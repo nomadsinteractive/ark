@@ -79,6 +79,7 @@
 #   define DTHREAD_CHECK(threadId) (void (threadId))
 #endif
 
+#define ASSERT(x) CHECK(x, "Assertion failed")
 #define DASSERT(x) DCHECK(x, "Assertion failed")
 
 #ifdef ARK_USE_CONSTEXPR

@@ -5,16 +5,17 @@
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/util/documents.h"
 
+#include "graphics/base/material.h"
 #include "graphics/util/max_rects_bin_pack.h"
 
 #include "renderer/base/texture_packer.h"
 
 namespace ark {
 
-MaterialBundle::MaterialBundle(const sp<ResourceLoaderContext>& resourceLoaderContext, std::map<String, sp<Material>> materials, std::array<sp<Texture>, Material::TEXTURE_TYPE_LENGTH> textures)
+MaterialBundle::MaterialBundle(const sp<ResourceLoaderContext>& resourceLoaderContext, std::map<String, sp<Material>> materials, std::array<sp<Texture>, MaterialTexture::TYPE_LENGTH> textures)
     : _materials(std::move(materials)), _width(0), _height(0)
 {
-    for(size_t i = 0; i < Material::TEXTURE_TYPE_LENGTH; ++i)
+    for(size_t i = 0; i < MaterialTexture::TYPE_LENGTH; ++i)
         if(textures[i])
         {
             if(_width == 0)
@@ -26,16 +27,16 @@ MaterialBundle::MaterialBundle(const sp<ResourceLoaderContext>& resourceLoaderCo
         }
 
     MaxRectsBinPack binPack(_width, _height, false);
-    std::vector<std::map<bitmap, RectI>> bitmapBounds(Material::TEXTURE_TYPE_LENGTH);
+    std::vector<std::map<bitmap, RectI>> bitmapBounds(MaterialTexture::TYPE_LENGTH);
 
     for(const auto& i : _materials)
     {
         const sp<Material>& material = i.second;
-        for(size_t j = 0; j < Material::TEXTURE_TYPE_LENGTH; ++j)
+        for(size_t j = 0; j < MaterialTexture::TYPE_LENGTH; ++j)
             if(_texture_packers[j])
             {
-                const sp<VariableWrapper<bitmap>>& bitmapProvider = material->getTexture(static_cast<Material::TextureType>(j));
-                bitmap bitmap = bitmapProvider->val();
+                const sp<MaterialTexture>& texture = material->getTexture(static_cast<MaterialTexture::Type>(j));
+                bitmap bitmap = texture->bitmap();
                 if(bitmap)
                 {
                     const auto biter = bitmapBounds[j].find(bitmap);
@@ -43,11 +44,11 @@ MaterialBundle::MaterialBundle(const sp<ResourceLoaderContext>& resourceLoaderCo
                     {
                         const auto iter = _material_bounds.find(i.first);
                         if(iter == _material_bounds.end())
-                            bitmapBounds[j][bitmap] = _material_bounds[i.first] = _texture_packers[j]->addBitmap(binPack, bitmap, bitmapProvider);
+                            bitmapBounds[j][bitmap] = _material_bounds[i.first] = _texture_packers[j]->addBitmap(binPack, bitmap, texture->bitmapWrapper());
                         else
                         {
                             const RectI& packedBounds = iter->second;
-                            _texture_packers[j]->addPackedBitmap(packedBounds.left(), packedBounds.top(), bitmap, bitmapProvider);
+                            _texture_packers[j]->addPackedBitmap(packedBounds.left(), packedBounds.top(), bitmap, texture->bitmapWrapper());
                         }
                     }
                     else
@@ -81,7 +82,7 @@ Rect MaterialBundle::getMaterialUV(const String& name) const
 
 MaterialBundle::BUILDER::BUILDER(BeanFactory& beanFactory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _resource_loader_context(resourceLoaderContext), _names(Documents::ensureAttributeList<String>(manifest, Constants::Attributes::NAME, "material")), _materials(beanFactory.getBuilderList<Material>(manifest, "material")),
-      _types(Documents::ensureAttributeList<Material::TextureType>(manifest, Constants::Attributes::TYPE, Constants::Attributes::TEXTURE)), _textures(beanFactory.getBuilderList<Texture>(manifest, Constants::Attributes::TEXTURE)) {
+      _types(Documents::ensureAttributeList<MaterialTexture::Type>(manifest, Constants::Attributes::TYPE, Constants::Attributes::TEXTURE)), _textures(beanFactory.getBuilderList<Texture>(manifest, Constants::Attributes::TEXTURE)) {
 }
 
 sp<MaterialBundle> MaterialBundle::BUILDER::build(const Scope& args)
@@ -92,7 +93,7 @@ sp<MaterialBundle> MaterialBundle::BUILDER::build(const Scope& args)
         materials[_names.at(i)] = _materials.at(i)->build(args);
 
     DASSERT(_types.size() == _textures.size());
-    std::array<sp<Texture>, Material::TEXTURE_TYPE_LENGTH> textures;
+    std::array<sp<Texture>, MaterialTexture::TYPE_LENGTH> textures;
     for(size_t i = 0; i < _types.size(); ++i)
         textures[_types.at(i)] = _textures.at(i)->build(args);
     return sp<MaterialBundle>::make(_resource_loader_context, std::move(materials), std::move(textures));

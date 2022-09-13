@@ -7,6 +7,7 @@
 #include "core/util/math.h"
 
 #include "graphics/base/bitmap.h"
+#include "graphics/base/material.h"
 #include "graphics/base/size.h"
 #include "graphics/util/matrix_util.h"
 
@@ -59,7 +60,7 @@ array<element_index_t> ModelImporterAssimp::loadIndices(const aiMesh* mesh, elem
     for(uint32_t i = 0; i < mesh->mNumFaces; i ++)
     {
         const aiFace& face = mesh->mFaces[i];
-        DASSERT(face.mNumIndices == 3);
+        DASSERT(face.mNumIndices <= 3);
         for(uint32_t j = 0; j < 3; ++j)
             *(buf++) = face.mNumIndices == 3 ? static_cast<element_index_t>(face.mIndices[j]) + vertexBase : 0;
     }
@@ -120,14 +121,14 @@ Model ModelImporterAssimp::import(const document& manifest, MaterialBundle& mate
 const aiScene* ModelImporterAssimp::loadScene(const sp<Assimp::Importer>& importer, const String& src, bool checkMeshes) const
 {
     importer->SetIOHandler(new ArkIOSystem);
-    uint32_t flags = static_cast<uint32_t>(aiProcessPreset_TargetRealtime_Fast | aiProcess_FlipUVs | aiProcess_GenBoundingBoxes | aiProcess_LimitBoneWeights | aiProcess_GlobalScale);
+    uint32_t flags = static_cast<uint32_t>(aiProcessPreset_TargetRealtime_Fast | aiProcess_FlipUVs | aiProcess_GenBoundingBoxes | aiProcess_LimitBoneWeights);
     const aiScene* scene = importer->ReadFile(src.c_str(), flags);
-    DCHECK(scene, "Loading \"%s\" failed", src.c_str());
-    DCHECK(!checkMeshes || scene->mNumMeshes > 0, "This scene(%s) has no meshes, maybe it's a scene contains animation-only informations. You should attach this one to its parent as an animation node.", src.c_str());
+    CHECK(scene, "Loading \"%s\" failed", src.c_str());
+    CHECK(!checkMeshes || scene->mNumMeshes > 0, "This scene(%s) has no meshes, maybe it's a scene contains animation-only informations. You should attach this one to its parent as an animation node.", src.c_str());
     return scene;
 }
 
-Mesh ModelImporterAssimp::loadMesh(const aiScene* scene, const aiMesh* mesh, MaterialBundle& materialBundle, element_index_t vertexBase, NodeTable& boneMapping) const
+Mesh ModelImporterAssimp::loadMesh(const aiScene* scene, const aiMesh* mesh, MaterialBundle& materialBundle, element_index_t vertexBase, NodeTable& boneMapping, std::vector<sp<Material>>& materials) const
 {
     sp<Array<element_index_t>> indices = loadIndices(mesh, vertexBase);
     sp<Array<V3>> vertices = sp<Array<V3>::Allocated>::make(mesh->mNumVertices);
@@ -142,10 +143,20 @@ Mesh ModelImporterAssimp::loadMesh(const aiScene* scene, const aiMesh* mesh, Mat
     Mesh::UV* u = uvs->buf() - 1;
 
     DASSERT(mesh->mMaterialIndex < scene->mNumMaterials);
-    const String mName = scene->mMaterials[mesh->mMaterialIndex]->GetName().C_Str();
-    sp<Material> material = materialBundle.getMaterial(mName);
-    DWARN(material, "Undefined material(%s) for mesh(%s)", mName.c_str(), mesh->mName.C_Str());
+    sp<Material>& material = materials[mesh->mMaterialIndex];
+    const aiMaterial* am = scene->mMaterials[mesh->mMaterialIndex];
+    String mName = am->GetName().C_Str();
     const Rect uvBounds = materialBundle.getMaterialUV(mName);
+    if(!material)
+        material = materialBundle.getMaterial(mName);
+    WARN(material, "Undefined material(%s) for mesh(%s)", mName.c_str(), mesh->mName.C_Str());
+    if(!material)
+    {
+        aiColor4D ac;
+        material = sp<Material>::make(mesh->mMaterialIndex, std::move(mName));
+        if(aiGetMaterialColor(am, AI_MATKEY_COLOR_DIFFUSE, &ac) == aiReturn_SUCCESS)
+            material->baseColor()->setColor(sp<Vec4::Const>::make(V4(ac.r, ac.g, ac.b, ac.a)));
+    }
 
     for(uint32_t i = 0; i < mesh->mNumVertices; i ++)
     {
@@ -160,7 +171,7 @@ Mesh ModelImporterAssimp::loadMesh(const aiScene* scene, const aiMesh* mesh, Mat
     if(mesh->HasBones())
         loadBones(mesh, boneMapping, bones);
 
-    return Mesh(indices, std::move(vertices), std::move(uvs), std::move(normals), std::move(tangents), std::move(bones), std::move(material));
+    return Mesh(mesh->mName.C_Str(), indices, std::move(vertices), std::move(uvs), std::move(normals), std::move(tangents), std::move(bones), std::move(material));
 }
 
 NodeTable ModelImporterAssimp::loadNodes(const aiNode* node, Model& model) const
@@ -170,28 +181,29 @@ NodeTable ModelImporterAssimp::loadNodes(const aiNode* node, Model& model) const
     loadNodeHierarchy(node, nodes, nodeIds);
 
     for(const auto& i : nodeIds)
-        model.meshes()->at(i.first).setNodeId(sp<Integer::Const>::make(i.second));
+        model.meshes().at(i.first)->setNodeId(sp<Integer::Const>::make(i.second));
 
     return nodes;
 }
 
 Model ModelImporterAssimp::loadModel(const aiScene* scene, MaterialBundle& materialBundle, const document& manifest) const
 {
-    std::vector<Mesh> meshes;
+    std::vector<sp<Mesh>> meshes;
     element_index_t vertexBase = 0;
 
     NodeTable bones;
     V3 aabbMin(std::numeric_limits<float>::max()), aabbMax(std::numeric_limits<float>::min());
+    std::vector<sp<Material>> materials(scene->mNumMaterials);
 
     for(uint32_t i = 0; i < scene->mNumMeshes; ++i)
     {
         const aiMesh* mesh = scene->mMeshes[i];
-        meshes.push_back(loadMesh(scene, mesh, materialBundle, vertexBase, bones));
+        meshes.push_back(sp<Mesh>::make(loadMesh(scene, mesh, materialBundle, vertexBase, bones, materials)));
 
         aabbMin = V3(std::min(mesh->mAABB.mMin.x, aabbMin.x()), std::min(mesh->mAABB.mMin.y, aabbMin.y()), std::min(mesh->mAABB.mMin.z, aabbMin.y()));
         aabbMax = V3(std::max(mesh->mAABB.mMax.x, aabbMax.x()), std::max(mesh->mAABB.mMax.y, aabbMax.y()), std::max(mesh->mAABB.mMax.z, aabbMax.y()));
 
-        vertexBase += static_cast<element_index_t>(meshes.back().vertexLength());
+        vertexBase += static_cast<element_index_t>(meshes.back()->vertexLength());
     }
 
     const std::vector<document>& animateManifests = manifest->children("animate");
@@ -218,14 +230,14 @@ Model ModelImporterAssimp::loadModel(const aiScene* scene, MaterialBundle& mater
         }
     }
 
-    Model model(sp<Array<Mesh>::Vector>::make(std::move(meshes)), {bounds, bounds, V3(0)});
+    Model model(std::move(materials), std::move(meshes), {bounds, bounds, V3(0)});
     if(hasAnimation)
     {
         bool noBones = bones.nodes().size() == 0;
         Table<String, sp<Animation>> animates;
         AnimationAssimpNodes::NodeLoaderCallback callback = noBones ? callbackNodeAnimation : callbackBoneAnimation;
         NodeTable nodes = noBones ? loadNodes(scene->mRootNode, model) : std::move(bones);
-        float defaultTps = Documents::getAttribute<float>(manifest, "tps", 60.0f);
+        float defaultTps = Documents::getAttribute<float>(manifest, "tps", 24.0f);
         loadAnimates(defaultTps, animates, scene, globalAnimationTransform, nodes.nodes(), callback);
         for(const auto& i : animateManifests)
         {
@@ -242,6 +254,7 @@ Model ModelImporterAssimp::loadModel(const aiScene* scene, MaterialBundle& mater
         }
 
         model.setAnimations(std::move(animates));
+        model.setNodeNames(nodes.nodes().keys());
     }
 
     return model;

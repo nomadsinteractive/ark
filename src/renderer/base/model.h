@@ -4,7 +4,6 @@
 #include "core/forwarding.h"
 #include "core/collection/table.h"
 #include "core/base/string.h"
-#include "core/inf/array.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/base/metrics.h"
@@ -21,14 +20,25 @@ class ARK_API Model {
 public:
     Model() = default;
     Model(sp<Uploader> indices, sp<Vertices> vertices, const Metrics& metrics = {V3(1.0f), V3(1.0f), V3(0)});
-    Model(sp<Array<Mesh>> meshes, const Metrics& metrics = {V3(1.0f), V3(1.0f), V3(0)});
+    Model(std::vector<sp<Material>> materials, std::vector<sp<Mesh>> meshes, const Metrics& metrics = {V3(1.0f), V3(1.0f), V3(0)});
     DEFAULT_COPY_AND_ASSIGN(Model);
 
     const sp<Uploader>& indices() const;
     const sp<Vertices>& vertices() const;
-    const sp<Array<Mesh>>& meshes() const;
+
+//[[script::bindings::property]]
+    const std::vector<sp<Material>>& materials() const;
+//[[script::bindings::property]]
+    const std::vector<sp<Mesh>>& meshes() const;
 
     const Metrics& metrics() const;
+
+//[[script::bindings::property]]
+    const V3& bounds() const;
+//[[script::bindings::property]]
+    const V3& size() const;
+//[[script::bindings::property]]
+    const V3& origin() const;
 
 //[[script::bindings::property]]
     size_t indexCount() const;
@@ -38,6 +48,10 @@ public:
 //  [[script::bindings::property]]
     const Table<String, sp<Animation>>& animations() const;
     void setAnimations(Table<String, sp<Animation>> animations);
+
+//  [[script::bindings::property]]
+    const std::vector<String>& nodeNames() const;
+    void setNodeNames(std::vector<String> nodes);
 
 //  [[script::bindings::auto]]
     const sp<Animation>& getAnimation(const String& name) const;
@@ -55,37 +69,38 @@ private:
 private:
     class MeshIndicesUploader : public Uploader {
     public:
-        MeshIndicesUploader(sp<ark::Array<Mesh>> meshes);
+        MeshIndicesUploader(std::vector<sp<Mesh>> meshes);
 
         virtual void upload(Writable& uploader) override;
 
     private:
-        size_t calcIndicesSize(ark::Array<Mesh>& meshes) const;
+        size_t calcIndicesSize(const std::vector<sp<Mesh>>& meshes) const;
 
     private:
-        sp<ark::Array<Mesh>> _meshes;
+        std::vector<sp<Mesh>> _meshes;
     };
 
     class MeshVertices : public Vertices {
     public:
-        MeshVertices(sp<Array<Mesh>> meshes);
+        MeshVertices(std::vector<sp<Mesh>> meshes);
 
         virtual void write(VertexStream& buf, const V3& size) override;
 
     private:
-        size_t calcVertexLength(Array<Mesh>& meshes) const;
+        size_t calcVertexLength(const std::vector<sp<Mesh> >& meshes) const;
 
     private:
-        sp<Array<Mesh>> _meshes;
+        std::vector<sp<Mesh>> _meshes;
         V3 _size;
     };
 
 private:
     sp<Uploader> _indices;
     sp<Vertices> _vertices;
-    sp<Array<Mesh>> _meshes;
-
+    std::vector<sp<Material>> _materials;
+    std::vector<sp<Mesh>> _meshes;
     Table<String, sp<Animation>> _animations;
+    std::vector<String> _node_names;
     Metrics _metrics;
 };
 

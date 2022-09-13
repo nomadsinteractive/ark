@@ -14,7 +14,7 @@
 #include "app/forwarding.h"
 
 #include "python/extension/py_instance.h"
-#include "python/extension/python_interpreter.h"
+#include "python/extension/py_cast.h"
 #include "python/extension/py_ark_type.h"
 
 #include "platform/platform.h"
@@ -82,8 +82,8 @@ PyObject* ark_log(Log::LogLevel level, PyObject* args)
         {
             PyInstance varargs = PyInstance::steal(PyTuple_GetSlice(args, 1, size));
             PyInstance formatted = PyInstance::steal(size > 1 ? PyUnicode_Format(pyContent.pyObject(), varargs.pyObject()) : PyObject_Str(pyContent.pyObject()));
-            DCHECK(formatted, "Unsatisfied format: %s", PythonInterpreter::instance()->toString(pyContent.pyObject()).c_str());
-            const String content = PythonInterpreter::instance()->toString(formatted.pyObject());
+            DCHECK(formatted, "Unsatisfied format: %s", PyCast::toString(pyContent.pyObject()).c_str());
+            const String content = PyCast::toString(formatted.pyObject());
             Log::log(level, "Python", content.c_str());
         }
     }
@@ -118,7 +118,7 @@ PyObject* ark_loadAsset(PyObject* /*self*/, PyObject* args)
         Py_RETURN_NONE;
     const sp<Readable> readable = Ark::instance().tryOpenAsset(arg0);
     if(readable)
-        return PythonInterpreter::instance()->toPyObject_impl<String>(Strings::loadFromReadable(readable));
+        return PyCast::toPyObject_impl<String>(Strings::loadFromReadable(readable));
     Py_RETURN_NONE;
 }
 
@@ -128,7 +128,7 @@ PyObject* ark_openAsset(PyObject* /*self*/, PyObject* args)
     if(!PyArg_ParseTuple(args, "s", &arg0))
         Py_RETURN_NONE;
     const sp<Readable> readable = Ark::instance().tryOpenAsset(arg0);
-    return PythonInterpreter::instance()->toPyObject(readable);
+    return PyCast::toPyObject(readable);
 }
 
 PyObject* ark_getAssetResource(PyObject* /*self*/, PyObject* args)
@@ -147,7 +147,7 @@ PyObject* ark_isDirectory(PyObject* /*self*/, PyObject* args)
     const char* arg0;
     if(!PyArg_ParseTuple(args, "s", &arg0))
         Py_RETURN_FALSE;
-    return PythonInterpreter::instance()->toPyObject_impl<bool>(Platform::isDirectory(arg0));
+    return PyCast::toPyObject_impl<bool>(Platform::isDirectory(arg0));
 }
 
 PyObject* ark_isDebugBuild(PyObject* /*self*/, PyObject* /*args*/)
@@ -174,7 +174,7 @@ PyObject* ark_isFile(PyObject* /*self*/, PyObject* args)
     const char* arg0;
     if(!PyArg_ParseTuple(args, "s", &arg0))
         Py_RETURN_FALSE;
-    return PythonInterpreter::instance()->toPyObject_impl<bool>(Platform::isFile(arg0));
+    return PyCast::toPyObject_impl<bool>(Platform::isFile(arg0));
 }
 
 PyObject* ark_loadFile(PyObject* /*self*/, PyObject* args)
@@ -183,18 +183,18 @@ PyObject* ark_loadFile(PyObject* /*self*/, PyObject* args)
     if(!PyArg_ParseTuple(args, "ss", &arg0, &arg1))
         Py_RETURN_NONE;
     const sp<Readable> readable = sp<FileReadable>::make(arg0, arg1);
-    return PythonInterpreter::instance()->toPyObject_impl<String>(Strings::loadFromReadable(readable));
+    return PyCast::toPyObject_impl<String>(Strings::loadFromReadable(readable));
 }
 
 PyObject* ark_dirSeparator(PyObject* /*self*/, PyObject* /*args*/)
 {
     const char ds[2] = {Platform::dirSeparator(), 0};
-    return PythonInterpreter::instance()->toPyObject_impl<String>(ds);
+    return PyCast::toPyObject_impl<String>(ds);
 }
 
 PyObject* ark_getRefManager(PyObject* /*self*/, PyObject* /*args*/)
 {
-    return PythonInterpreter::instance()->toPyObject(PythonInterpreter::instance()->referenceManager());
+    return PyCast::toPyObject(PythonInterpreter::instance()->referenceManager());
 }
 
 PyObject* ark_trace_(PyObject* /*self*/, PyObject* /*args*/)

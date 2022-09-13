@@ -355,7 +355,7 @@ def gen_py_binding_cpp(name, namespaces, includes, lines):
 #include "core/ark.h"
 
 #include "python/extension/arkmodule.h"
-#include "python/extension/python_interpreter.h"
+#include "python/extension/py_cast.h"
 #include "python/extension/py_ark_meta_type.h"
 
 %s
@@ -446,7 +446,7 @@ class GenArgument:
             return "%s && %s" % (varname, ARK_PY_ARGUMENT_CHECKERS[self._accept_type].check(varname))
         return None
 
-    def gen_declare(self, objname, argname, extract_cast=False):
+    def gen_declare(self, objname, argname, extract_cast=False, optional_check=False):
         typename = self._meta.cast_signature
         if self._meta.is_base_type:
             return '%s %s = %s;' % (typename, objname, gen_cast_call(typename, argname))
@@ -454,25 +454,29 @@ class GenArgument:
             return '%s %s = %s;' % (typename, objname, argname)
         m = acg.get_shared_ptr_type(self._accept_type)
         if m == 'Scope':
-            return acg.format('const Scope ${objname} = PythonInterpreter::instance()->toScope(kws);',
+            return acg.format('const Scope ${objname} = PyCast::toScope(kws);',
                               objname=objname, argname=argname)
+        optional_cast_prefix = 'to' if optional_check else 'ensure'
+        to_cpp_object = '%sCppObject' % optional_cast_prefix
         if m == 'char*':
-            return self._gen_var_declare('String', objname, 'toCppObject', 'String', argname)
+            return self._gen_var_declare('String', objname, to_cpp_object, 'String', argname, False, optional_check)
         if m in TYPE_DEFINED_OBJ:
-            return self._gen_var_declare(m, objname, 'toCppObject', m, argname)
+            return self._gen_var_declare(m, objname, to_cpp_object, m, argname, False, optional_check)
         if m in TYPE_DEFINED_SP:
-            return self._gen_var_declare(m, objname, 'toCppObject', m, argname)
+            return self._gen_var_declare(m, objname, to_cpp_object, m, argname, False, optional_check)
         typename = remove_crv(typename)
         if m != self._accept_type and not typename.startswith('std::'):
-            return self._gen_var_declare('sp<%s>' % m, objname, 'toSharedPtr', m, argname, extract_cast)
-        return self._gen_var_declare(typename, objname, 'toCppObject', typename, argname)
+            return self._gen_var_declare('sp<%s>' % m, objname, '%sSharedPtr' % optional_cast_prefix, m, argname, extract_cast, optional_check)
+        return self._gen_var_declare(typename, objname, to_cpp_object, typename, argname, False, optional_check)
 
-    def _gen_var_declare(self, typename, varname, funcname, functype, argname, extract_cast=False):
+    def _gen_var_declare(self, typename, varname, funcname, functype, argname, extract_cast=False, optional_check=False):
         argappendix = ', false' if extract_cast else ''
+        if optional_check:
+            typename = 'std::optional<%s>' % typename
         if self._default_value and (self._accept_type.startswith('sp<') or self._meta.parse_signature == 'O'):
-            return '%s %s = %s ? PythonInterpreter::instance()->%s<%s>(%s%s) : %s;' % (
+            return '%s %s = %s ? PyCast::%s<%s>(%s%s) : %s;' % (
                 typename, varname, argname, funcname, functype, argname, argappendix, self._default_value)
-        return '%s %s = PythonInterpreter::instance()->%s<%s>(%s%s);' % (typename, varname, funcname, functype, argname, argappendix)
+        return '%s %s = PyCast::%s<%s>(%s%s);' % (typename, varname, funcname, functype, argname, argappendix)
 
     def str(self):
         return self._str
@@ -540,10 +544,10 @@ def parse_method_arguments(arguments):
     return args
 
 
-def gen_method_call_arg(i, targettype, argtype):
+def gen_method_call_arg(name, targettype, argtype):
     ctype = remove_crv(argtype)
     equals = acg.typeCompare(targettype, ctype)
-    argname = 'obj%d' % i if equals else gen_cast_call(targettype, 'obj%d' % i)
+    argname = name if equals else gen_cast_call(targettype, name)
     if ctype in ARK_PY_ARGUMENT_CHECKERS:
         return ARK_PY_ARGUMENT_CHECKERS[ctype].cast(argname)
     return argname
@@ -649,7 +653,7 @@ class GenMethod(object):
             fromcall = 'template toPyObject<%s>' % m
         else:
             fromcall = 'toPyObject'
-        return ['return PythonInterpreter::instance()->%s(ret);' % fromcall]
+        return ['return PyCast::%s(ret);' % fromcall]
 
     def _gen_parse_tuple_code(self, lines, declares, args):
         parse_format = ''.join(i.parse_signature for i in args)
@@ -681,7 +685,7 @@ class GenMethod(object):
         return 'static %s %s(%s);' % (self.gen_py_return(), self._name, self.gen_py_arguments())
 
     @staticmethod
-    def _gen_convert_args_code(lines, argdeclare):
+    def _gen_convert_args_code(lines, argdeclare, optional_check=False):
         if argdeclare:
             lines.extend(argdeclare)
 
@@ -699,30 +703,31 @@ class GenMethod(object):
 
         return '\n    '.join(lines)
 
-    def gen_definition_body(self, genclass, lines, not_overloaded_args, gen_type_check_args, exact_cast, check_args=False):
+    def gen_definition_body(self, genclass, lines, not_overloaded_args, gen_type_check_args, exact_cast, check_args=False, optional_check=False):
         bodylines = []
         args = [(i, j) for i, j in enumerate(not_overloaded_args) if j]
-        argdeclare = [j.gen_declare('obj%d' % i, 'arg%d' % i, exact_cast) for i, j in args]
+        args_set = {i for i, j in args}
+        argdeclare = [j.gen_declare('obj%d' % i, 'arg%d' % i, exact_cast, optional_check) for i, j in args]
         self_type_checks = []
         if self._self_argument:
             if not self._self_argument.type_compare('sp<%s>' % genclass.binding_classname):
                 self_type_checks.append('unpacked.is<%s>()' % acg.get_shared_ptr_type(self._self_argument.accept_type))
-        self._gen_convert_args_code(bodylines, argdeclare)
+        self._gen_convert_args_code(bodylines, argdeclare, optional_check)
 
         if check_args and args:
             bodylines.append("if(%s) %s;" % (' || '.join(['!obj%d' % i for i, j in args]), self.err_return_value))
 
         r = acg.strip_key_words(self._return_type, ['virtual', 'const', '&'])
         argtypes = [i.gen_declare('t', 't').split()[0] for i in self._arguments]
-        argnames = ', '.join(gen_method_call_arg(i, j.str(), argtypes[i]) for i, j in enumerate(self._arguments))
-        callstatement = self._gen_calling_statement(genclass, argnames)
+        argvalues = ', '.join(gen_method_call_arg('obj%d.value()' % i if optional_check and i in args_set else 'obj%d' % i, j.str(), argtypes[i]) for i, j in enumerate(self._arguments))
+        callstatement = self._gen_calling_statement(genclass, argvalues)
         py_return = self.gen_py_return()
         pyret = ['return 0;'] if py_return == 'int' else self.gen_return_statement(r, py_return)
         if r != 'void' and r:
             callstatement = '%s ret = %s' % (acg.strip_key_words(self._return_type, ['virtual']), callstatement)
         calling_lines = [callstatement] + pyret
         type_checks = [(i, j.gen_type_check('t')) for i, j in enumerate(gen_type_check_args) if j]
-        nullptr_check = ['(isNotEmpty(obj%d) || %d >= argc)' % (i, i) for i, j in type_checks if not j]
+        nullptr_check = ['(obj%d || %d >= argc)' % (i, i) for i, j in type_checks if not j]
         if self_type_checks or nullptr_check:
             if nullptr_check:
                 lines.insert(0, 'Py_ssize_t argc = %s;' % self.gen_py_argc())
@@ -829,12 +834,12 @@ class GenPropertyMethod(GenMethod):
     def is_static(self):
         return self._is_static
 
-    def _gen_convert_args_code(self, lines, argdeclare):
+    def _gen_convert_args_code(self, lines, argdeclare, optional_check=False):
         if argdeclare:
             arg0 = self._arguments[0]
             meta = GenArgumentMeta('PyObject*', arg0.accept_type, 'O')
             ga = GenArgument(arg0.accept_type, arg0.default_value, meta, str(arg0))
-            lines.append(ga.gen_declare('obj0', 'arg0'))
+            lines.append(ga.gen_declare('obj0', 'arg0', optional_check=optional_check))
 
     def gen_py_arguments(self):
         if self._is_setter:
@@ -890,7 +895,7 @@ class GenGetPropMethod(GenMethod):
     def _gen_parse_tuple_code(self, lines, declares, args):
         pass
 
-    def _gen_convert_args_code(self, lines, argdeclare):
+    def _gen_convert_args_code(self, lines, argdeclare, optional_check=False):
         if argdeclare:
             arg0 = self._arguments[0]
             meta = GenArgumentMeta('PyObject*', arg0.accept_type, 'O')
@@ -1096,7 +1101,7 @@ class GenRichCompareMethod(GenMethod):
         return '%s::%s(%s%s);' % (genclass.classname, self._name, self.gen_self_statement(genclass), argnames if not argnames else ', ' + argnames)
 
     @staticmethod
-    def _gen_convert_args_code(lines, argdeclare):
+    def _gen_convert_args_code(lines, argdeclare, optional_check=False):
         pass
 
     def _gen_parse_tuple_code(self, lines, declares, args):
@@ -1120,7 +1125,7 @@ def create_overloaded_method_type(base_type, **kwargs):
             self.add_overloaded_method(m1)
             self.add_overloaded_method(m2)
 
-        def gen_definition_body(self, genclass, lines, arguments, gen_type_check_args, exact_cast, check_args):
+        def gen_definition_body(self, genclass, lines, arguments, gen_type_check_args, exact_cast, check_args, optional_check=False):
             not_overloaded_args = [i for i in self._arguments]
 
             for i in self._overloaded_methods:
@@ -1136,7 +1141,7 @@ def create_overloaded_method_type(base_type, **kwargs):
                 lines.extend(['if(%s)' % ' && '.join(([j for j in type_checks if j]) or ['true']), '{'])
                 body_lines = []
                 overloaded_args = [None if j else k for j, k in zip(not_overloaded_args, i.arguments)]
-                i.gen_definition_body(genclass, body_lines, overloaded_args, overloaded_args, True, False)
+                i.gen_definition_body(genclass, body_lines, overloaded_args, overloaded_args, True, False, True)
                 lines.extend(INDENT + j for j in body_lines)
                 lines.append('}')
             return_type = m0.err_return_value
@@ -1292,14 +1297,14 @@ class GenClass(object):
             for i in rich_compare_methods:
                 try:
                     cases.append('    case %s:' % RICH_COMPARE_OPS[i.operator])
-                    cases.append('        return PythonInterpreter::instance()->toPyObject(%s::%s(unpacked, obj0));' % (self._classname, i.name))
+                    cases.append('        return PyCast::toPyObject(%s::%s(unpacked, obj0));' % (self._classname, i.name))
                 except KeyError:
                     pass
             rich_compare_defs.extend([
                 '',
                 'static PyObject* %s_tp_richcompare (PyArkType::Instance* self, PyObject* args, int op) {' % self._py_class_name,
                 '    const sp<%s> unpacked = self->as<%s>();' % (self._binding_classname, self._binding_classname),
-                '    const sp<%s> obj0 = PythonInterpreter::instance()->toSharedPtr<%s>(args);' % (self._binding_classname, self._binding_classname),
+                '    const sp<%s> obj0 = PyCast::ensureSharedPtr<%s>(args);' % (self._binding_classname, self._binding_classname),
                 '    switch(op) {'] + cases + [
                 '    default:',
                 '        break;',

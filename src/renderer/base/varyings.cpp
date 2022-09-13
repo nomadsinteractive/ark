@@ -5,7 +5,7 @@
 #include "core/base/bean_factory.h"
 #include "core/inf/input.h"
 #include "core/inf/variable.h"
-#include "core/impl/flatable/flatable_by_variable.h"
+#include "core/impl/input/input_variable.h"
 #include "core/util/holder_util.h"
 #include "core/util/math.h"
 
@@ -63,25 +63,25 @@ void Varyings::setVarying(const String& name, sp<Input> flatable)
 void Varyings::setProperty(const String& name, const sp<Numeric>& var)
 {
     _properties[name] = var;
-    setVarying(name, sp<Input>::make<FlatableByVariable<float>>(var));
+    setVarying(name, sp<Input>::make<InputVariable<float>>(var));
 }
 
 void Varyings::setProperty(const String& name, const sp<Vec2>& var)
 {
     _properties[name] = var;
-    setVarying(name, sp<Input>::make<FlatableByVariable<V2>>(var));
+    setVarying(name, sp<Input>::make<InputVariable<V2>>(var));
 }
 
 void Varyings::setProperty(const String& name, const sp<Vec3>& var)
 {
     _properties[name] = var;
-    setVarying(name, sp<Input>::make<FlatableByVariable<V3>>(var));
+    setVarying(name, sp<Input>::make<InputVariable<V3>>(var));
 }
 
 void Varyings::setProperty(const String& name, const sp<Vec4>& var)
 {
     _properties[name] = var;
-    setVarying(name, sp<Input>::make<FlatableByVariable<V4>>(var));
+    setVarying(name, sp<Input>::make<InputVariable<V4>>(var));
 }
 
 Varyings::Snapshot Varyings::snapshot(const PipelineInput& pipelineInput, Allocator& allocator)

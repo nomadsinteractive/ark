@@ -9,7 +9,7 @@
 #include "python/impl/adapter/python_callable_event_listener.h"
 #include "python/impl/adapter/renderer_maker_python.h"
 
-#include "python/extension/python_interpreter.h"
+#include "python/extension/py_cast.h"
 
 namespace ark {
 namespace plugin {
@@ -26,13 +26,12 @@ public:
     virtual std::vector<sp<Glyph>> makeGlyphs(const std::wstring& text) override {
         DCHECK_THREAD_FLAG();
 
-        const sp<PythonInterpreter>& interpreter = PythonInterpreter::instance();
         PyInstance args(PyInstance::steal(PyTuple_New(1)));
-        PyTuple_SetItem(args.pyObject(), 0, interpreter->toPyObject(text));
+        PyTuple_SetItem(args.pyObject(), 0, PyCast::toPyObject(text));
         PyObject* ret = _callable.call(args.pyObject());
         if(ret)
         {
-            const std::vector<sp<Glyph>> glyphs = ret == Py_None ? std::vector<sp<Glyph>>() : PythonInterpreter::instance()->toCppObject<std::vector<sp<Glyph>>>(ret);
+            const std::vector<sp<Glyph>> glyphs = ret == Py_None ? std::vector<sp<Glyph>>() : PyCast::ensureCppObject<std::vector<sp<Glyph>>>(ret);
             Py_DECREF(ret);
             return glyphs;
         }

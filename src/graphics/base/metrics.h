@@ -9,7 +9,7 @@ namespace ark {
 struct Metrics {
     V3 bounds;
     V3 size;
-    V3 xyz;
+    V3 orgin;
 };
 
 }

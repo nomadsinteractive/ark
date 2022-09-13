@@ -10,11 +10,11 @@ namespace ark {
 
 namespace {
 
-class FlatableMat4fvFlatableArray : public Input {
+class InputMat4fvInputArray : public Input {
 public:
-    FlatableMat4fvFlatableArray(sp<Array<sp<Input>>> flatables)
-        : _flatables(std::move(flatables)), _size(0) {
-        for(const sp<Input>& i : * _flatables) {
+    InputMat4fvInputArray(sp<Array<sp<Input>>> inputs)
+        : _inputs(std::move(inputs)), _size(0) {
+        for(const sp<Input>& i : * _inputs) {
             uint32_t s = i->size();
             DASSERT((s % 64) == 0);
             _size += s;
@@ -23,7 +23,7 @@ public:
 
     virtual bool update(uint64_t timestamp) override {
         bool dirty = false;
-        for(const sp<Input>& i : * _flatables)
+        for(const sp<Input>& i : * _inputs)
             dirty = i->update(timestamp) || dirty;
         return dirty;
     }
@@ -31,7 +31,7 @@ public:
     virtual void flat(void* buf) override {
         uint32_t offset = 0;
         uint8_t* ptr = reinterpret_cast<uint8_t*>(buf);
-        for(const sp<Input>& i : * _flatables) {
+        for(const sp<Input>& i : * _inputs) {
             uint32_t s = i->size();
             i->flat(ptr + offset);
             offset += s;
@@ -43,7 +43,7 @@ public:
     }
 
 private:
-    sp<Array<sp<Input>>> _flatables;
+    sp<Array<sp<Input>>> _inputs;
     uint32_t _size;
 };
 
@@ -94,7 +94,7 @@ sp<Input> InputMat4fv::BUILDER::build(const Scope& args)
 
         array<sp<Input>> flatables = args.build<Array<sp<Input>>>(_id.arg(), args);
         if(flatables)
-            return sp<FlatableMat4fvFlatableArray>::make(std::move(flatables));
+            return sp<InputMat4fvInputArray>::make(std::move(flatables));
     }
 
     return sp<InputMat4fv>::make(_array->build(args));

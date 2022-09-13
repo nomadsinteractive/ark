@@ -169,7 +169,7 @@ String Documents::toString(const document& doc, const String& indent, uint16_t i
     return sb.str();
 }
 
-const String Documents::getId(const document& doc, const String& defValue)
+String Documents::getId(const document& doc, const String& defValue)
 {
     const String id = getAttribute(doc, Constants::Attributes::ID, defValue);
     return id ? Strings::stripReference(id) : "";
@@ -180,7 +180,7 @@ template<> ARK_API String Strings::toString<document>(const document& doc)
     return Documents::toString(doc);
 }
 
-const String Documents::getAttribute(const document& doc, const String& name, const String& defValue)
+String Documents::getAttribute(const document& doc, const String& name, const String& defValue)
 {
     const attribute& attr = doc->getAttribute(name);
     return attr ? attr->value() : defValue;

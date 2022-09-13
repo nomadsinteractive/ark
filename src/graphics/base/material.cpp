@@ -5,68 +5,54 @@
 
 namespace ark {
 
-Material::Material(bitmap baseColor, bitmap normal, bitmap roughness, bitmap metallic, bitmap specular)
+Material::Material(int32_t id, String name, bitmap baseColor, bitmap normal, bitmap roughness, bitmap metallic, bitmap specular)
+    : _id(id), _name(std::move(name))
 {
-    _textures[TEXTURE_TYPE_BASE_COLOR] = sp<VariableWrapper<bitmap>>::make(std::move(baseColor));
-    _textures[TEXTURE_TYPE_NORMAL] = sp<VariableWrapper<bitmap>>::make(std::move(normal));
-    _textures[TEXTURE_TYPE_ROUGHNESS] = sp<VariableWrapper<bitmap>>::make(std::move(roughness));
-    _textures[TEXTURE_TYPE_METALLIC] = sp<VariableWrapper<bitmap>>::make(std::move(metallic));
-    _textures[TEXTURE_TYPE_SPECULAR] = sp<VariableWrapper<bitmap>>::make(std::move(specular));
+    _textures[MaterialTexture::TYPE_BASE_COLOR] = sp<MaterialTexture>::make(nullptr, std::move(baseColor));
+    _textures[MaterialTexture::TYPE_NORMAL] = sp<MaterialTexture>::make(nullptr, std::move(normal));
+    _textures[MaterialTexture::TYPE_ROUGHNESS] = sp<MaterialTexture>::make(nullptr, std::move(roughness));
+    _textures[MaterialTexture::TYPE_METALLIC] = sp<MaterialTexture>::make(nullptr, std::move(metallic));
+    _textures[MaterialTexture::TYPE_SPECULAR] = sp<MaterialTexture>::make(nullptr, std::move(specular));
 }
 
-const sp<VariableWrapper<bitmap>>& Material::baseColor() const
+int32_t Material::id() const
 {
-    return _textures[TEXTURE_TYPE_BASE_COLOR];
+    return _id;
 }
 
-void Material::setBaseColor(bitmap baseColor) const
+const String& Material::name() const
 {
-    _textures[TEXTURE_TYPE_BASE_COLOR]->set(std::move(baseColor));
+    return _name;
 }
 
-const sp<VariableWrapper<bitmap>>& Material::normal() const
+const sp<MaterialTexture>& Material::baseColor() const
 {
-    return _textures[TEXTURE_TYPE_NORMAL];
+    return _textures[MaterialTexture::TYPE_BASE_COLOR];
 }
 
-void Material::setNormal(bitmap normal) const
+const sp<MaterialTexture>& Material::normal() const
 {
-    _textures[TEXTURE_TYPE_NORMAL]->set(std::move(normal));
+    return _textures[MaterialTexture::TYPE_NORMAL];
 }
 
-const sp<VariableWrapper<bitmap>>& Material::roughness() const
+const sp<MaterialTexture>& Material::roughness() const
 {
-    return _textures[TEXTURE_TYPE_ROUGHNESS];
+    return _textures[MaterialTexture::TYPE_ROUGHNESS];
 }
 
-void Material::setRoughness(bitmap roughness) const
+const sp<MaterialTexture>& Material::metallic() const
 {
-    _textures[TEXTURE_TYPE_ROUGHNESS]->set(std::move(roughness));
+    return _textures[MaterialTexture::TYPE_METALLIC];
 }
 
-const sp<VariableWrapper<bitmap>>& Material::metallic() const
+const sp<MaterialTexture>& Material::specular() const
 {
-    return _textures[TEXTURE_TYPE_METALLIC];
+    return _textures[MaterialTexture::TYPE_SPECULAR];
 }
 
-void Material::setMetallic(bitmap metallic) const
+const sp<MaterialTexture>& Material::getTexture(MaterialTexture::Type type) const
 {
-    _textures[TEXTURE_TYPE_METALLIC]->set(std::move(metallic));
-}
-
-const sp<VariableWrapper<bitmap>>& Material::specular() const
-{
-    return _textures[TEXTURE_TYPE_SPECULAR];
-}
-
-void Material::setSpecular(bitmap specular) const
-{
-    _textures[TEXTURE_TYPE_SPECULAR]->set(std::move(specular));
-}
-
-const sp<VariableWrapper<bitmap>>& Material::getTexture(Material::TextureType type) const
-{
-    DASSERT(type >= 0 && type < TEXTURE_TYPE_LENGTH);
+    ASSERT(type >= 0 && type < MaterialTexture::TYPE_LENGTH);
     return _textures[type];
 }
 
@@ -82,7 +68,7 @@ Material::BUILDER::BUILDER(BeanFactory& beanFactory, const document& manifest)
 
 sp<Material> Material::BUILDER::build(const Scope& args)
 {
-    return sp<Material>::make(_base_color->build(args), _normal->build(args), _roughness->build(args), _metallic->build(args), _specular->build(args));
+    return sp<Material>::make(0, "", _base_color->build(args), _normal->build(args), _roughness->build(args), _metallic->build(args), _specular->build(args));
 }
 
 sp<Builder<Bitmap>> Material::BUILDER::makeBitmapBuilder(BeanFactory& beanFactory, const document& manifest)
@@ -98,20 +84,6 @@ sp<Builder<Bitmap>> Material::BUILDER::makeBitmapBuilder(BeanFactory& beanFactor
         DFATAL("Unimplemented");
     }
     return nullptr;
-}
-
-template<> ARK_API Material::TextureType Conversions::to<String, Material::TextureType>(const String& str)
-{
-    if(str == "base_color")
-        return Material::TEXTURE_TYPE_BASE_COLOR;
-    if(str == "normal")
-        return Material::TEXTURE_TYPE_NORMAL;
-    if(str == "roughness")
-        return Material::TEXTURE_TYPE_ROUGHNESS;
-    if(str == "metallic")
-        return Material::TEXTURE_TYPE_METALLIC;
-    DCHECK(str == "specular", "Unknow texture-type: %s, possible values are [base_color, normal, roughness, metallic, specular]");
-    return Material::TEXTURE_TYPE_SPECULAR;
 }
 
 }

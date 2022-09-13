@@ -249,8 +249,8 @@ void Characters::placeOne(Glyph& glyph, const Metrics& metrics, float& flowx, fl
     float bitmapHeight = scale.y() * metrics.size.y();
     float width = scale.x() * metrics.bounds.x();
     float height = scale.y() * metrics.bounds.y();
-    float bitmapX = scale.x() * metrics.xyz.x();
-    float bitmapY = scale.y() * metrics.xyz.y();
+    float bitmapX = scale.x() * metrics.orgin.x();
+    float bitmapY = scale.y() * metrics.orgin.y();
     if(fontHeight)
         *fontHeight = std::max(height, *fontHeight);
     glyph.setLayoutPosition(V3(flowx + bitmapX, flowy + height - bitmapY - bitmapHeight, 0));

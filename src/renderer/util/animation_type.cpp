@@ -10,25 +10,35 @@
 
 namespace ark {
 
-sp<AnimationInput> AnimationType::makeTransforms(const sp<Animation>& self, const sp<Numeric>& duration, const sp<Runnable>& onComplete)
+sp<AnimationInput> AnimationType::makeInput(const sp<Animation>& self, const sp<Numeric>& tick, const sp<Runnable>& onComplete)
 {
-    sp<Numeric> t = duration;
+    sp<Numeric> t = tick;
 
     if(onComplete)
     {
-        float animationDuration = self->duration();
+        float animationDuration = AnimationType::ticks(self);
         DCHECK(t->val() <= animationDuration, "Animation has already completed");
         sp<ExpectationF> exp = NumericType::atMost(t, sp<Numeric::Const>::make(animationDuration));
         exp->addObserver(onComplete, true);
         t = std::move(exp);
     }
 
-    return self->makeTransforms(std::move(t));
+    return self->makeInput(std::move(t));
+}
+
+float AnimationType::ticks(const sp<Animation>& self)
+{
+    return self->ticks();
+}
+
+float AnimationType::tps(const sp<Animation>& self)
+{
+    return self->tps();
 }
 
 float AnimationType::duration(const sp<Animation>& self)
 {
-    return self->duration();
+    return self->ticks() / self->tps();
 }
 
 const std::vector<String>& AnimationType::nodeNames(const sp<Animation>& self)

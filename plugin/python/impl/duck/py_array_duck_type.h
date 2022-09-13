@@ -19,6 +19,7 @@ namespace python {
 class PyArrayDuckType : public Duck<Array<sp<Mat3>>>, public Duck<Array<sp<Mat4>>>, public Duck<Array<sp<Input>>>,
         public Implements<PyArrayDuckType, Duck<Array<sp<Mat3>>>, Duck<Array<sp<Mat4>>>, Duck<Array<sp<Input>>>> {
 public:
+[[deprecated]]
     PyArrayDuckType(PyInstance inst);
 
     virtual void to(sp<Array<sp<Mat3>>>& inst) override;
@@ -27,7 +28,6 @@ public:
 
 private:
     PyInstance _instance;
-
 };
 
 }

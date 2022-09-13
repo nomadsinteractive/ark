@@ -876,8 +876,18 @@ class AnimationInput(Input):
     def get_node_matrix(self, node_name: str) -> Mat4:
         pass
 
+    def get_transform_variance(self, c: tuple[float, float, float], nodes: list[str]) -> list[float]:
+        pass
+
 
 class Animation:
+    @property
+    def ticks(self) -> float:
+        return 0
+
+    @property
+    def tps(self) -> float:
+        return 0
 
     @property
     def duration(self) -> float:
@@ -887,11 +897,71 @@ class Animation:
     def node_names(self) -> List[str]:
         return []
 
-    def make_transforms(self, t: Numeric, on_complete: Optional[Callable] = None) -> AnimationInput:
+    def make_input(self, t: Numeric, on_complete: Optional[Callable] = None) -> AnimationInput:
         pass
 
 
+class MaterialTexture:
+
+    @property
+    def color(self) -> Optional[Vec4]:
+        return None
+
+    @property
+    def bitmap(self) -> Optional[Bitmap]:
+        return None
+
+
+class Material:
+    @property
+    def id(self) -> int:
+        return 0
+
+    @property
+    def name(self) -> str:
+        return ''
+
+    @property
+    def base_color(self) -> Optional[MaterialTexture]:
+        return None
+
+    @property
+    def normal(self) -> Optional[MaterialTexture]:
+        return None
+    @property
+    def roughness(self) -> Optional[MaterialTexture]:
+        return None
+    @property
+    def metallic(self) -> Optional[MaterialTexture]:
+        return None
+    @property
+    def specular(self) -> Optional[MaterialTexture]:
+        return None
+
+
+class Mesh:
+    @property
+    def name(self) -> str:
+        return ''
+
+    @property
+    def vertex_length(self) -> int:
+        return 0
+
+    @property
+    def material(self) -> Optional[Material]:
+        return None
+
+
 class Model:
+
+    @property
+    def materials(self) -> list[Material]:
+        return []
+
+    @property
+    def meshes(self) -> list[Mesh]:
+        return []
 
     @property
     def index_length(self) -> int:
@@ -902,8 +972,12 @@ class Model:
         return 0
 
     @property
-    def animations(self) -> Dict[str, Animation]:
+    def animations(self) -> dict[str, Animation]:
         return {}
+
+    @property
+    def node_names(self) -> list[str]:
+        return []
 
     def get_animation(self, name: str) -> Animation:
         pass

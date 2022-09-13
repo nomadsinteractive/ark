@@ -46,3 +46,6 @@
 [submodule "plugin/python/3rdparty/Python"]
 	path = plugin/python/3rdparty/Python
 	url = https://github.com/python/cpython.git
+[submodule "plugin/assimp/3rdparty/assimp"]
+	path = plugin/assimp/3rdparty/assimp
+	url = https://github.com/assimp/assimp.git

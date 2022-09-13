@@ -25,8 +25,8 @@ public:
     static void print(const document& doc, StringBuffer& sb, const String& indent = "\t", uint16_t indent_count = 0);
     static String toString(const document& doc, const String& indent = "\t", uint16_t indent_count = 0);
 
-    static const String getId(const document& doc, const String& defValue = String());
-    static const String getAttribute(const document& doc, const String& name, const String& defValue = String());
+    static String getId(const document& doc, const String& defValue = String());
+    static String getAttribute(const document& doc, const String& name, const String& defValue = String());
     static const String& ensureAttribute(const document& doc, const String& name);
 
     template<typename T> static T getValue(const document& doc, const String& name, const T& defValue) {

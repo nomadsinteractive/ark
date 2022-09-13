@@ -235,14 +235,10 @@ macro(ark_ensure_dependency TARGET_DIR)
 endmacro()
 
 macro(ark_find_vulkan)
-    find_package(Vulkan)
+    find_package(Vulkan REQUIRED)
 
-    if(NOT Vulkan_FOUND)
-        message(FATAL_ERROR "No Vulkan libraries found")
-    else()
-        message("Vulkan include dirs: " ${Vulkan_INCLUDE_DIRS})
-        message("Vulkan libraries: " ${Vulkan_LIBRARIES})
-    endif()
+    message("Vulkan include dirs: " ${Vulkan_INCLUDE_DIRS})
+    message("Vulkan libraries: " ${Vulkan_LIBRARIES})
 
     ark_include_directories(${Vulkan_INCLUDE_DIRS})
     ark_link_libraries(${Vulkan_LIBRARIES})

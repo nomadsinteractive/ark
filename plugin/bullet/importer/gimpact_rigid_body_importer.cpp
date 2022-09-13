@@ -56,8 +56,8 @@ void GImpactRigidBodyImporter::import(ColliderBullet& collider, const document& 
 sp<CollisionShape> GImpactRigidBodyImporter::makeCollisionShape(const Model& model, btScalar mass)
 {
     btTriangleIndexVertexArray* tiva = new btTriangleIndexVertexArray();
-    DCHECK(model.meshes(), "This model has no meshes data");
-    for(const Mesh& i : *model.meshes())
+    DCHECK(model.meshes().size() > 0, "This model has no meshes data");
+    for(const Mesh& i : model.meshes())
     {
         btIndexedMesh indexedMesh;
         indexedMesh.m_numTriangles = static_cast<int32_t>(i.indices()->length() / 3);

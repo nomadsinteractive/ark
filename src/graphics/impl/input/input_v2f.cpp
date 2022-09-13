@@ -2,7 +2,7 @@
 
 #include "core/base/bean_factory.h"
 #include "core/base/bean_factory.h"
-#include "core/impl/flatable/flatable_by_variable.h"
+#include "core/impl/input/input_variable.h"
 
 #include "graphics/base/v2.h"
 
@@ -15,7 +15,7 @@ InputV2f::BUILDER::BUILDER(BeanFactory& factory, const String& value)
 
 sp<Input> InputV2f::BUILDER::build(const Scope& args)
 {
-    return sp<FlatableByVariable<V2>>::make(_vec2->build(args));
+    return sp<InputVariable<V2>>::make(_vec2->build(args));
 }
 
 }

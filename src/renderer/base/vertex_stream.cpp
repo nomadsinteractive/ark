@@ -16,6 +16,11 @@ VertexStream::VertexStream(const PipelineInput::Attributes& attributes, bool doT
 {
 }
 
+bool VertexStream::hasAttribute(int32_t name) const
+{
+    return _attributes._offsets[name] >= 0;
+}
+
 void VertexStream::writePosition(const V3& position)
 {
     DASSERT(!_do_transform || _transform);
@@ -25,18 +30,18 @@ void VertexStream::writePosition(const V3& position)
 void VertexStream::writeTexCoordinate(uint16_t u, uint16_t v)
 {
     const uint16_t uv[2] = {u, v};
-    write(uv, _attributes._offsets, PipelineInput::ATTRIBUTE_NAME_TEX_COORDINATE);
+    writeAttribute(uv, PipelineInput::ATTRIBUTE_NAME_TEX_COORDINATE);
 }
 
 void VertexStream::writeBoneInfo(const Mesh::BoneInfo& boneInfo)
 {
-    write(boneInfo._ids, _attributes._offsets, PipelineInput::ATTRIBUTE_NAME_BONE_IDS);
-    write(boneInfo._weights, _attributes._offsets, PipelineInput::ATTRIBUTE_NAME_BONE_WEIGHTS);
+    writeAttribute(boneInfo._ids, PipelineInput::ATTRIBUTE_NAME_BONE_IDS);
+    writeAttribute(boneInfo._weights, PipelineInput::ATTRIBUTE_NAME_BONE_WEIGHTS);
 }
 
 void VertexStream::writeNodeId(int32_t nodeId)
 {
-    write(nodeId, _attributes._offsets, PipelineInput::ATTRIBUTE_NAME_NODE_ID);
+    writeAttribute(nodeId, PipelineInput::ATTRIBUTE_NAME_NODE_ID);
 }
 
 void VertexStream::write(const void* buf, uint32_t size, uint32_t offset)
@@ -54,17 +59,17 @@ void VertexStream::setRenderObject(const Renderable::Snapshot& renderObject)
 
 void VertexStream::writeNormal(const V3& normal)
 {
-    write(normal, _attributes._offsets, PipelineInput::ATTRIBUTE_NAME_NORMAL);
+    writeAttribute(normal, PipelineInput::ATTRIBUTE_NAME_NORMAL);
 }
 
 void VertexStream::writeTangent(const V3& tangent)
 {
-    write(tangent, _attributes._offsets, PipelineInput::ATTRIBUTE_NAME_TANGENT);
+    writeAttribute(tangent, PipelineInput::ATTRIBUTE_NAME_TANGENT);
 }
 
 void VertexStream::writeBitangent(const V3& bitangent)
 {
-    write(bitangent, _attributes._offsets, PipelineInput::ATTRIBUTE_NAME_BITANGENT);
+    writeAttribute(bitangent, PipelineInput::ATTRIBUTE_NAME_BITANGENT);
 }
 
 void VertexStream::next()

@@ -16,7 +16,7 @@ Model::Model(sp<Uploader> indices, sp<Vertices> vertices, const Metrics& metrics
 {
 }
 
-Model::Model(sp<Array<Mesh>> meshes, const Metrics& metrics)
+Model::Model(std::vector<sp<Material> > materials, std::vector<sp<Mesh>> meshes, const Metrics& metrics)
     : _indices(sp<MeshIndicesUploader>::make(meshes)), _vertices(sp<MeshVertices>::make(meshes)), _meshes(std::move(meshes)), _metrics(metrics)
 {
 }
@@ -31,7 +31,12 @@ const sp<Vertices>& Model::vertices() const
     return _vertices;
 }
 
-const sp<Array<Mesh>>& Model::meshes() const
+const std::vector<sp<Material>>& Model::materials() const
+{
+    return _materials;
+}
+
+const std::vector<sp<Mesh>>& Model::meshes() const
 {
     return _meshes;
 }
@@ -39,6 +44,21 @@ const sp<Array<Mesh>>& Model::meshes() const
 const Metrics& Model::metrics() const
 {
     return _metrics;
+}
+
+const V3& Model::bounds() const
+{
+    return _metrics.bounds;
+}
+
+const V3& Model::size() const
+{
+    return _metrics.size;
+}
+
+const V3& Model::origin() const
+{
+    return _metrics.orgin;
 }
 
 size_t Model::indexCount() const
@@ -59,6 +79,16 @@ const Table<String, sp<Animation>>& Model::animations() const
 void Model::setAnimations(Table<String, sp<Animation>> animates)
 {
     _animations = std::move(animates);
+}
+
+const std::vector<String>& Model::nodeNames() const
+{
+    return _node_names;
+}
+
+void Model::setNodeNames(std::vector<String> nodes)
+{
+    _node_names = std::move(nodes);
 }
 
 const sp<Animation>& Model::getAnimation(const String& name) const
@@ -87,7 +117,7 @@ void Model::dispose()
 {
     _indices = nullptr;
     _vertices = nullptr;
-    _meshes = nullptr;
+    _meshes.clear();
     _animations.clear();
 }
 
@@ -96,7 +126,7 @@ bool Model::isDisposed() const
     return !static_cast<bool>(_indices);
 }
 
-Model::MeshIndicesUploader::MeshIndicesUploader(sp<ark::Array<Mesh>> meshes)
+Model::MeshIndicesUploader::MeshIndicesUploader(std::vector<sp<Mesh>> meshes)
     : Uploader(calcIndicesSize(meshes)), _meshes(std::move(meshes))
 {
 }
@@ -104,18 +134,16 @@ Model::MeshIndicesUploader::MeshIndicesUploader(sp<ark::Array<Mesh>> meshes)
 void Model::MeshIndicesUploader::upload(Writable& uploader)
 {
     uint32_t offset = 0;
-    size_t length = _meshes->length();
-    Mesh* buf = _meshes->buf();
-    for(size_t i = 0; i < length; ++i)
+    for(const Mesh& i : _meshes)
     {
-        const array<element_index_t>& indices = buf[i].indices();
+        const array<element_index_t>& indices = i.indices();
         uint32_t size = static_cast<uint32_t>(indices->size());
         uploader.write(indices->buf(), size, offset);
         offset += size;
     }
 }
 
-size_t Model::MeshIndicesUploader::calcIndicesSize(ark::Array<Mesh>& meshes) const
+size_t Model::MeshIndicesUploader::calcIndicesSize(const std::vector<sp<Mesh>>& meshes) const
 {
     size_t size = 0;
     for(const Mesh& i : meshes)
@@ -123,24 +151,22 @@ size_t Model::MeshIndicesUploader::calcIndicesSize(ark::Array<Mesh>& meshes) con
     return size;
 }
 
-Model::MeshVertices::MeshVertices(sp<Array<Mesh>> meshes)
+Model::MeshVertices::MeshVertices(std::vector<sp<Mesh>> meshes)
     : Vertices(calcVertexLength(meshes)), _meshes(std::move(meshes))
 {
 }
 
-size_t Model::MeshVertices::calcVertexLength(Array<Mesh>& meshes) const
+size_t Model::MeshVertices::calcVertexLength(const std::vector<sp<Mesh>>& meshes) const
 {
-    size_t length = meshes.length();
     size_t vertexLength = 0;
-    Mesh* m = meshes.buf();
-    for(size_t i = 0; i < length; ++i)
-        vertexLength += m[i].vertexLength();
+    for(const Mesh& i : meshes)
+        vertexLength += i.vertexLength();
     return vertexLength;
 }
 
 void Model::MeshVertices::write(VertexStream& buf, const V3& /*size*/)
 {
-    for(const Mesh& m : *_meshes)
+    for(const Mesh& m : _meshes)
         m.write(buf);
 }
 

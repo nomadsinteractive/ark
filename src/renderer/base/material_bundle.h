@@ -11,7 +11,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
-#include "graphics/base/material.h"
+#include "graphics/base/material_texture.h"
 #include "graphics/base/rect.h"
 #include "graphics/util/max_rects_bin_pack.h"
 
@@ -22,7 +22,7 @@ namespace ark {
 
 class ARK_API MaterialBundle {
 public:
-    MaterialBundle(const sp<ResourceLoaderContext>& resourceLoaderContext, std::map<String, sp<Material>> materials, std::array<sp<Texture>, Material::TEXTURE_TYPE_LENGTH> textures);
+    MaterialBundle(const sp<ResourceLoaderContext>& resourceLoaderContext, std::map<String, sp<Material>> materials, std::array<sp<Texture>, MaterialTexture::TYPE_LENGTH> textures);
 
     sp<Material> getMaterial(const String& name) const;
     Rect getMaterialUV(const String& name) const;
@@ -40,7 +40,7 @@ public:
         std::vector<String> _names;
         std::vector<sp<Builder<Material>>> _materials;
 
-        std::vector<Material::TextureType> _types;
+        std::vector<MaterialTexture::Type> _types;
         std::vector<sp<Builder<Texture>>> _textures;
     };
 
@@ -50,7 +50,7 @@ private:
     int32_t _width;
     int32_t _height;
 
-    sp<TexturePacker> _texture_packers[Material::TEXTURE_TYPE_LENGTH];
+    sp<TexturePacker> _texture_packers[MaterialTexture::TYPE_LENGTH];
 
     MaxRectsBinPack _max_rects_bin_pack;
 };

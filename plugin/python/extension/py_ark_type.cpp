@@ -6,7 +6,7 @@
 #include "core/inf/variable.h"
 #include "core/util/log.h"
 
-#include "python/extension/python_interpreter.h"
+#include "python/extension/py_cast.h"
 #include "python/extension/py_instance_ref.h"
 
 namespace ark {
@@ -244,7 +244,7 @@ PyObject* PyArkType::__absorb__(PyArkType::Instance* self, PyObject* args, PyObj
 
 PyObject* PyArkType::__dispose__(PyArkType::Instance* self, PyObject* /*args*/, PyObject* /*kwargs*/)
 {
-    const sp<Disposed> disposed = PythonInterpreter::instance()->toSharedPtr<Disposed>(reinterpret_cast<PyObject*>(self));
+    const sp<Disposed> disposed = PyCast::ensureSharedPtr<Disposed>(reinterpret_cast<PyObject*>(self));
     disposed->dispose();
     Py_RETURN_NONE;
 }

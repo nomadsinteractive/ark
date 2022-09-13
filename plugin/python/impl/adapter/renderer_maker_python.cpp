@@ -1,6 +1,6 @@
 #include "python/impl/adapter/renderer_maker_python.h"
 
-#include "python/extension/python_interpreter.h"
+#include "python/extension/py_cast.h"
 
 #include "python/api.h"
 
@@ -23,17 +23,17 @@ std::vector<sp<Renderer>> RendererMakerPython::make(int32_t x, int32_t y)
     DCHECK_THREAD_FLAG();
 
     PyInstance args(PyInstance::steal(PyTuple_New(2)));
-    PyObject* pyX = PythonInterpreter::instance()->toPyObject<int32_t>(x);
-    PyObject* pyY = PythonInterpreter::instance()->toPyObject<int32_t>(y);
+    PyObject* pyX = PyCast::toPyObject<int32_t>(x);
+    PyObject* pyY = PyCast::toPyObject<int32_t>(y);
     PyTuple_SetItem(args.pyObject(), 0, pyX);
     PyTuple_SetItem(args.pyObject(), 1, pyY);
     PyInstance ret = PyInstance::steal(_maker.call(args.pyObject()));
     if(!ret.isNullptr())
     {
         if(ret.isList())
-            return PythonInterpreter::instance()->toCppObject<std::vector<sp<Renderer>>>(ret.pyObject());
+            return PyCast::ensureCppObject<std::vector<sp<Renderer>>>(ret.pyObject());
 
-        return {PythonInterpreter::instance()->toSharedPtr<Renderer>(ret.pyObject())};
+        return {PyCast::ensureSharedPtr<Renderer>(ret.pyObject())};
     }
     else
         PythonInterpreter::instance()->logErr();

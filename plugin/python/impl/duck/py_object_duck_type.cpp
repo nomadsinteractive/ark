@@ -2,7 +2,7 @@
 
 #include "graphics/base/color.h"
 
-#include "python/extension/python_interpreter.h"
+#include "python/extension/py_cast.h"
 #include "python/impl/adapter/collision_callback_python_adapter.h"
 #include "python/impl/adapter/renderer_maker_python.h"
 
@@ -17,12 +17,12 @@ PyObjectDuckType::PyObjectDuckType(PyInstance inst)
 
 void PyObjectDuckType::to(sp<String>& inst)
 {
-    inst = sp<String>::make(PythonInterpreter::instance()->toString(_instance.pyObject()));
+    inst = sp<String>::make(PyCast::toString(_instance.pyObject()));
 }
 
 void PyObjectDuckType::to(sp<CollisionCallback>& inst)
 {
-    inst = PythonInterpreter::instance()->toCppObject<sp<CollisionCallback>>(_instance.pyObject());
+    inst = PyCast::ensureCppObject<sp<CollisionCallback>>(_instance.pyObject());
 }
 
 void PyObjectDuckType::to(sp<RendererMaker>& inst)
@@ -33,12 +33,12 @@ void PyObjectDuckType::to(sp<RendererMaker>& inst)
 
 void PyObjectDuckType::to(sp<Integer>& inst)
 {
-    inst = PythonInterpreter::instance()->toCppObject<sp<Integer>>(_instance.pyObject());
+    inst = PyCast::ensureCppObject<sp<Integer>>(_instance.pyObject());
 }
 
 void PyObjectDuckType::to(sp<Numeric>& inst)
 {
-    inst = PythonInterpreter::instance()->toCppObject<sp<Numeric>>(_instance.pyObject());
+    inst = PyCast::ensureCppObject<sp<Numeric>>(_instance.pyObject());
 }
 
 }

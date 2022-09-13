@@ -18,9 +18,9 @@ namespace ark {
 
 namespace {
 
-class AlignedFlatable : public Input {
+class AlignedInput : public Input {
 public:
-    AlignedFlatable(const sp<Input>& delegate, size_t alignedSize)
+    AlignedInput(const sp<Input>& delegate, size_t alignedSize)
         : _delegate(delegate), _aligned_size(alignedSize) {
         DCHECK(_delegate->size() <= _aligned_size, "Alignment is lesser than delegate's size(%d)", _delegate->size());
     }
@@ -296,7 +296,7 @@ void PipelineBuildingContext::loadPredefinedUniform(BeanFactory& factory, const 
             else
                 FATAL("Unknow type \"%s\"", type.c_str());
         }
-        addUniform(name, uType, 1, uType == Uniform::TYPE_F3 ? sp<Input>::make<AlignedFlatable>(flatable, 16) : flatable, binding);
+        addUniform(name, uType, 1, uType == Uniform::TYPE_F3 ? sp<Input>::make<AlignedInput>(flatable, 16) : flatable, binding);
     }
 }
 

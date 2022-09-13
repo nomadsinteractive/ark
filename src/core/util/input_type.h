@@ -18,6 +18,8 @@ public:
     static sp<Input> create(const sp<Input>& value);
 //[[script::bindings::constructor]]
     static sp<Input> create(std::vector<sp<Mat4>> value);
+//[[script::bindings::constructor]]
+    static sp<Input> create(std::vector<sp<Vec4>> value);
 
 //[[script::bindings::classmethod]]
     static void set(const sp<Input>& self, const sp<Input>& delegate);

@@ -27,14 +27,16 @@ public:
     VertexStream(const PipelineInput::Attributes& attributes, bool doTransform, uint8_t* ptr, size_t size, size_t stride);
     VertexStream(const PipelineInput::Attributes& attributes, bool doTransform, sp<Writer> writer);
 
-    template<typename T> void write(const T& value, size_t offset = 0) {
+    template<typename T> void write(const T& value, uint32_t offset = 0) {
         _writer->write(&value, sizeof(T), offset);
     }
 
-    template<typename T> void write(const T& value, const int32_t* offsets, int32_t name) {
-        if(offsets[name] >= 0)
-            write<T>(value, offsets[name]);
+    template<typename T> void writeAttribute(const T& value, int32_t name) {
+        if(_attributes._offsets[name] >= 0)
+            write<T>(value, _attributes._offsets[name]);
     }
+
+    bool hasAttribute(int32_t name) const;
 
     void writePosition(const V3& position);
     void writeNormal(const V3& normal);

@@ -1,8 +1,6 @@
 #ifndef ARK_PLUGIN_ASSIMP_BASE_NODE_TABLE_H_
 #define ARK_PLUGIN_ASSIMP_BASE_NODE_TABLE_H_
 
-#include <unordered_map>
-
 #include <assimp/matrix4x4.h>
 
 #include "core/base/string.h"

@@ -3,8 +3,9 @@
 
 #include <array>
 
-#include "core/base/api.h"
 #include "core/forwarding.h"
+#include "core/base/api.h"
+#include "core/base/string.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/base/v3.h"
@@ -15,6 +16,10 @@ namespace ark {
 
 class ARK_API Mesh {
 public:
+    enum Bone {
+        INFO_ARRAY_LENGTH = 4
+    };
+
     struct ARK_API UV {
         UV() = default;
         UV(uint16_t u, uint16_t v);
@@ -33,31 +38,38 @@ public:
 
     struct ARK_API BoneInfo {
         BoneInfo() = default;
-        BoneInfo(std::array<float, 4> weights, std::array<uint32_t, 4> ids);
 
         void add(uint32_t id, float weight);
 
-        std::array<float, 4> _weights;
-        std::array<uint32_t, 4> _ids;
+        std::array<float, INFO_ARRAY_LENGTH> _weights;
+        std::array<uint32_t, INFO_ARRAY_LENGTH> _ids;
     };
 
 public:
-    Mesh(array<element_index_t> indices, sp<Array<V3>> vertices, sp<Array<UV>> uvs, sp<Array<V3>> normals, sp<Array<Tangent>> tangents, sp<Array<BoneInfo>> boneInfos, sp<Material> material);
+    Mesh(String name, array<element_index_t> indices, sp<Array<V3>> vertices, sp<Array<UV>> uvs, sp<Array<V3>> normals, sp<Array<Tangent>> tangents, sp<Array<BoneInfo>> boneInfos, sp<Material> material);
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Mesh);
 
+//  [[script::bindings::property]]
+    const String& name() const;
+//  [[script::bindings::property]]
     size_t vertexLength() const;
+//  [[script::bindings::property]]
+    const sp<Material>& material() const;
 
     const array<element_index_t>& indices() const;
     const array<V3>& vertices() const;
-    const sp<Material>& material() const;
     const sp<Array<V3>>& normals() const;
     const sp<Array<Tangent>>& tangents() const;
 
+//[[script::bindings::property]]
     const sp<Integer>& nodeId() const;
     void setNodeId(sp<Integer> nodeId);
 
     void write(VertexStream& buf) const;
 
 private:
+    String _name;
+
     array<element_index_t> _indices;
     sp<Array<V3>> _vertices;
     sp<Array<UV>> _uvs;

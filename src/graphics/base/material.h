@@ -2,44 +2,38 @@
 #define ARK_GRAPHICS_BASE_MATERIAL_H_
 
 #include "core/forwarding.h"
+#include "core/base/string.h"
 #include "core/inf/builder.h"
 #include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
-
+#include "graphics/base/material_texture.h"
 
 namespace ark {
 
-class Material {
+class ARK_API Material {
 public:
-    enum TextureType {
-        TEXTURE_TYPE_BASE_COLOR,
-        TEXTURE_TYPE_NORMAL,
-        TEXTURE_TYPE_ROUGHNESS,
-        TEXTURE_TYPE_METALLIC,
-        TEXTURE_TYPE_SPECULAR,
-        TEXTURE_TYPE_LENGTH
-    };
+    Material(int32_t id, String name, bitmap baseColor = nullptr, bitmap normal = nullptr, bitmap roughness = nullptr, bitmap metallic = nullptr, bitmap specular = nullptr);
 
-    Material(bitmap baseColor = nullptr, bitmap normal = nullptr, bitmap roughness = nullptr, bitmap metallic = nullptr, bitmap specular = nullptr);
+//  [[script::bindings::property]]
+    int32_t id() const;
+//  [[script::bindings::property]]
+    const String& name() const;
 
-    const sp<VariableWrapper<bitmap>>& baseColor() const;
-    void setBaseColor(bitmap baseColor) const;
+//  [[script::bindings::property]]
+    const sp<MaterialTexture>& baseColor() const;
+//  [[script::bindings::property]]
+    const sp<MaterialTexture>& normal() const;
+//  [[script::bindings::property]]
+    const sp<MaterialTexture>& roughness() const;
+//  [[script::bindings::property]]
+    const sp<MaterialTexture>& metallic() const;
+//  [[script::bindings::property]]
+    const sp<MaterialTexture>& specular() const;
 
-    const sp<VariableWrapper<bitmap>>& normal() const;
-    void setNormal(bitmap normal) const;
-
-    const sp<VariableWrapper<bitmap>>& roughness() const;
-    void setRoughness(bitmap roughness) const;
-
-    const sp<VariableWrapper<bitmap>>& metallic() const;
-    void setMetallic(bitmap metallic) const;
-
-    const sp<VariableWrapper<bitmap>>& specular() const;
-    void setSpecular(bitmap specular) const;
-
-    const sp<VariableWrapper<bitmap>>& getTexture(TextureType type) const;
+//  [[script::bindings::auto]]
+    const sp<MaterialTexture>& getTexture(MaterialTexture::Type type) const;
 
 //  [[plugin::builder]]
     class BUILDER : public Builder<Material> {
@@ -60,7 +54,9 @@ public:
     };
 
 private:
-    sp<VariableWrapper<bitmap>> _textures[TEXTURE_TYPE_LENGTH];
+    int32_t _id;
+    String _name;
+    sp<MaterialTexture> _textures[MaterialTexture::TYPE_LENGTH];
 };
 
 }

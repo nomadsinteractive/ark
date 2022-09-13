@@ -35,8 +35,8 @@ sp<CollisionShape> ConvexHullRigidBodyImporter::makeCollisionShape(const Model& 
 {
     btConvexHullShape* convexHullShape = new btConvexHullShape();
 
-    DCHECK(model.meshes(), "ConvexHullRigidBodyImporter only works with Mesh based models");
-    for(const Mesh& i : *model.meshes())
+    DCHECK(model.meshes().size() > 0, "ConvexHullRigidBodyImporter only works with Mesh based models");
+    for(const Mesh& i : model.meshes())
         for(const V3& j : *i.vertices())
             convexHullShape->addPoint(btVector3(j.x(), j.y(), j.z()), false);
 

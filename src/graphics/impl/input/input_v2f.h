@@ -1,5 +1,5 @@
-#ifndef ARK_GRAPHICS_IMPL_FLATABLE_FLATABLE_V2F_H_
-#define ARK_GRAPHICS_IMPL_FLATABLE_FLATABLE_V2F_H_
+#ifndef ARK_GRAPHICS_IMPL_INPUT_INPUT_V2F_H_
+#define ARK_GRAPHICS_IMPL_INPUT_INPUT_V2F_H_
 
 #include "core/inf/builder.h"
 #include "core/types/shared_ptr.h"

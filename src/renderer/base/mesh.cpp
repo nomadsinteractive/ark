@@ -4,6 +4,8 @@
 #include "core/util/log.h"
 #include "core/util/math.h"
 
+#include "graphics/base/material.h"
+
 #include "renderer/base/vertex_stream.h"
 
 namespace ark {
@@ -18,12 +20,17 @@ Mesh::Tangent::Tangent(const V3& tangent, const V3& bitangent)
 {
 }
 
-Mesh::Mesh(array<element_index_t> indices, sp<Array<V3>> vertices, sp<Array<UV>> uvs, sp<Array<V3>> normals, sp<Array<Tangent>> tangents, sp<Array<BoneInfo>> boneInfos, sp<Material> material)
-    : _indices(std::move(indices)), _vertices(std::move(vertices)), _uvs(std::move(uvs)), _normals(std::move(normals)), _tangents(std::move(tangents)), _bone_infos(std::move(boneInfos)),
+Mesh::Mesh(String name, array<element_index_t> indices, sp<Array<V3>> vertices, sp<Array<UV>> uvs, sp<Array<V3>> normals, sp<Array<Tangent>> tangents, sp<Array<BoneInfo>> boneInfos, sp<Material> material)
+    : _name(std::move(name)), _indices(std::move(indices)), _vertices(std::move(vertices)), _uvs(std::move(uvs)), _normals(std::move(normals)), _tangents(std::move(tangents)), _bone_infos(std::move(boneInfos)),
       _material(std::move(material))
 {
     DASSERT(_vertices->length() == _uvs->length() && (!_normals || _vertices->length() == _normals->length()) && (!_tangents || _vertices->length() == _tangents->length())
             && (!_bone_infos || _vertices->length() == _bone_infos->length()));
+}
+
+const String& Mesh::name() const
+{
+    return _name;
 }
 
 size_t Mesh::vertexLength() const
@@ -74,6 +81,7 @@ void Mesh::write(VertexStream& buf) const
     Tangent* tangent = _tangents ? _tangents->buf() : nullptr;
     BoneInfo* boneInfo = _bone_infos ? _bone_infos->buf() : nullptr;
     bool hasNodeId = static_cast<bool>(_node_id);
+    bool hasMaterialId = buf.hasAttribute(PipelineInput::ATTRIBUTE_NAME_MATERIAL_ID);
     int32_t nodeId = hasNodeId ? _node_id->val() : 0;
     size_t len = _vertices->length();
 
@@ -96,12 +104,9 @@ void Mesh::write(VertexStream& buf) const
             buf.writeBoneInfo(*(boneInfo++));
         if(hasNodeId)
             buf.writeNodeId(nodeId);
+        if(hasMaterialId)
+            buf.writeAttribute(_material->id(), PipelineInput::ATTRIBUTE_NAME_MATERIAL_ID);
     }
-}
-
-Mesh::BoneInfo::BoneInfo(std::array<float, 4> weights, std::array<uint32_t, 4> ids)
-    : _weights(std::move(weights)), _ids(std::move(ids))
-{
 }
 
 void Mesh::BoneInfo::add(uint32_t id, float weight)
@@ -113,7 +118,7 @@ void Mesh::BoneInfo::add(uint32_t id, float weight)
             _ids[i] = id;
             return;
         }
-    DWARN(Math::almostEqual(weight, 0.0f), "Unable to add more weight to BoneId(%d), max weightarray length: %d", id, _weights.size());
+    DWARN(Math::almostEqual(weight, 0.0f), "Unable to add more weight to BoneId(%d), max weightarray length: %d", id, Mesh::INFO_ARRAY_LENGTH);
 }
 
 }
