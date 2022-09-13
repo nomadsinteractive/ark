@@ -15,7 +15,7 @@ namespace ark {
 class ARK_API InputType {
 public:
 //[[script::bindings::constructor]]
-    static sp<Input> create(const sp<Input>& value);
+    static sp<Input> create(sp<Input> value);
 //[[script::bindings::constructor]]
     static sp<Input> create(std::vector<sp<Mat4>> value);
 //[[script::bindings::constructor]]

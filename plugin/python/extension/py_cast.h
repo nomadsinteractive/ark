@@ -46,7 +46,7 @@ public:
 
     template<typename T> static T ensureCppObject(PyObject* obj) {
         std::optional<T> opt = toCppObject_sfinae<T>(obj, nullptr);
-        DASSERT(opt);
+        ASSERT(opt);
         return opt.value();
     }
 
@@ -97,9 +97,16 @@ public:
         return toSharedPtrImpl<T>(object, alert);
     }
 
+    template<typename T> static sp<T> toSharedPtrOrNull(PyObject* object) {
+        if(object == Py_None)
+            return nullptr;
+        std::optional<sp<T>> opt = toSharedPtrDefault<T>(object, false);
+        return opt ? opt.value() : nullptr;
+    }
+
     template<typename T> static sp<T> ensureSharedPtr(PyObject* object, bool alert = true) {
         std::optional<sp<T>> opt = toSharedPtr<T>(object, alert);
-        DASSERT(opt);
+        DCHECK(opt, "Casting \"%s\" to class \"%s\" failed", Py_TYPE(object)->tp_name, Class::getClass<T>()->name());
         return opt.value();
     }
 
@@ -119,12 +126,10 @@ private:
         PyTypeObject* pyType = reinterpret_cast<PyTypeObject*>(PyObject_Type(object));
         if(PythonInterpreter::instance()->isPyArkTypeObject(pyType)) {
             PyArkType::Instance* instance = reinterpret_cast<PyArkType::Instance*>(object);
-            const sp<T> s = instance->box->as<T>();
-            DCHECK(!alert || s, "Casting \"%s\" to class \"%s\" failed", pyType->tp_name, Class::getClass<T>()->name());
-            return s ? std::optional<sp<T>>(s) : std::optional<sp<T>>();
+            sp<T> s = instance->box->as<T>();
+            return s ? std::optional<sp<T>>(std::move(s)) : std::optional<sp<T>>();
         }
-        DCHECK(!alert, "Casting \"%s\" to class \"%s\" failed", pyType->tp_name, Class::getClass<T>()->name());
-        return nullptr;
+        return std::optional<sp<T>>();
     }
 
     template<typename T> static PyObject* fromIterable_sfinae(const T& list, typename std::remove_reference<decltype(list.front())>::type*) {

@@ -127,11 +127,11 @@ sp<Vec3> PyCast::toVec3(PyObject* object, bool alert)
         if(PyArg_ParseTuple(object, "OO|O", &x, &y, &z))
             return Vec3Type::create(toNumeric(x), toNumeric(y), toNumeric(z));
     }
-    const sp<Vec3> vec3 = toSharedPtrDefault<Vec3>(object, false).value();
+    sp<Vec3> vec3 = toSharedPtrOrNull<Vec3>(object);
     if(vec3)
         return vec3;
 
-    const sp<Vec2> vec2 = toSharedPtrDefault<Vec2>(object, false).value();
+    sp<Vec2> vec2 = toSharedPtrOrNull<Vec2>(object);
     if(!vec2 && !alert)
         return nullptr;
 

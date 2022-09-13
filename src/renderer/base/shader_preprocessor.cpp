@@ -184,7 +184,7 @@ void ShaderPreprocessor::setupUniforms(Table<String, sp<Uniform>>& uniforms, int
             const Declaration& declare = iter.second;
             Uniform::Type type = Uniform::toType(declare.type());
             uniforms.push_back(name, sp<Uniform>::make(name, declare.type(), type, type == Uniform::TYPE_STRUCT ? getUniformSize(type, declare.type())
-                                                                                                                : Uniform::getTypeSize(type), declare.length(), nullptr));
+                                                                                                                : Uniform::getComponentSize(type), declare.length(), nullptr));
         }
     }
 
@@ -226,12 +226,12 @@ const char* ShaderPreprocessor::outVarPrefix() const
 
 void ShaderPreprocessor::inDeclare(const String& type, const String& name, int32_t location)
 {
-    _declaration_ins.declare(type, inVarPrefix(), name, location);
+    _declaration_ins.declare(type, inVarPrefix(), name, location, nullptr, _shader_stage == PipelineInput::SHADER_STAGE_FRAGMENT && type == "int");
 }
 
 void ShaderPreprocessor::outDeclare(const String& type, const String& name, int32_t location)
 {
-    _declaration_outs.declare(type, outVarPrefix(), name, location);
+    _declaration_outs.declare(type, outVarPrefix(), name, location, nullptr, type == "int");
 }
 
 void ShaderPreprocessor::linkNextStage(const String& returnValueName)
@@ -292,7 +292,7 @@ void ShaderPreprocessor::addUniform(const String& type, const String& name, uint
 uint32_t ShaderPreprocessor::getUniformSize(Uniform::Type type, const String& declaredType) const
 {
     if(type != Uniform::TYPE_STRUCT)
-        return Uniform::getTypeSize(type);
+        return Uniform::getComponentSize(type);
 
     const String source = _struct_definitions.at(declaredType);
     uint32_t size = 0;
@@ -479,11 +479,11 @@ ShaderPreprocessor::DeclarationList::DeclarationList(Source& source, const Strin
 {
 }
 
-void ShaderPreprocessor::DeclarationList::declare(const String& type, const char* prefix, const String& name, int32_t location, const char* qualifier)
+void ShaderPreprocessor::DeclarationList::declare(const String& type, const char* prefix, const String& name, int32_t location, const char* qualifier, bool isFlat)
 {
     if(!_vars.has(name))
     {
-        sp<String> declared = sp<String>::make(Strings::sprintf("%s %s %s%s;", qualifier ? qualifier : _descriptor.c_str(), type.c_str(), prefix, name.c_str()));
+        sp<String> declared = sp<String>::make(Strings::sprintf("%s%s %s %s%s;", isFlat ? "flat " : "", qualifier ? qualifier : _descriptor.c_str(), type.c_str(), prefix, name.c_str()));
         if(location >= 0)
             _source.push_back(sp<String>::make(Strings::sprintf("layout (location = %d) %s", location, declared->c_str())));
         else

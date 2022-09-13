@@ -71,7 +71,7 @@ public:
         const Table<String, Declaration>& vars() const;
         Table<String, Declaration>& vars();
 
-        void declare(const String& type, const char* prefix, const String& name, int32_t location, const char* qualifier = nullptr);
+        void declare(const String& type, const char* prefix, const String& name, int32_t location, const char* qualifier = nullptr, bool isFlat = false);
 
     private:
         Source& _source;

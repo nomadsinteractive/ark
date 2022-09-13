@@ -264,39 +264,12 @@ void PipelineBuildingContext::loadPredefinedUniform(BeanFactory& factory, const 
         const String& type = Documents::ensureAttribute(i, Constants::Attributes::TYPE);
         const String& value = Documents::ensureAttribute(i, Constants::Attributes::VALUE);
         int32_t binding = Documents::getAttribute<int32_t>(i, Constants::Attributes::BINDING, -1);
-        const sp<Input> flatable = factory.ensure<Input>(type, value, args);
-        const uint32_t size = flatable->size();
-        Uniform::Type uType = Uniform::TYPE_F1;
-        switch (size) {
-        case 4:
-            if(type[0] == 'f')
-                uType = Uniform::TYPE_F1;
-            else if(type[0] == 'i')
-                uType = Uniform::TYPE_I1;
-            else
-                FATAL("Unknow type \"%s\"", type.c_str());
-            break;
-        case 8:
-            uType = Uniform::TYPE_F2;
-            break;
-        case 12:
-            uType = Uniform::TYPE_F3;
-            break;
-        case 16:
-            uType = Uniform::TYPE_F4;
-            break;
-        case 64:
-            uType = Uniform::TYPE_MAT4;
-            break;
-        default:
-            if(size % 64 == 0) {
-                addUniform(name, Uniform::TYPE_MAT4V, size / 64, flatable, binding);
-                continue;
-            }
-            else
-                FATAL("Unknow type \"%s\"", type.c_str());
-        }
-        addUniform(name, uType, 1, uType == Uniform::TYPE_F3 ? sp<Input>::make<AlignedInput>(flatable, 16) : flatable, binding);
+        sp<Input> input = factory.ensure<Input>(type, value, args);
+        uint32_t size = input->size();
+        Uniform::Type uType = Uniform::toType(type);
+        uint32_t componentSize = uType != Uniform::TYPE_STRUCT ? Uniform::getComponentSize(uType) : size;
+        CHECK(componentSize, "Unknow type \"%s\"", type.c_str());
+        addUniform(name, uType, size / componentSize, uType == Uniform::TYPE_F3 ? sp<Input>::make<AlignedInput>(input, 16) : input, binding);
     }
 }
 

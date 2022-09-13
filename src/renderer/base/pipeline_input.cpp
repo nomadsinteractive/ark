@@ -39,7 +39,7 @@ void PipelineInput::initialize(const PipelineBuildingContext& buildingContext)
 
     for(const sp<Uniform>& i : buildingContext._uniforms.values())
     {
-        DCHECK(i->binding() >= 0, "Uniform %s has unspecified binding", i->name().c_str());
+        CHECK(i->binding() >= 0, "Uniform %s has unspecified binding", i->name().c_str());
         sp<PipelineInput::UBO>& ubo = ubos[i->binding()];
         if(!ubo)
             ubo = sp<PipelineInput::UBO>::make(i->binding());
@@ -172,7 +172,7 @@ void PipelineInput::UBO::doSnapshot(uint64_t timestamp, bool force) const
     for(size_t i = 0; i < uniforms.size(); ++i)
     {
         const Uniform& uniform = uniforms.at(i);
-        const sp<Input>& flatable = uniform.flatable();
+        const sp<Input>& flatable = uniform.input();
         bool dirty = flatable && flatable->update(timestamp);
         dirtyFlags[i] = static_cast<uint8_t>(force || dirty);
         if(dirtyFlags[i] && flatable)

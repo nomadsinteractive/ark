@@ -16,8 +16,8 @@ Model::Model(sp<Uploader> indices, sp<Vertices> vertices, const Metrics& metrics
 {
 }
 
-Model::Model(std::vector<sp<Material> > materials, std::vector<sp<Mesh>> meshes, const Metrics& metrics)
-    : _indices(sp<MeshIndicesUploader>::make(meshes)), _vertices(sp<MeshVertices>::make(meshes)), _meshes(std::move(meshes)), _metrics(metrics)
+Model::Model(std::vector<sp<Material>> materials, std::vector<sp<Mesh>> meshes, const Metrics& metrics)
+    : _indices(sp<MeshIndicesUploader>::make(meshes)), _vertices(sp<MeshVertices>::make(meshes)), _materials(std::move(materials)), _meshes(std::move(meshes)), _metrics(metrics)
 {
 }
 

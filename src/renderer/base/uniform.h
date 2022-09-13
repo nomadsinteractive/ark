@@ -17,11 +17,17 @@ public:
     enum Type {
         TYPE_NONE,
         TYPE_I1,
+        TYPE_I2,
+        TYPE_I3,
+        TYPE_I4,
         TYPE_F1,
         TYPE_F2,
         TYPE_F3,
         TYPE_F4,
         TYPE_I1V,
+        TYPE_I2V,
+        TYPE_I3V,
+        TYPE_I4V,
         TYPE_F1V,
         TYPE_F2V,
         TYPE_F3V,
@@ -48,11 +54,11 @@ public:
 
     static Type toType(const String& declaredType);
     static String toDeclaredType(Type type);
-    static uint32_t getTypeSize(Type type);
+    static uint32_t getComponentSize(Type type);
 
     const String& declaredType() const;
 
-    const sp<Input>& flatable() const;
+    const sp<Input>& input() const;
     void setInput(const sp<Input>& flatable);
 
     int32_t binding() const;
@@ -65,9 +71,9 @@ private:
     String _name;
     String _declared_type;
     Type _type;
-    size_t _size;
+    size_t _component_size;
     uint32_t _length;
-    sp<Input> _flatable;
+    sp<Input> _input;
     int32_t _binding;
 };
 

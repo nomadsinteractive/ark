@@ -387,19 +387,19 @@ public:
 
     template<typename T> sp<Builder<T>> ensureBuilder(const document& doc, const String& attr) {
         const sp<Builder<T>> builder = getBuilder<T>(doc, attr);
-        DCHECK(builder, "Cannot not build \"%s\" from \"%s\"", attr.c_str(), Documents::toString(doc).c_str());
+        CHECK(builder, "Cannot not build \"%s\" from \"%s\"", attr.c_str(), Documents::toString(doc).c_str());
         return builder;
     }
 
     template<typename T> sp<Builder<T>> ensureConcreteClassBuilder(const document& doc, const String& attr) {
         const sp<Builder<T>> builder = getConcreteClassBuilder<T>(doc, attr);
-        DCHECK(builder, "Cannot not build \"%s\" from \"%s\"", attr.c_str(), Documents::toString(doc).c_str());
+        CHECK(builder, "Cannot not build \"%s\" from \"%s\"", attr.c_str(), Documents::toString(doc).c_str());
         return builder;
     }
 
     template<typename T> sp<Builder<T>> ensureBuilderByTypeValue(const String& type, const String& value) {
         const sp<Builder<T>> builder = findBuilderByTypeValue<T>(type, value);
-        DCHECK(builder, "Cannot not build Type(%s) with value \"%s\"", type.c_str(), value.c_str());
+        CHECK(builder, "Cannot not build Type(%s) with value \"%s\"", type.c_str(), value.c_str());
         return builder;
     }
 

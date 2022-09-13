@@ -9,9 +9,9 @@
 
 namespace ark {
 
-sp<Input> InputType::create(const sp<Input>& value)
+sp<Input> InputType::create(sp<Input> value)
 {
-    return sp<InputWrapper>::make(value);
+    return sp<InputWrapper>::make(std::move(value));
 }
 
 sp<Input> InputType::create(std::vector<sp<Mat4>> value)

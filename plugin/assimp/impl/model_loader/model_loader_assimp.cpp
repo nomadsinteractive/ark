@@ -128,7 +128,7 @@ const aiScene* ModelImporterAssimp::loadScene(const sp<Assimp::Importer>& import
     return scene;
 }
 
-Mesh ModelImporterAssimp::loadMesh(const aiScene* scene, const aiMesh* mesh, MaterialBundle& materialBundle, element_index_t vertexBase, NodeTable& boneMapping, std::vector<sp<Material>>& materials) const
+Mesh ModelImporterAssimp::loadMesh(const aiScene* scene, const aiMesh* mesh, MaterialBundle& materialBundle, element_index_t vertexBase, NodeTable& boneMapping, const std::vector<sp<Material>>& materials) const
 {
     sp<Array<element_index_t>> indices = loadIndices(mesh, vertexBase);
     sp<Array<V3>> vertices = sp<Array<V3>::Allocated>::make(mesh->mNumVertices);
@@ -143,21 +143,8 @@ Mesh ModelImporterAssimp::loadMesh(const aiScene* scene, const aiMesh* mesh, Mat
     Mesh::UV* u = uvs->buf() - 1;
 
     DASSERT(mesh->mMaterialIndex < scene->mNumMaterials);
-    sp<Material>& material = materials[mesh->mMaterialIndex];
-    const aiMaterial* am = scene->mMaterials[mesh->mMaterialIndex];
-    String mName = am->GetName().C_Str();
-    const Rect uvBounds = materialBundle.getMaterialUV(mName);
-    if(!material)
-        material = materialBundle.getMaterial(mName);
-    WARN(material, "Undefined material(%s) for mesh(%s)", mName.c_str(), mesh->mName.C_Str());
-    if(!material)
-    {
-        aiColor4D ac;
-        material = sp<Material>::make(mesh->mMaterialIndex, std::move(mName));
-        if(aiGetMaterialColor(am, AI_MATKEY_COLOR_DIFFUSE, &ac) == aiReturn_SUCCESS)
-            material->baseColor()->setColor(sp<Vec4::Const>::make(V4(ac.r, ac.g, ac.b, ac.a)));
-    }
-
+    const sp<Material>& material = materials[mesh->mMaterialIndex];
+    const Rect uvBounds = materialBundle.getMaterialUV(material->name());
     for(uint32_t i = 0; i < mesh->mNumVertices; i ++)
     {
         *(++vert) = V3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
@@ -171,7 +158,7 @@ Mesh ModelImporterAssimp::loadMesh(const aiScene* scene, const aiMesh* mesh, Mat
     if(mesh->HasBones())
         loadBones(mesh, boneMapping, bones);
 
-    return Mesh(mesh->mName.C_Str(), indices, std::move(vertices), std::move(uvs), std::move(normals), std::move(tangents), std::move(bones), std::move(material));
+    return Mesh(mesh->mName.C_Str(), indices, std::move(vertices), std::move(uvs), std::move(normals), std::move(tangents), std::move(bones), material);
 }
 
 NodeTable ModelImporterAssimp::loadNodes(const aiNode* node, Model& model) const
@@ -194,6 +181,20 @@ Model ModelImporterAssimp::loadModel(const aiScene* scene, MaterialBundle& mater
     NodeTable bones;
     V3 aabbMin(std::numeric_limits<float>::max()), aabbMax(std::numeric_limits<float>::min());
     std::vector<sp<Material>> materials(scene->mNumMaterials);
+
+    for(uint32_t i = 0; i < scene->mNumMaterials; ++i)
+    {
+        const aiMaterial* am = scene->mMaterials[i];
+        String mName = am->GetName().C_Str();
+        sp<Material>& material = materials[i];
+        if(!(material = materialBundle.getMaterial(mName)))
+        {
+            aiColor4D ac;
+            material = sp<Material>::make(i, std::move(mName));
+            if(aiGetMaterialColor(am, AI_MATKEY_COLOR_DIFFUSE, &ac) == aiReturn_SUCCESS)
+                material->baseColor()->setColor(sp<Vec4::Const>::make(V4(ac.r, ac.g, ac.b, ac.a)));
+        }
+    }
 
     for(uint32_t i = 0; i < scene->mNumMeshes; ++i)
     {
