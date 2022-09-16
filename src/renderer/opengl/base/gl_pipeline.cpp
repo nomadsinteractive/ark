@@ -513,7 +513,7 @@ GLuint GLPipeline::Stage::compile(uint32_t version, GLenum type, const String& s
         StringBuffer sb;
         for(uint32_t i = 0; i <= slen; i++)
             sb << src[i] << '\n';
-        DFATAL("%s\n\n%s", logs.data(), sb.str().c_str());
+        FATAL("%s\n\n%s", logs.data(), sb.str().c_str());
         return 0;
     }
     return id;

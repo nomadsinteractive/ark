@@ -58,9 +58,9 @@ bool GLCubemap::download(GraphicsContext& /*graphicsContext*/, Bitmap& /*bitmap*
 void GLCubemap::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap& bitmap, const std::vector<sp<ByteArray>>& imagedata)
 {
     uint8_t channels = bitmap.channels();
-    GLenum format = GLUtil::getTextureFormat(_parameters->_format, channels);
-    GLenum pixelFormat = GLUtil::getPixelFormat(_parameters->_format, bitmap);
-    GLenum internalFormat = GLUtil::getTextureInternalFormat(_parameters->_format, bitmap);
+    GLenum format = GLUtil::getTextureFormat(_parameters->_usage, _parameters->_format, channels);
+    GLenum pixelFormat = GLUtil::getPixelType(_parameters->_format, bitmap);
+    GLenum internalFormat = GLUtil::getTextureInternalFormat(_parameters->_usage, _parameters->_format, bitmap);
     DASSERT(imagedata.size() <= 6);
     for(size_t i = 0; i < imagedata.size(); ++i)
         glTexImage2D(static_cast<GLenum>(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i), 0, static_cast<GLint>(internalFormat), static_cast<int32_t>(bitmap.width()), static_cast<int32_t>(bitmap.height()), 0, format, pixelFormat, imagedata.at(i)->buf());

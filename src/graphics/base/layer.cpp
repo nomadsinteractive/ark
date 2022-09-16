@@ -8,6 +8,8 @@
 #include "graphics/base/render_layer.h"
 #include "graphics/base/layer_context.h"
 
+#include "renderer/impl/model_loader/model_loader_cached.h"
+
 namespace ark {
 
 Layer::Layer(sp<LayerContext> layerContext)
@@ -31,9 +33,19 @@ void Layer::dispose()
     _layer_context = nullptr;
 }
 
+const sp<ModelLoader>& Layer::modelLoader() const
+{
+    return _layer_context ? _layer_context->modelLoader() : sp<ModelLoader>::null();
+}
+
 const sp<LayerContext>& Layer::context() const
 {
     return _layer_context;
+}
+
+void Layer::setContext(sp<LayerContext> context)
+{
+    _layer_context = std::move(context);
 }
 
 void Layer::addRenderObject(const sp<RenderObject>& renderObject, const sp<Boolean>& disposed)
@@ -46,19 +58,20 @@ void Layer::clear()
     _layer_context->clear();
 }
 
-Layer::BUILDER_IMPL1::BUILDER_IMPL1(BeanFactory& factory, const document& manifest)
-    : _type(Documents::getAttribute(manifest, Constants::Attributes::TYPE, Layer::TYPE_DYNAMIC)), _render_layer(factory.ensureBuilder<RenderLayer>(manifest, Constants::Attributes::RENDER_LAYER)),
+Layer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+    : _type(Documents::getAttribute(manifest, Constants::Attributes::TYPE, Layer::TYPE_DYNAMIC)), _render_layer(factory.getBuilder<RenderLayer>(manifest, Constants::Attributes::RENDER_LAYER)),
       _model_loader(factory.getBuilder<ModelLoader>(manifest, Constants::Attributes::MODEL)), _render_objects(factory.getBuilderList<RenderObject>(manifest, Constants::Attributes::RENDER_OBJECT))
 {
 }
 
-sp<Layer> Layer::BUILDER_IMPL1::build(const Scope& args)
+sp<Layer> Layer::BUILDER::build(const Scope& args)
 {
+    sp<ModelLoader> modelLoader = _model_loader->build(args);
     const sp<RenderLayer> renderLayer = _render_layer->build(args);
-    const sp<Layer> layer = sp<Layer>::make(renderLayer->makeContext(_type, _model_loader->build(args)));
-    const sp<LayerContext>& layerContext = layer->context();
+    const sp<Layer> layer = sp<Layer>::make(renderLayer ? renderLayer->makeContext(_type, std::move(modelLoader)) : sp<LayerContext>::make(ModelLoaderCached::decorate(std::move(modelLoader)), nullptr, _type));
+    LayerContext& layerContext = layer->context();
     for(const sp<Builder<RenderObject>>& i : _render_objects)
-        layerContext->addRenderObject(i->build(args));
+        layerContext.addRenderObject(i->build(args));
     return layer;
 }
 

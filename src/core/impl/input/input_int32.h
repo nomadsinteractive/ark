@@ -7,9 +7,9 @@
 
 namespace ark {
 
-class FlatableInt32 {
+class InputInt32 {
 public:
-//  [[plugin::builder::by-value("int32")]]
+//  [[plugin::builder::by-value("int")]]
     class BUILDER : public Builder<Input> {
     public:
         BUILDER(BeanFactory& factory, const String& value);

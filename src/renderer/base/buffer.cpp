@@ -38,25 +38,26 @@ private:
     std::vector<Buffer::Block> _blocks;
 };
 
-class UploaderByFlatable : public Uploader {
+class UploaderByInput : public Uploader {
 public:
-    UploaderByFlatable(sp<Input> flatable)
-        : Uploader(flatable->size()), _flatable(std::move(flatable)) {
+    UploaderByInput(sp<Input> input)
+        : Uploader(input->size()), _input(std::move(input)) {
 
     }
 
     virtual void upload(Writable& writable) override {
         std::vector<int8_t> buf(_size);
-        _flatable->flat(buf.data());
+        _input->flat(buf.data());
         writable.write(buf.data(), _size, 0);
     }
 
 private:
-    sp<Input> _flatable;
+    sp<Input> _input;
 };
 
 class BufferObjectUploader : public Uploader {
 public:
+    [[deprecated]]
     BufferObjectUploader(std::vector<sp<Input>> vars, size_t stride, size_t length)
         : Uploader(stride * length), _stride(stride), _length(length), _vars(std::move(vars)) {
     }
@@ -246,10 +247,10 @@ Buffer::Block::Block(size_t offset, const ByteArray::Borrowed& content)
 }
 
 Buffer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _resource_loader_context(resourceLoaderContext), _flatable(factory.getBuilder<Input>(manifest, "data")), _length(factory.getBuilder<Integer>(manifest, "length")),
+    : _resource_loader_context(resourceLoaderContext), _input(factory.getBuilder<Input>(manifest, Constants::Attributes::INPUT)), _length(factory.getBuilder<Integer>(manifest, "length")),
       _stride(factory.getBuilder<Integer>(manifest, "stride")), _usage(Documents::getAttribute<Usage>(manifest, "usage", USAGE_DYNAMIC))
 {
-    DCHECK(_flatable || _length, "You must specify either \"data\" or \"length\" to define a buffer");
+    DCHECK(_input || _length, "You must specify either \"%s\" or \"length\" to define a buffer", Constants::Attributes::INPUT);
     for(const document& i : manifest->children())
     {
         const String& type = Documents::ensureAttribute(i, Constants::Attributes::TYPE);
@@ -269,12 +270,12 @@ sp<Buffer> Buffer::BUILDER::build(const Scope& args)
         vars.push_back(std::move(var));
     }
     const sp<RenderController>& renderController = _resource_loader_context->renderController();
-    sp<Input> flatable = _flatable ? _flatable->build(args) : nullptr;
-    sp<Uploader> uploader = flatable ? sp<Uploader>::make<UploaderByFlatable>(flatable)
+    sp<Input> input = _input ? _input->build(args) : nullptr;
+    sp<Uploader> uploader = input ? sp<Uploader>::make<UploaderByInput>(input)
                                      : sp<Uploader>::make<BufferObjectUploader>(std::move(vars), _stride ? static_cast<uint32_t>(_stride->build(args)->val()) : stride, _length->build(args)->val());
     sp<Buffer> buffer = sp<Buffer>::make(renderController->makeBuffer(Buffer::TYPE_STORAGE, _usage, uploader));
-    if(flatable)
-        _resource_loader_context->renderController()->addPreRenderUpdateRequest(sp<PreRenderUpdate>::make(buffer, renderController, uploader, flatable), sp<BooleanByWeakRef<Buffer::Delegate>>::make(buffer->delegate(), 2));
+    if(input)
+        renderController->addPreRenderUpdateRequest(sp<PreRenderUpdate>::make(buffer, renderController, uploader, input), sp<BooleanByWeakRef<Buffer::Delegate>>::make(buffer->delegate(), 2));
     return buffer;
 }
 

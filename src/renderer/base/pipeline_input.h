@@ -6,6 +6,7 @@
 
 #include "core/base/api.h"
 #include "core/collection/table.h"
+#include "core/types/optional.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/base/render_layer.h"
@@ -42,9 +43,9 @@ public:
         SHADER_STAGE_COUNT
     };
 
-    struct ARK_API Attributes {
-        Attributes();
-        Attributes(const PipelineInput& input);
+    struct ARK_API AttributeOffsets {
+        AttributeOffsets();
+        AttributeOffsets(const PipelineInput& input);
 
         int32_t _offsets[ATTRIBUTE_NAME_COUNT];
     };
@@ -59,7 +60,7 @@ public:
         const Table<String, Attribute>& attributes() const;
         void addAttribute(String name, Attribute attribute);
 
-        const Attribute& getAttribute(const String& name) const;
+        Optional<const Attribute&> getAttribute(const String& name) const;
         int32_t getAttributeOffset(const String& name) const;
 
         void align();
@@ -134,7 +135,7 @@ public:
 
     const PipelineInput::Stream& getStream(uint32_t divisor) const;
 
-    const Attribute& getAttribute(const String& name, uint32_t divisor = 0) const;
+    Optional<const Attribute&> getAttribute(const String& name, uint32_t divisor = 0) const;
     int32_t getAttributeOffset(const String& name, uint32_t divisor = 0) const;
 
     sp<Uniform> getUniform(const String& name) const;

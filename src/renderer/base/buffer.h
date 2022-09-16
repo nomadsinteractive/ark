@@ -126,7 +126,7 @@ public:
     private:
         sp<ResourceLoaderContext> _resource_loader_context;
 
-        sp<Builder<Input>> _flatable;
+        sp<Builder<Input>> _input;
         sp<Builder<Integer>> _length;
         SafePtr<Builder<Integer>> _stride;
         Usage _usage;

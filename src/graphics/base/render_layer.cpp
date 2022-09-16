@@ -27,7 +27,7 @@
 namespace ark {
 
 RenderLayer::Stub::Stub(sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Vec4> scissor, sp<RenderController> renderController)
-    : _model_loader(sp<ModelLoaderCached>::make(std::move(modelLoader))), _shader(std::move(shader)), _scissor(std::move(scissor)), _render_controller(std::move(renderController)), _render_command_composer(_model_loader->makeRenderCommandComposer()),
+    : _model_loader(ModelLoaderCached::decorate(std::move(modelLoader))), _shader(std::move(shader)), _scissor(std::move(scissor)), _render_controller(std::move(renderController)), _render_command_composer(_model_loader->makeRenderCommandComposer()),
       _shader_bindings(_render_command_composer->makeShaderBindings(_shader, _render_controller, _model_loader->renderMode())), _layer(sp<Layer>::make(sp<LayerContext>::make(_model_loader, nullptr, Layer::TYPE_DYNAMIC))),
       _stride(_shader->input()->getStream(0).stride())
 {
@@ -147,14 +147,20 @@ RenderLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, co
 }
 
 RenderLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext, sp<Builder<ModelLoader>> modelLoader, sp<Builder<Shader>> shader)
-    : _resource_loader_context(resourceLoaderContext), _model_loader(std::move(modelLoader)), _shader(shader ? std::move(shader) : Shader::fromDocument(factory, manifest, resourceLoaderContext)),
+    : _resource_loader_context(resourceLoaderContext), _layers(factory.getBuilderList<Layer>(manifest, "layer")), _model_loader(std::move(modelLoader)), _shader(shader ? std::move(shader) : Shader::fromDocument(factory, manifest, resourceLoaderContext)),
       _scissor(factory.getBuilder<Vec4>(manifest, "scissor"))
 {
 }
 
 sp<RenderLayer> RenderLayer::BUILDER::build(const Scope& args)
 {
-    return sp<RenderLayer>::make(_model_loader->build(args), _shader->build(args), _scissor->build(args), _resource_loader_context->renderController());
+    const sp<RenderLayer> renderLayer = sp<RenderLayer>::make(_model_loader->build(args), _shader->build(args), _scissor->build(args), _resource_loader_context->renderController());
+    for(const sp<Builder<Layer>>& i : _layers)
+    {
+        const sp<Layer> layer = i->build(args);
+        layer->setContext(renderLayer->makeContext(Layer::TYPE_DYNAMIC, layer->modelLoader()));
+    }
+    return renderLayer;
 }
 
 RenderLayer::RENDERER_BUILDER::RENDERER_BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

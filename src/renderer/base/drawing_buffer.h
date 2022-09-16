@@ -37,7 +37,7 @@ public:
 
     bool isInstanced() const;
 
-    Buffer::Factory& getInstancedArrayBuilder(uint32_t divisor);
+    Buffer::Factory& getInstancedBufferBuilder(uint32_t divisor);
 
     std::vector<std::pair<uint32_t, Buffer::Snapshot>> makeDividedBufferSnapshots() const;
 

@@ -58,7 +58,7 @@ public:
 
         buildingContext->initialize();
         TESTCASE_VALIDATE(pipelineInput->streams()[0].stride() != 0);
-        TESTCASE_VALIDATE(pipelineInput->getAttribute("Position").length());
+        TESTCASE_VALIDATE(pipelineInput->getAttribute("Position")->length());
         TESTCASE_VALIDATE(pipelineInput->getAttributeOffset("TexCoordinate") != -1);
         TESTCASE_VALIDATE(pipelineInput->getAttributeOffset("Alpha01") == -1);
 

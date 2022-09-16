@@ -87,6 +87,7 @@ Uniform::Type Uniform::toType(const String& declaredType)
         return TYPE_MAT3;
     if(declaredType == "mat3fv")
         return TYPE_MAT3V;
+    CHECK(declaredType == "sampler2D", "Unknow type \"%s\"", declaredType.c_str());
     if(declaredType == "sampler2D")
         return TYPE_SAMPLER2D;
     return TYPE_STRUCT;

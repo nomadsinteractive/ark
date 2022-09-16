@@ -158,7 +158,7 @@ public:
     const sp<PipelineInput>& input() const;
     const sp<Snippet>& snippet() const;
 
-    const PipelineInput::Attributes& attributes() const;
+    const PipelineInput::AttributeOffsets& attributes() const;
     const std::vector<sp<Texture>>& samplers() const;
 
     void bindSampler(const sp<Texture>& texture, uint32_t name = 0);
@@ -183,7 +183,7 @@ private:
         sp<PipelineLayout> _layout;
         sp<PipelineInput> _input;
 
-        PipelineInput::Attributes _attributes;
+        PipelineInput::AttributeOffsets _attributes;
 
         std::vector<sp<Texture>> _samplers;
     };

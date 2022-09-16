@@ -31,9 +31,9 @@ public:
     static GLenum getEnum(const document& manifest, const String& name);
     static GLenum getEnum(const document& manifest, const String& name, GLenum defValue);
 
-    static GLenum getTextureInternalFormat(int32_t format, const Bitmap& bitmap);
-    static GLenum getTextureFormat(int32_t format, uint8_t channels);
-    static GLenum getPixelFormat(int32_t format, const Bitmap& bitmap);
+    static GLenum getTextureInternalFormat(Texture::Usage usage, Texture::Format format, const Bitmap& bitmap);
+    static GLenum getTextureFormat(Texture::Usage usage, Texture::Format format, uint8_t channels);
+    static GLenum getPixelType(int32_t format, const Bitmap& bitmap);
 
     static void renderCubemap(GraphicsContext& graphicsContext, uint32_t id, RenderController& renderController, const sp<Pipeline>& pipeline, Texture& texture, int32_t width, int32_t height);
 

@@ -117,7 +117,6 @@ void ShaderPreprocessor::parseMainBlock(const String& source, PipelineBuildingCo
 void ShaderPreprocessor::parseDeclarations()
 {
     _main.replace(_INCLUDE_PATTERN, [this](const std::smatch& m) {
-        const String filepath = m.str();
         this->addInclude(m.str(), m[1].str());
         return nullptr;
     });
@@ -176,12 +175,12 @@ ShaderPreprocessor::Preprocessed ShaderPreprocessor::preprocess()
 
 void ShaderPreprocessor::setupUniforms(Table<String, sp<Uniform>>& uniforms, int32_t& binding)
 {
-    for(const auto& iter : _declaration_uniforms.vars())
+    for(const auto& i : _declaration_uniforms.vars())
     {
-        const String& name = iter.first;
+        const String& name = i.first;
         if(!uniforms.has(name))
         {
-            const Declaration& declare = iter.second;
+            const Declaration& declare = i.second;
             Uniform::Type type = Uniform::toType(declare.type());
             uniforms.push_back(name, sp<Uniform>::make(name, declare.type(), type, type == Uniform::TYPE_STRUCT ? getUniformSize(type, declare.type())
                                                                                                                 : Uniform::getComponentSize(type), declare.length(), nullptr));
@@ -354,6 +353,7 @@ void ShaderPreprocessor::addInclude(const String& source, const String& filepath
         content = stringtable->getString(filepath, false);
     else
         content = stringtable->getString(filepath.substr(0, pos), filepath.substr(pos + 1).lstrip('/'), false);
+    CHECK(content, "Can't open include file \"%s\"", filepath.c_str());
     _includes.push_back(content ? std::move(content) : sp<String>::make(source));
 }
 

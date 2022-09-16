@@ -118,6 +118,7 @@ public:
 
     private:
         sp<ResourceLoaderContext> _resource_loader_context;
+        std::vector<sp<Builder<Layer>>> _layers;
         sp<Builder<ModelLoader>> _model_loader;
         sp<Builder<Shader>> _shader;
         SafePtr<Builder<Vec4>> _scissor;

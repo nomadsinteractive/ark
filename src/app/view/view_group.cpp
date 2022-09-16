@@ -22,6 +22,7 @@ ViewGroup::ViewGroup(const Frame& background, sp<Layout> layout, sp<LayoutV2> la
     if(_layout_param && background)
         if(background.size() != _layout_param->size())
             background.size()->adopt(static_cast<sp<Size>>(_layout_param->size()));
+    DTRACE(_background);
 }
 
 ViewGroup::~ViewGroup()

@@ -6,19 +6,19 @@
 
 namespace ark {
 
-VertexStream::VertexStream(const PipelineInput::Attributes& attributes, bool doTransform, uint8_t* ptr, size_t size, size_t stride)
+VertexStream::VertexStream(const PipelineInput::AttributeOffsets& attributes, bool doTransform, uint8_t* ptr, size_t size, size_t stride)
     : VertexStream(attributes, doTransform, sp<WriterMemory>::make(ptr, size, stride))
 {
 }
 
-VertexStream::VertexStream(const PipelineInput::Attributes& attributes, bool doTransform, sp<VertexStream::Writer> writer)
-    : _attributes(attributes), _writer(std::move(writer)), _do_transform(doTransform), _visible(true), _transform(nullptr)
+VertexStream::VertexStream(const PipelineInput::AttributeOffsets& attributes, bool doTransform, sp<VertexStream::Writer> writer)
+    : _attribute_offsets(attributes), _writer(std::move(writer)), _do_transform(doTransform), _visible(true), _transform(nullptr)
 {
 }
 
 bool VertexStream::hasAttribute(int32_t name) const
 {
-    return _attributes._offsets[name] >= 0;
+    return _attribute_offsets._offsets[name] >= 0;
 }
 
 void VertexStream::writePosition(const V3& position)

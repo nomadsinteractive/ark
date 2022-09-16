@@ -44,8 +44,8 @@ sp<Framebuffer> Framebuffer::BUILDER::build(const Scope& args)
             colorAttachments.push_back(std::move(tex));
         else
         {
-            DCHECK(depthStencilAttachments == nullptr, "Only one depth-stencil attachment is allowed");
-            DCHECK(tex->usage() & Texture::USAGE_DEPTH_STENCIL_ATTACHMENT, "Unknow Texture usage: %d", tex->usage());
+            CHECK(depthStencilAttachments == nullptr, "Only one depth-stencil attachment is allowed");
+            CHECK(tex->usage() & Texture::USAGE_DEPTH_STENCIL_ATTACHMENT, "Unknow Texture usage: %d", tex->usage());
             depthStencilAttachments = std::move(tex);
         }
     }

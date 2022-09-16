@@ -5,12 +5,12 @@
 
 namespace ark {
 
-FlatableInt32::BUILDER::BUILDER(BeanFactory& factory, const String &value)
+InputInt32::BUILDER::BUILDER(BeanFactory& factory, const String &value)
     : _var(factory.ensureBuilder<Integer>(value))
 {
 }
 
-sp<Input> FlatableInt32::BUILDER::build(const Scope& args)
+sp<Input> InputInt32::BUILDER::build(const Scope& args)
 {
     return sp<InputVariable<int32_t>>::make(_var->build(args));
 }

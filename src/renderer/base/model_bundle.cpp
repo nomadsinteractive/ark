@@ -67,7 +67,7 @@ size_t ModelBundle::indexLength() const
 
 void ModelBundle::Stub::import(BeanFactory& factory, const document& manifest, const Scope& args)
 {
-    for(const document& i : manifest->children())
+    for(const document& i : manifest->children("model"))
     {
         int32_t type = Documents::ensureAttribute<int32_t>(i, Constants::Attributes::TYPE);
         const String importer = Documents::getAttribute(i, "importer");

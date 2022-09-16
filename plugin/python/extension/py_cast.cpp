@@ -113,7 +113,9 @@ sp<Vec2> PyCast::toVec2(PyObject* object, bool alert)
         if(PyArg_ParseTuple(object, "OO", &x, &y))
             return Vec2Type::create(toNumeric(x), toNumeric(y));
     }
-    return toSharedPtrDefault<Vec2>(object, alert).value();
+    sp<Vec2> vec2 = toSharedPtrOrNull<Vec2>(object);
+    CHECK(vec2, "Cannot cast <%s> to <Vec2>", Py_TYPE(object)->tp_name);
+    return vec2;
 }
 
 sp<Vec3> PyCast::toVec3(PyObject* object, bool alert)
@@ -256,28 +258,28 @@ bool PyCast::isNoneOrNull(PyObject* pyObject)
     return !pyObject || pyObject == Py_None;
 }
 
-template<> ARK_PLUGIN_PYTHON_API std::optional<String> PyCast::toCppObject_impl<String>(PyObject* object)
+template<> ARK_PLUGIN_PYTHON_API Optional<String> PyCast::toCppObject_impl<String>(PyObject* object)
 {
     return toString(object);
 }
 
-template<> ARK_PLUGIN_PYTHON_API std::optional<std::wstring> PyCast::toCppObject_impl<std::wstring>(PyObject* object)
+template<> ARK_PLUGIN_PYTHON_API Optional<std::wstring> PyCast::toCppObject_impl<std::wstring>(PyObject* object)
 {
     return toWString(object);
 }
 
-template<> ARK_PLUGIN_PYTHON_API std::optional<Json> PyCast::toCppObject_impl<Json>(PyObject* object)
+template<> ARK_PLUGIN_PYTHON_API Optional<Json> PyCast::toCppObject_impl<Json>(PyObject* object)
 {
-    std::optional<sp<Json>> opt = toSharedPtr<Json>(object);
-    return opt ? std::optional<Json>(std::move(opt.value())) : std::optional<Json>();
+    Optional<sp<Json>> opt = toSharedPtr<Json>(object);
+    return opt ? Optional<Json>(std::move(*opt.value())) : Optional<Json>();
 }
 
-template<> ARK_PLUGIN_PYTHON_API std::optional<Box> PyCast::toCppObject_impl<Box>(PyObject* object)
+template<> ARK_PLUGIN_PYTHON_API Optional<Box> PyCast::toCppObject_impl<Box>(PyObject* object)
 {
     return object != Py_None ? Box(PyInstance::track(object).ref()) : Box();
 }
 
-template<> ARK_PLUGIN_PYTHON_API std::optional<bool> PyCast::toCppObject_impl<bool>(PyObject* object)
+template<> ARK_PLUGIN_PYTHON_API Optional<bool> PyCast::toCppObject_impl<bool>(PyObject* object)
 {
     if(object == Py_None)
         return false;
@@ -290,13 +292,13 @@ template<> ARK_PLUGIN_PYTHON_API std::optional<bool> PyCast::toCppObject_impl<bo
     return b->val();
 }
 
-template<> ARK_PLUGIN_PYTHON_API std::optional<float> PyCast::toCppObject_impl<float>(PyObject* object)
+template<> ARK_PLUGIN_PYTHON_API Optional<float> PyCast::toCppObject_impl<float>(PyObject* object)
 {
     DCHECK(PyNumber_Check(object), "Cannot cast Python object \"%s\" to float", object->ob_type->tp_name);
     return static_cast<float>(PyFloat_AsDouble(object));
 }
 
-template<> ARK_PLUGIN_PYTHON_API std::optional<uint32_t> PyCast::toCppObject_impl<uint32_t>(PyObject* object)
+template<> ARK_PLUGIN_PYTHON_API Optional<uint32_t> PyCast::toCppObject_impl<uint32_t>(PyObject* object)
 {
     PythonInterpreter& pi = PythonInterpreter::instance();
     if(pi.isPyArkTypeObject(object))
@@ -308,13 +310,13 @@ template<> ARK_PLUGIN_PYTHON_API std::optional<uint32_t> PyCast::toCppObject_imp
     return PyLong_AsUnsignedLong(object);
 }
 
-template<> ARK_PLUGIN_PYTHON_API std::optional<int32_t> PyCast::toCppObject_impl<int32_t>(PyObject* object)
+template<> ARK_PLUGIN_PYTHON_API Optional<int32_t> PyCast::toCppObject_impl<int32_t>(PyObject* object)
 {
     DCHECK(PyNumber_Check(object), "Cannot cast Python object \"%s\" to int32_t", object->ob_type->tp_name);
     return static_cast<int32_t>(PyLong_AsLong(object));
 }
 
-template<> ARK_PLUGIN_PYTHON_API std::optional<V2> PyCast::toCppObject_impl<V2>(PyObject* object)
+template<> ARK_PLUGIN_PYTHON_API Optional<V2> PyCast::toCppObject_impl<V2>(PyObject* object)
 {
     if(PyTuple_Check(object))
     {
@@ -329,7 +331,7 @@ template<> ARK_PLUGIN_PYTHON_API std::optional<V2> PyCast::toCppObject_impl<V2>(
     return V2();
 }
 
-template<> ARK_PLUGIN_PYTHON_API std::optional<V3> PyCast::toCppObject_impl<V3>(PyObject* object)
+template<> ARK_PLUGIN_PYTHON_API Optional<V3> PyCast::toCppObject_impl<V3>(PyObject* object)
 {
     if(PyTuple_Check(object))
     {
@@ -344,7 +346,7 @@ template<> ARK_PLUGIN_PYTHON_API std::optional<V3> PyCast::toCppObject_impl<V3>(
     return V3();
 }
 
-template<> ARK_PLUGIN_PYTHON_API std::optional<V4> PyCast::toCppObject_impl<V4>(PyObject* object)
+template<> ARK_PLUGIN_PYTHON_API Optional<V4> PyCast::toCppObject_impl<V4>(PyObject* object)
 {
     if(PyTuple_Check(object))
     {
@@ -369,17 +371,17 @@ template<typename T> RectT<T> toRectType(PyObject* obj)
     return RectT<T>(arg0, arg1, arg2, arg3);
 }
 
-template<> ARK_PLUGIN_PYTHON_API std::optional<RectF> PyCast::toCppObject_impl<RectF>(PyObject* object)
+template<> ARK_PLUGIN_PYTHON_API Optional<RectF> PyCast::toCppObject_impl<RectF>(PyObject* object)
 {
     return toRectType<float>(object);
 }
 
-template<> ARK_PLUGIN_PYTHON_API std::optional<RectI> PyCast::toCppObject_impl<RectI>(PyObject* object)
+template<> ARK_PLUGIN_PYTHON_API Optional<RectI> PyCast::toCppObject_impl<RectI>(PyObject* object)
 {
     return toRectType<int32_t>(object);
 }
 
-template<> ARK_PLUGIN_PYTHON_API std::optional<Color> PyCast::toCppObject_impl<Color>(PyObject* object)
+template<> ARK_PLUGIN_PYTHON_API Optional<Color> PyCast::toCppObject_impl<Color>(PyObject* object)
 {
     if(PyLong_Check(object))
         return Color(static_cast<uint32_t>(PyLong_AsLongLong(object)));

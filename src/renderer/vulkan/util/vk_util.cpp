@@ -411,13 +411,13 @@ std::vector<uint32_t> VKUtil::compileSPIR(const String& source, PipelineInput::S
     shader.setEnvClient(glslang::EShClientVulkan, glslang::EShTargetVulkan_1_0);
     shader.setEnvTarget(glslang::EShTargetSpv, glslang::EShTargetSpv_1_0);
 
-    if (!shader.parse(&initializer->builtInResource(), 100, false, EShMsgDefault))
-        DFATAL("Compile error: %s\n\n%s", source.c_str(), shader.getInfoLog());
+    if(!shader.parse(&initializer->builtInResource(), 100, false, EShMsgDefault))
+        FATAL("Compile error: %s\n\n%s", source.c_str(), shader.getInfoLog());
     {
         glslang::TProgram program;
         program.addShader(&shader);
-        if (!program.link(EShMsgDefault))
-            DFATAL("Link error: %s\n\n%s", source.c_str(), shader.getInfoLog());
+        if(!program.link(EShMsgDefault))
+            FATAL("Link error: %s\n\n%s", source.c_str(), shader.getInfoLog());
 
         glslang::TIntermediate* intermedia = program.getIntermediate(esStage);
         if (intermedia) {

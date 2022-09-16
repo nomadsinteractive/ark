@@ -17,7 +17,7 @@ namespace ark {
 Arena::Arena(const sp<ViewGroup>& view, const sp<ResourceLoader>& resourceLoader)
     : _event_listeners(new EventListenerList()), _view_group(view), _resource_loader(resourceLoader)
 {
-    DCHECK(_view_group, "Arena's renderer delegate must be ViewGroup");
+    DCHECK(_view_group.is<ViewGroup>(), "Arena's renderer delegate must be ViewGroup");
 }
 
 Arena::~Arena()

@@ -128,6 +128,7 @@ const char* const LAYOUT = "layout";
 const char* const LAYER = "layer";
 const char* const MODEL = "model";
 const char* const NAME = "name";
+const char* const INPUT = "input";
 const char* const INTERVAL = "interval";
 const char* const POSITION = "position";
 const char* const SNIPPET = "snippet";

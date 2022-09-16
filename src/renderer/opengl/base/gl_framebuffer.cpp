@@ -41,7 +41,7 @@ void GLFramebuffer::upload(GraphicsContext& graphicsContext, const sp<Uploader>&
     Table<uint64_t, GLenum> attachments;
 
     sp<Texture> depthTexture;
-    std::vector<GLenum> depthAttachments;
+    std::vector<GLenum> depthInputs;
     GLenum depthInternalformat;
 
     uint32_t idx = 0;
@@ -59,46 +59,48 @@ void GLFramebuffer::upload(GraphicsContext& graphicsContext, const sp<Uploader>&
 
     if(_depth_stencil_attachment)
     {
-        Texture::Usage usage = _depth_stencil_attachment->parameters()->_usage;
+        uint32_t usage = _depth_stencil_attachment->parameters()->_usage & Texture::USAGE_DEPTH_STENCIL_ATTACHMENT;
         DASSERT(_depth_stencil_attachment->id() != 0);
         const GLenum glAttachments[] = {GL_COLOR_ATTACHMENT0, GL_DEPTH_ATTACHMENT, GL_STENCIL_ATTACHMENT, GL_DEPTH_STENCIL_ATTACHMENT};
         DASSERT(usage & (Texture::USAGE_DEPTH_ATTACHMENT | Texture::USAGE_STENCIL_ATTACHMENT));
-        if(usage == Texture::USAGE_DEPTH_STENCIL_ATTACHMENT)
+        if(!(_depth_stencil_attachment->parameters()->_usage & Texture::USAGE_INPUT_DISABLED))
         {
-            depthTexture = _depth_stencil_attachment;
-            depthAttachments.push_back(GL_DEPTH_ATTACHMENT);
-            depthAttachments.push_back(GL_STENCIL_ATTACHMENT);
-            depthInternalformat = GL_DEPTH24_STENCIL8;
-        }
-        else if (usage & Texture::USAGE_DEPTH_ATTACHMENT)
-        {
-            depthTexture = _depth_stencil_attachment;
-            depthAttachments.push_back(glAttachments[usage]);
-            depthInternalformat = GL_DEPTH_COMPONENT;
-        }
-        else if (usage & Texture::USAGE_STENCIL_ATTACHMENT)
-        {
+            if(usage == Texture::USAGE_DEPTH_STENCIL_ATTACHMENT)
+            {
+                depthTexture = _depth_stencil_attachment;
+                depthInputs.push_back(GL_DEPTH_ATTACHMENT);
+                depthInputs.push_back(GL_STENCIL_ATTACHMENT);
+                depthInternalformat = GL_DEPTH24_STENCIL8;
+            }
+            else if (usage & Texture::USAGE_DEPTH_ATTACHMENT)
+            {
+                depthTexture = _depth_stencil_attachment;
+                depthInputs.push_back(glAttachments[usage]);
+                depthInternalformat = GL_DEPTH_COMPONENT;
+            }
+            else if (usage & Texture::USAGE_STENCIL_ATTACHMENT)
+            {
 #ifndef ANDROID
-            depthTexture = _depth_stencil_attachment;
-            depthAttachments.push_back(glAttachments[usage]);
-            depthInternalformat = GL_STENCIL_COMPONENTS;
+                depthTexture = _depth_stencil_attachment;
+                depthInputs.push_back(glAttachments[usage]);
+                depthInternalformat = GL_STENCIL_COMPONENTS;
 #else
-            WARN(false, "GL_STENCIL_COMPONENTS unsupported");
+                WARN(false, "GL_STENCIL_COMPONENTS unsupported");
 #endif
+            }
         }
         attachments.push_back(_depth_stencil_attachment->id(), glAttachments[usage]);
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, _id);
     glDrawBuffers(static_cast<uint32_t>(drawBuffers.size()), drawBuffers.data());
-
     for(const auto& i : attachments)
     {
         glFramebufferTexture2D(GL_FRAMEBUFFER, i.second, GL_TEXTURE_2D, static_cast<GLuint>(i.first), 0);
         LOGD("glFramebufferTexture2D, attachment: %d, id: %d", i.second, i.first);
     }
 
-    if(depthAttachments.size() > 0)
+    if(depthInputs.size() > 0)
     {
         sp<GLTexture> gltex = depthTexture->delegate();
         sp<GLRenderbuffer> renderbuffer = gltex->renderbuffer();
@@ -110,7 +112,7 @@ void GLFramebuffer::upload(GraphicsContext& graphicsContext, const sp<Uploader>&
         }
         glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer->id());
         glRenderbufferStorage(GL_RENDERBUFFER, depthInternalformat, static_cast<GLsizei>(depthTexture->width()), static_cast<GLsizei>(depthTexture->height()));
-        for(GLenum i : depthAttachments)
+        for(GLenum i : depthInputs)
             glFramebufferRenderbuffer(GL_FRAMEBUFFER, i, GL_RENDERBUFFER, renderbuffer->id());
     }
 

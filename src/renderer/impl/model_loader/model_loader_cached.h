@@ -14,10 +14,10 @@ public:
     ModelLoaderCached(sp<ModelLoader> delegate);
 
     virtual sp<RenderCommandComposer> makeRenderCommandComposer() override;
-
     virtual void initialize(ShaderBindings& shaderBindings) override;
-
     virtual sp<Model> loadModel(int32_t type) override;
+
+    static sp<ModelLoader> decorate(sp<ModelLoader> delegate);
 
 private:
     sp<ModelLoader> _delegate;

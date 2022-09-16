@@ -52,7 +52,7 @@ const sp<Snippet>& PipelineBindings::snippet() const
     return _stub->_layout->snippet();
 }
 
-const PipelineInput::Attributes& PipelineBindings::attributes() const
+const PipelineInput::AttributeOffsets& PipelineBindings::attributes() const
 {
     return _stub->_attributes;
 }

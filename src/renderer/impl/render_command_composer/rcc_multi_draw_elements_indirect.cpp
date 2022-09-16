@@ -121,7 +121,7 @@ void RCCMultiDrawElementsIndirect::VerticesUploader::upload(Writable& uploader)
 {
     uint32_t offset = 0;
     size_t stride = _pipeline_input->getStream(0).stride();
-    PipelineInput::Attributes attributes(_pipeline_input);
+    PipelineInput::AttributeOffsets attributes(_pipeline_input);
     for(const auto& i : _model_bundle->models())
     {
         const Model& model = i.second._model;

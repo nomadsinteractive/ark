@@ -22,7 +22,10 @@ void RendererGroup::addRenderer(const sp<Renderer>& renderer)
 void RendererGroup::render(RenderRequest& renderRequest, const V3& position)
 {
     for(const sp<Renderer>& i : _items.update(renderRequest.timestamp()))
-        i->render(renderRequest, position);
+    {
+        Renderer* r = i.get();
+        r->render(renderRequest, position);
+    }
 }
 
 RendererGroup::BUILDER::BUILDER(BeanFactory& beanFactory, const document& manifest)

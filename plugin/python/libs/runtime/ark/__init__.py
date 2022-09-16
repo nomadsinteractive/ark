@@ -1152,6 +1152,9 @@ class Layer(Renderer):
     TYPE_DYNAMIC = 1
     TYPE_STATIC = 2
 
+    def __init__(self, layer_context: Optional[LayerContext]):
+        super().__init__()
+
     @property
     def context(self) -> LayerContext:
         return LayerContext()

@@ -146,27 +146,49 @@ GLenum GLUtil::getEnum(const document& manifest, const String& name, GLenum defV
     return getEnum(Documents::getAttribute(manifest, name), defValue);
 }
 
-GLenum GLUtil::getTextureInternalFormat(int32_t format, const Bitmap& bitmap)
+GLenum GLUtil::getTextureInternalFormat(Texture::Usage usage, Texture::Format format, const Bitmap& bitmap)
 {
     static const GLenum formats[] = {GL_R8, GL_R8_SNORM, GL_R16, GL_R16_SNORM, GL_R8, GL_R8, GL_R16F, GL_R16F,
                                      GL_RG8, GL_RG8_SNORM, GL_RG16, GL_RG16_SNORM, GL_RG16F, GL_RG16F, GL_RG16F, GL_RG16F,
                                      GL_RGB8, GL_RGB8_SNORM, GL_RGB16, GL_RGB16_SNORM, GL_RGB16F, GL_RGB16F, GL_RGB16F, GL_RGB16F,
                                      GL_RGBA8, GL_RGBA8_SNORM, GL_RGBA16, GL_RGBA16_SNORM, GL_RGBA16F, GL_RGBA16F, GL_RGBA16F, GL_RGBA16F};
-    uint32_t signedOffset = (format & Texture::FORMAT_SIGNED) == Texture::FORMAT_SIGNED ? 1 : ((format & Texture::FORMAT_F16) == Texture::FORMAT_F16 ? 4 : 0);
-    uint32_t byteCount = bitmap.rowBytes() / bitmap.width() / bitmap.channels();
-    uint32_t channel8 = (bitmap.channels() - 1) * 8;
-    DCHECK(byteCount > 0 && byteCount <= 4, "Unsupported color depth: %d", byteCount * 8);
-    return formats[channel8 + (byteCount - 1) * 2 + signedOffset];
+    switch(usage & Texture::USAGE_DEPTH_STENCIL_ATTACHMENT)
+    {
+    case Texture::USAGE_COLOR_ATTACHMENT: {
+        uint32_t signedOffset = (format & Texture::FORMAT_SIGNED) == Texture::FORMAT_SIGNED ? 1 : ((format & Texture::FORMAT_F16) == Texture::FORMAT_F16 ? 4 : 0);
+        uint32_t byteCount = bitmap.rowBytes() / bitmap.width() / bitmap.channels();
+        uint32_t channel8 = (bitmap.channels() - 1) * 8;
+        DCHECK(byteCount > 0 && byteCount <= 4, "Unsupported color depth: %d", byteCount * 8);
+        return formats[channel8 + (byteCount - 1) * 2 + signedOffset];
+    }
+    case Texture::USAGE_DEPTH_ATTACHMENT:
+        return GL_DEPTH_COMPONENT;
+    case Texture::USAGE_STENCIL_ATTACHMENT:
+    case Texture::USAGE_DEPTH_STENCIL_ATTACHMENT:
+        return GL_DEPTH_STENCIL;
+    }
+    WARN(false, "Unknow texture usage: %d", usage);
+    return GL_R8;
 }
 
-GLenum GLUtil::getTextureFormat(int32_t format, uint8_t channels)
+GLenum GLUtil::getTextureFormat(Texture::Usage usage, Texture::Format format, uint8_t channels)
 {
-    const GLenum formatByChannels[] = {GL_RED, GL_RG, GL_RGB, GL_RGBA};
-    DCHECK(channels < 5, "Unknown bitmap format: (channels = %d)", static_cast<uint32_t>(channels));
-    return format == Texture::FORMAT_AUTO ? formatByChannels[channels - 1] : formatByChannels[static_cast<uint32_t>(format & Texture::FORMAT_RGBA)];
+    switch(usage & Texture::USAGE_DEPTH_STENCIL_ATTACHMENT)
+    {
+    case Texture::USAGE_COLOR_ATTACHMENT: {
+        const GLenum formatByChannels[] = {GL_RED, GL_RG, GL_RGB, GL_RGBA};
+        DCHECK(channels < 5, "Unknown bitmap format: (channels = %d)", static_cast<uint32_t>(channels));
+        return format == Texture::FORMAT_AUTO ? formatByChannels[channels - 1] : formatByChannels[static_cast<uint32_t>(format & Texture::FORMAT_RGBA)];
+    }
+    case Texture::USAGE_DEPTH_ATTACHMENT:
+        return GL_DEPTH_COMPONENT;
+    case Texture::USAGE_STENCIL_ATTACHMENT:
+    case Texture::USAGE_DEPTH_STENCIL_ATTACHMENT:
+        return GL_DEPTH_STENCIL;
+    }
 }
 
-GLenum GLUtil::getPixelFormat(int32_t format, const Bitmap& bitmap)
+GLenum GLUtil::getPixelType(int32_t format, const Bitmap& bitmap)
 {
     bool flagSigned = (format & Texture::FORMAT_SIGNED) == Texture::FORMAT_SIGNED;
     uint32_t byteCount = bitmap.rowBytes() / bitmap.width() / bitmap.channels();

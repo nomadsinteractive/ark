@@ -26,14 +26,14 @@ Varyings::Varyings()
 void Varyings::traverse(const Holder::Visitor& visitor)
 {
     for(const auto& iter : _varyings)
-        HolderUtil::visit(iter.second._flatable, visitor);
+        HolderUtil::visit(iter.second._input, visitor);
 }
 
 bool Varyings::update(uint64_t timestamp) const
 {
     bool dirty = false;
     for(const auto& i : _varyings)
-        if(i.second._flatable->update(timestamp))
+        if(i.second._input->update(timestamp))
             dirty = true;
     return dirty;
 }
@@ -45,43 +45,43 @@ Box Varyings::getProperty(const String& name) const
     return iter->second;
 }
 
-void Varyings::setVarying(const String& name, sp<Input> flatable)
+void Varyings::setVarying(const String& name, sp<Input> input)
 {
     auto iter = _varyings.find(name);
     if(iter == _varyings.end())
     {
-        _varyings.emplace(name, std::move(flatable));
+        _varyings.emplace(name, std::move(input));
         _size = 0;
     }
     else
     {
-        DCHECK(iter->second._flatable->size() == flatable->size(), "Replacing existing varying \"%s\"(%d) with a different size value(%d)", name.c_str(), iter->second._flatable->size(), flatable->size());
-        iter->second = Varying(std::move(flatable), iter->second._offset);
+        DCHECK(iter->second._input->size() == input->size(), "Replacing existing varying \"%s\"(%d) with a different size value(%d)", name.c_str(), iter->second._input->size(), input->size());
+        iter->second = Slot(std::move(input), iter->second._offset);
     }
 }
 
-void Varyings::setProperty(const String& name, const sp<Numeric>& var)
+void Varyings::setProperty(const String& name, sp<Numeric> var)
 {
     _properties[name] = var;
-    setVarying(name, sp<Input>::make<InputVariable<float>>(var));
+    setVarying(name, sp<Input>::make<InputVariable<float>>(std::move(var)));
 }
 
-void Varyings::setProperty(const String& name, const sp<Vec2>& var)
+void Varyings::setProperty(const String& name, sp<Vec2> var)
 {
     _properties[name] = var;
-    setVarying(name, sp<Input>::make<InputVariable<V2>>(var));
+    setVarying(name, sp<Input>::make<InputVariable<V2>>(std::move(var)));
 }
 
-void Varyings::setProperty(const String& name, const sp<Vec3>& var)
+void Varyings::setProperty(const String& name, sp<Vec3> var)
 {
     _properties[name] = var;
-    setVarying(name, sp<Input>::make<InputVariable<V3>>(var));
+    setVarying(name, sp<Input>::make<InputVariable<V3>>(std::move(var)));
 }
 
-void Varyings::setProperty(const String& name, const sp<Vec4>& var)
+void Varyings::setProperty(const String& name, sp<Vec4> var)
 {
     _properties[name] = var;
-    setVarying(name, sp<Input>::make<InputVariable<V4>>(var));
+    setVarying(name, sp<Input>::make<InputVariable<V4>>(std::move(var)));
 }
 
 Varyings::Snapshot Varyings::snapshot(const PipelineInput& pipelineInput, Allocator& allocator)
@@ -97,7 +97,7 @@ Varyings::Snapshot Varyings::snapshot(const PipelineInput& pipelineInput, Alloca
             i.second._offset = varyingStream.getAttributeOffset(i.first);
             DCHECK(i.second._offset >= 0, "Varying has no attribute \"%s\", offset: %d. Did you mean \"%s\"?", i.first.c_str(), i.second._offset,
                    Math::levensteinNearest(i.first, varyingStream.attributes().keys()).first.c_str());
-            _size = std::max<uint32_t>(static_cast<uint32_t>(i.second._offset) + i.second._flatable->size(), _size);
+            _size = std::max<uint32_t>(static_cast<uint32_t>(i.second._offset) + i.second._input->size(), _size);
         }
     }
 
@@ -125,7 +125,7 @@ sp<Varyings> Varyings::BUILDER::build(const Scope& args)
 
     const sp<Varyings> varyings = sp<Varyings>::make();
     for(const VaryingBuilder& i : _varying_builders)
-        varyings->setVarying(i._name,  i._flatable->build(args));
+        varyings->setVarying(i._name,  i._input->build(args));
     return varyings;
 }
 
@@ -134,24 +134,24 @@ template<> ARK_API sp<Varyings> Null::ptr()
     return sp<Varyings>::make();
 }
 
-Varyings::Varying::Varying(const sp<Input>& flatable, int32_t offset)
-    : _flatable(flatable), _offset(offset)
+Varyings::Slot::Slot(sp<Input> input, int32_t offset)
+    : _input(std::move(input)), _offset(offset)
 {
 }
 
-Varyings::Varying::Varying()
+Varyings::Slot::Slot()
     : _offset(-1)
 {
 }
 
-void Varyings::Varying::apply(uint8_t* ptr) const
+void Varyings::Slot::apply(uint8_t* ptr) const
 {
     DASSERT(_offset >= 0);
-    _flatable->flat(ptr + _offset);
+    _input->flat(ptr + _offset);
 }
 
-Varyings::BUILDER::VaryingBuilder::VaryingBuilder(const String& name, const sp<Builder<Input>>& flatable)
-    : _name(name), _flatable(flatable)
+Varyings::BUILDER::VaryingBuilder::VaryingBuilder(String name, sp<Builder<Input>> input)
+    : _name(std::move(name)), _input(std::move(input))
 {
 }
 

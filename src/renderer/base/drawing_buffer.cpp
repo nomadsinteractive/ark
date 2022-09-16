@@ -29,7 +29,7 @@ VertexStream DrawingBuffer::makeVertexStream(const RenderRequest& renderRequest,
 
 VertexStream DrawingBuffer::makeDividedVertexStream(const RenderRequest& renderRequest, size_t length, size_t offset, uint32_t divisor)
 {
-    Buffer::Factory& builder = getInstancedArrayBuilder(divisor);
+    Buffer::Factory& builder = getInstancedBufferBuilder(divisor);
 
     size_t size = length * builder._stride;
     ByteArray::Borrowed content = renderRequest.allocator().sbrk(size);
@@ -67,7 +67,7 @@ bool DrawingBuffer::isInstanced() const
     return _is_instanced;
 }
 
-Buffer::Factory& DrawingBuffer::getInstancedArrayBuilder(uint32_t divisor)
+Buffer::Factory& DrawingBuffer::getInstancedBufferBuilder(uint32_t divisor)
 {
     auto iter = _divided_buffer_builders.find(divisor);
     DCHECK(iter != _divided_buffer_builders.end(), "No instance buffer builder(%d) found", divisor);

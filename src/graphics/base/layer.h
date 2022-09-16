@@ -28,6 +28,7 @@ public:
     };
 
 public:
+// [[script::bindings::auto]]
     Layer(sp<LayerContext> layerContext);
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
@@ -36,8 +37,13 @@ public:
 // [[script::bindings::auto]]
     void dispose();
 
+//  [[script::bindings::property]]
+    const sp<ModelLoader>& modelLoader() const;
+
 // [[script::bindings::property]]
     const sp<LayerContext>& context() const;
+// [[script::bindings::property]]
+    void setContext(sp<LayerContext> context);
 
 // [[script::bindings::auto]]
     void addRenderObject(const sp<RenderObject>& renderObject, const sp<Boolean>& disposed = sp<Boolean>::null());
@@ -45,15 +51,15 @@ public:
     void clear();
 
 //  [[plugin::builder]]
-    class BUILDER_IMPL1 : public Builder<Layer> {
+    class BUILDER : public Builder<Layer> {
     public:
-        BUILDER_IMPL1(BeanFactory& factory, const document& manifest);
+        BUILDER(BeanFactory& factory, const document& manifest);
 
         virtual sp<Layer> build(const Scope& args) override;
 
     private:
         Layer::Type _type;
-        sp<Builder<RenderLayer>> _render_layer;
+        SafePtr<Builder<RenderLayer>> _render_layer;
         SafePtr<Builder<ModelLoader>> _model_loader;
         std::vector<sp<Builder<RenderObject>>> _render_objects;
     };
@@ -66,7 +72,7 @@ public:
         virtual sp<Renderer> build(const Scope& args) override;
 
     private:
-        BUILDER_IMPL1 _builder_impl;
+        BUILDER _builder_impl;
     };
 
 private:

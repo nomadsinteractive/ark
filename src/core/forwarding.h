@@ -17,6 +17,7 @@ template<typename T> class Dictionary;
 template<typename T> class Duck;
 template<typename T> class Expectation;
 template<typename T> class Importer;
+template<typename T> class Optional;
 template<typename T> class Outputer;
 template<typename T> class OwnedPtr;
 template<typename T> class Loader;

@@ -32,6 +32,7 @@ public:
 
     virtual void traverse(const Visitor& visitor) override;
 
+//  [[script::bindings::property]]
     const sp<ModelLoader>& modelLoader() const;
 
     Layer::Type layerType() const;

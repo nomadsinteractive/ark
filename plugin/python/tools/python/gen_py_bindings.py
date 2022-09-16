@@ -472,7 +472,7 @@ class GenArgument:
     def _gen_var_declare(self, typename, varname, funcname, functype, argname, extract_cast=False, optional_check=False):
         argappendix = ', false' if extract_cast else ''
         if optional_check:
-            typename = 'std::optional<%s>' % typename
+            typename = 'Optional<%s>' % typename
         if self._default_value and (self._accept_type.startswith('sp<') or self._meta.parse_signature == 'O'):
             return '%s %s = %s ? PyCast::%s<%s>(%s%s) : %s;' % (
                 typename, varname, argname, funcname, functype, argname, argappendix, self._default_value)

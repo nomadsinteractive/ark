@@ -13,6 +13,7 @@
 #include "core/forwarding.h"
 #include "core/inf/array.h"
 #include "core/types/box.h"
+#include "core/types/optional.h"
 #include "core/types/type.h"
 #include "core/types/shared_ptr.h"
 
@@ -40,19 +41,19 @@ public:
         return toPyObject_sfinae<T>(obj, nullptr);
     }
 
-    template<typename T> static std::optional<T> toCppObject(PyObject* obj) {
+    template<typename T> static Optional<T> toCppObject(PyObject* obj) {
         return toCppObject_sfinae<T>(obj, nullptr);
     }
 
     template<typename T> static T ensureCppObject(PyObject* obj) {
-        std::optional<T> opt = toCppObject_sfinae<T>(obj, nullptr);
+        Optional<T> opt = toCppObject_sfinae<T>(obj, nullptr);
         ASSERT(opt);
         return opt.value();
     }
 
     template<typename T> sp<Array<sp<T>>> static toSharedPtrArray(PyObject* object) {
         DCHECK(PyList_Check(object), "Object \"%s\" is not a Python list", Py_TYPE(object)->tp_name);
-        std::optional<std::vector<sp<T>>> opt = toCppObject<std::vector<sp<T>>>(object);
+        Optional<std::vector<sp<T>>> opt = toCppObject<std::vector<sp<T>>>(object);
         return opt ? sp<typename Array<sp<T>>::Vector>::make(std::move(opt.value())) : nullptr;
     }
 
@@ -88,10 +89,10 @@ public:
         return PythonInterpreter::instance()->pyNewObject<T>(object);
     }
 
-    template<typename T> static std::optional<T> toCppObject_impl(PyObject* object);
+    template<typename T> static Optional<T> toCppObject_impl(PyObject* object);
     template<typename T> static PyObject* toPyObject_impl(const T& value);
 
-    template<typename T> static std::optional<sp<T>> toSharedPtr(PyObject* object, bool alert = true) {
+    template<typename T> static Optional<sp<T>> toSharedPtr(PyObject* object, bool alert = true) {
         if(object == Py_None)
             return sp<T>::null();
         return toSharedPtrImpl<T>(object, alert);
@@ -100,12 +101,12 @@ public:
     template<typename T> static sp<T> toSharedPtrOrNull(PyObject* object) {
         if(object == Py_None)
             return nullptr;
-        std::optional<sp<T>> opt = toSharedPtrDefault<T>(object, false);
+        Optional<sp<T>> opt = toSharedPtrDefault<T>(object, false);
         return opt ? opt.value() : nullptr;
     }
 
     template<typename T> static sp<T> ensureSharedPtr(PyObject* object, bool alert = true) {
-        std::optional<sp<T>> opt = toSharedPtr<T>(object, alert);
+        Optional<sp<T>> opt = toSharedPtr<T>(object, alert);
         DCHECK(opt, "Casting \"%s\" to class \"%s\" failed", Py_TYPE(object)->tp_name, Class::getClass<T>()->name());
         return opt.value();
     }
@@ -115,21 +116,21 @@ public:
     static bool isNoneOrNull(PyObject* pyObject);
 
 private:
-    template<typename T> static std::optional<sp<T>> toSharedPtrImpl(PyObject* object, bool alert = true) {
+    template<typename T> static Optional<sp<T>> toSharedPtrImpl(PyObject* object, bool alert = true) {
         return toSharedPtrDefault<T>(object, alert);
     }
 
-    template<typename T> static std::optional<sp<T>> toSharedPtrDefault(PyObject* object, bool alert = true) {
+    template<typename T> static Optional<sp<T>> toSharedPtrDefault(PyObject* object, bool alert = true) {
         if(object == Py_None)
-            return std::optional<sp<T>>(sp<T>::null());
+            return Optional<sp<T>>(sp<T>::null());
 
         PyTypeObject* pyType = reinterpret_cast<PyTypeObject*>(PyObject_Type(object));
         if(PythonInterpreter::instance()->isPyArkTypeObject(pyType)) {
             PyArkType::Instance* instance = reinterpret_cast<PyArkType::Instance*>(object);
             sp<T> s = instance->box->as<T>();
-            return s ? std::optional<sp<T>>(std::move(s)) : std::optional<sp<T>>();
+            return s ? Optional<sp<T>>(std::move(s)) : Optional<sp<T>>();
         }
-        return std::optional<sp<T>>();
+        return Optional<sp<T>>();
     }
 
     template<typename T> static PyObject* fromIterable_sfinae(const T& list, typename std::remove_reference<decltype(list.front())>::type*) {
@@ -157,17 +158,17 @@ private:
         return pySet;
     }
 
-    template<typename T> static std::optional<T> toCppObject_sfinae(PyObject* obj, typename T::_PtrType*) {
+    template<typename T> static Optional<T> toCppObject_sfinae(PyObject* obj, typename T::_PtrType*) {
         return toSharedPtr<typename T::_PtrType>(obj, true);
     }
-    template<typename T> static std::optional<T> toCppObject_sfinae(PyObject* obj, decltype(std::declval<T>().push_back(std::declval<typename T::value_type>()))*) {
+    template<typename T> static Optional<T> toCppObject_sfinae(PyObject* obj, decltype(std::declval<T>().push_back(std::declval<typename T::value_type>()))*) {
         typedef typename T::value_type U;
         return toCppCollectionObject_sfinae<T, U>(obj, nullptr);
     }
-    template<typename T> static std::optional<T> toCppObject_sfinae(PyObject* obj, typename std::enable_if<std::is_enum<T>::value>::type*) {
-        std::optional<int32_t> opt = toCppObject_impl<int32_t>(obj);
+    template<typename T> static Optional<T> toCppObject_sfinae(PyObject* obj, typename std::enable_if<std::is_enum<T>::value>::type*) {
+        Optional<int32_t> opt = toCppObject_impl<int32_t>(obj);
         if(!opt)
-            return std::optional<T>();
+            return Optional<T>();
         return static_cast<T>(opt.value());
     }
     template<typename... Args> static PyObject* makeArgumentTuple(Args... args) {
@@ -181,7 +182,7 @@ private:
     }
     static void reduceArgumentTuple(PyObject *tuple, uint32_t idx) {
     }
-    template<typename R, typename... Args> static std::optional<std::function<R(Args...)>> toCppObject_function(PyObject* obj, std::function<R(Args...)>*) {
+    template<typename R, typename... Args> static Optional<std::function<R(Args...)>> toCppObject_function(PyObject* obj, std::function<R(Args...)>*) {
         if(PyCallable_Check(obj))
             return nullptr;
         PyInstance pyObj(PyInstance::own(obj));
@@ -193,10 +194,10 @@ private:
             return ensureCppObject<R>(result.pyObject());
         };
     }
-    template<typename T> static std::optional<T> toCppObject_sfinae(PyObject* obj, typename T::result_type*) {
+    template<typename T> static Optional<T> toCppObject_sfinae(PyObject* obj, typename T::result_type*) {
         return toCppObject_function(obj, reinterpret_cast<T*>(0));
     }
-    template<typename T> static std::optional<T> toCppObject_sfinae(PyObject* obj, ...) {
+    template<typename T> static Optional<T> toCppObject_sfinae(PyObject* obj, ...) {
         return toCppObject_impl<T>(obj);
     }
     template<typename T> static PyObject* toPyObject_sfinae(const T& ptr, typename T::_PtrType*) {
@@ -227,10 +228,10 @@ private:
         return toPyObject_impl<T>(value);
     }
 
-    template<typename T, typename U> static std::optional<T> toCppCollectionObject_sfinae(PyObject* obj, typename std::enable_if<std::is_same<T, std::string>::value || std::is_same<T, std::wstring>::value>::type*) {
+    template<typename T, typename U> static Optional<T> toCppCollectionObject_sfinae(PyObject* obj, typename std::enable_if<std::is_same<T, std::string>::value || std::is_same<T, std::wstring>::value>::type*) {
         return toCppObject_impl<T>(obj);
     }
-    template<typename T, typename U> static std::optional<T> toCppCollectionObject_sfinae(PyObject* obj, ...) {
+    template<typename T, typename U> static Optional<T> toCppCollectionObject_sfinae(PyObject* obj, ...) {
         T col;
         Py_ssize_t len = PyObject_Length(obj);
         DCHECK(len != -1, "Object \"%s\" has no length", Py_TYPE(obj)->tp_name);
@@ -238,10 +239,10 @@ private:
             PyObject* key = PyLong_FromLong(static_cast<int32_t>(i));
             PyObject* item = PyObject_GetItem(obj, key);
             Py_DECREF(key);
-            std::optional<U> opt = toCppObject<U>(item);
+            Optional<U> opt = toCppObject<U>(item);
             Py_XDECREF(item);
             if(!opt)
-                return std::optional<T>();
+                return Optional<T>();
             col.push_back(std::move(opt.value()));
         }
         return col;
@@ -263,57 +264,57 @@ private:
 
 };
 
-template<> inline std::optional<sp<String>> PyCast::toSharedPtrImpl<String>(PyObject* object, bool alert)
+template<> inline Optional<sp<String>> PyCast::toSharedPtrImpl<String>(PyObject* object, bool alert)
 {
     return sp<String>::make(toString(object));
 }
 
-template<> inline std::optional<sp<Numeric>> PyCast::toSharedPtrImpl<Numeric>(PyObject* object, bool alert)
+template<> inline Optional<sp<Numeric>> PyCast::toSharedPtrImpl<Numeric>(PyObject* object, bool alert)
 {
     return toNumeric(object, alert);
 }
 
-template<> inline std::optional<sp<Integer>> PyCast::toSharedPtrImpl<Integer>(PyObject* object, bool alert)
+template<> inline Optional<sp<Integer>> PyCast::toSharedPtrImpl<Integer>(PyObject* object, bool alert)
 {
     return toInteger(object, alert);
 }
 
-template<> inline std::optional<sp<Boolean>> PyCast::toSharedPtrImpl<Boolean>(PyObject* object, bool alert)
+template<> inline Optional<sp<Boolean>> PyCast::toSharedPtrImpl<Boolean>(PyObject* object, bool alert)
 {
     return toBoolean(object, alert);
 }
 
-template<> inline std::optional<sp<Runnable>> PyCast::toSharedPtrImpl<Runnable>(PyObject* object, bool alert)
+template<> inline Optional<sp<Runnable>> PyCast::toSharedPtrImpl<Runnable>(PyObject* object, bool alert)
 {
     return toRunnable(object, alert);
 }
 
-template<> inline std::optional<sp<Observer>> PyCast::toSharedPtrImpl<Observer>(PyObject* object, bool alert)
+template<> inline Optional<sp<Observer>> PyCast::toSharedPtrImpl<Observer>(PyObject* object, bool alert)
 {
     return toObserver(object, alert);
 }
 
-template<> inline std::optional<sp<CollisionCallback>> PyCast::toSharedPtrImpl<CollisionCallback>(PyObject* object, bool alert)
+template<> inline Optional<sp<CollisionCallback>> PyCast::toSharedPtrImpl<CollisionCallback>(PyObject* object, bool alert)
 {
     return toCollisionCallback(object);
 }
 
-template<> inline std::optional<sp<EventListener>> PyCast::toSharedPtrImpl<EventListener>(PyObject* object, bool alert)
+template<> inline Optional<sp<EventListener>> PyCast::toSharedPtrImpl<EventListener>(PyObject* object, bool alert)
 {
     return toEventListener(object);
 }
 
-template<> inline std::optional<sp<Vec2>> PyCast::toSharedPtrImpl<Vec2>(PyObject* object, bool alert)
+template<> inline Optional<sp<Vec2>> PyCast::toSharedPtrImpl<Vec2>(PyObject* object, bool alert)
 {
     return toVec2(object, alert);
 }
 
-template<> inline std::optional<sp<Vec3>> PyCast::toSharedPtrImpl<Vec3>(PyObject* object, bool alert)
+template<> inline Optional<sp<Vec3>> PyCast::toSharedPtrImpl<Vec3>(PyObject* object, bool alert)
 {
     return toVec3(object, alert);
 }
 
-template<> inline std::optional<sp<ByteArray>> PyCast::toSharedPtrImpl<ByteArray>(PyObject* object, bool alert) {
+template<> inline Optional<sp<ByteArray>> PyCast::toSharedPtrImpl<ByteArray>(PyObject* object, bool alert) {
     bool isBytes = PyBytes_Check(object);
     DCHECK(isBytes || !alert, "Object \"%s\" is not a bytes object", Py_TYPE(object)->tp_name);
     if(!isBytes)

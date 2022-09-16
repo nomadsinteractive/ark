@@ -24,8 +24,8 @@ bool GLTexture2D::download(GraphicsContext& /*graphicsContext*/, Bitmap& bitmap)
 {
     DCHECK(static_cast<uint32_t>(_size->width()) == bitmap.width() && static_cast<uint32_t>(_size->height()) == bitmap.height(), "Size mismatch: texture(%d, %d) vs bitmap(%d, %d)",
            static_cast<uint32_t>(_size->width()), static_cast<uint32_t>(_size->height()), bitmap.width(), bitmap.height());
-    GLenum textureFormat = GLUtil::getTextureFormat(Texture::FORMAT_AUTO, bitmap.channels());
-    GLenum pixelFormat = GLUtil::getPixelFormat(Texture::FORMAT_AUTO, bitmap);
+    GLenum textureFormat = GLUtil::getTextureFormat(Texture::USAGE_COLOR_ATTACHMENT, Texture::FORMAT_AUTO, bitmap.channels());
+    GLenum pixelType = GLUtil::getPixelType(Texture::FORMAT_AUTO, bitmap);
 #ifdef ARK_PLATFORM_ANDROID
     GLuint fbo;
     glGenFramebuffers(1, &fbo);
@@ -36,7 +36,7 @@ bool GLTexture2D::download(GraphicsContext& /*graphicsContext*/, Bitmap& bitmap)
     glDeleteFramebuffers(1, &fbo);
 #else
     glBindTexture(GL_TEXTURE_2D, _id);
-    glGetTexImage(GL_TEXTURE_2D, 0, textureFormat, pixelFormat, bitmap.at(0, 0));
+    glGetTexImage(GL_TEXTURE_2D, 0, textureFormat, pixelType, bitmap.at(0, 0));
     glBindTexture(GL_TEXTURE_2D, 0);
 #endif
     return true;
@@ -46,11 +46,11 @@ void GLTexture2D::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap
 {
     DASSERT(imagedata.size() == 1);
     uint8_t channels = bitmap.channels();
-    GLenum format = GLUtil::getTextureFormat(_parameters->_format, channels);
-    GLenum pixelFormat = GLUtil::getPixelFormat(_parameters->_format, bitmap);
-    GLenum internalFormat = GLUtil::getTextureInternalFormat(_parameters->_format, bitmap);
+    GLenum format = GLUtil::getTextureFormat(_parameters->_usage, _parameters->_format, channels);
+    GLenum pixelType = GLUtil::getPixelType(_parameters->_format, bitmap);
+    GLenum internalFormat = GLUtil::getTextureInternalFormat(_parameters->_usage, _parameters->_format, bitmap);
     const sp<ByteArray>& bytes = imagedata.at(0);
-    glTexImage2D(GL_TEXTURE_2D, 0, static_cast<GLint>(internalFormat), static_cast<int32_t>(bitmap.width()), static_cast<int32_t>(bitmap.height()), 0, format, pixelFormat, bytes ? bytes->buf() : nullptr);
+    glTexImage2D(GL_TEXTURE_2D, 0, static_cast<GLint>(internalFormat), static_cast<int32_t>(bitmap.width()), static_cast<int32_t>(bitmap.height()), 0, format, pixelType, bytes ? bytes->buf() : nullptr);
     LOGD("Texture Uploaded, id = %d, width = %d, height = %d", static_cast<uint32_t>(id()), bitmap.width(), bitmap.height());
 }
 

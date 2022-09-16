@@ -22,7 +22,7 @@ public:
 
     virtual void upload(Writable& uploader) override {
         size_t stride = _pipeline_input->getStream(0).stride();
-        PipelineInput::Attributes attributes(_pipeline_input);
+        PipelineInput::AttributeOffsets attributes(_pipeline_input);
         uint32_t size = static_cast<uint32_t>(_vertices->length() * stride);
         std::vector<uint8_t> buf(size);
         VertexStream stream(attributes, false, buf.data(), size, stride);

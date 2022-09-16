@@ -1,5 +1,6 @@
 #include "renderer/base/texture.h"
 
+#include "core/base/enums.h"
 #include "core/inf/array.h"
 #include "core/inf/variable.h"
 #include "core/impl/dictionary/dictionary_by_attribute_name.h"
@@ -138,44 +139,14 @@ template<> ARK_API Texture::Type Conversions::to<String, Texture::Type>(const St
 template<> ARK_API Texture::Format Conversions::to<String, Texture::Format>(const String& str)
 {
     if(str)
-    {
-        Texture::Format format = Texture::FORMAT_R;
-        for(const String& i : str.toLower().split('|'))
-        {
-            if(i == "r")
-                format = static_cast<Texture::Format>(format | Texture::FORMAT_R);
-            else if(i == "rg")
-                format = static_cast<Texture::Format>(format | Texture::FORMAT_RG);
-            else if(i == "rgb")
-                format = static_cast<Texture::Format>(format | Texture::FORMAT_RGB);
-            else if(i == "rgba")
-                format = static_cast<Texture::Format>(format | Texture::FORMAT_RGBA);
-            else if(i == "f16")
-                format = static_cast<Texture::Format>(format | Texture::FORMAT_F16);
-            else if(i == "f32")
-                format = static_cast<Texture::Format>(format | Texture::FORMAT_F32);
-            else if(i == "signed")
-                format = static_cast<Texture::Format>(format | Texture::FORMAT_SIGNED);
-            else
-                DFATAL("Unknow texture format: %s", i.c_str());
-        }
-        return format;
-    }
+        return Enums<Texture::Format>::instance().toEnumCombo(str);
     return Texture::FORMAT_AUTO;
 }
 
 template<> ARK_API Texture::Usage Conversions::to<String, Texture::Usage>(const String& str)
 {
     if(str)
-    {
-        if(str == "depth")
-            return Texture::USAGE_DEPTH_ATTACHMENT;
-        if(str == "depth_stencil")
-            return Texture::USAGE_DEPTH_STENCIL_ATTACHMENT;
-        if(str == "stencil")
-            return Texture::USAGE_STENCIL_ATTACHMENT;
-        DCHECK(str == "color", "Unknow texture usage: %s", str.c_str());
-    }
+        return Enums<Texture::Usage>::instance().toEnumCombo(str);
     return Texture::USAGE_COLOR_ATTACHMENT;
 }
 
@@ -301,6 +272,26 @@ Texture::UploaderBitmap::UploaderBitmap(const bitmap& bitmap)
 void Texture::UploaderBitmap::upload(GraphicsContext& graphicsContext, Texture::Delegate& delegate)
 {
     delegate.uploadBitmap(graphicsContext, _bitmap, {_bitmap->bytes()});
+}
+
+template<> ARK_API void Enums<Texture::Format>::initialize(std::map<String, Texture::Format>& enums)
+{
+    enums["r"] = Texture::FORMAT_R;
+    enums["rg"] = Texture::FORMAT_RG;
+    enums["rgb"] = Texture::FORMAT_RGB;
+    enums["rgba"] = Texture::FORMAT_RGBA;
+    enums["f16"] = Texture::FORMAT_F16;
+    enums["f32"] = Texture::FORMAT_F32;
+    enums["signed"] = Texture::FORMAT_SIGNED;
+}
+
+template<> ARK_API void Enums<Texture::Usage>::initialize(std::map<String, Texture::Usage>& enums)
+{
+    enums["color"] = Texture::USAGE_COLOR_ATTACHMENT;
+    enums["depth"] = Texture::USAGE_DEPTH_ATTACHMENT;
+    enums["stencil"] = Texture::USAGE_DEPTH_STENCIL_ATTACHMENT;
+    enums["input_disabled"] = Texture::USAGE_INPUT_DISABLED;
+    enums["output_disabled"] = Texture::USAGE_OUTPUT_DISABLED;
 }
 
 }

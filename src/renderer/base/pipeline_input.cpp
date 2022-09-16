@@ -9,13 +9,13 @@
 
 namespace ark {
 
-PipelineInput::Attributes::Attributes()
+PipelineInput::AttributeOffsets::AttributeOffsets()
 {
     for(uint32_t i = 0; i < ATTRIBUTE_NAME_COUNT; ++i)
         _offsets[i] = -1;
 }
 
-PipelineInput::Attributes::Attributes(const PipelineInput& input)
+PipelineInput::AttributeOffsets::AttributeOffsets(const PipelineInput& input)
 {
     _offsets[ATTRIBUTE_NAME_TEX_COORDINATE] = input.getAttributeOffset("TexCoordinate");
     _offsets[ATTRIBUTE_NAME_NORMAL] = input.getAttributeOffset("Normal");
@@ -39,7 +39,7 @@ void PipelineInput::initialize(const PipelineBuildingContext& buildingContext)
 
     for(const sp<Uniform>& i : buildingContext._uniforms.values())
     {
-        CHECK(i->binding() >= 0, "Uniform %s has unspecified binding", i->name().c_str());
+        CHECK(i->binding() >= 0, "Uniform \"%s\" has unspecified binding. (Declared but unused variables might be optimized out)", i->name().c_str());
         sp<PipelineInput::UBO>& ubo = ubos[i->binding()];
         if(!ubo)
             ubo = sp<PipelineInput::UBO>::make(i->binding());
@@ -98,7 +98,7 @@ const PipelineInput::Stream& PipelineInput::getStream(uint32_t divisor) const
     return iter->second;
 }
 
-const Attribute& PipelineInput::getAttribute(const String& name, uint32_t divisor) const
+Optional<const Attribute&> PipelineInput::getAttribute(const String& name, uint32_t divisor) const
 {
     return getStream(divisor).getAttribute(name);
 }
@@ -142,9 +142,9 @@ void PipelineInput::Stream::addAttribute(String name, Attribute attribute)
     _attributes.push_back(std::move(name), std::move(attribute));
 }
 
-const Attribute& PipelineInput::Stream::getAttribute(const String& name) const
+Optional<const Attribute&> PipelineInput::Stream::getAttribute(const String& name) const
 {
-    return _attributes.at(name);
+    return _attributes.has(name) ? Optional<const Attribute&>(_attributes.at(name)) : Optional<const Attribute&>();
 }
 
 int32_t PipelineInput::Stream::getAttributeOffset(const String& name) const

@@ -60,6 +60,7 @@ uint32_t Attribute::componentSize() const
         return 1;
     if(_type == TYPE_SHORT || _type == TYPE_USHORT)
         return sizeof(int16_t);
+    FATAL("Unknow compoent type: %d", _type);
     return 0;
 }
 
