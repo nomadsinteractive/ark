@@ -14,7 +14,7 @@ public:
     Vertices(size_t length);
     virtual ~Vertices() = default;
 
-    virtual void write(VertexStream& buf, const V3& size) = 0;
+    virtual void write(VertexWriter& buf, const V3& size) = 0;
 
     size_t length() const;
 

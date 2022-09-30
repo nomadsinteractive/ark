@@ -11,8 +11,8 @@ class RendererMaker {
 public:
     virtual ~RendererMaker() = default;
 
-    virtual std::vector<sp<Renderer>> make(int32_t x, int32_t y) = 0;
-    virtual void recycle(const sp<Renderer>& renderer) = 0;
+    virtual std::vector<Box> make(int32_t x, int32_t y) = 0;
+    virtual void recycle(const Box& renderer) = 0;
 
 };
 

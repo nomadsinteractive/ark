@@ -3,18 +3,18 @@
 #include <thread>
 #include <chrono>
 
+#include "core/base/clock.h"
 #include "core/base/memory_pool.h"
 
 #include "graphics/base/render_request.h"
 #include "graphics/base/v3.h"
 #include "graphics/impl/renderer/render_group.h"
-#include "graphics/inf/render_view.h"
 
 namespace ark {
 
-SurfaceController::SurfaceController(const sp<Executor>& executor)
-    : _executor(executor), _memory_pool(sp<MemoryPool>::make()), _renderers(sp<RendererGroup>::make()), _controls(sp<RendererGroup>::make()), _layers(sp<RendererGroup>::make()),
-      _render_requests(sp<OCSQueue<RenderRequest>>::make())
+SurfaceController::SurfaceController(sp<Executor> executor, sp<Clock> clock)
+    : _executor(std::move(executor)), _clock(std::move(clock)), _memory_pool(sp<MemoryPool>::make()), _renderers(sp<RendererGroup>::make()), _controls(sp<RendererGroup>::make()),
+      _layers(sp<RendererGroup>::make()), _render_requests(sp<OCSQueue<RenderRequest>>::make())
 {
 }
 
@@ -50,9 +50,15 @@ void SurfaceController::requestUpdate(uint64_t timestamp)
 
 void SurfaceController::onRenderFrame(const Color& backgroundColor, RenderView& renderView)
 {
+    DTHREAD_CHECK(THREAD_ID_RENDERER);
+    std::this_thread::sleep_for(std::chrono::milliseconds(4));
     RenderRequest renderRequest;
     while(!_render_requests->pop(renderRequest))
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    {
+        _clock->pause();
+        std::this_thread::sleep_for(std::chrono::milliseconds(4));
+        _clock->resume();
+    }
     renderRequest.onRenderFrame(backgroundColor, renderView);
 }
 

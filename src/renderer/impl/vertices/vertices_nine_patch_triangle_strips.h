@@ -12,7 +12,7 @@ public:
     VerticesNinePatchTriangleStrips();
     VerticesNinePatchTriangleStrips(const Rect& bounds, const Rect& patches, uint32_t textureWidth, uint32_t textureHeight);
 
-    virtual void write(VertexStream& buf, const V3& size) override;
+    virtual void write(VertexWriter& buf, const V3& size) override;
 
 };
 

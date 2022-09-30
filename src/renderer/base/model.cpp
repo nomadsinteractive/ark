@@ -3,7 +3,7 @@
 #include "core/inf/variable.h"
 
 #include "renderer/base/mesh.h"
-#include "renderer/base/vertex_stream.h"
+#include "renderer/base/vertex_writer.h"
 #include "renderer/inf/animation.h"
 #include "renderer/inf/uploader.h"
 #include "renderer/inf/vertices.h"
@@ -102,12 +102,12 @@ V3 Model::toScale(const V3& renderObjectSize) const
     return V3(renderObjectSize.x() == 0 ? _metrics.size.x() : renderObjectSize.x(), renderObjectSize.y() == 0 ? _metrics.size.y() : renderObjectSize.y(), renderObjectSize.z() == 0 ? _metrics.size.z() : renderObjectSize.z());
 }
 
-void Model::writeToStream(VertexStream& buf, const V3& size) const
+void Model::writeToStream(VertexWriter& buf, const V3& size) const
 {
     _vertices->write(buf, toScale(size));
 }
 
-void Model::writeRenderable(VertexStream& writer, const Renderable::Snapshot& renderable) const
+void Model::writeRenderable(VertexWriter& writer, const Renderable::Snapshot& renderable) const
 {
     writer.setRenderObject(renderable);
     writeToStream(writer, renderable._size);
@@ -164,7 +164,7 @@ size_t Model::MeshVertices::calcVertexLength(const std::vector<sp<Mesh>>& meshes
     return vertexLength;
 }
 
-void Model::MeshVertices::write(VertexStream& buf, const V3& /*size*/)
+void Model::MeshVertices::write(VertexWriter& buf, const V3& /*size*/)
 {
     for(const Mesh& m : _meshes)
         m.write(buf);

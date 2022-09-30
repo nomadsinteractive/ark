@@ -15,12 +15,14 @@ namespace ark {
 
 NarrowPhraseCuteC2::NarrowPhraseCuteC2(const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
 {
-    loadShapes(manifest);
+    float ppu = Documents::getAttribute<float>(manifest, "ppu", 1.0f);
+
+    loadShapes(manifest, ppu);
     for(const document& i : manifest->children("import"))
     {
         const String& src = Documents::ensureAttribute(i, Constants::Attributes::SRC);
         document content = resourceLoaderContext->documents()->get(src);
-        loadShapes(content->ensureChild("bodies"));
+        loadShapes(content->ensureChild("bodies"), ppu);
     }
 }
 
@@ -145,12 +147,12 @@ void NarrowPhraseCuteC2::toRay(const V2& from, const V2& to, c2Ray& ray) const
     }
 }
 
-void NarrowPhraseCuteC2::loadShapes(const document& manifest)
+void NarrowPhraseCuteC2::loadShapes(const document& manifest, float ppu)
 {
     for(const document& i : manifest->children("body"))
     {
         int32_t shapeId = Documents::ensureAttribute<int32_t>(i, "name");
-        _body_defs[shapeId] = sp<BodyDefCuteC2>::make(i);
+        _body_defs[shapeId] = sp<BodyDefCuteC2>::make(i, ppu);
     }
 }
 
@@ -238,8 +240,8 @@ NarrowPhraseCuteC2::BodyDefCuteC2::BodyDefCuteC2(const V2& size, const V2& pivot
 {
 }
 
-NarrowPhraseCuteC2::BodyDefCuteC2::BodyDefCuteC2(const document& manifest)
-    : _size(Documents::getAttribute<float>(manifest, "width", 0), Documents::getAttribute<float>(manifest, "height", 0)), _pivot(0.5f)
+NarrowPhraseCuteC2::BodyDefCuteC2::BodyDefCuteC2(const document& manifest, float ppu)
+    : _size(Documents::getAttribute<float>(manifest, "width", 0) / ppu, Documents::getAttribute<float>(manifest, "height", 0) / ppu), _pivot(0.5f)
 {
     const String shapeType = Documents::getAttribute(manifest, "shape-type");
     if(shapeType == "capsule")
@@ -249,7 +251,7 @@ NarrowPhraseCuteC2::BodyDefCuteC2::BodyDefCuteC2(const document& manifest)
         const float bx = Documents::ensureAttribute<float>(manifest, "bx");
         const float by = Documents::ensureAttribute<float>(manifest, "by");
         const float r = Documents::ensureAttribute<float>(manifest, "r");
-        _shapes.push_back(NarrowPhraseCuteC2::makeCapsuleShapeImpl(V2(ax, ay), V2(bx, by), r));
+        _shapes.push_back(NarrowPhraseCuteC2::makeCapsuleShapeImpl(V2(ax, ay) / ppu, V2(bx, by) / ppu, r / ppu));
     }
     else if(shapeType == "polygon")
     {
@@ -258,8 +260,8 @@ NarrowPhraseCuteC2::BodyDefCuteC2::BodyDefCuteC2(const document& manifest)
         for(const document& j : manifest->children())
         {
             DCHECK(c < C2_MAX_POLYGON_VERTS, "Unable to add more vertex, max count: %d", C2_MAX_POLYGON_VERTS);
-            shape.s.poly.verts[c].x = Documents::ensureAttribute<float>(j, "x");
-            shape.s.poly.verts[c].y = Documents::ensureAttribute<float>(j, "y");
+            shape.s.poly.verts[c].x = Documents::ensureAttribute<float>(j, "x") / ppu;
+            shape.s.poly.verts[c].y = Documents::ensureAttribute<float>(j, "y") / ppu;
             c++;
         }
         shape.t = C2_TYPE_POLY;
@@ -289,8 +291,8 @@ NarrowPhraseCuteC2::BodyDefCuteC2::BodyDefCuteC2(const document& manifest)
                 for(size_t k = 0; k < values.size(); k += 2)
                 {
                     DCHECK(k / 2 < C2_MAX_POLYGON_VERTS, "Unable to add more vertex, max count: %d", C2_MAX_POLYGON_VERTS);
-                    shape.s.poly.verts[k / 2].x = Strings::parse<float>(values.at(k));
-                    shape.s.poly.verts[k / 2].y = Strings::parse<float>(values.at(k + 1));
+                    shape.s.poly.verts[k / 2].x = Strings::parse<float>(values.at(k)) / ppu;
+                    shape.s.poly.verts[k / 2].y = Strings::parse<float>(values.at(k + 1)) / ppu;
                 }
                 shape.t = C2_TYPE_POLY;
                 shape.s.poly.count = static_cast<int32_t>(values.size() / 2);

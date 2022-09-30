@@ -32,8 +32,8 @@ namespace python {
 
 class ARK_PLUGIN_PYTHON_API PyCast {
 public:
-    static sp<Numeric> toNumeric(PyObject* object, bool alert = true);
-    static sp<Boolean> toBoolean(PyObject* object, bool alert = true);
+    static Optional<sp<Numeric> > toNumeric(PyObject* object, bool alert = true);
+    static Optional<sp<Boolean> > toBoolean(PyObject* object, bool alert = true);
     static String toString(PyObject* object, const char* encoding = nullptr, const char* error = nullptr);
     static Scope toScope(PyObject* kws);
 
@@ -115,6 +115,21 @@ public:
 
     static bool isNoneOrNull(PyObject* pyObject);
 
+    template<typename F, F f> struct func_wrapper_impl;
+    template<typename R, typename... Args, R(*f)(Args...)> struct func_wrapper_impl<R(*)(Args...), f> {
+        static R wrapped(Args... args) {
+            try {
+                return f(args...);
+            }
+            catch(const std::logic_error& e) {
+                PyErr_SetString(PyExc_RuntimeError, e.what());
+            }
+            return (R)(0);
+        }
+    };
+
+    template<typename F, F f> constexpr static auto RuntimeFuncWrapper = func_wrapper_impl<F, f>::wrapped;
+
 private:
     template<typename T> static Optional<sp<T>> toSharedPtrImpl(PyObject* object, bool alert = true) {
         return toSharedPtrDefault<T>(object, alert);
@@ -183,8 +198,8 @@ private:
     static void reduceArgumentTuple(PyObject *tuple, uint32_t idx) {
     }
     template<typename R, typename... Args> static Optional<std::function<R(Args...)>> toCppObject_function(PyObject* obj, std::function<R(Args...)>*) {
-        if(PyCallable_Check(obj))
-            return nullptr;
+        if(!PyCallable_Check(obj))
+            return Optional<std::function<R(Args...)>>();
         PyInstance pyObj(PyInstance::own(obj));
         return [pyObj](Args... args) -> R {
             PyInstance tuple = PyInstance::steal(makeArgumentTuple<Args...>(args...));
@@ -250,9 +265,9 @@ private:
 
     static sp<Vec2> toVec2(PyObject* object, bool alert);
     static sp<Vec3> toVec3(PyObject* object, bool alert);
-    static sp<Integer> toInteger(PyObject* object, bool alert);
-    static sp<Runnable> toRunnable(PyObject* object, bool alert);
-    static sp<Observer> toObserver(PyObject* object, bool alert);
+    static Optional<sp<Integer>> toInteger(PyObject* object, bool alert);
+    static Optional<sp<Runnable>> toRunnable(PyObject* object, bool alert);
+    static Optional<sp<Observer>> toObserver(PyObject* object, bool alert);
     static sp<CollisionCallback> toCollisionCallback(PyObject* object);
     static sp<EventListener> toEventListener(PyObject* object);
 
@@ -306,19 +321,21 @@ template<> inline Optional<sp<EventListener>> PyCast::toSharedPtrImpl<EventListe
 
 template<> inline Optional<sp<Vec2>> PyCast::toSharedPtrImpl<Vec2>(PyObject* object, bool alert)
 {
-    return toVec2(object, alert);
+    sp<Vec2> vec2 = toVec2(object, false);
+    return vec2 ? Optional<sp<Vec2>>(std::move(vec2)) : Optional<sp<Vec2>>();
 }
 
 template<> inline Optional<sp<Vec3>> PyCast::toSharedPtrImpl<Vec3>(PyObject* object, bool alert)
 {
-    return toVec3(object, alert);
+    sp<Vec3> vec3 = toVec3(object, false);
+    return vec3 ? Optional<sp<Vec3>>(std::move(vec3)) : Optional<sp<Vec3>>();
 }
 
 template<> inline Optional<sp<ByteArray>> PyCast::toSharedPtrImpl<ByteArray>(PyObject* object, bool alert) {
     bool isBytes = PyBytes_Check(object);
     DCHECK(isBytes || !alert, "Object \"%s\" is not a bytes object", Py_TYPE(object)->tp_name);
     if(!isBytes)
-        return nullptr;
+        return Optional<sp<ByteArray>>();
     Py_ssize_t len = PyBytes_Size(object);
     return sp<ByteArray::Borrowed>::make(reinterpret_cast<uint8_t*>(PyBytes_AsString(object)), len);
 }

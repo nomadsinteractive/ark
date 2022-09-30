@@ -35,11 +35,10 @@ sp<Future> MessageLoop::schedule(sp<Runnable> runnable, float interval, sp<Futur
     return future;
 }
 
-uint64_t MessageLoop::pollOnce(uint64_t now)
+uint64_t MessageLoop::pollOnce()
 {
     DPROFILER_TRACE("MessageLoop");
-    if(now == 0)
-        now = _clock->val();
+    uint64_t now = _clock->val();
 
     uint64_t nextFireTick = now + 10000;
     for(sp<Task>& task : _scheduled.clear())

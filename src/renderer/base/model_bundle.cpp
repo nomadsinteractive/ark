@@ -87,7 +87,7 @@ ModelBundle::ModelInfo& ModelBundle::Stub::addModel(int32_t type, const Model& m
 const ModelBundle::ModelInfo& ModelBundle::Stub::ensure(int32_t type) const
 {
     const auto iter = _models.find(type);
-    DCHECK(iter != _models.end(), "Model not found, type: %d", type);
+    CHECK(iter != _models.end(), "Model not found, type: %d", type);
     return iter->second;
 }
 

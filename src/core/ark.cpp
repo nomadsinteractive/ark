@@ -262,9 +262,14 @@ sp<Readable> Ark::tryOpenAsset(const String& path) const
     return asset ? asset->open() : sp<Readable>::null();
 }
 
-const sp<Clock>& Ark::clock() const
+const sp<Clock>& Ark::appClock() const
 {
-    return _application_context->clock();
+    return _application_context->appClock();
+}
+
+const sp<Clock>& Ark::sysClock() const
+{
+    return _application_context->sysClock();
 }
 
 const sp<ApplicationContext>& Ark::applicationContext() const

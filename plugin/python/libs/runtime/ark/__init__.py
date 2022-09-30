@@ -208,6 +208,17 @@ class DOMDocument:
         pass
 
 
+class IDHeap:
+    def __init__(self, heap_size_l1: int, heap_size_l2: int = 0):
+        pass
+
+    def allocate(self, size: int, alignment: int = 1) -> int:
+        pass
+
+    def free(self, ptr: int):
+        pass
+
+
 class MessageLoop:
 
     def post(self, task: Callable[[], None], delay: float):
@@ -256,6 +267,10 @@ class ApplicationFacade:
     @property
     def cursor_position(self) -> 'Vec2':
         return Vec2(0, 0)
+
+    @property
+    def surface_size(self) -> 'Size':
+        return Size(0, 0)
 
     @property
     def application_controller(self) -> 'ApplicationController':
@@ -764,6 +779,9 @@ class Vec2(_Var):
     def to_size(self) -> 'Size':
         pass
 
+    def extend(self, v) -> 'Vec3':
+        pass
+
     def __str__(self):
         return '(%.1f, %.1f)' % (self._x, self._y)
 
@@ -798,6 +816,9 @@ class Vec3(Vec2):
         pass
 
     def cross(self, other) -> 'Vec3':
+        pass
+
+    def extend(self, w: Union[float, Numeric]) -> 'Vec4':
         pass
 
 
@@ -1140,10 +1161,7 @@ class RenderLayer(Renderer):
     def layer(self) -> 'Layer':
         return Layer(self)
 
-    def make_layer(self, layer_type: int, model_loader: Optional[ModelLoader] = None) -> 'Layer':
-        pass
-
-    def make_context(self, layer_type) -> LayerContext:
+    def make_layer(self, model_loader: Optional[ModelLoader] = None) -> 'Layer':
         pass
 
 
@@ -1197,10 +1215,10 @@ class Arena:
     def add_renderer(self, renderer: Renderer):
         pass
 
-    def add_layer(self, layer: Layer):
+    def add_layer(self, layer: Renderer):
         pass
 
-    def add_render_layer(self, render_layer: RenderLayer):
+    def add_render_layer(self, render_layer: Renderer):
         pass
 
     def load_renderer(self, name: str, **kwargs):
@@ -1524,7 +1542,7 @@ class Size(Vec3):
 
 
 class Tile:
-    def __init__(self, id_: int, type_: str = '', shape_id: int = -1, width: int = 0, height: int = 0, render_object_id: int = 0):
+    def __init__(self, id_: int, type_: str = '', shape_id: int = -1, render_object: Optional[RenderObject] = None):
         pass
 
     @property
@@ -1561,21 +1579,20 @@ class TilemapImporter:
 
 
 class Tileset:
-    def __init__(self, tile_width: int, tile_height: int):
-        self._tile_width = tile_width
-        self._tile_height = tile_height
+    def __init__(self, tile_size: Size):
+        self._tile_size = tile_size
 
     @property
     def tiles(self) -> Dict[int, Tile]:
         return {}
 
     @property
-    def tile_width(self) -> int:
-        return self._tile_width
+    def tile_width(self) -> float:
+        return self._tile_size.width
 
     @property
-    def tile_height(self) -> int:
-        return self._tile_height
+    def tile_height(self) -> float:
+        return self._tile_size.height
 
     def add_tile(self, tile: Tile):
         pass
@@ -1588,7 +1605,8 @@ class Tileset:
 
 
 class TilemapLayer(Renderer):
-    def __init__(self, layer: Layer, tileset: Tileset, name: str, row_count: int, col_count: int, position: Optional[TYPE_VEC3] = None, scroller: Optional[TYPE_VEC3] = None, flag: int = 0):
+    def __init__(self, tileset: Tileset, name: str, row_count: int, col_count: int, position: Optional[TYPE_VEC3] = None, scroller: Optional[TYPE_VEC3] = None,
+                 visible: Optional[Boolean] = None, flag: int = 0):
         super().__init__()
 
     @property
@@ -1645,8 +1663,9 @@ class Tilemap:
     LAYER_FLAG_SCROLLABLE = 2
     LAYER_FLAG_INVISIBLE = 4
 
-    def __init__(self, layer: LayerContext, w: int, h: int, tileset: Tileset):
+    def __init__(self, render_layer: RenderLayer, size: Size, tileset: Tileset):
         super().__init__()
+        self._size = size
         self._tileset = tileset
 
     def clear(self):
@@ -1654,7 +1673,7 @@ class Tilemap:
 
     @property
     def size(self) -> Size:
-        return None
+        return self._size
 
     @property
     def tileset(self) -> Tileset:
@@ -1992,7 +2011,7 @@ class Collider:
     BODY_FLAG_MANUAL_POSITION = 8
     BODY_FLAG_MANUAL_ROTATION = 16
 
-    def create_body(self, type, shape, position, size=None, rotate=None) -> RigidBody:
+    def create_body(self, type_: Union[int, Integer], shape, position, size=None, rotate=None) -> RigidBody:
         pass
 
     def ray_cast(self, ray_from, ray_to) -> List[RayCastManifold]:

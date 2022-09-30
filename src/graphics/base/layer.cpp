@@ -33,6 +33,16 @@ void Layer::dispose()
     _layer_context = nullptr;
 }
 
+const sp<Visibility>& Layer::visible() const
+{
+    return _layer_context->visible().ensure();
+}
+
+void Layer::setVisible(sp<Boolean> visible)
+{
+    _layer_context->visible().reset(std::move(visible));
+}
+
 const sp<ModelLoader>& Layer::modelLoader() const
 {
     return _layer_context ? _layer_context->modelLoader() : sp<ModelLoader>::null();
@@ -60,7 +70,8 @@ void Layer::clear()
 
 Layer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _type(Documents::getAttribute(manifest, Constants::Attributes::TYPE, Layer::TYPE_DYNAMIC)), _render_layer(factory.getBuilder<RenderLayer>(manifest, Constants::Attributes::RENDER_LAYER)),
-      _model_loader(factory.getBuilder<ModelLoader>(manifest, Constants::Attributes::MODEL)), _render_objects(factory.getBuilderList<RenderObject>(manifest, Constants::Attributes::RENDER_OBJECT))
+      _model_loader(factory.getBuilder<ModelLoader>(manifest, Constants::Attributes::MODEL)), _visible(factory.getBuilder<Boolean>(manifest, Constants::Attributes::VISIBLE)),
+      _render_objects(factory.getBuilderList<RenderObject>(manifest, Constants::Attributes::RENDER_OBJECT))
 {
 }
 
@@ -68,7 +79,7 @@ sp<Layer> Layer::BUILDER::build(const Scope& args)
 {
     sp<ModelLoader> modelLoader = _model_loader->build(args);
     const sp<RenderLayer> renderLayer = _render_layer->build(args);
-    const sp<Layer> layer = sp<Layer>::make(renderLayer ? renderLayer->makeContext(_type, std::move(modelLoader)) : sp<LayerContext>::make(ModelLoaderCached::decorate(std::move(modelLoader)), nullptr, _type));
+    const sp<Layer> layer = sp<Layer>::make(renderLayer ? renderLayer->makeContext(nullptr, std::move(modelLoader)) : sp<LayerContext>::make(nullptr, ModelLoaderCached::decorate(std::move(modelLoader)), _visible->build(args), nullptr));
     LayerContext& layerContext = layer->context();
     for(const sp<Builder<RenderObject>>& i : _render_objects)
         layerContext.addRenderObject(i->build(args));

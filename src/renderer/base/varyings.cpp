@@ -19,20 +19,19 @@
 namespace ark {
 
 Varyings::Varyings()
-    : _size(0)
 {
 }
 
 void Varyings::traverse(const Holder::Visitor& visitor)
 {
-    for(const auto& iter : _varyings)
+    for(const auto& iter : _slots)
         HolderUtil::visit(iter.second._input, visitor);
 }
 
 bool Varyings::update(uint64_t timestamp) const
 {
     bool dirty = false;
-    for(const auto& i : _varyings)
+    for(const auto& i : _slots)
         if(i.second._input->update(timestamp))
             dirty = true;
     return dirty;
@@ -45,66 +44,82 @@ Box Varyings::getProperty(const String& name) const
     return iter->second;
 }
 
-void Varyings::setVarying(const String& name, sp<Input> input)
+void Varyings::setSlotInput(const String& name, sp<Input> input)
 {
-    auto iter = _varyings.find(name);
-    if(iter == _varyings.end())
+    auto iter = _slots.find(name);
+    if(iter == _slots.end())
     {
-        _varyings.emplace(name, std::move(input));
-        _size = 0;
+        _slots.emplace(name, std::move(input));
+        _slot_strides.clear();
     }
     else
     {
-        DCHECK(iter->second._input->size() == input->size(), "Replacing existing varying \"%s\"(%d) with a different size value(%d)", name.c_str(), iter->second._input->size(), input->size());
+        CHECK(iter->second._input->size() == input->size(), "Replacing existing varying \"%s\"(%d) with a different size value(%d)", name.c_str(), iter->second._input->size(), input->size());
         iter->second = Slot(std::move(input), iter->second._offset);
     }
+}
+
+void Varyings::setProperty(const String& name, sp<Integer> var)
+{
+    _properties[name] = var;
+    setSlotInput(name, sp<Input>::make<InputVariable<int32_t>>(std::move(var)));
 }
 
 void Varyings::setProperty(const String& name, sp<Numeric> var)
 {
     _properties[name] = var;
-    setVarying(name, sp<Input>::make<InputVariable<float>>(std::move(var)));
+    setSlotInput(name, sp<Input>::make<InputVariable<float>>(std::move(var)));
 }
 
 void Varyings::setProperty(const String& name, sp<Vec2> var)
 {
     _properties[name] = var;
-    setVarying(name, sp<Input>::make<InputVariable<V2>>(std::move(var)));
+    setSlotInput(name, sp<Input>::make<InputVariable<V2>>(std::move(var)));
 }
 
 void Varyings::setProperty(const String& name, sp<Vec3> var)
 {
     _properties[name] = var;
-    setVarying(name, sp<Input>::make<InputVariable<V3>>(std::move(var)));
+    setSlotInput(name, sp<Input>::make<InputVariable<V3>>(std::move(var)));
 }
 
 void Varyings::setProperty(const String& name, sp<Vec4> var)
 {
     _properties[name] = var;
-    setVarying(name, sp<Input>::make<InputVariable<V4>>(std::move(var)));
+    setSlotInput(name, sp<Input>::make<InputVariable<V4>>(std::move(var)));
 }
 
 Varyings::Snapshot Varyings::snapshot(const PipelineInput& pipelineInput, Allocator& allocator)
 {
-    if(!_varyings.size())
+    if(!_slots.size())
         return Snapshot();
 
-    if(!_size)
+    if(!_slot_strides.size())
     {
-        const PipelineInput::Stream& varyingStream = pipelineInput.streams().rbegin()->second;
-        for(auto& i : _varyings)
+        for(auto& i : _slots)
         {
-            i.second._offset = varyingStream.getAttributeOffset(i.first);
-            DCHECK(i.second._offset >= 0, "Varying has no attribute \"%s\", offset: %d. Did you mean \"%s\"?", i.first.c_str(), i.second._offset,
-                   Math::levensteinNearest(i.first, varyingStream.attributes().keys()).first.c_str());
-            _size = std::max<uint32_t>(static_cast<uint32_t>(i.second._offset) + i.second._input->size(), _size);
+            Optional<const Attribute&> attr = pipelineInput.getAttribute(i.first);
+            CHECK(attr, "Varying has no attribute \"%s\". Did you mean \"%%s\"?", i.first.c_str()/*, Math::levensteinNearest(i.first, varyingStream.attributes().keys()).first.c_str()*/);
+            i.second._divisor = attr->divisor();
+            i.second._offset = attr->offset();
         }
+        for(const auto& i : pipelineInput.streams())
+            _slot_strides[i.first] = i.second.stride();
     }
 
-    ByteArray::Borrowed memory = allocator.sbrk(_size);
-    for(const auto& i : _varyings)
-        i.second.apply(memory.buf());
-    return Snapshot(memory);
+    Array<Divided>::Borrowed buffers(reinterpret_cast<Divided*>(allocator.sbrk(sizeof(Divided) * _slot_strides.size()).buf()), _slot_strides.size());
+
+    size_t idx = 0;
+    for(const auto& i : _slot_strides)
+        new(&buffers.at(idx++)) Divided(i.first, allocator.sbrk(i.second));
+
+    for(const auto& i : _slots)
+    {
+        DASSERT(i.second._divisor < buffers.length());
+        i.second.apply(buffers.at(i.second._divisor)._content.buf());
+    }
+
+    return Snapshot(buffers);
 }
 
 Varyings::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
@@ -125,7 +140,7 @@ sp<Varyings> Varyings::BUILDER::build(const Scope& args)
 
     const sp<Varyings> varyings = sp<Varyings>::make();
     for(const VaryingBuilder& i : _varying_builders)
-        varyings->setVarying(i._name,  i._input->build(args));
+        varyings->setSlotInput(i._name,  i._input->build(args));
     return varyings;
 }
 
@@ -134,13 +149,8 @@ template<> ARK_API sp<Varyings> Null::ptr()
     return sp<Varyings>::make();
 }
 
-Varyings::Slot::Slot(sp<Input> input, int32_t offset)
-    : _input(std::move(input)), _offset(offset)
-{
-}
-
-Varyings::Slot::Slot()
-    : _offset(-1)
+Varyings::Slot::Slot(sp<Input> input, uint32_t divisor, int32_t offset)
+    : _input(std::move(input)), _divisor(divisor), _offset(offset)
 {
 }
 
@@ -155,19 +165,27 @@ Varyings::BUILDER::VaryingBuilder::VaryingBuilder(String name, sp<Builder<Input>
 {
 }
 
-Varyings::Snapshot::Snapshot()
-    : _memory(nullptr, 0)
-{
-}
-
-Varyings::Snapshot::Snapshot(ByteArray::Borrowed memory)
-    : _memory(memory)
+Varyings::Snapshot::Snapshot(Array<Varyings::Divided>::Borrowed buffers)
+    : _buffers(buffers)
 {
 }
 
 Varyings::Snapshot::operator bool() const
 {
-    return _memory.buf() != nullptr;
+    return _buffers.buf() != nullptr;
+}
+
+ByteArray::Borrowed Varyings::Snapshot::getDivided(uint32_t divisor) const
+{
+    for(size_t i = 0; i < _buffers.length(); ++i)
+        if(_buffers.at(i)._divisor == divisor)
+            return _buffers.at(i)._content;
+    return ByteArray::Borrowed();
+}
+
+Varyings::Divided::Divided(uint32_t divisor, ByteArray::Borrowed content)
+    : _divisor(divisor), _content(content)
+{
 }
 
 }

@@ -14,7 +14,7 @@ public:
     VerticesSphere(size_t length);
     VerticesSphere(sp<std::vector<ModelLoaderSphere::Vertex>> vertices, const Rect& uvBounds);
 
-    virtual void write(VertexStream& buf, const V3& size) override;
+    virtual void write(VertexWriter& buf, const V3& size) override;
 
 private:
     sp<std::vector<ModelLoaderSphere::Vertex>> _vertices;

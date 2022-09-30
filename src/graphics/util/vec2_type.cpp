@@ -189,13 +189,13 @@ sp<Vec2> Vec2Type::normalize(const sp<Vec2>& self)
 
 sp<Vec2> Vec2Type::integral(const sp<Vec2>& self, const sp<Numeric>& t)
 {
-    sp<Numeric> duration = t ? t : Ark::instance().clock()->duration();
+    sp<Numeric> duration = t ? t : Ark::instance().appClock()->duration();
     return sp<Integral<V2>>::make(self, std::move(duration));
 }
 
 sp<Vec2> Vec2Type::integralWithResistance(const sp<Vec2>& self, const V2& v0, const sp<Numeric>& cd, const sp<Numeric>& t)
 {
-    return sp<IntegralWithResistance<V2>>::make(v0, self, cd, t ? t : Ark::instance().clock()->duration());
+    return sp<IntegralWithResistance<V2>>::make(v0, self, cd, t ? t : Ark::instance().appClock()->duration());
 }
 
 sp<Numeric> Vec2Type::distanceTo(const sp<Vec2>& self, const sp<Vec2>& other)
@@ -287,6 +287,16 @@ void Vec2Type::setVy(const sp<Vec2>& self, const sp<Numeric>& y)
     ensureImpl(self)->y()->set(y);
 }
 
+sp<Vec3> Vec2Type::extend(const sp<Vec2>& self, const sp<Numeric>& z)
+{
+    return sp<VariableOP2<sp<Vec2>, sp<Numeric>, Operators::Extend<V2, float>>>::make(self, z);
+}
+
+sp<Vec4> Vec2Type::extend(const sp<Vec2>& self, const sp<Vec2>& zw)
+{
+    return sp<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::Extend<V2, V2>>>::make(self, zw);
+}
+
 void Vec2Type::fix(const sp<Vec2>& self)
 {
     sp<VariableWrapper<V2>> wrapper = self.as<VariableWrapper<V2>>();
@@ -343,13 +353,13 @@ sp<Vec2> Vec2Type::modCeil(const sp<Vec2>& self, const sp<Vec2>& mod)
 sp<Vec2> Vec2Type::sod(sp<Vec2> self, float k, float z, float r, sp<Numeric> t)
 {
     if(t == nullptr)
-        t = Ark::instance().clock()->duration();
+        t = Ark::instance().appClock()->duration();
     return sp<SecondOrderDynamics<V2>>::make(std::move(self), std::move(t), k, z, r);
 }
 
 sp<Vec2> Vec2Type::attract(const sp<Vec2>& self, const V2& s0, float duration, const sp<Numeric>& t)
 {
-    sp<Numeric> ts = t ? t : Ark::instance().clock()->duration();
+    sp<Numeric> ts = t ? t : Ark::instance().appClock()->duration();
     return sp<Vec2Impl>::make(sp<Stalker>::make(ts, vx(self), s0.x(), duration), sp<Stalker>::make(ts, vy(self), s0.y(), duration));
 }
 

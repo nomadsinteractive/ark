@@ -33,14 +33,14 @@ void StateMachine::start(State& entry)
 
 void StateMachine::transit(State& next)
 {
-    DCHECK(_active_state, "Statemachine has not active state(call start first)");
+    CHECK(_active_state, "Statemachine has not active state(call start first)");
     _active_state->deactivate();
     start(next);
 }
 
 void StateMachine::activateCommand(Command& command)
 {
-    DCHECK(command.state() != Command::STATE_ACTIVATED, "Illegal state, Command has been executed already");
+    CHECK(command.state() != Command::STATE_ACTIVATED, "Illegal state, Command has been executed already");
     command.setState(Command::STATE_ACTIVATED);
     if(command.commandGroup())
         command.commandGroup()->resolveConflicts(command, Command::STATE_ACTIVATED, Command::STATE_SUPPRESSED);
@@ -50,7 +50,7 @@ void StateMachine::activateCommand(Command& command)
 
 void StateMachine::deactivateCommand(Command& command)
 {
-    DCHECK(command.state() != Command::STATE_DEACTIVATED, "Illegal state, Command has been terminated already");
+    CHECK(command.state() != Command::STATE_DEACTIVATED, "Illegal state, Command has been terminated already");
     command.setState(Command::STATE_DEACTIVATED);
     if(command.commandGroup() && command.commandGroup()->resolveConflicts(command, Command::STATE_SUPPRESSED, Command::STATE_ACTIVATED) == 0)
         command.commandGroup()->deactivate();

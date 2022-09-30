@@ -90,7 +90,7 @@ Emitter::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const 
 sp<Emitter> Emitter::BUILDER::build(const Scope& args)
 {
     const sp<Source> stub = sp<Source>::make(_type->build(args), _position->build(args), _size->build(args), args);
-    return sp<Emitter>::make(_resource_loader_context, stub, Ark::instance().clock(), _layer_context->build(args), _manifest->children(), _factory, _disposed);
+    return sp<Emitter>::make(_resource_loader_context, stub, Ark::instance().appClock(), _layer_context->build(args), _manifest->children(), _factory, _disposed);
 }
 
 Emitter::Particale::Particale(const sp<Source>& stub, const document& manifest, BeanFactory& factory)

@@ -135,8 +135,7 @@ public:
 
     const PipelineInput::Stream& getStream(uint32_t divisor) const;
 
-    Optional<const Attribute&> getAttribute(const String& name, uint32_t divisor = 0) const;
-    int32_t getAttributeOffset(const String& name, uint32_t divisor = 0) const;
+    Optional<const Attribute&> getAttribute(const String& name) const;
 
     sp<Uniform> getUniform(const String& name) const;
 

@@ -27,7 +27,7 @@ uint64_t VKMemory::Stub::id()
     return (uint64_t)(_memory);
 }
 
-void VKMemory::Stub::upload(GraphicsContext& /*graphicsContext*/, const sp<Uploader>& /*uploader*/)
+void VKMemory::Stub::upload(GraphicsContext& /*graphicsContext*/)
 {
     VKUtil::checkResult(vkAllocateMemory(_device->vkLogicalDevice(), &_allocation_info, nullptr, &_memory));
 }
@@ -56,7 +56,7 @@ VKMemory::VKMemory(const sp<VKMemory::Stub>& stub)
 
 void VKMemory::upload(GraphicsContext& graphicsContext)
 {
-    _stub->upload(graphicsContext, nullptr);
+    _stub->upload(graphicsContext);
 }
 
 void* VKMemory::map(VkDeviceSize offset, VkDeviceSize size)

@@ -8,8 +8,8 @@ namespace {
 
 class ThrowException : public Runnable {
 public:
-    ThrowException(const String& what)
-        : _what(what) {
+    ThrowException(String what)
+        : _what(std::move(what)) {
     }
 
     virtual void run() override {
@@ -22,8 +22,8 @@ private:
 
 }
 
-ExecutorThreadPool::ExecutorThreadPool(const sp<Executor>& executor, uint32_t capacity)
-    : _stub(sp<Stub>::make(executor, std::max<uint32_t>(2, capacity ? capacity : std::thread::hardware_concurrency())))
+ExecutorThreadPool::ExecutorThreadPool(sp<Executor> exceptionExecutor, uint32_t capacity)
+    : _stub(sp<Stub>::make(std::move(exceptionExecutor), std::max<uint32_t>(2, capacity ? capacity : std::thread::hardware_concurrency())))
 {
 }
 
@@ -48,8 +48,8 @@ sp<ExecutorWorkerThread> ExecutorThreadPool::createWorkerThread()
     return workerThread;
 }
 
-ExecutorThreadPool::Stub::Stub(const sp<Executor>& executor, uint32_t capacity)
-    : _executor(executor), _capacity(capacity), _worker_count(0)
+ExecutorThreadPool::Stub::Stub(sp<Executor> exceptionExecutor, uint32_t capacity)
+    : _exception_executor(std::move(exceptionExecutor)), _capacity(capacity), _worker_count(0)
 {
 }
 
@@ -87,8 +87,8 @@ void ExecutorThreadPool::WorkerThreadStrategy::onExit()
 
 void ExecutorThreadPool::WorkerThreadStrategy::onException(const std::exception& e)
 {
-    if(_stub->_executor)
-        _stub->_executor->execute(sp<ThrowException>::make(e.what()));
+    if(_stub->_exception_executor)
+        _stub->_exception_executor->execute(sp<ThrowException>::make(e.what()));
 }
 
 uint64_t ExecutorThreadPool::WorkerThreadStrategy::onIdle(Thread& thread)

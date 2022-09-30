@@ -16,6 +16,11 @@ Size::Size()
 {
 }
 
+Size::Size(const V3& size)
+    : Size(size.x(), size.y(), size.z())
+{
+}
+
 Size::Size(float width, float height, float depth)
     : _impl(sp<Vec3Impl>::make(width, height, depth))
 {

@@ -6,6 +6,7 @@
 #include <queue>
 
 #include "core/collection/bitwise_trie.h"
+#include "core/types/optional.h"
 #include "core/types/shared_ptr.h"
 #include "core/types/weak_ptr.h"
 #include "core/util/math.h"
@@ -16,7 +17,7 @@ template<typename MemoryType, typename SizeType, size_t kAlignment = sizeof(void
 public:
     typedef decltype(std::declval<MemoryType>().begin()) PtrType;
 
-    static const SizeType npos = std::numeric_limits<SizeType>::max();
+    static constexpr SizeType npos = std::numeric_limits<SizeType>::max();
 
     class Allocator {
     public:
@@ -329,8 +330,8 @@ public:
 
 private:
     struct Stub {
-        Stub(MemoryType memory, const sp<Allocator>& allocator)
-            : _memory(std::move(memory)), _size(static_cast<SizeType>(_memory.end() - _memory.begin())), _allocated(0), _allocator(allocator) {
+        Stub(MemoryType memory, sp<Allocator> allocator)
+            : _memory(std::move(memory)), _size(static_cast<SizeType>(_memory.end() - _memory.begin())), _allocated(0), _allocator(std::move(allocator)) {
             _allocator->initialize(_size);
         }
 
@@ -342,14 +343,14 @@ private:
             return _size - _allocated + (_next ? _next->available() : 0);
         }
 
-        PtrType allocate(SizeType size, SizeType alignment) {
+        Optional<PtrType> allocate(SizeType size, SizeType alignment) {
             SizeType allocated = 0;
             SizeType offset = _allocator->allocate(align(size, kAlignment), alignment, allocated);
             if(offset != npos) {
                 _allocated += allocated;
                 return _memory.begin() + offset;
             }
-            return _next ? _next->allocate(size, alignment) : nullptr;
+            return _next ? _next->allocate(size, alignment) : Optional<PtrType>();
         }
 
         void free(PtrType ptr) {
@@ -383,8 +384,8 @@ private:
 
 public:
     Heap() = default;
-    Heap(MemoryType memory, const sp<Allocator>& allocator)
-        : _stub(sp<Stub>::make(std::move(memory), allocator)) {
+    Heap(MemoryType memory, sp<Allocator> allocator)
+        : _stub(sp<Stub>::make(std::move(memory), std::move(allocator))) {
     }
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Heap);
 
@@ -402,7 +403,7 @@ public:
         return _stub->available();
     }
 
-    PtrType allocate(SizeType size, SizeType alignment = kAlignment) {
+    Optional<PtrType> allocate(SizeType size, SizeType alignment = kAlignment) {
         DASSERT(_stub);
         DCHECK(alignment >= kAlignment && (alignment % kAlignment) == 0, "Illegal alignment %d", alignment);
         return _stub->allocate(size, alignment);

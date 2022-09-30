@@ -24,7 +24,7 @@ public:
 //  [[script::bindings::auto]]
     sp<Future> schedule(sp<Runnable> runnable, float interval, sp<Future> future = nullptr);
 
-    uint64_t pollOnce(uint64_t now = 0);
+    uint64_t pollOnce();
 
 private:
     class Task : public Runnable {

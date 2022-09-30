@@ -23,14 +23,13 @@ namespace ark {
 //[[script::bindings::extends(Renderer)]]
 class ARK_API RenderLayer : public Renderer {
 public:
-    struct Snapshot;
+    class Batch;
 
 private:
     struct Stub {
         Stub(sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Vec4> scissor, sp<RenderController> renderController);
 
-        sp<RenderCommand> render(const Snapshot& snapshot, float x, float y);
-        sp<LayerContext> makeLayerContext(Layer::Type layerType, sp<ModelLoader> modelLoader);
+        sp<LayerContext> makeLayerContext(sp<RenderLayer::Batch> batch, sp<ModelLoader> modelLoader, sp<Boolean> visible);
 
         sp<ModelLoader> _model_loader;
         sp<Shader> _shader;
@@ -40,7 +39,8 @@ private:
         sp<RenderCommandComposer> _render_command_composer;
         sp<ShaderBindings> _shader_bindings;
 
-        std::vector<sp<LayerContext>> _layer_contexts;
+        SafeVar<Visibility> _visible;
+        std::vector<sp<LayerContext>> _batch_groups;
         sp<Layer> _layer;
 
         uint32_t _stride;
@@ -82,6 +82,7 @@ public:
         SnapshotFlag _flag;
 
         DISALLOW_COPY_AND_ASSIGN(Snapshot);
+
     private:
         Snapshot(RenderRequest& renderRequest, const sp<Stub>& stub);
 
@@ -89,6 +90,14 @@ public:
         void doModelLoaderSnapshot(const RenderRequest& renderRequest, DrawingBuffer& buf) const;
 
         friend class RenderLayer;
+    };
+
+    class ARK_API Batch {
+    public:
+        virtual ~Batch() = default;
+
+        virtual bool preSnapshot(const RenderRequest& renderRequest, LayerContext& lc) = 0;
+        virtual void snapshot(const RenderRequest& renderRequest, const LayerContext& lc, Snapshot& output) = 0;
     };
 
 public:
@@ -104,9 +113,9 @@ public:
     const sp<LayerContext>& context() const;
 
 //[[script::bindings::auto]]
-    sp<LayerContext> makeContext(Layer::Type layerType, sp<ModelLoader> modelLoader = nullptr) const;
-//[[script::bindings::auto]]
-    sp<Layer> makeLayer(Layer::Type layerType, sp<ModelLoader> modelLoader = nullptr) const;
+    sp<Layer> makeLayer(sp<ModelLoader> modelLoader = nullptr, sp<Boolean> visible = nullptr) const;
+
+    sp<LayerContext> makeContext(sp<RenderLayer::Batch> batch = nullptr, sp<ModelLoader> modelLoader = nullptr, sp<Boolean> visible = nullptr) const;
 
 //  [[plugin::resource-loader]]
     class BUILDER : public Builder<RenderLayer> {

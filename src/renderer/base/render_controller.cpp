@@ -57,13 +57,13 @@ void RenderController::onSurfaceReady(GraphicsContext& graphicsContext)
     doSurfaceReady(graphicsContext);
 }
 
-void RenderController::prepare(GraphicsContext& graphicsContext, LFQueue<PreparingResource>& items)
+void RenderController::prepare(GraphicsContext& graphicsContext, LFQueue<UploadingResource>& items)
 {
-    PreparingResource front;
+    UploadingResource front;
     while(items.pop(front)) {
         if(!front._resource.isCancelled() && (!front._resource.isExpired() || front._strategy == RenderController::US_RELOAD))
         {
-            if(front._strategy == RenderController::US_RELOAD && front._resource.resource()->id() != 0)
+            if(front._strategy == RenderController::US_RELOAD && front._resource.id() != 0)
                 front._resource.recycle(graphicsContext);
 
             front._resource.upload(graphicsContext);
@@ -75,7 +75,7 @@ void RenderController::prepare(GraphicsContext& graphicsContext, LFQueue<Prepari
 
 void RenderController::onDrawFrame(GraphicsContext& graphicsContext)
 {
-    prepare(graphicsContext, _preparing_items);
+    prepare(graphicsContext, _uploading_resources);
 
     uint32_t tick = graphicsContext.tick();
     if(tick == 0)
@@ -84,24 +84,25 @@ void RenderController::onDrawFrame(GraphicsContext& graphicsContext)
         _recycler->doRecycling(graphicsContext);
 }
 
-void RenderController::upload(sp<Resource> resource, sp<Uploader> uploader, RenderController::UploadStrategy strategy, sp<Future> future, RenderController::UploadPriority priority)
+void RenderController::upload(sp<Resource> resource, RenderController::UploadStrategy strategy, sp<Future> future, RenderController::UploadPriority priority)
 {
     switch(strategy & 3)
     {
     case RenderController::US_ONCE_AND_ON_SURFACE_READY:
     case RenderController::US_ONCE:
     case RenderController::US_RELOAD:
-        _preparing_items.push(PreparingResource(RenderResource(std::move(resource), std::move(uploader), std::move(future), priority), strategy));
+        _uploading_resources.push(UploadingResource(RenderResource(std::move(resource), std::move(future), priority), strategy));
         break;
     case RenderController::US_ON_SURFACE_READY:
-        _on_surface_ready_items.insert(RenderResource(std::move(resource), std::move(uploader), std::move(future), priority));
+        _on_surface_ready_items.insert(RenderResource(std::move(resource), std::move(future), priority));
         break;
     }
 }
 
 void RenderController::uploadBuffer(const Buffer& buffer, sp<Uploader> uploader, RenderController::UploadStrategy strategy, sp<Future> future, RenderController::UploadPriority priority)
 {
-    return upload(buffer._delegate, std::move(uploader), strategy, std::move(future), priority);
+    buffer._delegate->setUploader(std::move(uploader));
+    return upload(buffer._delegate, strategy, std::move(future), priority);
 }
 
 const sp<Recycler>& RenderController::recycler() const
@@ -172,7 +173,7 @@ sp<Texture> RenderController::createTexture(sp<Size> size, sp<Texture::Parameter
     sp<Texture::Delegate> delegate = _render_engine->rendererFactory()->createTexture(size, parameters);
     DCHECK(delegate, "Unsupported TextureType: %d", parameters->_type);
     const sp<Texture> texture = sp<Texture>::make(std::move(delegate), std::move(size), std::move(uploader), std::move(parameters));
-    upload(texture, nullptr, us, std::move(future));
+    upload(texture, us, std::move(future));
     return texture;
 }
 
@@ -194,7 +195,7 @@ Buffer RenderController::makeIndexBuffer(Buffer::Usage usage, const sp<Uploader>
 sp<Framebuffer> RenderController::makeFramebuffer(sp<Renderer> renderer, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask)
 {
     const sp<Framebuffer> framebuffer = renderEngine()->rendererFactory()->createFramebuffer(std::move(renderer), std::move(colorAttachments), std::move(depthStencilAttachments), clearMask);
-    upload(framebuffer->delegate(), nullptr, RenderController::US_ONCE_AND_ON_SURFACE_READY, nullptr, UPLOAD_PRIORITY_LOW);
+    upload(framebuffer->delegate(), RenderController::US_ONCE_AND_ON_SURFACE_READY, nullptr, UPLOAD_PRIORITY_LOW);
     return framebuffer;
 }
 
@@ -295,14 +296,9 @@ uint64_t RenderController::tick() const
     return _tick;
 }
 
-RenderController::RenderResource::RenderResource(sp<Resource> resource, sp<Uploader> uploader, sp<Future> future, UploadPriority uploadPriority)
-    : _resource(std::move(resource)), _uploader(std::move(uploader)), _future(std::move(future)), _upload_priority(uploadPriority)
+RenderController::RenderResource::RenderResource(sp<Resource> resource, sp<Future> future, UploadPriority uploadPriority)
+    : _resource(std::move(resource)), _future(std::move(future)), _upload_priority(uploadPriority)
 {
-}
-
-const sp<Resource>& RenderController::RenderResource::resource() const
-{
-    return _resource;
 }
 
 bool RenderController::RenderResource::isExpired() const
@@ -317,7 +313,7 @@ bool RenderController::RenderResource::isCancelled() const
 
 void RenderController::RenderResource::upload(GraphicsContext& graphicsContext) const
 {
-    _resource->upload(graphicsContext, _uploader);
+    _resource->upload(graphicsContext);
 }
 
 void RenderController::RenderResource::recycle(GraphicsContext& graphicsContext) const
@@ -340,12 +336,12 @@ bool RenderController::RenderResource::operator <(const RenderController::Render
     return _resource < other._resource;
 }
 
-RenderController::PreparingResource::PreparingResource(RenderResource resource, RenderController::UploadStrategy strategy)
+RenderController::UploadingResource::UploadingResource(RenderResource resource, RenderController::UploadStrategy strategy)
     : _resource(std::move(resource)), _strategy(strategy)
 {
 }
 
-bool RenderController::PreparingResource::operator <(const RenderController::PreparingResource& other) const
+bool RenderController::UploadingResource::operator <(const RenderController::UploadingResource& other) const
 {
     return _resource < other._resource;
 }

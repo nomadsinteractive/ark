@@ -98,7 +98,7 @@ std::vector<Buffer::Snapshot> Shader::takeSSBOSnapshot(const RenderRequest& /*re
 {
     std::vector<Buffer::Snapshot> ssboSnapshot;
     for(const PipelineInput::SSBO& i : _input->ssbos())
-        ssboSnapshot.push_back(i._buffer.snapshot(nullptr));
+        ssboSnapshot.push_back(i._buffer.snapshot());
     return ssboSnapshot;
 }
 

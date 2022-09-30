@@ -44,7 +44,7 @@ private:
     class BodyDefCuteC2 {
     public:
         BodyDefCuteC2(const V2& size, const V2& pivot, std::vector<ShapeCuteC2> shapes);
-        BodyDefCuteC2(const document& manifest);
+        BodyDefCuteC2(const document& manifest, float ppu);
         DEFAULT_COPY_AND_ASSIGN(BodyDefCuteC2);
 
         const V2& size() const;
@@ -74,7 +74,7 @@ private:
     sp<BodyDefCuteC2> makeBodyCapsule(const V2& p1, const V2& p2, float radius);
 
     void toRay(const V2& from, const V2& to, c2Ray& ray) const;
-    void loadShapes(const document& manifest);
+    void loadShapes(const document& manifest, float ppu);
 
     const CollisionFilter& getCollisionFilter(const CollisionFilter& oneFilter, const sp<CollisionFilter>& specifiedFilter);
 

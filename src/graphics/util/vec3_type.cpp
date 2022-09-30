@@ -43,8 +43,8 @@ private:
 
 class Vec3Normalize : public Delegate<Vec3>, public Vec3, Implements<Vec3Normalize, Vec3, Delegate<Vec3>> {
 public:
-    Vec3Normalize(const sp<Vec3>& delegate)
-        : Delegate(delegate) {
+    Vec3Normalize(sp<Vec3> delegate)
+        : Delegate(std::move(delegate)) {
     }
 
     virtual V3 val() override {
@@ -59,29 +59,6 @@ public:
 
 };
 
-class Vec2ToVec3 : public Vec3, public Holder, Implements<Vec2ToVec3, Vec3, Holder> {
-public:
-    Vec2ToVec3(sp<Vec2> vec2)
-        : _vec2(std::move(vec2)) {
-    }
-
-    virtual V3 val() override {
-        return V3(_vec2->val(), 0);
-    }
-
-    virtual bool update(uint64_t timestamp) override {
-        return _vec2->update(timestamp);
-    }
-
-    virtual void traverse(const Visitor& visitor) override {
-        HolderUtil::visit(_vec2, visitor);
-    }
-
-private:
-    sp<Vec2> _vec2;
-
-};
-
 }
 
 sp<Vec3> Vec3Type::create(const sp<Numeric>& x, const sp<Numeric>& y, const sp<Numeric>& z)
@@ -92,11 +69,6 @@ sp<Vec3> Vec3Type::create(const sp<Numeric>& x, const sp<Numeric>& y, const sp<N
 sp<Vec3> Vec3Type::create(float x, float y, float z)
 {
     return sp<Vec3Impl>::make(x, y, z);
-}
-
-sp<Vec3> Vec3Type::create(const sp<Vec2>& vec2)
-{
-    return sp<Vec2ToVec3>::make(vec2);
 }
 
 sp<Vec3> Vec3Type::add(const sp<Vec3>& lvalue, const V3& rvalue)
@@ -132,6 +104,11 @@ sp<Vec3> Vec3Type::mul(const sp<Vec3>& lvalue, float rvalue)
 sp<Vec3> Vec3Type::mul(const sp<Vec3>& lvalue, sp<Numeric>& rvalue)
 {
     return sp<VariableOP2<sp<Vec3>, sp<Numeric>, Operators::Mul<V3, float>>>::make(lvalue, rvalue);
+}
+
+sp<Vec3> Vec3Type::truediv(const sp<Vec3>& lvalue, const sp<Numeric>& rvalue)
+{
+    return sp<VariableOP2<sp<Vec3>, sp<Numeric>, Operators::Div<V3, float>>>::make(lvalue, rvalue);
 }
 
 sp<Vec3> Vec3Type::truediv(const sp<Vec3>& lvalue, const V3& rvalue)
@@ -265,6 +242,11 @@ sp<Numeric> Vec3Type::vz(const sp<Vec3>& self)
     return impl ? static_cast<sp<Numeric>>(impl->z()) : sp<Numeric>::make<VariableOP1<float, V3>>(Operators::RandomAccess<V3, float>(2), self);
 }
 
+sp<Vec4> Vec3Type::extend(sp<Vec3> self, sp<Numeric> w)
+{
+    return sp<VariableOP2<sp<Vec3>, sp<Numeric>, Operators::Extend<V3, float>>>::make(std::move(self), std::move(w));
+}
+
 void Vec3Type::fix(const sp<Vec3>& self)
 {
     ensureImpl(self)->fix();
@@ -317,7 +299,7 @@ sp<Vec3> Vec3Type::ifElse(const sp<Vec3>& self, const sp<Boolean>& condition, co
 
 sp<Vec3> Vec3Type::attract(const sp<Vec3>& self, const V3& s0, float duration, const sp<Numeric>& t)
 {
-    sp<Numeric> ts = t ? t : Ark::instance().clock()->duration();
+    sp<Numeric> ts = t ? t : Ark::instance().appClock()->duration();
     return sp<Vec3Impl>::make(sp<Stalker>::make(ts, vx(self), s0.x(), duration), sp<Stalker>::make(ts, vy(self), s0.y(), duration), sp<Stalker>::make(ts, vz(self), s0.z(), duration));
 }
 
@@ -329,7 +311,7 @@ sp<Vec3> Vec3Type::lerp(const sp<Vec3>& self, const sp<Vec3>& b, const sp<Numeri
 sp<Vec3> Vec3Type::sod(sp<Vec3> self, float k, float z, float r, sp<Numeric> t)
 {
     if(t == nullptr)
-        t = Ark::instance().clock()->duration();
+        t = Ark::instance().appClock()->duration();
     return sp<SecondOrderDynamics<V3>>::make(std::move(self), std::move(t), k, z, r);
 }
 
@@ -350,7 +332,7 @@ sp<Vec3> Vec3Type::normalize(const sp<Vec3>& self)
 
 sp<Vec3> Vec3Type::integral(const sp<Vec3>& self, const sp<Numeric>& t)
 {
-    sp<Numeric> duration = t ? t : Ark::instance().clock()->duration();
+    sp<Numeric> duration = t ? t : Ark::instance().appClock()->duration();
     return sp<Integral<V3>>::make(self, std::move(duration));
 }
 

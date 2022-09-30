@@ -32,25 +32,26 @@ private:
     public:
         RendererPool(int32_t rendererWidth, int32_t rendererHeight);
 
-        const std::vector<sp<Renderer>>& ensureRenderer(RendererMaker& rendererMaker, int32_t x, int32_t y, const RectI& viewport);
+        const std::vector<Box>& cull(RendererMaker& rendererMaker, int32_t x, int32_t y, const RectI& viewport);
 
     private:
-        void recycleOutOfViewportRenderers(RendererMaker& rendererMaker, const RectI& viewport);
+        void recycleOutOfFrustum(RendererMaker& rendererMaker, const RectI& viewport);
 
     private:
         typedef std::pair<int32_t, int32_t> RendererKey;
 
         int32_t _renderer_width;
         int32_t _renderer_height;
-        std::map<RendererKey, std::vector<sp<Renderer>>> _renderers;
+        std::map<RendererKey, std::vector<Box>> _renderers;
     };
 
 public:
     Scrollable(sp<Vec3> scroller, sp<RendererMaker> rendererMaker, sp<Size> size, const Scrollable::Params& params);
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
-
     virtual const sp<Size>& size() override;
+
+    void cull();
 
     const sp<Vec3>& scroller() const;
     const sp<RendererMaker>& rendererMaker() const;

@@ -24,6 +24,7 @@ public:
     static GLenum toShaderType(PipelineInput::ShaderStage stage);
     static GLenum toCompareFunc(PipelineBindings::CompareFunc func);
     static GLenum toStencilFunc(PipelineBindings::StencilFunc func);
+    static GLenum toBlendFactor(PipelineBindings::BlendFactor blendFactor);
     static GLenum toFrontFaceType(PipelineBindings::FrontFaceType face);
 
     static GLenum getEnum(const String& name);

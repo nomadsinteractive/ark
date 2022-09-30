@@ -51,21 +51,20 @@ private:
 }
 
 
-DrawingContext::DrawingContext(const sp<ShaderBindings>& shaderBindings, const sp<ByType>& attachments, std::vector<RenderLayer::UBOSnapshot> ubo, std::vector<Buffer::Snapshot> ssbos)
-    : _shader_bindings(shaderBindings), _attachments(attachments), _ubos(std::move(ubo)), _ssbos(std::move(ssbos)), _scissor(0, 0, -1.0f, -1.0f)
+DrawingContext::DrawingContext(sp<ShaderBindings> shaderBindings, sp<ByType> attachments, std::vector<RenderLayer::UBOSnapshot> ubo, std::vector<Buffer::Snapshot> ssbos)
+    : _shader_bindings(std::move(shaderBindings)), _attachments(std::move(attachments)), _ubos(std::move(ubo)), _ssbos(std::move(ssbos)), _scissor(0, 0, -1.0f, -1.0f)
 {
 }
 
-DrawingContext::DrawingContext(const sp<ShaderBindings>& shaderBindings, const sp<ByType>& attachments, std::vector<RenderLayer::UBOSnapshot> ubo, std::vector<Buffer::Snapshot> ssbos, Buffer::Snapshot vertexBuffer, Buffer::Snapshot indexBuffer, Parameters parameters)
-    : _shader_bindings(shaderBindings), _attachments(attachments), _ubos(std::move(ubo)), _ssbos(std::move(ssbos)), _vertex_buffer(std::move(vertexBuffer)), _index_buffer(std::move(indexBuffer)), _scissor(0, 0, -1.0f, -1.0f), _parameters(std::move(parameters))
+DrawingContext::DrawingContext(sp<ShaderBindings> shaderBindings, sp<ByType> attachments, std::vector<RenderLayer::UBOSnapshot> ubo, std::vector<Buffer::Snapshot> ssbos, Buffer::Snapshot vertices, Buffer::Snapshot indices, Parameters parameters)
+    : _shader_bindings(std::move(shaderBindings)), _attachments(std::move(attachments)), _ubos(std::move(ubo)), _ssbos(std::move(ssbos)), _vertices(std::move(vertices)), _indices(std::move(indices)), _scissor(0, 0, -1.0f, -1.0f), _parameters(std::move(parameters))
 {
 }
 
 sp<RenderCommand> DrawingContext::toRenderCommand(const RenderRequest& renderRequest)
 {
     DCHECK(_shader_bindings, "DrawingContext cannot be converted to RenderCommand more than once");
-    sp<Snippet::DrawEvents> drawEvents = _shader_bindings->snippet()->makeDrawEvents(renderRequest);
-    return sp<RenderCommand>::make<RenderCommandDraw>(std::move(*this), std::move(drawEvents));
+    return sp<RenderCommand>::make<RenderCommandDraw>(std::move(*this), _shader_bindings->snippet()->makeDrawEvents(renderRequest));
 }
 
 sp<RenderCommand> DrawingContext::toBindCommand()
@@ -76,12 +75,12 @@ sp<RenderCommand> DrawingContext::toBindCommand()
 
 void DrawingContext::upload(GraphicsContext& graphicsContext)
 {
-    _vertex_buffer.upload(graphicsContext);
-    DCHECK(_vertex_buffer.id(), "Invaild VertexBuffer");
-    if(_index_buffer)
+    _vertices.upload(graphicsContext);
+    DCHECK(_vertices.id(), "Invaild VertexBuffer");
+    if(_indices)
     {
-        _index_buffer.upload(graphicsContext);
-        DCHECK(_index_buffer.id(), "Invaild IndexBuffer");
+        _indices.upload(graphicsContext);
+        DCHECK(_indices.id(), "Invaild IndexBuffer");
     }
 }
 

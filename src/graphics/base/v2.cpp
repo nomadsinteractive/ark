@@ -130,6 +130,16 @@ float V2::length() const
     return Math::sqrt(_x * _x + _y * _y);
 }
 
+V3 V2::extend(float z) const
+{
+    return V3(_x, _y, z);
+}
+
+V4 V2::extend(const V2& zw) const
+{
+    return V4(_x, _y, zw.x(), zw.y());
+}
+
 V2 V2::floorDiv(const V2& other) const
 {
     return V2(Math::floorDiv(_x, other._x), Math::floorDiv(_y, other._y));

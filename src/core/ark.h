@@ -74,7 +74,8 @@ public:
     sp<Readable> openAsset(const String& path) const;
     sp<Readable> tryOpenAsset(const String& path) const;
 
-    const sp<Clock>& clock() const;
+    const sp<Clock>& appClock() const;
+    const sp<Clock>& sysClock() const;
     const sp<ApplicationContext>& applicationContext() const;
     const sp<ApplicationProfiler>& applicationProfiler() const;
 

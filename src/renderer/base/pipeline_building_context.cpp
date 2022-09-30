@@ -143,7 +143,7 @@ void PipelineBuildingContext::initialize()
             const String& name = j.first;
             if(!sobs.has(name))
             {
-                DCHECK(_ssbos.has(name), "SSBO \"%s\" does not exist", name.c_str());
+                CHECK(_ssbos.has(name), "SSBO \"%s\" does not exist", name.c_str());
                 sobs[name] = PipelineInput::SSBO(_ssbos.at(name), static_cast<uint32_t>(j.second));
             }
             sobs[name]._stages.insert(i.first);
@@ -225,14 +225,14 @@ ShaderPreprocessor* PipelineBuildingContext::tryGetStage(PipelineInput::ShaderSt
 const op<ShaderPreprocessor>& PipelineBuildingContext::getStage(PipelineInput::ShaderStage shaderStage) const
 {
     auto iter = _stages.find(shaderStage);
-    DCHECK(iter != _stages.end(), "Stage '%d' not found", shaderStage);
+    CHECK(iter != _stages.end(), "Stage '%d' not found", shaderStage);
     return iter->second;
 }
 
 const op<ShaderPreprocessor>& PipelineBuildingContext::addStage(sp<String> source, PipelineInput::ShaderStage shaderStage, PipelineInput::ShaderStage preShaderStage)
 {
     op<ShaderPreprocessor>& stage = _stages[shaderStage];
-    DCHECK(!stage, "Stage '%d' has been initialized already", shaderStage);
+    CHECK(!stage, "Stage '%d' has been initialized already", shaderStage);
     stage.reset(new ShaderPreprocessor(std::move(source), shaderStage, preShaderStage));
     return stage;
 }
@@ -248,7 +248,7 @@ void PipelineBuildingContext::loadPredefinedAttribute(const document& manifest)
     {
         const String& name = Documents::ensureAttribute(i, Constants::Attributes::NAME);
         DCHECK(!name.empty(), "Empty name");
-        DWARN(isupper(name[0]) || name.startsWith("a_"), "Attribute name \"%s\" should be capital first or started with a_", name.c_str());
+        WARN(isupper(name[0]) || name.startsWith("a_"), "Attribute name \"%s\" should be capital first or started with a_", name.c_str());
         const String attrName = name.startsWith("a_") ? name.substr(2) : name;
         const String& type = Documents::ensureAttribute(i, Constants::Attributes::TYPE);
         uint32_t divisor = Documents::getAttribute<uint32_t>(i, "divisor", 0);
@@ -280,11 +280,11 @@ void PipelineBuildingContext::loadPredefinedSampler(BeanFactory& factory, const 
     for(const document& i : manifest->children("sampler"))
     {
         String name = Documents::getAttribute(i, Constants::Attributes::NAME);
-        const sp<Texture> texture = factory.ensure<Texture>(i, args);
+        sp<Texture> texture = factory.ensure<Texture>(i, args);
         if(!name)
             name = Strings::sprintf("u_Texture%d", binding);
         DCHECK(!_samplers.has(name), "Sampler \"%s\" redefined", name.c_str());
-        _samplers.push_back(name, texture);
+        _samplers.push_back(std::move(name), std::move(texture));
         binding++;
     }
 }

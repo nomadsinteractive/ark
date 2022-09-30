@@ -95,7 +95,7 @@ void VerticalScrollable::ensureTile(RendererTile& tile, int32_t position)
     if(tile.position() != position)
     {
         tile.setPosition(position);
-        tile.setRenderer(_tile_maker->make(0, position));
+//        tile.setRenderer(_tile_maker->make(0, position));
     }
 }
 

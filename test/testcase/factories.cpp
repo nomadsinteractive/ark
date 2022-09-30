@@ -36,7 +36,7 @@ public:
         Scope args;
         const sp<ResourceLoader> resourceLoader = ark.applicationContext()->createResourceLoader("application.xml", args);
         BeanFactory& beanFactory = resourceLoader->beanFactory();
-        ark.applicationContext()->clock()->setTicker(Platform::getSteadyClock());
+        ark.applicationContext()->sysClock()->setTicker(Platform::getSteadyClock());
 
         const sp<Disposed> e1 = beanFactory.build<Disposed>("@e1", args);
 

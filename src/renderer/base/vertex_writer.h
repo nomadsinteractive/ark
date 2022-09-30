@@ -1,5 +1,5 @@
-#ifndef ARK_RENDERER_BASE_VERTEX_BUFFER_H_
-#define ARK_RENDERER_BASE_VERTEX_BUFFER_H_
+#ifndef ARK_RENDERER_BASE_VERTEX_WRITTER_H_
+#define ARK_RENDERER_BASE_VERTEX_WRITTER_H_
 
 #include "core/base/api.h"
 #include "core/inf/writable.h"
@@ -13,8 +13,8 @@
 
 namespace ark {
 
-class ARK_API VertexStream {
-public:
+class ARK_API VertexWriter {
+private:
     class Writer : public Writable {
     public:
         virtual ~Writer() override = default;
@@ -23,9 +23,10 @@ public:
         virtual void writePosition(const V3& position) = 0;
     };
 
+    VertexWriter(const PipelineInput::AttributeOffsets& attributes, bool doTransform, sp<Writer> writer);
+
 public:
-    VertexStream(const PipelineInput::AttributeOffsets& attributes, bool doTransform, uint8_t* ptr, size_t size, size_t stride);
-    VertexStream(const PipelineInput::AttributeOffsets& attributes, bool doTransform, sp<Writer> writer);
+    VertexWriter(const PipelineInput::AttributeOffsets& attributes, bool doTransform, uint8_t* ptr, size_t size, size_t stride);
 
     template<typename T> void write(const T& value, uint32_t offset = 0) {
         _writer->write(&value, sizeof(T), offset);
@@ -83,7 +84,7 @@ private:
     const Transform::Snapshot* _transform;
     V3 _translate;
 
-    Varyings::Snapshot _varyings;
+    ByteArray::Borrowed _varying_contents;
 
 };
 

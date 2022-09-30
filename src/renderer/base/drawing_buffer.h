@@ -24,8 +24,9 @@ public:
     DrawingBuffer(const sp<ShaderBindings>& shaderBindings, uint32_t stride);
     DEFAULT_COPY_AND_ASSIGN(DrawingBuffer);
 
-    VertexStream makeVertexStream(const RenderRequest& renderRequest, size_t length, size_t offset);
-    VertexStream makeDividedVertexStream(const RenderRequest& renderRequest, size_t length, size_t offset, uint32_t divisor);
+    VertexWriter makeVertexStream(const RenderRequest& renderRequest, size_t length, size_t offset);
+    [[deprecated]]
+    VertexWriter makeDividedVertexStream(const RenderRequest& renderRequest, size_t length, size_t offset, uint32_t divisor);
 
     const sp<ShaderBindings>& shaderBindings() const;
 
@@ -39,7 +40,7 @@ public:
 
     Buffer::Factory& getInstancedBufferBuilder(uint32_t divisor);
 
-    std::vector<std::pair<uint32_t, Buffer::Snapshot>> makeDividedBufferSnapshots() const;
+    std::vector<std::pair<uint32_t, Buffer::Snapshot>> toDividedBufferSnapshots();
 
 private:
     sp<ShaderBindings> _shader_bindings;

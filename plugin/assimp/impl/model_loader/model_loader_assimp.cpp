@@ -212,7 +212,7 @@ Model ModelImporterAssimp::loadModel(const aiScene* scene, MaterialBundle& mater
     V3 bounds(aabbMax.x() - aabbMin.x(), aabbMax.y() - aabbMin.y(), aabbMax.z() - aabbMin.z());
     aiMatrix4x4 globalAnimationTransform;
     int32_t upAxis = -1;
-    if(scene->mMetaData->Get("UpAxis", upAxis))
+    if(scene->mMetaData->Get("UpAxis", upAxis) && false)
     {
         int32_t upAxisSign = 1;
         scene->mMetaData->Get("UpAxisSign", upAxisSign);
@@ -231,7 +231,7 @@ Model ModelImporterAssimp::loadModel(const aiScene* scene, MaterialBundle& mater
         }
     }
 
-    Model model(std::move(materials), std::move(meshes), {bounds, bounds, V3(0)});
+    Model model(std::move(materials), std::move(meshes), {bounds, bounds, -aabbMin});
     if(hasAnimation)
     {
         bool noBones = bones.nodes().size() == 0;

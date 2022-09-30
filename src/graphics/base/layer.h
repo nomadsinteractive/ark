@@ -5,8 +5,10 @@
 
 #include "core/inf/builder.h"
 #include "core/inf/holder.h"
+#include "core/epi/visibility.h"
 #include "core/types/shared_ptr.h"
 #include "core/types/safe_ptr.h"
+#include "core/types/safe_var.h"
 
 #include "graphics/inf/renderer.h"
 #include "graphics/forwarding.h"
@@ -38,6 +40,11 @@ public:
     void dispose();
 
 //  [[script::bindings::property]]
+    const sp<Visibility>& visible() const;
+//  [[script::bindings::property]]
+    void setVisible(sp<Boolean> visible);
+
+//  [[script::bindings::property]]
     const sp<ModelLoader>& modelLoader() const;
 
 // [[script::bindings::property]]
@@ -61,6 +68,7 @@ public:
         Layer::Type _type;
         SafePtr<Builder<RenderLayer>> _render_layer;
         SafePtr<Builder<ModelLoader>> _model_loader;
+        SafePtr<Builder<Boolean>> _visible;
         std::vector<sp<Builder<RenderObject>>> _render_objects;
     };
 

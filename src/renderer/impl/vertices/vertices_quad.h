@@ -13,7 +13,7 @@ public:
     VerticesQuad();
     VerticesQuad(const Atlas::Item& quad);
 
-    virtual void write(VertexStream& buf, const V3& size) override;
+    virtual void write(VertexWriter& buf, const V3& size) override;
 
 private:
     Rect _bounds;

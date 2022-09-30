@@ -62,9 +62,9 @@ public:
     };
 
     Allocated allocate(MemoryHeap& heap, uint32_t size, uint32_t ttl) {
-        uint8_t* ptr = heap.allocate(size);
+        Optional<uint8_t*> ptr = heap.allocate(size);
         DCHECK(ptr, "Unable to allocate block, size: %d", size);
-        return Allocated(ptr, size, ttl);
+        return Allocated(ptr.value(), size, ttl);
     }
 
     virtual int launch() override {

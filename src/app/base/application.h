@@ -13,7 +13,7 @@ namespace ark {
 
 class ARK_API Application {
 public:
-    Application(const sp<ApplicationDelegate>& applicationDelegate, const sp<ApplicationContext>& applicationContext, uint32_t width, uint32_t height, const Viewport& viewport);
+    Application(const sp<ApplicationDelegate>& applicationDelegate, const sp<ApplicationContext>& applicationContext, uint32_t surfaceWidth, uint32_t surfaceHeight, const Viewport& viewport);
     virtual ~Application();
 
     virtual int run() = 0;
@@ -34,6 +34,7 @@ public:
 
     const char* name() const;
     const sp<ApplicationContext>& context() const;
+    const sp<Size>& surfaceSize() const;
 
     static void __parse_opt__(int32_t argc, const char* argv[]);
 
@@ -42,7 +43,7 @@ protected:
     sp<ApplicationContext> _application_context;
     sp<Surface> _surface;
     Viewport _viewport;
-    uint32_t _width, _height;
+    sp<Size> _surface_size;
 
 private:
     void onCreateTask();

@@ -191,6 +191,13 @@ public:
         }
     };
 
+    template<typename T, typename U> class Extend {
+    public:
+        auto operator()(const T& v1, const U& v2) -> decltype(v1.extend(v2)) {
+            return v1.extend(v2);
+        }
+    };
+
     template<typename T, typename P> class Cast {
     public:
         P operator()(T v1) {

@@ -49,7 +49,7 @@ class SnippetFactory;
 class Texture;
 class TextureBundle;
 class TexturePacker;
-class VertexStream;
+class VertexWriter;
 class Vertices;
 class Uniform;
 class Uploader;

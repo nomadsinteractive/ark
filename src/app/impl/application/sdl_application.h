@@ -23,6 +23,7 @@ public:
     void onSurfaceChanged();
 
 private:
+    void pollEvents(uint64_t timestamp);
     uint32_t toSDLWindowFlag(const sp<ApplicationContext>& applicationContext, uint32_t appWindowFlag);
 
 private:

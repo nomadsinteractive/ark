@@ -2,7 +2,7 @@
 
 #include "core/util/math.h"
 
-#include "renderer/base/vertex_stream.h"
+#include "renderer/base/vertex_writer.h"
 
 namespace ark {
 
@@ -16,7 +16,7 @@ VerticesSphere::VerticesSphere(sp<std::vector<ModelLoaderSphere::Vertex>> vertic
 {
 }
 
-void VerticesSphere::write(VertexStream& buf, const V3& size)
+void VerticesSphere::write(VertexWriter& buf, const V3& size)
 {
     for(const ModelLoaderSphere::Vertex& vertex : *_vertices)
     {

@@ -15,7 +15,7 @@ public:
 
     virtual uint64_t id() = 0;
 
-    virtual void upload(GraphicsContext& graphicsContext, const sp<Uploader>& uploader) = 0;
+    virtual void upload(GraphicsContext& graphicsContext) = 0;
     virtual ResourceRecycleFunc recycle() = 0;
 };
 

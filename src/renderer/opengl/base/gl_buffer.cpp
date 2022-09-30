@@ -61,15 +61,15 @@ uint64_t GLBuffer::id()
     return _id;
 }
 
-void GLBuffer::upload(GraphicsContext& graphicsContext, const sp<Uploader>& uploader)
+void GLBuffer::upload(GraphicsContext& graphicsContext)
 {
     if(_id == 0)
         glGenBuffers(1, &_id);
 
-    if(uploader)
+    if(_uploader)
     {
         DWARN(_usage != GL_STATIC_DRAW || _size == 0, "Uploading transient data to GL_STATIC_DRAW GLBuffer");
-        doUpload(graphicsContext, uploader);
+        doUpload(graphicsContext, _uploader);
     }
 }
 

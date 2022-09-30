@@ -13,7 +13,7 @@ public:
     VerticesPoint();
     VerticesPoint(const Atlas::Item& atlasItem);
 
-    virtual void write(VertexStream& buf, const V3& size) override;
+    virtual void write(VertexWriter& buf, const V3& size) override;
 
 private:
     Atlas::Item _atlas_item;

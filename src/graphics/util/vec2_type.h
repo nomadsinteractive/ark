@@ -97,6 +97,11 @@ public:
     static void setVy(const sp<Vec2>& self, const sp<Numeric>& y);
 
 //  [[script::bindings::classmethod]]
+    static sp<Vec3> extend(const sp<Vec2>& self, const sp<Numeric>& z);
+//  [[script::bindings::classmethod]]
+    static sp<Vec4> extend(const sp<Vec2>& self, const sp<Vec2>& zw);
+
+//  [[script::bindings::classmethod]]
     static void fix(const sp<Vec2>& self);
 //  [[script::bindings::classmethod]]
     static sp<Vec2> freeze(const sp<Vec2>& self);

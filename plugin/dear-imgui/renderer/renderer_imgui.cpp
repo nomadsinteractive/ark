@@ -159,14 +159,11 @@ void RendererImgui::MyImGuiRenderFunction(const RenderRequest& renderRequest, Im
     {
         const ImDrawList* cmd_list = draw_data->CmdLists[i];
 
-        bytearray vb = sp<ByteArray::Borrowed>::make(renderRequest.allocator().sbrk(static_cast<size_t>(cmd_list->VtxBuffer.size_in_bytes())));
-        bytearray ib = sp<ByteArray::Borrowed>::make(renderRequest.allocator().sbrk(static_cast<size_t>(cmd_list->IdxBuffer.size_in_bytes())));
+        ByteArray::Borrowed vb = renderRequest.allocator().sbrk(static_cast<size_t>(cmd_list->VtxBuffer.size_in_bytes()));
+        ByteArray::Borrowed ib = renderRequest.allocator().sbrk(static_cast<size_t>(cmd_list->IdxBuffer.size_in_bytes()));
 
-        memcpy(vb->buf(), cmd_list->VtxBuffer.Data, static_cast<size_t>(cmd_list->VtxBuffer.size_in_bytes()));
-        memcpy(ib->buf(), cmd_list->IdxBuffer.Data, static_cast<size_t>(cmd_list->IdxBuffer.size_in_bytes()));
-
-        const sp<Uploader::Array<uint8_t>> verticsUploader = sp<Uploader::Array<uint8_t>>::make(vb);
-        const sp<Uploader::Array<uint8_t>> indicesUploader = sp<Uploader::Array<uint8_t>>::make(ib);
+        memcpy(vb.buf(), cmd_list->VtxBuffer.Data, static_cast<size_t>(vb.length()));
+        memcpy(ib.buf(), cmd_list->IdxBuffer.Data, static_cast<size_t>(ib.length()));
 
         uint32_t offset = 0;
         const std::vector<RenderLayer::UBOSnapshot> ubos = _shader->takeUBOSnapshot(renderRequest);
@@ -198,8 +195,8 @@ void RendererImgui::MyImGuiRenderFunction(const RenderRequest& renderRequest, Im
                 const sp<DrawCommandPool>& drawCommandPool = _renderer_context->obtainDrawCommandPool(reinterpret_cast<Texture*>(pcmd->TextureId));
                 sp<DrawCommandRecycler> recycler = drawCommandPool->obtainDrawCommandRecycler();
                 const sp<DrawCommand>& drawCommand = recycler->drawCommand();
-                Buffer::Snapshot vertexBuffer = drawCommand->_vertex_buffer.snapshot(verticsUploader);
-                Buffer::Snapshot indexBuffer = drawCommand->_index_buffer.snapshot(indicesUploader);
+                Buffer::Snapshot vertexBuffer = drawCommand->_vertex_buffer.snapshot(vb);
+                Buffer::Snapshot indexBuffer = drawCommand->_index_buffer.snapshot(ib);
                 DrawingContext drawingContext(drawCommandPool->_shader_bindings, drawCommand->_attachments, ubos, ssbos, std::move(vertexBuffer), std::move(indexBuffer), DrawingContext::ParamDrawElements(offset, pcmd->ElemCount));
                 drawingContext._scissor = _render_engine->toRendererScissor(Rect(pcmd->ClipRect.x - pos.x, pcmd->ClipRect.y - pos.y, pcmd->ClipRect.z - pos.x, pcmd->ClipRect.w - pos.y), Ark::COORDINATE_SYSTEM_LHS);
                 renderRequest.addRequest(sp<ImguiRenderCommand>::make(drawingContext.toRenderCommand(renderRequest), std::move(recycler)));

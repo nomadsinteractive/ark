@@ -28,16 +28,17 @@ uint64_t VKBuffer::id()
     return (uint64_t)(_descriptor.buffer);
 }
 
-void VKBuffer::upload(GraphicsContext& graphicsContext, const sp<Uploader>& uploader)
+void VKBuffer::upload(GraphicsContext& graphicsContext)
 {
-    if(uploader)
+    if(_uploader)
     {
-        ensureSize(graphicsContext, uploader);
+        ensureSize(graphicsContext, _uploader);
 
         if(isDeviceLocal())
         {
             VKBuffer stagingBuffer(_renderer, _recycler, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-            stagingBuffer.upload(graphicsContext, uploader);
+            stagingBuffer.setUploader(_uploader);
+            stagingBuffer.upload(graphicsContext);
 
             VkCommandBuffer copyCmd = _renderer->commandPool()->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
             VkBufferCopy copyRegion = {0, 0, _size};
@@ -49,7 +50,7 @@ void VKBuffer::upload(GraphicsContext& graphicsContext, const sp<Uploader>& uplo
         else
         {
             WritableMemory writable(_memory->map());
-            uploader->upload(writable);
+            _uploader->upload(writable);
             if(!isHostCoherent())
                 VKUtil::checkResult(flush());
             _memory->unmap();
@@ -99,7 +100,7 @@ void VKBuffer::allocateMemory(GraphicsContext& graphicsContext, const VkMemoryRe
     _memory = _renderer->heap()->allocate(graphicsContext, memReqs, _memory_property_flags);
 }
 
-void VKBuffer::ensureSize(GraphicsContext& graphicsContext, const Uploader& uploader)
+void VKBuffer::ensureSize(GraphicsContext& graphicsContext, Uploader& uploader)
 {
     if(_size < uploader.size())
     {

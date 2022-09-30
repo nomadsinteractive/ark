@@ -69,7 +69,7 @@ const SafePtr<Varyings>& RenderObject::varyings() const
 void RenderObject::setType(int32_t type)
 {
     _type->set(type);
-    _disposed = nullptr;
+    _disposed.reset(nullptr);
     _timestamp.setDirty();
 }
 

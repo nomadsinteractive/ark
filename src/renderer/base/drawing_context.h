@@ -88,8 +88,8 @@ public:
     };
 
 public:
-    DrawingContext(const sp<ShaderBindings>& shaderBindings, const sp<ByType>& attachments, std::vector<RenderLayer::UBOSnapshot> ubo, std::vector<Buffer::Snapshot> ssbos);
-    DrawingContext(const sp<ShaderBindings>& shaderBindings, const sp<ByType>& attachments, std::vector<RenderLayer::UBOSnapshot> ubo, std::vector<Buffer::Snapshot> ssbos, Buffer::Snapshot vertexBuffer, Buffer::Snapshot indexBuffer, Parameters parameters);
+    DrawingContext(sp<ShaderBindings> shaderBindings, sp<ByType> attachments, std::vector<RenderLayer::UBOSnapshot> ubo, std::vector<Buffer::Snapshot> ssbos);
+    DrawingContext(sp<ShaderBindings> shaderBindings, sp<ByType> attachments, std::vector<RenderLayer::UBOSnapshot> ubo, std::vector<Buffer::Snapshot> ssbos, Buffer::Snapshot vertexBuffer, Buffer::Snapshot indexBuffer, Parameters parameters);
     DEFAULT_COPY_AND_ASSIGN(DrawingContext);
 
     sp<RenderCommand> toRenderCommand(const RenderRequest& renderRequest);
@@ -102,8 +102,8 @@ public:
 
     std::vector<RenderLayer::UBOSnapshot> _ubos;
     std::vector<Buffer::Snapshot> _ssbos;
-    Buffer::Snapshot _vertex_buffer;
-    Buffer::Snapshot _index_buffer;
+    Buffer::Snapshot _vertices;
+    Buffer::Snapshot _indices;
 
     Rect _scissor;
     Parameters _parameters;

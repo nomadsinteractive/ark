@@ -29,7 +29,7 @@ uint64_t GLFramebuffer::id()
     return _id;
 }
 
-void GLFramebuffer::upload(GraphicsContext& graphicsContext, const sp<Uploader>& /*uploader*/)
+void GLFramebuffer::upload(GraphicsContext& graphicsContext)
 {
     if(_id == 0)
     {
@@ -108,7 +108,7 @@ void GLFramebuffer::upload(GraphicsContext& graphicsContext, const sp<Uploader>&
         {
             renderbuffer = sp<GLRenderbuffer>::make(_recycler);
             gltex->setRenderbuffer(renderbuffer);
-            renderbuffer->upload(graphicsContext, nullptr);
+            renderbuffer->upload(graphicsContext);
         }
         glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer->id());
         glRenderbufferStorage(GL_RENDERBUFFER, depthInternalformat, static_cast<GLsizei>(depthTexture->width()), static_cast<GLsizei>(depthTexture->height()));

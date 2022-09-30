@@ -47,7 +47,7 @@ void MessageLoopThread::RunnableImpl::run()
         while(_thread.isPaused())
             _thread.wait(std::chrono::milliseconds(100));
 
-        uint64_t nextFireTick = _message_loop->pollOnce(_ticker->val());
+        uint64_t nextFireTick = _message_loop->pollOnce();
         _thread.wait(_wait_duration, WaitPredicate(_ticker, nextFireTick));
     }
 }

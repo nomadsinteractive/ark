@@ -51,7 +51,7 @@ Texture::~Texture()
 {
 }
 
-void Texture::upload(GraphicsContext& graphicsContext, const sp<ark::Uploader>& /*uploader*/)
+void Texture::upload(GraphicsContext& graphicsContext)
 {
     _delegate->upload(graphicsContext, _uploader);
     _notifier.notify();

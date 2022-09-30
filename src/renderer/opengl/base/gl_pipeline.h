@@ -28,7 +28,7 @@ public:
     virtual ~GLPipeline() override;
 
     virtual uint64_t id() override;
-    virtual void upload(GraphicsContext& graphicsContext, const sp<Uploader>& uploader) override;
+    virtual void upload(GraphicsContext& graphicsContext) override;
     virtual ResourceRecycleFunc recycle() override;
 
     virtual void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
@@ -51,7 +51,7 @@ public:
         void setUniform2f(GLfloat x, GLfloat y) const;
         void setUniform3f(GLfloat x, GLfloat y, GLfloat z) const;
         void setUniform4f(GLfloat r, GLfloat g, GLfloat b, GLfloat a) const;
-        void setUniform4fv(GLsizei count, GLfloat* value) const;
+        void setUniform4fv(GLsizei count, const GLfloat* value) const;
         void setUniformColor4f(const Color& color) const;
         void setUniformMatrix4fv(GLsizei count, GLboolean transpose, const GLfloat* value) const;
 
@@ -148,7 +148,7 @@ private:
         Stub();
 
         void bindUBO(const RenderLayer::UBOSnapshot& uboSnapshot, const sp<PipelineInput::UBO>& ubo);
-        void bindUniform(float* buf, uint32_t size, const Uniform& uniform);
+        void bindUniform(const uint8_t* ptr, uint32_t size, const Uniform& uniform);
         void activeTexture(const Texture& texture, uint32_t name);
 
         const GLPipeline::GLUniform& getUniform(const String& name);
@@ -213,7 +213,7 @@ private:
     std::map<PipelineInput::ShaderStage, String> _shaders;
 
     sp<PipelineOperation> _pipeline_operation;
-    std::vector<sp<Snippet::DrawEvents>> _draw_tests;
+    std::vector<sp<Snippet::DrawEvents>> _draw_traits;
 };
 
 }

@@ -11,8 +11,8 @@
 
 namespace ark {
 
-Tileset::Tileset(uint32_t tileWidth, uint32_t tileHeight, const sp<TilesetImporter>& importer)
-    : _tile_width(tileWidth), _tile_height(tileHeight), _importer(importer)
+Tileset::Tileset(sp<Size> tileSize, sp<TilesetImporter> importer)
+    : _tile_size(std::move(tileSize)), _importer(importer)
 {
 }
 
@@ -21,14 +21,19 @@ const std::unordered_map<int32_t, sp<Tile>>& Tileset::tiles() const
     return _tiles;
 }
 
-uint32_t Tileset::tileWidth() const
+const sp<Size>& Tileset::tileSize() const
 {
-    return _tile_width;
+    return _tile_size;
 }
 
-uint32_t Tileset::tileHeight() const
+float Tileset::tileWidth() const
 {
-    return _tile_height;
+    return _tile_size->width();
+}
+
+float Tileset::tileHeight() const
+{
+    return _tile_size->height();
 }
 
 void Tileset::addTile(sp<Tile> t)
@@ -56,14 +61,14 @@ void Tileset::load(const String& src)
 }
 
 Tileset::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _tile_width(Documents::ensureAttribute<uint32_t>(manifest, "tile-width")), _tile_height(Documents::ensureAttribute<uint32_t>(manifest, "tile-height")),
+    : _tile_width(Documents::ensureAttribute<float>(manifest, "tile-width")), _tile_height(Documents::ensureAttribute<float>(manifest, "tile-height")),
       _importer(factory.getBuilder<TilesetImporter>(manifest, "importer"))
 {
 }
 
 sp<Tileset> Tileset::BUILDER::build(const Scope& args)
 {
-    return sp<Tileset>::make(_tile_width, _tile_height, _importer->build(args));
+    return sp<Tileset>::make(sp<Size>::make(_tile_width, _tile_height), _importer->build(args));
 }
 
 }

@@ -11,11 +11,10 @@ template<typename T> class Optional {
 public:
     _CONSTEXPR Optional() noexcept {
     }
-    _CONSTEXPR Optional(std::nullptr_t) noexcept {
-    }
     Optional(T value) noexcept
         : _optional(Stub(std::move(value))) {
     }
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Optional);
 
     typedef std::remove_reference_t<T> OPT;
 

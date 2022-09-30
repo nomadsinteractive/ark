@@ -7,7 +7,7 @@
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/shader_bindings.h"
-#include "renderer/base/vertex_stream.h"
+#include "renderer/base/vertex_writer.h"
 #include "renderer/inf/vertices.h"
 
 namespace ark {
@@ -25,7 +25,7 @@ public:
         PipelineInput::AttributeOffsets attributes(_pipeline_input);
         uint32_t size = static_cast<uint32_t>(_vertices->length() * stride);
         std::vector<uint8_t> buf(size);
-        VertexStream stream(attributes, false, buf.data(), size, stride);
+        VertexWriter stream(attributes, false, buf.data(), size, stride);
         _vertices->write(stream, V3(1.0f));
         uploader.write(buf.data(), size, 0);
     }

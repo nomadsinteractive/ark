@@ -28,7 +28,7 @@ namespace {
 class PreDrawElementsToFBO : public RenderCommand {
 public:
     PreDrawElementsToFBO(sp<GLFramebuffer> fbo, int32_t width, int32_t height, uint32_t drawBufferCount, int32_t clearMask)
-        : _fbo(std::move(fbo)), _width(width), _height(height), _clear_mask(clearMask), _clear_color_value{0, 0, 0, 0}, _clear_depth_value(1.0f),
+        : _fbo(std::move(fbo)), _width(width), _height(height), _clear_mask(clearMask), _clear_color_value(0, 0, 0, 1), _clear_depth_value(1.0f),
           _clear_stencil_value(0), _draw_buffer_count(drawBufferCount) {
     }
 
@@ -48,7 +48,7 @@ public:
 
             if(_clear_mask & Framebuffer::CLEAR_MASK_COLOR)
                 for(size_t i = 0; i < _draw_buffer_count; ++i)
-                    glClearBufferfv(GL_COLOR, static_cast<GLint>(i), _clear_color_value);
+                    glClearBufferfv(GL_COLOR, static_cast<GLint>(i), reinterpret_cast<GLfloat *>(&_clear_color_value));
         }
     }
 
@@ -57,7 +57,7 @@ private:
     GLsizei _width, _height;
     int32_t _clear_mask;
 
-    float _clear_color_value[4];
+    V4 _clear_color_value;
     float _clear_depth_value;
     int32_t _clear_stencil_value;
 

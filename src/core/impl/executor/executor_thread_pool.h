@@ -13,7 +13,7 @@ namespace ark {
 
 class ExecutorThreadPool final : public Executor {
 public:
-    ExecutorThreadPool(const sp<Executor>& executor = nullptr, uint32_t capacity = 0);
+    ExecutorThreadPool(sp<Executor> exceptionExecutor = nullptr, uint32_t capacity = 0);
 
     virtual void execute(const sp<Runnable>& task) override;
 
@@ -21,9 +21,9 @@ private:
     class WorkerThreadStrategy;
 
     struct Stub {
-        Stub(const sp<Executor>& executor, uint32_t capacity);
+        Stub(sp<Executor> exceptionExecutor, uint32_t capacity);
 
-        sp<Executor> _executor;
+        sp<Executor> _exception_executor;
         uint32_t _capacity;
         std::atomic<uint32_t> _worker_count;
 

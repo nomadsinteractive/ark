@@ -9,7 +9,7 @@
 #include "renderer/base/render_engine.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/base/shader.h"
-#include "renderer/base/vertex_stream.h"
+#include "renderer/base/vertex_writer.h"
 #include "renderer/inf/model_loader.h"
 #include "renderer/inf/vertices.h"
 
@@ -46,7 +46,7 @@ sp<RenderCommand> RCCDrawQuads::compose(const RenderRequest& renderRequest, Rend
         size_t vertexCount = i._model->vertexCount();
         if(reload || i.getState(Renderable::RENDERABLE_STATE_DIRTY))
         {
-            VertexStream writer = buf.makeVertexStream(renderRequest, vertexCount, offset);
+            VertexWriter writer = buf.makeVertexStream(renderRequest, vertexCount, offset);
             i._model->writeRenderable(writer, i);
         }
         offset += vertexCount;

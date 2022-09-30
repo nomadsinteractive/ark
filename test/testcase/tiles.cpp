@@ -42,12 +42,12 @@ private:
 
 class RendererMakerImpl : public RendererMaker {
 public:
-    virtual std::vector<sp<Renderer>> make(int32_t x, int32_t y) override {
+    virtual std::vector<Box> make(int32_t x, int32_t y) override {
         printf("makeTile(%d, %d)\n", x, y);
         return {sp<TileRendererImpl>::make(x, y)};
     }
 
-    virtual void recycle(const sp<Renderer>& /*renderer*/) override {
+    virtual void recycle(const Box& /*renderer*/) override {
     }
 };
 

@@ -52,7 +52,7 @@ private:
     };
 
 private:
-    sp<Uploader> makeIndirectBufferUploader();
+    ByteArray::Borrowed makeIndirectBuffer(const RenderRequest& renderRequest) const;
     void writeModelMatices(const RenderRequest& renderRequest, DrawingBuffer& buf, const RenderLayer::Snapshot& snapshot, bool reload);
     V3 toScale(const V3& size, const Metrics& metrics) const;
 

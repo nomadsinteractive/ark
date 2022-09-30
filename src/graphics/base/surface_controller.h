@@ -14,7 +14,7 @@ namespace ark {
 
 class ARK_API SurfaceController {
 public:
-    SurfaceController(const sp<Executor>& executor);
+    SurfaceController(sp<Executor> executor, sp<Clock> clock);
 
 // [[script::bindings::auto]]
     void addRenderer(const sp<Renderer>& renderer);
@@ -29,6 +29,7 @@ public:
 
 private:
     sp<Executor> _executor;
+    sp<Clock> _clock;
     sp<MemoryPool> _memory_pool;
 
     sp<RendererGroup> _renderers;

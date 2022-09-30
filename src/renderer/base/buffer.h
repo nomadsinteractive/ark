@@ -33,6 +33,8 @@ public:
         USAGE_COUNT
     };
 
+    class ARK_API Snapshot;
+
     class ARK_API Delegate : public Resource {
     public:
         Delegate();
@@ -40,17 +42,23 @@ public:
 
         size_t size() const;
 
+        void setUploader(sp<Uploader> uploader);
+//        virtual void upload(GraphicsContext& graphicsContext, const Snapshot& snapshot) = 0;
+
     protected:
         size_t _size;
+        sp<Uploader> _uploader;
     };
 
 public:
+    typedef std::pair<size_t, ByteArray::Borrowed> Strip;
+
     class ARK_API Snapshot {
     public:
         Snapshot() = default;
-        Snapshot(const sp<Delegate>& stub);
-        Snapshot(const sp<Delegate>& stub, size_t size);
-        Snapshot(const sp<Delegate>& stub, const sp<Uploader>& uploader);
+        Snapshot(sp<Delegate> stub);
+        Snapshot(sp<Delegate> stub, size_t size);
+        Snapshot(sp<Delegate> stub, sp<Uploader> uploader);
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Snapshot);
 
         explicit operator bool() const;
@@ -72,32 +80,23 @@ public:
         size_t _size;
     };
 
-    struct Block {
-        Block(size_t offset, const ByteArray::Borrowed& content);
-
-        size_t offset;
-        ByteArray::Borrowed content;
-    };
-
     class ARK_API Factory {
     public:
         Factory(size_t stride);
         DEFAULT_COPY_AND_ASSIGN(Factory);
 
-        Snapshot toSnapshot(const Buffer& buffer) const;
+        Snapshot toSnapshot(const Buffer& buffer);
 
-        void addBlock(size_t offset, ByteArray::Borrowed& content);
-
-        sp<Uploader> makeUploader() const;
+        void addStrip(size_t offset, ByteArray::Borrowed& content);
 
         size_t _stride;
         size_t _size;
 
-        std::vector<Block> _blocks;
+        std::vector<Strip> _strips;
     };
 
 public:
-    Buffer(const sp<Delegate>& delegate) noexcept;
+    Buffer(sp<Delegate> delegate) noexcept;
     Buffer() noexcept = default;
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Buffer);
 
@@ -106,7 +105,9 @@ public:
 //  [[script::bindings::property]]
     size_t size() const;
 
+[[deprecated]]
     Snapshot snapshot(const sp<Uploader>& uploader) const;
+    Snapshot snapshot(const ByteArray::Borrowed& strip) const;
     Snapshot snapshot(size_t size) const;
     Snapshot snapshot() const;
 

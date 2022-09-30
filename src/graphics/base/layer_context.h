@@ -1,6 +1,8 @@
 #ifndef ARK_GRAPHICS_BASE_LAYER_CONTEXT_H_
 #define ARK_GRAPHICS_BASE_LAYER_CONTEXT_H_
 
+#include <deque>
+
 #include "core/base/api.h"
 #include "core/inf/builder.h"
 #include "core/inf/holder.h"
@@ -17,10 +19,10 @@ namespace ark {
 
 //[[script::bindings::holder]]
 class ARK_API LayerContext : public Holder {
-private:
-    struct Item {
-        Item(const sp<Renderable>& renderable, const sp<Boolean>& disposed);
-        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Item);
+public:
+    struct Instance {
+        Instance(sp<Renderable> renderable, sp<Boolean> disposed);
+        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Instance);
 
         sp<Renderable> _renderable;
         SafeVar<Boolean> _disposed;
@@ -28,9 +30,12 @@ private:
     };
 
 public:
-    LayerContext(sp<ModelLoader> modelLoader, sp<Varyings> varyings, Layer::Type type);
+    LayerContext(sp<RenderLayer::Batch> batch, sp<ModelLoader> modelLoader, sp<Boolean> visible, sp<Varyings> varyings);
 
     virtual void traverse(const Visitor& visitor) override;
+
+    SafeVar<Visibility>& visible();
+    const SafeVar<Visibility>& visible() const;
 
 //  [[script::bindings::property]]
     const sp<ModelLoader>& modelLoader() const;
@@ -50,8 +55,10 @@ public:
 //  [[script::bindings::property]]
     void setVaryings(sp<Varyings> varyings);
 
-    bool preSnapshot(const RenderRequest& renderRequest);
-    void takeSnapshot(RenderLayer::Snapshot& output, const RenderRequest& renderRequest);
+    const std::deque<Instance>& instances() const;
+
+    bool preSnapshot(RenderRequest& renderRequest);
+    void snapshot(RenderRequest& renderRequest, RenderLayer::Snapshot& output);
 
     class BUILDER : public Builder<LayerContext> {
     public:
@@ -66,19 +73,29 @@ public:
     };
 
 private:
+    class DefaultBatch : public RenderLayer::Batch {
+    public:
+        virtual bool preSnapshot(const RenderRequest& renderRequest, LayerContext& lc) override;
+        virtual void snapshot(const RenderRequest& renderRequest, const LayerContext& lc, RenderLayer::Snapshot& output) override;
+    };
+
+public:
+    sp<RenderLayer::Batch> _batch;
+
     sp<ModelLoader> _model_loader;
+    SafeVar<Visibility> _visible;
     sp<Varyings> _varyings;
+
     Layer::Type _layer_type;
 
     bool _reload_requested;
-    bool _render_requested;
     bool _render_done;
     bool _position_changed;
 
     V3 _position;
 
-    std::list<Item> _renderables;
-    std::vector<Item> _renderable_emplaced;
+    std::deque<Instance> _renderables;
+    std::vector<Instance> _renderable_emplaced;
 };
 
 }

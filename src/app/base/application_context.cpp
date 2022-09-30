@@ -51,9 +51,9 @@ private:
 
 }
 
-ApplicationContext::ApplicationContext(const sp<ApplicationBundle>& applicationResources, const sp<RenderEngine>& renderEngine)
-    : _ticker(sp<Ticker>::make()), _cursor_position(sp<Vec2Impl>::make()), _application_resource(applicationResources), _render_engine(renderEngine), _render_controller(sp<RenderController>::make(renderEngine, applicationResources->recycler(), applicationResources->bitmapBundle(), applicationResources->bitmapBoundsBundle())),
-      _clock(sp<Clock>::make(_ticker)), _worker_strategy(sp<ExecutorWorkerStrategy>::make(_ticker)), _event_listeners(new EventListenerList()), _string_table(Global<StringTable>()), _background_color(Color::BLACK),
+ApplicationContext::ApplicationContext(sp<ApplicationBundle> applicationBundle, sp<RenderEngine> renderEngine)
+    : _ticker(sp<Ticker>::make()), _cursor_position(sp<Vec2Impl>::make()), _application_bundle(std::move(applicationBundle)), _render_engine(std::move(renderEngine)), _render_controller(sp<RenderController>::make(_render_engine, _application_bundle->recycler(), _application_bundle->bitmapBundle(), _application_bundle->bitmapBoundsBundle())),
+      _sys_clock(sp<Clock>::make(_ticker)), _app_clock(sp<Clock>::make(_sys_clock->ticker())), _worker_strategy(sp<ExecutorWorkerStrategy>::make(sp<MessageLoop>::make(_ticker))), _event_listeners(new EventListenerList()), _string_table(Global<StringTable>()), _background_color(Color::BLACK),
       _paused(false)
 {
     Ark& ark = Ark::instance();
@@ -79,6 +79,7 @@ void ApplicationContext::initMessageLoop()
     _executor_main = sp<ExecutorWorkerThread>::make(_worker_strategy, "Executor");
     _message_loop_renderer = sp<MessageLoop>::make(_ticker);
     _message_loop_core = ark.manifest()->application()._message_loop == Manifest::MESSAGE_LOOP_TYPE_RENDER ? _message_loop_renderer : _worker_strategy->_message_loop;
+    _message_loop_app = makeMessageLoop(_app_clock);
     _executor_pooled = sp<ExecutorThreadPool>::make(_executor_main);
 }
 
@@ -87,7 +88,7 @@ sp<ResourceLoader> ApplicationContext::createResourceLoader(const String& name, 
     Identifier id(Identifier::parse(name));
     if(id.isVal())
     {
-        const document doc = _application_resource->loadDocument(name);
+        const document doc = _application_bundle->loadDocument(name);
         DCHECK(doc, "Resource \"%s\" not found", name.c_str());
         return createResourceLoader(doc, nullptr);
     }
@@ -108,7 +109,7 @@ sp<ResourceLoader> ApplicationContext::createResourceLoaderImpl(const document& 
     const document doc = createResourceLoaderManifest(manifest);
     const sp<DictionaryByAttributeName> documentDictionary = sp<DictionaryByAttributeName>::make(doc, Constants::Attributes::ID);
     const sp<BeanFactory> beanFactory = Ark::instance().createBeanFactory(documentDictionary);
-    const sp<ResourceLoaderContext> context = resourceLoaderContext ? resourceLoaderContext : sp<ResourceLoaderContext>::make(_application_resource->documents(), _application_resource->bitmapBundle(), _application_resource->bitmapBoundsBundle(), _executor_pooled, _render_controller);
+    const sp<ResourceLoaderContext> context = resourceLoaderContext ? resourceLoaderContext : sp<ResourceLoaderContext>::make(_application_bundle->documents(), _application_bundle->bitmapBundle(), _application_bundle->bitmapBoundsBundle(), _executor_pooled, _render_controller);
 
     const Global<PluginManager> pluginManager;
     pluginManager->each([&] (const sp<Plugin>& plugin)->bool {
@@ -123,14 +124,14 @@ document ApplicationContext::createResourceLoaderManifest(const document& manife
 {
     DASSERT(manifest);
     const String src = Documents::getAttribute(manifest, Constants::Attributes::SRC);
-    const document doc = src ? _application_resource->loadDocument(src) : manifest;
+    const document doc = src ? _application_bundle->loadDocument(src) : manifest;
     DWARN(doc == manifest || manifest->children().size() == 0, "\"%s\" has already specified a ResourceLoader src \"%s\", its content will be ignored", Documents::toString(manifest).c_str(), src.c_str());
     return doc;
 }
 
 const sp<ApplicationBundle>& ApplicationContext::applicationBundle() const
 {
-    return _application_resource;
+    return _application_bundle;
 }
 
 const sp<RenderEngine>& ApplicationContext::renderEngine() const
@@ -163,9 +164,14 @@ const std::vector<String>& ApplicationContext::argv() const
     return _argv;
 }
 
-const sp<Clock>& ApplicationContext::clock() const
+const sp<Clock>& ApplicationContext::sysClock() const
 {
-    return _clock;
+    return _sys_clock;
+}
+
+const sp<Clock>& ApplicationContext::appClock() const
+{
+    return _app_clock;
 }
 
 const sp<Vec2Impl>& ApplicationContext::cursorPosition() const
@@ -185,24 +191,14 @@ void ApplicationContext::addPreRenderTask(const sp<Runnable>& task, const sp<Boo
     _render_controller->addPreRenderRunRequest(task, disposed);
 }
 
-void ApplicationContext::addEventListener(const sp<EventListener>& eventListener, int32_t priority)
+void ApplicationContext::addEventListener(sp<EventListener> eventListener, int32_t priority)
 {
-    _event_listeners->addEventListener(eventListener, priority);
+    _event_listeners->addEventListener(std::move(eventListener), priority);
 }
 
-void ApplicationContext::setDefaultEventListener(const sp<EventListener>& eventListener)
+void ApplicationContext::setDefaultEventListener(sp<EventListener> eventListener)
 {
-    _default_event_listener = eventListener;
-}
-
-void ApplicationContext::post(sp<Runnable> task, float delay, sp<Future> future)
-{
-    _message_loop_core->post(std::move(task), delay, std::move(future));
-}
-
-void ApplicationContext::schedule(sp<Runnable> task, float interval, sp<Future> future)
-{
-    _message_loop_core->schedule(std::move(task), interval, std::move(future));
+    _default_event_listener = std::move(eventListener);
 }
 
 sp<MessageLoop> ApplicationContext::makeMessageLoop(const sp<Clock>& clock)
@@ -210,6 +206,16 @@ sp<MessageLoop> ApplicationContext::makeMessageLoop(const sp<Clock>& clock)
     sp<MessageLoop> messageLoop = sp<MessageLoop>::make(clock->ticker());
     _worker_strategy->_app_message_loops.push_back(messageLoop);
     return messageLoop;
+}
+
+const sp<MessageLoop>& ApplicationContext::messageLoopApp() const
+{
+    return _message_loop_app;
+}
+
+void ApplicationContext::runAtCoreThread(sp<Runnable> task)
+{
+    _message_loop_core->post(std::move(task), 0);
 }
 
 void ApplicationContext::runAtCoreThread(std::function<void()> task)
@@ -254,19 +260,19 @@ void ApplicationContext::setBackgroundColor(const Color& backgroundColor)
 void ApplicationContext::pause()
 {
     _paused = true;
-    _clock->pause();
+    _sys_clock->pause();
 }
 
 void ApplicationContext::resume()
 {
     _paused = false;
-    _clock->resume();
+    _sys_clock->resume();
 }
 
 void ApplicationContext::updateRenderState()
 {
     _ticker->update(0);
-    _message_loop_renderer->pollOnce(_ticker->val());
+    _message_loop_renderer->pollOnce();
 }
 
 bool ApplicationContext::isPaused() const
@@ -290,8 +296,8 @@ uint64_t ApplicationContext::Ticker::val()
     return _val;
 }
 
-ApplicationContext::ExecutorWorkerStrategy::ExecutorWorkerStrategy(sp<Variable<uint64_t>> ticker)
-    : _ticker(ticker), _message_loop(sp<MessageLoop>::make(std::move(ticker)))
+ApplicationContext::ExecutorWorkerStrategy::ExecutorWorkerStrategy(sp<MessageLoop> messageLoop)
+    : _message_loop(std::move(messageLoop))
 {
 }
 
@@ -305,7 +311,7 @@ void ApplicationContext::ExecutorWorkerStrategy::onExit()
 
 uint64_t ApplicationContext::ExecutorWorkerStrategy::onBusy()
 {
-    _message_loop->pollOnce(_ticker->val());
+    _message_loop->pollOnce();
     for(const sp<MessageLoop>& i : _app_message_loops)
         i->pollOnce();
     return 0;

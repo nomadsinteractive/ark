@@ -1,6 +1,6 @@
 #include "renderer/impl/vertices/vertices_point.h"
 
-#include "renderer/base/vertex_stream.h"
+#include "renderer/base/vertex_writer.h"
 
 namespace ark {
 
@@ -14,7 +14,7 @@ VerticesPoint::VerticesPoint(const Atlas::Item& atlasItem)
 {
 }
 
-void VerticesPoint::write(VertexStream& buf, const V3& /*size*/)
+void VerticesPoint::write(VertexWriter& buf, const V3& /*size*/)
 {
     buf.next();
     buf.writePosition(V3(0));

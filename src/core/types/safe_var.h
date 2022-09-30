@@ -27,6 +27,7 @@ public:
     SafeVar(sp<T> delegate, const ValType& defaultVal) noexcept
         : Delegate<T>(std::move(delegate)), _default_val(defaultVal) {
     }
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(SafeVar);
 
     explicit operator bool() const {
         return static_cast<bool>(this->_delegate);
@@ -39,15 +40,6 @@ public:
         return this->_delegate != other;
     }
 
-    SafeVar& operator =(const sp<T>& other) noexcept {
-        this->_delegate = other;
-        return *this;
-    }
-    SafeVar& operator =(sp<T>&& other) noexcept {
-        this->_delegate = std::move(other);
-        return *this;
-    }
-
     ValType val() const {
         return this->_delegate ? this->_delegate->val() : _default_val;
     }
@@ -58,10 +50,24 @@ public:
 
     template<typename UPDATER = _SafeVarDefaultUpdater> const sp<T>& ensure(const UPDATER& updater = UPDATER()) {
         if(!this->_delegate) {
-            this->_delegate = Null::toSafe<T>(nullptr);
+            this->_delegate = ensure_sfinae(nullptr);
             updater();
         }
         return this->_delegate;
+    }
+
+private:
+    template<typename U = T> sp<T> ensure_sfinae(std::enable_if_t<std::is_abstract_v<U>, typename U::Const>*) const {
+        return sp<typename U::Const>::make(_default_val);
+    }
+
+    template<typename U = T> sp<T> ensure_sfinae(std::enable_if_t<!std::is_abstract_v<U>>*) const {
+        return sp<U>::make(_default_val);
+    }
+
+    template<typename U = T> sp<T> ensure_sfinae(...) const {
+        DFATAL("Constructor for default value required");
+        return Null::toSafe<U>(nullptr);
     }
 
 private:

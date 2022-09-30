@@ -29,11 +29,11 @@ public:
         : _tilemap(tilemap), _delegate(std::move(delegate)) {
     }
 
-    virtual std::vector<sp<Renderer>> make(int32_t x, int32_t y) override {
-        std::vector<sp<Renderer>> renderers = _delegate->make(x, y);
-        for(const sp<Renderer>& i : renderers) {
+    virtual std::vector<Box> make(int32_t x, int32_t y) override {
+        std::vector<Box> renderers = _delegate->make(x, y);
+        for(const Box& i : renderers) {
             sp<TilemapLayer> tilemapLayer = i.as<TilemapLayer>();
-            DWARN(tilemapLayer, "Tilemap's RendererMaker should return TilemapLayer instance, others will be ignored");
+            WARN(tilemapLayer, "Tilemap's RendererMaker should return TilemapLayer instance, others will be ignored");
             if(tilemapLayer) {
                 tilemapLayer->setFlag(static_cast<Tilemap::LayerFlag>(tilemapLayer->flag() | Tilemap::LAYER_FLAG_INVISIBLE));
                 _tilemap.addLayer(tilemapLayer);
@@ -42,9 +42,9 @@ public:
         return renderers;
     }
 
-    virtual void recycle(const sp<Renderer>& renderer) override {
+    virtual void recycle(const Box& renderer) override {
         sp<TilemapLayer> tilemapLayer = renderer.as<TilemapLayer>();
-        DWARN(tilemapLayer, "Tilemap's RendererMaker should return TilemapLayer instance, others will be ignored");
+        WARN(tilemapLayer, "Tilemap's RendererMaker should return TilemapLayer instance, others will be ignored");
         _delegate->recycle(renderer);
         if(tilemapLayer)
             _tilemap.removeLayer(tilemapLayer);
@@ -74,9 +74,9 @@ public:
 
 }
 
-Tilemap::Tilemap(sp<LayerContext> layerContext, sp<Size> size, sp<Tileset> tileset, sp<Importer<Tilemap>> importer, sp<Outputer<Tilemap>> outputer)
-    : _layer_context(std::move(layerContext)), _size(std::move(size)), _tileset(std::move(tileset)), _storage(sp<TilemapStorage>::make(*this, std::move(importer), std::move(outputer))),
-      _stub(sp<Stub>::make())
+Tilemap::Tilemap(sp<RenderLayer> renderLayer, sp<Size> size, sp<Tileset> tileset, sp<Importer<Tilemap>> importer, sp<Outputer<Tilemap>> outputer)
+    : _render_layer(std::move(renderLayer)), _size(std::move(size)), _tileset(std::move(tileset)), _storage(sp<TilemapStorage>::make(*this, std::move(importer), std::move(outputer))),
+      _stub(sp<Stub>::make()), _layer_context(_render_layer ? _render_layer->makeContext(_stub, nullptr, nullptr) : nullptr)
 {
 }
 
@@ -102,8 +102,9 @@ const sp<Storage>& Tilemap::storage() const
 
 sp<Renderer> Tilemap::makeRenderer(const sp<Layer>& layer) const
 {
-    DCHECK(layer || _layer_context, "No LayerContext specified");
-    return sp<TilemapRenderer>::make(layer ? layer->context() : _layer_context, _stub);
+    DCHECK(layer || _render_layer, "No LayerContext specified");
+//    return sp<TilemapRenderer>::make(layer ? layer->context() : _render_layer->makeContext(), _stub);
+    return nullptr;
 }
 
 void Tilemap::load(const sp<Readable>& readable)
@@ -116,16 +117,15 @@ void Tilemap::load(const String& src)
     load(Ark::instance().openAsset(src));
 }
 
-sp<TilemapLayer> Tilemap::makeLayer(const String& name, uint32_t rowCount, uint32_t colCount, const sp<Vec3>& position, const sp<Vec3>& scroller, Tilemap::LayerFlag layerFlag)
+sp<TilemapLayer> Tilemap::makeLayer(const String& name, uint32_t rowCount, uint32_t colCount, sp<Vec3> position, sp<Vec3> scroller, sp<Boolean> visible, Tilemap::LayerFlag layerFlag)
 {
-    sp<TilemapLayer> layer = sp<TilemapLayer>::make(_layer_context, _tileset, name, rowCount, colCount, position, scroller, layerFlag);
-    _stub->_layers.push_back(layer);
+    sp<TilemapLayer> layer = sp<TilemapLayer>::make(_tileset, name, rowCount, colCount, position, scroller, std::move(visible), layerFlag);
+    addLayer(layer);
     return layer;
 }
 
 void Tilemap::addLayer(sp<TilemapLayer> layer)
 {
-    layer->setLayerContext(_layer_context);
     _stub->_layers.push_back(std::move(layer));
 }
 
@@ -204,7 +204,7 @@ const std::list<sp<TilemapLayer>>& Tilemap::layers() const
 }
 
 Tilemap::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _layer(factory.getBuilder<Layer>(manifest, Constants::Attributes::LAYER)), _size(factory.ensureConcreteClassBuilder<Size>(manifest, Constants::Attributes::SIZE)),
+    : _render_layer(factory.getBuilder<RenderLayer>(manifest, Constants::Attributes::RENDER_LAYER)), _size(factory.ensureConcreteClassBuilder<Size>(manifest, Constants::Attributes::SIZE)),
       _tileset(factory.ensureBuilder<Tileset>(manifest, "tileset")), _importer(factory.getBuilder<Importer<Tilemap>>(manifest, "importer")), _outputer(factory.getBuilder<Outputer<Tilemap>>(manifest, "outputer")),
       _scrollable(factory.getBuilder<Scrollable>(manifest, "scrollable"))
 {
@@ -212,8 +212,7 @@ Tilemap::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 
 sp<Tilemap> Tilemap::BUILDER::build(const Scope& args)
 {
-    sp<Layer> layer = _layer->build(args);
-    sp<Tilemap> tilemap = sp<Tilemap>::make(layer ? layer->context() : nullptr, _size->build(args), _tileset->build(args), _importer->build(args), _outputer->build(args));
+    sp<Tilemap> tilemap = sp<Tilemap>::make(_render_layer->build(args), _size->build(args), _tileset->build(args), _importer->build(args), _outputer->build(args));
     if(_scrollable)
     {
         sp<Scrollable> scrollable = _scrollable->build(args);
@@ -223,21 +222,20 @@ sp<Tilemap> Tilemap::BUILDER::build(const Scope& args)
     return tilemap;
 }
 
-Tilemap::TilemapRenderer::TilemapRenderer(sp<LayerContext> layerContext, sp<Stub> stub)
-    : _layer_context(std::move(layerContext)), _stub(std::move(stub))
+bool Tilemap::Stub::preSnapshot(const RenderRequest& renderRequest, LayerContext& lc)
 {
+    bool needReload = false;
+    if(_scrollable)
+        _scrollable->cull();
+    for(TilemapLayer& i : _layers)
+        needReload = i._stub->preSnapshot(renderRequest, lc) || needReload;
+    return needReload;
 }
 
-void Tilemap::TilemapRenderer::render(RenderRequest& renderRequest, const V3& position)
+void Tilemap::Stub::snapshot(const RenderRequest& renderRequest, const LayerContext& lc, RenderLayer::Snapshot& output)
 {
-    _layer_context->renderRequest(position);
-
-    if(_stub->_scrollable)
-        _stub->_scrollable->render(renderRequest, V3(0));
-
-    for(const sp<TilemapLayer>& i : _stub->_layers)
-        if(!(i->flag() & LAYER_FLAG_INVISIBLE))
-            i->render(renderRequest, V3());
+    for(TilemapLayer& i : _layers)
+        i._stub->snapshot(renderRequest, lc, output);
 }
 
 }

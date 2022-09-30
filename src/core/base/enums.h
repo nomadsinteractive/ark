@@ -21,9 +21,14 @@ public:
         return iter != _values.end() ? std::optional<T>(iter->second) : std::optional<T>();
     }
 
+    T toEnumOrDefault(const String& value, const T& defValue) const {
+        const auto iter = _values.find(value);
+        return iter != _values.end() ? iter->second : defValue;
+    }
+
     T ensureEnum(const String& value) const {
         const auto iter = _values.find(value);
-        CHECK(iter != _values.end(), "Enum value \"%s\" not exist", value.c_str());
+        CHECK(iter != _values.end(), "Enum value \"%s\" not exist. Possible choices are: [%s", value.c_str(), joinKeys().c_str());
         return iter->second;
     }
 

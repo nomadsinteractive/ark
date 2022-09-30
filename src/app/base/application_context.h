@@ -26,7 +26,7 @@ namespace ark {
 
 class ARK_API ApplicationContext {
 public:
-    ApplicationContext(const sp<ApplicationBundle>& applicationResource, const sp<RenderEngine>& renderEngine);
+    ApplicationContext(sp<ApplicationBundle> applicationBundle, sp<RenderEngine> renderEngine);
     ~ApplicationContext();
 
     sp<ResourceLoader> createResourceLoader(const String& name, const Scope& args);
@@ -42,20 +42,20 @@ public:
 
     const std::vector<String>& argv() const;
 
-    const sp<Clock>& clock() const;
+    const sp<Clock>& sysClock() const;
+    const sp<Clock>& appClock() const;
     const sp<Vec2Impl>& cursorPosition() const;
 
     bool onEvent(const Event& event);
 
     void addPreRenderTask(const sp<Runnable>& task, const sp<Boolean>& disposed = nullptr);
-    void addEventListener(const sp<EventListener>& eventListener, int32_t priority);
-    void setDefaultEventListener(const sp<EventListener>& eventListener);
-
-    void post(sp<Runnable> task, float delay = 0, sp<Future> future = nullptr);
-    void schedule(sp<Runnable> task, float interval, sp<Future> future = nullptr);
+    void addEventListener(sp<EventListener> eventListener, int32_t priority);
+    void setDefaultEventListener(sp<EventListener> eventListener);
 
     sp<MessageLoop> makeMessageLoop(const sp<Clock>& clock);
+    const sp<MessageLoop>& messageLoopApp() const;
 
+    void runAtCoreThread(sp<Runnable> task);
     void runAtCoreThread(std::function<void()> task);
 
     void addStringBundle(const String& name, const sp<StringBundle>& stringBundle);
@@ -113,7 +113,7 @@ private:
 
     class ExecutorWorkerStrategy : public ExecutorWorkerThread::Strategy {
     public:
-        ExecutorWorkerStrategy(sp<Variable<uint64_t>> ticker);
+        ExecutorWorkerStrategy(sp<MessageLoop> messageLoop);
 
         virtual void onStart() override;
         virtual void onExit() override;
@@ -123,7 +123,6 @@ private:
 
         virtual void onException(const std::exception& e) override;
 
-        sp<Variable<uint64_t>> _ticker;
         sp<MessageLoop> _message_loop;
         List<MessageLoop, MessageLoopFilter> _app_message_loops;
     };
@@ -133,15 +132,17 @@ private:
     sp<Ticker> _ticker;
     sp<Vec2Impl> _cursor_position;
 
-    sp<ApplicationBundle> _application_resource;
+    sp<ApplicationBundle> _application_bundle;
     sp<RenderEngine> _render_engine;
     sp<RenderController> _render_controller;
-    sp<Clock> _clock;
+    sp<Clock> _sys_clock;
+    sp<Clock> _app_clock;
     sp<ExecutorWorkerStrategy> _worker_strategy;
     sp<Executor> _executor_main;
 
     sp<MessageLoop> _message_loop_renderer;
     sp<MessageLoop> _message_loop_core;
+    sp<MessageLoop> _message_loop_app;
     sp<Executor> _executor_pooled;
 
     op<EventListenerList> _event_listeners;

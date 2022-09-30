@@ -10,6 +10,7 @@
 #include "core/util/log.h"
 
 #include "graphics/base/color.h"
+#include "graphics/base/size.h"
 #include "graphics/util/vec2_type.h"
 #include "graphics/util/vec3_type.h"
 
@@ -35,21 +36,21 @@ namespace ark {
 namespace plugin {
 namespace python {
 
-sp<Runnable> PyCast::toRunnable(PyObject* object, bool alert)
+Optional<sp<Runnable>> PyCast::toRunnable(PyObject* object, bool alert)
 {
     if(PyCallable_Check(object))
         return sp<PythonCallableRunnable>::make(PyInstance::own(object));
 
-    return toSharedPtrDefault<Runnable>(object, alert).value();
+    return toSharedPtrDefault<Runnable>(object, alert);
 }
 
-sp<Observer> PyCast::toObserver(PyObject* object, bool alert)
+Optional<sp<Observer>> PyCast::toObserver(PyObject* object, bool alert)
 {
-    sp<Runnable> runnable = toRunnable(object, false);
+    Optional<sp<Runnable>> runnable = toRunnable(object, false);
     if(runnable)
-        return sp<Observer>::make(runnable);
+        return sp<Observer>::make(std::move(runnable.value()));
 
-    return toSharedPtrDefault<Observer>(object, alert).value();
+    return toSharedPtrDefault<Observer>(object, alert);
 }
 
 sp<CollisionCallback> PyCast::toCollisionCallback(PyObject* object)
@@ -111,10 +112,18 @@ sp<Vec2> PyCast::toVec2(PyObject* object, bool alert)
     {
         PyObject* x, *y;
         if(PyArg_ParseTuple(object, "OO", &x, &y))
-            return Vec2Type::create(toNumeric(x), toNumeric(y));
+            return Vec2Type::create(toNumeric(x).value(), toNumeric(y).value());
     }
     sp<Vec2> vec2 = toSharedPtrOrNull<Vec2>(object);
-    CHECK(vec2, "Cannot cast <%s> to <Vec2>", Py_TYPE(object)->tp_name);
+
+    if(!vec2)
+    {
+        const sp<Size> size = toSharedPtrOrNull<Size>(object);
+        if(size)
+            vec2 = Vec2Type::create(size->vwidth(), size->vheight());
+    }
+
+    CHECK(vec2 || !alert, "Cannot cast <%s> to <Vec2>", Py_TYPE(object)->tp_name);
     return vec2;
 }
 
@@ -127,7 +136,7 @@ sp<Vec3> PyCast::toVec3(PyObject* object, bool alert)
     {
         PyObject* x, *y, *z = nullptr;
         if(PyArg_ParseTuple(object, "OO|O", &x, &y, &z))
-            return Vec3Type::create(toNumeric(x), toNumeric(y), toNumeric(z));
+            return Vec3Type::create(toNumeric(x).value(), toNumeric(y).value(), toNumeric(z).value());
     }
     sp<Vec3> vec3 = toSharedPtrOrNull<Vec3>(object);
     if(vec3)
@@ -138,7 +147,7 @@ sp<Vec3> PyCast::toVec3(PyObject* object, bool alert)
         return nullptr;
 
     DCHECK(vec2, "Cannot cast \"%s\" to Vec3, possible candidates: tuple, Vec3, Vec2", Py_TYPE(object)->tp_name);
-    return Vec3Type::create(vec2);
+    return Vec2Type::extend(vec2, sp<Numeric>::make<Numeric::Const>(0));
 }
 
 PyObject* PyCast::toPyObject_SharedPtr(const bytearray& bytes)
@@ -146,7 +155,7 @@ PyObject* PyCast::toPyObject_SharedPtr(const bytearray& bytes)
     return PyBytes_FromStringAndSize(reinterpret_cast<const char*>(bytes->buf()), static_cast<size_t>(bytes->length()));
 }
 
-sp<Numeric> PyCast::toNumeric(PyObject* object, bool alert)
+Optional<sp<Numeric>> PyCast::toNumeric(PyObject* object, bool alert)
 {
     if(isNoneOrNull(object))
         return nullptr;
@@ -156,10 +165,10 @@ sp<Numeric> PyCast::toNumeric(PyObject* object, bool alert)
     if(PyFloat_Check(object))
         return sp<Numeric::Const>::make(static_cast<float>(PyFloat_AsDouble(object)));
 
-    return toSharedPtrDefault<Numeric>(object, alert).value();
+    return toSharedPtrDefault<Numeric>(object, alert);
 }
 
-sp<Boolean> PyCast::toBoolean(PyObject* object, bool alert)
+Optional<sp<Boolean>> PyCast::toBoolean(PyObject* object, bool alert)
 {
     if(isNoneOrNull(object))
         return sp<Boolean>::make<Boolean::Const>(false);
@@ -167,15 +176,15 @@ sp<Boolean> PyCast::toBoolean(PyObject* object, bool alert)
     if(PyBool_Check(object))
         return sp<Boolean>::make<Boolean::Const>(PyObject_IsTrue(object));
 
-    return toSharedPtrDefault<Boolean>(object, alert).value();
+    return toSharedPtrDefault<Boolean>(object, alert);
 }
 
-sp<Integer> PyCast::toInteger(PyObject* object, bool alert)
+Optional<sp<Integer>> PyCast::toInteger(PyObject* object, bool alert)
 {
     if(PyLong_CheckExact(object))
         return sp<Integer::Const>::make(PyLong_AsLong(object));
 
-    return toSharedPtrDefault<Integer>(object, alert).value();
+    return toSharedPtrDefault<Integer>(object, alert);
 }
 
 Scope PyCast::toScope(PyObject* kws)
@@ -276,6 +285,8 @@ template<> ARK_PLUGIN_PYTHON_API Optional<Json> PyCast::toCppObject_impl<Json>(P
 
 template<> ARK_PLUGIN_PYTHON_API Optional<Box> PyCast::toCppObject_impl<Box>(PyObject* object)
 {
+    if(PythonInterpreter::instance()->isPyArkTypeObject(Py_TYPE(object)))
+        return *reinterpret_cast<PyArkType::Instance*>(object)->box;
     return object != Py_None ? Box(PyInstance::track(object).ref()) : Box();
 }
 
@@ -327,7 +338,7 @@ template<> ARK_PLUGIN_PYTHON_API Optional<V2> PyCast::toCppObject_impl<V2>(PyObj
     const sp<Vec2> vec2 = toVec2(object, true);
     if(vec2)
         return vec2->val();
-    DFATAL("V2 object should be either Vec2 or length-2 tuple (eg. (1.0, 1.0))");
+    FATAL("V2 object should be either Vec2 or length-2 tuple (eg. (1.0, 1.0))");
     return V2();
 }
 

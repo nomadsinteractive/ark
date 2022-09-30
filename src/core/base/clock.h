@@ -39,7 +39,7 @@ public:
 public:
 //  [[script::bindings::auto]]
     Clock();
-    Clock(const sp<Variable<uint64_t>>& ticker);
+    Clock(sp<Variable<uint64_t>> ticker);
     Clock(const Clock& other) = default;
 
     virtual uint64_t val() override;
@@ -48,7 +48,7 @@ public:
 //  [[script::bindings::property]]
     uint64_t tick() const;
 
-    const sp<Variable<uint64_t>> ticker() const;
+    sp<Variable<uint64_t> > ticker() const;
     void setTicker(const sp<Variable<uint64_t>>& ticker);
 
 //  [[script::bindings::auto]]

@@ -65,7 +65,7 @@ public:
     const sp<Integer>& nodeId() const;
     void setNodeId(sp<Integer> nodeId);
 
-    void write(VertexStream& buf) const;
+    void write(VertexWriter& buf) const;
 
 private:
     String _name;

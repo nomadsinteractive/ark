@@ -22,15 +22,15 @@ float Viewport::clipFar() const
     return _clip_far;
 }
 
-float Viewport::toViewportX(float screenX, uint32_t screenWidth) const
+float Viewport::toViewportX(float screenX, float surfaceWidth) const
 {
-    return left() + (right() - left()) * screenX / static_cast<float>(screenWidth);
+    return left() + (right() - left()) * screenX / surfaceWidth;
 }
 
-float Viewport::toViewportY(float screenY, uint32_t screenHeight) const
+float Viewport::toViewportY(float screenY, float surfaceHeight) const
 {
     const float bt = bottom() - top();
-    return bt > 0.0f ? bt - bt * screenY / static_cast<float>(screenHeight) : - bt * screenY / static_cast<float>(screenHeight);
+    return bt > 0.0f ? bt - bt * screenY / static_cast<float>(surfaceHeight) : - bt * screenY / static_cast<float>(surfaceHeight);
 }
 
 }

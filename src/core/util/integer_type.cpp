@@ -227,7 +227,7 @@ sp<ExpectationI> IntegerType::repeat(std::vector<int32_t> array, IntegerType::Re
 
 sp<Integer> IntegerType::animate(const sp<Integer>& self, const sp<Numeric>& interval, const sp<Numeric>& duration)
 {
-    return sp<Periodic<int32_t>>::make(self, interval ? interval : sp<Numeric>::make<Numeric::Const>(1.0f / 24), duration ? duration : Ark::instance().clock()->duration());
+    return sp<Periodic<int32_t>>::make(self, interval ? interval : sp<Numeric>::make<Numeric::Const>(1.0f / 24), duration ? duration : Ark::instance().appClock()->duration());
 }
 
 sp<ExpectationI> IntegerType::atLeast(sp<Integer> self, sp<Integer> a1)

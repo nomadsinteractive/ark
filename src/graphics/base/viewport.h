@@ -13,8 +13,8 @@ public:
     float clipNear() const;
     float clipFar() const;
 
-    float toViewportX(float screenX, uint32_t screenWidth) const;
-    float toViewportY(float screenY, uint32_t screenHeight) const;
+    float toViewportX(float screenX, float surfaceWidth) const;
+    float toViewportY(float screenY, float surfaceHeight) const;
 
 private:
     float _clip_near;

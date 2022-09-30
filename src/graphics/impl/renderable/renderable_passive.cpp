@@ -20,9 +20,6 @@ Renderable::State RenderablePassive::updateState(const RenderRequest& renderRequ
 Renderable::Snapshot RenderablePassive::snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest, const V3& postTranslate, State state)
 {
     Renderable::Snapshot snapshot = _render_object ? _render_object->snapshot(pipelineInput, renderRequest, postTranslate + _position, state) : Renderable::Snapshot(state);
-//    snapshot.setState(Renderable::RENDERABLE_STATE_DIRTY, snapshot.getState(Renderable::RENDERABLE_STATE_DIRTY) || _position_changed || (_visible != _render_requested));
-//    snapshot.setState(Renderable::RENDERABLE_STATE_VISIBLE, _visible && _render_requested);
-//    _visible = snapshot.getState(Renderable::RENDERABLE_STATE_VISIBLE);
     _render_requested = false;
     _position_changed = false;
     return snapshot;

@@ -15,7 +15,7 @@ public:
     GLVertexArray(sp<opengl::GLPipeline> pipeline, Buffer vertices, const ShaderBindings& shaderBindings);
 
     virtual uint64_t id() override;
-    virtual void upload(GraphicsContext& graphicsContext, const sp<Uploader>& uploader) override;
+    virtual void upload(GraphicsContext& graphicsContext) override;
     virtual ResourceRecycleFunc recycle() override;
 
 private:

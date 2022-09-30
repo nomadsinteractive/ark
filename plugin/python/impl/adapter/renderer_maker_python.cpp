@@ -18,7 +18,7 @@ RendererMakerPython::RendererMakerPython(PyInstance maker, PyInstance recycler)
 {
 }
 
-std::vector<sp<Renderer>> RendererMakerPython::make(int32_t x, int32_t y)
+std::vector<Box> RendererMakerPython::make(int32_t x, int32_t y)
 {
     DCHECK_THREAD_FLAG();
 
@@ -31,9 +31,9 @@ std::vector<sp<Renderer>> RendererMakerPython::make(int32_t x, int32_t y)
     if(!ret.isNullptr())
     {
         if(ret.isList())
-            return PyCast::ensureCppObject<std::vector<sp<Renderer>>>(ret.pyObject());
+            return PyCast::ensureCppObject<std::vector<Box>>(ret.pyObject());
 
-        return {PyCast::ensureSharedPtr<Renderer>(ret.pyObject())};
+        return {PyCast::ensureSharedPtr<Box>(ret.pyObject())};
     }
     else
         PythonInterpreter::instance()->logErr();
@@ -41,7 +41,7 @@ std::vector<sp<Renderer>> RendererMakerPython::make(int32_t x, int32_t y)
     return {};
 }
 
-void RendererMakerPython::recycle(const sp<Renderer>& renderer)
+void RendererMakerPython::recycle(const Box& renderer)
 {
     DCHECK_THREAD_FLAG();
     if(_recycler)

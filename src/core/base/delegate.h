@@ -14,7 +14,7 @@ public:
         return _delegate;
     }
 
-    void setDelegate(sp<T> delegate) {
+    void reset(sp<T> delegate) {
         _delegate = std::move(delegate);
     }
 

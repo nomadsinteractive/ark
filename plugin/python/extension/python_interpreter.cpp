@@ -9,12 +9,7 @@
 #include "core/types/null.h"
 #include "core/util/log.h"
 
-#include "graphics/base/color.h"
-#include "graphics/util/vec2_type.h"
-#include "graphics/util/vec3_type.h"
-
 #include "app/base/event.h"
-#include "app/base/raycast_manifold.h"
 
 #include "python/api.h"
 #include "python/extension/python_interpreter.h"

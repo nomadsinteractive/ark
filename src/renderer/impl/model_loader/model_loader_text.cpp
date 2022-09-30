@@ -42,7 +42,7 @@ void ModelLoaderText::initialize(ShaderBindings& shaderBindings)
 
 sp<Model> ModelLoaderText::loadModel(int32_t type)
 {
-    GlyphModel& glyph = _glyph_bundle->ensureGlyphModel(Ark::instance().clock()->tick(), type, true);
+    GlyphModel& glyph = _glyph_bundle->ensureGlyphModel(Ark::instance().appClock()->tick(), type, true);
     return glyph._model;
 }
 
@@ -149,7 +149,7 @@ void ModelLoaderText::AtlasAttachment::initialize(uint32_t textureWidth, uint32_
 
 bool ModelLoaderText::AtlasAttachment::resize(uint32_t textureWidth, uint32_t textureHeight)
 {
-    uint64_t timestamp = Ark::instance().clock()->tick();
+    uint64_t timestamp = Ark::instance().appClock()->tick();
 
     initialize(textureWidth, textureHeight);
 

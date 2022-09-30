@@ -2,6 +2,7 @@
 
 #include <unordered_map>
 
+#include "core/base/enums.h"
 #include "core/types/global.h"
 #include "core/util/math.h"
 
@@ -25,55 +26,55 @@
 
 namespace ark {
 
-namespace {
+//namespace {
 
-struct GLConstants {
-    GLConstants() {
-        _enums["nearest"] = GL_NEAREST;
-        _enums["linear"] = GL_LINEAR;
-        _enums["texture_mag_filter"] = GL_TEXTURE_MAG_FILTER;
-        _enums["texture_min_filter"] = GL_TEXTURE_MIN_FILTER;
-        _enums["texture_wrap_s"] = GL_TEXTURE_WRAP_S;
-        _enums["texture_wrap_t"] = GL_TEXTURE_WRAP_T;
-        _enums["texture_wrap_r"] = GL_TEXTURE_WRAP_R;
-        _enums["clamp_to_edge"] = GL_CLAMP_TO_EDGE;
-        _enums["clamp_to_border"] = GL_CLAMP_TO_BORDER;
-        _enums["mirrored_repeat"] = GL_MIRRORED_REPEAT;
-        _enums["repeat"] = GL_REPEAT;
-        _enums["mirror_clamp_to_edge"] = GL_MIRROR_CLAMP_TO_EDGE;
+//struct GLConstants {
+//    GLConstants() {
+//        _enums["nearest"] = GL_NEAREST;
+//        _enums["linear"] = GL_LINEAR;
+//        _enums["texture_mag_filter"] = GL_TEXTURE_MAG_FILTER;
+//        _enums["texture_min_filter"] = GL_TEXTURE_MIN_FILTER;
+//        _enums["texture_wrap_s"] = GL_TEXTURE_WRAP_S;
+//        _enums["texture_wrap_t"] = GL_TEXTURE_WRAP_T;
+//        _enums["texture_wrap_r"] = GL_TEXTURE_WRAP_R;
+//        _enums["clamp_to_edge"] = GL_CLAMP_TO_EDGE;
+//        _enums["clamp_to_border"] = GL_CLAMP_TO_BORDER;
+//        _enums["mirrored_repeat"] = GL_MIRRORED_REPEAT;
+//        _enums["repeat"] = GL_REPEAT;
+//        _enums["mirror_clamp_to_edge"] = GL_MIRROR_CLAMP_TO_EDGE;
 
-        _enums["rgba"] = GL_RGBA;
-        _enums["rgb"] = GL_RGB;
-        _enums["alpha"] = GL_ALPHA;
-        _enums["rg"] = GL_RG;
+//        _enums["rgba"] = GL_RGBA;
+//        _enums["rgb"] = GL_RGB;
+//        _enums["alpha"] = GL_ALPHA;
+//        _enums["rg"] = GL_RG;
 
-        _enums["always"] = GL_ALWAYS;
-        _enums["never"] = GL_NEVER;
-        _enums["equal"] = GL_EQUAL;
-        _enums["not_equal"] = GL_NOTEQUAL;
-        _enums["less"] = GL_LESS;
-        _enums["greater"] = GL_GREATER;
-        _enums["less_equal"] = GL_LEQUAL;
-        _enums["greater_equal"] = GL_GEQUAL;
+//        _enums["always"] = GL_ALWAYS;
+//        _enums["never"] = GL_NEVER;
+//        _enums["equal"] = GL_EQUAL;
+//        _enums["not_equal"] = GL_NOTEQUAL;
+//        _enums["less"] = GL_LESS;
+//        _enums["greater"] = GL_GREATER;
+//        _enums["less_equal"] = GL_LEQUAL;
+//        _enums["greater_equal"] = GL_GEQUAL;
 
-        _enums["keep"] = GL_KEEP;
-        _enums["zero"] = GL_ZERO;
-        _enums["replace"] = GL_REPLACE;
-        _enums["incr"] = GL_INCR;
-        _enums["decr"] = GL_DECR;
+//        _enums["keep"] = GL_KEEP;
+//        _enums["zero"] = GL_ZERO;
+//        _enums["replace"] = GL_REPLACE;
+//        _enums["incr"] = GL_INCR;
+//        _enums["decr"] = GL_DECR;
 
-        _enums["cw"] = GL_CW;
-        _enums["ccw"] = GL_CCW;
+//        _enums["cw"] = GL_CW;
+//        _enums["ccw"] = GL_CCW;
 
-        _enums["front"] = GL_FRONT;
-        _enums["back"] = GL_BACK;
-        _enums["front_and_back"] = GL_FRONT_AND_BACK;
-    }
+//        _enums["front"] = GL_FRONT;
+//        _enums["back"] = GL_BACK;
+//        _enums["front_and_back"] = GL_FRONT_AND_BACK;
+//    }
 
-    std::unordered_map<String, GLenum> _enums;
-};
+//    std::unordered_map<String, GLenum> _enums;
+//};
 
-}
+//}
 
 GLenum GLUtil::toEnum(ModelLoader::RenderMode renderMode)
 {
@@ -114,6 +115,41 @@ GLenum GLUtil::toStencilFunc(PipelineBindings::StencilFunc func)
     return glFuncs[func];
 }
 
+GLenum GLUtil::toBlendFactor(PipelineBindings::BlendFactor blendFactor)
+{
+    switch(blendFactor) {
+    case PipelineBindings::BLEND_FACTOR_DEFAULT:
+        return std::numeric_limits<GLenum>::max();
+    case PipelineBindings::BLEND_FACTOR_ZERO:
+        return GL_ZERO;
+    case PipelineBindings::BLEND_FACTOR_ONE:
+        return GL_ONE;
+    case PipelineBindings::BLEND_FACTOR_SRC_COLOR:
+        return GL_SRC_COLOR;
+    case PipelineBindings::BLEND_FACTOR_ONE_MINUS_SRC_COLOR:
+        return GL_ONE_MINUS_SRC_COLOR;
+    case PipelineBindings::BLEND_FACTOR_DST_COLOR:
+        return GL_DST_COLOR;
+    case PipelineBindings::BLEND_FACTOR_ONE_MINUS_DST_COLOR:
+        return GL_ONE_MINUS_DST_COLOR;
+    case PipelineBindings::BLEND_FACTOR_SRC_ALPHA:
+        return GL_SRC_ALPHA;
+    case PipelineBindings::BLEND_FACTOR_ONE_MINUS_SRC_ALPHA:
+        return GL_ONE_MINUS_SRC_ALPHA;
+    case PipelineBindings::BLEND_FACTOR_DST_ALPHA:
+        return GL_DST_ALPHA;
+    case PipelineBindings::BLEND_FACTOR_ONE_MINUS_DST_ALPHA:
+        return GL_ONE_MINUS_DST_ALPHA;
+    case PipelineBindings::BLEND_FACTOR_CONST_COLOR:
+        return GL_CONSTANT_COLOR;
+    case PipelineBindings::BLEND_FACTOR_CONST_ALPHA:
+        return GL_CONSTANT_ALPHA;
+    default:
+        break;
+    }
+    FATAL("Unknow BlendFacor: %d", blendFactor);
+}
+
 GLenum GLUtil::toFrontFaceType(PipelineBindings::FrontFaceType face)
 {
     const GLenum glFaceTypes[PipelineBindings::FRONT_FACE_TYPE_LENGTH] = {GL_FRONT_AND_BACK, GL_FRONT, GL_BACK};
@@ -123,17 +159,12 @@ GLenum GLUtil::toFrontFaceType(PipelineBindings::FrontFaceType face)
 
 GLenum GLUtil::getEnum(const String& name)
 {
-    const Global<GLConstants> constants;
-    const auto iter = constants->_enums.find(name);
-    DCHECK(iter != constants->_enums.end(), "Bad GLenum name \"%s\"", name.c_str());
-    return iter->second;
+    return Enums<GLenum>::instance().ensureEnum(name);
 }
 
 GLenum GLUtil::getEnum(const String& name, GLenum defValue)
 {
-    const Global<GLConstants> constants;
-    const auto iter = constants->_enums.find(name);
-    return iter != constants->_enums.end() ? iter->second : defValue;
+    return Enums<GLenum>::instance().toEnumOrDefault(name, defValue);
 }
 
 GLenum GLUtil::getEnum(const document& manifest, const String& name)
@@ -186,6 +217,7 @@ GLenum GLUtil::getTextureFormat(Texture::Usage usage, Texture::Format format, ui
     case Texture::USAGE_DEPTH_STENCIL_ATTACHMENT:
         return GL_DEPTH_STENCIL;
     }
+    return GL_RGBA;
 }
 
 GLenum GLUtil::getPixelType(int32_t format, const Bitmap& bitmap)
@@ -233,7 +265,7 @@ void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, Render
     const sp<opengl::GLPipeline> glPipeline = pipeline;
     glUseProgram(static_cast<GLuint>(glPipeline->id()));
     glPipeline->getUniform("u_Projection").setUniformMatrix4fv(1, GL_FALSE, captureProjection.value());
-    texture.upload(graphicsContext, nullptr);
+    texture.upload(graphicsContext);
 
     glPipeline->activeTexture(texture, 0);
 
@@ -279,6 +311,49 @@ void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, Render
 void GLUtil::glTexImage2D(uint32_t index, int32_t n, void* data)
 {
     ::glTexImage2D(static_cast<GLenum>(GL_TEXTURE_CUBE_MAP_POSITIVE_X + index), 0, static_cast<GLint>(GL_RGBA8), n, n, 0, GL_RGBA, GL_FLOAT, data);
+}
+
+template<> ARK_API void Enums<GLenum>::initialize(std::map<String, GLenum>& enums)
+{
+    enums["nearest"] = GL_NEAREST;
+    enums["linear"] = GL_LINEAR;
+    enums["texture_mag_filter"] = GL_TEXTURE_MAG_FILTER;
+    enums["texture_min_filter"] = GL_TEXTURE_MIN_FILTER;
+    enums["texture_wrap_s"] = GL_TEXTURE_WRAP_S;
+    enums["texture_wrap_t"] = GL_TEXTURE_WRAP_T;
+    enums["texture_wrap_r"] = GL_TEXTURE_WRAP_R;
+    enums["clamp_to_edge"] = GL_CLAMP_TO_EDGE;
+    enums["clamp_to_border"] = GL_CLAMP_TO_BORDER;
+    enums["mirrored_repeat"] = GL_MIRRORED_REPEAT;
+    enums["repeat"] = GL_REPEAT;
+    enums["mirror_clamp_to_edge"] = GL_MIRROR_CLAMP_TO_EDGE;
+
+    enums["rgba"] = GL_RGBA;
+    enums["rgb"] = GL_RGB;
+    enums["alpha"] = GL_ALPHA;
+    enums["rg"] = GL_RG;
+
+    enums["always"] = GL_ALWAYS;
+    enums["never"] = GL_NEVER;
+    enums["equal"] = GL_EQUAL;
+    enums["not_equal"] = GL_NOTEQUAL;
+    enums["less"] = GL_LESS;
+    enums["greater"] = GL_GREATER;
+    enums["less_equal"] = GL_LEQUAL;
+    enums["greater_equal"] = GL_GEQUAL;
+
+    enums["keep"] = GL_KEEP;
+    enums["zero"] = GL_ZERO;
+    enums["replace"] = GL_REPLACE;
+    enums["incr"] = GL_INCR;
+    enums["decr"] = GL_DECR;
+
+    enums["cw"] = GL_CW;
+    enums["ccw"] = GL_CCW;
+
+    enums["front"] = GL_FRONT;
+    enums["back"] = GL_BACK;
+    enums["front_and_back"] = GL_FRONT_AND_BACK;
 }
 
 }

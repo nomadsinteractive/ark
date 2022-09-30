@@ -22,28 +22,37 @@ class ARK_API Varyings : public Holder {
 private:
     class Slot {
     public:
-        Slot(sp<Input> input, int32_t offset = -1);
-        Slot();
+        Slot(sp<Input> input = nullptr, uint32_t divisor = 0, int32_t offset = -1);
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Slot);
 
         void apply(uint8_t* ptr) const;
 
     private:
         sp<Input> _input;
+        uint32_t _divisor;
         int32_t _offset;
 
         friend class Varyings;
     };
 
+    struct Divided {
+        Divided(uint32_t divisor, ByteArray::Borrowed content);
+
+        uint32_t _divisor;
+        ByteArray::Borrowed _content;
+    };
+
 public:
     struct Snapshot {
-        Snapshot();
-        Snapshot(ByteArray::Borrowed memory);
+        Snapshot() = default;
+        Snapshot(Array<Divided>::Borrowed buffers);
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Snapshot);
 
-        ByteArray::Borrowed _memory;
+        Array<Divided>::Borrowed _buffers;
 
         explicit operator bool() const;
+
+        ByteArray::Borrowed getDivided(uint32_t divisor) const;
     };
 
 public:
@@ -57,6 +66,8 @@ public:
 //[[script::bindings::getprop]]
     Box getProperty(const String& name) const;
 
+//[[script::bindings::setprop]]
+    void setProperty(const String& name, sp<Integer> var);
 //[[script::bindings::setprop]]
     void setProperty(const String& name, sp<Numeric> var);
 //[[script::bindings::setprop]]
@@ -73,7 +84,7 @@ public:
     private:
         class VaryingBuilder {
         public:
-            VaryingBuilder(String name, sp<Builder<Input> > input);
+            VaryingBuilder(String name, sp<Builder<Input>> input);
             DEFAULT_COPY_AND_ASSIGN(VaryingBuilder);
 
             String _name;
@@ -90,13 +101,12 @@ public:
     };
 
 private:
-    void setVarying(const String& name, sp<Input> input);
+    void setSlotInput(const String& name, sp<Input> input);
 
 private:
     std::map<String, Box> _properties;
-    sp<PipelineInput> _pipeline_input;
-    std::map<String, Slot> _varyings;
-    uint32_t _size;
+    std::map<String, Slot> _slots;
+    std::map<uint32_t, uint32_t> _slot_strides;
 
     friend class BUILDER;
 };

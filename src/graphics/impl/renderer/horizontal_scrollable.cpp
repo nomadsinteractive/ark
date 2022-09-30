@@ -82,7 +82,7 @@ void HorizontalScrollable::ensureTile(RendererTile& tile, int32_t position)
     if(tile.position() != position)
     {
         tile.setPosition(position);
-        tile.setRenderer(_tile_maker->make(position, 0));
+//        tile.setRenderer(_tile_maker->make(position, 0));
     }
 }
 

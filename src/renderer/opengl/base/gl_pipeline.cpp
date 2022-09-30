@@ -208,6 +208,38 @@ private:
     GLenum _op, _op_dfail, _op_dpass;
 };
 
+class GLTraitBlend : public Snippet::DrawEvents {
+public:
+    GLTraitBlend(const PipelineBindings::TraitBlend& conf)
+        : _src_rgb_factor(GLUtil::toBlendFactor(conf._src_rgb_factor)), _dest_rgb_factor(GLUtil::toBlendFactor(conf._dst_rgb_factor)),
+          _src_alpha_factor(GLUtil::toBlendFactor(conf._src_alpha_factor)), _dest_alpha_factor(GLUtil::toBlendFactor(conf._dst_alpha_factor)) {
+    }
+
+    virtual void preDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override {
+        glGetIntegerv(GL_BLEND_SRC_RGB, &_src_rgb_factor_default);
+        glGetIntegerv(GL_BLEND_SRC_ALPHA, &_src_alpha_factor_default);
+        glGetIntegerv(GL_BLEND_DST_RGB, &_dest_rgb_factor_default);
+        glGetIntegerv(GL_BLEND_DST_ALPHA, &_dest_alpha_factor_default);
+        glBlendFuncSeparate(_src_rgb_factor != std::numeric_limits<GLenum>::max() ? _src_rgb_factor : _src_rgb_factor_default, _dest_rgb_factor != std::numeric_limits<GLenum>::max() ? _dest_rgb_factor : _dest_rgb_factor_default,
+                            _src_alpha_factor != std::numeric_limits<GLenum>::max() ? _src_alpha_factor : _src_alpha_factor_default, _dest_alpha_factor != std::numeric_limits<GLenum>::max() ? _dest_alpha_factor : _dest_alpha_factor_default);
+    }
+
+    virtual void postDraw(GraphicsContext& /*graphicsContext*/) override {
+        glBlendFuncSeparate(_src_rgb_factor_default, _dest_rgb_factor_default, _src_alpha_factor_default, _dest_alpha_factor_default);
+    }
+
+private:
+    GLenum _src_rgb_factor;
+    GLenum _dest_rgb_factor;
+    GLenum _src_alpha_factor;
+    GLenum _dest_alpha_factor;
+
+    GLenum _src_rgb_factor_default;
+    GLenum _dest_rgb_factor_default;
+    GLenum _src_alpha_factor_default;
+    GLenum _dest_alpha_factor_default;
+};
+
 }
 
 GLPipeline::GLPipeline(const sp<Recycler>& recycler, uint32_t version, std::map<PipelineInput::ShaderStage, String> shaders, const PipelineBindings& bindings)
@@ -215,14 +247,14 @@ GLPipeline::GLPipeline(const sp<Recycler>& recycler, uint32_t version, std::map<
 {
     for(const auto& i : bindings.parameters()._tests)
     {
-        if(i.first == PipelineBindings::FRAGMENT_TEST_CULL_FACE)
-            _draw_tests.push_back(sp<GLCullFaceTest>::make(i.second._trait._cull_face_test));
-        else if(i.first == PipelineBindings::FRAGMENT_TEST_DEPTH)
-            _draw_tests.push_back(sp<GLDepthTest>::make(i.second._trait._depth_test));
-        else if(i.first == PipelineBindings::FRAGMENT_TEST_STENCIL)
+        if(i.first == PipelineBindings::TRAIT_TYPE_CULL_FACE_TEST)
+            _draw_traits.push_back(sp<GLCullFaceTest>::make(i.second._configure._cull_face_test));
+        else if(i.first == PipelineBindings::TRAIT_TYPE_DEPTH_TEST)
+            _draw_traits.push_back(sp<GLDepthTest>::make(i.second._configure._depth_test));
+        else if(i.first == PipelineBindings::TRAIT_TYPE_STENCIL_TEST)
         {
             std::vector<sp<Snippet::DrawEvents>> delegate;
-            const PipelineBindings::TraitStencilTest& test = i.second._trait._stencil_test;
+            const PipelineBindings::TraitStencilTest& test = i.second._configure._stencil_test;
             if(test._front._type == PipelineBindings::FRONT_FACE_TYPE_DEFAULT && test._front._type == test._back._type)
                 delegate.push_back(sp<GLStencilTestSeparate>::make(test._front));
             else
@@ -233,8 +265,10 @@ GLPipeline::GLPipeline(const sp<Recycler>& recycler, uint32_t version, std::map<
                     delegate.push_back(sp<GLStencilTestSeparate>::make(test._back));
             }
             DASSERT(delegate.size() > 0);
-            _draw_tests.push_back(sp<GLStencilTest>::make(std::move(delegate)));
+            _draw_traits.push_back(sp<GLStencilTest>::make(std::move(delegate)));
         }
+        else if(i.first == PipelineBindings::TRAIT_TYPE_BLEND)
+            _draw_traits.push_back(sp<GLTraitBlend>::make(i.second._configure._blend));
     }
 }
 
@@ -248,7 +282,7 @@ uint64_t GLPipeline::id()
     return _stub->_id;
 }
 
-void GLPipeline::upload(GraphicsContext& graphicsContext, const sp<Uploader>& /*uploader*/)
+void GLPipeline::upload(GraphicsContext& graphicsContext)
 {
     GLuint id = glCreateProgram();
 
@@ -296,10 +330,10 @@ void GLPipeline::bind(GraphicsContext& graphicsContext, const DrawingContext& dr
 
 void GLPipeline::draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
-    for(const sp<Snippet::DrawEvents>& i : _draw_tests)
+    for(const sp<Snippet::DrawEvents>& i : _draw_traits)
         i->preDraw(graphicsContext, drawingContext);
     _pipeline_operation->draw(graphicsContext, drawingContext);
-    for(const sp<Snippet::DrawEvents>& i : _draw_tests)
+    for(const sp<Snippet::DrawEvents>& i : _draw_traits)
         i->postDraw(graphicsContext);
 }
 
@@ -457,7 +491,7 @@ void GLPipeline::GLUniform::setUniform4f(GLfloat r, GLfloat g, GLfloat b, GLfloa
     glUniform4f(_location, r, g, b, a);
 }
 
-void GLPipeline::GLUniform::setUniform4fv(GLsizei count, GLfloat* value) const
+void GLPipeline::GLUniform::setUniform4fv(GLsizei count, const GLfloat* value) const
 {
     glUniform4fv(_location, count, value);
 }
@@ -659,45 +693,46 @@ void GLPipeline::Stub::bindUBO(const RenderLayer::UBOSnapshot& uboSnapshot, cons
         if(uboSnapshot._dirty_flags.buf()[i] || _rebind_needed)
         {
             const sp<Uniform>& uniform = uniforms.at(i);
-            uint8_t* buf = uboSnapshot._buffer.buf();
+            const uint8_t* buf = uboSnapshot._buffer.buf();
             const auto pair = ubo->slots().at(i);
-            bindUniform(reinterpret_cast<float*>(buf + pair.first), pair.second, uniform);
+            bindUniform(buf + pair.first, pair.second, uniform);
         }
     }
 }
 
-void GLPipeline::Stub::bindUniform(float* buf, uint32_t size, const Uniform& uniform)
+void GLPipeline::Stub::bindUniform(const uint8_t* ptr, uint32_t size, const Uniform& uniform)
 {
     const GLPipeline::GLUniform& glUniform = getUniform(uniform.name());
+    const float* ptrf = reinterpret_cast<const float*>(ptr);
     switch(uniform.type()) {
     case Uniform::TYPE_I1:
         DCHECK(size == 4, "Wrong uniform1i size: %d", size);
-        glUniform.setUniform1i(*reinterpret_cast<int32_t*>(buf));
+        glUniform.setUniform1i(*reinterpret_cast<const int32_t*>(ptr));
         break;
     case Uniform::TYPE_F1:
         DCHECK(size == 4, "Wrong uniform1f size: %d", size);
-        glUniform.setUniform1f(buf[0]);
+        glUniform.setUniform1f(ptrf[0]);
         break;
     case Uniform::TYPE_F2:
         DCHECK(size == 8, "Wrong uniform2f size: %d", size);
-        glUniform.setUniform2f(buf[0], buf[1]);
+        glUniform.setUniform2f(ptrf[0], ptrf[1]);
         break;
     case Uniform::TYPE_F3:
         DCHECK(size >= 12, "Wrong uniform3f size: %d", size);
-        glUniform.setUniform3f(buf[0], buf[1], buf[2]);
+        glUniform.setUniform3f(ptrf[0], ptrf[1], ptrf[2]);
         break;
     case Uniform::TYPE_F4:
         DCHECK(size == 16, "Wrong uniform4f size: %d", size);
-        glUniform.setUniform4f(buf[0], buf[1], buf[2], buf[3]);
+        glUniform.setUniform4f(ptrf[0], ptrf[1], ptrf[2], ptrf[3]);
         break;
     case Uniform::TYPE_F4V:
         DCHECK(size % 16 == 0, "Wrong uniform4fv size: %d", size);
-        glUniform.setUniform4fv(size / 16, buf);
+        glUniform.setUniform4fv(size / 16, ptrf);
         break;
     case Uniform::TYPE_MAT4:
     case Uniform::TYPE_MAT4V:
         DCHECK(size % 64 == 0, "Wrong mat4fv size: %d", size);
-        glUniform.setUniformMatrix4fv(size / 64, GL_FALSE, buf);
+        glUniform.setUniformMatrix4fv(size / 64, GL_FALSE, ptrf);
         break;
     default:
         DFATAL("Unimplemented");

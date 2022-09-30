@@ -18,6 +18,7 @@ namespace ark {
 //[[core::class]]
 class ShaderFrame : public Renderer, public Block {
 public:
+    [[deprecated]]
     ShaderFrame(const sp<Size>& size, const sp<Shader>& shader, RenderController& renderController);
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
@@ -41,7 +42,7 @@ public:
     };
 
 private:
-    bytearray getVertexBuffer(const V3& position) const;
+    ByteArray::Borrowed getVertexBuffer(RenderRequest& renderRequest, const V3& position) const;
 
 private:
     SafePtr<Size> _size;

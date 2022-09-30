@@ -28,17 +28,17 @@ namespace ark {
 
 RenderLayer::Stub::Stub(sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Vec4> scissor, sp<RenderController> renderController)
     : _model_loader(ModelLoaderCached::decorate(std::move(modelLoader))), _shader(std::move(shader)), _scissor(std::move(scissor)), _render_controller(std::move(renderController)), _render_command_composer(_model_loader->makeRenderCommandComposer()),
-      _shader_bindings(_render_command_composer->makeShaderBindings(_shader, _render_controller, _model_loader->renderMode())), _layer(sp<Layer>::make(sp<LayerContext>::make(_model_loader, nullptr, Layer::TYPE_DYNAMIC))),
+      _shader_bindings(_render_command_composer->makeShaderBindings(_shader, _render_controller, _model_loader->renderMode())), _visible(nullptr, true), _layer(sp<Layer>::make(sp<LayerContext>::make(nullptr, _model_loader, nullptr, nullptr))),
       _stride(_shader->input()->getStream(0).stride())
 {
     _model_loader->initialize(_shader_bindings);
     DCHECK(!_scissor || _shader_bindings->pipelineBindings()->hasFlag(PipelineBindings::FLAG_DYNAMIC_SCISSOR, PipelineBindings::FLAG_DYNAMIC_SCISSOR_BITMASK), "RenderLayer has a scissor while its Shader has no FLAG_DYNAMIC_SCISSOR set");
 }
 
-sp<LayerContext> RenderLayer::Stub::makeLayerContext(Layer::Type layerType, sp<ModelLoader> modelLoader)
+sp<LayerContext> RenderLayer::Stub::makeLayerContext(sp<Batch> batch, sp<ModelLoader> modelLoader, sp<Boolean> visible)
 {
-    const sp<LayerContext> layerContext = sp<LayerContext>::make(modelLoader ? sp<ModelLoaderCached>::make(std::move(modelLoader)) : _model_loader, _layer->context()->varyings(), layerType);
-    _layer_contexts.push_back(layerContext);
+    sp<LayerContext> layerContext = sp<LayerContext>::make(std::move(batch), modelLoader ? sp<ModelLoaderCached>::make(std::move(modelLoader)) : _model_loader, std::move(visible), _layer->context()->varyings());
+    _batch_groups.push_back(layerContext);
     return layerContext;
 }
 
@@ -46,34 +46,29 @@ RenderLayer::Snapshot::Snapshot(RenderRequest& renderRequest, const sp<Stub>& st
     : _stub(stub), _index_count(0)
 {
     DPROFILER_TRACE("Snapshot");
-    Layer::Type combined = Layer::TYPE_UNSPECIFIED;
 
     bool needsReload = _stub->_layer->context()->preSnapshot(renderRequest);
 
-    for(auto iter = _stub->_layer_contexts.begin(); iter != _stub->_layer_contexts.end(); )
-        if(iter->unique())
+    for(auto iter = _stub->_batch_groups.begin(); iter != _stub->_batch_groups.end(); )
+    {
+        const sp<LayerContext>& layerContext = *iter;
+        if(layerContext.unique())
         {
-            iter = _stub->_layer_contexts.erase(iter);
+            iter = _stub->_batch_groups.erase(iter);
             needsReload = true;
         }
         else
         {
-            const sp<LayerContext>& i = *iter;
-            needsReload = i->preSnapshot(renderRequest) || needsReload;
-            DWARN(combined != Layer::TYPE_STATIC || i->layerType() != Layer::TYPE_DYNAMIC, "Combining static and dynamic layers together leads to low efficiency");
-            if(combined != Layer::TYPE_DYNAMIC)
-                combined = i->layerType();
+            needsReload = layerContext->preSnapshot(renderRequest) || needsReload;
             ++iter;
         }
+    }
 
-    if(combined != Layer::TYPE_STATIC)
-        _flag = needsReload ? SNAPSHOT_FLAG_RELOAD : SNAPSHOT_FLAG_DYNAMIC_UPDATE;
-    else
-        _flag = needsReload ? SNAPSHOT_FLAG_STATIC_MODIFIED : SNAPSHOT_FLAG_STATIC_REUSE;
+    _flag = needsReload ? SNAPSHOT_FLAG_RELOAD : SNAPSHOT_FLAG_DYNAMIC_UPDATE;
 
-    _stub->_layer->context()->takeSnapshot(*this, renderRequest);
-    for(const sp<LayerContext>& i : stub->_layer_contexts)
-        i->takeSnapshot(*this, renderRequest);
+    _stub->_layer->context()->snapshot(renderRequest, *this);
+    for(LayerContext& i : stub->_batch_groups)
+        i.snapshot(renderRequest, *this);
 
     _stub->_render_command_composer->postSnapshot(_stub->_render_controller, *this);
 
@@ -88,7 +83,7 @@ RenderLayer::Snapshot::Snapshot(RenderRequest& renderRequest, const sp<Stub>& st
 
 sp<RenderCommand> RenderLayer::Snapshot::render(const RenderRequest& renderRequest, const V3& /*position*/)
 {
-    if(_items.size() > 0)
+    if(_items.size() > 0 && _stub->_visible.val())
         return _stub->_render_command_composer->compose(renderRequest, *this);
 
     DrawingContext drawingContext(_stub->_shader_bindings, nullptr, std::move(_ubos), std::move(_ssbos));
@@ -125,14 +120,14 @@ const sp<Layer>& RenderLayer::layer() const
     return _stub->_layer;
 }
 
-sp<LayerContext> RenderLayer::makeContext(Layer::Type layerType, sp<ModelLoader> modelLoader) const
+sp<LayerContext> RenderLayer::makeContext(sp<Batch> batch, sp<ModelLoader> modelLoader, sp<Boolean> visible) const
 {
-    return _stub->makeLayerContext(layerType, std::move(modelLoader));
+    return _stub->makeLayerContext(std::move(batch), std::move(modelLoader), std::move(visible));
 }
 
-sp<Layer> RenderLayer::makeLayer(Layer::Type layerType, sp<ModelLoader> modelLoader) const
+sp<Layer> RenderLayer::makeLayer(sp<ModelLoader> modelLoader, sp<Boolean> visible) const
 {
-    return sp<Layer>::make(makeContext(layerType, std::move(modelLoader)));
+    return sp<Layer>::make(makeContext(nullptr, std::move(modelLoader), std::move(visible)));
 }
 
 void RenderLayer::render(RenderRequest& renderRequest, const V3& position)
@@ -158,7 +153,7 @@ sp<RenderLayer> RenderLayer::BUILDER::build(const Scope& args)
     for(const sp<Builder<Layer>>& i : _layers)
     {
         const sp<Layer> layer = i->build(args);
-        layer->setContext(renderLayer->makeContext(Layer::TYPE_DYNAMIC, layer->modelLoader()));
+        layer->setContext(renderLayer->makeContext(nullptr, layer->modelLoader()));
     }
     return renderLayer;
 }

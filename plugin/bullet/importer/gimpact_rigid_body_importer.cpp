@@ -7,7 +7,7 @@
 #include "renderer/base/buffer.h"
 #include "renderer/base/mesh.h"
 #include "renderer/base/model.h"
-#include "renderer/base/vertex_stream.h"
+#include "renderer/base/vertex_writer.h"
 #include "renderer/inf/model_loader.h"
 
 #include "plugin/bullet/base/collision_shape.h"

@@ -8,6 +8,41 @@
 
 namespace ark {
 
+namespace {
+
+class InputArray : public Input {
+public:
+    InputArray(std::vector<sp<Input>> inputs)
+        : _inputs(std::move(inputs)), _stride(_inputs.empty() ? 0 : _inputs.front()->size()) {
+    }
+
+    virtual bool update(uint64_t timestamp) override {
+        bool dirty = false;
+        for(const sp<Input>& i : _inputs)
+            dirty = i->update(timestamp) || dirty;
+        return dirty;
+    }
+
+    virtual void flat(void* buf) override {
+        uint8_t* ptr = reinterpret_cast<uint8_t*>(buf);
+        for(const sp<Input>& i : _inputs) {
+            CHECK(i->size() == _stride, "Input array should have same stride(%ld), but this one doesn't(%ld)", _stride, i->size());
+            i->flat(ptr);
+            ptr += _stride;
+        }
+    }
+
+    virtual uint32_t size() override {
+        return static_cast<uint32_t>(_stride * _inputs.size());
+    }
+
+private:
+    std::vector<sp<Input>> _inputs;
+    uint32_t _stride;
+};
+
+}
+
 sp<Input> InputType::create(sp<Input> value)
 {
     return sp<InputWrapper>::make(std::move(value));
@@ -21,6 +56,11 @@ sp<Input> InputType::create(std::vector<sp<Mat4>> value)
 sp<Input> InputType::create(std::vector<sp<Vec4>> value)
 {
     return sp<InputVariableArray<V4>>::make(std::move(value));
+}
+
+sp<Input> InputType::create(std::vector<sp<Input>> value)
+{
+    return sp<InputArray>::make(std::move(value));
 }
 
 void InputType::set(const sp<Input>& self, const sp<Input>& delegate)

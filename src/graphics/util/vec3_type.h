@@ -19,7 +19,6 @@ public:
     static sp<Vec3> create(float x, float y, float z);
 //  [[script::bindings::constructor]]
     static sp<Vec3> create(const sp<Numeric>& x, const sp<Numeric>& y, const sp<Numeric>& z);
-    static sp<Vec3> create(const sp<Vec2>& vec2);
 
 //  [[script::bindings::operator(+)]]
     static sp<Vec3> add(const sp<Vec3>& lvalue, const V3& rvalue);
@@ -35,6 +34,8 @@ public:
     static sp<Vec3> mul(const sp<Vec3>& lvalue, float rvalue);
 //  [[script::bindings::operator(*)]]
     static sp<Vec3> mul(const sp<Vec3>& lvalue, sp<Numeric>& rvalue);
+//  [[script::bindings::operator(/)]]
+    static sp<Vec3> truediv(const sp<Vec3>& lvalue, const sp<Numeric>& rvalue);
 //  [[script::bindings::operator(/)]]
     static sp<Vec3> truediv(const sp<Vec3>& lvalue, const V3& rvalue);
 //  [[script::bindings::operator(/)]]
@@ -88,6 +89,9 @@ public:
     static sp<Numeric> vy(const sp<Vec3>& self);
 //  [[script::bindings::property]]
     static sp<Numeric> vz(const sp<Vec3>& self);
+
+//  [[script::bindings::classmethod]]
+    static sp<Vec4> extend(sp<Vec3> self, sp<Numeric> w);
 
 //  [[script::bindings::classmethod]]
     static void fix(const sp<Vec3>& self);

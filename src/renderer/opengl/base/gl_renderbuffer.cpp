@@ -24,7 +24,7 @@ uint64_t GLRenderbuffer::id()
     return _id;
 }
 
-void GLRenderbuffer::upload(GraphicsContext& /*graphicsContext*/, const sp<Uploader>& /*uploader*/)
+void GLRenderbuffer::upload(GraphicsContext& /*graphicsContext*/)
 {
     if(_id == 0)
         glGenRenderbuffers(1, &_id);

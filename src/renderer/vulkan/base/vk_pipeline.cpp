@@ -69,7 +69,7 @@ uint64_t VKPipeline::id()
     return (uint64_t)(_pipeline);
 }
 
-void VKPipeline::upload(GraphicsContext& graphicsContext, const sp<Uploader>& /*uploader*/)
+void VKPipeline::upload(GraphicsContext& graphicsContext)
 {
     setupDescriptorSetLayout(_bindings.input());
 
@@ -224,9 +224,9 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
     _ubos.clear();
     for(const sp<PipelineInput::UBO>& i : bindings.input()->ubos())
     {
-        const sp<Uploader> uploader = sp<Uploader::Blank>::make(i->size());
         sp<VKBuffer> ubo = sp<VKBuffer>::make(_renderer, _recycler, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-        ubo->upload(graphicsContext, uploader);
+        ubo->setUploader(sp<Uploader::Blank>::make(i->size()));
+        ubo->upload(graphicsContext);
         binding = std::max(binding, i->binding());
         writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
                                           _descriptor_set,
@@ -367,10 +367,10 @@ void VKPipeline::buildDrawCommandBuffer(GraphicsContext& graphicsContext, const 
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _layout, 0, 1, &_descriptor_set, 0, nullptr);
 
     VkDeviceSize offsets = 0;
-    VkBuffer vkVertexBuffer = (VkBuffer)(drawingContext._vertex_buffer.id());
+    VkBuffer vkVertexBuffer = (VkBuffer)(drawingContext._vertices.id());
     vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vkVertexBuffer, &offsets);
-    if(drawingContext._index_buffer)
-        vkCmdBindIndexBuffer(commandBuffer, (VkBuffer)(drawingContext._index_buffer.id()), 0, kVKIndexType);
+    if(drawingContext._indices)
+        vkCmdBindIndexBuffer(commandBuffer, (VkBuffer)(drawingContext._indices.id()), 0, kVKIndexType);
 
     const Rect& scissor = drawingContext._scissor;
     if(scissor.right() > scissor.left() && scissor.bottom() >= scissor.top())
@@ -396,7 +396,7 @@ void VKPipeline::buildComputeCommandBuffer(GraphicsContext& graphicsContext, con
 bool VKPipeline::isDirty(const ByteArray::Borrowed& dirtyFlags) const
 {
     size_t size = dirtyFlags.length();
-    uint8_t* buf = dirtyFlags.buf();
+    const uint8_t* buf = dirtyFlags.buf();
     for(size_t i = 0; i < size; ++i)
         if(buf[i])
             return true;
@@ -457,18 +457,18 @@ VkPipelineDepthStencilStateCreateInfo VKPipeline::makeDepthStencilState() const
     state.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
     state.stencilTestEnable = false;
 
-    if(_bindings.parameters()._tests.has(PipelineBindings::FRAGMENT_TEST_DEPTH))
+    if(_bindings.parameters()._tests.has(PipelineBindings::TRAIT_TYPE_DEPTH_TEST))
     {
-        const PipelineBindings::TraitDepthTest& depthTest = _bindings.parameters()._tests.at(PipelineBindings::FRAGMENT_TEST_DEPTH)._trait._depth_test;
+        const PipelineBindings::TraitDepthTest& depthTest = _bindings.parameters()._tests.at(PipelineBindings::TRAIT_TYPE_DEPTH_TEST)._configure._depth_test;
         state.depthTestEnable = depthTest._enabled;
         state.depthWriteEnable = depthTest._write_enabled;
         state.depthCompareOp = VKUtil::toCompareOp(depthTest._func);
     }
 
-    if(_bindings.parameters()._tests.has(PipelineBindings::FRAGMENT_TEST_STENCIL))
+    if(_bindings.parameters()._tests.has(PipelineBindings::TRAIT_TYPE_STENCIL_TEST))
     {
         state.stencilTestEnable = true;
-        const PipelineBindings::TraitStencilTest& stencilTest = _bindings.parameters()._tests.at(PipelineBindings::FRAGMENT_TEST_STENCIL)._trait._stencil_test;
+        const PipelineBindings::TraitStencilTest& stencilTest = _bindings.parameters()._tests.at(PipelineBindings::TRAIT_TYPE_STENCIL_TEST)._configure._stencil_test;
         if(stencilTest._front._type == PipelineBindings::FRONT_FACE_TYPE_DEFAULT && stencilTest._front._type == stencilTest._back._type)
             state.front = state.back = makeStencilState(stencilTest._front);
         else
@@ -499,9 +499,9 @@ VkPipelineRasterizationStateCreateInfo VKPipeline::makeRasterizationState() cons
 {
     const VkCullModeFlags cullModeFlags[] = {VK_CULL_MODE_NONE, VK_CULL_MODE_FRONT_BIT, VK_CULL_MODE_BACK_BIT, VK_CULL_MODE_NONE};
     VkCullModeFlags flags = cullModeFlags[_bindings.getFlag(PipelineBindings::FLAG_CULL_MODE_BITMASK)];
-    if(_bindings.parameters()._tests.has(PipelineBindings::FRAGMENT_TEST_CULL_FACE))
+    if(_bindings.parameters()._tests.has(PipelineBindings::TRAIT_TYPE_CULL_FACE_TEST))
     {
-        const PipelineBindings::TraitCullFaceTest& cullFaceTest = _bindings.parameters()._tests.at(PipelineBindings::FRAGMENT_TEST_CULL_FACE)._trait._cull_face_test;
+        const PipelineBindings::TraitCullFaceTest& cullFaceTest = _bindings.parameters()._tests.at(PipelineBindings::TRAIT_TYPE_CULL_FACE_TEST)._configure._cull_face_test;
         return vks::initializers::pipelineRasterizationStateCreateInfo(
                 VK_POLYGON_MODE_FILL,
                 cullFaceTest._enabled ? cullModeFlags[_bindings.getFlag(PipelineBindings::FLAG_CULL_MODE_BITMASK)] : VK_CULL_MODE_NONE,

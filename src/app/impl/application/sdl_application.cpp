@@ -21,6 +21,7 @@
 #include "core/util/math.h"
 
 #include "graphics/base/bitmap.h"
+#include "graphics/base/size.h"
 #include "graphics/base/surface_controller.h"
 #include "graphics/inf/render_view.h"
 
@@ -43,6 +44,69 @@ extern "C" void* Cocoa_Metal_CreateView(SDL_VideoDevice* _this, SDL_Window* wind
 namespace ark {
 
 static bool gQuit = false;
+
+static Event::Code sdlScanCodeToEventCode(SDL_Scancode sc)
+{
+    if(Math::between<SDL_Scancode>(SDL_SCANCODE_A, SDL_SCANCODE_Z, sc))
+        return static_cast<Event::Code>(static_cast<int32_t>(Event::CODE_KEYBOARD_A) + sc - SDL_SCANCODE_A);
+    if(Math::between<SDL_Scancode>(SDL_SCANCODE_F1, SDL_SCANCODE_F12, sc))
+        return static_cast<Event::Code>(static_cast<int32_t>(Event::CODE_KEYBOARD_F1) + sc - SDL_SCANCODE_F1);
+    if(Math::between<SDL_Scancode>(SDL_SCANCODE_1, SDL_SCANCODE_9, sc))
+        return static_cast<Event::Code>(static_cast<int32_t>(Event::CODE_KEYBOARD_1) + sc - SDL_SCANCODE_1);
+    switch(sc) {
+    case SDL_SCANCODE_GRAVE:
+        return Event::CODE_KEYBOARD_GRAVE;
+    case SDL_SCANCODE_RIGHT:
+        return Event::CODE_KEYBOARD_RIGHT;
+    case SDL_SCANCODE_LEFT:
+        return Event::CODE_KEYBOARD_LEFT;
+    case SDL_SCANCODE_DOWN:
+        return Event::CODE_KEYBOARD_DOWN;
+    case SDL_SCANCODE_UP:
+        return Event::CODE_KEYBOARD_UP;
+    case SDL_SCANCODE_RETURN:
+        return Event::CODE_KEYBOARD_ENTER;
+    case SDL_SCANCODE_ESCAPE:
+        return Event::CODE_KEYBOARD_ESCAPE;
+    case SDL_SCANCODE_BACKSPACE:
+        return Event::CODE_KEYBOARD_BACKSPACE;
+    case SDL_SCANCODE_DELETE:
+        return Event::CODE_KEYBOARD_DELETE;
+    case SDL_SCANCODE_TAB:
+        return Event::CODE_KEYBOARD_TAB;
+    case SDL_SCANCODE_SPACE:
+        return Event::CODE_KEYBOARD_SPACE;
+    case SDL_SCANCODE_0:
+        return Event::CODE_KEYBOARD_0;
+    case SDL_SCANCODE_LSHIFT:
+        return Event::CODE_KEYBOARD_LSHIFT;
+    case SDL_SCANCODE_RSHIFT:
+        return Event::CODE_KEYBOARD_RSHIFT;
+    case SDL_SCANCODE_COMMA:
+        return Event::CODE_KEYBOARD_COMMA;
+    case SDL_SCANCODE_PERIOD:
+        return Event::CODE_KEYBOARD_PERIOD;
+    case SDL_SCANCODE_SLASH:
+        return Event::CODE_KEYBOARD_SLASH;
+    case SDL_SCANCODE_SEMICOLON:
+        return Event::CODE_KEYBOARD_SEMICOLON;
+    case SDL_SCANCODE_APOSTROPHE:
+        return Event::CODE_KEYBOARD_APOSTROPHE;
+    case SDL_SCANCODE_MINUS:
+        return Event::CODE_KEYBOARD_MINUS;
+    case SDL_SCANCODE_EQUALS:
+        return Event::CODE_KEYBOARD_EQUALS;
+    case SDL_SCANCODE_LEFTBRACKET:
+        return Event::CODE_KEYBOARD_LEFTBRACKET;
+    case SDL_SCANCODE_RIGHTBRACKET:
+        return Event::CODE_KEYBOARD_RIGHTBRACKET;
+    case SDL_SCANCODE_BACKSLASH:
+        return Event::CODE_KEYBOARD_BACKSLASH;
+    default:
+        break;
+    }
+    return Event::CODE_NONE;
+}
 
 namespace {
 
@@ -157,147 +221,6 @@ public:
 
 };
 
-class SDLPollEventTask : public Runnable {
-public:
-    SDLPollEventTask(SDLApplication& application, sp<Clock> clock)
-        : _application(application), _clock(std::move(clock)) {
-    }
-
-    virtual void run() override {
-        SDL_Event event;
-        while(SDL_PollEvent(&event))
-        {
-            uint64_t timestamp = _clock->tick();
-            switch(event.type)
-            {
-            case SDL_QUIT:
-                    gQuit = true;
-                    break;
-            case SDL_MOUSEBUTTONDOWN:
-            case SDL_MOUSEBUTTONUP:
-                {
-                    Event::Button which = static_cast<Event::Button>(Event::BUTTON_MOUSE_LEFT + event.button.button - SDL_BUTTON_LEFT);
-                    Event::ButtonInfo bi(_application.toViewportPosition(V2(static_cast<float>(event.button.x), static_cast<float>(event.button.y))), which);
-                    Event e(event.type == SDL_MOUSEBUTTONDOWN ? Event::ACTION_DOWN : Event::ACTION_UP, timestamp, bi);
-                    _application.onEvent(e);
-                    break;
-                }
-            case SDL_MOUSEMOTION:
-                {
-                    Event::Button which = static_cast<Event::Button>(Event::BUTTON_MOUSE_LEFT + event.button.button - SDL_BUTTON_LEFT);
-                    Event::MotionInfo mi(_application.toViewportPosition(V2(static_cast<float>(event.motion.x), static_cast<float>(event.motion.y))), which, event.motion.state);
-                    Event e(Event::ACTION_MOVE, timestamp, mi);
-                    _application.onEvent(e);
-                    break;
-                }
-            case SDL_MOUSEWHEEL:
-                {
-                    Event::Button which = static_cast<Event::Button>(Event::BUTTON_MOUSE_LEFT + event.button.button - SDL_BUTTON_LEFT);
-                    Event::MotionInfo mi(V2(static_cast<float>(event.motion.x), static_cast<float>(event.motion.y)), which, event.motion.state);
-                    Event e(Event::ACTION_WHEEL, timestamp, mi);
-                    _application.onEvent(e);
-                    break;
-                }
-            case SDL_KEYDOWN:
-            case SDL_KEYUP:
-                {
-                    Event::KeyboardInfo keyboardInfo(sdlScanCodeToEventCode(event.key.keysym.scancode), static_cast<wchar_t>(event.key.keysym.sym));
-                    Event e(event.key.repeat ? Event::ACTION_KEY_REPEAT : (event.type == SDL_KEYDOWN ? Event::ACTION_KEY_DOWN : Event::ACTION_KEY_UP), timestamp, keyboardInfo);
-                    _application.onEvent(e);
-                    break;
-                }
-            case SDL_TEXTINPUT:
-                {
-                    Event e(Event::ACTION_TEXT_INPUT, timestamp, Event::TextInputInfo(event.text.text));
-                    _application.onEvent(e);
-                    break;
-                }
-            case SDL_WINDOWEVENT:
-                {
-                    switch (event.window.event)  {
-                    case SDL_WINDOWEVENT_HIDDEN:
-                    case SDL_WINDOWEVENT_MINIMIZED:
-                        _application.onPause();
-                        break;
-                    case SDL_WINDOWEVENT_SHOWN:
-                    case SDL_WINDOWEVENT_RESTORED:
-                        _application.onResume();
-                        _application.onSurfaceChanged();
-                    }
-                    break;
-                }
-            }
-        }
-    }
-
-    Event::Code sdlScanCodeToEventCode(SDL_Scancode sc) {
-        if(Math::between<SDL_Scancode>(SDL_SCANCODE_A, SDL_SCANCODE_Z, sc))
-            return static_cast<Event::Code>(static_cast<int32_t>(Event::CODE_KEYBOARD_A) + sc - SDL_SCANCODE_A);
-        if(Math::between<SDL_Scancode>(SDL_SCANCODE_F1, SDL_SCANCODE_F12, sc))
-            return static_cast<Event::Code>(static_cast<int32_t>(Event::CODE_KEYBOARD_F1) + sc - SDL_SCANCODE_F1);
-        if(Math::between<SDL_Scancode>(SDL_SCANCODE_1, SDL_SCANCODE_9, sc))
-            return static_cast<Event::Code>(static_cast<int32_t>(Event::CODE_KEYBOARD_1) + sc - SDL_SCANCODE_1);
-        switch(sc) {
-        case SDL_SCANCODE_GRAVE:
-            return Event::CODE_KEYBOARD_GRAVE;
-        case SDL_SCANCODE_RIGHT:
-            return Event::CODE_KEYBOARD_RIGHT;
-        case SDL_SCANCODE_LEFT:
-            return Event::CODE_KEYBOARD_LEFT;
-        case SDL_SCANCODE_DOWN:
-            return Event::CODE_KEYBOARD_DOWN;
-        case SDL_SCANCODE_UP:
-            return Event::CODE_KEYBOARD_UP;
-        case SDL_SCANCODE_RETURN:
-            return Event::CODE_KEYBOARD_ENTER;
-        case SDL_SCANCODE_ESCAPE:
-            return Event::CODE_KEYBOARD_ESCAPE;
-        case SDL_SCANCODE_BACKSPACE:
-            return Event::CODE_KEYBOARD_BACKSPACE;
-        case SDL_SCANCODE_DELETE:
-            return Event::CODE_KEYBOARD_DELETE;
-        case SDL_SCANCODE_TAB:
-            return Event::CODE_KEYBOARD_TAB;
-        case SDL_SCANCODE_SPACE:
-            return Event::CODE_KEYBOARD_SPACE;
-        case SDL_SCANCODE_0:
-            return Event::CODE_KEYBOARD_0;
-        case SDL_SCANCODE_LSHIFT:
-            return Event::CODE_KEYBOARD_LSHIFT;
-        case SDL_SCANCODE_RSHIFT:
-            return Event::CODE_KEYBOARD_RSHIFT;
-        case SDL_SCANCODE_COMMA:
-            return Event::CODE_KEYBOARD_COMMA;
-        case SDL_SCANCODE_PERIOD:
-            return Event::CODE_KEYBOARD_PERIOD;
-        case SDL_SCANCODE_SLASH:
-            return Event::CODE_KEYBOARD_SLASH;
-        case SDL_SCANCODE_SEMICOLON:
-            return Event::CODE_KEYBOARD_SEMICOLON;
-        case SDL_SCANCODE_APOSTROPHE:
-            return Event::CODE_KEYBOARD_APOSTROPHE;
-        case SDL_SCANCODE_MINUS:
-            return Event::CODE_KEYBOARD_MINUS;
-        case SDL_SCANCODE_EQUALS:
-            return Event::CODE_KEYBOARD_EQUALS;
-        case SDL_SCANCODE_LEFTBRACKET:
-            return Event::CODE_KEYBOARD_LEFTBRACKET;
-        case SDL_SCANCODE_RIGHTBRACKET:
-            return Event::CODE_KEYBOARD_RIGHTBRACKET;
-        case SDL_SCANCODE_BACKSLASH:
-            return Event::CODE_KEYBOARD_BACKSLASH;
-        default:
-            break;
-        }
-        return Event::CODE_NONE;
-    }
-
-private:
-    SDLApplication& _application;
-    sp<Clock> _clock;
-
-};
-
 }
 
 SDLApplication::SDLApplication(const sp<ApplicationDelegate>& applicationDelegate, const sp<ApplicationContext>& applicationContext, uint32_t width, uint32_t height, const Manifest& manifest)
@@ -325,7 +248,7 @@ int SDLApplication::run()
 
     SDL_ShowCursor((_window_flag & Manifest::WINDOW_FLAG_SHOW_CURSOR) ? SDL_ENABLE : SDL_DISABLE);
 
-    _main_window = SDL_CreateWindow(name(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, static_cast<int32_t>(_width), static_cast<int32_t>(_height), toSDLWindowFlag(_application_context, _window_flag));
+    _main_window = SDL_CreateWindow(name(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, static_cast<int32_t>(_surface_size->width()), static_cast<int32_t>(_surface_size->height()), toSDLWindowFlag(_application_context, _window_flag));
     if(!_main_window)
     {
         /* Die if creation failed */
@@ -361,17 +284,15 @@ int SDLApplication::run()
     onSurfaceCreated();
     _application_context->updateRenderState();
 
-    const sp<SDLPollEventTask> pollevent = sp<SDLPollEventTask>::make(*this, _application_context->clock());
-
     while(!gQuit)
     {
         if(_application_context->isPaused())
         {
             SDL_Delay(50);
-            pollevent->run();
+            pollEvents(_application_context->sysClock()->val());
             continue;
         }
-        pollevent->run();
+        pollEvents(_application_context->sysClock()->val());
         onSurfaceUpdate();
         if(_use_open_gl)
             SDL_GL_SwapWindow(_main_window);
@@ -403,9 +324,7 @@ void SDLApplication::onSurfaceChanged()
 {
     int32_t w, h;
     SDL_GetWindowSize(_main_window, &w, &h);
-    _width = static_cast<uint32_t>(w);
-    _height = static_cast<uint32_t>(h);
-    Application::onSurfaceChanged(_width, _height);
+    Application::onSurfaceChanged(static_cast<uint32_t>(w), static_cast<uint32_t>(h));
 }
 
 uint32_t SDLApplication::toSDLWindowFlag(const sp<ApplicationContext>& applicationContext, uint32_t appWindowFlag)
@@ -425,6 +344,73 @@ uint32_t SDLApplication::toSDLWindowFlag(const sp<ApplicationContext>& applicati
     _use_open_gl = version != Ark::VULKAN_11;
     windowFlag |= (_use_open_gl ? SDL_WINDOW_OPENGL : SDL_WINDOW_VULKAN);
     return windowFlag;
+}
+
+void SDLApplication::pollEvents(uint64_t timestamp)
+{
+    SDL_Event event;
+    while(SDL_PollEvent(&event))
+    {
+        switch(event.type)
+        {
+        case SDL_QUIT:
+                gQuit = true;
+                break;
+        case SDL_MOUSEBUTTONDOWN:
+        case SDL_MOUSEBUTTONUP:
+            {
+                Event::Button which = static_cast<Event::Button>(Event::BUTTON_MOUSE_LEFT + event.button.button - SDL_BUTTON_LEFT);
+                Event::ButtonInfo bi(toViewportPosition(V2(static_cast<float>(event.button.x), static_cast<float>(event.button.y))), which);
+                Event e(event.type == SDL_MOUSEBUTTONDOWN ? Event::ACTION_DOWN : Event::ACTION_UP, timestamp, bi);
+                onEvent(e);
+                break;
+            }
+        case SDL_MOUSEMOTION:
+            {
+                Event::Button which = static_cast<Event::Button>(Event::BUTTON_MOUSE_LEFT + event.button.button - SDL_BUTTON_LEFT);
+                Event::MotionInfo mi(toViewportPosition(V2(static_cast<float>(event.motion.x), static_cast<float>(event.motion.y))), which, event.motion.state);
+                Event e(Event::ACTION_MOVE, timestamp, mi);
+                onEvent(e);
+                break;
+            }
+        case SDL_MOUSEWHEEL:
+            {
+                Event::Button which = static_cast<Event::Button>(Event::BUTTON_MOUSE_LEFT + event.button.button - SDL_BUTTON_LEFT);
+                Event::MotionInfo mi(V2(static_cast<float>(event.motion.x), static_cast<float>(event.motion.y)), which, event.motion.state);
+                Event e(Event::ACTION_WHEEL, timestamp, mi);
+                onEvent(e);
+                break;
+            }
+        case SDL_KEYDOWN:
+        case SDL_KEYUP:
+            {
+                Event::KeyboardInfo keyboardInfo(sdlScanCodeToEventCode(event.key.keysym.scancode), static_cast<wchar_t>(event.key.keysym.sym));
+                Event e(event.key.repeat ? Event::ACTION_KEY_REPEAT : (event.type == SDL_KEYDOWN ? Event::ACTION_KEY_DOWN : Event::ACTION_KEY_UP), timestamp, keyboardInfo);
+                onEvent(e);
+                break;
+            }
+        case SDL_TEXTINPUT:
+            {
+                Event e(Event::ACTION_TEXT_INPUT, timestamp, Event::TextInputInfo(event.text.text));
+                onEvent(e);
+                break;
+            }
+        case SDL_WINDOWEVENT:
+            {
+                switch (event.window.event)  {
+                case SDL_WINDOWEVENT_HIDDEN:
+                case SDL_WINDOWEVENT_MINIMIZED:
+                    onPause();
+                    break;
+                case SDL_WINDOWEVENT_SHOWN:
+                case SDL_WINDOWEVENT_RESTORED:
+                    onResume();
+                    onSurfaceChanged();
+                }
+                break;
+            }
+        }
+    }
 }
 
 }

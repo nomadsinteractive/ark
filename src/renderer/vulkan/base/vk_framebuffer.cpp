@@ -34,7 +34,7 @@ uint64_t VKFramebuffer::id()
     return (uint64_t) _stub->_render_pass_begin_info.framebuffer;
 }
 
-void VKFramebuffer::upload(GraphicsContext& /*graphicsContext*/, const sp<Uploader>& /*uploader*/)
+void VKFramebuffer::upload(GraphicsContext& /*graphicsContext*/)
 {
     _stub->initialize();
 }

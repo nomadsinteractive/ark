@@ -11,7 +11,7 @@
 #include "renderer/base/render_engine.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/base/shader.h"
-#include "renderer/base/vertex_stream.h"
+#include "renderer/base/vertex_writer.h"
 #include "renderer/inf/model_loader.h"
 #include "renderer/inf/vertices.h"
 
@@ -36,7 +36,6 @@ void RCCMultiDrawElementsIndirect::postSnapshot(RenderController& /*renderContro
 sp<RenderCommand> RCCMultiDrawElementsIndirect::compose(const RenderRequest& renderRequest, RenderLayer::Snapshot& snapshot)
 {
     DrawingBuffer buf(snapshot._stub->_shader_bindings, snapshot._stub->_stride);
-    sp<Uploader> indirectUploader = nullptr;
     const Buffer& vertices = snapshot._stub->_shader_bindings->vertices();
     bool reload = snapshot.needsReload();
 
@@ -56,14 +55,13 @@ sp<RenderCommand> RCCMultiDrawElementsIndirect::compose(const RenderRequest& ren
             ++ (modelIndirect._command._instance_count);
             modelIndirect._snapshot_offsets.push_back(offset ++);
         }
-        indirectUploader = makeIndirectBufferUploader();
     }
 
     writeModelMatices(renderRequest, buf, snapshot, reload);
 
     DrawingContext drawingContext(snapshot._stub->_shader_bindings, snapshot._stub->_shader_bindings->attachments(), std::move(snapshot._ubos), std::move(snapshot._ssbos),
                                   vertices.snapshot(), _indices.snapshot(),
-                                  DrawingContext::ParamDrawMultiElementsIndirect(buf.makeDividedBufferSnapshots(), _draw_indirect.snapshot(indirectUploader), static_cast<uint32_t>(_indirect_cmds.size())));
+                                  DrawingContext::ParamDrawMultiElementsIndirect(buf.toDividedBufferSnapshots(), reload ? _draw_indirect.snapshot(makeIndirectBuffer(renderRequest)) : _draw_indirect.snapshot(), static_cast<uint32_t>(_indirect_cmds.size())));
 
     if(snapshot._stub->_scissor)
         drawingContext._scissor = snapshot._stub->_render_controller->renderEngine()->toRendererScissor(snapshot._scissor);
@@ -71,18 +69,18 @@ sp<RenderCommand> RCCMultiDrawElementsIndirect::compose(const RenderRequest& ren
     return drawingContext.toRenderCommand(renderRequest);
 }
 
-sp<Uploader> RCCMultiDrawElementsIndirect::makeIndirectBufferUploader()
+ByteArray::Borrowed RCCMultiDrawElementsIndirect::makeIndirectBuffer(const RenderRequest& renderRequest) const
 {
-    std::vector<DrawingContext::DrawElementsIndirectCommand> cmds;
+    ByteArray::Borrowed cmds = renderRequest.allocator().sbrk(_indirect_cmds.size() * sizeof(DrawingContext::DrawElementsIndirectCommand));
+    DrawingContext::DrawElementsIndirectCommand* pcmds = reinterpret_cast<DrawingContext::DrawElementsIndirectCommand*>(cmds.buf());
     uint32_t baseInstance = 0;
     for(const auto& i : _indirect_cmds)
     {
-        const DrawingContext::DrawElementsIndirectCommand& cmd = i.second._command;
-        cmds.push_back(i.second._command);
-        cmds.back()._base_instance = baseInstance;
-        baseInstance += cmd._instance_count;
+        *pcmds = i.second._command;
+        pcmds->_base_instance = baseInstance;
+        baseInstance += pcmds->_instance_count;
     }
-    return sp<Uploader::Vector<DrawingContext::DrawElementsIndirectCommand>>::make(std::move(cmds));
+    return cmds;
 }
 
 void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& renderRequest, DrawingBuffer& buf, const RenderLayer::Snapshot& snapshot, bool reload)
@@ -96,9 +94,12 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
             {
                 const ModelBundle::ModelInfo& modelInfo = _model_bundle->ensure(s._type);
                 const Metrics& metrics = modelInfo._model->metrics();
-                VertexStream writer = buf.makeDividedVertexStream(renderRequest, 1, offset, 1);
+                VertexWriter writer = buf.makeDividedVertexStream(renderRequest, 1, offset, 1);
                 writer.next();
                 writer.write(MatrixUtil::translate(M4::identity(), s._position) * MatrixUtil::scale(s._transform.toMatrix(), toScale(s._size, metrics)));
+                const ByteArray::Borrowed divided = s._varyings.getDivided(1);
+                if(divided.length() > sizeof(M4))
+                    writer.write(divided.buf() + sizeof(M4), divided.length() - sizeof(M4), sizeof(M4));
             }
             ++ offset;
         }
@@ -127,7 +128,7 @@ void RCCMultiDrawElementsIndirect::VerticesUploader::upload(Writable& uploader)
         const Model& model = i.second._model;
         uint32_t size = static_cast<uint32_t>(model.vertices()->length() * stride);
         std::vector<uint8_t> buf(size);
-        VertexStream stream(attributes, false, buf.data(), size, stride);
+        VertexWriter stream(attributes, false, buf.data(), size, stride);
         i.second._model->writeToStream(stream, V3(1.0f));
         uploader.write(buf.data(), size, offset);
         offset += size;

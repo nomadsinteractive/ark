@@ -16,19 +16,26 @@ namespace ark {
 
 const V3 Rotation::Z_AXIS = V3(0, 0, 1.0f);
 
-Rotation::Rotation(float theta, const V3& axis)
+Rotation::Rotation(const V4& quat)
+    : Rotation(nullptr, nullptr, sp<Vec4::Const>::make(quat))
 {
-    setRotation(theta, axis);
+}
+
+Rotation::Rotation(float theta, const V3& axis)
+    : Rotation(sp<Numeric::Const>::make(theta), sp<Vec3::Const>::make(axis), nullptr)
+{
 }
 
 Rotation::Rotation(const sp<Numeric>& theta, const sp<Vec3>& axis)
+    : Rotation(theta, axis, nullptr)
 {
-    setRotation(theta, axis);
 }
 
 Rotation::Rotation(sp<Numeric> theta, sp<Vec3> axis, sp<Vec4> quaternion)
-    : _theta(std::move(theta)), _axis(std::move(axis)), _quaternion(std::move(quaternion))
+    : _theta(std::move(theta), 0), _axis(std::move(axis), Z_AXIS), _quaternion(quaternion ? std::move(quaternion) : sp<Quaternion>::make(_theta.ensure(), _axis.ensure()))
 {
+//TODO: _quaternion to SafeVar
+    _timestamp.setDirty();
 }
 
 V4 Rotation::val()
@@ -46,23 +53,23 @@ void Rotation::traverse(const Holder::Visitor& visitor)
     HolderUtil::visit(_quaternion, visitor);
 }
 
-const sp<Numeric>& Rotation::theta() const
+const sp<Numeric>& Rotation::theta()
 {
-    return _theta;
+    return _theta.ensure();
 }
 
 void Rotation::setTheta(const sp<Numeric>& theta)
 {
-    DCHECK(_theta, "Theta can only be set in Theta-Axis mode");
-    _theta = theta;
+    CHECK(_theta, "Theta can only be set in Theta-Axis mode");
+    _theta.reset(theta);
 
-    _quaternion = sp<Quaternion>::make(_theta, _axis);
+    _quaternion = sp<Quaternion>::make(_theta.ensure(), _axis.ensure());
     _timestamp.setDirty();
 }
 
-const sp<Vec3>& Rotation::axis() const
+const sp<Vec3>& Rotation::axis()
 {
-    return _axis;
+    return _axis.ensure();
 }
 
 void Rotation::setRotation(float theta, const V3& axis)
@@ -72,10 +79,10 @@ void Rotation::setRotation(float theta, const V3& axis)
 
 void Rotation::setRotation(const sp<Numeric>& theta, const sp<Vec3>& axis)
 {
-    _theta = theta;
-    _axis = axis ? axis : sp<Vec3>::make<Vec3::Const>(Rotation::Z_AXIS);
+    _theta.reset(theta);
+    _axis.reset(axis);
 
-    _quaternion = sp<Quaternion>::make(_theta, _axis);
+    _quaternion = sp<Quaternion>::make(_theta.ensure(), _axis.ensure());
     _timestamp.setDirty();
 }
 
@@ -86,8 +93,8 @@ void Rotation::setEuler(float pitch, float yaw, float roll)
 
 void Rotation::setEuler(const sp<Numeric>& pitch, const sp<Numeric>& yaw, const sp<Numeric>& roll)
 {
-    _theta = nullptr;
-    _axis = nullptr;
+    _theta.reset(nullptr);
+    _axis.reset(nullptr);
 
     _quaternion = sp<Quaternion>::make(pitch, yaw, roll);
     _timestamp.setDirty();

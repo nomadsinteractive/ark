@@ -67,7 +67,7 @@ public:
     virtual int launch() override {
         const sp<ResourceLoader> resourceLoader = getResourceLoader();
         const sp<ApplicationContext>& applicationContext = Ark::instance().applicationContext();
-        const sp<Clock>& clock = applicationContext->clock();
+        const sp<Clock>& clock = applicationContext->sysClock();
         const sp<Numeric> duration = clock->duration();
 
         Scope args;

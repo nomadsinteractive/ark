@@ -1,6 +1,6 @@
 #include "renderer/impl/vertices/vertices_quad.h"
 
-#include "renderer/base/vertex_stream.h"
+#include "renderer/base/vertex_writer.h"
 
 namespace ark {
 
@@ -14,7 +14,7 @@ VerticesQuad::VerticesQuad(const Atlas::Item& quad)
 {
 }
 
-void VerticesQuad::write(VertexStream& buf, const V3& size)
+void VerticesQuad::write(VertexWriter& buf, const V3& size)
 {
     float width = size.x();
     float height = size.y();

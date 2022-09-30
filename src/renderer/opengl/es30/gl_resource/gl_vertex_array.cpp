@@ -21,7 +21,7 @@ uint64_t GLVertexArray::id()
     return _id;
 }
 
-void GLVertexArray::upload(GraphicsContext& graphicsContext, const sp<Uploader>& /*uploader*/)
+void GLVertexArray::upload(GraphicsContext& graphicsContext)
 {
     glGenVertexArrays(1, &_id);
     glBindVertexArray(_id);

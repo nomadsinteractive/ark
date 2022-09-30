@@ -25,7 +25,7 @@ bool Duration::update(uint64_t timestamp)
 
 sp<Numeric> Duration::duration()
 {
-    return Ark::instance().clock()->duration();
+    return Ark::instance().appClock()->duration();
 }
 
 Duration::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
@@ -44,7 +44,7 @@ sp<Duration> Duration::BUILDER::build(const Scope& args)
         const sp<Numeric> delegate = _delegate->build(args);
         return sp<Duration>::make(util ? Math::min(delegate, util) : delegate);
     }
-    const sp<Clock> clock = _clock ? _clock->build(args) : Ark::instance().clock();
+    const sp<Clock> clock = _clock ? _clock->build(args) : Ark::instance().appClock();
     return sp<Duration>::make(util ? clock->durationUntil(util) : clock->duration());
 }
 
@@ -64,7 +64,7 @@ Duration::DICTIONARY::DICTIONARY(BeanFactory& /*factory*/)
 
 sp<Duration> Duration::DICTIONARY::build(const Scope& /*args*/)
 {
-    return sp<Duration>::make(Ark::instance().clock()->duration());
+    return sp<Duration>::make(Ark::instance().appClock()->duration());
 }
 
 }

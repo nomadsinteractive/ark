@@ -10,9 +10,9 @@ namespace ark {
 
 namespace {
 
-class InputMat4fvInputArray : public Input {
+class InputArray : public Input {
 public:
-    InputMat4fvInputArray(sp<Array<sp<Input>>> inputs)
+    InputArray(sp<Array<sp<Input>>> inputs)
         : _inputs(std::move(inputs)), _size(0) {
         for(const sp<Input>& i : * _inputs) {
             uint32_t s = i->size();
@@ -94,7 +94,7 @@ sp<Input> InputMat4fv::BUILDER::build(const Scope& args)
 
         array<sp<Input>> flatables = args.build<Array<sp<Input>>>(_id.arg(), args);
         if(flatables)
-            return sp<InputMat4fvInputArray>::make(std::move(flatables));
+            return sp<InputArray>::make(std::move(flatables));
     }
 
     return sp<InputMat4fv>::make(_array->build(args));

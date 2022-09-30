@@ -56,9 +56,9 @@ public:
 //  [[script::bindings::auto]]
     const sp<Animation>& getAnimation(const String& name) const;
 
-    void writeToStream(VertexStream& buf, const V3& size) const;
+    void writeToStream(VertexWriter& buf, const V3& size) const;
 
-    void writeRenderable(VertexStream& buf, const Renderable::Snapshot& renderable) const;
+    void writeRenderable(VertexWriter& buf, const Renderable::Snapshot& renderable) const;
 
     void dispose();
     bool isDisposed() const;
@@ -84,7 +84,7 @@ private:
     public:
         MeshVertices(std::vector<sp<Mesh>> meshes);
 
-        virtual void write(VertexStream& buf, const V3& size) override;
+        virtual void write(VertexWriter& buf, const V3& size) override;
 
     private:
         size_t calcVertexLength(const std::vector<sp<Mesh> >& meshes) const;

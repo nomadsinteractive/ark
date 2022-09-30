@@ -41,6 +41,9 @@ public:
     float dot(const V2& other) const;
     float length() const;
 
+    V3 extend(float z) const;
+    V4 extend(const V2& zw) const;
+
     V2 floorDiv(const V2& other) const;
     V2 normalize() const;
 

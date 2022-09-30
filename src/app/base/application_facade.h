@@ -20,6 +20,8 @@ public:
     const sp<Clock>& clock() const;
 //  [[script::bindings::property]]
     sp<Vec2> cursorPosition() const;
+//  [[script::bindings::property]]
+    const sp<Size>& surfaceSize() const;
 // [[script::bindings::property]]
     const sp<ApplicationController>& applicationController() const;
 // [[script::bindings::property]]
@@ -51,9 +53,9 @@ public:
 //  [[script::bindings::auto]]
     void addControlLayer(const sp<Renderer>& controlLayer);
 //  [[script::bindings::auto]]
-    void addEventListener(const sp<EventListener>& eventListener, int32_t priority = 0);
+    void addEventListener(sp<EventListener> eventListener, int32_t priority = 0);
 //  [[script::bindings::auto]]
-    void setDefaultEventListener(const sp<EventListener>& eventListener);
+    void setDefaultEventListener(sp<EventListener> eventListener);
 
 //  [[script::bindings::auto]]
     void exit();
@@ -92,6 +94,7 @@ private:
     sp<ApplicationContext> _context;
     sp<ApplicationController> _controller;
     sp<SurfaceController> _surface_controller;
+    sp<Size> _surface_size;
 
     sp<Manifest> _manifest;
 

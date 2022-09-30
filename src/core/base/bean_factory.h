@@ -537,7 +537,7 @@ public:
             DCHECK(references, "BeanFactory has been disposed");
             value = references->build<T>(_name, args);
         }
-        DCHECK(value || _fallback, "Cannot get argument \"%s\"", _name.c_str());
+        CHECK(value || _fallback, "Cannot get argument \"%s\"", _name.c_str());
         return value ? value : _fallback->build(args);
     }
 

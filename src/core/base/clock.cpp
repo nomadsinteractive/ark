@@ -3,6 +3,7 @@
 #include <cmath>
 
 #include "core/ark.h"
+#include "core/base/delegate.h"
 #include "core/inf/variable.h"
 #include "core/impl/boolean/boolean_by_timeout.h"
 #include "core/util/conversions.h"
@@ -42,10 +43,10 @@ private:
 
 }
 
-class Clock::Ticker : public Variable<uint64_t> {
+class Clock::Ticker : public Variable<uint64_t>, public Delegate<Variable<uint64_t>> {
 public:
-    Ticker(const sp<Variable<uint64_t>>& delegate)
-        : _delegate(delegate), _bypass(0), _paused(0) {
+    Ticker(sp<Variable<uint64_t>> delegate)
+        : Delegate(std::move(delegate)), _bypass(0), _paused(0) {
     }
 
     virtual uint64_t val() override {
@@ -56,24 +57,22 @@ public:
         return _paused ? false : _delegate->update(timestamp);
     }
 
-    void setDelegate(const sp<Variable<uint64_t>>& delegate) {
-        _delegate = delegate;
-    }
-
     void pause() {
-        if(!_paused)
-            _paused = val();
+        if(!_paused) {
+            _delegate->update(0);
+            _paused = _delegate->val();
+        }
     }
 
     void resume() {
         if(_paused != 0) {
+            _delegate->update(0);
             _bypass += (_delegate->val() - _bypass - _paused);
             _paused = 0;
         }
     }
 
 private:
-    sp<Variable<uint64_t>> _delegate;
     uint64_t _bypass;
     uint64_t _paused;
 };
@@ -126,8 +125,8 @@ Clock::Clock()
 {
 }
 
-Clock::Clock(const sp<Variable<uint64_t>>& ticker)
-    : _ticker(sp<Ticker>::make(ticker))
+Clock::Clock(sp<Variable<uint64_t>> ticker)
+    : _ticker(sp<Ticker>::make(std::move(ticker)))
 {
 }
 
@@ -146,14 +145,14 @@ uint64_t Clock::tick() const
     return _ticker->val();
 }
 
-const sp<Variable<uint64_t>> Clock::ticker() const
+sp<Variable<uint64_t>> Clock::ticker() const
 {
     return _ticker;
 }
 
 void Clock::setTicker(const sp<Variable<uint64_t>>& ticker)
 {
-    _ticker->setDelegate(ticker);
+    _ticker->reset(ticker);
 }
 
 sp<Numeric> Clock::duration() const

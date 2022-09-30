@@ -305,7 +305,7 @@ sp<Numeric> NumericType::ifElse(const sp<Numeric>& self, const sp<Boolean>& cond
 
 sp<Numeric> NumericType::pursue(float s0, const sp<Numeric>& target, float duration, const sp<Numeric>& t)
 {
-    return sp<Stalker>::make(t ? t : Ark::instance().clock()->duration(), target, s0, duration);
+    return sp<Stalker>::make(t ? t : Ark::instance().appClock()->duration(), target, s0, duration);
 }
 
 sp<Numeric> NumericType::vibrate(float s0, float v0, float s1, float v1, float duration, const sp<Numeric>& t)
@@ -315,7 +315,7 @@ sp<Numeric> NumericType::vibrate(float s0, float v0, float s1, float v1, float d
     Math::vibrate(s0, v0, s1, v1, o, a, t0, t1);
     float multiplier = (t1 - t0) / duration;
     const sp<Numeric> b = sp<Numeric::Const>::make(t1 - t0);
-    return sp<Vibrate>::make(boundary(mul(t ? t : Ark::instance().clock()->duration(), multiplier), b)->delegate(), a, t0, o);
+    return sp<Vibrate>::make(boundary(mul(t ? t : Ark::instance().appClock()->duration(), multiplier), b)->delegate(), a, t0, o);
 }
 
 sp<Numeric> NumericType::lerp(const sp<Numeric>& self, const sp<Numeric>& b, const sp<Numeric>& t)
@@ -326,18 +326,18 @@ sp<Numeric> NumericType::lerp(const sp<Numeric>& self, const sp<Numeric>& b, con
 sp<Numeric> NumericType::sod(sp<Numeric> self, float k, float z, float r, sp<Numeric> t)
 {
     if(t == nullptr)
-        t = Ark::instance().clock()->duration();
+        t = Ark::instance().appClock()->duration();
     return sp<SecondOrderDynamics<float>>::make(std::move(self), std::move(t), k, z, r);
 }
 
 sp<Numeric> NumericType::periodic(const sp<Numeric>& self, const sp<Numeric>& interval, const sp<Numeric>& duration)
 {
-    return sp<Periodic<float>>::make(self, interval ? interval : sp<Numeric>::make<Numeric::Const>(1.0f / 24), duration ? duration : Ark::instance().clock()->duration());
+    return sp<Periodic<float>>::make(self, interval ? interval : sp<Numeric>::make<Numeric::Const>(1.0f / 24), duration ? duration : Ark::instance().appClock()->duration());
 }
 
 sp<Numeric> NumericType::integralWithResistance(const sp<Numeric>& self, float v0, const sp<Numeric>& cd, const sp<Numeric>& t)
 {
-    return sp<IntegralWithResistance<float>>::make(v0, self, cd, t ? t : Ark::instance().clock()->duration());
+    return sp<IntegralWithResistance<float>>::make(v0, self, cd, t ? t : Ark::instance().appClock()->duration());
 }
 
 sp<Numeric> NumericType::modFloor(const sp<Numeric>& self, const sp<Numeric>& mod)
@@ -352,12 +352,12 @@ sp<Numeric> NumericType::modCeil(const sp<Numeric>& self, const sp<Numeric>& mod
 
 sp<Numeric> NumericType::attract(const sp<Numeric>& self, float s0, float duration, const sp<Numeric>& t)
 {
-    return sp<Stalker>::make(t ? t : Ark::instance().clock()->duration(), self, s0, duration);
+    return sp<Stalker>::make(t ? t : Ark::instance().appClock()->duration(), self, s0, duration);
 }
 
 sp<Numeric> NumericType::integral(const sp<Numeric>& self, const sp<Numeric>& t)
 {
-    return sp<Integral<float>>::make(self, t ? t : Ark::instance().clock()->duration());
+    return sp<Integral<float>>::make(self, t ? t : Ark::instance().appClock()->duration());
 }
 
 NumericType::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr)

@@ -15,18 +15,23 @@
 namespace ark {
 
 ApplicationFacade::ApplicationFacade(Application& app, const Surface& surface, const sp<Manifest>& manifest)
-    : _context(app.context()), _controller(app.controller()), _surface_controller(surface.controller()), _manifest(manifest)
+    : _context(app.context()), _controller(app.controller()), _surface_size(app.surfaceSize()), _surface_controller(surface.controller()), _manifest(manifest)
 {
 }
 
 const sp<Clock>& ApplicationFacade::clock() const
 {
-    return _context->clock();
+    return _context->sysClock();
 }
 
 sp<Vec2> ApplicationFacade::cursorPosition() const
 {
     return _context->cursorPosition();
+}
+
+const sp<Size>& ApplicationFacade::surfaceSize() const
+{
+    return _surface_size;
 }
 
 const sp<ApplicationController>& ApplicationFacade::applicationController() const
@@ -109,14 +114,14 @@ void ApplicationFacade::addControlLayer(const sp<Renderer>& controlLayer)
     _surface_controller->addControlLayer(controlLayer);
 }
 
-void ApplicationFacade::addEventListener(const sp<EventListener>& eventListener, int32_t priority)
+void ApplicationFacade::addEventListener(sp<EventListener> eventListener, int32_t priority)
 {
-    _context->addEventListener(eventListener, priority);
+    _context->addEventListener(std::move(eventListener), priority);
 }
 
-void ApplicationFacade::setDefaultEventListener(const sp<EventListener>& eventListener)
+void ApplicationFacade::setDefaultEventListener(sp<EventListener> eventListener)
 {
-    _context->setDefaultEventListener(eventListener);
+    _context->setDefaultEventListener(std::move(eventListener));
 }
 
 void ApplicationFacade::exit()
@@ -126,7 +131,7 @@ void ApplicationFacade::exit()
 
 void ApplicationFacade::post(sp<Runnable> task, float delay, sp<Future> future)
 {
-    _context->post(std::move(task), delay, std::move(future));
+    _context->messageLoopApp()->post(std::move(task), delay, std::move(future));
 }
 
 void ApplicationFacade::post(sp<Runnable> task, const std::vector<float>& delays, sp<Future> future)
@@ -137,7 +142,7 @@ void ApplicationFacade::post(sp<Runnable> task, const std::vector<float>& delays
 
 void ApplicationFacade::schedule(sp<Runnable> task, float interval, sp<Future> future)
 {
-    _context->schedule(std::move(task), interval, std::move(future));
+    _context->messageLoopApp()->schedule(std::move(task), interval, std::move(future));
 }
 
 void ApplicationFacade::addStringBundle(const String& name, const sp<StringBundle>& stringBundle)

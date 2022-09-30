@@ -11,7 +11,7 @@ namespace ark {
 
 class EventListenerList : public EventListener {
 public:
-    void addEventListener(const sp<EventListener>& eventListener, int32_t priority);
+    void addEventListener(sp<EventListener> eventListener, int32_t priority);
 
     virtual bool onEvent(const Event& event);
 

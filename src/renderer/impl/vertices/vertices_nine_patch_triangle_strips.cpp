@@ -1,6 +1,6 @@
 #include "renderer/impl/vertices/vertices_nine_patch_triangle_strips.h"
 
-#include "renderer/base/vertex_stream.h"
+#include "renderer/base/vertex_writer.h"
 
 namespace ark {
 
@@ -14,7 +14,7 @@ VerticesNinePatchTriangleStrips::VerticesNinePatchTriangleStrips(const Rect& bou
 {
 }
 
-void VerticesNinePatchTriangleStrips::write(VertexStream& buf, const V3& size)
+void VerticesNinePatchTriangleStrips::write(VertexWriter& buf, const V3& size)
 {
     const Rect paintRect(0, 0, std::max(_paddings.left() + _paddings.right(), size.x()), std::max(_paddings.top() + _paddings.bottom(), size.y()));
     float xData[4] = {paintRect.left(), paintRect.left() + _paddings.left(), paintRect.right() - _paddings.right(), paintRect.right()};

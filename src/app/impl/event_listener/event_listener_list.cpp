@@ -4,10 +4,10 @@
 
 namespace ark {
 
-void EventListenerList::addEventListener(const sp<EventListener>& eventListener, int32_t priority)
+void EventListenerList::addEventListener(sp<EventListener> eventListener, int32_t priority)
 {
     DASSERT(eventListener);
-    _event_listeners[-priority].push_back(eventListener);
+    _event_listeners[-priority].push_back(std::move(eventListener));
 }
 
 bool EventListenerList::onEvent(const Event& event)

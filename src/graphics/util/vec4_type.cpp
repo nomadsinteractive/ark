@@ -66,7 +66,7 @@ sp<Vec4> Vec4Type::transform(const sp<Vec4>& self, const sp<Transform>& transfor
 
 sp<Vec4> Vec4Type::integral(const sp<Vec4>& self, const sp<Numeric>& t)
 {
-    sp<Numeric> duration = t ? t : Ark::instance().clock()->duration();
+    sp<Numeric> duration = t ? t : Ark::instance().appClock()->duration();
     return sp<Integral<V4>>::make(self, std::move(duration));
 }
 
@@ -247,7 +247,7 @@ sp<Vec4> Vec4Type::lerp(const sp<Vec4>& self, const sp<Vec4>& b, const sp<Numeri
 sp<Vec4> Vec4Type::sod(sp<Vec4> self, float k, float z, float r, sp<Numeric> t)
 {
     if(t == nullptr)
-        t = Ark::instance().clock()->duration();
+        t = Ark::instance().appClock()->duration();
     return sp<SecondOrderDynamics<V4>>::make(std::move(self), std::move(t), k, z, r);
 }
 

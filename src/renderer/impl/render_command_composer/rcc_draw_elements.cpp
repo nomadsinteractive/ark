@@ -9,7 +9,7 @@
 #include "renderer/base/render_engine.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/base/shader.h"
-#include "renderer/base/vertex_stream.h"
+#include "renderer/base/vertex_writer.h"
 #include "renderer/inf/model_loader.h"
 #include "renderer/inf/vertices.h"
 
@@ -41,7 +41,7 @@ sp<RenderCommand> RCCDrawElements::compose(const RenderRequest& renderRequest, R
 
     if(snapshot.needsReload())
     {
-        VertexStream writer = buf.makeVertexStream(renderRequest, verticesLength * snapshot._items.size(), 0);
+        VertexWriter writer = buf.makeVertexStream(renderRequest, verticesLength * snapshot._items.size(), 0);
         for(const Renderable::Snapshot& i : snapshot._items)
             i._model->writeRenderable(writer, i);
     }
@@ -52,7 +52,7 @@ sp<RenderCommand> RCCDrawElements::compose(const RenderRequest& renderRequest, R
         {
             if(i.getState(Renderable::RENDERABLE_STATE_DIRTY))
             {
-                VertexStream writer = buf.makeVertexStream(renderRequest, verticesLength, offset);
+                VertexWriter writer = buf.makeVertexStream(renderRequest, verticesLength, offset);
                 i._model->writeRenderable(writer, i);
             }
             offset += verticesLength;

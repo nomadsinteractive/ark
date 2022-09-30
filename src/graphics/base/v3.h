@@ -38,6 +38,8 @@ public:
     float dot(const V3& other) const;
     float length() const;
 
+    V4 extend(float w) const;
+
     V3 floorDiv(const V3& other) const;
     V3 normalize() const;
 

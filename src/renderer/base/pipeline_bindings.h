@@ -32,11 +32,12 @@ public:
         RENDER_PROCEDURE_DRAW_MULTI_ELEMENTS_INDIRECT
     };
 
-    enum FragmentTest {
-        FRAGMENT_TEST_CULL_FACE,
-        FRAGMENT_TEST_DEPTH,
-        FRAGMENT_TEST_SCISSOR,
-        FRAGMENT_TEST_STENCIL
+    enum TrailType {
+        TRAIT_TYPE_CULL_FACE_TEST,
+        TRAIT_TYPE_DEPTH_TEST,
+        TRAIT_TYPE_STENCIL_TEST,
+        TRAIT_TYPE_SCISSOR,
+        TRAIT_TYPE_BLEND
     };
 
     enum CompareFunc {
@@ -78,6 +79,22 @@ public:
         FRONT_FACE_TYPE_LENGTH
     };
 
+    enum BlendFactor {
+        BLEND_FACTOR_DEFAULT,
+        BLEND_FACTOR_ZERO,
+        BLEND_FACTOR_ONE,
+        BLEND_FACTOR_SRC_COLOR,
+        BLEND_FACTOR_ONE_MINUS_SRC_COLOR,
+        BLEND_FACTOR_DST_COLOR,
+        BLEND_FACTOR_ONE_MINUS_DST_COLOR,
+        BLEND_FACTOR_SRC_ALPHA,
+        BLEND_FACTOR_ONE_MINUS_SRC_ALPHA,
+        BLEND_FACTOR_DST_ALPHA,
+        BLEND_FACTOR_ONE_MINUS_DST_ALPHA,
+        BLEND_FACTOR_CONST_COLOR,
+        BLEND_FACTOR_CONST_ALPHA,
+    };
+
     struct TraitDepthTest {
         bool _enabled;
         bool _write_enabled;
@@ -103,24 +120,32 @@ public:
         FrontFace _front_face;
     };
 
-    union Trait {
+    struct TraitBlend {
+        BlendFactor _src_rgb_factor;
+        BlendFactor _dst_rgb_factor;
+        BlendFactor _src_alpha_factor;
+        BlendFactor _dst_alpha_factor;
+    };
+
+    union TraitConfigure {
         TraitDepthTest _depth_test;
         TraitStencilTest _stencil_test;
         TraitCullFaceTest _cull_face_test;
+        TraitBlend _blend;
     };
 
-    struct FragmentTestManifest {
-        FragmentTestManifest(const document& manifest);
+    struct FragmentTraitManifest {
+        FragmentTraitManifest(const document& manifest);
 
-        FragmentTest _type;
-        Trait _trait;
+        TrailType _type;
+        TraitConfigure _configure;
 
     private:
         TraitStencilTestSeparate loadStencilTestSeparate(const document& manifest, bool allowDefaultFace) const;
 
     };
 
-    typedef Table<int32_t, FragmentTestManifest> FragmentTestTable;
+    typedef Table<int32_t, FragmentTraitManifest> FragmentTestTable;
 
     struct ARK_API Parameters {
         Parameters(const Rect& scissor, FragmentTestTable tests, uint32_t flags);
@@ -140,7 +165,8 @@ public:
             sp<RenderController> _render_controller;
 
             SafePtr<Builder<Vec4>> _pipeline_bindings_scissor;
-            FragmentTestTable _tests;
+            FragmentTestTable _traits;
+            [[deprecated]]
             uint32_t _pipeline_bindings_flags;
         };
     };

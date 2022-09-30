@@ -21,11 +21,10 @@ public:
     Uploader(size_t size);
     virtual ~Uploader() = default;
 
-    size_t size() const;
+    virtual size_t size();
     virtual void upload(Writable& writable) = 0;
 
     template<typename T> class Array;
-    template<typename T> class ArrayList;
     template<typename T> class Vector;
     template<typename T> class StandardLayout;
 
@@ -47,27 +46,6 @@ public:
 
 private:
     sp<ark::Array<T>> _array;
-};
-
-template<typename T> class Uploader::ArrayList : public Uploader {
-public:
-    ArrayList(std::vector<sp<ark::Array<T>>> arrayList)
-        : Uploader(0), _array_list(std::move(arrayList)) {
-        for(const auto& i : _array_list)
-            _size += i->size();
-    }
-
-    virtual void upload(Writable& uploader) override {
-        size_t offset = 0;
-        for(const auto& i : _array_list) {
-            size_t size = i->size();
-            uploader.write(i->buf(), size, offset);
-            offset += size;
-        }
-    }
-
-private:
-    std::vector<sp<ark::Array<T>>> _array_list;
 };
 
 template<typename T> class Uploader::Vector : public Uploader {
@@ -118,10 +96,7 @@ private:
 };
 
 typedef Uploader::Array<uint8_t> ByteArrayUploader;
-typedef Uploader::ArrayList<uint8_t> ByteArrayListUploader;
-
 typedef Uploader::Array<element_index_t> IndexArrayUploader;
-typedef Uploader::ArrayList<element_index_t> IndexArrayListUploader;
 
 }
 

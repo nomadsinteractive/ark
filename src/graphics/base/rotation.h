@@ -7,6 +7,7 @@
 #include "core/inf/holder.h"
 #include "core/inf/variable.h"
 #include "core/types/safe_ptr.h"
+#include "core/types/safe_var.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -19,6 +20,7 @@ namespace ark {
 //[[script::bindings::extends(Vec4)]]
 class ARK_API Rotation : public Holder, public Vec4 {
 public:
+    Rotation(const V4& quat);
 //  [[script::bindings::auto]]
     Rotation(float theta, const V3& axis = Rotation::Z_AXIS);
 //  [[script::bindings::auto]]
@@ -32,11 +34,11 @@ public:
     virtual void traverse(const Visitor& visitor) override;
 
 //  [[script::bindings::property]]
-    const sp<Numeric>& theta() const;
+    const sp<Numeric>& theta();
 //  [[script::bindings::property]]
     void setTheta(const sp<Numeric>& theta);
 //  [[script::bindings::property]]
-    const sp<Vec3>& axis() const;
+    const sp<Vec3>& axis();
 
 //  [[script::bindings::auto]]
     void setRotation(float theta, const V3& axis);
@@ -74,8 +76,8 @@ public:
     static const V3 Z_AXIS;
 
 private:
-    sp<Numeric> _theta;
-    sp<Vec3> _axis;
+    SafeVar<Numeric> _theta;
+    SafeVar<Vec3> _axis;
 
     sp<Vec4> _quaternion;
 

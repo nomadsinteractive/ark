@@ -67,7 +67,7 @@ void RendererType::setDelegate(const sp<Renderer>& self, const sp<Renderer>& del
 {
     const sp<Delegate<Renderer>> rd = self.as<Delegate<Renderer>>();
     DCHECK(rd, "Renderer is not an instance of Delegate<Renderer>");
-    rd->setDelegate(delegate);
+    rd->reset(delegate);
 }
 
 sp<Renderer> ark::RendererType::translate(const sp<Renderer>& self, const sp<Vec3>& position)

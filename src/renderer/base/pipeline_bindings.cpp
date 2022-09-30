@@ -1,5 +1,6 @@
 #include "renderer/base/pipeline_bindings.h"
 
+#include "core/base/enums.h"
 #include "core/util/conversions.h"
 
 #include "renderer/base/graphics_context.h"
@@ -94,14 +95,14 @@ sp<Pipeline> PipelineBindings::getPipeline(GraphicsContext& graphicsContext, con
     if(_pipeline)
     {
         if(_pipeline->id() == 0)
-            _pipeline->upload(graphicsContext, nullptr);
+            _pipeline->upload(graphicsContext);
         return _pipeline;
     }
 
     layout()->preCompile(graphicsContext);
     _pipeline = pipelineFactory->buildPipeline(graphicsContext, *this);
-    graphicsContext.renderController()->upload(_pipeline, nullptr, RenderController::US_ON_SURFACE_READY, nullptr, RenderController::UPLOAD_PRIORITY_HIGH);
-    _pipeline->upload(graphicsContext, nullptr);
+    graphicsContext.renderController()->upload(_pipeline, RenderController::US_ON_SURFACE_READY, nullptr, RenderController::UPLOAD_PRIORITY_HIGH);
+    _pipeline->upload(graphicsContext);
     return _pipeline;
 }
 
@@ -109,9 +110,8 @@ PipelineBindings::Stub::Stub(ModelLoader::RenderMode mode, RenderProcedure rende
     : _mode(mode), _render_procedure(renderProcedure), _parameters(std::move(parameters)), _layout(std::move(pipelineLayout)), _input(_layout->input()), _attributes(_input)
 {
     _samplers.resize(_input->samplerCount());
-
     const Table<String, sp<Texture>>& samplers = _layout->samplers();
-    DWARN(_samplers.size() >= samplers.size(), "Predefined samplers(%d) is more than samplers(%d) in PipelineLayout", samplers.size(), _samplers.size());
+    WARN(_samplers.size() >= samplers.size(), "Predefined samplers(%d) is more than samplers(%d) in PipelineLayout", samplers.size(), _samplers.size());
 
     for(size_t i = 0; i < samplers.values().size(); ++i)
         if(i < _samplers.size())
@@ -126,14 +126,14 @@ PipelineBindings::Parameters::Parameters(const Rect& scissor, PipelineBindings::
 PipelineBindings::Parameters::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _render_controller(resourceLoaderContext->renderController()), _pipeline_bindings_scissor(factory.getBuilder<Vec4>(manifest, "scissor")), _pipeline_bindings_flags(Documents::getAttribute<PipelineBindings::Flag>(manifest, "flags", PipelineBindings::FLAG_DEFAULT_VALUE))
 {
-    for(const document& i : manifest->children("test"))
-        _tests.push_back(Documents::ensureAttribute<FragmentTest>(i, Constants::Attributes::TYPE), i);
+    for(const document& i : manifest->children("trait"))
+        _traits.push_back(Documents::ensureAttribute<TrailType>(i, Constants::Attributes::TYPE), i);
 }
 
 PipelineBindings::Parameters PipelineBindings::Parameters::BUILDER::build(const Scope& args) const
 {
     sp<Vec4> scissor = _pipeline_bindings_scissor->build(args);
-    return Parameters(_render_controller->renderEngine()->toRendererScissor(scissor ? Rect(scissor->val()) : Rect()), _tests, _pipeline_bindings_flags);
+    return Parameters(_render_controller->renderEngine()->toRendererScissor(scissor ? Rect(scissor->val()) : Rect()), _traits, _pipeline_bindings_flags);
 }
 
 template<> ARK_API PipelineBindings::Flag Conversions::to<String, PipelineBindings::Flag>(const String& str)
@@ -163,18 +163,17 @@ template<> ARK_API PipelineBindings::Flag Conversions::to<String, PipelineBindin
     return static_cast<PipelineBindings::Flag>(flag);
 }
 
-PipelineBindings::FragmentTestManifest::FragmentTestManifest(const document& manifest)
-    : _type(Documents::ensureAttribute<FragmentTest>(manifest, Constants::Attributes::TYPE))
+PipelineBindings::FragmentTraitManifest::FragmentTraitManifest(const document& manifest)
+    : _type(Documents::ensureAttribute<TrailType>(manifest, Constants::Attributes::TYPE))
 {
-    if(_type == FRAGMENT_TEST_DEPTH)
-    {
-        _trait._depth_test._enabled = Documents::getAttribute<bool>(manifest, "enabled", true);
-        _trait._depth_test._write_enabled = Documents::getAttribute<bool>(manifest, "write-enabled", true);
-        _trait._depth_test._func = Documents::getAttribute<CompareFunc>(manifest, "func", PipelineBindings::COMPARE_FUNC_DEFAULT);
-    }
-    else if(_type == FRAGMENT_TEST_STENCIL)
-    {
-        TraitStencilTest& stencilTest = _trait._stencil_test;
+    switch(_type) {
+    case TRAIT_TYPE_DEPTH_TEST:
+        _configure._depth_test._enabled = Documents::getAttribute<bool>(manifest, "enabled", true);
+        _configure._depth_test._write_enabled = Documents::getAttribute<bool>(manifest, "write-enabled", true);
+        _configure._depth_test._func = Documents::getAttribute<CompareFunc>(manifest, "func", PipelineBindings::COMPARE_FUNC_DEFAULT);
+        break;
+    case TRAIT_TYPE_STENCIL_TEST: {
+        TraitStencilTest& stencilTest = _configure._stencil_test;
         const std::vector<document>& faces = manifest->children("face");
         if(faces.size() == 0)
             stencilTest._front = stencilTest._back = loadStencilTestSeparate(manifest, true);
@@ -188,15 +187,22 @@ PipelineBindings::FragmentTestManifest::FragmentTestManifest(const document& man
                 (face._type == FRONT_FACE_TYPE_FRONT ? stencilTest._front : stencilTest._back) = face;
             }
         }
+        break;
     }
-    else if(_type == FRAGMENT_TEST_CULL_FACE)
-    {
-        _trait._cull_face_test._enabled = Documents::getAttribute<bool>(manifest, "enabled", true);
-        _trait._cull_face_test._front_face = Documents::getAttribute<FrontFace>(manifest, "front-face", PipelineBindings::FRONT_FACE_DEFAULT);
+    case TRAIT_TYPE_CULL_FACE_TEST:
+        _configure._cull_face_test._enabled = Documents::getAttribute<bool>(manifest, "enabled", true);
+        _configure._cull_face_test._front_face = Documents::getAttribute<FrontFace>(manifest, "front-face", PipelineBindings::FRONT_FACE_DEFAULT);
+        break;
+    case TRAIT_TYPE_BLEND:
+        _configure._blend._src_rgb_factor = Documents::getAttribute<BlendFactor>(manifest, "src-rgb", BLEND_FACTOR_DEFAULT);
+        _configure._blend._dst_rgb_factor = Documents::getAttribute<BlendFactor>(manifest, "dst-rgb", BLEND_FACTOR_DEFAULT);
+        _configure._blend._src_alpha_factor = Documents::getAttribute<BlendFactor>(manifest, "src-alpha", BLEND_FACTOR_DEFAULT);
+        _configure._blend._dst_alpha_factor = Documents::getAttribute<BlendFactor>(manifest, "dst-alpha", BLEND_FACTOR_DEFAULT);
+        break;
     }
 }
 
-PipelineBindings::TraitStencilTestSeparate PipelineBindings::FragmentTestManifest::loadStencilTestSeparate(const document& manifest, bool allowDefaultFace) const
+PipelineBindings::TraitStencilTestSeparate PipelineBindings::FragmentTraitManifest::loadStencilTestSeparate(const document& manifest, bool allowDefaultFace) const
 {
     PipelineBindings::TraitStencilTestSeparate face;
     face._type = Documents::getAttribute<FrontFaceType>(manifest, "face-type", FRONT_FACE_TYPE_DEFAULT);
@@ -212,16 +218,18 @@ PipelineBindings::TraitStencilTestSeparate PipelineBindings::FragmentTestManifes
     return face;
 }
 
-template<> ARK_API PipelineBindings::FragmentTest Conversions::to<String, PipelineBindings::FragmentTest>(const String& str)
+template<> ARK_API PipelineBindings::TrailType Conversions::to<String, PipelineBindings::TrailType>(const String& str)
 {
     if(str == "cull_face")
-        return PipelineBindings::FRAGMENT_TEST_CULL_FACE;
+        return PipelineBindings::TRAIT_TYPE_CULL_FACE_TEST;
     if(str == "depth")
-        return PipelineBindings::FRAGMENT_TEST_DEPTH;
-    else if(str == "scissor")
-        return PipelineBindings::FRAGMENT_TEST_SCISSOR;
+        return PipelineBindings::TRAIT_TYPE_DEPTH_TEST;
+    if(str == "scissor")
+        return PipelineBindings::TRAIT_TYPE_SCISSOR;
+    if(str == "blend")
+        return PipelineBindings::TRAIT_TYPE_BLEND;
     DCHECK(str == "stencil", "Unknown FragmentTest: \"%s\", possible values are [cull_face, depth, scissor, stencil]", str.c_str());
-    return PipelineBindings::FRAGMENT_TEST_STENCIL;
+    return PipelineBindings::TRAIT_TYPE_STENCIL_TEST;
 }
 
 template<> ARK_API PipelineBindings::CompareFunc Conversions::to<String, PipelineBindings::CompareFunc>(const String& str)
@@ -278,6 +286,28 @@ template<> ARK_API PipelineBindings::FrontFaceType Conversions::to<String, Pipel
         return PipelineBindings::FRONT_FACE_TYPE_FRONT;
     DCHECK(str == "back", "Unknown FrontFaceType: \"%s\", possible values are [front, back]", str.c_str());
     return PipelineBindings::FRONT_FACE_TYPE_BACK;
+}
+
+template<> ARK_API void Enums<PipelineBindings::BlendFactor>::initialize(std::map<String, PipelineBindings::BlendFactor>& enums)
+{
+    enums["default"] = PipelineBindings::BLEND_FACTOR_DEFAULT;
+    enums["zero"] = PipelineBindings::BLEND_FACTOR_ZERO;
+    enums["one"] = PipelineBindings::BLEND_FACTOR_ONE;
+    enums["src_color"] = PipelineBindings::BLEND_FACTOR_SRC_COLOR;
+    enums["one_minus_src_color"] = PipelineBindings::BLEND_FACTOR_ONE_MINUS_SRC_COLOR;
+    enums["dst_color"] = PipelineBindings::BLEND_FACTOR_DST_COLOR;
+    enums["one_minus_dst_color"] = PipelineBindings::BLEND_FACTOR_ONE_MINUS_DST_COLOR;
+    enums["src_alpha"] = PipelineBindings::BLEND_FACTOR_SRC_ALPHA;
+    enums["one_minus_src_alpha"] = PipelineBindings::BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+    enums["dst_alpha"] = PipelineBindings::BLEND_FACTOR_DST_ALPHA;
+    enums["one_minus_dst_alpha"] = PipelineBindings::BLEND_FACTOR_ONE_MINUS_DST_ALPHA;
+    enums["const_color"] = PipelineBindings::BLEND_FACTOR_CONST_COLOR;
+    enums["const_alpha"] = PipelineBindings::BLEND_FACTOR_CONST_ALPHA;
+}
+
+template<> ARK_API PipelineBindings::BlendFactor Conversions::to<String, PipelineBindings::BlendFactor>(const String& str)
+{
+    return Enums<PipelineBindings::BlendFactor>::instance().ensureEnum(str);
 }
 
 }

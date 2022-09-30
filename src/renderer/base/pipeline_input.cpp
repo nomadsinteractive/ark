@@ -17,14 +17,15 @@ PipelineInput::AttributeOffsets::AttributeOffsets()
 
 PipelineInput::AttributeOffsets::AttributeOffsets(const PipelineInput& input)
 {
-    _offsets[ATTRIBUTE_NAME_TEX_COORDINATE] = input.getAttributeOffset("TexCoordinate");
-    _offsets[ATTRIBUTE_NAME_NORMAL] = input.getAttributeOffset("Normal");
-    _offsets[ATTRIBUTE_NAME_TANGENT] = input.getAttributeOffset("Tangent");
-    _offsets[ATTRIBUTE_NAME_BITANGENT] = input.getAttributeOffset("Bitangent");
-    _offsets[ATTRIBUTE_NAME_BONE_IDS] = input.getAttributeOffset("BoneIds");
-    _offsets[ATTRIBUTE_NAME_BONE_WEIGHTS] = input.getAttributeOffset("BoneWeights");
-    _offsets[ATTRIBUTE_NAME_NODE_ID] = input.getAttributeOffset("NodeId");
-    _offsets[ATTRIBUTE_NAME_MATERIAL_ID] = input.getAttributeOffset("MaterialId");
+    const PipelineInput::Stream& stream = input.streams().at(0);
+    _offsets[ATTRIBUTE_NAME_TEX_COORDINATE] = stream.getAttributeOffset("TexCoordinate");
+    _offsets[ATTRIBUTE_NAME_NORMAL] = stream.getAttributeOffset("Normal");
+    _offsets[ATTRIBUTE_NAME_TANGENT] = stream.getAttributeOffset("Tangent");
+    _offsets[ATTRIBUTE_NAME_BITANGENT] = stream.getAttributeOffset("Bitangent");
+    _offsets[ATTRIBUTE_NAME_BONE_IDS] = stream.getAttributeOffset("BoneIds");
+    _offsets[ATTRIBUTE_NAME_BONE_WEIGHTS] = stream.getAttributeOffset("BoneWeights");
+    _offsets[ATTRIBUTE_NAME_NODE_ID] = stream.getAttributeOffset("NodeId");
+    _offsets[ATTRIBUTE_NAME_MATERIAL_ID] = stream.getAttributeOffset("MaterialId");
 }
 
 PipelineInput::PipelineInput()
@@ -98,14 +99,15 @@ const PipelineInput::Stream& PipelineInput::getStream(uint32_t divisor) const
     return iter->second;
 }
 
-Optional<const Attribute&> PipelineInput::getAttribute(const String& name, uint32_t divisor) const
+Optional<const Attribute&> PipelineInput::getAttribute(const String& name) const
 {
-    return getStream(divisor).getAttribute(name);
-}
-
-int32_t PipelineInput::getAttributeOffset(const String& name, uint32_t divisor) const
-{
-    return getStream(divisor).getAttributeOffset(name);
+    for(const auto& i : _streams)
+    {
+        Optional<const Attribute&> opt = i.second.getAttribute(name);
+        if(opt)
+            return opt;
+    }
+    return Optional<const Attribute&>();
 }
 
 sp<Uniform> PipelineInput::getUniform(const String& name) const

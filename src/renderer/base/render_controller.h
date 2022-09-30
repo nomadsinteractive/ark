@@ -76,7 +76,7 @@ public:
 
     void onDrawFrame(GraphicsContext& graphicsContext);
 
-    void upload(sp<Resource> resource, sp<Uploader> uploader, RenderController::UploadStrategy strategy, sp<Future> future = nullptr, UploadPriority priority = UPLOAD_PRIORITY_NORMAL);
+    void upload(sp<Resource> resource, RenderController::UploadStrategy strategy, sp<Future> future = nullptr, UploadPriority priority = UPLOAD_PRIORITY_NORMAL);
     void uploadBuffer(const Buffer& buffer, sp<Uploader> uploader, RenderController::UploadStrategy strategy, sp<Future> future = nullptr, UploadPriority priority = UPLOAD_PRIORITY_NORMAL);
 
     template<typename T, typename... Args> sp<T> createResource(Args&&... args) {
@@ -122,10 +122,8 @@ private:
     class RenderResource {
     public:
         RenderResource() = default;
-        RenderResource(sp<Resource> resource, sp<Uploader> uploader, sp<Future> future, UploadPriority uploadPriority);
+        RenderResource(sp<Resource> resource, sp<Future> future, UploadPriority uploadPriority);
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(RenderResource);
-
-        const sp<Resource>& resource() const;
 
         bool isExpired() const;
         bool isCancelled() const;
@@ -140,24 +138,23 @@ private:
 
     private:
         sp<Resource> _resource;
-        sp<Uploader> _uploader;
         sp<Future> _future;
         UploadPriority _upload_priority;
     };
 
-    struct PreparingResource {
-        PreparingResource() = default;
-        PreparingResource(RenderResource resource, RenderController::UploadStrategy strategy);
-        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(PreparingResource);
+    struct UploadingResource {
+        UploadingResource() = default;
+        UploadingResource(RenderResource resource, RenderController::UploadStrategy strategy);
+        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(UploadingResource);
 
         RenderResource _resource;
         RenderController::UploadStrategy _strategy;
 
-        bool operator < (const PreparingResource& other) const;
+        bool operator < (const UploadingResource& other) const;
     };
 
 private:
-    void prepare(GraphicsContext& graphicsContext, LFQueue<PreparingResource>& items);
+    void prepare(GraphicsContext& graphicsContext, LFQueue<UploadingResource>& items);
     void doRecycling(GraphicsContext& graphicsContext);
     void doSurfaceReady(GraphicsContext& graphicsContext) const;
     void uploadSurfaceReadyItems(GraphicsContext& graphicsContext, UploadPriority up) const;
@@ -171,7 +168,7 @@ private:
     sp<Dictionary<bitmap>> _bitmap_bounds_loader;
     sp<Variable<uint64_t>> _clock;
 
-    LFQueue<PreparingResource> _preparing_items;
+    LFQueue<UploadingResource> _uploading_resources;
     std::set<RenderResource> _on_surface_ready_items;
 
     DList<Updatable> _on_pre_updatable;

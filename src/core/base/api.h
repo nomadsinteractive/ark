@@ -153,6 +153,7 @@ const char* const TRANSLATION = "translation";
 const char* const TYPE = "type";
 const char* const VALUE = "value";
 const char* const VIEW = "view";
+const char* const VISIBLE = "visible";
 
 const char* const TOP = "top";
 const char* const LEFT = "left";

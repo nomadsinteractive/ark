@@ -9,6 +9,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
+#include "graphics/base/render_layer.h"
 #include "graphics/inf/block.h"
 #include "graphics/inf/renderer.h"
 
@@ -28,22 +29,21 @@ public:
 
 public:
 // [[script::bindings::auto]]
-    Tilemap(sp<LayerContext> layerContext, sp<Size> size, sp<Tileset> tileset, sp<Importer<Tilemap>> importer = nullptr, sp<Outputer<Tilemap>> outputer = nullptr);
+    Tilemap(sp<RenderLayer> renderLayer, sp<Size> size, sp<Tileset> tileset, sp<Importer<Tilemap>> importer = nullptr, sp<Outputer<Tilemap>> outputer = nullptr);
 
 // [[script::bindings::property]]
     const sp<Size>& size();
-
 // [[script::bindings::property]]
     const sp<Tileset>& tileset() const;
-
 // [[script::bindings::property]]
     const sp<Storage>& storage() const;
 
+[[deprecated]]
 // [[script::bindings::auto]]
     sp<Renderer> makeRenderer(const sp<Layer>& layer = nullptr) const;
 
 // [[script::bindings::auto]]
-    sp<TilemapLayer> makeLayer(const String& name, uint32_t rowCount, uint32_t colCount, const sp<Vec3>& position = nullptr, const sp<Vec3>& scroller = nullptr, Tilemap::LayerFlag layerFlag = Tilemap::LAYER_FLAG_DEFAULT);
+    sp<TilemapLayer> makeLayer(const String& name, uint32_t rowCount, uint32_t colCount, sp<Vec3> position = nullptr, sp<Vec3> scroller = nullptr, sp<Boolean> visible = nullptr, Tilemap::LayerFlag layerFlag = Tilemap::LAYER_FLAG_DEFAULT);
 
 // [[script::bindings::auto]]
     void clear();
@@ -72,7 +72,7 @@ public:
         virtual sp<Tilemap> build(const Scope& args) override;
 
     private:
-        SafePtr<Builder<Layer>> _layer;
+        SafePtr<Builder<RenderLayer>> _render_layer;
         sp<Builder<Size>> _size;
         sp<Builder<Tileset>> _tileset;
         SafePtr<Builder<Importer<Tilemap>>> _importer;
@@ -82,30 +82,22 @@ public:
     };
 
 private:
-    struct Stub {
+    struct Stub : public RenderLayer::Batch {
         std::list<sp<TilemapLayer>> _layers;
         sp<Scrollable> _scrollable;
-    };
 
-    class TilemapRenderer : public Renderer {
-    public:
-        TilemapRenderer(sp<LayerContext> layerContext, sp<Stub> stub);
-
-        virtual void render(RenderRequest& renderRequest, const V3& position) override;
-
-    private:
-        sp<LayerContext> _layer_context;
-        sp<Stub> _stub;
-
+        virtual bool preSnapshot(const RenderRequest& renderRequest, LayerContext& lc) override;
+        virtual void snapshot(const RenderRequest& renderRequest, const LayerContext& lc, RenderLayer::Snapshot& output) override;
     };
 
 private:
-    sp<LayerContext> _layer_context;
+    sp<RenderLayer> _render_layer;
     SafePtr<Size> _size;
     sp<Tileset> _tileset;
     sp<Storage> _storage;
 
     sp<Stub> _stub;
+    sp<LayerContext> _layer_context;
 
     friend class TilemapLayer;
     friend class BUILDER;

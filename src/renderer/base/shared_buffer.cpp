@@ -19,9 +19,9 @@ Buffer::Snapshot SharedBuffer::SharedBuffer::snapshot(RenderController& renderCo
     if(_primitive_count < primitiveCount)
     {
         _primitive_count = primitiveCount + reservedIfInsufficient;
-        const sp<Uploader> uploader = _maker(_primitive_count);
+        sp<Uploader> uploader = _maker(_primitive_count);
         DCHECK(uploader && uploader->size() >= size, "Making Uploader failed, primitive-count: %d, uploader-size: %d, required-size: %d", _primitive_count, uploader ? uploader->size() : 0, size);
-        renderController.upload(_buffer.delegate(), uploader, RenderController::US_RELOAD);
+        renderController.uploadBuffer(_buffer, std::move(uploader), RenderController::US_RELOAD);
     }
     return _buffer.snapshot(size);
 }

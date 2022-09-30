@@ -14,15 +14,17 @@ namespace ark {
 class ARK_API Tileset {
 public:
 //  [[script::bindings::auto]]
-    Tileset(uint32_t tileWidth, uint32_t tileHeight, const sp<TilesetImporter>& importer = nullptr);
+    Tileset(sp<Size> tileSize, sp<TilesetImporter> importer = nullptr);
 
 //  [[script::bindings::property]]
     const std::unordered_map<int32_t, sp<Tile>>& tiles() const;
 
 //  [[script::bindings::property]]
-    uint32_t tileWidth() const;
+    const sp<Size>& tileSize() const;
 //  [[script::bindings::property]]
-    uint32_t tileHeight() const;
+    float tileWidth() const;
+//  [[script::bindings::property]]
+    float tileHeight() const;
 
 //  [[script::bindings::auto]]
     void addTile(sp<Tile> t);
@@ -42,14 +44,13 @@ public:
         virtual sp<Tileset> build(const Scope& args) override;
 
     private:
-        uint32_t _tile_width;
-        uint32_t _tile_height;
+        float _tile_width;
+        float _tile_height;
         sp<Builder<TilesetImporter>> _importer;
     };
 
 private:
-    uint32_t _tile_width;
-    uint32_t _tile_height;
+    sp<Size> _tile_size;
     sp<TilesetImporter> _importer;
 
     std::unordered_map<int32_t, sp<Tile>> _tiles;

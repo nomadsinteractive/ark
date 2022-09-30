@@ -202,8 +202,8 @@ def gen_header_source(filename, output_dir, output_file, results, namespaces):
 
 
 def gen_class_header_source(genclass, declares):
-    method_declarations = [i.gen_declaration() for i in genclass.methods]
-    s = '\n    '.join(i for i in method_declarations if i)
+    method_declarations = sum(filter(None, [i.gen_declaration() for i in genclass.methods]), [])
+    s = '\n    '.join(method_declarations)
     declares.append(acg.format('''class ${py_class_name} : public ark::plugin::python::PyArkType {
 public:
     ${py_class_name}(const String& name, const String& doc, PyTypeObject* base, unsigned long flags);
@@ -220,6 +220,7 @@ def gen_py_binding_h(filename, namespaces, includes, declares):
 ${includes}
 
 #include "python/extension/py_ark_type.h"
+#include "python/extension/py_cast.h"
 
 ${0}
 
@@ -312,6 +313,7 @@ def gen_class_body_source(genclass, includes, lines, buildables):
         rich_compare_defs = genclass.gen_rich_compare_defs()
         if rich_compare_defs:
             lines.extend(rich_compare_defs)
+            # TODO: Wrap with runtime exception checker function
             tp_method_lines.append('pyTypeObject->tp_richcompare = reinterpret_cast<richcmpfunc>(%s_tp_richcompare);' % genclass.py_class_name)
 
         property_defs = genclass.gen_property_defs()
@@ -355,7 +357,6 @@ def gen_py_binding_cpp(name, namespaces, includes, lines):
 #include "core/ark.h"
 
 #include "python/extension/arkmodule.h"
-#include "python/extension/py_cast.h"
 #include "python/extension/py_ark_meta_type.h"
 
 %s
@@ -475,7 +476,7 @@ class GenArgument:
             typename = 'Optional<%s>' % typename
         if self._default_value and (self._accept_type.startswith('sp<') or self._meta.parse_signature == 'O'):
             return '%s %s = %s ? PyCast::%s<%s>(%s%s) : %s;' % (
-                typename, varname, argname, funcname, functype, argname, argappendix, self._default_value)
+                typename, varname, argname, funcname, functype, argname, argappendix, '%s(%s)' % (typename, self._default_value) if optional_check else self._default_value)
         return '%s %s = PyCast::%s<%s>(%s%s);' % (typename, varname, funcname, functype, argname, argappendix)
 
     def str(self):
@@ -520,7 +521,6 @@ ARK_PY_ARGUMENT_CHECKERS = {
 def parse_method_arguments(arguments):
     args = []
     for i, j in enumerate(arguments):
-        m = None
         argstr = acg.strip_key_words(j, ['const', '&'])
         default_value = None
         pos = argstr.find('=')
@@ -538,7 +538,7 @@ def parse_method_arguments(arguments):
                 argument_meta = GenArgumentMeta(l.typename, cast_signature, l.parse_signature, l.is_base_type)
                 args.append(GenArgument(cast_signature, default_value, argument_meta, targettype))
                 break
-        if not m:
+        else:
             print('Undefined method argument: "%s"' % arguments[i])
             sys.exit(-1)
     return args
@@ -570,6 +570,9 @@ class GenMethod(object):
 
     def gen_py_method_def(self, genclass):
         return None
+
+    def gen_py_method_def_tp(self, genclass):
+        return '{"%s", (PyCFunction) %s::%s_r, %s, nullptr}' % (acg.camel_case_to_snake_case(self._name), genclass.py_class_name, self._name, self._flags)
 
     def gen_py_return(self):
         return 'PyObject*'
@@ -682,7 +685,10 @@ class GenMethod(object):
         return 'unpacked' + cast_statement
 
     def gen_declaration(self):
-        return 'static %s %s(%s);' % (self.gen_py_return(), self._name, self.gen_py_arguments())
+        return [
+            'static %s %s(%s);' % (self.gen_py_return(), self._name, self.gen_py_arguments()),
+            'constexpr static auto %s_r = ark::plugin::python::PyCast::RuntimeFuncWrapper<decltype(&%s), %s>;' % (self._name, self._name, self._name)
+            ]
 
     @staticmethod
     def _gen_convert_args_code(lines, argdeclare, optional_check=False):
@@ -789,7 +795,7 @@ class GenConstructorMethod(GenMethod):
         return False
 
     def gen_py_type_constructor_codes(self, lines, genclass):
-        lines.append('pyTypeObject->tp_init = reinterpret_cast<initproc>(%s::__init__);' % genclass.py_class_name)
+        lines.append('pyTypeObject->tp_init = reinterpret_cast<initproc>(%s::__init___r);' % genclass.py_class_name)
 
     @staticmethod
     def overload(m1, m2):
@@ -805,7 +811,7 @@ class GenMetaMethod(GenMethod):
         GenMethod.__init__(self, name, [], '')
 
     def gen_declaration(self):
-        return None
+        return []
 
     def gen_definition(self, classname):
         return None
@@ -854,9 +860,9 @@ class GenPropertyMethod(GenMethod):
     def gen_py_getset_def(self, properties, genclass):
         property_def = self._ensure_property_def(properties)
         if self._is_setter:
-            property_def[2] = '(setter) %s::%s' % (genclass.py_class_name, self._name)
+            property_def[2] = '(setter) %s::%s_r' % (genclass.py_class_name, self._name)
         else:
-            property_def[1] = '(getter) %s::%s' % (genclass.py_class_name, self._name)
+            property_def[1] = '(getter) %s::%s_r' % (genclass.py_class_name, self._name)
 
     def _gen_calling_statement(self, genclass, argnames):
         self_statement = self.gen_self_statement(genclass)
@@ -957,7 +963,7 @@ class GenLoaderMethod(GenMethod):
         GenMethod.__init__(self, name, ['TypeId typeId'] + args, 'PyObject*')
 
     def gen_py_method_def(self, genclass):
-        return '{"%s", (PyCFunction) %s::%s, %s, nullptr}' % (acg.camel_case_to_snake_case(self._name), genclass.py_class_name, self._name, self._flags)
+        return self.gen_py_method_def_tp(genclass)
 
     def _gen_calling_statement(self, genclass, argnames):
         return 'PythonInterpreter::instance()->ensurePyArkType(reinterpret_cast<PyObject*>(self))->load(*self, "%s", %s);' % (self._name, argnames)
@@ -974,7 +980,7 @@ class GenMemberMethod(GenMethod):
         GenMethod.__init__(self, name, args, return_type)
 
     def gen_py_method_def(self, genclass):
-        return '{"%s", (PyCFunction) %s::%s, %s, nullptr}' % (acg.camel_case_to_snake_case(self._name), genclass.py_class_name, self._name, self._flags)
+        return self.gen_py_method_def_tp(genclass)
 
     @staticmethod
     def overload(m1, m2):
@@ -988,9 +994,10 @@ class GenMemberMethod(GenMethod):
 class GenStaticMethod(GenMethod):
     def __init__(self, name, args, return_type):
         GenMethod.__init__(self, name, args, return_type)
+        self._flags = self._flags + '|METH_STATIC'
 
     def gen_py_method_def(self, genclass):
-        return '{"%s", (PyCFunction) %s::%s, %s|METH_STATIC, nullptr}' % (acg.camel_case_to_snake_case(self._name), genclass.py_class_name, self._name, self._flags)
+        return self.gen_py_method_def_tp(genclass)
 
     def need_unpack_statement(self):
         return False
@@ -1014,7 +1021,7 @@ class GenStaticMemberMethod(GenMethod):
         self._arguments = self._arguments[1:]
 
     def gen_py_method_def(self, genclass):
-        return '{"%s", (PyCFunction) %s::%s, %s, nullptr}' % (acg.camel_case_to_snake_case(self._name), genclass.py_class_name, self._name, self._flags)
+        return self.gen_py_method_def_tp(genclass)
 
     def _gen_calling_statement(self, genclass, argnames):
         return '%s::%s(%s%s);' % (genclass.classname, self._name, self.gen_self_statement(genclass), argnames if not argnames else ', ' + argnames)
@@ -1284,7 +1291,7 @@ class GenClass(object):
         operator_methods = self.operator_methods()
         if operator_methods:
             args = {'py_class_name': self._py_class_name}
-            methods_dict = dict((i.operator, '%s::%s' % (self._py_class_name, i.name)) for i in operator_methods)
+            methods_dict = dict((i.operator, '%s::%s_r' % (self._py_class_name, i.name)) for i in operator_methods)
             args.update((j, methods_dict[i] if i in methods_dict else 'nullptr') for i, j in TP_AS_NUMBER_TEMPLATE_OPERATOR.items())
             operator_defs.extend(acg.format(i, **args) for i in TP_AS_NUMBER_TEMPLATE)
         return operator_defs

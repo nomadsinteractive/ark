@@ -34,16 +34,17 @@ VKMemoryPtr VKHeap::doAllocate(GraphicsContext& graphicsContext, VkDeviceSize si
         _heaps[typeIndex].extend(makeMemory(graphicsContext, manifest.heap()._device_unit_size, typeIndex), sp<HeapType::L2>::make());
     }
 
-    VKMemoryPtr memory = _heaps[typeIndex].allocate(size, alignment);
-    DCHECK(memory.offset() % alignment == 0, "Alignment(%d) unsatisfied, size: %d, offset: %d", alignment, size, memory.offset());
-
-    if(!memory)
+    Optional<VKMemoryPtr> opt = _heaps[typeIndex].allocate(size, alignment);
+    if(!opt)
     {
         const Manifest& manifest = Ark::instance().manifest();
-        DCHECK(size < manifest.heap()._device_unit_size, "Out of heap memory, allocation size required: %lld, you may change device_unit_size(%d) to a greater value", size, manifest.heap()._device_unit_size);
+        CHECK(size < manifest.heap()._device_unit_size, "Out of heap memory, allocation size required: %lld, you may change device_unit_size(%d) to a greater value", size, manifest.heap()._device_unit_size);
         _heaps[typeIndex].extend(makeMemory(graphicsContext, manifest.heap()._device_unit_size, typeIndex), sp<HeapType::L2>::make());
         return doAllocate(graphicsContext, size, alignment, typeIndex);
     }
+
+    VKMemoryPtr memory = std::move(opt.value());
+    CHECK(memory.offset() % alignment == 0, "Alignment(%d) unsatisfied, size: %d, offset: %d", alignment, size, memory.offset());
 
     memory._stub->_size = size;
     memory._stub->_type_index = typeIndex;

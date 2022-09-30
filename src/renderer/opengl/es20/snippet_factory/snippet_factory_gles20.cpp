@@ -18,8 +18,8 @@ namespace {
 class DrawEventsGLES20 : public Snippet::DrawEvents {
 public:
     virtual void preDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override {
-        glBindBuffer(GL_ARRAY_BUFFER, static_cast<GLuint>(context._vertex_buffer.id()));
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLuint>(context._index_buffer.id()));
+        glBindBuffer(GL_ARRAY_BUFFER, static_cast<GLuint>(context._vertices.id()));
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLuint>(context._indices.id()));
         const sp<opengl::GLPipeline> pipeline = context._shader_bindings->getPipeline(graphicsContext);
         pipeline->bindBuffer(graphicsContext, context._shader_bindings->pipelineInput(), context._shader_bindings->divisors());
     }

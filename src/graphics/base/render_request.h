@@ -16,7 +16,7 @@ class ARK_API RenderRequest {
 public:
     RenderRequest() = default;
     RenderRequest(uint64_t timestamp, const sp<Executor>& executor, const sp<MemoryPool>& memoryPool, const sp<OCSQueue<RenderRequest>>& renderRequests);
-    DEFAULT_COPY_AND_ASSIGN(RenderRequest);
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(RenderRequest);
 
     uint64_t timestamp() const;
     Allocator& allocator() const;

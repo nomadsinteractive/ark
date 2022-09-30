@@ -25,9 +25,8 @@ ShaderFrame::ShaderFrame(const sp<Size>& size, const sp<Shader>& shader, RenderC
 
 void ShaderFrame::render(RenderRequest& renderRequest, const V3& position)
 {
-    const sp<Uploader> uploader = sp<ByteArrayUploader>::make(getVertexBuffer(position));
     DrawingContext drawingContext(_shader_bindings, _shader_bindings->attachments(), _shader->takeUBOSnapshot(renderRequest), _shader->takeSSBOSnapshot(renderRequest),
-                                  _vertex_buffer.snapshot(uploader), _index_buffer, DrawingContext::ParamDrawElements(0, _index_buffer.length<element_index_t>()));
+                                  _vertex_buffer.snapshot(getVertexBuffer(renderRequest, position)), _index_buffer, DrawingContext::ParamDrawElements(0, _index_buffer.length<element_index_t>()));
     renderRequest.addRequest(drawingContext.toRenderCommand(renderRequest));
 }
 
@@ -36,7 +35,7 @@ const sp<Size>& ShaderFrame::size()
     return _size;
 }
 
-bytearray ShaderFrame::getVertexBuffer(const V3& position) const
+ByteArray::Borrowed ShaderFrame::getVertexBuffer(RenderRequest& renderRequest, const V3& position) const
 {
     float x = position.x(), y = position.y();
     float top = y + _size->height(), bottom = y;
@@ -51,9 +50,9 @@ bytearray ShaderFrame::getVertexBuffer(const V3& position) const
     ip[23] = uvbottom;
     ip[30] = 0xffff;
     ip[31] = uvtop;
-    const bytearray preallocated = sp<ByteArray::Allocated>::make(buffer.size());
-    memcpy(preallocated->buf(), buffer.buf(), buffer.size());
-    return preallocated;
+    ByteArray::Borrowed allocated = renderRequest.allocator().sbrk(buffer.size());
+    memcpy(allocated.buf(), buffer.buf(), buffer.size());
+    return allocated;
 }
 
 ShaderFrame::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

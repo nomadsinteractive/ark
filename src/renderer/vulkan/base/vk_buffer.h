@@ -20,7 +20,7 @@ public:
     DISALLOW_COPY_AND_ASSIGN(VKBuffer);
 
     virtual uint64_t id() override;
-    virtual void upload(GraphicsContext& graphicsContext, const sp<Uploader>& uploader) override;
+    virtual void upload(GraphicsContext& graphicsContext) override;
     virtual ResourceRecycleFunc recycle() override;
 
     void reload(GraphicsContext& graphicsContext, const ByteArray::Borrowed& buf);
@@ -38,7 +38,7 @@ private:
     void unmap();
 
     void allocateMemory(GraphicsContext& graphicsContext, const VkMemoryRequirements& memReqs);
-    void ensureSize(GraphicsContext& graphicsContext, const Uploader& uploader);
+    void ensureSize(GraphicsContext& graphicsContext, Uploader& uploader);
 
     void bind();
     VkResult flush();

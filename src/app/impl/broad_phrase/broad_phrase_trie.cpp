@@ -132,7 +132,7 @@ void BroadPhraseTrie::Axis::remove(int32_t id)
 std::unordered_set<int32_t> BroadPhraseTrie::Axis::search(float low, float high) const
 {
     std::set<int32_t> c1;
-    std::set<int32_t> c2;
+    std::unordered_set<int32_t> c3;
     int32_t keyLower = static_cast<int32_t>(std::floor(low));
     int32_t keyUpper = static_cast<int32_t>(std::ceil(high));
 
@@ -140,10 +140,10 @@ std::unordered_set<int32_t> BroadPhraseTrie::Axis::search(float low, float high)
         c1.insert(iter->second.items.begin(), iter->second.items.end());
 
     for(auto iter = _upper_bounds.lower_bound(keyLower); iter != _upper_bounds.end(); ++iter)
-        c2.insert(iter->second.items.begin(), iter->second.items.end());
+        for(int32_t i : iter->second.items)
+            if(c1.find(i) != c1.end())
+                c3.insert(c3.begin(), i);
 
-    std::unordered_set<int32_t> c3;
-    std::set_intersection(c1.begin(), c1.end(), c2.begin(), c2.end(), std::inserter(c3, c3.begin()));
     return c3;
 }
 

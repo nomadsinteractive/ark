@@ -18,6 +18,7 @@ namespace ark {
 class ARK_API Size : public Vec3, public Holder {
 public:
     Size();
+    Size(const V3& size);
     Size(float width, float height, float depth = 0);
 //  [[script::bindings::auto]]
     Size(const sp<Numeric>& width, const sp<Numeric>& height, const sp<Numeric>& depth = nullptr);

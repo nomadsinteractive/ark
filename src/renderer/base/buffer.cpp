@@ -7,35 +7,26 @@
 #include "renderer/base/pipeline_input.h"
 #include "renderer/base/render_controller.h"
 #include "renderer/base/resource_loader_context.h"
-#include "renderer/base/vertex_stream.h"
+#include "renderer/base/vertex_writer.h"
 #include "renderer/inf/uploader.h"
 
 namespace ark {
 
 namespace {
 
-class UploaderImpl : public Uploader {
+class SnapshotUploader : public Uploader {
 public:
-    UploaderImpl(const std::vector<Buffer::Block>& blocks)
-        : Uploader(getUploaderSize(blocks)), _blocks(blocks) {
-
+    SnapshotUploader(size_t size, std::vector<Buffer::Strip> strips)
+        : Uploader(size), _blocks(std::move(strips)) {
     }
 
     virtual void upload(Writable& uploader) override {
-        for(const Buffer::Block& i : _blocks)
-            uploader.write(i.content.buf(), static_cast<uint32_t>(i.content.length()), static_cast<uint32_t>(i.offset));
+        for(const auto& [i, j] : _blocks)
+            uploader.write(j.buf(), static_cast<uint32_t>(j.length()), static_cast<uint32_t>(i));
     }
 
 private:
-    static size_t getUploaderSize(const std::vector<Buffer::Block>& blocks) {
-        size_t size = 0;
-        for(const Buffer::Block& i : blocks)
-            size = std::max(size, i.offset + i.content.length());
-        return size;
-    }
-
-private:
-    std::vector<Buffer::Block> _blocks;
+    std::vector<std::pair<size_t, ByteArray::Borrowed>> _blocks;
 };
 
 class UploaderByInput : public Uploader {
@@ -90,8 +81,8 @@ private:
 
 class PreRenderUpdate : public Updatable {
 public:
-    PreRenderUpdate(Buffer buffer, const sp<RenderController>& renderController, sp<Uploader> uploader, sp<Updatable> updatable)
-        : _buffer(std::move(buffer)), _render_controller(renderController), _uploader(std::move(uploader)), _updatable(std::move(updatable)) {
+    PreRenderUpdate(Buffer buffer, sp<Uploader> uploader, const sp<RenderController>& renderController, sp<Updatable> updatable)
+        : _buffer(std::move(buffer)), _uploader(std::move(uploader)), _render_controller(renderController), _updatable(std::move(updatable)) {
     }
 
     virtual bool update(uint64_t timestamp) override {
@@ -104,26 +95,25 @@ public:
 
 private:
     Buffer _buffer;
-
-    sp<RenderController> _render_controller;
     sp<Uploader> _uploader;
+    sp<RenderController> _render_controller;
     sp<Updatable> _updatable;
 };
 
 }
 
-Buffer::Snapshot::Snapshot(const sp<Delegate>& stub)
-    : _delegate(stub), _size(stub->size())
+Buffer::Snapshot::Snapshot(sp<Delegate> stub)
+    : _delegate(std::move(stub)), _size(_delegate->size())
 {
 }
 
-Buffer::Snapshot::Snapshot(const sp<Delegate>& stub, size_t size)
-    : _delegate(stub), _size(size)
+Buffer::Snapshot::Snapshot(sp<Delegate> stub, size_t size)
+    : _delegate(std::move(stub)), _size(size)
 {
 }
 
-Buffer::Snapshot::Snapshot(const sp<Delegate>& stub, const sp<Uploader>& uploader)
-    : _delegate(stub), _uploader(uploader), _size(_uploader? _uploader->size() : 0)
+Buffer::Snapshot::Snapshot(sp<Delegate> stub, sp<Uploader> uploader)
+    : _delegate(std::move(stub)), _uploader(std::move(uploader)), _size(_uploader? _uploader->size() : 0)
 {
 }
 
@@ -144,7 +134,8 @@ size_t Buffer::Snapshot::size() const
 
 void Buffer::Snapshot::upload(GraphicsContext& graphicsContext) const
 {
-    _delegate->upload(graphicsContext, _uploader);
+    _delegate->setUploader(_uploader);
+    _delegate->upload(graphicsContext);
 }
 
 const sp<Buffer::Delegate>& Buffer::Snapshot::delegate() const
@@ -152,8 +143,8 @@ const sp<Buffer::Delegate>& Buffer::Snapshot::delegate() const
     return _delegate;
 }
 
-Buffer::Buffer(const sp<Buffer::Delegate>& delegate) noexcept
-    : _delegate(delegate)
+Buffer::Buffer(sp<Buffer::Delegate> delegate) noexcept
+    : _delegate(std::move(delegate))
 {
 }
 
@@ -165,6 +156,11 @@ size_t Buffer::size() const
 Buffer::operator bool() const
 {
     return static_cast<bool>(_delegate);
+}
+
+Buffer::Snapshot Buffer::snapshot(const ByteArray::Borrowed& strip) const
+{
+    return Snapshot(_delegate, sp<SnapshotUploader>::make(strip.length(), std::vector<Buffer::Strip>{{0, strip}}));
 }
 
 Buffer::Snapshot Buffer::snapshot(const sp<Uploader>& uploader) const
@@ -189,7 +185,7 @@ uint64_t Buffer::id() const
 
 void Buffer::upload(GraphicsContext& graphicsContext) const
 {
-    _delegate->upload(graphicsContext, nullptr);
+    _delegate->upload(graphicsContext);
 }
 
 const sp<Buffer::Delegate>& Buffer::delegate() const
@@ -202,23 +198,18 @@ Buffer::Factory::Factory(size_t stride)
 {
 }
 
-Buffer::Snapshot Buffer::Factory::toSnapshot(const Buffer& buffer) const
+Buffer::Snapshot Buffer::Factory::toSnapshot(const Buffer& buffer)
 {
-    return buffer.snapshot(makeUploader());
+    if(_strips.size() == 0)
+        return buffer.snapshot(nullptr);
+
+    return buffer.snapshot(sp<SnapshotUploader>::make(_size, std::move(_strips)));
 }
 
-void Buffer::Factory::addBlock(size_t offset, ByteArray::Borrowed& content)
+void Buffer::Factory::addStrip(size_t offset, ByteArray::Borrowed& content)
 {
-    _blocks.emplace_back(offset, content);
+    _strips.emplace_back(offset, content);
     _size = std::max(_size, content.length() + offset);
-}
-
-sp<Uploader> Buffer::Factory::makeUploader() const
-{
-    if(_blocks.size() == 0)
-        return nullptr;
-
-    return sp<UploaderImpl>::make(_blocks);
 }
 
 Uploader::Uploader(size_t size)
@@ -226,7 +217,7 @@ Uploader::Uploader(size_t size)
 {
 }
 
-size_t Uploader::size() const
+size_t Uploader::size()
 {
     return _size;
 }
@@ -241,9 +232,9 @@ size_t Buffer::Delegate::size() const
     return _size;
 }
 
-Buffer::Block::Block(size_t offset, const ByteArray::Borrowed& content)
-    : offset(offset), content(content)
+void Buffer::Delegate::setUploader(sp<Uploader> uploader)
 {
+    _uploader = std::move(uploader);
 }
 
 Buffer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
@@ -275,7 +266,7 @@ sp<Buffer> Buffer::BUILDER::build(const Scope& args)
                                      : sp<Uploader>::make<BufferObjectUploader>(std::move(vars), _stride ? static_cast<uint32_t>(_stride->build(args)->val()) : stride, _length->build(args)->val());
     sp<Buffer> buffer = sp<Buffer>::make(renderController->makeBuffer(Buffer::TYPE_STORAGE, _usage, uploader));
     if(input)
-        renderController->addPreRenderUpdateRequest(sp<PreRenderUpdate>::make(buffer, renderController, uploader, input), sp<BooleanByWeakRef<Buffer::Delegate>>::make(buffer->delegate(), 2));
+        renderController->addPreRenderUpdateRequest(sp<PreRenderUpdate>::make(buffer, std::move(uploader), renderController, input), sp<BooleanByWeakRef<Buffer::Delegate>>::make(buffer->delegate(), 2));
     return buffer;
 }
 

@@ -9,6 +9,7 @@
 #include "core/util/log.h"
 
 #include "graphics/base/camera.h"
+#include "graphics/base/size.h"
 #include "graphics/base/viewport.h"
 #include "graphics/base/render_command_pipeline.h"
 #include "graphics/inf/render_view.h"
@@ -62,7 +63,7 @@ public:
 
     virtual void run() override {
         DPROFILER_TRACE("MainFrame", ApplicationProfiler::CATEGORY_RENDER_FRAME);
-        _application_context->post(_run_at_core);
+        _application_context->runAtCoreThread(_run_at_core);
         _application_context->updateRenderState();
         _application_delegate->onSurfaceDraw();
     }
@@ -75,8 +76,8 @@ private:
 
 }
 
-Application::Application(const sp<ApplicationDelegate>& applicationDelegate, const sp<ApplicationContext>& applicationContext, uint32_t width, uint32_t height, const Viewport& viewport)
-    : _application_delegate(applicationDelegate), _application_context(applicationContext), _viewport(viewport), _width(width), _height(height),
+Application::Application(const sp<ApplicationDelegate>& applicationDelegate, const sp<ApplicationContext>& applicationContext, uint32_t surfaceWidth, uint32_t surfaceHeight, const Viewport& viewport)
+    : _application_delegate(applicationDelegate), _application_context(applicationContext), _viewport(viewport), _surface_size(sp<Size>::make(surfaceWidth, surfaceHeight)),
       _surface_updater_pre_created(sp<OnSurfaceUpdatePreCreated>::make(_application_context)), _surface_updater(_surface_updater_pre_created.get())
 {
 }
@@ -93,6 +94,11 @@ const char* Application::name() const
 const sp<ApplicationContext>& Application::context() const
 {
     return _application_context;
+}
+
+const sp<Size>& Application::surfaceSize() const
+{
+    return _surface_size;
 }
 
 void Application::onCreateTask()
@@ -114,7 +120,6 @@ void Application::onResumeTask()
 
 void Application::onEventTask(const Event& event)
 {
-    DCHECK(_width && _height, "Illegal surface context state");
     _application_delegate->onEvent(event);
 }
 
@@ -184,6 +189,9 @@ void Application::onSurfaceChanged(uint32_t width, uint32_t height)
     LOGD("width = %d, height = %d", width, height);
     DTHREAD_CHECK(THREAD_ID_RENDERER);
 
+    _surface_size->setWidth(static_cast<float>(width));
+    _surface_size->setHeight(static_cast<float>(height));
+
     _application_context->runAtCoreThread([this] () {
         _application_context->renderController()->reset();
     });
@@ -191,8 +199,6 @@ void Application::onSurfaceChanged(uint32_t width, uint32_t height)
     _surface->onSurfaceChanged(width, height);
     _application_delegate->onSurfaceChanged(width, height);
     _application_context->renderEngine()->context()->setDisplayResolution({width, height});
-    _width = width;
-    _height = height;
 }
 
 void Application::onSurfaceUpdate()
@@ -210,7 +216,7 @@ bool Application::onEvent(const Event& event)
 
 V2 Application::toViewportPosition(const V2& xy) const
 {
-    return V2(_viewport.toViewportX(xy.x(), _width), _viewport.toViewportY(xy.y(), _height));
+    return V2(_viewport.toViewportX(xy.x(), _surface_size->width()), _viewport.toViewportY(xy.y(), _surface_size->height()));
 }
 
 }

@@ -1,6 +1,6 @@
 #include "renderer/impl/vertices/vertices_nine_patch.h"
 
-#include "renderer/base/vertex_stream.h"
+#include "renderer/base/vertex_writer.h"
 
 namespace ark {
 

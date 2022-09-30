@@ -82,7 +82,7 @@ document Documents::parse(const String& xml)
 {
     XMLDocument tinydoc;
     tinydoc.Parse(xml.c_str());
-    DCHECK(tinydoc.RootElement(), "XML document parse failed.");
+    CHECK(tinydoc.RootElement(), "XML document parse failed.");
     return _tinyelement2document(tinydoc.RootElement());
 }
 
@@ -90,7 +90,7 @@ document Documents::parseFull(const String& xml)
 {
     XMLDocument tinydoc;
     tinydoc.Parse(xml.c_str());
-    DCHECK(tinydoc.RootElement(), "XML document parse failed.");
+    CHECK(tinydoc.RootElement(), "XML document parse failed.");
     return _tinyelement2documentfull(tinydoc.RootElement());
 }
 
@@ -189,7 +189,7 @@ String Documents::getAttribute(const document& doc, const String& name, const St
 const String& Documents::ensureAttribute(const document& doc, const String& name)
 {
     const attribute& attr = doc->getAttribute(name);
-    DCHECK(attr, "Document '%s' has no attribute '%s'", toString(doc).c_str(), name.c_str());
+    CHECK(attr, "Document '%s' has no attribute '%s'", toString(doc).c_str(), name.c_str());
     return attr->value();
 }
 

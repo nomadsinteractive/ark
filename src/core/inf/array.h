@@ -24,11 +24,6 @@ public:
         return buf()[i];
     }
 
-    const T& at(size_t i) const {
-        DASSERT(i < length());
-        return buf()[i];
-    }
-
     class iterator {
     public:
         iterator(T* buf, size_t iter)
@@ -110,6 +105,9 @@ private:
 
 template<typename T> class Array<T>::Borrowed : public Array<T> {
 public:
+    Borrowed()
+        : _data(nullptr), _length(0) {
+    }
     Borrowed(T* data, size_t length)
         : _data(data), _length(length) {
     }
@@ -127,8 +125,18 @@ public:
         return _length;
     }
 
-    T* buf() const {
+    const T* buf() const {
         return _data;
+    }
+
+    T& at(size_t i) {
+        DASSERT(i < _length);
+        return _data[i];
+    }
+
+    const T& at(size_t i) const {
+        DASSERT(i < _length);
+        return _data[i];
     }
 
 private:

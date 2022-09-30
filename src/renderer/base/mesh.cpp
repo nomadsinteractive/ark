@@ -6,7 +6,7 @@
 
 #include "graphics/base/material.h"
 
-#include "renderer/base/vertex_stream.h"
+#include "renderer/base/vertex_writer.h"
 
 namespace ark {
 
@@ -73,7 +73,7 @@ void Mesh::setNodeId(sp<Integer> nodeId)
     _node_id = std::move(nodeId);
 }
 
-void Mesh::write(VertexStream& buf) const
+void Mesh::write(VertexWriter& buf) const
 {
     V3* vertice = _vertices->buf();
     UV* uv = _uvs->buf();

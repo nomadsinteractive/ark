@@ -124,7 +124,7 @@ public:
     ~Texture() override;
 
     virtual uint64_t id() override;
-    virtual void upload(GraphicsContext& graphicsContext, const sp<ark::Uploader>& uploader) override;
+    virtual void upload(GraphicsContext& graphicsContext) override;
     virtual ResourceRecycleFunc recycle() override;
 
     Type type() const;
