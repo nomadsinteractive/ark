@@ -43,7 +43,7 @@ public:
         size_t size() const;
 
         void setUploader(sp<Uploader> uploader);
-//        virtual void upload(GraphicsContext& graphicsContext, const Snapshot& snapshot) = 0;
+        virtual void uploadBuffer(GraphicsContext& graphicsContext, const Snapshot& snapshot) = 0;
 
     protected:
         size_t _size;
@@ -57,9 +57,10 @@ public:
     public:
         Snapshot() = default;
         Snapshot(sp<Delegate> stub);
-        Snapshot(sp<Delegate> stub, size_t size);
+        Snapshot(sp<Delegate> stub, size_t size, std::vector<Strip> strips = {});
+[[deprecated]]
         Snapshot(sp<Delegate> stub, sp<Uploader> uploader);
-        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Snapshot);
+        DEFAULT_COPY_AND_ASSIGN(Snapshot);
 
         explicit operator bool() const;
 
@@ -74,10 +75,10 @@ public:
 
         const sp<Delegate>& delegate() const;
 
-    private:
         sp<Delegate> _delegate;
         sp<Uploader> _uploader;
         size_t _size;
+        std::vector<Strip> _strips;
     };
 
     class ARK_API Factory {
@@ -106,9 +107,9 @@ public:
     size_t size() const;
 
 [[deprecated]]
-    Snapshot snapshot(const sp<Uploader>& uploader) const;
+//    Snapshot snapshot(const sp<Uploader>& uploader) const;
     Snapshot snapshot(const ByteArray::Borrowed& strip) const;
-    Snapshot snapshot(size_t size) const;
+    Snapshot snapshot(size_t size, std::vector<Strip> strips = {}) const;
     Snapshot snapshot() const;
 
 //  [[script::bindings::property]]

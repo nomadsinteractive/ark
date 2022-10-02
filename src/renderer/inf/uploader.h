@@ -16,8 +16,6 @@ namespace ark {
 
 class ARK_API Uploader {
 public:
-    typedef std::function<sp<Uploader>(size_t)> MakerFunc;
-
     Uploader(size_t size);
     virtual ~Uploader() = default;
 

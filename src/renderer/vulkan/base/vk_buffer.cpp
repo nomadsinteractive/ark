@@ -32,7 +32,7 @@ void VKBuffer::upload(GraphicsContext& graphicsContext)
 {
     if(_uploader)
     {
-        ensureSize(graphicsContext, _uploader);
+        ensureSize(graphicsContext, _uploader->size());
 
         if(isDeviceLocal())
         {
@@ -55,6 +55,35 @@ void VKBuffer::upload(GraphicsContext& graphicsContext)
                 VKUtil::checkResult(flush());
             _memory->unmap();
         }
+    }
+}
+
+void VKBuffer::uploadBuffer(GraphicsContext& graphicsContext, const Buffer::Snapshot& snapshot)
+{
+    ensureSize(graphicsContext, snapshot._size);
+
+    if(isDeviceLocal())
+    {
+        VKBuffer stagingBuffer(_renderer, _recycler, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        stagingBuffer.uploadBuffer(graphicsContext, snapshot);
+
+        VkCommandBuffer copyCmd = _renderer->commandPool()->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
+        std::vector<VkBufferCopy> copyRegions;
+        for(const auto& [i, j] : snapshot._strips)
+            copyRegions.push_back({i, i, j.length()});
+        vkCmdCopyBuffer(copyCmd, stagingBuffer.vkBuffer(), _descriptor.buffer, static_cast<uint32_t>(copyRegions.size()), copyRegions.data());
+        _renderer->commandPool()->flushCommandBuffer(copyCmd, true);
+
+        stagingBuffer.recycle()(graphicsContext);
+    }
+    else
+    {
+        uint8_t* memory = reinterpret_cast<uint8_t*>(_memory->map());
+        for(const auto& [i, j] : snapshot._strips)
+            memcpy(memory + i, j.buf(), j.length());
+        if(!isHostCoherent())
+            VKUtil::checkResult(flush());
+        _memory->unmap();
     }
 }
 
@@ -100,11 +129,11 @@ void VKBuffer::allocateMemory(GraphicsContext& graphicsContext, const VkMemoryRe
     _memory = _renderer->heap()->allocate(graphicsContext, memReqs, _memory_property_flags);
 }
 
-void VKBuffer::ensureSize(GraphicsContext& graphicsContext, Uploader& uploader)
+void VKBuffer::ensureSize(GraphicsContext& graphicsContext, size_t size)
 {
-    if(_size < uploader.size())
+    if(_size < size)
     {
-        _size = uploader.size();
+        _size = size;
         if (_descriptor.buffer)
             vkDestroyBuffer(_renderer->vkLogicalDevice(), _descriptor.buffer, nullptr);
 

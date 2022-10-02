@@ -330,7 +330,7 @@ sp<RenderEngine> Ark::createRenderEngine(RendererVersion version, RendererCoordi
 #endif
         break;
     }
-    DFATAL("Unknown engine type: %d", version);
+    FATAL("Unknown engine type: %d", version);
     return nullptr;
 }
 

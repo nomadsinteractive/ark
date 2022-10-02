@@ -12,24 +12,27 @@
 #include "renderer/base/render_controller.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/shader_bindings.h"
+#include "renderer/base/shared_indices.h"
 #include "renderer/base/snippet_delegate.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/base/render_engine.h"
 #include "renderer/base/render_engine_context.h"
+#include "renderer/inf/uploader.h"
 #include "renderer/util/render_util.h"
 
 namespace ark {
 
 Skybox::Skybox(const sp<Size>& size, const sp<Shader>& shader, const sp<Texture>& texture, RenderController& renderController)
     : _size(size), _shader(shader), _shader_bindings(shader->makeBindings(renderController.makeVertexBuffer(Buffer::USAGE_STATIC, sp<ByteArrayUploader>::make(makeUnitCubeVertices(renderController))), ModelLoader::RENDER_MODE_TRIANGLES, PipelineBindings::RENDER_PROCEDURE_DRAW_ELEMENTS)),
-      _index_buffer(renderController.getNamedBuffer(SharedBuffer::NAME_QUADS)->snapshot(renderController, 6))
+      _shared_indices(renderController.getSharedIndices(RenderController::SHARED_INDICES_QUAD))
 {
     _shader_bindings->pipelineBindings()->bindSampler(texture);
 }
 
 void Skybox::render(RenderRequest& renderRequest, const V3& /*position*/)
 {
-    DrawingContext drawingContext(_shader_bindings, _shader_bindings->attachments(), _shader->takeUBOSnapshot(renderRequest), _shader->takeSSBOSnapshot(renderRequest), _shader_bindings->vertices().snapshot(), _index_buffer, DrawingContext::ParamDrawElements(0, _index_buffer.length<element_index_t>()));
+    DrawingContext drawingContext(_shader_bindings, _shader_bindings->attachments(), _shader->takeUBOSnapshot(renderRequest), _shader->takeSSBOSnapshot(renderRequest), _shader_bindings->vertices().snapshot(),
+                                  _shared_indices->snapshot(renderRequest, 6), DrawingContext::ParamDrawElements(0, 36));
     renderRequest.addRequest(drawingContext.toRenderCommand(renderRequest));
 }
 

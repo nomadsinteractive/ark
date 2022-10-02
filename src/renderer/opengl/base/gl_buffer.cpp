@@ -73,6 +73,31 @@ void GLBuffer::upload(GraphicsContext& graphicsContext)
     }
 }
 
+void GLBuffer::uploadBuffer(GraphicsContext& /*graphicsContext*/, const Buffer::Snapshot& snapshot)
+{
+    if(_id == 0)
+        glGenBuffers(1, &_id);
+
+    glBindBuffer(_type, _id);
+    GLint bufsize = 0;
+    glGetBufferParameteriv(_type, GL_BUFFER_SIZE, &bufsize);
+
+    _size = static_cast<size_t>(bufsize);
+    if(_size < snapshot._size)
+    {
+        glBufferData(_type, static_cast<GLsizeiptr>(snapshot._size), nullptr, _usage);
+        _size = snapshot._size;
+    }
+
+    for(const auto& [i, j] : snapshot._strips)
+    {
+        DCHECK(i + j.length() <= _size, "GLBuffer data overflow, offset: %d, size: %s, buffer-size: %d", i, j.length(), _size);
+        glBufferSubData(_type, static_cast<GLsizeiptr>(i), static_cast<GLsizeiptr>(j.length()), j.buf());
+    }
+
+    glBindBuffer(_type, 0);
+}
+
 ResourceRecycleFunc GLBuffer::recycle()
 {
     uint32_t id = _id;

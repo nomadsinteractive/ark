@@ -405,7 +405,7 @@ public:
 
     Optional<PtrType> allocate(SizeType size, SizeType alignment = kAlignment) {
         DASSERT(_stub);
-        DCHECK(alignment >= kAlignment && (alignment % kAlignment) == 0, "Illegal alignment %d", alignment);
+        DCHECK(alignment != 0 && ((alignment % kAlignment) == 0 || (kAlignment % alignment) == 0), "Illegal alignment %d", alignment);
         return _stub->allocate(size, alignment);
     }
 

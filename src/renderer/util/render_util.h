@@ -21,7 +21,7 @@ public:
     static Model makeUnitPointModel();
     static Model makeUnitQuadModel();
 
-    static element_index_t hash(const element_index_t* buf, size_t len);
+    static uint32_t hash(const element_index_t* buf, size_t len);
 
     static String outAttributeName(const String& name, PipelineInput::ShaderStage preStage);
 

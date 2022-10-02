@@ -54,11 +54,11 @@ template<> ARK_API float Conversions::to<String, float>(const String& str)
 
 template<> ARK_API Ark::RendererVersion Conversions::to<String, Ark::RendererVersion>(const String& str)
 {
-    const String glversion = str.toLower();
-    if(glversion.startsWith("opengl_"))
-        return static_cast<Ark::RendererVersion>(atoi(glversion.c_str() + 7));
-    if(glversion.startsWith("vulkan_"))
-        return static_cast<Ark::RendererVersion>(atoi(glversion.c_str() + 7) + 100);
+    const String version = str.toLower();
+    if(version.startsWith("opengl_"))
+        return static_cast<Ark::RendererVersion>(atoi(version.c_str() + 7));
+    if(version.startsWith("vulkan_"))
+        return static_cast<Ark::RendererVersion>(atoi(version.c_str() + 7) + 100);
     WARN(str == "auto", "Unknow RendererVersion: \"%s, supported values are [\"opengl_21\", \"opengl_46\", \"vulkan_11\", ...]", str.c_str());
     return Ark::AUTO;
 }

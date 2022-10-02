@@ -341,7 +341,7 @@ uint32_t SDLApplication::toSDLWindowFlag(const sp<ApplicationContext>& applicati
     if(appWindowFlag & Manifest::WINDOW_FLAG_RESIZABLE)
         windowFlag |= SDL_WINDOW_RESIZABLE;
 
-    _use_open_gl = version != Ark::VULKAN_11;
+    _use_open_gl = version < Ark::VULKAN_11;
     windowFlag |= (_use_open_gl ? SDL_WINDOW_OPENGL : SDL_WINDOW_VULKAN);
     return windowFlag;
 }

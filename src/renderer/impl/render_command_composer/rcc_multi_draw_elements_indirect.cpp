@@ -94,7 +94,7 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
             {
                 const ModelBundle::ModelInfo& modelInfo = _model_bundle->ensure(s._type);
                 const Metrics& metrics = modelInfo._model->metrics();
-                VertexWriter writer = buf.makeDividedVertexStream(renderRequest, 1, offset, 1);
+                VertexWriter writer = buf.makeDividedVertexWriter(renderRequest, 1, offset, 1);
                 writer.next();
                 writer.write(MatrixUtil::translate(M4::identity(), s._position) * MatrixUtil::scale(s._transform.toMatrix(), toScale(s._size, metrics)));
                 const ByteArray::Borrowed divided = s._varyings.getDivided(1);

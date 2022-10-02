@@ -16,7 +16,9 @@
 #include "renderer/base/render_engine_context.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/shader_bindings.h"
+#include "renderer/base/shared_indices.h"
 #include "renderer/base/texture.h"
+#include "renderer/inf/uploader.h"
 #include "renderer/util/render_util.h"
 
 #include "renderer/opengl/base/gl_buffer.h"
@@ -25,56 +27,6 @@
 #include "renderer/opengl/util/gl_debug.h"
 
 namespace ark {
-
-//namespace {
-
-//struct GLConstants {
-//    GLConstants() {
-//        _enums["nearest"] = GL_NEAREST;
-//        _enums["linear"] = GL_LINEAR;
-//        _enums["texture_mag_filter"] = GL_TEXTURE_MAG_FILTER;
-//        _enums["texture_min_filter"] = GL_TEXTURE_MIN_FILTER;
-//        _enums["texture_wrap_s"] = GL_TEXTURE_WRAP_S;
-//        _enums["texture_wrap_t"] = GL_TEXTURE_WRAP_T;
-//        _enums["texture_wrap_r"] = GL_TEXTURE_WRAP_R;
-//        _enums["clamp_to_edge"] = GL_CLAMP_TO_EDGE;
-//        _enums["clamp_to_border"] = GL_CLAMP_TO_BORDER;
-//        _enums["mirrored_repeat"] = GL_MIRRORED_REPEAT;
-//        _enums["repeat"] = GL_REPEAT;
-//        _enums["mirror_clamp_to_edge"] = GL_MIRROR_CLAMP_TO_EDGE;
-
-//        _enums["rgba"] = GL_RGBA;
-//        _enums["rgb"] = GL_RGB;
-//        _enums["alpha"] = GL_ALPHA;
-//        _enums["rg"] = GL_RG;
-
-//        _enums["always"] = GL_ALWAYS;
-//        _enums["never"] = GL_NEVER;
-//        _enums["equal"] = GL_EQUAL;
-//        _enums["not_equal"] = GL_NOTEQUAL;
-//        _enums["less"] = GL_LESS;
-//        _enums["greater"] = GL_GREATER;
-//        _enums["less_equal"] = GL_LEQUAL;
-//        _enums["greater_equal"] = GL_GEQUAL;
-
-//        _enums["keep"] = GL_KEEP;
-//        _enums["zero"] = GL_ZERO;
-//        _enums["replace"] = GL_REPLACE;
-//        _enums["incr"] = GL_INCR;
-//        _enums["decr"] = GL_DECR;
-
-//        _enums["cw"] = GL_CW;
-//        _enums["ccw"] = GL_CCW;
-
-//        _enums["front"] = GL_FRONT;
-//        _enums["back"] = GL_BACK;
-//        _enums["front_and_back"] = GL_FRONT_AND_BACK;
-//    }
-
-//    std::unordered_map<String, GLenum> _enums;
-//};
-
-//}
 
 GLenum GLUtil::toEnum(ModelLoader::RenderMode renderMode)
 {
@@ -274,15 +226,15 @@ void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, Render
     glBindVertexArray(vao);
 
     Buffer vertexBuffer = renderController.makeVertexBuffer(Buffer::USAGE_STATIC);
-    Buffer indexBuffer = renderController.makeIndexBuffer(Buffer::USAGE_STATIC);
 
-    const Buffer::Snapshot vertexBufferSnapshot = vertexBuffer.snapshot(sp<Uploader::Array<uint8_t>>::make(RenderUtil::makeUnitCubeVertices(false)));
+    const sp<ByteArray> cubeVertices = RenderUtil::makeUnitCubeVertices(false);
+    const Buffer::Snapshot vertexBufferSnapshot = vertexBuffer.snapshot(ByteArray::Borrowed(cubeVertices->buf(), cubeVertices->length()));
     vertexBufferSnapshot.upload(graphicsContext);
     glBindBuffer(GL_ARRAY_BUFFER, static_cast<GLuint>(vertexBuffer.id()));
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 12, nullptr);
 
-    const Buffer::Snapshot indexBufferSnapshot = indexBuffer.snapshot(SharedBuffer::Quads::maker()(6));
+    const Buffer::Snapshot indexBufferSnapshot = renderController.getSharedIndices(RenderController::SHARED_INDICES_QUAD)->snapshot(renderController, 6);
     indexBufferSnapshot.upload(graphicsContext);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLuint>(indexBufferSnapshot.id()));
 

@@ -44,8 +44,7 @@ private:
     SafePtr<Size> _size;
     sp<Shader> _shader;
     sp<ShaderBindings> _shader_bindings;
-
-    Buffer::Snapshot _index_buffer;
+    sp<SharedIndices> _shared_indices;
 };
 
 }

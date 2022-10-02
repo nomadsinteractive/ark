@@ -9,6 +9,7 @@
 #include "renderer/base/render_engine.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/base/shader.h"
+#include "renderer/base/shared_indices.h"
 #include "renderer/base/vertex_writer.h"
 #include "renderer/inf/model_loader.h"
 #include "renderer/inf/vertices.h"
@@ -22,13 +23,13 @@ RCCDrawElements::RCCDrawElements(Model model)
 
 sp<ShaderBindings> RCCDrawElements::makeShaderBindings(Shader& shader, RenderController& renderController, ModelLoader::RenderMode renderMode)
 {
-    _shared_buffer = renderController.getSharedBuffer(renderMode, _model);
+    _shared_buffer = renderController.getSharedIndices(_model, renderMode == ModelLoader::RENDER_MODE_TRIANGLE_STRIP);
     return shader.makeBindings(renderController.makeVertexBuffer(), renderMode, PipelineBindings::RENDER_PROCEDURE_DRAW_ELEMENTS);
 }
 
 void RCCDrawElements::postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot)
 {
-    snapshot._index_buffer = _shared_buffer->snapshot(renderController, snapshot._items.size(), snapshot._items.size());
+//    snapshot._index_buffer = _shared_buffer->snapshot(renderController, snapshot._items.size(), snapshot._items.size());
 }
 
 sp<RenderCommand> RCCDrawElements::compose(const RenderRequest& renderRequest, RenderLayer::Snapshot& snapshot)
@@ -37,11 +38,12 @@ sp<RenderCommand> RCCDrawElements::compose(const RenderRequest& renderRequest, R
     const Buffer& vertices = snapshot._stub->_shader_bindings->vertices();
 
     DrawingBuffer buf(snapshot._stub->_shader_bindings, snapshot._stub->_stride);
-    buf.setIndices(snapshot._index_buffer);
+//    buf.setIndices(snapshot._index_buffer);
+    buf.setIndices(_shared_buffer->snapshot(renderRequest, snapshot._items.size(), snapshot._items.size()));
 
     if(snapshot.needsReload())
     {
-        VertexWriter writer = buf.makeVertexStream(renderRequest, verticesLength * snapshot._items.size(), 0);
+        VertexWriter writer = buf.makeVertexWriter(renderRequest, verticesLength * snapshot._items.size(), 0);
         for(const Renderable::Snapshot& i : snapshot._items)
             i._model->writeRenderable(writer, i);
     }
@@ -52,7 +54,7 @@ sp<RenderCommand> RCCDrawElements::compose(const RenderRequest& renderRequest, R
         {
             if(i.getState(Renderable::RENDERABLE_STATE_DIRTY))
             {
-                VertexWriter writer = buf.makeVertexStream(renderRequest, verticesLength, offset);
+                VertexWriter writer = buf.makeVertexWriter(renderRequest, verticesLength, offset);
                 i._model->writeRenderable(writer, i);
             }
             offset += verticesLength;
@@ -60,7 +62,7 @@ sp<RenderCommand> RCCDrawElements::compose(const RenderRequest& renderRequest, R
     }
 
     DrawingContext drawingContext(snapshot._stub->_shader_bindings, snapshot._stub->_shader_bindings->attachments(), std::move(snapshot._ubos), std::move(snapshot._ssbos),
-                                  buf.vertices().toSnapshot(vertices), buf.indices(), DrawingContext::ParamDrawElements(0, buf.indices().length<element_index_t>()));
+                                  buf.vertices().toSnapshot(vertices), buf.indices(), DrawingContext::ParamDrawElements(0, snapshot._index_count));
 
     if(snapshot._stub->_scissor)
         drawingContext._scissor = snapshot._stub->_render_controller->renderEngine()->toRendererScissor(snapshot._scissor);

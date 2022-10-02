@@ -19,7 +19,7 @@ public:
 
 private:
     Model _model;
-    sp<SharedBuffer> _shared_buffer;
+    sp<SharedIndices> _shared_buffer;
 };
 
 }

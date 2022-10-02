@@ -107,8 +107,8 @@ Buffer::Snapshot::Snapshot(sp<Delegate> stub)
 {
 }
 
-Buffer::Snapshot::Snapshot(sp<Delegate> stub, size_t size)
-    : _delegate(std::move(stub)), _size(size)
+Buffer::Snapshot::Snapshot(sp<Delegate> stub, size_t size, std::vector<Strip> strips)
+    : _delegate(std::move(stub)), _size(size), _strips(std::move(strips))
 {
 }
 
@@ -134,8 +134,13 @@ size_t Buffer::Snapshot::size() const
 
 void Buffer::Snapshot::upload(GraphicsContext& graphicsContext) const
 {
-    _delegate->setUploader(_uploader);
-    _delegate->upload(graphicsContext);
+    if(_uploader)
+    {
+        _delegate->setUploader(_uploader);
+        _delegate->upload(graphicsContext);
+    }
+    else
+        _delegate->uploadBuffer(graphicsContext, *this);
 }
 
 const sp<Buffer::Delegate>& Buffer::Snapshot::delegate() const
@@ -160,17 +165,12 @@ Buffer::operator bool() const
 
 Buffer::Snapshot Buffer::snapshot(const ByteArray::Borrowed& strip) const
 {
-    return Snapshot(_delegate, sp<SnapshotUploader>::make(strip.length(), std::vector<Buffer::Strip>{{0, strip}}));
+    return Snapshot(_delegate, strip.length(), std::vector<Buffer::Strip>{{0, strip}});
 }
 
-Buffer::Snapshot Buffer::snapshot(const sp<Uploader>& uploader) const
+Buffer::Snapshot Buffer::snapshot(size_t size, std::vector<Strip> strips) const
 {
-    return Snapshot(_delegate, uploader);
-}
-
-Buffer::Snapshot Buffer::snapshot(size_t size) const
-{
-    return Snapshot(_delegate, size);
+    return Snapshot(_delegate, size, std::move(strips));
 }
 
 Buffer::Snapshot Buffer::snapshot() const
@@ -201,9 +201,10 @@ Buffer::Factory::Factory(size_t stride)
 Buffer::Snapshot Buffer::Factory::toSnapshot(const Buffer& buffer)
 {
     if(_strips.size() == 0)
-        return buffer.snapshot(nullptr);
+        return buffer.snapshot();
 
-    return buffer.snapshot(sp<SnapshotUploader>::make(_size, std::move(_strips)));
+    return buffer.snapshot(_size, std::move(_strips));
+//    return buffer.snapshot(sp<SnapshotUploader>::make(_size, std::move(_strips)));
 }
 
 void Buffer::Factory::addStrip(size_t offset, ByteArray::Borrowed& content)

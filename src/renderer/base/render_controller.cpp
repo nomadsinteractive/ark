@@ -14,7 +14,7 @@
 #include "renderer/base/recycler.h"
 #include "renderer/base/render_engine.h"
 #include "renderer/base/render_engine_context.h"
-#include "renderer/base/shared_buffer.h"
+#include "renderer/base/shared_indices.h"
 #include "renderer/inf/renderer_factory.h"
 #include "renderer/inf/snippet_factory.h"
 #include "renderer/inf/vertices.h"
@@ -24,18 +24,20 @@ namespace ark {
 
 namespace {
 
-class WritableIndiceHash : public Writable {
+class WritableIndice : public Writable {
 public:
-    WritableIndiceHash()
-        : _hash(0) {
+    WritableIndice(size_t size)
+        : _hash(0), _indices(size) {
     }
 
     virtual uint32_t write(const void* buffer, uint32_t size, uint32_t offset) override {
-        _hash += RenderUtil::hash(reinterpret_cast<const element_index_t*>(buffer), size / sizeof(element_index_t));
+        _hash = _hash * 101 + RenderUtil::hash(reinterpret_cast<const element_index_t*>(buffer), size / sizeof(element_index_t));
+        memcpy(_indices.data() + offset, buffer, size);
         return size;
     }
 
-    element_index_t _hash;
+    uint32_t _hash;
+    std::vector<element_index_t> _indices;
 };
 
 }
@@ -48,7 +50,7 @@ RenderController::RenderController(const sp<RenderEngine>& renderEngine, const s
 void RenderController::reset()
 {
     DTHREAD_CHECK(THREAD_ID_CORE);
-    _shared_buffers.clear();
+    _shared_indices.clear();
 }
 
 void RenderController::onSurfaceReady(GraphicsContext& graphicsContext)
@@ -145,13 +147,6 @@ void RenderController::uploadSurfaceReadyItems(GraphicsContext& graphicsContext,
         }
 }
 
-element_index_t RenderController::getIndicesHash(Uploader& indices) const
-{
-    WritableIndiceHash writer;
-    indices.upload(writer);
-    return writer._hash;
-}
-
 const sp<RenderEngine>& RenderController::renderEngine() const
 {
     return _render_engine;
@@ -243,16 +238,16 @@ void RenderController::deferUnref(Box box)
     _defered_instances.push_back(std::move(box));
 }
 
-sp<SharedBuffer> RenderController::getNamedBuffer(SharedBuffer::Name name)
+sp<SharedIndices> RenderController::getSharedIndices(RenderController::SharedIndicesName name)
 {
     DTHREAD_CHECK(THREAD_ID_CORE);
     switch(name) {
-    case SharedBuffer::NAME_QUADS:
-        return getSharedBuffer(ModelLoader::RENDER_MODE_TRIANGLES, RenderUtil::makeUnitQuadModel());
-    case SharedBuffer::NAME_NINE_PATCH:
-        return getSharedBuffer(ModelLoader::RENDER_MODE_TRIANGLE_STRIP, RenderUtil::makeUnitNinePatchTriangleStripsModel());
-    case SharedBuffer::NAME_POINTS:
-        return getSharedBuffer(ModelLoader::RENDER_MODE_POINTS, RenderUtil::makeUnitPointModel());
+    case RenderController::SHARED_INDICES_QUAD:
+        return getSharedIndices(RenderUtil::makeUnitQuadModel(), false);
+    case RenderController::SHARED_INDICES_NINE_PATCH:
+        return getSharedIndices(RenderUtil::makeUnitNinePatchTriangleStripsModel(), true);
+    case RenderController::SHARED_INDICES_POINT:
+        return getSharedIndices(RenderUtil::makeUnitPointModel(), false);
     default:
         break;
     }
@@ -260,28 +255,35 @@ sp<SharedBuffer> RenderController::getNamedBuffer(SharedBuffer::Name name)
     return nullptr;
 }
 
-sp<SharedBuffer> RenderController::getSharedBuffer(ModelLoader::RenderMode renderMode, const Model& model)
+sp<SharedIndices> RenderController::getSharedIndices(const Model& model, bool degenerate)
 {
-    const sp<Uploader>& indices = model.indices();
-    element_index_t hash = getIndicesHash(indices);
-    const auto iter = _shared_buffers.find(hash);
-    if(iter != _shared_buffers.end())
+    DTHREAD_CHECK(THREAD_ID_CORE);
+    const sp<Uploader>& indicesUploader = model.indices();
+
+    WritableIndice writer(indicesUploader->size() / sizeof(element_index_t));
+    indicesUploader->upload(writer);
+
+    uint32_t hash = writer._hash;
+    std::vector<element_index_t> indices = std::move(writer._indices);
+    const auto iter = _shared_indices.find(hash);
+    if(iter != _shared_indices.end())
         return iter->second;
 
-    bool degenerate = renderMode == ModelLoader::RENDER_MODE_TRIANGLE_STRIP;
     size_t modelIndexCount = model.indexCount();
     size_t modelVertexCount = model.vertexCount();
 
-    sp<SharedBuffer> sharedBuffer;
+    sp<SharedIndices> sharedBuffer;
     if(degenerate)
-        sharedBuffer = sp<SharedBuffer>::make(makeIndexBuffer(Buffer::USAGE_STATIC),
-                                             [indices, modelVertexCount](size_t primitiveCount)->sp<Uploader> { return sp<SharedBuffer::Degenerate>::make(primitiveCount, modelVertexCount, indices); },
-                                             [modelIndexCount](size_t primitiveCount)->size_t { return ((modelIndexCount + 2) * primitiveCount - 2) * sizeof(element_index_t); });
+        sharedBuffer = sp<SharedIndices>::make(makeIndexBuffer(Buffer::USAGE_STATIC),
+                                             [indices, modelVertexCount](size_t primitiveCount)->sp<Uploader> { return sp<SharedIndices::Degenerate>::make(primitiveCount, modelVertexCount, indices); },
+                                             [modelIndexCount](size_t primitiveCount)->size_t { return ((modelIndexCount + 2) * primitiveCount - 2) * sizeof(element_index_t); },
+                                             indices, modelVertexCount, degenerate);
     else
-        sharedBuffer = sp<SharedBuffer>::make(makeIndexBuffer(Buffer::USAGE_STATIC),
-                                             [indices, modelVertexCount](size_t primitiveCount)->sp<Uploader> { return sp<SharedBuffer::Concat>::make(primitiveCount, modelVertexCount, indices); },
-                                             [modelIndexCount](size_t primitiveCount)->size_t { return modelIndexCount * primitiveCount * sizeof(element_index_t); });
-    _shared_buffers.insert(std::make_pair(hash, sharedBuffer));
+        sharedBuffer = sp<SharedIndices>::make(makeIndexBuffer(Buffer::USAGE_STATIC),
+                                             [indices, modelVertexCount](size_t primitiveCount)->sp<Uploader> { return sp<SharedIndices::Concat>::make(primitiveCount, modelVertexCount, indices); },
+                                             [modelIndexCount](size_t primitiveCount)->size_t { return modelIndexCount * primitiveCount * sizeof(element_index_t); },
+                                             indices, modelVertexCount, degenerate);
+    _shared_indices.insert(std::make_pair(hash, sharedBuffer));
     return sharedBuffer;
 }
 

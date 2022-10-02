@@ -24,9 +24,9 @@ public:
     DrawingBuffer(const sp<ShaderBindings>& shaderBindings, uint32_t stride);
     DEFAULT_COPY_AND_ASSIGN(DrawingBuffer);
 
-    VertexWriter makeVertexStream(const RenderRequest& renderRequest, size_t length, size_t offset);
+    VertexWriter makeVertexWriter(const RenderRequest& renderRequest, size_t length, size_t offset);
     [[deprecated]]
-    VertexWriter makeDividedVertexStream(const RenderRequest& renderRequest, size_t length, size_t offset, uint32_t divisor);
+    VertexWriter makeDividedVertexWriter(const RenderRequest& renderRequest, size_t length, size_t offset, uint32_t divisor);
 
     const sp<ShaderBindings>& shaderBindings() const;
 

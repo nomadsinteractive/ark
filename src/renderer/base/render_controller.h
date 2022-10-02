@@ -18,7 +18,6 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/base/texture.h"
-#include "renderer/base/shared_buffer.h"
 #include "renderer/inf/model_loader.h"
 
 #include "platform/platform.h"
@@ -38,6 +37,14 @@ public:
         UPLOAD_PRIORITY_LOW,                /* Framebuffers */
         UPLOAD_PRIORITY_NORMAL,
         UPLOAD_PRIORITY_HIGH                /* Pipelines */
+    };
+
+    enum SharedIndicesName {
+        SHARED_INDICES_NONE,
+        SHARED_INDICES_QUAD,
+        SHARED_INDICES_NINE_PATCH,
+        SHARED_INDICES_POINT,
+        SHARED_INDICES_COUNT
     };
 
 private:
@@ -112,8 +119,8 @@ public:
     void preUpdate(uint64_t timestamp);
     void deferUnref(Box box);
 
-    sp<SharedBuffer> getNamedBuffer(SharedBuffer::Name name);
-    sp<SharedBuffer> getSharedBuffer(ModelLoader::RenderMode renderMode, const Model& model);
+    sp<SharedIndices> getSharedIndices(SharedIndicesName name);
+    sp<SharedIndices> getSharedIndices(const Model& model, bool degenerate);
 
     uint64_t updateTick();
     uint64_t tick() const;
@@ -159,8 +166,6 @@ private:
     void doSurfaceReady(GraphicsContext& graphicsContext) const;
     void uploadSurfaceReadyItems(GraphicsContext& graphicsContext, UploadPriority up) const;
 
-    element_index_t getIndicesHash(Uploader& indices) const;
-
 private:
     sp<RenderEngine> _render_engine;
     sp<Recycler> _recycler;
@@ -175,7 +180,7 @@ private:
     DList<Runnable> _on_pre_update_request;
 
     std::vector<Box> _defered_instances;
-    std::unordered_map<element_index_t, sp<SharedBuffer>> _shared_buffers;
+    std::unordered_map<uint32_t, sp<SharedIndices>> _shared_indices;
 
     uint64_t _tick;
 

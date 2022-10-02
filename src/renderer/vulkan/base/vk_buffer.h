@@ -21,6 +21,7 @@ public:
 
     virtual uint64_t id() override;
     virtual void upload(GraphicsContext& graphicsContext) override;
+    virtual void uploadBuffer(GraphicsContext& graphicsContext, const Buffer::Snapshot& snapshot) override;
     virtual ResourceRecycleFunc recycle() override;
 
     void reload(GraphicsContext& graphicsContext, const ByteArray::Borrowed& buf);
@@ -38,7 +39,7 @@ private:
     void unmap();
 
     void allocateMemory(GraphicsContext& graphicsContext, const VkMemoryRequirements& memReqs);
-    void ensureSize(GraphicsContext& graphicsContext, Uploader& uploader);
+    void ensureSize(GraphicsContext& graphicsContext, size_t size);
 
     void bind();
     VkResult flush();

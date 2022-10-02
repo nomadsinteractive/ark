@@ -43,12 +43,12 @@ sp<RenderCommand> RCCDrawElementsInstanced::compose(const RenderRequest& renderR
 
     if(snapshot.needsReload())
     {
-        VertexWriter writer = buf.makeVertexStream(renderRequest, verticesLength, 0);
+        VertexWriter writer = buf.makeVertexWriter(renderRequest, verticesLength, 0);
         const Model model = modelLoader->loadModel(0);
         model.writeToStream(writer, V3(1.0f));
     }
 
-    VertexWriter writer = buf.makeDividedVertexStream(renderRequest, snapshot._items.size(), 0, 1);
+    VertexWriter writer = buf.makeDividedVertexWriter(renderRequest, snapshot._items.size(), 0, 1);
     for(const Renderable::Snapshot& i : snapshot._items)
     {
         writer.next();

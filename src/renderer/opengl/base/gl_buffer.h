@@ -17,6 +17,7 @@ public:
 
     virtual uint64_t id() override;
     virtual void upload(GraphicsContext& graphicsContext) override;
+    virtual void uploadBuffer(GraphicsContext& graphicsContext, const Buffer::Snapshot& snapshot) override;
     virtual ResourceRecycleFunc recycle() override;
 
 private:
@@ -29,6 +30,7 @@ private:
     sp<Recycler> _recycler;
 
     uint32_t _id;
+
 };
 
 

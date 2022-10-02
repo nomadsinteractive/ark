@@ -5,7 +5,6 @@
 #include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
 
-#include "graphics/base/layer_context.h"
 #include "graphics/inf/block.h"
 #include "graphics/inf/renderer.h"
 #include "graphics/forwarding.h"
@@ -50,7 +49,7 @@ private:
 
     sp<ShaderBindings> _shader_bindings;
     Buffer _vertex_buffer;
-    Buffer::Snapshot _index_buffer;
+    sp<SharedIndices> _index_buffer;
 };
 
 }

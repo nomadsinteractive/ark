@@ -13,20 +13,21 @@
 #include "renderer/base/render_controller.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/shader_bindings.h"
+#include "renderer/base/shared_indices.h"
 #include "renderer/inf/uploader.h"
 
 namespace ark {
 
 ShaderFrame::ShaderFrame(const sp<Size>& size, const sp<Shader>& shader, RenderController& renderController)
     : _size(size), _shader(shader), _shader_bindings(shader->makeBindings(Buffer(), ModelLoader::RENDER_MODE_TRIANGLES, PipelineBindings::RENDER_PROCEDURE_DRAW_ELEMENTS)),
-      _vertex_buffer(renderController.makeVertexBuffer()), _index_buffer(renderController.getNamedBuffer(SharedBuffer::NAME_QUADS)->snapshot(renderController, 1))
+      _vertex_buffer(renderController.makeVertexBuffer()), _index_buffer(renderController.getSharedIndices(RenderController::SHARED_INDICES_QUAD))
 {
 }
 
 void ShaderFrame::render(RenderRequest& renderRequest, const V3& position)
 {
     DrawingContext drawingContext(_shader_bindings, _shader_bindings->attachments(), _shader->takeUBOSnapshot(renderRequest), _shader->takeSSBOSnapshot(renderRequest),
-                                  _vertex_buffer.snapshot(getVertexBuffer(renderRequest, position)), _index_buffer, DrawingContext::ParamDrawElements(0, _index_buffer.length<element_index_t>()));
+                                  _vertex_buffer.snapshot(getVertexBuffer(renderRequest, position)), _index_buffer->snapshot(renderRequest, 1), DrawingContext::ParamDrawElements(0, 6));
     renderRequest.addRequest(drawingContext.toRenderCommand(renderRequest));
 }
 
