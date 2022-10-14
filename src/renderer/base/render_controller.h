@@ -14,7 +14,6 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
-#include "graphics/base/camera.h"
 
 #include "renderer/forwarding.h"
 #include "renderer/base/texture.h"
@@ -26,17 +25,20 @@ namespace ark {
 
 class ARK_API RenderController {
 public:
+//  [[script::bindings::enumeration]]
     enum UploadStrategy {
-        US_ONCE = 0,
+        US_ONCE,
         US_RELOAD = 1,
         US_ON_SURFACE_READY = 2,
-        US_ONCE_AND_ON_SURFACE_READY = 3
+        US_ONCE_AND_ON_SURFACE_READY = 3,
+        US_ON_CHANGED = 4,
     };
 
+//  [[script::bindings::enumeration]]
     enum UploadPriority {
-        UPLOAD_PRIORITY_LOW,                /* Framebuffers */
+        UPLOAD_PRIORITY_LOW,
         UPLOAD_PRIORITY_NORMAL,
-        UPLOAD_PRIORITY_HIGH                /* Pipelines */
+        UPLOAD_PRIORITY_HIGH
     };
 
     enum SharedIndicesName {
@@ -84,7 +86,7 @@ public:
     void onDrawFrame(GraphicsContext& graphicsContext);
 
     void upload(sp<Resource> resource, RenderController::UploadStrategy strategy, sp<Future> future = nullptr, UploadPriority priority = UPLOAD_PRIORITY_NORMAL);
-    void uploadBuffer(const Buffer& buffer, sp<Uploader> uploader, RenderController::UploadStrategy strategy, sp<Future> future = nullptr, UploadPriority priority = UPLOAD_PRIORITY_NORMAL);
+    void uploadBuffer(Buffer& buffer, sp<Uploader> uploader, RenderController::UploadStrategy strategy, sp<Future> future = nullptr, RenderController::UploadPriority priority = RenderController::UPLOAD_PRIORITY_NORMAL);
 
     template<typename T, typename... Args> sp<T> createResource(Args&&... args) {
         const sp<T> res = sp<T>::make(std::forward<Args>(args)...);
@@ -116,7 +118,7 @@ public:
     void addPreRenderUpdateRequest(const sp<Updatable>& updatable, const sp<Boolean>& disposed);
     void addPreRenderRunRequest(const sp<Runnable>& task, const sp<Boolean>& disposed);
 
-    void preUpdate(uint64_t timestamp);
+    void preRequestUpdate(uint64_t timestamp);
     void deferUnref(Box box);
 
     sp<SharedIndices> getSharedIndices(SharedIndicesName name);
@@ -126,11 +128,11 @@ public:
     uint64_t tick() const;
 
 private:
-    class RenderResource {
+    class PreUploadingResource {
     public:
-        RenderResource() = default;
-        RenderResource(sp<Resource> resource, sp<Future> future, UploadPriority uploadPriority);
-        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(RenderResource);
+        PreUploadingResource() = default;
+        PreUploadingResource(sp<Resource> resource, sp<Future> future, UploadPriority uploadPriority);
+        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(PreUploadingResource);
 
         bool isExpired() const;
         bool isCancelled() const;
@@ -141,7 +143,7 @@ private:
         uint64_t id() const;
         UploadPriority uploadPriority() const;
 
-        bool operator < (const RenderResource& other) const;
+        bool operator < (const PreUploadingResource& other) const;
 
     private:
         sp<Resource> _resource;
@@ -151,10 +153,10 @@ private:
 
     struct UploadingResource {
         UploadingResource() = default;
-        UploadingResource(RenderResource resource, RenderController::UploadStrategy strategy);
+        UploadingResource(PreUploadingResource resource, RenderController::UploadStrategy strategy);
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(UploadingResource);
 
-        RenderResource _resource;
+        PreUploadingResource _resource;
         RenderController::UploadStrategy _strategy;
 
         bool operator < (const UploadingResource& other) const;
@@ -174,7 +176,7 @@ private:
     sp<Variable<uint64_t>> _clock;
 
     LFQueue<UploadingResource> _uploading_resources;
-    std::set<RenderResource> _on_surface_ready_items;
+    std::set<PreUploadingResource> _on_surface_ready_items;
 
     DList<Updatable> _on_pre_updatable;
     DList<Runnable> _on_pre_update_request;

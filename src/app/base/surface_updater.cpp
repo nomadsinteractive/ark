@@ -18,7 +18,7 @@ void SurfaceUpdater::run()
     DPROFILER_TRACE("SurfaceUpdate");
     DTHREAD_CHECK(THREAD_ID_CORE);
     uint64_t timestamp = _render_controller->updateTick();
-    _render_controller->preUpdate(timestamp);
+    _render_controller->preRequestUpdate(timestamp);
     _surface_controller->requestUpdate(timestamp);
 }
 

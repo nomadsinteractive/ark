@@ -20,6 +20,7 @@ public:
     virtual ~Uploader() = default;
 
     virtual size_t size();
+    virtual sp<Updatable> updatable();
     virtual void upload(Writable& writable) = 0;
 
     template<typename T> class Array;

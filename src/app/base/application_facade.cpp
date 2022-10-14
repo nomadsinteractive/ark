@@ -44,6 +44,11 @@ const sp<ApplicationBundle>& ApplicationFacade::applicationBundle() const
     return _context->applicationBundle();
 }
 
+const sp<RenderController>& ApplicationFacade::renderController() const
+{
+    return _context->renderController();
+}
+
 const sp<SurfaceController>& ApplicationFacade::surfaceController() const
 {
     return _surface_controller;

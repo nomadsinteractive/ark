@@ -8,6 +8,8 @@
 
 #include "graphics/forwarding.h"
 
+#include "renderer/forwarding.h"
+
 #include "app/forwarding.h"
 
 namespace ark {
@@ -26,6 +28,8 @@ public:
     const sp<ApplicationController>& applicationController() const;
 // [[script::bindings::property]]
     const sp<ApplicationBundle>& applicationBundle() const;
+// [[script::bindings::property]]
+    const sp<RenderController>& renderController() const;
 // [[script::bindings::property]]
     const sp<SurfaceController>& surfaceController() const;
 // [[script::bindings::property]]

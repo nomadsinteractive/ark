@@ -4,6 +4,7 @@
 
 #include "renderer/base/recycler.h"
 #include "renderer/inf/uploader.h"
+#include "renderer/util/uploader_type.h"
 
 #include "renderer/vulkan/base/vk_command_pool.h"
 #include "renderer/vulkan/base/vk_heap.h"
@@ -13,8 +14,8 @@
 namespace ark {
 namespace vulkan {
 
-VKBuffer::VKBuffer(const sp<VKRenderer>& renderer, const sp<Recycler>& recycler, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags)
-    : _renderer(renderer), _recycler(recycler), _usage_flags(usageFlags), _memory_property_flags(memoryPropertyFlags), _descriptor{}, _memory_requirements{}
+VKBuffer::VKBuffer(sp<VKRenderer> renderer, sp<Recycler> recycler, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags)
+    : _renderer(std::move(renderer)), _recycler(std::move(recycler)), _usage_flags(usageFlags), _memory_property_flags(memoryPropertyFlags), _descriptor{}, _memory_requirements{}
 {
 }
 
@@ -30,47 +31,22 @@ uint64_t VKBuffer::id()
 
 void VKBuffer::upload(GraphicsContext& graphicsContext)
 {
-    if(_uploader)
-    {
-        ensureSize(graphicsContext, _uploader->size());
-
-        if(isDeviceLocal())
-        {
-            VKBuffer stagingBuffer(_renderer, _recycler, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-            stagingBuffer.setUploader(_uploader);
-            stagingBuffer.upload(graphicsContext);
-
-            VkCommandBuffer copyCmd = _renderer->commandPool()->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
-            VkBufferCopy copyRegion = {0, 0, _size};
-            vkCmdCopyBuffer(copyCmd, stagingBuffer.vkBuffer(), _descriptor.buffer, 1, &copyRegion);
-            _renderer->commandPool()->flushCommandBuffer(copyCmd, true);
-
-            stagingBuffer.recycle()(graphicsContext);
-        }
-        else
-        {
-            WritableMemory writable(_memory->map());
-            _uploader->upload(writable);
-            if(!isHostCoherent())
-                VKUtil::checkResult(flush());
-            _memory->unmap();
-        }
-    }
+//    if(_uploader)
+//        uploadBuffer(graphicsContext, _uploader);
 }
 
-void VKBuffer::uploadBuffer(GraphicsContext& graphicsContext, const Buffer::Snapshot& snapshot)
+void VKBuffer::uploadBuffer(GraphicsContext& graphicsContext, Uploader& uploader)
 {
-    ensureSize(graphicsContext, snapshot._size);
-
+    ensureSize(graphicsContext, uploader.size());
+//TODO: Copy every strips instead of copying the whole buffer
     if(isDeviceLocal())
     {
         VKBuffer stagingBuffer(_renderer, _recycler, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-        stagingBuffer.uploadBuffer(graphicsContext, snapshot);
+        stagingBuffer.uploadBuffer(graphicsContext, uploader);
 
         VkCommandBuffer copyCmd = _renderer->commandPool()->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
         std::vector<VkBufferCopy> copyRegions;
-        for(const auto& [i, j] : snapshot._strips)
-            copyRegions.push_back({i, i, j.length()});
+        copyRegions.push_back({0, 0, uploader.size()});
         vkCmdCopyBuffer(copyCmd, stagingBuffer.vkBuffer(), _descriptor.buffer, static_cast<uint32_t>(copyRegions.size()), copyRegions.data());
         _renderer->commandPool()->flushCommandBuffer(copyCmd, true);
 
@@ -78,9 +54,8 @@ void VKBuffer::uploadBuffer(GraphicsContext& graphicsContext, const Buffer::Snap
     }
     else
     {
-        uint8_t* memory = reinterpret_cast<uint8_t*>(_memory->map());
-        for(const auto& [i, j] : snapshot._strips)
-            memcpy(memory + i, j.buf(), j.length());
+        WritableMemory writable(_memory->map());
+        uploader.upload(writable);
         if(!isHostCoherent())
             VKUtil::checkResult(flush());
         _memory->unmap();

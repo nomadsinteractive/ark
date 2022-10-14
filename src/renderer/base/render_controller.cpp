@@ -3,6 +3,7 @@
 #include "core/base/manifest.h"
 #include "core/base/future.h"
 #include "core/inf/runnable.h"
+#include "core/util/boolean_type.h"
 #include "core/util/log.h"
 
 #include "graphics/base/bitmap.h"
@@ -18,6 +19,7 @@
 #include "renderer/inf/renderer_factory.h"
 #include "renderer/inf/snippet_factory.h"
 #include "renderer/inf/vertices.h"
+#include "renderer/impl/uploader/uploader_recoder.h"
 #include "renderer/util/render_util.h"
 
 namespace ark {
@@ -38,6 +40,49 @@ public:
 
     uint32_t _hash;
     std::vector<element_index_t> _indices;
+};
+
+class UploadingBufferResource : public Resource {
+public:
+    UploadingBufferResource(sp<Buffer::Delegate> buffer, sp<Uploader> uploader)
+        : _buffer(std::move(buffer)), _uploader(std::move(uploader)) {
+    }
+
+    virtual uint64_t id() override {
+        return _buffer->id();
+    }
+
+    virtual void upload(GraphicsContext& graphicsContext) override {
+        _buffer->uploadBuffer(graphicsContext, _uploader);
+    }
+
+    virtual ResourceRecycleFunc recycle() override {
+        return _buffer->recycle();
+    }
+
+private:
+    sp<Buffer::Delegate> _buffer;
+    sp<Uploader> _uploader;
+};
+
+class BufferUpdatable : public Updatable {
+public:
+    BufferUpdatable(RenderController& renderController, sp<Updatable> updatable, sp<Uploader> uploader, sp<Buffer::Delegate> buffer)
+        : _render_controller(renderController), _updatable(std::move(updatable)), _uploader(std::move(uploader)), _buffer(std::move(buffer)) {
+    }
+
+    virtual bool update(uint64_t timestamp) override {
+        bool dirty = _updatable->update(timestamp) || _buffer->id() == 0;
+        if(dirty)
+            _render_controller.upload(sp<UploadingBufferResource>::make(_buffer, sp<UploaderRecorder>::make(_uploader)), RenderController::US_ONCE);
+        return dirty;
+    }
+
+private:
+    RenderController& _render_controller;
+    sp<Updatable> _updatable;
+    sp<Uploader> _uploader;
+    sp<Buffer::Delegate> _buffer;
 };
 
 }
@@ -63,13 +108,13 @@ void RenderController::prepare(GraphicsContext& graphicsContext, LFQueue<Uploadi
 {
     UploadingResource front;
     while(items.pop(front)) {
-        if(!front._resource.isCancelled() && (!front._resource.isExpired() || front._strategy == RenderController::US_RELOAD))
+        if(!front._resource.isCancelled())
         {
             if(front._strategy == RenderController::US_RELOAD && front._resource.id() != 0)
                 front._resource.recycle(graphicsContext);
 
             front._resource.upload(graphicsContext);
-            if(front._strategy == RenderController::US_ONCE_AND_ON_SURFACE_READY)
+            if(front._strategy & RenderController::US_ON_SURFACE_READY)
                 _on_surface_ready_items.insert(std::move(front._resource));
         }
     }
@@ -93,18 +138,26 @@ void RenderController::upload(sp<Resource> resource, RenderController::UploadStr
     case RenderController::US_ONCE_AND_ON_SURFACE_READY:
     case RenderController::US_ONCE:
     case RenderController::US_RELOAD:
-        _uploading_resources.push(UploadingResource(RenderResource(std::move(resource), std::move(future), priority), strategy));
+        _uploading_resources.push(UploadingResource(PreUploadingResource(std::move(resource), std::move(future), priority), strategy));
         break;
     case RenderController::US_ON_SURFACE_READY:
-        _on_surface_ready_items.insert(RenderResource(std::move(resource), std::move(future), priority));
+        _on_surface_ready_items.insert(PreUploadingResource(std::move(resource), std::move(future), priority));
         break;
     }
 }
 
-void RenderController::uploadBuffer(const Buffer& buffer, sp<Uploader> uploader, RenderController::UploadStrategy strategy, sp<Future> future, RenderController::UploadPriority priority)
+void RenderController::uploadBuffer(Buffer& buffer, sp<Uploader> uploader, RenderController::UploadStrategy strategy, sp<Future> future, RenderController::UploadPriority priority)
 {
-    buffer._delegate->setUploader(std::move(uploader));
-    return upload(buffer._delegate, strategy, std::move(future), priority);
+    if(strategy & RenderController::US_ON_CHANGED)
+    {
+        sp<Boolean> disposed = future ? future->cancelled() : sp<Boolean>::make<BooleanByWeakRef<Buffer::Delegate>>(buffer.delegate(), 2);
+        addPreRenderUpdateRequest(sp<BufferUpdatable>::make(*this, uploader->updatable(), uploader, buffer.delegate()), disposed);
+    }
+    else if(uploader)
+    {
+        buffer._resource = sp<UploadingBufferResource>::make(buffer._delegate, std::move(uploader));
+        upload(buffer._resource, strategy, std::move(future), priority);
+    }
 }
 
 const sp<Recycler>& RenderController::recycler() const
@@ -116,7 +169,7 @@ void RenderController::doRecycling(GraphicsContext& graphicsContext)
 {
     for(auto iter = _on_surface_ready_items.begin(); iter != _on_surface_ready_items.end(); )
     {
-        const RenderResource& resource = *iter;
+        const PreUploadingResource& resource = *iter;
         if(resource.isExpired() || resource.isCancelled())
         {
             resource.recycle(graphicsContext);
@@ -129,7 +182,7 @@ void RenderController::doRecycling(GraphicsContext& graphicsContext)
 
 void RenderController::doSurfaceReady(GraphicsContext& graphicsContext) const
 {
-    for(const RenderResource& resource : _on_surface_ready_items)
+    for(const PreUploadingResource& resource : _on_surface_ready_items)
         resource.recycle(graphicsContext);
 
     uploadSurfaceReadyItems(graphicsContext, UPLOAD_PRIORITY_HIGH);
@@ -139,7 +192,7 @@ void RenderController::doSurfaceReady(GraphicsContext& graphicsContext) const
 
 void RenderController::uploadSurfaceReadyItems(GraphicsContext& graphicsContext, UploadPriority up) const
 {
-    for(const RenderResource& resource : _on_surface_ready_items)
+    for(const PreUploadingResource& resource : _on_surface_ready_items)
         if(resource.uploadPriority() == up)
         {
             DWARN(resource.id() == 0, "Resource[%d] has been uploaded, please check your UploadPriority", resource.id());
@@ -196,6 +249,7 @@ sp<Framebuffer> RenderController::makeFramebuffer(sp<Renderer> renderer, std::ve
 
 Buffer RenderController::makeBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Uploader>& uploader)
 {
+    DTHREAD_CHECK(THREAD_ID_CORE);
     Buffer buffer(_render_engine->rendererFactory()->createBuffer(type, usage));
     uploadBuffer(buffer, uploader, uploader ? RenderController::US_ONCE_AND_ON_SURFACE_READY : RenderController::US_ON_SURFACE_READY);
     return buffer;
@@ -218,7 +272,7 @@ void RenderController::addPreRenderRunRequest(const sp<Runnable>& task, const sp
     }
 }
 
-void RenderController::preUpdate(uint64_t timestamp)
+void RenderController::preRequestUpdate(uint64_t timestamp)
 {
     DPROFILER_TRACE("RendererPreUpdate");
 
@@ -269,20 +323,9 @@ sp<SharedIndices> RenderController::getSharedIndices(const Model& model, bool de
     if(iter != _shared_indices.end())
         return iter->second;
 
-    size_t modelIndexCount = model.indexCount();
     size_t modelVertexCount = model.vertexCount();
 
-    sp<SharedIndices> sharedBuffer;
-    if(degenerate)
-        sharedBuffer = sp<SharedIndices>::make(makeIndexBuffer(Buffer::USAGE_STATIC),
-                                             [indices, modelVertexCount](size_t primitiveCount)->sp<Uploader> { return sp<SharedIndices::Degenerate>::make(primitiveCount, modelVertexCount, indices); },
-                                             [modelIndexCount](size_t primitiveCount)->size_t { return ((modelIndexCount + 2) * primitiveCount - 2) * sizeof(element_index_t); },
-                                             indices, modelVertexCount, degenerate);
-    else
-        sharedBuffer = sp<SharedIndices>::make(makeIndexBuffer(Buffer::USAGE_STATIC),
-                                             [indices, modelVertexCount](size_t primitiveCount)->sp<Uploader> { return sp<SharedIndices::Concat>::make(primitiveCount, modelVertexCount, indices); },
-                                             [modelIndexCount](size_t primitiveCount)->size_t { return modelIndexCount * primitiveCount * sizeof(element_index_t); },
-                                             indices, modelVertexCount, degenerate);
+    sp<SharedIndices> sharedBuffer = sp<SharedIndices>::make(makeIndexBuffer(Buffer::USAGE_DYNAMIC), indices, modelVertexCount, degenerate);
     _shared_indices.insert(std::make_pair(hash, sharedBuffer));
     return sharedBuffer;
 }
@@ -298,47 +341,47 @@ uint64_t RenderController::tick() const
     return _tick;
 }
 
-RenderController::RenderResource::RenderResource(sp<Resource> resource, sp<Future> future, UploadPriority uploadPriority)
+RenderController::PreUploadingResource::PreUploadingResource(sp<Resource> resource, sp<Future> future, UploadPriority uploadPriority)
     : _resource(std::move(resource)), _future(std::move(future)), _upload_priority(uploadPriority)
 {
 }
 
-bool RenderController::RenderResource::isExpired() const
+bool RenderController::PreUploadingResource::isExpired() const
 {
     return _resource.unique();
 }
 
-bool RenderController::RenderResource::isCancelled() const
+bool RenderController::PreUploadingResource::isCancelled() const
 {
     return _future ? _future->isCancelled() : false;
 }
 
-void RenderController::RenderResource::upload(GraphicsContext& graphicsContext) const
+void RenderController::PreUploadingResource::upload(GraphicsContext& graphicsContext) const
 {
     _resource->upload(graphicsContext);
 }
 
-void RenderController::RenderResource::recycle(GraphicsContext& graphicsContext) const
+void RenderController::PreUploadingResource::recycle(GraphicsContext& graphicsContext) const
 {
     _resource->recycle()(graphicsContext);
 }
 
-uint64_t RenderController::RenderResource::id() const
+uint64_t RenderController::PreUploadingResource::id() const
 {
     return _resource->id();
 }
 
-RenderController::UploadPriority RenderController::RenderResource::uploadPriority() const
+RenderController::UploadPriority RenderController::PreUploadingResource::uploadPriority() const
 {
     return _upload_priority;
 }
 
-bool RenderController::RenderResource::operator <(const RenderController::RenderResource& other) const
+bool RenderController::PreUploadingResource::operator <(const RenderController::PreUploadingResource& other) const
 {
     return _resource < other._resource;
 }
 
-RenderController::UploadingResource::UploadingResource(RenderResource resource, RenderController::UploadStrategy strategy)
+RenderController::UploadingResource::UploadingResource(PreUploadingResource resource, RenderController::UploadStrategy strategy)
     : _resource(std::move(resource)), _strategy(strategy)
 {
 }

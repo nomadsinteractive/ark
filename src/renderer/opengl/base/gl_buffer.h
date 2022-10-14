@@ -12,12 +12,12 @@ namespace opengl {
 
 class GLBuffer : public Buffer::Delegate {
 public:
-    GLBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Recycler>& recycler);
+    GLBuffer(Buffer::Type type, Buffer::Usage usage, sp<Recycler> recycler);
     ~GLBuffer() override;
 
     virtual uint64_t id() override;
     virtual void upload(GraphicsContext& graphicsContext) override;
-    virtual void uploadBuffer(GraphicsContext& graphicsContext, const Buffer::Snapshot& snapshot) override;
+    virtual void uploadBuffer(GraphicsContext& graphicsContext, Uploader& uploader) override;
     virtual ResourceRecycleFunc recycle() override;
 
 private:

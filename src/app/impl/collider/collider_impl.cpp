@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <iterator>
 
+#include "core/ark.h"
 #include "core/types/null.h"
 #include "core/util/log.h"
 #include "core/util/variable_util.h"

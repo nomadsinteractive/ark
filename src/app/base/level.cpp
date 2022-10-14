@@ -4,6 +4,7 @@
 
 #include "core/ark.h"
 
+#include "graphics/base/camera.h"
 #include "graphics/base/render_object.h"
 #include "graphics/base/transform.h"
 #include "graphics/util/vec3_type.h"

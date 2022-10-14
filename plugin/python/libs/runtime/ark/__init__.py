@@ -408,6 +408,9 @@ class Buffer:
     def id(self) -> int:
         return 0
 
+    def upload(self, uploader: 'Uploader', future: Optional['Future'] = None):
+        pass
+
 
 class Future:
     def __init__(self):
@@ -919,6 +922,17 @@ class Animation:
         return []
 
     def make_input(self, t: Numeric, on_complete: Optional[Callable] = None) -> AnimationInput:
+        pass
+
+
+class Uploader:
+    def __init__(self, inputs: Union[Input, dict[int, Input]], size: int = 0):
+        pass
+
+    def add_input(self, offset: int, input_: Input):
+        pass
+
+    def remove_input(self, offset: int):
         pass
 
 

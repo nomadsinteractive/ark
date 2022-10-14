@@ -32,18 +32,20 @@ private:
 
 }
 
-GLBuffer::GLBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Recycler>& recycler)
-    : _type(GLUtil::toBufferType(type)), _usage(usage == Buffer::USAGE_DYNAMIC ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW), _recycler(recycler), _id(0)
+GLBuffer::GLBuffer(Buffer::Type type, Buffer::Usage usage, sp<Recycler> recycler)
+    : _type(GLUtil::toBufferType(type)), _usage(usage == Buffer::USAGE_DYNAMIC ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW), _recycler(std::move(recycler)), _id(0)
 {
 }
 
 GLBuffer::~GLBuffer()
 {
-    _recycler->recycle(*this);
+    _recycler->recycle(recycle());
 }
 
 void GLBuffer::doUpload(GraphicsContext& /*graphicsContext*/, Uploader& uploader)
 {
+    DWARN(_usage != GL_STATIC_DRAW || _size == 0, "Uploading transient data to GL_STATIC_DRAW GLBuffer");
+
     glBindBuffer(_type, _id);
     GLint bufsize = 0;
     glGetBufferParameteriv(_type, GL_BUFFER_SIZE, &bufsize);
@@ -61,41 +63,16 @@ uint64_t GLBuffer::id()
     return _id;
 }
 
-void GLBuffer::upload(GraphicsContext& graphicsContext)
+void GLBuffer::upload(GraphicsContext& /*graphicsContext*/)
 {
     if(_id == 0)
         glGenBuffers(1, &_id);
-
-    if(_uploader)
-    {
-        DWARN(_usage != GL_STATIC_DRAW || _size == 0, "Uploading transient data to GL_STATIC_DRAW GLBuffer");
-        doUpload(graphicsContext, _uploader);
-    }
 }
 
-void GLBuffer::uploadBuffer(GraphicsContext& /*graphicsContext*/, const Buffer::Snapshot& snapshot)
+void GLBuffer::uploadBuffer(GraphicsContext& graphicsContext, Uploader& uploader)
 {
-    if(_id == 0)
-        glGenBuffers(1, &_id);
-
-    glBindBuffer(_type, _id);
-    GLint bufsize = 0;
-    glGetBufferParameteriv(_type, GL_BUFFER_SIZE, &bufsize);
-
-    _size = static_cast<size_t>(bufsize);
-    if(_size < snapshot._size)
-    {
-        glBufferData(_type, static_cast<GLsizeiptr>(snapshot._size), nullptr, _usage);
-        _size = snapshot._size;
-    }
-
-    for(const auto& [i, j] : snapshot._strips)
-    {
-        DCHECK(i + j.length() <= _size, "GLBuffer data overflow, offset: %d, size: %s, buffer-size: %d", i, j.length(), _size);
-        glBufferSubData(_type, static_cast<GLsizeiptr>(i), static_cast<GLsizeiptr>(j.length()), j.buf());
-    }
-
-    glBindBuffer(_type, 0);
+    upload(graphicsContext);
+    doUpload(graphicsContext, uploader);
 }
 
 ResourceRecycleFunc GLBuffer::recycle()

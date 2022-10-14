@@ -19,6 +19,7 @@ namespace ark {
 
 class ARK_API Buffer {
 public:
+//  [[script::bindings::enumeration]]
     enum Type {
         TYPE_VERTEX,
         TYPE_INDEX,
@@ -27,27 +28,24 @@ public:
         TYPE_COUNT
     };
 
+//  [[script::bindings::enumeration]]
     enum Usage {
         USAGE_DYNAMIC,
         USAGE_STATIC,
         USAGE_COUNT
     };
 
-    class ARK_API Snapshot;
-
     class ARK_API Delegate : public Resource {
     public:
         Delegate();
         virtual ~Delegate() = default;
 
-        size_t size() const;
+        virtual void uploadBuffer(GraphicsContext& graphicsContext, Uploader& uploader) = 0;
 
-        void setUploader(sp<Uploader> uploader);
-        virtual void uploadBuffer(GraphicsContext& graphicsContext, const Snapshot& snapshot) = 0;
+        size_t size() const;
 
     protected:
         size_t _size;
-        sp<Uploader> _uploader;
     };
 
 public:
@@ -57,9 +55,7 @@ public:
     public:
         Snapshot() = default;
         Snapshot(sp<Delegate> stub);
-        Snapshot(sp<Delegate> stub, size_t size, std::vector<Strip> strips = {});
-[[deprecated]]
-        Snapshot(sp<Delegate> stub, sp<Uploader> uploader);
+        Snapshot(sp<Delegate> stub, size_t size, sp<Uploader> uploader);
         DEFAULT_COPY_AND_ASSIGN(Snapshot);
 
         explicit operator bool() const;
@@ -78,7 +74,6 @@ public:
         sp<Delegate> _delegate;
         sp<Uploader> _uploader;
         size_t _size;
-        std::vector<Strip> _strips;
     };
 
     class ARK_API Factory {
@@ -106,14 +101,14 @@ public:
 //  [[script::bindings::property]]
     size_t size() const;
 
-[[deprecated]]
-//    Snapshot snapshot(const sp<Uploader>& uploader) const;
+    Snapshot snapshot(size_t size) const;
     Snapshot snapshot(const ByteArray::Borrowed& strip) const;
-    Snapshot snapshot(size_t size, std::vector<Strip> strips = {}) const;
-    Snapshot snapshot() const;
+    Snapshot snapshot(sp<Uploader> uploader = nullptr, size_t size = 0) const;
 
 //  [[script::bindings::property]]
     uint64_t id() const;
+//  [[script::bindings::auto]]
+    void upload(sp<Uploader> uploader, sp<Future> future = nullptr);
     void upload(GraphicsContext&) const;
 
     const sp<Delegate>& delegate() const;
@@ -127,17 +122,14 @@ public:
 
     private:
         sp<ResourceLoaderContext> _resource_loader_context;
-
-        sp<Builder<Input>> _input;
-        sp<Builder<Integer>> _length;
-        SafePtr<Builder<Integer>> _stride;
+        SafePtr<Builder<Uploader>> _uploader;
         Usage _usage;
 
-        std::vector<sp<Builder<Input>>> _vars;
     };
 
 private:
     sp<Delegate> _delegate;
+    sp<Resource> _resource;
 
     friend class ResourceManager;
     friend class RenderController;

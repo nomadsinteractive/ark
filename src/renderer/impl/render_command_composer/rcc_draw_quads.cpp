@@ -29,8 +29,8 @@ sp<ShaderBindings> RCCDrawQuads::makeShaderBindings(Shader& shader, RenderContro
 
 void RCCDrawQuads::postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot)
 {
-//    size_t primitiveCount = snapshot._index_count / 6;
-//    snapshot._index_buffer = _shared_buffer->snapshot(renderController, primitiveCount, primitiveCount);
+    size_t primitiveCount = snapshot._index_count / 6;
+    snapshot._index_buffer = _shared_buffer->snapshot(renderController, primitiveCount, primitiveCount);
 }
 
 sp<RenderCommand> RCCDrawQuads::compose(const RenderRequest& renderRequest, RenderLayer::Snapshot& snapshot)
@@ -38,9 +38,9 @@ sp<RenderCommand> RCCDrawQuads::compose(const RenderRequest& renderRequest, Rend
     const Buffer& vertices = snapshot._stub->_shader_bindings->vertices();
 
     DrawingBuffer buf(snapshot._stub->_shader_bindings, snapshot._stub->_stride);
-    size_t primitiveCount = snapshot._index_count / 6;
-    buf.setIndices(_shared_buffer->snapshot(renderRequest, primitiveCount, primitiveCount));
-//    buf.setIndices(snapshot._index_buffer);
+//    size_t primitiveCount = snapshot._index_count / 6;
+//    buf.setIndices(_shared_buffer->snapshot(renderRequest, primitiveCount, primitiveCount));
+    buf.setIndices(snapshot._index_buffer);
 
     size_t offset = 0;
     bool reload = snapshot.needsReload();
@@ -56,7 +56,7 @@ sp<RenderCommand> RCCDrawQuads::compose(const RenderRequest& renderRequest, Rend
     }
 
     DrawingContext drawingContext(snapshot._stub->_shader_bindings, snapshot._stub->_shader_bindings->attachments(), std::move(snapshot._ubos), std::move(snapshot._ssbos),
-                                  buf.vertices().toSnapshot(vertices), buf.indices(), DrawingContext::ParamDrawElements(0, snapshot._index_count));
+                                  buf.vertices().toSnapshot(vertices), buf.indices(), DrawingContext::ParamDrawElements(0, buf.indices().length<element_index_t>()));
 
     if(snapshot._stub->_scissor)
         drawingContext._scissor = snapshot._stub->_render_controller->renderEngine()->toRendererScissor(snapshot._scissor);

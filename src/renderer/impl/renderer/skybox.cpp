@@ -24,7 +24,7 @@ namespace ark {
 
 Skybox::Skybox(const sp<Size>& size, const sp<Shader>& shader, const sp<Texture>& texture, RenderController& renderController)
     : _size(size), _shader(shader), _shader_bindings(shader->makeBindings(renderController.makeVertexBuffer(Buffer::USAGE_STATIC, sp<ByteArrayUploader>::make(makeUnitCubeVertices(renderController))), ModelLoader::RENDER_MODE_TRIANGLES, PipelineBindings::RENDER_PROCEDURE_DRAW_ELEMENTS)),
-      _shared_indices(renderController.getSharedIndices(RenderController::SHARED_INDICES_QUAD))
+      _ib_snapshot(renderController.getSharedIndices(RenderController::SHARED_INDICES_QUAD)->snapshot(renderController, 6))
 {
     _shader_bindings->pipelineBindings()->bindSampler(texture);
 }
@@ -32,7 +32,7 @@ Skybox::Skybox(const sp<Size>& size, const sp<Shader>& shader, const sp<Texture>
 void Skybox::render(RenderRequest& renderRequest, const V3& /*position*/)
 {
     DrawingContext drawingContext(_shader_bindings, _shader_bindings->attachments(), _shader->takeUBOSnapshot(renderRequest), _shader->takeSSBOSnapshot(renderRequest), _shader_bindings->vertices().snapshot(),
-                                  _shared_indices->snapshot(renderRequest, 6), DrawingContext::ParamDrawElements(0, 36));
+                                  _ib_snapshot, DrawingContext::ParamDrawElements(0, 36));
     renderRequest.addRequest(drawingContext.toRenderCommand(renderRequest));
 }
 

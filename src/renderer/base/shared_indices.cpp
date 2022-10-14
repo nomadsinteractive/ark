@@ -6,48 +6,22 @@
 
 namespace ark {
 
-SharedIndices::SharedIndices::SharedIndices(Buffer buffer, SharedIndices::MakerFunc maker, std::function<size_t(size_t)> sizeCalculator, std::vector<element_index_t> boilerPlate, size_t vertexCount, bool degenerate)
-    : _buffer(std::move(buffer)), _maker(std::move(maker)), _size_calculator(std::move(sizeCalculator)), _boiler_plate(std::move(boilerPlate)), _vertex_count(vertexCount), _degenerate(degenerate), _primitive_count(0)
+SharedIndices::SharedIndices::SharedIndices(Buffer buffer, std::vector<element_index_t> boilerPlate, size_t vertexCount, bool degenerate)
+    : _buffer(std::move(buffer)), _boiler_plate(std::move(boilerPlate)), _vertex_count(vertexCount), _degenerate(degenerate), _primitive_count(0)
 {
 }
 
-Buffer::Snapshot SharedIndices::SharedIndices::snapshot(RenderController& renderController, size_t primitiveCount, size_t reservedIfInsufficient)
-{
-    const size_t warningLimit = 20000;
-    DWARN(primitiveCount < warningLimit, "Object count(%d) exceeding warning limit(%d). You can make the limit larger if you're sure what you're doing", primitiveCount, warningLimit);
-    size_t size = _size_calculator(primitiveCount);
-    if(_primitive_count < primitiveCount)
-    {
-        _primitive_count = primitiveCount + reservedIfInsufficient;
-        sp<Uploader> uploader = _maker(_primitive_count);
-        DCHECK(uploader && uploader->size() >= size, "Making Uploader failed, primitive-count: %d, uploader-size: %d, required-size: %d", _primitive_count, uploader ? uploader->size() : 0, size);
-        renderController.uploadBuffer(_buffer, std::move(uploader), RenderController::US_RELOAD);
-    }
-    return _buffer.snapshot(size);
-}
-
-Buffer::Snapshot SharedIndices::snapshot(const RenderRequest& renderRequest, size_t primitiveCount, size_t reservedIfInsufficient)
+Buffer::Snapshot SharedIndices::snapshot(RenderController& renderController, size_t primitiveCount, size_t reservedIfInsufficient)
 {
     const size_t warningLimit = 20000;
     DWARN(primitiveCount < warningLimit, "Object count(%d) exceeding warning limit(%d). You can make the limit larger if you're sure what you're doing", primitiveCount, warningLimit);
     size_t size = (_degenerate ? (_boiler_plate.size() + 2) * primitiveCount - 2 : _boiler_plate.size() * primitiveCount) * sizeof(element_index_t);
-    if(_primitive_count < primitiveCount || _buffer.size() < size)
+    if(_primitive_count < primitiveCount)
     {
         _primitive_count = primitiveCount + reservedIfInsufficient;
-        ByteArray::Borrowed content = renderRequest.allocator().sbrk(size);
-        WritableMemory writer(content.buf());
-        if(_degenerate)
-        {
-            Degenerate degenerate(_primitive_count, _vertex_count, _boiler_plate);
-            degenerate.upload(writer);
-            return _buffer.snapshot(content);
-        }
-        else
-        {
-            Concat concat(_primitive_count, _vertex_count, _boiler_plate);
-            concat.upload(writer);
-            return _buffer.snapshot(content);
-        }
+        sp<Uploader> uploader = _degenerate ? sp<Uploader>::make<Degenerate>(_primitive_count, _vertex_count, _boiler_plate) : sp<Uploader>::make<Concat>(_primitive_count, _vertex_count, _boiler_plate);
+        DCHECK(uploader && uploader->size() >= size, "Making Uploader failed, primitive-count: %d, uploader-size: %d, required-size: %d", _primitive_count, uploader ? uploader->size() : 0, size);
+        renderController.uploadBuffer(_buffer, std::move(uploader), RenderController::US_RELOAD);
     }
     return _buffer.snapshot(size);
 }
@@ -75,7 +49,7 @@ void SharedIndices::Concat::upload(Writable& uploader)
 }
 
 SharedIndices::Degenerate::Degenerate(size_t primitiveCount, size_t vertexCount, std::vector<element_index_t> indices)
-    : Uploader((primitiveCount * indices.size() + 2 * (primitiveCount - 1)) *  sizeof(element_index_t)), _primitive_count(primitiveCount), _vertex_count(vertexCount), _indices(std::move(indices))
+    : Uploader(((indices.size() + 2) * primitiveCount - 2) *  sizeof(element_index_t)), _primitive_count(primitiveCount), _vertex_count(vertexCount), _indices(std::move(indices))
 {
 }
 

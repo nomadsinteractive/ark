@@ -32,8 +32,8 @@ namespace python {
 
 class ARK_PLUGIN_PYTHON_API PyCast {
 public:
-    static Optional<sp<Numeric> > toNumeric(PyObject* object, bool alert = true);
-    static Optional<sp<Boolean> > toBoolean(PyObject* object, bool alert = true);
+    static Optional<sp<Numeric>> toNumeric(PyObject* object, bool alert = true);
+    static Optional<sp<Boolean>> toBoolean(PyObject* object, bool alert = true);
     static String toString(PyObject* object, const char* encoding = nullptr, const char* error = nullptr);
     static Scope toScope(PyObject* kws);
 
@@ -212,6 +212,9 @@ private:
     template<typename T> static Optional<T> toCppObject_sfinae(PyObject* obj, typename T::result_type*) {
         return toCppObject_function(obj, reinterpret_cast<T*>(0));
     }
+    template<typename T> static Optional<T> toCppObject_sfinae(PyObject* obj, typename T::key_type*) {
+        return toCppObject_map<T, typename T::key_type, typename T::mapped_type>(obj);
+    }
     template<typename T> static Optional<T> toCppObject_sfinae(PyObject* obj, ...) {
         return toCppObject_impl<T>(obj);
     }
@@ -249,7 +252,7 @@ private:
     template<typename T, typename U> static Optional<T> toCppCollectionObject_sfinae(PyObject* obj, ...) {
         T col;
         Py_ssize_t len = PyObject_Length(obj);
-        DCHECK(len != -1, "Object \"%s\" has no length", Py_TYPE(obj)->tp_name);
+        CHECK(len != -1, "Object \"%s\" has no length", Py_TYPE(obj)->tp_name);
         for(Py_ssize_t i = 0; i < len; ++i) {
             PyObject* key = PyLong_FromLong(static_cast<int32_t>(i));
             PyObject* item = PyObject_GetItem(obj, key);
@@ -261,6 +264,24 @@ private:
             col.push_back(std::move(opt.value()));
         }
         return col;
+    }
+    template<typename T, typename K, typename V> static Optional<T> toCppObject_map(PyObject* obj) {
+        if(!PyDict_CheckExact(obj))
+            return Optional<T>();
+
+        T map;
+        PyInstance keys(PyInstance::steal(PyDict_Keys(obj)));
+        Py_ssize_t keySize = PyList_Size(keys.pyObject());
+        for(Py_ssize_t i = 0; i < keySize; ++i) {
+            PyObject* key = PyList_GetItem(keys.pyObject(), i);
+            PyObject* item = PyDict_GetItem(obj, key);
+            Optional<K> optKey = toCppObject<K>(key);
+            Optional<V> optValue = toCppObject<V>(item);
+            if(!optKey || !optValue)
+                return Optional<T>();
+            map[optKey.value()] = optValue.value();
+        }
+        return map;
     }
 
     static sp<Vec2> toVec2(PyObject* object, bool alert);

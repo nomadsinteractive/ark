@@ -1,5 +1,6 @@
 #include "app/view/arena.h"
 
+#include "core/ark.h"
 #include "core/base/bean_factory.h"
 #include "core/util/bean_utils.h"
 #include "core/util/holder_util.h"

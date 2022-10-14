@@ -15,13 +15,13 @@ namespace vulkan {
 
 class VKBuffer : public Buffer::Delegate {
 public:
-    VKBuffer(const sp<VKRenderer>& renderer, const sp<Recycler>& recycler, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags);
+    VKBuffer(sp<VKRenderer> renderer, sp<Recycler> recycler, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags);
     ~VKBuffer() override;
     DISALLOW_COPY_AND_ASSIGN(VKBuffer);
 
     virtual uint64_t id() override;
     virtual void upload(GraphicsContext& graphicsContext) override;
-    virtual void uploadBuffer(GraphicsContext& graphicsContext, const Buffer::Snapshot& snapshot) override;
+    virtual void uploadBuffer(GraphicsContext& graphicsContext, Uploader& uploader) override;
     virtual ResourceRecycleFunc recycle() override;
 
     void reload(GraphicsContext& graphicsContext, const ByteArray::Borrowed& buf);

@@ -49,7 +49,7 @@ private:
 
     sp<ShaderBindings> _shader_bindings;
     Buffer _vertex_buffer;
-    sp<SharedIndices> _index_buffer;
+    Buffer::Snapshot _ib_snapshot;
 };
 
 }

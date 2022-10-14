@@ -11,8 +11,8 @@
 namespace ark {
 namespace gles30 {
 
-GLVertexArray::GLVertexArray(sp<opengl::GLPipeline> pipeline, Buffer vertices, const ShaderBindings& shaderBindings)
-    : _pipeline(std::move(pipeline)), _pipeline_bindings(shaderBindings.pipelineBindings()), _vertex(std::move(vertices)), _divisors(shaderBindings.divisors()), _id(0)
+GLVertexArray::GLVertexArray(sp<opengl::GLPipeline> pipeline, sp<Buffer::Delegate> vertices, const ShaderBindings& shaderBindings)
+    : _pipeline(std::move(pipeline)), _vertex(std::move(vertices)), _pipeline_bindings(shaderBindings.pipelineBindings()), _divisors(shaderBindings.divisors()), _id(0)
 {
 }
 
@@ -25,8 +25,8 @@ void GLVertexArray::upload(GraphicsContext& graphicsContext)
 {
     glGenVertexArrays(1, &_id);
     glBindVertexArray(_id);
-    _vertex.upload(graphicsContext);
-    glBindBuffer(GL_ARRAY_BUFFER, static_cast<GLuint>(_vertex.id()));
+    _vertex->upload(graphicsContext);
+    glBindBuffer(GL_ARRAY_BUFFER, static_cast<GLuint>(_vertex->id()));
     _pipeline->bindBuffer(graphicsContext, _pipeline_bindings->input(), _divisors);
     glBindVertexArray(0);
     LOGD("id = %d", _id);

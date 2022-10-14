@@ -86,6 +86,7 @@ class StringTable;
 class Thread;
 class ExecutorThreadPool;
 class Updatable;
+class UpdatableWrapper;
 class Visibility;
 class Writable;
 

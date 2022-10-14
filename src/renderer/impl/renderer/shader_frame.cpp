@@ -20,14 +20,14 @@ namespace ark {
 
 ShaderFrame::ShaderFrame(const sp<Size>& size, const sp<Shader>& shader, RenderController& renderController)
     : _size(size), _shader(shader), _shader_bindings(shader->makeBindings(Buffer(), ModelLoader::RENDER_MODE_TRIANGLES, PipelineBindings::RENDER_PROCEDURE_DRAW_ELEMENTS)),
-      _vertex_buffer(renderController.makeVertexBuffer()), _index_buffer(renderController.getSharedIndices(RenderController::SHARED_INDICES_QUAD))
+      _vertex_buffer(renderController.makeVertexBuffer()), _ib_snapshot(renderController.getSharedIndices(RenderController::SHARED_INDICES_QUAD)->snapshot(renderController, 1))
 {
 }
 
 void ShaderFrame::render(RenderRequest& renderRequest, const V3& position)
 {
     DrawingContext drawingContext(_shader_bindings, _shader_bindings->attachments(), _shader->takeUBOSnapshot(renderRequest), _shader->takeSSBOSnapshot(renderRequest),
-                                  _vertex_buffer.snapshot(getVertexBuffer(renderRequest, position)), _index_buffer->snapshot(renderRequest, 1), DrawingContext::ParamDrawElements(0, 6));
+                                  _vertex_buffer.snapshot(getVertexBuffer(renderRequest, position)), _ib_snapshot, DrawingContext::ParamDrawElements(0, 6));
     renderRequest.addRequest(drawingContext.toRenderCommand(renderRequest));
 }
 

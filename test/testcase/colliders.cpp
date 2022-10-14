@@ -99,7 +99,7 @@ public:
 
         while(duration->val() < 3.0f) {
             applicationContext->updateRenderState();
-            applicationContext->renderController()->preUpdate(clock->tick());
+            applicationContext->renderController()->preRequestUpdate(clock->tick());
             rigidBody001->xy();
             rigidBody003->xy();
             std::this_thread::sleep_for(std::chrono::milliseconds(16));

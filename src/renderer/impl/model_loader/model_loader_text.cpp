@@ -1,5 +1,6 @@
 #include "renderer/impl/model_loader/model_loader_text.h"
 
+#include "core/ark.h"
 #include "core/base/clock.h"
 #include "core/base/future.h"
 #include "core/util/log.h"

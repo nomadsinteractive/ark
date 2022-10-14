@@ -20,6 +20,7 @@
 #include "renderer/base/texture.h"
 #include "renderer/inf/uploader.h"
 #include "renderer/util/render_util.h"
+#include "renderer/util/uploader_type.h"
 
 #include "renderer/opengl/base/gl_buffer.h"
 #include "renderer/opengl/base/gl_pipeline.h"
@@ -226,15 +227,14 @@ void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, Render
     glBindVertexArray(vao);
 
     Buffer vertexBuffer = renderController.makeVertexBuffer(Buffer::USAGE_STATIC);
+    Buffer::Snapshot indexBufferSnapshot = renderController.getSharedIndices(RenderController::SHARED_INDICES_QUAD)->snapshot(renderController, 6, 6);
 
-    const sp<ByteArray> cubeVertices = RenderUtil::makeUnitCubeVertices(false);
-    const Buffer::Snapshot vertexBufferSnapshot = vertexBuffer.snapshot(ByteArray::Borrowed(cubeVertices->buf(), cubeVertices->length()));
+    const Buffer::Snapshot vertexBufferSnapshot = vertexBuffer.snapshot(sp<Uploader::Array<uint8_t>>::make(RenderUtil::makeUnitCubeVertices(false)));
     vertexBufferSnapshot.upload(graphicsContext);
     glBindBuffer(GL_ARRAY_BUFFER, static_cast<GLuint>(vertexBuffer.id()));
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 12, nullptr);
 
-    const Buffer::Snapshot indexBufferSnapshot = renderController.getSharedIndices(RenderController::SHARED_INDICES_QUAD)->snapshot(renderController, 6);
     indexBufferSnapshot.upload(graphicsContext);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLuint>(indexBufferSnapshot.id()));
 
