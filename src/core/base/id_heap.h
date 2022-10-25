@@ -10,7 +10,8 @@ namespace ark {
 
 class ARK_API IDHeap {
 public:
-    IDHeap(size_t heapSizeL1, size_t heapSizeL2 = 0);
+//  [[script::bindings::auto]]
+    IDHeap(size_t heapSize, size_t heapSizeL1 = 0, size_t chunkSizeL1 = 0);
 
 //  [[script::bindings::auto]]
     size_t allocate(size_t size, size_t alignment = 1);

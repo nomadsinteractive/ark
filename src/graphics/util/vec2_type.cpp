@@ -394,7 +394,7 @@ void Vec2Type::setDelegate(const sp<Vec2>& self, const sp<Vec2>& delegate)
 
 sp<Vec2Impl> Vec2Type::ensureImpl(const sp<Vec2>& self)
 {
-    const sp<Vec2Impl> impl = self.as<Vec2Impl>();
+    sp<Vec2Impl> impl = self.as<Vec2Impl>();
     DCHECK(impl, "This Vec2 object is not a Vec2Impl instance");
     return impl;
 }

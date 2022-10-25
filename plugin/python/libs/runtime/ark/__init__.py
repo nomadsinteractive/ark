@@ -209,7 +209,7 @@ class DOMDocument:
 
 
 class IDHeap:
-    def __init__(self, heap_size_l1: int, heap_size_l2: int = 0):
+    def __init__(self, heap_size: int, heap_size_l2: int = 0, chunk_size_l2: int = 0):
         pass
 
     def allocate(self, size: int, alignment: int = 1) -> int:
@@ -255,6 +255,73 @@ class ApplicationBundle:
         pass
 
 
+class Future:
+    def __init__(self):
+        pass
+
+    def cancel(self):
+        pass
+
+    def done(self):
+        pass
+
+    @property
+    def is_cancelled(self) -> bool:
+        return False
+
+    @property
+    def is_done(self) -> bool:
+        return False
+
+
+class Buffer:
+    TYPE_VERTEX = 0
+    TYPE_INDEX = 1
+    TYPE_DRAW_INDIRECT = 2
+    TYPE_STORAGE = 3
+    TYPE_COUNT = 4
+
+    USAGE_DYNAMIC = 0
+    USAGE_STATIC = 1
+    USAGE_COUNT = 2
+
+    @property
+    def size(self) -> int:
+        return 0
+
+    @property
+    def id(self) -> int:
+        return 0
+
+    def upload(self, uploader: 'Uploader', future: Optional[Future] = None):
+        pass
+
+
+class RenderController:
+    US_ONCE = 0
+    US_RELOAD = 1
+    US_ON_SURFACE_READY = 2
+    US_ONCE_AND_ON_SURFACE_READY = 3
+    US_ON_CHANGED = 4
+
+    UPLOAD_PRIORITY_LOW = 0
+    UPLOAD_PRIORITY_NORMAL = 1
+    UPLOAD_PRIORITY_HIGH = 2
+
+    def upload_buffer(self, buffer: Buffer, uploader: 'Uploader', upload_strategy: int, future: Optional[Future] = None,
+                      upload_priority: int = UPLOAD_PRIORITY_NORMAL):
+        pass
+
+    def make_buffer(self, buffer_type: int, buffer_usage: int, uploader: Optional['Uploader']) -> Buffer:
+        pass
+
+    def make_vertex_buffer(self, buffer_usage: int = Buffer.USAGE_DYNAMIC, uploader: Optional['Uploader'] = None) -> Buffer:
+        pass
+
+    def make_index_buffer(self, buffer_usage: int = Buffer.USAGE_DYNAMIC, uploader: Optional['Uploader'] = None) -> Buffer:
+        pass
+
+
 class ApplicationFacade:
 
     def __init__(self):
@@ -283,6 +350,10 @@ class ApplicationFacade:
     @property
     def surface_controller(self) -> 'SurfaceController':
         return SurfaceController()
+
+    @property
+    def render_controller(self) -> RenderController:
+        return RenderController()
 
     @property
     def camera(self) -> 'Camera':
@@ -396,39 +467,6 @@ class Atlas:
 
     def add_importer(self, importer: AtlasImporter, readable: Optional[Readable] = None):
         pass
-
-
-class Buffer:
-
-    @property
-    def size(self) -> int:
-        return 0
-
-    @property
-    def id(self) -> int:
-        return 0
-
-    def upload(self, uploader: 'Uploader', future: Optional['Future'] = None):
-        pass
-
-
-class Future:
-    def __init__(self):
-        pass
-
-    def cancel(self):
-        pass
-
-    def done(self):
-        pass
-
-    @property
-    def is_cancelled(self) -> bool:
-        return False
-
-    @property
-    def is_done(self) -> bool:
-        return False
 
 
 class BroadPhrase:
@@ -884,12 +922,15 @@ class Mat4(_Mat):
 
 
 class Input:
-    def __init__(self, delegate: ['Input', list[_Mat]]):
+    def __init__(self, delegate: Union[list[_Mat], list[Vec4], list['Input']]):
         pass
 
     @property
     def size(self):
         return 0
+
+    def wrap(self) -> 'Input':
+        pass
 
     def set(self, delegate: 'Input'):
         pass
@@ -927,6 +968,12 @@ class Animation:
 
 class Uploader:
     def __init__(self, inputs: Union[Input, dict[int, Input]], size: int = 0):
+        pass
+
+    def set(self, uploader: 'Uploader'):
+        pass
+
+    def wrap(self) -> 'Uploader':
         pass
 
     def add_input(self, offset: int, input_: Input):

@@ -86,6 +86,8 @@ public:
     void onDrawFrame(GraphicsContext& graphicsContext);
 
     void upload(sp<Resource> resource, RenderController::UploadStrategy strategy, sp<Future> future = nullptr, UploadPriority priority = UPLOAD_PRIORITY_NORMAL);
+
+//  [[script::bindings::auto]]
     void uploadBuffer(Buffer& buffer, sp<Uploader> uploader, RenderController::UploadStrategy strategy, sp<Future> future = nullptr, RenderController::UploadPriority priority = RenderController::UPLOAD_PRIORITY_NORMAL);
 
     template<typename T, typename... Args> sp<T> createResource(Args&&... args) {
@@ -102,8 +104,11 @@ public:
     sp<Texture> createTexture(sp<Size> size, sp<Texture::Parameters> parameters, sp<Texture::Uploader> uploader, RenderController::UploadStrategy us = US_ONCE_AND_ON_SURFACE_READY, sp<Future> future = nullptr);
     sp<Texture> createTexture2D(sp<Size> size, sp<Texture::Uploader> uploader, UploadStrategy us = US_ONCE_AND_ON_SURFACE_READY, sp<Future> future = nullptr);
 
+//  [[script::bindings::auto]]
     Buffer makeBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Uploader>& uploader);
+//  [[script::bindings::auto]]
     Buffer makeVertexBuffer(Buffer::Usage usage = Buffer::USAGE_DYNAMIC, const sp<Uploader>& uploader = nullptr);
+//  [[script::bindings::auto]]
     Buffer makeIndexBuffer(Buffer::Usage usage = Buffer::USAGE_DYNAMIC, const sp<Uploader>& uploader = nullptr);
 
     sp<Framebuffer> makeFramebuffer(sp<Renderer> renderer, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask);

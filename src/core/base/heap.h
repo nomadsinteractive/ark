@@ -365,11 +365,11 @@ private:
             }
         }
 
-        void extend(const sp<Stub>& other) {
+        void extend(sp<Stub> other) {
             if(_next)
-                _next->extend(other);
+                _next->extend(std::move(other));
             else
-                _next = other;
+                _next = std::move(other);
         }
 
         MemoryType _memory;
@@ -419,9 +419,12 @@ public:
         _stub->extend(other._stub);
     }
 
-    void extend(MemoryType memory, const sp<Allocator>& allocator) {
-        DASSERT(_stub);
-        _stub->extend(sp<Stub>::make(std::move(memory), allocator));
+    void extend(MemoryType memory, sp<Allocator> allocator) {
+        sp<Stub> stub = sp<Stub>::make(std::move(memory), std::move(allocator));
+        if(_stub)
+            _stub->extend(std::move(stub));
+        else
+            _stub = std::move(stub);
     }
 
 private:

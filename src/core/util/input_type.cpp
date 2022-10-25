@@ -43,11 +43,6 @@ private:
 
 }
 
-sp<Input> InputType::create(sp<Input> value)
-{
-    return sp<InputWrapper>::make(std::move(value));
-}
-
 sp<Input> InputType::create(std::vector<sp<Mat4>> value)
 {
     return sp<InputVariableArray<M4>>::make(std::move(value));
@@ -63,6 +58,11 @@ sp<Input> InputType::create(std::vector<sp<Input>> value)
     return sp<InputArray>::make(std::move(value));
 }
 
+sp<Input> InputType::wrap(sp<Input> self)
+{
+    return sp<InputWrapper>::make(std::move(self));
+}
+
 void InputType::set(const sp<Input>& self, const sp<Input>& delegate)
 {
     ensureImpl(self)->setDelegate(delegate);
@@ -76,7 +76,7 @@ uint32_t InputType::size(const sp<Input>& self)
 sp<InputType::InputWrapper> InputType::ensureImpl(const sp<Input>& self)
 {
     const sp<InputType::InputWrapper> impl = self.as<InputType::InputWrapper>();
-    DCHECK(impl, "This Animate object is not a AnimateWrapper instance");
+    DCHECK(impl, "This Input object is not a InputWrapper instance");
     return impl;
 }
 

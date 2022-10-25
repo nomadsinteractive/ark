@@ -30,13 +30,15 @@ public:
         PyObject* weakreflist;
 
         template<typename T> const sp<T>& unpack() const {
-            DCHECK(typeCheck<T>(), "PyObject \"%s\" cannot being casted to %s", ob_base.ob_type->tp_name, Class::getClass<T>()->name());
+            DCHECK(box, "PyObject \"%s\" has not been initialized", ob_base.ob_type->tp_name);
+            CHECK(typeCheck<T>(), "PyObject \"%s\" cannot being casted to %s", ob_base.ob_type->tp_name, Class::getClass<T>()->name());
             return box->unpack<T>();
         }
 
         template<typename T> sp<T> as() const {
+            DCHECK(box, "PyObject \"%s\" has not been initialized", ob_base.ob_type->tp_name);
             const sp<T> inst = box->as<T>();
-            DCHECK(inst, "PyObject \"%s\" cannot being casted to %s", ob_base.ob_type->tp_name, Class::getClass<T>()->name());
+            CHECK(inst, "PyObject \"%s\" cannot being casted to %s", ob_base.ob_type->tp_name, Class::getClass<T>()->name());
             return inst;
         }
 

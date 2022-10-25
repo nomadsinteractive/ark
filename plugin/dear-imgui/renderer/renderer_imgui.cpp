@@ -60,6 +60,40 @@ static void updateKeyStatus(ImGuiIO& io, ImGuiKey_ keycode, bool isKeyDown) {
     io.KeysDown[keycode] = isKeyDown;
 }
 
+static ImGuiKey_ toImGuiKey(Event::Code code) {
+    switch(code)
+    {
+        case Event::CODE_KEYBOARD_A:
+            return ImGuiKey_A;
+        case Event::CODE_KEYBOARD_C:
+            return ImGuiKey_C;
+        case Event::CODE_KEYBOARD_V:
+            return ImGuiKey_V;
+        case Event::CODE_KEYBOARD_X:
+            return ImGuiKey_X;
+        case Event::CODE_KEYBOARD_Y:
+            return ImGuiKey_Y;
+        case Event::CODE_KEYBOARD_Z:
+            return ImGuiKey_Z;
+        case Event::CODE_KEYBOARD_LEFT:
+            return ImGuiKey_LeftArrow;
+        case Event::CODE_KEYBOARD_RIGHT:
+            return ImGuiKey_RightArrow;
+        case Event::CODE_KEYBOARD_UP:
+            return ImGuiKey_UpArrow;
+        case Event::CODE_KEYBOARD_DOWN:
+            return ImGuiKey_DownArrow;
+        case Event::CODE_KEYBOARD_DELETE:
+            return ImGuiKey_Delete;
+        case Event::CODE_KEYBOARD_BACKSPACE:
+            return ImGuiKey_Backspace;
+        case Event::CODE_KEYBOARD_ENTER:
+            return ImGuiKey_Enter;
+    }
+    DFATAL("Unknow ImGui key: %d", code);
+    return ImGuiKey_Tab;
+}
+
 RendererImgui::RendererImgui(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Shader>& shader, const sp<Texture>& texture)
     : _shader(shader), _render_controller(resourceLoaderContext->renderController()), _render_engine(_render_controller->renderEngine()), _renderer_group(sp<RendererGroup>::make()), _texture(texture),
       _pipeline_factory(shader->pipelineFactory()), _renderer_context(sp<RendererContext>::make(shader, resourceLoaderContext->renderController()))
@@ -107,34 +141,35 @@ bool RendererImgui::onEvent(const Event& event)
     case Event::ACTION_KEY_UP:
         {
             const bool isKeyDown = event.action() == Event::ACTION_KEY_DOWN;
-            switch(event.code())
+            const Event::Code code = event.code();
+            switch(code)
             {
                 case Event::CODE_KEYBOARD_LSHIFT:
                 case Event::CODE_KEYBOARD_RSHIFT:
-                    io.KeyShift = event.action() == Event::ACTION_KEY_DOWN;
+                    io.KeyShift = isKeyDown;
                     break;
+                case Event::CODE_KEYBOARD_LCTRL:
+                case Event::CODE_KEYBOARD_RCTRL:
+                    io.KeyCtrl = isKeyDown;
+                    break;
+                case Event::CODE_KEYBOARD_LALT:
+                case Event::CODE_KEYBOARD_RALT:
+                    io.KeyAlt = isKeyDown;
+                    break;
+                case Event::CODE_KEYBOARD_A:
+                case Event::CODE_KEYBOARD_C:
+                case Event::CODE_KEYBOARD_V:
+                case Event::CODE_KEYBOARD_X:
+                case Event::CODE_KEYBOARD_Y:
+                case Event::CODE_KEYBOARD_Z:
                 case Event::CODE_KEYBOARD_LEFT:
-                    updateKeyStatus(io, ImGuiKey_LeftArrow, isKeyDown);
-                    break;
                 case Event::CODE_KEYBOARD_RIGHT:
-                    updateKeyStatus(io, ImGuiKey_RightArrow, isKeyDown);
-                    break;
                 case Event::CODE_KEYBOARD_UP:
-                    updateKeyStatus(io, ImGuiKey_UpArrow, isKeyDown);
-                    break;
                 case Event::CODE_KEYBOARD_DOWN:
-                    updateKeyStatus(io, ImGuiKey_DownArrow, isKeyDown);
-                    break;
                 case Event::CODE_KEYBOARD_DELETE:
-                    updateKeyStatus(io, ImGuiKey_Delete, isKeyDown);
-                    break;
                 case Event::CODE_KEYBOARD_BACKSPACE:
-                    updateKeyStatus(io, ImGuiKey_Backspace, isKeyDown);
-                    break;
                 case Event::CODE_KEYBOARD_ENTER:
-                    updateKeyStatus(io, ImGuiKey_Enter, isKeyDown);
-                    break;
-                default:
+                    updateKeyStatus(io, toImGuiKey(code), isKeyDown);
                     break;
             }
             break;

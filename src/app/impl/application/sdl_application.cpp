@@ -82,6 +82,14 @@ static Event::Code sdlScanCodeToEventCode(SDL_Scancode sc)
         return Event::CODE_KEYBOARD_LSHIFT;
     case SDL_SCANCODE_RSHIFT:
         return Event::CODE_KEYBOARD_RSHIFT;
+    case SDL_SCANCODE_LCTRL:
+        return Event::CODE_KEYBOARD_LCTRL;
+    case SDL_SCANCODE_RCTRL:
+        return Event::CODE_KEYBOARD_RCTRL;
+    case SDL_SCANCODE_LALT:
+        return Event::CODE_KEYBOARD_LALT;
+    case SDL_SCANCODE_RALT:
+        return Event::CODE_KEYBOARD_RALT;
     case SDL_SCANCODE_COMMA:
         return Event::CODE_KEYBOARD_COMMA;
     case SDL_SCANCODE_PERIOD:

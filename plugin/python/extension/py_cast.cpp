@@ -438,6 +438,11 @@ template<> ARK_PLUGIN_PYTHON_API PyObject* PyCast::toPyObject_impl<Json>(const J
     return toPyObject_SharedPtr<Json>(sp<Json>::make(value));
 }
 
+template<> ARK_PLUGIN_PYTHON_API PyObject* PyCast::toPyObject_impl<Buffer>(const Buffer& buffer)
+{
+    return toPyObject_SharedPtr<Buffer>(sp<Buffer>::make(buffer));
+}
+
 template<> ARK_PLUGIN_PYTHON_API PyObject* PyCast::toPyObject_impl<bool>(const bool& value)
 {
     return PyBool_FromLong(value);

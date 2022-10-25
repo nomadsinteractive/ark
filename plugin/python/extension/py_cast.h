@@ -250,9 +250,10 @@ private:
         return toCppObject_impl<T>(obj);
     }
     template<typename T, typename U> static Optional<T> toCppCollectionObject_sfinae(PyObject* obj, ...) {
-        T col;
         Py_ssize_t len = PyObject_Length(obj);
-        CHECK(len != -1, "Object \"%s\" has no length", Py_TYPE(obj)->tp_name);
+        if(len == -1)
+            return Optional<T>();
+        T col;
         for(Py_ssize_t i = 0; i < len; ++i) {
             PyObject* key = PyLong_FromLong(static_cast<int32_t>(i));
             PyObject* item = PyObject_GetItem(obj, key);

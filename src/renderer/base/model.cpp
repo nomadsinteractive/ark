@@ -93,7 +93,7 @@ void Model::setNodeNames(std::vector<String> nodes)
 
 const sp<Animation>& Model::getAnimation(const String& name) const
 {
-    DCHECK(_animations.has(name), "Model has no animate(%s) defined", name.c_str());
+    CHECK(_animations.has(name), "Model has no animate(%s) defined", name.c_str());
     return _animations.at(name);
 }
 

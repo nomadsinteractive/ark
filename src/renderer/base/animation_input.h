@@ -12,6 +12,7 @@ namespace ark {
 
 typedef std::vector<M4> AnimationFrame;
 
+//[[script::bindings::extends(Input)]]
 class ARK_API AnimationInput : public Input {
 public:
     AnimationInput(sp<Numeric> duration, uint32_t durationInTicks, const sp<Table<String, uint32_t>>& node, const sp<std::vector<AnimationFrame>>& animationFrames);

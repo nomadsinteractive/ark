@@ -45,6 +45,7 @@ sp<RenderCommand> RCCMultiDrawElementsIndirect::compose(const RenderRequest& ren
         size_t offset = 0;
         for(const Renderable::Snapshot& i : snapshot._items)
         {
+            _indirect_cmds.has(i._type);
             IndirectCmd& modelIndirect = _indirect_cmds[i._type];
             if(modelIndirect._snapshot_offsets.empty())
             {
@@ -79,6 +80,7 @@ ByteArray::Borrowed RCCMultiDrawElementsIndirect::makeIndirectBuffer(const Rende
         *pcmds = i.second._command;
         pcmds->_base_instance = baseInstance;
         baseInstance += pcmds->_instance_count;
+         ++ pcmds;
     }
     return cmds;
 }

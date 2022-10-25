@@ -496,7 +496,7 @@ ARK_PY_ARGUMENTS = (
     (r'(V2|V3|V4)', GenArgumentMeta('PyObject*', '${0}', 'O')),
     (r'([^>]+|[\w\d_]+<[\w\d_]+>)\s*&', GenArgumentMeta('PyObject*', 'sp<${0}>', 'O')),
     (r'(uint32_t|unsigned int|uint8_t)', GenArgumentMeta('uint32_t', 'uint32_t', 'I')),
-    (r'size_t', GenArgumentMeta('size_t', 'size_t', 'I')),
+    (r'size_t', GenArgumentMeta('size_t', 'size_t', 'n')),
     (r'(int32_t|int|int8_t)', GenArgumentMeta('int32_t', 'int32_t', 'i')),
     (r'float', GenArgumentMeta('float', 'float', 'f')),
     (r'bool', GenArgumentMeta('int32_t', 'bool', 'p', True)),

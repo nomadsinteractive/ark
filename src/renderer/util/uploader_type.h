@@ -24,20 +24,20 @@ public:
 //  [[script::bindings::property]]
     static size_t size(const sp<Uploader>& self);
 
-//  [[script::bindings::auto]]
+//  [[script::bindings::classmethod]]
     static bytearray toBytes(const sp<Uploader>& self);
 
-//  [[script::bindings::auto]]
+//  [[script::bindings::classmethod]]
     static void set(const sp<Uploader>& self, sp<Uploader> delegate);
-//  [[script::bindings::auto]]
+//  [[script::bindings::classmethod]]
     static sp<Uploader> wrap(sp<Uploader> self);
 
-//  [[script::bindings::auto]]
+//  [[script::bindings::classmethod]]
     static sp<Uploader> record(const sp<Uploader>& self);
 
-//  [[script::bindings::auto]]
+//  [[script::bindings::classmethod]]
     static void addInput(const sp<Uploader>& self, size_t offset, sp<Input> input);
-//  [[script::bindings::auto]]
+//  [[script::bindings::classmethod]]
     static void removeInput(const sp<Uploader>& self, size_t offset);
 
 //  [[plugin::builder]]
