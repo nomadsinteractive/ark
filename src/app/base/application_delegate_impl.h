@@ -17,7 +17,7 @@ namespace ark {
 
 class ARK_API ApplicationDelegateImpl : public ApplicationDelegate {
 public:
-    ApplicationDelegateImpl(const sp<Manifest>& manifest);
+    ApplicationDelegateImpl(const sp<ApplicationManifest>& manifest);
 
     virtual void onCreate(Application& application, const sp<Surface>& surface) override;
 

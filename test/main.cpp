@@ -9,7 +9,7 @@ using namespace ark;
 int main(int argc, const char* argv[])
 {
     try {
-        const Ark ark(argc, argv, sp<Manifest>::make("manifest.xml"));
+        const Ark ark(argc, argv, sp<ApplicationManifest>::make("manifest.xml"));
         return ark.runTests(argc, argv);
     }
     catch(const std::exception& ex)

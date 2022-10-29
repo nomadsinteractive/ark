@@ -113,16 +113,17 @@ void ModelImporterAssimp::loadAnimates(float tps, Table<String, sp<Animation>>& 
 
 Model ModelImporterAssimp::import(const document& manifest, MaterialBundle& materialBundle)
 {
-    const sp<Assimp::Importer> importer = sp<Assimp::Importer>::make();
+    Assimp::Importer importer;
     const String& src = Documents::ensureAttribute(manifest, Constants::Attributes::SRC);
     return loadModel(loadScene(importer, src), materialBundle, manifest);
 }
 
-const aiScene* ModelImporterAssimp::loadScene(const sp<Assimp::Importer>& importer, const String& src, bool checkMeshes) const
+const aiScene* ModelImporterAssimp::loadScene(Assimp::Importer& importer, const String& src, bool checkMeshes) const
 {
-    importer->SetIOHandler(new ArkIOSystem);
+    importer.SetIOHandler(new ArkIOSystem);
+    importer.SetPropertyBool(AI_CONFIG_IMPORT_FBX_PRESERVE_PIVOTS, false);
     uint32_t flags = static_cast<uint32_t>(aiProcessPreset_TargetRealtime_Fast | aiProcess_FlipUVs | aiProcess_GenBoundingBoxes | aiProcess_LimitBoneWeights);
-    const aiScene* scene = importer->ReadFile(src.c_str(), flags);
+    const aiScene* scene = importer.ReadFile(src.c_str(), flags);
     CHECK(scene, "Loading \"%s\" failed", src.c_str());
     CHECK(!checkMeshes || scene->mNumMeshes > 0, "This scene(%s) has no meshes, maybe it's a scene contains animation-only informations. You should attach this one to its parent as an animation node.", src.c_str());
     return scene;
@@ -231,7 +232,7 @@ Model ModelImporterAssimp::loadModel(const aiScene* scene, MaterialBundle& mater
         }
     }
 
-    Model model(std::move(materials), std::move(meshes), {bounds, bounds, -aabbMin});
+    Model model(std::move(materials), std::move(meshes), {bounds, bounds, aabbMin});
     if(hasAnimation)
     {
         bool noBones = bones.nodes().size() == 0;
@@ -242,7 +243,7 @@ Model ModelImporterAssimp::loadModel(const aiScene* scene, MaterialBundle& mater
         loadAnimates(defaultTps, animates, scene, globalAnimationTransform, nodes.nodes(), callback);
         for(const auto& i : animateManifests)
         {
-            sp<Assimp::Importer> importer = sp<Assimp::Importer>::make();
+            Assimp::Importer importer;
             const String& src = Documents::ensureAttribute(i, Constants::Attributes::SRC);
             String name = Documents::getAttribute(i, Constants::Attributes::NAME);
             String alias = Documents::getAttribute(i, "alias");

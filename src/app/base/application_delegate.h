@@ -13,7 +13,7 @@ namespace ark {
 
 class ARK_API ApplicationDelegate : public EventListener {
 public:
-    ApplicationDelegate(const sp<Manifest>& manifest);
+    ApplicationDelegate(const sp<ApplicationManifest>& manifest);
     virtual ~ApplicationDelegate() = default;
 
     virtual const char* name();
@@ -30,7 +30,7 @@ public:
     virtual bool onEvent(const Event& event);
 
 protected:
-    sp<Manifest> _manifest;
+    sp<ApplicationManifest> _manifest;
 
     sp<ApplicationContext> _application_context;
     sp<RenderView> _render_view;

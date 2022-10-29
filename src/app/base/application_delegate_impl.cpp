@@ -19,7 +19,7 @@
 
 namespace ark {
 
-ApplicationDelegateImpl::ApplicationDelegateImpl(const sp<Manifest>& manifest)
+ApplicationDelegateImpl::ApplicationDelegateImpl(const sp<ApplicationManifest>& manifest)
     : ApplicationDelegate(manifest)
 {
 }

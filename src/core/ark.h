@@ -44,13 +44,13 @@ public:
     };
 
     Ark(int32_t argc, const char** argv);
-    Ark(int32_t argc, const char** argv, const sp<Manifest>& manifest);
+    Ark(int32_t argc, const char** argv, const sp<ApplicationManifest>& manifest);
     ~Ark();
 
     static Ark& instance();
 
     void push();
-    void initialize(const sp<Manifest>& manifest);
+    void initialize(const sp<ApplicationManifest>& manifest);
 
     template<typename T> const sp<T>& query() const {
         return _interfaces.get<T>();
@@ -66,7 +66,7 @@ public:
     int32_t argc() const;
     const char** argv() const;
 
-    const sp<Manifest>& manifest() const;
+    const sp<ApplicationManifest>& manifest() const;
 
     sp<AssetBundle> getAssetBundle(const String& path) const;
     sp<Asset> getAsset(const String& path) const;
@@ -87,10 +87,10 @@ public:
 private:
     class ArkAssetBundle;
 
-    sp<ApplicationContext> createApplicationContext(const Manifest& manifest, const sp<ApplicationBundle>& resource, const sp<RenderEngine>& renderEngine);
+    sp<ApplicationContext> createApplicationContext(const ApplicationManifest& manifest, const sp<ApplicationBundle>& resource, const sp<RenderEngine>& renderEngine);
     sp<RenderEngine> createRenderEngine(RendererVersion version, RendererCoordinateSystem coordinateSystem, const sp<ApplicationBundle>& appResource);
 
-    void loadPlugins(const Manifest& manifest) const;
+    void loadPlugins(const ApplicationManifest& manifest) const;
 
 private:
     static Ark* _instance;
@@ -105,7 +105,7 @@ private:
 
     sp<ArkAssetBundle> _asset_bundle;
 
-    sp<Manifest> _manifest;
+    sp<ApplicationManifest> _manifest;
 };
 
 }

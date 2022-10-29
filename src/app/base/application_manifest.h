@@ -15,7 +15,7 @@
 
 namespace ark {
 
-class ARK_API Manifest {
+class ARK_API ApplicationManifest {
 public:
     enum MessageLoopType {
         MESSAGE_LOOP_TYPE_CORE,
@@ -65,8 +65,8 @@ public:
     };
 
 public:
-    Manifest();
-    Manifest(const String& src);
+    ApplicationManifest();
+    ApplicationManifest(const String& src);
 
     void load(const String& src);
 

@@ -231,7 +231,7 @@ public:
 
 }
 
-SDLApplication::SDLApplication(const sp<ApplicationDelegate>& applicationDelegate, const sp<ApplicationContext>& applicationContext, uint32_t width, uint32_t height, const Manifest& manifest)
+SDLApplication::SDLApplication(const sp<ApplicationDelegate>& applicationDelegate, const sp<ApplicationContext>& applicationContext, uint32_t width, uint32_t height, const ApplicationManifest& manifest)
     : Application(applicationDelegate, applicationContext, width, height, manifest.renderer().toViewport()), _main_window(nullptr), _cond(SDL_CreateCond()), _lock(SDL_CreateMutex()),
       _controller(sp<SDLApplicationController>::make()), _window_flag(manifest.application()._window_flag)
 {
@@ -254,7 +254,7 @@ int SDLApplication::run()
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
-    SDL_ShowCursor((_window_flag & Manifest::WINDOW_FLAG_SHOW_CURSOR) ? SDL_ENABLE : SDL_DISABLE);
+    SDL_ShowCursor((_window_flag & ApplicationManifest::WINDOW_FLAG_SHOW_CURSOR) ? SDL_ENABLE : SDL_DISABLE);
 
     _main_window = SDL_CreateWindow(name(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, static_cast<int32_t>(_surface_size->width()), static_cast<int32_t>(_surface_size->height()), toSDLWindowFlag(_application_context, _window_flag));
     if(!_main_window)
@@ -340,13 +340,13 @@ uint32_t SDLApplication::toSDLWindowFlag(const sp<ApplicationContext>& applicati
     Ark::RendererVersion version = applicationContext->renderEngine()->version();
 
     uint32_t windowFlag = SDL_WINDOW_SHOWN;
-    if(appWindowFlag & Manifest::WINDOW_FLAG_FULL_SCREEN)
+    if(appWindowFlag & ApplicationManifest::WINDOW_FLAG_FULL_SCREEN)
         windowFlag |= SDL_WINDOW_FULLSCREEN;
-    if(appWindowFlag & Manifest::WINDOW_FLAG_FULL_SCREEN_WINDOWED)
+    if(appWindowFlag & ApplicationManifest::WINDOW_FLAG_FULL_SCREEN_WINDOWED)
         windowFlag |= SDL_WINDOW_FULLSCREEN_DESKTOP;
-    if(appWindowFlag & Manifest::WINDOW_FLAG_MAXINIZED)
+    if(appWindowFlag & ApplicationManifest::WINDOW_FLAG_MAXINIZED)
         windowFlag |= SDL_WINDOW_MAXIMIZED;
-    if(appWindowFlag & Manifest::WINDOW_FLAG_RESIZABLE)
+    if(appWindowFlag & ApplicationManifest::WINDOW_FLAG_RESIZABLE)
         windowFlag |= SDL_WINDOW_RESIZABLE;
 
     _use_open_gl = version < Ark::VULKAN_11;

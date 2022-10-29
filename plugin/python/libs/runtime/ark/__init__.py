@@ -1038,6 +1038,18 @@ class Mesh:
 class Model:
 
     @property
+    def size(self) -> tuple[float, float, float]:
+        return 0, 0, 0
+
+    @property
+    def bounds(self) -> tuple[float, float, float]:
+        return 0, 0, 0
+
+    @property
+    def origin(self) -> tuple[float, float, float]:
+        return 0, 0, 0
+
+    @property
     def materials(self) -> list[Material]:
         return []
 

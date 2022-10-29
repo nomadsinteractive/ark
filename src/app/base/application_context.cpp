@@ -78,7 +78,7 @@ void ApplicationContext::initMessageLoop()
     const Ark& ark = Ark::instance();
     _executor_main = sp<ExecutorWorkerThread>::make(_worker_strategy, "Executor");
     _message_loop_renderer = sp<MessageLoop>::make(_ticker);
-    _message_loop_core = ark.manifest()->application()._message_loop == Manifest::MESSAGE_LOOP_TYPE_RENDER ? _message_loop_renderer : _worker_strategy->_message_loop;
+    _message_loop_core = ark.manifest()->application()._message_loop == ApplicationManifest::MESSAGE_LOOP_TYPE_RENDER ? _message_loop_renderer : _worker_strategy->_message_loop;
     _message_loop_app = makeMessageLoop(_app_clock);
     _executor_pooled = sp<ExecutorThreadPool>::make(_executor_main);
 }

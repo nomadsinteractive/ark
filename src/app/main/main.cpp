@@ -17,7 +17,7 @@ int main(int argc, const char* argv[])
     if(scale == 0.0f)
         scale = 1.0f;
     try {
-        const sp<Manifest> manifest = sp<Manifest>::make("manifest.xml");
+        const sp<ApplicationManifest> manifest = sp<ApplicationManifest>::make("manifest.xml");
         const Ark ark(argc, argv, manifest);
         const sp<Size>& renderResolution = manifest->rendererResolution();
         SDLApplication app(sp<ApplicationDelegateImpl>::make(manifest), ark.applicationContext(), static_cast<uint32_t>(renderResolution->width() * scale),

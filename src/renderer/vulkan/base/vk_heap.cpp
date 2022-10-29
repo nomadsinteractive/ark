@@ -29,7 +29,7 @@ VKMemoryPtr VKHeap::doAllocate(GraphicsContext& graphicsContext, VkDeviceSize si
 
     if(!_heaps[typeIndex])
     {
-        const Manifest& manifest = Ark::instance().manifest();
+        const ApplicationManifest& manifest = Ark::instance().manifest();
         _heaps[typeIndex] = HeapType(makeMemory(graphicsContext, manifest.heap()._device_unit_size >> 4, typeIndex), sp<HeapType::L1>::make(sizeof(VkDeviceSize) * 4));
         _heaps[typeIndex].extend(makeMemory(graphicsContext, manifest.heap()._device_unit_size, typeIndex), sp<HeapType::L2>::make());
     }
@@ -37,7 +37,7 @@ VKMemoryPtr VKHeap::doAllocate(GraphicsContext& graphicsContext, VkDeviceSize si
     Optional<VKMemoryPtr> opt = _heaps[typeIndex].allocate(size, alignment);
     if(!opt)
     {
-        const Manifest& manifest = Ark::instance().manifest();
+        const ApplicationManifest& manifest = Ark::instance().manifest();
         CHECK(size < manifest.heap()._device_unit_size, "Out of heap memory, allocation size required: %lld, you may change device_unit_size(%d) to a greater value", size, manifest.heap()._device_unit_size);
         _heaps[typeIndex].extend(makeMemory(graphicsContext, manifest.heap()._device_unit_size, typeIndex), sp<HeapType::L2>::make());
         return doAllocate(graphicsContext, size, alignment, typeIndex);

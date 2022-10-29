@@ -1,6 +1,5 @@
 #include "renderer/base/render_controller.h"
 
-#include "core/base/manifest.h"
 #include "core/base/future.h"
 #include "core/inf/runnable.h"
 #include "core/util/boolean_type.h"
@@ -21,6 +20,8 @@
 #include "renderer/inf/vertices.h"
 #include "renderer/impl/uploader/uploader_recoder.h"
 #include "renderer/util/render_util.h"
+
+#include "app/base/application_manifest.h"
 
 namespace ark {
 

@@ -43,7 +43,7 @@ public:
     };
 
 private:
-    const aiScene* loadScene(const sp<Assimp::Importer>& importer, const String& src, bool checkMeshes = true) const;
+    const aiScene* loadScene(Assimp::Importer& importer, const String& src, bool checkMeshes = true) const;
     Model loadModel(const aiScene* scene, MaterialBundle& materialBundle, const document& manifest) const;
     Mesh loadMesh(const aiScene* scene, const aiMesh* mesh, MaterialBundle& materialBundle, element_index_t vertexBase, NodeTable& boneMapping, const std::vector<sp<Material> >& materials) const;
     NodeTable loadNodes(const aiNode* node, Model& model) const;

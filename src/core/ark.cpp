@@ -24,7 +24,7 @@ limitations under the License.
 
 #include "core/ark.h"
 
-#include "core/base/manifest.h"
+
 #include "core/base/plugin_manager.h"
 #include "core/base/url.h"
 #include "core/impl/asset_bundle/asset_bundle_with_fallback.h"
@@ -45,8 +45,9 @@ limitations under the License.
 #include "renderer/vulkan/renderer_factory/renderer_factory_vulkan.h"
 #endif
 
-#include "app/base/application_context.h"
 #include "app/base/application_bundle.h"
+#include "app/base/application_context.h"
+#include "app/base/application_manifest.h"
 
 #include "platform/platform.h"
 
@@ -63,9 +64,9 @@ std::list<Ark*> Ark::_instance_stack;
 
 class Ark::ArkAssetBundle {
 public:
-    ArkAssetBundle(const sp<AssetBundle>& builtInAssetBundle, BeanFactory& factory, const std::vector<Manifest::Asset>& assets)
+    ArkAssetBundle(const sp<AssetBundle>& builtInAssetBundle, BeanFactory& factory, const std::vector<ApplicationManifest::Asset>& assets)
         : _builtin_asset_bundle(builtInAssetBundle) {
-        for(const Manifest::Asset& i : assets) {
+        for(const ApplicationManifest::Asset& i : assets) {
             sp<AssetBundle> assetBundle = createAsset(factory, i);
             if(assetBundle)
                 _mounts.push_front(Mounted(i, assetBundle));
@@ -100,7 +101,7 @@ public:
     }
 
 private:
-    sp<AssetBundle> createAsset(BeanFactory& factory, const Manifest::Asset& manifest) {
+    sp<AssetBundle> createAsset(BeanFactory& factory, const ApplicationManifest::Asset& manifest) {
         sp<AssetBundle> asset = manifest._protocol.empty() ? _builtin_asset_bundle->getBundle(manifest._src) :
                                                              factory.build<AssetBundle>(manifest._protocol, manifest._src, {});
         DWARN(asset, "Unable to load AssetBundle, protocol: %s, src: %s", manifest._protocol.c_str(), manifest._src.c_str());
@@ -109,7 +110,7 @@ private:
 
     class Mounted {
     public:
-        Mounted(const Manifest::Asset& manifest, const sp<AssetBundle>& asset)
+        Mounted(const ApplicationManifest::Asset& manifest, const sp<AssetBundle>& asset)
             : _root(manifest._protocol, manifest._root), _asset_bundle(asset) {
         }
 
@@ -166,7 +167,7 @@ Ark::Ark(int32_t argc, const char** argv)
     __ark_bootstrap__();
 }
 
-Ark::Ark(int32_t argc, const char** argv, const sp<Manifest>& manifest)
+Ark::Ark(int32_t argc, const char** argv, const sp<ApplicationManifest>& manifest)
     : Ark(argc, argv)
 {
     initialize(manifest);
@@ -197,7 +198,7 @@ void Ark::push()
     _instance = this;
 }
 
-void Ark::initialize(const sp<Manifest>& manifest)
+void Ark::initialize(const sp<ApplicationManifest>& manifest)
 {
     _manifest = manifest;
 
@@ -234,7 +235,7 @@ const char** Ark::argv() const
     return _argv;
 }
 
-const sp<Manifest>& Ark::manifest() const
+const sp<ApplicationManifest>& Ark::manifest() const
 {
     return _manifest;
 }
@@ -292,7 +293,7 @@ op<ApplicationProfiler::Logger> Ark::makeProfilerLogger(const char* func, const 
     return _application_profiler ? _application_profiler->makeLogger(func, filename, lineno, name) : op<ApplicationProfiler::Logger>();
 }
 
-sp<ApplicationContext> Ark::createApplicationContext(const Manifest& manifest, const sp<ApplicationBundle>& appResource, const sp<RenderEngine>& renderEngine)
+sp<ApplicationContext> Ark::createApplicationContext(const ApplicationManifest& manifest, const sp<ApplicationBundle>& appResource, const sp<RenderEngine>& renderEngine)
 {
     const Global<PluginManager> pluginManager;
     const sp<ApplicationContext> applicationContext = sp<ApplicationContext>::make(appResource, renderEngine);
@@ -334,7 +335,7 @@ sp<RenderEngine> Ark::createRenderEngine(RendererVersion version, RendererCoordi
     return nullptr;
 }
 
-void Ark::loadPlugins(const Manifest& manifest) const
+void Ark::loadPlugins(const ApplicationManifest& manifest) const
 {
     const Global<PluginManager> pluginManager;
 

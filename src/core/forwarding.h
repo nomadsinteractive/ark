@@ -63,7 +63,7 @@ class Holder;
 class Interfaces;
 class Json;
 class Notifier;
-class Manifest;
+class ApplicationManifest;
 class MemoryPool;
 class MessageLoop;
 class Mutex;

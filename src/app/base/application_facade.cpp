@@ -14,7 +14,7 @@
 
 namespace ark {
 
-ApplicationFacade::ApplicationFacade(Application& app, const Surface& surface, const sp<Manifest>& manifest)
+ApplicationFacade::ApplicationFacade(Application& app, const Surface& surface, const sp<ApplicationManifest>& manifest)
     : _context(app.context()), _controller(app.controller()), _surface_size(app.surfaceSize()), _surface_controller(surface.controller()), _manifest(manifest)
 {
 }
@@ -59,7 +59,7 @@ const sp<Camera>& ApplicationFacade::camera() const
     return Camera::getDefaultCamera();
 }
 
-const sp<Manifest>& ApplicationFacade::manifest() const
+const sp<ApplicationManifest>& ApplicationFacade::manifest() const
 {
     return _manifest;
 }

@@ -1,4 +1,4 @@
-#include "core/base/manifest.h"
+#include "app/base/application_manifest.h"
 
 #include "core/inf/asset.h"
 #include "core/inf/asset_bundle.h"
@@ -11,16 +11,16 @@
 
 namespace ark {
 
-Manifest::Manifest()
+ApplicationManifest::ApplicationManifest()
 {
 }
 
-Manifest::Manifest(const String& src)
+ApplicationManifest::ApplicationManifest(const String& src)
 {
     load(src);
 }
 
-void Manifest::load(const String& src)
+void ApplicationManifest::load(const String& src)
 {
     Strings::rcut(Platform::getExecutablePath(), _application._dir, _application._filename, Platform::dirSeparator());
 
@@ -66,63 +66,63 @@ void Manifest::load(const String& src)
         _resource_loader = sp<DOMDocument>::make("resource-loader");
 }
 
-const String& Manifest::name() const
+const String& ApplicationManifest::name() const
 {
     return _application._title;
 }
 
-const Manifest::Application& Manifest::application() const
+const ApplicationManifest::Application& ApplicationManifest::application() const
 {
     return _application;
 }
 
-const String& Manifest::appDir() const
+const String& ApplicationManifest::appDir() const
 {
     return _application._dir;
 }
 
-const String& Manifest::assetDir() const
+const String& ApplicationManifest::assetDir() const
 {
     return _asset_dir;
 }
 
-const std::vector<Manifest::Asset>& Manifest::assets() const
+const std::vector<ApplicationManifest::Asset>& ApplicationManifest::assets() const
 {
     return _assets;
 }
 
-const std::vector<String>& Manifest::plugins() const
+const std::vector<String>& ApplicationManifest::plugins() const
 {
     return _plugins;
 }
 
-const sp<Size>& Manifest::rendererResolution() const
+const sp<Size>& ApplicationManifest::rendererResolution() const
 {
     DCHECK(_renderer._resolution, "RenderResolution undefined in manifest");
     return _renderer._resolution;
 }
 
-const Manifest::Heap& Manifest::heap() const
+const ApplicationManifest::Heap& ApplicationManifest::heap() const
 {
     return _heap;
 }
 
-const Manifest::Renderer& Manifest::renderer() const
+const ApplicationManifest::Renderer& ApplicationManifest::renderer() const
 {
     return _renderer;
 }
 
-const document& Manifest::content() const
+const document& ApplicationManifest::content() const
 {
     return _content;
 }
 
-const document& Manifest::resourceLoader() const
+const document& ApplicationManifest::resourceLoader() const
 {
     return _resource_loader;
 }
 
-uint32_t Manifest::toSize(const String& sizestr) const
+uint32_t ApplicationManifest::toSize(const String& sizestr) const
 {
     const String s = sizestr.toLower();
     const std::pair<String, uint32_t> suffixs[] = {{"k", 10}, {"kb", 10}, {"m", 20}, {"mb", 20}, {"g", 30}, {"gb", 30}};
@@ -132,43 +132,43 @@ uint32_t Manifest::toSize(const String& sizestr) const
     return Strings::parse<uint32_t>(s);
 }
 
-Manifest::Renderer::Renderer()
+ApplicationManifest::Renderer::Renderer()
     : _version(Ark::AUTO)
 {
 }
 
-Viewport Manifest::Renderer::toViewport() const
+Viewport ApplicationManifest::Renderer::toViewport() const
 {
     DASSERT(_resolution);
     return Viewport(0, 0, _resolution->width(), _resolution->height(), -1.0f, 1.0f);
 }
 
-static Manifest::WindowFlag toOneWindowFlag(const String& val)
+static ApplicationManifest::WindowFlag toOneWindowFlag(const String& val)
 {
     const String s = val.toLower();
     if(s == "show_cursor")
-        return Manifest::WINDOW_FLAG_SHOW_CURSOR;
+        return ApplicationManifest::WINDOW_FLAG_SHOW_CURSOR;
     if(s == "resizable")
-        return Manifest::WINDOW_FLAG_RESIZABLE;
+        return ApplicationManifest::WINDOW_FLAG_RESIZABLE;
     if(s == "maxinized")
-        return Manifest::WINDOW_FLAG_MAXINIZED;
+        return ApplicationManifest::WINDOW_FLAG_MAXINIZED;
     if(s == "full_screen")
-        return Manifest::WINDOW_FLAG_FULL_SCREEN;
+        return ApplicationManifest::WINDOW_FLAG_FULL_SCREEN;
     if(s == "full_screen_windowed")
-        return Manifest::WINDOW_FLAG_FULL_SCREEN_WINDOWED;
+        return ApplicationManifest::WINDOW_FLAG_FULL_SCREEN_WINDOWED;
     DFATAL("Unknow window flag: %s", val.c_str());
-    return Manifest::WINDOW_FLAG_NONE;
+    return ApplicationManifest::WINDOW_FLAG_NONE;
 }
 
-template<> ARK_API Manifest::WindowFlag Conversions::to<String, Manifest::WindowFlag>(const String& val)
+template<> ARK_API ApplicationManifest::WindowFlag Conversions::to<String, ApplicationManifest::WindowFlag>(const String& val)
 {
-    uint32_t v = Manifest::WINDOW_FLAG_NONE;
+    uint32_t v = ApplicationManifest::WINDOW_FLAG_NONE;
     for(const String& i : val.split('|'))
         v |= toOneWindowFlag(i);
-    return static_cast<Manifest::WindowFlag>(v);
+    return static_cast<ApplicationManifest::WindowFlag>(v);
 }
 
-Manifest::Asset::Asset(const document& manifest)
+ApplicationManifest::Asset::Asset(const document& manifest)
     : _protocol(Documents::getAttribute(manifest, "protocol")), _root(Documents::getAttribute(manifest, "root", "/")),
       _src(Documents::getAttribute(manifest, Constants::Attributes::SRC))
 {
