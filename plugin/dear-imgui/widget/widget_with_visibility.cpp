@@ -6,8 +6,8 @@ namespace ark {
 namespace plugin {
 namespace dear_imgui {
 
-WidgetWithVisibility::WidgetWithVisibility(const sp<Widget>& delegate, sp<Boolean> visible)
-    : Delegate(delegate), _visible(std::move(visible))
+WidgetWithVisibility::WidgetWithVisibility(sp<Widget> delegate, sp<Boolean> visible)
+    : Delegate(std::move(delegate)), _visible(std::move(visible))
 {
 }
 

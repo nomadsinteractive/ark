@@ -305,7 +305,7 @@ void GLPipeline::upload(GraphicsContext& graphicsContext)
 
     GLint linkstatus = 0;
     glGetProgramiv(id, GL_LINK_STATUS, &linkstatus);
-    DCHECK(linkstatus, "Program link failed: %s", getInformationLog(id).c_str());
+    CHECK(linkstatus, "Program link failed: %s", getInformationLog(id).c_str());
     LOGD("GLProgram[%d]:", id);
 }
 
@@ -632,13 +632,21 @@ void GLPipeline::PipelineOperationDraw::bind(GraphicsContext& /*graphicsContext*
     glUseProgram(_stub->_id);
     _stub->bindUBOSnapshots(drawingContext._ubos, drawingContext._shader_bindings->pipelineInput());
 
-    const std::vector<sp<Texture>>& samplers = drawingContext._shader_bindings->samplers();
+    const std::vector<sp<Texture>>& samplers = drawingContext._shader_bindings->pipelineBindings()->samplers();
     for(size_t i = 0; i < samplers.size(); ++i)
     {
         const sp<Texture>& sampler = samplers.at(i);
         DWARN(sampler, "Pipeline has unbound sampler at: %d", i);
         if(sampler)
             _stub->activeTexture(sampler, static_cast<uint32_t>(i));
+    }
+
+    const std::vector<sp<Texture>>& images = drawingContext._shader_bindings->pipelineBindings()->images();
+    for(size_t i = 0; i < images.size(); ++i)
+    {
+        const sp<Texture>& image = images.at(i);
+        if(image)
+            _stub->bindImage(image, static_cast<uint32_t>(i));
     }
 }
 
@@ -737,6 +745,14 @@ void GLPipeline::Stub::bindUniform(const uint8_t* ptr, uint32_t size, const Unif
     default:
         DFATAL("Unimplemented");
     }
+}
+
+void GLPipeline::Stub::bindImage(const Texture& texture, uint32_t name)
+{
+    char uniformName[16] = {'u', '_', 'I', 'm', 'a', 'g', 'e', static_cast<char>('0' + name)};
+    const GLPipeline::GLUniform& uImage = getUniform(uniformName);
+    uImage.setUniform1i(static_cast<GLint>(name));
+    glBindImageTexture(name, static_cast<GLuint>(texture.delegate()->id()), 0, GL_FALSE, 0, GL_READ_WRITE, GL_R16I);
 }
 
 void GLPipeline::Stub::activeTexture(const Texture& texture, uint32_t name)

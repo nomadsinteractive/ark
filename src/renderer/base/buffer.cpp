@@ -105,7 +105,7 @@ uint64_t Buffer::id() const
 
 void Buffer::upload(sp<Uploader> uploader, sp<Future> future)
 {
-    Ark::instance().applicationContext()->renderController()->uploadBuffer(*this, std::move(uploader), RenderController::US_ON_CHANGED, std::move(future));
+    Ark::instance().applicationContext()->renderController()->uploadBuffer(*this, std::move(uploader), RenderController::US_ON_CHANGE, std::move(future));
 }
 
 void Buffer::upload(GraphicsContext& graphicsContext) const

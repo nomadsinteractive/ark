@@ -1,5 +1,6 @@
 #include "plugin/assimp/impl/model_loader/model_loader_assimp.h"
 
+#include "core/base/manifest.h"
 #include "core/impl/readable/bytearray_readable.h"
 #include "core/inf/array.h"
 #include "core/inf/loader.h"
@@ -49,14 +50,14 @@ bitmap ModelImporterAssimp::loadBitmap(const sp<BitmapLoaderBundle>& imageResour
 
 void ModelImporterAssimp::loadSceneTexture(const ResourceLoaderContext& resourceLoaderContext, const aiTexture* tex)
 {
-    const bitmap bitmap = loadBitmap(resourceLoaderContext.bitmapBundle(), tex);
-    _textures.push_back(resourceLoaderContext.renderController()->createTexture2D(sp<Size>::make(static_cast<float>(bitmap->width()), static_cast<float>(bitmap->height())), sp<Texture::UploaderBitmap>::make(bitmap)));
+    bitmap bitmap = loadBitmap(resourceLoaderContext.bitmapBundle(), tex);
+    _textures.push_back(resourceLoaderContext.renderController()->createTexture2D(sp<Size>::make(static_cast<float>(bitmap->width()), static_cast<float>(bitmap->height())), std::move(bitmap)));
 }
 
-array<element_index_t> ModelImporterAssimp::loadIndices(const aiMesh* mesh, element_index_t vertexBase) const
+std::vector<element_index_t> ModelImporterAssimp::loadIndices(const aiMesh* mesh, element_index_t vertexBase) const
 {
-    const array<element_index_t> s = sp<Array<element_index_t>::Allocated>::make(mesh->mNumFaces * 3);
-    element_index_t* buf = s->buf();
+    std::vector<element_index_t> s(mesh->mNumFaces * 3);
+    element_index_t* buf = s.data();
     for(uint32_t i = 0; i < mesh->mNumFaces; i ++)
     {
         const aiFace& face = mesh->mFaces[i];
@@ -111,11 +112,10 @@ void ModelImporterAssimp::loadAnimates(float tps, Table<String, sp<Animation>>& 
     }
 }
 
-Model ModelImporterAssimp::import(const document& manifest, MaterialBundle& materialBundle)
+Model ModelImporterAssimp::import(const Manifest& manifest, MaterialBundle& materialBundle)
 {
     Assimp::Importer importer;
-    const String& src = Documents::ensureAttribute(manifest, Constants::Attributes::SRC);
-    return loadModel(loadScene(importer, src), materialBundle, manifest);
+    return loadModel(loadScene(importer, manifest.src()), materialBundle, manifest);
 }
 
 const aiScene* ModelImporterAssimp::loadScene(Assimp::Importer& importer, const String& src, bool checkMeshes) const
@@ -131,7 +131,7 @@ const aiScene* ModelImporterAssimp::loadScene(Assimp::Importer& importer, const 
 
 Mesh ModelImporterAssimp::loadMesh(const aiScene* scene, const aiMesh* mesh, MaterialBundle& materialBundle, element_index_t vertexBase, NodeTable& boneMapping, const std::vector<sp<Material>>& materials) const
 {
-    sp<Array<element_index_t>> indices = loadIndices(mesh, vertexBase);
+    std::vector<element_index_t> indices = loadIndices(mesh, vertexBase);
     sp<Array<V3>> vertices = sp<Array<V3>::Allocated>::make(mesh->mNumVertices);
     sp<Array<Mesh::UV>> uvs = sp<Array<Mesh::UV>::Allocated>::make(mesh->mNumVertices);
     sp<Array<V3>> normals = mesh->HasNormals() ? sp<Array<V3>::Allocated>::make(mesh->mNumVertices) : sp<Array<V3>::Allocated>::null();
@@ -159,7 +159,7 @@ Mesh ModelImporterAssimp::loadMesh(const aiScene* scene, const aiMesh* mesh, Mat
     if(mesh->HasBones())
         loadBones(mesh, boneMapping, bones);
 
-    return Mesh(mesh->mName.C_Str(), indices, std::move(vertices), std::move(uvs), std::move(normals), std::move(tangents), std::move(bones), material);
+    return Mesh(mesh->mName.C_Str(), std::move(indices), std::move(vertices), std::move(uvs), std::move(normals), std::move(tangents), std::move(bones), material);
 }
 
 NodeTable ModelImporterAssimp::loadNodes(const aiNode* node, Model& model) const
@@ -174,7 +174,7 @@ NodeTable ModelImporterAssimp::loadNodes(const aiNode* node, Model& model) const
     return nodes;
 }
 
-Model ModelImporterAssimp::loadModel(const aiScene* scene, MaterialBundle& materialBundle, const document& manifest) const
+Model ModelImporterAssimp::loadModel(const aiScene* scene, MaterialBundle& materialBundle, const Manifest& manifest) const
 {
     std::vector<sp<Mesh>> meshes;
     element_index_t vertexBase = 0;
@@ -208,7 +208,7 @@ Model ModelImporterAssimp::loadModel(const aiScene* scene, MaterialBundle& mater
         vertexBase += static_cast<element_index_t>(meshes.back()->vertexLength());
     }
 
-    const std::vector<document>& animateManifests = manifest->children("animate");
+    std::vector<document> animateManifests = manifest.descriptor() ? manifest.descriptor()->children("animate") : std::vector<document>();
     const bool hasAnimation = scene->HasAnimations() || animateManifests.size() > 0;
     V3 bounds(aabbMax.x() - aabbMin.x(), aabbMax.y() - aabbMin.y(), aabbMax.z() - aabbMin.z());
     aiMatrix4x4 globalAnimationTransform;
@@ -239,7 +239,7 @@ Model ModelImporterAssimp::loadModel(const aiScene* scene, MaterialBundle& mater
         Table<String, sp<Animation>> animates;
         AnimationAssimpNodes::NodeLoaderCallback callback = noBones ? callbackNodeAnimation : callbackBoneAnimation;
         NodeTable nodes = noBones ? loadNodes(scene->mRootNode, model) : std::move(bones);
-        float defaultTps = Documents::getAttribute<float>(manifest, "tps", 24.0f);
+        float defaultTps = manifest.getAttribute<float>("tps", 24.0f);
         loadAnimates(defaultTps, animates, scene, globalAnimationTransform, nodes.nodes(), callback);
         for(const auto& i : animateManifests)
         {

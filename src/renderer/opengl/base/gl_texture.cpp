@@ -20,7 +20,7 @@ namespace ark {
 namespace opengl {
 
 GLTexture::GLTexture(sp<Recycler> recycler, sp<Size> size, uint32_t target, Texture::Type type, sp<Texture::Parameters> parameters)
-    : Texture::Delegate(type), _recycler(std::move(recycler)), _size(std::move(size)), _target(target), _parameters(std::move(parameters)), _id(0)
+    : Texture::Delegate(type), _recycler(std::move(recycler)), _size(std::move(size)), _target(target), _parameters(std::move(parameters)), _id(0), _fbo(0)
 {
 }
 
@@ -32,32 +32,55 @@ GLTexture::~GLTexture()
 
 void GLTexture::upload(GraphicsContext& graphicsContext, const sp<Texture::Uploader>& uploader)
 {
-    if(_id == 0)
+    bool uninitialized = _id == 0;
+    if(uninitialized)
     {
+        static const GLenum glParameters[Texture::CONSTANT_COUNT] = {GL_NEAREST, GL_LINEAR, GL_LINEAR_MIPMAP_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_BORDER, GL_MIRRORED_REPEAT, GL_REPEAT, GL_MIRROR_CLAMP_TO_EDGE};
+
         glGenTextures(1, &_id);
         LOGD("Generating GLTexture[%d]", _id);
+        glBindTexture(static_cast<GLenum>(_target), _id);
+        glTexParameteri(static_cast<GLenum>(_target), GL_TEXTURE_MIN_FILTER, static_cast<GLint>(glParameters[_parameters->_min_filter]));
+        glTexParameteri(static_cast<GLenum>(_target), GL_TEXTURE_MAG_FILTER, static_cast<GLint>(glParameters[_parameters->_mag_filter]));
+        glTexParameteri(static_cast<GLenum>(_target), GL_TEXTURE_WRAP_S, static_cast<GLint>(glParameters[_parameters->_wrap_s]));
+        glTexParameteri(static_cast<GLenum>(_target), GL_TEXTURE_WRAP_T, static_cast<GLint>(glParameters[_parameters->_wrap_t]));
+        glTexParameteri(static_cast<GLenum>(_target), GL_TEXTURE_WRAP_R, static_cast<GLint>(glParameters[_parameters->_wrap_r]));
     }
-
-    glBindTexture(static_cast<GLenum>(_target), _id);
+    else
+        glBindTexture(static_cast<GLenum>(_target), _id);
 
     if(uploader)
-        uploader->upload(graphicsContext, *this);
+        if(uninitialized)
+            uploader->initialize(graphicsContext, *this);
+        else
+            uploader->update(graphicsContext, *this);
 
     if(_parameters->_features & Texture::FEATURE_MIPMAPS)
         glGenerateMipmap(static_cast<GLenum>(_target));
-
-    static const GLenum glParameters[Texture::CONSTANT_COUNT] = {GL_NEAREST, GL_LINEAR, GL_LINEAR_MIPMAP_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_BORDER, GL_MIRRORED_REPEAT, GL_REPEAT, GL_MIRROR_CLAMP_TO_EDGE};
-
-    glTexParameteri(static_cast<GLenum>(_target), GL_TEXTURE_MIN_FILTER, static_cast<GLint>(glParameters[_parameters->_min_filter]));
-    glTexParameteri(static_cast<GLenum>(_target), GL_TEXTURE_MAG_FILTER, static_cast<GLint>(glParameters[_parameters->_mag_filter]));
-    glTexParameteri(static_cast<GLenum>(_target), GL_TEXTURE_WRAP_S, static_cast<GLint>(glParameters[_parameters->_wrap_s]));
-    glTexParameteri(static_cast<GLenum>(_target), GL_TEXTURE_WRAP_T, static_cast<GLint>(glParameters[_parameters->_wrap_t]));
-    glTexParameteri(static_cast<GLenum>(_target), GL_TEXTURE_WRAP_R, static_cast<GLint>(glParameters[_parameters->_wrap_r]));
 }
 
 ResourceRecycleFunc GLTexture::recycle()
 {
     return doRecycle();
+}
+
+void GLTexture::clear(GraphicsContext& /*graphicsContext*/)
+{
+    if(_id)
+    {
+        if(!_fbo)
+        {
+            glGenFramebuffers(1, &_fbo);
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _fbo);
+            glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _id, 0);
+            glDrawBuffer(GL_COLOR_ATTACHMENT0);
+        }
+        else
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _fbo);
+        const GLuint clearColor[4] = {0, 0, 0, 0};
+        glClearBufferuiv(GL_COLOR, 0, clearColor);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    }
 }
 
 int32_t GLTexture::width() const
@@ -88,10 +111,14 @@ void GLTexture::setRenderbuffer(sp<GLRenderbuffer> renderbuffer)
 ResourceRecycleFunc GLTexture::doRecycle()
 {
     uint32_t id = _id;
+    uint32_t fbo = _fbo;
     _id = 0;
-    return [id](GraphicsContext&) {
+    _fbo = 0;
+    return [id, fbo](GraphicsContext&) {
         LOGD("Deleting GLTexture[%d]", id);
         glDeleteTextures(1, &id);
+        if(fbo)
+            glDeleteFramebuffers(1, &fbo);
     };
 }
 

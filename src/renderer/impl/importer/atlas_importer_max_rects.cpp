@@ -1,5 +1,6 @@
 #include "renderer/impl/importer/atlas_importer_max_rects.h"
 
+#include "core/ark.h"
 #include "core/util/math.h"
 #include "core/util/documents.h"
 
@@ -20,7 +21,7 @@ AtlasImporterMaxRects::AtlasImporterMaxRects(document manifest, sp<ResourceLoade
 
 void AtlasImporterMaxRects::import(Atlas& atlas, const sp<Readable>& /*readable*/)
 {
-    TexturePacker texturePacker(_resource_loader_context, atlas.texture());
+    TexturePacker texturePacker(Ark::instance().applicationContext(), atlas.texture());
     MaxRectsBinPack binPack(atlas.texture()->width(), atlas.texture()->height(), false);
     for(const document& i : _manifest->children())
     {

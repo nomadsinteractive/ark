@@ -1,13 +1,13 @@
 #include "renderer/vulkan/base/vk_heap.h"
 
 #include "core/ark.h"
-
-#include "core/base/manifest.h"
 #include "core/util/log.h"
 
 #include "renderer/base/graphics_context.h"
 
 #include "renderer/vulkan/base/vk_device.h"
+
+#include "app/base/application_manifest.h"
 
 namespace ark {
 namespace vulkan {

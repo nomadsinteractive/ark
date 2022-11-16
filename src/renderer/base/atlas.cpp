@@ -107,6 +107,10 @@ public:
         return _delegate->recycle();
     }
 
+    virtual void clear(GraphicsContext& graphicsContext) override {
+        _delegate->clear(graphicsContext);
+    }
+
     virtual bool download(GraphicsContext& graphicsContext, Bitmap& bitmap) override {
         return _delegate->download(graphicsContext, bitmap);
     }
@@ -128,7 +132,7 @@ sp<BitmapBundle> Atlas::makeBitmapBundle() const
 {
     GetTextureBitmap textureBitmap(_texture->delegate());
     GraphicsContext graphicsContext(nullptr, nullptr);
-    _texture->uploader()->upload(graphicsContext, textureBitmap);
+    _texture->uploader()->initialize(graphicsContext, textureBitmap);
     return sp<BitmapBundle>::make(*this, textureBitmap.bitmap());
 }
 

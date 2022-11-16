@@ -1,13 +1,18 @@
 #include "renderer/base/model_bundle.h"
 
+#include "core/ark.h"
 #include "core/base/bean_factory.h"
+#include "core/base/future.h"
+#include "core/inf/executor.h"
 #include "core/util/conversions.h"
 
 #include "renderer/base/atlas.h"
+#include "renderer/base/material_bundle.h"
 #include "renderer/base/texture_packer.h"
 #include "renderer/inf/vertices.h"
 #include "renderer/impl/render_command_composer/rcc_multi_draw_elements_indirect.h"
 
+#include "app/base/application_context.h"
 
 namespace ark {
 
@@ -35,19 +40,32 @@ void ModelBundle::initialize(ShaderBindings& /*shaderBindings*/)
 {
 }
 
-const ModelBundle::ModelInfo& ModelBundle::ensure(int32_t type) const
+const ModelBundle::ModelInfo& ModelBundle::ensureModelInfo(int32_t type) const
 {
-    return _stub->ensure(type);
+    return _stub->ensureModelInfo(type);
 }
 
 sp<Model> ModelBundle::loadModel(int32_t type)
 {
-    return ensure(type)._model;
+    return ensureModelInfo(type)._model;
 }
 
-sp<Model> ModelBundle::load(int32_t type)
+sp<Model> ModelBundle::getModel(int32_t type)
 {
-    return loadModel(type);
+    const auto iter = _stub->_models.find(type);
+    return iter != _stub->_models.end() ? iter->second._model : nullptr;
+}
+
+void ModelBundle::importModel(int32_t type, const String& src, sp<Future> future)
+{
+    importModel(type, Manifest(src), std::move(future));
+}
+
+void ModelBundle::importModel(int32_t type, const Manifest& manifest, sp<Future> future)
+{
+    ApplicationContext& applicationContext = Ark::instance().applicationContext();
+    sp<Runnable> task = sp<ImportModuleRunnable>::make(type, manifest, _stub, nullptr, applicationContext.executorMain(), std::move(future));
+    applicationContext.executorPooled()->execute(task);
 }
 
 const Table<int32_t, ModelBundle::ModelInfo>& ModelBundle::models() const
@@ -71,20 +89,28 @@ void ModelBundle::Stub::import(BeanFactory& factory, const document& manifest, c
     {
         int32_t type = Documents::ensureAttribute<int32_t>(i, Constants::Attributes::TYPE);
         const String importer = Documents::getAttribute(i, "importer");
-        addModel(type, importer ? factory.build<Importer>(importer, args)->import(i, _material_bundle) : _importer->import(i, _material_bundle));
+        const Manifest manifest(Documents::ensureAttribute(i, Constants::Attributes::SRC), i);
+        addModel(type, importModel(manifest, importer ? factory.build<Importer>(importer, args) : nullptr));
     }
 }
 
-ModelBundle::ModelInfo& ModelBundle::Stub::addModel(int32_t type, const Model& model)
+sp<Model> ModelBundle::Stub::importModel(const Manifest& manifest, const sp<Importer>& importer)
+{
+    return sp<Model>::make((importer ? importer : _importer)->import(manifest, _material_bundle));
+}
+
+ModelBundle::ModelInfo& ModelBundle::Stub::addModel(int32_t type, sp<Model> model)
 {
     ModelInfo& modelInfo = _models[type];
-    modelInfo = {sp<Model>::make(model), _vertex_length, _index_length};
-    _vertex_length += model.vertexCount();
-    _index_length += model.indexCount();
+    modelInfo._model = std::move(model);
+    modelInfo._vertex_offset = _vertex_length;
+    modelInfo._index_offset = _index_length;
+    _vertex_length += modelInfo._model->vertexCount();
+    _index_length += modelInfo._model->indexCount();
     return modelInfo;
 }
 
-const ModelBundle::ModelInfo& ModelBundle::Stub::ensure(int32_t type) const
+const ModelBundle::ModelInfo& ModelBundle::Stub::ensureModelInfo(int32_t type) const
 {
     const auto iter = _models.find(type);
     CHECK(iter != _models.end(), "Model not found, type: %d", type);
@@ -92,7 +118,7 @@ const ModelBundle::ModelInfo& ModelBundle::Stub::ensure(int32_t type) const
 }
 
 ModelBundle::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _bean_factory(factory), _manifest(manifest), _material_bundle(factory.ensureBuilder<MaterialBundle>(manifest, "material-bundle")),
+    : _bean_factory(factory), _manifest(manifest), _material_bundle(factory.getBuilder<MaterialBundle>(manifest, "material-bundle")),
       _importer(factory.ensureBuilder<ModelLoader::Importer>(manifest, "importer"))
 {
 }
@@ -105,7 +131,7 @@ sp<ModelBundle> ModelBundle::BUILDER::build(const Scope& args)
 }
 
 ModelBundle::Stub::Stub(sp<MaterialBundle> materialBundle, sp<ModelLoader::Importer> importer)
-    : _material_bundle(std::move(materialBundle)), _importer(std::move(importer)), _vertex_length(0), _index_length(0)
+    : _material_bundle(materialBundle ? std::move(materialBundle) : sp<MaterialBundle>::make()), _importer(std::move(importer)), _vertex_length(0), _index_length(0)
 {
 }
 
@@ -117,6 +143,28 @@ ModelBundle::MODEL_LOADER_BUILDER::MODEL_LOADER_BUILDER(BeanFactory& factory, co
 sp<ModelLoader> ModelBundle::MODEL_LOADER_BUILDER::build(const Scope& args)
 {
     return _impl.build(args);
+}
+
+ModelBundle::ImportModuleRunnable::ImportModuleRunnable(int32_t type, Manifest manifest, const sp<Stub>& stub, sp<Importer> importer, sp<Executor> executor, sp<Future> future)
+    : _type(type), _manifest(std::move(manifest)), _stub(stub), _importer(std::move(importer)), _executor(std::move(executor)), _future(future)
+{
+}
+
+void ModelBundle::ImportModuleRunnable::run()
+{
+    _executor->execute(sp<AddModuleRunnable>::make(_type, std::move(_stub), _stub->importModel(_manifest, _importer), std::move(_future)));
+}
+
+ModelBundle::AddModuleRunnable::AddModuleRunnable(int32_t type, sp<Stub> stub, sp<Model> model, sp<Future> future)
+    : _type(type), _stub(std::move(stub)), _model(std::move(model)), _future(std::move(future))
+{
+}
+
+void ModelBundle::AddModuleRunnable::run()
+{
+    _stub->addModel(_type, std::move(_model));
+    if(_future)
+        _future->done();
 }
 
 }

@@ -63,11 +63,16 @@ const std::vector<sp<Texture>>& PipelineBindings::samplers() const
     return _stub->_samplers;
 }
 
-void PipelineBindings::bindSampler(const sp<Texture>& texture, uint32_t name)
+const std::vector<sp<Texture>>& PipelineBindings::images() const
 {
-    DWARN(_stub->_samplers.size() > name, "Illegal sampler binding position: %d, sampler count: %d", name, _stub->_samplers.size());
+    return _stub->_images;
+}
+
+void PipelineBindings::bindSampler(sp<Texture> texture, uint32_t name)
+{
+    WARN(_stub->_samplers.size() > name, "Illegal sampler binding position: %d, sampler count: %d", name, _stub->_samplers.size());
     if(_stub->_samplers.size() > name)
-        _stub->_samplers[name] = texture;
+        _stub->_samplers[name] = std::move(texture);
 }
 
 bool PipelineBindings::hasDivisors() const
@@ -107,15 +112,9 @@ sp<Pipeline> PipelineBindings::getPipeline(GraphicsContext& graphicsContext, con
 }
 
 PipelineBindings::Stub::Stub(ModelLoader::RenderMode mode, RenderProcedure renderProcedure, Parameters parameters, sp<PipelineLayout> pipelineLayout)
-    : _mode(mode), _render_procedure(renderProcedure), _parameters(std::move(parameters)), _layout(std::move(pipelineLayout)), _input(_layout->input()), _attributes(_input)
+    : _mode(mode), _render_procedure(renderProcedure), _parameters(std::move(parameters)), _layout(std::move(pipelineLayout)), _input(_layout->input()), _attributes(_input),
+      _samplers(_layout->makeBindingSamplers()), _images(_layout->makeBindingImages())
 {
-    _samplers.resize(_input->samplerCount());
-    const Table<String, sp<Texture>>& samplers = _layout->samplers();
-    WARN(_samplers.size() >= samplers.size(), "Predefined samplers(%d) is more than samplers(%d) in PipelineLayout", samplers.size(), _samplers.size());
-
-    for(size_t i = 0; i < samplers.values().size(); ++i)
-        if(i < _samplers.size())
-            _samplers[i] = samplers.values().at(i);
 }
 
 PipelineBindings::Parameters::Parameters(const Rect& scissor, PipelineBindings::FragmentTestTable tests, uint32_t flags)

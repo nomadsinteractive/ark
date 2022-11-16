@@ -20,7 +20,7 @@ Mesh::Tangent::Tangent(const V3& tangent, const V3& bitangent)
 {
 }
 
-Mesh::Mesh(String name, array<element_index_t> indices, sp<Array<V3>> vertices, sp<Array<UV>> uvs, sp<Array<V3>> normals, sp<Array<Tangent>> tangents, sp<Array<BoneInfo>> boneInfos, sp<Material> material)
+Mesh::Mesh(String name, std::vector<element_index_t> indices, sp<Array<V3>> vertices, sp<Array<UV>> uvs, sp<Array<V3>> normals, sp<Array<Tangent>> tangents, sp<Array<BoneInfo>> boneInfos, sp<Material> material)
     : _name(std::move(name)), _indices(std::move(indices)), _vertices(std::move(vertices)), _uvs(std::move(uvs)), _normals(std::move(normals)), _tangents(std::move(tangents)), _bone_infos(std::move(boneInfos)),
       _material(std::move(material))
 {
@@ -38,7 +38,7 @@ size_t Mesh::vertexLength() const
     return _vertices->length();
 }
 
-const array<element_index_t>& Mesh::indices() const
+const std::vector<element_index_t>& Mesh::indices() const
 {
     return _indices;
 }

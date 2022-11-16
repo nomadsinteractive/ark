@@ -5,6 +5,9 @@
 
 #include "renderer/base/resource_loader_context.h"
 
+#include "app/base/application_context.h"
+#include "app/base/application_bundle.h"
+
 namespace ark {
 
 namespace {
@@ -31,14 +34,19 @@ private:
 
 }
 
-TexturePacker::TexturePacker(const sp<ResourceLoaderContext>& resourceLoaderContext, sp<Texture> texture)
-    : _resource_loader_context(resourceLoaderContext), _texture(std::move(texture)), _channels(0)
+TexturePacker::TexturePacker(const ApplicationContext& applicationContext, sp<Texture> texture)
+    : TexturePacker(applicationContext.applicationBundle()->bitmapBoundsBundle(), applicationContext.applicationBundle()->bitmapBundle(), applicationContext.renderController(), std::move(texture))
+{
+}
+
+TexturePacker::TexturePacker(sp<BitmapLoaderBundle> bitmapBundleBounds, sp<BitmapLoaderBundle> bitmapBundle, sp<RenderController> renderController, sp<Texture> texture)
+    : _bitmap_bundle_bounds(std::move(bitmapBundleBounds)), _bitmap_bundle(std::move(bitmapBundle)), _render_controller(std::move(renderController)), _texture(std::move(texture)), _channels(0)
 {
 }
 
 RectI TexturePacker::addBitmap(MaxRectsBinPack& binPack, const String& src)
 {
-    return addBitmap(binPack, _resource_loader_context->bitmapBoundsBundle()->get(src), sp<BitmapProvider>::make(_resource_loader_context->bitmapBundle(), src));
+    return addBitmap(binPack, _bitmap_bundle_bounds->get(src), sp<BitmapProvider>::make(_bitmap_bundle, src));
 }
 
 RectI TexturePacker::addBitmap(MaxRectsBinPack& binPack, bitmap fragment)
@@ -50,8 +58,8 @@ void TexturePacker::updateTexture()
 {
     if(_channels)
     {
-        const sp<Texture::Uploader> uploader = sp<PackedTextureUploader>::make(_texture->width(), _texture->height(), _channels, std::move(_packed_bitmaps));
-        const sp<Texture> tex = _resource_loader_context->renderController()->createTexture(_texture->size(), _texture->parameters(), uploader);
+        sp<Texture::Uploader> uploader = sp<PackedTextureUploader>::make(_texture->width(), _texture->height(), _channels, std::move(_packed_bitmaps));
+        const sp<Texture> tex = _render_controller->createTexture(_texture->size(), _texture->parameters(), std::move(uploader));
         _texture->setDelegate(tex->delegate());
     }
 }
@@ -75,7 +83,7 @@ TexturePacker::PackedTextureUploader::PackedTextureUploader(uint32_t width, uint
 {
 }
 
-void TexturePacker::PackedTextureUploader::upload(GraphicsContext& graphicsContext, Texture::Delegate& delegate)
+void TexturePacker::PackedTextureUploader::initialize(GraphicsContext& graphicsContext, Texture::Delegate& delegate)
 {
     const bitmap content = sp<Bitmap>::make(_width, _height, _width * _channels, _channels, true);
     for(const PackedBitmap& i : _bitmaps)

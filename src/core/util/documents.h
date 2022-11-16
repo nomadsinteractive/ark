@@ -40,6 +40,14 @@ public:
     template<typename T> static T ensureAttribute(const document& doc, const String& name) {
         return Strings::parse<T>(ensureAttribute(doc, name));
     }
+    template<typename T> static T getAttributeEnum(const document& doc, const String& name, const T& defValue) {
+        const attribute& attr = doc->getAttribute(name);
+        return attr ? Strings::toEnum<T>(attr->value()) : defValue;
+    }
+    template<typename T> static T getAttributeEnumCombo(const document& doc, const String& name, const T& defValue) {
+        const attribute& attr = doc->getAttribute(name);
+        return attr ? Strings::toEnumCombo<T>(attr->value()) : defValue;
+    }
 
     template<typename T> static std::vector<T> ensureAttributeList(const document& doc, const String& name, const String& childName = "") {
         std::vector<T> list;

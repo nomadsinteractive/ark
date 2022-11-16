@@ -17,7 +17,7 @@ class IrradianceCubemapUploader : public Texture::Uploader {
 public:
     IrradianceCubemapUploader(sp<Bitmap> bitmap, sp<Size> size);
 
-    virtual void upload(GraphicsContext& graphicsContext, Texture::Delegate& delegate) override;
+    virtual void initialize(GraphicsContext& graphicsContext, Texture::Delegate& delegate) override;
 
 //  [[plugin::builder("irradiance")]]
     class BUILDER : public Builder<Texture::Uploader> {

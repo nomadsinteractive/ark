@@ -49,7 +49,7 @@ sp<RenderCommand> RCCMultiDrawElementsIndirect::compose(const RenderRequest& ren
             IndirectCmd& modelIndirect = _indirect_cmds[i._type];
             if(modelIndirect._snapshot_offsets.empty())
             {
-                const ModelBundle::ModelInfo& modelInfo = _model_bundle->ensure(i._type);
+                const ModelBundle::ModelInfo& modelInfo = _model_bundle->ensureModelInfo(i._type);
                 modelIndirect._command = {static_cast<uint32_t>(modelInfo._model->indexCount()), 0, static_cast<uint32_t>(modelInfo._index_offset), static_cast<uint32_t>(modelInfo._vertex_offset), 0};
             }
 
@@ -94,7 +94,7 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
             const Renderable::Snapshot& s = snapshot._items.at(j);
             if(reload || s.getState(Renderable::RENDERABLE_STATE_DIRTY))
             {
-                const ModelBundle::ModelInfo& modelInfo = _model_bundle->ensure(s._type);
+                const ModelBundle::ModelInfo& modelInfo = _model_bundle->ensureModelInfo(s._type);
                 const Metrics& metrics = modelInfo._model->metrics();
                 VertexWriter writer = buf.makeDividedVertexWriter(renderRequest, 1, offset, 1);
                 writer.next();

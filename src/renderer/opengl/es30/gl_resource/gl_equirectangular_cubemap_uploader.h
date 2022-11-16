@@ -15,7 +15,7 @@ class GLEquirectangularCubemapUploader : public Texture::Uploader {
 public:
     GLEquirectangularCubemapUploader(const sp<RenderController>& renderController, const Shader& shader, const sp<Texture>& texture, const sp<Size>& size);
 
-    virtual void upload(GraphicsContext& graphicsContext, Texture::Delegate& delegate) override;
+    virtual void initialize(GraphicsContext& graphicsContext, Texture::Delegate& delegate) override;
 
 //  [[plugin::resource-loader("equirectangular")]]
     class BUILDER : public Builder<Texture::Uploader> {

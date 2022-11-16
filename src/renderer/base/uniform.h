@@ -37,6 +37,9 @@ public:
         TYPE_MAT4,
         TYPE_MAT4V,
         TYPE_SAMPLER2D,
+        TYPE_IMAGE2D,
+        TYPE_UIMAGE2D,
+        TYPE_IIMAGE2D,
         TYPE_STRUCT,
         TYPE_COUNT
     };

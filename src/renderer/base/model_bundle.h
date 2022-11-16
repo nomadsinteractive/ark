@@ -2,8 +2,10 @@
 #define ARK_RENDERER_BASE_MODEL_BUNDLE_H_
 
 #include "core/base/bean_factory.h"
+#include "core/base/manifest.h"
 #include "core/collection/table.h"
 #include "core/inf/builder.h"
+#include "core/inf/runnable.h"
 #include "core/types/shared_ptr.h"
 
 #include "renderer/base/model.h"
@@ -24,8 +26,10 @@ private:
         Stub(sp<MaterialBundle> materialBundle, sp<Importer> importer);
 
         void import(BeanFactory& factory, const document& manifest, const Scope& args);
-        ModelInfo& addModel(int32_t type, const Model& model);
-        const ModelInfo& ensure(int32_t type) const;
+
+        sp<Model> importModel(const Manifest& manifest, const sp<Importer>& importer);
+        ModelInfo& addModel(int32_t type, sp<Model> model);
+        const ModelInfo& ensureModelInfo(int32_t type) const;
 
         sp<MaterialBundle> _material_bundle;
         sp<Importer> _importer;
@@ -34,6 +38,36 @@ private:
         size_t _vertex_length;
         size_t _index_length;
     };
+
+    class AddModuleRunnable : public Runnable {
+    public:
+        AddModuleRunnable(int32_t type, sp<Stub> stub, sp<Model> model, sp<Future> future);
+
+        virtual void run() override;
+
+    private:
+        int32_t _type;
+        sp<Stub> _stub;
+        sp<Model> _model;
+        sp<Future> _future;
+
+    };
+
+    class ImportModuleRunnable : public Runnable {
+    public:
+        ImportModuleRunnable(int32_t type, Manifest manifest, const sp<Stub>& stub, sp<Importer> importer, sp<Executor> executor, sp<Future> future);
+
+        virtual void run() override;
+
+    private:
+        int32_t _type;
+        Manifest _manifest;
+        sp<Stub> _stub;
+        sp<Importer> _importer;
+        sp<Executor> _executor;
+        sp<Future> _future;
+    };
+
 
 public:
     ModelBundle(sp<MaterialBundle> materialBundle, sp<Importer> importer);
@@ -45,10 +79,16 @@ public:
     virtual void initialize(ShaderBindings& shaderBindings) override;
     virtual sp<Model> loadModel(int32_t type) override;
 
-    const ModelInfo& ensure(int32_t type) const;
+    const ModelInfo& ensureModelInfo(int32_t type) const;
 
 //[[script::bindings::auto]]
-    sp<Model> load(int32_t type);
+    sp<Model> getModel(int32_t type);
+
+//[[script::bindings::auto]]
+    void importModel(int32_t type, const String& src, sp<Future> future);
+//[[script::bindings::auto]]
+    void importModel(int32_t type, const Manifest& manifest, sp<Future> future);
+
 //[[script::bindings::property]]
     size_t vertexLength() const;
 //[[script::bindings::property]]
@@ -67,7 +107,7 @@ public:
         BeanFactory _bean_factory;
         document _manifest;
 
-        sp<Builder<MaterialBundle>> _material_bundle;
+        SafePtr<Builder<MaterialBundle>> _material_bundle;
         sp<Builder<Importer>> _importer;
     };
 

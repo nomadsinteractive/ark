@@ -32,8 +32,8 @@ public:
         return getLoader(fext)->load(asset->open());
     }
 
-    void addLoader(const String& ext, sp<LoaderType> loader) {
-        _loaders[ext] = std::move(loader);
+    void addLoader(String ext, sp<LoaderType> loader) {
+        _loaders[std::move(ext)] = std::move(loader);
     }
 
     const sp<LoaderType>& getLoader(const String& ext) const {

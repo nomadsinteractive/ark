@@ -1,6 +1,5 @@
 #include "graphics/impl/mat/mat3_impl.h"
 
-#include "core/ark.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/util/variable_util.h"
 

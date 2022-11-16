@@ -55,11 +55,6 @@ const sp<PipelineInput>& ShaderBindings::pipelineInput() const
     return _pipeline_bindings->input();
 }
 
-const std::vector<sp<Texture>>& ShaderBindings::samplers() const
-{
-    return _pipeline_bindings->samplers();
-}
-
 const sp<std::map<uint32_t, Buffer>>& ShaderBindings::divisors() const
 {
     return _divisors;

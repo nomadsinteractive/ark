@@ -2,6 +2,7 @@
 #define ARK_RENDERER_BASE_PIPELINE_LAYOUT_H_
 
 #include <map>
+#include <vector>
 
 #include "core/base/api.h"
 #include "core/base/string.h"
@@ -27,12 +28,14 @@ public:
 
     std::map<PipelineInput::ShaderStage, String> getPreprocessedShaders(const RenderEngineContext& renderEngineContext) const;
 
-    const Table<String, sp<Texture>>& samplers() const;
     uint32_t colorAttachmentCount() const;
 
 private:
     void initialize(const Camera& camera);
     void tryBindUniform(const ShaderPreprocessor& shaderPreprocessor, const String& name, const sp<Input>& input);
+
+    std::vector<sp<Texture>> makeBindingSamplers() const;
+    std::vector<sp<Texture>> makeBindingImages() const;
 
 private:
     sp<PipelineBuildingContext> _building_context;
@@ -41,13 +44,13 @@ private:
     sp<Snippet> _snippet;
 
     std::map<PipelineInput::ShaderStage, ShaderPreprocessor::Preprocessed> _preprocessed_stages;
-    Table<String, sp<Texture>> _samplers;
 
     uint32_t _color_attachment_count;
 
     friend class Shader;
     friend class ShaderBindings;
     friend class PipelineBuildingContext;
+    friend class PipelineBindings;
     friend class ShaderPreprocessor;
 
 };

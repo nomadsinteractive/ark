@@ -208,6 +208,15 @@ class DOMDocument:
         pass
 
 
+class Manifest:
+    def __init__(self, src: str, descriptor: Optional[DOMDocument] = None):
+        self._src = src
+
+    @property
+    def src(self) -> str:
+        return self._src
+
+
 class IDHeap:
     def __init__(self, heap_size: int, heap_size_l2: int = 0, chunk_size_l2: int = 0):
         pass
@@ -505,7 +514,7 @@ class Bitmap:
         return None
 
 
-class Manifest:
+class ApplicationManifest:
 
     @property
     def name(self) -> str:
@@ -521,6 +530,9 @@ class Observer:
         pass
 
     def update(self):
+        pass
+
+    def set_callback(self, callback: Callable):
         pass
 
 
@@ -1010,12 +1022,15 @@ class Material:
     @property
     def normal(self) -> Optional[MaterialTexture]:
         return None
+
     @property
     def roughness(self) -> Optional[MaterialTexture]:
         return None
+
     @property
     def metallic(self) -> Optional[MaterialTexture]:
         return None
+
     @property
     def specular(self) -> Optional[MaterialTexture]:
         return None
@@ -1077,9 +1092,20 @@ class Model:
         pass
 
 
+class MaterialBundle:
+    def __init__(self, materials: list[Material] = None):
+        pass
+
+    def add_material(self, name: str, material: Material):
+        pass
+
+
 class ModelBundle:
 
-    def load(self, t: int) -> Model:
+    def get_model(self, t: int) -> Model:
+        pass
+
+    def import_model(self, t: int, manifest: Union[str, Manifest], future: Optional[Future]):
         pass
 
 
@@ -1243,7 +1269,7 @@ class Layer(Renderer):
     TYPE_DYNAMIC = 1
     TYPE_STATIC = 2
 
-    def __init__(self, layer_context: Optional[LayerContext]):
+    def __init__(self, layer_context: Optional[LayerContext] = None):
         super().__init__()
 
     @property

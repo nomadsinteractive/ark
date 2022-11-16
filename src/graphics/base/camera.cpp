@@ -6,7 +6,6 @@
 #include "core/ark.h"
 
 #include "core/base/observer.h"
-#include "core/base/manifest.h"
 #include "core/base/notifier.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/impl/boolean/boolean_by_weak_ref.h"
@@ -25,6 +24,7 @@
 #include "renderer/base/render_engine_context.h"
 
 #include "app/base/application_context.h"
+#include "app/base/application_manifest.h"
 
 namespace ark {
 

@@ -24,9 +24,9 @@ void Observer::update()
         _callback = std::move(callback);
 }
 
-void Observer::setCallback(const sp<Runnable>& callback)
+void Observer::setCallback(sp<Runnable> callback)
 {
-    _callback = callback;
+    _callback = std::move(callback);
 }
 
 }

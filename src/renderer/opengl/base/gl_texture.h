@@ -23,6 +23,8 @@ public:
     virtual void upload(GraphicsContext& graphicsContext, const sp<Texture::Uploader>& uploader) override;
     virtual ResourceRecycleFunc recycle() override;
 
+    virtual void clear(GraphicsContext& /*graphicsContext*/) override;
+
     int32_t width() const;
     int32_t height() const;
 
@@ -43,6 +45,7 @@ protected:
     sp<GLRenderbuffer> _renderbuffer;
 
     uint32_t _id;
+    uint32_t _fbo;
 };
 
 }

@@ -12,7 +12,7 @@ namespace dear_imgui {
 
 class WidgetWithVisibility : public Delegate<Widget>, public Widget {
 public:
-    WidgetWithVisibility(const sp<Widget>& delegate, sp<Boolean> visible);
+    WidgetWithVisibility(sp<Widget> delegate, sp<Boolean> visible);
 
     virtual void render() override;
 

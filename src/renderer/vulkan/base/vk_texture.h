@@ -25,6 +25,7 @@ public:
     virtual void upload(GraphicsContext& graphicsContext, const sp<Texture::Uploader>& uploader) override;
     virtual ResourceRecycleFunc recycle() override;
 
+    virtual void clear(GraphicsContext& graphicsContext) override;
     virtual bool download(GraphicsContext& graphicsContext, Bitmap& bitmap) override;
     virtual void uploadBitmap(GraphicsContext& graphicsContext, const Bitmap& bitmap, const std::vector<sp<ByteArray>>& imagedata) override;
 

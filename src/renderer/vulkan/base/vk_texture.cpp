@@ -36,7 +36,12 @@ uint64_t VKTexture::id()
 void VKTexture::upload(GraphicsContext& graphicsContext, const sp<Texture::Uploader>& uploader)
 {
     if(uploader)
-        uploader->upload(graphicsContext, *this);
+    {
+        if(_image)
+            uploader->update(graphicsContext, *this);
+        else
+            uploader->initialize(graphicsContext, *this);
+    }
     else
     {
         Texture::Format format = _parameters->_format;
@@ -55,6 +60,11 @@ void VKTexture::upload(GraphicsContext& graphicsContext, const sp<Texture::Uploa
 ResourceRecycleFunc VKTexture::recycle()
 {
     return doRecycle();
+}
+
+void VKTexture::clear(GraphicsContext& /*graphicsContext*/)
+{
+    DFATAL("Unimplemented");
 }
 
 bool VKTexture::download(GraphicsContext& graphicsContext, Bitmap& bitmap)

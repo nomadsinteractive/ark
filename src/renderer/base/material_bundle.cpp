@@ -12,7 +12,21 @@
 
 namespace ark {
 
-MaterialBundle::MaterialBundle(const sp<ResourceLoaderContext>& resourceLoaderContext, std::map<String, sp<Material>> materials, std::array<sp<Texture>, MaterialTexture::TYPE_LENGTH> textures)
+static std::map<String, sp<Material>> _to_material_map(const std::vector<sp<Material>>& materials)
+{
+    std::map<String, sp<Material>> materialMap;
+    for(const sp<Material>& i : materials)
+        materialMap[i->name()] = i;
+    return materialMap;
+}
+
+
+MaterialBundle::MaterialBundle(const std::vector<sp<Material>>& materials)
+    : MaterialBundle(_to_material_map(materials), std::array<sp<Texture>, MaterialTexture::TYPE_LENGTH>())
+{
+}
+
+MaterialBundle::MaterialBundle(std::map<String, sp<Material>> materials, std::array<sp<Texture>, MaterialTexture::TYPE_LENGTH> textures)
     : _materials(std::move(materials)), _width(0), _height(0)
 {
     for(size_t i = 0; i < MaterialTexture::TYPE_LENGTH; ++i)
@@ -23,7 +37,7 @@ MaterialBundle::MaterialBundle(const sp<ResourceLoaderContext>& resourceLoaderCo
                 _width = textures[i]->width();
                 _height = textures[i]->height();
             }
-            _texture_packers[i] = sp<TexturePacker>::make(resourceLoaderContext, std::move(textures[i]));
+            _texture_packers[i] = sp<TexturePacker>::make(Ark::instance().applicationContext(), std::move(textures[i]));
         }
 
     MaxRectsBinPack binPack(_width, _height, false);
@@ -68,6 +82,11 @@ sp<Material> MaterialBundle::getMaterial(const String& name) const
     return iter != _materials.end() ? iter->second : nullptr;
 }
 
+void MaterialBundle::addMaterial(String name, sp<Material> material)
+{
+    _materials[std::move(name)] = std::move(material);
+}
+
 Rect MaterialBundle::getMaterialUV(const String& name) const
 {
     const auto iter = _material_bounds.find(name);
@@ -80,8 +99,8 @@ Rect MaterialBundle::getMaterialUV(const String& name) const
     return Rect(bounds.left() / fwidth, bounds.bottom() / fheight, bounds.right() / fwidth, bounds.top() / fheight);
 }
 
-MaterialBundle::BUILDER::BUILDER(BeanFactory& beanFactory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _resource_loader_context(resourceLoaderContext), _names(Documents::ensureAttributeList<String>(manifest, Constants::Attributes::NAME, "material")), _materials(beanFactory.getBuilderList<Material>(manifest, "material")),
+MaterialBundle::BUILDER::BUILDER(BeanFactory& beanFactory, const document& manifest)
+    : _names(Documents::ensureAttributeList<String>(manifest, Constants::Attributes::NAME, "material")), _materials(beanFactory.getBuilderList<Material>(manifest, "material")),
       _types(Documents::ensureAttributeList<MaterialTexture::Type>(manifest, Constants::Attributes::TYPE, Constants::Attributes::TEXTURE)), _textures(beanFactory.getBuilderList<Texture>(manifest, Constants::Attributes::TEXTURE)) {
 }
 
@@ -96,7 +115,7 @@ sp<MaterialBundle> MaterialBundle::BUILDER::build(const Scope& args)
     std::array<sp<Texture>, MaterialTexture::TYPE_LENGTH> textures;
     for(size_t i = 0; i < _types.size(); ++i)
         textures[_types.at(i)] = _textures.at(i)->build(args);
-    return sp<MaterialBundle>::make(_resource_loader_context, std::move(materials), std::move(textures));
+    return sp<MaterialBundle>::make(std::move(materials), std::move(textures));
 }
 
 }

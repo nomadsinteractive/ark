@@ -30,6 +30,7 @@ public:
     ModelLoader::RenderMode renderMode() const;
 //[[script::bindings::auto]]
     virtual sp<Model> loadModel(int32_t type) = 0;
+
     virtual sp<RenderCommandComposer> makeRenderCommandComposer() = 0;
     virtual void initialize(ShaderBindings& shaderBindings) = 0;
 
@@ -37,7 +38,7 @@ public:
     public:
         virtual ~Importer() = default;
 
-        virtual Model import(const document& manifest, MaterialBundle& materialBundle) = 0;
+        virtual Model import(const Manifest& manifest, MaterialBundle& materialBundle) = 0;
     };
 
 private:

@@ -34,6 +34,7 @@ class ARK_PLUGIN_PYTHON_API PyCast {
 public:
     static Optional<sp<Numeric>> toNumeric(PyObject* object, bool alert = true);
     static Optional<sp<Boolean>> toBoolean(PyObject* object, bool alert = true);
+    static Optional<String> toStringExact(PyObject* object, const char* encoding = nullptr, const char* error = nullptr);
     static String toString(PyObject* object, const char* encoding = nullptr, const char* error = nullptr);
     static Scope toScope(PyObject* kws);
 
@@ -142,6 +143,7 @@ private:
         PyTypeObject* pyType = reinterpret_cast<PyTypeObject*>(PyObject_Type(object));
         if(PythonInterpreter::instance()->isPyArkTypeObject(pyType)) {
             PyArkType::Instance* instance = reinterpret_cast<PyArkType::Instance*>(object);
+            DASSERT(instance->box);
             sp<T> s = instance->box->as<T>();
             return s ? Optional<sp<T>>(std::move(s)) : Optional<sp<T>>();
         }
@@ -303,7 +305,10 @@ private:
 
 template<> inline Optional<sp<String>> PyCast::toSharedPtrImpl<String>(PyObject* object, bool alert)
 {
-    return sp<String>::make(toString(object));
+    Optional<String> opt = toStringExact(object);
+    if(opt)
+        return sp<String>::make(std::move(opt.value()));
+    return Optional<sp<String>>();
 }
 
 template<> inline Optional<sp<Numeric>> PyCast::toSharedPtrImpl<Numeric>(PyObject* object, bool alert)

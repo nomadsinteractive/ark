@@ -66,21 +66,27 @@ sp<EventListener> PyCast::toEventListener(PyObject* object)
     return toSharedPtrDefault<EventListener>(object).value();
 }
 
+Optional<String> PyCast::toStringExact(PyObject* object, const char* encoding, const char* error)
+{
+    if(PyUnicode_Check(object))
+        return unicodeToUTF8String(object, encoding, error);
+    else if (PyBytes_Check(object))
+        return PyBytes_AS_STRING(object);
+    return Optional<String>();
+}
+
 String PyCast::toString(PyObject* object, const char* encoding, const char* error)
 {
     if(object)
     {
-        if(PyUnicode_Check(object))
-            return unicodeToUTF8String(object, encoding, error);
-        else if (PyBytes_Check(object))
-            return PyBytes_AS_STRING(object);
-        else
-        {
-            PyObject* str = PyObject_Str(object);
-            const String r = unicodeToUTF8String(str, encoding, error);
-            Py_DECREF(str);
-            return r;
-        }
+        Optional<String> opt = toStringExact(object, encoding, error);
+        if(opt)
+            return opt.value();
+
+        PyObject* str = PyObject_Str(object);
+        const String r = unicodeToUTF8String(str, encoding, error);
+        Py_DECREF(str);
+        return r;
     }
     return "";
 }
@@ -269,7 +275,7 @@ bool PyCast::isNoneOrNull(PyObject* pyObject)
 
 template<> ARK_PLUGIN_PYTHON_API Optional<String> PyCast::toCppObject_impl<String>(PyObject* object)
 {
-    return toString(object);
+    return toStringExact(object);
 }
 
 template<> ARK_PLUGIN_PYTHON_API Optional<std::wstring> PyCast::toCppObject_impl<std::wstring>(PyObject* object)

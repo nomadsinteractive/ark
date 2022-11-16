@@ -14,7 +14,7 @@ namespace dear_imgui {
 
 class DrawCommandPool {
 public:
-    DrawCommandPool(const Shader& shader, const sp<RenderController>& renderController, const sp<Texture>& texture);
+    DrawCommandPool(const Shader& shader, const sp<RenderController>& renderController, sp<Texture> texture);
 
     sp<RendererImgui::DrawCommandRecycler> obtainDrawCommandRecycler();
 

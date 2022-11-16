@@ -60,8 +60,8 @@ sp<CollisionShape> GImpactRigidBodyImporter::makeCollisionShape(const Model& mod
     for(const Mesh& i : model.meshes())
     {
         btIndexedMesh indexedMesh;
-        indexedMesh.m_numTriangles = static_cast<int32_t>(i.indices()->length() / 3);
-        indexedMesh.m_triangleIndexBase = reinterpret_cast<const unsigned char*>(i.indices()->buf());
+        indexedMesh.m_numTriangles = static_cast<int32_t>(i.indices().size() / 3);
+        indexedMesh.m_triangleIndexBase = reinterpret_cast<const unsigned char*>(i.indices().data());
         indexedMesh.m_triangleIndexStride = 3 * sizeof(element_index_t);
         indexedMesh.m_numVertices = static_cast<int32_t>(i.vertices()->length());
         indexedMesh.m_vertexBase = reinterpret_cast<const unsigned char*>(i.vertices()->buf());

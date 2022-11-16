@@ -31,7 +31,7 @@ namespace assimp {
 class ModelImporterAssimp : public ModelLoader::Importer {
 public:
 
-    virtual Model import(const document& manifest, MaterialBundle& materialBundle) override;
+    virtual Model import(const Manifest& manifest, MaterialBundle& materialBundle) override;
 
 //  [[plugin::builder::by-value("assimp")]]
     class BUILDER : public Builder<ModelLoader::Importer> {
@@ -44,7 +44,7 @@ public:
 
 private:
     const aiScene* loadScene(Assimp::Importer& importer, const String& src, bool checkMeshes = true) const;
-    Model loadModel(const aiScene* scene, MaterialBundle& materialBundle, const document& manifest) const;
+    Model loadModel(const aiScene* scene, MaterialBundle& materialBundle, const Manifest& manifest) const;
     Mesh loadMesh(const aiScene* scene, const aiMesh* mesh, MaterialBundle& materialBundle, element_index_t vertexBase, NodeTable& boneMapping, const std::vector<sp<Material> >& materials) const;
     NodeTable loadNodes(const aiNode* node, Model& model) const;
     void loadBones(const aiMesh* mesh, NodeTable& boneMapping, Array<Mesh::BoneInfo>& bones) const;
@@ -52,7 +52,7 @@ private:
     void loadAnimates(float tps, Table<String, sp<Animation>>& animates, const aiScene* scene, const aiMatrix4x4& globalTransformation, Table<String, Node>& nodes, const AnimationAssimpNodes::NodeLoaderCallback& callback, String name, String alias) const;
 
     bitmap loadBitmap(const sp<BitmapLoaderBundle>& imageResource, const aiTexture* tex) const;
-    array<element_index_t> loadIndices(const aiMesh* mesh, element_index_t indexOffset) const;
+    std::vector<element_index_t> loadIndices(const aiMesh* mesh, element_index_t indexOffset) const;
 
     void loadNodeHierarchy(const aiNode* node, NodeTable& nodes, std::unordered_map<uint32_t, uint32_t>& nodeIds) const;
 

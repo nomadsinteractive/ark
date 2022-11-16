@@ -292,8 +292,8 @@ sp<Renderer> RendererImgui::BUILDER::build(const Scope& args)
     int32_t width, height, bytesPerPixel;
 
     io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height, &bytesPerPixel);
-    const sp<Bitmap> bitmap = sp<Bitmap>::make(width, height, bytesPerPixel * width, 4, sp<ByteArray::Borrowed>::make(reinterpret_cast<uint8_t*>(pixels), width * height * bytesPerPixel));
-    const sp<Texture> texture = _resource_loader_context->renderController()->createTexture2D(sp<Size>::make(static_cast<float>(width), static_cast<float>(height)), sp<Texture::UploaderBitmap>::make(bitmap));
+    sp<Bitmap> bitmap = sp<Bitmap>::make(width, height, bytesPerPixel * width, 4, sp<ByteArray::Borrowed>::make(reinterpret_cast<uint8_t*>(pixels), width * height * bytesPerPixel));
+    sp<Texture> texture = _resource_loader_context->renderController()->createTexture2D(sp<Size>::make(static_cast<float>(width), static_cast<float>(height)), std::move(bitmap));
 
     return sp<RendererImgui>::make(_resource_loader_context, _shader->build(args), texture);
 }

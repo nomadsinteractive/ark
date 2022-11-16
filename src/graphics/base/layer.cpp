@@ -19,7 +19,8 @@ Layer::Layer(sp<LayerContext> layerContext)
 
 void Layer::render(RenderRequest& /*renderRequest*/, const V3& position)
 {
-    _layer_context->renderRequest(position);
+    if(_layer_context)
+        _layer_context->renderRequest(position);
 }
 
 void Layer::traverse(const Holder::Visitor& visitor)

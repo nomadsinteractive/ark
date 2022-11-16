@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<import name="pre" src="prefab.xml"/>
+	<view id="@root_view" class="view-group" size="960, 540" layout="frame"/>
+	<buffer id="@ssbo">
+		<uploader length="$pc">
+			<attribute type="v2f" value="$pos"/>
+			<attribute type="v2f" value="(0, 0)"/>
+			<attribute type="v4f" value="(0, 0, 0, 0)"/>
+		</uploader>
+	</buffer>
+	<shader id="@s001">
+		<uniform name="u_MouseDown" type="int" value="$md"/>
+		<uniform name="u_MousePos" type="v2f" value="$mp"/>
+		<uniform name="u_ParticleCount" type="int" value="$pc"/>
+		<uniform name="u_DeltaT" type="float" value="$dt"/>
+		<uniform name="u_Resolution" type="v2f" value="(960, 540)"/>
+		<buffer name="Pos" ref="@ssbo"/>
+		<stage type="compute" src="@asset:particle.comp"/>
+	</shader>
+	<shader id="@s002" vertex="@asset:particle.vert" fragment="@asset:particle.frag">
+		<snippet class="compute" shader="@s001" num-work-groups="256"/>
+	</shader>
+	<renderer id="@imgui" ref="@pre:imgui"/>
+	<arena id="main" view="@root_view">
+		<render-layer ref="@pre:rl001"/>
+		<renderer class="render-pass" mode="points" shader="@s002" vertex-buffer="@ssbo" draw-count="$pc"/>
+		<renderer ref="@imgui"/>
+		<renderer ref="@pre:fps-counter"/>
+		<event-listener ref="@imgui"/>
+	</arena>
+</resources>

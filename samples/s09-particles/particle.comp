@@ -1,0 +1,77 @@
+struct Particle
+{
+    vec2 pos;
+    vec2 vel;
+    vec4 uv;
+};
+
+layout(std140, binding = 0) buffer Pos
+{
+   Particle particles[];
+};
+
+layout(local_size_x = 32) in;
+
+uniform int   u_ParticleCount;
+uniform int   u_MouseDown;
+uniform float u_DeltaT;
+uniform vec2  u_MousePos;
+uniform vec2  u_Resolution;
+
+vec2 attraction(vec2 direction)
+{
+    const float damp = 0.5;
+    float dDampedDot = dot(direction, direction) + damp;
+    float invDist = 1.0f / sqrt(dDampedDot);
+    float invDistCubed = invDist * invDist * invDist;
+    return direction * invDistCubed * 0.0035;
+}
+
+vec2 repulsion(vec2 direction)
+{
+    float ddot = max(dot(direction, direction), 0.0001);
+    float targetDistance = sqrt(ddot);
+    return direction * (1.0 / (ddot * targetDistance)) * -0.0003;
+}
+
+vec2 vNormalize(vec2 pos)
+{
+    return pos / u_Resolution * 2.0 - 1.0;
+}
+
+vec2 vUnnormalize(vec2 pos)
+{
+    return (pos + 1.0) / 2.0 * u_Resolution;
+}
+
+void ark_main()
+{
+    int index = int(gl_GlobalInvocationID.x);
+    if (index >= u_ParticleCount)
+        return;
+
+    // Read position and velocity
+    vec2 vVel = particles[index].vel.xy;
+    vec2 vPos = vNormalize(particles[index].pos.xy);
+    vec2 vMousePos = vNormalize(u_MousePos.xy);
+
+    vVel += u_MouseDown == 0 ? repulsion(vMousePos - vPos) : attraction(vMousePos - vPos);
+    vPos += vVel * u_DeltaT;
+
+    // collide with boundary
+    if (vPos.x < -1.0)
+        vVel.x = abs(vVel.x) / 2.0;
+    if (vPos.x > 1.0)
+        vVel.x = -abs(vVel.x) / 2.0;
+    if (vPos.y < -1.0)
+        vVel.y = abs(vVel.y) / 2.0;
+    if (vPos.y > 1.0)
+        vVel.y = -abs(vVel.y) / 2.0;
+
+    particles[index].pos.xy = vUnnormalize(vPos);
+
+    // Write back
+    particles[index].vel = vVel;
+    particles[index].uv.xy = (vPos + 1.0) / 2.0;
+}
+

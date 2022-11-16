@@ -12,6 +12,7 @@ namespace ark {
 namespace plugin {
 namespace dear_imgui {
 
+//[[script::bindings::extends(Widget)]]
 class ARK_PLUGIN_DEAR_IMGUI_API Controller : public Widget {
 public:
     Controller(sp<Widget> widget);

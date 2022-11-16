@@ -20,6 +20,11 @@ GLTexture2D::GLTexture2D(sp<Recycler> recycler, sp<Size> size, sp<Texture::Param
 {
 }
 
+GLTexture2D::~GLTexture2D()
+{
+
+}
+
 bool GLTexture2D::download(GraphicsContext& /*graphicsContext*/, Bitmap& bitmap)
 {
     DCHECK(static_cast<uint32_t>(_size->width()) == bitmap.width() && static_cast<uint32_t>(_size->height()) == bitmap.height(), "Size mismatch: texture(%d, %d) vs bitmap(%d, %d)",

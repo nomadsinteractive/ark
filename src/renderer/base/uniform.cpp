@@ -87,9 +87,15 @@ Uniform::Type Uniform::toType(const String& declaredType)
         return TYPE_MAT3;
     if(declaredType == "mat3fv")
         return TYPE_MAT3V;
-    CHECK(declaredType == "sampler2D", "Unknow type \"%s\"", declaredType.c_str());
     if(declaredType == "sampler2D")
         return TYPE_SAMPLER2D;
+    if(declaredType == "uimage2D")
+        return TYPE_UIMAGE2D;
+    if(declaredType == "iimage2D")
+        return TYPE_IIMAGE2D;
+    CHECK(declaredType == "image2D", "Unknow type \"%s\"", declaredType.c_str());
+    if(declaredType == "image2D")
+        return TYPE_IMAGE2D;
     return TYPE_STRUCT;
 }
 
@@ -119,6 +125,12 @@ String Uniform::toDeclaredType(Type type)
         return "mat3";
     case TYPE_SAMPLER2D:
         return "sampler2D";
+    case TYPE_IMAGE2D:
+        return "image2D";
+    case TYPE_UIMAGE2D:
+        return "uimage2D";
+    case TYPE_IIMAGE2D:
+        return "iimage2D";
     default:
         break;
     }

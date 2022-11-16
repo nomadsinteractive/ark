@@ -10,6 +10,7 @@ class DrawCommandPool;
 class ImguiContext;
 class RendererContext;
 class Widget;
+class WidgetGroup;
 
 }
 }

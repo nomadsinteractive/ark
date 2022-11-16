@@ -2,6 +2,7 @@
 #define ARK_RENDERER_BASE_MESH_H_
 
 #include <array>
+#include <vector>
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
@@ -46,7 +47,7 @@ public:
     };
 
 public:
-    Mesh(String name, array<element_index_t> indices, sp<Array<V3>> vertices, sp<Array<UV>> uvs, sp<Array<V3>> normals, sp<Array<Tangent>> tangents, sp<Array<BoneInfo>> boneInfos, sp<Material> material);
+    Mesh(String name, std::vector<element_index_t> indices, sp<Array<V3>> vertices, sp<Array<UV>> uvs, sp<Array<V3>> normals, sp<Array<Tangent>> tangents, sp<Array<BoneInfo>> boneInfos, sp<Material> material);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Mesh);
 
 //  [[script::bindings::property]]
@@ -56,7 +57,7 @@ public:
 //  [[script::bindings::property]]
     const sp<Material>& material() const;
 
-    const array<element_index_t>& indices() const;
+    const std::vector<element_index_t>& indices() const;
     const array<V3>& vertices() const;
     const sp<Array<V3>>& normals() const;
     const sp<Array<Tangent>>& tangents() const;
@@ -69,8 +70,7 @@ public:
 
 private:
     String _name;
-
-    array<element_index_t> _indices;
+    std::vector<element_index_t> _indices;
     sp<Array<V3>> _vertices;
     sp<Array<UV>> _uvs;
     sp<Array<V3>> _normals;

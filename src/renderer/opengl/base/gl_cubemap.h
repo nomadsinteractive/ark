@@ -14,6 +14,7 @@ class ARK_API GLCubemap : public GLTexture {
 public:
     GLCubemap(sp<Recycler> recycler, sp<Size> size, sp<Texture::Parameters> parameters);
 
+    virtual void clear(GraphicsContext& graphicsContext) override;
     virtual bool download(GraphicsContext& graphicsContext, Bitmap& bitmap) override;
     virtual void uploadBitmap(GraphicsContext& graphicsContext, const Bitmap& bitmap, const std::vector<sp<ByteArray>>& imagedata) override;
 

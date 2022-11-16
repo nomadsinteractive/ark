@@ -1,13 +1,14 @@
 #include "renderer/vulkan/base/vk_instance.h"
 
 #include "core/ark.h"
-#include "core/base/manifest.h"
 #include "core/util/log.h"
 
 #include "renderer/vulkan/util/vulkan_tools.h"
 #include "renderer/vulkan/util/vulkan_debug.h"
 
 #include "renderer/vulkan/util/vk_util.h"
+
+#include "app/base/application_manifest.h"
 
 #if defined(ARK_FLAG_DEBUG) && !defined(ARK_PLATFORM_DARWIN) && !defined(ARK_PLATFORM_ANDROID) && 0
 #define ARK_VK_DEBUG_LAYER_ENABLED  1

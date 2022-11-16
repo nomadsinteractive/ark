@@ -36,6 +36,7 @@ public:
     std::map<String, Attribute> _attributes;
     Table<String, sp<Uniform>> _uniforms;
     Table<String, sp<Texture>> _samplers;
+    Table<String, sp<Texture>> _images;
     Table<String, Buffer> _ssbos;
 
     std::set<String> _input_vars;
@@ -65,6 +66,7 @@ private:
     void loadPredefinedAttribute(const document& manifest);
     void loadPredefinedUniform(BeanFactory& factory, const Scope& args, const document& manifest);
     void loadPredefinedSampler(BeanFactory& factory, const Scope& args, const document& manifest);
+    void loadPredefinedImage(BeanFactory& factory, const Scope& args, const document& manifest);
     void loadPredefinedBuffer(BeanFactory& factory, const Scope& args, const document& manifest);
 
     std::map<PipelineInput::ShaderStage, op<ShaderPreprocessor>> _stages;

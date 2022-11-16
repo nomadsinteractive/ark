@@ -20,7 +20,7 @@ public:
     void update();
 
 //  [[script::bindings::auto]]
-    void setCallback(const sp<Runnable>& callback);
+    void setCallback(sp<Runnable> callback);
 
 private:
     sp<Runnable> _callback;

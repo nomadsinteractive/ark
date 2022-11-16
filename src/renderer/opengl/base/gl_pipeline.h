@@ -149,6 +149,7 @@ private:
 
         void bindUBO(const RenderLayer::UBOSnapshot& uboSnapshot, const sp<PipelineInput::UBO>& ubo);
         void bindUniform(const uint8_t* ptr, uint32_t size, const Uniform& uniform);
+        void bindImage(const Texture& texture, uint32_t name);
         void activeTexture(const Texture& texture, uint32_t name);
 
         const GLPipeline::GLUniform& getUniform(const String& name);

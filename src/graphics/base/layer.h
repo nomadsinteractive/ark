@@ -31,7 +31,7 @@ public:
 
 public:
 // [[script::bindings::auto]]
-    Layer(sp<LayerContext> layerContext);
+    Layer(sp<LayerContext> layerContext = nullptr);
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
     virtual void traverse(const Visitor& visitor) override;

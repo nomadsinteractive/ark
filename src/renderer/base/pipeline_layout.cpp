@@ -22,7 +22,7 @@
 namespace ark {
 
 PipelineLayout::PipelineLayout(const sp<PipelineBuildingContext>& buildingContext)
-    : _building_context(buildingContext), _input(_building_context->_input), _snippet(_building_context->makePipelineSnippet()), _samplers(_building_context->_samplers), _color_attachment_count(0)
+    : _building_context(buildingContext), _input(_building_context->_input), _snippet(_building_context->makePipelineSnippet()), _color_attachment_count(0)
 {
 }
 
@@ -52,11 +52,6 @@ std::map<PipelineInput::ShaderStage, String> PipelineLayout::getPreprocessedShad
         shaders[i.first] = i.second.toSourceCode(renderEngineContext);
 
     return shaders;
-}
-
-const Table<String, sp<Texture>>& PipelineLayout::samplers() const
-{
-    return _samplers;
 }
 
 uint32_t PipelineLayout::colorAttachmentCount() const
@@ -97,6 +92,26 @@ void PipelineLayout::tryBindUniform(const ShaderPreprocessor& shaderPreprocessor
         uniform->setInput(input);
         _building_context->addUniform(uniform);
     }
+}
+
+std::vector<sp<Texture>> PipelineLayout::makeBindingSamplers() const
+{
+    DASSERT(_building_context);
+    std::vector<sp<Texture>> bs(_input->samplerCount());
+    const Table<String, sp<Texture>>& samplers = _building_context->_samplers;
+    WARN(bs.size() >= samplers.size(), "Predefined samplers(%d) is more than samplers(%d) in PipelineLayout", samplers.size(), bs.size());
+
+    for(size_t i = 0; i < samplers.values().size(); ++i)
+        if(i < bs.size())
+            bs[i] = samplers.values().at(i);
+
+    return bs;
+}
+
+std::vector<sp<Texture>> PipelineLayout::makeBindingImages() const
+{
+    DASSERT(_building_context);
+    return _building_context->_images.values();
 }
 
 const sp<Snippet>& PipelineLayout::snippet() const

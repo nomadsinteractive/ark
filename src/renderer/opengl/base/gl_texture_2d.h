@@ -14,10 +14,10 @@ namespace opengl {
 class GLTexture2D : public GLTexture {
 public:
     GLTexture2D(sp<Recycler> recycler, sp<Size> size, sp<Texture::Parameters> parameters);
+    ~GLTexture2D();
 
     virtual bool download(GraphicsContext& graphicsContext, Bitmap& bitmap) override;
     virtual void uploadBitmap(GraphicsContext& graphicsContext, const Bitmap& bitmap, const std::vector<sp<ByteArray>>& imagedata) override;
-
 };
 
 }

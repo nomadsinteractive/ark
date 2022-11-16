@@ -14,10 +14,9 @@
 #include "graphics/util/vec3_type.h"
 #include "graphics/util/vec4_type.h"
 
-#include "graphics/inf/renderer.h"
-
 #include "dear-imgui/base/controller.h"
 #include "dear-imgui/base/imgui_context.h"
+#include "dear-imgui/base/widget_type.h"
 #include "dear-imgui/base/renderer_context.h"
 #include "dear-imgui/renderer/renderer_imgui.h"
 
@@ -29,8 +28,8 @@ class WidgetGroup : public Widget {
 public:
     virtual ~WidgetGroup() override = default;
 
-    void addWidget(const sp<Widget>& widget) {
-        _widgets.push_back(widget);
+    void addWidget(sp<Widget> widget) {
+        _widgets.push_back(std::move(widget));
     }
 
     virtual void render() override {
@@ -214,20 +213,6 @@ private:
     bool _open;
 };
 
-class RendererWidget : public Renderer {
-public:
-    RendererWidget(sp<Widget> widget)
-        : _widget(std::move(widget)) {
-    }
-
-    virtual void render(RenderRequest& /*renderRequest*/, const V3& /*position*/) override {
-        _widget->render();
-    }
-
-private:
-    sp<Widget> _widget;
-};
-
 }
 
 
@@ -331,6 +316,11 @@ sp<Observer> RendererBuilder::inputText(String label, sp<Text::Impl> value, size
 void RendererBuilder::inputInt(const String& label, const sp<Integer>& value, int32_t step, int32_t step_fast, int32_t flags)
 {
     addWidget(sp<Input<int32_t>>::make([step, step_fast, flags](const char* l, int32_t* v) { return ImGui::InputInt(l, v, step, step_fast, flags); }, label, value));
+}
+
+void RendererBuilder::sliderInt(const String& label, const sp<Integer>& value, int32_t vmin, int32_t vmax, const String& format)
+{
+    addWidget(sp<Input<int32_t>>::make([vmin, vmax, format](const char* l, int32_t* v) { return ImGui::SliderInt(l, v, vmin, vmax, format.c_str()); }, label, value));
 }
 
 void RendererBuilder::inputFloat(const String& label, const sp<Numeric>& value, float step, float step_fast, const String& format)
@@ -437,10 +427,9 @@ sp<Controller> RendererBuilder::showDemoWindow()
     return controller;
 }
 
-sp<Renderer> RendererBuilder::build() const
+sp<Renderer> RendererBuilder::makeRenderer() const
 {
-    DCHECK(_stub->_states.size() == 1, "Builder has uncompleted begin/end states");
-    return sp<RendererWidget>::make(_stub->_states.top());
+    return WidgetType::toRenderer(makeWidget());
 }
 
 void RendererBuilder::addBlock(std::function<void()> func)
@@ -448,9 +437,15 @@ void RendererBuilder::addBlock(std::function<void()> func)
     addWidget(sp<Block>::make(std::move(func)));
 }
 
-void RendererBuilder::addWidget(const sp<Widget>& widget)
+void RendererBuilder::addWidget(sp<Widget> widget)
 {
-    current()->addWidget(widget);
+    current()->addWidget(std::move(widget));
+}
+
+sp<Widget> RendererBuilder::makeWidget() const
+{
+    CHECK(_stub->_states.size() == 1, "Builder has uncompleted begin/end states");
+    return _stub->_states.top();
 }
 
 void RendererBuilder::push(const sp<WidgetGroup>& widget)

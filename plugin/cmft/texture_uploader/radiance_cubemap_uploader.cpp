@@ -40,7 +40,7 @@ RadianceCubemapUploader::RadianceCubemapUploader(sp<Bitmap> bitmap, sp<Size> siz
 {
 }
 
-void RadianceCubemapUploader::upload(GraphicsContext& graphicsContext, Texture::Delegate& delegate) {
+void RadianceCubemapUploader::initialize(GraphicsContext& graphicsContext, Texture::Delegate& delegate) {
     DCHECK(_size->width() == _size->height(), "Cubemap should be square, but (%.2f, %.2f) provided", _size->width(), _size->height());
     DCHECK(delegate.type() == Texture::TYPE_CUBEMAP, "This uploader uploads bitmaps to a cubmap, not Texture::Type(%d)", delegate.type());
 

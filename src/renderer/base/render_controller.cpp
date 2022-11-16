@@ -1,6 +1,7 @@
 #include "renderer/base/render_controller.h"
 
 #include "core/base/future.h"
+#include "core/base/enums.h"
 #include "core/inf/runnable.h"
 #include "core/util/boolean_type.h"
 #include "core/util/log.h"
@@ -101,8 +102,7 @@ void RenderController::reset()
 
 void RenderController::onSurfaceReady(GraphicsContext& graphicsContext)
 {
-    doRecycling(graphicsContext);
-    doSurfaceReady(graphicsContext);
+    _on_surface_ready.foreach(graphicsContext, true, true);
 }
 
 void RenderController::prepare(GraphicsContext& graphicsContext, LFQueue<UploadingResource>& items)
@@ -114,9 +114,13 @@ void RenderController::prepare(GraphicsContext& graphicsContext, LFQueue<Uploadi
             if(front._strategy == RenderController::US_RELOAD && front._resource.id() != 0)
                 front._resource.recycle(graphicsContext);
 
-            front._resource.upload(graphicsContext);
-            if(front._strategy & RenderController::US_ON_SURFACE_READY)
-                _on_surface_ready_items.insert(std::move(front._resource));
+            if((front._strategy & US_ONCE) || front._strategy == US_RELOAD)
+                front._resource.upload(graphicsContext);
+
+            if(front._strategy & RenderController::US_ON_EVERY_FRAME)
+                _on_every_frame.append(front._priority, std::move(front._resource));
+            else if(front._strategy & RenderController::US_ON_SURFACE_READY)
+                _on_surface_ready.append(front._priority, std::move(front._resource));
         }
     }
 }
@@ -124,35 +128,26 @@ void RenderController::prepare(GraphicsContext& graphicsContext, LFQueue<Uploadi
 void RenderController::onDrawFrame(GraphicsContext& graphicsContext)
 {
     prepare(graphicsContext, _uploading_resources);
+    _on_every_frame.foreach(graphicsContext, false, true);
 
-    uint32_t tick = graphicsContext.tick();
+    uint32_t tick = graphicsContext.tick() % 300;
     if(tick == 0)
-        doRecycling(graphicsContext);
+        _on_surface_ready.foreach(graphicsContext, false, false);
     else if (tick == 150)
         _recycler->doRecycling(graphicsContext);
 }
 
 void RenderController::upload(sp<Resource> resource, RenderController::UploadStrategy strategy, sp<Future> future, RenderController::UploadPriority priority)
 {
-    switch(strategy & 3)
-    {
-    case RenderController::US_ONCE_AND_ON_SURFACE_READY:
-    case RenderController::US_ONCE:
-    case RenderController::US_RELOAD:
-        _uploading_resources.push(UploadingResource(PreUploadingResource(std::move(resource), std::move(future), priority), strategy));
-        break;
-    case RenderController::US_ON_SURFACE_READY:
-        _on_surface_ready_items.insert(PreUploadingResource(std::move(resource), std::move(future), priority));
-        break;
-    }
+    _uploading_resources.push(UploadingResource(PreUploadingResource(std::move(resource), std::move(future)), strategy, priority));
 }
 
 void RenderController::uploadBuffer(Buffer& buffer, sp<Uploader> uploader, RenderController::UploadStrategy strategy, sp<Future> future, RenderController::UploadPriority priority)
 {
-    if(strategy & RenderController::US_ON_CHANGED)
+    if(strategy & RenderController::US_ON_CHANGE)
     {
-        sp<Boolean> disposed = future ? future->cancelled() : sp<Boolean>::make<BooleanByWeakRef<Buffer::Delegate>>(buffer.delegate(), 2);
-        addPreRenderUpdateRequest(sp<BufferUpdatable>::make(*this, uploader->updatable(), uploader, buffer.delegate()), disposed);
+        sp<Boolean> disposed = future ? future->cancelled() : sp<Boolean>::make<BooleanByWeakRef<Buffer::Delegate>>(buffer.delegate(), 1);
+        addPreRenderUpdateRequest(sp<BufferUpdatable>::make(*this, uploader->updatable(), uploader, buffer.delegate()), std::move(disposed));
     }
     else if(uploader)
     {
@@ -164,41 +159,6 @@ void RenderController::uploadBuffer(Buffer& buffer, sp<Uploader> uploader, Rende
 const sp<Recycler>& RenderController::recycler() const
 {
     return _recycler;
-}
-
-void RenderController::doRecycling(GraphicsContext& graphicsContext)
-{
-    for(auto iter = _on_surface_ready_items.begin(); iter != _on_surface_ready_items.end(); )
-    {
-        const PreUploadingResource& resource = *iter;
-        if(resource.isExpired() || resource.isCancelled())
-        {
-            resource.recycle(graphicsContext);
-            iter = _on_surface_ready_items.erase(iter);
-        }
-        else
-            ++iter;
-    }
-}
-
-void RenderController::doSurfaceReady(GraphicsContext& graphicsContext) const
-{
-    for(const PreUploadingResource& resource : _on_surface_ready_items)
-        resource.recycle(graphicsContext);
-
-    uploadSurfaceReadyItems(graphicsContext, UPLOAD_PRIORITY_HIGH);
-    uploadSurfaceReadyItems(graphicsContext, UPLOAD_PRIORITY_NORMAL);
-    uploadSurfaceReadyItems(graphicsContext, UPLOAD_PRIORITY_LOW);
-}
-
-void RenderController::uploadSurfaceReadyItems(GraphicsContext& graphicsContext, UploadPriority up) const
-{
-    for(const PreUploadingResource& resource : _on_surface_ready_items)
-        if(resource.uploadPriority() == up)
-        {
-            DWARN(resource.id() == 0, "Resource[%d] has been uploaded, please check your UploadPriority", resource.id());
-            resource.upload(graphicsContext);
-        }
 }
 
 const sp<RenderEngine>& RenderController::renderEngine() const
@@ -226,9 +186,9 @@ sp<Texture> RenderController::createTexture(sp<Size> size, sp<Texture::Parameter
     return texture;
 }
 
-sp<Texture> RenderController::createTexture2D(sp<Size> size, sp<Texture::Uploader> uploader, RenderController::UploadStrategy us, sp<Future> future)
+sp<Texture> RenderController::createTexture2D(sp<Size> size, sp<Bitmap> bitmap, UploadStrategy us, sp<Future> future)
 {
-    return createTexture(std::move(size), sp<Texture::Parameters>::make(Texture::TYPE_2D, 0), std::move(uploader), us, std::move(future));
+    return createTexture(std::move(size), sp<Texture::Parameters>::make(Texture::TYPE_2D, 0), sp<Texture::UploaderBitmap>::make(std::move(bitmap)), us, std::move(future));
 }
 
 Buffer RenderController::makeVertexBuffer(Buffer::Usage usage, const sp<Uploader>& uploader)
@@ -256,9 +216,10 @@ Buffer RenderController::makeBuffer(Buffer::Type type, Buffer::Usage usage, cons
     return buffer;
 }
 
-void RenderController::addPreRenderUpdateRequest(const sp<Updatable>& updatable, const sp<Boolean>& disposed)
+void RenderController::addPreRenderUpdateRequest(sp<Updatable> updatable, sp<Boolean> disposed)
 {
-    _on_pre_updatable.push_back(updatable, disposed ? disposed : sp<Boolean>::make<BooleanByWeakRef<Updatable>>(updatable, 1));
+    DASSERT(updatable && disposed);
+    _on_pre_updatable.push_back(std::move(updatable), std::move(disposed));
 }
 
 void RenderController::addPreRenderRunRequest(const sp<Runnable>& task, const sp<Boolean>& disposed)
@@ -267,9 +228,9 @@ void RenderController::addPreRenderRunRequest(const sp<Runnable>& task, const sp
         _on_pre_update_request.push_back(task, disposed);
     else
     {
-        const sp<Disposed> e = task.as<Disposed>();
-        DCHECK(e, "Adding an undisposable running task, it's that what you REALLY want?");
-        _on_pre_update_request.push_back(task, e);
+        sp<Disposed> e = task.as<Disposed>();
+        CHECK(e, "Adding an undisposable running task, it's that what you REALLY want?");
+        _on_pre_update_request.push_back(task, std::move(e));
     }
 }
 
@@ -342,8 +303,8 @@ uint64_t RenderController::tick() const
     return _tick;
 }
 
-RenderController::PreUploadingResource::PreUploadingResource(sp<Resource> resource, sp<Future> future, UploadPriority uploadPriority)
-    : _resource(std::move(resource)), _future(std::move(future)), _upload_priority(uploadPriority)
+RenderController::PreUploadingResource::PreUploadingResource(sp<Resource> resource, sp<Future> future)
+    : _resource(std::move(resource)), _future(std::move(future))
 {
 }
 
@@ -372,24 +333,42 @@ uint64_t RenderController::PreUploadingResource::id() const
     return _resource->id();
 }
 
-RenderController::UploadPriority RenderController::PreUploadingResource::uploadPriority() const
-{
-    return _upload_priority;
-}
-
-bool RenderController::PreUploadingResource::operator <(const RenderController::PreUploadingResource& other) const
-{
-    return _resource < other._resource;
-}
-
-RenderController::UploadingResource::UploadingResource(PreUploadingResource resource, RenderController::UploadStrategy strategy)
-    : _resource(std::move(resource)), _strategy(strategy)
+RenderController::UploadingResource::UploadingResource(PreUploadingResource resource, UploadStrategy strategy, UploadPriority priority)
+    : _resource(std::move(resource)), _strategy(strategy), _priority(priority)
 {
 }
 
-bool RenderController::UploadingResource::operator <(const RenderController::UploadingResource& other) const
+void RenderController::RenderResourceList::append(UploadPriority priority, PreUploadingResource ur)
 {
-    return _resource < other._resource;
+    _resources[priority].push_back(std::move(ur));
+}
+
+void RenderController::RenderResourceList::foreach(GraphicsContext& graphicsContext, bool recycle, bool upload)
+{
+    for(size_t i = 0; i < UPLOAD_PRIORITY_COUNT; ++i)
+        for(auto iter = _resources[i].begin(); iter != _resources[i].end(); )
+        {
+            const PreUploadingResource& resource = *iter;
+            if(resource.isExpired() || resource.isCancelled())
+                iter = _resources[i].erase(iter);
+            else
+            {
+                if(recycle)
+                    resource.recycle(graphicsContext);
+                if(upload)
+                    resource.upload(graphicsContext);
+                ++iter;
+            }
+        }
+}
+
+template<> void Enums<RenderController::UploadStrategy>::initialize(std::map<String, RenderController::UploadStrategy>& enums)
+{
+    enums["reload"] = RenderController::US_RELOAD;
+    enums["once"] = RenderController::US_ONCE;
+    enums["on_surface_ready"] = RenderController::US_ON_SURFACE_READY;
+    enums["on_change"] = RenderController::US_ON_CHANGE;
+    enums["on_every_frame"] = RenderController::US_ON_EVERY_FRAME;
 }
 
 }

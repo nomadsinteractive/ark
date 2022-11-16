@@ -1,5 +1,6 @@
 #include "renderer/impl/model_loader/model_loader_sphere.h"
 
+#include "core/base/manifest.h"
 #include "core/util/documents.h"
 #include "core/util/math.h"
 
@@ -80,8 +81,8 @@ namespace {
 
 class ModelBundleImporterSphere : public ModelLoader::Importer {
 public:
-    virtual Model import(const document& manifest, MaterialBundle& materialBundle) override {
-        uint32_t sampleCount = Documents::ensureAttribute<uint32_t>(manifest, "sample-count");
+    virtual Model import(const Manifest& manifest, MaterialBundle& /*materialBundle*/) override {
+        uint32_t sampleCount = Documents::ensureAttribute<uint32_t>(manifest.descriptor(), "sample-count");
         const Rect uvBounds = Rect(0, 1.0f, 1.0f, 0);
         indexarray indices = makeIndices(sampleCount);
         sp<std::vector<ModelLoaderSphere::Vertex>> vertices = makeVertices(sampleCount);

@@ -16,9 +16,9 @@ RendererContext::RendererContext(const sp<Shader>& shader, const sp<RenderContro
 {
 }
 
-void RendererContext::addDefaultTexture(const sp<Texture>& texture)
+void RendererContext::addDefaultTexture(sp<Texture> texture)
 {
-    _draw_commands[nullptr] = sp<DrawCommandPool>::make(_shader, _render_controller, texture);
+    _draw_commands[nullptr] = sp<DrawCommandPool>::make(_shader, _render_controller, std::move(texture));
 }
 
 const sp<DrawCommandPool>& RendererContext::obtainDrawCommandPool(void* texture) const

@@ -1,12 +1,12 @@
 #include <stdlib.h>
 
 #include "core/ark.h"
-#include "core/base/manifest.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/base/size.h"
 
 #include "app/base/application_delegate_impl.h"
+#include "app/base/application_manifest.h"
 #include "app/impl/application/sdl_application.h"
 
 using namespace ark;

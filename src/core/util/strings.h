@@ -4,6 +4,7 @@
 #include <map>
 
 #include "core/base/api.h"
+#include "core/base/enums.h"
 #include "core/base/string.h"
 #include "core/base/string_buffer.h"
 #include "core/inf/builder.h"
@@ -76,6 +77,16 @@ public:
 
     template<typename T> static String toString(const T& value) {
         return Conversions::to<T, String>(value);
+    }
+
+    template<typename T> static T toEnum(const String& str) {
+        Global<Enums<T>> enums;
+        return enums->ensureEnum(str);
+    }
+
+    template<typename T> static T toEnumCombo(const String& str) {
+        Global<Enums<T>> enums;
+        return enums->toEnumCombo(str);
     }
 
     template<typename T> static T parse(const String& str) {

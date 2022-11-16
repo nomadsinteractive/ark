@@ -18,7 +18,7 @@ class RendererContext {
 public:
     RendererContext(const sp<Shader>& shader, const sp<RenderController>& renderController);
 
-    void addDefaultTexture(const sp<Texture>& texture);
+    void addDefaultTexture(sp<Texture> texture);
     const sp<DrawCommandPool>& obtainDrawCommandPool(void* texture) const;
 
     void addTextureRefCount(Texture* texture);

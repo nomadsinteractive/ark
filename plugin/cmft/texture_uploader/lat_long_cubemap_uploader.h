@@ -17,7 +17,7 @@ class LatLongCubemapUploader : public Texture::Uploader {
 public:
     LatLongCubemapUploader(sp<Bitmap> bitmap, sp<Size> size);
 
-    virtual void upload(GraphicsContext& graphicsContext, Texture::Delegate& delegate) override;
+    virtual void initialize(GraphicsContext& graphicsContext, Texture::Delegate& delegate) override;
 
 //  [[plugin::builder("lat-long")]]
     class BUILDER : public Builder<Texture::Uploader> {

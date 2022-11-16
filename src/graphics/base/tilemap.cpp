@@ -102,7 +102,7 @@ const sp<Storage>& Tilemap::storage() const
 
 sp<Renderer> Tilemap::makeRenderer(const sp<Layer>& layer) const
 {
-    DCHECK(layer || _render_layer, "No LayerContext specified");
+//    DCHECK(layer || _render_layer, "No LayerContext specified");
 //    return sp<TilemapRenderer>::make(layer ? layer->context() : _render_layer->makeContext(), _stub);
     return nullptr;
 }

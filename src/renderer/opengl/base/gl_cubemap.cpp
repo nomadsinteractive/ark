@@ -25,7 +25,7 @@ public:
         : _bitmaps(std::move(bitmaps)) {
     }
 
-    virtual void upload(GraphicsContext& graphicContext, Texture::Delegate& delegate) override {
+    virtual void initialize(GraphicsContext& graphicContext, Texture::Delegate& delegate) override {
         std::vector<bitmap> bitmaps;
         for(const sp<Variable<bitmap>>& i : _bitmaps)
             bitmaps.push_back(i->val());
@@ -48,6 +48,11 @@ private:
 GLCubemap::GLCubemap(sp<Recycler> recycler, sp<Size> size, sp<Texture::Parameters> parameters)
     : GLTexture(std::move(recycler), std::move(size), static_cast<uint32_t>(GL_TEXTURE_CUBE_MAP), Texture::TYPE_CUBEMAP, std::move(parameters))
 {
+}
+
+void GLCubemap::clear(GraphicsContext& /*graphicsContext*/)
+{
+    DFATAL("Unimplemented");
 }
 
 bool GLCubemap::download(GraphicsContext& /*graphicsContext*/, Bitmap& /*bitmap*/)

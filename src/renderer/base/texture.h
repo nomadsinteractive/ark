@@ -26,7 +26,10 @@ public:
         FORMAT_RGBA = 3,
         FORMAT_SIGNED = 8,
         FORMAT_F16 = 16,
-        FORMAT_F32 = 32
+        FORMAT_F32 = 32,
+        FORMAT_I8 = 64,
+        FORMAT_I16 = 128,
+        FORMAT_I32 = 192,
     };
 
     enum Usage {
@@ -88,7 +91,8 @@ public:
     public:
         virtual ~Uploader() = default;
 
-        virtual void upload(GraphicsContext& graphicsContext, Delegate& delegate) = 0;
+        virtual void initialize(GraphicsContext& graphicsContext, Delegate& delegate) = 0;
+        virtual void update(GraphicsContext& graphicsContext, Delegate& delegate);
 
     };
 
@@ -103,6 +107,7 @@ public:
         virtual void upload(GraphicsContext& graphicsContext, const sp<Uploader>& uploader) = 0;
         virtual ResourceRecycleFunc recycle() = 0;
 
+        virtual void clear(GraphicsContext& graphicsContext) = 0;
         virtual bool download(GraphicsContext& graphicsContext, Bitmap& bitmap) = 0;
         virtual void uploadBitmap(GraphicsContext& graphicsContext, const Bitmap& bitmap, const std::vector<sp<ByteArray>>& imagedata) = 0;
 
@@ -110,11 +115,11 @@ public:
         Type _type;
     };
 
-    class ARK_API UploaderBitmap : public Uploader {
+    class UploaderBitmap : public Uploader {
     public:
-        UploaderBitmap(const bitmap& bitmap);
+        UploaderBitmap(bitmap bitmap);
 
-        virtual void upload(GraphicsContext& graphicsContext, Delegate& delegate) override;
+        virtual void initialize(GraphicsContext& graphicsContext, Delegate& delegate) override;
 
     private:
         bitmap _bitmap;
@@ -180,6 +185,7 @@ public:
         document _manifest;
         SafePtr<Builder<String>> _src;
         SafePtr<Builder<Texture::Uploader>> _uploader;
+        uint32_t _upload_strategy;
     };
 
 private:

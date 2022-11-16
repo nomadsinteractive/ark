@@ -24,20 +24,21 @@ namespace {
 
 class BlankUploader : public Texture::Uploader {
 public:
-    BlankUploader(sp<Size> size, Texture::Format format)
-        : _size(std::move(size)), _component_size(RenderUtil::getComponentSize(format)), _channels((format & Texture::FORMAT_RGBA) + 1) {
+    BlankUploader(Size& size, Texture::Format format)
+        : _bitmap(static_cast<uint32_t>(size.width()), static_cast<uint32_t>(size.height()), static_cast<uint32_t>(size.width()) * RenderUtil::getComponentSize(format),
+                  (format & Texture::FORMAT_RGBA) + 1, false) {
     }
 
-    virtual void upload(GraphicsContext& graphicsContext, Texture::Delegate& delegate) override {
-        uint32_t width = static_cast<uint32_t>(_size->width());
-        Bitmap bitmap(width, static_cast<uint32_t>(_size->height()), width * _component_size, _channels, false);
-        delegate.uploadBitmap(graphicsContext, bitmap, {nullptr});
+    virtual void initialize(GraphicsContext& graphicsContext, Texture::Delegate& delegate) override {
+        delegate.uploadBitmap(graphicsContext, _bitmap, {nullptr});
+    }
+
+    virtual void update(GraphicsContext& graphicsContext, Texture::Delegate& delegate) override {
+        delegate.clear(graphicsContext);
     }
 
 private:
-    sp<Size> _size;
-    uint32_t _component_size;
-    uint8_t _channels;
+    Bitmap _bitmap;
 };
 
 }
@@ -240,7 +241,7 @@ sp<Texture> Texture::DICTIONARY::build(const Scope& /*args*/)
 
 Texture::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _resource_loader_context(resourceLoaderContext), _factory(factory), _manifest(manifest), _src(factory.getBuilder<String>(manifest, Constants::Attributes::SRC)),
-      _uploader(factory.getBuilder<Texture::Uploader>(manifest, "uploader"))
+      _uploader(factory.getBuilder<Texture::Uploader>(manifest, "uploader")), _upload_strategy(Documents::getAttributeEnumCombo(manifest, "upload-strategy", RenderController::US_ONCE_AND_ON_SURFACE_READY))
 {
 }
 
@@ -256,7 +257,7 @@ sp<Texture> Texture::BUILDER::build(const Scope& args)
     const sp<Size> size = _factory.ensureConcreteClassBuilder<Size>(_manifest, Constants::Attributes::SIZE)->build(args);
     DCHECK(size->width() != 0 && size->height() != 0, "Cannot build texture from \"%s\"", Documents::toString(_manifest).c_str());
     sp<Texture::Uploader> uploader = _uploader->build(args);
-    return _resource_loader_context->renderController()->createTexture(size, parameters, uploader ? std::move(uploader) : makeBlankUploader(size, parameters));
+    return _resource_loader_context->renderController()->createTexture(size, parameters, uploader ? std::move(uploader) : makeBlankUploader(size, parameters), static_cast<RenderController::UploadStrategy>(_upload_strategy));
 }
 
 sp<Texture::Uploader> Texture::BUILDER::makeBlankUploader(const sp<Size>& size, const Texture::Parameters& params)
@@ -264,12 +265,12 @@ sp<Texture::Uploader> Texture::BUILDER::makeBlankUploader(const sp<Size>& size, 
     return sp<BlankUploader>::make(size, params._format);
 }
 
-Texture::UploaderBitmap::UploaderBitmap(const bitmap& bitmap)
-    : _bitmap(bitmap)
+Texture::UploaderBitmap::UploaderBitmap(bitmap bitmap)
+    : _bitmap(std::move(bitmap))
 {
 }
 
-void Texture::UploaderBitmap::upload(GraphicsContext& graphicsContext, Texture::Delegate& delegate)
+void Texture::UploaderBitmap::initialize(GraphicsContext& graphicsContext, Texture::Delegate& delegate)
 {
     delegate.uploadBitmap(graphicsContext, _bitmap, {_bitmap->bytes()});
 }
@@ -283,6 +284,9 @@ template<> ARK_API void Enums<Texture::Format>::initialize(std::map<String, Text
     enums["f16"] = Texture::FORMAT_F16;
     enums["f32"] = Texture::FORMAT_F32;
     enums["signed"] = Texture::FORMAT_SIGNED;
+    enums["i8"] = Texture::FORMAT_I8;
+    enums["i16"] = Texture::FORMAT_I16;
+    enums["i32"] = Texture::FORMAT_I32;
 }
 
 template<> ARK_API void Enums<Texture::Usage>::initialize(std::map<String, Texture::Usage>& enums)
@@ -292,6 +296,11 @@ template<> ARK_API void Enums<Texture::Usage>::initialize(std::map<String, Textu
     enums["stencil"] = Texture::USAGE_DEPTH_STENCIL_ATTACHMENT;
     enums["input_disabled"] = Texture::USAGE_INPUT_DISABLED;
     enums["output_disabled"] = Texture::USAGE_OUTPUT_DISABLED;
+}
+
+void Texture::Uploader::update(GraphicsContext& graphicsContext, Delegate& delegate)
+{
+    initialize(graphicsContext, delegate);
 }
 
 }

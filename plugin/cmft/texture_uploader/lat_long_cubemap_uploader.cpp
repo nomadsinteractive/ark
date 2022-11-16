@@ -18,7 +18,7 @@ LatLongCubemapUploader::LatLongCubemapUploader(sp<Bitmap> bitmap, sp<Size> size)
 {
 }
 
-void LatLongCubemapUploader::upload(GraphicsContext& graphicsContext, Texture::Delegate& delegate)
+void LatLongCubemapUploader::initialize(GraphicsContext& graphicsContext, Texture::Delegate& delegate)
 {
     DCHECK(_size->width() == _size->height(), "Cubemap should be square, but (%.2f, %.2f) provided", _size->width(), _size->height());
     DCHECK(delegate.type() == Texture::TYPE_CUBEMAP, "This uploader uploads bitmaps to a cubmap, not Texture::Type(%d)", delegate.type());

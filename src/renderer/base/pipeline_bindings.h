@@ -186,8 +186,9 @@ public:
 
     const PipelineInput::AttributeOffsets& attributes() const;
     const std::vector<sp<Texture>>& samplers() const;
+    const std::vector<sp<Texture>>& images() const;
 
-    void bindSampler(const sp<Texture>& texture, uint32_t name = 0);
+    void bindSampler(sp<Texture> texture, uint32_t name = 0);
 
     bool hasDivisors() const;
 
@@ -212,6 +213,7 @@ private:
         PipelineInput::AttributeOffsets _attributes;
 
         std::vector<sp<Texture>> _samplers;
+        std::vector<sp<Texture>> _images;
     };
 
 private:

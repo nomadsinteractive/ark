@@ -22,21 +22,25 @@ namespace ark {
 
 class ARK_API MaterialBundle {
 public:
-    MaterialBundle(const sp<ResourceLoaderContext>& resourceLoaderContext, std::map<String, sp<Material>> materials, std::array<sp<Texture>, MaterialTexture::TYPE_LENGTH> textures);
+//  [[script::bindings::auto]]
+    MaterialBundle(const std::vector<sp<Material>>& materials = std::vector<sp<Material>>{});
+    MaterialBundle(std::map<String, sp<Material>> materials, std::array<sp<Texture>, MaterialTexture::TYPE_LENGTH> textures);
 
+//  [[script::bindings::auto]]
     sp<Material> getMaterial(const String& name) const;
+//  [[script::bindings::auto]]
+    void addMaterial(String name, sp<Material> material);
+
     Rect getMaterialUV(const String& name) const;
 
-//  [[plugin::resource-loader]]
+//  [[plugin::builder]]
     class BUILDER : public Builder<MaterialBundle> {
     public:
-        BUILDER(BeanFactory& beanFactory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
+        BUILDER(BeanFactory& beanFactory, const document& manifest);
 
         virtual sp<MaterialBundle> build(const Scope& args) override;
 
     private:
-        sp<ResourceLoaderContext> _resource_loader_context;
-
         std::vector<String> _names;
         std::vector<sp<Builder<Material>>> _materials;
 

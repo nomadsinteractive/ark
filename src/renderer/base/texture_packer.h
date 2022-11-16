@@ -12,11 +12,14 @@
 #include "renderer/forwarding.h"
 #include "renderer/base/texture.h"
 
+#include "app/forwarding.h"
+
 namespace ark {
 
 class ARK_API TexturePacker {
 public:
-    TexturePacker(const sp<ResourceLoaderContext>& resourceLoaderContext, sp<Texture> texture);
+    TexturePacker(const ApplicationContext& applicationContext, sp<Texture> texture);
+    TexturePacker(sp<BitmapLoaderBundle> bitmapBundleBounds, sp<BitmapLoaderBundle> bitmapBundle, sp<RenderController> renderController, sp<Texture> texture);
 
     RectI addBitmap(MaxRectsBinPack& binPack, const String& src);
     RectI addBitmap(MaxRectsBinPack& binPack, bitmap fragment);
@@ -39,7 +42,7 @@ private:
     public:
         PackedTextureUploader(uint32_t width, uint32_t height, uint8_t channels, std::vector<PackedBitmap> bitmaps);
 
-        virtual void upload(GraphicsContext& graphicsContext, Texture::Delegate& delegate) override;
+        virtual void initialize(GraphicsContext& graphicsContext, Texture::Delegate& delegate) override;
 
     private:
         uint32_t _width;
@@ -49,7 +52,9 @@ private:
     };
 
 private:
-    sp<ResourceLoaderContext> _resource_loader_context;
+    sp<BitmapLoaderBundle> _bitmap_bundle_bounds;
+    sp<BitmapLoaderBundle> _bitmap_bundle;
+    sp<RenderController> _render_controller;
     sp<Texture> _texture;
     uint8_t _channels;
 

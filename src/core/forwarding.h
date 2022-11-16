@@ -39,6 +39,7 @@ template <typename T> using array = sp<Array<T>>;
 
 class Ark;
 class Allocator;
+class ApplicationManifest;
 class Asset;
 class AssetBundle;
 class BeanFactory;
@@ -63,7 +64,7 @@ class Holder;
 class Interfaces;
 class Json;
 class Notifier;
-class ApplicationManifest;
+class Manifest;
 class MemoryPool;
 class MessageLoop;
 class Mutex;

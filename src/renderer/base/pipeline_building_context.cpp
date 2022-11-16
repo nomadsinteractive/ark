@@ -61,6 +61,7 @@ void PipelineBuildingContext::loadManifest(const document& manifest, BeanFactory
 {
     loadPredefinedUniform(factory, args, manifest);
     loadPredefinedSampler(factory, args, manifest);
+    loadPredefinedImage(factory, args, manifest);
     loadPredefinedBuffer(factory, args, manifest);
     loadPredefinedAttribute(manifest);
 }
@@ -276,15 +277,29 @@ void PipelineBuildingContext::loadPredefinedUniform(BeanFactory& factory, const 
 void PipelineBuildingContext::loadPredefinedSampler(BeanFactory& factory, const Scope& args, const document& manifest)
 {
     uint32_t binding = 0;
-
     for(const document& i : manifest->children("sampler"))
     {
         String name = Documents::getAttribute(i, Constants::Attributes::NAME);
         sp<Texture> texture = factory.ensure<Texture>(i, args);
         if(!name)
             name = Strings::sprintf("u_Texture%d", binding);
-        DCHECK(!_samplers.has(name), "Sampler \"%s\" redefined", name.c_str());
+        CHECK(!_samplers.has(name), "Sampler \"%s\" redefined", name.c_str());
         _samplers.push_back(std::move(name), std::move(texture));
+        binding++;
+    }
+}
+
+void PipelineBuildingContext::loadPredefinedImage(BeanFactory& factory, const Scope& args, const document& manifest)
+{
+    uint32_t binding = 0;
+    for(const document& i : manifest->children("image"))
+    {
+        String name = Documents::getAttribute(i, Constants::Attributes::NAME);
+        sp<Texture> texture = factory.ensure<Texture>(i, args);
+        if(!name)
+            name = Strings::sprintf("u_Image%d", binding);
+        CHECK(!_images.has(name), "Image \"%s\" redefined", name.c_str());
+        _images.push_back(std::move(name), std::move(texture));
         binding++;
     }
 }

@@ -27,18 +27,20 @@ class ARK_API RenderController {
 public:
 //  [[script::bindings::enumeration]]
     enum UploadStrategy {
-        US_ONCE,
-        US_RELOAD = 1,
+        US_RELOAD = 0,
+        US_ONCE = 1,
         US_ON_SURFACE_READY = 2,
         US_ONCE_AND_ON_SURFACE_READY = 3,
-        US_ON_CHANGED = 4,
+        US_ON_CHANGE = 4,
+        US_ON_EVERY_FRAME = 8
     };
 
 //  [[script::bindings::enumeration]]
     enum UploadPriority {
-        UPLOAD_PRIORITY_LOW,
+        UPLOAD_PRIORITY_HIGH = 0,
         UPLOAD_PRIORITY_NORMAL,
-        UPLOAD_PRIORITY_HIGH
+        UPLOAD_PRIORITY_LOW,
+        UPLOAD_PRIORITY_COUNT
     };
 
     enum SharedIndicesName {
@@ -90,19 +92,15 @@ public:
 //  [[script::bindings::auto]]
     void uploadBuffer(Buffer& buffer, sp<Uploader> uploader, RenderController::UploadStrategy strategy, sp<Future> future = nullptr, RenderController::UploadPriority priority = RenderController::UPLOAD_PRIORITY_NORMAL);
 
-    template<typename T, typename... Args> sp<T> createResource(Args&&... args) {
-        const sp<T> res = sp<T>::make(std::forward<Args>(args)...);
-        upload(res, nullptr, RenderController::US_ONCE_AND_ON_SURFACE_READY);
-        return res;
-    }
-
     const sp<RenderEngine>& renderEngine() const;
 
     sp<Camera> createCamera() const;
     sp<PipelineFactory> createPipelineFactory() const;
 
     sp<Texture> createTexture(sp<Size> size, sp<Texture::Parameters> parameters, sp<Texture::Uploader> uploader, RenderController::UploadStrategy us = US_ONCE_AND_ON_SURFACE_READY, sp<Future> future = nullptr);
-    sp<Texture> createTexture2D(sp<Size> size, sp<Texture::Uploader> uploader, UploadStrategy us = US_ONCE_AND_ON_SURFACE_READY, sp<Future> future = nullptr);
+
+//  [[script::bindings::auto]]
+    sp<Texture> createTexture2D(sp<Size> size, sp<Bitmap> bitmap, RenderController::UploadStrategy us = RenderController::US_ONCE_AND_ON_SURFACE_READY, sp<Future> future = nullptr);
 
 //  [[script::bindings::auto]]
     Buffer makeBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Uploader>& uploader);
@@ -120,7 +118,7 @@ public:
         return var;
     }
 
-    void addPreRenderUpdateRequest(const sp<Updatable>& updatable, const sp<Boolean>& disposed);
+    void addPreRenderUpdateRequest(sp<Updatable> updatable, sp<Boolean> disposed);
     void addPreRenderRunRequest(const sp<Runnable>& task, const sp<Boolean>& disposed);
 
     void preRequestUpdate(uint64_t timestamp);
@@ -136,7 +134,7 @@ private:
     class PreUploadingResource {
     public:
         PreUploadingResource() = default;
-        PreUploadingResource(sp<Resource> resource, sp<Future> future, UploadPriority uploadPriority);
+        PreUploadingResource(sp<Resource> resource, sp<Future> future);
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(PreUploadingResource);
 
         bool isExpired() const;
@@ -146,32 +144,34 @@ private:
         void recycle(GraphicsContext& graphicsContext) const;
 
         uint64_t id() const;
-        UploadPriority uploadPriority() const;
-
-        bool operator < (const PreUploadingResource& other) const;
 
     private:
         sp<Resource> _resource;
         sp<Future> _future;
-        UploadPriority _upload_priority;
     };
 
     struct UploadingResource {
         UploadingResource() = default;
-        UploadingResource(PreUploadingResource resource, RenderController::UploadStrategy strategy);
+        UploadingResource(PreUploadingResource resource, UploadStrategy strategy, UploadPriority priority);
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(UploadingResource);
 
         PreUploadingResource _resource;
-        RenderController::UploadStrategy _strategy;
+        UploadStrategy _strategy;
+        UploadPriority _priority;
+    };
 
-        bool operator < (const UploadingResource& other) const;
+    class RenderResourceList {
+    public:
+        void append(UploadPriority priority, PreUploadingResource ur);
+
+        void foreach(GraphicsContext& graphicsContext, bool recycle, bool upload);
+
+    private:
+        std::vector<PreUploadingResource> _resources[UPLOAD_PRIORITY_COUNT];
     };
 
 private:
     void prepare(GraphicsContext& graphicsContext, LFQueue<UploadingResource>& items);
-    void doRecycling(GraphicsContext& graphicsContext);
-    void doSurfaceReady(GraphicsContext& graphicsContext) const;
-    void uploadSurfaceReadyItems(GraphicsContext& graphicsContext, UploadPriority up) const;
 
 private:
     sp<RenderEngine> _render_engine;
@@ -181,7 +181,9 @@ private:
     sp<Variable<uint64_t>> _clock;
 
     LFQueue<UploadingResource> _uploading_resources;
-    std::set<PreUploadingResource> _on_surface_ready_items;
+
+    RenderResourceList _on_surface_ready;
+    RenderResourceList _on_every_frame;
 
     DList<Updatable> _on_pre_updatable;
     DList<Runnable> _on_pre_update_request;

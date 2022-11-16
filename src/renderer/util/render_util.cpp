@@ -135,9 +135,9 @@ uint32_t RenderUtil::getComponentSize(Texture::Format format)
         return 4;
 
     uint32_t unitSize = 1;
-    if(format & Texture::FORMAT_F16)
+    if(format & Texture::FORMAT_F16 || (format & Texture::FORMAT_I16) == Texture::FORMAT_I16)
         unitSize = 2;
-    else if(format & Texture::FORMAT_F32)
+    else if(format & Texture::FORMAT_F32 || (format & Texture::FORMAT_I32) == Texture::FORMAT_I32)
         unitSize = 4;
 
     return (static_cast<uint32_t>(format & Texture::FORMAT_RGBA) + 1) * unitSize;

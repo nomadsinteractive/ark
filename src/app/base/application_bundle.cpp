@@ -44,7 +44,10 @@ const sp<BitmapLoaderBundle>& ApplicationBundle::bitmapBoundsBundle() const
 
 document ApplicationBundle::loadDocument(const String& resid) const
 {
-    return _document_loader_bundle->get(resid);
+    String fname, fext;
+    Strings::rcut(resid, fname, fext, '.');
+    const sp<Asset> asset = _asset_bundle->get(resid);
+    return asset ? _document_loader_bundle->getLoader(fext)->load(asset->open()) : nullptr;
 }
 
 Json ApplicationBundle::loadJson(const String& resid) const

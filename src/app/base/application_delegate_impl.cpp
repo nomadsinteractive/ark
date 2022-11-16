@@ -1,7 +1,6 @@
 #include "app/base/application_delegate_impl.h"
 
 #include "core/ark.h"
-#include "core/base/manifest.h"
 #include "core/base/scope.h"
 #include "core/inf/script.h"
 #include "core/util/conversions.h"
@@ -12,6 +11,7 @@
 #include "app/base/application.h"
 #include "app/base/application_context.h"
 #include "app/base/application_facade.h"
+#include "app/base/application_manifest.h"
 #include "app/base/resource_loader.h"
 #include "app/base/surface.h"
 #include "app/impl/event_listener/event_listener_by_script.h"
