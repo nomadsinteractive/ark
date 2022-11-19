@@ -189,9 +189,10 @@ void PipelineBuildingContext::addUniform(const String& name, Uniform::Type type,
     _uniforms.push_back(name, sp<Uniform>::make(name, type, length, flatable, binding));
 }
 
-void PipelineBuildingContext::addUniform(const sp<Uniform>& uniform)
+void PipelineBuildingContext::addUniform(sp<Uniform> uniform)
 {
-    _uniforms.push_back(uniform->name(), uniform);
+    String name = uniform->name();
+    _uniforms.push_back(std::move(name), std::move(uniform));
 }
 
 void PipelineBuildingContext::addInputAttribute(const String& name, const String& type)
@@ -265,7 +266,9 @@ void PipelineBuildingContext::loadPredefinedUniform(BeanFactory& factory, const 
         const String& type = Documents::ensureAttribute(i, Constants::Attributes::TYPE);
         const String& value = Documents::ensureAttribute(i, Constants::Attributes::VALUE);
         int32_t binding = Documents::getAttribute<int32_t>(i, Constants::Attributes::BINDING, -1);
-        sp<Input> input = factory.ensure<Input>(type, value, args);
+//TODO: TypeValue build
+        sp<Builder<Input>> builder = factory.findBuilderByTypeValue<Input>(type, value);
+        sp<Input> input = builder ? builder->build(args) : factory.ensure<Input>(value, args);
         uint32_t size = input->size();
         Uniform::Type uType = Uniform::toType(type);
         uint32_t componentSize = uType != Uniform::TYPE_STRUCT ? Uniform::getComponentSize(uType) : size;
@@ -320,7 +323,9 @@ Attribute PipelineBuildingContext::makePredefinedAttribute(const String& name, c
         return Attribute("a_TexCoordinate", Attribute::TYPE_USHORT, type, 2, true);
     if(name == "Position")
     {
-        DCHECK(type == "vec2" || type == "vec3" || type == "vec4", "Unacceptable Position type: '%s', must be in [vec2, vec3, vec4]", type.c_str());
+        if(type == "int")
+            return Attribute("a_Position", Attribute::TYPE_INTEGER, type, 1, false);
+        CHECK(type == "vec2" || type == "vec3" || type == "vec4", "Unacceptable Position type: '%s', must be in [int, vec2, vec3, vec4]", type.c_str());
         return Attribute("a_Position", Attribute::TYPE_FLOAT, type, std::min<uint32_t>(3, static_cast<uint32_t>(type.at(3) - '0')), false);
     }
     return RenderUtil::makePredefinedAttribute("a_" + name, type);

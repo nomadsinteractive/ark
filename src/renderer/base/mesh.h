@@ -47,7 +47,7 @@ public:
     };
 
 public:
-    Mesh(String name, std::vector<element_index_t> indices, sp<Array<V3>> vertices, sp<Array<UV>> uvs, sp<Array<V3>> normals, sp<Array<Tangent>> tangents, sp<Array<BoneInfo>> boneInfos, sp<Material> material);
+    Mesh(String name, std::vector<element_index_t> indices, std::vector<V3> vertices, sp<Array<UV>> uvs, sp<Array<V3>> normals, sp<Array<Tangent>> tangents, sp<Array<BoneInfo>> boneInfos, sp<Material> material);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Mesh);
 
 //  [[script::bindings::property]]
@@ -57,8 +57,10 @@ public:
 //  [[script::bindings::property]]
     const sp<Material>& material() const;
 
+//  [[script::bindings::property]]
     const std::vector<element_index_t>& indices() const;
-    const array<V3>& vertices() const;
+//  [[script::bindings::property]]
+    const std::vector<V3>& vertices() const;
     const sp<Array<V3>>& normals() const;
     const sp<Array<Tangent>>& tangents() const;
 
@@ -71,7 +73,7 @@ public:
 private:
     String _name;
     std::vector<element_index_t> _indices;
-    sp<Array<V3>> _vertices;
+    std::vector<V3> _vertices;
     sp<Array<UV>> _uvs;
     sp<Array<V3>> _normals;
     sp<Array<Tangent>> _tangents;

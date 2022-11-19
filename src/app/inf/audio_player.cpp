@@ -21,7 +21,7 @@ sp<Future> AudioPlayer::play(const sp<AudioPlayer>& self, const String& src, Pla
     String name, ext;
     Strings::rcut(src, name, ext, '.');
     DCHECK(ext, "Unable to guess AudioFormat for \"%s\"", src.c_str());
-    const sp<Readable> source = beanFactory.ensure<Readable>(ext, src, {});
+    const sp<Readable> source = beanFactory.ensureByTypeValue<Readable>(ext, src, {});
     DCHECK(self->isAudioFormatSupported(AUDIO_FORMAT_PCM), "AudioPlayer should support PCM format at least");
     return self->play(source, AUDIO_FORMAT_PCM, options);
 }

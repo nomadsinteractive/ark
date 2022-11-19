@@ -65,6 +65,19 @@ sp<Uploader> UploaderType::create(sp<Input> value, size_t size)
     return sp<UploaderImpl>::make(std::move(inputs), size);
 }
 
+sp<Uploader> UploaderType::create(std::vector<sp<Input>> inputs, size_t size)
+{
+    std::map<size_t, sp<Input>> inputMap;
+    size_t offset = 0;
+    for(sp<Input>& i : inputs)
+    {
+        size_t size = i->size();
+        inputMap.insert(std::make_pair(offset, std::move(i)));
+        offset += size;
+    }
+    return sp<UploaderImpl>::make(std::move(inputMap), size);
+}
+
 sp<Uploader> UploaderType::create(std::map<size_t, sp<Input>> inputs, size_t size)
 {
     return sp<UploaderImpl>::make(std::move(inputs), size);

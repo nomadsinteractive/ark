@@ -1,7 +1,9 @@
 #include "core/util/input_type.h"
 
 #include "core/inf/array.h"
+#include "core/impl/input/input_object_array.h"
 #include "core/impl/input/input_variable_array.h"
+#include "core/impl/input/input_variable.h"
 
 #include "graphics/base/v4.h"
 #include "graphics/base/mat.h"
@@ -13,34 +15,41 @@ namespace {
 class InputArray : public Input {
 public:
     InputArray(std::vector<sp<Input>> inputs)
-        : _inputs(std::move(inputs)), _stride(_inputs.empty() ? 0 : _inputs.front()->size()) {
+        : _size(0) {
+        for(sp<Input>& i : inputs) {
+            size_t size = i->size();
+            _inputs.emplace_back(_size, std::move(i));
+            _size += size;
+        }
     }
 
     virtual bool update(uint64_t timestamp) override {
         bool dirty = false;
-        for(const sp<Input>& i : _inputs)
-            dirty = i->update(timestamp) || dirty;
+        for(const auto& i : _inputs)
+            dirty = i.second->update(timestamp) || dirty;
         return dirty;
     }
 
     virtual void flat(void* buf) override {
         uint8_t* ptr = reinterpret_cast<uint8_t*>(buf);
-        for(const sp<Input>& i : _inputs) {
-            CHECK(i->size() == _stride, "Input array should have same stride(%ld), but this one doesn't(%ld)", _stride, i->size());
-            i->flat(ptr);
-            ptr += _stride;
-        }
+        for(const auto& i : _inputs)
+            i.second->flat(ptr + i.first);
     }
 
     virtual uint32_t size() override {
-        return static_cast<uint32_t>(_stride * _inputs.size());
+        return static_cast<uint32_t>(_size);
     }
 
 private:
-    std::vector<sp<Input>> _inputs;
-    uint32_t _stride;
+    std::vector<std::pair<size_t, sp<Input>>> _inputs;
+    size_t _size;
 };
 
+}
+
+sp<Input> InputType::create(sp<Numeric> value)
+{
+    return sp<InputVariable<float>>::make(std::move(value));
 }
 
 sp<Input> InputType::create(std::vector<sp<Mat4>> value)
@@ -58,9 +67,29 @@ sp<Input> InputType::create(std::vector<sp<Input>> value)
     return sp<InputArray>::make(std::move(value));
 }
 
+sp<Input> InputType::create(std::vector<V3> value)
+{
+    return sp<InputObjectArray<V3>>::make(std::move(value));
+}
+
+sp<Input> InputType::create(std::vector<V4> value)
+{
+    return sp<InputObjectArray<V4>>::make(std::move(value));
+}
+
+sp<Input> InputType::create(std::vector<uint32_t> value)
+{
+    return sp<InputObjectArray<uint32_t>>::make(std::move(value));
+}
+
 sp<Input> InputType::wrap(sp<Input> self)
 {
     return sp<InputWrapper>::make(std::move(self));
+}
+
+sp<Input> InputType::makeElementIndexInput(std::vector<element_index_t> value)
+{
+    return sp<InputObjectArray<element_index_t>>::make(std::move(value));
 }
 
 void InputType::set(const sp<Input>& self, const sp<Input>& delegate)

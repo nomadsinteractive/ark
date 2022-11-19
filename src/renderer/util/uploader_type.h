@@ -19,6 +19,8 @@ public:
 //[[script::bindings::constructor]]
     static sp<Uploader> create(sp<Input> value, size_t size = 0);
 //[[script::bindings::constructor]]
+    static sp<Uploader> create(std::vector<sp<Input>> inputs, size_t size = 0);
+//[[script::bindings::constructor]]
     static sp<Uploader> create(std::map<size_t, sp<Input>> inputs, size_t size = 0);
 
 //  [[script::bindings::property]]

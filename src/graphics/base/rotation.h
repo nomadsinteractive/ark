@@ -15,7 +15,6 @@
 
 namespace ark {
 
-
 //[[script::bindings::holder]]
 //[[script::bindings::extends(Vec4)]]
 class ARK_API Rotation : public Holder, public Vec4 {

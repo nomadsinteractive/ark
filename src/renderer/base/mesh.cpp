@@ -20,12 +20,12 @@ Mesh::Tangent::Tangent(const V3& tangent, const V3& bitangent)
 {
 }
 
-Mesh::Mesh(String name, std::vector<element_index_t> indices, sp<Array<V3>> vertices, sp<Array<UV>> uvs, sp<Array<V3>> normals, sp<Array<Tangent>> tangents, sp<Array<BoneInfo>> boneInfos, sp<Material> material)
+Mesh::Mesh(String name, std::vector<element_index_t> indices, std::vector<V3> vertices, sp<Array<UV>> uvs, sp<Array<V3>> normals, sp<Array<Tangent>> tangents, sp<Array<BoneInfo>> boneInfos, sp<Material> material)
     : _name(std::move(name)), _indices(std::move(indices)), _vertices(std::move(vertices)), _uvs(std::move(uvs)), _normals(std::move(normals)), _tangents(std::move(tangents)), _bone_infos(std::move(boneInfos)),
       _material(std::move(material))
 {
-    DASSERT(_vertices->length() == _uvs->length() && (!_normals || _vertices->length() == _normals->length()) && (!_tangents || _vertices->length() == _tangents->length())
-            && (!_bone_infos || _vertices->length() == _bone_infos->length()));
+    DASSERT(_vertices.size() == _uvs->length() && (!_normals || _vertices.size() == _normals->length()) && (!_tangents || _vertices.size() == _tangents->length())
+            && (!_bone_infos || _vertices.size() == _bone_infos->length()));
 }
 
 const String& Mesh::name() const
@@ -35,7 +35,7 @@ const String& Mesh::name() const
 
 size_t Mesh::vertexLength() const
 {
-    return _vertices->length();
+    return _vertices.size();
 }
 
 const std::vector<element_index_t>& Mesh::indices() const
@@ -43,7 +43,7 @@ const std::vector<element_index_t>& Mesh::indices() const
     return _indices;
 }
 
-const array<V3>& Mesh::vertices() const
+const std::vector<V3>& Mesh::vertices() const
 {
     return _vertices;
 }
@@ -75,7 +75,7 @@ void Mesh::setNodeId(sp<Integer> nodeId)
 
 void Mesh::write(VertexWriter& buf) const
 {
-    V3* vertice = _vertices->buf();
+    const V3* vertice = _vertices.data();
     UV* uv = _uvs->buf();
     V3* normal = _normals ? _normals->buf() : nullptr;
     Tangent* tangent = _tangents ? _tangents->buf() : nullptr;
@@ -83,7 +83,7 @@ void Mesh::write(VertexWriter& buf) const
     bool hasNodeId = static_cast<bool>(_node_id);
     bool hasMaterialId = buf.hasAttribute(PipelineInput::ATTRIBUTE_NAME_MATERIAL_ID);
     int32_t nodeId = hasNodeId ? _node_id->val() : 0;
-    size_t len = _vertices->length();
+    size_t len = _vertices.size();
 
     for(size_t i = 0; i < len; ++i)
     {

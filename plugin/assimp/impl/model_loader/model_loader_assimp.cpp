@@ -132,13 +132,13 @@ const aiScene* ModelImporterAssimp::loadScene(Assimp::Importer& importer, const 
 Mesh ModelImporterAssimp::loadMesh(const aiScene* scene, const aiMesh* mesh, MaterialBundle& materialBundle, element_index_t vertexBase, NodeTable& boneMapping, const std::vector<sp<Material>>& materials) const
 {
     std::vector<element_index_t> indices = loadIndices(mesh, vertexBase);
-    sp<Array<V3>> vertices = sp<Array<V3>::Allocated>::make(mesh->mNumVertices);
+    std::vector<V3> vertices(mesh->mNumVertices);
     sp<Array<Mesh::UV>> uvs = sp<Array<Mesh::UV>::Allocated>::make(mesh->mNumVertices);
     sp<Array<V3>> normals = mesh->HasNormals() ? sp<Array<V3>::Allocated>::make(mesh->mNumVertices) : sp<Array<V3>::Allocated>::null();
     sp<Array<Mesh::Tangent>> tangents = mesh->HasTangentsAndBitangents() ? sp<Array<Mesh::Tangent>::Allocated>::make(mesh->mNumVertices) : sp<Array<Mesh::Tangent>::Allocated>::null();
     sp<Array<Mesh::BoneInfo>> bones = mesh->HasBones() ? sp<Array<Mesh::BoneInfo>::Allocated>::make(mesh->mNumVertices) : sp<Array<Mesh::BoneInfo>::Allocated>::null();
 
-    V3* vert = vertices->buf() - 1;
+    V3* vert = vertices.data() - 1;
     V3* norm = normals ? normals->buf() - 1 : nullptr;
     Mesh::Tangent* t = tangents ? tangents->buf() - 1 : nullptr;
     Mesh::UV* u = uvs->buf() - 1;
@@ -212,25 +212,25 @@ Model ModelImporterAssimp::loadModel(const aiScene* scene, MaterialBundle& mater
     const bool hasAnimation = scene->HasAnimations() || animateManifests.size() > 0;
     V3 bounds(aabbMax.x() - aabbMin.x(), aabbMax.y() - aabbMin.y(), aabbMax.z() - aabbMin.z());
     aiMatrix4x4 globalAnimationTransform;
-    int32_t upAxis = -1;
-    if(scene->mMetaData->Get("UpAxis", upAxis) && false)
-    {
-        int32_t upAxisSign = 1;
-        scene->mMetaData->Get("UpAxisSign", upAxisSign);
-        DWARN(upAxis != 0, "X up axis does not supported");
-        if(upAxis == 1)
-        {
-            if(hasAnimation)
-                aiMatrix4x4::RotationX(-upAxisSign * Math::PI_2, globalAnimationTransform);
-            else
-            {
-                for(Mesh& i : meshes)
-                    yUp2zUp(i, upAxisSign > 0);
-                bounds = yUp2zUp(bounds, upAxisSign > 0);
-                bounds = V3(std::abs(bounds.x()), std::abs(bounds.y()), std::abs(bounds.z()));
-            }
-        }
-    }
+//    int32_t upAxis = -1;
+//    if(scene->mMetaData->Get("UpAxis", upAxis) && false)
+//    {
+//        int32_t upAxisSign = 1;
+//        scene->mMetaData->Get("UpAxisSign", upAxisSign);
+//        DWARN(upAxis != 0, "X up axis does not supported");
+//        if(upAxis == 1)
+//        {
+//            if(hasAnimation)
+//                aiMatrix4x4::RotationX(-upAxisSign * Math::PI_2, globalAnimationTransform);
+//            else
+//            {
+//                for(Mesh& i : meshes)
+//                    yUp2zUp(i, upAxisSign > 0);
+//                bounds = yUp2zUp(bounds, upAxisSign > 0);
+//                bounds = V3(std::abs(bounds.x()), std::abs(bounds.y()), std::abs(bounds.z()));
+//            }
+//        }
+//    }
 
     Model model(std::move(materials), std::move(meshes), {bounds, bounds, aabbMin});
     if(hasAnimation)
@@ -281,23 +281,23 @@ void ModelImporterAssimp::loadBones(const aiMesh* mesh, NodeTable& boneMapping, 
     }
 }
 
-void ModelImporterAssimp::yUp2zUp(const Mesh& mesh, bool upSign)
-{
-    for(V3& v : *mesh.vertices())
-        v = yUp2zUp(v, upSign);
-    for(V3& n : *mesh.normals())
-        n = yUp2zUp(n, upSign);
-    for(Mesh::Tangent& t : *mesh.tangents())
-    {
-        t._tangent = yUp2zUp(t._tangent, upSign);
-        t._bitangent = yUp2zUp(t._bitangent, upSign);
-    }
-}
+//void ModelImporterAssimp::yUp2zUp(const Mesh& mesh, bool upSign)
+//{
+//    for(V3& v : *mesh.vertices())
+//        v = yUp2zUp(v, upSign);
+//    for(V3& n : *mesh.normals())
+//        n = yUp2zUp(n, upSign);
+//    for(Mesh::Tangent& t : *mesh.tangents())
+//    {
+//        t._tangent = yUp2zUp(t._tangent, upSign);
+//        t._bitangent = yUp2zUp(t._bitangent, upSign);
+//    }
+//}
 
-V3 ModelImporterAssimp::yUp2zUp(const V3& p, bool upSign)
-{
-    return V3(p.x(), upSign ? -p.z() : p.z(), upSign ? p.y() : -p.y());
-}
+//V3 ModelImporterAssimp::yUp2zUp(const V3& p, bool upSign)
+//{
+//    return V3(p.x(), upSign ? -p.z() : p.z(), upSign ? p.y() : -p.y());
+//}
 
 aiMatrix4x4 ModelImporterAssimp::callbackNodeAnimation(const Node& /*node*/, const aiMatrix4x4& transform)
 {

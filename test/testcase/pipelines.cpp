@@ -53,7 +53,7 @@ public:
         const sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(Ark::instance().applicationContext()->renderController(), std::move(vert), std::move(frag));
         buildingContext->addSnippet(snippet);
 
-        const sp<PipelineLayout> pipelineLayout = sp<PipelineLayout>::make(buildingContext);
+        const sp<PipelineLayout> pipelineLayout = sp<PipelineLayout>::make(buildingContext, Camera::getDefaultCamera());
         const sp<PipelineInput>& pipelineInput = pipelineLayout->input();
 
         buildingContext->initialize();

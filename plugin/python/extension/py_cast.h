@@ -252,7 +252,7 @@ private:
         return toCppObject_impl<T>(obj);
     }
     template<typename T, typename U> static Optional<T> toCppCollectionObject_sfinae(PyObject* obj, ...) {
-        Py_ssize_t len = PyObject_Length(obj);
+        Py_ssize_t len = (PyList_Check(obj) || PyTuple_Check(obj)) ? PyObject_Length(obj) : -1;
         if(len == -1)
             return Optional<T>();
         T col;

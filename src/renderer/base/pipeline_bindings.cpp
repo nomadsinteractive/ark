@@ -106,14 +106,14 @@ sp<Pipeline> PipelineBindings::getPipeline(GraphicsContext& graphicsContext, con
 
     layout()->preCompile(graphicsContext);
     _pipeline = pipelineFactory->buildPipeline(graphicsContext, *this);
-    graphicsContext.renderController()->upload(_pipeline, RenderController::US_ON_SURFACE_READY, nullptr, RenderController::UPLOAD_PRIORITY_HIGH);
+    graphicsContext.renderController()->upload(_pipeline, RenderController::US_ON_SURFACE_READY, nullptr, nullptr, RenderController::UPLOAD_PRIORITY_HIGH);
     _pipeline->upload(graphicsContext);
     return _pipeline;
 }
 
 PipelineBindings::Stub::Stub(ModelLoader::RenderMode mode, RenderProcedure renderProcedure, Parameters parameters, sp<PipelineLayout> pipelineLayout)
     : _mode(mode), _render_procedure(renderProcedure), _parameters(std::move(parameters)), _layout(std::move(pipelineLayout)), _input(_layout->input()), _attributes(_input),
-      _samplers(_layout->makeBindingSamplers()), _images(_layout->makeBindingImages())
+      _samplers(_layout->samplers()), _images(_layout->images())
 {
 }
 

@@ -2,7 +2,7 @@
 #define ARK_CORE_BASE_FUTURE_H_
 
 #include "core/base/api.h"
-#include "core/inf/variable.h"
+#include "core/impl/variable/variable_wrapper.h"
 #include "core/types/shared_ptr.h"
 
 namespace ark {
@@ -10,7 +10,7 @@ namespace ark {
 class ARK_API Future {
 public:
 //  [[script::bindings::auto]]
-    Future();
+    Future(const sp<Boolean>& cancelled = nullptr);
 
 //  [[script::bindings::auto]]
     void cancel();
@@ -22,10 +22,11 @@ public:
 //  [[script::bindings::property]]
     bool isDone() const;
 
+//  [[script::bindings::property]]
     sp<Boolean> cancelled() const;
 
 private:
-    sp<Boolean::Impl> _cancelled;
+    sp<VariableWrapper<bool>> _cancelled;
     bool _done;
 };
 

@@ -1,29 +1,19 @@
 #include "renderer/base/pipeline_layout.h"
 
-#include "core/base/bean_factory.h"
-#include "core/base/observer.h"
-#include "core/dom/dom_document.h"
-#include "core/base/notifier.h"
-#include "core/inf/array.h"
 #include "core/inf/input.h"
-#include "core/util/documents.h"
 
 #include "graphics/base/camera.h"
 
-#include "renderer/base/render_engine_context.h"
-#include "renderer/base/graphics_context.h"
 #include "renderer/base/pipeline_building_context.h"
-#include "renderer/base/render_controller.h"
 #include "renderer/base/shader_preprocessor.h"
-#include "renderer/inf/pipeline_factory.h"
-#include "renderer/inf/renderer_factory.h"
 #include "renderer/inf/snippet.h"
 
 namespace ark {
 
-PipelineLayout::PipelineLayout(const sp<PipelineBuildingContext>& buildingContext)
+PipelineLayout::PipelineLayout(const sp<PipelineBuildingContext>& buildingContext, const Camera& camera)
     : _building_context(buildingContext), _input(_building_context->_input), _snippet(_building_context->makePipelineSnippet()), _color_attachment_count(0)
 {
+    initialize(camera);
 }
 
 void PipelineLayout::preCompile(GraphicsContext& graphicsContext)
@@ -54,9 +44,19 @@ std::map<PipelineInput::ShaderStage, String> PipelineLayout::getPreprocessedShad
     return shaders;
 }
 
-uint32_t PipelineLayout::colorAttachmentCount() const
+size_t PipelineLayout::colorAttachmentCount() const
 {
     return _color_attachment_count;
+}
+
+const std::vector<sp<Texture>>& PipelineLayout::samplers() const
+{
+    return _samplers;
+}
+
+const std::vector<sp<Texture>>& PipelineLayout::images() const
+{
+    return _images;
 }
 
 void PipelineLayout::initialize(const Camera& camera)
@@ -67,21 +67,22 @@ void PipelineLayout::initialize(const Camera& camera)
     _building_context->initialize();
 
     ShaderPreprocessor* vertex = _building_context->tryGetStage(PipelineInput::SHADER_STAGE_VERTEX);
+    ShaderPreprocessor* compute = _building_context->tryGetStage(PipelineInput::SHADER_STAGE_COMPUTE);
     if(vertex)
-    {
-        tryBindUniform(*vertex, "u_MVP", camera.vp());
-        tryBindUniform(*vertex, "u_VP", camera.vp());
-        tryBindUniform(*vertex, "u_View", camera.view());
-        tryBindUniform(*vertex, "u_Projection", camera.projection());
-    }
+        tryBindCamera(*vertex, camera);
+    if(compute)
+        tryBindCamera(*compute, camera);
+
     ShaderPreprocessor* fragment = _building_context->tryGetStage(PipelineInput::SHADER_STAGE_FRAGMENT);
     if(fragment)
         _color_attachment_count = fragment->_main_block->_outs.size() + (fragment->_main_block->hasReturnValue() ? 1 : 0);
 
-
     _building_context->setupUniforms();
 
     _input->initialize(_building_context);
+
+    _samplers = makeBindingSamplers();
+    _images = makeBindingImages();
 }
 
 void PipelineLayout::tryBindUniform(const ShaderPreprocessor& shaderPreprocessor, const String& name, const sp<Input>& input)
@@ -90,8 +91,15 @@ void PipelineLayout::tryBindUniform(const ShaderPreprocessor& shaderPreprocessor
     if(uniform)
     {
         uniform->setInput(input);
-        _building_context->addUniform(uniform);
+        _building_context->addUniform(std::move(uniform));
     }
+}
+
+void PipelineLayout::tryBindCamera(const ShaderPreprocessor& shaderPreprocessor, const Camera& camera)
+{
+    tryBindUniform(shaderPreprocessor, "u_VP", camera.vp());
+    tryBindUniform(shaderPreprocessor, "u_View", camera.view());
+    tryBindUniform(shaderPreprocessor, "u_Projection", camera.projection());
 }
 
 std::vector<sp<Texture>> PipelineLayout::makeBindingSamplers() const

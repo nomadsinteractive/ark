@@ -16,7 +16,7 @@ namespace ark {
 
 class ARK_API ComputeContext {
 public:
-    ComputeContext(const sp<ShaderBindings>& shaderBindings, std::vector<RenderLayer::UBOSnapshot> ubo, std::vector<Buffer::Snapshot> ssbo, std::array<int32_t, 3> numWorkGroups);
+    ComputeContext(sp<ShaderBindings> shaderBindings, std::vector<RenderLayer::UBOSnapshot> ubo, std::vector<Buffer::Snapshot> ssbo, std::array<int32_t, 3> numWorkGroups);
     DEFAULT_COPY_AND_ASSIGN(ComputeContext);
 
     sp<RenderCommand> toComputeCommand();

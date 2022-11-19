@@ -137,7 +137,7 @@ void Model::MeshIndicesUploader::upload(Writable& uploader)
     for(const Mesh& i : _meshes)
     {
         const std::vector<element_index_t>& indices = i.indices();
-        uint32_t size = static_cast<uint32_t>(indices.size());
+        uint32_t size = static_cast<uint32_t>(indices.size() * sizeof(element_index_t));
         uploader.write(indices.data(), size, offset);
         offset += size;
     }

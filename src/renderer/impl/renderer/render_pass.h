@@ -20,19 +20,16 @@ public:
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
-//  [[plugin::resource-loader("render-pass")]]
+//  [[plugin::builder("render-pass")]]
     class BUILDER : public Builder<Renderer> {
     public:
-        BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
+        BUILDER(BeanFactory& factory, const document& manifest);
 
         virtual sp<Renderer> build(const Scope& args) override;
 
     private:
-        sp<ResourceLoaderContext> _resource_loader_context;
         sp<Builder<Shader>> _shader;
-        document _model;
-        SafePtr<Builder<ModelLoader::Importer>> _model_importer;
-        SafePtr<Builder<Buffer>> _vertex_buffer;
+        sp<Builder<Buffer>> _vertex_buffer;
         SafePtr<Builder<Buffer>> _index_buffer;
         ModelLoader::RenderMode _mode;
         sp<Builder<Integer>> _draw_count;

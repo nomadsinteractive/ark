@@ -24,7 +24,7 @@ public:
     virtual void preInitialize(PipelineBuildingContext& context) {}
     virtual void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout) {}
 
-    virtual sp<DrawEvents> makeDrawEvents(const RenderRequest& renderRequest) { return makeDrawEvents(); }
+    virtual sp<DrawEvents> makeDrawEvents(const RenderRequest& /*renderRequest*/) { return makeDrawEvents(); }
     virtual sp<DrawEvents> makeDrawEvents() { return nullptr; }
 };
 

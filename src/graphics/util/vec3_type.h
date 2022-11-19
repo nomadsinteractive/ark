@@ -107,17 +107,17 @@ public:
     static sp<Vec3> synchronize(const sp<Vec3>& self, const sp<Boolean>& disposed = nullptr);
 
 //  [[script::bindings::classmethod]]
-    static sp<Vec3> modFloor(const sp<Vec3>& self, const sp<Numeric>& mod);
+    static sp<Vec3> modFloor(sp<Vec3> self, sp<Numeric> mod);
 //  [[script::bindings::classmethod]]
-    static sp<Vec3> modFloor(const sp<Vec3>& self, const sp<Vec3>& mod);
+    static sp<Vec3> modFloor(sp<Vec3> self, sp<Vec3> mod);
 //  [[script::bindings::classmethod]]
-    static sp<Vec3> modCeil(const sp<Vec3>& self, const sp<Numeric>& mod);
+    static sp<Vec3> modCeil(sp<Vec3> self, sp<Numeric> mod);
 //  [[script::bindings::classmethod]]
-    static sp<Vec3> modCeil(const sp<Vec3>& self, const sp<Vec3>& mod);
+    static sp<Vec3> modCeil(sp<Vec3> self, sp<Vec3> mod);
 
 //  [[script::bindings::classmethod]]
-    static sp<Vec3> ifElse(const sp<Vec3>& self, const sp<Boolean>& condition, const sp<Vec3>& otherwise);
-
+    static sp<Vec3> ifElse(sp<Vec3> self, sp<Boolean> condition, sp<Vec3> otherwise);
+[[deprecated]]
 //  [[script::bindings::classmethod]]
     static sp<Vec3> attract(const sp<Vec3>& self, const V3& s0, float duration, const sp<Numeric>& t = nullptr);
 //  [[script::bindings::classmethod]]

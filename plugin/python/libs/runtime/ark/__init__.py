@@ -311,7 +311,7 @@ class RenderController:
     US_RELOAD = 1
     US_ON_SURFACE_READY = 2
     US_ONCE_AND_ON_SURFACE_READY = 3
-    US_ON_CHANGED = 4
+    US_ON_CHANGE = 4
 
     UPLOAD_PRIORITY_LOW = 0
     UPLOAD_PRIORITY_NORMAL = 1
@@ -321,7 +321,7 @@ class RenderController:
                       upload_priority: int = UPLOAD_PRIORITY_NORMAL):
         pass
 
-    def make_buffer(self, buffer_type: int, buffer_usage: int, uploader: Optional['Uploader']) -> Buffer:
+    def make_buffer(self, buffer_type: int, buffer_usage: int, uploader: Optional['Uploader'], upload_strategy: int, future: Optional[Future] = None) -> Buffer:
         pass
 
     def make_vertex_buffer(self, buffer_usage: int = Buffer.USAGE_DYNAMIC, uploader: Optional['Uploader'] = None) -> Buffer:
@@ -934,7 +934,7 @@ class Mat4(_Mat):
 
 
 class Input:
-    def __init__(self, delegate: Union[list[_Mat], list[Vec4], list['Input']]):
+    def __init__(self, delegate: Union[Numeric, list[_Mat], list[Vec4], list[tuple], list[int], list['Input']]):
         pass
 
     @property
@@ -979,7 +979,7 @@ class Animation:
 
 
 class Uploader:
-    def __init__(self, inputs: Union[Input, dict[int, Input]], size: int = 0):
+    def __init__(self, inputs: Union[Input, dict[int, Input], list[Input]], size: int = 0):
         pass
 
     def set(self, uploader: 'Uploader'):
@@ -1046,6 +1046,14 @@ class Mesh:
         return 0
 
     @property
+    def indices(self) -> list[int]:
+        return []
+
+    @property
+    def vertices(self) -> list[float]:
+        return []
+
+    @property
     def material(self) -> Optional[Material]:
         return None
 
@@ -1101,6 +1109,14 @@ class MaterialBundle:
 
 
 class ModelBundle:
+
+    @property
+    def index_length(self) -> int:
+        return 0
+
+    @property
+    def vertex_length(self) -> int:
+        return 0
 
     def get_model(self, t: int) -> Model:
         pass

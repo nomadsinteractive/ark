@@ -548,6 +548,7 @@ def gen_method_call_arg(name, targettype, argtype):
     ctype = remove_crv(argtype)
     equals = acg.typeCompare(targettype, ctype)
     argname = name if equals else gen_cast_call(targettype, name)
+    return 'std::move(%s)' % argname if 'std::vector' in argtype else argname
     if ctype in ARK_PY_ARGUMENT_CHECKERS:
         return ARK_PY_ARGUMENT_CHECKERS[ctype].cast(argname)
     return argname
@@ -702,7 +703,7 @@ class GenMethod(object):
             self._gen_parse_tuple_code(lines, self.gen_local_var_declarations(), self._arguments)
 
         if self.need_unpack_statement():
-            lines.append(acg.format('const sp<${class_name}> unpacked = self->as<${class_name}>();',
+            lines.append(acg.format('sp<${class_name}> unpacked = self->as<${class_name}>();',
                                     class_name=genclass.binding_classname))
         self.gen_definition_body(genclass, lines, self._arguments, [None] * len(self._arguments), not self.check_argument_type,
                                  not self.check_argument_type)

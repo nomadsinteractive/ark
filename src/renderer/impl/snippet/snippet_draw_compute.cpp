@@ -13,15 +13,15 @@ namespace {
 
 class DrawEventsCompute : public Snippet::DrawEvents {
 public:
-    DrawEventsCompute(const sp<Shader>& shader, ComputeContext computeContext)
-        : _shader(shader), _compute_context(std::move(computeContext)) {
+    DrawEventsCompute(sp<Shader> shader, ComputeContext computeContext)
+        : _shader(std::move(shader)), _compute_context(std::move(computeContext)) {
     }
 
-    virtual void preDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override {
+    virtual void preDraw(GraphicsContext& graphicsContext, const DrawingContext& /*context*/) override {
+        _compute_context._shader_bindings->getPipeline(graphicsContext)->compute(graphicsContext, _compute_context);
     }
 
     virtual void postDraw(GraphicsContext& graphicsContext) override {
-        _compute_context._shader_bindings->getPipeline(graphicsContext)->compute(graphicsContext, _compute_context);
     }
 
 private:

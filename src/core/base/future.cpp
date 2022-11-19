@@ -2,8 +2,8 @@
 
 namespace ark {
 
-Future::Future()
-    : _cancelled(sp<Boolean::Impl>::make(false)), _done(false) {
+Future::Future(const sp<Boolean>& cancelled)
+    : _cancelled(cancelled ? sp<VariableWrapper<bool>>::make(cancelled) : sp<VariableWrapper<bool>>::make(false)), _done(false) {
 }
 
 void Future::cancel()

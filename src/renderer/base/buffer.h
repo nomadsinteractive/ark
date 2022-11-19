@@ -107,6 +107,7 @@ public:
 
 //  [[script::bindings::property]]
     uint64_t id() const;
+[[deprecated]]
 //  [[script::bindings::auto]]
     void upload(sp<Uploader> uploader, sp<Future> future = nullptr);
     void upload(GraphicsContext&) const;
@@ -129,10 +130,8 @@ public:
 
 private:
     sp<Delegate> _delegate;
-    sp<Resource> _resource;
 
     friend class ResourceManager;
-    friend class RenderController;
 };
 
 }

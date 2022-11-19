@@ -67,9 +67,15 @@ public:
         : _target(target), _buffer(buffer) {
         glBindBuffer(_target, _buffer);
     }
-    ~GLBufferBinder() {
-        glBindBuffer(_target, 0);
+    GLBufferBinder(GLBufferBinder&& other)
+        : _target(other._target), _buffer(other._buffer) {
+        other._buffer = 0;
     }
+    ~GLBufferBinder() {
+        if(_buffer)
+            glBindBuffer(_target, 0);
+    }
+    DISALLOW_COPY_AND_ASSIGN(GLBufferBinder);
 
 private:
     GLenum _target;
@@ -82,9 +88,15 @@ public:
         : _target(target), _base(base), _buffer(buffer) {
         glBindBufferBase(_target, _base, _buffer);
     }
-    ~GLBufferBaseBinder() {
-        glBindBufferBase(_target, _base, 0);
+    GLBufferBaseBinder(GLBufferBaseBinder&& other)
+        : _target(other._target), _base(other._base), _buffer(other._buffer) {
+        other._buffer = 0;
     }
+    ~GLBufferBaseBinder() {
+        if(_buffer)
+            glBindBufferBase(_target, _base, 0);
+    }
+    DISALLOW_COPY_AND_ASSIGN(GLBufferBaseBinder);
 
 private:
     GLenum _target;
@@ -657,9 +669,10 @@ void GLPipeline::PipelineOperationDraw::draw(GraphicsContext& graphicsContext, c
     const GLCullFace cullFace(_cull_face);
     const GLScissor scissor(contextScissorEnabled ? drawingContext._scissor : _scissor, contextScissorEnabled || _scissor_enabled);
 
+    uint32_t binding = 0;
     std::vector<GLBufferBaseBinder> binders;
     for(const Buffer::Snapshot& i : drawingContext._ssbos)
-        binders.emplace_back(GL_SHADER_STORAGE_BUFFER, 0, i.id());
+        binders.emplace_back(GL_SHADER_STORAGE_BUFFER, binding++, i.id());
 
     _renderer->draw(graphicsContext, drawingContext);
 }
@@ -827,11 +840,13 @@ void GLPipeline::PipelineOperationCompute::compute(GraphicsContext& /*graphicsCo
     glUseProgram(_stub->_id);
     _stub->bindUBOSnapshots(computeContext._ubos, computeContext._shader_bindings->pipelineInput());
 
+    uint32_t binding = 0;
     std::vector<GLBufferBaseBinder> binders;
     for(const Buffer::Snapshot& i : computeContext._ssbo)
-        binders.emplace_back(GL_SHADER_STORAGE_BUFFER, 0, i.id());
+        binders.emplace_back(GL_SHADER_STORAGE_BUFFER, binding++, i.id());
 
     glDispatchCompute(computeContext._num_work_groups.at(0), computeContext._num_work_groups.at(1), computeContext._num_work_groups.at(2));
+    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 }
 
 }

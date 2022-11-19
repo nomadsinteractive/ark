@@ -27,5 +27,4 @@ template<> ARK_API ModelLoader::RenderMode Conversions::to<String, ModelLoader::
     return ModelLoader::RENDER_MODE_NONE;
 }
 
-
 }

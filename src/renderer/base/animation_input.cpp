@@ -79,9 +79,9 @@ void AnimationInput::Stub::flat(void* buf)
 
 const M4* AnimationInput::Stub::getFrameInput() const
 {
+    DCHECK(_frame_index < _animation_frames->size(), "Animation has no frame[%d]", _frame_index);
     return _animation_frames->at(_frame_index).data();
 }
-
 
 AnimationInput::NodeMatrix::NodeMatrix(const sp<Stub>& stub, const String& name)
     : _stub(stub), _node_index(_stub->_nodes->at(name))

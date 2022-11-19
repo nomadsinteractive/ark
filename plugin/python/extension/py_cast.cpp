@@ -119,6 +119,7 @@ sp<Vec2> PyCast::toVec2(PyObject* object, bool alert)
         PyObject* x, *y;
         if(PyArg_ParseTuple(object, "OO", &x, &y))
             return Vec2Type::create(toNumeric(x).value(), toNumeric(y).value());
+        PyErr_Clear();
     }
     sp<Vec2> vec2 = toSharedPtrOrNull<Vec2>(object);
 
@@ -143,6 +144,7 @@ sp<Vec3> PyCast::toVec3(PyObject* object, bool alert)
         PyObject* x, *y, *z = nullptr;
         if(PyArg_ParseTuple(object, "OO|O", &x, &y, &z))
             return Vec3Type::create(toNumeric(x).value(), toNumeric(y).value(), toNumeric(z).value());
+        PyErr_Clear();
     }
     sp<Vec3> vec3 = toSharedPtrOrNull<Vec3>(object);
     if(vec3)
@@ -324,13 +326,22 @@ template<> ARK_PLUGIN_PYTHON_API Optional<uint32_t> PyCast::toCppObject_impl<uin
         DCHECK(pyArkType, "Cannot convert PyObject to PyArkType");
         return pyArkType->typeId();
     }
-    return PyLong_AsUnsignedLong(object);
+    if(PyLong_Check(object))
+        return PyLong_AsUnsignedLong(object);
+    return Optional<uint32_t>();
 }
 
 template<> ARK_PLUGIN_PYTHON_API Optional<int32_t> PyCast::toCppObject_impl<int32_t>(PyObject* object)
 {
-    CHECK(PyNumber_Check(object), "Cannot cast Python object \"%s\" to int32_t", object->ob_type->tp_name);
+    CHECK(PyLong_Check(object), "Cannot cast Python object \"%s\" to int32_t", object->ob_type->tp_name);
     return static_cast<int32_t>(PyLong_AsLong(object));
+}
+
+template<> ARK_PLUGIN_PYTHON_API Optional<uint16_t> PyCast::toCppObject_impl<uint16_t>(PyObject* object)
+{
+    if(PyLong_CheckExact(object))
+        return static_cast<uint16_t>(PyLong_AsUnsignedLong(object));
+    return Optional<uint16_t>();
 }
 
 template<> ARK_PLUGIN_PYTHON_API Optional<int64_t> PyCast::toCppObject_impl<int64_t>(PyObject* object)
@@ -352,6 +363,7 @@ template<> ARK_PLUGIN_PYTHON_API Optional<V2> PyCast::toCppObject_impl<V2>(PyObj
         float x, y;
         if(PyArg_ParseTuple(object, "ff", &x, &y))
             return V2(x, y);
+        PyErr_Clear();
     }
     const sp<Vec2> vec2 = toVec2(object, true);
     if(vec2)
@@ -367,12 +379,12 @@ template<> ARK_PLUGIN_PYTHON_API Optional<V3> PyCast::toCppObject_impl<V3>(PyObj
         float x, y, z = 0;
         if(PyArg_ParseTuple(object, "ff|f", &x, &y, &z))
             return V3(x, y, z);
+        PyErr_Clear();
     }
-    const sp<Vec3> vec3 = toSharedPtr<Vec3>(object).value();
+    Optional<sp<Vec3>> vec3 = toSharedPtr<Vec3>(object);
     if(vec3)
-        return vec3->val();
-    DFATAL("V3 object should be either Vec3 or length-3 tuple (eg. (1.0, 1.0, 1.0))");
-    return V3();
+        return vec3.value()->val();
+    return Optional<V3>();
 }
 
 template<> ARK_PLUGIN_PYTHON_API Optional<V4> PyCast::toCppObject_impl<V4>(PyObject* object)
@@ -382,12 +394,12 @@ template<> ARK_PLUGIN_PYTHON_API Optional<V4> PyCast::toCppObject_impl<V4>(PyObj
         float x, y, z = 0, w = 0;
         if(PyArg_ParseTuple(object, "ff|ff", &x, &y, &z, &w))
             return V4(x, y, z, w);
+        PyErr_Clear();
     }
-    const sp<Vec4> vec4 = toSharedPtr<Vec4>(object).value();
+    Optional<sp<Vec4>> vec4 = toSharedPtr<Vec4>(object);
     if(vec4)
-        return vec4->val();
-    DFATAL("V4 object should be either Vec4 or length-4 tuple (eg. (1.0, 1.0, 1.0, 1.0))");
-    return V4();
+        return vec4.value()->val();
+    return Optional<V4>();
 }
 
 template<typename T> RectT<T> toRectType(PyObject* obj)
@@ -419,8 +431,9 @@ template<> ARK_PLUGIN_PYTHON_API Optional<Color> PyCast::toCppObject_impl<Color>
         float r, g, b, a = 1.0f;
         if(PyArg_ParseTuple(object, "fff|f", &r, &g, &b, &a))
             return Color(r, g, b, a);
+        PyErr_Clear();
     }
-    DFATAL("Color object should be either int or length-4 float tuple. (eg. 0xffffffff or (1.0, 1.0, 1.0, 1.0))");
+    FATAL("Color object should be either int or length-4 float tuple. (eg. 0xffffffff or (1.0, 1.0, 1.0, 1.0))");
     return Color();
 }
 

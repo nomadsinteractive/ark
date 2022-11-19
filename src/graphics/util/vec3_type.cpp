@@ -272,29 +272,29 @@ sp<Vec3> Vec3Type::synchronize(const sp<Vec3>& self, const sp<Boolean>& disposed
     return Ark::instance().applicationContext()->synchronize(self, disposed);
 }
 
-sp<Vec3> Vec3Type::modFloor(const sp<Vec3>& self, const sp<Numeric>& mod)
+sp<Vec3> Vec3Type::modFloor(sp<Vec3> self, sp<Numeric> mod)
 {
-    return sp<VariableOP2<sp<Vec3>, sp<Vec3>, Operators::ModFloor<V3>>>::make(self, create(mod, mod, mod));
+    return sp<VariableOP2<sp<Vec3>, sp<Vec3>, Operators::ModFloor<V3>>>::make(std::move(self), create(mod, mod, mod));
 }
 
-sp<Vec3> Vec3Type::modFloor(const sp<Vec3>& self, const sp<Vec3>& mod)
+sp<Vec3> Vec3Type::modFloor(sp<Vec3> self, sp<Vec3> mod)
 {
-    return sp<VariableOP2<sp<Vec3>, sp<Vec3>, Operators::ModFloor<V3>>>::make(self, mod);
+    return sp<VariableOP2<sp<Vec3>, sp<Vec3>, Operators::ModFloor<V3>>>::make(std::move(self), std::move(mod));
 }
 
-sp<Vec3> Vec3Type::modCeil(const sp<Vec3>& self, const sp<Numeric>& mod)
+sp<Vec3> Vec3Type::modCeil(sp<Vec3> self, sp<Numeric> mod)
 {
     return sp<VariableOP2<sp<Vec3>, sp<Vec3>, Operators::ModCeil<V3>>>::make(self, create(mod, mod, mod));
 }
 
-sp<Vec3> Vec3Type::modCeil(const sp<Vec3>& self, const sp<Vec3>& mod)
+sp<Vec3> Vec3Type::modCeil(sp<Vec3> self, sp<Vec3> mod)
 {
-    return sp<VariableOP2<sp<Vec3>, sp<Vec3>, Operators::ModCeil<V3>>>::make(self, mod);
+    return sp<VariableOP2<sp<Vec3>, sp<Vec3>, Operators::ModCeil<V3>>>::make(std::move(self), std::move(mod));
 }
 
-sp<Vec3> Vec3Type::ifElse(const sp<Vec3>& self, const sp<Boolean>& condition, const sp<Vec3>& otherwise)
+sp<Vec3> Vec3Type::ifElse(sp<Vec3> self, sp<Boolean> condition, sp<Vec3> otherwise)
 {
-    return sp<VariableTernary<V3>>::make(condition, self, otherwise);
+    return sp<VariableTernary<V3>>::make(std::move(condition), std::move(self), std::move(otherwise));
 }
 
 sp<Vec3> Vec3Type::attract(const sp<Vec3>& self, const V3& s0, float duration, const sp<Numeric>& t)

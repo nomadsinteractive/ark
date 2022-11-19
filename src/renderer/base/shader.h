@@ -21,7 +21,7 @@ namespace ark {
 //[[script::bindings::auto]]
 class ARK_API Shader {
 public:
-    Shader(sp<PipelineFactory> pipelineFactory, sp<RenderController> renderController, sp<PipelineLayout> layout, const sp<Camera>& camera, PipelineBindings::Parameters bindingParams);
+    Shader(sp<PipelineFactory> pipelineFactory, sp<RenderController> renderController, sp<PipelineLayout> layout, PipelineBindings::Parameters bindingParams);
     DEFAULT_COPY_AND_ASSIGN(Shader);
 
     static sp<Builder<Shader>> fromDocument(BeanFactory& factory, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext, const String& defVertex = "shaders/default.vert", const String& defFragment = "shaders/texture.frag", const sp<Camera>& defaultCamera = nullptr);
@@ -66,7 +66,6 @@ private:
     sp<RenderController> _render_controller;
     sp<PipelineLayout> _pipeline_layout;
     sp<PipelineInput> _input;
-    sp<Camera> _camera;
 
     PipelineBindings::Parameters _binding_params;
 };

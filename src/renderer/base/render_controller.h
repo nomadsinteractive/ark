@@ -87,7 +87,7 @@ public:
 
     void onDrawFrame(GraphicsContext& graphicsContext);
 
-    void upload(sp<Resource> resource, RenderController::UploadStrategy strategy, sp<Future> future = nullptr, UploadPriority priority = UPLOAD_PRIORITY_NORMAL);
+    void upload(sp<Resource> resource, RenderController::UploadStrategy strategy, sp<Updatable> updatable = nullptr, sp<Future> future = nullptr, UploadPriority priority = UPLOAD_PRIORITY_NORMAL);
 
 //  [[script::bindings::auto]]
     void uploadBuffer(Buffer& buffer, sp<Uploader> uploader, RenderController::UploadStrategy strategy, sp<Future> future = nullptr, RenderController::UploadPriority priority = RenderController::UPLOAD_PRIORITY_NORMAL);
@@ -103,7 +103,8 @@ public:
     sp<Texture> createTexture2D(sp<Size> size, sp<Bitmap> bitmap, RenderController::UploadStrategy us = RenderController::US_ONCE_AND_ON_SURFACE_READY, sp<Future> future = nullptr);
 
 //  [[script::bindings::auto]]
-    Buffer makeBuffer(Buffer::Type type, Buffer::Usage usage, const sp<Uploader>& uploader);
+    Buffer makeBuffer(Buffer::Type type, Buffer::Usage usage, sp<Uploader> uploader, RenderController::UploadStrategy us, sp<Future> future = nullptr);
+    Buffer makeBuffer(Buffer::Type type, Buffer::Usage usage, sp<Uploader> uploader);
 //  [[script::bindings::auto]]
     Buffer makeVertexBuffer(Buffer::Usage usage = Buffer::USAGE_DYNAMIC, const sp<Uploader>& uploader = nullptr);
 //  [[script::bindings::auto]]
@@ -131,11 +132,11 @@ public:
     uint64_t tick() const;
 
 private:
-    class PreUploadingResource {
+    class RenderResource {
     public:
-        PreUploadingResource() = default;
-        PreUploadingResource(sp<Resource> resource, sp<Future> future);
-        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(PreUploadingResource);
+        RenderResource() = default;
+        RenderResource(sp<Resource> resource, sp<Future> future);
+        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(RenderResource);
 
         bool isExpired() const;
         bool isCancelled() const;
@@ -150,28 +151,28 @@ private:
         sp<Future> _future;
     };
 
-    struct UploadingResource {
-        UploadingResource() = default;
-        UploadingResource(PreUploadingResource resource, UploadStrategy strategy, UploadPriority priority);
-        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(UploadingResource);
+    struct UploadingRenderResource {
+        UploadingRenderResource() = default;
+        UploadingRenderResource(RenderResource resource, UploadStrategy strategy, UploadPriority priority);
+        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(UploadingRenderResource);
 
-        PreUploadingResource _resource;
+        RenderResource _resource;
         UploadStrategy _strategy;
         UploadPriority _priority;
     };
 
     class RenderResourceList {
     public:
-        void append(UploadPriority priority, PreUploadingResource ur);
+        void append(UploadPriority priority, RenderResource ur);
 
         void foreach(GraphicsContext& graphicsContext, bool recycle, bool upload);
 
     private:
-        std::vector<PreUploadingResource> _resources[UPLOAD_PRIORITY_COUNT];
+        std::vector<RenderResource> _resources[UPLOAD_PRIORITY_COUNT];
     };
 
 private:
-    void prepare(GraphicsContext& graphicsContext, LFQueue<UploadingResource>& items);
+    void prepare(GraphicsContext& graphicsContext, LFQueue<UploadingRenderResource>& items);
 
 private:
     sp<RenderEngine> _render_engine;
@@ -180,7 +181,7 @@ private:
     sp<Dictionary<bitmap>> _bitmap_bounds_loader;
     sp<Variable<uint64_t>> _clock;
 
-    LFQueue<UploadingResource> _uploading_resources;
+    LFQueue<UploadingRenderResource> _uploading_resources;
 
     RenderResourceList _on_surface_ready;
     RenderResourceList _on_every_frame;

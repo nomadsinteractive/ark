@@ -97,9 +97,9 @@ public:
     static void setVy(const sp<Vec2>& self, const sp<Numeric>& y);
 
 //  [[script::bindings::classmethod]]
-    static sp<Vec3> extend(const sp<Vec2>& self, const sp<Numeric>& z);
+    static sp<Vec3> extend(sp<Vec2> self, sp<Numeric> z);
 //  [[script::bindings::classmethod]]
-    static sp<Vec4> extend(const sp<Vec2>& self, const sp<Vec2>& zw);
+    static sp<Vec4> extend(sp<Vec2> self, sp<Vec2> zw);
 
 //  [[script::bindings::classmethod]]
     static void fix(const sp<Vec2>& self);

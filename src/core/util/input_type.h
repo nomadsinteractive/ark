@@ -15,11 +15,19 @@ namespace ark {
 class ARK_API InputType {
 public:
 //[[script::bindings::constructor]]
+    static sp<Input> create(sp<Numeric> value);
+//[[script::bindings::constructor]]
     static sp<Input> create(std::vector<sp<Mat4>> value);
 //[[script::bindings::constructor]]
     static sp<Input> create(std::vector<sp<Vec4>> value);
 //[[script::bindings::constructor]]
     static sp<Input> create(std::vector<sp<Input>> value);
+//[[script::bindings::constructor]]
+    static sp<Input> create(std::vector<V3> value);
+//[[script::bindings::constructor]]
+    static sp<Input> create(std::vector<V4> value);
+//[[script::bindings::constructor]]
+    static sp<Input> create(std::vector<uint32_t> value);
 
 //[[script::bindings::property]]
     static uint32_t size(const sp<Input>& self);
@@ -28,6 +36,9 @@ public:
     static void set(const sp<Input>& self, const sp<Input>& delegate);
 //[[script::bindings::classmethod]]
     static sp<Input> wrap(sp<Input> self);
+
+//[[script::bindings::auto]]
+    static sp<Input> makeElementIndexInput(std::vector<element_index_t> value);
 
 private:
     class InputWrapper : public Input, Implements<InputWrapper, Input> {

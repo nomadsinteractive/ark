@@ -287,14 +287,14 @@ void Vec2Type::setVy(const sp<Vec2>& self, const sp<Numeric>& y)
     ensureImpl(self)->y()->set(y);
 }
 
-sp<Vec3> Vec2Type::extend(const sp<Vec2>& self, const sp<Numeric>& z)
+sp<Vec3> Vec2Type::extend(sp<Vec2> self, sp<Numeric> z)
 {
-    return sp<VariableOP2<sp<Vec2>, sp<Numeric>, Operators::Extend<V2, float>>>::make(self, z);
+    return sp<VariableOP2<sp<Vec2>, sp<Numeric>, Operators::Extend<V2, float>>>::make(std::move(self), std::move(z));
 }
 
-sp<Vec4> Vec2Type::extend(const sp<Vec2>& self, const sp<Vec2>& zw)
+sp<Vec4> Vec2Type::extend(sp<Vec2> self, sp<Vec2> zw)
 {
-    return sp<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::Extend<V2, V2>>>::make(self, zw);
+    return sp<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::Extend<V2, V2>>>::make(std::move(self), std::move(zw));
 }
 
 void Vec2Type::fix(const sp<Vec2>& self)

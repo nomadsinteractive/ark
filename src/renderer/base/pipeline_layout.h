@@ -18,7 +18,7 @@ namespace ark {
 
 class PipelineLayout {
 public:
-    PipelineLayout(const sp<PipelineBuildingContext>& buildingContext);
+    PipelineLayout(const sp<PipelineBuildingContext>& buildingContext, const Camera& camera);
 
     const sp<Snippet>& snippet() const;
 
@@ -28,11 +28,15 @@ public:
 
     std::map<PipelineInput::ShaderStage, String> getPreprocessedShaders(const RenderEngineContext& renderEngineContext) const;
 
-    uint32_t colorAttachmentCount() const;
+    size_t colorAttachmentCount() const;
+
+    const std::vector<sp<Texture>>& samplers() const;
+    const std::vector<sp<Texture>>& images() const;
 
 private:
     void initialize(const Camera& camera);
     void tryBindUniform(const ShaderPreprocessor& shaderPreprocessor, const String& name, const sp<Input>& input);
+    void tryBindCamera(const ShaderPreprocessor& shaderPreprocessor, const Camera& camera);
 
     std::vector<sp<Texture>> makeBindingSamplers() const;
     std::vector<sp<Texture>> makeBindingImages() const;
@@ -45,13 +49,12 @@ private:
 
     std::map<PipelineInput::ShaderStage, ShaderPreprocessor::Preprocessed> _preprocessed_stages;
 
-    uint32_t _color_attachment_count;
+    size_t _color_attachment_count;
 
-    friend class Shader;
-    friend class ShaderBindings;
+    std::vector<sp<Texture>> _samplers;
+    std::vector<sp<Texture>> _images;
+
     friend class PipelineBuildingContext;
-    friend class PipelineBindings;
-    friend class ShaderPreprocessor;
 
 };
 

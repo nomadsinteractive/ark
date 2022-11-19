@@ -106,7 +106,7 @@ private:
             if(iter == _builders.end())
                 return _default_builder_factory ? wrapBuilder(decorateBuilder(factory, _default_builder_factory(factory, doc), style), id) : nullptr;
             const sp<Builder<T>> builder = iter->second(factory, doc);
-            DCHECK(builder, "Builder \"%s\" create failed", className.c_str());
+            CHECK(builder, "Builder \"%s\" create failed", className.c_str());
             return wrapBuilder(decorateBuilder(factory, builder, style), id);
         }
 
@@ -118,7 +118,7 @@ private:
                 for(const String& style : styles.split(';')) {
                     if(style.at(0) == '@') {
                         const document node = _document_by_id->get(style.substr(1));
-                        DCHECK(node, "Style \"%s\" not found", style.substr(1).c_str());
+                        CHECK(node, "Style \"%s\" not found", style.substr(1).c_str());
                         f = factory.decorate<T>(f, node);
                     } else {
                         String key, value;
@@ -229,7 +229,7 @@ public:
         sp<Builder<T>> builder;
         if(id.package()) {
             const sp<BeanFactory>& factory = getPackage(id.package());
-            DCHECK(factory, "Id: \"%s\"'s package \"%s\" not found", id.toString().c_str(), id.package().c_str());
+            CHECK(factory, "Id: \"%s\"'s package \"%s\" not found", id.toString().c_str(), id.package().c_str());
             builder = factory ? factory->getBuilderByRef<T>(id, *this) : nullptr;
         }
         else
@@ -255,23 +255,23 @@ public:
 
     template<typename T> sp<T> ensure(const String& value, const Scope& args) {
         const sp<T> obj = build<T>(value, args);
-        DCHECK(obj, "Counld not build \"%s\"", value.c_str());
+        CHECK(obj, "Counld not build \"%s\"", value.c_str());
         return obj;
     }
 
-    template<typename T> sp<T> ensure(const String& type, const String& value, const Scope& args) {
+    template<typename T> sp<T> ensureByTypeValue(const String& type, const String& value, const Scope& args) {
         return ensureBuilderByTypeValue<T>(type, value)->build(args);
     }
 
     template<typename T> sp<T> ensure(const document& doc, const Scope& args) {
         const sp<T> obj = build<T>(doc, args);
-        DCHECK(obj, "Counld not build \"%s\"", Documents::toString(doc).c_str());
+        CHECK(obj, "Counld not build \"%s\"", Documents::toString(doc).c_str());
         return obj;
     }
 
     template<typename T> sp<T> ensure(const document& doc, const String& attr, const Scope& args) {
         const sp<T> obj = build<T>(doc, attr, args);
-        DCHECK(obj, "Counld not build \"%s\" from \"%s\"", attr.c_str(), Documents::toString(doc).c_str());
+        CHECK(obj, "Counld not build \"%s\" from \"%s\"", attr.c_str(), Documents::toString(doc).c_str());
         return obj;
     }
 
@@ -288,7 +288,7 @@ public:
 
     template<typename T, typename U> sp<T> ensureDecorated(const document& doc, const Scope& args) {
         const sp<T> obj = buildDecorated<T, U>(doc, args);
-        DCHECK(obj, "Counld not build \"%s\"", Documents::toString(doc).c_str());
+        CHECK(obj, "Counld not build \"%s\"", Documents::toString(doc).c_str());
         return obj;
     }
 
@@ -319,7 +319,7 @@ public:
             const document& child = doc->getChild(attr);
             if(child) {
                 const sp<Builder<T>> builder = findBuilderByDocument<T>(child);
-                DCHECK(builder, "Cannot build \"%s\" from \"%s\"", attr.c_str(), Documents::toString(doc).c_str());
+                CHECK(builder, "Cannot build \"%s\" from \"%s\"", attr.c_str(), Documents::toString(doc).c_str());
                 return builder;
             }
             return nullptr;
@@ -332,7 +332,7 @@ public:
 
         for(const document& i : doc->children()) {
             sp<Builder<T>> builder = findBuilderByDocument<T>(i);
-            DCHECK(builder, "Cannot build \"%s\"", Documents::toString(i).c_str());
+            CHECK(builder, "Cannot build \"%s\"", Documents::toString(i).c_str());
             list.push_back(std::move(builder));
         }
         return list;
@@ -346,7 +346,7 @@ public:
 
         for(const document& i : doc->children(nodeName)) {
             sp<Builder<T>> builder = findBuilderByDocument<T>(i);
-            DCHECK(builder, "Cannot build \"%s\" from \"%s\"", nodeName.c_str(), Documents::toString(i).c_str());
+            CHECK(builder, "Cannot build \"%s\" from \"%s\"", nodeName.c_str(), Documents::toString(i).c_str());
             list.push_back(std::move(builder));
         }
         return list;
@@ -375,13 +375,13 @@ public:
     template<typename T> sp<Builder<T>> ensureBuilder(const String& id, Identifier::Type idType = Identifier::ID_TYPE_AUTO) {
         DCHECK(id, "Empty value being built");
         const sp<Builder<T>> builder = getBuilder<T>(id, idType);
-        DCHECK(builder, "Cannot find builder \"%s\"", id.c_str());
+        CHECK(builder, "Cannot find builder \"%s\"", id.c_str());
         return builder;
     }
 
     template<typename T> sp<Builder<T>> ensureBuilder(const document& doc) {
         const sp<Builder<T>> builder = findBuilderByDocument<T>(doc);
-        DCHECK(builder, "Cannot not build from \"%s\"", Documents::toString(doc).c_str());
+        CHECK(builder, "Cannot not build from \"%s\"", Documents::toString(doc).c_str());
         return builder;
     }
 
@@ -428,7 +428,6 @@ public:
         return nb;
     }
 
-private:
     template<typename T> sp<Builder<T>> findBuilderByDocument(const document& doc) {
         const String className = Documents::getAttribute(doc, Constants::Attributes::CLASS);
         return findBuilderByDocument<T>(doc, className);
@@ -473,6 +472,7 @@ private:
     template<typename T> sp<T> buildSafe(const sp<Builder<T>>& builder, const Scope& args) {
         return builder ? builder->build(args) : nullptr;
     }
+
 private:
     BeanFactory(sp<Stub> stub)
         : _stub(std::move(stub)) {
@@ -507,11 +507,11 @@ public:
 
     virtual sp<T> build(const Scope& args) override {
         const sp<Scope> reference = _references.lock();
-        DCHECK(reference, "BeanFactory has been disposed");
+        CHECK(reference, "BeanFactory has been disposed");
         sp<T> inst = reference->build<T>(_name, args);
         if(!inst) {
             inst = _delegate->build(args);
-            DCHECK(inst, "Cannot build \"%s\"", _name.c_str());
+            CHECK(inst, "Cannot build \"%s\"", _name.c_str());
             reference->put(_name, inst);
             _delegate = nullptr;
         }
@@ -534,7 +534,7 @@ public:
         sp<T> value = args.build<T>(_name, args);
         if(!value) {
             const sp<Scope> references = _references.lock();
-            DCHECK(references, "BeanFactory has been disposed");
+            CHECK(references, "BeanFactory has been disposed");
             value = references->build<T>(_name, args);
         }
         CHECK(value || _fallback, "Cannot get argument \"%s\"", _name.c_str());
@@ -578,7 +578,7 @@ template<typename T> sp<Builder<T>> BeanFactory::getBuilderByArg(const String& a
 }
 
 template<typename T> sp<Builder<T>> BeanFactory::getBuilderByArg(const Identifier& id) {
-    DCHECK(id.isArg(), "Cannot build \"%s\" because it's not an argument", id.toString().c_str());
+    CHECK(id.isArg(), "Cannot build \"%s\" because it's not an argument", id.toString().c_str());
     return sp<BuilderByArgument<T>>::make(_stub->_references, id.arg(), findBuilderByValue<T>(id.toString()));
 }
 

@@ -42,7 +42,7 @@ public:
         sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(_render_controller, _vertex, _fragment);
         buildingContext->loadManifest(_manifest, _factory, args);
         sp<Camera> camera = _camera->build(args);
-        return sp<Shader>::make(_render_controller->createPipelineFactory(), _render_controller, sp<PipelineLayout>::make(buildingContext), camera ? camera : _default_camera, _parameters.build(args));
+        return sp<Shader>::make(_render_controller->createPipelineFactory(), _render_controller, sp<PipelineLayout>::make(buildingContext, camera ? camera : _default_camera), _parameters.build(args));
     }
 
 private:
@@ -60,12 +60,9 @@ private:
 
 }
 
-Shader::Shader(sp<PipelineFactory> pipelineFactory, sp<RenderController> renderController, sp<PipelineLayout> pipelineLayout,
-               const sp<Camera>& camera, PipelineBindings::Parameters bindingParams)
-    : _pipeline_factory(std::move(pipelineFactory)), _render_controller(std::move(renderController)), _pipeline_layout(std::move(pipelineLayout)), _input(_pipeline_layout->input()), _camera(camera ? camera : Camera::getDefaultCamera()),
-      _binding_params(std::move(bindingParams))
+Shader::Shader(sp<PipelineFactory> pipelineFactory, sp<RenderController> renderController, sp<PipelineLayout> pipelineLayout, PipelineBindings::Parameters bindingParams)
+    : _pipeline_factory(std::move(pipelineFactory)), _render_controller(std::move(renderController)), _pipeline_layout(std::move(pipelineLayout)), _input(_pipeline_layout->input()), _binding_params(std::move(bindingParams))
 {
-    _pipeline_layout->initialize(_camera);
 }
 
 sp<Builder<Shader>> Shader::fromDocument(BeanFactory& factory, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext, const String& defVertex, const String& defFragment, const sp<Camera>& defaultCamera)
@@ -83,7 +80,7 @@ sp<Shader> Shader::fromStringTable(const String& vertex, const String& fragment,
         buildingContext->addSnippet(snippet);
 
     const sp<RenderController>& renderController = resourceLoaderContext->renderController();
-    return sp<Shader>::make(renderController->createPipelineFactory(), renderController, sp<PipelineLayout>::make(buildingContext), nullptr, PipelineBindings::Parameters(Rect(), PipelineBindings::FragmentTestTable(), PipelineBindings::FLAG_DEFAULT_VALUE));
+    return sp<Shader>::make(renderController->createPipelineFactory(), renderController, sp<PipelineLayout>::make(buildingContext, Camera::getDefaultCamera()), PipelineBindings::Parameters(Rect(), PipelineBindings::FragmentTestTable(), PipelineBindings::FLAG_DEFAULT_VALUE));
 }
 
 std::vector<RenderLayer::UBOSnapshot> Shader::takeUBOSnapshot(const RenderRequest& renderRequest) const
@@ -143,7 +140,8 @@ sp<Shader> Shader::BUILDER::build(const Scope& args)
         buildingContext->addSnippet(i->build(args));
 
     const sp<RenderController>& renderController = _resource_loader_context->renderController();
-    return sp<Shader>::make(renderController->createPipelineFactory(), renderController, sp<PipelineLayout>::make(buildingContext), _camera->build(args), _parameters.build(args));
+    const sp<Camera> camera = _camera->build(args);
+    return sp<Shader>::make(renderController->createPipelineFactory(), renderController, sp<PipelineLayout>::make(buildingContext, camera ? camera : Camera::getDefaultCamera()), _parameters.build(args));
 }
 
 std::map<PipelineInput::ShaderStage, sp<Builder<String>>> Shader::BUILDER::loadStages(BeanFactory& factory, const document& manifest) const

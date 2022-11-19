@@ -23,38 +23,38 @@ public:
         return a1 <= a2 ? (a1 <= val && val <= a2) : (a2 <= val && val <= a1);
     }
 
-    template<typename T, typename U> static typename std::remove_reference<T>::type floorDiv(T&& value, U&& mod) {
+    template<typename T, typename U> static std::remove_reference_t<T> floorDiv(T&& value, U&& mod) {
         return floorDiv_sfinae(std::forward<T>(value), std::forward<U>(mod), nullptr);
     }
 
-    template<typename T, typename U> static typename std::remove_reference<T>::type floorDiv_sfinae(T&& value, U&& mod, decltype(value.floorDiv(mod))*) {
+    template<typename T, typename U> static std::remove_reference_t<T> floorDiv_sfinae(T&& value, U&& mod, decltype(value.floorDiv(mod))*) {
         return value.floorDiv(std::forward<T>(mod));
     }
 
-    template<typename T, typename U> static typename std::remove_reference<T>::type floorDiv_sfinae(T value, U mod, typename std::enable_if<std::is_integral<T>::value && std::is_integral<U>::value>::type*) {
-        return std::floor(value /  static_cast<float>(mod));
+    template<typename T, typename U> static std::remove_reference_t<T> floorDiv_sfinae(T value, U mod, typename std::enable_if<std::is_integral<T>::value && std::is_integral<U>::value>::type*) {
+        return static_cast<std::remove_reference_t<T>>(std::floor(value /  static_cast<float>(mod)));
     }
 
-    template<typename T, typename U> static typename std::remove_reference<T>::type floorDiv_sfinae(T value, U mod, ...) {
+    template<typename T, typename U> static std::remove_reference_t<T> floorDiv_sfinae(T value, U mod, ...) {
         return std::floor(value /  mod);
     }
 
-    template<typename T> static typename std::remove_reference<T>::type divmod(T value, T mod, T& remainder) {
+    template<typename T> static std::remove_reference_t<T> divmod(T value, T mod, T& remainder) {
         auto quot = floorDiv(value,  mod);
         remainder = value - quot * mod;
         return quot;
     }
 
-    template<typename T> static typename std::remove_reference<T>::type mod(T&& value, T&& mod) {
+    template<typename T> static std::remove_reference_t<T> mod(T&& value, T&& mod) {
         auto v = value - floorDiv(std::forward<T>(value),  std::forward<T>(mod)) * T(mod);
         return signEquals(v, mod) ? v : v + mod;
     }
 
-    template<typename T, typename U> static typename std::remove_reference<T>::type modFloor(T&& value, U&& mod) {
+    template<typename T, typename U> static std::remove_reference_t<T> modFloor(T&& value, U&& mod) {
         return floorDiv(std::forward<T>(value), std::forward<U>(mod)) * mod;
     }
 
-    template<typename T, typename U> static typename std::remove_reference<T>::type modCeil(T&& value, U&& mod) {
+    template<typename T, typename U> static std::remove_reference_t<T> modCeil(T&& value, U&& mod) {
         return modFloor(std::forward<T>(value), std::forward<U>(mod)) + mod;
     }
 
