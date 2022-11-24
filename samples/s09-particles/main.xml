@@ -19,7 +19,7 @@
 		<stage type="compute" src="@asset:particle.comp"/>
 	</shader>
 	<shader id="@s002" vertex="@asset:particle.vert" fragment="@asset:particle.frag">
-		<snippet class="compute" shader="@s001" num-work-groups="256"/>
+		<snippet class="compute" shader="@s001" num-work-groups="512"/>
 	</shader>
 	<renderer id="@imgui" ref="@pre:imgui"/>
 	<arena id="main" view="@root_view">

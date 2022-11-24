@@ -47,19 +47,34 @@ private:
 
 }
 
+sp<Input> InputType::create(sp<Integer> value)
+{
+    return sp<InputVariable<int32_t>>::make(std::move(value));
+}
+
 sp<Input> InputType::create(sp<Numeric> value)
 {
     return sp<InputVariable<float>>::make(std::move(value));
 }
 
+sp<Input> InputType::create(sp<Vec2> value)
+{
+    return sp<InputVariable<V2>>::make(std::move(value));
+}
+
+sp<Input> InputType::create(sp<Vec3> value)
+{
+    return sp<InputVariable<V3>>::make(std::move(value));
+}
+
+sp<Input> InputType::create(sp<Vec4> value)
+{
+    return sp<InputVariable<V4>>::make(std::move(value));
+}
+
 sp<Input> InputType::create(std::vector<sp<Mat4>> value)
 {
     return sp<InputVariableArray<M4>>::make(std::move(value));
-}
-
-sp<Input> InputType::create(std::vector<sp<Vec4>> value)
-{
-    return sp<InputVariableArray<V4>>::make(std::move(value));
 }
 
 sp<Input> InputType::create(std::vector<sp<Input>> value)

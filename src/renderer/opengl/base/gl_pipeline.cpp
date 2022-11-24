@@ -846,7 +846,6 @@ void GLPipeline::PipelineOperationCompute::compute(GraphicsContext& /*graphicsCo
         binders.emplace_back(GL_SHADER_STORAGE_BUFFER, binding++, i.id());
 
     glDispatchCompute(computeContext._num_work_groups.at(0), computeContext._num_work_groups.at(1), computeContext._num_work_groups.at(2));
-    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 }
 
 }

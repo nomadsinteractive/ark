@@ -17,7 +17,7 @@ namespace ark {
 class ARK_API TilemapLayer {
 public:
 // [[script::bindings::auto]]
-    TilemapLayer(sp<Tileset> tileset, String name, uint32_t rowCount, uint32_t colCount, sp<Vec3> position = nullptr, sp<Vec3> scroller = nullptr, sp<Boolean> visible = nullptr, Tilemap::LayerFlag flag = Tilemap::LAYER_FLAG_DEFAULT);
+    TilemapLayer(sp<Tileset> tileset, String name, uint32_t rowCount, uint32_t colCount, sp<Vec3> position = nullptr, sp<Vec3> scroller = nullptr, sp<Boolean> visible = nullptr, float zorder = 0, Tilemap::LayerFlag flag = Tilemap::LAYER_FLAG_DEFAULT);
 
     bool getSelectionTileRange(const Rect& aabb, V3& selectionPosition, RectI& selectionRange) const;
 
@@ -28,6 +28,9 @@ public:
     sp<Vec3> position();
 // [[script::bindings::property]]
     void setPosition(sp<Vec3> position);
+
+// [[script::bindings::property]]
+    float zorder() const;
 
 // [[script::bindings::property]]
     const sp<Tileset>& tileset() const;
@@ -102,6 +105,7 @@ private:
 
     SafePtr<Vec3> _scroller;
     sp<Boolean> _visible;
+    float _zorder;
 
     Tilemap::LayerFlag _flag;
 

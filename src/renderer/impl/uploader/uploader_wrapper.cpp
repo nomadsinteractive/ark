@@ -5,7 +5,7 @@
 namespace ark {
 
 UploaderWrapper::UploaderWrapper(sp<Uploader> delegate)
-    : Uploader(delegate->size()), Delegate<Uploader>(std::move(delegate))
+    : Uploader(delegate->size()), Delegate<Uploader>(std::move(delegate)), _updatable(sp<UpdatableWrapper>::make(_delegate->updatable()))
 {
 }
 
@@ -21,7 +21,7 @@ void UploaderWrapper::upload(Writable& writable)
 
 sp<Updatable> UploaderWrapper::updatable()
 {
-    return _delegate->updatable();
+    return _updatable;
 }
 
 void UploaderWrapper::reset(sp<Uploader> uploader)

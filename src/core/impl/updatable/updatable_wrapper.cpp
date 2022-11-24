@@ -9,7 +9,13 @@ UpdatableWrapper::UpdatableWrapper(sp<Updatable> updatable)
 
 bool UpdatableWrapper::update(uint64_t timestamp)
 {
-    return _delegate->update(timestamp);
+    return (_delegate ? _delegate->update(timestamp) : false) | _timestamp.update(timestamp);
+}
+
+void UpdatableWrapper::reset(sp<UpdatableWrapper> delegate)
+{
+    _timestamp.setDirty();
+    Delegate::reset(std::move(delegate));
 }
 
 }

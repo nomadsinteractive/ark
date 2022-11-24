@@ -6,26 +6,13 @@
 
 namespace ark {
 
-static size_t calculateUploaderSize(const std::map<size_t, sp<Input>>& inputs)
-{
-    size_t size = 0;
-    for(const auto& [i, j] : inputs)
-    {
-        size_t maxSize = i + j->size();
-        if(maxSize > size)
-            size = maxSize;
-    }
-    return size;
-}
-
-
-UploaderImpl::UploaderImpl(std::map<size_t, sp<Input>> inputs, size_t size)
-    : Uploader(size), _inputs(std::move(inputs)), _updatable(sp<UpdatableWrapper>::make(makeUpdatable()))
+UploaderImpl::UploaderImpl(const std::map<size_t, sp<Input>>& inputs, size_t size)
+    : Uploader(size), _inputs(makeInputs(inputs)), _updatable(sp<UpdatableWrapper>::make(makeUpdatable()))
 {
     if(_size == 0)
-        _size = calculateUploaderSize(_inputs);
+        _size = calculateUploaderSize();
     else
-        CHECK(calculateUploaderSize(_inputs) <= _size, "Uploader size overflow, size %zd is not long enough to fill all the inputs", _size);
+        CHECK(calculateUploaderSize() <= _size, "Uploader size overflow, size %zd is not long enough to fill all the inputs", _size);
 }
 
 size_t UploaderImpl::size()
@@ -37,13 +24,7 @@ void UploaderImpl::upload(Writable& writable)
 {
     DTHREAD_CHECK(THREAD_ID_CORE);
     for(const auto& [i, j] : _inputs)
-    {
-        auto inputSize = j->size();
-        if(_buf.size() < inputSize)
-            _buf.resize(inputSize);
-        j->flat(_buf.data());
-        writable.write(_buf.data(), inputSize, i);
-    }
+        j->upload(writable, _buf, i);
 }
 
 sp<Updatable> UploaderImpl::updatable()
@@ -53,7 +34,7 @@ sp<Updatable> UploaderImpl::updatable()
 
 void UploaderImpl::addInput(size_t offset, sp<Input> input)
 {
-    _inputs[offset] = std::move(input);
+    _inputs[offset] = sp<InputImpl>::make(std::move(input));
     _updatable->reset(makeUpdatable());
 }
 
@@ -71,6 +52,50 @@ sp<Updatable> UploaderImpl::makeUpdatable() const
     for(const auto& i : _inputs)
         updatables.push_back(i.second);
     return sp<UpdatableComposite>::make(std::move(updatables));
+}
+
+std::map<size_t, sp<UploaderImpl::InputImpl>> UploaderImpl::makeInputs(const std::map<size_t, sp<Input>>& inputs) const
+{
+    std::map<size_t, sp<InputImpl>> res;
+    for(const auto& [i, j] : inputs)
+        res.insert(std::make_pair(i, sp<InputImpl>::make(j)));
+    return res;
+}
+
+size_t UploaderImpl::calculateUploaderSize() const
+{
+    size_t size = 0;
+    for(const auto& [i, j] : _inputs)
+    {
+        size_t maxSize = i + j->_input->size();
+        if(maxSize > size)
+            size = maxSize;
+    }
+    return size;
+}
+
+UploaderImpl::InputImpl::InputImpl(sp<Input> input)
+    : _input(std::move(input)), _dirty(true)
+{
+}
+
+bool UploaderImpl::InputImpl::update(uint64_t timestamp)
+{
+    _dirty = _input->update(timestamp) || _dirty;
+    return _dirty;
+}
+
+void UploaderImpl::InputImpl::upload(Writable& writable, std::vector<uint8_t>& buf, size_t offset)
+{
+    if(_dirty)
+    {
+        uint32_t size = _input->size();
+        if(buf.size() < size)
+            buf.resize(size);
+        _input->flat(buf.data());
+        writable.write(buf.data(), size, offset);
+        _dirty = false;
+    }
 }
 
 }

@@ -6,6 +6,7 @@ import os
 import re
 import sys
 from os import path
+from typing import Optional
 
 LOADER_TEMPLATE = '''template<typename T> static Box PyArk${classname}_${methodname}Function(PyArkType::Instance& inst, const String& id, const Scope& args) {
     const sp<T> bean = inst.unpack<${classname}>()->${methodname}<T>(id, args);
@@ -408,11 +409,16 @@ class GenConverter:
 
 
 class GenArgument:
-    def __init__(self, accept_type, default_value, meta, _str):
+    def __init__(self, accept_type, default_value, meta, argtype, argname: Optional[str] = None):
         self._accept_type = accept_type
         self._default_value = default_value
         self._meta = meta
-        self._str = _str
+        self._str = argtype
+        self._argname = argname
+
+    @property
+    def argname(self):
+        return self._argname
 
     @property
     def accept_type(self):
@@ -530,13 +536,15 @@ def parse_method_arguments(arguments):
                 if default_value.endswith('('):
                     default_value += ')'
             argstr = argstr[:pos - 1].strip()
-        targettype = ' '.join(argstr.split()[:-1])
+        argsplit = argstr.split()
+        argtype = ' '.join(argsplit[:-1])
+        argname = argsplit[-1]
         for k, l in ARK_PY_ARGUMENTS:
-            m = re.match(k, targettype)
+            m = re.match(k, argtype)
             if m:
                 cast_signature = acg.format(l.cast_signature, *m.groups())
                 argument_meta = GenArgumentMeta(l.typename, cast_signature, l.parse_signature, l.is_base_type)
-                args.append(GenArgument(cast_signature, default_value, argument_meta, targettype))
+                args.append(GenArgument(cast_signature, default_value, argument_meta, argtype, argname))
                 break
         else:
             print('Undefined method argument: "%s"' % arguments[i])
@@ -660,6 +668,7 @@ class GenMethod(object):
         return ['return PyCast::%s(ret);' % fromcall]
 
     def _gen_parse_tuple_code(self, lines, declares, args):
+        lines.append(f'\n{INDENT}'.join(declares))
         parse_format = ''.join(i.parse_signature for i in args)
         if parse_format.count('|') > 1:
             ts = parse_format.split('|')
@@ -667,11 +676,28 @@ class GenMethod(object):
                 print('Illegal default arguments: %s', parse_format)
                 sys.exit(-1)
             parse_format = ts[0] + '|' + ''.join(ts[1:])
-        parsestatement = '''%s
-    if(!PyArg_ParseTuple(args, "%s", %s))
+
+        parse_arg_refnames = ', '.join('&arg%d' % i for i, j in enumerate(args) if j.meta.parse_signature)
+        # TODO: to all possible methods
+        if self._has_keyword_arguments() and self._name == '__init__':
+            lines.append(self._make_argname_declares())
+            parsestatement = '''if(!PyArg_ParseTupleAndKeywords(args, kws, "%s", const_cast<char**>(argnames), %s))
         %s;
-''' % ('\n    '.join(declares), parse_format, ', '.join('&arg%d' % i for i, j in enumerate(args) if j.meta.parse_signature), self.err_return_value)
+    ''' % (parse_format, parse_arg_refnames, self.err_return_value)
+        else:
+            parsestatement = '''if(!PyArg_ParseTuple(args, "%s", %s))
+        %s;
+    ''' % (parse_format, parse_arg_refnames, self.err_return_value)
         lines.append(parsestatement)
+
+    def _make_argname_declares(self):
+        return '''const char* argnames[] = {
+        %s%s
+        nullptr
+    };''' % (f',\n{INDENT * 2}'.join(f'"{acg.camel_case_to_snake_case(i.argname)}"' for i in self._arguments), ',' if self._arguments else '')
+
+    def _has_keyword_arguments(self) -> bool:
+        return all(i.argname is not None for i in self._arguments)
 
     def need_unpack_statement(self):
         return True
@@ -786,7 +812,7 @@ class GenConstructorMethod(GenMethod):
         return 'int'
 
     def gen_py_arguments(self):
-        return 'Instance* self, PyObject* args, PyObject* /*kws*/'
+        return 'Instance* self, PyObject* args, PyObject* kws'
 
     @property
     def err_return_value(self):

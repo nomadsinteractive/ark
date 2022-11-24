@@ -1,7 +1,7 @@
 #ifndef ARK_GRAPHICS_BASE_TILEMAP_H_
 #define ARK_GRAPHICS_BASE_TILEMAP_H_
 
-#include <list>
+#include <vector>
 
 #include "core/base/api.h"
 #include "core/inf/builder.h"
@@ -38,18 +38,14 @@ public:
 // [[script::bindings::property]]
     const sp<Storage>& storage() const;
 
-[[deprecated]]
 // [[script::bindings::auto]]
-    sp<Renderer> makeRenderer(const sp<Layer>& layer = nullptr) const;
-
-// [[script::bindings::auto]]
-    sp<TilemapLayer> makeLayer(const String& name, uint32_t rowCount, uint32_t colCount, sp<Vec3> position = nullptr, sp<Vec3> scroller = nullptr, sp<Boolean> visible = nullptr, Tilemap::LayerFlag layerFlag = Tilemap::LAYER_FLAG_DEFAULT);
+    sp<TilemapLayer> makeLayer(const String& name, uint32_t rowCount, uint32_t colCount, sp<Vec3> position = nullptr, sp<Vec3> scroller = nullptr, sp<Boolean> visible = nullptr, float zorder = 0, Tilemap::LayerFlag layerFlag = Tilemap::LAYER_FLAG_DEFAULT);
 
 // [[script::bindings::auto]]
     void clear();
 
 //  [[script::bindings::property]]
-    const std::list<sp<TilemapLayer>>& layers() const;
+    const std::vector<sp<TilemapLayer>>& layers() const;
 
 //  [[script::bindings::auto]]
     void load(const sp<Readable>& readable);
@@ -82,13 +78,19 @@ public:
     };
 
 private:
-    struct Stub : public RenderLayer::Batch {
-        std::list<sp<TilemapLayer>> _layers;
-        sp<Scrollable> _scrollable;
+    class Stub : public RenderLayer::Batch {
+    public:
+        Stub();
 
         virtual bool preSnapshot(const RenderRequest& renderRequest, LayerContext& lc) override;
         virtual void snapshot(const RenderRequest& renderRequest, const LayerContext& lc, RenderLayer::Snapshot& output) override;
+
+        std::vector<sp<TilemapLayer>> _layers;
+        sp<Scrollable> _scrollable;
+        bool _need_reload;
     };
+
+    static bool _tilemapLayerComp(const TilemapLayer& a, const TilemapLayer& b);
 
 private:
     sp<RenderLayer> _render_layer;

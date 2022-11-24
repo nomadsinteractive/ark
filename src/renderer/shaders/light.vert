@@ -1,5 +1,5 @@
 
-uniform mat4 u_MVP;
+uniform mat4 u_VP;
 uniform mat4 u_Model;
 
 uniform vec3 u_LightPos;
@@ -18,5 +18,5 @@ vec4 ark_main(vec4 position, vec3 normal, out vec4 v_Color) {
 
     v_Color = min(u_LightColor * diffuse + u_AmbientLightColor, 1.0);
 
-    return u_MVP * position;
+    return u_VP * position;
 }

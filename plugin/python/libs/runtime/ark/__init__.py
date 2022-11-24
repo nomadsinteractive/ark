@@ -312,6 +312,7 @@ class RenderController:
     US_ON_SURFACE_READY = 2
     US_ONCE_AND_ON_SURFACE_READY = 3
     US_ON_CHANGE = 4
+    US_ON_EVERY_FRAME = 8
 
     UPLOAD_PRIORITY_LOW = 0
     UPLOAD_PRIORITY_NORMAL = 1
@@ -832,7 +833,7 @@ class Vec2(_Var):
     def to_size(self) -> 'Size':
         pass
 
-    def extend(self, v) -> 'Vec3':
+    def extend(self, v):
         pass
 
     def __str__(self):
@@ -934,7 +935,7 @@ class Mat4(_Mat):
 
 
 class Input:
-    def __init__(self, delegate: Union[Numeric, list[_Mat], list[Vec4], list[tuple], list[int], list['Input']]):
+    def __init__(self, delegate: Union[Numeric, Vec2, Vec3, Vec4, list[_Mat], list[tuple], list[int], list['Input']]):
         pass
 
     @property
@@ -1636,8 +1637,8 @@ class Math:
 
 
 class Size(Vec3):
-    def __init__(self, w, h, d=None):
-        super().__init__(w, h, d)
+    def __init__(self, width, height, depth=None):
+        super().__init__(width, height, depth)
 
     @property
     def width(self):
@@ -1721,7 +1722,7 @@ class Tileset:
 
 class TilemapLayer(Renderer):
     def __init__(self, tileset: Tileset, name: str, row_count: int, col_count: int, position: Optional[TYPE_VEC3] = None, scroller: Optional[TYPE_VEC3] = None,
-                 visible: Optional[Boolean] = None, flag: int = 0):
+                 visible: Optional[Boolean] = None, zorder: float = 0, flag: int = 0):
         super().__init__()
 
     @property
@@ -1821,7 +1822,8 @@ class Tilemap:
     def make_renderer(self, layer: Optional[Layer] = None) -> Renderer:
         pass
 
-    def make_layer(self, name: str, row_count: int, col_count: int, position: Optional[Vec3] = None, scroller: Optional[Vec3] = None, layer_flag: int = 0) -> TilemapLayer:
+    def make_layer(self, name: str, row_count: int, col_count: int, position: Optional[Vec3] = None, scroller: Optional[Vec3] = None,
+                   visible: Optional[Boolean] = None, layer_flag: int = 0) -> TilemapLayer:
         pass
 
     def add_layer(self, layer: TilemapLayer):

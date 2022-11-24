@@ -14,8 +14,8 @@
 namespace ark {
 namespace opengl {
 
-GLFramebuffer::GLFramebuffer(const sp<Recycler>& recycler, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments)
-    : _recycler(recycler), _color_attachments(std::move(colorAttachments)), _depth_stencil_attachment(depthStencilAttachments), _id(0)
+GLFramebuffer::GLFramebuffer(sp<Recycler> recycler, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments)
+    : _recycler(std::move(recycler)), _color_attachments(std::move(colorAttachments)), _depth_stencil_attachment(depthStencilAttachments), _id(0)
 {
 }
 

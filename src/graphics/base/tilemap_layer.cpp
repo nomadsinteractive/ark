@@ -20,9 +20,9 @@
 
 namespace ark {
 
-TilemapLayer::TilemapLayer(sp<Tileset> tileset, String name, uint32_t rowCount, uint32_t colCount, sp<Vec3> position, sp<Vec3> scroller, sp<Boolean> visible, Tilemap::LayerFlag flag)
+TilemapLayer::TilemapLayer(sp<Tileset> tileset, String name, uint32_t rowCount, uint32_t colCount, sp<Vec3> position, sp<Vec3> scroller, sp<Boolean> visible, float zorder, Tilemap::LayerFlag flag)
     : _name(std::move(name)), _col_count(colCount), _row_count(rowCount), _size(sp<Size>::make(tileset->tileWidth() * colCount, tileset->tileHeight() * rowCount)),
-      _scroller(std::move(scroller)), _visible(std::move(visible)), _flag(flag), _stub(sp<BatchImpl>::make(colCount, rowCount, std::move(tileset), std::move(position)))
+      _scroller(std::move(scroller)), _visible(std::move(visible)), _zorder(zorder), _flag(flag), _stub(sp<BatchImpl>::make(colCount, rowCount, std::move(tileset), std::move(position)))
 {
 }
 
@@ -65,6 +65,11 @@ sp<Vec3> TilemapLayer::position()
 void TilemapLayer::setPosition(sp<Vec3> position)
 {
     _stub->_position.reset(std::move(position));
+}
+
+float TilemapLayer::zorder() const
+{
+    return _zorder;
 }
 
 const sp<Tileset>& TilemapLayer::tileset() const

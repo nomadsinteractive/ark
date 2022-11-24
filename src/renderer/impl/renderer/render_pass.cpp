@@ -48,18 +48,9 @@ void RenderPass::render(RenderRequest& renderRequest, const V3& /*position*/)
     uint32_t drawCount = static_cast<uint32_t>(_draw_count->val());
     const Buffer& vertices = _shader_bindings->vertices();
 
-//    if(_index_buffer)
-    {
-        DrawingContext drawingContext(_shader_bindings, _shader_bindings->attachments(), _shader->takeUBOSnapshot(renderRequest), _shader->takeSSBOSnapshot(renderRequest), vertices.snapshot(),
-                                      _index_buffer.snapshot(), DrawingContext::ParamDrawElements(0, drawCount));
-        renderRequest.addRequest(drawingContext.toRenderCommand(renderRequest));
-    }
-//    else
-//    {
-//        DrawingContext drawingContext(_shader_bindings, _shader_bindings->attachments(), _shader->takeUBOSnapshot(renderRequest), _shader->takeSSBOSnapshot(renderRequest), vertices.snapshot(),
-//                                      Buffer::Snapshot(), DrawingContext::ParamDrawElements(0, drawCount));
-//        renderRequest.addRequest(drawingContext.toRenderCommand(renderRequest));
-//    }
+    DrawingContext drawingContext(_shader_bindings, _shader_bindings->attachments(), _shader->takeUBOSnapshot(renderRequest), _shader->takeSSBOSnapshot(renderRequest), vertices.snapshot(),
+                                  _index_buffer.snapshot(), DrawingContext::ParamDrawElements(0, drawCount));
+    renderRequest.addRequest(drawingContext.toRenderCommand(renderRequest));
 }
 
 RenderPass::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

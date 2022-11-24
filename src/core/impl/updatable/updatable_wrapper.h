@@ -1,7 +1,7 @@
 #ifndef ARK_CORE_IMPL_UPDATABLE_UPDATABLE_WRAPPER_H_
 #define ARK_CORE_IMPL_UPDATABLE_UPDATABLE_WRAPPER_H_
 
-
+#include "core/base/timestamp.h"
 #include "core/base/delegate.h"
 #include "core/inf/updatable.h"
 
@@ -12,6 +12,11 @@ public:
     UpdatableWrapper(sp<Updatable> updatable);
 
     virtual bool update(uint64_t timestamp) override;
+
+    void reset(sp<UpdatableWrapper> delegate);
+
+private:
+    Timestamp _timestamp;
 };
 
 }

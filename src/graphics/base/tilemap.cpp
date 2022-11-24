@@ -100,13 +100,6 @@ const sp<Storage>& Tilemap::storage() const
     return _storage;
 }
 
-sp<Renderer> Tilemap::makeRenderer(const sp<Layer>& layer) const
-{
-//    DCHECK(layer || _render_layer, "No LayerContext specified");
-//    return sp<TilemapRenderer>::make(layer ? layer->context() : _render_layer->makeContext(), _stub);
-    return nullptr;
-}
-
 void Tilemap::load(const sp<Readable>& readable)
 {
     _storage->import(readable);
@@ -117,16 +110,17 @@ void Tilemap::load(const String& src)
     load(Ark::instance().openAsset(src));
 }
 
-sp<TilemapLayer> Tilemap::makeLayer(const String& name, uint32_t rowCount, uint32_t colCount, sp<Vec3> position, sp<Vec3> scroller, sp<Boolean> visible, Tilemap::LayerFlag layerFlag)
+sp<TilemapLayer> Tilemap::makeLayer(const String& name, uint32_t rowCount, uint32_t colCount, sp<Vec3> position, sp<Vec3> scroller, sp<Boolean> visible, float zorder, Tilemap::LayerFlag layerFlag)
 {
-    sp<TilemapLayer> layer = sp<TilemapLayer>::make(_tileset, name, rowCount, colCount, position, scroller, std::move(visible), layerFlag);
+    sp<TilemapLayer> layer = sp<TilemapLayer>::make(_tileset, name, rowCount, colCount, position, scroller, std::move(visible), zorder, layerFlag);
     addLayer(layer);
     return layer;
 }
 
 void Tilemap::addLayer(sp<TilemapLayer> layer)
 {
-    _stub->_layers.push_back(std::move(layer));
+    _stub->_layers.insert(std::upper_bound(_stub->_layers.begin(), _stub->_layers.end(), layer, _tilemapLayerComp), std::move(layer));
+    _stub->_need_reload = true;
 }
 
 void Tilemap::removeLayer(const sp<TilemapLayer>& layer)
@@ -134,6 +128,7 @@ void Tilemap::removeLayer(const sp<TilemapLayer>& layer)
     const auto iter = std::find(_stub->_layers.begin(), _stub->_layers.end(), layer);
     DCHECK(iter != _stub->_layers.end(), "Layer does not belong to this Tilemap");
     _stub->_layers.erase(iter);
+    _stub->_need_reload = true;
 }
 
 void Tilemap::jsonLoad(const Json& json)
@@ -198,7 +193,12 @@ Json Tilemap::jsonDump() const
     return jTilemap;
 }
 
-const std::list<sp<TilemapLayer>>& Tilemap::layers() const
+bool Tilemap::_tilemapLayerComp(const TilemapLayer& a, const TilemapLayer& b)
+{
+    return a.zorder() < b.zorder();
+}
+
+const std::vector<sp<TilemapLayer>>& Tilemap::layers() const
 {
     return _stub->_layers;
 }
@@ -222,9 +222,15 @@ sp<Tilemap> Tilemap::BUILDER::build(const Scope& args)
     return tilemap;
 }
 
+Tilemap::Stub::Stub()
+    : _need_reload(false)
+{
+}
+
 bool Tilemap::Stub::preSnapshot(const RenderRequest& renderRequest, LayerContext& lc)
 {
-    bool needReload = false;
+    bool needReload = _need_reload;
+    _need_reload = false;
     if(_scrollable)
         _scrollable->cull();
     for(TilemapLayer& i : _layers)

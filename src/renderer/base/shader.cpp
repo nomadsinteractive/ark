@@ -33,8 +33,8 @@ namespace {
 
 class ShaderBuilderImpl : public Builder<Shader> {
 public:
-    ShaderBuilderImpl(BeanFactory& factory, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext, sp<String> vertex, sp<String> fragment, const sp<Camera>& defaultCamera)
-        : _factory(factory), _manifest(doc), _render_controller(resourceLoaderContext->renderController()), _vertex(std::move(vertex)), _fragment(std::move(fragment)), _default_camera(defaultCamera),
+    ShaderBuilderImpl(BeanFactory& factory, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext, sp<String> vertex, sp<String> fragment, sp<Camera> defaultCamera)
+        : _factory(factory), _manifest(doc), _render_controller(resourceLoaderContext->renderController()), _vertex(std::move(vertex)), _fragment(std::move(fragment)), _default_camera(defaultCamera ? std::move(defaultCamera) : Camera::getDefaultCamera()),
           _camera(factory.getBuilder<Camera>(doc, Constants::Attributes::CAMERA)), _parameters(factory, doc, resourceLoaderContext) {
     }
 

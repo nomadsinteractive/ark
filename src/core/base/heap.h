@@ -24,7 +24,7 @@ public:
         virtual ~Allocator() = default;
 
         virtual void initialize(SizeType size) = 0;
-        virtual SizeType allocate(SizeType size, SizeType alignment, SizeType& allocated) = 0;
+        virtual std::pair<SizeType, SizeType> allocate(SizeType size, SizeType alignment) = 0;
         virtual SizeType free(SizeType offset) = 0;
     };
 
@@ -49,10 +49,10 @@ public:
 
         }
 
-        virtual SizeType allocate(SizeType size, SizeType alignment, SizeType& allocated) override {
+        virtual std::pair<SizeType, SizeType> allocate(SizeType size, SizeType alignment) override {
             SizeType length = size / kAlignment;
             if(alignment > kAlignment || length > _max_chunk_length)
-                return npos;
+                return std::make_pair(npos, 0);
 
             Chunk chunk;
             uint32_t level = getLevel(length);
@@ -63,8 +63,7 @@ public:
             if(aquire(aquired, chunk)) {
                 if(aquired != level)
                     split(chunk, aquired, level);
-                allocated = (static_cast<SizeType>(1) << level) * kAlignment;
-                return chunk * kAlignment;
+                return std::make_pair(chunk * kAlignment, (static_cast<SizeType>(1) << level) * kAlignment);
             }
             else {
                 if(_length > (_allocated + length)) {
@@ -72,11 +71,10 @@ public:
 
                     SizeType offset = _allocated * kAlignment;
                     _allocated += length;
-                    allocated = length * kAlignment;
-                    return offset;
+                    return std::make_pair(offset, length * kAlignment);
                 }
             }
-            return npos;
+            return std::make_pair(npos, 0);
         }
 
         virtual SizeType free(SizeType ptr) override {
@@ -240,7 +238,7 @@ public:
             addFragment(FRAGMENT_STATE_UNUSED, 0, size);
         }
 
-        virtual SizeType allocate(SizeType size, SizeType alignment, SizeType& allocated) override {
+        virtual std::pair<SizeType, SizeType> allocate(SizeType size, SizeType alignment) override {
             SizeType sizeNeeded = size + (alignment > kAlignment ? alignment : 0);
             FragmentQueue* allocator = _fragment_trie.find(sizeNeeded);
             while(allocator) {
@@ -249,15 +247,14 @@ public:
                     fragment = allocator->pop();
                     if(fragment && fragment->_state == FRAGMENT_STATE_UNUSED) {
                         Fragment splitted = fragment->split(fragment, findOptimizedPosition(fragment, size, alignment), size, *this);
-                        allocated = splitted._size;
-                        return splitted._offset;
+                        return std::make_pair(splitted._offset, splitted._size);
                     }
                 }
                 _fragment_trie.remove(allocator->_size);
                 allocator = _fragment_trie.find(sizeNeeded);
             }
             DWARN(checkFragments(sizeNeeded), "Unallocated candidate block which's in not in Allocator but found in fragments, something might go wrong");
-            return npos;
+            return std::make_pair(npos, 0);
         }
 
         virtual SizeType free(SizeType offset) override {
@@ -344,8 +341,7 @@ private:
         }
 
         Optional<PtrType> allocate(SizeType size, SizeType alignment) {
-            SizeType allocated = 0;
-            SizeType offset = _allocator->allocate(align(size, kAlignment), alignment, allocated);
+            const auto [offset, allocated] = _allocator->allocate(align(size, kAlignment), alignment);
             if(offset != npos) {
                 _allocated += allocated;
                 return _memory.begin() + offset;

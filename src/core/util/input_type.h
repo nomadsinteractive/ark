@@ -15,11 +15,17 @@ namespace ark {
 class ARK_API InputType {
 public:
 //[[script::bindings::constructor]]
+    static sp<Input> create(sp<Integer> value);
+//[[script::bindings::constructor]]
     static sp<Input> create(sp<Numeric> value);
 //[[script::bindings::constructor]]
-    static sp<Input> create(std::vector<sp<Mat4>> value);
+    static sp<Input> create(sp<Vec2> value);
 //[[script::bindings::constructor]]
-    static sp<Input> create(std::vector<sp<Vec4>> value);
+    static sp<Input> create(sp<Vec3> value);
+//[[script::bindings::constructor]]
+    static sp<Input> create(sp<Vec4> value);
+//[[script::bindings::constructor]]
+    static sp<Input> create(std::vector<sp<Mat4>> value);
 //[[script::bindings::constructor]]
     static sp<Input> create(std::vector<sp<Input>> value);
 //[[script::bindings::constructor]]
