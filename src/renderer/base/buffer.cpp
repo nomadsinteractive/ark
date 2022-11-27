@@ -7,18 +7,15 @@
 #include "renderer/base/render_controller.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/base/vertex_writer.h"
-#include "renderer/inf/uploader.h"
-
-#include "app/base/application_context.h"
 
 namespace ark {
 
 namespace {
 
-class SnapshotUploader : public Uploader {
+class InputSnapshot : public Input {
 public:
-    SnapshotUploader(size_t size, std::vector<Buffer::Strip> strips)
-        : Uploader(size), _blocks(std::move(strips)) {
+    InputSnapshot(size_t size, std::vector<Buffer::Strip> strips)
+        : Input(size), _blocks(std::move(strips)) {
     }
 
     virtual void upload(Writable& uploader) override {
@@ -37,8 +34,8 @@ Buffer::Snapshot::Snapshot(sp<Delegate> stub)
 {
 }
 
-Buffer::Snapshot::Snapshot(sp<Delegate> stub, size_t size, sp<Uploader> uploader)
-    : _delegate(std::move(stub)), _uploader(std::move(uploader)), _size(size)
+Buffer::Snapshot::Snapshot(sp<Delegate> stub, size_t size, sp<Input> input)
+    : _delegate(std::move(stub)), _input(std::move(input)), _size(size)
 {
 }
 
@@ -59,8 +56,8 @@ size_t Buffer::Snapshot::size() const
 
 void Buffer::Snapshot::upload(GraphicsContext& graphicsContext) const
 {
-    if(_uploader)
-        _delegate->uploadBuffer(graphicsContext, _uploader);
+    if(_input)
+        _delegate->uploadBuffer(graphicsContext, _input);
 }
 
 const sp<Buffer::Delegate>& Buffer::Snapshot::delegate() const
@@ -90,12 +87,12 @@ Buffer::operator bool() const
 
 Buffer::Snapshot Buffer::snapshot(const ByteArray::Borrowed& strip) const
 {
-    return Snapshot(_delegate, strip.length(), sp<Uploader>::make<SnapshotUploader>(strip.length(), std::vector<Buffer::Strip>{{0, strip}}));
+    return Snapshot(_delegate, strip.length(), sp<InputSnapshot>::make(strip.length(), std::vector<Buffer::Strip>{{0, strip}}));
 }
 
-Buffer::Snapshot Buffer::snapshot(sp<Uploader> uploader, size_t size) const
+Buffer::Snapshot Buffer::snapshot(sp<Input> input, size_t size) const
 {
-    return Snapshot(_delegate, size, std::move(uploader));
+    return Snapshot(_delegate, size, std::move(input));
 }
 
 uint64_t Buffer::id() const
@@ -103,10 +100,10 @@ uint64_t Buffer::id() const
     return _delegate->id();
 }
 
-void Buffer::upload(sp<Uploader> uploader, sp<Future> future)
-{
-    Ark::instance().applicationContext()->renderController()->uploadBuffer(*this, std::move(uploader), RenderController::US_ON_CHANGE, std::move(future));
-}
+//void Buffer::upload(sp<Uploader> uploader, sp<Future> future)
+//{
+//    Ark::instance().applicationContext()->renderController()->uploadBuffer(*this, std::move(uploader), RenderController::US_ON_CHANGE, std::move(future));
+//}
 
 void Buffer::upload(GraphicsContext& graphicsContext) const
 {
@@ -128,28 +125,13 @@ Buffer::Snapshot Buffer::Factory::toSnapshot(const Buffer& buffer)
     if(_strips.size() == 0)
         return buffer.snapshot();
 
-    return buffer.snapshot(sp<SnapshotUploader>::make(_size, std::move(_strips)));
+    return buffer.snapshot(sp<InputSnapshot>::make(_size, std::move(_strips)));
 }
 
 void Buffer::Factory::addStrip(size_t offset, ByteArray::Borrowed& content)
 {
     _strips.emplace_back(offset, content);
     _size = std::max(_size, content.length() + offset);
-}
-
-Uploader::Uploader(size_t size)
-    : _size(size)
-{
-}
-
-size_t Uploader::size()
-{
-    return _size;
-}
-
-sp<Updatable> Uploader::updatable()
-{
-    return nullptr;
 }
 
 Buffer::Delegate::Delegate()
@@ -163,14 +145,14 @@ size_t Buffer::Delegate::size() const
 }
 
 Buffer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _resource_loader_context(resourceLoaderContext), _uploader(factory.getBuilder<Uploader>(manifest, "uploader")), _usage(Documents::getAttribute<Usage>(manifest, "usage", USAGE_DYNAMIC))
+    : _resource_loader_context(resourceLoaderContext), _input(factory.getBuilder<Input>(manifest, "input")), _usage(Documents::getAttribute<Usage>(manifest, "usage", USAGE_DYNAMIC))
 {
 }
 
 sp<Buffer> Buffer::BUILDER::build(const Scope& args)
 {
     const sp<RenderController>& renderController = _resource_loader_context->renderController();
-    return sp<Buffer>::make(renderController->makeBuffer(Buffer::TYPE_STORAGE, _usage, _uploader->build(args)));
+    return sp<Buffer>::make(renderController->makeBuffer(Buffer::TYPE_STORAGE, _usage, _input->build(args)));
 }
 
 template<> ARK_API Buffer::Usage Conversions::to<String, Buffer::Usage>(const String& str)

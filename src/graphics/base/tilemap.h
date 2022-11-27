@@ -53,7 +53,7 @@ public:
     void load(const String& src);
 
 //  [[script::bindings::auto]]
-    void addLayer(sp<TilemapLayer> layer);
+    void addLayer(sp<TilemapLayer> layer, float zorder = 0);
 //  [[script::bindings::auto]]
     void removeLayer(const sp<TilemapLayer>& layer);
 

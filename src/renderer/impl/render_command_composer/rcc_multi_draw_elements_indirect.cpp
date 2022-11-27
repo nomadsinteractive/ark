@@ -1,5 +1,7 @@
 #include "renderer/impl/render_command_composer/rcc_multi_draw_elements_indirect.h"
 
+#include "core/impl/writable/writable_with_offset.h"
+
 #include "graphics/base/render_layer.h"
 #include "graphics/base/render_request.h"
 #include "graphics/util/matrix_util.h"
@@ -16,6 +18,57 @@
 #include "renderer/inf/vertices.h"
 
 namespace ark {
+
+namespace {
+
+class VerticesUploader : public Input {
+public:
+    VerticesUploader(sp<ModelBundle> multiModels, sp<PipelineInput> pipelineInput)
+        : Input(multiModels->vertexLength() * pipelineInput->getStream(0).stride()), _model_bundle(std::move(multiModels)), _pipeline_input(std::move(pipelineInput)) {
+    }
+
+    void upload(Writable& uploader) override {
+        uint32_t offset = 0;
+        size_t stride = _pipeline_input->getStream(0).stride();
+        PipelineInput::AttributeOffsets attributes(_pipeline_input);
+        for(const auto& i : _model_bundle->models())
+        {
+            const Model& model = i.second._model;
+            uint32_t size = static_cast<uint32_t>(model.vertices()->length() * stride);
+            std::vector<uint8_t> buf(size);
+            VertexWriter stream(attributes, false, buf.data(), size, stride);
+            i.second._model->writeToStream(stream, V3(1.0f));
+            uploader.write(buf.data(), size, offset);
+            offset += size;
+        }
+    }
+
+private:
+    sp<ModelBundle> _model_bundle;
+    sp<PipelineInput> _pipeline_input;
+};
+
+class IndicesUploader : public Input {
+public:
+    IndicesUploader(sp<ModelBundle> multiModels)
+        : Input(multiModels->indexLength() * sizeof(element_index_t)), _model_bundle(std::move(multiModels)) {
+    }
+
+    void upload(Writable& uploader) override {
+        size_t offset = 0;
+        for(const auto& i: _model_bundle->models())
+        {
+            Input& indices = i.second._model->indices();
+            indices.upload(WritableWithOffset(uploader, offset));
+            offset += indices.size();
+        }
+    }
+
+private:
+    sp<ModelBundle> _model_bundle;
+};
+
+}
 
 RCCMultiDrawElementsIndirect::RCCMultiDrawElementsIndirect(sp<ModelBundle> multiModels)
     : _model_bundle(std::move(multiModels))
@@ -113,67 +166,6 @@ V3 RCCMultiDrawElementsIndirect::toScale(const V3& displaySize, const Metrics& m
     return V3(displaySize.x() != 0 ? displaySize.x() / size.x() : 1.0f,
               displaySize.y() != 0 ? displaySize.y() / size.y() : 1.0f,
               displaySize.z() != 0 ? displaySize.z() /  size.z() : 1.0f);
-}
-
-RCCMultiDrawElementsIndirect::VerticesUploader::VerticesUploader(const sp<ModelBundle>& multiModels, const sp<PipelineInput>& pipelineInput)
-    : Uploader(multiModels->vertexLength() * pipelineInput->getStream(0).stride()), _model_bundle(multiModels), _pipeline_input(pipelineInput)
-{
-}
-
-void RCCMultiDrawElementsIndirect::VerticesUploader::upload(Writable& uploader)
-{
-    uint32_t offset = 0;
-    size_t stride = _pipeline_input->getStream(0).stride();
-    PipelineInput::AttributeOffsets attributes(_pipeline_input);
-    for(const auto& i : _model_bundle->models())
-    {
-        const Model& model = i.second._model;
-        uint32_t size = static_cast<uint32_t>(model.vertices()->length() * stride);
-        std::vector<uint8_t> buf(size);
-        VertexWriter stream(attributes, false, buf.data(), size, stride);
-        i.second._model->writeToStream(stream, V3(1.0f));
-        uploader.write(buf.data(), size, offset);
-        offset += size;
-    }
-}
-
-RCCMultiDrawElementsIndirect::IndicesUploader::IndicesUploader(const sp<ModelBundle>& multiModels)
-    : Uploader(multiModels->indexLength() * sizeof(element_index_t)), _model_bundle(multiModels)
-{
-}
-
-namespace {
-
-class WritableWithOffset : public Writable {
-public:
-    WritableWithOffset(Writable& delegate, uint32_t offset)
-        : _delegate(delegate), _offset(offset) {
-    }
-
-    virtual uint32_t write(const void* buffer, uint32_t size, uint32_t offset) override {
-        _delegate.write(buffer, size, _offset + offset);
-        return size;
-    }
-
-private:
-    Writable& _delegate;
-    uint32_t _offset;
-
-};
-
-}
-
-void RCCMultiDrawElementsIndirect::IndicesUploader::upload(Writable& uploader)
-{
-    uint32_t offset = 0;
-    for(const auto& i: _model_bundle->models())
-    {
-        const sp<Uploader>& indices = i.second._model->indices();
-        uint32_t size = static_cast<uint32_t>(indices->size());
-        WritableWithOffset writable(uploader, offset);
-        indices->upload(writable);
-        offset += size;
-    }
 }
 
 }

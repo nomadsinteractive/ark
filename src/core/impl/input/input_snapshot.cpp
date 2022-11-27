@@ -1,13 +1,16 @@
-#include "renderer/impl/uploader/uploader_recoder.h"
+#include "core/impl/input/input_snapshot.h"
 
+#include "core/inf/array.h"
+#include "core/inf/writable.h"
+#include "core/types/shared_ptr.h"
 
 namespace ark {
 
 namespace {
 
-class WritableImpl : public Writable {
+class WritableSnapshot : public Writable {
 public:
-    WritableImpl(size_t size)
+    WritableSnapshot(size_t size)
         : _size(size) {
     }
 
@@ -26,26 +29,18 @@ public:
 
 }
 
-UploaderRecorder::UploaderRecorder(Uploader& delegate)
-    : Uploader(delegate.size())
+InputSnapshot::InputSnapshot(Input& delegate)
+    : Input(delegate.size())
 {
-    WritableImpl writable(_size);
+    WritableSnapshot writable(_size);
     delegate.upload(writable);
     _strips = std::move(writable._strips);
 }
 
-void UploaderRecorder::upload(Writable& writable)
+void InputSnapshot::upload(Writable& writable)
 {
     for(const auto& [i, j] : _strips)
         writable.write(j->buf(), j->length(), i);
-}
-
-std::vector<std::pair<size_t, ByteArray::Borrowed>> UploaderRecorder::toStrips() const
-{
-    std::vector<std::pair<size_t, ByteArray::Borrowed>> strips;
-    for(const auto& [i, j] : _strips)
-        strips.push_back(std::make_pair(i, ByteArray::Borrowed(j->buf(), j->length())));
-    return strips;
 }
 
 }

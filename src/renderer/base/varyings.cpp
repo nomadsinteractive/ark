@@ -6,6 +6,7 @@
 #include "core/inf/input.h"
 #include "core/inf/variable.h"
 #include "core/impl/input/input_variable.h"
+#include "core/impl/writable/writable_memory.h"
 #include "core/util/holder_util.h"
 #include "core/util/math.h"
 
@@ -157,7 +158,8 @@ Varyings::Slot::Slot(sp<Input> input, uint32_t divisor, int32_t offset)
 void Varyings::Slot::apply(uint8_t* ptr) const
 {
     DASSERT(_offset >= 0);
-    _input->flat(ptr + _offset);
+    WritableMemory writer(ptr + _offset);
+    _input->upload(writer);
 }
 
 Varyings::BUILDER::VaryingBuilder::VaryingBuilder(String name, sp<Builder<Input>> input)

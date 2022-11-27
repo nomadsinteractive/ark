@@ -1,9 +1,9 @@
 #include "renderer/opengl/base/gl_buffer.h"
 
+#include "core/inf/writable.h"
 #include "core/util/log.h"
 
 #include "renderer/base/recycler.h"
-#include "renderer/inf/uploader.h"
 
 #include "renderer/opengl/util/gl_util.h"
 
@@ -42,7 +42,7 @@ GLBuffer::~GLBuffer()
     _recycler->recycle(recycle());
 }
 
-void GLBuffer::doUpload(GraphicsContext& /*graphicsContext*/, Uploader& uploader)
+void GLBuffer::doUpload(GraphicsContext& /*graphicsContext*/, Input& input)
 {
     DWARN(_usage != GL_STATIC_DRAW || _size == 0, "Uploading transient data to GL_STATIC_DRAW GLBuffer");
 
@@ -50,11 +50,11 @@ void GLBuffer::doUpload(GraphicsContext& /*graphicsContext*/, Uploader& uploader
     GLint bufsize = 0;
     glGetBufferParameteriv(_type, GL_BUFFER_SIZE, &bufsize);
 
-    _size = uploader.size();
+    _size = input.size();
     if(static_cast<size_t>(bufsize) < _size)
         glBufferData(_type, static_cast<GLsizeiptr>(_size), nullptr, _usage);
     WritableGLBuffer writer(_type, _size);
-    uploader.upload(writer);
+    input.upload(writer);
     glBindBuffer(_type, 0);
 }
 
@@ -69,10 +69,10 @@ void GLBuffer::upload(GraphicsContext& /*graphicsContext*/)
         glGenBuffers(1, &_id);
 }
 
-void GLBuffer::uploadBuffer(GraphicsContext& graphicsContext, Uploader& uploader)
+void GLBuffer::uploadBuffer(GraphicsContext& graphicsContext, Input& input)
 {
     upload(graphicsContext);
-    doUpload(graphicsContext, uploader);
+    doUpload(graphicsContext, input);
 }
 
 ResourceRecycleFunc GLBuffer::recycle()

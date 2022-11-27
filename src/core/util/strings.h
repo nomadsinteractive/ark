@@ -110,6 +110,8 @@ public:
         return sb.str();
     }
 
+    static String dumpMemory(const uint8_t* memory, size_t length);
+
     static String stripReference(const String& id);
 
     static bool isNumeric(const String& value);

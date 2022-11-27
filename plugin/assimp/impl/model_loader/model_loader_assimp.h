@@ -19,7 +19,6 @@
 #include "renderer/base/mesh.h"
 #include "renderer/base/model_bundle.h"
 #include "renderer/inf/model_loader.h"
-#include "renderer/inf/uploader.h"
 
 #include "assimp/forwarding.h"
 #include "assimp/impl/animation/animation_assimp_nodes.h"

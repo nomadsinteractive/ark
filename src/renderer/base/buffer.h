@@ -40,7 +40,7 @@ public:
         Delegate();
         virtual ~Delegate() = default;
 
-        virtual void uploadBuffer(GraphicsContext& graphicsContext, Uploader& uploader) = 0;
+        virtual void uploadBuffer(GraphicsContext& graphicsContext, Input& input) = 0;
 
         size_t size() const;
 
@@ -55,7 +55,7 @@ public:
     public:
         Snapshot() = default;
         Snapshot(sp<Delegate> stub);
-        Snapshot(sp<Delegate> stub, size_t size, sp<Uploader> uploader);
+        Snapshot(sp<Delegate> stub, size_t size, sp<Input> input);
         DEFAULT_COPY_AND_ASSIGN(Snapshot);
 
         explicit operator bool() const;
@@ -72,7 +72,7 @@ public:
         const sp<Delegate>& delegate() const;
 
         sp<Delegate> _delegate;
-        sp<Uploader> _uploader;
+        sp<Input> _input;
         size_t _size;
     };
 
@@ -103,13 +103,11 @@ public:
 
     Snapshot snapshot(size_t size) const;
     Snapshot snapshot(const ByteArray::Borrowed& strip) const;
-    Snapshot snapshot(sp<Uploader> uploader = nullptr, size_t size = 0) const;
+    Snapshot snapshot(sp<Input> input = nullptr, size_t size = 0) const;
 
 //  [[script::bindings::property]]
     uint64_t id() const;
-[[deprecated]]
-//  [[script::bindings::auto]]
-    void upload(sp<Uploader> uploader, sp<Future> future = nullptr);
+
     void upload(GraphicsContext&) const;
 
     const sp<Delegate>& delegate() const;
@@ -123,7 +121,7 @@ public:
 
     private:
         sp<ResourceLoaderContext> _resource_loader_context;
-        SafePtr<Builder<Uploader>> _uploader;
+        SafePtr<Builder<Input>> _input;
         Usage _usage;
 
     };

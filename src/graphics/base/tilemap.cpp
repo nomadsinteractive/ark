@@ -112,13 +112,14 @@ void Tilemap::load(const String& src)
 
 sp<TilemapLayer> Tilemap::makeLayer(const String& name, uint32_t rowCount, uint32_t colCount, sp<Vec3> position, sp<Vec3> scroller, sp<Boolean> visible, float zorder, Tilemap::LayerFlag layerFlag)
 {
-    sp<TilemapLayer> layer = sp<TilemapLayer>::make(_tileset, name, rowCount, colCount, position, scroller, std::move(visible), zorder, layerFlag);
-    addLayer(layer);
+    sp<TilemapLayer> layer = sp<TilemapLayer>::make(_tileset, name, rowCount, colCount, position, scroller, std::move(visible), layerFlag);
+    addLayer(layer, zorder);
     return layer;
 }
 
-void Tilemap::addLayer(sp<TilemapLayer> layer)
+void Tilemap::addLayer(sp<TilemapLayer> layer, float zorder)
 {
+    layer->_zorder = zorder;
     _stub->_layers.insert(std::upper_bound(_stub->_layers.begin(), _stub->_layers.end(), layer, _tilemapLayerComp), std::move(layer));
     _stub->_need_reload = true;
 }
@@ -240,8 +241,11 @@ bool Tilemap::Stub::preSnapshot(const RenderRequest& renderRequest, LayerContext
 
 void Tilemap::Stub::snapshot(const RenderRequest& renderRequest, const LayerContext& lc, RenderLayer::Snapshot& output)
 {
-    for(TilemapLayer& i : _layers)
-        i._stub->snapshot(renderRequest, lc, output);
+    for(auto iter = _layers.rbegin(); iter != _layers.rend(); ++iter)
+    {
+        const sp<TilemapLayer>& i = *iter;
+        i->_stub->snapshot(renderRequest, lc, output);
+    }
 }
 
 }

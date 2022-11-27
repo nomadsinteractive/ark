@@ -3,6 +3,7 @@
 #include "core/base/manifest.h"
 #include "core/util/documents.h"
 #include "core/util/math.h"
+#include "core/util/input_type.h"
 
 #include "renderer/base/atlas.h"
 #include "renderer/base/model.h"
@@ -11,7 +12,6 @@
 #include "renderer/base/texture.h"
 #include "renderer/impl/vertices/vertices_sphere.h"
 #include "renderer/impl/render_command_composer/rcc_draw_elements_instanced.h"
-#include "renderer/inf/uploader.h"
 #include "renderer/util/render_util.h"
 
 namespace ark {
@@ -52,10 +52,10 @@ static sp<std::vector<ModelLoaderSphere::Vertex>> makeVertices(uint32_t sampleCo
     return sp<std::vector<ModelLoaderSphere::Vertex>>::make(std::move(vertices));
 }
 
-static indexarray makeIndices(uint32_t sampleCount)
+static sp<Input> makeIndices(uint32_t sampleCount)
 {
-    indexarray indices = sp<IndexArray::Allocated>::make(2 * 6 * sampleCount * sampleCount);
-    element_index_t* buf = indices->buf();
+    std::vector<element_index_t> indices(2 * 6 * sampleCount * sampleCount);
+    element_index_t* buf = indices.data();
     for(uint32_t i = 0; i < sampleCount * 2; i++)
     {
         element_index_t offset = static_cast<element_index_t>(i * (sampleCount + 1));
@@ -74,7 +74,7 @@ static indexarray makeIndices(uint32_t sampleCount)
         (*buf++) = static_cast<element_index_t>(offset + sampleCount);
         (*buf++) = static_cast<element_index_t>(offset + sampleCount - 1);
     }
-    return indices;
+    return InputType::makeElementIndexInput(std::move(indices));
 }
 
 namespace {
@@ -84,9 +84,8 @@ public:
     virtual Model import(const Manifest& manifest, MaterialBundle& /*materialBundle*/) override {
         uint32_t sampleCount = Documents::ensureAttribute<uint32_t>(manifest.descriptor(), "sample-count");
         const Rect uvBounds = Rect(0, 1.0f, 1.0f, 0);
-        indexarray indices = makeIndices(sampleCount);
         sp<std::vector<ModelLoaderSphere::Vertex>> vertices = makeVertices(sampleCount);
-        return Model(sp<Uploader::Array<element_index_t>>::make(std::move(indices)), sp<VerticesSphere>::make(std::move(vertices), uvBounds));
+        return Model(makeIndices(sampleCount), sp<VerticesSphere>::make(std::move(vertices), uvBounds));
     }
 };
 
@@ -99,7 +98,7 @@ ModelLoaderSphere::ModelLoaderSphere(const sp<Atlas>& atlas, uint32_t sampleCoun
 
 sp<RenderCommandComposer> ModelLoaderSphere::makeRenderCommandComposer()
 {
-    return sp<RCCDrawElementsInstanced>::make(Model(sp<Uploader::Array<element_index_t>>::make(_indices), sp<VerticesSphere>::make(_vertices->size())));
+    return sp<RCCDrawElementsInstanced>::make(Model(_indices, sp<VerticesSphere>::make(_vertices->size())));
 }
 
 void ModelLoaderSphere::initialize(ShaderBindings& shaderBindings)

@@ -501,6 +501,45 @@ String Strings::svprintf(const char* format, va_list args)
     return String(lpstr); // We don't want the '\0' inside
 }
 
+String Strings::dumpMemory(const uint8_t* memory, size_t length)
+{
+    char buf[256];
+    char padding[] = "         ";
+    StringBuffer sb;
+
+    for(size_t i = 0; i < length; i += 16)
+    {
+        std::snprintf(buf, sizeof(buf), "%08Xh: ", static_cast<uint32_t>(i));
+        sb << buf;
+
+        for(size_t j = 0; j < 16; j += 4)
+        {
+            size_t offset = i + j;
+            const int32_t* p1 = reinterpret_cast<const int32_t*>(memory + offset);
+            if(offset < length)
+            {
+                std::snprintf(buf, sizeof(buf), "%08X ", *p1);
+                sb << buf;
+            }
+            else
+                sb << padding;
+        }
+
+        sb << " |  ";
+        for(size_t j = 0; j < 16; ++j)
+        {
+            size_t offset = i + j;
+            if(offset < length)
+                sb << (std::isprint(memory[offset]) ? static_cast<char>(memory[offset]) : '.');
+            else
+                sb << ' ';
+        }
+        sb << std::endl;
+    }
+
+    return sb.str();
+}
+
 String Strings::stripReference(const String& id)
 {
     DASSERT(id);

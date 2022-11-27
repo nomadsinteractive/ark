@@ -47,7 +47,7 @@ public:
 private:
     sp<Atlas> _atlas;
 
-    indexarray _indices;
+    sp<Input> _indices;
     sp<std::vector<ModelLoaderSphere::Vertex>> _vertices;
 
 };

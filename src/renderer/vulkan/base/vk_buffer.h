@@ -21,7 +21,7 @@ public:
 
     virtual uint64_t id() override;
     virtual void upload(GraphicsContext& graphicsContext) override;
-    virtual void uploadBuffer(GraphicsContext& graphicsContext, Uploader& uploader) override;
+    virtual void uploadBuffer(GraphicsContext& graphicsContext, Input& input) override;
     virtual ResourceRecycleFunc recycle() override;
 
     void reload(GraphicsContext& graphicsContext, const ByteArray::Borrowed& buf);

@@ -1,8 +1,7 @@
 #include "renderer/vulkan/base/vk_memory_ptr.h"
 
+#include "core/inf/input.h"
 #include "core/impl/writable/writable_memory.h"
-
-#include "renderer/inf/uploader.h"
 
 #include "renderer/vulkan/base/vk_memory.h"
 
@@ -98,12 +97,12 @@ void VKMemoryPtr::Stub::unmap()
     _memory.unmap();
 }
 
-void VKMemoryPtr::Stub::upload(Uploader& uploader)
+void VKMemoryPtr::Stub::upload(Input& input)
 {
-    DCHECK(uploader.size() <= _size, "Uploader size: %d, memory size: %d", uploader.size(), _size);
+    CHECK(input.size() <= _size, "Uploader size: %d, memory size: %d", input.size(), _size);
 
     WritableMemory writer(map());
-    uploader.upload(writer);
+    input.upload(writer);
 
     unmap();
 }

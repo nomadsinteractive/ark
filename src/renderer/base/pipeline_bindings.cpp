@@ -219,15 +219,15 @@ PipelineBindings::TraitStencilTestSeparate PipelineBindings::FragmentTraitManife
 
 template<> ARK_API PipelineBindings::TrailType Conversions::to<String, PipelineBindings::TrailType>(const String& str)
 {
-    if(str == "cull_face")
+    if(str == "cull_face_test")
         return PipelineBindings::TRAIT_TYPE_CULL_FACE_TEST;
-    if(str == "depth")
+    if(str == "depth_test")
         return PipelineBindings::TRAIT_TYPE_DEPTH_TEST;
     if(str == "scissor")
         return PipelineBindings::TRAIT_TYPE_SCISSOR;
     if(str == "blend")
         return PipelineBindings::TRAIT_TYPE_BLEND;
-    DCHECK(str == "stencil", "Unknown FragmentTest: \"%s\", possible values are [cull_face, depth, scissor, stencil]", str.c_str());
+    CHECK(str == "stencil", "Unknown FragmentTest: \"%s\", possible values are [cull_face_test, depth_test, scissor, stencil]", str.c_str());
     return PipelineBindings::TRAIT_TYPE_STENCIL_TEST;
 }
 
@@ -247,7 +247,7 @@ template<> ARK_API PipelineBindings::CompareFunc Conversions::to<String, Pipelin
         return PipelineBindings::COMPARE_FUNC_GREATER;
     if(str == "less_equal")
         return PipelineBindings::COMPARE_FUNC_LEQUAL;
-    DCHECK(str == "greater_equal", "Unknown CompareFunc: \"%s\", possible values are [always, never, equal, not_equal, less, greater, less_equal, greater_equal]", str.c_str());
+    CHECK(str == "greater_equal", "Unknown CompareFunc: \"%s\", possible values are [always, never, equal, not_equal, less, greater, less_equal, greater_equal]", str.c_str());
     return PipelineBindings::COMPARE_FUNC_GEQUAL;
 }
 

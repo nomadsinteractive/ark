@@ -2,13 +2,14 @@
 
 #include "core/collection/table.h"
 #include "core/base/string.h"
+#include "core/inf/writable.h"
 
 #include "graphics/base/mat.h"
 
 namespace ark {
 
 AnimationInput::AnimationInput(sp<Numeric> duration, uint32_t durationInTicks, const sp<Table<String, uint32_t>>& node, const sp<std::vector<AnimationFrame>>& animationFrames)
-    : _stub(sp<Stub>::make(std::move(duration), durationInTicks, node, animationFrames))
+    : Input(node->size() * sizeof(M4)), _stub(sp<Stub>::make(std::move(duration), durationInTicks, node, animationFrames))
 {
 }
 
@@ -46,18 +47,13 @@ bool AnimationInput::update(uint64_t timestamp)
     return _stub->update(timestamp);
 }
 
-void AnimationInput::flat(void* buf)
+void AnimationInput::upload(Writable& buf)
 {
-    _stub->flat(buf);
-}
-
-uint32_t AnimationInput::size()
-{
-    return static_cast<uint32_t>(_stub->_size);
+    buf.write(_stub->getFrameInput(), _size, 0);
 }
 
 AnimationInput::Stub::Stub(sp<Numeric> tick, uint32_t durationInTicks, const sp<Table<String, uint32_t>>& nodes, const sp<std::vector<AnimationFrame>>& matrics)
-    : _duration_in_ticks(durationInTicks), _tick(std::move(tick)), _nodes(nodes), _animation_frames(matrics), _size(_nodes->size() * sizeof(M4)), _frame_index(0)
+    : _duration_in_ticks(durationInTicks), _tick(std::move(tick)), _nodes(nodes), _animation_frames(matrics), _frame_index(0)
 {
 }
 
@@ -69,12 +65,6 @@ bool AnimationInput::Stub::update(uint64_t timestamp)
         return true;
     }
     return false;
-}
-
-void AnimationInput::Stub::flat(void* buf)
-{
-    const M4* frameInput = getFrameInput();
-    memcpy(buf, frameInput, _size);
 }
 
 const M4* AnimationInput::Stub::getFrameInput() const

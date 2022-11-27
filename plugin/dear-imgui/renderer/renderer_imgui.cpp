@@ -23,7 +23,6 @@
 #include "renderer/base/shader.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/base/render_engine.h"
-#include "renderer/inf/uploader.h"
 
 #include "app/base/application_context.h"
 #include "app/base/event.h"

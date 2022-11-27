@@ -5,23 +5,22 @@
 #include "renderer/base/mesh.h"
 #include "renderer/base/vertex_writer.h"
 #include "renderer/inf/animation.h"
-#include "renderer/inf/uploader.h"
 #include "renderer/inf/vertices.h"
 
 
 namespace ark {
 
-Model::Model(sp<Uploader> indices, sp<Vertices> vertices, const Metrics& metrics)
+Model::Model(sp<Input> indices, sp<Vertices> vertices, const Metrics& metrics)
     : _indices(std::move(indices)), _vertices(std::move(vertices)), _metrics(metrics)
 {
 }
 
 Model::Model(std::vector<sp<Material>> materials, std::vector<sp<Mesh>> meshes, const Metrics& metrics)
-    : _indices(sp<MeshIndicesUploader>::make(meshes)), _vertices(sp<MeshVertices>::make(meshes)), _materials(std::move(materials)), _meshes(std::move(meshes)), _metrics(metrics)
+    : _indices(sp<InputMeshIndices>::make(meshes)), _vertices(sp<MeshVertices>::make(meshes)), _materials(std::move(materials)), _meshes(std::move(meshes)), _metrics(metrics)
 {
 }
 
-const sp<Uploader>& Model::indices() const
+const sp<Input>& Model::indices() const
 {
     return _indices;
 }
@@ -126,12 +125,12 @@ bool Model::isDisposed() const
     return !static_cast<bool>(_indices);
 }
 
-Model::MeshIndicesUploader::MeshIndicesUploader(std::vector<sp<Mesh>> meshes)
-    : Uploader(calcIndicesSize(meshes)), _meshes(std::move(meshes))
+Model::InputMeshIndices::InputMeshIndices(std::vector<sp<Mesh>> meshes)
+    : Input(calcIndicesSize(meshes)), _meshes(std::move(meshes))
 {
 }
 
-void Model::MeshIndicesUploader::upload(Writable& uploader)
+void Model::InputMeshIndices::upload(Writable& uploader)
 {
     uint32_t offset = 0;
     for(const Mesh& i : _meshes)
@@ -143,7 +142,7 @@ void Model::MeshIndicesUploader::upload(Writable& uploader)
     }
 }
 
-size_t Model::MeshIndicesUploader::calcIndicesSize(const std::vector<sp<Mesh>>& meshes) const
+size_t Model::InputMeshIndices::calcIndicesSize(const std::vector<sp<Mesh>>& meshes) const
 {
     size_t size = 0;
     for(const Mesh& i : meshes)

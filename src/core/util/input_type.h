@@ -3,6 +3,8 @@
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
+#include "core/base/timestamp.h"
+#include "core/inf/builder.h"
 #include "core/inf/input.h"
 #include "core/types/implements.h"
 #include "core/types/shared_ptr.h"
@@ -15,6 +17,8 @@ namespace ark {
 class ARK_API InputType {
 public:
 //[[script::bindings::constructor]]
+    static sp<Input> create(sp<ByteArray> value);
+//[[script::bindings::constructor]]
     static sp<Input> create(sp<Integer> value);
 //[[script::bindings::constructor]]
     static sp<Input> create(sp<Numeric> value);
@@ -24,6 +28,8 @@ public:
     static sp<Input> create(sp<Vec3> value);
 //[[script::bindings::constructor]]
     static sp<Input> create(sp<Vec4> value);
+//[[script::bindings::constructor]]
+    static sp<Input> create(std::map<size_t, sp<Input>> value);
 //[[script::bindings::constructor]]
     static sp<Input> create(std::vector<sp<Mat4>> value);
 //[[script::bindings::constructor]]
@@ -36,10 +42,20 @@ public:
     static sp<Input> create(std::vector<uint32_t> value);
 
 //[[script::bindings::property]]
-    static uint32_t size(const sp<Input>& self);
+    static size_t size(const sp<Input>& self);
 
 //[[script::bindings::classmethod]]
-    static void set(const sp<Input>& self, const sp<Input>& delegate);
+    static sp<Input> shift(const sp<Input>& self, size_t offset, size_t size = 0);
+//[[script::bindings::classmethod]]
+    static sp<Input> repeat(sp<Input> self, size_t length, size_t stride = 0);
+
+//  [[script::bindings::classmethod]]
+    static void addInput(const sp<Input>& self, size_t offset, sp<Input> input);
+//  [[script::bindings::classmethod]]
+    static void removeInput(const sp<Input>& self, size_t offset);
+
+//[[script::bindings::classmethod]]
+    static void set(const sp<Input>& self, sp<Input> delegate);
 //[[script::bindings::classmethod]]
     static sp<Input> wrap(sp<Input> self);
 
@@ -52,18 +68,17 @@ private:
         InputWrapper(sp<Input> delegate);
 
         virtual bool update(uint64_t timestamp) override;
-        virtual void flat(void* buf) override;
-        virtual uint32_t size() override;
+        virtual void upload(Writable& buf) override;
 
         void setDelegate(sp<Input> delegate);
 
     private:
         sp<Input> _delegate;
+        Timestamp _timestamp;
     };
 
 private:
-    static sp<InputWrapper> ensureImpl(const sp<Input>& self);
-
+    static sp<InputWrapper> ensureWrapper(const sp<Input>& self);
 };
 
 }

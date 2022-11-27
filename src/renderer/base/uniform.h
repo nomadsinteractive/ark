@@ -44,9 +44,9 @@ public:
         TYPE_COUNT
     };
 
-    Uniform(const String& name, const String& declaredType, Type type, size_t size, uint32_t length, const sp<Input>& flatable, int32_t binding = -1);
-    Uniform(const String& name, const String& type, uint32_t length, const sp<Input>& flatable, int32_t binding = -1);
-    Uniform(const String& name, Type type, uint32_t length, const sp<Input>& flatable, int32_t binding = -1);
+    Uniform(String name, String declaredType, Type type, size_t size, uint32_t length, sp<Input> input, int32_t binding = -1);
+    Uniform(String name, String type, uint32_t length, sp<Input> input, int32_t binding = -1);
+    Uniform(String name, Type type, uint32_t length, sp<Input> flatable, int32_t binding = -1);
     DEFAULT_COPY_AND_ASSIGN(Uniform);
 
     const String& name() const;

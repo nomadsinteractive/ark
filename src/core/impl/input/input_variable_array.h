@@ -6,6 +6,7 @@
 #include "core/inf/holder.h"
 #include "core/inf/input.h"
 #include "core/inf/variable.h"
+#include "core/inf/writable.h"
 #include "core/types/implements.h"
 #include "core/types/shared_ptr.h"
 #include "core/util/holder_util.h"
@@ -16,17 +17,13 @@ namespace ark {
 template<typename T, size_t ALIGN = sizeof(T)> class InputVariableArray : public Input, public Holder, Implements<InputVariableArray<T, ALIGN>, Input, Holder> {
 public:
     InputVariableArray(std::vector<sp<Variable<T>>> vector)
-        : _vector(std::move(vector)) {
-        DTRACE(_vector.size() > 0 && _vector.at(0) == nullptr);
+        : Input(vector.size() * ALIGN), _vector(std::move(vector)) {
     }
 
-    virtual void flat(void* buf) override {
+    virtual void upload(Writable& buf) override {
         for(size_t i = 0; i < _vector.size(); ++i)
-            *reinterpret_cast<T*>(reinterpret_cast<uint8_t*>(buf) + i * ALIGN) = _vector[i]->val();
-    }
-
-    virtual uint32_t size() override {
-        return static_cast<uint32_t>(_vector.size() * ALIGN);
+            buf.writeObject(_vector[i]->val(), sizeof(T), i * ALIGN);
+//            *reinterpret_cast<T*>(reinterpret_cast<uint8_t*>(buf) + i * ALIGN) = _vector[i]->val();
     }
 
     virtual bool update(uint64_t timestamp) override {

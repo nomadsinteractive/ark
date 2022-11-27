@@ -4,6 +4,7 @@
 #include "core/inf/input.h"
 #include "core/inf/holder.h"
 #include "core/inf/variable.h"
+#include "core/inf/writable.h"
 #include "core/types/implements.h"
 #include "core/types/shared_ptr.h"
 #include "core/util/holder_util.h"
@@ -15,15 +16,12 @@ public:
     typedef Variable<S> VarType;
 
     InputVariable(const sp<VarType>& var)
-        : _var(var) {
+        : Input(sizeof(T)), _var(var) {
     }
 
-    virtual void flat(void* buf) override {
-        *reinterpret_cast<T*>(buf) = static_cast<T>(_var->val());
-    }
-
-    virtual uint32_t size() override {
-        return static_cast<uint32_t>(sizeof(T));
+    virtual void upload(Writable& buf) override {
+        buf.writeObject(_var->val());
+//         *reinterpret_cast<T*>(buf) = static_cast<T>(_var->val());
     }
 
     virtual void traverse(const Visitor& visitor) override {

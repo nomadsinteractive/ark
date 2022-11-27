@@ -90,7 +90,7 @@ public:
     void upload(sp<Resource> resource, RenderController::UploadStrategy strategy, sp<Updatable> updatable = nullptr, sp<Future> future = nullptr, UploadPriority priority = UPLOAD_PRIORITY_NORMAL);
 
 //  [[script::bindings::auto]]
-    void uploadBuffer(Buffer& buffer, sp<Uploader> uploader, RenderController::UploadStrategy strategy, sp<Future> future = nullptr, RenderController::UploadPriority priority = RenderController::UPLOAD_PRIORITY_NORMAL);
+    void uploadBuffer(Buffer& buffer, sp<Input> input, RenderController::UploadStrategy strategy, sp<Future> future = nullptr, RenderController::UploadPriority priority = RenderController::UPLOAD_PRIORITY_NORMAL);
 
     const sp<RenderEngine>& renderEngine() const;
 
@@ -103,12 +103,12 @@ public:
     sp<Texture> createTexture2D(sp<Size> size, sp<Bitmap> bitmap, RenderController::UploadStrategy us = RenderController::US_ONCE_AND_ON_SURFACE_READY, sp<Future> future = nullptr);
 
 //  [[script::bindings::auto]]
-    Buffer makeBuffer(Buffer::Type type, Buffer::Usage usage, sp<Uploader> uploader, RenderController::UploadStrategy us, sp<Future> future = nullptr);
-    Buffer makeBuffer(Buffer::Type type, Buffer::Usage usage, sp<Uploader> uploader);
+    Buffer makeBuffer(Buffer::Type type, Buffer::Usage usage, sp<Input> uploader, RenderController::UploadStrategy us, sp<Future> future = nullptr);
+    Buffer makeBuffer(Buffer::Type type, Buffer::Usage usage, sp<Input> input);
 //  [[script::bindings::auto]]
-    Buffer makeVertexBuffer(Buffer::Usage usage = Buffer::USAGE_DYNAMIC, const sp<Uploader>& uploader = nullptr);
+    Buffer makeVertexBuffer(Buffer::Usage usage = Buffer::USAGE_DYNAMIC, sp<Input> input = nullptr);
 //  [[script::bindings::auto]]
-    Buffer makeIndexBuffer(Buffer::Usage usage = Buffer::USAGE_DYNAMIC, const sp<Uploader>& uploader = nullptr);
+    Buffer makeIndexBuffer(Buffer::Usage usage = Buffer::USAGE_DYNAMIC, sp<Input> input = nullptr);
 
     sp<Framebuffer> makeFramebuffer(sp<Renderer> renderer, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask);
 

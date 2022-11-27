@@ -12,18 +12,17 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/inf/vertices.h"
-#include "renderer/inf/uploader.h"
 
 namespace ark {
 
 class ARK_API Model {
 public:
     Model() = default;
-    Model(sp<Uploader> indices, sp<Vertices> vertices, const Metrics& metrics = {V3(1.0f), V3(1.0f), V3(0)});
+    Model(sp<Input> indices, sp<Vertices> vertices, const Metrics& metrics = {V3(1.0f), V3(1.0f), V3(0)});
     Model(std::vector<sp<Material>> materials, std::vector<sp<Mesh>> meshes, const Metrics& metrics = {V3(1.0f), V3(1.0f), V3(0)});
     DEFAULT_COPY_AND_ASSIGN(Model);
 
-    const sp<Uploader>& indices() const;
+    const sp<Input>& indices() const;
     const sp<Vertices>& vertices() const;
 
 //[[script::bindings::property]]
@@ -67,9 +66,9 @@ private:
     V3 toScale(const V3& renderObjectSize) const;
 
 private:
-    class MeshIndicesUploader : public Uploader {
+    class InputMeshIndices : public Input {
     public:
-        MeshIndicesUploader(std::vector<sp<Mesh>> meshes);
+        InputMeshIndices(std::vector<sp<Mesh>> meshes);
 
         virtual void upload(Writable& uploader) override;
 
@@ -95,7 +94,7 @@ private:
     };
 
 private:
-    sp<Uploader> _indices;
+    sp<Input> _indices;
     sp<Vertices> _vertices;
     std::vector<sp<Material>> _materials;
     std::vector<sp<Mesh>> _meshes;

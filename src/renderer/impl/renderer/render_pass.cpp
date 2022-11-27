@@ -7,35 +7,9 @@
 #include "renderer/base/shader.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/base/vertex_writer.h"
-#include "renderer/inf/uploader.h"
 #include "renderer/inf/vertices.h"
 
 namespace ark {
-
-namespace {
-
-class VerticesBufferUploader : public Uploader {
-public:
-    VerticesBufferUploader(sp<Vertices> vertices, sp<PipelineInput> pipelineInput)
-        : Uploader(vertices->length() * pipelineInput->getStream(0).stride()), _vertices(std::move(vertices)), _pipeline_input(std::move(pipelineInput)) {
-    }
-
-    virtual void upload(Writable& uploader) override {
-        size_t stride = _pipeline_input->getStream(0).stride();
-        PipelineInput::AttributeOffsets attributes(_pipeline_input);
-        uint32_t size = static_cast<uint32_t>(_vertices->length() * stride);
-        std::vector<uint8_t> buf(size);
-        VertexWriter stream(attributes, false, buf.data(), size, stride);
-        _vertices->write(stream, V3(1.0f));
-        uploader.write(buf.data(), size, 0);
-    }
-
-private:
-    sp<Vertices> _vertices;
-    sp<PipelineInput> _pipeline_input;
-};
-
-}
 
 RenderPass::RenderPass(sp<Shader> shader, Buffer vertexBuffer, Buffer indexBuffer, ModelLoader::RenderMode mode, sp<Integer> drawCount)
     : _shader(std::move(shader)), _index_buffer(std::move(indexBuffer)), _draw_count(std::move(drawCount)),

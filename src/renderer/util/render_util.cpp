@@ -1,6 +1,7 @@
 #include "renderer/util/render_util.h"
 
 #include "core/types/shared_ptr.h"
+#include "core/util/input_type.h"
 
 #include "graphics/base/rect.h"
 #include "graphics/base/v3.h"
@@ -10,7 +11,6 @@
 #include "renderer/impl/vertices/vertices_nine_patch_triangle_strips.h"
 #include "renderer/impl/vertices/vertices_point.h"
 #include "renderer/impl/vertices/vertices_quad.h"
-#include "renderer/inf/uploader.h"
 
 
 namespace ark {
@@ -90,22 +90,22 @@ Attribute RenderUtil::makePredefinedAttribute(const String& name, const String& 
 
 Model RenderUtil::makeUnitQuadModel()
 {
-    return Model(sp<Uploader::Array<element_index_t>>::make(sp<IndexArray::Fixed<6>>::make(std::initializer_list<element_index_t>({0, 2, 1, 2, 3, 1}))), sp<VerticesQuad>::make(), Metrics{V3(1.0f), V3(1.0f), V3(0)});
+    return Model(InputType::makeElementIndexInput(std::initializer_list<element_index_t>({0, 2, 1, 2, 3, 1})), sp<VerticesQuad>::make(), Metrics{V3(1.0f), V3(1.0f), V3(0)});
 }
 
 Model RenderUtil::makeUnitNinePatchTriangleStripsModel()
 {
-    return Model(sp<Uploader::Array<element_index_t>>::make(sp<IndexArray::Fixed<28>>::make(std::initializer_list<element_index_t>({0, 4, 1, 5, 2, 6, 3, 7, 7, 4, 4, 8, 5, 9, 6, 10, 7, 11, 11, 8, 8, 12, 9, 13, 10, 14, 11, 15}))), sp<VerticesNinePatchTriangleStrips>::make());
+    return Model(InputType::makeElementIndexInput(std::initializer_list<element_index_t>({0, 4, 1, 5, 2, 6, 3, 7, 7, 4, 4, 8, 5, 9, 6, 10, 7, 11, 11, 8, 8, 12, 9, 13, 10, 14, 11, 15})), sp<VerticesNinePatchTriangleStrips>::make());
 }
 
 Model RenderUtil::makeUnitNinePatchQuadsModel()
 {
-    return Model(sp<Uploader::Array<element_index_t>>::make(sp<IndexArray::Fixed<54>>::make(std::initializer_list<element_index_t>({0, 2, 1, 2, 3, 1, 6, 8, 7, 8, 9, 7, 12, 14, 13, 14, 15, 13, 18, 20, 19, 20, 21, 19, 24, 26, 25, 26, 27, 25, 30, 32, 31, 32, 33, 31, 36, 38, 37, 38, 39, 37, 42, 44, 43, 44, 45, 43, 48, 50, 49, 50, 51, 49}))), sp<VerticesNinePatchQuads>::make());
+    return Model(InputType::makeElementIndexInput(std::initializer_list<element_index_t>({0, 2, 1, 2, 3, 1, 6, 8, 7, 8, 9, 7, 12, 14, 13, 14, 15, 13, 18, 20, 19, 20, 21, 19, 24, 26, 25, 26, 27, 25, 30, 32, 31, 32, 33, 31, 36, 38, 37, 38, 39, 37, 42, 44, 43, 44, 45, 43, 48, 50, 49, 50, 51, 49})), sp<VerticesNinePatchQuads>::make());
 }
 
 Model RenderUtil::makeUnitPointModel()
 {
-    return Model(sp<Uploader::Array<element_index_t>>::make(sp<IndexArray::Fixed<1>>::make(std::initializer_list<element_index_t>({0}))), sp<VerticesPoint>::make(), Metrics{V3(1.0f), V3(1.0f), V3()});
+    return Model(InputType::makeElementIndexInput(std::initializer_list<element_index_t>({0})), sp<VerticesPoint>::make(), Metrics{V3(1.0f), V3(1.0f), V3()});
 }
 
 uint32_t RenderUtil::hash(const element_index_t* buf, size_t len)

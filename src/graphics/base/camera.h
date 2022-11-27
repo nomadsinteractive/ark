@@ -19,8 +19,7 @@ public:
     public:
         Holder(sp<Mat4> value);
 
-        virtual void flat(void* buf) override;
-        virtual uint32_t size() override;
+        virtual void upload(Writable& buf) override;
         virtual bool update(uint64_t timestamp) override;
 
         virtual M4 val() override;

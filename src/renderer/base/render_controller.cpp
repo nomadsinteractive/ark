@@ -3,6 +3,7 @@
 #include "core/base/future.h"
 #include "core/base/enums.h"
 #include "core/inf/runnable.h"
+#include "core/inf/writable.h"
 #include "core/util/boolean_type.h"
 #include "core/util/log.h"
 
@@ -19,7 +20,6 @@
 #include "renderer/inf/renderer_factory.h"
 #include "renderer/inf/snippet_factory.h"
 #include "renderer/inf/vertices.h"
-#include "renderer/impl/uploader/uploader_recoder.h"
 #include "renderer/util/render_util.h"
 
 #include "app/base/application_manifest.h"
@@ -46,8 +46,8 @@ public:
 
 class UploadingBufferResource : public Resource {
 public:
-    UploadingBufferResource(sp<Buffer::Delegate> buffer, sp<Uploader> uploader)
-        : _buffer(std::move(buffer)), _uploader(std::move(uploader)) {
+    UploadingBufferResource(sp<Buffer::Delegate> buffer, sp<Input> input)
+        : _buffer(std::move(buffer)), _input(std::move(input)) {
     }
 
     virtual uint64_t id() override {
@@ -55,7 +55,7 @@ public:
     }
 
     virtual void upload(GraphicsContext& graphicsContext) override {
-        _buffer->uploadBuffer(graphicsContext, _uploader);
+        _buffer->uploadBuffer(graphicsContext, _input);
     }
 
     virtual ResourceRecycleFunc recycle() override {
@@ -64,26 +64,25 @@ public:
 
 private:
     sp<Buffer::Delegate> _buffer;
-    sp<Uploader> _uploader;
+    sp<Input> _input;
 };
 
 class BufferUpdatable : public Updatable {
 public:
-    BufferUpdatable(RenderController& renderController, sp<Updatable> updatable, sp<Uploader> uploader, sp<Buffer::Delegate> buffer)
-        : _render_controller(renderController), _updatable(std::move(updatable)), _uploader(std::move(uploader)), _buffer(std::move(buffer)) {
+    BufferUpdatable(RenderController& renderController, sp<Input> input, sp<Buffer::Delegate> buffer)
+        : _render_controller(renderController), _input(std::move(input)), _buffer(std::move(buffer)) {
     }
 
     virtual bool update(uint64_t timestamp) override {
-        bool dirty = _updatable->update(timestamp) || _buffer->id() == 0;
+        bool dirty = _input->update(timestamp) || _buffer->id() == 0;
         if(dirty)
-            _render_controller.upload(sp<UploadingBufferResource>::make(_buffer, sp<UploaderRecorder>::make(_uploader)), RenderController::US_ONCE);
+            _render_controller.upload(sp<UploadingBufferResource>::make(_buffer, _input), RenderController::US_ONCE);
         return dirty;
     }
 
 private:
     RenderController& _render_controller;
-    sp<Updatable> _updatable;
-    sp<Uploader> _uploader;
+    sp<Input> _input;
     sp<Buffer::Delegate> _buffer;
 };
 
@@ -149,13 +148,13 @@ void RenderController::upload(sp<Resource> resource, UploadStrategy strategy, sp
         _uploading_resources.push(UploadingRenderResource(RenderResource(std::move(resource), std::move(future)), strategy, priority));
 }
 
-void RenderController::uploadBuffer(Buffer& buffer, sp<Uploader> uploader, RenderController::UploadStrategy strategy, sp<Future> future, RenderController::UploadPriority priority)
+void RenderController::uploadBuffer(Buffer& buffer, sp<Input> input, RenderController::UploadStrategy strategy, sp<Future> future, RenderController::UploadPriority priority)
 {
-    ASSERT(uploader);
-    sp<Updatable> updatable = strategy & RenderController::US_ON_CHANGE ? sp<Updatable>::make<BufferUpdatable>(*this, uploader->updatable(), uploader, buffer.delegate()) : nullptr;
+    ASSERT(input);
+    sp<Updatable> updatable = strategy & RenderController::US_ON_CHANGE ? sp<Updatable>::make<BufferUpdatable>(*this, input, buffer.delegate()) : nullptr;
     if(!future)
         future = sp<Future>::make(sp<BooleanByWeakRef<Buffer::Delegate>>::make(buffer.delegate(), 1));
-    upload(sp<UploadingBufferResource>::make(buffer.delegate(), std::move(uploader)), strategy, std::move(updatable), std::move(future), priority);
+    upload(sp<UploadingBufferResource>::make(buffer.delegate(), std::move(input)), strategy, std::move(updatable), std::move(future), priority);
 }
 
 const sp<Recycler>& RenderController::recycler() const
@@ -193,29 +192,29 @@ sp<Texture> RenderController::createTexture2D(sp<Size> size, sp<Bitmap> bitmap, 
     return createTexture(std::move(size), sp<Texture::Parameters>::make(Texture::TYPE_2D, 0), sp<Texture::UploaderBitmap>::make(std::move(bitmap)), us, std::move(future));
 }
 
-Buffer RenderController::makeBuffer(Buffer::Type type, Buffer::Usage usage, sp<Uploader> uploader, UploadStrategy us, sp<Future> future)
+Buffer RenderController::makeBuffer(Buffer::Type type, Buffer::Usage usage, sp<Input> input, UploadStrategy us, sp<Future> future)
 {
     DTHREAD_CHECK(THREAD_ID_CORE);
     Buffer buffer(_render_engine->rendererFactory()->createBuffer(type, usage));
-    if(uploader)
-        uploadBuffer(buffer, std::move(uploader), us, std::move(future));
+    if(input)
+        uploadBuffer(buffer, std::move(input), us, std::move(future));
     return buffer;
 }
 
-Buffer RenderController::makeBuffer(Buffer::Type type, Buffer::Usage usage, sp<Uploader> uploader)
+Buffer RenderController::makeBuffer(Buffer::Type type, Buffer::Usage usage, sp<Input> input)
 {
-    RenderController::UploadStrategy us = uploader ? RenderController::US_ONCE_AND_ON_SURFACE_READY : RenderController::US_ON_SURFACE_READY;
-    return makeBuffer(type, usage, std::move(uploader), us);
+    RenderController::UploadStrategy us = input ? RenderController::US_ONCE_AND_ON_SURFACE_READY : RenderController::US_ON_SURFACE_READY;
+    return makeBuffer(type, usage, std::move(input), us);
 }
 
-Buffer RenderController::makeVertexBuffer(Buffer::Usage usage, const sp<Uploader>& uploader)
+Buffer RenderController::makeVertexBuffer(Buffer::Usage usage, sp<Input> input)
 {
-    return makeBuffer(Buffer::TYPE_VERTEX, usage, uploader);
+    return makeBuffer(Buffer::TYPE_VERTEX, usage, std::move(input));
 }
 
-Buffer RenderController::makeIndexBuffer(Buffer::Usage usage, const sp<Uploader>& uploader)
+Buffer RenderController::makeIndexBuffer(Buffer::Usage usage, sp<Input> input)
 {
-    return makeBuffer(Buffer::TYPE_INDEX, usage, uploader);
+    return makeBuffer(Buffer::TYPE_INDEX, usage, input);
 }
 
 sp<Framebuffer> RenderController::makeFramebuffer(sp<Renderer> renderer, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask)
@@ -283,7 +282,7 @@ sp<SharedIndices> RenderController::getSharedIndices(RenderController::SharedInd
 sp<SharedIndices> RenderController::getSharedIndices(const Model& model, bool degenerate)
 {
     DTHREAD_CHECK(THREAD_ID_CORE);
-    const sp<Uploader>& indicesUploader = model.indices();
+    const sp<Input>& indicesUploader = model.indices();
 
     WritableIndice writer(indicesUploader->size() / sizeof(element_index_t));
     indicesUploader->upload(writer);

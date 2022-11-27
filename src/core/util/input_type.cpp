@@ -1,9 +1,13 @@
 #include "core/util/input_type.h"
 
 #include "core/inf/array.h"
+#include "core/impl/input/input_impl.h"
 #include "core/impl/input/input_object_array.h"
+#include "core/impl/input/input_repeat.h"
 #include "core/impl/input/input_variable_array.h"
 #include "core/impl/input/input_variable.h"
+#include "core/impl/writable/writable_memory.h"
+#include "core/impl/writable/writable_with_offset.h"
 
 #include "graphics/base/v4.h"
 #include "graphics/base/mat.h"
@@ -15,7 +19,7 @@ namespace {
 class InputArray : public Input {
 public:
     InputArray(std::vector<sp<Input>> inputs)
-        : _size(0) {
+        : Input(0) {
         for(sp<Input>& i : inputs) {
             size_t size = i->size();
             _inputs.emplace_back(_size, std::move(i));
@@ -30,21 +34,28 @@ public:
         return dirty;
     }
 
-    virtual void flat(void* buf) override {
-        uint8_t* ptr = reinterpret_cast<uint8_t*>(buf);
+    virtual void upload(Writable& buf) override {
         for(const auto& i : _inputs)
-            i.second->flat(ptr + i.first);
-    }
-
-    virtual uint32_t size() override {
-        return static_cast<uint32_t>(_size);
+            i.second->upload(WritableWithOffset(buf, i.first));
     }
 
 private:
     std::vector<std::pair<size_t, sp<Input>>> _inputs;
-    size_t _size;
 };
 
+}
+
+static sp<InputImpl> ensureImpl(const sp<Input>& self)
+{
+    const sp<InputImpl> impl = self.as<InputImpl>();
+    CHECK(impl, "This object is not a InputImpl instance. Use \"shift\" method to create an InputImpl instance.");
+    return impl;
+}
+
+
+sp<Input> InputType::create(sp<ByteArray> value)
+{
+    return sp<InputObjectArray<uint8_t>>::make(std::move(value));
 }
 
 sp<Input> InputType::create(sp<Integer> value)
@@ -70,6 +81,11 @@ sp<Input> InputType::create(sp<Vec3> value)
 sp<Input> InputType::create(sp<Vec4> value)
 {
     return sp<InputVariable<V4>>::make(std::move(value));
+}
+
+sp<Input> InputType::create(std::map<size_t, sp<Input>> value)
+{
+    return sp<InputImpl>::make(std::move(value));
 }
 
 sp<Input> InputType::create(std::vector<sp<Mat4>> value)
@@ -107,17 +123,40 @@ sp<Input> InputType::makeElementIndexInput(std::vector<element_index_t> value)
     return sp<InputObjectArray<element_index_t>>::make(std::move(value));
 }
 
-void InputType::set(const sp<Input>& self, const sp<Input>& delegate)
+void InputType::set(const sp<Input>& self, sp<Input> delegate)
 {
-    ensureImpl(self)->setDelegate(delegate);
+    ensureWrapper(self)->setDelegate(std::move(delegate));
 }
 
-uint32_t InputType::size(const sp<Input>& self)
+size_t InputType::size(const sp<Input>& self)
 {
     return self->size();
 }
 
-sp<InputType::InputWrapper> InputType::ensureImpl(const sp<Input>& self)
+sp<Input> InputType::shift(const sp<Input>& self, size_t offset, size_t size)
+{
+    sp<InputImpl> inputImpl = sp<InputImpl>::make(size ? size : offset + self->size());
+    if(self->size() > 0)
+        inputImpl->addInput(offset,  self);
+    return inputImpl;
+}
+
+sp<Input> InputType::repeat(sp<Input> self, size_t length, size_t stride)
+{
+    return sp<InputRepeat>::make(std::move(self), length, stride);
+}
+
+void InputType::addInput(const sp<Input>& self, size_t offset, sp<Input> input)
+{
+    ensureImpl(self)->addInput(offset, std::move(input));
+}
+
+void InputType::removeInput(const sp<Input>& self, size_t offset)
+{
+    ensureImpl(self)->removeInput(offset);
+}
+
+sp<InputType::InputWrapper> InputType::ensureWrapper(const sp<Input>& self)
 {
     const sp<InputType::InputWrapper> impl = self.as<InputType::InputWrapper>();
     DCHECK(impl, "This Input object is not a InputWrapper instance");
@@ -125,27 +164,24 @@ sp<InputType::InputWrapper> InputType::ensureImpl(const sp<Input>& self)
 }
 
 InputType::InputWrapper::InputWrapper(sp<Input> delegate)
-    : _delegate(std::move(delegate)) {
+    : Input(delegate->size()), _delegate(std::move(delegate)) {
 }
 
 bool InputType::InputWrapper::update(uint64_t timestamp)
 {
-    return _delegate->update(timestamp);
+    return _delegate->update(timestamp) || _timestamp.update(timestamp);
 }
 
-void InputType::InputWrapper::flat(void* buf)
+void InputType::InputWrapper::upload(Writable& buf)
 {
-    _delegate->flat(buf);
-}
-
-uint32_t InputType::InputWrapper::size()
-{
-    return _delegate->size();
+    _delegate->upload(buf);
 }
 
 void InputType::InputWrapper::setDelegate(sp<Input> delegate)
 {
+    _size = delegate->size();
     _delegate = std::move(delegate);
+    _timestamp.setDirty();
 }
 
 }

@@ -359,12 +359,18 @@ template<> inline Optional<sp<Vec3>> PyCast::toSharedPtrImpl<Vec3>(PyObject* obj
 }
 
 template<> inline Optional<sp<ByteArray>> PyCast::toSharedPtrImpl<ByteArray>(PyObject* object, bool alert) {
-    bool isBytes = PyBytes_Check(object);
-    DCHECK(isBytes || !alert, "Object \"%s\" is not a bytes object", Py_TYPE(object)->tp_name);
-    if(!isBytes)
-        return Optional<sp<ByteArray>>();
-    Py_ssize_t len = PyBytes_Size(object);
-    return sp<ByteArray::Borrowed>::make(reinterpret_cast<uint8_t*>(PyBytes_AsString(object)), len);
+    if(PyBytes_Check(object)) {
+        Py_ssize_t len = PyBytes_Size(object);
+        return sp<ByteArray::Borrowed>::make(reinterpret_cast<uint8_t*>(PyBytes_AsString(object)), len);
+    }
+    if(PyObject_CheckBuffer(object)) {
+        Py_buffer buf;
+        PyObject_GetBuffer(object, &buf, PyBUF_C_CONTIGUOUS);
+        sp<ByteArray> arr = sp<ByteArray::Allocated>::make(buf.len);
+        memcpy(arr->buf(), buf.buf, buf.len);
+        return arr;
+    }
+    return Optional<sp<ByteArray>>();
 }
 
 }

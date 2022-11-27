@@ -302,7 +302,7 @@ class Buffer:
     def id(self) -> int:
         return 0
 
-    def upload(self, uploader: 'Uploader', future: Optional[Future] = None):
+    def upload(self, input_: 'Input', future: Optional[Future] = None):
         pass
 
 
@@ -318,17 +318,17 @@ class RenderController:
     UPLOAD_PRIORITY_NORMAL = 1
     UPLOAD_PRIORITY_HIGH = 2
 
-    def upload_buffer(self, buffer: Buffer, uploader: 'Uploader', upload_strategy: int, future: Optional[Future] = None,
+    def upload_buffer(self, buffer: Buffer, input_: 'Input', upload_strategy: int, future: Optional[Future] = None,
                       upload_priority: int = UPLOAD_PRIORITY_NORMAL):
         pass
 
-    def make_buffer(self, buffer_type: int, buffer_usage: int, uploader: Optional['Uploader'], upload_strategy: int, future: Optional[Future] = None) -> Buffer:
+    def make_buffer(self, buffer_type: int, buffer_usage: int, input_: Optional['Input'], upload_strategy: int, future: Optional[Future] = None) -> Buffer:
         pass
 
-    def make_vertex_buffer(self, buffer_usage: int = Buffer.USAGE_DYNAMIC, uploader: Optional['Uploader'] = None) -> Buffer:
+    def make_vertex_buffer(self, buffer_usage: int = Buffer.USAGE_DYNAMIC, input_: Optional['Input'] = None) -> Buffer:
         pass
 
-    def make_index_buffer(self, buffer_usage: int = Buffer.USAGE_DYNAMIC, uploader: Optional['Uploader'] = None) -> Buffer:
+    def make_index_buffer(self, buffer_usage: int = Buffer.USAGE_DYNAMIC, input_: Optional['Input'] = None) -> Buffer:
         pass
 
 
@@ -942,6 +942,15 @@ class Input:
     def size(self):
         return 0
 
+    def shift(self, offset: int, size: int = 0) -> 'Input':
+        pass
+
+    def add_input(self, offset: int, input_: 'Input'):
+        pass
+
+    def remove_input(self, offset: int):
+        pass
+
     def wrap(self) -> 'Input':
         pass
 
@@ -976,23 +985,6 @@ class Animation:
         return []
 
     def make_input(self, t: Numeric, on_complete: Optional[Callable] = None) -> AnimationInput:
-        pass
-
-
-class Uploader:
-    def __init__(self, inputs: Union[Input, dict[int, Input], list[Input]], size: int = 0):
-        pass
-
-    def set(self, uploader: 'Uploader'):
-        pass
-
-    def wrap(self) -> 'Uploader':
-        pass
-
-    def add_input(self, offset: int, input_: Input):
-        pass
-
-    def remove_input(self, offset: int):
         pass
 
 
@@ -1722,7 +1714,7 @@ class Tileset:
 
 class TilemapLayer(Renderer):
     def __init__(self, tileset: Tileset, name: str, row_count: int, col_count: int, position: Optional[TYPE_VEC3] = None, scroller: Optional[TYPE_VEC3] = None,
-                 visible: Optional[Boolean] = None, zorder: float = 0, flag: int = 0):
+                 visible: Optional[Boolean] = None, flag: int = 0):
         super().__init__()
 
     @property
@@ -1823,10 +1815,10 @@ class Tilemap:
         pass
 
     def make_layer(self, name: str, row_count: int, col_count: int, position: Optional[Vec3] = None, scroller: Optional[Vec3] = None,
-                   visible: Optional[Boolean] = None, layer_flag: int = 0) -> TilemapLayer:
+                   visible: Optional[Boolean] = None, zorder: float = 0, layer_flag: int = 0) -> TilemapLayer:
         pass
 
-    def add_layer(self, layer: TilemapLayer):
+    def add_layer(self, layer: TilemapLayer, zorder: float = 0):
         pass
 
     def remove_layer(self, layer: TilemapLayer):

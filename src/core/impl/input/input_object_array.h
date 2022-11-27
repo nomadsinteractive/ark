@@ -1,25 +1,24 @@
 #ifndef ARK_CORE_IMPL_INPUT_INPUT_OBJECT_ARRAY_H_
 #define ARK_CORE_IMPL_INPUT_INPUT_OBJECT_ARRAY_H_
 
-#include <vector>
-
+#include "core/inf/array.h"
 #include "core/inf/input.h"
+#include "core/inf/writable.h"
 
 
 namespace ark {
 
 template<typename T> class InputObjectArray : public Input {
 public:
+    InputObjectArray(sp<Array<T>> vector)
+        : Input(vector->size()), _vector(std::move(vector)) {
+    }
     InputObjectArray(std::vector<T> vector)
-        : _vector(std::move(vector)) {
+        : InputObjectArray(sp<Array<T>::Vector>::make(std::move(vector))) {
     }
 
-    virtual void flat(void* buf) override {
-        memcpy(buf, _vector.data(), _vector.size() * sizeof(T));
-    }
-
-    virtual uint32_t size() override {
-        return static_cast<uint32_t>(_vector.size() * sizeof(T));
+    virtual void upload(Writable& buf) override {
+        buf.write(_vector->buf(), _vector->size(), 0);
     }
 
     virtual bool update(uint64_t /*timestamp*/) override {
@@ -27,7 +26,7 @@ public:
     }
 
 private:
-    std::vector<T> _vector;
+    sp<Array<T>> _vector;
 
 };
 

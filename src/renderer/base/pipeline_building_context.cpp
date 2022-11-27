@@ -20,17 +20,13 @@ namespace {
 
 class AlignedInput : public Input {
 public:
-    AlignedInput(const sp<Input>& delegate, size_t alignedSize)
-        : _delegate(delegate), _aligned_size(alignedSize) {
-        DCHECK(_delegate->size() <= _aligned_size, "Alignment is lesser than delegate's size(%d)", _delegate->size());
+    AlignedInput(sp<Input> delegate, size_t alignedSize)
+        : Input(alignedSize), _delegate(std::move(delegate)), _aligned_size(alignedSize) {
+        CHECK(_delegate->size() <= _aligned_size, "Alignment is lesser than delegate's size(%d)", _delegate->size());
     }
 
-    virtual void flat(void* buf) override {
-        _delegate->flat(buf);
-    }
-
-    virtual uint32_t size() override {
-        return _aligned_size;
+    virtual void upload(Writable& buf) override {
+        _delegate->upload(buf);
     }
 
     virtual bool update(uint64_t timestamp) override {
@@ -39,7 +35,6 @@ public:
 
 private:
     sp<Input> _delegate;
-
     size_t _aligned_size;
 };
 
@@ -184,9 +179,9 @@ void PipelineBuildingContext::addSnippet(const sp<Snippet>& snippet)
     _snippet = _snippet ? sp<Snippet>::make<SnippetLinkedChain>(_snippet, snippet) : snippet;
 }
 
-void PipelineBuildingContext::addUniform(const String& name, Uniform::Type type, uint32_t length, const sp<Input>& flatable, int32_t binding)
+void PipelineBuildingContext::addUniform(String name, Uniform::Type type, uint32_t length, sp<Input> input, int32_t binding)
 {
-    _uniforms.push_back(name, sp<Uniform>::make(name, type, length, flatable, binding));
+    addUniform(sp<Uniform>::make(std::move(name), type, length, std::move(input), binding));
 }
 
 void PipelineBuildingContext::addUniform(sp<Uniform> uniform)

@@ -14,7 +14,6 @@
 #include "renderer/base/shader.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/base/shared_indices.h"
-#include "renderer/inf/uploader.h"
 
 namespace ark {
 

@@ -52,7 +52,6 @@ class TexturePacker;
 class VertexWriter;
 class Vertices;
 class Uniform;
-class Uploader;
 
 //[[script::bindings::auto]]
 typedef Importer<Atlas> AtlasImporter;

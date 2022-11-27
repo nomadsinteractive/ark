@@ -145,4 +145,9 @@ template<> ARK_API String Conversions::to<indexarray, String>(const indexarray& 
     return sb.str();
 }
 
+template<> ARK_API String Conversions::to<bytearray, String>(const bytearray& val)
+{
+    return Strings::dumpMemory(val->buf(), val->size());
+}
+
 }

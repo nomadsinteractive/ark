@@ -1180,7 +1180,7 @@ def create_overloaded_method_type(base_type, **kwargs):
                 lines.append('}')
             return_type = m0.err_return_value
             if m0.check_argument_type:
-                lines.append('PyErr_SetString(PyExc_TypeError, "Calling overloaded method(%s) failed, no arguments matched");' % self._name)
+                lines.append('PyErr_SetString(PyExc_TypeError, Strings::sprintf("Calling overloaded method(%%s::%%s) failed, no arguments matched", "%s", "%s").c_str());' % (genclass.name, self._name))
             lines.append(return_type + ';')
 
         def add_overloaded_method(self, method):

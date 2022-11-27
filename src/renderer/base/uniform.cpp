@@ -10,18 +10,18 @@
 
 namespace ark {
 
-Uniform::Uniform(const String& name, const String& declaredType, Uniform::Type type, size_t size, uint32_t length, const sp<Input>& flatable, int32_t binding)
-    : _name(name), _declared_type(declaredType), _type(type), _component_size(size), _length(length), _input(flatable), _binding(binding)
+Uniform::Uniform(String name, String declaredType, Uniform::Type type, size_t size, uint32_t length, sp<Input> input, int32_t binding)
+    : _name(std::move(name)), _declared_type(std::move(declaredType)), _type(type), _component_size(size), _length(length), _input(std::move(input)), _binding(binding)
 {
 }
 
-Uniform::Uniform(const String& name, const String& type, uint32_t length, const sp<Input>& flatable, int32_t binding)
-    : Uniform(name, type, toType(type), getComponentSize(toType(type)), length, flatable, binding)
+Uniform::Uniform(String name, String type, uint32_t length, sp<Input> input, int32_t binding)
+    : Uniform(std::move(name), std::move(type), toType(type), getComponentSize(toType(type)), length, std::move(input), binding)
 {
 }
 
-Uniform::Uniform(const String& name, Uniform::Type type, uint32_t length, const sp<Input>& flatable, int32_t binding)
-    : Uniform(name, toDeclaredType(type), type, getComponentSize(type), length, flatable, binding)
+Uniform::Uniform(String name, Uniform::Type type, uint32_t length, sp<Input> input, int32_t binding)
+    : Uniform(std::move(name), toDeclaredType(type), type, getComponentSize(type), length, std::move(input), binding)
 {
 }
 

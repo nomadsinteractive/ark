@@ -255,7 +255,7 @@ bytearray Json::toBson() const
 
 Json Json::fromBson(ByteArray& content)
 {
-    return sp<Stub>::make(nlohmann::json::from_bson(content.buf(), content.size(), true, true));
+    return sp<Stub>::make(nlohmann::json::from_bson(content.buf(), content.buf() + content.size(), true, true));
 }
 
 String Json::dump() const

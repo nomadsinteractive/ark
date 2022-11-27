@@ -7,6 +7,7 @@
 
 #include "core/base/api.h"
 #include "core/inf/array.h"
+#include "core/inf/input.h"
 #include "core/inf/writable.h"
 #include "core/types/shared_ptr.h"
 
@@ -96,6 +97,26 @@ private:
 
 typedef Uploader::Array<uint8_t> ByteArrayUploader;
 typedef Uploader::Array<element_index_t> IndexArrayUploader;
+
+
+class UploaderInput : public Input {
+public:
+    UploaderInput(sp<Uploader> uploader)
+        : Input(uploader->size()), _uploader(std::move(uploader)), _updatable(_uploader->updatable()) {
+    }
+
+    virtual bool update(uint64_t timestamp) override {
+        return _updatable ? _updatable->update(timestamp) : false;
+    }
+
+    virtual void upload(Writable& buf) override {
+        _uploader->upload(buf);
+    }
+
+private:
+    sp<Uploader> _uploader;
+    sp<Updatable> _updatable;
+};
 
 }
 

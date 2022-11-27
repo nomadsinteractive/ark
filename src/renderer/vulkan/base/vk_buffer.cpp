@@ -3,8 +3,6 @@
 #include "core/impl/writable/writable_memory.h"
 
 #include "renderer/base/recycler.h"
-#include "renderer/inf/uploader.h"
-#include "renderer/util/uploader_type.h"
 
 #include "renderer/vulkan/base/vk_command_pool.h"
 #include "renderer/vulkan/base/vk_heap.h"
@@ -29,24 +27,22 @@ uint64_t VKBuffer::id()
     return (uint64_t)(_descriptor.buffer);
 }
 
-void VKBuffer::upload(GraphicsContext& graphicsContext)
+void VKBuffer::upload(GraphicsContext& /*graphicsContext*/)
 {
-//    if(_uploader)
-//        uploadBuffer(graphicsContext, _uploader);
 }
 
-void VKBuffer::uploadBuffer(GraphicsContext& graphicsContext, Uploader& uploader)
+void VKBuffer::uploadBuffer(GraphicsContext& graphicsContext, Input& input)
 {
-    ensureSize(graphicsContext, uploader.size());
+    ensureSize(graphicsContext, input.size());
 //TODO: Copy every strips instead of copying the whole buffer
     if(isDeviceLocal())
     {
         VKBuffer stagingBuffer(_renderer, _recycler, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-        stagingBuffer.uploadBuffer(graphicsContext, uploader);
+        stagingBuffer.uploadBuffer(graphicsContext, input);
 
         VkCommandBuffer copyCmd = _renderer->commandPool()->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
         std::vector<VkBufferCopy> copyRegions;
-        copyRegions.push_back({0, 0, uploader.size()});
+        copyRegions.push_back({0, 0, input.size()});
         vkCmdCopyBuffer(copyCmd, stagingBuffer.vkBuffer(), _descriptor.buffer, static_cast<uint32_t>(copyRegions.size()), copyRegions.data());
         _renderer->commandPool()->flushCommandBuffer(copyCmd, true);
 
@@ -55,7 +51,7 @@ void VKBuffer::uploadBuffer(GraphicsContext& graphicsContext, Uploader& uploader
     else
     {
         WritableMemory writable(_memory->map());
-        uploader.upload(writable);
+        input.upload(writable);
         if(!isHostCoherent())
             VKUtil::checkResult(flush());
         _memory->unmap();

@@ -4,6 +4,7 @@
 
 #include "core/base/enums.h"
 #include "core/types/global.h"
+#include "core/util/input_type.h"
 #include "core/util/math.h"
 
 #include "graphics/base/bitmap.h"
@@ -18,9 +19,7 @@
 #include "renderer/base/shader_bindings.h"
 #include "renderer/base/shared_indices.h"
 #include "renderer/base/texture.h"
-#include "renderer/inf/uploader.h"
 #include "renderer/util/render_util.h"
-#include "renderer/util/uploader_type.h"
 
 #include "renderer/opengl/base/gl_buffer.h"
 #include "renderer/opengl/base/gl_pipeline.h"
@@ -262,7 +261,7 @@ void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, Render
     Buffer vertexBuffer = renderController.makeVertexBuffer(Buffer::USAGE_STATIC);
     Buffer::Snapshot indexBufferSnapshot = renderController.getSharedIndices(RenderController::SHARED_INDICES_QUAD)->snapshot(renderController, 6, 6);
 
-    const Buffer::Snapshot vertexBufferSnapshot = vertexBuffer.snapshot(sp<Uploader::Array<uint8_t>>::make(RenderUtil::makeUnitCubeVertices(false)));
+    const Buffer::Snapshot vertexBufferSnapshot = vertexBuffer.snapshot(InputType::create(RenderUtil::makeUnitCubeVertices(false)));
     vertexBufferSnapshot.upload(graphicsContext);
     glBindBuffer(GL_ARRAY_BUFFER, static_cast<GLuint>(vertexBuffer.id()));
     glEnableVertexAttribArray(0);

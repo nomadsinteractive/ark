@@ -9,7 +9,6 @@
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/model.h"
 #include "renderer/inf/render_command_composer.h"
-#include "renderer/inf/uploader.h"
 
 
 namespace ark {
@@ -24,28 +23,6 @@ public:
     virtual sp<RenderCommand> compose(const RenderRequest& renderRequest, RenderLayer::Snapshot& snapshot) override;
 
 private:
-
-    class VerticesUploader : public Uploader {
-    public:
-        VerticesUploader(const sp<ModelBundle>& multiModels, const sp<PipelineInput>& pipelineInput);
-
-        void upload(Writable& uploader) override;
-
-    private:
-        sp<ModelBundle> _model_bundle;
-        sp<PipelineInput> _pipeline_input;
-    };
-
-    class IndicesUploader : public Uploader {
-    public:
-        IndicesUploader(const sp<ModelBundle>& multiModels);
-
-        void upload(Writable& uploader) override;
-
-    private:
-        sp<ModelBundle> _model_bundle;
-    };
-
     struct IndirectCmd {
         DrawingContext::DrawElementsIndirectCommand _command;
         std::vector<size_t> _snapshot_offsets;

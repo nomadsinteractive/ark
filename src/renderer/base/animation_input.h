@@ -22,9 +22,8 @@ public:
 //  [[script::bindings::auto]]
     std::vector<float> getTransformVariance(const V3& c, const std::vector<String>& nodes);
 
-    virtual bool update(uint64_t timestamp);
-    virtual void flat(void* buf) override;
-    virtual uint32_t size() override;
+    virtual bool update(uint64_t timestamp) override;
+    virtual void upload(Writable& buf) override;
 
 private:
     struct Stub {
@@ -41,7 +40,6 @@ private:
 
         sp<Table<String, uint32_t>> _nodes;
         sp<std::vector<AnimationFrame>> _animation_frames;
-        size_t _size;
 
         uint32_t _frame_index;
     };

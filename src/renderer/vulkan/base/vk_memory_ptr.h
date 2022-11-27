@@ -22,7 +22,7 @@ public:
         void* map();
         void unmap();
 
-        void upload(Uploader& uploader);
+        void upload(Input& input);
 
     private:
         VKMemory _memory;

@@ -1,6 +1,7 @@
 #include "renderer/impl/renderer/skybox.h"
 
 #include "core/base/api.h"
+#include "core/util/input_type.h"
 
 #include "graphics/base/render_request.h"
 #include "graphics/base/size.h"
@@ -17,13 +18,12 @@
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/base/render_engine.h"
 #include "renderer/base/render_engine_context.h"
-#include "renderer/inf/uploader.h"
 #include "renderer/util/render_util.h"
 
 namespace ark {
 
 Skybox::Skybox(const sp<Size>& size, const sp<Shader>& shader, const sp<Texture>& texture, RenderController& renderController)
-    : _size(size), _shader(shader), _shader_bindings(shader->makeBindings(renderController.makeVertexBuffer(Buffer::USAGE_STATIC, sp<ByteArrayUploader>::make(makeUnitCubeVertices(renderController))), ModelLoader::RENDER_MODE_TRIANGLES, PipelineBindings::RENDER_PROCEDURE_DRAW_ELEMENTS)),
+    : _size(size), _shader(shader), _shader_bindings(shader->makeBindings(renderController.makeVertexBuffer(Buffer::USAGE_STATIC, InputType::create(makeUnitCubeVertices(renderController))), ModelLoader::RENDER_MODE_TRIANGLES, PipelineBindings::RENDER_PROCEDURE_DRAW_ELEMENTS)),
       _ib_snapshot(renderController.getSharedIndices(RenderController::SHARED_INDICES_QUAD)->snapshot(renderController, 6))
 {
     _shader_bindings->pipelineBindings()->bindSampler(texture);

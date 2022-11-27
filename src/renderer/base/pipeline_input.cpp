@@ -3,6 +3,7 @@
 #include "core/base/allocator.h"
 #include "core/base/memory_pool.h"
 #include "core/base/string.h"
+#include "core/impl/writable/writable_memory.h"
 
 #include "renderer/base/pipeline_building_context.h"
 #include "renderer/base/render_controller.h"
@@ -178,7 +179,7 @@ void PipelineInput::UBO::doSnapshot(uint64_t timestamp, bool force) const
         bool dirty = input && input->update(timestamp);
         dirtyFlags[i] = static_cast<uint8_t>(force || dirty);
         if(dirtyFlags[i] && input)
-            input->flat(buf);
+            input->upload(WritableMemory(buf));
         buf += uniform.size();
     }
 }
