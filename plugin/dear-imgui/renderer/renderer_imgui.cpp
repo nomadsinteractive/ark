@@ -200,8 +200,8 @@ void RendererImgui::MyImGuiRenderFunction(const RenderRequest& renderRequest, Im
         memcpy(ib.buf(), cmd_list->IdxBuffer.Data, static_cast<size_t>(ib.length()));
 
         uint32_t offset = 0;
-        const std::vector<RenderLayer::UBOSnapshot> ubos = _shader->takeUBOSnapshot(renderRequest);
-        const std::vector<Buffer::Snapshot> ssbos = _shader->takeSSBOSnapshot(renderRequest);
+        auto ubos = _shader->takeUBOSnapshot(renderRequest);
+        auto ssbos = _shader->takeSSBOSnapshot(renderRequest);
         for (int j = 0; j < cmd_list->CmdBuffer.Size; j++)
         {
             const ImDrawCmd* pcmd = &cmd_list->CmdBuffer[j];

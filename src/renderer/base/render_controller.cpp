@@ -4,6 +4,7 @@
 #include "core/base/enums.h"
 #include "core/inf/runnable.h"
 #include "core/inf/writable.h"
+#include "core/impl/input/input_snapshot.h"
 #include "core/util/boolean_type.h"
 #include "core/util/log.h"
 
@@ -46,8 +47,8 @@ public:
 
 class UploadingBufferResource : public Resource {
 public:
-    UploadingBufferResource(sp<Buffer::Delegate> buffer, sp<Input> input)
-        : _buffer(std::move(buffer)), _input(std::move(input)) {
+    UploadingBufferResource(sp<Buffer::Delegate> buffer, Input& input)
+        : _buffer(std::move(buffer)), _input_snapshot(input) {
     }
 
     virtual uint64_t id() override {
@@ -55,7 +56,7 @@ public:
     }
 
     virtual void upload(GraphicsContext& graphicsContext) override {
-        _buffer->uploadBuffer(graphicsContext, _input);
+        _buffer->uploadBuffer(graphicsContext, _input_snapshot);
     }
 
     virtual ResourceRecycleFunc recycle() override {
@@ -64,13 +65,13 @@ public:
 
 private:
     sp<Buffer::Delegate> _buffer;
-    sp<Input> _input;
+    InputSnapshot _input_snapshot;
 };
 
 class BufferUpdatable : public Updatable {
 public:
     BufferUpdatable(RenderController& renderController, sp<Input> input, sp<Buffer::Delegate> buffer)
-        : _render_controller(renderController), _input(std::move(input)), _buffer(std::move(buffer)) {
+        : _render_controller(renderController), _buffer(std::move(buffer)), _input(std::move(input)) {
     }
 
     virtual bool update(uint64_t timestamp) override {
@@ -82,8 +83,8 @@ public:
 
 private:
     RenderController& _render_controller;
-    sp<Input> _input;
     sp<Buffer::Delegate> _buffer;
+    sp<Input> _input;
 };
 
 }

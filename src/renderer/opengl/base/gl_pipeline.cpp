@@ -318,7 +318,6 @@ void GLPipeline::upload(GraphicsContext& graphicsContext)
     GLint linkstatus = 0;
     glGetProgramiv(id, GL_LINK_STATUS, &linkstatus);
     CHECK(linkstatus, "Program link failed: %s", getInformationLog(id).c_str());
-    LOGD("GLProgram[%d]:", id);
 }
 
 ResourceRecycleFunc GLPipeline::recycle()
@@ -671,8 +670,8 @@ void GLPipeline::PipelineOperationDraw::draw(GraphicsContext& graphicsContext, c
 
     uint32_t binding = 0;
     std::vector<GLBufferBaseBinder> binders;
-    for(const Buffer::Snapshot& i : drawingContext._ssbos)
-        binders.emplace_back(GL_SHADER_STORAGE_BUFFER, binding++, i.id());
+    for(const auto& [i, j] : drawingContext._ssbos)
+        binders.emplace_back(GL_SHADER_STORAGE_BUFFER, i, j.id());
 
     _renderer->draw(graphicsContext, drawingContext);
 }
@@ -791,7 +790,7 @@ const GLPipeline::GLUniform& GLPipeline::Stub::getUniform(const String& name)
 GLint GLPipeline::Stub::getUniformLocation(const String& name)
 {
     GLint location = glGetUniformLocation(_id, name.c_str());
-    DWARN(location != -1, "Undefined uniform \"%s\". It might be optimized out, or something goes wrong.", name.c_str());
+    WARN(location != -1, "Undefined uniform \"%s\". It might be optimized out, or something goes wrong.", name.c_str());
     return location;
 }
 
@@ -842,8 +841,8 @@ void GLPipeline::PipelineOperationCompute::compute(GraphicsContext& /*graphicsCo
 
     uint32_t binding = 0;
     std::vector<GLBufferBaseBinder> binders;
-    for(const Buffer::Snapshot& i : computeContext._ssbo)
-        binders.emplace_back(GL_SHADER_STORAGE_BUFFER, binding++, i.id());
+    for(const auto& [i, j] : computeContext._ssbo)
+        binders.emplace_back(GL_SHADER_STORAGE_BUFFER, i, j.id());
 
     glDispatchCompute(computeContext._num_work_groups.at(0), computeContext._num_work_groups.at(1), computeContext._num_work_groups.at(2));
 }

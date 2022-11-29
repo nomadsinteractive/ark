@@ -56,6 +56,7 @@ list(APPEND LOCAL_INCLUDE_DIRS src)
 
 message("Building for ${ARK_SYSTEM_NAME} - ${CMAKE_BUILD_TYPE}; build-share-libs: ${BUILD_SHARED_LIBS}\nCompiler: ${CMAKE_CXX_COMPILER_ID}-${CMAKE_CXX_COMPILER_VERSION}")
 ark_compile_definitions(-DARK_SYSTEM_NAME="${ARK_SYSTEM_NAME}")
+ark_compile_definitions(-DARK_BINARY_POSTFIX="$<$<CONFIG:DEBUG>:${CMAKE_DEBUG_POSTFIX}>$<$<CONFIG:RELWITHDEBINFO>:${CMAKE_RELWITHDEBINFO_POSTFIX}>")
 
 ark_add_debug_flag()
 
@@ -176,6 +177,7 @@ ark_ensure_dependency(3rdparty/cute_headers)
 ark_include_directories(3rdparty/cute_headers)
 
 ark_include_directories(3rdparty/json/include)
+ark_include_directories(3rdparty/spdlog/include)
 
 if(ARK_USE_LIBPNG)
     set(SKIP_INSTALL_ALL ON)

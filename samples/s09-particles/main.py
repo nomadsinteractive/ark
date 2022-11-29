@@ -1,4 +1,4 @@
-from ark import dear_imgui, ApplicationFacade, Event, Arena, Math, Vec2, Integer
+from ark import dear_imgui, ApplicationFacade, Event, Arena, Math, Vec2, Integer, Input
 
 
 class Application:
@@ -9,8 +9,9 @@ class Application:
         self._resource_loader = self._application.create_resource_loader('main.xml')
         self._mouse_down = Integer(0)
         self._particle_count = Integer(self.PARTICLE_COUNT_MAX)
+        particles = Input([Input(self.make_default_pos()), Input((0, 0)), Input((0, 0, 0, 0))]).repeat(self.PARTICLE_COUNT_MAX)
         self._arena = self._resource_loader.load(Arena, 'main', mp=application.cursor_position, pc=self._particle_count, dt=1 / 60, md=self._mouse_down,
-                                                 pos=self.make_default_pos())
+                                                 p=particles)
         self._application.arena = self._arena
         self._arena.add_event_listener(self.on_event)
         self._imgui = self._arena.resource_loader.refs.imgui

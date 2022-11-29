@@ -16,10 +16,9 @@
 
 #define ARRAY_PATTERN           "(?:\\[\\s*(\\d+)\\s*\\])?"
 #define STD_TYPE_PATTERN        "int|uint8|float|[bi]?vec[234]|mat3|mat4"
-//#define UNIFORM_TYPE_PATTERN    "\\s+(" STD_TYPE_PATTERN "|sampler2D|samplerCube|image2D|iimage2D|uimage2D)\\s+"
 #define ATTRIBUTE_PATTERN       "\\s+(" STD_TYPE_PATTERN ")\\s+" "(?:a_|v_)(\\w+)" ARRAY_PATTERN ";"
 #define UNIFORM_PATTERN         "\\s+(\\w+)\\s+" "(u_\\w+)" ARRAY_PATTERN ";"
-#define LAYOUT_PATTERN          "(?:layout\\((?:std140|binding\\s*=\\s*(\\d+)|r\\d+[ui]*|\\s)+\\)\\s+)?"
+#define LAYOUT_PATTERN          "layout\\((?:std140|binding\\s*=\\s*(\\d+)|r\\d+[ui]*|[\\s,])+\\)\\s+"
 
 #define INDENT_STR "    "
 
@@ -35,8 +34,8 @@ const char* ShaderPreprocessor::ANNOTATION_FRAG_COLOR = "${frag.color}";
 static std::regex _INCLUDE_PATTERN("#include\\s*[<\"]([^>\"]+)[>\"]");
 static std::regex _STRUCT_PATTERN("struct\\s+(\\w+)\\s*\\{([^}]+)\\}\\s*;");
 static std::regex _IN_PATTERN("(?:attribute|varying|in)" ATTRIBUTE_PATTERN);
-static std::regex _UNIFORM_PATTERN(LAYOUT_PATTERN "uniform" UNIFORM_PATTERN);
-static std::regex _SSBO_PATTERN("layout\\(std140, binding\\s*=\\s*(\\d+)\\)\\s+(?:(?:read|write)only\\s+)?buffer\\s+(\\w+)");
+static std::regex _UNIFORM_PATTERN("(?:" LAYOUT_PATTERN ")?uniform" UNIFORM_PATTERN);
+static std::regex _SSBO_PATTERN(LAYOUT_PATTERN "(?:(?:read|write)only\\s+)?buffer\\s+(\\w+)");
 
 #ifndef ANDROID
 static char _STAGE_ATTR_PREFIX[PipelineInput::SHADER_STAGE_COUNT + 1][4] = {"a_", "v_", "t_", "e_", "g_", "f_", "c_"};
@@ -84,7 +83,7 @@ void ShaderPreprocessor::initializeAsFirst(PipelineBuildingContext& context)
 static bool sanitizer(const std::smatch& match) {
     DWARN(false, match.str().c_str());
     return false;
-};
+}
 
 void ShaderPreprocessor::parseMainBlock(const String& source, PipelineBuildingContext& buildingContext)
 {
@@ -140,7 +139,7 @@ void ShaderPreprocessor::parseDeclarations()
     });
 
     auto ssboPattern = [this](const std::smatch& m) {
-        _ssbos[m[2].str()] = Strings::parse<int32_t>(m[0].str());
+        _ssbos[m[2].str()] = Strings::parse<int32_t>(m[1].str());
         return true;
     };
     _includes.search(_SSBO_PATTERN, ssboPattern);

@@ -32,7 +32,7 @@ public:
 
     void load(const String& name);
 
-    void addPlugin(const sp<Plugin>& plugin);
+    void addPlugin(sp<Plugin> plugin);
 
 private:
     std::vector<sp<Plugin>> _plugins;

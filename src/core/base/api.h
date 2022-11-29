@@ -51,9 +51,11 @@
 #define ARK_CONCAT_IMPL(x, y) x##y
 #define ARK_CONCAT(x, y) ARK_CONCAT_IMPL(x, y)
 
-#define FATAL(...) ark::__fatal__(__ARK_FUNCTION__, nullptr, __VA_ARGS__)
-#define CHECK(cond, ...) if(!(cond)) ark::__fatal__(__ARK_FUNCTION__, #cond, __VA_ARGS__)
-#define WARN(cond, ...) if(!(cond)) ark::__warning__(__ARK_FUNCTION__, __VA_ARGS__)
+#define FATAL(...) ark::__message__(ark::__fatal__, __ARK_FUNCTION__, nullptr, __VA_ARGS__)
+#define THREAD_CHECK(threadId) __thread_check__<threadId>(__ARK_FUNCTION__)
+#define CHECK(cond, ...) if(!(cond)) ark::__message__(ark::__fatal__, __ARK_FUNCTION__, #cond, __VA_ARGS__)
+#define WARN(cond, ...) if(!(cond)) ark::__message__(ark::__warning__, __ARK_FUNCTION__, #cond, __VA_ARGS__)
+#define TRACE(cond, ...) if(cond) ark::__message__(ark::__trace__, __ARK_FUNCTION__, #cond, __VA_ARGS__)
 
 #ifndef ARK_FLAG_PUBLISHING_BUILD
 #   define DPROFILER_TRACE(...) static auto ARK_CONCAT(_ag_tracer_, __LINE__) = Ark::instance().makeProfilerTracer(__ARK_FUNCTION_SIGANTURE__, __FILE__, __LINE__, __VA_ARGS__); \
@@ -69,13 +71,13 @@
 #   define DFATAL(...) FATAL(__VA_ARGS__)
 #   define DCHECK(cond, ...) CHECK(cond, __VA_ARGS__)
 #   define DWARN(cond, ...) WARN(cond, __VA_ARGS__)
-#   define DTRACE(cond) if(cond) __trace__()
-#   define DTHREAD_CHECK(threadId) __thread_check__<threadId>(__ARK_FUNCTION__)
+#   define DTRACE(cond) TRACE(cond, __VA_ARGS__)
+#   define DTHREAD_CHECK(threadId) THREAD_CHECK(threadId)
 #else
 #   define DFATAL(...)
 #   define DCHECK(cond, ...) (void (cond))
 #   define DWARN(cond, ...) (void (cond))
-#   define DTRACE(cond) (void (cond))
+#   define DTRACE(cond, ...) (void (cond))
 #   define DTHREAD_CHECK(threadId) (void (threadId))
 #endif
 
@@ -175,9 +177,14 @@ enum THREAD_ID {
     THREAD_ID_RENDERER = 3
 };
 
+typedef void(*fnTraceCallback)(const char* func, const char* condition, const char* message);
+
+void ARK_API __message__(fnTraceCallback callback, const char* func, const char* condition, const char* format = "", ...);
+
 [[noreturn]]
-void ARK_API __fatal__(const char* func, const char* condition, const char* format, ...);
-void ARK_API __warning__(const char* func, const char* format, ...);
+void ARK_API __fatal__(const char* func, const char* condition, const char* message);
+void ARK_API __warning__(const char* func, const char* condition, const char* message);
+void ARK_API __trace__(const char* func, const char* condition, const char* message);
 
 namespace _internal {
 
@@ -196,10 +203,9 @@ template<THREAD_ID ID> void __thread_init__() {
 
 template<THREAD_ID ID> void __thread_check__(const char* func) {
     if(_internal::ThreadFlag<ID>::id() != ID)
-        __fatal__(func, "", "ThreadId check failed: %d, should be %d", _internal::ThreadFlag<ID>::id(), ID);
+        __message__(__fatal__, func, "", "ThreadId check failed: %d, should be %d", _internal::ThreadFlag<ID>::id(), ID);
 }
 
-void ARK_API __trace__();
 bool ARK_API __trace_flag__();
 void ARK_API __set_trace_flag__();
 

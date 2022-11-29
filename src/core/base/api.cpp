@@ -11,28 +11,23 @@ namespace ark {
 
 static bool gTraceFlag = false;
 
-void __fatal__(const char* func, const char* condition, const char* format, ...)
+void __fatal__(const char* func, const char* condition, const char* message)
 {
-    va_list args;
-    va_start(args, format);
-    const String str = condition ? Strings::sprintf("\"%s\" failed! ", condition) + Strings::svprintf(format, args) : Strings::svprintf(format, args);
-    va_end(args);
+    const String str = Strings::sprintf("%s%s", condition ? Strings::sprintf("\"%s\" failed! ", condition).c_str() : "", message);
     Log::e(func, str.c_str());
     throw std::logic_error(str.c_str());
 }
 
-void __warning__(const char* func, const char* format, ...)
+void __warning__(const char* func, const char* /*condition*/, const char* message)
 {
-    va_list args;
-    va_start(args, format);
-    const String str = Strings::svprintf(format, args);
-    va_end(args);
-    Log::w(func, str.c_str());
+    Log::w(func, message);
 }
 
-void __trace__()
+void __trace__(const char* func, const char* /*condition*/, const char* message)
 {
-    LOGD(">>>__TRACE HERE___<<<");
+    Log::d(func, ">>>__TRACING__>>>");
+    Log::d(func, message);
+    Log::d(func, "<<<__TRACING__<<<");
     gTraceFlag = false;
 }
 
@@ -44,6 +39,16 @@ bool __trace_flag__()
 void __set_trace_flag__()
 {
     gTraceFlag = true;
+}
+
+void __message__(fnTraceCallback callback, const char* func, const char* condition, const char* format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    const String str = Strings::svprintf(format, args);
+    va_end(args);
+
+    callback(func, condition, str.c_str());
 }
 
 }

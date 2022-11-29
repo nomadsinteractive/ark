@@ -48,69 +48,69 @@ private:
 static sp<InputImpl> ensureImpl(const sp<Input>& self)
 {
     const sp<InputImpl> impl = self.as<InputImpl>();
-    CHECK(impl, "This object is not a InputImpl instance. Use \"shift\" method to create an InputImpl instance.");
+    CHECK(impl, "This object is not a InputImpl instance. Use \"reserve\" method to create an InputImpl instance.");
     return impl;
 }
 
 
-sp<Input> InputType::create(sp<ByteArray> value)
+sp<Input> InputType::create(sp<ByteArray> value, size_t size)
 {
-    return sp<InputObjectArray<uint8_t>>::make(std::move(value));
+    return reserve(sp<InputObjectArray<uint8_t>>::make(std::move(value)), size);
 }
 
-sp<Input> InputType::create(sp<Integer> value)
+sp<Input> InputType::create(sp<Integer> value, size_t size)
 {
-    return sp<InputVariable<int32_t>>::make(std::move(value));
+    return reserve(sp<InputVariable<int32_t>>::make(std::move(value)), size);
 }
 
-sp<Input> InputType::create(sp<Numeric> value)
+sp<Input> InputType::create(sp<Numeric> value, size_t size)
 {
-    return sp<InputVariable<float>>::make(std::move(value));
+    return reserve(sp<InputVariable<float>>::make(std::move(value)), size);
 }
 
-sp<Input> InputType::create(sp<Vec2> value)
+sp<Input> InputType::create(sp<Vec2> value, size_t size)
 {
-    return sp<InputVariable<V2>>::make(std::move(value));
+    return reserve(sp<InputVariable<V2>>::make(std::move(value)), size);
 }
 
-sp<Input> InputType::create(sp<Vec3> value)
+sp<Input> InputType::create(sp<Vec3> value, size_t size)
 {
-    return sp<InputVariable<V3>>::make(std::move(value));
+    return reserve(sp<InputVariable<V3>>::make(std::move(value)), size);
 }
 
-sp<Input> InputType::create(sp<Vec4> value)
+sp<Input> InputType::create(sp<Vec4> value, size_t size)
 {
-    return sp<InputVariable<V4>>::make(std::move(value));
+    return reserve(sp<InputVariable<V4>>::make(std::move(value)), size);
 }
 
-sp<Input> InputType::create(std::map<size_t, sp<Input>> value)
+sp<Input> InputType::create(std::map<size_t, sp<Input>> value, size_t size)
 {
-    return sp<InputImpl>::make(std::move(value));
+    return sp<InputImpl>::make(std::move(value), size);
 }
 
-sp<Input> InputType::create(std::vector<sp<Mat4>> value)
+sp<Input> InputType::create(std::vector<sp<Mat4>> value, size_t size)
 {
-    return sp<InputVariableArray<M4>>::make(std::move(value));
+    return reserve(sp<InputVariableArray<M4>>::make(std::move(value)), size);
 }
 
-sp<Input> InputType::create(std::vector<sp<Input>> value)
+sp<Input> InputType::create(std::vector<sp<Input>> value, size_t size)
 {
-    return sp<InputArray>::make(std::move(value));
+    return reserve(sp<InputArray>::make(std::move(value)), size);
 }
 
-sp<Input> InputType::create(std::vector<V3> value)
+sp<Input> InputType::create(std::vector<V3> value, size_t size)
 {
-    return sp<InputObjectArray<V3>>::make(std::move(value));
+    return reserve(sp<InputObjectArray<V3>>::make(std::move(value)), size);
 }
 
-sp<Input> InputType::create(std::vector<V4> value)
+sp<Input> InputType::create(std::vector<V4> value, size_t size)
 {
-    return sp<InputObjectArray<V4>>::make(std::move(value));
+    return reserve(sp<InputObjectArray<V4>>::make(std::move(value)), size);
 }
 
-sp<Input> InputType::create(std::vector<uint32_t> value)
+sp<Input> InputType::create(std::vector<uint32_t> value, size_t size)
 {
-    return sp<InputObjectArray<uint32_t>>::make(std::move(value));
+    return reserve(sp<InputObjectArray<uint32_t>>::make(std::move(value)), size);
 }
 
 sp<Input> InputType::wrap(sp<Input> self)
@@ -133,11 +133,14 @@ size_t InputType::size(const sp<Input>& self)
     return self->size();
 }
 
-sp<Input> InputType::shift(const sp<Input>& self, size_t offset, size_t size)
+sp<Input> InputType::reserve(sp<Input> self, size_t size)
 {
-    sp<InputImpl> inputImpl = sp<InputImpl>::make(size ? size : offset + self->size());
+    if(size <= self->size())
+        return self;
+
+    sp<InputImpl> inputImpl = sp<InputImpl>::make(size);
     if(self->size() > 0)
-        inputImpl->addInput(offset,  self);
+        inputImpl->addInput(0,  std::move(self));
     return inputImpl;
 }
 

@@ -17,35 +17,35 @@ namespace ark {
 class ARK_API InputType {
 public:
 //[[script::bindings::constructor]]
-    static sp<Input> create(sp<ByteArray> value);
+    static sp<Input> create(sp<ByteArray> value, size_t size = 0);
 //[[script::bindings::constructor]]
-    static sp<Input> create(sp<Integer> value);
+    static sp<Input> create(sp<Integer> value, size_t size = 0);
 //[[script::bindings::constructor]]
-    static sp<Input> create(sp<Numeric> value);
+    static sp<Input> create(sp<Numeric> value, size_t size = 0);
 //[[script::bindings::constructor]]
-    static sp<Input> create(sp<Vec2> value);
+    static sp<Input> create(sp<Vec2> value, size_t size = 0);
 //[[script::bindings::constructor]]
-    static sp<Input> create(sp<Vec3> value);
+    static sp<Input> create(sp<Vec3> value, size_t size = 0);
 //[[script::bindings::constructor]]
-    static sp<Input> create(sp<Vec4> value);
+    static sp<Input> create(sp<Vec4> value, size_t size = 0);
 //[[script::bindings::constructor]]
-    static sp<Input> create(std::map<size_t, sp<Input>> value);
+    static sp<Input> create(std::map<size_t, sp<Input>> value, size_t size = 0);
 //[[script::bindings::constructor]]
-    static sp<Input> create(std::vector<sp<Mat4>> value);
+    static sp<Input> create(std::vector<sp<Mat4>> value, size_t size = 0);
 //[[script::bindings::constructor]]
-    static sp<Input> create(std::vector<sp<Input>> value);
+    static sp<Input> create(std::vector<sp<Input>> value, size_t size = 0);
 //[[script::bindings::constructor]]
-    static sp<Input> create(std::vector<V3> value);
+    static sp<Input> create(std::vector<V3> value, size_t size = 0);
 //[[script::bindings::constructor]]
-    static sp<Input> create(std::vector<V4> value);
+    static sp<Input> create(std::vector<V4> value, size_t size = 0);
 //[[script::bindings::constructor]]
-    static sp<Input> create(std::vector<uint32_t> value);
+    static sp<Input> create(std::vector<uint32_t> value, size_t size = 0);
 
 //[[script::bindings::property]]
     static size_t size(const sp<Input>& self);
 
 //[[script::bindings::classmethod]]
-    static sp<Input> shift(const sp<Input>& self, size_t offset, size_t size = 0);
+    static sp<Input> reserve(sp<Input> self, size_t size);
 //[[script::bindings::classmethod]]
     static sp<Input> repeat(sp<Input> self, size_t length, size_t stride = 0);
 

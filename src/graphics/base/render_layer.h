@@ -72,7 +72,7 @@ public:
         size_t _index_count;
 
         std::vector<UBOSnapshot> _ubos;
-        std::vector<Buffer::Snapshot> _ssbos;
+        std::vector<std::pair<uint32_t, Buffer::Snapshot>> _ssbos;
         std::deque<Renderable::Snapshot> _items;
 
         Buffer::Snapshot _index_buffer;

@@ -91,11 +91,11 @@ std::vector<RenderLayer::UBOSnapshot> Shader::takeUBOSnapshot(const RenderReques
     return uboSnapshot;
 }
 
-std::vector<Buffer::Snapshot> Shader::takeSSBOSnapshot(const RenderRequest& /*renderRequest*/) const
+std::vector<std::pair<uint32_t, Buffer::Snapshot>> Shader::takeSSBOSnapshot(const RenderRequest& /*renderRequest*/) const
 {
-    std::vector<Buffer::Snapshot> ssboSnapshot;
+    std::vector<std::pair<uint32_t, Buffer::Snapshot>> ssboSnapshot;
     for(const PipelineInput::SSBO& i : _input->ssbos())
-        ssboSnapshot.push_back(i._buffer.snapshot());
+        ssboSnapshot.push_back(std::make_pair(i._binding, i._buffer.snapshot()));
     return ssboSnapshot;
 }
 

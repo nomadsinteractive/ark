@@ -51,12 +51,12 @@ private:
 }
 
 
-DrawingContext::DrawingContext(sp<ShaderBindings> shaderBindings, sp<ByType> attachments, std::vector<RenderLayer::UBOSnapshot> ubo, std::vector<Buffer::Snapshot> ssbos)
+DrawingContext::DrawingContext(sp<ShaderBindings> shaderBindings, sp<ByType> attachments, std::vector<RenderLayer::UBOSnapshot> ubo, std::vector<std::pair<uint32_t, Buffer::Snapshot> > ssbos)
     : _shader_bindings(std::move(shaderBindings)), _attachments(std::move(attachments)), _ubos(std::move(ubo)), _ssbos(std::move(ssbos)), _scissor(0, 0, -1.0f, -1.0f)
 {
 }
 
-DrawingContext::DrawingContext(sp<ShaderBindings> shaderBindings, sp<ByType> attachments, std::vector<RenderLayer::UBOSnapshot> ubo, std::vector<Buffer::Snapshot> ssbos, Buffer::Snapshot vertices, Buffer::Snapshot indices, Parameters parameters)
+DrawingContext::DrawingContext(sp<ShaderBindings> shaderBindings, sp<ByType> attachments, std::vector<RenderLayer::UBOSnapshot> ubo, std::vector<std::pair<uint32_t, Buffer::Snapshot> > ssbos, Buffer::Snapshot vertices, Buffer::Snapshot indices, Parameters parameters)
     : _shader_bindings(std::move(shaderBindings)), _attachments(std::move(attachments)), _ubos(std::move(ubo)), _ssbos(std::move(ssbos)), _vertices(std::move(vertices)), _indices(std::move(indices)), _scissor(0, 0, -1.0f, -1.0f), _parameters(std::move(parameters))
 {
 }

@@ -33,7 +33,7 @@ bool InputImpl::update(uint64_t timestamp)
 
 void InputImpl::upload(Writable& writable)
 {
-    DTHREAD_CHECK(THREAD_ID_CORE);
+    THREAD_CHECK(THREAD_ID_CORE);
     for(InputStub& i : _inputs)
         if(i._dirty || i._fresh)
         {

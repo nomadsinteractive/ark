@@ -9,7 +9,7 @@ Use it for:
 3. Unit test(maybe)
 
 """
-
+from ctypes import Structure
 from typing import Callable, List, Type, TypeVar, Union, Optional, Dict, Tuple, Any
 
 _BUILDABLE_TYPES = TypeVar('_BUILDABLE_TYPES', 'Arena', 'AudioPlayer', 'Boolean', 'Characters', 'Collider', 'Integer', 'ModelLoader', 'Numeric', 'NarrowPhrase',
@@ -935,14 +935,14 @@ class Mat4(_Mat):
 
 
 class Input:
-    def __init__(self, delegate: Union[Numeric, Vec2, Vec3, Vec4, list[_Mat], list[tuple], list[int], list['Input']]):
+    def __init__(self, delegate: Union[Numeric, Vec2, Vec3, Vec4, list[_Mat], list[tuple], list[int], list['Input'], Any], size: int = 0):
         pass
 
     @property
     def size(self):
         return 0
 
-    def shift(self, offset: int, size: int = 0) -> 'Input':
+    def reserve(self, size: int) -> 'Input':
         pass
 
     def add_input(self, offset: int, input_: 'Input'):

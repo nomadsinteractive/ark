@@ -28,7 +28,7 @@ public:
     static sp<Shader> fromStringTable(const String& vertex = "shaders/default.vert", const String& fragment = "shaders/texture.frag", const sp<Snippet>& snippet = nullptr, const sp<ResourceLoaderContext>& resourceLoaderContext = nullptr);
 
     std::vector<RenderLayer::UBOSnapshot> takeUBOSnapshot(const RenderRequest& renderRequest) const;
-    std::vector<Buffer::Snapshot> takeSSBOSnapshot(const RenderRequest& renderRequest) const;
+    std::vector<std::pair<uint32_t, Buffer::Snapshot>> takeSSBOSnapshot(const RenderRequest& renderRequest) const;
 
     const sp<PipelineFactory>& pipelineFactory() const;
     const sp<RenderController>& renderController() const;

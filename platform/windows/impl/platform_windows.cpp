@@ -127,8 +127,9 @@ void* Platform::dlOpen(const char* name)
 {
     if(name)
     {
-        const String dllName = Strings::sprintf("%s.dll", name);
-        return LoadLibrary(dllName.c_str());
+        if(String(name).endsWith(".dll"))
+            LoadLibrary(name);
+        return LoadLibrary(Strings::sprintf("%s.dll", name).c_str());
     }
     HMODULE hModule = nullptr;
     GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS, (LPCTSTR)Platform::dlOpen, &hModule);

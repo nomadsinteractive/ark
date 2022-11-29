@@ -134,13 +134,12 @@ void PipelineBuildingContext::initialize()
     Table<String, PipelineInput::SSBO> sobs;
     for(const auto& i : _stages)
     {
-        for(const auto& j : i.second->_ssbos)
+        for(const auto& [name, bindings] : i.second->_ssbos)
         {
-            const String& name = j.first;
             if(!sobs.has(name))
             {
                 CHECK(_ssbos.has(name), "SSBO \"%s\" does not exist", name.c_str());
-                sobs[name] = PipelineInput::SSBO(_ssbos.at(name), static_cast<uint32_t>(j.second));
+                sobs[name] = PipelineInput::SSBO(_ssbos.at(name), static_cast<uint32_t>(bindings));
             }
             sobs[name]._stages.insert(i.first);
         }
@@ -261,10 +260,9 @@ void PipelineBuildingContext::loadPredefinedUniform(BeanFactory& factory, const 
         const String& type = Documents::ensureAttribute(i, Constants::Attributes::TYPE);
         const String& value = Documents::ensureAttribute(i, Constants::Attributes::VALUE);
         int32_t binding = Documents::getAttribute<int32_t>(i, Constants::Attributes::BINDING, -1);
-//TODO: TypeValue build
         sp<Builder<Input>> builder = factory.findBuilderByTypeValue<Input>(type, value);
         sp<Input> input = builder ? builder->build(args) : factory.ensure<Input>(value, args);
-        uint32_t size = input->size();
+        size_t size = input->size();
         Uniform::Type uType = Uniform::toType(type);
         uint32_t componentSize = uType != Uniform::TYPE_STRUCT ? Uniform::getComponentSize(uType) : size;
         CHECK(componentSize, "Unknow type \"%s\"", type.c_str());

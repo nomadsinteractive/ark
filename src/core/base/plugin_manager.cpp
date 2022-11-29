@@ -36,7 +36,9 @@ void PluginManager::load(const String& name)
     PluginInitializer func = reinterpret_cast<PluginInitializer>(iter != _ark_static_plugin_initializers.end() ? iter->second : nullptr);
     CHECK(func, "Error loading plugin \"%s\"", name.c_str());
 #else
-    void* library = Platform::dlOpen(name.c_str());
+    void* library = Platform::dlOpen(Strings::sprintf("%s" ARK_BINARY_POSTFIX, name.c_str()).c_str());
+    if(!library)
+        library = Platform::dlOpen(name.c_str());
     CHECK(library, "Cannot load plugin \"%s\"", name.c_str());
     const String symbolName = Strings::sprintf("__%s_initialize__", name.replace("-", "_").c_str());
     void* symbol = Platform::dlSymbol(library, symbolName.c_str());
@@ -44,14 +46,14 @@ void PluginManager::load(const String& name)
     CHECK(func, "Error loading plugin \"%s\", symbol \"%s\" not found", name.c_str(), symbolName.c_str());
 #endif
     Plugin* plugin = func(Ark::instance());
-    CHECK(plugin, "Error loading plugin \"%s\", PluginInitializer returned null", name.c_str());
+    CHECK(plugin, "Error initializing plugin \"%s\", PluginInitializer returned null", name.c_str());
     addPlugin(sp<Plugin>::adopt(plugin));
 }
 
-void PluginManager::addPlugin(const sp<Plugin>& plugin)
+void PluginManager::addPlugin(sp<Plugin> plugin)
 {
     plugin->initialize();
-    _plugins.push_back(plugin);
+    _plugins.push_back(std::move(plugin));
 }
 
 }

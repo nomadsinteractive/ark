@@ -88,8 +88,8 @@ public:
     };
 
 public:
-    DrawingContext(sp<ShaderBindings> shaderBindings, sp<ByType> attachments, std::vector<RenderLayer::UBOSnapshot> ubo, std::vector<Buffer::Snapshot> ssbos);
-    DrawingContext(sp<ShaderBindings> shaderBindings, sp<ByType> attachments, std::vector<RenderLayer::UBOSnapshot> ubo, std::vector<Buffer::Snapshot> ssbos, Buffer::Snapshot vertexBuffer, Buffer::Snapshot indexBuffer, Parameters parameters);
+    DrawingContext(sp<ShaderBindings> shaderBindings, sp<ByType> attachments, std::vector<RenderLayer::UBOSnapshot> ubo, std::vector<std::pair<uint32_t, Buffer::Snapshot>> ssbos);
+    DrawingContext(sp<ShaderBindings> shaderBindings, sp<ByType> attachments, std::vector<RenderLayer::UBOSnapshot> ubo, std::vector<std::pair<uint32_t, Buffer::Snapshot>> ssbos, Buffer::Snapshot vertexBuffer, Buffer::Snapshot indexBuffer, Parameters parameters);
     DEFAULT_COPY_AND_ASSIGN(DrawingContext);
 
     sp<RenderCommand> toRenderCommand(const RenderRequest& renderRequest);
@@ -101,7 +101,7 @@ public:
     sp<ByType> _attachments;
 
     std::vector<RenderLayer::UBOSnapshot> _ubos;
-    std::vector<Buffer::Snapshot> _ssbos;
+    std::vector<std::pair<uint32_t, Buffer::Snapshot>> _ssbos;
     Buffer::Snapshot _vertices;
     Buffer::Snapshot _indices;
 
