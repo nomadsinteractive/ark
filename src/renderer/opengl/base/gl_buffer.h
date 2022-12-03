@@ -10,7 +10,7 @@
 namespace ark {
 namespace opengl {
 
-class GLBuffer : public Buffer::Delegate {
+class GLBuffer : public Buffer::Uploader {
 public:
     GLBuffer(Buffer::Type type, Buffer::Usage usage, sp<Recycler> recycler);
     ~GLBuffer() override;

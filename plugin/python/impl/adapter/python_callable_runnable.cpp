@@ -20,7 +20,7 @@ void PythonCallableRunnable::run()
 {
     DCHECK_THREAD_FLAG();
 
-    DWARN(_callable, "This PyObject has been recycled by Python garbage collector");
+    WARN(_callable, "This PyObject has been recycled by Python garbage collector");
     if(_callable.pyObject())
     {
         PyInstance args(PyInstance::steal(PyTuple_New(0)));

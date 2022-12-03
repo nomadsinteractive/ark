@@ -5,6 +5,7 @@
 
 #include "core/base/api.h"
 #include "core/types/shared_ptr.h"
+#include "core/types/optional.h"
 
 #include "graphics/base/render_layer.h"
 #include "graphics/base/rect.h"
@@ -105,7 +106,7 @@ public:
     Buffer::Snapshot _vertices;
     Buffer::Snapshot _indices;
 
-    Rect _scissor;
+    Optional<Rect> _scissor;
     Parameters _parameters;
 
 

@@ -134,13 +134,13 @@ private:
         bool hasOutAttribute(const String& name) const;
         bool hasReturnValue() const;
 
+        size_t outArgumentCount() const;
+
         String _name;
         String _params;
         String _return_type;
         String _body;
-        std::vector<Parameter> _ins;
-        std::vector<Parameter> _outs;
-
+        std::vector<Parameter> _args;
         sp<String> _place_hoder;
 
     private:
@@ -163,8 +163,12 @@ public:
     const char* inVarPrefix() const;
     const char* outVarPrefix() const;
 
+    const std::vector<Parameter>& args() const;
+
     void inDeclare(const String& type, const String& name, int32_t location = -1);
     void outDeclare(const String& type, const String& name, int32_t location = -1);
+    void passThroughDeclare(const String& type, const String& name, int32_t location = -1);
+
     void linkNextStage(const String& returnValueName);
 
     void linkPreStage(const ShaderPreprocessor& preStage, std::set<String>& passThroughVars);

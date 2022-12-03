@@ -74,8 +74,8 @@ public:
 
     bool isPaused() const;
 
-    template<typename T> void deferUnref(sp<T>&& inst) const {
-        _render_controller->deferUnref(inst);
+    template<typename T> void deferUnref(sp<T> inst) const {
+        _render_controller->deferUnref(std::move(inst));
     }
 
     template<typename T> sp<Variable<T>> synchronize(const sp<Variable<T>>& delegate, const sp<Boolean>& disposed = nullptr) const {

@@ -67,7 +67,7 @@ RenderLayer::Snapshot::Snapshot(RenderRequest& renderRequest, const sp<Stub>& st
     _flag = needsReload ? SNAPSHOT_FLAG_RELOAD : SNAPSHOT_FLAG_DYNAMIC_UPDATE;
 
     _stub->_layer->context()->snapshot(renderRequest, *this);
-    for(LayerContext& i : stub->_batch_groups)
+    for(LayerContext& i : _stub->_batch_groups)
         i.snapshot(renderRequest, *this);
 
     _stub->_render_command_composer->postSnapshot(_stub->_render_controller, *this);

@@ -29,12 +29,12 @@ private:
 
 }
 
-Buffer::Snapshot::Snapshot(sp<Delegate> stub)
+Buffer::Snapshot::Snapshot(sp<Uploader> stub)
     : _delegate(std::move(stub)), _size(_delegate->size())
 {
 }
 
-Buffer::Snapshot::Snapshot(sp<Delegate> stub, size_t size, sp<Input> input)
+Buffer::Snapshot::Snapshot(sp<Uploader> stub, size_t size, sp<Input> input)
     : _delegate(std::move(stub)), _input(std::move(input)), _size(size)
 {
 }
@@ -60,12 +60,12 @@ void Buffer::Snapshot::upload(GraphicsContext& graphicsContext) const
         _delegate->uploadBuffer(graphicsContext, _input);
 }
 
-const sp<Buffer::Delegate>& Buffer::Snapshot::delegate() const
+const sp<Buffer::Uploader>& Buffer::Snapshot::delegate() const
 {
     return _delegate;
 }
 
-Buffer::Buffer(sp<Buffer::Delegate> delegate) noexcept
+Buffer::Buffer(sp<Buffer::Uploader> delegate) noexcept
     : _delegate(std::move(delegate))
 {
 }
@@ -110,7 +110,7 @@ void Buffer::upload(GraphicsContext& graphicsContext) const
     _delegate->upload(graphicsContext);
 }
 
-const sp<Buffer::Delegate>& Buffer::delegate() const
+const sp<Buffer::Uploader>& Buffer::delegate() const
 {
     return _delegate;
 }
@@ -134,12 +134,12 @@ void Buffer::Factory::addStrip(size_t offset, ByteArray::Borrowed& content)
     _size = std::max(_size, content.length() + offset);
 }
 
-Buffer::Delegate::Delegate()
+Buffer::Uploader::Uploader()
     :_size(0)
 {
 }
 
-size_t Buffer::Delegate::size() const
+size_t Buffer::Uploader::size() const
 {
     return _size;
 }

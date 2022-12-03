@@ -213,7 +213,7 @@ const sp<Numeric>& NumericType::delegate(const sp<Numeric>& self)
 void NumericType::setDelegate(const sp<Numeric>& self, const sp<Numeric>& delegate)
 {
     const sp<NumericWrapper> nw = self.as<NumericWrapper>();
-    DCHECK(nw, "Must be an NumericWrapper instance to set its delegate attribute");
+    CHECK(nw, "Must be an NumericWrapper instance to set its delegate attribute");
     nw->set(delegate);
 }
 

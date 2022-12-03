@@ -75,7 +75,7 @@ void PipelineLayout::initialize(const Camera& camera)
 
     ShaderPreprocessor* fragment = _building_context->tryGetStage(PipelineInput::SHADER_STAGE_FRAGMENT);
     if(fragment)
-        _color_attachment_count = fragment->_main_block->_outs.size() + (fragment->_main_block->hasReturnValue() ? 1 : 0);
+        _color_attachment_count = fragment->_main_block->outArgumentCount() + (fragment->_main_block->hasReturnValue() ? 1 : 0);
 
     _building_context->setupUniforms();
 

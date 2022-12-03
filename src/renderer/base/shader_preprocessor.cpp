@@ -76,8 +76,9 @@ void ShaderPreprocessor::initialize(PipelineBuildingContext& context)
 void ShaderPreprocessor::initializeAsFirst(PipelineBuildingContext& context)
 {
     initialize(context);
-    for(const auto& i : _main_block->_ins)
-        context.addInputAttribute(Strings::capitalizeFirst(i._name), i._type);
+    for(const auto& i : _main_block->_args)
+        if(i._modifier & ShaderPreprocessor::Parameter::PARAMETER_MODIFIER_IN)
+            context.addInputAttribute(Strings::capitalizeFirst(i._name), i._type);
 }
 
 static bool sanitizer(const std::smatch& match) {
@@ -166,7 +167,6 @@ void ShaderPreprocessor::parseDeclarations()
         _main.push_back(_post_main);
         _main.push_back(sp<String>::make("\n}\n\n"));
     }
-
 }
 
 ShaderPreprocessor::Preprocessed ShaderPreprocessor::preprocess()
@@ -224,6 +224,11 @@ const char* ShaderPreprocessor::outVarPrefix() const
     return _STAGE_ATTR_PREFIX[_shader_stage + 1];
 }
 
+const std::vector<ShaderPreprocessor::Parameter>& ShaderPreprocessor::args() const
+{
+    return _main_block->_args;
+}
+
 void ShaderPreprocessor::inDeclare(const String& type, const String& name, int32_t location)
 {
     _declaration_ins.declare(type, inVarPrefix(), name, location, nullptr, _shader_stage == PipelineInput::SHADER_STAGE_FRAGMENT && type == "int");
@@ -234,20 +239,27 @@ void ShaderPreprocessor::outDeclare(const String& type, const String& name, int3
     _declaration_outs.declare(type, outVarPrefix(), name, location, nullptr, type == "int");
 }
 
+void ShaderPreprocessor::passThroughDeclare(const String& type, const String& name, int32_t location)
+{
+    outDeclare(type, name, location);
+    addPreMainSource(Strings::sprintf("%s%s = %s%s;", outVarPrefix(), name.c_str(), inVarPrefix(), name.c_str()));
+}
+
 void ShaderPreprocessor::linkNextStage(const String& returnValueName)
 {
     const char* varPrefix = outVarPrefix();
     int32_t location = -1;
     if(_main_block->hasReturnValue())
         _declaration_outs.declare(_main_block->_return_type, varPrefix, returnValueName, ++location);
-    for(const Parameter& i : _main_block->_outs)
-        _declaration_outs.declare(i._type, varPrefix, Strings::capitalizeFirst(i._name), ++location, i.getQualifierStr());
+    for(const Parameter& i : _main_block->_args)
+        if(i._modifier == ShaderPreprocessor::Parameter::PARAMETER_MODIFIER_OUT)
+            _declaration_outs.declare(i._type, varPrefix, Strings::capitalizeFirst(i._name), ++location, i.getQualifierStr());
 }
 
 void ShaderPreprocessor::linkPreStage(const ShaderPreprocessor& preStage, std::set<String>& passThroughVars)
 {
     linkParameters(_predefined_parameters, preStage, passThroughVars);
-    linkParameters(_main_block->_ins, preStage, passThroughVars);
+    linkParameters(_main_block->_args, preStage, passThroughVars);
 }
 
 sp<Uniform> ShaderPreprocessor::getUniformInput(const String& name, Uniform::Type type) const
@@ -310,12 +322,8 @@ void ShaderPreprocessor::linkParameters(const std::vector<ShaderPreprocessor::Pa
 {
     for(const auto& i : parameters)
         if(i._modifier & Parameter::PARAMETER_MODIFIER_IN)
-        {
-            const String n = Strings::capitalizeFirst(i._name);
-            inDeclare(i._type, n);
-            if(!preStage._main_block->hasOutAttribute(n))
-                passThroughVars.insert(n);
-        }
+            if(!preStage._main_block->hasOutAttribute(i._name))
+                passThroughVars.insert(Strings::capitalizeFirst(i._name));
 }
 
 const char* ShaderPreprocessor::getOutAttributePrefix(PipelineInput::ShaderStage preStage)
@@ -368,20 +376,18 @@ void ShaderPreprocessor::Function::parse(PipelineBuildingContext& buildingContex
     uint32_t stride = 0;
     for(const String& i : _params.split(','))
     {
-        String s = i.strip();
+        const String s = i.strip();
         Parameter param = parseParameter(s);
         if(param._modifier & Parameter::PARAMETER_MODIFIER_OUT)
         {
             const Attribute attr = RenderUtil::makePredefinedAttribute(param._name, param._type);
-            _outs.push_back(std::move(param));
-            DWARN(attr.length() != 3 || stride % 16 == 0, "3-component out attribute \"%s\" ranged from %d to %d, some GPUs may not like this", attr.name().c_str(), stride, stride + attr.size());
+            WARN(attr.length() != 3 || stride % 16 == 0, "3-component out attribute \"%s\" ranged from %d to %d, some GPUs may not like this", attr.name().c_str(), stride, stride + attr.size());
             stride += attr.size();
         }
-        else
-        {
+        if(param._modifier & Parameter::PARAMETER_MODIFIER_IN)
             buildingContext.addPredefinedAttribute(Strings::capitalizeFirst(param._name), param._type, PipelineInput::SHADER_STAGE_VERTEX);
-            _ins.push_back(std::move(param));
-        }
+
+        _args.push_back(std::move(param));
     }
 }
 
@@ -426,17 +432,13 @@ void ShaderPreprocessor::Function::genDefinition()
     StringBuffer sb;
     sb << _return_type << " ark_" << _name << "(";
 
-    const auto begin = _ins.begin();
-    for(auto iter = begin; iter != _ins.end(); ++iter)
+    const auto begin = _args.begin();
+    for(auto iter = begin; iter != _args.end(); ++iter)
     {
         if(iter != begin)
             sb << ", ";
-        sb << "in " << iter->_type << " " << iter->_name;
+        sb << iter->getQualifierStr() << " " << iter->_type << " " << iter->_name;
     }
-
-    for(const auto& i : _outs)
-        sb << ", " << i.getQualifierStr() << " " << i._type << " " << i._name;
-
 
     sb << ") {\n    " << _body << "\n}";
     *_place_hoder = sb.str();
@@ -446,17 +448,17 @@ String ShaderPreprocessor::Function::genOutCall(PipelineInput::ShaderStage preSh
 {
     StringBuffer sb;
     sb << "ark_main(";
-    const auto begin = _ins.begin();
-    for(auto iter = begin; iter != _ins.end(); ++iter)
+    const auto begin = _args.begin();
+    for(auto iter = begin; iter != _args.end(); ++iter)
     {
         if(iter != begin)
             sb << ", ";
-        sb << getOutAttributePrefix(preShaderStage);
+        if(iter->_modifier & Parameter::PARAMETER_MODIFIER_OUT)
+            sb << getOutAttributePrefix(shaderStage);
+        else
+            sb << getOutAttributePrefix(preShaderStage);
         sb << Strings::capitalizeFirst(iter->_name);
     }
-
-    for(const auto& i : _outs)
-        sb << ", " << getOutAttributePrefix(shaderStage) << Strings::capitalizeFirst(i._name);
 
     sb << ')';
     return sb.str();
@@ -464,8 +466,8 @@ String ShaderPreprocessor::Function::genOutCall(PipelineInput::ShaderStage preSh
 
 bool ShaderPreprocessor::Function::hasOutAttribute(const String& name) const
 {
-    for(const auto& i : _outs)
-        if(Strings::capitalizeFirst(i._name) == name)
+    for(const auto& i : _args)
+        if(i._modifier & Parameter::PARAMETER_MODIFIER_OUT && i._name == name)
             return true;
     return false;
 }
@@ -473,6 +475,15 @@ bool ShaderPreprocessor::Function::hasOutAttribute(const String& name) const
 bool ShaderPreprocessor::Function::hasReturnValue() const
 {
     return _return_type != "void";
+}
+
+size_t ShaderPreprocessor::Function::outArgumentCount() const
+{
+    size_t count = 0;
+    for(const auto& i : _args)
+        if(i._modifier & Parameter::PARAMETER_MODIFIER_OUT)
+            count ++;
+    return count;
 }
 
 ShaderPreprocessor::DeclarationList::DeclarationList(Source& source, const String& descriptor)
@@ -493,7 +504,7 @@ void ShaderPreprocessor::DeclarationList::declare(const String& type, const char
         _vars.push_back(name, Declaration(name, type, 1, declared));
     }
     else
-        DCHECK(_vars.at(name).type() == type, "Declared type \"\" and variable type \"\" mismatch", _vars.at(name).type().c_str(), type.c_str());
+        CHECK(_vars.at(name).type() == type, "Declared type \"\" and variable type \"\" mismatch", _vars.at(name).type().c_str(), type.c_str());
 }
 
 bool ShaderPreprocessor::DeclarationList::has(const String& name) const

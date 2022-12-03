@@ -11,7 +11,7 @@
 namespace ark {
 namespace gles30 {
 
-GLVertexArray::GLVertexArray(sp<opengl::GLPipeline> pipeline, sp<Buffer::Delegate> vertices, const ShaderBindings& shaderBindings)
+GLVertexArray::GLVertexArray(sp<opengl::GLPipeline> pipeline, sp<Buffer::Uploader> vertices, const ShaderBindings& shaderBindings)
     : _pipeline(std::move(pipeline)), _vertex(std::move(vertices)), _pipeline_bindings(shaderBindings.pipelineBindings()), _divisors(shaderBindings.divisors()), _id(0)
 {
 }

@@ -67,7 +67,7 @@ RigidBodyDef NarrowPhraseCuteC2::makeBodyDef(int32_t shapeId, const sp<Size>& si
     }
     else
     {
-        DCHECK(size, "Size required for predefined shapes");
+        CHECK(size, "Size required for predefined shapes");
         sizeVal = size->val();
 
         const Rect bounds(sizeVal.x() / -2.0f, sizeVal.y() / -2.0f, sizeVal.x() / 2.0f, sizeVal.y() / 2.0f);
@@ -83,7 +83,7 @@ RigidBodyDef NarrowPhraseCuteC2::makeBodyDef(int32_t shapeId, const sp<Size>& si
             {
                 float radius = bounds.width() / 2;
                 float x = (bounds.left() + bounds.right()) / 2;
-                DCHECK(radius < bounds.height() / 2, "Capsule too narrow, width = %.2f, height = %.2f, radius = %.2f", bounds.width(), bounds.height(), radius);
+                CHECK(radius < bounds.height() / 2, "Capsule too narrow, width = %.2f, height = %.2f, radius = %.2f", bounds.width(), bounds.height(), radius);
                 bodyDef = makeBodyCapsule(V2(x, bounds.top() + radius), V2(x, bounds.bottom() - radius), radius);
                 break;
             }
@@ -91,7 +91,7 @@ RigidBodyDef NarrowPhraseCuteC2::makeBodyDef(int32_t shapeId, const sp<Size>& si
                 bodyDef = makeBodyBox(bounds);
             break;
             default:
-                DFATAL("Shape %d not found", shapeId);
+                FATAL("Shape %d not found", shapeId);
                 break;
         }
     }
@@ -172,7 +172,7 @@ sp<NarrowPhraseCuteC2::BodyDefCuteC2> NarrowPhraseCuteC2::ensureBodyDef(const Br
     if(candidate.body_def)
         return candidate.body_def.unpack<BodyDefCuteC2>();
     sp<BodyDefCuteC2> bodyDef = findBodyDef(candidate.shape_id);
-    DCHECK(bodyDef, "Shape %d not found", candidate.shape_id);
+    CHECK(bodyDef, "Shape %d not found", candidate.shape_id);
     return bodyDef;
 }
 
@@ -221,7 +221,7 @@ ShapeCuteC2 NarrowPhraseCuteC2::makeCapsuleShapeImpl(const V2& p1, const V2& p2,
 
 ShapeCuteC2 NarrowPhraseCuteC2::makePolygonShapeImpl(const std::vector<V2>& vertices)
 {
-    DCHECK(vertices.size() < C2_MAX_POLYGON_VERTS, "Max polygon vertices exceeded, vertices.size: %d, max size: %d", vertices.size(), C2_MAX_POLYGON_VERTS);
+    CHECK(vertices.size() < C2_MAX_POLYGON_VERTS, "Max polygon vertices exceeded, vertices.size: %d, max size: %d", vertices.size(), C2_MAX_POLYGON_VERTS);
 
     ShapeCuteC2 shape;
     c2Poly& poly = shape.s.poly;
@@ -259,7 +259,7 @@ NarrowPhraseCuteC2::BodyDefCuteC2::BodyDefCuteC2(const document& manifest, float
         ShapeCuteC2 shape;
         for(const document& j : manifest->children())
         {
-            DCHECK(c < C2_MAX_POLYGON_VERTS, "Unable to add more vertex, max count: %d", C2_MAX_POLYGON_VERTS);
+            CHECK(c < C2_MAX_POLYGON_VERTS, "Unable to add more vertex, max count: %d", C2_MAX_POLYGON_VERTS);
             shape.s.poly.verts[c].x = Documents::ensureAttribute<float>(j, "x") / ppu;
             shape.s.poly.verts[c].y = Documents::ensureAttribute<float>(j, "y") / ppu;
             c++;
@@ -278,19 +278,19 @@ NarrowPhraseCuteC2::BodyDefCuteC2::BodyDefCuteC2(const document& manifest, float
         for(const document& j : fixtures->children("fixture"))
         {
             const document& fixture_type = j->ensureChild("fixture_type");
-            DCHECK(fixture_type->value() == "POLYGON", "Unsupported fixture_type: %s", fixture_type->value().c_str());
+            CHECK(fixture_type->value() == "POLYGON", "Unsupported fixture_type: %s", fixture_type->value().c_str());
             const document& polygons = j->ensureChild("polygons");
             for(const document& k : polygons->children("polygon"))
             {
                 const std::vector<String> values = k->value().split(',');
-                DCHECK(values.size() % 2 == 0, "Illegal vertex points: %s", k->value().c_str());
+                CHECK(values.size() % 2 == 0, "Illegal vertex points: %s", k->value().c_str());
                 ShapeCuteC2 shape;
                 shape._collision_filter.setCategoryBits(Documents::getValue<uint32_t>(j, "filter_categoryBits", 1));
                 shape._collision_filter.setMaskBits(Documents::getValue<uint32_t>(j, "filter_maskBits", 0xffffffff));
                 shape._collision_filter.setGroupIndex(Documents::getValue<int32_t>(j, "filter_groupIndex", 0));
                 for(size_t k = 0; k < values.size(); k += 2)
                 {
-                    DCHECK(k / 2 < C2_MAX_POLYGON_VERTS, "Unable to add more vertex, max count: %d", C2_MAX_POLYGON_VERTS);
+                    CHECK(k / 2 < C2_MAX_POLYGON_VERTS, "Unable to add more vertex, max count: %d", C2_MAX_POLYGON_VERTS);
                     shape.s.poly.verts[k / 2].x = Strings::parse<float>(values.at(k)) / ppu;
                     shape.s.poly.verts[k / 2].y = Strings::parse<float>(values.at(k + 1)) / ppu;
                 }

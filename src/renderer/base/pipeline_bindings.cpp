@@ -28,7 +28,7 @@ PipelineBindings::RenderProcedure PipelineBindings::renderProcedure() const
     return _stub->_render_procedure;
 }
 
-const Rect& PipelineBindings::scissor() const
+const Optional<Rect>& PipelineBindings::scissor() const
 {
     return _stub->_parameters._scissor;
 }
@@ -117,8 +117,8 @@ PipelineBindings::Stub::Stub(ModelLoader::RenderMode mode, RenderProcedure rende
 {
 }
 
-PipelineBindings::Parameters::Parameters(const Rect& scissor, PipelineBindings::FragmentTestTable tests, uint32_t flags)
-    : _scissor(scissor), _tests(std::move(tests)), _flags(flags)
+PipelineBindings::Parameters::Parameters(Optional<Rect> scissor, PipelineBindings::FragmentTestTable tests, uint32_t flags)
+    : _scissor(std::move(scissor)), _traits(std::move(tests)), _flags(flags)
 {
 }
 
@@ -131,8 +131,8 @@ PipelineBindings::Parameters::BUILDER::BUILDER(BeanFactory& factory, const docum
 
 PipelineBindings::Parameters PipelineBindings::Parameters::BUILDER::build(const Scope& args) const
 {
-    sp<Vec4> scissor = _pipeline_bindings_scissor->build(args);
-    return Parameters(_render_controller->renderEngine()->toRendererScissor(scissor ? Rect(scissor->val()) : Rect()), _traits, _pipeline_bindings_flags);
+    const sp<Vec4> scissor = _pipeline_bindings_scissor->build(args);
+    return Parameters(scissor ? Optional<Rect>(_render_controller->renderEngine()->toRendererScissor(Rect(scissor->val()))) : Optional<Rect>(), _traits, _pipeline_bindings_flags);
 }
 
 template<> ARK_API PipelineBindings::Flag Conversions::to<String, PipelineBindings::Flag>(const String& str)
@@ -162,7 +162,7 @@ template<> ARK_API PipelineBindings::Flag Conversions::to<String, PipelineBindin
     return static_cast<PipelineBindings::Flag>(flag);
 }
 
-PipelineBindings::FragmentTraitManifest::FragmentTraitManifest(const document& manifest)
+PipelineBindings::FragmentTraitMeta::FragmentTraitMeta(const document& manifest)
     : _type(Documents::ensureAttribute<TrailType>(manifest, Constants::Attributes::TYPE))
 {
     switch(_type) {
@@ -201,7 +201,7 @@ PipelineBindings::FragmentTraitManifest::FragmentTraitManifest(const document& m
     }
 }
 
-PipelineBindings::TraitStencilTestSeparate PipelineBindings::FragmentTraitManifest::loadStencilTestSeparate(const document& manifest, bool allowDefaultFace) const
+PipelineBindings::TraitStencilTestSeparate PipelineBindings::FragmentTraitMeta::loadStencilTestSeparate(const document& manifest, bool allowDefaultFace) const
 {
     PipelineBindings::TraitStencilTestSeparate face;
     face._type = Documents::getAttribute<FrontFaceType>(manifest, "face-type", FRONT_FACE_TYPE_DEFAULT);

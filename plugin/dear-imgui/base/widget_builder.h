@@ -24,10 +24,10 @@ namespace ark {
 namespace plugin {
 namespace dear_imgui {
 
-class ARK_PLUGIN_DEAR_IMGUI_API RendererBuilder {
+class ARK_PLUGIN_DEAR_IMGUI_API WidgetBuilder {
 public:
 // [[script::bindings::auto]]
-    RendererBuilder(const sp<Renderer>& imguiRenderer);
+    WidgetBuilder(const sp<Renderer>& imguiRenderer);
 
 // [[script::bindings::auto]]
     bool begin(const String& name);
@@ -105,20 +105,25 @@ public:
     void colorPicker4(const String& label, const sp<Vec4>& value);
 
 // [[script::bindings::auto]]
+    void pushID(const String& id);
+// [[script::bindings::auto]]
+    void pushID(int64_t id);
+// [[script::bindings::auto]]
+    void popID();
+
+// [[script::bindings::auto]]
     void image(const sp<Texture>& texture, const sp<Vec2>& size, const V2& uv0 = V2(0), const V2& uv1 = V2(1.0f), const sp<Vec4>& color = nullptr, const sp<Vec4>& borderColor = nullptr);
 
 // [[script::bindings::auto]]
-    sp<Controller> showAboutWindow();
+    sp<Widget> makeAboutWindow();
 // [[script::bindings::auto]]
-    sp<Controller> showDemoWindow();
+    sp<Widget> makeDemoWindow();
 
 // [[script::bindings::auto]]
     void addWidget(sp<Widget> widget);
 
 // [[script::bindings::auto]]
     sp<Widget> makeWidget() const;
-// [[script::bindings::auto]]
-    sp<Renderer> makeRenderer() const;
 
 private:
 
@@ -171,8 +176,8 @@ private:
     public:
         typedef std::function<bool(typename Argument<T>::ArgType)> FuncType;
 
-        Callback(FuncType func, T arg, const sp<Observer>& observer)
-            : _func(std::move(func)), _arg(std::move(arg)), _observer(observer) {
+        Callback(FuncType func, T arg, sp<Observer> observer)
+            : _func(std::move(func)), _arg(std::move(arg)), _observer(std::move(observer)) {
         }
 
         virtual void render() override {
@@ -187,14 +192,14 @@ private:
     };
 
 private:
-    void addBlock(std::function<void(void)> func);
+    void addFunctionCall(std::function<void(void)> func);
 
     template<typename T> void addInvocation(std::function<void(typename Argument<T>::ArgType)> func, T arg) {
         addWidget(sp<Invocation<T>>::make(std::move(func), std::move(arg)));
     }
 
-    template<typename T> void addCallback(std::function<bool(typename Argument<T>::ArgType)> func, T arg, const sp<Observer>& observer) {
-        addWidget(sp<Callback<T>>::make(std::move(func), std::move(arg), observer));
+    template<typename T> void addCallback(std::function<bool(typename Argument<T>::ArgType)> func, T arg, sp<Observer> observer) {
+        addWidget(sp<Callback<T>>::make(std::move(func), std::move(arg), std::move(observer)));
     }
 
     void push(const sp<WidgetGroup>& widget);

@@ -13,7 +13,7 @@
 namespace ark {
 namespace vulkan {
 
-class VKBuffer : public Buffer::Delegate {
+class VKBuffer : public Buffer::Uploader {
 public:
     VKBuffer(sp<VKRenderer> renderer, sp<Recycler> recycler, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags);
     ~VKBuffer() override;

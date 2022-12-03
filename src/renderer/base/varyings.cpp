@@ -90,6 +90,19 @@ void Varyings::setProperty(const String& name, sp<Vec4> var)
     setSlotInput(name, sp<Input>::make<InputVariable<V4>>(std::move(var)));
 }
 
+static String findNearestAttribute(const PipelineInput& pipelineInput, const String& name)
+{
+    String nearest;
+    size_t nd = std::numeric_limits<size_t>::max();
+    for(const auto& [i, j] : pipelineInput.streams())
+    {
+        const auto [value, distance] = Math::levensteinNearest(name, j.attributes().keys());
+        if(distance < nd)
+            nearest = std::move(value);
+    }
+    return nearest;
+}
+
 Varyings::Snapshot Varyings::snapshot(const PipelineInput& pipelineInput, Allocator& allocator)
 {
     if(!_slots.size())
@@ -100,7 +113,7 @@ Varyings::Snapshot Varyings::snapshot(const PipelineInput& pipelineInput, Alloca
         for(auto& i : _slots)
         {
             Optional<const Attribute&> attr = pipelineInput.getAttribute(i.first);
-            CHECK(attr, "Varying has no attribute \"%s\". Did you mean \"%%s\"?", i.first.c_str()/*, Math::levensteinNearest(i.first, varyingStream.attributes().keys()).first.c_str()*/);
+            CHECK(attr, "Varying has no attribute \"%s\". Did you mean \"%s\"?", i.first.c_str(), findNearestAttribute(pipelineInput, i.first).c_str());
             i.second._divisor = attr->divisor();
             i.second._offset = attr->offset();
         }

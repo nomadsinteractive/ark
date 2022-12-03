@@ -184,9 +184,7 @@ private:
 
         bool _cull_face;
 
-        Rect _scissor;
-        bool _scissor_enabled;
-
+        Optional<Rect> _scissor;
         sp<BakedRenderer> _renderer;
     };
 

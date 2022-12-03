@@ -14,8 +14,10 @@ public:
         return _delegate;
     }
 
-    void reset(sp<T> delegate) {
+    sp<T> reset(sp<T> delegate) {
+        sp<T> oldDelegate = std::move(_delegate);
         _delegate = std::move(delegate);
+        return oldDelegate;
     }
 
 protected:

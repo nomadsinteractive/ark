@@ -124,11 +124,6 @@ String RenderUtil::outAttributeName(const String& name, PipelineInput::ShaderSta
     return name.startsWith(prefix) ? name : prefix + Strings::capitalizeFirst(name);
 }
 
-bool RenderUtil::isScissorEnabled(const Rect& scissor)
-{
-    return scissor.right() > scissor.left() && scissor.bottom() > scissor.top();
-}
-
 uint32_t RenderUtil::getComponentSize(Texture::Format format)
 {
     if(format == Texture::FORMAT_AUTO)

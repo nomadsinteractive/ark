@@ -29,11 +29,11 @@ namespace {
 
 class GLScissor {
 public:
-    GLScissor(const Rect& rect, bool enabled)
-        : _enabled(enabled) {
+    GLScissor(const Optional<Rect>& scissor)
+        : _enabled(static_cast<bool>(scissor)) {
         if(_enabled) {
             glEnable(GL_SCISSOR_TEST);
-            glScissor(static_cast<GLint>(rect.left()), static_cast<GLint>(rect.top()), static_cast<GLsizei>(rect.width()), static_cast<GLsizei>(rect.height()));
+            glScissor(static_cast<GLint>(scissor->left()), static_cast<GLint>(scissor->top()), static_cast<GLsizei>(scissor->width()), static_cast<GLsizei>(scissor->height()));
         }
     }
     ~GLScissor() {
@@ -257,7 +257,7 @@ private:
 GLPipeline::GLPipeline(const sp<Recycler>& recycler, uint32_t version, std::map<PipelineInput::ShaderStage, String> shaders, const PipelineBindings& bindings)
     : _stub(sp<Stub>::make()), _recycler(recycler), _version(version), _shaders(std::move(shaders)), _pipeline_operation(makePipelineOperation(bindings))
 {
-    for(const auto& i : bindings.parameters()._tests)
+    for(const auto& i : bindings.parameters()._traits)
     {
         if(i.first == PipelineBindings::TRAIT_TYPE_CULL_FACE_TEST)
             _draw_traits.push_back(sp<GLCullFaceTest>::make(i.second._configure._cull_face_test));
@@ -634,7 +634,7 @@ void GLPipeline::GLMultiDrawElementsIndirect::draw(GraphicsContext& graphicsCont
 
 GLPipeline::PipelineOperationDraw::PipelineOperationDraw(const sp<Stub>& stub, const PipelineBindings& bindings)
     : _stub(stub), _cull_face(bindings.getFlag(PipelineBindings::FLAG_CULL_MODE_BITMASK) != PipelineBindings::FLAG_CULL_MODE_NONE),
-      _scissor(bindings.scissor()), _scissor_enabled(RenderUtil::isScissorEnabled(_scissor)), _renderer(makeBakedRenderer(bindings))
+      _scissor(bindings.scissor()), _renderer(makeBakedRenderer(bindings))
 {
 }
 
@@ -663,12 +663,9 @@ void GLPipeline::PipelineOperationDraw::bind(GraphicsContext& /*graphicsContext*
 
 void GLPipeline::PipelineOperationDraw::draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
-    bool contextScissorEnabled = RenderUtil::isScissorEnabled(drawingContext._scissor);
+    const volatile GLCullFace cullFace(_cull_face);
+    const volatile GLScissor scissor(drawingContext._scissor ? drawingContext._scissor : _scissor);
 
-    const GLCullFace cullFace(_cull_face);
-    const GLScissor scissor(contextScissorEnabled ? drawingContext._scissor : _scissor, contextScissorEnabled || _scissor_enabled);
-
-    uint32_t binding = 0;
     std::vector<GLBufferBaseBinder> binders;
     for(const auto& [i, j] : drawingContext._ssbos)
         binders.emplace_back(GL_SHADER_STORAGE_BUFFER, i, j.id());

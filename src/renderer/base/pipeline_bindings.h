@@ -5,6 +5,7 @@
 #include "core/forwarding.h"
 #include "core/collection/table.h"
 #include "core/types/shared_ptr.h"
+#include "core/types/optional.h"
 
 #include "graphics/forwarding.h"
 
@@ -134,8 +135,8 @@ public:
         TraitBlend _blend;
     };
 
-    struct FragmentTraitManifest {
-        FragmentTraitManifest(const document& manifest);
+    struct FragmentTraitMeta {
+        FragmentTraitMeta(const document& manifest);
 
         TrailType _type;
         TraitConfigure _configure;
@@ -145,14 +146,14 @@ public:
 
     };
 
-    typedef Table<int32_t, FragmentTraitManifest> FragmentTestTable;
+    typedef Table<int32_t, FragmentTraitMeta> FragmentTestTable;
 
     struct ARK_API Parameters {
-        Parameters(const Rect& scissor, FragmentTestTable tests, uint32_t flags);
+        Parameters(Optional<Rect> scissor, FragmentTestTable tests, uint32_t flags);
         DEFAULT_COPY_AND_ASSIGN(Parameters);
 
-        Rect _scissor;
-        FragmentTestTable _tests;
+        Optional<Rect> _scissor;
+        FragmentTestTable _traits;
         uint32_t _flags;
 
         class BUILDER {
@@ -177,7 +178,7 @@ public:
 
     ModelLoader::RenderMode mode() const;
     RenderProcedure renderProcedure() const;
-    const Rect& scissor() const;
+    const Optional<Rect>& scissor() const;
     const Parameters& parameters() const;
 
     const sp<PipelineLayout>& layout() const;

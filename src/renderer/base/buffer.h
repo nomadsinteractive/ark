@@ -35,10 +35,10 @@ public:
         USAGE_COUNT
     };
 
-    class ARK_API Delegate : public Resource {
+    class ARK_API Uploader : public Resource {
     public:
-        Delegate();
-        virtual ~Delegate() = default;
+        Uploader();
+        virtual ~Uploader() = default;
 
         virtual void uploadBuffer(GraphicsContext& graphicsContext, Input& input) = 0;
 
@@ -54,8 +54,8 @@ public:
     class ARK_API Snapshot {
     public:
         Snapshot() = default;
-        Snapshot(sp<Delegate> stub);
-        Snapshot(sp<Delegate> stub, size_t size, sp<Input> input);
+        Snapshot(sp<Uploader> stub);
+        Snapshot(sp<Uploader> stub, size_t size, sp<Input> input);
         DEFAULT_COPY_AND_ASSIGN(Snapshot);
 
         explicit operator bool() const;
@@ -69,9 +69,9 @@ public:
 
         void upload(GraphicsContext& graphicsContext) const;
 
-        const sp<Delegate>& delegate() const;
+        const sp<Uploader>& delegate() const;
 
-        sp<Delegate> _delegate;
+        sp<Uploader> _delegate;
         sp<Input> _input;
         size_t _size;
     };
@@ -92,7 +92,7 @@ public:
     };
 
 public:
-    Buffer(sp<Delegate> delegate) noexcept;
+    Buffer(sp<Uploader> delegate) noexcept;
     Buffer() noexcept = default;
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Buffer);
 
@@ -110,7 +110,7 @@ public:
 
     void upload(GraphicsContext&) const;
 
-    const sp<Delegate>& delegate() const;
+    const sp<Uploader>& delegate() const;
 
 //  [[plugin::resource-loader]]
     class BUILDER : public Builder<Buffer> {
@@ -127,7 +127,7 @@ public:
     };
 
 private:
-    sp<Delegate> _delegate;
+    sp<Uploader> _delegate;
 
     friend class ResourceManager;
 };

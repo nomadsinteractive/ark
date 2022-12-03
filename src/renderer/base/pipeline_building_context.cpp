@@ -70,8 +70,12 @@ void PipelineBuildingContext::initialize()
     for(const auto& i : firstStage._declaration_ins.vars().values())
         addInputAttribute(i.name(), i.type());
 
-    for(const auto& i : firstStage._main_block->_ins)
-        firstStage.inDeclare(i._type, Strings::capitalizeFirst(i._name));
+    for(const auto& [i, j] : _stages)
+        for(const ShaderPreprocessor::Parameter& k : j->args())
+            if(k._modifier & ShaderPreprocessor::Parameter::PARAMETER_MODIFIER_IN)
+            {
+                j->inDeclare(k._type, Strings::capitalizeFirst(k._name));
+            }
 
     std::set<String> passThroughVars;
     const ShaderPreprocessor* prestage = nullptr;
@@ -84,11 +88,13 @@ void PipelineBuildingContext::initialize()
 
     Table<String, String> attributes;
 
-    for(auto iter = _stages.begin(); iter != _stages.end(); ++iter)
-        if(iter != _stages.begin())
+    {
+        auto iter = _stages.begin();
+        for(++iter; iter != _stages.end(); ++iter)
             for(const auto& i : iter->second->_declaration_ins.vars().values())
                 if(!attributes.has(i.name()))
                     attributes.push_back(i.name(), i.type());
+    }
 
     for(const auto& i : _attributes)
         if(!attributes.has(i.first))
@@ -110,26 +116,28 @@ void PipelineBuildingContext::initialize()
         iter.second.align();
 
     //TODO: link all outputs to next stage's inputs
-    for(auto iter = _stages.begin(); iter != _stages.end(); ++iter)
-        if(iter != _stages.begin())
-            for(const auto& i : attributes)
+    {
+        auto iter = _stages.begin();
+        for(++iter; iter != _stages.end(); ++iter)
+            for(const auto& [i, j] : attributes)
             {
-                if(passThroughVars.find(i.first) != passThroughVars.end())
-                    iter->second->inDeclare(i.second, i.first);
+                if(passThroughVars.find(i) != passThroughVars.end())
+                    iter->second->inDeclare(j, i);
             }
+    }
 
     for(const String& i : generated)
     {
         firstStage.inDeclare(attributes.at(i), i);
         if(passThroughVars.find(i) != passThroughVars.end())
-        {
-            firstStage.outDeclare(attributes.at(i), i);
-            firstStage.addPreMainSource(Strings::sprintf("%s%s = %s%s;", firstStage.outVarPrefix(), i.c_str(), firstStage.inVarPrefix(), i.c_str()));
-        }
+            firstStage.passThroughDeclare(attributes.at(i), i);
     }
 
-    for(const auto& i : firstStage._main_block->_outs)
-        firstStage.outDeclare(i._type, Strings::capitalizeFirst(i._name));
+    for(const auto& i : firstStage._main_block->_args)
+        if(i._modifier == ShaderPreprocessor::Parameter::PARAMETER_MODIFIER_INOUT)
+            firstStage.passThroughDeclare(i._type, Strings::capitalizeFirst(i._name));
+        else if(i._modifier & ShaderPreprocessor::Parameter::PARAMETER_MODIFIER_OUT)
+            firstStage.outDeclare(i._type, Strings::capitalizeFirst(i._name));
 
     Table<String, PipelineInput::SSBO> sobs;
     for(const auto& i : _stages)

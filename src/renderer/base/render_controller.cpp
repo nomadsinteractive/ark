@@ -45,9 +45,9 @@ public:
     std::vector<element_index_t> _indices;
 };
 
-class UploadingBufferResource : public Resource {
+class ResourceUploadBufferSnapshot : public Resource {
 public:
-    UploadingBufferResource(sp<Buffer::Delegate> buffer, Input& input)
+    ResourceUploadBufferSnapshot(sp<Buffer::Uploader> buffer, Input& input)
         : _buffer(std::move(buffer)), _input_snapshot(input) {
     }
 
@@ -64,26 +64,26 @@ public:
     }
 
 private:
-    sp<Buffer::Delegate> _buffer;
+    sp<Buffer::Uploader> _buffer;
     InputSnapshot _input_snapshot;
 };
 
 class BufferUpdatable : public Updatable {
 public:
-    BufferUpdatable(RenderController& renderController, sp<Input> input, sp<Buffer::Delegate> buffer)
+    BufferUpdatable(RenderController& renderController, sp<Input> input, sp<Buffer::Uploader> buffer)
         : _render_controller(renderController), _buffer(std::move(buffer)), _input(std::move(input)) {
     }
 
     virtual bool update(uint64_t timestamp) override {
         bool dirty = _input->update(timestamp) || _buffer->id() == 0;
         if(dirty)
-            _render_controller.upload(sp<UploadingBufferResource>::make(_buffer, _input), RenderController::US_ONCE);
+            _render_controller.upload(sp<ResourceUploadBufferSnapshot>::make(_buffer, _input), RenderController::US_ONCE);
         return dirty;
     }
 
 private:
     RenderController& _render_controller;
-    sp<Buffer::Delegate> _buffer;
+    sp<Buffer::Uploader> _buffer;
     sp<Input> _input;
 };
 
@@ -152,10 +152,14 @@ void RenderController::upload(sp<Resource> resource, UploadStrategy strategy, sp
 void RenderController::uploadBuffer(Buffer& buffer, sp<Input> input, RenderController::UploadStrategy strategy, sp<Future> future, RenderController::UploadPriority priority)
 {
     ASSERT(input);
-    sp<Updatable> updatable = strategy & RenderController::US_ON_CHANGE ? sp<Updatable>::make<BufferUpdatable>(*this, input, buffer.delegate()) : nullptr;
     if(!future)
-        future = sp<Future>::make(sp<BooleanByWeakRef<Buffer::Delegate>>::make(buffer.delegate(), 1));
-    upload(sp<UploadingBufferResource>::make(buffer.delegate(), std::move(input)), strategy, std::move(updatable), std::move(future), priority);
+        future = sp<Future>::make(sp<BooleanByWeakRef<Buffer::Uploader>>::make(buffer.delegate(), 1));
+    sp<Updatable> updatable = strategy & RenderController::US_ON_CHANGE ? sp<Updatable>::make<BufferUpdatable>(*this, input, buffer.delegate()) : nullptr;
+    //TODO: make this mess a bit more cleaner
+    if(strategy == RenderController::US_ON_CHANGE)
+        upload(nullptr, strategy, std::move(updatable), std::move(future), priority);
+    else
+        upload(sp<ResourceUploadBufferSnapshot>::make(buffer.delegate(), std::move(input)), strategy, std::move(updatable), std::move(future), priority);
 }
 
 const sp<Recycler>& RenderController::recycler() const
