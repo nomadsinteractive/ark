@@ -205,8 +205,8 @@ void ColliderBox2D::Stub::run()
 
 void ColliderBox2D::ContactListenerImpl::BeginContact(b2Contact* contact)
 {
-    RigidBodyBox2D::Shadow* s1 = reinterpret_cast<RigidBodyBox2D::Shadow*>(contact->GetFixtureA()->GetBody()->GetUserData());
-    RigidBodyBox2D::Shadow* s2 = reinterpret_cast<RigidBodyBox2D::Shadow*>(contact->GetFixtureB()->GetBody()->GetUserData());
+    RigidBodyBox2D::Shadow* s1 = reinterpret_cast<RigidBodyBox2D::Shadow*>(contact->GetFixtureA()->GetBody()->GetUserData().pointer);
+    RigidBodyBox2D::Shadow* s2 = reinterpret_cast<RigidBodyBox2D::Shadow*>(contact->GetFixtureB()->GetBody()->GetUserData().pointer);
     if(s1 && s2)
     {
         b2WorldManifold worldManifold;
@@ -232,8 +232,8 @@ void ColliderBox2D::ContactListenerImpl::BeginContact(b2Contact* contact)
 
 void ColliderBox2D::ContactListenerImpl::EndContact(b2Contact* contact)
 {
-    RigidBodyBox2D::Shadow* s1 = reinterpret_cast<RigidBodyBox2D::Shadow*>(contact->GetFixtureA()->GetBody()->GetUserData());
-    RigidBodyBox2D::Shadow* s2 = reinterpret_cast<RigidBodyBox2D::Shadow*>(contact->GetFixtureB()->GetBody()->GetUserData());
+    RigidBodyBox2D::Shadow* s1 = reinterpret_cast<RigidBodyBox2D::Shadow*>(contact->GetFixtureA()->GetBody()->GetUserData().pointer);
+    RigidBodyBox2D::Shadow* s2 = reinterpret_cast<RigidBodyBox2D::Shadow*>(contact->GetFixtureB()->GetBody()->GetUserData().pointer);
     if(s1 && s2)
     {
         const sp<RigidBodyBox2D::Stub> body1 = s1->_body.ensure();

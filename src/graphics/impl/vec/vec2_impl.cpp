@@ -26,8 +26,13 @@ Vec2Impl::Vec2Impl(const V2& xy) noexcept
 {
 }
 
-Vec2Impl::Vec2Impl(const sp<Numeric>& xProperty, const sp<Numeric>& yProperty) noexcept
-    : _x(sp<NumericWrapper>::make(xProperty)), _y(sp<NumericWrapper>::make(yProperty))
+Vec2Impl::Vec2Impl(sp<Numeric> v) noexcept
+    : _x(sp<NumericWrapper>::make(v)), _y(sp<NumericWrapper>::make(std::move(v)))
+{
+}
+
+Vec2Impl::Vec2Impl(sp<Numeric> x, sp<Numeric> y) noexcept
+    : _x(sp<NumericWrapper>::make(std::move(x))), _y(sp<NumericWrapper>::make(std::move(y)))
 {
 }
 

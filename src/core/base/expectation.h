@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "core/base/api.h"
-#include "core/base/delegate.h"
+#include "core/base/wrapper.h"
 #include "core/base/observer.h"
 #include "core/base/notifier.h"
 #include "core/inf/holder.h"
@@ -14,18 +14,18 @@
 
 namespace ark {
 
-template<typename T> class Expectation : public Variable<T>, public Delegate<Variable<T>>, public Holder, public Implements<Expectation<T>, Variable<T>, Delegate<Variable<T>>, Holder> {
+template<typename T> class Expectation : public Variable<T>, public Wrapper<Variable<T>>, public Holder, public Implements<Expectation<T>, Variable<T>, Wrapper<Variable<T>>, Holder> {
 public:
     Expectation(sp<Variable<T>> delegate, Notifier notifier)
-        : Delegate<Variable<T>>(std::move(delegate)), _notifier(std::move(notifier)) {
+        : Wrapper<Variable<T>>(std::move(delegate)), _notifier(std::move(notifier)) {
     }
 
     virtual T val() override {
-        return this->_delegate->val();
+        return this->_wrapped->val();
     }
 
     virtual bool update(uint64_t timestamp) override {
-        return this->_delegate->update(timestamp);
+        return this->_wrapped->update(timestamp);
     }
 
     virtual void traverse(const Visitor& visitor) override {

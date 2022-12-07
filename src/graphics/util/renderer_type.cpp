@@ -58,14 +58,14 @@ SafePtr<Size> RendererType::size(const sp<Renderer>& self)
 
 const sp<Renderer>& RendererType::delegate(const sp<Renderer>& self)
 {
-    const sp<Delegate<Renderer>> rd = self.as<Delegate<Renderer>>();
+    const sp<Wrapper<Renderer>> rd = self.as<Wrapper<Renderer>>();
     DWARN(rd, "Renderer is not an instance of Delegate<Renderer>");
-    return rd ? rd->delegate() : sp<Renderer>::null();
+    return rd ? rd->wrapped() : sp<Renderer>::null();
 }
 
 void RendererType::setDelegate(const sp<Renderer>& self, const sp<Renderer>& delegate)
 {
-    const sp<Delegate<Renderer>> rd = self.as<Delegate<Renderer>>();
+    const sp<Wrapper<Renderer>> rd = self.as<Wrapper<Renderer>>();
     DCHECK(rd, "Renderer is not an instance of Delegate<Renderer>");
     rd->reset(delegate);
 }

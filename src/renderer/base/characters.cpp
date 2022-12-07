@@ -188,7 +188,7 @@ void Characters::createLayerContent(float width, float height)
 float Characters::doLayoutWithBoundary(GlyphContents& cm, float& flowx, float& flowy, float boundary)
 {
     const std::vector<LayoutChar> layoutChars = Characters::getCharacterMetrics(cm);
-    float fontHeight = layoutChars.size() > 0 ? layoutChars.at(0)._metrics.bounds.y() * _text_scale : 0;
+    float fontHeight = layoutChars.size() > 0 ? layoutChars.at(0)._metrics.aabb().y() * _text_scale : 0;
     size_t begin = 0;
     for(size_t i = 0; i < layoutChars.size(); ++i)
     {
@@ -245,12 +245,12 @@ void Characters::place(GlyphContents& cm, const std::vector<Characters::LayoutCh
 void Characters::placeOne(Glyph& glyph, const Metrics& metrics, float& flowx, float flowy, float* fontHeight)
 {
     const V2 scale = V2(_text_scale, _text_scale);
-    float bitmapWidth = scale.x() * metrics.size.x();
-    float bitmapHeight = scale.y() * metrics.size.y();
-    float width = scale.x() * metrics.bounds.x();
-    float height = scale.y() * metrics.bounds.y();
-    float bitmapX = scale.x() * metrics.orgin.x();
-    float bitmapY = scale.y() * metrics.orgin.y();
+    float bitmapWidth = scale.x() * metrics.width();
+    float bitmapHeight = scale.y() * metrics.height();
+    float width = scale.x() * metrics.aabb().x();
+    float height = scale.y() * metrics.aabb().y();
+    float bitmapX = scale.x() * metrics.origin().x();
+    float bitmapY = scale.y() * metrics.origin().y();
     if(fontHeight)
         *fontHeight = std::max(height, *fontHeight);
     glyph.setLayoutPosition(V3(flowx + bitmapX, flowy + height - bitmapY - bitmapHeight, 0));
@@ -286,7 +286,7 @@ std::vector<Characters::LayoutChar> Characters::getCharacterMetrics(const GlyphC
         if(iter != mmap.end())
         {
             const std::tuple<Metrics, bool, bool>& val = iter->second;
-            integral += xScale * std::get<0>(val).bounds.x();
+            integral += xScale * std::get<0>(val).aabb().x();
             metrics.emplace_back(std::get<0>(val), integral, std::get<1>(val), std::get<2>(val), isLineBreak);
         }
         else
@@ -296,7 +296,7 @@ std::vector<Characters::LayoutChar> Characters::getCharacterMetrics(const GlyphC
             const Metrics& m = model->metrics();
             bool iscjk = isCJK(c);
             bool iswordbreak = isWordBreaker(c);
-            integral += xScale * m.bounds.x();
+            integral += xScale * m.aabb().x();
             mmap.insert(std::make_pair(c, std::make_tuple(m, iscjk, iswordbreak)));
             metrics.emplace_back(m, integral, iscjk, iswordbreak, isLineBreak);
         }

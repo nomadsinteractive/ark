@@ -59,9 +59,9 @@ Transform::Transform(sp<Transform::Delegate> delegate)
 
 void Transform::traverse(const Holder::Visitor& visitor)
 {
-    HolderUtil::visit(_rotation.delegate(), visitor);
-    HolderUtil::visit(_scale.delegate(), visitor);
-    HolderUtil::visit(_pivot.delegate(), visitor);
+    HolderUtil::visit(_rotation.wrapped(), visitor);
+    HolderUtil::visit(_scale.wrapped(), visitor);
+    HolderUtil::visit(_pivot.wrapped(), visitor);
 }
 
 Transform::Snapshot Transform::snapshot(const V3& postTranslate) const

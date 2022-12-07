@@ -6,7 +6,6 @@
 #include "core/base/clock.h"
 #include "core/base/observer.h"
 #include "core/inf/holder.h"
-#include "core/impl/numeric/stalker.h"
 #include "core/impl/variable/integral.h"
 #include "core/impl/variable/integral_with_resistance.h"
 #include "core/impl/variable/second_order_dynamics.h"
@@ -25,31 +24,6 @@
 namespace ark {
 
 namespace {
-
-class Vec2Normalize : public Vec2, public Holder, Implements<Vec2Normalize, Vec2, Holder> {
-public:
-    Vec2Normalize(const sp<Vec2>& value)
-        : _delegate(value) {
-    }
-
-    virtual V2 val() override {
-        V2 val = _delegate->val();
-        float hypot = std::max(Math::hypot(val.x(), val.y()), 0.000001f);
-        return val / hypot;
-    }
-
-    virtual bool update(uint64_t timestamp) override {
-        return _delegate->update(timestamp);
-    }
-
-    virtual void traverse(const Visitor& visitor) override {
-        HolderUtil::visit(_delegate, visitor);
-    }
-
-private:
-    sp<Vec2> _delegate;
-
-};
 
 class Vec2Fence : public Vec2, public Holder, Implements<Vec2Fence, Vec2, Holder> {
 public:
@@ -97,9 +71,9 @@ static float _atan2(const V2& val)
     return Math::atan2(val.y(), val.x());
 }
 
-sp<Vec2> Vec2Type::create(const sp<Numeric>& x, const sp<Numeric>& y)
+sp<Vec2> Vec2Type::create(sp<Numeric> x, sp<Numeric> y)
 {
-    return sp<Vec2Impl>::make(x, y);
+    return sp<Vec2Impl>::make(std::move(x), std::move(y));
 }
 
 sp<Vec2> Vec2Type::create(float x, float y)
@@ -107,121 +81,116 @@ sp<Vec2> Vec2Type::create(float x, float y)
     return sp<Vec2Impl>::make(x, y);
 }
 
-sp<Vec2> Vec2Type::add(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue)
-{
-    return sp<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::Add<V2>>>::make(lvalue, rvalue);
-}
+//sp<Vec2> Vec2Type::add(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue)
+//{
+//    return sp<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::Add<V2>>>::make(lvalue, rvalue);
+//}
 
-sp<Vec2> Vec2Type::sub(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue)
-{
-    return sp<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::Sub<V2>>>::make(lvalue, rvalue);
-}
+//sp<Vec2> Vec2Type::sub(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue)
+//{
+//    return sp<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::Sub<V2>>>::make(lvalue, rvalue);
+//}
 
-sp<Vec2> Vec2Type::mul(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue)
-{
-    return sp<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::Mul<V2>>>::make(lvalue, rvalue);
-}
+//sp<Vec2> Vec2Type::mul(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue)
+//{
+//    return sp<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::Mul<V2>>>::make(lvalue, rvalue);
+//}
 
-sp<Vec2> Vec2Type::mul(const sp<Vec2>& lvalue, float rvalue)
-{
-    return sp<VariableOP2<sp<Vec2>, float, Operators::Mul<V2, float>>>::make(lvalue, rvalue);
-}
+//sp<Vec2> Vec2Type::mul(const sp<Vec2>& lvalue, float rvalue)
+//{
+//    return sp<VariableOP2<sp<Vec2>, float, Operators::Mul<V2, float>>>::make(lvalue, rvalue);
+//}
 
-sp<Vec2> Vec2Type::mul(float lvalue, const sp<Vec2>& rvalue)
-{
-    return sp<VariableOP2<float, sp<Vec2>, Operators::Mul<float, V2>>>::make(lvalue, rvalue);
-}
+//sp<Vec2> Vec2Type::mul(float lvalue, const sp<Vec2>& rvalue)
+//{
+//    return sp<VariableOP2<float, sp<Vec2>, Operators::Mul<float, V2>>>::make(lvalue, rvalue);
+//}
 
-sp<Vec2> Vec2Type::mul(const sp<Vec2>& lvalue, sp<Numeric>& rvalue)
-{
-    return sp<VariableOP2<sp<Vec2>, sp<Numeric>, Operators::Mul<V2, float>>>::make(lvalue, rvalue);
-}
+//sp<Vec2> Vec2Type::mul(const sp<Vec2>& lvalue, sp<Numeric>& rvalue)
+//{
+//    return sp<VariableOP2<sp<Vec2>, sp<Numeric>, Operators::Mul<V2, float>>>::make(lvalue, rvalue);
+//}
 
-sp<Vec2> Vec2Type::truediv(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue)
-{
-    return sp<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::Div<V2>>>::make(lvalue, rvalue);
-}
+//sp<Vec2> Vec2Type::truediv(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue)
+//{
+//    return sp<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::Div<V2>>>::make(lvalue, rvalue);
+//}
 
-sp<Vec2> Vec2Type::truediv(const sp<Vec2>& lvalue, const sp<Numeric>& rvalue)
-{
-    return sp<VariableOP2<sp<Vec2>, sp<Numeric>, Operators::Div<V2, float>>>::make(lvalue, rvalue);
-}
+//sp<Vec2> Vec2Type::truediv(const sp<Vec2>& lvalue, const sp<Numeric>& rvalue)
+//{
+//    return sp<VariableOP2<sp<Vec2>, sp<Numeric>, Operators::Div<V2, float>>>::make(lvalue, rvalue);
+//}
 
-sp<Vec2> Vec2Type::floordiv(const sp<Vec2>& lvalue, float rvalue)
-{
-    return sp<VariableOP2<sp<Vec2>, V2, Operators::FloorDiv<V2>>>::make(lvalue, V2(rvalue, rvalue));
-}
+//sp<Vec2> Vec2Type::floordiv(const sp<Vec2>& lvalue, float rvalue)
+//{
+//    return sp<VariableOP2<sp<Vec2>, V2, Operators::FloorDiv<V2>>>::make(lvalue, V2(rvalue, rvalue));
+//}
 
-sp<Vec2> Vec2Type::floordiv(const sp<Vec2>& lvalue, const sp<Numeric>& rvalue)
-{
-    return sp<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::FloorDiv<V2>>>::make(lvalue, Vec2Type::create(rvalue, rvalue));
-}
+//sp<Vec2> Vec2Type::floordiv(const sp<Vec2>& lvalue, const sp<Numeric>& rvalue)
+//{
+//    return sp<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::FloorDiv<V2>>>::make(lvalue, Vec2Type::create(rvalue, rvalue));
+//}
 
-sp<Vec2> Vec2Type::floordiv(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue)
-{
-    return sp<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::FloorDiv<V2>>>::make(lvalue, rvalue);
-}
+//sp<Vec2> Vec2Type::floordiv(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue)
+//{
+//    return sp<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::FloorDiv<V2>>>::make(lvalue, rvalue);
+//}
 
-sp<Vec2> Vec2Type::truediv(const sp<Vec2>& lvalue, float rvalue)
-{
-    return sp<VariableOP2<sp<Vec2>, float, Operators::Div<V2, float>>>::make(lvalue, rvalue);
-}
+//sp<Vec2> Vec2Type::truediv(const sp<Vec2>& lvalue, float rvalue)
+//{
+//    return sp<VariableOP2<sp<Vec2>, float, Operators::Div<V2, float>>>::make(lvalue, rvalue);
+//}
 
-sp<Vec2> Vec2Type::negative(const sp<Vec2>& self)
-{
-    return sp<VariableOP1<V2>>::make(Operators::Neg<V2>(), self);
-}
+//sp<Vec2> Vec2Type::negative(const sp<Vec2>& self)
+//{
+//    return sp<VariableOP1<V2>>::make(Operators::Neg<V2>(), self);
+//}
 
-sp<Vec2> Vec2Type::absolute(const sp<Vec2>& self)
-{
-    return sp<VariableOP1<V2>>::make(Operators::Abs<V2>(), self);
-}
+//sp<Vec2> Vec2Type::absolute(const sp<Vec2>& self)
+//{
+//    return sp<VariableOP1<V2>>::make(Operators::Abs<V2>(), self);
+//}
 
 sp<Vec2> Vec2Type::transform(const sp<Vec2>& self, const sp<Transform>& transform)
 {
     return sp<Vec2WithTransform>::make(self, transform);
 }
 
-sp<Vec2> Vec2Type::normalize(const sp<Vec2>& self)
-{
-    return sp<Vec2Normalize>::make(self);
-}
+//sp<Vec2> Vec2Type::normalize(const sp<Vec2>& self)
+//{
+//    return sp<Vec2Normalize>::make(self);
+//}
 
-sp<Vec2> Vec2Type::integral(const sp<Vec2>& self, const sp<Numeric>& t)
-{
-    sp<Numeric> duration = t ? t : Ark::instance().appClock()->duration();
-    return sp<Integral<V2>>::make(self, std::move(duration));
-}
+//sp<Vec2> Vec2Type::integral(const sp<Vec2>& self, const sp<Numeric>& t)
+//{
+//    sp<Numeric> duration = t ? t : Ark::instance().appClock()->duration();
+//    return sp<Integral<V2>>::make(self, std::move(duration));
+//}
 
-sp<Vec2> Vec2Type::integralWithResistance(const sp<Vec2>& self, const V2& v0, const sp<Numeric>& cd, const sp<Numeric>& t)
-{
-    return sp<IntegralWithResistance<V2>>::make(v0, self, cd, t ? t : Ark::instance().appClock()->duration());
-}
+//sp<Vec2> Vec2Type::integralWithResistance(const sp<Vec2>& self, const V2& v0, const sp<Numeric>& cd, const sp<Numeric>& t)
+//{
+//    return sp<IntegralWithResistance<V2>>::make(v0, self, cd, t ? t : Ark::instance().appClock()->duration());
+//}
 
-sp<Numeric> Vec2Type::distanceTo(const sp<Vec2>& self, const sp<Vec2>& other)
-{
-    return Math::distance(self, other);
-}
+//sp<Numeric> Vec2Type::distanceTo(const sp<Vec2>& self, const sp<Vec2>& other)
+//{
+//    return Math::distance(self, other);
+//}
 
-void Vec2Type::set(const sp<VariableWrapper<V2>>& self, const V2& val)
-{
-    self->set(val);
-}
+//void Vec2Type::set(const sp<VariableWrapper<V2>>& self, const V2& val)
+//{
+//    self->set(val);
+//}
 
-void Vec2Type::set(const sp<VariableWrapper<V2>>& self, const sp<Vec2>& val)
-{
-    self->set(val);
-}
+//void Vec2Type::set(const sp<VariableWrapper<V2>>& self, const sp<Vec2>& val)
+//{
+//    self->set(val);
+//}
 
-void Vec2Type::set(const sp<Vec2>& self, const V2 val)
-{
-    ensureImpl(self)->set(val);
-}
-
-V2 Vec2Type::val(const sp<Vec2>& self)
-{
-    return self->val();
-}
+//void Vec2Type::set(const sp<Vec2>& self, const V2 val)
+//{
+//    ensureImpl(self)->set(val);
+//}
 
 V2 Vec2Type::xy(const sp<Vec2>& self)
 {
@@ -233,59 +202,71 @@ void Vec2Type::setXy(const sp<Vec2>& self, const V2& xy)
     ensureImpl(self)->set(xy);
 }
 
-float Vec2Type::x(const sp<Vec2>& self)
-{
-    const sp<Vec2Impl> impl = self.as<Vec2Impl>();
-    return impl ? impl->x()->val() : self->val().x();
-}
+//sp<Numeric> Vec2Type::x(const sp<Vec2>& self)
+//{
+//    const sp<Vec2Impl> impl = self.as<Vec2Impl>();
+//    return impl ? static_cast<sp<Numeric>>(impl->x()) : sp<Numeric>::make<VariableOP1<float, V2>>(Operators::RandomAccess<V2, float>(0), self);
+//}
 
-void Vec2Type::setX(const sp<Vec2>& self, float x)
-{
-    ensureImpl(self)->x()->set(x);
-}
+////float Vec2Type::x(const sp<Vec2>& self)
+////{
+////    const sp<Vec2Impl> impl = self.as<Vec2Impl>();
+////    return impl ? impl->x()->val() : self->val().x();
+////}
 
-void Vec2Type::setX(const sp<Vec2>& self, const sp<Numeric>& x)
-{
-    ensureImpl(self)->x()->set(x);
-}
+//void Vec2Type::setX(const sp<Vec2>& self, float x)
+//{
+//    ensureImpl(self)->x()->set(x);
+//}
 
-float Vec2Type::y(const sp<Vec2>& self)
-{
-    const sp<Vec2Impl> impl = self.as<Vec2Impl>();
-    return impl ? impl->y()->val() : self->val().y();
-}
+//void Vec2Type::setX(const sp<Vec2>& self, const sp<Numeric>& x)
+//{
+//    ensureImpl(self)->x()->set(x);
+//}
 
-void Vec2Type::setY(const sp<Vec2>& self, float y)
-{
-    ensureImpl(self)->y()->set(y);
-}
+//sp<Numeric> Vec2Type::y(const sp<Vec2>& self)
+//{
+//    const sp<Vec2Impl> impl = self.as<Vec2Impl>();
+//    return impl ? static_cast<sp<Numeric>>(impl->y()) : sp<Numeric>::make<VariableOP1<float, V2>>(Operators::RandomAccess<V2, float>(1), self);
+//}
 
-void Vec2Type::setY(const sp<Vec2>& self, const sp<Numeric>& y)
-{
-    ensureImpl(self)->y()->set(y);
-}
+////sp<Numeric> Vec2Type::y(const sp<Vec2>& self)
+////{
+////    const sp<Vec2Impl> impl = self.as<Vec2Impl>();
+////    return impl ? impl->y()->val() : self->val().y();
+////}
 
-sp<Numeric> Vec2Type::vx(const sp<Vec2>& self)
-{
-    const sp<Vec2Impl> impl = self.as<Vec2Impl>();
-    return impl ? static_cast<sp<Numeric>>(impl->x()) : sp<Numeric>::make<VariableOP1<float, V2>>(Operators::RandomAccess<V2, float>(0), self);
-}
+//void Vec2Type::setY(const sp<Vec2>& self, float y)
+//{
+//    ensureImpl(self)->y()->set(y);
+//}
 
-void Vec2Type::setVx(const sp<Vec2>& self, const sp<Numeric>& x)
-{
-    ensureImpl(self)->x()->set(x);
-}
+//void Vec2Type::setY(const sp<Vec2>& self, const sp<Numeric>& y)
+//{
+//    ensureImpl(self)->y()->set(y);
+//}
 
-sp<Numeric> Vec2Type::vy(const sp<Vec2>& self)
-{
-    const sp<Vec2Impl> impl = self.as<Vec2Impl>();
-    return impl ? static_cast<sp<Numeric>>(impl->y()) : sp<Numeric>::make<VariableOP1<float, V2>>(Operators::RandomAccess<V2, float>(1), self);
-}
+////sp<Numeric> Vec2Type::vx(const sp<Vec2>& self)
+////{
+////    const sp<Vec2Impl> impl = self.as<Vec2Impl>();
+////    return impl ? static_cast<sp<Numeric>>(impl->x()) : sp<Numeric>::make<VariableOP1<float, V2>>(Operators::RandomAccess<V2, float>(0), self);
+////}
 
-void Vec2Type::setVy(const sp<Vec2>& self, const sp<Numeric>& y)
-{
-    ensureImpl(self)->y()->set(y);
-}
+////void Vec2Type::setVx(const sp<Vec2>& self, const sp<Numeric>& x)
+////{
+////    ensureImpl(self)->x()->set(x);
+////}
+
+////sp<Numeric> Vec2Type::vy(const sp<Vec2>& self)
+////{
+////    const sp<Vec2Impl> impl = self.as<Vec2Impl>();
+////    return impl ? static_cast<sp<Numeric>>(impl->y()) : sp<Numeric>::make<VariableOP1<float, V2>>(Operators::RandomAccess<V2, float>(1), self);
+////}
+
+////void Vec2Type::setVy(const sp<Vec2>& self, const sp<Numeric>& y)
+////{
+////    ensureImpl(self)->y()->set(y);
+////}
 
 sp<Vec3> Vec2Type::extend(sp<Vec2> self, sp<Numeric> z)
 {
@@ -297,107 +278,94 @@ sp<Vec4> Vec2Type::extend(sp<Vec2> self, sp<Vec2> zw)
     return sp<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::Extend<V2, V2>>>::make(std::move(self), std::move(zw));
 }
 
-void Vec2Type::fix(const sp<Vec2>& self)
-{
-    sp<VariableWrapper<V2>> wrapper = self.as<VariableWrapper<V2>>();
-    if(wrapper)
-    {
-        wrapper->fix();
-        return;
-    }
-    sp<Vec2Impl> impl = self.as<Vec2Impl>();
-    DCHECK(impl, "Object is not an instance of neither VariableWrapper<V2> or Vec2Impl");
-    ensureImpl(self)->fix();
-}
+//void Vec2Type::fix(const sp<Vec2>& self)
+//{
+//    sp<VariableWrapper<V2>> wrapper = self.as<VariableWrapper<V2>>();
+//    if(wrapper)
+//    {
+//        wrapper->fix();
+//        return;
+//    }
+//    sp<Vec2Impl> impl = self.as<Vec2Impl>();
+//    DCHECK(impl, "Object is not an instance of neither VariableWrapper<V2> or Vec2Impl");
+//    ensureImpl(self)->fix();
+//}
 
-sp<Vec2> Vec2Type::freeze(const sp<Vec2>& self)
-{
-    return sp<Vec2::Const>::make(self->val());
-}
+//sp<Vec2> Vec2Type::freeze(const sp<Vec2>& self)
+//{
+//    return sp<Vec2::Const>::make(self->val());
+//}
 
 sp<Size> Vec2Type::toSize(const sp<Vec2>& self)
 {
-    return sp<Size>::make(vx(self), vy(self));
+    return sp<Size>::make(x(self), y(self));
 }
 
-sp<Vec2> Vec2Type::wrap(const sp<Vec2>& self)
+//sp<Vec2> Vec2Type::wrap(sp<Vec2> self)
+//{
+//    return sp<VariableWrapper<V2>>::make(std::move(self));
+//}
+
+//sp<Vec2> Vec2Type::synchronize(const sp<Vec2>& self, const sp<Boolean>& disposed)
+//{
+//    return Ark::instance().applicationContext()->synchronize(self, disposed);
+//}
+
+//sp<Vec2> Vec2Type::modFloor(const sp<Vec2>& self, const sp<Numeric>& mod)
+//{
+//    return sp<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::ModFloor<V2>>>::make(self, create(mod, mod));
+//}
+
+//sp<Vec2> Vec2Type::modFloor(const sp<Vec2>& self, const sp<Vec2>& mod)
+//{
+//    return sp<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::ModFloor<V2>>>::make(self, mod);
+//}
+
+//sp<Vec2> Vec2Type::modCeil(const sp<Vec2>& self, const sp<Numeric>& mod)
+//{
+//    return sp<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::ModCeil<V2>>>::make(self, create(mod, mod));
+//}
+
+//sp<Vec2> Vec2Type::modCeil(const sp<Vec2>& self, const sp<Vec2>& mod)
+//{
+//    return sp<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::ModCeil<V2>>>::make(self, mod);
+//}
+
+//sp<Vec2> Vec2Type::sod(sp<Vec2> self, float k, float z, float r, sp<Numeric> t)
+//{
+//    if(t == nullptr)
+//        t = Ark::instance().appClock()->duration();
+//    return sp<SecondOrderDynamics<V2>>::make(std::move(self), std::move(t), k, z, r);
+//}
+
+sp<Vec2> Vec2Type::fence(sp<Vec2> self, sp<Vec3> plane, sp<Observer> observer)
 {
-    return sp<VariableWrapper<V2>>::make(self);
+    return sp<Vec2Fence>::make(std::move(self), std::move(plane), std::move(observer));
 }
 
-sp<Vec2> Vec2Type::synchronize(const sp<Vec2>& self, const sp<Boolean>& disposed)
+//sp<Vec2> Vec2Type::ifElse(const sp<Vec2>& self, const sp<Boolean>& condition, const sp<Vec2>& otherwise)
+//{
+//    return sp<VariableTernary<V2>>::make(condition, self, otherwise);
+//}
+
+sp<Numeric> Vec2Type::atan2(sp<Vec2> self)
 {
-    return Ark::instance().applicationContext()->synchronize(self, disposed);
+    return sp<VariableOP1<float, V2>>::make(_atan2, std::move(self));
 }
 
-sp<Vec2> Vec2Type::modFloor(const sp<Vec2>& self, const sp<Numeric>& mod)
-{
-    return sp<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::ModFloor<V2>>>::make(self, create(mod, mod));
-}
+//sp<Vec2> Vec2Type::wrapped(const sp<Vec2>& self)
+//{
+//    sp<VariableWrapper<V2>> wrapper = self.as<VariableWrapper<V2>>();
+//    DWARN(wrapper, "Non-Vec2Wrapper instance has no delegate attribute. This should be an error unless you're inspecting it.");
+//    return wrapper ? wrapper->wrapped() : nullptr;
+//}
 
-sp<Vec2> Vec2Type::modFloor(const sp<Vec2>& self, const sp<Vec2>& mod)
-{
-    return sp<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::ModFloor<V2>>>::make(self, mod);
-}
-
-sp<Vec2> Vec2Type::modCeil(const sp<Vec2>& self, const sp<Numeric>& mod)
-{
-    return sp<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::ModCeil<V2>>>::make(self, create(mod, mod));
-}
-
-sp<Vec2> Vec2Type::modCeil(const sp<Vec2>& self, const sp<Vec2>& mod)
-{
-    return sp<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::ModCeil<V2>>>::make(self, mod);
-}
-
-sp<Vec2> Vec2Type::sod(sp<Vec2> self, float k, float z, float r, sp<Numeric> t)
-{
-    if(t == nullptr)
-        t = Ark::instance().appClock()->duration();
-    return sp<SecondOrderDynamics<V2>>::make(std::move(self), std::move(t), k, z, r);
-}
-
-sp<Vec2> Vec2Type::attract(const sp<Vec2>& self, const V2& s0, float duration, const sp<Numeric>& t)
-{
-    sp<Numeric> ts = t ? t : Ark::instance().appClock()->duration();
-    return sp<Vec2Impl>::make(sp<Stalker>::make(ts, vx(self), s0.x(), duration), sp<Stalker>::make(ts, vy(self), s0.y(), duration));
-}
-
-sp<Vec2> Vec2Type::fence(const sp<Vec2>& self, const sp<Vec3>& plane, const sp<Observer>& observer)
-{
-    return sp<Vec2Fence>::make(self, plane, observer);
-}
-
-sp<Vec2> Vec2Type::ifElse(const sp<Vec2>& self, const sp<Boolean>& condition, const sp<Vec2>& otherwise)
-{
-    return sp<VariableTernary<V2>>::make(condition, self, otherwise);
-}
-
-sp<Numeric> Vec2Type::atan2(const sp<Vec2>& self)
-{
-    return sp<VariableOP1<float, V2>>::make(_atan2, self);
-}
-
-sp<Vec2> Vec2Type::delegate(const sp<Vec2>& self)
-{
-    sp<VariableWrapper<V2>> wrapper = self.as<VariableWrapper<V2>>();
-    DWARN(wrapper, "Non-Vec2Wrapper instance has no delegate attribute. This should be an error unless you're inspecting it.");
-    return wrapper ? wrapper->delegate() : nullptr;
-}
-
-void Vec2Type::setDelegate(const sp<Vec2>& self, const sp<Vec2>& delegate)
-{
-    sp<VariableWrapper<V2>> wrapper = self.as<VariableWrapper<V2>>();
-    DCHECK(wrapper, "Must be an Vec2Wrapper instance to set its delegate attribute");
-    wrapper->set(delegate);
-}
-
-sp<Vec2Impl> Vec2Type::ensureImpl(const sp<Vec2>& self)
-{
-    sp<Vec2Impl> impl = self.as<Vec2Impl>();
-    DCHECK(impl, "This Vec2 object is not a Vec2Impl instance");
-    return impl;
-}
+//sp<Vec2Impl> Vec2Type::ensureImpl(const sp<Vec2>& self)
+//{
+//    sp<Vec2Impl> impl = self.as<Vec2Impl>();
+//    DCHECK(impl, "This Vec2 object is not a Vec2Impl instance");
+//    return impl;
+//}
 
 template<> ARK_API sp<Vec2> Null::ptr()
 {

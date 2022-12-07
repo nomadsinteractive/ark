@@ -1,7 +1,7 @@
 #ifndef ARK_CORE_UTIL_SHARED_PTR_UTIL_H_
 #define ARK_CORE_UTIL_SHARED_PTR_UTIL_H_
 
-#include "core/base/delegate.h"
+#include "core/base/wrapper.h"
 #include "core/types/shared_ptr.h"
 
 namespace ark {
@@ -13,7 +13,7 @@ public:
         if(directConvertedPtr)
             return directConvertedPtr;
 
-        const auto delegatePtr = ptr.template as<Delegate<T>>();
+        const auto delegatePtr = ptr.template as<Wrapper<T>>();
         if(delegatePtr)
             return delegatePtr->delegate();
 

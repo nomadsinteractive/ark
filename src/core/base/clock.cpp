@@ -3,7 +3,7 @@
 #include <cmath>
 
 #include "core/ark.h"
-#include "core/base/delegate.h"
+#include "core/base/wrapper.h"
 #include "core/inf/variable.h"
 #include "core/impl/boolean/boolean_by_timeout.h"
 #include "core/util/conversions.h"
@@ -43,31 +43,31 @@ private:
 
 }
 
-class Clock::Ticker : public Variable<uint64_t>, public Delegate<Variable<uint64_t>> {
+class Clock::Ticker : public Variable<uint64_t>, public Wrapper<Variable<uint64_t>> {
 public:
     Ticker(sp<Variable<uint64_t>> delegate)
-        : Delegate(std::move(delegate)), _bypass(0), _paused(0) {
+        : Wrapper(std::move(delegate)), _bypass(0), _paused(0) {
     }
 
     virtual uint64_t val() override {
-        return _paused ? _paused : _delegate->val() - _bypass;
+        return _paused ? _paused : _wrapped->val() - _bypass;
     }
 
     virtual bool update(uint64_t timestamp) override {
-        return _paused ? false : _delegate->update(timestamp);
+        return _paused ? false : _wrapped->update(timestamp);
     }
 
     void pause() {
         if(!_paused) {
-            _delegate->update(0);
-            _paused = _delegate->val();
+            _wrapped->update(0);
+            _paused = _wrapped->val();
         }
     }
 
     void resume() {
         if(_paused != 0) {
-            _delegate->update(0);
-            _bypass += (_delegate->val() - _bypass - _paused);
+            _wrapped->update(0);
+            _bypass += (_wrapped->val() - _bypass - _paused);
             _paused = 0;
         }
     }

@@ -226,6 +226,13 @@ public:
         int32_t _idx;
     };
 
+    template<typename T> class Normalize {
+    public:
+        T operator()(const T& v) {
+            return Math::normalize(v);
+        }
+    };
+
     template<typename T, typename OP> class Builder : public ark::Builder<Variable<T>> {
     public:
         typedef sp<ark::Builder<Variable<T>>> BuilderType;

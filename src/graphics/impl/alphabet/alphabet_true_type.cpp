@@ -30,23 +30,25 @@ void AlphabetTrueType::setTextSize(const Font::TextSize& size)
     setFontSize(size._value > 0 ? size : _text_size);
 }
 
-bool AlphabetTrueType::measure(int32_t c, Metrics& metrics, bool hasFallback)
+Optional<Alphabet::Metrics> AlphabetTrueType::measure(int32_t c)
 {
     FT_UInt glyphIndex = FT_Get_Char_Index(_ft_font_face, c);
-    if(hasFallback && !glyphIndex)
-        return false;
+    if(!glyphIndex)
+        return Optional<Metrics>();
 
     FT_Error err;
     if((err = FT_Load_Glyph(_ft_font_face, glyphIndex, FT_LOAD_NO_BITMAP)) != 0)
-        DFATAL("Error loading metrics, character: %d. Error code: %d", c, err);
+        WARN(false, "Error loading metrics, character: %d. Error code: %d", c, err);
+
     FT_GlyphSlot slot = _ft_font_face->glyph;
+    Alphabet::Metrics metrics;
     metrics.width = slot->advance.x >> 6;
     metrics.height = _line_height_in_pixel;
     metrics.bitmap_width = slot->metrics.width >> 6;
     metrics.bitmap_height = slot->metrics.height >> 6;
     metrics.bitmap_x = slot->metrics.horiBearingX >> 6;
     metrics.bitmap_y = _base_line_position - (slot->metrics.horiBearingY >> 6);
-    return true;
+    return metrics;
 }
 
 bool AlphabetTrueType::draw(uint32_t c, Bitmap& image, int32_t x, int32_t y)

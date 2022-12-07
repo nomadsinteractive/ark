@@ -2,12 +2,12 @@
 #define ARK_CORE_IMPL_UPDATABLE_UPDATABLE_WRAPPER_H_
 
 #include "core/base/timestamp.h"
-#include "core/base/delegate.h"
+#include "core/base/wrapper.h"
 #include "core/inf/updatable.h"
 
 namespace ark {
 
-class UpdatableWrapper : public Updatable, public Delegate<Updatable> {
+class UpdatableWrapper : public Updatable, public Wrapper<Updatable> {
 public:
     UpdatableWrapper(sp<Updatable> updatable);
 

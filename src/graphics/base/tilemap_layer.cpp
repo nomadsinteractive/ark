@@ -92,14 +92,14 @@ const sp<Vec3>& TilemapLayer::scroller() const
     return _scroller;
 }
 
-void TilemapLayer::setScroller(const sp<Vec3>& scroller)
+void TilemapLayer::setScroller(sp<Vec3> scroller)
 {
-    _scroller = scroller;
+    _scroller = std::move(scroller);
 }
 
 const sp<Tile>& TilemapLayer::getTile(uint32_t rowId, uint32_t colId) const
 {
-    DCHECK(rowId < _row_count && colId < _col_count, "Invaild tile id:(%d, %d), tile map size(%d, %d)", rowId, colId, _row_count, _col_count);
+    CHECK(rowId < _row_count && colId < _col_count, "Invaild tile id:(%d, %d), tile map size(%d, %d)", rowId, colId, _row_count, _col_count);
     const LayerTile& layerTile = _stub->_layer_tiles.at(rowId * _col_count + colId);
     return layerTile.tile;
 }

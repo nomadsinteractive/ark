@@ -2,14 +2,14 @@
 #define ARK_CORE_IMPL_INTEGER_INTEGER_ARRAY_H_
 
 #include "core/forwarding.h"
-#include "core/base/delegate.h"
+#include "core/base/wrapper.h"
 #include "core/base/notifier.h"
 #include "core/inf/variable.h"
 #include "core/util/integer_type.h"
 
 namespace ark {
 
-class IntegerByArray : public Delegate<IntArray>, public Integer {
+class IntegerByArray : public Wrapper<IntArray>, public Integer {
 public:
     IntegerByArray(const sp<IntArray>& array, IntegerType::Repeat repeat, Notifier notifier);
 

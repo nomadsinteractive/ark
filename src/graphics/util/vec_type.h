@@ -1,0 +1,210 @@
+#ifndef ARK_GRAPHICS_UTIL_VEC_TYPE_H_
+#define ARK_GRAPHICS_UTIL_VEC_TYPE_H_
+
+#include "core/forwarding.h"
+#include "core/base/api.h"
+#include "core/base/clock.h"
+#include "core/impl/variable/integral.h"
+#include "core/impl/variable/integral_with_resistance.h"
+#include "core/impl/variable/second_order_dynamics.h"
+#include "core/impl/variable/variable_op1.h"
+#include "core/impl/variable/variable_op2.h"
+#include "core/impl/variable/variable_ternary.h"
+#include "core/impl/variable/variable_wrapper.h"
+#include "core/inf/variable.h"
+#include "core/types/optional.h"
+#include "core/types/shared_ptr.h"
+#include "core/util/operators.h"
+
+#include "graphics/forwarding.h"
+
+namespace ark {
+
+template<typename T, typename IMPL> class VecType {
+public:
+    typedef Variable<T> VarType;
+
+    static const size_t DIMENSION = sizeof(T) / sizeof(float);
+
+    static sp<VarType> add(sp<VarType> lvalue, sp<VarType> rvalue) {
+        return sp<VariableOP2<sp<VarType>, sp<VarType>, Operators::Add<T>>>::make(std::move(lvalue), std::move(rvalue));
+    }
+
+    static sp<VarType> sub(sp<VarType> lvalue, sp<VarType> rvalue) {
+        return sp<VariableOP2<sp<VarType>, sp<VarType>, Operators::Sub<T>>>::make(std::move(lvalue), std::move(rvalue));
+    }
+
+    static sp<VarType> mul(sp<VarType> lvalue, sp<VarType> rvalue) {
+        return sp<VariableOP2<sp<VarType>, sp<VarType>, Operators::Mul<T>>>::make(std::move(lvalue), std::move(rvalue));
+    }
+
+    static sp<VarType> mul(sp<VarType> lvalue, float rvalue) {
+        return sp<VariableOP2<sp<VarType>, float, Operators::Mul<T, float>>>::make(std::move(lvalue), rvalue);
+    }
+
+    static sp<VarType> mul(sp<Numeric> lvalue, sp<VarType> rvalue) {
+        return mul(std::move(rvalue), std::move(lvalue));
+    }
+
+    static sp<VarType> mul(sp<VarType> lvalue, sp<Numeric> rvalue) {
+        return sp<VariableOP2<sp<VarType>, sp<Numeric>, Operators::Mul<T, float>>>::make(std::move(lvalue), std::move(rvalue));
+    }
+
+    static sp<VarType> truediv(sp<VarType> lvalue, sp<VarType> rvalue) {
+        return sp<VariableOP2<sp<VarType>, sp<VarType>, Operators::Div<T>>>::make(std::move(lvalue), std::move(rvalue));
+    }
+
+    static sp<VarType> truediv(sp<VarType> lvalue, sp<Numeric> rvalue) {
+        return sp<VariableOP2<sp<VarType>, sp<Numeric>, Operators::Div<T, float>>>::make(std::move(lvalue), std::move(rvalue));
+    }
+
+    static sp<VarType> floordiv(sp<VarType> lvalue, float rvalue) {
+        return sp<VariableOP2<sp<VarType>, V2, Operators::FloorDiv<T>>>::make(std::move(lvalue), V2(rvalue, rvalue));
+    }
+
+    static sp<VarType> floordiv(sp<VarType> lvalue, sp<Numeric> rvalue) {
+        return sp<VariableOP2<sp<VarType>, sp<VarType>, Operators::FloorDiv<T>>>::make(std::move(lvalue), sp<IMPL>::make(std::move(rvalue)));
+    }
+
+    static sp<VarType> floordiv(sp<VarType> lvalue, sp<VarType> rvalue) {
+        return sp<VariableOP2<sp<VarType>, sp<VarType>, Operators::FloorDiv<T>>>::make(std::move(lvalue), std::move(rvalue));
+    }
+
+    static sp<VarType> truediv(sp<VarType> lvalue, float rvalue) {
+        return sp<VariableOP2<sp<VarType>, float, Operators::Div<T, float>>>::make(std::move(lvalue), rvalue);
+    }
+
+    static sp<VarType> negative(sp<VarType> self) {
+        return sp<VariableOP1<T>>::make(Operators::Neg<T>(), std::move(self));
+    }
+
+    static sp<VarType> absolute(sp<VarType> self) {
+        return sp<VariableOP1<T>>::make(Operators::Abs<T>(), std::move(self));
+    }
+
+    static sp<VarType> normalize(sp<VarType> self) {
+        return sp<VariableOP1<T>>::make(Operators::Normalize<T>(), std::move(self));
+    }
+
+    static sp<VarType> integral(sp<VarType> self, sp<Numeric> t) {
+        sp<Numeric> duration = t ? std::move(t) : Ark::instance().appClock()->duration();
+        return sp<Integral<T>>::make(std::move(self), std::move(duration));
+    }
+
+    static sp<VarType> integralS2(sp<VarType> self, const T& s0, const Optional<T>& s1, sp<Numeric> t) {
+        sp<Numeric> duration = t ? std::move(t) : Ark::instance().appClock()->duration();
+        return sp<IntegralS2<T>>::make(std::move(self), std::move(duration), s0, s1 ? s1.value() : s0);
+    }
+
+    static sp<VarType> integralWithResistance(sp<VarType> self, const T& v0, sp<Numeric> cd, sp<Numeric> t) {
+        return sp<IntegralWithResistance<T>>::make(v0, std::move(self), cd, t ? std::move(t) : Ark::instance().appClock()->duration());
+    }
+
+    static sp<Numeric> distanceTo(sp<VarType> self, sp<VarType> other) {
+        return Math::distance(std::move(self), std::move(other));
+    }
+
+    static void set(const sp<VariableWrapper<T>>& self, const T& val) {
+        self->set(val);
+    }
+
+    static void set(const sp<VariableWrapper<T>>& self, sp<VarType> val) {
+        self->set(std::move(val));
+    }
+
+    static void set(const sp<VarType>& self, const T& val) {
+        ensureImpl(self)->set(val);
+    }
+
+    static sp<Numeric> x(const sp<VarType>& self) {
+        const sp<IMPL> impl = self.as<IMPL>();
+        return impl ? static_cast<sp<Numeric>>(impl->x()) : sp<Numeric>::make<VariableOP1<float, T>>(Operators::RandomAccess<T, float>(0), self);
+    }
+
+    static void setX(const sp<VarType>& self, float x) {
+        ensureImpl(self)->x()->set(x);
+    }
+
+    static void setX(const sp<VarType>& self, sp<Numeric> x) {
+        ensureImpl(self)->x()->set(std::move(x));
+    }
+
+    static sp<Numeric> y(const sp<VarType>& self) {
+        const sp<IMPL> impl = self.as<IMPL>();
+        return impl ? static_cast<sp<Numeric>>(impl->y()) : sp<Numeric>::make<VariableOP1<float, T>>(Operators::RandomAccess<T, float>(1), self);
+    }
+
+    static void setY(const sp<VarType>& self, float y) {
+        ensureImpl(self)->y()->set(y);
+    }
+
+    static void setY(const sp<VarType>& self, sp<Numeric> y) {
+        ensureImpl(self)->y()->set(std::move(y));
+    }
+
+    static void fix(const sp<VarType>& self) {
+        sp<VariableWrapper<T>> wrapper = self.as<VariableWrapper<T>>();
+        if(wrapper) {
+            wrapper->fix();
+            return;
+        }
+        sp<Vec2Impl> impl = self.as<Vec2Impl>();
+        CHECK(impl, "Object is not an instance of neither VariableWrapper<T> or Vec%dImpl", DIMENSION);
+        ensureImpl(self)->fix();
+    }
+
+    static sp<VarType> freeze(const sp<VarType>& self) {
+        return sp<Vec2::Const>::make(self->val());
+    }
+
+    static sp<VarType> wrap(sp<VarType> self) {
+        return sp<VariableWrapper<T>>::make(std::move(self));
+    }
+
+    static sp<VarType> synchronize(sp<VarType> self, sp<Boolean> disposed) {
+        return Ark::instance().applicationContext()->synchronize(std::move(self), std::move(disposed));
+    }
+
+    static sp<VarType> modFloor(sp<VarType> self, sp<Numeric> mod) {
+        return sp<VariableOP2<sp<VarType>, sp<VarType>, Operators::ModFloor<T>>>::make(std::move(self), sp<IMPL>::make(std::move(mod)));
+    }
+
+    static sp<VarType> modFloor(sp<VarType> self, sp<VarType> mod) {
+        return sp<VariableOP2<sp<VarType>, sp<VarType>, Operators::ModFloor<T>>>::make(std::move(self), std::move(mod));
+    }
+
+    static sp<VarType> modCeil(sp<VarType> self, sp<Numeric> mod) {
+        return sp<VariableOP2<sp<VarType>, sp<VarType>, Operators::ModCeil<T>>>::make(std::move(self), sp<IMPL>::make(std::move(mod)));
+    }
+
+    static sp<VarType> modCeil(sp<VarType> self, sp<VarType> mod) {
+        return sp<VariableOP2<sp<VarType>, sp<VarType>, Operators::ModCeil<T>>>::make(self, std::move(mod));
+    }
+
+    static sp<VarType> sod(sp<VarType> self, float k, float z, float r, sp<Numeric> t) {
+        if(!t)
+            t = Ark::instance().appClock()->duration();
+        return sp<SecondOrderDynamics<T>>::make(std::move(self), std::move(t), k, z, r);
+    }
+
+    static sp<VarType> ifElse(sp<VarType> self, sp<Boolean> condition, sp<VarType> otherwise) {
+        return sp<VariableTernary<T>>::make(std::move(condition), std::move(self), std::move(otherwise));
+    }
+
+    static sp<VarType> wrapped(const sp<VarType>& self) {
+        sp<VariableWrapper<T>> wrapper = self.as<VariableWrapper<T>>();
+        WARN(wrapper, "Non-Vec%dWrapper instance has no delegate attribute. This should be an error unless you're inspecting it.", DIMENSION);
+        return wrapper ? wrapper->wrapped() : nullptr;
+    }
+
+protected:
+    static sp<IMPL> ensureImpl(const sp<VarType>& self) {
+        sp<IMPL> impl = self.as<IMPL>();
+        CHECK(impl, "This Vec%d object is not a Vec%dImpl instance", DIMENSION, DIMENSION);
+        return impl;
+    }
+};
+
+}
+
+#endif

@@ -11,12 +11,12 @@
 namespace ark {
 
 Model::Model(sp<Input> indices, sp<Vertices> vertices, const Metrics& metrics)
-    : _indices(std::move(indices)), _vertices(std::move(vertices)), _metrics(metrics)
+    : _indices(std::move(indices)), _vertices(std::move(vertices)), _metrics(sp<Metrics>::make(metrics))
 {
 }
 
 Model::Model(std::vector<sp<Material>> materials, std::vector<sp<Mesh>> meshes, const Metrics& metrics)
-    : _indices(sp<InputMeshIndices>::make(meshes)), _vertices(sp<MeshVertices>::make(meshes)), _materials(std::move(materials)), _meshes(std::move(meshes)), _metrics(metrics)
+    : _indices(sp<InputMeshIndices>::make(meshes)), _vertices(sp<MeshVertices>::make(meshes)), _materials(std::move(materials)), _meshes(std::move(meshes)), _metrics(sp<Metrics>::make(metrics))
 {
 }
 
@@ -40,24 +40,9 @@ const std::vector<sp<Mesh>>& Model::meshes() const
     return _meshes;
 }
 
-const Metrics& Model::metrics() const
+const sp<Metrics>& Model::metrics() const
 {
     return _metrics;
-}
-
-const V3& Model::bounds() const
-{
-    return _metrics.bounds;
-}
-
-const V3& Model::size() const
-{
-    return _metrics.size;
-}
-
-const V3& Model::origin() const
-{
-    return _metrics.orgin;
 }
 
 size_t Model::indexCount() const
@@ -98,7 +83,8 @@ const sp<Animation>& Model::getAnimation(const String& name) const
 
 V3 Model::toScale(const V3& renderObjectSize) const
 {
-    return V3(renderObjectSize.x() == 0 ? _metrics.size.x() : renderObjectSize.x(), renderObjectSize.y() == 0 ? _metrics.size.y() : renderObjectSize.y(), renderObjectSize.z() == 0 ? _metrics.size.z() : renderObjectSize.z());
+    const Metrics& m = _metrics;
+    return V3(renderObjectSize.x() == 0 ? m.width() : renderObjectSize.x(), renderObjectSize.y() == 0 ? m.height() : renderObjectSize.y(), renderObjectSize.z() == 0 ? m.depth() : renderObjectSize.z());
 }
 
 void Model::writeToStream(VertexWriter& buf, const V3& size) const

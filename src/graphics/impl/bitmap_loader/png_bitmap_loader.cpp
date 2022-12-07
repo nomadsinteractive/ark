@@ -5,8 +5,6 @@
 #include <stdlib.h>
 
 #include <png.h>
-#include <pngstruct.h>
-#include <pnginfo.h>
 
 #include "core/inf/readable.h"
 #include "core/util/log.h"
@@ -17,7 +15,7 @@ namespace ark {
 
 static void _png_readable_read_fn(png_structp png_ptr, png_bytep buffer, png_size_t size)
 {
-    Readable* readable = reinterpret_cast<Readable*>(png_ptr->io_ptr);
+    Readable* readable = reinterpret_cast<Readable*>(png_get_io_ptr(png_ptr));
     readable->read(buffer, size);
 }
 
@@ -90,7 +88,7 @@ bitmap PNGBitmapLoader::load(const sp<Readable>& readable)
     rowbytes += 3 - ((rowbytes - 1) % 4);
 
     // Allocate the image_data as a big block, to be given to opengl
-    const bitmap bitmap =  bitmap::make(temp_width, temp_height, rowbytes, info_ptr->channels, !_just_decode_bounds);
+    const bitmap bitmap =  bitmap::make(temp_width, temp_height, rowbytes, png_get_channels(png_ptr, info_ptr), !_just_decode_bounds);
 
     if(!_just_decode_bounds)
     {

@@ -105,7 +105,7 @@ AUTOBIND_TYPEDEF_PATTERN = re.compile(r'\[\[script::bindings::auto]]\s+typedef\s
 AUTOBIND_ANNOTATION_PATTERN = re.compile(r'\[\[script::bindings::(auto|container|holder)]]%s\s+class\s+([^{\r\n]+)\s*{' % ANNOTATION_PATTERN)
 AUTOBIND_META_PATTERN = re.compile(r'\[\[script::bindings::meta\(([^)]+)\([^)]*\)\)]]')
 
-BUILDABLE_PATTERN = re.compile(r'\[\[plugin::(?:builder|resource-loader)[^]]*]]\s+class\s+[\w\d_]+\s*:\s*public\s+Builder<([^{]+)>\s*{')
+BUILDABLE_PATTERN = re.compile(r'\[\[plugin::(?:builder|resource-loader)[^]]*]]\s+class\s+\w+\s*:\s*public\s+Builder<([^{]+)>\s*{')
 
 CLASS_DELIMITER = '\n//%s\n' % ('-' * 120)
 TYPE_DEFINED_SP = ('document', 'element', 'attribute', 'bitmap')
@@ -214,7 +214,7 @@ public:
 
 
 def gen_py_binding_h(filename, namespaces, includes, declares):
-    header_macro = re.sub(r'[^\w\d]', '_', filename).upper()
+    header_macro = re.sub(r'\W', '_', filename).upper()
     return acg.format('''#ifndef PY_${header_macro}_GEN
 #define PY_${header_macro}_GEN
 
@@ -463,7 +463,8 @@ class GenArgument:
         if m == 'Scope':
             return acg.format('const Scope ${objname} = PyCast::toScope(kws);',
                               objname=objname, argname=argname)
-        optional_cast_prefix = 'to' if optional_check else 'ensure'
+        is_optional_type = 'Optional<' in m
+        optional_cast_prefix = 'to' if optional_check or is_optional_type else 'ensure'
         to_cpp_object = '%sCppObject' % optional_cast_prefix
         if m == 'char*':
             return self._gen_var_declare('String', objname, to_cpp_object, 'String', argname, False, optional_check)
@@ -474,7 +475,8 @@ class GenArgument:
         typename = remove_crv(typename)
         if m != self._accept_type and not typename.startswith('std::'):
             return self._gen_var_declare('sp<%s>' % m, objname, '%sSharedPtr' % optional_cast_prefix, m, argname, extract_cast, optional_check)
-        return self._gen_var_declare(typename, objname, to_cpp_object, typename, argname, False, optional_check)
+        functype = acg.get_template_type(typename, 'Optional') if is_optional_type else typename
+        return self._gen_var_declare(typename, objname, to_cpp_object, functype, argname, False, optional_check)
 
     def _gen_var_declare(self, typename, varname, funcname, functype, argname, extract_cast=False, optional_check=False):
         argappendix = ', false' if extract_cast else ''
@@ -497,10 +499,11 @@ ARK_PY_ARGUMENTS = (
     (r'Scope\s*&', GenArgumentMeta('PyObject*', 'Scope', '')),
     (r'std::wstring\s*&', GenArgumentMeta('PyObject*', 'std::wstring', 'O')),
     (r'Box\s*&', GenArgumentMeta('PyObject*', 'Box', 'O')),
-    (r'sp<([^>]+|[\w\d_]+<[\w\d_]+>)>(?:\s*&|$)', GenArgumentMeta('PyObject*', 'sp<${0}>', 'O')),
+    (r'sp<([^>]+|\w+<\w+>)>(?:\s*&|$)', GenArgumentMeta('PyObject*', 'sp<${0}>', 'O')),
+    (r'(Optional<[^\s]+>)[&\s]+', GenArgumentMeta('PyObject*', '${0}', 'O')),
     (r'(document|element|attribute)\s*&', GenArgumentMeta('PyObject*', '${0}', 'O')),
     (r'(V2|V3|V4)', GenArgumentMeta('PyObject*', '${0}', 'O')),
-    (r'([^>]+|[\w\d_]+<[\w\d_]+>)\s*&', GenArgumentMeta('PyObject*', 'sp<${0}>', 'O')),
+    (r'([^>]+|\w+<\w+>)\s*&', GenArgumentMeta('PyObject*', 'sp<${0}>', 'O')),
     (r'(uint32_t|unsigned int|uint8_t)', GenArgumentMeta('uint32_t', 'uint32_t', 'I')),
     (r'size_t', GenArgumentMeta('size_t', 'size_t', 'n')),
     (r'(int64_t|uint64_t)', GenArgumentMeta('${0}', '${0}', 'i')),

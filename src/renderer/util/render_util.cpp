@@ -90,7 +90,7 @@ Attribute RenderUtil::makePredefinedAttribute(const String& name, const String& 
 
 Model RenderUtil::makeUnitQuadModel()
 {
-    return Model(InputType::makeElementIndexInput(std::initializer_list<element_index_t>({0, 2, 1, 2, 3, 1})), sp<VerticesQuad>::make(), Metrics{V3(1.0f), V3(1.0f), V3(0)});
+    return Model(InputType::makeElementIndexInput(std::initializer_list<element_index_t>({0, 2, 1, 2, 3, 1})), sp<VerticesQuad>::make(), Metrics(V3(1.0f), V3(1.0f), V3(0)));
 }
 
 Model RenderUtil::makeUnitNinePatchTriangleStripsModel()
@@ -105,7 +105,7 @@ Model RenderUtil::makeUnitNinePatchQuadsModel()
 
 Model RenderUtil::makeUnitPointModel()
 {
-    return Model(InputType::makeElementIndexInput(std::initializer_list<element_index_t>({0})), sp<VerticesPoint>::make(), Metrics{V3(1.0f), V3(1.0f), V3()});
+    return Model(InputType::makeElementIndexInput(std::initializer_list<element_index_t>({0})), sp<VerticesPoint>::make(), Metrics());
 }
 
 uint32_t RenderUtil::hash(const element_index_t* buf, size_t len)

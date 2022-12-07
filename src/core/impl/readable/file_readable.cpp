@@ -9,7 +9,7 @@ FileReadable::FileReadable(const String& filepath, const String& mode)
     : _filepath(filepath)
 {
     _fp = fopen(filepath.c_str(), mode.c_str());
-    DCHECK(_fp, "Cannot open file \"%s\" for reading", filepath.c_str());
+    CHECK(_fp, "Cannot open file \"%s\" for reading", filepath.c_str());
     init();
 }
 

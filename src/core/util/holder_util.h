@@ -1,7 +1,7 @@
 #ifndef ARK_CORE_UTIL_HOLDER_UTIL_H_
 #define ARK_CORE_UTIL_HOLDER_UTIL_H_
 
-#include "core/base/delegate.h"
+#include "core/base/wrapper.h"
 #include "core/base/scope.h"
 #include "core/base/string.h"
 #include "core/inf/holder.h"
@@ -52,9 +52,9 @@ private:
     }
 
     template<typename T> static void traverse_delegate_sfinae(const sp<T>& inst, const Holder::Visitor& visitor, ...) {
-        const sp<Delegate<T>> delegate = inst.template as<Delegate<T>>();
+        const sp<Wrapper<T>> delegate = inst.template as<Wrapper<T>>();
         if(delegate)
-            return visit(delegate->delegate(), visitor);
+            return visit(delegate->wrapped(), visitor);
     }
 
     template<typename T = void, typename... Args> static void visit_box(const Box& packed, const Holder::Visitor& visitor) {

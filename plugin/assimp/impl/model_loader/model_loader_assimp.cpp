@@ -210,7 +210,6 @@ Model ModelImporterAssimp::loadModel(const aiScene* scene, MaterialBundle& mater
 
     std::vector<document> animateManifests = manifest.descriptor() ? manifest.descriptor()->children("animate") : std::vector<document>();
     const bool hasAnimation = scene->HasAnimations() || animateManifests.size() > 0;
-    V3 bounds(aabbMax.x() - aabbMin.x(), aabbMax.y() - aabbMin.y(), aabbMax.z() - aabbMin.z());
     aiMatrix4x4 globalAnimationTransform;
 //    int32_t upAxis = -1;
 //    if(scene->mMetaData->Get("UpAxis", upAxis) && false)
@@ -232,7 +231,7 @@ Model ModelImporterAssimp::loadModel(const aiScene* scene, MaterialBundle& mater
 //        }
 //    }
 
-    Model model(std::move(materials), std::move(meshes), {bounds, bounds, aabbMin});
+    Model model(std::move(materials), std::move(meshes), Metrics(aabbMin, aabbMax, aabbMin, aabbMax));
     if(hasAnimation)
     {
         bool noBones = bones.nodes().size() == 0;

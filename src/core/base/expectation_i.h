@@ -11,7 +11,7 @@ typedef Expectation<int32_t> ExpectationI;
 
 //[[script::bindings::holder]]
 //[[script::bindings::extends(Integer)]]
-class ARK_API ExpectationI : public Integer, public Delegate<Integer>, public Holder {
+class ARK_API ExpectationI : public Integer, public Wrapper<Integer>, public Holder {
  public:
     ExpectationI(sp<Integer> delegate, Notifier notifier);
 

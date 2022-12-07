@@ -47,7 +47,7 @@ void Visibility::set(const sp<Boolean>& visible)
 
 const sp<Boolean>& Visibility::delegate() const
 {
-    return _visible->delegate();
+    return _visible->wrapped();
 }
 
 Visibility::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)

@@ -35,7 +35,7 @@ void Arc::apply(b2Body* body, const sp<Size>& size, const BodyCreateInfo& create
         float degree = da + step * static_cast<float>(i);
         vecs[i].Set(Math::cos(degree) * radius, Math::sin(degree) * radius);
     }
-    shape.CreateChain(vecs.data(), _sample_count + 1);
+    shape.CreateLoop(vecs.data(), _sample_count + 1);
 
     b2FixtureDef fixtureDef = createInfo.toFixtureDef(&shape);
     body->CreateFixture(&fixtureDef);

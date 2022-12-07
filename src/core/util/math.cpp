@@ -4,6 +4,8 @@
 #include <math.h>
 #include <stdlib.h>
 
+#include <glm/glm.hpp>
+
 #include "core/inf/variable.h"
 #include "core/impl/variable/interpolate.h"
 #include "core/impl/variable/variable_op1.h"
@@ -294,6 +296,24 @@ V2 Math::projectile(float dx, float dy, float v, float g, uint32_t sid)
     float vx = std::sqrt(vx2);
     float vy = std::sqrt(v * v - vx2);
     return V2(dx > 0 ? vx : -vx, g < 0 ? vy : -vy);
+}
+
+V2 Math::normalize(const V2& v2)
+{
+    const glm::vec2 n = glm::normalize(glm::vec2(v2.x(), v2.y()));
+    return V2(n.x, n.y);
+}
+
+V3 Math::normalize(const V3& v3)
+{
+    const glm::vec3 n = glm::normalize(glm::vec3(v3.x(), v3.y(), v3.z()));
+    return V3(n.x, n.y, n.z);
+}
+
+V4 Math::normalize(const V4& v4)
+{
+    const glm::vec4 n = glm::normalize(glm::vec4(v4.x(), v4.y(), v4.z(), v4.w()));
+    return V4(n.x, n.y, n.z, n.w);
 }
 
 /**

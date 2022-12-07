@@ -48,7 +48,7 @@ public:
 // [[script::bindings::property]]
     const sp<Vec3>& scroller() const;
 // [[script::bindings::property]]
-    void setScroller(const sp<Vec3>& scroller);
+    void setScroller(sp<Vec3> scroller);
 
 // [[script::bindings::auto]]
     const sp<Tile>& getTile(uint32_t rowId, uint32_t colId) const;

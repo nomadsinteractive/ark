@@ -20,7 +20,7 @@ namespace box2d {
 class ARK_PLUGIN_BOX2D_API WeldJoint : public Object, public Joint, Implements<Object> {
 public:
 //  [[script::bindings::auto]]
-    WeldJoint(const sp<ColliderBox2D>& world, const RigidBodyBox2D& b1, const RigidBodyBox2D& b2, const V2& anchorA, const V2& anchorB, float referenceAngle, bool collideConnected = false, float frequencyHz = 0, float dampingRatio = 0);
+    WeldJoint(const sp<ColliderBox2D>& world, const RigidBodyBox2D& b1, const RigidBodyBox2D& b2, const V2& anchorA, const V2& anchorB, float referenceAngle, bool collideConnected = false);
 
 /*
 //  [[script::bindings::auto]]
@@ -30,7 +30,7 @@ public:
 */
 
 private:
-    static b2Joint* makeJoint(b2World& b2World, const RigidBodyBox2D& b1, const RigidBodyBox2D& b2, const V2& anchorA, const V2& anchorB, float referenceAngle, bool collideConnected, float frequencyHz, float dampingRatio);
+    static b2Joint* makeJoint(b2World& b2World, const RigidBodyBox2D& b1, const RigidBodyBox2D& b2, const V2& anchorA, const V2& anchorB, float referenceAngle, bool collideConnected);
 
 };
 

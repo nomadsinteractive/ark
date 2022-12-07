@@ -90,8 +90,12 @@ def strip_key_words(statement, keywords):
 
 
 def get_shared_ptr_type(typename):
+    return get_template_type(typename, 'sp')
+
+
+def get_template_type(typename, template_name):
     t = strip_key_words(typename, ['const']).replace('&', '').strip()
-    return t[3:-1] if t.startswith('sp<') and t.endswith('>') else t
+    return t[len(template_name) + 1:-1] if t.startswith(f'{template_name}<') and t.endswith('>') else t
 
 
 def get_argument_type(statement):

@@ -13,7 +13,7 @@ MemoryPool::MemoryPool()
         size_t blockSize = i ? 1 << (BLOCK_SIZE_BASE_LOG2 - 1 + i) : 0;
         for(size_t j = 0; j < SUB_BLOCK_COUNT; ++j)
         {
-            size_t slotSize = blockSize + (1 << (BLOCK_SIZE_BASE_LOG2 - SUB_BLOCK_BITS + (i ? i - 1 : 0))) * (j + 1);
+            size_t slotSize = blockSize + (static_cast<size_t>(1) << (BLOCK_SIZE_BASE_LOG2 - SUB_BLOCK_BITS + (i ? i - 1 : 0))) * (j + 1);
             size_t blockid = i * SUB_BLOCK_COUNT + j;
             DASSERT(blockid == getBlockId(slotSize));
             _blocks[blockid] = std::make_shared<Block>(slotSize, 1);

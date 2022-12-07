@@ -1,11 +1,11 @@
 #include "renderer/vulkan/util/vk_util.h"
 
 #include <array>
+#include <xutility>
 
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <ShaderLang.h>
-#include <SPIRV/GlslangToSpv.h>
+#include <glslang/SPIRV/GlslangToSpv.h>
 
 #include "core/base/plugin_manager.h"
 #include "core/inf/array.h"
@@ -136,18 +136,20 @@ static const TBuiltInResource DefaultTBuiltInResource = {
     /* .maxTaskWorkGroupSizeY_NV = */ 1,
     /* .maxTaskWorkGroupSizeZ_NV = */ 1,
     /* .maxMeshViewCountNV = */ 4,
+    /* .maxDualSourceDrawBuffersEXT = */ 1,
 
     /* .limits = */ {
-        /* .nonInductiveForLoops = */ 1,
-        /* .whileLoops = */ 1,
-        /* .doWhileLoops = */ 1,
-        /* .generalUniformIndexing = */ 1,
-        /* .generalAttributeMatrixVectorIndexing = */ 1,
-        /* .generalVaryingIndexing = */ 1,
-        /* .generalSamplerIndexing = */ 1,
-        /* .generalVariableIndexing = */ 1,
-        /* .generalConstantMatrixVectorIndexing = */ 1,
-    }};
+        /* .nonInductiveForLoops = */ true,
+        /* .whileLoops = */ true,
+        /* .doWhileLoops = */ true,
+        /* .generalUniformIndexing = */ true,
+        /* .generalAttributeMatrixVectorIndexing = */ true,
+        /* .generalVaryingIndexing = */ true,
+        /* .generalSamplerIndexing = */ true,
+        /* .generalVariableIndexing = */ true,
+        /* .generalConstantMatrixVectorIndexing = */ true,
+    }
+};
 
 class GLSLLangInitializer {
 public:
@@ -183,7 +185,7 @@ private:
 
 void VKUtil::checkResult(VkResult result)
 {
-    DCHECK(result == VK_SUCCESS, "Vulkan error: %s", vks::tools::errorString(result).c_str());
+    CHECK(result == VK_SUCCESS, "Vulkan error: %s", vks::tools::errorString(result).c_str());
 }
 
 VkPipelineShaderStageCreateInfo VKUtil::loadShaderSPIR(VkDevice device, std::string fileName, VkShaderStageFlagBits stage)
@@ -367,7 +369,7 @@ VkShaderStageFlagBits VKUtil::toStage(PipelineInput::ShaderStage stage)
 VkPrimitiveTopology VKUtil::toPrimitiveTopology(ModelLoader::RenderMode mode)
 {
     static const VkPrimitiveTopology topologies[ModelLoader::RENDER_MODE_COUNT] = {VK_PRIMITIVE_TOPOLOGY_LINE_LIST, VK_PRIMITIVE_TOPOLOGY_POINT_LIST, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP};
-    DCHECK(mode >= 0 && mode < ModelLoader::RENDER_MODE_COUNT, "Unsupported render-mode: %d", mode);
+    CHECK(mode >= 0 && mode < ModelLoader::RENDER_MODE_COUNT, "Unsupported render-mode: %d", mode);
     return topologies[mode];
 }
 
@@ -400,7 +402,9 @@ std::vector<uint32_t> VKUtil::compileSPIR(const String& source, PipelineInput::S
              i != baseBindingForSet[res][esStage].end(); ++i)
             shader.setShiftBindingForSet(res, i->second, i->first);
     }
+#ifdef ENABLE_HLSL
     shader.setFlattenUniformArrays(false);
+#endif
     shader.setNoStorageFormat(false);
     shader.setResourceSetBinding(baseResourceSetBinding[esStage]);
 

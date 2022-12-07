@@ -1,21 +1,22 @@
 project(ark-box2d)
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.7)
 
 include(${ARK_SRC_DIR}/tools/cmake/core.cmake)
 
-ark_ensure_dependency(3rdparty/Box2D)
+#ark_ensure_dependency(3rdparty/Box2D)
 
-set(BOX2D_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/Box2D)
+#set(BOX2D_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/Box2D)
 
-set(BOX2D_BUILD_EXAMPLES OFF CACHE BOOL "")
-add_subdirectory(3rdparty/Box2D/Box2D)
+#set(BOX2D_BUILD_EXAMPLES OFF CACHE BOOL "")
+#add_subdirectory(3rdparty/Box2D/Box2D)
+#list(APPEND LOCAL_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/Box2D/Box2D)
+#ark_link_libraries(Box2D)
 
-ark_link_libraries(Box2D)
+ark_find_vcpkg_package(box2d LIBRARIES box2d::box2d)
 
 list(APPEND LOCAL_INCLUDE_DIRS ${ARK_INCLUDE_DIRS})
 list(APPEND LOCAL_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR})
 list(APPEND LOCAL_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/..)
-list(APPEND LOCAL_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/Box2D/Box2D)
 list(APPEND LOCAL_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR})
 
 aux_source_directory(. LOCAL_SRC_LIST)
@@ -32,4 +33,4 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE -DARK_FLAG_BUILDING_PLUGIN_BO
 ark_setup_tools(ark_gen_pybindings)
 ark_gen_pybindings(box2d ark::plugin::box2d ark.box2d impl pybindings/pybindings_main.cpp ${PROJECT_NAME})
 
-ark_export_dependency_libraries(${PROJECT_NAME} Box2D)
+#ark_export_dependency_libraries(${PROJECT_NAME} Box2D)

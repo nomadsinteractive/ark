@@ -3,7 +3,7 @@
 
 #include "core/forwarding.h"
 #include "core/ark.h"
-#include "core/base/delegate.h"
+#include "core/base/wrapper.h"
 #include "core/base/timestamp.h"
 #include "core/inf/variable.h"
 #include "core/types/implements.h"
@@ -13,22 +13,22 @@
 
 namespace ark {
 
-template<typename T> class VariableWrapper final : public Variable<T>, public Delegate<Variable<T>>, Implements<VariableWrapper<T>, Variable<T>, Delegate<Variable<T>>> {
+template<typename T> class VariableWrapper final : public Variable<T>, public Wrapper<Variable<T>>, Implements<VariableWrapper<T>, Variable<T>, Wrapper<Variable<T>>> {
 public:
     VariableWrapper(const sp<Variable<T>>& delegate) noexcept
-        : Delegate<Variable<T>>(Null::toSafe(delegate)), _variable_impl(nullptr) {
+        : Wrapper<Variable<T>>(Null::toSafe(delegate)), _variable_impl(nullptr) {
     }
     VariableWrapper(T value) noexcept
-        : Delegate<Variable<T>>(sp<typename Variable<T>::Impl>::make(value)), _variable_impl(static_cast<typename Variable<T>::Impl*>(this->_delegate.get())) {
+        : Wrapper<Variable<T>>(sp<typename Variable<T>::Impl>::make(value)), _variable_impl(static_cast<typename Variable<T>::Impl*>(this->_wrapped.get())) {
     }
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(VariableWrapper);
 
     virtual T val() override {
-        return this->_delegate->val();
+        return this->_wrapped->val();
     }
 
     virtual bool update(uint64_t timestamp) override {
-        return this->_delegate->update(timestamp) || _timestamp.update(timestamp);
+        return this->_wrapped->update(timestamp) || _timestamp.update(timestamp);
     }
 
     void set(T value) {
@@ -37,7 +37,7 @@ public:
         else {
             deferedUnref();
             _variable_impl = new typename Variable<T>::Impl(std::move(value));
-            this->_delegate = sp<Variable<T>>::adopt(_variable_impl);
+            this->_wrapped = sp<Variable<T>>::adopt(_variable_impl);
             _timestamp.setDirty();
         }
     }
@@ -45,12 +45,12 @@ public:
     void set(const sp<Variable<T>>& delegate) {
         deferedUnref();
         DCHECK(delegate.get() != this, "Recursive delegate being set");
-        this->_delegate = Null::toSafe(delegate);
+        this->_wrapped = Null::toSafe(delegate);
         _timestamp.setDirty();
     }
 
     T fix() {
-        T val = this->_delegate->val();
+        T val = this->_wrapped->val();
         set(val);
         return val;
     }
@@ -58,8 +58,8 @@ public:
 private:
     void deferedUnref() {
         _variable_impl = nullptr;
-        if(this->_delegate)
-            Ark::instance().applicationContext()->deferUnref(std::move(this->_delegate));
+        if(this->_wrapped)
+            Ark::instance().applicationContext()->deferUnref(std::move(this->_wrapped));
     }
 
 private:

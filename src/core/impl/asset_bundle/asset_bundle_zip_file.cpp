@@ -85,6 +85,8 @@ static zip_int64_t _local_zip_source_callback(void *userdata, void *data, zip_ui
         return 0;
     case ZIP_SOURCE_FREE:
         return 0;
+    case ZIP_SOURCE_ERROR:
+        return 0;
     case ZIP_SOURCE_SEEK:
     {
         zip_error_t _zip_error;
@@ -92,7 +94,7 @@ static zip_int64_t _local_zip_source_callback(void *userdata, void *data, zip_ui
         return stub->readable()->seek(static_cast<int32_t>(args->offset), args->whence);
     }
     case ZIP_SOURCE_SUPPORTS:
-        return zip_source_make_command_bitmap(ZIP_SOURCE_OPEN, ZIP_SOURCE_READ, ZIP_SOURCE_CLOSE, ZIP_SOURCE_FREE, ZIP_SOURCE_SEEK, ZIP_SOURCE_TELL, ZIP_SOURCE_STAT, -1);
+        return ZIP_SOURCE_SUPPORTS_SEEKABLE;
     default:
         break;
     }
@@ -126,12 +128,12 @@ bool AssetBundleZipFile::hasEntry(const String& name) const
 AssetBundleZipFile::Stub::Stub(const sp<Readable>& zipReadable, const String& zipLocation)
     : _zip_readable(zipReadable), _zip_location(Platform::getRealPath(zipLocation)), _size(_zip_readable ? _zip_readable->remaining() : 0)
 {
-    DCHECK(_zip_readable, "Cannot open file %s", _zip_location.c_str());
-    zip_error_t error;
+    CHECK(_zip_readable, "Cannot open file %s", _zip_location.c_str());
+    zip_error_t error = {0};
     _zip_source = zip_source_function_create(_local_zip_source_callback, this, &error);
-    DCHECK(_zip_source, "Zip function create error: %s", zip_error_strerror(&error));
+    CHECK(_zip_source, "Zip function create error: %s", zip_error_strerror(&error));
     _zip_archive = zip_open_from_source(_zip_source, 0, &error);
-    DCHECK(_zip_archive, "Zip open error: %s", zip_error_strerror(&error));
+    CHECK(_zip_archive, "Zip open error: %s", zip_error_strerror(&error));
 }
 
 AssetBundleZipFile::Stub::~Stub()

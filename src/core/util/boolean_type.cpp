@@ -157,7 +157,7 @@ const sp<Boolean>& BooleanType::delegate(const sp<Boolean>& self)
 {
     const sp<BooleanWrapper> ib = self.as<BooleanWrapper>();
     DWARN(ib, "Non-BooleanWrapper instance has no delegate attribute. This should be an error unless you're inspecting it.");
-    return ib ? ib->delegate() : sp<Boolean>::null();
+    return ib ? ib->wrapped() : sp<Boolean>::null();
 }
 
 void BooleanType::setDelegate(const sp<Boolean>& self, const sp<Boolean>& delegate)

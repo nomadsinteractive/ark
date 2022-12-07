@@ -43,7 +43,7 @@ void Disposed::set(const sp<Boolean>& disposed)
 
 const sp<Boolean>& Disposed::delegate() const
 {
-    return _disposed->delegate();
+    return _disposed->wrapped();
 }
 
 Disposed::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)

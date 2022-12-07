@@ -3,16 +3,19 @@ cmake_minimum_required(VERSION 3.0)
 
 include(${ARK_SRC_DIR}/tools/cmake/core.cmake)
 
-ark_ensure_dependency(3rdparty/bullet3)
+#ark_ensure_dependency(3rdparty/bullet3)
+#add_subdirectory(3rdparty/bullet3)
 
-add_subdirectory(3rdparty/bullet3)
+#find_package(Bullet CONFIG REQUIRED)
+#target_link_libraries(main PRIVATE LinearMath Bullet3Common BulletDynamics BulletSoftBody)
+ark_find_vcpkg_package(Bullet LIBRARIES LinearMath Bullet3Common BulletDynamics BulletSoftBody)
 
 ark_include_directories(${ARK_INCLUDE_DIRS})
 ark_include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 ark_include_directories(${CMAKE_CURRENT_SOURCE_DIR}/..)
 ark_include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-ark_include_directories(3rdparty/bullet3/src)
+#ark_include_directories(3rdparty/bullet3/src)
 
 aux_source_directory(. LOCAL_SRC_LIST)
 aux_source_directory(base LOCAL_SRC_LIST)

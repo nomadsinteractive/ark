@@ -35,7 +35,7 @@ const sp<Text>& TextType::delegate(const sp<Text>& self)
 {
     const sp<TextWrapper> ib = self.as<TextWrapper>();
     DWARN(ib, "Non-TextWrapper instance has no delegate attribute. This should be an error unless you're inspecting it.");
-    return ib ? ib->delegate() : sp<Text>::null();
+    return ib ? ib->wrapped() : sp<Text>::null();
 }
 
 void TextType::setDelegate(const sp<Text>& self, const sp<Text>& delegate)

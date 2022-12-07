@@ -3,148 +3,131 @@
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
-#include "core/impl/variable/variable_wrapper.h"
-#include "core/inf/variable.h"
-#include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
 #include "graphics/base/v2.h"
+#include "graphics/impl/vec/vec2_impl.h"
+#include "graphics/util/vec_type.h"
 
 namespace ark {
 
 //  [[script::bindings::class("Vec2")]]
-class ARK_API Vec2Type final {
+class ARK_API Vec2Type final : public VecType<V2, Vec2Impl> {
 public:
 //  [[script::bindings::constructor]]
     static sp<Vec2> create(float x, float y);
 //  [[script::bindings::constructor]]
-    static sp<Vec2> create(const sp<Numeric>& x, const sp<Numeric>& y);
+    static sp<Vec2> create(sp<Numeric> x, sp<Numeric> y);
 
+/**
 //  [[script::bindings::operator(+)]]
-    static sp<Vec2> add(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue);
+    static sp<Vec2> add(sp<Vec2> lvalue, sp<Vec2> rvalue);
 //  [[script::bindings::operator(-)]]
-    static sp<Vec2> sub(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue);
+    static sp<Vec2> sub(sp<Vec2> lvalue, sp<Vec2> rvalue);
 //  [[script::bindings::operator(*)]]
-    static sp<Vec2> mul(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue);
+    static sp<Vec2> mul(sp<Vec2> lvalue, sp<Vec2> rvalue);
 //  [[script::bindings::operator(*)]]
-    static sp<Vec2> mul(const sp<Vec2>& lvalue, float rvalue);
+    static sp<Vec2> mul(sp<Vec2> lvalue, float rvalue);
 //  [[script::bindings::operator(*)]]
-    static sp<Vec2> mul(float lvalue, const sp<Vec2>& rvalue);
+    static sp<Vec2> mul(sp<Numeric> lvalue, sp<Vec2> rvalue);
 //  [[script::bindings::operator(*)]]
-    static sp<Vec2> mul(const sp<Vec2>& lvalue, sp<Numeric>& rvalue);
+    static sp<Vec2> mul(sp<Vec2> lvalue, sp<Numeric> rvalue);
 //  [[script::bindings::operator(/)]]
-    static sp<Vec2> truediv(const sp<Vec2>& lvalue, float rvalue);
+    static sp<Vec2> truediv(sp<Vec2> lvalue, float rvalue);
 //  [[script::bindings::operator(/)]]
-    static sp<Vec2> truediv(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue);
+    static sp<Vec2> truediv(sp<Vec2> lvalue, sp<Vec2> rvalue);
 //  [[script::bindings::operator(/)]]
-    static sp<Vec2> truediv(const sp<Vec2>& lvalue, const sp<Numeric>& rvalue);
+    static sp<Vec2> truediv(sp<Vec2> lvalue, sp<Numeric> rvalue);
 //  [[script::bindings::operator(//)]]
-    static sp<Vec2> floordiv(const sp<Vec2>& lvalue, float rvalue);
+    static sp<Vec2> floordiv(sp<Vec2> lvalue, float rvalue);
 //  [[script::bindings::operator(//)]]
-    static sp<Vec2> floordiv(const sp<Vec2>& lvalue, const sp<Numeric>& rvalue);
+    static sp<Vec2> floordiv(sp<Vec2> lvalue, sp<Numeric> rvalue);
 //  [[script::bindings::operator(//)]]
-    static sp<Vec2> floordiv(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue);
+    static sp<Vec2> floordiv(sp<Vec2> lvalue, sp<Vec2> rvalue);
 //  [[script::bindings::operator(neg)]]
-    static sp<Vec2> negative(const sp<Vec2>& self);
+    static sp<Vec2> negative(sp<Vec2> self);
 //  [[script::bindings::operator(abs)]]
-    static sp<Vec2> absolute(const sp<Vec2>& self);
+    static sp<Vec2> absolute(sp<Vec2> self);
 
 //  [[script::bindings::classmethod]]
-    static sp<Vec2> transform(const sp<Vec2>& self, const sp<Transform>& transform);
+    static sp<Vec2> normalize(sp<Vec2> self);
 //  [[script::bindings::classmethod]]
-    static sp<Vec2> normalize(const sp<Vec2>& self);
+    static sp<Vec2> integral(sp<Vec2> self, sp<Numeric> t = nullptr);
 //  [[script::bindings::classmethod]]
-    static sp<Vec2> integral(const sp<Vec2>& self, const sp<Numeric>& t = nullptr);
+    static sp<Vec2> integralS2(sp<Vec2> self, const V2& s0, const Optional<V2>& s1 = Optional<V2>(), sp<Numeric> t = nullptr);
 //  [[script::bindings::classmethod]]
-    static sp<Vec2> integralWithResistance(const sp<Vec2>& self, const V2& v0, const sp<Numeric>& cd, const sp<Numeric>& t = nullptr);
+    static sp<Vec2> integralWithResistance(sp<Vec2> self, const V2& v0, sp<Numeric> cd, sp<Numeric> t = nullptr);
 
 //  [[script::bindings::classmethod]]
-    static sp<Numeric> distanceTo(const sp<Vec2>& self, const sp<Vec2>& other);
+    static sp<Numeric> distanceTo(sp<Vec2> self, sp<Vec2> other);
 
 //  [[script::bindings::classmethod]]
     static void set(const sp<VariableWrapper<V2>>& self, const V2& val);
 //  [[script::bindings::classmethod]]
-    static void set(const sp<VariableWrapper<V2>>& self, const sp<Vec2>& val);
+    static void set(const sp<VariableWrapper<V2>>& self, sp<Vec2> val);
 //  [[script::bindings::classmethod]]
     static void set(const sp<Vec2>& self, const V2 val);
 
 //  [[script::bindings::property]]
-    static V2 val(const sp<Vec2>& self);
-//  [[script::bindings::property]]
-    static V2 xy(const sp<Vec2>& self);
-//  [[script::bindings::property]]
-    static void setXy(const sp<Vec2>& self, const V2& xy);
-
-//  [[script::bindings::property]]
-    static float x(const sp<Vec2>& self);
+    static sp<Numeric> x(const sp<Vec2>& self);
 //  [[script::bindings::property]]
     static void setX(const sp<Vec2>& self, float x);
 //  [[script::bindings::property]]
-    static void setX(const sp<Vec2>& self, const sp<Numeric>& x);
+    static void setX(const sp<Vec2>& self, sp<Numeric> x);
 //  [[script::bindings::property]]
-    static float y(const sp<Vec2>& self);
+    static sp<Numeric> y(const sp<Vec2>& self);
 //  [[script::bindings::property]]
     static void setY(const sp<Vec2>& self, float y);
 //  [[script::bindings::property]]
-    static void setY(const sp<Vec2>& self, const sp<Numeric>& y);
-//  [[script::bindings::property]]
-    static sp<Numeric> vx(const sp<Vec2>& self);
-//  [[script::bindings::property]]
-    static void setVx(const sp<Vec2>& self, const sp<Numeric>& x);
-//  [[script::bindings::property]]
-    static sp<Numeric> vy(const sp<Vec2>& self);
-//  [[script::bindings::property]]
-    static void setVy(const sp<Vec2>& self, const sp<Numeric>& y);
+    static void setY(const sp<Vec2>& self, sp<Numeric> y);
 
 //  [[script::bindings::classmethod]]
-    static sp<Vec3> extend(sp<Vec2> self, sp<Numeric> z);
+    static void fix(sp<Vec2> self);
 //  [[script::bindings::classmethod]]
-    static sp<Vec4> extend(sp<Vec2> self, sp<Vec2> zw);
+    static sp<Vec2> freeze(sp<Vec2> self);
 
 //  [[script::bindings::classmethod]]
-    static void fix(const sp<Vec2>& self);
+    static sp<Vec2> wrap(sp<Vec2> self);
 //  [[script::bindings::classmethod]]
-    static sp<Vec2> freeze(const sp<Vec2>& self);
+    static sp<Vec2> synchronize(sp<Vec2> self, sp<Boolean> disposed = nullptr);
 
 //  [[script::bindings::classmethod]]
-    static sp<Size> toSize(const sp<Vec2>& self);
-
+    static sp<Vec2> modFloor(sp<Vec2> self, sp<Numeric> mod);
 //  [[script::bindings::classmethod]]
-    static sp<Vec2> wrap(const sp<Vec2>& self);
+    static sp<Vec2> modFloor(sp<Vec2> self, sp<Vec2> mod);
 //  [[script::bindings::classmethod]]
-    static sp<Vec2> synchronize(const sp<Vec2>& self, const sp<Boolean>& disposed = nullptr);
-
+    static sp<Vec2> modCeil(sp<Vec2> self, sp<Numeric> mod);
 //  [[script::bindings::classmethod]]
-    static sp<Vec2> modFloor(const sp<Vec2>& self, const sp<Numeric>& mod);
-//  [[script::bindings::classmethod]]
-    static sp<Vec2> modFloor(const sp<Vec2>& self, const sp<Vec2>& mod);
-//  [[script::bindings::classmethod]]
-    static sp<Vec2> modCeil(const sp<Vec2>& self, const sp<Numeric>& mod);
-//  [[script::bindings::classmethod]]
-    static sp<Vec2> modCeil(const sp<Vec2>& self, const sp<Vec2>& mod);
+    static sp<Vec2> modCeil(sp<Vec2> self, sp<Vec2> mod);
 
 //  [[script::bindings::classmethod]]
     static sp<Vec2> sod(sp<Vec2> self, float k, float z, float r, sp<Numeric> t = nullptr);
 
 //  [[script::bindings::classmethod]]
-    static sp<Vec2> attract(const sp<Vec2>& self, const V2& s0, float duration, const sp<Numeric>& t = nullptr);
-
-//  [[script::bindings::classmethod]]
-    static sp<Vec2> fence(const sp<Vec2>& self, const sp<Vec3>& plane, const sp<Observer>& observer);
-//  [[script::bindings::classmethod]]
-    static sp<Vec2> ifElse(const sp<Vec2>& self, const sp<Boolean>& condition, const sp<Vec2>& otherwise);
-
-//  [[script::bindings::classmethod]]
-    static sp<Numeric> atan2(const sp<Vec2>& self);
+    static sp<Vec2> ifElse(sp<Vec2> self, sp<Boolean> condition, sp<Vec2> otherwise);
 
 //  [[script::bindings::property]]
-    static sp<Vec2> delegate(const sp<Vec2>& self);
+    static sp<Vec2> wrapped(const sp<Vec2>& self);
+**/
+
+[[deprecated]]
+//  [[script::bindings::classmethod]]
+    static sp<Vec2> transform(const sp<Vec2>& self, const sp<Transform>& transform);
+//  [[script::bindings::classmethod]]
+    static sp<Vec3> extend(sp<Vec2> self, sp<Numeric> z);
+//  [[script::bindings::classmethod]]
+    static sp<Vec4> extend(sp<Vec2> self, sp<Vec2> zw);
+//  [[script::bindings::classmethod]]
+    static sp<Size> toSize(const sp<Vec2>& self);
+//  [[script::bindings::classmethod]]
+    static sp<Vec2> fence(sp<Vec2> self, sp<Vec3> plane, sp<Observer> observer);
+//  [[script::bindings::classmethod]]
+    static sp<Numeric> atan2(sp<Vec2> self);
+
 //  [[script::bindings::property]]
-    static void setDelegate(const sp<Vec2>& self, const sp<Vec2>& delegate);
-
-private:
-    static sp<Vec2Impl> ensureImpl(const sp<Vec2>& self);
-
+    static V2 xy(const sp<Vec2>& self);
+//  [[script::bindings::property]]
+    static void setXy(const sp<Vec2>& self, const V2& xy);
 };
 
 }

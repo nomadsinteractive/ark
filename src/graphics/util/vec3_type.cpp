@@ -41,20 +41,20 @@ private:
 
 };
 
-class Vec3Normalize : public Delegate<Vec3>, public Vec3, Implements<Vec3Normalize, Vec3, Delegate<Vec3>> {
+class Vec3Normalize : public Wrapper<Vec3>, public Vec3, Implements<Vec3Normalize, Vec3, Wrapper<Vec3>> {
 public:
     Vec3Normalize(sp<Vec3> delegate)
-        : Delegate(std::move(delegate)) {
+        : Wrapper(std::move(delegate)) {
     }
 
     virtual V3 val() override {
-        const V3 v = _delegate->val();
+        const V3 v = _wrapped->val();
         const glm::vec3 normalized = glm::normalize(glm::vec3(v.x(), v.y(), v.z()));
         return V3(normalized.x, normalized.y, normalized.z);
     }
 
     virtual bool update(uint64_t timestamp) override {
-        return _delegate->update(timestamp);
+        return _wrapped->update(timestamp);
     }
 
 };

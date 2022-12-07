@@ -105,7 +105,6 @@ void ShapeCuteC2::doTransform(const V2& position, float rotation)
         translate(s.circle.p.x, s.circle.p.y, position, s.circle.p.x, s.circle.p.y);
         break;
     case C2_TYPE_AABB:
-        DCHECK(rotation == 0, "Rotation: %.2f, which is not supported on AABBs", rotation);
         translate(s.aabb.min.x, s.aabb.min.y, position, s.aabb.min.x, s.aabb.min.y);
         translate(s.aabb.max.x, s.aabb.max.y, position, s.aabb.max.x, s.aabb.max.y);
         break;

@@ -47,13 +47,13 @@ const sp<Size>& RenderObject::size()
 void RenderObject::traverse(const Holder::Visitor& visitor)
 {
     visitor(_tag);
-    HolderUtil::visit(_type->delegate(), visitor);
-    HolderUtil::visit(_position.delegate(), visitor);
-    HolderUtil::visit(_size.delegate(), visitor);
+    HolderUtil::visit(_type->wrapped(), visitor);
+    HolderUtil::visit(_position.wrapped(), visitor);
+    HolderUtil::visit(_size.wrapped(), visitor);
     HolderUtil::visit(_transform, visitor);
     HolderUtil::visit(_varyings, visitor);
-    HolderUtil::visit(_disposed.delegate(), visitor);
-    HolderUtil::visit(_visible.delegate(), visitor);
+    HolderUtil::visit(_disposed.wrapped(), visitor);
+    HolderUtil::visit(_visible.wrapped(), visitor);
 }
 
 const SafePtr<Transform>& RenderObject::transform() const

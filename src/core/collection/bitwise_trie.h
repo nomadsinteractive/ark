@@ -13,16 +13,16 @@ namespace ark {
 namespace {
 
 template<size_t> struct _KeySelector;
-template<> struct _KeySelector<1> { typedef uint8_t KeyValue; };
-template<> struct _KeySelector<2> { typedef uint16_t KeyValue; };
-template<> struct _KeySelector<4> { typedef uint32_t KeyValue; };
-template<> struct _KeySelector<8> { typedef uint64_t KeyValue; };
+template<> struct _KeySelector<1> { typedef uint8_t KeyType; };
+template<> struct _KeySelector<2> { typedef uint16_t KeyType; };
+template<> struct _KeySelector<4> { typedef uint32_t KeyType; };
+template<> struct _KeySelector<8> { typedef uint64_t KeyType; };
 
 }
 
 template<typename T, typename U, size_t N = 1> class BitwiseTrie {
 private:
-    typedef typename _KeySelector<sizeof(T)>::KeyValue KeyType;
+    typedef typename _KeySelector<sizeof(T)>::KeyType KeyType;
     static_assert (N < 2, "Default lookup position must be lesser than 2");
     static_assert(std::is_convertible<T, KeyType>::value, "Key value must be unsigned integer or can be casted into an unsigned integer");
 
@@ -32,7 +32,7 @@ private:
     };
 
     struct Key {
-        Key(KeyType value, uint32_t level)
+        Key(KeyType value, size_t level)
             : _mask(static_cast<KeyType>(1) << (MAX_LEVEL_DEPTH - 1 - level)), _prefix(value >> (MAX_LEVEL_DEPTH - 1 - level)), _value(value) {
         }
         Key(KeyType mask, KeyType prefix, KeyType value)
@@ -63,7 +63,7 @@ private:
         Path()
             : Path(0, 0, nullptr) {
         }
-        Path(KeyType key, uint32_t level, Path* upper)
+        Path(KeyType key, size_t level, Path* upper)
             : _key(key), _level(level), _upper(upper), _next{nullptr, nullptr}, _leaf(nullptr) {
         }
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Path);
@@ -72,12 +72,12 @@ private:
             return _next[0] == nullptr && _next[1] == nullptr;
         }
 
-        const Path* findLeafPath(const Key& key, uint32_t minEntry = N) const {
+        const Path* findLeafPath(const Key& key, size_t minEntry = N) const {
             if(isLeaf())
                 return _key >= key._value ? this : nullptr;
 
-            uint32_t sig = key._prefix & 1;
-            const Path* next = _next[sig] ? _next[sig] : _next[std::max<uint32_t>(minEntry, sig ? 0 : 1)];
+            size_t sig = key._prefix & 1;
+            const Path* next = _next[sig] ? _next[sig] : _next[std::max<size_t>(minEntry, sig ? 0 : 1)];
             return next ? next->findLeafPath(key.shift(), next != _next[sig] ? 0 : minEntry) : nullptr;
         }
 
@@ -88,7 +88,7 @@ private:
         }
 
         KeyType _key;
-        uint32_t _level;
+        size_t _level;
 
         Path* _upper;
         Path* _next[2];
@@ -98,14 +98,14 @@ private:
 
     struct LSS {
 
-        Path* ensureNextRoute(const Key& key, uint32_t level, Path* upper) {
-            uint32_t sig = key._prefix & 1;
+        Path* ensureNextRoute(const Key& key, size_t level, Path* upper) {
+            size_t sig = key._prefix & 1;
             if(!upper->_next[sig])
                 upper->_next[sig] = addPath(key, level, upper);
             return upper->_next[sig];
         }
 
-        Path* addPath(const Key& key, uint32_t level, Path* upper) {
+        Path* addPath(const Key& key, size_t level, Path* upper) {
             Path& path = _paths[key._prefix];
             path = Path(key._value, level, upper);
             return &path;
@@ -159,14 +159,14 @@ public:
 
     void clear() {
         _root = Path();
-        for(uint32_t i = 0; i < MAX_LEVEL_DEPTH; ++i)
+        for(size_t i = 0; i < MAX_LEVEL_DEPTH; ++i)
             _lss[i]._paths.clear();
         _leaves.clear();
     }
 
 private:
     const Path* findLeafPath(KeyType keyvalue) const {
-        uint32_t level;
+        size_t level;
         Key key(keyvalue, 0);
         const Path* path = findLSS(key, level)->findLeafPath(key);
         if(path) {
@@ -174,7 +174,7 @@ private:
             return path;
         }
 
-        for(uint32_t i = level; i > 0; --i) {
+        for(size_t i = level; i > 0; --i) {
             const auto& paths = _lss[i - 1]._paths;
             key.unshift();
             auto iter = paths.find(key._prefix);
@@ -185,11 +185,11 @@ private:
         return nullptr;
     }
 
-    const Path* findLSS(Key& key, uint32_t& level) const {
+    const Path* findLSS(Key& key, size_t& level) const {
         const Path* path = &_root;
         level = 0;
-        for(uint32_t i = 0; i < MAX_LEVEL_DEPTH; ++i) {
-            uint32_t sig = key._prefix & 1;
+        for(size_t i = 0; i < MAX_LEVEL_DEPTH; ++i) {
+            size_t sig = key._prefix & 1;
             if(path->_next[sig]) {
                 path = path->_next[sig];
                 ++level;
@@ -200,7 +200,7 @@ private:
         return path;
     }
 
-    Path* makeLeafPath(Path* upper, Key key, uint32_t level) {
+    Path* makeLeafPath(Path* upper, Key key, size_t level) {
         Path* path = upper;
 
         for(size_t i = level; i < MAX_LEVEL_DEPTH; ++i) {

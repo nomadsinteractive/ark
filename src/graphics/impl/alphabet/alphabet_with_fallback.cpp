@@ -15,11 +15,10 @@ void AlphabetWithFallback::setTextSize(const Font::TextSize& size)
     _fallback->setTextSize(size);
 }
 
-bool AlphabetWithFallback::measure(int32_t c, Metrics& metrics, bool hasFallback)
+Optional<Alphabet::Metrics> AlphabetWithFallback::measure(int32_t c)
 {
-    if(_alphabet->measure(c, metrics, true))
-        return true;
-    return _fallback->measure(c, metrics, hasFallback);
+    Optional<Alphabet::Metrics> opt = _alphabet->measure(c);
+    return opt ? opt : _fallback->measure(c);
 }
 
 bool AlphabetWithFallback::draw(uint32_t c, Bitmap& image, int32_t x, int32_t y)

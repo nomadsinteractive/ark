@@ -185,7 +185,7 @@ RigidBodyBox2D::RigidBodyBox2D(const sp<Stub>& stub, Collider::BodyType type, co
                 sp<Rotation>::make(sp<_RigidBodyRotation>::make(stub, rotation)), Box(), stub->_disposed), _stub(stub)
 {
     _stub->_callback = callback();
-    _stub->_body->SetUserData(new Shadow(stub, RigidBody::stub()));
+    _stub->_body->GetUserData().pointer = reinterpret_cast<uintptr_t>(new Shadow(stub, RigidBody::stub()));
 }
 
 RigidBodyBox2D::RigidBodyBox2D(const sp<RigidBodyBox2D::Stub>& stub, const sp<RigidBody::Stub>& rigidbody)
@@ -278,13 +278,13 @@ void RigidBodyBox2D::setGravityScale(float scale)
 
 bool RigidBodyBox2D::active()
 {
-    return _stub->body()->IsActive();
+    return _stub->body()->IsEnabled();
 }
 
 void RigidBodyBox2D::setActive(bool active)
 {
-    DCHECK(!_stub->_world.world().IsLocked(), "Cannot set active in the middle of a time step");
-    _stub->body()->SetActive(active);
+    CHECK(!_stub->_world.world().IsLocked(), "Cannot set active in the middle of a time step");
+    _stub->body()->SetEnabled(active);
 }
 
 bool RigidBodyBox2D::awake()
@@ -375,8 +375,8 @@ void RigidBodyBox2D::Stub::dispose()
     DCHECK(_body, "Body has been disposed already");
     LOGD("id = %d", _id);
 
-    delete reinterpret_cast<RigidBodyBox2D::Shadow*>(_body->GetUserData());
-    _body->SetUserData(nullptr);
+    delete reinterpret_cast<RigidBodyBox2D::Shadow*>(_body->GetUserData().pointer);
+    _body->GetUserData().pointer = 0;
     _disposed->dispose();
 
     if(_world.world().IsLocked())

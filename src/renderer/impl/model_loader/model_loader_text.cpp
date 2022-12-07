@@ -64,11 +64,12 @@ ModelLoaderText::GlyphBundle::GlyphBundle(AtlasAttachment& atlasAttachment, sp<A
 {
 }
 
-bool ModelLoaderText::GlyphBundle::prepareOne(uint64_t timestamp, int32_t c)
+bool ModelLoaderText::GlyphBundle::prepareOne(uint64_t timestamp, int32_t c, int32_t kc)
 {
-    Alphabet::Metrics metrics;
-    if(_alphabet->measure(c, metrics, false))
+    Optional<Alphabet::Metrics> optMetrics = _alphabet->measure(c);
+    if(optMetrics)
     {
+        const Alphabet::Metrics& metrics = optMetrics.value();
         int32_t width = metrics.width;
         int32_t height = metrics.height;
         DCHECK(width > 0 && height > 0, "Error loading character %d: width = %d, height = %d", c, width, height);
@@ -82,10 +83,13 @@ bool ModelLoaderText::GlyphBundle::prepareOne(uint64_t timestamp, int32_t c)
         V3 bounds(static_cast<float>(metrics.width), static_cast<float>(metrics.height), 0);
         V3 size(static_cast<float>(metrics.bitmap_width), static_cast<float>(metrics.bitmap_height), 0);
         V3 xyz = V3(static_cast<float>(metrics.bitmap_x), static_cast<float>(metrics.bitmap_y), 0);
-        _glyphs[c] = GlyphModel(sp<Model>::make(_atlas_attachment._unit_model.indices(), sp<VerticesQuad>::make(item), Metrics{bounds, size, xyz}), timestamp);
+        _glyphs[kc] = GlyphModel(sp<Model>::make(_atlas_attachment._unit_model.indices(), sp<VerticesQuad>::make(item), Metrics(bounds, size, xyz)), timestamp);
     }
     else
-        DWARN(false, "Error loading character %d", c);
+    {
+        WARN(false, "Error loading character %d", c);
+        return kc == c && kc != ' ' ? prepareOne(timestamp, ' ', kc) : false;
+    }
     return true;
 }
 
@@ -112,7 +116,7 @@ ModelLoaderText::GlyphModel& ModelLoaderText::GlyphBundle::ensureGlyphModel(uint
         if(oneshot)
             _alphabet->setTextSize(_text_size);
 
-        while(!prepareOne(timestamp, c))
+        while(!prepareOne(timestamp, c, c))
         {
             uint32_t width = _atlas_attachment._glyph_bitmap->width() * 2;
             uint32_t height = _atlas_attachment._glyph_bitmap->height() * 2;

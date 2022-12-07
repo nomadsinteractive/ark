@@ -85,8 +85,6 @@ public:
 //  [[script::bindings::property]]
     static float val(const sp<Numeric>& self);
 //  [[script::bindings::property]]
-    static void setVal(const sp<Numeric>& self, float value);
-//  [[script::bindings::property]]
     static const sp<Numeric>& delegate(const sp<Numeric>& self);
 //  [[script::bindings::property]]
     static void setDelegate(const sp<Numeric>& self, const sp<Numeric>& delegate);

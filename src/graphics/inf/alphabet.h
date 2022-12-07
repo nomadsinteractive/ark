@@ -1,6 +1,8 @@
 #ifndef ARK_GRAPHICS_INF_ALPHABET_H_
 #define ARK_GRAPHICS_INF_ALPHABET_H_
 
+#include "core/types/optional.h"
+
 #include "graphics/forwarding.h"
 #include "graphics/base/font.h"
 
@@ -21,7 +23,7 @@ public:
 
     virtual void setTextSize(const Font::TextSize& size) = 0;
 
-    virtual bool measure(int32_t c, Metrics& metrics, bool hasFallback) = 0;
+    virtual Optional<Metrics> measure(int32_t c) = 0;
     virtual bool draw(uint32_t c, Bitmap& image, int32_t x, int32_t y) = 0;
 };
 

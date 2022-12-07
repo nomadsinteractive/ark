@@ -3,19 +3,19 @@
 namespace ark {
 
 UpdatableWrapper::UpdatableWrapper(sp<Updatable> updatable)
-    : Delegate<Updatable>(std::move(updatable))
+    : Wrapper<Updatable>(std::move(updatable))
 {
 }
 
 bool UpdatableWrapper::update(uint64_t timestamp)
 {
-    return (_delegate ? _delegate->update(timestamp) : false) | _timestamp.update(timestamp);
+    return (_wrapped ? _wrapped->update(timestamp) : false) | _timestamp.update(timestamp);
 }
 
 void UpdatableWrapper::reset(sp<UpdatableWrapper> delegate)
 {
     _timestamp.setDirty();
-    Delegate::reset(std::move(delegate));
+    Wrapper::reset(std::move(delegate));
 }
 
 }

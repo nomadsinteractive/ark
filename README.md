@@ -11,12 +11,13 @@ Licensed under the Apache 2.0 license.
 
 System requirements
 --------------
-1. CMake 3.0+
-2. Python 2.7+
-3. MSVC 2013+
-4. GCC 4.7+
-5. Clang 3.3+
-6. Ninja (Optional)
+1. CMake 3.7+
+2. Vcpkg
+3. Python 3.6+
+4. MSVC 2017+
+5. GCC 4.7+
+6. Clang 3.3+
+7. Ninja (Optional)
 
 
 Building
@@ -41,6 +42,8 @@ Android
 
 Dependencies
 --------------
+This project uses Vcpkg to maintain its dependencies. Please visit their [github page](https://github.com/microsoft/vcpkg) for more informations.
+
 * [freetype](http://www.freetype.org)
 * [glbinding](http://www.glbinding.org) (Desktop applications only)
 * [glm](http://glm.g-truc.net)

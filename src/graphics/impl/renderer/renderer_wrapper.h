@@ -2,7 +2,7 @@
 #define ARK_GRAPHICS_IMPL_RENDERER_RENDERER_WRAPPER_H_
 
 #include "core/forwarding.h"
-#include "core/base/delegate.h"
+#include "core/base/wrapper.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -10,7 +10,7 @@
 
 namespace ark {
 
-class RendererWrapper : public Renderer, public Delegate<Renderer> {
+class RendererWrapper : public Renderer, public Wrapper<Renderer> {
 public:
     RendererWrapper(const sp<Renderer>& delegate);
 

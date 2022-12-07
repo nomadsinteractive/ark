@@ -2,7 +2,7 @@
 #define ARK_CORE_TYPES_SAFE_VAR_H_
 
 #include "core/inf/variable.h"
-#include "core/base/delegate.h"
+#include "core/base/wrapper.h"
 #include "core/types/null.h"
 #include "core/types/shared_ptr.h"
 
@@ -14,46 +14,46 @@ public:
 
 };
 
-template<typename T> class SafeVar : public Delegate<T> {
+template<typename T> class SafeVar : public Wrapper<T> {
 public:
     typedef decltype(std::declval<T>().val()) ValType;
 
     SafeVar() noexcept
-        : Delegate<T>(nullptr) {
+        : Wrapper<T>(nullptr) {
     }
     SafeVar(sp<T> delegate) noexcept
-        : Delegate<T>(std::move(delegate)) {
+        : Wrapper<T>(std::move(delegate)) {
     }
     SafeVar(sp<T> delegate, const ValType& defaultVal) noexcept
-        : Delegate<T>(std::move(delegate)), _default_val(defaultVal) {
+        : Wrapper<T>(std::move(delegate)), _default_val(defaultVal) {
     }
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(SafeVar);
 
     explicit operator bool() const {
-        return static_cast<bool>(this->_delegate);
+        return static_cast<bool>(this->_wrapped);
     }
 
     bool operator == (const sp<T>& other) const {
-        return this->_delegate != other;
+        return this->_wrapped != other;
     }
     bool operator != (const sp<T>& other) const {
-        return this->_delegate != other;
+        return this->_wrapped != other;
     }
 
     ValType val() const {
-        return this->_delegate ? this->_delegate->val() : _default_val;
+        return this->_wrapped ? this->_wrapped->val() : _default_val;
     }
 
     bool update(uint64_t timestamp) const {
-        return this->_delegate ? this->_delegate->update(timestamp) : false;
+        return this->_wrapped ? this->_wrapped->update(timestamp) : false;
     }
 
     template<typename UPDATER = _SafeVarDefaultUpdater> const sp<T>& ensure(const UPDATER& updater = UPDATER()) {
-        if(!this->_delegate) {
-            this->_delegate = ensure_sfinae(nullptr);
+        if(!this->_wrapped) {
+            this->_wrapped = ensure_sfinae(nullptr);
             updater();
         }
-        return this->_delegate;
+        return this->_wrapped;
     }
 
 private:

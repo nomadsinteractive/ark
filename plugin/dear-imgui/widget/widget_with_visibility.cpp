@@ -7,14 +7,14 @@ namespace plugin {
 namespace dear_imgui {
 
 WidgetWithVisibility::WidgetWithVisibility(sp<Widget> delegate, sp<Boolean> visible)
-    : Delegate(std::move(delegate)), _visible(std::move(visible))
+    : Wrapper(std::move(delegate)), _visible(std::move(visible))
 {
 }
 
 void WidgetWithVisibility::render()
 {
     if(_visible->val())
-        _delegate->render();
+        _wrapped->render();
 }
 
 }

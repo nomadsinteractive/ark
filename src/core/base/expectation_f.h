@@ -11,7 +11,7 @@ typedef Expectation<float> ExpectationF;
 
 //[[script::bindings::holder]]
 //[[script::bindings::extends(Numeric)]]
-class ARK_API ExpectationF : public Numeric, public Delegate<Numeric>, public Holder {
+class ARK_API ExpectationF : public Numeric, public Wrapper<Numeric>, public Holder {
  public:
     ExpectationF(sp<Numeric> delegate, Notifier notifier);
 

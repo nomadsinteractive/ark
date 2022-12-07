@@ -179,7 +179,7 @@ void Strings::parentheses(const String& expr, String& lvalue, String& remaining)
 size_t Strings::parentheses(const String& expr, size_t start, char open, char close)
 {
     DCHECK(expr.length() > start, "Illegal expression: unexpected end");
-    DCHECK(expr.at(start) == open, "Illegal expression: \"%s\", parentheses unmatch", expr.c_str());
+    CHECK(expr.at(start) == open, "Illegal expression: \"%s\", parentheses unmatch", expr.c_str());
     size_t size = expr.length();
     int32_t count = 1;
     for(size_t i = start + 1; i < size; i++)
@@ -191,6 +191,7 @@ size_t Strings::parentheses(const String& expr, size_t start, char open, char cl
             return i;
     }
     FATAL("Illegal expression: \"%s\", parentheses unmatch", expr.c_str());
+    return 0;
 }
 
 bool Strings::parseNameValuePair(const String& expr, char equal, String& name, String& value)

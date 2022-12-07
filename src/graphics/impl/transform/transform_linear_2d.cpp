@@ -8,7 +8,7 @@ namespace ark {
 void TransformLinear2D::snapshot(const Transform& transform, const V3& postTranslate, Transform::Snapshot& snapshot) const
 {
     Snapshot* data = snapshot.makeData<Snapshot>();
-    const sp<Numeric>& theta = transform._rotation.delegate()->theta();
+    const sp<Numeric>& theta = transform._rotation.wrapped()->theta();
     data->matrix = MatrixUtil::translate(MatrixUtil::rotate(MatrixUtil::scale(MatrixUtil::translate(M3::identity(), V2(postTranslate)), V2(transform._scale.val())), theta->val()), V2(transform._pivot.val()));
 }
 

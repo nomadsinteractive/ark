@@ -8,12 +8,12 @@ namespace ark {
 namespace plugin {
 namespace box2d {
 
-WeldJoint::WeldJoint(const sp<ColliderBox2D>& world, const RigidBodyBox2D& b1, const RigidBodyBox2D& b2, const V2& anchorA, const V2& anchorB, float referenceAngle, bool collideConnected, float frequencyHz, float dampingRatio)
-    : Joint(world, makeJoint(world->world(), b1, b2, anchorA, anchorB, referenceAngle, collideConnected, frequencyHz, dampingRatio))
+WeldJoint::WeldJoint(const sp<ColliderBox2D>& world, const RigidBodyBox2D& b1, const RigidBodyBox2D& b2, const V2& anchorA, const V2& anchorB, float referenceAngle, bool collideConnected)
+    : Joint(world, makeJoint(world->world(), b1, b2, anchorA, anchorB, referenceAngle, collideConnected))
 {
 }
 
-b2Joint* WeldJoint::makeJoint(b2World& b2World, const RigidBodyBox2D& b1, const RigidBodyBox2D& b2, const V2& anchorA, const V2& anchorB, float referenceAngle, bool collideConnected, float frequencyHz, float dampingRatio)
+b2Joint* WeldJoint::makeJoint(b2World& b2World, const RigidBodyBox2D& b1, const RigidBodyBox2D& b2, const V2& anchorA, const V2& anchorB, float referenceAngle, bool collideConnected)
 {
     b2WeldJointDef jointDef;
     jointDef.bodyA = b1.body();
@@ -22,8 +22,6 @@ b2Joint* WeldJoint::makeJoint(b2World& b2World, const RigidBodyBox2D& b1, const 
     jointDef.localAnchorB = b2Vec2(anchorB.x(), anchorB.y());
     jointDef.referenceAngle = referenceAngle;
     jointDef.collideConnected = collideConnected;
-    jointDef.frequencyHz = frequencyHz;
-    jointDef.dampingRatio = dampingRatio;
     return b2World.CreateJoint(&jointDef);
 }
 

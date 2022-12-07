@@ -285,7 +285,7 @@ if(WIN32)
                   _ctypes/libffi_msvc/${_ctype_arch_impl}
           REQUIRES BUILD_SHARED
           INCLUDEDIRS
-              ${libffi_INCLUDE_DIRS}
+              ${LIBFFI_INCLUDE_DIRS}
           LIBRARIES libffi
         )
     endif(MINGW)

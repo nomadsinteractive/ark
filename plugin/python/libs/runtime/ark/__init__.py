@@ -156,7 +156,10 @@ class _Var:
     def __eq__(self, other) -> 'Boolean':
         return Boolean(False)
 
-    def __float__(self):
+    def __ne__(self, other) -> 'Boolean':
+        return Boolean(False)
+
+    def __float__(self) -> float:
         return 0.0
 
 
@@ -754,7 +757,7 @@ class Vec2(_Var):
         self._y = y
 
     @property
-    def x(self) -> float:
+    def x(self) -> Numeric:
         return self._x
 
     @x.setter
@@ -762,11 +765,11 @@ class Vec2(_Var):
         pass
 
     @property
-    def y(self) -> float:
+    def y(self) -> Numeric:
         return self._y
 
     @property
-    def xy(self):
+    def xy(self) -> tuple[float, float]:
         return self._x, self._y
 
     @xy.setter
@@ -775,22 +778,6 @@ class Vec2(_Var):
 
     @y.setter
     def y(self, v):
-        pass
-
-    @property
-    def vx(self) -> Numeric:
-        return self._x
-
-    @vx.setter
-    def vx(self, vx):
-        pass
-
-    @property
-    def vy(self) -> Numeric:
-        return self._y
-
-    @vy.setter
-    def vy(self, vy):
         pass
 
     @property
@@ -862,8 +849,8 @@ class Vec3(Vec2):
         pass
 
     @property
-    def xyz(self):
-        return None
+    def xyz(self) -> tuple[float, float, float]:
+        return 0, 0, 0
 
     @xyz.setter
     def xyz(self, v):
@@ -888,6 +875,10 @@ class Vec4(Vec3):
     @w.setter
     def w(self, v):
         pass
+
+    @property
+    def xyzw(self) -> tuple[float, float, float, float]:
+        return 0, 0, 0, 0
 
     @property
     def vw(self):
@@ -1051,19 +1042,42 @@ class Mesh:
         return None
 
 
-class Model:
+class Metrics:
+
+    @property
+    def width(self) -> float:
+        return 0
+
+    @property
+    def height(self) -> float:
+        return 0
+
+    @property
+    def depth(self) -> float:
+        return 0
+
+    @property
+    def aabb(self) -> tuple[float, float, float]:
+        return 0, 0, 0
+
+    @property
+    def aabb_min(self) -> tuple[float, float, float]:
+        return 0, 0, 0
+
+    @property
+    def aabb_max(self) -> tuple[float, float, float]:
+        return 0, 0, 0
 
     @property
     def size(self) -> tuple[float, float, float]:
         return 0, 0, 0
 
-    @property
-    def bounds(self) -> tuple[float, float, float]:
-        return 0, 0, 0
+
+class Model:
 
     @property
-    def origin(self) -> tuple[float, float, float]:
-        return 0, 0, 0
+    def metrics(self) -> Metrics:
+        return Metrics()
 
     @property
     def materials(self) -> list[Material]:

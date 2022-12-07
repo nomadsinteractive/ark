@@ -299,9 +299,9 @@ void VKPipeline::setupGraphicsPipeline(GraphicsContext& graphicsContext, const V
     VkPipelineDepthStencilStateCreateInfo depthStencilState = makeDepthStencilState();
 
     const RenderEngineContext::Resolution& displayResolution = graphicsContext.renderContext()->displayResolution();
-    const Rect& scissor = _bindings.scissor();
-    const VkRect2D vkScissors = RenderUtil::isScissorEnabled(scissor) ? VkRect2D({{static_cast<int32_t>(scissor.left()), static_cast<int32_t>(scissor.top())}, {static_cast<uint32_t>(scissor.width()), static_cast<uint32_t>(scissor.height())}})
-                                                                      : VkRect2D({{0, 0}, {displayResolution.width, displayResolution.height}});
+    const Optional<Rect>& scissor = _bindings.scissor();
+    const VkRect2D vkScissors = scissor ? VkRect2D({{static_cast<int32_t>(scissor->left()), static_cast<int32_t>(scissor->top())}, {static_cast<uint32_t>(scissor->width()), static_cast<uint32_t>(scissor->height())}})
+                                                      : VkRect2D({{0, 0}, {displayResolution.width, displayResolution.height}});
     VkPipelineViewportStateCreateInfo viewportState = vks::initializers::pipelineViewportStateCreateInfo(1, 1, 0);
     viewportState.pScissors = &vkScissors;
     viewportState.scissorCount = 1;
@@ -371,11 +371,11 @@ void VKPipeline::buildDrawCommandBuffer(GraphicsContext& graphicsContext, const 
     if(drawingContext._indices)
         vkCmdBindIndexBuffer(commandBuffer, (VkBuffer)(drawingContext._indices.id()), 0, kVKIndexType);
 
-    const Rect& scissor = drawingContext._scissor;
-    if(scissor.right() > scissor.left() && scissor.bottom() >= scissor.top())
+    const Optional<Rect>& scissor = drawingContext._scissor;
+    if(scissor)
     {
-        DCHECK(drawingContext._shader_bindings->pipelineBindings()->hasFlag(PipelineBindings::FLAG_DYNAMIC_SCISSOR, PipelineBindings::FLAG_DYNAMIC_SCISSOR_BITMASK), "Pipeline has no DYNAMIC_SCISSOR flag set");
-        VkRect2D vkScissor{{static_cast<int32_t>(scissor.left()), static_cast<int32_t>(scissor.top())}, {static_cast<uint32_t>(scissor.width()), static_cast<uint32_t>(scissor.height())}};
+        CHECK(drawingContext._shader_bindings->pipelineBindings()->hasFlag(PipelineBindings::FLAG_DYNAMIC_SCISSOR, PipelineBindings::FLAG_DYNAMIC_SCISSOR_BITMASK), "Pipeline has no DYNAMIC_SCISSOR flag set");
+        VkRect2D vkScissor{{static_cast<int32_t>(scissor->left()), static_cast<int32_t>(scissor->top())}, {static_cast<uint32_t>(scissor->width()), static_cast<uint32_t>(scissor->height())}};
         vkCmdSetScissor(commandBuffer, 0, 1, &vkScissor);
     }
 
@@ -456,18 +456,18 @@ VkPipelineDepthStencilStateCreateInfo VKPipeline::makeDepthStencilState() const
     state.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
     state.stencilTestEnable = false;
 
-    if(_bindings.parameters()._tests.has(PipelineBindings::TRAIT_TYPE_DEPTH_TEST))
+    if(_bindings.parameters()._traits.has(PipelineBindings::TRAIT_TYPE_DEPTH_TEST))
     {
-        const PipelineBindings::TraitDepthTest& depthTest = _bindings.parameters()._tests.at(PipelineBindings::TRAIT_TYPE_DEPTH_TEST)._configure._depth_test;
+        const PipelineBindings::TraitDepthTest& depthTest = _bindings.parameters()._traits.at(PipelineBindings::TRAIT_TYPE_DEPTH_TEST)._configure._depth_test;
         state.depthTestEnable = depthTest._enabled;
         state.depthWriteEnable = depthTest._write_enabled;
         state.depthCompareOp = VKUtil::toCompareOp(depthTest._func);
     }
 
-    if(_bindings.parameters()._tests.has(PipelineBindings::TRAIT_TYPE_STENCIL_TEST))
+    if(_bindings.parameters()._traits.has(PipelineBindings::TRAIT_TYPE_STENCIL_TEST))
     {
         state.stencilTestEnable = true;
-        const PipelineBindings::TraitStencilTest& stencilTest = _bindings.parameters()._tests.at(PipelineBindings::TRAIT_TYPE_STENCIL_TEST)._configure._stencil_test;
+        const PipelineBindings::TraitStencilTest& stencilTest = _bindings.parameters()._traits.at(PipelineBindings::TRAIT_TYPE_STENCIL_TEST)._configure._stencil_test;
         if(stencilTest._front._type == PipelineBindings::FRONT_FACE_TYPE_DEFAULT && stencilTest._front._type == stencilTest._back._type)
             state.front = state.back = makeStencilState(stencilTest._front);
         else
@@ -498,9 +498,9 @@ VkPipelineRasterizationStateCreateInfo VKPipeline::makeRasterizationState() cons
 {
     const VkCullModeFlags cullModeFlags[] = {VK_CULL_MODE_NONE, VK_CULL_MODE_FRONT_BIT, VK_CULL_MODE_BACK_BIT, VK_CULL_MODE_NONE};
     VkCullModeFlags flags = cullModeFlags[_bindings.getFlag(PipelineBindings::FLAG_CULL_MODE_BITMASK)];
-    if(_bindings.parameters()._tests.has(PipelineBindings::TRAIT_TYPE_CULL_FACE_TEST))
+    if(_bindings.parameters()._traits.has(PipelineBindings::TRAIT_TYPE_CULL_FACE_TEST))
     {
-        const PipelineBindings::TraitCullFaceTest& cullFaceTest = _bindings.parameters()._tests.at(PipelineBindings::TRAIT_TYPE_CULL_FACE_TEST)._configure._cull_face_test;
+        const PipelineBindings::TraitCullFaceTest& cullFaceTest = _bindings.parameters()._traits.at(PipelineBindings::TRAIT_TYPE_CULL_FACE_TEST)._configure._cull_face_test;
         return vks::initializers::pipelineRasterizationStateCreateInfo(
                 VK_POLYGON_MODE_FILL,
                 cullFaceTest._enabled ? cullModeFlags[_bindings.getFlag(PipelineBindings::FLAG_CULL_MODE_BITMASK)] : VK_CULL_MODE_NONE,

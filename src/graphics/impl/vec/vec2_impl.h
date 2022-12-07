@@ -19,7 +19,8 @@ public:
     Vec2Impl() noexcept;
     Vec2Impl(float x, float y) noexcept;
     Vec2Impl(const V2& xy) noexcept;
-    Vec2Impl(const sp<Numeric>& xProperty, const sp<Numeric>& yProperty) noexcept;
+    Vec2Impl(sp<Numeric> v) noexcept;
+    Vec2Impl(sp<Numeric> x, sp<Numeric> y) noexcept;
     Vec2Impl(Vec2& other) noexcept;
 
     virtual V2 val() override;

@@ -12,7 +12,6 @@ template<typename T> class Array;
 template<typename T> class Builder;
 template<typename T> class ByIndex;
 template<typename T> class Callable;
-template<typename T> class Delegate;
 template<typename T> class Dictionary;
 template<typename T> class Duck;
 template<typename T> class Expectation;
@@ -31,6 +30,7 @@ template<typename T> class Type;
 template<typename T> class Variable;
 template<typename T> class VariableWrapper;
 template<typename T> class WeakPtr;
+template<typename T> class Wrapper;
 
 
 template <typename T> using sp = SharedPtr<T>;

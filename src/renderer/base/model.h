@@ -18,8 +18,8 @@ namespace ark {
 class ARK_API Model {
 public:
     Model() = default;
-    Model(sp<Input> indices, sp<Vertices> vertices, const Metrics& metrics = {V3(1.0f), V3(1.0f), V3(0)});
-    Model(std::vector<sp<Material>> materials, std::vector<sp<Mesh>> meshes, const Metrics& metrics = {V3(1.0f), V3(1.0f), V3(0)});
+    Model(sp<Input> indices, sp<Vertices> vertices, const Metrics& metrics = Metrics());
+    Model(std::vector<sp<Material>> materials, std::vector<sp<Mesh>> meshes, const Metrics& metrics = Metrics());
     DEFAULT_COPY_AND_ASSIGN(Model);
 
     const sp<Input>& indices() const;
@@ -30,14 +30,8 @@ public:
 //[[script::bindings::property]]
     const std::vector<sp<Mesh>>& meshes() const;
 
-    const Metrics& metrics() const;
-
 //[[script::bindings::property]]
-    const V3& bounds() const;
-//[[script::bindings::property]]
-    const V3& size() const;
-//[[script::bindings::property]]
-    const V3& origin() const;
+    const sp<Metrics>& metrics() const;
 
 //[[script::bindings::property]]
     size_t indexCount() const;
@@ -96,11 +90,11 @@ private:
 private:
     sp<Input> _indices;
     sp<Vertices> _vertices;
+    sp<Metrics> _metrics;
     std::vector<sp<Material>> _materials;
     std::vector<sp<Mesh>> _meshes;
     Table<String, sp<Animation>> _animations;
     std::vector<String> _node_names;
-    Metrics _metrics;
 };
 
 }

@@ -1,0 +1,23 @@
+{
+  "name": "ark",
+  "version-string": "0.9.5",
+  "dependencies": [
+    "assimp",
+    "box2d",
+    "bullet3",
+    "freetype",
+    "glbinding",
+    "glm",
+    "glslang",
+    "libffi",
+    "libpng",
+    "libjpeg-turbo",
+    "libvorbis",
+    "libyaml",
+    "libzip",
+    "python3",
+    "sdl2",
+    "stb",
+    "tinyxml2"
+  ]
+}

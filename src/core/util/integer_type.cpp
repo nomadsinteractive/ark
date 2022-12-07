@@ -157,7 +157,7 @@ const sp<Integer>& IntegerType::delegate(const sp<Integer>& self)
 {
     const sp<IntegerWrapper> iw = self.as<IntegerWrapper>();
     DWARN(iw, "Non-IntegerWrapper instance has no delegate attribute. This should be an error unless you're inspecting it.");
-    return iw ? iw->delegate() : sp<Integer>::null();
+    return iw ? iw->wrapped() : sp<Integer>::null();
 }
 
 void IntegerType::setDelegate(const sp<Integer>& self, const sp<Integer>& delegate)

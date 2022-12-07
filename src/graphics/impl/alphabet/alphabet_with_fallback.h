@@ -14,7 +14,7 @@ public:
 
     virtual void setTextSize(const Font::TextSize& size) override;
 
-    virtual bool measure(int32_t c, Metrics& metrics, bool hasFallback) override;
+    virtual Optional<Metrics> measure(int32_t c) override;
     virtual bool draw(uint32_t c, Bitmap& image, int32_t x, int32_t y) override;
 
 //  [[plugin::style("fallback")]]

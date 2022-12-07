@@ -7,11 +7,10 @@ add_subdirectory(3rdparty/libnoise)
 
 include(${ARK_SRC_DIR}/tools/cmake/core.cmake)
 
-list(APPEND LOCAL_LIBS ${ARK_LIBRARIES})
+ark_include_directories(${ARK_INCLUDE_DIRS})
 
 list(APPEND LOCAL_INCLUDE_DIRS .)
-list(APPEND LOCAL_INCLUDE_DIRS ${ARK_SRC_DIR})
-list(APPEND LOCAL_INCLUDE_DIRS ${ARK_SRC_DIR}/src)
+list(APPEND LOCAL_INCLUDE_DIRS ${ARK_INCLUDE_DIRS})
 
 list(APPEND LOCAL_INCLUDE_DIRS ${ARK_PLUGIN_DIR})
 
@@ -23,7 +22,7 @@ if(MSVC)
     ark_compile_options("/arch:AVX2")
 endif()
 
-add_subdirectory(tools)
+#add_subdirectory(tools)
 
 list(APPEND LOCAL_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR})
 

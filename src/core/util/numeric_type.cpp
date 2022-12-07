@@ -2,7 +2,7 @@
 
 #include "core/base/bean_factory.h"
 #include "core/base/clock.h"
-#include "core/base/delegate.h"
+#include "core/base/wrapper.h"
 #include "core/base/expression.h"
 #include "core/impl/numeric/approach.h"
 #include "core/impl/numeric/stalker.h"
@@ -190,24 +190,11 @@ float NumericType::val(const sp<Numeric>& self)
     return self->val();
 }
 
-void NumericType::setVal(const sp<Numeric>& self, float value)
-{
-    const sp<NumericWrapper> nw = self.as<NumericWrapper>();
-    if(nw)
-        nw->set(value);
-    else
-    {
-        const sp<Numeric::Impl> ni = self.as<Numeric::Impl>();
-        DCHECK(ni, "Numeric instance should be either NumericWrapper or Numeric::Impl to be set its value.");
-        ni->set(value);
-    }
-}
-
 const sp<Numeric>& NumericType::delegate(const sp<Numeric>& self)
 {
     const sp<NumericWrapper> nw = self.as<NumericWrapper>();
     DWARN(nw, "Non-NumericWrapper instance has no delegate attribute. This should be an error unless you're inspecting it.");
-    return nw ? nw->delegate() : sp<Numeric>::null();
+    return nw ? nw->wrapped() : sp<Numeric>::null();
 }
 
 void NumericType::setDelegate(const sp<Numeric>& self, const sp<Numeric>& delegate)
@@ -315,7 +302,7 @@ sp<Numeric> NumericType::vibrate(float s0, float v0, float s1, float v1, float d
     Math::vibrate(s0, v0, s1, v1, o, a, t0, t1);
     float multiplier = (t1 - t0) / duration;
     const sp<Numeric> b = sp<Numeric::Const>::make(t1 - t0);
-    return sp<Vibrate>::make(boundary(mul(t ? t : Ark::instance().appClock()->duration(), multiplier), b)->delegate(), a, t0, o);
+    return sp<Vibrate>::make(boundary(mul(t ? t : Ark::instance().appClock()->duration(), multiplier), b)->wrapped(), a, t0, o);
 }
 
 sp<Numeric> NumericType::lerp(const sp<Numeric>& self, const sp<Numeric>& b, const sp<Numeric>& t)

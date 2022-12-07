@@ -29,7 +29,7 @@ sp<Model> ModelLoaderQuad::loadModel(int32_t type)
 {
     const Atlas::Item& texCoord = _atlas->at(type);
     const V2& size = texCoord.size();
-    return sp<Model>::make(_unit_model.indices(), sp<VerticesQuad>::make(texCoord), Metrics{V3(size, 0), V3(size, 0), V3(0)});
+    return sp<Model>::make(_unit_model.indices(), sp<VerticesQuad>::make(texCoord), Metrics(V3(size, 0), V3(size, 0), V3(0)));
 }
 
 ModelLoaderQuad::MAKER::MAKER(BeanFactory& factory, const String& atlas)
