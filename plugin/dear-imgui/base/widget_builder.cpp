@@ -44,19 +44,41 @@ namespace {
 
 class Window : public WidgetGroup {
 public:
-    Window(String name, bool open = true)
-        : _name(std::move(name)), _open(open) {
+    Window(String name, sp<BooleanWrapper> isOpen)
+        : _name(std::move(name)), _is_open(std::move(isOpen)) {
     }
 
     virtual void render() override {
-        if(ImGui::Begin(_name.c_str(), &_open))
+        bool isOpen = _is_open->val();
+        if(isOpen) {
+            bool isOpenArg = isOpen;
+            if(ImGui::Begin(_name.c_str(), &isOpenArg))
+                WidgetGroup::render();
+            ImGui::End();
+            if(isOpen != isOpenArg)
+                _is_open->set(isOpenArg);
+        }
+    }
+
+private:
+    String _name;
+    sp<BooleanWrapper> _is_open;
+};
+
+class WindowNoClose : public WidgetGroup {
+public:
+    WindowNoClose(String name)
+        : _name(std::move(name)) {
+    }
+
+    virtual void render() override {
+        if(ImGui::Begin(_name.c_str(), nullptr))
             WidgetGroup::render();
         ImGui::End();
     }
 
 private:
     String _name;
-    bool _open;
 };
 
 class WidgetText : public Widget {
@@ -196,20 +218,26 @@ private:
     std::vector<char> _text_buf;
 };
 
+
 class DemoWindow : public Widget {
 public:
-    DemoWindow(std::function<void(bool*)> func)
-        : _func(std::move(func)), _open(true) {
+    DemoWindow(std::function<void(bool*)> func, sp<BooleanWrapper> isOpen)
+        : _func(std::move(func)), _is_open(std::move(isOpen)) {
     }
 
     virtual void render() override {
-        _func(&_open);
+        bool isOpen = _is_open->val();
+        if(isOpen) {
+            bool isOpenArg = isOpen;
+            _func(&isOpenArg);
+            if(isOpen != isOpenArg)
+                _is_open->set(isOpenArg);
+        }
     }
 
 private:
     std::function<void(bool*)> _func;
-
-    bool _open;
+    sp<BooleanWrapper> _is_open;
 };
 
 }
@@ -229,11 +257,12 @@ WidgetBuilder::WidgetBuilder(const sp<Renderer>& imguiRenderer)
     push(sp<WidgetGroup>::make());
 }
 
-bool WidgetBuilder::begin(const String& name)
+bool WidgetBuilder::begin(String name, sp<Boolean> isOpen)
 {
-    sp<Window> window = sp<Window>::make(name);
+    CHECK(isOpen == nullptr || isOpen.is<BooleanWrapper>(), "isOpen parameter must be either BooleanWrapper instance or nullptr");
+    sp<WidgetGroup> window = isOpen ? sp<WidgetGroup>::make<Window>(std::move(name), std::move(isOpen)) : sp<WidgetGroup>::make<WindowNoClose>(std::move(name));
     addWidget(window);
-    push(window);
+    push(std::move(window));
     return true;
 }
 
@@ -428,14 +457,14 @@ void WidgetBuilder::spacing()
     addFunctionCall(ImGui::Spacing);
 }
 
-sp<Widget> WidgetBuilder::makeAboutWindow()
+sp<Widget> WidgetBuilder::makeAboutWidget(sp<Boolean> isOpen)
 {
-    return sp<DemoWindow>::make(ImGui::ShowAboutWindow);
+    return sp<DemoWindow>::make(ImGui::ShowAboutWindow, std::move(isOpen));
 }
 
-sp<Widget> WidgetBuilder::makeDemoWindow()
+sp<Widget> WidgetBuilder::makeDemoWidget(sp<Boolean> isOpen)
 {
-    return sp<DemoWindow>::make(ImGui::ShowDemoWindow);
+    return sp<DemoWindow>::make(ImGui::ShowDemoWindow, std::move(isOpen));
 }
 
 void WidgetBuilder::addFunctionCall(std::function<void()> func)
@@ -454,9 +483,9 @@ sp<Widget> WidgetBuilder::makeWidget() const
     return _stub->_states.top();
 }
 
-void WidgetBuilder::push(const sp<WidgetGroup>& widget)
+void WidgetBuilder::push(sp<WidgetGroup> widgetGroup)
 {
-    _stub->_states.push(widget);
+    _stub->_states.push(std::move(widgetGroup));
 }
 
 void WidgetBuilder::pop()

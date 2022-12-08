@@ -46,7 +46,7 @@ document ApplicationBundle::loadDocument(const String& resid) const
 {
     String fname, fext;
     Strings::rcut(resid, fname, fext, '.');
-    const sp<Asset> asset = _asset_bundle->get(resid);
+    const sp<Asset> asset = _asset_bundle->getAsset(resid);
     return asset ? _document_loader_bundle->getLoader(fext)->load(asset->open()) : nullptr;
 }
 

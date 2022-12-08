@@ -12,7 +12,7 @@ class AssetBundleWithPrefix : public AssetBundle {
 public:
     AssetBundleWithPrefix(const sp<AssetBundle>& delegate, const String& prefix);
 
-    virtual sp<Asset> get(const String& name) override;
+    virtual sp<Asset> getAsset(const String& name) override;
     virtual sp<AssetBundle> getBundle(const String& path) override;
 
 private:

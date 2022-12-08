@@ -69,6 +69,9 @@ public:
     static void set(const sp<Vec2>& self, const V2 val);
 
 //  [[script::bindings::property]]
+    static V2 val(const sp<Vec2>& self);
+
+//  [[script::bindings::property]]
     static sp<Numeric> x(const sp<Vec2>& self);
 //  [[script::bindings::property]]
     static void setX(const sp<Vec2>& self, float x);

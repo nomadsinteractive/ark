@@ -11,6 +11,96 @@
 
 namespace ark {
 
+namespace {
+
+class TextInteger : public Text {
+public:
+    TextInteger(sp<Integer> delegate)
+        : _delegate(std::move(delegate)), _text(sp<String>::make(Strings::toString(_delegate->val()))) {
+    }
+
+    virtual bool update(uint64_t timestamp) override {
+        if(_delegate->update(timestamp)) {
+            _text = sp<String>::make(Strings::toString(_delegate->val()));
+            return true;
+        }
+        return false;
+    }
+
+    virtual sp<String> val() override {
+        return _text;
+    }
+
+private:
+    sp<Integer> _delegate;
+    sp<String> _text;
+};
+
+
+class TextFormatted : public Text {
+public:
+    TextFormatted(String format, std::map<String, Box> args)
+        : _format(format), _args(std::move(args)) {
+        update(0);
+    }
+
+    virtual bool update(uint64_t timestamp) override {
+        bool dirty = false;
+        for(const auto& [i, j] : _args)
+            dirty = tryUpdate<float, int32_t>(i, j, timestamp) || dirty;
+        if(dirty)
+            _text = sp<String>::make(doFormat());
+        return dirty;
+    }
+
+    virtual sp<String> val() override {
+        return _text;
+    }
+
+private:
+    template<typename T = String, typename... ARGS> bool tryUpdate(const String& name, const Box& box, uint64_t timestamp) {
+        if(std::is_same_v<T, String>)
+            return false;
+
+        sp<Variable<T>> var = box.as<Variable<T>>();
+        if(var) {
+            bool dirty = timestamp ? var->update(timestamp) : true;
+            if(dirty)
+                _values[name] = toString_sfinae(var->val(), nullptr);
+            return dirty;
+        }
+        return tryUpdate<ARGS...>(name, box, timestamp);
+    }
+
+    template<typename T> static String toString_sfinae(const T& val, decltype(Strings::toString<T>)*) {
+        return Strings::toString<T>(val);
+    }
+
+    template<typename T> static String toString_sfinae(const T& val, std::enable_if_t<std::is_same_v<T, sp<String>>>*) {
+        return val->val();
+    }
+
+    String doFormat() const {
+        static std::regex VAR_PATTERN("\\{(\\w+)\\}");
+        return _format.replace(VAR_PATTERN, [this] (Array<String>& matches) {
+            const String& keyname = matches.at(1);
+            if(keyname[0] == '{')
+                return keyname;
+            const auto iter = _values.find(keyname);
+            CHECK(iter != _values.end(), "Undefined var \"%s\"", keyname.c_str());
+            return iter->second;
+        });
+    }
+
+private:
+    String _format;
+    std::map<String, Box> _args;
+    std::map<String, String> _values;
+    sp<String> _text;
+};
+
+}
+
 sp<Text> TextType::create(sp<Text> value)
 {
     return sp<TextWrapper>::make(std::move(value));
@@ -19,6 +109,11 @@ sp<Text> TextType::create(sp<Text> value)
 sp<Text> TextType::create(sp<String> value)
 {
     return sp<Text::Impl>::make(std::move(value));
+}
+
+sp<Text> TextType::create(sp<Integer> value)
+{
+    return sp<TextInteger>::make(std::move(value));
 }
 
 sp<Text> TextType::create()
@@ -31,18 +126,11 @@ String TextType::val(const sp<Text>& self)
     return self->val();
 }
 
-const sp<Text>& TextType::delegate(const sp<Text>& self)
+const sp<Text>& TextType::wrapped(const sp<Text>& self)
 {
     const sp<TextWrapper> ib = self.as<TextWrapper>();
-    DWARN(ib, "Non-TextWrapper instance has no delegate attribute. This should be an error unless you're inspecting it.");
+    DWARN(ib, "Non-TextWrapper instance has no wrapped attribute. This should be an error unless you're inspecting it.");
     return ib ? ib->wrapped() : sp<Text>::null();
-}
-
-void TextType::setDelegate(const sp<Text>& self, const sp<Text>& delegate)
-{
-    const sp<TextWrapper> ib = self.as<TextWrapper>();
-    DCHECK(ib, "Must be a TextWrapper instance to set its delegate attribute");
-    ib->set(delegate);
 }
 
 void TextType::set(const sp<Text::Impl>& self, sp<String> value)
@@ -60,12 +148,14 @@ void TextType::set(const sp<TextWrapper>& self, sp<Text> delegate)
     self->set(std::move(delegate));
 }
 
-void TextType::fix(const sp<Text>& self)
+sp<Text> TextType::freeze(const sp<Text>& self)
 {
-    const sp<TextWrapper> ib = self.as<TextWrapper>();
-    DWARN(ib, "Calling fix on non-BooleanWrapper has no effect.");
-    if(ib)
-        ib->fix();
+    return create(self->val());
+}
+
+sp<Text> TextType::format(String format, const Scope& kwargs)
+{
+    return sp<TextFormatted>::make(std::move(format), kwargs.variables());
 }
 
 TextType::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr)

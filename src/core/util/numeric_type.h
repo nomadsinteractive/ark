@@ -67,7 +67,7 @@ public:
     static float toFloat(const sp<Numeric>& self);
 
 //  [[script::bindings::classmethod]]
-    static sp<Integer> toInteger(const sp<Numeric>& self);
+    static sp<Integer> toInteger(sp<Numeric> self);
 
 //  [[script::bindings::operator(>)]]
     static sp<Boolean> gt(const sp<Numeric>& self, const sp<Numeric>& other);

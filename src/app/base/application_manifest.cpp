@@ -26,7 +26,7 @@ void ApplicationManifest::load(const String& src)
 
     const sp<ark::AssetBundle> appAsset = Platform::getAssetBundle(".", _application._dir);
     DASSERT(appAsset);
-    const sp<ark::Asset> asset = appAsset->get(src);
+    const sp<ark::Asset> asset = appAsset->getAsset(src);
     DCHECK(asset, "Cannot load application manifest \"%s\"", src.c_str());
 
     _content = asset ? Documents::loadFromReadable(asset->open()) : document::make("");

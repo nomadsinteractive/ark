@@ -8,8 +8,8 @@ namespace ark {
 namespace plugin {
 namespace assimp {
 
-ArkIOStream::ArkIOStream(const sp<Readable>& readable)
-    : _readable(readable), _file_size(readable->remaining())
+ArkIOStream::ArkIOStream(sp<Readable> readable)
+    : _readable(std::move(readable)), _file_size(_readable->remaining())
 {
 }
 
@@ -20,6 +20,7 @@ size_t ArkIOStream::Read(void* pvBuffer, size_t pSize, size_t pCount)
 
 size_t ArkIOStream::Write(const void* pvBuffer, size_t pSize, size_t pCount)
 {
+    DFATAL("Unimplemented");
     return 0;
 }
 

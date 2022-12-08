@@ -15,15 +15,15 @@ namespace {
 
 class BuiltInAssetBundle : public AssetBundle {
 public:
-    BuiltInAssetBundle(const String& assetDir, const String& appDir)
-        : _asset_dir(assetDir), _app_dir(appDir) {
+    BuiltInAssetBundle(String assetDir, String appDir)
+        : _asset_dir(std::move(assetDir)), _app_dir(std::move(appDir)) {
     }
 
-    virtual sp<Asset> get(const String& filepath) override {
+    virtual sp<Asset> getAsset(const String& filepath) override {
         String dirname, filename;
         Strings::rcut(filepath, dirname, filename, '/');
         const sp<AssetBundle> dir = getBundle(dirname);
-        const sp<Asset> asset = dir ? dir->get(filename) : nullptr;
+        const sp<Asset> asset = dir ? dir->getAsset(filename) : nullptr;
         LOGD("filepath(%s) dirname(%s) ==> dir<%p> asset<%p>", filepath.c_str(), dirname.c_str(), dir.get(), asset.get());
         return asset;
     }
@@ -35,7 +35,7 @@ public:
         if(assetBundle)
             return assetBundle;
 
-        const sp<Asset> asset = get(path);
+        const sp<Asset> asset = getAsset(path);
         if(asset) {
             const sp<Readable> readable = asset->open();
             if(readable)
@@ -49,7 +49,7 @@ public:
             String name;
             Strings::rcut(s, dirname, name, '/');
             filename = filename.empty() ? name : name + "/" + filename;
-            const sp<Asset> asset = dirname.empty() ? nullptr : get(dirname);
+            const sp<Asset> asset = dirname.empty() ? nullptr : getAsset(dirname);
             const sp<Readable> readable = asset ? asset->open() : nullptr;
             if(readable) {
                 const sp<AssetBundleZipFile> zip = sp<AssetBundleZipFile>::make(readable, dirname);
@@ -69,7 +69,7 @@ public:
 
 sp<Asset> AssetBundleUtil::get(const sp<AssetBundle>& self, const String& name)
 {
-    return self->get(name);
+    return self->getAsset(name);
 }
 
 sp<AssetBundle> AssetBundleUtil::getBundle(const sp<AssetBundle>& self, const String& path)
@@ -79,14 +79,14 @@ sp<AssetBundle> AssetBundleUtil::getBundle(const sp<AssetBundle>& self, const St
 
 sp<String> AssetBundleUtil::getString(const sp<AssetBundle>& self, const String& filepath)
 {
-    const sp<Asset> asset = self->get(filepath);
+    const sp<Asset> asset = self->getAsset(filepath);
     const sp<Readable> readable = asset ? asset->open() : nullptr;
     return readable ? sp<String>::make(Strings::loadFromReadable(readable)) : nullptr;
 }
 
 String AssetBundleUtil::getRealPath(const sp<AssetBundle>& self, const String& filepath)
 {
-    const sp<Asset> asset = self->get(filepath);
+    const sp<Asset> asset = self->getAsset(filepath);
     return asset ? asset->location() : filepath;
 }
 

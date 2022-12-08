@@ -15,7 +15,7 @@ class AssetBundleDarwin : public AssetBundle {
 public:
     AssetBundleDarwin(const String& directory);
 
-    virtual sp<Asset> get(const String& name) override;
+    virtual sp<Asset> getAsset(const String& name) override;
     virtual sp<AssetBundle> getBundle(const String& path) override;
 
     static bool exists(const String& location);

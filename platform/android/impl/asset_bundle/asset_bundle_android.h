@@ -15,7 +15,7 @@ class AssetBundleAndroid : public AssetBundle {
 public:
     AssetBundleAndroid(AAssetManager* assetManager, const String& dirname);
 
-    virtual sp<Asset> get(const String& name) override;
+    virtual sp<Asset> getAsset(const String& name) override;
     virtual sp<AssetBundle> getBundle(const String& path) override;
 
 private:

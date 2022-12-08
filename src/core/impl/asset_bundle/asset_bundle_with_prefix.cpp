@@ -8,9 +8,9 @@ AssetBundleWithPrefix::AssetBundleWithPrefix(const sp<AssetBundle>& delegate, co
     DASSERT(_delegate);
 }
 
-sp<Asset> AssetBundleWithPrefix::get(const String& name)
+sp<Asset> AssetBundleWithPrefix::getAsset(const String& name)
 {
-    return _delegate->get(_prefix + name);
+    return _delegate->getAsset(_prefix + name);
 }
 
 sp<AssetBundle> AssetBundleWithPrefix::getBundle(const String& path)

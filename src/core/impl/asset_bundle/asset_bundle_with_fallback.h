@@ -11,7 +11,7 @@ class AssetBundleWithFallback : public AssetBundle {
 public:
     AssetBundleWithFallback(const sp<AssetBundle>& delegate, const sp<AssetBundle>& fallback);
 
-    virtual sp<Asset> get(const String& name) override;
+    virtual sp<Asset> getAsset(const String& name) override;
     virtual sp<AssetBundle> getBundle(const String& path) override;
 
 private:

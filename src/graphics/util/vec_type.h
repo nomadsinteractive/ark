@@ -26,6 +26,10 @@ public:
 
     static const size_t DIMENSION = sizeof(T) / sizeof(float);
 
+    static T val(const sp<VarType>& self) {
+        return self->val();
+    }
+
     static sp<VarType> add(sp<VarType> lvalue, sp<VarType> rvalue) {
         return sp<VariableOP2<sp<VarType>, sp<VarType>, Operators::Add<T>>>::make(std::move(lvalue), std::move(rvalue));
     }

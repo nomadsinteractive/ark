@@ -8,6 +8,7 @@ namespace ark {
 
 class RenderablePassive : public Renderable {
 public:
+[[deprecated]]
     RenderablePassive(sp<RenderObject> renderObject);
 
     virtual State updateState(const RenderRequest& renderRequest) override;

@@ -15,7 +15,7 @@ class AssetBundleZipFile : public AssetBundle {
 public:
     AssetBundleZipFile(const sp<Readable>& zipReadable, const String& zipLocation);
 
-    virtual sp<Asset> get(const String& name) override;
+    virtual sp<Asset> getAsset(const String& name) override;
     virtual sp<AssetBundle> getBundle(const String& path) override;
 
     bool hasEntry(const String& name) const;

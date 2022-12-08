@@ -150,9 +150,9 @@ float NumericType::toFloat(const sp<Numeric>& self)
     return self->val();
 }
 
-sp<Integer> NumericType::toInteger(const sp<Numeric>& self)
+sp<Integer> NumericType::toInteger(sp<Numeric> self)
 {
-    return sp<VariableOP1<int32_t, float>>::make(Operators::Cast<float, int32_t>(), self);
+    return sp<VariableOP1<int32_t, float>>::make(Operators::Cast<float, int32_t>(), std::move(self));
 }
 
 sp<Boolean> NumericType::gt(const sp<Numeric>& self, const sp<Numeric>& other)

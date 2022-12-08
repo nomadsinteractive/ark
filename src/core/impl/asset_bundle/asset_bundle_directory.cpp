@@ -12,7 +12,7 @@ AssetBundleDirectory::AssetBundleDirectory(const String& directory)
 {
 }
 
-sp<Asset> AssetBundleDirectory::get(const String& name)
+sp<Asset> AssetBundleDirectory::getAsset(const String& name)
 {
     const String filepath = Platform::isAbsolutePath(name) ? name : Strings::sprintf("%s/%s", _directory.c_str(), name.c_str());
     if(Platform::isFile(filepath))

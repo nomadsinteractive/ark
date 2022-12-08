@@ -15,17 +15,14 @@ RendererGroup::~RendererGroup()
 
 void RendererGroup::addRenderer(const sp<Renderer>& renderer)
 {
-    DASSERT(renderer);
+    ASSERT(renderer);
     _items.push_back(renderer);
 }
 
 void RendererGroup::render(RenderRequest& renderRequest, const V3& position)
 {
     for(const sp<Renderer>& i : _items.update(renderRequest.timestamp()))
-    {
-        Renderer* r = i.get();
-        r->render(renderRequest, position);
-    }
+        i->render(renderRequest, position);
 }
 
 RendererGroup::BUILDER::BUILDER(BeanFactory& beanFactory, const document& manifest)

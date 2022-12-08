@@ -16,14 +16,14 @@ public:
     static sp<Text> create(sp<Text> value);
 //[[script::bindings::constructor]]
     static sp<Text> create(sp<String> value);
+//[[script::bindings::constructor]]
+    static sp<Text> create(sp<Integer> value);
     static sp<Text> create();
 
 //[[script::bindings::property]]
     static String val(const sp<Text>& self);
 //[[script::bindings::property]]
-    static const sp<Text>& delegate(const sp<Text>& self);
-//[[script::bindings::property]]
-    static void setDelegate(const sp<Text>& self, const sp<Text>& delegate);
+    static const sp<Text>& wrapped(const sp<Text>& self);
 
 //[[script::bindings::classmethod]]
     static void set(const sp<Text::Impl>& self, sp<String> value);
@@ -33,7 +33,10 @@ public:
     static void set(const sp<TextWrapper>& self, sp<Text> delegate);
 
 //[[script::bindings::classmethod]]
-    static void fix(const sp<Text>& self);
+    static sp<Text> freeze(const sp<Text>& self);
+
+//[[script::bindings::auto]]
+    static sp<Text> format(String format, const Scope& kwargs);
 
 //  [[plugin::builder::by-value]]
     class DICTIONARY : public Builder<Text> {

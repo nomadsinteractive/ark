@@ -12,7 +12,7 @@ namespace assimp {
 
 class ArkIOStream : public Assimp::IOStream {
 public:
-    ArkIOStream(const sp<Readable>& readable);
+    ArkIOStream(sp<Readable> readable);
 
     virtual size_t Read(void* pvBuffer, size_t pSize, size_t pCount);
     virtual size_t Write(const void* pvBuffer, size_t pSize, size_t pCount);

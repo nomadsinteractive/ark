@@ -10,6 +10,7 @@
 #include "core/base/string.h"
 #include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
+#include "core/util/boolean_type.h"
 
 #include "graphics/forwarding.h"
 #include "graphics/base/v2.h"
@@ -30,7 +31,7 @@ public:
     WidgetBuilder(const sp<Renderer>& imguiRenderer);
 
 // [[script::bindings::auto]]
-    bool begin(const String& name);
+    bool begin(String name, sp<Boolean> isOpen = nullptr);
 // [[script::bindings::auto]]
     void end();
 
@@ -115,9 +116,9 @@ public:
     void image(const sp<Texture>& texture, const sp<Vec2>& size, const V2& uv0 = V2(0), const V2& uv1 = V2(1.0f), const sp<Vec4>& color = nullptr, const sp<Vec4>& borderColor = nullptr);
 
 // [[script::bindings::auto]]
-    sp<Widget> makeAboutWindow();
+    sp<Widget> makeAboutWidget(sp<Boolean> isOpen = BooleanType::create(true));
 // [[script::bindings::auto]]
-    sp<Widget> makeDemoWindow();
+    sp<Widget> makeDemoWidget(sp<Boolean> isOpen = BooleanType::create(true));
 
 // [[script::bindings::auto]]
     void addWidget(sp<Widget> widget);
@@ -202,7 +203,7 @@ private:
         addWidget(sp<Callback<T>>::make(std::move(func), std::move(arg), std::move(observer)));
     }
 
-    void push(const sp<WidgetGroup>& widget);
+    void push(sp<WidgetGroup> widgetGroup);
     void pop();
 
     const sp<WidgetGroup>& current() const;

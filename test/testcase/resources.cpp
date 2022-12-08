@@ -17,7 +17,7 @@ public:
         if(!readable)
             return -1;
         const sp<AssetBundle> zip = sp<AssetBundleZipFile>::make(readable, "/");
-        const sp<Readable> fp1 = zip->get("boxes.cpp")->open();
+        const sp<Readable> fp1 = zip->getAsset("boxes.cpp")->open();
         if(!fp1)
             return 1;
         String content = Strings::loadFromReadable(fp1);

@@ -9,10 +9,10 @@ AssetBundleWithFallback::AssetBundleWithFallback(const sp<AssetBundle>& delegate
     DASSERT(_fallback);
 }
 
-sp<Asset> AssetBundleWithFallback::get(const String& name)
+sp<Asset> AssetBundleWithFallback::getAsset(const String& name)
 {
-    const sp<Asset> asset = _delegate->get(name);
-    return asset ? asset : _fallback->get(name);
+    const sp<Asset> asset = _delegate->getAsset(name);
+    return asset ? asset : _fallback->getAsset(name);
 }
 
 sp<AssetBundle> AssetBundleWithFallback::getBundle(const String& path)

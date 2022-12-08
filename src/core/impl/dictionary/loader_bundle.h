@@ -26,7 +26,7 @@ public:
         String fname, fext;
         Strings::rcut(name, fname, fext, '.');
 
-        const sp<Asset> asset = _asset_bundle->get(name);
+        const sp<Asset> asset = _asset_bundle->getAsset(name);
         CHECK(asset, "Asset %s not found", name.c_str());
 
         return getLoader(fext)->load(asset->open());

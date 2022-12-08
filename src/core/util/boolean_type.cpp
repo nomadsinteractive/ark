@@ -143,28 +143,11 @@ bool BooleanType::val(const sp<Boolean>& self)
     return self->val();
 }
 
-void BooleanType::setVal(const sp<Boolean::Impl>& self, bool value)
-{
-    self->set(value);
-}
-
-void BooleanType::setVal(const sp<BooleanWrapper>& self, bool value)
-{
-    self->set(value);
-}
-
 const sp<Boolean>& BooleanType::delegate(const sp<Boolean>& self)
 {
     const sp<BooleanWrapper> ib = self.as<BooleanWrapper>();
-    DWARN(ib, "Non-BooleanWrapper instance has no delegate attribute. This should be an error unless you're inspecting it.");
+    DWARN(ib, "Non-BooleanWrapper instance has no wrapped attribute. This should be an error unless you're inspecting it.");
     return ib ? ib->wrapped() : sp<Boolean>::null();
-}
-
-void BooleanType::setDelegate(const sp<Boolean>& self, const sp<Boolean>& delegate)
-{
-    const sp<BooleanWrapper> ib = self.as<BooleanWrapper>();
-    DCHECK(ib, "Must be a BooleanWrapper instance to set its delegate attribute");
-    ib->set(delegate);
 }
 
 void BooleanType::set(const sp<Boolean::Impl>& self, bool value)

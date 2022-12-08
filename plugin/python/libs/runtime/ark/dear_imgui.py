@@ -1,6 +1,6 @@
 from typing import Optional, Union
 
-from ark import Renderer, Boolean, Observer, Text
+from ark import Renderer, Boolean, Observer, Text, Integer
 
 
 class Widget:
@@ -29,7 +29,7 @@ class WidgetBuilder:
     def __init__(self, renderer):
         pass
 
-    def begin(self, title: str):
+    def begin(self, title: str, is_open: Optional[Boolean] = None):
         pass
 
     def end(self):
@@ -42,6 +42,9 @@ class WidgetBuilder:
         pass
 
     def button(self, title: str) -> Observer:
+        pass
+
+    def input_int(self, label: str, value: Integer, step: int = 1, step_fast: int = 100, flags: int = 0):
         pass
 
     def input_text(self, label: str, text: Text, max_length: int = 64, flags: int = 0):

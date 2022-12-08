@@ -9,7 +9,6 @@
     "glbinding",
     "glm",
     "glslang",
-    "libffi",
     "libpng",
     "libjpeg-turbo",
     "libvorbis",

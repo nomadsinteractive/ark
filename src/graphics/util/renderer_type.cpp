@@ -56,18 +56,18 @@ SafePtr<Size> RendererType::size(const sp<Renderer>& self)
     return SafePtr<Size>();
 }
 
-const sp<Renderer>& RendererType::delegate(const sp<Renderer>& self)
+const sp<Renderer>& RendererType::wrapped(const sp<Renderer>& self)
 {
     const sp<Wrapper<Renderer>> rd = self.as<Wrapper<Renderer>>();
-    DWARN(rd, "Renderer is not an instance of Delegate<Renderer>");
+    WARN(rd, "Renderer is not an instance of Wrapper<Renderer>");
     return rd ? rd->wrapped() : sp<Renderer>::null();
 }
 
-void RendererType::setDelegate(const sp<Renderer>& self, const sp<Renderer>& delegate)
+void RendererType::setWrapped(const sp<Renderer>& self, sp<Renderer> wrapped)
 {
     const sp<Wrapper<Renderer>> rd = self.as<Wrapper<Renderer>>();
-    DCHECK(rd, "Renderer is not an instance of Delegate<Renderer>");
-    rd->reset(delegate);
+    CHECK(rd, "Renderer is not an instance of Wrapper<Renderer>");
+    rd->reset(std::move(wrapped));
 }
 
 sp<Renderer> ark::RendererType::translate(const sp<Renderer>& self, const sp<Vec3>& position)

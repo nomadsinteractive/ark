@@ -73,15 +73,15 @@ public:
         }
     }
 
-    sp<Asset> get(const String& name) const {
+    sp<Asset> getAsset(const String& name) const {
         const URL url(name);
 
         for(const Mounted& i : _mounts) {
-            const sp<Asset> readable = i.open(url);
-            if(readable)
-                return readable;
+            sp<Asset> asset = i.getAsset(url);
+            if(asset)
+                return asset;
         }
-        return _builtin_asset_bundle->get(name);
+        return _builtin_asset_bundle->getAsset(name);
     }
 
     sp<AssetBundle> getAssetBundle(const String& path) const {
@@ -96,7 +96,7 @@ public:
         const sp<AssetBundle> fallback = _builtin_asset_bundle->getBundle(path);
         if(fallback)
             return asset ? sp<AssetBundle>::adopt(new AssetBundleWithFallback(asset, fallback)) : fallback;
-        DCHECK(asset, "AssetBundle \"%s\" doesn't exists", path.c_str());
+        CHECK(asset, "AssetBundle \"%s\" doesn't exists", path.c_str());
         return asset;
     }
 
@@ -104,20 +104,20 @@ private:
     sp<AssetBundle> createAsset(BeanFactory& factory, const ApplicationManifest::Asset& manifest) {
         sp<AssetBundle> asset = manifest._protocol.empty() ? _builtin_asset_bundle->getBundle(manifest._src) :
                                                              factory.build<AssetBundle>(manifest._protocol, manifest._src, {});
-        DWARN(asset, "Unable to load AssetBundle, protocol: %s, src: %s", manifest._protocol.c_str(), manifest._src.c_str());
+        WARN(asset, "Unable to load AssetBundle, protocol: %s, src: %s", manifest._protocol.c_str(), manifest._src.c_str());
         return asset;
     }
 
     class Mounted {
     public:
-        Mounted(const ApplicationManifest::Asset& manifest, const sp<AssetBundle>& asset)
-            : _root(manifest._protocol, manifest._root), _asset_bundle(asset) {
+        Mounted(const ApplicationManifest::Asset& manifest, sp<AssetBundle> asset)
+            : _root(manifest._protocol, manifest._root), _asset_bundle(std::move(asset)) {
         }
 
-        sp<Asset> open(const URL& url) const {
+        sp<Asset> getAsset(const URL& url) const {
             String relpath;
             if(getRelativePath(url, relpath))
-                return _asset_bundle->get(relpath);
+                return _asset_bundle->getAsset(relpath);
             return nullptr;
         }
 
@@ -131,7 +131,7 @@ private:
                     return asset;
 
                 const String filename = relpath.rstrip('/');
-                const sp<Asset> fp = _asset_bundle->get(filename);
+                const sp<Asset> fp = _asset_bundle->getAsset(filename);
                 if(fp)
                     return sp<AssetBundleZipFile>::make(fp->open(), Platform::getRealPath(filename));
             }
@@ -215,7 +215,7 @@ sp<BeanFactory> Ark::createBeanFactory(const String& src) const
 {
     const Global<Dictionary<document>> resources;
     const document doc = resources->get(src);
-    DCHECK(doc, "Resource \"%s\" not found", src.c_str());
+    CHECK(doc, "Resource \"%s\" not found", src.c_str());
     return createBeanFactory(sp<DictionaryByAttributeName>::make(doc, Constants::Attributes::ID));
 }
 
@@ -247,19 +247,19 @@ sp<AssetBundle> Ark::getAssetBundle(const String& path) const
 
 sp<Asset> Ark::getAsset(const String& path) const
 {
-    return _asset_bundle->get(path);
+    return _asset_bundle->getAsset(path);
 }
 
 sp<Readable> Ark::openAsset(const String& path) const
 {
-    const sp<Asset> asset = _asset_bundle->get(path);
-    DCHECK(asset, "Cannot open asset \"%s\"", path.c_str());
+    const sp<Asset> asset = _asset_bundle->getAsset(path);
+    CHECK(asset, "Cannot open asset \"%s\"", path.c_str());
     return asset->open();
 }
 
 sp<Readable> Ark::tryOpenAsset(const String& path) const
 {
-    const sp<Asset> asset = _asset_bundle->get(path);
+    const sp<Asset> asset = _asset_bundle->getAsset(path);
     return asset ? asset->open() : sp<Readable>::null();
 }
 

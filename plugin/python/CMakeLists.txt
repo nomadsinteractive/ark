@@ -32,9 +32,8 @@ include(${ARK_SRC_DIR}/tools/cmake/core.cmake)
 
 get_filename_component(PLUGIN_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR} PATH)
 
-#ark_find_vcpkg_package(libffi LIBRARIES libffi)
-
 #ark_ensure_dependency(3rdparty/Python)
+set(ARK_PYTHON_SRC_DIR 3rdparty/Python)
 #add_subdirectory(python-cmake-buildsystem)
 #ark_link_libraries(${ARK_PYTHON_LIBRARIES})
 
@@ -66,11 +65,13 @@ if(NOT (ANDROID OR IOS))
     ark_add_generated_file(_freeze_importlib ${CMAKE_CURRENT_SOURCE_DIR}/extension/ark_py_importlib.h ${CMAKE_CURRENT_SOURCE_DIR}/extension extension/_ark_bootstrap.py ark_importlib _ark_bootstrap.py)
 endif()
 
+include(extensions.cmake)
+
 ark_setup_tools(ark_gen_plugin_class)
 ark_gen_plugin_class(python core ark::plugin::python python_plugin impl)
 
 ark_include_directories(${ARK_PYTHON_INCLUDE_DIR})
-ark_add_plugin_library(${PROJECT_NAME} ${LOCAL_SRC_LIST} ${LOCAL_GENERATED_SRC_LIST})
+ark_add_plugin_library(${PROJECT_NAME} ${LOCAL_SRC_LIST} ${LOCAL_GENERATED_SRC_LIST} extension_ctypes extension_decimal)
 target_compile_definitions(${PROJECT_NAME} PRIVATE -DARK_FLAG_BUILDING_PLUGIN_PYTHON)
 
 ark_export_dependency_libraries(${PROJECT_NAME} ${ARK_PYTHON_LIBRARIES} ${ARK_PYTHON_PATCH_LIBS})

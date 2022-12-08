@@ -27,13 +27,7 @@ public:
 //[[script::bindings::property]]
     static bool val(const sp<Boolean>& self);
 //[[script::bindings::property]]
-    static void setVal(const sp<Boolean::Impl>& self, bool value);
-//[[script::bindings::property]]
-    static void setVal(const sp<BooleanWrapper>& self, bool value);
-//[[script::bindings::property]]
     static const sp<Boolean>& delegate(const sp<Boolean>& self);
-//[[script::bindings::property]]
-    static void setDelegate(const sp<Boolean>& self, const sp<Boolean>& delegate);
 
 //[[script::bindings::classmethod]]
     static sp<Boolean> negative(const sp<Boolean>& self);

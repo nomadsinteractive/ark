@@ -106,7 +106,7 @@ AssetBundleZipFile::AssetBundleZipFile(const sp<Readable>& zipReadable, const St
 {
 }
 
-sp<Asset> AssetBundleZipFile::get(const String& name)
+sp<Asset> AssetBundleZipFile::getAsset(const String& name)
 {
     zip_int64_t idx = zip_name_locate(_stub->archive(), name.c_str(), 0);
     zip_file_t* zf = idx >= 0 ? zip_fopen_index(_stub->archive(), static_cast<zip_uint64_t>(idx), 0) : nullptr;

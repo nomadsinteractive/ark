@@ -21,7 +21,12 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-extern PyObject* PyInit_ark();
+
+PyMODINIT_FUNC PyInit_ark();
+PyMODINIT_FUNC PyInit__ctypes(void);
+PyMODINIT_FUNC PyInit__ctypes(void);
+PyMODINIT_FUNC PyInit__decimal(void);
+
 #ifdef __cplusplus
 }
 #endif
@@ -45,6 +50,8 @@ PythonScript::PythonScript(const String& name, const document& libraries)
 {
     DSET_THREAD_FLAG();
     PyImport_AppendInittab("ark", PyInit_ark);
+    PyImport_AppendInittab("_ctypes", PyInit__ctypes);
+    PyImport_AppendInittab("_decimal", PyInit__decimal);
     if(!hasInjected())
     {
         memset(_injected_frozen, 0, sizeof(_injected_frozen));

@@ -84,7 +84,7 @@ std::vector<String> StringBundleYAML::getStringArray(const String& resid)
 
 void StringBundleYAML::loadBundle(const String& name)
 {
-    const sp<Asset> asset = _resource->get(name + ".yaml");
+    const sp<Asset> asset = _resource->getAsset(name + ".yaml");
     DCHECK(asset, "Unable to load %s.yaml", name.c_str());
     yaml_parser_t parser;
     if(!yaml_parser_initialize(&parser))
