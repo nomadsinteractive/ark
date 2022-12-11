@@ -47,9 +47,11 @@ public:
     };
 
 public:
-    Mesh(String name, std::vector<element_index_t> indices, std::vector<V3> vertices, sp<Array<UV>> uvs, sp<Array<V3>> normals, sp<Array<Tangent>> tangents, sp<Array<BoneInfo>> boneInfos, sp<Material> material);
+    Mesh(uint32_t id, String name, std::vector<element_index_t> indices, std::vector<V3> vertices, sp<Array<UV>> uvs, sp<Array<V3>> normals, sp<Array<Tangent>> tangents, sp<Array<BoneInfo>> boneInfos, sp<Material> material);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Mesh);
 
+//  [[script::bindings::property]]
+    uint32_t id() const;
 //  [[script::bindings::property]]
     const String& name() const;
 //  [[script::bindings::property]]
@@ -64,13 +66,10 @@ public:
     const sp<Array<V3>>& normals() const;
     const sp<Array<Tangent>>& tangents() const;
 
-//[[script::bindings::property]]
-    const sp<Integer>& nodeId() const;
-    void setNodeId(sp<Integer> nodeId);
-
     void write(VertexWriter& buf) const;
 
 private:
+    uint32_t _id;
     String _name;
     std::vector<element_index_t> _indices;
     std::vector<V3> _vertices;
@@ -79,8 +78,6 @@ private:
     sp<Array<Tangent>> _tangents;
     sp<Array<BoneInfo>> _bone_infos;
     sp<Material> _material;
-
-    sp<Integer> _node_id;
 };
 
 }

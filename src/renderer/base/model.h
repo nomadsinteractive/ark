@@ -19,7 +19,7 @@ class ARK_API Model {
 public:
     Model() = default;
     Model(sp<Input> indices, sp<Vertices> vertices, const Metrics& metrics = Metrics());
-    Model(std::vector<sp<Material>> materials, std::vector<sp<Mesh>> meshes, const Metrics& metrics = Metrics());
+    Model(std::vector<sp<Material>> materials, std::vector<sp<Mesh>> meshes, sp<Node> rootNode, const Metrics& metrics = Metrics());
     DEFAULT_COPY_AND_ASSIGN(Model);
 
     const sp<Input>& indices() const;
@@ -29,6 +29,8 @@ public:
     const std::vector<sp<Material>>& materials() const;
 //[[script::bindings::property]]
     const std::vector<sp<Mesh>>& meshes() const;
+//[[script::bindings::property]]
+    const sp<Node>& rootNode() const;
 
 //[[script::bindings::property]]
     const sp<Metrics>& metrics() const;
@@ -80,7 +82,7 @@ private:
         virtual void write(VertexWriter& buf, const V3& size) override;
 
     private:
-        size_t calcVertexLength(const std::vector<sp<Mesh> >& meshes) const;
+        size_t calcVertexLength(const std::vector<sp<Mesh>>& meshes) const;
 
     private:
         std::vector<sp<Mesh>> _meshes;
@@ -91,6 +93,7 @@ private:
     sp<Input> _indices;
     sp<Vertices> _vertices;
     sp<Metrics> _metrics;
+    sp<Node> _root_node;
     std::vector<sp<Material>> _materials;
     std::vector<sp<Mesh>> _meshes;
     Table<String, sp<Animation>> _animations;

@@ -9,9 +9,9 @@ namespace ark {
 namespace plugin {
 namespace assimp {
 
-struct Node {
-    Node();
-    Node(uint32_t id, const aiMatrix4x4& offset);
+struct AnimationNode {
+    AnimationNode();
+    AnimationNode(uint32_t id, const aiMatrix4x4& offset);
 
     uint32_t _id;
     aiMatrix4x4 _offset;

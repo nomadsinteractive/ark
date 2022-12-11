@@ -15,10 +15,18 @@ namespace ark {
 
 class ARK_API ModelBundle : public ModelLoader {
 public:
-    struct ModelInfo {
+    struct MeshLayout {
+        sp<Mesh> _mesh;
+        size_t _vertex_offset;
+        size_t _index_offset;
+    };
+
+    struct ModelLayout {
         sp<Model> _model;
         size_t _vertex_offset;
         size_t _index_offset;
+
+        std::vector<MeshLayout> _mesh_layouts;
     };
 
 private:
@@ -28,13 +36,13 @@ private:
         void import(BeanFactory& factory, const document& manifest, const Scope& args);
 
         sp<Model> importModel(const Manifest& manifest, const sp<Importer>& importer);
-        ModelInfo& addModel(int32_t type, sp<Model> model);
-        const ModelInfo& ensureModelInfo(int32_t type) const;
+        ModelLayout& addModel(int32_t type, sp<Model> model);
+        const ModelLayout& ensureModelLayout(int32_t type) const;
 
         sp<MaterialBundle> _material_bundle;
         sp<Importer> _importer;
 
-        Table<int32_t, ModelInfo> _models;
+        Table<int32_t, ModelLayout> _model_layouts;
         size_t _vertex_length;
         size_t _index_length;
     };
@@ -79,7 +87,7 @@ public:
     virtual void initialize(ShaderBindings& shaderBindings) override;
     virtual sp<Model> loadModel(int32_t type) override;
 
-    const ModelInfo& ensureModelInfo(int32_t type) const;
+    const ModelLayout& ensureModelInfo(int32_t type) const;
 
 //[[script::bindings::auto]]
     sp<Model> getModel(int32_t type);
@@ -94,7 +102,7 @@ public:
 //[[script::bindings::property]]
     size_t indexLength() const;
 
-    const Table<int32_t, ModelInfo>& models() const;
+    const Table<int32_t, ModelLayout>& modelLayouts() const;
 
 //  [[plugin::builder]]
     class BUILDER : public Builder<ModelBundle> {

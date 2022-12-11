@@ -15,8 +15,8 @@ void Ball::apply(b2Body* body, const sp<Size>& size, const BodyCreateInfo& creat
 {
     b2CircleShape shape;
 
-    DWARN(size->width() == size->height(), "RigidBody size: (%.2f, %.2f) is not a circle", size->width(), size->height());
-    shape.m_radius = (size->width() + size->height()) / 4.0f;
+    DWARN(size->widthAsFloat() == size->heightAsFloat(), "RigidBody size: (%.2f, %.2f) is not a circle", size->widthAsFloat(), size->heightAsFloat());
+    shape.m_radius = (size->widthAsFloat() + size->heightAsFloat()) / 4.0f;
 
     b2FixtureDef fixtureDef = createInfo.toFixtureDef(&shape);
     body->CreateFixture(&fixtureDef);

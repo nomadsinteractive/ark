@@ -17,8 +17,9 @@ namespace ark {
 class ARK_API Vec4Impl final : public Vec4, public Holder {
 public:
     Vec4Impl() noexcept;
+    Vec4Impl(sp<Numeric> v) noexcept;
     Vec4Impl(float x, float y, float z, float w) noexcept;
-    Vec4Impl(const sp<Numeric>& x, const sp<Numeric>& y, const sp<Numeric>& z, const sp<Numeric>& w) noexcept;
+    Vec4Impl(sp<Numeric> x, sp<Numeric> y, sp<Numeric> z, sp<Numeric> w) noexcept;
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Vec4Impl);
 
     virtual V4 val() override;

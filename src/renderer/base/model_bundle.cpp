@@ -8,6 +8,7 @@
 
 #include "renderer/base/atlas.h"
 #include "renderer/base/material_bundle.h"
+#include "renderer/base/mesh.h"
 #include "renderer/base/texture_packer.h"
 #include "renderer/inf/vertices.h"
 #include "renderer/impl/render_command_composer/rcc_multi_draw_elements_indirect.h"
@@ -40,9 +41,9 @@ void ModelBundle::initialize(ShaderBindings& /*shaderBindings*/)
 {
 }
 
-const ModelBundle::ModelInfo& ModelBundle::ensureModelInfo(int32_t type) const
+const ModelBundle::ModelLayout& ModelBundle::ensureModelInfo(int32_t type) const
 {
-    return _stub->ensureModelInfo(type);
+    return _stub->ensureModelLayout(type);
 }
 
 sp<Model> ModelBundle::loadModel(int32_t type)
@@ -52,8 +53,8 @@ sp<Model> ModelBundle::loadModel(int32_t type)
 
 sp<Model> ModelBundle::getModel(int32_t type)
 {
-    const auto iter = _stub->_models.find(type);
-    return iter != _stub->_models.end() ? iter->second._model : nullptr;
+    const auto iter = _stub->_model_layouts.find(type);
+    return iter != _stub->_model_layouts.end() ? iter->second._model : nullptr;
 }
 
 void ModelBundle::importModel(int32_t type, const String& src, sp<Future> future)
@@ -68,9 +69,9 @@ void ModelBundle::importModel(int32_t type, const Manifest& manifest, sp<Future>
     applicationContext.executorPooled()->execute(task);
 }
 
-const Table<int32_t, ModelBundle::ModelInfo>& ModelBundle::models() const
+const Table<int32_t, ModelBundle::ModelLayout>& ModelBundle::modelLayouts() const
 {
-    return _stub->_models;
+    return _stub->_model_layouts;
 }
 
 size_t ModelBundle::vertexLength() const
@@ -99,21 +100,30 @@ sp<Model> ModelBundle::Stub::importModel(const Manifest& manifest, const sp<Impo
     return sp<Model>::make((importer ? importer : _importer)->import(manifest, _material_bundle));
 }
 
-ModelBundle::ModelInfo& ModelBundle::Stub::addModel(int32_t type, sp<Model> model)
+ModelBundle::ModelLayout& ModelBundle::Stub::addModel(int32_t type, sp<Model> model)
 {
-    ModelInfo& modelInfo = _models[type];
+    ModelLayout& modelInfo = _model_layouts[type];
     modelInfo._model = std::move(model);
     modelInfo._vertex_offset = _vertex_length;
     modelInfo._index_offset = _index_length;
+    size_t meshVertexOffset = _vertex_length;
+    size_t meshIndexOffset = _index_length;
+    for(const sp<Mesh>& i : modelInfo._model->meshes())
+    {
+        MeshLayout ml = {i, meshVertexOffset, meshIndexOffset};
+        meshVertexOffset += i->vertexLength();
+        meshIndexOffset += i->indices().size();
+        modelInfo._mesh_layouts.push_back(std::move(ml));
+    }
     _vertex_length += modelInfo._model->vertexCount();
     _index_length += modelInfo._model->indexCount();
     return modelInfo;
 }
 
-const ModelBundle::ModelInfo& ModelBundle::Stub::ensureModelInfo(int32_t type) const
+const ModelBundle::ModelLayout& ModelBundle::Stub::ensureModelLayout(int32_t type) const
 {
-    const auto iter = _models.find(type);
-    CHECK(iter != _models.end(), "Model not found, type: %d", type);
+    const auto iter = _model_layouts.find(type);
+    CHECK(iter != _model_layouts.end(), "Model not found, type: %d", type);
     return iter->second;
 }
 

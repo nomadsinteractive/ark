@@ -11,7 +11,7 @@
 
 namespace ark {
 
-//  [[script::bindings::class("Vec2")]]
+//[[script::bindings::class("Vec2")]]
 class ARK_API Vec2Type final : public VecType<V2, Vec2Impl> {
 public:
 //  [[script::bindings::constructor]]
@@ -35,9 +35,11 @@ public:
 //  [[script::bindings::operator(/)]]
     static sp<Vec2> truediv(sp<Vec2> lvalue, float rvalue);
 //  [[script::bindings::operator(/)]]
+    static sp<Vec2> truediv(sp<Vec2> lvalue, sp<Numeric> rvalue);
+//  [[script::bindings::operator(/)]]
     static sp<Vec2> truediv(sp<Vec2> lvalue, sp<Vec2> rvalue);
 //  [[script::bindings::operator(/)]]
-    static sp<Vec2> truediv(sp<Vec2> lvalue, sp<Numeric> rvalue);
+    static sp<Vec2> truediv(sp<Vec2> lvalue, const V2& rvalue);
 //  [[script::bindings::operator(//)]]
     static sp<Vec2> floordiv(sp<Vec2> lvalue, float rvalue);
 //  [[script::bindings::operator(//)]]
@@ -85,9 +87,15 @@ public:
     static void setY(const sp<Vec2>& self, sp<Numeric> y);
 
 //  [[script::bindings::classmethod]]
-    static void fix(sp<Vec2> self);
+    static sp<Size> toSize(const sp<Vec2>& self);
+//  [[script::bindings::property]]
+    static V2 xy(const sp<Vec2>& self);
+
 //  [[script::bindings::classmethod]]
     static sp<Vec2> freeze(sp<Vec2> self);
+
+//  [[script::bindings::classmethod]]
+    static sp<Size> toSize(const sp<Vec2>& self);
 
 //  [[script::bindings::classmethod]]
     static sp<Vec2> wrap(sp<Vec2> self);
@@ -103,6 +111,8 @@ public:
 //  [[script::bindings::classmethod]]
     static sp<Vec2> modCeil(sp<Vec2> self, sp<Vec2> mod);
 
+//  [[script::bindings::classmethod]]
+    static sp<Vec2> lerp(sp<Vec2> self, sp<Vec2> b, sp<Numeric> t = nullptr);
 //  [[script::bindings::classmethod]]
     static sp<Vec2> sod(sp<Vec2> self, float k, float z, float r, sp<Numeric> t = nullptr);
 
@@ -121,16 +131,9 @@ public:
 //  [[script::bindings::classmethod]]
     static sp<Vec4> extend(sp<Vec2> self, sp<Vec2> zw);
 //  [[script::bindings::classmethod]]
-    static sp<Size> toSize(const sp<Vec2>& self);
-//  [[script::bindings::classmethod]]
     static sp<Vec2> fence(sp<Vec2> self, sp<Vec3> plane, sp<Observer> observer);
 //  [[script::bindings::classmethod]]
     static sp<Numeric> atan2(sp<Vec2> self);
-
-//  [[script::bindings::property]]
-    static V2 xy(const sp<Vec2>& self);
-//  [[script::bindings::property]]
-    static void setXy(const sp<Vec2>& self, const V2& xy);
 };
 
 }

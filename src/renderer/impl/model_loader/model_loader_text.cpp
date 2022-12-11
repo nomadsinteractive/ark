@@ -43,7 +43,7 @@ void ModelLoaderText::initialize(ShaderBindings& shaderBindings)
 
 sp<Model> ModelLoaderText::loadModel(int32_t type)
 {
-    GlyphModel& glyph = _glyph_bundle->ensureGlyphModel(Ark::instance().appClock()->tick(), type, true);
+    const GlyphModel& glyph = _glyph_bundle->ensureGlyphModel(Ark::instance().appClock()->tick(), type, true);
     return glyph._model;
 }
 
@@ -72,16 +72,19 @@ bool ModelLoaderText::GlyphBundle::prepareOne(uint64_t timestamp, int32_t c, int
         const Alphabet::Metrics& metrics = optMetrics.value();
         int32_t width = metrics.width;
         int32_t height = metrics.height;
-        DCHECK(width > 0 && height > 0, "Error loading character %d: width = %d, height = %d", c, width, height);
+        CHECK(width > 0 && height > 0, "Error loading character %d: width = %d, height = %d", c, width, height);
         const MaxRectsBinPack::Rect packedBounds = _atlas_attachment._bin_pack.Insert(metrics.bitmap_width, metrics.bitmap_height, MaxRectsBinPack::RectBestShortSideFit);
         if(packedBounds.height != metrics.bitmap_height)
             return false;
 
-        _alphabet->draw(c, _atlas_attachment._glyph_bitmap, packedBounds.x, packedBounds.y);
+        uint32_t cx = packedBounds.x;
+        uint32_t cy = packedBounds.y;
+        _alphabet->draw(c, _atlas_attachment._glyph_bitmap, cx, cy);
 
-        Atlas::Item item = _atlas_attachment._atlas.makeItem(packedBounds.x, packedBounds.y, packedBounds.x + metrics.bitmap_width, packedBounds.y + metrics.bitmap_height, Rect(0, 0, 1.0f, 1.0f), V2(metrics.bitmap_width, metrics.bitmap_height), V2(0));
+        const V2 charSize(static_cast<float>(metrics.bitmap_width), static_cast<float>(metrics.bitmap_height));
+        Atlas::Item item = _atlas_attachment._atlas.makeItem(cx, cy, cx + metrics.bitmap_width, cy + metrics.bitmap_height, Rect(0, 0, 1.0f, 1.0f), charSize, V2(0));
         V3 bounds(static_cast<float>(metrics.width), static_cast<float>(metrics.height), 0);
-        V3 size(static_cast<float>(metrics.bitmap_width), static_cast<float>(metrics.bitmap_height), 0);
+        V3 size(charSize, 0);
         V3 xyz = V3(static_cast<float>(metrics.bitmap_x), static_cast<float>(metrics.bitmap_y), 0);
         _glyphs[kc] = GlyphModel(sp<Model>::make(_atlas_attachment._unit_model.indices(), sp<VerticesQuad>::make(item), Metrics(bounds, size, xyz)), timestamp);
     }

@@ -8,7 +8,7 @@
 
 #include "graphics/base/mat.h"
 
-#include "assimp/base/node.h"
+#include "assimp/base/animation_node.h"
 
 namespace ark {
 namespace plugin {
@@ -18,13 +18,13 @@ class NodeTable {
 public:
 
     bool hasNode(const String& name) const;
-    Node& ensureNode(const String& name, const aiMatrix4x4& transform);
+    AnimationNode& ensureNode(const String& name, const aiMatrix4x4& transform);
 
-    const Table<String, Node>& nodes() const;
-    Table<String, Node>& nodes();
+    const Table<String, AnimationNode>& nodes() const;
+    Table<String, AnimationNode>& nodes();
 
 private:
-    Table<String, Node> _nodes;
+    Table<String, AnimationNode> _nodes;
 };
 
 }

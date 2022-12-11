@@ -22,7 +22,7 @@ System requirements
 
 Building
 --------------
-Things would be much easier if you've already bean familiar with CMake building system.
+Things would be much easier if you've already been familiar with CMake building system.
 
 
 > cmake -G "Unix Makefiles" path_to_src
@@ -42,7 +42,7 @@ Android
 
 Dependencies
 --------------
-This project uses Vcpkg to maintain its dependencies. Please visit their [github page](https://github.com/microsoft/vcpkg) for more informations.
+This project uses Vcpkg to maintain its dependencies. Please visit their [GitHub page](https://github.com/microsoft/vcpkg) for more informations.
 
 * [freetype](http://www.freetype.org)
 * [glbinding](http://www.glbinding.org) (Desktop applications only)

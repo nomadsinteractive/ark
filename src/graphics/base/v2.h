@@ -47,8 +47,8 @@ public:
     V2 floorDiv(const V2& other) const;
     V2 normalize() const;
 
-    const float& operator[](int32_t p) const;
-    float& operator[](int32_t p);
+    const float& operator[](size_t idx) const;
+    float& operator[](size_t idx);
 
 protected:
     void initialize(const std::initializer_list<float>& values, size_t len);

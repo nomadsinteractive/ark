@@ -77,12 +77,12 @@ V3 RigidBody::xyz() const
 
 float RigidBody::width() const
 {
-    return _stub->_size->width();
+    return _stub->_size->widthAsFloat();
 }
 
 float RigidBody::height() const
 {
-    return _stub->_size->height();
+    return _stub->_size->heightAsFloat();
 }
 
 const sp<Vec3>& RigidBody::position() const

@@ -30,7 +30,7 @@ void AtlasImporterMaxRects::import(Atlas& atlas, const sp<Readable>& /*readable*
         const String& src = Documents::ensureAttribute(i, Constants::Attributes::SRC);
         int32_t type = Documents::ensureAttribute<int32_t>(i, Constants::Attributes::TYPE);
         const RectI rect = texturePacker.addBitmap(binPack, src);
-        atlas.add(type, rect.left(), rect.top(), rect.right(), rect.bottom(), Rect(0, 0, 1.0f, 1.0f), V2(rect.width(), rect.height()), V2(0.5f, 0.5f));
+        atlas.add(type, rect.left(), rect.top(), rect.right(), rect.bottom(), Rect(0, 0, 1.0f, 1.0f), V2(static_cast<float>(rect.width()), static_cast<float>(rect.height())), V2(0.5f, 0.5f));
     }
     texturePacker.updateTexture();
 }

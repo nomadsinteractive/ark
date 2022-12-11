@@ -26,6 +26,7 @@ class Mesh;
 class Model;
 class ModelLoader;
 class ModelBundle;
+class Node;
 class Pipeline;
 class PipelineFactory;
 class PipelineInput;

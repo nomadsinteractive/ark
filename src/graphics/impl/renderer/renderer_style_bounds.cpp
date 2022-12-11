@@ -20,7 +20,7 @@ RendererStyleBounds::RendererStyleBounds(const sp<Renderer>& renderer, const sp<
 void RendererStyleBounds::render(RenderRequest& renderRequest, const V3& position)
 {
     _renderer->render(renderRequest, position);
-    _bounds->set(V4(position.x(), position.y(), position.x() + _size->width(), position.y() + _size->height()));
+    _bounds->set(V4(position.x(), position.y(), position.x() + _size->widthAsFloat(), position.y() + _size->heightAsFloat()));
 }
 
 RendererStyleBounds::STYLE::STYLE(BeanFactory& factory, const sp<Builder<Renderer>>& delegate, const String& value)

@@ -28,16 +28,16 @@ namespace assimp {
 
 class AnimationAssimpNodes : public Animation {
 public:
-    typedef std::function<aiMatrix4x4(const Node& node, const aiMatrix4x4& globalTransformation)> NodeLoaderCallback;
+    typedef std::function<aiMatrix4x4(const AnimationNode& node, const aiMatrix4x4& globalTransformation)> NodeLoaderCallback;
 
-    AnimationAssimpNodes(float tps, const aiAnimation* animation, const aiNode* rootNode, const aiMatrix4x4& globalTransform, Table<String, Node>& nodes, const NodeLoaderCallback& callback);
+    AnimationAssimpNodes(float tps, const aiAnimation* animation, const aiNode* rootNode, const aiMatrix4x4& globalTransform, Table<String, AnimationNode>& nodes, const NodeLoaderCallback& callback);
 
     virtual sp<AnimationInput> makeInput(sp<Numeric> tick) override;
     virtual const std::vector<String>& nodeNames() override;
 
 private:
-    static void loadHierarchy(float tick, const aiNode* node, const aiAnimation* animation, const aiMatrix4x4& parentTransform, Table<String, Node>& nodes, const NodeLoaderCallback& callback, AnimationFrame& output);
-    static void loadNodeHierarchy(float tick, const aiNode* node, const aiAnimation* animation, const aiMatrix4x4& parentTransform, Table<String, Node>& nodes, const NodeLoaderCallback& callback);
+    static void loadHierarchy(float tick, const aiNode* node, const aiAnimation* animation, const aiMatrix4x4& parentTransform, Table<String, AnimationNode>& nodes, const NodeLoaderCallback& callback, AnimationFrame& output);
+    static void loadNodeHierarchy(float tick, const aiNode* node, const aiAnimation* animation, const aiMatrix4x4& parentTransform, Table<String, AnimationNode>& nodes, const NodeLoaderCallback& callback);
 
 private:
     uint32_t _duration_in_ticks;

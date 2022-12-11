@@ -151,16 +151,14 @@ V2 V2::normalize() const
     return V2(_x / hypot, _y / hypot);
 }
 
-const float& V2::operator[](int32_t p) const
+const float& V2::operator[](size_t idx) const
 {
-    DCHECK(p >= 0, "Index out bounds: %d", p);
-    return reinterpret_cast<const float*>(this)[p];
+    return reinterpret_cast<const float*>(this)[idx];
 }
 
-float& V2::operator[](int32_t p)
+float& V2::operator[](size_t idx)
 {
-    DCHECK(p >=0, "Index out bounds: %d", p);
-    return reinterpret_cast<float*>(this)[p];
+    return reinterpret_cast<float*>(this)[idx];
 }
 
 void V2::initialize(const std::initializer_list<float>& values, size_t len)

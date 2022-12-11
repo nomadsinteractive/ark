@@ -16,13 +16,18 @@ Vec3Impl::Vec3Impl() noexcept
 {
 }
 
+Vec3Impl::Vec3Impl(sp<Numeric> v) noexcept
+    : _x(sp<NumericWrapper>::make(v)), _y(sp<NumericWrapper>::make(v)), _z(sp<NumericWrapper>::make(std::move(v)))
+{
+}
+
 Vec3Impl::Vec3Impl(float x, float y, float z) noexcept
     : _x(sp<NumericWrapper>::make(x)), _y(sp<NumericWrapper>::make(y)), _z(sp<NumericWrapper>::make(z))
 {
 }
 
-Vec3Impl::Vec3Impl(const sp<Numeric>& x, const sp<Numeric>& y, const sp<Numeric>& z) noexcept
-    : _x(sp<NumericWrapper>::make(x)), _y(sp<NumericWrapper>::make(y)), _z(sp<NumericWrapper>::make(z))
+Vec3Impl::Vec3Impl(sp<Numeric> x, sp<Numeric> y, sp<Numeric> z) noexcept
+    : _x(sp<NumericWrapper>::make(std::move(x))), _y(sp<NumericWrapper>::make(std::move(y))), _z(sp<NumericWrapper>::make(std::move(z)))
 {
 }
 

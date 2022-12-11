@@ -85,12 +85,12 @@ void GLTexture::clear(GraphicsContext& /*graphicsContext*/)
 
 int32_t GLTexture::width() const
 {
-    return static_cast<int32_t>(_size->width());
+    return static_cast<int32_t>(_size->widthAsFloat());
 }
 
 int32_t GLTexture::height() const
 {
-    return static_cast<int32_t>(_size->height());
+    return static_cast<int32_t>(_size->heightAsFloat());
 }
 
 uint32_t GLTexture::target() const

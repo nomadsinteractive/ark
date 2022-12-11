@@ -232,16 +232,16 @@ private:
         PyList_SetItem(pyTuple, 1, toPyObject(value.second));
         return pyTuple;
     }
-    template<typename T> static PyObject* toPyObject_sfinae(const T& value, typename std::enable_if<std::is_enum<T>::value>::type*) {
+    template<typename T> static PyObject* toPyObject_sfinae(const T& value, std::enable_if_t<std::is_enum<T>::value>*) {
         return PyLong_FromLong(static_cast<int32_t>(value));
     }
-    template<typename T> static PyObject* toPyObject_sfinae(const T& value, typename std::enable_if<std::is_integral<T>::value && !std::is_same<T, bool>::value && std::is_signed<T>::value>::type*) {
+    template<typename T> static PyObject* toPyObject_sfinae(const T& value, std::enable_if_t<std::is_integral<T>::value && !std::is_same<T, bool>::value && std::is_signed<T>::value>*) {
         return PyLong_FromLong(value);
     }
-    template<typename T> static PyObject* toPyObject_sfinae(const T& value, typename std::enable_if<std::is_integral<T>::value && !std::is_same<T, bool>::value && std::is_unsigned<T>::value>::type*) {
+    template<typename T> static PyObject* toPyObject_sfinae(const T& value, std::enable_if_t<std::is_integral<T>::value && !std::is_same<T, bool>::value && std::is_unsigned<T>::value>*) {
         return PyLong_FromUnsignedLong(static_cast<uint32_t>(value));
     }
-    template<typename T> static PyObject* toPyObject_sfinae(const T& value, typename std::enable_if<std::is_floating_point<T>::value>::type*) {
+    template<typename T> static PyObject* toPyObject_sfinae(const T& value, std::enable_if_t<std::is_floating_point<T>::value>*) {
         return PyFloat_FromDouble(value);
     }
     template<typename T> static PyObject* toPyObject_sfinae(const T& value, ...) {

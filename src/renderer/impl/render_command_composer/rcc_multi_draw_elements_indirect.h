@@ -1,6 +1,7 @@
 #ifndef ARK_RENDERER_IMPL_RENDER_COMMAND_COMPOSER_RCC_MULTI_DRAW_ELEMENTS_INDIRECT_H_
 #define ARK_RENDERER_IMPL_RENDER_COMMAND_COMPOSER_RCC_MULTI_DRAW_ELEMENTS_INDIRECT_H_
 
+#include <vector>
 #include <unordered_map>
 
 #include "core/collection/table.h"
@@ -23,9 +24,9 @@ public:
     virtual sp<RenderCommand> compose(const RenderRequest& renderRequest, RenderLayer::Snapshot& snapshot) override;
 
 private:
-    struct IndirectCmd {
+    struct IndirectCmds {
         DrawingContext::DrawElementsIndirectCommand _command;
-        std::vector<size_t> _snapshot_offsets;
+        std::vector<size_t> _snapshot_indices;
     };
 
 private:
@@ -39,7 +40,7 @@ private:
     Buffer _indices;
     Buffer _draw_indirect;
 
-    Table<int32_t, IndirectCmd> _indirect_cmds;
+    Table<uint64_t, IndirectCmds> _indirect_cmds;
 };
 
 }

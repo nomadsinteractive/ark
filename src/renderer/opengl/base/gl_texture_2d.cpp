@@ -27,8 +27,8 @@ GLTexture2D::~GLTexture2D()
 
 bool GLTexture2D::download(GraphicsContext& /*graphicsContext*/, Bitmap& bitmap)
 {
-    DCHECK(static_cast<uint32_t>(_size->width()) == bitmap.width() && static_cast<uint32_t>(_size->height()) == bitmap.height(), "Size mismatch: texture(%d, %d) vs bitmap(%d, %d)",
-           static_cast<uint32_t>(_size->width()), static_cast<uint32_t>(_size->height()), bitmap.width(), bitmap.height());
+    DCHECK(static_cast<uint32_t>(_size->widthAsFloat()) == bitmap.width() && static_cast<uint32_t>(_size->heightAsFloat()) == bitmap.height(), "Size mismatch: texture(%d, %d) vs bitmap(%d, %d)",
+           static_cast<uint32_t>(_size->widthAsFloat()), static_cast<uint32_t>(_size->heightAsFloat()), bitmap.width(), bitmap.height());
     GLenum textureFormat = GLUtil::getTextureFormat(Texture::USAGE_COLOR_ATTACHMENT, Texture::FORMAT_AUTO, bitmap.channels());
     GLenum pixelType = GLUtil::getPixelType(Texture::FORMAT_AUTO, bitmap);
 #ifdef ARK_PLATFORM_ANDROID

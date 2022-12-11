@@ -268,7 +268,7 @@ float Characters::getFlowY() const
 {
     if(!_layout_param || _layout_direction > 0)
         return 0;
-    return _layout_param->size()->height() + _line_height;
+    return _layout_param->size()->heightAsFloat() + _line_height;
 }
 
 std::vector<Characters::LayoutChar> Characters::getCharacterMetrics(const GlyphContents& glyphs) const

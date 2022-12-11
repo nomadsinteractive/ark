@@ -20,13 +20,13 @@ IrradianceCubemapUploader::IrradianceCubemapUploader(sp<Bitmap> bitmap, sp<Size>
 
 void IrradianceCubemapUploader::initialize(GraphicsContext& graphicsContext, Texture::Delegate& delegate)
 {
-    DCHECK(_size->width() == _size->height(), "Cubemap should be square, but (%.2f, %.2f) provided", _size->width(), _size->height());
+    DCHECK(_size->widthAsFloat() == _size->heightAsFloat(), "Cubemap should be square, but (%.2f, %.2f) provided", _size->widthAsFloat(), _size->heightAsFloat());
     DCHECK(delegate.type() == Texture::TYPE_CUBEMAP, "This uploader uploads bitmaps to a cubmap, not Texture::Type(%d)", delegate.type());
 
     ::cmft::Image input;
     ::cmft::imageConvert(input, ::cmft::TextureFormat::RGBA32F, CMFTUtil::bitmapToImage(_bitmap));
 
-    uint32_t n = static_cast<uint32_t>(_size->width());
+    uint32_t n = static_cast<uint32_t>(_size->widthAsFloat());
     ::cmft::Image output;
     ::cmft::imageCreate(output, n, n, 0, 1, 6, ::cmft::TextureFormat::RGBA32F);
     ::cmft::imageToCubemap(input);

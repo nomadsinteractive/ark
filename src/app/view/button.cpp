@@ -38,7 +38,7 @@ void Button::render(RenderRequest& renderRequest, const V3& position)
             const sp<Size>& size = block ? static_cast<const sp<Size>&>(block->size()) : sp<Size>::null();
             if(size)
             {
-                Rect target = GravityLayout::place(_gravity, _layout_param->size()->width(), _layout_param->size()->height(), size->width(), size->height());
+                Rect target = GravityLayout::place(_gravity, _layout_param->size()->widthAsFloat(), _layout_param->size()->heightAsFloat(), size->widthAsFloat(), size->heightAsFloat());
                 fg->render(renderRequest, position + V3(target.left(), target.top(), 0));
             }
             else

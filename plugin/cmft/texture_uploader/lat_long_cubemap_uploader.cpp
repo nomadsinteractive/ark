@@ -20,7 +20,7 @@ LatLongCubemapUploader::LatLongCubemapUploader(sp<Bitmap> bitmap, sp<Size> size)
 
 void LatLongCubemapUploader::initialize(GraphicsContext& graphicsContext, Texture::Delegate& delegate)
 {
-    DCHECK(_size->width() == _size->height(), "Cubemap should be square, but (%.2f, %.2f) provided", _size->width(), _size->height());
+    DCHECK(_size->widthAsFloat() == _size->heightAsFloat(), "Cubemap should be square, but (%.2f, %.2f) provided", _size->widthAsFloat(), _size->heightAsFloat());
     DCHECK(delegate.type() == Texture::TYPE_CUBEMAP, "This uploader uploads bitmaps to a cubmap, not Texture::Type(%d)", delegate.type());
     DWARN(_bitmap->width() == _bitmap->height() * 2, "LatLong bitmap's size should be (2n, n), but got (%d, %d)", _bitmap->width(), _bitmap->height());
 
@@ -33,7 +33,7 @@ void LatLongCubemapUploader::initialize(GraphicsContext& graphicsContext, Textur
     input.m_numMips = 1;
     input.m_numFaces = 1;
 
-    uint32_t n = static_cast<uint32_t>(_size->width());
+    uint32_t n = static_cast<uint32_t>(_size->widthAsFloat());
 
     ::cmft::Image output;
     ::cmft::imageCubemapFromLatLong(output, input);

@@ -14,7 +14,7 @@
 namespace ark {
 
 VerticalScrollable::VerticalScrollable(const sp<RendererMaker>& tileMaker, const sp<Numeric>& scroller, const sp<Size>& size, int32_t tileHeight, uint32_t itemCount)
-    : _tile_maker(tileMaker),  _tiles(itemCount), _scroller(scroller), _size(size), _height(static_cast<int32_t>(_size->height())), _tile_height(tileHeight), _scroll_position(static_cast<int32_t>(scroller->val())),
+    : _tile_maker(tileMaker),  _tiles(itemCount), _scroller(scroller), _size(size), _height(static_cast<int32_t>(_size->heightAsFloat())), _tile_height(tileHeight), _scroll_position(static_cast<int32_t>(scroller->val())),
       _grid_position(lower(_scroll_position))
 {
     scrollTo(static_cast<int32_t>(_scroller->val()));
@@ -116,7 +116,7 @@ VerticalScrollable::BUILDER::BUILDER(BeanFactory& factory, const document& manif
 sp<Renderer> VerticalScrollable::BUILDER::build(const Scope& args)
 {
     const sp<Size> size = _size->build(args);
-    return sp<VerticalScrollable>::make(_renderer_maker->build(args), _scroller->build(args), size, _tile_height, _rows ? _rows : (static_cast<int32_t>(size->height()) - 1) / _tile_height  + 2);
+    return sp<VerticalScrollable>::make(_renderer_maker->build(args), _scroller->build(args), size, _tile_height, _rows ? _rows : (static_cast<int32_t>(size->heightAsFloat()) - 1) / _tile_height  + 2);
 }
 
 }

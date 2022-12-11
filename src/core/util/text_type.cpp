@@ -58,26 +58,21 @@ public:
     }
 
 private:
-    template<typename T = String, typename... ARGS> bool tryUpdate(const String& name, const Box& box, uint64_t timestamp) {
-        if(std::is_same_v<T, String>)
-            return false;
-
+    template<typename T, typename... ARGS> bool tryUpdate(const String& name, const Box& box, uint64_t timestamp) {
         sp<Variable<T>> var = box.as<Variable<T>>();
         if(var) {
             bool dirty = timestamp ? var->update(timestamp) : true;
-            if(dirty)
-                _values[name] = toString_sfinae(var->val(), nullptr);
+            if(dirty) {
+                if constexpr(std::is_same_v<T, sp<String>>)
+                    _values[name] = *var->val();
+                else
+                    _values[name] = Strings::toString<T>(var->val());
+            }
             return dirty;
         }
-        return tryUpdate<ARGS...>(name, box, timestamp);
-    }
-
-    template<typename T> static String toString_sfinae(const T& val, decltype(Strings::toString<T>)*) {
-        return Strings::toString<T>(val);
-    }
-
-    template<typename T> static String toString_sfinae(const T& val, std::enable_if_t<std::is_same_v<T, sp<String>>>*) {
-        return val->val();
+        if constexpr(sizeof...(ARGS) > 0)
+            return tryUpdate<ARGS...>(name, box, timestamp);
+        return false;
     }
 
     String doFormat() const {

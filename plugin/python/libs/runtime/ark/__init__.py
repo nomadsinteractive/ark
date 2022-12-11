@@ -1642,23 +1642,31 @@ class Math:
 
 
 class Size(Vec3):
-    def __init__(self, width, height, depth=None):
+    def __init__(self, width: Union[float, Numeric], height: Union[float, Numeric], depth: Union[float, Numeric, None] = None):
         super().__init__(width, height, depth)
 
     @property
-    def width(self):
-        return 0
+    def width(self) -> Numeric:
+        return self.x
 
     @width.setter
-    def width(self, width):
+    def width(self, width: Union[float, Numeric]):
         pass
 
     @property
-    def height(self):
-        return 0
+    def height(self) -> Numeric:
+        return self.y
 
     @height.setter
-    def height(self, height):
+    def height(self, height: Union[float, Numeric]):
+        pass
+
+    @property
+    def depth(self) -> Numeric:
+        return self.z
+
+    @depth.setter
+    def depth(self, depth: Union[float, Numeric]):
         pass
 
 

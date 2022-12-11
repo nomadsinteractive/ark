@@ -19,7 +19,7 @@ void GLEquirectangularCubemapUploader::initialize(GraphicsContext& graphicsConte
 {
     DCHECK(delegate.type() == Texture::TYPE_CUBEMAP, "This uploader uploads bitmaps to a cubmap, not Texture::Type(%d)", delegate.type());
     GLUtil::renderCubemap(graphicsContext, static_cast<uint32_t>(delegate.id()), _render_controller, _shader_bindings->getPipeline(graphicsContext), _texture,
-                          static_cast<int32_t>(_size->width()), static_cast<int32_t>(_size->height()));
+                          static_cast<int32_t>(_size->widthAsFloat()), static_cast<int32_t>(_size->heightAsFloat()));
 }
 
 GLEquirectangularCubemapUploader::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

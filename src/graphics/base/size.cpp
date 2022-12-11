@@ -26,8 +26,8 @@ Size::Size(float width, float height, float depth)
 {
 }
 
-Size::Size(const sp<Numeric>& width, const sp<Numeric>& height, const sp<Numeric>& depth)
-    : _impl(sp<Vec3Impl>::make(width, height, depth))
+Size::Size(sp<Numeric> width, sp<Numeric> height, sp<Numeric> depth)
+    : _impl(sp<Vec3Impl>::make(std::move(width), std::move(height), std::move(depth)))
 {
 }
 
@@ -46,7 +46,7 @@ void Size::traverse(const Holder::Visitor& visitor)
     HolderUtil::visit(_impl, visitor);
 }
 
-float Size::width() const
+float Size::widthAsFloat() const
 {
     return _impl->x()->val();
 }
@@ -61,7 +61,7 @@ void Size::setWidth(const sp<Numeric>& width)
     _impl->x()->set(width);
 }
 
-float Size::height() const
+float Size::heightAsFloat() const
 {
     return _impl->y()->val();
 }
@@ -76,7 +76,7 @@ void Size::setHeight(const sp<Numeric>& height)
     _impl->y()->set(height);
 }
 
-float Size::depth() const
+float Size::depthAsFloat() const
 {
     return _impl->z()->val();
 }
@@ -91,31 +91,26 @@ void Size::setDepth(const sp<Numeric>& depth)
     _impl->z()->set(depth);
 }
 
-const sp<Numeric> Size::vwidth() const
+sp<Numeric> Size::width() const
 {
     return _impl->x();
 }
 
-const sp<Numeric> Size::vheight() const
+sp<Numeric> Size::height() const
 {
     return _impl->y();
 }
 
-const sp<Numeric> Size::vdepth() const
+sp<Numeric> Size::depth() const
 {
     return _impl->z();
 }
 
-void Size::adopt(const Size& other)
+void Size::set(const Size& other)
 {
-    setWidth(other.vwidth());
-    setHeight(other.vheight());
-    setDepth(other.vdepth());
-}
-
-void Size::fix()
-{
-    _impl->fix();
+    setWidth(other.width());
+    setHeight(other.height());
+    setDepth(other.depth());
 }
 
 const sp<Vec3Impl>& Size::impl() const

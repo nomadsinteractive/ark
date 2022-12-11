@@ -127,7 +127,7 @@ sp<Vec2> PyCast::toVec2(PyObject* object, bool alert)
     {
         const sp<Size> size = toSharedPtrOrNull<Size>(object);
         if(size)
-            vec2 = Vec2Type::create(size->vwidth(), size->vheight());
+            vec2 = Vec2Type::create(size->width(), size->height());
     }
 
     CHECK(vec2 || !alert, "Cannot cast <%s> to <Vec2>", Py_TYPE(object)->tp_name);

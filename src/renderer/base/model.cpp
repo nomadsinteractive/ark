@@ -15,8 +15,8 @@ Model::Model(sp<Input> indices, sp<Vertices> vertices, const Metrics& metrics)
 {
 }
 
-Model::Model(std::vector<sp<Material>> materials, std::vector<sp<Mesh>> meshes, const Metrics& metrics)
-    : _indices(sp<InputMeshIndices>::make(meshes)), _vertices(sp<MeshVertices>::make(meshes)), _materials(std::move(materials)), _meshes(std::move(meshes)), _metrics(sp<Metrics>::make(metrics))
+Model::Model(std::vector<sp<Material>> materials, std::vector<sp<Mesh>> meshes, sp<Node> rootNode, const Metrics& metrics)
+    : _indices(sp<InputMeshIndices>::make(meshes)), _vertices(sp<MeshVertices>::make(meshes)), _metrics(sp<Metrics>::make(metrics)), _root_node(std::move(rootNode)), _materials(std::move(materials)), _meshes(std::move(meshes))
 {
 }
 
@@ -38,6 +38,11 @@ const std::vector<sp<Material>>& Model::materials() const
 const std::vector<sp<Mesh>>& Model::meshes() const
 {
     return _meshes;
+}
+
+const sp<Node>& Model::rootNode() const
+{
+    return _root_node;
 }
 
 const sp<Metrics>& Model::metrics() const

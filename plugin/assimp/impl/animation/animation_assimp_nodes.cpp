@@ -10,7 +10,7 @@ namespace ark {
 namespace plugin {
 namespace assimp {
 
-AnimationAssimpNodes::AnimationAssimpNodes(float tps, const aiAnimation* animation, const aiNode* rootNode, const aiMatrix4x4& globalTransform, Table<String, Node>& nodes, const NodeLoaderCallback& callback)
+AnimationAssimpNodes::AnimationAssimpNodes(float tps, const aiAnimation* animation, const aiNode* rootNode, const aiMatrix4x4& globalTransform, Table<String, AnimationNode>& nodes, const NodeLoaderCallback& callback)
     : Animation(static_cast<float>(animation->mDuration), tps), _nodes(sp<Table<String, uint32_t>>::make()), _animation_frames(sp<std::vector<AnimationFrame>>::make())
 {
     aiMatrix4x4 globalInversedTransform = rootNode->mTransformation * globalTransform;
@@ -42,17 +42,17 @@ const std::vector<String>& AnimationAssimpNodes::nodeNames()
     return _nodes->keys();
 }
 
-void AnimationAssimpNodes::loadHierarchy(float tick, const aiNode* node, const aiAnimation* animation, const aiMatrix4x4& transform, Table<String, Node>& nodes, const NodeLoaderCallback& callback, std::vector<M4>& output)
+void AnimationAssimpNodes::loadHierarchy(float tick, const aiNode* node, const aiAnimation* animation, const aiMatrix4x4& transform, Table<String, AnimationNode>& nodes, const NodeLoaderCallback& callback, std::vector<M4>& output)
 {
     loadNodeHierarchy(tick, node, animation, aiMatrix4x4(), nodes, callback);
-    for(Node& i : nodes.values())
+    for(AnimationNode& i : nodes.values())
     {
         const aiMatrix4x4 finalMatrix = transform * i._intermediate;
         output.push_back(M4(finalMatrix).transpose());
     }
 }
 
-void AnimationAssimpNodes::loadNodeHierarchy(float tick, const aiNode* node, const aiAnimation* animation, const aiMatrix4x4& parentTransform, Table<String, Node>& nodes, const NodeLoaderCallback& callback)
+void AnimationAssimpNodes::loadNodeHierarchy(float tick, const aiNode* node, const aiAnimation* animation, const aiMatrix4x4& parentTransform, Table<String, AnimationNode>& nodes, const NodeLoaderCallback& callback)
 {
     const String nodeName(node->mName.data);
     const aiNodeAnim* pNodeAnim = AnimateUtil::findNodeAnim(animation, nodeName);

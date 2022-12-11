@@ -28,12 +28,12 @@ const sp<Size>& Tileset::tileSize() const
 
 float Tileset::tileWidth() const
 {
-    return _tile_size->width();
+    return _tile_size->widthAsFloat();
 }
 
 float Tileset::tileHeight() const
 {
-    return _tile_size->height();
+    return _tile_size->heightAsFloat();
 }
 
 void Tileset::addTile(sp<Tile> t)

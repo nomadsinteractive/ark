@@ -16,13 +16,18 @@ Vec4Impl::Vec4Impl() noexcept
 {
 }
 
+Vec4Impl::Vec4Impl(sp<Numeric> v) noexcept
+    : _x(sp<NumericWrapper>::make(v)), _y(sp<NumericWrapper>::make(v)), _z(sp<NumericWrapper>::make(v)), _w(sp<NumericWrapper>::make(std::move(v)))
+{
+}
+
 Vec4Impl::Vec4Impl(float x, float y, float z, float w) noexcept
     : _x(sp<NumericWrapper>::make(x)), _y(sp<NumericWrapper>::make(y)), _z(sp<NumericWrapper>::make(z)), _w(sp<NumericWrapper>::make(w))
 {
 }
 
-Vec4Impl::Vec4Impl(const sp<Numeric>& x, const sp<Numeric>& y, const sp<Numeric>& z, const sp<Numeric>& w) noexcept
-    : _x(sp<NumericWrapper>::make(x)), _y(sp<NumericWrapper>::make(y)), _z(sp<NumericWrapper>::make(z)), _w(sp<NumericWrapper>::make(w))
+Vec4Impl::Vec4Impl(sp<Numeric> x, sp<Numeric> y, sp<Numeric> z, sp<Numeric> w) noexcept
+    : _x(sp<NumericWrapper>::make(std::move(x))), _y(sp<NumericWrapper>::make(std::move(y))), _z(sp<NumericWrapper>::make(std::move(z))), _w(sp<NumericWrapper>::make(std::move(w)))
 {
 }
 

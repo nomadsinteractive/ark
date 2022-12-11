@@ -13,7 +13,7 @@ namespace box2d {
 void Box::apply(b2Body* body, const sp<Size>& size, const BodyCreateInfo& createInfo)
 {
     b2PolygonShape shape;
-    shape.SetAsBox(size->width() / 2.0f, size->height() / 2.0f);
+    shape.SetAsBox(size->widthAsFloat() / 2.0f, size->heightAsFloat() / 2.0f);
 
     b2FixtureDef fixtureDef = createInfo.toFixtureDef(&shape);
     body->CreateFixture(&fixtureDef);

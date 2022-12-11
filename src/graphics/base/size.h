@@ -19,45 +19,41 @@ class ARK_API Size : public Vec3, public Holder {
 public:
     Size();
     Size(const V3& size);
+//  [[script::bindings::auto]]
     Size(float width, float height, float depth = 0);
 //  [[script::bindings::auto]]
-    Size(const sp<Numeric>& width, const sp<Numeric>& height, const sp<Numeric>& depth = nullptr);
+    Size(sp<Numeric> width, sp<Numeric> height, sp<Numeric> depth = nullptr);
 
     virtual V3 val() override;
     virtual bool update(uint64_t timestamp) override;
 
     virtual void traverse(const Visitor& visitor) override;
 
+    float widthAsFloat() const;
+    float heightAsFloat() const;
+    float depthAsFloat() const;
+
 //  [[script::bindings::property]]
-    float width() const;
+    sp<Numeric> width() const;
 //  [[script::bindings::property]]
     void setWidth(float width);
 //  [[script::bindings::property]]
     void setWidth(const sp<Numeric>& width);
 //  [[script::bindings::property]]
-    float height() const;
+    sp<Numeric> height() const;
 //  [[script::bindings::property]]
     void setHeight(float height);
 //  [[script::bindings::property]]
     void setHeight(const sp<Numeric>& height);
 //  [[script::bindings::property]]
-    float depth() const;
+    sp<Numeric> depth() const;
 //  [[script::bindings::property]]
     void setDepth(float depth);
 //  [[script::bindings::property]]
     void setDepth(const sp<Numeric>& depth);
 
-//  [[script::bindings::property]]
-    const sp<Numeric> vwidth() const;
-//  [[script::bindings::property]]
-    const sp<Numeric> vheight() const;
-//  [[script::bindings::property]]
-    const sp<Numeric> vdepth() const;
-
 //  [[script::bindings::auto]]
-    void adopt(const Size& other);
-//  [[script::bindings::auto]]
-    void fix();
+    void set(const Size& other);
 
     const sp<Vec3Impl>& impl() const;
 

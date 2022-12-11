@@ -9,117 +9,136 @@
 
 #include "graphics/forwarding.h"
 #include "graphics/base/v4.h"
+#include "graphics/impl/vec/vec4_impl.h"
+#include "graphics/util/vec_type.h"
 
 namespace ark {
 
-//  [[script::bindings::class("Vec4")]]
-class ARK_API Vec4Type final {
+//[[script::bindings::class("Vec4")]]
+class ARK_API Vec4Type final : public VecType<V4, Vec4Impl> {
 public:
 //  [[script::bindings::constructor]]
     static sp<Vec4> create(float x, float y, float z, float w);
 //  [[script::bindings::constructor]]
-    static sp<Vec4> create(const sp<Numeric>& x, const sp<Numeric>& y, const sp<Numeric>& z, const sp<Numeric>& w);
-
+    static sp<Vec4> create(sp<Numeric> x, sp<Numeric> y, sp<Numeric> z, sp<Numeric> w);
+/**
 //  [[script::bindings::operator(+)]]
-    static sp<Vec4> add(const sp<Vec4>& lvalue, const sp<Vec4>& rvalue);
+    static sp<Vec4> add(sp<Vec4> lvalue, const V4& rvalue);
+//  [[script::bindings::operator(+)]]
+    static sp<Vec4> add(sp<Vec4> lvalue, sp<Vec4> rvalue);
 //  [[script::bindings::operator(-)]]
-    static sp<Vec4> sub(const sp<Vec4>& lvalue, const sp<Vec4>& rvalue);
+    static sp<Vec4> sub(sp<Vec4> lvalue, sp<Vec4> rvalue);
 //  [[script::bindings::operator(*)]]
-    static sp<Vec4> mul(const sp<Vec4>& lvalue, const sp<Vec4>& rvalue);
+    static sp<Vec4> mul(sp<Vec4> lvalue, sp<Vec4> rvalue);
+//  [[script::bindings::operator(*)]]
+    static sp<Vec4> mul(sp<Vec4> lvalue, float rvalue);
+//  [[script::bindings::operator(*)]]
+    static sp<Vec4> mul(sp<Numeric> lvalue, sp<Vec4> rvalue);
+//  [[script::bindings::operator(*)]]
+    static sp<Vec4> mul(sp<Vec4> lvalue, sp<Numeric> rvalue);
 //  [[script::bindings::operator(/)]]
-    static sp<Vec4> truediv(const sp<Vec4>& lvalue, const sp<Vec4>& rvalue);
+    static sp<Vec4> truediv(sp<Vec4> lvalue, float rvalue);
+//  [[script::bindings::operator(/)]]
+    static sp<Vec4> truediv(sp<Vec4> lvalue, sp<Numeric> rvalue);
+//  [[script::bindings::operator(/)]]
+    static sp<Vec4> truediv(sp<Vec4> lvalue, sp<Vec4> rvalue);
+//  [[script::bindings::operator(/)]]
+    static sp<Vec4> truediv(sp<Vec4> lvalue, const V4& rvalue);
 //  [[script::bindings::operator(//)]]
-    static sp<Vec4> floordiv(const sp<Vec4>& self, const sp<Vec4>& rvalue);
+    static sp<Vec4> floordiv(sp<Vec4> lvalue, float rvalue);
+//  [[script::bindings::operator(//)]]
+    static sp<Vec4> floordiv(sp<Vec4> lvalue, sp<Numeric> rvalue);
+//  [[script::bindings::operator(//)]]
+    static sp<Vec4> floordiv(sp<Vec4> lvalue, sp<Vec4> rvalue);
 //  [[script::bindings::operator(neg)]]
-    static sp<Vec4> negative(const sp<Vec4>& self);
+    static sp<Vec4> negative(sp<Vec4> self);
 //  [[script::bindings::operator(abs)]]
-    static sp<Vec4> absolute(const sp<Vec4>& self);
+    static sp<Vec4> absolute(sp<Vec4> self);
 
 //  [[script::bindings::classmethod]]
-    static sp<Vec4> transform(const sp<Vec4>& self, const sp<Transform>& transform, const sp<Vec4>& org);
+    static sp<Vec4> normalize(sp<Vec4> self);
 //  [[script::bindings::classmethod]]
-    static sp<Vec4> integral(const sp<Vec4>& self, const sp<Numeric>& t = nullptr);
+    static sp<Vec4> integral(sp<Vec4> self, sp<Numeric> t = nullptr);
+//  [[script::bindings::classmethod]]
+    static sp<Vec4> integralS2(sp<Vec4> self, const V4& s0, const Optional<V4>& s1 = Optional<V4>(), sp<Numeric> t = nullptr);
 
 //  [[script::bindings::classmethod]]
-    static sp<Numeric> distanceTo(const sp<Vec4>& self, const sp<Vec4>& other);
+    static sp<Numeric> distanceTo(sp<Vec4> self, sp<Vec4> other);
 
 //  [[script::bindings::classmethod]]
     static void set(const sp<VariableWrapper<V4>>& self, const V4& val);
 //  [[script::bindings::classmethod]]
-    static void set(const sp<VariableWrapper<V4>>& self, const sp<Vec4>& val);
+    static void set(const sp<VariableWrapper<V4>>& self, sp<Vec4> val);
 //  [[script::bindings::classmethod]]
     static void set(const sp<Vec4>& self, const V4& val);
 
 //  [[script::bindings::property]]
     static V4 val(const sp<Vec4>& self);
-//  [[script::bindings::property]]
-    static V3 xyz(const sp<Vec4>& self);
-//  [[script::bindings::property]]
-    static V2 xy(const sp<Vec4>& self);
-//  [[script::bindings::property]]
-    static void setXy(const sp<Vec4>& self, const V2& xy);
 
 //  [[script::bindings::property]]
-    static float x(const sp<Vec4>& self);
+    static sp<Numeric> x(const sp<Vec4>& self);
 //  [[script::bindings::property]]
     static void setX(const sp<Vec4>& self, float x);
 //  [[script::bindings::property]]
-    static void setX(const sp<Vec4>& self, const sp<Numeric>& x);
+    static void setX(const sp<Vec4>& self, sp<Numeric> x);
 //  [[script::bindings::property]]
-    static float y(const sp<Vec4>& self);
+    static sp<Numeric> y(const sp<Vec4>& self);
 //  [[script::bindings::property]]
     static void setY(const sp<Vec4>& self, float y);
 //  [[script::bindings::property]]
-    static void setY(const sp<Vec4>& self, const sp<Numeric>& y);
+    static void setY(const sp<Vec4>& self, sp<Numeric> y);
 //  [[script::bindings::property]]
-    static float z(const sp<Vec4>& self);
+    static sp<Numeric> z(const sp<Vec4>& self);
 //  [[script::bindings::property]]
     static void setZ(const sp<Vec4>& self, float z);
 //  [[script::bindings::property]]
-    static void setZ(const sp<Vec4>& self, const sp<Numeric>& z);
+    static void setZ(const sp<Vec4>& self, sp<Numeric> z);
+**/
 //  [[script::bindings::property]]
     static float w(const sp<Vec4>& self);
 //  [[script::bindings::property]]
     static void setW(const sp<Vec4>& self, float w);
 //  [[script::bindings::property]]
-    static void setW(const sp<Vec4>& self, const sp<Numeric>& w);
+    static void setW(const sp<Vec4>& self, sp<Numeric> w);
+/**
+
 //  [[script::bindings::property]]
-    static sp<Numeric> vx(const sp<Vec4>& self);
+    static V2 xy(const sp<Vec4>& self);
 //  [[script::bindings::property]]
-    static sp<Numeric> vy(const sp<Vec4>& self);
-//  [[script::bindings::property]]
-    static sp<Numeric> vz(const sp<Vec4>& self);
-//  [[script::bindings::property]]
-    static sp<Numeric> vw(const sp<Vec4>& self);
+    static V2 xyz(const sp<Vec4>& self);
 
 //  [[script::bindings::classmethod]]
-    static void fix(const sp<Vec4>& self);
-//  [[script::bindings::classmethod]]
-    static sp<Vec4> freeze(const sp<Vec4>& self);
+    static sp<Vec4> freeze(sp<Vec4> self);
 
 //  [[script::bindings::classmethod]]
-    static sp<Vec4> wrap(const sp<Vec4>& self);
-//  [[script::bindings::classmethod]]
-    static sp<Vec4> synchronize(const sp<Vec4>& self, const sp<Boolean>& disposed = nullptr);
+    static sp<Size> toSize(const sp<Vec4>& self);
 
 //  [[script::bindings::classmethod]]
-    static sp<Vec4> modFloor(const sp<Vec4>& self, const sp<Numeric>& mod);
+    static sp<Vec4> wrap(sp<Vec4> self);
 //  [[script::bindings::classmethod]]
-    static sp<Vec4> modFloor(const sp<Vec4>& self, const sp<Vec4>& mod);
-//  [[script::bindings::classmethod]]
-    static sp<Vec4> modCeil(const sp<Vec4>& self, const sp<Numeric>& mod);
-//  [[script::bindings::classmethod]]
-    static sp<Vec4> modCeil(const sp<Vec4>& self, const sp<Vec4>& mod);
+    static sp<Vec4> synchronize(sp<Vec4> self, sp<Boolean> disposed = nullptr);
 
 //  [[script::bindings::classmethod]]
-    static sp<Vec4> lerp(const sp<Vec4>& self, const sp<Vec4>& b, const sp<Numeric>& t);
+    static sp<Vec4> modFloor(sp<Vec4> self, sp<Numeric> mod);
+//  [[script::bindings::classmethod]]
+    static sp<Vec4> modFloor(sp<Vec4> self, sp<Vec4> mod);
+//  [[script::bindings::classmethod]]
+    static sp<Vec4> modCeil(sp<Vec4> self, sp<Numeric> mod);
+//  [[script::bindings::classmethod]]
+    static sp<Vec4> modCeil(sp<Vec4> self, sp<Vec4> mod);
 
+//  [[script::bindings::classmethod]]
+    static sp<Vec4> lerp(sp<Vec4> self, sp<Vec4> b, sp<Numeric> t = nullptr);
 //  [[script::bindings::classmethod]]
     static sp<Vec4> sod(sp<Vec4> self, float k, float z, float r, sp<Numeric> t = nullptr);
 
-private:
-    static sp<Vec4Impl> ensureImpl(const sp<Vec4>& self);
+//  [[script::bindings::classmethod]]
+    static sp<Vec4> ifElse(sp<Vec4> self, sp<Boolean> condition, sp<Vec4> otherwise);
 
+//  [[script::bindings::property]]
+    static sp<Vec4> wrapped(const sp<Vec4>& self);
+
+**/
 };
 
 }

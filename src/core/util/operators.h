@@ -212,9 +212,9 @@ public:
         }
     };
 
-    template<typename T, typename U> class RandomAccess {
+    template<typename T, typename U> class Subscript {
     public:
-        RandomAccess(int32_t idx)
+        Subscript(int32_t idx)
             : _idx(idx) {
         }
 

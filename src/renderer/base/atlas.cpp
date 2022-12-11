@@ -20,6 +20,8 @@
 
 namespace ark {
 
+static const uint32_t UV_NORMALIZE_RANGE = static_cast<uint32_t>(std::numeric_limits<uint16_t>::max());
+
 Atlas::Atlas(sp<Texture> texture, bool allowDefaultItem)
     : _texture(std::move(texture)), _allow_default_item(allowDefaultItem)
 {
@@ -160,14 +162,14 @@ const Atlas::Item& Atlas::at(int32_t id) const
 Rect Atlas::getOriginalPosition(int32_t id) const
 {
     const Atlas::Item& item = at(id);
-    float nw = _texture->width() / 65536.0f;
-    float nh = _texture->height() / 65536.0f;
+    float nw = _texture->width() / static_cast<float>(UV_NORMALIZE_RANGE);
+    float nh = _texture->height() / static_cast<float>(UV_NORMALIZE_RANGE);
     return Rect(item.ux() * nw, item.vy() * nh, item.vx() * nw, item.uy() * nh);
 }
 
 uint16_t Atlas::unnormalize(uint32_t x, uint32_t s)
 {
-    return static_cast<uint16_t>(std::min<uint32_t>(x * 65536 / s, std::numeric_limits<uint16_t>::max()));
+    return static_cast<uint16_t>(std::min<uint32_t>(x * UV_NORMALIZE_RANGE / s, UV_NORMALIZE_RANGE));
 }
 
 Atlas::Item Atlas::makeItem(uint32_t ux, uint32_t uy, uint32_t vx, uint32_t vy, const Rect& bounds, const V2& size, const V2& pivot) const
@@ -288,7 +290,7 @@ const V2& Atlas::Item::pivot() const
 
 Rect Atlas::Item::uv() const
 {
-    return Rect(_ux / 65536.0f, _uy / 65536.0f, _vx / 65536.0f, _vy / 65536.0f);
+    return Rect(_ux / static_cast<float>(UV_NORMALIZE_RANGE), _uy / static_cast<float>(UV_NORMALIZE_RANGE), _vx / static_cast<float>(UV_NORMALIZE_RANGE), _vy / static_cast<float>(UV_NORMALIZE_RANGE));
 }
 
 uint16_t Atlas::Item::ux() const

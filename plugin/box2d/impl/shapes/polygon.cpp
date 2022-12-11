@@ -22,7 +22,7 @@ void Polygon::apply(b2Body* body, const sp<Size>& size, const BodyCreateInfo& cr
     b2PolygonShape shape;
     b2Vec2* vecs = new b2Vec2[_vertices.size()];
     for(uint32_t i = 0; i < _vertices.size(); i ++)
-        vecs[i].Set(_vertices[i].x() * size->width() / 2.0f, _vertices[i].y() * size->height() / 2.0f);
+        vecs[i].Set(_vertices[i].x() * size->widthAsFloat() / 2.0f, _vertices[i].y() * size->heightAsFloat() / 2.0f);
     shape.Set(vecs, static_cast<int32_t>(_vertices.size()));
     delete[] vecs;
 

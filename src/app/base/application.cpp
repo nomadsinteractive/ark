@@ -77,7 +77,7 @@ private:
 }
 
 Application::Application(const sp<ApplicationDelegate>& applicationDelegate, const sp<ApplicationContext>& applicationContext, uint32_t surfaceWidth, uint32_t surfaceHeight, const Viewport& viewport)
-    : _application_delegate(applicationDelegate), _application_context(applicationContext), _viewport(viewport), _surface_size(sp<Size>::make(surfaceWidth, surfaceHeight)),
+    : _application_delegate(applicationDelegate), _application_context(applicationContext), _viewport(viewport), _surface_size(sp<Size>::make(static_cast<float>(surfaceWidth), static_cast<float>(surfaceHeight))),
       _surface_updater_pre_created(sp<OnSurfaceUpdatePreCreated>::make(_application_context)), _surface_updater(_surface_updater_pre_created.get())
 {
 }
@@ -216,7 +216,7 @@ bool Application::onEvent(const Event& event)
 
 V2 Application::toViewportPosition(const V2& xy) const
 {
-    return V2(_viewport.toViewportX(xy.x(), _surface_size->width()), _viewport.toViewportY(xy.y(), _surface_size->height()));
+    return V2(_viewport.toViewportX(xy.x(), _surface_size->widthAsFloat()), _viewport.toViewportY(xy.y(), _surface_size->heightAsFloat()));
 }
 
 }

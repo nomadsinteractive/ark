@@ -25,7 +25,7 @@ namespace {
 class BlankUploader : public Texture::Uploader {
 public:
     BlankUploader(Size& size, Texture::Format format)
-        : _bitmap(static_cast<uint32_t>(size.width()), static_cast<uint32_t>(size.height()), static_cast<uint32_t>(size.width()) * RenderUtil::getComponentSize(format),
+        : _bitmap(static_cast<uint32_t>(size.widthAsFloat()), static_cast<uint32_t>(size.heightAsFloat()), static_cast<uint32_t>(size.widthAsFloat()) * RenderUtil::getComponentSize(format),
                   (format & Texture::FORMAT_RGBA) + 1, false) {
     }
 
@@ -80,17 +80,17 @@ uint64_t Texture::id()
 
 int32_t Texture::width() const
 {
-    return static_cast<int32_t>(_size->width());
+    return static_cast<int32_t>(_size->widthAsFloat());
 }
 
 int32_t Texture::height() const
 {
-    return static_cast<int32_t>(_size->height());
+    return static_cast<int32_t>(_size->heightAsFloat());
 }
 
 int32_t Texture::depth() const
 {
-    return static_cast<int32_t>(_size->depth());
+    return static_cast<int32_t>(_size->depthAsFloat());
 }
 
 const sp<Size>& Texture::size() const
@@ -255,7 +255,7 @@ sp<Texture> Texture::BUILDER::build(const Scope& args)
        return _resource_loader_context->textureBundle()->createTexture(*src, parameters);
 
     const sp<Size> size = _factory.ensureConcreteClassBuilder<Size>(_manifest, Constants::Attributes::SIZE)->build(args);
-    DCHECK(size->width() != 0 && size->height() != 0, "Cannot build texture from \"%s\"", Documents::toString(_manifest).c_str());
+    DCHECK(size->widthAsFloat() != 0 && size->heightAsFloat() != 0, "Cannot build texture from \"%s\"", Documents::toString(_manifest).c_str());
     sp<Texture::Uploader> uploader = _uploader->build(args);
     return _resource_loader_context->renderController()->createTexture(size, parameters, uploader ? std::move(uploader) : makeBlankUploader(size, parameters), static_cast<RenderController::UploadStrategy>(_upload_strategy));
 }

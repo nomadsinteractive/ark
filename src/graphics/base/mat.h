@@ -15,7 +15,7 @@ template<uint32_t S> class Mat {
 public:
     Mat() = default;
     template<typename T> Mat(const T& other) {
-        DCHECK(sizeof(_value) == sizeof(T), "Matrix size unmatch: %d != %d", sizeof(_value), sizeof(T));
+        CHECK(sizeof(_value) == sizeof(T), "Matrix size unmatch: %d != %d", sizeof(_value), sizeof(T));
         memcpy(_value, &other, sizeof(_value));
     }
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Mat);

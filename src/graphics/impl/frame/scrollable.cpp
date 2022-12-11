@@ -85,12 +85,12 @@ void Scrollable::update()
 
 int32_t Scrollable::width() const
 {
-    return static_cast<int32_t>(_size->width());
+    return static_cast<int32_t>(_size->widthAsFloat());
 }
 
 int32_t Scrollable::height() const
 {
-    return static_cast<int32_t>(_size->height());
+    return static_cast<int32_t>(_size->heightAsFloat());
 }
 
 Scrollable::RendererPool::RendererPool(int32_t rendererWidth, int32_t rendererHeight)

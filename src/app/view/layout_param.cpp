@@ -28,28 +28,28 @@ LayoutParam::LayoutParam(const sp<Size>& size, LayoutParam::Display display, Gra
 float LayoutParam::calcLayoutWidth(float available)
 {
     const V4 margins = _margins.val();
-    if(isMatchParent(_size->width()))
+    if(isMatchParent(_size->widthAsFloat()))
     {
         _size->setWidth(available - margins.w() - margins.y());
         return available;
     }
-    return _size->width() + margins.w() + margins.y();
+    return _size->widthAsFloat() + margins.w() + margins.y();
 }
 
 float LayoutParam::calcLayoutHeight(float available)
 {
     const V4 margins = _margins.val();
-    if(isMatchParent(_size->height()))
+    if(isMatchParent(_size->heightAsFloat()))
     {
         _size->setHeight(available - margins.x() - margins.z());
         return available;
     }
-    return _size->height() + margins.x() + margins.z();
+    return _size->heightAsFloat() + margins.x() + margins.z();
 }
 
 float LayoutParam::contentWidth() const
 {
-    return std::max(_size->width(), 0.0f);
+    return std::max(_size->widthAsFloat(), 0.0f);
 }
 
 float LayoutParam::offsetWidth() const
@@ -65,7 +65,7 @@ void LayoutParam::setContentWidth(float contentWidth)
 
 float LayoutParam::contentHeight() const
 {
-    return std::max(_size->height(), 0.0f);
+    return std::max(_size->heightAsFloat(), 0.0f);
 }
 
 float LayoutParam::offsetHeight() const
@@ -151,12 +151,12 @@ bool LayoutParam::isWrapContent() const
 
 bool LayoutParam::isWidthWrapContent() const
 {
-    return isWrapContent(_size->width());
+    return isWrapContent(_size->widthAsFloat());
 }
 
 bool LayoutParam::isHeightWrapContent() const
 {
-    return isWrapContent(_size->height());
+    return isWrapContent(_size->heightAsFloat());
 }
 
 bool LayoutParam::isMatchParent() const
@@ -166,12 +166,12 @@ bool LayoutParam::isMatchParent() const
 
 bool LayoutParam::isWidthMatchParent() const
 {
-    return isMatchParent(_size->width());
+    return isMatchParent(_size->widthAsFloat());
 }
 
 bool LayoutParam::isHeightMatchParent() const
 {
-    return isMatchParent(_size->height());
+    return isMatchParent(_size->heightAsFloat());
 }
 
 bool LayoutParam::isMatchParent(float unit)

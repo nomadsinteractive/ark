@@ -53,7 +53,8 @@ sp<RenderObject> Glyph::toRenderObject() const
 
 sp<Vec3> Glyph::toRenderObjectPosition() const
 {
-    return _position ? Vec3Type::add(_position, _layout_position) : sp<Vec3>::make<Vec3::Const>(_layout_position);
+    sp<Vec3> layoutPosition = sp<Vec3>::make<Vec3::Const>(_layout_position);
+    return _position ? Vec3Type::add(_position, std::move(layoutPosition)) : layoutPosition;
 }
 
 wchar_t Glyph::character() const

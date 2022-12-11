@@ -48,14 +48,14 @@ sp<RigidBody> ColliderBullet::createBody(Collider::BodyType type, int32_t shapeI
         switch(shapeId)
         {
         case Collider::BODY_SHAPE_BOX:
-            btShape = new btBoxShape(btVector3(size->width() / 2, size->height() / 2, size->depth() / 2));
+            btShape = new btBoxShape(btVector3(size->widthAsFloat() / 2, size->heightAsFloat() / 2, size->depthAsFloat() / 2));
             break;
         case Collider::BODY_SHAPE_BALL:
-            btShape = new btSphereShape(size->width() / 2);
+            btShape = new btSphereShape(size->widthAsFloat() / 2);
             break;
         case Collider::BODY_SHAPE_CAPSULE:
-            DWARN(size->height() > size->width(), "When constructing a capsule shape, its height(%.2f) needs be greater than its width(%.2f)", size->height(), size->width());
-            btShape = new btCapsuleShapeZ(size->width() / 2, size->height() - size->width());
+            DWARN(size->heightAsFloat() > size->widthAsFloat(), "When constructing a capsule shape, its height(%.2f) needs be greater than its width(%.2f)", size->heightAsFloat(), size->widthAsFloat());
+            btShape = new btCapsuleShapeZ(size->widthAsFloat() / 2, size->heightAsFloat() - size->widthAsFloat());
             break;
         default:
             DFATAL("Undefined RigidBody(%d) in this world", shapeId);

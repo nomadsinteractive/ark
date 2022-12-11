@@ -28,8 +28,8 @@ TilemapLayer::TilemapLayer(sp<Tileset> tileset, String name, uint32_t rowCount, 
 
 bool TilemapLayer::getSelectionTileRange(const Rect& aabb, V3& selectionPosition, RectI& selectionRange) const
 {
-    float width = _size->width();
-    float height = _size->height();
+    float width = _size->widthAsFloat();
+    float height = _size->heightAsFloat();
     const V3 pos = _stub->_position.val();
     float tileWidth = _stub->_tileset->tileWidth(), tileHeight = _stub->_tileset->tileHeight();
 

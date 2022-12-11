@@ -20,8 +20,8 @@ int main(int argc, const char* argv[])
         const sp<ApplicationManifest> manifest = sp<ApplicationManifest>::make("manifest.xml");
         const Ark ark(argc, argv, manifest);
         const sp<Size>& renderResolution = manifest->rendererResolution();
-        SDLApplication app(sp<ApplicationDelegateImpl>::make(manifest), ark.applicationContext(), static_cast<uint32_t>(renderResolution->width() * scale),
-                           static_cast<uint32_t>(renderResolution->height() * scale), manifest);
+        SDLApplication app(sp<ApplicationDelegateImpl>::make(manifest), ark.applicationContext(), static_cast<uint32_t>(renderResolution->widthAsFloat() * scale),
+                           static_cast<uint32_t>(renderResolution->heightAsFloat() * scale), manifest);
         return app.run();
     }
     catch(const std::exception& ex)

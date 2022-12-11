@@ -256,7 +256,7 @@ int SDLApplication::run()
 
     SDL_ShowCursor((_window_flag & ApplicationManifest::WINDOW_FLAG_SHOW_CURSOR) ? SDL_ENABLE : SDL_DISABLE);
 
-    _main_window = SDL_CreateWindow(name(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, static_cast<int32_t>(_surface_size->width()), static_cast<int32_t>(_surface_size->height()), toSDLWindowFlag(_application_context, _window_flag));
+    _main_window = SDL_CreateWindow(name(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, static_cast<int32_t>(_surface_size->widthAsFloat()), static_cast<int32_t>(_surface_size->heightAsFloat()), toSDLWindowFlag(_application_context, _window_flag));
     if(!_main_window)
     {
         /* Die if creation failed */

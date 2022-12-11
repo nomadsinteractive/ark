@@ -11,7 +11,7 @@
 namespace ark {
 
 HorizontalScrollable::HorizontalScrollable(const sp<RendererMaker>& tileMaker, const sp<Numeric>& scroller, const sp<Size>& size, int32_t tileWidth, uint32_t itemCount)
-    : _tile_maker(tileMaker), _tiles(itemCount), _scroller(scroller), _size(size), _width(static_cast<int32_t >(_size->width())), _tile_width(tileWidth),
+    : _tile_maker(tileMaker), _tiles(itemCount), _scroller(scroller), _size(size), _width(static_cast<int32_t >(_size->widthAsFloat())), _tile_width(tileWidth),
       _scroll_position(std::numeric_limits<int32_t>::min()), _grid_position(0)
 {
     scrollTo(static_cast<int32_t>(_scroller->val()));
@@ -99,7 +99,7 @@ sp<Renderer> HorizontalScrollable::BUILDER::build(const Scope& args)
     const sp<Size> size = _size->build(args);
     int32_t tileWidth = static_cast<int32_t>(BeanUtils::toFloat(_tile_width, args));
     DCHECK(tileWidth > 0, "Illegal tile-width: %d", tileWidth);
-    return sp<HorizontalScrollable>::make(_renderer_maker->build(args), _scroller->build(args), size, tileWidth, _cols ? _cols : (static_cast<int32_t >(size->width()) - 1) / tileWidth + 2);
+    return sp<HorizontalScrollable>::make(_renderer_maker->build(args), _scroller->build(args), size, tileWidth, _cols ? _cols : (static_cast<int32_t >(size->widthAsFloat()) - 1) / tileWidth + 2);
 }
 
 }

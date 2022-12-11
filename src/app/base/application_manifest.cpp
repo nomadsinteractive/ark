@@ -140,7 +140,7 @@ ApplicationManifest::Renderer::Renderer()
 Viewport ApplicationManifest::Renderer::toViewport() const
 {
     DASSERT(_resolution);
-    return Viewport(0, 0, _resolution->width(), _resolution->height(), -1.0f, 1.0f);
+    return Viewport(0, 0, _resolution->widthAsFloat(), _resolution->heightAsFloat(), -1.0f, 1.0f);
 }
 
 static ApplicationManifest::WindowFlag toOneWindowFlag(const String& val)

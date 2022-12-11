@@ -42,7 +42,7 @@ public:
             b2PolygonShape shape;
 
             std::vector<b2Vec2> vec2s;
-            float width = size->width(), height = size->height();
+            float width = size->widthAsFloat(), height = size->heightAsFloat();
             for(const V2& j : i)
                 vec2s.push_back(b2Vec2(j.x() * width, j.y() * height));
 

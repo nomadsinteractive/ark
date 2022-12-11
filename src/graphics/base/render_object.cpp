@@ -31,12 +31,12 @@ sp<Integer> RenderObject::type() const
 
 float RenderObject::width()
 {
-    return _size.ensure()->width();
+    return _size.ensure()->widthAsFloat();
 }
 
 float RenderObject::height()
 {
-    return _size.ensure()->height();
+    return _size.ensure()->heightAsFloat();
 }
 
 const sp<Size>& RenderObject::size()
