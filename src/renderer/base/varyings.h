@@ -49,6 +49,7 @@ public:
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Snapshot);
 
         Array<Divided>::Borrowed _buffers;
+        std::map<size_t, Snapshot> _sub_buffers;
 
         explicit operator bool() const;
 
@@ -76,6 +77,9 @@ public:
     void setProperty(const String& name, sp<Vec3> var);
 //[[script::bindings::setprop]]
     void setProperty(const String& name, sp<Vec4> var);
+
+//[[script::bindings::map([])]]
+    sp<Varyings> subscribe(const String& name);
 
     Snapshot snapshot(const PipelineInput& pipelineInput, Allocator& allocator);
 
@@ -107,6 +111,8 @@ private:
     std::map<String, Box> _properties;
     std::map<String, Slot> _slots;
     std::map<uint32_t, uint32_t> _slot_strides;
+
+    std::map<size_t, sp<Varyings>> _sub_properties;
 
     friend class BUILDER;
 };

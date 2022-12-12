@@ -17,8 +17,15 @@ class ARK_API ModelBundle : public ModelLoader {
 public:
     struct MeshLayout {
         sp<Mesh> _mesh;
-        size_t _vertex_offset;
         size_t _index_offset;
+    };
+
+    struct NodeLayout {
+        NodeLayout() = default;
+        NodeLayout(const sp<Node>& node, const NodeLayout& parentLayout);
+
+        sp<Node> _node;
+        M4 _transform;
     };
 
     struct ModelLayout {
@@ -27,6 +34,7 @@ public:
         size_t _index_offset;
 
         std::vector<MeshLayout> _mesh_layouts;
+        std::vector<NodeLayout> _node_layouts;
     };
 
 private:
@@ -38,6 +46,8 @@ private:
         sp<Model> importModel(const Manifest& manifest, const sp<Importer>& importer);
         ModelLayout& addModel(int32_t type, sp<Model> model);
         const ModelLayout& ensureModelLayout(int32_t type) const;
+
+        void loadNodeLayouts(const sp<Node>& node, const M4& parentTransform, std::vector<NodeLayout>& nodeLayouts) const;
 
         sp<MaterialBundle> _material_bundle;
         sp<Importer> _importer;
@@ -87,7 +97,7 @@ public:
     virtual void initialize(ShaderBindings& shaderBindings) override;
     virtual sp<Model> loadModel(int32_t type) override;
 
-    const ModelLayout& ensureModelInfo(int32_t type) const;
+    const ModelLayout& ensureModelLayout(int32_t type) const;
 
 //[[script::bindings::auto]]
     sp<Model> getModel(int32_t type);

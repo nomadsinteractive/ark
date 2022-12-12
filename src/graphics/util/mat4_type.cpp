@@ -11,10 +11,10 @@
 
 namespace ark {
 
-sp<Mat4> Mat4Type::create(const sp<Vec4>& t, const sp<Vec4>& b, const sp<Vec4>& n, const sp<Vec4>& w)
+sp<Mat4> Mat4Type::create(sp<Vec4> t, sp<Vec4> b, sp<Vec4> n, sp<Vec4> w)
 {
     ASSERT((t && b && n && w) || (!t && !b && !n && !w));
-    return t ? sp<Mat4>::make<Mat4Impl>(t, b, n, w) : sp<Mat4>::make<Mat4::Const>(M4::identity());
+    return t ? sp<Mat4>::make<Mat4Impl>(std::move(t), std::move(b), std::move(n), std::move(w)) : sp<Mat4>::make<Mat4::Const>(M4::identity());
 }
 
 sp<Mat4> Mat4Type::create(const V4& t, const V4& b, const V4& n, const V4& w)

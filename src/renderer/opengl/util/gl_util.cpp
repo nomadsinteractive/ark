@@ -100,6 +100,7 @@ GLenum GLUtil::toBlendFactor(PipelineBindings::BlendFactor blendFactor)
         break;
     }
     FATAL("Unknow BlendFacor: %d", blendFactor);
+    return GL_ZERO;
 }
 
 GLenum GLUtil::toFrontFaceType(PipelineBindings::FrontFaceType face)

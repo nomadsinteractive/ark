@@ -174,7 +174,7 @@ void ModelLoaderText::AtlasAttachment::reloadTexture()
         _texture_reload_future->cancel();
 
     _texture_reload_future = sp<Future>::make();
-    sp<Size> size = sp<Size>::make(_glyph_bitmap->width(), _glyph_bitmap->height());
+    sp<Size> size = sp<Size>::make(static_cast<float>(_glyph_bitmap->width()), static_cast<float>(_glyph_bitmap->height()));
     sp<Texture> texture = _render_controller->createTexture(size, _atlas.texture()->parameters(), sp<Texture::UploaderBitmap>::make(_glyph_bitmap), RenderController::US_RELOAD, _texture_reload_future);
     _atlas.texture()->setDelegate(texture->delegate(), std::move(size));
 }

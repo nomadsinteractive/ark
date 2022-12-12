@@ -58,6 +58,24 @@ public:
     void dispose();
     bool isDisposed() const;
 
+    template<typename T> std::vector<T> toFlatLayouts() const {
+        std::vector<T> nodeLayouts;
+        loadFlatLayouts(_root_node, T(), nodeLayouts);
+        return nodeLayouts;
+    }
+
+private:
+    template<typename T> void loadFlatLayouts(const sp<Node>& node, const T& parentLayout, std::vector<T>& nodeLayouts) const {
+        T layout(node, parentLayout);
+
+        if(!node->meshes().empty())
+            nodeLayouts.emplace_back(layout);
+
+        for(const sp<Node>& childNode : node->childNodes())
+            loadFlatLayouts(childNode, layout, nodeLayouts);
+    }
+
+
 private:
     V3 toScale(const V3& renderObjectSize) const;
 

@@ -100,11 +100,6 @@ uint64_t Buffer::id() const
     return _delegate->id();
 }
 
-//void Buffer::upload(sp<Uploader> uploader, sp<Future> future)
-//{
-//    Ark::instance().applicationContext()->renderController()->uploadBuffer(*this, std::move(uploader), RenderController::US_ON_CHANGE, std::move(future));
-//}
-
 void Buffer::upload(GraphicsContext& graphicsContext) const
 {
     _delegate->upload(graphicsContext);

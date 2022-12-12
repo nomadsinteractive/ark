@@ -92,10 +92,9 @@ sp<Integer> IntegerType::floordiv(const sp<Integer>& self, const sp<Integer>& rv
     return sp<VariableOP2<sp<Integer>, sp<Integer>, Operators::Div<int32_t>>>::make(self, rvalue);
 }
 
-sp<Integer> IntegerType::negative(const sp<Integer>& self)
+sp<Integer> IntegerType::negative(sp<Integer> self)
 {
-    FATAL("Unimplemented");
-    return nullptr;
+    return sp<VariableOP1<int32_t>>::make(Operators::Neg<int32_t>(), std::move(self));
 }
 
 int32_t IntegerType::toInt32(const sp<Integer>& self)

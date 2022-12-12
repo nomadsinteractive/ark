@@ -37,8 +37,8 @@ private:
 
 }
 
-Mat4Impl::Mat4Impl() noexcept
-    : _impl(sp<VariableWrapper<M4>>::make(M4::identity()))
+Mat4Impl::Mat4Impl(const M4& mat) noexcept
+    : _impl(sp<VariableWrapper<M4>>::make(mat))
 {
 }
 
@@ -47,8 +47,8 @@ Mat4Impl::Mat4Impl(const V4& t, const V4& b, const V4& n, const V4& w) noexcept
 {
 }
 
-Mat4Impl::Mat4Impl(const sp<Vec4>& t, const sp<Vec4>& b, const sp<Vec4>& n, const sp<Vec4>& w) noexcept
-    : _impl(sp<VariableWrapper<M4>>::make(sp<Mat4>::make<TBNMat4>(t, b, n, w)))
+Mat4Impl::Mat4Impl(sp<Vec4> t, sp<Vec4> b, sp<Vec4> n, sp<Vec4> w) noexcept
+    : _impl(sp<VariableWrapper<M4>>::make(sp<Mat4>::make<TBNMat4>(std::move(t), std::move(b), std::move(n), std::move(w))))
 {
 }
 
@@ -60,6 +60,16 @@ M4 Mat4Impl::val()
 bool Mat4Impl::update(uint64_t timestamp)
 {
     return _impl->update(timestamp);
+}
+
+void Mat4Impl::set(const M4& mat)
+{
+    _impl->set(mat);
+}
+
+void Mat4Impl::set(sp<Mat4> mat)
+{
+    _impl->set(std::move(mat));
 }
 
 void Mat4Impl::fix()

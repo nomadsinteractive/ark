@@ -8,6 +8,7 @@
 
 #include "renderer/base/drawing_buffer.h"
 #include "renderer/base/model_bundle.h"
+#include "renderer/base/node.h"
 #include "renderer/base/pipeline_input.h"
 #include "renderer/base/render_controller.h"
 #include "renderer/base/render_engine.h"
@@ -93,21 +94,7 @@ sp<RenderCommand> RCCMultiDrawElementsIndirect::compose(const RenderRequest& ren
     bool reload = snapshot.needsReload();
 
     if(reload)
-    {
-        size_t offset = 0;
-        _indirect_cmds.clear();
-        for(const Renderable::Snapshot& i : snapshot._items)
-        {
-            const ModelBundle::ModelLayout& modelInfo = _model_bundle->ensureModelInfo(i._type);
-            IndirectCmds& modelIndirect = _indirect_cmds[static_cast<uint64_t>(i._type) << 32];
-            if(modelIndirect._snapshot_indices.empty())
-                modelIndirect._command = {static_cast<uint32_t>(modelInfo._model->indexCount()), 0, static_cast<uint32_t>(modelInfo._index_offset), static_cast<uint32_t>(modelInfo._vertex_offset), 0};
-
-            ++ modelIndirect._command._instance_count;
-            modelIndirect._snapshot_indices.push_back(offset);
-            offset ++;
-        }
-    }
+        reloadIndirectCommands(snapshot);
 
     writeModelMatices(renderRequest, buf, snapshot, reload);
 
@@ -140,16 +127,16 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
 {
     size_t offset = 0;
     for(const IndirectCmds& i : _indirect_cmds.values())
-        for(size_t j : i._snapshot_indices)
+        for(const MeshInstance& j : i._snapshot_indices)
         {
-            const Renderable::Snapshot& s = snapshot._items.at(j);
+            const Renderable::Snapshot& s = snapshot._items.at(j._snapshot_index);
             if(reload || s.getState(Renderable::RENDERABLE_STATE_DIRTY))
             {
-                const ModelBundle::ModelLayout& modelInfo = _model_bundle->ensureModelInfo(s._type);
+                const ModelBundle::ModelLayout& modelInfo = _model_bundle->ensureModelLayout(s._type);
                 const Metrics& metrics = modelInfo._model->metrics();
                 VertexWriter writer = buf.makeDividedVertexWriter(renderRequest, 1, offset, 1);
                 writer.next();
-                writer.write(MatrixUtil::translate(M4::identity(), s._position) * MatrixUtil::scale(s._transform.toMatrix(), toScale(s._size, metrics)));
+                writer.write(MatrixUtil::translate(M4::identity(), s._position) * MatrixUtil::scale(s._transform.toMatrix(), toScale(s._size, metrics)) * j._transform->val());
                 const ByteArray::Borrowed divided = s._varyings.getDivided(1);
                 if(divided.length() > sizeof(M4))
                     writer.write(divided.buf() + sizeof(M4), divided.length() - sizeof(M4), sizeof(M4));
@@ -164,6 +151,28 @@ V3 RCCMultiDrawElementsIndirect::toScale(const V3& displaySize, const Metrics& m
     return V3(displaySize.x() != 0 ? displaySize.x() / size.x() : 1.0f,
               displaySize.y() != 0 ? displaySize.y() / size.y() : 1.0f,
               displaySize.z() != 0 ? displaySize.z() /  size.z() : 1.0f);
+}
+
+void RCCMultiDrawElementsIndirect::reloadIndirectCommands(const RenderLayer::Snapshot& snapshot)
+{
+    size_t offset = 0;
+    _indirect_cmds.clear();
+    for(const Renderable::Snapshot& i : snapshot._items)
+    {
+        const ModelBundle::ModelLayout& modelInfo = _model_bundle->ensureModelLayout(i._type);
+        for(const ModelBundle::NodeLayout& j : modelInfo._node_layouts)
+            for(const sp<Mesh>& k : j._node->meshes())
+            {
+                const ModelBundle::MeshLayout& meshLayout = modelInfo._mesh_layouts.at(k->id());
+                IndirectCmds& modelIndirect = _indirect_cmds[static_cast<uint64_t>(i._type) << 32 | k->id()];
+                if(modelIndirect._snapshot_indices.empty())
+                    modelIndirect._command = {static_cast<uint32_t>(meshLayout._mesh->indices().size()), 0, static_cast<uint32_t>(meshLayout._index_offset), static_cast<uint32_t>(modelInfo._vertex_offset), 0};
+
+                ++ modelIndirect._command._instance_count;
+                modelIndirect._snapshot_indices.push_back(MeshInstance{offset, sp<Mat4::Const>::make(j._transform)});
+            }
+        offset ++;
+    }
 }
 
 }

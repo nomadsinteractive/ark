@@ -9,6 +9,7 @@
 #include "renderer/base/atlas.h"
 #include "renderer/base/material_bundle.h"
 #include "renderer/base/mesh.h"
+#include "renderer/base/node.h"
 #include "renderer/base/texture_packer.h"
 #include "renderer/inf/vertices.h"
 #include "renderer/impl/render_command_composer/rcc_multi_draw_elements_indirect.h"
@@ -41,14 +42,14 @@ void ModelBundle::initialize(ShaderBindings& /*shaderBindings*/)
 {
 }
 
-const ModelBundle::ModelLayout& ModelBundle::ensureModelInfo(int32_t type) const
+const ModelBundle::ModelLayout& ModelBundle::ensureModelLayout(int32_t type) const
 {
     return _stub->ensureModelLayout(type);
 }
 
 sp<Model> ModelBundle::loadModel(int32_t type)
 {
-    return ensureModelInfo(type)._model;
+    return ensureModelLayout(type)._model;
 }
 
 sp<Model> ModelBundle::getModel(int32_t type)
@@ -103,20 +104,22 @@ sp<Model> ModelBundle::Stub::importModel(const Manifest& manifest, const sp<Impo
 ModelBundle::ModelLayout& ModelBundle::Stub::addModel(int32_t type, sp<Model> model)
 {
     ModelLayout& modelInfo = _model_layouts[type];
-    modelInfo._model = std::move(model);
+    modelInfo._node_layouts = model->toFlatLayouts<NodeLayout>();
+//    loadNodeLayouts(model->rootNode(), M4::identity(), modelInfo._node_layouts);
+
     modelInfo._vertex_offset = _vertex_length;
     modelInfo._index_offset = _index_length;
-    size_t meshVertexOffset = _vertex_length;
     size_t meshIndexOffset = _index_length;
-    for(const sp<Mesh>& i : modelInfo._model->meshes())
+    for(const sp<Mesh>& i : model->meshes())
     {
-        MeshLayout ml = {i, meshVertexOffset, meshIndexOffset};
-        meshVertexOffset += i->vertexLength();
+        MeshLayout ml = {i, meshIndexOffset};
         meshIndexOffset += i->indices().size();
         modelInfo._mesh_layouts.push_back(std::move(ml));
     }
-    _vertex_length += modelInfo._model->vertexCount();
-    _index_length += modelInfo._model->indexCount();
+    _vertex_length += model->vertexCount();
+    _index_length += model->indexCount();
+
+    modelInfo._model = std::move(model);
     return modelInfo;
 }
 
@@ -126,6 +129,17 @@ const ModelBundle::ModelLayout& ModelBundle::Stub::ensureModelLayout(int32_t typ
     CHECK(iter != _model_layouts.end(), "Model not found, type: %d", type);
     return iter->second;
 }
+
+//void ModelBundle::Stub::loadNodeLayouts(const sp<Node>& node, const M4& parentTransform, std::vector<NodeLayout>& nodeLayouts) const
+//{
+//    NodeLayout nl(node, parentTransform * node->transform());
+
+//    if(!node->meshes().empty())
+//        nodeLayouts.push_back(std::move(nl));
+
+//    for(const sp<Node>& childNode : node->childNodes())
+//        loadNodeLayouts(childNode, nl._transform, nodeLayouts);
+//}
 
 ModelBundle::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _bean_factory(factory), _manifest(manifest), _material_bundle(factory.getBuilder<MaterialBundle>(manifest, "material-bundle")),
@@ -175,6 +189,11 @@ void ModelBundle::AddModuleRunnable::run()
     _stub->addModel(_type, std::move(_model));
     if(_future)
         _future->done();
+}
+
+ModelBundle::NodeLayout::NodeLayout(const sp<Node>& node, const NodeLayout& parentLayout)
+    : _node(node), _transform(parentLayout._node ? parentLayout._transform * _node->transform() : _node->transform())
+{
 }
 
 }

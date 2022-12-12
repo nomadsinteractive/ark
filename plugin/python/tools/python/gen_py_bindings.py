@@ -1,82 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import getopt
 import os
 import re
 import sys
 from os import path
-from typing import Optional
+
+from gen_core import get_param_and_paths, import_acg, INDENT, GenArgumentMeta, GenArgument, create_overloaded_method_type
+from gen_method import GenMethod, GenGetPropMethod, GenSetPropMethod, GenMappingMethod, gen_operator_defs, gen_as_mapping_defs
 
 LOADER_TEMPLATE = '''template<typename T> static Box PyArk${classname}_${methodname}Function(PyArkType::Instance& inst, const String& id, const Scope& args) {
     const sp<T> bean = inst.unpack<${classname}>()->${methodname}<T>(id, args);
     return Box(bean);
 }'''
-
-
-TP_AS_NUMBER_TEMPLATE = [
-    'static PyNumberMethods ${py_class_name}_tp_as_number = {',
-    '    (binaryfunc) ${nb_add},        /* binaryfunc nb_add;                  */ /* __add__ */',
-    '    (binaryfunc) ${nb_subtract}, /* binaryfunc nb_subtract; */ /* __sub__ */',
-    '    (binaryfunc) ${nb_multiply}, /* binaryfunc nb_multiply; */ /* __mul__ */',
-    '    (binaryfunc) ${nb_remainder}, /* binaryfunc nb_remainder; */ /* __mod__ */',
-    '    nullptr,               /* binaryfunc nb_divmod; */ /* __divmod__ */',
-    '    (ternaryfunc) ${nb_power},   /* ternaryfunc nb_power; */ /* __pow__ */',
-    '    (unaryfunc) ${nb_negative},        /* unaryfunc nb_negative; */ /* __neg__ */',
-    '    nullptr,               /* unaryfunc nb_positive; */ /* __pos__ */',
-    '    (unaryfunc) ${nb_absolute},               /* unaryfunc nb_absolute; */ /* __abs__ */',
-    '    (inquiry) ${nb_bool}, /* inquiry nb_bool; */ /* __bool__ */',
-    '    nullptr,               /* unaryfunc nb_invert; */ /* __invert__ */',
-    '    nullptr,               /* binaryfunc nb_lshift; */ /* __lshift__ */',
-    '    nullptr,               /* binaryfunc nb_rshift; */ /* __rshift__ */',
-    '    (binaryfunc) ${nb_and}, /* binaryfunc nb_and; */ /* __and__ */',
-    '    nullptr,               /* binaryfunc nb_xor; */ /* __xor__ */',
-    '    (binaryfunc) ${nb_or}, /* binaryfunc nb_or; */ /* __or__ */',
-    '    (unaryfunc) ${nb_int}, /* unaryfunc nb_int; */ /* __int__ */',
-    '    nullptr,               /* void *nb_reserved; */',
-    '    (unaryfunc) ${nb_float},       /* unaryfunc nb_float; */ /* __float__ */',
-    '    (binaryfunc) ${nb_inplace_add},       /* binaryfunc nb_inplace_add */',
-    '    (binaryfunc) ${nb_inplace_subtract},       /* binaryfunc nb_inplace_subtract */',
-    '    (binaryfunc) ${nb_inplace_multiply},       /* binaryfunc nb_inplace_multiply */',
-    '    nullptr, /* binaryfunc nb_inplace_remainder;  */',
-    '    nullptr, /* ternaryfunc nb_inplace_power;     */',
-    '    nullptr, /* binaryfunc nb_inplace_lshift;     */',
-    '    nullptr, /* binaryfunc nb_inplace_rshift;     */',
-    '    nullptr, /* binaryfunc nb_inplace_and;        */',
-    '    nullptr, /* binaryfunc nb_inplace_xor;        */',
-    '    nullptr, /* binaryfunc nb_inplace_or;         */',
-    '    (binaryfunc) ${nb_floor_divide}, /* binaryfunc nb_floor_divide;       */',
-    '    (binaryfunc) ${nb_true_divide}, /* binaryfunc nb_true_divide;         */ /* __div__ */',
-    '    nullptr, /* binaryfunc nb_inplace_floor_divide;*/',
-    '    (binaryfunc) ${nb_inplace_true_divide}, /* binaryfunc nb_inplace_true_divide  */ /* __idiv__ */',
-    '    nullptr, /* unaryfunc nb_index;  */',
-    '    (binaryfunc) ${nb_matrix_multiply}, /* binaryfunc nb_matrix_multiply */ /* __matmul__ */',
-    '    (binaryfunc) ${nb_inplace_matrix_multiply} /* binaryfunc nb_inplace_matrix_multiply */ /* __imatmul__ */',
-    '};'
-]
-
-TP_AS_NUMBER_TEMPLATE_OPERATOR = {
-    '+': 'nb_add',
-    '-': 'nb_subtract',
-    '*': 'nb_multiply',
-    '%': 'nb_remainder',
-    'bool': 'nb_bool',
-    'neg': 'nb_negative',
-    'abs': 'nb_absolute',
-    'pow': 'nb_power',
-    '&&': 'nb_and',
-    '||': 'nb_or',
-    'int': 'nb_int',
-    'float': 'nb_float',
-    '+=': 'nb_inplace_add',
-    '-=': 'nb_inplace_subtract',
-    '*=': 'nb_inplace_multiply',
-    '//': 'nb_floor_divide',
-    '/': 'nb_true_divide',
-    '/=': 'nb_inplace_true_divide',
-    '@': 'nb_matrix_multiply',
-    '@=': 'nb_inplace_matrix_multiply'
-}
 
 NO_STATIC_OPS = {'neg', 'abs', 'int', 'float', '+=', '-=', '*=', '/='}
 
@@ -98,6 +34,7 @@ AUTOBIND_GETPROP_PATTERN = re.compile(r'\[\[script::bindings::getprop]]\s+%s' % 
 AUTOBIND_SETPROP_PATTERN = re.compile(r'\[\[script::bindings::setprop]]\s+%s' % METHOD_PATTERN)
 AUTOBIND_LOADER_PATTERN = re.compile(r'\[\[script::bindings::loader]]\s+template<typename T>\s+([^(\r\n]+)\(([^)\r\n]*)\)[^;{]*{')
 AUTOBIND_METHOD_PATTERN = re.compile(r'\[\[script::bindings::(auto|classmethod|constructor)]]\s+%s' % METHOD_PATTERN)
+AUTOBIND_AS_MAPPING_PATTERN = re.compile(r'\[\[script::bindings::map\(([^)]+)\)]]\s+%s' % METHOD_PATTERN)
 AUTOBIND_OPERATOR_PATTERN = re.compile(r'\[\[script::bindings::operator\(([^)]+)\)]]\s+%s' % METHOD_PATTERN)
 AUTOBIND_CLASS_PATTERN = re.compile(r'\[\[script::bindings::(class|name)\(([^)]+)\)]]')
 AUTOBIND_EXTENDS_PATTERN = re.compile(r'\[\[script::bindings::extends\((\w+)\)]]')
@@ -108,11 +45,7 @@ AUTOBIND_META_PATTERN = re.compile(r'\[\[script::bindings::meta\(([^)]+)\([^)]*\
 BUILDABLE_PATTERN = re.compile(r'\[\[plugin::(?:builder|resource-loader)[^]]*]]\s+class\s+\w+\s*:\s*public\s+Builder<([^{]+)>\s*{')
 
 CLASS_DELIMITER = '\n//%s\n' % ('-' * 120)
-TYPE_DEFINED_SP = ('document', 'element', 'attribute', 'bitmap')
-TYPE_DEFINED_OBJ = ('V2', 'V3', 'V4', 'Rect', 'RectI', 'RectF')
 ARK_CORE_BUILDABLES = {'AudioPlayer', 'Object'}
-
-INDENT = '    '
 
 _just_print_flag = True
 
@@ -128,11 +61,6 @@ def text_align(lines, text):
     max_alignment = max(text_pos)
 
     return [i[:j] + ' ' * (max_alignment - j) + i[j:] if j >= 0 else i for i, j in zip(lines, text_pos)]
-
-
-def remove_crv(typename):
-    t1 = acg.strip_key_words(typename, ['const', 'volatile']).strip()
-    return (t1[:-1] if t1.endswith('&') else t1).strip()
 
 
 def gen_cmakelist_source(arguments, paths, output_dir, output_file, results):
@@ -305,7 +233,13 @@ def gen_class_body_source(genclass, includes, lines, buildables):
                 print("WARNING: at least two setprop methods defined in %s, which is probably not right", genclass.classname)
             tp_method_lines.append('pyTypeObject->tp_setattro = (setattrofunc) %s;' % setprop_methods[0].name)
 
-        operator_defs = genclass.gen_operator_defs()
+        as_mapping_defs = gen_as_mapping_defs(genclass)
+        if as_mapping_defs:
+            lines.append('')
+            lines.extend(text_align(text_align(as_mapping_defs, '/*'), '*/'))
+            tp_method_lines.append('pyTypeObject->tp_as_mapping = &%s_tp_as_mapping;' % genclass.py_class_name)
+
+        operator_defs = gen_operator_defs(genclass)
         if operator_defs:
             lines.append('')
             lines.extend(text_align(text_align(operator_defs, '/*'), '*/'))
@@ -365,440 +299,6 @@ def gen_py_binding_cpp(name, namespaces, includes, lines):
 using namespace ark::plugin::python;
 
 ''' % (name, '\n'.join(includes))) + acg.wrapByNamespaces(namespaces, '\n'.join(lines))
-
-
-class GenArgumentMeta:
-    def __init__(self, typename, castsig, parsetuplesig, is_base_type=False, has_defvalue=False):
-        self._typename = typename
-        self._cast_signature = castsig
-        self._parse_signature = parsetuplesig
-        self._is_base_type = is_base_type
-        self._has_defvalue = has_defvalue
-
-    @property
-    def typename(self):
-        return self._typename
-
-    @property
-    def cast_signature(self):
-        return self._cast_signature
-
-    @property
-    def parse_signature(self):
-        return self._parse_signature
-
-    @property
-    def is_base_type(self):
-        return self._is_base_type
-
-    @property
-    def has_defvalue(self):
-        return self._has_defvalue
-
-
-class GenConverter:
-    def __init__(self, check_func, cast_func):
-        self._check_func = check_func
-        self._cast_func = cast_func
-
-    def check(self, var):
-        return self._check_func.format(var)
-
-    def cast(self, var):
-        return self._cast_func.format(var)
-
-
-class GenArgument:
-    def __init__(self, accept_type, default_value, meta, argtype, argname: Optional[str] = None):
-        self._accept_type = accept_type
-        self._default_value = default_value
-        self._meta = meta
-        self._str = argtype
-        self._argname = argname
-
-    @property
-    def argname(self):
-        return self._argname
-
-    @property
-    def accept_type(self):
-        return self._accept_type
-
-    @property
-    def default_value(self):
-        return self._default_value
-
-    @property
-    def meta(self):
-        return self._meta
-
-    @property
-    def typename(self):
-        return self._meta.typename
-
-    @property
-    def parse_signature(self):
-        s = self._meta.parse_signature
-        return s if not self.has_defvalue else '|' + s
-
-    @property
-    def has_defvalue(self):
-        return self._default_value is not None or self._meta.has_defvalue
-
-    def type_compare(self, typename):
-        return acg.typeCompare(typename, self._str)
-
-    def gen_type_check(self, varname):
-        if self._accept_type in ARK_PY_ARGUMENT_CHECKERS:
-            return "%s && %s" % (varname, ARK_PY_ARGUMENT_CHECKERS[self._accept_type].check(varname))
-        return None
-
-    def gen_declare(self, objname, argname, extract_cast=False, optional_check=False):
-        typename = self._meta.cast_signature
-        if self._meta.is_base_type:
-            return '%s %s = %s;' % (typename, objname, gen_cast_call(typename, argname))
-        if self.typename == self._meta.cast_signature:
-            return '%s %s = %s;' % (typename, objname, argname)
-        m = acg.get_shared_ptr_type(self._accept_type)
-        if m == 'Scope':
-            return acg.format('const Scope ${objname} = PyCast::toScope(kws);',
-                              objname=objname, argname=argname)
-        is_optional_type = 'Optional<' in m
-        optional_cast_prefix = 'to' if optional_check or is_optional_type else 'ensure'
-        to_cpp_object = '%sCppObject' % optional_cast_prefix
-        if m == 'char*':
-            return self._gen_var_declare('String', objname, to_cpp_object, 'String', argname, False, optional_check)
-        if m in TYPE_DEFINED_OBJ:
-            return self._gen_var_declare(m, objname, to_cpp_object, m, argname, False, optional_check)
-        if m in TYPE_DEFINED_SP:
-            return self._gen_var_declare(m, objname, to_cpp_object, m, argname, False, optional_check)
-        typename = remove_crv(typename)
-        if m != self._accept_type and not typename.startswith('std::'):
-            return self._gen_var_declare('sp<%s>' % m, objname, '%sSharedPtr' % optional_cast_prefix, m, argname, extract_cast, optional_check)
-        functype = acg.get_template_type(typename, 'Optional') if is_optional_type else typename
-        return self._gen_var_declare(typename, objname, to_cpp_object, functype, argname, False, optional_check)
-
-    def _gen_var_declare(self, typename, varname, funcname, functype, argname, extract_cast=False, optional_check=False):
-        argappendix = ', false' if extract_cast else ''
-        if optional_check:
-            typename = 'Optional<%s>' % typename
-        if self._default_value and (self._accept_type.startswith('sp<') or self._meta.parse_signature == 'O'):
-            return '%s %s = %s ? PyCast::%s<%s>(%s%s) : %s;' % (
-                typename, varname, argname, funcname, functype, argname, argappendix, '%s(%s)' % (typename, self._default_value) if optional_check else self._default_value)
-        return '%s %s = PyCast::%s<%s>(%s%s);' % (typename, varname, funcname, functype, argname, argappendix)
-
-    def str(self):
-        return self._str
-
-    def __str__(self):
-        return self.str()
-
-
-ARK_PY_ARGUMENTS = (
-    (r'String\s*&?', GenArgumentMeta('const char*', 'const char*', 's')),
-    (r'Scope\s*&', GenArgumentMeta('PyObject*', 'Scope', '')),
-    (r'std::wstring\s*&', GenArgumentMeta('PyObject*', 'std::wstring', 'O')),
-    (r'Box\s*&', GenArgumentMeta('PyObject*', 'Box', 'O')),
-    (r'sp<([^>]+|\w+<\w+>)>(?:\s*&|$)', GenArgumentMeta('PyObject*', 'sp<${0}>', 'O')),
-    (r'(Optional<[^\s]+>)[&\s]+', GenArgumentMeta('PyObject*', '${0}', 'O')),
-    (r'(document|element|attribute)\s*&', GenArgumentMeta('PyObject*', '${0}', 'O')),
-    (r'(V2|V3|V4)', GenArgumentMeta('PyObject*', '${0}', 'O')),
-    (r'([^>]+|\w+<\w+>)\s*&', GenArgumentMeta('PyObject*', 'sp<${0}>', 'O')),
-    (r'(uint32_t|unsigned int|uint8_t)', GenArgumentMeta('uint32_t', 'uint32_t', 'I')),
-    (r'size_t', GenArgumentMeta('size_t', 'size_t', 'n')),
-    (r'(int64_t|uint64_t)', GenArgumentMeta('${0}', '${0}', 'i')),
-    (r'(int32_t|int16_t|int8_t)', GenArgumentMeta('int32_t', 'int32_t', 'i')),
-    (r'float', GenArgumentMeta('float', 'float', 'f')),
-    (r'bool', GenArgumentMeta('int32_t', 'bool', 'p', True)),
-    (r'TypeId', GenArgumentMeta('PyObject*', 'TypeId', 'O')),
-    (r'([^:]+::.+)', GenArgumentMeta('PyObject*', '${0}', 'O')),
-)
-
-ARK_PY_ARGUMENT_CHECKERS = {
-    'bool': GenConverter('(PyLong_CheckExact({0}) || PyBool_Check({0}))', '{0}'),
-    'int32_t': GenConverter('PyLong_CheckExact({0})', '{0}'),
-    'uint32_t': GenConverter('PyLong_CheckExact({0})', '{0}'),
-    'float': GenConverter('(PyLong_CheckExact({0}) || PyFloat_CheckExact({0}))', '{0}'),
-    'std::vector<float>': GenConverter('(PyList_CheckExact({0}) || PyTuple_CheckExact({0}))', 'std::move({0})'),
-    'std::vector<int32_t>': GenConverter('(PyList_CheckExact({0}) || PyTuple_CheckExact({0}))', 'std::move({0})'),
-    'V2': GenConverter('(PyTuple_CheckExact({0}) && PyObject_Length({0}) == 2)', '{0}'),
-    'V3': GenConverter('(PyTuple_CheckExact({0}) && PyObject_Length({0}) == 3)', '{0}'),
-    'V4': GenConverter('(PyTuple_CheckExact({0}) && PyObject_Length({0}) == 4)', '{0}'),
-    'std::wstring': GenConverter('PyUnicode_CheckExact({0})', '{0}')
-}
-
-
-def parse_method_arguments(arguments):
-    args = []
-    for i, j in enumerate(arguments):
-        argstr = acg.strip_key_words(j, ['const', '&'])
-        default_value = None
-        pos = argstr.find('=')
-        if pos != -1:
-            if not argstr.startswith('Scope'):
-                default_value = argstr[pos + 1:].strip()
-                if default_value.endswith('('):
-                    default_value += ')'
-            argstr = argstr[:pos - 1].strip()
-        argsplit = argstr.split()
-        argtype = ' '.join(argsplit[:-1])
-        argname = argsplit[-1]
-        for k, l in ARK_PY_ARGUMENTS:
-            m = re.match(k, argtype)
-            if m:
-                cast_signature = acg.format(l.cast_signature, *m.groups())
-                argument_meta = GenArgumentMeta(l.typename, cast_signature, l.parse_signature, l.is_base_type)
-                args.append(GenArgument(cast_signature, default_value, argument_meta, argtype, argname))
-                break
-        else:
-            print('Undefined method argument: "%s"' % arguments[i])
-            sys.exit(-1)
-    return args
-
-
-def gen_method_call_arg(name, targettype, argtype):
-    ctype = remove_crv(argtype)
-    equals = acg.typeCompare(targettype, ctype)
-    argname = name if equals else gen_cast_call(targettype, name)
-    return 'std::move(%s)' % argname if 'std::vector' in argtype else argname
-    if ctype in ARK_PY_ARGUMENT_CHECKERS:
-        return ARK_PY_ARGUMENT_CHECKERS[ctype].cast(argname)
-    return argname
-
-
-def gen_cast_call(targettype, name):
-    if targettype == 'bool':
-        return '%s != 0' % name
-    return 'static_cast<%s>(%s)' % (targettype, name)
-
-
-class GenMethod(object):
-    def __init__(self, name, args, return_type):
-        self._name = name
-        self._return_type = return_type
-        self._arguments = parse_method_arguments(args)
-        self._has_keyvalue_arguments = args and self._arguments[-1].type_compare('Scope')
-        self._flags = ('METH_VARARGS|METH_KEYWORDS' if self._has_keyvalue_arguments else 'METH_VARARGS')
-        self._self_argument = None
-
-    def gen_py_method_def(self, genclass):
-        return None
-
-    def gen_py_method_def_tp(self, genclass):
-        return '{"%s", (PyCFunction) %s::%s_r, %s, nullptr}' % (acg.camel_case_to_snake_case(self._name), genclass.py_class_name, self._name, self._flags)
-
-    def gen_py_return(self):
-        return 'PyObject*'
-
-    def gen_py_arguments(self):
-        return 'Instance* self, PyObject* args' + (', PyObject* kws' if self._has_keyvalue_arguments else '')
-
-    def gen_py_argc(self):
-        return 'PyObject_Length(args)'
-
-    def gen_local_var_declarations(self):
-        declares = {}
-        for i, j in enumerate(self._arguments):
-            typename = j.typename
-            realtypename = remove_crv(typename)
-            if typename in declares:
-                declares[typename] = '%s, %sarg%d' % (declares[typename], '*' if typename.endswith('*') else '', i)
-            else:
-                declares[typename] = '%s arg%d' % (typename, i)
-            if not j.meta.parse_signature:
-                declares[typename] += ' = kws'
-            else:
-                dvalue = None
-                if realtypename == 'PyObject*':
-                    if j.accept_type == 'bool':
-                        dvalue = 'Py_True' if j.default_value == 'true' else 'Py_False'
-                    else:
-                        dvalue = 'nullptr'
-                elif j.default_value is not None:
-                    dmap = {'true': '1', 'false': '0'}
-                    if j.typename in ('uint32_t', 'int32_t', 'float', 'size_t'):
-                        dvalue = j.default_value if j.default_value not in dmap else dmap[j.default_value]
-                    elif realtypename == 'bool' and j.accept_type == 'bool':
-                        dvalue = 'true' if j.default_value == 'true' else 'false'
-                    elif realtypename == 'char*' and j.default_value:
-                        dvalue = j.default_value
-                    else:
-                        dvalue = 'nullptr'
-                if dvalue:
-                    declares[typename] += ' = %s' % dvalue
-        return [i + ';' for i in declares.values()]
-
-    @property
-    def name(self):
-        return self._name
-
-    @property
-    def arguments(self):
-        return self._arguments
-
-    @property
-    def return_type(self):
-        return self._return_type
-
-    @property
-    def err_return_value(self):
-        return 'Py_RETURN_NONE'
-
-    @property
-    def check_argument_type(self):
-        return True
-
-    def _gen_calling_statement(self, genclass, argnames):
-        return 'unpacked->%s(%s);' % (self._name, argnames)
-
-    def _gen_calling_body(self, genclass, calling_lines):
-        return calling_lines
-
-    @staticmethod
-    def gen_return_statement(return_type, py_return):
-        if acg.typeCompare(return_type, py_return):
-            return ['return ret;']
-
-        if py_return != 'PyObject*':
-            return ['return %s;' % gen_cast_call(py_return, 'ret')]
-
-        if return_type == 'void':
-            return ['Py_RETURN_NONE;']
-        m = acg.get_shared_ptr_type(return_type)
-        if m in ('std::wstring',):
-            fromcall = 'template toPyObject<%s>' % m
-        else:
-            fromcall = 'toPyObject'
-        return ['return PyCast::%s(ret);' % fromcall]
-
-    def _gen_parse_tuple_code(self, lines, declares, args):
-        lines.append(f'\n{INDENT}'.join(declares))
-        parse_format = ''.join(i.parse_signature for i in args)
-        if parse_format.count('|') > 1:
-            ts = parse_format.split('|')
-            if any(len(i) > 1 for i in ts[1:]):
-                print('Illegal default arguments: %s', parse_format)
-                sys.exit(-1)
-            parse_format = ts[0] + '|' + ''.join(ts[1:])
-
-        parse_arg_refnames = ', '.join('&arg%d' % i for i, j in enumerate(args) if j.meta.parse_signature)
-        # TODO: to all possible methods
-        if self._has_keyword_arguments() and self._name == '__init__':
-            lines.append(self._make_argname_declares())
-            parsestatement = '''if(!PyArg_ParseTupleAndKeywords(args, kws, "%s", const_cast<char**>(argnames), %s))
-        %s;
-    ''' % (parse_format, parse_arg_refnames, self.err_return_value)
-        else:
-            parsestatement = '''if(!PyArg_ParseTuple(args, "%s", %s))
-        %s;
-    ''' % (parse_format, parse_arg_refnames, self.err_return_value)
-        lines.append(parsestatement)
-
-    def _make_argname_declares(self):
-        return '''const char* argnames[] = {
-        %s%s
-        nullptr
-    };''' % (f',\n{INDENT * 2}'.join(f'"{acg.camel_case_to_snake_case(i.argname)}"' for i in self._arguments), ',' if self._arguments else '')
-
-    def _has_keyword_arguments(self) -> bool:
-        return all(i.argname is not None for i in self._arguments)
-
-    def need_unpack_statement(self):
-        return True
-
-    def gen_py_type_constructor_codes(self, lines, genclass):
-        pass
-
-    def gen_self_statement(self, genclass):
-        cast_statement = ''
-        if self._self_argument and not self._self_argument.type_compare('sp<%s>' % genclass.binding_classname):
-            cast_statement = '.cast<%s>()' % acg.get_shared_ptr_type(self._self_argument.accept_type)
-        return 'unpacked' + cast_statement
-
-    def gen_declaration(self):
-        return [
-            'static %s %s(%s);' % (self.gen_py_return(), self._name, self.gen_py_arguments()),
-            'constexpr static auto %s_r = ark::plugin::python::PyCast::RuntimeFuncWrapper<decltype(&%s), %s>;' % (self._name, self._name, self._name)
-            ]
-
-    @staticmethod
-    def _gen_convert_args_code(lines, argdeclare, optional_check=False):
-        if argdeclare:
-            lines.extend(argdeclare)
-
-    def gen_definition(self, genclass):
-        lines = []
-
-        if len(self._arguments) > 0:
-            self._gen_parse_tuple_code(lines, self.gen_local_var_declarations(), self._arguments)
-
-        if self.need_unpack_statement():
-            lines.append(acg.format('sp<${class_name}> unpacked = self->as<${class_name}>();',
-                                    class_name=genclass.binding_classname))
-        self.gen_definition_body(genclass, lines, self._arguments, [None] * len(self._arguments), not self.check_argument_type,
-                                 not self.check_argument_type)
-
-        return '\n    '.join(lines)
-
-    def gen_definition_body(self, genclass, lines, not_overloaded_args, gen_type_check_args, exact_cast, check_args=False, optional_check=False):
-        bodylines = []
-        args = [(i, j) for i, j in enumerate(not_overloaded_args) if j]
-        args_set = {i for i, j in args}
-        argdeclare = [j.gen_declare('obj%d' % i, 'arg%d' % i, exact_cast, optional_check) for i, j in args]
-        self_type_checks = []
-        if self._self_argument:
-            if not self._self_argument.type_compare('sp<%s>' % genclass.binding_classname):
-                self_type_checks.append('unpacked.is<%s>()' % acg.get_shared_ptr_type(self._self_argument.accept_type))
-        self._gen_convert_args_code(bodylines, argdeclare, optional_check)
-
-        if check_args and args:
-            bodylines.append("if(%s) %s;" % (' || '.join(['!obj%d' % i for i, j in args]), self.err_return_value))
-
-        r = acg.strip_key_words(self._return_type, ['virtual', 'const', '&'])
-        argtypes = [i.gen_declare('t', 't').split()[0] for i in self._arguments]
-        argvalues = ', '.join(gen_method_call_arg('obj%d.value()' % i if optional_check and i in args_set else 'obj%d' % i, j.str(), argtypes[i]) for i, j in enumerate(self._arguments))
-        callstatement = self._gen_calling_statement(genclass, argvalues)
-        py_return = self.gen_py_return()
-        pyret = ['return 0;'] if py_return == 'int' else self.gen_return_statement(r, py_return)
-        if r != 'void' and r:
-            callstatement = '%s ret = %s' % (acg.strip_key_words(self._return_type, ['virtual']), callstatement)
-        calling_lines = [callstatement] + pyret
-        type_checks = [(i, j.gen_type_check('t')) for i, j in enumerate(gen_type_check_args) if j]
-        nullptr_check = ['(obj%d || %d >= argc)' % (i, i) for i, j in type_checks if not j]
-        if self_type_checks or nullptr_check:
-            if nullptr_check:
-                lines.insert(0, 'Py_ssize_t argc = %s;' % self.gen_py_argc())
-            nullptr_check = self_type_checks + nullptr_check
-            calling_lines = ['if(%s)' % ' && '.join(nullptr_check), '{'] + [INDENT + i for i in calling_lines] + ['}']
-        lines.extend(bodylines + self._gen_calling_body(genclass, calling_lines))
-
-    @staticmethod
-    def split(repl):
-        name = repl[0].split()[-1]
-        rs = repl[0].split()[:-1]
-        return_type = ' '.join(i for i in rs if i not in('static', 'ARK_API'))
-        # args = [i.strip() for i in repl[1].split(',') if i]
-        args = [i.strip() for i in GenMethod._bracket_match_split(repl[1], '<(', '>)', ',') if i]
-        return name, args, return_type, 'static' in rs
-
-    @staticmethod
-    def _bracket_match_split(content, bracket_open, bracket_close, splitter):
-        balance = 0
-        results = []
-        split_start = 0
-        for i, j in enumerate(content):
-            if j in bracket_open:
-                balance += 1
-            elif j in bracket_close:
-                assert balance > 0
-                balance -= 1
-            elif j == splitter and balance == 0:
-                results.append(content[split_start: i])
-                split_start = i + 1
-        assert balance == 0
-        if split_start < len(content):
-            results.append(content[split_start:])
-        return results
 
 
 class GenConstructorMethod(GenMethod):
@@ -923,70 +423,6 @@ class GenPropertyMethod(GenMethod):
             return m1
         except AttributeError:
             return create_overloaded_method_type(GenPropertyMethod, is_static=m1.is_static)(m1, m2)
-
-
-class GenGetPropMethod(GenMethod):
-    def __init__(self, name, args, return_type):
-        GenMethod.__init__(self, name, args, return_type)
-
-    def _gen_parse_tuple_code(self, lines, declares, args):
-        pass
-
-    def _gen_convert_args_code(self, lines, argdeclare, optional_check=False):
-        if argdeclare:
-            arg0 = self._arguments[0]
-            meta = GenArgumentMeta('PyObject*', arg0.accept_type, 'O')
-            ga = GenArgument(arg0.accept_type, arg0.default_value, meta, str(arg0))
-            lines.append(ga.gen_declare('obj0', 'arg0'))
-
-    def gen_py_arguments(self):
-        return 'Instance* self, PyObject* arg0'
-
-    def gen_py_argc(self):
-        return 1
-
-    def _gen_calling_body(self, genclass, calling_lines):
-        return ['PyObject* attr = PyObject_GenericGetAttr(reinterpret_cast<PyObject*>(self), arg0);',
-                'if(attr)',
-                INDENT + 'return attr;',
-                'if(!PythonInterpreter::instance()->exceptErr(PyExc_AttributeError))',
-                INDENT + 'Py_RETURN_NONE;'
-                '\n',
-                'try {'] + [INDENT + i for i in calling_lines] + [
-                '} catch(const std::exception& ex) {',
-                INDENT + 'PyErr_SetString(PyExc_AttributeError, Strings::sprintf("\'%s\' object has no attribute \'%%s\'. \\nCaused by: %%s", obj0.c_str(), ex.what()).c_str());' % genclass.classname,
-                INDENT + 'return nullptr;',
-                '}'
-        ]
-
-
-class GenSetPropMethod(GenMethod):
-    def __init__(self, name, args, return_type):
-        GenMethod.__init__(self, name, args, return_type)
-
-    def gen_py_return(self):
-        return 'int'
-
-    @property
-    def err_return_value(self):
-        return 'return -1'
-
-    def _gen_parse_tuple_code(self, lines, declares, args):
-        pass
-
-    def gen_py_arguments(self):
-        return 'Instance* self, PyObject* arg0, PyObject* arg1'
-
-    def gen_py_argc(self):
-        return 2
-
-    @staticmethod
-    def overload(m1, m2):
-        try:
-            m1.add_overloaded_method(m2)
-            return m1
-        except AttributeError:
-            return create_overloaded_method_type(GenSetPropMethod)(m1, m2)
 
 
 class GenLoaderMethod(GenMethod):
@@ -1153,57 +589,6 @@ class GenRichCompareMethod(GenMethod):
         return self._operator
 
 
-def create_overloaded_method_type(base_type, **kwargs):
-
-    class GenOverloadedMethod(base_type):
-        def __init__(self, m1, m2):
-            base_type.__init__(self, m1.name, [], m1.return_type, **kwargs)
-            self._arguments = self._replace_arguments(m1.arguments, m2.arguments)
-            self._overloaded_methods = []
-            self.add_overloaded_method(m1)
-            self.add_overloaded_method(m2)
-
-        def gen_definition_body(self, genclass, lines, arguments, gen_type_check_args, exact_cast, check_args, optional_check=False):
-            not_overloaded_args = [i for i in self._arguments]
-
-            for i in self._overloaded_methods:
-                for j, k in enumerate(not_overloaded_args):
-                    if k and i.arguments[j].accept_type != k.accept_type:
-                        not_overloaded_args[j] = None
-
-            m0 = self._overloaded_methods[0]
-            not_overloaded_declar = [j.gen_declare('obj%d' % i, 'arg%d' % i, not m0.check_argument_type) for i, j in enumerate(not_overloaded_args) if j]
-            self._gen_convert_args_code(lines, not_overloaded_declar)
-            for i in self._overloaded_methods:
-                type_checks = [k.gen_type_check('arg%d' % j) for j, k, l in zip(range(len(i.arguments)), i.arguments, not_overloaded_args) if not l]
-                lines.extend(['if(%s)' % ' && '.join(([j for j in type_checks if j]) or ['true']), '{'])
-                body_lines = []
-                overloaded_args = [None if j else k for j, k in zip(not_overloaded_args, i.arguments)]
-                i.gen_definition_body(genclass, body_lines, overloaded_args, overloaded_args, True, False, True)
-                lines.extend(INDENT + j for j in body_lines)
-                lines.append('}')
-            return_type = m0.err_return_value
-            if m0.check_argument_type:
-                lines.append('PyErr_SetString(PyExc_TypeError, Strings::sprintf("Calling overloaded method(%%s::%%s) failed, no arguments matched", "%s", "%s").c_str());' % (genclass.name, self._name))
-            lines.append(return_type + ';')
-
-        def add_overloaded_method(self, method):
-            if self._overloaded_methods:
-                m1 = self._overloaded_methods[-1]
-                if len(m1.arguments) != len(method.arguments):
-                    print('Overloaded methods(%s, %s) should have equal number of arguments' % (m1, method))
-                    sys.exit(-1)
-            method._arguments = self._replace_arguments(method.arguments, self._arguments)
-            self._overloaded_methods.append(method)
-
-        @staticmethod
-        def _replace_arguments(args1, args2):
-            assert len(args1) == len(args2)
-            return [GenArgument(i.accept_type, i.default_value, GenArgumentMeta('PyObject*', i.meta.cast_signature, 'O', False, i.has_defvalue or j.has_defvalue), i.str()) for i, j in zip(args1, args2)]
-
-    return GenOverloadedMethod
-
-
 class GenClass(object):
     def __init__(self, filename, class_name, is_container=False):
         self._py_src_name = 'py_ark_' + acg.camel_case_to_snake_case(class_name) + '_type'
@@ -1304,6 +689,9 @@ class GenClass(object):
     def setprop_methods(self):
         return self.find_methods_by_type(GenSetPropMethod)
 
+    def subscribe_methods(self):
+        return self.find_methods_by_type(GenMappingMethod)
+
     def find_methods_by_type(self, method_type):
         return [i for i in self.methods if isinstance(i, method_type)]
 
@@ -1316,16 +704,6 @@ class GenClass(object):
         for i in self.property_methods():
             i.gen_py_getset_def(property_defs, self)
         return property_defs
-
-    def gen_operator_defs(self):
-        operator_defs = []
-        operator_methods = self.operator_methods()
-        if operator_methods:
-            args = {'py_class_name': self._py_class_name}
-            methods_dict = dict((i.operator, '%s::%s_r' % (self._py_class_name, i.name)) for i in operator_methods)
-            args.update((j, methods_dict[i] if i in methods_dict else 'nullptr') for i, j in TP_AS_NUMBER_TEMPLATE_OPERATOR.items())
-            operator_defs.extend(acg.format(i, **args) for i in TP_AS_NUMBER_TEMPLATE)
-        return operator_defs
 
     def gen_rich_compare_defs(self):
         rich_compare_defs = []
@@ -1395,6 +773,12 @@ def main(params, paths):
         else:
             genclass.add_method(GenOperatorMethod(name, args, return_type, operator))
 
+    def autoasmapping(filename, content, main_class, x):
+        genclass = get_result_class(results, filename, main_class)
+        operator = x[0]
+        name, args, return_type, is_static = GenMethod.split(x[1:])
+        genclass.add_method(GenMappingMethod(name, args, return_type, operator))
+
     def autoclass(filename, content, main_class, x):
         genclass = get_result_class(results, filename, main_class)
         name = x[1].strip('"')
@@ -1463,6 +847,7 @@ def main(params, paths):
                               HeaderPattern(AUTOBIND_TYPEDEF_PATTERN, autotypedef),
                               HeaderPattern(AUTOBIND_METHOD_PATTERN, automethod),
                               HeaderPattern(AUTOBIND_OPERATOR_PATTERN, autooperator),
+                              HeaderPattern(AUTOBIND_AS_MAPPING_PATTERN, autoasmapping),
                               HeaderPattern(AUTOBIND_CLASS_PATTERN, autoclass),
                               HeaderPattern(AUTOBIND_EXTENDS_PATTERN, autoextends),
                               HeaderPattern(AUTOBIND_LOADER_PATTERN, AutoMethodCall(GenLoaderMethod, 2)),
@@ -1492,17 +877,19 @@ def main(params, paths):
 
 
 if __name__ == '__main__':
-    opts, paths = getopt.getopt(sys.argv[1:], 'b:c:p:n:o:l:m:d:j')
-    params = dict((i.lstrip('-'), j) for i, j in opts)
-    if any(i not in params for i in ['p', 'm']) or len(paths) == 0:
-        print('Usage: %s -p namespace -m modulename [-c cmakefile] [-o output_file] [-l library_path] dir_paths...' % sys.argv[0])
-        sys.exit(0)
+    # opts, paths = getopt.getopt(sys.argv[1:], 'b:c:p:n:o:l:m:d:j')
+    # params = dict((i.lstrip('-'), j) for i, j in opts)
+    # if any(i not in params for i in ['p', 'm']) or len(paths) == 0:
+    #     print('Usage: %s -p namespace -m modulename [-c cmakefile] [-o output_file] [-l library_path] dir_paths...' % sys.argv[0])
+    #     sys.exit(0)
+    #
+    # library_path = params['l'] if 'l' in params else None
+    # if library_path and library_path not in sys.path:
+    #     sys.path.append(library_path)
+    params, paths = get_param_and_paths()
 
-    library_path = params['l'] if 'l' in params else None
-    if library_path and library_path not in sys.path:
-        sys.path.append(library_path)
+    acg = import_acg()
 
-    import acg
     from acg import HeaderPattern
 
     if 'j' in params:

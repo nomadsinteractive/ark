@@ -90,6 +90,14 @@ void Varyings::setProperty(const String& name, sp<Vec4> var)
     setSlotInput(name, sp<Input>::make<InputVariable<V4>>(std::move(var)));
 }
 
+sp<Varyings> Varyings::subscribe(const String& name)
+{
+    sp<Varyings>& subProp = _sub_properties[name.hash()];
+    if(!subProp)
+        subProp = sp<Varyings>::make();
+    return subProp;
+}
+
 static String findNearestAttribute(const PipelineInput& pipelineInput, const String& name)
 {
     String nearest;

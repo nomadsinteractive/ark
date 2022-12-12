@@ -24,15 +24,25 @@ public:
     virtual sp<RenderCommand> compose(const RenderRequest& renderRequest, RenderLayer::Snapshot& snapshot) override;
 
 private:
+    struct MeshInstance {
+        size_t _snapshot_index;
+        sp<Mat4> _transform;
+    };
+
+    struct ModelTable {
+    };
+
     struct IndirectCmds {
         DrawingContext::DrawElementsIndirectCommand _command;
-        std::vector<size_t> _snapshot_indices;
+        std::vector<MeshInstance> _snapshot_indices;
     };
 
 private:
     ByteArray::Borrowed makeIndirectBuffer(const RenderRequest& renderRequest) const;
     void writeModelMatices(const RenderRequest& renderRequest, DrawingBuffer& buf, const RenderLayer::Snapshot& snapshot, bool reload);
     V3 toScale(const V3& size, const Metrics& metrics) const;
+
+    void reloadIndirectCommands(const RenderLayer::Snapshot& snapshot);
 
 private:
     sp<ModelBundle> _model_bundle;

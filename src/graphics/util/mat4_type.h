@@ -10,13 +10,13 @@
 
 namespace ark {
 
-//  [[script::bindings::class("Mat4")]]
+//[[script::bindings::class("Mat4")]]
 class ARK_API Mat4Type final {
 public:
 //  [[script::bindings::constructor]]
     static sp<Mat4> create(const V4& t, const V4& b, const V4& n, const V4& w);
 //  [[script::bindings::constructor]]
-    static sp<Mat4> create(const sp<Vec4>& t = nullptr, const sp<Vec4>& b = nullptr, const sp<Vec4>& n = nullptr, const sp<Vec4>& w = nullptr);
+    static sp<Mat4> create(sp<Vec4> t = nullptr, sp<Vec4> b = nullptr, sp<Vec4> n = nullptr, sp<Vec4> w = nullptr);
 
 //  [[script::bindings::operator(@)]]
     static sp<Mat4> matmul(sp<Mat4> lvalue, sp<Mat4> rvalue);
