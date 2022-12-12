@@ -35,8 +35,10 @@ public:
     }
 
     virtual void upload(Writable& buf) override {
-        for(const auto& i : _inputs)
-            i.second->upload(WritableWithOffset(buf, i.first));
+        for(const auto& i : _inputs) {
+            WritableWithOffset wwo(buf, i.first);
+            i.second->upload(wwo);
+        }
     }
 
 private:

@@ -836,7 +836,6 @@ void GLPipeline::PipelineOperationCompute::compute(GraphicsContext& /*graphicsCo
     glUseProgram(_stub->_id);
     _stub->bindUBOSnapshots(computeContext._ubos, computeContext._shader_bindings->pipelineInput());
 
-    uint32_t binding = 0;
     std::vector<GLBufferBaseBinder> binders;
     for(const auto& [i, j] : computeContext._ssbo)
         binders.emplace_back(GL_SHADER_STORAGE_BUFFER, i, j.id());

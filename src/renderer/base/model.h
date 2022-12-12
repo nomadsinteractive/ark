@@ -11,6 +11,7 @@
 #include "graphics/inf/renderable.h"
 
 #include "renderer/forwarding.h"
+#include "renderer/base/node.h"
 #include "renderer/inf/vertices.h"
 
 namespace ark {

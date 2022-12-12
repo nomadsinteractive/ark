@@ -182,7 +182,8 @@ ark_find_vcpkg_package(glm LIBRARIES glm::glm)
 ark_include_directories(3rdparty/cute_headers)
 
 ark_include_directories(3rdparty/json/include)
-ark_include_directories(3rdparty/spdlog/include)
+#ark_include_directories(3rdparty/spdlog/include)
+ark_find_vcpkg_package(spdlog LIBRARIES spdlog::spdlog spdlog::spdlog_header_only)
 
 if(ARK_USE_LIBPNG)
 #    set(SKIP_INSTALL_ALL ON)

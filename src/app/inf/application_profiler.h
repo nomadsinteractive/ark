@@ -59,19 +59,19 @@ public:
             log(reinterpret_cast<const void*>(&logData), DATA_TYPE_UINT32);
         }
 
-        void log_sfinae(const String& data, nullptr_t) {
+        void log_sfinae(const String& data, std::nullptr_t) {
             log(data.c_str(), DATA_TYPE_STRING);
         }
 
-        void log_sfinae(const V2& data, nullptr_t) {
+        void log_sfinae(const V2& data, std::nullptr_t) {
             log(&data, DATA_TYPE_VEC2);
         }
 
-        void log_sfinae(const V3& data, nullptr_t) {
+        void log_sfinae(const V3& data, std::nullptr_t) {
             log(&data, DATA_TYPE_VEC3);
         }
 
-        void log_sfinae(const V4& data, nullptr_t) {
+        void log_sfinae(const V4& data, std::nullptr_t) {
             log(&data, DATA_TYPE_VEC4);
         }
 

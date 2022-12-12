@@ -1,13 +1,10 @@
-#include "graphics/base/quaternion.h"
+#include "graphics/base/rotation.h"
 
 #include <glm/gtx/quaternion.hpp>
 
-#include "core/ark.h"
 #include "core/base/bean_factory.h"
-#include "core/impl/variable/variable_wrapper.h"
 #include "core/types/null.h"
 #include "core/util/holder_util.h"
-#include "core/util/variable_util.h"
 
 #include "graphics/base/v3.h"
 #include "graphics/base/quaternion.h"
@@ -32,7 +29,7 @@ Rotation::Rotation(const sp<Numeric>& theta, const sp<Vec3>& axis)
 }
 
 Rotation::Rotation(sp<Numeric> theta, sp<Vec3> axis, sp<Vec4> quaternion)
-    : _theta(std::move(theta), 0), _axis(std::move(axis), Z_AXIS), _quaternion(quaternion ? std::move(quaternion) : sp<Quaternion>::make(_theta.ensure(), _axis.ensure()))
+    : _theta(std::move(theta), 0), _axis(std::move(axis), Z_AXIS), _quaternion(quaternion ? std::move(quaternion) : sp<Vec4>::make<Quaternion>(_theta.ensure(), _axis.ensure()))
 {
 //TODO: _quaternion to SafeVar
     _timestamp.setDirty();

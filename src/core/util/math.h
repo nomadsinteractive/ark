@@ -120,9 +120,9 @@ public:
 
     template<typename T, typename U> static std::pair<T, typename T::size_type> levensteinNearest(const T& source, const U& candidates) {
         T nearest;
-        T::size_type ldmin = std::numeric_limits<T::size_type>::max();
+        typename T::size_type ldmin = std::numeric_limits<typename T::size_type>::max();
         for(const auto& j : candidates) {
-            T::size_type ld = levensteinDistance(source, j);
+            typename T::size_type ld = levensteinDistance(source, j);
             if(ld < ldmin) {
                 ldmin = ld;
                 nearest = j;

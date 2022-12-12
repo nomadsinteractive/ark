@@ -13,11 +13,11 @@ template<typename T> class AtLeast : public Variable<T>, public Wrapper<Variable
 public:
     AtLeast(sp<Variable<T>> delegate, sp<Variable<T>> boundary, Notifier notifier)
          : Wrapper<Variable<T>>(std::move(delegate)), _boundary(std::move(boundary)), _notifer(std::move(notifier)) {
-        DASSERT(_wrapped && _boundary);
+        DASSERT(this->_wrapped && _boundary);
     }
 
     virtual T val() override {
-        T value = _wrapped->val();
+        T value = this->_wrapped->val();
         T boundary = _boundary->val();
         if(value < boundary) {
             _notifer.notify();
@@ -27,7 +27,7 @@ public:
     }
 
     virtual bool update(uint64_t timestamp) override {
-        return VariableUtil::update(timestamp, _wrapped, _boundary);
+        return VariableUtil::update(timestamp, this->_wrapped, _boundary);
     }
 
 private:

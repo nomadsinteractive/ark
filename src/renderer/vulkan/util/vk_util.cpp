@@ -1,7 +1,7 @@
 #include "renderer/vulkan/util/vk_util.h"
 
 #include <array>
-#include <xutility>
+//#include <xutility>
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -138,7 +138,7 @@ static const TBuiltInResource DefaultTBuiltInResource = {
     /* .maxMeshViewCountNV = */ 4,
     /* .maxDualSourceDrawBuffersEXT = */ 1,
 
-    /* .limits = */ {
+     .limits =  {
         /* .nonInductiveForLoops = */ true,
         /* .whileLoops = */ true,
         /* .doWhileLoops = */ true,
@@ -147,7 +147,7 @@ static const TBuiltInResource DefaultTBuiltInResource = {
         /* .generalVaryingIndexing = */ true,
         /* .generalSamplerIndexing = */ true,
         /* .generalVariableIndexing = */ true,
-        /* .generalConstantMatrixVectorIndexing = */ true,
+        /* .generalConstantMatrixVectorIndexing = */ true
     }
 };
 

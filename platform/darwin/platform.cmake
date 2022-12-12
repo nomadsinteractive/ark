@@ -1,18 +1,20 @@
 if(ARK_USE_OPEN_GL)
     find_package(OpenGL REQUIRED)
-    list(APPEND LOCAL_LIBS ${OPENGL_gl_LIBRARY})
-    list(APPEND LOCAL_INCLUDE_DIRS ${OPENGL_INCLUDE_DIR})
+    ark_find_vcpkg_package(glbinding LIBRARIES glbinding::glbinding glbinding::glbinding-aux)
+#    list(APPEND LOCAL_LIBS ${OPENGL_gl_LIBRARY})
+#    list(APPEND LOCAL_INCLUDE_DIRS ${OPENGL_INCLUDE_DIR})
 
-    ark_add_denpendency(3rdparty/glbinding glbinding 3rdparty/glbinding/source/glbinding/include)
+#    ark_add_denpendency(3rdparty/glbinding glbinding 3rdparty/glbinding/source/glbinding/include)
 
-    list(APPEND ARK_OPENGL_INCLUDE_DIRS
-        ${ARK_SRC_DIR}/3rdparty/glbinding/source/glbinding/include
-        ${PROJECT_BINARY_DIR}/3rdparty/glbinding/source/glbinding/include
-        )
-    set(ARK_OPENGL_LIBRARIES glbinding)
+#    list(APPEND ARK_OPENGL_INCLUDE_DIRS
+#        ${ARK_SRC_DIR}/3rdparty/glbinding/source/glbinding/include
+#        ${PROJECT_BINARY_DIR}/3rdparty/glbinding/source/glbinding/include
+#        )
+#    set(ARK_OPENGL_LIBRARIES glbinding)
 endif()
 
 if(ARK_USE_VULKAN)
+    ark_find_vcpkg_package(Threads MODULE_MODE LIBRARIES Threads::Threads)
     ark_compile_definitions(-DVK_USE_PLATFORM_MACOS_MVK)
     ark_include_directories($ENV{MOLTONVK_HOME}/MoltenVK/include)
     if(IOS)

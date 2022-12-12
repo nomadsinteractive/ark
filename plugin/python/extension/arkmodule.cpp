@@ -199,7 +199,7 @@ PyObject* ark_getRefManager(PyObject* /*self*/, PyObject* /*args*/)
 
 PyObject* ark_trace_(PyObject* /*self*/, PyObject* /*args*/)
 {
-    TRACE(true);
+    TRACE(true, "");
     Py_RETURN_NONE;
 }
 

@@ -37,7 +37,8 @@ void InputImpl::upload(Writable& writable)
     for(InputStub& i : _inputs)
         if(i._dirty || i._fresh)
         {
-            i._input->upload(WritableWithOffset(writable, i._offset));
+            WritableWithOffset wwo(writable, i._offset);
+            i._input->upload(wwo);
             i._fresh = false;
         }
 }

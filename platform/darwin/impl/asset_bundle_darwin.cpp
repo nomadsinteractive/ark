@@ -63,7 +63,7 @@ AssetBundleDarwin::AssetBundleDarwin(const String& directory)
 {
 }
 
-sp<Asset> AssetBundleDarwin::get(const String& name)
+sp<Asset> AssetBundleDarwin::getAsset(const String& name)
 {
     CFBundleRef bundle = CFBundleGetMainBundle();
     CFStringRef cfDirectory = CFStringCreateWithCString(nullptr, _directory.c_str(), kCFStringEncodingUTF8);

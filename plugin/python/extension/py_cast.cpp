@@ -5,7 +5,6 @@
 #include "core/base/scope.h"
 #include "core/inf/variable.h"
 #include "core/types/box.h"
-#include "core/types/global.h"
 #include "core/types/null.h"
 #include "core/util/log.h"
 
@@ -39,7 +38,7 @@ namespace python {
 Optional<sp<Runnable>> PyCast::toRunnable(PyObject* object, bool alert)
 {
     if(PyCallable_Check(object))
-        return sp<PythonCallableRunnable>::make(PyInstance::own(object));
+        return sp<Runnable>::make<PythonCallableRunnable>(PyInstance::own(object));
 
     return toSharedPtrDefault<Runnable>(object, alert);
 }
@@ -71,7 +70,7 @@ Optional<String> PyCast::toStringExact(PyObject* object, const char* encoding, c
     if(PyUnicode_Check(object))
         return unicodeToUTF8String(object, encoding, error);
     else if (PyBytes_Check(object))
-        return PyBytes_AS_STRING(object);
+        return String(PyBytes_AS_STRING(object));
     return Optional<String>();
 }
 
@@ -166,12 +165,12 @@ PyObject* PyCast::toPyObject_SharedPtr(const bytearray& bytes)
 Optional<sp<Numeric>> PyCast::toNumeric(PyObject* object, bool alert)
 {
     if(isNoneOrNull(object))
-        return nullptr;
+        return sp<Numeric>::null();
 
     if(PyLong_Check(object))
-        return sp<Numeric::Const>::make(static_cast<float>(PyLong_AsLong(object)));
+        return sp<Numeric>::make<Numeric::Const>(static_cast<float>(PyLong_AsLong(object)));
     if(PyFloat_Check(object))
-        return sp<Numeric::Const>::make(static_cast<float>(PyFloat_AsDouble(object)));
+        return sp<Numeric>::make<Numeric::Const>(static_cast<float>(PyFloat_AsDouble(object)));
 
     return toSharedPtrDefault<Numeric>(object, alert);
 }
@@ -190,7 +189,7 @@ Optional<sp<Boolean>> PyCast::toBoolean(PyObject* object, bool alert)
 Optional<sp<Integer>> PyCast::toInteger(PyObject* object, bool alert)
 {
     if(PyLong_CheckExact(object))
-        return sp<Integer::Const>::make(PyLong_AsLong(object));
+        return sp<Integer>::make<Integer::Const>(PyLong_AsLong(object));
 
     return toSharedPtrDefault<Integer>(object, alert);
 }

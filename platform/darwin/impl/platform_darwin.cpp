@@ -14,7 +14,6 @@
 #include <glbinding/Binding.h>
 #endif
 
-#include "core/inf/variable.h"
 #include "core/impl/asset_bundle/asset_bundle_directory.h"
 #include "core/impl/asset_bundle/asset_bundle_with_fallback.h"
 #include "core/util/strings.h"
@@ -52,10 +51,9 @@ sp<AssetBundle> Platform::getAssetBundle(const String& path, const String& appPa
 
 sp<Alphabet> Platform::getSystemAlphabet(const Font& font, const String& lang)
 {
-    const AlphabetTrueType::TextSize textSize(font.size(), AlphabetTrueType::TextSize::TEXT_SIZE_UNIT_PT);
     if(isFile("/Library/Fonts/Arial Unicode.ttf"))
-        return sp<AlphabetTrueType>::make("Arial Unicode.ttf", textSize);
-    return sp<AlphabetTrueType>::make("Arial.ttf", textSize);
+        return sp<AlphabetTrueType>::make("Arial Unicode.ttf", font.size());
+    return sp<AlphabetTrueType>::make("Arial.ttf", font.size());
 }
 
 

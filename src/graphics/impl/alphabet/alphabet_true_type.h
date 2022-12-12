@@ -18,7 +18,7 @@ public:
     AlphabetTrueType(const String& src, const Font::TextSize& textSize);
     ~AlphabetTrueType() override;
 
-    virtual void setTextSize(const Font::TextSize& size);
+    virtual void setTextSize(const Font::TextSize& size) override;
 
     virtual Optional<Metrics> measure(int32_t c) override;
     virtual bool draw(uint32_t c, Bitmap& image, int32_t x, int32_t y) override;

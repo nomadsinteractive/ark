@@ -15,7 +15,7 @@
 namespace ark {
 
 ApplicationFacade::ApplicationFacade(Application& app, const Surface& surface, const sp<ApplicationManifest>& manifest)
-    : _context(app.context()), _controller(app.controller()), _surface_size(app.surfaceSize()), _surface_controller(surface.controller()), _manifest(manifest)
+    : _context(app.context()), _controller(app.controller()), _surface_controller(surface.controller()), _surface_size(app.surfaceSize()), _manifest(manifest)
 {
 }
 

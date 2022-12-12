@@ -16,7 +16,7 @@ public:
     }
 
     virtual T val() override {
-        T value = _wrapped->val();
+        T value = this->_wrapped->val();
         T boundary = _boundary->val();
         if(value > boundary) {
             _notifer.notify();
@@ -26,7 +26,7 @@ public:
     }
 
     virtual bool update(uint64_t timestamp) override {
-        return VariableUtil::update(timestamp, _wrapped, _boundary);
+        return VariableUtil::update(timestamp, this->_wrapped, _boundary);
     }
 
 private:

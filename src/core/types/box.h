@@ -17,7 +17,7 @@ public:
     typedef void(*Destructor)(const void*);
 
     Box() noexcept = default;
-    Box(nullptr_t);
+    Box(std::nullptr_t);
     template<typename T> Box(sp<T> sharedPtr) noexcept
         : Box(sharedPtr ? new SharedPtr<T>(std::move(sharedPtr)) : nullptr) {
     }

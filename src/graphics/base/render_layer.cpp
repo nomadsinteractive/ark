@@ -37,7 +37,7 @@ RenderLayer::Stub::Stub(sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Vec4>
 
 sp<LayerContext> RenderLayer::Stub::makeLayerContext(sp<Batch> batch, sp<ModelLoader> modelLoader, sp<Boolean> visible)
 {
-    sp<LayerContext> layerContext = sp<LayerContext>::make(std::move(batch), modelLoader ? sp<ModelLoaderCached>::make(std::move(modelLoader)) : _model_loader, std::move(visible), _layer->context()->varyings());
+    sp<LayerContext> layerContext = sp<LayerContext>::make(std::move(batch), modelLoader ? sp<ModelLoader>::make<ModelLoaderCached>(std::move(modelLoader)) : _model_loader, std::move(visible), _layer->context()->varyings());
     _batch_groups.push_back(layerContext);
     return layerContext;
 }

@@ -16,7 +16,6 @@
 #include "renderer/base/shader.h"
 #include "renderer/base/vertex_writer.h"
 #include "renderer/inf/model_loader.h"
-#include "renderer/inf/vertices.h"
 
 namespace ark {
 
@@ -60,7 +59,8 @@ public:
         for(const auto& i: _model_bundle->modelLayouts())
         {
             Input& indices = i.second._model->indices();
-            indices.upload(WritableWithOffset(uploader, offset));
+            WritableWithOffset writable(uploader, offset);
+            indices.upload(writable);
             offset += indices.size();
         }
     }

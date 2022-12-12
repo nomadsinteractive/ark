@@ -13,9 +13,13 @@
     "libjpeg-turbo",
     "libvorbis",
     "libyaml",
-    "libzip",
+    "libzip", {
+      "name": "pthread",
+      "platform": "osx"
+    },
     "python3",
     "sdl2",
+    "spdlog",
     "stb",
     "tinyxml2"
   ]

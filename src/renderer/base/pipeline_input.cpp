@@ -179,7 +179,10 @@ void PipelineInput::UBO::doSnapshot(uint64_t timestamp, bool force) const
         bool dirty = input && input->update(timestamp);
         dirtyFlags[i] = static_cast<uint8_t>(force || dirty);
         if(dirtyFlags[i] && input)
-            input->upload(WritableMemory(buf));
+        {
+            WritableMemory writable(buf);
+            input->upload(writable);
+        }
         buf += uniform.size();
     }
 }

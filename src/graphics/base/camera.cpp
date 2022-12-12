@@ -5,15 +5,10 @@
 
 #include "core/ark.h"
 
-#include "core/base/observer.h"
-#include "core/base/notifier.h"
 #include "core/impl/variable/variable_wrapper.h"
-#include "core/impl/boolean/boolean_by_weak_ref.h"
-#include "core/impl/variable/variable_op2.h"
 #include "core/impl/writable/writable_memory.h"
 #include "core/inf/writable.h"
 #include "core/types/global.h"
-#include "core/util/operators.h"
 #include "core/util/variable_util.h"
 
 #include "graphics/base/mat.h"
@@ -23,7 +18,6 @@
 #include "graphics/util/vec3_type.h"
 
 #include "renderer/base/render_engine.h"
-#include "renderer/base/render_engine_context.h"
 
 #include "app/base/application_context.h"
 #include "app/base/application_manifest.h"
@@ -198,7 +192,8 @@ void Camera::lookAt(const sp<Vec3>& position, const sp<Vec3>& target, const sp<V
 V3 Camera::toWorldPosition(float screenX, float screenY, float z) const
 {
     M4 vp;
-    _vp->upload(WritableMemory(&vp));
+    WritableMemory wm(&vp);
+    _vp->upload(wm);
     return Ark::instance().applicationContext()->renderEngine()->toWorldPosition(vp, screenX, screenY, z);
 }
 

@@ -84,7 +84,7 @@ public:
         return obj;
     }
 
-    template<typename T> static PyObject* toPyObject_SharedPtr_sfinae(const sp<T>& object, nullptr_t ) {
+    template<typename T> static PyObject* toPyObject_SharedPtr_sfinae(const sp<T>& object, std::nullptr_t ) {
         if(!object)
             Py_RETURN_NONE;
         return PythonInterpreter::instance()->pyNewObject<T>(object);
@@ -211,7 +211,7 @@ private:
             return ensureCppObject<R>(result.pyObject());
         };
     }
-    template<typename T> static Optional<T> toCppObject_sfinae(PyObject* obj, typename T::result_type*) {
+    template<typename T> static Optional<T> toCppObject_sfinae(PyObject* obj, typename std::enable_if_t<std::is_function_v<T>>*) {
         return toCppObject_function(obj, reinterpret_cast<T*>(0));
     }
     template<typename T> static Optional<T> toCppObject_sfinae(PyObject* obj, typename T::key_type*) {
@@ -361,7 +361,7 @@ template<> inline Optional<sp<Vec3>> PyCast::toSharedPtrImpl<Vec3>(PyObject* obj
 template<> inline Optional<sp<ByteArray>> PyCast::toSharedPtrImpl<ByteArray>(PyObject* object, bool alert) {
     if(PyBytes_Check(object)) {
         Py_ssize_t len = PyBytes_Size(object);
-        return sp<ByteArray::Borrowed>::make(reinterpret_cast<uint8_t*>(PyBytes_AsString(object)), len);
+        return sp<ByteArray>::make<ByteArray::Borrowed>(reinterpret_cast<uint8_t*>(PyBytes_AsString(object)), len);
     }
     if(PyObject_CheckBuffer(object)) {
         Py_buffer buf;

@@ -14,7 +14,7 @@ public:
         : Input(vector->size()), _vector(std::move(vector)) {
     }
     InputObjectArray(std::vector<T> vector)
-        : InputObjectArray(sp<Array<T>::Vector>::make(std::move(vector))) {
+        : InputObjectArray(sp<typename Array<T>::Vector>::make(std::move(vector))) {
     }
 
     virtual void upload(Writable& buf) override {
