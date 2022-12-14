@@ -203,15 +203,15 @@ private:
         if(!PyCallable_Check(obj))
             return Optional<std::function<R(Args...)>>();
         PyInstance pyObj(PyInstance::own(obj));
-        return [pyObj](Args... args) -> R {
+        return Optional<std::function<R(Args...)>>([pyObj](Args... args) -> R {
             PyInstance tuple = PyInstance::steal(makeArgumentTuple<Args...>(args...));
             PyInstance result = PyInstance::steal(pyObj.call(tuple.pyObject()));
             if(result.isNullptr())
                 PythonInterpreter::instance()->logErr();
             return ensureCppObject<R>(result.pyObject());
-        };
+        });
     }
-    template<typename T> static Optional<T> toCppObject_sfinae(PyObject* obj, typename std::enable_if_t<std::is_function_v<T>>*) {
+    template<typename T> static Optional<T> toCppObject_sfinae(PyObject* obj, typename T::result_type*) {
         return toCppObject_function(obj, reinterpret_cast<T*>(0));
     }
     template<typename T> static Optional<T> toCppObject_sfinae(PyObject* obj, typename T::key_type*) {

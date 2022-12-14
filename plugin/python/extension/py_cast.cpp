@@ -355,6 +355,14 @@ template<> ARK_PLUGIN_PYTHON_API Optional<uint64_t> PyCast::toCppObject_impl<uin
     return static_cast<uint64_t>(PyLong_AsUnsignedLongLong(object));
 }
 
+#ifdef __APPLE__
+template<> ARK_PLUGIN_PYTHON_API Optional<size_t> PyCast::toCppObject_impl<size_t>(PyObject* object)
+{
+    CHECK(PyNumber_Check(object), "Cannot cast Python object \"%s\" to size_t", object->ob_type->tp_name);
+    return static_cast<size_t>(PyLong_AsUnsignedLongLong(object));
+}
+#endif
+
 template<> ARK_PLUGIN_PYTHON_API Optional<V2> PyCast::toCppObject_impl<V2>(PyObject* object)
 {
     if(PyTuple_Check(object))
