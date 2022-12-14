@@ -3,6 +3,7 @@
 bin
 gen
 out
+vcpkg_installed
 
 # Prerequisites
 *.d
