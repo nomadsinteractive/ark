@@ -28,18 +28,12 @@
 [submodule "3rdparty/libyaml"]
 	path = 3rdparty/libyaml
 	url = https://github.com/yaml/libyaml.git
-[submodule "3rdparty/libzip"]
-	path = 3rdparty/libzip
-	url = https://github.com/nih-at/libzip.git
 [submodule "3rdparty/stb"]
 	path = 3rdparty/stb
 	url = https://github.com/nothings/stb.git
 [submodule "3rdparty/tinyxml2"]
 	path = 3rdparty/tinyxml2
 	url = https://github.com/leethomason/tinyxml2.git
-[submodule "3rdparty/zlib"]
-	path = 3rdparty/zlib
-	url = https://github.com/madler/zlib.git
 [submodule "plugin/python/3rdparty/Python"]
 	path = plugin/python/3rdparty/Python
 	url = https://github.com/python/cpython.git
