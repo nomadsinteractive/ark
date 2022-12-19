@@ -148,37 +148,15 @@ aux_source_directory(src/app/view LOCAL_SRC_LIST)
 aux_source_directory(platform/any LOCAL_SRC_LIST)
 ark_include_directories(platform/any)
 
-#ark_include_directories(3rdparty/glm)
-
-#ark_add_denpendency(3rdparty/tinyxml2 tinyxml2 3rdparty/tinyxml2)
 ark_find_vcpkg_package(tinyxml2 LIBRARIES tinyxml2::tinyxml2)
-#ark_add_denpendency(3rdparty/libyaml yaml 3rdparty/libyaml/include)
-#ark_compile_definitions(-DYAML_DECLARE_STATIC)
 ark_find_vcpkg_package(yaml LIBRARIES yaml)
 
-#find_package(ZLIB)
-#if(ZLIB_FOUND)
-#    option(ARK_USE_SYSTEM_ZLIB "Use system zlib library" OFF)
-#endif()
-#if(NOT ARK_USE_SYSTEM_ZLIB)
 ark_find_vcpkg_package(zlib LIBRARIES ZLIB::ZLIB MODULE_MODE)
-#set(ZLIB_LIBRARY ZLIB::ZLIB CACHE STRING ZLIB_LIBRARY)
-#    set(ZLIB_ROOT ${ARK_3RDPARTY_DIR}/zlib CACHE PATH ZLIB_ROOT)
-#    set(ZLIB_INCLUDE_DIR ${ARK_3RDPARTY_DIR}/zlib ${CMAKE_CURRENT_BINARY_DIR}/3rdparty/zlib)
-#    set(ZLIB_VERSION_STRING "1.2.11" CACHE STRING ZLIB_VERSION_STRING)
-#    set(ZLIB_LIBRARY zlibstatic CACHE STRING ZLIB_LIBRARY)
-#endif()
 
-#ark_add_denpendency(3rdparty/libzip zip ${CMAKE_CURRENT_BINARY_DIR}/3rdparty/libzip 3rdparty/libzip/lib)
 ark_find_vcpkg_package(libzip LIBRARIES libzip::zip)
 
-#set(GLM_TEST_ENABLE OFF)
-#ark_ensure_dependency(3rdparty/glm)
-#add_subdirectory(3rdparty/glm)
-#list(APPEND LOCAL_INCLUDE_DIRS 3rdparty/glm)
 ark_find_vcpkg_package(glm LIBRARIES glm::glm)
 
-#ark_ensure_dependency(3rdparty/cute_headers)
 ark_include_directories(3rdparty/cute_headers)
 
 ark_include_directories(3rdparty/json/include)

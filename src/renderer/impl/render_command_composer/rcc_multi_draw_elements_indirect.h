@@ -1,6 +1,7 @@
 #ifndef ARK_RENDERER_IMPL_RENDER_COMMAND_COMPOSER_RCC_MULTI_DRAW_ELEMENTS_INDIRECT_H_
 #define ARK_RENDERER_IMPL_RENDER_COMMAND_COMPOSER_RCC_MULTI_DRAW_ELEMENTS_INDIRECT_H_
 
+#include <mutex>
 #include <vector>
 #include <unordered_map>
 
@@ -8,6 +9,7 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/base/drawing_context.h"
+#include "renderer/base/model_bundle.h"
 #include "renderer/base/model.h"
 #include "renderer/inf/render_command_composer.h"
 
@@ -24,17 +26,46 @@ public:
     virtual sp<RenderCommand> compose(const RenderRequest& renderRequest, RenderLayer::Snapshot& snapshot) override;
 
 private:
-    struct MeshInstance {
-        size_t _snapshot_index;
-        sp<Mat4> _transform;
+    struct NodeLayoutInstance {
+        NodeLayoutInstance() = default;
+        NodeLayoutInstance(const Node& node, const M4& globalTransform);
+        NodeLayoutInstance(const Node& node, const NodeLayoutInstance& parentLayout);
+
+        size_t _node_id;
+
+        sp<Mat4Impl> _node_transform;
+        sp<Mat4> _global_transform;
     };
 
-    struct ModelTable {
+    struct ModelInstance;
+
+    struct NodeInstance {
+        NodeInstance(ModelInstance& modelInstance, size_t nodeId);
+
+        M4 globalTransform() const;
+        size_t snapshotIndex() const;
+
+        ModelInstance& _model_instance;
+        size_t _node_id;
+    };
+
+    struct ModelInstance {
+        ModelInstance() = default;
+        ModelInstance(size_t snapshotIndex, const ModelBundle::ModelLayout& modelLayout);
+
+        bool isDynamicLayout() const;
+        void toDynamicLayout();
+
+        void setNodeTransform(size_t nodeId, const M4& transform);
+
+        sp<Model> _model;
+        size_t _snapshot_index;
+        std::map<size_t, NodeLayoutInstance> _node_layouts;
     };
 
     struct IndirectCmds {
         DrawingContext::DrawElementsIndirectCommand _command;
-        std::vector<MeshInstance> _snapshot_indices;
+        std::vector<sp<NodeInstance>> _node_instances;
     };
 
 private:
@@ -45,12 +76,17 @@ private:
     void reloadIndirectCommands(const RenderLayer::Snapshot& snapshot);
 
 private:
+//TODO: make RenderCommandComposer thread safe.
+[[deprecated]]
+    std::mutex _mutex;
+
     sp<ModelBundle> _model_bundle;
 
     Buffer _indices;
     Buffer _draw_indirect;
 
     Table<uint64_t, IndirectCmds> _indirect_cmds;
+    std::unordered_map<size_t, ModelInstance> _model_instances;
 };
 
 }

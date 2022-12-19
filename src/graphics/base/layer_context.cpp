@@ -98,9 +98,10 @@ bool LayerContext::preSnapshot(RenderRequest& renderRequest)
         _renderables.insert(_renderables.end(), emplaced.begin(), emplaced.end());
     }
 
-    needsReload = _batch->preSnapshot(renderRequest, *this) || needsReload;
+    needsReload = _batch->preSnapshot(renderRequest, *this) || needsReload || _reload_requested;
+    _reload_requested = false;
 
-    return needsReload || _reload_requested || _layer_type == Layer::TYPE_TRANSIENT;
+    return needsReload || _layer_type == Layer::TYPE_TRANSIENT;
 }
 
 void LayerContext::snapshot(RenderRequest& renderRequest, RenderLayer::Snapshot& output)

@@ -13,7 +13,7 @@ _paths = None
 
 INDENT = '    '
 
-TYPE_DEFINED_OBJ = ('V2', 'V3', 'V4', 'Rect', 'RectI', 'RectF')
+TYPE_DEFINED_OBJ = ('V2', 'V3', 'V4', 'M3', 'M4', 'Rect', 'RectI', 'RectF')
 TYPE_DEFINED_SP = ('document', 'element', 'attribute', 'bitmap')
 
 

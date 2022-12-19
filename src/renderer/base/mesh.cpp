@@ -100,6 +100,20 @@ void Mesh::write(VertexWriter& buf) const
     }
 }
 
+std::pair<V3, V3> Mesh::calcBoundingAABB() const
+{
+    V3 aabbMin(std::numeric_limits<float>::max()), aabbMax(std::numeric_limits<float>::min());
+
+    for(const V3& i : _vertices)
+    {
+        if(i.x() < aabbMin.x() || i.y() < aabbMin.y() || i.z() < aabbMin.z())
+            aabbMin = V3(std::min(i.x(), aabbMin.x()), std::min(i.y(), aabbMin.y()), std::min(i.z(), aabbMin.z()));
+        if(i.x() > aabbMax.x() || i.y() > aabbMax.y() || i.z() > aabbMax.z())
+            aabbMax = V3(std::max(i.x(), aabbMax.x()), std::max(i.y(), aabbMax.y()), std::max(i.z(), aabbMax.z()));
+    }
+    return {aabbMin, aabbMax};
+}
+
 void Mesh::BoneInfo::add(uint32_t id, float weight)
 {
     for(size_t i = 0; i < _weights.size(); ++i)

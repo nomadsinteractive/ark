@@ -65,11 +65,10 @@ public:
         return nodeLayouts;
     }
 
-private:
-    template<typename T> void loadFlatLayouts(const sp<Node>& node, const T& parentLayout, std::vector<T>& nodeLayouts) const {
+    template<typename T> static void loadFlatLayouts(const sp<Node>& node, const T& parentLayout, std::vector<T>& nodeLayouts) {
         T layout(node, parentLayout);
 
-        if(!node->meshes().empty())
+        if(!node->name().empty())
             nodeLayouts.emplace_back(layout);
 
         for(const sp<Node>& childNode : node->childNodes())

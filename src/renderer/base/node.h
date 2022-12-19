@@ -29,7 +29,11 @@ public:
     const std::vector<sp<Mesh>>& meshes() const;
     std::vector<sp<Mesh>>& meshes();
 
+//  [[script::bindings::property]]
     const M4& transform() const;
+
+//  [[script::bindings::auto]]
+    sp<Node> findChildNode(const String& name) const;
 
 private:
     String _name;

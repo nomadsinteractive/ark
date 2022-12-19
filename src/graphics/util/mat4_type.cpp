@@ -17,6 +17,16 @@ sp<Mat4> Mat4Type::create(sp<Vec4> t, sp<Vec4> b, sp<Vec4> n, sp<Vec4> w)
     return t ? sp<Mat4>::make<Mat4Impl>(std::move(t), std::move(b), std::move(n), std::move(w)) : sp<Mat4>::make<Mat4::Const>(M4::identity());
 }
 
+sp<Mat4> Mat4Type::create(const M4& m)
+{
+    return sp<Mat4Impl>::make(m);
+}
+
+sp<Mat4> Mat4Type::create(sp<Mat4> other)
+{
+    return sp<Mat4Impl>::make(std::move(other));
+}
+
 sp<Mat4> Mat4Type::create(const V4& t, const V4& b, const V4& n, const V4& w)
 {
     return sp<Mat4Impl>::make(t, b, n, w);
@@ -24,7 +34,12 @@ sp<Mat4> Mat4Type::create(const V4& t, const V4& b, const V4& n, const V4& w)
 
 sp<Mat4> Mat4Type::matmul(sp<Mat4> lvalue, sp<Mat4> rvalue)
 {
-    return sp<VariableOP2<sp<Mat4>, sp<Mat4>, Operators::Mul<M4, M4>>>::make(lvalue, rvalue);
+    return sp<VariableOP2<sp<Mat4>, sp<Mat4>, Operators::Mul<M4, M4>>>::make(std::move(lvalue), rvalue);
+}
+
+sp<Mat4> Mat4Type::matmul(sp<Mat4> lvalue, const M4& rvalue)
+{
+    return sp<VariableOP2<sp<Mat4>, M4, Operators::Mul<M4, M4>>>::make(std::move(lvalue), rvalue);
 }
 
 sp<Vec4> Mat4Type::matmul(sp<Mat4> lvalue, sp<Vec4> rvalue)

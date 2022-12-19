@@ -21,7 +21,6 @@ public:
 
     virtual void upload(Writable& buf) override {
         buf.writeObject(_var->val());
-//         *reinterpret_cast<T*>(buf) = static_cast<T>(_var->val());
     }
 
     virtual void traverse(const Visitor& visitor) override {

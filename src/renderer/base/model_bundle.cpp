@@ -105,8 +105,6 @@ ModelBundle::ModelLayout& ModelBundle::Stub::addModel(int32_t type, sp<Model> mo
 {
     ModelLayout& modelInfo = _model_layouts[type];
     modelInfo._node_layouts = model->toFlatLayouts<NodeLayout>();
-//    loadNodeLayouts(model->rootNode(), M4::identity(), modelInfo._node_layouts);
-
     modelInfo._vertex_offset = _vertex_length;
     modelInfo._index_offset = _index_length;
     size_t meshIndexOffset = _index_length;
@@ -129,17 +127,6 @@ const ModelBundle::ModelLayout& ModelBundle::Stub::ensureModelLayout(int32_t typ
     CHECK(iter != _model_layouts.end(), "Model not found, type: %d", type);
     return iter->second;
 }
-
-//void ModelBundle::Stub::loadNodeLayouts(const sp<Node>& node, const M4& parentTransform, std::vector<NodeLayout>& nodeLayouts) const
-//{
-//    NodeLayout nl(node, parentTransform * node->transform());
-
-//    if(!node->meshes().empty())
-//        nodeLayouts.push_back(std::move(nl));
-
-//    for(const sp<Node>& childNode : node->childNodes())
-//        loadNodeLayouts(childNode, nl._transform, nodeLayouts);
-//}
 
 ModelBundle::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _bean_factory(factory), _manifest(manifest), _material_bundle(factory.getBuilder<MaterialBundle>(manifest, "material-bundle")),

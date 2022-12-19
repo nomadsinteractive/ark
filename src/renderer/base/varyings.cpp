@@ -5,7 +5,6 @@
 #include "core/base/bean_factory.h"
 #include "core/inf/input.h"
 #include "core/inf/variable.h"
-#include "core/impl/input/input_variable.h"
 #include "core/impl/writable/writable_memory.h"
 #include "core/util/holder_util.h"
 #include "core/util/math.h"
@@ -32,6 +31,9 @@ void Varyings::traverse(const Holder::Visitor& visitor)
 bool Varyings::update(uint64_t timestamp) const
 {
     bool dirty = false;
+    for(const auto& [i, j] : _sub_properties)
+        if(j->update(timestamp))
+            dirty = true;
     for(const auto& i : _slots)
         if(i.second._input->update(timestamp))
             dirty = true;
@@ -40,7 +42,7 @@ bool Varyings::update(uint64_t timestamp) const
 
 Box Varyings::getProperty(const String& name) const
 {
-    const auto iter = _properties.find(name);
+    const auto iter = _properties.find(Strings::capitalizeFirst(name));
     CHECK(iter != _properties.end(), "Varyings has no property \"%s\"", name.c_str());
     return iter->second;
 }
@@ -62,37 +64,37 @@ void Varyings::setSlotInput(const String& name, sp<Input> input)
 
 void Varyings::setProperty(const String& name, sp<Integer> var)
 {
-    _properties[name] = var;
-    setSlotInput(name, sp<Input>::make<InputVariable<int32_t>>(std::move(var)));
+    setProperty<int32_t>(name, std::move(var));
 }
 
 void Varyings::setProperty(const String& name, sp<Numeric> var)
 {
-    _properties[name] = var;
-    setSlotInput(name, sp<Input>::make<InputVariable<float>>(std::move(var)));
+    setProperty<float>(name, std::move(var));
 }
 
 void Varyings::setProperty(const String& name, sp<Vec2> var)
 {
-    _properties[name] = var;
-    setSlotInput(name, sp<Input>::make<InputVariable<V2>>(std::move(var)));
+    setProperty<V2>(name, std::move(var));
 }
 
 void Varyings::setProperty(const String& name, sp<Vec3> var)
 {
-    _properties[name] = var;
-    setSlotInput(name, sp<Input>::make<InputVariable<V3>>(std::move(var)));
+    setProperty<V3>(name, std::move(var));
 }
 
 void Varyings::setProperty(const String& name, sp<Vec4> var)
 {
-    _properties[name] = var;
-    setSlotInput(name, sp<Input>::make<InputVariable<V4>>(std::move(var)));
+    setProperty<V4>(name, std::move(var));
+}
+
+void Varyings::setProperty(const String& name, sp<Mat4> var)
+{
+    setProperty<M4>(name, std::move(var));
 }
 
 sp<Varyings> Varyings::subscribe(const String& name)
 {
-    sp<Varyings>& subProp = _sub_properties[name.hash()];
+    sp<Varyings>& subProp = _sub_properties[name];
     if(!subProp)
         subProp = sp<Varyings>::make();
     return subProp;
@@ -114,7 +116,11 @@ static String findNearestAttribute(const PipelineInput& pipelineInput, const Str
 Varyings::Snapshot Varyings::snapshot(const PipelineInput& pipelineInput, Allocator& allocator)
 {
     if(!_slots.size())
-        return Snapshot();
+    {
+        Snapshot snapshot;
+        snapshot.snapshotSubProperties(_sub_properties, pipelineInput, allocator);
+        return snapshot;
+    }
 
     if(!_slot_strides.size())
     {
@@ -141,7 +147,9 @@ Varyings::Snapshot Varyings::snapshot(const PipelineInput& pipelineInput, Alloca
         i.second.apply(buffers.at(i.second._divisor)._content.buf());
     }
 
-    return Snapshot(buffers);
+    Snapshot snapshot(buffers);
+    snapshot.snapshotSubProperties(_sub_properties, pipelineInput, allocator);
+    return snapshot;
 }
 
 Varyings::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
@@ -204,6 +212,12 @@ ByteArray::Borrowed Varyings::Snapshot::getDivided(uint32_t divisor) const
         if(_buffers.at(i)._divisor == divisor)
             return _buffers.at(i)._content;
     return ByteArray::Borrowed();
+}
+
+void Varyings::Snapshot::snapshotSubProperties(const std::map<String, sp<Varyings>>& subProperties, const PipelineInput& pipelineInput, Allocator& allocator)
+{
+    for(const auto& [i, j] : subProperties)
+        _sub_properties[i.hash()] = j->snapshot(pipelineInput, allocator);
 }
 
 Varyings::Divided::Divided(uint32_t divisor, ByteArray::Borrowed content)

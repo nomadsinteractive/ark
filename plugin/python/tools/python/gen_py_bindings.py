@@ -76,10 +76,13 @@ def gen_cmakelist_source(arguments, paths, output_dir, output_file, results):
     calls = sorted(['ark_add_py_binding(%s)' % ' '.join(i) for i in macro_calls])
     arguments_without_d = ' '.join('-%s %s' % (j, k) for j, k in arguments.items() if j not in ('c',))
     arguments_without_o = ' '.join('-%s %s' % (j, k) for j, k in arguments.items() if j not in ('c', 'o'))
+    script_path = make_abs_path(sys.argv[0])
+    script_dir = path.dirname(script_path)
+    script_deps = ' '.join([f'{script_dir}/{i}' for i in ('gen_core.py', 'gen_method.py')])
     return acg.format('''macro(ark_add_py_binding SRC_PATH SRC_ABS_PATH)
     add_custom_command(OUTPUT #{ARGN}
         COMMAND #{Python_EXECUTABLE} ${script_path} -b "${bindable_paths}" ${arguments_without_o} #{SRC_PATH}
-        DEPENDS #{SRC_ABS_PATH} ${script_path}
+        DEPENDS #{SRC_ABS_PATH} ${script_path} ${script_deps}
         WORKING_DIRECTORY ${working_dir})
     if(MSVC)
         foreach(i #{ARGN})
@@ -97,11 +100,11 @@ set(LOCAL_PY_TYPE_DEPENDENCY_LIST
 
 add_custom_command(OUTPUT ${output_files}
         COMMAND #{Python_EXECUTABLE} ${script_path} ${arguments_without_d} ${paths}
-        DEPENDS #{LOCAL_PY_TYPE_DEPENDENCY_LIST}  ${script_path}
+        DEPENDS #{LOCAL_PY_TYPE_DEPENDENCY_LIST} ${script_path} ${script_deps}
         WORKING_DIRECTORY ${working_dir})
 list(APPEND LOCAL_GENERATED_SRC_LIST ${output_files})
 
-''', script_path=make_abs_path(sys.argv[0]),
+''', script_path=script_path, script_deps=script_deps,
                       output_files=' '.join(output_files),
                       paths=' '.join(paths),
                       bindable_paths=path.pathsep.join(paths),

@@ -68,6 +68,8 @@ public:
 
     void write(VertexWriter& buf) const;
 
+    std::pair<V3, V3> calcBoundingAABB() const;
+
 private:
     uint32_t _id;
     String _name;

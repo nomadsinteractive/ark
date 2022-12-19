@@ -409,6 +409,25 @@ template<> ARK_PLUGIN_PYTHON_API Optional<V4> PyCast::toCppObject_impl<V4>(PyObj
     return Optional<V4>();
 }
 
+template<> ARK_PLUGIN_PYTHON_API Optional<M4> PyCast::toCppObject_impl<M4>(PyObject* object)
+{
+    if(PyTuple_Check(object) && PyTuple_Size(object) == 4)
+    {
+        M4 ret;
+        for(Py_ssize_t i = 0; i < 4; ++i)
+        {
+            float* fp = reinterpret_cast<float*>(&ret) + i * 4;
+            if(!PyArg_ParseTuple(PyTuple_GetItem(object, i), "ffff", fp, fp + 1, fp + 2, fp + 3))
+            {
+                PyErr_Clear();
+                break;
+            }
+        }
+        return ret;
+    }
+    return Optional<M4>();
+}
+
 template<typename T> RectT<T> toRectType(PyObject* obj)
 {
     DCHECK(PyTuple_Check(obj) && PyTuple_Size(obj) == 4, "Rect object should be 4-length tuple");
@@ -499,6 +518,15 @@ template<> ARK_PLUGIN_PYTHON_API PyObject* PyCast::toPyObject_impl<V4>(const V4&
     PyTuple_SetItem(v4, 2, PyFloat_FromDouble(value.z()));
     PyTuple_SetItem(v4, 3, PyFloat_FromDouble(value.w()));
     return v4;
+}
+
+template<> ARK_PLUGIN_PYTHON_API PyObject* PyCast::toPyObject_impl<M4>(const M4& value)
+{
+    PyObject* m4 = PyTuple_New(4);
+    const V4* ptr = reinterpret_cast<const V4*>(&value);
+    for(Py_ssize_t i = 0; i < 4; ++i)
+        PyTuple_SetItem(m4, i, toPyObject_impl<V4>(*(ptr ++)));
+    return m4;
 }
 
 template<> ARK_PLUGIN_PYTHON_API PyObject* PyCast::toPyObject_impl<Rect>(const Rect& value)

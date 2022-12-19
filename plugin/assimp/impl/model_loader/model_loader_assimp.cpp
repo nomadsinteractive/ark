@@ -39,6 +39,44 @@ namespace ark {
 namespace plugin {
 namespace assimp {
 
+namespace {
+
+struct NodeLayout {
+    NodeLayout()
+        : _node(nullptr), _transform(M4::identity()) {
+    }
+    NodeLayout(const Node& node, const NodeLayout& parentLayout)
+        : _node(&node), _transform(parentLayout._transform * node.transform()) {
+    }
+
+    void calcTransformedBoudingAABB(const V3& a0, const V3& a1, V3& aabbMin, V3& aabbMax) const {
+        calcTransformedPosition(a0, aabbMin, aabbMax);
+        calcTransformedPosition(V3(a0.x(), a0.y(), a1.z()), aabbMin, aabbMax);
+        calcTransformedPosition(V3(a0.x(), a1.y(), a0.z()), aabbMin, aabbMax);
+        calcTransformedPosition(V3(a0.x(), a1.y(), a1.z()), aabbMin, aabbMax);
+        calcTransformedPosition(a1, aabbMin, aabbMax);
+        calcTransformedPosition(V3(a1.x(), a0.y(), a1.z()), aabbMin, aabbMax);
+        calcTransformedPosition(V3(a1.x(), a1.y(), a0.z()), aabbMin, aabbMax);
+        calcTransformedPosition(V3(a1.x(), a1.y(), a1.z()), aabbMin, aabbMax);
+    }
+
+    void calcTransformedPosition(const V3& p0, V3& aabbMin, V3& aabbMax) const {
+        const V3 tp = _transform * p0;
+        for(size_t i = 0; i < 3; ++i) {
+            if(aabbMin[i] > tp[i])
+                aabbMin[i] = tp[i];
+            else if(aabbMax[i] < tp[i])
+                aabbMax[i] = tp[i];
+        }
+    }
+
+    const Node* _node;
+    M4 _transform;
+};
+
+}
+
+
 bitmap ModelImporterAssimp::loadBitmap(const sp<BitmapLoaderBundle>& imageResource, const aiTexture* tex) const
 {
     if(tex->mHeight == 0)
@@ -144,7 +182,7 @@ const aiScene* ModelImporterAssimp::loadScene(Assimp::Importer& importer, const 
 {
     importer.SetIOHandler(new ArkIOSystem);
     importer.SetPropertyBool(AI_CONFIG_IMPORT_FBX_PRESERVE_PIVOTS, false);
-    uint32_t flags = static_cast<uint32_t>(aiProcessPreset_TargetRealtime_Fast | aiProcess_FlipUVs | aiProcess_GenBoundingBoxes | aiProcess_LimitBoneWeights | aiProcess_OptimizeMeshes);
+    uint32_t flags = static_cast<uint32_t>(aiProcessPreset_TargetRealtime_Fast | aiProcess_FlipUVs | aiProcess_LimitBoneWeights | aiProcess_OptimizeMeshes);
     const aiScene* scene = importer.ReadFile(src.c_str(), flags);
     CHECK(scene, "Loading \"%s\" failed", src.c_str());
     CHECK(!checkMeshes || scene->mNumMeshes > 0, "This scene(%s) has no meshes, maybe it's a scene contains animation-only informations. You should attach this one to its parent as an animation node.", src.c_str());
@@ -196,26 +234,34 @@ Model ModelImporterAssimp::loadModel(const aiScene* scene, MaterialBundle& mater
 {
     NodeTable bones;
     std::vector<sp<Mesh>> meshes;
+    std::map<Mesh*, std::pair<V3, V3>> meshBounds;
     element_index_t vertexBase = 0;
     std::vector<sp<Material>> materials = loadMaterials(scene, materialBundle);
-    V3 aabbMin(std::numeric_limits<float>::max()), aabbMax(std::numeric_limits<float>::min());
 
     for(uint32_t i = 0; i < scene->mNumMeshes; ++i)
     {
         const aiMesh* mesh = scene->mMeshes[i];
-        meshes.push_back(sp<Mesh>::make(loadMesh(scene, mesh, materialBundle, i, vertexBase, bones, materials)));
-
-        aabbMin = V3(std::min(mesh->mAABB.mMin.x, aabbMin.x()), std::min(mesh->mAABB.mMin.y, aabbMin.y()), std::min(mesh->mAABB.mMin.z, aabbMin.y()));
-        aabbMax = V3(std::max(mesh->mAABB.mMax.x, aabbMax.x()), std::max(mesh->mAABB.mMax.y, aabbMax.y()), std::max(mesh->mAABB.mMax.z, aabbMax.y()));
-
+        sp<Mesh> m = sp<Mesh>::make(loadMesh(scene, mesh, materialBundle, i, vertexBase, bones, materials));
+        meshBounds.insert(std::make_pair(m.get(), m->calcBoundingAABB()));
+        meshes.push_back(std::move(m));
         vertexBase += static_cast<element_index_t>(meshes.back()->vertexLength());
     }
+
+    std::vector<NodeLayout> nodeLayouts;
+    sp<Node> rootNode = loadNodeHierarchy(scene->mRootNode, meshes);
+    V3 aabbMin(std::numeric_limits<float>::max()), aabbMax(std::numeric_limits<float>::min());
+    Model::loadFlatLayouts(rootNode, NodeLayout(), nodeLayouts);
+    for(const NodeLayout& i : nodeLayouts)
+        for(const sp<Mesh>& j : i._node->meshes())
+        {
+            const auto& [p0, p1] = meshBounds.at(j.get());
+            i.calcTransformedBoudingAABB(p0, p1, aabbMin, aabbMax);
+        }
 
     std::vector<document> animateManifests = manifest.descriptor() ? manifest.descriptor()->children("animate") : std::vector<document>();
     const bool hasAnimation = scene->HasAnimations() || animateManifests.size() > 0;
     aiMatrix4x4 globalAnimationTransform;
 
-    sp<Node> rootNode = loadNodeHierarchy(scene->mRootNode, meshes);
     Model model(std::move(materials), std::move(meshes), std::move(rootNode), Metrics(aabbMin, aabbMax, aabbMin, aabbMax));
     if(hasAnimation)
     {

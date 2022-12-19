@@ -137,8 +137,9 @@ static const TBuiltInResource DefaultTBuiltInResource = {
     /* .maxTaskWorkGroupSizeZ_NV = */ 1,
     /* .maxMeshViewCountNV = */ 4,
     /* .maxDualSourceDrawBuffersEXT = */ 1,
-
+#ifndef _MSC_VER
      .limits =  {
+#endif
         /* .nonInductiveForLoops = */ true,
         /* .whileLoops = */ true,
         /* .doWhileLoops = */ true,
@@ -148,7 +149,9 @@ static const TBuiltInResource DefaultTBuiltInResource = {
         /* .generalSamplerIndexing = */ true,
         /* .generalVariableIndexing = */ true,
         /* .generalConstantMatrixVectorIndexing = */ true
+#ifndef _MSC_VER
     }
+#endif
 };
 
 class GLSLLangInitializer {

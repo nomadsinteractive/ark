@@ -1,5 +1,8 @@
 #include "renderer/base/node.h"
 
+#include "core/inf/variable.h"
+
+
 namespace ark {
 
 Node::Node(String name, const M4& transform)
@@ -34,6 +37,19 @@ std::vector<sp<Mesh>>& Node::meshes()
 const M4& Node::transform() const
 {
     return _transform;
+}
+
+sp<Node> Node::findChildNode(const String& name) const
+{
+    for(const sp<Node>& i : _child_nodes)
+    {
+        if(i->name() == name)
+            return i;
+        sp<Node> childHit = i->findChildNode(name);
+        if(childHit)
+            return childHit;
+    }
+    return nullptr;
 }
 
 }

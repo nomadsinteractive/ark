@@ -42,6 +42,11 @@ Mat4Impl::Mat4Impl(const M4& mat) noexcept
 {
 }
 
+Mat4Impl::Mat4Impl(sp<Mat4> other) noexcept
+    : _impl(sp<VariableWrapper<M4>>::make(std::move(other)))
+{
+}
+
 Mat4Impl::Mat4Impl(const V4& t, const V4& b, const V4& n, const V4& w) noexcept
     : _impl(sp<VariableWrapper<M4>>::make(TBNMat4::toMatrix(t, b, n, w)))
 {

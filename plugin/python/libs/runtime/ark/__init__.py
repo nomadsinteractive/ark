@@ -24,6 +24,8 @@ TYPE_RECT = Tuple[TYPE_INT_OR_FLOAT, TYPE_INT_OR_FLOAT, TYPE_INT_OR_FLOAT, TYPE_
 TYPE_VEC2 = Union[Tuple[TYPE_NUMERIC, TYPE_NUMERIC], 'Vec2']
 TYPE_VEC3 = Union[Tuple[TYPE_NUMERIC, TYPE_NUMERIC, TYPE_NUMERIC], TYPE_VEC2, 'Vec3']
 TYPE_RECTI = Tuple[int, int, int, int]
+TYPE_FLOAT4 = tuple[float, float, float, float]
+TYPE_M4 = tuple[TYPE_FLOAT4, TYPE_FLOAT4, TYPE_FLOAT4, TYPE_FLOAT4]
 
 
 def logd(*args):
@@ -654,6 +656,10 @@ class Text:
     def set(self, val: str):
         pass
 
+    @staticmethod
+    def format(msg: str, **kwargs) -> 'Text':
+        pass
+
 
 class Boolean(_Var):
     def __init__(self, value):
@@ -1041,6 +1047,28 @@ class Mesh:
         return None
 
 
+class Node:
+
+    @property
+    def name(self) -> str:
+        return ''
+
+    @property
+    def child_nodes(self) -> list['Node']:
+        return []
+
+    @property
+    def meshes(self) -> list[Mesh]:
+        return []
+
+    @property
+    def transform(self) -> TYPE_M4:
+        return ((0,) * 4, ) * 4
+
+    def find_child_node(self, name: str) -> Optional['Node']:
+        pass
+
+
 class Metrics:
 
     @property
@@ -1101,6 +1129,10 @@ class Model:
     @property
     def node_names(self) -> list[str]:
         return []
+
+    @property
+    def root_node(self) -> Optional[Node]:
+        return None
 
     def get_animation(self, name: str) -> Animation:
         pass
@@ -1942,10 +1974,13 @@ class Varyings:
     def __init__(self):
         pass
 
-    def __setattr__(self, key, value):
+    def __setattr__(self, key: str, value):
         pass
 
-    def __getattribute__(self, item):
+    def __getattr__(self, key: str) -> Any:
+        pass
+
+    def __getitem__(self, subkey: str) -> 'Varyings':
         pass
 
 

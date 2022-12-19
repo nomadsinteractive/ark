@@ -7,6 +7,7 @@
 
 #include "graphics/forwarding.h"
 #include "graphics/base/v4.h"
+#include "graphics/base/mat.h"
 
 namespace ark {
 
@@ -14,12 +15,16 @@ namespace ark {
 class ARK_API Mat4Type final {
 public:
 //  [[script::bindings::constructor]]
-    static sp<Mat4> create(const V4& t, const V4& b, const V4& n, const V4& w);
+    static sp<Mat4> create(const M4& m = M4::identity());
 //  [[script::bindings::constructor]]
+    static sp<Mat4> create(sp<Mat4> other);
+    static sp<Mat4> create(const V4& t, const V4& b, const V4& n, const V4& w);
     static sp<Mat4> create(sp<Vec4> t = nullptr, sp<Vec4> b = nullptr, sp<Vec4> n = nullptr, sp<Vec4> w = nullptr);
 
 //  [[script::bindings::operator(@)]]
     static sp<Mat4> matmul(sp<Mat4> lvalue, sp<Mat4> rvalue);
+//  [[script::bindings::operator(@)]]
+    static sp<Mat4> matmul(sp<Mat4> lvalue, const M4& rvalue);
 //  [[script::bindings::operator(@)]]
     static sp<Vec4> matmul(sp<Mat4> lvalue, sp<Vec4> rvalue);
 //  [[script::bindings::operator(@)]]

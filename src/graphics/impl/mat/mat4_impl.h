@@ -14,6 +14,7 @@ namespace ark {
 class ARK_API Mat4Impl final : public Mat4 {
 public:
     Mat4Impl(const M4& mat = M4::identity()) noexcept;
+    Mat4Impl(sp<Mat4> other) noexcept;
     Mat4Impl(const V4& t, const V4& b, const V4& n, const V4& w) noexcept;
     Mat4Impl(sp<Vec4> t, sp<Vec4> b, sp<Vec4> n, sp<Vec4> w) noexcept;
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Mat4Impl);
