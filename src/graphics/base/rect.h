@@ -63,26 +63,29 @@ public:
         return std::abs(_bottom - _top);
     }
 
-    void scale(T xScale, T yScale) {
+    RectT& scale(T xScale, T yScale) {
         _left = _left * xScale;
         _right = _right * xScale;
         _top = _top * yScale;
         _bottom = _bottom * yScale;
+        return *this;
     }
-    void scale(const V2& scale) {
-        this->scale(static_cast<T>(scale.x()), static_cast<T>(scale.y()));
+    RectT& scale(const V2& scale) {
+        return this->scale(static_cast<T>(scale.x()), static_cast<T>(scale.y()));
     }
-    void translate(T x, T y) {
+    RectT& translate(T x, T y) {
         _left += x;
         _right += x;
         _top += y;
         _bottom += y;
+        return *this;
     }
 
-    void vflip(T height) {
+    RectT& vflip(T height) {
         std::swap(_top, _bottom);
         _top = height - _top;
         _bottom = height - _bottom;
+        return *this;
     }
 
     bool ptin(T x, T y) const {

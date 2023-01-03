@@ -1,6 +1,6 @@
 from typing import Optional, Union
 
-from ark import Renderer, Boolean, Observer, Text, Integer
+from ark import Renderer, Boolean, Observer, String, Integer
 
 
 class Widget:
@@ -47,7 +47,7 @@ class WidgetBuilder:
     def input_int(self, label: str, value: Integer, step: int = 1, step_fast: int = 100, flags: int = 0):
         pass
 
-    def input_text(self, label: str, text: Text, max_length: int = 64, flags: int = 0):
+    def input_text(self, label: str, text: String, max_length: int = 64, flags: int = 0):
         pass
 
     def separator(self):

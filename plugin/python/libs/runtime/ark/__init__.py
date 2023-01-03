@@ -645,7 +645,7 @@ class Camera:
         pass
 
 
-class Text:
+class String:
     def __init__(self, value):
         pass
 
@@ -657,7 +657,7 @@ class Text:
         pass
 
     @staticmethod
-    def format(msg: str, **kwargs) -> 'Text':
+    def format(msg: str, **kwargs) -> 'String':
         pass
 
 
@@ -1929,7 +1929,7 @@ class Glyph:
 
 
 class Characters(Renderer):
-    def __init__(self, layer: Union[Layer, RenderLayer, LayerContext], text: Union[Text, str, None] = None, text_scale=1.0, letter_spacing=0, line_height=0,
+    def __init__(self, layer: Union[Layer, RenderLayer, LayerContext], text: Union[String, str, None] = None, text_scale=1.0, letter_spacing=0, line_height=0,
                  line_indent=0):
         super().__init__()
 

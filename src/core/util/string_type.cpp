@@ -1,4 +1,4 @@
-#include "core/util/text_type.h"
+#include "core/util/string_type.h"
 
 #include <regex>
 
@@ -13,9 +13,9 @@ namespace ark {
 
 namespace {
 
-class TextInteger : public Text {
+class StringVarInteger : public StringVar {
 public:
-    TextInteger(sp<Integer> delegate)
+    StringVarInteger(sp<Integer> delegate)
         : _delegate(std::move(delegate)), _text(sp<String>::make(Strings::toString(_delegate->val()))) {
     }
 
@@ -37,9 +37,9 @@ private:
 };
 
 
-class TextFormatted : public Text {
+class StringVarFormatted : public StringVar {
 public:
-    TextFormatted(String format, std::map<String, Box> args)
+    StringVarFormatted(String format, std::map<String, Box> args)
         : _format(format), _args(std::move(args)) {
         update(0);
     }
@@ -96,80 +96,80 @@ private:
 
 }
 
-sp<Text> TextType::create(sp<Text> value)
+sp<StringVar> StringType::create(sp<StringVar> value)
 {
-    return sp<TextWrapper>::make(std::move(value));
+    return sp<StringVarWrapper>::make(std::move(value));
 }
 
-sp<Text> TextType::create(sp<String> value)
+sp<StringVar> StringType::create(sp<String> value)
 {
-    return sp<Text::Impl>::make(std::move(value));
+    return sp<StringVar::Impl>::make(std::move(value));
 }
 
-sp<Text> TextType::create(sp<Integer> value)
+sp<StringVar> StringType::create(sp<Integer> value)
 {
-    return sp<TextInteger>::make(std::move(value));
+    return sp<StringVarInteger>::make(std::move(value));
 }
 
-sp<Text> TextType::create()
+sp<StringVar> StringType::create()
 {
-    return sp<Text::Impl>::make(sp<String>::null());
+    return sp<StringVar::Impl>::make(sp<String>::null());
 }
 
-String TextType::val(const sp<Text>& self)
+String StringType::val(const sp<StringVar>& self)
 {
     return self->val();
 }
 
-const sp<Text>& TextType::wrapped(const sp<Text>& self)
+const sp<StringVar>& StringType::wrapped(const sp<StringVar>& self)
 {
-    const sp<TextWrapper> ib = self.as<TextWrapper>();
+    const sp<StringVarWrapper> ib = self.as<StringVarWrapper>();
     DWARN(ib, "Non-TextWrapper instance has no wrapped attribute. This should be an error unless you're inspecting it.");
-    return ib ? ib->wrapped() : sp<Text>::null();
+    return ib ? ib->wrapped() : sp<StringVar>::null();
 }
 
-void TextType::set(const sp<Text::Impl>& self, sp<String> value)
+void StringType::set(const sp<StringVar::Impl>& self, sp<String> value)
 {
     self->set(std::move(value));
 }
 
-void TextType::set(const sp<TextWrapper>& self, sp<String> value)
+void StringType::set(const sp<StringVarWrapper>& self, sp<String> value)
 {
     self->set(std::move(value));
 }
 
-void TextType::set(const sp<TextWrapper>& self, sp<Text> delegate)
+void StringType::set(const sp<StringVarWrapper>& self, sp<StringVar> delegate)
 {
     self->set(std::move(delegate));
 }
 
-sp<Text> TextType::freeze(const sp<Text>& self)
+sp<StringVar> StringType::freeze(const sp<StringVar>& self)
 {
     return create(self->val());
 }
 
-sp<Text> TextType::format(String format, const Scope& kwargs)
+sp<StringVar> StringType::format(String format, const Scope& kwargs)
 {
-    return sp<TextFormatted>::make(std::move(format), kwargs.variables());
+    return sp<StringVarFormatted>::make(std::move(format), kwargs.variables());
 }
 
-TextType::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr)
+StringType::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr)
     : _value(factory.ensureBuilder<String>(expr))
 {
 }
 
-sp<Text> TextType::DICTIONARY::build(const Scope& args)
+sp<StringVar> StringType::DICTIONARY::build(const Scope& args)
 {
-    return TextType::create(_value->build(args));
+    return StringType::create(_value->build(args));
 }
 
-TextType::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+StringType::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _value(factory.ensureBuilder<String>(manifest, Constants::Attributes::VALUE)) {
 }
 
-sp<Text> TextType::BUILDER::build(const Scope& args)
+sp<StringVar> StringType::BUILDER::build(const Scope& args)
 {
-    return TextType::create(_value->build(args));
+    return StringType::create(_value->build(args));
 }
 
 }

@@ -21,7 +21,7 @@ void AtlasImporterTiles::import(Atlas& atlas, const sp<Readable>& /*readable*/)
     const bool override = Documents::getAttribute<bool>(_manifest, "override", false);
     const uint32_t flowx = marginX + _tile_width;
     const uint32_t flowy = marginY + _tile_height;
-    const Rect bounds = _type != -1 ? atlas.getOriginalPosition(_type) : Rect::parse(_manifest);
+    const Rect bounds = _type != -1 ? atlas.getItemBounds(_type) : Rect::parse(_manifest);
     const uint32_t xCount = static_cast<uint32_t>(Math::round(bounds.width() / flowx));
     const uint32_t yCount = static_cast<uint32_t>(Math::round(bounds.height() / flowy));
     const uint32_t bl = static_cast<uint32_t>(bounds.left());

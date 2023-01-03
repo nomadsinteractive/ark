@@ -25,7 +25,6 @@
 #include "python/impl/adapter/python_callable_runnable.h"
 #include "python/impl/adapter/python_callable_event_listener.h"
 
-#include "python/impl/duck/py_array_duck_type.h"
 #include "python/impl/duck/py_callable_duck_type.h"
 #include "python/impl/duck/py_numeric_duck_type.h"
 #include "python/impl/duck/py_object_duck_type.h"
@@ -215,8 +214,6 @@ Scope PyCast::toScope(PyObject* kws)
                 scope.put(sKey, sp<Boolean::Const>::make(PyObject_IsTrue(item) != 0));
             else if(PyCallable_Check(item))
                 scope.put(sKey, sp<PyCallableDuckType>::make(PyInstance::track(item)));
-            else if(PyList_CheckExact(item))
-                scope.put(sKey, sp<PyArrayDuckType>::make(PyInstance::track(item)));
             else
                 scope.put(sKey, sp<PyObjectDuckType>::make(PyInstance::track(item)));
         }

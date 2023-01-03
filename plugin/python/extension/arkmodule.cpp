@@ -52,9 +52,9 @@ static int __traverse__(PyObject* module, visitproc visitor, void* args)
 }
 
 static PyMethodDef ARK_METHODS[] = {
-    {"logd",  ark_logd, METH_VARARGS, "LOG_DEBUG"},
-    {"logw",  ark_logw, METH_VARARGS, "LOG_WARN"},
-    {"loge",  ark_loge, METH_VARARGS, "LOG_ERROR"},
+    {"logd",  ark_logd, METH_VARARGS, "logd"},
+    {"logw",  ark_logw, METH_VARARGS, "logw"},
+    {"loge",  ark_loge, METH_VARARGS, "loge"},
     {"set_trace_flag",  ark_set_trace_flag, METH_VARARGS, "ark_set_trace_flag"},
     {"load_asset",  ark_loadAsset, METH_VARARGS, "loadAsset"},
     {"open_asset",  ark_openAsset, METH_VARARGS, "openAsset"},
@@ -82,7 +82,7 @@ PyObject* ark_log(Log::LogLevel level, PyObject* args)
         {
             PyInstance varargs = PyInstance::steal(PyTuple_GetSlice(args, 1, size));
             PyInstance formatted = PyInstance::steal(size > 1 ? PyUnicode_Format(pyContent.pyObject(), varargs.pyObject()) : PyObject_Str(pyContent.pyObject()));
-            DCHECK(formatted, "Unsatisfied format: %s", PyCast::toString(pyContent.pyObject()).c_str());
+            CHECK(formatted, "Unsatisfied format: %s", PyCast::toString(pyContent.pyObject()).c_str());
             const String content = PyCast::toString(formatted.pyObject());
             Log::log(level, "Python", content.c_str());
         }

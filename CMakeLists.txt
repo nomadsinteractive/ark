@@ -159,7 +159,8 @@ ark_find_vcpkg_package(glm LIBRARIES glm::glm)
 
 ark_include_directories(3rdparty/cute_headers)
 
-ark_include_directories(3rdparty/json/include)
+ark_find_vcpkg_package(nlohmann_json LIBRARIES nlohmann_json::nlohmann_json)
+#ark_include_directories(3rdparty/json/include)
 #ark_include_directories(3rdparty/spdlog/include)
 ark_find_vcpkg_package(spdlog LIBRARIES spdlog::spdlog spdlog::spdlog_header_only)
 
@@ -181,8 +182,10 @@ if(ARK_USE_LIBJPEG_TURBO)
 endif()
 
 if(ARK_USE_STB_IMAGE)
-    ark_ensure_dependency(3rdparty/stb)
-    list(APPEND LOCAL_INCLUDE_DIRS 3rdparty/stb)
+    find_path(LOCAL_STB_INCLUDE_DIRS "stb_c_lexer.h")
+    ark_include_directories(${LOCAL_STB_INCLUDE_DIRS})
+#    ark_ensure_dependency(3rdparty/stb)
+#    list(APPEND LOCAL_INCLUDE_DIRS 3rdparty/stb)
 endif()
 
 #set(FREETYPE_NO_DIST ON)

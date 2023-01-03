@@ -1,6 +1,7 @@
 #include "renderer/impl/importer/atlas_importer_generic_xml.h"
 
 #include "core/ark.h"
+#include "core/types/optional.h"
 #include "core/util/documents.h"
 
 #include "graphics/base/rect.h"
@@ -35,10 +36,10 @@ void AtlasImporterGenericXML::import(Atlas& atlas, const sp<Readable>& /*readabl
         bounds.vflip(1.0f);
         atlas.add(n, x, y, x + w, y + h, bounds, V2(ow, oh), V2(px, 1.0f - py));
 
-        const String s9 = Documents::getAttribute(i, "s9", "");
-        if(s9.length() > 0)
+        const Optional<String> s9 = Documents::getAttributeOptional<String>(i, "s9");
+        if(s9)
         {
-            const Rect s9Rect = Strings::parse<Rect>(s9);
+            const Rect s9Rect = Strings::parse<Rect>(s9.value());
             Atlas::AttachmentNinePatch& aNinePatch = atlas.attachments().ensure<Atlas::AttachmentNinePatch>();
             aNinePatch.addNinePatch(n, atlas.width(), atlas.height(), Rect(s9Rect.left(), s9Rect.top(), s9Rect.left() + s9Rect.right(), s9Rect.top() + s9Rect.bottom()), atlas);
         }

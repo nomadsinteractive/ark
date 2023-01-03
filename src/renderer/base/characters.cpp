@@ -8,7 +8,7 @@
 #include "core/impl/boolean/boolean_by_weak_ref.h"
 #include "core/util/bean_utils.h"
 #include "core/util/math.h"
-#include "core/util/text_type.h"
+#include "core/util/string_type.h"
 
 #include "graphics/base/layer.h"
 #include "graphics/base/layer_context.h"
@@ -37,18 +37,18 @@
 
 namespace ark {
 
-Characters::Characters(const sp<LayerContext>& layer, sp<Text> text, float textScale, float letterSpacing, float lineHeight, float lineIndent)
+Characters::Characters(const sp<LayerContext>& layer, sp<StringVar> text, float textScale, float letterSpacing, float lineHeight, float lineIndent)
     : Characters(Ark::instance().applicationContext()->resourceLoader()->beanFactory(), layer, std::move(text), nullptr, textScale, letterSpacing, lineHeight, lineIndent)
 {
 }
 
-Characters::Characters(const sp<Layer>& layer, sp<Text> text, float textScale, float letterSpacing, float lineHeight, float lineIndent)
+Characters::Characters(const sp<Layer>& layer, sp<StringVar> text, float textScale, float letterSpacing, float lineHeight, float lineIndent)
     : Characters(layer->context(), std::move(text), textScale, letterSpacing, lineHeight, lineIndent)
 {
 }
 
-Characters::Characters(const BeanFactory& factory, const sp<LayerContext>& layerContext, sp<Text> text, const sp<GlyphMaker>& glyphMaker, float textScale, float letterSpacing, float lineHeight, float lineIndent)
-    : _bean_factory(factory), _layer_context(layerContext), _text(text ? std::move(text) : TextType::create()), _text_scale(textScale), _glyph_maker(glyphMaker ? glyphMaker : sp<GlyphMaker>::make<GlyphMakerSpan>()),
+Characters::Characters(const BeanFactory& factory, const sp<LayerContext>& layerContext, sp<StringVar> text, const sp<GlyphMaker>& glyphMaker, float textScale, float letterSpacing, float lineHeight, float lineIndent)
+    : _bean_factory(factory), _layer_context(layerContext), _text(text ? std::move(text) : StringType::create()), _text_scale(textScale), _glyph_maker(glyphMaker ? glyphMaker : sp<GlyphMaker>::make<GlyphMakerSpan>()),
       _letter_spacing(letterSpacing), _layout_direction(Ark::instance().applicationContext()->renderEngine()->toLayoutDirection(1.0f)), _line_height(_layout_direction * lineHeight),
       _line_indent(lineIndent), _model_loader(layerContext->modelLoader()), _size(sp<Size>::make(0.0f, 0.0f))
 {
@@ -326,7 +326,7 @@ Characters::GlyphContents Characters::makeGlyphs(GlyphMaker& gm, const std::wstr
 }
 
 Characters::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _bean_factory(factory), _text(factory.getBuilder<Text>(manifest, Constants::Attributes::TEXT)), _layer_context(sp<LayerContext::BUILDER>::make(factory, manifest, Layer::TYPE_DYNAMIC)),
+    : _bean_factory(factory), _text(factory.getBuilder<StringVar>(manifest, Constants::Attributes::TEXT)), _layer_context(sp<LayerContext::BUILDER>::make(factory, manifest, Layer::TYPE_DYNAMIC)),
       _glyph_maker(factory.getBuilder<GlyphMaker>(manifest, "glyph-maker")), _text_scale(factory.getBuilder<String>(manifest, "text-scale")), _letter_spacing(factory.getBuilder<Numeric>(manifest, "letter-spacing")),
       _line_height(Documents::getAttribute<float>(manifest, "line-height", 0.0f)), _line_indent(Documents::getAttribute<float>(manifest, "line-indent", 0.0f))
 {

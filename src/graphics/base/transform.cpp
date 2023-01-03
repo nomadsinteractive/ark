@@ -24,8 +24,8 @@ namespace {
 
 class TransformMat4 : public Mat4 {
 public:
-    TransformMat4(const sp<Transform>& transform)
-        : _transform(transform) {
+    TransformMat4(sp<Transform> transform)
+        : _transform(std::move(transform)) {
     }
 
     virtual bool update(uint64_t timestamp) override {
@@ -107,9 +107,9 @@ void Transform::setPivot(const sp<Vec3>& pivot)
     updateDelegate();
 }
 
-sp<Mat4> Transform::toMatrix(const sp<Transform>& self)
+sp<Mat4> Transform::toMatrix(sp<Transform> self)
 {
-    return sp<TransformMat4>::make(self);
+    return sp<TransformMat4>::make(std::move(self));
 }
 
 void Transform::updateDelegate()
@@ -164,16 +164,6 @@ Transform::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 sp<Transform> Transform::BUILDER::build(const Scope& args)
 {
     return sp<Transform>::make(_type, _rotation->build(args), _scale->build(args), _pivot->build(args));
-}
-
-Transform::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)
-    : _impl(factory, Documents::fromProperties(Strings::parseProperties(value)))
-{
-}
-
-sp<Transform> Transform::DICTIONARY::build(const Scope& args)
-{
-    return _impl.build(args);
 }
 
 template<> ARK_API sp<Transform> Null::ptr()

@@ -6,7 +6,7 @@
 
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/types/global.h"
-#include "core/util/text_type.h"
+#include "core/util/string_type.h"
 
 #include "graphics/base/size.h"
 #include "graphics/impl/vec/vec3_impl.h"
@@ -181,7 +181,7 @@ private:
 
 template<typename T> class WidgetInputText : public Widget {
 public:
-    WidgetInputText(String label, sp<T> value, size_t maxLength, sp<Text> hint, sp<Observer> observer, ImGuiInputTextFlags flags)
+    WidgetInputText(String label, sp<T> value, size_t maxLength, sp<StringVar> hint, sp<Observer> observer, ImGuiInputTextFlags flags)
         : _label(std::move(label)), _value(std::move(value)), _hint(std::move(hint)), _observer(std::move(observer)), _flags(flags), _text_buf(maxLength) {
         updateInputText();
     }
@@ -190,7 +190,7 @@ public:
         const String v = _value->val();
         bool renderResult = ImGui::InputTextWithHint(_label.c_str(), _hint ? _hint->val()->c_str() : nullptr, &_text_buf[0], _text_buf.size(), _flags);
         if(renderResult) {
-            TextType::set(_value, sp<String>::make(_text_buf.data()));
+            StringType::set(_value, sp<String>::make(_text_buf.data()));
             if(_observer) {
                 _observer->update();
                 updateInputText();
@@ -212,7 +212,7 @@ private:
     std::function<bool(const char*, char*, size_t)> _func;
     String _label;
     sp<T> _value;
-    sp<Text> _hint;
+    sp<StringVar> _hint;
     sp<Observer> _observer;
     ImGuiInputTextFlags _flags;
     std::vector<char> _text_buf;
@@ -334,10 +334,10 @@ void WidgetBuilder::text(const String& content)
     addWidget(sp<WidgetText>::make(ImGui::Text, content));
 }
 
-sp<Observer> WidgetBuilder::inputText(String label, sp<Text::Impl> value, size_t maxLength, int32_t flags)
+sp<Observer> WidgetBuilder::inputText(String label, sp<StringVar::Impl> value, size_t maxLength, int32_t flags)
 {
     sp<Observer> observer = sp<Observer>::make(nullptr, false);
-    addWidget(sp<WidgetInputText<Text::Impl>>::make(std::move(label), std::move(value), maxLength, nullptr, observer, flags));
+    addWidget(sp<WidgetInputText<StringVar::Impl>>::make(std::move(label), std::move(value), maxLength, nullptr, observer, flags));
     return observer;
 }
 

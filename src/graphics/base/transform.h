@@ -95,11 +95,12 @@ public:
     void setPivot(const sp<Vec3>& pivot);
 
 //  [[script::bindings::classmethod]]
-    static sp<Mat4> toMatrix(const sp<Transform>& self);
+    static sp<Mat4> toMatrix(sp<Transform> self);
 
 //  [[plugin::builder]]
     class BUILDER : public Builder<Transform> {
     public:
+        [[deprecated]]
         BUILDER(BeanFactory& factory, const document& manifest);
 
         virtual sp<Transform> build(const Scope& args) override;
@@ -109,18 +110,6 @@ public:
         SafePtr<Builder<Rotation>> _rotation;
         SafePtr<Builder<Vec3>> _scale;
         SafePtr<Builder<Vec3>> _pivot;
-
-    };
-
-//  [[plugin::builder::by-value]]
-    class DICTIONARY : public Builder<Transform> {
-    public:
-        DICTIONARY(BeanFactory& factory, const String& value);
-
-        virtual sp<Transform> build(const Scope& args) override;
-
-    private:
-        BUILDER _impl;
 
     };
 

@@ -14,7 +14,6 @@ endif()
 
 if(ARK_USE_OPEN_GL)
     ark_find_vcpkg_package(glbinding LIBRARIES glbinding::glbinding glbinding::glbinding-aux)
-#    ark_add_denpendency(3rdparty/glbinding glbinding ${PROJECT_SOURCE_DIR}/3rdparty/glbinding/source/glbinding/include ${CMAKE_CURRENT_BINARY_DIR}/3rdparty/glbinding/source/glbinding/include)
 endif()
 
 if(ARK_USE_VULKAN)

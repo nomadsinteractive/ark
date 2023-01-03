@@ -25,10 +25,10 @@ namespace ark {
 class ARK_API Characters : public Renderer {
 public:
 //  [[script::bindings::auto]]
-    Characters(const sp<Layer>& layer, sp<Text> text = nullptr, float textScale = 1.0f, float letterSpacing = 0.0f, float lineHeight = 0.0f, float lineIndent = 0.0f);
+    Characters(const sp<Layer>& layer, sp<StringVar> text = nullptr, float textScale = 1.0f, float letterSpacing = 0.0f, float lineHeight = 0.0f, float lineIndent = 0.0f);
 //  [[script::bindings::auto]]
-    Characters(const sp<LayerContext>& layer, sp<Text> text = nullptr, float textScale = 1.0f, float letterSpacing = 0.0f, float lineHeight = 0.0f, float lineIndent = 0.0f);
-    Characters(const BeanFactory& factory, const sp<LayerContext>& layerContext, sp<Text> text, const sp<GlyphMaker>& glyphMaker, float textScale, float letterSpacing, float lineHeight, float lineIndent);
+    Characters(const sp<LayerContext>& layer, sp<StringVar> text = nullptr, float textScale = 1.0f, float letterSpacing = 0.0f, float lineHeight = 0.0f, float lineIndent = 0.0f);
+    Characters(const BeanFactory& factory, const sp<LayerContext>& layerContext, sp<StringVar> text, const sp<GlyphMaker>& glyphMaker, float textScale, float letterSpacing, float lineHeight, float lineIndent);
 
 //  [[script::bindings::property]]
     const sp<LayoutParam>& layoutParam() const;
@@ -60,7 +60,7 @@ public:
 
     private:
         BeanFactory _bean_factory;
-        SafePtr<Builder<Text>> _text;
+        SafePtr<Builder<StringVar>> _text;
         sp<Builder<LayerContext>> _layer_context;
         SafePtr<Builder<GlyphMaker>> _glyph_maker;
 
@@ -109,7 +109,7 @@ private:
 private:
     BeanFactoryWeakRef _bean_factory;
     sp<LayerContext> _layer_context;
-    sp<Text> _text;
+    sp<StringVar> _text;
     float _text_scale;
     sp<LayoutParam> _layout_param;
     sp<GlyphMaker> _glyph_maker;

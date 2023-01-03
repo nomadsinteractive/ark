@@ -21,9 +21,9 @@ template<> ARK_API sp<Boolean> Null::ptr()
     return sp<Boolean>::make<Boolean::Const>(false);
 }
 
-template<> ARK_API sp<Text> Null::ptr()
+template<> ARK_API sp<StringVar> Null::ptr()
 {
-    return sp<Text>::make<Text::Const>(sp<String>::null());
+    return sp<StringVar>::make<StringVar::Const>(sp<String>::null());
 }
 
 }

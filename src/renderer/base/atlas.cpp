@@ -159,7 +159,7 @@ const Atlas::Item& Atlas::at(int32_t id) const
     return _allow_default_item || id == 0 ? (has(id) ? _items.at(id) : _default_item) : _items.at(id);
 }
 
-Rect Atlas::getOriginalPosition(int32_t id) const
+Rect Atlas::getItemBounds(int32_t id) const
 {
     const Atlas::Item& item = at(id);
     float nw = _texture->width() / static_cast<float>(UV_NORMALIZE_RANGE);
@@ -196,7 +196,7 @@ void Atlas::AttachmentNinePatch::import(Atlas& atlas, const document& manifest)
         }
         else
         {
-            DWARN(name == "nine-patch", "\"%s\" nodeName should be \"nine-patch\"", Documents::toString(i).c_str());
+            WARN(name == "nine-patch", "\"%s\" nodeName should be \"nine-patch\"", Documents::toString(i).c_str());
             int32_t type = Documents::ensureAttribute<int32_t>(i, Constants::Attributes::TYPE);
             add(type, textureWidth, textureHeight, paddings, atlas);
         }
@@ -205,14 +205,14 @@ void Atlas::AttachmentNinePatch::import(Atlas& atlas, const document& manifest)
 
 void Atlas::AttachmentNinePatch::add(int32_t type, uint32_t textureWidth, uint32_t textureHeight, const Rect& paddings, const Atlas& atlas)
 {
-    const Rect bounds = atlas.getOriginalPosition(type);
+    Rect bounds = atlas.getItemBounds(type);
     const Rect ninePatches(paddings.left(), paddings.top(), bounds.width() - paddings.right(), bounds.height() - paddings.bottom());
-    addNinePatch(type, textureWidth, textureHeight, ninePatches, atlas.getOriginalPosition(type));
+    addNinePatch(type, textureWidth, textureHeight, ninePatches, bounds);
 }
 
 void Atlas::AttachmentNinePatch::addNinePatch(int32_t type, uint32_t textureWidth, uint32_t textureHeight, const Rect& ninePatch, const Atlas& atlas)
 {
-    addNinePatch(type, textureWidth, textureHeight, ninePatch, atlas.getOriginalPosition(type));
+    addNinePatch(type, textureWidth, textureHeight, ninePatch, atlas.getItemBounds(type).translate(1, 1));
 }
 
 void Atlas::AttachmentNinePatch::addNinePatch(int32_t type, uint32_t textureWidth, uint32_t textureHeight, const Rect& ninePatch, const Rect& bounds)

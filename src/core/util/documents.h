@@ -6,6 +6,7 @@
 #include "core/base/api.h"
 #include "core/dom/dom_document.h"
 #include "core/types/null.h"
+#include "core/types/optional.h"
 #include "core/types/shared_ptr.h"
 #include "core/util/strings.h"
 
@@ -36,6 +37,10 @@ public:
     template<typename T> static T getAttribute(const document& doc, const String& name, const T& defValue) {
         const attribute& attr = doc->getAttribute(name);
         return attr ? Strings::parse<T>(attr->value()) : defValue;
+    }
+    template<typename T> static Optional<T> getAttributeOptional(const document& doc, const String& name) {
+        const attribute& attr = doc->getAttribute(name);
+        return attr ? Optional<T>(Strings::parse<T>(attr->value())) : Optional<T>();
     }
     template<typename T> static T ensureAttribute(const document& doc, const String& name) {
         return Strings::parse<T>(ensureAttribute(doc, name));

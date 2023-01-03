@@ -784,11 +784,14 @@ def main(params, paths):
 
     def autoclass(filename, content, main_class, x):
         genclass = get_result_class(results, filename, main_class)
-        name = x[1].strip('"')
+        args = [i.strip() for i in x[1].replace('"', '').split(',')]
+        assert x[0] in ('class', 'name') and len(args) in (1, 2)
         if x[0] == 'class':
-            genclass.binding_classname = name
+            genclass.binding_classname = args[0]
+            if len(args) > 1:
+                genclass.name = args[1]
         else:
-            genclass.name = name
+            genclass.name = args[0]
 
     def autoextends(filename, content, main_class, x):
         genclass = get_result_class(results, filename, main_class)

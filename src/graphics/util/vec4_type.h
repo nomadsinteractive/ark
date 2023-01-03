@@ -95,17 +95,20 @@ public:
     static void setZ(const sp<Vec4>& self, sp<Numeric> z);
 **/
 //  [[script::bindings::property]]
-    static float w(const sp<Vec4>& self);
+    static sp<Numeric> w(const sp<Vec4>& self);
 //  [[script::bindings::property]]
     static void setW(const sp<Vec4>& self, float w);
 //  [[script::bindings::property]]
     static void setW(const sp<Vec4>& self, sp<Numeric> w);
+
+//  [[script::bindings::property]]
+    static V4 xyzw(const sp<Vec4>& self);
 /**
 
 //  [[script::bindings::property]]
     static V2 xy(const sp<Vec4>& self);
 //  [[script::bindings::property]]
-    static V2 xyz(const sp<Vec4>& self);
+    static V3 xyz(const sp<Vec4>& self);
 
 //  [[script::bindings::classmethod]]
     static sp<Vec4> freeze(sp<Vec4> self);

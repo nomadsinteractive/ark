@@ -82,7 +82,7 @@ public:
     Item makeItem(uint32_t ux, uint32_t uy, uint32_t vx, uint32_t vy, const Rect& bounds, const V2& size, const V2& pivot) const;
 
     const Item& at(int32_t id) const;
-    Rect getOriginalPosition(int32_t id) const;
+    Rect getItemBounds(int32_t id) const;
 
     void clear();
 
