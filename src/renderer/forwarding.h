@@ -13,7 +13,7 @@ class Atlas;
 class Attribute;
 class BitmapBundle;
 class Buffer;
-class Characters;
+class Text;
 class ComputeContext;
 class DrawingBuffer;
 class DrawingContext;

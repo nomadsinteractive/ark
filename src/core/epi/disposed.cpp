@@ -11,7 +11,7 @@ Disposed::Disposed(bool disposed)
 {
 }
 
-Disposed::Disposed(const sp<Boolean>& disposed)
+Disposed::Disposed(sp<Boolean> disposed)
     : _disposed(sp<BooleanWrapper>::make(disposed))
 {
 }

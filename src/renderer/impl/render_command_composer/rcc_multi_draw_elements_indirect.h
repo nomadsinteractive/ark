@@ -22,8 +22,8 @@ public:
 
     virtual sp<ShaderBindings> makeShaderBindings(Shader& shader, RenderController& renderController, ModelLoader::RenderMode renderMode) override;
 
-    virtual void postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot) override;
-    virtual sp<RenderCommand> compose(const RenderRequest& renderRequest, RenderLayer::Snapshot& snapshot) override;
+    virtual void postSnapshot(RenderController& renderController, RenderLayerSnapshot& snapshot) override;
+    virtual sp<RenderCommand> compose(const RenderRequest& renderRequest, RenderLayerSnapshot& snapshot) override;
 
 private:
     struct NodeLayoutInstance {
@@ -70,10 +70,10 @@ private:
 
 private:
     ByteArray::Borrowed makeIndirectBuffer(const RenderRequest& renderRequest) const;
-    void writeModelMatices(const RenderRequest& renderRequest, DrawingBuffer& buf, const RenderLayer::Snapshot& snapshot, bool reload);
+    void writeModelMatices(const RenderRequest& renderRequest, DrawingBuffer& buf, const RenderLayerSnapshot& snapshot, bool reload);
     V3 toScale(const V3& size, const Metrics& metrics) const;
 
-    void reloadIndirectCommands(const RenderLayer::Snapshot& snapshot);
+    void reloadIndirectCommands(const RenderLayerSnapshot& snapshot);
 
 private:
 //TODO: make RenderCommandComposer thread safe.

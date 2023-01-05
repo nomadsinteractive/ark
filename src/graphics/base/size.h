@@ -54,6 +54,8 @@ public:
 
 //  [[script::bindings::auto]]
     void set(const Size& other);
+//  [[script::bindings::auto]]
+    sp<Size> freeze();
 
     const sp<Vec3Impl>& impl() const;
 

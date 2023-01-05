@@ -4,27 +4,27 @@
 
 namespace ark {
 
-Rect LayoutUtil::flow(LayoutParam::FlexFlow flexFlow, const V2& size, Rect& available)
+Rect LayoutUtil::flow(LayoutParam::FlexDirection flexFlow, const V2& size, Rect& available)
 {
     switch(flexFlow) {
-        case LayoutParam::FLEX_FLOW_NONE:
+        case LayoutParam::FLEX_DIRECTION_NONE:
             break;
-        case LayoutParam::FLEX_FLOW_COLUMN: {
+        case LayoutParam::FLEX_DIRECTION_COLUMN: {
             Rect allocated(available.left(), available.top(), available.left() + size.x(), available.bottom());
             available.setLeft(allocated.right());
             return allocated;
         }
-        case LayoutParam::FLEX_FLOW_COLUMN_REVERSE: {
+        case LayoutParam::FLEX_DIRECTION_COLUMN_REVERSE: {
             Rect allocated(available.right() - size.x(), available.top(), available.right(), available.bottom());
             available.setRight(allocated.left());
             return allocated;
         }
-        case LayoutParam::FLEX_FLOW_ROW: {
+        case LayoutParam::FLEX_DIRECTION_ROW: {
             Rect allocated(available.left(), available.top(), available.right(), available.top() + size.y());
             available.setTop(allocated.bottom());
             return allocated;
         }
-        case LayoutParam::FLEX_FLOW_ROW_REVERSE: {
+        case LayoutParam::FLEX_DIRECTION_ROW_REVERSE: {
             Rect allocated(available.left(), available.bottom() - size.y(), available.right(), available.bottom());
             available.setBottom(allocated.top());
             return allocated;
@@ -51,17 +51,17 @@ V2 LayoutUtil::place(LayoutParam::Gravity gravity, const V2& size, const Rect& a
     return V2(x + available.left(), y + available.top());
 }
 
-V2 LayoutUtil::place(LayoutParam::Gravity gravity, LayoutParam::FlexFlow flexFlow, const V2& size, Rect& available)
+V2 LayoutUtil::place(LayoutParam::Gravity gravity, LayoutParam::FlexDirection flexFlow, const V2& size, Rect& available)
 {
     const Rect allocated = flow(flexFlow, size, available);
     switch(flexFlow) {
-        case LayoutParam::FLEX_FLOW_NONE:
+        case LayoutParam::FLEX_DIRECTION_NONE:
             break;
-        case LayoutParam::FLEX_FLOW_COLUMN:
-        case LayoutParam::FLEX_FLOW_COLUMN_REVERSE:
+        case LayoutParam::FLEX_DIRECTION_COLUMN:
+        case LayoutParam::FLEX_DIRECTION_COLUMN_REVERSE:
             return place(static_cast<LayoutParam::Gravity>(gravity & LayoutParam::GRAVITY_CENTER_VERTICAL), size, allocated);
-        case LayoutParam::FLEX_FLOW_ROW:
-        case LayoutParam::FLEX_FLOW_ROW_REVERSE:
+        case LayoutParam::FLEX_DIRECTION_ROW:
+        case LayoutParam::FLEX_DIRECTION_ROW_REVERSE:
             return place(static_cast<LayoutParam::Gravity>(gravity & LayoutParam::GRAVITY_CENTER_HORIZONTAL), size, allocated);
     }
     return place(gravity, size, allocated);

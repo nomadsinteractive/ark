@@ -27,12 +27,12 @@ sp<ShaderBindings> RCCDrawElementsInstanced::makeShaderBindings(Shader& shader, 
     return shader.makeBindings(renderController.makeVertexBuffer(), renderMode, PipelineBindings::RENDER_PROCEDURE_DRAW_ELEMENTS_INSTANCED);
 }
 
-void RCCDrawElementsInstanced::postSnapshot(RenderController& /*renderController*/, RenderLayer::Snapshot& snapshot)
+void RCCDrawElementsInstanced::postSnapshot(RenderController& /*renderController*/, RenderLayerSnapshot& snapshot)
 {
     snapshot._index_buffer = _indices.snapshot();
 }
 
-sp<RenderCommand> RCCDrawElementsInstanced::compose(const RenderRequest& renderRequest, RenderLayer::Snapshot& snapshot)
+sp<RenderCommand> RCCDrawElementsInstanced::compose(const RenderRequest& renderRequest, RenderLayerSnapshot& snapshot)
 {
     size_t verticesLength = _model.vertices()->length();
     const sp<ModelLoader>& modelLoader = snapshot._stub->_model_loader;

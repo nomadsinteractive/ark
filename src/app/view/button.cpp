@@ -12,8 +12,8 @@
 
 #include "app/base/event.h"
 #include "app/impl/renderer/renderer_with_state.h"
-#include "app/impl/layout/gravity_layout.h"
 #include "app/inf/layout.h"
+#include "app/util/layout_util.h"
 
 namespace ark {
 
@@ -38,8 +38,9 @@ void Button::render(RenderRequest& renderRequest, const V3& position)
             const sp<Size>& size = block ? static_cast<const sp<Size>&>(block->size()) : sp<Size>::null();
             if(size)
             {
-                Rect target = GravityLayout::place(_gravity, _layout_param->size()->widthAsFloat(), _layout_param->size()->heightAsFloat(), size->widthAsFloat(), size->heightAsFloat());
-                fg->render(renderRequest, position + V3(target.left(), target.top(), 0));
+                Rect available(position.x(), position.y(), position.x() + _layout_param->size()->widthAsFloat(), position.y() + _layout_param->size()->heightAsFloat());
+                const V2 pos = LayoutUtil::place(_gravity, V2(size->widthAsFloat(), size->heightAsFloat()), available);
+                fg->render(renderRequest, V3(pos, 0));
             }
             else
                 fg->render(renderRequest, position);

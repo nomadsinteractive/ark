@@ -1,5 +1,6 @@
 #include "app/impl/layout/gravity_layout_v2.h"
 
+#include "graphics/base/rect.h"
 #include "graphics/base/size.h"
 
 #include "app/util/layout_util.h"
@@ -34,9 +35,9 @@ GravityLayoutV2::STYLE::STYLE(const String& gravity)
     : _gravity(Strings::parse<LayoutParam::Gravity>(gravity)) {
 }
 
-sp<LayoutV2> GravityLayoutV2::STYLE::build(const Scope& /*args*/)
+sp<Layout> GravityLayoutV2::STYLE::build(const Scope& /*args*/)
 {
-    return sp<LayoutV2>::make<GravityLayoutV2>(_gravity);
+    return sp<Layout>::make<GravityLayoutV2>(_gravity);
 }
 
 }

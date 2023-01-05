@@ -47,17 +47,17 @@ static int32_t toInteger(float value) {
 
 }
 
-sp<Integer> IntegerType::create(const sp<Integer>& value)
+sp<IntegerWrapper> IntegerType::create(sp<Integer> value)
 {
-    return sp<IntegerWrapper>::make(value);
+    return sp<IntegerWrapper>::make(std::move(value));
 }
 
-sp<Integer> IntegerType::create(const sp<Numeric>& value)
+sp<IntegerWrapper> IntegerType::create(sp<Numeric> value)
 {
-    return sp<IntegerWrapper>::make(sp<VariableOP1<int32_t, float>>::make(toInteger, value));
+    return sp<IntegerWrapper>::make(sp<VariableOP1<int32_t, float>>::make(toInteger, std::move(value)));
 }
 
-sp<Integer> IntegerType::create(int32_t value)
+sp<IntegerWrapper> IntegerType::create(int32_t value)
 {
     return sp<IntegerWrapper>::make(value);
 }

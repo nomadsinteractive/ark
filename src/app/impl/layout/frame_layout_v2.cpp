@@ -16,9 +16,9 @@ std::vector<V2> FrameLayoutV2::place(const std::vector<sp<LayoutParam>>& childre
     return slots;
 }
 
-sp<LayoutV2> FrameLayoutV2::BUILDER::build(const Scope& /*args*/)
+sp<Layout> FrameLayoutV2::BUILDER::build(const Scope& /*args*/)
 {
-    return sp<LayoutV2>::make<FrameLayoutV2>();
+    return sp<Layout>::make<FrameLayoutV2>();
 }
 
 }

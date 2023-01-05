@@ -18,7 +18,7 @@ namespace ark {
 //[[core::class]]
 class Paragraph : public Renderer, public Block {
 public:
-    Paragraph(const sp<Characters>& characters);
+    Paragraph(const sp<Text>& characters);
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
@@ -32,14 +32,14 @@ public:
         virtual sp<Renderer> build(const Scope& args) override;
 
     private:
-        sp<Builder<Characters>> _characters;
+        sp<Builder<Text>> _characters;
         sp<Builder<LayoutParam>> _layout_param;
         SafePtr<Builder<String>> _string;
     };
 
 private:
     sp<RenderLayer> _render_layer;
-    sp<Characters> _characters;
+    sp<Text> _characters;
 };
 
 }

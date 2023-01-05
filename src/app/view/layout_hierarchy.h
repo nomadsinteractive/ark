@@ -33,10 +33,6 @@ private:
         void updateLayout();
         void wrapContentLayout() const;
 
-        void doPlace(Layout::Context& ctx, float clientHeight, const sp<Layout>& layout);
-        void doWrapContentPlace(Layout::Context& ctx, const sp<Layout>& layout, Rect& contentRect) const;
-        void doLayoutEnd(const Rect& p);
-
         void render(RenderRequest& renderRequest, const V3& position);
 
         bool onEventDispatch(const Event& event, float x, float y);
@@ -58,7 +54,7 @@ private:
     };
 
 public:
-    LayoutHierarchy(sp<Layout> layout, sp<LayoutV2> layoutV2);
+    LayoutHierarchy(sp<Layout> layoutV2);
 
     virtual void traverse(const Visitor& visitor) override;
 
@@ -70,15 +66,13 @@ public:
     void addRenderer(const sp<Renderer>& renderer);
 
 private:
-    void doWrapContentLayout(Layout::Context& ctx, LayoutParam& layoutParam);
     bool isLayoutNeeded(const LayoutParam& layoutParam);
 
     std::vector<sp<LayoutParam>> getLayoutParams() const;
     std::pair<std::vector<sp<Slot>>, std::vector<sp<LayoutParam>>> getLayoutItems() const;
 
 private:
-    sp<Layout> _layout;
-    sp<LayoutV2> _layout_v2;
+    sp<Layout> _layout_v2;
     V3 _layout_size;
 
     std::vector<sp<Slot>> _slots;

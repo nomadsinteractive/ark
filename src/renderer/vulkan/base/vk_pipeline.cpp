@@ -432,13 +432,13 @@ sp<VKDescriptorPool> VKPipeline::makeDescriptorPool() const
     return sp<VKDescriptorPool>::make(_recycler, _renderer->device(), std::move(poolSizes));
 }
 
-void VKPipeline::bindUBOShapshots(GraphicsContext& graphicsContext, const std::vector<RenderLayer::UBOSnapshot>& uboSnapshots)
+void VKPipeline::bindUBOShapshots(GraphicsContext& graphicsContext, const std::vector<RenderLayerSnapshot::UBOSnapshot>& uboSnapshots)
 {
     DCHECK(uboSnapshots.size() == _ubos.size(), "UBO Snapshot and UBO Layout mismatch: %d vs %d", uboSnapshots.size(), _ubos.size());
 
     for(size_t i = 0; i < uboSnapshots.size(); ++i)
     {
-        const RenderLayer::UBOSnapshot& uboSnapshot = uboSnapshots.at(i);
+        const RenderLayerSnapshot::UBOSnapshot& uboSnapshot = uboSnapshots.at(i);
         if(_rebind_needed || isDirty(uboSnapshot._dirty_flags))
         {
             const sp<VKBuffer>& ubo = _ubos.at(i);

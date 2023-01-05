@@ -20,7 +20,7 @@ namespace ark {
 class ARK_API ViewGroup final : public View, public Renderer, public Renderer::Group, public LayoutEventListener,
                                 Implements<ViewGroup, View, Block, Renderer, Renderer::Group, LayoutEventListener, Holder> {
 public:
-    ViewGroup(const Frame& background, sp<Layout> layout, sp<LayoutV2> layoutV2, sp<LayoutParam> layoutParam);
+    ViewGroup(const Frame& background, sp<Layout> layoutV2, sp<LayoutParam> layoutParam);
     ~ViewGroup() override;
 
     virtual void addRenderer(const sp<Renderer>& renderer) override;
@@ -43,8 +43,7 @@ public:
         BeanFactory _factory;
         document _manifest;
 
-        SafePtr<Builder<Layout>> _layout;
-        SafePtr<Builder<LayoutV2>> _layout_v2;
+        SafePtr<Builder<Layout>> _layout_v2;
         SafePtr<Builder<Renderer>> _background;
         sp<Builder<LayoutParam>> _layout_param;
     };

@@ -187,10 +187,10 @@ void PipelineInput::UBO::doSnapshot(uint64_t timestamp, bool force) const
     }
 }
 
-RenderLayer::UBOSnapshot PipelineInput::UBO::snapshot(const RenderRequest& renderRequest) const
+RenderLayerSnapshot::UBOSnapshot PipelineInput::UBO::snapshot(const RenderRequest& renderRequest) const
 {
     doSnapshot(renderRequest.timestamp(), false);
-    RenderLayer::UBOSnapshot ubo {
+    RenderLayerSnapshot::UBOSnapshot ubo {
         renderRequest.allocator().sbrk(_dirty_flags->size()),
         renderRequest.allocator().sbrk(_buffer->size())
     };

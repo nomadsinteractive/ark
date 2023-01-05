@@ -702,7 +702,7 @@ GLPipeline::Stub::Stub()
 {
 }
 
-void GLPipeline::Stub::bindUBO(const RenderLayer::UBOSnapshot& uboSnapshot, const sp<PipelineInput::UBO>& ubo)
+void GLPipeline::Stub::bindUBO(const RenderLayerSnapshot::UBOSnapshot& uboSnapshot, const sp<PipelineInput::UBO>& ubo)
 {
     const std::vector<sp<Uniform>>& uniforms = ubo->uniforms().values();
     for(size_t i = 0; i < uniforms.size(); ++i)
@@ -805,13 +805,13 @@ GLint GLPipeline::Stub::getAttribLocation(const String& name)
     return glGetAttribLocation(_id, name.c_str());
 }
 
-void GLPipeline::Stub::bindUBOSnapshots(const std::vector<RenderLayer::UBOSnapshot>& uboSnapshots, const PipelineInput& pipelineInput)
+void GLPipeline::Stub::bindUBOSnapshots(const std::vector<RenderLayerSnapshot::UBOSnapshot>& uboSnapshots, const PipelineInput& pipelineInput)
 {
     DCHECK(uboSnapshots.size() == pipelineInput.ubos().size(), "UBO Snapshot and UBO Layout mismatch: %d vs %d", uboSnapshots.size(), pipelineInput.ubos().size());
 
     for(size_t i = 0; i < uboSnapshots.size(); ++i)
     {
-        const RenderLayer::UBOSnapshot& uboSnapshot = uboSnapshots.at(i);
+        const RenderLayerSnapshot::UBOSnapshot& uboSnapshot = uboSnapshots.at(i);
         const sp<PipelineInput::UBO>& ubo = pipelineInput.ubos().at(i);
         bindUBO(uboSnapshot, ubo);
     }

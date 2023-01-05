@@ -10,13 +10,13 @@
 #include "graphics/base/layer_context.h"
 #include "graphics/base/render_layer.h"
 
-#include "renderer/base/characters.h"
+#include "renderer/base/text.h"
 
 #include "app/base/application_context.h"
 
 namespace ark {
 
-FPSCounter::FPSCounter(const sp<Clock>& clock, float refreshInterval, const sp<Characters>& characters, const String& message)
+FPSCounter::FPSCounter(const sp<Clock>& clock, float refreshInterval, const sp<Text>& characters, const String& message)
     : _characters(characters), _message(message), _frame_rendered(0),
       _duration(clock->duration()), _refresh_interval(refreshInterval), _last_refresh(0)
 {
@@ -50,7 +50,7 @@ void FPSCounter::updateFPS(float fps)
 }
 
 FPSCounter::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _characters(factory.ensureConcreteClassBuilder<Characters>(manifest, "characters")),
+    : _characters(factory.ensureConcreteClassBuilder<Text>(manifest, "characters")),
       _message(Documents::getAttribute(manifest, "message", "FPS %.1f")),
       _interval(Documents::getAttribute<Clock::Interval>(manifest, Constants::Attributes::INTERVAL, 2000000).sec())
 {

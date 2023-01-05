@@ -15,7 +15,7 @@ namespace ark {
 
 class Label : public Renderer, public Block {
 public:
-    Label(const sp<Characters>& characters);
+    Label(const sp<Text>& characters);
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
@@ -29,12 +29,12 @@ public:
         virtual sp<Renderer> build(const Scope& args) override;
 
     private:
-        sp<Builder<Characters>> _characters;
+        sp<Builder<Text>> _characters;
         SafePtr<Builder<String>> _text;
     };
 
 private:
-    sp<Characters> _characters;
+    sp<Text> _characters;
 };
 
 }

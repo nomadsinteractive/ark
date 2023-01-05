@@ -113,6 +113,11 @@ void Size::set(const Size& other)
     setDepth(other.depth());
 }
 
+sp<Size> Size::freeze()
+{
+    return sp<Size>::make(_impl->val());
+}
+
 const sp<Vec3Impl>& Size::impl() const
 {
     return _impl;

@@ -27,7 +27,7 @@ class ColliderImpl : public Collider {
 public:
     ColliderImpl(std::vector<sp<BroadPhrase>> broadPhrase, sp<NarrowPhrase> narrowPhrase, const document& manifest, const sp<RenderController>& renderController);
 
-    virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate) override;
+    virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate, sp<Boolean> disposed) override;
     virtual std::vector<RayCastManifold> rayCast(const V3& from, const V3& to) override;
 
 //  [[plugin::resource-loader]]

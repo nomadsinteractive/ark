@@ -13,9 +13,9 @@ public:
     virtual ~RenderCommandComposer() = default;
 
     virtual sp<ShaderBindings> makeShaderBindings(Shader& shader, RenderController& renderController, ModelLoader::RenderMode renderMode) = 0;
-    virtual void postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot) = 0;
+    virtual void postSnapshot(RenderController& renderController, RenderLayerSnapshot& snapshot) = 0;
 
-    virtual sp<RenderCommand> compose(const RenderRequest& renderRequest, RenderLayer::Snapshot& snapshot) = 0;
+    virtual sp<RenderCommand> compose(const RenderRequest& renderRequest, RenderLayerSnapshot& snapshot) = 0;
 
 };
 

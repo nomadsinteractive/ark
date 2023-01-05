@@ -12,6 +12,7 @@
 #include "graphics/base/render_layer.h"
 #include "graphics/base/layer.h"
 #include "graphics/inf/renderable.h"
+#include "graphics/inf/renderable_batch.h"
 
 #include "renderer/forwarding.h"
 
@@ -30,12 +31,16 @@ public:
     };
 
 public:
-    LayerContext(sp<RenderLayer::Batch> batch, sp<ModelLoader> modelLoader, sp<Boolean> visible, sp<Varyings> varyings);
+    LayerContext(sp<RenderableBatch> batch, sp<ModelLoader> modelLoader, sp<Boolean> visible, sp<Boolean> disposed, sp<Varyings> varyings);
 
     virtual void traverse(const Visitor& visitor) override;
 
     SafeVar<Visibility>& visible();
     const SafeVar<Visibility>& visible() const;
+
+    const SafeVar<Disposed>& disposed() const;
+
+    bool isDisposed() const;
 
 //  [[script::bindings::property]]
     const sp<ModelLoader>& modelLoader() const;
@@ -58,7 +63,7 @@ public:
     const std::deque<Instance>& instances() const;
 
     bool preSnapshot(RenderRequest& renderRequest);
-    void snapshot(RenderRequest& renderRequest, RenderLayer::Snapshot& output);
+    void snapshot(RenderRequest& renderRequest, RenderLayerSnapshot& output);
 
     class BUILDER : public Builder<LayerContext> {
     public:
@@ -73,17 +78,18 @@ public:
     };
 
 private:
-    class DefaultBatch : public RenderLayer::Batch {
+    class DefaultBatch : public RenderableBatch {
     public:
         virtual bool preSnapshot(const RenderRequest& renderRequest, LayerContext& lc) override;
-        virtual void snapshot(const RenderRequest& renderRequest, const LayerContext& lc, RenderLayer::Snapshot& output) override;
+        virtual void snapshot(const RenderRequest& renderRequest, const LayerContext& lc, RenderLayerSnapshot& output) override;
     };
 
 public:
-    sp<RenderLayer::Batch> _batch;
+    sp<RenderableBatch> _batch;
 
     sp<ModelLoader> _model_loader;
     SafeVar<Visibility> _visible;
+    SafeVar<Disposed> _disposed;
     sp<Varyings> _varyings;
 
     Layer::Type _layer_type;

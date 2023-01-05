@@ -31,7 +31,7 @@ ColliderBullet::ColliderBullet(const V3& gravity, sp<ModelLoader> modelLoader)
     _stub->_dynamics_world->setInternalTickCallback(myInternalTickCallback, this);
 }
 
-sp<RigidBody> ColliderBullet::createBody(Collider::BodyType type, int32_t shapeId, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate)
+sp<RigidBody> ColliderBullet::createBody(Collider::BodyType type, int32_t shapeId, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate, sp<Boolean> disposed)
 {
     btTransform transform;
     const V3 pos = position->val();
@@ -39,6 +39,7 @@ sp<RigidBody> ColliderBullet::createBody(Collider::BodyType type, int32_t shapeI
     transform.setIdentity();
     transform.setOrigin(btVector3(pos.x(), pos.y(), pos.z()));
     transform.setRotation(btQuaternion(quat.x(), quat.y(), quat.z(), quat.w()));
+    DCHECK(!disposed, "Unimplemented");
 
     sp<CollisionShape> cs;
     const auto iter = _stub->_collision_shapes.find(shapeId);

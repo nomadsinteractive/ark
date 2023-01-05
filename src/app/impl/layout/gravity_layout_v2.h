@@ -11,7 +11,7 @@
 
 namespace ark {
 
-class GravityLayoutV2 : public LayoutV2 {
+class GravityLayoutV2 : public Layout {
 public:
     GravityLayoutV2(const LayoutParam::Gravity& gravity);
 
@@ -19,11 +19,11 @@ public:
     virtual std::vector<V2> place(const std::vector<sp<LayoutParam>>& slots, const LayoutParam& parent, const V2& contentSize) override;
 
 //  [[plugin::builder::by-value("gravity")]]
-    class STYLE : public Builder<LayoutV2> {
+    class STYLE : public Builder<Layout> {
     public:
         STYLE(const String& gravity);
 
-        virtual sp<LayoutV2> build(const Scope& args) override;
+        virtual sp<Layout> build(const Scope& args) override;
 
     private:
         LayoutParam::Gravity _gravity;

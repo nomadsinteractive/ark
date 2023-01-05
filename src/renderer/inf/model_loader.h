@@ -4,8 +4,6 @@
 #include "core/base/api.h"
 #include "core/forwarding.h"
 
-#include "graphics/base/render_layer.h"
-
 #include "renderer/forwarding.h"
 #include "renderer/base/atlas.h"
 

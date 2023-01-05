@@ -22,8 +22,9 @@ LayerContext::Instance::Instance(sp<Renderable> renderable, sp<Boolean> disposed
     DASSERT(_renderable);
 }
 
-LayerContext::LayerContext(sp<RenderLayer::Batch> batch, sp<ModelLoader> models, sp<Boolean> visible, sp<Varyings> varyings)
-    : _batch(batch ? std::move(batch) : sp<RenderLayer::Batch>::make<DefaultBatch>()), _model_loader(std::move(models)), _visible(visible ? sp<Visibility>::make(std::move(visible)) : nullptr, true), _varyings(std::move(varyings)), _layer_type(Layer::TYPE_DYNAMIC), _reload_requested(false), _render_done(false), _position_changed(false)
+LayerContext::LayerContext(sp<RenderableBatch> batch, sp<ModelLoader> models, sp<Boolean> visible, sp<Boolean> disposed, sp<Varyings> varyings)
+    : _batch(batch ? std::move(batch) : sp<RenderableBatch>::make<DefaultBatch>()), _model_loader(std::move(models)), _visible(visible ? sp<Visibility>::make(std::move(visible)) : nullptr, true),
+      _disposed(disposed ? std::move(disposed) : nullptr, false), _varyings(std::move(varyings)), _layer_type(Layer::TYPE_DYNAMIC), _reload_requested(false), _render_done(false), _position_changed(false)
 {
 }
 
@@ -42,6 +43,16 @@ SafeVar<Visibility>& LayerContext::visible()
 const SafeVar<Visibility>& LayerContext::visible() const
 {
     return _visible;
+}
+
+const SafeVar<Disposed>& LayerContext::disposed() const
+{
+    return _disposed;
+}
+
+bool LayerContext::isDisposed() const
+{
+    return _disposed.val();
 }
 
 const sp<ModelLoader>& LayerContext::modelLoader() const
@@ -104,7 +115,7 @@ bool LayerContext::preSnapshot(RenderRequest& renderRequest)
     return needsReload || _layer_type == Layer::TYPE_TRANSIENT;
 }
 
-void LayerContext::snapshot(RenderRequest& renderRequest, RenderLayer::Snapshot& output)
+void LayerContext::snapshot(RenderRequest& renderRequest, RenderLayerSnapshot& output)
 {
     DPROFILER_TRACE("TakeSnapshot");
 
@@ -135,9 +146,9 @@ bool LayerContext::DefaultBatch::preSnapshot(const RenderRequest& renderRequest,
     return needsReload;
 }
 
-void LayerContext::DefaultBatch::snapshot(const RenderRequest& renderRequest, const LayerContext& lc, RenderLayer::Snapshot& output)
+void LayerContext::DefaultBatch::snapshot(const RenderRequest& renderRequest, const LayerContext& lc, RenderLayerSnapshot& output)
 {
-    const sp<PipelineInput>& pipelineInput = output._stub->_shader->input();
+    const PipelineInput& pipelineInput = output.pipelineInput();
     const bool visible = lc._visible.val();
     const bool needsReload = lc._position_changed || lc._render_done != visible || output.needsReload();
     const bool hasDefaultVaryings = static_cast<bool>(lc._varyings);
@@ -152,11 +163,9 @@ void LayerContext::DefaultBatch::snapshot(const RenderRequest& renderRequest, co
         if(state & Renderable::RENDERABLE_STATE_VISIBLE)
             Renderable::setState(state, Renderable::RENDERABLE_STATE_VISIBLE, visible);
         Renderable::Snapshot snapshot = i._renderable->snapshot(pipelineInput, renderRequest, lc._position, state);
-        snapshot._model = lc._model_loader->loadModel(snapshot._type);
         if(hasDefaultVaryings && !snapshot._varyings)
             snapshot._varyings = defaultVaryingsSnapshot;
-        output._index_count += snapshot._model->indexCount();
-        output._items.push_back(std::move(snapshot));
+        output.addSnapshot(lc, std::move(snapshot));
         ++iter;
     }
 }

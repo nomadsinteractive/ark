@@ -76,21 +76,21 @@ ColliderImpl::ColliderImpl(std::vector<sp<BroadPhrase>> broadPhrase, sp<NarrowPh
     _render_controller->addPreRenderRunRequest(_stub, sp<BooleanByWeakRef<Stub>>::make(_stub, 1));
 }
 
-sp<RigidBody> ColliderImpl::createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate)
+sp<RigidBody> ColliderImpl::createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate, sp<Boolean> disposed)
 {
     ASSERT(position);
     ASSERT(size);
     CHECK(type == Collider::BODY_TYPE_KINEMATIC || type == Collider::BODY_TYPE_DYNAMIC || type == Collider::BODY_TYPE_STATIC || type == Collider::BODY_TYPE_SENSOR, "Unknown BodyType: %d", type);
 
-    sp<Disposed> disposed = sp<Disposed>::make();
+    sp<Disposed> disp = sp<Disposed>::make(std::move(disposed));
     const int32_t rigidBodyId = _stub->generateRigidBodyId();
     if(type != Collider::BODY_TYPE_STATIC)
     {
         sp<DynamicPosition> dpos = sp<DynamicPosition>::make(_stub, rigidBodyId, position, size);
-        sp<Vec3> pos = _render_controller->synchronize<V3>(std::move(dpos), disposed);
-        return _stub->createRigidBody(rigidBodyId, type, shape, pos, size, rotate, disposed, _stub);
+        sp<Vec3> pos = _render_controller->synchronize<V3>(std::move(dpos), disp);
+        return _stub->createRigidBody(rigidBodyId, type, shape, pos, size, rotate, std::move(disp), _stub);
     }
-    return _stub->createRigidBody(rigidBodyId, type, shape, position, size, rotate, std::move(disposed), _stub);
+    return _stub->createRigidBody(rigidBodyId, type, shape, position, size, rotate, std::move(disp), _stub);
 }
 
 std::vector<RayCastManifold> ColliderImpl::rayCast(const V3& from, const V3& to)

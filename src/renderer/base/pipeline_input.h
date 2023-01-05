@@ -9,7 +9,7 @@
 #include "core/types/optional.h"
 #include "core/types/shared_ptr.h"
 
-#include "graphics/base/render_layer.h"
+#include "graphics/base/render_layer_snapshot.h"
 
 #include "renderer/forwarding.h"
 #include "renderer/base/attribute.h"
@@ -75,7 +75,7 @@ public:
     public:
         UBO(uint32_t binding);
 
-        RenderLayer::UBOSnapshot snapshot(const RenderRequest& renderRequest) const;
+        RenderLayerSnapshot::UBOSnapshot snapshot(const RenderRequest& renderRequest) const;
 
         uint32_t binding() const;
         size_t size() const;

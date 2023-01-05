@@ -28,71 +28,18 @@ namespace ark {
 
 RenderLayer::Stub::Stub(sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Vec4> scissor, sp<RenderController> renderController)
     : _model_loader(ModelLoaderCached::decorate(std::move(modelLoader))), _shader(std::move(shader)), _scissor(std::move(scissor)), _render_controller(std::move(renderController)), _render_command_composer(_model_loader->makeRenderCommandComposer()),
-      _shader_bindings(_render_command_composer->makeShaderBindings(_shader, _render_controller, _model_loader->renderMode())), _visible(nullptr, true), _layer(sp<Layer>::make(sp<LayerContext>::make(nullptr, _model_loader, nullptr, nullptr))),
+      _shader_bindings(_render_command_composer->makeShaderBindings(_shader, _render_controller, _model_loader->renderMode())), _visible(nullptr, true), _layer(sp<Layer>::make(sp<LayerContext>::make(nullptr, _model_loader, nullptr, nullptr, nullptr))),
       _stride(_shader->input()->getStream(0).stride())
 {
     _model_loader->initialize(_shader_bindings);
     DCHECK(!_scissor || _shader_bindings->pipelineBindings()->hasFlag(PipelineBindings::FLAG_DYNAMIC_SCISSOR, PipelineBindings::FLAG_DYNAMIC_SCISSOR_BITMASK), "RenderLayer has a scissor while its Shader has no FLAG_DYNAMIC_SCISSOR set");
 }
 
-sp<LayerContext> RenderLayer::Stub::makeLayerContext(sp<Batch> batch, sp<ModelLoader> modelLoader, sp<Boolean> visible)
+sp<LayerContext> RenderLayer::Stub::makeLayerContext(sp<RenderableBatch> batch, sp<ModelLoader> modelLoader, sp<Boolean> visible, sp<Boolean> disposed)
 {
-    sp<LayerContext> layerContext = sp<LayerContext>::make(std::move(batch), modelLoader ? sp<ModelLoader>::make<ModelLoaderCached>(std::move(modelLoader)) : _model_loader, std::move(visible), _layer->context()->varyings());
+    sp<LayerContext> layerContext = sp<LayerContext>::make(std::move(batch), modelLoader ? sp<ModelLoader>::make<ModelLoaderCached>(std::move(modelLoader)) : _model_loader, std::move(visible), std::move(disposed), _layer->context()->varyings());
     _batch_groups.push_back(layerContext);
     return layerContext;
-}
-
-RenderLayer::Snapshot::Snapshot(RenderRequest& renderRequest, const sp<Stub>& stub)
-    : _stub(stub), _index_count(0)
-{
-    DPROFILER_TRACE("Snapshot");
-
-    bool needsReload = _stub->_layer->context()->preSnapshot(renderRequest);
-
-    for(auto iter = _stub->_batch_groups.begin(); iter != _stub->_batch_groups.end(); )
-    {
-        const sp<LayerContext>& layerContext = *iter;
-        if(layerContext.unique())
-        {
-            iter = _stub->_batch_groups.erase(iter);
-            needsReload = true;
-        }
-        else
-        {
-            needsReload = layerContext->preSnapshot(renderRequest) || needsReload;
-            ++iter;
-        }
-    }
-
-    _flag = needsReload ? SNAPSHOT_FLAG_RELOAD : SNAPSHOT_FLAG_DYNAMIC_UPDATE;
-
-    _stub->_layer->context()->snapshot(renderRequest, *this);
-    for(LayerContext& i : _stub->_batch_groups)
-        i.snapshot(renderRequest, *this);
-
-    _stub->_render_command_composer->postSnapshot(_stub->_render_controller, *this);
-
-    _ubos = _stub->_shader->takeUBOSnapshot(renderRequest);
-    _ssbos = _stub->_shader->takeSSBOSnapshot(renderRequest);
-
-    if(_stub->_scissor && _stub->_scissor->update(renderRequest.timestamp()))
-        _scissor = Rect(_stub->_scissor->val());
-
-    DPROFILER_LOG("NeedsReload", needsReload);
-}
-
-sp<RenderCommand> RenderLayer::Snapshot::render(const RenderRequest& renderRequest, const V3& /*position*/)
-{
-    if(_items.size() > 0 && _stub->_visible.val())
-        return _stub->_render_command_composer->compose(renderRequest, *this);
-
-    DrawingContext drawingContext(_stub->_shader_bindings, nullptr, std::move(_ubos), std::move(_ssbos));
-    return drawingContext.toBindCommand();
-}
-
-bool RenderLayer::Snapshot::needsReload() const
-{
-    return _flag == RenderLayer::SNAPSHOT_FLAG_RELOAD || _stub->_shader_bindings->vertices().size() == 0;
 }
 
 RenderLayer::RenderLayer(sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Vec4> scissor, sp<RenderController> renderController)
@@ -110,9 +57,9 @@ const sp<LayerContext>& RenderLayer::context() const
     return _stub->_layer->context();
 }
 
-RenderLayer::Snapshot RenderLayer::snapshot(RenderRequest& renderRequest) const
+RenderLayerSnapshot RenderLayer::snapshot(RenderRequest& renderRequest) const
 {
-    return Snapshot(renderRequest, _stub);
+    return RenderLayerSnapshot(renderRequest, _stub);
 }
 
 const sp<Layer>& RenderLayer::layer() const
@@ -120,9 +67,9 @@ const sp<Layer>& RenderLayer::layer() const
     return _stub->_layer;
 }
 
-sp<LayerContext> RenderLayer::makeContext(sp<Batch> batch, sp<ModelLoader> modelLoader, sp<Boolean> visible) const
+sp<LayerContext> RenderLayer::makeContext(sp<RenderableBatch> batch, sp<ModelLoader> modelLoader, sp<Boolean> visible, sp<Boolean> disposed) const
 {
-    return _stub->makeLayerContext(std::move(batch), std::move(modelLoader), std::move(visible));
+    return _stub->makeLayerContext(std::move(batch), std::move(modelLoader), std::move(visible), std::move(disposed));
 }
 
 sp<Layer> RenderLayer::makeLayer(sp<ModelLoader> modelLoader, sp<Boolean> visible) const
@@ -142,7 +89,7 @@ RenderLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, co
 }
 
 RenderLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext, sp<Builder<ModelLoader>> modelLoader, sp<Builder<Shader>> shader)
-    : _resource_loader_context(resourceLoaderContext), _layers(factory.getBuilderList<Layer>(manifest, "layer")), _model_loader(std::move(modelLoader)), _shader(shader ? std::move(shader) : Shader::fromDocument(factory, manifest, resourceLoaderContext)),
+    : _resource_loader_context(resourceLoaderContext), _layers(factory.getBuilderList<Layer>(manifest, Constants::Attributes::LAYER)), _model_loader(std::move(modelLoader)), _shader(shader ? std::move(shader) : Shader::fromDocument(factory, manifest, resourceLoaderContext)),
       _scissor(factory.getBuilder<Vec4>(manifest, "scissor"))
 {
 }

@@ -12,6 +12,7 @@ namespace ark {
 
 class Frame final : public Renderer, public Block {
 public:
+[[deprecated]]
     Frame() = default;
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Frame);
     Frame(const sp<Renderer>& renderer);

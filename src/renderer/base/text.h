@@ -14,6 +14,8 @@
 #include "graphics/forwarding.h"
 #include "graphics/base/metrics.h"
 #include "graphics/inf/renderer.h"
+#include "graphics/inf/renderable.h"
+#include "graphics/inf/renderable_batch.h"
 
 #include "renderer/forwarding.h"
 
@@ -22,13 +24,17 @@
 namespace ark {
 
 //[[script::bindings::extends(Renderer)]]
-class ARK_API Characters : public Renderer {
+class ARK_API Text : public Renderer {
 public:
+[[deprecated]]
 //  [[script::bindings::auto]]
-    Characters(const sp<Layer>& layer, sp<StringVar> text = nullptr, float textScale = 1.0f, float letterSpacing = 0.0f, float lineHeight = 0.0f, float lineIndent = 0.0f);
+    Text(const sp<Layer>& layer, sp<StringVar> text = nullptr, float textScale = 1.0f, float letterSpacing = 0.0f, float lineHeight = 0.0f, float lineIndent = 0.0f);
+[[deprecated]]
 //  [[script::bindings::auto]]
-    Characters(const sp<LayerContext>& layer, sp<StringVar> text = nullptr, float textScale = 1.0f, float letterSpacing = 0.0f, float lineHeight = 0.0f, float lineIndent = 0.0f);
-    Characters(const BeanFactory& factory, const sp<LayerContext>& layerContext, sp<StringVar> text, const sp<GlyphMaker>& glyphMaker, float textScale, float letterSpacing, float lineHeight, float lineIndent);
+    Text(const sp<LayerContext>& layer, sp<StringVar> text = nullptr, float textScale = 1.0f, float letterSpacing = 0.0f, float lineHeight = 0.0f, float lineIndent = 0.0f);
+//  [[script::bindings::auto]]
+    Text(sp<RenderLayer> renderLayer, sp<StringVar> text = nullptr, float textScale = 1.0f, float letterSpacing = 0.0f, float lineHeight = 0.0f, float lineIndent = 0.0f);
+    Text(const BeanFactory& factory, sp<RenderLayer> renderLayer, const sp<LayerContext>& layerContext, sp<StringVar> text, const sp<GlyphMaker>& glyphMaker, float textScale, float letterSpacing, float lineHeight, float lineIndent);
 
 //  [[script::bindings::property]]
     const sp<LayoutParam>& layoutParam() const;
@@ -39,6 +45,11 @@ public:
     const std::vector<sp<RenderObject>>& contents() const;
 
 //  [[script::bindings::property]]
+    const sp<Vec3>& position() const;
+//  [[script::bindings::property]]
+    void setPosition(sp<Vec3> position);
+
+//  [[script::bindings::property]]
     const SafePtr<Size>& size() const;
 
 //  [[script::bindings::property]]
@@ -47,20 +58,25 @@ public:
     void setText(const std::wstring& text);
 
 //  [[script::bindings::auto]]
+    void show(sp<Boolean> disposed = nullptr);
+
+//  [[script::bindings::auto]]
     void setRichText(const std::wstring& richText, const Scope& args);
 
+    [[deprecated]]
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
 //[[plugin::builder]]
-    class BUILDER : public Builder<Characters> {
+    class BUILDER : public Builder<Text> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Characters> build(const Scope& args) override;
+        virtual sp<Text> build(const Scope& args) override;
 
     private:
         BeanFactory _bean_factory;
         SafePtr<Builder<StringVar>> _text;
+        SafePtr<Builder<RenderLayer>> _render_layer;
         sp<Builder<LayerContext>> _layer_context;
         SafePtr<Builder<GlyphMaker>> _glyph_maker;
 
@@ -106,8 +122,29 @@ private:
 
     GlyphContents makeGlyphs(GlyphMaker& gm, const std::wstring& text);
 
+    class Content : public RenderableBatch {
+    public:
+        Content();
+
+        virtual bool preSnapshot(const RenderRequest& renderRequest, LayerContext& lc) override;
+        virtual void snapshot(const RenderRequest& renderRequest, const LayerContext& lc, RenderLayerSnapshot& output) override;
+
+        SafeVar<Vec3>& position();
+
+        const std::vector<sp<RenderObject>>& renderObjects() const;
+        void setRenderObjects(std::vector<sp<RenderObject>> renderObjects);
+
+    private:
+        SafeVar<Vec3> _position;
+        std::vector<sp<RenderObject>> _render_objects;
+        std::vector<Renderable::State> _render_object_states;
+
+        bool _needs_reload;
+    };
+
 private:
     BeanFactoryWeakRef _bean_factory;
+    sp<RenderLayer> _render_layer;
     sp<LayerContext> _layer_context;
     sp<StringVar> _text;
     float _text_scale;
@@ -115,7 +152,6 @@ private:
     sp<GlyphMaker> _glyph_maker;
 
     std::vector<sp<Glyph>> _glyphs;
-    std::vector<sp<RenderObject>> _contents;
     std::vector<sp<RenderablePassive>> _renderables;
     std::wstring _text_unicode;
 
@@ -128,6 +164,8 @@ private:
 
     SafePtr<Size> _size;
     V3 _layout_size;
+
+    sp<Content> _content;
 };
 
 }

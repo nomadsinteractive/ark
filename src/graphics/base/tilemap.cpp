@@ -235,16 +235,16 @@ bool Tilemap::Stub::preSnapshot(const RenderRequest& renderRequest, LayerContext
     if(_scrollable)
         _scrollable->cull();
     for(TilemapLayer& i : _layers)
-        needReload = i._stub->preSnapshot(renderRequest, lc) || needReload;
+        needReload = i._renderable_batch->preSnapshot(renderRequest, lc) || needReload;
     return needReload;
 }
 
-void Tilemap::Stub::snapshot(const RenderRequest& renderRequest, const LayerContext& lc, RenderLayer::Snapshot& output)
+void Tilemap::Stub::snapshot(const RenderRequest& renderRequest, const LayerContext& lc, RenderLayerSnapshot& output)
 {
     for(auto iter = _layers.rbegin(); iter != _layers.rend(); ++iter)
     {
         const sp<TilemapLayer>& i = *iter;
-        i->_stub->snapshot(renderRequest, lc, output);
+        i->_renderable_batch->snapshot(renderRequest, lc, output);
     }
 }
 

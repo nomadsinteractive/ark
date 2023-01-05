@@ -25,12 +25,12 @@
 
 namespace ark {
 
-sp<Numeric> NumericType::create(const sp<Numeric>& value)
+sp<NumericWrapper> NumericType::create(sp<Numeric> value)
 {
-    return sp<NumericWrapper>::make(value);
+    return sp<NumericWrapper>::make(std::move(value));
 }
 
-sp<Numeric> NumericType::create(float value)
+sp<NumericWrapper> NumericType::create(float value)
 {
     return sp<NumericWrapper>::make(value);
 }
@@ -233,9 +233,9 @@ sp<Numeric> NumericType::freeze(const sp<Numeric>& self)
     return sp<NumericWrapper>::make(self->val());
 }
 
-sp<Numeric> NumericType::wrap(const sp<Numeric>& self)
+sp<Numeric> NumericType::wrap(sp<Numeric> self)
 {
-    return sp<NumericWrapper>::make(self);
+    return sp<NumericWrapper>::make(std::move(self));
 }
 
 sp<Numeric> NumericType::synchronize(const sp<Numeric>& self, const sp<Boolean>& disposed)

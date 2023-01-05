@@ -6,10 +6,11 @@
 #include "graphics/forwarding.h"
 
 #include "app/inf/layout.h"
+#include "app/view/layout_param.h"
 
 namespace ark {
 
-class HorizontalLayoutV2 : public LayoutV2 {
+class HorizontalLayoutV2 : public Layout {
 public:
     HorizontalLayoutV2(LayoutParam::Gravity layoutGravity);
 
@@ -18,11 +19,11 @@ public:
     virtual std::vector<V2> place(const std::vector<sp<LayoutParam>>& children, const LayoutParam& parent, const V2& contentSize) override;
 
 //  [[plugin::builder::by-value("horizontal")]]
-    class BUILDER : public Builder<LayoutV2> {
+    class BUILDER : public Builder<Layout> {
     public:
         BUILDER(const String& gravity);
 
-        virtual sp<LayoutV2> build(const Scope& args) override;
+        virtual sp<Layout> build(const Scope& args) override;
 
     private:
         LayoutParam::Gravity _layout_gravity;

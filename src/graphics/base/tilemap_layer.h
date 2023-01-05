@@ -83,12 +83,12 @@ private:
         Renderable::State state;
     };
 
-    class BatchImpl : public RenderLayer::Batch {
+    class BatchImpl : public RenderableBatch {
     public:
         BatchImpl(size_t colCount, size_t rowCount, sp<Tileset> tileset, sp<Vec3> position);
 
         virtual bool preSnapshot(const RenderRequest& renderRequest, LayerContext& lc) override;
-        virtual void snapshot(const RenderRequest& renderRequest, const LayerContext& lc, RenderLayer::Snapshot& output) override;
+        virtual void snapshot(const RenderRequest& renderRequest, const LayerContext& lc, RenderLayerSnapshot& output) override;
 
         size_t _col_count;
         size_t _row_count;
@@ -109,7 +109,7 @@ private:
 
     Tilemap::LayerFlag _flag;
 
-    sp<BatchImpl> _stub;
+    sp<BatchImpl> _renderable_batch;
 
     friend class Tilemap;
 };

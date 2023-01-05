@@ -147,7 +147,7 @@ private:
     struct Stub {
         Stub();
 
-        void bindUBO(const RenderLayer::UBOSnapshot& uboSnapshot, const sp<PipelineInput::UBO>& ubo);
+        void bindUBO(const RenderLayerSnapshot::UBOSnapshot& uboSnapshot, const sp<PipelineInput::UBO>& ubo);
         void bindUniform(const uint8_t* ptr, uint32_t size, const Uniform& uniform);
         void bindImage(const Texture& texture, uint32_t name);
         void activeTexture(const Texture& texture, uint32_t name);
@@ -158,7 +158,7 @@ private:
         const GLPipeline::GLAttribute& getAttribute(const String& name);
         GLint getAttribLocation(const String& name);
 
-        void bindUBOSnapshots(const std::vector<RenderLayer::UBOSnapshot>& uboSnapshots, const PipelineInput& pipelineInput);
+        void bindUBOSnapshots(const std::vector<RenderLayerSnapshot::UBOSnapshot>& uboSnapshots, const PipelineInput& pipelineInput);
 
         GLuint _id;
 

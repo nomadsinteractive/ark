@@ -83,9 +83,9 @@ sp<Shader> Shader::fromStringTable(const String& vertex, const String& fragment,
     return sp<Shader>::make(renderController->createPipelineFactory(), renderController, sp<PipelineLayout>::make(buildingContext, Camera::getDefaultCamera()), PipelineBindings::Parameters(Rect(), PipelineBindings::FragmentTestTable(), PipelineBindings::FLAG_DEFAULT_VALUE));
 }
 
-std::vector<RenderLayer::UBOSnapshot> Shader::takeUBOSnapshot(const RenderRequest& renderRequest) const
+std::vector<RenderLayerSnapshot::UBOSnapshot> Shader::takeUBOSnapshot(const RenderRequest& renderRequest) const
 {
-    std::vector<RenderLayer::UBOSnapshot> uboSnapshot;
+    std::vector<RenderLayerSnapshot::UBOSnapshot> uboSnapshot;
     for(const sp<PipelineInput::UBO>& i : _input->ubos())
         uboSnapshot.push_back(i->snapshot(renderRequest));
     return uboSnapshot;

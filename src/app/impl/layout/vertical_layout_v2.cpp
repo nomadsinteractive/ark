@@ -39,7 +39,7 @@ std::vector<V2> VerticalLayoutV2::place(const std::vector<sp<LayoutParam>>& slot
     const V2 layoutPos = LayoutUtil::place(_layout_gravity, contentSize, Rect(0, 0, parent.contentWidth(), parent.contentHeight()));
     Rect r = hasWeight ? Rect(0, 0, parent.contentWidth(), parent.contentWidth()) : Rect(layoutPos.x(), layoutPos.y(), contentSize.x(), contentSize.y());
 
-    LayoutParam::FlexFlow ff = LayoutParam::FLEX_FLOW_ROW;
+    LayoutParam::FlexDirection ff = LayoutParam::FLEX_DIRECTION_ROW;
     for(const sp<LayoutParam>& i : slots)
     {
         float width = i->calcLayoutWidth(parent.contentWidth());
@@ -55,7 +55,7 @@ VerticalLayoutV2::BUILDER::BUILDER(const String& gravity)
 {
 }
 
-sp<LayoutV2> VerticalLayoutV2::BUILDER::build(const Scope& /*args*/)
+sp<Layout> VerticalLayoutV2::BUILDER::build(const Scope& /*args*/)
 {
     return sp<VerticalLayoutV2>::make(_layout_gravity);
 }

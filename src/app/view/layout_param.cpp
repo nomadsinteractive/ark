@@ -228,4 +228,27 @@ template<> ARK_API LayoutParam::Gravity Conversions::to<String, LayoutParam::Gra
     return static_cast<LayoutParam::Gravity>(gravity);
 }
 
+template<> ARK_API LayoutParam::Length Conversions::to<String, LayoutParam::Length>(const String& s)
+{
+    if(s == "auto")
+        return LayoutParam::Length();
+
+    if(s.endsWith("px"))
+        return LayoutParam::Length(LayoutParam::LENGTH_TYPE_PIXEL, Strings::parse<float>(s.substr(0, s.length() - 2)));
+    if(s.endsWith("%"))
+        return LayoutParam::Length(LayoutParam::LENGTH_TYPE_PERCENTAGE, Strings::parse<float>(s.substr(0, s.length() - 1)));
+
+    return LayoutParam::Length(LayoutParam::LENGTH_TYPE_PIXEL, Strings::parse<float>(s));
+}
+
+LayoutParam::Length::Length()
+    : _type(LENGTH_TYPE_AUTO), _value(0)
+{
+}
+
+LayoutParam::Length::Length(LengthType type, float value)
+    : _type(type), _value(value)
+{
+}
+
 }

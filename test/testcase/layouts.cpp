@@ -103,6 +103,7 @@ public:
     }
 
 private:
+/*
     int testLayout(const sp<Layout>& layout, int base, float l1, float t1, float l2, float t2, float l3, float t3) {
         Layout::Context ctx(_layout_param, []() -> std::vector<sp<LayoutParam>> {
             return {};
@@ -130,6 +131,7 @@ private:
             return base + 5;
         return 0;
     }
+*/
 
 private:
     LayoutParam _client_layout_param;

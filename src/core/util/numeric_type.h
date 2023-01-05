@@ -15,9 +15,9 @@ namespace ark {
 class ARK_API NumericType final {
 public:
 //  [[script::bindings::constructor]]
-    static sp<Numeric> create(float value);
+    static sp<NumericWrapper> create(float value);
 //  [[script::bindings::constructor]]
-    static sp<Numeric> create(const sp<Numeric>& value);
+    static sp<NumericWrapper> create(sp<Numeric> value);
 
 //  [[script::bindings::operator(+)]]
     static sp<Numeric> add(const sp<Numeric>& lvalue, const sp<Numeric>& rvalue);
@@ -101,7 +101,7 @@ public:
 //  [[script::bindings::classmethod]]
     static sp<Numeric> freeze(const sp<Numeric>& self);
 //  [[script::bindings::classmethod]]
-    static sp<Numeric> wrap(const sp<Numeric>& self);
+    static sp<Numeric> wrap(sp<Numeric> self);
 //  [[script::bindings::classmethod]]
     static sp<Numeric> synchronize(const sp<Numeric>& self, const sp<Boolean>& disposed = nullptr);
 

@@ -62,6 +62,8 @@ static void updateKeyStatus(ImGuiIO& io, ImGuiKey_ keycode, bool isKeyDown) {
 static ImGuiKey_ toImGuiKey(Event::Code code) {
     switch(code)
     {
+        case Event::CODE_KEYBOARD_TAB:
+            return ImGuiKey_Tab;
         case Event::CODE_KEYBOARD_A:
             return ImGuiKey_A;
         case Event::CODE_KEYBOARD_C:
@@ -155,6 +157,7 @@ bool RendererImgui::onEvent(const Event& event)
                 case Event::CODE_KEYBOARD_RALT:
                     io.KeyAlt = isKeyDown;
                     break;
+                case Event::CODE_KEYBOARD_TAB:
                 case Event::CODE_KEYBOARD_A:
                 case Event::CODE_KEYBOARD_C:
                 case Event::CODE_KEYBOARD_V:

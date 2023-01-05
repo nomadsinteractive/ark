@@ -5,7 +5,7 @@
 
 #include "graphics/base/render_command_pipeline.h"
 #include "graphics/base/surface_controller.h"
-#include "graphics/base/render_layer.h"
+#include "graphics/base/render_layer_snapshot.h"
 #include "graphics/inf/render_view.h"
 
 namespace ark {
@@ -30,7 +30,7 @@ public:
 
 private:
     RenderRequest _render_request;
-    RenderLayer::Snapshot _layer_snapshot;
+    RenderLayerSnapshot _layer_snapshot;
     V3 _position;
 
     sp<RenderCommand> _delegate;

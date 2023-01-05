@@ -14,8 +14,8 @@ public:
 
     virtual sp<ShaderBindings> makeShaderBindings(Shader& shader, RenderController& renderController, ModelLoader::RenderMode renderMode) override;
 
-    virtual void postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot) override;
-    virtual sp<RenderCommand> compose(const RenderRequest& renderRequest, RenderLayer::Snapshot& snapshot) override;
+    virtual void postSnapshot(RenderController& renderController, RenderLayerSnapshot& snapshot) override;
+    virtual sp<RenderCommand> compose(const RenderRequest& renderRequest, RenderLayerSnapshot& snapshot) override;
 
 private:
     Model _model;

@@ -32,12 +32,38 @@ public:
         GRAVITY_CENTER = GRAVITY_CENTER_VERTICAL | GRAVITY_CENTER_HORIZONTAL
     };
 
-    enum FlexFlow {
-        FLEX_FLOW_NONE,
-        FLEX_FLOW_COLUMN,
-        FLEX_FLOW_COLUMN_REVERSE,
-        FLEX_FLOW_ROW,
-        FLEX_FLOW_ROW_REVERSE
+    enum JustifyContent {
+        JUSTIFY_CONTENT_FLEX_START,
+        JUSTIFY_CONTENT_FLEX_END,
+        JUSTIFY_CONTENT_CENTER,
+        JUSTIFY_CONTENT_SPACE_BETWEEN,
+        JUSTIFY_CONTENT_SPACE_AROUND,
+        JUSTIFY_CONTENT_SPACE_EVENLY
+    };
+
+    enum Align {
+        ALIGN_AUTO,
+        ALIGN_FLEX_START,
+        ALIGN_CENTER,
+        ALIGN_FLEX_END,
+        ALIGN_STRETCH,
+        ALIGN_BASELINE,
+        ALIGN_SPACE_BETWEEN,
+        ALIGN_SPACE_AROUND
+    };
+
+    enum FlexDirection {
+        FLEX_DIRECTION_NONE,
+        FLEX_DIRECTION_COLUMN,
+        FLEX_DIRECTION_COLUMN_REVERSE,
+        FLEX_DIRECTION_ROW,
+        FLEX_DIRECTION_ROW_REVERSE
+    };
+
+    enum FlexWrap {
+        FLEX_WRAP_NOWRAP,
+        FLEX_WRAP_WRAP,
+        FLEX_WRAP_WRAP_REVERSE
     };
 
     enum SizeConstraint {
@@ -45,10 +71,24 @@ public:
         SIZE_CONSTRAINT_WRAP_CONTENT = -2
     };
 
+    enum LengthType {
+        LENGTH_TYPE_AUTO,
+        LENGTH_TYPE_PIXEL,
+        LENGTH_TYPE_PERCENTAGE
+    };
+
+    struct Length {
+        Length();
+        Length(LengthType type, float value);
+
+        LengthType _type;
+        float _value;
+    };
+
 public:
 //  [[script::bindings::auto]]
     LayoutParam(const sp<Size>& size, LayoutParam::Display display = LayoutParam::DISPLAY_BLOCK, LayoutParam::Gravity gravity = LayoutParam::GRAVITY_DEFAULT, float weight = 0);
-    LayoutParam(const LayoutParam& other) = default;
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(LayoutParam);
 
     float calcLayoutWidth(float available);
     float calcLayoutHeight(float available);
@@ -123,6 +163,7 @@ private:
 
     Display _display;
     Gravity _gravity;
+
     float _weight;
 };
 

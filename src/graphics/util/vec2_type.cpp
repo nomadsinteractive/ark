@@ -86,11 +86,6 @@ sp<Vec2> Vec2Type::transform(const sp<Vec2>& self, const sp<Transform>& transfor
     return sp<Vec2WithTransform>::make(self, transform);
 }
 
-//void Vec2Type::setXy(const sp<Vec2>& self, const V2& xy)
-//{
-//    ensureImpl(self)->set(xy);
-//}
-
 sp<Vec3> Vec2Type::extend(sp<Vec2> self, sp<Numeric> z)
 {
     return sp<VariableOP2<sp<Vec2>, sp<Numeric>, Operators::Extend<V2, float>>>::make(std::move(self), std::move(z));

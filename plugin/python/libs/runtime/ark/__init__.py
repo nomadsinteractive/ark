@@ -116,6 +116,9 @@ class _Var:
     def periodic(self, interval: Optional['Numeric'] = None, duration: Optional['Numeric'] = None):
         pass
 
+    def clamp(self, a, b):
+        pass
+
     def mod_floor(self, mod):
         pass
 
@@ -1928,7 +1931,7 @@ class Glyph:
         return None
 
 
-class Characters(Renderer):
+class Text(Renderer):
     def __init__(self, layer: Union[Layer, RenderLayer, LayerContext], text: Union[String, str, None] = None, text_scale=1.0, letter_spacing=0, line_height=0,
                  line_indent=0):
         super().__init__()
@@ -1944,6 +1947,9 @@ class Characters(Renderer):
     @property
     def contents(self) -> List[RenderObject]:
         return []
+
+    def show(self, disposed: Optional[Boolean] = None):
+        pass
 
     def set_rich_text(self, text: str, **kwargs):
         pass
@@ -2176,7 +2182,7 @@ class Collider:
     BODY_FLAG_MANUAL_POSITION = 8
     BODY_FLAG_MANUAL_ROTATION = 16
 
-    def create_body(self, type_: Union[int, Integer], shape, position, size=None, rotate=None) -> RigidBody:
+    def create_body(self, type_: Union[int, Integer], shape, position, size=None, rotate=None, disposed: Optional[Boolean] = None) -> RigidBody:
         pass
 
     def ray_cast(self, ray_from, ray_to) -> List[RayCastManifold]:

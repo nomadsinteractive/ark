@@ -80,7 +80,7 @@ sp<Layer> Layer::BUILDER::build(const Scope& args)
 {
     sp<ModelLoader> modelLoader = _model_loader->build(args);
     const sp<RenderLayer> renderLayer = _render_layer->build(args);
-    const sp<Layer> layer = sp<Layer>::make(renderLayer ? renderLayer->makeContext(nullptr, std::move(modelLoader)) : sp<LayerContext>::make(nullptr, ModelLoaderCached::decorate(std::move(modelLoader)), _visible->build(args), nullptr));
+    const sp<Layer> layer = sp<Layer>::make(renderLayer ? renderLayer->makeContext(nullptr, std::move(modelLoader)) : sp<LayerContext>::make(nullptr, ModelLoaderCached::decorate(std::move(modelLoader)), _visible->build(args), nullptr, nullptr));
     LayerContext& layerContext = layer->context();
     for(const sp<Builder<RenderObject>>& i : _render_objects)
         layerContext.addRenderObject(i->build(args));

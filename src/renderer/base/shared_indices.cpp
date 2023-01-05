@@ -1,6 +1,7 @@
 #include "renderer/base/shared_indices.h"
 
 #include "core/impl/writable/writable_memory.h"
+#include "core/inf/input.h"
 
 #include "renderer/base/render_controller.h"
 

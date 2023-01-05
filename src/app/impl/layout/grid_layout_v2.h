@@ -5,10 +5,11 @@
 
 #include "app/forwarding.h"
 #include "app/inf/layout.h"
+#include "app/view/layout_param.h"
 
 namespace ark {
 
-class GridLayoutV2 : public LayoutV2 {
+class GridLayoutV2 : public Layout {
 public:
     GridLayoutV2(uint32_t rows, uint32_t cols, const LayoutParam::Gravity gravity);
 
@@ -16,11 +17,11 @@ public:
     virtual std::vector<V2> place(const std::vector<sp<LayoutParam>>& slots, const LayoutParam& parent, const V2& contentSize) override;
 
 //  [[plugin::builder("grid")]]
-    class BUILDER : public Builder<LayoutV2> {
+    class BUILDER : public Builder<Layout> {
     public:
         BUILDER(BeanFactory& parent, const document& doc);
 
-        virtual sp<LayoutV2> build(const Scope& args) override;
+        virtual sp<Layout> build(const Scope& args) override;
 
     private:
         sp<Builder<Numeric>> _rows, _cols;

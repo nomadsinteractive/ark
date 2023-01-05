@@ -12,6 +12,7 @@
 #include "graphics/base/render_layer.h"
 #include "graphics/inf/block.h"
 #include "graphics/inf/renderer.h"
+#include "graphics/inf/renderable_batch.h"
 
 #include "app/forwarding.h"
 
@@ -78,12 +79,12 @@ public:
     };
 
 private:
-    class Stub : public RenderLayer::Batch {
+    class Stub : public RenderableBatch {
     public:
         Stub();
 
         virtual bool preSnapshot(const RenderRequest& renderRequest, LayerContext& lc) override;
-        virtual void snapshot(const RenderRequest& renderRequest, const LayerContext& lc, RenderLayer::Snapshot& output) override;
+        virtual void snapshot(const RenderRequest& renderRequest, const LayerContext& lc, RenderLayerSnapshot& output) override;
 
         std::vector<sp<TilemapLayer>> _layers;
         sp<Scrollable> _scrollable;

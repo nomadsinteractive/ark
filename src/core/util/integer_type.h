@@ -27,11 +27,11 @@ public:
     };
 
 //[[script::bindings::constructor]]
-    static sp<Integer> create(int32_t value);
+    static sp<IntegerWrapper> create(int32_t value);
 //[[script::bindings::constructor]]
-    static sp<Integer> create(const sp<Integer>& value);
+    static sp<IntegerWrapper> create(sp<Integer> value);
 //[[script::bindings::constructor]]
-    static sp<Integer> create(const sp<Numeric>& value);
+    static sp<IntegerWrapper> create(sp<Numeric> value);
 
 //[[script::bindings::operator(+)]]
     static sp<Integer> add(const sp<Integer>& self, const sp<Integer>& rvalue);

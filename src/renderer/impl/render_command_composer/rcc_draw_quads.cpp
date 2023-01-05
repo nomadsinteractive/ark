@@ -27,13 +27,13 @@ sp<ShaderBindings> RCCDrawQuads::makeShaderBindings(Shader& shader, RenderContro
     return shader.makeBindings(renderController.makeVertexBuffer(), renderMode, PipelineBindings::RENDER_PROCEDURE_DRAW_ELEMENTS);
 }
 
-void RCCDrawQuads::postSnapshot(RenderController& renderController, RenderLayer::Snapshot& snapshot)
+void RCCDrawQuads::postSnapshot(RenderController& renderController, RenderLayerSnapshot& snapshot)
 {
     size_t primitiveCount = snapshot._index_count / 6;
     snapshot._index_buffer = _shared_buffer->snapshot(renderController, primitiveCount, primitiveCount);
 }
 
-sp<RenderCommand> RCCDrawQuads::compose(const RenderRequest& renderRequest, RenderLayer::Snapshot& snapshot)
+sp<RenderCommand> RCCDrawQuads::compose(const RenderRequest& renderRequest, RenderLayerSnapshot& snapshot)
 {
     const Buffer& vertices = snapshot._stub->_shader_bindings->vertices();
 

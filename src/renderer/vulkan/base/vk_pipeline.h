@@ -88,7 +88,7 @@ private:
 
     sp<BakedRenderer> makeBakedRenderer(const PipelineBindings& bindings) const;
     sp<VKDescriptorPool> makeDescriptorPool() const;
-    void bindUBOShapshots(GraphicsContext& graphicsContext, const std::vector<RenderLayer::UBOSnapshot>& uboSnapshots);
+    void bindUBOShapshots(GraphicsContext& graphicsContext, const std::vector<RenderLayerSnapshot::UBOSnapshot>& uboSnapshots);
 
     VkPipelineDepthStencilStateCreateInfo makeDepthStencilState() const;
     VkStencilOpState makeStencilState(const PipelineBindings::TraitStencilTestSeparate& stencil) const;

@@ -85,11 +85,11 @@ sp<ShaderBindings> RCCMultiDrawElementsIndirect::makeShaderBindings(Shader& shad
     return shader.makeBindings(renderController.makeVertexBuffer(Buffer::USAGE_STATIC, sp<VerticesUploader>::make(_model_bundle, shader.input())), renderMode, PipelineBindings::RENDER_PROCEDURE_DRAW_MULTI_ELEMENTS_INDIRECT);
 }
 
-void RCCMultiDrawElementsIndirect::postSnapshot(RenderController& /*renderController*/, RenderLayer::Snapshot& /*snapshot*/)
+void RCCMultiDrawElementsIndirect::postSnapshot(RenderController& /*renderController*/, RenderLayerSnapshot& /*snapshot*/)
 {
 }
 
-sp<RenderCommand> RCCMultiDrawElementsIndirect::compose(const RenderRequest& renderRequest, RenderLayer::Snapshot& snapshot)
+sp<RenderCommand> RCCMultiDrawElementsIndirect::compose(const RenderRequest& renderRequest, RenderLayerSnapshot& snapshot)
 {
     const std::lock_guard<std::mutex> lg(_mutex);
     DrawingBuffer buf(snapshot._stub->_shader_bindings, snapshot._stub->_stride);
@@ -126,7 +126,7 @@ ByteArray::Borrowed RCCMultiDrawElementsIndirect::makeIndirectBuffer(const Rende
     return cmds;
 }
 
-void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& renderRequest, DrawingBuffer& buf, const RenderLayer::Snapshot& snapshot, bool reload)
+void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& renderRequest, DrawingBuffer& buf, const RenderLayerSnapshot& snapshot, bool reload)
 {
     for(size_t i = 0; i < snapshot._items.size(); ++i)
     {
@@ -179,7 +179,7 @@ V3 RCCMultiDrawElementsIndirect::toScale(const V3& displaySize, const Metrics& m
               displaySize.z() != 0 ? displaySize.z() /  size.z() : 1.0f);
 }
 
-void RCCMultiDrawElementsIndirect::reloadIndirectCommands(const RenderLayer::Snapshot& snapshot)
+void RCCMultiDrawElementsIndirect::reloadIndirectCommands(const RenderLayerSnapshot& snapshot)
 {
     size_t offset = 0;
     _indirect_cmds.clear();

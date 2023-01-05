@@ -7,7 +7,7 @@
 #include "core/types/shared_ptr.h"
 #include "core/types/optional.h"
 
-#include "graphics/base/render_layer.h"
+#include "graphics/base/render_layer_snapshot.h"
 #include "graphics/base/rect.h"
 
 #include "renderer/forwarding.h"
@@ -89,8 +89,8 @@ public:
     };
 
 public:
-    DrawingContext(sp<ShaderBindings> shaderBindings, sp<ByType> attachments, std::vector<RenderLayer::UBOSnapshot> ubo, std::vector<std::pair<uint32_t, Buffer::Snapshot>> ssbos);
-    DrawingContext(sp<ShaderBindings> shaderBindings, sp<ByType> attachments, std::vector<RenderLayer::UBOSnapshot> ubo, std::vector<std::pair<uint32_t, Buffer::Snapshot>> ssbos, Buffer::Snapshot vertexBuffer, Buffer::Snapshot indexBuffer, Parameters parameters);
+    DrawingContext(sp<ShaderBindings> shaderBindings, sp<ByType> attachments, std::vector<RenderLayerSnapshot::UBOSnapshot> ubo, std::vector<std::pair<uint32_t, Buffer::Snapshot>> ssbos);
+    DrawingContext(sp<ShaderBindings> shaderBindings, sp<ByType> attachments, std::vector<RenderLayerSnapshot::UBOSnapshot> ubo, std::vector<std::pair<uint32_t, Buffer::Snapshot>> ssbos, Buffer::Snapshot vertexBuffer, Buffer::Snapshot indexBuffer, Parameters parameters);
     DEFAULT_COPY_AND_ASSIGN(DrawingContext);
 
     sp<RenderCommand> toRenderCommand(const RenderRequest& renderRequest);
@@ -101,7 +101,7 @@ public:
     sp<ShaderBindings> _shader_bindings;
     sp<ByType> _attachments;
 
-    std::vector<RenderLayer::UBOSnapshot> _ubos;
+    std::vector<RenderLayerSnapshot::UBOSnapshot> _ubos;
     std::vector<std::pair<uint32_t, Buffer::Snapshot>> _ssbos;
     Buffer::Snapshot _vertices;
     Buffer::Snapshot _indices;
