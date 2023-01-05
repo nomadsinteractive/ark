@@ -5,23 +5,23 @@
 #include "core/util/holder_util.h"
 #include "core/util/log.h"
 
-#include "graphics/base/frame.h"
 #include "graphics/base/layer.h"
 #include "graphics/base/render_request.h"
 #include "graphics/base/size.h"
+#include "graphics/util/renderer_type.h"
 
 #include "app/base/event.h"
 #include "app/inf/layout.h"
 
 namespace ark {
 
-ViewGroup::ViewGroup(const Frame& background, sp<Layout> layoutV2, sp<LayoutParam> layoutParam)
-    : View(!layoutParam && background ? sp<LayoutParam>::make(background.size()) : std::move(layoutParam)), _background(background.renderer()), _layout_hierarchy(sp<LayoutHierarchy>::make(std::move(layoutV2)))
+ViewGroup::ViewGroup(sp<Renderer> background, sp<Layout> layout, sp<LayoutV3> layoutV3, sp<LayoutParam> layoutParam)
+    : View(!layoutParam && background ? sp<LayoutParam>::make(RendererType::size(background)) : std::move(layoutParam)), _background(std::move(background)), _layout_hierarchy(sp<LayoutHierarchy>::make(std::move(layout), std::move(layoutV3)))
 {
-    DCHECK(!_layout_hierarchy->_layout_v2 || _layout_param, "Null LayoutParam. This would happen if your ViewGroup has neither background or size defined.");
-    if(_layout_param && background)
-        if(background.size() != _layout_param->size())
-            background.size()->set(static_cast<sp<Size>>(_layout_param->size()));
+    CHECK(!_layout_hierarchy->_layout || _layout_param, "Null LayoutParam. This would happen if your ViewGroup has neither background or size defined.");
+//    if(_layout_param && background)
+//        if(background.size() != _layout_param->size())
+//            background.size()->set(static_cast<sp<Size>>(_layout_param->size()));
 }
 
 ViewGroup::~ViewGroup()
@@ -60,15 +60,20 @@ void ViewGroup::updateLayout() const
     _layout_hierarchy->updateLayout(_layout_param);
 }
 
+sp<LayoutV3::Node> ViewGroup::makeLayoutNode() const
+{
+    return _layout_hierarchy->makeLayoutNode(_layout_param);
+}
+
 ViewGroup::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _factory(factory), _manifest(manifest), _layout_v2(factory.getBuilder<Layout>(manifest, Constants::Attributes::LAYOUT)), _background(factory.getBuilder<Renderer>(manifest, Constants::Attributes::BACKGROUND)),
-      _layout_param(factory.ensureBuilder<LayoutParam>(manifest))
+    : _factory(factory), _manifest(manifest), _layout(factory.getBuilder<Layout>(manifest, Constants::Attributes::LAYOUT)), _layout_v3(factory.getBuilder<LayoutV3>(manifest, "layout-v3")),
+      _background(factory.getBuilder<Renderer>(manifest, Constants::Attributes::BACKGROUND)), _layout_param(factory.ensureBuilder<LayoutParam>(manifest))
 {
 }
 
 sp<Renderer> ViewGroup::BUILDER::build(const Scope& args)
 {
-    const sp<ViewGroup> viewGroup = sp<ViewGroup>::make(_background->build(args), _layout_v2->build(args), _layout_param->build(args));
+    const sp<ViewGroup> viewGroup = sp<ViewGroup>::make(_background->build(args), _layout->build(args), _layout_v3->build(args), _layout_param->build(args));
     for(const document& i : _manifest->children())
     {
         const String& name = i->name();

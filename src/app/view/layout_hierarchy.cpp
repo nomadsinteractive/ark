@@ -72,44 +72,6 @@ void LayoutHierarchy::Slot::wrapContentLayout() const
         _view_group->updateLayout();
 }
 
-//void LayoutHierarchy::Slot::doPlace(Layout::Context& ctx, float clientHeight, const sp<Layout>& layout)
-//{
-//    if(_view)
-//    {
-//        const sp<LayoutParam>& layoutParam = _view->layoutParam();
-//        DASSERT(layoutParam);
-//        if(layoutParam->display() == LayoutParam::DISPLAY_BLOCK)
-//        {
-//            const V4 margins = layoutParam->margins().val();
-//            const Rect target = layout->place(ctx, layoutParam);
-//            _position = V2(target.left() + margins.w(), clientHeight - layoutParam->contentHeight() - target.top() - margins.x());
-//        }
-//    }
-//}
-
-//void LayoutHierarchy::Slot::doWrapContentPlace(Layout::Context& ctx, const sp<Layout>& layout, Rect& contentRect) const
-//{
-//    if(_view)
-//    {
-//        const sp<LayoutParam>& layoutParam = _view->layoutParam();
-//        DASSERT(layoutParam);
-//        if(layoutParam->display() == LayoutParam::DISPLAY_BLOCK)
-//        {
-//            ctx._client_width = std::max(ctx._client_width, layoutParam->offsetWidth());
-//            ctx._client_height = std::max(ctx._client_height, layoutParam->offsetHeight());
-//            const Rect rect = layout->place(ctx, layoutParam);
-//            contentRect = Rect(std::min(contentRect.left(), rect.left()), std::min(contentRect.top(), rect.top()),
-//                               std::max(contentRect.right(), rect.right()), std::max(contentRect.bottom(), rect.bottom()));
-//        }
-//    }
-//}
-
-//void LayoutHierarchy::Slot::doLayoutEnd(const Rect& p)
-//{
-//    if(_view)
-//        _position += V2(p.left(), -p.top());
-//}
-
 void LayoutHierarchy::Slot::render(RenderRequest& renderRequest, const V3& position)
 {
     if(!_layout_requested)
@@ -141,8 +103,15 @@ sp<LayoutParam> LayoutHierarchy::Slot::getLayoutParam() const
     return _view ? static_cast<sp<LayoutParam>>(_view->layoutParam()) : nullptr;
 }
 
-LayoutHierarchy::LayoutHierarchy(sp<Layout> layoutV2)
-    : _layout_v2(std::move(layoutV2))
+sp<LayoutV3::Node> LayoutHierarchy::Slot::makeLayoutNode() const
+{
+    if(_view_group || _view)
+        return _view_group ? _view_group->makeLayoutNode() : sp<LayoutV3::Node>::make(_view->layoutParam());
+    return nullptr;
+}
+
+LayoutHierarchy::LayoutHierarchy(sp<Layout> layout, sp<LayoutV3> layoutV3)
+    : _layout(std::move(layout)), _layout_v3(std::move(layoutV3))
 {
 }
 
@@ -173,7 +142,7 @@ bool LayoutHierarchy::onEvent(const Event& event, float x, float y) const
     return false;
 }
 
-bool LayoutHierarchy::isLayoutNeeded(const LayoutParam& layoutParam)
+bool LayoutHierarchy::isLayoutNeeded(const LayoutParam& layoutParam, bool& inflateNeeded)
 {
     bool layoutNeeded = false;
     for(auto iter = _slots.begin(); iter != _slots.end(); )
@@ -183,6 +152,7 @@ bool LayoutHierarchy::isLayoutNeeded(const LayoutParam& layoutParam)
         {
             iter = _slots.erase(iter);
             layoutNeeded = true;
+            inflateNeeded = true;
         }
         else
             ++iter;
@@ -196,20 +166,6 @@ bool LayoutHierarchy::isLayoutNeeded(const LayoutParam& layoutParam)
         return true;
     }
     return layoutNeeded;
-}
-
-std::vector<sp<LayoutParam>> LayoutHierarchy::getLayoutParams() const
-{
-    std::vector<sp<LayoutParam>> layoutParams;
-
-    for(const sp<Slot>& i : _slots)
-    {
-        sp<LayoutParam> lp = i->getLayoutParam();
-        if(lp && lp->display() == LayoutParam::DISPLAY_BLOCK)
-            layoutParams.push_back(std::move(lp));
-    }
-
-    return layoutParams;
 }
 
 std::pair<std::vector<sp<LayoutHierarchy::Slot>>, std::vector<sp<LayoutParam>>> LayoutHierarchy::getLayoutItems() const
@@ -227,77 +183,69 @@ std::pair<std::vector<sp<LayoutHierarchy::Slot>>, std::vector<sp<LayoutParam>>> 
     return items;
 }
 
-void LayoutHierarchy::updateLayout(LayoutParam& layoutParam)
+void LayoutHierarchy::updateLayout(const sp<LayoutParam>& layoutParam)
 {
+    bool inflatNeeded = false;
     if(_incremental.size())
     {
         for(sp<Slot>& i : _incremental)
             _slots.push_back(std::move(i));
         _incremental.clear();
+        inflatNeeded = true;
     }
-    if(isLayoutNeeded(layoutParam))
+
+    if(isLayoutNeeded(layoutParam, inflatNeeded))
     {
         for(const sp<Slot>& i : _slots)
             i->wrapContentLayout();
 
-        if(_layout_v2)
+        if(_layout)
         {
-            const auto items = getLayoutItems();
-            const V2 contentSize = _layout_v2->inflate(items.second);
+            const auto [slots, layoutParamSlots] = getLayoutItems();
+            const V2 contentSize = _layout->inflate(layoutParamSlots);
 
-            if(layoutParam.isWidthWrapContent())
-                layoutParam.setContentWidth(contentSize.x());
-            if(layoutParam.isHeightWrapContent())
-                layoutParam.setContentHeight(contentSize.y());
+            if(layoutParam->isWidthWrapContent())
+                layoutParam->setContentWidth(contentSize.x());
+            if(layoutParam->isHeightWrapContent())
+                layoutParam->setContentHeight(contentSize.y());
 
-            const std::vector<V2> positions = _layout_v2->place(items.second, layoutParam, contentSize);
-            DASSERT(positions.size() == items.first.size());
+            const std::vector<V2> positions = _layout->place(layoutParamSlots, layoutParam, contentSize);
+            DASSERT(positions.size() == slots.size());
 
             for(size_t i = 0; i < positions.size(); ++i)
-                items.first.at(i)->updateLayoutPosition(positions.at(i), layoutParam.contentHeight());
+                slots.at(i)->updateLayoutPosition(positions.at(i), layoutParam->contentHeight());
         }
-//        else if(_layout)
-//        {
-//            Layout::Context ctx(layoutParam, [this]() {
-//                return this->getLayoutParams();
-//            });
+        else if(_layout_v3)
+        {
+            if(inflatNeeded)
+                doLayoutInflat(layoutParam);
 
-//            if(layoutParam.isWrapContent())
-//                doWrapContentLayout(ctx, layoutParam);
+            _layout_v3->place(_layout_node);
+        }
 
-//            _layout->begin(ctx, layoutParam);
-
-//            for(const sp<Slot>& i: _slots)
-//                i->doPlace(ctx, layoutParam.contentHeight(), _layout);
-
-//            const Rect p = _layout->end(ctx);
-//            for(const sp<Slot>& i : _slots)
-//                i->doLayoutEnd(p);
-//        }
         for(const sp<Slot>& i : _slots)
             i->updateLayout();
     }
 }
 
-//void LayoutHierarchy::doWrapContentLayout(Layout::Context& ctx, LayoutParam& layoutParam)
-//{
-//    LayoutParam lp(layoutParam);
-//    Rect clientRect;
-//    _layout->begin(ctx, lp);
-//    for(const sp<Slot>& i: _slots)
-//        i->doWrapContentPlace(ctx, _layout, clientRect);
-
-//    _layout->end(ctx);
-//    if(layoutParam.isWidthWrapContent())
-//        layoutParam.setContentWidth(clientRect.width());
-//    if(layoutParam.isHeightWrapContent())
-//        layoutParam.setContentHeight(clientRect.height());
-//}
-
 void LayoutHierarchy::addRenderer(const sp<Renderer>& renderer)
 {
     DASSERT(renderer);
-    _incremental.push_back(sp<LayoutHierarchy::Slot>::make(renderer, static_cast<bool>(_layout_v2)));
+    _incremental.push_back(sp<LayoutHierarchy::Slot>::make(renderer, static_cast<bool>(_layout)));
+}
+
+sp<LayoutV3::Node> LayoutHierarchy::makeLayoutNode(sp<LayoutParam> layoutParam) const
+{
+    sp<LayoutV3::Node> node = sp<LayoutV3::Node>::make(std::move(layoutParam));
+    for(const Slot& i : _slots)
+        node->_child_nodes.push_back(i.makeLayoutNode());
+    return node;
+}
+
+void LayoutHierarchy::doLayoutInflat(sp<LayoutParam> layoutParam)
+{
+    _layout_node = makeLayoutNode(std::move(layoutParam));
+    _layout_v3->inflate(_layout_node);
 }
 
 }

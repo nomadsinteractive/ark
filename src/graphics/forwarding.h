@@ -13,7 +13,6 @@ class Camera;
 class GlyphMaker;
 class Color;
 class Font;
-class Frame;
 class Glyph;
 class Scrollable;
 class RenderLayer;

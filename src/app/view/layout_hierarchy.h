@@ -33,46 +33,54 @@ private:
         void updateLayout();
         void wrapContentLayout() const;
 
+        [[deprecated]]
         void render(RenderRequest& renderRequest, const V3& position);
 
         bool onEventDispatch(const Event& event, float x, float y);
 
         sp<LayoutParam> getLayoutParam() const;
 
+        sp<LayoutV3::Node> makeLayoutNode() const;
+
     private:
         V2 _position;
         bool _layout_requested;
+        [[deprecated]]
         sp<Renderer> _renderer;
         sp<View> _view;
         sp<ViewGroup> _view_group;
         sp<LayoutEventListener> _layout_event_listener;
         sp<Disposed> _disposed;
         sp<Visibility> _visible;
-
         friend class LayoutHierarchy;
 
     };
 
 public:
-    LayoutHierarchy(sp<Layout> layoutV2);
+    LayoutHierarchy(sp<Layout> layout, sp<LayoutV3> layoutV3);
 
     virtual void traverse(const Visitor& visitor) override;
 
+    [[deprecated]]
     void render(RenderRequest& renderRequest, const V3& position) const;
     bool onEvent(const Event& event, float x, float y) const;
 
-    void updateLayout(LayoutParam& layoutParam);
+    void updateLayout(const sp<LayoutParam>& layoutParam);
 
     void addRenderer(const sp<Renderer>& renderer);
 
-private:
-    bool isLayoutNeeded(const LayoutParam& layoutParam);
+    sp<LayoutV3::Node> makeLayoutNode(sp<LayoutParam> layoutParam) const;
+    void doLayoutInflat(sp<LayoutParam> layoutParam);
 
-    std::vector<sp<LayoutParam>> getLayoutParams() const;
+private:
+    bool isLayoutNeeded(const LayoutParam& layoutParam, bool& inflateNeeded);
+
     std::pair<std::vector<sp<Slot>>, std::vector<sp<LayoutParam>>> getLayoutItems() const;
 
 private:
-    sp<Layout> _layout_v2;
+    sp<Layout> _layout;
+    sp<LayoutV3> _layout_v3;
+    sp<LayoutV3::Node> _layout_node;
     V3 _layout_size;
 
     std::vector<sp<Slot>> _slots;

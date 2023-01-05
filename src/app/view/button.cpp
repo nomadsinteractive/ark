@@ -9,6 +9,7 @@
 #include "graphics/base/size.h"
 #include "graphics/base/rect.h"
 #include "graphics/base/v3.h"
+#include "graphics/util/renderer_type.h"
 
 #include "app/base/event.h"
 #include "app/impl/renderer/renderer_with_state.h"
@@ -71,12 +72,12 @@ Button::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 
 sp<Button> Button::BUILDER::build(const Scope& args)
 {
-    const sp<Renderer> foreground = _foreground->build(args);
-    const Frame background = _background->build(args);
+    sp<Renderer> foreground = _foreground->build(args);
+    sp<Renderer> background = _background->build(args);
     const sp<Size> builtSize = _size->build(args);
     const String style = Documents::getAttribute(_manifest, Constants::Attributes::STYLE);
-    const sp<Size> size = builtSize ? builtSize : background.size();
-    const sp<Button> button = sp<Button>::make(foreground, background.renderer(), size, _gravity ? Strings::parse<LayoutParam::Gravity>(_gravity) : LayoutParam::GRAVITY_CENTER);
+    sp<Size> size = builtSize ? builtSize : static_cast<const sp<Size>&>(RendererType::size(background));
+    sp<Button> button = sp<Button>::make(std::move(foreground), std::move(background), size, _gravity ? Strings::parse<LayoutParam::Gravity>(_gravity) : LayoutParam::GRAVITY_CENTER);
     loadStatus(button, _manifest, _factory, args);
     if(style)
         _factory.decorate<Renderer>(sp<Builder<Renderer>::Prebuilt>::make(button), style)->build(args);

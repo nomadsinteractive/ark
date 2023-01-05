@@ -30,7 +30,7 @@ class Application:
         return False
 
     def create_toolbox(self):
-        builder = dear_imgui.RendererBuilder(self._imgui)
+        builder = dear_imgui.WidgetBuilder(self._imgui)
         builder.begin('Particles')
         builder.text('This demo uses the following to achieve a particle system:')
         builder.bullet_text('Compute Shader')
@@ -38,7 +38,7 @@ class Application:
         builder.separator()
         builder.slider_int('Paricle Count', self._particle_count, 1, self.PARTICLE_COUNT_MAX, f'%d / {self.PARTICLE_COUNT_MAX}')
         builder.end()
-        self._imgui.add_renderer(builder.make_renderer())
+        self._imgui.add_renderer(builder.make_widget().to_renderer())
 
     @staticmethod
     def make_default_pos() -> Vec2:

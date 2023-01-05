@@ -20,8 +20,15 @@ template<> ARK_API LayoutParam::Display Conversions::to<String, LayoutParam::Dis
     return LayoutParam::DISPLAY_BLOCK;
 }
 
-LayoutParam::LayoutParam(const sp<Size>& size, LayoutParam::Display display, Gravity gravity, float weight)
-    : _size(Null::toSafe(size)), _margins(nullptr), _display(display), _gravity(gravity), _weight(weight)
+LayoutParam::LayoutParam(const sp<Size>& size, LayoutParam::Display display, Gravity gravity, float grow)
+    : _size(Null::toSafe(size)), _margins(nullptr), _display(display), _gravity(gravity), _flex_grow(grow)
+{
+}
+
+LayoutParam::LayoutParam(Length width, Length height, FlexDirection flexDirection, FlexWrap flexWrap, JustifyContent justifyContent, Align alignItems, Align alignSelf,
+                         Align alignContent, Display display, float flexGrow)
+    : _width(width), _height(height), _flex_direction(flexDirection), _flex_wrap(flexWrap), _justify_content(justifyContent), _align_items(alignItems), _align_self(alignSelf),
+      _align_content(alignContent), _display(display), _flex_grow(flexGrow)
 {
 }
 
@@ -119,19 +126,59 @@ void LayoutParam::setGravity(LayoutParam::Gravity gravity)
     _gravity = gravity;
 }
 
-float LayoutParam::weight() const
+float LayoutParam::flexGrow() const
 {
-    return _weight;
+    return _flex_grow;
 }
 
-void LayoutParam::setWeight(float weight)
+void LayoutParam::setFlexGrow(float weight)
 {
-    _weight = weight;
+    _flex_grow = weight;
 }
 
-bool LayoutParam::hasWeight() const
+bool LayoutParam::hasFlexGrow() const
 {
-    return _weight != 0.0f;
+    return _flex_grow != 0.0f;
+}
+
+const LayoutParam::Length& LayoutParam::width() const
+{
+    return _width;
+}
+
+const LayoutParam::Length& LayoutParam::height() const
+{
+    return _height;
+}
+
+LayoutParam::FlexDirection LayoutParam::flexDirection() const
+{
+    return _flex_direction;
+}
+
+LayoutParam::FlexWrap LayoutParam::flexWrap() const
+{
+    return _flex_wrap;
+}
+
+LayoutParam::JustifyContent LayoutParam::justifyContent() const
+{
+    return _justify_content;
+}
+
+LayoutParam::Align LayoutParam::alignItems() const
+{
+    return _align_items;
+}
+
+LayoutParam::Align LayoutParam::alignSelf() const
+{
+    return _align_self;
+}
+
+LayoutParam::Align LayoutParam::alignContent() const
+{
+    return _align_content;
 }
 
 const SafeVar<Vec4>& LayoutParam::margins() const
@@ -142,6 +189,16 @@ const SafeVar<Vec4>& LayoutParam::margins() const
 void LayoutParam::setMargins(sp<Vec4> margins)
 {
     _margins = std::move(margins);
+}
+
+const SafeVar<Vec4>& LayoutParam::paddings() const
+{
+    return _paddings;
+}
+
+void LayoutParam::setPaddings(sp<Vec4> paddings)
+{
+    _paddings.reset(std::move(paddings));
 }
 
 bool LayoutParam::isWrapContent() const
@@ -185,13 +242,20 @@ bool LayoutParam::isWrapContent(float unit)
 }
 
 LayoutParam::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _size(factory.getBuilder<Size>(manifest, Constants::Attributes::SIZE)), _display(Documents::getAttribute<Display>(manifest, "display", LayoutParam::DISPLAY_BLOCK))
+    : _width(Documents::getAttributeOptional<Length>(manifest, "layout-width")), _height(Documents::getAttributeOptional<Length>(manifest, "layout-height")),
+      _size(factory.getBuilder<Size>(manifest, Constants::Attributes::SIZE)), _display(Documents::getAttribute<Display>(manifest, "display", LayoutParam::DISPLAY_BLOCK))
 {
 }
 
 sp<LayoutParam> LayoutParam::BUILDER::build(const Scope& args)
 {
-    return _size ? sp<LayoutParam>::make(_size->build(args), _display) : nullptr;
+    if(_size)
+        return sp<LayoutParam>::make(_size->build(args), _display);
+
+    if(_width || _height)
+        return sp<LayoutParam>::make(_size->build(args), _display);
+
+    return nullptr;
 }
 
 template<> ARK_API sp<LayoutParam> Null::ptr()
@@ -249,6 +313,21 @@ LayoutParam::Length::Length()
 LayoutParam::Length::Length(LengthType type, float value)
     : _type(type), _value(value)
 {
+}
+
+bool LayoutParam::Length::isAuto() const
+{
+    return _type == LENGTH_TYPE_AUTO;
+}
+
+bool LayoutParam::Length::isPixel() const
+{
+    return _type == LENGTH_TYPE_PIXEL;
+}
+
+bool LayoutParam::Length::isPercentage() const
+{
+    return _type == LENGTH_TYPE_PERCENTAGE;
 }
 
 }

@@ -30,7 +30,7 @@ std::vector<V2> VerticalLayoutV2::place(const std::vector<sp<LayoutParam>>& slot
     float spaceAvailable = parent.contentHeight();
     for(const sp<LayoutParam>& i : slots)
     {
-        weights += i->weight();
+        weights += i->flexGrow();
         spaceAvailable -= i->offsetHeight();
     }
 
@@ -43,7 +43,7 @@ std::vector<V2> VerticalLayoutV2::place(const std::vector<sp<LayoutParam>>& slot
     for(const sp<LayoutParam>& i : slots)
     {
         float width = i->calcLayoutWidth(parent.contentWidth());
-        float height = i->calcLayoutHeight(i->hasWeight() ? i->weight() * unitWeight : parent.contentHeight());
+        float height = i->calcLayoutHeight(i->hasFlexGrow() ? i->flexGrow() * unitWeight : parent.contentHeight());
         positions.push_back(LayoutUtil::place(i->gravity(), ff, V2(width, height), r));
     }
 

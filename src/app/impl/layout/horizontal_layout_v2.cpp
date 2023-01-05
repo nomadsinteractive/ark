@@ -30,7 +30,7 @@ std::vector<V2> HorizontalLayoutV2::place(const std::vector<sp<LayoutParam>>& sl
     float spaceAvailable = parent.contentWidth();
     for(const sp<LayoutParam>& i : slots)
     {
-        weights += i->weight();
+        weights += i->flexGrow();
         spaceAvailable -= i->offsetWidth();
     }
 
@@ -42,7 +42,7 @@ std::vector<V2> HorizontalLayoutV2::place(const std::vector<sp<LayoutParam>>& sl
     LayoutParam::FlexDirection ff = LayoutParam::FLEX_DIRECTION_COLUMN;
     for(const sp<LayoutParam>& i : slots)
     {
-        float width = i->hasWeight() ? i->calcLayoutWidth(i->weight() * unitWeight) : i->offsetWidth();
+        float width = i->hasFlexGrow() ? i->calcLayoutWidth(i->flexGrow() * unitWeight) : i->offsetWidth();
         positions.push_back(LayoutUtil::place(i->gravity(), ff, V2(width, i->offsetHeight()), r));
     }
 

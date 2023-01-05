@@ -334,7 +334,7 @@ View::STYLE_LAYOUT_WEIGHT::STYLE_LAYOUT_WEIGHT(BeanFactory& beanFactory, const s
 sp<Renderer> View::STYLE_LAYOUT_WEIGHT::build(const Scope& args)
 {
     sp<Renderer> renderer = _delegate->build(args);
-    bindView(renderer)->layoutParam()->setWeight(_layout_weight->build(args)->val());
+    bindView(renderer)->layoutParam()->setFlexGrow(_layout_weight->build(args)->val());
     return renderer;
 }
 
