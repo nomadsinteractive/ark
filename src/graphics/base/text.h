@@ -1,5 +1,5 @@
-#ifndef ARK_RENDERER_BASE_CHARACTERS_H_
-#define ARK_RENDERER_BASE_CHARACTERS_H_
+#ifndef ARK_GRAPHICS_BASE_CHARACTERS_H_
+#define ARK_GRAPHICS_BASE_CHARACTERS_H_
 
 #include <string>
 #include <vector>
@@ -17,14 +17,11 @@
 #include "graphics/inf/renderable.h"
 #include "graphics/inf/renderable_batch.h"
 
-#include "renderer/forwarding.h"
-
-#include "app/forwarding.h"
 
 namespace ark {
 
 //[[script::bindings::extends(Renderer)]]
-class ARK_API Text : public Renderer {
+class ARK_API Text : public Renderer, public Updatable {
 public:
 [[deprecated]]
 //  [[script::bindings::auto]]
@@ -37,11 +34,6 @@ public:
     Text(const BeanFactory& factory, sp<RenderLayer> renderLayer, const sp<LayerContext>& layerContext, sp<StringVar> text, const sp<GlyphMaker>& glyphMaker, float textScale, float letterSpacing, float lineHeight, float lineIndent);
 
 //  [[script::bindings::property]]
-    const sp<LayoutParam>& layoutParam() const;
-//  [[script::bindings::property]]
-    void setLayoutParam(const sp<LayoutParam>& layoutParam);
-
-//  [[script::bindings::property]]
     const std::vector<sp<RenderObject>>& contents() const;
 
 //  [[script::bindings::property]]
@@ -50,7 +42,12 @@ public:
     void setPosition(sp<Vec3> position);
 
 //  [[script::bindings::property]]
-    const SafePtr<Size>& size() const;
+    const sp<Size>& size() const;
+
+//  [[script::bindings::property]]
+    const sp<Size>& layoutSize() const;
+//  [[script::bindings::property]]
+    void setLayoutSize(sp<Size> layoutSize);
 
 //  [[script::bindings::property]]
     const std::wstring& text() const;
@@ -65,6 +62,8 @@ public:
 
     [[deprecated]]
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
+
+    virtual bool update(uint64_t timestamp) override;
 
 //[[plugin::builder]]
     class BUILDER : public Builder<Text> {
@@ -122,6 +121,8 @@ private:
 
     GlyphContents makeGlyphs(GlyphMaker& gm, const std::wstring& text);
 
+    float getLayoutBoundary() const;
+
     class Content : public RenderableBatch {
     public:
         Content();
@@ -137,7 +138,7 @@ private:
     private:
         SafeVar<Vec3> _position;
         std::vector<sp<RenderObject>> _render_objects;
-        std::vector<Renderable::State> _render_object_states;
+        std::vector<Renderable::StateBits> _render_object_states;
 
         bool _needs_reload;
     };
@@ -148,7 +149,6 @@ private:
     sp<LayerContext> _layer_context;
     sp<StringVar> _text;
     float _text_scale;
-    sp<LayoutParam> _layout_param;
     sp<GlyphMaker> _glyph_maker;
 
     std::vector<sp<Glyph>> _glyphs;
@@ -162,8 +162,8 @@ private:
 
     sp<ModelLoader> _model_loader;
 
-    SafePtr<Size> _size;
-    V3 _layout_size;
+    sp<Size> _size;
+    sp<Size> _layout_size;
 
     sp<Content> _content;
 };

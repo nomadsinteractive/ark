@@ -5,20 +5,20 @@
 	<render-object id="f001" type="3" size="200, 120" render-layer="@pre:rl003"/>
 	<render-object id="f002" type="4" size="200, 120" render-layer="@pre:rl003"/>
 
-	<view id="@root_view" class="view-group" size="540, 960" layout="vertical(left)">
+	<view id="@root_view" size="540, 960" layout="vertical(left)">
 		<label text="This is some text" render-layer="@pre:rl002" text-scale="0.5" style="display: block"/>
 		<label text="This is some other text" render-layer="@pre:rl001" text-scale="0.6" style="display: block; margin-top: 50"/>
 		<label text="This are some buttonz" render-layer="@pre:rl002" text-scale="0.5" style="display: block; margin-top: 50"/>
-		<view-group layout="vertical(left)" size="match_parent, wrap_content">
-			<view-group size="match_parent, 200" layout="horizontal(center)">
+		<view layout="vertical(left)" size="match_parent, wrap_content">
+			<view size="match_parent, 200" layout="horizontal(center)">
 				<button background="@f001" style="onclick: $on_red_clicked">
 					<state name="pushing" background="@f002"/>
 				</button>
-			</view-group>
-			<view-group size="match_parent, 200" layout="horizontal(center)">
+			</view>
+			<view size="match_parent, 200" layout="horizontal(center)">
 				<label text="This is some other text" render-layer="@pre:rl001" text-scale="0.6" style="display: block; margin-top: 50"/>
-			</view-group>
-		</view-group>
+			</view>
+		</view>
 	</view>
 	<arena id="main" view="@root_view">
 		<render-layer ref="@pre:rl001"/>

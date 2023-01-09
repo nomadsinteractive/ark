@@ -49,7 +49,7 @@ public:
 
     void renderRequest(const V3& position);
 
-    void add(const sp<Renderable>& renderable, const sp<Boolean>& disposed = nullptr);
+    void add(sp<Renderable> renderable, sp<Boolean> disposed = nullptr);
 //  [[script::bindings::auto]]
     void addRenderObject(const sp<RenderObject>& renderObject, const sp<Boolean>& disposed = nullptr);
 //  [[script::bindings::auto]]

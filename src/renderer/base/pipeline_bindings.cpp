@@ -1,7 +1,7 @@
 #include "renderer/base/pipeline_bindings.h"
 
 #include "core/base/enums.h"
-#include "core/util/conversions.h"
+#include "core/util/string_convert.h"
 
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/pipeline_input.h"
@@ -135,7 +135,7 @@ PipelineBindings::Parameters PipelineBindings::Parameters::BUILDER::build(const 
     return Parameters(scissor ? Optional<Rect>(_render_controller->renderEngine()->toRendererScissor(Rect(scissor->val()))) : Optional<Rect>(), _traits, _pipeline_bindings_flags);
 }
 
-template<> ARK_API PipelineBindings::Flag Conversions::to<String, PipelineBindings::Flag>(const String& str)
+template<> ARK_API PipelineBindings::Flag StringConvert::to<String, PipelineBindings::Flag>(const String& str)
 {
     int32_t flag = 0;
     for(const String& i : str.split('|'))
@@ -217,7 +217,7 @@ PipelineBindings::TraitStencilTestSeparate PipelineBindings::FragmentTraitMeta::
     return face;
 }
 
-template<> ARK_API PipelineBindings::TrailType Conversions::to<String, PipelineBindings::TrailType>(const String& str)
+template<> ARK_API PipelineBindings::TrailType StringConvert::to<String, PipelineBindings::TrailType>(const String& str)
 {
     if(str == "cull_face_test")
         return PipelineBindings::TRAIT_TYPE_CULL_FACE_TEST;
@@ -231,7 +231,7 @@ template<> ARK_API PipelineBindings::TrailType Conversions::to<String, PipelineB
     return PipelineBindings::TRAIT_TYPE_STENCIL_TEST;
 }
 
-template<> ARK_API PipelineBindings::CompareFunc Conversions::to<String, PipelineBindings::CompareFunc>(const String& str)
+template<> ARK_API PipelineBindings::CompareFunc StringConvert::to<String, PipelineBindings::CompareFunc>(const String& str)
 {
     if(str == "always")
         return PipelineBindings::COMPARE_FUNC_ALWAYS;
@@ -251,7 +251,7 @@ template<> ARK_API PipelineBindings::CompareFunc Conversions::to<String, Pipelin
     return PipelineBindings::COMPARE_FUNC_GEQUAL;
 }
 
-template<> ARK_API PipelineBindings::StencilFunc Conversions::to<String, PipelineBindings::StencilFunc>(const String& str)
+template<> ARK_API PipelineBindings::StencilFunc StringConvert::to<String, PipelineBindings::StencilFunc>(const String& str)
 {
     if(str == "keep")
         return PipelineBindings::STENCIL_FUNC_KEEP;
@@ -271,7 +271,7 @@ template<> ARK_API PipelineBindings::StencilFunc Conversions::to<String, Pipelin
     return PipelineBindings::STENCIL_FUNC_INVERT;
 }
 
-template<> ARK_API PipelineBindings::FrontFace Conversions::to<String, PipelineBindings::FrontFace>(const String& str)
+template<> ARK_API PipelineBindings::FrontFace StringConvert::to<String, PipelineBindings::FrontFace>(const String& str)
 {
     if(str == "ccw")
         return PipelineBindings::FRONT_FACE_COUTER_CLOCK_WISE;
@@ -279,7 +279,7 @@ template<> ARK_API PipelineBindings::FrontFace Conversions::to<String, PipelineB
     return PipelineBindings::FRONT_FACE_CLOCK_WISE;
 }
 
-template<> ARK_API PipelineBindings::FrontFaceType Conversions::to<String, PipelineBindings::FrontFaceType>(const String& str)
+template<> ARK_API PipelineBindings::FrontFaceType StringConvert::to<String, PipelineBindings::FrontFaceType>(const String& str)
 {
     if(str == "front")
         return PipelineBindings::FRONT_FACE_TYPE_FRONT;
@@ -304,7 +304,7 @@ template<> ARK_API void Enums<PipelineBindings::BlendFactor>::initialize(std::ma
     enums["const_alpha"] = PipelineBindings::BLEND_FACTOR_CONST_ALPHA;
 }
 
-template<> ARK_API PipelineBindings::BlendFactor Conversions::to<String, PipelineBindings::BlendFactor>(const String& str)
+template<> ARK_API PipelineBindings::BlendFactor StringConvert::to<String, PipelineBindings::BlendFactor>(const String& str)
 {
     return Enums<PipelineBindings::BlendFactor>::instance().ensureEnum(str);
 }

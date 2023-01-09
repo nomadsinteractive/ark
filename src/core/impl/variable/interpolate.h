@@ -7,7 +7,7 @@
 #include "core/types/implements.h"
 #include "core/types/shared_ptr.h"
 #include "core/util/holder_util.h"
-#include "core/util/variable_util.h"
+#include "core/util/updatable_util.h"
 
 namespace ark {
 
@@ -22,7 +22,7 @@ public:
     }
 
     virtual bool update(uint64_t timestamp) override {
-        bool dirty = VariableUtil::update(timestamp, _a, _b);
+        bool dirty = UpdatableUtil::update(timestamp, _a, _b);
         if(dirty) {
             _a_freezed = _a->val();
             _delta_freezed = _b->val() - _a_freezed;

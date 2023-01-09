@@ -5,19 +5,19 @@
 #include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
 #include "core/types/implements.h"
-#include "core/util/variable_util.h"
+#include "core/util/updatable_util.h"
 
 namespace ark {
 
-template<typename T> class Periodic : public Variable<T>::Updatable, public Wrapper<Variable<T>>, public Implements<Periodic<T>, Variable<T>, Wrapper<Variable<T>>> {
+template<typename T> class Periodic : public Variable<T>::ByUpdate, public Wrapper<Variable<T>>, public Implements<Periodic<T>, Variable<T>, Wrapper<Variable<T>>> {
 public:
     Periodic(sp<Variable<T>> delegate, sp<Numeric> interval, sp<Numeric> duration)
-        : Variable<T>::Updatable(delegate->val()), Wrapper<Variable<T>>(std::move(delegate)), _interval(std::move(interval)), _duration(std::move(duration)),
+        : Variable<T>::ByUpdate(delegate->val()), Wrapper<Variable<T>>(std::move(delegate)), _interval(std::move(interval)), _duration(std::move(duration)),
           _next_update_time(_duration->val() + _interval->val()) {
     }
 
     virtual bool doUpdate(uint64_t timestamp, T& value) override {
-        if(!VariableUtil::update(timestamp, this->_wrapped, _interval, _duration))
+        if(!UpdatableUtil::update(timestamp, this->_wrapped, _interval, _duration))
             return false;
 
         float d = _duration->val();

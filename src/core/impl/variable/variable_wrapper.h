@@ -16,7 +16,7 @@ namespace ark {
 template<typename T> class VariableWrapper final : public Variable<T>, public Wrapper<Variable<T>>, Implements<VariableWrapper<T>, Variable<T>, Wrapper<Variable<T>>> {
 public:
     VariableWrapper(const sp<Variable<T>>& delegate) noexcept
-        : Wrapper<Variable<T>>(Null::toSafe(delegate)), _variable_impl(nullptr) {
+        : Wrapper<Variable<T>>(Null::toSafePtr(delegate)), _variable_impl(nullptr) {
     }
     VariableWrapper(T value) noexcept
         : Wrapper<Variable<T>>(sp<typename Variable<T>::Impl>::make(value)), _variable_impl(static_cast<typename Variable<T>::Impl*>(this->_wrapped.get())) {
@@ -45,7 +45,7 @@ public:
     void set(const sp<Variable<T>>& delegate) {
         deferedUnref();
         DCHECK(delegate.get() != this, "Recursive delegate being set");
-        this->_wrapped = Null::toSafe(delegate);
+        this->_wrapped = Null::toSafePtr(delegate);
         _timestamp.setDirty();
     }
 

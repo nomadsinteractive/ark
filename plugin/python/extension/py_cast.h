@@ -48,7 +48,7 @@ public:
 
     template<typename T> static T ensureCppObject(PyObject* obj) {
         Optional<T> opt = toCppObject_sfinae<T>(obj, nullptr);
-        DCHECK(opt, "Casting \"%s\" to class \"%s\" failed", Py_TYPE(object)->tp_name, Class::getClass<T>()->name());
+        DCHECK(opt, "Casting \"%s\" to class \"%s\" failed", Py_TYPE(obj)->tp_name, Class::getClass<T>()->name());
         return opt.value();
     }
 

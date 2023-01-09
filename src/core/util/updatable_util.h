@@ -1,5 +1,5 @@
-#ifndef ARK_CORE_UTIL_VARIABLE_UTIL_H_
-#define ARK_CORE_UTIL_VARIABLE_UTIL_H_
+#ifndef ARK_CORE_UTIL_UPDATABLE_UTIL_H_
+#define ARK_CORE_UTIL_UPDATABLE_UTIL_H_
 
 #include <utility>
 
@@ -7,7 +7,7 @@
 
 namespace ark {
 
-class ARK_API VariableUtil {
+class ARK_API UpdatableUtil {
 public:
     template<typename T, typename... VARS> static bool update(uint64_t timestamp, T& var, VARS&&... vars) {
         bool dirty = update_sfinae(var, timestamp, nullptr);

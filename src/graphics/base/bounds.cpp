@@ -1,7 +1,7 @@
 #include "graphics/base/bounds.h"
 
 #include "core/util/math.h"
-#include "core/util/variable_util.h"
+#include "core/util/updatable_util.h"
 
 #include "graphics/base/size.h"
 
@@ -34,7 +34,7 @@ const sp<Size>& Bounds::size()
 
 bool Bounds::update(uint64_t timestamp)
 {
-    return VariableUtil::update(timestamp, _center, _size);
+    return UpdatableUtil::update(timestamp, _center, _size);
 }
 
 }

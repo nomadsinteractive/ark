@@ -60,7 +60,7 @@ bool Font::TextSize::operator <(const TextSize& other) const
     return _value < other._value || _unit < other._unit;
 }
 
-template<> ARK_API Font::TextSize Conversions::to<String, Font::TextSize>(const String& str)
+template<> ARK_API Font::TextSize StringConvert::to<String, Font::TextSize>(const String& str)
 {
     return Font::TextSize(str);
 }

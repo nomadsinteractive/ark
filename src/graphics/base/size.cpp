@@ -5,7 +5,7 @@
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/util/bean_utils.h"
 #include "core/util/holder_util.h"
-#include "core/util/variable_util.h"
+#include "core/util/updatable_util.h"
 
 #include "graphics/base/v2.h"
 
@@ -123,7 +123,7 @@ const sp<Vec3Impl>& Size::impl() const
     return _impl;
 }
 
-template<> ARK_API sp<Size> Null::ptr()
+template<> ARK_API sp<Size> Null::safePtr()
 {
     return sp<Size>::make();
 }

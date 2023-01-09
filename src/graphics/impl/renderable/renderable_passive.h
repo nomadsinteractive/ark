@@ -11,8 +11,8 @@ public:
 [[deprecated]]
     RenderablePassive(sp<RenderObject> renderObject);
 
-    virtual State updateState(const RenderRequest& renderRequest) override;
-    virtual Snapshot snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest, const V3& postTranslate, State state) override;
+    virtual StateBits updateState(const RenderRequest& renderRequest) override;
+    virtual Snapshot snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest, const V3& postTranslate, StateBits state) override;
 
     void requestUpdate(const V3& position);
 

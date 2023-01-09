@@ -1,7 +1,7 @@
 #include "graphics/impl/boolean/out_of_bounds.h"
 
 #include "core/base/bean_factory.h"
-#include "core/util/variable_util.h"
+#include "core/util/updatable_util.h"
 
 #include "graphics/base/bounds.h"
 #include "graphics/base/v3.h"
@@ -23,7 +23,7 @@ bool OutOfBounds::val()
 
 bool OutOfBounds::update(uint64_t timestamp)
 {
-    return VariableUtil::update(timestamp, _position, _bounds);
+    return UpdatableUtil::update(timestamp, _position, _bounds);
 }
 
 OutOfBounds::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

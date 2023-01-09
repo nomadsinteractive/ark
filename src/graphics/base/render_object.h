@@ -110,8 +110,8 @@ public:
     bool isDisposed() const;
     bool isVisible() const;
 
-    virtual State updateState(const RenderRequest& renderRequest) override;
-    virtual Renderable::Snapshot snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest, const V3& postTranslate, State state) override;
+    virtual StateBits updateState(const RenderRequest& renderRequest) override;
+    virtual Renderable::Snapshot snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest, const V3& postTranslate, StateBits state) override;
 
 //  [[plugin::builder]]
     class BUILDER : public Builder<RenderObject> {
@@ -144,7 +144,7 @@ private:
 
     Timestamp _timestamp;
 
-    friend class RendererByRenderObject;
+    friend class RenderObjectWithLayer;
 };
 
 }

@@ -1,20 +1,32 @@
 #ifndef ARK_APP_VIEW_VIEW_H_
 #define ARK_APP_VIEW_VIEW_H_
 
+#include <vector>
+
+#include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
+#include "core/inf/builder.h"
 #include "core/inf/holder.h"
+#include "core/inf/updatable.h"
+#include "core/types/implements.h"
+#include "core/types/safe_ptr.h"
+#include "core/types/safe_var.h"
 
-#include "graphics/base/rect.h"
 #include "graphics/inf/block.h"
+#include "graphics/inf/renderer.h"
+#include "graphics/inf/renderable.h"
 #include "graphics/forwarding.h"
 
 #include "app/forwarding.h"
-#include "app/view/layout_param.h"
+#include "app/inf/layout_event_listener.h"
+#include "app/inf/layout.h"
 
 namespace ark {
 
-class ARK_API View : public Block, public Holder {
+//[[script::bindings::extends(Renderer)]]
+class ARK_API View : public Block, public Renderer, public Renderer::Group, public LayoutEventListener, public Holder,
+                     Implements<View, Block, Renderer, Renderer::Group, LayoutEventListener, Holder> {
 public:
     enum State {
         STATE_DEFAULT = 0,
@@ -24,34 +36,47 @@ public:
         STATE_COUNT = 4
     };
 
-private:
-    template<typename T> class LayoutValueBuilder {
-    public:
-        LayoutValueBuilder(BeanFactory& factory, const String& style)
-            : _factory(factory), _value(style) {
-        }
-
-        T build(const Scope& args) {
-            if(_value.startsWith("$"))
-                return static_cast<T>(_factory.ensure<Integer>(_value, args)->val());
-            return Strings::parse<T>(_value);
-        }
-
-    private:
-        BeanFactory _factory;
-        String _value;
-    };
-
 public:
-    View(sp<LayoutParam> layoutParam);
-    View(const sp<Size>& size);
+    View(const sp<LayoutParam>& layoutParam, sp<RenderObjectWithLayer> background = nullptr, sp<Text> text = nullptr, sp<Layout> layout = nullptr, sp<LayoutV3> layoutV3 = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> disposed = nullptr);
+    View(sp<Size> size);
+    ~View() override;
 
     virtual const sp<Size>& size() override;
 
     virtual void traverse(const Visitor& visitor) override;
 
-    const SafePtr<LayoutParam>& layoutParam() const;
-    void setLayoutParam(const sp<LayoutParam>& layoutParam);
+    virtual void render(RenderRequest& renderRequest, const V3& position) override;
+    virtual void addRenderer(const sp<Renderer>& renderer) override;
+
+    virtual bool onEvent(const Event& event, float x, float y, bool ptin) override;
+
+    void addRenderObjectWithLayer(sp<RenderObjectWithLayer> ro, bool isBackground);
+
+    void updateLayout();
+    void updateTextLayout(uint64_t timestamp);
+
+    const sp<LayoutV3::Node>& layoutNode() const;
+    const sp<LayoutV3::Node>& newLayoutNode();
+
+//  [[script::bindings::property]]
+    const sp<Boolean>& visible() const;
+//  [[script::bindings::property]]
+    void setVisbile(sp<Boolean> visible);
+
+//  [[script::bindings::property]]
+    const sp<Boolean>& disposed() const;
+//  [[script::bindings::property]]
+    void setDisposed(sp<Boolean> disposed);
+
+//  [[script::bindings::property]]
+    const sp<LayoutParam>& layoutParam() const;
+//  [[script::bindings::property]]
+    void setLayoutParam(sp<LayoutParam> layoutParam);
+
+//  [[script::bindings::auto]]
+    void addView(sp<View> view);
+
+    void setParent(const View& view);
 
     State state() const;
     void addState(State state);
@@ -72,40 +97,33 @@ public:
 
     bool dispatchEvent(const Event& event, bool ptin);
 
-//  [[plugin::style("display")]]
-    class STYLE_DISPLAY : public Builder<Renderer> {
+//  [[plugin::builder]]
+    class BUILDER : public Builder<View> {
     public:
-        STYLE_DISPLAY(BeanFactory& factory, const sp<Builder<Renderer>>& delegate, const String& style);
+        BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Renderer> build(const Scope& args) override;
+        virtual sp<View> build(const Scope& args) override;
 
     private:
-        sp<Builder<Renderer>> _delegate;
-        LayoutValueBuilder<LayoutParam::Display> _display;
+        BeanFactory _factory;
+        document _manifest;
+
+        SafePtr<Builder<Layout>> _layout;
+        SafePtr<Builder<LayoutV3>> _layout_v3;
+        SafePtr<Builder<RenderObjectWithLayer>> _background;
+        SafePtr<Builder<Text>> _text;
+        sp<Builder<LayoutParam>> _layout_param;
     };
 
-//  [[plugin::style("gravity")]]
-    class STYLE_GRAVITY : public Builder<Renderer> {
+//  [[plugin::builder("view")]]
+    class BUILDER_VIEW : public Builder<Renderer> {
     public:
-        STYLE_GRAVITY(BeanFactory& factory, const sp<Builder<Renderer>>& delegate, const String& style);
+        BUILDER_VIEW(BeanFactory& factory, const document& manifest);
 
         virtual sp<Renderer> build(const Scope& args) override;
 
     private:
-        sp<Builder<Renderer>> _delegate;
-        LayoutValueBuilder<LayoutParam::Gravity> _gravity;
-    };
-
-//  [[plugin::style("size")]]
-    class STYLE_SIZE : public Builder<Renderer> {
-    public:
-        STYLE_SIZE(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
-
-        virtual sp<Renderer> build(const Scope& args) override;
-
-    private:
-        sp<Builder<Renderer>> _delegate;
-        sp<Builder<Size>> _size;
+        BUILDER _impl;
     };
 
 //  [[plugin::style("layout-weight")]]
@@ -280,17 +298,89 @@ public:
 
     };
 
-protected:
-    virtual bool fireOnEnter();
-    virtual bool fireOnLeave();
-    virtual bool fireOnPush();
-    virtual bool fireOnRelease();
-    virtual bool fireOnClick();
+    struct Stub : public Updatable {
+        Stub(const sp<LayoutParam>& layoutParam, sp<ViewHierarchy> viewHierarchy, sp<Boolean> visible, sp<Boolean> disposed);
 
-    virtual bool fireOnMove(const Event& event);
+        virtual bool update(uint64_t timestamp) override;
+
+        void dispose();
+
+        bool isVisible() const;
+        bool isDisposed() const;
+
+        V2 getTopViewOffsetPosition() const;
+        sp<LayoutV3::Node> getTopViewLayoutNode() const;
+
+        const sp<ViewHierarchy>& viewHierarchy() const;
+        ViewHierarchy& ensureViewHierarchy();
+
+        sp<LayoutParam> _layout_param;
+        sp<LayoutV3::Node> _layout_node;
+
+        SafeVar<Boolean> _visible;
+        SafeVar<Boolean> _disposed;
+
+        sp<Stub> _parent_stub;
+        bool _top_view;
+    };
+
+private:
+    bool fireOnEnter();
+    bool fireOnLeave();
+    bool fireOnPush();
+    bool fireOnRelease();
+    bool fireOnClick();
+
+    bool fireOnMove(const Event& event);
+
+    void markAsTopView();
+
+    sp<Stub> getLayoutViewStub() const;
+
+    class RenderableViewSlot : public Renderable {
+    public:
+        RenderableViewSlot(const View& view, sp<Renderable> renderable, bool isBackground);
+
+        virtual StateBits updateState(const RenderRequest& renderRequest) override;
+        virtual Snapshot snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest, const V3& postTranslate, StateBits state) override;
+
+    private:
+        const View& _view;
+        sp<Stub> _view_stub;
+        sp<Renderable> _renderable;
+        bool _is_background;
+    };
+
+    class IsDisposed : public Boolean {
+    public:
+        IsDisposed(sp<Stub> stub);
+
+        virtual bool update(uint64_t timestamp) override;
+        virtual bool val() override;
+
+    private:
+        sp<Stub> _stub;
+    };
+
+    class LayoutPosition : public Vec3 {
+    public:
+        LayoutPosition(sp<Stub> stub, bool isBackground, bool isCenter);
+
+        virtual bool update(uint64_t timestamp) override;
+        virtual V3 val() override;
+
+    private:
+        sp<Stub> _stub;
+
+        bool _is_background;
+        bool _is_center;
+    };
 
 protected:
-    SafePtr<LayoutParam> _layout_param;
+    sp<Stub> _stub;
+    sp<Updatable> _updatable;
+    sp<RenderObjectWithLayer> _background;
+    sp<Text> _text;
 
     sp<State> _state;
     sp<Runnable> _on_enter;
@@ -300,7 +390,10 @@ protected:
     sp<Runnable> _on_release;
 
     sp<EventListener> _on_move;
+    sp<IsDisposed> _is_disposed;
 
+    friend class Arena;
+    friend class ViewHierarchy;
 };
 
 }

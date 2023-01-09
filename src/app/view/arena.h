@@ -10,22 +10,19 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
+#include "graphics/inf/renderer.h"
 
 #include "app/base/resource_loader.h"
 #include "app/forwarding.h"
 #include "app/inf/event_listener.h"
-#include "app/view/view_group.h"
 
 namespace ark {
 
 //[[script::bindings::holder]]
 class ARK_API Arena final : public EventListener, public Renderer, public Renderer::Group, public Holder {
 public:
-    Arena(const sp<ViewGroup>& view, const sp<ResourceLoader>& resourceLoader);
+    Arena(sp<View> view, sp<ResourceLoader> resourceLoader);
     ~Arena() override;
-
-//  [[script::bindings::meta(expire())]]
-//  [[script::bindings::meta(isExpired())]]
 
 //  [[script::bindings::auto]]
     virtual void addRenderer(const sp<Renderer>& renderer) override;
@@ -68,9 +65,12 @@ public:
     void addRenderLayer(sp<Renderer> renderLayer);
 
 //  [[script::bindings::property]]
-    void setView(const sp<Renderer>& view);
+    void setView(sp<View> view);
 //  [[script::bindings::property]]
-    const sp<ViewGroup>& view() const;
+    const sp<View>& view() const;
+
+//  [[script::bindings::auto]]
+    void addView(sp<View> view);
 
 //  [[plugin::builder]]
     class BUILDER : public Builder<Arena> {
@@ -83,16 +83,18 @@ public:
         BeanFactory _factory;
         document _manifest;
         SafePtr<Builder<ResourceLoader>> _resource_loader;
-        SafePtr<Builder<Layout>> _layout;
-        sp<Builder<LayoutParam>> _layout_param;
-        String _background;
-        String _view;
+//        SafePtr<Builder<Layout>> _layout;
+        SafePtr<Builder<View>> _view;
+//        sp<Builder<LayoutParam>> _layout_param;
+//        String _background;
+//        String _view;
     };
 
 private:
-    op<EventListenerList> _event_listeners;
-    sp<ViewGroup> _view_group;
+    sp<View> _view;
     sp<ResourceLoader> _resource_loader;
+    op<EventListenerList> _event_listeners;
+
     DList<Renderer> _layers;
     DList<Renderer> _render_layers;
 };

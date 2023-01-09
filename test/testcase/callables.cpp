@@ -2,7 +2,7 @@
 
 #include "core/base/callable.h"
 #include "core/base/library.h"
-#include "core/util/conversions.h"
+#include "core/util/string_convert.h"
 
 #include "test/base/test_case.h"
 
@@ -16,11 +16,11 @@ int test(int i) {
 class CallablesTestCase : public TestCase {
 public:
     virtual int launch() override {
-        if(Conversions::to<String, uint32_t>("16") != 16)
+        if(StringConvert::to<String, uint32_t>("16") != 16)
             return 1;
-        if(Conversions::to<String, int32_t>("7") != 7)
+        if(StringConvert::to<String, int32_t>("7") != 7)
             return 2;
-        if(Conversions::to<String, int16_t>("3") != 3)
+        if(StringConvert::to<String, int16_t>("3") != 3)
             return 3;
 
         Library library;

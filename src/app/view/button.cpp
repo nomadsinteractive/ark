@@ -18,8 +18,8 @@
 
 namespace ark {
 
-Button::Button(const sp<Renderer>& foreground, const sp<Renderer>& background, const sp<Size>& block, LayoutParam::Gravity gravity)
-    : View(block), _foreground(new RendererWithState(foreground, _state)), _background(new RendererWithState(background, _state)), _gravity(gravity)
+Button::Button(sp<Renderer> foreground, sp<Renderer> background, sp<Size> size, LayoutParam::Gravity gravity)
+    : View(std::move(size)), _foreground(new RendererWithState(std::move(foreground), _state)), _background(new RendererWithState(std::move(background), _state)), _gravity(gravity)
 {
 }
 
@@ -39,7 +39,7 @@ void Button::render(RenderRequest& renderRequest, const V3& position)
             const sp<Size>& size = block ? static_cast<const sp<Size>&>(block->size()) : sp<Size>::null();
             if(size)
             {
-                Rect available(position.x(), position.y(), position.x() + _layout_param->size()->widthAsFloat(), position.y() + _layout_param->size()->heightAsFloat());
+                Rect available(position.x(), position.y(), position.x() + _stub->_layout_param->size()->widthAsFloat(), position.y() + _stub->_layout_param->size()->heightAsFloat());
                 const V2 pos = LayoutUtil::place(_gravity, V2(size->widthAsFloat(), size->heightAsFloat()), available);
                 fg->render(renderRequest, V3(pos, 0));
             }
@@ -74,10 +74,10 @@ sp<Button> Button::BUILDER::build(const Scope& args)
 {
     sp<Renderer> foreground = _foreground->build(args);
     sp<Renderer> background = _background->build(args);
-    const sp<Size> builtSize = _size->build(args);
+    sp<Size> builtSize = _size->build(args);
     const String style = Documents::getAttribute(_manifest, Constants::Attributes::STYLE);
     sp<Size> size = builtSize ? builtSize : static_cast<const sp<Size>&>(RendererType::size(background));
-    sp<Button> button = sp<Button>::make(std::move(foreground), std::move(background), size, _gravity ? Strings::parse<LayoutParam::Gravity>(_gravity) : LayoutParam::GRAVITY_CENTER);
+    sp<Button> button = sp<Button>::make(std::move(foreground), std::move(background), std::move(size), _gravity ? Strings::parse<LayoutParam::Gravity>(_gravity) : LayoutParam::GRAVITY_CENTER);
     loadStatus(button, _manifest, _factory, args);
     if(style)
         _factory.decorate<Renderer>(sp<Builder<Renderer>::Prebuilt>::make(button), style)->build(args);

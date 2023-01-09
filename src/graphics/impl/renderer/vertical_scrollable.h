@@ -11,7 +11,7 @@
 #include "graphics/inf/renderer.h"
 #include "graphics/util/tiles.h"
 
-#include "app/view/layout_hierarchy.h"
+#include "app/view/view_hierarchy.h"
 
 namespace ark {
 

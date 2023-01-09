@@ -51,7 +51,7 @@ sp<RenderCommand> RCCDrawElements::compose(const RenderRequest& renderRequest, R
         size_t offset = 0;
         for(const Renderable::Snapshot& i : snapshot._items)
         {
-            if(i.getState(Renderable::RENDERABLE_STATE_DIRTY))
+            if(i._state.hasState(Renderable::RENDERABLE_STATE_DIRTY))
             {
                 VertexWriter writer = buf.makeVertexWriter(renderRequest, verticesLength, offset);
                 i._model->writeRenderable(writer, i);

@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "core/base/api.h"
+#include "core/types/optional.h"
 
 namespace ark {
 
@@ -44,6 +45,9 @@ public:
     String replace(const String& text, const String& replacement) const;
     String replace(const std::regex& pattern, const std::function<String(Array<String>& matches)>& replacer) const;
     String toLower() const;
+
+    std::pair<String, Optional<String>> cut(char sep) const;
+    std::pair<Optional<String>, String> rcut(char sep) const;
 
     void insert(size_type pos, const String& str);
 

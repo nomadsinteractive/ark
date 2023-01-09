@@ -4,14 +4,15 @@
 
 #include "core/inf/variable.h"
 #include "core/util/bean_utils.h"
-#include "core/util/conversions.h"
+#include "core/util/string_convert.h"
 #include "core/util/strings.h"
+#include "core/util/updatable_util.h"
 
 #include "graphics/base/size.h"
 
 namespace ark {
 
-template<> ARK_API LayoutParam::Display Conversions::to<String, LayoutParam::Display>(const String& str)
+template<> ARK_API LayoutParam::Display StringConvert::to<String, LayoutParam::Display>(const String& str)
 {
     if(str == "float")
         return LayoutParam::DISPLAY_FLOAT;
@@ -20,19 +21,25 @@ template<> ARK_API LayoutParam::Display Conversions::to<String, LayoutParam::Dis
     return LayoutParam::DISPLAY_BLOCK;
 }
 
-LayoutParam::LayoutParam(const sp<Size>& size, LayoutParam::Display display, Gravity gravity, float grow)
-    : _size(Null::toSafe(size)), _margins(nullptr), _display(display), _gravity(gravity), _flex_grow(grow)
+LayoutParam::LayoutParam(const sp<Size>& size, Display display, Gravity gravity, float grow)
+    : _size(Null::toSafePtr(size)), _margins(nullptr), _display(display), _gravity(gravity), _flex_grow(grow)
 {
 }
 
 LayoutParam::LayoutParam(Length width, Length height, FlexDirection flexDirection, FlexWrap flexWrap, JustifyContent justifyContent, Align alignItems, Align alignSelf,
-                         Align alignContent, Display display, float flexGrow)
-    : _width(width), _height(height), _flex_direction(flexDirection), _flex_wrap(flexWrap), _justify_content(justifyContent), _align_items(alignItems), _align_self(alignSelf),
-      _align_content(alignContent), _display(display), _flex_grow(flexGrow)
+                         Align alignContent, Display display, float flexGrow, Length flexBasis, sp<Vec4> margins)
+    : _width_type(width._type), _height_type(height._type), _size(sp<Size>::make(width._value, height._value)), _size_min(nullptr, V3(NAN)), _size_max(nullptr, V3(NAN)),
+      _flex_direction(flexDirection), _flex_wrap(flexWrap), _justify_content(justifyContent), _align_items(alignItems), _align_self(alignSelf), _align_content(alignContent),
+      _display(display), _flex_grow(flexGrow), _flex_basis(std::move(flexBasis)), _margins(std::move(margins))
 {
 }
 
-float LayoutParam::calcLayoutWidth(float available)
+bool LayoutParam::update(uint64_t timestamp)
+{
+    return _timestamp.update(timestamp) || UpdatableUtil::update(timestamp, _size, _size_min, _size_max, _margins, _paddings, _flex_basis);
+}
+
+float LayoutParam::calcLayoutWidth(float available) const
 {
     const V4 margins = _margins.val();
     if(isMatchParent(_size->widthAsFloat()))
@@ -43,7 +50,7 @@ float LayoutParam::calcLayoutWidth(float available)
     return _size->widthAsFloat() + margins.w() + margins.y();
 }
 
-float LayoutParam::calcLayoutHeight(float available)
+float LayoutParam::calcLayoutHeight(float available) const
 {
     const V4 margins = _margins.val();
     if(isMatchParent(_size->heightAsFloat()))
@@ -86,14 +93,9 @@ void LayoutParam::setContentHeight(float contentHeight)
     _size->setHeight(contentHeight);
 }
 
-const SafePtr<Size>& LayoutParam::size() const
+const sp<Size>& LayoutParam::size() const
 {
     return _size;
-}
-
-void LayoutParam::setSize(const sp<Size>& size)
-{
-    _size = size;
 }
 
 const sp<Boolean>& LayoutParam::stopPropagation() const
@@ -126,6 +128,27 @@ void LayoutParam::setGravity(LayoutParam::Gravity gravity)
     _gravity = gravity;
 }
 
+LayoutParam::LengthType LayoutParam::flexBasisType() const
+{
+    return _flex_basis._type;
+}
+
+void LayoutParam::setFlexBasisType(LengthType basisType)
+{
+    _flex_basis._type = basisType;
+    _timestamp.setDirty();
+}
+
+sp<Numeric> LayoutParam::flexBasis() const
+{
+    return _flex_basis._value.ensure();
+}
+
+void LayoutParam::setFlexBasis(sp<Numeric> flexBasis)
+{
+    _flex_basis._value = std::move(flexBasis);
+}
+
 float LayoutParam::flexGrow() const
 {
     return _flex_grow;
@@ -141,14 +164,46 @@ bool LayoutParam::hasFlexGrow() const
     return _flex_grow != 0.0f;
 }
 
-const LayoutParam::Length& LayoutParam::width() const
+sp<Numeric> LayoutParam::width() const
 {
-    return _width;
+    return _size->width();
 }
 
-const LayoutParam::Length& LayoutParam::height() const
+void LayoutParam::setWidth(sp<Numeric> width)
 {
-    return _height;
+    _size->setWidth(std::move(width));
+}
+
+LayoutParam::LengthType LayoutParam::widthType() const
+{
+    return _width_type;
+}
+
+void LayoutParam::setWidthType(LengthType widthType)
+{
+    _width_type = widthType;
+    _timestamp.setDirty();
+}
+
+sp<Numeric> LayoutParam::height() const
+{
+    return _size->height();
+}
+
+void LayoutParam::setHeight(sp<Numeric> height)
+{
+    _size->setHeight(std::move(height));
+}
+
+LayoutParam::LengthType LayoutParam::heightType() const
+{
+    return _height_type;
+}
+
+void LayoutParam::setHeightType(LengthType heightType)
+{
+    _height_type = heightType;
+    _timestamp.setDirty();
 }
 
 LayoutParam::FlexDirection LayoutParam::flexDirection() const
@@ -242,8 +297,12 @@ bool LayoutParam::isWrapContent(float unit)
 }
 
 LayoutParam::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _width(Documents::getAttributeOptional<Length>(manifest, "layout-width")), _height(Documents::getAttributeOptional<Length>(manifest, "layout-height")),
-      _size(factory.getBuilder<Size>(manifest, Constants::Attributes::SIZE)), _display(Documents::getAttribute<Display>(manifest, "display", LayoutParam::DISPLAY_BLOCK))
+    : _width(Documents::getAttributeOptional<Length>(manifest, "width")), _height(Documents::getAttributeOptional<Length>(manifest, "height")),
+      _flex_direction(Documents::getAttribute<FlexDirection>(manifest, "flex-direction", FLEX_DIRECTION_ROW)), _flex_wrap(Documents::getAttribute<FlexWrap>(manifest, "flex-wrap", FLEX_WRAP_NOWRAP)),
+      _justify_content(Documents::getAttribute<JustifyContent>(manifest, "justify-content", JUSTIFY_CONTENT_FLEX_START)), _align_items(Documents::getAttribute<Align>(manifest, "align-items", ALIGN_STRETCH)),
+      _align_self(Documents::getAttribute<Align>(manifest, "align-self", ALIGN_AUTO)), _align_content(Documents::getAttribute<Align>(manifest, "align-content", ALIGN_FLEX_START)),
+      _size(factory.getBuilder<Size>(manifest, Constants::Attributes::SIZE)), _display(Documents::getAttribute<Display>(manifest, "display", LayoutParam::DISPLAY_BLOCK)),
+      _flex_grow(Documents::getAttribute<float>(manifest, "flex-grow", 0.0)), _margins(factory.getBuilder<Vec4>(manifest, "margins"))
 {
 }
 
@@ -251,19 +310,18 @@ sp<LayoutParam> LayoutParam::BUILDER::build(const Scope& args)
 {
     if(_size)
         return sp<LayoutParam>::make(_size->build(args), _display);
-
     if(_width || _height)
-        return sp<LayoutParam>::make(_size->build(args), _display);
-
+        return sp<LayoutParam>::make(_width ? _width.value() : Length(), _height ? _height.value() : Length(), _flex_direction, _flex_wrap, _justify_content, _align_items, _align_self,
+                                     _align_content, _display, _flex_grow, LayoutParam::Length(), _margins->build(args));
     return nullptr;
 }
 
-template<> ARK_API sp<LayoutParam> Null::ptr()
+template<> ARK_API sp<LayoutParam> Null::safePtr()
 {
     return sp<LayoutParam>::make(sp<Size>::make(static_cast<float>(LayoutParam::SIZE_CONSTRAINT_MATCH_PARENT), static_cast<float>(LayoutParam::SIZE_CONSTRAINT_MATCH_PARENT)));
 }
 
-template<> ARK_API LayoutParam::Gravity Conversions::to<String, LayoutParam::Gravity>(const String& s)
+template<> ARK_API LayoutParam::Gravity StringConvert::to<String, LayoutParam::Gravity>(const String& s)
 {
     if(s == "default")
         return LayoutParam::GRAVITY_DEFAULT;
@@ -292,7 +350,7 @@ template<> ARK_API LayoutParam::Gravity Conversions::to<String, LayoutParam::Gra
     return static_cast<LayoutParam::Gravity>(gravity);
 }
 
-template<> ARK_API LayoutParam::Length Conversions::to<String, LayoutParam::Length>(const String& s)
+template<> ARK_API LayoutParam::Length StringConvert::to<String, LayoutParam::Length>(const String& s)
 {
     if(s == "auto")
         return LayoutParam::Length();
@@ -305,29 +363,84 @@ template<> ARK_API LayoutParam::Length Conversions::to<String, LayoutParam::Leng
     return LayoutParam::Length(LayoutParam::LENGTH_TYPE_PIXEL, Strings::parse<float>(s));
 }
 
+template<> ARK_API LayoutParam::FlexDirection StringConvert::to<String, LayoutParam::FlexDirection>(const String& s)
+{
+    if(s == "column")
+        return LayoutParam::FLEX_DIRECTION_COLUMN;
+    if(s == "column_reverse")
+        return LayoutParam::FLEX_DIRECTION_COLUMN_REVERSE;
+
+    if(s == "row")
+        return LayoutParam::FLEX_DIRECTION_ROW;
+
+    CHECK(s == "row_reverse", "Unknow enum %s(\"%s\"), possible values are: [%s]", s.c_str(), "FlexDirection", "'column', 'column_reverse', 'row', 'row_reverse'");
+    return LayoutParam::FLEX_DIRECTION_ROW_REVERSE;
+}
+
+template<> ARK_API LayoutParam::FlexWrap StringConvert::to<String, LayoutParam::FlexWrap>(const String& s)
+{
+    if(s == "nowrap")
+        return LayoutParam::FLEX_WRAP_NOWRAP;
+    if(s == "wrap")
+        return LayoutParam::FLEX_WRAP_WRAP;
+    CHECK(s == "wrap_reverse", "Unknow enum %s(\"%s\"), possible values are: [%s]", s.c_str(), "FlexWrap", "'nowrap', 'wrap_reverse'");
+    return LayoutParam::FLEX_WRAP_WRAP_REVERSE;
+}
+
+template<> ARK_API LayoutParam::JustifyContent StringConvert::to<String, LayoutParam::JustifyContent>(const String& s)
+{
+    if(s == "flex_start")
+        return LayoutParam::JUSTIFY_CONTENT_FLEX_START;
+    if(s == "flex_end")
+        return LayoutParam::JUSTIFY_CONTENT_FLEX_END;
+    if(s == "center")
+        return LayoutParam::JUSTIFY_CONTENT_CENTER;
+    if(s == "space_between")
+        return LayoutParam::JUSTIFY_CONTENT_SPACE_BETWEEN;
+    if(s == "space_around")
+        return LayoutParam::JUSTIFY_CONTENT_SPACE_AROUND;
+    CHECK(s == "space_evently", "Unknow enum %s(\"%s\"), possible values are: [%s]", s.c_str(), "JustifyContent", "'flex_start', 'flex_end', 'center', 'space_between', 'space_around', 'space_evently'");
+    return LayoutParam::JUSTIFY_CONTENT_SPACE_EVENLY;
+}
+
+template<> ARK_API LayoutParam::Align StringConvert::to<String, LayoutParam::Align>(const String& s)
+{
+    if(s == "auto")
+        return LayoutParam::ALIGN_AUTO;
+    if(s == "flex_start")
+        return LayoutParam::ALIGN_FLEX_START;
+    if(s == "flex_end")
+        return LayoutParam::ALIGN_FLEX_END;
+    if(s == "center")
+        return LayoutParam::ALIGN_CENTER;
+    if(s == "stretch")
+        return LayoutParam::ALIGN_STRETCH;
+    if(s == "baseline")
+        return LayoutParam::ALIGN_BASELINE;
+    if(s == "space_between")
+        return LayoutParam::ALIGN_SPACE_BETWEEN;
+    CHECK(s == "space_around", "Unknow enum %s(\"%s\"), possible values are: [%s]", s.c_str(), "Align", "'auto', 'flex_start', 'flex_end', 'center', 'stretch', 'baseline', 'space_between', 'space_around'");
+    return LayoutParam::ALIGN_SPACE_AROUND;
+}
+
 LayoutParam::Length::Length()
-    : _type(LENGTH_TYPE_AUTO), _value(0)
+    : _type(LENGTH_TYPE_AUTO), _value(nullptr, 0)
 {
 }
 
 LayoutParam::Length::Length(LengthType type, float value)
-    : _type(type), _value(value)
+    : _type(type), _value(sp<Numeric::Const>::make(value))
 {
 }
 
-bool LayoutParam::Length::isAuto() const
+LayoutParam::Length::Length(LengthType type, sp<Numeric> value)
+    : _type(type), _value(std::move(value))
 {
-    return _type == LENGTH_TYPE_AUTO;
 }
 
-bool LayoutParam::Length::isPixel() const
+bool LayoutParam::Length::update(uint64_t timestamp) const
 {
-    return _type == LENGTH_TYPE_PIXEL;
-}
-
-bool LayoutParam::Length::isPercentage() const
-{
-    return _type == LENGTH_TYPE_PERCENTAGE;
+    return _value.update(timestamp);
 }
 
 }

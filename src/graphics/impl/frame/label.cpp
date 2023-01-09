@@ -2,7 +2,7 @@
 
 #include "core/base/bean_factory.h"
 
-#include "renderer/base/text.h"
+#include "graphics/base/text.h"
 
 namespace ark {
 

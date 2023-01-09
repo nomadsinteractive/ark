@@ -7,7 +7,7 @@
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/types/null.h"
 #include "core/util/holder_util.h"
-#include "core/util/variable_util.h"
+#include "core/util/updatable_util.h"
 #include "core/util/math.h"
 
 #include "graphics/base/v3.h"
@@ -24,7 +24,7 @@ public:
     }
 
     virtual bool update(uint64_t timestamp) override {
-        if(VariableUtil::update(timestamp, _theta, _axis)) {
+        if(UpdatableUtil::update(timestamp, _theta, _axis)) {
             _val = updateQuaternion();
             return true;
         }
@@ -58,7 +58,7 @@ public:
     }
 
     virtual bool update(uint64_t timestamp) override {
-        if(VariableUtil::update(timestamp, _pitch, _yaw, _roll)) {
+        if(UpdatableUtil::update(timestamp, _pitch, _yaw, _roll)) {
             _val = updateQuaternion();
             return true;
         }

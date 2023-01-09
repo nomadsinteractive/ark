@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 	<import name="pre" src="prefab.xml"/>
-	<view id="@root_view" class="view-group" size="960, 540" layout="frame"/>
+	<view id="@root_view" size="960, 540" layout="frame"/>
 	<buffer id="@ssbo" input="$p">
 		<uploader length="$pc">
 			<attribute type="v2f" value="$pos"/>

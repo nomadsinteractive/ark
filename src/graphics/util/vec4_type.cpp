@@ -44,7 +44,7 @@ V4 Vec4Type::xyzw(const sp<Vec4>& self)
     return self->val();
 }
 
-template<> ARK_API sp<Vec4> Null::ptr()
+template<> ARK_API sp<Vec4> Null::safePtr()
 {
     return sp<Vec4Impl>::make();
 }

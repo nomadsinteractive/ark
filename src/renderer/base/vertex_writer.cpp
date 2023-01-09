@@ -54,7 +54,7 @@ void VertexWriter::setRenderObject(const Renderable::Snapshot& renderObject)
     _transform = &renderObject._transform;
     _translate = renderObject._position;
     _varying_contents = renderObject._varyings.getDivided(0);
-    _visible = renderObject.getState(Renderable::RENDERABLE_STATE_VISIBLE);
+    _visible = renderObject._state.hasState(Renderable::RENDERABLE_STATE_VISIBLE);
 }
 
 void VertexWriter::writeNormal(const V3& normal)

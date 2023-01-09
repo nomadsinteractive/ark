@@ -1,7 +1,7 @@
 #include "renderer/base/framebuffer.h"
 
 #include "core/base/bean_factory.h"
-#include "core/util/conversions.h"
+#include "core/util/string_convert.h"
 
 #include "renderer/base/recycler.h"
 #include "renderer/base/render_engine.h"
@@ -62,7 +62,7 @@ sp<Renderer> Framebuffer::RENDERER_BUILDER::build(const Scope& args)
     return _framebuffer->build(args);
 }
 
-template<> ARK_API Framebuffer::ClearMask Conversions::to<String, Framebuffer::ClearMask>(const String& str)
+template<> ARK_API Framebuffer::ClearMask StringConvert::to<String, Framebuffer::ClearMask>(const String& str)
 {
     if(str == "none")
         return Framebuffer::CLEAR_MASK_NONE;

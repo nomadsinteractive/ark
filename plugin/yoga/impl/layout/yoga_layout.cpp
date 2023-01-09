@@ -7,6 +7,7 @@
 #include "graphics/base/v2.h"
 
 #include "app/view/layout_param.h"
+#include "app/view/view_hierarchy.h"
 
 namespace ark {
 namespace plugin {
@@ -90,56 +91,89 @@ static YGAlign toYGAlign(LayoutParam::Align align)
 }
 
 YogaLayout::YogaLayout()
-    : _root_node(nullptr)
+    : _yg_node(nullptr)
 {
 }
 
 YogaLayout::~YogaLayout()
 {
-    if(_root_node)
-        YGNodeFreeRecursive(_root_node);
+    if(_yg_node)
+        YGNodeFreeRecursive(_yg_node);
 }
 
-void YogaLayout::inflate(Node& rootNode)
+void YogaLayout::inflate(sp<Node> rootNode)
 {
-    if(_root_node)
-        YGNodeFreeRecursive(_root_node);
+    if(_yg_node)
+        YGNodeFreeRecursive(_yg_node);
 
-    _root_node = doInflate(Global<YogaConfig>(), rootNode, nullptr);
+    _yg_node = doInflate(Global<YogaConfig>(), rootNode, nullptr);
+    _layout_node = std::move(rootNode);
 }
 
-void YogaLayout::place(Node& rootNode)
+bool YogaLayout::update(uint64_t timestamp)
 {
-
+    const LayoutParam& layoutParam = _layout_node->_layout_param;
+    ASSERT(layoutParam.widthType() != LayoutParam::LENGTH_TYPE_PERCENTAGE && layoutParam.heightType() != LayoutParam::LENGTH_TYPE_PERCENTAGE);
+    doUpdate(_layout_node, timestamp);
+    YGNodeCalculateLayout(_yg_node, layoutParam.size()->widthAsFloat(), layoutParam.size()->heightAsFloat(), YGDirectionLTR);
+    updateLayoutResult(_layout_node);
+    return YGNodeIsDirty(_yg_node);
 }
 
-void YogaLayout::applyLayoutParam(const LayoutParam& layoutParam, YGNodeRef node)
+template<typename T> Optional<T> updateVar(uint64_t timestamp, Variable<T>& var)
 {
-    const LayoutParam::Length& width = layoutParam.width();
-    if(width.isAuto())
-        YGNodeStyleSetWidthAuto(node);
-    else if(width.isPixel())
-        YGNodeStyleSetWidth(node, width._value);
-    else
+    if(!timestamp || var.update(timestamp))
+        return var.val();
+    return Optional<T>();
+}
+
+void YogaLayout::applyLayoutParam(const LayoutParam& layoutParam, YGNodeRef node, uint64_t timestamp)
+{
+    const Optional<float> width = updateVar<float>(timestamp, layoutParam.width());
+    if(width)
     {
-        ASSERT(width.isPercentage());
-        YGNodeStyleSetWidthPercent(node, width._value);
+        if(layoutParam.widthType() == LayoutParam::LENGTH_TYPE_AUTO)
+            YGNodeStyleSetWidthAuto(node);
+        else if(layoutParam.widthType() == LayoutParam::LENGTH_TYPE_PIXEL)
+            YGNodeStyleSetWidth(node, width.value());
+        else
+        {
+            ASSERT(layoutParam.widthType() == LayoutParam::LENGTH_TYPE_PERCENTAGE);
+            YGNodeStyleSetWidthPercent(node, width.value());
+        }
     }
 
-    const LayoutParam::Length& height = layoutParam.height();
-    if(height.isAuto())
-        YGNodeStyleSetHeightAuto(node);
-    else if(height.isPixel())
-        YGNodeStyleSetHeight(node, height._value);
-    else
+    const Optional<float> height = updateVar<float>(timestamp, layoutParam.height());
+    if(height)
     {
-        ASSERT(height.isPercentage());
-        YGNodeStyleSetHeightPercent(node, height._value);
+        if(layoutParam.heightType() == LayoutParam::LENGTH_TYPE_AUTO)
+            YGNodeStyleSetHeightAuto(node);
+        else if(layoutParam.heightType() == LayoutParam::LENGTH_TYPE_PIXEL)
+            YGNodeStyleSetHeight(node, height.value());
+        else
+        {
+            ASSERT(layoutParam.heightType() == LayoutParam::LENGTH_TYPE_PERCENTAGE);
+            YGNodeStyleSetHeightPercent(node, height.value());
+        }
     }
 
     YGNodeStyleSetFlexDirection(node, toYGFlexDirection(layoutParam.flexDirection()));
     YGNodeStyleSetFlexGrow(node, layoutParam.flexGrow());
-//    YGNodeStyleSetFlexBasis
+
+    const Optional<float> flexBasis = updateVar<float>(timestamp, layoutParam.flexBasis());
+    if(flexBasis)
+    {
+        if(layoutParam.flexBasisType() == LayoutParam::LENGTH_TYPE_AUTO)
+            YGNodeStyleSetFlexBasisAuto(node);
+        else if(layoutParam.flexBasisType() == LayoutParam::LENGTH_TYPE_PIXEL)
+            YGNodeStyleSetFlexBasis(node, flexBasis.value());
+        else
+        {
+            ASSERT(layoutParam.flexBasisType() == LayoutParam::LENGTH_TYPE_PERCENTAGE);
+            YGNodeStyleSetFlexBasisPercent(node, flexBasis.value());
+        }
+    }
+
     YGNodeStyleSetFlexWrap(node, toYGWrap(layoutParam.flexWrap()));
     YGNodeStyleSetJustifyContent(node, toYGJustify(layoutParam.justifyContent()));
     YGNodeStyleSetAlignItems(node, toYGAlign(layoutParam.alignItems()));
@@ -147,22 +181,37 @@ void YogaLayout::applyLayoutParam(const LayoutParam& layoutParam, YGNodeRef node
     YGNodeStyleSetAlignContent(node, toYGAlign(layoutParam.alignContent()));
 
     if(layoutParam.margins())
-    {
-        const V4 margins = layoutParam.margins().val();
-        YGNodeStyleSetMargin(node, YGEdgeTop, margins.x());
-        YGNodeStyleSetMargin(node, YGEdgeRight, margins.y());
-        YGNodeStyleSetMargin(node, YGEdgeBottom, margins.z());
-        YGNodeStyleSetMargin(node, YGEdgeLeft, margins.w());
-    }
+        if(!timestamp || layoutParam.margins().update(timestamp))
+        {
+            const V4 margins = layoutParam.margins().val();
+            YGNodeStyleSetMargin(node, YGEdgeTop, margins.x());
+            YGNodeStyleSetMargin(node, YGEdgeRight, margins.y());
+            YGNodeStyleSetMargin(node, YGEdgeBottom, margins.z());
+            YGNodeStyleSetMargin(node, YGEdgeLeft, margins.w());
+        }
 
     if(layoutParam.paddings())
-    {
-        const V4 paddings = layoutParam.paddings().val();
-        YGNodeStyleSetPadding(node, YGEdgeTop, paddings.x());
-        YGNodeStyleSetPadding(node, YGEdgeRight, paddings.y());
-        YGNodeStyleSetPadding(node, YGEdgeBottom, paddings.z());
-        YGNodeStyleSetPadding(node, YGEdgeLeft, paddings.w());
-    }
+        if(!timestamp || layoutParam.paddings().update(timestamp))
+        {
+            const V4 paddings = layoutParam.paddings().val();
+            YGNodeStyleSetPadding(node, YGEdgeTop, paddings.x());
+            YGNodeStyleSetPadding(node, YGEdgeRight, paddings.y());
+            YGNodeStyleSetPadding(node, YGEdgeBottom, paddings.z());
+            YGNodeStyleSetPadding(node, YGEdgeLeft, paddings.w());
+        }
+}
+
+void YogaLayout::updateLayoutResult(Node& layoutNode)
+{
+    YGNodeRef ygNode = reinterpret_cast<YGNodeRef>(layoutNode._tag);
+    layoutNode._paddings = V4(YGNodeLayoutGetPadding(ygNode, YGEdgeTop), YGNodeLayoutGetPadding(ygNode, YGEdgeRight),
+                        YGNodeLayoutGetPadding(ygNode, YGEdgeBottom), YGNodeLayoutGetPadding(ygNode, YGEdgeLeft));
+    layoutNode._offset_position = V2(YGNodeLayoutGetLeft(ygNode), YGNodeLayoutGetTop(ygNode));
+    layoutNode._size = V2(YGNodeLayoutGetWidth(ygNode), YGNodeLayoutGetHeight(ygNode));
+
+    if(layoutNode._view_hierarchy)
+        for(const ViewHierarchy::Slot& i : layoutNode._view_hierarchy->updateSlots())
+            updateLayoutResult(i.layoutNode());
 }
 
 YGNodeRef YogaLayout::doInflate(const Global<YogaLayout::YogaConfig>& config, Node& layoutNode, YGNodeRef parentNode)
@@ -170,16 +219,26 @@ YGNodeRef YogaLayout::doInflate(const Global<YogaLayout::YogaConfig>& config, No
     YGNodeRef ygNode = config->newNode();
     layoutNode._tag = reinterpret_cast<void*>(ygNode);
 
-    if(layoutNode._layout_param)
-        applyLayoutParam(layoutNode._layout_param, ygNode);
-
     if(parentNode)
-        YGNodeInsertChild(parentNode, ygNode, 0);
+        YGNodeInsertChild(parentNode, ygNode, YGNodeGetChildCount(parentNode));
 
-    for(Node& i : layoutNode._child_nodes)
-        doInflate(config, i, ygNode);
+    if(layoutNode._view_hierarchy)
+        for(const ViewHierarchy::Slot& i : layoutNode._view_hierarchy->updateSlots())
+            doInflate(config, i.layoutNode(), ygNode);
 
     return ygNode;
+}
+
+void YogaLayout::doUpdate(Node& layoutNode, uint64_t timestamp)
+{
+    YGNodeRef ygNode = reinterpret_cast<YGNodeRef>(layoutNode._tag);
+
+    if(layoutNode._layout_param)
+        applyLayoutParam(layoutNode._layout_param, ygNode, timestamp);
+
+    if(layoutNode._view_hierarchy)
+        for(const ViewHierarchy::Slot& i : layoutNode._view_hierarchy->updateSlots())
+            doUpdate(i.layoutNode(), timestamp);
 }
 
 YogaLayout::BUILDER::BUILDER(BeanFactory& factory)

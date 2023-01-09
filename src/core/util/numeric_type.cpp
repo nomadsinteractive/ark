@@ -21,7 +21,7 @@
 #include "core/impl/variable/variable_ternary.h"
 #include "core/util/operators.h"
 #include "core/util/strings.h"
-#include "core/util/variable_util.h"
+#include "core/util/updatable_util.h"
 
 namespace ark {
 

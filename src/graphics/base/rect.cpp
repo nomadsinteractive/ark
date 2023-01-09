@@ -1,13 +1,13 @@
 #include "graphics/base/rect.h"
 
 #include "core/types/shared_ptr.h"
-#include "core/util/conversions.h"
+#include "core/util/string_convert.h"
 
 #include "graphics/base/v4.h"
 
 namespace ark {
 
-template<> ARK_API Rect Conversions::to<String, Rect>(const String& str)
+template<> ARK_API Rect StringConvert::to<String, Rect>(const String& str)
 {
     const std::vector<String> m = Strings::unwrap(str.strip(), '(', ')').split(',');
     DCHECK(m.size() == 4, "Cannot parse Rect from \"%s\"", str.c_str());
@@ -18,7 +18,7 @@ template<> ARK_API Rect Conversions::to<String, Rect>(const String& str)
     return Rect(left, top, right, bottom);
 }
 
-template<> ARK_API String Conversions::to<Rect, String>(const Rect& rect)
+template<> ARK_API String StringConvert::to<Rect, String>(const Rect& rect)
 {
     return Strings::sprintf("(%.2f, %.2f, %.2f, %.2f)", rect.left(), rect.top(), rect.right(), rect.bottom());
 }

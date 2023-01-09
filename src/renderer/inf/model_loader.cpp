@@ -1,6 +1,6 @@
 #include "renderer/inf/model_loader.h"
 
-#include "core/util/conversions.h"
+#include "core/util/string_convert.h"
 
 namespace ark {
 
@@ -13,7 +13,7 @@ ModelLoader::RenderMode ModelLoader::renderMode() const
     return _render_mode;
 }
 
-template<> ARK_API ModelLoader::RenderMode Conversions::to<String, ModelLoader::RenderMode>(const String& str)
+template<> ARK_API ModelLoader::RenderMode StringConvert::to<String, ModelLoader::RenderMode>(const String& str)
 {
     if(str == "lines")
         return ModelLoader::RENDER_MODE_LINES;

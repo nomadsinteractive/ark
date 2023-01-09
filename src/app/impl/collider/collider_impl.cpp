@@ -6,7 +6,7 @@
 #include "core/ark.h"
 #include "core/types/null.h"
 #include "core/util/log.h"
-#include "core/util/variable_util.h"
+#include "core/util/updatable_util.h"
 
 #include "graphics/base/rect.h"
 #include "graphics/base/render_object.h"

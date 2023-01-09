@@ -2,6 +2,8 @@
 
 #include "core/util/math.h"
 
+#include "graphics/base/rect.h"
+
 #include "app/util/layout_util.h"
 #include "app/view/view.h"
 

@@ -15,25 +15,40 @@
 namespace ark {
 
 //[[core::class]]
-class RendererByRenderObject : public Renderer, public Block {
+class RenderObjectWithLayer : public Renderer, public Block {
 public:
-    RendererByRenderObject(sp<LayerContext> layerContext, sp<RenderObject> renderObject);
-    ~RendererByRenderObject() override;
-
+    RenderObjectWithLayer(sp<LayerContext> layerContext, sp<RenderObject> renderObject);
+    ~RenderObjectWithLayer() override;
+[[deprecated]]
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
     virtual const sp<Size>& size() override;
 
-//  [[plugin::builder("render-object")]]
-    class BUILDER : public Builder<Renderer> {
+    const sp<LayerContext>& layerContext() const;
+    const sp<RenderObject>& renderObject() const;
+
+//  [[plugin::builder]]
+    class BUILDER : public Builder<RenderObjectWithLayer> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Renderer> build(const Scope& args) override;
+        virtual sp<RenderObjectWithLayer> build(const Scope& args) override;
 
     private:
         sp<Builder<RenderObject>> _render_object;
         sp<Builder<LayerContext>> _layer_context;
+    };
+
+
+//  [[plugin::builder("render-object")]]
+    class BUILDER_RENDERER : public Builder<Renderer> {
+    public:
+        BUILDER_RENDERER(BeanFactory& factory, const document& manifest);
+
+        virtual sp<Renderer> build(const Scope& args) override;
+
+    private:
+        BUILDER _impl;
     };
 
 private:

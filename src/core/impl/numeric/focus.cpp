@@ -6,7 +6,7 @@
 namespace ark {
 
 Focus::Focus(const sp<Numeric>& target, float nearest, float farest, float value)
-    : Updatable(value), _target(target), _nearest(nearest), _farest(farest)
+    : Numeric::ByUpdate(value), _target(target), _nearest(nearest), _farest(farest)
 {
 }
 

@@ -34,6 +34,7 @@ class Renderable;
 class RenderCommand;
 class RenderCommandPipeline;
 class RenderObject;
+class RenderObjectWithLayer;
 class RenderView;
 class Layer;
 class RenderRequest;

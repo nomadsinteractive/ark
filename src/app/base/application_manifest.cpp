@@ -2,7 +2,7 @@
 
 #include "core/inf/asset.h"
 #include "core/inf/asset_bundle.h"
-#include "core/util/conversions.h"
+#include "core/util/string_convert.h"
 #include "core/util/documents.h"
 
 #include "graphics/base/size.h"
@@ -160,7 +160,7 @@ static ApplicationManifest::WindowFlag toOneWindowFlag(const String& val)
     return ApplicationManifest::WINDOW_FLAG_NONE;
 }
 
-template<> ARK_API ApplicationManifest::WindowFlag Conversions::to<String, ApplicationManifest::WindowFlag>(const String& val)
+template<> ARK_API ApplicationManifest::WindowFlag StringConvert::to<String, ApplicationManifest::WindowFlag>(const String& val)
 {
     uint32_t v = ApplicationManifest::WINDOW_FLAG_NONE;
     for(const String& i : val.split('|'))

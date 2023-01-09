@@ -8,7 +8,7 @@
 #include "core/inf/variable.h"
 #include "core/types/implements.h"
 #include "core/util/holder_util.h"
-#include "core/util/variable_util.h"
+#include "core/util/updatable_util.h"
 
 namespace ark {
 
@@ -26,7 +26,7 @@ public:
     }
 
     virtual bool update(uint64_t timestamp) override {
-        if(!VariableUtil::update(timestamp, _arg, _timestamp))
+        if(!UpdatableUtil::update(timestamp, _arg, _timestamp))
             return false;
 
         _val = _func(_arg->val());

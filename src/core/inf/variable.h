@@ -10,14 +10,14 @@ namespace ark {
 
 template<typename T> class Variable : public Updatable {
 public:
-    virtual ~Variable() override = default;
+    virtual ~Variable() = default;
 
     virtual T val() = 0;
 
     class Const;
     class Impl;
 
-    class Updatable;
+    class ByUpdate;
 };
 
 template<typename T> class Variable<T>::Impl : public Variable<T>, Implements<typename Variable<T>::Impl, Variable<T>> {
@@ -65,9 +65,9 @@ private:
     T _value;
 };
 
-template<typename T> class Variable<T>::Updatable : public Variable<T> {
+template<typename T> class Variable<T>::ByUpdate : public Variable<T> {
 public:
-    Updatable(T value)
+    ByUpdate(T value)
         : _value(std::move(value)) {
     }
 

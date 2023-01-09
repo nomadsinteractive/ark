@@ -174,7 +174,7 @@ sp<Varyings> Varyings::BUILDER::build(const Scope& args)
     return varyings;
 }
 
-template<> ARK_API sp<Varyings> Null::ptr()
+template<> ARK_API sp<Varyings> Null::safePtr()
 {
     return sp<Varyings>::make();
 }

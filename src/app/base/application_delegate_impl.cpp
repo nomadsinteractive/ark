@@ -3,7 +3,7 @@
 #include "core/ark.h"
 #include "core/base/scope.h"
 #include "core/inf/script.h"
-#include "core/util/conversions.h"
+#include "core/util/string_convert.h"
 #include "core/util/log.h"
 
 #include "graphics/base/surface_controller.h"
@@ -109,7 +109,7 @@ sp<EventListener> ApplicationDelegateImpl::ScriptTag::makeEventListener() const
     return sp<EventListenerByScript>::make(_script, _function_name);
 }
 
-template<> ApplicationDelegateImpl::ScriptRunOn Conversions::to<String, ApplicationDelegateImpl::ScriptRunOn>(const String& str)
+template<> ApplicationDelegateImpl::ScriptRunOn StringConvert::to<String, ApplicationDelegateImpl::ScriptRunOn>(const String& str)
 {
     if(str == "create")
         return ApplicationDelegateImpl::SCRIPT_RUN_ON_CREATE;

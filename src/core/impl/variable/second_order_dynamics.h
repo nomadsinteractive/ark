@@ -4,7 +4,7 @@
 #include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
 #include "core/util/math.h"
-#include "core/util/variable_util.h"
+#include "core/util/updatable_util.h"
 
 namespace ark {
 
@@ -41,7 +41,7 @@ public:
     }
 
     virtual bool update(uint64_t timestamp) override {
-        return VariableUtil::update(timestamp, _x, _t);
+        return UpdatableUtil::update(timestamp, _x, _t);
     }
 
 private:

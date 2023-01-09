@@ -131,14 +131,14 @@ String Strings::loadFromReadable(const sp<Readable>& readable)
     return sb.str().c_str();
 }
 
-uint32_t Strings::hash(const String& text)
-{
-    const char* str = text.c_str();
-    uint32_t h = 0;
-    while(*str)
-        h = h * 101 + *str++;
-    return h;
-}
+//uint32_t Strings::hash(const String& text)
+//{
+//    const char* str = text.c_str();
+//    uint32_t h = 0;
+//    while(*str)
+//        h = h * 101 + *str++;
+//    return h;
+//}
 
 String Strings::unwrap(const String& str, char open, char close)
 {
@@ -194,14 +194,6 @@ size_t Strings::parentheses(const String& expr, size_t start, char open, char cl
     return 0;
 }
 
-bool Strings::parseNameValuePair(const String& expr, char equal, String& name, String& value)
-{
-    String::size_type pos = expr.find(equal);
-    name = (pos != String::npos ?  expr.substr(0, pos) : expr).strip();
-    value = pos != String::npos ?  expr.substr(pos + 1).strip() : String::null();
-    return pos != String::npos;
-}
-
 bool Strings::parseArrayAndIndex(const String& expr, String& name, int32_t& index)
 {
     const auto s1 = expr.find('[');
@@ -222,17 +214,10 @@ std::map<String, String> Strings::parseProperties(const String& str, char delim,
     std::vector<String> elems = str.split(delim);
     for(const String& i : elems)
     {
-        String key, value;
-        parseNameValuePair(i, equal, key, value);
-        properties[key] = value;
+        const auto [key, value] = i.cut(equal);
+        properties[key] = value ? value.value() : "";
     }
     return properties;
-}
-
-const String& Strings::getProperty(const std::map<String, String>& properties, const String& key, const String& defValue)
-{
-    auto iterator = properties.find(key);
-    return iterator != properties.end() ? properties.at(key) : defValue;
 }
 
 typedef unsigned char byte_t;

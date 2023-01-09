@@ -6,7 +6,7 @@
 #include "core/base/wrapper.h"
 #include "core/inf/variable.h"
 #include "core/impl/boolean/boolean_by_timeout.h"
-#include "core/util/conversions.h"
+#include "core/util/string_convert.h"
 #include "core/util/math.h"
 #include "core/util/strings.h"
 
@@ -180,7 +180,7 @@ void Clock::resume() const
     _ticker->resume();
 }
 
-template<> ARK_API Clock::Interval Conversions::to<String, Clock::Interval>(const String& val)
+template<> ARK_API Clock::Interval StringConvert::to<String, Clock::Interval>(const String& val)
 {
     size_t len = val.length();
     if(val.endsWith("ms"))

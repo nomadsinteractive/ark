@@ -10,7 +10,7 @@
 			<render-layer ref="@pre:rl001"/>
 			<render-layer ref="@pre:rl002"/>
 			<renderer ref="@pre:fps-counter"/>
-			<view class="view-group" size="540, 960" layout="vertical(center)">
+			<view size="540, 960" layout="vertical(center)">
 				<renderer class="label" text="Hello World" text-scale="0.5" render-layer="@pre:rl002" style="display: block"/>
 				<renderer class="label" text="Hello World" text-scale="0.5" render-layer="@pre:rl002" style="display: block; margin-top: 50"/>
 				<renderer class="label" text="Hello World" text-scale="0.5" render-layer="@pre:rl002" style="display: block; margins: 50,0,0,100"/>

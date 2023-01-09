@@ -12,8 +12,8 @@ namespace ark {
 
 class ARK_API Renderable {
 public:
-    enum State {
-        RENDERABLE_STATE_NORMAL = 0,
+    enum StateBits {
+        RENDERABLE_STATE_NONE = 0,
         RENDERABLE_STATE_DISPOSED = 1,
         RENDERABLE_STATE_DIRTY = 2,
         RENDERABLE_STATE_VISIBLE = 4
@@ -21,23 +21,23 @@ public:
 
     virtual ~Renderable() = default;
 
+    class ARK_API State {
+    public:
+        State(StateBits state = RENDERABLE_STATE_NONE);
+
+        bool hasState(StateBits state) const;
+        void setState(StateBits state, bool enabled);
+
+        StateBits stateBits() const;
+
+    private:
+        StateBits _state_bits;
+    };
+
     struct Snapshot {
-        Snapshot(State state = RENDERABLE_STATE_DISPOSED)
-            : _state(state) {
-        }
-        Snapshot(State state, int32_t type, const V3& position, const V3& size, const Transform::Snapshot& transform, const Varyings::Snapshot& varyings)
-            : _state(state), _type(type), _position(position),
-              _size(size), _transform(transform), _varyings(varyings) {
-        }
+        Snapshot(State state = RENDERABLE_STATE_DISPOSED);
+        Snapshot(State state, int32_t type, const V3& position, const V3& size, const Transform::Snapshot& transform, const Varyings::Snapshot& varyings);
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Snapshot);
-
-        bool getState(State state) const {
-            return _state & state;
-        }
-
-        void setState(State state, bool enabled) {
-            _state = static_cast<State>((_state & ~state) | (enabled ? state : 0));
-        }
 
         State _state;
         int32_t _type;
@@ -48,16 +48,12 @@ public:
         Varyings::Snapshot _varyings;
     };
 
-    static State toState(bool disposed, bool dirty, bool visible) {
-        return static_cast<State>((disposed ? RENDERABLE_STATE_DISPOSED : 0) | (dirty ? RENDERABLE_STATE_DIRTY : 0) | (visible ? RENDERABLE_STATE_VISIBLE : 0));
+    static StateBits toState(bool disposed, bool dirty, bool visible) {
+        return static_cast<StateBits>((disposed ? RENDERABLE_STATE_DISPOSED : 0) | (dirty ? RENDERABLE_STATE_DIRTY : 0) | (visible ? RENDERABLE_STATE_VISIBLE : 0));
     }
 
-    static void setState(State& s0, State s1, bool enabled) {
-        s0 = static_cast<State>(enabled ? s0 | s1 : s0 & ~s1);
-    }
-
-    virtual State updateState(const RenderRequest& renderRequest) = 0;
-    virtual Snapshot snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest, const V3& postTranslate, State state) = 0;
+    virtual StateBits updateState(const RenderRequest& renderRequest) = 0;
+    virtual Snapshot snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest, const V3& postTranslate, StateBits state) = 0;
 };
 
 }

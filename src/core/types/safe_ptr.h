@@ -9,10 +9,10 @@ namespace ark {
 template<typename T> class SafePtr {
 public:
     SafePtr() noexcept
-        : _inst(Null::toSafe<T>(nullptr)), _not_null(false) {
+        : _inst(Null::toSafePtr<T>(nullptr)), _not_null(false) {
     }
     SafePtr(const sp<T>& inst) noexcept
-        : _inst(Null::toSafe<T>(inst)), _not_null(static_cast<bool>(inst)) {
+        : _inst(Null::toSafePtr<T>(inst)), _not_null(static_cast<bool>(inst)) {
     }
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(SafePtr);
 
@@ -24,12 +24,12 @@ public:
 
     SafePtr& operator =(const sp<T>& other) noexcept {
         _not_null = static_cast<bool>(other);
-        _inst = Null::toSafe<T>(other);
+        _inst = Null::toSafePtr<T>(other);
         return *this;
     }
     SafePtr& operator =(sp<T>&& other) noexcept {
         _not_null = static_cast<bool>(other);
-        _inst = _not_null ? std::move(other) : Null::toSafe<T>(nullptr);
+        _inst = _not_null ? std::move(other) : Null::toSafePtr<T>(nullptr);
         return *this;
     }
 

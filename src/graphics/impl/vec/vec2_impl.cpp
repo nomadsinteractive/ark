@@ -7,7 +7,7 @@
 #include "core/util/holder_util.h"
 #include "core/util/numeric_type.h"
 #include "core/util/strings.h"
-#include "core/util/variable_util.h"
+#include "core/util/updatable_util.h"
 
 namespace ark {
 
@@ -48,7 +48,7 @@ V2 Vec2Impl::val()
 
 bool Vec2Impl::update(uint64_t timestamp)
 {
-    return VariableUtil::update(timestamp, _x, _y);
+    return UpdatableUtil::update(timestamp, _x, _y);
 }
 
 void Vec2Impl::traverse(const Holder::Visitor& visitor)

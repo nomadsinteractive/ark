@@ -2,17 +2,20 @@
 #define ARK_APP_VIEW_LAYOUT_PARAM_H_
 
 #include "core/base/api.h"
+#include "core/base/timestamp.h"
 #include "core/inf/builder.h"
+#include "core/inf/updatable.h"
 #include "core/types/optional.h"
 #include "core/types/safe_ptr.h"
 #include "core/types/safe_var.h"
 
 #include "graphics/forwarding.h"
+#include "graphics/base/size.h"
 #include "graphics/base/v4.h"
 
 namespace ark {
 
-class ARK_API LayoutParam {
+class ARK_API LayoutParam : public Updatable {
 public:
 //  [[script::bindings::enumeration]]
     enum Display {
@@ -75,22 +78,23 @@ public:
         SIZE_CONSTRAINT_WRAP_CONTENT = -2
     };
 
+//  [[script::bindings::enumeration]]
     enum LengthType {
         LENGTH_TYPE_AUTO,
         LENGTH_TYPE_PIXEL,
         LENGTH_TYPE_PERCENTAGE
     };
 
-    struct ARK_API Length {
+    struct Length {
         Length();
         Length(LengthType type, float value);
+        Length(LengthType type, sp<Numeric> value);
+        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Length);
 
-        bool isAuto() const;
-        bool isPixel() const;
-        bool isPercentage() const;
+        bool update(uint64_t timestamp) const;
 
         LengthType _type;
-        float _value;
+        SafeVar<Numeric> _value;
     };
 
 public:
@@ -99,11 +103,13 @@ public:
     LayoutParam(Length width, Length height, LayoutParam::FlexDirection flexDirection = LayoutParam::FLEX_DIRECTION_ROW, LayoutParam::FlexWrap flexWrap = LayoutParam::FLEX_WRAP_NOWRAP,
                 LayoutParam::JustifyContent justifyContent = LayoutParam::JUSTIFY_CONTENT_FLEX_START, LayoutParam::Align alignItems = LayoutParam::ALIGN_STRETCH,
                 LayoutParam::Align alignSelf = LayoutParam::ALIGN_AUTO, LayoutParam::Align alignContent = LayoutParam::ALIGN_STRETCH,
-                LayoutParam::Display display = LayoutParam::DISPLAY_BLOCK, float flexGrow = 0);
+                LayoutParam::Display display = LayoutParam::DISPLAY_BLOCK, float flexGrow = 0, Length flexBasis = Length(), sp<Vec4> margins = nullptr);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(LayoutParam);
 
-    float calcLayoutWidth(float available);
-    float calcLayoutHeight(float available);
+    virtual bool update(uint64_t timestamp) override;
+
+    float calcLayoutWidth(float available) const;
+    float calcLayoutHeight(float available) const;
 
 //  [[script::bindings::property]]
     float contentWidth() const;
@@ -119,9 +125,7 @@ public:
     float offsetHeight() const;
 
 //  [[script::bindings::property]]
-    const SafePtr<Size>& size() const;
-//  [[script::bindings::property]]
-    void setSize(const sp<Size>& size);
+    const sp<Size>& size() const;
 
     const sp<Boolean>& stopPropagation() const;
     void setStopPropagation(sp<Boolean> stopPropagation);
@@ -137,14 +141,40 @@ public:
     void setGravity(LayoutParam::Gravity gravity);
 
 //  [[script::bindings::property]]
+    LayoutParam::LengthType flexBasisType() const;
+//  [[script::bindings::property]]
+    void setFlexBasisType(LayoutParam::LengthType basisType);
+//  [[script::bindings::property]]
+    sp<Numeric> flexBasis() const;
+//  [[script::bindings::property]]
+    void setFlexBasis(sp<Numeric> flexBasis);
+
+//  [[script::bindings::property]]
     float flexGrow() const;
 //  [[script::bindings::property]]
     void setFlexGrow(float weight);
 
     bool hasFlexGrow() const;
 
-    const Length& width() const;
-    const Length& height() const;
+//  [[script::bindings::property]]
+    sp<Numeric> width() const;
+//  [[script::bindings::property]]
+    void setWidth(sp<Numeric> width);
+
+//  [[script::bindings::property]]
+    LayoutParam::LengthType widthType() const;
+//  [[script::bindings::property]]
+    void setWidthType(LayoutParam::LengthType widthType);
+
+//  [[script::bindings::property]]
+    sp<Numeric> height() const;
+//  [[script::bindings::property]]
+    void setHeight(sp<Numeric> height);
+
+//  [[script::bindings::property]]
+    LayoutParam::LengthType heightType() const;
+//  [[script::bindings::property]]
+    void setHeightType(LayoutParam::LengthType heightType);
 
 //  [[script::bindings::property]]
     LayoutParam::FlexDirection flexDirection() const;
@@ -159,10 +189,14 @@ public:
 //  [[script::bindings::property]]
     LayoutParam::Align alignContent() const;
 
+//  [[script::bindings::property]]
     const SafeVar<Vec4>& margins() const;
+//  [[script::bindings::property]]
     void setMargins(sp<Vec4> margins);
 
+//  [[script::bindings::property]]
     const SafeVar<Vec4>& paddings() const;
+//  [[script::bindings::property]]
     void setPaddings(sp<Vec4> paddings);
 
     bool isWrapContent() const;
@@ -186,13 +220,27 @@ public:
     private:
         Optional<Length> _width;
         Optional<Length> _height;
+        FlexDirection _flex_direction;
+        FlexWrap _flex_wrap;
+        JustifyContent _justify_content;
+
+        Align _align_items;
+        Align _align_self;
+        Align _align_content;
         sp<Builder<Size>> _size;
         Display _display;
+        float _flex_grow;
+
+        SafePtr<Builder<Vec4>> _margins;
     };
 
 private:
-    Length _width;
-    Length _height;
+    LengthType _width_type;
+    LengthType _height_type;
+    sp<Size> _size;
+
+    SafeVar<Size> _size_min;
+    SafeVar<Size> _size_max;
 
     FlexDirection _flex_direction;
     FlexWrap _flex_wrap;
@@ -202,15 +250,17 @@ private:
     Align _align_self;
     Align _align_content;
 
-    SafePtr<Size> _size;
-    SafeVar<Vec4> _margins;
-    SafeVar<Vec4> _paddings;
     sp<Boolean> _stop_propagation;
 
     Display _display;
     Gravity _gravity;
 
+    Length _flex_basis;
     float _flex_grow;
+    SafeVar<Vec4> _margins;
+    SafeVar<Vec4> _paddings;
+
+    Timestamp _timestamp;
 };
 
 }

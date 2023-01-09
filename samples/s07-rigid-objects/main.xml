@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 	<import name="pre" src="prefab.xml"/>
-	<view id="@root_view" class="view-group" size="960, 540" layout="frame"/>
+	<view id="@root_view" size="960, 540" layout="frame"/>
 	<texture id="@t01" width="1024" height="1024"/>
 	<shader id="@s001" vertex="@asset:light.vert" fragment="@asset:light.frag" camera="$c">
 		<sampler ref="@t01"/>

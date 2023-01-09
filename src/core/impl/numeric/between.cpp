@@ -3,7 +3,7 @@
 #include "core/ark.h"
 #include "core/base/bean_factory.h"
 #include "core/base/observer.h"
-#include "core/util/variable_util.h"
+#include "core/util/updatable_util.h"
 
 namespace ark {
 
@@ -19,7 +19,7 @@ float Between::val()
 
 bool Between::update(uint64_t timestamp)
 {
-    if(!VariableUtil::update(timestamp, _delegate, _min, _max))
+    if(!UpdatableUtil::update(timestamp, _delegate, _min, _max))
         return false;
 
     _value = _delegate->val();

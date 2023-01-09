@@ -8,7 +8,7 @@
 #include "core/base/bean_factory.h"
 #include "core/base/string.h"
 #include "core/inf/variable.h"
-#include "core/util/conversions.h"
+#include "core/util/string_convert.h"
 #include "core/util/holder_util.h"
 
 #include "graphics/base/size.h"
@@ -155,7 +155,7 @@ const sp<RigidBody::Callback>& RigidBody::callback() const
     return _stub->_callback;
 }
 
-template<> ARK_API Collider::BodyType Conversions::to<String, Collider::BodyType>(const String& str)
+template<> ARK_API Collider::BodyType StringConvert::to<String, Collider::BodyType>(const String& str)
 {
     if(str == "static")
         return Collider::BODY_TYPE_STATIC;

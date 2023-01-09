@@ -114,7 +114,6 @@ public:
     };
 
 private:
-    void updateDelegate();
     sp<Delegate> makeDelegate() const;
     sp<Delegate> makeTransformLinear() const;
     sp<Delegate> makeTransformSimple() const;
@@ -127,12 +126,23 @@ private:
 
         void operator() () const {
             if(_transform._type != TYPE_DELEGATED)
-                _transform.updateDelegate();
+                _transform.doUpdateDelegate();
         }
 
     private:
         Transform& _transform;
     };
+    template<typename T> const sp<T>& tryUpdateDelegate(SafeVar<T>& safevar) {
+        if(safevar)
+            return safevar;
+
+        const sp<T>& var = safevar.ensure();
+        if(_type != TYPE_DELEGATED)
+            doUpdateDelegate();
+        return var;
+    }
+
+    void doUpdateDelegate();
 
 private:
     Type _type;

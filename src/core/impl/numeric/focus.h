@@ -8,7 +8,7 @@
 
 namespace ark {
 
-class Focus : public Numeric::Updatable {
+class Focus : public Numeric::ByUpdate {
 public:
     Focus(const sp<Numeric>& focus, float nearest, float farest, float value);
 

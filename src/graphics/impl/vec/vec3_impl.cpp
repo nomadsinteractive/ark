@@ -5,7 +5,7 @@
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/util/bean_utils.h"
 #include "core/util/holder_util.h"
-#include "core/util/variable_util.h"
+#include "core/util/updatable_util.h"
 
 #include "graphics/base/v3.h"
 
@@ -38,7 +38,7 @@ V3 Vec3Impl::val()
 
 bool Vec3Impl::update(uint64_t timestamp)
 {
-    return VariableUtil::update(timestamp, _x, _y, _z);
+    return UpdatableUtil::update(timestamp, _x, _y, _z);
 }
 
 void Vec3Impl::traverse(const Holder::Visitor& visitor)

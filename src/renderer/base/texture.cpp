@@ -4,7 +4,7 @@
 #include "core/inf/array.h"
 #include "core/inf/variable.h"
 #include "core/impl/dictionary/dictionary_by_attribute_name.h"
-#include "core/util/conversions.h"
+#include "core/util/string_convert.h"
 #include "core/util/documents.h"
 #include "core/util/log.h"
 
@@ -129,7 +129,7 @@ const Notifier& Texture::notifier() const
     return _notifier;
 }
 
-template<> ARK_API Texture::Type Conversions::to<String, Texture::Type>(const String& str)
+template<> ARK_API Texture::Type StringConvert::to<String, Texture::Type>(const String& str)
 {
     if(str == "cubemap")
         return Texture::TYPE_CUBEMAP;
@@ -137,21 +137,21 @@ template<> ARK_API Texture::Type Conversions::to<String, Texture::Type>(const St
     return Texture::TYPE_2D;
 }
 
-template<> ARK_API Texture::Format Conversions::to<String, Texture::Format>(const String& str)
+template<> ARK_API Texture::Format StringConvert::to<String, Texture::Format>(const String& str)
 {
     if(str)
         return Enums<Texture::Format>::instance().toEnumCombo(str);
     return Texture::FORMAT_AUTO;
 }
 
-template<> ARK_API Texture::Usage Conversions::to<String, Texture::Usage>(const String& str)
+template<> ARK_API Texture::Usage StringConvert::to<String, Texture::Usage>(const String& str)
 {
     if(str)
         return Enums<Texture::Usage>::instance().toEnumCombo(str);
     return Texture::USAGE_COLOR_ATTACHMENT;
 }
 
-template<> ARK_API Texture::Feature Conversions::to<String, Texture::Feature>(const String& str)
+template<> ARK_API Texture::Feature StringConvert::to<String, Texture::Feature>(const String& str)
 {
     if(str)
     {
@@ -168,7 +168,7 @@ template<> ARK_API Texture::Feature Conversions::to<String, Texture::Feature>(co
     return Texture::FEATURE_DEFAULT;
 }
 
-template<> ARK_API Texture::CONSTANT Conversions::to<String, Texture::CONSTANT>(const String& str)
+template<> ARK_API Texture::CONSTANT StringConvert::to<String, Texture::CONSTANT>(const String& str)
 {
     if(str)
     {

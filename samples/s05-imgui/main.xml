@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 	<import name="pre" src="prefab.xml"/>
-	<view id="@root_view" class="view-group" size="960, 540" layout="vertical(left)"/>
+	<view id="@root_view" size="960, 540" layout="vertical(left)"/>
 	<texture id="@t001" width="960" height="540"/>
 	<shader id="@s001">
 		<sampler ref="@t001"/>

@@ -13,7 +13,7 @@ namespace ark {
 
 class RendererWithState : public Renderer {
 public:
-    RendererWithState(const sp<Renderer>& def, const sp<View::State>& state);
+    RendererWithState(sp<Renderer> def, sp<View::State> state);
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
 

@@ -5,7 +5,7 @@
 #include "core/impl/variable/variable_op2.h"
 #include "core/impl/variable/variable_ternary.h"
 #include "core/util/operators.h"
-#include "core/util/variable_util.h"
+#include "core/util/updatable_util.h"
 
 #include "graphics/base/mat.h"
 #include "graphics/impl/mat/mat2_impl.h"
@@ -65,7 +65,7 @@ sp<Mat2> Mat2Type::freeze(const sp<Mat2>& self)
     return sp<Mat2::Const>::make(self->val());
 }
 
-template<> ARK_API sp<Mat2> Null::ptr()
+template<> ARK_API sp<Mat2> Null::safePtr()
 {
     return sp<Mat2Impl>::make();
 }

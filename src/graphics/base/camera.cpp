@@ -9,7 +9,7 @@
 #include "core/impl/writable/writable_memory.h"
 #include "core/inf/writable.h"
 #include "core/types/global.h"
-#include "core/util/variable_util.h"
+#include "core/util/updatable_util.h"
 
 #include "graphics/base/mat.h"
 #include "graphics/base/viewport.h"
@@ -38,7 +38,7 @@ public:
     }
 
     virtual bool update(uint64_t timestamp) override {
-        if(VariableUtil::update(timestamp, _left_top, _right_bottom, _clip)) {
+        if(UpdatableUtil::update(timestamp, _left_top, _right_bottom, _clip)) {
             _matrix = calcMatrix();
             return true;
         }
@@ -75,7 +75,7 @@ public:
     }
 
     virtual bool update(uint64_t timestamp) override {
-        if(VariableUtil::update(timestamp, _position, _target, _up)) {
+        if(UpdatableUtil::update(timestamp, _position, _target, _up)) {
             _matrix = _delegate->lookAt(_position->val(), _target->val(), _up->val());
             return true;
         }
@@ -103,7 +103,7 @@ public:
     }
 
     virtual bool update(uint64_t timestamp) override {
-        if(VariableUtil::update(timestamp, _lvalue, _rvalue)) {
+        if(UpdatableUtil::update(timestamp, _lvalue, _rvalue)) {
             _matrix = MatrixUtil::mul(_lvalue->val(), _rvalue->val());
             return true;
         }

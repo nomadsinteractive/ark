@@ -23,7 +23,7 @@ M4 TransformNone::toMatrix(const Transform::Snapshot& /*snapshot*/) const
     return M4::identity();
 }
 
-template<> ARK_API sp<Transform::Delegate> Null::ptr()
+template<> ARK_API sp<Transform::Delegate> Null::safePtr()
 {
     return Global<TransformNone>().cast<Transform::Delegate>();
 }

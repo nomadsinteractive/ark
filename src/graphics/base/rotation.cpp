@@ -97,7 +97,7 @@ void Rotation::setEuler(const sp<Numeric>& pitch, const sp<Numeric>& yaw, const 
     _timestamp.setDirty();
 }
 
-template<> ARK_API sp<Rotation> Null::ptr()
+template<> ARK_API sp<Rotation> Null::safePtr()
 {
     return sp<Rotation>::make(sp<Numeric>::make<Numeric::Const>(0.0f));
 }

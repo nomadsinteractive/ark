@@ -6,10 +6,9 @@
 
 #include "graphics/base/frame.h"
 #include "graphics/base/render_object.h"
-#include "graphics/impl/renderer/renderer_by_render_object.h"
 
 namespace ark {
-
+/*
 Frame::Frame(const sp<Renderer>& renderer)
     : _renderer(renderer), _block(renderer ? renderer.as<Block>() : nullptr)
 {
@@ -47,5 +46,5 @@ const sp<Size>& Frame::size() const
     DASSERT(_block);
     return _block->size();
 }
-
+*/
 }

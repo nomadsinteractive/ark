@@ -131,7 +131,7 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
     for(size_t i = 0; i < snapshot._items.size(); ++i)
     {
         const Renderable::Snapshot& s = snapshot._items.at(i);
-        if(reload || s.getState(Renderable::RENDERABLE_STATE_DIRTY))
+        if(reload || s._state.hasState(Renderable::RENDERABLE_STATE_DIRTY))
         {
             if(s._varyings._sub_properties.size() > 0)
             {
@@ -156,7 +156,7 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
         for(const NodeInstance& j : i._node_instances)
         {
             const Renderable::Snapshot& s = snapshot._items.at(j.snapshotIndex());
-            if(reload || s.getState(Renderable::RENDERABLE_STATE_DIRTY))
+            if(reload || s._state.hasState(Renderable::RENDERABLE_STATE_DIRTY))
             {
                 const ModelBundle::ModelLayout& modelInfo = _model_bundle->ensureModelLayout(s._type);
                 const Metrics& metrics = modelInfo._model->metrics();

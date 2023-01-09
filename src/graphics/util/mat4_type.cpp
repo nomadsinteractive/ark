@@ -4,7 +4,7 @@
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/impl/variable/variable_op2.h"
 #include "core/util/operators.h"
-#include "core/util/variable_util.h"
+#include "core/util/updatable_util.h"
 
 #include "graphics/base/mat.h"
 #include "graphics/impl/mat/mat4_impl.h"
@@ -79,7 +79,7 @@ sp<Mat4Impl> Mat4Type::ensureImpl(const sp<Mat4>& self)
     return impl;
 }
 
-template<> ARK_API sp<Mat4> Null::ptr()
+template<> ARK_API sp<Mat4> Null::safePtr()
 {
     return sp<Mat4Impl>::make();
 }

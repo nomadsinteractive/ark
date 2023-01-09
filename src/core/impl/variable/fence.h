@@ -5,18 +5,18 @@
 #include "core/base/notifier.h"
 #include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
-#include "core/util/variable_util.h"
+#include "core/util/updatable_util.h"
 
 namespace ark {
 
-template<typename T> class Fence : public Variable<T>::Updatable {
+template<typename T> class Fence : public Variable<T>::ByUpdate {
 public:
     Fence(const sp<Variable<T>>& delegate, const sp<Variable<T>>& expectation, Notifier notifier)
-        : Variable<T>::Updatable(delegate->val()), _delegate(delegate), _expectation(expectation), _notifer(std::move(notifier)), _is_greater(this->val() > expectation->val()) {
+        : Variable<T>::ByUpdate(delegate->val()), _delegate(delegate), _expectation(expectation), _notifer(std::move(notifier)), _is_greater(this->val() > expectation->val()) {
     }
 
     virtual bool doUpdate(uint64_t timestamp, T& value) override {
-        if(!VariableUtil::update(timestamp, _delegate, _expectation))
+        if(!UpdatableUtil::update(timestamp, _delegate, _expectation))
             return false;
 
         value = _delegate->val();

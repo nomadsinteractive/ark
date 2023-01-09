@@ -122,7 +122,7 @@ void Color::doNotify()
     notify();
 }
 
-template<> ARK_API Color Conversions::to<String, Color>(const String& s)
+template<> ARK_API Color StringConvert::to<String, Color>(const String& s)
 {
     const String val = s.toLower();
     uint32_t r = 0, g = 0, b = 0, a = 255;

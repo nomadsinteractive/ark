@@ -1,7 +1,7 @@
 #include "graphics/impl/mat/mat2_impl.h"
 
 #include "core/impl/variable/variable_wrapper.h"
-#include "core/util/variable_util.h"
+#include "core/util/updatable_util.h"
 
 #include "graphics/base/mat.h"
 
@@ -23,7 +23,7 @@ public:
     }
 
     virtual bool update(uint64_t timestamp) override {
-        return VariableUtil::update(timestamp, _t, _b);
+        return UpdatableUtil::update(timestamp, _t, _b);
     }
 
 private:

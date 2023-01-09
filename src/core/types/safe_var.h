@@ -2,58 +2,62 @@
 #define ARK_CORE_TYPES_SAFE_VAR_H_
 
 #include "core/inf/variable.h"
-#include "core/base/wrapper.h"
 #include "core/types/null.h"
 #include "core/types/shared_ptr.h"
 
 namespace ark {
 
-class _SafeVarDefaultUpdater {
-public:
-    void operator() () const {}
-
-};
-
-template<typename T> class SafeVar : public Wrapper<T> {
+template<typename T> class SafeVar {
 public:
     typedef decltype(std::declval<T>().val()) ValType;
+    typedef T _PtrType;
 
     SafeVar() noexcept
-        : Wrapper<T>(nullptr) {
+        : _wrapped(nullptr) {
     }
     SafeVar(sp<T> delegate) noexcept
-        : Wrapper<T>(std::move(delegate)) {
+        : _wrapped(std::move(delegate)) {
     }
     SafeVar(sp<T> delegate, const ValType& defaultVal) noexcept
-        : Wrapper<T>(std::move(delegate)), _default_val(defaultVal) {
+        : _wrapped(std::move(delegate)), _default_val(defaultVal) {
     }
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(SafeVar);
 
     explicit operator bool() const {
-        return static_cast<bool>(this->_wrapped);
+        return static_cast<bool>(_wrapped);
     }
 
     bool operator == (const sp<T>& other) const {
-        return this->_wrapped != other;
+        return _wrapped != other;
     }
     bool operator != (const sp<T>& other) const {
-        return this->_wrapped != other;
+        return _wrapped != other;
     }
 
     ValType val() const {
-        return this->_wrapped ? this->_wrapped->val() : _default_val;
+        return _wrapped ? _wrapped->val() : _default_val;
     }
 
     bool update(uint64_t timestamp) const {
-        return this->_wrapped ? this->_wrapped->update(timestamp) : false;
+        return _wrapped ? _wrapped->update(timestamp) : false;
     }
 
-    template<typename UPDATER = _SafeVarDefaultUpdater> const sp<T>& ensure(const UPDATER& updater = UPDATER()) {
-        if(!this->_wrapped) {
-            this->_wrapped = ensure_sfinae(nullptr);
-            updater();
-        }
-        return this->_wrapped;
+    operator const sp<T>&() const {
+        return ensure();
+    }
+
+    const sp<T>& ensure() const {
+        if(!_wrapped)
+            _wrapped = ensure_sfinae(nullptr);
+        return _wrapped;
+    }
+
+    const sp<T>& wrapped() const {
+        return _wrapped;
+    }
+
+    void reset(sp<T> wrapped) {
+        _wrapped = std::move(wrapped);
     }
 
 private:
@@ -67,10 +71,11 @@ private:
 
     template<typename U = T> sp<T> ensure_sfinae(...) const {
         DFATAL("Constructor for default value required");
-        return Null::toSafe<U>(nullptr);
+        return Null::toSafePtr<U>(nullptr);
     }
 
 private:
+    mutable sp<T> _wrapped;
     ValType _default_val;
 };
 

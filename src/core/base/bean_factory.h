@@ -121,9 +121,8 @@ private:
                         CHECK(node, "Style \"%s\" not found", style.substr(1).c_str());
                         f = factory.decorate<T>(f, node);
                     } else {
-                        String key, value;
-                        Strings::parseNameValuePair(style, ':', key, value);
-                        f = factory.decorate<T>(f, key, value);
+                        const auto [key, value] = style.cut(':');
+                        f = factory.decorate<T>(f, key, value ? value.value() : "");
                     }
                 }
                 return f;

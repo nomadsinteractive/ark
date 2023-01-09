@@ -4,7 +4,7 @@
 #include "core/base/bean_factory.h"
 #include "core/base/future.h"
 #include "core/inf/executor.h"
-#include "core/util/conversions.h"
+#include "core/util/string_convert.h"
 
 #include "renderer/base/atlas.h"
 #include "renderer/base/material_bundle.h"

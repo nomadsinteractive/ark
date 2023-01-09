@@ -86,15 +86,10 @@ const sp<Animation>& Model::getAnimation(const String& name) const
     return _animations.at(name);
 }
 
-V3 Model::toScale(const V3& renderObjectSize) const
-{
-    const Metrics& m = _metrics;
-    return V3(renderObjectSize.x() == 0 ? m.width() : renderObjectSize.x(), renderObjectSize.y() == 0 ? m.height() : renderObjectSize.y(), renderObjectSize.z() == 0 ? m.depth() : renderObjectSize.z());
-}
-
 void Model::writeToStream(VertexWriter& buf, const V3& size) const
 {
-    _vertices->write(buf, toScale(size));
+    const Metrics& m = _metrics;
+    _vertices->write(buf, size == V3(0) ? m.size() : size);
 }
 
 void Model::writeRenderable(VertexWriter& writer, const Renderable::Snapshot& renderable) const

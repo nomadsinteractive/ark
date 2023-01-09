@@ -9,7 +9,7 @@
 #include "graphics/impl/vec/vec4_impl.h"
 
 #include "app/base/event.h"
-#include "app/view/layout_hierarchy.h"
+#include "app/view/view_hierarchy.h"
 
 namespace ark {
 

@@ -11,32 +11,33 @@
 
 #include "app/base/application_context.h"
 #include "app/impl/event_listener/event_listener_list.h"
+#include "app/view/view.h"
 
 
 namespace ark {
 
-Arena::Arena(const sp<ViewGroup>& view, const sp<ResourceLoader>& resourceLoader)
-    : _event_listeners(new EventListenerList()), _view_group(view), _resource_loader(resourceLoader)
+Arena::Arena(sp<View> view, sp<ResourceLoader> resourceLoader)
+    : _view(std::move(view)), _resource_loader(std::move(resourceLoader)), _event_listeners(new EventListenerList())
 {
-    DCHECK(_view_group.is<ViewGroup>(), "Arena's renderer delegate must be ViewGroup");
+    _view->markAsTopView();
 }
 
 Arena::~Arena()
 {
-    Ark::instance().applicationContext()->deferUnref(std::move(_view_group));
+    Ark::instance().applicationContext()->deferUnref(std::move(_view));
     LOGD("");
 }
 
 void Arena::addRenderer(const sp<Renderer>& renderer)
 {
-    DASSERT(_view_group);
-    _view_group->addRenderer(renderer);
+    DASSERT(_view);
+    _view->addRenderer(renderer);
 }
 
 void Arena::render(RenderRequest& renderRequest, const V3& position)
 {
-    DASSERT(_view_group);
-    _view_group->render(renderRequest, position);
+    DASSERT(_view);
+    _view->render(renderRequest, position);
     for(const sp<Renderer>& i : _layers.update(renderRequest.timestamp()))
         i->render(renderRequest, position);
     for(const sp<Renderer>& i : _render_layers.update(renderRequest.timestamp()))
@@ -45,13 +46,13 @@ void Arena::render(RenderRequest& renderRequest, const V3& position)
 
 bool Arena::onEvent(const Event& event)
 {
-    DASSERT(_view_group);
-    return _view_group->onEvent(event, 0.0f, 0.0f, true) || _event_listeners->onEvent(event);
+    DASSERT(_view);
+    return _view->onEvent(event, 0.0f, 0.0f, true) || _event_listeners->onEvent(event);
 }
 
 void Arena::traverse(const Holder::Visitor& visitor)
 {
-    HolderUtil::visit(_view_group, visitor);
+    HolderUtil::visit(_view, visitor);
     for(const auto& i : _layers.items())
         HolderUtil::visit(i._item, visitor);
     for(const auto& i : _render_layers.items())
@@ -115,35 +116,34 @@ void Arena::addRenderLayer(sp<Renderer> renderLayer)
     _render_layers.push_back(std::move(renderLayer));
 }
 
-void Arena::setView(const sp<Renderer>& view)
+void Arena::setView(sp<View> view)
 {
-    DCHECK(view.is<ViewGroup>(), "Arena's renderer delegate must be ViewGroup");
-    _view_group = view.as<ViewGroup>();
+    _view = std::move(view);
 }
 
-const sp<ViewGroup>& Arena::view() const
+const sp<View>& Arena::view() const
 {
-    return _view_group;
+    return _view;
+}
+
+void Arena::addView(sp<View> view)
+{
+    _view->addView(std::move(view));
 }
 
 Arena::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _factory(factory), _manifest(manifest), _resource_loader(factory.getBuilder<ResourceLoader>(manifest, "resource-loader")),
-      _layout(factory.getBuilder<Layout>(manifest, Constants::Attributes::LAYOUT)),
-      _layout_param(factory.ensureBuilder<LayoutParam>(manifest)),
-      _background(Documents::getAttribute(manifest, Constants::Attributes::BACKGROUND)),
-      _view(Documents::getAttribute(manifest, Constants::Attributes::VIEW))
+      _view(factory.getBuilder<View>(manifest, Constants::Attributes::VIEW))
 {
 }
 
 sp<Arena> Arena::BUILDER::build(const Scope& args)
 {
-    const sp<ResourceLoader> r1 = _resource_loader->build(args);
-    const sp<ResourceLoader> resourceLoader = r1 ? r1 : sp<ResourceLoader>::make(_factory);
-    const sp<Renderer> background = _background.empty() ? nullptr : resourceLoader->load<Renderer>(_background, args);
-    const sp<Renderer> view = _view ? resourceLoader->load<Renderer>(_view, args) : nullptr;
-    const sp<Arena> arena = sp<Arena>::make(view ? view : sp<ViewGroup>::make(background, _layout->build(args), nullptr, _layout_param->build(args)).cast<Renderer>(), resourceLoader);
-
+    sp<ResourceLoader> r1 = _resource_loader->build(args);
+    sp<ResourceLoader> resourceLoader = r1 ? std::move(r1) : sp<ResourceLoader>::make(_factory);
     BeanFactory& factory = resourceLoader->beanFactory();
+    sp<Arena> arena = sp<Arena>::make(_view->build(args), std::move(resourceLoader));
+
     for(const document& i : _manifest->children())
     {
         const String& name = i->name();
@@ -153,9 +153,9 @@ sp<Arena> Arena::BUILDER::build(const Scope& args)
             arena->addRenderLayer(factory.ensureDecorated<Renderer, RenderLayer>(i, args));
         else if(name == Constants::Attributes::LAYER)
             arena->addLayer(factory.ensureDecorated<Renderer, Layer>(i, args));
-        else
+        else if(name != Constants::Attributes::VIEW)
         {
-            DWARN(name == Constants::Attributes::RENDERER || name == Constants::Attributes::VIEW, "[Renderer, RenderLayer, Layer, View] expected, \"%s\" found", name.c_str());
+            WARN(name == Constants::Attributes::RENDERER, "['Renderer', 'RenderLayer', 'Layer'] expected, \"%s\" found", name.c_str());
             arena->addRenderer(factory.ensure<Renderer>(i, args));
         }
     }

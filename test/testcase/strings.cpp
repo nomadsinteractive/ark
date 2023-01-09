@@ -10,6 +10,7 @@
 #include "graphics/base/color.h"
 
 #include "app/view/view.h"
+#include "app/view/layout_param.h"
 
 #include "test/base/test_case.h"
 
@@ -20,11 +21,9 @@ class StringsTestCase : public TestCase {
 public:
     virtual int launch() {
         String str = "left:0; top:0; width:20; height:20; auto";
-        const std::map<String, String> properties = Strings::parseProperties(str);
-        const String& s = Strings::getProperty(properties, "abc");
-        const String& left = Strings::getProperty(properties, "left");
+        std::map<String, String> properties = Strings::parseProperties(str);
 
-        TESTCASE_VALIDATE(s.empty() && !left.empty());
+        TESTCASE_VALIDATE(properties["abc"].empty() && !properties["left"].empty());
 
         Rect rect = Strings::parse<Rect>("(0, 0, 20, 30)");
         TESTCASE_VALIDATE(rect.left() == 0 && rect.top() == 0 && rect.width() == 20 && rect.height() == 30);

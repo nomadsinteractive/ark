@@ -6,7 +6,7 @@
 #include "core/inf/array.h"
 #include "core/types/safe_ptr.h"
 #include "core/types/global.h"
-#include "core/util/conversions.h"
+#include "core/util/string_convert.h"
 #include "core/util/documents.h"
 #include "core/util/strings.h"
 
@@ -176,7 +176,7 @@ sp<PipelineBuildingContext> Shader::BUILDER::makePipelineBuildingContext(const S
     return context;
 }
 
-template<> ARK_API PipelineInput::ShaderStage Conversions::to<String, PipelineInput::ShaderStage>(const String& val)
+template<> ARK_API PipelineInput::ShaderStage StringConvert::to<String, PipelineInput::ShaderStage>(const String& val)
 {
     if(val == "vertex")
         return PipelineInput::SHADER_STAGE_VERTEX;

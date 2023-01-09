@@ -5,19 +5,19 @@
 #include "core/base/notifier.h"
 #include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
-#include "core/util/variable_util.h"
+#include "core/util/updatable_util.h"
 
 namespace ark {
 
-template<typename T> class Clamp : public Variable<T>::Updatable {
+template<typename T> class Clamp : public Variable<T>::ByUpdate {
 public:
     Clamp(const sp<Variable<T>>& delegate, const sp<Variable<T>>& min, const sp<Variable<T>>& max, Notifier notifier)
-        : Variable<T>::Updatable(delegate->val()), _delegate(delegate), _min(min), _max(max), _notifier(std::move(notifier)) {
+        : Variable<T>::ByUpdate(delegate->val()), _delegate(delegate), _min(min), _max(max), _notifier(std::move(notifier)) {
         doClamp(this->_value);
     }
 
     virtual bool doUpdate(uint64_t timestamp, T& value) override {
-        if(!VariableUtil::update(timestamp, _delegate, _min, _max))
+        if(!UpdatableUtil::update(timestamp, _delegate, _min, _max))
             return false;
 
         doClamp(value);

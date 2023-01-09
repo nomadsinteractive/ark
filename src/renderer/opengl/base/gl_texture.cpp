@@ -2,7 +2,7 @@
 
 #include "core/inf/array.h"
 #include "core/inf/variable.h"
-#include "core/util/conversions.h"
+#include "core/util/string_convert.h"
 #include "core/util/documents.h"
 #include "core/util/log.h"
 

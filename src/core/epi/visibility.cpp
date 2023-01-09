@@ -60,7 +60,7 @@ sp<Visibility> Visibility::DICTIONARY::build(const Scope& args)
     return sp<Visibility>::make(_visible->build(args));
 }
 
-template<> ARK_API sp<Visibility> Null::ptr()
+template<> ARK_API sp<Visibility> Null::safePtr()
 {
     return sp<Visibility>::make(true);
 }

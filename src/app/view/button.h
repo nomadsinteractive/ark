@@ -4,6 +4,7 @@
 #include "core/base/api.h"
 #include "core/forwarding.h"
 #include "core/inf/builder.h"
+#include "core/types/implements.h"
 #include "core/types/safe_ptr.h"
 #include "core/types/owned_ptr.h"
 
@@ -12,13 +13,14 @@
 
 #include "app/inf/event_listener.h"
 #include "app/view/view.h"
+#include "app/view/layout_param.h"
 #include "app/forwarding.h"
 
 namespace ark {
 
-class Button final : public View, public Renderer {
+class Button final : public View, Implements<Button, View, Renderer> {
 public:
-    Button(const sp<Renderer>& foreground, const sp<Renderer>& background, const sp<Size>& block, LayoutParam::Gravity gravity);
+    Button(sp<Renderer> foreground, sp<Renderer> background, sp<Size> block, LayoutParam::Gravity gravity);
     ~Button() override;
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;

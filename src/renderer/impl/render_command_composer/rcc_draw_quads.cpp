@@ -38,8 +38,6 @@ sp<RenderCommand> RCCDrawQuads::compose(const RenderRequest& renderRequest, Rend
     const Buffer& vertices = snapshot._stub->_shader_bindings->vertices();
 
     DrawingBuffer buf(snapshot._stub->_shader_bindings, snapshot._stub->_stride);
-//    size_t primitiveCount = snapshot._index_count / 6;
-//    buf.setIndices(_shared_buffer->snapshot(renderRequest, primitiveCount, primitiveCount));
     buf.setIndices(snapshot._index_buffer);
 
     size_t offset = 0;
@@ -47,7 +45,7 @@ sp<RenderCommand> RCCDrawQuads::compose(const RenderRequest& renderRequest, Rend
     for(const Renderable::Snapshot& i : snapshot._items)
     {
         size_t vertexCount = i._model->vertexCount();
-        if(reload || i.getState(Renderable::RENDERABLE_STATE_DIRTY))
+        if(reload || i._state.hasState(Renderable::RENDERABLE_STATE_DIRTY))
         {
             VertexWriter writer = buf.makeVertexWriter(renderRequest, vertexCount, offset);
             i._model->writeRenderable(writer, i);

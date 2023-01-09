@@ -5,8 +5,8 @@
 
 namespace ark {
 
-RendererWithState::RendererWithState(const sp<Renderer>& def, const sp<View::State>& state)
-    : _default(def), _state(state)
+RendererWithState::RendererWithState(sp<Renderer> def, sp<View::State> state)
+    : _default(std::move(def)), _state(std::move(state))
 {
 }
 

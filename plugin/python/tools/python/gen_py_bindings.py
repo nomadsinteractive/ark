@@ -40,7 +40,6 @@ AUTOBIND_CLASS_PATTERN = re.compile(r'\[\[script::bindings::(class|name)\(([^)]+
 AUTOBIND_EXTENDS_PATTERN = re.compile(r'\[\[script::bindings::extends\((\w+)\)]]')
 AUTOBIND_TYPEDEF_PATTERN = re.compile(r'\[\[script::bindings::auto]]\s+typedef\s+\w[\w<>\s]+\s+(\w+);')
 AUTOBIND_ANNOTATION_PATTERN = re.compile(r'\[\[script::bindings::(auto|container|holder)]]%s\s+class\s+([^{\r\n]+)\s*{' % ANNOTATION_PATTERN)
-AUTOBIND_META_PATTERN = re.compile(r'\[\[script::bindings::meta\(([^)]+)\([^)]*\)\)]]')
 
 BUILDABLE_PATTERN = re.compile(r'\[\[plugin::(?:builder|resource-loader)[^]]*]]\s+class\s+\w+\s*:\s*public\s+Builder<([^{]+)>\s*{')
 
@@ -295,7 +294,6 @@ def gen_py_binding_cpp(name, namespaces, includes, lines):
 #include "core/ark.h"
 
 #include "python/extension/arkmodule.h"
-#include "python/extension/py_ark_meta_type.h"
 
 %s
 
@@ -338,20 +336,6 @@ class GenConstructorMethod(GenMethod):
             return m1
         except AttributeError:
             return create_overloaded_method_type(GenConstructorMethod)(m1, m2)
-
-
-class GenMetaMethod(GenMethod):
-    def __init__(self, name):
-        GenMethod.__init__(self, name, [], '')
-
-    def gen_declaration(self):
-        return []
-
-    def gen_definition(self, classname):
-        return None
-
-    def gen_py_method_def(self, genclass):
-        return '{"%s", (PyCFunction) PyArkMetaType<%s>::%s, %s, nullptr}' % (acg.camel_case_to_snake_case(self._name), genclass.binding_classname, self._name, self._flags)
 
 
 class GenPropertyMethod(GenMethod):
@@ -834,10 +818,6 @@ def main(params, paths):
         genclass = get_result_class(results, filename, main_class)
         genclass.add_constant(x[0], x[1])
 
-    def autometa(filename, content, main_class, x):
-        genclass = get_result_class(results, filename, main_class)
-        genclass.add_method(GenMetaMethod(x))
-
     def autobindable(filename, content, main_class, x):
         bindables.add(x)
 
@@ -862,7 +842,6 @@ def main(params, paths):
                               HeaderPattern(AUTOBIND_SETPROP_PATTERN, AutoMethodCall(GenSetPropMethod, 3)),
                               HeaderPattern(AUTOBIND_CONSTANT_PATTERN, autoconstant),
                               HeaderPattern(AUTOBIND_ENUMERATION_PATTERN, autoenumeration),
-                              HeaderPattern(AUTOBIND_META_PATTERN, autometa),
                               HeaderPattern(BUILDABLE_PATTERN, autobindable))
 
     acg.match_header_patterns(paths, False,

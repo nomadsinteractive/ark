@@ -3,7 +3,7 @@
 #include "core/base/api.h"
 #include "core/base/plugin_manager.h"
 #include "core/types/shared_ptr.h"
-#include "core/util/conversions.h"
+#include "core/util/string_convert.h"
 
 #include "python/impl/script/python_script.h"
 #include "python/extension/python_interpreter.h"

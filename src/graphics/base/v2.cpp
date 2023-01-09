@@ -4,7 +4,7 @@
 #include "core/inf/variable.h"
 #include "core/types/null.h"
 #include "core/types/shared_ptr.h"
-#include "core/util/conversions.h"
+#include "core/util/string_convert.h"
 #include "core/util/math.h"
 #include "core/util/strings.h"
 
@@ -172,7 +172,7 @@ void V2::initialize(const std::initializer_list<float>& values, size_t len)
         (*this)[idx++] = i;
 }
 
-template<> ARK_API V2 Conversions::to<String, V2>(const String& str)
+template<> ARK_API V2 StringConvert::to<String, V2>(const String& str)
 {
     std::vector<String> sst = str.split(',');
     DCHECK(sst.size() == 2, "Illegal size: %s", str.c_str());

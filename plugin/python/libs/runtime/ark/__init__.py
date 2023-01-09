@@ -9,12 +9,11 @@ Use it for:
 3. Unit test(maybe)
 
 """
-from ctypes import Structure
 from typing import Callable, List, Type, TypeVar, Union, Optional, Dict, Tuple, Any
 
 _BUILDABLE_TYPES = TypeVar('_BUILDABLE_TYPES', 'Arena', 'AudioPlayer', 'Boolean', 'Characters', 'Collider', 'Integer', 'ModelLoader', 'Numeric', 'NarrowPhrase',
                            'Layer', 'Vec2', 'Vec3', 'Vec4', 'Renderer', 'RenderLayer', 'RenderObject', 'Rotation', 'Size', 'StringBundle', 'Tilemap',
-                           'TilemapImporter', 'Tileset', 'TilesetImporter', 'Transform', 'Varyings')
+                           'TilemapImporter', 'Tileset', 'TilesetImporter', 'Transform', 'Varyings', 'View')
 
 
 TYPE_INTEGER = Union[int, 'Integer']
@@ -1371,6 +1370,9 @@ class Arena:
     def add_renderer(self, renderer: Renderer):
         pass
 
+    def add_view(self, view: 'View'):
+        pass
+
     def add_layer(self, layer: Renderer):
         pass
 
@@ -2288,7 +2290,17 @@ class LayoutParam:
     GRAVITY_CENTER = GRAVITY_CENTER_VERTICAL | GRAVITY_CENTER_HORIZONTAL
     GRAVITY_DEFAULT = GRAVITY_CENTER
 
-    def __init__(self, size: Size, display: int = DISPLAY_BLOCK, gravity: int = GRAVITY_DEFAULT, weight: float = 0):
+    def __init__(self, size: Size = None, display: int = DISPLAY_BLOCK, gravity: int = GRAVITY_DEFAULT, weight: float = 0):
+        pass
+
+
+class View(Renderer):
+
+    @property
+    def layout_param(self) -> LayoutParam:
+        return LayoutParam()
+
+    def add_view(self, view: 'View'):
         pass
 
 

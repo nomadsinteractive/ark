@@ -77,9 +77,6 @@ public:
 
 
 private:
-    V3 toScale(const V3& renderObjectSize) const;
-
-private:
     class InputMeshIndices : public Input {
     public:
         InputMeshIndices(std::vector<sp<Mesh>> meshes);

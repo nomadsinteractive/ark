@@ -173,7 +173,7 @@ public:
         return false;
     }
 
-    static SharedPtr<void>& null() {
+    static const SharedPtr<void>& null() {
         static SharedPtr<void> s;
         return s;
     }

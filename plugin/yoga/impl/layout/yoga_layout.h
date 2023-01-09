@@ -19,8 +19,8 @@ public:
     YogaLayout();
     virtual ~YogaLayout() override;
 
-    virtual void inflate(Node& rootNode) override;
-    virtual void place(Node& rootNode) override;
+    virtual void inflate(sp<Node> rootNode) override;
+    virtual bool update(uint64_t timestamp) override;
 
 //  [[plugin::builder::by-value("yoga")]]
     class BUILDER : public Builder<LayoutV3> {
@@ -43,13 +43,15 @@ private:
     };
 
 private:
-    static void applyLayoutParam(const LayoutParam& layoutParam, YGNodeRef node);
+    static void applyLayoutParam(const LayoutParam& layoutParam, YGNodeRef node, uint64_t timestamp);
+    static void updateLayoutResult(LayoutV3::Node& layoutNode);
 
     static YGNodeRef doInflate(const Global<YogaConfig>& config, LayoutV3::Node& layoutNode, YGNodeRef parentNode);
+    static void doUpdate(LayoutV3::Node& layoutNode, uint64_t timestamp);
 
 private:
-    YGNodeRef _root_node;
-
+    YGNodeRef _yg_node;
+    sp<Node> _layout_node;
 };
 
 }

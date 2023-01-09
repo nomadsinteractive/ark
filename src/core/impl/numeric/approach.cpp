@@ -2,7 +2,7 @@
 
 #include "core/base/notifier.h"
 #include "core/util/math.h"
-#include "core/util/variable_util.h"
+#include "core/util/updatable_util.h"
 
 namespace ark {
 
@@ -18,7 +18,7 @@ float Approach::val()
 
 bool Approach::update(uint64_t timestamp)
 {
-    if(!VariableUtil::update(timestamp, _delegate, _expectation))
+    if(!UpdatableUtil::update(timestamp, _delegate, _expectation))
         return false;
 
     float value = _delegate->val();

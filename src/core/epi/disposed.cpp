@@ -58,7 +58,7 @@ sp<Disposed> Disposed::DICTIONARY::build(const Scope& args)
     return _delegate ? sp<Disposed>::make(_delegate->build(args)) : sp<Disposed>::make(_disposed);
 }
 
-template<> ARK_API sp<Disposed> Null::ptr()
+template<> ARK_API sp<Disposed> Null::safePtr()
 {
     return sp<Disposed>::make(false);
 }

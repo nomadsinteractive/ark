@@ -6,7 +6,7 @@
 #include "core/inf/builder.h"
 #include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
-#include "core/util/variable_util.h"
+#include "core/util/updatable_util.h"
 
 #include "graphics/forwarding.h"
 #include "graphics/base/v3.h"

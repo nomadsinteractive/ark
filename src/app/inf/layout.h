@@ -4,10 +4,11 @@
 #include <vector>
 
 #include "core/base/api.h"
+#include "core/inf/updatable.h"
+#include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
-#include "graphics/base/size.h"
-#include "graphics/impl/vec/vec3_impl.h"
+#include "graphics/base/v4.h"
 
 #include "app/forwarding.h"
 
@@ -22,26 +23,26 @@ public:
 
 };
 
-class ARK_API LayoutV3 {
+class ARK_API LayoutV3 : public Updatable {
 public:
     struct Node {
-        Node(sp<LayoutParam> layoutParam, void* tag = nullptr)
-            : _layout_param(std::move(layoutParam)), _position(sp<Vec3Impl>::make()), _size(sp<Size>::make()), _tag(tag) {
+        Node(sp<LayoutParam> layoutParam, sp<ViewHierarchy> viewHierarchy, void* tag = nullptr)
+            : _layout_param(std::move(layoutParam)), _view_hierarchy(std::move(viewHierarchy)), _tag(tag) {
         }
 
         sp<LayoutParam> _layout_param;
-        sp<Vec3Impl> _position;
-        sp<Size> _size;
+        sp<ViewHierarchy> _view_hierarchy;
         void* _tag;
 
-        std::vector<sp<Node>> _child_nodes;
+        V4 _paddings;
+        V2 _offset_position;
+        V2 _size;
     };
 
 public:
     virtual ~LayoutV3() = default;
 
-    virtual void inflate(Node& rootNode) = 0;
-    virtual void place(Node& rootNode) = 0;
+    virtual void inflate(sp<Node> rootNode) = 0;
 };
 
 }

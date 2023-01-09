@@ -2,6 +2,8 @@
 
 #include "core/util/math.h"
 
+#include "graphics/base/rect.h"
+
 #include "app/util/layout_util.h"
 #include "app/view/view.h"
 
@@ -40,11 +42,11 @@ std::vector<V2> VerticalLayoutV2::place(const std::vector<sp<LayoutParam>>& slot
     Rect r = hasWeight ? Rect(0, 0, parent.contentWidth(), parent.contentWidth()) : Rect(layoutPos.x(), layoutPos.y(), contentSize.x(), contentSize.y());
 
     LayoutParam::FlexDirection ff = LayoutParam::FLEX_DIRECTION_ROW;
-    for(const sp<LayoutParam>& i : slots)
+    for(const LayoutParam& i : slots)
     {
-        float width = i->calcLayoutWidth(parent.contentWidth());
-        float height = i->calcLayoutHeight(i->hasFlexGrow() ? i->flexGrow() * unitWeight : parent.contentHeight());
-        positions.push_back(LayoutUtil::place(i->gravity(), ff, V2(width, height), r));
+        float width = i.calcLayoutWidth(parent.contentWidth());
+        float height = i.calcLayoutHeight(i.hasFlexGrow() ? i.flexGrow() * unitWeight : parent.contentHeight());
+        positions.push_back(LayoutUtil::place(i.gravity(), ff, V2(width, height), r));
     }
 
     return positions;

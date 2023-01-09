@@ -36,7 +36,7 @@ void Layer::dispose()
 
 const sp<Visibility>& Layer::visible() const
 {
-    return _layer_context->visible().ensure();
+    return _layer_context->visible();
 }
 
 void Layer::setVisible(sp<Boolean> visible)
@@ -97,7 +97,7 @@ sp<Renderer> Layer::BUILDER_IMPL2::build(const Scope& args)
     return _builder_impl.build(args);
 }
 
-template<> ARK_API Layer::Type Conversions::to<String, Layer::Type>(const String& str)
+template<> ARK_API Layer::Type StringConvert::to<String, Layer::Type>(const String& str)
 {
     if(str == "dynamic")
         return Layer::TYPE_DYNAMIC;

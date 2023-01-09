@@ -15,7 +15,7 @@
 #include "core/util/holder_util.h"
 #include "core/util/numeric_type.h"
 #include "core/util/operators.h"
-#include "core/util/variable_util.h"
+#include "core/util/updatable_util.h"
 
 #include "graphics/base/size.h"
 #include "graphics/impl/vec/vec2_impl.h"
@@ -42,7 +42,7 @@ public:
     }
 
     virtual bool update(uint64_t timestamp) override {
-        return VariableUtil::update(timestamp, _delegate, _plane);
+        return UpdatableUtil::update(timestamp, _delegate, _plane);
     }
 
     virtual void traverse(const Visitor& visitor) override {
@@ -106,7 +106,7 @@ sp<Numeric> Vec2Type::atan2(sp<Vec2> self)
     return sp<VariableOP1<float, V2>>::make(_atan2, std::move(self));
 }
 
-template<> ARK_API sp<Vec2> Null::ptr()
+template<> ARK_API sp<Vec2> Null::safePtr()
 {
     return sp<Vec2Impl>::make();
 }

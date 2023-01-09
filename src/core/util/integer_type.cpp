@@ -13,7 +13,7 @@
 #include "core/impl/variable/variable_op1.h"
 #include "core/impl/variable/variable_op2.h"
 #include "core/impl/variable/variable_ternary.h"
-#include "core/util/conversions.h"
+#include "core/util/string_convert.h"
 #include "core/util/operators.h"
 #include "core/util/strings.h"
 #include "core/util/shared_ptr_util.h"
@@ -301,7 +301,7 @@ sp<Integer> IntegerType::BUILDER::build(const Scope& args)
     return _delegate.build(args);
 }
 
-template<> ARK_API IntegerType::Repeat Conversions::to<String, IntegerType::Repeat>(const String& str)
+template<> ARK_API IntegerType::Repeat StringConvert::to<String, IntegerType::Repeat>(const String& str)
 {
     return static_cast<IntegerType::Repeat>(IntegerType::toRepeat(str));
 }

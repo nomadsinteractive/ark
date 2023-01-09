@@ -1,4 +1,4 @@
-#include "core/util/conversions.h"
+#include "core/util/string_convert.h"
 
 #include <string>
 #include <stdlib.h>
@@ -16,43 +16,43 @@
 
 namespace ark {
 
-template<> ARK_API String Conversions::to<String, String>(const String& str)
+template<> ARK_API String StringConvert::to<String, String>(const String& str)
 {
     return str;
 }
 
-template<> ARK_API uint32_t Conversions::to<String, uint32_t>(const String& str)
+template<> ARK_API uint32_t StringConvert::to<String, uint32_t>(const String& str)
 {
     return atoi(str.c_str());
 }
 
-template<> ARK_API int32_t Conversions::to<String, int32_t>(const String& str)
+template<> ARK_API int32_t StringConvert::to<String, int32_t>(const String& str)
 {
     return atoi(str.c_str());
 }
 
-template<> ARK_API uint16_t Conversions::to<String, uint16_t>(const String& str)
+template<> ARK_API uint16_t StringConvert::to<String, uint16_t>(const String& str)
 {
     return static_cast<uint16_t>(atoi(str.c_str()));
 }
 
-template<> ARK_API int16_t Conversions::to<String, int16_t>(const String& str)
+template<> ARK_API int16_t StringConvert::to<String, int16_t>(const String& str)
 {
     return static_cast<int16_t>(atoi(str.c_str()));
 }
 
-template<> ARK_API float Conversions::to<String, float>(const String& str)
+template<> ARK_API float StringConvert::to<String, float>(const String& str)
 {
     if(str == "match_parent")
         return static_cast<float>(LayoutParam::SIZE_CONSTRAINT_MATCH_PARENT);
     if(str == "wrap_content")
         return static_cast<float>(LayoutParam::SIZE_CONSTRAINT_WRAP_CONTENT);
     if(str.endsWith("s"))
-        return Conversions::to<String, Clock::Interval>(str).sec();
+        return StringConvert::to<String, Clock::Interval>(str).sec();
     return static_cast<float>(atof(str.c_str()));
 }
 
-template<> ARK_API Ark::RendererVersion Conversions::to<String, Ark::RendererVersion>(const String& str)
+template<> ARK_API Ark::RendererVersion StringConvert::to<String, Ark::RendererVersion>(const String& str)
 {
     const String version = str.toLower();
     if(version.startsWith("opengl_"))
@@ -63,7 +63,7 @@ template<> ARK_API Ark::RendererVersion Conversions::to<String, Ark::RendererVer
     return Ark::AUTO;
 }
 
-template<> ARK_API Ark::RendererCoordinateSystem Conversions::to<String, Ark::RendererCoordinateSystem>(const String& str)
+template<> ARK_API Ark::RendererCoordinateSystem StringConvert::to<String, Ark::RendererCoordinateSystem>(const String& str)
 {
     const String cs = str.toLower();
     if(cs == "lhs")
@@ -72,32 +72,32 @@ template<> ARK_API Ark::RendererCoordinateSystem Conversions::to<String, Ark::Re
     return Ark::COORDINATE_SYSTEM_RHS;
 }
 
-template<> ARK_API String Conversions::to<uint32_t, String>(const uint32_t& val)
+template<> ARK_API String StringConvert::to<uint32_t, String>(const uint32_t& val)
 {
     return Strings::sprintf("%d", val);
 }
 
-template<> ARK_API String Conversions::to<int32_t, String>(const int32_t& val)
+template<> ARK_API String StringConvert::to<int32_t, String>(const int32_t& val)
 {
     return Strings::sprintf("%d", val);
 }
 
-template<> ARK_API String Conversions::to<uint16_t, String>(const uint16_t& val)
+template<> ARK_API String StringConvert::to<uint16_t, String>(const uint16_t& val)
 {
     return Strings::sprintf("%d", val);
 }
 
-template<> ARK_API String Conversions::to<int16_t, String>(const int16_t& val)
+template<> ARK_API String StringConvert::to<int16_t, String>(const int16_t& val)
 {
     return Strings::sprintf("%d", val);
 }
 
-template<> ARK_API String Conversions::to<float, String>(const float& val)
+template<> ARK_API String StringConvert::to<float, String>(const float& val)
 {
     return Strings::sprintf("%.2f", val);
 }
 
-template<> ARK_API bool Conversions::to<String, bool>(const String& str)
+template<> ARK_API bool StringConvert::to<String, bool>(const String& str)
 {
     if(str == "true")
         return true;
@@ -106,46 +106,36 @@ template<> ARK_API bool Conversions::to<String, bool>(const String& str)
     return !str.empty();
 }
 
-template<> ARK_API String Conversions::to<bool, String>(const bool& val)
+template<> ARK_API String StringConvert::to<bool, String>(const bool& val)
 {
     return val ? "true" : "false";
 }
 
-template<> ARK_API std::wstring Conversions::to<String, std::wstring>(const String& str)
+template<> ARK_API std::wstring StringConvert::to<String, std::wstring>(const String& str)
 {
     return Strings::fromUTF8(str);
 }
 
-template<> ARK_API String Conversions::to<std::wstring, String>(const std::wstring& str)
+template<> ARK_API String StringConvert::to<std::wstring, String>(const std::wstring& str)
 {
     return Strings::toUTF8(str);
 }
 
-template<> ARK_API sp<Numeric> Conversions::to<float, sp<Numeric>>(const float& val)
-{
-    return sp<Numeric::Impl>::make(val);
-}
-
-template<> ARK_API float Conversions::to<sp<Numeric>, float>(const sp<Numeric>& val)
-{
-    return val->val();
-}
-
-template<> ARK_API String Conversions::to<floatarray, String>(const floatarray& val)
+template<> ARK_API String StringConvert::to<floatarray, String>(const floatarray& val)
 {
     StringBuffer sb;
     sb << '[' << Strings::join<float>(val->buf(), 0, val->length()) << ']';
     return sb.str();
 }
 
-template<> ARK_API String Conversions::to<indexarray, String>(const indexarray& val)
+template<> ARK_API String StringConvert::to<indexarray, String>(const indexarray& val)
 {
     StringBuffer sb;
     sb << '[' << Strings::join<uint16_t>(val->buf(), 0, val->length()) << ']';
     return sb.str();
 }
 
-template<> ARK_API String Conversions::to<bytearray, String>(const bytearray& val)
+template<> ARK_API String StringConvert::to<bytearray, String>(const bytearray& val)
 {
     return Strings::dumpMemory(val->buf(), val->size());
 }

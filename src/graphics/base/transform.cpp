@@ -5,10 +5,10 @@
 #include "core/inf/variable.h"
 #include "core/types/global.h"
 #include "core/types/null.h"
-#include "core/util/conversions.h"
+#include "core/util/string_convert.h"
 #include "core/util/documents.h"
 #include "core/util/holder_util.h"
-#include "core/util/variable_util.h"
+#include "core/util/updatable_util.h"
 
 #include "graphics/base/v3.h"
 #include "graphics/impl/transform/transform_none.h"
@@ -71,40 +71,40 @@ Transform::Snapshot Transform::snapshot(const V3& postTranslate) const
 
 bool Transform::update(uint64_t timestamp)
 {
-    return VariableUtil::update(timestamp, _rotation, _scale, _pivot) || _timestamp.update(timestamp);
+    return UpdatableUtil::update(timestamp, _rotation, _scale, _pivot) || _timestamp.update(timestamp);
 }
 
 const sp<Rotation>& Transform::rotation()
 {
-    return _rotation.ensure<DelegateUpdater>(DelegateUpdater(*this));
+    return tryUpdateDelegate(_rotation);
 }
 
 void Transform::setRotation(const sp<Rotation>& rotate)
 {
     _rotation = rotate;
-    updateDelegate();
+    doUpdateDelegate();
 }
 
 const sp<Vec3>& Transform::scale()
 {
-    return _scale.ensure<DelegateUpdater>(DelegateUpdater(*this));
+    return tryUpdateDelegate(_scale);
 }
 
 void Transform::setScale(const sp<Vec3>& scale)
 {
     _scale = scale;
-    updateDelegate();
+    doUpdateDelegate();
 }
 
 const sp<Vec3>& Transform::pivot()
 {
-    return _pivot.ensure<DelegateUpdater>(DelegateUpdater(*this));
+    return tryUpdateDelegate(_pivot);
 }
 
 void Transform::setPivot(const sp<Vec3>& pivot)
 {
     _pivot = pivot;
-    updateDelegate();
+    doUpdateDelegate();
 }
 
 sp<Mat4> Transform::toMatrix(sp<Transform> self)
@@ -112,7 +112,7 @@ sp<Mat4> Transform::toMatrix(sp<Transform> self)
     return sp<TransformMat4>::make(std::move(self));
 }
 
-void Transform::updateDelegate()
+void Transform::doUpdateDelegate()
 {
     _delegate = makeDelegate();
     _timestamp.setDirty();
@@ -123,7 +123,7 @@ sp<Transform::Delegate> Transform::makeDelegate() const
     DCHECK(_type != TYPE_DELEGATED, "Delegated Transform may not be updated");
 
     if(!_rotation && !_scale && !_pivot)
-        return Null::toSafe<Transform::Delegate>(nullptr);
+        return Null::toSafePtr<Transform::Delegate>(nullptr);
 
     return _rotation ? makeTransformLinear() : makeTransformSimple();
 }
@@ -166,12 +166,12 @@ sp<Transform> Transform::BUILDER::build(const Scope& args)
     return sp<Transform>::make(_type, _rotation->build(args), _scale->build(args), _pivot->build(args));
 }
 
-template<> ARK_API sp<Transform> Null::ptr()
+template<> ARK_API sp<Transform> Null::safePtr()
 {
     return sp<Transform>::make();
 }
 
-template<> ARK_API Transform::Type Conversions::to<String, Transform::Type>(const String& str)
+template<> ARK_API Transform::Type StringConvert::to<String, Transform::Type>(const String& str)
 {
     if(str == "2d")
         return Transform::TYPE_LINEAR_2D;

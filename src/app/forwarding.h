@@ -23,7 +23,7 @@ class EventListener;
 class EventListenerList;
 class Layout;
 class LayoutParam;
-class LayoutHierarchy;
+class ViewHierarchy;
 class Level;
 class NarrowPhrase;
 class MessageLoopThread;

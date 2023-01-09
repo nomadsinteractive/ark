@@ -72,10 +72,10 @@ void LayerContext::renderRequest(const V3& position)
         _position = position;
 }
 
-void LayerContext::add(const sp<Renderable>& renderable, const sp<Boolean>& disposed)
+void LayerContext::add(sp<Renderable> renderable, sp<Boolean> disposed)
 {
     DASSERT(renderable);
-    _renderable_emplaced.emplace_back(renderable, disposed);
+    _renderable_emplaced.emplace_back(std::move(renderable), std::move(disposed));
     _reload_requested = true;
 }
 
@@ -135,7 +135,7 @@ bool LayerContext::DefaultBatch::preSnapshot(const RenderRequest& renderRequest,
         LayerContext::Instance& i = *iter;
         i._disposed.update(timestamp);
         i._state = i._renderable->updateState(renderRequest);
-        if((i._state & Renderable::RENDERABLE_STATE_DISPOSED) || i._disposed.val())
+        if(i._state.hasState(Renderable::RENDERABLE_STATE_DISPOSED) || i._disposed.val())
         {
             needsReload = true;
             iter = lc._renderables.erase(iter);
@@ -159,10 +159,10 @@ void LayerContext::DefaultBatch::snapshot(const RenderRequest& renderRequest, co
         const LayerContext::Instance& i = *iter;
         Renderable::State state = i._state;
         if(needsReload)
-            Renderable::setState(state, Renderable::RENDERABLE_STATE_DIRTY, true);
-        if(state & Renderable::RENDERABLE_STATE_VISIBLE)
-            Renderable::setState(state, Renderable::RENDERABLE_STATE_VISIBLE, visible);
-        Renderable::Snapshot snapshot = i._renderable->snapshot(pipelineInput, renderRequest, lc._position, state);
+            state.setState(Renderable::RENDERABLE_STATE_DIRTY, true);
+        if(state.hasState(Renderable::RENDERABLE_STATE_VISIBLE))
+            state.setState(Renderable::RENDERABLE_STATE_VISIBLE, visible);
+        Renderable::Snapshot snapshot = i._renderable->snapshot(pipelineInput, renderRequest, lc._position, state.stateBits());
         if(hasDefaultVaryings && !snapshot._varyings)
             snapshot._varyings = defaultVaryingsSnapshot;
         output.addSnapshot(lc, std::move(snapshot));

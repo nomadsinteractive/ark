@@ -1,4 +1,4 @@
-#include "renderer/base/text.h"
+#include "graphics/base/text.h"
 
 #include <cwctype>
 
@@ -64,18 +64,6 @@ Text::Text(const BeanFactory& factory, sp<RenderLayer> renderLayer, const sp<Lay
         setText(Strings::fromUTF8(*_text->val()));
 }
 
-const sp<LayoutParam>& Text::layoutParam() const
-{
-    return _layout_param;
-}
-
-void Text::setLayoutParam(const sp<LayoutParam>& layoutParam)
-{
-    _layout_param = layoutParam;
-    if(_layout_param)
-        _layout_size = _layout_param->size()->val();
-}
-
 const std::vector<sp<RenderObject>>& Text::contents() const
 {
     return _content->renderObjects();
@@ -91,9 +79,19 @@ void Text::setPosition(sp<Vec3> position)
     _content->position().reset(std::move(position));
 }
 
-const SafePtr<Size>& Text::size() const
+const sp<Size>& Text::size() const
 {
     return _size;
+}
+
+const sp<Size>& Text::layoutSize() const
+{
+    return _layout_size;
+}
+
+void Text::setLayoutSize(sp<Size> layoutSize)
+{
+    _layout_size = std::move(layoutSize);
 }
 
 const std::wstring& Text::text() const
@@ -120,22 +118,28 @@ void Text::setRichText(const std::wstring& richText, const Scope& args)
 
 void Text::render(RenderRequest& renderRequest, const V3& position)
 {
-    if(_text->update(renderRequest.timestamp()))
-        setText(Strings::fromUTF8(*_text->val()));
-    else if(_layout_param && _layout_size != _layout_param->size()->val())
-    {
-        _layout_size = _layout_param->size()->val();
-        layoutContent();
-    }
+    if(!update(renderRequest.timestamp()))
+        if(_layout_size && _layout_size->update(renderRequest.timestamp()))
+            layoutContent();
 
     _layer_context->renderRequest(V3());
     for(const sp<RenderablePassive>& i : _renderables)
         i->requestUpdate(position);
 }
 
+bool Text::update(uint64_t timestamp)
+{
+    if(_text->update(timestamp))
+    {
+        setText(Strings::fromUTF8(*_text->val()));
+        return true;
+    }
+    return false;
+}
+
 void Text::createContent()
 {
-    float boundary = _layout_param ? _layout_param->contentWidth() : 0;
+    float boundary = getLayoutBoundary();
     float flowx = boundary > 0 ? 0 : -_letter_spacing, flowy = getFlowY();
     _glyphs = makeGlyphs(_glyph_maker, _text_unicode);
     flowy = doLayoutContent(_glyphs, flowx, flowy, boundary);
@@ -149,7 +153,7 @@ float Text::doLayoutContent(GlyphContents& cm, float& flowx, float& flowy, float
 
 void Text::createRichContent(const Scope& args)
 {
-    float boundary = _layout_param ? _layout_param->contentWidth() : 0;
+    float boundary = getLayoutBoundary();
     float flowx = boundary > 0 ? 0 : -_letter_spacing, flowy = getFlowY();
     BeanFactory factory = _bean_factory.ensure();
     const document richtext = Documents::parseFull(Strings::toUTF8(_text_unicode));
@@ -180,7 +184,7 @@ float Text::doCreateRichContent(GlyphContents& cm, GlyphMaker& gm, const documen
 void Text::layoutContent()
 {
     DCHECK(_content->renderObjects().size() == _text_unicode.length(), "Contents have changed, cannot do relayout");
-    float boundary = _layout_param ? _layout_param->contentWidth() : 0;
+    float boundary = getLayoutBoundary();
     float flowx = boundary > 0 ? 0 : -_letter_spacing, flowy = getFlowY();
     flowy = doLayoutContent(_glyphs, flowx, flowy, boundary);
     for(size_t i = 0; i < _content->renderObjects().size(); ++i)
@@ -291,9 +295,9 @@ void Text::nextLine(float fontHeight, float& flowx, float& flowy) const
 
 float Text::getFlowY() const
 {
-    if(!_layout_param || _layout_direction > 0)
+    if(!_layout_size || _layout_direction > 0)
         return 0;
-    return _layout_param->size()->heightAsFloat() + _line_height;
+    return _layout_size->heightAsFloat() + _line_height;
 }
 
 std::vector<Text::LayoutChar> Text::getCharacterMetrics(const GlyphContents& glyphs) const
@@ -350,6 +354,11 @@ Text::GlyphContents Text::makeGlyphs(GlyphMaker& gm, const std::wstring& text)
     return glyphs;
 }
 
+float Text::getLayoutBoundary() const
+{
+    return _layout_size ? _layout_size->widthAsFloat() : 0;
+}
+
 Text::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _bean_factory(factory), _text(factory.getBuilder<StringVar>(manifest, Constants::Attributes::TEXT)), _render_layer(factory.getBuilder<RenderLayer>(manifest, Constants::Attributes::RENDER_LAYER)),
       _layer_context(sp<LayerContext::BUILDER>::make(factory, manifest, Layer::TYPE_DYNAMIC)), _glyph_maker(factory.getBuilder<GlyphMaker>(manifest, "glyph-maker")),
@@ -385,8 +394,8 @@ bool Text::Content::preSnapshot(const RenderRequest& renderRequest, LayerContext
         const sp<RenderObject>& renderObject = _render_objects.at(i);
         if(renderObject)
         {
-            Renderable::State state = renderObject->updateState(renderRequest);
-            if(state == Renderable::RENDERABLE_STATE_DISPOSED)
+            Renderable::StateBits state = renderObject->updateState(renderRequest);
+            if(state & Renderable::RENDERABLE_STATE_DISPOSED)
                 _render_objects[i] = nullptr;
             _render_object_states[i] = state;
         }
@@ -405,8 +414,8 @@ void Text::Content::snapshot(const RenderRequest& renderRequest, const LayerCont
         {
             Renderable::State state = _render_object_states.at(i);
             if(output.needsReload())
-                Renderable::setState(state, Renderable::RENDERABLE_STATE_DIRTY, true);
-            output.addSnapshot(lc, renderObject->snapshot(pipelineInput, renderRequest, lc._position + _position.val(), state));
+                state.setState(Renderable::RENDERABLE_STATE_DIRTY, true);
+            output.addSnapshot(lc, renderObject->snapshot(pipelineInput, renderRequest, lc._position + _position.val(), state.stateBits()));
         }
     }
 }
@@ -425,7 +434,7 @@ void Text::Content::setRenderObjects(std::vector<sp<RenderObject>> renderObjects
 {
     _needs_reload = true;
     _render_objects = std::move(renderObjects);
-    _render_object_states = std::vector<Renderable::State>(_render_objects.size());
+    _render_object_states = std::vector<Renderable::StateBits>(_render_objects.size());
 }
 
 }

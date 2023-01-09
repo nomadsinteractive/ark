@@ -33,7 +33,6 @@ public:
 
     private:
         sp<Builder<Text>> _characters;
-        sp<Builder<LayoutParam>> _layout_param;
         SafePtr<Builder<String>> _string;
     };
 

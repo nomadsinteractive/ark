@@ -1,4 +1,4 @@
-#include "graphics/impl/renderer/renderer_by_render_object.h"
+#include "graphics/base/render_object_with_layer.h"
 
 #include "core/base/bean_factory.h"
 #include "core/types/safe_ptr.h"
@@ -15,7 +15,7 @@
 
 namespace ark {
 
-RendererByRenderObject::RendererByRenderObject(sp<LayerContext> layerContext, sp<RenderObject> renderObject)
+RenderObjectWithLayer::RenderObjectWithLayer(sp<LayerContext> layerContext, sp<RenderObject> renderObject)
     : _layer_context(std::move(layerContext)), _render_object(std::move(renderObject))
 {
     DASSERT(_layer_context);
@@ -23,12 +23,11 @@ RendererByRenderObject::RendererByRenderObject(sp<LayerContext> layerContext, sp
         measure(_render_object->_size.ensure());
 }
 
-RendererByRenderObject::~RendererByRenderObject()
+RenderObjectWithLayer::~RenderObjectWithLayer()
 {
-    _render_object->dispose();
 }
 
-void RendererByRenderObject::render(RenderRequest& /*renderRequest*/, const V3& position)
+void RenderObjectWithLayer::render(RenderRequest& /*renderRequest*/, const V3& position)
 {
     if(!_renderable)
     {
@@ -38,26 +37,46 @@ void RendererByRenderObject::render(RenderRequest& /*renderRequest*/, const V3& 
     _renderable->requestUpdate(position);
 }
 
-const sp<Size>& RendererByRenderObject::size()
+const sp<Size>& RenderObjectWithLayer::size()
 {
     return _render_object->_size.ensure();
 }
 
-void RendererByRenderObject::measure(Size& size)
+const sp<LayerContext>& RenderObjectWithLayer::layerContext() const
+{
+    return _layer_context;
+}
+
+const sp<RenderObject>& RenderObjectWithLayer::renderObject() const
+{
+    return _render_object;
+}
+
+void RenderObjectWithLayer::measure(Size& size)
 {
     const Metrics& metrics = _layer_context->modelLoader()->loadModel(_render_object->type()->val())->metrics();
     size.setWidth(metrics.width());
     size.setHeight(metrics.height());
 }
 
-RendererByRenderObject::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+RenderObjectWithLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _render_object(factory.ensureConcreteClassBuilder<RenderObject>(manifest, Constants::Attributes::RENDER_OBJECT)), _layer_context(sp<LayerContext::BUILDER>::make(factory, manifest, Layer::TYPE_UNSPECIFIED))
 {
 }
 
-sp<Renderer> RendererByRenderObject::BUILDER::build(const Scope& args)
+sp<RenderObjectWithLayer> RenderObjectWithLayer::BUILDER::build(const Scope& args)
 {
-    return sp<RendererByRenderObject>::make(_layer_context->build(args), _render_object->build(args));
+    return sp<RenderObjectWithLayer>::make(_layer_context->build(args), _render_object->build(args));
+}
+
+RenderObjectWithLayer::BUILDER_RENDERER::BUILDER_RENDERER(BeanFactory& factory, const document& manifest)
+    : _impl(factory, manifest)
+{
+}
+
+sp<Renderer> RenderObjectWithLayer::BUILDER_RENDERER::build(const Scope& args)
+{
+    return _impl.build(args);
 }
 
 }

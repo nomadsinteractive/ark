@@ -6,7 +6,7 @@
 #include "core/util/bean_utils.h"
 #include "core/util/holder_util.h"
 #include "core/util/numeric_type.h"
-#include "core/util/variable_util.h"
+#include "core/util/updatable_util.h"
 
 #include "graphics/util/vec3_type.h"
 
@@ -233,14 +233,17 @@ bool RenderObject::isVisible() const
     return _visible.val();
 }
 
-Renderable::State RenderObject::updateState(const RenderRequest& renderRequest)
+Renderable::StateBits RenderObject::updateState(const RenderRequest& renderRequest)
 {
-    bool disposed = _disposed.update(renderRequest.timestamp()) && _disposed.val();
-    bool dirty = VariableUtil::update(renderRequest.timestamp(), _visible, _type, _position, _size, _transform, _varyings, _visible) || _timestamp.update(renderRequest.timestamp());
-    return Renderable::toState(disposed || _type->val() == -1, dirty, _visible.val());
+    if(_disposed.update(renderRequest.timestamp()) && _disposed.val())
+        return Renderable::RENDERABLE_STATE_DISPOSED;
+
+    bool dirty = UpdatableUtil::update(renderRequest.timestamp(), _visible, _type, _position, _size, _transform, _varyings, _visible) || _timestamp.update(renderRequest.timestamp());
+    return static_cast<Renderable::StateBits>((_type->val() == -1 ? Renderable::RENDERABLE_STATE_DISPOSED : 0) | (dirty ? Renderable::RENDERABLE_STATE_DIRTY : 0) |
+                                              (_visible.val() ? Renderable::RENDERABLE_STATE_VISIBLE : 0));
 }
 
-Renderable::Snapshot RenderObject::snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest, const V3& postTranslate, State state)
+Renderable::Snapshot RenderObject::snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest, const V3& postTranslate, StateBits state)
 {
     if(state & Renderable::RENDERABLE_STATE_DIRTY)
         return Renderable::Snapshot(state, _type->val(), _position.val(), _size.val(), _transform->snapshot(postTranslate), _varyings->snapshot(pipelineInput, renderRequest.allocator()));

@@ -3,7 +3,7 @@
 	<import name="pre" src="prefab.xml"/>
 
 	<label id="label" text="$t" text-scale="0.5" render-layer="@pre:rl002" style="display: block"/>
-	<view id="@root_view" class="view-group" size="540, 960" layout="vertical(center)"/>
+	<view id="@root_view" size="540, 960" layout="vertical(center)"/>
 	<arena id="main" view="@root_view">
 		<render-layer ref="@pre:rl001"/>
 		<render-layer ref="@pre:rl002"/>

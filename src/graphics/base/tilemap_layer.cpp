@@ -204,7 +204,7 @@ bool TilemapLayer::BatchImpl::preSnapshot(const RenderRequest& renderRequest, La
         if(i.renderable)
         {
             i.state = i.renderable->updateState(renderRequest);
-            if((i.state & Renderable::RENDERABLE_STATE_DISPOSED))
+            if(i.state.hasState(Renderable::RENDERABLE_STATE_DISPOSED))
             {
                 needsReload = true;
                 i.renderable = nullptr;
@@ -236,10 +236,10 @@ void TilemapLayer::BatchImpl::snapshot(const RenderRequest& renderRequest, const
             {
                 Renderable::State state = tile.state;
                 if(needsReload)
-                    Renderable::setState(state, Renderable::RENDERABLE_STATE_DIRTY, true);
-                if(state & Renderable::RENDERABLE_STATE_VISIBLE)
-                    Renderable::setState(state, Renderable::RENDERABLE_STATE_VISIBLE, visible);
-                Renderable::Snapshot snapshot = tile.renderable->snapshot(pipelineInput, renderRequest, posOff + V3(j * tileWidth + tileWidth / 2, dy, 0), state);
+                    state.setState(Renderable::RENDERABLE_STATE_DIRTY, true);
+                if(state.hasState(Renderable::RENDERABLE_STATE_VISIBLE))
+                    state.setState(Renderable::RENDERABLE_STATE_VISIBLE, visible);
+                Renderable::Snapshot snapshot = tile.renderable->snapshot(pipelineInput, renderRequest, posOff + V3(j * tileWidth + tileWidth / 2, dy, 0), state.stateBits());
                 if(hasDefaultVaryings && !snapshot._varyings)
                     snapshot._varyings = defaultVaryingsSnapshot;
                 output.addSnapshot(lc, std::move(snapshot));

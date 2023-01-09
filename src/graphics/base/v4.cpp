@@ -3,7 +3,7 @@
 #include "core/ark.h"
 #include "core/inf/array.h"
 #include "core/types/null.h"
-#include "core/util/conversions.h"
+#include "core/util/string_convert.h"
 #include "core/util/strings.h"
 #include "core/util/math.h"
 
@@ -146,14 +146,6 @@ V4 V4::normalize() const
 V4 V4::floorDiv(const V4& other) const
 {
     return V4(Math::floorDiv(_x, other._x), Math::floorDiv(_y, other._y), Math::floorDiv(_z, other._z), Math::floorDiv(_w, other._w));
-}
-
-template<> ARK_API V4 Conversions::to<String, V4>(const String& s)
-{
-    const array<float> val = Strings::toArray<float>(Strings::unwrap(s, '(', ')'));
-    DCHECK(val->length() == 4, "Illegal vector4 format \"%s\"", s.c_str());
-    float* ptr = val->buf();
-    return V4(ptr[0], ptr[1], ptr[2], ptr[3]);
 }
 
 }
