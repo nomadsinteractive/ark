@@ -164,19 +164,27 @@ private:
 template<typename T, typename U> class InputWithType : public Widget {
 public:
     InputWithType(std::function<bool(const char*, T*)> func, String label, sp<Variable<T>> value)
-        : _func(std::move(func)), _label(std::move(label)), _value(std::move(value)) {
+        : _label(std::move(label)), _value(std::move(value)), _func(std::move(func)) {
     }
 
     virtual void render() override {
         T v = _value->val();
         if(_func(_label.c_str(), &v))
-            U::set(_value, v);
+        {
+            sp<VariableWrapper<T>> wrapper = _value.as<VariableWrapper<T>>();
+            if(wrapper)
+                return wrapper->set(v);
+
+            sp<U> impl = _value.as<U>();
+            CHECK(impl, "Mutablable variable required.");
+            impl->set(v);
+        }
     }
 
 private:
-    std::function<bool(const char*, T*)> _func;
-    const String _label;
+    String _label;
     sp<Variable<T>> _value;
+    std::function<bool(const char*, T*)> _func;
 };
 
 template<typename T> class WidgetInputText : public Widget {
@@ -187,7 +195,6 @@ public:
     }
 
     virtual void render() override {
-        const String v = _value->val();
         bool renderResult = ImGui::InputTextWithHint(_label.c_str(), _hint ? _hint->val()->c_str() : nullptr, &_text_buf[0], _text_buf.size(), _flags);
         if(renderResult) {
             StringType::set(_value, sp<String>::make(_text_buf.data()));
@@ -358,7 +365,7 @@ void WidgetBuilder::inputFloat(const String& label, const sp<Numeric>& value, fl
 
 void WidgetBuilder::inputFloat2(const String& label, const sp<Vec2>& value, const String& format, int32_t flags)
 {
-    addWidget(sp<InputWithType<V2, Vec2Type>>::make([format, flags](const char* l, V2* v) { return ImGui::InputFloat2(l, reinterpret_cast<float*>(v), format.c_str(), flags); }, label, value));
+    addWidget(sp<InputWithType<V2, Vec2Impl>>::make([format, flags](const char* l, V2* v) { return ImGui::InputFloat2(l, reinterpret_cast<float*>(v), format.c_str(), flags); }, label, value));
 }
 
 void WidgetBuilder::inputFloat3(const String& label, const sp<Size>& size, const String& format, int32_t flags)
@@ -368,12 +375,12 @@ void WidgetBuilder::inputFloat3(const String& label, const sp<Size>& size, const
 
 void WidgetBuilder::inputFloat3(const String& label, const sp<Vec3>& value, const String& format, int32_t flags)
 {
-    addWidget(sp<InputWithType<V3, Vec3Type>>::make([format, flags](const char* l, V3* v) { return ImGui::InputFloat3(l, reinterpret_cast<float*>(v), format.c_str(), flags); }, label, value));
+    addWidget(sp<InputWithType<V3, Vec3Impl>>::make([format, flags](const char* l, V3* v) { return ImGui::InputFloat3(l, reinterpret_cast<float*>(v), format.c_str(), flags); }, label, value));
 }
 
 void WidgetBuilder::inputFloat4(const String& label, const sp<Vec4>& value, const String& format, int32_t flags)
 {
-    addWidget(sp<InputWithType<V4, Vec4Type>>::make([format, flags](const char* l, V4* v) { return ImGui::InputFloat4(l, reinterpret_cast<float*>(v), format.c_str(), flags); }, label, value));
+    addWidget(sp<InputWithType<V4, Vec4Impl>>::make([format, flags](const char* l, V4* v) { return ImGui::InputFloat4(l, reinterpret_cast<float*>(v), format.c_str(), flags); }, label, value));
 }
 
 void WidgetBuilder::sliderFloat(const String& label, const sp<Numeric>& value, float v_min, float v_max, const String& format, float power)
@@ -383,7 +390,7 @@ void WidgetBuilder::sliderFloat(const String& label, const sp<Numeric>& value, f
 
 void WidgetBuilder::sliderFloat2(const String& label, const sp<Vec2>& value, float v_min, float v_max, const String& format, float power)
 {
-    addWidget(sp<InputWithType<V2, Vec2Type>>::make([v_min, v_max, format, power](const char* l, V2* v) { return ImGui::SliderFloat2(l, reinterpret_cast<float*>(v), v_min, v_max, format.c_str(), power); }, label, value));
+    addWidget(sp<InputWithType<V2, Vec2Impl>>::make([v_min, v_max, format, power](const char* l, V2* v) { return ImGui::SliderFloat2(l, reinterpret_cast<float*>(v), v_min, v_max, format.c_str(), power); }, label, value));
 }
 
 void WidgetBuilder::sliderFloat3(const String& label, const sp<Size>& size, float v_min, float v_max, const String& format, float power)
@@ -393,32 +400,32 @@ void WidgetBuilder::sliderFloat3(const String& label, const sp<Size>& size, floa
 
 void WidgetBuilder::sliderFloat3(const String& label, const sp<Vec3>& value, float v_min, float v_max, const String& format, float power)
 {
-    addWidget(sp<InputWithType<V3, Vec3Type>>::make([v_min, v_max, format, power](const char* l, V3* v) { return ImGui::SliderFloat3(l, reinterpret_cast<float*>(v), v_min, v_max, format.c_str(), power); }, label, value));
+    addWidget(sp<InputWithType<V3, Vec3Impl>>::make([v_min, v_max, format, power](const char* l, V3* v) { return ImGui::SliderFloat3(l, reinterpret_cast<float*>(v), v_min, v_max, format.c_str(), power); }, label, value));
 }
 
 void WidgetBuilder::sliderFloat4(const String& label, const sp<Vec4>& value, float v_min, float v_max, const String& format, float power)
 {
-    addWidget(sp<InputWithType<V4, Vec4Type>>::make([v_min, v_max, format, power](const char* l, V4* v) { return ImGui::SliderFloat4(l, reinterpret_cast<float*>(v), v_min, v_max, format.c_str(), power); }, label, value));
+    addWidget(sp<InputWithType<V4, Vec4Impl>>::make([v_min, v_max, format, power](const char* l, V4* v) { return ImGui::SliderFloat4(l, reinterpret_cast<float*>(v), v_min, v_max, format.c_str(), power); }, label, value));
 }
 
 void WidgetBuilder::colorEdit3(const String& label, const sp<Vec3>& value)
 {
-    addWidget(sp<InputWithType<V3, Vec3Type>>::make([](const char* l, V3* v) { return ImGui::ColorEdit3(l, reinterpret_cast<float*>(v)); }, label, value));
+    addWidget(sp<InputWithType<V3, Vec3Impl>>::make([](const char* l, V3* v) { return ImGui::ColorEdit3(l, reinterpret_cast<float*>(v)); }, label, value));
 }
 
 void WidgetBuilder::colorEdit4(const String& label, const sp<Vec4>& value)
 {
-    addWidget(sp<InputWithType<V4, Vec4Type>>::make([](const char* l, V4* v) { return ImGui::ColorEdit4(l, reinterpret_cast<float*>(v)); }, label, value));
+    addWidget(sp<InputWithType<V4, Vec4Impl>>::make([](const char* l, V4* v) { return ImGui::ColorEdit4(l, reinterpret_cast<float*>(v)); }, label, value));
 }
 
 void WidgetBuilder::colorPicker3(const String& label, const sp<Vec3>& value)
 {
-    addWidget(sp<InputWithType<V3, Vec3Type>>::make([](const char* l, V3* v) { return ImGui::ColorPicker3(l, reinterpret_cast<float*>(v)); }, label, value));
+    addWidget(sp<InputWithType<V3, Vec3Impl>>::make([](const char* l, V3* v) { return ImGui::ColorPicker3(l, reinterpret_cast<float*>(v)); }, label, value));
 }
 
 void WidgetBuilder::colorPicker4(const String& label, const sp<Vec4>& value)
 {
-    addWidget(sp<InputWithType<V4, Vec4Type>>::make([](const char* l, V4* v) { return ImGui::ColorPicker4(l, reinterpret_cast<float*>(v)); }, label, value));
+    addWidget(sp<InputWithType<V4, Vec4Impl>>::make([](const char* l, V4* v) { return ImGui::ColorPicker4(l, reinterpret_cast<float*>(v)); }, label, value));
 }
 
 void WidgetBuilder::pushID(const String& id)

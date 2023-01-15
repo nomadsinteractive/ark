@@ -11,7 +11,7 @@ namespace ark {
 
 class IntegerByArray : public Wrapper<IntArray>, public Integer {
 public:
-    IntegerByArray(const sp<IntArray>& array, IntegerType::Repeat repeat, Notifier notifier);
+    IntegerByArray(sp<IntArray> array, IntegerType::Repeat repeat, Notifier notifier);
 
     virtual int32_t val() override;
     virtual bool update(uint64_t timestamp) override;

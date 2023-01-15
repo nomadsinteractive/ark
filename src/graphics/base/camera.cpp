@@ -283,7 +283,7 @@ const sp<Mat4>& Camera::Holder::matrix() const
 void Camera::Holder::setMatrix(sp<Mat4> matrix)
 {
     _matrix = std::move(matrix);
-    _timestamp.setDirty();
+    _timestamp.markDirty();
 }
 
 M4 Camera::DelegateLH_ZO::frustum(float left, float right, float bottom, float top, float clipNear, float clipFar)

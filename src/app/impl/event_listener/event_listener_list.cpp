@@ -4,27 +4,23 @@
 
 namespace ark {
 
-void EventListenerList::addEventListener(sp<EventListener> eventListener, int32_t priority)
+void EventListenerList::addEventListener(sp<EventListener> eventListener, sp<Boolean> disposed)
 {
-    DASSERT(eventListener);
-    _event_listeners[-priority].push_back(std::move(eventListener));
+    ASSERT(eventListener);
+    _event_listeners.push_back(std::move(eventListener), std::move(disposed));
+}
+
+void EventListenerList::pushEventListener(sp<EventListener> eventListener, sp<Boolean> disposed)
+{
+    ASSERT(eventListener);
+    _event_listeners.push_front(std::move(eventListener), std::move(disposed));
 }
 
 bool EventListenerList::onEvent(const Event& event)
 {
-    for(auto iter = _event_listeners.begin(); iter != _event_listeners.end(); )
-    {
-        DList<EventListener>& eventListener = iter->second;
-        if(eventListener.items().size() == 0)
-            iter = _event_listeners.erase(iter);
-        else
-        {
-            for(const sp<EventListener>& i : eventListener.update(event.timestamp()))
-                if(i->onEvent(event))
-                    return true;
-            ++iter;
-        }
-    }
+    for(EventListener& i : _event_listeners.update(event.timestamp()))
+        if(i.onEvent(event))
+            return true;
     return false;
 }
 

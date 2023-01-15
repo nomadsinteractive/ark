@@ -13,7 +13,7 @@ public:
 
     virtual bool update(uint64_t timestamp) override;
 
-    void reset(sp<UpdatableWrapper> delegate);
+    void reset(sp<Updatable> delegate);
 
 private:
     Timestamp _timestamp;

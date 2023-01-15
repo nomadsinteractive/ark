@@ -69,7 +69,7 @@ const sp<PipelineInput>& RenderLayerSnapshot::pipelineInput() const
     return _stub->_shader->input();
 }
 
-void RenderLayerSnapshot::addSnapshot(const LayerContext& lc,Renderable::Snapshot snapshot)
+void RenderLayerSnapshot::addSnapshot(const LayerContext& lc, Renderable::Snapshot snapshot)
 {
     if(!snapshot._model)
         snapshot._model = lc._model_loader->loadModel(snapshot._type);

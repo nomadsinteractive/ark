@@ -411,7 +411,10 @@ class ApplicationFacade:
     def add_control_layer(self, control: Union['Layer', 'Renderer']):
         pass
 
-    def add_event_listener(self, event_listener: Callable[['Event'], bool], priority: int = 0):
+    def add_event_listener(self, event_listener: Callable[['Event'], bool], disposed: Optional['Boolean'] = None):
+        pass
+
+    def push_event_listener(self, event_listener: Callable[['Event'], bool], disposed: Optional['Boolean'] = None):
         pass
 
     def set_default_event_listener(self, event_listener: Callable[['Event'], bool]):
@@ -1892,13 +1895,16 @@ class Function:
 
 
 class EventListener:
-    def __init__(self, listener):
+    def __init__(self, listener: Any = None):
         pass
 
-    def make_disposable(self, disposed: Optional[Boolean] = None) -> 'EventListener':
+    def on_event(self, event: Event):
         pass
 
-    def make_auto_release(self, ref_count: int = 1) -> 'EventListener':
+    def reset(self, listener: Any = None):
+        pass
+
+    def add_event_listener(self, listener: Any, disposed: Optional[Boolean] = None, push_front: bool = False):
         pass
 
 
@@ -1906,13 +1912,13 @@ class EventDispatcher(EventListener):
     def __init__(self):
         super().__init__(None)
 
+    def on_event(self, event):
+        pass
+
     def on_key_event(self, code, on_press, on_release, on_click, on_repeat):
         pass
 
     def on_motion_event(self, on_down, on_up, on_click, on_move):
-        pass
-
-    def on_event(self, event):
         pass
 
 
@@ -2295,6 +2301,14 @@ class LayoutParam:
 
 
 class View(Renderer):
+
+    @property
+    def disposed(self) -> Boolean:
+        return Boolean(False)
+
+    @property
+    def position(self) -> Vec3:
+        return Vec3(0, 0, 0)
 
     @property
     def layout_param(self) -> LayoutParam:

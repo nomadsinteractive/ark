@@ -21,6 +21,7 @@ class Event;
 class EventDispatcher;
 class EventListener;
 class EventListenerList;
+class EventListenerWrapper;
 class Layout;
 class LayoutParam;
 class ViewHierarchy;

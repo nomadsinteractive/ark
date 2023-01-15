@@ -62,7 +62,7 @@ sp<RenderCommand> RCCDrawElementsInstanced::compose(const RenderRequest& renderR
                                   buf.vertices().toSnapshot(vertices), buf.indices(), DrawingContext::ParamDrawElementsInstanced(0, static_cast<uint32_t>(_model.indexCount()), static_cast<int32_t>(snapshot._items.size()), buf.toDividedBufferSnapshots()));
 
     if(snapshot._stub->_scissor)
-        drawingContext._scissor = snapshot._stub->_render_controller->renderEngine()->toRendererScissor(snapshot._scissor);
+        drawingContext._scissor = snapshot._stub->_render_controller->renderEngine()->toRendererRect(snapshot._scissor);
 
     return drawingContext.toRenderCommand(renderRequest);
 }

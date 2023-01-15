@@ -86,7 +86,9 @@ PythonScript::PythonScript(const String& name, const document& libraries)
         Py_FileSystemDefaultEncoding = encodings;
     }
     Py_SetProgramName(_name.c_str());
+#ifdef ARK_FLAG_PUBLISHING_BUILD
     Py_NoSiteFlag = 1;
+#endif
     Py_InitializeEx(0);
     _ark_module = PyImport_ImportModule("ark");
     Py_XINCREF(_ark_module);

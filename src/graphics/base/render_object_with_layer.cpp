@@ -32,7 +32,7 @@ void RenderObjectWithLayer::render(RenderRequest& /*renderRequest*/, const V3& p
     if(!_renderable)
     {
          _renderable = sp<RenderablePassive>::make(_render_object);
-         _layer_context->add(_renderable, _render_object->disposed());
+         _layer_context->add(_renderable, nullptr, _render_object->disposed());
     }
     _renderable->requestUpdate(position);
 }

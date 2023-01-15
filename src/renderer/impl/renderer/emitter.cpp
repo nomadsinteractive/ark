@@ -139,7 +139,7 @@ uint64_t Emitter::Particale::show(const V3& position, uint64_t tick, const sp<La
         const sp<Boolean> disposed = _disposed->build(_stub->_arguments);
         const sp<RenderObject> renderObject = sp<RenderObject>::make(type, position, size, transform, varyings);
         DWARN(disposed, "You're creating particles that will NEVER die, is that what you really want?");
-        layerContext->addRenderObject(renderObject, disposed);
+        layerContext->add(renderObject, nullptr, disposed);
     }
     return _last_emit_tick + _interval;
 }

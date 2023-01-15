@@ -49,7 +49,9 @@ public:
     bool onEvent(const Event& event);
 
     void addPreRenderTask(const sp<Runnable>& task, const sp<Boolean>& disposed = nullptr);
-    void addEventListener(sp<EventListener> eventListener, int32_t priority);
+
+    void addEventListener(sp<EventListener> eventListener, sp<Boolean> disposed = nullptr);
+    void pushEventListener(sp<EventListener> eventListener, sp<Boolean> disposed = nullptr);
     void setDefaultEventListener(sp<EventListener> eventListener);
 
     sp<MessageLoop> makeMessageLoop(const sp<Clock>& clock);

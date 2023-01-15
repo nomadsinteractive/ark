@@ -62,6 +62,13 @@ sp<EventListener> PyCast::toEventListener(PyObject* object)
     if(PyCallable_Check(object))
         return sp<PythonCallableEventListener>::make(PyInstance::track(object));
 
+    if(PyObject_HasAttrString(object, "on_event"))
+    {
+        PyInstance onEvent = PyInstance::steal(PyObject_GetAttrString(object, "on_event"));
+        CHECK(onEvent.isCallable(), "The on_event method of type \"%s\" should be Callable", Py_TYPE(object)->tp_name);
+        return sp<PythonCallableEventListener>::make(std::move(onEvent));
+    }
+
     return toSharedPtrDefault<EventListener>(object).value();
 }
 
@@ -154,7 +161,7 @@ sp<Vec3> PyCast::toVec3(PyObject* object, bool alert)
         return nullptr;
 
     CHECK(vec2, "Cannot cast \"%s\" to Vec3, possible candidates: tuple, Vec3, Vec2", Py_TYPE(object)->tp_name);
-    return Vec2Type::extend(vec2, sp<Numeric>::make<Numeric::Const>(0.0));
+    return Vec2Type::extend(vec2, sp<Numeric>::make<Numeric::Const>(0));
 }
 
 PyObject* PyCast::toPyObject_SharedPtr(const bytearray& bytes)

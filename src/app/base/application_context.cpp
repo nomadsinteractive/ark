@@ -191,9 +191,14 @@ void ApplicationContext::addPreRenderTask(const sp<Runnable>& task, const sp<Boo
     _render_controller->addPreRenderRunRequest(task, disposed);
 }
 
-void ApplicationContext::addEventListener(sp<EventListener> eventListener, int32_t priority)
+void ApplicationContext::addEventListener(sp<EventListener> eventListener, sp<Boolean> disposed)
 {
-    _event_listeners->addEventListener(std::move(eventListener), priority);
+    _event_listeners->addEventListener(std::move(eventListener), std::move(disposed));
+}
+
+void ApplicationContext::pushEventListener(sp<EventListener> eventListener, sp<Boolean> disposed)
+{
+    _event_listeners->pushEventListener(std::move(eventListener), std::move(disposed));
 }
 
 void ApplicationContext::setDefaultEventListener(sp<EventListener> eventListener)

@@ -6,6 +6,7 @@
 #include "graphics/base/layer_context.h"
 #include "graphics/base/render_command_pipeline.h"
 #include "graphics/base/render_layer.h"
+#include "graphics/base/render_object.h"
 #include "graphics/base/layer_context.h"
 
 #include "renderer/impl/model_loader/model_loader_cached.h"
@@ -61,7 +62,7 @@ void Layer::setContext(sp<LayerContext> context)
 
 void Layer::addRenderObject(const sp<RenderObject>& renderObject, const sp<Boolean>& disposed)
 {
-    _layer_context->addRenderObject(renderObject, disposed);
+    _layer_context->add(renderObject, nullptr, disposed);
 }
 
 void Layer::clear()
@@ -83,7 +84,7 @@ sp<Layer> Layer::BUILDER::build(const Scope& args)
     const sp<Layer> layer = sp<Layer>::make(renderLayer ? renderLayer->makeContext(nullptr, std::move(modelLoader)) : sp<LayerContext>::make(nullptr, ModelLoaderCached::decorate(std::move(modelLoader)), _visible->build(args), nullptr, nullptr));
     LayerContext& layerContext = layer->context();
     for(const sp<Builder<RenderObject>>& i : _render_objects)
-        layerContext.addRenderObject(i->build(args));
+        layerContext.add(i->build(args));
     return layer;
 }
 

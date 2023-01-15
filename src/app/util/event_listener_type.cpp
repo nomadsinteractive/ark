@@ -4,27 +4,55 @@
 #include "core/impl/boolean/boolean_by_weak_ref.h"
 
 #include "app/impl/event_listener/event_listener_list.h"
+#include "app/impl/event_listener/event_listener_wrapper.h"
 
 namespace ark {
 
-sp<EventListener> EventListenerType::create(const sp<EventListener>& eventListener)
+sp<EventListener> EventListenerType::create(sp<EventListener> eventListener)
 {
-    return eventListener;
+    return sp<EventListenerWrapper>::make(std::move(eventListener));
 }
 
-sp<EventListener> EventListenerType::makeDisposable(const sp<EventListener>& self, const sp<Boolean>& disposed)
+bool EventListenerType::onEvent(const sp<EventListener>& self, const Event& event)
 {
-    return self.absorb(disposed ? sp<Disposed>::make(disposed) : sp<Disposed>::make());
+    return self->onEvent(event);
 }
 
-sp<EventListener> EventListenerType::makeAutoRelease(const sp<EventListener>& self, int32_t refCount)
+void EventListenerType::reset(const sp<EventListener>& self, sp<EventListener> eventListener)
 {
-    return makeDisposable(self, sp<BooleanByWeakRef<EventListener>>::make(self, refCount));
+    ensureWrapper(self)->reset(std::move(eventListener));
 }
 
-sp<EventListener> EventListenerType::BUILDER::build(const Scope& /*args*/)
+void EventListenerType::addEventListener(const sp<EventListener>& self, sp<EventListener> eventListener, sp<Boolean> disposed)
 {
-    return sp<EventListenerList>::make();
+    ensureEventListenerList(self)->addEventListener(std::move(eventListener), std::move(disposed));
+}
+
+void EventListenerType::pushEventListener(const sp<EventListener>& self, sp<EventListener> eventListener, sp<Boolean> disposed)
+{
+    ensureEventListenerList(self)->pushEventListener(std::move(eventListener), std::move(disposed));
+}
+
+sp<EventListenerWrapper> EventListenerType::ensureWrapper(const sp<EventListener>& self)
+{
+    sp<EventListenerWrapper> wrapper = self.as<EventListenerWrapper>();
+    CHECK(wrapper, "This EventListener object is not a EventListenerWrapper instance");
+    return wrapper;
+}
+
+sp<EventListenerList> EventListenerType::ensureEventListenerList(const sp<EventListener>& self)
+{
+    sp<EventListenerWrapper> wrapper = ensureWrapper(self);
+    sp<EventListener> wrapped = wrapper->wrapped();
+    sp<EventListenerList> ell = wrapped ? wrapped.as<EventListenerList>() : nullptr;
+    if(!ell)
+    {
+        ell = sp<EventListenerList>::make();
+        if(wrapped)
+            ell->addEventListener(std::move(wrapped));
+        wrapper->reset(ell);
+    }
+    return ell;
 }
 
 }

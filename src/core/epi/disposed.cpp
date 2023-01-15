@@ -36,12 +36,12 @@ void Disposed::set(bool disposed)
     _disposed->set(disposed);
 }
 
-void Disposed::set(const sp<Boolean>& disposed)
+void Disposed::set(sp<Boolean> disposed)
 {
-    _disposed->set(disposed);
+    _disposed->set(std::move(disposed));
 }
 
-const sp<Boolean>& Disposed::delegate() const
+const sp<Boolean>& Disposed::wrapped() const
 {
     return _disposed->wrapped();
 }

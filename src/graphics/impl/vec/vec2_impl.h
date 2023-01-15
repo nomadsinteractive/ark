@@ -14,7 +14,7 @@
 
 namespace ark {
 
-class Vec2Impl : public Vec2, public Holder {
+class ARK_API Vec2Impl final : public Vec2, public Holder {
 public:
     Vec2Impl() noexcept;
     Vec2Impl(float x, float y) noexcept;

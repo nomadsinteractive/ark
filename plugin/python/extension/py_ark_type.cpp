@@ -18,7 +18,7 @@ static PyObject* __richcmp__(PyArkType::Instance* obj1, PyObject* obj2, int op)
     bool obj2IsNone = obj2 == Py_None;
     if(!(obj2IsNone || PythonInterpreter::instance()->isPyArkTypeObject(Py_TYPE(obj2))))
     {
-        LOGW("Comparing \"%s\" with \"%s\" is not supported", Py_TYPE(obj1)->tp_name, Py_TYPE(obj2)->tp_name);
+        LOGW("Comparing Ark-Type object \"%s\" with non-Ark-Type object \"%s\"", Py_TYPE(obj1)->tp_name, Py_TYPE(obj2)->tp_name);
         Py_RETURN_NOTIMPLEMENTED;
     }
 

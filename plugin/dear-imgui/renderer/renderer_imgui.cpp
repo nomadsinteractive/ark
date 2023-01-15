@@ -235,7 +235,7 @@ void RendererImgui::MyImGuiRenderFunction(const RenderRequest& renderRequest, Im
                 Buffer::Snapshot vertexBuffer = drawCommand->_vertex_buffer.snapshot(vb);
                 Buffer::Snapshot indexBuffer = drawCommand->_index_buffer.snapshot(ib);
                 DrawingContext drawingContext(drawCommandPool->_shader_bindings, drawCommand->_attachments, ubos, ssbos, std::move(vertexBuffer), std::move(indexBuffer), DrawingContext::ParamDrawElements(offset, pcmd->ElemCount));
-                drawingContext._scissor = _render_engine->toRendererScissor(Rect(pcmd->ClipRect.x - pos.x, pcmd->ClipRect.y - pos.y, pcmd->ClipRect.z - pos.x, pcmd->ClipRect.w - pos.y), Ark::COORDINATE_SYSTEM_LHS);
+                drawingContext._scissor = _render_engine->toRendererRect(Rect(pcmd->ClipRect.x - pos.x, pcmd->ClipRect.y - pos.y, pcmd->ClipRect.z - pos.x, pcmd->ClipRect.w - pos.y), Ark::COORDINATE_SYSTEM_LHS);
                 renderRequest.addRequest(sp<ImguiRenderCommand>::make(drawingContext.toRenderCommand(renderRequest), std::move(recycler)));
             }
             offset += pcmd->ElemCount;

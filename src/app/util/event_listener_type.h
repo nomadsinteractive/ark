@@ -13,23 +13,24 @@ namespace ark {
 //[[script::bindings::class("EventListener")]]
 class ARK_API EventListenerType {
 public:
-//[[script::bindings::constructor]]
-    static sp<EventListener> create(const sp<EventListener>& eventListener);
+//  [[script::bindings::constructor]]
+    static sp<EventListener> create(sp<EventListener> eventListener = nullptr);
 
 //  [[script::bindings::classmethod]]
-    static sp<EventListener> makeDisposable(const sp<EventListener>& self, const sp<Boolean>& disposed = nullptr);
-//[[script::bindings::classmethod]]
-    static sp<EventListener> makeAutoRelease(const sp<EventListener>& self, int32_t refCount = 1);
+    static bool onEvent(const sp<EventListener>& self, const Event& event);
 
+//  [[script::bindings::classmethod]]
+    static void reset(const sp<EventListener>& self, sp<EventListener> eventListener);
 
-//  [[plugin::builder]]
-    class BUILDER : public Builder<EventListener> {
-    public:
-        BUILDER() = default;
+//  [[script::bindings::classmethod]]
+    static void addEventListener(const sp<EventListener>& self, sp<EventListener> eventListener, sp<Boolean> disposed = nullptr);
+//  [[script::bindings::classmethod]]
+    static void pushEventListener(const sp<EventListener>& self, sp<EventListener> eventListener, sp<Boolean> disposed = nullptr);
 
-        virtual sp<EventListener> build(const Scope& args) override;
+private:
+    static sp<EventListenerWrapper> ensureWrapper(const sp<EventListener>& self);
+    static sp<EventListenerList> ensureEventListenerList(const sp<EventListener>& self);
 
-    };
 };
 
 }

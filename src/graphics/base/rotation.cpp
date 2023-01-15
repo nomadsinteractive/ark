@@ -32,7 +32,7 @@ Rotation::Rotation(sp<Numeric> theta, sp<Vec3> axis, sp<Vec4> quaternion)
     : _theta(std::move(theta), 0), _axis(std::move(axis), Z_AXIS), _quaternion(quaternion ? std::move(quaternion) : sp<Vec4>::make<Quaternion>(_theta.ensure(), _axis.ensure()))
 {
 //TODO: _quaternion to SafeVar
-    _timestamp.setDirty();
+    _timestamp.markDirty();
 }
 
 V4 Rotation::val()
@@ -61,7 +61,7 @@ void Rotation::setTheta(const sp<Numeric>& theta)
     _theta.reset(theta);
 
     _quaternion = sp<Quaternion>::make(_theta.ensure(), _axis.ensure());
-    _timestamp.setDirty();
+    _timestamp.markDirty();
 }
 
 const sp<Vec3>& Rotation::axis()
@@ -80,7 +80,7 @@ void Rotation::setRotation(const sp<Numeric>& theta, const sp<Vec3>& axis)
     _axis.reset(axis);
 
     _quaternion = sp<Quaternion>::make(_theta.ensure(), _axis.ensure());
-    _timestamp.setDirty();
+    _timestamp.markDirty();
 }
 
 void Rotation::setEuler(float pitch, float yaw, float roll)
@@ -94,7 +94,7 @@ void Rotation::setEuler(const sp<Numeric>& pitch, const sp<Numeric>& yaw, const 
     _axis.reset(nullptr);
 
     _quaternion = sp<Quaternion>::make(pitch, yaw, roll);
-    _timestamp.setDirty();
+    _timestamp.markDirty();
 }
 
 template<> ARK_API sp<Rotation> Null::safePtr()

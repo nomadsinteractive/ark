@@ -42,7 +42,7 @@ public:
 // [[script::bindings::property]]
     const sp<Arena>& arena() const;
 // [[script::bindings::property]]
-    void setArena(const sp<Arena>& arena);
+    void setArena(sp<Arena> arena);
 
 //  [[script::bindings::auto]]
     sp<ResourceLoader> createResourceLoader(const String& name, const Scope& args);
@@ -57,7 +57,9 @@ public:
 //  [[script::bindings::auto]]
     void addControlLayer(const sp<Renderer>& controlLayer);
 //  [[script::bindings::auto]]
-    void addEventListener(sp<EventListener> eventListener, int32_t priority = 0);
+    void addEventListener(sp<EventListener> eventListener, sp<Boolean> disposed = nullptr);
+//  [[script::bindings::auto]]
+    void pushEventListener(sp<EventListener> eventListener, sp<Boolean> disposed = nullptr);
 //  [[script::bindings::auto]]
     void setDefaultEventListener(sp<EventListener> eventListener);
 

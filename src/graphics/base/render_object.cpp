@@ -70,14 +70,14 @@ void RenderObject::setType(int32_t type)
 {
     _type->set(type);
     _disposed.reset(nullptr);
-    _timestamp.setDirty();
+    _timestamp.markDirty();
 }
 
 void RenderObject::setType(const sp<Integer>& type)
 {
     _type->set(type);
     _disposed = type.as<Disposed>();
-    _timestamp.setDirty();
+    _timestamp.markDirty();
 }
 
 float RenderObject::x() const
@@ -88,13 +88,13 @@ float RenderObject::x() const
 void RenderObject::setX(float x)
 {
     Vec3Type::setX(_position.ensure(), x);
-    _timestamp.setDirty();
+    _timestamp.markDirty();
 }
 
 void RenderObject::setX(const sp<Numeric>& x)
 {
     Vec3Type::setX(_position.ensure(), x);
-    _timestamp.setDirty();
+    _timestamp.markDirty();
 }
 
 float RenderObject::y() const
@@ -105,13 +105,13 @@ float RenderObject::y() const
 void RenderObject::setY(float y)
 {
     Vec3Type::setY(_position.ensure(), y);
-    _timestamp.setDirty();
+    _timestamp.markDirty();
 }
 
 void RenderObject::setY(const sp<Numeric>& y)
 {
     Vec3Type::setY(_position.ensure(), y);
-    _timestamp.setDirty();
+    _timestamp.markDirty();
 }
 
 float RenderObject::z() const
@@ -122,13 +122,13 @@ float RenderObject::z() const
 void RenderObject::setZ(float z)
 {
     Vec3Type::setZ(_position.ensure(), z);
-    _timestamp.setDirty();
+    _timestamp.markDirty();
 }
 
 void RenderObject::setZ(const sp<Numeric>& z)
 {
     Vec3Type::setZ(_position.ensure(), z);
-    _timestamp.setDirty();
+    _timestamp.markDirty();
 }
 
 V2 RenderObject::xy() const
@@ -150,25 +150,25 @@ const sp<Vec3>& RenderObject::position()
 void RenderObject::setPosition(const sp<Vec3>& position)
 {
     _position = position;
-    _timestamp.setDirty();
+    _timestamp.markDirty();
 }
 
 void RenderObject::setSize(const sp<Size>& size)
 {
     _size = size;
-    _timestamp.setDirty();
+    _timestamp.markDirty();
 }
 
 void RenderObject::setTransform(const sp<Transform>& transform)
 {
     _transform = transform;
-    _timestamp.setDirty();
+    _timestamp.markDirty();
 }
 
 void RenderObject::setVaryings(const sp<Varyings>& varyings)
 {
     _varyings = varyings;
-    _timestamp.setDirty();
+    _timestamp.markDirty();
 }
 
 const Box& RenderObject::tag() const
@@ -199,13 +199,13 @@ const sp<Visibility>& RenderObject::visible()
 void RenderObject::setVisible(bool visible)
 {
     _visible.ensure()->set(visible);
-    _timestamp.setDirty();
+    _timestamp.markDirty();
 }
 
 void RenderObject::setVisible(const sp<Boolean>& visible)
 {
     _visible.ensure()->set(visible);
-    _timestamp.setDirty();
+    _timestamp.markDirty();
 }
 
 void RenderObject::dispose()

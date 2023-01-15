@@ -38,7 +38,7 @@ public:
             deferedUnref();
             _variable_impl = new typename Variable<T>::Impl(std::move(value));
             this->_wrapped = sp<Variable<T>>::adopt(_variable_impl);
-            _timestamp.setDirty();
+            _timestamp.markDirty();
         }
     }
 
@@ -46,7 +46,7 @@ public:
         deferedUnref();
         DCHECK(delegate.get() != this, "Recursive delegate being set");
         this->_wrapped = Null::toSafePtr(delegate);
-        _timestamp.setDirty();
+        _timestamp.markDirty();
     }
 
     T fix() {

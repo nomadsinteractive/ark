@@ -12,10 +12,10 @@ public:
 
     virtual bool update(uint64_t timestamp) override;
 
-    void setDirty();
+    void markDirty();
 
 private:
-    uint64_t _timestamp;
+    uint64_t _last_modified;
 };
 
 }

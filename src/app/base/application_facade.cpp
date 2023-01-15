@@ -74,24 +74,27 @@ const sp<Arena>& ApplicationFacade::arena() const
     return _arena;
 }
 
-void ApplicationFacade::setArena(const sp<Arena>& arena)
+void ApplicationFacade::setArena(sp<Arena> arena)
 {
     if(_arena == arena)
     {
-        DWARN(false, "Replacing current Arena with the same one");
+        WARN(false, "Replacing current Arena with the same one");
         return;
     }
 
     if(_arena)
+    {
         _arena.as<Disposed>()->dispose();
+        _context->deferUnref(std::move(_arena));
+    }
 
-    DASSERT(arena);
-    DWARN(!arena.is<Disposed>(), "Application main arena's lifecycle should be managed by application itself");
-    _arena = arena;
+    ASSERT(arena);
+    WARN(!arena.is<Disposed>(), "Application main arena's lifecycle should be managed by application itself");
+    _arena = std::move(arena);
     _arena.absorb<Disposed>(sp<Disposed>::make());
 
     _surface_controller->addRenderer(_arena);
-    _context->addEventListener(_arena, 0);
+    _context->addEventListener(_arena, _arena.as<Disposed>());
 }
 
 sp<ResourceLoader> ApplicationFacade::createResourceLoader(const String& name, const Scope& args)
@@ -119,9 +122,14 @@ void ApplicationFacade::addControlLayer(const sp<Renderer>& controlLayer)
     _surface_controller->addControlLayer(controlLayer);
 }
 
-void ApplicationFacade::addEventListener(sp<EventListener> eventListener, int32_t priority)
+void ApplicationFacade::addEventListener(sp<EventListener> eventListener, sp<Boolean> disposed)
 {
-    _context->addEventListener(std::move(eventListener), priority);
+    _context->addEventListener(std::move(eventListener), std::move(disposed));
+}
+
+void ApplicationFacade::pushEventListener(sp<EventListener> eventListener, sp<Boolean> disposed)
+{
+    _context->pushEventListener(std::move(eventListener), std::move(disposed));
 }
 
 void ApplicationFacade::setDefaultEventListener(sp<EventListener> eventListener)

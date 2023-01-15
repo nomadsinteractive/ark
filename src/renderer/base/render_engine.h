@@ -23,7 +23,10 @@ public:
     const Viewport& viewport() const;
 
     float toLayoutDirection(float direction) const;
-    Rect toRendererScissor(const Rect& scissor, Ark::RendererCoordinateSystem cs = Ark::COORDINATE_SYSTEM_DEFAULT) const;
+
+    Rect toViewportRect(const Rect& rect, Ark::RendererCoordinateSystem cs = Ark::COORDINATE_SYSTEM_DEFAULT) const;
+    V2 toViewportPosition(const V2& position, Ark::RendererCoordinateSystem cs = Ark::COORDINATE_SYSTEM_DEFAULT) const;
+    Rect toRendererRect(const Rect& scissor, Ark::RendererCoordinateSystem cs = Ark::COORDINATE_SYSTEM_DEFAULT) const;
     V3 toWorldPosition(const M4& vpMatrix, float screenX, float screenY, float z) const;
 
     void onSurfaceCreated();

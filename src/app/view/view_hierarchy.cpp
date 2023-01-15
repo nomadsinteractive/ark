@@ -203,14 +203,14 @@ std::pair<std::vector<sp<ViewHierarchy::Slot>>, std::vector<sp<LayoutParam>>> Vi
     return items;
 }
 
-void ViewHierarchy::updateLayout(View& view, uint64_t timestamp)
+void ViewHierarchy::updateLayout(View& view, uint64_t timestamp, bool isDirty)
 {
     bool inflatNeeded = _incremental.size() > 0;
     if(inflatNeeded)
         updateSlots();
 
     const sp<LayoutParam>& layoutParam = view.layoutParam();
-    if(isLayoutNeeded(layoutParam, inflatNeeded))
+    if(isLayoutNeeded(layoutParam, inflatNeeded) || isDirty)
     {
         sp<LayoutV3::Node> layoutNode = view.layoutNode();
 
@@ -238,7 +238,7 @@ void ViewHierarchy::updateLayout(View& view, uint64_t timestamp)
         {
             if(inflatNeeded)
             {
-                _layout_v3->inflate(view.newLayoutNode());
+                _layout_v3->inflate(layoutNode);
                 timestamp = 0;
             }
 

@@ -186,7 +186,7 @@ void InputType::InputWrapper::setDelegate(sp<Input> delegate)
 {
     _size = delegate->size();
     _delegate = std::move(delegate);
-    _timestamp.setDirty();
+    _timestamp.markDirty();
 }
 
 }

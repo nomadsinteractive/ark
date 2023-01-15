@@ -207,7 +207,7 @@ void Text::createLayerContent(float width, float height)
     for(const sp<RenderObject>& i : renderObjects)
     {
         sp<RenderablePassive> renderable = sp<RenderablePassive>::make(i);
-        _layer_context->add(renderable, sp<BooleanByWeakRef<RenderablePassive>>::make(renderable, 1));
+        _layer_context->add(renderable, nullptr, sp<BooleanByWeakRef<RenderablePassive>>::make(renderable, 1));
         _renderables.push_back(std::move(renderable));
     }
 

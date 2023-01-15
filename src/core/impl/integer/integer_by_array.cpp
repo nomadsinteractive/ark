@@ -5,11 +5,11 @@
 
 namespace ark {
 
-IntegerByArray::IntegerByArray(const sp<IntArray>& array, IntegerType::Repeat repeat, Notifier notifier)
-    : Wrapper(array), _repeat(repeat), _position(0), _step(1), _notifier(std::move(notifier))
+IntegerByArray::IntegerByArray(sp<IntArray> array, IntegerType::Repeat repeat, Notifier notifier)
+    : Wrapper(std::move(array)), _repeat(repeat), _position(0), _step(1), _notifier(std::move(notifier))
 {
-    DCHECK(array && array->length() > 0, "Empty array");
-    DCHECK(repeat != IntegerType::REPEAT_REVERSE || array->length() > 1, "A reversable array must have at least 2 elements");
+    CHECK(_wrapped && _wrapped->length() > 0, "Empty array");
+    CHECK(repeat != IntegerType::REPEAT_REVERSE || _wrapped->length() > 1, "A reversable array must have at least 2 elements");
 }
 
 int32_t IntegerByArray::val()

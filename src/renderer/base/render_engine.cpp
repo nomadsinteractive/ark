@@ -41,7 +41,22 @@ float RenderEngine::toLayoutDirection(float direction) const
     return _coordinate_system == Ark::COORDINATE_SYSTEM_RHS ? -direction : direction;
 }
 
-Rect RenderEngine::toRendererScissor(const Rect& scissor, Ark::RendererCoordinateSystem cs) const
+Rect RenderEngine::toViewportRect(const Rect& rect, Ark::RendererCoordinateSystem cs) const
+{
+    Rect s(rect);
+    if(_render_context->coordinateSystem() != (cs == Ark::COORDINATE_SYSTEM_DEFAULT ? _coordinate_system : cs))
+        s.vflip(_render_context->viewport().height());
+    return s;
+}
+
+V2 RenderEngine::toViewportPosition(const V2& position, Ark::RendererCoordinateSystem cs) const
+{
+    if(_render_context->coordinateSystem() != (cs == Ark::COORDINATE_SYSTEM_DEFAULT ? _coordinate_system : cs))
+        return V2(position.x(), _render_context->viewport().height() - position.y());
+    return position;
+}
+
+Rect RenderEngine::toRendererRect(const Rect& scissor, Ark::RendererCoordinateSystem cs) const
 {
     Rect s(scissor);
     s.scale(_render_context->displayUnit());

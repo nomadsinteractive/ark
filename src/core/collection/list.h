@@ -161,8 +161,14 @@ public:
         uint64_t _timestamp;
     };
 
-    template<typename... Args> void push_back(const sp<T>& item, Args&&... args) {
-        _items.emplace_back(item, Filter(item, std::forward<Args>(args)...));
+    template<typename... Args> void push_front(sp<T> item, Args&&... args) {
+        Filter filter(item, std::forward<Args>(args)...);
+        _items.emplace_front(std::move(item), std::move(filter));
+    }
+
+    template<typename... Args> void push_back(sp<T> item, Args&&... args) {
+        Filter filter(item, std::forward<Args>(args)...);
+        _items.emplace_back(std::move(item), std::move(filter));
     }
 
     UpdatedList update(uint64_t timestamp) {

@@ -132,7 +132,7 @@ PipelineBindings::Parameters::BUILDER::BUILDER(BeanFactory& factory, const docum
 PipelineBindings::Parameters PipelineBindings::Parameters::BUILDER::build(const Scope& args) const
 {
     const sp<Vec4> scissor = _pipeline_bindings_scissor->build(args);
-    return Parameters(scissor ? Optional<Rect>(_render_controller->renderEngine()->toRendererScissor(Rect(scissor->val()))) : Optional<Rect>(), _traits, _pipeline_bindings_flags);
+    return Parameters(scissor ? Optional<Rect>(_render_controller->renderEngine()->toRendererRect(Rect(scissor->val()))) : Optional<Rect>(), _traits, _pipeline_bindings_flags);
 }
 
 template<> ARK_API PipelineBindings::Flag StringConvert::to<String, PipelineBindings::Flag>(const String& str)

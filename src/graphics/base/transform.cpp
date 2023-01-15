@@ -115,7 +115,7 @@ sp<Mat4> Transform::toMatrix(sp<Transform> self)
 void Transform::doUpdateDelegate()
 {
     _delegate = makeDelegate();
-    _timestamp.setDirty();
+    _timestamp.markDirty();
 }
 
 sp<Transform::Delegate> Transform::makeDelegate() const

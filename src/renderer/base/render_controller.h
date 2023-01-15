@@ -121,7 +121,7 @@ public:
     }
 
     void addPreRenderUpdateRequest(sp<Updatable> updatable, sp<Boolean> disposed);
-    void addPreRenderRunRequest(const sp<Runnable>& task, const sp<Boolean>& disposed);
+    void addPreRenderRunRequest(sp<Runnable> task, sp<Boolean> disposed);
 
     void preRequestUpdate(uint64_t timestamp);
     void deferUnref(Box box);

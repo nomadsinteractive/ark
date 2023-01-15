@@ -4,6 +4,7 @@
 
 #include "core/base/bean_factory.h"
 #include "core/base/expression.h"
+#include "core/impl/boolean/boolean_dyed.h"
 #include "core/impl/variable/variable_observer.h"
 #include "core/impl/variable/variable_op1.h"
 #include "core/impl/variable/variable_op2.h"
@@ -178,6 +179,15 @@ void BooleanType::toggle(const sp<BooleanWrapper>& self)
 sp<Boolean> BooleanType::observe(const sp<Boolean>& self, const sp<Observer>& observer)
 {
     return sp<VariableObserver<bool>>::make(self, observer);
+}
+
+sp<Boolean> BooleanType::dye(sp<Boolean> self, sp<Boolean> condition, String message)
+{
+#ifdef ARK_FLAG_PUBLISHING_BUILD
+    LOGW("Dyeing is a debugging technique, which should not be used in publish builds");
+    return self;
+#endif
+    return sp<BooleanDyed>::make(std::move(self), std::move(condition), std::move(message));
 }
 
 void BooleanType::fix(const sp<Boolean>& self)

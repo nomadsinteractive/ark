@@ -218,8 +218,8 @@ public:
         virtual sp<LayoutParam> build(const Scope& args) override;
 
     private:
-        Optional<Length> _width;
-        Optional<Length> _height;
+        sp<Builder<Length>> _width;
+        sp<Builder<Length>> _height;
         FlexDirection _flex_direction;
         FlexWrap _flex_wrap;
         JustifyContent _justify_content;

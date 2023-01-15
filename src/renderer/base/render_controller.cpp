@@ -235,16 +235,10 @@ void RenderController::addPreRenderUpdateRequest(sp<Updatable> updatable, sp<Boo
     _on_pre_updatable.push_back(std::move(updatable), std::move(disposed));
 }
 
-void RenderController::addPreRenderRunRequest(const sp<Runnable>& task, const sp<Boolean>& disposed)
+void RenderController::addPreRenderRunRequest(sp<Runnable> task, sp<Boolean> disposed)
 {
-    if(disposed)
-        _on_pre_update_request.push_back(task, disposed);
-    else
-    {
-        sp<Disposed> e = task.as<Disposed>();
-        CHECK(e, "Adding an undisposable running task, it's that what you REALLY want?");
-        _on_pre_update_request.push_back(task, std::move(e));
-    }
+    DASSERT(task && disposed);
+    _on_pre_update_request.push_back(std::move(task), std::move(disposed));
 }
 
 void RenderController::preRequestUpdate(uint64_t timestamp)

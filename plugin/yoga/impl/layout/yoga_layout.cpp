@@ -112,6 +112,9 @@ void YogaLayout::inflate(sp<Node> rootNode)
 
 bool YogaLayout::update(uint64_t timestamp)
 {
+    if(!_layout_node)
+        return false;
+
     const LayoutParam& layoutParam = _layout_node->_layout_param;
     ASSERT(layoutParam.widthType() != LayoutParam::LENGTH_TYPE_PERCENTAGE && layoutParam.heightType() != LayoutParam::LENGTH_TYPE_PERCENTAGE);
     doUpdate(_layout_node, timestamp);
@@ -253,6 +256,7 @@ sp<LayoutV3> YogaLayout::BUILDER::build(const Scope& args)
 YogaLayout::YogaConfig::YogaConfig()
     : _config(YGConfigNew())
 {
+    YGConfigSetUseWebDefaults(_config, true);
 }
 
 YogaLayout::YogaConfig::~YogaConfig()

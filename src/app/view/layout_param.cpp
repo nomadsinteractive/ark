@@ -22,7 +22,7 @@ template<> ARK_API LayoutParam::Display StringConvert::to<String, LayoutParam::D
 }
 
 LayoutParam::LayoutParam(const sp<Size>& size, Display display, Gravity gravity, float grow)
-    : _size(Null::toSafePtr(size)), _margins(nullptr), _display(display), _gravity(gravity), _flex_grow(grow)
+    : _size(Null::toSafePtr(size)), _width_type(LayoutParam::LENGTH_TYPE_PIXEL), _height_type(LayoutParam::LENGTH_TYPE_PIXEL), _margins(nullptr), _display(display), _gravity(gravity), _flex_grow(grow)
 {
 }
 
@@ -136,7 +136,7 @@ LayoutParam::LengthType LayoutParam::flexBasisType() const
 void LayoutParam::setFlexBasisType(LengthType basisType)
 {
     _flex_basis._type = basisType;
-    _timestamp.setDirty();
+    _timestamp.markDirty();
 }
 
 sp<Numeric> LayoutParam::flexBasis() const
@@ -182,7 +182,7 @@ LayoutParam::LengthType LayoutParam::widthType() const
 void LayoutParam::setWidthType(LengthType widthType)
 {
     _width_type = widthType;
-    _timestamp.setDirty();
+    _timestamp.markDirty();
 }
 
 sp<Numeric> LayoutParam::height() const
@@ -203,7 +203,7 @@ LayoutParam::LengthType LayoutParam::heightType() const
 void LayoutParam::setHeightType(LengthType heightType)
 {
     _height_type = heightType;
-    _timestamp.setDirty();
+    _timestamp.markDirty();
 }
 
 LayoutParam::FlexDirection LayoutParam::flexDirection() const
@@ -296,8 +296,42 @@ bool LayoutParam::isWrapContent(float unit)
     return static_cast<int32_t>(unit) == SIZE_CONSTRAINT_WRAP_CONTENT;
 }
 
+namespace {
+
+class BuilderLengthVar : public Builder<LayoutParam::Length> {
+public:
+    BuilderLengthVar(LayoutParam::LengthType varType, sp<Builder<Numeric>> var)
+        : _var_type(varType), _var(std::move(var)) {
+    }
+
+    virtual sp<LayoutParam::Length> build(const Scope& args) override {
+        return sp<LayoutParam::Length>::make(_var_type, _var->build(args));
+    }
+
+private:
+    LayoutParam::LengthType _var_type;
+    sp<Builder<Numeric>> _var;
+};
+
+}
+
+static sp<Builder<LayoutParam::Length>> getLengthBuilder(BeanFactory& factory, const document& manifest, const String& attrName) {
+    const Optional<String> attrOpt = Documents::getAttributeOptional<String>(manifest, attrName);
+    if(attrOpt) {
+        const String& s = attrOpt.value();
+        if(s == "auto")
+            return sp<typename Builder<LayoutParam::Length>::Prebuilt>::make(sp<LayoutParam::Length>::make());
+        if(s.endsWith("px"))
+            return sp<typename Builder<LayoutParam::Length>::Prebuilt>::make(sp<LayoutParam::Length>::make(LayoutParam::LENGTH_TYPE_PIXEL, Strings::parse<float>(s.substr(0, s.length() - 2))));
+        if(s.endsWith("%"))
+            return sp<typename Builder<LayoutParam::Length>::Prebuilt>::make(sp<LayoutParam::Length>::make(LayoutParam::LENGTH_TYPE_PERCENTAGE, Strings::parse<float>(s.substr(0, s.length() - 1))));
+        return sp<BuilderLengthVar>::make(LayoutParam::LENGTH_TYPE_PIXEL, factory.ensureBuilder<Numeric>(s));
+    }
+    return nullptr;
+}
+
 LayoutParam::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _width(Documents::getAttributeOptional<Length>(manifest, "width")), _height(Documents::getAttributeOptional<Length>(manifest, "height")),
+    : _width(getLengthBuilder(factory, manifest, "width")), _height(getLengthBuilder(factory, manifest, "height")),
       _flex_direction(Documents::getAttribute<FlexDirection>(manifest, "flex-direction", FLEX_DIRECTION_ROW)), _flex_wrap(Documents::getAttribute<FlexWrap>(manifest, "flex-wrap", FLEX_WRAP_NOWRAP)),
       _justify_content(Documents::getAttribute<JustifyContent>(manifest, "justify-content", JUSTIFY_CONTENT_FLEX_START)), _align_items(Documents::getAttribute<Align>(manifest, "align-items", ALIGN_STRETCH)),
       _align_self(Documents::getAttribute<Align>(manifest, "align-self", ALIGN_AUTO)), _align_content(Documents::getAttribute<Align>(manifest, "align-content", ALIGN_FLEX_START)),
@@ -311,7 +345,7 @@ sp<LayoutParam> LayoutParam::BUILDER::build(const Scope& args)
     if(_size)
         return sp<LayoutParam>::make(_size->build(args), _display);
     if(_width || _height)
-        return sp<LayoutParam>::make(_width ? _width.value() : Length(), _height ? _height.value() : Length(), _flex_direction, _flex_wrap, _justify_content, _align_items, _align_self,
+        return sp<LayoutParam>::make(_width ? _width->build(args) : Length(), _height ? _height->build(args) : Length(), _flex_direction, _flex_wrap, _justify_content, _align_items, _align_self,
                                      _align_content, _display, _flex_grow, LayoutParam::Length(), _margins->build(args));
     return nullptr;
 }
@@ -348,19 +382,6 @@ template<> ARK_API LayoutParam::Gravity StringConvert::to<String, LayoutParam::G
             DFATAL("Unknown gravity value: \"%s\"", i.c_str());
     }
     return static_cast<LayoutParam::Gravity>(gravity);
-}
-
-template<> ARK_API LayoutParam::Length StringConvert::to<String, LayoutParam::Length>(const String& s)
-{
-    if(s == "auto")
-        return LayoutParam::Length();
-
-    if(s.endsWith("px"))
-        return LayoutParam::Length(LayoutParam::LENGTH_TYPE_PIXEL, Strings::parse<float>(s.substr(0, s.length() - 2)));
-    if(s.endsWith("%"))
-        return LayoutParam::Length(LayoutParam::LENGTH_TYPE_PERCENTAGE, Strings::parse<float>(s.substr(0, s.length() - 1)));
-
-    return LayoutParam::Length(LayoutParam::LENGTH_TYPE_PIXEL, Strings::parse<float>(s));
 }
 
 template<> ARK_API LayoutParam::FlexDirection StringConvert::to<String, LayoutParam::FlexDirection>(const String& s)

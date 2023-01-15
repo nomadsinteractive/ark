@@ -48,6 +48,9 @@ public:
     static sp<Boolean> observe(const sp<Boolean>& self, const sp<Observer>& observer);
 
 //[[script::bindings::classmethod]]
+    static sp<Boolean> dye(sp<Boolean> self, sp<Boolean> condition, String message);
+
+//[[script::bindings::classmethod]]
     static void fix(const sp<Boolean>& self);
 
 //  [[plugin::builder::by-value]]

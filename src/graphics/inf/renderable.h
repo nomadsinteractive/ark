@@ -25,6 +25,8 @@ public:
     public:
         State(StateBits state = RENDERABLE_STATE_NONE);
 
+        explicit operator bool() const;
+
         bool hasState(StateBits state) const;
         void setState(StateBits state, bool enabled);
 

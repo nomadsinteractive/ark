@@ -21,12 +21,15 @@ namespace ark {
 //[[script::bindings::holder]]
 class ARK_API LayerContext : public Holder {
 public:
-    struct Instance {
-        Instance(sp<Renderable> renderable, sp<Boolean> disposed);
-        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Instance);
+    struct RenderableItem {
+        RenderableItem(sp<Renderable> renderable, sp<Updatable> updatable, sp<Boolean> disposed);
+        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(RenderableItem);
 
         sp<Renderable> _renderable;
+        sp<Updatable> _updatable;
+
         SafeVar<Boolean> _disposed;
+
         Renderable::State _state;
     };
 
@@ -49,9 +52,8 @@ public:
 
     void renderRequest(const V3& position);
 
-    void add(sp<Renderable> renderable, sp<Boolean> disposed = nullptr);
 //  [[script::bindings::auto]]
-    void addRenderObject(const sp<RenderObject>& renderObject, const sp<Boolean>& disposed = nullptr);
+    void add(sp<Renderable> renderable, sp<Updatable> isDirty = nullptr, sp<Boolean> isDisposed = nullptr);
 //  [[script::bindings::auto]]
     void clear();
 
@@ -60,7 +62,7 @@ public:
 //  [[script::bindings::property]]
     void setVaryings(sp<Varyings> varyings);
 
-    const std::deque<Instance>& instances() const;
+    const std::deque<RenderableItem>& instances() const;
 
     bool preSnapshot(RenderRequest& renderRequest);
     void snapshot(RenderRequest& renderRequest, RenderLayerSnapshot& output);
@@ -100,8 +102,8 @@ public:
 
     V3 _position;
 
-    std::deque<Instance> _renderables;
-    std::vector<Instance> _renderable_emplaced;
+    std::deque<RenderableItem> _renderables;
+    std::vector<RenderableItem> _renderable_emplaced;
 };
 
 }

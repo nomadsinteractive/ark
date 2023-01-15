@@ -118,7 +118,7 @@ bool Color::update(uint64_t timestamp)
 
 void Color::doNotify()
 {
-    _timestamp.setDirty();
+    _timestamp.markDirty();
     notify();
 }
 

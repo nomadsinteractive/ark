@@ -56,9 +56,9 @@ void Size::setWidth(float width)
     _impl->x()->set(width);
 }
 
-void Size::setWidth(const sp<Numeric>& width)
+void Size::setWidth(sp<Numeric> width)
 {
-    _impl->x()->set(width);
+    _impl->x()->set(std::move(width));
 }
 
 float Size::heightAsFloat() const
@@ -71,9 +71,9 @@ void Size::setHeight(float height)
     _impl->y()->set(height);
 }
 
-void Size::setHeight(const sp<Numeric>& height)
+void Size::setHeight(sp<Numeric> height)
 {
-    _impl->y()->set(height);
+    _impl->y()->set(std::move(height));
 }
 
 float Size::depthAsFloat() const
@@ -86,9 +86,9 @@ void Size::setDepth(float depth)
     _impl->z()->set(depth);
 }
 
-void Size::setDepth(const sp<Numeric>& depth)
+void Size::setDepth(sp<Numeric> depth)
 {
-    _impl->z()->set(depth);
+    _impl->z()->set(std::move(depth));
 }
 
 sp<Numeric> Size::width() const

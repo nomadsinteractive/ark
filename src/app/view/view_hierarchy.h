@@ -70,7 +70,7 @@ public:
     void render(RenderRequest& renderRequest, const V3& position);
     bool onEvent(const Event& event, float x, float y) const;
 
-    void updateLayout(View& view, uint64_t timestamp);
+    void updateLayout(View& view, uint64_t timestamp, bool isDirty);
     const std::vector<sp<Slot>>& updateSlots();
 
     void addRenderer(const sp<Renderer>& renderer);

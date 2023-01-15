@@ -7,6 +7,11 @@ Renderable::State::State(StateBits state)
 {
 }
 
+Renderable::State::operator bool() const
+{
+    return static_cast<bool>(_state_bits);
+}
+
 bool Renderable::State::hasState(StateBits state) const
 {
     return _state_bits & state;

@@ -6,6 +6,7 @@
 #include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
+#include "core/impl/updatable/updatable_wrapper.h"
 #include "core/inf/builder.h"
 #include "core/inf/holder.h"
 #include "core/inf/updatable.h"
@@ -41,6 +42,7 @@ public:
     View(sp<Size> size);
     ~View() override;
 
+//  [[script::bindings::property]]
     virtual const sp<Size>& size() override;
 
     virtual void traverse(const Visitor& visitor) override;
@@ -52,11 +54,13 @@ public:
 
     void addRenderObjectWithLayer(sp<RenderObjectWithLayer> ro, bool isBackground);
 
+//  [[script::bindings::property]]
+    const sp<Vec3>& position() const;
+
     void updateLayout();
     void updateTextLayout(uint64_t timestamp);
 
     const sp<LayoutV3::Node>& layoutNode() const;
-    const sp<LayoutV3::Node>& newLayoutNode();
 
 //  [[script::bindings::property]]
     const sp<Boolean>& visible() const;
@@ -64,7 +68,7 @@ public:
     void setVisbile(sp<Boolean> visible);
 
 //  [[script::bindings::property]]
-    const sp<Boolean>& disposed() const;
+    sp<Boolean> disposed() const;
 //  [[script::bindings::property]]
     void setDisposed(sp<Boolean> disposed);
 
@@ -82,17 +86,30 @@ public:
     void addState(State state);
     void removeState(State state);
 
+//  [[script::bindings::property]]
     const sp<Runnable>& onEnter() const;
+//  [[script::bindings::property]]
     void setOnEnter(const sp<Runnable>& fireOnEnter);
+//  [[script::bindings::property]]
     const sp<Runnable>& onLeave() const;
+//  [[script::bindings::property]]
     void setOnLeave(const sp<Runnable>& fireOnLeave);
+//  [[script::bindings::property]]
     const sp<Runnable>& onPush() const;
+//  [[script::bindings::property]]
     void setOnPush(const sp<Runnable>& fireOnPush);
+//  [[script::bindings::property]]
     const sp<Runnable>& onClick() const;
+//  [[script::bindings::property]]
     void setOnClick(const sp<Runnable>& fireOnClick);
+//  [[script::bindings::property]]
     const sp<Runnable>& onRelease() const;
+//  [[script::bindings::property]]
     void setOnRelease(const sp<Runnable>& fireOnRelease);
+
+//  [[script::bindings::property]]
     const sp<EventListener>& onMove() const;
+//  [[script::bindings::property]]
     void setOnMove(const sp<EventListener>& fireOnMove);
 
     bool dispatchEvent(const Event& event, bool ptin);
@@ -108,6 +125,8 @@ public:
         BeanFactory _factory;
         document _manifest;
 
+        SafePtr<Builder<Boolean>> _disposed;
+        SafePtr<Builder<Boolean>> _visible;
         SafePtr<Builder<Layout>> _layout;
         SafePtr<Builder<LayoutV3>> _layout_v3;
         SafePtr<Builder<RenderObjectWithLayer>> _background;
@@ -318,10 +337,20 @@ public:
         sp<LayoutV3::Node> _layout_node;
 
         SafeVar<Boolean> _visible;
-        SafeVar<Boolean> _disposed;
+        sp<BooleanWrapper> _disposed;
 
         sp<Stub> _parent_stub;
         bool _top_view;
+    };
+
+    class UpdatableLayoutView : public Updatable {
+    public:
+        UpdatableLayoutView(sp<Stub> stub);
+
+        virtual bool update(uint64_t timestamp) override;
+
+    private:
+        sp<Stub> _stub;
     };
 
 private:
@@ -335,17 +364,14 @@ private:
 
     void markAsTopView();
 
-    sp<Stub> getLayoutViewStub() const;
-
     class RenderableViewSlot : public Renderable {
     public:
-        RenderableViewSlot(const View& view, sp<Renderable> renderable, bool isBackground);
+        RenderableViewSlot(sp<Stub> viewStub, sp<Renderable> renderable, bool isBackground);
 
         virtual StateBits updateState(const RenderRequest& renderRequest) override;
         virtual Snapshot snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest, const V3& postTranslate, StateBits state) override;
 
     private:
-        const View& _view;
         sp<Stub> _view_stub;
         sp<Renderable> _renderable;
         bool _is_background;
@@ -364,13 +390,14 @@ private:
 
     class LayoutPosition : public Vec3 {
     public:
-        LayoutPosition(sp<Stub> stub, bool isBackground, bool isCenter);
+        LayoutPosition(sp<Stub> stub, sp<Updatable> updatable, bool isBackground, bool isCenter);
 
         virtual bool update(uint64_t timestamp) override;
         virtual V3 val() override;
 
     private:
         sp<Stub> _stub;
+        sp<Updatable> _updatable;
 
         bool _is_background;
         bool _is_center;
@@ -378,7 +405,6 @@ private:
 
 protected:
     sp<Stub> _stub;
-    sp<Updatable> _updatable;
     sp<RenderObjectWithLayer> _background;
     sp<Text> _text;
 
@@ -391,6 +417,10 @@ protected:
 
     sp<EventListener> _on_move;
     sp<IsDisposed> _is_disposed;
+    sp<Updatable> _is_dirty;
+
+    sp<Size> _size;
+    sp<Vec3> _position;
 
     friend class Arena;
     friend class ViewHierarchy;

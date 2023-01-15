@@ -14,7 +14,7 @@ bool UpdatableOncePerFrame::update(uint64_t timestamp)
 
     _last_update_value = _delegate->update(timestamp);
     _last_update_timestamp = timestamp;
-
+    return _last_update_value;
 }
 
 }

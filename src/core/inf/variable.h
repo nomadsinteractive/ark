@@ -36,7 +36,7 @@ public:
 
     void set(T value) {
         _value = std::move(value);
-        _timestamp.setDirty();
+        _timestamp.markDirty();
     }
 
 private:

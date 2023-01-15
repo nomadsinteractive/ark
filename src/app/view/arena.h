@@ -58,7 +58,9 @@ public:
     sp<BoxBundle> packages() const;
 
 //  [[script::bindings::auto]]
-    void addEventListener(sp<EventListener> eventListener, int32_t priority = 0);
+    void addEventListener(sp<EventListener> eventListener, sp<Boolean> disposed = nullptr);
+//  [[script::bindings::auto]]
+    void pushEventListener(sp<EventListener> eventListener, sp<Boolean> disposed = nullptr);
 //  [[script::bindings::auto]]
     void addLayer(sp<Renderer> layer);
 //  [[script::bindings::auto]]
@@ -72,6 +74,8 @@ public:
 //  [[script::bindings::auto]]
     void addView(sp<View> view);
 
+    void dispose();
+
 //  [[plugin::builder]]
     class BUILDER : public Builder<Arena> {
     public:
@@ -83,11 +87,7 @@ public:
         BeanFactory _factory;
         document _manifest;
         SafePtr<Builder<ResourceLoader>> _resource_loader;
-//        SafePtr<Builder<Layout>> _layout;
         SafePtr<Builder<View>> _view;
-//        sp<Builder<LayoutParam>> _layout_param;
-//        String _background;
-//        String _view;
     };
 
 private:

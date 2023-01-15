@@ -20,11 +20,10 @@ public:
     }
 
     virtual sp<Asset> getAsset(const String& filepath) override {
-        String dirname, filename;
-        Strings::rcut(filepath, dirname, filename, '/');
-        const sp<AssetBundle> dir = getBundle(dirname);
+        const auto [dirname, filename] = filepath.rcut('/');
+        const sp<AssetBundle> dir = getBundle(dirname ? dirname.value() : "");
         const sp<Asset> asset = dir ? dir->getAsset(filename) : nullptr;
-        LOGD("filepath(%s) dirname(%s) ==> dir<%p> asset<%p>", filepath.c_str(), dirname.c_str(), dir.get(), asset.get());
+        LOGD("filepath(%s) dirname(%s) ==> dir<%p> asset<%p>", filepath.c_str(), dirname ? dirname.value().c_str() : "", dir.get(), asset.get());
         return asset;
     }
 
@@ -50,9 +49,9 @@ public:
             Strings::rcut(s, dirname, name, '/');
             filename = filename.empty() ? name : name + "/" + filename;
             const sp<Asset> asset = dirname.empty() ? nullptr : getAsset(dirname);
-            const sp<Readable> readable = asset ? asset->open() : nullptr;
+            sp<Readable> readable = asset ? asset->open() : nullptr;
             if(readable) {
-                const sp<AssetBundleZipFile> zip = sp<AssetBundleZipFile>::make(readable, dirname);
+                const sp<AssetBundleZipFile> zip = sp<AssetBundleZipFile>::make(std::move(readable), dirname);
                 const String entryName = filename + "/";
                 return zip->hasEntry(entryName) ? sp<AssetBundleWithPrefix>::make(zip, entryName) : nullptr;
             }

@@ -210,7 +210,7 @@ int32_t IntegerType::toRepeat(const String& repeat)
             flags |= IntegerType::REPEAT_LOOP;
         else
         {
-            DCHECK(s == "notify", "Unknow Repeat: \"%s, supported enums are [\"none\", \"last\", \"reverse\", \"loop\", \"notify\"]", s.c_str());
+            CHECK(s == "notify", "Unknow Repeat: \"%s, supported enums are [\"none\", \"last\", \"reverse\", \"loop\", \"notify\"]", s.c_str());
             flags |= IntegerType::REPEAT_NOTIFY;
         }
     }

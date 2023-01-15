@@ -16,10 +16,10 @@
 
 namespace ark {
 
-LayerContext::Instance::Instance(sp<Renderable> renderable, sp<Boolean> disposed)
-    : _renderable(std::move(renderable)), _disposed(std::move(disposed), false)
+LayerContext::RenderableItem::RenderableItem(sp<Renderable> renderable, sp<Updatable> updatable, sp<Boolean> disposed)
+    : _renderable(std::move(renderable)), _updatable(std::move(updatable)), _disposed(std::move(disposed), false)
 {
-    DASSERT(_renderable);
+    ASSERT(_renderable);
 }
 
 LayerContext::LayerContext(sp<RenderableBatch> batch, sp<ModelLoader> models, sp<Boolean> visible, sp<Boolean> disposed, sp<Varyings> varyings)
@@ -31,7 +31,7 @@ LayerContext::LayerContext(sp<RenderableBatch> batch, sp<ModelLoader> models, sp
 void LayerContext::traverse(const Holder::Visitor& visitor)
 {
     if(_layer_type != Layer::TYPE_TRANSIENT)
-        for(const Instance& i : _renderables)
+        for(const RenderableItem& i : _renderables)
             HolderUtil::visit(i._renderable, visitor);
 }
 
@@ -72,16 +72,11 @@ void LayerContext::renderRequest(const V3& position)
         _position = position;
 }
 
-void LayerContext::add(sp<Renderable> renderable, sp<Boolean> disposed)
+void LayerContext::add(sp<Renderable> renderable, sp<Updatable> isDirty, sp<Boolean> isDisposed)
 {
-    DASSERT(renderable);
-    _renderable_emplaced.emplace_back(std::move(renderable), std::move(disposed));
+    ASSERT(renderable);
+    _renderable_emplaced.emplace_back(std::move(renderable), std::move(isDirty), std::move(isDisposed));
     _reload_requested = true;
-}
-
-void LayerContext::addRenderObject(const sp<RenderObject>& renderObject, const sp<Boolean>& disposed)
-{
-    add(renderObject, disposed ? disposed : renderObject->disposed().as<Boolean>());
 }
 
 void LayerContext::clear()
@@ -105,7 +100,7 @@ bool LayerContext::preSnapshot(RenderRequest& renderRequest)
     bool needsReload = _renderable_emplaced.size() > 0;
     if(needsReload)
     {
-        const std::vector<Instance> emplaced(std::move(_renderable_emplaced));
+        const std::vector<RenderableItem> emplaced(std::move(_renderable_emplaced));
         _renderables.insert(_renderables.end(), emplaced.begin(), emplaced.end());
     }
 
@@ -132,16 +127,21 @@ bool LayerContext::DefaultBatch::preSnapshot(const RenderRequest& renderRequest,
 
     for(auto iter = lc._renderables.begin(); iter != lc._renderables.end(); )
     {
-        LayerContext::Instance& i = *iter;
+        LayerContext::RenderableItem& i = *iter;
         i._disposed.update(timestamp);
         i._state = i._renderable->updateState(renderRequest);
-        if(i._state.hasState(Renderable::RENDERABLE_STATE_DISPOSED) || i._disposed.val())
+        if(!i._state || i._state.hasState(Renderable::RENDERABLE_STATE_DISPOSED) || i._disposed.val())
         {
             needsReload = true;
             iter = lc._renderables.erase(iter);
         }
         else
+        {
+            if(!i._state.hasState(Renderable::RENDERABLE_STATE_DIRTY) && i._updatable)
+                i._state.setState(Renderable::RENDERABLE_STATE_DIRTY, i._updatable->update(timestamp));
+
             ++iter;
+        }
     }
     return needsReload;
 }
@@ -156,7 +156,7 @@ void LayerContext::DefaultBatch::snapshot(const RenderRequest& renderRequest, co
 
     for(auto iter = lc._renderables.begin(); iter != lc._renderables.end(); )
     {
-        const LayerContext::Instance& i = *iter;
+        const LayerContext::RenderableItem& i = *iter;
         Renderable::State state = i._state;
         if(needsReload)
             state.setState(Renderable::RENDERABLE_STATE_DIRTY, true);

@@ -24,19 +24,18 @@ Arena::Arena(sp<View> view, sp<ResourceLoader> resourceLoader)
 
 Arena::~Arena()
 {
-    Ark::instance().applicationContext()->deferUnref(std::move(_view));
     LOGD("");
 }
 
 void Arena::addRenderer(const sp<Renderer>& renderer)
 {
-    DASSERT(_view);
+    ASSERT(_view);
     _view->addRenderer(renderer);
 }
 
 void Arena::render(RenderRequest& renderRequest, const V3& position)
 {
-    DASSERT(_view);
+    ASSERT(_view);
     _view->render(renderRequest, position);
     for(const sp<Renderer>& i : _layers.update(renderRequest.timestamp()))
         i->render(renderRequest, position);
@@ -46,7 +45,7 @@ void Arena::render(RenderRequest& renderRequest, const V3& position)
 
 bool Arena::onEvent(const Event& event)
 {
-    DASSERT(_view);
+    ASSERT(_view);
     return _view->onEvent(event, 0.0f, 0.0f, true) || _event_listeners->onEvent(event);
 }
 
@@ -101,9 +100,14 @@ sp<BoxBundle> Arena::packages() const
     return _resource_loader->packages();
 }
 
-void Arena::addEventListener(sp<EventListener> eventListener, int32_t priority)
+void Arena::addEventListener(sp<EventListener> eventListener, sp<Boolean> disposed)
 {
-    _event_listeners->addEventListener(std::move(eventListener), priority);
+    _event_listeners->addEventListener(std::move(eventListener), std::move(disposed));
+}
+
+void Arena::pushEventListener(sp<EventListener> eventListener, sp<Boolean> disposed)
+{
+    _event_listeners->pushEventListener(std::move(eventListener), std::move(disposed));
 }
 
 void Arena::addLayer(sp<Renderer> layer)
