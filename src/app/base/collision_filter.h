@@ -10,7 +10,7 @@ namespace ark {
 class ARK_API CollisionFilter {
 public:
 //  [[script::bindings::auto]]
-    CollisionFilter(uint32_t categoryBits = 1, uint32_t maskBits = 0xffffffff, int32_t groupIndex = 0);
+    CollisionFilter(uint32_t categoryBits = 1, uint32_t maskBits = std::numeric_limits<uint32_t>::max(), int32_t groupIndex = 0);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(CollisionFilter);
 
 //  [[script::bindings::property]]

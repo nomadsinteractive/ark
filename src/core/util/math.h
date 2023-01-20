@@ -31,7 +31,7 @@ public:
         return value.floorDiv(std::forward<T>(mod));
     }
 
-    template<typename T, typename U> static std::remove_reference_t<T> floorDiv_sfinae(T value, U mod, typename std::enable_if<std::is_integral<T>::value && std::is_integral<U>::value>::type*) {
+    template<typename T, typename U> static std::remove_reference_t<T> floorDiv_sfinae(T value, U mod, std::enable_if_t<std::is_integral<T>::value && std::is_integral<U>::value>*) {
         return static_cast<std::remove_reference_t<T>>(std::floor(value /  static_cast<float>(mod)));
     }
 
@@ -172,7 +172,10 @@ public:
     static ARK_API float tanh(float x);
 
     static ARK_API int32_t floor(float x);
-    static ARK_API int32_t round(float x);
+    static ARK_API float round(float x);
+    static ARK_API V2 round(const V2& v);
+    static ARK_API V3 round(const V3& v);
+    static ARK_API V4 round(const V4& v);
 
 //  [[script::bindings::auto]]
     static ARK_API float randf();

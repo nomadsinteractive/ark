@@ -41,11 +41,12 @@ void BroadPhraseTilemap::remove(int32_t /*id*/)
 BroadPhrase::Result BroadPhraseTilemap::search(const V3& position, const V3& size)
 {
     std::vector<Candidate> candidates;
+    std::set<int32_t> candidateIdSet;
     const V2 sizeHalf = size / V2(2.0, 2.0);
     const Rect aabb(V2(position) - sizeHalf, V2(position) + sizeHalf);
     const V2 tileSize(static_cast<float>(_tilemap->tileset()->tileWidth()), static_cast<float>(_tilemap->tileset()->tileHeight()));
     for(const sp<TilemapLayer>& i : _tilemap->layers())
-        if(i->flag() & Tilemap::LAYER_FLAG_COLLIDABLE)
+        if(i->flags() & Tilemap::LAYER_FLAG_COLLIDABLE)
         {
             V3 selectionPoint;
             RectI selectionRange;
@@ -61,7 +62,16 @@ BroadPhrase::Result BroadPhraseTilemap::search(const V3& position, const V3& siz
                         {
                             int32_t shapeId = tile->shapeId();
                             if(shapeId != Collider::BODY_SHAPE_NONE)
-                                candidates.push_back(makeCandidate(toCandidateId(layerId, k, j), shapeId, V2(px, selectionPoint.y() + (k - selectionRange.top()) * tileSize.y() + tileSize.y() / 2)));
+                            {
+                                int32_t candidateId = toCandidateId(layerId, k, j);
+                                if(candidateIdSet.find(candidateId) != candidateIdSet.end())
+                                {
+                                    LOGW("Duplicated candidate found, this may be caused by duplidated layer name \"%s\"", i->name().c_str());
+                                    continue;
+                                }
+                                candidateIdSet.insert(candidateId);
+                                candidates.push_back(makeCandidate(candidateId, shapeId, V2(px, selectionPoint.y() + (k - selectionRange.top()) * tileSize.y() + tileSize.y() / 2)));
+                            }
                         }
                     }
                 }
@@ -76,7 +86,7 @@ BroadPhrase::Result BroadPhraseTilemap::rayCast(const V3& from, const V3& to)
     float tileHeight = static_cast<float>(_tilemap->tileset()->tileHeight());
     const Rect aabb = Rect(from, to);
     for(const sp<TilemapLayer>& i : _tilemap->layers())
-        if(i->flag() & Tilemap::LAYER_FLAG_COLLIDABLE)
+        if(i->flags() & Tilemap::LAYER_FLAG_COLLIDABLE)
         {
             Rect intersection;
             float tilemapLayerWidth = tileWidth * static_cast<float>(i->colCount());

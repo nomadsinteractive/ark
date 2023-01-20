@@ -53,7 +53,7 @@ private:
 
 ApplicationContext::ApplicationContext(sp<ApplicationBundle> applicationBundle, sp<RenderEngine> renderEngine)
     : _ticker(sp<Ticker>::make()), _cursor_position(sp<Vec2Impl>::make()), _application_bundle(std::move(applicationBundle)), _render_engine(std::move(renderEngine)), _render_controller(sp<RenderController>::make(_render_engine, _application_bundle->recycler(), _application_bundle->bitmapBundle(), _application_bundle->bitmapBoundsBundle())),
-      _sys_clock(sp<Clock>::make(_ticker)), _app_clock(sp<Clock>::make(_sys_clock->ticker())), _worker_strategy(sp<ExecutorWorkerStrategy>::make(sp<MessageLoop>::make(_ticker))), _event_listeners(new EventListenerList()), _string_table(Global<StringTable>()), _background_color(Color::BLACK),
+      _app_clock_ticker(sp<Variable<uint64_t>::Impl>::make(0)), _sys_clock(sp<Clock>::make(_ticker)), _app_clock(sp<Clock>::make(_app_clock_ticker)), _worker_strategy(sp<ExecutorWorkerStrategy>::make(sp<MessageLoop>::make(_ticker))), _event_listeners(new EventListenerList()), _string_table(Global<StringTable>()), _background_color(Color::BLACK),
       _paused(false)
 {
     Ark& ark = Ark::instance();

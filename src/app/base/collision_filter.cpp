@@ -3,7 +3,7 @@
 namespace ark {
 
 CollisionFilter::CollisionFilter(uint32_t categoryBits, uint32_t maskBits, int32_t groupIndex)
-    : _category_bits(categoryBits), _mask_bits(maskBits), _group_index(groupIndex)
+    : _category_bits(categoryBits ? categoryBits : std::numeric_limits<uint32_t>::max()), _mask_bits(maskBits), _group_index(groupIndex)
 {
 }
 
@@ -14,7 +14,7 @@ uint32_t CollisionFilter::categoryBits() const
 
 void CollisionFilter::setCategoryBits(uint32_t categoryBits)
 {
-    _category_bits = categoryBits;
+    _category_bits = categoryBits ? categoryBits : std::numeric_limits<uint32_t>::max();
 }
 
 uint32_t CollisionFilter::maskBits() const
@@ -41,7 +41,7 @@ bool CollisionFilter::collisionTest(const CollisionFilter& other) const
 {
     if(_group_index != 0 && other._group_index != 0 && _group_index == other._group_index)
         return _group_index > 0;
-    return (_mask_bits & other._category_bits) && ((_category_bits & other._mask_bits) || _category_bits == 0);
+    return (_mask_bits & other._category_bits) && (_category_bits & other._mask_bits);
 }
 
 }

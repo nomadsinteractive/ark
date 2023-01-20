@@ -131,9 +131,18 @@ public:
     static sp<Vec4> modCeil(sp<Vec4> self, sp<Vec4> mod);
 
 //  [[script::bindings::classmethod]]
+    static sp<Vec4> floor(sp<Vec4> self);
+//  [[script::bindings::classmethod]]
+    static sp<Vec4> ceil(sp<Vec4> self);
+//  [[script::bindings::classmethod]]
+    static sp<Vec4> round(sp<Vec4> self);
+
+//  [[script::bindings::classmethod]]
     static sp<Vec4> lerp(sp<Vec4> self, sp<Vec4> b, sp<Numeric> t = nullptr);
 //  [[script::bindings::classmethod]]
     static sp<Vec4> sod(sp<Vec4> self, float k, float z, float r, sp<Numeric> t = nullptr);
+//  [[script::bindings::classmethod]]
+    static sp<Vec4> dye(sp<Vec4> self, sp<Boolean> c, String message);
 
 //  [[script::bindings::classmethod]]
     static sp<Vec4> ifElse(sp<Vec4> self, sp<Boolean> condition, sp<Vec4> otherwise);

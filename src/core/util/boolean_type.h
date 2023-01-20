@@ -53,6 +53,9 @@ public:
 //[[script::bindings::classmethod]]
     static void fix(const sp<Boolean>& self);
 
+    static const sp<Boolean> TRUE;
+    static const sp<Boolean> FALSE;
+
 //  [[plugin::builder::by-value]]
     class DICTIONARY : public Builder<Boolean> {
     public:

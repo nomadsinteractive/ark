@@ -124,6 +124,15 @@ class _Var:
     def mod_ceil(self, mod):
         pass
 
+    def floor(self):
+        pass
+
+    def ceil(self):
+        pass
+
+    def round(self):
+        pass
+
     def if_else(self, condition, otherwise):
         pass
 
@@ -149,6 +158,9 @@ class _Var:
         pass
 
     def __truediv__(self, other):
+        pass
+
+    def __mod__(self):
         pass
 
     def __gt__(self, other) -> 'Boolean':
@@ -429,10 +441,10 @@ class ApplicationFacade:
     def exit(self):
         pass
 
-    def post(self, task: Callable, delay: float):
+    def post(self, task: Callable, delay: float, future: Optional[Future] = None):
         pass
 
-    def schedule(self, task: Callable, interval: float):
+    def schedule(self, task: Callable, interval: float, future: Optional[Future] = None):
         pass
 
 
@@ -714,9 +726,6 @@ class Numeric(_Var):
     def synchronize(self, disposed: Boolean) -> 'Numeric':
         pass
 
-    def to_integer(self) -> 'Integer':
-        pass
-
     @staticmethod
     def vibrate(s0: float, v0: float, s1: float, v1: float, duration: float, t=None):
         return None
@@ -732,7 +741,7 @@ class Integer(_Var):
     REPEAT_LAST = 8
     REPEAT_NOTIFY = 16
 
-    def __init__(self, value: Union[int, 'Integer', Numeric]):
+    def __init__(self, value: Union[int, 'Integer', Numeric, list['Integer']]):
         super().__init__(value)
 
     @staticmethod
@@ -744,6 +753,12 @@ class Integer(_Var):
         pass
 
     def animate(self, interval: Union[Numeric, float] = None, duration: Union[Numeric, float] = None) -> 'Integer':
+        pass
+
+    def __len__(self):
+        pass
+
+    def __getitem__(self, index: 'Integer') -> 'Integer':
         pass
 
 
@@ -1799,11 +1814,11 @@ class TilemapLayer(Renderer):
         return ''
 
     @property
-    def flag(self) -> int:
+    def flags(self) -> int:
         return 0
 
-    @flag.setter
-    def flag(self, flag):
+    @flags.setter
+    def flags(self, flag):
         pass
 
     @property
@@ -1832,17 +1847,9 @@ class Tilemap:
     LAYER_FLAG_SCROLLABLE = 2
     LAYER_FLAG_INVISIBLE = 4
 
-    def __init__(self, render_layer: RenderLayer, size: Size, tileset: Tileset):
+    def __init__(self, tileset: Tileset, render_layer: Optional[RenderLayer] = None):
         super().__init__()
-        self._size = size
         self._tileset = tileset
-
-    def clear(self):
-        pass
-
-    @property
-    def size(self) -> Size:
-        return self._size
 
     @property
     def tileset(self) -> Tileset:
@@ -1857,14 +1864,6 @@ class Tilemap:
         pass
 
     @property
-    def scroller(self):
-        return None
-
-    @scroller.setter
-    def scroller(self, val):
-        pass
-
-    @property
     def layers(self) -> List[TilemapLayer]:
         return []
 
@@ -1872,10 +1871,10 @@ class Tilemap:
     def storage(self) -> Optional[Storage]:
         return None
 
-    def make_renderer(self, layer: Optional[Layer] = None) -> Renderer:
+    def clear(self):
         pass
 
-    def make_layer(self, name: str, row_count: int, col_count: int, position: Optional[Vec3] = None, scroller: Optional[Vec3] = None,
+    def make_layer(self, name: str, row_count: int, col_count: int, position: Optional[TYPE_VEC3] = None, scroller: Optional[TYPE_VEC3] = None,
                    visible: Optional[Boolean] = None, zorder: float = 0, layer_flag: int = 0) -> TilemapLayer:
         pass
 
@@ -1915,7 +1914,7 @@ class EventDispatcher(EventListener):
     def on_event(self, event):
         pass
 
-    def on_key_event(self, code, on_press, on_release, on_click, on_repeat):
+    def on_key_event(self, code, on_press, on_release, on_repeat):
         pass
 
     def on_motion_event(self, on_down, on_up, on_click, on_move):

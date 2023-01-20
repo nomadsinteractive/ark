@@ -4,7 +4,6 @@
 #include "core/base/api.h"
 #include "core/base/string.h"
 #include "core/base/bean_factory.h"
-#include "core/base/notifier.h"
 #include "core/inf/builder.h"
 #include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
@@ -36,9 +35,7 @@ public:
         USAGE_COLOR_ATTACHMENT = 0,
         USAGE_DEPTH_ATTACHMENT = 1,
         USAGE_STENCIL_ATTACHMENT = 2,
-        USAGE_DEPTH_STENCIL_ATTACHMENT = 3,
-        USAGE_INPUT_DISABLED = 4,
-        USAGE_OUTPUT_DISABLED = 8
+        USAGE_DEPTH_STENCIL_ATTACHMENT = 3
     };
 
     enum Feature {
@@ -64,8 +61,16 @@ public:
         CONSTANT_COUNT
     };
 
-    struct ARK_API Parameters {
+    enum Flag {
+        FLAG_NONE = 0,
+        FLAG_FOR_INPUT = 1,
+        FLAG_FOR_OUTPUT = 2,
+        FLAG_COUNT
+    };
+
+    struct Parameters {
         Parameters(Type type, int, const document& parameters = nullptr, Format format = FORMAT_AUTO, Feature features = FEATURE_DEFAULT);
+        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Parameters);
 
         void loadParameters(const document& parameters, BeanFactory& factory, const Scope& args);
 
@@ -73,6 +78,7 @@ public:
         Usage _usage;
         Format _format;
         Feature _features;
+        Flag _flags;
 
         CONSTANT _min_filter;
         CONSTANT _mag_filter;
@@ -127,6 +133,7 @@ public:
 
     Texture(sp<Delegate> delegate, sp<Size> size, sp<Uploader> uploader, sp<Parameters> parameters);
     ~Texture() override;
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Texture);
 
     virtual uint64_t id() override;
     virtual void upload(GraphicsContext& graphicsContext) override;
@@ -144,15 +151,15 @@ public:
 
 //  [[script::bindings::property]]
     const sp<Size>& size() const;
+
     const sp<Parameters>& parameters() const;
+    void setParameters(sp<Parameters> parameters);
 
     const sp<Delegate>& delegate() const;
     void setDelegate(sp<Delegate> delegate);
     void setDelegate(sp<Delegate> delegate, sp<Size> size);
 
     const sp<Uploader>& uploader() const;
-
-    const Notifier& notifier() const;
 
 public:
 
@@ -193,9 +200,6 @@ private:
     sp<Size> _size;
     sp<Uploader> _uploader;
     sp<Parameters> _parameters;
-
-    Notifier _notifier;
-
 };
 
 }

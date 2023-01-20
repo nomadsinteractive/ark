@@ -5,7 +5,6 @@
 #include "core/base/wrapper.h"
 #include "core/base/expression.h"
 #include "core/impl/numeric/approach.h"
-#include "core/impl/numeric/stalker.h"
 #include "core/impl/numeric/vibrate.h"
 #include "core/impl/variable/at_least.h"
 #include "core/impl/variable/at_most.h"
@@ -16,6 +15,7 @@
 #include "core/impl/variable/interpolate.h"
 #include "core/impl/variable/periodic.h"
 #include "core/impl/variable/second_order_dynamics.h"
+#include "core/impl/variable/variable_dyed.h"
 #include "core/impl/variable/variable_op1.h"
 #include "core/impl/variable/variable_op2.h"
 #include "core/impl/variable/variable_ternary.h"
@@ -25,14 +25,20 @@
 
 namespace ark {
 
+sp<NumericWrapper> NumericType::create(float value)
+{
+    return sp<NumericWrapper>::make(value);
+}
+
 sp<NumericWrapper> NumericType::create(sp<Numeric> value)
 {
     return sp<NumericWrapper>::make(std::move(value));
 }
 
-sp<NumericWrapper> NumericType::create(float value)
+sp<NumericWrapper> NumericType::create(sp<Integer> value)
 {
-    return sp<NumericWrapper>::make(value);
+    sp<Numeric> casted = sp<VariableOP1<float, int32_t>>::make(Operators::Cast<int32_t, float>(), std::move(value));
+    return sp<NumericWrapper>::make(std::move(casted));
 }
 
 sp<Numeric> NumericType::add(const sp<Numeric>& lvalue, const sp<Numeric>& rvalue)
@@ -65,19 +71,19 @@ sp<Numeric> NumericType::sub(float lvalue, const sp<Numeric>& rvalue)
     return sp<VariableOP2<float, sp<Numeric>, Operators::Sub<float>>>::make(lvalue, rvalue);
 }
 
-sp<Numeric> NumericType::mul(const sp<Numeric>& lvalue, const sp<Numeric>& rvalue)
+sp<Numeric> NumericType::mul(sp<Numeric> lvalue, sp<Numeric> rvalue)
 {
-    return sp<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::Mul<float>>>::make(lvalue, rvalue);
+    return sp<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::Mul<float>>>::make(std::move(lvalue), std::move(rvalue));
 }
 
-sp<Numeric> NumericType::mul(const sp<Numeric>& lvalue, float rvalue)
+sp<Numeric> NumericType::mul(sp<Numeric> lvalue, float rvalue)
 {
-    return sp<VariableOP2<sp<Numeric>, float, Operators::Mul<float>>>::make(lvalue, rvalue);
+    return sp<VariableOP2<sp<Numeric>, float, Operators::Mul<float>>>::make(std::move(lvalue), rvalue);
 }
 
-sp<Numeric> NumericType::mul(float lvalue, const sp<Numeric>& rvalue)
+sp<Numeric> NumericType::mul(float lvalue, sp<Numeric> rvalue)
 {
-    return sp<VariableOP2<float, sp<Numeric>, Operators::Mul<float>>>::make(lvalue, rvalue);
+    return sp<VariableOP2<float, sp<Numeric>, Operators::Mul<float>>>::make(lvalue, std::move(rvalue));
 }
 
 sp<Numeric> NumericType::truediv(const sp<Numeric>& lvalue, const sp<Numeric>& rvalue)
@@ -148,11 +154,6 @@ int32_t NumericType::toInt32(const sp<Numeric>& self)
 float NumericType::toFloat(const sp<Numeric>& self)
 {
     return self->val();
-}
-
-sp<Integer> NumericType::toInteger(sp<Numeric> self)
-{
-    return sp<VariableOP1<int32_t, float>>::make(Operators::Cast<float, int32_t>(), std::move(self));
 }
 
 sp<Boolean> NumericType::gt(const sp<Numeric>& self, const sp<Numeric>& other)
@@ -290,11 +291,6 @@ sp<Numeric> NumericType::ifElse(const sp<Numeric>& self, const sp<Boolean>& cond
     return sp<VariableTernary<float>>::make(condition, self, negative);
 }
 
-sp<Numeric> NumericType::pursue(float s0, const sp<Numeric>& target, float duration, const sp<Numeric>& t)
-{
-    return sp<Stalker>::make(t ? t : Ark::instance().appClock()->duration(), target, s0, duration);
-}
-
 sp<Numeric> NumericType::vibrate(float s0, float v0, float s1, float v1, float duration, const sp<Numeric>& t)
 {
     DCHECK(duration > 0, "Duration must be greater than zero");
@@ -303,6 +299,11 @@ sp<Numeric> NumericType::vibrate(float s0, float v0, float s1, float v1, float d
     float multiplier = (t1 - t0) / duration;
     const sp<Numeric> b = sp<Numeric::Const>::make(t1 - t0);
     return sp<Vibrate>::make(boundary(mul(t ? t : Ark::instance().appClock()->duration(), multiplier), b)->wrapped(), a, t0, o);
+}
+
+sp<Numeric> NumericType::dye(sp<Numeric> self, sp<Boolean> condition, String message)
+{
+    return sp<VariableDyed<float>>::make(std::move(self), std::move(condition), std::move(message));
 }
 
 sp<Numeric> NumericType::lerp(const sp<Numeric>& self, const sp<Numeric>& b, const sp<Numeric>& t)
@@ -337,9 +338,19 @@ sp<Numeric> NumericType::modCeil(const sp<Numeric>& self, const sp<Numeric>& mod
     return sp<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::ModCeil<float>>>::make(self, mod);
 }
 
-sp<Numeric> NumericType::attract(const sp<Numeric>& self, float s0, float duration, const sp<Numeric>& t)
+sp<Numeric> NumericType::floor(sp<Numeric> self)
 {
-    return sp<Stalker>::make(t ? t : Ark::instance().appClock()->duration(), self, s0, duration);
+    return sp<VariableOP1<float>>::make(Operators::Floor<float>(), std::move(self));
+}
+
+sp<Numeric> NumericType::ceil(sp<Numeric> self)
+{
+    return sp<VariableOP1<float>>::make(Operators::Ceil<float>(), std::move(self));
+}
+
+sp<Numeric> NumericType::round(sp<Numeric> self)
+{
+    return sp<VariableOP1<float>>::make(Operators::Round<float>(), std::move(self));
 }
 
 sp<Numeric> NumericType::integral(const sp<Numeric>& self, const sp<Numeric>& t)
@@ -350,7 +361,7 @@ sp<Numeric> NumericType::integral(const sp<Numeric>& self, const sp<Numeric>& t)
 NumericType::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr)
     : _value(Expression::Compiler<float, NumericOperation<float>>().compile(factory, expr.strip()))
 {
-    DCHECK(_value, "Numeric expression compile failed: %s", expr.c_str());
+    CHECK(_value, "Numeric expression compile failed: %s", expr.c_str());
 }
 
 sp<Numeric> NumericType::DICTIONARY::build(const Scope& args)

@@ -3,7 +3,7 @@ ARK
 
 ARK is a rendering kit for rapid OpenGL(ES) and Vulkan game development.
 
-Forcing on simplicity, the ARK core library provides few functionality.
+Focusing on simplicity, the ARK core library provides few functionality.
 Some plugins listed below are probably needed if you are tending to start a rapid and feature-rich game development.
 
 Licensed under the Apache 2.0 license.

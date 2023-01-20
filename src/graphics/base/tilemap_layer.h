@@ -36,9 +36,9 @@ public:
     const sp<Tileset>& tileset() const;
 
 // [[script::bindings::property]]
-    Tilemap::LayerFlag flag() const;
+    Tilemap::LayerFlag flags() const;
 // [[script::bindings::property]]
-    void setFlag(Tilemap::LayerFlag flag);
+    void setFlag(Tilemap::LayerFlag flags);
 
 // [[script::bindings::property]]
     uint32_t colCount() const;
@@ -46,9 +46,9 @@ public:
     uint32_t rowCount() const;
 
 // [[script::bindings::property]]
-    const sp<Vec3>& scroller() const;
+    const SafeVar<Boolean>& visible() const;
 // [[script::bindings::property]]
-    void setScroller(sp<Vec3> scroller);
+    void setVisible(sp<Boolean> visible);
 
 // [[script::bindings::auto]]
     const sp<Tile>& getTile(uint32_t rowId, uint32_t colId) const;
@@ -78,14 +78,14 @@ private:
         LayerTile() = default;
         LayerTile(sp<Tile> tile, sp<RenderObject> renderable);
 
-        sp<Tile> tile;
-        sp<RenderObject> renderable;
-        Renderable::State state;
+        sp<Tile> _tile;
+        sp<RenderObject> _renderable;
+        Renderable::State _state;
     };
 
-    class BatchImpl : public RenderableBatch {
+    class Stub : public RenderableBatch {
     public:
-        BatchImpl(size_t colCount, size_t rowCount, sp<Tileset> tileset, sp<Vec3> position);
+        Stub(size_t colCount, size_t rowCount, sp<Tileset> tileset, sp<Vec3> position);
 
         virtual bool preSnapshot(const RenderRequest& renderRequest, LayerContext& lc) override;
         virtual void snapshot(const RenderRequest& renderRequest, const LayerContext& lc, RenderLayerSnapshot& output) override;
@@ -103,13 +103,12 @@ private:
     uint32_t _row_count;
     sp<Size> _size;
 
-    SafePtr<Vec3> _scroller;
-    sp<Boolean> _visible;
+    SafeVar<Boolean> _visible;
     float _zorder;
 
-    Tilemap::LayerFlag _flag;
+    Tilemap::LayerFlag _flags;
 
-    sp<BatchImpl> _renderable_batch;
+    sp<Stub> _stub;
 
     friend class Tilemap;
 };

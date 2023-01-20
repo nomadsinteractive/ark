@@ -3,12 +3,10 @@
 
 #include <functional>
 
-#include "core/base/timestamp.h"
 #include "core/inf/holder.h"
 #include "core/inf/variable.h"
 #include "core/types/implements.h"
 #include "core/util/holder_util.h"
-#include "core/util/updatable_util.h"
 
 namespace ark {
 
@@ -18,19 +16,15 @@ private:
 
 public:
     VariableOP1(OPFunc func, sp<Variable<U>> arg)
-        : _func(std::move(func)), _arg(std::move(arg)), _val(_func(_arg->val())) {
+        : _func(std::move(func)), _arg(std::move(arg)) {
     }
 
     virtual T val() override {
-        return _val;
+        return _func(_arg->val());
     }
 
     virtual bool update(uint64_t timestamp) override {
-        if(!UpdatableUtil::update(timestamp, _arg, _timestamp))
-            return false;
-
-        _val = _func(_arg->val());
-        return true;
+        return _arg->update(timestamp);
     }
 
     virtual void traverse(const Visitor& visitor) override {
@@ -40,9 +34,6 @@ public:
 private:
     OPFunc _func;
     sp<Variable<U>> _arg;
-
-    T _val;
-    Timestamp _timestamp;
 };
 
 }

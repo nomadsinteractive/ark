@@ -27,25 +27,38 @@ const sp<Resource>& Framebuffer::delegate() const
 
 Framebuffer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _render_controller(resourceLoaderContext->renderController()), _renderer(factory.ensureBuilder<Renderer>(manifest, Constants::Attributes::DELEGATE)),
-      _textures(factory.getBuilderList<Texture>(manifest, Constants::Attributes::TEXTURE)),
       _clear_mask(Documents::getAttribute<Framebuffer::ClearMask>(manifest, "clear-mask", Framebuffer::CLEAR_MASK_ALL))
 {
-    DCHECK(_textures.size(), "No texture attachment defined in manifest: \"%s\"", Documents::toString(manifest).c_str());
+    for(const document& i : manifest->children(Constants::Attributes::TEXTURE))
+        _textures.emplace_back(factory.ensureBuilder<Texture>(i), i);
+
+    CHECK(_textures.size(), "No texture attachment defined in manifest: \"%s\"", Documents::toString(manifest).c_str());
 }
 
 sp<Framebuffer> Framebuffer::BUILDER::build(const Scope& args)
 {
     std::vector<sp<Texture>> colorAttachments;
     sp<Texture> depthStencilAttachments;
-    for(const sp<Builder<Texture>>& i : _textures)
+    for(const auto& [i, j] : _textures)
     {
         sp<Texture> tex = i->build(args);
         if(tex->usage() == Texture::USAGE_COLOR_ATTACHMENT)
             colorAttachments.push_back(std::move(tex));
         else
         {
-            CHECK(depthStencilAttachments == nullptr, "Only one depth-stencil attachment is allowed");
+            CHECK(depthStencilAttachments == nullptr, "Only one depth-stencil attachment allowed");
             CHECK(tex->usage() & Texture::USAGE_DEPTH_STENCIL_ATTACHMENT, "Unknow Texture usage: %d", tex->usage());
+            Texture::Flag flags = Documents::getAttribute<Texture::Flag>(j, "flags", Texture::FLAG_NONE);
+            if(flags != Texture::FLAG_NONE)
+            {
+                sp<Texture::Parameters> tp = sp<Texture::Parameters>::make(*tex->parameters());
+                sp<Texture> newTexture = sp<Texture>::make(*tex);
+                tp->_flags = flags;
+                WARN(!(flags == Texture::FLAG_FOR_INPUT && (tex->usage() & Texture::USAGE_DEPTH_STENCIL_ATTACHMENT) && _clear_mask & Framebuffer::CLEAR_MASK_DEPTH_STENCIL),
+                       "Depth-stencil texture marked \"for input\" would be cleared before rendering pass");
+                newTexture->setParameters(std::move(tp));
+                tex = std::move(newTexture);
+            }
             depthStencilAttachments = std::move(tex);
         }
     }
@@ -64,26 +77,16 @@ sp<Renderer> Framebuffer::RENDERER_BUILDER::build(const Scope& args)
 
 template<> ARK_API Framebuffer::ClearMask StringConvert::to<String, Framebuffer::ClearMask>(const String& str)
 {
-    if(str == "none")
-        return Framebuffer::CLEAR_MASK_NONE;
-    if(str == "all")
-        return Framebuffer::CLEAR_MASK_ALL;
-
-    int32_t clearMask = Framebuffer::CLEAR_MASK_NONE;
-    for(const String& i : str.split('|'))
-    {
-        if(i == "color")
-            clearMask |= Framebuffer::CLEAR_MASK_COLOR;
-        else if(i == "depth")
-            clearMask |= Framebuffer::CLEAR_MASK_DEPTH;
-        else
-        {
-            DCHECK(i == "stencil", "Unknow ClearMask: \"%s\"", i.c_str());
-            clearMask |= Framebuffer::CLEAR_MASK_STENCIL;
-        }
-    }
-    return static_cast<Framebuffer::ClearMask>(clearMask);
+    return Enums<Framebuffer::ClearMask>::instance().toEnumCombo(str);
 }
 
+template<> void Enums<Framebuffer::ClearMask>::initialize(std::map<String, Framebuffer::ClearMask>& enums)
+{
+    enums["none"] = Framebuffer::CLEAR_MASK_NONE;
+    enums["all"] = Framebuffer::CLEAR_MASK_ALL;
+    enums["color"] = Framebuffer::CLEAR_MASK_COLOR;
+    enums["depth"] = Framebuffer::CLEAR_MASK_DEPTH;
+    enums["stencil"] = Framebuffer::CLEAR_MASK_STENCIL;
+}
 
 }

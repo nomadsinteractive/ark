@@ -48,7 +48,7 @@ public:
 //  [[script::bindings::property]]
     uint64_t tick() const;
 
-    sp<Variable<uint64_t> > ticker() const;
+    sp<Variable<uint64_t>> ticker() const;
     void setTicker(const sp<Variable<uint64_t>>& ticker);
 
 //  [[script::bindings::auto]]

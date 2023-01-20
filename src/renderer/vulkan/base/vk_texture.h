@@ -30,6 +30,7 @@ public:
     virtual void uploadBitmap(GraphicsContext& graphicsContext, const Bitmap& bitmap, const std::vector<sp<ByteArray>>& imagedata) override;
 
     const VkDescriptorImageInfo& vkDescriptor() const;
+    const Notifier& notifier() const;
 
 protected:
     void doUploadBitmap(const Bitmap& bitmap, size_t imageDataSize, const std::vector<bytearray>& imagedata);
@@ -51,6 +52,7 @@ private:
     uint32_t _mip_levels;
     VkDescriptorImageInfo _descriptor;
 
+    Notifier _notifier;
 };
 
 

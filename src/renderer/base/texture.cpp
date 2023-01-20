@@ -55,7 +55,6 @@ Texture::~Texture()
 void Texture::upload(GraphicsContext& graphicsContext)
 {
     _delegate->upload(graphicsContext, _uploader);
-    _notifier.notify();
 }
 
 ResourceRecycleFunc Texture::recycle()
@@ -103,6 +102,11 @@ const sp<Texture::Parameters>& Texture::parameters() const
     return _parameters;
 }
 
+void Texture::setParameters(sp<Parameters> parameters)
+{
+    _parameters = std::move(parameters);
+}
+
 const sp<Texture::Delegate>& Texture::delegate() const
 {
     return _delegate;
@@ -122,11 +126,6 @@ void Texture::setDelegate(sp<Delegate> delegate, sp<Size> size)
 const sp<Texture::Uploader>& Texture::uploader() const
 {
     return _uploader;
-}
-
-const Notifier& Texture::notifier() const
-{
-    return _notifier;
 }
 
 template<> ARK_API Texture::Type StringConvert::to<String, Texture::Type>(const String& str)
@@ -193,10 +192,18 @@ template<> ARK_API Texture::CONSTANT StringConvert::to<String, Texture::CONSTANT
     return Texture::CONSTANT_NEAREST;
 }
 
+template<> Texture::Flag StringConvert::to<String, Texture::Flag>(const String& str)
+{
+    if(str)
+        return Enums<Texture::Flag>::instance().toEnumCombo(str);
+    return Texture::FLAG_FOR_INPUT;
+}
+
 Texture::Parameters::Parameters(Type type, int, const document& parameters, Format format, Texture::Feature features)
     : _type(type), _usage(parameters ? Documents::getAttribute<Texture::Usage>(parameters, "usage", Texture::USAGE_COLOR_ATTACHMENT) : Texture::USAGE_COLOR_ATTACHMENT),
       _format(parameters ? Documents::getAttribute<Texture::Format>(parameters, "format", format) : format),
       _features(parameters ? Documents::getAttribute<Texture::Feature>(parameters, "feature", features) : features),
+      _flags(parameters ? Documents::getAttribute<Texture::Flag>(parameters, "flags", FLAG_FOR_INPUT) : FLAG_FOR_INPUT),
       _min_filter((features & Texture::FEATURE_MIPMAPS) ? CONSTANT_LINEAR_MIPMAP : CONSTANT_LINEAR), _mag_filter(CONSTANT_LINEAR),
       _wrap_s(CONSTANT_CLAMP_TO_EDGE), _wrap_t(CONSTANT_CLAMP_TO_EDGE), _wrap_r(CONSTANT_CLAMP_TO_EDGE)
 {
@@ -294,8 +301,12 @@ template<> ARK_API void Enums<Texture::Usage>::initialize(std::map<String, Textu
     enums["color"] = Texture::USAGE_COLOR_ATTACHMENT;
     enums["depth"] = Texture::USAGE_DEPTH_ATTACHMENT;
     enums["stencil"] = Texture::USAGE_DEPTH_STENCIL_ATTACHMENT;
-    enums["input_disabled"] = Texture::USAGE_INPUT_DISABLED;
-    enums["output_disabled"] = Texture::USAGE_OUTPUT_DISABLED;
+}
+
+template<> void Enums<Texture::Flag>::initialize(std::map<String, Texture::Flag>& enums)
+{
+    enums["for_input"] = Texture::FLAG_FOR_INPUT;
+    enums["for_output"] = Texture::FLAG_FOR_OUTPUT;
 }
 
 void Texture::Uploader::update(GraphicsContext& graphicsContext, Delegate& delegate)

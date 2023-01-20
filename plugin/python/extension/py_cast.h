@@ -48,14 +48,8 @@ public:
 
     template<typename T> static T ensureCppObject(PyObject* obj) {
         Optional<T> opt = toCppObject_sfinae<T>(obj, nullptr);
-        DCHECK(opt, "Casting \"%s\" to class \"%s\" failed", Py_TYPE(obj)->tp_name, Class::getClass<T>()->name());
+        CHECK(opt, "Casting \"%s\" to class \"%s\" failed", Py_TYPE(obj)->tp_name, Class::getClass<T>()->name());
         return opt.value();
-    }
-
-    template<typename T> sp<Array<sp<T>>> static toSharedPtrArray(PyObject* object) {
-        DCHECK(PyList_Check(object), "Object \"%s\" is not a Python list", Py_TYPE(object)->tp_name);
-        Optional<std::vector<sp<T>>> opt = toCppObject<std::vector<sp<T>>>(object);
-        return opt ? sp<typename Array<sp<T>>::Vector>::make(std::move(opt.value())) : nullptr;
     }
 
     static PyObject* toPyObject_SharedPtr(const sp<PyInstanceRef>& inst);
@@ -108,7 +102,7 @@ public:
 
     template<typename T> static sp<T> ensureSharedPtr(PyObject* object, bool alert = true) {
         Optional<sp<T>> opt = toSharedPtr<T>(object, alert);
-        DCHECK(opt, "Casting \"%s\" to class \"%s\" failed", Py_TYPE(object)->tp_name, Class::getClass<T>()->name());
+        CHECK(opt, "Casting \"%s\" to class \"%s\" failed", Py_TYPE(object)->tp_name, Class::getClass<T>()->name());
         return opt.value();
     }
 

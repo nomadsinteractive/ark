@@ -121,6 +121,37 @@ public:
         }
     };
 
+    template<typename T> class Floor {
+    public:
+        T operator()(T v) {
+            return std::floor(v);
+        }
+    };
+
+    template<typename T> class Ceil {
+    public:
+        T operator()(T v) {
+            return std::ceil(v);
+        }
+    };
+
+    template<typename T, typename UO, typename size_t N> class Transform {
+    public:
+        Transform(UO unaryOp)
+            : _unary_op(std::move(unaryOp)) {
+        }
+
+        T operator()(const T& v) {
+            T result;
+            for(size_t i = 0; i < N; ++i)
+                result[i] = _unary_op(v[i]);
+            return result;
+        }
+
+    private:
+        UO _unary_op;
+    };
+
     template<typename T> class ModFloor {
     public:
         T operator()(const T& v1, const T& v2) {
@@ -132,6 +163,13 @@ public:
     public:
         T operator()(const T& v1, const T& v2) {
             return Math::modCeil(v1, v2);
+        }
+    };
+
+    template<typename T> class Round {
+    public:
+        T operator()(T v1) {
+            return Math::round(v1);
         }
     };
 

@@ -4,7 +4,6 @@
 
 #include "core/ark.h"
 #include "core/base/clock.h"
-#include "core/impl/numeric/stalker.h"
 #include "core/impl/variable/integral.h"
 #include "core/impl/variable/interpolate.h"
 #include "core/impl/variable/second_order_dynamics.h"

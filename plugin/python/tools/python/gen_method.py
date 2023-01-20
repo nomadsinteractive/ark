@@ -3,7 +3,6 @@ import sys
 from gen_core import parse_method_arguments, acg, remove_crv, gen_cast_call, INDENT, gen_method_call_arg, GenArgumentMeta, GenArgument, \
     create_overloaded_method_type
 
-
 TP_AS_NUMBER_TEMPLATE = [
     'static PyNumberMethods ${py_class_name}_tp_as_number = {',
     '    (binaryfunc) ${nb_add},        /* binaryfunc nb_add;                  */ /* __add__ */',
@@ -68,6 +67,9 @@ TP_AS_NUMBER_TEMPLATE_OPERATOR = {
     '@': 'nb_matrix_multiply',
     '@=': 'nb_inplace_matrix_multiply'
 }
+
+
+NO_STATIC_OPS = {'neg', 'abs', 'int', 'float', '+=', '-=', '*=', '/='}
 
 
 class GenMethod(object):
@@ -363,10 +365,71 @@ class GenSetPropMethod(GenMethod):
             return create_overloaded_method_type(GenSetPropMethod)(m1, m2)
 
 
-class GenMappingMethod(GenMethod):
+class GenOperatorMethod(GenMethod):
     def __init__(self, name, args, return_type, operator):
         GenMethod.__init__(self, name, args, return_type)
+        self._is_static = operator not in NO_STATIC_OPS
+        self._self_argument = None if self._is_static else self._arguments and self._arguments[0]
+        self._arguments = self._arguments if self._is_static else self._arguments[1:]
         self._operator = operator
+        self._return_int = self._return_type == 'bool'
+
+    def gen_py_return(self):
+        return 'int32_t' if self._return_int else 'PyObject*'
+
+    def need_unpack_statement(self):
+        return not self._is_static
+
+    @property
+    def check_argument_type(self):
+        return self._operator not in ('&&', '||')
+
+    def gen_py_arguments(self):
+        arglen = len(self._arguments)
+        args = ['PyObject* arg%d' % i for i in range(arglen)]
+        if self._is_static:
+            return ', '.join(args)
+        return ', '.join(['Instance* self'] + args)
+
+    def gen_py_argc(self):
+        return len(self._arguments)
+
+    def _gen_calling_statement(self, genclass, argnames):
+        if self._is_static:
+            return '%s::%s(%s);' % (genclass.classname, self._name, argnames)
+        return '%s::%s(%s%s);' % (genclass.classname, self._name, self.gen_self_statement(genclass), argnames if not argnames else ', ' + argnames)
+
+    def gen_return_statement(self, return_type, py_return):
+        if self._operator in ('+=', '-=', '*=', '/='):
+            return ['Py_INCREF(self);', 'return reinterpret_cast<PyObject*>(self);']
+        return GenMethod.gen_return_statement(return_type, py_return)
+
+    def _gen_parse_tuple_code(self, lines, declares, args):
+        pass
+
+    @property
+    def err_return_value(self):
+        return 'return 0' if self._return_int else 'Py_RETURN_NOTIMPLEMENTED'
+
+    @property
+    def operator(self):
+        return self._operator
+
+    @staticmethod
+    def overload(m1, m2):
+        try:
+            m1.add_overloaded_method(m2)
+            return m1
+        except AttributeError:
+            return create_overloaded_method_type(GenOperatorMethod, operator=m1.operator)(m1, m2)
+
+
+class GenMappingMethod(GenMethod):
+    def __init__(self, name, args, return_type, operator, is_static):
+        self._operator = operator
+        self._is_static = is_static
+        self._is_len_func = operator == 'len'
+        super().__init__(name, args[1:] if self._is_static else args, return_type)
 
     @property
     def operator(self):
@@ -376,26 +439,24 @@ class GenMappingMethod(GenMethod):
         pass
 
     def _gen_convert_args_code(self, lines, argdeclare, optional_check=False):
-        if argdeclare:
+        if argdeclare and not self._is_len_func:
             arg0 = self._arguments[0]
             meta = GenArgumentMeta('PyObject*', arg0.accept_type, 'O')
             ga = GenArgument(arg0.accept_type, arg0.default_value, meta, str(arg0))
             lines.append(ga.gen_declare('obj0', 'arg0'))
 
     def gen_py_arguments(self):
+        if self._is_len_func:
+            return 'Instance* self'
         return 'Instance* self, PyObject* arg0'
 
     def gen_py_argc(self):
-        return 1
+        return 0 if self._is_len_func else 1
 
-    def _gen_calling_body(self, genclass, calling_lines):
-        return [
-            'try {'] + [INDENT + i for i in calling_lines] + [
-            '} catch(const std::exception& ex) {',
-            INDENT + 'PyErr_SetString(PyExc_KeyError, Strings::sprintf("Cannot subscribe \'%s\' object with key \'%%s\'. \\nCaused by: %%s", obj0.c_str(), ex.what()).c_str());' % genclass.classname,
-            INDENT + 'return nullptr;',
-            '}'
-        ]
+    def _gen_calling_statement(self, genclass, argnames):
+        if self._is_static:
+            return '%s::%s(%s);' % (genclass.classname, self._name, f'unpacked{", " if argnames else ""}{argnames}')
+        return super()._gen_calling_statement(genclass, argnames)
 
 
 def gen_operator_defs(genclass):

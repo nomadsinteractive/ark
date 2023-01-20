@@ -6,13 +6,13 @@
 namespace ark {
 
 EventDispatcher::EventDispatcher()
-    : _key_click_interval(500), _motion_click_range(50.0f)
+    : _motion_click_range(50.0f)
 {
 }
 
-void EventDispatcher::onKeyEvent(Event::Code code, const sp<Runnable>& onPress, const sp<Runnable>& onRelease, const sp<Runnable>& onClick, const sp<Runnable>& onRepeat)
+void EventDispatcher::onKeyEvent(Event::Code code, sp<Runnable> onPress, sp<Runnable> onRelease, sp<Runnable> onRepeat)
 {
-    _key_events[code].emplace(onPress, onRelease, onClick, onRepeat);
+    _key_events[code].emplace(std::move(onPress), std::move(onRelease), std::move(onRepeat));
 }
 
 void EventDispatcher::unKeyEvent(Event::Code code)
@@ -23,20 +23,15 @@ void EventDispatcher::unKeyEvent(Event::Code code)
             iter->second.pop();
 }
 
-void EventDispatcher::onMotionEvent(const sp<EventListener>& onDown, const sp<EventListener>& onUp, const sp<EventListener>& onClick, const sp<EventListener>& onMove)
+void EventDispatcher::onMotionEvent(sp<EventListener> onDown, sp<EventListener> onUp, sp<EventListener> onClick, sp<EventListener> onMove)
 {
-    _motion_events.emplace(onDown, onUp, onClick, onMove);
+    _motion_events.emplace(std::move(onDown), std::move(onUp), std::move(onClick), std::move(onMove));
 }
 
 void EventDispatcher::unMotionEvent()
 {
     if(!_motion_events.empty())
         _motion_events.pop();
-}
-
-uint32_t EventDispatcher::keyClickInterval() const
-{
-    return _key_click_interval;
 }
 
 float EventDispatcher::motionClickRange() const
@@ -64,8 +59,8 @@ bool EventDispatcher::onEvent(const Event& event)
     return false;
 }
 
-EventDispatcher::KeyEventListener::KeyEventListener(const sp<Runnable>& onPress, const sp<Runnable>& onRelease, const sp<Runnable>& onClick, const sp<Runnable>& onRepeat)
-    : _on_press(onPress), _on_release(onRelease), _on_click(onClick), _on_repeat(onRepeat), _pressed_timestamp(0)
+EventDispatcher::KeyEventListener::KeyEventListener(sp<Runnable> onPress, sp<Runnable> onRelease, sp<Runnable> onRepeat)
+    : _on_press(std::move(onPress)), _on_release(std::move(onRelease)), _on_repeat(std::move(onRepeat))
 {
 }
 
@@ -74,16 +69,11 @@ void EventDispatcher::KeyEventListener::onEvent(const EventDispatcher& dispatche
     Event::Action action = event.action();
     if(action == Event::ACTION_KEY_DOWN)
     {
-        _pressed_timestamp = event.timestamp();
         if(_on_press)
             _on_press->run();
     }
     else if(action == Event::ACTION_KEY_UP)
     {
-        uint32_t d = event.timestamp() - _pressed_timestamp;
-        _pressed_timestamp = 0;
-        if(_on_click && d < dispatcher.keyClickInterval())
-            _on_click->run();
         if(_on_release)
             _on_release->run();
     }

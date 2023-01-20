@@ -40,9 +40,9 @@ Command::State Command::state() const
 
 void Command::setState(Command::State state)
 {
-    _state_holder->setState(state);
     if(state == STATE_ACTIVATED && _command_group->stateHolder()->state() != state)
         _command_group->activate();
+    _state_holder->setState(state);
 }
 
 const sp<CommandGroup>& Command::commandGroup() const

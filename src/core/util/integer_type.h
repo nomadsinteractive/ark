@@ -32,13 +32,17 @@ public:
     static sp<IntegerWrapper> create(sp<Integer> value);
 //[[script::bindings::constructor]]
     static sp<IntegerWrapper> create(sp<Numeric> value);
+//[[script::bindings::constructor]]
+    static sp<Integer> create(std::vector<sp<Integer>> values);
 
 //[[script::bindings::operator(+)]]
     static sp<Integer> add(const sp<Integer>& self, const sp<Integer>& rvalue);
 //[[script::bindings::operator(-)]]
     static sp<Integer> sub(const sp<Integer>& self, const sp<Integer>& rvalue);
 //[[script::bindings::operator(*)]]
-    static sp<Integer> mul(const sp<Integer>& self, const sp<Integer>& rvalue);
+    static sp<Integer> mul(sp<Integer> self, sp<Integer> rvalue);
+//[[script::bindings::operator(*)]]
+    static sp<Numeric> mul(sp<Integer> self, sp<Numeric> rvalue);
 //[[script::bindings::operator(%)]]
     static sp<Integer> mod(const sp<Integer>& self, const sp<Integer>& rvalue);
 //[[script::bindings::operator(/)]]
@@ -65,6 +69,11 @@ public:
 //[[script::bindings::operator(!=)]]
     static sp<Boolean> ne(const sp<Integer>& self, const sp<Integer>& other);
 
+//[[script::bindings::map(len)]]
+    static size_t len(const sp<Integer>& self);
+//[[script::bindings::map([])]]
+    static sp<Integer> subscribe(const sp<Integer>& self, sp<Integer> index);
+
 //[[script::bindings::property]]
     static int32_t val(const sp<Integer>& self);
 //[[script::bindings::property]]
@@ -89,9 +98,9 @@ public:
     static void set(const sp<IntegerWrapper>& self, const sp<Integer>& delegate);
 
 //[[script::bindings::classmethod]]
-    static void fix(const sp<Integer>& self);
-//[[script::bindings::classmethod]]
     static sp<Integer> wrap(const sp<Integer>& self);
+//  [[script::bindings::classmethod]]
+    static sp<Integer> freeze(const sp<Integer>& self);
 
 //[[script::bindings::classmethod]]
     static sp<Integer> animate(const sp<Integer>& self, const sp<Numeric>& interval = nullptr, const sp<Numeric>& duration = nullptr);
@@ -109,16 +118,17 @@ public:
 //  [[script::bindings::classmethod]]
     static sp<Integer> ifElse(const sp<Integer>& self, const sp<Boolean>& condition, const sp<Integer>& negative);
 
+//[[script::bindings::classmethod]]
+    static sp<Integer> dye(sp<Integer> self, sp<Boolean> condition = nullptr, String message = "");
+
+    static const sp<Integer> ZERO;
+
 //  [[plugin::builder::by-value]]
     class DICTIONARY : public Builder<Integer> {
     public:
-        DICTIONARY(BeanFactory& factory, const String& value);
-        DICTIONARY(BeanFactory& factory, const String& value, Repeat repeat);
+        DICTIONARY(BeanFactory& factory, const String& expr);
 
         virtual sp<Integer> build(const Scope& args) override;
-
-    private:
-        sp<Builder<Integer>> makeIntegerBuilder(BeanFactory& factory, const String& expr, Repeat repeat) const;
 
     private:
         sp<Builder<Integer>> _value;

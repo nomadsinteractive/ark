@@ -252,7 +252,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
         if(i)
         {
             const sp<VKTexture> texture = i->delegate();
-            _texture_observers.push_back(i->notifier().createDirtyFlag());
+            _texture_observers.push_back(texture->notifier().createDirtyFlag());
             writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
                                           _descriptor_set,
                                           VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,

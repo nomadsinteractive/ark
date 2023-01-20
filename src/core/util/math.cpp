@@ -141,9 +141,24 @@ int32_t Math::floor(float x)
     return static_cast<int32_t>(x);
 }
 
-int32_t Math::round(float x)
+float Math::round(float x)
 {
-    return static_cast<int32_t>(x + 0.5f);
+    return std::round(x);
+}
+
+V2 Math::round(const V2& v)
+{
+    return V2(std::round(v.x()), std::round(v.y()));
+}
+
+V3 Math::round(const V3& v)
+{
+    return V3(std::round(v.x()), std::round(v.y()), std::round(v.z()));
+}
+
+V4 Math::round(const V4& v)
+{
+    return V4(std::round(v.x()), std::round(v.y()), std::round(v.z()), std::round(v.w()));
 }
 
 float Math::randf()

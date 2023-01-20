@@ -15,6 +15,7 @@
 #include "renderer/base/resource_loader_context.h"
 
 #include "app/base/application_context.h"
+#include "app/base/collision_filter.h"
 #include "app/base/collision_manifold.h"
 #include "app/base/raycast_manifold.h"
 #include "app/base/rigid_body.h"
@@ -25,8 +26,13 @@
 
 namespace ark {
 
-ColliderImpl::ColliderImpl(std::vector<sp<BroadPhrase>> broadPhrase, sp<NarrowPhrase> narrowPhrase, RenderController& renderController)
-    : _stub(sp<Stub>::make(std::move(broadPhrase), std::move(narrowPhrase)))
+static bool collisionFilterTest(const sp<CollisionFilter>& cf1, const sp<CollisionFilter>& cf2)
+{
+    return cf1 && cf2 ? cf1->collisionTest(*cf2) : true;
+}
+
+ColliderImpl::ColliderImpl(std::vector<std::pair<sp<BroadPhrase>, sp<CollisionFilter>>> broadPhrases, sp<NarrowPhrase> narrowPhrase, RenderController& renderController)
+    : _stub(sp<Stub>::make(std::move(broadPhrases), std::move(narrowPhrase)))
 {
     renderController.addPreRenderUpdateRequest(_stub, sp<BooleanByWeakRef<Stub>>::make(_stub, 1));
 }
@@ -46,19 +52,23 @@ std::vector<RayCastManifold> ColliderImpl::rayCast(const V3& from, const V3& to)
     return _stub->rayCast(V2(from.x(), from.y()), V2(to.x(), to.y()));
 }
 
-ColliderImpl::Stub::Stub(std::vector<sp<BroadPhrase>> broadPhrases, sp<NarrowPhrase> narrowPhrase)
+ColliderImpl::Stub::Stub(std::vector<std::pair<sp<BroadPhrase>, sp<CollisionFilter>>> broadPhrases, sp<NarrowPhrase> narrowPhrase)
     : _rigid_body_base_id(0), _broad_phrases(std::move(broadPhrases)), _narrow_phrase(std::move(narrowPhrase))
 {
 }
 
-BroadPhrase::Result ColliderImpl::Stub::broadPhraseSearch(const V3& position, const V3& aabb) const
+BroadPhrase::Result ColliderImpl::Stub::broadPhraseSearch(const V3& position, const V3& aabb, const sp<CollisionFilter>& collisionFilter) const
 {
     if(_broad_phrases.size() == 1)
-        return _broad_phrases.at(0)->search(position, aabb);
+    {
+        const auto& [i, j] = _broad_phrases.at(0);
+        return collisionFilterTest(j, collisionFilter) ? i->search(position, aabb) : BroadPhrase::Result();
+    }
 
     BroadPhrase::Result result;
-    for(const sp<BroadPhrase>& i : _broad_phrases)
-        result.merge(i->search(position, aabb));
+    for(const auto& [i, j] : _broad_phrases)
+        if(collisionFilterTest(j, collisionFilter))
+            result.merge(i->search(position, aabb));
 
     return result;
 }
@@ -66,10 +76,13 @@ BroadPhrase::Result ColliderImpl::Stub::broadPhraseSearch(const V3& position, co
 BroadPhrase::Result ColliderImpl::Stub::broadPhraseRayCast(const V3& from, const V3& to) const
 {
     if(_broad_phrases.size() == 1)
-        return _broad_phrases.at(0)->rayCast(from, to);
+    {
+        const auto& [i, j] = _broad_phrases.at(0);
+        return i->rayCast(from, to);
+    }
 
     BroadPhrase::Result result;
-    for(const sp<BroadPhrase>& i : _broad_phrases)
+    for(const auto& [i, j] : _broad_phrases)
         result.merge(i->rayCast(from, to));
 
     return result;
@@ -77,13 +90,13 @@ BroadPhrase::Result ColliderImpl::Stub::broadPhraseRayCast(const V3& from, const
 
 void ColliderImpl::Stub::updateBroadPhraseCandidate(int32_t id, const V3& position, const V3& aabb) const
 {
-    for(const sp<BroadPhrase>& i : _broad_phrases)
+    for(const auto& [i, j] : _broad_phrases)
         i->update(id, position, aabb);
 }
 
 void ColliderImpl::Stub::removeBroadPhraseCandidate(int32_t id)
 {
-    for(const sp<BroadPhrase>& i : _broad_phrases)
+    for(const auto& [i, j] : _broad_phrases)
         i->remove(id);
 }
 
@@ -139,7 +152,7 @@ sp<ColliderImpl::RigidBodyImpl> ColliderImpl::Stub::createRigidBody(int32_t rigi
     _rigid_bodies[rigidBodyShadow->id()] = rigidBodyShadow;
 
     float s = rigidBodyDef.occupyRadius() * 2;
-    for(const sp<BroadPhrase>& i : _broad_phrases)
+    for(const auto& [i, j] : _broad_phrases)
         i->create(rigidBodyId, posVal, V3(s));
 
     return sp<RigidBodyImpl>::make(std::move(rigidBodyShadow));
@@ -301,7 +314,7 @@ void ColliderImpl::RigidBodyShadow::collisionTest(const sp<RigidBodyShadow>& sel
 
     {
         DPROFILER_TRACE("BroadPhrase");
-        result = collider.broadPhraseSearch(position, size);
+        result = collider.broadPhraseSearch(position, size, self->collisionFilter());
         dynamicCandidates = std::move(result.dynamic_candidates);
         dynamicCandidates.erase(shadowStub._id);
         for(int32_t i : removingIds)
@@ -333,17 +346,19 @@ const RigidBodyDef& ColliderImpl::RigidBodyShadow::updateBodyDef(NarrowPhrase& n
 }
 
 ColliderImpl::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _broad_phrases(factory.getBuilderList<BroadPhrase>(manifest, "broad-phrase")), _narrow_phrase(factory.ensureBuilder<NarrowPhrase>(manifest, "narrow-phrase")),
-      _render_controller(resourceLoaderContext->renderController())
+    : _narrow_phrase(factory.ensureBuilder<NarrowPhrase>(manifest, "narrow-phrase")), _render_controller(resourceLoaderContext->renderController())
 {
-    DCHECK(_broad_phrases.size() > 0, "Collider should have at least one BroadPhrase");
+    for(const document& i : manifest->children("broad-phrase"))
+        _broad_phrases.emplace_back(factory.ensureBuilder<BroadPhrase>(i), factory.getBuilder<CollisionFilter>(i, "collision-filter"));
+
+    CHECK(_broad_phrases.size() > 0, "Collider should have at least one BroadPhrase");
 }
 
 sp<Collider> ColliderImpl::BUILDER::build(const Scope& args)
 {
-    std::vector<sp<BroadPhrase>> broadPhrases;
-    for(const auto& i : _broad_phrases)
-        broadPhrases.push_back(i->build(args));
+    std::vector<std::pair<sp<BroadPhrase>, sp<CollisionFilter>>> broadPhrases;
+    for(const auto& [i, j] : _broad_phrases)
+        broadPhrases.emplace_back(i->build(args), j->build(args));
     return sp<ColliderImpl>::make(std::move(broadPhrases), _narrow_phrase->build(args), _render_controller);
 }
 

@@ -3,6 +3,7 @@
 
 #include "core/forwarding.h"
 #include "core/inf/runnable.h"
+#include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -15,13 +16,15 @@ namespace ark {
 
 class SurfaceUpdater : public Runnable {
 public:
-    SurfaceUpdater(const sp<SurfaceController>& surfaceController, const sp<RenderController>& renderController);
+    SurfaceUpdater(sp<SurfaceController> surfaceController, const ApplicationContext& applicationContext);
 
     virtual void run() override;
 
 private:
     sp<SurfaceController> _surface_controller;
     sp<RenderController> _render_controller;
+    sp<Variable<uint64_t>::Impl> _app_clock_ticker;
+    uint64_t _pre_frame_timestamp;
 };
 
 }

@@ -18,6 +18,8 @@ public:
     static sp<NumericWrapper> create(float value);
 //  [[script::bindings::constructor]]
     static sp<NumericWrapper> create(sp<Numeric> value);
+//  [[script::bindings::constructor]]
+    static sp<NumericWrapper> create(sp<Integer> value);
 
 //  [[script::bindings::operator(+)]]
     static sp<Numeric> add(const sp<Numeric>& lvalue, const sp<Numeric>& rvalue);
@@ -32,11 +34,11 @@ public:
 //  [[script::bindings::operator(-)]]
     static sp<Numeric> sub(float lvalue, const sp<Numeric>& rvalue);
 //  [[script::bindings::operator(*)]]
-    static sp<Numeric> mul(const sp<Numeric>& lvalue, const sp<Numeric>& rvalue);
+    static sp<Numeric> mul(sp<Numeric> lvalue, sp<Numeric> rvalue);
 //  [[script::bindings::operator(*)]]
-    static sp<Numeric> mul(const sp<Numeric>& lvalue, float rvalue);
+    static sp<Numeric> mul(sp<Numeric> lvalue, float rvalue);
 //  [[script::bindings::operator(*)]]
-    static sp<Numeric> mul(float lvalue, const sp<Numeric>& rvalue);
+    static sp<Numeric> mul(float lvalue, sp<Numeric> rvalue);
 //  [[script::bindings::operator(/)]]
     static sp<Numeric> truediv(const sp<Numeric>& lvalue, const sp<Numeric>& rvalue);
 //  [[script::bindings::operator(/)]]
@@ -65,9 +67,6 @@ public:
     static int32_t toInt32(const sp<Numeric>& self);
 //  [[script::bindings::operator(float)]]
     static float toFloat(const sp<Numeric>& self);
-
-//  [[script::bindings::classmethod]]
-    static sp<Integer> toInteger(sp<Numeric> self);
 
 //  [[script::bindings::operator(>)]]
     static sp<Boolean> gt(const sp<Numeric>& self, const sp<Numeric>& other);
@@ -128,9 +127,13 @@ public:
     static sp<Numeric> modFloor(const sp<Numeric>& self, const sp<Numeric>& mod);
 //  [[script::bindings::classmethod]]
     static sp<Numeric> modCeil(const sp<Numeric>& self, const sp<Numeric>& mod);
-
 //  [[script::bindings::classmethod]]
-    static sp<Numeric> attract(const sp<Numeric>& self, float s0, float duration, const sp<Numeric>& t = nullptr);
+    static sp<Numeric> floor(sp<Numeric> self);
+//  [[script::bindings::classmethod]]
+    static sp<Numeric> ceil(sp<Numeric> self);
+//  [[script::bindings::classmethod]]
+    static sp<Numeric> round(sp<Numeric> self);
+
 //  [[script::bindings::classmethod]]
     static sp<Numeric> lerp(const sp<Numeric>& self, const sp<Numeric>& b, const sp<Numeric>& t);
 
@@ -141,9 +144,10 @@ public:
     static sp<Numeric> periodic(const sp<Numeric>& self, const sp<Numeric>& interval = nullptr, const sp<Numeric>& duration = nullptr);
 
 //  [[script::bindings::auto]]
-    static sp<Numeric> pursue(float s0, const sp<Numeric>& target, float duration, const sp<Numeric>& t = nullptr);
-//  [[script::bindings::auto]]
     static sp<Numeric> vibrate(float s0, float v0, float s1, float v1, float duration, const sp<Numeric>& t = nullptr);
+
+//[[script::bindings::classmethod]]
+    static sp<Numeric> dye(sp<Numeric> self, sp<Boolean> condition = nullptr, String message = "");
 
 //  [[plugin::builder::by-value]]
     class DICTIONARY : public Builder<Numeric> {

@@ -137,6 +137,7 @@ private:
     sp<ApplicationBundle> _application_bundle;
     sp<RenderEngine> _render_engine;
     sp<RenderController> _render_controller;
+    sp<Variable<uint64_t>::Impl> _app_clock_ticker;
     sp<Clock> _sys_clock;
     sp<Clock> _app_clock;
     sp<ExecutorWorkerStrategy> _worker_strategy;
@@ -158,7 +159,7 @@ private:
 
     friend class Ark;
     friend class Application;
-
+    friend class SurfaceUpdater;
 };
 
 }

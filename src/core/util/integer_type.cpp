@@ -3,12 +3,14 @@
 #include "core/base/bean_factory.h"
 #include "core/base/clock.h"
 #include "core/base/expression.h"
+#include "core/base/timestamp.h"
 #include "core/impl/integer/integer_by_array.h"
 #include "core/impl/variable/at_least.h"
 #include "core/impl/variable/at_most.h"
 #include "core/impl/variable/clamp.h"
 #include "core/impl/variable/fence.h"
 #include "core/impl/variable/periodic.h"
+#include "core/impl/variable/variable_dyed.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/impl/variable/variable_op1.h"
 #include "core/impl/variable/variable_op2.h"
@@ -16,7 +18,6 @@
 #include "core/util/string_convert.h"
 #include "core/util/operators.h"
 #include "core/util/strings.h"
-#include "core/util/shared_ptr_util.h"
 
 namespace ark {
 
@@ -41,11 +42,45 @@ public:
 
 };
 
-static int32_t toInteger(float value) {
-    return static_cast<int32_t>(value);
-}
+class IntegerSubscribed : public Integer, Implements<IntegerSubscribed, Integer> {
+public:
+    IntegerSubscribed(std::vector<sp<Integer>> values, sp<Integer> index)
+        : _values(std::move(values)), _index(std::move(index)) {
+        CHECK(_values.size() > 0, "IntegerVector should have at least one component");
+        updateSubscription();
+    }
+
+    virtual bool update(uint64_t timestamp) override {
+        bool indexDirty = _index->update(timestamp);
+        if(indexDirty)
+            updateSubscription();
+        return _subscribed->update(timestamp) || indexDirty;
+    }
+
+    virtual int32_t val() override {
+        return _subscribed->val();
+    }
+
+    const std::vector<sp<Integer>>& values() const {
+        return _values;
+    }
+
+private:
+    void updateSubscription() {
+        int32_t index = _index->val();
+        CHECK(index < _values.size(), "Subscription index out of bounds: index: %d, array_length: %d", index, _values.size());
+        _subscribed = _values.at(index % _values.size());
+    }
+
+private:
+    std::vector<sp<Integer>> _values;
+    sp<Integer> _index;
+    sp<Integer> _subscribed;
+};
 
 }
+
+const sp<Integer> IntegerType::ZERO = sp<Integer::Const>::make(0);
 
 sp<IntegerWrapper> IntegerType::create(sp<Integer> value)
 {
@@ -54,7 +89,13 @@ sp<IntegerWrapper> IntegerType::create(sp<Integer> value)
 
 sp<IntegerWrapper> IntegerType::create(sp<Numeric> value)
 {
-    return sp<IntegerWrapper>::make(sp<VariableOP1<int32_t, float>>::make(toInteger, std::move(value)));
+    sp<Integer> casted = sp<VariableOP1<int32_t, float>>::make(Operators::Cast<float, int32_t>(), std::move(value));
+    return sp<IntegerWrapper>::make(std::move(casted));
+}
+
+sp<Integer> IntegerType::create(std::vector<sp<Integer>> values)
+{
+    return sp<IntegerSubscribed>::make(std::move(values), ZERO);
 }
 
 sp<IntegerWrapper> IntegerType::create(int32_t value)
@@ -72,9 +113,14 @@ sp<Integer> IntegerType::sub(const sp<Integer>& self, const sp<Integer>& rvalue)
     return sp<VariableOP2<sp<Integer>, sp<Integer>, Operators::Sub<int32_t>>>::make(self, rvalue);
 }
 
-sp<Integer> IntegerType::mul(const sp<Integer>& self, const sp<Integer>& rvalue)
+sp<Integer> IntegerType::mul(sp<Integer> self, sp<Integer> rvalue)
 {
-    return sp<VariableOP2<sp<Integer>, sp<Integer>, Operators::Mul<int32_t>>>::make(self, rvalue);
+    return sp<VariableOP2<sp<Integer>, sp<Integer>, Operators::Mul<int32_t>>>::make(std::move(self), std::move(rvalue));
+}
+
+sp<Numeric> IntegerType::mul(sp<Integer> self, sp<Numeric> rvalue)
+{
+    return sp<VariableOP2<sp<Integer>, sp<Numeric>, Operators::Mul<int32_t, float>>>::make(std::move(self), std::move(rvalue));
 }
 
 sp<Integer> IntegerType::mod(const sp<Integer>& self, const sp<Integer>& rvalue)
@@ -137,6 +183,20 @@ sp<Boolean> IntegerType::ne(const sp<Integer>& self, const sp<Integer>& other)
     return sp<VariableOP2<sp<Integer>, sp<Integer>, Operators::NE<int32_t>>>::make(self, other);
 }
 
+size_t IntegerType::len(const sp<Integer>& self)
+{
+    sp<IntegerSubscribed> is = self.as<IntegerSubscribed>();
+    ASSERT(is);
+    return is->values().size();
+}
+
+sp<Integer> IntegerType::subscribe(const sp<Integer>& self, sp<Integer> index)
+{
+    sp<IntegerSubscribed> is = self.as<IntegerSubscribed>();
+    ASSERT(is);
+    return sp<IntegerSubscribed>::make(is->values(), std::move(index));
+}
+
 int32_t IntegerType::val(const sp<Integer>& self)
 {
     return self->val();
@@ -181,17 +241,14 @@ void IntegerType::set(const sp<IntegerWrapper>& self, const sp<Integer>& delegat
     self->set(delegate);
 }
 
-void IntegerType::fix(const sp<Integer>& self)
-{
-    const sp<IntegerWrapper> iw = self.as<IntegerWrapper>();
-    DWARN(iw, "Calling fix on non-IntegerWrapper has no effect.");
-    if(iw)
-        iw->fix();
-}
-
 sp<Integer> IntegerType::wrap(const sp<Integer>& self)
 {
     return sp<IntegerWrapper>::make(self);
+}
+
+sp<Integer> IntegerType::freeze(const sp<Integer>& self)
+{
+    return sp<Integer::Const>::make(self->val());
 }
 
 int32_t IntegerType::toRepeat(const String& repeat)
@@ -262,14 +319,15 @@ sp<Integer> IntegerType::ifElse(const sp<Integer>& self, const sp<Boolean>& cond
     return sp<VariableTernary<int32_t>>::make(condition, self, negative);
 }
 
-IntegerType::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)
-    : DICTIONARY(factory, value, REPEAT_NONE)
+sp<Integer> IntegerType::dye(sp<Integer> self, sp<Boolean> condition, String message)
 {
+    return sp<VariableDyed<int32_t>>::make(std::move(self), std::move(condition), std::move(message));
 }
 
-IntegerType::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr, Repeat repeat)
-    : _value(makeIntegerBuilder(factory, expr.strip(), repeat))
+IntegerType::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr)
+    : _value(Expression::Compiler<int32_t, NumericOperation<int32_t>>().compile(factory, expr))
 {
+    CHECK(_value, "Numeric expression compile failed: %s", expr.c_str());
 }
 
 sp<Integer> IntegerType::DICTIONARY::build(const Scope& args)
@@ -277,33 +335,14 @@ sp<Integer> IntegerType::DICTIONARY::build(const Scope& args)
     return _value->build(args);
 }
 
-sp<Builder<Integer>> IntegerType::DICTIONARY::makeIntegerBuilder(BeanFactory& factory, const String& expr, Repeat repeat) const
-{
-    DCHECK(expr, "Empty Integer expression");
-    if(expr.at(0) == '[')
-    {
-        DCHECK(expr.at(expr.length() - 1) == ']', "Illegal IntArray expression");
-        std::vector<int32_t> values;
-        for(const String& i : expr.substr(1, expr.length() - 1).split(','))
-            values.push_back(Strings::parse<int32_t>(i.strip()));
-        return sp<IntegerArray::BUILDER>::make(std::move(values), repeat);
-    }
-    return Expression::Compiler<int32_t, NumericOperation<int32_t>>().compile(factory, expr);
-}
-
 IntegerType::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _delegate(factory, Documents::ensureAttribute(manifest, Constants::Attributes::VALUE), Documents::getAttribute<Repeat>(manifest, "repeat", REPEAT_NONE))
+    : _delegate(factory, Documents::ensureAttribute(manifest, Constants::Attributes::VALUE))
 {
 }
 
 sp<Integer> IntegerType::BUILDER::build(const Scope& args)
 {
     return _delegate.build(args);
-}
-
-template<> ARK_API IntegerType::Repeat StringConvert::to<String, IntegerType::Repeat>(const String& str)
-{
-    return static_cast<IntegerType::Repeat>(IntegerType::toRepeat(str));
 }
 
 }

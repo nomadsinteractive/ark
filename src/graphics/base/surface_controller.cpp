@@ -12,8 +12,8 @@
 
 namespace ark {
 
-SurfaceController::SurfaceController(sp<Executor> executor, sp<Clock> clock)
-    : _executor(std::move(executor)), _clock(std::move(clock)), _memory_pool(sp<MemoryPool>::make()), _renderers(sp<RendererGroup>::make()), _controls(sp<RendererGroup>::make()),
+SurfaceController::SurfaceController(sp<Executor> executor)
+    : _executor(std::move(executor)), _memory_pool(sp<MemoryPool>::make()), _renderers(sp<RendererGroup>::make()), _controls(sp<RendererGroup>::make()),
       _layers(sp<RendererGroup>::make()), _render_requests(sp<OCSQueue<RenderRequest>>::make())
 {
 }
@@ -54,11 +54,7 @@ void SurfaceController::onRenderFrame(const Color& backgroundColor, RenderView& 
     std::this_thread::sleep_for(std::chrono::milliseconds(4));
     RenderRequest renderRequest;
     while(!_render_requests->pop(renderRequest))
-    {
-        _clock->pause();
         std::this_thread::sleep_for(std::chrono::milliseconds(4));
-        _clock->resume();
-    }
     renderRequest.onRenderFrame(backgroundColor, renderView);
 }
 

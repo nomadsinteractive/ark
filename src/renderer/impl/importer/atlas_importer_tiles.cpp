@@ -1,6 +1,7 @@
 #include "renderer/impl/importer/atlas_importer_tiles.h"
 
 #include "core/base/bean_factory.h"
+#include "core/inf/variable.h"
 #include "core/util/math.h"
 #include "core/util/documents.h"
 
@@ -22,8 +23,8 @@ void AtlasImporterTiles::import(Atlas& atlas, const sp<Readable>& /*readable*/)
     const uint32_t flowx = marginX + _tile_width;
     const uint32_t flowy = marginY + _tile_height;
     const Rect bounds = _type != -1 ? atlas.getItemBounds(_type) : Rect::parse(_manifest);
-    const uint32_t xCount = static_cast<uint32_t>(Math::round(bounds.width() / flowx));
-    const uint32_t yCount = static_cast<uint32_t>(Math::round(bounds.height() / flowy));
+    const uint32_t xCount = static_cast<uint32_t>(std::lround(bounds.width() / flowx));
+    const uint32_t yCount = static_cast<uint32_t>(std::lround(bounds.height() / flowy));
     const uint32_t bl = static_cast<uint32_t>(bounds.left());
     const uint32_t bt = static_cast<uint32_t>(bounds.top());
 

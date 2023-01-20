@@ -101,12 +101,12 @@ const sp<Size>& View::size()
 
 void View::traverse(const Holder::Visitor& visitor)
 {
-    HolderUtil::visit(_on_enter, visitor);
-    HolderUtil::visit(_on_leave, visitor);
-    HolderUtil::visit(_on_push, visitor);
-    HolderUtil::visit(_on_click, visitor);
-    HolderUtil::visit(_on_release, visitor);
-    HolderUtil::visit(_on_move, visitor);
+//    HolderUtil::visit(_on_enter, visitor);
+//    HolderUtil::visit(_on_leave, visitor);
+//    HolderUtil::visit(_on_push, visitor);
+//    HolderUtil::visit(_on_click, visitor);
+//    HolderUtil::visit(_on_release, visitor);
+//    HolderUtil::visit(_on_move, visitor);
 
     HolderUtil::visit(_background, visitor);
     if(_stub->viewHierarchy())

@@ -18,16 +18,15 @@ public:
     EventDispatcher();
 
 //  [[script::bindings::auto]]
-    void onKeyEvent(Event::Code code, const sp<Runnable>& onPress, const sp<Runnable>& onRelease, const sp<Runnable>& onClick, const sp<Runnable>& onRepeat);
+    void onKeyEvent(Event::Code code, sp<Runnable> onPress, sp<Runnable> onRelease, sp<Runnable> onRepeat);
 //  [[script::bindings::auto]]
     void unKeyEvent(Event::Code code);
 
 //  [[script::bindings::auto]]
-    void onMotionEvent(const sp<EventListener>& onDown, const sp<EventListener>& onUp, const sp<EventListener>& onClick, const sp<EventListener>& onMove);
+    void onMotionEvent(sp<EventListener> onDown, sp<EventListener> onUp, sp<EventListener> onClick, sp<EventListener> onMove);
 //  [[script::bindings::auto]]
     void unMotionEvent();
 
-    uint32_t keyClickInterval() const;
     float motionClickRange() const;
 
 //  [[script::bindings::auto]]
@@ -36,19 +35,15 @@ public:
 private:
     class KeyEventListener {
     public:
-        KeyEventListener(const sp<Runnable>& onPress, const sp<Runnable>& onRelease, const sp<Runnable>& onClick, const sp<Runnable>& onRepeat);
-        KeyEventListener(const KeyEventListener& other) = default;
-        KeyEventListener(KeyEventListener&& other) = default;
+        KeyEventListener(sp<Runnable> onPress, sp<Runnable> onRelease, sp<Runnable> onRepeat);
+        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(KeyEventListener);
 
         void onEvent(const EventDispatcher& dispatcher, const Event& event);
 
     private:
         sp<Runnable> _on_press;
         sp<Runnable> _on_release;
-        sp<Runnable> _on_click;
         sp<Runnable> _on_repeat;
-
-        uint32_t _pressed_timestamp;
     };
 
     class MotionEventListener {
@@ -73,7 +68,6 @@ private:
     };
 
 private:
-    uint32_t _key_click_interval;
     float _motion_click_range;
 
     std::map<Event::Code, std::stack<KeyEventListener>> _key_events;

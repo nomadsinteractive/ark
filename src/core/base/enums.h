@@ -21,7 +21,7 @@ public:
         return iter != _values.end() ? std::optional<T>(iter->second) : std::optional<T>();
     }
 
-    T toEnumOrDefault(const String& value, const T& defValue) const {
+    T toEnumOrDefault(const String& value, T defValue) const {
         const auto iter = _values.find(value);
         return iter != _values.end() ? iter->second : defValue;
     }
@@ -36,7 +36,7 @@ public:
         int32_t v = 0;
         for(const String& i : value.split('|')) {
             std::optional<T> opt = toEnum(i);
-            CHECK(opt, "Unknow enum: %s. Possible choices are: [%s]", value.c_str(), joinKeys().c_str());
+            CHECK(opt, "Unknow enum: \"%s\". Possible choices are: [%s]", value.c_str(), joinKeys().c_str());
             v |= opt.value();
         }
         return static_cast<T>(v);

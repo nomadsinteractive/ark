@@ -14,7 +14,7 @@ namespace ark {
 
 class ARK_API Surface {
 public:
-    Surface(sp<RenderView> renderView, ApplicationContext& applicationContext);
+    Surface(sp<RenderView> renderView, const ApplicationContext& applicationContext);
 
     const sp<RenderView>& renderView() const;
     const sp<SurfaceController>& controller() const;

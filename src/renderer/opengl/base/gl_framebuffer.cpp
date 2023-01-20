@@ -63,31 +63,32 @@ void GLFramebuffer::upload(GraphicsContext& graphicsContext)
         DASSERT(_depth_stencil_attachment->id() != 0);
         const GLenum glAttachments[] = {GL_COLOR_ATTACHMENT0, GL_DEPTH_ATTACHMENT, GL_STENCIL_ATTACHMENT, GL_DEPTH_STENCIL_ATTACHMENT};
         DASSERT(usage & (Texture::USAGE_DEPTH_ATTACHMENT | Texture::USAGE_STENCIL_ATTACHMENT));
-        if(!(_depth_stencil_attachment->parameters()->_usage & Texture::USAGE_INPUT_DISABLED))
+        if(_depth_stencil_attachment->parameters()->_flags & Texture::FLAG_FOR_INPUT)
         {
+            depthTexture = _depth_stencil_attachment;
             if(usage == Texture::USAGE_DEPTH_STENCIL_ATTACHMENT)
             {
-                depthTexture = _depth_stencil_attachment;
                 depthInputs.push_back(GL_DEPTH_ATTACHMENT);
                 depthInputs.push_back(GL_STENCIL_ATTACHMENT);
                 depthInternalformat = GL_DEPTH24_STENCIL8;
             }
             else if (usage & Texture::USAGE_DEPTH_ATTACHMENT)
             {
-                depthTexture = _depth_stencil_attachment;
                 depthInputs.push_back(glAttachments[usage]);
                 depthInternalformat = GL_DEPTH_COMPONENT;
             }
             else if (usage & Texture::USAGE_STENCIL_ATTACHMENT)
             {
 #ifndef ANDROID
-                depthTexture = _depth_stencil_attachment;
                 depthInputs.push_back(glAttachments[usage]);
                 depthInternalformat = GL_STENCIL_COMPONENTS;
 #else
-                WARN(false, "GL_STENCIL_COMPONENTS unsupported");
+                LOGW("GL_STENCIL_COMPONENTS unsupported");
+                depthTexture = nullptr;
 #endif
             }
+            else
+                LOGE("Unknow depth-stencil texture usage: %d", usage);
         }
         attachments.push_back(_depth_stencil_attachment->id(), glAttachments[usage]);
     }
@@ -100,7 +101,7 @@ void GLFramebuffer::upload(GraphicsContext& graphicsContext)
         LOGD("glFramebufferTexture2D, attachment: %d, id: %d", i.second, i.first);
     }
 
-    if(depthInputs.size() > 0)
+    if(depthInputs.size() > 0 && depthTexture->parameters()->_flags & Texture::FLAG_FOR_OUTPUT)
     {
         sp<GLTexture> gltex = depthTexture->delegate();
         sp<GLRenderbuffer> renderbuffer = gltex->renderbuffer();
@@ -110,10 +111,10 @@ void GLFramebuffer::upload(GraphicsContext& graphicsContext)
             gltex->setRenderbuffer(renderbuffer);
             renderbuffer->upload(graphicsContext);
         }
-        glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer->id());
+        glBindRenderbuffer(GL_RENDERBUFFER, static_cast<GLuint>(renderbuffer->id()));
         glRenderbufferStorage(GL_RENDERBUFFER, depthInternalformat, static_cast<GLsizei>(depthTexture->width()), static_cast<GLsizei>(depthTexture->height()));
         for(GLenum i : depthInputs)
-            glFramebufferRenderbuffer(GL_FRAMEBUFFER, i, GL_RENDERBUFFER, renderbuffer->id());
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, i, GL_RENDERBUFFER, static_cast<GLuint>(renderbuffer->id()));
     }
 
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)

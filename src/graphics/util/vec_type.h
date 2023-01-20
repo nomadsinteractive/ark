@@ -4,6 +4,7 @@
 #include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/base/clock.h"
+#include "core/impl/variable/variable_dyed.h"
 #include "core/impl/variable/integral.h"
 #include "core/impl/variable/integral_with_resistance.h"
 #include "core/impl/variable/interpolate.h"
@@ -229,6 +230,18 @@ public:
         return Ark::instance().applicationContext()->synchronize(std::move(self), std::move(disposed));
     }
 
+    static sp<VarType> floor(sp<VarType> self) {
+        return sp<VariableOP1<T>>::make(Operators::Transform<T, typename Operators::Floor<float>, DIMENSION>(Operators::Floor<float>()), std::move(self));
+    }
+
+    static sp<VarType> ceil(sp<VarType> self) {
+        return sp<VariableOP1<T>>::make(Operators::Transform<T, typename Operators::Ceil<float>, DIMENSION>(Operators::Ceil<float>()), std::move(self));
+    }
+
+    static sp<VarType> round(sp<VarType> self) {
+        return sp<VariableOP1<T>>::make(Operators::Transform<T, typename Operators::Round<float>, DIMENSION>(Operators::Round<float>()), std::move(self));
+    }
+
     static sp<VarType> modFloor(sp<VarType> self, sp<Numeric> mod) {
         return sp<VariableOP2<sp<VarType>, sp<VarType>, Operators::ModFloor<T>>>::make(std::move(self), sp<IMPL>::make(std::move(mod)));
     }
@@ -269,6 +282,10 @@ public:
         if(!t)
             t = Ark::instance().appClock()->duration();
         return sp<SecondOrderDynamics<T>>::make(std::move(self), std::move(t), k, z, r);
+    }
+
+    static sp<VarType> dye(sp<VarType> self, sp<Boolean> c, String message) {
+        return sp<VariableDyed<T>>::make(std::move(self), std::move(c), std::move(message));
     }
 
 protected:

@@ -23,19 +23,18 @@ public:
 //  [[script::bindings::enumeration]]
     enum LayerFlag {
         LAYER_FLAG_COLLIDABLE = 1,
-        LAYER_FLAG_SCROLLABLE = 2,
-        LAYER_FLAG_INVISIBLE = 4,
         LAYER_FLAG_DEFAULT = 0
     };
 
 public:
 // [[script::bindings::auto]]
-    Tilemap(sp<RenderLayer> renderLayer, sp<Size> size, sp<Tileset> tileset, sp<Importer<Tilemap>> importer = nullptr, sp<Outputer<Tilemap>> outputer = nullptr);
+    Tilemap(sp<Tileset> tileset, sp<RenderLayer> renderLayer = nullptr, sp<Importer<Tilemap>> importer = nullptr, sp<Outputer<Tilemap>> outputer = nullptr);
 
 // [[script::bindings::property]]
-    const sp<Size>& size();
-// [[script::bindings::property]]
     const sp<Tileset>& tileset() const;
+// [[script::bindings::property]]
+    const sp<RenderLayer>& renderLayer() const;
+
 // [[script::bindings::property]]
     const sp<Storage>& storage() const;
 
@@ -69,9 +68,8 @@ public:
         virtual sp<Tilemap> build(const Scope& args) override;
 
     private:
-        SafePtr<Builder<RenderLayer>> _render_layer;
-        sp<Builder<Size>> _size;
         sp<Builder<Tileset>> _tileset;
+        SafePtr<Builder<RenderLayer>> _render_layer;
         SafePtr<Builder<Importer<Tilemap>>> _importer;
         SafePtr<Builder<Outputer<Tilemap>>> _outputer;
 

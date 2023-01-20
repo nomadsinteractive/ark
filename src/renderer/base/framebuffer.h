@@ -40,7 +40,7 @@ public:
     private:
         sp<RenderController> _render_controller;
         sp<Builder<Renderer>> _renderer;
-        std::vector<sp<Builder<Texture>>> _textures;
+        std::vector<std::pair<sp<Builder<Texture>>, document>> _textures;
         ClearMask _clear_mask;
     };
 

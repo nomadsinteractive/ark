@@ -61,9 +61,6 @@ execute_process(
     WORKING_DIRECTORY ${ARK_SRC_DIR}
 )
 include(${ARK_GENERATED_FILE_DIRECTORY}/py_ark_bindings.cmake)
-if(NOT (ANDROID OR IOS))
-    ark_add_generated_file(_freeze_importlib ${CMAKE_CURRENT_SOURCE_DIR}/extension/ark_py_importlib.h ${CMAKE_CURRENT_SOURCE_DIR}/extension extension/_ark_bootstrap.py ark_importlib _ark_bootstrap.py)
-endif()
 
 include(extensions.cmake)
 
@@ -87,6 +84,7 @@ endif()
 
 if(NOT (ANDROID OR IOS))
     ark_add_executable(_freeze_importlib ${SRC_DIR}/Programs/_freeze_importlib.c)
+    ark_add_generated_file(_freeze_importlib ${CMAKE_CURRENT_SOURCE_DIR}/extension/ark_py_importlib.h ${CMAKE_CURRENT_SOURCE_DIR}/extension extension/_ark_bootstrap.py ark_importlib _ark_bootstrap.py)
 endif()
 
 set(ARK_PYTHON_INCLUDE_DIR ${ARK_PYTHON_INCLUDE_DIR} PARENT_SCOPE)

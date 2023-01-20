@@ -24,7 +24,7 @@ namespace ark {
 
 class ColliderImpl : public Collider {
 public:
-    ColliderImpl(std::vector<sp<BroadPhrase>> broadPhrase, sp<NarrowPhrase> narrowPhrase, RenderController& renderController);
+    ColliderImpl(std::vector<std::pair<sp<BroadPhrase>, sp<CollisionFilter>>> broadPhrase, sp<NarrowPhrase> narrowPhrase, RenderController& renderController);
 
     virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate, sp<Boolean> disposed) override;
     virtual std::vector<RayCastManifold> rayCast(const V3& from, const V3& to) override;
@@ -37,7 +37,7 @@ public:
         virtual sp<Collider> build(const Scope& args) override;
 
     private:
-        std::vector<sp<Builder<BroadPhrase>>> _broad_phrases;
+        std::vector<std::pair<sp<Builder<BroadPhrase>>, SafePtr<Builder<CollisionFilter>>>> _broad_phrases;
         sp<Builder<NarrowPhrase>> _narrow_phrase;
         sp<RenderController> _render_controller;
     };
@@ -47,7 +47,7 @@ public:
     class RigidBodyShadow;
 
     struct Stub : public Updatable {
-        Stub(std::vector<sp<BroadPhrase>> broadPhrases, sp<NarrowPhrase> narrowPhrase);
+        Stub(std::vector<std::pair<sp<BroadPhrase>, sp<CollisionFilter>>> broadPhrases, sp<NarrowPhrase> narrowPhrase);
 
         std::vector<RayCastManifold> rayCast(const V2& from, const V2& to) const;
 
@@ -75,12 +75,12 @@ public:
         virtual bool update(uint64_t timestamp) override;
 
     private:
-        BroadPhrase::Result broadPhraseSearch(const V3& position, const V3& aabb) const;
+        BroadPhrase::Result broadPhraseSearch(const V3& position, const V3& aabb, const sp<CollisionFilter>& collisionFilter) const;
         BroadPhrase::Result broadPhraseRayCast(const V3& from, const V3& to) const;
 
     private:
         int32_t _rigid_body_base_id;
-        std::vector<sp<BroadPhrase>> _broad_phrases;
+        std::vector<std::pair<sp<BroadPhrase>, sp<CollisionFilter>>> _broad_phrases;
         sp<NarrowPhrase> _narrow_phrase;
         std::unordered_map<int32_t, sp<RigidBodyShadow>> _rigid_bodies;
 

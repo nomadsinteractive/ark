@@ -4,7 +4,7 @@
 
 #include "core/base/bean_factory.h"
 #include "core/base/expression.h"
-#include "core/impl/boolean/boolean_dyed.h"
+#include "core/impl/variable/variable_dyed.h"
 #include "core/impl/variable/variable_observer.h"
 #include "core/impl/variable/variable_op1.h"
 #include "core/impl/variable/variable_op2.h"
@@ -109,6 +109,9 @@ static bool _operator_not(bool val)
 
 }
 
+const sp<Boolean> BooleanType::TRUE = sp<Boolean::Const>::make(true);
+const sp<Boolean> BooleanType::FALSE = sp<Boolean::Const>::make(false);
+
 sp<Boolean> BooleanType::create(const sp<Boolean>& value)
 {
     return sp<BooleanWrapper>::make(value);
@@ -187,7 +190,7 @@ sp<Boolean> BooleanType::dye(sp<Boolean> self, sp<Boolean> condition, String mes
     LOGW("Dyeing is a debugging technique, which should not be used in publish builds");
     return self;
 #endif
-    return sp<BooleanDyed>::make(std::move(self), std::move(condition), std::move(message));
+    return sp<VariableDyed<bool>>::make(std::move(self), std::move(condition), std::move(message));
 }
 
 void BooleanType::fix(const sp<Boolean>& self)

@@ -7,14 +7,12 @@ import sys
 from os import path
 
 from gen_core import get_param_and_paths, import_acg, INDENT, GenArgumentMeta, GenArgument, create_overloaded_method_type
-from gen_method import GenMethod, GenGetPropMethod, GenSetPropMethod, GenMappingMethod, gen_operator_defs, gen_as_mapping_defs
+from gen_method import GenMethod, GenGetPropMethod, GenSetPropMethod, GenMappingMethod, gen_operator_defs, gen_as_mapping_defs, GenOperatorMethod
 
 LOADER_TEMPLATE = '''template<typename T> static Box PyArk${classname}_${methodname}Function(PyArkType::Instance& inst, const String& id, const Scope& args) {
     const sp<T> bean = inst.unpack<${classname}>()->${methodname}<T>(id, args);
     return Box(bean);
 }'''
-
-NO_STATIC_OPS = {'neg', 'abs', 'int', 'float', '+=', '-=', '*=', '/='}
 
 RICH_COMPARE_OPS = {
     '<': 'Py_LT',
@@ -489,65 +487,6 @@ class GenStaticMemberMethod(GenMethod):
             return create_overloaded_method_type(GenStaticMemberMethod)(m1, m2)
 
 
-class GenOperatorMethod(GenMethod):
-    def __init__(self, name, args, return_type, operator):
-        GenMethod.__init__(self, name, args, return_type)
-        self._is_static = operator not in NO_STATIC_OPS
-        self._self_argument = None if self._is_static else self._arguments and self._arguments[0]
-        self._arguments = self._arguments if self._is_static else self._arguments[1:]
-        self._operator = operator
-        self._return_int = self._return_type == 'bool'
-
-    def gen_py_return(self):
-        return 'int32_t' if self._return_int else 'PyObject*'
-
-    def need_unpack_statement(self):
-        return not self._is_static
-
-    @property
-    def check_argument_type(self):
-        return self._operator not in ('&&', '||')
-
-    def gen_py_arguments(self):
-        arglen = len(self._arguments)
-        args = ['PyObject* arg%d' % i for i in range(arglen)]
-        if self._is_static:
-            return ', '.join(args)
-        return ', '.join(['Instance* self'] + args)
-
-    def gen_py_argc(self):
-        return len(self._arguments)
-
-    def _gen_calling_statement(self, genclass, argnames):
-        if self._is_static:
-            return '%s::%s(%s);' % (genclass.classname, self._name, argnames)
-        return '%s::%s(%s%s);' % (genclass.classname, self._name, self.gen_self_statement(genclass), argnames if not argnames else ', ' + argnames)
-
-    def gen_return_statement(self, return_type, py_return):
-        if self._operator in ('+=', '-=', '*=', '/='):
-            return ['Py_INCREF(self);', 'return reinterpret_cast<PyObject*>(self);']
-        return GenMethod.gen_return_statement(return_type, py_return)
-
-    def _gen_parse_tuple_code(self, lines, declares, args):
-        pass
-
-    @property
-    def err_return_value(self):
-        return 'return 0' if self._return_int else 'Py_RETURN_NOTIMPLEMENTED'
-
-    @property
-    def operator(self):
-        return self._operator
-
-    @staticmethod
-    def overload(m1, m2):
-        try:
-            m1.add_overloaded_method(m2)
-            return m1
-        except AttributeError:
-            return create_overloaded_method_type(GenOperatorMethod, operator=m1.operator)(m1, m2)
-
-
 class GenRichCompareMethod(GenMethod):
     def __init__(self, name, args, return_type, operator):
         GenMethod.__init__(self, name, args, return_type)
@@ -764,7 +703,7 @@ def main(params, paths):
         genclass = get_result_class(results, filename, main_class)
         operator = x[0]
         name, args, return_type, is_static = GenMethod.split(x[1:])
-        genclass.add_method(GenMappingMethod(name, args, return_type, operator))
+        genclass.add_method(GenMappingMethod(name, args, return_type, operator, is_static))
 
     def autoclass(filename, content, main_class, x):
         genclass = get_result_class(results, filename, main_class)

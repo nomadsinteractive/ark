@@ -12,7 +12,7 @@
 
 namespace ark {
 
-class ARK_API Animation {
+class Animation {
 public:
     Animation(float ticks, float tps)
         : _ticks(ticks), _tps(tps) {
