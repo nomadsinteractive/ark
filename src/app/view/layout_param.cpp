@@ -1,7 +1,5 @@
 #include "app/view/layout_param.h"
 
-#include "core/ark.h"
-
 #include "core/inf/variable.h"
 #include "core/util/bean_utils.h"
 #include "core/util/string_convert.h"
@@ -22,7 +20,7 @@ template<> ARK_API LayoutParam::Display StringConvert::to<String, LayoutParam::D
 }
 
 LayoutParam::LayoutParam(const sp<Size>& size, Display display, Gravity gravity, float grow)
-    : _size(Null::toSafePtr(size)), _width_type(LayoutParam::LENGTH_TYPE_PIXEL), _height_type(LayoutParam::LENGTH_TYPE_PIXEL), _margins(nullptr), _display(display), _gravity(gravity), _flex_grow(grow)
+    : _width_type(LayoutParam::LENGTH_TYPE_PIXEL), _height_type(LayoutParam::LENGTH_TYPE_PIXEL), _size(Null::toSafePtr(size)), _display(display), _gravity(gravity), _flex_grow(grow)
 {
 }
 
@@ -30,7 +28,7 @@ LayoutParam::LayoutParam(Length width, Length height, FlexDirection flexDirectio
                          Align alignContent, Display display, float flexGrow, Length flexBasis, sp<Vec4> margins)
     : _width_type(width._type), _height_type(height._type), _size(sp<Size>::make(width._value, height._value)), _size_min(nullptr, V3(NAN)), _size_max(nullptr, V3(NAN)),
       _flex_direction(flexDirection), _flex_wrap(flexWrap), _justify_content(justifyContent), _align_items(alignItems), _align_self(alignSelf), _align_content(alignContent),
-      _display(display), _flex_grow(flexGrow), _flex_basis(std::move(flexBasis)), _margins(std::move(margins))
+      _display(display), _flex_basis(std::move(flexBasis)), _flex_grow(flexGrow), _margins(std::move(margins))
 {
 }
 

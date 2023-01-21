@@ -4,24 +4,20 @@
 #include <iterator>
 
 #include "core/ark.h"
-#include "core/types/null.h"
 #include "core/util/log.h"
 
-#include "graphics/base/rect.h"
-#include "graphics/base/render_object.h"
 #include "graphics/base/size.h"
+#include "graphics/base/transform.h"
 #include "graphics/base/v2.h"
 
 #include "renderer/base/resource_loader_context.h"
 
-#include "app/base/application_context.h"
 #include "app/base/collision_filter.h"
 #include "app/base/collision_manifold.h"
 #include "app/base/raycast_manifold.h"
 #include "app/base/rigid_body.h"
 #include "app/inf/broad_phrase.h"
 #include "app/inf/narrow_phrase.h"
-#include "app/inf/collision_callback.h"
 #include "app/util/rigid_body_def.h"
 
 namespace ark {
@@ -168,7 +164,7 @@ const sp<ColliderImpl::RigidBodyShadow>& ColliderImpl::Stub::ensureRigidBody(int
 sp<ColliderImpl::RigidBodyShadow> ColliderImpl::Stub::ensureRigidBody(int32_t id, int32_t shapeId, const V3& position, bool isDynamicCandidate) const
 {
     sp<RigidBodyShadow> s = isDynamicCandidate ? findRigidBody(id) : nullptr;
-    DCHECK(!isDynamicCandidate || s);
+    DASSERT(!isDynamicCandidate || s);
     return s ? s : sp<RigidBodyShadow>::make(*this, id, isDynamicCandidate ? Collider::BODY_TYPE_DYNAMIC : Collider::BODY_TYPE_STATIC, shapeId, sp<Vec3::Const>::make(position), nullptr, nullptr, nullptr);
 }
 

@@ -9,7 +9,6 @@
 #include "core/inf/dictionary.h"
 #include "core/inf/loader.h"
 #include "core/types/shared_ptr.h"
-#include "core/util/strings.h"
 
 namespace ark {
 
@@ -23,9 +22,7 @@ public:
     }
 
     virtual T get(const String& name) override {
-        String fname, fext;
-        Strings::rcut(name, fname, fext, '.');
-
+        const auto [fname, fext] = name.rcut('.');
         const sp<Asset> asset = _asset_bundle->getAsset(name);
         CHECK(asset, "Asset %s not found", name.c_str());
 

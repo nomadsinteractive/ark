@@ -135,7 +135,7 @@ public:
         }
     };
 
-    template<typename T, typename UO, typename size_t N> class Transform {
+    template<typename T, typename UO, size_t N> class Transform {
     public:
         Transform(UO unaryOp)
             : _unary_op(std::move(unaryOp)) {

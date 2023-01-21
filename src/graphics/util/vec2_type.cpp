@@ -2,22 +2,14 @@
 
 #include <algorithm>
 
-#include "core/ark.h"
-#include "core/base/clock.h"
 #include "core/base/observer.h"
 #include "core/inf/holder.h"
-#include "core/impl/variable/integral.h"
-#include "core/impl/variable/integral_with_resistance.h"
-#include "core/impl/variable/second_order_dynamics.h"
 #include "core/impl/variable/variable_op1.h"
 #include "core/impl/variable/variable_op2.h"
-#include "core/impl/variable/variable_ternary.h"
 #include "core/util/holder_util.h"
-#include "core/util/numeric_type.h"
 #include "core/util/operators.h"
 #include "core/util/updatable_util.h"
 
-#include "graphics/base/size.h"
 #include "graphics/impl/vec/vec2_impl.h"
 #include "graphics/impl/vec/vec2_with_transform.h"
 

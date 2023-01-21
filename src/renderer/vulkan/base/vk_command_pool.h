@@ -28,7 +28,6 @@ public:
 
 private:
     VkDevice _logical_device;
-    uint32_t _queue_family_index;
 
     VkQueue _queue;
     VkCommandPool _command_pool;

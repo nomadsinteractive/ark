@@ -6,8 +6,6 @@
 #include "core/util/string_convert.h"
 #include "core/util/log.h"
 
-#include "graphics/base/surface_controller.h"
-
 #include "app/base/application.h"
 #include "app/base/application_context.h"
 #include "app/base/application_facade.h"
@@ -87,7 +85,7 @@ ApplicationDelegateImpl::ScriptTag::ScriptTag(ResourceLoader& resourceLoader, co
     if(src)
     {
         _source = Ark::instance().getAsset(src);
-        DCHECK(_source, "Cannot open script \"%s\"", src.c_str());
+        CHECK(_source, "Cannot open script \"%s\"", src.c_str());
     }
 }
 

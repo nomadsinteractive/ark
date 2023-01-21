@@ -13,17 +13,17 @@ namespace ark {
 template<typename T> class VariableDyed : public Wrapper<Variable<T>>, public Variable<T> {
 public:
     VariableDyed(sp<Variable<T>> delegate, sp<Boolean> condition, String message)
-        :  Wrapper(std::move(delegate)), _condition(std::move(condition), true), _message(std::move(message)) {
+        :  Wrapper<Variable<T>>(std::move(delegate)), _condition(std::move(condition), true), _message(std::move(message)) {
     }
 
     virtual bool update(uint64_t timestamp) override {
         _condition.update(timestamp);
-        return _wrapped->update(timestamp);
+        return this->_wrapped->update(timestamp);
     }
 
     virtual T val() override {
         TRACE(_condition.val(), _message.c_str());
-        return _wrapped->val();
+        return this->_wrapped->val();
     }
 
 private:

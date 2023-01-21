@@ -1,12 +1,6 @@
 #include "graphics/util/vec4_type.h"
 
-#include "core/ark.h"
-#include "core/base/clock.h"
-#include "core/impl/variable/integral.h"
-#include "core/impl/variable/interpolate.h"
-#include "core/impl/variable/second_order_dynamics.h"
 #include "core/impl/variable/variable_op1.h"
-#include "core/impl/variable/variable_op2.h"
 #include "core/util/operators.h"
 
 #include "graphics/impl/vec/vec4_impl.h"
@@ -26,7 +20,7 @@ sp<Vec4> Vec4Type::create(sp<Numeric> x, sp<Numeric> y, sp<Numeric> z, sp<Numeri
 sp<Numeric> Vec4Type::w(const sp<Vec4>& self)
 {
     const sp<Vec4Impl> impl = self.as<Vec4Impl>();
-    return impl ? impl->w() : sp<Numeric>::make<VariableOP1<float, V4>>(Operators::Subscript<V4, float>(3), self);
+    return impl ? static_cast<sp<Numeric>>(impl->w()) : sp<Numeric>::make<VariableOP1<float, V4>>(Operators::Subscript<V4, float>(3), self);
 }
 
 void Vec4Type::setW(const sp<Vec4>& self, float w)
