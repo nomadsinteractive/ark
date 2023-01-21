@@ -46,7 +46,7 @@ private:
 template<typename T> class IntegralS2 : public Variable<T>, public Holder, Implements<IntegralS2<T>, Variable<T>, Holder> {
 public:
     IntegralS2(sp<Variable<T>> a, sp<Numeric> t, const T& s0, const T& s1)
-        : _a(std::move(a)), _t(std::move(t)), _s0(s0), _s1(s1), _t0(_t->val()), _t1(_t0), _a1(0) {
+        : _a(std::move(a)), _t(std::move(t)), _s0(s0), _s1(s1), _a1(0), _t0(_t->val()), _t1(_t0) {
     }
 
     virtual T val() override {

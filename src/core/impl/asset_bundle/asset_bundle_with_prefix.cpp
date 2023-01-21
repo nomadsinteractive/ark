@@ -2,8 +2,8 @@
 
 namespace ark {
 
-AssetBundleWithPrefix::AssetBundleWithPrefix(const sp<AssetBundle>& delegate, const String& prefix)
-    : _delegate(delegate), _prefix(prefix)
+AssetBundleWithPrefix::AssetBundleWithPrefix(sp<AssetBundle> delegate, String prefix)
+    : _delegate(std::move(delegate)), _prefix(std::move(prefix))
 {
     DASSERT(_delegate);
 }

@@ -136,7 +136,6 @@ bool View::onEvent(const Event& event, float x, float y, bool ptin)
 
 void View::addRenderObjectWithLayer(sp<RenderObjectWithLayer> ro, bool isBackground)
 {
-    DTRACE(ro->renderObject()->type()->val() == 203);
     ro->layerContext()->add(sp<RenderableViewSlot>::make(_stub, ro->renderObject(), isBackground), _is_dirty, _is_disposed);
 }
 

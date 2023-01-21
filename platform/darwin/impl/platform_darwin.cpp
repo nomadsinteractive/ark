@@ -127,13 +127,12 @@ void* Platform::dlOpen(const char* name)
     if(!name)
         return dlopen(nullptr, RTLD_LAZY);
 
-    String sDirname, sFilename;
     const String sFilePath = getExecutablePath();
     const String soName = Strings::sprintf("lib%s.dylib", name);
-    Strings::rcut(sFilePath, sDirname, sFilename, dirSeparator());
+    const auto [sDirname, sFilename] = sFilePath.rcut(dirSeparator());
     void* library = dlopen(soName.c_str(), RTLD_LAZY);
-    if(!library)
-        library = dlopen((sDirname + "/" + soName).c_str(), RTLD_LAZY);
+    if(!library && sDirname)
+        library = dlopen((sDirname.value() + "/" + soName).c_str(), RTLD_LAZY);
     return library;
 }
 

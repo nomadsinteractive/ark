@@ -51,9 +51,9 @@ public:
             const sp<Asset> asset = dirname.empty() ? nullptr : getAsset(dirname);
             sp<Readable> readable = asset ? asset->open() : nullptr;
             if(readable) {
-                const sp<AssetBundleZipFile> zip = sp<AssetBundleZipFile>::make(std::move(readable), dirname);
-                const String entryName = filename + "/";
-                return zip->hasEntry(entryName) ? sp<AssetBundleWithPrefix>::make(zip, entryName) : nullptr;
+                sp<AssetBundleZipFile> zip = sp<AssetBundleZipFile>::make(std::move(readable), dirname);
+                String entryName = filename + "/";
+                return zip->hasEntry(entryName) ? sp<AssetBundleWithPrefix>::make(std::move(zip), std::move(entryName)) : nullptr;
             }
             s = dirname;
         } while(!dirname.empty());

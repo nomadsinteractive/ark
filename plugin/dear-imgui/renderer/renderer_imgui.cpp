@@ -90,6 +90,8 @@ static ImGuiKey_ toImGuiKey(Event::Code code) {
             return ImGuiKey_Backspace;
         case Event::CODE_KEYBOARD_ENTER:
             return ImGuiKey_Enter;
+        default:
+            break;
     }
     DFATAL("Unknow ImGui key: %d", code);
     return ImGuiKey_Tab;
@@ -172,6 +174,8 @@ bool RendererImgui::onEvent(const Event& event)
                 case Event::CODE_KEYBOARD_BACKSPACE:
                 case Event::CODE_KEYBOARD_ENTER:
                     updateKeyStatus(io, toImGuiKey(code), isKeyDown);
+                    break;
+                default:
                     break;
             }
             break;

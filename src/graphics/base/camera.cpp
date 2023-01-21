@@ -161,14 +161,14 @@ void Camera::ortho(float left, float right, float bottom, float top, float clipN
 
 void Camera::frustum(float left, float right, float bottom, float top, float clipNear, float clipFar)
 {
-    DWARN(clipFar > clipNear && clipNear > 0, sclipNearclipFarPlaneWarning, clipNear, clipFar);
+    WARN(clipFar > clipNear && clipNear > 0, sclipNearclipFarPlaneWarning, clipNear, clipFar);
     _projection->setMatrix(sp<Mat4::Const>::make(_delegate->frustum(left, right, bottom, top, clipNear, clipFar)));
     updateViewProjection();
 }
 
 void Camera::perspective(float fov, float aspect, float clipNear, float clipFar)
 {
-    DWARN(clipFar > clipNear && clipNear > 0, sclipNearclipFarPlaneWarning, clipNear, clipFar);
+    WARN(clipFar > clipNear && clipNear > 0, sclipNearclipFarPlaneWarning, clipNear, clipFar);
     _projection->setMatrix(sp<Mat4::Const>::make(_delegate->perspective(fov, aspect, clipNear, clipFar)));
     updateViewProjection();
 }

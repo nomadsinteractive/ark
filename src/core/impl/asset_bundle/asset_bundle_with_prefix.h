@@ -10,7 +10,7 @@ namespace ark {
 
 class AssetBundleWithPrefix : public AssetBundle {
 public:
-    AssetBundleWithPrefix(const sp<AssetBundle>& delegate, const String& prefix);
+    AssetBundleWithPrefix(sp<AssetBundle> delegate, String prefix);
 
     virtual sp<Asset> getAsset(const String& name) override;
     virtual sp<AssetBundle> getBundle(const String& path) override;

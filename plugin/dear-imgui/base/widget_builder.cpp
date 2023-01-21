@@ -5,17 +5,13 @@
 #include <imgui.h>
 
 #include "core/impl/variable/variable_wrapper.h"
-#include "core/types/global.h"
 #include "core/util/string_type.h"
 
 #include "graphics/base/size.h"
+#include "graphics/impl/vec/vec2_impl.h"
 #include "graphics/impl/vec/vec3_impl.h"
-#include "graphics/util/vec2_type.h"
-#include "graphics/util/vec3_type.h"
-#include "graphics/util/vec4_type.h"
+#include "graphics/impl/vec/vec4_impl.h"
 
-#include "dear-imgui/base/imgui_context.h"
-#include "dear-imgui/base/widget_type.h"
 #include "dear-imgui/base/renderer_context.h"
 #include "dear-imgui/renderer/renderer_imgui.h"
 
@@ -171,11 +167,11 @@ public:
         T v = _value->val();
         if(_func(_label.c_str(), &v))
         {
-            sp<VariableWrapper<T>> wrapper = _value.as<VariableWrapper<T>>();
+            sp<VariableWrapper<T>> wrapper = _value.template as<VariableWrapper<T>>();
             if(wrapper)
                 return wrapper->set(v);
 
-            sp<U> impl = _value.as<U>();
+            sp<U> impl = _value.template as<U>();
             CHECK(impl, "Mutablable variable required.");
             impl->set(v);
         }

@@ -7,7 +7,7 @@ namespace ark {
 namespace vulkan {
 
 VKCommandPool::VKCommandPool(const VKDevice& device, uint32_t queueFamilyIndex)
-    : _logical_device(device.vkLogicalDevice()), _queue_family_index(queueFamilyIndex), _queue(device.getQueueByFamilyIndex(queueFamilyIndex))
+    : _logical_device(device.vkLogicalDevice()), _queue(device.getQueueByFamilyIndex(queueFamilyIndex))
 {
     VkCommandPoolCreateInfo cmdPoolInfo = {};
     cmdPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
