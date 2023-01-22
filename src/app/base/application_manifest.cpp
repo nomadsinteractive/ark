@@ -22,7 +22,10 @@ ApplicationManifest::ApplicationManifest(const String& src)
 
 void ApplicationManifest::load(const String& src)
 {
-    Strings::rcut(Platform::getExecutablePath(), _application._dir, _application._filename, Platform::dirSeparator());
+    auto [appDirOpt, appFileName] = Platform::getExecutablePath().rcut(Platform::dirSeparator());
+    if(appDirOpt)
+        _application._dir = std::move(appDirOpt.value());
+    _application._filename = std::move(appFileName);
 
     const sp<ark::AssetBundle> appAsset = Platform::getAssetBundle(".", _application._dir);
     DASSERT(appAsset);

@@ -1,9 +1,7 @@
 #include "core/base/plugin.h"
 
 #include "core/base/api.h"
-#include "core/base/plugin_manager.h"
 #include "core/types/shared_ptr.h"
-#include "core/util/string_convert.h"
 
 #include "python/impl/script/python_script.h"
 #include "generated/py_dear-imgui_bindings.h"
@@ -40,7 +38,6 @@ public:
             PyObject* dearimguimodule = PyModule_Create(&cModPyArkDearImgui);
             __init_py_dear_imgui_bindings__(dearimguimodule);
             PyModule_AddObject(arkmodule, "dear_imgui", dearimguimodule);
-
         }
     }
 };

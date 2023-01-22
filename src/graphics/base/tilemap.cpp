@@ -7,17 +7,13 @@
 #include "core/base/json.h"
 #include "core/inf/storage.h"
 #include "core/inf/variable.h"
-#include "core/util/math.h"
 
 #include "graphics/base/layer_context.h"
-#include "graphics/base/render_object.h"
-#include "graphics/base/size.h"
 #include "graphics/base/tile.h"
 #include "graphics/base/tilemap_layer.h"
 #include "graphics/base/tileset.h"
 #include "graphics/base/v2.h"
 #include "graphics/impl/frame/scrollable.h"
-#include "graphics/util/vec2_type.h"
 
 namespace ark {
 
@@ -34,10 +30,8 @@ public:
         for(const Box& i : renderers) {
             sp<TilemapLayer> tilemapLayer = i.as<TilemapLayer>();
             WARN(tilemapLayer, "Tilemap's RendererMaker should return TilemapLayer instance, others will be ignored");
-            if(tilemapLayer) {
-//                tilemapLayer->setFlag(static_cast<Tilemap::LayerFlag>(tilemapLayer->flags() | Tilemap::LAYER_FLAG_INVISIBLE));
+            if(tilemapLayer)
                 _tilemap.addLayer(tilemapLayer);
-            }
         }
         return renderers;
     }
@@ -145,10 +139,10 @@ void Tilemap::jsonLoad(const Json& json)
         String name = layer->getString("name");
         uint32_t rowCount = static_cast<uint32_t>(layer->getInt("height"));
         uint32_t colCount = static_cast<uint32_t>(layer->getInt("width"));
-        float x = layer->getFloat("x");
-        float y = layer->getFloat("y");
-        float z = layer->getFloat("z");
-        int32_t flags = layer->getInt("flags");
+        float x = layer->getFloat("x", 0);
+        float y = layer->getFloat("y", 0);
+        float z = layer->getFloat("z", 0);
+        int32_t flags = layer->getInt("flags", 0);
 
         const sp<TilemapLayer> tilemapLayer = makeLayer(std::move(name), rowCount, colCount, sp<Vec3::Const>::make(V3(x, y, z)), nullptr, nullptr, 0, static_cast<Tilemap::LayerFlag>(flags));
         const sp<Json> data = layer->get("data");

@@ -104,7 +104,7 @@ String Json::getString(const String& key, const String& defValue) const
     const auto val = _stub->_json.find(key.c_str());
     if(val == _stub->_json.end())
         return defValue;
-    DCHECK(val->is_string(), "Key \"%s\" value is not a string", key.c_str());
+    CHECK(val->is_string(), "Key \"%s\" value is not a string", key.c_str());
     return val->get<std::string>().c_str();
 }
 
@@ -113,7 +113,7 @@ int32_t Json::getInt(const String& key, int32_t defValue) const
     const auto val = _stub->_json.find(key.c_str());
     if(val == _stub->_json.end())
         return defValue;
-    DCHECK(val->is_number_integer(), "Key \"%s\" value is not an integer", key.c_str());
+    CHECK(val->is_number_integer(), "Key \"%s\" value is not an integer", key.c_str());
     return val->get<int32_t>();
 }
 
@@ -122,7 +122,7 @@ float Json::getFloat(const String& key, float defValue) const
     const auto val = _stub->_json.find(key.c_str());
     if(val == _stub->_json.end())
         return defValue;
-    DCHECK(val->is_number_float(), "Key \"%s\" value is not float", key.c_str());
+    CHECK(val->is_number_float() || val->is_number_integer(), "Key \"%s\" value is not float", key.c_str());
     return val->get<float>();
 }
 

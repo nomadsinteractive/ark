@@ -183,10 +183,8 @@ sp<Script> PythonScript::BUILDER::build(const Scope& args)
 {
     const sp<Script> script = sp<PythonScript>::make("ark-python", _manifest);
     const Global<PluginManager> pluginManager;
-    pluginManager->each([script](const sp<Plugin>& plugin) {
-        plugin->createScriptModule(script);
-        return true;
-    });
+    for(Plugin& i : pluginManager->plugins())
+        i.createScriptModule(script);
     return script;
 }
 

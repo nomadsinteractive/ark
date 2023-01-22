@@ -139,10 +139,10 @@ VkRenderPass VKFramebuffer::Stub::create(const PipelineBindings& bindings)
     std::vector<VkAttachmentReference> attachmentReferences;
     std::vector<VkImageView> attachments;
 
-    for(const sp<Texture>& i : _color_attachments)
+    for(const Texture& i : _color_attachments)
     {
         VkAttachmentDescription colorAttachmentDescription = {};
-        colorAttachmentDescription.format = VKUtil::toTextureFormat(i->parameters()->_format);
+        colorAttachmentDescription.format = VKUtil::toTextureFormat(i.parameters()->_format);
         colorAttachmentDescription.samples = VK_SAMPLE_COUNT_1_BIT;
         colorAttachmentDescription.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         colorAttachmentDescription.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -154,7 +154,7 @@ VkRenderPass VKFramebuffer::Stub::create(const PipelineBindings& bindings)
 
         attachmentReferences.push_back({ static_cast<uint32_t>(attachmentReferences.size()), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL });
 
-        const sp<VKTexture> vkTexture = i->delegate();
+        const sp<VKTexture> vkTexture = i.delegate();
         DCHECK(vkTexture->id(), "VKTexture uninitialized");
         attachments.push_back(vkTexture->vkDescriptor().imageView);
     }

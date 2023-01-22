@@ -29,9 +29,9 @@ public:
     sp<BeanFactory> createBeanFactory(const sp<Dictionary<document>>& documentById) const;
 
     void each(const std::function<bool(const sp<Plugin>&)>& visitor) const;
-
     void load(const String& name);
 
+    const std::vector<sp<Plugin>>& plugins() const;
     void addPlugin(sp<Plugin> plugin);
 
 private:

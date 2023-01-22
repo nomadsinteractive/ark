@@ -58,19 +58,30 @@ void Uniform::setBinding(int32_t binding)
     _binding = binding;
 }
 
+static Optional<Uniform::Type> vecToUniformType(const String& declaredType, const String& vecPrefix, Uniform::Type baseType)
+{
+    if(declaredType.startsWith(vecPrefix) && declaredType.length() == vecPrefix.length() + 1)
+    {
+        int32_t vs = declaredType.at(vecPrefix.length()) - '1';
+        CHECK(vs >= 0 && vs < 4, "Unknow type %s", declaredType.c_str());
+        return static_cast<Uniform::Type>(baseType + vs);
+    }
+    return Optional<Uniform::Type>();
+}
+
 Uniform::Type Uniform::toType(const String& declaredType)
 {
     if(declaredType == "int")
         return TYPE_I1;
     if(declaredType == "float")
         return TYPE_F1;
-    if(declaredType.startsWith("vec") && declaredType.size() > 3)
-    {
-        int32_t vs = declaredType.at(3) - '1';
-        CHECK(vs >= 0 && vs < 4, "Unknow type %s", declaredType.c_str());
-        return static_cast<Type>(TYPE_F1 + vs);
-    }
-    if(declaredType.startsWith("v") && declaredType.size() > 2)
+    Optional<Uniform::Type> typeOpt = vecToUniformType(declaredType, "vec", TYPE_F1);
+    if(typeOpt)
+        return typeOpt.value();
+    typeOpt = vecToUniformType(declaredType, "ivec", TYPE_I1);
+    if(typeOpt)
+        return typeOpt.value();
+    if(declaredType.startsWith("v") && (declaredType.size() == 3 || declaredType.size() == 4))
     {
         int32_t vs = declaredType.at(1) - '1';
         char ts = declaredType.at(2);

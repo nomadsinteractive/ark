@@ -40,6 +40,7 @@ void VKInstance::initialize()
     appInfo.pEngineName = "ark";
     appInfo.apiVersion = VK_API_VERSION_1_0;
 
+    VkInstanceCreateInfo instanceCreateInfo = {};
 #if defined(_WIN32)
     _extensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
 #elif defined(VK_USE_PLATFORM_ANDROID_KHR)
@@ -54,9 +55,10 @@ void VKInstance::initialize()
     _extensions.push_back(VK_MVK_IOS_SURFACE_EXTENSION_NAME);
 #elif defined(VK_USE_PLATFORM_MACOS_MVK)
     _extensions.push_back(VK_MVK_MACOS_SURFACE_EXTENSION_NAME);
+    _extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+    instanceCreateInfo.flags = VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
 #endif
 
-    VkInstanceCreateInfo instanceCreateInfo = {};
     instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     instanceCreateInfo.pNext = nullptr;
     instanceCreateInfo.pApplicationInfo = &appInfo;

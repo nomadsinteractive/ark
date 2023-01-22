@@ -149,15 +149,14 @@ void StringBundleYAML::loadBundle(const String& name)
     yaml_parser_delete(&parser);
 }
 
-const std::map<String, sp<StringBundleYAML::Item>>& StringBundleYAML::getPackageBundle(const String& resid, String& nodename)
+const std::map<String, sp<StringBundleYAML::Item>>& StringBundleYAML::getPackageBundle(const String& resid, String& nodeName)
 {
-    String package;
-    Strings::cut(resid, package, nodename, '/');
-    DCHECK(package && nodename, "Illegal string bundle \"%s\"", resid.c_str());
+    auto [package, nodeNameOpt] = resid.cut('/');
+    CHECK(package && nodeNameOpt, "Illegal string bundle \"%s\"", resid.c_str());
     const auto iter = _bundle.find(package);
     if(iter == _bundle.end())
         loadBundle(package);
-
+    nodeName = std::move(nodeNameOpt.value());
     return _bundle[package];
 }
 

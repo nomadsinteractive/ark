@@ -50,6 +50,11 @@ void PluginManager::load(const String& name)
     addPlugin(sp<Plugin>::adopt(plugin));
 }
 
+const std::vector<sp<Plugin>>& PluginManager::plugins() const
+{
+    return _plugins;
+}
+
 void PluginManager::addPlugin(sp<Plugin> plugin)
 {
     plugin->initialize();
