@@ -1,5 +1,8 @@
 
-option(ARK_FORCE_STATIC_VCRT "Force /MT for static VC runtimes" OFF)
+set(LOCAL_MSVC_RUNTIME_CONF_SUFFIX DLL)
+
+option(ARK_FORCE_STATIC_VCRT "Force /MT for static VC runtimes" $<$<CONFIG:Release>:ON,OFF>)
+
 if(ARK_FORCE_STATIC_VCRT)
   foreach(flag_var
       CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE
@@ -10,7 +13,11 @@ if(ARK_FORCE_STATIC_VCRT)
       string(REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}")
     endif()
   endforeach()
+
+  set(LOCAL_MSVC_RUNTIME_CONF_SUFFIX "")
 endif()
+
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>${LOCAL_MSVC_RUNTIME_CONF_SUFFIX}")
 
 if(ARK_USE_OPEN_GL)
     ark_find_vcpkg_package(glbinding LIBRARIES glbinding::glbinding glbinding::glbinding-aux)

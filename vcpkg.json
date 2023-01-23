@@ -9,6 +9,7 @@
     "glbinding",
     "glm",
     "glslang",
+    "imgui",
     "libpng",
     "libjpeg-turbo",
     "libvorbis",
@@ -23,6 +24,7 @@
     "spdlog",
     "stb",
     "tinyxml2",
-    "yoga"
+    "yoga",
+    "zlib"
   ]
 }

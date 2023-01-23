@@ -44,8 +44,7 @@ const sp<BitmapLoaderBundle>& ApplicationBundle::bitmapBoundsBundle() const
 
 document ApplicationBundle::loadDocument(const String& resid) const
 {
-    String fname, fext;
-    Strings::rcut(resid, fname, fext, '.');
+    const auto [fname, fext] = resid.rcut('.');
     const sp<Asset> asset = _asset_bundle->getAsset(resid);
     return asset ? _document_loader_bundle->getLoader(fext)->load(asset->open()) : nullptr;
 }

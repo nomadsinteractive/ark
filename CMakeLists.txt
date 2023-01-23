@@ -1,10 +1,8 @@
-cmake_minimum_required(VERSION 3.7)
+cmake_minimum_required(VERSION 3.15)
 
 project(ark VERSION 0.9.5)
 
 include(CMakeDependentOption)
-
-find_package(Python COMPONENTS Interpreter)
 
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libs")
 
@@ -25,6 +23,10 @@ set(ARK_LIBRARIES ${ARK_RUNTIME_SHARED_LIBRARY})
 set(ARK_STATIC_LIBRARIES ${ARK_RUNTIME_STATIC_LIBRARY})
 
 include(${ARK_TOOLS_DIR}/core.cmake)
+
+ark_find_vcpkg_package(ZLIB LIBRARIES ZLIB::ZLIB MODULE_MODE)
+
+find_package(Python COMPONENTS Interpreter)
 
 set(ARK_SYSTEM_NAME ${SYSTEM} CACHE STRING "Target system name of ARK was built for")
 
@@ -149,8 +151,6 @@ ark_include_directories(platform/any)
 
 ark_find_vcpkg_package(tinyxml2 LIBRARIES tinyxml2::tinyxml2)
 ark_find_vcpkg_package(yaml LIBRARIES yaml)
-
-ark_find_vcpkg_package(zlib LIBRARIES ZLIB::ZLIB MODULE_MODE)
 
 ark_find_vcpkg_package(libzip LIBRARIES libzip::zip)
 

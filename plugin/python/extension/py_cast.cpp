@@ -161,7 +161,7 @@ sp<Vec3> PyCast::toVec3(PyObject* object, bool alert)
         return nullptr;
 
     CHECK(vec2, "Cannot cast \"%s\" to Vec3, possible candidates: tuple, Vec3, Vec2", Py_TYPE(object)->tp_name);
-    return Vec2Type::extend(vec2, sp<Numeric>::make<Numeric::Const>(0));
+    return Vec2Type::extend(vec2, sp<Numeric>::make<Numeric::Const>(0.0f));
 }
 
 PyObject* PyCast::toPyObject_SharedPtr(const bytearray& bytes)

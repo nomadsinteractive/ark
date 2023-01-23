@@ -36,9 +36,9 @@ public:
     static sp<Integer> create(std::vector<sp<Integer>> values);
 
 //[[script::bindings::operator(+)]]
-    static sp<Integer> add(const sp<Integer>& self, const sp<Integer>& rvalue);
+    static sp<Integer> add(sp<Integer> self, sp<Integer> rvalue);
 //[[script::bindings::operator(-)]]
-    static sp<Integer> sub(const sp<Integer>& self, const sp<Integer>& rvalue);
+    static sp<Integer> sub(sp<Integer> self, sp<Integer> rvalue);
 //[[script::bindings::operator(*)]]
     static sp<Integer> mul(sp<Integer> self, sp<Integer> rvalue);
 //[[script::bindings::operator(*)]]

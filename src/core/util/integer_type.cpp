@@ -103,14 +103,14 @@ sp<IntegerWrapper> IntegerType::create(int32_t value)
     return sp<IntegerWrapper>::make(value);
 }
 
-sp<Integer> IntegerType::add(const sp<Integer>& self, const sp<Integer>& rvalue)
+sp<Integer> IntegerType::add(sp<Integer> self, sp<Integer> rvalue)
 {
-    return sp<VariableOP2<sp<Integer>, sp<Integer>, Operators::Add<int32_t>>>::make(self, rvalue);
+    return sp<VariableOP2<sp<Integer>, sp<Integer>, Operators::Add<int32_t>>>::make(std::move(self), std::move(rvalue));
 }
 
-sp<Integer> IntegerType::sub(const sp<Integer>& self, const sp<Integer>& rvalue)
+sp<Integer> IntegerType::sub(sp<Integer> self, sp<Integer> rvalue)
 {
-    return sp<VariableOP2<sp<Integer>, sp<Integer>, Operators::Sub<int32_t>>>::make(self, rvalue);
+    return sp<VariableOP2<sp<Integer>, sp<Integer>, Operators::Sub<int32_t>>>::make(std::move(self), std::move(rvalue));
 }
 
 sp<Integer> IntegerType::mul(sp<Integer> self, sp<Integer> rvalue)

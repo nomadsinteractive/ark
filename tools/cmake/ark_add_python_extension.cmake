@@ -153,7 +153,7 @@ function(ark_add_python_extension name)
         set_property(GLOBAL APPEND PROPERTY builtin_extensions ${name})
         set_property(GLOBAL APPEND PROPERTY extension_${name}_link_libraries ${target_name} ${ARK_ADD_PYTHON_EXTENSION_LIBRARIES})
         target_include_directories(${target_name} PRIVATE ${ARK_ADD_PYTHON_EXTENSION_INCLUDEDIRS})
-        target_compile_definitions(${target_name} PRIVATE -DPy_BUILD_CORE -DNDEBUG -DPy_BUILD_CORE_BUILTIN ${ARK_ADD_PYTHON_EXTENSION_DEFINITIONS})
+        target_compile_definitions(${target_name} PRIVATE -DPy_BUILD_CORE -DPy_BUILD_CORE_BUILTIN ${ARK_ADD_PYTHON_EXTENSION_DEFINITIONS})
     elseif(WIN32 AND NOT BUILD_SHARED)
         # Extensions cannot be built against a static libpython on windows
     else(ARK_PYTHON_EXTENSION_BUILTIN_${upper_name})

@@ -25,6 +25,7 @@
 #include "python/api.h"
 #include "python/extension/py_instance.h"
 #include "python/extension/python_interpreter.h"
+#include "python/extension/py_bridge.h"
 
 namespace ark {
 namespace plugin {
@@ -60,27 +61,27 @@ public:
         return toPyObject_SharedPtr_sfinae(object, nullptr);
     }
 
-    template<typename T> static PyObject* toPyObject_SharedPtr_sfinae(const sp<Array<T>>& arrayObject, typename std::enable_if<std::is_integral<T>::value>::type* ) {
-        const uint32_t arrayLength = arrayObject->length();
-        const T* arrayBuf = arrayObject->buf();
-        PyObject* obj = PyList_New(arrayLength);
-        for(uint32_t i = 0; i < arrayLength; ++i)
-            PyList_SetItem(i, std::is_signed<T>::value ? PyLong_FromLong(arrayBuf[i]) : PyLong_FromUnsignedLong(arrayBuf[i]));
-        return obj;
-    }
+//    template<typename T> static PyObject* toPyObject_SharedPtr_sfinae(const sp<Array<T>>& arrayObject, typename std::enable_if<std::is_integral<T>::value>::type* ) {
+//        const uint32_t arrayLength = arrayObject->length();
+//        const T* arrayBuf = arrayObject->buf();
+//        PyObject* obj = PyList_New(arrayLength);
+//        for(uint32_t i = 0; i < arrayLength; ++i)
+//            PyList_SetItem(i, std::is_signed<T>::value ? PyLong_FromLong(arrayBuf[i]) : PyLong_FromUnsignedLong(arrayBuf[i]));
+//        return obj;
+//    }
 
-    template<typename T> static PyObject* toPyObject_SharedPtr_sfinae(const sp<Array<T>>& arrayObject, typename std::enable_if<std::is_floating_point<T>::value>::type* ) {
-        const uint32_t arrayLength = arrayObject->length();
-        const T* arrayBuf = arrayObject->buf();
-        PyObject* obj = PyList_New(arrayLength);
-        for(uint32_t i = 0; i < arrayLength; ++i)
-            PyList_SetItem(i, PyFloat_FromDouble(arrayBuf[i]));
-        return obj;
-    }
+//    template<typename T> static PyObject* toPyObject_SharedPtr_sfinae(const sp<Array<T>>& arrayObject, typename std::enable_if<std::is_floating_point<T>::value>::type* ) {
+//        const uint32_t arrayLength = arrayObject->length();
+//        const T* arrayBuf = arrayObject->buf();
+//        PyObject* obj = PyList_New(arrayLength);
+//        for(uint32_t i = 0; i < arrayLength; ++i)
+//            PyList_SetItem(i, PyFloat_FromDouble(arrayBuf[i]));
+//        return obj;
+//    }
 
     template<typename T> static PyObject* toPyObject_SharedPtr_sfinae(const sp<T>& object, std::nullptr_t ) {
         if(!object)
-            Py_RETURN_NONE;
+            return PyBridge::incRefNone();
         return PythonInterpreter::instance()->pyNewObject<T>(object);
     }
 
@@ -88,13 +89,13 @@ public:
     template<typename T> static PyObject* toPyObject_impl(const T& value);
 
     template<typename T> static Optional<sp<T>> toSharedPtr(PyObject* object, bool alert = true) {
-        if(object == Py_None)
+        if(PyBridge::isPyNone(object))
             return sp<T>::null();
         return toSharedPtrImpl<T>(object, alert);
     }
 
     template<typename T> static sp<T> toSharedPtrOrNull(PyObject* object) {
-        if(object == Py_None)
+        if(PyBridge::isPyNone(object))
             return nullptr;
         Optional<sp<T>> opt = toSharedPtrDefault<T>(object, false);
         return opt ? opt.value() : nullptr;
@@ -117,7 +118,7 @@ public:
                 return f(args...);
             }
             catch(const std::logic_error& e) {
-                PyErr_SetString(PyExc_RuntimeError, e.what());
+                PyBridge::setRuntimeErrString(e.what());
             }
             return (R)(0);
         }
@@ -131,10 +132,10 @@ private:
     }
 
     template<typename T> static Optional<sp<T>> toSharedPtrDefault(PyObject* object, bool alert = true) {
-        if(object == Py_None)
+        if(PyBridge::isPyNone(object))
             return Optional<sp<T>>(sp<T>::null());
 
-        PyTypeObject* pyType = reinterpret_cast<PyTypeObject*>(PyObject_Type(object));
+        PyTypeObject* pyType = reinterpret_cast<PyTypeObject*>(PyBridge::PyObject_Type(object));
         if(PythonInterpreter::instance()->isPyArkTypeObject(pyType)) {
             PyArkType::Instance* instance = reinterpret_cast<PyArkType::Instance*>(object);
             DASSERT(instance->box);
@@ -145,17 +146,17 @@ private:
     }
 
     template<typename T> static PyObject* fromIterable_sfinae(const T& list, typename std::remove_reference<decltype(list.front())>::type*) {
-        PyObject* pyList = PyList_New(list.size());
+        PyObject* pyList = PyBridge::PyList_New(list.size());
         Py_ssize_t index = 0;
         for(const auto& i : list)
-            PyList_SetItem(pyList, index++, toPyObject(i));
+            PyBridge::PyList_SetItem(pyList, index++, toPyObject(i));
         return pyList;
     }
 
     template<typename T> static PyObject* fromIterable_sfinae(const T& map, typename std::remove_reference<decltype(map.begin()->second)>::type*) {
         PyObject* pyDict = PyDict_New();
         for(const auto& i : map)
-            PyDict_SetItem(pyDict, toPyObject(i.first), toPyObject(i.second));
+            PyBridge::PyDict_SetItem(pyDict, toPyObject(i.first), toPyObject(i.second));
         return pyDict;
     }
 
@@ -227,16 +228,16 @@ private:
         return pyTuple;
     }
     template<typename T> static PyObject* toPyObject_sfinae(const T& value, std::enable_if_t<std::is_enum<T>::value>*) {
-        return PyLong_FromLong(static_cast<int32_t>(value));
+        return PyBridge::PyLong_FromLong(static_cast<int32_t>(value));
     }
     template<typename T> static PyObject* toPyObject_sfinae(const T& value, std::enable_if_t<std::is_integral<T>::value && !std::is_same<T, bool>::value && std::is_signed<T>::value>*) {
-        return PyLong_FromLong(value);
+        return PyBridge::PyLong_FromLong(value);
     }
     template<typename T> static PyObject* toPyObject_sfinae(const T& value, std::enable_if_t<std::is_integral<T>::value && !std::is_same<T, bool>::value && std::is_unsigned<T>::value>*) {
-        return PyLong_FromUnsignedLong(static_cast<uint32_t>(value));
+        return PyBridge::PyLong_FromUnsignedLong(static_cast<uint32_t>(value));
     }
     template<typename T> static PyObject* toPyObject_sfinae(const T& value, std::enable_if_t<std::is_floating_point<T>::value>*) {
-        return PyFloat_FromDouble(value);
+        return PyBridge::PyFloat_FromDouble(value);
     }
     template<typename T> static PyObject* toPyObject_sfinae(const T& value, ...) {
         return toPyObject_impl<T>(value);
@@ -246,16 +247,17 @@ private:
         return toCppObject_impl<T>(obj);
     }
     template<typename T, typename U> static Optional<T> toCppCollectionObject_sfinae(PyObject* obj, ...) {
-        Py_ssize_t len = (PyList_Check(obj) || PyTuple_Check(obj)) ? PyObject_Length(obj) : -1;
+        Py_ssize_t len = (PyBridge::isPyList(obj) || PyBridge::isPyTuple(obj)) ? PyBridge::PyObject_Size(obj) : -1;
         if(len == -1)
             return Optional<T>();
         T col;
         for(Py_ssize_t i = 0; i < len; ++i) {
-            PyObject* key = PyLong_FromLong(static_cast<int32_t>(i));
-            PyObject* item = PyObject_GetItem(obj, key);
-            Py_DECREF(key);
+            PyObject* key = PyBridge::PyLong_FromLong(static_cast<int32_t>(i));
+            PyObject* item = PyBridge::PyObject_GetItem(obj, key);
+            PyBridge::decRef(key);
             Optional<U> opt = toCppObject<U>(item);
-            Py_XDECREF(item);
+            if(item)
+                PyBridge::decRef(item);
             if(!opt)
                 return Optional<T>();
             col.push_back(std::move(opt.value()));
@@ -263,15 +265,15 @@ private:
         return col;
     }
     template<typename T, typename K, typename V> static Optional<T> toCppObject_map(PyObject* obj) {
-        if(!PyDict_CheckExact(obj))
+        if(!PyBridge::isPyDictExact(obj))
             return Optional<T>();
 
         T map;
-        PyInstance keys(PyInstance::steal(PyDict_Keys(obj)));
-        Py_ssize_t keySize = PyList_Size(keys.pyObject());
+        PyInstance keys(PyInstance::steal(PyBridge::PyDict_Keys(obj)));
+        Py_ssize_t keySize = PyBridge::PyList_Size(keys.pyObject());
         for(Py_ssize_t i = 0; i < keySize; ++i) {
-            PyObject* key = PyList_GetItem(keys.pyObject(), i);
-            PyObject* item = PyDict_GetItem(obj, key);
+            PyObject* key = PyBridge::PyList_GetItem(keys.pyObject(), i);
+            PyObject* item = PyBridge::PyDict_GetItem(obj, key);
             Optional<K> optKey = toCppObject<K>(key);
             Optional<V> optValue = toCppObject<V>(item);
             if(!optKey || !optValue)

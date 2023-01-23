@@ -31,35 +31,24 @@ public:
     }
 
     virtual void createScriptModule(const sp<Script>& script) override {
-        const sp<PythonScript> pythonScript = script.as<PythonScript>();
-        if(pythonScript) {
-            PyObject* arkmodule = pythonScript->arkModule();
+        PythonInterpreter::instance()->addModulePlugin<BulletPybindingsPlugin>(*this, script, "bullet", "ark.bullet module", ARK_BULLET_METHODS);
 
-            static struct PyModuleDef cModPyArkBullet = {
-                PyModuleDef_HEAD_INIT,
-                "bullet",                /* name of module */
-                "ark.bullet module",     /* module documentation, may be NULL */
-                -1,                     /* size of per-interpreter state of the module, or -1 if the module keeps state in global variables. */
-                ARK_BULLET_METHODS
-            };
-
-            PyObject* bulletmodule = PyModule_Create(&cModPyArkBullet);
-            __init_py_bullet_bindings__(bulletmodule);
-            PyModule_AddObject(arkmodule, "bullet", bulletmodule);
-
-            PyArkType* pyResourceLoaderType = PythonInterpreter::instance()->getPyArkType<ResourceLoader>();
-            {
-                std::map<TypeId, PyArkType::LoaderFunction>& loader = pyResourceLoaderType->ensureLoader("load");
-                loader[Type<ColliderBullet>::id()] = [](PyArkType::Instance& inst, const String& id, const Scope& args)->Box { return inst.unpack<ResourceLoader>()->load<ColliderBullet>(id, args); };
-                loader[Type<RigidBodyBullet>::id()] = [](PyArkType::Instance& inst, const String& id, const Scope& args)->Box { return inst.unpack<ResourceLoader>()->load<RigidBodyBullet>(id, args); };
-            }
-            PyArkType* pyArenaType = PythonInterpreter::instance()->getPyArkType<Arena>();
-            {
-                std::map<TypeId, PyArkType::LoaderFunction>& loader = pyArenaType->ensureLoader("load");
-                loader[Type<ColliderBullet>::id()] = [](PyArkType::Instance& inst, const String& id, const Scope& args)->Box { return inst.unpack<Arena>()->load<ColliderBullet>(id, args); };
-                loader[Type<RigidBodyBullet>::id()] = [](PyArkType::Instance& inst, const String& id, const Scope& args)->Box { return inst.unpack<Arena>()->load<RigidBodyBullet>(id, args); };
-            }
+        PyArkType* pyResourceLoaderType = PythonInterpreter::instance()->getPyArkType<ResourceLoader>();
+        {
+            std::map<TypeId, PyArkType::LoaderFunction>& loader = pyResourceLoaderType->ensureLoader("load");
+            loader[Type<ColliderBullet>::id()] = [](PyArkType::Instance& inst, const String& id, const Scope& args)->Box { return inst.unpack<ResourceLoader>()->load<ColliderBullet>(id, args); };
+            loader[Type<RigidBodyBullet>::id()] = [](PyArkType::Instance& inst, const String& id, const Scope& args)->Box { return inst.unpack<ResourceLoader>()->load<RigidBodyBullet>(id, args); };
         }
+        PyArkType* pyArenaType = PythonInterpreter::instance()->getPyArkType<Arena>();
+        {
+            std::map<TypeId, PyArkType::LoaderFunction>& loader = pyArenaType->ensureLoader("load");
+            loader[Type<ColliderBullet>::id()] = [](PyArkType::Instance& inst, const String& id, const Scope& args)->Box { return inst.unpack<Arena>()->load<ColliderBullet>(id, args); };
+            loader[Type<RigidBodyBullet>::id()] = [](PyArkType::Instance& inst, const String& id, const Scope& args)->Box { return inst.unpack<Arena>()->load<RigidBodyBullet>(id, args); };
+        }
+    }
+
+    void initialize(PyObject* bulletmodule) {
+        __init_py_bullet_bindings__(bulletmodule);
     }
 };
 

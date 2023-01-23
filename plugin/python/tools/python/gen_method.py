@@ -71,6 +71,8 @@ TP_AS_NUMBER_TEMPLATE_OPERATOR = {
 
 NO_STATIC_OPS = {'neg', 'abs', 'int', 'float', '+=', '-=', '*=', '/='}
 
+PY_RETURN_NONE = 'return PyBridge::incRefNone()'
+
 
 class GenMethod(object):
     def __init__(self, name, args, return_type):
@@ -94,7 +96,7 @@ class GenMethod(object):
         return 'Instance* self, PyObject* args' + (', PyObject* kws' if self._has_keyvalue_arguments else '')
 
     def gen_py_argc(self):
-        return 'PyObject_Length(args)'
+        return 'PyBridge::PyObject_Size(args)'
 
     def gen_local_var_declarations(self):
         declares = {}
@@ -142,7 +144,7 @@ class GenMethod(object):
 
     @property
     def err_return_value(self):
-        return 'Py_RETURN_NONE'
+        return PY_RETURN_NONE
 
     @property
     def check_argument_type(self):
@@ -163,7 +165,7 @@ class GenMethod(object):
             return ['return %s;' % gen_cast_call(py_return, 'ret')]
 
         if return_type == 'void':
-            return ['Py_RETURN_NONE;']
+            return [f'{PY_RETURN_NONE};']
         m = acg.get_shared_ptr_type(return_type)
         if m in ('std::wstring',):
             fromcall = 'template toPyObject<%s>' % m
@@ -185,11 +187,11 @@ class GenMethod(object):
         # TODO: to all possible methods
         if self._has_keyword_arguments() and self._name == '__init__':
             lines.append(self._make_argname_declares())
-            parsestatement = '''if(!PyArg_ParseTupleAndKeywords(args, kws, "%s", const_cast<char**>(argnames), %s))
+            parsestatement = '''if(!PyBridge::PyArg_ParseTupleAndKeywords(args, kws, "%s", const_cast<char**>(argnames), %s))
         %s;
     ''' % (parse_format, parse_arg_refnames, self.err_return_value)
         else:
-            parsestatement = '''if(!PyArg_ParseTuple(args, "%s", %s))
+            parsestatement = '''if(!PyBridge::PyArg_ParseTuple(args, "%s", %s))
         %s;
     ''' % (parse_format, parse_arg_refnames, self.err_return_value)
         lines.append(parsestatement)
@@ -326,7 +328,7 @@ class GenGetPropMethod(GenMethod):
                 'if(attr)',
                 INDENT + 'return attr;',
                 'if(!PythonInterpreter::instance()->exceptErr(PyExc_AttributeError))',
-                INDENT + 'Py_RETURN_NONE;'
+                f'{INDENT}{PY_RETURN_NONE};'
                 '\n',
                 'try {'] + [INDENT + i for i in calling_lines] + [
                 '} catch(const std::exception& ex) {',

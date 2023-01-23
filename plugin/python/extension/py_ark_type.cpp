@@ -129,6 +129,14 @@ std::map<TypeId, PyArkType::LoaderFunction>& PyArkType::ensureLoader(const Strin
     return _loaders[name];
 }
 
+int32_t plugin::python::PyArkType::doReady()
+{
+    int32_t r = PyType_Ready(&_py_type_object);
+    for(const auto [name, value] : _constants)
+        PyDict_SetItemString(_py_type_object.tp_dict, name.c_str(), PyLong_FromLong(value));
+    return r;
+}
+
 const std::map<TypeId, PyArkType::LoaderFunction>& PyArkType::getLoader(const String& name) const
 {
     auto iter = _loaders.find(name);
@@ -142,16 +150,6 @@ PyObject* PyArkType::load(Instance& inst, const String& loader, TypeId typeId, c
     const auto iter = functions.find(typeId);
     DCHECK(iter != functions.end(), "Loader \"%s\" has no LoaderFunction for %d", loader.c_str(), typeId);
     return PythonInterpreter::instance()->toPyObject(iter->second(inst, id, args));
-}
-
-void PyArkType::doInitConstants()
-{
-    for(auto iter = _constants.begin(); iter != _constants.end(); ++iter)
-    {
-        const String& name = iter->first;
-        int32_t value = iter->second;
-        PyDict_SetItemString(_py_type_object.tp_dict, name.c_str(), PyLong_FromLong(value));
-    }
 }
 
 PyTypeObject* PyArkType::basetype()

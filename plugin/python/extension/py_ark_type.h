@@ -54,10 +54,7 @@ public:
 
     template<typename T> int ready() {
         _type_id = Type<T>::id();
-
-        int r = PyType_Ready(&_py_type_object);
-        doInitConstants();
-        return r;
+        return doReady();
     }
 
     TypeId typeId() const;
@@ -77,7 +74,7 @@ protected:
     std::map<String, std::map<TypeId, LoaderFunction>> _loaders;
 
 private:
-    void doInitConstants();
+    int32_t doReady();
 
     const std::map<TypeId, LoaderFunction>& getLoader(const String& name) const;
 

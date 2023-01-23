@@ -16,7 +16,9 @@
 
 #include "python/api.h"
 #include "python/forwarding.h"
+#include "python/impl/script/python_script.h"
 #include "python/extension/py_ark_type.h"
+#include "python/extension/py_bridge.h"
 
 namespace ark {
 namespace plugin {
@@ -55,7 +57,7 @@ public:
         int ret = addPyArkType<P>(&pyType);
         DCHECK(!ret, "PyArkType init failed");
         if(!ret)
-            PyModule_AddObject(module, typeName, pyType.getPyObject());
+            PyBridge::PyModule_AddObject(module, typeName, pyType.getPyObject());
     }
 
     bool isPyArkTypeObject(void* pyTypeObject) const;
@@ -69,6 +71,22 @@ public:
 
     void logErr() const;
     bool exceptErr(PyObject* type) const;
+
+    template<typename T> void addModulePlugin(T& plugin, const sp<Script>& script, const char* name, const char* documentation, const PyMethodDef* methods) {
+        const sp<PythonScript> pythonScript = script.as<PythonScript>();
+        ASSERT(pythonScript);
+        static struct PyModuleDef cPluginModuleDef = {
+            PyModuleDef_HEAD_INIT,
+            name,                /* name of module */
+            documentation,       /* module documentation, may be NULL */
+            -1,                  /* size of per-interpreter state of the module, or -1 if the module keeps state in global variables. */
+            const_cast<PyMethodDef*>(methods)
+        };
+
+        PyObject* pluginModule = PyBridge::PyModule_Create2(&cPluginModuleDef, PYTHON_ABI_VERSION);
+        plugin.initialize(pluginModule);
+        PyBridge::PyModule_AddObject(pythonScript->arkModule(), name, pluginModule);
+    }
 
 private:
     std::map<TypeId, PyArkType*> _type_by_id;

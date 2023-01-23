@@ -149,6 +149,7 @@ def gen_py_binding_h(filename, namespaces, includes, declares):
 ${includes}
 
 #include "python/extension/py_ark_type.h"
+#include "python/extension/py_bridge.h"
 #include "python/extension/py_cast.h"
 
 ${0}

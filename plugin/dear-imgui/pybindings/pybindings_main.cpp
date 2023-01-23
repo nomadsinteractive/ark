@@ -3,7 +3,7 @@
 #include "core/base/api.h"
 #include "core/types/shared_ptr.h"
 
-#include "python/impl/script/python_script.h"
+#include "python/extension/python_interpreter.h"
 #include "generated/py_dear-imgui_bindings.h"
 
 using namespace ark;
@@ -16,29 +16,18 @@ PyMethodDef ARK_DEAR_IMGUI_METHODS[] = {
     {nullptr, nullptr, 0, nullptr}
 };
 
-class Box2dPybindingsPlugin : public Plugin {
+class DearImguiPybindingsPlugin : public Plugin {
 public:
-    Box2dPybindingsPlugin()
+    DearImguiPybindingsPlugin()
         : Plugin("dear-imgui-pybindings", Plugin::PLUGIN_TYPE_CORE) {
     }
 
     virtual void createScriptModule(const sp<Script>& script) override {
-        const sp<PythonScript> pythonScript = script.as<PythonScript>();
-        if(pythonScript) {
-            PyObject* arkmodule = pythonScript->arkModule();
+        PythonInterpreter::instance()->addModulePlugin<DearImguiPybindingsPlugin>(*this, script, "dear_imgui", "ark.dear_imgui module", ARK_DEAR_IMGUI_METHODS);
+    }
 
-            static struct PyModuleDef cModPyArkDearImgui = {
-                PyModuleDef_HEAD_INIT,
-                "dear_imgui",                /* name of module */
-                "ark.dear_imgui module",     /* module documentation, may be NULL */
-                -1,                     /* size of per-interpreter state of the module, or -1 if the module keeps state in global variables. */
-                ARK_DEAR_IMGUI_METHODS
-            };
-
-            PyObject* dearimguimodule = PyModule_Create(&cModPyArkDearImgui);
-            __init_py_dear_imgui_bindings__(dearimguimodule);
-            PyModule_AddObject(arkmodule, "dear_imgui", dearimguimodule);
-        }
+    void initialize(PyObject* dearimguimodule) {
+        __init_py_dear_imgui_bindings__(dearimguimodule);
     }
 };
 
@@ -48,5 +37,5 @@ extern "C" ARK_API Plugin* __ark_dear_imgui_pybindings_initialize__(Ark&);
 
 Plugin* __ark_dear_imgui_pybindings_initialize__(Ark&)
 {
-    return new Box2dPybindingsPlugin();
+    return new DearImguiPybindingsPlugin();
 }

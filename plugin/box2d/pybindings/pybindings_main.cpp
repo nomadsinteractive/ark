@@ -31,35 +31,24 @@ public:
     }
 
     virtual void createScriptModule(const sp<Script>& script) override {
-        const sp<PythonScript> pythonScript = script.as<PythonScript>();
-        if(pythonScript) {
-            PyObject* arkmodule = pythonScript->arkModule();
+        PythonInterpreter::instance()->addModulePlugin<Box2dPybindingsPlugin>(*this, script, "box2d", "ark.box2d module", ARK_BOX2D_METHODS);
 
-            static struct PyModuleDef cModPyArkBox2d = {
-                PyModuleDef_HEAD_INIT,
-                "box2d",                /* name of module */
-                "ark.box2d module",     /* module documentation, may be NULL */
-                -1,                     /* size of per-interpreter state of the module, or -1 if the module keeps state in global variables. */
-                ARK_BOX2D_METHODS
-            };
-
-            PyObject* box2dmodule = PyModule_Create(&cModPyArkBox2d);
-            __init_py_box2d_bindings__(box2dmodule);
-            PyModule_AddObject(arkmodule, "box2d", box2dmodule);
-
-            PyArkType* pyResourceLoaderType = PythonInterpreter::instance()->getPyArkType<ResourceLoader>();
-            {
-                std::map<TypeId, PyArkType::LoaderFunction>& loader = pyResourceLoaderType->ensureLoader("load");
-                loader[Type<ColliderBox2D>::id()] = [](PyArkType::Instance& inst, const String& id, const Scope& args)->Box { return inst.unpack<ResourceLoader>()->load<ColliderBox2D>(id, args); };
-                loader[Type<RigidBodyBox2D>::id()] = [](PyArkType::Instance& inst, const String& id, const Scope& args)->Box { return inst.unpack<ResourceLoader>()->load<RigidBodyBox2D>(id, args); };
-            }
-            PyArkType* pyArenaType = PythonInterpreter::instance()->getPyArkType<Arena>();
-            {
-                std::map<TypeId, PyArkType::LoaderFunction>& loader = pyArenaType->ensureLoader("load");
-                loader[Type<ColliderBox2D>::id()] = [](PyArkType::Instance& inst, const String& id, const Scope& args)->Box { return inst.unpack<Arena>()->load<ColliderBox2D>(id, args); };
-                loader[Type<RigidBodyBox2D>::id()] = [](PyArkType::Instance& inst, const String& id, const Scope& args)->Box { return inst.unpack<Arena>()->load<RigidBodyBox2D>(id, args); };
-            }
+        PyArkType* pyResourceLoaderType = PythonInterpreter::instance()->getPyArkType<ResourceLoader>();
+        {
+            std::map<TypeId, PyArkType::LoaderFunction>& loader = pyResourceLoaderType->ensureLoader("load");
+            loader[Type<ColliderBox2D>::id()] = [](PyArkType::Instance& inst, const String& id, const Scope& args)->Box { return inst.unpack<ResourceLoader>()->load<ColliderBox2D>(id, args); };
+            loader[Type<RigidBodyBox2D>::id()] = [](PyArkType::Instance& inst, const String& id, const Scope& args)->Box { return inst.unpack<ResourceLoader>()->load<RigidBodyBox2D>(id, args); };
         }
+        PyArkType* pyArenaType = PythonInterpreter::instance()->getPyArkType<Arena>();
+        {
+            std::map<TypeId, PyArkType::LoaderFunction>& loader = pyArenaType->ensureLoader("load");
+            loader[Type<ColliderBox2D>::id()] = [](PyArkType::Instance& inst, const String& id, const Scope& args)->Box { return inst.unpack<Arena>()->load<ColliderBox2D>(id, args); };
+            loader[Type<RigidBodyBox2D>::id()] = [](PyArkType::Instance& inst, const String& id, const Scope& args)->Box { return inst.unpack<Arena>()->load<RigidBodyBox2D>(id, args); };
+        }
+    }
+
+    void initialize(PyObject* module) {
+        __init_py_box2d_bindings__(module);
     }
 };
 

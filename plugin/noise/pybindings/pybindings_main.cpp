@@ -27,23 +27,11 @@ public:
     }
 
     virtual void createScriptModule(const sp<Script>& script) override {
-        const sp<PythonScript> pythonScript = script.as<PythonScript>();
-        if(pythonScript) {
-            PyObject* arkmodule = pythonScript->arkModule();
+        PythonInterpreter::instance()->addModulePlugin<NoisePybindingsPlugin>(*this, script, "noise", "ark.noise module", ARK_NOISE_METHODS);
+    }
 
-            static struct PyModuleDef cModPyArkNoise = {
-                PyModuleDef_HEAD_INIT,
-                "noise",                /* name of module */
-                "ark.noise module",     /* module documentation, may be NULL */
-                -1,                     /* size of per-interpreter state of the module, or -1 if the module keeps state in global variables. */
-                ARK_NOISE_METHODS
-            };
-
-            PyObject* noisemodule = PyModule_Create(&cModPyArkNoise);
-            __init_py_noise_bindings__(noisemodule);
-            PyModule_AddObject(arkmodule, "noise", noisemodule);
-
-        }
+    void initialize(PyObject* noisemodule) {
+        __init_py_noise_bindings__(noisemodule);
     }
 };
 
