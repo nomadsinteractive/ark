@@ -132,9 +132,9 @@ sp<Boolean> BooleanType::__or__(const sp<Boolean>& self, const sp<Boolean>& rval
     return sp<VariableOP2<sp<Boolean>, sp<Boolean>, Operators::Or<bool>>>::make(self, rvalue);
 }
 
-sp<Boolean> BooleanType::negative(const sp<Boolean>& self)
+sp<Boolean> BooleanType::negative(sp<Boolean> self)
 {
-    return sp<VariableOP1<bool>>::make(_operator_not, self);
+    return sp<VariableOP1<bool>>::make(_operator_not, std::move(self));
 }
 
 bool BooleanType::toBool(const sp<Boolean>& self)
@@ -147,7 +147,7 @@ bool BooleanType::val(const sp<Boolean>& self)
     return self->val();
 }
 
-const sp<Boolean>& BooleanType::delegate(const sp<Boolean>& self)
+const sp<Boolean>& BooleanType::wrapped(const sp<Boolean>& self)
 {
     const sp<BooleanWrapper> ib = self.as<BooleanWrapper>();
     DWARN(ib, "Non-BooleanWrapper instance has no wrapped attribute. This should be an error unless you're inspecting it.");

@@ -27,10 +27,10 @@ public:
 //[[script::bindings::property]]
     static bool val(const sp<Boolean>& self);
 //[[script::bindings::property]]
-    static const sp<Boolean>& delegate(const sp<Boolean>& self);
+    static const sp<Boolean>& wrapped(const sp<Boolean>& self);
 
 //[[script::bindings::classmethod]]
-    static sp<Boolean> negative(const sp<Boolean>& self);
+    static sp<Boolean> negative(sp<Boolean> self);
 
 //[[script::bindings::classmethod]]
     static void set(const sp<Boolean::Impl>& self, bool value);
@@ -48,7 +48,7 @@ public:
     static sp<Boolean> observe(const sp<Boolean>& self, const sp<Observer>& observer);
 
 //[[script::bindings::classmethod]]
-    static sp<Boolean> dye(sp<Boolean> self, sp<Boolean> condition, String message);
+    static sp<Boolean> dye(sp<Boolean> self, sp<Boolean> condition = nullptr, String message = "");
 
 //[[script::bindings::classmethod]]
     static void fix(const sp<Boolean>& self);

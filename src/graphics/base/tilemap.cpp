@@ -104,9 +104,9 @@ void Tilemap::load(const String& src)
     load(Ark::instance().openAsset(src));
 }
 
-sp<TilemapLayer> Tilemap::makeLayer(const String& name, uint32_t rowCount, uint32_t colCount, sp<Vec3> position, sp<Vec3> scroller, sp<Boolean> visible, float zorder, Tilemap::LayerFlag layerFlag)
+sp<TilemapLayer> Tilemap::makeLayer(const String& name, uint32_t colCount, uint32_t rowCount, sp<Vec3> position, sp<Vec3> scroller, sp<Boolean> visible, float zorder, Tilemap::LayerFlag layerFlag)
 {
-    sp<TilemapLayer> layer = sp<TilemapLayer>::make(_tileset, name, rowCount, colCount, position, scroller, std::move(visible), layerFlag);
+    sp<TilemapLayer> layer = sp<TilemapLayer>::make(_tileset, name, colCount, rowCount, position, scroller, std::move(visible), layerFlag);
     addLayer(layer, zorder);
     return layer;
 }
@@ -137,14 +137,14 @@ void Tilemap::jsonLoad(const Json& json)
         const sp<Json> layer = layers->at(static_cast<int32_t>(i));
         DASSERT(layer);
         String name = layer->getString("name");
-        uint32_t rowCount = static_cast<uint32_t>(layer->getInt("height"));
         uint32_t colCount = static_cast<uint32_t>(layer->getInt("width"));
+        uint32_t rowCount = static_cast<uint32_t>(layer->getInt("height"));
         float x = layer->getFloat("x", 0);
         float y = layer->getFloat("y", 0);
         float z = layer->getFloat("z", 0);
         int32_t flags = layer->getInt("flags", 0);
 
-        const sp<TilemapLayer> tilemapLayer = makeLayer(std::move(name), rowCount, colCount, sp<Vec3::Const>::make(V3(x, y, z)), nullptr, nullptr, 0, static_cast<Tilemap::LayerFlag>(flags));
+        const sp<TilemapLayer> tilemapLayer = makeLayer(std::move(name), colCount, rowCount, sp<Vec3::Const>::make(V3(x, y, z)), nullptr, nullptr, 0, static_cast<Tilemap::LayerFlag>(flags));
         const sp<Json> data = layer->get("data");
         DASSERT(data);
         DASSERT(data->isArray());
@@ -153,7 +153,7 @@ void Tilemap::jsonLoad(const Json& json)
         data->foreach([&tilemapLayer, &row, &col, rowCount, colCount](const Json& idx) {
             int32_t type = idx.toInt();
             if(type > 0) {
-                tilemapLayer->setTile(rowCount - row, col, type - 1);
+                tilemapLayer->setTile(col, rowCount - row, type - 1);
             }
             if(++col == colCount) {
                 col = 0;
@@ -173,7 +173,7 @@ Json Tilemap::jsonDump() const
         Json jLayer;
         uint32_t rowCount = i->rowCount();
         uint32_t colCount = i->colCount();
-        const V3 position = i->position()->val();
+        const V3 position = i->position().val();
         jLayer.setString("name", i->name());
         jLayer.setInt("width", static_cast<int32_t>(colCount));
         jLayer.setInt("height", static_cast<int32_t>(rowCount));
@@ -237,18 +237,15 @@ bool Tilemap::Stub::preSnapshot(const RenderRequest& renderRequest, LayerContext
     _need_reload = false;
     if(_scrollable)
         _scrollable->cull();
-    for(TilemapLayer& i : _layers)
+    for(const TilemapLayer& i : _layers)
         needReload = i._stub->preSnapshot(renderRequest, lc) || needReload;
     return needReload;
 }
 
 void Tilemap::Stub::snapshot(const RenderRequest& renderRequest, const LayerContext& lc, RenderLayerSnapshot& output)
 {
-    for(auto iter = _layers.rbegin(); iter != _layers.rend(); ++iter)
-    {
-        const sp<TilemapLayer>& i = *iter;
-        i->_stub->snapshot(renderRequest, lc, output);
-    }
+    for(const TilemapLayer& i : _layers)
+        i._stub->snapshot(renderRequest, lc, output);
 }
 
 }

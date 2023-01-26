@@ -21,7 +21,7 @@
 namespace ark {
 
 //[[script::bindings::extends(Renderer)]]
-class ARK_API Text : public Renderer, public Updatable {
+class ARK_API Text : public Renderer {
 public:
 [[deprecated]]
 //  [[script::bindings::auto]]
@@ -31,7 +31,7 @@ public:
     Text(const sp<LayerContext>& layer, sp<StringVar> text = nullptr, float textScale = 1.0f, float letterSpacing = 0.0f, float lineHeight = 0.0f, float lineIndent = 0.0f);
 //  [[script::bindings::auto]]
     Text(sp<RenderLayer> renderLayer, sp<StringVar> text = nullptr, float textScale = 1.0f, float letterSpacing = 0.0f, float lineHeight = 0.0f, float lineIndent = 0.0f);
-    Text(const BeanFactory& factory, sp<RenderLayer> renderLayer, const sp<LayerContext>& layerContext, sp<StringVar> text, const sp<GlyphMaker>& glyphMaker, float textScale, float letterSpacing, float lineHeight, float lineIndent);
+    Text(sp<RenderLayer> renderLayer, sp<LayerContext> layerContext, sp<StringVar> text, sp<GlyphMaker> glyphMaker, float textScale, float letterSpacing, float lineHeight, float lineIndent);
 
 //  [[script::bindings::property]]
     const std::vector<sp<RenderObject>>& contents() const;
@@ -52,18 +52,18 @@ public:
 //  [[script::bindings::property]]
     const std::wstring& text() const;
 //  [[script::bindings::property]]
-    void setText(const std::wstring& text);
+    void setText(std::wstring text);
 
 //  [[script::bindings::auto]]
     void show(sp<Boolean> disposed = nullptr);
 
 //  [[script::bindings::auto]]
-    void setRichText(const std::wstring& richText, const Scope& args);
+    void setRichText(std::wstring richText, const sp<ResourceLoader>& resourceLoader = nullptr, const Scope& args = Scope());
 
     [[deprecated]]
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
-    virtual bool update(uint64_t timestamp) override;
+    bool update(uint64_t timestamp) const;
 
 //[[plugin::builder]]
     class BUILDER : public Builder<Text> {
@@ -88,17 +88,6 @@ public:
 private:
     typedef std::vector<sp<Glyph>> GlyphContents;
 
-    void createContent();
-    void createRichContent(const Scope& args);
-    float doLayoutWithBoundary(GlyphContents& cm, float& flowx, float& flowy, float boundary);
-    float doLayoutWithoutBoundary(GlyphContents& cm, float& flowx, float flowy);
-
-    float doLayoutContent(GlyphContents& cm, float& flowx, float& flowy, float boundary);
-    float doCreateRichContent(GlyphContents& cm, GlyphMaker& gm, const document& richtext, BeanFactory& factory, const Scope& args, float& flowx, float& flowy, float boundary);
-    void layoutContent();
-
-    void createLayerContent(float width, float height);
-
     struct LayoutChar {
         LayoutChar(const Metrics& metrics, float widthIntegral, bool isCJK, bool isWordBreak, bool isLineBreak);
 
@@ -109,61 +98,80 @@ private:
         bool _is_line_break;
     };
 
-    void place(GlyphContents& cm, const std::vector<LayoutChar>& layouts, size_t begin, size_t end, float& flowx, float flowy);
-    void placeOne(Glyph& cm, const Metrics& metrics, float& flowx, float flowy, float* fontHeight = nullptr);
-
-    void nextLine(float fontHeight, float& flowx, float& flowy) const;
-    float getFlowY() const;
-
-    std::vector<LayoutChar> getCharacterMetrics(const GlyphContents& glyphs) const;
-    bool isCJK(int32_t c) const;
-    bool isWordBreaker(wchar_t c) const;
-
-    GlyphContents makeGlyphs(GlyphMaker& gm, const std::wstring& text);
-
-    float getLayoutBoundary() const;
+    static bool isCJK(int32_t c);
+    static bool isWordBreaker(wchar_t c);
+    static GlyphContents makeGlyphs(GlyphMaker& gm, const std::wstring& text);
 
     class Content : public RenderableBatch {
     public:
-        Content();
+        Content(const sp<LayerContext>& layerContext, sp<StringVar> string, sp<GlyphMaker> glyphMaker, sp<ModelLoader> modelLoader, float textScale, float letterSpacing, float lineHeight, float lineIndent);
 
         virtual bool preSnapshot(const RenderRequest& renderRequest, LayerContext& lc) override;
         virtual void snapshot(const RenderRequest& renderRequest, const LayerContext& lc, RenderLayerSnapshot& output) override;
 
         SafeVar<Vec3>& position();
 
+        bool update(const sp<LayerContext>& layerContext, uint64_t timestamp);
+
+        void setText(const sp<LayerContext>& layerContext, std::wstring text);
+        void setRichText(const sp<LayerContext>& layerContext, std::wstring richText, const sp<ResourceLoader>& resourceLoader, const Scope& args);
+
         const std::vector<sp<RenderObject>>& renderObjects() const;
         void setRenderObjects(std::vector<sp<RenderObject>> renderObjects);
 
+        void layoutContent();
+
+        void createContent(const sp<LayerContext>& layerContext);
+        void createRichContent(const sp<LayerContext>& layerContext, const Scope& args, BeanFactory& factory);
+
     private:
+        float doLayoutContent(GlyphContents& cm, float& flowx, float& flowy, float boundary);
+        float doCreateRichContent(GlyphContents& cm, GlyphMaker& gm, const document& richtext, BeanFactory& factory, const Scope& args, float& flowx, float& flowy, float boundary);
+        float doLayoutWithBoundary(GlyphContents& cm, float& flowx, float& flowy, float boundary);
+        float doLayoutWithoutBoundary(GlyphContents& cm, float& flowx, float flowy);
+
+        void createLayerContent(const sp<LayerContext>& layerContext, float width, float height);
+        void place(GlyphContents& cm, const std::vector<Text::LayoutChar>& layouts, size_t begin, size_t end, float& flowx, float flowy);
+        void placeOne(Glyph& glyph, const Metrics& metrics, float& flowx, float flowy, float* fontHeight = nullptr);
+
+        void nextLine(float fontHeight, float& flowx, float& flowy) const;
+
+        float getFlowY() const;
+        float getLayoutBoundary() const;
+
+        std::vector<Text::LayoutChar> getCharacterMetrics(const GlyphContents& glyphs) const;
+
+    private:
+        sp<StringVar> _string;
+        sp<GlyphMaker> _glyph_maker;
+        sp<ModelLoader> _model_loader;
+
+        float _text_scale;
+        float _letter_spacing;
+        float _layout_direction;
+        float _line_height;
+        float _line_indent;
+
+        sp<Size> _size;
+        sp<Size> _layout_size;
+
+        std::wstring _text_unicode;
+        std::vector<sp<Glyph>> _glyphs;
+
         SafeVar<Vec3> _position;
         std::vector<sp<RenderObject>> _render_objects;
         std::vector<Renderable::StateBits> _render_object_states;
 
+        std::vector<sp<RenderablePassive>> _renderables;
+
         bool _needs_reload;
+
+        friend class Text;
     };
 
 private:
-    BeanFactoryWeakRef _bean_factory;
     sp<RenderLayer> _render_layer;
     sp<LayerContext> _layer_context;
-    sp<StringVar> _text;
-    float _text_scale;
-    sp<GlyphMaker> _glyph_maker;
-
-    std::vector<sp<Glyph>> _glyphs;
-    std::vector<sp<RenderablePassive>> _renderables;
-    std::wstring _text_unicode;
-
-    float _letter_spacing;
-    float _layout_direction;
-    float _line_height;
-    float _line_indent;
-
-    sp<ModelLoader> _model_loader;
-
-    sp<Size> _size;
-    sp<Size> _layout_size;
 
     sp<Content> _content;
 };

@@ -20,6 +20,7 @@ namespace ark {
 
 class ARK_API Tilemap {
 public:
+[[deprecated]]
 //  [[script::bindings::enumeration]]
     enum LayerFlag {
         LAYER_FLAG_COLLIDABLE = 1,
@@ -39,7 +40,7 @@ public:
     const sp<Storage>& storage() const;
 
 // [[script::bindings::auto]]
-    sp<TilemapLayer> makeLayer(const String& name, uint32_t rowCount, uint32_t colCount, sp<Vec3> position = nullptr, sp<Vec3> scroller = nullptr, sp<Boolean> visible = nullptr, float zorder = 0, Tilemap::LayerFlag layerFlag = Tilemap::LAYER_FLAG_DEFAULT);
+    sp<TilemapLayer> makeLayer(const String& name, uint32_t colCount, uint32_t rowCount, sp<Vec3> position = nullptr, sp<Vec3> scroller = nullptr, sp<Boolean> visible = nullptr, float zorder = 0, Tilemap::LayerFlag layerFlag = Tilemap::LAYER_FLAG_DEFAULT);
 
 // [[script::bindings::auto]]
     void clear();

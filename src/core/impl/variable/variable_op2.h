@@ -21,7 +21,9 @@ public:
     }
 
     virtual OPType val() override {
-        return _op2(_val_sfinae<T, LTYPE>(_lv, nullptr), _val_sfinae<U, RTYPE>(_rv, nullptr));
+        auto lv = _val_sfinae<T, LTYPE>(_lv, nullptr);
+        auto rv = _val_sfinae<U, RTYPE>(_rv, nullptr);
+        return _op2(std::move(lv), std::move(rv));
     }
 
     virtual bool update(uint64_t timestamp) override {

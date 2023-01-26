@@ -45,19 +45,19 @@ BroadPhrase::Result BroadPhraseTilemap::search(const V3& position, const V3& siz
     const V2 sizeHalf = size / V2(2.0, 2.0);
     const Rect aabb(V2(position) - sizeHalf, V2(position) + sizeHalf);
     const V2 tileSize(static_cast<float>(_tilemap->tileset()->tileWidth()), static_cast<float>(_tilemap->tileset()->tileHeight()));
-    for(const sp<TilemapLayer>& i : _tilemap->layers())
-        if(i->flags() & Tilemap::LAYER_FLAG_COLLIDABLE)
+    for(const TilemapLayer& i : _tilemap->layers())
+        if(i.flags() & Tilemap::LAYER_FLAG_COLLIDABLE)
         {
             V3 selectionPoint;
             RectI selectionRange;
-            int32_t layerId = static_cast<int32_t>(i->name().hash());
-            if(i->getSelectionTileRange(aabb, selectionPoint, selectionRange))
+            int32_t layerId = static_cast<int32_t>(i.name().hash());
+            if(i.getSelectionTileRange(aabb, selectionPoint, selectionRange))
                 for(int32_t j = selectionRange.left(); j < selectionRange.right(); ++j)
                 {
                     float px = selectionPoint.x() + (j - selectionRange.left()) * tileSize.x() + tileSize.x() / 2;
                     for(int32_t k = selectionRange.top(); k < selectionRange.bottom(); ++k)
                     {
-                        const sp<Tile>& tile = i->getTile(k, j);
+                        const sp<Tile>& tile = i.getTile(j, k);
                         if(tile)
                         {
                             int32_t shapeId = tile->shapeId();
@@ -66,7 +66,7 @@ BroadPhrase::Result BroadPhraseTilemap::search(const V3& position, const V3& siz
                                 int32_t candidateId = toCandidateId(layerId, k, j);
                                 if(candidateIdSet.find(candidateId) != candidateIdSet.end())
                                 {
-                                    LOGW("Duplicated candidate found, this may be caused by duplidated layer name \"%s\"", i->name().c_str());
+                                    LOGW("Duplicated candidate found, this may be caused by duplidated layer name \"%s\"", i.name().c_str());
                                     continue;
                                 }
                                 candidateIdSet.insert(candidateId);
@@ -91,7 +91,7 @@ BroadPhrase::Result BroadPhraseTilemap::rayCast(const V3& from, const V3& to)
             Rect intersection;
             float tilemapLayerWidth = tileWidth * static_cast<float>(i->colCount());
             float tilemapLayerHeight = tileHeight * static_cast<float>(i->rowCount());
-            const V2 tilemapPosition = i->position()->val();
+            const V2 tilemapPosition = i->position().val();
             const Rect tilemapLayerAabb(tilemapPosition, tilemapPosition + V2(tilemapLayerWidth, tilemapLayerHeight));
             if(tilemapLayerAabb.intersect(aabb, intersection))
             {
@@ -142,7 +142,7 @@ void BroadPhraseTilemap::addCandidate(const TilemapLayer& tilemapLayer, std::set
         const int32_t candidateId = toCandidateId(layerId, row, col);
         if(candidateIdSet.find(candidateId) == candidateIdSet.end())
         {
-            const sp<Tile>& tile = tilemapLayer.getTile(static_cast<uint32_t>(row), static_cast<uint32_t>(col));
+            const sp<Tile>& tile = tilemapLayer.getTile(static_cast<uint32_t>(col), static_cast<uint32_t>(row));
             candidateIdSet.insert(candidateId);
             if(tile)
             {

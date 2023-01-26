@@ -57,7 +57,7 @@ public:
     sp<Numeric> durationUntil(const sp<Numeric>& until) const;
 
 //  [[script::bindings::auto]]
-    sp<Boolean> timeout(float seconds) const;
+    sp<Boolean> timeout(float seconds, bool timeoutValue = true) const;
 
 //  [[script::bindings::auto]]
     void pause() const;

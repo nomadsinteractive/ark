@@ -6,8 +6,8 @@
 
 namespace ark {
 
-Command::Command(StateMachine& stateMachine, sp<Runnable> onActivate, sp<CommandGroup> commandGroup)
-    : _state_machine(stateMachine), _command_group(std::move(commandGroup)), _state_holder(sp<StateHolder>::make(std::move(onActivate), nullptr))
+Command::Command(StateMachine& stateMachine, sp<Runnable> onActivate, sp<Runnable> onDeactivate, sp<CommandGroup> commandGroup)
+    : _state_machine(stateMachine), _command_group(std::move(commandGroup)), _state_holder(sp<StateHolder>::make(std::move(onActivate), std::move(onDeactivate)))
 {
     if(_command_group)
         _command_group->_commands.push_back(this);

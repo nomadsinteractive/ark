@@ -16,7 +16,7 @@ public:
     StateMachine();
 
 //  [[script::bindings::auto]]
-    sp<Command> addCommand(const sp<Runnable>& onActive = nullptr, const sp<CommandGroup>& commandGroup = nullptr);
+    sp<Command> addCommand(sp<Runnable> onActivate = nullptr, sp<Runnable> onDeactivate = nullptr, sp<CommandGroup> commandGroup = nullptr);
 
 //  [[script::bindings::auto]]
     sp<State> addState(const sp<Runnable>& onActivate = nullptr, const sp<State>& fallback = nullptr);

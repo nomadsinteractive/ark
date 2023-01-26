@@ -54,6 +54,7 @@ private:
 
 }
 
+[[deprecated]]
 static void updateKeyStatus(ImGuiIO& io, ImGuiKey_ keycode, bool isKeyDown) {
     io.KeyMap[keycode] = isKeyDown ? keycode : -1;
     io.KeysDown[keycode] = isKeyDown;
@@ -125,20 +126,18 @@ void RendererImgui::addRenderer(const sp<Renderer>& renderer)
 
 bool RendererImgui::onEvent(const Event& event)
 {
+    static const int32_t MouseIndex[5] = {0, 2, 1, 0, 0};
     ImGuiIO& io = ImGui::GetIO();
-    const size_t MouseIndex[5] = {0, 2, 1, 0, 0};
     switch(event.action())
     {
-    case Event::ACTION_DOWN:
-        io.MouseDown[MouseIndex[event.button() - Event::BUTTON_MOUSE_LEFT]] = true;
-    case Event::ACTION_MOVE:
-        io.MousePos = ImVec2(event.x(), io.DisplaySize.y - event.y());
-        break;
     case Event::ACTION_UP:
-        io.MouseDown[MouseIndex[event.button() - Event::BUTTON_MOUSE_LEFT]] = false;
+    case Event::ACTION_DOWN:
+        io.AddMouseButtonEvent(MouseIndex[event.button() - Event::BUTTON_MOUSE_LEFT], event.action() == Event::ACTION_DOWN);
+    case Event::ACTION_MOVE:
+        io.AddMousePosEvent(event.x(), io.DisplaySize.y - event.y());
         break;
     case Event::ACTION_WHEEL:
-        io.MouseWheel = event.x();
+        io.AddMouseWheelEvent(0, event.x());
         break;
     case Event::ACTION_KEY_DOWN:
     case Event::ACTION_KEY_UP:
@@ -173,7 +172,8 @@ bool RendererImgui::onEvent(const Event& event)
                 case Event::CODE_KEYBOARD_DELETE:
                 case Event::CODE_KEYBOARD_BACKSPACE:
                 case Event::CODE_KEYBOARD_ENTER:
-                    updateKeyStatus(io, toImGuiKey(code), isKeyDown);
+                    io.AddKeyEvent(toImGuiKey(code), isKeyDown);
+//                    updateKeyStatus(io, toImGuiKey(code), isKeyDown);
                     break;
                 default:
                     break;

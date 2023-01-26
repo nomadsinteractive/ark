@@ -11,9 +11,9 @@ StateMachine::StateMachine()
 {
 }
 
-sp<Command> StateMachine::addCommand(const sp<Runnable>& onActive, const sp<CommandGroup>& commandGroup)
+sp<Command> StateMachine::addCommand(sp<Runnable> onActivate, sp<Runnable> onDeactivate, sp<CommandGroup> commandGroup)
 {
-    sp<Command> cmd = sp<Command>::make(*this, onActive, commandGroup);
+    sp<Command> cmd = sp<Command>::make(*this, std::move(onActivate), std::move(onDeactivate), std::move(commandGroup));
     _commands.push_back(cmd);
     return cmd;
 }

@@ -165,9 +165,9 @@ sp<Numeric> Clock::durationUntil(const sp<Numeric>& until) const
     return Math::min(duration(), until);
 }
 
-sp<Boolean> Clock::timeout(float seconds) const
+sp<Boolean> Clock::timeout(float seconds, bool timeoutValue) const
 {
-    return sp<BooleanByTimeout>::make(duration(), seconds);
+    return sp<BooleanByTimeout>::make(duration(), seconds, timeoutValue);
 }
 
 void Clock::pause() const

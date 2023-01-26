@@ -1413,7 +1413,7 @@ class Clock:
     def duration(self) -> 'Numeric':
         pass
 
-    def timeout(self, seconds: float) -> 'Boolean':
+    def timeout(self, seconds: float, timeout_value: bool = True) -> 'Boolean':
         pass
 
     def pause(self):
@@ -1825,19 +1825,25 @@ class TilemapLayer(Renderer):
     def tileset(self) -> Tileset:
         pass
 
-    def get_tile(self, row: int, col: int) -> Optional[Tile]:
+    def get_tile(self, col: int, row: int) -> Optional[Tile]:
         pass
 
     def get_tile_rect(self, rect: TYPE_RECTI) -> List[int]:
         pass
 
-    def set_tile(self, row: int, col: int, tile: Union[int, RenderObject, Tile]):
+    def set_tile(self, col: int, row: int, tile: Union[int, RenderObject, Tile]):
         pass
 
-    def copy_tiles(self, tiles: List[int], dest: TYPE_RECTI):
+    def set_tile_rect(self, tiles: List[int], dest: TYPE_RECTI):
         pass
 
     def foreach_tile(self, callback: Callable[[int, int, Tile], bool]):
+        pass
+
+    def resize(self, col_count: int, row_count: int, offset_x: int = 0, offset_y: int = 0):
+        pass
+
+    def clear(self):
         pass
 
 
@@ -1874,7 +1880,7 @@ class Tilemap:
     def clear(self):
         pass
 
-    def make_layer(self, name: str, row_count: int, col_count: int, position: Optional[TYPE_VEC3] = None, scroller: Optional[TYPE_VEC3] = None,
+    def make_layer(self, name: str, col_count: int, row_count: int, position: Optional[TYPE_VEC3] = None, scroller: Optional[TYPE_VEC3] = None,
                    visible: Optional[Boolean] = None, zorder: float = 0, layer_flag: int = 0) -> TilemapLayer:
         pass
 
@@ -2231,7 +2237,7 @@ class StateMachine:
     def __init__(self):
         pass
 
-    def add_command(self, on_active: Optional[Callable] = None, command_group: CommandGroup = None) -> Command:
+    def add_command(self, on_activate: Optional[Callable] = None, on_deactivate: Optional[Callable] = None, command_group: CommandGroup = None) -> Command:
         pass
 
     def add_state(self, on_active: Optional[Callable] = None, fallback_state: Optional[State] = None) -> State:

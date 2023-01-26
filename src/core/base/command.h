@@ -31,7 +31,7 @@ public:
     };
 
 public:
-    Command(StateMachine& stateMachine, sp<Runnable> onActivate, sp<CommandGroup> commandGroup);
+    Command(StateMachine& stateMachine, sp<Runnable> onActivate, sp<Runnable> onDeactivate, sp<CommandGroup> commandGroup);
 
 //  [[script::bindings::auto]]
     void activate();
