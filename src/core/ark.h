@@ -19,22 +19,22 @@ namespace ark {
 class ARK_API Ark {
 public:
     enum RendererVersion {
-        AUTO = 0,
-        OPENGL_20 = 20,
-        OPENGL_21 = 21,
-        OPENGL_30 = 30,
-        OPENGL_31 = 31,
-        OPENGL_32 = 32,
-        OPENGL_33 = 33,
-        OPENGL_40 = 40,
-        OPENGL_41 = 41,
-        OPENGL_42 = 42,
-        OPENGL_43 = 43,
-        OPENGL_44 = 44,
-        OPENGL_45 = 45,
-        OPENGL_46 = 46,
-        VULKAN_11 = 111,
-        VULKAN_12 = 112
+        RENDERER_VERSION_AUTO = 0,
+        RENDERER_VERSION_OPENGL_20 = 20,
+        RENDERER_VERSION_OPENGL_21 = 21,
+        RENDERER_VERSION_OPENGL_30 = 30,
+        RENDERER_VERSION_OPENGL_31 = 31,
+        RENDERER_VERSION_OPENGL_32 = 32,
+        RENDERER_VERSION_OPENGL_33 = 33,
+        RENDERER_VERSION_OPENGL_40 = 40,
+        RENDERER_VERSION_OPENGL_41 = 41,
+        RENDERER_VERSION_OPENGL_42 = 42,
+        RENDERER_VERSION_OPENGL_43 = 43,
+        RENDERER_VERSION_OPENGL_44 = 44,
+        RENDERER_VERSION_OPENGL_45 = 45,
+        RENDERER_VERSION_OPENGL_46 = 46,
+        RENDERER_VERSION_VULKAN_11 = 111,
+        RENDERER_VERSION_VULKAN_12 = 112
     };
 
     enum RendererCoordinateSystem {
@@ -85,14 +85,16 @@ public:
     int32_t runTests(int argc, const char* argv[]) const;
 
 private:
-    class ArkAssetBundle;
-
-    sp<ApplicationContext> createApplicationContext(const ApplicationManifest& manifest, const sp<ApplicationBundle>& resource, const sp<RenderEngine>& renderEngine);
     sp<RenderEngine> createRenderEngine(RendererVersion version, RendererCoordinateSystem coordinateSystem, const sp<ApplicationBundle>& appResource);
+
+    sp<ApplicationContext> createApplicationContext(const ApplicationManifest& manifest, sp<ApplicationBundle> resource, sp<RenderEngine> renderEngine);
+    sp<RenderEngine> doCreateRenderEngine(RendererVersion version, RendererCoordinateSystem coordinateSystem, const sp<ApplicationBundle>& appResource);
 
     void loadPlugins(const ApplicationManifest& manifest) const;
 
 private:
+    class ArkAssetBundle;
+
     static Ark* _instance;
     static std::list<Ark*> _instance_stack;
 

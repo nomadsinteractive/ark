@@ -8,6 +8,7 @@ namespace gles20 {
 
 class SnippetFactoryGLES20 : public SnippetFactory {
 public:
+[[deprecated]]
     virtual sp<Snippet> createCoreSnippet() override;
 };
 

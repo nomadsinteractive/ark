@@ -85,6 +85,11 @@ String Platform::getRealPath(const String& path)
     return path;
 }
 
+std::vector<Ark::RendererVersion> Platform::getRendererVersionPreferences()
+{
+    return {Ark::RENDERER_VERSION_VULKAN_12, Ark::RENDERER_VERSION_OPENGL_41};
+}
+
 String Platform::getUserStoragePath(const String& path)
 {
     return Strings::sprintf("%s/Library/Application Support/%s", getenv("HOME"), path.c_str());

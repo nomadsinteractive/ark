@@ -46,7 +46,7 @@ void ApplicationManifest::load(const String& src)
         if(resolution)
             _renderer._resolution = sp<Size>::make(Documents::ensureAttribute<float>(resolution, Constants::Attributes::WIDTH),
                                                    Documents::ensureAttribute<float>(resolution, Constants::Attributes::HEIGHT));
-        _renderer._version = Documents::getAttribute<Ark::RendererVersion>(renderer, "version", Ark::AUTO);
+        _renderer._version = Documents::getAttribute<Ark::RendererVersion>(renderer, "version", Ark::RENDERER_VERSION_AUTO);
         _renderer._coordinate_system = Documents::getAttribute<Ark::RendererCoordinateSystem>(renderer, "coordinate-system", Ark::COORDINATE_SYSTEM_RHS);
     }
 
@@ -136,7 +136,7 @@ uint32_t ApplicationManifest::toSize(const String& sizestr) const
 }
 
 ApplicationManifest::Renderer::Renderer()
-    : _version(Ark::AUTO)
+    : _version(Ark::RENDERER_VERSION_AUTO)
 {
 }
 

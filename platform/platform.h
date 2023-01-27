@@ -27,6 +27,7 @@ public:
     static String getDefaultFontDirectory();
     static String getExecutablePath();
     static String getRealPath(const String& path);
+    static std::vector<Ark::RendererVersion> getRendererVersionPreferences();
 
     static void glInitialize();
     static void vkInitialize();

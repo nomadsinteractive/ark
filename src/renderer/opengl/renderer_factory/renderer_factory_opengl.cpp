@@ -43,7 +43,7 @@ RendererFactoryOpenGL::RendererFactoryOpenGL(const sp<Recycler>& recycler)
 sp<RenderEngineContext> RendererFactoryOpenGL::initialize(Ark::RendererVersion version)
 {
     const sp<RenderEngineContext> renderContext = sp<RenderEngineContext>::make(version, Ark::COORDINATE_SYSTEM_RHS, Viewport(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f));
-    if(version != Ark::AUTO)
+    if(version != Ark::RENDERER_VERSION_AUTO)
         setVersion(version, renderContext);
     return renderContext;
 }
@@ -54,7 +54,7 @@ void RendererFactoryOpenGL::onSurfaceCreated(RenderEngineContext& glContext)
 
     Platform::glInitialize();
 
-    if(glContext.version() == Ark::AUTO)
+    if(glContext.version() == Ark::RENDERER_VERSION_AUTO)
     {
         int glMajorVersion = 0, glMinorVersion = 0;
         glGetIntegerv(GL_MAJOR_VERSION, &glMajorVersion);
@@ -62,7 +62,7 @@ void RendererFactoryOpenGL::onSurfaceCreated(RenderEngineContext& glContext)
         if(glMajorVersion != 0)
             setVersion(static_cast<Ark::RendererVersion>(glMajorVersion * 10 + glMinorVersion), glContext);
         else
-            setVersion(Ark::OPENGL_20, glContext);
+            setVersion(Ark::RENDERER_VERSION_OPENGL_20, glContext);
     }
 }
 
@@ -70,7 +70,7 @@ void RendererFactoryOpenGL::setVersion(Ark::RendererVersion version, RenderEngin
 {
     LOGD("Choose GLVersion = %d", version);
     std::map<String, String>& annotations = glContext.annotations();
-    if(version == Ark::OPENGL_20 || version == Ark::OPENGL_21)
+    if(version == Ark::RENDERER_VERSION_OPENGL_20 || version == Ark::RENDERER_VERSION_OPENGL_21)
     {
         annotations["vert.in"] = "attribute";
         annotations["vert.out"] = "varying";

@@ -17,7 +17,7 @@ TYPE_DEFINED_OBJ = ('V2', 'V3', 'V4', 'M3', 'M4', 'Rect', 'RectI', 'RectF')
 TYPE_DEFINED_SP = ('document', 'element', 'attribute', 'bitmap')
 
 
-def get_param_and_paths() -> tuple[dict[str, str], list[str]]:
+def get_param_and_paths() -> 'tuple[dict[str, str], list[str]]':
     global _opts, _paths, _params
 
     if _opts is None and _paths is None:

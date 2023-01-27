@@ -64,24 +64,24 @@ const V2& RenderEngineContext::displayUnit() const
 uint32_t RenderEngineContext::getGLSLVersion() const
 {
     switch(_version) {
-    case Ark::OPENGL_20:
+    case Ark::RENDERER_VERSION_OPENGL_20:
         return 110;
-    case Ark::OPENGL_21:
+    case Ark::RENDERER_VERSION_OPENGL_21:
         return 120;
-    case Ark::OPENGL_30:
+    case Ark::RENDERER_VERSION_OPENGL_30:
         return 130;
-    case Ark::OPENGL_31:
+    case Ark::RENDERER_VERSION_OPENGL_31:
         return 140;
-    case Ark::OPENGL_32:
+    case Ark::RENDERER_VERSION_OPENGL_32:
         return 150;
-    case Ark::OPENGL_33:
-    case Ark::OPENGL_40:
-    case Ark::OPENGL_41:
-    case Ark::OPENGL_42:
-    case Ark::OPENGL_43:
-    case Ark::OPENGL_44:
-    case Ark::OPENGL_45:
-    case Ark::OPENGL_46:
+    case Ark::RENDERER_VERSION_OPENGL_33:
+    case Ark::RENDERER_VERSION_OPENGL_40:
+    case Ark::RENDERER_VERSION_OPENGL_41:
+    case Ark::RENDERER_VERSION_OPENGL_42:
+    case Ark::RENDERER_VERSION_OPENGL_43:
+    case Ark::RENDERER_VERSION_OPENGL_44:
+    case Ark::RENDERER_VERSION_OPENGL_45:
+    case Ark::RENDERER_VERSION_OPENGL_46:
         return static_cast<uint32_t>(_version) * 10;
     default:
         break;

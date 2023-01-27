@@ -55,14 +55,26 @@ private:
 }
 
 [[deprecated]]
-static void updateKeyStatus(ImGuiIO& io, ImGuiKey_ keycode, bool isKeyDown) {
+static void updateKeyStatus(ImGuiIO& io, ImGuiKey keycode, bool isKeyDown) {
     io.KeyMap[keycode] = isKeyDown ? keycode : -1;
     io.KeysDown[keycode] = isKeyDown;
 }
 
-static ImGuiKey_ toImGuiKey(Event::Code code) {
+static ImGuiKey toImGuiKey(Event::Code code) {
     switch(code)
     {
+        case Event::CODE_KEYBOARD_LSHIFT:
+            return ImGuiKey_LeftShift;
+        case Event::CODE_KEYBOARD_RSHIFT:
+            return ImGuiKey_RightShift;
+        case Event::CODE_KEYBOARD_LCTRL:
+            return ImGuiKey_LeftCtrl;
+        case Event::CODE_KEYBOARD_RCTRL:
+            return ImGuiKey_RightCtrl;
+        case Event::CODE_KEYBOARD_LALT:
+            return ImGuiKey_LeftAlt;
+        case Event::CODE_KEYBOARD_RALT:
+            return ImGuiKey_RightCtrl;
         case Event::CODE_KEYBOARD_TAB:
             return ImGuiKey_Tab;
         case Event::CODE_KEYBOARD_A:

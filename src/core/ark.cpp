@@ -53,7 +53,6 @@ limitations under the License.
 
 #include "generated/ark_bootstrap.h"
 #include "generated/application_plugin.h"
-#include "generated/framework_plugin.h"
 
 #include "platform/platform.h"
 
@@ -204,11 +203,11 @@ void Ark::initialize(const sp<ApplicationManifest>& manifest)
 
     loadPlugins(_manifest);
 
-    const sp<BeanFactory> factory = createBeanFactory(sp<DictionaryImpl<document>>::make());
+    sp<BeanFactory> factory = createBeanFactory(sp<DictionaryImpl<document>>::make());
     _asset_bundle = sp<ArkAssetBundle>::make(AssetBundleUtil::createBuiltInAssetBundle(_manifest->assetDir(), _manifest->appDir()), factory, _manifest->assets());
-    const sp<ApplicationBundle> appResource = sp<ApplicationBundle>::make(_asset_bundle->getAssetBundle("/"));
-    const sp<RenderEngine> renderEngine = createRenderEngine(_manifest->renderer()._version, _manifest->renderer()._coordinate_system, appResource);
-    _application_context = createApplicationContext(_manifest, appResource, renderEngine);
+    sp<ApplicationBundle> appResource = sp<ApplicationBundle>::make(_asset_bundle->getAssetBundle("/"));
+    sp<RenderEngine> renderEngine = createRenderEngine(_manifest->renderer()._version, _manifest->renderer()._coordinate_system, appResource);
+    _application_context = createApplicationContext(_manifest, std::move(appResource), std::move(renderEngine));
 }
 
 sp<BeanFactory> Ark::createBeanFactory(const String& src) const
@@ -293,10 +292,25 @@ op<ApplicationProfiler::Logger> Ark::makeProfilerLogger(const char* func, const 
     return _application_profiler ? _application_profiler->makeLogger(func, filename, lineno, name) : op<ApplicationProfiler::Logger>();
 }
 
-sp<ApplicationContext> Ark::createApplicationContext(const ApplicationManifest& manifest, const sp<ApplicationBundle>& appResource, const sp<RenderEngine>& renderEngine)
+sp<RenderEngine> Ark::createRenderEngine(RendererVersion version, RendererCoordinateSystem coordinateSystem, const sp<ApplicationBundle>& appResource)
+{
+    if(version != Ark::RENDERER_VERSION_AUTO)
+        return doCreateRenderEngine(version, coordinateSystem, appResource);
+
+    for(const Ark::RendererVersion i : Platform::getRendererVersionPreferences())
+    {
+        sp<RenderEngine> renderEngine = doCreateRenderEngine(i, coordinateSystem, appResource);
+        if(renderEngine)
+            return renderEngine;
+    }
+    FATAL("Cannot create prefered RenderEngine");
+    return nullptr;
+}
+
+sp<ApplicationContext> Ark::createApplicationContext(const ApplicationManifest& manifest, sp<ApplicationBundle> appResource, sp<RenderEngine> renderEngine)
 {
     const Global<PluginManager> pluginManager;
-    const sp<ApplicationContext> applicationContext = sp<ApplicationContext>::make(appResource, renderEngine);
+    const sp<ApplicationContext> applicationContext = sp<ApplicationContext>::make(std::move(appResource), std::move(renderEngine));
     pluginManager->addPlugin(sp<ApplicationPlugin>::make(applicationContext));
     applicationContext->initResourceLoader(manifest.resourceLoader());
     _application_profiler = applicationContext->resourceLoader()->beanFactory().build<ApplicationProfiler>(document::make("root"), Scope());
@@ -304,28 +318,28 @@ sp<ApplicationContext> Ark::createApplicationContext(const ApplicationManifest& 
     return applicationContext;
 }
 
-sp<RenderEngine> Ark::createRenderEngine(RendererVersion version, RendererCoordinateSystem coordinateSystem, const sp<ApplicationBundle>& appResource)
+sp<RenderEngine> Ark::doCreateRenderEngine(RendererVersion version, RendererCoordinateSystem coordinateSystem, const sp<ApplicationBundle>& appResource)
 {
     switch(version) {
-    case AUTO:
-    case OPENGL_20:
-    case OPENGL_21:
-    case OPENGL_30:
-    case OPENGL_31:
-    case OPENGL_32:
-    case OPENGL_33:
-    case OPENGL_40:
-    case OPENGL_41:
-    case OPENGL_42:
-    case OPENGL_43:
-    case OPENGL_44:
-    case OPENGL_45:
-    case OPENGL_46:
+    case RENDERER_VERSION_AUTO:
+    case RENDERER_VERSION_OPENGL_20:
+    case RENDERER_VERSION_OPENGL_21:
+    case RENDERER_VERSION_OPENGL_30:
+    case RENDERER_VERSION_OPENGL_31:
+    case RENDERER_VERSION_OPENGL_32:
+    case RENDERER_VERSION_OPENGL_33:
+    case RENDERER_VERSION_OPENGL_40:
+    case RENDERER_VERSION_OPENGL_41:
+    case RENDERER_VERSION_OPENGL_42:
+    case RENDERER_VERSION_OPENGL_43:
+    case RENDERER_VERSION_OPENGL_44:
+    case RENDERER_VERSION_OPENGL_45:
+    case RENDERER_VERSION_OPENGL_46:
 #ifdef ARK_USE_OPEN_GL
         return sp<RenderEngine>::make(version, coordinateSystem, sp<opengl::RendererFactoryOpenGL>::make(appResource->recycler()));
 #endif
-    case VULKAN_11:
-    case VULKAN_12:
+    case RENDERER_VERSION_VULKAN_11:
+    case RENDERER_VERSION_VULKAN_12:
 #ifdef ARK_USE_VULKAN
         return sp<RenderEngine>::make(version, coordinateSystem, sp<vulkan::RendererFactoryVulkan>::make(appResource->recycler()));
 #endif

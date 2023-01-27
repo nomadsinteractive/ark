@@ -60,7 +60,7 @@ template<> ARK_API Ark::RendererVersion StringConvert::to<String, Ark::RendererV
     if(version.startsWith("vulkan_"))
         return static_cast<Ark::RendererVersion>(atoi(version.c_str() + 7) + 100);
     WARN(str == "auto", "Unknow RendererVersion: \"%s, supported values are [\"opengl_21\", \"opengl_46\", \"vulkan_11\", ...]", str.c_str());
-    return Ark::AUTO;
+    return Ark::RENDERER_VERSION_AUTO;
 }
 
 template<> ARK_API Ark::RendererCoordinateSystem StringConvert::to<String, Ark::RendererCoordinateSystem>(const String& str)
