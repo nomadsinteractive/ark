@@ -10,7 +10,7 @@ void TransformSimple3D::snapshot(const Transform& transform, const V3& postTrans
 {
     Snapshot* data = snapshot.makeData<Snapshot>();
     data->scale = transform._scale.val();
-    data->preTranslate = transform._pivot.val();
+    data->preTranslate = transform._translation.val();
     data->postTranslate = postTranslate;
 }
 

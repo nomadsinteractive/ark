@@ -116,9 +116,9 @@ public:
     static sp<Vec3> lerp(const sp<Vec3>& self, const sp<Vec3>& b, sp<Numeric> t = nullptr);
 
 //  [[script::bindings::classmethod]]
-    static sp<Vec3> sod(sp<Vec3> self, float k, float z, float r, sp<Numeric> t = nullptr);
+    static sp<Vec3> sod(sp<Vec3> self, const V3& d0, float k, float z, float r, sp<Numeric> t = nullptr);
 //  [[script::bindings::classmethod]]
-    static sp<Vec3> dye(sp<Vec3> self, sp<Boolean> c, String message);
+    static sp<Vec3> dye(sp<Vec3> self, sp<Boolean> c = nullptr, String message = "");
 
 //  [[script::bindings::classmethod]]
     static sp<Vec3> normalize(const sp<Vec3>& self);

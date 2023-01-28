@@ -89,7 +89,7 @@ private:
 
     class Stub : public RenderableBatch {
     public:
-        Stub(size_t colCount, size_t rowCount, sp<Tileset> tileset, SafeVar<Vec3> position);
+        Stub(size_t colCount, size_t rowCount, sp<Tileset> tileset, SafeVar<Vec3> position, float zorder);
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Stub);
 
         virtual bool preSnapshot(const RenderRequest& renderRequest, LayerContext& lc) override;
@@ -100,6 +100,7 @@ private:
         sp<Tileset> _tileset;
         SafeVar<Vec3> _position;
         std::vector<LayerTile> _layer_tiles;
+        float _zorder;
         Timestamp _timestamp;
     };
 
@@ -110,7 +111,6 @@ private:
     sp<Size> _size;
 
     SafeVar<Boolean> _visible;
-    float _zorder;
 
     Tilemap::LayerFlag _flags;
 

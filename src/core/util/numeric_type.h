@@ -138,7 +138,7 @@ public:
     static sp<Numeric> lerp(const sp<Numeric>& self, const sp<Numeric>& b, const sp<Numeric>& t);
 
 //  [[script::bindings::classmethod]]
-    static sp<Numeric> sod(sp<Numeric> self, float k, float z, float r, sp<Numeric> t = nullptr);
+    static sp<Numeric> sod(sp<Numeric> self, float d0, float k, float z = 1.0, float r = 0, sp<Numeric> t = nullptr);
 
 //  [[script::bindings::classmethod]]
     static sp<Numeric> periodic(const sp<Numeric>& self, const sp<Numeric>& interval = nullptr, const sp<Numeric>& duration = nullptr);

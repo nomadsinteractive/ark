@@ -10,7 +10,7 @@ void TransformSimple2D::snapshot(const Transform& transform, const V3& postTrans
 {
     Snapshot* data = snapshot.makeData<Snapshot>();
     data->scale = transform._scale.val();
-    data->preTranslate = transform._pivot.val();
+    data->preTranslate = transform._translation.val();
     data->postTranslate = V2(postTranslate.x(), postTranslate.y());
 }
 

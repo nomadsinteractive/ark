@@ -111,6 +111,21 @@ template<> ARK_API String StringConvert::to<bool, String>(const bool& val)
     return val ? "true" : "false";
 }
 
+template<> ARK_API String StringConvert::to<V2, String>(const V2& val)
+{
+    return Strings::sprintf("(%.2f, %.2f)", val.x(), val.y());
+}
+
+template<> ARK_API String StringConvert::to<V3, String>(const V3& val)
+{
+    return Strings::sprintf("(%.2f, %.2f, %.2f)", val.x(), val.y(), val.z());
+}
+
+template<> ARK_API String StringConvert::to<V4, String>(const V4& val)
+{
+    return Strings::sprintf("(%.2f, %.2f, %.2f, %.2f)", val.x(), val.y(), val.z(), val.w());
+}
+
 template<> ARK_API std::wstring StringConvert::to<String, std::wstring>(const String& str)
 {
     return Strings::fromUTF8(str);
@@ -121,21 +136,21 @@ template<> ARK_API String StringConvert::to<std::wstring, String>(const std::wst
     return Strings::toUTF8(str);
 }
 
-template<> ARK_API String StringConvert::to<floatarray, String>(const floatarray& val)
+template<> String StringConvert::to<floatarray, String>(const floatarray& val)
 {
     StringBuffer sb;
     sb << '[' << Strings::join<float>(val->buf(), 0, val->length()) << ']';
     return sb.str();
 }
 
-template<> ARK_API String StringConvert::to<indexarray, String>(const indexarray& val)
+template<> String StringConvert::to<indexarray, String>(const indexarray& val)
 {
     StringBuffer sb;
     sb << '[' << Strings::join<uint16_t>(val->buf(), 0, val->length()) << ']';
     return sb.str();
 }
 
-template<> ARK_API String StringConvert::to<bytearray, String>(const bytearray& val)
+template<> String StringConvert::to<bytearray, String>(const bytearray& val)
 {
     return Strings::dumpMemory(val->buf(), val->size());
 }

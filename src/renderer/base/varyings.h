@@ -6,6 +6,7 @@
 #include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/base/string.h"
+#include "core/base/timestamp.h"
 #include "core/inf/array.h"
 #include "core/inf/builder.h"
 #include "core/inf/holder.h"
@@ -63,7 +64,7 @@ public:
 
     virtual void traverse(const Visitor& visitor) override;
 
-    bool update(uint64_t timestamp) const;
+    bool update(uint64_t timestamp);
 
 //[[script::bindings::getprop]]
     Box getProperty(const String& name) const;
@@ -112,6 +113,7 @@ private:
         String cname = Strings::capitalizeFirst(name);
         _properties[cname] = var;
         setSlotInput(std::move(cname), sp<Input>::make<InputVariable<T>>(std::move(var)));
+        _timestamp.markDirty();
     }
 
     void setSlotInput(const String& name, sp<Input> input);
@@ -122,6 +124,8 @@ private:
     std::map<uint32_t, uint32_t> _slot_strides;
 
     std::map<String, sp<Varyings>> _sub_properties;
+
+    Timestamp _timestamp;
 
     friend class BUILDER;
 };

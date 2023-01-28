@@ -48,7 +48,7 @@ private:
 }
 
 Transform::Transform(Type type, sp<Rotation> rotate, sp<Vec3> scale, sp<Vec3> pivot)
-    : _type(type), _rotation(std::move(rotate), V4(0, 0, 0, 1.0f)), _scale(std::move(scale), V3(1.0f)), _pivot(std::move(pivot)), _delegate(makeDelegate())
+    : _type(type), _rotation(std::move(rotate), V4(0, 0, 0, 1.0f)), _scale(std::move(scale), V3(1.0f)), _translation(std::move(pivot)), _delegate(makeDelegate())
 {
 }
 
@@ -61,7 +61,7 @@ void Transform::traverse(const Holder::Visitor& visitor)
 {
     HolderUtil::visit(_rotation.wrapped(), visitor);
     HolderUtil::visit(_scale.wrapped(), visitor);
-    HolderUtil::visit(_pivot.wrapped(), visitor);
+    HolderUtil::visit(_translation.wrapped(), visitor);
 }
 
 Transform::Snapshot Transform::snapshot(const V3& postTranslate) const
@@ -71,7 +71,7 @@ Transform::Snapshot Transform::snapshot(const V3& postTranslate) const
 
 bool Transform::update(uint64_t timestamp)
 {
-    return UpdatableUtil::update(timestamp, _rotation, _scale, _pivot) || _timestamp.update(timestamp);
+    return UpdatableUtil::update(timestamp, _rotation, _scale, _translation) || _timestamp.update(timestamp);
 }
 
 const sp<Rotation>& Transform::rotation()
@@ -79,9 +79,9 @@ const sp<Rotation>& Transform::rotation()
     return tryUpdateDelegate(_rotation);
 }
 
-void Transform::setRotation(const sp<Rotation>& rotate)
+void Transform::setRotation(sp<Rotation> rotation)
 {
-    _rotation = rotate;
+    _rotation = std::move(rotation);
     doUpdateDelegate();
 }
 
@@ -90,20 +90,20 @@ const sp<Vec3>& Transform::scale()
     return tryUpdateDelegate(_scale);
 }
 
-void Transform::setScale(const sp<Vec3>& scale)
+void Transform::setScale(sp<Vec3> scale)
 {
-    _scale = scale;
+    _scale = std::move(scale);
     doUpdateDelegate();
 }
 
-const sp<Vec3>& Transform::pivot()
+const sp<Vec3>& Transform::translation()
 {
-    return tryUpdateDelegate(_pivot);
+    return tryUpdateDelegate(_translation);
 }
 
-void Transform::setPivot(const sp<Vec3>& pivot)
+void Transform::setTranslation(sp<Vec3> translation)
 {
-    _pivot = pivot;
+    _translation = std::move(translation);
     doUpdateDelegate();
 }
 
@@ -122,7 +122,7 @@ sp<Transform::Delegate> Transform::makeDelegate() const
 {
     DCHECK(_type != TYPE_DELEGATED, "Delegated Transform may not be updated");
 
-    if(!_rotation && !_scale && !_pivot)
+    if(!_rotation && !_scale && !_translation)
         return Null::toSafePtr<Transform::Delegate>(nullptr);
 
     return _rotation ? makeTransformLinear() : makeTransformSimple();

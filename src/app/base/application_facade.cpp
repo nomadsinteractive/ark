@@ -21,7 +21,7 @@ ApplicationFacade::ApplicationFacade(Application& app, const Surface& surface, c
 
 const sp<Clock>& ApplicationFacade::clock() const
 {
-    return _context->sysClock();
+    return _context->appClock();
 }
 
 sp<Vec2> ApplicationFacade::cursorPosition() const

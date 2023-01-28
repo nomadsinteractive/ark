@@ -113,7 +113,7 @@ sp<TilemapLayer> Tilemap::makeLayer(const String& name, uint32_t colCount, uint3
 
 void Tilemap::addLayer(sp<TilemapLayer> layer, float zorder)
 {
-    layer->_zorder = zorder;
+    layer->_stub->_zorder = zorder;
     _stub->_layers.insert(std::upper_bound(_stub->_layers.begin(), _stub->_layers.end(), layer, _tilemapLayerComp), std::move(layer));
     _stub->_need_reload = true;
 }

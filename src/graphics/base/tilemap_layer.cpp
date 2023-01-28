@@ -22,7 +22,7 @@ namespace ark {
 
 TilemapLayer::TilemapLayer(sp<Tileset> tileset, String name, uint32_t colCount, uint32_t rowCount, sp<Vec3> position, sp<Vec3> scroller, sp<Boolean> visible, Tilemap::LayerFlag flag)
     : _name(std::move(name)), _col_count(colCount), _row_count(rowCount), _size(sp<Size>::make(tileset->tileWidth() * colCount, tileset->tileHeight() * rowCount)),
-      _visible(std::move(visible), true), _zorder(0), _flags(flag), _stub(sp<Stub>::make(colCount, rowCount, std::move(tileset), SafeVar<Vec3>(std::move(position))))
+      _visible(std::move(visible), true), _flags(flag), _stub(sp<Stub>::make(colCount, rowCount, std::move(tileset), SafeVar<Vec3>(std::move(position)), 0))
 {
 }
 
@@ -70,7 +70,7 @@ void TilemapLayer::setPosition(sp<Vec3> position)
 
 float TilemapLayer::zorder() const
 {
-    return _zorder;
+    return _stub->_zorder;
 }
 
 const sp<Tileset>& TilemapLayer::tileset() const
@@ -158,7 +158,7 @@ void TilemapLayer::resize(uint32_t colCount, uint32_t rowCount, uint32_t offsetX
 {
     CHECK(colCount >= _col_count && rowCount >= _row_count, "Changing size(%d, %d) to (%d, %d) failed. TilemapLayer can not be shrinked.", _col_count, _row_count, colCount, rowCount);
     CHECK(offsetX <= (colCount - _col_count) && offsetY <= (rowCount - _row_count), "Offset position out of bounds(%d, %d)", offsetX, offsetY);
-    Stub stub(colCount, rowCount, std::move(_stub->_tileset), std::move(_stub->_position));
+    Stub stub(colCount, rowCount, std::move(_stub->_tileset), std::move(_stub->_position), _stub->_zorder);
     for(uint32_t i = 0; i < _row_count; ++i)
         for(uint32_t j = 0; j < _col_count; ++j)
             stub._layer_tiles[(i + offsetY) * _col_count + j + offsetX] = std::move(_stub->_layer_tiles[i * _col_count + j]);
@@ -210,8 +210,8 @@ TilemapLayer::LayerTile::LayerTile(sp<Tile> tile, sp<RenderObject> renderable)
     : _tile(std::move(tile)), _renderable(std::move(renderable)) {
 }
 
-TilemapLayer::Stub::Stub(size_t colCount, size_t rowCount, sp<Tileset> tileset, SafeVar<Vec3> position)
-    : _col_count(colCount), _row_count(rowCount), _tileset(std::move(tileset)), _position(std::move(position)), _layer_tiles(colCount * rowCount)
+TilemapLayer::Stub::Stub(size_t colCount, size_t rowCount, sp<Tileset> tileset, SafeVar<Vec3> position, float zorder)
+    : _col_count(colCount), _row_count(rowCount), _tileset(std::move(tileset)), _position(std::move(position)), _layer_tiles(colCount * rowCount), _zorder(zorder)
 {
 }
 
@@ -258,7 +258,7 @@ void TilemapLayer::Stub::snapshot(const RenderRequest& renderRequest, const Laye
                     state.setState(Renderable::RENDERABLE_STATE_DIRTY, true);
                 if(state.hasState(Renderable::RENDERABLE_STATE_VISIBLE))
                     state.setState(Renderable::RENDERABLE_STATE_VISIBLE, visible);
-                Renderable::Snapshot snapshot = tile._renderable->snapshot(pipelineInput, renderRequest, posOff + V3(j * tileWidth + tileWidth / 2, dy, 0), state.stateBits());
+                Renderable::Snapshot snapshot = tile._renderable->snapshot(pipelineInput, renderRequest, posOff + V3(j * tileWidth + tileWidth / 2, dy, _zorder), state.stateBits());
                 if(hasDefaultVaryings && !snapshot._varyings)
                     snapshot._varyings = defaultVaryingsSnapshot;
                 output.addSnapshot(lc, std::move(snapshot));

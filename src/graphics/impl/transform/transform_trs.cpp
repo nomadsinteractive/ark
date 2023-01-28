@@ -9,7 +9,7 @@ void TransformTRS::snapshot(const Transform& transform, const V3& postTranslate,
 {
     Snapshot* data = snapshot.makeData<Snapshot>();
     const sp<Numeric>& theta = transform._rotation.wrapped()->theta();
-    data->matrix = MatrixUtil::translate(MatrixUtil::rotate(MatrixUtil::scale(M3::identity(), V2(transform._scale.val())), theta->val()), V2(transform._pivot.val()));
+    data->matrix = MatrixUtil::translate(MatrixUtil::rotate(MatrixUtil::scale(M3::identity(), V2(transform._scale.val())), theta->val()), V2(transform._translation.val()));
 }
 
 V3 TransformTRS::transform(const Transform::Snapshot& snapshot, const V3& position) const

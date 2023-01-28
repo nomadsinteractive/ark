@@ -311,11 +311,11 @@ sp<Numeric> NumericType::lerp(const sp<Numeric>& self, const sp<Numeric>& b, con
     return sp<Interpolate<float, float>>::make(self, b, t);
 }
 
-sp<Numeric> NumericType::sod(sp<Numeric> self, float k, float z, float r, sp<Numeric> t)
+sp<Numeric> NumericType::sod(sp<Numeric> self, float d0, float k, float z, float r, sp<Numeric> t)
 {
-    if(t == nullptr)
+    if(!t)
         t = Ark::instance().appClock()->duration();
-    return sp<SecondOrderDynamics<float>>::make(std::move(self), std::move(t), k, z, r);
+    return sp<SecondOrderDynamics<float>>::make(std::move(self), d0, std::move(t), k, z, r);
 }
 
 sp<Numeric> NumericType::periodic(const sp<Numeric>& self, const sp<Numeric>& interval, const sp<Numeric>& duration)

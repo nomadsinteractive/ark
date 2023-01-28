@@ -140,9 +140,9 @@ public:
 //  [[script::bindings::classmethod]]
     static sp<Vec4> lerp(sp<Vec4> self, sp<Vec4> b, sp<Numeric> t = nullptr);
 //  [[script::bindings::classmethod]]
-    static sp<Vec4> sod(sp<Vec4> self, float k, float z, float r, sp<Numeric> t = nullptr);
+    static sp<Vec4> sod(sp<Vec4> self, const V4& d0, float k, float z, float r, sp<Numeric> t = nullptr);
 //  [[script::bindings::classmethod]]
-    static sp<Vec4> dye(sp<Vec4> self, sp<Boolean> c, String message);
+    static sp<Vec4> dye(sp<Vec4> self, sp<Boolean> c = nullptr, String message = "");
 
 //  [[script::bindings::classmethod]]
     static sp<Vec4> ifElse(sp<Vec4> self, sp<Boolean> condition, sp<Vec4> otherwise);

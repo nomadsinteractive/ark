@@ -82,17 +82,17 @@ public:
 //  [[script::bindings::property]]
     const sp<Rotation>& rotation();
 //  [[script::bindings::property]]
-    void setRotation(const sp<Rotation>& rotation);
+    void setRotation(sp<Rotation> rotation);
 
 //  [[script::bindings::property]]
     const sp<Vec3>& scale();
 //  [[script::bindings::property]]
-    void setScale(const sp<Vec3>& scale);
+    void setScale(sp<Vec3> scale);
 
 //  [[script::bindings::property]]
-    const sp<Vec3>& pivot();
+    const sp<Vec3>& translation();
 //  [[script::bindings::property]]
-    void setPivot(const sp<Vec3>& pivot);
+    void setTranslation(sp<Vec3> translation);
 
 //  [[script::bindings::classmethod]]
     static sp<Mat4> toMatrix(sp<Transform> self);
@@ -149,7 +149,7 @@ private:
 
     SafeVar<Rotation> _rotation;
     SafeVar<Vec3> _scale;
-    SafeVar<Vec3> _pivot;
+    SafeVar<Vec3> _translation;
 
     sp<Delegate> _delegate;
 

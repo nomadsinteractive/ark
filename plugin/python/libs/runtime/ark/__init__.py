@@ -178,6 +178,9 @@ class _Var:
     def __float__(self) -> float:
         return 0.0
 
+    def __neg__(self):
+        pass
+
 
 class Json:
     def __init__(self):
@@ -726,6 +729,9 @@ class Numeric(_Var):
     def synchronize(self, disposed: Boolean) -> 'Numeric':
         pass
 
+    def sod(self, d0: float, k: float, z: float = 1.0, r: float = 0, t: Optional['Numeric'] = None) -> 'Numeric':
+        pass
+
     @staticmethod
     def vibrate(s0: float, v0: float, s1: float, v1: float, duration: float, t=None):
         return None
@@ -843,6 +849,9 @@ class Vec2(_Var):
         pass
 
     def to_size(self) -> 'Size':
+        pass
+
+    def sod(self, d0, k: float, z: float, r: float, t: Optional['Numeric'] = None):
         pass
 
     def extend(self, v):
@@ -1566,11 +1575,11 @@ class Transform:
     TYPE_LINEAR_2D = 0
     TYPE_LINEAR_3D = 1
 
-    def __init__(self, t: int = TYPE_LINEAR_3D, rotation: Optional[Rotation] = None, scale: Union[Vec3, Vec2] = None, pivot: Union[Vec3, Vec2] = None):
+    def __init__(self, t: int = TYPE_LINEAR_3D, rotation: Optional[Rotation] = None, scale: Union[Vec3, Vec2] = None, translation: Union[Vec3, Vec2] = None):
         self._type = t
         self._rotation = rotation
         self._scale = scale
-        self._pivot = pivot
+        self._translation = translation
 
     @property
     def rotation(self) -> Rotation:
@@ -1589,12 +1598,12 @@ class Transform:
         self._scale = v
 
     @property
-    def pivot(self) -> Vec3:
-        return self._pivot
+    def translation(self) -> Vec3:
+        return self._translation
 
-    @pivot.setter
-    def pivot(self, v):
-        self._pivot = v
+    @translation.setter
+    def translation(self, v):
+        self._translation = v
 
     def to_matrix(self) -> Mat4:
         pass

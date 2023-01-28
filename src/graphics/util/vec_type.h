@@ -278,10 +278,10 @@ public:
         return sp<Interpolate<T, float>>::make(std::move(self), std::move(b), std::move(t));
     }
 
-    static sp<VarType> sod(sp<VarType> self, float k, float z, float r, sp<Numeric> t) {
+    static sp<VarType> sod(sp<VarType> self, const T& d0, float k, float z, float r, sp<Numeric> t) {
         if(!t)
             t = Ark::instance().appClock()->duration();
-        return sp<SecondOrderDynamics<T>>::make(std::move(self), std::move(t), k, z, r);
+        return sp<SecondOrderDynamics<T>>::make(std::move(self), d0, std::move(t), k, z, r);
     }
 
     static sp<VarType> dye(sp<VarType> self, sp<Boolean> c, String message) {

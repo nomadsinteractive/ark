@@ -75,11 +75,10 @@ String Platform::getRealPath(const String& path)
     return realpath;
 }
 
-//static int CALLBACK _enumerate_font_callback(CONST LOGFONT* lpelfe, CONST TEXTMETRIC* lpntme, DWORD FontType, LPARAM lParam)
-//{
-//    puts(lpelfe->lfFaceName);
-//    return 1;
-//}
+std::vector<Ark::RendererVersion> Platform::getRendererVersionPreferences()
+{
+    return {Ark::RENDERER_VERSION_OPENGL_46, Ark::RENDERER_VERSION_VULKAN_12};
+}
 
 sp<Alphabet> Platform::getSystemAlphabet(const Font& font, const String& lang)
 {

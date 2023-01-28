@@ -11,7 +11,7 @@ void TransformLinear3D::snapshot(const Transform& transform, const V3& postTrans
 {
     Snapshot* data = snapshot.makeData<Snapshot>();
     const V4 quat = transform._rotation.val();
-    data->matrix = MatrixUtil::translate(MatrixUtil::rotate(MatrixUtil::scale(MatrixUtil::translate(M4::identity(), postTranslate), transform._scale.val()), quat), transform._pivot.val());
+    data->matrix = MatrixUtil::translate(MatrixUtil::rotate(MatrixUtil::scale(MatrixUtil::translate(M4::identity(), postTranslate), transform._scale.val()), quat), transform._translation.val());
 }
 
 V3 TransformLinear3D::transform(const Transform::Snapshot& snapshot, const V3& position) const

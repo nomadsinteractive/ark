@@ -28,9 +28,9 @@ void Varyings::traverse(const Holder::Visitor& visitor)
         HolderUtil::visit(iter.second._input, visitor);
 }
 
-bool Varyings::update(uint64_t timestamp) const
+bool Varyings::update(uint64_t timestamp)
 {
-    bool dirty = false;
+    bool dirty = _timestamp.update(timestamp);
     for(const auto& [i, j] : _sub_properties)
         if(j->update(timestamp))
             dirty = true;
@@ -49,7 +49,7 @@ Box Varyings::getProperty(const String& name) const
 
 void Varyings::setSlotInput(const String& name, sp<Input> input)
 {
-    auto iter = _slots.find(name);
+    const auto iter = _slots.find(name);
     if(iter == _slots.end())
     {
         _slots.emplace(name, std::move(input));
@@ -57,8 +57,9 @@ void Varyings::setSlotInput(const String& name, sp<Input> input)
     }
     else
     {
-        CHECK(iter->second._input->size() == input->size(), "Replacing existing varying \"%s\"(%d) with a different size value(%d)", name.c_str(), iter->second._input->size(), input->size());
-        iter->second = Slot(std::move(input), iter->second._offset);
+        Slot& preslot = iter->second;
+        CHECK(preslot._input->size() == input->size(), "Replacing existing varying \"%s\"(%d) with a different size value(%d)", name.c_str(), preslot._input->size(), input->size());
+        iter->second = Slot(std::move(input), preslot._divisor, preslot._offset);
     }
 }
 
@@ -124,12 +125,12 @@ Varyings::Snapshot Varyings::snapshot(const PipelineInput& pipelineInput, Alloca
 
     if(!_slot_strides.size())
     {
-        for(auto& i : _slots)
+        for(auto& [i, j] : _slots)
         {
-            Optional<const Attribute&> attr = pipelineInput.getAttribute(i.first);
-            CHECK(attr, "Varying has no attribute \"%s\". Did you mean \"%s\"?", i.first.c_str(), findNearestAttribute(pipelineInput, i.first).c_str());
-            i.second._divisor = attr->divisor();
-            i.second._offset = attr->offset();
+            Optional<const Attribute&> attr = pipelineInput.getAttribute(i);
+            CHECK(attr, "Varying has no attribute \"%s\". Did you mean \"%s\"?", i.c_str(), findNearestAttribute(pipelineInput, i).c_str());
+            j._divisor = attr->divisor();
+            j._offset = attr->offset();
         }
         for(const auto& i : pipelineInput.streams())
             _slot_strides[i.first] = i.second.stride();
@@ -138,13 +139,13 @@ Varyings::Snapshot Varyings::snapshot(const PipelineInput& pipelineInput, Alloca
     Array<Divided>::Borrowed buffers(reinterpret_cast<Divided*>(allocator.sbrk(sizeof(Divided) * _slot_strides.size()).buf()), _slot_strides.size());
 
     size_t idx = 0;
-    for(const auto& i : _slot_strides)
-        new(&buffers.at(idx++)) Divided(i.first, allocator.sbrk(i.second));
+    for(const auto& [i, j] : _slot_strides)
+        new(&buffers.at(idx++)) Divided(i, allocator.sbrk(j));
 
-    for(const auto& i : _slots)
+    for(const auto& [i, j] : _slots)
     {
-        DASSERT(i.second._divisor < buffers.length());
-        i.second.apply(buffers.at(i.second._divisor)._content.buf());
+        DASSERT(j._divisor < buffers.length());
+        j.apply(buffers.at(j._divisor)._content.buf());
     }
 
     Snapshot snapshot(buffers);

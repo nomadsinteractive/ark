@@ -7,6 +7,7 @@
 #include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
 #include "core/types/safe_var.h"
+#include "core/util/strings.h"
 
 namespace ark {
 
@@ -22,8 +23,9 @@ public:
     }
 
     virtual T val() override {
-        TRACE(_condition.val(), _message.c_str());
-        return this->_wrapped->val();
+        T v = this->_wrapped->val();
+        TRACE(_condition.val(), Strings::sprintf("%s: %s", _message.c_str(), Strings::toString(v).c_str()).c_str());
+        return v;
     }
 
 private:
