@@ -262,6 +262,12 @@ float Math::lerp(float a, float b, float t)
     return a + (b - a) * t;
 }
 
+float Math::lerp(float a, float b, float t0, float t1, float t)
+{
+    float nt = t0 == t1 ? 0 : (t - t0) / (t1 - t0);
+    return lerp(a, b, nt);
+}
+
 sp<Numeric> Math::lerp(sp<Numeric> a, sp<Numeric> b, sp<Numeric> t)
 {
     return sp<Interpolate<float, float>>::make(std::move(a), std::move(b), std::move(t));

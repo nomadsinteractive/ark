@@ -25,10 +25,10 @@ LayoutParam::LayoutParam(const sp<Size>& size, Display display, Gravity gravity,
 }
 
 LayoutParam::LayoutParam(Length width, Length height, FlexDirection flexDirection, FlexWrap flexWrap, JustifyContent justifyContent, Align alignItems, Align alignSelf,
-                         Align alignContent, Display display, float flexGrow, Length flexBasis, sp<Vec4> margins)
+                         Align alignContent, Display display, float flexGrow, Length flexBasis, sp<Vec4> margins, sp<Vec4> paddings, sp<Vec3> position)
     : _width_type(width._type), _height_type(height._type), _size(sp<Size>::make(width._value, height._value)), _size_min(nullptr, V3(NAN)), _size_max(nullptr, V3(NAN)),
       _flex_direction(flexDirection), _flex_wrap(flexWrap), _justify_content(justifyContent), _align_items(alignItems), _align_self(alignSelf), _align_content(alignContent),
-      _display(display), _flex_basis(std::move(flexBasis)), _flex_grow(flexGrow), _margins(std::move(margins))
+      _display(display), _flex_basis(std::move(flexBasis)), _flex_grow(flexGrow), _margins(std::move(margins)), _paddings(std::move(paddings)), _position(std::move(position))
 {
 }
 
@@ -254,6 +254,16 @@ void LayoutParam::setPaddings(sp<Vec4> paddings)
     _paddings.reset(std::move(paddings));
 }
 
+const SafeVar<Vec3>& LayoutParam::position() const
+{
+    return _position;
+}
+
+void LayoutParam::setPosition(sp<Vec3> position)
+{
+    _position.reset(std::move(position));
+}
+
 bool LayoutParam::isWrapContent() const
 {
     return isWidthWrapContent() || isHeightWrapContent();
@@ -334,17 +344,23 @@ LayoutParam::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
       _justify_content(Documents::getAttribute<JustifyContent>(manifest, "justify-content", JUSTIFY_CONTENT_FLEX_START)), _align_items(Documents::getAttribute<Align>(manifest, "align-items", ALIGN_STRETCH)),
       _align_self(Documents::getAttribute<Align>(manifest, "align-self", ALIGN_AUTO)), _align_content(Documents::getAttribute<Align>(manifest, "align-content", ALIGN_FLEX_START)),
       _size(factory.getBuilder<Size>(manifest, Constants::Attributes::SIZE)), _display(Documents::getAttribute<Display>(manifest, "display", LayoutParam::DISPLAY_BLOCK)),
-      _flex_grow(Documents::getAttribute<float>(manifest, "flex-grow", 0.0)), _margins(factory.getBuilder<Vec4>(manifest, "margins"))
+      _flex_grow(Documents::getAttribute<float>(manifest, "flex-grow", 0.0)), _margins(factory.getBuilder<Vec4>(manifest, "margins")), _paddings(factory.getBuilder<Vec4>(manifest, "margins")),
+      _position(factory.getBuilder<Vec3>(manifest, Constants::Attributes::POSITION))
 {
 }
 
 sp<LayoutParam> LayoutParam::BUILDER::build(const Scope& args)
 {
-    if(_size)
-        return sp<LayoutParam>::make(_size->build(args), _display);
+    const sp<Size> size = _size ? _size->build(args) : nullptr;
+    sp<Vec4> margins = _margins->build(args);
+    sp<Vec4> paddings = _paddings->build(args);
+    sp<Vec3> position = _position->build(args);
+    if(size)
+        return sp<LayoutParam>::make(Length(LENGTH_TYPE_PIXEL, size->width()), Length(LENGTH_TYPE_PIXEL, size->height()), _flex_direction, _flex_wrap, _justify_content, _align_items, _align_self,
+                                     _align_content, _display, _flex_grow, LayoutParam::Length(), std::move(margins), std::move(paddings), std::move(position));
     if(_width || _height)
         return sp<LayoutParam>::make(_width ? _width->build(args) : Length(), _height ? _height->build(args) : Length(), _flex_direction, _flex_wrap, _justify_content, _align_items, _align_self,
-                                     _align_content, _display, _flex_grow, LayoutParam::Length(), _margins->build(args));
+                                     _align_content, _display, _flex_grow, LayoutParam::Length(), std::move(margins), std::move(paddings), std::move(position));
     return nullptr;
 }
 

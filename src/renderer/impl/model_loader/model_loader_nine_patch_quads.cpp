@@ -27,7 +27,7 @@ void ModelLoaderNinePatchQuads::initialize(ShaderBindings& shaderBindings)
 
 sp<Model> ModelLoaderNinePatchQuads::loadModel(int32_t type)
 {
-    return sp<Model>::make(_unit_model.indices(), _nine_patch_attachment->ensureVerticesQuads(type));
+    return sp<Model>::make(_unit_model.indices(), _nine_patch_attachment->ensureVerticesQuads(type), nullptr);
 }
 
 ModelLoaderNinePatchQuads::BUILDER::BUILDER(BeanFactory& factory, const String& atlas)

@@ -15,6 +15,7 @@ namespace ark {
 
 class Label : public Renderer, public Block {
 public:
+[[deprecated]]
     Label(const sp<Text>& characters);
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;

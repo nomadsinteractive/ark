@@ -103,6 +103,16 @@ static ImGuiKey toImGuiKey(Event::Code code) {
             return ImGuiKey_Backspace;
         case Event::CODE_KEYBOARD_ENTER:
             return ImGuiKey_Enter;
+        case Event::CODE_KEYBOARD_INSERT:
+            return ImGuiKey_Insert;
+        case Event::CODE_KEYBOARD_PAGE_UP:
+            return ImGuiKey_PageUp;
+        case Event::CODE_KEYBOARD_PAGE_DOWN:
+            return ImGuiKey_PageDown;
+        case Event::CODE_KEYBOARD_HOME:
+            return ImGuiKey_Home;
+        case Event::CODE_KEYBOARD_END:
+            return ImGuiKey_End;
         default:
             break;
     }
@@ -160,16 +170,10 @@ bool RendererImgui::onEvent(const Event& event)
             {
                 case Event::CODE_KEYBOARD_LSHIFT:
                 case Event::CODE_KEYBOARD_RSHIFT:
-                    io.KeyShift = isKeyDown;
-                    break;
                 case Event::CODE_KEYBOARD_LCTRL:
                 case Event::CODE_KEYBOARD_RCTRL:
-                    io.KeyCtrl = isKeyDown;
-                    break;
                 case Event::CODE_KEYBOARD_LALT:
                 case Event::CODE_KEYBOARD_RALT:
-                    io.KeyAlt = isKeyDown;
-                    break;
                 case Event::CODE_KEYBOARD_TAB:
                 case Event::CODE_KEYBOARD_A:
                 case Event::CODE_KEYBOARD_C:
@@ -184,8 +188,12 @@ bool RendererImgui::onEvent(const Event& event)
                 case Event::CODE_KEYBOARD_DELETE:
                 case Event::CODE_KEYBOARD_BACKSPACE:
                 case Event::CODE_KEYBOARD_ENTER:
+                case Event::CODE_KEYBOARD_INSERT:
+                case Event::CODE_KEYBOARD_HOME:
+                case Event::CODE_KEYBOARD_END:
+                case Event::CODE_KEYBOARD_PAGE_UP:
+                case Event::CODE_KEYBOARD_PAGE_DOWN:
                     io.AddKeyEvent(toImGuiKey(code), isKeyDown);
-//                    updateKeyStatus(io, toImGuiKey(code), isKeyDown);
                     break;
                 default:
                     break;

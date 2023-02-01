@@ -130,9 +130,9 @@ const sp<View>& Arena::view() const
     return _view;
 }
 
-void Arena::addView(sp<View> view)
+void Arena::addView(sp<View> view, sp<Boolean> disposable)
 {
-    _view->addView(std::move(view));
+    _view->addView(std::move(view), std::move(disposable));
 }
 
 Arena::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

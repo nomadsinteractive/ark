@@ -194,6 +194,7 @@ void TilemapLayer::setTile(uint32_t col, uint32_t row, const sp<Tile>& tile, con
     const sp<RenderObject>& ro = renderObject ? renderObject : (tile ? tile->renderObject() : nullptr);
     sp<Tile> tileDup = renderObject ? (tile ? sp<Tile>::make(tile->id(), tile->type(), tile->shapeId(), renderObject) : sp<Tile>::make(0, "", -1, renderObject)) : tile;
     _stub->_layer_tiles[index] = LayerTile(std::move(tileDup), ro);
+    _stub->_timestamp.markDirty();
 }
 
 Tilemap::LayerFlag TilemapLayer::flags() const

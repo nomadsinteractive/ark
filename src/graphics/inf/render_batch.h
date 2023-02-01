@@ -1,5 +1,5 @@
-#ifndef ARK_GRAPHICS_INF_RENDERABLE_BATCH_H_
-#define ARK_GRAPHICS_INF_RENDERABLE_BATCH_H_
+#ifndef ARK_GRAPHICS_INF_RENDER_BATCH_H_
+#define ARK_GRAPHICS_INF_RENDER_BATCH_H_
 
 #include "core/base/api.h"
 #include "core/forwarding.h"
@@ -8,9 +8,9 @@
 
 namespace ark {
 
-class ARK_API RenderableBatch {
+class ARK_API RenderBatch {
 public:
-    virtual ~RenderableBatch() = default;
+    virtual ~RenderBatch() = default;
 
     virtual bool preSnapshot(const RenderRequest& renderRequest, LayerContext& lc) = 0;
     virtual void snapshot(const RenderRequest& renderRequest, const LayerContext& lc, RenderLayerSnapshot& output) = 0;

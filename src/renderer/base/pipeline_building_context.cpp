@@ -313,7 +313,7 @@ void PipelineBuildingContext::loadPredefinedBuffer(BeanFactory& factory, const S
     for(const document& i : manifest->children("buffer"))
     {
         String name = Documents::getAttribute(i, Constants::Attributes::NAME);
-        DCHECK(!_ssbos.has(name), "Buffer object \"%s\" redefined", name.c_str());
+        CHECK(!_ssbos.has(name), "Buffer object \"%s\" redefined", name.c_str());
         _ssbos.push_back(name, factory.ensure<Buffer>(i, args));
     }
 }

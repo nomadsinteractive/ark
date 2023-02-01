@@ -263,7 +263,7 @@ Model ModelImporterAssimp::loadModel(const aiScene* scene, MaterialBundle& mater
     const bool hasAnimation = scene->HasAnimations() || animateManifests.size() > 0;
     aiMatrix4x4 globalAnimationTransform;
 
-    Model model(std::move(materials), std::move(meshes), std::move(rootNode), Metrics(aabbMin, aabbMax, aabbMin, aabbMax));
+    Model model(std::move(materials), std::move(meshes), std::move(rootNode), sp<Metrics>::make(aabbMin, aabbMax));
     if(hasAnimation)
     {
         bool noBones = bones.nodes().size() == 0;

@@ -19,8 +19,8 @@ namespace ark {
 class ARK_API Model {
 public:
     Model() = default;
-    Model(sp<Input> indices, sp<Vertices> vertices, const Metrics& metrics = Metrics());
-    Model(std::vector<sp<Material>> materials, std::vector<sp<Mesh>> meshes, sp<Node> rootNode, const Metrics& metrics = Metrics());
+    Model(sp<Input> indices, sp<Vertices> vertices, sp<Metrics> bounds, sp<Metrics> occupies = nullptr);
+    Model(std::vector<sp<Material>> materials, std::vector<sp<Mesh>> meshes, sp<Node> rootNode, sp<Metrics> bounds, sp<Metrics> occupies = nullptr);
     DEFAULT_COPY_AND_ASSIGN(Model);
 
     const sp<Input>& indices() const;
@@ -34,7 +34,9 @@ public:
     const sp<Node>& rootNode() const;
 
 //[[script::bindings::property]]
-    const sp<Metrics>& metrics() const;
+    const sp<Metrics>& bounds() const;
+//[[script::bindings::property]]
+    const sp<Metrics>& occupies() const;
 
 //[[script::bindings::property]]
     size_t indexCount() const;
@@ -107,7 +109,8 @@ private:
 private:
     sp<Input> _indices;
     sp<Vertices> _vertices;
-    sp<Metrics> _metrics;
+    sp<Metrics> _bounds;
+    sp<Metrics> _occupies;
     sp<Node> _root_node;
     std::vector<sp<Material>> _materials;
     std::vector<sp<Mesh>> _meshes;

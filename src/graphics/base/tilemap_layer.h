@@ -87,7 +87,7 @@ private:
         Renderable::State _state;
     };
 
-    class Stub : public RenderableBatch {
+    class Stub : public RenderBatch {
     public:
         Stub(size_t colCount, size_t rowCount, sp<Tileset> tileset, SafeVar<Vec3> position, float zorder);
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Stub);

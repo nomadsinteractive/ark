@@ -38,7 +38,7 @@ class RenderObjectWithLayer;
 class RenderView;
 class Layer;
 class RenderRequest;
-class RenderableBatch;
+class RenderBatch;
 class RenderablePassive;
 class Renderer;
 class RendererGroup;

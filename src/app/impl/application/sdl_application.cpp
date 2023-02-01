@@ -110,6 +110,14 @@ static Event::Code sdlScanCodeToEventCode(SDL_Scancode sc)
         return Event::CODE_KEYBOARD_RIGHTBRACKET;
     case SDL_SCANCODE_BACKSLASH:
         return Event::CODE_KEYBOARD_BACKSLASH;
+    case SDL_SCANCODE_HOME:
+        return Event::CODE_KEYBOARD_HOME;
+    case SDL_SCANCODE_END:
+        return Event::CODE_KEYBOARD_END;
+    case SDL_SCANCODE_PAGEUP:
+        return Event::CODE_KEYBOARD_PAGE_UP;
+    case SDL_SCANCODE_PAGEDOWN:
+        return Event::CODE_KEYBOARD_PAGE_DOWN;
     default:
         break;
     }

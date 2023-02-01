@@ -214,6 +214,7 @@ public:
 
 //  [[script::bindings::auto]]
     static ARK_API float lerp(float a, float b, float t);
+    static ARK_API float lerp(float a, float b, float t0, float t1, float t);
 //  [[script::bindings::auto]]
     static ARK_API sp<Numeric> lerp(sp<Numeric> a, sp<Numeric> b, sp<Numeric> t);
 //  [[script::bindings::auto]]
@@ -223,6 +224,7 @@ public:
 //  [[script::bindings::auto]]
     static ARK_API sp<Vec4> lerp(sp<Vec4> a, sp<Vec4> b, sp<Numeric> t);
 
+    [[deprecated]]
 //  [[script::bindings::auto]]
     static ARK_API sp<Vec2> bezier(sp<Vec2> p0, sp<Vec2> p1, sp<Vec2> p2, sp<Numeric> t);
 

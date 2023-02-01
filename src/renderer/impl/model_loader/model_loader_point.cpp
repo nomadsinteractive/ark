@@ -30,7 +30,7 @@ sp<Model> ModelLoaderPoint::loadModel(int32_t type)
 {
     const Atlas::Item& texCoord = _atlas->at(type);
     const V2& size = texCoord.size();
-    return sp<Model>::make(nullptr, sp<VerticesPoint>::make(texCoord), Metrics(V3(size, 0), V3(size, 0), V3(0)));
+    return sp<Model>::make(nullptr, sp<VerticesPoint>::make(texCoord), sp<Metrics>::make(V3(0), V3(size, 0), V3(texCoord.pivot(), 0)));
 }
 
 ModelLoaderPoint::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

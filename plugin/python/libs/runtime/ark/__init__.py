@@ -166,7 +166,13 @@ class _Var:
     def __gt__(self, other) -> 'Boolean':
         return Boolean(False)
 
+    def __ge__(self, other) -> 'Boolean':
+        return Boolean(False)
+
     def __lt__(self, other) -> 'Boolean':
+        return Boolean(False)
+
+    def __le__(self, other) -> 'Boolean':
         return Boolean(False)
 
     def __eq__(self, other) -> 'Boolean':
@@ -1113,10 +1119,6 @@ class Metrics:
         return 0
 
     @property
-    def aabb(self) -> tuple[float, float, float]:
-        return 0, 0, 0
-
-    @property
     def aabb_min(self) -> tuple[float, float, float]:
         return 0, 0, 0
 
@@ -1132,7 +1134,7 @@ class Metrics:
 class Model:
 
     @property
-    def metrics(self) -> Metrics:
+    def bounds(self) -> Metrics:
         return Metrics()
 
     @property
@@ -1343,7 +1345,8 @@ class RenderLayer(Renderer):
     def layer(self) -> 'Layer':
         return Layer(self)
 
-    def make_layer(self, model_loader: Optional[ModelLoader] = None) -> 'Layer':
+    def make_layer(self, model_loader: Optional[ModelLoader] = None, visible: Optional[Boolean] = None, disposable: Optional[Boolean] = None,
+                   position: Optional[Vec3] = None) -> 'Layer':
         pass
 
 
@@ -1397,7 +1400,7 @@ class Arena:
     def add_renderer(self, renderer: Renderer):
         pass
 
-    def add_view(self, view: 'View'):
+    def add_view(self, view: 'View', disposable: Optional[Boolean] = None):
         pass
 
     def add_layer(self, layer: Renderer):

@@ -85,7 +85,7 @@ public:
         uint32_t sampleCount = Documents::ensureAttribute<uint32_t>(manifest.descriptor(), "sample-count");
         const Rect uvBounds = Rect(0, 1.0f, 1.0f, 0);
         sp<std::vector<ModelLoaderSphere::Vertex>> vertices = makeVertices(sampleCount);
-        return Model(makeIndices(sampleCount), sp<VerticesSphere>::make(std::move(vertices), uvBounds));
+        return Model(makeIndices(sampleCount), sp<VerticesSphere>::make(std::move(vertices), uvBounds), nullptr);
     }
 };
 
@@ -98,7 +98,7 @@ ModelLoaderSphere::ModelLoaderSphere(const sp<Atlas>& atlas, uint32_t sampleCoun
 
 sp<RenderCommandComposer> ModelLoaderSphere::makeRenderCommandComposer()
 {
-    return sp<RCCDrawElementsInstanced>::make(Model(_indices, sp<VerticesSphere>::make(_vertices->size())));
+    return sp<RCCDrawElementsInstanced>::make(Model(_indices, sp<VerticesSphere>::make(_vertices->size()), nullptr));
 }
 
 void ModelLoaderSphere::initialize(ShaderBindings& shaderBindings)
@@ -108,7 +108,7 @@ void ModelLoaderSphere::initialize(ShaderBindings& shaderBindings)
 
 sp<Model> ModelLoaderSphere::loadModel(int32_t type)
 {
-    return sp<Model>::make(nullptr, sp<VerticesSphere>::make(_vertices, _atlas->getItemUV(type)));
+    return sp<Model>::make(nullptr, sp<VerticesSphere>::make(_vertices, _atlas->getItemUV(type)), nullptr);
 }
 
 ModelLoaderSphere::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

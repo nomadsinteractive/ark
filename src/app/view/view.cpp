@@ -4,10 +4,8 @@
 #include "core/inf/runnable.h"
 #include "core/impl/updatable/updatable_once_per_frame.h"
 #include "core/types/safe_var.h"
+#include "core/util/math.h"
 #include "core/util/string_convert.h"
-#include "core/util/holder_util.h"
-#include "core/util/updatable_util.h"
-#include "core/util/log.h"
 
 #include "graphics/base/bounds.h"
 #include "graphics/base/layer.h"
@@ -16,10 +14,10 @@
 #include "graphics/base/render_object_with_layer.h"
 #include "graphics/base/size.h"
 #include "graphics/base/text.h"
-#include "graphics/inf/renderable.h"
 #include "graphics/util/vec4_type.h"
 #include "graphics/util/renderer_type.h"
 
+#include "renderer/base/model.h"
 #include "renderer/base/render_engine.h"
 
 #include "app/base/event.h"
@@ -29,18 +27,7 @@
 
 namespace ark {
 
-template<> ARK_API View::State StringConvert::to<String, View::State>(const String& str)
-{
-    if(str == "default")
-        return View::STATE_DEFAULT;
-    if(str == "moving")
-        return View::STATE_MOVING;
-    if(str == "pushing")
-        return View::STATE_PUSHING;
-    if(str == "actived")
-        return View::STATE_ACTIVED;
-    return View::STATE_DEFAULT;
-}
+namespace {
 
 template<size_t IDX> class LayoutSize : public Numeric {
 public:
@@ -62,9 +49,32 @@ private:
 
 };
 
-static V2 toViewportPosition(float x, float y)
+}
+
+template<> ARK_API View::State StringConvert::to<String, View::State>(const String& str)
 {
-    return Ark::instance().applicationContext()->renderEngine()->toViewportPosition(V2(x, y), Ark::COORDINATE_SYSTEM_LHS);
+    if(str == "default")
+        return View::STATE_DEFAULT;
+    if(str == "moving")
+        return View::STATE_MOVING;
+    if(str == "pushing")
+        return View::STATE_PUSHING;
+    if(str == "actived")
+        return View::STATE_ACTIVED;
+    return View::STATE_DEFAULT;
+}
+
+static V2 toViewSpacePosition(const V2& position)
+{
+    return Ark::instance().applicationContext()->renderEngine()->toViewportPosition(position, Ark::COORDINATE_SYSTEM_LHS);
+}
+
+static V2 toPivotPosition(const sp<Metrics>& occupies, const V2& size)
+{
+    if(!occupies)
+        return V2(0, size.y());
+
+    return size * V2(Math::lerp(0, size.x(), occupies->aabbMin().x(), occupies->aabbMax().x(), 0), Math::lerp(0, size.y(), occupies->aabbMin().y(), occupies->aabbMax().y(), 0));
 }
 
 View::View(const sp<LayoutParam>& layoutParam, sp<RenderObjectWithLayer> background, sp<Text> text, sp<Layout> layout, sp<LayoutV3> layoutV3, sp<Boolean> visible, sp<Boolean> disposed)
@@ -79,8 +89,10 @@ View::View(const sp<LayoutParam>& layoutParam, sp<RenderObjectWithLayer> backgro
     {
         updateTextLayout(0);
         _text->setPosition(sp<LayoutPosition>::make(_stub, _is_dirty, false, false));
-        _text->show(sp<IsDisposed>::make(_stub));
+        _text->show(_is_disposed);
     }
+
+    _stub->_layout_node->_size = V2(layoutParam->contentWidth(), layoutParam->contentHeight());
 }
 
 View::View(sp<Size> size)
@@ -107,8 +119,8 @@ void View::traverse(const Holder::Visitor& visitor)
 //    HolderUtil::visit(_on_click, visitor);
 //    HolderUtil::visit(_on_release, visitor);
 //    HolderUtil::visit(_on_move, visitor);
+//    HolderUtil::visit(_background, visitor);
 
-    HolderUtil::visit(_background, visitor);
     if(_stub->viewHierarchy())
         _stub->viewHierarchy()->traverse(visitor);
 }
@@ -136,7 +148,7 @@ bool View::onEvent(const Event& event, float x, float y, bool ptin)
 
 void View::addRenderObjectWithLayer(sp<RenderObjectWithLayer> ro, bool isBackground)
 {
-    ro->layerContext()->add(sp<RenderableViewSlot>::make(_stub, ro->renderObject(), isBackground), _is_dirty, _is_disposed);
+    ro->layerContext()->add(sp<RenderableViewSlot>::make(_stub, ro->renderObject(), ro->layerContext()->modelLoader(), isBackground), _is_dirty, _is_disposed);
 }
 
 const sp<Vec3>& View::position() const
@@ -204,8 +216,11 @@ void View::setLayoutParam(sp<LayoutParam> layoutParam)
     _stub->_layout_param = std::move(layoutParam);
 }
 
-void View::addView(sp<View> view)
+void View::addView(sp<View> view, sp<Boolean> disposable)
 {
+    if(disposable)
+        view->setDisposed(std::move(disposable));
+
     view->setParent(*this);
     _stub->ensureViewHierarchy().addView(std::move(view));
 }
@@ -518,18 +533,6 @@ sp<Renderer> View::STYLE_ON_RELEASE::build(const Scope& args)
     return renderer;
 }
 
-View::STYLE_ON_MOVE::STYLE_ON_MOVE(BeanFactory &beanFactory, const sp<Builder<Renderer> > &delegate, const String &style)
-    : _delegate(delegate), _on_move(beanFactory.ensureBuilder<EventListener>(style))
-{
-}
-
-sp<Renderer> View::STYLE_ON_MOVE::build(const Scope& args)
-{
-    sp<Renderer> renderer = _delegate->build(args);
-    bindView(renderer)->setOnMove(_on_move->build(args));
-    return renderer;
-}
-
 View::STOP_PROPAGATION_STYLE::STOP_PROPAGATION_STYLE(BeanFactory& factory, const sp<Builder<Renderer>>& delegate, const String& style)
     : _delegate(delegate), _stop_propagation(style ? factory.ensureBuilder<Boolean>(style) : nullptr)
 {
@@ -539,18 +542,6 @@ sp<Renderer> View::STOP_PROPAGATION_STYLE::build(const Scope& args)
 {
     sp<Renderer> renderer = _delegate->build(args);
     bindView(renderer)->layoutParam()->setStopPropagation(_stop_propagation ? _stop_propagation->build(args) : sp<Boolean>::make<Boolean::Const>(true));
-    return renderer;
-}
-
-View::STYLE_LAYOUT_PARAM::STYLE_LAYOUT_PARAM(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style)
-    : _delegate(delegate), _layout_param(beanFactory.ensureBuilder<LayoutParam>(style))
-{
-}
-
-sp<Renderer> View::STYLE_LAYOUT_PARAM::build(const Scope& args)
-{
-    sp<Renderer> renderer = _delegate->build(args);
-    bindView(renderer)->setLayoutParam(_layout_param->build(args));
     return renderer;
 }
 
@@ -622,10 +613,12 @@ bool View::Stub::isDisposed() const
     return _disposed->val() || (_parent_stub ? _parent_stub->isDisposed() : false);
 }
 
-V2 View::Stub::getTopViewOffsetPosition() const
+V3 View::Stub::getTopViewOffsetPosition() const
 {
     const LayoutV3::Node& layoutNode = _layout_node;
-    return (_parent_stub ? _parent_stub->getTopViewOffsetPosition() + layoutNode._offset_position : layoutNode._offset_position) + V2(layoutNode._paddings.x(), layoutNode._paddings.y());
+    const V3 layoutOffset = V3(layoutNode._offset_position, 0);
+    const V3 offset = (_parent_stub ? _parent_stub->getTopViewOffsetPosition() + layoutOffset : layoutOffset) + V3(layoutNode._paddings.w(), layoutNode._paddings.x(), 0);
+    return _layout_param->position().val() + offset;
 }
 
 sp<LayoutV3::Node> View::Stub::getTopViewLayoutNode() const
@@ -648,8 +641,8 @@ ViewHierarchy& View::Stub::ensureViewHierarchy()
     return _layout_node->_view_hierarchy;
 }
 
-View::RenderableViewSlot::RenderableViewSlot(sp<Stub> viewStub, sp<Renderable> renderable, bool isBackground)
-    : _view_stub(viewStub), _renderable(std::move(renderable)), _is_background(isBackground)
+View::RenderableViewSlot::RenderableViewSlot(sp<Stub> viewStub, sp<Renderable> renderable, sp<ModelLoader> modelLoader, bool isBackground)
+    : _view_stub(viewStub), _renderable(std::move(renderable)), _model_loader(std::move(modelLoader)), _is_background(isBackground)
 {
 }
 
@@ -667,16 +660,15 @@ Renderable::Snapshot View::RenderableViewSlot::snapshot(const PipelineInput& pip
     if(topViewLayoutNode)
     {
         const LayoutV3::Node& layoutNode = _view_stub->_layout_node;
-        const V2& size = layoutNode._size;
         const V4& paddings = layoutNode._paddings;
-        const V2 offsetPosition = _view_stub->getTopViewOffsetPosition();
-        float x = offsetPosition.x() + (_is_background ? 0 : paddings.w()) + size.x() / 2;
-        float y = (offsetPosition.y() + (_is_background ? 0 : paddings.x())) + size.y() / 2;
-        Renderable::Snapshot snapshot = _renderable->snapshot(pipelineInput, renderRequest, postTranslate + V3(toViewportPosition(x, y), 0), state);
-        if(_is_background)
-            snapshot._size = V3(layoutNode._size, 0);
-        else
-            snapshot._size = V3((layoutNode._size - V2(paddings.y() + paddings.w(), paddings.x() + paddings.z())), 0);
+        const V2 size = _is_background ? layoutNode._size : layoutNode._size - V2(paddings.y() + paddings.w(), paddings.x() + paddings.z());
+        const V3 topViewOffset = _view_stub->getTopViewOffsetPosition();
+        const V3 offset = _is_background ? topViewOffset : topViewOffset + V3(paddings.w(), paddings.x(), 0);
+        Renderable::Snapshot snapshot = _renderable->snapshot(pipelineInput, renderRequest, postTranslate, state);
+        if(!snapshot._model)
+            snapshot._model = _model_loader->loadModel(snapshot._type);
+        snapshot._position += V3(toViewSpacePosition(toPivotPosition(snapshot._model->occupies(), size) + V2(offset.x(), offset.y())), offset.z());
+        snapshot._size = V3(size, 0);
         return snapshot;
     }
     return Renderable::Snapshot(Renderable::RENDERABLE_STATE_NONE);
@@ -719,10 +711,10 @@ V3 View::LayoutPosition::val()
     const LayoutV3::Node& layoutNode = _stub->_layout_node;
     const V2& size = layoutNode._size;
     const V4& paddings = layoutNode._paddings;
-    const V2 offsetPosition = _stub->getTopViewOffsetPosition();
+    const V3 offsetPosition = _stub->getTopViewOffsetPosition();
     float x = offsetPosition.x() + (_is_background ? 0 : paddings.w()) + (_is_center ? size.x() / 2 : 0);
     float y = (offsetPosition.y() + (_is_background ? 0 : paddings.x())) + (_is_center ? size.y() / 2 : size.y());
-    return V3(toViewportPosition(x, y), 0);
+    return V3(toViewSpacePosition(V2(x, y)), offsetPosition.z());
 }
 
 View::UpdatableLayoutView::UpdatableLayoutView(sp<Stub> stub)

@@ -103,7 +103,8 @@ public:
     LayoutParam(Length width, Length height, LayoutParam::FlexDirection flexDirection = LayoutParam::FLEX_DIRECTION_ROW, LayoutParam::FlexWrap flexWrap = LayoutParam::FLEX_WRAP_NOWRAP,
                 LayoutParam::JustifyContent justifyContent = LayoutParam::JUSTIFY_CONTENT_FLEX_START, LayoutParam::Align alignItems = LayoutParam::ALIGN_STRETCH,
                 LayoutParam::Align alignSelf = LayoutParam::ALIGN_AUTO, LayoutParam::Align alignContent = LayoutParam::ALIGN_STRETCH,
-                LayoutParam::Display display = LayoutParam::DISPLAY_BLOCK, float flexGrow = 0, Length flexBasis = Length(), sp<Vec4> margins = nullptr);
+                LayoutParam::Display display = LayoutParam::DISPLAY_BLOCK, float flexGrow = 0, Length flexBasis = Length(), sp<Vec4> margins = nullptr, sp<Vec4> paddings = nullptr,
+                sp<Vec3> position = nullptr);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(LayoutParam);
 
     virtual bool update(uint64_t timestamp) override;
@@ -199,6 +200,9 @@ public:
 //  [[script::bindings::property]]
     void setPaddings(sp<Vec4> paddings);
 
+    const SafeVar<Vec3>& position() const;
+    void setPosition(sp<Vec3> position);
+
     bool isWrapContent() const;
     bool isWidthWrapContent() const;
     bool isHeightWrapContent() const;
@@ -232,6 +236,8 @@ public:
         float _flex_grow;
 
         SafePtr<Builder<Vec4>> _margins;
+        SafePtr<Builder<Vec4>> _paddings;
+        SafePtr<Builder<Vec3>> _position;
     };
 
 private:
@@ -259,6 +265,8 @@ private:
     float _flex_grow;
     SafeVar<Vec4> _margins;
     SafeVar<Vec4> _paddings;
+
+    SafeVar<Vec3> _position;
 
     Timestamp _timestamp;
 };

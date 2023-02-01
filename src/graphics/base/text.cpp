@@ -74,6 +74,7 @@ const sp<Vec3>& Text::position() const
 void Text::setPosition(sp<Vec3> position)
 {
     _content->position().reset(std::move(position));
+    _content->_needs_reload = true;
 }
 
 const sp<Size>& Text::size() const
@@ -103,7 +104,7 @@ void Text::setText(std::wstring text)
 
 void Text::show(sp<Boolean> disposed)
 {
-    _layer_context = _render_layer->makeContext(_content, nullptr, nullptr, std::move(disposed));
+    _layer_context = _render_layer->makeLayerContext(_content, nullptr, nullptr, std::move(disposed));
 }
 
 void Text::setRichText(std::wstring richText, const sp<ResourceLoader>& resourceLoader, const Scope& args)
@@ -113,6 +114,8 @@ void Text::setRichText(std::wstring richText, const sp<ResourceLoader>& resource
 
 void Text::render(RenderRequest& renderRequest, const V3& position)
 {
+    return;
+
     if(!_content->update(_layer_context, renderRequest.timestamp()))
         if(_content->_layout_size && _content->_layout_size->update(renderRequest.timestamp()))
             _content->layoutContent();
@@ -237,7 +240,7 @@ void Text::Content::createLayerContent(const sp<LayerContext>& layerContext, flo
     _size->setHeight(height);
 
     _renderables.clear();
-    if(layerContext)
+    if(layerContext && false)
         for(const sp<RenderObject>& i : renderObjects)
         {
             sp<RenderablePassive> renderable = sp<RenderablePassive>::make(i);
@@ -250,8 +253,8 @@ void Text::Content::createLayerContent(const sp<LayerContext>& layerContext, flo
 
 float Text::Content::doLayoutWithBoundary(GlyphContents& cm, float& flowx, float& flowy, float boundary)
 {
-    const std::vector<LayoutChar> layoutChars = getCharacterMetrics(cm);
-    float fontHeight = layoutChars.size() > 0 ? layoutChars.at(0)._metrics.aabb().y() * _text_scale : 0;
+    const std::vector<LayoutChar> layoutChars = toLayoutCharacters(cm);
+    float fontHeight = layoutChars.size() > 0 ? layoutChars.at(0)._model->occupies()->size().y() * _text_scale : 0;
     size_t begin = 0;
     for(size_t i = 0; i < layoutChars.size(); ++i)
     {
@@ -261,7 +264,7 @@ float Text::Content::doLayoutWithBoundary(GlyphContents& cm, float& flowx, float
         {
             if(end - begin == 1)
             {
-                placeOne(cm[i], currentChar._metrics, flowx, flowy);
+                placeOne(cm[i], currentChar._model, flowx, flowy);
                 if(flowx > boundary || currentChar._is_line_break)
                     nextLine(fontHeight, flowx, flowy);
             }
@@ -286,9 +289,8 @@ float Text::Content::doLayoutWithoutBoundary(GlyphContents& cm, float& flowx, fl
     for(Glyph& i : cm)
     {
         const sp<Model> model = _model_loader->loadModel(i.type()->val());
-        const Metrics& metrics = model->metrics();
         flowx += _letter_spacing;
-        placeOne(i, metrics, flowx, flowy, &fontHeight);
+        placeOne(i, model, flowx, flowy, &fontHeight);
     }
     return std::abs(flowy) + fontHeight;
 }
@@ -301,19 +303,21 @@ void Text::Content::place(GlyphContents& cm, const std::vector<Text::LayoutChar>
             flowx += _letter_spacing;
 
         const Text::LayoutChar& layoutChar = layouts.at(i);
-        placeOne(cm[i], layoutChar._metrics, flowx, flowy);
+        placeOne(cm[i], layoutChar._model, flowx, flowy);
     }
 }
 
-void Text::Content::placeOne(Glyph& glyph, const Metrics& metrics, float& flowx, float flowy, float* fontHeight)
+void Text::Content::placeOne(Glyph& glyph, const Model& model, float& flowx, float flowy, float* fontHeight)
 {
     const V2 scale = V2(_text_scale, _text_scale);
-    float bitmapWidth = scale.x() * metrics.width();
-    float bitmapHeight = scale.y() * metrics.height();
-    float width = scale.x() * metrics.aabb().x();
-    float height = scale.y() * metrics.aabb().y();
-    float bitmapX = scale.x() * metrics.origin().x();
-    float bitmapY = scale.y() * metrics.origin().y();
+    const Metrics& bounds = model.bounds();
+    const Metrics& occupies = model.occupies();
+    float bitmapWidth = scale.x() * bounds.width();
+    float bitmapHeight = scale.y() * bounds.height();
+    float width = scale.x() * occupies.width();
+    float height = scale.y() * occupies.height();
+    float bitmapX = - scale.x() * occupies.aabbMin().x();
+    float bitmapY = - scale.y() * occupies.aabbMin().y();
     if(fontHeight)
         *fontHeight = std::max(height, *fontHeight);
     glyph.setLayoutPosition(V3(flowx + bitmapX, flowy + height - bitmapY - bitmapHeight, 0));
@@ -334,13 +338,13 @@ float Text::Content::getFlowY() const
     return _layout_size->heightAsFloat() + _line_height;
 }
 
-std::vector<Text::LayoutChar> Text::Content::getCharacterMetrics(const GlyphContents& glyphs) const
+std::vector<Text::LayoutChar> Text::Content::toLayoutCharacters(const GlyphContents& glyphs) const
 {
-    std::vector<LayoutChar> metrics;
-    std::unordered_map<wchar_t, std::tuple<Metrics, bool, bool>> mmap;
+    std::vector<LayoutChar> layoutChars;
+    std::unordered_map<wchar_t, std::tuple<sp<Model>, bool, bool>> mmap;
     const float xScale = _text_scale;
     float integral = 0;
-    metrics.reserve(glyphs.size());
+    layoutChars.reserve(glyphs.size());
     for(const sp<Glyph>& i : glyphs)
     {
         const wchar_t c = i->character();
@@ -348,23 +352,23 @@ std::vector<Text::LayoutChar> Text::Content::getCharacterMetrics(const GlyphCont
         const auto iter = mmap.find(c);
         if(iter != mmap.end())
         {
-            const std::tuple<Metrics, bool, bool>& val = iter->second;
-            integral += xScale * std::get<0>(val).aabb().x();
-            metrics.emplace_back(std::get<0>(val), integral, std::get<1>(val), std::get<2>(val), isLineBreak);
+            const std::tuple<sp<Model>, bool, bool>& val = iter->second;
+            integral += xScale * std::get<0>(val)->occupies()->width();
+            layoutChars.emplace_back(std::get<0>(val), integral, std::get<1>(val), std::get<2>(val), isLineBreak);
         }
         else
         {
             int32_t type = static_cast<int32_t>(c);
-            const sp<Model> model = _model_loader->loadModel(type);
-            const Metrics& m = model->metrics();
+            sp<Model> model = _model_loader->loadModel(type);
+            const Metrics& m = model->occupies();
             bool iscjk = isCJK(c);
             bool iswordbreak = isWordBreaker(c);
-            integral += xScale * m.aabb().x();
-            mmap.insert(std::make_pair(c, std::make_tuple(m, iscjk, iswordbreak)));
-            metrics.emplace_back(m, integral, iscjk, iswordbreak, isLineBreak);
+            integral += xScale * m.size().x();
+            mmap.insert(std::make_pair(c, std::make_tuple(model, iscjk, iswordbreak)));
+            layoutChars.emplace_back(std::move(model), integral, iscjk, iswordbreak, isLineBreak);
         }
     }
-    return metrics;
+    return layoutChars;
 }
 
 float Text::Content::getLayoutBoundary() const
@@ -387,8 +391,8 @@ sp<Text> Text::BUILDER::build(const Scope& args)
                           BeanUtils::toFloat(_letter_spacing, args, 0.0f), _line_height, _line_indent);
 }
 
-Text::LayoutChar::LayoutChar(const Metrics& metrics, float widthIntegral, bool isCJK, bool isWordBreak, bool isLineBreak)
-    : _metrics(metrics), _width_integral(widthIntegral), _is_cjk(isCJK), _is_word_break(isWordBreak), _is_line_break(isLineBreak)
+Text::LayoutChar::LayoutChar(sp<Model> model, float widthIntegral, bool isCJK, bool isWordBreak, bool isLineBreak)
+    : _model(std::move(model)), _width_integral(widthIntegral), _is_cjk(isCJK), _is_word_break(isWordBreak), _is_line_break(isLineBreak)
 {
 }
 

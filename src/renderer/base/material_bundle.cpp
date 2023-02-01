@@ -100,8 +100,8 @@ Rect MaterialBundle::getMaterialUV(const String& name) const
 }
 
 MaterialBundle::BUILDER::BUILDER(BeanFactory& beanFactory, const document& manifest)
-    : _names(Documents::ensureAttributeList<String>(manifest, Constants::Attributes::NAME, "material")), _materials(beanFactory.getBuilderList<Material>(manifest, "material")),
-      _types(Documents::ensureAttributeList<MaterialTexture::Type>(manifest, Constants::Attributes::TYPE, Constants::Attributes::TEXTURE)), _textures(beanFactory.getBuilderList<Texture>(manifest, Constants::Attributes::TEXTURE)) {
+    : _names(Documents::ensureAttributeList<String>(manifest, Constants::Attributes::NAME, "material")), _materials(beanFactory.makeBuilderList<Material>(manifest, "material")),
+      _types(Documents::ensureAttributeList<MaterialTexture::Type>(manifest, Constants::Attributes::TYPE, Constants::Attributes::TEXTURE)), _textures(beanFactory.makeBuilderList<Texture>(manifest, Constants::Attributes::TEXTURE)) {
 }
 
 sp<MaterialBundle> MaterialBundle::BUILDER::build(const Scope& args)

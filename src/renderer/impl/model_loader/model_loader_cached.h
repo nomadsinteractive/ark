@@ -17,7 +17,7 @@ public:
     virtual void initialize(ShaderBindings& shaderBindings) override;
     virtual sp<Model> loadModel(int32_t type) override;
 
-    static sp<ModelLoader> decorate(sp<ModelLoader> delegate);
+    static sp<ModelLoader> ensureCached(sp<ModelLoader> delegate);
 
 private:
     sp<ModelLoader> _delegate;

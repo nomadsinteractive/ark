@@ -49,7 +49,8 @@ void ViewHierarchy::Slot::updateLayoutPosition(const V2& position, float clientH
         {
             LayoutV3::Node& layoutNode = _view->layoutNode();
             const V4 margins = layoutParam->margins().val();
-            layoutNode._offset_position = V2(position.x() + margins.w(), clientHeight - layoutParam->contentHeight() - position.y() - margins.x());
+            layoutNode._paddings = layoutParam->paddings().val();
+            layoutNode._offset_position = V2(position.x() + margins.w(), position.y() + margins.x());
         }
     }
 }

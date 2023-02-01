@@ -49,8 +49,6 @@ public:
 
 // [[script::bindings::property]]
     const sp<LayerContext>& context() const;
-// [[script::bindings::property]]
-    void setContext(sp<LayerContext> context);
 
 // [[script::bindings::auto]]
     void addRenderObject(const sp<RenderObject>& renderObject, const sp<Boolean>& disposed = sp<Boolean>::null());
@@ -69,6 +67,7 @@ public:
         SafePtr<Builder<RenderLayer>> _render_layer;
         SafePtr<Builder<ModelLoader>> _model_loader;
         SafePtr<Builder<Boolean>> _visible;
+        SafePtr<Builder<Vec3>> _position;
         std::vector<sp<Builder<RenderObject>>> _render_objects;
     };
 

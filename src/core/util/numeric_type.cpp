@@ -156,34 +156,34 @@ float NumericType::toFloat(const sp<Numeric>& self)
     return self->val();
 }
 
-sp<Boolean> NumericType::gt(const sp<Numeric>& self, const sp<Numeric>& other)
+sp<Boolean> NumericType::gt(sp<Numeric> self, sp<Numeric> other)
 {
-    return sp<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::GT<float>>>::make(self, other);
+    return sp<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::GT<float>>>::make(std::move(self), std::move(other));
 }
 
-sp<Boolean> NumericType::ge(const sp<Numeric>& self, const sp<Numeric>& other)
+sp<Boolean> NumericType::ge(sp<Numeric> self, sp<Numeric> other)
 {
-    return sp<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::GE<float>>>::make(self, other);
+    return sp<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::GE<float>>>::make(std::move(self), std::move(other));
 }
 
-sp<Boolean> NumericType::lt(const sp<Numeric>& self, const sp<Numeric>& other)
+sp<Boolean> NumericType::lt(sp<Numeric> self, sp<Numeric> other)
 {
-    return sp<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::LT<float>>>::make(self, other);
+    return sp<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::LT<float>>>::make(std::move(self), std::move(other));
 }
 
-sp<Boolean> NumericType::le(const sp<Numeric>& self, const sp<Numeric>& other)
+sp<Boolean> NumericType::le(sp<Numeric> self, sp<Numeric> other)
 {
-    return sp<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::LE<float>>>::make(self, other);
+    return sp<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::LE<float>>>::make(std::move(self), std::move(other));
 }
 
-sp<Boolean> NumericType::eq(const sp<Numeric>& self, const sp<Numeric>& other)
+sp<Boolean> NumericType::eq(sp<Numeric> self, sp<Numeric> other)
 {
-    return sp<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::EQ<float>>>::make(self, other);
+    return sp<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::EQ<float>>>::make(std::move(self), std::move(other));
 }
 
-sp<Boolean> NumericType::ne(const sp<Numeric>& self, const sp<Numeric>& other)
+sp<Boolean> NumericType::ne(sp<Numeric> self, sp<Numeric> other)
 {
-    return sp<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::NE<float>>>::make(self, other);
+    return sp<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::NE<float>>>::make(std::move(self), std::move(other));
 }
 
 float NumericType::val(const sp<Numeric>& self)

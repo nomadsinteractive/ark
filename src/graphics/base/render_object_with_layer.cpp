@@ -29,6 +29,8 @@ RenderObjectWithLayer::~RenderObjectWithLayer()
 
 void RenderObjectWithLayer::render(RenderRequest& /*renderRequest*/, const V3& position)
 {
+    return;
+
     if(!_renderable)
     {
          _renderable = sp<RenderablePassive>::make(_render_object);
@@ -54,9 +56,12 @@ const sp<RenderObject>& RenderObjectWithLayer::renderObject() const
 
 void RenderObjectWithLayer::measure(Size& size)
 {
-    const Metrics& metrics = _layer_context->modelLoader()->loadModel(_render_object->type()->val())->metrics();
-    size.setWidth(metrics.width());
-    size.setHeight(metrics.height());
+    const sp<Metrics>& metrics = _layer_context->modelLoader()->loadModel(_render_object->type()->val())->bounds();
+    if(metrics)
+    {
+        size.setWidth(metrics->width());
+        size.setHeight(metrics->height());
+    }
 }
 
 RenderObjectWithLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

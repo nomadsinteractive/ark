@@ -9,6 +9,8 @@
 #include "graphics/base/render_request.h"
 #include "graphics/base/size.h"
 #include "graphics/base/v4.h"
+#include "graphics/impl/render_batch/render_batch_impl.h"
+#include "graphics/impl/render_batch/render_batch_with_translation.h"
 
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/model.h"
@@ -27,19 +29,28 @@
 namespace ark {
 
 RenderLayer::Stub::Stub(sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Vec4> scissor, sp<RenderController> renderController)
-    : _model_loader(ModelLoaderCached::decorate(std::move(modelLoader))), _shader(std::move(shader)), _scissor(std::move(scissor)), _render_controller(std::move(renderController)), _render_command_composer(_model_loader->makeRenderCommandComposer()),
-      _shader_bindings(_render_command_composer->makeShaderBindings(_shader, _render_controller, _model_loader->renderMode())), _visible(nullptr, true), _layer(sp<Layer>::make(sp<LayerContext>::make(nullptr, _model_loader, nullptr, nullptr, nullptr))),
+    : _model_loader(ModelLoaderCached::ensureCached(std::move(modelLoader))), _shader(std::move(shader)), _scissor(std::move(scissor)), _render_controller(std::move(renderController)), _render_command_composer(_model_loader->makeRenderCommandComposer()),
+      _shader_bindings(_render_command_composer->makeShaderBindings(_shader, _render_controller, _model_loader->renderMode())), _visible(nullptr, true), _layer(sp<Layer>::make(sp<LayerContext>::make(sp<RenderBatchImpl>::make(), _model_loader))),
       _stride(_shader->input()->getStream(0).stride())
 {
     _model_loader->initialize(_shader_bindings);
     DCHECK(!_scissor || _shader_bindings->pipelineBindings()->hasFlag(PipelineBindings::FLAG_DYNAMIC_SCISSOR, PipelineBindings::FLAG_DYNAMIC_SCISSOR_BITMASK), "RenderLayer has a scissor while its Shader has no FLAG_DYNAMIC_SCISSOR set");
 }
 
-sp<LayerContext> RenderLayer::Stub::makeLayerContext(sp<RenderableBatch> batch, sp<ModelLoader> modelLoader, sp<Boolean> visible, sp<Boolean> disposed)
+sp<LayerContext> RenderLayer::Stub::makeLayerContext(sp<RenderBatch> batch, sp<ModelLoader> modelLoader, sp<Boolean> visible, sp<Boolean> disposed)
 {
     sp<LayerContext> layerContext = sp<LayerContext>::make(std::move(batch), modelLoader ? sp<ModelLoader>::make<ModelLoaderCached>(std::move(modelLoader)) : _model_loader, std::move(visible), std::move(disposed), _layer->context()->varyings());
     _batch_groups.push_back(layerContext);
     return layerContext;
+}
+
+void RenderLayer::Stub::addLayerContext(sp<LayerContext> layerContext)
+{
+    if(!layerContext->modelLoader())
+        layerContext->setModelLoader(_model_loader);
+    if(!layerContext->varyings())
+        layerContext->setVaryings(_layer->context()->varyings());
+    _batch_groups.push_back(std::move(layerContext));
 }
 
 RenderLayer::RenderLayer(sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Vec4> scissor, sp<RenderController> renderController)
@@ -67,14 +78,22 @@ const sp<Layer>& RenderLayer::layer() const
     return _stub->_layer;
 }
 
-sp<LayerContext> RenderLayer::makeContext(sp<RenderableBatch> batch, sp<ModelLoader> modelLoader, sp<Boolean> visible, sp<Boolean> disposed) const
+sp<LayerContext> RenderLayer::makeLayerContext(sp<RenderBatch> batchOptional, sp<ModelLoader> modelLoader, sp<Boolean> visible, sp<Boolean> disposed, sp<Vec3> position) const
 {
-    return _stub->makeLayerContext(std::move(batch), std::move(modelLoader), std::move(visible), std::move(disposed));
+    sp<RenderBatch> renderBatch = batchOptional ? std::move(batchOptional) : sp<RenderBatch>::make<RenderBatchImpl>();
+    if(position)
+        renderBatch = sp<RenderBatchWithTranslation>::make(std::move(renderBatch), std::move(position));
+    return _stub->makeLayerContext(std::move(renderBatch), std::move(modelLoader), std::move(visible), std::move(disposed));
 }
 
-sp<Layer> RenderLayer::makeLayer(sp<ModelLoader> modelLoader, sp<Boolean> visible) const
+void RenderLayer::addLayerContext(sp<LayerContext> layerContext)
 {
-    return sp<Layer>::make(makeContext(nullptr, std::move(modelLoader), std::move(visible)));
+    _stub->addLayerContext(std::move(layerContext));
+}
+
+sp<Layer> RenderLayer::makeLayer(sp<ModelLoader> modelLoader, sp<Boolean> visible, sp<Boolean> disposed, sp<Vec3> position) const
+{
+    return sp<Layer>::make(makeLayerContext(nullptr, std::move(modelLoader), std::move(visible), std::move(disposed), std::move(position)));
 }
 
 void RenderLayer::render(RenderRequest& renderRequest, const V3& position)
@@ -89,7 +108,7 @@ RenderLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, co
 }
 
 RenderLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext, sp<Builder<ModelLoader>> modelLoader, sp<Builder<Shader>> shader)
-    : _resource_loader_context(resourceLoaderContext), _layers(factory.getBuilderList<Layer>(manifest, Constants::Attributes::LAYER)), _model_loader(std::move(modelLoader)), _shader(shader ? std::move(shader) : Shader::fromDocument(factory, manifest, resourceLoaderContext)),
+    : _resource_loader_context(resourceLoaderContext), _layers(factory.makeBuilderList<Layer>(manifest, Constants::Attributes::LAYER)), _model_loader(std::move(modelLoader)), _shader(shader ? std::move(shader) : Shader::fromDocument(factory, manifest, resourceLoaderContext)),
       _scissor(factory.getBuilder<Vec4>(manifest, "scissor"))
 {
 }
@@ -100,7 +119,7 @@ sp<RenderLayer> RenderLayer::BUILDER::build(const Scope& args)
     for(const sp<Builder<Layer>>& i : _layers)
     {
         const sp<Layer> layer = i->build(args);
-        layer->setContext(renderLayer->makeContext(nullptr, layer->modelLoader()));
+        renderLayer->addLayerContext(layer->context());
     }
     return renderLayer;
 }

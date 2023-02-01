@@ -30,7 +30,7 @@ sp<Model> ModelLoaderCached::loadModel(int32_t type)
     return model;
 }
 
-sp<ModelLoader> ModelLoaderCached::decorate(sp<ModelLoader> delegate)
+sp<ModelLoader> ModelLoaderCached::ensureCached(sp<ModelLoader> delegate)
 {
     return delegate ? sp<ModelLoader>::make<ModelLoaderCached>(std::move(delegate)) : delegate;
 }

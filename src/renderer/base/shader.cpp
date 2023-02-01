@@ -126,7 +126,7 @@ sp<ShaderBindings> Shader::makeBindings(Buffer vertices, ModelLoader::RenderMode
 
 Shader::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _factory(factory), _manifest(manifest), _resource_loader_context(resourceLoaderContext), _stages(loadStages(factory, manifest)),
-      _snippets(factory.getBuilderList<Snippet>(manifest, "snippet")), _camera(factory.getBuilder<Camera>(manifest, Constants::Attributes::CAMERA)),
+      _snippets(factory.makeBuilderList<Snippet>(manifest, "snippet")), _camera(factory.getBuilder<Camera>(manifest, Constants::Attributes::CAMERA)),
       _parameters(factory, manifest, resourceLoaderContext)
 {
 }

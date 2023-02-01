@@ -159,7 +159,7 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
             if(reload || s._state.hasState(Renderable::RENDERABLE_STATE_DIRTY))
             {
                 const ModelBundle::ModelLayout& modelInfo = _model_bundle->ensureModelLayout(s._type);
-                const Metrics& metrics = modelInfo._model->metrics();
+                const Metrics& metrics = modelInfo._model->bounds();
                 VertexWriter writer = buf.makeDividedVertexWriter(renderRequest, 1, offset, 1);
                 writer.next();
                 writer.write(MatrixUtil::translate(M4::identity(), s._position) * MatrixUtil::scale(s._transform.toMatrix(), toScale(s._size, metrics)) * j.globalTransform());

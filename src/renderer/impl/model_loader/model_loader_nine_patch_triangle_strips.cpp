@@ -27,7 +27,7 @@ void ModelLoaderNinePatchTriangleStrips::initialize(ShaderBindings& shaderBindin
 
 sp<Model> ModelLoaderNinePatchTriangleStrips::loadModel(int32_t type)
 {
-    return sp<Model>::make(_unit_model.indices(), _nine_patch_attachment->ensureVerticesTriangleStrips(type));
+    return sp<Model>::make(_unit_model.indices(), _nine_patch_attachment->ensureVerticesTriangleStrips(type), nullptr);
 }
 
 ModelLoaderNinePatchTriangleStrips::BUILDER::BUILDER(BeanFactory& factory, const String& atlas)

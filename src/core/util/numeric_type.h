@@ -69,17 +69,17 @@ public:
     static float toFloat(const sp<Numeric>& self);
 
 //  [[script::bindings::operator(>)]]
-    static sp<Boolean> gt(const sp<Numeric>& self, const sp<Numeric>& other);
+    static sp<Boolean> gt(sp<Numeric> self, sp<Numeric> other);
 //  [[script::bindings::operator(>=)]]
-    static sp<Boolean> ge(const sp<Numeric>& self, const sp<Numeric>& other);
+    static sp<Boolean> ge(sp<Numeric> self, sp<Numeric> other);
 //  [[script::bindings::operator(<)]]
-    static sp<Boolean> lt(const sp<Numeric>& self, const sp<Numeric>& other);
+    static sp<Boolean> lt(sp<Numeric> self, sp<Numeric> other);
 //  [[script::bindings::operator(<=)]]
-    static sp<Boolean> le(const sp<Numeric>& self, const sp<Numeric>& other);
+    static sp<Boolean> le(sp<Numeric> self, sp<Numeric> other);
 //  [[script::bindings::operator(==)]]
-    static sp<Boolean> eq(const sp<Numeric>& self, const sp<Numeric>& other);
+    static sp<Boolean> eq(sp<Numeric> self, sp<Numeric> other);
 //  [[script::bindings::operator(!=)]]
-    static sp<Boolean> ne(const sp<Numeric>& self, const sp<Numeric>& other);
+    static sp<Boolean> ne(sp<Numeric> self, sp<Numeric> other);
 
 //  [[script::bindings::property]]
     static float val(const sp<Numeric>& self);

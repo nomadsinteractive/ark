@@ -90,22 +90,22 @@ Attribute RenderUtil::makePredefinedAttribute(const String& name, const String& 
 
 Model RenderUtil::makeUnitQuadModel()
 {
-    return Model(InputType::makeElementIndexInput(std::initializer_list<element_index_t>({0, 2, 1, 2, 3, 1})), sp<VerticesQuad>::make(), Metrics(V3(1.0f), V3(1.0f), V3(0)));
+    return Model(InputType::makeElementIndexInput(std::initializer_list<element_index_t>({0, 2, 1, 2, 3, 1})), sp<VerticesQuad>::make(), sp<Metrics>::make(Metrics::unit()));
 }
 
 Model RenderUtil::makeUnitNinePatchTriangleStripsModel()
 {
-    return Model(InputType::makeElementIndexInput(std::initializer_list<element_index_t>({0, 4, 1, 5, 2, 6, 3, 7, 7, 4, 4, 8, 5, 9, 6, 10, 7, 11, 11, 8, 8, 12, 9, 13, 10, 14, 11, 15})), sp<VerticesNinePatchTriangleStrips>::make());
+    return Model(InputType::makeElementIndexInput(std::initializer_list<element_index_t>({0, 4, 1, 5, 2, 6, 3, 7, 7, 4, 4, 8, 5, 9, 6, 10, 7, 11, 11, 8, 8, 12, 9, 13, 10, 14, 11, 15})), sp<VerticesNinePatchTriangleStrips>::make(), sp<Metrics>::make(Metrics::unit()));
 }
 
 Model RenderUtil::makeUnitNinePatchQuadsModel()
 {
-    return Model(InputType::makeElementIndexInput(std::initializer_list<element_index_t>({0, 2, 1, 2, 3, 1, 6, 8, 7, 8, 9, 7, 12, 14, 13, 14, 15, 13, 18, 20, 19, 20, 21, 19, 24, 26, 25, 26, 27, 25, 30, 32, 31, 32, 33, 31, 36, 38, 37, 38, 39, 37, 42, 44, 43, 44, 45, 43, 48, 50, 49, 50, 51, 49})), sp<VerticesNinePatchQuads>::make());
+    return Model(InputType::makeElementIndexInput(std::initializer_list<element_index_t>({0, 2, 1, 2, 3, 1, 6, 8, 7, 8, 9, 7, 12, 14, 13, 14, 15, 13, 18, 20, 19, 20, 21, 19, 24, 26, 25, 26, 27, 25, 30, 32, 31, 32, 33, 31, 36, 38, 37, 38, 39, 37, 42, 44, 43, 44, 45, 43, 48, 50, 49, 50, 51, 49})), sp<VerticesNinePatchQuads>::make(), sp<Metrics>::make(Metrics::unit()));
 }
 
 Model RenderUtil::makeUnitPointModel()
 {
-    return Model(InputType::makeElementIndexInput(std::initializer_list<element_index_t>({0})), sp<VerticesPoint>::make(), Metrics());
+    return Model(InputType::makeElementIndexInput(std::initializer_list<element_index_t>({0})), sp<VerticesPoint>::make(), sp<Metrics>::make(V3(0), V3(0)));
 }
 
 uint32_t RenderUtil::hash(const element_index_t* buf, size_t len)

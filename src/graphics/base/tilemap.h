@@ -12,7 +12,7 @@
 #include "graphics/base/render_layer.h"
 #include "graphics/inf/block.h"
 #include "graphics/inf/renderer.h"
-#include "graphics/inf/renderable_batch.h"
+#include "graphics/inf/render_batch.h"
 
 #include "app/forwarding.h"
 
@@ -78,7 +78,7 @@ public:
     };
 
 private:
-    class Stub : public RenderableBatch {
+    class Stub : public RenderBatch {
     public:
         Stub();
 
@@ -89,8 +89,6 @@ private:
         sp<Scrollable> _scrollable;
         bool _need_reload;
     };
-
-    static bool _tilemapLayerComp(const TilemapLayer& a, const TilemapLayer& b);
 
 private:
     sp<RenderLayer> _render_layer;

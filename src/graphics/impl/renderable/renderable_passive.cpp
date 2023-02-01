@@ -11,6 +11,8 @@ RenderablePassive::RenderablePassive(sp<RenderObject> renderObject)
 
 Renderable::StateBits RenderablePassive::updateState(const RenderRequest& renderRequest)
 {
+    return Renderable::RENDERABLE_STATE_NONE;
+
     Renderable::StateBits state = _render_object ? _render_object->updateState(renderRequest) : Renderable::RENDERABLE_STATE_NONE;
     bool dirty = (state & Renderable::RENDERABLE_STATE_DIRTY) || _position_changed || (_visible != _render_requested);
     _visible = (state & Renderable::RENDERABLE_STATE_VISIBLE) && _render_requested;

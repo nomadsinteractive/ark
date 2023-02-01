@@ -78,7 +78,7 @@ public:
     void setLayoutParam(sp<LayoutParam> layoutParam);
 
 //  [[script::bindings::auto]]
-    void addView(sp<View> view);
+    void addView(sp<View> view, sp<Boolean> disposable = nullptr);
 
     void setParent(const View& view);
 
@@ -230,18 +230,6 @@ public:
         sp<Builder<Boolean>> _stop_propagation;
     };
 
-//  [[plugin::style("layout-param")]]
-    class STYLE_LAYOUT_PARAM : public Builder<Renderer> {
-    public:
-        STYLE_LAYOUT_PARAM(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
-
-        virtual sp<Renderer> build(const Scope& args) override;
-
-    private:
-        sp<Builder<Renderer>> _delegate;
-        sp<Builder<LayoutParam>> _layout_param;
-    };
-
 //  [[plugin::style("onenter")]]
     class STYLE_ON_ENTER : public Builder<Renderer> {
     public:
@@ -304,19 +292,6 @@ public:
 
     };
 
-//  [[plugin::style("onmove")]]
-    class STYLE_ON_MOVE : public Builder<Renderer> {
-    public:
-        STYLE_ON_MOVE(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
-
-        virtual sp<Renderer> build(const Scope& args) override;
-
-    private:
-        sp<Builder<Renderer>> _delegate;
-        sp<Builder<EventListener>> _on_move;
-
-    };
-
     struct Stub : public Updatable {
         Stub(const sp<LayoutParam>& layoutParam, sp<ViewHierarchy> viewHierarchy, sp<Boolean> visible, sp<Boolean> disposed);
 
@@ -327,7 +302,7 @@ public:
         bool isVisible() const;
         bool isDisposed() const;
 
-        V2 getTopViewOffsetPosition() const;
+        V3 getTopViewOffsetPosition() const;
         sp<LayoutV3::Node> getTopViewLayoutNode() const;
 
         const sp<ViewHierarchy>& viewHierarchy() const;
@@ -366,7 +341,7 @@ private:
 
     class RenderableViewSlot : public Renderable {
     public:
-        RenderableViewSlot(sp<Stub> viewStub, sp<Renderable> renderable, bool isBackground);
+        RenderableViewSlot(sp<Stub> viewStub, sp<Renderable> renderable, sp<ModelLoader> modelLoader, bool isBackground);
 
         virtual StateBits updateState(const RenderRequest& renderRequest) override;
         virtual Snapshot snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest, const V3& postTranslate, StateBits state) override;
@@ -374,6 +349,7 @@ private:
     private:
         sp<Stub> _view_stub;
         sp<Renderable> _renderable;
+        sp<ModelLoader> _model_loader;
         bool _is_background;
     };
 

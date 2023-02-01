@@ -2,17 +2,17 @@
 #define ARK_GRAPHICS_BASE_LAYER_CONTEXT_H_
 
 #include <deque>
+#include <vector>
 
 #include "core/base/api.h"
 #include "core/inf/builder.h"
 #include "core/inf/holder.h"
 
 #include "graphics/forwarding.h"
-#include "graphics/base/v2.h"
-#include "graphics/base/render_layer.h"
 #include "graphics/base/layer.h"
+#include "graphics/base/render_layer.h"
+#include "graphics/inf/render_batch.h"
 #include "graphics/inf/renderable.h"
-#include "graphics/inf/renderable_batch.h"
 
 #include "renderer/forwarding.h"
 
@@ -34,7 +34,7 @@ public:
     };
 
 public:
-    LayerContext(sp<RenderableBatch> batch, sp<ModelLoader> modelLoader, sp<Boolean> visible, sp<Boolean> disposed, sp<Varyings> varyings);
+    LayerContext(sp<RenderBatch> batch = nullptr, sp<ModelLoader> modelLoader = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> disposed = nullptr, sp<Varyings> varyings = nullptr);
 
     virtual void traverse(const Visitor& visitor) override;
 
@@ -47,6 +47,7 @@ public:
 
 //  [[script::bindings::property]]
     const sp<ModelLoader>& modelLoader() const;
+    void setModelLoader(sp<ModelLoader> modelLoader);
 
     Layer::Type layerType() const;
 
@@ -79,15 +80,8 @@ public:
         Layer::Type _layer_type;
     };
 
-private:
-    class DefaultBatch : public RenderableBatch {
-    public:
-        virtual bool preSnapshot(const RenderRequest& renderRequest, LayerContext& lc) override;
-        virtual void snapshot(const RenderRequest& renderRequest, const LayerContext& lc, RenderLayerSnapshot& output) override;
-    };
-
 public:
-    sp<RenderableBatch> _batch;
+    sp<RenderBatch> _render_batch;
 
     sp<ModelLoader> _model_loader;
     SafeVar<Visibility> _visible;

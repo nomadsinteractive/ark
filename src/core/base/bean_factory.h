@@ -326,16 +326,24 @@ public:
         return ensureBuilder<T>(attrValue);
     }
 
-    template<typename T> std::vector<sp<Builder<T>>> getBuilderList(const document& doc, const String& nodeName, const String& defValue = "") {
-        std::vector<sp<Builder<T>>> list;
+    template<typename T, typename U = sp<Builder<T>>> std::vector<U> makeBuilderList(const document& doc, const String& nodeName, const String& defValue = "") {
+        std::vector<U> list;
         const String attrValue = Documents::getAttribute(doc, nodeName, defValue);
-        if(attrValue)
-            list.push_back(ensureBuilder<T>(attrValue));
+        if(attrValue) {
+            sp<Builder<T>> builder = ensureBuilder<T>(attrValue);
+            if constexpr(std::is_same_v<U, sp<Builder<T>>>)
+                list.push_back(std::move(builder));
+            else
+                list.emplace_back(std::move(builder));
+        }
 
         for(const document& i : doc->children(nodeName)) {
             sp<Builder<T>> builder = findBuilderByDocument<T>(i);
             CHECK(builder, "Cannot build \"%s\" from \"%s\"", nodeName.c_str(), Documents::toString(i).c_str());
-            list.push_back(std::move(builder));
+            if constexpr(std::is_same_v<U, sp<Builder<T>>>)
+                list.push_back(std::move(builder));
+            else
+                list.emplace_back(std::move(builder), *this, i);
         }
         return list;
     }

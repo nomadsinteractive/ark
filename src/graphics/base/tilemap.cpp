@@ -68,9 +68,19 @@ public:
 
 }
 
+static bool _tilemapLayerCompareLess(const TilemapLayer& a, const TilemapLayer& b)
+{
+    return a.zorder() < b.zorder();
+}
+
+static bool _tilemapLayerCompareGreater(const TilemapLayer& a, const TilemapLayer& b)
+{
+    return a.zorder() > b.zorder();
+}
+
 Tilemap::Tilemap(sp<Tileset> tileset, sp<RenderLayer> renderLayer, sp<Importer<Tilemap>> importer, sp<Outputer<Tilemap>> outputer)
     : _render_layer(std::move(renderLayer)), _tileset(std::move(tileset)), _storage(sp<TilemapStorage>::make(*this, std::move(importer), std::move(outputer))),
-      _stub(sp<Stub>::make()), _layer_context(_render_layer ? _render_layer->makeContext(_stub, nullptr, nullptr) : nullptr)
+      _stub(sp<Stub>::make()), _layer_context(_render_layer ? _render_layer->makeLayerContext(_stub, nullptr, nullptr) : nullptr)
 {
 }
 
@@ -114,7 +124,7 @@ sp<TilemapLayer> Tilemap::makeLayer(const String& name, uint32_t colCount, uint3
 void Tilemap::addLayer(sp<TilemapLayer> layer, float zorder)
 {
     layer->_stub->_zorder = zorder;
-    _stub->_layers.insert(std::upper_bound(_stub->_layers.begin(), _stub->_layers.end(), layer, _tilemapLayerComp), std::move(layer));
+    _stub->_layers.insert(std::upper_bound(_stub->_layers.begin(), _stub->_layers.end(), layer, _tilemapLayerCompareGreater), std::move(layer));
     _stub->_need_reload = true;
 }
 
@@ -195,11 +205,6 @@ Json Tilemap::jsonDump() const
     Json jTilemap;
     jTilemap.set("layers", jLayers);
     return jTilemap;
-}
-
-bool Tilemap::_tilemapLayerComp(const TilemapLayer& a, const TilemapLayer& b)
-{
-    return a.zorder() < b.zorder();
 }
 
 const std::vector<sp<TilemapLayer>>& Tilemap::layers() const

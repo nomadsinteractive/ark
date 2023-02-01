@@ -10,13 +10,14 @@
 
 namespace ark {
 
-Model::Model(sp<Input> indices, sp<Vertices> vertices, const Metrics& metrics)
-    : _indices(std::move(indices)), _vertices(std::move(vertices)), _metrics(sp<Metrics>::make(metrics))
+Model::Model(sp<Input> indices, sp<Vertices> vertices, sp<Metrics> bounds, sp<Metrics> occupies)
+    : _indices(std::move(indices)), _vertices(std::move(vertices)), _bounds(std::move(bounds)), _occupies(occupies ? std::move(occupies) : sp<Metrics>(_bounds))
 {
 }
 
-Model::Model(std::vector<sp<Material>> materials, std::vector<sp<Mesh>> meshes, sp<Node> rootNode, const Metrics& metrics)
-    : _indices(sp<InputMeshIndices>::make(meshes)), _vertices(sp<MeshVertices>::make(meshes)), _metrics(sp<Metrics>::make(metrics)), _root_node(std::move(rootNode)), _materials(std::move(materials)), _meshes(std::move(meshes))
+Model::Model(std::vector<sp<Material>> materials, std::vector<sp<Mesh>> meshes, sp<Node> rootNode, sp<Metrics> bounds, sp<Metrics> occupies)
+    : _indices(sp<InputMeshIndices>::make(meshes)), _vertices(sp<MeshVertices>::make(meshes)), _bounds(std::move(bounds)), _occupies(occupies ? std::move(occupies) : sp<Metrics>(_bounds)),
+      _root_node(std::move(rootNode)), _materials(std::move(materials)),_meshes(std::move(meshes))
 {
 }
 
@@ -45,9 +46,14 @@ const sp<Node>& Model::rootNode() const
     return _root_node;
 }
 
-const sp<Metrics>& Model::metrics() const
+const sp<Metrics>& Model::bounds() const
 {
-    return _metrics;
+    return _bounds;
+}
+
+const sp<Metrics>& Model::occupies() const
+{
+    return _occupies;
 }
 
 size_t Model::indexCount() const
@@ -88,8 +94,7 @@ const sp<Animation>& Model::getAnimation(const String& name) const
 
 void Model::writeToStream(VertexWriter& buf, const V3& size) const
 {
-    const Metrics& m = _metrics;
-    _vertices->write(buf, size == V3(0) ? m.size() : size);
+    _vertices->write(buf, size == V3(0) && _bounds ? _bounds->size() : size);
 }
 
 void Model::writeRenderable(VertexWriter& writer, const Renderable::Snapshot& renderable) const

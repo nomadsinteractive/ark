@@ -26,7 +26,8 @@ private:
     struct Stub {
         Stub(sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Vec4> scissor, sp<RenderController> renderController);
 
-        sp<LayerContext> makeLayerContext(sp<RenderableBatch> batch, sp<ModelLoader> modelLoader, sp<Boolean> visible, sp<Boolean> disposed);
+        sp<LayerContext> makeLayerContext(sp<RenderBatch> batch, sp<ModelLoader> modelLoader, sp<Boolean> visible, sp<Boolean> disposed);
+        void addLayerContext(sp<LayerContext> layerContext);
 
         sp<ModelLoader> _model_loader;
         sp<Shader> _shader;
@@ -57,9 +58,10 @@ public:
     const sp<LayerContext>& context() const;
 
 //[[script::bindings::auto]]
-    sp<Layer> makeLayer(sp<ModelLoader> modelLoader = nullptr, sp<Boolean> visible = nullptr) const;
+    sp<Layer> makeLayer(sp<ModelLoader> modelLoader = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> disposed = nullptr, sp<Vec3> position = nullptr) const;
 
-    sp<LayerContext> makeContext(sp<RenderableBatch> batch = nullptr, sp<ModelLoader> modelLoader = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> disposed = nullptr) const;
+    sp<LayerContext> makeLayerContext(sp<RenderBatch> batchOptional = nullptr, sp<ModelLoader> modelLoader = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> disposed = nullptr, sp<Vec3> position = nullptr) const;
+    void addLayerContext(sp<LayerContext> layerContext);
 
 //  [[plugin::resource-loader]]
     class BUILDER : public Builder<RenderLayer> {

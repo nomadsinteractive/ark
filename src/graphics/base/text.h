@@ -15,7 +15,7 @@
 #include "graphics/base/metrics.h"
 #include "graphics/inf/renderer.h"
 #include "graphics/inf/renderable.h"
-#include "graphics/inf/renderable_batch.h"
+#include "graphics/inf/render_batch.h"
 
 
 namespace ark {
@@ -89,9 +89,9 @@ private:
     typedef std::vector<sp<Glyph>> GlyphContents;
 
     struct LayoutChar {
-        LayoutChar(const Metrics& metrics, float widthIntegral, bool isCJK, bool isWordBreak, bool isLineBreak);
+        LayoutChar(sp<Model> model, float widthIntegral, bool isCJK, bool isWordBreak, bool isLineBreak);
 
-        Metrics _metrics;
+        sp<Model> _model;
         float _width_integral;
         bool _is_cjk;
         bool _is_word_break;
@@ -102,7 +102,7 @@ private:
     static bool isWordBreaker(wchar_t c);
     static GlyphContents makeGlyphs(GlyphMaker& gm, const std::wstring& text);
 
-    class Content : public RenderableBatch {
+    class Content : public RenderBatch {
     public:
         Content(const sp<LayerContext>& layerContext, sp<StringVar> string, sp<GlyphMaker> glyphMaker, sp<ModelLoader> modelLoader, float textScale, float letterSpacing, float lineHeight, float lineIndent);
 
@@ -132,14 +132,14 @@ private:
 
         void createLayerContent(const sp<LayerContext>& layerContext, float width, float height);
         void place(GlyphContents& cm, const std::vector<Text::LayoutChar>& layouts, size_t begin, size_t end, float& flowx, float flowy);
-        void placeOne(Glyph& glyph, const Metrics& metrics, float& flowx, float flowy, float* fontHeight = nullptr);
+        void placeOne(Glyph& glyph, const Model& model, float& flowx, float flowy, float* fontHeight = nullptr);
 
         void nextLine(float fontHeight, float& flowx, float& flowy) const;
 
         float getFlowY() const;
         float getLayoutBoundary() const;
 
-        std::vector<Text::LayoutChar> getCharacterMetrics(const GlyphContents& glyphs) const;
+        std::vector<Text::LayoutChar> toLayoutCharacters(const GlyphContents& glyphs) const;
 
     private:
         sp<StringVar> _string;
@@ -162,6 +162,7 @@ private:
         std::vector<sp<RenderObject>> _render_objects;
         std::vector<Renderable::StateBits> _render_object_states;
 
+        [[deprecated]]
         std::vector<sp<RenderablePassive>> _renderables;
 
         bool _needs_reload;

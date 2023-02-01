@@ -72,7 +72,7 @@ public:
     const sp<View>& view() const;
 
 //  [[script::bindings::auto]]
-    void addView(sp<View> view);
+    void addView(sp<View> view, sp<Boolean> disposable = nullptr);
 
     void dispose();
 
