@@ -13,6 +13,7 @@ namespace ark {
 
 class RendererWithState : public Renderer {
 public:
+[[deprecated]]
     RendererWithState(sp<Renderer> def, sp<View::State> state);
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;

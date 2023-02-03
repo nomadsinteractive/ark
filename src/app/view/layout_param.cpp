@@ -355,13 +355,10 @@ sp<LayoutParam> LayoutParam::BUILDER::build(const Scope& args)
     sp<Vec4> margins = _margins->build(args);
     sp<Vec4> paddings = _paddings->build(args);
     sp<Vec3> position = _position->build(args);
-    if(size)
-        return sp<LayoutParam>::make(Length(LENGTH_TYPE_PIXEL, size->width()), Length(LENGTH_TYPE_PIXEL, size->height()), _flex_direction, _flex_wrap, _justify_content, _align_items, _align_self,
-                                     _align_content, _display, _flex_grow, LayoutParam::Length(), std::move(margins), std::move(paddings), std::move(position));
-    if(_width || _height)
-        return sp<LayoutParam>::make(_width ? _width->build(args) : Length(), _height ? _height->build(args) : Length(), _flex_direction, _flex_wrap, _justify_content, _align_items, _align_self,
-                                     _align_content, _display, _flex_grow, LayoutParam::Length(), std::move(margins), std::move(paddings), std::move(position));
-    return nullptr;
+    Length width = size ? Length(LENGTH_TYPE_PIXEL, size->width()) : _width ? _width->build(args) : Length();
+    Length height = size ? Length(LENGTH_TYPE_PIXEL, size->height()) : _height ? _height->build(args) : Length();
+    return sp<LayoutParam>::make(std::move(width), std::move(height), _flex_direction, _flex_wrap, _justify_content, _align_items, _align_self, _align_content, _display, _flex_grow,
+                                 LayoutParam::Length(), std::move(margins), std::move(paddings), std::move(position));
 }
 
 template<> ARK_API sp<LayoutParam> Null::safePtr()

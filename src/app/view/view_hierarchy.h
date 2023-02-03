@@ -17,42 +17,25 @@
 
 namespace ark {
 
-class ARK_API ViewHierarchy : public Holder, public Updatable {
+class ARK_API ViewHierarchy : public Holder {
 public:
     class ARK_API Slot : public Holder {
     public:
-        Slot(const sp<Renderer>& renderer, sp<View> view, bool layoutRequested);
+        Slot(sp<View> view);
 
         virtual void traverse(const Visitor& visitor) override;
 
-        const sp<View>& view() const;
-
-        void updateLayoutPosition(const V2& position, float clientHeight);
-
         bool isDisposed() const;
         bool isVisible() const;
-        bool layoutRequested() const;
 
         void updateLayout();
-        void wrapContentLayout() const;
+        void updateLayoutPosition(const V2& position);
 
-        [[deprecated]]
-        void render(RenderRequest& renderRequest, const V3& position);
-
-        bool onEventDispatch(const Event& event, float x, float y);
-
-        sp<LayoutParam> getLayoutParam() const;
-
-        sp<LayoutV3::Node> layoutNode() const;
+        const sp<LayoutParam>& layoutParam() const;
+        const sp<LayoutV3::Node>& layoutNode() const;
 
     private:
-        bool _layout_requested;
-        [[deprecated]]
-        sp<Renderer> _renderer;
         sp<View> _view;
-        sp<LayoutEventListener> _layout_event_listener;
-        sp<Disposed> _disposed;
-        sp<Visibility> _visible;
 
         friend class ViewHierarchy;
     };
@@ -62,29 +45,23 @@ public:
 
     virtual void traverse(const Visitor& visitor) override;
 
-    virtual bool update(uint64_t timestamp) override;
+    bool isIsolatedLayout() const;
 
-    const sp<LayoutV3>& layout() const;
+    bool updateDescendantLayout(uint64_t timestamp);
+    bool updateLayout(const LayoutParam& layoutParam, const sp<LayoutV3::Node>& layoutNode, uint64_t timestamp, bool isDirty);
 
-    [[deprecated]]
-    void render(RenderRequest& renderRequest, const V3& position);
-    bool onEvent(const Event& event, float x, float y) const;
-
-    void updateLayout(View& view, uint64_t timestamp, bool isDirty);
     const std::vector<sp<Slot>>& updateSlots();
 
-    void addRenderer(const sp<Renderer>& renderer);
     void addView(sp<View> view);
 
 private:
-    bool isLayoutNeeded(const LayoutParam& layoutParam, bool& inflateNeeded);
+    bool isInflateNeeded();
 
     std::pair<std::vector<sp<Slot>>, std::vector<sp<LayoutParam>>> getLayoutItems() const;
 
 private:
     sp<Layout> _layout;
     sp<LayoutV3> _layout_v3;
-    V3 _layout_size;
 
     std::vector<sp<Slot>> _slots;
     std::vector<sp<Slot>> _incremental;

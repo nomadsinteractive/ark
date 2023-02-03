@@ -17,6 +17,7 @@
 #include "graphics/impl/vec/vec2_impl.h"
 
 #include "renderer/base/render_controller.h"
+#include "renderer/base/render_engine.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/inf/renderer_factory.h"
 
@@ -184,6 +185,11 @@ bool ApplicationContext::onEvent(const Event& event)
     if(event.action() == Event::ACTION_UP || event.action() == Event::ACTION_DOWN || event.action() == Event::ACTION_MOVE)
         _cursor_position->set(event.xy());
     return _event_listeners->onEvent(event) || (_default_event_listener && _default_event_listener->onEvent(event));
+}
+
+V2 ApplicationContext::toViewportPosition(const V2& position, Ark::RendererCoordinateSystem cs) const
+{
+    return _render_engine->toViewportPosition(position, cs);
 }
 
 void ApplicationContext::addPreRenderTask(const sp<Runnable>& task, const sp<Boolean>& disposed)

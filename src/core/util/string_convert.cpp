@@ -126,6 +126,11 @@ template<> ARK_API String StringConvert::to<V4, String>(const V4& val)
     return Strings::sprintf("(%.2f, %.2f, %.2f, %.2f)", val.x(), val.y(), val.z(), val.w());
 }
 
+template<> ARK_API String StringConvert::to<sp<String>, String>(const sp<String>& val)
+{
+    return *val;
+}
+
 template<> ARK_API std::wstring StringConvert::to<String, std::wstring>(const String& str)
 {
     return Strings::fromUTF8(str);

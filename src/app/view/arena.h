@@ -95,6 +95,7 @@ private:
     sp<ResourceLoader> _resource_loader;
     op<EventListenerList> _event_listeners;
 
+    DList<Renderer> _renderers;
     DList<Renderer> _layers;
     DList<Renderer> _render_layers;
 };

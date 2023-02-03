@@ -18,104 +18,47 @@
 
 namespace ark {
 
-ViewHierarchy::Slot::Slot(const sp<Renderer>& renderer, sp<View> view, bool layoutRequested)
-    : _layout_requested(layoutRequested), _renderer(renderer), _view(std::move(view)), _layout_event_listener(renderer.as<LayoutEventListener>()),
-      _disposed(_renderer.as<Disposed>()), _visible(_renderer.as<Visibility>())
+ViewHierarchy::Slot::Slot(sp<View> view)
+    : _view(std::move(view))
 {
-    if(!_view)
-        _view = _renderer.as<View>();
+    DASSERT(_view);
 }
 
 void ViewHierarchy::Slot::traverse(const Holder::Visitor& visitor)
 {
-    if(_view)
-        HolderUtil::visit(_view, visitor);
-    else
-        HolderUtil::visit(_renderer, visitor);
+    HolderUtil::visit(_view, visitor);
 }
 
-const sp<View>& ViewHierarchy::Slot::view() const
+void ViewHierarchy::Slot::updateLayoutPosition(const V2& position)
 {
-    return _view;
-}
-
-void ViewHierarchy::Slot::updateLayoutPosition(const V2& position, float clientHeight)
-{
-    if(_view)
+    const LayoutParam& layoutParam = _view->layoutParam();
+    if(layoutParam.display() == LayoutParam::DISPLAY_BLOCK)
     {
-        const sp<LayoutParam>& layoutParam = _view->layoutParam();
-        DASSERT(layoutParam);
-        if(layoutParam->display() == LayoutParam::DISPLAY_BLOCK)
-        {
-            LayoutV3::Node& layoutNode = _view->layoutNode();
-            const V4 margins = layoutParam->margins().val();
-            layoutNode._paddings = layoutParam->paddings().val();
-            layoutNode._offset_position = V2(position.x() + margins.w(), position.y() + margins.x());
-        }
+        LayoutV3::Node& layoutNode = _view->layoutNode();
+        const V4 margins = layoutParam.margins().val();
+        layoutNode.setPaddings(layoutParam.paddings().val());
+        layoutNode.setOffsetPosition(V2(position.x() + margins.w(), position.y() + margins.x()));
     }
 }
 
 bool ViewHierarchy::Slot::isDisposed() const
 {
-    return _disposed && _disposed->val();
+    return _view->disposed()->val();
 }
 
 bool ViewHierarchy::Slot::isVisible() const
 {
-    return !_visible || _visible->val();
+    return _view->visible()->val();
 }
 
-bool ViewHierarchy::Slot::layoutRequested() const
+const sp<LayoutParam>& ViewHierarchy::Slot::layoutParam() const
 {
-    return _layout_requested;
+    return _view->layoutParam();
 }
 
-void ViewHierarchy::Slot::updateLayout()
+const sp<LayoutV3::Node>& ViewHierarchy::Slot::layoutNode() const
 {
-    _layout_requested = false;
-}
-
-void ViewHierarchy::Slot::wrapContentLayout() const
-{
-    if(_view && _view->layoutParam()->isWrapContent())
-        _view->updateLayout();
-}
-
-void ViewHierarchy::Slot::render(RenderRequest& renderRequest, const V3& position)
-{
-    if(!_layout_requested)
-    {
-        if(_renderer)
-            _renderer->render(renderRequest, _view ? (position + V3(_view->layoutNode()->_offset_position, 0)) : position);
-        if(_view)
-            _layout_requested = UpdatableUtil::update(renderRequest.timestamp(), _view->layoutParam()->margins(), _view->size());
-    }
-}
-
-bool ViewHierarchy::Slot::onEventDispatch(const Event& event, float x, float y)
-{
-    if(_view && isVisible())
-    {
-        const sp<LayoutParam>& layoutParam = _view->layoutParam();
-        const V2 pos = _view->layoutNode()->_offset_position;
-        const Rect target(x + pos.x(), y + pos.y(), x + pos.x() + layoutParam->contentWidth(), y + pos.y() + layoutParam->contentHeight());
-        const Event viewEvent(event, V2(event.x() - x - pos.x(), event.y() - y - pos.y()));
-        const bool ptin = event.ptin(target);
-        if(_layout_event_listener)
-            return _layout_event_listener->onEvent(event, target.left(), target.top(), ptin);
-        return _view->dispatchEvent(viewEvent, ptin);
-    }
-    return false;
-}
-
-sp<LayoutParam> ViewHierarchy::Slot::getLayoutParam() const
-{
-    return _view ? _view->layoutParam() : nullptr;
-}
-
-sp<LayoutV3::Node> ViewHierarchy::Slot::layoutNode() const
-{
-    return _view ? _view->layoutNode() : nullptr;
+    return _view->layoutNode();
 }
 
 ViewHierarchy::ViewHierarchy(sp<Layout> layout, sp<LayoutV3> layoutV3)
@@ -131,62 +74,39 @@ void ViewHierarchy::traverse(const Holder::Visitor& visitor)
         i->traverse(visitor);
 }
 
-bool ViewHierarchy::update(uint64_t timestamp)
+bool ViewHierarchy::isIsolatedLayout() const
 {
-    bool dirty = _incremental.size() > 0;
-    for(const sp<Slot>& i : _slots)
-        dirty = i->_view->_stub->update(timestamp) || dirty;
-    return dirty;
-}
-
-const sp<LayoutV3>& ViewHierarchy::layout() const
-{
-    return _layout_v3;
-}
-
-void ViewHierarchy::render(RenderRequest& renderRequest, const V3& position)
-{
-    for(Slot& i: updateSlots())
-        if(i.isVisible())
-            i.render(renderRequest, position);
-}
-
-bool ViewHierarchy::onEvent(const Event& event, float x, float y) const
-{
-    Event::Action action = event.action();
-    if(action == Event::ACTION_MOVE || action == Event::ACTION_UP || action == Event::ACTION_DOWN)
-    {
-        for(auto iter =_slots.rbegin(); iter != _slots.rend(); ++iter)
-            if((*iter)->onEventDispatch(event, x, y))
-                return true;
-    }
+//TODO: return its value when LayoutV3 is ready
     return false;
 }
 
-bool ViewHierarchy::isLayoutNeeded(const LayoutParam& layoutParam, bool& inflateNeeded)
+bool ViewHierarchy::updateDescendantLayout(uint64_t timestamp)
 {
-    bool layoutNeeded = false;
+    bool isDirty = false;
+    for(const Slot& i: updateSlots())
+        if(i.isVisible())
+            isDirty = i._view->updateLayout(timestamp) || isDirty;
+    return isDirty;
+}
+
+bool ViewHierarchy::isInflateNeeded()
+{
+    bool inflateNeeded = _incremental.size() > 0;
+    if(inflateNeeded)
+        updateSlots();
+
     for(auto iter = _slots.begin(); iter != _slots.end(); )
     {
         const sp<Slot>& i = *iter;
         if(i->isDisposed())
         {
             iter = _slots.erase(iter);
-            layoutNeeded = true;
             inflateNeeded = true;
         }
         else
             ++iter;
-        layoutNeeded = layoutNeeded || i->layoutRequested();
     }
-
-    const V3 newLayoutSize = layoutParam.size()->val();
-    if(newLayoutSize != _layout_size)
-    {
-        _layout_size = newLayoutSize;
-        return true;
-    }
-    return layoutNeeded;
+    return inflateNeeded;
 }
 
 std::pair<std::vector<sp<ViewHierarchy::Slot>>, std::vector<sp<LayoutParam>>> ViewHierarchy::getLayoutItems() const
@@ -194,7 +114,7 @@ std::pair<std::vector<sp<ViewHierarchy::Slot>>, std::vector<sp<LayoutParam>>> Vi
     std::pair<std::vector<sp<ViewHierarchy::Slot>>, std::vector<sp<LayoutParam>>> items = std::make_pair(std::vector<sp<ViewHierarchy::Slot>>(), std::vector<sp<LayoutParam>>());
     for(const sp<Slot>& i : _slots)
     {
-        sp<LayoutParam> lp = i->getLayoutParam();
+        sp<LayoutParam> lp = i->layoutParam();
         if(lp && lp->display() == LayoutParam::DISPLAY_BLOCK)
         {
             items.first.push_back(i);
@@ -204,40 +124,26 @@ std::pair<std::vector<sp<ViewHierarchy::Slot>>, std::vector<sp<LayoutParam>>> Vi
     return items;
 }
 
-void ViewHierarchy::updateLayout(View& view, uint64_t timestamp, bool isDirty)
+bool ViewHierarchy::updateLayout(const LayoutParam& layoutParam, const sp<LayoutV3::Node>& layoutNode, uint64_t timestamp, bool isDirty)
 {
-    bool inflatNeeded = _incremental.size() > 0;
-    if(inflatNeeded)
-        updateSlots();
-
-    const sp<LayoutParam>& layoutParam = view.layoutParam();
-    if(isLayoutNeeded(layoutParam, inflatNeeded) || isDirty)
+    bool inflateNeeded = isInflateNeeded();
+    if(inflateNeeded || isDirty)
     {
-        sp<LayoutV3::Node> layoutNode = view.layoutNode();
-
-        for(const sp<Slot>& i : _slots)
-            i->wrapContentLayout();
-
         if(_layout)
         {
             const auto [slots, layoutParamSlots] = getLayoutItems();
             const V2 contentSize = _layout->inflate(layoutParamSlots);
 
-            if(layoutParam->isWidthWrapContent())
-                layoutParam->setContentWidth(contentSize.x());
-            if(layoutParam->isHeightWrapContent())
-                layoutParam->setContentHeight(contentSize.y());
-
-            layoutNode->_size = layoutParam->size()->val();
+            layoutNode->setSize(layoutParam.size()->val());
             const std::vector<V2> positions = _layout->place(layoutParamSlots, layoutParam, contentSize);
             DASSERT(positions.size() == slots.size());
 
             for(size_t i = 0; i < positions.size(); ++i)
-                slots.at(i)->updateLayoutPosition(positions.at(i), layoutParam->contentHeight());
+                slots.at(i)->updateLayoutPosition(positions.at(i));
         }
         else if(_layout_v3)
         {
-            if(inflatNeeded)
+            if(inflateNeeded)
             {
                 _layout_v3->inflate(layoutNode);
                 timestamp = 0;
@@ -245,10 +151,10 @@ void ViewHierarchy::updateLayout(View& view, uint64_t timestamp, bool isDirty)
 
             _layout_v3->update(timestamp);
         }
-
-        for(const sp<Slot>& i : _slots)
-            i->updateLayout();
+        isDirty = true;
     }
+
+    return updateDescendantLayout(timestamp) || isDirty;
 }
 
 const std::vector<sp<ViewHierarchy::Slot>>& ViewHierarchy::updateSlots()
@@ -259,17 +165,10 @@ const std::vector<sp<ViewHierarchy::Slot>>& ViewHierarchy::updateSlots()
     return _slots;
 }
 
-void ViewHierarchy::addRenderer(const sp<Renderer>& renderer)
-{
-    DASSERT(renderer);
-    _incremental.push_back(sp<ViewHierarchy::Slot>::make(renderer, renderer.as<View>(), static_cast<bool>(_layout) || static_cast<bool>(_layout_v3)));
-}
-
 void ViewHierarchy::addView(sp<View> view)
 {
     ASSERT(view);
-    sp<Renderer> renderer = view;
-    _incremental.push_back(sp<ViewHierarchy::Slot>::make(std::move(renderer), std::move(view), static_cast<bool>(_layout) || static_cast<bool>(_layout_v3)));
+    _incremental.push_back(sp<ViewHierarchy::Slot>::make(std::move(view)));
 }
 
 }

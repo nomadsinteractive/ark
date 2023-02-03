@@ -90,6 +90,7 @@ const sp<Size>& Text::layoutSize() const
 void Text::setLayoutSize(sp<Size> layoutSize)
 {
     _content->_layout_size = std::move(layoutSize);
+    _content->layoutContent();
 }
 
 const std::wstring& Text::text() const
@@ -165,13 +166,14 @@ void Text::Content::setRichText(const sp<LayerContext>& layerContext, std::wstri
 
 bool Text::Content::update(const sp<LayerContext>& layerContext, uint64_t timestamp)
 {
-    bool dirty = _position.update(timestamp);
-    if(_string->update(timestamp))
-    {
+    bool positionDirty = _position.update(timestamp);
+    bool contentDirty = _string->update(timestamp);
+    bool sizeDirty = _layout_size && _layout_size->update(timestamp);
+    if(contentDirty)
         setText(layerContext, Strings::fromUTF8(*_string->val()));
-        return true;
-    }
-    return dirty;
+    if(sizeDirty)
+        layoutContent();
+    return positionDirty || contentDirty || sizeDirty;
 }
 
 void Text::Content::createContent(const sp<LayerContext>& layerContext)
@@ -185,7 +187,7 @@ void Text::Content::createContent(const sp<LayerContext>& layerContext)
 
 float Text::Content::doLayoutContent(GlyphContents& cm, float& flowx, float& flowy, float boundary)
 {
-    return boundary > 0 ? doLayoutWithBoundary(cm, flowx, flowy, boundary) : doLayoutWithoutBoundary(cm, flowx, getFlowY());
+    return boundary > 0 ? doLayoutWithBoundary(cm, flowx, flowy, boundary) : doLayoutWithoutBoundary(cm, flowx, flowy);
 }
 
 void Text::Content::createRichContent(const sp<LayerContext>& layerContext, const Scope& args, BeanFactory& factory)
@@ -260,22 +262,24 @@ float Text::Content::doLayoutWithBoundary(GlyphContents& cm, float& flowx, float
     {
         size_t end = i + 1;
         const LayoutChar& currentChar = layoutChars.at(i);
-        if(end == layoutChars.size() || currentChar._is_cjk || currentChar._is_word_break)
+        bool allowLineBreak = currentChar._is_cjk || currentChar._is_word_break;
+        if(end == layoutChars.size() || allowLineBreak)
         {
+            float beginWidth = begin > 0 ? layoutChars.at(begin - 1)._width_integral : 0;
+            float placingWidth = currentChar._width_integral - beginWidth;
+            if(flowx + placingWidth > boundary && allowLineBreak)
+            {
+                if(flowx != _line_indent)
+                    nextLine(fontHeight, flowx, flowy);
+                else
+                    LOGW("No other choices, placing word out of boundary(%.2f)", boundary);
+            }
+
             if(end - begin == 1)
-            {
                 placeOne(cm[i], currentChar._model, flowx, flowy);
-                if(flowx > boundary || currentChar._is_line_break)
-                    nextLine(fontHeight, flowx, flowy);
-            }
             else
-            {
-                float beginWidth = begin > 0 ? layoutChars.at(begin - 1)._width_integral : 0;
-                float width = currentChar._width_integral - beginWidth;
-                if(flowx + width > boundary || currentChar._is_line_break)
-                    nextLine(fontHeight, flowx, flowy);
                 place(cm, layoutChars, begin, end, flowx, flowy);
-            }
+
             begin = i + 1;
         }
     }

@@ -11,7 +11,7 @@ namespace ark {
 class ARK_API LayoutEventListener {
 public:
     virtual ~LayoutEventListener() = default;
-
+[[deprecated]]
     virtual bool onEvent(const Event& event, float x, float y, bool ptin) = 0;
 };
 

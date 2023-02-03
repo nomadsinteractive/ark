@@ -35,6 +35,9 @@ public:
 //[[script::bindings::classmethod]]
     static sp<StringVar> freeze(const sp<StringVar>& self);
 
+//[[script::bindings::classmethod]]
+    static sp<StringVar> dye(sp<StringVar> self, sp<Boolean> condition = nullptr, String message = "");
+
 //[[script::bindings::auto]]
     static sp<StringVar> format(String format, const Scope& kwargs);
 

@@ -29,14 +29,15 @@ Arena::~Arena()
 
 void Arena::addRenderer(const sp<Renderer>& renderer)
 {
-    ASSERT(_view);
-    _view->addRenderer(renderer);
+    _renderers.push_back(renderer);
 }
 
 void Arena::render(RenderRequest& renderRequest, const V3& position)
 {
     ASSERT(_view);
     _view->render(renderRequest, position);
+    for(const sp<Renderer>& i : _renderers.update(renderRequest.timestamp()))
+        i->render(renderRequest, position);
     for(const sp<Renderer>& i : _layers.update(renderRequest.timestamp()))
         i->render(renderRequest, position);
     for(const sp<Renderer>& i : _render_layers.update(renderRequest.timestamp()))
@@ -45,8 +46,7 @@ void Arena::render(RenderRequest& renderRequest, const V3& position)
 
 bool Arena::onEvent(const Event& event)
 {
-    ASSERT(_view);
-    return _view->onEvent(event, 0.0f, 0.0f, true) || _event_listeners->onEvent(event);
+    return _event_listeners->onEvent(event);
 }
 
 void Arena::traverse(const Holder::Visitor& visitor)

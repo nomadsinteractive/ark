@@ -4,6 +4,7 @@
 
 #include "core/base/bean_factory.h"
 #include "core/base/expression.h"
+#include "core/impl/variable/variable_dyed.h"
 #include "core/impl/variable/variable_observer.h"
 #include "core/impl/variable/variable_op1.h"
 #include "core/impl/variable/variable_op2.h"
@@ -151,6 +152,11 @@ sp<StringVar> StringType::freeze(const sp<StringVar>& self)
 sp<StringVar> StringType::format(String format, const Scope& kwargs)
 {
     return sp<StringVarFormatted>::make(std::move(format), kwargs.variables());
+}
+
+sp<StringVar> StringType::dye(sp<StringVar> self, sp<Boolean> condition, String message)
+{
+    return sp<VariableDyed<sp<String>>>::make(std::move(self), std::move(condition), std::move(message));
 }
 
 StringType::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr)

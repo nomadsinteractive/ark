@@ -207,10 +207,10 @@ void YogaLayout::applyLayoutParam(const LayoutParam& layoutParam, YGNodeRef node
 void YogaLayout::updateLayoutResult(Node& layoutNode)
 {
     YGNodeRef ygNode = reinterpret_cast<YGNodeRef>(layoutNode._tag);
-    layoutNode._paddings = V4(YGNodeLayoutGetPadding(ygNode, YGEdgeTop), YGNodeLayoutGetPadding(ygNode, YGEdgeRight),
-                        YGNodeLayoutGetPadding(ygNode, YGEdgeBottom), YGNodeLayoutGetPadding(ygNode, YGEdgeLeft));
-    layoutNode._offset_position = V2(YGNodeLayoutGetLeft(ygNode), YGNodeLayoutGetTop(ygNode));
-    layoutNode._size = V2(YGNodeLayoutGetWidth(ygNode), YGNodeLayoutGetHeight(ygNode));
+    layoutNode.setPaddings(V4(YGNodeLayoutGetPadding(ygNode, YGEdgeTop), YGNodeLayoutGetPadding(ygNode, YGEdgeRight),
+                              YGNodeLayoutGetPadding(ygNode, YGEdgeBottom), YGNodeLayoutGetPadding(ygNode, YGEdgeLeft)));
+    layoutNode.setOffsetPosition(V2(YGNodeLayoutGetLeft(ygNode), YGNodeLayoutGetTop(ygNode)));
+    layoutNode.setSize(V2(YGNodeLayoutGetWidth(ygNode), YGNodeLayoutGetHeight(ygNode)));
 
     if(layoutNode._view_hierarchy)
         for(const ViewHierarchy::Slot& i : layoutNode._view_hierarchy->updateSlots())

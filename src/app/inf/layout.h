@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "core/base/api.h"
+#include "core/base/with_timestamp.h"
 #include "core/inf/updatable.h"
 #include "core/types/shared_ptr.h"
 
@@ -25,18 +26,30 @@ public:
 
 class ARK_API LayoutV3 : public Updatable {
 public:
-    struct Node {
-        Node(sp<LayoutParam> layoutParam, sp<ViewHierarchy> viewHierarchy, void* tag = nullptr)
-            : _layout_param(std::move(layoutParam)), _view_hierarchy(std::move(viewHierarchy)), _tag(tag) {
-        }
+    class ARK_API Node {
+    public:
+        Node(sp<LayoutParam> layoutParam, sp<ViewHierarchy> viewHierarchy, void* tag = nullptr);
+
+        float contentWidth() const;
+        float contentHeight() const;
+
+        const V4& paddings() const;
+        void setPaddings(const V4& paddings);
+
+        const WithTimestamp<V2>& offsetPosition() const;
+        void setOffsetPosition(const V2& offsetPosition);
+
+        const WithTimestamp<V2>& size() const;
+        void setSize(const V2& size);
 
         sp<LayoutParam> _layout_param;
         sp<ViewHierarchy> _view_hierarchy;
         void* _tag;
 
+    private:
         V4 _paddings;
-        V2 _offset_position;
-        V2 _size;
+        WithTimestamp<V2> _offset_position;
+        WithTimestamp<V2> _size;
     };
 
 public:

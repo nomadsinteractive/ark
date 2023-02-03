@@ -13,6 +13,7 @@
 #include "core/types/implements.h"
 #include "core/types/safe_ptr.h"
 #include "core/types/safe_var.h"
+#include "core/types/weak_ptr.h"
 
 #include "graphics/inf/block.h"
 #include "graphics/inf/renderer.h"
@@ -26,8 +27,7 @@
 namespace ark {
 
 //[[script::bindings::extends(Renderer)]]
-class ARK_API View : public Block, public Renderer, public Renderer::Group, public LayoutEventListener, public Holder,
-                     Implements<View, Block, Renderer, Renderer::Group, LayoutEventListener, Holder> {
+class ARK_API View : public Block, public Renderer, public Holder, Implements<View, Block, Renderer, Holder> {
 public:
     enum State {
         STATE_DEFAULT = 0,
@@ -48,16 +48,14 @@ public:
     virtual void traverse(const Visitor& visitor) override;
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
-    virtual void addRenderer(const sp<Renderer>& renderer) override;
-
-    virtual bool onEvent(const Event& event, float x, float y, bool ptin) override;
+//    virtual void addRenderer(const sp<Renderer>& renderer) override;
 
     void addRenderObjectWithLayer(sp<RenderObjectWithLayer> ro, bool isBackground);
 
 //  [[script::bindings::property]]
     const sp<Vec3>& position() const;
 
-    void updateLayout();
+    bool updateLayout(uint64_t timestamp) const;
     void updateTextLayout(uint64_t timestamp);
 
     const sp<LayoutV3::Node>& layoutNode() const;
@@ -85,34 +83,6 @@ public:
     State state() const;
     void addState(State state);
     void removeState(State state);
-
-//  [[script::bindings::property]]
-    const sp<Runnable>& onEnter() const;
-//  [[script::bindings::property]]
-    void setOnEnter(const sp<Runnable>& fireOnEnter);
-//  [[script::bindings::property]]
-    const sp<Runnable>& onLeave() const;
-//  [[script::bindings::property]]
-    void setOnLeave(const sp<Runnable>& fireOnLeave);
-//  [[script::bindings::property]]
-    const sp<Runnable>& onPush() const;
-//  [[script::bindings::property]]
-    void setOnPush(const sp<Runnable>& fireOnPush);
-//  [[script::bindings::property]]
-    const sp<Runnable>& onClick() const;
-//  [[script::bindings::property]]
-    void setOnClick(const sp<Runnable>& fireOnClick);
-//  [[script::bindings::property]]
-    const sp<Runnable>& onRelease() const;
-//  [[script::bindings::property]]
-    void setOnRelease(const sp<Runnable>& fireOnRelease);
-
-//  [[script::bindings::property]]
-    const sp<EventListener>& onMove() const;
-//  [[script::bindings::property]]
-    void setOnMove(const sp<EventListener>& fireOnMove);
-
-    bool dispatchEvent(const Event& event, bool ptin);
 
 //  [[plugin::builder]]
     class BUILDER : public Builder<View> {
@@ -218,91 +188,19 @@ public:
         sp<Builder<Numeric>> _margin_bottom;
     };
 
-//  [[plugin::style("stop-propagation")]]
-    class STOP_PROPAGATION_STYLE : public Builder<Renderer> {
-    public:
-        STOP_PROPAGATION_STYLE(BeanFactory& factory, const sp<Builder<Renderer>>& delegate, const String& style);
-
-        virtual sp<Renderer> build(const Scope& args) override;
-
-    private:
-        sp<Builder<Renderer>> _delegate;
-        sp<Builder<Boolean>> _stop_propagation;
-    };
-
-//  [[plugin::style("onenter")]]
-    class STYLE_ON_ENTER : public Builder<Renderer> {
-    public:
-        STYLE_ON_ENTER(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
-
-        virtual sp<Renderer> build(const Scope& args) override;
-
-    private:
-        sp<Builder<Renderer>> _delegate;
-        sp<Builder<Runnable>> _on_enter;
-    };
-
-//  [[plugin::style("onleave")]]
-    class STYLE_ON_LEAVE : public Builder<Renderer> {
-    public:
-        STYLE_ON_LEAVE(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
-
-        virtual sp<Renderer> build(const Scope& args) override;
-
-    private:
-        sp<Builder<Renderer>> _delegate;
-        sp<Builder<Runnable>> _on_leave;
-    };
-
-//  [[plugin::style("onpush")]]
-    class STYLE_ON_PUSH : public Builder<Renderer> {
-    public:
-        STYLE_ON_PUSH(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
-
-        virtual sp<Renderer> build(const Scope& args) override;
-
-    private:
-        sp<Builder<Renderer>> _delegate;
-        sp<Builder<Runnable>> _on_push;
-    };
-
-//  [[plugin::style("onclick")]]
-    class STYLE_ON_CLICK : public Builder<Renderer> {
-    public:
-        STYLE_ON_CLICK(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
-
-        virtual sp<Renderer> build(const Scope& args) override;
-
-    private:
-        sp<Builder<Renderer>> _delegate;
-        sp<Builder<Runnable>> _on_click;
-
-    };
-
-//  [[plugin::style("onrelease")]]
-    class STYLE_ON_RELEASE : public Builder<Renderer> {
-    public:
-        STYLE_ON_RELEASE(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
-
-        virtual sp<Renderer> build(const Scope& args) override;
-
-    private:
-        sp<Builder<Renderer>> _delegate;
-        sp<Builder<Runnable>> _on_release;
-
-    };
-
     struct Stub : public Updatable {
-        Stub(const sp<LayoutParam>& layoutParam, sp<ViewHierarchy> viewHierarchy, sp<Boolean> visible, sp<Boolean> disposed);
+        Stub(sp<LayoutParam> layoutParam, sp<ViewHierarchy> viewHierarchy, sp<Boolean> visible, sp<Boolean> disposed);
 
         virtual bool update(uint64_t timestamp) override;
+
+        void updateLayout(uint64_t timestamp);
 
         void dispose();
 
         bool isVisible() const;
         bool isDisposed() const;
 
-        V3 getTopViewOffsetPosition() const;
+        V3 getTopViewOffsetPosition(bool includePaddings) const;
         sp<LayoutV3::Node> getTopViewLayoutNode() const;
 
         const sp<ViewHierarchy>& viewHierarchy() const;
@@ -314,13 +212,13 @@ public:
         SafeVar<Boolean> _visible;
         sp<BooleanWrapper> _disposed;
 
-        sp<Stub> _parent_stub;
+        WeakPtr<Stub> _parent_stub;
         bool _top_view;
     };
 
-    class UpdatableLayoutView : public Updatable {
+    class UpdatableIsolatedLayout : public Updatable {
     public:
-        UpdatableLayoutView(sp<Stub> stub);
+        UpdatableIsolatedLayout(sp<Stub> stub);
 
         virtual bool update(uint64_t timestamp) override;
 
@@ -329,14 +227,6 @@ public:
     };
 
 private:
-    bool fireOnEnter();
-    bool fireOnLeave();
-    bool fireOnPush();
-    bool fireOnRelease();
-    bool fireOnClick();
-
-    bool fireOnMove(const Event& event);
-
     void markAsTopView();
 
     class RenderableViewSlot : public Renderable {
@@ -385,15 +275,11 @@ protected:
     sp<Text> _text;
 
     sp<State> _state;
-    sp<Runnable> _on_enter;
-    sp<Runnable> _on_leave;
-    sp<Runnable> _on_push;
-    sp<Runnable> _on_click;
-    sp<Runnable> _on_release;
 
     sp<EventListener> _on_move;
     sp<IsDisposed> _is_disposed;
-    sp<Updatable> _is_dirty;
+    sp<Updatable> _is_stub_dirty;
+    sp<Updatable> _is_layout_dirty;
 
     sp<Size> _size;
     sp<Vec3> _position;

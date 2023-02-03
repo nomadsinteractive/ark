@@ -24,7 +24,7 @@ public:
     }
 
     SharedPtr<T> ensure() const {
-        const SharedPtr<T> ptr = lock();
+        SharedPtr<T> ptr = lock();
         DASSERT(ptr);
         return ptr;
     }
