@@ -159,7 +159,7 @@ sp<Arena> Arena::BUILDER::build(const Scope& args)
             arena->addLayer(factory.ensureDecorated<Renderer, Layer>(i, args));
         else if(name != Constants::Attributes::VIEW)
         {
-            WARN(name == Constants::Attributes::RENDERER, "['Renderer', 'RenderLayer', 'Layer'] expected, \"%s\" found", name.c_str());
+            CHECK_WARN(name == Constants::Attributes::RENDERER, "['Renderer', 'RenderLayer', 'Layer'] expected, \"%s\" found", name.c_str());
             arena->addRenderer(factory.ensure<Renderer>(i, args));
         }
     }

@@ -228,7 +228,7 @@ public:
 
     virtual void setMouseCapture(bool enabled) override {
         int32_t r = SDL_CaptureMouse(enabled ? SDL_TRUE : SDL_FALSE);
-        DWARN(r == 0, "Error calling SDL_CaptureMouse, enabled: %d, return: %d", enabled, r);
+        DCHECK_WARN(r == 0, "Error calling SDL_CaptureMouse, enabled: %d, return: %d", enabled, r);
     }
 
     virtual void exit() override {

@@ -58,7 +58,7 @@ void Emitter::setActive(bool active)
 
 void Emitter::activate()
 {
-    DWARN(_disposed->val(), "Emitter activated already");
+    DCHECK_WARN(_disposed->val(), "Emitter activated already");
     if(_disposed->val())
     {
         doActivate();
@@ -68,7 +68,7 @@ void Emitter::activate()
 
 void Emitter::deactivate()
 {
-    DWARN(!_disposed->val(), "Emitter has not been activated");
+    DCHECK_WARN(!_disposed->val(), "Emitter has not been activated");
     _disposed->set(true);
 }
 
@@ -138,7 +138,7 @@ uint64_t Emitter::Particale::show(const V3& position, uint64_t tick, const sp<La
         const sp<Vec3> position = makePosition(_source_position);
         const sp<Boolean> disposed = _disposed->build(_stub->_arguments);
         const sp<RenderObject> renderObject = sp<RenderObject>::make(type, position, size, transform, varyings);
-        DWARN(disposed, "You're creating particles that will NEVER die, is that what you really want?");
+        DCHECK_WARN(disposed, "You're creating particles that will NEVER die, is that what you really want?");
         layerContext->add(renderObject, nullptr, disposed);
     }
     return _last_emit_tick + _interval;
@@ -159,7 +159,7 @@ Emitter::Source::Source(const sp<Integer>& type, const sp<Vec3>& position, const
 Emitter::Stub::Stub(const sp<Clock>& clock, const sp<LayerContext>& layerContext, const sp<Emitter::Source>& source, const std::vector<document>& particleDescriptor, BeanFactory& beanFactory)
     : _clock(clock), _layer_context(layerContext), _source(source), _next_tick(0)
 {
-    DWARN(_layer_context->layerType() == Layer::TYPE_TRANSIENT, "You're creating emitter on a non-transient Layer, which may cause efficiency problems");
+    DCHECK_WARN(_layer_context->layerType() == Layer::TYPE_TRANSIENT, "You're creating emitter on a non-transient Layer, which may cause efficiency problems");
     for(const document& i : particleDescriptor)
         _particles.push_back(Particale(_source, i, beanFactory));
 }

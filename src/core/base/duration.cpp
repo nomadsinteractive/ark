@@ -33,7 +33,7 @@ Duration::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
       _delegate(factory.getBuilder<Numeric>(manifest, "t")),
       _until(factory.getBuilder<Numeric>(manifest, "until"))
 {
-    DWARN(!(_clock && _delegate), "Clock will be ommited since \"t\" is specified");
+    DCHECK_WARN(!(_clock && _delegate), "Clock will be ommited since \"t\" is specified");
 }
 
 sp<Duration> Duration::BUILDER::build(const Scope& args)

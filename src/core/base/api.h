@@ -51,10 +51,11 @@
 #define ARK_CONCAT_IMPL(x, y) x##y
 #define ARK_CONCAT(x, y) ARK_CONCAT_IMPL(x, y)
 
-#define FATAL(...) ark::__message__(ark::__fatal__, __ARK_FUNCTION__, nullptr, __VA_ARGS__)
+#define WARN(...)   ark::__message__(ark::__warning__, __ARK_FUNCTION__, nullptr, __VA_ARGS__)
+#define FATAL(...)  ark::__message__(ark::__fatal__, __ARK_FUNCTION__, nullptr, __VA_ARGS__)
 #define THREAD_CHECK(threadId) __thread_check__<threadId>(__ARK_FUNCTION__)
 #define CHECK(cond, ...) if(!(cond)) ark::__message__(ark::__fatal__, __ARK_FUNCTION__, #cond, __VA_ARGS__)
-#define WARN(cond, ...) if(!(cond)) ark::__message__(ark::__warning__, __ARK_FUNCTION__, #cond, __VA_ARGS__)
+#define CHECK_WARN(cond, ...) if(!(cond)) ark::__message__(ark::__warning__, __ARK_FUNCTION__, #cond, __VA_ARGS__)
 #define TRACE(cond, ...) if(cond) ark::__message__(ark::__trace__, __ARK_FUNCTION__, #cond, __VA_ARGS__)
 
 #ifndef ARK_FLAG_PUBLISHING_BUILD
@@ -70,13 +71,13 @@
 #ifdef ARK_FLAG_DEBUG
 #   define DFATAL(...) FATAL(__VA_ARGS__)
 #   define DCHECK(cond, ...) CHECK(cond, __VA_ARGS__)
-#   define DWARN(cond, ...) WARN(cond, __VA_ARGS__)
+#   define DCHECK_WARN(cond, ...) CHECK_WARN(cond, __VA_ARGS__)
 #   define DTRACE(cond) TRACE(cond, __VA_ARGS__)
 #   define DTHREAD_CHECK(threadId) THREAD_CHECK(threadId)
 #else
 #   define DFATAL(...)
 #   define DCHECK(cond, ...) (void (cond))
-#   define DWARN(cond, ...) (void (cond))
+#   define DCHECK_WARN(cond, ...) (void (cond))
 #   define DTRACE(cond, ...) (void (cond))
 #   define DTHREAD_CHECK(threadId) (void (threadId))
 #endif

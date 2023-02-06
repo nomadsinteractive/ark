@@ -28,19 +28,19 @@
 
 namespace ark {
 
-RenderLayer::Stub::Stub(sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Vec4> scissor, sp<RenderController> renderController)
-    : _model_loader(ModelLoaderCached::ensureCached(std::move(modelLoader))), _shader(std::move(shader)), _scissor(std::move(scissor)), _render_controller(std::move(renderController)), _render_command_composer(_model_loader->makeRenderCommandComposer()),
-      _shader_bindings(_render_command_composer->makeShaderBindings(_shader, _render_controller, _model_loader->renderMode())), _visible(nullptr, true), _layer(sp<Layer>::make(sp<LayerContext>::make(sp<RenderBatchImpl>::make(), _model_loader))),
+RenderLayer::Stub::Stub(sp<RenderController> renderController, sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Boolean> visible, sp<Boolean> disposed, sp<Varyings> varyings, sp<Vec4> scissor)
+    : _render_controller(std::move(renderController)), _model_loader(ModelLoaderCached::ensureCached(std::move(modelLoader))), _shader(std::move(shader)), _scissor(std::move(scissor)), _render_command_composer(_model_loader->makeRenderCommandComposer()),
+      _shader_bindings(_render_command_composer->makeShaderBindings(_shader, _render_controller, _model_loader->renderMode())), _layer_context(sp<LayerContext>::make(sp<RenderBatchImpl>::make(), _model_loader, std::move(visible), std::move(disposed), std::move(varyings))),
       _stride(_shader->input()->getStream(0).stride())
 {
     _model_loader->initialize(_shader_bindings);
-    DCHECK(!_scissor || _shader_bindings->pipelineBindings()->hasFlag(PipelineBindings::FLAG_DYNAMIC_SCISSOR, PipelineBindings::FLAG_DYNAMIC_SCISSOR_BITMASK), "RenderLayer has a scissor while its Shader has no FLAG_DYNAMIC_SCISSOR set");
+    CHECK(!_scissor || _shader_bindings->pipelineBindings()->hasFlag(PipelineBindings::FLAG_DYNAMIC_SCISSOR, PipelineBindings::FLAG_DYNAMIC_SCISSOR_BITMASK), "RenderLayer has a scissor while its Shader has no FLAG_DYNAMIC_SCISSOR set");
 }
 
 sp<LayerContext> RenderLayer::Stub::makeLayerContext(sp<RenderBatch> batch, sp<ModelLoader> modelLoader, sp<Boolean> visible, sp<Boolean> disposed)
 {
-    sp<LayerContext> layerContext = sp<LayerContext>::make(std::move(batch), modelLoader ? sp<ModelLoader>::make<ModelLoaderCached>(std::move(modelLoader)) : _model_loader, std::move(visible), std::move(disposed), _layer->context()->varyings());
-    _batch_groups.push_back(layerContext);
+    sp<LayerContext> layerContext = sp<LayerContext>::make(std::move(batch), modelLoader ? sp<ModelLoader>::make<ModelLoaderCached>(std::move(modelLoader)) : _model_loader, std::move(visible), std::move(disposed), _layer_context->varyings());
+    _layer_context_list.push_back(layerContext);
     return layerContext;
 }
 
@@ -49,12 +49,12 @@ void RenderLayer::Stub::addLayerContext(sp<LayerContext> layerContext)
     if(!layerContext->modelLoader())
         layerContext->setModelLoader(_model_loader);
     if(!layerContext->varyings())
-        layerContext->setVaryings(_layer->context()->varyings());
-    _batch_groups.push_back(std::move(layerContext));
+        layerContext->setVaryings(_layer_context->varyings());
+    _layer_context_list.push_back(std::move(layerContext));
 }
 
-RenderLayer::RenderLayer(sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Vec4> scissor, sp<RenderController> renderController)
-    : RenderLayer(sp<Stub>::make(std::move(modelLoader), std::move(shader), std::move(scissor), std::move(renderController)))
+RenderLayer::RenderLayer(sp<RenderController> renderController, sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Boolean> visible, sp<Boolean> disposed, sp<Varyings> varyings, sp<Vec4> scissor)
+    : RenderLayer(sp<Stub>::make(std::move(renderController), std::move(modelLoader), std::move(shader), std::move(visible), std::move(disposed), std::move(varyings), std::move(scissor)))
 {
 }
 
@@ -65,17 +65,12 @@ RenderLayer::RenderLayer(const sp<RenderLayer::Stub>& stub)
 
 const sp<LayerContext>& RenderLayer::context() const
 {
-    return _stub->_layer->context();
+    return _stub->_layer_context;
 }
 
 RenderLayerSnapshot RenderLayer::snapshot(RenderRequest& renderRequest) const
 {
     return RenderLayerSnapshot(renderRequest, _stub);
-}
-
-const sp<Layer>& RenderLayer::layer() const
-{
-    return _stub->_layer;
 }
 
 sp<LayerContext> RenderLayer::makeLayerContext(sp<RenderBatch> batchOptional, sp<ModelLoader> modelLoader, sp<Boolean> visible, sp<Boolean> disposed, sp<Vec3> position) const
@@ -98,7 +93,7 @@ sp<Layer> RenderLayer::makeLayer(sp<ModelLoader> modelLoader, sp<Boolean> visibl
 
 void RenderLayer::render(RenderRequest& renderRequest, const V3& position)
 {
-    _stub->_layer->render(renderRequest, position);
+    _stub->_layer_context->renderRequest(position);
     renderRequest.addBackgroundRequest(*this, position);
 }
 
@@ -109,13 +104,15 @@ RenderLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, co
 
 RenderLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext, sp<Builder<ModelLoader>> modelLoader, sp<Builder<Shader>> shader)
     : _resource_loader_context(resourceLoaderContext), _layers(factory.makeBuilderList<Layer>(manifest, Constants::Attributes::LAYER)), _model_loader(std::move(modelLoader)), _shader(shader ? std::move(shader) : Shader::fromDocument(factory, manifest, resourceLoaderContext)),
-      _scissor(factory.getBuilder<Vec4>(manifest, "scissor"))
+      _varyings(factory.getConcreteClassBuilder<Varyings>(manifest, Constants::Attributes::VARYINGS)), _visible(factory.getBuilder<Boolean>(manifest, Constants::Attributes::VISIBLE)),
+      _disposed(factory.getBuilder<Boolean>(manifest, Constants::Attributes::DISPOSED)), _scissor(factory.getBuilder<Vec4>(manifest, "scissor"))
 {
 }
 
 sp<RenderLayer> RenderLayer::BUILDER::build(const Scope& args)
 {
-    const sp<RenderLayer> renderLayer = sp<RenderLayer>::make(_model_loader->build(args), _shader->build(args), _scissor->build(args), _resource_loader_context->renderController());
+    const sp<RenderLayer> renderLayer = sp<RenderLayer>::make(_resource_loader_context->renderController(), _model_loader->build(args), _shader->build(args), _visible->build(args),
+                                                              _disposed->build(args), _varyings->build(args), _scissor->build(args));
     for(const sp<Builder<Layer>>& i : _layers)
     {
         const sp<Layer> layer = i->build(args);

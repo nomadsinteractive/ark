@@ -6,8 +6,8 @@
 
 namespace ark {
 
-AssetFile::AssetFile(const String& filepath)
-    : _filepath(filepath)
+AssetFile::AssetFile(String filepath)
+    : _filepath(std::move(filepath))
 {
 }
 

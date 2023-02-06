@@ -68,7 +68,7 @@ public:
 
     virtual sp<String> build(const Scope& args) override {
         const sp<String> value = args.build<String>(_name, args);
-        DCHECK(value, "Cannot get argument \"%s\"", _name.c_str());
+        CHECK(value, "Cannot get argument \"%s\"", _name.c_str());
         return value;
     }
 

@@ -144,7 +144,7 @@ void ColliderBox2D::track(const sp<Joint::Stub>& joint) const
 
 void ColliderBox2D::setBodyManifest(int32_t id, const BodyCreateInfo& bodyManifest)
 {
-    DWARN(_stub->_body_manifests.find(id) == _stub->_body_manifests.end(), "Overriding existing body: %d", id);
+    DCHECK_WARN(_stub->_body_manifests.find(id) == _stub->_body_manifests.end(), "Overriding existing body: %d", id);
     _stub->_body_manifests[id] = bodyManifest;
 }
 

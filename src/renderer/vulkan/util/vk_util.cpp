@@ -314,10 +314,10 @@ VkFormat VKUtil::toTextureFormat(uint32_t componentSize, uint8_t channels, Textu
         VK_FORMAT_R8G8B8_UNORM, VK_FORMAT_R8G8B8_SNORM, VK_FORMAT_R16G16B16_UNORM, VK_FORMAT_R16G16B16_SNORM, VK_FORMAT_R16G16B16_SFLOAT, VK_FORMAT_R32G32B32_SFLOAT, VK_FORMAT_R32G32B32_UINT, VK_FORMAT_R32G32B32_SINT,
         VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_R8G8B8A8_SNORM, VK_FORMAT_R16G16B16A16_UNORM, VK_FORMAT_R16G16B16A16_SNORM, VK_FORMAT_R16G16B16A16_SFLOAT, VK_FORMAT_R32G32B32A32_SFLOAT, VK_FORMAT_R32G32B32A32_UINT, VK_FORMAT_R32G32B32A32_SINT
     };
-    DCHECK(!(format & Texture::FORMAT_SIGNED && format & Texture::FORMAT_F16), "FORMAT_SIGNED format can not combined with FORMAT_F16");
-    DCHECK(!(format & Texture::FORMAT_SIGNED && format & Texture::FORMAT_F32), "FORMAT_SIGNED format can not combined with FORMAT_F32");
+    CHECK(!(format & Texture::FORMAT_SIGNED && format & Texture::FORMAT_F16), "FORMAT_SIGNED format can not combined with FORMAT_F16");
+    CHECK(!(format & Texture::FORMAT_SIGNED && format & Texture::FORMAT_F32), "FORMAT_SIGNED format can not combined with FORMAT_F32");
     uint32_t channel8 = (channels - 1) * 8;
-    WARN(channels != 3, "RGB texture format may not be supported by all the graphics drivers");
+    CHECK_WARN(channels != 3, "RGB texture format may not be supported by all the graphics drivers");
     return toVkChannelFormat(vkFormats + channel8, componentSize, format);
 }
 

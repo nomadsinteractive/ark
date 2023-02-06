@@ -17,6 +17,7 @@ public:
 
     virtual sp<Asset> getAsset(const String& name) override;
     virtual sp<AssetBundle> getBundle(const String& path) override;
+    virtual std::vector<ark::sp<Asset>> listAssets(const String& regex) override;
 
     bool hasEntry(const String& name) const;
 

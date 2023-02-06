@@ -78,7 +78,7 @@ void ApplicationFacade::setArena(sp<Arena> arena)
 {
     if(_arena == arena)
     {
-        WARN(false, "Replacing current Arena with the same one");
+        WARN("Replacing current Arena with the same one");
         return;
     }
 
@@ -89,7 +89,7 @@ void ApplicationFacade::setArena(sp<Arena> arena)
     }
 
     ASSERT(arena);
-    WARN(!arena.is<Disposed>(), "Application main arena's lifecycle should be managed by application itself");
+    CHECK_WARN(!arena.is<Disposed>(), "Application main arena's lifecycle should be managed by application itself");
     _arena = std::move(arena);
     _arena.absorb<Disposed>(sp<Disposed>::make());
 

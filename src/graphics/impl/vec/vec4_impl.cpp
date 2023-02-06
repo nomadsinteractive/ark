@@ -86,12 +86,16 @@ void Vec4Impl::fix()
 }
 
 Vec4Impl::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _x(factory.getBuilder<Numeric>(manifest, "x")), _y(factory.getBuilder<Numeric>(manifest, "y")), _z(factory.getBuilder<Numeric>(manifest, "z")), _w(factory.getBuilder<Numeric>(manifest, "w"))
+    : _x(factory.getBuilder<Numeric>(manifest, "x")), _y(factory.getBuilder<Numeric>(manifest, "y")), _z(factory.getBuilder<Numeric>(manifest, "z")), _w(factory.getBuilder<Numeric>(manifest, "w")),
+      _value(factory.getBuilder<Vec4>(manifest, "value"))
 {
+    CHECK_WARN(manifest->name() == "vec4" || manifest->name() == "color", "Vec4 meta data name should be ['vec4', 'color'], not \"%s\"", manifest->name().c_str());
 }
 
 sp<Vec4> Vec4Impl::BUILDER::build(const Scope& args)
 {
+    if(_value)
+        return _value->build(args);
     return sp<Vec4Impl>::make(_x->build(args), _y->build(args), _z->build(args), _w->build(args));
 }
 
@@ -108,7 +112,7 @@ sp<Vec4> Vec4Impl::DICTIONARY::build(const Scope& args)
 {
     if(_is_color)
         return sp<Color>::make(_color);
-    return sp<Vec4Impl>::make(_x->build(args), _y->build(args), _z->build(args), _w->build(args));
+    return sp<Vec4>::make<Vec4Impl>(_x->build(args), _y->build(args), _z->build(args), _w->build(args));
 }
 
 }

@@ -36,7 +36,7 @@ static PyObject* ark_loge(PyObject* self, PyObject* args);
 static PyObject* ark_set_trace_flag(PyObject* self, PyObject* args);
 static PyObject* ark_loadAsset(PyObject* self, PyObject* args);
 static PyObject* ark_openAsset(PyObject* self, PyObject* args);
-static PyObject* ark_getAssetResource(PyObject* self, PyObject* args);
+static PyObject* ark_loadAssetBundle(PyObject* self, PyObject* args);
 static PyObject* ark_isDebugBuild(PyObject* self, PyObject* args);
 static PyObject* ark_isPublishingBuild(PyObject* self, PyObject* args);
 static PyObject* ark_isDirectory(PyObject* self, PyObject* args);
@@ -58,7 +58,7 @@ static PyMethodDef ARK_METHODS[] = {
     {"set_trace_flag",  ark_set_trace_flag, METH_VARARGS, "ark_set_trace_flag"},
     {"load_asset",  ark_loadAsset, METH_VARARGS, "loadAsset"},
     {"open_asset",  ark_openAsset, METH_VARARGS, "openAsset"},
-    {"get_asset_resource",  ark_getAssetResource, METH_VARARGS, "getAssetResource"},
+    {"load_asset_bundle",  ark_loadAssetBundle, METH_VARARGS, "loadAssetBundle"},
     {"is_debug_build",  ark_isDebugBuild, METH_VARARGS, "isDebugBuild"},
     {"is_publishing_build",  ark_isPublishingBuild, METH_VARARGS, "isPublishingBuild"},
     {"is_directory",  ark_isDirectory, METH_VARARGS, "isDirectory"},
@@ -131,14 +131,14 @@ PyObject* ark_openAsset(PyObject* /*self*/, PyObject* args)
     return PyCast::toPyObject(readable);
 }
 
-PyObject* ark_getAssetResource(PyObject* /*self*/, PyObject* args)
+PyObject* ark_loadAssetBundle(PyObject* /*self*/, PyObject* args)
 {
     const char* arg0;
     if(!PyArg_ParseTuple(args, "s", &arg0))
         Py_RETURN_NONE;
-    const sp<AssetBundle> resource = Ark::instance().getAssetBundle(*arg0 ? arg0 : "/");
-    if(resource)
-        return PythonInterpreter::instance()->toPyObject(resource);
+    const sp<AssetBundle> assetBundle = Ark::instance().getAssetBundle(*arg0 ? arg0 : "/");
+    if(assetBundle)
+        return PythonInterpreter::instance()->toPyObject(assetBundle);
     Py_RETURN_NONE;
 }
 

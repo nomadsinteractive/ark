@@ -19,7 +19,7 @@ sp<Renderer> RendererWithExpired::STYLE::build(const Scope& args)
 RendererWithExpired::STYLE_DISPOSABLE::STYLE_DISPOSABLE(BeanFactory& /*factory*/, const sp<Builder<Renderer>>& delegate, const String& value)
     : _delegate(delegate)
 {
-    DWARN(value.empty(), "Style \"disposable\" has unnecessary value: \"%s\"", value.c_str());
+    DCHECK_WARN(value.empty(), "Style \"disposable\" has unnecessary value: \"%s\"", value.c_str());
 }
 
 sp<Renderer> RendererWithExpired::STYLE_DISPOSABLE::build(const Scope& args)

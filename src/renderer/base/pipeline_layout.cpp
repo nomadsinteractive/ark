@@ -107,7 +107,7 @@ std::vector<sp<Texture>> PipelineLayout::makeBindingSamplers() const
     DASSERT(_building_context);
     std::vector<sp<Texture>> bs(_input->samplerCount());
     const Table<String, sp<Texture>>& samplers = _building_context->_samplers;
-    WARN(bs.size() >= samplers.size(), "Predefined samplers(%d) is more than samplers(%d) in PipelineLayout", samplers.size(), bs.size());
+    CHECK_WARN(bs.size() >= samplers.size(), "Predefined samplers(%d) is more than samplers(%d) in PipelineLayout", samplers.size(), bs.size());
 
     for(size_t i = 0; i < samplers.values().size(); ++i)
         if(i < bs.size())

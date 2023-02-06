@@ -53,7 +53,7 @@ public:
     void setDepth(sp<Numeric> depth);
 
 //  [[script::bindings::auto]]
-    void set(const Size& other);
+    void reset(const Size& other);
 //  [[script::bindings::auto]]
     sp<Size> freeze();
 

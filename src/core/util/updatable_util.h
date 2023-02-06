@@ -21,7 +21,7 @@ private:
     }
 
     template<typename T> static bool update_sfinae(T& var, uint64_t timestamp, decltype(var->update(timestamp))*) {
-        return var->update(timestamp);
+        return var ? var->update(timestamp) : false;
     }
 
     template<typename T> static bool update_sfinae(T& var, uint64_t timestamp, decltype(var.update(timestamp))*) {

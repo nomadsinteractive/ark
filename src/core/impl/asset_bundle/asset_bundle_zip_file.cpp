@@ -120,6 +120,12 @@ sp<AssetBundle> AssetBundleZipFile::getBundle(const String& path)
     return sp<AssetBundleWithPrefix>::make(sp<AssetBundleZipFile>::make(*this), path.endsWith("/") ? path : path + "/");
 }
 
+std::vector<ark::sp<Asset>> AssetBundleZipFile::listAssets(const String& regex)
+{
+    DFATAL(false, "Unimplemented");
+    return {};
+}
+
 bool AssetBundleZipFile::hasEntry(const String& name) const
 {
     return zip_name_locate(_stub->archive(), name.c_str(), 0) != -1;

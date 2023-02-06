@@ -1,8 +1,8 @@
 #include "platform/any/platform_independent.h"
 
-#include <sys/stat.h>
 #include <cctype>
 #include <chrono>
+#include <filesystem>
 
 #include "core/base/string.h"
 #include "core/inf/variable.h"
@@ -29,10 +29,11 @@ public:
 
 bool PlatformIndependent::isFile(const String& filepath)
 {
-    struct stat s;
-    if(stat(filepath.c_str(), &s) == 0)
-        return (s.st_mode & S_IFREG) != 0;
-    return false;
+    return std::filesystem::is_regular_file(filepath.c_str());
+//    struct stat s;
+//    if(stat(filepath.c_str(), &s) == 0)
+//        return (s.st_mode & S_IFREG) != 0;
+//    return false;
 }
 
 bool PlatformIndependent::isAbsolutePath(const String& path)
@@ -47,10 +48,11 @@ bool PlatformIndependent::isAbsolutePath(const String& path)
 
 bool PlatformIndependent::isDirectory(const String& filepath)
 {
-    struct stat s;
-    if(stat(filepath.c_str(), &s) == 0)
-        return (s.st_mode & S_IFDIR) != 0;
-    return false;
+    return std::filesystem::is_directory(filepath.c_str());
+//    struct stat s;
+//    if(stat(filepath.c_str(), &s) == 0)
+//        return (s.st_mode & S_IFDIR) != 0;
+//    return false;
 }
 
 char PlatformIndependent::dirSeparator()

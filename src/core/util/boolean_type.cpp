@@ -9,6 +9,7 @@
 #include "core/impl/variable/variable_op1.h"
 #include "core/impl/variable/variable_op2.h"
 #include "core/impl/variable/variable_ternary.h"
+#include "core/inf/array.h"
 
 namespace ark {
 
@@ -73,7 +74,7 @@ public:
             if(id.isArg())
                 return factory.getBuilderByArg<Boolean>(id.arg());
         }
-        DCHECK(matches && matches->length() == 4, "Illegal expression: \"%s\" syntax error", expr.c_str());
+        CHECK(matches && matches->length() == 4, "Illegal expression: \"%s\" syntax error", expr.c_str());
         const String* ptr = matches->buf();
         const sp<Builder<Numeric>> lvalue = factory.ensureBuilder<Numeric>(ptr[1]);
         const String& op = ptr[2];
@@ -150,7 +151,7 @@ bool BooleanType::val(const sp<Boolean>& self)
 const sp<Boolean>& BooleanType::wrapped(const sp<Boolean>& self)
 {
     const sp<BooleanWrapper> ib = self.as<BooleanWrapper>();
-    DWARN(ib, "Non-BooleanWrapper instance has no wrapped attribute. This should be an error unless you're inspecting it.");
+    DCHECK_WARN(ib, "Non-BooleanWrapper instance has no wrapped attribute. This should be an error unless you're inspecting it.");
     return ib ? ib->wrapped() : sp<Boolean>::null();
 }
 
@@ -196,7 +197,7 @@ sp<Boolean> BooleanType::dye(sp<Boolean> self, sp<Boolean> condition, String mes
 void BooleanType::fix(const sp<Boolean>& self)
 {
     const sp<BooleanWrapper> ib = self.as<BooleanWrapper>();
-    DWARN(ib, "Calling fix on non-BooleanWrapper has no effect.");
+    DCHECK_WARN(ib, "Calling fix on non-BooleanWrapper has no effect.");
     if(ib)
         ib->fix();
 }

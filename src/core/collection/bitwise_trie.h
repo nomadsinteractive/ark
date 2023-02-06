@@ -140,7 +140,7 @@ public:
 
     void remove(T keyvalue) {
         const auto iter = _leaves.find(keyvalue);
-        DWARN(iter != _leaves.end(), "Key \"%d\" does not exist", keyvalue);
+        DCHECK_WARN(iter != _leaves.end(), "Key \"%d\" does not exist", keyvalue);
         if(iter != _leaves.end()) {
             Path* path = const_cast<Path*>(findLeafPath(keyvalue));
             DASSERT(path && path->_key == keyvalue);

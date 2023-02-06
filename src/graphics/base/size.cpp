@@ -106,7 +106,7 @@ sp<Numeric> Size::depth() const
     return _impl->z();
 }
 
-void Size::set(const Size& other)
+void Size::reset(const Size& other)
 {
     setWidth(other.width());
     setHeight(other.height());

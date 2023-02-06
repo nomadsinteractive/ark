@@ -23,6 +23,8 @@
 #include "core/util/strings.h"
 #include "core/util/updatable_util.h"
 
+#include "app/base/application_context.h"
+
 namespace ark {
 
 sp<NumericWrapper> NumericType::create(float value)
@@ -194,7 +196,7 @@ float NumericType::val(const sp<Numeric>& self)
 const sp<Numeric>& NumericType::delegate(const sp<Numeric>& self)
 {
     const sp<NumericWrapper> nw = self.as<NumericWrapper>();
-    DWARN(nw, "Non-NumericWrapper instance has no delegate attribute. This should be an error unless you're inspecting it.");
+    DCHECK_WARN(nw, "Non-NumericWrapper instance has no delegate attribute. This should be an error unless you're inspecting it.");
     return nw ? nw->wrapped() : sp<Numeric>::null();
 }
 
@@ -223,7 +225,7 @@ void NumericType::set(const sp<NumericWrapper>& self, const sp<Numeric>& delegat
 float NumericType::fix(const sp<Numeric>& self)
 {
     const sp<NumericWrapper> iw = self.as<NumericWrapper>();
-    DWARN(iw, "Calling fix on non-NumericWrapper has no effect.");
+    DCHECK_WARN(iw, "Calling fix on non-NumericWrapper has no effect.");
     if(iw)
         return iw->fix();
     return 0;

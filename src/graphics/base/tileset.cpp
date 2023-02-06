@@ -39,7 +39,7 @@ float Tileset::tileHeight() const
 void Tileset::addTile(sp<Tile> t)
 {
     sp<Tile>& tile = _tiles[t->id()];
-    DWARN(!tile, "Overriding existing tile: %d", t->id());
+    DCHECK_WARN(!tile, "Overriding existing tile: %d", t->id());
     tile = std::move(t);
 }
 

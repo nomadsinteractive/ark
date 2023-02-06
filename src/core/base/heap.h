@@ -35,7 +35,7 @@ public:
     public:
         L1(SizeType maxChunkLength)
             : _max_chunk_length(maxChunkLength) {
-            DWARN(Math::isPOT(maxChunkLength), "maxChunkLength(%d) should be POT", _max_chunk_length);
+            DCHECK_WARN(Math::isPOT(maxChunkLength), "maxChunkLength(%d) should be POT", _max_chunk_length);
         }
 
         virtual void initialize(SizeType size) override {
@@ -253,7 +253,7 @@ public:
                 _fragment_trie.remove(allocator->_size);
                 allocator = _fragment_trie.find(sizeNeeded);
             }
-            DWARN(checkFragments(sizeNeeded), "Unallocated candidate block which's in not in Allocator but found in fragments, something might go wrong");
+            DCHECK_WARN(checkFragments(sizeNeeded), "Unallocated candidate block which's in not in Allocator but found in fragments, something might go wrong");
             return std::make_pair(npos, 0);
         }
 

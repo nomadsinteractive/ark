@@ -1,7 +1,9 @@
 #include "graphics/base/material.h"
 
+#include "core/base/bean_factory.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/impl/dictionary/dictionary_by_attribute_name.h"
+#include "core/util/documents.h"
 
 namespace ark {
 

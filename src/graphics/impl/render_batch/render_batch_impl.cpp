@@ -13,18 +13,19 @@ bool RenderBatchImpl::preSnapshot(const RenderRequest& renderRequest, LayerConte
 
     for(auto iter = lc._renderables.begin(); iter != lc._renderables.end(); )
     {
-        LayerContext::RenderableItem& i = *iter;
+        const LayerContext::RenderableItem& i = iter->first;
+        Renderable::State& state = iter->second;
         i._disposed.update(timestamp);
-        i._state = i._renderable->updateState(renderRequest);
-        if(!i._state || i._state.hasState(Renderable::RENDERABLE_STATE_DISPOSED) || i._disposed.val())
+        state = i._renderable->updateState(renderRequest);
+        if(!state || state.hasState(Renderable::RENDERABLE_STATE_DISPOSED) || i._disposed.val())
         {
             needsReload = true;
             iter = lc._renderables.erase(iter);
         }
         else
         {
-            if(!i._state.hasState(Renderable::RENDERABLE_STATE_DIRTY) && i._updatable)
-                i._state.setState(Renderable::RENDERABLE_STATE_DIRTY, i._updatable->update(timestamp));
+            if(!state.hasState(Renderable::RENDERABLE_STATE_DIRTY) && i._updatable)
+                state.setState(Renderable::RENDERABLE_STATE_DIRTY, i._updatable->update(timestamp));
 
             ++iter;
         }
@@ -34,26 +35,7 @@ bool RenderBatchImpl::preSnapshot(const RenderRequest& renderRequest, LayerConte
 
 void RenderBatchImpl::snapshot(const RenderRequest& renderRequest, const LayerContext& lc, RenderLayerSnapshot& output)
 {
-    const PipelineInput& pipelineInput = output.pipelineInput();
-    const bool visible = lc._visible.val();
-    const bool needsReload = lc._position_changed || lc._render_done != visible || output.needsReload();
-    const bool hasDefaultVaryings = static_cast<bool>(lc._varyings);
-    const Varyings::Snapshot defaultVaryingsSnapshot = hasDefaultVaryings ? lc._varyings->snapshot(pipelineInput, renderRequest.allocator()) : Varyings::Snapshot();
-
-    for(auto iter = lc._renderables.begin(); iter != lc._renderables.end(); )
-    {
-        const LayerContext::RenderableItem& i = *iter;
-        Renderable::State state = i._state;
-        if(needsReload)
-            state.setState(Renderable::RENDERABLE_STATE_DIRTY, true);
-        if(state.hasState(Renderable::RENDERABLE_STATE_VISIBLE))
-            state.setState(Renderable::RENDERABLE_STATE_VISIBLE, visible);
-        Renderable::Snapshot snapshot = i._renderable->snapshot(pipelineInput, renderRequest, lc._position, state.stateBits());
-        if(hasDefaultVaryings && !snapshot._varyings)
-            snapshot._varyings = defaultVaryingsSnapshot;
-        output.addSnapshot(lc, std::move(snapshot));
-        ++iter;
-    }
+    lc.doSnapshot(lc._renderables, renderRequest, output);
 }
 
 }

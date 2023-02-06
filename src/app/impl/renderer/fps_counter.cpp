@@ -39,7 +39,7 @@ void FPSCounter::render(RenderRequest& renderequest, const V3& position)
         _last_refresh = duration;
         _frame_rendered = 0;
     }
-    _characters->render(renderequest, position);
+//    _characters->render(renderequest, position);
 }
 
 void FPSCounter::updateFPS(float fps)

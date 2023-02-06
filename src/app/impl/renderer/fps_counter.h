@@ -15,6 +15,7 @@ namespace ark {
 
 class FPSCounter : public Renderer, public Block {
 public:
+[[deprecated]]
     FPSCounter(const sp<Clock>& clock, float refreshInterval, const sp<Text>& characters, const String& message);
 
     virtual const sp<Size>& size() override;

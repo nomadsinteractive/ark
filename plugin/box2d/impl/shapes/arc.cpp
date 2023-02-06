@@ -19,7 +19,7 @@ Arc::Arc(uint32_t sampleCount, float a, float b)
 
 void Arc::apply(b2Body* body, const sp<Size>& size, const BodyCreateInfo& createInfo)
 {
-    DWARN(Math::almostEqual<float>(size->widthAsFloat(), size->heightAsFloat()), "RigidBody size: (%.2f, %.2f) is not a circle", size->widthAsFloat(), size->heightAsFloat());
+    DCHECK_WARN(Math::almostEqual<float>(size->widthAsFloat(), size->heightAsFloat()), "RigidBody size: (%.2f, %.2f) is not a circle", size->widthAsFloat(), size->heightAsFloat());
 
     b2ChainShape shape;
     float radius = (size->widthAsFloat() + size->heightAsFloat()) / 4.0f;

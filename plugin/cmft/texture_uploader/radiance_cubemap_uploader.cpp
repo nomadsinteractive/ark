@@ -21,7 +21,7 @@ namespace {
 struct OpenCLContext {
     OpenCLContext() {
         int ec = ::cmft::clLoad();
-        WARN(ec != 0, "Loading OpenCL contexting failed.");
+        CHECK_WARN(ec != 0, "Loading OpenCL contexting failed.");
         if(ec != 0)
             cl_context = ::cmft::clInit();
     }

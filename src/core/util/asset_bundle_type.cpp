@@ -1,10 +1,11 @@
-#include "core/util/asset_bundle_util.h"
+#include "core/util/asset_bundle_type.h"
 
 #include "core/impl/asset_bundle/asset_bundle_directory.h"
 #include "core/impl/asset_bundle/asset_bundle_with_prefix.h"
 #include "core/impl/asset_bundle/asset_bundle_zip_file.h"
 #include "core/impl/readable/file_readable.h"
 #include "core/inf/asset.h"
+#include "core/types/optional.h"
 #include "core/util/strings.h"
 
 #include "platform/platform.h"
@@ -41,60 +42,69 @@ public:
                 return sp<AssetBundleZipFile>::make(asset->open(), path);
         }
 
-        String dirname;
         String filename;
-
         do {
-            String name;
-            Strings::rcut(s, dirname, name, '/');
+            const auto [dirnameOpt, name] = s.rcut('/');
             filename = filename.empty() ? name : name + "/" + filename;
-            const sp<Asset> asset = dirname.empty() ? nullptr : getAsset(dirname);
+            const sp<Asset> asset = dirnameOpt ? nullptr : getAsset(dirnameOpt.value());
             sp<Readable> readable = asset ? asset->open() : nullptr;
             if(readable) {
-                sp<AssetBundleZipFile> zip = sp<AssetBundleZipFile>::make(std::move(readable), dirname);
+                sp<AssetBundleZipFile> zip = sp<AssetBundleZipFile>::make(std::move(readable), dirnameOpt.value());
                 String entryName = filename + "/";
                 return zip->hasEntry(entryName) ? sp<AssetBundleWithPrefix>::make(std::move(zip), std::move(entryName)) : nullptr;
             }
-            s = dirname;
-        } while(!dirname.empty());
+            s = dirnameOpt ? dirnameOpt.value() : "";
+        } while(!s.empty());
         return nullptr;
     }
 
+    virtual std::vector<sp<Asset>> listAssets(const String& regex) override {
+        DFATAL(false, "Unimplemented");
+        return {};
+    }
+
+
     String _asset_dir;
     String _app_dir;
+
 };
 
 }
 
-sp<Asset> AssetBundleUtil::get(const sp<AssetBundle>& self, const String& name)
+std::vector<sp<Asset>> AssetBundleType::listAssets(const sp<AssetBundle>& self, const String& regex)
+{
+    return self->listAssets(regex);
+}
+
+sp<Asset> AssetBundleType::get(const sp<AssetBundle>& self, const String& name)
 {
     return self->getAsset(name);
 }
 
-sp<AssetBundle> AssetBundleUtil::getBundle(const sp<AssetBundle>& self, const String& path)
+sp<AssetBundle> AssetBundleType::getBundle(const sp<AssetBundle>& self, const String& path)
 {
     return self->getBundle(path);
 }
 
-sp<String> AssetBundleUtil::getString(const sp<AssetBundle>& self, const String& filepath)
+sp<String> AssetBundleType::getString(const sp<AssetBundle>& self, const String& filepath)
 {
     const sp<Asset> asset = self->getAsset(filepath);
     const sp<Readable> readable = asset ? asset->open() : nullptr;
     return readable ? sp<String>::make(Strings::loadFromReadable(readable)) : nullptr;
 }
 
-String AssetBundleUtil::getRealPath(const sp<AssetBundle>& self, const String& filepath)
+String AssetBundleType::getRealPath(const sp<AssetBundle>& self, const String& filepath)
 {
     const sp<Asset> asset = self->getAsset(filepath);
     return asset ? asset->location() : filepath;
 }
 
-sp<AssetBundle> AssetBundleUtil::createBuiltInAssetBundle(const String& assetDir, const String& appDir)
+sp<AssetBundle> AssetBundleType::createBuiltInAssetBundle(const String& assetDir, const String& appDir)
 {
     return sp<BuiltInAssetBundle>::make(assetDir, appDir);
 }
 
-sp<AssetBundle> AssetBundleUtil::createFileAssetBundle(const String& filepath)
+sp<AssetBundle> AssetBundleType::createFileAssetBundle(const String& filepath)
 {
     if(Platform::isDirectory(filepath))
         return sp<AssetBundleDirectory>::make(filepath);
@@ -103,24 +113,24 @@ sp<AssetBundle> AssetBundleUtil::createFileAssetBundle(const String& filepath)
     return nullptr;
 }
 
-AssetBundleUtil::FILE_DICTIONARY::FILE_DICTIONARY(BeanFactory& /*factory*/, const String& src)
+AssetBundleType::FILE_DICTIONARY::FILE_DICTIONARY(BeanFactory& /*factory*/, const String& src)
     : _src(src)
 {
 }
 
-sp<AssetBundle> AssetBundleUtil::FILE_DICTIONARY::build(const Scope& /*args*/)
+sp<AssetBundle> AssetBundleType::FILE_DICTIONARY::build(const Scope& /*args*/)
 {
-    return AssetBundleUtil::createFileAssetBundle(_src);
+    return AssetBundleType::createFileAssetBundle(_src);
 }
 
-AssetBundleUtil::EXTERNAL_DICTIONARY::EXTERNAL_DICTIONARY(BeanFactory& /*factory*/, const String& src)
+AssetBundleType::EXTERNAL_DICTIONARY::EXTERNAL_DICTIONARY(BeanFactory& /*factory*/, const String& src)
     : _src(Platform::getExternalStoragePath(src))
 {
 }
 
-sp<AssetBundle> AssetBundleUtil::EXTERNAL_DICTIONARY::build(const Scope& /*args*/)
+sp<AssetBundle> AssetBundleType::EXTERNAL_DICTIONARY::build(const Scope& /*args*/)
 {
-    return AssetBundleUtil::createFileAssetBundle(_src);
+    return AssetBundleType::createFileAssetBundle(_src);
 }
 
 }

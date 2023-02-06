@@ -48,8 +48,12 @@ def load_asset(filename) -> str:
         return fp.read()
 
 
-def open_asset(filename):
+def open_asset(filename: str):
     return load_asset(filename)
+
+
+def load_asset_bundle(filepath: str) -> Optional['AssetBundle']:
+    pass
 
 
 def get_ref_manager():
@@ -78,6 +82,28 @@ class Writable:
 
 class ModelLoader:
     pass
+
+
+class Asset:
+
+    @property
+    def location(self) -> str:
+        return ''
+
+    def read_string(self) -> str:
+        pass
+
+
+class AssetBundle:
+
+    def get_asset(self, path: str) -> Asset:
+        pass
+
+    def get_bundle(self, path: str) -> 'AssetBundle':
+        pass
+
+    def list_assets(self, regex: str = '') -> list[Asset]:
+        pass
 
 
 class _Var:
@@ -597,7 +623,7 @@ class Renderer:
     def translate(self, position: Union[tuple, 'Vec2']) -> 'Renderer':
         return self
 
-    def make_disposable(self, disposed: Union[bool, 'Disposed'] = None) -> 'Renderer':
+    def make_disposable(self, disposed: Union[bool, 'Boolean'] = None) -> 'Renderer':
         pass
 
     def make_visible(self, visibility: Union[bool, 'Boolean', 'Visibility']) -> 'Renderer':
@@ -1341,10 +1367,6 @@ class RenderLayer(Renderer):
     def context(self) -> LayerContext:
         return LayerContext()
 
-    @property
-    def layer(self) -> 'Layer':
-        return Layer(self)
-
     def make_layer(self, model_loader: Optional[ModelLoader] = None, visible: Optional[Boolean] = None, disposable: Optional[Boolean] = None,
                    position: Optional[Vec3] = None) -> 'Layer':
         pass
@@ -1956,10 +1978,10 @@ class Glyph:
         return None
 
 
-class Text(Renderer):
-    def __init__(self, layer: Union[Layer, RenderLayer, LayerContext], text: Union[String, str, None] = None, text_scale=1.0, letter_spacing=0, line_height=0,
-                 line_indent=0):
-        super().__init__()
+class Text:
+    def __init__(self, render_layer: RenderLayer, text: String | str | None = None, glyph_maker: Any = None, text_scale: float = 1.0, letter_spacing: float = 0,
+                 line_height: float = 0, line_indent: float = 0):
+        pass
 
     @property
     def text(self) -> str:
@@ -1970,7 +1992,11 @@ class Text(Renderer):
         pass
 
     @property
-    def contents(self) -> List[RenderObject]:
+    def size(self) -> Size:
+        return Size(0, 0)
+
+    @property
+    def contents(self) -> list[RenderObject]:
         return []
 
     def show(self, disposed: Optional[Boolean] = None):

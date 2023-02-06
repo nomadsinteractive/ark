@@ -13,7 +13,7 @@ DictionaryByAttributeName::DictionaryByAttributeName(const document& doc, const 
         const String name = Documents::getAttribute(node, attrName);
         if(name)
         {
-            DWARN(name.at(0) != '#', "Top level id \"%s\" is hard reference, which is legal but pointless", name.c_str());
+            DCHECK_WARN(name.at(0) != '#', "Top level id \"%s\" is hard reference, which is legal but pointless", name.c_str());
             _by_names[Strings::stripReference(name)] = node;
         }
     }

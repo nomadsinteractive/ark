@@ -82,7 +82,7 @@ void ShaderPreprocessor::initializeAsFirst(PipelineBuildingContext& context)
 }
 
 static bool sanitizer(const std::smatch& match) {
-    DWARN(false, match.str().c_str());
+    DCHECK_WARN(false, match.str().c_str());
     return false;
 }
 
@@ -90,11 +90,11 @@ void ShaderPreprocessor::parseMainBlock(const String& source, PipelineBuildingCo
 {
     if(source.find("void main()") != String::npos)
     {
-        DWARN(false, "Shader which contains main function will not be preprocessed by ark shader preprocessor. Try to replace it with \"vec4 ark_main(vec4 position, ...)\" for better flexibilty and compatibilty");
+        DCHECK_WARN(false, "Shader which contains main function will not be preprocessed by ark shader preprocessor. Try to replace it with \"vec4 ark_main(vec4 position, ...)\" for better flexibilty and compatibilty");
         return;
     }
 
-    DWARN(source.search(_IN_PATTERN, sanitizer), "Non-standard attribute declared above, move it into ark_main function's parameters will disable this warning.");
+    DCHECK_WARN(source.search(_IN_PATTERN, sanitizer), "Non-standard attribute declared above, move it into ark_main function's parameters will disable this warning.");
 
     static const std::regex FUNC_PATTERN("(vec4|void)\\s+ark_main\\(([^)]*)\\)");
 
@@ -381,7 +381,7 @@ void ShaderPreprocessor::Function::parse(PipelineBuildingContext& buildingContex
         if(param._modifier & Parameter::PARAMETER_MODIFIER_OUT)
         {
             const Attribute attr = RenderUtil::makePredefinedAttribute(param._name, param._type);
-            WARN(attr.length() != 3 || stride % 16 == 0, "3-component out attribute \"%s\" ranged from %d to %d, some GPUs may not like this", attr.name().c_str(), stride, stride + attr.size());
+            CHECK_WARN(attr.length() != 3 || stride % 16 == 0, "3-component out attribute \"%s\" ranged from %d to %d, some GPUs may not like this", attr.name().c_str(), stride, stride + attr.size());
             stride += attr.size();
         }
         if(param._modifier & Parameter::PARAMETER_MODIFIER_IN)

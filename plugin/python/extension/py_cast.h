@@ -117,7 +117,7 @@ public:
             try {
                 return f(args...);
             }
-            catch(const std::logic_error& e) {
+            catch(const std::exception& e) {
                 PyBridge::setRuntimeErrString(e.what());
             }
             return (R)(0);
@@ -218,15 +218,22 @@ private:
     template<typename T> static PyObject* toPyObject_sfinae(const T& ptr, typename T::_PtrType*) {
         return toPyObject_SharedPtr(static_cast<sp<typename T::_PtrType>>(ptr));
     }
+    template<typename T> static PyObject* toPyObject_sfinae(const T& ptr, typename T::OPT_TYPE*) {
+        if(ptr)
+            return toPyObject(ptr.value());
+        return PyBridge::incRefNone();
+    }
     template<typename T> static PyObject* toPyObject_sfinae(const T& iterable, typename std::enable_if<!(std::is_same<T, std::string>::value  || std::is_same<T, std::wstring>::value), decltype(iterable.begin())>::type*) {
         return fromIterable_sfinae<T>(iterable, nullptr);
     }
+/*
     template<typename T> static PyObject* toPyObject_sfinae(const T& value, decltype(value.second)*) {
         PyObject* pyTuple = PyTuple_New(2);
         PyList_SetItem(pyTuple, 0, toPyObject(value.first));
         PyList_SetItem(pyTuple, 1, toPyObject(value.second));
         return pyTuple;
     }
+*/
     template<typename T> static PyObject* toPyObject_sfinae(const T& value, std::enable_if_t<std::is_enum<T>::value>*) {
         return PyBridge::PyLong_FromLong(static_cast<int32_t>(value));
     }

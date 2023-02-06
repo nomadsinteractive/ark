@@ -11,7 +11,7 @@ template<typename T> class IntegralWithResistance : public Variable<T> {
 public:
     IntegralWithResistance(const T& v0, sp<Variable<T>> a, sp<Numeric> cd, sp<Numeric> t)
         : _v(v0), _a(std::move(a)), _cd(std::move(cd)), _t(std::move(t)), _last_t(_t->val()) {
-        DWARN(_cd->val() >= 0, "The drag coefficient factor should be greater than 0, got %.2f", _cd->val());
+        DCHECK_WARN(_cd->val() >= 0, "The drag coefficient factor should be greater than 0, got %.2f", _cd->val());
     }
 
     virtual T val() override {

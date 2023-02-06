@@ -196,7 +196,7 @@ void Atlas::AttachmentNinePatch::import(Atlas& atlas, const document& manifest)
         }
         else
         {
-            WARN(name == "nine-patch", "\"%s\" nodeName should be \"nine-patch\"", Documents::toString(i).c_str());
+            CHECK_WARN(name == "nine-patch", "\"%s\" nodeName should be \"nine-patch\"", Documents::toString(i).c_str());
             int32_t type = Documents::ensureAttribute<int32_t>(i, Constants::Attributes::TYPE);
             add(type, textureWidth, textureHeight, paddings, atlas);
         }

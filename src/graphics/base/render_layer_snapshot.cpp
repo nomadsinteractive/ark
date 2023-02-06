@@ -15,15 +15,15 @@ RenderLayerSnapshot::RenderLayerSnapshot(RenderRequest& renderRequest, const sp<
 {
     DPROFILER_TRACE("Snapshot");
 
-    bool needsReload = _stub->_layer->context()->preSnapshot(renderRequest);
+    bool needsReload = _stub->_layer_context->preSnapshot(renderRequest);
 
-    for(auto iter = _stub->_batch_groups.begin(); iter != _stub->_batch_groups.end(); )
+    for(auto iter = _stub->_layer_context_list.begin(); iter != _stub->_layer_context_list.end(); )
     {
         const sp<LayerContext>& layerContext = *iter;
-        const SafeVar<Disposed>& disposed = layerContext->disposed();
+        const SafeVar<Boolean>& disposed = layerContext->disposed();
         if((!disposed && layerContext.unique()) || disposed.val())
         {
-            iter = _stub->_batch_groups.erase(iter);
+            iter = _stub->_layer_context_list.erase(iter);
             needsReload = true;
         }
         else
@@ -35,8 +35,8 @@ RenderLayerSnapshot::RenderLayerSnapshot(RenderRequest& renderRequest, const sp<
 
     _flag = needsReload ? SNAPSHOT_FLAG_RELOAD : SNAPSHOT_FLAG_DYNAMIC_UPDATE;
 
-    _stub->_layer->context()->snapshot(renderRequest, *this);
-    for(LayerContext& i : _stub->_batch_groups)
+    _stub->_layer_context->snapshot(renderRequest, *this);
+    for(LayerContext& i : _stub->_layer_context_list)
         i.snapshot(renderRequest, *this);
 
     _stub->_render_command_composer->postSnapshot(_stub->_render_controller, *this);
@@ -52,7 +52,7 @@ RenderLayerSnapshot::RenderLayerSnapshot(RenderRequest& renderRequest, const sp<
 
 sp<RenderCommand> RenderLayerSnapshot::render(const RenderRequest& renderRequest, const V3& /*position*/)
 {
-    if(_items.size() > 0 && _stub->_visible.val())
+    if(_items.size() > 0 && _stub->_layer_context->visible().val())
         return _stub->_render_command_composer->compose(renderRequest, *this);
 
     DrawingContext drawingContext(_stub->_shader_bindings, nullptr, std::move(_ubos), std::move(_ssbos));

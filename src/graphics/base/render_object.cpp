@@ -14,13 +14,13 @@
 
 namespace ark {
 
-RenderObject::RenderObject(int32_t type, const sp<Vec3>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<Varyings>& varyings, sp<Visibility> visible, sp<Disposed> disposed)
-    : _type(sp<IntegerWrapper>::make(type)), _position(position), _size(size), _transform(transform), _varyings(varyings), _visible(std::move(visible), true), _disposed(std::move(disposed), false)
+RenderObject::RenderObject(int32_t type, sp<Vec3> position, sp<Size> size, sp<Transform> transform, sp<Varyings> varyings, sp<Boolean> visible, sp<Boolean> disposed)
+    : RenderObject(sp<IntegerWrapper>::make(type), std::move(position), std::move(size), std::move(transform), std::move(varyings), std::move(visible), std::move(disposed))
 {
 }
 
-RenderObject::RenderObject(const sp<Integer>& type, const sp<Vec3>& position, const sp<Size>& size, const sp<Transform>& transform, const sp<Varyings>& varyings, sp<Visibility> visible, sp<Disposed> disposed)
-    : _type(sp<IntegerWrapper>::make(type)), _position(position), _size(size), _transform(transform), _varyings(varyings), _visible(std::move(visible), true), _disposed(std::move(disposed), false)
+RenderObject::RenderObject(sp<Integer> type, sp<Vec3> position, sp<Size> size, sp<Transform> transform, sp<Varyings> varyings, sp<Boolean> visible, sp<Boolean> disposed)
+    : _type(sp<IntegerWrapper>::make(std::move(type))), _position(std::move(position)), _size(std::move(size)), _transform(std::move(transform)), _varyings(std::move(varyings)), _visible(std::move(visible), true), _disposed(std::move(disposed), false)
 {
 }
 
@@ -61,8 +61,10 @@ const SafePtr<Transform>& RenderObject::transform() const
     return _transform;
 }
 
-const SafePtr<Varyings>& RenderObject::varyings() const
+const sp<Varyings>& RenderObject::varyings()
 {
+    if(!_varyings)
+        setVaryings(sp<Varyings>::make());
     return _varyings;
 }
 
@@ -76,7 +78,6 @@ void RenderObject::setType(int32_t type)
 void RenderObject::setType(const sp<Integer>& type)
 {
     _type->set(type);
-    _disposed = type.as<Disposed>();
     _timestamp.markDirty();
 }
 
@@ -165,7 +166,7 @@ void RenderObject::setTransform(const sp<Transform>& transform)
     _timestamp.markDirty();
 }
 
-void RenderObject::setVaryings(const sp<Varyings>& varyings)
+void RenderObject::setVaryings(sp<Varyings> varyings)
 {
     _varyings = varyings;
     _timestamp.markDirty();
@@ -181,46 +182,47 @@ void RenderObject::setTag(const Box& tag)
     _tag = tag;
 }
 
-const sp<Disposed>& RenderObject::disposed()
+sp<Boolean> RenderObject::disposed()
 {
     return _disposed.ensure();
 }
 
-void RenderObject::setDisposed(const sp<Boolean>& disposed)
+void RenderObject::setDisposed(sp<Boolean> disposed)
 {
-    _disposed.ensure()->set(disposed);
+    _disposed.reset(std::move(disposed));
+    _timestamp.markDirty();
 }
 
-const sp<Visibility>& RenderObject::visible()
+sp<Boolean> RenderObject::visible()
 {
     return _visible.ensure();
 }
 
 void RenderObject::setVisible(bool visible)
 {
-    _visible.ensure()->set(visible);
+    _visible.reset(sp<Boolean::Const>::make(visible));
     _timestamp.markDirty();
 }
 
-void RenderObject::setVisible(const sp<Boolean>& visible)
+void RenderObject::setVisible(sp<Boolean> visible)
 {
-    _visible.ensure()->set(visible);
+    _visible.reset(std::move(visible));
     _timestamp.markDirty();
 }
 
 void RenderObject::dispose()
 {
-    _disposed.ensure()->dispose();
+    setDisposed(sp<Boolean::Const>::make(true));
 }
 
 void RenderObject::show()
 {
-    _visible.ensure()->set(true);
+    setVisible(true);
 }
 
 void RenderObject::hide()
 {
-    _visible.ensure()->set(false);
+    setVisible(false);
 }
 
 bool RenderObject::isDisposed() const
@@ -235,10 +237,11 @@ bool RenderObject::isVisible() const
 
 Renderable::StateBits RenderObject::updateState(const RenderRequest& renderRequest)
 {
-    if(_disposed.update(renderRequest.timestamp()) && _disposed.val())
+    bool dirty = _timestamp.update(renderRequest.timestamp());
+    if((_disposed.update(renderRequest.timestamp()) || dirty) && _disposed.val())
         return Renderable::RENDERABLE_STATE_DISPOSED;
 
-    bool dirty = UpdatableUtil::update(renderRequest.timestamp(), _visible, _type, _position, _size, _transform, _varyings, _visible) || _timestamp.update(renderRequest.timestamp());
+    dirty = UpdatableUtil::update(renderRequest.timestamp(), _visible, _type, _position, _size, _transform, _varyings, _visible) || dirty;
     return static_cast<Renderable::StateBits>((_type->val() == -1 ? Renderable::RENDERABLE_STATE_DISPOSED : 0) | (dirty ? Renderable::RENDERABLE_STATE_DIRTY : 0) |
                                               (_visible.val() ? Renderable::RENDERABLE_STATE_VISIBLE : 0));
 }
@@ -246,7 +249,7 @@ Renderable::StateBits RenderObject::updateState(const RenderRequest& renderReque
 Renderable::Snapshot RenderObject::snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest, const V3& postTranslate, StateBits state)
 {
     if(state & Renderable::RENDERABLE_STATE_DIRTY)
-        return Renderable::Snapshot(state, _type->val(), _position.val(), _size.val(), _transform->snapshot(postTranslate), _varyings->snapshot(pipelineInput, renderRequest.allocator()));
+        return Renderable::Snapshot(state, _type->val(), _position.val(), _size.val(), _transform->snapshot(postTranslate), _varyings ? _varyings->snapshot(pipelineInput, renderRequest.allocator()) : Varyings::Snapshot());
     return Renderable::Snapshot(state, _type->val(), V3(), V3(), Transform::Snapshot(), Varyings::Snapshot());
 }
 
@@ -256,7 +259,7 @@ RenderObject::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
       _size(factory.getBuilder<Size>(manifest, Constants::Attributes::SIZE)),
       _transform(factory.getBuilder<Transform>(manifest, Constants::Attributes::TRANSFORM)),
       _varyings(factory.getConcreteClassBuilder<Varyings>(manifest, Constants::Attributes::VARYINGS)),
-      _disposed(factory.getBuilder<Disposed>(manifest, Constants::Attributes::DISPOSED))
+      _disposed(factory.getBuilder<Boolean>(manifest, Constants::Attributes::DISPOSED))
 {
 }
 

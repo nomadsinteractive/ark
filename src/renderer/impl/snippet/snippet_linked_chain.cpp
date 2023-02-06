@@ -111,7 +111,7 @@ sp<Snippet> SnippetLinkedChain::BUILDER::build(const Scope& args)
                 chain = sp<SnippetLinkedChain>::make(chain, snippet);
         }
     }
-    DWARN(chain, "Only one snippet in SnippetLinkedChain");
+    DCHECK_WARN(chain, "Only one snippet in SnippetLinkedChain");
     return chain ? chain.cast<Snippet>() : snippet;
 }
 

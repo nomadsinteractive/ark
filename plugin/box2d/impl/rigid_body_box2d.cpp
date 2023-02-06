@@ -16,6 +16,8 @@
 #include "graphics/base/transform.h"
 #include "graphics/base/v3.h"
 
+#include "app/base/application_context.h"
+
 #include "box2d/impl/collider_box2d.h"
 
 namespace ark {

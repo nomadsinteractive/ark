@@ -66,7 +66,7 @@ template<typename T> class Uploader::StandardLayout : public Uploader {
 public:
     StandardLayout(sp<T> object)
         : Uploader(sizeof(T)), _object(std::move(object)) {
-        DWARN(std::is_standard_layout<T>::value, "T is not a StandardLayoutType");
+        DCHECK_WARN(std::is_standard_layout<T>::value, "T is not a StandardLayoutType");
     }
 
     virtual void upload(Writable& uploader) override {

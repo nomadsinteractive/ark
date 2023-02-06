@@ -83,7 +83,7 @@ void EventDispatcher::KeyEventListener::onEvent(const EventDispatcher& dispatche
             _on_repeat->run();
     }
     else
-        DWARN(false, "Unknown event: %d", event.action());
+        DCHECK_WARN(false, "Unknown event: %d", event.action());
 }
 
 EventDispatcher::MotionEventListener::MotionEventListener(const sp<EventListener>& onPress, const sp<EventListener>& onRelease, const sp<EventListener>& onClick, const sp<EventListener>& onMove)
@@ -119,7 +119,7 @@ bool EventDispatcher::MotionEventListener::onEvent(const EventDispatcher& dispat
     else if(action == Event::ACTION_CANCEL)
         _pressed_y = _pressed_x = -1000.0f;
     else
-        DWARN(false, "Unknown event: %d", event.action());
+        DCHECK_WARN(false, "Unknown event: %d", event.action());
     return false;
 }
 

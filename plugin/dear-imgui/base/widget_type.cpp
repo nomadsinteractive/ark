@@ -78,7 +78,7 @@ sp<Widget> WidgetType::before(sp<Widget> self, sp<Widget> after)
 sp<Widget> WidgetType::wrapped(sp<Widget> self)
 {
     sp<Wrapper<Widget>> wrapper = self.as<Wrapper<Widget>>();
-    WARN(wrapper, "Must be a Wrapper<Widget> instance to get its wrapped attribute");
+    CHECK_WARN(wrapper, "Must be a Wrapper<Widget> instance to get its wrapped attribute");
     return wrapper ? wrapper->wrapped() : nullptr;
 }
 

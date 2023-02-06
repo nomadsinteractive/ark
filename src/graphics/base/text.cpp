@@ -38,32 +38,18 @@
 
 namespace ark {
 
-Text::Text(const sp<LayerContext>& layer, sp<StringVar> text, float textScale, float letterSpacing, float lineHeight, float lineIndent)
-    : Text(nullptr, layer, std::move(text), nullptr, textScale, letterSpacing, lineHeight, lineIndent)
+Text::Text(sp<RenderLayer> renderLayer, sp<StringVar> content, sp<GlyphMaker> glyphMaker, float textScale, float letterSpacing, float lineHeight, float lineIndent)
+    : _render_layer(std::move(renderLayer)), _content(sp<Content>::make(std::move(content), std::move(glyphMaker), _render_layer->context()->modelLoader(), textScale, letterSpacing, lineHeight, lineIndent))
 {
+    ASSERT(_render_layer);
 }
 
-Text::Text(sp<RenderLayer> renderLayer, sp<StringVar> text, float textScale, float letterSpacing, float lineHeight, float lineIndent)
-    : Text(renderLayer->context(), std::move(text), textScale, letterSpacing, lineHeight, lineIndent)
+std::vector<sp<RenderObject>> Text::contents() const
 {
-    _render_layer = std::move(renderLayer);
-}
-
-Text::Text(const sp<Layer>& layer, sp<StringVar> text, float textScale, float letterSpacing, float lineHeight, float lineIndent)
-    : Text(layer->context(), std::move(text), textScale, letterSpacing, lineHeight, lineIndent)
-{
-}
-
-Text::Text(sp<RenderLayer> renderLayer, sp<LayerContext> layerContext, sp<StringVar> text, sp<GlyphMaker> glyphMaker, float textScale, float letterSpacing, float lineHeight, float lineIndent)
-    : _render_layer(std::move(renderLayer)), _layer_context(std::move(layerContext)), _content(sp<Content>::make(_layer_context, std::move(text), std::move(glyphMaker), _layer_context->modelLoader(), textScale,
-                                                                                                                 letterSpacing, lineHeight, lineIndent))
-{
-    WARN(_render_layer, "Text without a RenderLayer will no longer be supported");
-}
-
-const std::vector<sp<RenderObject>>& Text::contents() const
-{
-    return _content->renderObjects();
+    std::vector<sp<RenderObject>> contents;
+    for(const auto& i : _content->_render_objects)
+        contents.push_back(i.first);
+    return contents;
 }
 
 const sp<Vec3>& Text::position() const
@@ -100,7 +86,7 @@ const std::wstring& Text::text() const
 
 void Text::setText(std::wstring text)
 {
-    _content->setText(_layer_context, std::move(text));
+    _content->setText(std::move(text));
 }
 
 void Text::show(sp<Boolean> disposed)
@@ -110,25 +96,12 @@ void Text::show(sp<Boolean> disposed)
 
 void Text::setRichText(std::wstring richText, const sp<ResourceLoader>& resourceLoader, const Scope& args)
 {
-    _content->setRichText(_layer_context, std::move(richText), resourceLoader, args);
-}
-
-void Text::render(RenderRequest& renderRequest, const V3& position)
-{
-    return;
-
-    if(!_content->update(_layer_context, renderRequest.timestamp()))
-        if(_content->_layout_size && _content->_layout_size->update(renderRequest.timestamp()))
-            _content->layoutContent();
-
-    _layer_context->renderRequest(V3());
-    for(const sp<RenderablePassive>& i : _content->_renderables)
-        i->requestUpdate(position);
+    _content->setRichText(std::move(richText), resourceLoader, args);
 }
 
 bool Text::update(uint64_t timestamp) const
 {
-    return _content->update(_layer_context, timestamp);
+    return _content->update(timestamp);
 }
 
 bool Text::isCJK(int32_t c)
@@ -152,37 +125,37 @@ Text::GlyphContents Text::makeGlyphs(GlyphMaker& gm, const std::wstring& text)
     return glyphs;
 }
 
-void Text::Content::setText(const sp<LayerContext>& layerContext, std::wstring text)
+void Text::Content::setText(std::wstring text)
 {
     _text_unicode = std::move(text);
-    createContent(layerContext);
+    createContent();
 }
 
-void Text::Content::setRichText(const sp<LayerContext>& layerContext, std::wstring richText, const sp<ResourceLoader>& resourceLoader, const Scope& args)
+void Text::Content::setRichText(std::wstring richText, const sp<ResourceLoader>& resourceLoader, const Scope& args)
 {
     _text_unicode = std::move(richText);
-    createRichContent(layerContext, args, resourceLoader ? resourceLoader->beanFactory() : Ark::instance().applicationContext()->resourceLoader()->beanFactory());
+    createRichContent(args, resourceLoader ? resourceLoader->beanFactory() : Ark::instance().applicationContext()->resourceLoader()->beanFactory());
 }
 
-bool Text::Content::update(const sp<LayerContext>& layerContext, uint64_t timestamp)
+bool Text::Content::update(uint64_t timestamp)
 {
     bool positionDirty = _position.update(timestamp);
     bool contentDirty = _string->update(timestamp);
     bool sizeDirty = _layout_size && _layout_size->update(timestamp);
     if(contentDirty)
-        setText(layerContext, Strings::fromUTF8(*_string->val()));
+        setText(Strings::fromUTF8(*_string->val()));
     if(sizeDirty)
         layoutContent();
     return positionDirty || contentDirty || sizeDirty;
 }
 
-void Text::Content::createContent(const sp<LayerContext>& layerContext)
+void Text::Content::createContent()
 {
     float boundary = getLayoutBoundary();
     float flowx = boundary > 0 ? 0 : -_letter_spacing, flowy = getFlowY();
     _glyphs = makeGlyphs(_glyph_maker, _text_unicode);
     flowy = doLayoutContent(_glyphs, flowx, flowy, boundary);
-    createLayerContent(layerContext, flowx, flowy);
+    createLayerContent(flowx, flowy);
 }
 
 float Text::Content::doLayoutContent(GlyphContents& cm, float& flowx, float& flowy, float boundary)
@@ -190,14 +163,14 @@ float Text::Content::doLayoutContent(GlyphContents& cm, float& flowx, float& flo
     return boundary > 0 ? doLayoutWithBoundary(cm, flowx, flowy, boundary) : doLayoutWithoutBoundary(cm, flowx, flowy);
 }
 
-void Text::Content::createRichContent(const sp<LayerContext>& layerContext, const Scope& args, BeanFactory& factory)
+void Text::Content::createRichContent(const Scope& args, BeanFactory& factory)
 {
     float boundary = getLayoutBoundary();
     float flowx = boundary > 0 ? 0 : -_letter_spacing, flowy = getFlowY();
     const document richtext = Documents::parseFull(Strings::toUTF8(_text_unicode));
     _glyphs.clear();
     float height = doCreateRichContent(_glyphs, _glyph_maker, richtext, factory, args, flowx, flowy, boundary);
-    createLayerContent(layerContext, flowx, height);
+    createLayerContent(flowx, height);
 }
 
 float Text::Content::doCreateRichContent(GlyphContents& cm, GlyphMaker& gm, const document& richtext, BeanFactory& factory, const Scope& args, float& flowx, float& flowy, float boundary)
@@ -226,12 +199,12 @@ void Text::Content::layoutContent()
     float flowx = boundary > 0 ? 0 : -_letter_spacing, flowy = getFlowY();
     flowy = doLayoutContent(_glyphs, flowx, flowy, boundary);
     for(size_t i = 0; i < _render_objects.size(); ++i)
-        _render_objects.at(i)->setPosition(_glyphs.at(i)->toRenderObjectPosition());
+        _render_objects.at(i).first->setPosition(_glyphs.at(i)->toRenderObjectPosition());
     _size->setWidth(flowx);
     _size->setHeight(flowy);
 }
 
-void Text::Content::createLayerContent(const sp<LayerContext>& layerContext, float width, float height)
+void Text::Content::createLayerContent(float width, float height)
 {
     std::vector<sp<RenderObject>> renderObjects;
 
@@ -240,15 +213,6 @@ void Text::Content::createLayerContent(const sp<LayerContext>& layerContext, flo
 
     _size->setWidth(width);
     _size->setHeight(height);
-
-    _renderables.clear();
-    if(layerContext && false)
-        for(const sp<RenderObject>& i : renderObjects)
-        {
-            sp<RenderablePassive> renderable = sp<RenderablePassive>::make(i);
-            layerContext->add(renderable, nullptr, sp<BooleanByWeakRef<RenderablePassive>>::make(renderable, 1));
-            _renderables.push_back(std::move(renderable));
-        }
 
     setRenderObjects(std::move(renderObjects));
 }
@@ -382,8 +346,7 @@ float Text::Content::getLayoutBoundary() const
 
 Text::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _bean_factory(factory), _text(factory.getBuilder<StringVar>(manifest, Constants::Attributes::TEXT)), _render_layer(factory.getBuilder<RenderLayer>(manifest, Constants::Attributes::RENDER_LAYER)),
-      _layer_context(sp<LayerContext::BUILDER>::make(factory, manifest, Layer::TYPE_DYNAMIC)), _glyph_maker(factory.getBuilder<GlyphMaker>(manifest, "glyph-maker")),
-      _text_scale(factory.getBuilder<String>(manifest, "text-scale")), _letter_spacing(factory.getBuilder<Numeric>(manifest, "letter-spacing")),
+      _glyph_maker(factory.getBuilder<GlyphMaker>(manifest, "glyph-maker")), _text_scale(factory.getBuilder<String>(manifest, "text-scale")), _letter_spacing(factory.getBuilder<Numeric>(manifest, "letter-spacing")),
       _line_height(Documents::getAttribute<float>(manifest, "line-height", 0.0f)), _line_indent(Documents::getAttribute<float>(manifest, "line-indent", 0.0f))
 {
 }
@@ -391,8 +354,7 @@ Text::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 sp<Text> Text::BUILDER::build(const Scope& args)
 {
     float textScale = _text_scale ? Strings::parse<float>(_text_scale->build(args)) : 1.0f;
-    return sp<Text>::make(_render_layer->build(args), _layer_context->build(args), _text->build(args), _glyph_maker->build(args), textScale,
-                          BeanUtils::toFloat(_letter_spacing, args, 0.0f), _line_height, _line_indent);
+    return sp<Text>::make(_render_layer->build(args), _text->build(args), _glyph_maker->build(args), textScale, BeanUtils::toFloat(_letter_spacing, args, 0.0f), _line_height, _line_indent);
 }
 
 Text::LayoutChar::LayoutChar(sp<Model> model, float widthIntegral, bool isCJK, bool isWordBreak, bool isLineBreak)
@@ -400,47 +362,34 @@ Text::LayoutChar::LayoutChar(sp<Model> model, float widthIntegral, bool isCJK, b
 {
 }
 
-Text::Content::Content(const sp<LayerContext>& layerContext, sp<StringVar> string, sp<GlyphMaker> glyphMaker, sp<ModelLoader> modelLoader, float textScale, float letterSpacing, float lineHeight, float lineIndent)
+Text::Content::Content(sp<StringVar> string, sp<GlyphMaker> glyphMaker, sp<ModelLoader> modelLoader, float textScale, float letterSpacing, float lineHeight, float lineIndent)
     : _string(string ? std::move(string) : StringType::create()), _glyph_maker(glyphMaker ? std::move(glyphMaker) : sp<GlyphMaker>::make<GlyphMakerSpan>()), _model_loader(std::move(modelLoader)),
       _text_scale(textScale), _letter_spacing(letterSpacing), _layout_direction(Ark::instance().applicationContext()->renderEngine()->toLayoutDirection(1.0f)), _line_height(_layout_direction * lineHeight),
       _line_indent(lineIndent), _size(sp<Size>::make(0.0f, 0.0f)), _needs_reload(false)
 {
     if(_string->val() && !_string->val()->empty())
-        setText(layerContext, Strings::fromUTF8(*_string->val()));
+        setText(Strings::fromUTF8(*_string->val()));
 }
 
-bool Text::Content::preSnapshot(const RenderRequest& renderRequest, LayerContext& /*lc*/)
+bool Text::Content::preSnapshot(const RenderRequest& renderRequest, LayerContext& lc)
 {
-    bool needsReload = update(nullptr, renderRequest.timestamp()) || _needs_reload;
-    for(size_t i = 0; i < _render_objects.size(); ++i)
-    {
-        const sp<RenderObject>& renderObject = _render_objects.at(i);
-        if(renderObject)
+    bool needsReload = update(renderRequest.timestamp()) || _needs_reload;
+    for(auto& [i, j] : _render_objects)
+        if(i)
         {
-            Renderable::StateBits state = renderObject->updateState(renderRequest);
+            Renderable::StateBits state = i->updateState(renderRequest);
             if(state & Renderable::RENDERABLE_STATE_DISPOSED)
-                _render_objects[i] = nullptr;
-            _render_object_states[i] = state;
+                i = nullptr;
+            j = state;
         }
-    }
+    lc._position = _position.val();
     _needs_reload = false;
     return needsReload;
 }
 
 void Text::Content::snapshot(const RenderRequest& renderRequest, const LayerContext& lc, RenderLayerSnapshot& output)
 {
-    const PipelineInput& pipelineInput = output.pipelineInput();
-    for(size_t i = 0; i < _render_objects.size(); ++i)
-    {
-        const sp<RenderObject>& renderObject = _render_objects.at(i);
-        if(renderObject)
-        {
-            Renderable::State state = _render_object_states.at(i);
-            if(output.needsReload())
-                state.setState(Renderable::RENDERABLE_STATE_DIRTY, true);
-            output.addSnapshot(lc, renderObject->snapshot(pipelineInput, renderRequest, lc._position + _position.val(), state.stateBits()));
-        }
-    }
+    lc.doSnapshot(_render_objects, renderRequest, output);
 }
 
 SafeVar<Vec3>& Text::Content::position()
@@ -448,16 +397,12 @@ SafeVar<Vec3>& Text::Content::position()
     return _position;
 }
 
-const std::vector<sp<RenderObject>>& Text::Content::renderObjects() const
-{
-    return _render_objects;
-}
-
 void Text::Content::setRenderObjects(std::vector<sp<RenderObject>> renderObjects)
 {
     _needs_reload = true;
-    _render_objects = std::move(renderObjects);
-    _render_object_states = std::vector<Renderable::StateBits>(_render_objects.size());
+    _render_objects = std::vector<std::pair<sp<RenderObject>, Renderable::State>>(renderObjects.size());
+    for(size_t i = 0; i < renderObjects.size(); ++i)
+        _render_objects[i].first = std::move(renderObjects[i]);
 }
 
 }

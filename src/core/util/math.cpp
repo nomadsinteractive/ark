@@ -310,7 +310,7 @@ V2 Math::projectile(float dx, float dy, float v, float g, uint32_t sid)
 	float b = -dy * g - v * v;
 	float c = g * g * dx * dx * 0.25f;
     const V3 solutions = quadratic(a, b, c);
-    DWARN(sid == 0 || sid == 1, "Illegal solution id: %d, should be 0 or 1", sid);
+    DCHECK_WARN(sid == 0 || sid == 1, "Illegal solution id: %d, should be 0 or 1", sid);
     float vx2 = sid == 0 ? solutions.y() : solutions.z();
     if(solutions.x() < 0 || vx2 < 0)
 		return V2(0, 0);

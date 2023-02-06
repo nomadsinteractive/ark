@@ -119,7 +119,7 @@ private:
 
     uint32_t setLayoutDescriptor(const ShaderPreprocessor::DeclarationList& ins, const ShaderPreprocessor::DeclarationList& outs, const String& descriptor, uint32_t start) {
         uint32_t counter = start;
-        DWARN(ins.vars().size() == outs.vars().size(), "Output/Input mismatch, output and input have different numbers of items: [%s] vs [%s]",
+        DCHECK_WARN(ins.vars().size() == outs.vars().size(), "Output/Input mismatch, output and input have different numbers of items: [%s] vs [%s]",
                Strings::join(&ins.vars().keys().at(0), 0, ins.vars().keys().size()).c_str(), Strings::join(&outs.vars().keys().at(0), 0, outs.vars().keys().size()).c_str());
         for(const ShaderPreprocessor::Declaration& i : ins.vars().values()) {
             const String prefix = Strings::sprintf("layout (%s = %d) ", descriptor.c_str(), getNextLayoutLocation(i, counter));
@@ -127,7 +127,7 @@ private:
 
             const String outName = Strings::capitalizeFirst(i.name().startsWith("v_") ? i.name().substr(2) : i.name());
             bool hasOutName = outs.vars().has(outName);
-            DWARN(hasOutName, "Output/Input mismatch, \"%s\" exists in input but not found in next stage of shader", outName.c_str());
+            DCHECK_WARN(hasOutName, "Output/Input mismatch, \"%s\" exists in input but not found in next stage of shader", outName.c_str());
             if(hasOutName) {
                 const sp<String>& os = outs.vars().at(outName).source();
                 *os = prefix + *os;

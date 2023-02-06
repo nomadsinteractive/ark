@@ -33,7 +33,7 @@ limitations under the License.
 #include "core/impl/dictionary/dictionary_impl.h"
 #include "core/inf/asset.h"
 #include "core/types/global.h"
-#include "core/util/asset_bundle_util.h"
+#include "core/util/asset_bundle_type.h"
 
 #include "renderer/base/render_engine.h"
 
@@ -103,7 +103,7 @@ private:
     sp<AssetBundle> createAsset(BeanFactory& factory, const ApplicationManifest::Asset& manifest) {
         sp<AssetBundle> asset = manifest._protocol.empty() ? _builtin_asset_bundle->getBundle(manifest._src) :
                                                              factory.build<AssetBundle>(manifest._protocol, manifest._src, {});
-        WARN(asset, "Unable to load AssetBundle, protocol: %s, src: %s", manifest._protocol.c_str(), manifest._src.c_str());
+        CHECK_WARN(asset, "Unable to load AssetBundle, protocol: %s, src: %s", manifest._protocol.c_str(), manifest._src.c_str());
         return asset;
     }
 
@@ -204,7 +204,7 @@ void Ark::initialize(const sp<ApplicationManifest>& manifest)
     loadPlugins(_manifest);
 
     sp<BeanFactory> factory = createBeanFactory(sp<DictionaryImpl<document>>::make());
-    _asset_bundle = sp<ArkAssetBundle>::make(AssetBundleUtil::createBuiltInAssetBundle(_manifest->assetDir(), _manifest->appDir()), factory, _manifest->assets());
+    _asset_bundle = sp<ArkAssetBundle>::make(AssetBundleType::createBuiltInAssetBundle(_manifest->assetDir(), _manifest->appDir()), factory, _manifest->assets());
     sp<ApplicationBundle> appResource = sp<ApplicationBundle>::make(_asset_bundle->getAssetBundle("/"));
     sp<RenderEngine> renderEngine = createRenderEngine(_manifest->renderer()._version, _manifest->renderer()._coordinate_system, appResource);
     _application_context = createApplicationContext(_manifest, std::move(appResource), std::move(renderEngine));
@@ -290,6 +290,11 @@ op<ApplicationProfiler::Tracer> Ark::makeProfilerTracer(const char* func, const 
 op<ApplicationProfiler::Logger> Ark::makeProfilerLogger(const char* func, const char* filename, int32_t lineno, const char* name) const
 {
     return _application_profiler ? _application_profiler->makeLogger(func, filename, lineno, name) : op<ApplicationProfiler::Logger>();
+}
+
+void Ark::deferUnref(Box box)
+{
+    _application_context->renderController()->deferUnref(std::move(box));
 }
 
 sp<RenderEngine> Ark::createRenderEngine(RendererVersion version, RendererCoordinateSystem coordinateSystem, const sp<ApplicationBundle>& appResource)

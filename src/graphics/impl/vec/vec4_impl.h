@@ -34,14 +34,15 @@ public:
     void set(const V4& val);
     void fix();
 
-//  [[plugin::builder("vec4")]]
+//  [[plugin::builder]]
     class BUILDER : public Builder<Vec4> {
     public:
-        BUILDER(BeanFactory& parent, const document& manifest);
+        BUILDER(BeanFactory& factory, const document& manifest);
 
         virtual sp<Vec4> build(const Scope& args) override;
 
     private:
+        sp<Builder<Vec4>> _value;
         SafePtr<Builder<Numeric>> _x, _y, _z, _w;
     };
 

@@ -21,6 +21,11 @@ public:
         RENDER_MODE_COUNT,
     };
 
+    enum ModelTrait {
+        MODEL_TRAIT_NONE = 0,
+        MODEL_TRAIT_FIXED_VERTEX_COUNT = 1
+    };
+
     ModelLoader(RenderMode renderMode);
     virtual ~ModelLoader() = default;
 

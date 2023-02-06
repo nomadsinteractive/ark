@@ -27,7 +27,6 @@ if(ARK_USE_VULKAN)
     endif()
 endif()
 
-ark_compile_definitions(-DARK_USE_CONSTEXPR)
 if(IOS)
     ark_compile_definitions(-DARK_PLATFORM_IOS)
 endif()

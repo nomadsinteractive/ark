@@ -14,7 +14,7 @@ Identifier::Identifier(Type type, String package, String value, String valueType
 
 Identifier Identifier::parse(const String& s, Identifier::Type idType, bool strictMode)
 {
-    DCHECK(s, "Illegal identifier: empty string");
+    CHECK(s, "Illegal identifier: empty string");
 
     Identifier::Type headTypeToken = static_cast<Type>(s.at(0));
     Identifier::Type idTypeToken = idType == ID_TYPE_AUTO ? headTypeToken : idType;
@@ -28,7 +28,7 @@ Identifier Identifier::parse(const String& s, Identifier::Type idType, bool stri
 
     if(idTypeToken == ID_TYPE_EXPRESSION)
     {
-        DCHECK(s.back() == '}', "Illegal identifier, expression not in braces: %s", s.c_str());
+        CHECK(s.back() == '}', "Illegal identifier, expression not in braces: %s", s.c_str());
         return Identifier(ID_TYPE_EXPRESSION, package, s.substr(1, s.length() - 1).strip(), "", queries);
     }
 
@@ -43,7 +43,7 @@ Identifier Identifier::parseRef(const String& s, bool strictMode)
     DCHECK(s, "Illegal identifier: empty string");
     String package, ref, queries;
     bool idValid = parseAndValidate(s, package, ref, queries, strictMode);
-    DWARN(idValid, "Unvaild refid \"%s\"", s.c_str());
+    DCHECK_WARN(idValid, "Unvaild refid \"%s\"", s.c_str());
     return idValid ? Identifier(ID_TYPE_REFERENCE, package, ref, "", queries) : Identifier(ID_TYPE_REFERENCE, "", s, "", queries);
 }
 
@@ -112,6 +112,13 @@ bool Identifier::isArg() const
 bool Identifier::isVal() const
 {
     return _type == ID_TYPE_VALUE;
+}
+
+Identifier Identifier::withouPackage() const
+{
+    Identifier wp = *this;
+    wp._package = "";
+    return wp;
 }
 
 bool Identifier::parseAndValidate(const String& s, String& package, String& value, String& queries, bool strictMode)

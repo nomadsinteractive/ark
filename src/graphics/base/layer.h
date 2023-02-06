@@ -40,7 +40,7 @@ public:
     void dispose();
 
 //  [[script::bindings::property]]
-    const sp<Visibility>& visible() const;
+    const SafeVar<Boolean>& visible() const;
 //  [[script::bindings::property]]
     void setVisible(sp<Boolean> visible);
 
@@ -51,7 +51,7 @@ public:
     const sp<LayerContext>& context() const;
 
 // [[script::bindings::auto]]
-    void addRenderObject(const sp<RenderObject>& renderObject, const sp<Boolean>& disposed = sp<Boolean>::null());
+    void addRenderObject(const sp<RenderObject>& renderObject, const sp<Boolean>& disposed = nullptr);
 // [[script::bindings::auto]]
     void clear();
 

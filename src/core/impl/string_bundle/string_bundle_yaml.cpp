@@ -39,17 +39,17 @@ sp<String> StringBundleYAML::getString(const String& resid)
 
             if(iter == bundle.end())
             {
-                DWARN(false, "YAML node \"%s\" not found", arrayname.c_str());
+                DCHECK_WARN(false, "YAML node \"%s\" not found", arrayname.c_str());
                 break;
             }
             if(!iter->second->isSequence())
             {
-                DWARN(false, "YAML node \"%s\" found, but it's not an array", arrayname.c_str());
+                DCHECK_WARN(false, "YAML node \"%s\" found, but it's not an array", arrayname.c_str());
                 break;
             }
             if(arrayindex < 0 || static_cast<size_t>(arrayindex) >= iter->second->sequence()->size())
             {
-                DWARN(false , "YAML node \"%s\" found, but index out of range", arrayname.c_str());
+                DCHECK_WARN(false , "YAML node \"%s\" found, but index out of range", arrayname.c_str());
                 break;
             }
             return sp<String>::make(iter->second->sequence()->at(static_cast<size_t>(arrayindex)));
@@ -57,7 +57,7 @@ sp<String> StringBundleYAML::getString(const String& resid)
         const auto iter = bundle.find(nodename);
         if(iter == bundle.end())
         {
-            DWARN(false, "YAML node \"%s\" not found", nodename.c_str());
+            DCHECK_WARN(false, "YAML node \"%s\" not found", nodename.c_str());
             break;
         }
         return iter->second->value();
@@ -74,7 +74,7 @@ std::vector<String> StringBundleYAML::getStringArray(const String& resid)
         const auto iter = bundle.find(nodename);
         if(iter == bundle.end())
         {
-            DWARN(false, "YAML node \"%s\" not found", nodename.c_str());
+            DCHECK_WARN(false, "YAML node \"%s\" not found", nodename.c_str());
             break;
         }
         return iter->second->isSequence() ? iter->second->sequence() : std::vector<String>({*iter->second->value()});

@@ -90,10 +90,10 @@ public:
 //  [[plugin::builder]]
     class BUILDER : public Builder<Varyings> {
     private:
-        class VaryingBuilder {
+        class InputBuilder {
         public:
-            VaryingBuilder(String name, sp<Builder<Input>> input);
-            DEFAULT_COPY_AND_ASSIGN(VaryingBuilder);
+            InputBuilder(BeanFactory& factory, const document& manifest);
+            DEFAULT_COPY_AND_ASSIGN(InputBuilder);
 
             String _name;
             sp<Builder<Input>> _input;
@@ -105,7 +105,7 @@ public:
         virtual sp<Varyings> build(const Scope& args) override;
 
     private:
-        std::vector<VaryingBuilder> _varying_builders;
+        std::vector<InputBuilder> _input_builders;
     };
 
 private:

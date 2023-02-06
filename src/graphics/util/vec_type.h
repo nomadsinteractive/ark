@@ -22,6 +22,8 @@
 #include "graphics/base/v4.h"
 #include "graphics/base/size.h"
 
+#include "app/base/application_context.h"
+
 namespace ark {
 
 template<typename T, typename IMPL> class VecType {
@@ -264,7 +266,7 @@ public:
 
     static sp<VarType> wrapped(const sp<VarType>& self) {
         sp<VariableWrapper<T>> wrapper = self.template as<VariableWrapper<T>>();
-        WARN(wrapper, "Non-Vec%dWrapper instance has no delegate attribute. This should be an error unless you're inspecting it.", DIMENSION);
+        CHECK_WARN(wrapper, "Non-Vec%dWrapper instance has no delegate attribute. This should be an error unless you're inspecting it.", DIMENSION);
         return wrapper ? wrapper->wrapped() : nullptr;
     }
 

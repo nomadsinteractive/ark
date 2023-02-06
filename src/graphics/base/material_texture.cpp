@@ -1,6 +1,7 @@
 #include "graphics/base/material_texture.h"
 
 #include "core/impl/variable/variable_wrapper.h"
+#include "core/util/string_convert.h"
 
 namespace ark {
 

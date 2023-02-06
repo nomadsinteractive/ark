@@ -126,7 +126,7 @@ document ApplicationContext::createResourceLoaderManifest(const document& manife
     DASSERT(manifest);
     const String src = Documents::getAttribute(manifest, Constants::Attributes::SRC);
     const document doc = src ? _application_bundle->loadDocument(src) : manifest;
-    DWARN(doc == manifest || manifest->children().size() == 0, "\"%s\" has already specified a ResourceLoader src \"%s\", its content will be ignored", Documents::toString(manifest).c_str(), src.c_str());
+    DCHECK_WARN(doc == manifest || manifest->children().size() == 0, "\"%s\" has already specified a ResourceLoader src \"%s\", its content will be ignored", Documents::toString(manifest).c_str(), src.c_str());
     return doc;
 }
 

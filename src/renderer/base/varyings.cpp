@@ -154,30 +154,19 @@ Varyings::Snapshot Varyings::snapshot(const PipelineInput& pipelineInput, Alloca
 }
 
 Varyings::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+    : _input_builders(factory.makeBuilderList<Input, InputBuilder>(manifest, "varying"))
 {
-    for(const document& i : manifest->children("varying"))
-    {
-        const String& name = Documents::ensureAttribute(i, Constants::Attributes::NAME);
-        const String& value = Documents::ensureAttribute(i, Constants::Attributes::VALUE);
-        const String& type = Documents::ensureAttribute(i, Constants::Attributes::TYPE);
-        _varying_builders.emplace_back(name, factory.ensureBuilderByTypeValue<Input>(type, value));
-    }
 }
 
 sp<Varyings> Varyings::BUILDER::build(const Scope& args)
 {
-    if(_varying_builders.size() == 0)
-        return sp<Varyings>::make();
+    if(_input_builders.size() == 0)
+        return nullptr;
 
     const sp<Varyings> varyings = sp<Varyings>::make();
-    for(const VaryingBuilder& i : _varying_builders)
+    for(const InputBuilder& i : _input_builders)
         varyings->setSlotInput(i._name,  i._input->build(args));
     return varyings;
-}
-
-template<> ARK_API sp<Varyings> Null::safePtr()
-{
-    return sp<Varyings>::make();
 }
 
 Varyings::Slot::Slot(sp<Input> input, uint32_t divisor, int32_t offset)
@@ -192,8 +181,9 @@ void Varyings::Slot::apply(uint8_t* ptr) const
     _input->upload(writer);
 }
 
-Varyings::BUILDER::VaryingBuilder::VaryingBuilder(String name, sp<Builder<Input>> input)
-    : _name(std::move(name)), _input(std::move(input))
+Varyings::BUILDER::InputBuilder::InputBuilder(BeanFactory& factory, const document& manifest)
+    : _name(Documents::ensureAttribute(manifest, Constants::Attributes::NAME)), _input(factory.ensureBuilderByTypeValue<Input>(Documents::ensureAttribute(manifest, Constants::Attributes::TYPE),
+                                                                                                                               Documents::ensureAttribute(manifest, Constants::Attributes::VALUE)))
 {
 }
 

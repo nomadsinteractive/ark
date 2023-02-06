@@ -33,7 +33,7 @@ void Level::load(const String& src)
         const String& name = Documents::ensureAttribute(i, Constants::Attributes::NAME);
         const String& dimensions = Documents::ensureAttribute(i, "dimensions");
         const int32_t id = Documents::ensureAttribute<int32_t>(i, Constants::Attributes::ID);
-        DWARN(libraryMapping.find(id) == libraryMapping.end(), "Overwriting instance library mapping(%d), originally mapped to type(%d)", id, libraryMapping.find(id)->second._render_object_instance->_type);
+        DCHECK_WARN(libraryMapping.find(id) == libraryMapping.end(), "Overwriting instance library mapping(%d), originally mapped to type(%d)", id, libraryMapping.find(id)->second._render_object_instance->_type);
 
         const auto it1 = _render_object_libraries.find(name);
         DCHECK(it1 != _render_object_libraries.end(), "Cannot find instance library(%s)", name.c_str());
@@ -80,7 +80,7 @@ void Level::load(const String& src)
                 const String& rotation = Documents::ensureAttribute(j, "rotation");
                 const sp<Transform> transform = makeTransform(rotation, "");
                 const sp<Camera> camera = getCamera(name);
-                DWARN(camera, "Undefined camera(%s) in \"%s\"", name.c_str(), src.c_str());
+                DCHECK_WARN(camera, "Undefined camera(%s) in \"%s\"", name.c_str(), src.c_str());
                 if(camera)
                 {
                     const V3 p = parseVector<V3>(position);
@@ -92,7 +92,7 @@ void Level::load(const String& src)
             {
                 const String& name = Documents::ensureAttribute(j, Constants::Attributes::NAME);
                 const sp<Vec3> light = getLight(name);
-                DWARN(light, "Undefined light(%s) in \"%s\"", name.c_str(), src.c_str());
+                DCHECK_WARN(light, "Undefined light(%s) in \"%s\"", name.c_str(), src.c_str());
                 if(light)
                 {
                     const V3 position = parseVector<V3>(Documents::ensureAttribute(j, Constants::Attributes::POSITION));

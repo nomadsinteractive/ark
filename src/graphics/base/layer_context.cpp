@@ -21,6 +21,11 @@ LayerContext::RenderableItem::RenderableItem(sp<Renderable> renderable, sp<Updat
     ASSERT(_renderable);
 }
 
+LayerContext::RenderableItem::operator Renderable&() const
+{
+    return *_renderable;
+}
+
 LayerContext::LayerContext(sp<RenderBatch> batch, sp<ModelLoader> models, sp<Boolean> visible, sp<Boolean> disposed, sp<Varyings> varyings)
     : _render_batch(batch ? std::move(batch) : sp<RenderBatch>::make<RenderBatchImpl>()), _model_loader(std::move(models)), _visible(visible ? sp<Visibility>::make(std::move(visible)) : nullptr, true),
       _disposed(disposed ? std::move(disposed) : nullptr, false), _varyings(std::move(varyings)), _layer_type(Layer::TYPE_DYNAMIC), _reload_requested(false), _render_done(false), _position_changed(false)
@@ -31,28 +36,23 @@ LayerContext::LayerContext(sp<RenderBatch> batch, sp<ModelLoader> models, sp<Boo
 void LayerContext::traverse(const Holder::Visitor& visitor)
 {
     if(_layer_type != Layer::TYPE_TRANSIENT)
-        for(const RenderableItem& i : _renderables)
-            HolderUtil::visit(i._renderable, visitor);
+        for(const auto& i : _renderables)
+            HolderUtil::visit(i.first._renderable, visitor);
 }
 
-SafeVar<Visibility>& LayerContext::visible()
+SafeVar<Boolean>& LayerContext::visible()
 {
     return _visible;
 }
 
-const SafeVar<Visibility>& LayerContext::visible() const
+const SafeVar<Boolean>& LayerContext::visible() const
 {
     return _visible;
 }
 
-const SafeVar<Disposed>& LayerContext::disposed() const
+const SafeVar<Boolean>& LayerContext::disposed() const
 {
     return _disposed;
-}
-
-bool LayerContext::isDisposed() const
-{
-    return _disposed.val();
 }
 
 const sp<ModelLoader>& LayerContext::modelLoader() const
@@ -105,8 +105,9 @@ bool LayerContext::preSnapshot(RenderRequest& renderRequest)
     bool needsReload = _renderable_emplaced.size() > 0;
     if(needsReload)
     {
-        const std::vector<RenderableItem> emplaced(std::move(_renderable_emplaced));
-        _renderables.insert(_renderables.end(), emplaced.begin(), emplaced.end());
+        for(RenderableItem& i : _renderable_emplaced)
+            _renderables.emplace_back(std::move(i), Renderable::State());
+        _renderable_emplaced.clear();
     }
 
     needsReload = _render_batch->preSnapshot(renderRequest, *this) || needsReload || _reload_requested;

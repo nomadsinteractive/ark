@@ -12,7 +12,7 @@ namespace ark {
 class ARK_API Glyph {
 public:
 //  [[script::bindings::auto]]
-    Glyph(const sp<Integer>& type, const sp<Vec3>& position = nullptr, const sp<Transform>& transform = nullptr, const sp<Varyings>& varyings = nullptr, const sp<Visibility>& visible = nullptr, const sp<Disposed>& disposed = nullptr);
+    Glyph(sp<Integer> type, sp<Vec3> position = nullptr, sp<Transform> transform = nullptr, sp<Varyings> varyings = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> disposed = nullptr);
 
 //  [[script::bindings::property]]
     const sp<Integer>& type() const;
@@ -25,9 +25,9 @@ public:
 //  [[script::bindings::property]]
     void setVaryings(const sp<Varyings>& varyings);
 //  [[script::bindings::property]]
-    const sp<Disposed>& disposed() const;
+    const sp<Boolean>& disposed() const;
 //  [[script::bindings::property]]
-    const sp<Visibility>& visible() const;
+    const sp<Boolean>& visible() const;
 
     sp<RenderObject> toRenderObject() const;
     sp<Vec3> toRenderObjectPosition() const;
@@ -46,9 +46,8 @@ private:
     sp<Vec3> _position;
     sp<Transform> _transform;
     sp<Varyings> _varyings;
-    sp<Visibility> _visible;
-
-    sp<Disposed> _disposed;
+    sp<Boolean> _visible;
+    sp<Boolean> _disposed;
 
     wchar_t _character;
     V3 _layout_position;

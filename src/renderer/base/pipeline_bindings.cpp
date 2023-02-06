@@ -70,7 +70,7 @@ const std::vector<sp<Texture>>& PipelineBindings::images() const
 
 void PipelineBindings::bindSampler(sp<Texture> texture, uint32_t name)
 {
-    WARN(_stub->_samplers.size() > name, "Illegal sampler binding position: %d, sampler count: %d", name, _stub->_samplers.size());
+    CHECK_WARN(_stub->_samplers.size() > name, "Illegal sampler binding position: %d, sampler count: %d", name, _stub->_samplers.size());
     if(_stub->_samplers.size() > name)
         _stub->_samplers[name] = std::move(texture);
 }

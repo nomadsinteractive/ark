@@ -16,25 +16,25 @@ public:
     }
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Optional);
 
-    typedef std::remove_reference_t<T> OPT;
+    typedef std::remove_reference_t<T> OPT_TYPE;
 
     explicit operator bool() const {
         return static_cast<bool>(_optional);
     }
 
-    OPT& value() {
+    OPT_TYPE& value() {
         return *_ptr();
     }
 
-    const OPT& value() const {
+    const OPT_TYPE& value() const {
         return *_ptr();
     }
 
-    OPT* operator ->() {
+    OPT_TYPE* operator ->() {
         return _ptr();
     }
 
-    const OPT* operator ->() const {
+    const OPT_TYPE* operator ->() const {
         return _ptr();
     }
 
@@ -47,12 +47,12 @@ private:
         T _value;
     };
 
-    const OPT* _ptr() const {
+    const OPT_TYPE* _ptr() const {
         CHECK(_optional, "Bad optional access");
         return &_optional.value()._value;
     }
 
-    OPT* _ptr() {
+    OPT_TYPE* _ptr() {
         CHECK(_optional, "Bad optional access");
         return &_optional.value()._value;
     }

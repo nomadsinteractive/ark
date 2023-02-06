@@ -16,6 +16,7 @@
 
 #include "renderer/base/model.h"
 
+#include "app/base/application_context.h"
 #include "app/view/layout_param.h"
 #include "app/view/view_hierarchy.h"
 
@@ -331,7 +332,7 @@ sp<View> View::BUILDER::build(const Scope& args)
         else if(name == Constants::Attributes::RENDER_OBJECT)
             view->addRenderObjectWithLayer(_factory.ensure<RenderObjectWithLayer>(i, args), false);
         else
-            WARN(name == Constants::Attributes::TEXT || name == Constants::Attributes::BACKGROUND, "Ignoring unknown view child: %s", Documents::toString(i).c_str());
+            CHECK_WARN(name == Constants::Attributes::TEXT || name == Constants::Attributes::BACKGROUND, "Ignoring unknown view child: %s", Documents::toString(i).c_str());
     }
     return view;
 }

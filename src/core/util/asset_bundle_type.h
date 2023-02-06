@@ -1,5 +1,7 @@
-#ifndef ARK_CORE_UTIL_ASSET_BUNDLE_UTIL_H_
-#define ARK_CORE_UTIL_ASSET_BUNDLE_UTIL_H_
+#ifndef ARK_CORE_UTIL_ASSET_BUNDLE_TYPE_H_
+#define ARK_CORE_UTIL_ASSET_BUNDLE_TYPE_H_
+
+#include <vector>
 
 #include "core/forwarding.h"
 #include "core/base/string.h"
@@ -9,17 +11,20 @@
 namespace ark {
 
 //[[script::bindings::class("AssetBundle")]]
-class ARK_API AssetBundleUtil final {
+class ARK_API AssetBundleType final {
 public:
 
-//[[script::bindings::classmethod]]
+//  [[script::bindings::classmethod]]
+    static std::vector<sp<Asset>> listAssets(const sp<AssetBundle>& self, const String& regex = "");
+
+//  [[script::bindings::classmethod]]
     static sp<Asset> get(const sp<AssetBundle>& self, const String& name);
-//[[script::bindings::classmethod]]
+//  [[script::bindings::classmethod]]
     static sp<AssetBundle> getBundle(const sp<AssetBundle>& self, const String& path);
 
-//[[script::bindings::classmethod]]
+//  [[script::bindings::classmethod]]
     static sp<String> getString(const sp<AssetBundle>& self, const String& filepath);
-//[[script::bindings::classmethod]]
+//  [[script::bindings::classmethod]]
     static String getRealPath(const sp<AssetBundle>& self, const String& filepath);
 
     static sp<AssetBundle> createBuiltInAssetBundle(const String& assetDir, const String& appDir);

@@ -9,10 +9,11 @@ namespace ark {
 
 class AssetBundleDirectory : public AssetBundle {
 public:
-    AssetBundleDirectory(const String& directory);
+    AssetBundleDirectory(String directory);
 
     virtual sp<Asset> getAsset(const String& name) override;
     virtual sp<AssetBundle> getBundle(const String& path) override;
+    virtual std::vector<sp<Asset>> listAssets(const String& regex) override;
 
 private:
     String _directory;

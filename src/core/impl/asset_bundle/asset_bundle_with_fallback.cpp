@@ -2,8 +2,8 @@
 
 namespace ark {
 
-AssetBundleWithFallback::AssetBundleWithFallback(const sp<AssetBundle>& delegate, const sp<AssetBundle>& fallback)
-    : _delegate(delegate), _fallback(fallback)
+AssetBundleWithFallback::AssetBundleWithFallback(sp<AssetBundle> delegate, sp<AssetBundle> fallback)
+    : _delegate(std::move(delegate)), _fallback(std::move(fallback))
 {
     DASSERT(_delegate);
     DASSERT(_fallback);
@@ -19,6 +19,12 @@ sp<AssetBundle> AssetBundleWithFallback::getBundle(const String& path)
 {
     const sp<AssetBundle> assetBundle = _delegate->getBundle(path);
     return assetBundle ? assetBundle : _fallback->getBundle(path);
+}
+
+std::vector<sp<Asset>> AssetBundleWithFallback::listAssets(const String& regex)
+{
+    std::vector<sp<Asset>> assets = _delegate->listAssets(regex);
+    return assets.size() > 0 ? assets : _fallback->listAssets(regex);
 }
 
 }

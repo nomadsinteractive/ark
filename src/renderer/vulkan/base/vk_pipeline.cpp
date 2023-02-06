@@ -248,7 +248,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
     _texture_observers.clear();
     for(const sp<Texture>& i : bindings.samplers())
     {
-        DWARN(i, "Pipeline has unbound sampler");
+        DCHECK_WARN(i, "Pipeline has unbound sampler");
         if(i)
         {
             const sp<VKTexture> texture = i->delegate();
@@ -289,7 +289,7 @@ void VKPipeline::setupGraphicsPipeline(GraphicsContext& graphicsContext, const V
         blendAttachmentStates.push_back(state);
     }
 
-    DWARN(blendAttachmentStates.size() > 0, "Graphics pipeline has no color attachment");
+    DCHECK_WARN(blendAttachmentStates.size() > 0, "Graphics pipeline has no color attachment");
 
     VkPipelineColorBlendStateCreateInfo colorBlendState =
             vks::initializers::pipelineColorBlendStateCreateInfo(

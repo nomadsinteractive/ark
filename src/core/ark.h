@@ -82,6 +82,8 @@ public:
     op<ApplicationProfiler::Tracer> makeProfilerTracer(const char* func, const char* filename, int32_t lineno, const char* name, ApplicationProfiler::Category category = ApplicationProfiler::CATEGORY_DEFAULT) const;
     op<ApplicationProfiler::Logger> makeProfilerLogger(const char* func, const char* filename, int32_t lineno, const char* name) const;
 
+    void deferUnref(Box box);
+
     int32_t runTests(int argc, const char* argv[]) const;
 
 private:

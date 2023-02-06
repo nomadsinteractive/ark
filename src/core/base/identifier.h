@@ -42,6 +42,8 @@ public:
     bool isArg() const;
     bool isVal() const;
 
+    Identifier withouPackage() const;
+
 private:
     Identifier(Type type, String package, String val, String valueType, const String& queries);
 

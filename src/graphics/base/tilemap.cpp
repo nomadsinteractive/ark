@@ -29,7 +29,7 @@ public:
         std::vector<Box> renderers = _delegate->make(x, y);
         for(const Box& i : renderers) {
             sp<TilemapLayer> tilemapLayer = i.as<TilemapLayer>();
-            WARN(tilemapLayer, "Tilemap's RendererMaker should return TilemapLayer instance, others will be ignored");
+            CHECK_WARN(tilemapLayer, "Tilemap's RendererMaker should return TilemapLayer instance, others will be ignored");
             if(tilemapLayer)
                 _tilemap.addLayer(tilemapLayer);
         }
@@ -38,7 +38,7 @@ public:
 
     virtual void recycle(const Box& renderer) override {
         sp<TilemapLayer> tilemapLayer = renderer.as<TilemapLayer>();
-        WARN(tilemapLayer, "Tilemap's RendererMaker should return TilemapLayer instance, others will be ignored");
+        CHECK_WARN(tilemapLayer, "Tilemap's RendererMaker should return TilemapLayer instance, others will be ignored");
         _delegate->recycle(renderer);
         if(tilemapLayer)
             _tilemap.removeLayer(tilemapLayer);

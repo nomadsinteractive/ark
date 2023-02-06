@@ -37,7 +37,7 @@ void Layer::dispose()
     _layer_context = nullptr;
 }
 
-const sp<Visibility>& Layer::visible() const
+const SafeVar<Boolean>& Layer::visible() const
 {
     return _layer_context->visible();
 }

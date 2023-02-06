@@ -44,7 +44,7 @@ GLBuffer::~GLBuffer()
 
 void GLBuffer::doUpload(GraphicsContext& /*graphicsContext*/, Input& input)
 {
-    DWARN(_usage != GL_STATIC_DRAW || _size == 0, "Uploading transient data to GL_STATIC_DRAW GLBuffer");
+    DCHECK_WARN(_usage != GL_STATIC_DRAW || _size == 0, "Uploading transient data to GL_STATIC_DRAW GLBuffer");
 
     glBindBuffer(_type, _id);
     GLint bufsize = 0;

@@ -9,6 +9,7 @@
 #include "core/impl/variable/variable_op1.h"
 #include "core/impl/variable/variable_op2.h"
 #include "core/impl/variable/variable_ternary.h"
+#include "core/inf/array.h"
 
 namespace ark {
 
@@ -125,7 +126,7 @@ String StringType::val(const sp<StringVar>& self)
 const sp<StringVar>& StringType::wrapped(const sp<StringVar>& self)
 {
     const sp<StringVarWrapper> ib = self.as<StringVarWrapper>();
-    DWARN(ib, "Non-TextWrapper instance has no wrapped attribute. This should be an error unless you're inspecting it.");
+    DCHECK_WARN(ib, "Non-TextWrapper instance has no wrapped attribute. This should be an error unless you're inspecting it.");
     return ib ? ib->wrapped() : sp<StringVar>::null();
 }
 

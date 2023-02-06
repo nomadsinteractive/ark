@@ -18,6 +18,7 @@ namespace ark {
 //[[core::class]]
 class Paragraph : public Renderer, public Block {
 public:
+[[deprecated]]
     Paragraph(const sp<Text>& characters);
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;

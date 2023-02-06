@@ -14,9 +14,9 @@ namespace ark {
 AlphabetTrueType::AlphabetTrueType(const String& src, const Font::TextSize& textSize)
     : _free_types(Ark::instance().ensure<FreeTypes>()), _text_size(textSize)
 {
-    const sp<Readable> readable = getFontResource(src);
-    DCHECK(readable, "Font \"%s\" does not exists", src.c_str());
-    _free_types->ftNewFaceFromReadable(readable, 0, &_ft_font_face);
+    sp<Readable> readable = getFontResource(src);
+    CHECK(readable, "Font \"%s\" does not exists", src.c_str());
+    _free_types->ftNewFaceFromReadable(std::move(readable), 0, &_ft_font_face);
     setFontSize(textSize);
 }
 
@@ -38,7 +38,7 @@ Optional<Alphabet::Metrics> AlphabetTrueType::measure(int32_t c)
 
     FT_Error err;
     if((err = FT_Load_Glyph(_ft_font_face, glyphIndex, FT_LOAD_NO_BITMAP)) != 0)
-        WARN(false, "Error loading metrics, character: %d. Error code: %d", c, err);
+        CHECK_WARN(false, "Error loading metrics, character: %d. Error code: %d", c, err);
 
     FT_GlyphSlot slot = _ft_font_face->glyph;
     Alphabet::Metrics metrics;
@@ -56,7 +56,7 @@ bool AlphabetTrueType::draw(uint32_t c, Bitmap& image, int32_t x, int32_t y)
     FT_UInt glyphIndex = FT_Get_Char_Index(_ft_font_face, c);
     if(!glyphIndex)
         return false;
-    if(FT_Load_Glyph(_ft_font_face, glyphIndex, FT_LOAD_RENDER) != 0)
+    if(FT_Load_Glyph(_ft_font_face, glyphIndex, FT_LOAD_RENDER | FT_LOAD_TARGET_NORMAL) != 0)
         DFATAL("Error loading glyph, character: %d", c);
     FT_GlyphSlot slot = _ft_font_face->glyph;
     DCHECK(slot, "Glyph not loaded");

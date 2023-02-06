@@ -4,6 +4,7 @@
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/inf/variable.h"
 
+#include "graphics/base/render_request.h"
 #include "graphics/base/size.h"
 #include "graphics/base/v3.h"
 #include "graphics/impl/vec/vec4_impl.h"

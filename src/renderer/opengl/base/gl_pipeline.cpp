@@ -436,7 +436,7 @@ GLPipeline::GLAttribute::GLAttribute(GLint location)
 
 void GLPipeline::GLAttribute::bind(const Attribute& attribute, GLsizei stride) const
 {
-    DWARN(_location >= 0, "Attribute \"%s\" location: %d", attribute.name().c_str(), _location);
+    DCHECK_WARN(_location >= 0, "Attribute \"%s\" location: %d", attribute.name().c_str(), _location);
     if(attribute.length() <= 4)
         setVertexPointer(attribute, _location, stride, attribute.length(), attribute.offset());
     else if(attribute.length() == 16)
@@ -647,7 +647,7 @@ void GLPipeline::PipelineOperationDraw::bind(GraphicsContext& /*graphicsContext*
     for(size_t i = 0; i < samplers.size(); ++i)
     {
         const sp<Texture>& sampler = samplers.at(i);
-        DWARN(sampler, "Pipeline has unbound sampler at: %d", i);
+        DCHECK_WARN(sampler, "Pipeline has unbound sampler at: %d", i);
         if(sampler)
             _stub->activeTexture(sampler, static_cast<uint32_t>(i));
     }
@@ -787,7 +787,7 @@ const GLPipeline::GLUniform& GLPipeline::Stub::getUniform(const String& name)
 GLint GLPipeline::Stub::getUniformLocation(const String& name)
 {
     GLint location = glGetUniformLocation(_id, name.c_str());
-    WARN(location != -1, "Undefined uniform \"%s\". It might be optimized out, or something goes wrong.", name.c_str());
+    CHECK_WARN(location != -1, "Undefined uniform \"%s\". It might be optimized out, or something goes wrong.", name.c_str());
     return location;
 }
 

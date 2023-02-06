@@ -83,7 +83,7 @@ SharedIndices::SharedIndices::SharedIndices(Buffer buffer, std::vector<element_i
 Buffer::Snapshot SharedIndices::snapshot(RenderController& renderController, size_t primitiveCount, size_t reservedIfInsufficient)
 {
     const size_t warningLimit = 20000;
-    DWARN(primitiveCount < warningLimit, "Object count(%d) exceeding warning limit(%d). You can make the limit larger if you're sure what you're doing", primitiveCount, warningLimit);
+    DCHECK_WARN(primitiveCount < warningLimit, "Object count(%d) exceeding warning limit(%d). You can make the limit larger if you're sure what you're doing", primitiveCount, warningLimit);
     size_t size = (_degenerate ? (_boiler_plate.size() + 2) * primitiveCount - 2 : _boiler_plate.size() * primitiveCount) * sizeof(element_index_t);
     if(_primitive_count < primitiveCount)
     {

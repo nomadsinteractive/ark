@@ -123,7 +123,7 @@ void Mesh::BoneInfo::add(uint32_t id, float weight)
             _ids[i] = id;
             return;
         }
-    DWARN(Math::almostEqual(weight, 0.0f), "Unable to add more weight to BoneId(%d), max weightarray length: %d", id, Mesh::INFO_ARRAY_LENGTH);
+    DCHECK_WARN(Math::almostEqual(weight, 0.0f), "Unable to add more weight to BoneId(%d), max weightarray length: %d", id, Mesh::INFO_ARRAY_LENGTH);
 }
 
 }

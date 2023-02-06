@@ -142,7 +142,7 @@ void TilemapLayer::setTile(uint32_t col, uint32_t row, int32_t tileId)
 
 void TilemapLayer::setTile(uint32_t col, uint32_t row, const sp<Tile>& tile)
 {
-    WARN(tile->renderObject(), "This tile has no RenderObject assigned");
+    CHECK_WARN(tile->renderObject(), "This tile has no RenderObject assigned");
     setTile(col, row, tile, nullptr);
 }
 

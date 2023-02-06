@@ -14,6 +14,7 @@ public:
 
     virtual sp<Asset> getAsset(const String& name) override;
     virtual sp<AssetBundle> getBundle(const String& path) override;
+    virtual std::vector<ark::sp<Asset>> listAssets(const String& regex) override;
 
 private:
     sp<AssetBundle> _delegate;

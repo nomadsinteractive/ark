@@ -24,36 +24,33 @@ namespace ark {
 class ARK_API RenderLayer : public Renderer {
 private:
     struct Stub {
-        Stub(sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Vec4> scissor, sp<RenderController> renderController);
+        Stub(sp<RenderController> renderController, sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Boolean> visible, sp<Boolean> disposed, sp<Varyings> varyings, sp<Vec4> scissor);
 
         sp<LayerContext> makeLayerContext(sp<RenderBatch> batch, sp<ModelLoader> modelLoader, sp<Boolean> visible, sp<Boolean> disposed);
         void addLayerContext(sp<LayerContext> layerContext);
 
+        sp<RenderController> _render_controller;
         sp<ModelLoader> _model_loader;
         sp<Shader> _shader;
         sp<Vec4> _scissor;
 
-        sp<RenderController> _render_controller;
         sp<RenderCommandComposer> _render_command_composer;
         sp<ShaderBindings> _shader_bindings;
 
-        SafeVar<Visibility> _visible;
-        std::vector<sp<LayerContext>> _batch_groups;
-        sp<Layer> _layer;
+        std::vector<sp<LayerContext>> _layer_context_list;
+        sp<LayerContext> _layer_context;
 
         uint32_t _stride;
 
     };
 
 public:
-    RenderLayer(sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Vec4> scissor, sp<RenderController> renderController);
+    RenderLayer(sp<RenderController> renderController, sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Boolean> visible, sp<Boolean> disposed, sp<Varyings> varyings, sp<Vec4> scissor);
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
     RenderLayerSnapshot snapshot(RenderRequest& renderRequest) const;
 
-//  [[script::bindings::property]]
-    const sp<Layer>& layer() const;
 //  [[script::bindings::property]]
     const sp<LayerContext>& context() const;
 
@@ -76,6 +73,9 @@ public:
         std::vector<sp<Builder<Layer>>> _layers;
         sp<Builder<ModelLoader>> _model_loader;
         sp<Builder<Shader>> _shader;
+        sp<Builder<Varyings>> _varyings;
+        SafePtr<Builder<Boolean>> _visible;
+        SafePtr<Builder<Boolean>> _disposed;
         SafePtr<Builder<Vec4>> _scissor;
     };
 

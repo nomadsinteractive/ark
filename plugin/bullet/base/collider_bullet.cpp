@@ -13,6 +13,7 @@
 
 #include "renderer/base/resource_loader_context.h"
 
+#include "app/base/application_context.h"
 #include "app/base/collision_manifold.h"
 #include "app/inf/collision_callback.h"
 
@@ -55,7 +56,7 @@ sp<RigidBody> ColliderBullet::createBody(Collider::BodyType type, int32_t shapeI
             btShape = new btSphereShape(size->widthAsFloat() / 2);
             break;
         case Collider::BODY_SHAPE_CAPSULE:
-            DWARN(size->heightAsFloat() > size->widthAsFloat(), "When constructing a capsule shape, its height(%.2f) needs be greater than its width(%.2f)", size->heightAsFloat(), size->widthAsFloat());
+            DCHECK_WARN(size->heightAsFloat() > size->widthAsFloat(), "When constructing a capsule shape, its height(%.2f) needs be greater than its width(%.2f)", size->heightAsFloat(), size->widthAsFloat());
             btShape = new btCapsuleShapeZ(size->widthAsFloat() / 2, size->heightAsFloat() - size->widthAsFloat());
             break;
         default:

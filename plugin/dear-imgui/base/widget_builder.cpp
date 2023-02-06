@@ -4,6 +4,7 @@
 
 #include <imgui.h>
 
+#include "core/base/string_buffer.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/util/string_type.h"
 

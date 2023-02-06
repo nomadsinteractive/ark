@@ -45,7 +45,7 @@ class ArkModuleFinder:
         self._util = util
         self._ark_asset_loader_type = ark_asset_loader_type
         self._path = path
-        self._asset_resource_cache = {}
+        self._asset_bundle_cache = {}
 
     def find_spec(self, fullname, path, target=None):
         paths = [i for i in fullname.split('.') if i]
@@ -62,7 +62,7 @@ class ArkModuleFinder:
 
     def find_asset_spec(self, fullname, filepath):
         module_path, module_name = self._parse_resource_path(fullname, filepath)
-        asset = self._get_asset_resource(module_path)
+        asset = self._load_asset_bundle(module_path)
         if asset:
             source = asset.get_string(module_name + '.py')
             package = fullname
@@ -91,11 +91,11 @@ class ArkModuleFinder:
     def _parse_resource_path(self, fullname, filepath):
         return filepath[:-len(fullname) - 1], fullname.replace('.', '/')
 
-    def _get_asset_resource(self, asset_path):
-        if asset_path in self._asset_resource_cache:
-            return self._asset_resource_cache[asset_path]
-        asset = self._ark.get_asset_resource(asset_path)
-        self._asset_resource_cache[asset_path] = asset
+    def _load_asset_bundle(self, asset_path):
+        if asset_path in self._asset_bundle_cache:
+            return self._asset_bundle_cache[asset_path]
+        asset = self._ark.load_asset_bundle(asset_path)
+        self._asset_bundle_cache[asset_path] = asset
         return asset
 
 

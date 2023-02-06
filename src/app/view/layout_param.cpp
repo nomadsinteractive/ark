@@ -137,7 +137,7 @@ void LayoutParam::setFlexBasisType(LengthType basisType)
     _timestamp.markDirty();
 }
 
-sp<Numeric> LayoutParam::flexBasis() const
+const sp<Numeric>& LayoutParam::flexBasis() const
 {
     return _flex_basis._value.ensure();
 }

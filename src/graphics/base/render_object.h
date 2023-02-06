@@ -22,9 +22,9 @@ namespace ark {
 class ARK_API RenderObject : public Holder, public Renderable {
 public:
 //  [[script::bindings::auto]]
-    RenderObject(int32_t type, const sp<Vec3>& position = nullptr, const sp<Size>& size = nullptr, const sp<Transform>& transform = nullptr, const sp<Varyings>& varyings = nullptr, sp<Visibility> visible = nullptr, sp<Disposed> disposed = nullptr);
+    RenderObject(int32_t type, sp<Vec3> position = nullptr, sp<Size> size = nullptr, sp<Transform> transform = nullptr, sp<Varyings> varyings = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> disposed = nullptr);
 //  [[script::bindings::auto]]
-    RenderObject(const sp<Integer>& type, const sp<Vec3>& position = nullptr, const sp<Size>& size = nullptr, const sp<Transform>& transform = nullptr, const sp<Varyings>& varyings = nullptr, sp<Visibility> visible = nullptr, sp<Disposed> disposed = nullptr);
+    RenderObject(sp<Integer> type, sp<Vec3> position = nullptr, sp<Size> size = nullptr, sp<Transform> transform = nullptr, sp<Varyings> varyings = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> disposed = nullptr);
 
     virtual void traverse(const Visitor& visitor) override;
 
@@ -78,9 +78,9 @@ public:
 //  [[script::bindings::property]]
     void setTransform(const sp<Transform>& transform);
 //  [[script::bindings::property]]
-    const SafePtr<Varyings>& varyings() const;
+    const sp<Varyings>& varyings();
 //  [[script::bindings::property]]
-    void setVaryings(const sp<Varyings>& varyings);
+    void setVaryings(sp<Varyings> varyings);
 
 //  [[script::bindings::property]]
     const Box& tag() const;
@@ -88,16 +88,16 @@ public:
     void setTag(const Box& tag);
 
 //  [[script::bindings::property]]
-    const sp<Disposed>& disposed();
+    sp<Boolean> disposed();
 //  [[script::bindings::property]]
-    void setDisposed(const sp<Boolean>& disposed);
+    void setDisposed(sp<Boolean> disposed);
 
 //  [[script::bindings::property]]
-    const sp<Visibility>& visible();
+    sp<Boolean> visible();
 //  [[script::bindings::property]]
     void setVisible(bool visible);
 //  [[script::bindings::property]]
-    void setVisible(const sp<Boolean>& visible);
+    void setVisible(sp<Boolean> visible);
 
 //  [[script::bindings::auto]]
     void dispose();
@@ -126,7 +126,7 @@ public:
         SafePtr<Builder<Size>> _size;
         SafePtr<Builder<Transform>> _transform;
         SafePtr<Builder<Varyings>> _varyings;
-        SafePtr<Builder<Disposed>> _disposed;
+        SafePtr<Builder<Boolean>> _disposed;
     };
 
 private:
@@ -135,10 +135,10 @@ private:
     SafeVar<Vec3> _position;
     SafeVar<Size> _size;
     SafePtr<Transform> _transform;
-    SafePtr<Varyings> _varyings;
+    sp<Varyings> _varyings;
 
-    SafeVar<Visibility> _visible;
-    SafeVar<Disposed> _disposed;
+    SafeVar<Boolean> _visible;
+    SafeVar<Boolean> _disposed;
 
     Box _tag;
 

@@ -8,7 +8,7 @@ namespace ark {
 
 class AssetFile : public Asset {
 public:
-    AssetFile(const String& filepath);
+    AssetFile(String filepath);
 
     virtual sp<Readable> open() override;
     virtual String location() override;

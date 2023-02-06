@@ -22,7 +22,7 @@ int FreeTypes::ftNewFace(const char *filename, FT_Long face_index, FT_Face *afac
     return FT_New_Face(_library, filename, face_index, aface);
 }
 
-int FreeTypes::ftNewFaceFromReadable(const sp<Readable>& readable, FT_Long face_index, FT_Face* aface)
+int FreeTypes::ftNewFaceFromReadable(sp<Readable> readable, FT_Long face_index, FT_Face* aface)
 {
     FT_Open_Args args;
     args.flags = FT_OPEN_STREAM;
@@ -32,7 +32,7 @@ int FreeTypes::ftNewFaceFromReadable(const sp<Readable>& readable, FT_Long face_
     args.stream->size = 0x7FFFFFFF;
     args.stream->read = ftStreamIOFunc;
     args.stream->close = ftStreamCloseFunc;
-    args.stream->descriptor.pointer = new FTReadableStream(readable);
+    args.stream->descriptor.pointer = new FTReadableStream(std::move(readable));
     return FT_Open_Face(_library, &args, face_index, aface);
 }
 
@@ -65,8 +65,8 @@ void FreeTypes::ftStreamCloseFunc(FT_Stream stream)
     delete stream;
 }
 
-FreeTypes::FTReadableStream::FTReadableStream(const sp<Readable>& readable)
-    : _readable(readable)
+FreeTypes::FTReadableStream::FTReadableStream(sp<Readable> readable)
+    : _readable(std::move(readable))
 {
 }
 

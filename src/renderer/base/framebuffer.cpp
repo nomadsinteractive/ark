@@ -54,8 +54,8 @@ sp<Framebuffer> Framebuffer::BUILDER::build(const Scope& args)
                 sp<Texture::Parameters> tp = sp<Texture::Parameters>::make(*tex->parameters());
                 sp<Texture> newTexture = sp<Texture>::make(*tex);
                 tp->_flags = flags;
-                WARN(!(flags == Texture::FLAG_FOR_INPUT && (tex->usage() & Texture::USAGE_DEPTH_STENCIL_ATTACHMENT) && _clear_mask & Framebuffer::CLEAR_MASK_DEPTH_STENCIL),
-                       "Depth-stencil texture marked \"for input\" would be cleared before rendering pass");
+                CHECK_WARN(!(flags == Texture::FLAG_FOR_INPUT && (tex->usage() & Texture::USAGE_DEPTH_STENCIL_ATTACHMENT) && _clear_mask & Framebuffer::CLEAR_MASK_DEPTH_STENCIL),
+                           "Depth-stencil texture marked \"for input\" would be cleared before rendering pass");
                 newTexture->setParameters(std::move(tp));
                 tex = std::move(newTexture);
             }

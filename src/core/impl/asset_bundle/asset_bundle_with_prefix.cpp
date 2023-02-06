@@ -18,4 +18,9 @@ sp<AssetBundle> AssetBundleWithPrefix::getBundle(const String& path)
     return _delegate->getBundle(_prefix + path);
 }
 
+std::vector<sp<Asset>> AssetBundleWithPrefix::listAssets(const String& regex)
+{
+    return _delegate->listAssets(regex);
+}
+
 }

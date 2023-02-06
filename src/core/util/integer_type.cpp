@@ -15,6 +15,7 @@
 #include "core/impl/variable/variable_op1.h"
 #include "core/impl/variable/variable_op2.h"
 #include "core/impl/variable/variable_ternary.h"
+#include "core/inf/array.h"
 #include "core/util/string_convert.h"
 #include "core/util/operators.h"
 #include "core/util/strings.h"
@@ -215,7 +216,7 @@ void IntegerType::setVal(const sp<IntegerWrapper>& self, int32_t value)
 const sp<Integer>& IntegerType::delegate(const sp<Integer>& self)
 {
     const sp<IntegerWrapper> iw = self.as<IntegerWrapper>();
-    DWARN(iw, "Non-IntegerWrapper instance has no delegate attribute. This should be an error unless you're inspecting it.");
+    DCHECK_WARN(iw, "Non-IntegerWrapper instance has no delegate attribute. This should be an error unless you're inspecting it.");
     return iw ? iw->wrapped() : sp<Integer>::null();
 }
 

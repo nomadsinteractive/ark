@@ -45,6 +45,8 @@ ark_compile_definition_option(ARK_BUILD_STATIC_PLUGINS "Build static plugin libr
 if(WIN32)
     ark_compile_definition_option(ARK_USE_LIBJPEG_TURBO "Use libjpeg-turbo decoding library" OFF)
 endif()
+
+ark_compile_definition_option(ARK_USE_CONSTEXPR  "Use constexpr wherever possible" ON)
 ark_compile_definition_option(ARK_USE_LIBPNG "Use libpng decoding library" ON)
 ark_compile_definition_option(ARK_USE_STB_IMAGE "Use stb image decoding library" ON)
 
@@ -167,7 +169,9 @@ if(ARK_USE_LIBPNG)
 endif()
 
 if(ARK_USE_LIBJPEG_TURBO)
-    ark_find_vcpkg_package(JPEG LIBRARIES jpeg MODULE_MODE)
+    ark_find_vcpkg_package(JPEG MODULE_MODE)
+    ark_link_libraries(${JPEG_LIBRARIES})
+    ark_include_directories(${JPEG_INCLUDE_DIR})
 endif()
 
 if(ARK_USE_STB_IMAGE)
@@ -254,7 +258,7 @@ endif()
 
 ark_export_libraries(${ARK_LIBRARIES})
 
-if(ARK_BUILD_SAMPLES AND NOT ANDROID AND NOT IOS)
+if(NOT ANDROID AND NOT IOS)
     ark_add_executable(ark-launcher src/app/main/main.cpp)
     target_link_libraries(ark-launcher PRIVATE ${ARK_LIBRARIES})
 endif()

@@ -25,12 +25,12 @@ public:
         RenderableItem(sp<Renderable> renderable, sp<Updatable> updatable, sp<Boolean> disposed);
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(RenderableItem);
 
+        operator Renderable& () const;
+
         sp<Renderable> _renderable;
         sp<Updatable> _updatable;
 
         SafeVar<Boolean> _disposed;
-
-        Renderable::State _state;
     };
 
 public:
@@ -38,12 +38,10 @@ public:
 
     virtual void traverse(const Visitor& visitor) override;
 
-    SafeVar<Visibility>& visible();
-    const SafeVar<Visibility>& visible() const;
+    SafeVar<Boolean>& visible();
+    const SafeVar<Boolean>& visible() const;
 
-    const SafeVar<Disposed>& disposed() const;
-
-    bool isDisposed() const;
+    const SafeVar<Boolean>& disposed() const;
 
 //  [[script::bindings::property]]
     const sp<ModelLoader>& modelLoader() const;
@@ -63,10 +61,29 @@ public:
 //  [[script::bindings::property]]
     void setVaryings(sp<Varyings> varyings);
 
-    const std::deque<RenderableItem>& instances() const;
-
     bool preSnapshot(RenderRequest& renderRequest);
     void snapshot(RenderRequest& renderRequest, RenderLayerSnapshot& output);
+
+    template<typename T> void doSnapshot(const T& renderables, const RenderRequest& renderRequest, RenderLayerSnapshot& output) const {
+        const PipelineInput& pipelineInput = output.pipelineInput();
+        const bool visible = _visible.val();
+        const bool needsReload = _position_changed || _render_done != visible || output.needsReload();
+        const bool hasDefaultVaryings = static_cast<bool>(_varyings);
+        const Varyings::Snapshot defaultVaryingsSnapshot = hasDefaultVaryings ? _varyings->snapshot(pipelineInput, renderRequest.allocator()) : Varyings::Snapshot();
+
+        for(const auto& [i, j] : renderables) {
+            Renderable& renderable = i;
+            Renderable::State state = j;
+            if(needsReload)
+                state.setState(Renderable::RENDERABLE_STATE_DIRTY, true);
+            if(state.hasState(Renderable::RENDERABLE_STATE_VISIBLE))
+                state.setState(Renderable::RENDERABLE_STATE_VISIBLE, visible);
+            Renderable::Snapshot snapshot = renderable.snapshot(pipelineInput, renderRequest, _position, state.stateBits());
+            if(hasDefaultVaryings && !snapshot._varyings)
+                snapshot._varyings = defaultVaryingsSnapshot;
+            output.addSnapshot(*this, std::move(snapshot));
+        }
+    }
 
     class BUILDER : public Builder<LayerContext> {
     public:
@@ -82,10 +99,11 @@ public:
 
 public:
     sp<RenderBatch> _render_batch;
-
     sp<ModelLoader> _model_loader;
-    SafeVar<Visibility> _visible;
-    SafeVar<Disposed> _disposed;
+
+    SafeVar<Boolean> _visible;
+    SafeVar<Boolean> _disposed;
+
     sp<Varyings> _varyings;
 
     Layer::Type _layer_type;
@@ -96,7 +114,7 @@ public:
 
     V3 _position;
 
-    std::deque<RenderableItem> _renderables;
+    std::deque<std::pair<RenderableItem, Renderable::State>> _renderables;
     std::vector<RenderableItem> _renderable_emplaced;
 };
 

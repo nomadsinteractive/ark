@@ -49,7 +49,7 @@ const sp<Texture>& TextureBundle::getTexture(const String& src)
 const sp<Texture>& TextureBundle::createTexture(const String& src, const sp<Texture::Parameters>& parameters)
 {
     sp<Texture>& texture = _textures[src];
-    DWARN(!texture, "Overriding Texture \"%s\"", src.c_str());
+    DCHECK_WARN(!texture, "Overriding Texture \"%s\"", src.c_str());
     texture = doCreateTexture(src, parameters);
     return texture;
 }

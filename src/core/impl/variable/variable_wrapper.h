@@ -9,8 +9,6 @@
 #include "core/types/implements.h"
 #include "core/types/null.h"
 
-#include "app/base/application_context.h"
-
 namespace ark {
 
 template<typename T> class VariableWrapper final : public Variable<T>, public Wrapper<Variable<T>>, Implements<VariableWrapper<T>, Variable<T>, Wrapper<Variable<T>>> {
@@ -59,7 +57,7 @@ private:
     void deferedUnref() {
         _variable_impl = nullptr;
         if(this->_wrapped)
-            Ark::instance().applicationContext()->deferUnref(std::move(this->_wrapped));
+            Ark::instance().deferUnref(std::move(this->_wrapped));
     }
 
 private:

@@ -20,7 +20,7 @@ public:
     ~FreeTypes();
 
     int ftNewFace(const char* filepathname, FT_Long face_index, FT_Face* aface);
-    int ftNewFaceFromReadable(const sp<Readable>& readable, FT_Long face_index, FT_Face* aface);
+    int ftNewFaceFromReadable(sp<Readable> readable, FT_Long face_index, FT_Face* aface);
 
     static FT_F26Dot6 ftF26Dot6(uint32_t integer, uint32_t fractional);
     static int32_t ftCalculateLineHeight(FT_Face face);
@@ -29,7 +29,7 @@ public:
 private:
     class FTReadableStream {
     public:
-        FTReadableStream(const sp<Readable>& readable);
+        FTReadableStream(sp<Readable> readable);
         sp<Readable> _readable;
     };
 

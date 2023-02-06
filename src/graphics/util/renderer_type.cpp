@@ -59,7 +59,7 @@ SafePtr<Size> RendererType::size(const sp<Renderer>& self)
 const sp<Renderer>& RendererType::wrapped(const sp<Renderer>& self)
 {
     const sp<Wrapper<Renderer>> rd = self.as<Wrapper<Renderer>>();
-    WARN(rd, "Renderer is not an instance of Wrapper<Renderer>");
+    CHECK_WARN(rd, "Renderer is not an instance of Wrapper<Renderer>");
     return rd ? rd->wrapped() : sp<Renderer>::null();
 }
 

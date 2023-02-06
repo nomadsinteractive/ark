@@ -181,7 +181,7 @@ GLenum GLUtil::getTextureInternalFormat(Texture::Usage usage, Texture::Format fo
     case Texture::USAGE_DEPTH_STENCIL_ATTACHMENT:
         return GL_DEPTH_STENCIL;
     }
-    WARN(false, "Unknow texture usage: %d", usage);
+    WARN("Unknow texture usage: %d", usage);
     return GL_R8;
 }
 

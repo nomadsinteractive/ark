@@ -45,7 +45,7 @@ void SurfaceController::requestUpdate(uint64_t timestamp)
         _layers->render(renderRequest, position);
         renderRequest.jobDone();
     }
-    DWARN(size < 3, "Frame skipped. RenderCommand size: %d. Rendering thread busy?", size);
+    DCHECK_WARN(size < 3, "Frame skipped. RenderCommand size: %d. Rendering thread busy?", size);
 }
 
 void SurfaceController::onRenderFrame(const Color& backgroundColor, RenderView& renderView)
