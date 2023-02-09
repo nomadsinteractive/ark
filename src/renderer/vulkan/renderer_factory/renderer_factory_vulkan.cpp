@@ -73,13 +73,13 @@ void RendererFactoryVulkan::onSurfaceCreated(RenderEngineContext& vkContext)
 void RendererFactoryVulkan::setVersion(Ark::RendererVersion version, RenderEngineContext& vkContext)
 {
     LOGD("Choose Vulkan Version = %d", version);
-    std::map<String, String>& annotations = vkContext.annotations();
+    std::map<String, String>& definitions = vkContext.definitions();
 
-    annotations["vert.in"] = "in";
-    annotations["vert.out"] = "out";
-    annotations["frag.in"] = "in";
-    annotations["frag.out"] = "out";
-    annotations["frag.color"] = "f_FragColor";
+    definitions["vert.in"] = "in";
+    definitions["vert.out"] = "out";
+    definitions["frag.in"] = "in";
+    definitions["frag.out"] = "out";
+    definitions["frag.color"] = "f_FragColor";
     vkContext.setSnippetFactory(sp<SnippetFactoryVulkan>::make());
 
     vkContext.setVersion(version);

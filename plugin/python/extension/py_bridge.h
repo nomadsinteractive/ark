@@ -23,11 +23,14 @@ public:
     static PyObject* PyFloat_FromDouble(double);
 
     static Py_ssize_t PyObject_Size(PyObject* obj);
-    static PyObject * PyObject_Type(PyObject* obj);
+    static PyObject* PyObject_Type(PyObject* obj);
+    static PyObject* PyObject_GetIter(PyObject *obj);
 
     static PyObject* PyList_New(Py_ssize_t size);
     static PyObject* PyList_GetItem(PyObject* obj, Py_ssize_t idx);
     static Py_ssize_t PyList_Size(PyObject* obj);
+
+    static PyObject* PyIter_Next(PyObject* iter);
 
     static PyObject* PyDict_Keys(PyObject* mp);
     static PyObject* PyDict_GetItem(PyObject* mp, PyObject* key);

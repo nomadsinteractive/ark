@@ -24,12 +24,12 @@ Ark::RendererCoordinateSystem RenderEngineContext::coordinateSystem() const
     return _coordinate_system;
 }
 
-const std::map<String, String>& RenderEngineContext::annotations() const
+const std::map<String, String>& RenderEngineContext::definitions() const
 {
     return _annotations;
 }
 
-std::map<String, String>& RenderEngineContext::annotations()
+std::map<String, String>& RenderEngineContext::definitions()
 {
     return _annotations;
 }

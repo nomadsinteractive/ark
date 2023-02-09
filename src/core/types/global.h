@@ -7,8 +7,8 @@ namespace ark {
 
 template<typename T> class Global {
 public:
-    template<typename... Args> Global(Args&&... args)
-        : _inst(Ark::instance().ensure<T>(std::forward<Args>(args)...)) {
+    template<typename... Args> Global()
+        : _inst(Ark::instance().ensure<T>()) {
     }
     Global(const Global& other) = default;
 

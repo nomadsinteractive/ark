@@ -69,7 +69,7 @@ void RendererFactoryOpenGL::onSurfaceCreated(RenderEngineContext& glContext)
 void RendererFactoryOpenGL::setVersion(Ark::RendererVersion version, RenderEngineContext& glContext)
 {
     LOGD("Choose GLVersion = %d", version);
-    std::map<String, String>& annotations = glContext.annotations();
+    std::map<String, String>& annotations = glContext.definitions();
     if(version == Ark::RENDERER_VERSION_OPENGL_20 || version == Ark::RENDERER_VERSION_OPENGL_21)
     {
         annotations["vert.in"] = "attribute";

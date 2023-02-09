@@ -11,21 +11,17 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/base/buffer.h"
+#include "renderer/base/pipeline_context.h"
 
 namespace ark {
 
-class ARK_API ComputeContext {
+class ARK_API ComputeContext : public PipelineContext {
 public:
     ComputeContext(sp<ShaderBindings> shaderBindings, std::vector<RenderLayerSnapshot::UBOSnapshot> ubo, std::vector<std::pair<uint32_t, Buffer::Snapshot>> ssbo, std::array<int32_t, 3> numWorkGroups);
     DEFAULT_COPY_AND_ASSIGN(ComputeContext);
 
     sp<RenderCommand> toComputeCommand();
-    sp<RenderCommand> toBindCommand();
 
-    sp<ShaderBindings> _shader_bindings;
-
-    std::vector<RenderLayerSnapshot::UBOSnapshot> _ubos;
-    std::vector<std::pair<uint32_t, Buffer::Snapshot>> _ssbo;
     std::array<int32_t, 3> _num_work_groups;
 };
 

@@ -37,7 +37,7 @@ public:
 
         PipelineInput::ShaderStage stage() const;
 
-        String toSourceCode(const RenderEngineContext& renderEngineContext) const;
+        String toSourceCode(const RenderEngineContext& renderEngineContext, const std::map<String, String>& definitions) const;
 
     private:
         PipelineInput::ShaderStage _type;

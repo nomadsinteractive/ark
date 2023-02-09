@@ -21,7 +21,7 @@ public:
     virtual void remove(int32_t id) override;
 
     virtual Result search(const V3& position, const V3& size) override;
-    virtual Result rayCast(const V3& from, const V3& to) override;
+    virtual Result rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter) override;
 
 //  [[plugin::builder("broad-phrase-tilemap")]]
     class BUILDER : public Builder<BroadPhrase> {

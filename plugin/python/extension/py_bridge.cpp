@@ -54,9 +54,19 @@ PyObject* PyBridge::PyObject_Type(PyObject* obj)
     return ::PyObject_Type(obj);
 }
 
+PyObject* PyBridge::PyObject_GetIter(PyObject* obj)
+{
+    return ::PyObject_GetIter(obj);
+}
+
 Py_ssize_t PyBridge::PyList_Size(PyObject* obj)
 {
     return ::PyList_Size(obj);
+}
+
+PyObject* PyBridge::PyIter_Next(PyObject* iter)
+{
+    return ::PyIter_Next(iter);
 }
 
 PyObject* PyBridge::PyList_GetItem(PyObject* obj, Py_ssize_t idx)

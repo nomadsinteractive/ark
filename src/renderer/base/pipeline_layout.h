@@ -53,6 +53,7 @@ private:
 
     std::vector<sp<Texture>> _samplers;
     std::vector<sp<Texture>> _images;
+    std::map<String, String> _definitions;
 
     friend class PipelineBuildingContext;
 

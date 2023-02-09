@@ -173,9 +173,8 @@ private:
     template<typename T> static Optional<T> toCppObject_sfinae(PyObject* obj, typename T::_PtrType*) {
         return toSharedPtr<typename T::_PtrType>(obj, true);
     }
-    template<typename T> static Optional<T> toCppObject_sfinae(PyObject* obj, decltype(std::declval<T>().push_back(std::declval<typename T::value_type>()))*) {
-        typedef typename T::value_type U;
-        return toCppCollectionObject_sfinae<T, U>(obj, nullptr);
+    template<typename T> static Optional<T> toCppObject_sfinae(PyObject* obj, typename T::value_type*) {
+        return toCppCollectionObject_sfinae<T, typename T::value_type>(obj, nullptr);
     }
     template<typename T> static Optional<T> toCppObject_sfinae(PyObject* obj, typename std::enable_if<std::is_enum<T>::value>::type*) {
         Optional<int32_t> opt = toCppObject_impl<int32_t>(obj);
@@ -209,9 +208,6 @@ private:
     template<typename T> static Optional<T> toCppObject_sfinae(PyObject* obj, typename T::result_type*) {
         return toCppObject_function(obj, reinterpret_cast<T*>(0));
     }
-    template<typename T> static Optional<T> toCppObject_sfinae(PyObject* obj, typename T::key_type*) {
-        return toCppObject_map<T, typename T::key_type, typename T::mapped_type>(obj);
-    }
     template<typename T> static Optional<T> toCppObject_sfinae(PyObject* obj, ...) {
         return toCppObject_impl<T>(obj);
     }
@@ -223,7 +219,7 @@ private:
             return toPyObject(ptr.value());
         return PyBridge::incRefNone();
     }
-    template<typename T> static PyObject* toPyObject_sfinae(const T& iterable, typename std::enable_if<!(std::is_same<T, std::string>::value  || std::is_same<T, std::wstring>::value), decltype(iterable.begin())>::type*) {
+    template<typename T> static PyObject* toPyObject_sfinae(const T& iterable, typename std::enable_if<!(std::is_same<T, std::string>::value || std::is_same<T, std::wstring>::value), decltype(iterable.begin())>::type*) {
         return fromIterable_sfinae<T>(iterable, nullptr);
     }
 /*
@@ -250,26 +246,48 @@ private:
         return toPyObject_impl<T>(value);
     }
 
-    template<typename T, typename U> static Optional<T> toCppCollectionObject_sfinae(PyObject* obj, typename std::enable_if<std::is_same<T, std::string>::value || std::is_same<T, std::wstring>::value>::type*) {
+    template<typename T, typename U> static Optional<T> toCppCollectionObject_sfinae(PyObject* obj, std::pair<typename T::key_type, typename T::mapped_type>*) {
+        return toCppObject_map<T, typename T::key_type, typename T::mapped_type>(obj);
+    }
+    template<typename T, typename U> static Optional<T> toCppCollectionObject_sfinae(PyObject* obj, std::enable_if_t<std::is_same_v<T, std::string> || std::is_same_v<T, std::wstring>>*) {
         return toCppObject_impl<T>(obj);
     }
-    template<typename T, typename U> static Optional<T> toCppCollectionObject_sfinae(PyObject* obj, ...) {
-        Py_ssize_t len = (PyBridge::isPyList(obj) || PyBridge::isPyTuple(obj)) ? PyBridge::PyObject_Size(obj) : -1;
+    template<typename T, typename U> static Optional<T> toCppCollectionObject_sfinae(PyObject* obj, std::enable_if_t<!std::is_same_v<T, std::string> && !std::is_same_v<T, std::wstring>, decltype(&T::push_back)>*) {
+        Py_ssize_t len = !PyBridge::isPyDictExact(obj) ? PyBridge::PyObject_Size(obj) : -1;
         if(len == -1)
             return Optional<T>();
         T col;
-        for(Py_ssize_t i = 0; i < len; ++i) {
-            PyObject* key = PyBridge::PyLong_FromLong(static_cast<int32_t>(i));
-            PyObject* item = PyBridge::PyObject_GetItem(obj, key);
-            PyBridge::decRef(key);
-            Optional<U> opt = toCppObject<U>(item);
-            if(item)
-                PyBridge::decRef(item);
-            if(!opt)
-                return Optional<T>();
-            col.push_back(std::move(opt.value()));
+        if(copyToCppObject<U>(obj, std::back_inserter(col)))
+            return col;
+        return Optional<T>();
+    }
+    template<typename T, typename U> static Optional<T> toCppCollectionObject_sfinae(PyObject* obj, ...) {
+        Py_ssize_t len = !PyBridge::isPyDictExact(obj) ? PyBridge::PyObject_Size(obj) : -1;
+        if(len == -1)
+            return Optional<T>();
+        T col;
+        if(copyToCppObject<U>(obj, std::inserter(col, col.begin())))
+            return col;
+        return Optional<T>();
+    }
+    template<typename T, typename OutIt> static bool copyToCppObject(PyObject* obj, OutIt outIter) {
+        PyObject* iter = PyBridge::PyObject_GetIter(obj);
+        ASSERT(iter);
+        PyObject* next = PyBridge::PyIter_Next(iter);
+        bool successed = true;
+        while(next != nullptr) {
+            Optional<T> opt = toCppObject<T>(next);
+            PyBridge::decRef(next);
+            if(!opt) {
+                successed = false;
+                break;
+            }
+            next = PyBridge::PyIter_Next(iter);
+            *outIter = std::move(opt.value());
+            ++outIter;
         }
-        return col;
+        PyBridge::decRef(iter);
+        return successed;
     }
     template<typename T, typename K, typename V> static Optional<T> toCppObject_map(PyObject* obj) {
         if(!PyBridge::isPyDictExact(obj))

@@ -35,7 +35,7 @@ public:
     const sp<std::map<uint32_t, Buffer>>& divisors() const;
     const sp<ByType>& attachments() const;
 
-    sp<Pipeline> getPipeline(GraphicsContext& graphicsContext);
+    const sp<Pipeline>& getPipeline(GraphicsContext& graphicsContext);
 
     std::map<uint32_t, Buffer::Factory> makeDividedBufferBuilders() const;
 

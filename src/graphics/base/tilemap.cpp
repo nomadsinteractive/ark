@@ -15,6 +15,8 @@
 #include "graphics/base/v2.h"
 #include "graphics/impl/frame/scrollable.h"
 
+#include "app/base/collision_filter.h"
+
 namespace ark {
 
 namespace {
@@ -78,6 +80,17 @@ static bool _tilemapLayerCompareGreater(const TilemapLayer& a, const TilemapLaye
     return a.zorder() > b.zorder();
 }
 
+static sp<CollisionFilter> toCollisionFilter(sp<Json> jCollisionFilter)
+{
+    if(!jCollisionFilter)
+        return nullptr;
+
+    uint32_t categoryBits = static_cast<uint32_t>(jCollisionFilter->getInt("category", 1));
+    uint32_t maskBits = static_cast<uint32_t>(jCollisionFilter->getInt("mask", -1));
+    uint32_t groupIndex = static_cast<uint32_t>(jCollisionFilter->getInt("group_index", 0));
+    return sp<CollisionFilter>::make(categoryBits, maskBits, groupIndex);
+}
+
 Tilemap::Tilemap(sp<Tileset> tileset, sp<RenderLayer> renderLayer, sp<Importer<Tilemap>> importer, sp<Outputer<Tilemap>> outputer)
     : _render_layer(std::move(renderLayer)), _tileset(std::move(tileset)), _storage(sp<TilemapStorage>::make(*this, std::move(importer), std::move(outputer))),
       _stub(sp<Stub>::make()), _layer_context(_render_layer ? _render_layer->makeLayerContext(_stub, nullptr, nullptr) : nullptr)
@@ -114,9 +127,9 @@ void Tilemap::load(const String& src)
     load(Ark::instance().openAsset(src));
 }
 
-sp<TilemapLayer> Tilemap::makeLayer(const String& name, uint32_t colCount, uint32_t rowCount, sp<Vec3> position, sp<Vec3> scroller, sp<Boolean> visible, float zorder, Tilemap::LayerFlag layerFlag)
+sp<TilemapLayer> Tilemap::makeLayer(const String& name, uint32_t colCount, uint32_t rowCount, sp<Vec3> position, sp<Boolean> visible, sp<CollisionFilter> collisionFilter, float zorder)
 {
-    sp<TilemapLayer> layer = sp<TilemapLayer>::make(_tileset, name, colCount, rowCount, position, scroller, std::move(visible), layerFlag);
+    sp<TilemapLayer> layer = sp<TilemapLayer>::make(_tileset, name, colCount, rowCount, position, std::move(visible), std::move(collisionFilter));
     addLayer(layer, zorder);
     return layer;
 }
@@ -152,9 +165,9 @@ void Tilemap::jsonLoad(const Json& json)
         float x = layer->getFloat("x", 0);
         float y = layer->getFloat("y", 0);
         float z = layer->getFloat("z", 0);
-        int32_t flags = layer->getInt("flags", 0);
+        sp<Json> jCollisionFilter = layer->get("collision_filter");
 
-        const sp<TilemapLayer> tilemapLayer = makeLayer(std::move(name), colCount, rowCount, sp<Vec3::Const>::make(V3(x, y, z)), nullptr, nullptr, 0, static_cast<Tilemap::LayerFlag>(flags));
+        const sp<TilemapLayer> tilemapLayer = makeLayer(std::move(name), colCount, rowCount, sp<Vec3::Const>::make(V3(x, y, z)), nullptr, toCollisionFilter(jCollisionFilter));
         const sp<Json> data = layer->get("data");
         DASSERT(data);
         DASSERT(data->isArray());
@@ -190,7 +203,16 @@ Json Tilemap::jsonDump() const
         jLayer.setFloat("x", position.x());
         jLayer.setFloat("y", position.y());
         jLayer.setFloat("z", position.z());
-        jLayer.setInt("flags", static_cast<int32_t>(i->flags()));
+
+        const sp<CollisionFilter>& collisionFilter = i->collisionFilter();
+        if(collisionFilter)
+        {
+            Json jCollisionFilter;
+            jCollisionFilter.setInt("category", static_cast<int32_t>(collisionFilter->categoryBits()));
+            jCollisionFilter.setInt("mask", static_cast<int32_t>(collisionFilter->maskBits()));
+            jCollisionFilter.setInt("group_index", static_cast<int32_t>(collisionFilter->groupIndex()));
+            jLayer.set("collision_filter", jCollisionFilter);
+        }
 
         std::vector<int32_t> tiles(colCount * rowCount, 0);
         i->foreachTile([&tiles, rowCount, colCount] (uint32_t col, uint32_t row, const sp<Tile>& tile) {

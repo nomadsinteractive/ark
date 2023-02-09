@@ -35,7 +35,7 @@ BroadPhrase::Result BroadPhraseAll::search(const V3& /*position*/, const V3& /*s
     return result;
 }
 
-BroadPhrase::Result BroadPhraseAll::rayCast(const V3& from, const V3& to)
+BroadPhrase::Result BroadPhraseAll::rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& /*collisionFilter*/)
 {
     return search(from, to);
 }

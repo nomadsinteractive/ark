@@ -638,27 +638,9 @@ GLPipeline::PipelineOperationDraw::PipelineOperationDraw(const sp<Stub>& stub, c
 {
 }
 
-void GLPipeline::PipelineOperationDraw::bind(GraphicsContext& /*graphicsContext*/, const DrawingContext& drawingContext)
+void GLPipeline::PipelineOperationDraw::bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
-    glUseProgram(_stub->_id);
-    _stub->bindUBOSnapshots(drawingContext._ubos, drawingContext._shader_bindings->pipelineInput());
-
-    const std::vector<sp<Texture>>& samplers = drawingContext._shader_bindings->pipelineBindings()->samplers();
-    for(size_t i = 0; i < samplers.size(); ++i)
-    {
-        const sp<Texture>& sampler = samplers.at(i);
-        DCHECK_WARN(sampler, "Pipeline has unbound sampler at: %d", i);
-        if(sampler)
-            _stub->activeTexture(sampler, static_cast<uint32_t>(i));
-    }
-
-    const std::vector<sp<Texture>>& images = drawingContext._shader_bindings->pipelineBindings()->images();
-    for(size_t i = 0; i < images.size(); ++i)
-    {
-        const sp<Texture>& image = images.at(i);
-        if(image)
-            _stub->bindImage(image, static_cast<uint32_t>(i));
-    }
+    _stub->bind(graphicsContext, drawingContext);
 }
 
 void GLPipeline::PipelineOperationDraw::draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
@@ -700,6 +682,29 @@ sp<GLPipeline::BakedRenderer> GLPipeline::PipelineOperationDraw::makeBakedRender
 GLPipeline::Stub::Stub()
     : _id(0), _rebind_needed(true)
 {
+}
+
+void GLPipeline::Stub::bind(GraphicsContext& /*graphicsContext*/, const PipelineContext& pipelineContext)
+{
+    glUseProgram(_id);
+    bindUBOSnapshots(pipelineContext._ubos, pipelineContext._shader_bindings->pipelineInput());
+
+    const std::vector<sp<Texture>>& samplers = pipelineContext._shader_bindings->pipelineBindings()->samplers();
+    for(size_t i = 0; i < samplers.size(); ++i)
+    {
+        const sp<Texture>& sampler = samplers.at(i);
+        CHECK_WARN(sampler, "Pipeline has unbound sampler at: %d", i);
+        if(sampler)
+            activeTexture(sampler, static_cast<uint32_t>(i));
+    }
+
+    const std::vector<sp<Texture>>& images = pipelineContext._shader_bindings->pipelineBindings()->images();
+    for(size_t i = 0; i < images.size(); ++i)
+    {
+        const sp<Texture>& image = images.at(i);
+        if(image)
+            bindImage(image, static_cast<uint32_t>(i));
+    }
 }
 
 void GLPipeline::Stub::bindUBO(const RenderLayerSnapshot::UBOSnapshot& uboSnapshot, const sp<PipelineInput::UBO>& ubo)
@@ -831,13 +836,12 @@ void GLPipeline::PipelineOperationCompute::draw(GraphicsContext& /*graphicsConte
 {
 }
 
-void GLPipeline::PipelineOperationCompute::compute(GraphicsContext& /*graphicsContext*/, const ComputeContext& computeContext)
+void GLPipeline::PipelineOperationCompute::compute(GraphicsContext& graphicsContext, const ComputeContext& computeContext)
 {
-    glUseProgram(_stub->_id);
-    _stub->bindUBOSnapshots(computeContext._ubos, computeContext._shader_bindings->pipelineInput());
+    _stub->bind(graphicsContext, computeContext);
 
     std::vector<GLBufferBaseBinder> binders;
-    for(const auto& [i, j] : computeContext._ssbo)
+    for(const auto& [i, j] : computeContext._ssbos)
         binders.emplace_back(GL_SHADER_STORAGE_BUFFER, i, j.id());
 
     glDispatchCompute(computeContext._num_work_groups.at(0), computeContext._num_work_groups.at(1), computeContext._num_work_groups.at(2));

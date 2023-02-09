@@ -189,6 +189,7 @@ public:
     };
 
     struct Stub : public Updatable {
+        Stub();
         Stub(sp<LayoutParam> layoutParam, sp<ViewHierarchy> viewHierarchy, sp<Boolean> visible, sp<Boolean> disposed);
 
         virtual bool update(uint64_t timestamp) override;
@@ -210,7 +211,7 @@ public:
         sp<LayoutV3::Node> _layout_node;
 
         SafeVar<Boolean> _visible;
-        sp<BooleanWrapper> _disposed;
+        SafeVar<Boolean> _disposed;
 
         WeakPtr<Stub> _parent_stub;
         bool _top_view;

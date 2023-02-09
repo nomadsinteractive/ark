@@ -102,7 +102,7 @@ void ColliderBullet::rayCastClosest(const V3& from, const V3& to, const sp<Colli
     }
 }
 
-std::vector<RayCastManifold> ColliderBullet::rayCast(const V3& from, const V3& to)
+std::vector<RayCastManifold> ColliderBullet::rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& /*collisionFilter*/)
 {
     btVector3 btFrom(from.x(), from.y(), from.z());
     btVector3 btTo(to.x(), to.y(), to.z());

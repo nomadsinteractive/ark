@@ -27,7 +27,7 @@ public:
     ColliderImpl(std::vector<std::pair<sp<BroadPhrase>, sp<CollisionFilter>>> broadPhrase, sp<NarrowPhrase> narrowPhrase, RenderController& renderController);
 
     virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate, sp<Boolean> disposed) override;
-    virtual std::vector<RayCastManifold> rayCast(const V3& from, const V3& to) override;
+    virtual std::vector<RayCastManifold> rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter) override;
 
 //  [[plugin::resource-loader]]
     class BUILDER : public Builder<Collider> {
@@ -49,7 +49,7 @@ public:
     struct Stub : public Updatable {
         Stub(std::vector<std::pair<sp<BroadPhrase>, sp<CollisionFilter>>> broadPhrases, sp<NarrowPhrase> narrowPhrase);
 
-        std::vector<RayCastManifold> rayCast(const V2& from, const V2& to) const;
+        std::vector<RayCastManifold> rayCast(const V2& from, const V2& to, const sp<CollisionFilter>& collisionFilter) const;
 
         void requestRigidBodyRemoval(int32_t rigidBodyId);
 
@@ -76,7 +76,7 @@ public:
 
     private:
         BroadPhrase::Result broadPhraseSearch(const V3& position, const V3& aabb, const sp<CollisionFilter>& collisionFilter) const;
-        BroadPhrase::Result broadPhraseRayCast(const V3& from, const V3& to) const;
+        BroadPhrase::Result broadPhraseRayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter) const;
 
     private:
         int32_t _rigid_body_base_id;

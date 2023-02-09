@@ -537,17 +537,20 @@ PipelineInput::ShaderStage ShaderPreprocessor::Preprocessed::stage() const
     return _type;
 }
 
-String ShaderPreprocessor::Preprocessed::toSourceCode(const RenderEngineContext& renderEngineContext) const
+String ShaderPreprocessor::Preprocessed::toSourceCode(const RenderEngineContext& renderEngineContext, const std::map<String, String>& definitions) const
 {
     DCHECK(renderEngineContext.version() > 0, "Unintialized RenderEngineContext");
 
     static std::regex var_pattern("\\$\\{([\\w.]+)\\}");
-    const std::map<String, String>& annotations = renderEngineContext.annotations();
+    const std::map<String, String>& engineDefinitions = renderEngineContext.definitions();
 
-    return _source.replace(var_pattern, [&annotations] (Array<String>& matches)->String {
-        const String& varName = matches.buf()[1];
-        const auto iter = annotations.find(varName);
-        DCHECK(iter != annotations.end(), "Cannot find constant \"%s\" in RenderEngineContext", varName.c_str());
+    return _source.replace(var_pattern, [&engineDefinitions, &definitions] (Array<String>& matches)->String {
+        const String& varName = matches.at(1);
+        auto iter = engineDefinitions.find(varName);
+        if(iter != engineDefinitions.end())
+            return iter->second;
+        iter = definitions.find(varName);
+        CHECK(iter != definitions.end(), "Undefinition \"%s\"", varName.c_str());
         return iter->second;
     });
 }

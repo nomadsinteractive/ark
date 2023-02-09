@@ -2,6 +2,7 @@
 
 #include "core/base/bean_factory.h"
 #include "core/impl/updatable/updatable_once_per_frame.h"
+#include "core/util/boolean_type.h"
 #include "core/util/math.h"
 #include "core/util/string_convert.h"
 
@@ -176,7 +177,7 @@ sp<Boolean> View::disposed() const
 
 void View::setDisposed(sp<Boolean> disposed)
 {
-    _stub->_disposed->reset(std::move(disposed));
+    _stub->_disposed.reset(std::move(disposed));
 }
 
 const sp<LayoutParam>& View::layoutParam() const
@@ -221,6 +222,7 @@ void View::removeState(View::State state)
 void View::markAsTopView()
 {
     _stub->_top_view = true;
+    _stub->_parent_stub.reset(nullptr);
 }
 
 namespace {
@@ -347,9 +349,15 @@ sp<Renderer> View::BUILDER_VIEW::build(const Scope& args)
     return _impl.build(args);
 }
 
+View::Stub::Stub()
+    : _layout_param(sp<LayoutParam>::make(LayoutParam::Length(), LayoutParam::Length())), _layout_node(sp<LayoutV3::Node>::make(_layout_param, nullptr)), _visible(nullptr, false),
+      _disposed(nullptr, false), _top_view(true)
+{
+}
+
 View::Stub::Stub(sp<LayoutParam> layoutParam, sp<ViewHierarchy> viewHierarchy, sp<Boolean> visible, sp<Boolean> disposed)
     : _layout_param(std::move(layoutParam)), _layout_node(sp<LayoutV3::Node>::make(_layout_param, std::move(viewHierarchy))), _visible(std::move(visible), true),
-      _disposed(sp<BooleanWrapper>::make(std::move(disposed))), _top_view(false)
+      _disposed(std::move(disposed), false), _parent_stub(sp<Stub>(Global<Stub>())), _top_view(false)
 {
 }
 
@@ -363,7 +371,7 @@ bool View::Stub::update(uint64_t timestamp)
 
 void View::Stub::dispose()
 {
-    _disposed->set(true);
+    _disposed.reset(BooleanType::TRUE);
     _layout_param = nullptr;
     _layout_node = nullptr;
 }
@@ -371,13 +379,13 @@ void View::Stub::dispose()
 bool View::Stub::isVisible() const
 {
     const sp<Stub> parentStub = _parent_stub.lock();
-    return _visible.val() && (parentStub ? parentStub->isVisible() : _top_view);
+    return _visible.val() && (_top_view || (parentStub ? parentStub->isVisible() : false));
 }
 
 bool View::Stub::isDisposed() const
 {
     const sp<Stub> parentStub = _parent_stub.lock();
-    return _disposed->val() || (parentStub ? parentStub->isDisposed() : false);
+    return _disposed.val() || (parentStub ? parentStub->isDisposed() : !_top_view);
 }
 
 V3 View::Stub::getTopViewOffsetPosition(bool includePaddings) const
@@ -457,7 +465,7 @@ bool View::IsDisposed::update(uint64_t timestamp)
     sp<Stub> stub = _stub;
     while(stub)
     {
-        dirty = stub->_disposed->update(timestamp) || dirty;
+        dirty = stub->_disposed.update(timestamp) || dirty;
         stub = stub->_parent_stub.lock();
     }
     return dirty;

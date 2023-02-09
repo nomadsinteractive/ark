@@ -1,8 +1,8 @@
 #include "graphics/impl/alphabet/alphabet_true_type.h"
 
-#include "core/ark.h"
 #include "core/base/bean_factory.h"
 #include "core/impl/readable/file_readable.h"
+#include "core/types/global.h"
 #include "core/util/documents.h"
 
 #include "graphics/base/bitmap.h"
@@ -12,7 +12,7 @@
 namespace ark {
 
 AlphabetTrueType::AlphabetTrueType(const String& src, const Font::TextSize& textSize)
-    : _free_types(Ark::instance().ensure<FreeTypes>()), _text_size(textSize)
+    : _free_types(Global<FreeTypes>()), _text_size(textSize)
 {
     sp<Readable> readable = getFontResource(src);
     CHECK(readable, "Font \"%s\" does not exists", src.c_str());

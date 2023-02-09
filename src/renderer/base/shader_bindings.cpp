@@ -65,7 +65,7 @@ const sp<ByType>& ShaderBindings::attachments() const
     return _attachments;
 }
 
-sp<Pipeline> ShaderBindings::getPipeline(GraphicsContext& graphicsContext)
+const sp<Pipeline>& ShaderBindings::getPipeline(GraphicsContext& graphicsContext)
 {
     if(!_pipeline)
         _pipeline = _pipeline_bindings->getPipeline(graphicsContext, _pipeline_factory);

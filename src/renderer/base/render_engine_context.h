@@ -76,8 +76,8 @@ public:
 
     Ark::RendererCoordinateSystem coordinateSystem() const;
 
-    const std::map<String, String>& annotations() const;
-    std::map<String, String>& annotations();
+    const std::map<String, String>& definitions() const;
+    std::map<String, String>& definitions();
 
     const Viewport& viewport() const;
     void setViewport(const Viewport& viewport);

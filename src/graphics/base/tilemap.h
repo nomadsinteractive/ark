@@ -40,7 +40,7 @@ public:
     const sp<Storage>& storage() const;
 
 // [[script::bindings::auto]]
-    sp<TilemapLayer> makeLayer(const String& name, uint32_t colCount, uint32_t rowCount, sp<Vec3> position = nullptr, sp<Vec3> scroller = nullptr, sp<Boolean> visible = nullptr, float zorder = 0, Tilemap::LayerFlag layerFlag = Tilemap::LAYER_FLAG_DEFAULT);
+    sp<TilemapLayer> makeLayer(const String& name, uint32_t colCount, uint32_t rowCount, sp<Vec3> position = nullptr, sp<Boolean> visible = nullptr, sp<CollisionFilter> collisionFilter = nullptr, float zorder = 0);
 
 // [[script::bindings::auto]]
     void clear();

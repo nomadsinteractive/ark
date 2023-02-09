@@ -20,9 +20,9 @@
 
 namespace ark {
 
-TilemapLayer::TilemapLayer(sp<Tileset> tileset, String name, uint32_t colCount, uint32_t rowCount, sp<Vec3> position, sp<Vec3> scroller, sp<Boolean> visible, Tilemap::LayerFlag flag)
-    : _name(std::move(name)), _col_count(colCount), _row_count(rowCount), _size(sp<Size>::make(tileset->tileWidth() * colCount, tileset->tileHeight() * rowCount)),
-      _visible(std::move(visible), true), _flags(flag), _stub(sp<Stub>::make(colCount, rowCount, std::move(tileset), SafeVar<Vec3>(std::move(position)), 0))
+TilemapLayer::TilemapLayer(sp<Tileset> tileset, String name, uint32_t colCount, uint32_t rowCount, sp<Vec3> position, sp<Boolean> visible, sp<CollisionFilter> collisionFilter)
+    : _name(std::move(name)), _col_count(colCount), _row_count(rowCount), _size(sp<Size>::make(tileset->tileWidth() * colCount, tileset->tileHeight() * rowCount)), _visible(std::move(visible), true),
+      _collision_filter(std::move(collisionFilter)), _stub(sp<Stub>::make(colCount, rowCount, std::move(tileset), SafeVar<Vec3>(std::move(position)), 0))
 {
 }
 
@@ -197,14 +197,14 @@ void TilemapLayer::setTile(uint32_t col, uint32_t row, const sp<Tile>& tile, con
     _stub->_timestamp.markDirty();
 }
 
-Tilemap::LayerFlag TilemapLayer::flags() const
+const sp<CollisionFilter>& TilemapLayer::collisionFilter() const
 {
-    return _flags;
+    return _collision_filter;
 }
 
-void TilemapLayer::setFlag(Tilemap::LayerFlag flags)
+void TilemapLayer::setCollisionFilter(sp<CollisionFilter> collisionFilter)
 {
-    _flags = flags;
+    _collision_filter = std::move(collisionFilter);
 }
 
 TilemapLayer::LayerTile::LayerTile(sp<Tile> tile, sp<RenderObject> renderable)

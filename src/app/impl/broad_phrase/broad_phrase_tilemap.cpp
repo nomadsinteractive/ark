@@ -15,6 +15,7 @@
 
 #include "app/inf/collider.h"
 #include "app/inf/narrow_phrase.h"
+#include "app/base/collision_filter.h"
 #include "app/util/rigid_body_def.h"
 
 namespace ark {
@@ -46,7 +47,7 @@ BroadPhrase::Result BroadPhraseTilemap::search(const V3& position, const V3& siz
     const Rect aabb(V2(position) - sizeHalf, V2(position) + sizeHalf);
     const V2 tileSize(static_cast<float>(_tilemap->tileset()->tileWidth()), static_cast<float>(_tilemap->tileset()->tileHeight()));
     for(const TilemapLayer& i : _tilemap->layers())
-        if(i.flags() & Tilemap::LAYER_FLAG_COLLIDABLE)
+        if(i.collisionFilter())
         {
             V3 selectionPoint;
             RectI selectionRange;
@@ -79,23 +80,23 @@ BroadPhrase::Result BroadPhraseTilemap::search(const V3& position, const V3& siz
     return BroadPhrase::Result({}, std::move(candidates));
 }
 
-BroadPhrase::Result BroadPhraseTilemap::rayCast(const V3& from, const V3& to)
+BroadPhrase::Result BroadPhraseTilemap::rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter)
 {
     std::vector<Candidate> candidates;
     float tileWidth = static_cast<float>(_tilemap->tileset()->tileWidth());
     float tileHeight = static_cast<float>(_tilemap->tileset()->tileHeight());
     const Rect aabb = Rect(from, to);
-    for(const sp<TilemapLayer>& i : _tilemap->layers())
-        if(i->flags() & Tilemap::LAYER_FLAG_COLLIDABLE)
+    for(const TilemapLayer& i : _tilemap->layers())
+        if(i.collisionFilter() && (!collisionFilter || i.collisionFilter()->collisionTest(*collisionFilter)))
         {
             Rect intersection;
-            float tilemapLayerWidth = tileWidth * static_cast<float>(i->colCount());
-            float tilemapLayerHeight = tileHeight * static_cast<float>(i->rowCount());
-            const V2 tilemapPosition = i->position().val();
+            float tilemapLayerWidth = tileWidth * static_cast<float>(i.colCount());
+            float tilemapLayerHeight = tileHeight * static_cast<float>(i.rowCount());
+            const V2 tilemapPosition = i.position().val();
             const Rect tilemapLayerAabb(tilemapPosition, tilemapPosition + V2(tilemapLayerWidth, tilemapLayerHeight));
             if(tilemapLayerAabb.intersect(aabb, intersection))
             {
-                const int32_t layerId = static_cast<int32_t>(i->name().hash());
+                const int32_t layerId = static_cast<int32_t>(i.name().hash());
                 const float rayIntersectionWidth = intersection.right() - intersection.left();
                 const float rayIntersectionHeight = intersection.bottom() - intersection.top();
                 const bool xwise = aabb.width() > aabb.height();

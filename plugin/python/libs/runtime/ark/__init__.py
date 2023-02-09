@@ -1823,8 +1823,8 @@ class Tileset:
 
 
 class TilemapLayer(Renderer):
-    def __init__(self, tileset: Tileset, name: str, row_count: int, col_count: int, position: Optional[TYPE_VEC3] = None, scroller: Optional[TYPE_VEC3] = None,
-                 visible: Optional[Boolean] = None, flag: int = 0):
+    def __init__(self, tileset: Tileset, name: str, row_count: int, col_count: int, position: Optional[TYPE_VEC3] = None, visible: Optional[Boolean] = None,
+                 collision_filter: Optional['CollisionFilter'] = None):
         super().__init__()
 
     @property
@@ -1914,8 +1914,8 @@ class Tilemap:
     def clear(self):
         pass
 
-    def make_layer(self, name: str, col_count: int, row_count: int, position: Optional[TYPE_VEC3] = None, scroller: Optional[TYPE_VEC3] = None,
-                   visible: Optional[Boolean] = None, zorder: float = 0, layer_flag: int = 0) -> TilemapLayer:
+    def make_layer(self, name: str, col_count: int, row_count: int, position: Optional[TYPE_VEC3] = None, visible: Optional[Boolean] = None,
+                   collision_filter: Optional['CollisionFilter'] = None, zorder: float = 0) -> TilemapLayer:
         pass
 
     def add_layer(self, layer: TilemapLayer, zorder: float = 0):

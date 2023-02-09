@@ -40,6 +40,8 @@ public:
     static sp<Input> create(std::vector<V4> value, size_t size = 0);
 //[[script::bindings::constructor]]
     static sp<Input> create(std::vector<uint32_t> value, size_t size = 0);
+//[[script::bindings::constructor]]
+    static sp<Input> create(const std::set<uint32_t>& value, size_t size = 0);
 
 //[[script::bindings::property]]
     static size_t size(const sp<Input>& self);

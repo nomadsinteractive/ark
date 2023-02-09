@@ -11,7 +11,7 @@
 namespace ark {
 
 PipelineLayout::PipelineLayout(const sp<PipelineBuildingContext>& buildingContext, const Camera& camera)
-    : _building_context(buildingContext), _input(_building_context->_input), _snippet(_building_context->makePipelineSnippet()), _color_attachment_count(0)
+    : _building_context(buildingContext), _input(_building_context->_input), _snippet(_building_context->makePipelineSnippet()), _color_attachment_count(0), _definitions(_building_context->toDefinitions())
 {
     initialize(camera);
 }
@@ -37,9 +37,10 @@ const sp<PipelineInput>& PipelineLayout::input() const
 std::map<PipelineInput::ShaderStage, String> PipelineLayout::getPreprocessedShaders(const RenderEngineContext& renderEngineContext) const
 {
     std::map<PipelineInput::ShaderStage, String> shaders;
+    const std::map<String, String>& definitions = _definitions;
 
-    for(const auto& i : _preprocessed_stages)
-        shaders[i.first] = i.second.toSourceCode(renderEngineContext);
+    for(const auto& [i, j] : _preprocessed_stages)
+        shaders[i] = j.toSourceCode(renderEngineContext, definitions);
 
     return shaders;
 }

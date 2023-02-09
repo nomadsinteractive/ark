@@ -115,6 +115,11 @@ sp<Input> InputType::create(std::vector<uint32_t> value, size_t size)
     return reserve(sp<InputObjectArray<uint32_t>>::make(std::move(value)), size);
 }
 
+sp<Input> InputType::create(const std::set<uint32_t>& value, size_t size)
+{
+    return reserve(sp<InputObjectArray<uint32_t>>::make(std::vector<uint32_t>(value.begin(), value.end())), size);
+}
+
 sp<Input> InputType::wrap(sp<Input> self)
 {
     return sp<InputWrapper>::make(std::move(self));
@@ -164,7 +169,7 @@ void InputType::removeInput(const sp<Input>& self, size_t offset)
 sp<InputType::InputWrapper> InputType::ensureWrapper(const sp<Input>& self)
 {
     const sp<InputType::InputWrapper> impl = self.as<InputType::InputWrapper>();
-    DCHECK(impl, "This Input object is not a InputWrapper instance");
+    CHECK(impl, "This Input object is not a InputWrapper instance");
     return impl;
 }
 

@@ -56,7 +56,7 @@ public:
     virtual void remove(int32_t id) = 0;
 
     virtual Result search(const V3& position, const V3& aabb) = 0;
-    virtual Result rayCast(const V3& from, const V3& to) = 0;
+    virtual Result rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter = nullptr) = 0;
 
 };
 

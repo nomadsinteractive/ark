@@ -42,7 +42,7 @@ public:
 //  [[script::bindings::auto]]
     virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shapeId, const sp<Vec3>& position, const sp<Size>& size = nullptr, const sp<Rotation>& rotate = nullptr, sp<Boolean> disposed = nullptr) = 0;
 //  [[script::bindings::auto]]
-    virtual std::vector<RayCastManifold> rayCast(const V3& from, const V3& to) = 0;
+    virtual std::vector<RayCastManifold> rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter = nullptr) = 0;
 
 };
 

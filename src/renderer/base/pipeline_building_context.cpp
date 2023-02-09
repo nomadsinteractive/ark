@@ -58,6 +58,7 @@ void PipelineBuildingContext::loadManifest(const document& manifest, BeanFactory
     loadPredefinedSampler(factory, args, manifest);
     loadPredefinedImage(factory, args, manifest);
     loadPredefinedBuffer(factory, args, manifest);
+    loadDefinitions(factory, args, manifest);
     loadPredefinedAttribute(manifest);
 }
 
@@ -246,6 +247,14 @@ sp<Snippet> PipelineBuildingContext::makePipelineSnippet() const
     return sp<SnippetDelegate>::make(_snippet);
 }
 
+std::map<String, String> PipelineBuildingContext::toDefinitions() const
+{
+    std::map<String, String> definitions;
+    for(const auto& [i, j] : _definitions)
+        definitions.insert(std::make_pair(i, j->val()));
+    return definitions;
+}
+
 void PipelineBuildingContext::loadPredefinedAttribute(const document& manifest)
 {
     for(const document& i : manifest->children("attribute"))
@@ -270,7 +279,7 @@ void PipelineBuildingContext::loadPredefinedUniform(BeanFactory& factory, const 
         int32_t binding = Documents::getAttribute<int32_t>(i, Constants::Attributes::BINDING, -1);
         sp<Builder<Input>> builder = factory.findBuilderByTypeValue<Input>(type, value);
         sp<Input> input = builder ? builder->build(args) : factory.ensure<Input>(value, args);
-        size_t size = input->size();
+        uint32_t size = static_cast<uint32_t>(input->size());
         Uniform::Type uType = Uniform::toType(type);
         uint32_t componentSize = uType != Uniform::TYPE_STRUCT ? Uniform::getComponentSize(uType) : size;
         CHECK(componentSize, "Unknow type \"%s\"", type.c_str());
@@ -339,6 +348,16 @@ void PipelineBuildingContext::initializePipelines()
             iter->second->initializeAsFirst(*this);
         else
             iter->second->initialize(*this);
+}
+
+void PipelineBuildingContext::loadDefinitions(BeanFactory& factory, const Scope& args, const document& manifest)
+{
+    for(const document& i : manifest->children("define"))
+    {
+        String name = Documents::getAttribute(i, Constants::Attributes::NAME);
+        CHECK_WARN(_definitions.find(name) == _definitions.end(), "Definition \"%s\" redefined", name.c_str());
+        _definitions.insert(std::make_pair(name, factory.ensureBuilder<StringVar>(i, Constants::Attributes::VALUE)->build(args)));
+    }
 }
 
 }

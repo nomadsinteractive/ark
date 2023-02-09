@@ -12,10 +12,11 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/base/buffer.h"
+#include "renderer/base/pipeline_context.h"
 
 namespace ark {
 
-class ARK_API DrawingContext {
+class ARK_API DrawingContext : public PipelineContext {
 public:
     template<typename T> struct Param {
         Param()
@@ -98,11 +99,8 @@ public:
 
     void upload(GraphicsContext& graphicsContext);
 
-    sp<ShaderBindings> _shader_bindings;
     sp<ByType> _attachments;
 
-    std::vector<RenderLayerSnapshot::UBOSnapshot> _ubos;
-    std::vector<std::pair<uint32_t, Buffer::Snapshot>> _ssbos;
     Buffer::Snapshot _vertices;
     Buffer::Snapshot _indices;
 

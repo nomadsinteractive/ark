@@ -33,7 +33,7 @@ BroadPhrase::Result BroadPhraseTrie::search(const V3& position, const V3& size)
     return BroadPhrase::Result(_stub->search(position, size), {});
 }
 
-BroadPhrase::Result BroadPhraseTrie::rayCast(const V3& from, const V3& to)
+BroadPhrase::Result BroadPhraseTrie::rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& /*collisionFilter*/)
 {
     return search(V3((from + to) / 2, 0), V3(std::abs(from.x() - to.x()), std::abs(from.y() - to.y()), 0));
 }

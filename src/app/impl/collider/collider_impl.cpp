@@ -43,9 +43,9 @@ sp<RigidBody> ColliderImpl::createBody(Collider::BodyType type, int32_t shape, c
     return _stub->createRigidBody(_stub->generateRigidBodyId(), type, shape, position, size, rotate, std::move(disp));
 }
 
-std::vector<RayCastManifold> ColliderImpl::rayCast(const V3& from, const V3& to)
+std::vector<RayCastManifold> ColliderImpl::rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter)
 {
-    return _stub->rayCast(V2(from.x(), from.y()), V2(to.x(), to.y()));
+    return _stub->rayCast(V2(from.x(), from.y()), V2(to.x(), to.y()), collisionFilter);
 }
 
 ColliderImpl::Stub::Stub(std::vector<std::pair<sp<BroadPhrase>, sp<CollisionFilter>>> broadPhrases, sp<NarrowPhrase> narrowPhrase)
@@ -69,17 +69,17 @@ BroadPhrase::Result ColliderImpl::Stub::broadPhraseSearch(const V3& position, co
     return result;
 }
 
-BroadPhrase::Result ColliderImpl::Stub::broadPhraseRayCast(const V3& from, const V3& to) const
+BroadPhrase::Result ColliderImpl::Stub::broadPhraseRayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter) const
 {
     if(_broad_phrases.size() == 1)
     {
         const auto& [i, j] = _broad_phrases.at(0);
-        return i->rayCast(from, to);
+        return i->rayCast(from, to, collisionFilter);
     }
 
     BroadPhrase::Result result;
     for(const auto& [i, j] : _broad_phrases)
-        result.merge(i->rayCast(from, to));
+        result.merge(i->rayCast(from, to, collisionFilter));
 
     return result;
 }
@@ -203,10 +203,10 @@ BroadPhrase::Candidate ColliderImpl::Stub::toBroadPhraseCandidate(const RigidBod
     return BroadPhrase::Candidate(rigidBody.id(), rigidBody.position()->val(), rigidBody.transform()->rotation()->theta()->val(), rigidBody.shapeId(), rigidBody.collisionFilter(), rigidBody.bodyDef().impl());
 }
 
-std::vector<RayCastManifold> ColliderImpl::Stub::rayCast(const V2& from, const V2& to) const
+std::vector<RayCastManifold> ColliderImpl::Stub::rayCast(const V2& from, const V2& to, const sp<CollisionFilter>& collisionFilter) const
 {
     std::vector<RayCastManifold> manifolds;
-    const BroadPhrase::Result result = broadPhraseRayCast(V3(from.x(), from.y(), 0), V3(to.x(), to.y(), 0));
+    const BroadPhrase::Result result = broadPhraseRayCast(V3(from.x(), from.y(), 0), V3(to.x(), to.y(), 0), collisionFilter);
 
     const NarrowPhrase::Ray ray = _narrow_phrase->toRay(from, to);
     for(const auto& i : toRigidBodyShadows(result.dynamic_candidates, Collider::BODY_TYPE_RIGID))
