@@ -7,7 +7,7 @@ namespace ark {
 
 template<typename T> class Global {
 public:
-    template<typename... Args> Global()
+    Global()
         : _inst(Ark::instance().ensure<T>()) {
     }
     Global(const Global& other) = default;
@@ -21,6 +21,10 @@ public:
     }
 
     operator const T& () const {
+        return *_inst;
+    }
+
+    operator T& () {
         return *_inst;
     }
 

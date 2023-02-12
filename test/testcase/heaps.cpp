@@ -63,7 +63,7 @@ public:
 
     Allocated allocate(MemoryHeap& heap, uint32_t size, uint32_t ttl) {
         Optional<uint8_t*> ptr = heap.allocate(size);
-        DCHECK(ptr, "Unable to allocate block, size: %d", size);
+        CHECK(ptr, "Unable to allocate block, size: %d", size);
         return Allocated(ptr.value(), size, ttl);
     }
 

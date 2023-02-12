@@ -34,9 +34,19 @@ PyObject* PyBridge::PyLong_FromLong(long value)
     return ::PyLong_FromLong(value);
 }
 
+PyObject* PyBridge::PyLong_FromLongLong(long long value)
+{
+    return ::PyLong_FromLongLong(value);
+}
+
 PyObject* PyBridge::PyLong_FromUnsignedLong(unsigned long value)
 {
     return ::PyLong_FromUnsignedLong(value);
+}
+
+PyObject* PyBridge::PyLong_FromUnsignedLongLong(unsigned long long value)
+{
+    return ::PyLong_FromUnsignedLongLong(value);
 }
 
 PyObject* PyBridge::PyFloat_FromDouble(double value)

@@ -11,10 +11,10 @@ namespace cmft {
 ::cmft::Image CMFTUtil::bitmapToImage(const Bitmap& bitmap)
 {
     ::cmft::Image image;
-    image.m_data = bitmap.bytes()->buf();
+    image.m_data = bitmap.byteArray()->buf();
     image.m_width = bitmap.width();
     image.m_height = bitmap.height();
-    image.m_dataSize = bitmap.bytes()->size();
+    image.m_dataSize = bitmap.byteArray()->size();
     image.m_format = ::cmft::TextureFormat::RGB32F;
     image.m_numMips = 1;
     image.m_numFaces = 1;

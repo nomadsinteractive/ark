@@ -79,6 +79,7 @@ class Readable;
 class Runnable;
 class Scope;
 class Script;
+class Slice;
 class State;
 class StateMachine;
 class Storage;
@@ -126,6 +127,8 @@ typedef sp<IndexArray> indexarray;
 typedef sp<FloatArray> floatarray;
 
 typedef std::chrono::time_point<std::chrono::steady_clock> TimePoint;
+//TODO: change to std::span when c++20 or above arrives
+typedef std::string_view Span;
 
 typedef Loader<document> DocumentLoader;
 typedef LoaderBundle<document> DocumentLoaderBundle;

@@ -47,7 +47,7 @@ public:
     static size_t size(const sp<Input>& self);
 
 //[[script::bindings::classmethod]]
-    static sp<Input> reserve(sp<Input> self, size_t size);
+    static sp<Input> realloc(sp<Input> self, size_t size);
 //[[script::bindings::classmethod]]
     static sp<Input> repeat(sp<Input> self, size_t length, size_t stride = 0);
 
@@ -63,6 +63,8 @@ public:
 
 //[[script::bindings::auto]]
     static sp<Input> makeElementIndexInput(std::vector<element_index_t> value);
+//[[script::bindings::auto]]
+    static sp<Input> blank(size_t size, int32_t fill = 0);
 
 private:
     class InputWrapper : public Input, Implements<InputWrapper, Input> {

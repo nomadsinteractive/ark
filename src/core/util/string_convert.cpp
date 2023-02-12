@@ -52,7 +52,7 @@ template<> ARK_API float StringConvert::to<String, float>(const String& str)
     return static_cast<float>(atof(str.c_str()));
 }
 
-template<> ARK_API Ark::RendererVersion StringConvert::to<String, Ark::RendererVersion>(const String& str)
+template<> Ark::RendererVersion StringConvert::to<String, Ark::RendererVersion>(const String& str)
 {
     const String version = str.toLower();
     if(version.startsWith("opengl_"))
@@ -63,7 +63,7 @@ template<> ARK_API Ark::RendererVersion StringConvert::to<String, Ark::RendererV
     return Ark::RENDERER_VERSION_AUTO;
 }
 
-template<> ARK_API Ark::RendererCoordinateSystem StringConvert::to<String, Ark::RendererCoordinateSystem>(const String& str)
+template<> Ark::RendererCoordinateSystem StringConvert::to<String, Ark::RendererCoordinateSystem>(const String& str)
 {
     const String cs = str.toLower();
     if(cs == "lhs")

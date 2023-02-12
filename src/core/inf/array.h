@@ -2,6 +2,7 @@
 #define ARK_CORE_INF_ARRAY_H_
 
 #include <array>
+#include <string_view>
 #include <vector>
 
 #include "core/forwarding.h"
@@ -22,6 +23,10 @@ public:
     T& at(size_t i) {
         DASSERT(i < length());
         return buf()[i];
+    }
+
+    Span toBytes() {
+        return Span(reinterpret_cast<const char*>(buf()), size());
     }
 
     class iterator {

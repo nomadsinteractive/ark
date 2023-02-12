@@ -27,7 +27,7 @@ public:
         V2 v = _delegate->val();
         float distance = getPlaneDistance(v);
         if(!Math::signEquals(_distance, distance)) {
-            _observer->update();
+            _observer->notify();
             _distance = distance;
         }
         return v;

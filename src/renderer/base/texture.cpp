@@ -279,7 +279,7 @@ Texture::UploaderBitmap::UploaderBitmap(bitmap bitmap)
 
 void Texture::UploaderBitmap::initialize(GraphicsContext& graphicsContext, Texture::Delegate& delegate)
 {
-    delegate.uploadBitmap(graphicsContext, _bitmap, {_bitmap->bytes()});
+    delegate.uploadBitmap(graphicsContext, _bitmap, {_bitmap->byteArray()});
 }
 
 template<> ARK_API void Enums<Texture::Format>::initialize(std::map<String, Texture::Format>& enums)

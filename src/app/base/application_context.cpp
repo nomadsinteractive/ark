@@ -194,7 +194,7 @@ V2 ApplicationContext::toViewportPosition(const V2& position, Ark::RendererCoord
 
 void ApplicationContext::addPreRenderTask(const sp<Runnable>& task, const sp<Boolean>& disposed)
 {
-    _render_controller->addPreRenderRunRequest(task, disposed);
+    _render_controller->addPreComposeRunnable(task, disposed);
 }
 
 void ApplicationContext::addEventListener(sp<EventListener> eventListener, sp<Boolean> disposed)

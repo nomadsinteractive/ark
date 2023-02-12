@@ -57,32 +57,32 @@ static sp<InputImpl> ensureImpl(const sp<Input>& self)
 
 sp<Input> InputType::create(sp<ByteArray> value, size_t size)
 {
-    return reserve(sp<InputObjectArray<uint8_t>>::make(std::move(value)), size);
+    return realloc(sp<InputObjectArray<uint8_t>>::make(std::move(value)), size);
 }
 
 sp<Input> InputType::create(sp<Integer> value, size_t size)
 {
-    return reserve(sp<InputVariable<int32_t>>::make(std::move(value)), size);
+    return realloc(sp<InputVariable<int32_t>>::make(std::move(value)), size);
 }
 
 sp<Input> InputType::create(sp<Numeric> value, size_t size)
 {
-    return reserve(sp<InputVariable<float>>::make(std::move(value)), size);
+    return realloc(sp<InputVariable<float>>::make(std::move(value)), size);
 }
 
 sp<Input> InputType::create(sp<Vec2> value, size_t size)
 {
-    return reserve(sp<InputVariable<V2>>::make(std::move(value)), size);
+    return realloc(sp<InputVariable<V2>>::make(std::move(value)), size);
 }
 
 sp<Input> InputType::create(sp<Vec3> value, size_t size)
 {
-    return reserve(sp<InputVariable<V3>>::make(std::move(value)), size);
+    return realloc(sp<InputVariable<V3>>::make(std::move(value)), size);
 }
 
 sp<Input> InputType::create(sp<Vec4> value, size_t size)
 {
-    return reserve(sp<InputVariable<V4>>::make(std::move(value)), size);
+    return realloc(sp<InputVariable<V4>>::make(std::move(value)), size);
 }
 
 sp<Input> InputType::create(std::map<size_t, sp<Input>> value, size_t size)
@@ -92,32 +92,32 @@ sp<Input> InputType::create(std::map<size_t, sp<Input>> value, size_t size)
 
 sp<Input> InputType::create(std::vector<sp<Mat4>> value, size_t size)
 {
-    return reserve(sp<InputVariableArray<M4>>::make(std::move(value)), size);
+    return realloc(sp<InputVariableArray<M4>>::make(std::move(value)), size);
 }
 
 sp<Input> InputType::create(std::vector<sp<Input>> value, size_t size)
 {
-    return reserve(sp<InputArray>::make(std::move(value)), size);
+    return realloc(sp<InputArray>::make(std::move(value)), size);
 }
 
 sp<Input> InputType::create(std::vector<V3> value, size_t size)
 {
-    return reserve(sp<InputObjectArray<V3>>::make(std::move(value)), size);
+    return realloc(sp<InputObjectArray<V3>>::make(std::move(value)), size);
 }
 
 sp<Input> InputType::create(std::vector<V4> value, size_t size)
 {
-    return reserve(sp<InputObjectArray<V4>>::make(std::move(value)), size);
+    return realloc(sp<InputObjectArray<V4>>::make(std::move(value)), size);
 }
 
 sp<Input> InputType::create(std::vector<uint32_t> value, size_t size)
 {
-    return reserve(sp<InputObjectArray<uint32_t>>::make(std::move(value)), size);
+    return realloc(sp<InputObjectArray<uint32_t>>::make(std::move(value)), size);
 }
 
 sp<Input> InputType::create(const std::set<uint32_t>& value, size_t size)
 {
-    return reserve(sp<InputObjectArray<uint32_t>>::make(std::vector<uint32_t>(value.begin(), value.end())), size);
+    return realloc(sp<InputObjectArray<uint32_t>>::make(std::vector<uint32_t>(value.begin(), value.end())), size);
 }
 
 sp<Input> InputType::wrap(sp<Input> self)
@@ -130,6 +130,11 @@ sp<Input> InputType::makeElementIndexInput(std::vector<element_index_t> value)
     return sp<InputObjectArray<element_index_t>>::make(std::move(value));
 }
 
+sp<Input> InputType::blank(size_t size, int32_t fill)
+{
+    return sp<InputObjectArray<int8_t>>::make(std::vector<int8_t>(size, static_cast<int8_t>(fill)));
+}
+
 void InputType::set(const sp<Input>& self, sp<Input> delegate)
 {
     ensureWrapper(self)->setDelegate(std::move(delegate));
@@ -140,7 +145,7 @@ size_t InputType::size(const sp<Input>& self)
     return self->size();
 }
 
-sp<Input> InputType::reserve(sp<Input> self, size_t size)
+sp<Input> InputType::realloc(sp<Input> self, size_t size)
 {
     if(size <= self->size())
         return self;

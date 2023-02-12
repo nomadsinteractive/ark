@@ -1,6 +1,7 @@
 #include "renderer/base/graphics_context.h"
 
 #include "core/inf/variable.h"
+#include "core/types/global.h"
 #include "core/util/strings.h"
 
 #include "graphics/base/camera.h"
@@ -18,6 +19,12 @@ GraphicsContext::GraphicsContext(const sp<RenderEngineContext>& renderContext, c
 
 GraphicsContext::~GraphicsContext()
 {
+}
+
+GraphicsContext& GraphicsContext::mocked()
+{
+    DTHREAD_CHECK(THREAD_ID_RENDERER);
+    return Global<GraphicsContext>();
 }
 
 void GraphicsContext::onSurfaceReady()

@@ -35,12 +35,13 @@ public:
         USAGE_COUNT
     };
 
-    class ARK_API Uploader : public Resource {
+    class ARK_API Delegate : public Resource {
     public:
-        Uploader();
-        virtual ~Uploader() = default;
+        Delegate();
+        virtual ~Delegate() = default;
 
         virtual void uploadBuffer(GraphicsContext& graphicsContext, Input& input) = 0;
+        virtual void downloadBuffer(GraphicsContext& graphicsContext, size_t offset, size_t size, void* ptr) = 0;
 
         size_t size() const;
 
@@ -54,8 +55,8 @@ public:
     class ARK_API Snapshot {
     public:
         Snapshot() = default;
-        Snapshot(sp<Uploader> stub);
-        Snapshot(sp<Uploader> stub, size_t size, sp<Input> input);
+        Snapshot(sp<Delegate> stub);
+        Snapshot(sp<Delegate> stub, size_t size, sp<Input> input);
         DEFAULT_COPY_AND_ASSIGN(Snapshot);
 
         explicit operator bool() const;
@@ -69,9 +70,9 @@ public:
 
         void upload(GraphicsContext& graphicsContext) const;
 
-        const sp<Uploader>& delegate() const;
+        const sp<Delegate>& delegate() const;
 
-        sp<Uploader> _delegate;
+        sp<Delegate> _delegate;
         sp<Input> _input;
         size_t _size;
     };
@@ -92,7 +93,7 @@ public:
     };
 
 public:
-    Buffer(sp<Uploader> delegate) noexcept;
+    Buffer(sp<Delegate> delegate) noexcept;
     Buffer() noexcept = default;
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Buffer);
 
@@ -108,9 +109,12 @@ public:
 //  [[script::bindings::property]]
     uint64_t id() const;
 
+//  [[script::bindings::auto]]
+    sp<ByteArray> synchronize(size_t offset, size_t size, sp<Boolean> cancelled);
+
     void upload(GraphicsContext&) const;
 
-    const sp<Uploader>& delegate() const;
+    const sp<Delegate>& delegate() const;
 
 //  [[plugin::resource-loader]]
     class BUILDER : public Builder<Buffer> {
@@ -127,7 +131,8 @@ public:
     };
 
 private:
-    sp<Uploader> _delegate;
+    sp<RenderController> _render_controller;
+    sp<Delegate> _delegate;
 
     friend class ResourceManager;
 };

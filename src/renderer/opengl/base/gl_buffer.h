@@ -10,7 +10,7 @@
 namespace ark {
 namespace opengl {
 
-class GLBuffer : public Buffer::Uploader {
+class GLBuffer : public Buffer::Delegate {
 public:
     GLBuffer(Buffer::Type type, Buffer::Usage usage, sp<Recycler> recycler);
     ~GLBuffer() override;
@@ -18,6 +18,7 @@ public:
     virtual uint64_t id() override;
     virtual void upload(GraphicsContext& graphicsContext) override;
     virtual void uploadBuffer(GraphicsContext& graphicsContext, Input& input) override;
+    virtual void downloadBuffer(GraphicsContext& graphicsContext, size_t offset, size_t size, void* ptr) override;
     virtual ResourceRecycleFunc recycle() override;
 
 private:

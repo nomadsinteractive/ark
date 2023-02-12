@@ -45,7 +45,7 @@ void Notifier::notify() const
 {
     const auto observers = _observers;
     for(const sp<Observer>& i : *observers)
-        i->update();
+        i->notify();
 }
 
 sp<Observer> Notifier::createObserver(const sp<Runnable>& handler, bool oneshot) const

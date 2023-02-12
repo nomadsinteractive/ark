@@ -43,4 +43,9 @@ void InputSnapshot::upload(Writable& writable)
         writable.write(j->buf(), j->length(), i);
 }
 
+bool InputSnapshot::update(uint64_t /*timestamp*/)
+{
+    return false;
+}
+
 }

@@ -14,8 +14,11 @@ namespace ark {
 
 class ARK_API GraphicsContext {
 public:
+    GraphicsContext() = default;
     GraphicsContext(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController);
     ~GraphicsContext();
+
+    static GraphicsContext& mocked();
 
     void onSurfaceReady();
     void onDrawFrame();

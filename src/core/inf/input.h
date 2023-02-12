@@ -16,10 +16,6 @@ public:
 
     virtual void upload(Writable& buf) = 0;
 
-    virtual bool update(uint64_t /*timestamp*/) override {
-        return false;
-    }
-
     size_t size() const {
         return _size;
     }

@@ -16,7 +16,7 @@ namespace ark {
 
 class ARK_API ApplicationFacade {
 public:
-    ApplicationFacade(Application& app, const Surface& surface, const sp<ApplicationManifest>& manifest);
+    ApplicationFacade(Application& app, const Surface& surface, sp<ApplicationManifest> manifest);
 
 //  [[script::bindings::property]]
     const sp<Clock>& clock() const;
@@ -67,11 +67,14 @@ public:
     void exit();
 
 //  [[script::bindings::auto]]
-    void post(sp<Runnable> task, float delay, sp<Future> future = nullptr);
+    void post(sp<Runnable> task, float delay, sp<Boolean> canceled = nullptr);
 //  [[script::bindings::auto]]
-    void post(sp<Runnable> task, const std::vector<float>& delay, sp<Future> future = nullptr);
+    void post(sp<Runnable> task, const std::vector<float>& delay, sp<Boolean> canceled = nullptr);
 //  [[script::bindings::auto]]
-    void schedule(sp<Runnable> task, float interval, sp<Future> future = nullptr);
+    void schedule(sp<Runnable> task, float interval, sp<Boolean> canceled = nullptr);
+
+//  [[script::bindings::auto]]
+    sp<Future> expect(sp<Boolean> condition, sp<Observer> observer, sp<Boolean> canceled = nullptr);
 
 //  [[script::bindings::auto]]
     void addStringBundle(const String& name, const sp<StringBundle>& stringBundle);

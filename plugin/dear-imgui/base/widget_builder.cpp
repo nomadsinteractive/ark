@@ -196,7 +196,7 @@ public:
         if(renderResult) {
             StringType::set(_value, sp<String>::make(_text_buf.data()));
             if(_observer) {
-                _observer->update();
+                _observer->notify();
                 updateInputText();
             }
         }

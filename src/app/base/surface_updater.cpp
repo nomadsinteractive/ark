@@ -22,7 +22,7 @@ void SurfaceUpdater::run()
     DTHREAD_CHECK(THREAD_ID_CORE);
     uint64_t timestamp = _render_controller->updateTick();
     _app_clock_ticker->set(_app_clock_ticker->val() + std::min<uint64_t>(timestamp - _pre_frame_timestamp, 1000000 / 24));
-    _render_controller->preRequestUpdate(timestamp);
+    _render_controller->onPreCompose(timestamp);
     _surface_controller->requestUpdate(timestamp);
     _pre_frame_timestamp = timestamp;
 }

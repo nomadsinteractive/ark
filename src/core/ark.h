@@ -76,6 +76,8 @@ public:
 
     const sp<Clock>& appClock() const;
     const sp<Clock>& sysClock() const;
+
+    const sp<RenderController>& renderController() const;
     const sp<ApplicationContext>& applicationContext() const;
     const sp<ApplicationProfiler>& applicationProfiler() const;
 

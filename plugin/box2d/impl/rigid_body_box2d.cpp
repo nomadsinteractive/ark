@@ -349,7 +349,7 @@ sp<Future> RigidBodyBox2D::applyLinearVelocity(const sp<Vec2>& velocity)
 {
     const sp<Future> future = sp<Future>::make();
     const sp<ManualLinearVelocity> task = sp<ManualLinearVelocity>::make(_stub, velocity, future);
-    Ark::instance().applicationContext()->addPreRenderTask(task, future->cancelled());
+    Ark::instance().applicationContext()->addPreRenderTask(task, future->canceled());
     return future;
 }
 
@@ -357,7 +357,7 @@ sp<Future> RigidBodyBox2D::applyRotate(const sp<Numeric>& rotate)
 {
     const sp<Future> future = sp<Future>::make();
     const sp<Runnable> task = sp<ManualApplyRotate>::make(_stub, rotate, future);
-    Ark::instance().applicationContext()->addPreRenderTask(task, future->cancelled());
+    Ark::instance().applicationContext()->addPreRenderTask(task, future->canceled());
     return future;
 }
 

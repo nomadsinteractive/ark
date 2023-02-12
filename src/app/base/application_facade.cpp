@@ -1,5 +1,6 @@
 #include "app/base/application_facade.h"
 
+#include "core/base/future.h"
 #include "core/epi/disposed.h"
 
 #include "graphics/base/camera.h"
@@ -14,8 +15,30 @@
 
 namespace ark {
 
-ApplicationFacade::ApplicationFacade(Application& app, const Surface& surface, const sp<ApplicationManifest>& manifest)
-    : _context(app.context()), _controller(app.controller()), _surface_controller(surface.controller()), _surface_size(app.surfaceSize()), _manifest(manifest)
+namespace {
+
+class UpdatableExpecting : public Updatable {
+public:
+    UpdatableExpecting(sp<Boolean> condition, sp<Future> future)
+        : _condition(std::move(condition)), _future(std::move(future)) {
+    }
+
+    virtual bool update(uint64_t timestamp) override {
+        bool dirty = _condition->update(timestamp);
+        if(_condition->val())
+            _future->done();
+        return dirty;
+    }
+
+private:
+    sp<Boolean> _condition;
+    sp<Future> _future;
+};
+
+}
+
+ApplicationFacade::ApplicationFacade(Application& app, const Surface& surface, sp<ApplicationManifest> manifest)
+    : _context(app.context()), _controller(app.controller()), _surface_controller(surface.controller()), _surface_size(app.surfaceSize()), _manifest(std::move(manifest))
 {
 }
 
@@ -142,20 +165,27 @@ void ApplicationFacade::exit()
     _controller->exit();
 }
 
-void ApplicationFacade::post(sp<Runnable> task, float delay, sp<Future> future)
+void ApplicationFacade::post(sp<Runnable> task, float delay, sp<Boolean> canceled)
 {
-    _context->messageLoopApp()->post(std::move(task), delay, std::move(future));
+    _context->messageLoopApp()->post(std::move(task), delay, std::move(canceled));
 }
 
-void ApplicationFacade::post(sp<Runnable> task, const std::vector<float>& delays, sp<Future> future)
+void ApplicationFacade::post(sp<Runnable> task, const std::vector<float>& delays, sp<Boolean> canceled)
 {
     for(float i : delays)
-        post(task, i, future);
+        post(task, i, canceled);
 }
 
-void ApplicationFacade::schedule(sp<Runnable> task, float interval, sp<Future> future)
+void ApplicationFacade::schedule(sp<Runnable> task, float interval, sp<Boolean> canceled)
 {
-    _context->messageLoopApp()->schedule(std::move(task), interval, std::move(future));
+    _context->messageLoopApp()->schedule(std::move(task), interval, std::move(canceled));
+}
+
+sp<Future> ApplicationFacade::expect(sp<Boolean> condition, sp<Observer> observer, sp<Boolean> canceled)
+{
+    sp<Future> future = sp<Future>::make(std::move(canceled), std::move(observer));
+    _context->renderController()->addPreComposeUpdatable(sp<UpdatableExpecting>::make(std::move(condition), future), future->canceled());
+    return future;
 }
 
 void ApplicationFacade::addStringBundle(const String& name, const sp<StringBundle>& stringBundle)

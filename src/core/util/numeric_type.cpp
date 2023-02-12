@@ -5,7 +5,6 @@
 #include "core/base/wrapper.h"
 #include "core/base/expression.h"
 #include "core/impl/numeric/approach.h"
-#include "core/impl/numeric/vibrate.h"
 #include "core/impl/variable/at_least.h"
 #include "core/impl/variable/at_most.h"
 #include "core/impl/variable/clamp.h"
@@ -291,16 +290,6 @@ sp<ExpectationF> NumericType::fence(const sp<Numeric>& self, const sp<Numeric>& 
 sp<Numeric> NumericType::ifElse(const sp<Numeric>& self, const sp<Boolean>& condition, const sp<Numeric>& negative)
 {
     return sp<VariableTernary<float>>::make(condition, self, negative);
-}
-
-sp<Numeric> NumericType::vibrate(float s0, float v0, float s1, float v1, float duration, const sp<Numeric>& t)
-{
-    DCHECK(duration > 0, "Duration must be greater than zero");
-    float o, a, t0, t1;
-    Math::vibrate(s0, v0, s1, v1, o, a, t0, t1);
-    float multiplier = (t1 - t0) / duration;
-    const sp<Numeric> b = sp<Numeric::Const>::make(t1 - t0);
-    return sp<Vibrate>::make(boundary(mul(t ? t : Ark::instance().appClock()->duration(), multiplier), b)->wrapped(), a, t0, o);
 }
 
 sp<Numeric> NumericType::dye(sp<Numeric> self, sp<Boolean> condition, String message)

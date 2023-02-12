@@ -133,6 +133,11 @@ void Model::InputMeshIndices::upload(Writable& uploader)
     }
 }
 
+bool Model::InputMeshIndices::update(uint64_t /*timestamp*/)
+{
+    return false;
+}
+
 size_t Model::InputMeshIndices::calcIndicesSize(const std::vector<sp<Mesh>>& meshes) const
 {
     size_t size = 0;

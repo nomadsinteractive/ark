@@ -143,9 +143,6 @@ public:
 //  [[script::bindings::classmethod]]
     static sp<Numeric> periodic(const sp<Numeric>& self, const sp<Numeric>& interval = nullptr, const sp<Numeric>& duration = nullptr);
 
-//  [[script::bindings::auto]]
-    static sp<Numeric> vibrate(float s0, float v0, float s1, float v1, float duration, const sp<Numeric>& t = nullptr);
-
 //[[script::bindings::classmethod]]
     static sp<Numeric> dye(sp<Numeric> self, sp<Boolean> condition = nullptr, String message = "");
 

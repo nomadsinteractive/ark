@@ -33,7 +33,7 @@ public:
 
         std::vector<sp<ByteArray>> imagedata;
         for(const bitmap& i : bitmaps)
-            imagedata.push_back(i->bytes());
+            imagedata.push_back(i->byteArray());
 
         delegate.uploadBitmap(graphicContext, bitmaps.at(0), imagedata);
     }

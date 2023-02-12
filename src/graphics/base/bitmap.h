@@ -38,7 +38,10 @@ public:
     uint32_t rowBytes() const;
 
 //  [[script::bindings::property]]
-    const sp<Array<uint8_t>>& bytes() const;
+    Span bytes() const;
+
+//  [[script::bindings::property]]
+    const sp<ByteArray>& byteArray() const;
 
     uint8_t* at(uint32_t x, uint32_t y) const;
 
@@ -154,7 +157,7 @@ private:
     uint32_t _row_bytes;
     uint8_t _channels;
 
-    bytearray _bytes;
+    bytearray _byte_array;
 };
 
 }

@@ -89,9 +89,9 @@ void TexturePacker::PackedTextureUploader::initialize(GraphicsContext& graphicsC
     for(const PackedBitmap& i : _bitmaps)
     {
         const bitmap s = i._bitmap_provider->val();
-        content->draw(i._x, i._y, s->bytes()->buf(), s->width(), s->height(), s->rowBytes());
+        content->draw(i._x, i._y, s->byteArray()->buf(), s->width(), s->height(), s->rowBytes());
     }
-    delegate.uploadBitmap(graphicsContext, content, {content->bytes()});
+    delegate.uploadBitmap(graphicsContext, content, {content->byteArray()});
 }
 
 TexturePacker::PackedBitmap::PackedBitmap(sp<Variable<bitmap>> bitmapProvider, int32_t x, int32_t y)

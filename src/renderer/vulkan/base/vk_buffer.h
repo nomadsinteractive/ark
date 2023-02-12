@@ -13,7 +13,7 @@
 namespace ark {
 namespace vulkan {
 
-class VKBuffer : public Buffer::Uploader {
+class VKBuffer : public Buffer::Delegate {
 public:
     VKBuffer(sp<VKRenderer> renderer, sp<Recycler> recycler, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags);
     ~VKBuffer() override;
@@ -22,6 +22,7 @@ public:
     virtual uint64_t id() override;
     virtual void upload(GraphicsContext& graphicsContext) override;
     virtual void uploadBuffer(GraphicsContext& graphicsContext, Input& input) override;
+    virtual void downloadBuffer(GraphicsContext& graphicsContext, size_t offset, size_t size, void* ptr) override;
     virtual ResourceRecycleFunc recycle() override;
 
     void reload(GraphicsContext& graphicsContext, const ByteArray::Borrowed& buf);

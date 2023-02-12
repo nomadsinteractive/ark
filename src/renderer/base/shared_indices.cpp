@@ -31,11 +31,15 @@ public:
         }
     }
 
+    virtual bool update(uint64_t /*timestamp*/) override {
+        return false;
+    }
 
 private:
     size_t _primitive_count;
     size_t _vertex_count;
     std::vector<element_index_t> _indices;
+
 };
 
 class Degenerate : public Input {
@@ -67,10 +71,15 @@ public:
         }
     }
 
+    virtual bool update(uint64_t /*timestamp*/) override {
+        return false;
+    }
+
 private:
     size_t _primitive_count;
     size_t _vertex_count;
     std::vector<element_index_t> _indices;
+
 };
 
 }

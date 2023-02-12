@@ -106,6 +106,37 @@ class AssetBundle:
         pass
 
 
+class ByteArray:
+
+    @property
+    def native_ptr(self) -> int:
+        return 0
+
+    def to_bytes(self) -> bytes:
+        pass
+
+    def to_integer(self) -> 'Integer':
+        pass
+
+    def to_numeric(self) -> 'Numeric':
+        pass
+
+    def to_vec2(self) -> 'Vec2':
+        pass
+
+    def to_vec3(self) -> 'Vec3':
+        pass
+
+    def to_vec4(self) -> 'Vec4':
+        pass
+
+    def __len__(self) -> int:
+        return 0
+
+    def __getitem__(self, item):
+        pass
+
+
 class _Var:
     def __init__(self, val: Any):
         pass
@@ -221,11 +252,11 @@ class Json:
     def dump(self) -> str:
         pass
 
-    def to_bson(self) -> bytes:
+    def to_bson(self) -> ByteArray:
         pass
 
     @staticmethod
-    def from_bson(content: bytes) -> 'Json':
+    def from_bson(content: bytes | ByteArray) -> 'Json':
         pass
 
 
@@ -356,7 +387,10 @@ class Buffer:
     def id(self) -> int:
         return 0
 
-    def upload(self, input_: 'Input', future: Optional[Future] = None):
+    def upload(self, uploader: 'Input', future: Optional[Future] = None):
+        pass
+
+    def synchronize(self, offset: int, size: int, cancelled: 'Boolean') -> ByteArray:
         pass
 
 
@@ -476,10 +510,13 @@ class ApplicationFacade:
     def exit(self):
         pass
 
-    def post(self, task: Callable, delay: float, future: Optional[Future] = None):
+    def post(self, task: Callable, delay: float | list[float], canceled: Optional['Boolean'] = None):
         pass
 
-    def schedule(self, task: Callable, interval: float, future: Optional[Future] = None):
+    def schedule(self, task: Callable, interval: float, canceled: Optional['Boolean'] = None):
+        pass
+
+    def expect(self, condition: 'Boolean', observer: 'Observer', canceled: Optional['Boolean']) -> Future:
         pass
 
 
@@ -568,7 +605,11 @@ class Bitmap:
         return 0
 
     @property
-    def bytes(self):
+    def bytes(self) -> bytes:
+        return b''
+
+    @property
+    def byte_array(self) -> Optional[ByteArray]:
         return None
 
 
@@ -999,7 +1040,7 @@ class Input:
     def size(self):
         return 0
 
-    def reserve(self, size: int) -> 'Input':
+    def realloc(self, size: int) -> 'Input':
         pass
 
     def add_input(self, offset: int, input_: 'Input'):
@@ -1012,6 +1053,10 @@ class Input:
         pass
 
     def set(self, delegate: 'Input'):
+        pass
+
+    @staticmethod
+    def blank(size: int, fill: int = 0) -> 'Input':
         pass
 
 
@@ -2236,7 +2281,7 @@ class Collider:
     def create_body(self, type_: Union[int, Integer], shape, position, size=None, rotate=None, disposed: Optional[Boolean] = None) -> RigidBody:
         pass
 
-    def ray_cast(self, ray_from, ray_to) -> List[RayCastManifold]:
+    def ray_cast(self, ray_from, ray_to, collision_filter: Optional[CollisionFilter] = None) -> List[RayCastManifold]:
         pass
 
 

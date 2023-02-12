@@ -328,22 +328,13 @@ class GenConstructorMethod(GenMethod):
     def gen_py_type_constructor_codes(self, lines, genclass):
         lines.append('pyTypeObject->tp_init = reinterpret_cast<initproc>(%s::__init___r);' % genclass.py_class_name)
 
-    @staticmethod
-    def overload(m1, m2):
-        try:
-            m1.add_overloaded_method(m2)
-            return m1
-        except AttributeError:
-            return create_overloaded_method_type(GenConstructorMethod)(m1, m2)
-
 
 class GenPropertyMethod(GenMethod):
     def __init__(self, name, args, return_type, is_static):
-        GenMethod.__init__(self, name, args, return_type)
+        GenMethod.__init__(self, name, args, return_type, is_static)
         if is_static:
             self._self_argument = self._arguments and self._arguments[0]
             self._arguments = self._arguments[1:]
-        self._is_static = is_static
         self._is_setter = name.startswith('set')
         self._property_name = name[3].lower() + name[4:] if self._is_setter else name
 
@@ -352,10 +343,6 @@ class GenPropertyMethod(GenMethod):
 
     def _gen_parse_tuple_code(self, lines, declares, args):
         pass
-
-    @property
-    def is_static(self):
-        return self._is_static
 
     def _gen_convert_args_code(self, lines, argdeclare, optional_check=False):
         if argdeclare:
@@ -402,8 +389,7 @@ class GenPropertyMethod(GenMethod):
     def err_return_value(self):
         return 'return -1'
 
-    @staticmethod
-    def overload(m1, m2):
+    def overload(self, m1, m2):
         try:
             m1.add_overloaded_method(m2)
             return m1
@@ -435,14 +421,6 @@ class GenMemberMethod(GenMethod):
     def gen_py_method_def(self, genclass):
         return self.gen_py_method_def_tp(genclass)
 
-    @staticmethod
-    def overload(m1, m2):
-        try:
-            m1.add_overloaded_method(m2)
-            return m1
-        except AttributeError:
-            return create_overloaded_method_type(GenMemberMethod)(m1, m2)
-
 
 class GenStaticMethod(GenMethod):
     def __init__(self, name, args, return_type):
@@ -458,14 +436,6 @@ class GenStaticMethod(GenMethod):
     def _gen_calling_statement(self, genclass, argnames):
         return '%s::%s(%s);' % (genclass.classname, self._name, argnames)
 
-    @staticmethod
-    def overload(m1, m2):
-        try:
-            m1.add_overloaded_method(m2)
-            return m1
-        except AttributeError:
-            return create_overloaded_method_type(GenStaticMethod)(m1, m2)
-
 
 class GenStaticMemberMethod(GenMethod):
     def __init__(self, name, args, return_type):
@@ -478,14 +448,6 @@ class GenStaticMemberMethod(GenMethod):
 
     def _gen_calling_statement(self, genclass, argnames):
         return '%s::%s(%s%s);' % (genclass.classname, self._name, self.gen_self_statement(genclass), argnames if not argnames else ', ' + argnames)
-
-    @staticmethod
-    def overload(m1, m2):
-        try:
-            m1.add_overloaded_method(m2)
-            return m1
-        except AttributeError:
-            return create_overloaded_method_type(GenStaticMemberMethod)(m1, m2)
 
 
 class GenRichCompareMethod(GenMethod):
@@ -587,7 +549,7 @@ class GenClass(object):
     def add_method(self, method):
         try:
             m = self._methods[method.name]
-            method = type(m).overload(m, method)
+            method = m.overload(m, method)
         except KeyError:
             pass
         self._methods[method.name] = method

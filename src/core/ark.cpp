@@ -272,6 +272,11 @@ const sp<Clock>& Ark::sysClock() const
     return _application_context->sysClock();
 }
 
+const sp<RenderController>& Ark::renderController() const
+{
+    return _application_context->renderController();
+}
+
 const sp<ApplicationContext>& Ark::applicationContext() const
 {
     return _application_context;

@@ -7,7 +7,7 @@
 
 namespace ark {
 
-class FlatableNumeric {
+class InputNumeric {
 public:
 //  [[plugin::builder::by-value("float")]]
     class BUILDER : public Builder<Input> {

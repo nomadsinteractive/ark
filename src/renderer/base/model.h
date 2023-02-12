@@ -84,12 +84,14 @@ private:
         InputMeshIndices(std::vector<sp<Mesh>> meshes);
 
         virtual void upload(Writable& uploader) override;
+        virtual bool update(uint64_t timestamp) override;
 
     private:
         size_t calcIndicesSize(const std::vector<sp<Mesh>>& meshes) const;
 
     private:
         std::vector<sp<Mesh>> _meshes;
+
     };
 
     class MeshVertices : public Vertices {

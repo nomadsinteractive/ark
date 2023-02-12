@@ -183,7 +183,7 @@ private:
 
         virtual void render() override {
             if(_func(_arg()))
-                _observer->update();
+                _observer->notify();
         }
 
     private:

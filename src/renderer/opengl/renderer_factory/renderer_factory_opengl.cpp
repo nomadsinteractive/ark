@@ -96,7 +96,7 @@ sp<RenderView> RendererFactoryOpenGL::createRenderView(const sp<RenderEngineCont
     return sp<RenderView>::adopt(new RenderViewOpenGL(renderContext, renderController));
 }
 
-sp<Buffer::Uploader> RendererFactoryOpenGL::createBuffer(Buffer::Type type, Buffer::Usage usage)
+sp<Buffer::Delegate> RendererFactoryOpenGL::createBuffer(Buffer::Type type, Buffer::Usage usage)
 {
     return sp<GLBuffer>::make(type, usage, _recycler);
 }

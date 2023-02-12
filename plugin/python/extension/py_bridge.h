@@ -19,7 +19,9 @@ public:
     static int32_t PyModule_AddObject(PyObject* mod, const char* name, PyObject* value);
     static int32_t PyList_SetItem(PyObject* obj, Py_ssize_t idx, PyObject* item);
     static PyObject* PyLong_FromLong(long);
+    static PyObject* PyLong_FromLongLong(long long value);
     static PyObject* PyLong_FromUnsignedLong(unsigned long);
+    static PyObject* PyLong_FromUnsignedLongLong(unsigned long long);
     static PyObject* PyFloat_FromDouble(double);
 
     static Py_ssize_t PyObject_Size(PyObject* obj);

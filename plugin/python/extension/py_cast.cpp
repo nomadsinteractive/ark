@@ -3,6 +3,7 @@
 #include "core/base/json.h"
 #include "core/base/observer.h"
 #include "core/base/scope.h"
+#include "core/base/slice.h"
 #include "core/inf/variable.h"
 #include "core/types/box.h"
 #include "core/types/null.h"
@@ -162,11 +163,6 @@ sp<Vec3> PyCast::toVec3(PyObject* object, bool alert)
 
     CHECK(vec2, "Cannot cast \"%s\" to Vec3, possible candidates: tuple, Vec3, Vec2", Py_TYPE(object)->tp_name);
     return Vec2Type::extend(vec2, sp<Numeric>::make<Numeric::Const>(0.0f));
-}
-
-PyObject* PyCast::toPyObject_SharedPtr(const bytearray& bytes)
-{
-    return PyBytes_FromStringAndSize(reinterpret_cast<const char*>(bytes->buf()), static_cast<size_t>(bytes->length()));
 }
 
 Optional<sp<Numeric>> PyCast::toNumeric(PyObject* object, bool alert)
@@ -337,8 +333,9 @@ template<> ARK_PLUGIN_PYTHON_API Optional<uint32_t> PyCast::toCppObject_impl<uin
 
 template<> ARK_PLUGIN_PYTHON_API Optional<int32_t> PyCast::toCppObject_impl<int32_t>(PyObject* object)
 {
-    CHECK(PyLong_Check(object), "Cannot cast Python object \"%s\" to int32_t", object->ob_type->tp_name);
-    return static_cast<int32_t>(PyLong_AsLong(object));
+    if(PyLong_Check(object))
+        return static_cast<int32_t>(PyLong_AsLong(object));
+    return Optional<int32_t>();
 }
 
 template<> ARK_PLUGIN_PYTHON_API Optional<uint16_t> PyCast::toCppObject_impl<uint16_t>(PyObject* object)
@@ -350,14 +347,16 @@ template<> ARK_PLUGIN_PYTHON_API Optional<uint16_t> PyCast::toCppObject_impl<uin
 
 template<> ARK_PLUGIN_PYTHON_API Optional<int64_t> PyCast::toCppObject_impl<int64_t>(PyObject* object)
 {
-    CHECK(PyNumber_Check(object), "Cannot cast Python object \"%s\" to int32_t", object->ob_type->tp_name);
-    return static_cast<int64_t>(PyLong_AsLongLong(object));
+    if(PyLong_Check(object))
+        return static_cast<int64_t>(PyLong_AsLongLong(object));
+    return Optional<int64_t>();
 }
 
 template<> ARK_PLUGIN_PYTHON_API Optional<uint64_t> PyCast::toCppObject_impl<uint64_t>(PyObject* object)
 {
-    CHECK(PyNumber_Check(object), "Cannot cast Python object \"%s\" to int32_t", object->ob_type->tp_name);
-    return static_cast<uint64_t>(PyLong_AsUnsignedLongLong(object));
+    if(PyLong_Check(object))
+        return static_cast<uint64_t>(PyLong_AsUnsignedLongLong(object));
+    return Optional<uint64_t>();
 }
 
 #ifdef __APPLE__
@@ -431,6 +430,18 @@ template<> ARK_PLUGIN_PYTHON_API Optional<M4> PyCast::toCppObject_impl<M4>(PyObj
         return ret;
     }
     return Optional<M4>();
+}
+
+template<> ARK_PLUGIN_PYTHON_API Optional<Slice> PyCast::toCppObject_impl<Slice>(PyObject* object)
+{
+    if(PySlice_Check(object))
+    {
+        Py_ssize_t begin = 0, end = -1, step = 1;
+        int32_t r = PySlice_Unpack(object, &begin, &end, &step);
+        CHECK(r == 0, "PySlice_Unpack failed: %d", r);
+        return Slice(begin, end, step);
+    }
+    return Optional<Slice>();
 }
 
 template<typename T> RectT<T> toRectType(PyObject* obj)
@@ -552,6 +563,11 @@ template<> ARK_PLUGIN_PYTHON_API PyObject* PyCast::toPyObject_impl<Color>(const 
 template<> ARK_PLUGIN_PYTHON_API PyObject* PyCast::toPyObject_impl<RayCastManifold>(const RayCastManifold& manifold)
 {
     return toPyObject_SharedPtr<RayCastManifold>(sp<RayCastManifold>::make(manifold));
+}
+
+template<> ARK_PLUGIN_PYTHON_API PyObject* PyCast::toPyObject_impl<Span>(const Span& strview)
+{
+    return PyBytes_FromStringAndSize(strview.data(), static_cast<size_t>(strview.size()));
 }
 
 }

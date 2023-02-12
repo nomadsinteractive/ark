@@ -341,4 +341,22 @@ template<> ARK_API void Enums<GLenum>::initialize(std::map<String, GLenum>& enum
     enums["front_and_back"] = GL_FRONT_AND_BACK;
 }
 
+GLBufferBinder::GLBufferBinder(GLenum target, GLuint buffer)
+    : _target(target), _buffer(buffer)
+{
+    glBindBuffer(_target, _buffer);
+}
+
+GLBufferBinder::GLBufferBinder(GLBufferBinder&& other)
+    : _target(other._target), _buffer(other._buffer)
+{
+    other._buffer = 0;
+}
+
+GLBufferBinder::~GLBufferBinder()
+{
+    if(_buffer)
+        glBindBuffer(_target, 0);
+}
+
 }

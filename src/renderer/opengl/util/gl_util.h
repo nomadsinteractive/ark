@@ -17,7 +17,7 @@
 
 namespace ark {
 
-class ARK_API GLUtil {
+class GLUtil {
 public:
     static GLenum toEnum(ModelLoader::RenderMode renderMode);
     static GLenum toBufferType(Buffer::Type type);
@@ -39,6 +39,18 @@ public:
     static void renderCubemap(GraphicsContext& graphicsContext, uint32_t id, RenderController& renderController, const sp<Pipeline>& pipeline, Texture& texture, int32_t width, int32_t height);
 
     static void glTexImage2D(uint32_t index, int32_t n, void* data);
+};
+
+class GLBufferBinder {
+public:
+    GLBufferBinder(GLenum target, GLuint buffer);
+    GLBufferBinder(GLBufferBinder&& other);
+    ~GLBufferBinder();
+    DISALLOW_COPY_AND_ASSIGN(GLBufferBinder);
+
+private:
+    GLenum _target;
+    GLuint _buffer;
 };
 
 }

@@ -12,9 +12,11 @@ public:
     InputSnapshot(Input& delegate);
 
     virtual void upload(Writable& writable) override;
+    virtual bool update(uint64_t timestamp) override;
 
 private:
     std::vector<std::pair<size_t, sp<ByteArray>>> _strips;
+
 };
 
 }

@@ -30,7 +30,7 @@ static bool collisionFilterTest(const sp<CollisionFilter>& cf1, const sp<Collisi
 ColliderImpl::ColliderImpl(std::vector<std::pair<sp<BroadPhrase>, sp<CollisionFilter>>> broadPhrases, sp<NarrowPhrase> narrowPhrase, RenderController& renderController)
     : _stub(sp<Stub>::make(std::move(broadPhrases), std::move(narrowPhrase)))
 {
-    renderController.addPreRenderUpdateRequest(_stub, sp<BooleanByWeakRef<Stub>>::make(_stub, 1));
+    renderController.addPreComposeUpdatable(_stub, sp<BooleanByWeakRef<Stub>>::make(_stub, 1));
 }
 
 sp<RigidBody> ColliderImpl::createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate, sp<Boolean> disposed)

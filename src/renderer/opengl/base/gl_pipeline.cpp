@@ -61,27 +61,6 @@ private:
     bool _enabled;
 };
 
-class GLBufferBinder {
-public:
-    GLBufferBinder(GLenum target, GLuint buffer)
-        : _target(target), _buffer(buffer) {
-        glBindBuffer(_target, _buffer);
-    }
-    GLBufferBinder(GLBufferBinder&& other)
-        : _target(other._target), _buffer(other._buffer) {
-        other._buffer = 0;
-    }
-    ~GLBufferBinder() {
-        if(_buffer)
-            glBindBuffer(_target, 0);
-    }
-    DISALLOW_COPY_AND_ASSIGN(GLBufferBinder);
-
-private:
-    GLenum _target;
-    GLuint _buffer;
-};
-
 class GLBufferBaseBinder {
 public:
     GLBufferBaseBinder(GLenum target, GLuint base, GLuint buffer)

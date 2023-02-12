@@ -22,7 +22,7 @@ public:
             T val = _delegate->val();
             if(val != _val) {
                 _val = val;
-                _observer->update();
+                _observer->notify();
             }
             return true;
         }

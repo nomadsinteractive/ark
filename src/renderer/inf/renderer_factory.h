@@ -21,7 +21,7 @@ public:
 
     virtual void onSurfaceCreated(RenderEngineContext& renderContext) = 0;
 
-    virtual sp<Buffer::Uploader> createBuffer(Buffer::Type type, Buffer::Usage usage) = 0;
+    virtual sp<Buffer::Delegate> createBuffer(Buffer::Type type, Buffer::Usage usage) = 0;
     virtual sp<Camera::Delegate> createCamera(Ark::RendererCoordinateSystem cs) = 0;
     virtual sp<Framebuffer> createFramebuffer(sp<Renderer> renderer, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask) = 0;
     virtual sp<PipelineFactory> createPipelineFactory() = 0;

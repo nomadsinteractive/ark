@@ -35,7 +35,7 @@ bool Between::update(uint64_t timestamp)
     else
         crossed = _value <= min || _value >= max;
     if(crossed)
-        _observer->update();
+        _observer->notify();
 
     return true;
 }

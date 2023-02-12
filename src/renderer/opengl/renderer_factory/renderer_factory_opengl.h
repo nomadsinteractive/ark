@@ -18,7 +18,7 @@ public:
 
     virtual void onSurfaceCreated(RenderEngineContext& glContext) override;
 
-    virtual sp<Buffer::Uploader> createBuffer(Buffer::Type type, Buffer::Usage usage) override;
+    virtual sp<Buffer::Delegate> createBuffer(Buffer::Type type, Buffer::Usage usage) override;
     virtual sp<Camera::Delegate> createCamera(Ark::RendererCoordinateSystem cs) override;
     virtual sp<Framebuffer> createFramebuffer(sp<Renderer> renderer, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask) override;
     virtual sp<RenderView> createRenderView(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController) override;

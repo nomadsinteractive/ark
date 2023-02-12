@@ -96,7 +96,7 @@ public:
     void foreach(const std::function<bool(const Json&)>& callback);
 
 //  [[script::bindings::auto]]
-    bytearray toBson() const;
+    sp<ByteArray> toBson() const;
 //  [[script::bindings::auto]]
     static Json fromBson(ByteArray& content);
 

@@ -5,8 +5,8 @@
 
 namespace ark {
 
-Observer::Observer(const sp<Runnable>& callback, bool oneshot)
-    : _callback(callback), _oneshot(oneshot)
+Observer::Observer(sp<Runnable> callback, bool oneshot)
+    : _callback(std::move(callback)), _oneshot(oneshot)
 {
 }
 
@@ -15,7 +15,7 @@ void Observer::traverse(const Holder::Visitor& visitor)
     HolderUtil::visit(_callback, visitor);
 }
 
-void Observer::update()
+void Observer::notify()
 {
     sp<Runnable> callback = std::move(_callback);
     if(callback)

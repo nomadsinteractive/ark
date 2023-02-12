@@ -55,29 +55,10 @@ public:
 
     static PyObject* toPyObject_SharedPtr(const sp<PyInstanceRef>& inst);
     static PyObject* toPyObject_SharedPtr(const sp<String>& inst);
-    static PyObject* toPyObject_SharedPtr(const bytearray& bytes);
 
     template<typename T> static PyObject* toPyObject_SharedPtr(const sp<T>& object) {
         return toPyObject_SharedPtr_sfinae(object, nullptr);
     }
-
-//    template<typename T> static PyObject* toPyObject_SharedPtr_sfinae(const sp<Array<T>>& arrayObject, typename std::enable_if<std::is_integral<T>::value>::type* ) {
-//        const uint32_t arrayLength = arrayObject->length();
-//        const T* arrayBuf = arrayObject->buf();
-//        PyObject* obj = PyList_New(arrayLength);
-//        for(uint32_t i = 0; i < arrayLength; ++i)
-//            PyList_SetItem(i, std::is_signed<T>::value ? PyLong_FromLong(arrayBuf[i]) : PyLong_FromUnsignedLong(arrayBuf[i]));
-//        return obj;
-//    }
-
-//    template<typename T> static PyObject* toPyObject_SharedPtr_sfinae(const sp<Array<T>>& arrayObject, typename std::enable_if<std::is_floating_point<T>::value>::type* ) {
-//        const uint32_t arrayLength = arrayObject->length();
-//        const T* arrayBuf = arrayObject->buf();
-//        PyObject* obj = PyList_New(arrayLength);
-//        for(uint32_t i = 0; i < arrayLength; ++i)
-//            PyList_SetItem(i, PyFloat_FromDouble(arrayBuf[i]));
-//        return obj;
-//    }
 
     template<typename T> static PyObject* toPyObject_SharedPtr_sfinae(const sp<T>& object, std::nullptr_t ) {
         if(!object)
@@ -219,7 +200,7 @@ private:
             return toPyObject(ptr.value());
         return PyBridge::incRefNone();
     }
-    template<typename T> static PyObject* toPyObject_sfinae(const T& iterable, typename std::enable_if<!(std::is_same<T, std::string>::value || std::is_same<T, std::wstring>::value), decltype(iterable.begin())>::type*) {
+    template<typename T> static PyObject* toPyObject_sfinae(const T& iterable, std::enable_if_t<!(std::is_same_v<T, std::string> || std::is_same_v<T, std::wstring> || std::is_same_v<T, Span>), decltype(iterable.begin())>*) {
         return fromIterable_sfinae<T>(iterable, nullptr);
     }
 /*
@@ -233,11 +214,19 @@ private:
     template<typename T> static PyObject* toPyObject_sfinae(const T& value, std::enable_if_t<std::is_enum<T>::value>*) {
         return PyBridge::PyLong_FromLong(static_cast<int32_t>(value));
     }
-    template<typename T> static PyObject* toPyObject_sfinae(const T& value, std::enable_if_t<std::is_integral<T>::value && !std::is_same<T, bool>::value && std::is_signed<T>::value>*) {
-        return PyBridge::PyLong_FromLong(value);
-    }
-    template<typename T> static PyObject* toPyObject_sfinae(const T& value, std::enable_if_t<std::is_integral<T>::value && !std::is_same<T, bool>::value && std::is_unsigned<T>::value>*) {
-        return PyBridge::PyLong_FromUnsignedLong(static_cast<uint32_t>(value));
+    template<typename T> static PyObject* toPyObject_sfinae(const T& value, std::enable_if_t<std::is_integral_v<T> && !std::is_same_v<T, bool>>*) {
+        if constexpr(sizeof(T) <= sizeof(int32_t)) {
+            if constexpr(std::is_signed_v<T>)
+                return PyBridge::PyLong_FromLong(value);
+            else
+                return PyBridge::PyLong_FromUnsignedLong(static_cast<uint32_t>(value));
+        } else {
+            static_assert(sizeof(T) == sizeof(int64_t));
+            if constexpr(std::is_signed_v<T>)
+                return PyBridge::PyLong_FromLongLong(value);
+            else
+                return PyBridge::PyLong_FromUnsignedLongLong(static_cast<uint64_t>(value));
+        }
     }
     template<typename T> static PyObject* toPyObject_sfinae(const T& value, std::enable_if_t<std::is_floating_point<T>::value>*) {
         return PyBridge::PyFloat_FromDouble(value);
@@ -389,6 +378,7 @@ template<> inline Optional<sp<ByteArray>> PyCast::toSharedPtrImpl<ByteArray>(PyO
         PyObject_GetBuffer(object, &buf, PyBUF_C_CONTIGUOUS);
         sp<ByteArray> arr = sp<ByteArray::Allocated>::make(buf.len);
         memcpy(arr->buf(), buf.buf, buf.len);
+        PyBuffer_Release(&buf);
         return arr;
     }
     return Optional<sp<ByteArray>>();

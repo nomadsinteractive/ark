@@ -3,6 +3,7 @@
 #include "core/ark.h"
 #include "core/base/memory_pool.h"
 
+#include "renderer/base/graphics_context.h"
 #include "renderer/base/pipeline_input.h"
 #include "renderer/base/render_controller.h"
 #include "renderer/base/resource_loader_context.h"
@@ -12,9 +13,9 @@ namespace ark {
 
 namespace {
 
-class InputSnapshot : public Input {
+class InputBufferSnapshot : public Input {
 public:
-    InputSnapshot(size_t size, std::vector<Buffer::Strip> strips)
+    InputBufferSnapshot(size_t size, std::vector<Buffer::Strip> strips)
         : Input(size), _blocks(std::move(strips)) {
     }
 
@@ -23,18 +24,39 @@ public:
             uploader.write(j.buf(), static_cast<uint32_t>(j.length()), static_cast<uint32_t>(i));
     }
 
+    virtual bool update(uint64_t /*timestamp*/) override {
+        return false;
+    }
+
 private:
     std::vector<std::pair<size_t, ByteArray::Borrowed>> _blocks;
+
+};
+
+class RunnableBufferSynchronizer : public Runnable {
+public:
+    RunnableBufferSynchronizer(Buffer buffer, sp<ByteArray> memory, size_t offset)
+        : _buffer(std::move(buffer)), _memory(std::move(memory)), _offset(offset) {
+    }
+
+    virtual void run() override {
+        _buffer.delegate()->downloadBuffer(GraphicsContext::mocked(), _offset, _memory->size(), _memory->buf());
+    }
+
+private:
+    Buffer _buffer;
+    sp<ByteArray> _memory;
+    size_t _offset;
 };
 
 }
 
-Buffer::Snapshot::Snapshot(sp<Uploader> stub)
+Buffer::Snapshot::Snapshot(sp<Delegate> stub)
     : _delegate(std::move(stub)), _size(_delegate->size())
 {
 }
 
-Buffer::Snapshot::Snapshot(sp<Uploader> stub, size_t size, sp<Input> input)
+Buffer::Snapshot::Snapshot(sp<Delegate> stub, size_t size, sp<Input> input)
     : _delegate(std::move(stub)), _input(std::move(input)), _size(size)
 {
 }
@@ -60,12 +82,12 @@ void Buffer::Snapshot::upload(GraphicsContext& graphicsContext) const
         _delegate->uploadBuffer(graphicsContext, _input);
 }
 
-const sp<Buffer::Uploader>& Buffer::Snapshot::delegate() const
+const sp<Buffer::Delegate>& Buffer::Snapshot::delegate() const
 {
     return _delegate;
 }
 
-Buffer::Buffer(sp<Buffer::Uploader> delegate) noexcept
+Buffer::Buffer(sp<Buffer::Delegate> delegate) noexcept
     : _delegate(std::move(delegate))
 {
 }
@@ -87,7 +109,7 @@ Buffer::operator bool() const
 
 Buffer::Snapshot Buffer::snapshot(const ByteArray::Borrowed& strip) const
 {
-    return Snapshot(_delegate, strip.length(), sp<InputSnapshot>::make(strip.length(), std::vector<Buffer::Strip>{{0, strip}}));
+    return Snapshot(_delegate, strip.length(), sp<InputBufferSnapshot>::make(strip.length(), std::vector<Buffer::Strip>{{0, strip}}));
 }
 
 Buffer::Snapshot Buffer::snapshot(sp<Input> input, size_t size) const
@@ -100,12 +122,20 @@ uint64_t Buffer::id() const
     return _delegate->id();
 }
 
+sp<ByteArray> Buffer::synchronize(size_t offset, size_t size, sp<Boolean> cancelled)
+{
+    sp<ByteArray> memory = sp<ByteArray::Allocated>::make(size);
+    RenderController& renderController = Ark::instance().renderController();
+    renderController.addPreRenderRequest(sp<RunnableBufferSynchronizer>::make(*this, memory, offset), std::move(cancelled));
+    return memory;
+}
+
 void Buffer::upload(GraphicsContext& graphicsContext) const
 {
     _delegate->upload(graphicsContext);
 }
 
-const sp<Buffer::Uploader>& Buffer::delegate() const
+const sp<Buffer::Delegate>& Buffer::delegate() const
 {
     return _delegate;
 }
@@ -120,7 +150,7 @@ Buffer::Snapshot Buffer::Factory::toSnapshot(const Buffer& buffer)
     if(_strips.size() == 0)
         return buffer.snapshot();
 
-    return buffer.snapshot(sp<InputSnapshot>::make(_size, std::move(_strips)));
+    return buffer.snapshot(sp<InputBufferSnapshot>::make(_size, std::move(_strips)));
 }
 
 void Buffer::Factory::addStrip(size_t offset, ByteArray::Borrowed& content)
@@ -129,12 +159,12 @@ void Buffer::Factory::addStrip(size_t offset, ByteArray::Borrowed& content)
     _size = std::max(_size, content.length() + offset);
 }
 
-Buffer::Uploader::Uploader()
+Buffer::Delegate::Delegate()
     :_size(0)
 {
 }
 
-size_t Buffer::Uploader::size() const
+size_t Buffer::Delegate::size() const
 {
     return _size;
 }

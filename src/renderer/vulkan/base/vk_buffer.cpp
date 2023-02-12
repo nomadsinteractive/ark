@@ -58,6 +58,11 @@ void VKBuffer::uploadBuffer(GraphicsContext& graphicsContext, Input& input)
     }
 }
 
+void VKBuffer::downloadBuffer(GraphicsContext& graphicsContext, size_t offset, size_t size, void* ptr)
+{
+    FATAL("Unimplemented");
+}
+
 ResourceRecycleFunc VKBuffer::recycle()
 {
     const sp<VKDevice> device = _renderer->device();

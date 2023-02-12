@@ -47,7 +47,7 @@ public:
 
 class ResourceUploadBufferSnapshot : public Resource {
 public:
-    ResourceUploadBufferSnapshot(sp<Buffer::Uploader> buffer, Input& input)
+    ResourceUploadBufferSnapshot(sp<Buffer::Delegate> buffer, Input& input)
         : _buffer(std::move(buffer)), _input_snapshot(input) {
     }
 
@@ -64,13 +64,13 @@ public:
     }
 
 private:
-    sp<Buffer::Uploader> _buffer;
+    sp<Buffer::Delegate> _buffer;
     InputSnapshot _input_snapshot;
 };
 
 class BufferUpdatable : public Updatable {
 public:
-    BufferUpdatable(RenderController& renderController, sp<Input> input, sp<Buffer::Uploader> buffer)
+    BufferUpdatable(RenderController& renderController, sp<Input> input, sp<Buffer::Delegate> buffer)
         : _render_controller(renderController), _buffer(std::move(buffer)), _input(std::move(input)) {
     }
 
@@ -83,7 +83,7 @@ public:
 
 private:
     RenderController& _render_controller;
-    sp<Buffer::Uploader> _buffer;
+    sp<Buffer::Delegate> _buffer;
     sp<Input> _input;
 };
 
@@ -135,6 +135,9 @@ void RenderController::onDrawFrame(GraphicsContext& graphicsContext)
         _on_surface_ready.foreach(graphicsContext, false, false);
     else if (tick == 150)
         _recycler->doRecycling(graphicsContext);
+
+    for(const sp<Runnable>& runnable : _on_pre_render_runnable.update(0))
+        runnable->run();
 }
 
 void RenderController::upload(sp<Resource> resource, UploadStrategy strategy, sp<Updatable> updatable, sp<Future> future, UploadPriority priority)
@@ -142,8 +145,8 @@ void RenderController::upload(sp<Resource> resource, UploadStrategy strategy, sp
     if(strategy & RenderController::US_ON_CHANGE)
     {
         CHECK(updatable, "An updatable must be specified using \"on_change\" upload strategy");
-        sp<Boolean> disposed = future ? future->cancelled() : sp<Boolean>::make<BooleanByWeakRef<Resource>>(resource, 1);
-        addPreRenderUpdateRequest(std::move(updatable), std::move(disposed));
+        sp<Boolean> disposed = future ? future->canceled() : sp<Boolean>::make<BooleanByWeakRef<Resource>>(resource, 1);
+        addPreComposeUpdatable(std::move(updatable), std::move(disposed));
     }
     if(strategy != RenderController::US_ON_CHANGE)
         _uploading_resources.push(UploadingRenderResource(RenderResource(std::move(resource), std::move(future)), strategy, priority));
@@ -153,7 +156,7 @@ void RenderController::uploadBuffer(Buffer& buffer, sp<Input> input, RenderContr
 {
     ASSERT(input);
     if(!future)
-        future = sp<Future>::make(sp<BooleanByWeakRef<Buffer::Uploader>>::make(buffer.delegate(), 1));
+        future = sp<Future>::make(sp<BooleanByWeakRef<Buffer::Delegate>>::make(buffer.delegate(), 1));
     sp<Updatable> updatable = strategy & RenderController::US_ON_CHANGE ? sp<Updatable>::make<BufferUpdatable>(*this, input, buffer.delegate()) : nullptr;
     //TODO: make this mess a bit more cleaner
     if(strategy == RenderController::US_ON_CHANGE)
@@ -229,31 +232,49 @@ sp<Framebuffer> RenderController::makeFramebuffer(sp<Renderer> renderer, std::ve
     return framebuffer;
 }
 
-void RenderController::addPreRenderUpdateRequest(sp<Updatable> updatable, sp<Boolean> disposed)
+void RenderController::addPreComposeUpdatable(sp<Updatable> updatable, sp<Boolean> canceled)
 {
-    DASSERT(updatable && disposed);
-    _on_pre_updatable.push_back(std::move(updatable), std::move(disposed));
+    DASSERT(updatable && canceled);
+    _on_pre_compose_updatable.push_back(std::move(updatable), std::move(canceled));
 }
 
-void RenderController::addPreRenderRunRequest(sp<Runnable> task, sp<Boolean> disposed)
+void RenderController::addPreComposeRunnable(sp<Runnable> task, sp<Boolean> canceled)
 {
-    DASSERT(task && disposed);
-    _on_pre_update_request.push_back(std::move(task), std::move(disposed));
+    DASSERT(task && canceled);
+    _on_pre_compose_runnable.push_back(std::move(task), std::move(canceled));
 }
 
-void RenderController::preRequestUpdate(uint64_t timestamp)
+void RenderController::addPreRenderRequest(sp<Runnable> task, sp<Boolean> canceled)
+{
+    ASSERT(task && canceled);
+    UpdatableSynchronized<bool> var(std::move(canceled));
+    _on_pre_render_runnable.push_back(std::move(task), var.synchronized());
+    _on_pre_render_sync.push_back(std::move(var));
+}
+
+void RenderController::onPreCompose(uint64_t timestamp)
 {
     DPROFILER_TRACE("RendererPreUpdate");
 
     _defered_instances.clear();
 
-    DPROFILER_LOG("Updatables", _on_pre_updatable.items().size());
-    for(const sp<Updatable>& i : _on_pre_updatable.update(timestamp))
+    DPROFILER_LOG("Updatables", _on_pre_compose_updatable.items().size());
+    for(const sp<Updatable>& i : _on_pre_compose_updatable.update(timestamp))
         i->update(timestamp);
 
-    DPROFILER_LOG("Runnables", _on_pre_update_request.items().size());
-    for(const sp<Runnable>& runnable : _on_pre_update_request.update(timestamp))
+    DPROFILER_LOG("Runnables", _on_pre_compose_runnable.items().size());
+    for(const sp<Runnable>& runnable : _on_pre_compose_runnable.update(timestamp))
         runnable->run();
+
+    for(auto iter = _on_pre_render_sync.begin(); iter != _on_pre_render_sync.end(); )
+    {
+        UpdatableSynchronized<bool>& i = *iter;
+        i.update(timestamp);
+        if(i.synchronized()->val())
+            iter = _on_pre_render_sync.erase(iter);
+        else
+            ++iter;
+    }
 }
 
 void RenderController::deferUnref(Box box)

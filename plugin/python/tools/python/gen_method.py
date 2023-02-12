@@ -75,13 +75,18 @@ PY_RETURN_NONE = 'return PyBridge::incRefNone()'
 
 
 class GenMethod(object):
-    def __init__(self, name, args, return_type):
+    def __init__(self, name, args, return_type, is_static: bool = False):
         self._name = name
         self._return_type = return_type
+        self._is_static = is_static
         self._arguments = parse_method_arguments(args)
         self._has_keyvalue_arguments = args and self._arguments[-1].type_compare('Scope')
         self._flags = ('METH_VARARGS|METH_KEYWORDS' if self._has_keyvalue_arguments else 'METH_VARARGS')
         self._self_argument = None
+
+    @property
+    def is_static(self):
+        return self._is_static
 
     def gen_py_method_def(self, genclass):
         return None
@@ -269,7 +274,7 @@ class GenMethod(object):
         nullptr_check = ['(obj%d || %d >= argc)' % (i, i) for i, j in type_checks if not j]
         if self_type_checks or nullptr_check:
             if nullptr_check:
-                lines.insert(0, 'Py_ssize_t argc = %s;' % self.gen_py_argc())
+                lines.insert(0, 'const Py_ssize_t argc = %s;' % self.gen_py_argc())
             nullptr_check = self_type_checks + nullptr_check
             calling_lines = ['if(%s)' % ' && '.join(nullptr_check), '{'] + [INDENT + i for i in calling_lines] + ['}']
         lines.extend(bodylines + self._gen_calling_body(genclass, calling_lines))
@@ -301,6 +306,13 @@ class GenMethod(object):
         if split_start < len(content):
             results.append(content[split_start:])
         return results
+
+    def overload(self, m1, m2):
+        try:
+            m1.add_overloaded_method(m2)
+            return m1
+        except AttributeError:
+            return create_overloaded_method_type(type(self))(m1, m2)
 
 
 class GenGetPropMethod(GenMethod):
@@ -358,14 +370,6 @@ class GenSetPropMethod(GenMethod):
     def gen_py_argc(self):
         return 2
 
-    @staticmethod
-    def overload(m1, m2):
-        try:
-            m1.add_overloaded_method(m2)
-            return m1
-        except AttributeError:
-            return create_overloaded_method_type(GenSetPropMethod)(m1, m2)
-
 
 class GenOperatorMethod(GenMethod):
     def __init__(self, name, args, return_type, operator):
@@ -417,8 +421,7 @@ class GenOperatorMethod(GenMethod):
     def operator(self):
         return self._operator
 
-    @staticmethod
-    def overload(m1, m2):
+    def overload(self, m1, m2):
         try:
             m1.add_overloaded_method(m2)
             return m1
@@ -431,7 +434,7 @@ class GenMappingMethod(GenMethod):
         self._operator = operator
         self._is_static = is_static
         self._is_len_func = operator == 'len'
-        super().__init__(name, args[1:] if self._is_static else args, return_type)
+        super().__init__(name, args[1:] if self._is_static else args, return_type, is_static)
 
     @property
     def operator(self):
@@ -445,7 +448,7 @@ class GenMappingMethod(GenMethod):
             arg0 = self._arguments[0]
             meta = GenArgumentMeta('PyObject*', arg0.accept_type, 'O')
             ga = GenArgument(arg0.accept_type, arg0.default_value, meta, str(arg0))
-            lines.append(ga.gen_declare('obj0', 'arg0'))
+            lines.append(ga.gen_declare('obj0', 'arg0', False, optional_check))
 
     def gen_py_arguments(self):
         if self._is_len_func:
@@ -454,6 +457,13 @@ class GenMappingMethod(GenMethod):
 
     def gen_py_argc(self):
         return 0 if self._is_len_func else 1
+
+    def overload(self, m1, m2):
+        try:
+            m1.add_overloaded_method(m2)
+            return m1
+        except AttributeError:
+            return create_overloaded_method_type(type(self), is_static=m1.is_static, operator=m1.operator)(m1, m2)
 
     def _gen_calling_statement(self, genclass, argnames):
         if self._is_static:

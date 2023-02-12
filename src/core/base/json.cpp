@@ -248,7 +248,7 @@ void Json::foreach(const std::function<bool (const Json&)>& callback)
     }
 }
 
-bytearray Json::toBson() const
+sp<ByteArray> Json::toBson() const
 {
     return sp<ByteArray::Vector>::make(nlohmann::json::to_bson(_stub->_json));
 }

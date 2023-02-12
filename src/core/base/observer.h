@@ -11,13 +11,13 @@ namespace ark {
 class ARK_API Observer : public Holder {
 public:
 //  [[script::bindings::auto]]
-    Observer(const sp<Runnable>& callback, bool oneshot = true);
+    Observer(sp<Runnable> callback, bool oneshot = true);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Observer);
 
     virtual void traverse(const Visitor& visitor) override;
 
 //  [[script::bindings::auto]]
-    void update();
+    void notify();
 
 //  [[script::bindings::auto]]
     void setCallback(sp<Runnable> callback);

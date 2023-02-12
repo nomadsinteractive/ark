@@ -45,9 +45,14 @@ public:
         }
     }
 
+    virtual bool update(uint64_t /*timestamp*/) override {
+        return false;
+    }
+
 private:
     sp<ModelBundle> _model_bundle;
     sp<PipelineInput> _pipeline_input;
+
 };
 
 class IndicesUploader : public Input {
@@ -67,8 +72,13 @@ public:
         }
     }
 
+    virtual bool update(uint64_t /*timestamp*/) override {
+        return false;
+    }
+
 private:
     sp<ModelBundle> _model_bundle;
+
 };
 
 }

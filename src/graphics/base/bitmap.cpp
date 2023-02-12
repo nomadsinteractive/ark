@@ -24,7 +24,7 @@ Bitmap::Bitmap(uint32_t width, uint32_t height, uint32_t rowBytes, uint8_t chann
 }
 
 Bitmap::Bitmap(uint32_t width, uint32_t height, uint32_t rowBytes, uint8_t channels, const bytearray& bytes)
-    : _width(width), _height(height), _row_bytes(rowBytes), _channels(channels), _bytes(bytes)
+    : _width(width), _height(height), _row_bytes(rowBytes), _channels(channels), _byte_array(bytes)
 {
     DASSERT(_channels != 0);
 }
@@ -63,14 +63,19 @@ uint32_t Bitmap::rowBytes() const
     return _row_bytes;
 }
 
-const sp<Array<uint8_t>>& Bitmap::bytes() const
+Span Bitmap::bytes() const
 {
-    return _bytes;
+    return _byte_array->toBytes();
+}
+
+const sp<Array<uint8_t>>& Bitmap::byteArray() const
+{
+    return _byte_array;
 }
 
 uint8_t* Bitmap::at(uint32_t x, uint32_t y) const
 {
-    return _bytes ? _bytes->buf() + y * _row_bytes + x * _channels : nullptr;
+    return _byte_array ? _byte_array->buf() + y * _row_bytes + x * _channels : nullptr;
 }
 
 Bitmap Bitmap::resize(uint32_t w, uint32_t h) const
@@ -79,9 +84,9 @@ Bitmap Bitmap::resize(uint32_t w, uint32_t h) const
     DCHECK(d == 1 || d == 4, "Unsupported bitmap depth: %d", d);
     Bitmap s(w, h, w * _channels * d, _channels, true);
     if(d == 1)
-        stbir_resize_uint8(_bytes->buf(), _width, _height, _row_bytes, s.at(0, 0), w, h, s.rowBytes(), _channels);
+        stbir_resize_uint8(_byte_array->buf(), _width, _height, _row_bytes, s.at(0, 0), w, h, s.rowBytes(), _channels);
     else if (d == 4)
-        stbir_resize_float(reinterpret_cast<const float*>(_bytes->buf()), _width, _height, _row_bytes, reinterpret_cast<float*>(s.at(0, 0)), w, h, s.rowBytes(), _channels);
+        stbir_resize_float(reinterpret_cast<const float*>(_byte_array->buf()), _width, _height, _row_bytes, reinterpret_cast<float*>(s.at(0, 0)), w, h, s.rowBytes(), _channels);
     return s;
 }
 

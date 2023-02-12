@@ -25,10 +25,10 @@ void LatLongCubemapUploader::initialize(GraphicsContext& graphicsContext, Textur
     DCHECK_WARN(_bitmap->width() == _bitmap->height() * 2, "LatLong bitmap's size should be (2n, n), but got (%d, %d)", _bitmap->width(), _bitmap->height());
 
     ::cmft::Image input;
-    input.m_data = _bitmap->bytes()->buf();
+    input.m_data = _bitmap->byteArray()->buf();
     input.m_width = _bitmap->width();
     input.m_height = _bitmap->height();
-    input.m_dataSize = _bitmap->bytes()->size();
+    input.m_dataSize = _bitmap->byteArray()->size();
     input.m_format = ::cmft::TextureFormat::RGB32F;
     input.m_numMips = 1;
     input.m_numFaces = 1;

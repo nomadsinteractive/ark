@@ -22,17 +22,16 @@ MessageLoop::MessageLoop(sp<Variable<uint64_t>> clock, sp<Executor> executor)
 {
 }
 
-void MessageLoop::post(sp<Runnable> runnable, float delay, sp<Future> future)
+void MessageLoop::post(sp<Runnable> runnable, float delay, sp<Boolean> canceled)
 {
-    DASSERT(runnable);
-    _scheduled.push(sp<Task>::make(std::move(runnable), std::move(future), delay == 0 ? 0 : _clock->val() + static_cast<uint64_t>(delay * 1000000), 0));
+    ASSERT(runnable);
+    _scheduled.push(sp<Task>::make(std::move(runnable), std::move(canceled), delay == 0 ? 0 : _clock->val() + static_cast<uint64_t>(delay * 1000000), 0));
 }
 
-sp<Future> MessageLoop::schedule(sp<Runnable> runnable, float interval, sp<Future> future)
+void MessageLoop::schedule(sp<Runnable> runnable, float interval, sp<Boolean> canceled)
 {
-    DASSERT(runnable);
-    _scheduled.push(sp<Task>::make(std::move(runnable), std::move(future), 0, static_cast<uint32_t>(interval * 1000000)));
-    return future;
+    ASSERT(runnable);
+    _scheduled.push(sp<Task>::make(std::move(runnable), std::move(canceled), 0, static_cast<uint32_t>(interval * 1000000)));
 }
 
 uint64_t MessageLoop::pollOnce()
@@ -97,20 +96,17 @@ void MessageLoop::runScheduledTask(std::vector<sp<Runnable>> scheduled)
     }
 }
 
-MessageLoop::Task::Task(sp<Runnable> target, sp<Future> future, uint64_t nextFireTick, uint32_t interval)
-    : _target(std::move(target)), _future(std::move(future)), _next_fire_tick(nextFireTick), _interval(interval)
+MessageLoop::Task::Task(sp<Runnable> target, sp<Boolean> canceled, uint64_t nextFireTick, uint32_t interval)
+    : _target(std::move(target)), _canceled(std::move(canceled)), _next_fire_tick(nextFireTick), _interval(interval)
 {
 }
 
 void MessageLoop::Task::run()
 {
-    if(_future)
+    if(_canceled)
     {
-        if(!_future->isCancelled())
-        {
+        if(!_canceled->val())
             _target->run();
-            _future->done();
-        }
     }
     else
         _target->run();
@@ -118,7 +114,7 @@ void MessageLoop::Task::run()
 
 bool MessageLoop::Task::isCancelled() const
 {
-    return _future ? _future->isCancelled() : false;
+    return _canceled ? _canceled->val() : false;
 }
 
 uint64_t MessageLoop::Task::nextFireTick() const
