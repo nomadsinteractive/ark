@@ -434,29 +434,40 @@ class GenMappingMethod(GenMethod):
         self._operator = operator
         self._is_static = is_static
         self._is_len_func = operator == 'len'
+        self._is_set_func = len(args) == 3
         super().__init__(name, args[1:] if self._is_static else args, return_type, is_static)
 
     @property
     def operator(self):
         return self._operator
 
+    @property
+    def err_return_value(self):
+        return 'return -1' if len(self._arguments) == 2 else super().err_return_value
+
     def _gen_parse_tuple_code(self, lines, declares, args):
         pass
 
     def _gen_convert_args_code(self, lines, argdeclare, optional_check=False):
         if argdeclare and not self._is_len_func:
-            arg0 = self._arguments[0]
-            meta = GenArgumentMeta('PyObject*', arg0.accept_type, 'O')
-            ga = GenArgument(arg0.accept_type, arg0.default_value, meta, str(arg0))
-            lines.append(ga.gen_declare('obj0', 'arg0', False, optional_check))
+            for i, j in enumerate(self._arguments):
+                meta = GenArgumentMeta('PyObject*', j.accept_type, 'O')
+                ga = GenArgument(j.accept_type, j.default_value, meta, str(j))
+                lines.append(ga.gen_declare(f'obj{i}', f'arg{i}', False, optional_check))
 
     def gen_py_arguments(self):
+        self_arg = f'Instance* self'
         if self._is_len_func:
-            return 'Instance* self'
-        return 'Instance* self, PyObject* arg0'
+            return self_arg
+
+        argc = self.gen_py_argc()
+        return f'{self_arg}, {", ".join("PyObject* arg%d" % i for i in range(argc))}'
 
     def gen_py_argc(self):
-        return 0 if self._is_len_func else 1
+        return len(self._arguments)
+
+    def gen_py_return(self):
+        return 'int32_t' if len(self._arguments) == 2 else super().gen_py_return()
 
     def overload(self, m1, m2):
         try:
@@ -486,14 +497,15 @@ TP_AS_MAPPING_TEMPLATE = [
     'static PyMappingMethods ${py_class_name}_tp_as_mapping = {',
     '    (lenfunc) ${mp_length},        /* lenfunc mp_length;                  */',
     '    (binaryfunc) ${mp_subscribe}, /* binaryfunc mp_subscript; */',
-    '    nullptr, /* objobjargproc mp_ass_subscript; */',
+    '    (objobjargproc) ${mp_ass_subscript}, /* objobjargproc mp_ass_subscript; */',
     '};'
 ]
 
 
 TP_AS_MAPPING_TEMPLATE_OPERATOR = {
     'len': 'mp_length',
-    '[]': 'mp_subscribe'
+    'get': 'mp_subscribe',
+    'set': 'mp_ass_subscript'
 }
 
 

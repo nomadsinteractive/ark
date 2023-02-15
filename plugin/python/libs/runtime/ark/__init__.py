@@ -106,14 +106,36 @@ class AssetBundle:
         pass
 
 
-class ByteArray:
-
+class _Array:
     @property
     def native_ptr(self) -> int:
         return 0
 
+    def wrap(self):
+        pass
+
+    def reset(self, other):
+        pass
+
     def to_bytes(self) -> bytes:
         pass
+
+    def __len__(self) -> int:
+        return 0
+
+    def __getitem__(self, item):
+        pass
+
+    def __setitem__(self, item, value):
+        pass
+
+
+class IntArray(_Array):
+    def __init__(self, size: int, fill: int = 0):
+        pass
+
+
+class ByteArray(_Array):
 
     def to_integer(self) -> 'Integer':
         pass
@@ -128,12 +150,6 @@ class ByteArray:
         pass
 
     def to_vec4(self) -> 'Vec4':
-        pass
-
-    def __len__(self) -> int:
-        return 0
-
-    def __getitem__(self, item):
         pass
 
 
@@ -734,7 +750,7 @@ class Camera:
     def to_world_position(self, screen_x: float, screen_y: float, z: float) -> tuple:
         pass
 
-    def to_screen_position(self, position: TYPE_VEC3) -> 'Vec3':
+    def to_viewport_position(self, position: TYPE_VEC3) -> 'Vec3':
         pass
 
 
@@ -1040,7 +1056,7 @@ class Input:
     def size(self):
         return 0
 
-    def realloc(self, size: int) -> 'Input':
+    def reserve(self, size: int) -> 'Input':
         pass
 
     def add_input(self, offset: int, input_: 'Input'):
@@ -1052,7 +1068,10 @@ class Input:
     def wrap(self) -> 'Input':
         pass
 
-    def set(self, delegate: 'Input'):
+    def reset(self, delegate: 'Input'):
+        pass
+
+    def mark_dirty(self):
         pass
 
     @staticmethod
@@ -1206,6 +1225,10 @@ class Model:
 
     @property
     def bounds(self) -> Metrics:
+        return Metrics()
+
+    @property
+    def occupies(self) -> Metrics:
         return Metrics()
 
     @property

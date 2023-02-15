@@ -107,7 +107,6 @@ public:
     Optional<Rect> _scissor;
     Parameters _parameters;
 
-
 };
 
 }

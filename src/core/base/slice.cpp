@@ -22,6 +22,11 @@ ptrdiff_t Slice::step() const
     return _step;
 }
 
+ptrdiff_t Slice::length() const
+{
+    return _end - _begin;
+}
+
 Slice Slice::adjustIndices(size_t length) const
 {
     Slice adjusted = *this;

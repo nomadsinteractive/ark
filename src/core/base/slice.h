@@ -13,6 +13,8 @@ public:
     ptrdiff_t end() const;
     ptrdiff_t step() const;
 
+    ptrdiff_t length() const;
+
     Slice adjustIndices(size_t length) const;
 
 private:

@@ -193,8 +193,8 @@ public:
             }
 
             void merge(const sp<Fragment>& other) {
-                DASSERT(_state == FRAGMENT_STATE_UNUSED && other->_state == FRAGMENT_STATE_UNUSED);
-                DCHECK(_offset + _size == other->_offset, "Cannot merge non-adjacent fragments: size: %d, offset: %d, next-fragment-offset: %d", _size, _offset, other->_offset);
+                ASSERT(_state == FRAGMENT_STATE_UNUSED && other->_state == FRAGMENT_STATE_UNUSED);
+                CHECK(_offset + _size == other->_offset, "Cannot merge non-adjacent fragments: size: %d, offset: %d, next-fragment-offset: %d", _size, _offset, other->_offset);
                 other->_state = FRAGMENT_STATE_DELETED;
                 _size += other->_size;
             }
@@ -223,7 +223,7 @@ public:
             }
 
             void push(sp<Fragment> fragment) {
-                DCHECK(fragment->_size >= _size, "Allocator won't accept fragment(%d) which is lesser than its size(%d)", fragment->_size, _size);
+                CHECK(fragment->_size >= _size, "Allocator won't accept fragment(%d) which is lesser than its size(%d)", fragment->_size, _size);
                 _queue.push(std::move(fragment));
             }
         };
@@ -253,17 +253,17 @@ public:
                 _fragment_trie.remove(allocator->_size);
                 allocator = _fragment_trie.find(sizeNeeded);
             }
-            DCHECK_WARN(checkFragments(sizeNeeded), "Unallocated candidate block which's in not in Allocator but found in fragments, something might go wrong");
+            CHECK_WARN(checkFragments(sizeNeeded), "Unallocated candidate block which's in not in Allocator but found in fragments, something might go wrong");
             return std::make_pair(npos, 0);
         }
 
         virtual SizeType free(SizeType offset) override {
             auto iter = _fragments.find(offset);
-            DCHECK(iter != _fragments.end(), "Invalid offset(%d) being freed", offset);
+            CHECK(iter != _fragments.end(), "Invalid offset(%d) being freed", offset);
 
             sp<Fragment> fragment = iter->second;
             SizeType freed = fragment->_size;
-            DASSERT(fragment->_state == FRAGMENT_STATE_ALLOCATED);
+            ASSERT(fragment->_state == FRAGMENT_STATE_ALLOCATED);
             fragment->_state = FRAGMENT_STATE_UNUSED;
 
             const auto previter = iter != _fragments.begin() ? std::prev(iter) : iter;

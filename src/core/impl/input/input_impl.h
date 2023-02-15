@@ -21,14 +21,16 @@ public:
     void addInput(size_t offset, sp<Input> input);
     void removeInput(size_t offset);
 
+    void markDirty();
+
 private:
     struct InputStub {
         InputStub(size_t offset, sp<Input> input);
 
         size_t _offset;
         sp<Input> _input;
-        bool _dirty;
-        bool _fresh;
+        bool _dirty_updated;
+        bool _dirty_marked;
     };
 
     std::vector<InputStub> makeInputs(const std::map<size_t, sp<Input>>& inputs) const;
@@ -38,7 +40,7 @@ private:
 
 private:
     std::vector<InputStub> _inputs;
-    std::vector<uint8_t> _buf;
+
 };
 
 }

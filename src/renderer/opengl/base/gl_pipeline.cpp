@@ -45,45 +45,6 @@ private:
     bool _enabled;
 };
 
-class GLCullFace {
-public:
-    GLCullFace(bool enabled)
-        : _enabled(enabled) {
-        if(_enabled)
-            glEnable(GL_CULL_FACE);
-    }
-    ~GLCullFace() {
-        if(_enabled)
-            glDisable(GL_CULL_FACE);
-    }
-
-private:
-    bool _enabled;
-};
-
-class GLBufferBaseBinder {
-public:
-    GLBufferBaseBinder(GLenum target, GLuint base, GLuint buffer)
-        : _target(target), _base(base), _buffer(buffer) {
-        glBindBufferBase(_target, _base, _buffer);
-    }
-    GLBufferBaseBinder(GLBufferBaseBinder&& other)
-        : _target(other._target), _base(other._base), _buffer(other._buffer) {
-        other._buffer = 0;
-    }
-    ~GLBufferBaseBinder() {
-        if(_buffer)
-            glBindBufferBase(_target, _base, 0);
-    }
-    DISALLOW_COPY_AND_ASSIGN(GLBufferBaseBinder);
-
-private:
-    GLenum _target;
-    GLuint _base;
-    GLuint _buffer;
-};
-
-
 class GLCullFaceTest : public Snippet::DrawEvents {
 public:
     GLCullFaceTest(const PipelineBindings::TraitCullFaceTest& trait)
@@ -611,9 +572,8 @@ void GLPipeline::GLMultiDrawElementsIndirect::draw(GraphicsContext& graphicsCont
 #endif
 }
 
-GLPipeline::PipelineOperationDraw::PipelineOperationDraw(const sp<Stub>& stub, const PipelineBindings& bindings)
-    : _stub(stub), _cull_face(bindings.getFlag(PipelineBindings::FLAG_CULL_MODE_BITMASK) != PipelineBindings::FLAG_CULL_MODE_NONE),
-      _scissor(bindings.scissor()), _renderer(makeBakedRenderer(bindings))
+GLPipeline::PipelineOperationDraw::PipelineOperationDraw(sp<Stub> stub, const PipelineBindings& bindings)
+    : _stub(std::move(stub)), _scissor(bindings.scissor()), _renderer(makeBakedRenderer(bindings))
 {
 }
 
@@ -624,14 +584,14 @@ void GLPipeline::PipelineOperationDraw::bind(GraphicsContext& graphicsContext, c
 
 void GLPipeline::PipelineOperationDraw::draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
-    const volatile GLCullFace cullFace(_cull_face);
     const volatile GLScissor scissor(drawingContext._scissor ? drawingContext._scissor : _scissor);
 
-    std::vector<GLBufferBaseBinder> binders;
     for(const auto& [i, j] : drawingContext._ssbos)
-        binders.emplace_back(GL_SHADER_STORAGE_BUFFER, i, j.id());
+        _ssbo_binders.emplace_back(GL_SHADER_STORAGE_BUFFER, i, j.id());
 
     _renderer->draw(graphicsContext, drawingContext);
+
+    _ssbo_binders.clear();
 }
 
 void GLPipeline::PipelineOperationDraw::compute(GraphicsContext& /*graphicsContext*/, const ComputeContext& /*computeContext*/)
@@ -819,11 +779,30 @@ void GLPipeline::PipelineOperationCompute::compute(GraphicsContext& graphicsCont
 {
     _stub->bind(graphicsContext, computeContext);
 
-    std::vector<GLBufferBaseBinder> binders;
     for(const auto& [i, j] : computeContext._ssbos)
-        binders.emplace_back(GL_SHADER_STORAGE_BUFFER, i, j.id());
+        _ssbo_binders.emplace_back(GL_SHADER_STORAGE_BUFFER, i, j.id());
 
     glDispatchCompute(computeContext._num_work_groups.at(0), computeContext._num_work_groups.at(1), computeContext._num_work_groups.at(2));
+
+    _ssbo_binders.clear();
+}
+
+GLPipeline::GLBufferBaseBinder::GLBufferBaseBinder(GLenum target, GLuint base, GLuint buffer)
+    : _target(target), _base(base), _buffer(buffer)
+{
+    glBindBufferBase(_target, _base, _buffer);
+}
+
+GLPipeline::GLBufferBaseBinder::GLBufferBaseBinder(GLBufferBaseBinder&& other)
+    : _target(other._target), _base(other._base), _buffer(other._buffer)
+{
+    other._buffer = 0;
+}
+
+GLPipeline::GLBufferBaseBinder::~GLBufferBaseBinder()
+{
+    if(_buffer)
+        glBindBufferBase(_target, _base, 0);
 }
 
 }

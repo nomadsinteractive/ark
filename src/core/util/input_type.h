@@ -13,57 +13,61 @@
 
 namespace ark {
 
-//[[script::bindings::class("Input")]]
+//  [[script::bindings::class("Input")]]
 class ARK_API InputType {
 public:
-//[[script::bindings::constructor]]
+//  [[script::bindings::constructor]]
     static sp<Input> create(sp<ByteArray> value, size_t size = 0);
-//[[script::bindings::constructor]]
+//  [[script::bindings::constructor]]
+    static sp<Input> create(sp<IntArray> value, size_t size = 0);
+//  [[script::bindings::constructor]]
     static sp<Input> create(sp<Integer> value, size_t size = 0);
-//[[script::bindings::constructor]]
+//  [[script::bindings::constructor]]
     static sp<Input> create(sp<Numeric> value, size_t size = 0);
-//[[script::bindings::constructor]]
+//  [[script::bindings::constructor]]
     static sp<Input> create(sp<Vec2> value, size_t size = 0);
-//[[script::bindings::constructor]]
+//  [[script::bindings::constructor]]
     static sp<Input> create(sp<Vec3> value, size_t size = 0);
-//[[script::bindings::constructor]]
+//  [[script::bindings::constructor]]
     static sp<Input> create(sp<Vec4> value, size_t size = 0);
-//[[script::bindings::constructor]]
+//  [[script::bindings::constructor]]
     static sp<Input> create(std::map<size_t, sp<Input>> value, size_t size = 0);
-//[[script::bindings::constructor]]
+//  [[script::bindings::constructor]]
     static sp<Input> create(std::vector<sp<Mat4>> value, size_t size = 0);
-//[[script::bindings::constructor]]
+//  [[script::bindings::constructor]]
     static sp<Input> create(std::vector<sp<Input>> value, size_t size = 0);
-//[[script::bindings::constructor]]
+//  [[script::bindings::constructor]]
     static sp<Input> create(std::vector<V3> value, size_t size = 0);
-//[[script::bindings::constructor]]
+//  [[script::bindings::constructor]]
     static sp<Input> create(std::vector<V4> value, size_t size = 0);
-//[[script::bindings::constructor]]
+//  [[script::bindings::constructor]]
     static sp<Input> create(std::vector<uint32_t> value, size_t size = 0);
-//[[script::bindings::constructor]]
+//  [[script::bindings::constructor]]
     static sp<Input> create(const std::set<uint32_t>& value, size_t size = 0);
 
-//[[script::bindings::property]]
+//  [[script::bindings::property]]
     static size_t size(const sp<Input>& self);
 
-//[[script::bindings::classmethod]]
-    static sp<Input> realloc(sp<Input> self, size_t size);
-//[[script::bindings::classmethod]]
+//  [[script::bindings::classmethod]]
+    static sp<Input> reserve(sp<Input> self, size_t size);
+//  [[script::bindings::classmethod]]
     static sp<Input> repeat(sp<Input> self, size_t length, size_t stride = 0);
 
 //  [[script::bindings::classmethod]]
     static void addInput(const sp<Input>& self, size_t offset, sp<Input> input);
 //  [[script::bindings::classmethod]]
     static void removeInput(const sp<Input>& self, size_t offset);
+//  [[script::bindings::classmethod]]
+    static void markDirty(const sp<Input>& self);
 
-//[[script::bindings::classmethod]]
-    static void set(const sp<Input>& self, sp<Input> delegate);
-//[[script::bindings::classmethod]]
+//  [[script::bindings::classmethod]]
+    static void reset(const sp<Input>& self, sp<Input> delegate);
+//  [[script::bindings::classmethod]]
     static sp<Input> wrap(sp<Input> self);
 
-//[[script::bindings::auto]]
+//  [[script::bindings::auto]]
     static sp<Input> makeElementIndexInput(std::vector<element_index_t> value);
-//[[script::bindings::auto]]
+//  [[script::bindings::auto]]
     static sp<Input> blank(size_t size, int32_t fill = 0);
 
 private:

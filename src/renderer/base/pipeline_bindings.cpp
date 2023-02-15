@@ -117,7 +117,7 @@ PipelineBindings::Stub::Stub(ModelLoader::RenderMode mode, RenderProcedure rende
 {
 }
 
-PipelineBindings::Parameters::Parameters(Optional<Rect> scissor, PipelineBindings::FragmentTestTable tests, uint32_t flags)
+PipelineBindings::Parameters::Parameters(Optional<Rect> scissor, PipelineBindings::PipelineTraitTable tests, uint32_t flags)
     : _scissor(std::move(scissor)), _traits(std::move(tests)), _flags(flags)
 {
 }
@@ -126,7 +126,7 @@ PipelineBindings::Parameters::BUILDER::BUILDER(BeanFactory& factory, const docum
     : _render_controller(resourceLoaderContext->renderController()), _pipeline_bindings_scissor(factory.getBuilder<Vec4>(manifest, "scissor")), _pipeline_bindings_flags(Documents::getAttribute<PipelineBindings::Flag>(manifest, "flags", PipelineBindings::FLAG_DEFAULT_VALUE))
 {
     for(const document& i : manifest->children("trait"))
-        _traits.push_back(Documents::ensureAttribute<TrailType>(i, Constants::Attributes::TYPE), i);
+        _traits.push_back(Documents::ensureAttribute<TraitType>(i, Constants::Attributes::TYPE), i);
 }
 
 PipelineBindings::Parameters PipelineBindings::Parameters::BUILDER::build(const Scope& args) const
@@ -162,8 +162,8 @@ template<> ARK_API PipelineBindings::Flag StringConvert::to<String, PipelineBind
     return static_cast<PipelineBindings::Flag>(flag);
 }
 
-PipelineBindings::FragmentTraitMeta::FragmentTraitMeta(const document& manifest)
-    : _type(Documents::ensureAttribute<TrailType>(manifest, Constants::Attributes::TYPE))
+PipelineBindings::PipelineTraitMeta::PipelineTraitMeta(const document& manifest)
+    : _type(Documents::ensureAttribute<TraitType>(manifest, Constants::Attributes::TYPE))
 {
     switch(_type) {
     case TRAIT_TYPE_DEPTH_TEST:
@@ -201,7 +201,7 @@ PipelineBindings::FragmentTraitMeta::FragmentTraitMeta(const document& manifest)
     }
 }
 
-PipelineBindings::TraitStencilTestSeparate PipelineBindings::FragmentTraitMeta::loadStencilTestSeparate(const document& manifest, bool allowDefaultFace) const
+PipelineBindings::TraitStencilTestSeparate PipelineBindings::PipelineTraitMeta::loadStencilTestSeparate(const document& manifest, bool allowDefaultFace) const
 {
     PipelineBindings::TraitStencilTestSeparate face;
     face._type = Documents::getAttribute<FrontFaceType>(manifest, "face-type", FRONT_FACE_TYPE_DEFAULT);
@@ -217,7 +217,7 @@ PipelineBindings::TraitStencilTestSeparate PipelineBindings::FragmentTraitMeta::
     return face;
 }
 
-template<> ARK_API PipelineBindings::TrailType StringConvert::to<String, PipelineBindings::TrailType>(const String& str)
+template<> ARK_API PipelineBindings::TraitType StringConvert::to<String, PipelineBindings::TraitType>(const String& str)
 {
     if(str == "cull_face_test")
         return PipelineBindings::TRAIT_TYPE_CULL_FACE_TEST;

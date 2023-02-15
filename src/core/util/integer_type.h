@@ -71,7 +71,7 @@ public:
 
 //[[script::bindings::map(len)]]
     static size_t len(const sp<Integer>& self);
-//[[script::bindings::map([])]]
+//[[script::bindings::map(get)]]
     static sp<Integer> subscribe(const sp<Integer>& self, sp<Integer> index);
 
 //[[script::bindings::property]]

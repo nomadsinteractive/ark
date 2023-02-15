@@ -82,7 +82,7 @@ public:
 //[[script::bindings::setprop]]
     void setProperty(const String& name, sp<Mat4> var);
 
-//[[script::bindings::map([])]]
+//[[script::bindings::map(get)]]
     sp<Varyings> subscribe(const String& name);
 
     Snapshot snapshot(const PipelineInput& pipelineInput, Allocator& allocator);

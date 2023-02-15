@@ -68,7 +68,7 @@
 #   define DPROFILER_LOG(...)
 #endif
 
-#ifdef ARK_FLAG_DEBUG
+#if ARK_FLAG_DEBUG
 #   define DFATAL(...) FATAL(__VA_ARGS__)
 #   define DCHECK(cond, ...) CHECK(cond, __VA_ARGS__)
 #   define DCHECK_WARN(cond, ...) CHECK_WARN(cond, __VA_ARGS__)

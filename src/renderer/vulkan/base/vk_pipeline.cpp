@@ -496,17 +496,14 @@ VkStencilOpState VKPipeline::makeStencilState(const PipelineBindings::TraitStenc
 
 VkPipelineRasterizationStateCreateInfo VKPipeline::makeRasterizationState() const
 {
-    const VkCullModeFlags cullModeFlags[] = {VK_CULL_MODE_NONE, VK_CULL_MODE_FRONT_BIT, VK_CULL_MODE_BACK_BIT, VK_CULL_MODE_NONE};
-    VkCullModeFlags flags = cullModeFlags[_bindings.getFlag(PipelineBindings::FLAG_CULL_MODE_BITMASK)];
     if(_bindings.parameters()._traits.has(PipelineBindings::TRAIT_TYPE_CULL_FACE_TEST))
     {
         const PipelineBindings::TraitCullFaceTest& cullFaceTest = _bindings.parameters()._traits.at(PipelineBindings::TRAIT_TYPE_CULL_FACE_TEST)._configure._cull_face_test;
         return vks::initializers::pipelineRasterizationStateCreateInfo(
-                VK_POLYGON_MODE_FILL,
-                cullFaceTest._enabled ? cullModeFlags[_bindings.getFlag(PipelineBindings::FLAG_CULL_MODE_BITMASK)] : VK_CULL_MODE_NONE,
+                VK_POLYGON_MODE_FILL, cullFaceTest._enabled ? VK_CULL_MODE_FRONT_BIT : VK_CULL_MODE_NONE,
                 VKUtil::toFrontFace(cullFaceTest._front_face), 0);
     }
-    return vks::initializers::pipelineRasterizationStateCreateInfo(VK_POLYGON_MODE_FILL, flags, VK_FRONT_FACE_COUNTER_CLOCKWISE, 0);
+    return vks::initializers::pipelineRasterizationStateCreateInfo(VK_POLYGON_MODE_FILL, VK_CULL_MODE_FRONT_BIT, VK_FRONT_FACE_COUNTER_CLOCKWISE, 0);
 }
 
 void VKPipeline::VKDrawArrays::draw(GraphicsContext& /*graphicsContext*/, const DrawingContext& drawingContext, VkCommandBuffer commandBuffer)

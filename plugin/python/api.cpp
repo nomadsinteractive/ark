@@ -6,8 +6,6 @@ namespace ark {
 namespace plugin {
 namespace python {
 
-#ifdef ARK_FLAG_DEBUG
-
 namespace {
 
 struct PythonThreadFlag {
@@ -32,10 +30,8 @@ bool getThreadFlag()
 
 void checkThreadFlag()
 {
-    DCHECK(Thread::local<PythonThreadFlag>()._flag == 1, "Not calling from main python interpreter thread");
+    CHECK(Thread::local<PythonThreadFlag>()._flag == 1, "Not calling from main python interpreter thread");
 }
-
-#endif
 
 }
 }

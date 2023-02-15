@@ -123,14 +123,14 @@ sp<Boolean> BooleanType::create(bool value)
     return sp<BooleanWrapper>::make(value);
 }
 
-sp<Boolean> BooleanType::__and__(const sp<Boolean>& self, const sp<Boolean>& rvalue)
+sp<Boolean> BooleanType::__and__(sp<Boolean> self, sp<Boolean> rvalue)
 {
-    return sp<VariableOP2<sp<Boolean>, sp<Boolean>, Operators::And<bool>>>::make(self, rvalue);
+    return sp<VariableOP2<sp<Boolean>, sp<Boolean>, Operators::And<bool>>>::make(std::move(self), std::move(rvalue));
 }
 
-sp<Boolean> BooleanType::__or__(const sp<Boolean>& self, const sp<Boolean>& rvalue)
+sp<Boolean> BooleanType::__or__(sp<Boolean> self, sp<Boolean> rvalue)
 {
-    return sp<VariableOP2<sp<Boolean>, sp<Boolean>, Operators::Or<bool>>>::make(self, rvalue);
+    return sp<VariableOP2<sp<Boolean>, sp<Boolean>, Operators::Or<bool>>>::make(std::move(self), std::move(rvalue));
 }
 
 sp<Boolean> BooleanType::negative(sp<Boolean> self)

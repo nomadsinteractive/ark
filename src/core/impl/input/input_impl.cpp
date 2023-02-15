@@ -25,8 +25,8 @@ bool InputImpl::update(uint64_t timestamp)
     bool dirty = false;
     for(InputStub& i : _inputs)
     {
-        i._dirty = i._input->update(timestamp);
-        dirty = dirty || i._dirty || i._fresh;
+        i._dirty_updated = i._input->update(timestamp);
+        dirty = dirty || i._dirty_updated || i._dirty_marked;
     }
     return dirty;
 }
@@ -35,11 +35,11 @@ void InputImpl::upload(Writable& writable)
 {
     THREAD_CHECK(THREAD_ID_CORE);
     for(InputStub& i : _inputs)
-        if(i._dirty || i._fresh)
+        if(i._dirty_updated || i._dirty_marked)
         {
             WritableWithOffset wwo(writable, i._offset);
             i._input->upload(wwo);
-            i._fresh = false;
+            i._dirty_marked = false;
         }
 }
 
@@ -58,6 +58,12 @@ void InputImpl::removeInput(size_t offset)
         else
             ++iter;
     }
+}
+
+void InputImpl::markDirty()
+{
+    for(InputStub& i : _inputs)
+        i._dirty_marked = true;
 }
 
 std::vector<InputImpl::InputStub> InputImpl::makeInputs(const std::map<size_t, sp<Input>>& inputs) const
@@ -86,7 +92,7 @@ bool InputImpl::_input_stub_comp(size_t offset, const InputStub& inputStub)
 }
 
 InputImpl::InputStub::InputStub(size_t offset, sp<Input> input)
-    : _offset(offset), _input(std::move(input)), _dirty(true), _fresh(true)
+    : _offset(offset), _input(std::move(input)), _dirty_updated(true), _dirty_marked(true)
 {
 }
 

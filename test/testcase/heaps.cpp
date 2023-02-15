@@ -68,43 +68,53 @@ public:
     }
 
     virtual int launch() override {
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::uniform_int_distribution<uint32_t> dis1(4, HEAP_SIZE >> 5);
-        std::uniform_int_distribution<uint32_t> dis2(4, 256);
-
-        std::vector<Allocated> allocations;
-
-        const uint32_t cycleCount = 128;
-
         {
             MemoryHeap heap(Memory(1 << 13), sp<MemoryHeap::L1>::make(64));
             heap.extend(Memory(HEAP_SIZE), sp<MemoryHeap::L2>::make());
 
-            for(uint32_t i = 0; i < cycleCount; ++i) {
-                printf("Cycle %d: allocated: %d available: %d\n", i, heap.allocated(), heap.available());
+            TESTCASE_VALIDATE(cycleTest(heap, 128) == 0);
+        }
 
-                std::uniform_int_distribution<uint32_t> ttldis(1, cycleCount - i);
+        {
+            MemoryHeap heap(Memory(HEAP_SIZE), sp<MemoryHeap::L2>::make());
 
-                Allocated a1 = allocate(heap, dis1(gen), ttldis(gen));
-                TESTCASE_VALIDATE(a1.aquire());
-                allocations.push_back(a1);
+            TESTCASE_VALIDATE(cycleTest(heap, 128) == 0);
+        }
 
-                for(uint32_t j = 0; j < 8; ++j) {
-                    Allocated a2 = allocate(heap, dis2(gen), ttldis(gen));
-                    TESTCASE_VALIDATE(a2.aquire());
-                    allocations.push_back(a2);
-                }
+        return 0;
+    }
 
-                for(auto iter = allocations.begin(); iter != allocations.end(); ++iter) {
-                    Allocated& i = *iter;
-                    --i._ttl;
-                    if(i._ttl == 0) {
-                        i.free(heap);
-                        iter = allocations.erase(iter);
-                        if(iter == allocations.end())
-                            break;
-                    }
+    int32_t cycleTest(MemoryHeap& heap, uint32_t cycleCount) {
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_int_distribution<uint32_t> dis1(4, HEAP_SIZE >> 6);
+        std::uniform_int_distribution<uint32_t> dis2(4, 512);
+
+        std::vector<Allocated> allocations;
+
+        for(uint32_t i = 0; i < cycleCount; ++i) {
+            printf("Cycle %d: allocated: %d available: %d\n", i, heap.allocated(), heap.available());
+
+            std::uniform_int_distribution<uint32_t> ttldis(1, cycleCount - i);
+
+            Allocated a1 = allocate(heap, dis1(gen), ttldis(gen));
+            TESTCASE_VALIDATE(a1.aquire());
+            allocations.push_back(a1);
+
+            for(uint32_t j = 0; j < 32; ++j) {
+                Allocated a2 = allocate(heap, dis2(gen), ttldis(gen));
+                TESTCASE_VALIDATE(a2.aquire());
+                allocations.push_back(a2);
+            }
+
+            for(auto iter = allocations.begin(); iter != allocations.end(); ++iter) {
+                Allocated& i = *iter;
+                --i._ttl;
+                if(i._ttl == 0) {
+                    i.free(heap);
+                    iter = allocations.erase(iter);
+                    if(iter == allocations.end())
+                        break;
                 }
             }
         }

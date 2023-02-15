@@ -100,7 +100,7 @@ public:
 //  [[script::bindings::auto]]
     V3 toWorldPosition(float screenX, float screenY, float z) const;
 //  [[script::bindings::auto]]
-    sp<Vec3> toScreenPosition(const sp<Vec3>& position) const;
+    sp<Vec3> toViewportPosition(const sp<Vec3>& position) const;
 
 //  [[script::bindings::property]]
     sp<Vec3> position() const;

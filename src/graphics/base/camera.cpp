@@ -197,7 +197,7 @@ V3 Camera::toWorldPosition(float screenX, float screenY, float z) const
     return Ark::instance().applicationContext()->renderEngine()->toWorldPosition(vp, screenX, screenY, z);
 }
 
-sp<Vec3> Camera::toScreenPosition(const sp<Vec3>& position) const
+sp<Vec3> Camera::toViewportPosition(const sp<Vec3>& position) const
 {
     const Viewport& viewport = Ark::instance().applicationContext()->renderEngine()->viewport();
     const V3 scale = Ark::instance().manifest()->renderer()._coordinate_system == _coordinate_system ? V3(0.5f, 0.5f, 0.5f) : V3(0.5f, -0.5f, 0.5f);

@@ -97,6 +97,19 @@ private:
 
     void bindBuffer(GraphicsContext&, const PipelineInput& input, uint32_t divisor);
 
+    class GLBufferBaseBinder {
+    public:
+        GLBufferBaseBinder(GLenum target, GLuint base, GLuint buffer);
+        GLBufferBaseBinder(GLBufferBaseBinder&& other);
+        ~GLBufferBaseBinder();
+        DISALLOW_COPY_AND_ASSIGN(GLBufferBaseBinder);
+
+    private:
+        GLenum _target;
+        GLuint _base;
+        GLuint _buffer;
+    };
+
     class BakedRenderer {
     public:
         virtual ~BakedRenderer() = default;
@@ -172,7 +185,7 @@ private:
 
     class PipelineOperationDraw : public PipelineOperation {
     public:
-        PipelineOperationDraw(const sp<Stub>& stub, const PipelineBindings& bindings);
+        PipelineOperationDraw(sp<Stub> stub, const PipelineBindings& bindings);
 
         virtual void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
         virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
@@ -184,10 +197,11 @@ private:
     private:
         sp<Stub> _stub;
 
-        bool _cull_face;
-
         Optional<Rect> _scissor;
         sp<BakedRenderer> _renderer;
+
+        std::vector<GLBufferBaseBinder> _ssbo_binders;
+
     };
 
     class PipelineOperationCompute : public PipelineOperation {
@@ -200,6 +214,7 @@ private:
 
     private:
         sp<Stub> _stub;
+        std::vector<GLBufferBaseBinder> _ssbo_binders;
 
     };
 

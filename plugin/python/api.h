@@ -17,7 +17,7 @@ namespace ark {
 namespace plugin {
 namespace python {
 
-#ifdef ARK_FLAG_DEBUG
+#if ARK_FLAG_DEBUG
 
 void setThreadFlag();
 bool getThreadFlag();

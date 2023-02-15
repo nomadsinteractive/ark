@@ -1,5 +1,5 @@
-#ifndef ARK_CORE_UTIL_ASSET_TYPE_H_
-#define ARK_CORE_UTIL_ASSET_TYPE_H_
+#ifndef ARK_CORE_UTIL_BYTE_ARRAY_TYPE_H_
+#define ARK_CORE_UTIL_BYTE_ARRAY_TYPE_H_
 
 #include "core/forwarding.h"
 #include "core/base/slice.h"
@@ -18,9 +18,9 @@ public:
 //  [[script::bindings::map(len)]]
     static size_t len(const sp<ByteArray>& self);
 
-//  [[script::bindings::map([])]]
+//  [[script::bindings::map(get)]]
     static uint8_t subscribe(const sp<ByteArray>& self, ptrdiff_t index);
-//  [[script::bindings::map([])]]
+//  [[script::bindings::map(get)]]
     static sp<ByteArray> subscribe(sp<ByteArray> self, const Slice& slice);
 
 //  [[script::bindings::classmethod]]

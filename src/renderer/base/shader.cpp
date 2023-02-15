@@ -80,7 +80,7 @@ sp<Shader> Shader::fromStringTable(const String& vertex, const String& fragment,
         buildingContext->addSnippet(snippet);
 
     const sp<RenderController>& renderController = resourceLoaderContext->renderController();
-    return sp<Shader>::make(renderController->createPipelineFactory(), renderController, sp<PipelineLayout>::make(buildingContext, Camera::getDefaultCamera()), PipelineBindings::Parameters(Rect(), PipelineBindings::FragmentTestTable(), PipelineBindings::FLAG_DEFAULT_VALUE));
+    return sp<Shader>::make(renderController->createPipelineFactory(), renderController, sp<PipelineLayout>::make(buildingContext, Camera::getDefaultCamera()), PipelineBindings::Parameters(Rect(), PipelineBindings::PipelineTraitTable(), PipelineBindings::FLAG_DEFAULT_VALUE));
 }
 
 std::vector<RenderLayerSnapshot::UBOSnapshot> Shader::takeUBOSnapshot(const RenderRequest& renderRequest) const

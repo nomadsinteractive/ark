@@ -33,7 +33,7 @@ public:
         RENDER_PROCEDURE_DRAW_MULTI_ELEMENTS_INDIRECT
     };
 
-    enum TrailType {
+    enum TraitType {
         TRAIT_TYPE_CULL_FACE_TEST,
         TRAIT_TYPE_DEPTH_TEST,
         TRAIT_TYPE_STENCIL_TEST,
@@ -135,10 +135,10 @@ public:
         TraitBlend _blend;
     };
 
-    struct FragmentTraitMeta {
-        FragmentTraitMeta(const document& manifest);
+    struct PipelineTraitMeta {
+        PipelineTraitMeta(const document& manifest);
 
-        TrailType _type;
+        TraitType _type;
         TraitConfigure _configure;
 
     private:
@@ -146,14 +146,14 @@ public:
 
     };
 
-    typedef Table<int32_t, FragmentTraitMeta> FragmentTestTable;
+    typedef Table<int32_t, PipelineTraitMeta> PipelineTraitTable;
 
     struct ARK_API Parameters {
-        Parameters(Optional<Rect> scissor, FragmentTestTable tests, uint32_t flags);
+        Parameters(Optional<Rect> scissor, PipelineTraitTable tests, uint32_t flags);
         DEFAULT_COPY_AND_ASSIGN(Parameters);
 
         Optional<Rect> _scissor;
-        FragmentTestTable _traits;
+        PipelineTraitTable _traits;
         uint32_t _flags;
 
         class BUILDER {
@@ -166,7 +166,7 @@ public:
             sp<RenderController> _render_controller;
 
             SafePtr<Builder<Vec4>> _pipeline_bindings_scissor;
-            FragmentTestTable _traits;
+            PipelineTraitTable _traits;
             [[deprecated]]
             uint32_t _pipeline_bindings_flags;
         };
