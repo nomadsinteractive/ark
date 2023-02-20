@@ -12,33 +12,36 @@ namespace ark {
 //[[script::bindings::class("StringVar", "String")]]
 class ARK_API StringType {
 public:
-//[[script::bindings::constructor]]
-    static sp<StringVar> create(sp<StringVar> value);
-//[[script::bindings::constructor]]
+//  [[script::bindings::constructor]]
     static sp<StringVar> create(sp<String> value);
-//[[script::bindings::constructor]]
+//  [[script::bindings::constructor]]
     static sp<StringVar> create(sp<Integer> value);
+//  [[script::bindings::constructor]]
+    static sp<StringVar> create(sp<StringVar> value);
     static sp<StringVar> create();
 
-//[[script::bindings::property]]
+//  [[script::bindings::property]]
     static String val(const sp<StringVar>& self);
-//[[script::bindings::property]]
+//  [[script::bindings::property]]
     static const sp<StringVar>& wrapped(const sp<StringVar>& self);
 
-//[[script::bindings::classmethod]]
+//  [[script::bindings::classmethod]]
     static void set(const sp<StringVar::Impl>& self, sp<String> value);
-//[[script::bindings::classmethod]]
+//  [[script::bindings::classmethod]]
     static void set(const sp<StringVarWrapper>& self, sp<String> value);
-//[[script::bindings::classmethod]]
+//  [[script::bindings::classmethod]]
     static void set(const sp<StringVarWrapper>& self, sp<StringVar> delegate);
 
-//[[script::bindings::classmethod]]
+//  [[script::bindings::classmethod]]
+    static sp<StringVar> ifElse(sp<StringVar> self, sp<Boolean> condition, sp<StringVar> negative);
+
+//  [[script::bindings::classmethod]]
     static sp<StringVar> freeze(const sp<StringVar>& self);
 
-//[[script::bindings::classmethod]]
+//  [[script::bindings::classmethod]]
     static sp<StringVar> dye(sp<StringVar> self, sp<Boolean> condition = nullptr, String message = "");
 
-//[[script::bindings::auto]]
+//  [[script::bindings::auto]]
     static sp<StringVar> format(String format, const Scope& kwargs);
 
 //  [[plugin::builder::by-value]]

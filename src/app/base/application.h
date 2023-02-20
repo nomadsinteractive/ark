@@ -13,7 +13,7 @@ namespace ark {
 
 class ARK_API Application {
 public:
-    Application(const sp<ApplicationDelegate>& applicationDelegate, const sp<ApplicationContext>& applicationContext, uint32_t surfaceWidth, uint32_t surfaceHeight, const Viewport& viewport);
+    Application(sp<ApplicationDelegate> applicationDelegate, sp<ApplicationContext> applicationContext, uint32_t surfaceWidth, uint32_t surfaceHeight, const Viewport& viewport);
     virtual ~Application();
 
     virtual int run() = 0;

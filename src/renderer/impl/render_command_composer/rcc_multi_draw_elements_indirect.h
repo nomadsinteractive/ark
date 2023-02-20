@@ -33,8 +33,11 @@ private:
 
         size_t _node_id;
 
-        sp<Mat4Impl> _node_transform;
+        sp<Mat4::Impl> _node_transform;
         sp<Mat4> _global_transform;
+
+    private:
+        sp<Mat4> makeGlobalTransform(sp<Mat4> parentTransform, const M4& localTransform) const;
     };
 
     struct ModelInstance;

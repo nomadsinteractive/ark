@@ -62,7 +62,7 @@ template<uint32_t Id, uint32_t Interval> uint64_t Trace<Id, Interval>::_TRACE_MA
 template<uint32_t Id, uint32_t Interval> uint64_t Trace<Id, Interval>::_TRACE_MIN = std::numeric_limits<std::uint64_t>::max();
 
 }
-#ifdef ARK_FLAG_DEBUG
+#if ARK_FLAG_DEBUG == 1
     #define  LOGD(...)     ark::Log::d(ark::Log::func(__ARK_FUNCTION__).c_str(), ark::Strings::sprintf(__VA_ARGS__).c_str())
 #else
     #define  LOGD(...)

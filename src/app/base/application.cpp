@@ -76,8 +76,8 @@ private:
 
 }
 
-Application::Application(const sp<ApplicationDelegate>& applicationDelegate, const sp<ApplicationContext>& applicationContext, uint32_t surfaceWidth, uint32_t surfaceHeight, const Viewport& viewport)
-    : _application_delegate(applicationDelegate), _application_context(applicationContext), _viewport(viewport), _surface_size(sp<Size>::make(static_cast<float>(surfaceWidth), static_cast<float>(surfaceHeight))),
+Application::Application(sp<ApplicationDelegate> applicationDelegate, sp<ApplicationContext> applicationContext, uint32_t surfaceWidth, uint32_t surfaceHeight, const Viewport& viewport)
+    : _application_delegate(std::move(applicationDelegate)), _application_context(std::move(applicationContext)), _viewport(viewport), _surface_size(sp<Size>::make(static_cast<float>(surfaceWidth), static_cast<float>(surfaceHeight))),
       _surface_updater_pre_created(sp<OnSurfaceUpdatePreCreated>::make(_application_context)), _surface_updater(_surface_updater_pre_created.get())
 {
 }

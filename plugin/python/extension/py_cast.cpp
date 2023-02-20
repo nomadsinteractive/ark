@@ -41,7 +41,7 @@ Optional<sp<Runnable>> PyCast::toRunnable(PyObject* object, bool alert)
     if(PyCallable_Check(object))
         return sp<Runnable>::make<PythonCallableRunnable>(PyInstance::own(object));
 
-    return toSharedPtrDefault<Runnable>(object, alert);
+    return toSharedPtrDefault<Runnable>(object);
 }
 
 Optional<sp<Observer>> PyCast::toObserver(PyObject* object, bool alert)
@@ -50,7 +50,7 @@ Optional<sp<Observer>> PyCast::toObserver(PyObject* object, bool alert)
     if(runnable)
         return sp<Observer>::make(std::move(runnable.value()));
 
-    return toSharedPtrDefault<Observer>(object, alert);
+    return toSharedPtrDefault<Observer>(object);
 }
 
 sp<CollisionCallback> PyCast::toCollisionCallback(PyObject* object)
@@ -165,6 +165,15 @@ sp<Vec3> PyCast::toVec3(PyObject* object, bool alert)
     return Vec2Type::extend(vec2, sp<Numeric>::make<Numeric::Const>(0.0f));
 }
 
+Optional<sp<StringVar>> PyCast::toStringVar(PyObject* object)
+{
+    Optional<String> opt = toStringExact(object);
+    if(opt)
+        return sp<StringVar::Const>::make(sp<String>::make(opt.value()));
+
+    return toSharedPtrDefault<StringVar>(object);
+}
+
 Optional<sp<Numeric>> PyCast::toNumeric(PyObject* object, bool alert)
 {
     if(isNoneOrNull(object))
@@ -175,7 +184,7 @@ Optional<sp<Numeric>> PyCast::toNumeric(PyObject* object, bool alert)
     if(PyFloat_Check(object))
         return sp<Numeric>::make<Numeric::Const>(static_cast<float>(PyFloat_AsDouble(object)));
 
-    return toSharedPtrDefault<Numeric>(object, alert);
+    return toSharedPtrDefault<Numeric>(object);
 }
 
 Optional<sp<Boolean>> PyCast::toBoolean(PyObject* object, bool alert)
@@ -186,7 +195,7 @@ Optional<sp<Boolean>> PyCast::toBoolean(PyObject* object, bool alert)
     if(PyBool_Check(object))
         return sp<Boolean>::make<Boolean::Const>(PyObject_IsTrue(object));
 
-    return toSharedPtrDefault<Boolean>(object, alert);
+    return toSharedPtrDefault<Boolean>(object);
 }
 
 Optional<sp<Integer>> PyCast::toInteger(PyObject* object, bool alert)
@@ -194,7 +203,7 @@ Optional<sp<Integer>> PyCast::toInteger(PyObject* object, bool alert)
     if(PyLong_CheckExact(object))
         return sp<Integer>::make<Integer::Const>(PyLong_AsLong(object));
 
-    return toSharedPtrDefault<Integer>(object, alert);
+    return toSharedPtrDefault<Integer>(object);
 }
 
 Scope PyCast::toScope(PyObject* kws)
@@ -420,12 +429,18 @@ template<> ARK_PLUGIN_PYTHON_API Optional<M4> PyCast::toCppObject_impl<M4>(PyObj
         M4 ret;
         for(Py_ssize_t i = 0; i < 4; ++i)
         {
-            float* fp = reinterpret_cast<float*>(&ret) + i * 4;
-            if(!PyArg_ParseTuple(PyTuple_GetItem(object, i), "ffff", fp, fp + 1, fp + 2, fp + 3))
+            PyObject* row = PyTuple_GetItem(object, i);
+            if(PyTuple_CheckExact(row))
             {
-                PyErr_Clear();
-                break;
+                float* fp = reinterpret_cast<float*>(&ret) + i * 4;
+                if(!PyArg_ParseTuple(row, "ffff", fp, fp + 1, fp + 2, fp + 3))
+                {
+                    PyErr_Clear();
+                    break;
+                }
             }
+            else
+                return Optional<M4>();
         }
         return ret;
     }

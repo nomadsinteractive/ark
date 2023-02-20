@@ -7,6 +7,7 @@
 #include "core/inf/runnable.h"
 #include "core/inf/variable.h"
 #include "core/impl/executor/executor_this_thread.h"
+#include "core/impl/runnable/runnable_by_function.h"
 #include "core/impl/runnable/runnable_composite.h"
 #include "core/util/log.h"
 
@@ -26,6 +27,11 @@ void MessageLoop::post(sp<Runnable> runnable, float delay, sp<Boolean> canceled)
 {
     ASSERT(runnable);
     _scheduled.push(sp<Task>::make(std::move(runnable), std::move(canceled), delay == 0 ? 0 : _clock->val() + static_cast<uint64_t>(delay * 1000000), 0));
+}
+
+void MessageLoop::post(std::function<void()> task, float delay, sp<Boolean> canceled)
+{
+    post(sp<RunnableByFunction>::make(std::move(task)), delay, std::move(canceled));
 }
 
 void MessageLoop::schedule(sp<Runnable> runnable, float interval, sp<Boolean> canceled)

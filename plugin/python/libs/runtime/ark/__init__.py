@@ -765,6 +765,9 @@ class String:
     def set(self, val: str):
         pass
 
+    def if_else(self, condition: 'Boolean', negative: str | 'String') -> 'String':
+        pass
+
     @staticmethod
     def format(msg: str, **kwargs) -> 'String':
         pass
@@ -1057,6 +1060,9 @@ class Input:
         return 0
 
     def reserve(self, size: int) -> 'Input':
+        pass
+
+    def remap(self, size: int, offset: int = 0) -> 'Input':
         pass
 
     def add_input(self, offset: int, input_: 'Input'):
@@ -1668,7 +1674,7 @@ class Transform:
     TYPE_LINEAR_2D = 0
     TYPE_LINEAR_3D = 1
 
-    def __init__(self, t: int = TYPE_LINEAR_3D, rotation: Optional[Rotation] = None, scale: Union[Vec3, Vec2] = None, translation: Union[Vec3, Vec2] = None):
+    def __init__(self, t: int = TYPE_LINEAR_3D, rotation: Optional[Rotation] = None, scale: Vec3 | Vec2 | None = None, translation: Vec3 | Vec2 | None = None):
         self._type = t
         self._rotation = rotation
         self._scale = scale
@@ -1740,6 +1746,10 @@ class Math:
     @staticmethod
     def cos(x):
         return 0
+
+    @staticmethod
+    def acos(x):
+        pass
 
     @staticmethod
     def max(a, b):
@@ -2066,6 +2076,14 @@ class Text:
     @property
     def contents(self) -> list[RenderObject]:
         return []
+
+    @property
+    def position(self) -> Vec3:
+        return Vec3(0, 0, 0)
+
+    @position.setter
+    def position(self, position):
+        pass
 
     def show(self, disposed: Optional[Boolean] = None):
         pass

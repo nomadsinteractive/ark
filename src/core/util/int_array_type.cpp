@@ -98,12 +98,13 @@ int32_t IntArrayType::setItem(sp<IntArray> self, ptrdiff_t index, int32_t value)
 int32_t IntArrayType::setItem(sp<IntArray> self, const Slice& slice, const std::vector<int32_t>& values)
 {
     Slice adjusted = slice.adjustIndices(self->length());
-    CHECK(adjusted.begin() < adjusted.end() && adjusted.begin() >= 0 && adjusted.end() <= static_cast<ptrdiff_t>(self->length()), "Illegal slice(%d, %d)", slice.begin(), slice.end());
-    CHECK(adjusted.step() == 1, "Non-continuous slicing is not supported");
-    CHECK_WARN((adjusted.end() - adjusted.begin()) == values.size() || slice.end() == std::numeric_limits<ptrdiff_t>::max(), "Assigning slice a different length array: slice length: %d, values length: %d", adjusted.length(), values.size());
-    const size_t length = std::min<size_t>(values.size(), adjusted.length());
-    for(size_t i = 0; i < length; ++i)
-        self->at(i + adjusted.begin()) = values.at(i);
+    size_t stepCount = std::abs(adjusted.length() / adjusted.step());
+    CHECK(adjusted.step() > 0 ? adjusted.begin() < adjusted.end() && adjusted.begin() >= 0 && adjusted.end() <= static_cast<ptrdiff_t>(self->length())
+          : adjusted.begin() > adjusted.end() && adjusted.end() >= -1 && adjusted.begin() <= static_cast<ptrdiff_t>(self->length()), "Illegal slice(%d, %d, %d)", slice.begin(), slice.end(), slice.step());
+    CHECK_WARN(stepCount == values.size() || slice.end() == std::numeric_limits<ptrdiff_t>::max(), "Assigning slice a different length array: slice length: %d, values length: %d", adjusted.length(), values.size());
+    const size_t maxStepCount = std::min<size_t>(values.size(), stepCount);
+    for(size_t i = 0; i < maxStepCount; ++i)
+        self->at(i * adjusted.step() + adjusted.begin()) = values.at(i);
     return 0;
 }
 

@@ -51,6 +51,8 @@ public:
 //  [[script::bindings::classmethod]]
     static sp<Input> reserve(sp<Input> self, size_t size);
 //  [[script::bindings::classmethod]]
+    static sp<Input> remap(sp<Input> self, size_t size, size_t offset = 0);
+//  [[script::bindings::classmethod]]
     static sp<Input> repeat(sp<Input> self, size_t length, size_t stride = 0);
 
 //  [[script::bindings::classmethod]]

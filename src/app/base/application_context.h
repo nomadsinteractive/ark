@@ -58,6 +58,8 @@ public:
 
     sp<MessageLoop> makeMessageLoop(const sp<Clock>& clock);
     const sp<MessageLoop>& messageLoopApp() const;
+    const sp<MessageLoop>& messageLoopCore() const;
+    const sp<MessageLoop>& messageLoopRenderer() const;
 
     void runAtCoreThread(sp<Runnable> task);
     void runAtCoreThread(std::function<void()> task);

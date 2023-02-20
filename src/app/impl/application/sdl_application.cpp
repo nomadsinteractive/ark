@@ -147,6 +147,10 @@ private:
 
 class SDLApplicationController : public ApplicationController {
 public:
+    SDLApplicationController(sp<ApplicationContext> applicationContext)
+        : _application_context(std::move(applicationContext)) {
+    }
+
     virtual sp<Object> createCursor(const sp<Bitmap>& bitmap, int32_t hotX, int32_t hotY) override {
         Uint32 rmask, gmask, bmask, amask;
         #if SDL_BYTEORDER == SDL_BIG_ENDIAN
@@ -227,21 +231,35 @@ public:
     }
 
     virtual void setMouseCapture(bool enabled) override {
-        int32_t r = SDL_CaptureMouse(enabled ? SDL_TRUE : SDL_FALSE);
-        DCHECK_WARN(r == 0, "Error calling SDL_CaptureMouse, enabled: %d, return: %d", enabled, r);
+#ifdef _WIN32
+        _application_context->messageLoopRenderer()->post([this, enabled] () {
+            this->doSetMouseCapture(enabled);
+        }, 0);
+#else
+        doSetMouseCapture(enabled);
+#endif
     }
 
     virtual void exit() override {
         gQuit = true;
     }
 
+private:
+    void doSetMouseCapture(bool enabled) {
+        int32_t r = SDL_CaptureMouse(enabled ? SDL_TRUE : SDL_FALSE);
+        CHECK_WARN(r == 0, "Error calling SDL_CaptureMouse, enabled: %d, return: %d, error: %s", enabled, r, SDL_GetError());
+    }
+
+private:
+    sp<ApplicationContext> _application_context;
+
 };
 
 }
 
-SDLApplication::SDLApplication(const sp<ApplicationDelegate>& applicationDelegate, const sp<ApplicationContext>& applicationContext, uint32_t width, uint32_t height, const ApplicationManifest& manifest)
-    : Application(applicationDelegate, applicationContext, width, height, manifest.renderer().toViewport()), _main_window(nullptr), _cond(SDL_CreateCond()), _lock(SDL_CreateMutex()),
-      _controller(sp<SDLApplicationController>::make()), _window_flag(manifest.application()._window_flag)
+SDLApplication::SDLApplication(sp<ApplicationDelegate> applicationDelegate, sp<ApplicationContext> applicationContext, uint32_t width, uint32_t height, const ApplicationManifest& manifest)
+    : Application(std::move(applicationDelegate), applicationContext, width, height, manifest.renderer().toViewport()), _main_window(nullptr), _cond(SDL_CreateCond()), _lock(SDL_CreateMutex()),
+      _controller(sp<SDLApplicationController>::make(std::move(applicationContext))), _window_flag(manifest.application()._window_flag)
 {
 }
 

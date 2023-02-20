@@ -152,12 +152,21 @@ size_t InputType::size(const sp<Input>& self)
 
 sp<Input> InputType::reserve(sp<Input> self, size_t size)
 {
-    if(size <= self->size())
+    if(size == 0)
         return self;
 
+    ASSERT(size >= self->size());
     sp<InputImpl> inputImpl = sp<InputImpl>::make(size);
     if(self->size() > 0)
         inputImpl->addInput(0,  std::move(self));
+    return inputImpl;
+}
+
+sp<Input> InputType::remap(sp<Input> self, size_t size, size_t offset)
+{
+    sp<InputImpl> inputImpl = sp<InputImpl>::make(size);
+    if(self->size() > 0)
+        inputImpl->addInput(offset,  std::move(self));
     return inputImpl;
 }
 

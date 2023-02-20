@@ -189,7 +189,7 @@ public:
     static ARK_API float sqrt(float number);
 //  [[plugin::function("sqrt")]]
 //  [[script::bindings::auto]]
-    static ARK_API sp<Numeric> sqrt(const sp<Numeric>& number);
+    static ARK_API sp<Numeric> sqrt(sp<Numeric> number);
 
 //  [[script::bindings::auto]]
     static ARK_API float distance(const V2& lvalue, const V2& rvalue);

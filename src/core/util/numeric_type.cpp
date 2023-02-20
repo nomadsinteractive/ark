@@ -287,9 +287,9 @@ sp<ExpectationF> NumericType::fence(const sp<Numeric>& self, const sp<Numeric>& 
     return sp<ExpectationF>::make(std::move(delegate), std::move(notifier));
 }
 
-sp<Numeric> NumericType::ifElse(const sp<Numeric>& self, const sp<Boolean>& condition, const sp<Numeric>& negative)
+sp<Numeric> NumericType::ifElse(sp<Numeric> self, sp<Boolean> condition, sp<Numeric> negative)
 {
-    return sp<VariableTernary<float>>::make(condition, self, negative);
+    return sp<VariableTernary<float>>::make(std::move(condition), std::move(self), std::move(negative));
 }
 
 sp<Numeric> NumericType::dye(sp<Numeric> self, sp<Boolean> condition, String message)

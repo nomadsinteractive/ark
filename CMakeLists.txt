@@ -61,7 +61,7 @@ list(APPEND LOCAL_INCLUDE_DIRS src)
 message("Building for ${ARK_SYSTEM_NAME} - ${CMAKE_BUILD_TYPE}; build-share-libs: ${BUILD_SHARED_LIBS}\nCompiler: ${CMAKE_CXX_COMPILER_ID}-${CMAKE_CXX_COMPILER_VERSION}")
 ark_compile_definitions(-DARK_SYSTEM_NAME="${ARK_SYSTEM_NAME}")
 ark_compile_definitions(-DARK_BINARY_POSTFIX="$<$<CONFIG:DEBUG>:${CMAKE_DEBUG_POSTFIX}>$<$<CONFIG:RELWITHDEBINFO>:${CMAKE_RELWITHDEBINFO_POSTFIX}>")
-ark_compile_definitions(-DARK_FLAG_DEBUG=$<IF:$<CONFIG:DEBUG>,1,$<IF:$<CONFIG:RELWITHDEBINFO>,1,0>>)
+ark_compile_definitions(-DARK_FLAG_DEBUG=$<IF:$<CONFIG:DEBUG>,1,$<IF:$<CONFIG:RELWITHDEBINFO>,2,0>>)
 
 #ark_add_debug_flag()
 
@@ -155,6 +155,7 @@ ark_include_directories(platform/any)
 
 ark_find_vcpkg_package(tinyxml2 LIBRARIES tinyxml2::tinyxml2)
 ark_find_vcpkg_package(yaml LIBRARIES yaml)
+ark_find_vcpkg_package(fmt LIBRARIES fmt::fmt)
 
 ark_find_vcpkg_package(libzip LIBRARIES libzip::zip)
 

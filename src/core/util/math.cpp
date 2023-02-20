@@ -207,9 +207,9 @@ float Math::sqrt(float x)
     return std::sqrt(x);
 }
 
-sp<Numeric> Math::sqrt(const sp<Numeric>& x)
+sp<Numeric> Math::sqrt(sp<Numeric> x)
 {
-    return sp<VariableOP1<float>>::make(static_cast<float(*)(float)>(Math::sqrt), x);
+    return sp<VariableOP1<float>>::make(static_cast<float(*)(float)>(Math::sqrt), std::move(x));
 }
 
 float Math::distance(const V2& lvalue, const V2& rvalue)

@@ -84,7 +84,7 @@ V4 MatrixUtil::mul(const M4& lvalue, const V4& rvalue)
 V3 MatrixUtil::mul(const M4& lvalue, const V3& rvalue)
 {
     const glm::vec4 r = lvalue.mat<glm::mat4>() * glm::vec4(rvalue.x(), rvalue.y(), rvalue.z(), 1.0f);
-    DCHECK(r.w != 0, "Division by zero");
+    CHECK(r.w != 0, "Division by zero");
     return V3(r.x / r.w, r.y / r.w, r.z / r.w);
 }
 

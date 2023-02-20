@@ -33,7 +33,6 @@ public:
 
     const std::map<String, Box>& variables() const;
 
-private:
     Box getObject(const String& name) const;
 
 private:

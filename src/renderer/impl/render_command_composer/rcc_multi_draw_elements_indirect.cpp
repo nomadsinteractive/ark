@@ -218,7 +218,13 @@ void RCCMultiDrawElementsIndirect::reloadIndirectCommands(const RenderLayerSnaps
 }
 
 RCCMultiDrawElementsIndirect::NodeLayoutInstance::NodeLayoutInstance(const Node& node, const NodeLayoutInstance& parentLayout)
-    : _node_id(node.name().hash()), _node_transform(sp<Mat4Impl>::make(node.transform())), _global_transform(parentLayout._global_transform ? Mat4Type::matmul(parentLayout._global_transform, static_cast<sp<Mat4>>(_node_transform)) : static_cast<sp<Mat4>>(_node_transform)) {
+    : _node_id(node.name().hash()), _node_transform(sp<Mat4::Impl>::make(M4::identity())), _global_transform(makeGlobalTransform(parentLayout._global_transform, node.transform())) {
+}
+
+sp<Mat4> RCCMultiDrawElementsIndirect::NodeLayoutInstance::makeGlobalTransform(sp<Mat4> parentTransform, const M4& localTransform) const
+{
+    sp<Mat4> nodeTransform = Mat4Type::matmul(sp<Mat4>::make<Mat4::Const>(localTransform), static_cast<sp<Mat4>>(_node_transform));
+    return parentTransform ? Mat4Type::matmul(std::move(parentTransform), std::move(nodeTransform)) : nodeTransform;
 }
 
 RCCMultiDrawElementsIndirect::NodeLayoutInstance::NodeLayoutInstance(const Node& node, const M4& globalTransform)

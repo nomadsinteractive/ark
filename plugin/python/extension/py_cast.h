@@ -33,6 +33,8 @@ namespace python {
 
 class ARK_PLUGIN_PYTHON_API PyCast {
 public:
+    static Optional<sp<StringVar>> toStringVar(PyObject* object);
+
     static Optional<sp<Numeric>> toNumeric(PyObject* object, bool alert = true);
     static Optional<sp<Boolean>> toBoolean(PyObject* object, bool alert = true);
     static Optional<String> toStringExact(PyObject* object, const char* encoding = nullptr, const char* error = nullptr);
@@ -78,7 +80,7 @@ public:
     template<typename T> static sp<T> toSharedPtrOrNull(PyObject* object) {
         if(PyBridge::isPyNone(object))
             return nullptr;
-        Optional<sp<T>> opt = toSharedPtrDefault<T>(object, false);
+        Optional<sp<T>> opt = toSharedPtrDefault<T>(object);
         return opt ? opt.value() : nullptr;
     }
 
@@ -109,10 +111,10 @@ public:
 
 private:
     template<typename T> static Optional<sp<T>> toSharedPtrImpl(PyObject* object, bool alert = true) {
-        return toSharedPtrDefault<T>(object, alert);
+        return toSharedPtrDefault<T>(object);
     }
 
-    template<typename T> static Optional<sp<T>> toSharedPtrDefault(PyObject* object, bool alert = true) {
+    template<typename T> static Optional<sp<T>> toSharedPtrDefault(PyObject* object) {
         if(PyBridge::isPyNone(object))
             return Optional<sp<T>>(sp<T>::null());
 
@@ -310,7 +312,6 @@ private:
     static std::wstring pyUnicodeToWString(PyObject* unicode);
     static std::wstring toWString(PyObject* object);
 
-
 };
 
 template<> inline Optional<sp<String>> PyCast::toSharedPtrImpl<String>(PyObject* object, bool alert)
@@ -319,6 +320,11 @@ template<> inline Optional<sp<String>> PyCast::toSharedPtrImpl<String>(PyObject*
     if(opt)
         return sp<String>::make(std::move(opt.value()));
     return Optional<sp<String>>();
+}
+
+template<> inline Optional<sp<StringVar>> PyCast::toSharedPtrImpl<StringVar>(PyObject* object, bool alert)
+{
+    return toStringVar(object);
 }
 
 template<> inline Optional<sp<Numeric>> PyCast::toSharedPtrImpl<Numeric>(PyObject* object, bool alert)

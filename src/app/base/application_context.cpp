@@ -224,6 +224,16 @@ const sp<MessageLoop>& ApplicationContext::messageLoopApp() const
     return _message_loop_app;
 }
 
+const sp<MessageLoop>& ApplicationContext::messageLoopCore() const
+{
+    return _message_loop_core;
+}
+
+const sp<MessageLoop>& ApplicationContext::messageLoopRenderer() const
+{
+    return _message_loop_renderer;
+}
+
 void ApplicationContext::runAtCoreThread(sp<Runnable> task)
 {
     _message_loop_core->post(std::move(task), 0);

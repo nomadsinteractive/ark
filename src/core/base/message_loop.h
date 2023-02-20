@@ -21,6 +21,7 @@ public:
 
 //  [[script::bindings::auto]]
     void post(sp<Runnable> runnable, float delay, sp<Boolean> canceled = nullptr);
+    void post(std::function<void()> task, float delay, sp<Boolean> canceled = nullptr);
 //  [[script::bindings::auto]]
     void schedule(sp<Runnable> runnable, float interval, sp<Boolean> canceled = nullptr);
 
