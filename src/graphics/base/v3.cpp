@@ -120,7 +120,7 @@ float V3::dot(const V3& other) const
     return _x * other._x + _y * other._y + _z * other._z;
 }
 
-float V3::length() const
+float V3::hypot() const
 {
     return Math::sqrt(_x * _x + _y * _y + _z * _z);
 }
@@ -137,8 +137,8 @@ V3 V3::floorDiv(const V3& other) const
 
 V3 V3::normalize() const
 {
-    float hypot = std::max(length(), MIN_NORMALIZE_LENGTH);
-    return V3(_x / hypot, _y / hypot, _z / hypot);
+    float length = std::max(hypot(), MIN_NORMALIZE_LENGTH);
+    return V3(_x / length, _y / length, _z / length);
 }
 
 V3 V3::cross(const V3& other) const

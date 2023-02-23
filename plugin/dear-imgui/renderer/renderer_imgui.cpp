@@ -220,8 +220,8 @@ void RendererImgui::MyImGuiRenderFunction(const RenderRequest& renderRequest, Im
     {
         const ImDrawList* cmd_list = draw_data->CmdLists[i];
 
-        ByteArray::Borrowed vb = renderRequest.allocator().sbrk(static_cast<size_t>(cmd_list->VtxBuffer.size_in_bytes()));
-        ByteArray::Borrowed ib = renderRequest.allocator().sbrk(static_cast<size_t>(cmd_list->IdxBuffer.size_in_bytes()));
+        ByteArray::Borrowed vb = renderRequest.allocator().sbrkSpan(static_cast<size_t>(cmd_list->VtxBuffer.size_in_bytes()));
+        ByteArray::Borrowed ib = renderRequest.allocator().sbrkSpan(static_cast<size_t>(cmd_list->IdxBuffer.size_in_bytes()));
 
         memcpy(vb.buf(), cmd_list->VtxBuffer.Data, static_cast<size_t>(vb.length()));
         memcpy(ib.buf(), cmd_list->IdxBuffer.Data, static_cast<size_t>(ib.length()));

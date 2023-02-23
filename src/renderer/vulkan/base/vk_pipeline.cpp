@@ -246,7 +246,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
     }
 
     _texture_observers.clear();
-    for(const sp<Texture>& i : bindings.samplers())
+    for(const sp<Texture>& i : bindings.samplers().values())
     {
         DCHECK_WARN(i, "Pipeline has unbound sampler");
         if(i)

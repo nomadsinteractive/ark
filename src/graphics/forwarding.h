@@ -39,7 +39,6 @@ class RenderView;
 class Layer;
 class RenderRequest;
 class RenderBatch;
-class RenderablePassive;
 class Renderer;
 class RendererGroup;
 class Rotation;

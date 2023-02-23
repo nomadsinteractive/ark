@@ -134,11 +134,11 @@ void NarrowPhraseCuteC2::toRay(const V2& from, const V2& to, c2Ray& ray) const
 {
     const V2 delta = to - from;
     ray.p = { from.x(), from.y() };
-    if(delta.length() > 0.01f)
+    if(delta.hypot() > 0.01f)
     {
         const V2 nd = delta.normalize();
         ray.d = { nd.x(), nd.y() };
-        ray.t = delta.length();
+        ray.t = delta.hypot();
     }
     else
     {

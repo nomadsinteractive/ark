@@ -130,6 +130,7 @@ public:
     std::map<uint32_t, Stream>& streams();
 
     size_t samplerCount() const;
+    const std::vector<String>& samplerNames() const;
 
     void addAttribute(String name, Attribute attribute);
 
@@ -144,7 +145,7 @@ private:
     std::vector<SSBO> _ssbos;
 
     std::map<uint32_t, Stream> _streams;
-    size_t _sampler_count;
+    std::vector<String> _sampler_names;
 
     friend class PipelineLayout;
 };

@@ -132,6 +132,10 @@ public:
         return Math::distance(std::move(self), std::move(other));
     }
 
+    static sp<Numeric> hypot(sp<VarType> self) {
+        return sp<VariableOP1<float, T>>::make(Operators::Hypot<T>(), std::move(self));
+    }
+
     static void set(const sp<VariableWrapper<T>>& self, const T& val) {
         self->set(val);
     }

@@ -239,8 +239,7 @@ void TilemapLayer::Stub::snapshot(const RenderRequest& renderRequest, const Laye
     const PipelineInput& pipelineInput = output.pipelineInput();
     const bool visible = lc._visible.val();
     const bool needsReload = lc._position_changed || lc._render_done != visible || output.needsReload();
-    const bool hasDefaultVaryings = static_cast<bool>(lc._varyings);
-    const Varyings::Snapshot defaultVaryingsSnapshot = hasDefaultVaryings ? lc._varyings->snapshot(pipelineInput, renderRequest.allocator()) : Varyings::Snapshot();
+    Varyings::Snapshot defaultVaryingsSnapshot = lc._varyings ? lc._varyings->snapshot(pipelineInput, renderRequest.allocator()) : Varyings::Snapshot();
 
     float tileWidth = _tileset->tileWidth(), tileHeight = _tileset->tileWidth();
     const V3 posOff = lc._position + _position.val();
@@ -260,8 +259,7 @@ void TilemapLayer::Stub::snapshot(const RenderRequest& renderRequest, const Laye
                 if(state.hasState(Renderable::RENDERABLE_STATE_VISIBLE))
                     state.setState(Renderable::RENDERABLE_STATE_VISIBLE, visible);
                 Renderable::Snapshot snapshot = tile._renderable->snapshot(pipelineInput, renderRequest, posOff + V3(j * tileWidth + tileWidth / 2, dy, _zorder), state.stateBits());
-                if(hasDefaultVaryings && !snapshot._varyings)
-                    snapshot._varyings = defaultVaryingsSnapshot;
+                snapshot.applyVaryings(defaultVaryingsSnapshot);
                 output.addSnapshot(lc, std::move(snapshot));
             }
         }

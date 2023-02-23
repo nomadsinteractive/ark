@@ -37,7 +37,7 @@ public:
 
     void bindBuffer(GraphicsContext& graphicsContext, const PipelineInput& input, const std::map<uint32_t, Buffer>& divisors);
 
-    void activeTexture(const Texture& texture, uint32_t name);
+    void activeTexture(const Texture& texture, const String& name, uint32_t binding);
 
     class GLUniform {
     public:
@@ -165,7 +165,7 @@ private:
         void bindUBO(const RenderLayerSnapshot::UBOSnapshot& uboSnapshot, const sp<PipelineInput::UBO>& ubo);
         void bindUniform(const uint8_t* ptr, uint32_t size, const Uniform& uniform);
         void bindImage(const Texture& texture, uint32_t name);
-        void activeTexture(const Texture& texture, uint32_t name);
+        void activeTexture(const Texture& texture, const String& name, uint32_t binding);
 
         const GLPipeline::GLUniform& getUniform(const String& name);
         GLint getUniformLocation(const String& name);

@@ -36,7 +36,7 @@ public:
     V4 operator -() const;
 
     float dot(const V4& other) const;
-    float length() const;
+    float hypot() const;
 
     V4 normalize() const;
     V4 floorDiv(const V4& other) const;

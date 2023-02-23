@@ -39,7 +39,7 @@ public:
     float z() const;
 
     float dot(const V2& other) const;
-    float length() const;
+    float hypot() const;
 
     V3 extend(float z) const;
     V4 extend(const V2& zw) const;

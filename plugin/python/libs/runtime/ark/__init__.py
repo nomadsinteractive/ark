@@ -233,7 +233,7 @@ class _Var:
     def __truediv__(self, other):
         pass
 
-    def __mod__(self):
+    def __mod__(self, other):
         pass
 
     def __gt__(self, other) -> 'Boolean':
@@ -938,6 +938,9 @@ class Vec2(_Var):
         pass
 
     def distance_to(self, other) -> Numeric:
+        pass
+
+    def hypot(self) -> Numeric:
         pass
 
     def to_size(self) -> 'Size':

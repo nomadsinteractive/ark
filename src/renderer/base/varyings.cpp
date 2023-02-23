@@ -136,16 +136,16 @@ Varyings::Snapshot Varyings::snapshot(const PipelineInput& pipelineInput, Alloca
             _slot_strides[i.first] = i.second.stride();
     }
 
-    Array<Divided>::Borrowed buffers(reinterpret_cast<Divided*>(allocator.sbrk(sizeof(Divided) * _slot_strides.size()).buf()), _slot_strides.size());
+    Array<Divided>::Borrowed buffers(reinterpret_cast<Divided*>(allocator.sbrkSpan(sizeof(Divided) * _slot_strides.size()).buf()), _slot_strides.size());
 
     size_t idx = 0;
     for(const auto& [i, j] : _slot_strides)
-        new(&buffers.at(idx++)) Divided(i, allocator.sbrk(j));
+        new(&buffers.at(idx++)) Divided(i, allocator.sbrkSpan(j));
 
     for(const auto& [i, j] : _slots)
     {
         DASSERT(j._divisor < buffers.length());
-        j.apply(buffers.at(j._divisor)._content.buf());
+        buffers.at(j._divisor).addSnapshot(allocator, j);
     }
 
     Snapshot snapshot(buffers);
@@ -174,13 +174,6 @@ Varyings::Slot::Slot(sp<Input> input, uint32_t divisor, int32_t offset)
 {
 }
 
-void Varyings::Slot::apply(uint8_t* ptr) const
-{
-    DASSERT(_offset >= 0);
-    WritableMemory writer(ptr + _offset);
-    _input->upload(writer);
-}
-
 Varyings::BUILDER::InputBuilder::InputBuilder(BeanFactory& factory, const document& manifest)
     : _name(Documents::ensureAttribute(manifest, Constants::Attributes::NAME)), _input(factory.ensureBuilderByTypeValue<Input>(Documents::ensureAttribute(manifest, Constants::Attributes::TYPE),
                                                                                                                                Documents::ensureAttribute(manifest, Constants::Attributes::VALUE)))
@@ -192,17 +185,32 @@ Varyings::Snapshot::Snapshot(Array<Varyings::Divided>::Borrowed buffers)
 {
 }
 
+void Varyings::Snapshot::applyDefaults(const Snapshot* defaults)
+{
+    for(size_t i = 0; i < _buffers.length(); ++i)
+    {
+        Divided& div = _buffers.at(i);
+        if(defaults)
+        {
+            Divided def = defaults->getDivided(div._divisor);
+            if(def)
+                div.apply(def._slot_snapshot);
+        }
+    }
+}
+
 Varyings::Snapshot::operator bool() const
 {
     return _buffers.buf() != nullptr;
 }
 
-ByteArray::Borrowed Varyings::Snapshot::getDivided(uint32_t divisor) const
+Varyings::Divided Varyings::Snapshot::getDivided(uint32_t divisor) const
 {
     for(size_t i = 0; i < _buffers.length(); ++i)
         if(_buffers.at(i)._divisor == divisor)
-            return _buffers.at(i)._content;
-    return ByteArray::Borrowed();
+            return _buffers.at(i);
+
+    return Varyings::Divided();
 }
 
 void Varyings::Snapshot::snapshotSubProperties(const std::map<String, sp<Varyings>>& subProperties, const PipelineInput& pipelineInput, Allocator& allocator)
@@ -211,8 +219,62 @@ void Varyings::Snapshot::snapshotSubProperties(const std::map<String, sp<Varying
         _sub_properties[i.hash()] = j->snapshot(pipelineInput, allocator);
 }
 
+Varyings::Divided::Divided()
+    : _divisor(0), _content(), _slot_snapshot(nullptr)
+{
+}
+
 Varyings::Divided::Divided(uint32_t divisor, ByteArray::Borrowed content)
-    : _divisor(divisor), _content(content)
+    : _divisor(divisor), _content(content), _slot_snapshot(nullptr)
+{
+}
+
+Varyings::Divided::operator bool() const
+{
+    return _content.length() > 0;
+}
+
+void Varyings::Divided::apply(const SlotSnapshot* slots)
+{
+    uint8_t* ptr = _content.buf();
+
+    const SlotSnapshot* iter = slots ? slots : _slot_snapshot;
+    while(iter)
+    {
+        memcpy(ptr + iter->_offset, iter->_content, iter->_size);
+        iter = iter->_next;
+    }
+}
+
+void Varyings::Divided::addSnapshot(Allocator& allocator, const Slot& slot)
+{
+    DASSERT(slot._offset >= 0);
+    void* content = _content.buf() + slot._offset;
+    uint32_t size = static_cast<uint32_t>(slot._input->size());
+
+    WritableMemory writer(content);
+    slot._input->upload(writer);
+    addSlotSnapshot(new(allocator.sbrk(sizeof(SlotSnapshot))) SlotSnapshot(content, slot._offset, size));
+}
+
+void Varyings::Divided::addSlotSnapshot(SlotSnapshot* slotSnapshot)
+{
+    DASSERT(slotSnapshot->_offset + slotSnapshot->_size <= _content.length());
+
+    if(!_slot_snapshot)
+    {
+        _slot_snapshot = slotSnapshot;
+        return;
+    }
+
+    SlotSnapshot* tail = _slot_snapshot;
+    while(tail->_next != nullptr)
+        tail = tail->_next;
+    tail->_next = slotSnapshot;
+}
+
+Varyings::SlotSnapshot::SlotSnapshot(void* content, uint32_t offset, uint32_t size)
+    : _content(content), _offset(offset), _size(size), _next(nullptr)
 {
 }
 

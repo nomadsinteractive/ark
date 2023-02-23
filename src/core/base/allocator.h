@@ -1,33 +1,55 @@
 #ifndef ARK_CORE_BASE_ALLOCATOR_H_
 #define ARK_CORE_BASE_ALLOCATOR_H_
 
-#include <mutex>
 #include <vector>
 
 #include "core/base/api.h"
+#include "core/concurrent/lf_stack.h"
 #include "core/inf/array.h"
 #include "core/types/shared_ptr.h"
 
 namespace ark {
 
 class ARK_API Allocator {
+private:
+    struct Block {
+        Block(size_t blockSize);
+
+        uint8_t* allocate(size_t size);
+        void reset();
+
+        std::vector<uint8_t> _memory;
+        uint8_t* _allocated_ptr;
+    };
+
 public:
-    Allocator(const sp<MemoryPool>& memoryPool, size_t blockSize = 1024 * 1024);
 
-    ByteArray::Borrowed sbrk(size_t size, size_t alignment = sizeof(void*));
+    struct Pool {
+        Pool(size_t blockSize = 128 * 1024);
+
+        sp<Block> obtain();
+        void recycle(sp<Block> block);
+
+        size_t _block_size;
+        LFStack<sp<Block>> _blocks;
+    };
+
+public:
+    Allocator(sp<Pool> pool);
+    ~Allocator();
+
+    uint8_t* sbrk(size_t size, size_t alignment = sizeof(void*));
+    ByteArray::Borrowed sbrkSpan(size_t size, size_t alignment = sizeof(void*));
 
 private:
-    void newBlock(size_t size);
+    uint8_t* _sbrk(size_t size);
 
 private:
-    sp<MemoryPool> _memory_pool;
+    sp<Pool> _pool;
     size_t _block_size;
 
-    std::vector<bytearray> _blocks;
-    uint8_t* _ptr;
-    size_t _available;
-
-    std::mutex _mutex;
+    LFStack<sp<Block>> _actived;
+    LFStack<sp<Block>> _allocated;
 };
 
 }

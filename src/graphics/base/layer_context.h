@@ -68,8 +68,7 @@ public:
         const PipelineInput& pipelineInput = output.pipelineInput();
         const bool visible = _visible.val();
         const bool needsReload = _position_changed || _render_done != visible || output.needsReload();
-        const bool hasDefaultVaryings = static_cast<bool>(_varyings);
-        const Varyings::Snapshot defaultVaryingsSnapshot = hasDefaultVaryings ? _varyings->snapshot(pipelineInput, renderRequest.allocator()) : Varyings::Snapshot();
+        Varyings::Snapshot defaultVaryingsSnapshot = _varyings ? _varyings->snapshot(pipelineInput, renderRequest.allocator()) : Varyings::Snapshot();
 
         for(const auto& [i, j] : renderables) {
             Renderable& renderable = i;
@@ -79,8 +78,7 @@ public:
             if(state.hasState(Renderable::RENDERABLE_STATE_VISIBLE))
                 state.setState(Renderable::RENDERABLE_STATE_VISIBLE, visible);
             Renderable::Snapshot snapshot = renderable.snapshot(pipelineInput, renderRequest, _position, state.stateBits());
-            if(hasDefaultVaryings && !snapshot._varyings)
-                snapshot._varyings = defaultVaryingsSnapshot;
+            snapshot.applyVaryings(defaultVaryingsSnapshot);
             output.addSnapshot(*this, std::move(snapshot));
         }
     }

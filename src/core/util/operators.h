@@ -110,7 +110,14 @@ public:
     template<typename T, typename P = T> class Distance {
     public:
         float operator()(const T& v1, const P& v2) {
-            return (v1 - v2).length();
+            return (v1 - v2).hypot();
+        }
+    };
+
+    template<typename T> class Hypot {
+    public:
+        float operator()(const T& v) {
+            return v.hypot();
         }
     };
 

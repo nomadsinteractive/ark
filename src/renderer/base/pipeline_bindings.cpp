@@ -58,7 +58,7 @@ const PipelineInput::AttributeOffsets& PipelineBindings::attributes() const
     return _stub->_attributes;
 }
 
-const std::vector<sp<Texture>>& PipelineBindings::samplers() const
+const Table<String, sp<Texture>>& PipelineBindings::samplers() const
 {
     return _stub->_samplers;
 }
@@ -72,7 +72,7 @@ void PipelineBindings::bindSampler(sp<Texture> texture, uint32_t name)
 {
     CHECK_WARN(_stub->_samplers.size() > name, "Illegal sampler binding position: %d, sampler count: %d", name, _stub->_samplers.size());
     if(_stub->_samplers.size() > name)
-        _stub->_samplers[name] = std::move(texture);
+        _stub->_samplers.values()[name] = std::move(texture);
 }
 
 bool PipelineBindings::hasDivisors() const

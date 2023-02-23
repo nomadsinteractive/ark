@@ -53,7 +53,7 @@ sp<RenderCommand> RCCDrawElementsInstanced::compose(const RenderRequest& renderR
     {
         writer.next();
         writer.write(MatrixUtil::translate(M4::identity(), i._position) * MatrixUtil::scale(i._transform.toMatrix(), i._size));
-        ByteArray::Borrowed vm = i._varyings.getDivided(0);
+        ByteArray::Borrowed vm = i._varyings.getDivided(0)._content;
         if(vm.length() > 0)
             writer.write(vm.buf() + sizeof(M4), vm.length() - sizeof(M4), sizeof(M4));
     }

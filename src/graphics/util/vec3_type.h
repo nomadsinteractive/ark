@@ -129,6 +129,8 @@ public:
 
 //  [[script::bindings::classmethod]]
     static sp<Numeric> distanceTo(const sp<Vec3>& self, const sp<Vec3>& other);
+//  [[script::bindings::classmethod]]
+    static sp<Numeric> hypot(sp<Vec3> self);
 **/
 //  [[script::bindings::classmethod]]
     static sp<Vec4> extend(sp<Vec3> self, sp<Numeric> w);

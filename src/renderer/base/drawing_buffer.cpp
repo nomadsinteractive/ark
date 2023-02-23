@@ -22,7 +22,7 @@ DrawingBuffer::DrawingBuffer(const sp<ShaderBindings>& shaderBindings, uint32_t 
 VertexWriter DrawingBuffer::makeVertexWriter(const RenderRequest& renderRequest, size_t length, size_t offset)
 {
     size_t size = length * _vertices._stride;
-    ByteArray::Borrowed content = renderRequest.allocator().sbrk(size);
+    ByteArray::Borrowed content = renderRequest.allocator().sbrkSpan(size);
     _vertices.addStrip(offset * _vertices._stride, content);
     return VertexWriter(_pipeline_bindings->attributes(), !_is_instanced, content.buf(), size, _vertices._stride);
 }
@@ -32,7 +32,7 @@ VertexWriter DrawingBuffer::makeDividedVertexWriter(const RenderRequest& renderR
     Buffer::Factory& builder = getInstancedBufferBuilder(divisor);
 
     size_t size = length * builder._stride;
-    ByteArray::Borrowed content = renderRequest.allocator().sbrk(size);
+    ByteArray::Borrowed content = renderRequest.allocator().sbrkSpan(size);
     builder.addStrip(offset * builder._stride, content);
     return VertexWriter(_pipeline_bindings->attributes(), !_is_instanced, content.buf(), size, builder._stride);
 }

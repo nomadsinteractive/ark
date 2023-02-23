@@ -27,18 +27,6 @@ RenderObjectWithLayer::~RenderObjectWithLayer()
 {
 }
 
-void RenderObjectWithLayer::render(RenderRequest& /*renderRequest*/, const V3& position)
-{
-    return;
-
-    if(!_renderable)
-    {
-         _renderable = sp<RenderablePassive>::make(_render_object);
-         _layer_context->add(_renderable, nullptr, _render_object->disposed());
-    }
-    _renderable->requestUpdate(position);
-}
-
 const sp<Size>& RenderObjectWithLayer::size()
 {
     return _render_object->_size.ensure();
@@ -72,16 +60,6 @@ RenderObjectWithLayer::BUILDER::BUILDER(BeanFactory& factory, const document& ma
 sp<RenderObjectWithLayer> RenderObjectWithLayer::BUILDER::build(const Scope& args)
 {
     return sp<RenderObjectWithLayer>::make(_layer_context->build(args), _render_object->build(args));
-}
-
-RenderObjectWithLayer::BUILDER_RENDERER::BUILDER_RENDERER(BeanFactory& factory, const document& manifest)
-    : _impl(factory, manifest)
-{
-}
-
-sp<Renderer> RenderObjectWithLayer::BUILDER_RENDERER::build(const Scope& args)
-{
-    return _impl.build(args);
 }
 
 }

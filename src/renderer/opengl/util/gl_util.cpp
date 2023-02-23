@@ -253,7 +253,7 @@ void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, Render
     glPipeline->getUniform("u_Projection").setUniformMatrix4fv(1, GL_FALSE, captureProjection.value());
     texture.upload(graphicsContext);
 
-    glPipeline->activeTexture(texture, 0);
+    glPipeline->activeTexture(texture, "u_Texture0", 0);
 
     uint32_t vao;
     glGenVertexArrays(1, &vao);

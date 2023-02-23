@@ -102,14 +102,14 @@ void PipelineBuildingContext::initialize()
             attributes.push_back(i.first, i.second.declareType());
 
     std::vector<String> generated;
-    for(const auto& i : attributes)
+    for(const auto& [i, j] : attributes)
     {
-        if(!firstStage._declaration_ins.has(i.first)
-                && !firstStage._declaration_outs.has(i.first)
-                && !firstStage._main_block->hasOutAttribute(i.first))
+        if(!firstStage._declaration_ins.has(i)
+                && !firstStage._declaration_outs.has(i)
+                && !firstStage._main_block->hasOutAttribute(i))
         {
-            generated.push_back(i.first);
-            addAttribute(i.first, i.second);
+            generated.push_back(i);
+            addAttribute(i, j);
         }
     }
 

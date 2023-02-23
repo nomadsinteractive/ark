@@ -9,7 +9,6 @@
 
 #include "renderer/base/mesh.h"
 #include "renderer/base/pipeline_input.h"
-#include "renderer/base/varyings.h"
 
 namespace ark {
 

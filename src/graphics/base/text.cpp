@@ -20,7 +20,6 @@
 #include "graphics/base/size.h"
 #include "graphics/base/v3.h"
 #include "graphics/impl/glyph_maker/glyph_maker_span.h"
-#include "graphics/impl/renderable/renderable_passive.h"
 #include "graphics/inf/glyph_maker.h"
 
 #include "renderer/base/atlas.h"

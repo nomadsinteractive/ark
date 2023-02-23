@@ -125,7 +125,7 @@ float V2::dot(const V2& other) const
     return _x * other._x + _y * other._y;
 }
 
-float V2::length() const
+float V2::hypot() const
 {
     return Math::sqrt(_x * _x + _y * _y);
 }
@@ -147,8 +147,8 @@ V2 V2::floorDiv(const V2& other) const
 
 V2 V2::normalize() const
 {
-    float hypot = std::max(length(), MIN_NORMALIZE_LENGTH);
-    return V2(_x / hypot, _y / hypot);
+    float length = std::max(hypot(), MIN_NORMALIZE_LENGTH);
+    return V2(_x / length, _y / length);
 }
 
 const float& V2::operator[](size_t idx) const

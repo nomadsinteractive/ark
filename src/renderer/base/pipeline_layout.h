@@ -6,6 +6,7 @@
 
 #include "core/base/api.h"
 #include "core/base/string.h"
+#include "core/collection/table.h"
 
 #include "renderer/forwarding.h"
 #include "renderer/base/attribute.h"
@@ -30,7 +31,7 @@ public:
 
     size_t colorAttachmentCount() const;
 
-    const std::vector<sp<Texture>>& samplers() const;
+    const Table<String, sp<Texture>>& samplers() const;
     const std::vector<sp<Texture>>& images() const;
 
 private:
@@ -38,7 +39,7 @@ private:
     void tryBindUniform(const ShaderPreprocessor& shaderPreprocessor, const String& name, const sp<Input>& input);
     void tryBindCamera(const ShaderPreprocessor& shaderPreprocessor, const Camera& camera);
 
-    std::vector<sp<Texture>> makeBindingSamplers() const;
+    Table<String, sp<Texture>> makeBindingSamplers() const;
     std::vector<sp<Texture>> makeBindingImages() const;
 
 private:
@@ -51,7 +52,7 @@ private:
 
     size_t _color_attachment_count;
 
-    std::vector<sp<Texture>> _samplers;
+    Table<String, sp<Texture>> _samplers;
     std::vector<sp<Texture>> _images;
     std::map<String, String> _definitions;
 

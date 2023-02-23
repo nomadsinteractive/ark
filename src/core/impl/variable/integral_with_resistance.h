@@ -29,8 +29,8 @@ public:
     }
 
 private:
-    template<typename U> U getRC_sfinae(const U& v, float cd, decltype(v.length())*) const {
-        auto length = v.length();
+    template<typename U> U getRC_sfinae(const U& v, float cd, decltype(v.hypot())*) const {
+        auto length = v.hypot();
         return v * length * cd;
     }
 

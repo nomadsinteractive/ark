@@ -37,4 +37,12 @@ Renderable::Snapshot::Snapshot(State state, int32_t type, const V3& position, co
 {
 }
 
+void Renderable::Snapshot::applyVaryings(const Varyings::Snapshot& defaultVaryingsSnapshot)
+{
+    if(!_varyings)
+        _varyings = defaultVaryingsSnapshot;
+    else
+        _varyings.applyDefaults(defaultVaryingsSnapshot ? &defaultVaryingsSnapshot : nullptr);
+}
+
 }

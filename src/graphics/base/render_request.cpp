@@ -38,8 +38,8 @@ private:
 
 }
 
-RenderRequest::RenderRequest(uint64_t timestamp, const sp<Executor>& executor, const sp<MemoryPool>& memoryPool, const sp<OCSQueue<RenderRequest>>& renderRequests)
-    : _stub(sp<Stub>::make(timestamp, executor, memoryPool, renderRequests))
+RenderRequest::RenderRequest(uint64_t timestamp, const sp<Allocator::Pool>& allocatorPool, const sp<Executor>& executor, const sp<OCSQueue<RenderRequest>>& renderRequests)
+    : _stub(sp<Stub>::make(timestamp, allocatorPool, executor, renderRequests))
 {
 }
 
@@ -58,8 +58,8 @@ void RenderRequest::onRenderFrame(const Color& backgroundColor, RenderView& rend
     renderView.onRenderFrame(backgroundColor, _stub->_render_command_pipe_line);
 }
 
-RenderRequest::RenderRequest(const sp<RenderRequest::Stub>& stub)
-    : _stub(stub)
+RenderRequest::RenderRequest(sp<RenderRequest::Stub> stub)
+    : _stub(std::move(stub))
 {
 }
 
@@ -82,8 +82,8 @@ void RenderRequest::addBackgroundRequest(const RenderLayer& layer, const V3& pos
     _stub->_render_command_pipe_line->add(std::move(renderCommand));
 }
 
-RenderRequest::Stub::Stub(uint64_t timestamp, const sp<Executor>& executor, const sp<MemoryPool>& memoryPool, const sp<OCSQueue<RenderRequest>>& renderRequests)
-    : _timestamp(timestamp), _allocator(memoryPool), _executor(executor), _render_requests(renderRequests), _render_command_pipe_line(sp<RenderCommandPipeline>::make()), _background_renderer_count(1)
+RenderRequest::Stub::Stub(uint64_t timestamp, const sp<Allocator::Pool>& allocatorPool, const sp<Executor>& executor, const sp<OCSQueue<RenderRequest>>& renderRequests)
+    : _timestamp(timestamp), _allocator(allocatorPool), _executor(executor), _render_requests(renderRequests), _render_command_pipe_line(sp<RenderCommandPipeline>::make()), _background_renderer_count(1)
 {
 }
 

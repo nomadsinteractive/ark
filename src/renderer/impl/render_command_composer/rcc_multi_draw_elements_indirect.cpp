@@ -123,7 +123,7 @@ sp<RenderCommand> RCCMultiDrawElementsIndirect::compose(const RenderRequest& ren
 
 ByteArray::Borrowed RCCMultiDrawElementsIndirect::makeIndirectBuffer(const RenderRequest& renderRequest) const
 {
-    ByteArray::Borrowed cmds = renderRequest.allocator().sbrk(_indirect_cmds.size() * sizeof(DrawingContext::DrawElementsIndirectCommand));
+    ByteArray::Borrowed cmds = renderRequest.allocator().sbrkSpan(_indirect_cmds.size() * sizeof(DrawingContext::DrawElementsIndirectCommand));
     DrawingContext::DrawElementsIndirectCommand* pcmds = reinterpret_cast<DrawingContext::DrawElementsIndirectCommand*>(cmds.buf());
     uint32_t baseInstance = 0;
     for(const IndirectCmds& i : _indirect_cmds.values())
@@ -153,9 +153,9 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
 
                 for(const auto& [j, k] : s._varyings._sub_properties)
                 {
-                    const ByteArray::Borrowed subProperty = k.getDivided(1);
-                    if(subProperty.length() > sizeof(M4))
-                        iter->second.setNodeTransform(j, *reinterpret_cast<const M4*>(subProperty.buf()));
+                    Varyings::Divided subProperty = k.getDivided(1);
+                    if(subProperty._content.length() > sizeof(M4))
+                        iter->second.setNodeTransform(j, *reinterpret_cast<const M4*>(subProperty._content.buf()));
                 }
             }
         }
@@ -173,7 +173,7 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
                 VertexWriter writer = buf.makeDividedVertexWriter(renderRequest, 1, offset, 1);
                 writer.next();
                 writer.write(MatrixUtil::translate(M4::identity(), s._position) * MatrixUtil::scale(s._transform.toMatrix(), toScale(s._size, metrics)) * j.globalTransform());
-                const ByteArray::Borrowed divided = s._varyings.getDivided(1);
+                ByteArray::Borrowed divided = s._varyings.getDivided(1)._content;
                 if(divided.length() > sizeof(M4))
                     writer.write(divided.buf() + sizeof(M4), divided.length() - sizeof(M4), sizeof(M4));
             }

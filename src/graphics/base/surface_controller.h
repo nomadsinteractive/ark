@@ -2,6 +2,7 @@
 #define ARK_GRAPHICS_BASE_SURFACE_CONTROLLER_H_
 
 #include "core/base/api.h"
+#include "core/base/allocator.h"
 #include "core/concurrent/one_consumer_synchronized.h"
 #include "core/forwarding.h"
 #include "core/types/shared_ptr.h"
@@ -30,6 +31,7 @@ public:
 private:
     sp<Executor> _executor;
     sp<MemoryPool> _memory_pool;
+    sp<Allocator::Pool> _allocator_pool;
 
     sp<RendererGroup> _renderers;
     sp<RendererGroup> _controls;

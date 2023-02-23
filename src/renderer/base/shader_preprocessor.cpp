@@ -467,7 +467,7 @@ String ShaderPreprocessor::Function::genOutCall(PipelineInput::ShaderStage preSh
 bool ShaderPreprocessor::Function::hasOutAttribute(const String& name) const
 {
     for(const auto& i : _args)
-        if(i._modifier & Parameter::PARAMETER_MODIFIER_OUT && i._name == name)
+        if(i._modifier & Parameter::PARAMETER_MODIFIER_OUT && Strings::capitalizeFirst(i._name) == name)
             return true;
     return false;
 }

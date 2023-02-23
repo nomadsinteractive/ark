@@ -21,40 +21,55 @@ namespace ark {
 
 class ARK_API Varyings : public Holder {
 private:
-    class Slot {
-    public:
+    struct SlotSnapshot {
+        SlotSnapshot(void* content, uint32_t offset, uint32_t size);
+
+        void* _content;
+        uint32_t _offset;
+        uint32_t _size;
+        SlotSnapshot* _next;
+    };
+
+    struct Slot {
         Slot(sp<Input> input = nullptr, uint32_t divisor = 0, int32_t offset = -1);
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Slot);
 
-        void apply(uint8_t* ptr) const;
-
-    private:
         sp<Input> _input;
         uint32_t _divisor;
         int32_t _offset;
-
-        friend class Varyings;
-    };
-
-    struct Divided {
-        Divided(uint32_t divisor, ByteArray::Borrowed content);
-
-        uint32_t _divisor;
-        ByteArray::Borrowed _content;
     };
 
 public:
+    struct Divided {
+        Divided();
+        Divided(uint32_t divisor, ByteArray::Borrowed content);
+
+        explicit operator bool() const;
+
+        void apply(const SlotSnapshot* slots = nullptr);
+        void addSnapshot(Allocator& allocator, const Slot& slot);
+
+        void addSlotSnapshot(SlotSnapshot* slotSnapshot);
+
+        uint32_t _divisor;
+
+        ByteArray::Borrowed _content;
+        SlotSnapshot* _slot_snapshot;
+    };
+
     struct Snapshot {
         Snapshot() = default;
         Snapshot(Array<Divided>::Borrowed buffers);
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Snapshot);
+
+        void applyDefaults(const Snapshot* defaults = nullptr);
 
         Array<Divided>::Borrowed _buffers;
         std::map<size_t, Snapshot> _sub_properties;
 
         explicit operator bool() const;
 
-        ByteArray::Borrowed getDivided(uint32_t divisor) const;
+        Varyings::Divided getDivided(uint32_t divisor) const;
         void snapshotSubProperties(const std::map<String, sp<Varyings>>& subProperties, const PipelineInput& pipelineInput, Allocator& allocator);
     };
 

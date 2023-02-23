@@ -151,10 +151,10 @@ public:
 
 //  [[plugin::function("min")]]
 //  [[script::bindings::auto]]
-    static ARK_API sp<Numeric> min(const sp<Numeric>& a1, const sp<Numeric>& a2);
+    static ARK_API sp<Numeric> min(sp<Numeric> a1, sp<Numeric> a2);
 //  [[plugin::function("max")]]
 //  [[script::bindings::auto]]
-    static ARK_API sp<Numeric> max(const sp<Numeric>& a1, const sp<Numeric>& a2);
+    static ARK_API sp<Numeric> max(sp<Numeric> a1, sp<Numeric> a2);
 
 //  [[script::bindings::auto]]
     static ARK_API float acos(float x);

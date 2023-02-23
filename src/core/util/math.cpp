@@ -96,14 +96,14 @@ sp<Numeric> Math::cos(const sp<Numeric>& x)
     return sp<VariableOP1<float>>::make(static_cast<float(*)(float)>(Math::cos), x);
 }
 
-sp<Numeric> Math::min(const sp<Numeric>& a1, const sp<Numeric>& a2)
+sp<Numeric> Math::min(sp<Numeric> a1, sp<Numeric> a2)
 {
-    return sp<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::Min<float>>>::make(a1, a2);
+    return sp<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::Min<float>>>::make(std::move(a1), std::move(a2));
 }
 
-sp<Numeric> Math::max(const sp<Numeric>& a1, const sp<Numeric>& a2)
+sp<Numeric> Math::max(sp<Numeric> a1, sp<Numeric> a2)
 {
-    return sp<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::Max<float>>>::make(a1, a2);
+    return sp<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::Max<float>>>::make(std::move(a1), std::move(a2));
 }
 
 float Math::acos(float x)
@@ -214,17 +214,17 @@ sp<Numeric> Math::sqrt(sp<Numeric> x)
 
 float Math::distance(const V2& lvalue, const V2& rvalue)
 {
-    return (lvalue - rvalue).length();
+    return (lvalue - rvalue).hypot();
 }
 
 float Math::distance(const V3& lvalue, const V3& rvalue)
 {
-    return (lvalue - rvalue).length();
+    return (lvalue - rvalue).hypot();
 }
 
 float Math::distance(const V4& lvalue, const V4& rvalue)
 {
-    return (lvalue - rvalue).length();
+    return (lvalue - rvalue).hypot();
 }
 
 sp<Numeric> Math::distance(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue)

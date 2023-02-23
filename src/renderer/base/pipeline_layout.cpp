@@ -50,7 +50,7 @@ size_t PipelineLayout::colorAttachmentCount() const
     return _color_attachment_count;
 }
 
-const std::vector<sp<Texture>>& PipelineLayout::samplers() const
+const Table<String, sp<Texture>>& PipelineLayout::samplers() const
 {
     return _samplers;
 }
@@ -103,18 +103,22 @@ void PipelineLayout::tryBindCamera(const ShaderPreprocessor& shaderPreprocessor,
     tryBindUniform(shaderPreprocessor, "u_Projection", camera.projection());
 }
 
-std::vector<sp<Texture>> PipelineLayout::makeBindingSamplers() const
+Table<String, sp<Texture> > PipelineLayout::makeBindingSamplers() const
 {
     DASSERT(_building_context);
-    std::vector<sp<Texture>> bs(_input->samplerCount());
-    const Table<String, sp<Texture>>& samplers = _building_context->_samplers;
-    CHECK_WARN(bs.size() >= samplers.size(), "Predefined samplers(%d) is more than samplers(%d) in PipelineLayout", samplers.size(), bs.size());
+    const PipelineInput& pipelineInput = _input;
+    const Table<String, sp<Texture>>& predefinedSamplers = _building_context->_samplers;
+    CHECK_WARN(pipelineInput.samplerCount() >= predefinedSamplers.size(), "Predefined samplers(%d) is more than samplers(%d) in PipelineLayout", predefinedSamplers.size(), _input->samplerCount());
 
-    for(size_t i = 0; i < samplers.values().size(); ++i)
-        if(i < bs.size())
-            bs[i] = samplers.values().at(i);
+    Table<String, sp<Texture>> samplers;
+    for(size_t i = 0; i < pipelineInput.samplerCount(); ++i)
+    {
+        const String& name = pipelineInput.samplerNames().at(i);
+        const auto iter = predefinedSamplers.find(name);
+        samplers.push_back(name, iter != predefinedSamplers.end() ? iter->second : (i < predefinedSamplers.size() ? predefinedSamplers.values().at(i) : nullptr));
+    }
 
-    return bs;
+    return samplers;
 }
 
 std::vector<sp<Texture>> PipelineLayout::makeBindingImages() const

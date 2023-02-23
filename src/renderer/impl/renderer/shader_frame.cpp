@@ -50,7 +50,7 @@ ByteArray::Borrowed ShaderFrame::getVertexBuffer(RenderRequest& renderRequest, c
     ip[23] = uvbottom;
     ip[30] = 0xffff;
     ip[31] = uvtop;
-    ByteArray::Borrowed allocated = renderRequest.allocator().sbrk(buffer.size());
+    ByteArray::Borrowed allocated = renderRequest.allocator().sbrkSpan(buffer.size());
     memcpy(allocated.buf(), buffer.buf(), buffer.size());
     return allocated;
 }

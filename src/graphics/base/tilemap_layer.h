@@ -10,7 +10,6 @@
 #include "graphics/base/rect.h"
 #include "graphics/base/render_layer.h"
 #include "graphics/base/tilemap.h"
-#include "graphics/impl/renderable/renderable_passive.h"
 
 
 namespace ark {

@@ -13,8 +13,8 @@
 namespace ark {
 
 SurfaceController::SurfaceController(sp<Executor> executor)
-    : _executor(std::move(executor)), _memory_pool(sp<MemoryPool>::make()), _renderers(sp<RendererGroup>::make()), _controls(sp<RendererGroup>::make()),
-      _layers(sp<RendererGroup>::make()), _render_requests(sp<OCSQueue<RenderRequest>>::make())
+    : _executor(std::move(executor)), _memory_pool(sp<MemoryPool>::make()), _allocator_pool(sp<Allocator::Pool>::make()), _renderers(sp<RendererGroup>::make()),
+      _controls(sp<RendererGroup>::make()), _layers(sp<RendererGroup>::make()), _render_requests(sp<OCSQueue<RenderRequest>>::make())
 {
 }
 
@@ -39,7 +39,7 @@ void SurfaceController::requestUpdate(uint64_t timestamp)
     if(size < 3)
     {
         const V3 position(0);
-        RenderRequest renderRequest(timestamp, _executor, _memory_pool, _render_requests);
+        RenderRequest renderRequest(timestamp, _allocator_pool, _executor, _render_requests);
         _renderers->render(renderRequest, position);
         _controls->render(renderRequest, position);
         _layers->render(renderRequest, position);
@@ -51,10 +51,12 @@ void SurfaceController::requestUpdate(uint64_t timestamp)
 void SurfaceController::onRenderFrame(const Color& backgroundColor, RenderView& renderView)
 {
     DTHREAD_CHECK(THREAD_ID_RENDERER);
-    std::this_thread::sleep_for(std::chrono::milliseconds(4));
+
     RenderRequest renderRequest;
-    while(!_render_requests->pop(renderRequest))
+    do {
         std::this_thread::sleep_for(std::chrono::milliseconds(4));
+    } while(!_render_requests->pop(renderRequest));
+
     renderRequest.onRenderFrame(backgroundColor, renderView);
 }
 

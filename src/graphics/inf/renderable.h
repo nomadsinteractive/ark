@@ -41,6 +41,8 @@ public:
         Snapshot(State state, int32_t type, const V3& position, const V3& size, const Transform::Snapshot& transform, const Varyings::Snapshot& varyings);
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Snapshot);
 
+        void applyVaryings(const Varyings::Snapshot& defaultVaryingsSnapshot);
+
         State _state;
         int32_t _type;
         sp<Model> _model;

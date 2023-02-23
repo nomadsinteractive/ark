@@ -297,19 +297,19 @@ void GLPipeline::bindBuffer(GraphicsContext& graphicsContext, const PipelineInpu
 {
     DCHECK(id(), "GLProgram unprepared");
     bindBuffer(graphicsContext, input, 0);
-    for(const auto& i : divisors)
+    for(const auto& [i, j] : divisors)
     {
-        if(!i.second.id())
-            i.second.upload(graphicsContext);
+        if(!j.id())
+            j.upload(graphicsContext);
 
-        const GLBufferBinder binder(GL_ARRAY_BUFFER, static_cast<GLuint>(i.second.id()));
-        bindBuffer(graphicsContext, input, i.first);
+        const GLBufferBinder binder(GL_ARRAY_BUFFER, static_cast<GLuint>(j.id()));
+        bindBuffer(graphicsContext, input, i);
     }
 }
 
-void GLPipeline::activeTexture(const Texture& texture, uint32_t name)
+void GLPipeline::activeTexture(const Texture& texture, const String& name, uint32_t binding)
 {
-    _stub->activeTexture(texture, name);
+    _stub->activeTexture(texture, name, binding);
 }
 
 const GLPipeline::GLUniform& GLPipeline::getUniform(const String& name)
@@ -376,7 +376,7 @@ GLPipeline::GLAttribute::GLAttribute(GLint location)
 
 void GLPipeline::GLAttribute::bind(const Attribute& attribute, GLsizei stride) const
 {
-    DCHECK_WARN(_location >= 0, "Attribute \"%s\" location: %d", attribute.name().c_str(), _location);
+    CHECK_WARN(_location >= 0, "Attribute \"%s\" location: %d", attribute.name().c_str(), _location);
     if(attribute.length() <= 4)
         setVertexPointer(attribute, _location, stride, attribute.length(), attribute.offset());
     else if(attribute.length() == 16)
@@ -390,6 +390,10 @@ void GLPipeline::GLAttribute::bind(const Attribute& attribute, GLsizei stride) c
         uint32_t offset = attribute.size() / 3;
         for(int32_t i = 0; i < 3; i++)
             setVertexPointer(attribute, _location + i, stride, 3, attribute.offset() + offset * i);
+    }
+    else
+    {
+        FATAL("Unknow attribute \"%s %s\"", attribute.type(), attribute.name());
     }
 }
 
@@ -628,13 +632,13 @@ void GLPipeline::Stub::bind(GraphicsContext& /*graphicsContext*/, const Pipeline
     glUseProgram(_id);
     bindUBOSnapshots(pipelineContext._ubos, pipelineContext._shader_bindings->pipelineInput());
 
-    const std::vector<sp<Texture>>& samplers = pipelineContext._shader_bindings->pipelineBindings()->samplers();
-    for(size_t i = 0; i < samplers.size(); ++i)
+    uint32_t binding = 0;
+    for(const auto& [i, j] : pipelineContext._shader_bindings->pipelineBindings()->samplers())
     {
-        const sp<Texture>& sampler = samplers.at(i);
-        CHECK_WARN(sampler, "Pipeline has unbound sampler at: %d", i);
-        if(sampler)
-            activeTexture(sampler, static_cast<uint32_t>(i));
+        CHECK_WARN(j, "Pipeline has unbound sampler \"%s\"", i.c_str());
+        if(j)
+            activeTexture(j, i, binding);
+        ++ binding;
     }
 
     const std::vector<sp<Texture>>& images = pipelineContext._shader_bindings->pipelineBindings()->images();
@@ -708,15 +712,14 @@ void GLPipeline::Stub::bindImage(const Texture& texture, uint32_t name)
     glBindImageTexture(name, static_cast<GLuint>(texture.delegate()->id()), 0, GL_FALSE, 0, GL_READ_WRITE, GL_R16I);
 }
 
-void GLPipeline::Stub::activeTexture(const Texture& texture, uint32_t name)
+void GLPipeline::Stub::activeTexture(const Texture& texture, const String& name, uint32_t binding)
 {
     static GLenum glTargets[Texture::TYPE_COUNT] = {GL_TEXTURE_2D, GL_TEXTURE_CUBE_MAP};
-    glActiveTexture(static_cast<GLenum>(GL_TEXTURE0 + name));
+    glActiveTexture(static_cast<GLenum>(GL_TEXTURE0 + binding));
     glBindTexture(glTargets[texture.type()], static_cast<GLuint>(texture.delegate()->id()));
 
-    char uniformName[16] = {'u', '_', 'T', 'e', 'x', 't', 'u', 'r', 'e', static_cast<char>('0' + name)};
-    const GLPipeline::GLUniform& uTexture = getUniform(uniformName);
-    uTexture.setUniform1i(static_cast<GLint>(name));
+    const GLPipeline::GLUniform& uTexture = getUniform(name);
+    uTexture.setUniform1i(static_cast<GLint>(binding));
 }
 
 const GLPipeline::GLUniform& GLPipeline::Stub::getUniform(const String& name)

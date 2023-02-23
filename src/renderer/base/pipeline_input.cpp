@@ -30,7 +30,6 @@ PipelineInput::AttributeOffsets::AttributeOffsets(const PipelineInput& input)
 }
 
 PipelineInput::PipelineInput()
-    : _sampler_count(0)
 {
     _streams.insert(std::make_pair(0, Stream()));
 }
@@ -41,11 +40,14 @@ void PipelineInput::initialize(const PipelineBuildingContext& buildingContext)
 
     for(const sp<Uniform>& i : buildingContext._uniforms.values())
     {
-        CHECK(i->binding() >= 0, "Uniform \"%s\" has unspecified binding. (Declared but unused variables might be optimized out)", i->name().c_str());
-        sp<PipelineInput::UBO>& ubo = ubos[i->binding()];
-        if(!ubo)
-            ubo = sp<PipelineInput::UBO>::make(i->binding());
-        ubo->addUniform(i);
+        CHECK_WARN(i->binding() >= 0, "Uniform \"%s\" has unspecified binding. (Declared but unused variables might be optimized out)", i->name().c_str());
+        if(i->binding() >= 0)
+        {
+            sp<PipelineInput::UBO>& ubo = ubos[i->binding()];
+            if(!ubo)
+                ubo = sp<PipelineInput::UBO>::make(i->binding());
+            ubo->addUniform(i);
+        }
     }
 
     for(auto& i : ubos)
@@ -56,7 +58,7 @@ void PipelineInput::initialize(const PipelineBuildingContext& buildingContext)
 
     ShaderPreprocessor* fragment = buildingContext.tryGetStage(SHADER_STAGE_FRAGMENT);
     ShaderPreprocessor* compute = buildingContext.tryGetStage(SHADER_STAGE_COMPUTE);
-    _sampler_count = fragment ? fragment->_declaration_samplers.vars().size() : (compute ? compute->_declaration_samplers.vars().size() : 0);
+    _sampler_names = fragment ? fragment->_declaration_samplers.vars().keys() : (compute ? compute->_declaration_samplers.vars().keys() : std::vector<String>());
 }
 
 const std::vector<sp<PipelineInput::UBO>>& PipelineInput::ubos() const
@@ -86,7 +88,12 @@ std::map<uint32_t, PipelineInput::Stream>& PipelineInput::streams()
 
 size_t PipelineInput::samplerCount() const
 {
-    return _sampler_count;
+    return _sampler_names.size();
+}
+
+const std::vector<String>& PipelineInput::samplerNames() const
+{
+    return _sampler_names;
 }
 
 void PipelineInput::addAttribute(String name, Attribute attribute)
@@ -192,8 +199,8 @@ RenderLayerSnapshot::UBOSnapshot PipelineInput::UBO::snapshot(const RenderReques
 {
     doSnapshot(renderRequest.timestamp(), false);
     RenderLayerSnapshot::UBOSnapshot ubo {
-        renderRequest.allocator().sbrk(_dirty_flags->size()),
-        renderRequest.allocator().sbrk(_buffer->size())
+        renderRequest.allocator().sbrkSpan(_dirty_flags->size()),
+        renderRequest.allocator().sbrkSpan(_buffer->size())
     };
     memcpy(ubo._dirty_flags.buf(), _dirty_flags->buf(), _dirty_flags->size());
     memcpy(ubo._buffer.buf(), _buffer->buf(), _buffer->size());
