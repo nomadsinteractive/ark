@@ -33,9 +33,9 @@ void Vec4Type::setW(const sp<Vec4>& self, sp<Numeric> w)
     ensureImpl(self)->w()->set(std::move(w));
 }
 
-V4 Vec4Type::xyzw(const sp<Vec4>& self)
+sp<Vec4> Vec4Type::xyzw(sp<Vec4> self)
 {
-    return self->val();
+    return self;
 }
 
 template<> ARK_API sp<Vec4> Null::safePtr()

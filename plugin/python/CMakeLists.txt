@@ -51,7 +51,11 @@ execute_process(
 )
 include(${ARK_GENERATED_FILE_DIRECTORY}/py_ark_bindings.cmake)
 
+ark_find_vcpkg_package(expat LIBRARIES expat::expat)
 include(extensions.cmake)
+if(WIN32)
+    ark_link_libraries(ws2_32 iphlpapi)
+endif()
 
 if(NOT (ANDROID OR IOS))
     if(Python3_LIBRARIES MATCHES "static")
@@ -65,19 +69,10 @@ ark_setup_tools(ark_gen_plugin_class)
 ark_gen_plugin_class(python core ark::plugin::python python_plugin impl)
 
 ark_include_directories(${ARK_PYTHON_INCLUDE_DIR})
-ark_add_plugin_library(${PROJECT_NAME} ${LOCAL_SRC_LIST} ${LOCAL_GENERATED_SRC_LIST} extension_ctypes extension_decimal)
+ark_add_plugin_library(${PROJECT_NAME} ${LOCAL_SRC_LIST} ${LOCAL_GENERATED_SRC_LIST} extension_ctypes extension_decimal extension_socket extension_select extension_pyexpat extension_overlapped)
 target_compile_definitions(${PROJECT_NAME} PRIVATE -DARK_FLAG_BUILDING_PLUGIN_PYTHON)
 
 ark_export_dependency_libraries(${PROJECT_NAME} ${ARK_PYTHON_LIBRARIES} ${ARK_PYTHON_PATCH_LIBS})
-
-#ark_unset_local_variables()
-
-#list(APPEND LOCAL_LIBS ${ARK_PYTHON_LIBRARIES})
-#list(APPEND LOCAL_INCLUDE_DIRS ${ARK_PYTHON_INCLUDE_DIR})
-
-#if(WIN32)
-#    list(APPEND LOCAL_LIBS version.lib Shlwapi.lib Pathcch.lib Iphlpapi.lib)
-#endif()
 
 set(ARK_PYTHON_INCLUDE_DIR ${ARK_PYTHON_INCLUDE_DIR} PARENT_SCOPE)
 set(ARK_PYTHON_PATCH_LIBS ${ARK_PYTHON_PATCH_LIBS} PARENT_SCOPE)

@@ -43,6 +43,7 @@ public:
 
     static void setRuntimeErrString(const char* string);
     static void setTypeErrString(const char* string);
+    static void setStopIterationErrString(const char* string);
 
     static PyObject* incRefNone();
 

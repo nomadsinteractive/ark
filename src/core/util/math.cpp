@@ -288,13 +288,6 @@ sp<Vec4> Math::lerp(sp<Vec4> a, sp<Vec4> b, sp<Numeric> t)
     return sp<Interpolate<V4, float>>::make(std::move(a), std::move(b), std::move(t));
 }
 
-sp<Vec2> Math::bezier(sp<Vec2> p0, sp<Vec2> p1, sp<Vec2> p2, sp<Numeric> t)
-{
-    sp<Vec2> i1 = lerp(std::move(p0), p1, t);
-    sp<Vec2> i2 = lerp(std::move(p1), std::move(p2), t);
-    return lerp(std::move(i1), std::move(i2), std::move(t));
-}
-
 V3 Math::quadratic(float a, float b, float c)
 {
     float d = b * b - 4.0f * a * c;

@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_UTIL_VEC3_TYPE_H_
-#define ARK_GRAPHICS_UTIL_VEC3_TYPE_H_
+#pragma once
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
@@ -24,13 +23,9 @@ public:
 
 /**
 //  [[script::bindings::operator(+)]]
-    static sp<Vec3> add(const sp<Vec3>& lvalue, const V3& rvalue);
-//  [[script::bindings::operator(+)]]
     static sp<Vec3> add(const sp<Vec3>& lvalue, sp<Vec3> rvalue);
 //  [[script::bindings::operator(-)]]
     static sp<Vec3> sub(const sp<Vec3>& lvalue, sp<Vec3> rvalue);
-//  [[script::bindings::operator(*)]]
-    static sp<Vec3> mul(const sp<Vec3>& lvalue, const V3& rvalue);
 //  [[script::bindings::operator(*)]]
     static sp<Vec3> mul(const sp<Vec3>& lvalue, sp<Vec3> rvalue);
 //  [[script::bindings::operator(*)]]
@@ -39,8 +34,6 @@ public:
     static sp<Vec3> mul(const sp<Vec3>& lvalue, sp<Numeric> rvalue);
 //  [[script::bindings::operator(/)]]
     static sp<Vec3> truediv(const sp<Vec3>& lvalue, sp<Numeric> rvalue);
-//  [[script::bindings::operator(/)]]
-    static sp<Vec3> truediv(const sp<Vec3>& lvalue, const V3& rvalue);
 //  [[script::bindings::operator(/)]]
     static sp<Vec3> truediv(const sp<Vec3>& lvalue, sp<Vec3> rvalue);
 //  [[script::bindings::operator(//)]]
@@ -60,9 +53,9 @@ public:
 //  [[script::bindings::property]]
     static V3 val(const sp<Vec3>& self);
 //  [[script::bindings::property]]
-    static V3 xyz(const sp<Vec3>& self);
+    static sp<Vec3> xyz(sp<Vec3> self);
 //  [[script::bindings::property]]
-    static V2 xy(const sp<Vec3>& self);
+    static sp<Vec2> xy(sp<Vec3> self);
 
 //  [[script::bindings::property]]
     static sp<Numeric> x(const sp<Vec3>& self);
@@ -141,5 +134,3 @@ public:
 };
 
 }
-
-#endif

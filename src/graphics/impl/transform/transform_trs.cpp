@@ -21,7 +21,7 @@ V3 TransformTRS::transform(const Transform::Snapshot& snapshot, const V3& positi
 
 M4 TransformTRS::toMatrix(const Transform::Snapshot& snapshot) const
 {
-    M4 matrix = M4::identity();
+    M4 matrix;
     const Snapshot* data = snapshot.getData<Snapshot>();
     memcpy(matrix.value(), data->matrix.value(), sizeof(float) * 3);
     memcpy(matrix.value() + 4, data->matrix.value() + 3, sizeof(float) * 3);

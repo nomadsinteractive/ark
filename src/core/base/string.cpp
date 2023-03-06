@@ -186,6 +186,11 @@ String String::toLower() const
     return String(s);
 }
 
+StringView String::toStringView() const
+{
+    return StringView(_str);
+}
+
 std::pair<String, Optional<String>> String::cut(char sep) const
 {
     const size_type pos = find(sep);

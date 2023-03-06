@@ -97,22 +97,6 @@ public:
 //  [[script::bindings::classmethod]]
     static sp<Mat4> toMatrix(sp<Transform> self);
 
-//  [[plugin::builder]]
-    class BUILDER : public Builder<Transform> {
-    public:
-        [[deprecated]]
-        BUILDER(BeanFactory& factory, const document& manifest);
-
-        virtual sp<Transform> build(const Scope& args) override;
-
-    private:
-        Type _type;
-        SafePtr<Builder<Rotation>> _rotation;
-        SafePtr<Builder<Vec3>> _scale;
-        SafePtr<Builder<Vec3>> _pivot;
-
-    };
-
 private:
     sp<Delegate> makeDelegate() const;
     sp<Delegate> makeTransformLinear() const;
@@ -132,6 +116,7 @@ private:
     private:
         Transform& _transform;
     };
+
     template<typename T> const sp<T>& tryUpdateDelegate(SafeVar<T>& safevar) {
         if(safevar)
             return safevar;

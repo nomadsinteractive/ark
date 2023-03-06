@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_API_H_
-#define ARK_CORE_API_H_
+#pragma once
 
 #include <limits>
 #include <stdint.h>
@@ -211,5 +210,3 @@ bool ARK_API __trace_flag__();
 void ARK_API __set_trace_flag__();
 
 }
-
-#endif

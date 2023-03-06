@@ -5,9 +5,11 @@ import os
 import re
 import sys
 from os import path
+from typing import Optional
 
 from gen_core import get_param_and_paths, import_acg, INDENT, GenArgumentMeta, GenArgument, create_overloaded_method_type
-from gen_method import GenMethod, GenGetPropMethod, GenSetPropMethod, GenMappingMethod, gen_operator_defs, gen_as_mapping_defs, GenOperatorMethod
+from gen_method import GenMethod, GenGetPropMethod, GenSetPropMethod, GenMappingMethod, gen_operator_defs, gen_as_mapping_defs, GenOperatorMethod, \
+    GenSequenceMethod, gen_as_sequence_defs
 
 LOADER_TEMPLATE = '''template<typename T> static Box PyArk${classname}_${methodname}Function(PyArkType::Instance& inst, const String& id, const Scope& args) {
     const sp<T> bean = inst.unpack<${classname}>()->${methodname}<T>(id, args);
@@ -25,7 +27,9 @@ RICH_COMPARE_OPS = {
 
 ANNOTATION_PATTERN = r'(?:\s*(?://)?\s*\[\[[^]]+]])*'
 METHOD_PATTERN = r'([^(\r\n]+)\(([^\r\n]*)\)[^;\r\n]*;'
-AUTOBIND_CONSTANT_PATTERN = re.compile(r'\[\[script::bindings::constant\(([\w_]+)\s*=\s*([^;\r\n]*)\)]]')
+DECLARATION_PATTERN = r'(static\s+)?(const\s+)?([\w\s]+);'
+
+AUTOBIND_CONSTANT_PATTERN = re.compile(r'\[\[script::bindings::constant]][\r\n\s]+%s' % DECLARATION_PATTERN)
 AUTOBIND_ENUMERATION_PATTERN = re.compile(r'\[\[script::bindings::enumeration]]\s*enum\s+(\w+)\s*{([^}]+)};')
 AUTOBIND_PROPERTY_PATTERN = re.compile(r'\[\[script::bindings::property]]\s+%s' % METHOD_PATTERN)
 AUTOBIND_GETPROP_PATTERN = re.compile(r'\[\[script::bindings::getprop]]\s+%s' % METHOD_PATTERN)
@@ -33,6 +37,7 @@ AUTOBIND_SETPROP_PATTERN = re.compile(r'\[\[script::bindings::setprop]]\s+%s' % 
 AUTOBIND_LOADER_PATTERN = re.compile(r'\[\[script::bindings::loader]]\s+template<typename T>\s+([^(\r\n]+)\(([^)\r\n]*)\)[^;{]*{')
 AUTOBIND_METHOD_PATTERN = re.compile(r'\[\[script::bindings::(auto|classmethod|constructor)]]\s+%s' % METHOD_PATTERN)
 AUTOBIND_AS_MAPPING_PATTERN = re.compile(r'\[\[script::bindings::map\(([^)]+)\)]]\s+%s' % METHOD_PATTERN)
+AUTOBIND_AS_SEQUENCE_PATTERN = re.compile(r'\[\[script::bindings::seq\(([^)]+)\)]]\s+%s' % METHOD_PATTERN)
 AUTOBIND_OPERATOR_PATTERN = re.compile(r'\[\[script::bindings::operator\(([^)]+)\)]]\s+%s' % METHOD_PATTERN)
 AUTOBIND_CLASS_PATTERN = re.compile(r'\[\[script::bindings::(class|name)\(([^)]+)\)]]')
 AUTOBIND_EXTENDS_PATTERN = re.compile(r'\[\[script::bindings::extends\((\w+)\)]]')
@@ -143,8 +148,7 @@ public:
 
 def gen_py_binding_h(filename, namespaces, includes, declares):
     header_macro = re.sub(r'\W', '_', filename).upper()
-    return acg.format('''#ifndef PY_${header_macro}_GEN
-#define PY_${header_macro}_GEN
+    return acg.format('''#pragma once
 
 ${includes}
 
@@ -153,8 +157,7 @@ ${includes}
 #include "python/extension/py_cast.h"
 
 ${0}
-
-#endif''', acg.wrapByNamespaces(namespaces, '\n'.join(declares)), header_macro=header_macro,
+''', acg.wrapByNamespaces(namespaces, '\n'.join(declares)), header_macro=header_macro,
                       includes='\n'.join(includes))
 
 
@@ -210,6 +213,17 @@ def gen_body_source(filename, output_dir, output_file, namespaces, modulename, r
     return gen_py_binding_cpp(name, namespaces, includes, lines)
 
 
+def gen_constructor_definition_source(py_class_name: str, tp_name: str, definitions: list[str], constructor_section: list[str], declaration_section: list[str],
+                                      cast_type: Optional[str] = None):
+    if definitions:
+        constructor_section.append('')
+        constructor_section.extend(text_align(text_align(definitions, '/*'), '*/'))
+        value = f'&{py_class_name}_tp_{tp_name}'
+        if cast_type:
+            value = f'reinterpret_cast<{cast_type}>({value})'
+        declaration_section.append(f'pyTypeObject->tp_{tp_name} = {value};')
+
+
 def gen_class_body_source(genclass, includes, lines, buildables):
     tp_method_lines = []
     includes.append('#include "%s"' % genclass.filename)
@@ -234,23 +248,21 @@ def gen_class_body_source(genclass, includes, lines, buildables):
                 print("WARNING: at least two setprop methods defined in %s, which is probably not right", genclass.classname)
             tp_method_lines.append('pyTypeObject->tp_setattro = (setattrofunc) %s;' % setprop_methods[0].name)
 
+        as_sequence_defs = gen_as_sequence_defs(genclass)
+        gen_constructor_definition_source(genclass.py_class_name, 'as_sequence', as_sequence_defs, lines, tp_method_lines)
+
         as_mapping_defs = gen_as_mapping_defs(genclass)
-        if as_mapping_defs:
-            lines.append('')
-            lines.extend(text_align(text_align(as_mapping_defs, '/*'), '*/'))
-            tp_method_lines.append('pyTypeObject->tp_as_mapping = &%s_tp_as_mapping;' % genclass.py_class_name)
+        gen_constructor_definition_source(genclass.py_class_name, 'as_mapping', as_mapping_defs, lines, tp_method_lines)
 
         operator_defs = gen_operator_defs(genclass)
-        if operator_defs:
-            lines.append('')
-            lines.extend(text_align(text_align(operator_defs, '/*'), '*/'))
-            tp_method_lines.append('pyTypeObject->tp_as_number = &%s_tp_as_number;' % genclass.py_class_name)
+        gen_constructor_definition_source(genclass.py_class_name, 'as_number', operator_defs, lines, tp_method_lines)
 
         rich_compare_defs = genclass.gen_rich_compare_defs()
-        if rich_compare_defs:
-            lines.extend(rich_compare_defs)
-            # TODO: Wrap with runtime exception checker function
-            tp_method_lines.append('pyTypeObject->tp_richcompare = reinterpret_cast<richcmpfunc>(%s_tp_richcompare);' % genclass.py_class_name)
+        gen_constructor_definition_source(genclass.py_class_name, 'richcompare', rich_compare_defs, lines, tp_method_lines, 'richcmpfunc')
+        # if rich_compare_defs:
+        #     lines.extend(rich_compare_defs)
+        #     # TODO: Wrap with runtime exception checker function
+        #     tp_method_lines.append('pyTypeObject->tp_richcompare = reinterpret_cast<richcmpfunc>(%s_tp_richcompare);' % genclass.py_class_name)
 
         property_defs = genclass.gen_property_defs()
         if property_defs:
@@ -270,8 +282,10 @@ def gen_class_body_source(genclass, includes, lines, buildables):
             tp_method_lines.append('}')
 
     genclass.gen_py_type_constructor_codes(tp_method_lines)
-    if genclass.constants:
-        tp_method_lines.extend('_constants["%s"] = %s;' % (i, j) for i, j in genclass.constants.items())
+
+    tp_method_lines.extend('_enum_constants["%s"] = %s;' % (i, j) for i, j in genclass.enum_constants.items())
+    tp_method_lines.extend('_string_constants["%s"] = %s;' % (i, j) for i, j in genclass.string_constants.items())
+
     constructor = acg.format('''${py_class_name}::${py_class_name}(const String& name, const String& doc, PyTypeObject* base, unsigned long flags)
     : PyArkType(name, doc, base, flags)
 {${tp_methods}
@@ -489,7 +503,8 @@ class GenClass(object):
         self._base_classname = None
         self._is_container = is_container
         self._methods = {}
-        self._constants = {}
+        self._enum_constants = {}
+        self._string_constants = {}
 
     @property
     def classname(self):
@@ -535,8 +550,12 @@ class GenClass(object):
         return self._methods.values()
 
     @property
-    def constants(self):
-        return self._constants
+    def enum_constants(self):
+        return self._enum_constants
+
+    @property
+    def string_constants(self):
+        return self._string_constants
 
     @property
     def filename(self):
@@ -549,13 +568,18 @@ class GenClass(object):
     def add_method(self, method):
         try:
             m = self._methods[method.name]
+            can_overload = hasattr(m, 'add_overloaded_method') or type(m) is type(method)
+            assert can_overload, f'Trying to overload two different methods "{type(m).__name__}" and "{type(method).__name__}"'
             method = m.overload(m, method)
         except KeyError:
             pass
         self._methods[method.name] = method
 
-    def add_constant(self, name, value):
-        self._constants[name] = value
+    def add_enum_constant(self, name, value):
+        self._enum_constants[name] = value
+
+    def add_string_constant(self, name, value):
+        self._string_constants[name] = value
 
     def has_methods(self):
         return len(self._methods) > 0
@@ -580,6 +604,9 @@ class GenClass(object):
 
     def subscribe_methods(self):
         return self.find_methods_by_type(GenMappingMethod)
+
+    def sequence_methods(self):
+        return self.find_methods_by_type(GenSequenceMethod)
 
     def find_methods_by_type(self, method_type):
         return [i for i in self.methods if isinstance(i, method_type)]
@@ -668,6 +695,12 @@ def main(params, paths):
         name, args, return_type, is_static = GenMethod.split(x[1:])
         genclass.add_method(GenMappingMethod(name, args, return_type, operator, is_static))
 
+    def autoassequence(filename, content, main_class, x):
+        genclass = get_result_class(results, filename, main_class)
+        operator = x[0]
+        name, args, return_type, is_static = GenMethod.split(x[1:])
+        genclass.add_method(GenSequenceMethod(name, args, return_type, operator, is_static))
+
     def autoclass(filename, content, main_class, x):
         genclass = get_result_class(results, filename, main_class)
         args = [i.strip() for i in x[1].replace('"', '').split(',')]
@@ -718,7 +751,13 @@ def main(params, paths):
 
     def autoconstant(filename, content, main_class, x):
         genclass = get_result_class(results, filename, main_class)
-        genclass.add_constant(x[0], x[1])
+        type_name, _, var_name = x[2].rpartition(' ')
+        assert type_name in ('String', 'int32_t'), f'Unsupported type "{type_name}". Only string and int supported now'
+        value_name = f'{genclass.classname}::{var_name}'
+        if type_name == 'String':
+            genclass.add_string_constant(var_name, value_name)
+        else:
+            genclass.add_enum_constant(var_name, value_name)
 
     def autobindable(filename, content, main_class, x):
         bindables.add(x)
@@ -728,7 +767,7 @@ def main(params, paths):
         for i in x[1].split(',\n'):
             varname = i.split('=')[0].strip()
             if varname:
-                genclass.add_constant(varname, '%s::%s' % (main_class, varname))
+                genclass.add_enum_constant(varname, '%s::%s' % (main_class, varname))
 
     acg.match_header_patterns(paths, True,
                               HeaderPattern(AUTOBIND_ANNOTATION_PATTERN, autoannotation),
@@ -736,6 +775,7 @@ def main(params, paths):
                               HeaderPattern(AUTOBIND_METHOD_PATTERN, automethod),
                               HeaderPattern(AUTOBIND_OPERATOR_PATTERN, autooperator),
                               HeaderPattern(AUTOBIND_AS_MAPPING_PATTERN, autoasmapping),
+                              HeaderPattern(AUTOBIND_AS_SEQUENCE_PATTERN, autoassequence),
                               HeaderPattern(AUTOBIND_CLASS_PATTERN, autoclass),
                               HeaderPattern(AUTOBIND_EXTENDS_PATTERN, autoextends),
                               HeaderPattern(AUTOBIND_LOADER_PATTERN, AutoMethodCall(GenLoaderMethod, 2)),

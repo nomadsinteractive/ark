@@ -1,8 +1,8 @@
-#ifndef ARK_GRAPHICS_BASE_V2_H_
-#define ARK_GRAPHICS_BASE_V2_H_
+#pragma once
 
 #include <initializer_list>
 
+#include "core/forwarding.h"
 #include "core/base/api.h"
 
 #include "graphics/forwarding.h"
@@ -50,6 +50,8 @@ public:
     const float& operator[](size_t idx) const;
     float& operator[](size_t idx);
 
+    Range<float> subscribe(const Slice& slice, size_t length);
+
 protected:
     void initialize(const std::initializer_list<float>& values, size_t len);
 
@@ -65,5 +67,3 @@ protected:
 };
 
 }
-
-#endif

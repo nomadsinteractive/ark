@@ -765,7 +765,7 @@ class String:
     def set(self, val: str):
         pass
 
-    def if_else(self, condition: 'Boolean', negative: str | 'String') -> 'String':
+    def if_else(self, condition: 'Boolean', negative: Union[str, 'String']) -> 'String':
         pass
 
     @staticmethod
@@ -892,8 +892,8 @@ class Vec2(_Var):
         return self._y
 
     @property
-    def xy(self) -> tuple[float, float]:
-        return self._x, self._y
+    def xy(self) -> 'Vec2':
+        return self
 
     @xy.setter
     def xy(self, val):
@@ -916,7 +916,7 @@ class Vec2(_Var):
     def integral(self, t: Optional[Numeric] = None) -> 'Vec2':
         pass
 
-    def integral_with_resistance(self, v0: Tuple[float, float], cd: Union[float, 'Numeric'], t: Optional['Numeric'] = None) -> 'Vec2':
+    def integral_with_resistance(self, v0: tuple[float, float], cd: Union[float, 'Numeric'], t: Optional['Numeric'] = None) -> 'Vec2':
         pass
 
     def wrap(self) -> 'Vec2':
@@ -952,6 +952,9 @@ class Vec2(_Var):
     def extend(self, v):
         pass
 
+    def __iter__(self):
+        pass
+
     def __str__(self):
         return '(%.1f, %.1f)' % (self._x, self._y)
 
@@ -978,8 +981,8 @@ class Vec3(Vec2):
         pass
 
     @property
-    def xyz(self) -> tuple[float, float, float]:
-        return 0, 0, 0
+    def xyz(self) -> 'Vec3':
+        return self
 
     @xyz.setter
     def xyz(self, v):
@@ -1023,6 +1026,13 @@ class _Mat:
         pass
 
     def __matmul__(self, other):
+        pass
+
+    @property
+    def val(self) -> tuple:
+        return 0, 0, 0, 0
+
+    def translate(self, translation: Vec2 | Vec3):
         pass
 
     def rotate(self, rot: Union[float, Numeric, 'Rotation']):
@@ -1659,7 +1669,7 @@ class Rotation:
         return self._theta
 
     @theta.setter
-    def theta(self, theta: Union[float, Numeric]):
+    def theta(self, theta: float | Numeric):
         pass
 
     @property
@@ -1943,7 +1953,7 @@ class TilemapLayer(Renderer):
     def get_tile(self, col: int, row: int) -> Optional[Tile]:
         pass
 
-    def get_tile_rect(self, rect: TYPE_RECTI) -> List[int]:
+    def get_tile_rect(self, rect: TYPE_RECTI) -> list[int]:
         pass
 
     def set_tile(self, col: int, row: int, tile: Union[int, RenderObject, Tile]):
@@ -2105,15 +2115,15 @@ class StringBundle:
 
 
 class Color(Vec4):
-    def __init__(self, v):
-        super().__init__(0, 0, 0, 0)
-
-    def assign(self, other: 'Color'):
-        pass
+    def __init__(self, r, g, b, a):
+        super().__init__(r, g, b, a)
 
     @property
     def value(self) -> int:
         return 0
+
+    def to_vec3(self) -> Vec3:
+        pass
 
 
 class Varyings:
@@ -2313,6 +2323,12 @@ class Collider:
     BODY_SHAPE_BOX = -3
     BODY_SHAPE_CAPSULE = -4
 
+    SHAPE_TYPE_NONE = "ark_shape_type_none"
+    SHAPE_TYPE_AABB = "ark_shape_type_aabb"
+    SHAPE_TYPE_BALL = "ark_shape_type_ball"
+    SHAPE_TYPE_BOX = "ark_shape_type_box"
+    SHAPE_TYPE_CAPSULE = "ark_shape_type_capsule"
+
     BODY_TYPE_KINEMATIC = 0
     BODY_TYPE_DYNAMIC = 1
     BODY_TYPE_STATIC = 2
@@ -2322,7 +2338,7 @@ class Collider:
     BODY_FLAG_MANUAL_POSITION = 8
     BODY_FLAG_MANUAL_ROTATION = 16
 
-    def create_body(self, type_: Union[int, Integer], shape, position, size=None, rotate=None, disposed: Optional[Boolean] = None) -> RigidBody:
+    def create_body(self, type_: int | Integer, shape, position, size=None, rotate=None, disposed: Optional[Boolean] = None) -> RigidBody:
         pass
 
     def ray_cast(self, ray_from, ray_to, collision_filter: Optional[CollisionFilter] = None) -> List[RayCastManifold]:

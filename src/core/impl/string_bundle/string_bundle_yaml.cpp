@@ -7,10 +7,7 @@
 #include "core/inf/asset.h"
 #include "core/inf/asset_bundle.h"
 #include "core/inf/readable.h"
-#include "core/util/documents.h"
-#include "core/types/null.h"
 
-#include "platform/platform.h"
 
 namespace ark {
 
@@ -21,85 +18,43 @@ static int _yaml_read_handler(void* data, unsigned char* buffer, size_t size, si
     return 1;
 }
 
-StringBundleYAML::StringBundleYAML(const sp<AssetBundle>& resource)
-    : _resource(resource)
+StringBundleYAML::StringBundleYAML(sp<AssetBundle> assetBundle)
+    : _root(std::move(assetBundle))
 {
-    DASSERT(_resource);
+    DASSERT(_root._asset_bundle);
 }
 
 sp<String> StringBundleYAML::getString(const String& resid)
 {
-    String nodename, arrayname;
-    int32_t arrayindex;
-    const std::map<String, sp<Item>>& bundle = getPackageBundle(resid, nodename);
-    do {
-        if(Strings::parseArrayAndIndex(nodename, arrayname, arrayindex))
-        {
-            const auto iter = bundle.find(arrayname);
-
-            if(iter == bundle.end())
-            {
-                DCHECK_WARN(false, "YAML node \"%s\" not found", arrayname.c_str());
-                break;
-            }
-            if(!iter->second->isSequence())
-            {
-                DCHECK_WARN(false, "YAML node \"%s\" found, but it's not an array", arrayname.c_str());
-                break;
-            }
-            if(arrayindex < 0 || static_cast<size_t>(arrayindex) >= iter->second->sequence()->size())
-            {
-                DCHECK_WARN(false , "YAML node \"%s\" found, but index out of range", arrayname.c_str());
-                break;
-            }
-            return sp<String>::make(iter->second->sequence()->at(static_cast<size_t>(arrayindex)));
-        }
-        const auto iter = bundle.find(nodename);
-        if(iter == bundle.end())
-        {
-            DCHECK_WARN(false, "YAML node \"%s\" not found", nodename.c_str());
-            break;
-        }
-        return iter->second->value();
-    } while(false);
-
-    return nullptr;
+    sp<Node> node = _root.findNode(resid);
+    CHECK_WARN(node, "YAML node \"%s\" not found", resid.c_str());
+    return node ? node->value() : nullptr;
 }
 
 std::vector<String> StringBundleYAML::getStringArray(const String& resid)
 {
-    String nodename, arrayname;
-    const std::map<String, sp<Item>>& bundle = getPackageBundle(resid, nodename);
-    do {
-        const auto iter = bundle.find(nodename);
-        if(iter == bundle.end())
-        {
-            DCHECK_WARN(false, "YAML node \"%s\" not found", nodename.c_str());
-            break;
-        }
-        return iter->second->isSequence() ? iter->second->sequence() : std::vector<String>({*iter->second->value()});
-    } while(false);
+    sp<Node> node = _root.findNode(resid);
+    if(node)
+        return node->isSequence() ? node->sequence() : std::vector<String>({node->value()});
     return {};
 }
 
-void StringBundleYAML::loadBundle(const String& name)
+sp<StringBundleYAML::Directory> StringBundleYAML::loadAssetDirectory(Asset& asset, sp<AssetBundle> assetBundle)
 {
-    const sp<Asset> asset = _resource->getAsset(name + ".yaml");
-    CHECK(asset, "Unable to load %s.yaml", name.c_str());
     yaml_parser_t parser;
     if(!yaml_parser_initialize(&parser))
         FATAL("Failed to initialize parser");
 
-    const sp<Readable> readable = asset->open();
+    const sp<Readable> readable = asset.open();
     yaml_parser_set_input(&parser, _yaml_read_handler, readable.get());
     yaml_parser_set_encoding(&parser, YAML_UTF8_ENCODING);
 
     yaml_event_t event;
     yaml_event_type_t eventType;
 
-    std::map<String, sp<Item>>& bundle = _bundle[name];
     std::vector<String> keys;
-    sp<Item> value;
+    sp<Directory> directory = sp<Directory>::make(std::move(assetBundle));
+    sp<Node> value;
     do {
         if (!yaml_parser_parse(&parser, &event))
             FATAL("YAML parser error %d\n", parser.error);
@@ -119,7 +74,7 @@ void StringBundleYAML::loadBundle(const String& name)
             value->makeSequence();
             break;
         case YAML_SEQUENCE_END_EVENT:
-            makeKey(bundle, keys) = std::move(value);
+            directory->setNode(keys, std::move(value));
             break;
         case YAML_SCALAR_EVENT: {
             DCHECK(keys.size() > 0, "Illegal state: mapping event not start.");
@@ -127,7 +82,7 @@ void StringBundleYAML::loadBundle(const String& name)
             if(value == nullptr)
             {
                 keys.back() = std::move(scalar);
-                value = sp<Item>::make();
+                value = sp<Node>::make();
             }
             else
             {
@@ -136,7 +91,7 @@ void StringBundleYAML::loadBundle(const String& name)
                 else
                 {
                     value->setValue(std::move(scalar));
-                    makeKey(bundle, keys) = std::move(value);
+                    directory->setNode(keys, std::move(value));
                 }
             }
         }
@@ -147,33 +102,8 @@ void StringBundleYAML::loadBundle(const String& name)
         yaml_event_delete(&event);
     } while(eventType != YAML_STREAM_END_EVENT);
     yaml_parser_delete(&parser);
-}
 
-const std::map<String, sp<StringBundleYAML::Item>>& StringBundleYAML::getPackageBundle(const String& resid, String& nodeName)
-{
-    auto [package, nodeNameOpt] = resid.cut('/');
-    CHECK(package && nodeNameOpt, "Illegal string bundle \"%s\"", resid.c_str());
-    const auto iter = _bundle.find(package);
-    if(iter == _bundle.end())
-        loadBundle(package);
-    nodeName = std::move(nodeNameOpt.value());
-    return _bundle[package];
-}
-
-sp<StringBundleYAML::Item>& StringBundleYAML::makeKey(std::map<String, sp<Item>>& bundle, const std::vector<String>& keys) const
-{
-    StringBuffer sb;
-    bool dirty = false;
-    for(const String& i : keys)
-    {
-        if(dirty)
-            sb << '/';
-        else
-            dirty = true;
-        sb << i;
-
-    }
-    return bundle[sb.str()];
+    return directory;
 }
 
 StringBundleYAML::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
@@ -186,35 +116,86 @@ sp<StringBundle> StringBundleYAML::BUILDER::build(const Scope& args)
     return sp<StringBundleYAML>::make(Ark::instance().getAssetBundle(_src->build(args)));
 }
 
-void StringBundleYAML::Item::setValue(String value)
+void StringBundleYAML::Node::setValue(String value)
 {
     _value = sp<String>::make(std::move(value));
 }
 
-void StringBundleYAML::Item::addSequenceValue(String value)
+void StringBundleYAML::Node::addSequenceValue(String value)
 {
     DASSERT(_sequence);
     _sequence->push_back(std::move(value));
 }
 
-void StringBundleYAML::Item::makeSequence()
+void StringBundleYAML::Node::makeSequence()
 {
     _sequence = sp<std::vector<String>>::make();
 }
 
-bool StringBundleYAML::Item::isSequence() const
+bool StringBundleYAML::Node::isSequence() const
 {
     return static_cast<bool>(_sequence);
 }
 
-const sp<String>& StringBundleYAML::Item::value() const
+const sp<String>& StringBundleYAML::Node::value() const
 {
     return _value;
 }
 
-const sp<std::vector<String> >& StringBundleYAML::Item::sequence() const
+const sp<std::vector<String> >& StringBundleYAML::Node::sequence() const
 {
     return _sequence;
+}
+
+StringBundleYAML::Directory::Directory(sp<AssetBundle> assetBundle)
+    : _asset_bundle(std::move(assetBundle))
+{
+}
+
+sp<StringBundleYAML::Node> StringBundleYAML::Directory::findNode(const String& resid)
+{
+    const auto [dirname, nodeNameOpt] = resid.cut('/');
+    if(nodeNameOpt)
+    {
+        const auto iter = _sub_directories.find(dirname);
+        sp<StringBundleYAML::Directory> subdir;
+        if(iter == _sub_directories.end())
+        {
+            if(!_asset_bundle)
+                return nullptr;
+
+            sp<Asset> asset = _asset_bundle->getAsset(dirname + ".yaml");
+            sp<AssetBundle> subBundle = _asset_bundle->getBundle(dirname);
+            subdir = asset ? loadAssetDirectory(asset, std::move(subBundle)) : sp<StringBundleYAML::Directory>::make(std::move(subBundle));
+            _sub_directories.insert(std::make_pair(dirname, subdir));
+        }
+        else
+            subdir = iter->second;
+
+        return subdir->findNode(nodeNameOpt.value());
+    }
+    else if(dirname)
+    {
+        const auto iter = _nodes.find(dirname);
+        return iter != _nodes.end() ? iter->second : nullptr;
+    }
+    return nullptr;
+}
+
+void StringBundleYAML::Directory::setNode(const std::vector<String>& keys, sp<Node> node)
+{
+    DASSERT(keys.size() > 0);
+
+    Directory* iter = this;
+    for(size_t i = 0; i < keys.size() - 1; ++i)
+    {
+        sp<Directory>& dir = iter->_sub_directories[keys.at(i)];
+        if(!dir)
+            dir = sp<Directory>::make();
+        iter = dir.get();
+    }
+
+    iter->_nodes.insert_or_assign(keys.back(), std::move(node));
 }
 
 }

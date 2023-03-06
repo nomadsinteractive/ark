@@ -198,21 +198,11 @@ private:
         return toPyObject_SharedPtr(static_cast<sp<typename T::_PtrType>>(ptr));
     }
     template<typename T> static PyObject* toPyObject_sfinae(const T& ptr, typename T::OPT_TYPE*) {
-        if(ptr)
-            return toPyObject(ptr.value());
-        return PyBridge::incRefNone();
+        return ptr ? toPyObject(ptr.value()) : nullptr;
     }
     template<typename T> static PyObject* toPyObject_sfinae(const T& iterable, std::enable_if_t<!(std::is_same_v<T, std::string> || std::is_same_v<T, std::wstring> || std::is_same_v<T, Span>), decltype(iterable.begin())>*) {
         return fromIterable_sfinae<T>(iterable, nullptr);
     }
-/*
-    template<typename T> static PyObject* toPyObject_sfinae(const T& value, decltype(value.second)*) {
-        PyObject* pyTuple = PyTuple_New(2);
-        PyList_SetItem(pyTuple, 0, toPyObject(value.first));
-        PyList_SetItem(pyTuple, 1, toPyObject(value.second));
-        return pyTuple;
-    }
-*/
     template<typename T> static PyObject* toPyObject_sfinae(const T& value, std::enable_if_t<std::is_enum<T>::value>*) {
         return PyBridge::PyLong_FromLong(static_cast<int32_t>(value));
     }

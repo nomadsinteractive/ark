@@ -109,12 +109,10 @@ private:
 
     class MessageLoopFilter {
     public:
-        MessageLoopFilter(const sp<MessageLoop>& messageLoop);
+        MessageLoopFilter() = default;
 
-        FilterAction operator() () const;
+        FilterAction operator() (const sp<MessageLoop>& messageLoop) const;
 
-    private:
-        WeakPtr<MessageLoop> _message_loop;
     };
 
     class ExecutorWorkerStrategy : public ExecutorWorkerThread::Strategy {
@@ -130,7 +128,7 @@ private:
         virtual void onException(const std::exception& e) override;
 
         sp<MessageLoop> _message_loop;
-        List<MessageLoop, MessageLoopFilter> _app_message_loops;
+        UList<sp<MessageLoop>> _app_message_loops;
     };
 
 private:

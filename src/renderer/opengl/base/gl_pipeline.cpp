@@ -451,10 +451,10 @@ void GLPipeline::GLUniform::setUniform4fv(GLsizei count, const GLfloat* value) c
     glUniform4fv(_location, count, value);
 }
 
-void GLPipeline::GLUniform::setUniformColor4f(const Color& color) const
-{
-    glUniform4f(_location, color.r(), color.g(), color.b(), color.a());
-}
+//void GLPipeline::GLUniform::setUniformColor4f(const Color& color) const
+//{
+//    glUniform4f(_location, color.r(), color.g(), color.b(), color.a());
+//}
 
 void GLPipeline::GLUniform::setUniformMatrix4fv(GLsizei count, GLboolean transpose, const GLfloat* value) const
 {

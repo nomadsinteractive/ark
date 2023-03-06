@@ -185,7 +185,7 @@ Varyings::Snapshot::Snapshot(Array<Varyings::Divided>::Borrowed buffers)
 {
 }
 
-void Varyings::Snapshot::applyDefaults(const Snapshot* defaults)
+void Varyings::Snapshot::apply(const Snapshot* defaults)
 {
     for(size_t i = 0; i < _buffers.length(); ++i)
     {
@@ -196,6 +196,7 @@ void Varyings::Snapshot::applyDefaults(const Snapshot* defaults)
             if(def)
                 div.apply(def._slot_snapshot);
         }
+        div.apply();
     }
 }
 
@@ -249,11 +250,12 @@ void Varyings::Divided::apply(const SlotSnapshot* slots)
 void Varyings::Divided::addSnapshot(Allocator& allocator, const Slot& slot)
 {
     DASSERT(slot._offset >= 0);
-    void* content = _content.buf() + slot._offset;
     uint32_t size = static_cast<uint32_t>(slot._input->size());
+    void* content = allocator.sbrk(size);
 
     WritableMemory writer(content);
     slot._input->upload(writer);
+    memcpy(_content.buf() + slot._offset, content, size);
     addSlotSnapshot(new(allocator.sbrk(sizeof(SlotSnapshot))) SlotSnapshot(content, slot._offset, size));
 }
 

@@ -226,10 +226,8 @@ public:
 
     [[deprecated]]
 //  [[script::bindings::auto]]
-    static ARK_API sp<Vec2> bezier(sp<Vec2> p0, sp<Vec2> p1, sp<Vec2> p2, sp<Numeric> t);
-
-//  [[script::bindings::auto]]
     static ARK_API V3 quadratic(float a, float b, float c);
+    [[deprecated]]
 //  [[script::bindings::auto]]
     static ARK_API V2 projectile(float dx, float dy, float v, float g, uint32_t sid);
 

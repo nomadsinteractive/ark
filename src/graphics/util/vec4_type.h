@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_UTIL_VEC4_TYPE_H_
-#define ARK_GRAPHICS_UTIL_VEC4_TYPE_H_
+#pragma once
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
@@ -23,29 +22,19 @@ public:
     static sp<Vec4> create(sp<Numeric> x, sp<Numeric> y, sp<Numeric> z, sp<Numeric> w);
 /**
 //  [[script::bindings::operator(+)]]
-    static sp<Vec4> add(sp<Vec4> lvalue, const V4& rvalue);
-//  [[script::bindings::operator(+)]]
     static sp<Vec4> add(sp<Vec4> lvalue, sp<Vec4> rvalue);
 //  [[script::bindings::operator(-)]]
     static sp<Vec4> sub(sp<Vec4> lvalue, sp<Vec4> rvalue);
 //  [[script::bindings::operator(*)]]
     static sp<Vec4> mul(sp<Vec4> lvalue, sp<Vec4> rvalue);
 //  [[script::bindings::operator(*)]]
-    static sp<Vec4> mul(sp<Vec4> lvalue, float rvalue);
-//  [[script::bindings::operator(*)]]
     static sp<Vec4> mul(sp<Numeric> lvalue, sp<Vec4> rvalue);
 //  [[script::bindings::operator(*)]]
     static sp<Vec4> mul(sp<Vec4> lvalue, sp<Numeric> rvalue);
 //  [[script::bindings::operator(/)]]
-    static sp<Vec4> truediv(sp<Vec4> lvalue, float rvalue);
-//  [[script::bindings::operator(/)]]
     static sp<Vec4> truediv(sp<Vec4> lvalue, sp<Numeric> rvalue);
 //  [[script::bindings::operator(/)]]
     static sp<Vec4> truediv(sp<Vec4> lvalue, sp<Vec4> rvalue);
-//  [[script::bindings::operator(/)]]
-    static sp<Vec4> truediv(sp<Vec4> lvalue, const V4& rvalue);
-//  [[script::bindings::operator(//)]]
-    static sp<Vec4> floordiv(sp<Vec4> lvalue, float rvalue);
 //  [[script::bindings::operator(//)]]
     static sp<Vec4> floordiv(sp<Vec4> lvalue, sp<Numeric> rvalue);
 //  [[script::bindings::operator(//)]]
@@ -104,13 +93,13 @@ public:
     static void setW(const sp<Vec4>& self, sp<Numeric> w);
 
 //  [[script::bindings::property]]
-    static V4 xyzw(const sp<Vec4>& self);
+    static sp<Vec4> xyzw(sp<Vec4> self);
 /**
 
 //  [[script::bindings::property]]
-    static V2 xy(const sp<Vec4>& self);
+    static sp<Vec2> xy(sp<Vec4> self);
 //  [[script::bindings::property]]
-    static V3 xyz(const sp<Vec4>& self);
+    static sp<Vec3> xyz(const sp<Vec4>& self);
 
 //  [[script::bindings::classmethod]]
     static sp<Vec4> freeze(sp<Vec4> self);
@@ -156,5 +145,3 @@ public:
 };
 
 }
-
-#endif

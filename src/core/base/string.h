@@ -1,5 +1,4 @@
-#ifndef ARK_SRC_CORE_BASE_STRING_H_
-#define ARK_SRC_CORE_BASE_STRING_H_
+#pragma once
 
 #include <functional>
 #include <string>
@@ -45,6 +44,8 @@ public:
     String replace(const String& text, const String& replacement) const;
     String replace(const std::regex& pattern, const std::function<String(Array<String>& matches)>& replacer) const;
     String toLower() const;
+
+    StringView toStringView() const;
 
     std::pair<String, Optional<String>> cut(char sep) const;
     std::pair<Optional<String>, String> rcut(char sep) const;
@@ -97,5 +98,3 @@ template <> struct hash<ark::String> {
 };
 
 }
-
-#endif

@@ -4,7 +4,6 @@
 #include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/collection/list.h"
-#include "core/types/weak_ptr.h"
 
 namespace ark {
 
@@ -24,18 +23,17 @@ public:
 private:
     class ObserverFilter {
     public:
-        ObserverFilter(const sp<Observer>& observer, sp<Boolean> dirtyFlag);
+        ObserverFilter(sp<Boolean> dirtyFlag);
 
-        FilterAction operator() () const;
+        FilterAction operator() (const sp<Observer>& observer) const;
 
     private:
-        WeakPtr<Observer> _observer;
         sp<Boolean> _dirty_flag;
 
     };
 
 private:
-    sp<List<Observer, ObserverFilter>> _observers;
+    sp<List<sp<Observer>, ObserverFilter>> _observers;
 };
 
 }

@@ -218,7 +218,8 @@ void RCCMultiDrawElementsIndirect::reloadIndirectCommands(const RenderLayerSnaps
 }
 
 RCCMultiDrawElementsIndirect::NodeLayoutInstance::NodeLayoutInstance(const Node& node, const NodeLayoutInstance& parentLayout)
-    : _node_id(node.name().hash()), _node_transform(sp<Mat4::Impl>::make(M4::identity())), _global_transform(makeGlobalTransform(parentLayout._global_transform, node.transform())) {
+    : _node_id(node.name().hash()), _node_transform(sp<Mat4::Impl>::make(M4::identity())), _global_transform(makeGlobalTransform(parentLayout._global_transform, node.transform()))
+{
 }
 
 sp<Mat4> RCCMultiDrawElementsIndirect::NodeLayoutInstance::makeGlobalTransform(sp<Mat4> parentTransform, const M4& localTransform) const
@@ -228,11 +229,13 @@ sp<Mat4> RCCMultiDrawElementsIndirect::NodeLayoutInstance::makeGlobalTransform(s
 }
 
 RCCMultiDrawElementsIndirect::NodeLayoutInstance::NodeLayoutInstance(const Node& node, const M4& globalTransform)
-    : _node_id(node.name().hash()), _global_transform(sp<Mat4Impl>::make(globalTransform)) {
+    : _node_id(node.name().hash()), _global_transform(sp<Mat4Impl>::make(globalTransform))
+{
 }
 
 RCCMultiDrawElementsIndirect::ModelInstance::ModelInstance(size_t snapshotIndex, const ModelBundle::ModelLayout& modelLayout)
-    : _model(modelLayout._model), _snapshot_index(snapshotIndex) {
+    : _model(modelLayout._model), _snapshot_index(snapshotIndex)
+{
     for(const ModelBundle::NodeLayout& i : modelLayout._node_layouts)
     {
         NodeLayoutInstance nodeLayout(i._node, i._transform);

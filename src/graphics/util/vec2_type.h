@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_UTIL_VEC2_TYPE_H_
-#define ARK_GRAPHICS_UTIL_VEC2_TYPE_H_
+#pragma once
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
@@ -91,7 +90,12 @@ public:
 //  [[script::bindings::classmethod]]
     static sp<Size> toSize(const sp<Vec2>& self);
 //  [[script::bindings::property]]
-    static V2 xy(const sp<Vec2>& self);
+    static sp<Vec2> xy(sp<Vec2> self);
+
+//  [[script::bindings::seq(len)]]
+    static size_t len(const sp<Vec2>& self);
+//  [[script::bindings::seq(get)]]
+    static Optional<float> getItem(const sp<Vec2>& self, ptrdiff_t index);
 
 //  [[script::bindings::classmethod]]
     static sp<Vec2> freeze(sp<Vec2> self);
@@ -148,5 +152,3 @@ public:
 };
 
 }
-
-#endif

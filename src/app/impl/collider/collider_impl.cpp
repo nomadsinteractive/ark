@@ -209,17 +209,17 @@ std::vector<RayCastManifold> ColliderImpl::Stub::rayCast(const V2& from, const V
     const BroadPhrase::Result result = broadPhraseRayCast(V3(from.x(), from.y(), 0), V3(to.x(), to.y(), 0), collisionFilter);
 
     const NarrowPhrase::Ray ray = _narrow_phrase->toRay(from, to);
-    for(const auto& i : toRigidBodyShadows(result.dynamic_candidates, Collider::BODY_TYPE_RIGID))
+    for(const auto& i : toRigidBodyShadows(result._dynamic_candidates, Collider::BODY_TYPE_RIGID))
     {
         RayCastManifold raycast(0, V3(0), i);
         if(_narrow_phrase->rayCastManifold(ray, toBroadPhraseCandidate(*i), raycast))
             manifolds.push_back(raycast);
     }
     RayCastManifold raycast;
-    for(const auto& i : result.static_candidates)
+    for(const auto& i : result._static_candidates)
     {
         if(_narrow_phrase->rayCastManifold(ray, i, raycast))
-            manifolds.emplace_back(raycast.distance(), raycast.normal(), sp<RigidBodyShadow>::make(*this, i.id, Collider::BODY_TYPE_STATIC, i.shape_id, sp<Vec3::Const>::make(V3(i.position.x(), i.position.y(), 0)), nullptr, nullptr, nullptr));
+            manifolds.emplace_back(raycast.distance(), raycast.normal(), sp<RigidBodyShadow>::make(*this, i._id, Collider::BODY_TYPE_STATIC, i._shape_id, sp<Vec3::Const>::make(V3(i._position.x(), i._position.y(), 0)), nullptr, nullptr, nullptr));
     }
     return manifolds;
 }
@@ -233,12 +233,12 @@ void ColliderImpl::Stub::resolveCandidates(const sp<RigidBody>& self, const Broa
         CollisionManifold manifold;
         if(_narrow_phrase->collisionManifold(candidateSelf, i, manifold))
         {
-            auto iter = contacts.find(i.id);
+            auto iter = contacts.find(i._id);
             if(iter == contacts.end())
-                callback.onBeginContact(self, ensureRigidBody(i.id, i.shape_id, V3(i.position.x(), i.position.y(), 0), isDynamicCandidates), manifold);
+                callback.onBeginContact(self, ensureRigidBody(i._id, i._shape_id, V3(i._position.x(), i._position.y(), 0), isDynamicCandidates), manifold);
             else
                 contacts.erase(iter);
-            contactsOut.insert(i.id);
+            contactsOut.insert(i._id);
         }
     }
     for(int32_t i : contacts)
@@ -311,7 +311,7 @@ void ColliderImpl::RigidBodyShadow::collisionTest(const sp<RigidBodyShadow>& sel
     {
         DPROFILER_TRACE("BroadPhrase");
         result = collider.broadPhraseSearch(position, size, self->collisionFilter());
-        dynamicCandidates = std::move(result.dynamic_candidates);
+        dynamicCandidates = std::move(result._dynamic_candidates);
         dynamicCandidates.erase(shadowStub._id);
         for(int32_t i : removingIds)
             dynamicCandidates.erase(i);
@@ -321,7 +321,7 @@ void ColliderImpl::RigidBodyShadow::collisionTest(const sp<RigidBodyShadow>& sel
         DPROFILER_TRACE("NarrowPhrase");
         const BroadPhrase::Candidate candidateSelf(self->id(), position, self->transform()->rotation()->theta()->val(), self->shapeId(), self->collisionFilter(), self->bodyDef().impl());
         collider.resolveCandidates(self, candidateSelf, collider.toBroadPhraseCandidates(dynamicCandidates, Collider::BODY_TYPE_ALL), true, shadowStub._callback, _dynamic_contacts);
-        collider.resolveCandidates(self, candidateSelf, result.static_candidates, false, shadowStub._callback, _static_contacts);
+        collider.resolveCandidates(self, candidateSelf, result._static_candidates, false, shadowStub._callback, _static_contacts);
     }
 }
 

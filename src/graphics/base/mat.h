@@ -13,18 +13,18 @@ namespace ark {
 
 template<uint32_t S> class Mat {
 public:
-    Mat() = default;
+    Mat() {
+        setIndentity();
+    }
     template<typename T> Mat(const T& other) {
-        CHECK(sizeof(_value) == sizeof(T), "Matrix size unmatch: %d != %d", sizeof(_value), sizeof(T));
+        DCHECK(sizeof(_value) == sizeof(T), "Matrix size unmatch: %d != %d", sizeof(_value), sizeof(T));
         memcpy(_value, &other, sizeof(_value));
+        DASSERT(sanityCheck());
     }
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Mat);
 
     static Mat<S> identity() {
-        Mat<S> m;
-        memset(&m, 0, sizeof(m));
-        for(uint32_t i = 0; i < S; ++i)
-            m._value[i * S + i] = 1.0f;
+        static Mat<S> m;
         return m;
     }
 
@@ -72,6 +72,20 @@ public:
 
     float& operator[] (size_t i) {
         return _value[i];
+    }
+
+private:
+    void setIndentity() {
+        memset(_value, 0, sizeof(_value));
+        for(uint32_t i = 0; i < S; ++i)
+            _value[i * S + i] = 1.0f;
+    }
+
+    bool sanityCheck() const {
+        for(size_t i = 0; i < S * S; ++i)
+            if(std::isnan(_value[i]) || std::isinf(_value[i]))
+                return false;
+        return true;
     }
 
 private:

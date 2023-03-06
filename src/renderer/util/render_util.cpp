@@ -70,7 +70,7 @@ Attribute RenderUtil::makePredefinedAttribute(const String& name, const String& 
         return Attribute(name, Attribute::TYPE_FLOAT, type, 2, false);
     if(type == "float")
         return Attribute(name, Attribute::TYPE_FLOAT, type, 1, false);
-    if(type == "int")
+    if(type == "int" || type == "uint")
         return Attribute(name, Attribute::TYPE_INTEGER, type, 1, false);
     if(type == "vec4" || type == "v4f")
         return Attribute(name, Attribute::TYPE_FLOAT, type, 4, false);

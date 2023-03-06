@@ -93,12 +93,10 @@ private:
 
         class ListFilter {
         public:
-            ListFilter(const sp<KinematicObject>& item);
+            ListFilter() = default;
 
-            FilterAction operator() () const;
+            FilterAction operator() (const KinematicObject& item) const;
 
-        private:
-            WeakPtr<BtRigidBodyRef> _rigid_body;
         };
     };
 

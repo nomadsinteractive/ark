@@ -39,8 +39,6 @@ ark_compile_definition_option(ARK_BUILD_TESTS "Build testcases" ON)
 
 option(ARK_BUILD_PLUGIN_FMOD "Build fmod plugin" OFF)
 
-option(ARK_DOWNLOAD_DEPENDENCIES "Download dependency libraries automatically" ON)
-
 ark_compile_definition_option(ARK_BUILD_STATIC_PLUGINS "Build static plugin libraries" OFF)
 if(WIN32)
     ark_compile_definition_option(ARK_USE_LIBJPEG_TURBO "Use libjpeg-turbo decoding library" OFF)
@@ -61,9 +59,7 @@ list(APPEND LOCAL_INCLUDE_DIRS src)
 message("Building for ${ARK_SYSTEM_NAME} - ${CMAKE_BUILD_TYPE}; build-share-libs: ${BUILD_SHARED_LIBS}\nCompiler: ${CMAKE_CXX_COMPILER_ID}-${CMAKE_CXX_COMPILER_VERSION}")
 ark_compile_definitions(-DARK_SYSTEM_NAME="${ARK_SYSTEM_NAME}")
 ark_compile_definitions(-DARK_BINARY_POSTFIX="$<$<CONFIG:DEBUG>:${CMAKE_DEBUG_POSTFIX}>$<$<CONFIG:RELWITHDEBINFO>:${CMAKE_RELWITHDEBINFO_POSTFIX}>")
-ark_compile_definitions(-DARK_FLAG_DEBUG=$<IF:$<CONFIG:DEBUG>,1,$<IF:$<CONFIG:RELWITHDEBINFO>,2,0>>)
-
-#ark_add_debug_flag()
+add_compile_definitions(ARK_FLAG_DEBUG=$<IF:$<CONFIG:DEBUG>,1,$<IF:$<CONFIG:RELWITHDEBINFO>,2,0>>)
 
 ark_test_big_endian()
 

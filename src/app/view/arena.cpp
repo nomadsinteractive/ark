@@ -29,7 +29,7 @@ Arena::~Arena()
 
 void Arena::addRenderer(const sp<Renderer>& renderer)
 {
-    _renderers.push_back(renderer);
+    _renderers.emplace_back(renderer, renderer.as<Disposed>());
 }
 
 void Arena::render(RenderRequest& renderRequest, const V3& position)
@@ -112,12 +112,14 @@ void Arena::pushEventListener(sp<EventListener> eventListener, sp<Boolean> dispo
 
 void Arena::addLayer(sp<Renderer> layer)
 {
-    _layers.push_back(std::move(layer));
+    sp<Boolean> disposed = layer.as<Disposed>();
+    _layers.emplace_back(std::move(layer), std::move(disposed));
 }
 
 void Arena::addRenderLayer(sp<Renderer> renderLayer)
 {
-    _render_layers.push_back(std::move(renderLayer));
+    sp<Boolean> disposed = renderLayer.as<Disposed>();
+    _render_layers.emplace_back(std::move(renderLayer), std::move(disposed));
 }
 
 void Arena::setView(sp<View> view)

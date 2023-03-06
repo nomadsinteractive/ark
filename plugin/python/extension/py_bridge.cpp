@@ -127,6 +127,11 @@ void PyBridge::setTypeErrString(const char* string)
     PyErr_SetString(PyExc_TypeError, string);
 }
 
+void PyBridge::setStopIterationErrString(const char* string)
+{
+    PyErr_SetString(PyExc_StopIteration, string);
+}
+
 PyObject* PyBridge::incRefNone()
 {
     Py_RETURN_NONE;

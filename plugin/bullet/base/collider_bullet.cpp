@@ -71,7 +71,7 @@ sp<RigidBody> ColliderBullet::createBody(Collider::BodyType type, int32_t shapeI
     if(type == Collider::BODY_TYPE_SENSOR)
     {
         sp<BtRigidBodyRef> rigidBody = makeGhostObject(btDynamicWorld(), cs->btShape(), type);
-        _stub->_kinematic_objects.push_back(sp<KinematicObject>::make(position, rotate, rigidBody));
+        _stub->_kinematic_objects.emplace_back(KinematicObject(position, rotate, rigidBody));
         return sp<RigidBodyBullet>::make(++ _stub->_body_id_base, type, *this, std::move(cs), position,
                                          sp<Transform>::make(Transform::TYPE_LINEAR_3D, rotate), std::move(rigidBody));
     }
@@ -148,16 +148,16 @@ void ColliderBullet::myInternalPreTickCallback(btDynamicsWorld* dynamicsWorld, b
 {
     ColliderBullet* self = reinterpret_cast<ColliderBullet*>(dynamicsWorld->getWorldUserInfo());
     uint64_t tick = Ark::instance().applicationContext()->renderController()->tick();
-    for(const sp<KinematicObject>& i : self->_stub->_kinematic_objects)
+    for(const KinematicObject& i : self->_stub->_kinematic_objects)
     {
-        i->_position->update(tick);
-        i->_rotation->update(tick);
-        V3 pos = i->_position->val();
-        const V4 quaternion =  i->_rotation->val();
+        i._position->update(tick);
+        i._rotation->update(tick);
+        V3 pos = i._position->val();
+        const V4 quaternion = i._rotation->val();
         btTransform transform;
         transform.setRotation(btQuaternion(quaternion.x(), quaternion.y(), quaternion.z(), quaternion.w()));
         transform.setOrigin(btVector3(pos.x(), pos.y(), pos.z()));
-        i->_rigid_body->collisionObject()->setWorldTransform(transform);
+        i._rigid_body->collisionObject()->setWorldTransform(transform);
     }
 }
 
@@ -362,7 +362,6 @@ ColliderBullet::BUILDER_IMPL1::BUILDER_IMPL1(BeanFactory& factory, const documen
 sp<ColliderBullet> ColliderBullet::BUILDER_IMPL1::build(const Scope& args)
 {
     const sp<ColliderBullet> collider = sp<ColliderBullet>::make(_gravity->build(args)->val(), _model_loader->build(args));
-
     for(const auto& i : _importers)
         i.first->build(args)->import(collider, i.second);
     _resource_loader_context->renderController()->addPreComposeRunnable(collider, BooleanType::__or__(_resource_loader_context->disposed(), sp<Boolean>::make<BooleanByWeakRef<ColliderBullet>>(collider, 1)));
@@ -384,14 +383,9 @@ ColliderBullet::KinematicObject::KinematicObject(sp<Vec3> position, sp<Rotation>
 {
 }
 
-ColliderBullet::KinematicObject::ListFilter::ListFilter(const sp<ColliderBullet::KinematicObject>& item)
-    : _rigid_body(item->_rigid_body)
+FilterAction ColliderBullet::KinematicObject::ListFilter::operator() (const KinematicObject& item) const
 {
-}
-
-FilterAction ColliderBullet::KinematicObject::ListFilter::operator() () const
-{
-    return _rigid_body.unique() ? FILTER_ACTION_REMOVE : FILTER_ACTION_NONE;
+    return item._rigid_body.unique() ? FILTER_ACTION_REMOVE : FILTER_ACTION_NONE;
 }
 
 }

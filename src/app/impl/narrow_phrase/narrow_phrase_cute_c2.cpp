@@ -109,11 +109,11 @@ bool NarrowPhraseCuteC2::collisionManifold(const BroadPhrase::Candidate& candida
 {
     for(const ShapeCuteC2& i : ensureBodyDef(candidateOne)->shapes())
     {
-        const ShapeCuteC2 transformed = i.transform(candidateOne.position, candidateOne.rotation);
-        const CollisionFilter& oneFilter = getCollisionFilter(transformed._collision_filter, candidateOne.collision_filter);
+        const ShapeCuteC2 transformed = i.transform(candidateOne._position, candidateOne._rotation);
+        const CollisionFilter& oneFilter = getCollisionFilter(transformed._collision_filter, candidateOne._collision_filter);
         for(const ShapeCuteC2& j : ensureBodyDef(candidateOther)->shapes())
-            if(oneFilter.collisionTest(getCollisionFilter(j._collision_filter, candidateOther.collision_filter)) &&
-                    transformed.collideManifold(j.transform(candidateOther.position, candidateOther.rotation), collisionManifold))
+            if(oneFilter.collisionTest(getCollisionFilter(j._collision_filter, candidateOther._collision_filter)) &&
+                    transformed.collideManifold(j.transform(candidateOther._position, candidateOther._rotation), collisionManifold))
                 return true;
     }
     return false;
@@ -123,7 +123,7 @@ bool NarrowPhraseCuteC2::rayCastManifold(const Ray& ray, const BroadPhrase::Cand
 {
     for(const ShapeCuteC2& i : ensureBodyDef(candidate)->shapes())
     {
-        const ShapeCuteC2 transformed = i.transform(candidate.position, candidate.rotation);
+        const ShapeCuteC2 transformed = i.transform(candidate._position, candidate._rotation);
         if(transformed.rayCastManifold(*ray.data<c2Ray>(), rayCastManifold))
             return true;
     }
@@ -169,10 +169,10 @@ sp<NarrowPhraseCuteC2::BodyDefCuteC2> NarrowPhraseCuteC2::findBodyDef(int32_t sh
 
 sp<NarrowPhraseCuteC2::BodyDefCuteC2> NarrowPhraseCuteC2::ensureBodyDef(const BroadPhrase::Candidate& candidate) const
 {
-    if(candidate.body_def)
-        return candidate.body_def.unpack<BodyDefCuteC2>();
-    sp<BodyDefCuteC2> bodyDef = findBodyDef(candidate.shape_id);
-    CHECK(bodyDef, "Shape %d not found", candidate.shape_id);
+    if(candidate._body_def)
+        return candidate._body_def.unpack<BodyDefCuteC2>();
+    sp<BodyDefCuteC2> bodyDef = findBodyDef(candidate._shape_id);
+    CHECK(bodyDef, "Shape %d not found", candidate._shape_id);
     return bodyDef;
 }
 

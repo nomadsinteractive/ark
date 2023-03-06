@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_FORWARDING_H_
-#define ARK_GRAPHICS_FORWARDING_H_
+#pragma once
 
 #include "core/forwarding.h"
 
@@ -85,5 +84,3 @@ typedef LoaderBundle<sp<Bitmap>> BitmapLoaderBundle;
 typedef Importer<Tileset> TilesetImporter;
 
 }
-
-#endif

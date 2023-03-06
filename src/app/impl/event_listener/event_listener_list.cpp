@@ -7,13 +7,13 @@ namespace ark {
 void EventListenerList::addEventListener(sp<EventListener> eventListener, sp<Boolean> disposed)
 {
     ASSERT(eventListener);
-    _event_listeners.push_back(std::move(eventListener), std::move(disposed));
+    _event_listeners.emplace_back(std::move(eventListener), std::move(disposed));
 }
 
 void EventListenerList::pushEventListener(sp<EventListener> eventListener, sp<Boolean> disposed)
 {
     ASSERT(eventListener);
-    _event_listeners.push_front(std::move(eventListener), std::move(disposed));
+    _event_listeners.emplace_front(std::move(eventListener), std::move(disposed));
 }
 
 bool EventListenerList::onEvent(const Event& event)

@@ -14,12 +14,17 @@
 namespace ark {
 namespace vulkan {
 
+static VkClearColorValue toVkClearColorValue(const V4& rgba)
+{
+    return {rgba.x(), rgba.y(), rgba.z(), rgba.w()};
+}
+
 namespace {
 
 class MainRenderPassPhrase : public VKGraphicsContext::RenderPassPhrase {
 public:
     MainRenderPassPhrase(const sp<VKRenderer>& renderer, VkCommandBuffer commandBuffer, VkFramebuffer framebuffer, const Color& backgroundColor)
-        : _renderer(renderer), _command_buffer(commandBuffer), _framebuffer(framebuffer), _clear_color_value{{backgroundColor.r(), backgroundColor.g(), backgroundColor.b(), backgroundColor.a()}} {
+        : _renderer(renderer), _command_buffer(commandBuffer), _framebuffer(framebuffer), _clear_color_value(toVkClearColorValue(backgroundColor.rgba())) {
     }
 
     virtual VkCommandBuffer vkCommandBuffer() override {

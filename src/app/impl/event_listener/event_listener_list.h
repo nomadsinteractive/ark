@@ -15,7 +15,7 @@ public:
     void pushEventListener(sp<EventListener> eventListener, sp<Boolean> disposed = nullptr);
 
 private:
-    DList<EventListener> _event_listeners;
+    DList<sp<EventListener>> _event_listeners;
 };
 
 }

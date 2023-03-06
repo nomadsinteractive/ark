@@ -37,7 +37,7 @@ private:
 
 
 Notifier::Notifier()
-    : _observers(sp<List<Observer, ObserverFilter>>::make())
+    : _observers(sp<List<sp<Observer>, ObserverFilter>>::make())
 {
 }
 
@@ -50,29 +50,28 @@ void Notifier::notify() const
 
 sp<Observer> Notifier::createObserver(const sp<Runnable>& handler, bool oneshot) const
 {
-    const sp<Observer> observer = sp<Observer>::make(handler, oneshot);
-    _observers->push_back(observer, nullptr);
+    sp<Observer> observer = sp<Observer>::make(handler, oneshot);
+    _observers->emplace_back(observer, nullptr);
     return observer;
 }
 
 sp<Boolean> Notifier::createDirtyFlag(bool dirty) const
 {
-    const sp<DirtyFlag> dirtyFlag = sp<DirtyFlag>::make(dirty);
-    const sp<Observer> observer = sp<Observer>::make(dirtyFlag, false);
-    _observers->push_back(observer, dirtyFlag);
+    sp<DirtyFlag> dirtyFlag = sp<DirtyFlag>::make(dirty);
+    _observers->emplace_back(sp<Observer>::make(dirtyFlag, false), dirtyFlag);
     return dirtyFlag;
 }
 
-Notifier::ObserverFilter::ObserverFilter(const sp<Observer>& observer, sp<Boolean> dirtyFlag)
-    : _observer(observer), _dirty_flag(std::move(dirtyFlag))
+Notifier::ObserverFilter::ObserverFilter(sp<Boolean> dirtyFlag)
+    : _dirty_flag(std::move(dirtyFlag))
 {
 }
 
-FilterAction Notifier::ObserverFilter::operator() () const
+FilterAction Notifier::ObserverFilter::operator() (const sp<Observer>& observer) const
 {
     if(_dirty_flag)
         return _dirty_flag.unique() ? FILTER_ACTION_REMOVE : FILTER_ACTION_NONE;
-    return _observer.unique() ? FILTER_ACTION_REMOVE : FILTER_ACTION_NONE;
+    return observer.unique() ? FILTER_ACTION_REMOVE : FILTER_ACTION_NONE;
 }
 
 }

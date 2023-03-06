@@ -56,3 +56,40 @@ ark_add_python_extension(_decimal SOURCES
         ${ARK_PYTHON_SRC_DIR}/Modules/_decimal
         ${ARK_PYTHON_SRC_DIR}/Modules/_decimal/libmpdec
 )
+
+ark_add_python_extension(_socket
+    SOURCES socketmodule.c
+    BUILTIN
+    DEFINITIONS Py_ENABLE_SHARED Py_BUILD_CORE_MODULE
+    INCLUDEDIRS
+        ${ARK_PYTHON_INCLUDE_DIR}
+        ${ARK_PYTHON_SRC_DIR}/Modules
+)
+
+ark_add_python_extension(select
+    SOURCES selectmodule.c
+    BUILTIN
+    DEFINITIONS Py_ENABLE_SHARED Py_BUILD_CORE_MODULE
+    INCLUDEDIRS
+        ${ARK_PYTHON_INCLUDE_DIR}
+        ${ARK_PYTHON_SRC_DIR}/Modules
+)
+
+ark_add_python_extension(pyexpat
+    SOURCES pyexpat.c
+    BUILTIN
+    DEFINITIONS Py_ENABLE_SHARED Py_BUILD_CORE_MODULE
+    INCLUDEDIRS
+        ${LOCAL_INCLUDE_DIRS}
+        ${ARK_PYTHON_INCLUDE_DIR}
+        ${ARK_PYTHON_SRC_DIR}/Modules
+)
+
+ark_add_python_extension(overlapped
+    SOURCES overlapped.c
+    BUILTIN
+    DEFINITIONS Py_ENABLE_SHARED Py_BUILD_CORE_MODULE
+    INCLUDEDIRS
+        ${ARK_PYTHON_INCLUDE_DIR}
+        ${ARK_PYTHON_SRC_DIR}/Modules
+)

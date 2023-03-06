@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_BASE_VARYINGS_H_
-#define ARK_RENDERER_BASE_VARYINGS_H_
+#pragma once
 
 #include <map>
 
@@ -62,7 +61,7 @@ public:
         Snapshot(Array<Divided>::Borrowed buffers);
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Snapshot);
 
-        void applyDefaults(const Snapshot* defaults = nullptr);
+        void apply(const Snapshot* defaults = nullptr);
 
         Array<Divided>::Borrowed _buffers;
         std::map<size_t, Snapshot> _sub_properties;
@@ -146,5 +145,3 @@ private:
 };
 
 }
-
-#endif

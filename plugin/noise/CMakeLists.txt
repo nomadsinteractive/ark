@@ -1,9 +1,9 @@
 project(ark-noise)
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.15)
 
 #git clone https://github.com/eXpl0it3r/libnoise.git
 #git clone https://github.com/Reputeless/PerlinNoise.git
-add_subdirectory(3rdparty/libnoise)
+#add_subdirectory(3rdparty/libnoise)
 
 include(${ARK_SRC_DIR}/tools/cmake/core.cmake)
 
@@ -14,9 +14,10 @@ list(APPEND LOCAL_INCLUDE_DIRS ${ARK_INCLUDE_DIRS})
 
 list(APPEND LOCAL_INCLUDE_DIRS ${ARK_PLUGIN_DIR})
 
-ark_ensure_dependency(3rdparty/FastNoise)
-list(APPEND LOCAL_INCLUDE_DIRS 3rdparty/FastNoise)
-aux_source_directory(3rdparty/FastNoise LOCAL_SRC_LIST)
+#ark_ensure_dependency(3rdparty/FastNoise)
+ark_include_directories(3rdparty/FastNoise2/include)
+add_subdirectory(3rdparty/FastNoise2)
+ark_link_libraries(FastNoise2)
 
 if(MSVC)
     ark_compile_options("/arch:AVX2")
@@ -28,7 +29,6 @@ list(APPEND LOCAL_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR})
 
 aux_source_directory(. LOCAL_SRC_LIST)
 aux_source_directory(base LOCAL_SRC_LIST)
-aux_source_directory(impl/resource LOCAL_SRC_LIST)
 
 ark_setup_tools(gen_plugin_class)
 ark_gen_plugin_class(noise core ark::plugin::noise noise_plugin impl)

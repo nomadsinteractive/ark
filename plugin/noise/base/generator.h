@@ -1,8 +1,9 @@
-#ifndef ARK_PLUGIN_NOISE_BASE_GENERATOR_H_
-#define ARK_PLUGIN_NOISE_BASE_GENERATOR_H_
+#pragma once
+
+#include <vector>
 
 #include "noise/api.h"
-#include "FastNoise.h"
+#include "FastNoise/FastNoise.h"
 
 #include "core/forwarding.h"
 #include "core/types/shared_ptr.h"
@@ -15,10 +16,10 @@ class ARK_PLUGIN_NOISE_API Generator {
 public:
 //  [[script::bindings::enumeration]]
     enum NoiseType {
-        NOISE_TYPE_PERLIN = FastNoise::Perlin,
-        NOISE_TYPE_PERLIN_FRACTAL = FastNoise::PerlinFractal,
-        NOISE_TYPE_SIMPLEX = FastNoise::Simplex,
-        NOISE_TYPE_SIMPLEX_FRACTAL = FastNoise::SimplexFractal
+        NOISE_TYPE_PERLIN,
+        NOISE_TYPE_PERLIN_FRACTAL,
+        NOISE_TYPE_SIMPLEX,
+        NOISE_TYPE_SIMPLEX_FRACTAL
     };
 
 public:
@@ -46,14 +47,14 @@ public:
     float noise3d(float x, float y, float z);
 
 //  [[script::bindings::auto]]
-    array<array<float>> noiseMap2d(uint32_t rows, uint32_t cols, float x1, float x2, float y1, float y2);
+    std::vector<array<float>> noiseMap2d(uint32_t rows, uint32_t cols, float x1, float x2, float y1, float y2);
 
 private:
-    FastNoise _noise_impl;
+    FastNoise::SmartNode<FastNoise::Generator> _noise_generator;
+    int32_t _seed;
+    float _frequency;
 };
 
 }
 }
 }
-
-#endif

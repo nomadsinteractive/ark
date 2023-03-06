@@ -5,6 +5,7 @@
     "assimp",
     "box2d",
     "bullet3",
+    "expat",
     "fmt",
     "freetype",
     "glbinding",

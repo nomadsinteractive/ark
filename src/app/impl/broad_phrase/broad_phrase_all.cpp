@@ -31,7 +31,7 @@ void BroadPhraseAll::remove(int32_t id)
 BroadPhrase::Result BroadPhraseAll::search(const V3& /*position*/, const V3& /*size*/)
 {
     BroadPhrase::Result result;
-    result.dynamic_candidates = _candidates;
+    result._dynamic_candidates = _candidates;
     return result;
 }
 

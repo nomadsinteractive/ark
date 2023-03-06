@@ -2,9 +2,7 @@
 #define ARK_GRAPHICS_BASE_COLOR_H_
 
 #include "core/base/api.h"
-#include "core/base/notifier.h"
 #include "core/inf/variable.h"
-#include "core/types/class.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -14,31 +12,36 @@ namespace ark {
 
 //[[core::class]]
 //[[script::bindings::extends(Vec4)]]
-class ARK_API Color : public Vec4, public Notifier {
+class ARK_API Color : public Vec4 {
 public:
     Color();
-//  [[script::bindings::auto]]
     Color(uint32_t value);
-    Color(float r, float g, float b, float a);
-    Color(float r, float g, float b);
+//  [[script::bindings::auto]]
+    Color(float r, float g, float b, float a = 1.0);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Color);
 
 //  [[script::bindings::property]]
-    float r() const;
+    sp<Numeric> r() const;
 //  [[script::bindings::property]]
     void setR(float r);
 //  [[script::bindings::property]]
-    float g() const;
+    sp<Numeric> g() const;
 //  [[script::bindings::property]]
     void setG(float g);
 //  [[script::bindings::property]]
-    float b() const;
+    sp<Numeric> b() const;
 //  [[script::bindings::property]]
     void setB(float b);
 //  [[script::bindings::property]]
-    float a() const;
+    sp<Numeric> a() const;
 //  [[script::bindings::property]]
     void setA(float a);
+
+//  [[script::bindings::property]]
+    V4 rgba() const;
+
+//  [[script::bindings::auto]]
+    sp<Vec3> toVec3() const;
 
 //  [[script::bindings::property]]
     uint32_t value() const;
@@ -58,12 +61,10 @@ public:
     virtual V4 val() override;
     virtual bool update(uint64_t timestamp) override;
 
-private:
-    void doNotify();
+    const sp<Vec4Impl>& wrapped() const;
 
 private:
-    V4 _color;
-    Timestamp _timestamp;
+    sp<Vec4Impl> _wrapped;
 
 };
 

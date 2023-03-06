@@ -127,8 +127,8 @@ Camera::Camera()
 }
 
 Camera::Camera(Ark::RendererCoordinateSystem cs, sp<Delegate> delegate)
-    : _coordinate_system(cs), _delegate(std::move(delegate)), _view(sp<Holder>::make(sp<Mat4::Const>::make(M4::identity()))), _projection(sp<Holder>::make(sp<Mat4::Const>::make(M4::identity()))),
-      _vp(sp<Holder>::make(sp<Mat4::Const>::make(M4::identity()))), _position(sp<VariableWrapper<V3>>::make(V3(0))), _target(sp<VariableWrapper<V3>>::make(V3(0)))
+    : _coordinate_system(cs), _delegate(std::move(delegate)), _view(sp<Holder>::make(sp<Mat4::Const>::make(M4()))), _projection(sp<Holder>::make(sp<Mat4::Const>::make(M4()))),
+      _vp(sp<Holder>::make(sp<Mat4::Const>::make(M4()))), _position(sp<VariableWrapper<V3>>::make(V3(0))), _target(sp<VariableWrapper<V3>>::make(V3(0)))
 {
 }
 

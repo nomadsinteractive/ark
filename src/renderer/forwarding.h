@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_BASE_FORWARDING_H_
-#define ARK_RENDERER_BASE_FORWARDING_H_
+#pragma once
 
 #include <functional>
 
@@ -61,5 +60,3 @@ typedef Importer<Atlas> AtlasImporter;
 typedef std::function<void(GraphicsContext&)> ResourceRecycleFunc;
 
 }
-
-#endif

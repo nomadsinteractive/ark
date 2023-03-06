@@ -354,6 +354,13 @@ template<> ARK_PLUGIN_PYTHON_API Optional<uint16_t> PyCast::toCppObject_impl<uin
     return Optional<uint16_t>();
 }
 
+template<> ARK_PLUGIN_PYTHON_API Optional<uint8_t> PyCast::toCppObject_impl<uint8_t>(PyObject* object)
+{
+    if(PyLong_Check(object))
+        return static_cast<uint8_t>(PyLong_AsLong(object));
+    return Optional<uint8_t>();
+}
+
 template<> ARK_PLUGIN_PYTHON_API Optional<int64_t> PyCast::toCppObject_impl<int64_t>(PyObject* object)
 {
     if(PyLong_Check(object))

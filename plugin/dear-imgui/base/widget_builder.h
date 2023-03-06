@@ -99,9 +99,13 @@ public:
 // [[script::bindings::auto]]
     void colorEdit3(const String& label, const sp<Vec3>& value);
 // [[script::bindings::auto]]
+    void colorEdit4(const String& label, const sp<Color>& value);
+// [[script::bindings::auto]]
     void colorEdit4(const String& label, const sp<Vec4>& value);
 // [[script::bindings::auto]]
     void colorPicker3(const String& label, const sp<Vec3>& value);
+// [[script::bindings::auto]]
+    void colorPicker4(const String& label, const sp<Color>& color);
 // [[script::bindings::auto]]
     void colorPicker4(const String& label, const sp<Vec4>& value);
 

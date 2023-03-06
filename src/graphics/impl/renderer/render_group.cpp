@@ -16,12 +16,12 @@ RendererGroup::~RendererGroup()
 void RendererGroup::addRenderer(const sp<Renderer>& renderer)
 {
     ASSERT(renderer);
-    _items.push_back(renderer);
+    _renderers.emplace_back(renderer, renderer.as<Disposed>(), renderer.as<Visibility>());
 }
 
 void RendererGroup::render(RenderRequest& renderRequest, const V3& position)
 {
-    for(const sp<Renderer>& i : _items.update(renderRequest.timestamp()))
+    for(const sp<Renderer>& i : _renderers.update(renderRequest.timestamp()))
         i->render(renderRequest, position);
 }
 

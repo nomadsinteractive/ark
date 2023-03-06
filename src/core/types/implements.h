@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_TYPES_IMPLEMENTS_H_
-#define ARK_CORE_TYPES_IMPLEMENTS_H_
+#pragma once
 
 #include <set>
 #include <unordered_set>
@@ -84,5 +83,3 @@ public:
 };
 
 }
-
-#endif

@@ -21,17 +21,12 @@ public:
         DList<uint32_t> expirableList;
 
         for(uint32_t i = 0; i < 10; i++)
-        {
-            sp<uint32_t> ptr = sp<uint32_t>::adopt((new uint32_t(i)));
-            if(i % 4 == 1)
-                ptr.absorb<Disposed>(expirable);
-            expirableList.push_back(ptr);
-        }
+            expirableList.emplace_back(i, i % 4 == 1 ? expirable : nullptr);
         expirable->dispose();
 
         uint32_t sum = 0;
-        for(const sp<uint32_t>& i : expirableList.update(0))
-            sum += *i.get();
+        for(uint32_t i : expirableList.update(0))
+            sum += i;
 
         TESTCASE_VALIDATE(sum == 30);
 

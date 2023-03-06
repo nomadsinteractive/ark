@@ -1,5 +1,4 @@
-#ifndef ARK_APP_INF_COLLIDER_H_
-#define ARK_APP_INF_COLLIDER_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/types/shared_ptr.h"
@@ -36,6 +35,17 @@ public:
         BODY_FLAG_MANUAL_ROTATION = 16
     };
 
+//  [[script::bindings::constant]]
+    static const String SHAPE_TYPE_NONE;
+//  [[script::bindings::constant]]
+    static const String SHAPE_TYPE_AABB;
+//  [[script::bindings::constant]]
+    static const String SHAPE_TYPE_BALL;
+//  [[script::bindings::constant]]
+    static const String SHAPE_TYPE_BOX;
+//  [[script::bindings::constant]]
+    static const String SHAPE_TYPE_CAPSULE;
+
 public:
     virtual ~Collider() = default;
 
@@ -47,5 +57,3 @@ public:
 };
 
 }
-
-#endif

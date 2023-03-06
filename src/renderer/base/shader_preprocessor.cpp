@@ -231,7 +231,7 @@ const std::vector<ShaderPreprocessor::Parameter>& ShaderPreprocessor::args() con
 
 void ShaderPreprocessor::inDeclare(const String& type, const String& name, int32_t location)
 {
-    _declaration_ins.declare(type, inVarPrefix(), name, location, nullptr, _shader_stage == PipelineInput::SHADER_STAGE_FRAGMENT && type == "int");
+    _declaration_ins.declare(type, inVarPrefix(), name, location, nullptr, _shader_stage == PipelineInput::SHADER_STAGE_FRAGMENT && (type == "int" || type == "uint"));
 }
 
 void ShaderPreprocessor::outDeclare(const String& type, const String& name, int32_t location)

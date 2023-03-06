@@ -117,7 +117,7 @@ public:
     template<typename T> sp<Variable<T>> synchronize(sp<Variable<T>> delegate, sp<Boolean> disposed) {
         const sp<UpdatableSynchronized<T>> s = sp<UpdatableSynchronized<T>>::make(std::move(delegate));
         const sp<Variable<T>>& var = s->synchronized();
-        _on_pre_compose_updatable.push_back(s, disposed ? std::move(disposed) : sp<Boolean>::make<BooleanByWeakRef<Variable<T>>>(var, 1));
+        _on_pre_compose_updatable.emplace_back(s, disposed ? std::move(disposed) : sp<Boolean>::make<BooleanByWeakRef<Variable<T>>>(var, 1));
         return var;
     }
 
@@ -190,11 +190,11 @@ private:
     RenderResourceList _on_surface_ready;
     RenderResourceList _on_every_frame;
 
-    DList<Updatable> _on_pre_compose_updatable;
-    DList<Runnable> _on_pre_compose_runnable;
+    DList<sp<Updatable>> _on_pre_compose_updatable;
+    DList<sp<Runnable>> _on_pre_compose_runnable;
 
     std::vector<UpdatableSynchronized<bool>> _on_pre_render_sync;
-    DList<Runnable> _on_pre_render_runnable;
+    DList<sp<Runnable>> _on_pre_render_runnable;
 
     std::vector<Box> _defered_instances;
     std::unordered_map<uint32_t, sp<SharedIndices>> _shared_indices;

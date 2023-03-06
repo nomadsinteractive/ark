@@ -1,9 +1,7 @@
 #include "graphics/base/v2.h"
 
-#include "core/ark.h"
-#include "core/inf/variable.h"
-#include "core/types/null.h"
-#include "core/types/shared_ptr.h"
+#include "core/base/range.h"
+#include "core/base/slice.h"
 #include "core/util/string_convert.h"
 #include "core/util/math.h"
 #include "core/util/strings.h"
@@ -13,13 +11,14 @@ namespace ark {
 const float V2::MIN_NORMALIZE_LENGTH = 0.000000001f;
 
 V2::V2(float v)
-    : _x(v), _y(v)
+    : V2(v, v)
 {
 }
 
 V2::V2(float x, float y)
     : _x(x), _y(y)
 {
+    DASSERT(!(std::isinf(_x) || std::isinf(_y)));
 }
 
 V2::V2(const std::initializer_list<float>& values)
@@ -154,6 +153,12 @@ V2 V2::normalize() const
 const float& V2::operator[](size_t idx) const
 {
     return reinterpret_cast<const float*>(this)[idx];
+}
+
+Range<float> V2::subscribe(const Slice& slice, size_t length)
+{
+    const Slice adjusted = slice.adjustIndices(length);
+    return Range<float>(&_x + adjusted.begin(), &_x + adjusted.end(), slice.step());
 }
 
 float& V2::operator[](size_t idx)

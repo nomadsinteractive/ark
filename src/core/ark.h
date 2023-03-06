@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_ARK_H_
-#define ARK_CORE_ARK_H_
+#pragma once
 
 #include <list>
 
@@ -115,5 +114,3 @@ private:
 };
 
 }
-
-#endif

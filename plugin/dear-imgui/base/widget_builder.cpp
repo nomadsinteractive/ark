@@ -410,6 +410,11 @@ void WidgetBuilder::colorEdit3(const String& label, const sp<Vec3>& value)
     addWidget(sp<InputWithType<V3, Vec3Impl>>::make([](const char* l, V3* v) { return ImGui::ColorEdit3(l, reinterpret_cast<float*>(v)); }, label, value));
 }
 
+void WidgetBuilder::colorEdit4(const String& label, const sp<Color>& color)
+{
+    addWidget(sp<InputWithType<V4, Vec4Impl>>::make([](const char* l, V4* v) { return ImGui::ColorEdit4(l, reinterpret_cast<float*>(v)); }, label, color->wrapped()));
+}
+
 void WidgetBuilder::colorEdit4(const String& label, const sp<Vec4>& value)
 {
     addWidget(sp<InputWithType<V4, Vec4Impl>>::make([](const char* l, V4* v) { return ImGui::ColorEdit4(l, reinterpret_cast<float*>(v)); }, label, value));
@@ -418,6 +423,11 @@ void WidgetBuilder::colorEdit4(const String& label, const sp<Vec4>& value)
 void WidgetBuilder::colorPicker3(const String& label, const sp<Vec3>& value)
 {
     addWidget(sp<InputWithType<V3, Vec3Impl>>::make([](const char* l, V3* v) { return ImGui::ColorPicker3(l, reinterpret_cast<float*>(v)); }, label, value));
+}
+
+void WidgetBuilder::colorPicker4(const String& label, const sp<Color>& color)
+{
+    addWidget(sp<InputWithType<V4, Vec4Impl>>::make([](const char* l, V4* v) { return ImGui::ColorPicker4(l, reinterpret_cast<float*>(v)); }, label, color->wrapped()));
 }
 
 void WidgetBuilder::colorPicker4(const String& label, const sp<Vec4>& value)

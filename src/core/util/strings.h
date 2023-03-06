@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_UTIL_STRINGS_H_
-#define ARK_CORE_UTIL_STRINGS_H_
+#pragma once
 
 #include <map>
 
@@ -117,5 +116,3 @@ public:
 };
 
 }
-
-#endif

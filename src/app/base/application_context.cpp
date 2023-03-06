@@ -215,7 +215,7 @@ void ApplicationContext::setDefaultEventListener(sp<EventListener> eventListener
 sp<MessageLoop> ApplicationContext::makeMessageLoop(const sp<Clock>& clock)
 {
     sp<MessageLoop> messageLoop = sp<MessageLoop>::make(clock->ticker());
-    _worker_strategy->_app_message_loops.push_back(messageLoop);
+    _worker_strategy->_app_message_loops.emplace_back(messageLoop);
     return messageLoop;
 }
 
@@ -348,14 +348,9 @@ void ApplicationContext::ExecutorWorkerStrategy::onException(const std::exceptio
     throw e;
 }
 
-ApplicationContext::MessageLoopFilter::MessageLoopFilter(const sp<MessageLoop>& messageLoop)
-    : _message_loop(messageLoop)
+FilterAction ApplicationContext::MessageLoopFilter::operator()(const sp<MessageLoop>& messageLoop) const
 {
-}
-
-FilterAction ApplicationContext::MessageLoopFilter::operator()() const
-{
-    return _message_loop.unique() ? FILTER_ACTION_REMOVE : FILTER_ACTION_NONE;
+    return messageLoop.unique() ? FILTER_ACTION_REMOVE : FILTER_ACTION_NONE;
 }
 
 }

@@ -131,15 +131,6 @@ String Strings::loadFromReadable(const sp<Readable>& readable)
     return sb.str().c_str();
 }
 
-//uint32_t Strings::hash(const String& text)
-//{
-//    const char* str = text.c_str();
-//    uint32_t h = 0;
-//    while(*str)
-//        h = h * 101 + *str++;
-//    return h;
-//}
-
 String Strings::unwrap(const String& str, char open, char close)
 {
     if(!str.empty() && str.at(0) == open && str.at(str.length() - 1) == close)

@@ -14,8 +14,14 @@ static bool gTraceFlag = false;
 void __fatal__(const char* func, const char* condition, const char* message)
 {
     const String str = Strings::sprintf("%s%s", condition ? Strings::sprintf("\"%s\" failed! ", condition).c_str() : "", message);
+#if ARK_FLAG_DEBUG
+    uint32_t raise = 1;
+#else
+    constexpr bool raise = true;
+#endif
     Log::e(func, str.c_str());
-    throw std::logic_error(str.c_str());
+    if(raise)
+        throw std::runtime_error(str.c_str());
 }
 
 void __warning__(const char* func, const char* /*condition*/, const char* message)

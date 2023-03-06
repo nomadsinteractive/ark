@@ -2,7 +2,11 @@
 
 #include <algorithm>
 
+#include "core/impl/variable/variable_wrapper.h"
 #include "core/util/strings.h"
+
+#include "graphics/impl/vec/vec4_impl.h"
+#include "graphics/util/vec3_type.h"
 
 namespace ark {
 
@@ -11,115 +15,117 @@ const Color Color::WHITE(1.0f, 1.0f, 1.0f, 1.0f);
 const Color Color::BLACK(0.0f, 0.0f, 0.0f, 1.0f);
 
 Color::Color()
-    : _color(0, 0, 0, 0)
+    : Color(0, 0, 0, 0)
 {
 }
 
 Color::Color(uint32_t value)
-    : _color((value >> 24) / 255.0f, ((value >> 16) & 0xff) / 255.0f, ((value >> 8) & 0xff) / 255.0f, (value & 0xff) / 255.0f)
+    : Color((value >> 24) / 255.0f, ((value >> 16) & 0xff) / 255.0f, ((value >> 8) & 0xff) / 255.0f, (value & 0xff) / 255.0f)
 {
 }
 
 Color::Color(float red, float green, float blue, float alpha)
-    : _color(red, green, blue, alpha)
+    : _wrapped(sp<Vec4Impl>::make(red, green, blue, alpha))
 {
 }
 
-Color::Color(float red, float green, float blue)
-    : _color(red, green, blue, 1.0f)
+sp<Numeric> Color::r() const
 {
-}
-
-float Color::r() const
-{
-    return _color._x;
+    return _wrapped->x();
 }
 
 void Color::setR(float red)
 {
-    _color._x = red;
-    doNotify();
+    _wrapped->x()->set(red);
 }
 
-float Color::g() const
+sp<Numeric> Color::g() const
 {
-    return _color._y;
+    return _wrapped->y();
 }
 
 void Color::setG(float green)
 {
-    _color._y = green;
-    doNotify();
+    _wrapped->y()->set(green);
 }
 
-float Color::b() const
+sp<Numeric> Color::b() const
 {
-    return _color._z;
+    return _wrapped->z();
 }
 
 void Color::setB(float blue)
 {
-    _color._z = blue;
-    doNotify();
+    _wrapped->z()->set(blue);
 }
 
-float Color::a() const
+sp<Numeric> Color::a() const
 {
-    return _color.w();
+    return _wrapped->w();
 }
 
 void Color::setA(float alpha)
 {
-    _color._w = alpha;
-    doNotify();
+    _wrapped->w()->set(alpha);
+}
+
+V4 Color::rgba() const
+{
+    return _wrapped->val();
+}
+
+sp<Vec3> Color::toVec3() const
+{
+    return Vec3Type::create(_wrapped->x(), _wrapped->y(), _wrapped->z());
 }
 
 uint32_t Color::value() const
 {
+    const V4 color = rgba();
     uint8_t v[4];
-    v[3] = static_cast<uint8_t>(_color.x() * 255);
-    v[2] = static_cast<uint8_t>(_color.y() * 255);
-    v[1] = static_cast<uint8_t>(_color.z() * 255);
-    v[0] = static_cast<uint8_t>(_color.w() * 255);
+    v[3] = static_cast<uint8_t>(color.x() * 255);
+    v[2] = static_cast<uint8_t>(color.y() * 255);
+    v[1] = static_cast<uint8_t>(color.z() * 255);
+    v[0] = static_cast<uint8_t>(color.w() * 255);
     return *reinterpret_cast<uint32_t*>(v);
 }
 
 void Color::setValue(uint32_t value)
 {
-    _color = V4((value >> 24) / 255.0f, ((value >> 16) & 0xff) / 255.0f, ((value >> 8) & 0xff) / 255.0f, (value & 0xff) / 255.0f);
-    doNotify();
+    setR((value >> 24) / 255.0f);
+    setG(((value >> 16) & 0xff) / 255.0f);
+    setB(((value >> 8) & 0xff) / 255.0f);
+    setA((value & 0xff) / 255.0f);
 }
 
 void Color::assign(const Color& other)
 {
-    _color = other._color;
-    doNotify();
+    _wrapped = other._wrapped;
 }
 
 bool Color::operator ==(const Color& other) const
 {
-    return _color == other._color;
+    return _wrapped->val() == other._wrapped->val();
 }
 
 bool Color::operator !=(const Color& other) const
 {
-    return _color != other._color;
+    return _wrapped->val() != other._wrapped->val();
 }
 
 V4 Color::val()
 {
-    return _color;
+    return _wrapped->val();
 }
 
 bool Color::update(uint64_t timestamp)
 {
-    return _timestamp.update(timestamp);
+    return _wrapped->update(timestamp);
 }
 
-void Color::doNotify()
+const sp<Vec4Impl>& Color::wrapped() const
 {
-    _timestamp.markDirty();
-    notify();
+    return _wrapped;
 }
 
 template<> ARK_API Color StringConvert::to<String, Color>(const String& s)

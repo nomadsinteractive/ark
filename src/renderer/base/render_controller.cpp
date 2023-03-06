@@ -235,20 +235,20 @@ sp<Framebuffer> RenderController::makeFramebuffer(sp<Renderer> renderer, std::ve
 void RenderController::addPreComposeUpdatable(sp<Updatable> updatable, sp<Boolean> canceled)
 {
     DASSERT(updatable && canceled);
-    _on_pre_compose_updatable.push_back(std::move(updatable), std::move(canceled));
+    _on_pre_compose_updatable.emplace_back(std::move(updatable), std::move(canceled));
 }
 
 void RenderController::addPreComposeRunnable(sp<Runnable> task, sp<Boolean> canceled)
 {
     DASSERT(task && canceled);
-    _on_pre_compose_runnable.push_back(std::move(task), std::move(canceled));
+    _on_pre_compose_runnable.emplace_back(std::move(task), std::move(canceled));
 }
 
 void RenderController::addPreRenderRequest(sp<Runnable> task, sp<Boolean> canceled)
 {
     ASSERT(task && canceled);
     UpdatableSynchronized<bool> var(std::move(canceled));
-    _on_pre_render_runnable.push_back(std::move(task), var.synchronized());
+    _on_pre_render_runnable.emplace_back(std::move(task), var.synchronized());
     _on_pre_render_sync.push_back(std::move(var));
 }
 

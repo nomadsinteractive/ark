@@ -90,11 +90,11 @@ public:
         const sp<CollisionCallbackImpl> collisionCallbackImpl003 = sp<CollisionCallbackImpl>::make(c003);
         rigidBody001->setCollisionCallback(collisionCallbackImpl001);
         rigidBody003->setCollisionCallback(collisionCallbackImpl003);
-        const std::unordered_set<int32_t> s1 = bp1->search(V3(120, 380, 0), V3(60, 60, 0)).dynamic_candidates;
+        const std::unordered_set<int32_t> s1 = bp1->search(V3(120, 380, 0), V3(60, 60, 0))._dynamic_candidates;
         TESTCASE_VALIDATE(s1.find(rigidBody001->id()) != s1.end());
-        const std::unordered_set<int32_t> s2 = bp1->search(V3(40, 380, 0), V3(60, 60, 0)).dynamic_candidates;
+        const std::unordered_set<int32_t> s2 = bp1->search(V3(40, 380, 0), V3(60, 60, 0))._dynamic_candidates;
         TESTCASE_VALIDATE(s2.find(rigidBody001->id()) == s2.end());
-        const std::unordered_set<int32_t> s3 = bp1->search(V3(120, 450, 0), V3(60, 60, 0)).dynamic_candidates;
+        const std::unordered_set<int32_t> s3 = bp1->search(V3(120, 450, 0), V3(60, 60, 0))._dynamic_candidates;
         TESTCASE_VALIDATE(s3.find(rigidBody001->id()) == s3.end());
 
         while(duration->val() < 3.0f) {

@@ -132,8 +132,10 @@ std::map<TypeId, PyArkType::LoaderFunction>& PyArkType::ensureLoader(const Strin
 int32_t plugin::python::PyArkType::doReady()
 {
     int32_t r = PyType_Ready(&_py_type_object);
-    for(const auto& [name, value] : _constants)
+    for(const auto& [name, value] : _enum_constants)
         PyDict_SetItemString(_py_type_object.tp_dict, name.c_str(), PyLong_FromLong(value));
+    for(const auto& [name, value] : _string_constants)
+        PyDict_SetItemString(_py_type_object.tp_dict, name.c_str(), PyCast::toPyObject<String>(value));
     return r;
 }
 

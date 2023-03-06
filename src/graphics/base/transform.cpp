@@ -154,18 +154,6 @@ V3 Transform::Snapshot::transform(const V3& p) const
     return _delegate->transform(*this, p);
 }
 
-Transform::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _type(Documents::getAttribute(manifest, Constants::Attributes::TYPE, Transform::TYPE_LINEAR_3D)),
-      _rotation(factory.getBuilder<Rotation>(manifest, Constants::Attributes::ROTATION)), _scale(factory.getBuilder<Vec3>(manifest, "scale")),
-      _pivot(factory.getBuilder<Vec3>(manifest, "pivot"))
-{
-}
-
-sp<Transform> Transform::BUILDER::build(const Scope& args)
-{
-    return sp<Transform>::make(_type, _rotation->build(args), _scale->build(args), _pivot->build(args));
-}
-
 template<> ARK_API sp<Transform> Null::safePtr()
 {
     return sp<Transform>::make();

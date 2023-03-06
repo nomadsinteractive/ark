@@ -143,7 +143,7 @@ public:
 //  [[script::bindings::classmethod]]
     static sp<Numeric> periodic(const sp<Numeric>& self, const sp<Numeric>& interval = nullptr, const sp<Numeric>& duration = nullptr);
 
-//[[script::bindings::classmethod]]
+//  [[script::bindings::classmethod]]
     static sp<Numeric> dye(sp<Numeric> self, sp<Boolean> condition = nullptr, String message = "");
 
 //  [[plugin::builder::by-value]]

@@ -49,23 +49,23 @@ const sp<StringBundle>& StringTable::getStringBundle(const String& name)
 sp<String> StringTable::getString(const String& stringTableName, const String& stringName, bool alert)
 {
     const sp<StringBundle>& sb = getStringBundle(stringTableName);
-    DCHECK(!alert || sb, "String bundle \"%s\" does not exist", stringTableName.c_str());
+    CHECK(!alert || sb, "String bundle \"%s\" does not exist", stringTableName.c_str());
     const sp<String> str = sb ? sb->getString(stringName) : sp<String>::null();
-    DCHECK(!alert || str, "String bundle \"%s\" has no resource \"%s\"", stringTableName.c_str(), stringName.c_str());
+    CHECK(!alert || str, "String bundle \"%s\" has no resource \"%s\"", stringTableName.c_str(), stringName.c_str());
     return str;
 }
 
 sp<String> StringTable::getString(const String& name, bool alert)
 {
     auto pos = name.find('/');
-    DCHECK(pos != String::npos, "The name \"%s\" doest follow [stringtablename/stringname] pattern", name.c_str());
+    CHECK(pos != String::npos, "The name \"%s\" doest follow [stringtablename/stringname] pattern", name.c_str());
     return getString(name.substr(0, pos), name.substr(pos + 1), alert);
 }
 
 std::vector<String> StringTable::getStringArray(const String& stringTableName, const String& name, bool alert)
 {
     const sp<StringBundle>& sb = getStringBundle(stringTableName);
-    DCHECK(!alert || sb, "String bundle \"%s\" does not exist", stringTableName.c_str());
+    CHECK(!alert || sb, "String bundle \"%s\" does not exist", stringTableName.c_str());
     if(sb)
         return sb->getStringArray(name);
     DCHECK(!alert, "String bundle \"%s\" has no resource \"%s\"", stringTableName.c_str(), name.c_str());

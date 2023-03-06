@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_FORWARDING_H_
-#define ARK_CORE_FORWARDING_H_
+#pragma once
 
 #include <chrono>
 
@@ -24,6 +23,7 @@ template<typename T> class Loader;
 template<typename T> class LoaderBundle;
 template<typename T> class LFStack;
 template<typename T> class LFQueue;
+template<typename T> class Range;
 template<typename T> class SafePtr;
 template<typename T> class SafeVar;
 template<typename T> class SharedPtr;
@@ -129,6 +129,7 @@ typedef sp<FloatArray> floatarray;
 typedef std::chrono::time_point<std::chrono::steady_clock> TimePoint;
 //TODO: change to std::span when c++20 or above arrives
 typedef std::string_view Span;
+typedef String StringView;
 
 typedef Loader<document> DocumentLoader;
 typedef LoaderBundle<document> DocumentLoaderBundle;
@@ -156,5 +157,3 @@ typedef LoaderBundle<String> StringLoaderBundle;
     TypeName(TypeName&&) noexcept = default;   \
     TypeName& operator=(const TypeName&) noexcept = default;   \
     TypeName& operator=(TypeName&&) noexcept = default
-
-#endif

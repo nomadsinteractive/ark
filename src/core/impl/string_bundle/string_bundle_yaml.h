@@ -13,7 +13,7 @@ namespace ark {
 
 class StringBundleYAML : public StringBundle {
 public:
-    StringBundleYAML(const sp<AssetBundle>& resource);
+    StringBundleYAML(sp<AssetBundle> assetBundle);
 
     virtual sp<String> getString(const String& resid) override;
     virtual std::vector<String> getStringArray(const String& resid) override;
@@ -31,10 +31,10 @@ public:
 
 private:
 
-    class Item {
+    class Node {
     public:
-        Item() = default;
-        DEFAULT_COPY_AND_ASSIGN(Item);
+        Node() = default;
+        DEFAULT_COPY_AND_ASSIGN(Node);
 
         void setValue(String value);
         void addSequenceValue(String value);
@@ -50,14 +50,21 @@ private:
         sp<std::vector<String>> _sequence;
     };
 
-    void loadBundle(const String& name);
+    struct Directory {
+        Directory(sp<AssetBundle> assetBundle = nullptr);
 
-    const std::map<String, sp<Item>>& getPackageBundle(const String& resid, String& nodename);
-    sp<Item>& makeKey(std::map<String, sp<Item>>& bundle, const std::vector<String>& keys) const;
+        sp<Node> findNode(const String& resid);
+        void setNode(const std::vector<String>& keys, sp<Node> node);
+
+        sp<AssetBundle> _asset_bundle;
+        std::map<String, sp<Node>> _nodes;
+        std::map<String, sp<Directory>> _sub_directories;
+    };
+
+    static sp<Directory> loadAssetDirectory(Asset& asset, sp<AssetBundle> assetBundle);
 
 private:
-    sp<AssetBundle> _resource;
-    std::map<String, std::map<String, sp<Item>>> _bundle;
+    Directory _root;
 
 };
 

@@ -161,8 +161,7 @@ class GenMethod(object):
     def _gen_calling_body(self, genclass, calling_lines):
         return calling_lines
 
-    @staticmethod
-    def gen_return_statement(return_type, py_return):
+    def gen_return_statement(self, return_type, py_return):
         if acg.typeCompare(return_type, py_return):
             return ['return ret;']
 
@@ -408,7 +407,7 @@ class GenOperatorMethod(GenMethod):
     def gen_return_statement(self, return_type, py_return):
         if self._operator in ('+=', '-=', '*=', '/='):
             return ['Py_INCREF(self);', 'return reinterpret_cast<PyObject*>(self);']
-        return GenMethod.gen_return_statement(return_type, py_return)
+        return super().gen_return_statement(return_type, py_return)
 
     def _gen_parse_tuple_code(self, lines, declares, args):
         pass
@@ -429,7 +428,7 @@ class GenOperatorMethod(GenMethod):
             return create_overloaded_method_type(GenOperatorMethod, operator=m1.operator)(m1, m2)
 
 
-class GenMappingMethod(GenMethod):
+class GenSubscribableMethod(GenMethod):
     def __init__(self, name, args, return_type, operator, is_static):
         self._operator = operator
         self._is_static = is_static
@@ -448,25 +447,12 @@ class GenMappingMethod(GenMethod):
     def _gen_parse_tuple_code(self, lines, declares, args):
         pass
 
-    def _gen_convert_args_code(self, lines, argdeclare, optional_check=False):
-        if argdeclare and not self._is_len_func:
-            for i, j in enumerate(self._arguments):
-                meta = GenArgumentMeta('PyObject*', j.accept_type, 'O')
-                ga = GenArgument(j.accept_type, j.default_value, meta, str(j))
-                lines.append(ga.gen_declare(f'obj{i}', f'arg{i}', False, optional_check))
-
-    def gen_py_arguments(self):
-        self_arg = f'Instance* self'
-        if self._is_len_func:
-            return self_arg
-
-        argc = self.gen_py_argc()
-        return f'{self_arg}, {", ".join("PyObject* arg%d" % i for i in range(argc))}'
-
     def gen_py_argc(self):
         return len(self._arguments)
 
     def gen_py_return(self):
+        if self._is_len_func:
+            return 'Py_ssize_t'
         return 'int32_t' if len(self._arguments) == 2 else super().gen_py_return()
 
     def overload(self, m1, m2):
@@ -482,15 +468,57 @@ class GenMappingMethod(GenMethod):
         return super()._gen_calling_statement(genclass, argnames)
 
 
-def gen_operator_defs(genclass):
-    operator_defs = []
-    operator_methods = genclass.operator_methods()
-    if operator_methods:
-        args = {'py_class_name': genclass.py_class_name}
-        methods_dict = dict((i.operator, '%s::%s_r' % (genclass.py_class_name, i.name)) for i in operator_methods)
-        args.update((j, methods_dict[i] if i in methods_dict else 'nullptr') for i, j in TP_AS_NUMBER_TEMPLATE_OPERATOR.items())
-        operator_defs.extend(acg.format(i, **args) for i in TP_AS_NUMBER_TEMPLATE)
-    return operator_defs
+class GenMappingMethod(GenSubscribableMethod):
+    def __init__(self, name, args, return_type, operator, is_static):
+        super().__init__(name, args, return_type, operator, is_static)
+
+    def _gen_convert_args_code(self, lines, argdeclare, optional_check=False):
+        if argdeclare and not self._is_len_func:
+            for i, j in enumerate(self._arguments):
+                meta = GenArgumentMeta('PyObject*', j.accept_type, 'O')
+                ga = GenArgument(j.accept_type, j.default_value, meta, str(j))
+                lines.append(ga.gen_declare(f'obj{i}', f'arg{i}', False, optional_check))
+
+    def gen_py_arguments(self):
+        self_arg = f'Instance* self'
+        if self._is_len_func:
+            return self_arg
+
+        argc = self.gen_py_argc()
+        return f'{self_arg}, {", ".join("PyObject* arg%d" % i for i in range(argc))}'
+
+
+class GenSequenceMethod(GenSubscribableMethod):
+    def __init__(self, name, args, return_type, operator, is_static):
+        super().__init__(name, args, return_type, operator, is_static)
+
+    def _gen_convert_args_code(self, lines, argdeclare, optional_check=False):
+        if argdeclare and not self._is_len_func:
+            arg0 = self._arguments[0]
+            lines.append(f'{arg0.accept_type} obj0 = static_cast<{arg0.accept_type}>(arg0);')
+            for i, j in enumerate(self._arguments[1:]):
+                meta = GenArgumentMeta('PyObject*', j.accept_type, 'O')
+                ga = GenArgument(j.accept_type, j.default_value, meta, str(j))
+                lines.append(ga.gen_declare(f'obj{i + 1}', f'arg{i + 1}', False, optional_check))
+
+    def gen_py_arguments(self):
+        self_arg = f'Instance* self'
+        if self._is_len_func:
+            return self_arg
+
+        argc = self.gen_py_argc()
+        argc_types = ['Py_ssize_t', 'PyObject*']
+        return f'{self_arg}, {", ".join("%s arg%d" % (argc_types[i], i) for i in range(argc))}'
+
+    def gen_return_statement(self, return_type, py_return):
+        return_statement = super().gen_return_statement(return_type, py_return)
+        if not self._is_len_func and not self._is_set_func:
+            index_check = [
+                'if(!ret)',
+                '    PyBridge::setStopIterationErrString("");'
+            ]
+            return index_check + return_statement
+        return return_statement
 
 
 TP_AS_MAPPING_TEMPLATE = [
@@ -509,12 +537,48 @@ TP_AS_MAPPING_TEMPLATE_OPERATOR = {
 }
 
 
+TP_AS_SEQUENCE_TEMPLATE = [
+    'static PySequenceMethods ${py_class_name}_tp_as_sequence = {',
+    '    (lenfunc) ${sq_length},               /* lenfunc sq_length;        */',
+    '    (binaryfunc) ${sq_concat},            /* binaryfunc sq_concat;     */',
+    '    (ssizeargfunc) ${sq_repeat},          /* ssizeargfunc sq_repeat;   */',
+    '    (ssizeargfunc) ${sq_item},            /* ssizeargfunc sq_item;     */',
+    '    nullptr,               /* was_sq_slice */',
+    '    (ssizeobjargproc) ${sq_ass_item},               /* ssizeobjargproc sq_ass_item;*/',
+    '    nullptr,               /* was_sq_ass_slice */',
+    '    nullptr,               /* sq_contains */',
+    '    nullptr,               /* sq_inplace_concat */',
+    '    nullptr,               /* sq_inplace_repeat */',
+    '};'
+]
+
+
+TP_AS_SEQUENCE_TEMPLATE_OPERATOR = {
+    'len': 'sq_length',
+    '+': 'sq_concat',
+    '*': 'sq_repeat',
+    'get': 'sq_item',
+    'set': 'sq_ass_item'
+}
+
+
+def gen_template_defs(py_class_name: str, methods, code_templates: list[str], operator_templates: dict[str, str]):
+    code_lines = []
+    if methods:
+        args = {'py_class_name': py_class_name}
+        methods_dict = dict((i.operator, '%s::%s_r' % (py_class_name, i.name)) for i in methods)
+        args.update((j, methods_dict[i] if i in methods_dict else 'nullptr') for i, j in operator_templates.items())
+        code_lines.extend(acg.format(i, **args) for i in code_templates)
+    return code_lines
+
+
+def gen_operator_defs(genclass):
+    return gen_template_defs(genclass.py_class_name, genclass.operator_methods(), TP_AS_NUMBER_TEMPLATE, TP_AS_NUMBER_TEMPLATE_OPERATOR)
+
+
 def gen_as_mapping_defs(genclass):
-    as_mapping_defs = []
-    subscribe_methods = genclass.subscribe_methods()
-    if subscribe_methods:
-        args = {'py_class_name': genclass.py_class_name}
-        methods_dict = dict((i.operator, '%s::%s_r' % (genclass.py_class_name, i.name)) for i in subscribe_methods)
-        args.update((j, methods_dict[i] if i in methods_dict else 'nullptr') for i, j in TP_AS_MAPPING_TEMPLATE_OPERATOR.items())
-        as_mapping_defs.extend(acg.format(i, **args) for i in TP_AS_MAPPING_TEMPLATE)
-    return as_mapping_defs
+    return gen_template_defs(genclass.py_class_name, genclass.subscribe_methods(), TP_AS_MAPPING_TEMPLATE, TP_AS_MAPPING_TEMPLATE_OPERATOR)
+
+
+def gen_as_sequence_defs(genclass):
+    return gen_template_defs(genclass.py_class_name, genclass.sequence_methods(), TP_AS_SEQUENCE_TEMPLATE, TP_AS_SEQUENCE_TEMPLATE_OPERATOR)

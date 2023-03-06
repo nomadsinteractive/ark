@@ -1,11 +1,9 @@
-#ifndef ARK_GRAPHICS_BASE_RENDER_OBJECT_H_
-#define ARK_GRAPHICS_BASE_RENDER_OBJECT_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/base/timestamp.h"
 #include "core/inf/builder.h"
 #include "core/inf/holder.h"
-#include "core/epi/disposed.h"
 #include "core/epi/visibility.h"
 #include "core/types/box.h"
 #include "core/types/shared_ptr.h"
@@ -21,7 +19,6 @@ namespace ark {
 //[[script::bindings::holder]]
 class ARK_API RenderObject : public Holder, public Renderable {
 public:
-//  [[script::bindings::auto]]
     RenderObject(int32_t type, sp<Vec3> position = nullptr, sp<Size> size = nullptr, sp<Transform> transform = nullptr, sp<Varyings> varyings = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> disposed = nullptr);
 //  [[script::bindings::auto]]
     RenderObject(sp<Integer> type, sp<Vec3> position = nullptr, sp<Size> size = nullptr, sp<Transform> transform = nullptr, sp<Varyings> varyings = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> disposed = nullptr);
@@ -148,4 +145,3 @@ private:
 };
 
 }
-#endif

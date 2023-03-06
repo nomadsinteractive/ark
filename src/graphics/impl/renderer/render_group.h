@@ -33,7 +33,7 @@ public:
     };
 
 private:
-    DVList<Renderer> _items;
+    DVList<sp<Renderer>> _renderers;
 
 };
 

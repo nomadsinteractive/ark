@@ -42,7 +42,7 @@ void Renderable::Snapshot::applyVaryings(const Varyings::Snapshot& defaultVaryin
     if(!_varyings)
         _varyings = defaultVaryingsSnapshot;
     else
-        _varyings.applyDefaults(defaultVaryingsSnapshot ? &defaultVaryingsSnapshot : nullptr);
+        _varyings.apply(defaultVaryingsSnapshot ? &defaultVaryingsSnapshot : nullptr);
 }
 
 }

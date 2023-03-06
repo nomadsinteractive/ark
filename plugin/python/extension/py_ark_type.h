@@ -1,5 +1,4 @@
-#ifndef ARK_PLUGIN_PYTHON_EXTENSION_EXTENSION_UTIL_H_
-#define ARK_PLUGIN_PYTHON_EXTENSION_EXTENSION_UTIL_H_
+#pragma once
 
 #include <map>
 
@@ -70,7 +69,9 @@ public:
     std::map<TypeId, LoaderFunction>& ensureLoader(const String& name);
 
 protected:
-    std::map<String, int32_t> _constants;
+    std::map<String, int32_t> _enum_constants;
+    std::map<String, String> _string_constants;
+
     std::map<String, std::map<TypeId, LoaderFunction>> _loaders;
 
 private:
@@ -98,5 +99,3 @@ private:
 }
 }
 }
-
-#endif

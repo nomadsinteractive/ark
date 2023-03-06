@@ -1,5 +1,4 @@
-#ifndef ARK_APP_FORWARDING_H_
-#define ARK_APP_FORWARDING_H_
+#pragma once
 
 namespace ark {
 
@@ -40,5 +39,3 @@ class View;
 class ViewGroup;
 
 }
-
-#endif

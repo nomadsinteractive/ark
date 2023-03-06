@@ -162,7 +162,7 @@ function(ark_find_vcpkg_package PACKAGE_NAME)
 
     ark_link_libraries(${ark_find_vcpkg_package_LIBRARIES})
 #    ark_export_dependency_libraries(${ark_find_vcpkg_package_LIBRARIES})
-    list(APPEND LOCAL_INCLUDE_DIRS ${PACKAGE_NAME}_INCLUDE_DIRS)
+    list(APPEND LOCAL_INCLUDE_DIRS ${${PACKAGE_NAME}_INCLUDE_DIRS})
     ark_export(LOCAL_INCLUDE_DIRS LOCAL_LIBS LOCAL_EXPORT_TARGETS ${ark_find_vcpkg_package_EXPORT_VARS})
 endfunction()
 

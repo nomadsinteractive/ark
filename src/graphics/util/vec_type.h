@@ -1,9 +1,10 @@
-#ifndef ARK_GRAPHICS_UTIL_VEC_TYPE_H_
-#define ARK_GRAPHICS_UTIL_VEC_TYPE_H_
+#pragma once
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/base/clock.h"
+#include "core/base/range.h"
+#include "core/base/slice.h"
 #include "core/impl/variable/variable_dyed.h"
 #include "core/impl/variable/integral.h"
 #include "core/impl/variable/integral_with_resistance.h"
@@ -21,6 +22,7 @@
 #include "graphics/forwarding.h"
 #include "graphics/base/v4.h"
 #include "graphics/base/size.h"
+#include "graphics/impl/vec/vec_subscribed.h"
 
 #include "app/base/application_context.h"
 
@@ -191,25 +193,29 @@ public:
             FATAL("You shouldn't be here");
     }
 
-    static auto subscript(const sp<VarType>& self, size_t idx) -> remove_cvref_t<decltype(std::declval<T>()[0])> {
-        CHECK(idx < DIMENSION, "Index(%uz) out of bounds", idx);
-        return self->val()[idx];
+    static size_t len(const sp<VarType>& /*self*/) {
+        return DIMENSION;
     }
 
-    static V2 xy(const sp<VarType>& self) {
-        const T val = self->val();
-        return V2(val[0], val[1]);
+    static Optional<float> getItem(const sp<VarType>& self, ptrdiff_t idx) {
+        return idx < DIMENSION ? Optional<float>(self->val()[idx]) : Optional<float>();
     }
 
-    static V2 yx(const sp<VarType>& self) {
-        const T val = self->val();
-        return V2(val[1], val[0]);
+    static sp<Vec2> xy(sp<VarType> self) {
+        if constexpr(std::is_same_v<V2, T>)
+            return self;
+        return sp<VecSubscribed<V2, T>>::make(std::move(self), std::array<size_t, 2>{0, 1});
     }
 
-    static V3 xyz(const sp<VarType>& self) {
-        const T val = self->val();
+    static sp<Vec2> yx(const sp<VarType>& self) {
+        return sp<VecSubscribed<V2, T>>::make(std::move(self), std::array<size_t, 2>{1, 0});
+    }
+
+    static sp<Vec3> xyz(sp<VarType> self) {
         CHECK(2 < DIMENSION, "Index z(3) out of bounds");
-        return V3(val[0], val[1], val[2]);
+        if constexpr(std::is_same_v<V3, T>)
+            return self;
+        return sp<VecSubscribed<V3, T>>::make(std::move(self), std::array<size_t, 3>{0, 1, 2});
     }
 
     [[deprecated]]
@@ -307,5 +313,3 @@ protected:
 };
 
 }
-
-#endif

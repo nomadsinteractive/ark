@@ -24,8 +24,11 @@ extern "C" {
 
 PyMODINIT_FUNC PyInit_ark();
 PyMODINIT_FUNC PyInit__ctypes(void);
-PyMODINIT_FUNC PyInit__ctypes(void);
 PyMODINIT_FUNC PyInit__decimal(void);
+PyMODINIT_FUNC PyInit__socket(void);
+PyMODINIT_FUNC PyInit_select(void);
+PyMODINIT_FUNC PyInit_pyexpat(void);
+PyMODINIT_FUNC PyInit__overlapped(void);
 
 #ifdef __cplusplus
 }
@@ -52,6 +55,10 @@ PythonScript::PythonScript(const String& name, const document& libraries)
     PyImport_AppendInittab("ark", PyInit_ark);
     PyImport_AppendInittab("_ctypes", PyInit__ctypes);
     PyImport_AppendInittab("_decimal", PyInit__decimal);
+    PyImport_AppendInittab("_socket", PyInit__socket);
+    PyImport_AppendInittab("select", PyInit_select);
+    PyImport_AppendInittab("pyexpat", PyInit_pyexpat);
+    PyImport_AppendInittab("_overlapped", PyInit__overlapped);
     if(!hasInjected())
     {
         memset(_injected_frozen, 0, sizeof(_injected_frozen));

@@ -1,8 +1,7 @@
 #include "core/impl/input/input_impl.h"
 
-#include <algorithm>
-
 #include "core/impl/writable/writable_with_offset.h"
+#include "core/util/log.h"
 
 namespace ark {
 
@@ -11,9 +10,12 @@ InputImpl::InputImpl(size_t size)
 {
 }
 
-InputImpl::InputImpl(const std::map<size_t, sp<Input>>& inputs, size_t size)
-    : Input(size), _inputs(makeInputs(inputs))
+InputImpl::InputImpl(const std::map<size_t, sp<Input>>& inputMap, size_t size)
+    : Input(size)
 {
+    for(const auto& [i, j] : inputMap)
+        addInput(i, j);
+
     if(_size == 0)
         _size = calculateUploaderSize();
     else
@@ -45,19 +47,22 @@ void InputImpl::upload(Writable& writable)
 
 void InputImpl::addInput(size_t offset, sp<Input> input)
 {
+    LOGD("[%p] offset: %zd, size: %zd", this, offset, input->size());
+    sp<Boolean::Impl>& disposed = _inputs_disposed[offset];
+    CHECK(disposed == nullptr, "Input offset(%zd) was occupied already", offset);
     CHECK(_size >= offset + input->size(), "Input size overflow, size(%zd) is not big enough to fit this one(offset: %zd, size: %zd)", _size, offset, input->size());
-    _inputs.insert(std::upper_bound(_inputs.begin(), _inputs.end(), offset, _input_stub_comp), InputStub(offset, std::move(input)));
+    if(!disposed)
+        disposed = sp<Boolean::Impl>::make(false);
+    _inputs.emplace_back(InputStub(offset, std::move(input), disposed));
 }
 
 void InputImpl::removeInput(size_t offset)
 {
-    for(auto iter = _inputs.begin(); iter != _inputs.end(); )
-    {
-        if(iter->_offset == offset)
-            iter = _inputs.erase(iter);
-        else
-            ++iter;
-    }
+    LOGD("[%p] offset: %zd", this, offset);
+    const auto iter = _inputs_disposed.find(offset);
+    CHECK(iter != _inputs_disposed.end(), "Input offset(%zd) unoccupied", offset);
+    iter->second->set(true);
+    _inputs_disposed.erase(iter);
 }
 
 void InputImpl::markDirty()
@@ -66,15 +71,7 @@ void InputImpl::markDirty()
         i._dirty_marked = true;
 }
 
-std::vector<InputImpl::InputStub> InputImpl::makeInputs(const std::map<size_t, sp<Input>>& inputs) const
-{
-    std::vector<InputImpl::InputStub> res;
-    for(const auto& [i, j] : inputs)
-        res.insert(std::upper_bound(res.begin(), res.end(), i, _input_stub_comp), InputStub(i, j));
-    return res;
-}
-
-size_t InputImpl::calculateUploaderSize() const
+size_t InputImpl::calculateUploaderSize()
 {
     size_t size = 0;
     for(const InputStub& i : _inputs)
@@ -86,14 +83,15 @@ size_t InputImpl::calculateUploaderSize() const
     return size;
 }
 
-bool InputImpl::_input_stub_comp(size_t offset, const InputStub& inputStub)
+InputImpl::InputStub::InputStub(size_t offset, sp<Input> input, sp<Boolean> disposed)
+    : _offset(offset), _input(std::move(input)), _dirty_updated(true), _dirty_marked(true), _disposed(disposed)
 {
-    return offset < inputStub._offset;
+    DASSERT(_input);
 }
 
-InputImpl::InputStub::InputStub(size_t offset, sp<Input> input)
-    : _offset(offset), _input(std::move(input)), _dirty_updated(true), _dirty_marked(true)
+bool InputImpl::InputStub::isDisposed() const
 {
+    return _disposed->val();
 }
 
 }

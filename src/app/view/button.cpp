@@ -78,29 +78,29 @@ sp<Button> Button::BUILDER::build(const Scope& args)
     const String style = Documents::getAttribute(_manifest, Constants::Attributes::STYLE);
     sp<Size> size = builtSize ? builtSize : static_cast<const sp<Size>&>(RendererType::size(background));
     sp<Button> button = sp<Button>::make(std::move(foreground), std::move(background), std::move(size), _gravity ? Strings::parse<LayoutParam::Gravity>(_gravity) : LayoutParam::GRAVITY_CENTER);
-    loadStatus(button, _manifest, _factory, args);
+//    loadStatus(button, _manifest, _factory, args);
     if(style)
         _factory.decorate<Renderer>(sp<Builder<Renderer>::Prebuilt>::make(button), style)->build(args);
     return button;
 }
 
-void Button::BUILDER::loadStatus(const sp<Button>& button, const document& doc, BeanFactory& factory, const Scope& args)
-{
-    for(const document& node : doc->children("state"))
-    {
-        View::State status = Documents::ensureAttribute<View::State>(node, Constants::Attributes::NAME);
-        sp<Renderer> foreground = factory.build<Renderer>(node, Constants::Attributes::FOREGROUND, args);
-        sp<Renderer> background = factory.build<Renderer>(node, Constants::Attributes::BACKGROUND, args);
-        const sp<Boolean> enabled = factory.build<Boolean>(node, "enabled", args);
-        if(enabled)
-            button->addState(status);
+//void Button::BUILDER::loadStatus(const sp<Button>& button, const document& doc, BeanFactory& factory, const Scope& args)
+//{
+//    for(const document& node : doc->children("state"))
+//    {
+//        View::State status = Documents::ensureAttribute<View::State>(node, Constants::Attributes::NAME);
+//        sp<Renderer> foreground = factory.build<Renderer>(node, Constants::Attributes::FOREGROUND, args);
+//        sp<Renderer> background = factory.build<Renderer>(node, Constants::Attributes::BACKGROUND, args);
+//        const sp<Boolean> enabled = factory.build<Boolean>(node, "enabled", args);
+//        if(enabled)
+//            button->addState(status);
 
-        if(foreground)
-            button->setForeground(status, std::move(foreground), enabled);
-        if(background)
-            button->setBackground(status, std::move(background), enabled);
-    }
-}
+//        if(foreground)
+//            button->setForeground(status, std::move(foreground), enabled);
+//        if(background)
+//            button->setBackground(status, std::move(background), enabled);
+//    }
+//}
 
 Button::BUILDER_IMPL2::BUILDER_IMPL2(BeanFactory& parent, const document& doc)
     : _delegate(parent, doc)
