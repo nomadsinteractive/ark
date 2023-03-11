@@ -4,6 +4,6 @@
 
 	<script id="@main" class="python">
 		<library path="asset:///scripts"/>
-		<library path="asset:///scripts/runtime.egg"/>
+		<library path="asset:///scripts/runtime-python310.egg"/>
 	</script>
 </resources>

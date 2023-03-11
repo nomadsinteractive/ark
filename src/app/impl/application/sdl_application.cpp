@@ -14,7 +14,6 @@
 
 #include "core/base/clock.h"
 #include "core/base/message_loop.h"
-#include "core/base/object.h"
 #include "core/inf/runnable.h"
 #include "core/types/implements.h"
 #include "core/util/math.h"
@@ -126,13 +125,13 @@ static Event::Code sdlScanCodeToEventCode(SDL_Scancode sc)
 
 namespace {
 
-class SDLCursor : public Object, public Implements<SDLCursor, Object> {
+class SDLCursor {
 public:
     SDLCursor(SDL_Cursor* cursor)
         : _cursor(cursor) {
     }
 
-    ~SDLCursor() override {
+    ~SDLCursor() {
         if(_cursor)
             SDL_FreeCursor(_cursor);
     }
@@ -151,7 +150,7 @@ public:
         : _application_context(std::move(applicationContext)) {
     }
 
-    virtual sp<Object> createCursor(const sp<Bitmap>& bitmap, int32_t hotX, int32_t hotY) override {
+    virtual Box createCursor(const sp<Bitmap>& bitmap, int32_t hotX, int32_t hotY) override {
         Uint32 rmask, gmask, bmask, amask;
         #if SDL_BYTEORDER == SDL_BIG_ENDIAN
             rmask = 0xff000000;
@@ -171,7 +170,7 @@ public:
         return sp<SDLCursor>::make(cursor);
     }
 
-    virtual sp<Object> createSystemCursor(ApplicationController::SystemCursorName name) override {
+    virtual Box createSystemCursor(ApplicationController::SystemCursorName name) override {
         SDL_Cursor* cursor = nullptr;
         switch(name) {
             case ApplicationController::SYSTEM_CURSOR_ARROW:
@@ -214,13 +213,13 @@ public:
         return cursor ? sp<SDLCursor>::make(cursor) : nullptr;
     }
 
-    virtual void showCursor(const sp<Object>& cursor) override {
+    virtual void showCursor(const Box& cursor) override {
         if(SDL_ShowCursor(SDL_QUERY) == SDL_DISABLE)
             SDL_ShowCursor(SDL_ENABLE);
 
         if(cursor) {
             const sp<SDLCursor> s = cursor.as<SDLCursor>();
-            DCHECK(s, "Object is not a SDLCursor instance");
+            CHECK(s, "Object is not a SDLCursor instance");
             if(s)
                 SDL_SetCursor(s->cursor());
         }

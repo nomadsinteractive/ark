@@ -71,7 +71,7 @@ BroadPhrase::Result BroadPhraseTilemap::search(const V3& position, const V3& siz
                                     continue;
                                 }
                                 candidateIdSet.insert(candidateId);
-                                candidates.push_back(makeCandidate(candidateId, shapeId, V2(px, selectionPoint.y() + (k - selectionRange.top()) * tileSize.y() + tileSize.y() / 2), i.collisionFilter()));
+                                candidates.push_back(makeCandidate(candidateId, tile->id(), shapeId, V2(px, selectionPoint.y() + (k - selectionRange.top()) * tileSize.y() + tileSize.y() / 2), i.collisionFilter()));
                             }
                         }
                     }
@@ -149,16 +149,16 @@ void BroadPhraseTilemap::addCandidate(const TilemapLayer& tilemapLayer, std::set
             {
                 int32_t shapeId = tile->shapeId();
                 if(shapeId != Collider::BODY_SHAPE_NONE)
-                    candidates.push_back(makeCandidate(candidateId, shapeId, tl + V2(col * tileSize.x(), row * tileSize.y()), tilemapLayer.collisionFilter()));
+                    candidates.push_back(makeCandidate(candidateId, tile->id(), shapeId, tl + V2(col * tileSize.x(), row * tileSize.y()), tilemapLayer.collisionFilter()));
             }
         }
     }
 }
 
-BroadPhrase::Candidate BroadPhraseTilemap::makeCandidate(int32_t candidateId, int32_t shapeId, const V2& position, sp<CollisionFilter> collisionFilter) const
+BroadPhrase::Candidate BroadPhraseTilemap::makeCandidate(int32_t candidateId, uint32_t metaId, int32_t shapeId, const V2& position, sp<CollisionFilter> collisionFilter) const
 {
     Box bodyDef = shapeId == Collider::BODY_SHAPE_AABB ? _body_def_tile : Box();
-    return Candidate(candidateId, position, 0, shapeId, std::move(collisionFilter), std::move(bodyDef));
+    return Candidate(candidateId, position, 0.0f, metaId, shapeId, std::move(collisionFilter), std::move(bodyDef));
 }
 
 BroadPhraseTilemap::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

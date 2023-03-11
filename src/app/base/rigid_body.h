@@ -37,13 +37,14 @@ public:
     };
 
     struct ARK_API Stub {
-        Stub(int32_t id, Collider::BodyType type, int32_t shapeId, sp<Vec3> position, sp<Size> size, sp<Transform> transform, Box impl, sp<Disposed> disposed = nullptr);
+        Stub(int32_t id, Collider::BodyType type, uint32_t metaId, int32_t shapeId, sp<Vec3> position, sp<Size> size, sp<Transform> transform, Box impl, sp<Disposed> disposed = nullptr);
         ~Stub();
 
         DISALLOW_COPY_AND_ASSIGN(Stub);
 
         int32_t _id;
         Collider::BodyType _type;
+        uint32_t _meta_id;
         int32_t _shape_id;
         SafePtr<Vec3> _position;
         SafePtr<Size> _size;
@@ -81,6 +82,8 @@ public:
     Collider::BodyType rigidType() const;
 //  [[script::bindings::property]]
     int32_t shapeId() const;
+//  [[script::bindings::property]]
+    uint32_t metaId() const;
 
 //  [[script::bindings::property]]
     V2 xy() const;

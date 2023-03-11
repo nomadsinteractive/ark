@@ -46,7 +46,7 @@ public:
         do {
             const auto [dirnameOpt, name] = s.rcut('/');
             filename = filename.empty() ? name : name + "/" + filename;
-            const sp<Asset> asset = dirnameOpt ? nullptr : getAsset(dirnameOpt.value());
+            const sp<Asset> asset = dirnameOpt ? nullptr : getAsset(dirnameOpt ? dirnameOpt.value() : "");
             sp<Readable> readable = asset ? asset->open() : nullptr;
             if(readable) {
                 sp<AssetBundleZipFile> zip = sp<AssetBundleZipFile>::make(std::move(readable), dirnameOpt.value());
@@ -62,7 +62,6 @@ public:
         DFATAL(false, "Unimplemented");
         return {};
     }
-
 
     String _asset_dir;
     String _app_dir;

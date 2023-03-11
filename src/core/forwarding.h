@@ -70,7 +70,6 @@ class Manifest;
 class MemoryPool;
 class MessageLoop;
 class Mutex;
-class Object;
 class Observer;
 class Plugin;
 class PluginManager;

@@ -31,12 +31,12 @@ public:
     virtual ~ApplicationController() = default;
 
 //  [[script::bindings::auto]]
-    virtual sp<Object> createCursor(const sp<Bitmap>& bitmap, int32_t hotX, int32_t hotY) = 0;
+    virtual Box createCursor(const sp<Bitmap>& bitmap, int32_t hotX, int32_t hotY) = 0;
 //  [[script::bindings::auto]]
-    virtual sp<Object> createSystemCursor(ApplicationController::SystemCursorName name) = 0;
+    virtual Box createSystemCursor(ApplicationController::SystemCursorName name) = 0;
 
 //  [[script::bindings::auto]]
-    virtual void showCursor(const sp<Object>& cursor = nullptr) = 0;
+    virtual void showCursor(const Box& cursor = nullptr) = 0;
 //  [[script::bindings::auto]]
     virtual void hideCursor() = 0;
 

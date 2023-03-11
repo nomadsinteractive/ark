@@ -23,7 +23,7 @@
 namespace ark {
 
 RigidBody::RigidBody(int32_t id, Collider::BodyType type, int32_t shapeId, sp<Vec3> position, sp<Size> size, sp<Rotation> rotate, Box impl, sp<Disposed> disposed)
-    : _stub(sp<Stub>::make(id, type, shapeId, std::move(position), std::move(size), sp<Transform>::make(Transform::TYPE_LINEAR_3D, rotate), std::move(impl), std::move(disposed)))
+    : _stub(sp<Stub>::make(id, type, 0, shapeId, std::move(position), std::move(size), sp<Transform>::make(Transform::TYPE_LINEAR_3D, rotate), std::move(impl), std::move(disposed)))
 {
 }
 
@@ -63,6 +63,11 @@ Collider::BodyType RigidBody::rigidType() const
 int32_t RigidBody::shapeId() const
 {
     return _stub->_shape_id;
+}
+
+uint32_t RigidBody::metaId() const
+{
+    return _stub->_meta_id;
 }
 
 V2 RigidBody::xy() const
@@ -167,8 +172,8 @@ template<> ARK_API Collider::BodyType StringConvert::to<String, Collider::BodyTy
     return Collider::BODY_TYPE_STATIC;
 }
 
-RigidBody::Stub::Stub(int32_t id, Collider::BodyType type, int32_t shapeId, sp<Vec3> position, sp<Size> size, sp<Transform> transform, Box impl, sp<Disposed> disposed)
-    : _id(id), _type(type), _shape_id(shapeId), _position(std::move(position)), _size(std::move(size)), _transform(std::move(transform)), _impl(std::move(impl)), _disposed(std::move(disposed)), _callback(sp<Callback>::make())
+RigidBody::Stub::Stub(int32_t id, Collider::BodyType type, uint32_t metaId, int32_t shapeId, sp<Vec3> position, sp<Size> size, sp<Transform> transform, Box impl, sp<Disposed> disposed)
+    : _id(id), _type(type), _meta_id(metaId), _shape_id(shapeId), _position(std::move(position)), _size(std::move(size)), _transform(std::move(transform)), _impl(std::move(impl)), _disposed(std::move(disposed)), _callback(sp<Callback>::make())
 {
 }
 

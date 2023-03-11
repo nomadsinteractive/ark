@@ -78,8 +78,7 @@ PyObject* PythonInterpreter::toPyObject(const Box& box)
     }
 
     const auto iter = _type_by_id.find(box.typeId());
-    DCHECK(iter != _type_by_id.end(), "Unknow box type: %s", Class::getClass(box.typeId())->name());
-    return iter->second->create(box);
+    return iter != _type_by_id.end() ? iter->second->create(box) : getPyArkType<Box>()->create(box);
 }
 
 bool PythonInterpreter::isPyObject(TypeId type) const

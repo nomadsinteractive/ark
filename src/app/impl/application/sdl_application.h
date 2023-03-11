@@ -1,5 +1,4 @@
-#ifndef ARK_APP_IMPL_APPLICATION_SDL_APPLICATION_H_
-#define ARK_APP_IMPL_APPLICATION_SDL_APPLICATION_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/forwarding.h"
@@ -39,5 +38,3 @@ private:
 };
 
 }
-
-#endif

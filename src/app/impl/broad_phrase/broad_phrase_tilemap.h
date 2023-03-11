@@ -40,7 +40,7 @@ private:
     int32_t toCandidateShapeId(const sp<RenderObject>& renderObject, int32_t row, int32_t col) const;
 
     void addCandidate(const TilemapLayer& tilemapLayer, std::set<int32_t>& candidateIdSet, std::vector<BroadPhrase::Candidate>& candidates, int32_t row, int32_t col, int32_t layerId, const V2& tl, const V2& tileSize);
-    Candidate makeCandidate(int32_t candidateId, int32_t shapeId, const V2& position, sp<CollisionFilter> collisionFilter) const;
+    Candidate makeCandidate(int32_t candidateId, uint32_t metaId, int32_t shapeId, const V2& position, sp<CollisionFilter> collisionFilter) const;
 
 private:
     sp<Tilemap> _tilemap;

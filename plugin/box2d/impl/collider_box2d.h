@@ -7,7 +7,6 @@
 #include <Box2D/Box2D.h>
 
 #include "core/base/bean_factory.h"
-#include "core/base/object.h"
 #include "core/inf/builder.h"
 #include "core/inf/runnable.h"
 #include "core/types/implements.h"

@@ -58,12 +58,11 @@ public:
         sp<RigidBodyImpl> createRigidBody(int32_t rigidBodyId, Collider::BodyType type, int32_t shape, sp<Vec3> position, sp<Size> size, sp<Rotation> rotate, sp<Disposed> disposed);
 
         const sp<RigidBodyShadow>& ensureRigidBody(int32_t id) const;
-        sp<RigidBodyShadow> ensureRigidBody(int32_t id, int32_t shapeId, const V3& position, bool isDynamicRigidBody) const;
+        sp<RigidBodyShadow> ensureRigidBody(int32_t id, uint32_t metaId, int32_t shapeId, const V3& position, bool isDynamicRigidBody) const;
         sp<RigidBodyShadow> findRigidBody(int32_t id) const;
 
         std::vector<sp<RigidBodyShadow>> toRigidBodyShadows(const std::unordered_set<int32_t>& candidateSet, uint32_t filter) const;
         std::vector<BroadPhrase::Candidate> toBroadPhraseCandidates(const std::unordered_set<int32_t>& candidateSet, uint32_t filter) const;
-        BroadPhrase::Candidate toBroadPhraseCandidate(const RigidBodyShadow& rigidBody) const;
 
         void resolveCandidates(const sp<RigidBody>& self, const BroadPhrase::Candidate& candidateSelf, const std::vector<BroadPhrase::Candidate>& candidates, bool isDynamicCandidates, RigidBody::Callback& callback, std::set<int32_t>& c);
 
@@ -94,7 +93,7 @@ public:
 
     class RigidBodyShadow : public RigidBody, public Updatable {
     public:
-        RigidBodyShadow(const ColliderImpl::Stub& stub, uint32_t id, Collider::BodyType type, int32_t shape, sp<Vec3> position, sp<Size> size, sp<Rotation> rotation, sp<Disposed> disposed);
+        RigidBodyShadow(const ColliderImpl::Stub& stub, uint32_t id, Collider::BodyType type, uint32_t metaId, int32_t shape, sp<Vec3> position, sp<Size> size, sp<Rotation> rotation, sp<Disposed> disposed);
 
         virtual void dispose() override;
         virtual bool update(uint64_t timestamp) override;
@@ -105,6 +104,8 @@ public:
 
         const RigidBodyDef& bodyDef() const;
         const RigidBodyDef& updateBodyDef(NarrowPhrase& narrowPhrase, const sp<Size>& size);
+
+        BroadPhrase::Candidate toBroadPhraseCandidate() const;
 
     private:
         const ColliderImpl::Stub& _collider_stub;

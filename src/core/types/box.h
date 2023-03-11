@@ -26,6 +26,7 @@ public:
 
     explicit operator bool() const;
 
+//  [[script::bindings::property]]
     TypeId typeId() const;
 
     template<typename T> const sp<T>& unpack() const {

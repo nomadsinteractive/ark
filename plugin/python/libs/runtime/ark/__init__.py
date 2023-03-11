@@ -19,10 +19,10 @@ _BUILDABLE_TYPES = TypeVar('_BUILDABLE_TYPES', 'Arena', 'AudioPlayer', 'Boolean'
 TYPE_INTEGER = Union[int, 'Integer']
 TYPE_INT_OR_FLOAT = Union[int, float]
 TYPE_NUMERIC = Union[TYPE_INT_OR_FLOAT, 'Numeric']
-TYPE_RECT = Tuple[TYPE_INT_OR_FLOAT, TYPE_INT_OR_FLOAT, TYPE_INT_OR_FLOAT, TYPE_INT_OR_FLOAT]
-TYPE_VEC2 = Union[Tuple[TYPE_NUMERIC, TYPE_NUMERIC], 'Vec2']
-TYPE_VEC3 = Union[Tuple[TYPE_NUMERIC, TYPE_NUMERIC, TYPE_NUMERIC], TYPE_VEC2, 'Vec3']
-TYPE_RECTI = Tuple[int, int, int, int]
+TYPE_RECT = tuple[TYPE_INT_OR_FLOAT, TYPE_INT_OR_FLOAT, TYPE_INT_OR_FLOAT, TYPE_INT_OR_FLOAT]
+TYPE_VEC2 = Union[tuple[TYPE_NUMERIC, TYPE_NUMERIC], 'Vec2']
+TYPE_VEC3 = Union[tuple[TYPE_NUMERIC, TYPE_NUMERIC, TYPE_NUMERIC], TYPE_VEC2, 'Vec3']
+TYPE_RECTI = tuple[int, int, int, int]
 TYPE_FLOAT4 = tuple[float, float, float, float]
 TYPE_M4 = tuple[TYPE_FLOAT4, TYPE_FLOAT4, TYPE_FLOAT4, TYPE_FLOAT4]
 
@@ -1956,7 +1956,7 @@ class TilemapLayer(Renderer):
     def get_tile_rect(self, rect: TYPE_RECTI) -> list[int]:
         pass
 
-    def set_tile(self, col: int, row: int, tile: Union[int, RenderObject, Tile]):
+    def set_tile(self, col: int, row: int, tile: Union[int, RenderObject, Tile, None]):
         pass
 
     def set_tile_rect(self, tiles: List[int], dest: TYPE_RECTI):
@@ -2193,7 +2193,7 @@ class RigidBody:
         return 0
 
     @property
-    def shape_id(self) -> int:
+    def meta_id(self) -> int:
         return 0
 
     @property
@@ -2463,6 +2463,31 @@ class View(Renderer):
         return LayoutParam()
 
     def add_view(self, view: 'View'):
+        pass
+
+
+class Graph:
+    def __init__(self):
+        pass
+
+    @property
+    def nodes(self) -> set['GraphNode']:
+        return set()
+
+    def make_node(self, position: Vec3, tag: Any = None) -> 'GraphNode':
+        pass
+
+
+class GraphNode:
+
+    @property
+    def position(self) -> Vec3:
+        pass
+
+    def add_route(self, to_node: 'GraphNode', length: float):
+        pass
+
+    def find_route(self, goal: 'GraphNode') -> list:
         pass
 
 

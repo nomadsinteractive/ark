@@ -47,7 +47,7 @@ AUTOBIND_ANNOTATION_PATTERN = re.compile(r'\[\[script::bindings::(auto|container
 BUILDABLE_PATTERN = re.compile(r'\[\[plugin::(?:builder|resource-loader)[^]]*]]\s+class\s+\w+\s*:\s*public\s+Builder<([^{]+)>\s*{')
 
 CLASS_DELIMITER = '\n//%s\n' % ('-' * 120)
-ARK_CORE_BUILDABLES = {'AudioPlayer', 'Object'}
+ARK_CORE_BUILDABLES = {'AudioPlayer'}
 
 _just_print_flag = True
 

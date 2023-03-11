@@ -3,7 +3,6 @@
 
 #include "core/base/bean_factory.h"
 #include "core/base/plugin_manager.h"
-#include "core/base/object.h"
 #include "core/inf/dictionary.h"
 #include "core/inf/runnable.h"
 #include "core/inf/variable.h"
@@ -28,12 +27,11 @@ public:
         const sp<ResourceLoader> resourceLoader = getResourceLoader();
 
         const Scope args;
-        const sp<Object> world = resourceLoader->load<Object>("world", args);
+        const sp<Collider> world = resourceLoader->load<Collider>("world", args);
         if(!world.is<Runnable>())
             return 1;
 
         const sp<Runnable> worldRunnable = world.as<Runnable>();
-        const sp<Object> body = resourceLoader->load<Object>("body", args);
         const sp<Vec3> position = resourceLoader->load<Vec3>("position", args);
         const sp<Numeric> rotation = resourceLoader->load<Numeric>("rotation", args);
         for(uint32_t i = 0; i < 100; ++i)

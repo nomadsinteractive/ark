@@ -138,11 +138,16 @@ void TilemapLayer::setTile(uint32_t col, uint32_t row, int32_t tileId)
         CHECK(tile, "TileId %d does not exist", tileId);
         setTile(col, row, tile);
     }
+    else
+    {
+        CHECK(tileId == -1, "Illegal negative tileId: %d", tileId);
+        setTile(col, row, nullptr, nullptr);
+    }
 }
 
 void TilemapLayer::setTile(uint32_t col, uint32_t row, const sp<Tile>& tile)
 {
-    CHECK_WARN(tile->renderObject(), "This tile has no RenderObject assigned");
+    CHECK_WARN(tile == nullptr || tile->renderObject(), "This tile has no RenderObject assigned");
     setTile(col, row, tile, nullptr);
 }
 
