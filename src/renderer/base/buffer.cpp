@@ -1,7 +1,6 @@
 #include "renderer/base/buffer.h"
 
 #include "core/ark.h"
-#include "core/base/memory_pool.h"
 
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/pipeline_input.h"

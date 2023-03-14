@@ -67,7 +67,6 @@ class Interfaces;
 class Json;
 class Notifier;
 class Manifest;
-class MemoryPool;
 class MessageLoop;
 class Mutex;
 class Observer;

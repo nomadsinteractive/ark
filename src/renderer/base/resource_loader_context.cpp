@@ -1,6 +1,5 @@
 #include "renderer/base/resource_loader_context.h"
 
-#include "core/base/memory_pool.h"
 #include "core/inf/variable.h"
 #include "core/util/log.h"
 

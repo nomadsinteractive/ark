@@ -2,7 +2,6 @@
 #define ARK_PLUGIN_DEAR_IMGUI_RENDERER_RENDERER_IMGUI_H_
 
 #include "core/inf/builder.h"
-#include "core/base/memory_pool.h"
 #include "core/concurrent/lf_stack.h"
 #include "core/types/implements.h"
 #include "core/types/shared_ptr.h"

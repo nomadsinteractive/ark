@@ -98,7 +98,7 @@ private:
         _render_position[1] = p2;
         _render_position[2] = p3;
         _render_position[3] = p4;
-        RenderRequest renderRequest(Platform::getSteadyClock()->val(), nullptr, nullptr, nullptr);
+        RenderRequest renderRequest(Platform::getSteadyClock()->val(), nullptr);
         scrollable->render(renderRequest, V3(0));
         return _error_code;
     }

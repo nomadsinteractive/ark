@@ -1,6 +1,5 @@
 #include "renderer/base/shader.h"
 
-#include "core/base/memory_pool.h"
 #include "core/base/string_buffer.h"
 #include "core/base/string_table.h"
 #include "core/inf/array.h"

@@ -30,7 +30,7 @@ public:
 public:
     RenderLayerSnapshot(RenderLayerSnapshot&& other) = default;
 
-    sp<RenderCommand> render(const RenderRequest& renderRequest, const V3& position);
+    sp<RenderCommand> compose(const RenderRequest& renderRequest);
 
     bool needsReload() const;
     const sp<PipelineInput>& pipelineInput() const;

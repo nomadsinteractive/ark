@@ -1,7 +1,6 @@
 #include "renderer/base/drawing_buffer.h"
 
 #include "core/inf/array.h"
-#include "core/base/memory_pool.h"
 
 #include "graphics/base/v3.h"
 

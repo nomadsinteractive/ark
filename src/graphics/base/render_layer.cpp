@@ -100,7 +100,7 @@ sp<Layer> RenderLayer::makeLayer(sp<ModelLoader> modelLoader, sp<Boolean> visibl
 void RenderLayer::render(RenderRequest& renderRequest, const V3& position)
 {
     _stub->_layer_context->renderRequest(position);
-    renderRequest.addBackgroundRequest(*this, position);
+    renderRequest.addRenderCommand(snapshot(renderRequest).compose(renderRequest));
 }
 
 RenderLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

@@ -1,7 +1,6 @@
 #include "renderer/impl/renderer/shader_frame.h"
 
 #include "core/base/api.h"
-#include "core/base/memory_pool.h"
 
 #include "graphics/base/render_request.h"
 #include "graphics/base/size.h"
@@ -27,7 +26,7 @@ void ShaderFrame::render(RenderRequest& renderRequest, const V3& position)
 {
     DrawingContext drawingContext(_shader_bindings, _shader_bindings->attachments(), _shader->takeUBOSnapshot(renderRequest), _shader->takeSSBOSnapshot(renderRequest),
                                   _vertex_buffer.snapshot(getVertexBuffer(renderRequest, position)), _ib_snapshot, DrawingContextParams::DrawElements(0, 6));
-    renderRequest.addRequest(drawingContext.toRenderCommand(renderRequest));
+    renderRequest.addRenderCommand(drawingContext.toRenderCommand(renderRequest));
 }
 
 const sp<Size>& ShaderFrame::size()

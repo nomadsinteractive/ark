@@ -2,7 +2,6 @@
 #include <vector>
 
 #include "core/base/string.h"
-#include "core/base/memory_pool.h"
 #include "core/inf/array.h"
 #include "core/inf/duck.h"
 #include "core/inf/variable.h"
@@ -124,32 +123,6 @@ public:
         Box nb = nodeB;
 
         sp<D> b = nb.as<D>();
-
-        MemoryPool memoryPool;
-        void* ap1;
-        {
-            auto a1 = memoryPool.allocate(32);
-            ap1 = a1.get();
-        }
-        auto a2 = memoryPool.allocate(32);
-        TESTCASE_VALIDATE(a2.get() == ap1);
-        memoryPool.allocate(64);
-        memoryPool.allocate(64);
-        memoryPool.allocate(19113);
-        memoryPool.allocate(20481);
-
-        std::set<array<uint8_t>> _used;
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::normal_distribution<> dis1(512 * 1024, 1 << 15);
-        std::uniform_int_distribution<> dis2(0, 3);
-        for(uint32_t i = 0; i < 1000; i ++) {
-            uint32_t desiredLen = static_cast<uint32_t>(dis1(gen));
-            const array<uint8_t> buf = memoryPool.allocate(desiredLen);
-            TESTCASE_VALIDATE(desiredLen <= buf->length());
-            if(dis2(gen))
-                _used.insert(buf);
-        }
 
         const Class* renderLayerClass = Class::getClass<RenderLayer>();
         TESTCASE_VALIDATE(renderLayerClass->isInstance(Type<Renderer>::id()));

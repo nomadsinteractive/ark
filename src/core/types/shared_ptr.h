@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_TYPES_SHARED_PTR_H_
-#define ARK_CORE_TYPES_SHARED_PTR_H_
+#pragma once
 
 #include <functional>
 #include <memory>
@@ -124,8 +123,6 @@ private:
     template<typename U> friend class SharedPtr;
     template<typename U> friend class WeakPtr;
 
-    friend class MemoryPool;
-
 private:
     std::shared_ptr<T> _ptr;
     mutable std::shared_ptr<Interfaces> _interfaces;
@@ -184,5 +181,3 @@ private:
 };
 
 }
-
-#endif

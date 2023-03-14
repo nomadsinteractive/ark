@@ -50,7 +50,7 @@ RenderLayerSnapshot::RenderLayerSnapshot(RenderRequest& renderRequest, const sp<
     DPROFILER_LOG("NeedsReload", needsReload);
 }
 
-sp<RenderCommand> RenderLayerSnapshot::render(const RenderRequest& renderRequest, const V3& /*position*/)
+sp<RenderCommand> RenderLayerSnapshot::compose(const RenderRequest& renderRequest)
 {
     if(_items.size() > 0 && _stub->_layer_context->visible().val())
         return _stub->_render_command_composer->compose(renderRequest, *this);

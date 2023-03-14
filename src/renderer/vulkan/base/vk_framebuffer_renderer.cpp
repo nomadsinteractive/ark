@@ -49,9 +49,9 @@ VKFramebufferRenderer::VKFramebufferRenderer(sp<Renderer> delegate, sp<VKFramebu
 
 void VKFramebufferRenderer::render(RenderRequest& renderRequest, const V3& position)
 {
-    renderRequest.addRequest(_pre_draw);
+    renderRequest.addRenderCommand(_pre_draw);
     _delegate->render(renderRequest, position);
-    renderRequest.addRequest(_post_draw);
+    renderRequest.addRenderCommand(_post_draw);
 }
 
 }

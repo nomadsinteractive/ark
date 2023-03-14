@@ -42,7 +42,7 @@ void RenderViewVulkan::onSurfaceChanged(uint32_t width, uint32_t height)
     _graphics_context->onSurfaceReady();
 }
 
-void RenderViewVulkan::onRenderFrame(const Color& backgroundColor, const sp<RenderCommand>& renderCommand)
+void RenderViewVulkan::onRenderFrame(const Color& backgroundColor, RenderCommand& renderCommand)
 {
     _graphics_context->onDrawFrame();
 
@@ -50,7 +50,7 @@ void RenderViewVulkan::onRenderFrame(const Color& backgroundColor, const sp<Rend
     uint32_t imageId = renderTarget->acquire(_vk_graphics_context);
 
     _vk_graphics_context->begin(imageId, backgroundColor);
-    renderCommand->draw(_graphics_context);
+    renderCommand.draw(_graphics_context);
     _vk_graphics_context->end();
 
     renderTarget->swap(_vk_graphics_context);

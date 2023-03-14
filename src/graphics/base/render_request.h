@@ -1,11 +1,9 @@
-#ifndef ARK_GRAPHICS_BASE_RENDER_REQUEST_H_
-#define ARK_GRAPHICS_BASE_RENDER_REQUEST_H_
+#pragma once
 
 #include <atomic>
 
 #include "core/base/api.h"
 #include "core/base/allocator.h"
-#include "core/concurrent/one_consumer_synchronized.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -15,7 +13,7 @@ namespace ark {
 class ARK_API RenderRequest {
 public:
     RenderRequest() = default;
-    RenderRequest(uint64_t timestamp, sp<Allocator::Pool> allocatorPool, sp<Executor> executor, sp<OCSQueue<RenderRequest>> renderRequests);
+    RenderRequest(uint64_t timestamp, sp<Allocator::Pool> allocatorPool);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(RenderRequest);
 
     uint64_t timestamp() const;
@@ -23,24 +21,16 @@ public:
 
     void onRenderFrame(const Color& backgroundColor, RenderView& renderView) const;
 
-    void jobDone();
-
-    void addRequest(sp<RenderCommand> renderCommand) const;
-    void addBackgroundRequest(const RenderLayer& renderLayer, const V3& position);
+    void addRenderCommand(sp<RenderCommand> renderCommand) const;
 
 public:
     struct Stub {
-        Stub(uint64_t timestamp, sp<Allocator::Pool> allocatorPool, sp<Executor> executor, sp<OCSQueue<RenderRequest>> renderRequests);
-
-        void onJobDone(const sp<Stub>& self);
+        Stub(uint64_t timestamp, sp<Allocator::Pool> allocatorPool);
 
         uint64_t _timestamp;
         Allocator _allocator;
-        sp<Executor> _executor;
-        sp<OCSQueue<RenderRequest>> _render_requests;
 
         sp<RenderCommandPipeline> _render_command_pipe_line;
-        std::atomic<int32_t> _background_renderer_count;
     };
 
 private:
@@ -53,5 +43,3 @@ private:
 };
 
 }
-
-#endif

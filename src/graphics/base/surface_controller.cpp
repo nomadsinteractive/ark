@@ -4,7 +4,6 @@
 #include <chrono>
 
 #include "core/base/clock.h"
-#include "core/base/memory_pool.h"
 
 #include "graphics/base/render_request.h"
 #include "graphics/base/v3.h"
@@ -12,9 +11,9 @@
 
 namespace ark {
 
-SurfaceController::SurfaceController(sp<Executor> executor)
-    : _executor(std::move(executor)), _memory_pool(sp<MemoryPool>::make()), _allocator_pool(sp<Allocator::Pool>::make()), _renderers(sp<RendererGroup>::make()),
-      _controls(sp<RendererGroup>::make()), _layers(sp<RendererGroup>::make()), _render_requests(sp<OCSQueue<RenderRequest>>::make())
+SurfaceController::SurfaceController()
+    : _allocator_pool(sp<Allocator::Pool>::make()), _renderers(sp<RendererGroup>::make()), _controls(sp<RendererGroup>::make()), _layers(sp<RendererGroup>::make()),
+      _render_requests(sp<OCSQueue<RenderRequest>>::make())
 {
 }
 
@@ -39,11 +38,11 @@ void SurfaceController::requestUpdate(uint64_t timestamp)
     if(size < 3)
     {
         const V3 position(0);
-        RenderRequest renderRequest(timestamp, _allocator_pool, _executor, _render_requests);
+        RenderRequest renderRequest(timestamp, _allocator_pool);
         _renderers->render(renderRequest, position);
         _controls->render(renderRequest, position);
         _layers->render(renderRequest, position);
-        renderRequest.jobDone();
+        _render_requests->add(std::move(renderRequest));
     }
     DCHECK_WARN(size < 3, "Frame skipped. RenderCommand size: %d. Rendering thread busy?", size);
 }

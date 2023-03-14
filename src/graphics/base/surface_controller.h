@@ -15,7 +15,7 @@ namespace ark {
 
 class ARK_API SurfaceController {
 public:
-    SurfaceController(sp<Executor> executor);
+    SurfaceController();
 
 // [[script::bindings::auto]]
     void addRenderer(const sp<Renderer>& renderer);
@@ -29,8 +29,6 @@ public:
     void onRenderFrame(const Color& backgroundColor, RenderView& renderView);
 
 private:
-    sp<Executor> _executor;
-    sp<MemoryPool> _memory_pool;
     sp<Allocator::Pool> _allocator_pool;
 
     sp<RendererGroup> _renderers;

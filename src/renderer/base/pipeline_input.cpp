@@ -1,7 +1,6 @@
 #include "renderer/base/pipeline_input.h"
 
 #include "core/base/allocator.h"
-#include "core/base/memory_pool.h"
 #include "core/base/string.h"
 #include "core/impl/writable/writable_memory.h"
 

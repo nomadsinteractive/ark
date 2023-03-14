@@ -19,7 +19,7 @@ public:
 
     virtual void onSurfaceCreated() override;
     virtual void onSurfaceChanged(uint32_t width, uint32_t height) override;
-    virtual void onRenderFrame(const Color& backgroundColor, const sp<RenderCommand>& renderCommand) override;
+    virtual void onRenderFrame(const Color& backgroundColor, RenderCommand& renderCommand) override;
 
 private:
     void initialize(uint32_t width, uint32_t height);
