@@ -21,14 +21,14 @@ namespace ark {
 
 class ARK_API ResourceLoaderContext {
 public:
-    ResourceLoaderContext(const sp<Dictionary<document>>& documents, const sp<BitmapLoaderBundle>& bitmapBundle, const sp<BitmapLoaderBundle>& bitmapBoundsBundle,
-                          const sp<Executor>& executor, const sp<RenderController>& renderController);
+    ResourceLoaderContext(sp<Dictionary<document>> documents, sp<BitmapLoaderBundle> bitmapBundle, sp<BitmapLoaderBundle> bitmapBoundsBundle, sp<ExecutorThreadPool> executor,
+                          sp<RenderController> renderController);
     ~ResourceLoaderContext();
 
     const sp<Dictionary<document>>& documents() const;
 
     const sp<RenderController>& renderController() const;
-    const sp<Executor>& executor() const;
+    const sp<ExecutorThreadPool>& executorThreadPool() const;
 
     const sp<BitmapLoaderBundle>& bitmapBundle() const;
     const sp<BitmapLoaderBundle>& bitmapBoundsBundle() const;
@@ -44,7 +44,7 @@ private:
     sp<Dictionary<document>> _documents;
     sp<BitmapLoaderBundle> _bitmap_bundle;
     sp<BitmapLoaderBundle> _bitmap_bounds_bundle;
-    sp<Executor> _executor;
+    sp<ExecutorThreadPool> _executor_thread_pool;
     sp<RenderController> _render_controller;
     sp<TextureBundle> _texture_bundle;
 

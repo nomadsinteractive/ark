@@ -508,21 +508,21 @@ VkPipelineRasterizationStateCreateInfo VKPipeline::makeRasterizationState() cons
 
 void VKPipeline::VKDrawArrays::draw(GraphicsContext& /*graphicsContext*/, const DrawingContext& drawingContext, VkCommandBuffer commandBuffer)
 {
-    const DrawingContext::ParamDrawElements& param = drawingContext._parameters._draw_elements;
+    const DrawingContextParams::DrawElements& param = drawingContext._parameters._draw_elements;
     DASSERT(param.isActive());
     vkCmdDraw(commandBuffer, param._count, 1, param._start, 0);
 }
 
 void VKPipeline::VKDrawElements::draw(GraphicsContext& /*graphicsContext*/, const DrawingContext& drawingContext, VkCommandBuffer commandBuffer)
 {
-    const DrawingContext::ParamDrawElements& param = drawingContext._parameters._draw_elements;
+    const DrawingContextParams::DrawElements& param = drawingContext._parameters._draw_elements;
     DASSERT(param.isActive());
     vkCmdDrawIndexed(commandBuffer, param._count, 1, param._start, 0, 0);
 }
 
 void VKPipeline::VKDrawElementsInstanced::draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext, VkCommandBuffer commandBuffer)
 {
-    const DrawingContext::ParamDrawElementsInstanced& param = drawingContext._parameters._draw_elements_instanced;
+    const DrawingContextParams::DrawElementsInstanced& param = drawingContext._parameters._draw_elements_instanced;
     DASSERT(param.isActive());
 
     VkDeviceSize offsets = 0;
@@ -538,7 +538,7 @@ void VKPipeline::VKDrawElementsInstanced::draw(GraphicsContext& graphicsContext,
 
 void VKPipeline::VKMultiDrawElementsIndirect::draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext, VkCommandBuffer commandBuffer)
 {
-    const DrawingContext::ParamDrawMultiElementsIndirect& param = drawingContext._parameters._draw_multi_elements_indirect;
+    const DrawingContextParams::DrawMultiElementsIndirect& param = drawingContext._parameters._draw_multi_elements_indirect;
     DASSERT(param.isActive());
 
     VkDeviceSize offsets = 0;
@@ -551,7 +551,7 @@ void VKPipeline::VKMultiDrawElementsIndirect::draw(GraphicsContext& graphicsCont
     }
 
     param._indirect_cmds.upload(graphicsContext);
-    vkCmdDrawIndexedIndirect(commandBuffer, (VkBuffer) (param._indirect_cmds.id()), 0, param._draw_count, sizeof(DrawingContext::DrawElementsIndirectCommand));
+    vkCmdDrawIndexedIndirect(commandBuffer, (VkBuffer) (param._indirect_cmds.id()), 0, param._draw_count, sizeof(DrawingContextParams::DrawElementsIndirectCommand));
 }
 
 }

@@ -38,7 +38,7 @@ public:
     const sp<ResourceLoader>& resourceLoader() const;
 
     const sp<Executor>& executorMain() const;
-    const sp<Executor>& executorPooled() const;
+    const sp<ExecutorThreadPool>& executorThreadPool() const;
 
     const std::vector<String>& argv() const;
 
@@ -148,7 +148,7 @@ private:
     sp<MessageLoop> _message_loop_renderer;
     sp<MessageLoop> _message_loop_core;
     sp<MessageLoop> _message_loop_app;
-    sp<Executor> _executor_pooled;
+    sp<ExecutorThreadPool> _executor_thread_pool;
 
     op<EventListenerList> _event_listeners;
     sp<EventListener> _default_event_listener;

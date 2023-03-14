@@ -17,6 +17,8 @@ public:
 
     virtual void execute(const sp<Runnable>& task) override;
 
+    sp<ExecutorWorkerThread> obtainWorkerThread();
+
 private:
     class WorkerThreadStrategy;
 
@@ -43,15 +45,13 @@ private:
 
         virtual void onException(const std::exception& e) override;
 
-
-        bool idle() const;
+        bool isIdle() const;
+        void markBusy();
 
     private:
         sp<Stub> _stub;
 
-        bool _idle;
         uint32_t _idled_cycle;
-
     };
 
     sp<ExecutorWorkerThread> createWorkerThread();

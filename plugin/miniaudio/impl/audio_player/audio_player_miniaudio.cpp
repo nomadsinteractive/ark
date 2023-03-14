@@ -9,6 +9,7 @@
 #include "core/inf/executor.h"
 #include "core/inf/readable.h"
 #include "core/inf/runnable.h"
+#include "core/impl/executor/executor_thread_pool.h"
 #include "core/util/log.h"
 
 #include "renderer/base/resource_loader_context.h"
@@ -94,7 +95,7 @@ ma_bool32 _decoder_seek_proc(ma_decoder* pDecoder, int byteOffset, ma_seek_origi
 }
 
 AudioPlayerMiniAudio::AudioPlayerMiniAudio(const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _executor(resourceLoaderContext->executor())
+    : _executor(resourceLoaderContext->executorThreadPool())
 {
 }
 

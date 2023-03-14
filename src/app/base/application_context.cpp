@@ -54,8 +54,9 @@ private:
 
 ApplicationContext::ApplicationContext(sp<ApplicationBundle> applicationBundle, sp<RenderEngine> renderEngine)
     : _ticker(sp<Ticker>::make()), _cursor_position(sp<Vec2Impl>::make()), _application_bundle(std::move(applicationBundle)), _render_engine(std::move(renderEngine)), _render_controller(sp<RenderController>::make(_render_engine, _application_bundle->recycler(), _application_bundle->bitmapBundle(), _application_bundle->bitmapBoundsBundle())),
-      _app_clock_ticker(sp<Variable<uint64_t>::Impl>::make(0)), _sys_clock(sp<Clock>::make(_ticker)), _app_clock(sp<Clock>::make(_app_clock_ticker)), _worker_strategy(sp<ExecutorWorkerStrategy>::make(sp<MessageLoop>::make(_ticker))), _event_listeners(new EventListenerList()), _string_table(Global<StringTable>()), _background_color(Color::BLACK),
-      _paused(false)
+      _app_clock_ticker(sp<Variable<uint64_t>::Impl>::make(0)), _sys_clock(sp<Clock>::make(_ticker)), _app_clock(sp<Clock>::make(_app_clock_ticker)), _worker_strategy(sp<ExecutorWorkerStrategy>::make(sp<MessageLoop>::make(_ticker))),
+      _executor_main(sp<ExecutorWorkerThread>::make(_worker_strategy, "Executor")), _executor_thread_pool(sp<ExecutorThreadPool>::make(_executor_main)), _event_listeners(new EventListenerList()), _string_table(Global<StringTable>()),
+      _background_color(Color::BLACK), _paused(false)
 {
     Ark& ark = Ark::instance();
 
@@ -77,11 +78,9 @@ void ApplicationContext::initResourceLoader(const document& manifest)
 void ApplicationContext::initMessageLoop()
 {
     const Ark& ark = Ark::instance();
-    _executor_main = sp<ExecutorWorkerThread>::make(_worker_strategy, "Executor");
     _message_loop_renderer = sp<MessageLoop>::make(_ticker);
     _message_loop_core = ark.manifest()->application()._message_loop == ApplicationManifest::MESSAGE_LOOP_TYPE_RENDER ? _message_loop_renderer : _worker_strategy->_message_loop;
     _message_loop_app = makeMessageLoop(_app_clock);
-    _executor_pooled = sp<ExecutorThreadPool>::make(_executor_main);
 }
 
 sp<ResourceLoader> ApplicationContext::createResourceLoader(const String& name, const Scope& args)
@@ -110,7 +109,7 @@ sp<ResourceLoader> ApplicationContext::createResourceLoaderImpl(const document& 
     const document doc = createResourceLoaderManifest(manifest);
     const sp<DictionaryByAttributeName> documentDictionary = sp<DictionaryByAttributeName>::make(doc, Constants::Attributes::ID);
     const sp<BeanFactory> beanFactory = Ark::instance().createBeanFactory(documentDictionary);
-    const sp<ResourceLoaderContext> context = resourceLoaderContext ? resourceLoaderContext : sp<ResourceLoaderContext>::make(_application_bundle->documents(), _application_bundle->bitmapBundle(), _application_bundle->bitmapBoundsBundle(), _executor_pooled, _render_controller);
+    const sp<ResourceLoaderContext> context = resourceLoaderContext ? resourceLoaderContext : sp<ResourceLoaderContext>::make(_application_bundle->documents(), _application_bundle->bitmapBundle(), _application_bundle->bitmapBoundsBundle(), _executor_thread_pool, _render_controller);
 
     const Global<PluginManager> pluginManager;
     pluginManager->each([&] (const sp<Plugin>& plugin)->bool {
@@ -155,9 +154,9 @@ const sp<Executor>& ApplicationContext::executorMain() const
     return _executor_main;
 }
 
-const sp<Executor>& ApplicationContext::executorPooled() const
+const sp<ExecutorThreadPool>& ApplicationContext::executorThreadPool() const
 {
-    return _executor_pooled;
+    return _executor_thread_pool;
 }
 
 const std::vector<String>& ApplicationContext::argv() const

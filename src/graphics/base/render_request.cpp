@@ -38,8 +38,8 @@ private:
 
 }
 
-RenderRequest::RenderRequest(uint64_t timestamp, const sp<Allocator::Pool>& allocatorPool, const sp<Executor>& executor, const sp<OCSQueue<RenderRequest>>& renderRequests)
-    : _stub(sp<Stub>::make(timestamp, allocatorPool, executor, renderRequests))
+RenderRequest::RenderRequest(uint64_t timestamp, sp<Allocator::Pool> allocatorPool, sp<Executor> executor, sp<OCSQueue<RenderRequest>> renderRequests)
+    : _stub(sp<Stub>::make(timestamp, std::move(allocatorPool), std::move(executor), std::move(renderRequests)))
 {
 }
 
@@ -74,16 +74,16 @@ void RenderRequest::addRequest(sp<RenderCommand> renderCommand) const
     _stub->_render_command_pipe_line->add(std::move(renderCommand));
 }
 
-void RenderRequest::addBackgroundRequest(const RenderLayer& layer, const V3& position)
+void RenderRequest::addBackgroundRequest(const RenderLayer& renderLayer, const V3& position)
 {
-    sp<BackgroundRenderCommand> renderCommand = sp<BackgroundRenderCommand>::make(*this, layer, position);
+    sp<BackgroundRenderCommand> renderCommand = sp<BackgroundRenderCommand>::make(*this, renderLayer, position);
     ++(_stub->_background_renderer_count);
-    _stub->_executor->execute(renderCommand);
+    renderLayer.executor()->execute(renderCommand);
     _stub->_render_command_pipe_line->add(std::move(renderCommand));
 }
 
-RenderRequest::Stub::Stub(uint64_t timestamp, const sp<Allocator::Pool>& allocatorPool, const sp<Executor>& executor, const sp<OCSQueue<RenderRequest>>& renderRequests)
-    : _timestamp(timestamp), _allocator(allocatorPool), _executor(executor), _render_requests(renderRequests), _render_command_pipe_line(sp<RenderCommandPipeline>::make()), _background_renderer_count(1)
+RenderRequest::Stub::Stub(uint64_t timestamp, sp<Allocator::Pool> allocatorPool, sp<Executor> executor, sp<OCSQueue<RenderRequest>> renderRequests)
+    : _timestamp(timestamp), _allocator(std::move(allocatorPool)), _executor(std::move(executor)), _render_requests(std::move(renderRequests)), _render_command_pipe_line(sp<RenderCommandPipeline>::make()), _background_renderer_count(1)
 {
 }
 

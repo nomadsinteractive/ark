@@ -67,7 +67,7 @@ private:
     };
 
     struct IndirectCmds {
-        DrawingContext::DrawElementsIndirectCommand _command;
+        DrawingContextParams::DrawElementsIndirectCommand _command;
         std::vector<sp<NodeInstance>> _node_instances;
     };
 
@@ -79,10 +79,6 @@ private:
     void reloadIndirectCommands(const RenderLayerSnapshot& snapshot);
 
 private:
-//TODO: make RenderCommandComposer thread safe.
-[[deprecated]]
-    std::mutex _mutex;
-
     sp<ModelBundle> _model_bundle;
 
     Buffer _indices;

@@ -29,15 +29,22 @@ ExecutorThreadPool::ExecutorThreadPool(sp<Executor> exceptionExecutor, uint32_t 
 
 void ExecutorThreadPool::execute(const sp<Runnable>& task)
 {
+    obtainWorkerThread()->execute(task);
+}
+
+sp<ExecutorWorkerThread> ExecutorThreadPool::obtainWorkerThread()
+{
     for(const sp<ExecutorWorkerThread>& i : _stub->_worker_threads)
     {
-        const sp<WorkerThreadStrategy> strategy = i->strategy();
-        if(strategy->idle())
-            return i->execute(task);
+        const sp<WorkerThreadStrategy>& strategy = i->strategy();
+        if(strategy->isIdle())
+        {
+            strategy->markBusy();
+            return i;
+        }
     }
 
-    createWorkerThread()->execute(task);
-
+    return createWorkerThread();
 }
 
 sp<ExecutorWorkerThread> ExecutorThreadPool::createWorkerThread()
@@ -54,18 +61,16 @@ ExecutorThreadPool::Stub::Stub(sp<Executor> exceptionExecutor, uint32_t capacity
 }
 
 ExecutorThreadPool::WorkerThreadStrategy::WorkerThreadStrategy(const sp<ExecutorThreadPool::Stub>& stub)
-    : _stub(stub), _idle(false), _idled_cycle(0)
+    : _stub(stub), _idled_cycle(0)
 {
 }
 
 void ExecutorThreadPool::WorkerThreadStrategy::onStart()
 {
-    _idle = true;
 }
 
 uint64_t ExecutorThreadPool::WorkerThreadStrategy::onBusy()
 {
-    _idle = false;
     _idled_cycle = 0;
     return 0;
 }
@@ -73,7 +78,7 @@ uint64_t ExecutorThreadPool::WorkerThreadStrategy::onBusy()
 void ExecutorThreadPool::WorkerThreadStrategy::onExit()
 {
     bool removed = false;
-    const std::scoped_lock<std::mutex> guard(_stub->_mutex);
+    const volatile std::scoped_lock<std::mutex> guard(_stub->_mutex);
     for(const sp<ExecutorWorkerThread>& i : _stub->_worker_threads.clear())
         if(i->strategy().get() != this)
             _stub->_worker_threads.push(i);
@@ -93,16 +98,20 @@ void ExecutorThreadPool::WorkerThreadStrategy::onException(const std::exception&
 
 uint64_t ExecutorThreadPool::WorkerThreadStrategy::onIdle(Thread& thread)
 {
-    _idle = true;
     _idled_cycle ++;
     if(_idled_cycle > 20000 && _stub->_worker_count.load(std::memory_order_relaxed) > _stub->_capacity)
         thread.terminate();
     return 20000;
 }
 
-bool ExecutorThreadPool::WorkerThreadStrategy::idle() const
+bool ExecutorThreadPool::WorkerThreadStrategy::isIdle() const
 {
-    return _idle;
+    return _idled_cycle > 0;
+}
+
+void ExecutorThreadPool::WorkerThreadStrategy::markBusy()
+{
+    _idled_cycle = 0;
 }
 
 }

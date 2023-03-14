@@ -10,10 +10,10 @@
 
 namespace ark {
 
-ResourceLoaderContext::ResourceLoaderContext(const sp<Dictionary<document>>& documents, const sp<BitmapLoaderBundle>& bitmapBundle, const sp<BitmapLoaderBundle>& bitmapBoundsBundle,
-                                             const sp<Executor>& executor, const sp<RenderController>& renderController)
-    : _documents(documents), _bitmap_bundle(bitmapBundle), _bitmap_bounds_bundle(bitmapBoundsBundle), _executor(executor), _render_controller(renderController),
-      _texture_bundle(sp<TextureBundle>::make(renderController)), _disposed(sp<Boolean::Impl>::make(false))
+ResourceLoaderContext::ResourceLoaderContext(sp<Dictionary<document>> documents, sp<BitmapLoaderBundle> bitmapBundle, sp<BitmapLoaderBundle> bitmapBoundsBundle,
+                                             sp<ExecutorThreadPool> executor, sp<RenderController> renderController)
+    : _documents(std::move(documents)), _bitmap_bundle(std::move(bitmapBundle)), _bitmap_bounds_bundle(std::move(bitmapBoundsBundle)), _executor_thread_pool(std::move(executor)),
+      _render_controller(std::move(renderController)), _texture_bundle(sp<TextureBundle>::make(_render_controller)), _disposed(sp<Boolean::Impl>::make(false))
 {
 }
 
@@ -38,9 +38,9 @@ const sp<BitmapLoaderBundle>& ResourceLoaderContext::bitmapBoundsBundle() const
     return _bitmap_bounds_bundle;
 }
 
-const sp<Executor>& ResourceLoaderContext::executor() const
+const sp<ExecutorThreadPool>& ResourceLoaderContext::executorThreadPool() const
 {
-    return _executor;
+    return _executor_thread_pool;
 }
 
 const sp<RenderController>& ResourceLoaderContext::renderController() const

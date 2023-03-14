@@ -26,6 +26,16 @@ TilemapLayer::TilemapLayer(sp<Tileset> tileset, String name, uint32_t colCount, 
 {
 }
 
+bool TilemapLayer::preSnapshot(const RenderRequest& renderRequest, LayerContext& lc)
+{
+    return _stub->preSnapshot(renderRequest, lc);
+}
+
+void TilemapLayer::snapshot(const RenderRequest& renderRequest, const LayerContext& lc, RenderLayerSnapshot& output)
+{
+    _stub->snapshot(renderRequest, lc, output);
+}
+
 bool TilemapLayer::getSelectionTileRange(const Rect& aabb, V3& selectionPosition, RectI& selectionRange) const
 {
     float width = _size->widthAsFloat();

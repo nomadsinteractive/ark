@@ -12,8 +12,8 @@
 
 namespace ark {
 
-DrawingBuffer::DrawingBuffer(const sp<ShaderBindings>& shaderBindings, uint32_t stride)
-    : _shader_bindings(shaderBindings), _pipeline_bindings(_shader_bindings->pipelineBindings()), _vertices(stride),
+DrawingBuffer::DrawingBuffer(sp<ShaderBindings> shaderBindings, uint32_t stride)
+    : _shader_bindings(std::move(shaderBindings)), _pipeline_bindings(_shader_bindings->pipelineBindings()), _vertices(stride),
       _divided_buffer_builders(_shader_bindings->makeDividedBufferBuilders()),
       _is_instanced(_pipeline_bindings->hasDivisors())
 {

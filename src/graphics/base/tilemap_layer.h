@@ -14,10 +14,13 @@
 
 namespace ark {
 
-class ARK_API TilemapLayer {
+class ARK_API TilemapLayer : public RenderBatch {
 public:
 // [[script::bindings::auto]]
     TilemapLayer(sp<Tileset> tileset, String name, uint32_t colCount, uint32_t rowCount, sp<Vec3> position = nullptr, sp<Boolean> visible = nullptr, sp<CollisionFilter> collisionFilter = nullptr);
+
+    virtual bool preSnapshot(const RenderRequest& renderRequest, LayerContext& lc) override;
+    virtual void snapshot(const RenderRequest& renderRequest, const LayerContext& lc, RenderLayerSnapshot& output) override;
 
     bool getSelectionTileRange(const Rect& aabb, V3& selectionPosition, RectI& selectionRange) const;
 
@@ -115,6 +118,7 @@ private:
     sp<Stub> _stub;
 
     friend class Tilemap;
+
 };
 
 }

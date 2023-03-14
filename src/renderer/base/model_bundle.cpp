@@ -4,6 +4,7 @@
 #include "core/base/bean_factory.h"
 #include "core/base/future.h"
 #include "core/inf/executor.h"
+#include "core/impl/executor/executor_thread_pool.h"
 #include "core/util/string_convert.h"
 
 #include "renderer/base/atlas.h"
@@ -67,7 +68,7 @@ void ModelBundle::importModel(int32_t type, const Manifest& manifest, sp<Future>
 {
     ApplicationContext& applicationContext = Ark::instance().applicationContext();
     sp<Runnable> task = sp<ImportModuleRunnable>::make(type, manifest, _stub, nullptr, applicationContext.executorMain(), std::move(future));
-    applicationContext.executorPooled()->execute(task);
+    applicationContext.executorThreadPool()->execute(task);
 }
 
 const Table<int32_t, ModelBundle::ModelLayout>& ModelBundle::modelLayouts() const

@@ -17,6 +17,7 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/base/buffer.h"
+#include "renderer/base/graphics_buffer_allocator.h"
 #include "renderer/base/texture.h"
 #include "renderer/inf/model_loader.h"
 
@@ -198,6 +199,8 @@ private:
 
     std::vector<Box> _defered_instances;
     std::unordered_map<uint32_t, sp<SharedIndices>> _shared_indices;
+
+    GraphicsBufferAllocator _gba;
 
     uint64_t _tick;
 

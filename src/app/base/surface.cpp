@@ -1,6 +1,7 @@
 #include "app/base/surface.h"
 
 #include "core/inf/runnable.h"
+#include "core/impl/executor/executor_thread_pool.h"
 #include "core/impl/runnable/runnable_by_function.h"
 
 #include "graphics/base/render_command_pipeline.h"
@@ -18,7 +19,7 @@
 namespace ark {
 
 Surface::Surface(sp<RenderView> renderView, const ApplicationContext& applicationContext)
-    : _render_view(std::move(renderView)), _surface_controller(sp<SurfaceController>::make(applicationContext.executorPooled())),
+    : _render_view(std::move(renderView)), _surface_controller(sp<SurfaceController>::make(applicationContext.executorThreadPool())),
       _updater(sp<SurfaceUpdater>::make(_surface_controller, applicationContext))
 {
 }

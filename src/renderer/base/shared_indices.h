@@ -8,6 +8,7 @@ namespace ark {
 
 class SharedIndices {
 public:
+[[deprecated]]
     SharedIndices(Buffer buffer, std::vector<element_index_t> boilerPlate, size_t vertexCount, bool degenerate);
 
     Buffer::Snapshot snapshot(RenderController& renderController, size_t primitiveCount, size_t reservedIfInsufficient = 0);

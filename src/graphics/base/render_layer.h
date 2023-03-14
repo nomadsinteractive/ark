@@ -24,7 +24,7 @@ namespace ark {
 class ARK_API RenderLayer : public Renderer {
 private:
     struct Stub {
-        Stub(sp<RenderController> renderController, sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Boolean> visible, sp<Boolean> disposed, sp<Varyings> varyings, sp<Vec4> scissor);
+        Stub(sp<RenderController> renderController, sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Boolean> visible, sp<Boolean> disposed, sp<Varyings> varyings, sp<Vec4> scissor, sp<Executor> executor);
 
         sp<LayerContext> makeLayerContext(sp<RenderBatch> batch, sp<ModelLoader> modelLoader, sp<Boolean> visible, sp<Boolean> disposed);
         void addLayerContext(sp<LayerContext> layerContext);
@@ -33,6 +33,7 @@ private:
         sp<ModelLoader> _model_loader;
         sp<Shader> _shader;
         sp<Vec4> _scissor;
+        sp<Executor> _executor;
 
         sp<RenderCommandComposer> _render_command_composer;
         sp<ShaderBindings> _shader_bindings;
@@ -45,7 +46,7 @@ private:
     };
 
 public:
-    RenderLayer(sp<RenderController> renderController, sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Boolean> visible, sp<Boolean> disposed, sp<Varyings> varyings, sp<Vec4> scissor);
+    RenderLayer(sp<RenderController> renderController, sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Boolean> visible, sp<Boolean> disposed, sp<Varyings> varyings, sp<Vec4> scissor, sp<Executor> executor);
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
@@ -59,6 +60,8 @@ public:
 
     sp<LayerContext> makeLayerContext(sp<RenderBatch> batchOptional = nullptr, sp<ModelLoader> modelLoader = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> disposed = nullptr, sp<Vec3> position = nullptr) const;
     void addLayerContext(sp<LayerContext> layerContext);
+
+    const sp<Executor>& executor() const;
 
 //  [[plugin::resource-loader]]
     class BUILDER : public Builder<RenderLayer> {

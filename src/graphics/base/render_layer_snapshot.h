@@ -56,9 +56,6 @@ public:
 private:
     RenderLayerSnapshot(RenderRequest& renderRequest, const sp<RenderLayer::Stub>& stub);
 
-    void doRenderModelSnapshot(const RenderRequest& renderRequest, DrawingBuffer& buf) const;
-    void doModelLoaderSnapshot(const RenderRequest& renderRequest, DrawingBuffer& buf) const;
-
     friend class RenderLayer;
 };
 

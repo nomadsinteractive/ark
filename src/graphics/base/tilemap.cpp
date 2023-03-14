@@ -264,15 +264,15 @@ bool Tilemap::Stub::preSnapshot(const RenderRequest& renderRequest, LayerContext
     _need_reload = false;
     if(_scrollable)
         _scrollable->cull();
-    for(const TilemapLayer& i : _layers)
-        needReload = i._stub->preSnapshot(renderRequest, lc) || needReload;
+    for(TilemapLayer& i : _layers)
+        needReload = i.preSnapshot(renderRequest, lc) || needReload;
     return needReload;
 }
 
 void Tilemap::Stub::snapshot(const RenderRequest& renderRequest, const LayerContext& lc, RenderLayerSnapshot& output)
 {
-    for(const TilemapLayer& i : _layers)
-        i._stub->snapshot(renderRequest, lc, output);
+    for(TilemapLayer& i : _layers)
+        i.snapshot(renderRequest, lc, output);
 }
 
 }

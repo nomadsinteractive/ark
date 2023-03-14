@@ -101,7 +101,6 @@ void RCCMultiDrawElementsIndirect::postSnapshot(RenderController& /*renderContro
 
 sp<RenderCommand> RCCMultiDrawElementsIndirect::compose(const RenderRequest& renderRequest, RenderLayerSnapshot& snapshot)
 {
-    const std::lock_guard<std::mutex> lg(_mutex);
     DrawingBuffer buf(snapshot._stub->_shader_bindings, snapshot._stub->_stride);
     const Buffer& vertices = snapshot._stub->_shader_bindings->vertices();
     bool reload = snapshot.needsReload();
@@ -113,7 +112,7 @@ sp<RenderCommand> RCCMultiDrawElementsIndirect::compose(const RenderRequest& ren
 
     DrawingContext drawingContext(snapshot._stub->_shader_bindings, snapshot._stub->_shader_bindings->attachments(), std::move(snapshot._ubos), std::move(snapshot._ssbos),
                                   vertices.snapshot(), _indices.snapshot(),
-                                  DrawingContext::ParamDrawMultiElementsIndirect(buf.toDividedBufferSnapshots(), reload ? _draw_indirect.snapshot(makeIndirectBuffer(renderRequest)) : _draw_indirect.snapshot(), static_cast<uint32_t>(_indirect_cmds.size())));
+                                  DrawingContextParams::DrawMultiElementsIndirect(buf.toDividedBufferSnapshots(), reload ? _draw_indirect.snapshot(makeIndirectBuffer(renderRequest)) : _draw_indirect.snapshot(), static_cast<uint32_t>(_indirect_cmds.size())));
 
     if(snapshot._stub->_scissor)
         drawingContext._scissor = snapshot._stub->_render_controller->renderEngine()->toRendererRect(snapshot._scissor);
@@ -123,8 +122,8 @@ sp<RenderCommand> RCCMultiDrawElementsIndirect::compose(const RenderRequest& ren
 
 ByteArray::Borrowed RCCMultiDrawElementsIndirect::makeIndirectBuffer(const RenderRequest& renderRequest) const
 {
-    ByteArray::Borrowed cmds = renderRequest.allocator().sbrkSpan(_indirect_cmds.size() * sizeof(DrawingContext::DrawElementsIndirectCommand));
-    DrawingContext::DrawElementsIndirectCommand* pcmds = reinterpret_cast<DrawingContext::DrawElementsIndirectCommand*>(cmds.buf());
+    ByteArray::Borrowed cmds = renderRequest.allocator().sbrkSpan(_indirect_cmds.size() * sizeof(DrawingContextParams::DrawElementsIndirectCommand));
+    DrawingContextParams::DrawElementsIndirectCommand* pcmds = reinterpret_cast<DrawingContextParams::DrawElementsIndirectCommand*>(cmds.buf());
     uint32_t baseInstance = 0;
     for(const IndirectCmds& i : _indirect_cmds.values())
     {

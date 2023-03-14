@@ -2,6 +2,7 @@
 
 #include "core/base/observer.h"
 #include "core/base/notifier.h"
+#include "core/impl/executor/executor_thread_pool.h"
 
 #include "graphics/base/camera.h"
 #include "graphics/base/layer_context.h"
@@ -28,10 +29,10 @@
 
 namespace ark {
 
-RenderLayer::Stub::Stub(sp<RenderController> renderController, sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Boolean> visible, sp<Boolean> disposed, sp<Varyings> varyings, sp<Vec4> scissor)
-    : _render_controller(std::move(renderController)), _model_loader(ModelLoaderCached::ensureCached(std::move(modelLoader))), _shader(std::move(shader)), _scissor(std::move(scissor)), _render_command_composer(_model_loader->makeRenderCommandComposer()),
-      _shader_bindings(_render_command_composer->makeShaderBindings(_shader, _render_controller, _model_loader->renderMode())), _layer_context(sp<LayerContext>::make(sp<RenderBatchImpl>::make(), _model_loader, std::move(visible), std::move(disposed), std::move(varyings))),
-      _stride(_shader->input()->getStream(0).stride())
+RenderLayer::Stub::Stub(sp<RenderController> renderController, sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Boolean> visible, sp<Boolean> disposed, sp<Varyings> varyings, sp<Vec4> scissor, sp<Executor> executor)
+    : _render_controller(std::move(renderController)), _model_loader(ModelLoaderCached::ensureCached(std::move(modelLoader))), _shader(std::move(shader)), _scissor(std::move(scissor)), _executor(std::move(executor)),
+      _render_command_composer(_model_loader->makeRenderCommandComposer()), _shader_bindings(_render_command_composer->makeShaderBindings(_shader, _render_controller, _model_loader->renderMode())),
+      _layer_context(sp<LayerContext>::make(sp<RenderBatchImpl>::make(), _model_loader, std::move(visible), std::move(disposed), std::move(varyings))), _stride(_shader->input()->getStream(0).stride())
 {
     _model_loader->initialize(_shader_bindings);
     CHECK(!_scissor || _shader_bindings->pipelineBindings()->hasFlag(PipelineBindings::FLAG_DYNAMIC_SCISSOR, PipelineBindings::FLAG_DYNAMIC_SCISSOR_BITMASK), "RenderLayer has a scissor while its Shader has no FLAG_DYNAMIC_SCISSOR set");
@@ -53,8 +54,8 @@ void RenderLayer::Stub::addLayerContext(sp<LayerContext> layerContext)
     _layer_context_list.push_back(std::move(layerContext));
 }
 
-RenderLayer::RenderLayer(sp<RenderController> renderController, sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Boolean> visible, sp<Boolean> disposed, sp<Varyings> varyings, sp<Vec4> scissor)
-    : RenderLayer(sp<Stub>::make(std::move(renderController), std::move(modelLoader), std::move(shader), std::move(visible), std::move(disposed), std::move(varyings), std::move(scissor)))
+RenderLayer::RenderLayer(sp<RenderController> renderController, sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Boolean> visible, sp<Boolean> disposed, sp<Varyings> varyings, sp<Vec4> scissor, sp<Executor> executor)
+    : RenderLayer(sp<Stub>::make(std::move(renderController), std::move(modelLoader), std::move(shader), std::move(visible), std::move(disposed), std::move(varyings), std::move(scissor), std::move(executor)))
 {
 }
 
@@ -86,6 +87,11 @@ void RenderLayer::addLayerContext(sp<LayerContext> layerContext)
     _stub->addLayerContext(std::move(layerContext));
 }
 
+const sp<Executor>& RenderLayer::executor() const
+{
+    return _stub->_executor;
+}
+
 sp<Layer> RenderLayer::makeLayer(sp<ModelLoader> modelLoader, sp<Boolean> visible, sp<Boolean> disposed, sp<Vec3> position) const
 {
     return sp<Layer>::make(makeLayerContext(nullptr, std::move(modelLoader), std::move(visible), std::move(disposed), std::move(position)));
@@ -112,7 +118,7 @@ RenderLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, co
 sp<RenderLayer> RenderLayer::BUILDER::build(const Scope& args)
 {
     const sp<RenderLayer> renderLayer = sp<RenderLayer>::make(_resource_loader_context->renderController(), _model_loader->build(args), _shader->build(args), _visible->build(args),
-                                                              _disposed->build(args), _varyings->build(args), _scissor->build(args));
+                                                              _disposed->build(args), _varyings->build(args), _scissor->build(args), _resource_loader_context->executorThreadPool()->obtainWorkerThread());
     for(const sp<Builder<Layer>>& i : _layers)
     {
         const sp<Layer> layer = i->build(args);
