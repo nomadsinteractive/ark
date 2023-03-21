@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_IMPL_VERTICES_VERTICES_NINE_PATCH_QUADS_H_
-#define ARK_RENDERER_IMPL_VERTICES_VERTICES_NINE_PATCH_QUADS_H_
+#pragma once
 
 #include "graphics/base/rect.h"
 
@@ -17,6 +16,3 @@ public:
 };
 
 }
-
-
-#endif

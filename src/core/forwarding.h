@@ -59,7 +59,7 @@ class DOMElement;
 class Disposed;
 class Duration;
 class Executor;
-class Input;
+class Uploader;
 class Function;
 class Future;
 class Holder;
@@ -89,6 +89,7 @@ class Thread;
 class ExecutorThreadPool;
 class Updatable;
 class UpdatableWrapper;
+class UploaderWrapper;
 class Visibility;
 class Writable;
 

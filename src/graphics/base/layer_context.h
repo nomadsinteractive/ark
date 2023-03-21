@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_BASE_LAYER_CONTEXT_H_
-#define ARK_GRAPHICS_BASE_LAYER_CONTEXT_H_
+#pragma once
 
 #include <deque>
 #include <vector>
@@ -33,6 +32,10 @@ public:
         SafeVar<Boolean> _disposed;
     };
 
+    struct ElementState {
+        element_index_t _index;
+    };
+
 public:
     LayerContext(sp<RenderBatch> batch = nullptr, sp<ModelLoader> modelLoader = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> disposed = nullptr, sp<Varyings> varyings = nullptr);
 
@@ -61,27 +64,13 @@ public:
 //  [[script::bindings::property]]
     void setVaryings(sp<Varyings> varyings);
 
-    bool preSnapshot(RenderRequest& renderRequest);
-    void snapshot(RenderRequest& renderRequest, RenderLayerSnapshot& output);
+    bool snapshot(RenderRequest& renderRequest, RenderLayerSnapshot& output);
 
-    template<typename T> void doSnapshot(const T& renderables, const RenderRequest& renderRequest, RenderLayerSnapshot& output) const {
-        const PipelineInput& pipelineInput = output.pipelineInput();
-        const bool visible = _visible.val();
-        const bool needsReload = _position_changed || _render_done != visible || output.needsReload();
-        Varyings::Snapshot defaultVaryingsSnapshot = _varyings ? _varyings->snapshot(pipelineInput, renderRequest.allocator()) : Varyings::Snapshot();
+    bool ensureState(void* stateKey);
+    ElementState& addElementState(void* key);
 
-        for(const auto& [i, j] : renderables) {
-            Renderable& renderable = i;
-            Renderable::State state = j;
-            if(needsReload)
-                state.setState(Renderable::RENDERABLE_STATE_DIRTY, true);
-            if(state.hasState(Renderable::RENDERABLE_STATE_VISIBLE))
-                state.setState(Renderable::RENDERABLE_STATE_VISIBLE, visible);
-            Renderable::Snapshot snapshot = renderable.snapshot(pipelineInput, renderRequest, _position, state.stateBits());
-            snapshot.applyVaryings(defaultVaryingsSnapshot);
-            output.addSnapshot(*this, std::move(snapshot));
-        }
-    }
+    bool doPreSnapshot(const RenderRequest& renderRequest, RenderLayerSnapshot& output);
+    void doSnapshot(const RenderRequest& renderRequest, RenderLayerSnapshot& output);
 
     class BUILDER : public Builder<LayerContext> {
     public:
@@ -113,9 +102,9 @@ public:
     V3 _position;
 
     std::deque<std::pair<RenderableItem, Renderable::State>> _renderables;
-    std::vector<RenderableItem> _renderable_emplaced;
+    std::vector<RenderableItem> _renderable_created;
+
+    std::unordered_map<void*, ElementState> _element_states;
 };
 
 }
-
-#endif

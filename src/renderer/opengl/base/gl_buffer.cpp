@@ -42,7 +42,7 @@ GLBuffer::~GLBuffer()
     _recycler->recycle(recycle());
 }
 
-void GLBuffer::doUpload(GraphicsContext& /*graphicsContext*/, Input& input)
+void GLBuffer::doUpload(GraphicsContext& /*graphicsContext*/, Uploader& input)
 {
     DCHECK_WARN(_usage != GL_STATIC_DRAW || _size == 0, "Uploading transient data to GL_STATIC_DRAW GLBuffer");
 
@@ -69,7 +69,7 @@ void GLBuffer::upload(GraphicsContext& /*graphicsContext*/)
         glGenBuffers(1, &_id);
 }
 
-void GLBuffer::uploadBuffer(GraphicsContext& graphicsContext, Input& input)
+void GLBuffer::uploadBuffer(GraphicsContext& graphicsContext, Uploader& input)
 {
     upload(graphicsContext);
     doUpload(graphicsContext, input);

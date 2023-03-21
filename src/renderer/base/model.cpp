@@ -1,6 +1,7 @@
 #include "renderer/base/model.h"
 
 #include "core/inf/variable.h"
+#include "core/impl/writable/writable_memory.h"
 
 #include "renderer/base/mesh.h"
 #include "renderer/base/vertex_writer.h"
@@ -10,7 +11,7 @@
 
 namespace ark {
 
-Model::Model(sp<Input> indices, sp<Vertices> vertices, sp<Metrics> bounds, sp<Metrics> occupies)
+Model::Model(sp<Uploader> indices, sp<Vertices> vertices, sp<Metrics> bounds, sp<Metrics> occupies)
     : _indices(std::move(indices)), _vertices(std::move(vertices)), _bounds(std::move(bounds)), _occupies(occupies ? std::move(occupies) : sp<Metrics>(_bounds))
 {
 }
@@ -21,7 +22,7 @@ Model::Model(std::vector<sp<Material>> materials, std::vector<sp<Mesh>> meshes, 
 {
 }
 
-const sp<Input>& Model::indices() const
+const sp<Uploader>& Model::indices() const
 {
     return _indices;
 }
@@ -29,6 +30,16 @@ const sp<Input>& Model::indices() const
 const sp<Vertices>& Model::vertices() const
 {
     return _vertices;
+}
+
+element_index_t Model::writeIndices(element_index_t* buf, element_index_t baseIndex) const
+{
+    _indices->upload(WritableMemory(buf));
+    element_index_t length = static_cast<element_index_t>(_indices->size() / sizeof(element_index_t));
+    if(baseIndex != 0)
+        for(size_t i = 0; i < length; ++i)
+            buf[i] += baseIndex;
+    return length;
 }
 
 const std::vector<sp<Material>>& Model::materials() const
@@ -117,7 +128,7 @@ bool Model::isDisposed() const
 }
 
 Model::InputMeshIndices::InputMeshIndices(std::vector<sp<Mesh>> meshes)
-    : Input(calcIndicesSize(meshes)), _meshes(std::move(meshes))
+    : Uploader(calcIndicesSize(meshes)), _meshes(std::move(meshes))
 {
 }
 

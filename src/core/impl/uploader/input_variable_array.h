@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "core/inf/holder.h"
-#include "core/inf/input.h"
+#include "core/inf/uploader.h"
 #include "core/inf/variable.h"
 #include "core/inf/writable.h"
 #include "core/types/implements.h"
@@ -14,10 +14,10 @@
 
 namespace ark {
 
-template<typename T, size_t ALIGN = sizeof(T)> class InputVariableArray : public Input, public Holder, Implements<InputVariableArray<T, ALIGN>, Input, Holder> {
+template<typename T, size_t ALIGN = sizeof(T)> class InputVariableArray : public Uploader, public Holder, Implements<InputVariableArray<T, ALIGN>, Uploader, Holder> {
 public:
     InputVariableArray(std::vector<sp<Variable<T>>> vector)
-        : Input(vector.size() * ALIGN), _vector(std::move(vector)) {
+        : Uploader(vector.size() * ALIGN), _vector(std::move(vector)) {
     }
 
     virtual void upload(Writable& buf) override {

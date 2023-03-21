@@ -22,6 +22,14 @@ void Renderable::State::setState(StateBits state, bool enabled)
     _state_bits = static_cast<StateBits>((_state_bits & ~state) | (enabled ? state : 0));
 }
 
+void Renderable::State::setState(StateBits state)
+{
+    bool isNewState = _state_bits & RENDERABLE_STATE_NEW;
+    _state_bits = state;
+    if(isNewState)
+        _state_bits = static_cast<StateBits>(_state_bits | RENDERABLE_STATE_NEW);
+}
+
 Renderable::StateBits Renderable::State::stateBits() const
 {
     return _state_bits;

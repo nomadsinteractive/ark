@@ -41,14 +41,16 @@ sp<RenderCommand> RCCDrawQuads::compose(const RenderRequest& renderRequest, Rend
     buf.setIndices(snapshot._index_buffer);
 
     size_t offset = 0;
-    bool reload = snapshot.needsReload();
-    for(const Renderable::Snapshot& i : snapshot._items)
+//    bool reload = snapshot.needsReload();
+    for(const RenderLayerSnapshot::SnapshotWithState& i : snapshot._items)
     {
-        size_t vertexCount = i._model->vertexCount();
-        if(reload || i._state.hasState(Renderable::RENDERABLE_STATE_DIRTY))
+        const Renderable::Snapshot& snapshot = i._snapshot;
+        size_t vertexCount = snapshot._model->vertexCount();
+//        if(reload || snapshot._state.hasState(Renderable::RENDERABLE_STATE_DIRTY))
+        if(snapshot._state.hasState(Renderable::RENDERABLE_STATE_DIRTY))
         {
             VertexWriter writer = buf.makeVertexWriter(renderRequest, vertexCount, offset);
-            i._model->writeRenderable(writer, i);
+            snapshot._model->writeRenderable(writer, snapshot);
         }
         offset += vertexCount;
     }

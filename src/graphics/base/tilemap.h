@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_BASE_TILEMAP_H_
-#define ARK_GRAPHICS_BASE_TILEMAP_H_
+#pragma once
 
 #include <vector>
 
@@ -82,8 +81,8 @@ private:
     public:
         Stub();
 
-        virtual bool preSnapshot(const RenderRequest& renderRequest, LayerContext& lc) override;
-        virtual void snapshot(const RenderRequest& renderRequest, const LayerContext& lc, RenderLayerSnapshot& output) override;
+        virtual bool preSnapshot(const RenderRequest& renderRequest, LayerContext& lc, RenderLayerSnapshot& output) override;
+        virtual void snapshot(const RenderRequest& renderRequest, LayerContext& lc, RenderLayerSnapshot& output) override;
 
         std::vector<sp<TilemapLayer>> _layers;
         sp<Scrollable> _scrollable;
@@ -104,5 +103,3 @@ private:
 };
 
 }
-
-#endif

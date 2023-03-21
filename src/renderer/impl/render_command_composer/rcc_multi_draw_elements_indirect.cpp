@@ -23,10 +23,10 @@ namespace ark {
 
 namespace {
 
-class VerticesUploader : public Input {
+class VerticesUploader : public Uploader {
 public:
     VerticesUploader(sp<ModelBundle> multiModels, sp<PipelineInput> pipelineInput)
-        : Input(multiModels->vertexLength() * pipelineInput->getStream(0).stride()), _model_bundle(std::move(multiModels)), _pipeline_input(std::move(pipelineInput)) {
+        : Uploader(multiModels->vertexLength() * pipelineInput->getStream(0).stride()), _model_bundle(std::move(multiModels)), _pipeline_input(std::move(pipelineInput)) {
     }
 
     void upload(Writable& uploader) override {
@@ -55,17 +55,17 @@ private:
 
 };
 
-class IndicesUploader : public Input {
+class IndicesUploader : public Uploader {
 public:
     IndicesUploader(sp<ModelBundle> multiModels)
-        : Input(multiModels->indexLength() * sizeof(element_index_t)), _model_bundle(std::move(multiModels)) {
+        : Uploader(multiModels->indexLength() * sizeof(element_index_t)), _model_bundle(std::move(multiModels)) {
     }
 
     void upload(Writable& uploader) override {
         size_t offset = 0;
         for(const auto& i: _model_bundle->modelLayouts())
         {
-            Input& indices = i.second._model->indices();
+            Uploader& indices = i.second._model->indices();
             WritableWithOffset writable(uploader, offset);
             indices.upload(writable);
             offset += indices.size();
@@ -110,14 +110,8 @@ sp<RenderCommand> RCCMultiDrawElementsIndirect::compose(const RenderRequest& ren
 
     writeModelMatices(renderRequest, buf, snapshot, reload);
 
-    DrawingContext drawingContext(snapshot._stub->_shader_bindings, snapshot._stub->_shader_bindings->attachments(), std::move(snapshot._ubos), std::move(snapshot._ssbos),
-                                  vertices.snapshot(), _indices.snapshot(),
-                                  DrawingContextParams::DrawMultiElementsIndirect(buf.toDividedBufferSnapshots(), reload ? _draw_indirect.snapshot(makeIndirectBuffer(renderRequest)) : _draw_indirect.snapshot(), static_cast<uint32_t>(_indirect_cmds.size())));
-
-    if(snapshot._stub->_scissor)
-        drawingContext._scissor = snapshot._stub->_render_controller->renderEngine()->toRendererRect(snapshot._scissor);
-
-    return drawingContext.toRenderCommand(renderRequest);
+    DrawingContextParams::DrawMultiElementsIndirect drawParams(buf.toDividedBufferSnapshots(), reload ? _draw_indirect.snapshot(makeIndirectBuffer(renderRequest)) : _draw_indirect.snapshot(), static_cast<uint32_t>(_indirect_cmds.size()));
+    return snapshot.toRenderCommand(renderRequest, vertices.snapshot(), _indices.snapshot(), std::move(drawParams));
 }
 
 ByteArray::Borrowed RCCMultiDrawElementsIndirect::makeIndirectBuffer(const RenderRequest& renderRequest) const
@@ -139,10 +133,10 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
 {
     for(size_t i = 0; i < snapshot._items.size(); ++i)
     {
-        const Renderable::Snapshot& s = snapshot._items.at(i);
-        if(reload || s._state.hasState(Renderable::RENDERABLE_STATE_DIRTY))
+        const RenderLayerSnapshot::SnapshotWithState& s = snapshot._items.at(i);
+        if(reload || s._snapshot._state.hasState(Renderable::RENDERABLE_STATE_DIRTY))
         {
-            if(s._varyings._sub_properties.size() > 0)
+            if(s._snapshot._varyings._sub_properties.size() > 0)
             {
                 const auto iter = _model_instances.find(i);
                 DASSERT(iter != _model_instances.end());
@@ -150,7 +144,7 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
                 if(!iter->second.isDynamicLayout())
                     iter->second.toDynamicLayout();
 
-                for(const auto& [j, k] : s._varyings._sub_properties)
+                for(const auto& [j, k] : s._snapshot._varyings._sub_properties)
                 {
                     Varyings::Divided subProperty = k.getDivided(1);
                     if(subProperty._content.length() > sizeof(M4))
@@ -164,15 +158,16 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
     for(const IndirectCmds& i : _indirect_cmds.values())
         for(const NodeInstance& j : i._node_instances)
         {
-            const Renderable::Snapshot& s = snapshot._items.at(j.snapshotIndex());
-            if(reload || s._state.hasState(Renderable::RENDERABLE_STATE_DIRTY))
+            const RenderLayerSnapshot::SnapshotWithState& s = snapshot._items.at(j.snapshotIndex());
+            const Renderable::Snapshot& snapshot = s._snapshot;
+            if(reload || snapshot._state.hasState(Renderable::RENDERABLE_STATE_DIRTY))
             {
-                const ModelBundle::ModelLayout& modelInfo = _model_bundle->ensureModelLayout(s._type);
+                const ModelBundle::ModelLayout& modelInfo = _model_bundle->ensureModelLayout(snapshot._type);
                 const Metrics& metrics = modelInfo._model->bounds();
                 VertexWriter writer = buf.makeDividedVertexWriter(renderRequest, 1, offset, 1);
                 writer.next();
-                writer.write(MatrixUtil::translate(M4::identity(), s._position) * MatrixUtil::scale(s._transform.toMatrix(), toScale(s._size, metrics)) * j.globalTransform());
-                ByteArray::Borrowed divided = s._varyings.getDivided(1)._content;
+                writer.write(MatrixUtil::translate(M4::identity(), snapshot._position) * MatrixUtil::scale(snapshot._transform.toMatrix(), toScale(snapshot._size, metrics)) * j.globalTransform());
+                ByteArray::Borrowed divided = snapshot._varyings.getDivided(1)._content;
                 if(divided.length() > sizeof(M4))
                     writer.write(divided.buf() + sizeof(M4), divided.length() - sizeof(M4), sizeof(M4));
             }
@@ -193,9 +188,10 @@ void RCCMultiDrawElementsIndirect::reloadIndirectCommands(const RenderLayerSnaps
     size_t offset = 0;
     _indirect_cmds.clear();
     _model_instances.clear();
-    for(const Renderable::Snapshot& i : snapshot._items)
+    for(const RenderLayerSnapshot::SnapshotWithState& i : snapshot._items)
     {
-        const ModelBundle::ModelLayout& modelLayout = _model_bundle->ensureModelLayout(i._type);
+        int32_t type = i._snapshot._type;
+        const ModelBundle::ModelLayout& modelLayout = _model_bundle->ensureModelLayout(type);
         ModelInstance& modelInstance = _model_instances[offset];
         modelInstance = ModelInstance(offset, modelLayout);
         for(const ModelBundle::NodeLayout& j : modelLayout._node_layouts)
@@ -204,7 +200,7 @@ void RCCMultiDrawElementsIndirect::reloadIndirectCommands(const RenderLayerSnaps
             for(const sp<Mesh>& k : j._node->meshes())
             {
                 const ModelBundle::MeshLayout& meshLayout = modelLayout._mesh_layouts.at(k->id());
-                IndirectCmds& modelIndirect = _indirect_cmds[static_cast<uint64_t>(i._type) << 32 | k->id()];
+                IndirectCmds& modelIndirect = _indirect_cmds[static_cast<uint64_t>(type) << 32 | k->id()];
                 if(modelIndirect._node_instances.empty())
                     modelIndirect._command = {static_cast<uint32_t>(meshLayout._mesh->indices().size()), 0, static_cast<uint32_t>(meshLayout._index_offset), static_cast<uint32_t>(modelLayout._vertex_offset), 0};
 

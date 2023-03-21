@@ -18,6 +18,7 @@ class DrawingBuffer;
 class DrawingContext;
 class Emitter;
 class Framebuffer;
+class GraphicsBufferAllocator;
 class GraphicsContext;
 class Layer;
 class MaterialBundle;

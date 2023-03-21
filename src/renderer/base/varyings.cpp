@@ -3,7 +3,7 @@
 #include "core/ark.h"
 #include "core/base/allocator.h"
 #include "core/base/bean_factory.h"
-#include "core/inf/input.h"
+#include "core/inf/uploader.h"
 #include "core/inf/variable.h"
 #include "core/impl/writable/writable_memory.h"
 #include "core/util/holder_util.h"
@@ -47,7 +47,7 @@ Box Varyings::getProperty(const String& name) const
     return iter->second;
 }
 
-void Varyings::setSlotInput(const String& name, sp<Input> input)
+void Varyings::setSlotInput(const String& name, sp<Uploader> input)
 {
     const auto iter = _slots.find(name);
     if(iter == _slots.end())
@@ -154,7 +154,7 @@ Varyings::Snapshot Varyings::snapshot(const PipelineInput& pipelineInput, Alloca
 }
 
 Varyings::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _input_builders(factory.makeBuilderList<Input, InputBuilder>(manifest, "varying"))
+    : _input_builders(factory.makeBuilderList<Uploader, InputBuilder>(manifest, "varying"))
 {
 }
 
@@ -169,13 +169,13 @@ sp<Varyings> Varyings::BUILDER::build(const Scope& args)
     return varyings;
 }
 
-Varyings::Slot::Slot(sp<Input> input, uint32_t divisor, int32_t offset)
+Varyings::Slot::Slot(sp<Uploader> input, uint32_t divisor, int32_t offset)
     : _input(std::move(input)), _divisor(divisor), _offset(offset)
 {
 }
 
 Varyings::BUILDER::InputBuilder::InputBuilder(BeanFactory& factory, const document& manifest)
-    : _name(Documents::ensureAttribute(manifest, Constants::Attributes::NAME)), _input(factory.ensureBuilderByTypeValue<Input>(Documents::ensureAttribute(manifest, Constants::Attributes::TYPE),
+    : _name(Documents::ensureAttribute(manifest, Constants::Attributes::NAME)), _input(factory.ensureBuilderByTypeValue<Uploader>(Documents::ensureAttribute(manifest, Constants::Attributes::TYPE),
                                                                                                                                Documents::ensureAttribute(manifest, Constants::Attributes::VALUE)))
 {
 }

@@ -11,11 +11,11 @@ namespace ark {
 class InputV4f {
 public:
 //  [[plugin::builder::by-value("v4f")]]
-    class BUILDER : public Builder<Input> {
+    class BUILDER : public Builder<Uploader> {
     public:
         BUILDER(BeanFactory& factory, const String& value);
 
-        virtual sp<Input> build(const Scope& args) override;
+        virtual sp<Uploader> build(const Scope& args) override;
 
     private:
         sp<Builder<Vec4>> _vec4;

@@ -1,11 +1,11 @@
-#include "core/impl/input/input_repeat.h"
+#include "core/impl/uploader/input_repeat.h"
 
 #include "core/impl/writable/writable_with_offset.h"
 
 namespace ark {
 
-InputRepeat::InputRepeat(sp<Input> delegate, size_t length, size_t stride)
-    : Input(length * (stride ? stride : delegate->size())), _delegate(std::move(delegate)), _length(length), _stride(stride ? stride : _delegate->size())
+InputRepeat::InputRepeat(sp<Uploader> delegate, size_t length, size_t stride)
+    : Uploader(length * (stride ? stride : delegate->size())), _delegate(std::move(delegate)), _length(length), _stride(stride ? stride : _delegate->size())
 {
     ASSERT(_stride >= _delegate->size());
 }

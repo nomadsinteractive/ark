@@ -2,14 +2,9 @@
 
 namespace ark {
 
-IDHeap::IDHeap(size_t heapSize, size_t heapSizeL1, size_t chunkSizeL1)
+IDHeap::IDHeap(size_t heapSize)
+    : _heap(IDMemory(0, heapSize))
 {
-    CHECK(heapSize != 0 && heapSizeL1 <= heapSize && (heapSizeL1 == 0 || (chunkSizeL1 != 0 && chunkSizeL1 <= heapSizeL1)), "Illegal heap creating arugments, heap_size: %zu, heap_size_l1: %zu, chunk_size_l1: %zu", heapSize, heapSizeL1, chunkSizeL1);
-    size_t heapSizeL2 = heapSize - heapSizeL1;
-    if(heapSizeL1 > 0)
-        _heap.extend(IDMemory(0, heapSizeL1), sp<HeapType::L1>::make(chunkSizeL1));
-    if(heapSizeL2 > 0)
-        _heap.extend(IDMemory(heapSizeL1, heapSize), sp<HeapType::L2>::make());
 }
 
 size_t IDHeap::allocate(size_t size, size_t alignment)

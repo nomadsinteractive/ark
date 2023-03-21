@@ -26,12 +26,12 @@ TilemapLayer::TilemapLayer(sp<Tileset> tileset, String name, uint32_t colCount, 
 {
 }
 
-bool TilemapLayer::preSnapshot(const RenderRequest& renderRequest, LayerContext& lc)
+bool TilemapLayer::preSnapshot(const RenderRequest& renderRequest, LayerContext& lc, RenderLayerSnapshot& output)
 {
-    return _stub->preSnapshot(renderRequest, lc);
+    return _stub->preSnapshot(renderRequest, lc, output);
 }
 
-void TilemapLayer::snapshot(const RenderRequest& renderRequest, const LayerContext& lc, RenderLayerSnapshot& output)
+void TilemapLayer::snapshot(const RenderRequest& renderRequest, LayerContext& lc, RenderLayerSnapshot& output)
 {
     _stub->snapshot(renderRequest, lc, output);
 }
@@ -231,7 +231,7 @@ TilemapLayer::Stub::Stub(size_t colCount, size_t rowCount, sp<Tileset> tileset, 
 {
 }
 
-bool TilemapLayer::Stub::preSnapshot(const RenderRequest& renderRequest, LayerContext& lc)
+bool TilemapLayer::Stub::preSnapshot(const RenderRequest& renderRequest, LayerContext& lc, RenderLayerSnapshot& output)
 {
     bool needsReload = _timestamp.update(renderRequest.timestamp());
     for(LayerTile& i : _layer_tiles)
@@ -242,6 +242,7 @@ bool TilemapLayer::Stub::preSnapshot(const RenderRequest& renderRequest, LayerCo
             if(i._state.hasState(Renderable::RENDERABLE_STATE_DISPOSED))
             {
                 needsReload = true;
+                output.addDisposedState(lc, &i);
                 i._renderable = nullptr;
             }
         }
@@ -249,11 +250,11 @@ bool TilemapLayer::Stub::preSnapshot(const RenderRequest& renderRequest, LayerCo
     return needsReload;
 }
 
-void TilemapLayer::Stub::snapshot(const RenderRequest& renderRequest, const LayerContext& lc, RenderLayerSnapshot& output)
+void TilemapLayer::Stub::snapshot(const RenderRequest& renderRequest, LayerContext& lc, RenderLayerSnapshot& output)
 {
     const PipelineInput& pipelineInput = output.pipelineInput();
     const bool visible = lc._visible.val();
-    const bool needsReload = lc._position_changed || lc._render_done != visible || output.needsReload();
+    const bool needsReload = lc._position_changed || lc._render_done != visible;
     Varyings::Snapshot defaultVaryingsSnapshot = lc._varyings ? lc._varyings->snapshot(pipelineInput, renderRequest.allocator()) : Varyings::Snapshot();
 
     float tileWidth = _tileset->tileWidth(), tileHeight = _tileset->tileWidth();
@@ -273,9 +274,11 @@ void TilemapLayer::Stub::snapshot(const RenderRequest& renderRequest, const Laye
                     state.setState(Renderable::RENDERABLE_STATE_DIRTY, true);
                 if(state.hasState(Renderable::RENDERABLE_STATE_VISIBLE))
                     state.setState(Renderable::RENDERABLE_STATE_VISIBLE, visible);
+                if(lc.ensureState(&tile))
+                    state.setState(Renderable::RENDERABLE_STATE_NEW, true);
                 Renderable::Snapshot snapshot = tile._renderable->snapshot(pipelineInput, renderRequest, posOff + V3(j * tileWidth + tileWidth / 2, dy, _zorder), state.stateBits());
-                snapshot.applyVaryings(defaultVaryingsSnapshot);
-                output.addSnapshot(lc, std::move(snapshot));
+                output.loadSnapshot(lc, snapshot, defaultVaryingsSnapshot);
+                output.addSnapshot(lc, std::move(snapshot), &tile);
             }
         }
     }

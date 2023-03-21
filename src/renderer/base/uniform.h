@@ -44,9 +44,9 @@ public:
         TYPE_COUNT
     };
 
-    Uniform(String name, String declaredType, Type type, size_t size, uint32_t length, sp<Input> input, int32_t binding = -1);
-    Uniform(String name, String type, uint32_t length, sp<Input> input, int32_t binding = -1);
-    Uniform(String name, Type type, uint32_t length, sp<Input> flatable, int32_t binding = -1);
+    Uniform(String name, String declaredType, Type type, size_t size, uint32_t length, sp<Uploader> input, int32_t binding = -1);
+    Uniform(String name, String type, uint32_t length, sp<Uploader> input, int32_t binding = -1);
+    Uniform(String name, Type type, uint32_t length, sp<Uploader> flatable, int32_t binding = -1);
     DEFAULT_COPY_AND_ASSIGN(Uniform);
 
     const String& name() const;
@@ -61,8 +61,8 @@ public:
 
     const String& declaredType() const;
 
-    const sp<Input>& input() const;
-    void setInput(const sp<Input>& flatable);
+    const sp<Uploader>& input() const;
+    void setInput(const sp<Uploader>& flatable);
 
     int32_t binding() const;
     void setBinding(int32_t binding);
@@ -76,7 +76,7 @@ private:
     Type _type;
     size_t _component_size;
     uint32_t _length;
-    sp<Input> _input;
+    sp<Uploader> _input;
     int32_t _binding;
 };
 

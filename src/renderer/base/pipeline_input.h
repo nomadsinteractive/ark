@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_BASE_PIPELINE_INPUT_H_
-#define ARK_RENDERER_BASE_PIPELINE_INPUT_H_
+#pragma once
 
 #include <map>
 #include <vector>
@@ -151,5 +150,3 @@ private:
 };
 
 }
-
-#endif

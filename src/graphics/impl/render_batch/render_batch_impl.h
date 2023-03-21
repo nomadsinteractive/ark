@@ -9,8 +9,8 @@ namespace ark {
 class RenderBatchImpl : public RenderBatch {
 public:
 
-    virtual bool preSnapshot(const RenderRequest& renderRequest, LayerContext& lc) override;
-    virtual void snapshot(const RenderRequest& renderRequest, const LayerContext& lc, RenderLayerSnapshot& output) override;
+    virtual bool preSnapshot(const RenderRequest& renderRequest, LayerContext& lc, RenderLayerSnapshot& output) override;
+    virtual void snapshot(const RenderRequest& renderRequest, LayerContext& lc, RenderLayerSnapshot& output) override;
 
 };
 

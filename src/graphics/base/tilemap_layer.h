@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_BASE_TILEMAP_LAYER_H_
-#define ARK_GRAPHICS_BASE_TILEMAP_LAYER_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/base/timestamp.h"
@@ -19,8 +18,8 @@ public:
 // [[script::bindings::auto]]
     TilemapLayer(sp<Tileset> tileset, String name, uint32_t colCount, uint32_t rowCount, sp<Vec3> position = nullptr, sp<Boolean> visible = nullptr, sp<CollisionFilter> collisionFilter = nullptr);
 
-    virtual bool preSnapshot(const RenderRequest& renderRequest, LayerContext& lc) override;
-    virtual void snapshot(const RenderRequest& renderRequest, const LayerContext& lc, RenderLayerSnapshot& output) override;
+    virtual bool preSnapshot(const RenderRequest& renderRequest, LayerContext& lc, RenderLayerSnapshot& output) override;
+    virtual void snapshot(const RenderRequest& renderRequest, LayerContext& lc, RenderLayerSnapshot& output) override;
 
     bool getSelectionTileRange(const Rect& aabb, V3& selectionPosition, RectI& selectionRange) const;
 
@@ -94,8 +93,8 @@ private:
         Stub(size_t colCount, size_t rowCount, sp<Tileset> tileset, SafeVar<Vec3> position, float zorder);
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Stub);
 
-        virtual bool preSnapshot(const RenderRequest& renderRequest, LayerContext& lc) override;
-        virtual void snapshot(const RenderRequest& renderRequest, const LayerContext& lc, RenderLayerSnapshot& output) override;
+        virtual bool preSnapshot(const RenderRequest& renderRequest, LayerContext& lc, RenderLayerSnapshot& output) override;
+        virtual void snapshot(const RenderRequest& renderRequest, LayerContext& lc, RenderLayerSnapshot& output) override;
 
         size_t _col_count;
         size_t _row_count;
@@ -122,5 +121,3 @@ private:
 };
 
 }
-
-#endif

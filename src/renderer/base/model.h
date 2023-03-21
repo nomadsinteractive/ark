@@ -19,12 +19,14 @@ namespace ark {
 class ARK_API Model {
 public:
     Model() = default;
-    Model(sp<Input> indices, sp<Vertices> vertices, sp<Metrics> bounds, sp<Metrics> occupies = nullptr);
+    Model(sp<Uploader> indices, sp<Vertices> vertices, sp<Metrics> bounds, sp<Metrics> occupies = nullptr);
     Model(std::vector<sp<Material>> materials, std::vector<sp<Mesh>> meshes, sp<Node> rootNode, sp<Metrics> bounds, sp<Metrics> occupies = nullptr);
     DEFAULT_COPY_AND_ASSIGN(Model);
 
-    const sp<Input>& indices() const;
+    const sp<Uploader>& indices() const;
     const sp<Vertices>& vertices() const;
+
+    element_index_t writeIndices(element_index_t* buf, element_index_t baseIndex = 0) const;
 
 //[[script::bindings::property]]
     const std::vector<sp<Material>>& materials() const;
@@ -79,7 +81,7 @@ public:
 
 
 private:
-    class InputMeshIndices : public Input {
+    class InputMeshIndices : public Uploader {
     public:
         InputMeshIndices(std::vector<sp<Mesh>> meshes);
 
@@ -109,7 +111,7 @@ private:
     };
 
 private:
-    sp<Input> _indices;
+    sp<Uploader> _indices;
     sp<Vertices> _vertices;
     sp<Metrics> _bounds;
     sp<Metrics> _occupies;

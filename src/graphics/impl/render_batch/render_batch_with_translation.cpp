@@ -12,14 +12,14 @@ RenderBatchWithTranslation::RenderBatchWithTranslation(sp<RenderBatch> renderBat
 {
 }
 
-bool RenderBatchWithTranslation::preSnapshot(const RenderRequest& renderRequest, LayerContext& lc)
+bool RenderBatchWithTranslation::preSnapshot(const RenderRequest& renderRequest, LayerContext& lc, RenderLayerSnapshot& output)
 {
     bool dirty = _translation->update(renderRequest.timestamp());
     lc._position += _translation->val();
-    return _wrapped->preSnapshot(renderRequest, lc) || dirty;
+    return _wrapped->preSnapshot(renderRequest, lc, output) || dirty;
 }
 
-void RenderBatchWithTranslation::snapshot(const RenderRequest& renderRequest, const LayerContext& lc, RenderLayerSnapshot& output)
+void RenderBatchWithTranslation::snapshot(const RenderRequest& renderRequest, LayerContext& lc, RenderLayerSnapshot& output)
 {
     _wrapped->snapshot(renderRequest, lc, output);
 }

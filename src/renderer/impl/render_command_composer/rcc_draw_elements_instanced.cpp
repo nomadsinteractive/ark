@@ -49,11 +49,12 @@ sp<RenderCommand> RCCDrawElementsInstanced::compose(const RenderRequest& renderR
     }
 
     VertexWriter writer = buf.makeDividedVertexWriter(renderRequest, snapshot._items.size(), 0, 1);
-    for(const Renderable::Snapshot& i : snapshot._items)
+    for(const RenderLayerSnapshot::SnapshotWithState& i : snapshot._items)
     {
+        const Renderable::Snapshot& snapshot = i._snapshot;
         writer.next();
-        writer.write(MatrixUtil::translate(M4::identity(), i._position) * MatrixUtil::scale(i._transform.toMatrix(), i._size));
-        ByteArray::Borrowed vm = i._varyings.getDivided(0)._content;
+        writer.write(MatrixUtil::translate(M4::identity(), snapshot._position) * MatrixUtil::scale(snapshot._transform.toMatrix(), snapshot._size));
+        ByteArray::Borrowed vm = snapshot._varyings.getDivided(0)._content;
         if(vm.length() > 0)
             writer.write(vm.buf() + sizeof(M4), vm.length() - sizeof(M4), sizeof(M4));
     }

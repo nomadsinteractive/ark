@@ -257,7 +257,7 @@ void Camera::updateViewProjection()
 }
 
 Camera::Holder::Holder(sp<Mat4> value)
-    : Input(sizeof(M4)), _matrix(std::move(value)) {
+    : Uploader(sizeof(M4)), _matrix(std::move(value)) {
 }
 
 void Camera::Holder::upload(Writable& buf)

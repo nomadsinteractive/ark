@@ -1,6 +1,6 @@
 #include "renderer/impl/snippet/snippet_ucolor.h"
 
-#include "core/impl/input/input_variable.h"
+#include "core/impl/uploader/input_variable.h"
 
 #include "renderer/base/pipeline_building_context.h"
 #include "renderer/base/pipeline_layout.h"

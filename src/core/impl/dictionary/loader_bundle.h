@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_IMPL_DICTIONARY_LOADER_BUNDLE_H_
-#define ARK_CORE_IMPL_DICTIONARY_LOADER_BUNDLE_H_
+#pragma once
 
 #include <map>
 
@@ -50,5 +49,3 @@ private:
 };
 
 }
-
-#endif

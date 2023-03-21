@@ -3,24 +3,24 @@
 #include "core/base/observer.h"
 #include "core/base/notifier.h"
 #include "core/inf/array.h"
-#include "core/inf/input.h"
+#include "core/inf/uploader.h"
 #include "core/inf/variable.h"
 #include "core/util/boolean_type.h"
 #include "core/util/strings.h"
 
 namespace ark {
 
-Uniform::Uniform(String name, String declaredType, Uniform::Type type, size_t size, uint32_t length, sp<Input> input, int32_t binding)
+Uniform::Uniform(String name, String declaredType, Uniform::Type type, size_t size, uint32_t length, sp<Uploader> input, int32_t binding)
     : _name(std::move(name)), _declared_type(std::move(declaredType)), _type(type), _component_size(size), _length(length), _input(std::move(input)), _binding(binding)
 {
 }
 
-Uniform::Uniform(String name, String type, uint32_t length, sp<Input> input, int32_t binding)
+Uniform::Uniform(String name, String type, uint32_t length, sp<Uploader> input, int32_t binding)
     : Uniform(std::move(name), std::move(type), toType(type), getComponentSize(toType(type)), length, std::move(input), binding)
 {
 }
 
-Uniform::Uniform(String name, Uniform::Type type, uint32_t length, sp<Input> input, int32_t binding)
+Uniform::Uniform(String name, Uniform::Type type, uint32_t length, sp<Uploader> input, int32_t binding)
     : Uniform(std::move(name), toDeclaredType(type), type, getComponentSize(type), length, std::move(input), binding)
 {
 }
@@ -189,12 +189,12 @@ const String& Uniform::declaredType() const
     return _declared_type;
 }
 
-const sp<Input>& Uniform::input() const
+const sp<Uploader>& Uniform::input() const
 {
     return _input;
 }
 
-void Uniform::setInput(const sp<Input>& flatable)
+void Uniform::setInput(const sp<Uploader>& flatable)
 {
     _input = flatable;
 }

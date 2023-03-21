@@ -43,12 +43,9 @@ Text::Text(sp<RenderLayer> renderLayer, sp<StringVar> content, sp<GlyphMaker> gl
     ASSERT(_render_layer);
 }
 
-std::vector<sp<RenderObject>> Text::contents() const
+const std::vector<sp<RenderObject>>& Text::contents() const
 {
-    std::vector<sp<RenderObject>> contents;
-    for(const auto& i : _content->_render_objects)
-        contents.push_back(i.first);
-    return contents;
+    return _content->_render_objects;
 }
 
 const sp<Vec3>& Text::position() const
@@ -198,7 +195,7 @@ void Text::Content::layoutContent()
     float flowx = boundary > 0 ? 0 : -_letter_spacing, flowy = getFlowY();
     flowy = doLayoutContent(_glyphs, flowx, flowy, boundary);
     for(size_t i = 0; i < _render_objects.size(); ++i)
-        _render_objects.at(i).first->setPosition(_glyphs.at(i)->toRenderObjectPosition());
+        _render_objects.at(i)->setPosition(_glyphs.at(i)->toRenderObjectPosition());
     _size->setWidth(flowx);
     _size->setHeight(flowy);
 }
@@ -370,25 +367,26 @@ Text::Content::Content(sp<StringVar> string, sp<GlyphMaker> glyphMaker, sp<Model
         setText(Strings::fromUTF8(*_string->val()));
 }
 
-bool Text::Content::preSnapshot(const RenderRequest& renderRequest, LayerContext& lc)
+bool Text::Content::preSnapshot(const RenderRequest& renderRequest, LayerContext& lc, RenderLayerSnapshot& output)
 {
+    if(_render_object_created.size() > 0)
+    {
+        lc.clear();
+        for(const sp<RenderObject>& i : _render_object_created)
+            lc.add(i);
+
+        _render_objects = std::move(_render_object_created);
+    }
+
     bool needsReload = update(renderRequest.timestamp()) || _needs_reload;
-    for(auto& [i, j] : _render_objects)
-        if(i)
-        {
-            Renderable::StateBits state = i->updateState(renderRequest);
-            if(state & Renderable::RENDERABLE_STATE_DISPOSED)
-                i = nullptr;
-            j = state;
-        }
     lc._position = _position.val();
     _needs_reload = false;
-    return needsReload;
+    return lc.doPreSnapshot(renderRequest, output) || needsReload;
 }
 
-void Text::Content::snapshot(const RenderRequest& renderRequest, const LayerContext& lc, RenderLayerSnapshot& output)
+void Text::Content::snapshot(const RenderRequest& renderRequest, LayerContext& lc, RenderLayerSnapshot& output)
 {
-    lc.doSnapshot(_render_objects, renderRequest, output);
+    lc.doSnapshot(renderRequest, output);
 }
 
 SafeVar<Vec3>& Text::Content::position()
@@ -398,10 +396,7 @@ SafeVar<Vec3>& Text::Content::position()
 
 void Text::Content::setRenderObjects(std::vector<sp<RenderObject>> renderObjects)
 {
-    _needs_reload = true;
-    _render_objects = std::vector<std::pair<sp<RenderObject>, Renderable::State>>(renderObjects.size());
-    for(size_t i = 0; i < renderObjects.size(); ++i)
-        _render_objects[i].first = std::move(renderObjects[i]);
+    _render_object_created = std::move(renderObjects);
 }
 
 }

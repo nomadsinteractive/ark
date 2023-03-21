@@ -31,7 +31,7 @@ void VKBuffer::upload(GraphicsContext& /*graphicsContext*/)
 {
 }
 
-void VKBuffer::uploadBuffer(GraphicsContext& graphicsContext, Input& input)
+void VKBuffer::uploadBuffer(GraphicsContext& graphicsContext, Uploader& input)
 {
     ensureSize(graphicsContext, input.size());
 //TODO: Copy every strips instead of copying the whole buffer

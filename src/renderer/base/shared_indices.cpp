@@ -1,7 +1,7 @@
 #include "renderer/base/shared_indices.h"
 
 #include "core/impl/writable/writable_memory.h"
-#include "core/inf/input.h"
+#include "core/inf/uploader.h"
 
 #include "renderer/base/render_controller.h"
 
@@ -9,10 +9,10 @@ namespace ark {
 
 namespace {
 
-class Concat : public Input {
+class Concat : public Uploader {
 public:
     Concat(size_t primitiveCount, size_t vertexCount, std::vector<element_index_t> indices)
-        : Input(primitiveCount * indices.size() * sizeof(element_index_t)), _primitive_count(primitiveCount), _vertex_count(vertexCount), _indices(std::move(indices)) {
+        : Uploader(primitiveCount * indices.size() * sizeof(element_index_t)), _primitive_count(primitiveCount), _vertex_count(vertexCount), _indices(std::move(indices)) {
     }
 
     virtual void upload(Writable& uploader) override {
@@ -42,10 +42,10 @@ private:
 
 };
 
-class Degenerate : public Input {
+class Degenerate : public Uploader {
 public:
     Degenerate(size_t primitiveCount, size_t vertexCount, std::vector<element_index_t> indices)
-        : Input(((indices.size() + 2) * primitiveCount - 2) *  sizeof(element_index_t)), _primitive_count(primitiveCount), _vertex_count(vertexCount), _indices(std::move(indices)) {
+        : Uploader(((indices.size() + 2) * primitiveCount - 2) *  sizeof(element_index_t)), _primitive_count(primitiveCount), _vertex_count(vertexCount), _indices(std::move(indices)) {
     }
 
     virtual void upload(Writable& uploader) override {
@@ -97,7 +97,7 @@ Buffer::Snapshot SharedIndices::snapshot(RenderController& renderController, siz
     if(_primitive_count < primitiveCount)
     {
         _primitive_count = primitiveCount + reservedIfInsufficient;
-        sp<Input> input = _degenerate ? sp<Input>::make<Degenerate>(_primitive_count, _vertex_count, _boiler_plate) : sp<Input>::make<Concat>(_primitive_count, _vertex_count, _boiler_plate);
+        sp<Uploader> input = _degenerate ? sp<Uploader>::make<Degenerate>(_primitive_count, _vertex_count, _boiler_plate) : sp<Uploader>::make<Concat>(_primitive_count, _vertex_count, _boiler_plate);
         DCHECK(input && input->size() >= size, "Making Input failed, primitive-count: %d, input-size: %d, required-size: %d", _primitive_count, input ? input->size() : 0, size);
         renderController.uploadBuffer(_buffer, std::move(input), RenderController::US_RELOAD);
     }

@@ -1,7 +1,7 @@
 #include "renderer/vulkan/base/vk_pipeline.h"
 
 #include "core/base/observer.h"
-#include "core/impl/input/input_object_array.h"
+#include "core/impl/uploader/uploader_array.h"
 
 #include "renderer/base/buffer.h"
 #include "renderer/base/compute_context.h"
@@ -225,7 +225,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
     for(const sp<PipelineInput::UBO>& i : bindings.input()->ubos())
     {
         sp<VKBuffer> ubo = sp<VKBuffer>::make(_renderer, _recycler, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-        ubo->uploadBuffer(graphicsContext, sp<InputObjectArray<uint8_t>>::make(std::vector<uint8_t>(i->size(), 0)));
+        ubo->uploadBuffer(graphicsContext, sp<UploaderArray<uint8_t>>::make(std::vector<uint8_t>(i->size(), 0)));
         binding = std::max(binding, i->binding());
         writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
                                           _descriptor_set,

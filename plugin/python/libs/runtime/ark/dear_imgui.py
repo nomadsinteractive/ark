@@ -1,6 +1,6 @@
 from typing import Optional, Union
 
-from ark import Renderer, Boolean, Observer, String, Integer
+from ark import Renderer, Boolean, Observer, String, Integer, Numeric
 
 
 class Widget:
@@ -42,6 +42,12 @@ class WidgetBuilder:
         pass
 
     def button(self, title: str) -> Observer:
+        pass
+
+    def slider_int(self, label: str, value: Integer, min_value: int, max_value: int, prompt_format: str = '%d'):
+        pass
+
+    def slider_float(self, label: str, value: Numeric, min_value: float, max_value: float, prompt_format: str = '%.3f'):
         pass
 
     def input_int(self, label: str, value: Integer, step: int = 1, step_fast: int = 100, flags: int = 0):

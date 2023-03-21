@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_IMPL_WRITABLE_WRITABLE_MEMORY_H_
-#define ARK_CORE_IMPL_WRITABLE_WRITABLE_MEMORY_H_
+#pragma once
 
 #include "core/inf/writable.h"
 
@@ -16,5 +15,3 @@ private:
 };
 
 }
-
-#endif

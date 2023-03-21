@@ -1,8 +1,7 @@
-#ifndef ARK_RENDERER_BASE_ANIMATION_INPUT_H_
-#define ARK_RENDERER_BASE_ANIMATION_INPUT_H_
+#pragma once
 
 #include "core/base/api.h"
-#include "core/inf/input.h"
+#include "core/inf/uploader.h"
 #include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
 
@@ -12,8 +11,8 @@ namespace ark {
 
 typedef std::vector<M4> AnimationFrame;
 
-//[[script::bindings::extends(Input)]]
-class ARK_API AnimationInput : public Input {
+//[[script::bindings::extends(Uploader)]]
+class ARK_API AnimationInput : public Uploader {
 public:
     AnimationInput(sp<Numeric> duration, uint32_t durationInTicks, const sp<Table<String, uint32_t>>& node, const sp<std::vector<AnimationFrame>>& animationFrames);
 
@@ -62,5 +61,3 @@ private:
 };
 
 }
-
-#endif

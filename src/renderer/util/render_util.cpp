@@ -1,7 +1,7 @@
 #include "renderer/util/render_util.h"
 
 #include "core/types/shared_ptr.h"
-#include "core/util/input_type.h"
+#include "core/util/uploader_type.h"
 
 #include "graphics/base/rect.h"
 #include "graphics/base/v3.h"
@@ -100,7 +100,7 @@ Model RenderUtil::makeUnitNinePatchTriangleStripsModel()
 
 Model RenderUtil::makeUnitNinePatchQuadsModel()
 {
-    return Model(InputType::makeElementIndexInput(std::initializer_list<element_index_t>({0, 2, 1, 2, 3, 1, 6, 8, 7, 8, 9, 7, 12, 14, 13, 14, 15, 13, 18, 20, 19, 20, 21, 19, 24, 26, 25, 26, 27, 25, 30, 32, 31, 32, 33, 31, 36, 38, 37, 38, 39, 37, 42, 44, 43, 44, 45, 43, 48, 50, 49, 50, 51, 49})), sp<VerticesNinePatchQuads>::make(), sp<Metrics>::make(Metrics::unit()));
+    return Model(InputType::makeElementIndexInput(std::initializer_list<element_index_t>({0, 2, 1, 2, 3, 1, 4, 6, 5, 6, 7, 5, 8, 10, 9, 10, 11, 9, 12, 14, 13, 14, 15, 13, 16, 18, 17, 18, 19, 17, 20, 22, 21, 22, 23, 21, 24, 26, 25, 26, 27, 25, 28, 30, 29, 30, 31, 29, 32, 34, 33, 34, 35, 33})), sp<VerticesNinePatchQuads>::make(), sp<Metrics>::make(Metrics::unit()));
 }
 
 Model RenderUtil::makeUnitPointModel()

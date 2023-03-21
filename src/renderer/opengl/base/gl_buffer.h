@@ -17,12 +17,12 @@ public:
 
     virtual uint64_t id() override;
     virtual void upload(GraphicsContext& graphicsContext) override;
-    virtual void uploadBuffer(GraphicsContext& graphicsContext, Input& input) override;
+    virtual void uploadBuffer(GraphicsContext& graphicsContext, Uploader& input) override;
     virtual void downloadBuffer(GraphicsContext& graphicsContext, size_t offset, size_t size, void* ptr) override;
     virtual ResourceRecycleFunc recycle() override;
 
 private:
-    void doUpload(GraphicsContext& graphicsContext, Input& input);
+    void doUpload(GraphicsContext& graphicsContext, Uploader& input);
 
 private:
     GLenum _type;

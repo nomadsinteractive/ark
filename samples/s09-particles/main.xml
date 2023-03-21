@@ -27,6 +27,5 @@
 		<renderer class="render-pass" mode="points" shader="@s002" vertex-buffer="@ssbo" draw-count="$pc"/>
 		<renderer ref="@imgui"/>
 		<renderer ref="@pre:fps-counter"/>
-		<event-listener ref="@imgui"/>
 	</arena>
 </resources>

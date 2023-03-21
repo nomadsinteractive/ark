@@ -43,18 +43,18 @@ sp<RenderCommand> RCCDrawElements::compose(const RenderRequest& renderRequest, R
     if(snapshot.needsReload())
     {
         VertexWriter writer = buf.makeVertexWriter(renderRequest, verticesLength * snapshot._items.size(), 0);
-        for(const Renderable::Snapshot& i : snapshot._items)
-            i._model->writeRenderable(writer, i);
+        for(const RenderLayerSnapshot::SnapshotWithState& i : snapshot._items)
+            i._snapshot._model->writeRenderable(writer, i._snapshot);
     }
     else
     {
         size_t offset = 0;
-        for(const Renderable::Snapshot& i : snapshot._items)
+        for(const RenderLayerSnapshot::SnapshotWithState& i : snapshot._items)
         {
-            if(i._state.hasState(Renderable::RENDERABLE_STATE_DIRTY))
+            if(i._snapshot._state.hasState(Renderable::RENDERABLE_STATE_DIRTY))
             {
                 VertexWriter writer = buf.makeVertexWriter(renderRequest, verticesLength, offset);
-                i._model->writeRenderable(writer, i);
+                i._snapshot._model->writeRenderable(writer, i._snapshot);
             }
             offset += verticesLength;
         }

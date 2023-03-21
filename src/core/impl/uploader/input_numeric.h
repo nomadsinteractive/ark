@@ -10,11 +10,11 @@ namespace ark {
 class InputNumeric {
 public:
 //  [[plugin::builder::by-value("float")]]
-    class BUILDER : public Builder<Input> {
+    class BUILDER : public Builder<Uploader> {
     public:
         BUILDER(BeanFactory& factory, const String& value);
 
-        virtual sp<Input> build(const Scope& args) override;
+        virtual sp<Uploader> build(const Scope& args) override;
 
     private:
         sp<Builder<Numeric>> _numeric;

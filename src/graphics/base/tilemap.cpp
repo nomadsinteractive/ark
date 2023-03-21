@@ -258,18 +258,18 @@ Tilemap::Stub::Stub()
 {
 }
 
-bool Tilemap::Stub::preSnapshot(const RenderRequest& renderRequest, LayerContext& lc)
+bool Tilemap::Stub::preSnapshot(const RenderRequest& renderRequest, LayerContext& lc, RenderLayerSnapshot& output)
 {
     bool needReload = _need_reload;
     _need_reload = false;
     if(_scrollable)
         _scrollable->cull();
     for(TilemapLayer& i : _layers)
-        needReload = i.preSnapshot(renderRequest, lc) || needReload;
+        needReload = i.preSnapshot(renderRequest, lc, output) || needReload;
     return needReload;
 }
 
-void Tilemap::Stub::snapshot(const RenderRequest& renderRequest, const LayerContext& lc, RenderLayerSnapshot& output)
+void Tilemap::Stub::snapshot(const RenderRequest& renderRequest, LayerContext& lc, RenderLayerSnapshot& output)
 {
     for(TilemapLayer& i : _layers)
         i.snapshot(renderRequest, lc, output);

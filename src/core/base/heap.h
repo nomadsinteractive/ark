@@ -1,7 +1,8 @@
-#ifndef ARK_CORE_BASE_HEAP_H_
-#define ARK_CORE_BASE_HEAP_H_
+#pragma once
 
+#include <execution>
 #include <limits>
+#include <list>
 #include <map>
 #include <queue>
 
@@ -15,412 +16,320 @@ namespace ark {
 
 template<typename MemoryType, typename SizeType, size_t kAlignment = sizeof(void*)> class Heap {
 public:
-    typedef decltype(std::declval<MemoryType>().begin()) PtrType;
-
-    static constexpr SizeType npos = std::numeric_limits<SizeType>::max();
-
-    class Allocator {
-    public:
-        virtual ~Allocator() = default;
-
-        virtual void initialize(SizeType size) = 0;
-        virtual std::pair<SizeType, SizeType> allocate(SizeType size, SizeType alignment) = 0;
-        virtual SizeType free(SizeType offset) = 0;
-    };
-
-    class L1 : public Allocator {
-    private:
-        typedef SizeType Chunk;
-
-    public:
-        L1(SizeType maxChunkLength)
-            : _max_chunk_length(maxChunkLength) {
-            DCHECK_WARN(Math::isPOT(maxChunkLength), "maxChunkLength(%d) should be POT", _max_chunk_length);
-        }
-
-        virtual void initialize(SizeType size) override {
-            _trie.clear();
-            _trie.resize(getLevel(_max_chunk_length) + 1);
-
-            _chunks.clear();
-
-            _length = size / kAlignment;
-            _allocated = 0;
-
-        }
-
-        virtual std::pair<SizeType, SizeType> allocate(SizeType size, SizeType alignment) override {
-            SizeType length = size / kAlignment;
-            if(alignment > kAlignment || length > _max_chunk_length)
-                return std::make_pair(npos, 0);
-
-            Chunk chunk;
-            uint32_t level = getLevel(length);
-            uint32_t aquired = level;
-
-            length = static_cast<SizeType>(1) << level;
-
-            if(aquire(aquired, chunk)) {
-                if(aquired != level)
-                    split(chunk, aquired, level);
-                return std::make_pair(chunk * kAlignment, (static_cast<SizeType>(1) << level) * kAlignment);
-            }
-            else {
-                if(_length > (_allocated + length)) {
-                    _chunks[_allocated] = true;
-
-                    SizeType offset = _allocated * kAlignment;
-                    _allocated += length;
-                    return std::make_pair(offset, length * kAlignment);
-                }
-            }
-            return std::make_pair(npos, 0);
-        }
-
-        virtual SizeType free(SizeType ptr) override {
-            SizeType offset = ptr / kAlignment;
-            auto iter = _chunks.find(offset);
-            DCHECK(iter != _chunks.end() && iter->second, "Invalid offset(%d) being freed", offset);
-            const auto next = std::next(iter);
-
-            SizeType freed = (next == _chunks.end() ? _allocated : next->first)- iter->first;
-            uint32_t level = getLevel(freed);
-            iter->second = false;
-            push(level, offset);
-            return freed * kAlignment;
-        }
-
-    private:
-        bool aquire(uint32_t& level, Chunk& chunk) {
-            for(; level < _trie.size(); ++level) {
-                std::queue<Chunk>& queue = _trie[level];
-                if(!queue.empty()) {
-                    chunk = queue.front();
-                    queue.pop();
-
-                    auto iter = _chunks.find(chunk);
-                    DCHECK(iter != _chunks.end() && !iter->second, "Invalid chunk(%d)", chunk);
-                    iter->second = true;
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        void split(const Chunk& chunk, uint32_t chunkLevel, uint32_t toLevel) {
-            for(uint32_t i = chunkLevel; i != toLevel; --i) {
-                SizeType offset = chunk + (static_cast<SizeType>(1) << (i - 1));
-                push(i - 1, offset);
-                _chunks[offset] = false;
-            }
-        }
-
-        uint32_t getLevel(SizeType length) const {
-            for(uint32_t i = 0; i < sizeof(SizeType) * 8; ++i)
-                if(length <= (static_cast<SizeType>(1) << i))
-                    return i;
-            return 0;
-        }
-
-        void push(uint32_t level, const Chunk& chunk) {
-            DCHECK(level < _trie.size(), "Illegal level(%d)", level);
-            _trie[level].push(chunk);
-        }
-
-    private:
-        SizeType _max_chunk_length;
-        SizeType _length;
-
-        SizeType _allocated;
-
-        std::vector<std::queue<Chunk>> _trie;
-        std::map<SizeType, bool> _chunks;
-    };
-
-    class L2 : public Allocator {
-    private:
-        enum FragmentState {
-            FRAGMENT_STATE_UNUSED,
-            FRAGMENT_STATE_ALLOCATED,
-            FRAGMENT_STATE_FREEZED,
-            FRAGMENT_STATE_DELETED
-        };
-
-        struct Fragment {
-            Fragment(FragmentState state, SizeType offset, SizeType size)
-                : _state(state), _offset(offset), _size(size) {
-            }
-            Fragment(const Fragment& other) = default;
-
-            Fragment split(const sp<Fragment>& self, SizeType position, SizeType size, L2& l2) {
-                DCHECK(_size >= position + size && _state == FRAGMENT_STATE_UNUSED, "Heap corrupted: size: %d, position: %d, fragment-state: %d, fragment-size: %d", size, position, _state, _size);
-
-                const auto iter = l2._fragments.find(_offset);
-                DCHECK(iter != l2._fragments.end(), "Heap corrupted: Fragment with offset(%d) not found", _offset);
-
-                SizeType remaining = (_size - size - position);
-                if(remaining != 0) {
-                    const auto next = std::next(iter);
-                    if(next == l2._fragments.end() || next->second->_state != FRAGMENT_STATE_UNUSED)
-                        l2.addFragment(FRAGMENT_STATE_UNUSED, _offset + position + size, remaining);
-                    else {
-                        const sp<Fragment>& nextFragment = next->second;
-                        nextFragment->_state = FRAGMENT_STATE_DELETED;
-                        l2.addFragment(FRAGMENT_STATE_UNUSED, _offset + position + size, remaining + nextFragment->_size);
-                        l2._fragments.erase(next);
-                    }
-                }
-
-                if(position == 0) {
-                    _size = size;
-                    _state = FRAGMENT_STATE_ALLOCATED;
-                    return *this;
-                } else {
-                    const auto prev = iter != l2._fragments.begin() ? std::prev(iter) : l2._fragments.end();
-                    if(prev == l2._fragments.end() || prev->second->_state != FRAGMENT_STATE_UNUSED) {
-                        _size = position;
-                    }
-                    else {
-                        const sp<Fragment>& prevFragment = prev->second;
-                        prevFragment->_state = FRAGMENT_STATE_DELETED;
-                        _size = position + prevFragment->_size;
-                        _offset = prevFragment->_offset;
-                        l2._fragments[_offset] = self;
-                    }
-                    l2.ensureAllocator(_size).push(self);
-                    return *l2.addFragment(FRAGMENT_STATE_ALLOCATED, _offset + position, size);
-                }
-            }
-
-            void merge(const sp<Fragment>& other) {
-                ASSERT(_state == FRAGMENT_STATE_UNUSED && other->_state == FRAGMENT_STATE_UNUSED);
-                CHECK(_offset + _size == other->_offset, "Cannot merge non-adjacent fragments: size: %d, offset: %d, next-fragment-offset: %d", _size, _offset, other->_offset);
-                other->_state = FRAGMENT_STATE_DELETED;
-                _size += other->_size;
-            }
-
-            FragmentState _state;
-            SizeType _offset;
-            SizeType _size;
-        };
-
-        struct FragmentQueue {
-            SizeType _size;
-            std::queue<WeakPtr<Fragment>> _queue;
-
-            FragmentQueue()
-                : _size(0) {
-            }
-
-            bool empty() const {
-                return _queue.empty();
-            }
-
-            sp<Fragment> pop() {
-                const sp<Fragment> fragment = _queue.front().lock();
-                _queue.pop();
-                return fragment;
-            }
-
-            void push(sp<Fragment> fragment) {
-                CHECK(fragment->_size >= _size, "Allocator won't accept fragment(%d) which is lesser than its size(%d)", fragment->_size, _size);
-                _queue.push(std::move(fragment));
-            }
-        };
-
-        typedef BitwiseTrie<SizeType, FragmentQueue> FragmentTrie;
-
-    public:
-
-        virtual void initialize(SizeType size) override {
-            _fragments.clear();
-            _fragment_trie.clear();
-            addFragment(FRAGMENT_STATE_UNUSED, 0, size);
-        }
-
-        virtual std::pair<SizeType, SizeType> allocate(SizeType size, SizeType alignment) override {
-            SizeType sizeNeeded = size + (alignment > kAlignment ? alignment : 0);
-            FragmentQueue* allocator = _fragment_trie.find(sizeNeeded);
-            while(allocator) {
-                sp<Fragment> fragment;
-                while(!allocator->empty()) {
-                    fragment = allocator->pop();
-                    if(fragment && fragment->_state == FRAGMENT_STATE_UNUSED) {
-                        Fragment splitted = fragment->split(fragment, findOptimizedPosition(fragment, size, alignment), size, *this);
-                        return std::make_pair(splitted._offset, splitted._size);
-                    }
-                }
-                _fragment_trie.remove(allocator->_size);
-                allocator = _fragment_trie.find(sizeNeeded);
-            }
-            CHECK_WARN(checkFragments(sizeNeeded), "Unallocated candidate block which's in not in Allocator but found in fragments, something might go wrong");
-            return std::make_pair(npos, 0);
-        }
-
-        virtual SizeType free(SizeType offset) override {
-            auto iter = _fragments.find(offset);
-            CHECK(iter != _fragments.end(), "Invalid offset(%d) being freed", offset);
-
-            sp<Fragment> fragment = iter->second;
-            SizeType freed = fragment->_size;
-            ASSERT(fragment->_state == FRAGMENT_STATE_ALLOCATED);
-            fragment->_state = FRAGMENT_STATE_UNUSED;
-
-            const auto previter = iter != _fragments.begin() ? std::prev(iter) : iter;
-            if(iter != _fragments.begin() && previter->second->_state == FRAGMENT_STATE_UNUSED) {
-                previter->second->merge(fragment);
-                fragment = previter->second;
-                iter = _fragments.erase(iter);
-            }
-            else
-                ++iter;
-
-            if(iter != _fragments.end() && iter->second->_state == FRAGMENT_STATE_UNUSED) {
-                fragment->merge(iter->second);
-                _fragments.erase(iter);
-            }
-
-            addFragment(FRAGMENT_STATE_UNUSED, fragment->_offset, fragment->_size);
-            return freed;
-        }
-
-    private:
-        bool checkFragments(SizeType size) {
-            SizeType offset = 0;
-            bool r = true;
-            for(const auto& i : _fragments) {
-                DCHECK(offset == i.first, "Fragments are not continuous");
-                r = r && !(size <= i.second->_size && i.second->_state == FRAGMENT_STATE_UNUSED);
-                offset += i.second->_size;
-            }
-            return r;
-        }
-
-        SizeType findOptimizedPosition(const Fragment& fragment, SizeType size, SizeType alignment) const {
-            if(size * 8 < fragment._size) {
-                SizeType p = align(fragment._offset + size * 3, alignment) - fragment._offset;
-                if(fragment._size - p >= size)
-                    return p;
-            }
-            return align(fragment._offset, alignment) - fragment._offset;
-        }
-
-        sp<Fragment> addFragment(FragmentState state, SizeType offset, SizeType size) {
-            sp<Fragment> fragment = sp<Fragment>::make(state, offset, size);
-            if(state == FRAGMENT_STATE_UNUSED)
-                ensureAllocator(size).push(fragment);
-            _fragments[offset] = fragment;
-            return fragment;
-        }
-
-        FragmentQueue& ensureAllocator(SizeType size) {
-            FragmentQueue* allocator = _fragment_trie.ensure(size);
-            DCHECK(allocator->_size == size || allocator->_size == 0, "Bad Allocator, size = %d, required-size: %d", allocator->_size, size);
-            allocator->_size = size;
-            return *allocator;
-        }
-
-    private:
-        FragmentTrie _fragment_trie;
-        std::map<SizeType, sp<Fragment>> _fragments;
-    };
-
-private:
-    struct Stub {
-        Stub(MemoryType memory, sp<Allocator> allocator)
-            : _memory(std::move(memory)), _size(static_cast<SizeType>(_memory.end() - _memory.begin())), _allocated(0), _allocator(std::move(allocator)) {
-            _allocator->initialize(_size);
-        }
-
-        SizeType allocated() const {
-            return _allocated + (_next ? _next->allocated() : 0);
-        }
-
-        SizeType available() const {
-            return _size - _allocated + (_next ? _next->available() : 0);
-        }
-
-        Optional<PtrType> allocate(SizeType size, SizeType alignment) {
-            const auto [offset, allocated] = _allocator->allocate(align(size, kAlignment), alignment);
-            if(offset != npos) {
-                _allocated += allocated;
-                return _memory.begin() + offset;
-            }
-            return _next ? _next->allocate(size, alignment) : Optional<PtrType>();
-        }
-
-        void free(PtrType ptr) {
-            if(ptr >= _memory.begin() && ptr < _memory.end()) {
-                SizeType offset = ptr - _memory.begin();
-                SizeType freed = _allocator->free(offset);
-                _allocated -= freed;
-            }
-            else {
-                DCHECK(_next, "We go throught all heaps but find no way to free it");
-                _next->free(ptr);
-            }
-        }
-
-        void extend(sp<Stub> other) {
-            if(_next)
-                _next->extend(std::move(other));
-            else
-                _next = std::move(other);
-        }
-
-        MemoryType _memory;
-
-        SizeType _size;
-        SizeType _allocated;
-
-        sp<Allocator> _allocator;
-
-        sp<Stub> _next;
+    enum FragmentState {
+        FRAGMENT_STATE_UNUSED,
+        FRAGMENT_STATE_ALLOCATED,
+        FRAGMENT_STATE_RESERVED
     };
 
 public:
-    Heap() = default;
-    Heap(MemoryType memory, sp<Allocator> allocator)
-        : _stub(sp<Stub>::make(std::move(memory), std::move(allocator))) {
-    }
-    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Heap);
+    typedef decltype(std::declval<MemoryType>().begin()) PtrType;
 
-    explicit operator bool() const {
-        return static_cast<bool>(_stub);
+    struct Fragment {
+        Fragment(FragmentState state, SizeType offset, SizeType size)
+            : _state(state), _offset(offset), _size(size) {
+        }
+        Fragment(const Fragment& other) = default;
+
+        void merge(const Fragment& other) {
+            ASSERT(_state == FRAGMENT_STATE_UNUSED && other._state == FRAGMENT_STATE_UNUSED);
+            CHECK(_offset + _size == other._offset, "Cannot merge non-adjacent fragments: size: %d, offset: %d, next-fragment-offset: %d", _size, _offset, other._offset);
+            _size += other._size;
+        }
+
+        FragmentState _state;
+        SizeType _offset;
+        SizeType _size;
+    };
+
+    struct FragmentQueue {
+        SizeType _size;
+        std::queue<WeakPtr<Fragment>> _queue;
+
+        FragmentQueue()
+            : _size(0) {
+        }
+
+        bool empty() const {
+            return _queue.empty();
+        }
+
+        sp<Fragment> pop() {
+            const sp<Fragment> fragment = _queue.front().lock();
+            _queue.pop();
+            return fragment;
+        }
+
+        void push(sp<Fragment> fragment) {
+            CHECK(fragment->_size >= _size, "Allocator won't accept fragment(%d) which is lesser than its size(%d)", fragment->_size, _size);
+            _queue.push(std::move(fragment));
+        }
+    };
+
+    typedef BitwiseTrie<SizeType, FragmentQueue> FragmentTrie;
+
+    class Strategy {
+    public:
+        virtual ~Strategy() = default;
+
+        virtual Optional<Fragment> allocate(Heap& heap, SizeType size, SizeType alignment) = 0;
+        virtual Optional<SizeType> free(Heap& heap, SizeType offset) = 0;
+        virtual void dispose(Heap& heap) = 0;
+    };
+
+private:
+    sp<Fragment> doSplit(const sp<Fragment>& fragment, SizeType position, SizeType size) {
+        DCHECK(fragment->_size >= position + size && fragment->_state == FRAGMENT_STATE_UNUSED, "Heap corrupted: size: %d, position: %d, fragment-state: %d, fragment-size: %d", size, position, fragment->_state, fragment->_size);
+
+        const auto iter = _fragments.find(fragment->_offset);
+        DCHECK(iter != _fragments.end(), "Heap corrupted: Fragment with offset(%d) not found", fragment->_offset);
+
+        SizeType remaining = (fragment->_size - size - position);
+        if(remaining != 0) {
+            const auto next = std::next(iter);
+            if(next == _fragments.end() || next->second->_state != FRAGMENT_STATE_UNUSED)
+                addFragment(FRAGMENT_STATE_UNUSED, fragment->_offset + position + size, remaining);
+            else {
+                const sp<Fragment>& nextFragment = next->second;
+                addFragment(FRAGMENT_STATE_UNUSED, fragment->_offset + position + size, remaining + nextFragment->_size);
+                _fragments.erase(next);
+            }
+        }
+
+        if(position == 0) {
+            fragment->_size = size;
+            fragment->_state = FRAGMENT_STATE_ALLOCATED;
+            return fragment;
+        } else {
+            const auto prev = iter != _fragments.begin() ? std::prev(iter) : _fragments.end();
+            if(prev == _fragments.end() || prev->second->_state != FRAGMENT_STATE_UNUSED) {
+                fragment->_size = position;
+            }
+            else {
+                const sp<Fragment>& prevFragment = prev->second;
+                fragment->_size = position + prevFragment->_size;
+                fragment->_offset = prevFragment->_offset;
+                _fragments.erase(prev);
+                _fragments[fragment->_offset] = fragment;
+            }
+            ensureFragmentQueue(fragment->_size).push(fragment);
+            return addFragment(FRAGMENT_STATE_ALLOCATED, fragment->_offset + position, size);
+        }
+    }
+
+    sp<Fragment> doAllocate(SizeType size, SizeType alignment) {
+        SizeType sizeNeeded = size + (alignment > kAlignment ? alignment : 0);
+        FragmentQueue* fragmentQueue = _fragment_trie.find(sizeNeeded);
+        while(fragmentQueue) {
+            sp<Fragment> fragment;
+            while(!fragmentQueue->empty()) {
+                fragment = fragmentQueue->pop();
+                if(fragment && fragment->_state == FRAGMENT_STATE_UNUSED) {
+                    return doSplit(fragment, findOptimizedPosition(fragment, size, alignment), size);
+                }
+            }
+            _fragment_trie.remove(fragmentQueue->_size);
+            fragmentQueue = _fragment_trie.find(sizeNeeded);
+        }
+        CHECK_WARN(checkFragments(sizeNeeded), "Unallocated candidate block which's in not in Allocator but found in fragments, something might go wrong");
+        return nullptr;
+    }
+
+    SizeType doFree(SizeType offset) {
+        auto iter = _fragments.find(offset);
+        CHECK(iter != _fragments.end(), "Invalid offset(%d) being freed", offset);
+
+        sp<Fragment> fragment = iter->second;
+        SizeType freed = fragment->_size;
+        ASSERT(fragment->_state == FRAGMENT_STATE_ALLOCATED);
+        fragment->_state = FRAGMENT_STATE_UNUSED;
+
+        const auto previter = iter != _fragments.begin() ? std::prev(iter) : iter;
+        if(iter != _fragments.begin() && previter->second->_state == FRAGMENT_STATE_UNUSED) {
+            previter->second->merge(fragment);
+            fragment = previter->second;
+            iter = _fragments.erase(iter);
+        }
+        else
+            ++iter;
+
+        if(iter != _fragments.end() && iter->second->_state == FRAGMENT_STATE_UNUSED) {
+            fragment->merge(iter->second);
+            _fragments.erase(iter);
+        }
+
+        addFragment(FRAGMENT_STATE_UNUSED, fragment->_offset, fragment->_size);
+        return freed;
+    }
+
+private:
+    bool checkFragments(SizeType size) {
+        SizeType offset = 0;
+        bool r = true;
+        for(const auto& i : _fragments) {
+            DCHECK(offset == i.first, "Fragments are not continuous");
+            r = r && !(size <= i.second->_size && i.second->_state == FRAGMENT_STATE_UNUSED);
+            offset += i.second->_size;
+        }
+        return r;
+    }
+
+    SizeType findOptimizedPosition(const Fragment& fragment, SizeType size, SizeType alignment) const {
+        if(size * 8 < fragment._size) {
+            SizeType p = align(fragment._offset + size * 3, alignment) - fragment._offset;
+            if(fragment._size - p >= size)
+                return p;
+        }
+        return align(fragment._offset, alignment) - fragment._offset;
+    }
+
+    sp<Fragment> addFragment(FragmentState state, SizeType offset, SizeType size) {
+        sp<Fragment> fragment = sp<Fragment>::make(state, offset, size);
+        if(state == FRAGMENT_STATE_UNUSED)
+            ensureFragmentQueue(size).push(fragment);
+        _fragments[offset] = fragment;
+        return fragment;
+    }
+
+    FragmentQueue& ensureFragmentQueue(SizeType size) {
+        FragmentQueue* fragementQueue = _fragment_trie.ensure(size);
+        DCHECK(fragementQueue->_size == size || fragementQueue->_size == 0, "Bad FragementQueue, size = %d, required-size: %d", fragementQueue->_size, size);
+        fragementQueue->_size = size;
+        return *fragementQueue;
+    }
+
+    class StrategyDefault : public Strategy {
+    public:
+        virtual Optional<Fragment> allocate(Heap& heap, SizeType size, SizeType alignment) {
+            sp<Fragment> fragment = heap.doAllocate(align(size, alignment), alignment);
+            return fragment ? Optional<Fragment>(*fragment) : Optional<Fragment>();
+        }
+
+        virtual Optional<SizeType> free(Heap& heap, SizeType offset) {
+            return heap.doFree(offset);
+        }
+
+        virtual void dispose(Heap& /*heap*/) {
+        }
+    };
+
+public:
+
+    class StrategyFixSize : public Strategy {
+    public:
+        StrategyFixSize(SizeType sizeRequired)
+            : _size_required(sizeRequired), _allocation_units(32), _allocation_units_max(_allocation_units << 4) {
+        }
+
+        virtual Optional<Fragment> allocate(Heap& heap, SizeType size, SizeType alignment) {
+            if(size != _size_required)
+                return Optional<Fragment>();
+
+            SizeType offset;
+            const auto iter = _recycled.begin();
+            if(iter == _recycled.end()) {
+                if(!_allocated.empty() && _allocation_units < _allocation_units_max)
+                    _allocation_units *= 2;
+                sp<Fragment> fragment = heap.doAllocate(_allocation_units * size, alignment);
+                offset = fragment->_offset;
+                for(SizeType i = 1; i < _allocation_units; ++i)
+                    _recycled.insert(offset + i * _size_required);
+                _fragments.push_back(std::move(fragment));
+            } else {
+                offset = *iter;
+                _recycled.erase(iter);
+            }
+            _allocated.insert(offset);
+            return Fragment(FRAGMENT_STATE_ALLOCATED, offset, _size_required);
+        }
+
+        virtual Optional<SizeType> free(Heap& /*heap*/, SizeType offset) {
+            const auto iter = _allocated.find(offset);
+            if(iter != _allocated.end()) {
+                _allocated.erase(iter);
+                _recycled.insert(offset);
+                return _size_required;
+            }
+            return Optional<SizeType>();
+        }
+
+        virtual void dispose(Heap& heap) {
+            for(const Fragment& i : _fragments)
+                heap.doFree(i._offset);
+            _allocated.clear();
+            _recycled.clear();
+        }
+
+    private:
+        SizeType _size_required;
+
+        SizeType _allocation_units;
+        SizeType _allocation_units_max;
+
+        std::unordered_set<SizeType> _allocated;
+        std::unordered_set<SizeType> _recycled;
+
+        std::vector<sp<Fragment>> _fragments;
+    };
+
+public:
+    Heap(MemoryType memory)
+        : _memory(std::move(memory)), _strategies{sp<StrategyDefault>::make()}, _size(static_cast<SizeType>(_memory.end() - _memory.begin())), _allocated(0) {
+        addFragment(FRAGMENT_STATE_UNUSED, 0, _size);
     }
 
     SizeType allocated() const {
-        DASSERT(_stub);
-        return _stub->allocated();
+        return _allocated + (_next ? _next->allocated() : 0);
     }
 
     SizeType available() const {
-        DASSERT(_stub);
-        return _stub->available();
+        return _size - _allocated + (_next ? _next->available() : 0);
     }
 
     Optional<PtrType> allocate(SizeType size, SizeType alignment = kAlignment) {
-        DASSERT(_stub);
         DCHECK(alignment != 0 && ((alignment % kAlignment) == 0 || (kAlignment % alignment) == 0), "Illegal alignment %d", alignment);
-        return _stub->allocate(size, alignment);
+        for(Strategy& i : _strategies) {
+            const Optional<Fragment> fragmentOpt = i.allocate(*this, size, alignment);
+            if(fragmentOpt) {
+                const Fragment& fragment = fragmentOpt.value();
+                _allocated += fragment._size;
+                return _memory.begin() + fragment._offset;
+            }
+        }
+        return _next ? _next->allocate(size, alignment) : Optional<PtrType>();
     }
 
-    void free(PtrType ptr) {
-        DASSERT(_stub);
-        _stub->free(ptr);
+    SizeType free(PtrType ptr) {
+        if(ptr >= _memory.begin() && ptr < _memory.end()) {
+            SizeType offset = ptr - _memory.begin();
+            for(Strategy& i : _strategies) {
+                const Optional<SizeType> freedOpt = i.free(*this, offset);
+                if(freedOpt) {
+                    _allocated -= freedOpt.value();
+                    return freedOpt.value();
+                }
+            }
+        }
+        else {
+            DCHECK(_next, "We go throught all heaps but find no way to free it");
+            return _next->free(ptr);
+        }
     }
 
-    void extend(const Heap& other) {
-        DASSERT(_stub);
-        _stub->extend(other._stub);
+    void addStrategy(sp<Strategy> strategy) {
+        _strategies.push_front(std::move(strategy));
     }
 
-    void extend(MemoryType memory, sp<Allocator> allocator) {
-        sp<Stub> stub = sp<Stub>::make(std::move(memory), std::move(allocator));
-        if(_stub)
-            _stub->extend(std::move(stub));
+    void removeStrategy(const sp<Strategy>& strategy) {
+        strategy->dispose(*this);
+        _strategies.erase(std::remove(std::execution::seq, _strategies.begin(), _strategies.end(), strategy));
+    }
+
+    void extend(sp<Heap> other) {
+        if(_next)
+            _next->extend(std::move(other));
         else
-            _stub = std::move(stub);
+            _next = std::move(other);
     }
 
 private:
@@ -430,9 +339,17 @@ private:
     }
 
 private:
-    sp<Stub> _stub;
+    MemoryType _memory;
+    FragmentTrie _fragment_trie;
+    std::map<SizeType, sp<Fragment>> _fragments;
+    std::list<sp<Strategy>> _strategies;
+
+    SizeType _size;
+    SizeType _allocated;
+
+    sp<Heap> _next;
+
+    friend class Strategy;
 };
 
 }
-
-#endif

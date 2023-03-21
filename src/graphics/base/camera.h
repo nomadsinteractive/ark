@@ -3,7 +3,7 @@
 
 #include "core/ark.h"
 #include "core/forwarding.h"
-#include "core/inf/input.h"
+#include "core/inf/uploader.h"
 #include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
 
@@ -15,7 +15,7 @@ namespace ark {
 
 class ARK_API Camera {
 public:
-    class Holder : public Input, public Mat4 {
+    class Holder : public Uploader, public Mat4 {
     public:
         Holder(sp<Mat4> value);
 

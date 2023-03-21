@@ -1,7 +1,7 @@
 #include "renderer/impl/renderer/skybox.h"
 
 #include "core/base/api.h"
-#include "core/util/input_type.h"
+#include "core/util/uploader_type.h"
 
 #include "graphics/base/render_request.h"
 #include "graphics/base/size.h"

@@ -24,7 +24,7 @@ bool VertexWriter::hasAttribute(int32_t name) const
 void VertexWriter::writePosition(const V3& position)
 {
     DASSERT(!_do_transform || _transform);
-    _writer->writePosition(_visible ? (_do_transform ? (_transform->transform(position) + _translate) : position) : V3());
+    _writer->writeObject<V3>(_visible ? (_do_transform ? (_transform->transform(position) + _translate) : position) : V3());
 }
 
 void VertexWriter::writeTexCoordinate(uint16_t u, uint16_t v)
@@ -74,7 +74,7 @@ void VertexWriter::writeBitangent(const V3& bitangent)
 
 void VertexWriter::next()
 {
-    _writer->next();
+    _writer->nextVertex();
     writeVaryings();
 }
 
@@ -88,15 +88,10 @@ VertexWriter::WriterMemory::WriterMemory(uint8_t* ptr, uint32_t size, uint32_t s
 {
 }
 
-void VertexWriter::WriterMemory::next()
+void VertexWriter::WriterMemory::nextVertex()
 {
     _ptr = _ptr ? _ptr + _stride : _begin;
     DCHECK(_ptr <= _end - _stride, "Writer buffer out of bounds");
-}
-
-void VertexWriter::WriterMemory::writePosition(const V3& position)
-{
-    write(&position, sizeof(position), 0);
 }
 
 uint32_t VertexWriter::WriterMemory::write(const void* ptr, uint32_t size, uint32_t offset)

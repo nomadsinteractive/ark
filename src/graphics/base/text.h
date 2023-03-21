@@ -1,6 +1,6 @@
-#ifndef ARK_GRAPHICS_BASE_CHARACTERS_H_
-#define ARK_GRAPHICS_BASE_CHARACTERS_H_
+#pragma once
 
+#include <deque>
 #include <string>
 #include <vector>
 
@@ -26,7 +26,7 @@ public:
     Text(sp<RenderLayer> renderLayer, sp<StringVar> content = nullptr, sp<GlyphMaker> glyphMaker = nullptr, float textScale = 1.0f, float letterSpacing = 0.0f, float lineHeight = 0.0f, float lineIndent = 0.0f);
 
 //  [[script::bindings::property]]
-    std::vector<sp<RenderObject> > contents() const;
+    const std::vector<sp<RenderObject>>& contents() const;
 
 //  [[script::bindings::property]]
     const sp<Vec3>& position() const;
@@ -94,8 +94,8 @@ private:
     public:
         Content(sp<StringVar> string, sp<GlyphMaker> glyphMaker, sp<ModelLoader> modelLoader, float textScale, float letterSpacing, float lineHeight, float lineIndent);
 
-        virtual bool preSnapshot(const RenderRequest& renderRequest, LayerContext& lc) override;
-        virtual void snapshot(const RenderRequest& renderRequest, const LayerContext& lc, RenderLayerSnapshot& output) override;
+        virtual bool preSnapshot(const RenderRequest& renderRequest, LayerContext& lc, RenderLayerSnapshot& output) override;
+        virtual void snapshot(const RenderRequest& renderRequest, LayerContext& lc, RenderLayerSnapshot& output) override;
 
         SafeVar<Vec3>& position();
 
@@ -146,8 +146,9 @@ private:
         std::vector<sp<Glyph>> _glyphs;
 
         SafeVar<Vec3> _position;
-        std::vector<std::pair<sp<RenderObject>, Renderable::State>> _render_objects;
-
+//        std::deque<std::pair<sp<RenderObject>, Renderable::State>> _render_objects;
+        std::vector<sp<RenderObject>> _render_objects;
+        std::vector<sp<RenderObject>> _render_object_created;
         bool _needs_reload;
 
         friend class Text;
@@ -161,5 +162,3 @@ private:
 };
 
 }
-
-#endif

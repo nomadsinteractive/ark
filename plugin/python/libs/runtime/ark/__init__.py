@@ -403,7 +403,7 @@ class Buffer:
     def id(self) -> int:
         return 0
 
-    def upload(self, uploader: 'Input', future: Optional[Future] = None):
+    def upload(self, uploader: 'Uploader', future: Optional[Future] = None):
         pass
 
     def synchronize(self, offset: int, size: int, cancelled: 'Boolean') -> ByteArray:
@@ -422,17 +422,17 @@ class RenderController:
     UPLOAD_PRIORITY_NORMAL = 1
     UPLOAD_PRIORITY_HIGH = 2
 
-    def upload_buffer(self, buffer: Buffer, input_: 'Input', upload_strategy: int, future: Optional[Future] = None,
+    def upload_buffer(self, buffer: Buffer, input_: 'Uploader', upload_strategy: int, future: Optional[Future] = None,
                       upload_priority: int = UPLOAD_PRIORITY_NORMAL):
         pass
 
-    def make_buffer(self, buffer_type: int, buffer_usage: int, input_: Optional['Input'], upload_strategy: int, future: Optional[Future] = None) -> Buffer:
+    def make_buffer(self, buffer_type: int, buffer_usage: int, input_: Optional['Uploader'], upload_strategy: int, future: Optional[Future] = None) -> Buffer:
         pass
 
-    def make_vertex_buffer(self, buffer_usage: int = Buffer.USAGE_DYNAMIC, input_: Optional['Input'] = None) -> Buffer:
+    def make_vertex_buffer(self, buffer_usage: int = Buffer.USAGE_DYNAMIC, input_: Optional['Uploader'] = None) -> Buffer:
         pass
 
-    def make_index_buffer(self, buffer_usage: int = Buffer.USAGE_DYNAMIC, input_: Optional['Input'] = None) -> Buffer:
+    def make_index_buffer(self, buffer_usage: int = Buffer.USAGE_DYNAMIC, input_: Optional['Uploader'] = None) -> Buffer:
         pass
 
 
@@ -1064,41 +1064,41 @@ class Mat4(_Mat):
         pass
 
 
-class Input:
-    def __init__(self, delegate: Union[Numeric, Vec2, Vec3, Vec4, list[_Mat], list[tuple], list[int], list['Input'], Any], size: int = 0):
+class Uploader:
+    def __init__(self, delegate: Union[Numeric, Vec2, Vec3, Vec4, list[_Mat], list[tuple], list[int], list['Uploader'], Any], size: int = 0):
         pass
 
     @property
     def size(self):
         return 0
 
-    def reserve(self, size: int) -> 'Input':
+    def reserve(self, size: int) -> 'Uploader':
         pass
 
-    def remap(self, size: int, offset: int = 0) -> 'Input':
+    def remap(self, size: int, offset: int = 0) -> 'Uploader':
         pass
 
-    def add_input(self, offset: int, input_: 'Input'):
+    def add_input(self, offset: int, input_: 'Uploader'):
         pass
 
     def remove_input(self, offset: int):
         pass
 
-    def wrap(self) -> 'Input':
+    def wrap(self) -> 'Uploader':
         pass
 
-    def reset(self, delegate: 'Input'):
+    def reset(self, delegate: 'Uploader'):
         pass
 
     def mark_dirty(self):
         pass
 
     @staticmethod
-    def blank(size: int, fill: int = 0) -> 'Input':
+    def blank(size: int, fill: int = 0) -> 'Uploader':
         pass
 
 
-class AnimationInput(Input):
+class AnimationInput(Uploader):
 
     def get_node_matrix(self, node_name: str) -> Mat4:
         pass

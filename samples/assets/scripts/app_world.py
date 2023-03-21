@@ -18,7 +18,7 @@ class AppWorld:
         self._camera.look_at(self._position, self._target, Vec3(0, 0, 1))
         self._tangent_space = self._create_tangent_matrix()
         self._light_position_impl = light_position
-        self._light_position = self._position + (self._tangent_space * light_position)
+        self._light_position = self._position + (self._tangent_space @ light_position)
 
     @property
     def target(self):
@@ -90,6 +90,6 @@ class AppWorld:
 
     def _create_tangent_matrix(self):
         n = (self._target - self._position).normalize()
-        t = Vec3(-n.vz, Numeric(0), n.vx + 0.01).normalize()
+        t = Vec3(-n.z, Numeric(0), n.x + 0.01).normalize()
         b = -n.cross(t).normalize()
         return Mat3(t, b, n)

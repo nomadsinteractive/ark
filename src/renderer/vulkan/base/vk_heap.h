@@ -33,7 +33,7 @@ private:
 private:
     sp<VKDevice> _device;
 
-    HeapType _heaps[VK_MAX_MEMORY_TYPES];
+    sp<HeapType> _heaps[VK_MAX_MEMORY_TYPES];
 
 };
 

@@ -1,6 +1,6 @@
 #include "renderer/base/pipeline_layout.h"
 
-#include "core/inf/input.h"
+#include "core/inf/uploader.h"
 
 #include "graphics/base/camera.h"
 
@@ -86,7 +86,7 @@ void PipelineLayout::initialize(const Camera& camera)
     _images = makeBindingImages();
 }
 
-void PipelineLayout::tryBindUniform(const ShaderPreprocessor& shaderPreprocessor, const String& name, const sp<Input>& input)
+void PipelineLayout::tryBindUniform(const ShaderPreprocessor& shaderPreprocessor, const String& name, const sp<Uploader>& input)
 {
     sp<Uniform> uniform = shaderPreprocessor.getUniformInput(name, Uniform::TYPE_MAT4);
     if(uniform)

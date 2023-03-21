@@ -4,7 +4,7 @@
 
 #include "core/base/enums.h"
 #include "core/types/global.h"
-#include "core/util/input_type.h"
+#include "core/util/uploader_type.h"
 #include "core/util/math.h"
 
 #include "graphics/base/bitmap.h"

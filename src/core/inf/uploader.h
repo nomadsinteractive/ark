@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_INF_INPUT_H_
-#define ARK_CORE_INF_INPUT_H_
+#pragma once
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
@@ -7,12 +6,12 @@
 
 namespace ark {
 
-class ARK_API Input : public Updatable {
+class ARK_API Uploader : public Updatable {
 public:
-    Input(size_t size)
+    Uploader(size_t size)
         : _size(size) {
     }
-    virtual ~Input() override = default;
+    virtual ~Uploader() override = default;
 
     virtual void upload(Writable& buf) = 0;
 
@@ -26,5 +25,3 @@ protected:
 };
 
 }
-
-#endif

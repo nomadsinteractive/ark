@@ -4,7 +4,7 @@
 
 #include "core/base/string_buffer.h"
 #include "core/base/notifier.h"
-#include "core/inf/input.h"
+#include "core/inf/uploader.h"
 #include "core/util/strings.h"
 
 #include "renderer/base/pipeline_layout.h"
@@ -18,10 +18,10 @@ namespace ark {
 
 namespace {
 
-class AlignedInput : public Input {
+class AlignedInput : public Uploader {
 public:
-    AlignedInput(sp<Input> delegate, size_t alignedSize)
-        : Input(alignedSize), _delegate(std::move(delegate)), _aligned_size(alignedSize) {
+    AlignedInput(sp<Uploader> delegate, size_t alignedSize)
+        : Uploader(alignedSize), _delegate(std::move(delegate)), _aligned_size(alignedSize) {
         CHECK(_delegate->size() <= _aligned_size, "Alignment is lesser than delegate's size(%d)", _delegate->size());
     }
 
@@ -34,7 +34,7 @@ public:
     }
 
 private:
-    sp<Input> _delegate;
+    sp<Uploader> _delegate;
     size_t _aligned_size;
 };
 
@@ -187,7 +187,7 @@ void PipelineBuildingContext::addSnippet(const sp<Snippet>& snippet)
     _snippet = _snippet ? sp<Snippet>::make<SnippetLinkedChain>(_snippet, snippet) : snippet;
 }
 
-void PipelineBuildingContext::addUniform(String name, Uniform::Type type, uint32_t length, sp<Input> input, int32_t binding)
+void PipelineBuildingContext::addUniform(String name, Uniform::Type type, uint32_t length, sp<Uploader> input, int32_t binding)
 {
     addUniform(sp<Uniform>::make(std::move(name), type, length, std::move(input), binding));
 }
@@ -277,13 +277,13 @@ void PipelineBuildingContext::loadPredefinedUniform(BeanFactory& factory, const 
         const String& type = Documents::ensureAttribute(i, Constants::Attributes::TYPE);
         const String& value = Documents::ensureAttribute(i, Constants::Attributes::VALUE);
         int32_t binding = Documents::getAttribute<int32_t>(i, Constants::Attributes::BINDING, -1);
-        sp<Builder<Input>> builder = factory.findBuilderByTypeValue<Input>(type, value);
-        sp<Input> input = builder ? builder->build(args) : factory.ensure<Input>(value, args);
+        sp<Builder<Uploader>> builder = factory.findBuilderByTypeValue<Uploader>(type, value);
+        sp<Uploader> input = builder ? builder->build(args) : factory.ensure<Uploader>(value, args);
         uint32_t size = static_cast<uint32_t>(input->size());
         Uniform::Type uType = Uniform::toType(type);
         uint32_t componentSize = uType != Uniform::TYPE_STRUCT ? Uniform::getComponentSize(uType) : size;
         CHECK(componentSize, "Unknow type \"%s\"", type.c_str());
-        addUniform(name, uType, size / componentSize, uType == Uniform::TYPE_F3 ? sp<Input>::make<AlignedInput>(input, 16) : input, binding);
+        addUniform(name, uType, size / componentSize, uType == Uniform::TYPE_F3 ? sp<Uploader>::make<AlignedInput>(input, 16) : input, binding);
     }
 }
 

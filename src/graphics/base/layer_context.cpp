@@ -4,6 +4,7 @@
 #include "core/epi/disposed.h"
 #include "core/base/notifier.h"
 #include "core/util/holder_util.h"
+#include "core/util/log.h"
 
 #include "graphics/base/layer.h"
 #include "graphics/base/render_object.h"
@@ -80,13 +81,14 @@ void LayerContext::renderRequest(const V3& position)
 void LayerContext::add(sp<Renderable> renderable, sp<Updatable> isDirty, sp<Boolean> isDisposed)
 {
     ASSERT(renderable);
-    _renderable_emplaced.emplace_back(std::move(renderable), std::move(isDirty), std::move(isDisposed));
+    _renderable_created.emplace_back(std::move(renderable), std::move(isDirty), std::move(isDisposed));
     _reload_requested = true;
 }
 
 void LayerContext::clear()
 {
-    _renderables.clear();
+    for(auto& [i, j] : _renderables)
+        i._disposed = SafeVar<Boolean>(nullptr, true);
     _reload_requested = true;
 }
 
@@ -100,30 +102,99 @@ void LayerContext::setVaryings(sp<Varyings> varyings)
     _varyings = std::move(varyings);
 }
 
-bool LayerContext::preSnapshot(RenderRequest& renderRequest)
-{
-    bool needsReload = _renderable_emplaced.size() > 0;
-    if(needsReload)
-    {
-        for(RenderableItem& i : _renderable_emplaced)
-            _renderables.emplace_back(std::move(i), Renderable::State());
-        _renderable_emplaced.clear();
-    }
-
-    needsReload = _render_batch->preSnapshot(renderRequest, *this) || needsReload || _reload_requested;
-    _reload_requested = false;
-
-    return needsReload || _layer_type == Layer::TYPE_TRANSIENT;
-}
-
-void LayerContext::snapshot(RenderRequest& renderRequest, RenderLayerSnapshot& output)
+bool LayerContext::snapshot(RenderRequest& renderRequest, RenderLayerSnapshot& output)
 {
     DPROFILER_TRACE("TakeSnapshot");
 
+    bool needsReload = _render_batch->preSnapshot(renderRequest, *this, output) || _reload_requested;
     _render_batch->snapshot(renderRequest, *this, output);
     _render_done = _visible.val();
+    _reload_requested = false;
 
     DPROFILER_LOG("Renderables", _renderables.size());
+    return needsReload || _layer_type == Layer::TYPE_TRANSIENT;
+}
+
+bool LayerContext::ensureState(void* stateKey)
+{
+    const auto iter = _element_states.find(stateKey);
+    if(iter == _element_states.end())
+    {
+        _element_states.insert(std::make_pair(stateKey, ElementState{0}));
+        return true;
+    }
+    return false;
+}
+
+LayerContext::ElementState& LayerContext::addElementState(void* key)
+{
+    DASSERT(_element_states.find(key) == _element_states.end());
+    return _element_states.insert(std::make_pair(key, ElementState{0})).first->second;
+}
+
+bool LayerContext::doPreSnapshot(const RenderRequest& renderRequest, RenderLayerSnapshot& output)
+{
+    bool needsReload = false;
+    if(_renderable_created.size() > 0)
+    {
+        for(RenderableItem& i : _renderable_created)
+        {
+            LOGD("create: %p", i._renderable.get());
+            addElementState(i._renderable.get());
+            _renderables.emplace_back(std::move(i), Renderable::State(Renderable::RENDERABLE_STATE_NEW));
+        }
+        _renderable_created.clear();
+        needsReload = true;
+    }
+
+    const uint64_t timestamp = renderRequest.timestamp();
+    for(auto iter = _renderables.begin(); iter != _renderables.end(); )
+    {
+        const LayerContext::RenderableItem& i = iter->first;
+        Renderable::State& state = iter->second;
+        i._disposed.update(timestamp);
+        state.setState(i._renderable->updateState(renderRequest));
+        if(!state || state.hasState(Renderable::RENDERABLE_STATE_DISPOSED) || i._disposed.val())
+        {
+            LOGD("delete: %p", i._renderable.get());
+            needsReload = true;
+            output.addDisposedState(*this, i._renderable.get());
+            iter = _renderables.erase(iter);
+        }
+        else
+        {
+            if(!state.hasState(Renderable::RENDERABLE_STATE_DIRTY) && i._updatable)
+                state.setState(Renderable::RENDERABLE_STATE_DIRTY, i._updatable->update(timestamp));
+
+            ++iter;
+        }
+    }
+    return needsReload;
+}
+
+void LayerContext::doSnapshot(const RenderRequest& renderRequest, RenderLayerSnapshot& output)
+{
+    const PipelineInput& pipelineInput = output.pipelineInput();
+    const bool visible = _visible.val();
+    const bool needsReload = _position_changed || _render_done != visible || output.needsReload();
+    Varyings::Snapshot defaultVaryingsSnapshot = _varyings ? _varyings->snapshot(pipelineInput, renderRequest.allocator()) : Varyings::Snapshot();
+
+    for(auto& [i, j] : _renderables) {
+        Renderable& renderable = i;
+        Renderable::State state = j;
+        if(needsReload)
+            state.setState(Renderable::RENDERABLE_STATE_DIRTY, true);
+        if(state.hasState(Renderable::RENDERABLE_STATE_VISIBLE))
+            state.setState(Renderable::RENDERABLE_STATE_VISIBLE, visible);
+        if(j.hasState(Renderable::RENDERABLE_STATE_NEW))
+        {
+            state.setState(Renderable::RENDERABLE_STATE_DIRTY, true);
+            j.setState(Renderable::RENDERABLE_STATE_NEW, false);
+        }
+        Renderable::Snapshot snapshot = renderable.snapshot(pipelineInput, renderRequest, _position, state.stateBits());
+        output.loadSnapshot(*this, snapshot, defaultVaryingsSnapshot);
+        output.addSnapshot(*this, std::move(snapshot), &renderable);
+    }
 }
 
 LayerContext::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, Layer::Type layerType)

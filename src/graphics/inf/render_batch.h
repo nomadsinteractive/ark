@@ -12,8 +12,8 @@ class ARK_API RenderBatch {
 public:
     virtual ~RenderBatch() = default;
 
-    virtual bool preSnapshot(const RenderRequest& renderRequest, LayerContext& lc) = 0;
-    virtual void snapshot(const RenderRequest& renderRequest, const LayerContext& lc, RenderLayerSnapshot& output) = 0;
+    virtual bool preSnapshot(const RenderRequest& renderRequest, LayerContext& lc, RenderLayerSnapshot& output) = 0;
+    virtual void snapshot(const RenderRequest& renderRequest, LayerContext& lc, RenderLayerSnapshot& output) = 0;
 
 };
 

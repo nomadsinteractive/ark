@@ -3,7 +3,7 @@
 #include "core/base/manifest.h"
 #include "core/util/documents.h"
 #include "core/util/math.h"
-#include "core/util/input_type.h"
+#include "core/util/uploader_type.h"
 
 #include "renderer/base/atlas.h"
 #include "renderer/base/model.h"
@@ -52,7 +52,7 @@ static sp<std::vector<ModelLoaderSphere::Vertex>> makeVertices(uint32_t sampleCo
     return sp<std::vector<ModelLoaderSphere::Vertex>>::make(std::move(vertices));
 }
 
-static sp<Input> makeIndices(uint32_t sampleCount)
+static sp<Uploader> makeIndices(uint32_t sampleCount)
 {
     std::vector<element_index_t> indices(2 * 6 * sampleCount * sampleCount);
     element_index_t* buf = indices.data();

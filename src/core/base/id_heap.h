@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_BASE_ID_HEAP_H_
-#define ARK_CORE_BASE_ID_HEAP_H_
+#pragma once
 
 #include <vector>
 
@@ -11,7 +10,7 @@ namespace ark {
 class ARK_API IDHeap {
 public:
 //  [[script::bindings::auto]]
-    IDHeap(size_t heapSize, size_t heapSizeL1 = 0, size_t chunkSizeL1 = 0);
+    IDHeap(size_t heapSize);
 
 //  [[script::bindings::auto]]
     size_t allocate(size_t size, size_t alignment = 1);
@@ -38,5 +37,3 @@ private:
 };
 
 }
-
-#endif

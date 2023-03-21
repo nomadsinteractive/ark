@@ -93,7 +93,7 @@ public:
     void upload(sp<Resource> resource, RenderController::UploadStrategy strategy, sp<Updatable> updatable = nullptr, sp<Future> future = nullptr, UploadPriority priority = UPLOAD_PRIORITY_NORMAL);
 
 //  [[script::bindings::auto]]
-    void uploadBuffer(Buffer& buffer, sp<Input> input, RenderController::UploadStrategy strategy, sp<Future> future = nullptr, RenderController::UploadPriority priority = RenderController::UPLOAD_PRIORITY_NORMAL);
+    void uploadBuffer(Buffer& buffer, sp<Uploader> input, RenderController::UploadStrategy strategy, sp<Future> future = nullptr, RenderController::UploadPriority priority = RenderController::UPLOAD_PRIORITY_NORMAL);
 
     const sp<RenderEngine>& renderEngine() const;
 
@@ -106,12 +106,12 @@ public:
     sp<Texture> createTexture2D(sp<Size> size, sp<Bitmap> bitmap, RenderController::UploadStrategy us = RenderController::US_ONCE_AND_ON_SURFACE_READY, sp<Future> future = nullptr);
 
 //  [[script::bindings::auto]]
-    Buffer makeBuffer(Buffer::Type type, Buffer::Usage usage, sp<Input> uploader, RenderController::UploadStrategy us, sp<Future> future = nullptr);
-    Buffer makeBuffer(Buffer::Type type, Buffer::Usage usage, sp<Input> input);
+    Buffer makeBuffer(Buffer::Type type, Buffer::Usage usage, sp<Uploader> uploader, RenderController::UploadStrategy us, sp<Future> future = nullptr);
+    Buffer makeBuffer(Buffer::Type type, Buffer::Usage usage, sp<Uploader> input);
 //  [[script::bindings::auto]]
-    Buffer makeVertexBuffer(Buffer::Usage usage = Buffer::USAGE_DYNAMIC, sp<Input> input = nullptr);
+    Buffer makeVertexBuffer(Buffer::Usage usage = Buffer::USAGE_DYNAMIC, sp<Uploader> input = nullptr);
 //  [[script::bindings::auto]]
-    Buffer makeIndexBuffer(Buffer::Usage usage = Buffer::USAGE_DYNAMIC, sp<Input> input = nullptr);
+    Buffer makeIndexBuffer(Buffer::Usage usage = Buffer::USAGE_DYNAMIC, sp<Uploader> input = nullptr);
 
     sp<Framebuffer> makeFramebuffer(sp<Renderer> renderer, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask);
 
@@ -132,6 +132,8 @@ public:
 
     sp<SharedIndices> getSharedIndices(SharedIndicesName name);
     sp<SharedIndices> getSharedIndices(const Model& model, bool degenerate);
+
+    GraphicsBufferAllocator& gba();
 
     uint64_t updateTick();
     uint64_t tick() const;

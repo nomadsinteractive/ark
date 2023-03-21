@@ -14,7 +14,8 @@ namespace unittest {
 class HeapsTestCase : public TestCase {
 public:
     enum {
-        HEAP_SIZE = (1 << 20)
+        HEAP_SIZE = (1 << 20),
+        ALLOCATION_FIXED_SIZE = 16
     };
 
     struct Memory {
@@ -68,19 +69,14 @@ public:
     }
 
     virtual int launch() override {
-        {
-            MemoryHeap heap(Memory(1 << 13), sp<MemoryHeap::L1>::make(64));
-            heap.extend(Memory(HEAP_SIZE), sp<MemoryHeap::L2>::make());
-
+        MemoryHeap heap = Memory(HEAP_SIZE);
+        const auto heapStrategy = sp<MemoryHeap::StrategyFixSize>::make(ALLOCATION_FIXED_SIZE);
+        heap.addStrategy(heapStrategy);
+        for(size_t i = 0; i < 32; ++i) {
+            if(i == 16)
+                heap.removeStrategy(heapStrategy);
             TESTCASE_VALIDATE(cycleTest(heap, 128) == 0);
         }
-
-        {
-            MemoryHeap heap(Memory(HEAP_SIZE), sp<MemoryHeap::L2>::make());
-
-            TESTCASE_VALIDATE(cycleTest(heap, 128) == 0);
-        }
-
         return 0;
     }
 
@@ -107,6 +103,12 @@ public:
                 allocations.push_back(a2);
             }
 
+            for(uint32_t j = 0; j < 64; ++j) {
+                Allocated a3 = allocate(heap, ALLOCATION_FIXED_SIZE, ttldis(gen));
+                TESTCASE_VALIDATE(a3.aquire());
+                allocations.push_back(a3);
+            }
+
             for(auto iter = allocations.begin(); iter != allocations.end(); ++iter) {
                 Allocated& i = *iter;
                 --i._ttl;
@@ -118,6 +120,9 @@ public:
                 }
             }
         }
+
+        for(Allocated& i : allocations)
+            i.free(heap);
 
         return 0;
     }

@@ -1,4 +1,4 @@
-#include "core/impl/input/input_snapshot.h"
+#include "core/impl/uploader/uploader_snapshot.h"
 
 #include "core/inf/array.h"
 #include "core/inf/writable.h"
@@ -29,8 +29,8 @@ public:
 
 }
 
-InputSnapshot::InputSnapshot(Input& delegate)
-    : Input(delegate.size())
+InputSnapshot::InputSnapshot(Uploader& delegate)
+    : Uploader(delegate.size())
 {
     WritableSnapshot writable(_size);
     delegate.upload(writable);

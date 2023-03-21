@@ -1,7 +1,6 @@
-#ifndef ARK_CORE_IMPL_INPUT_INPUT_BY_VARIABLE_H_
-#define ARK_CORE_IMPL_INPUT_INPUT_BY_VARIABLE_H_
+#pragma once
 
-#include "core/inf/input.h"
+#include "core/inf/uploader.h"
 #include "core/inf/holder.h"
 #include "core/inf/variable.h"
 #include "core/inf/writable.h"
@@ -11,12 +10,12 @@
 
 namespace ark {
 
-template<typename T, typename S = T> class InputVariable : public Input, public Holder, Implements<InputVariable<T, S>, Input, Holder> {
+template<typename T, typename S = T> class InputVariable : public Uploader, public Holder, Implements<InputVariable<T, S>, Uploader, Holder> {
 public:
     typedef Variable<S> VarType;
 
     InputVariable(const sp<VarType>& var)
-        : Input(sizeof(T)), _var(var) {
+        : Uploader(sizeof(T)), _var(var) {
     }
 
     virtual void upload(Writable& buf) override {
@@ -41,5 +40,3 @@ private:
 };
 
 }
-
-#endif

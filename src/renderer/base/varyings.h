@@ -9,7 +9,7 @@
 #include "core/inf/array.h"
 #include "core/inf/builder.h"
 #include "core/inf/holder.h"
-#include "core/impl/input/input_variable.h"
+#include "core/impl/uploader/input_variable.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -30,10 +30,10 @@ private:
     };
 
     struct Slot {
-        Slot(sp<Input> input = nullptr, uint32_t divisor = 0, int32_t offset = -1);
+        Slot(sp<Uploader> input = nullptr, uint32_t divisor = 0, int32_t offset = -1);
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Slot);
 
-        sp<Input> _input;
+        sp<Uploader> _input;
         uint32_t _divisor;
         int32_t _offset;
     };
@@ -110,7 +110,7 @@ public:
             DEFAULT_COPY_AND_ASSIGN(InputBuilder);
 
             String _name;
-            sp<Builder<Input>> _input;
+            sp<Builder<Uploader>> _input;
         };
 
     public:
@@ -126,11 +126,11 @@ private:
     template<typename T> void setProperty(const String& name, sp<Variable<T>> var) {
         String cname = Strings::capitalizeFirst(name);
         _properties[cname] = var;
-        setSlotInput(std::move(cname), sp<Input>::make<InputVariable<T>>(std::move(var)));
+        setSlotInput(std::move(cname), sp<Uploader>::make<InputVariable<T>>(std::move(var)));
         _timestamp.markDirty();
     }
 
-    void setSlotInput(const String& name, sp<Input> input);
+    void setSlotInput(const String& name, sp<Uploader> input);
 
 private:
     std::map<String, Box> _properties;

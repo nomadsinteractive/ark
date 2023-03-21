@@ -182,7 +182,7 @@ void PipelineInput::UBO::doSnapshot(uint64_t timestamp, bool force) const
     for(size_t i = 0; i < uniforms.size(); ++i)
     {
         const Uniform& uniform = uniforms.at(i);
-        const sp<Input>& input = uniform.input();
+        const sp<Uploader>& input = uniform.input();
         bool dirty = input && input->update(timestamp);
         dirtyFlags[i] = static_cast<uint8_t>(force || dirty);
         if(dirtyFlags[i] && input)

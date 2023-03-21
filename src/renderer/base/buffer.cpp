@@ -12,10 +12,10 @@ namespace ark {
 
 namespace {
 
-class InputBufferSnapshot : public Input {
+class InputBufferSnapshot : public Uploader {
 public:
     InputBufferSnapshot(size_t size, std::vector<Buffer::Strip> strips)
-        : Input(size), _blocks(std::move(strips)) {
+        : Uploader(size), _blocks(std::move(strips)) {
     }
 
     virtual void upload(Writable& uploader) override {
@@ -55,7 +55,7 @@ Buffer::Snapshot::Snapshot(sp<Delegate> stub)
 {
 }
 
-Buffer::Snapshot::Snapshot(sp<Delegate> stub, size_t size, sp<Input> input)
+Buffer::Snapshot::Snapshot(sp<Delegate> stub, size_t size, sp<Uploader> input)
     : _delegate(std::move(stub)), _input(std::move(input)), _size(size)
 {
 }
@@ -93,7 +93,7 @@ Buffer::Buffer(sp<Buffer::Delegate> delegate) noexcept
 
 size_t Buffer::size() const
 {
-    return _delegate->size();
+    return _delegate ? _delegate->size() : 0;
 }
 
 Buffer::Snapshot Buffer::snapshot(size_t size) const
@@ -111,7 +111,7 @@ Buffer::Snapshot Buffer::snapshot(const ByteArray::Borrowed& strip) const
     return Snapshot(_delegate, strip.length(), sp<InputBufferSnapshot>::make(strip.length(), std::vector<Buffer::Strip>{{0, strip}}));
 }
 
-Buffer::Snapshot Buffer::snapshot(sp<Input> input, size_t size) const
+Buffer::Snapshot Buffer::snapshot(sp<Uploader> input, size_t size) const
 {
     return Snapshot(_delegate, size, std::move(input));
 }
@@ -169,7 +169,7 @@ size_t Buffer::Delegate::size() const
 }
 
 Buffer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _resource_loader_context(resourceLoaderContext), _input(factory.getBuilder<Input>(manifest, "input")), _usage(Documents::getAttribute<Usage>(manifest, "usage", USAGE_DYNAMIC))
+    : _resource_loader_context(resourceLoaderContext), _input(factory.getBuilder<Uploader>(manifest, "input")), _usage(Documents::getAttribute<Usage>(manifest, "usage", USAGE_DYNAMIC))
 {
 }
 

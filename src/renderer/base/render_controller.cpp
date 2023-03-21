@@ -4,7 +4,7 @@
 #include "core/base/enums.h"
 #include "core/inf/runnable.h"
 #include "core/inf/writable.h"
-#include "core/impl/input/input_snapshot.h"
+#include "core/impl/uploader/uploader_snapshot.h"
 #include "core/util/boolean_type.h"
 #include "core/util/log.h"
 
@@ -47,7 +47,7 @@ public:
 
 class ResourceUploadBufferSnapshot : public Resource {
 public:
-    ResourceUploadBufferSnapshot(sp<Buffer::Delegate> buffer, Input& input)
+    ResourceUploadBufferSnapshot(sp<Buffer::Delegate> buffer, Uploader& input)
         : _buffer(std::move(buffer)), _input_snapshot(input) {
     }
 
@@ -70,7 +70,7 @@ private:
 
 class BufferUpdatable : public Updatable {
 public:
-    BufferUpdatable(RenderController& renderController, sp<Input> input, sp<Buffer::Delegate> buffer)
+    BufferUpdatable(RenderController& renderController, sp<Uploader> input, sp<Buffer::Delegate> buffer)
         : _render_controller(renderController), _buffer(std::move(buffer)), _input(std::move(input)) {
     }
 
@@ -84,7 +84,7 @@ public:
 private:
     RenderController& _render_controller;
     sp<Buffer::Delegate> _buffer;
-    sp<Input> _input;
+    sp<Uploader> _input;
 };
 
 }
@@ -152,7 +152,7 @@ void RenderController::upload(sp<Resource> resource, UploadStrategy strategy, sp
         _uploading_resources.push(UploadingRenderResource(RenderResource(std::move(resource), std::move(future)), strategy, priority));
 }
 
-void RenderController::uploadBuffer(Buffer& buffer, sp<Input> input, RenderController::UploadStrategy strategy, sp<Future> future, RenderController::UploadPriority priority)
+void RenderController::uploadBuffer(Buffer& buffer, sp<Uploader> input, RenderController::UploadStrategy strategy, sp<Future> future, RenderController::UploadPriority priority)
 {
     ASSERT(input);
     if(!future)
@@ -200,7 +200,7 @@ sp<Texture> RenderController::createTexture2D(sp<Size> size, sp<Bitmap> bitmap, 
     return createTexture(std::move(size), sp<Texture::Parameters>::make(Texture::TYPE_2D, 0), sp<Texture::UploaderBitmap>::make(std::move(bitmap)), us, std::move(future));
 }
 
-Buffer RenderController::makeBuffer(Buffer::Type type, Buffer::Usage usage, sp<Input> input, UploadStrategy us, sp<Future> future)
+Buffer RenderController::makeBuffer(Buffer::Type type, Buffer::Usage usage, sp<Uploader> input, UploadStrategy us, sp<Future> future)
 {
     DTHREAD_CHECK(THREAD_ID_CORE);
     Buffer buffer(_render_engine->rendererFactory()->createBuffer(type, usage));
@@ -209,18 +209,18 @@ Buffer RenderController::makeBuffer(Buffer::Type type, Buffer::Usage usage, sp<I
     return buffer;
 }
 
-Buffer RenderController::makeBuffer(Buffer::Type type, Buffer::Usage usage, sp<Input> input)
+Buffer RenderController::makeBuffer(Buffer::Type type, Buffer::Usage usage, sp<Uploader> input)
 {
     RenderController::UploadStrategy us = input ? RenderController::US_ONCE_AND_ON_SURFACE_READY : RenderController::US_ON_SURFACE_READY;
     return makeBuffer(type, usage, std::move(input), us);
 }
 
-Buffer RenderController::makeVertexBuffer(Buffer::Usage usage, sp<Input> input)
+Buffer RenderController::makeVertexBuffer(Buffer::Usage usage, sp<Uploader> input)
 {
     return makeBuffer(Buffer::TYPE_VERTEX, usage, std::move(input));
 }
 
-Buffer RenderController::makeIndexBuffer(Buffer::Usage usage, sp<Input> input)
+Buffer RenderController::makeIndexBuffer(Buffer::Usage usage, sp<Uploader> input)
 {
     return makeBuffer(Buffer::TYPE_INDEX, usage, input);
 }
@@ -302,7 +302,7 @@ sp<SharedIndices> RenderController::getSharedIndices(RenderController::SharedInd
 sp<SharedIndices> RenderController::getSharedIndices(const Model& model, bool degenerate)
 {
     DTHREAD_CHECK(THREAD_ID_CORE);
-    const sp<Input>& indicesUploader = model.indices();
+    const sp<Uploader>& indicesUploader = model.indices();
 
     WritableIndice writer(indicesUploader->size() / sizeof(element_index_t));
     indicesUploader->upload(writer);
@@ -318,6 +318,11 @@ sp<SharedIndices> RenderController::getSharedIndices(const Model& model, bool de
     sp<SharedIndices> sharedBuffer = sp<SharedIndices>::make(makeIndexBuffer(Buffer::USAGE_DYNAMIC), indices, modelVertexCount, degenerate);
     _shared_indices.insert(std::make_pair(hash, sharedBuffer));
     return sharedBuffer;
+}
+
+GraphicsBufferAllocator& RenderController::gba()
+{
+    return _gba;
 }
 
 uint64_t RenderController::updateTick()

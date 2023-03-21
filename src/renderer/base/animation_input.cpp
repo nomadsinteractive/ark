@@ -9,7 +9,7 @@
 namespace ark {
 
 AnimationInput::AnimationInput(sp<Numeric> duration, uint32_t durationInTicks, const sp<Table<String, uint32_t>>& node, const sp<std::vector<AnimationFrame>>& animationFrames)
-    : Input(node->size() * sizeof(M4)), _stub(sp<Stub>::make(std::move(duration), durationInTicks, node, animationFrames))
+    : Uploader(node->size() * sizeof(M4)), _stub(sp<Stub>::make(std::move(duration), durationInTicks, node, animationFrames))
 {
 }
 

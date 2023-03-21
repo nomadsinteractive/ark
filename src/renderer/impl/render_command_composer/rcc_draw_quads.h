@@ -1,6 +1,4 @@
-#ifndef ARK_RENDERER_IMPL_RENDER_COMMAND_COMPOSER_RCC_DRAW_QUADS_H_
-#define ARK_RENDERER_IMPL_RENDER_COMMAND_COMPOSER_RCC_DRAW_QUADS_H_
-
+#pragma once
 
 #include "renderer/forwarding.h"
 #include "renderer/base/model.h"
@@ -23,5 +21,3 @@ private:
 };
 
 }
-
-#endif

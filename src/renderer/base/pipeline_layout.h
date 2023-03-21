@@ -36,7 +36,7 @@ public:
 
 private:
     void initialize(const Camera& camera);
-    void tryBindUniform(const ShaderPreprocessor& shaderPreprocessor, const String& name, const sp<Input>& input);
+    void tryBindUniform(const ShaderPreprocessor& shaderPreprocessor, const String& name, const sp<Uploader>& input);
     void tryBindCamera(const ShaderPreprocessor& shaderPreprocessor, const Camera& camera);
 
     Table<String, sp<Texture>> makeBindingSamplers() const;

@@ -1,4 +1,4 @@
-#include "core/impl/input/input_impl.h"
+#include "core/impl/uploader/input_impl.h"
 
 #include "core/impl/writable/writable_with_offset.h"
 #include "core/util/log.h"
@@ -6,12 +6,12 @@
 namespace ark {
 
 InputImpl::InputImpl(size_t size)
-    : Input(size)
+    : Uploader(size)
 {
 }
 
-InputImpl::InputImpl(const std::map<size_t, sp<Input>>& inputMap, size_t size)
-    : Input(size)
+InputImpl::InputImpl(const std::map<size_t, sp<Uploader>>& inputMap, size_t size)
+    : Uploader(size)
 {
     for(const auto& [i, j] : inputMap)
         addInput(i, j);
@@ -45,7 +45,7 @@ void InputImpl::upload(Writable& writable)
         }
 }
 
-void InputImpl::addInput(size_t offset, sp<Input> input)
+void InputImpl::addInput(size_t offset, sp<Uploader> input)
 {
     LOGD("[%p] offset: %zd, size: %zd", this, offset, input->size());
     sp<Boolean::Impl>& disposed = _inputs_disposed[offset];
@@ -83,7 +83,7 @@ size_t InputImpl::calculateUploaderSize()
     return size;
 }
 
-InputImpl::InputStub::InputStub(size_t offset, sp<Input> input, sp<Boolean> disposed)
+InputImpl::InputStub::InputStub(size_t offset, sp<Uploader> input, sp<Boolean> disposed)
     : _offset(offset), _input(std::move(input)), _dirty_updated(true), _dirty_marked(true), _disposed(disposed)
 {
     DASSERT(_input);

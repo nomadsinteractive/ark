@@ -4,6 +4,8 @@
 
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/model.h"
+#include "renderer/base/render_controller.h"
+#include "renderer/base/render_engine.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/inf/render_command_composer.h"
@@ -15,7 +17,8 @@ RenderLayerSnapshot::RenderLayerSnapshot(RenderRequest& renderRequest, const sp<
 {
     DPROFILER_TRACE("Snapshot");
 
-    bool needsReload = _stub->_layer_context->preSnapshot(renderRequest);
+    bool needsReload = _stub->_layer_context->snapshot(renderRequest, *this);
+//    _stub->_layer_context->snapshot(renderRequest, *this);
 
     for(auto iter = _stub->_layer_context_list.begin(); iter != _stub->_layer_context_list.end(); )
     {
@@ -23,21 +26,19 @@ RenderLayerSnapshot::RenderLayerSnapshot(RenderRequest& renderRequest, const sp<
         const SafeVar<Boolean>& disposed = layerContext->disposed();
         if((!disposed && layerContext.unique()) || disposed.val())
         {
+            addDisposedLayerContext(layerContext);
             iter = _stub->_layer_context_list.erase(iter);
             needsReload = true;
         }
         else
         {
-            needsReload = layerContext->preSnapshot(renderRequest) || needsReload;
+            needsReload = layerContext->snapshot(renderRequest, *this) || needsReload;
+//            layerContext->snapshot(renderRequest, *this);
             ++iter;
         }
     }
 
     _flag = needsReload ? SNAPSHOT_FLAG_RELOAD : SNAPSHOT_FLAG_DYNAMIC_UPDATE;
-
-    _stub->_layer_context->snapshot(renderRequest, *this);
-    for(LayerContext& i : _stub->_layer_context_list)
-        i.snapshot(renderRequest, *this);
 
     _stub->_render_command_composer->postSnapshot(_stub->_render_controller, *this);
 
@@ -69,12 +70,53 @@ const sp<PipelineInput>& RenderLayerSnapshot::pipelineInput() const
     return _stub->_shader->input();
 }
 
-void RenderLayerSnapshot::addSnapshot(const LayerContext& lc, Renderable::Snapshot snapshot)
+void RenderLayerSnapshot::addSnapshot(LayerContext& lc, Renderable::Snapshot snapshot, void* stateKey)
 {
+    auto iter = lc._element_states.find(stateKey);
+    DASSERT(iter != lc._element_states.end());
+    _items.emplace_back(iter->second, std::move(snapshot));
+}
+
+void RenderLayerSnapshot::addDisposedState(LayerContext& lc, void* stateKey)
+{
+    const auto iter = lc._element_states.find(stateKey);
+    if(iter != lc._element_states.end())
+    {
+        _item_deleted.push_back(iter->second);
+        lc._element_states.erase(iter);
+    }
+}
+
+void RenderLayerSnapshot::addDisposedLayerContext(LayerContext& lc)
+{
+    for(const auto& [i, j] : lc._element_states)
+        _item_deleted.push_back(j);
+    lc._renderables.clear();
+    lc._element_states.clear();
+}
+
+sp<RenderCommand> RenderLayerSnapshot::toRenderCommand(const RenderRequest& renderRequest, Buffer::Snapshot vertices, Buffer::Snapshot indices, DrawingContextParams::Parameters params)
+{
+    DrawingContext drawingContext(_stub->_shader_bindings, _stub->_shader_bindings->attachments(), std::move(_ubos), std::move(_ssbos), std::move(vertices), std::move(indices),
+                                  std::move(params));
+
+    if(_stub->_scissor)
+        drawingContext._scissor = _stub->_render_controller->renderEngine()->toRendererRect(_scissor);
+
+    return drawingContext.toRenderCommand(renderRequest);
+}
+
+void RenderLayerSnapshot::loadSnapshot(const LayerContext& lc, Renderable::Snapshot& snapshot, const Varyings::Snapshot& defaultVaryingsSnapshot)
+{
+    snapshot.applyVaryings(defaultVaryingsSnapshot);
     if(!snapshot._model)
         snapshot._model = lc._model_loader->loadModel(snapshot._type);
     _index_count += snapshot._model->indexCount();
-    _items.push_back(std::move(snapshot));
+}
+
+RenderLayerSnapshot::SnapshotWithState::SnapshotWithState(LayerContext::ElementState& state, Renderable::Snapshot snapshot)
+    : _state(state), _snapshot(std::move(snapshot))
+{
 }
 
 }

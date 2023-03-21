@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_BASE_VERTEX_WRITTER_H_
-#define ARK_RENDERER_BASE_VERTEX_WRITTER_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/inf/writable.h"
@@ -13,18 +12,16 @@
 namespace ark {
 
 class ARK_API VertexWriter {
-private:
+public:
     class Writer : public Writable {
     public:
         virtual ~Writer() override = default;
 
-        virtual void next() = 0;
-        virtual void writePosition(const V3& position) = 0;
+        virtual void nextVertex() = 0;
     };
 
-    VertexWriter(const PipelineInput::AttributeOffsets& attributes, bool doTransform, sp<Writer> writer);
-
 public:
+    VertexWriter(const PipelineInput::AttributeOffsets& attributes, bool doTransform, sp<Writer> writer);
     VertexWriter(const PipelineInput::AttributeOffsets& attributes, bool doTransform, uint8_t* ptr, size_t size, size_t stride);
 
     template<typename T> void write(const T& value, uint32_t offset = 0) {
@@ -57,8 +54,7 @@ private:
     public:
         WriterMemory(uint8_t* ptr, uint32_t size, uint32_t stride);
 
-        virtual void next() override;
-        virtual void writePosition(const V3& position) override;
+        virtual void nextVertex() override;
 
         virtual uint32_t write(const void* ptr, uint32_t size, uint32_t offset) override;
 
@@ -88,5 +84,3 @@ private:
 };
 
 }
-
-#endif

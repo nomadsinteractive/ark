@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_IMPL_RENDER_BATCH_RENDER_BATCH_WITH_TRANSLATION_H_
-#define ARK_GRAPHICS_IMPL_RENDER_BATCH_RENDER_BATCH_WITH_TRANSLATION_H_
+#pragma once
 
 #include "core/base/wrapper.h"
 
@@ -12,8 +11,8 @@ class RenderBatchWithTranslation : public Wrapper<RenderBatch>, public RenderBat
 public:
     RenderBatchWithTranslation(sp<RenderBatch> renderBatch, sp<Vec3> translation);
 
-    virtual bool preSnapshot(const RenderRequest& renderRequest, LayerContext& lc) override;
-    virtual void snapshot(const RenderRequest& renderRequest, const LayerContext& lc, RenderLayerSnapshot& output) override;
+    virtual bool preSnapshot(const RenderRequest& renderRequest, LayerContext& lc, RenderLayerSnapshot& output) override;
+    virtual void snapshot(const RenderRequest& renderRequest, LayerContext& lc, RenderLayerSnapshot& output) override;
 
 private:
     sp<Vec3> _translation;
@@ -21,5 +20,3 @@ private:
 };
 
 }
-
-#endif

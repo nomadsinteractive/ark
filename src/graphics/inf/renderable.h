@@ -16,7 +16,8 @@ public:
         RENDERABLE_STATE_NONE = 0,
         RENDERABLE_STATE_DISPOSED = 1,
         RENDERABLE_STATE_DIRTY = 2,
-        RENDERABLE_STATE_VISIBLE = 4
+        RENDERABLE_STATE_VISIBLE = 4,
+        RENDERABLE_STATE_NEW = 8
     };
 
     virtual ~Renderable() = default;
@@ -29,6 +30,7 @@ public:
 
         bool hasState(StateBits state) const;
         void setState(StateBits state, bool enabled);
+        void setState(StateBits state);
 
         StateBits stateBits() const;
 
