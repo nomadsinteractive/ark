@@ -129,7 +129,7 @@ element_index_t GraphicsBufferAllocator::Strips::allocate(uint32_t unitVertexCou
 void GraphicsBufferAllocator::Strips::free(element_index_t idx)
 {
     const auto iter = _allocations.find(idx);
-    DASSERT(iter != _allocations.end());
+    DCHECK(iter != _allocations.end(), "Unallocated index %d is being freed", idx);
     _allocations.erase(iter);
     _size -= _page->_heap.free(idx * _heap_strategy_fix_size);
 }

@@ -119,7 +119,7 @@ private:
 
     template<typename T> const sp<T>& tryUpdateDelegate(SafeVar<T>& safevar) {
         if(safevar)
-            return safevar;
+            return static_cast<const sp<T>&>(safevar);
 
         const sp<T>& var = safevar.ensure();
         if(_type != TYPE_DELEGATED)

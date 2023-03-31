@@ -44,6 +44,8 @@ public:
     bool needsReload() const;
     const sp<PipelineInput>& pipelineInput() const;
 
+    void snapshot(RenderRequest& renderRequest, std::vector<sp<LayerContext>>& layerContexts);
+
     void loadSnapshot(const LayerContext& lc, Renderable::Snapshot& snapshot, const Varyings::Snapshot& defaultVaryingsSnapshot);
     void addSnapshot(LayerContext& lc, Renderable::Snapshot snapshot, void* stateKey);
 
@@ -51,6 +53,8 @@ public:
     void addDisposedState(LayerContext& lc, void* stateKey);
 
     void addDisposedLayerContext(LayerContext& lc);
+    void addDisposedLayerContexts(const std::vector<sp<LayerContext>>& layerContexts);
+    bool addLayerContext(const RenderRequest& renderRequest, LayerContext& layerContext);
 
     sp<RenderCommand> toRenderCommand(const RenderRequest& renderRequest, Buffer::Snapshot vertices, Buffer::Snapshot indices, DrawingContextParams::Parameters params);
 
@@ -62,14 +66,10 @@ public:
     std::vector<std::pair<uint32_t, Buffer::Snapshot>> _ssbos;
 
     std::deque<SnapshotWithState> _items;
-
     std::deque<LayerContext::ElementState> _item_deleted;
-
     Buffer::Snapshot _index_buffer;
-
     Rect _scissor;
-
-    SnapshotFlag _flag;
+    bool _needs_reload;
 
     DISALLOW_COPY_AND_ASSIGN(RenderLayerSnapshot);
 

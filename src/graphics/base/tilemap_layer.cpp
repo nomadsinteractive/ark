@@ -22,18 +22,8 @@ namespace ark {
 
 TilemapLayer::TilemapLayer(sp<Tileset> tileset, String name, uint32_t colCount, uint32_t rowCount, sp<Vec3> position, sp<Boolean> visible, sp<CollisionFilter> collisionFilter)
     : _name(std::move(name)), _col_count(colCount), _row_count(rowCount), _size(sp<Size>::make(tileset->tileWidth() * colCount, tileset->tileHeight() * rowCount)), _visible(std::move(visible), true),
-      _collision_filter(std::move(collisionFilter)), _stub(sp<Stub>::make(colCount, rowCount, std::move(tileset), SafeVar<Vec3>(std::move(position)), 0))
+      _collision_filter(std::move(collisionFilter)), _stub(sp<Stub>::make(colCount, rowCount, std::move(tileset), SafeVar<Vec3>(std::move(position)), 0)), _layer_tiles(colCount * rowCount)
 {
-}
-
-bool TilemapLayer::preSnapshot(const RenderRequest& renderRequest, LayerContext& lc, RenderLayerSnapshot& output)
-{
-    return _stub->preSnapshot(renderRequest, lc, output);
-}
-
-void TilemapLayer::snapshot(const RenderRequest& renderRequest, LayerContext& lc, RenderLayerSnapshot& output)
-{
-    _stub->snapshot(renderRequest, lc, output);
 }
 
 bool TilemapLayer::getSelectionTileRange(const Rect& aabb, V3& selectionPosition, RectI& selectionRange) const
@@ -108,11 +98,11 @@ void TilemapLayer::setVisible(sp<Boolean> visible)
     _visible.reset(std::move(visible));
 }
 
-const sp<Tile>& TilemapLayer::getTile(uint32_t colId, uint32_t rowId) const
+sp<Tile> TilemapLayer::getTile(uint32_t colId, uint32_t rowId) const
 {
     CHECK(rowId < _row_count && colId < _col_count, "Invaild tile id:(%d, %d), tile map size(%d, %d)", colId, rowId, _row_count, _col_count);
-    const LayerTile& layerTile = _stub->_layer_tiles.at(rowId * _col_count + colId);
-    return layerTile._tile;
+    const sp<RenderableTile>& layerTile = _layer_tiles.at(rowId * _col_count + colId);
+    return layerTile ? layerTile->_tile : nullptr;
 }
 
 std::vector<int32_t> TilemapLayer::getTileRect(const RectI& rect) const
@@ -124,8 +114,12 @@ std::vector<int32_t> TilemapLayer::getTileRect(const RectI& rect) const
     for(int32_t i = srcRect.top(); i < srcRect.bottom(); ++i)
         for(int32_t j = srcRect.left(); j < srcRect.right(); ++j)
         {
-            const sp<Tile>& tile = _stub->_layer_tiles.at(i * _col_count + j)._tile;
-            tiles[static_cast<size_t>((i - srcRect.top()) * srcRect.width() + j - srcRect.left())] = tile ? tile->id() : -1;
+            const sp<RenderableTile>& rt = _layer_tiles.at(i * _col_count + j);
+            size_t idx = static_cast<size_t>((i - srcRect.top()) * srcRect.width() + j - srcRect.left());
+            if(!rt || !rt->_tile)
+                tiles[idx] = -1;
+            else
+                tiles[idx] = rt->_tile->id();
         }
     return tiles;
 }
@@ -173,22 +167,37 @@ void TilemapLayer::resize(uint32_t colCount, uint32_t rowCount, uint32_t offsetX
 {
     CHECK(colCount >= _col_count && rowCount >= _row_count, "Changing size(%d, %d) to (%d, %d) failed. TilemapLayer can not be shrinked.", _col_count, _row_count, colCount, rowCount);
     CHECK(offsetX <= (colCount - _col_count) && offsetY <= (rowCount - _row_count), "Offset position out of bounds(%d, %d)", offsetX, offsetY);
+    const bool positionChanged = offsetX && offsetY;
+    float tileWidth = _stub->_tileset->tileWidth(), tileHeight = _stub->_tileset->tileWidth();
     Stub stub(colCount, rowCount, std::move(_stub->_tileset), std::move(_stub->_position), _stub->_zorder);
+
+    std::vector<sp<RenderableTile>> layerTiles(colCount * rowCount);
     for(uint32_t i = 0; i < _row_count; ++i)
         for(uint32_t j = 0; j < _col_count; ++j)
-            stub._layer_tiles[(i + offsetY) * _col_count + j + offsetX] = std::move(_stub->_layer_tiles[i * _col_count + j]);
+        {
+            sp<RenderableTile>& renderTile = layerTiles[(i + offsetY) * colCount + j + offsetX];
+            renderTile = std::move(_layer_tiles[i * _col_count + j]);
+            if(renderTile && positionChanged)
+            {
+                float dx = static_cast<float>(j) * tileWidth + tileWidth / 2;
+                float dy = static_cast<float>(i) * tileHeight + tileHeight / 2;
+                renderTile->_position = V3(dx, dy, 0);
+            }
+        }
 
     *_stub = std::move(stub);
     _col_count = colCount;
     _row_count = rowCount;
     _size->setWidth(_stub->_tileset->tileWidth() * colCount);
     _size->setHeight(_stub->_tileset->tileHeight() * rowCount);
-    _stub->_timestamp.markDirty();
+    _layer_tiles = std::move(layerTiles);
+    if(positionChanged)
+        _stub->_timestamp.markDirty();
 }
 
 void TilemapLayer::clear()
 {
-    std::fill(_stub->_layer_tiles.begin(), _stub->_layer_tiles.end(), LayerTile());
+    std::fill(_layer_tiles.begin(), _layer_tiles.end(), nullptr);
 }
 
 void TilemapLayer::foreachTile(const std::function<bool (uint32_t, uint32_t, const sp<Tile>&)>& callback) const
@@ -196,8 +205,8 @@ void TilemapLayer::foreachTile(const std::function<bool (uint32_t, uint32_t, con
     for(uint32_t i = 0; i < _row_count; ++i)
         for(uint32_t j = 0; j < _col_count; ++j)
         {
-            const LayerTile& layerTile = _stub->_layer_tiles.at(i * _col_count + j);
-            if(layerTile._tile && !callback(j, i, layerTile._tile))
+            const sp<RenderableTile>& layerTile = _layer_tiles.at(i * _col_count + j);
+            if(layerTile && layerTile->_tile && !callback(j, i, layerTile->_tile))
                 return;
         }
 }
@@ -208,8 +217,16 @@ void TilemapLayer::setTile(uint32_t col, uint32_t row, const sp<Tile>& tile, con
     uint32_t index = row * _col_count + col;
     const sp<RenderObject>& ro = renderObject ? renderObject : (tile ? tile->renderObject() : nullptr);
     sp<Tile> tileDup = renderObject ? (tile ? sp<Tile>::make(tile->id(), tile->type(), tile->shapeId(), renderObject) : sp<Tile>::make(0, "", -1, renderObject)) : tile;
-    _stub->_layer_tiles[index] = LayerTile(std::move(tileDup), ro);
-    _stub->_timestamp.markDirty();
+    float tileWidth = _stub->_tileset->tileWidth(), tileHeight = _stub->_tileset->tileWidth();
+    float dx = static_cast<float>(col) * tileWidth + tileWidth / 2;
+    float dy = static_cast<float>(row) * tileHeight + tileHeight / 2;
+    sp<RenderableTile> renderableTile = ro ? sp<RenderableTile>::make(_stub, std::move(tileDup), ro, V3(dx, dy, 0.0)) : nullptr;
+    sp<RenderableTile>& targetTile = _layer_tiles[index];
+    if(targetTile)
+        targetTile->_renderable->dispose();
+    if(_layer_context)
+        _layer_context->add(renderableTile);
+    _layer_tiles[index] = std::move(renderableTile);
 }
 
 const sp<CollisionFilter>& TilemapLayer::collisionFilter() const
@@ -222,66 +239,39 @@ void TilemapLayer::setCollisionFilter(sp<CollisionFilter> collisionFilter)
     _collision_filter = std::move(collisionFilter);
 }
 
-TilemapLayer::LayerTile::LayerTile(sp<Tile> tile, sp<RenderObject> renderable)
-    : _tile(std::move(tile)), _renderable(std::move(renderable)) {
+const sp<LayerContext>& TilemapLayer::layerContext() const
+{
+    return _layer_context;
+}
+
+void TilemapLayer::setLayerContext(sp<LayerContext> layerContext)
+{
+    _layer_context = std::move(layerContext);
+    for(const sp<RenderableTile>& i : _layer_tiles)
+        if(i)
+            _layer_context->add(i);
+}
+
+TilemapLayer::RenderableTile::RenderableTile(const sp<Stub>& stub, sp<Tile> tile, sp<RenderObject> renderable, const V3& position)
+    : _stub(stub), _tile(std::move(tile)), _renderable(std::move(renderable)), _position(position)
+{
+    ASSERT(_renderable);
+}
+
+Renderable::StateBits TilemapLayer::RenderableTile::updateState(const RenderRequest& renderRequest)
+{
+    return _renderable->updateState(renderRequest);
+}
+
+Renderable::Snapshot TilemapLayer::RenderableTile::snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest, const V3& postTranslate, StateBits state)
+{
+    const V3 tileTranslate = _position + V3(0, 0, _stub->_zorder);
+    return _renderable->snapshot(pipelineInput, renderRequest, postTranslate + tileTranslate, state);
 }
 
 TilemapLayer::Stub::Stub(size_t colCount, size_t rowCount, sp<Tileset> tileset, SafeVar<Vec3> position, float zorder)
-    : _col_count(colCount), _row_count(rowCount), _tileset(std::move(tileset)), _position(std::move(position)), _layer_tiles(colCount * rowCount), _zorder(zorder)
+    : _col_count(colCount), _row_count(rowCount), _tileset(std::move(tileset)), _position(std::move(position)), _zorder(zorder)
 {
-}
-
-bool TilemapLayer::Stub::preSnapshot(const RenderRequest& renderRequest, LayerContext& lc, RenderLayerSnapshot& output)
-{
-    bool needsReload = _timestamp.update(renderRequest.timestamp());
-    for(LayerTile& i : _layer_tiles)
-    {
-        if(i._renderable)
-        {
-            i._state = i._renderable->updateState(renderRequest);
-            if(i._state.hasState(Renderable::RENDERABLE_STATE_DISPOSED))
-            {
-                needsReload = true;
-                output.addDisposedState(lc, &i);
-                i._renderable = nullptr;
-            }
-        }
-    }
-    return needsReload;
-}
-
-void TilemapLayer::Stub::snapshot(const RenderRequest& renderRequest, LayerContext& lc, RenderLayerSnapshot& output)
-{
-    const PipelineInput& pipelineInput = output.pipelineInput();
-    const bool visible = lc._visible.val();
-    const bool needsReload = lc._position_changed || lc._render_done != visible;
-    Varyings::Snapshot defaultVaryingsSnapshot = lc._varyings ? lc._varyings->snapshot(pipelineInput, renderRequest.allocator()) : Varyings::Snapshot();
-
-    float tileWidth = _tileset->tileWidth(), tileHeight = _tileset->tileWidth();
-    const V3 posOff = lc._position + _position.val();
-
-    for(size_t i = 0; i < _row_count; ++i)
-    {
-        size_t rowIndex = i * _col_count;
-        float dy = static_cast<float>(i) * tileHeight + tileHeight / 2;
-        for(size_t j = 0; j < _col_count; ++j)
-        {
-            LayerTile& tile = _layer_tiles.at(rowIndex + j);
-            if(tile._renderable)
-            {
-                Renderable::State state = tile._state;
-                if(needsReload)
-                    state.setState(Renderable::RENDERABLE_STATE_DIRTY, true);
-                if(state.hasState(Renderable::RENDERABLE_STATE_VISIBLE))
-                    state.setState(Renderable::RENDERABLE_STATE_VISIBLE, visible);
-                if(lc.ensureState(&tile))
-                    state.setState(Renderable::RENDERABLE_STATE_NEW, true);
-                Renderable::Snapshot snapshot = tile._renderable->snapshot(pipelineInput, renderRequest, posOff + V3(j * tileWidth + tileWidth / 2, dy, _zorder), state.stateBits());
-                output.loadSnapshot(lc, snapshot, defaultVaryingsSnapshot);
-                output.addSnapshot(lc, std::move(snapshot), &tile);
-            }
-        }
-    }
 }
 
 }

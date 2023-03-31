@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_IMPL_MODEL_LOADER_MODEL_LOADER_TEXT_H_
-#define ARK_RENDERER_IMPL_MODEL_LOADER_MODEL_LOADER_TEXT_H_
+#pragma once
 
 #include <vector>
 #include <unordered_map>
@@ -105,5 +104,3 @@ private:
 };
 
 }
-
-#endif

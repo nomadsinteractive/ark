@@ -13,13 +13,10 @@
 
 namespace ark {
 
-class ARK_API TilemapLayer : public RenderBatch {
+class ARK_API TilemapLayer {
 public:
 // [[script::bindings::auto]]
     TilemapLayer(sp<Tileset> tileset, String name, uint32_t colCount, uint32_t rowCount, sp<Vec3> position = nullptr, sp<Boolean> visible = nullptr, sp<CollisionFilter> collisionFilter = nullptr);
-
-    virtual bool preSnapshot(const RenderRequest& renderRequest, LayerContext& lc, RenderLayerSnapshot& output) override;
-    virtual void snapshot(const RenderRequest& renderRequest, LayerContext& lc, RenderLayerSnapshot& output) override;
 
     bool getSelectionTileRange(const Rect& aabb, V3& selectionPosition, RectI& selectionRange) const;
 
@@ -42,6 +39,9 @@ public:
 // [[script::bindings::property]]
     void setCollisionFilter(sp<CollisionFilter> collisionFilter);
 
+    const sp<LayerContext>& layerContext() const;
+    void setLayerContext(sp<LayerContext> layerContext);
+
 // [[script::bindings::property]]
     uint32_t colCount() const;
 // [[script::bindings::property]]
@@ -53,7 +53,7 @@ public:
     void setVisible(sp<Boolean> visible);
 
 // [[script::bindings::auto]]
-    const sp<Tile>& getTile(uint32_t colId, uint32_t rowId) const;
+    sp<Tile> getTile(uint32_t colId, uint32_t rowId) const;
 // [[script::bindings::auto]]
     const sp<Tile>& getTileByPosition(float x, float y) const;
 // [[script::bindings::auto]]
@@ -79,28 +79,30 @@ public:
 private:
     void setTile(uint32_t col, uint32_t row, const sp<Tile>& tile, const sp<RenderObject>& renderObject);
 
-    struct LayerTile {
-        LayerTile() = default;
-        LayerTile(sp<Tile> tile, sp<RenderObject> renderable);
+    class Stub;
 
+    class RenderableTile : public Renderable {
+    public:
+        RenderableTile(const sp<Stub>& stub, sp<Tile> tile, sp<RenderObject> renderable, const V3& position);
+
+        virtual StateBits updateState(const RenderRequest& renderRequest) override;
+        virtual Snapshot snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest, const V3& postTranslate, StateBits state) override;
+
+        sp<Stub> _stub;
         sp<Tile> _tile;
         sp<RenderObject> _renderable;
-        Renderable::State _state;
+        V3 _position;
     };
 
-    class Stub : public RenderBatch {
+    class Stub {
     public:
         Stub(size_t colCount, size_t rowCount, sp<Tileset> tileset, SafeVar<Vec3> position, float zorder);
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Stub);
-
-        virtual bool preSnapshot(const RenderRequest& renderRequest, LayerContext& lc, RenderLayerSnapshot& output) override;
-        virtual void snapshot(const RenderRequest& renderRequest, LayerContext& lc, RenderLayerSnapshot& output) override;
 
         size_t _col_count;
         size_t _row_count;
         sp<Tileset> _tileset;
         SafeVar<Vec3> _position;
-        std::vector<LayerTile> _layer_tiles;
         float _zorder;
         Timestamp _timestamp;
     };
@@ -113,8 +115,11 @@ private:
 
     SafeVar<Boolean> _visible;
     sp<CollisionFilter> _collision_filter;
+    sp<LayerContext> _layer_context;
 
     sp<Stub> _stub;
+
+    std::vector<sp<RenderableTile>> _layer_tiles;
 
     friend class Tilemap;
 

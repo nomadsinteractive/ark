@@ -14,55 +14,55 @@ public:
     typedef T _PtrType;
 
     SafeVar() noexcept
-        : _wrapper(nullptr) {
+        : _wrapped(nullptr) {
     }
     SafeVar(sp<T> delegate) noexcept
         : SafeVar(std::move(delegate), ValType()) {
     }
     SafeVar(sp<T> delegate, const ValType& defaultVal) noexcept
-        : _default_val(defaultVal), _wrapper(delegate ? ensure_sfinae(std::move(delegate), nullptr) : nullptr) {
+        : _default_val(defaultVal), _wrapped(delegate ? ensure_sfinae(std::move(delegate), nullptr) : nullptr) {
     }
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(SafeVar);
 
     explicit operator bool() const {
-        return static_cast<bool>(_wrapper);
+        return static_cast<bool>(_wrapped);
     }
 
     ValType val() const {
-        return _wrapper ? _wrapper->val() : _default_val;
+        return _wrapped ? _wrapped->val() : _default_val;
     }
 
     bool update(uint64_t timestamp) const {
-        return _wrapper ? _wrapper->update(timestamp) : false;
+        return _wrapped ? _wrapped->update(timestamp) : false;
     }
 
-    operator const sp<T>&() const {
-        return ensure();
+    explicit operator const sp<T>&() const {
+        return _wrapped;
     }
 
     const sp<T>& ensure() const {
-        if(!_wrapper)
-            _wrapper = ensure_sfinae(nullptr, nullptr);
-        return _wrapper;
+        if(!_wrapped)
+            _wrapped = ensure_sfinae(nullptr, nullptr);
+        return _wrapped;
     }
 
     const sp<T>& wrapped() const {
-        return _wrapper;
+        return _wrapped;
     }
 
     void reset(sp<T> delegate) {
         if(!delegate) {
-            _wrapper = nullptr;
+            _wrapped = nullptr;
             return;
         }
 
-        if(!_wrapper)
-            _wrapper = ensure_sfinae(std::move(delegate), nullptr);
+        if(!_wrapped)
+            _wrapped = ensure_sfinae(std::move(delegate), nullptr);
         else {
             if constexpr(std::is_abstract_v<T>)
-                _wrapper.cast<WrapperType>()->reset(std::move(delegate));
+                _wrapped.cast<WrapperType>()->reset(std::move(delegate));
             else
-                _wrapper->reset(std::move(delegate));
+                _wrapped->reset(std::move(delegate));
         }
     }
 
@@ -82,7 +82,7 @@ private:
 
 private:
     ValType _default_val;
-    mutable sp<T> _wrapper;
+    mutable sp<T> _wrapped;
 };
 
 }

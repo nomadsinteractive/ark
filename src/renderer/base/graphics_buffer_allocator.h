@@ -11,7 +11,7 @@
 namespace ark {
 
 class GraphicsBufferAllocator {
-private:
+public:
     struct Memory {
         Memory(uint32_t size);
 
@@ -21,12 +21,7 @@ private:
         uint32_t _size;
     };
 
-public:
-    GraphicsBufferAllocator(RenderController& renderController);
-
     typedef Heap<Memory, uint32_t, 16> HeapType;
-
-    class Strips;
 
     class Page {
     public:
@@ -46,6 +41,9 @@ public:
 
         friend class Strips;
     };
+
+public:
+    GraphicsBufferAllocator(RenderController& renderController);
 
     class Strips {
     public:

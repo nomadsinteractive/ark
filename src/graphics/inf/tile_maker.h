@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_INF_RENDERER_MAKER_H_
-#define ARK_GRAPHICS_INF_RENDERER_MAKER_H_
+#pragma once
 
 #include <vector>
 
@@ -11,11 +10,9 @@ class RendererMaker {
 public:
     virtual ~RendererMaker() = default;
 
-    virtual std::vector<Box> make(int32_t x, int32_t y) = 0;
+    virtual std::vector<Box> make(float x, float y) = 0;
     virtual void recycle(const Box& renderer) = 0;
 
 };
 
 }
-
-#endif

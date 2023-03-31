@@ -172,7 +172,7 @@ void View::setVisbile(sp<Boolean> visible)
 
 sp<Boolean> View::disposed() const
 {
-    return _stub->_disposed;
+    return _stub->_disposed.ensure();
 }
 
 void View::setDisposed(sp<Boolean> disposed)

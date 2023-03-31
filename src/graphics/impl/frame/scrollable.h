@@ -1,5 +1,6 @@
-#ifndef ARK_GRAPHICS_IMPL_FRAME_SCORLLABLE_H_
-#define ARK_GRAPHICS_IMPL_FRAME_SCORLLABLE_H_
+#pragma once
+
+#include <vector>
 
 #include "core/base/api.h"
 #include "core/inf/builder.h"
@@ -14,7 +15,7 @@
 
 namespace ark {
 
-class ARK_API Scrollable : public Renderer, public Block {
+class ARK_API Scrollable : public Block {
 public:
     struct ARK_API Params {
         Params(int32_t rowCount, int32_t colCount, int32_t rowIndex, int32_t colIndex, int32_t rendererWidth, int32_t rendererHeight);
@@ -30,15 +31,15 @@ public:
 private:
     class RendererPool {
     public:
-        RendererPool(int32_t rendererWidth, int32_t rendererHeight);
+        RendererPool(float rendererWidth, float rendererHeight);
 
-        const std::vector<Box>& cull(RendererMaker& rendererMaker, int32_t x, int32_t y, const RectI& viewport);
-
-    private:
-        void recycleOutOfFrustum(RendererMaker& rendererMaker, const RectI& viewport);
+        const std::vector<Box>& cull(RendererMaker& rendererMaker, float x, float y, const Rect& viewport);
 
     private:
-        typedef std::pair<int32_t, int32_t> RendererKey;
+        void recycleOutOfFrustum(RendererMaker& rendererMaker, const Rect& viewport);
+
+    private:
+        typedef std::pair<float, float> RendererKey;
 
         int32_t _renderer_width;
         int32_t _renderer_height;
@@ -48,12 +49,12 @@ private:
 public:
     Scrollable(sp<Vec3> scroller, sp<RendererMaker> rendererMaker, sp<Size> size, const Scrollable::Params& params);
 
-    virtual void render(RenderRequest& renderRequest, const V3& position) override;
     virtual const sp<Size>& size() override;
 
-    void cull();
+    const std::vector<Box>& cull(uint64_t timestamp);
 
     const sp<Vec3>& scroller() const;
+
     const sp<RendererMaker>& rendererMaker() const;
     void setRendererMaker(const sp<RendererMaker>& rendererMaker);
 
@@ -75,22 +76,11 @@ public:
         sp<Builder<Numeric>> _renderer_height;
     };
 
-//  [[plugin::builder("scrollable")]]
-    class BUILDER_RENDERER : public Builder<Renderer> {
-    public:
-        BUILDER_RENDERER(BeanFactory& factory, const document& manifest);
-
-        virtual sp<Renderer> build(const Scope& args) override;
-
-    private:
-        BUILDER_SCROLLABLE _impl;
-    };
-
 private:
     int32_t width() const;
     int32_t height() const;
 
-    void update();
+    void update(uint64_t timestamp);
     void updateTask();
 
 private:
@@ -99,10 +89,8 @@ private:
     sp<Vec3> _scroller;
     sp<RendererMaker> _renderer_maker;
     SafePtr<Size> _size;
-    int32_t _scroll_x;
-    int32_t _scroll_y;
+
+    std::vector<Box> _culled_objects;
 };
 
 }
-
-#endif

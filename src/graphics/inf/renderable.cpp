@@ -24,10 +24,7 @@ void Renderable::State::setState(StateBits state, bool enabled)
 
 void Renderable::State::setState(StateBits state)
 {
-    bool isNewState = _state_bits & RENDERABLE_STATE_NEW;
-    _state_bits = state;
-    if(isNewState)
-        _state_bits = static_cast<StateBits>(_state_bits | RENDERABLE_STATE_NEW);
+    _state_bits = static_cast<StateBits>(state | (_state_bits & (RENDERABLE_STATE_NEW | RENDERABLE_STATE_DISPOSED)));
 }
 
 Renderable::StateBits Renderable::State::stateBits() const

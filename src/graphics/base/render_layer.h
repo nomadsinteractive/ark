@@ -1,6 +1,6 @@
-#ifndef ARK_GRAPHICS_INF_RENDER_LAYER_H_
-#define ARK_GRAPHICS_INF_RENDER_LAYER_H_
+#pragma once
 
+#include <set>
 #include <deque>
 #include <vector>
 #include <unordered_map>
@@ -12,6 +12,7 @@
 #include "graphics/forwarding.h"
 #include "graphics/base/layer.h"
 #include "graphics/base/rect.h"
+#include "graphics/impl/render_batch/render_batch_impl.h"
 #include "graphics/inf/renderable.h"
 #include "graphics/inf/renderer.h"
 
@@ -24,44 +25,45 @@ namespace ark {
 class ARK_API RenderLayer : public Renderer {
 private:
     struct Stub {
-        Stub(sp<RenderController> renderController, sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Boolean> visible, sp<Boolean> disposed, sp<Varyings> varyings, sp<Vec4> scissor, sp<Executor> executor);
-
-        sp<LayerContext> makeLayerContext(sp<RenderBatch> batch, sp<ModelLoader> modelLoader, sp<Boolean> visible, sp<Boolean> disposed);
-        void addLayerContext(sp<LayerContext> layerContext);
+        Stub(sp<RenderController> renderController, sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Boolean> visible, sp<Boolean> disposed, sp<Varyings> varyings, sp<Vec4> scissor);
 
         sp<RenderController> _render_controller;
         sp<ModelLoader> _model_loader;
         sp<Shader> _shader;
         sp<Vec4> _scissor;
-        sp<Executor> _executor;
 
         sp<RenderCommandComposer> _render_command_composer;
         sp<ShaderBindings> _shader_bindings;
 
-        std::vector<sp<LayerContext>> _layer_context_list;
-        sp<LayerContext> _layer_context;
-
         uint32_t _stride;
 
+    private:
+        sp<LayerContext> _layer_context;
+
+        friend class RenderLayer;
+        friend class RenderLayerSnapshot;
     };
 
 public:
-    RenderLayer(sp<RenderController> renderController, sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Boolean> visible, sp<Boolean> disposed, sp<Varyings> varyings, sp<Vec4> scissor, sp<Executor> executor);
+    RenderLayer(sp<RenderController> renderController, sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Boolean> visible, sp<Boolean> disposed, sp<Varyings> varyings, sp<Vec4> scissor);
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
-    RenderLayerSnapshot snapshot(RenderRequest& renderRequest) const;
+    RenderLayerSnapshot snapshot(RenderRequest& renderRequest);
 
 //  [[script::bindings::property]]
     const sp<LayerContext>& context() const;
 
-//[[script::bindings::auto]]
-    sp<Layer> makeLayer(sp<ModelLoader> modelLoader = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> disposed = nullptr, sp<Vec3> position = nullptr) const;
+//  [[script::bindings::auto]]
+    sp<Layer> makeLayer(sp<ModelLoader> modelLoader = nullptr, sp<Vec3> position = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> disposed = nullptr) const;
 
-    sp<LayerContext> makeLayerContext(sp<RenderBatch> batchOptional = nullptr, sp<ModelLoader> modelLoader = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> disposed = nullptr, sp<Vec3> position = nullptr) const;
+    void dispose();
+
+    sp<LayerContext> makeLayerContext(sp<ModelLoader> modelLoader, sp<Vec3> position, sp<Boolean> visible, sp<Boolean> disposed) const;
+    sp<LayerContext> addLayerContext(sp<ModelLoader> modelLoader = nullptr, sp<Vec3> position = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> disposed = nullptr) const;
     void addLayerContext(sp<LayerContext> layerContext);
 
-    const sp<Executor>& executor() const;
+    void addRenderBatch(sp<RenderBatch> renderBatch);
 
 //  [[plugin::resource-loader]]
     class BUILDER : public Builder<RenderLayer> {
@@ -99,10 +101,11 @@ private:
 private:
     sp<Stub> _stub;
 
+    sp<RenderBatchImpl> _render_batch;
+    std::vector<sp<RenderBatch>> _render_batches;
+
     friend class Layer;
     friend class RenderLayerSnapshot;
 };
 
 }
-
-#endif

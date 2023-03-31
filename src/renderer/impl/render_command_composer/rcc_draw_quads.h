@@ -1,6 +1,8 @@
 #pragma once
 
 #include "renderer/forwarding.h"
+#include "renderer/base/buffer.h"
+#include "renderer/base/graphics_buffer_allocator.h"
 #include "renderer/base/model.h"
 #include "renderer/inf/render_command_composer.h"
 
@@ -17,7 +19,8 @@ public:
 
 private:
     Model _model;
-    sp<SharedIndices> _shared_buffer;
+    Buffer _indices;
+    sp<GraphicsBufferAllocator::Strips> _strips;
 };
 
 }

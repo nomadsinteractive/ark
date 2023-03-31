@@ -18,13 +18,13 @@ RendererMakerPython::RendererMakerPython(PyInstance maker, PyInstance recycler)
 {
 }
 
-std::vector<Box> RendererMakerPython::make(int32_t x, int32_t y)
+std::vector<Box> RendererMakerPython::make(float x, float y)
 {
     DCHECK_THREAD_FLAG();
 
     PyInstance args(PyInstance::steal(PyTuple_New(2)));
-    PyObject* pyX = PyCast::toPyObject<int32_t>(x);
-    PyObject* pyY = PyCast::toPyObject<int32_t>(y);
+    PyObject* pyX = PyCast::toPyObject<float>(x);
+    PyObject* pyY = PyCast::toPyObject<float>(y);
     PyTuple_SetItem(args.pyObject(), 0, pyX);
     PyTuple_SetItem(args.pyObject(), 1, pyY);
     PyInstance ret = PyInstance::steal(_maker.call(args.pyObject()));

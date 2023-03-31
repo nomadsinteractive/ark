@@ -1,5 +1,4 @@
-#ifndef ARK_APP_IMPL_BROAD_PHRASE_BROAD_PHRASE_TILEMAP_H_
-#define ARK_APP_IMPL_BROAD_PHRASE_BROAD_PHRASE_TILEMAP_H_
+#pragma once
 
 #include "core/base/string.h"
 #include "core/inf/builder.h"
@@ -48,5 +47,3 @@ private:
 };
 
 }
-
-#endif

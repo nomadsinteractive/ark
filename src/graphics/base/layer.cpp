@@ -9,7 +9,6 @@
 #include "graphics/base/render_object.h"
 #include "graphics/base/layer_context.h"
 #include "graphics/impl/render_batch/render_batch_impl.h"
-#include "graphics/impl/render_batch/render_batch_with_translation.h"
 
 #include "renderer/impl/model_loader/model_loader_cached.h"
 
@@ -22,8 +21,6 @@ Layer::Layer(sp<LayerContext> layerContext)
 
 void Layer::render(RenderRequest& /*renderRequest*/, const V3& position)
 {
-    if(_layer_context)
-        _layer_context->renderRequest(position);
 }
 
 void Layer::traverse(const Holder::Visitor& visitor)
@@ -78,9 +75,8 @@ sp<Layer> Layer::BUILDER::build(const Scope& args)
 {
     sp<Vec3> position = _position->build(args);
     sp<ModelLoader> modelLoader = _model_loader->build(args);
-    sp<RenderBatch> renderBatch = position ? sp<RenderBatch>::make<RenderBatchWithTranslation>(sp<RenderBatchImpl>::make(), std::move(position)) : sp<RenderBatch>::make<RenderBatchImpl>();
     const sp<RenderLayer> renderLayer = _render_layer->build(args);
-    const sp<Layer> layer = sp<Layer>::make(renderLayer ? renderLayer->makeLayerContext(std::move(renderBatch), std::move(modelLoader)) : sp<LayerContext>::make(std::move(renderBatch), ModelLoaderCached::ensureCached(std::move(modelLoader)), _visible->build(args)));
+    const sp<Layer> layer = sp<Layer>::make(renderLayer ? renderLayer->addLayerContext(std::move(modelLoader), std::move(position)) : sp<LayerContext>::make(ModelLoaderCached::ensureCached(std::move(modelLoader)), std::move(position), _visible->build(args)));
     LayerContext& layerContext = layer->context();
     for(const sp<Builder<RenderObject>>& i : _render_objects)
         layerContext.add(i->build(args));

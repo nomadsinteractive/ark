@@ -1,8 +1,8 @@
-#ifndef ARK_GRAPHICS_INF_RENDER_BATCH_H_
-#define ARK_GRAPHICS_INF_RENDER_BATCH_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/forwarding.h"
+#include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
 
@@ -10,13 +10,15 @@ namespace ark {
 
 class ARK_API RenderBatch {
 public:
+    RenderBatch(sp<Boolean> disposed = nullptr);
     virtual ~RenderBatch() = default;
 
-    virtual bool preSnapshot(const RenderRequest& renderRequest, LayerContext& lc, RenderLayerSnapshot& output) = 0;
-    virtual void snapshot(const RenderRequest& renderRequest, LayerContext& lc, RenderLayerSnapshot& output) = 0;
+    const sp<Boolean>& disposed() const;
 
+    virtual std::vector<sp<LayerContext>>& snapshot(const RenderRequest& renderRequest) = 0;
+
+protected:
+    sp<Boolean> _disposed;
 };
 
 }
-
-#endif

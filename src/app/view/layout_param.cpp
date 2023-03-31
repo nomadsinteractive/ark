@@ -26,7 +26,7 @@ LayoutParam::LayoutParam(const sp<Size>& size, Display display, Gravity gravity,
 
 LayoutParam::LayoutParam(Length width, Length height, FlexDirection flexDirection, FlexWrap flexWrap, JustifyContent justifyContent, Align alignItems, Align alignSelf,
                          Align alignContent, Display display, float flexGrow, Length flexBasis, sp<Vec4> margins, sp<Vec4> paddings, sp<Vec3> position)
-    : _width_type(width._type), _height_type(height._type), _size(sp<Size>::make(width._value, height._value)), _size_min(nullptr, V3(NAN)), _size_max(nullptr, V3(NAN)),
+    : _width_type(width._type), _height_type(height._type), _size(sp<Size>::make(width._value.ensure(), height._value.ensure())), _size_min(nullptr, V3(NAN)), _size_max(nullptr, V3(NAN)),
       _flex_direction(flexDirection), _flex_wrap(flexWrap), _justify_content(justifyContent), _align_items(alignItems), _align_self(alignSelf), _align_content(alignContent),
       _display(display), _flex_basis(std::move(flexBasis)), _flex_grow(flexGrow), _margins(std::move(margins)), _paddings(std::move(paddings)), _position(std::move(position))
 {

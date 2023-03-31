@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "core/base/api.h"
+#include "core/base/timestamp.h"
 #include "core/inf/builder.h"
 #include "core/inf/holder.h"
 
@@ -18,28 +19,20 @@
 namespace ark {
 
 //[[script::bindings::holder]]
-class ARK_API LayerContext : public Holder {
+class ARK_API LayerContext : public Updatable, public Holder {
 public:
-    struct RenderableItem {
-        RenderableItem(sp<Renderable> renderable, sp<Updatable> updatable, sp<Boolean> disposed);
-        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(RenderableItem);
-
-        operator Renderable& () const;
-
-        sp<Renderable> _renderable;
-        sp<Updatable> _updatable;
-
-        SafeVar<Boolean> _disposed;
-    };
-
     struct ElementState {
         element_index_t _index;
     };
 
 public:
-    LayerContext(sp<RenderBatch> batch = nullptr, sp<ModelLoader> modelLoader = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> disposed = nullptr, sp<Varyings> varyings = nullptr);
+    LayerContext(sp<ModelLoader> modelLoader = nullptr, sp<Vec3> position = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> disposed = nullptr, sp<Varyings> varyings = nullptr);
 
+    virtual bool update(uint64_t timestamp) override;
     virtual void traverse(const Visitor& visitor) override;
+
+    const SafeVar<Vec3>& position() const;
+    void setPosition(sp<Vec3> position);
 
     SafeVar<Boolean>& visible();
     const SafeVar<Boolean>& visible() const;
@@ -52,13 +45,11 @@ public:
 
     Layer::Type layerType() const;
 
-    void renderRequest(const V3& position);
-
 //  [[script::bindings::auto]]
     void add(sp<Renderable> renderable, sp<Updatable> isDirty = nullptr, sp<Boolean> isDisposed = nullptr);
 //  [[script::bindings::auto]]
     void clear();
-
+    void dispose();
 //  [[script::bindings::property]]
     const sp<Varyings>& varyings() const;
 //  [[script::bindings::property]]
@@ -68,9 +59,6 @@ public:
 
     bool ensureState(void* stateKey);
     ElementState& addElementState(void* key);
-
-    bool doPreSnapshot(const RenderRequest& renderRequest, RenderLayerSnapshot& output);
-    void doSnapshot(const RenderRequest& renderRequest, RenderLayerSnapshot& output);
 
     class BUILDER : public Builder<LayerContext> {
     public:
@@ -84,10 +72,13 @@ public:
         Layer::Type _layer_type;
     };
 
+    bool doPreSnapshot(const RenderRequest& renderRequest, RenderLayerSnapshot& output);
+    void doSnapshot(const RenderRequest& renderRequest, RenderLayerSnapshot& output);
+
 public:
-    sp<RenderBatch> _render_batch;
     sp<ModelLoader> _model_loader;
 
+    SafeVar<Vec3> _position;
     SafeVar<Boolean> _visible;
     SafeVar<Boolean> _disposed;
 
@@ -97,14 +88,14 @@ public:
 
     bool _reload_requested;
     bool _render_done;
-    bool _position_changed;
 
-    V3 _position;
-
-    std::deque<std::pair<RenderableItem, Renderable::State>> _renderables;
-    std::vector<RenderableItem> _renderable_created;
+    std::deque<std::pair<sp<Renderable>, Renderable::State>> _renderables;
+    std::vector<sp<Renderable>> _renderable_created;
 
     std::unordered_map<void*, ElementState> _element_states;
+
+    Timestamp _timestamp;
+
 };
 
 }

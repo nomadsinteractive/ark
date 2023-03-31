@@ -19,14 +19,6 @@ namespace ark {
 
 class ARK_API Tilemap {
 public:
-[[deprecated]]
-//  [[script::bindings::enumeration]]
-    enum LayerFlag {
-        LAYER_FLAG_COLLIDABLE = 1,
-        LAYER_FLAG_DEFAULT = 0
-    };
-
-public:
 // [[script::bindings::auto]]
     Tilemap(sp<Tileset> tileset, sp<RenderLayer> renderLayer = nullptr, sp<Importer<Tilemap>> importer = nullptr, sp<Outputer<Tilemap>> outputer = nullptr);
 
@@ -77,16 +69,15 @@ public:
     };
 
 private:
+
     class Stub : public RenderBatch {
     public:
-        Stub();
 
-        virtual bool preSnapshot(const RenderRequest& renderRequest, LayerContext& lc, RenderLayerSnapshot& output) override;
-        virtual void snapshot(const RenderRequest& renderRequest, LayerContext& lc, RenderLayerSnapshot& output) override;
+        virtual std::vector<sp<LayerContext>>& snapshot(const RenderRequest& renderRequest) override;
 
         std::vector<sp<TilemapLayer>> _layers;
         sp<Scrollable> _scrollable;
-        bool _need_reload;
+        std::vector<sp<LayerContext>> _layer_contexts;
     };
 
 private:

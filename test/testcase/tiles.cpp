@@ -25,24 +25,24 @@ namespace {
 
 class TileRendererImpl : public Renderer {
 public:
-    TileRendererImpl(int32_t tileX, int32_t tileY)
+    TileRendererImpl(float tileX, float tileY)
         : _tile_x(tileX), _tile_y(tileY) {
     }
 
     virtual void render(RenderRequest& /*pipeline*/, const V3& position) override {
-        const int32_t idx = (_tile_y + _tile_height) / _tile_height;
-        if(_render_position[idx] != position.y())
+        const float idx = (_tile_y + _tile_height) / _tile_height;
+        if(_render_position[static_cast<int32_t>(idx)] != position.y())
             _error_code = _error_base + idx;
     }
 
 private:
-    int32_t _tile_x, _tile_y;
+    float _tile_x, _tile_y;
 };
 
 
 class RendererMakerImpl : public RendererMaker {
 public:
-    virtual std::vector<Box> make(int32_t x, int32_t y) override {
+    virtual std::vector<Box> make(float x, float y) override {
         printf("makeTile(%d, %d)\n", x, y);
         return {sp<TileRendererImpl>::make(x, y)};
     }

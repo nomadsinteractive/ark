@@ -310,10 +310,8 @@ public:
                 }
             }
         }
-        else {
-            DCHECK(_next, "We go throught all heaps but find no way to free it");
-            return _next->free(ptr);
-        }
+        DCHECK(_next, "We go throught all heaps but find no way to free it");
+        return _next->free(ptr);
     }
 
     void addStrategy(sp<Strategy> strategy) {

@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_IMPL_RENDER_BATCH_RENDER_BATCH_IMPL_H_
-#define ARK_GRAPHICS_IMPL_RENDER_BATCH_RENDER_BATCH_IMPL_H_
+#pragma once
 
 #include "graphics/forwarding.h"
 #include "graphics/inf/render_batch.h"
@@ -9,11 +8,12 @@ namespace ark {
 class RenderBatchImpl : public RenderBatch {
 public:
 
-    virtual bool preSnapshot(const RenderRequest& renderRequest, LayerContext& lc, RenderLayerSnapshot& output) override;
-    virtual void snapshot(const RenderRequest& renderRequest, LayerContext& lc, RenderLayerSnapshot& output) override;
+    virtual std::vector<sp<LayerContext>>& snapshot(const RenderRequest& renderRequest) override;
 
+    void addLayerContext(sp<LayerContext> layerContext);
+
+private:
+    std::vector<sp<LayerContext>> _layer_contexts;
 };
 
 }
-
-#endif

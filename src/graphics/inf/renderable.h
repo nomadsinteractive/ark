@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_INF_RENDERABLE_H_
-#define ARK_GRAPHICS_INF_RENDERABLE_H_
+#pragma once
 
 #include "core/base/api.h"
 
@@ -63,5 +62,3 @@ public:
 };
 
 }
-
-#endif

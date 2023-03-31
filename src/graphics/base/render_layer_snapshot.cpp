@@ -17,30 +17,7 @@ RenderLayerSnapshot::RenderLayerSnapshot(RenderRequest& renderRequest, const sp<
 {
     DPROFILER_TRACE("Snapshot");
 
-    bool needsReload = _stub->_layer_context->snapshot(renderRequest, *this);
-//    _stub->_layer_context->snapshot(renderRequest, *this);
-
-    for(auto iter = _stub->_layer_context_list.begin(); iter != _stub->_layer_context_list.end(); )
-    {
-        const sp<LayerContext>& layerContext = *iter;
-        const SafeVar<Boolean>& disposed = layerContext->disposed();
-        if((!disposed && layerContext.unique()) || disposed.val())
-        {
-            addDisposedLayerContext(layerContext);
-            iter = _stub->_layer_context_list.erase(iter);
-            needsReload = true;
-        }
-        else
-        {
-            needsReload = layerContext->snapshot(renderRequest, *this) || needsReload;
-//            layerContext->snapshot(renderRequest, *this);
-            ++iter;
-        }
-    }
-
-    _flag = needsReload ? SNAPSHOT_FLAG_RELOAD : SNAPSHOT_FLAG_DYNAMIC_UPDATE;
-
-    _stub->_render_command_composer->postSnapshot(_stub->_render_controller, *this);
+    _needs_reload = _stub->_layer_context->snapshot(renderRequest, *this);
 
     _ubos = _stub->_shader->takeUBOSnapshot(renderRequest);
     _ssbos = _stub->_shader->takeSSBOSnapshot(renderRequest);
@@ -48,7 +25,7 @@ RenderLayerSnapshot::RenderLayerSnapshot(RenderRequest& renderRequest, const sp<
     if(_stub->_scissor && _stub->_scissor->update(renderRequest.timestamp()))
         _scissor = Rect(_stub->_scissor->val());
 
-    DPROFILER_LOG("NeedsReload", needsReload);
+    DPROFILER_LOG("NeedsReload", _needs_reload);
 }
 
 sp<RenderCommand> RenderLayerSnapshot::compose(const RenderRequest& renderRequest)
@@ -62,12 +39,32 @@ sp<RenderCommand> RenderLayerSnapshot::compose(const RenderRequest& renderReques
 
 bool RenderLayerSnapshot::needsReload() const
 {
-    return _flag == RenderLayerSnapshot::SNAPSHOT_FLAG_RELOAD || _stub->_shader_bindings->vertices().size() == 0;
+    return _needs_reload || _stub->_shader_bindings->vertices().size() == 0;
 }
 
 const sp<PipelineInput>& RenderLayerSnapshot::pipelineInput() const
 {
     return _stub->_shader->input();
+}
+
+void RenderLayerSnapshot::snapshot(RenderRequest& renderRequest, std::vector<sp<LayerContext>>& layerContexts)
+{
+    for(auto iter = layerContexts.begin(); iter != layerContexts.end(); )
+    {
+        const sp<LayerContext>& layerContext = *iter;
+        const SafeVar<Boolean>& disposed = layerContext->disposed();
+        if((!disposed && layerContext.unique()) || disposed.val())
+        {
+            addDisposedLayerContext(layerContext);
+            iter = layerContexts.erase(iter);
+            _needs_reload = true;
+        }
+        else
+        {
+            _needs_reload = layerContext->snapshot(renderRequest, *this) || _needs_reload;
+            ++iter;
+        }
+    }
 }
 
 void RenderLayerSnapshot::addSnapshot(LayerContext& lc, Renderable::Snapshot snapshot, void* stateKey)
@@ -93,6 +90,19 @@ void RenderLayerSnapshot::addDisposedLayerContext(LayerContext& lc)
         _item_deleted.push_back(j);
     lc._renderables.clear();
     lc._element_states.clear();
+}
+
+void RenderLayerSnapshot::addDisposedLayerContexts(const std::vector<sp<LayerContext>>& layerContexts)
+{
+    for(LayerContext& lc : layerContexts)
+        addDisposedLayerContext(lc);
+}
+
+bool RenderLayerSnapshot::addLayerContext(const RenderRequest& renderRequest, LayerContext& layerContext)
+{
+    bool dirty = layerContext.doPreSnapshot(renderRequest, *this);
+    layerContext.doSnapshot(renderRequest, *this);
+    return dirty;
 }
 
 sp<RenderCommand> RenderLayerSnapshot::toRenderCommand(const RenderRequest& renderRequest, Buffer::Snapshot vertices, Buffer::Snapshot indices, DrawingContextParams::Parameters params)

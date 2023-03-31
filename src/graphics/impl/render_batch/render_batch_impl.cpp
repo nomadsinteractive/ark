@@ -1,17 +1,17 @@
 #include "graphics/impl/render_batch/render_batch_impl.h"
 
-#include "graphics/base/layer_context.h"
+#include "graphics/base/render_layer_snapshot.h"
 
 namespace ark {
 
-bool RenderBatchImpl::preSnapshot(const RenderRequest& renderRequest, LayerContext& lc, RenderLayerSnapshot& output)
+std::vector<sp<LayerContext>>& RenderBatchImpl::snapshot(const RenderRequest& renderRequest)
 {
-    return lc.doPreSnapshot(renderRequest, output);
+    return _layer_contexts;
 }
 
-void RenderBatchImpl::snapshot(const RenderRequest& renderRequest, LayerContext& lc, RenderLayerSnapshot& output)
+void RenderBatchImpl::addLayerContext(sp<LayerContext> layerContext)
 {
-    lc.doSnapshot(renderRequest, output);
+    _layer_contexts.push_back(std::move(layerContext));
 }
 
 }

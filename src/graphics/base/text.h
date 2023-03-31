@@ -29,7 +29,7 @@ public:
     const std::vector<sp<RenderObject>>& contents() const;
 
 //  [[script::bindings::property]]
-    const sp<Vec3>& position() const;
+    sp<Vec3> position() const;
 //  [[script::bindings::property]]
     void setPosition(sp<Vec3> position);
 
@@ -62,9 +62,8 @@ public:
         virtual sp<Text> build(const Scope& args) override;
 
     private:
-        BeanFactory _bean_factory;
+        sp<Builder<RenderLayer>> _render_layer;
         SafePtr<Builder<StringVar>> _text;
-        SafePtr<Builder<RenderLayer>> _render_layer;
         SafePtr<Builder<GlyphMaker>> _glyph_maker;
 
         sp<Builder<String>> _text_scale;
@@ -90,14 +89,9 @@ private:
     static bool isWordBreaker(wchar_t c);
     static GlyphContents makeGlyphs(GlyphMaker& gm, const std::wstring& text);
 
-    class Content : public RenderBatch {
+    class Content {
     public:
-        Content(sp<StringVar> string, sp<GlyphMaker> glyphMaker, sp<ModelLoader> modelLoader, float textScale, float letterSpacing, float lineHeight, float lineIndent);
-
-        virtual bool preSnapshot(const RenderRequest& renderRequest, LayerContext& lc, RenderLayerSnapshot& output) override;
-        virtual void snapshot(const RenderRequest& renderRequest, LayerContext& lc, RenderLayerSnapshot& output) override;
-
-        SafeVar<Vec3>& position();
+        Content(sp<RenderLayer> renderLayer, sp<StringVar> string, sp<GlyphMaker> glyphMaker, float textScale, float letterSpacing, float lineHeight, float lineIndent);
 
         bool update(uint64_t timestamp);
 
@@ -105,6 +99,7 @@ private:
         void setRichText(std::wstring richText, const sp<ResourceLoader>& resourceLoader, const Scope& args);
 
         void setRenderObjects(std::vector<sp<RenderObject>> renderObjects);
+        void reload();
 
         void layoutContent();
 
@@ -129,9 +124,10 @@ private:
         std::vector<Text::LayoutChar> toLayoutCharacters(const GlyphContents& glyphs) const;
 
     private:
+        sp<RenderLayer> _render_layer;
         sp<StringVar> _string;
+        sp<LayerContext> _layer_context;
         sp<GlyphMaker> _glyph_maker;
-        sp<ModelLoader> _model_loader;
 
         float _text_scale;
         float _letter_spacing;
@@ -145,20 +141,28 @@ private:
         std::wstring _text_unicode;
         std::vector<sp<Glyph>> _glyphs;
 
-        SafeVar<Vec3> _position;
-//        std::deque<std::pair<sp<RenderObject>, Renderable::State>> _render_objects;
+        sp<VariableWrapper<V3>> _position;
         std::vector<sp<RenderObject>> _render_objects;
-        std::vector<sp<RenderObject>> _render_object_created;
-        bool _needs_reload;
 
         friend class Text;
     };
 
+    class RenderBatchContent : public RenderBatch {
+    public:
+        RenderBatchContent(sp<Content> content, sp<Boolean> disposed);
+
+        virtual std::vector<sp<LayerContext>>& snapshot(const RenderRequest& renderRequest) override;
+
+    private:
+        sp<Content> _content;
+        std::vector<sp<LayerContext>> _layer_contexts;
+    };
+
 private:
     sp<RenderLayer> _render_layer;
-    sp<LayerContext> _layer_context;
 
     sp<Content> _content;
+    sp<RenderBatch> _render_batch;
 };
 
 }

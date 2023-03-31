@@ -27,7 +27,7 @@ public:
         : _tilemap(tilemap), _delegate(std::move(delegate)) {
     }
 
-    virtual std::vector<Box> make(int32_t x, int32_t y) override {
+    virtual std::vector<Box> make(float x, float y) override {
         std::vector<Box> renderers = _delegate->make(x, y);
         for(const Box& i : renderers) {
             sp<TilemapLayer> tilemapLayer = i.as<TilemapLayer>();
@@ -93,8 +93,10 @@ static sp<CollisionFilter> toCollisionFilter(sp<Json> jCollisionFilter)
 
 Tilemap::Tilemap(sp<Tileset> tileset, sp<RenderLayer> renderLayer, sp<Importer<Tilemap>> importer, sp<Outputer<Tilemap>> outputer)
     : _render_layer(std::move(renderLayer)), _tileset(std::move(tileset)), _storage(sp<TilemapStorage>::make(*this, std::move(importer), std::move(outputer))),
-      _stub(sp<Stub>::make()), _layer_context(_render_layer ? _render_layer->makeLayerContext(_stub, nullptr, nullptr) : nullptr)
+      _stub(sp<Stub>::make())/*, _layer_context(_render_layer ? _render_layer->addLayerContext(_stub, nullptr, nullptr) : nullptr)*/
 {
+    if(_render_layer)
+        _render_layer->addRenderBatch(_stub);
 }
 
 void Tilemap::clear()
@@ -136,9 +138,10 @@ sp<TilemapLayer> Tilemap::makeLayer(const String& name, uint32_t colCount, uint3
 
 void Tilemap::addLayer(sp<TilemapLayer> layer, float zorder)
 {
+    if(_render_layer)
+        layer->setLayerContext(_render_layer->makeLayerContext(nullptr, layer->position().wrapped(), layer->visible().wrapped(), nullptr));
     layer->_stub->_zorder = zorder;
     _stub->_layers.insert(std::upper_bound(_stub->_layers.begin(), _stub->_layers.end(), layer, _tilemapLayerCompareGreater), std::move(layer));
-    _stub->_need_reload = true;
 }
 
 void Tilemap::removeLayer(const sp<TilemapLayer>& layer)
@@ -146,7 +149,6 @@ void Tilemap::removeLayer(const sp<TilemapLayer>& layer)
     const auto iter = std::find(_stub->_layers.begin(), _stub->_layers.end(), layer);
     DCHECK(iter != _stub->_layers.end(), "Layer does not belong to this Tilemap");
     _stub->_layers.erase(iter);
-    _stub->_need_reload = true;
 }
 
 void Tilemap::jsonLoad(const Json& json)
@@ -253,26 +255,20 @@ sp<Tilemap> Tilemap::BUILDER::build(const Scope& args)
     return tilemap;
 }
 
-Tilemap::Stub::Stub()
-    : _need_reload(false)
+std::vector<sp<LayerContext>>& Tilemap::Stub::snapshot(const RenderRequest& renderRequest)
 {
-}
-
-bool Tilemap::Stub::preSnapshot(const RenderRequest& renderRequest, LayerContext& lc, RenderLayerSnapshot& output)
-{
-    bool needReload = _need_reload;
-    _need_reload = false;
+    _layer_contexts.clear();
+    for(TilemapLayer& i : _layers)
+        if(i._layer_context)
+            _layer_contexts.push_back(i._layer_context);
     if(_scrollable)
-        _scrollable->cull();
-    for(TilemapLayer& i : _layers)
-        needReload = i.preSnapshot(renderRequest, lc, output) || needReload;
-    return needReload;
-}
-
-void Tilemap::Stub::snapshot(const RenderRequest& renderRequest, LayerContext& lc, RenderLayerSnapshot& output)
-{
-    for(TilemapLayer& i : _layers)
-        i.snapshot(renderRequest, lc, output);
+        for(const Box& i : _scrollable->cull(renderRequest.timestamp()))
+        {
+            const sp<TilemapLayer> tilemapLayer = i.as<TilemapLayer>();
+            if(tilemapLayer && std::find(_layer_contexts.begin(), _layer_contexts.end(), tilemapLayer->_layer_context) == _layer_contexts.end())
+                _layer_contexts.push_back(tilemapLayer->_layer_context);
+        }
+    return _layer_contexts;
 }
 
 }

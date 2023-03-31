@@ -1454,8 +1454,8 @@ class RenderLayer(Renderer):
     def context(self) -> LayerContext:
         return LayerContext()
 
-    def make_layer(self, model_loader: Optional[ModelLoader] = None, visible: Optional[Boolean] = None, disposable: Optional[Boolean] = None,
-                   position: Optional[Vec3] = None) -> 'Layer':
+    def make_layer(self, model_loader: Optional[ModelLoader] = None, position: Optional[Vec3] = None, visible: Optional[Boolean] = None,
+                   disposable: Optional[Boolean] = None) -> 'Layer':
         pass
 
 
