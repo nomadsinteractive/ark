@@ -29,7 +29,7 @@ sp<ShaderBindings> RCCDrawElements::makeShaderBindings(Shader& shader, RenderCon
 
 void RCCDrawElements::postSnapshot(RenderController& renderController, RenderLayerSnapshot& snapshot)
 {
-    snapshot._index_buffer = _shared_buffer->snapshot(renderController, snapshot._items.size(), snapshot._items.size());
+    snapshot._index_buffer = _shared_buffer->snapshot(renderController, snapshot._droplets.size(), snapshot._droplets.size());
 }
 
 sp<RenderCommand> RCCDrawElements::compose(const RenderRequest& renderRequest, RenderLayerSnapshot& snapshot)
@@ -42,14 +42,14 @@ sp<RenderCommand> RCCDrawElements::compose(const RenderRequest& renderRequest, R
 
     if(snapshot.needsReload())
     {
-        VertexWriter writer = buf.makeVertexWriter(renderRequest, verticesLength * snapshot._items.size(), 0);
-        for(const RenderLayerSnapshot::SnapshotWithState& i : snapshot._items)
+        VertexWriter writer = buf.makeVertexWriter(renderRequest, verticesLength * snapshot._droplets.size(), 0);
+        for(const RenderLayerSnapshot::Droplet& i : snapshot._droplets)
             i._snapshot._model->writeRenderable(writer, i._snapshot);
     }
     else
     {
         size_t offset = 0;
-        for(const RenderLayerSnapshot::SnapshotWithState& i : snapshot._items)
+        for(const RenderLayerSnapshot::Droplet& i : snapshot._droplets)
         {
             if(i._snapshot._state.hasState(Renderable::RENDERABLE_STATE_DIRTY))
             {

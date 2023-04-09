@@ -48,8 +48,8 @@ sp<RenderCommand> RCCDrawElementsInstanced::compose(const RenderRequest& renderR
         model.writeToStream(writer, V3(1.0f));
     }
 
-    VertexWriter writer = buf.makeDividedVertexWriter(renderRequest, snapshot._items.size(), 0, 1);
-    for(const RenderLayerSnapshot::SnapshotWithState& i : snapshot._items)
+    VertexWriter writer = buf.makeDividedVertexWriter(renderRequest, snapshot._droplets.size(), 0, 1);
+    for(const RenderLayerSnapshot::Droplet& i : snapshot._droplets)
     {
         const Renderable::Snapshot& snapshot = i._snapshot;
         writer.next();
@@ -60,7 +60,7 @@ sp<RenderCommand> RCCDrawElementsInstanced::compose(const RenderRequest& renderR
     }
 
     DrawingContext drawingContext(snapshot._stub->_shader_bindings, snapshot._stub->_shader_bindings->attachments(), std::move(snapshot._ubos), std::move(snapshot._ssbos),
-                                  buf.vertices().toSnapshot(vertices), buf.indices(), DrawingContextParams::DrawElementsInstanced(0, static_cast<uint32_t>(_model.indexCount()), static_cast<int32_t>(snapshot._items.size()), buf.toDividedBufferSnapshots()));
+                                  buf.vertices().toSnapshot(vertices), buf.indices(), DrawingContextParams::DrawElementsInstanced(0, static_cast<uint32_t>(_model.indexCount()), static_cast<int32_t>(snapshot._droplets.size()), buf.toDividedBufferSnapshots()));
 
     if(snapshot._stub->_scissor)
         drawingContext._scissor = snapshot._stub->_render_controller->renderEngine()->toRendererRect(snapshot._scissor);

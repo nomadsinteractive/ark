@@ -69,7 +69,7 @@ public:
             return data;
         }
 
-//    private:
+    private:
         sp<Delegate> _delegate;
         TypeId _magic;
         alignas(64) uint8_t _data[72];

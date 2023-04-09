@@ -129,14 +129,16 @@ ByteArray::Borrowed RCCMultiDrawElementsIndirect::makeIndirectBuffer(const Rende
     return cmds;
 }
 
-void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& renderRequest, DrawingBuffer& buf, const RenderLayerSnapshot& snapshot, bool reload)
+void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& renderRequest, DrawingBuffer& buf, RenderLayerSnapshot& renderLayerSnapshot, bool reload)
 {
-    for(size_t i = 0; i < snapshot._items.size(); ++i)
+    auto& renderLayerItems = renderLayerSnapshot._droplets;
+    for(size_t i = 0; i < renderLayerItems.size(); ++i)
     {
-        const RenderLayerSnapshot::SnapshotWithState& s = snapshot._items.at(i);
+        RenderLayerSnapshot::Droplet& s = renderLayerItems.at(i);
+        const Renderable::Snapshot& snapshot = reload ? s.ensureDirtySnapshot(renderLayerSnapshot.pipelineInput(), renderRequest) : s._snapshot;
         if(reload || s._snapshot._state.hasState(Renderable::RENDERABLE_STATE_DIRTY))
         {
-            if(s._snapshot._varyings._sub_properties.size() > 0)
+            if(snapshot._varyings._sub_properties.size() > 0)
             {
                 const auto iter = _model_instances.find(i);
                 DASSERT(iter != _model_instances.end());
@@ -144,7 +146,7 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
                 if(!iter->second.isDynamicLayout())
                     iter->second.toDynamicLayout();
 
-                for(const auto& [j, k] : s._snapshot._varyings._sub_properties)
+                for(const auto& [j, k] : snapshot._varyings._sub_properties)
                 {
                     Varyings::Divided subProperty = k.getDivided(1);
                     if(subProperty._content.length() > sizeof(M4))
@@ -158,7 +160,7 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
     for(const IndirectCmds& i : _indirect_cmds.values())
         for(const NodeInstance& j : i._node_instances)
         {
-            const RenderLayerSnapshot::SnapshotWithState& s = snapshot._items.at(j.snapshotIndex());
+            const RenderLayerSnapshot::Droplet& s = renderLayerItems.at(j.snapshotIndex());
             const Renderable::Snapshot& snapshot = s._snapshot;
             if(reload || snapshot._state.hasState(Renderable::RENDERABLE_STATE_DIRTY))
             {
@@ -188,7 +190,7 @@ void RCCMultiDrawElementsIndirect::reloadIndirectCommands(const RenderLayerSnaps
     size_t offset = 0;
     _indirect_cmds.clear();
     _model_instances.clear();
-    for(const RenderLayerSnapshot::SnapshotWithState& i : snapshot._items)
+    for(const RenderLayerSnapshot::Droplet& i : snapshot._droplets)
     {
         int32_t type = i._snapshot._type;
         const ModelBundle::ModelLayout& modelLayout = _model_bundle->ensureModelLayout(type);

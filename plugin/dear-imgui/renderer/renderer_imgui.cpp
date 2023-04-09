@@ -54,12 +54,6 @@ private:
 
 }
 
-[[deprecated]]
-static void updateKeyStatus(ImGuiIO& io, ImGuiKey keycode, bool isKeyDown) {
-    io.KeyMap[keycode] = isKeyDown ? keycode : -1;
-    io.KeysDown[keycode] = isKeyDown;
-}
-
 static ImGuiKey toImGuiKey(Event::Code code) {
     switch(code)
     {

@@ -286,6 +286,7 @@ public:
         return _size - _allocated + (_next ? _next->available() : 0);
     }
 
+    [[nodiscard]]
     Optional<PtrType> allocate(SizeType size, SizeType alignment = kAlignment) {
         DCHECK(alignment != 0 && ((alignment % kAlignment) == 0 || (kAlignment % alignment) == 0), "Illegal alignment %d", alignment);
         for(Strategy& i : _strategies) {

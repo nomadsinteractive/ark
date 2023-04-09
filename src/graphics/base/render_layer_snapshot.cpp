@@ -15,22 +15,18 @@ namespace ark {
 RenderLayerSnapshot::RenderLayerSnapshot(RenderRequest& renderRequest, const sp<RenderLayer::Stub>& stub)
     : _stub(stub), _index_count(0)
 {
-    DPROFILER_TRACE("Snapshot");
-
-    _needs_reload = _stub->_layer_context->snapshot(renderRequest, *this);
+    _needs_reload = addLayerContext(renderRequest, _stub->_layer_context);
 
     _ubos = _stub->_shader->takeUBOSnapshot(renderRequest);
     _ssbos = _stub->_shader->takeSSBOSnapshot(renderRequest);
 
     if(_stub->_scissor && _stub->_scissor->update(renderRequest.timestamp()))
         _scissor = Rect(_stub->_scissor->val());
-
-    DPROFILER_LOG("NeedsReload", _needs_reload);
 }
 
 sp<RenderCommand> RenderLayerSnapshot::compose(const RenderRequest& renderRequest)
 {
-    if(_items.size() > 0 && _stub->_layer_context->visible().val())
+    if(_droplets.size() > 0 && _stub->_layer_context->visible().val())
         return _stub->_render_command_composer->compose(renderRequest, *this);
 
     DrawingContext drawingContext(_stub->_shader_bindings, nullptr, std::move(_ubos), std::move(_ssbos));
@@ -61,17 +57,10 @@ void RenderLayerSnapshot::snapshot(RenderRequest& renderRequest, std::vector<sp<
         }
         else
         {
-            _needs_reload = layerContext->snapshot(renderRequest, *this) || _needs_reload;
+            _needs_reload = addLayerContext(renderRequest, layerContext) || _needs_reload;
             ++iter;
         }
     }
-}
-
-void RenderLayerSnapshot::addSnapshot(LayerContext& lc, Renderable::Snapshot snapshot, void* stateKey)
-{
-    auto iter = lc._element_states.find(stateKey);
-    DASSERT(iter != lc._element_states.end());
-    _items.emplace_back(iter->second, std::move(snapshot));
 }
 
 void RenderLayerSnapshot::addDisposedState(LayerContext& lc, void* stateKey)
@@ -98,13 +87,6 @@ void RenderLayerSnapshot::addDisposedLayerContexts(const std::vector<sp<LayerCon
         addDisposedLayerContext(lc);
 }
 
-bool RenderLayerSnapshot::addLayerContext(const RenderRequest& renderRequest, LayerContext& layerContext)
-{
-    bool dirty = layerContext.doPreSnapshot(renderRequest, *this);
-    layerContext.doSnapshot(renderRequest, *this);
-    return dirty;
-}
-
 sp<RenderCommand> RenderLayerSnapshot::toRenderCommand(const RenderRequest& renderRequest, Buffer::Snapshot vertices, Buffer::Snapshot indices, DrawingContextParams::Parameters params)
 {
     DrawingContext drawingContext(_stub->_shader_bindings, _stub->_shader_bindings->attachments(), std::move(_ubos), std::move(_ssbos), std::move(vertices), std::move(indices),
@@ -116,17 +98,70 @@ sp<RenderCommand> RenderLayerSnapshot::toRenderCommand(const RenderRequest& rend
     return drawingContext.toRenderCommand(renderRequest);
 }
 
-void RenderLayerSnapshot::loadSnapshot(const LayerContext& lc, Renderable::Snapshot& snapshot, const Varyings::Snapshot& defaultVaryingsSnapshot)
+bool RenderLayerSnapshot::addLayerContext(RenderRequest& renderRequest, LayerContext& layerContext)
 {
-    snapshot.applyVaryings(defaultVaryingsSnapshot);
-    if(!snapshot._model)
-        snapshot._model = lc._model_loader->loadModel(snapshot._type);
-    _index_count += snapshot._model->indexCount();
+    const PipelineInput& pipelineInput = _stub->_shader->input();
+
+    _layer_contexts.push_back(layerContext.snapshot(renderRequest, pipelineInput));
+    const LayerContext::Snapshot& layerSnapshot = _layer_contexts.back();
+
+    const bool reload = needsReload();
+    bool dirty = layerContext.processNewCreated();
+
+    for(auto iter = layerContext._renderables.begin(); iter != layerContext._renderables.end(); )
+    {
+        Renderable& renderable = iter->first;
+        Renderable::State& s = iter->second;
+        s.setState(renderable.updateState(renderRequest));
+        ASSERT(s);
+        Renderable::State state = s;
+        if(!state || state.hasState(Renderable::RENDERABLE_STATE_DISPOSED))
+        {
+            LOGD("delete: %p", &renderable);
+            dirty = true;
+            addDisposedState(layerContext, &renderable);
+            iter = layerContext._renderables.erase(iter);
+        }
+        else
+        {
+            if(reload)
+                state.setState(Renderable::RENDERABLE_STATE_DIRTY, true);
+            if(state.hasState(Renderable::RENDERABLE_STATE_VISIBLE))
+                state.setState(Renderable::RENDERABLE_STATE_VISIBLE, layerSnapshot._visible);
+            if(s.hasState(Renderable::RENDERABLE_STATE_NEW))
+            {
+                state.setState(Renderable::RENDERABLE_STATE_DIRTY, true);
+                s.setState(Renderable::RENDERABLE_STATE_NEW, false);
+            }
+            Renderable::Snapshot snapshot = renderable.snapshot(pipelineInput, renderRequest, layerSnapshot._position, state.stateBits());
+            snapshot.applyVaryings(layerSnapshot._varyings);
+            if(!snapshot._model)
+                snapshot._model = layerContext._model_loader->loadModel(snapshot._type);
+            _index_count += snapshot._model->indexCount();
+            auto fiter = layerContext._element_states.find(&renderable);
+            DASSERT(fiter != layerContext._element_states.end());
+            _droplets.emplace_back(renderable, layerSnapshot, fiter->second, snapshot);
+
+            ++iter;
+        }
+    }
+
+    return dirty;
 }
 
-RenderLayerSnapshot::SnapshotWithState::SnapshotWithState(LayerContext::ElementState& state, Renderable::Snapshot snapshot)
-    : _state(state), _snapshot(std::move(snapshot))
+RenderLayerSnapshot::Droplet::Droplet(Renderable& renderable, const LayerContext::Snapshot& layerContext, LayerContext::ElementState& state, const Renderable::Snapshot& snapshot)
+    : _renderable(renderable), _layer_context(layerContext), _element_state(state), _snapshot(snapshot)
 {
+}
+
+const Renderable::Snapshot& RenderLayerSnapshot::Droplet::ensureDirtySnapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest)
+{
+    if(!_snapshot._state.hasState(Renderable::RENDERABLE_STATE_DIRTY))
+    {
+        _snapshot =_renderable.snapshot(pipelineInput, renderRequest, _layer_context._position, static_cast<Renderable::StateBits>(_snapshot._state.stateBits() | Renderable::RENDERABLE_STATE_DIRTY));
+        _snapshot.applyVaryings(_layer_context._varyings);
+    }
+    return _snapshot;
 }
 
 }

@@ -29,10 +29,14 @@ public:
         SNAPSHOT_FLAG_STATIC_REUSE
     };
 
-    struct SnapshotWithState {
-        SnapshotWithState(LayerContext::ElementState& state, Renderable::Snapshot snapshot);
+    struct Droplet {
+        Droplet(Renderable& renderable, const LayerContext::Snapshot& layerContext, LayerContext::ElementState& state, const Renderable::Snapshot& snapshot);
 
-        LayerContext::ElementState& _state;
+        const Renderable::Snapshot& ensureDirtySnapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest);
+
+        Renderable& _renderable;
+        const LayerContext::Snapshot& _layer_context;
+        LayerContext::ElementState& _element_state;
         Renderable::Snapshot _snapshot;
     };
 
@@ -46,15 +50,10 @@ public:
 
     void snapshot(RenderRequest& renderRequest, std::vector<sp<LayerContext>>& layerContexts);
 
-    void loadSnapshot(const LayerContext& lc, Renderable::Snapshot& snapshot, const Varyings::Snapshot& defaultVaryingsSnapshot);
-    void addSnapshot(LayerContext& lc, Renderable::Snapshot snapshot, void* stateKey);
-
-    void ensureState(LayerContext& lc, void* stateKey);
     void addDisposedState(LayerContext& lc, void* stateKey);
 
     void addDisposedLayerContext(LayerContext& lc);
     void addDisposedLayerContexts(const std::vector<sp<LayerContext>>& layerContexts);
-    bool addLayerContext(const RenderRequest& renderRequest, LayerContext& layerContext);
 
     sp<RenderCommand> toRenderCommand(const RenderRequest& renderRequest, Buffer::Snapshot vertices, Buffer::Snapshot indices, DrawingContextParams::Parameters params);
 
@@ -65,13 +64,18 @@ public:
     std::vector<UBOSnapshot> _ubos;
     std::vector<std::pair<uint32_t, Buffer::Snapshot>> _ssbos;
 
-    std::deque<SnapshotWithState> _items;
+    std::vector<LayerContext::Snapshot> _layer_contexts;
+
+    std::deque<Droplet> _droplets;
     std::deque<LayerContext::ElementState> _item_deleted;
     Buffer::Snapshot _index_buffer;
     Rect _scissor;
     bool _needs_reload;
 
     DISALLOW_COPY_AND_ASSIGN(RenderLayerSnapshot);
+
+private:
+    bool addLayerContext(RenderRequest& renderRequest, LayerContext& layerContext);
 
 private:
 

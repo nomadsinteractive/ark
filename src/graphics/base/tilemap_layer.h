@@ -104,7 +104,6 @@ private:
         sp<Tileset> _tileset;
         SafeVar<Vec3> _position;
         float _zorder;
-        Timestamp _timestamp;
     };
 
 private:

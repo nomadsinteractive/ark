@@ -38,7 +38,7 @@ public:
     };
 
     struct Snapshot {
-        Snapshot(State state = RENDERABLE_STATE_DISPOSED);
+        Snapshot(State state = RENDERABLE_STATE_DISPOSED, int32_t type = 0);
         Snapshot(State state, int32_t type, const V3& position, const V3& size, const Transform::Snapshot& transform, const Varyings::Snapshot& varyings);
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Snapshot);
 
@@ -52,10 +52,6 @@ public:
         Transform::Snapshot _transform;
         Varyings::Snapshot _varyings;
     };
-
-    static StateBits toState(bool disposed, bool dirty, bool visible) {
-        return static_cast<StateBits>((disposed ? RENDERABLE_STATE_DISPOSED : 0) | (dirty ? RENDERABLE_STATE_DIRTY : 0) | (visible ? RENDERABLE_STATE_VISIBLE : 0));
-    }
 
     virtual StateBits updateState(const RenderRequest& renderRequest) = 0;
     virtual Snapshot snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest, const V3& postTranslate, StateBits state) = 0;

@@ -54,24 +54,28 @@ const sp<LayerContext>& RenderLayer::context() const
 
 RenderLayerSnapshot RenderLayer::snapshot(RenderRequest& renderRequest)
 {
-    RenderLayerSnapshot snapshot(renderRequest, _stub);
+    DPROFILER_TRACE("Snapshot");
+
+    RenderLayerSnapshot renderLayerSnapshot(renderRequest, _stub);
     for(auto iter = _render_batches.begin(); iter != _render_batches.end();)
     {
         const sp<RenderBatch>& i = *iter;
         std::vector<sp<LayerContext>>& layerContexts = i->snapshot(renderRequest);
         if(i->disposed() ? i->disposed()->val() : i.unique())
         {
-            snapshot.addDisposedLayerContexts(layerContexts);
+            renderLayerSnapshot.addDisposedLayerContexts(layerContexts);
             iter = _render_batches.erase(iter);
         }
         else
         {
-            snapshot.snapshot(renderRequest, layerContexts);
+            renderLayerSnapshot.snapshot(renderRequest, layerContexts);
             ++iter;
         }
     }
-    _stub->_render_command_composer->postSnapshot(_stub->_render_controller, snapshot);
-    return snapshot;
+    _stub->_render_command_composer->postSnapshot(_stub->_render_controller, renderLayerSnapshot);
+
+    DPROFILER_LOG("NeedsReload", renderLayerSnapshot.needsReload());
+    return renderLayerSnapshot;
 }
 
 sp<LayerContext> RenderLayer::makeLayerContext(sp<ModelLoader> modelLoader, sp<Vec3> position, sp<Boolean> visible, sp<Boolean> disposed) const

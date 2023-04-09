@@ -73,7 +73,7 @@ private:
 
 private:
     ByteArray::Borrowed makeIndirectBuffer(const RenderRequest& renderRequest) const;
-    void writeModelMatices(const RenderRequest& renderRequest, DrawingBuffer& buf, const RenderLayerSnapshot& snapshot, bool reload);
+    void writeModelMatices(const RenderRequest& renderRequest, DrawingBuffer& buf, RenderLayerSnapshot& renderLayerSnapshot, bool reload);
     V3 toScale(const V3& size, const Metrics& metrics) const;
 
     void reloadIndirectCommands(const RenderLayerSnapshot& snapshot);

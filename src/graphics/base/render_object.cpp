@@ -250,7 +250,7 @@ Renderable::Snapshot RenderObject::snapshot(const PipelineInput& pipelineInput, 
 {
     if(state & Renderable::RENDERABLE_STATE_DIRTY)
         return Renderable::Snapshot(state, _type->val(), _position.val(), _size.val(), _transform->snapshot(postTranslate), _varyings ? _varyings->snapshot(pipelineInput, renderRequest.allocator()) : Varyings::Snapshot());
-    return Renderable::Snapshot(state, _type->val(), V3(), V3(), Transform::Snapshot(), Varyings::Snapshot());
+    return Renderable::Snapshot(state, _type->val());
 }
 
 RenderObject::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

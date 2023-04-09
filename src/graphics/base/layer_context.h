@@ -25,6 +25,14 @@ public:
         element_index_t _index;
     };
 
+    struct Snapshot {
+        bool _dirty;
+        V3 _position;
+        bool _visible;
+        bool _disposed;
+        Varyings::Snapshot _varyings;
+    };
+
 public:
     LayerContext(sp<ModelLoader> modelLoader = nullptr, sp<Vec3> position = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> disposed = nullptr, sp<Varyings> varyings = nullptr);
 
@@ -55,7 +63,11 @@ public:
 //  [[script::bindings::property]]
     void setVaryings(sp<Varyings> varyings);
 
-    bool snapshot(RenderRequest& renderRequest, RenderLayerSnapshot& output);
+    void markDirty();
+
+    bool processNewCreated();
+
+    Snapshot snapshot(RenderRequest& renderRequest, const PipelineInput& pipelineInput) const;
 
     bool ensureState(void* stateKey);
     ElementState& addElementState(void* key);
@@ -72,9 +84,6 @@ public:
         Layer::Type _layer_type;
     };
 
-    bool doPreSnapshot(const RenderRequest& renderRequest, RenderLayerSnapshot& output);
-    void doSnapshot(const RenderRequest& renderRequest, RenderLayerSnapshot& output);
-
 public:
     sp<ModelLoader> _model_loader;
 
@@ -87,7 +96,6 @@ public:
     Layer::Type _layer_type;
 
     bool _reload_requested;
-    bool _render_done;
 
     std::deque<std::pair<sp<Renderable>, Renderable::State>> _renderables;
     std::vector<sp<Renderable>> _renderable_created;

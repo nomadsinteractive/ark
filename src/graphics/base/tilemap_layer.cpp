@@ -65,7 +65,9 @@ const SafeVar<Vec3>& TilemapLayer::position() const
 void TilemapLayer::setPosition(sp<Vec3> position)
 {
     _stub->_position.reset(std::move(position));
-    _stub->_timestamp.markDirty();
+    if(_layer_context)
+        _layer_context->markDirty();
+
 }
 
 float TilemapLayer::zorder() const
@@ -167,7 +169,7 @@ void TilemapLayer::resize(uint32_t colCount, uint32_t rowCount, uint32_t offsetX
 {
     CHECK(colCount >= _col_count && rowCount >= _row_count, "Changing size(%d, %d) to (%d, %d) failed. TilemapLayer can not be shrinked.", _col_count, _row_count, colCount, rowCount);
     CHECK(offsetX <= (colCount - _col_count) && offsetY <= (rowCount - _row_count), "Offset position out of bounds(%d, %d)", offsetX, offsetY);
-    const bool positionChanged = offsetX && offsetY;
+    const bool positionChanged = offsetX || offsetY;
     float tileWidth = _stub->_tileset->tileWidth(), tileHeight = _stub->_tileset->tileWidth();
     Stub stub(colCount, rowCount, std::move(_stub->_tileset), std::move(_stub->_position), _stub->_zorder);
 
@@ -179,8 +181,8 @@ void TilemapLayer::resize(uint32_t colCount, uint32_t rowCount, uint32_t offsetX
             renderTile = std::move(_layer_tiles[i * _col_count + j]);
             if(renderTile && positionChanged)
             {
-                float dx = static_cast<float>(j) * tileWidth + tileWidth / 2;
-                float dy = static_cast<float>(i) * tileHeight + tileHeight / 2;
+                float dx = static_cast<float>(j + offsetX) * tileWidth + tileWidth / 2;
+                float dy = static_cast<float>(i + offsetY) * tileHeight + tileHeight / 2;
                 renderTile->_position = V3(dx, dy, 0);
             }
         }
@@ -191,8 +193,8 @@ void TilemapLayer::resize(uint32_t colCount, uint32_t rowCount, uint32_t offsetX
     _size->setWidth(_stub->_tileset->tileWidth() * colCount);
     _size->setHeight(_stub->_tileset->tileHeight() * rowCount);
     _layer_tiles = std::move(layerTiles);
-    if(positionChanged)
-        _stub->_timestamp.markDirty();
+    if(_layer_context && positionChanged)
+        _layer_context->markDirty();
 }
 
 void TilemapLayer::clear()

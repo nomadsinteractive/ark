@@ -32,8 +32,8 @@ Renderable::StateBits Renderable::State::stateBits() const
     return _state_bits;
 }
 
-Renderable::Snapshot::Snapshot(State state)
-    : _state(state)
+Renderable::Snapshot::Snapshot(State state, int32_t type)
+    : _state(state), _type(type)
 {
 }
 

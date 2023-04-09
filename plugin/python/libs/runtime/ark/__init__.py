@@ -68,10 +68,6 @@ def is_publishing_build():
     return False
 
 
-class Object:
-    pass
-
-
 class Readable:
     pass
 
