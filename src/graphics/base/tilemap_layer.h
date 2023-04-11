@@ -88,6 +88,8 @@ private:
         virtual StateBits updateState(const RenderRequest& renderRequest) override;
         virtual Snapshot snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest, const V3& postTranslate, StateBits state) override;
 
+        void dispose();
+
         sp<Stub> _stub;
         sp<Tile> _tile;
         sp<RenderObject> _renderable;

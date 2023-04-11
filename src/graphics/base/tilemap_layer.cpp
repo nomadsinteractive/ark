@@ -225,10 +225,10 @@ void TilemapLayer::setTile(uint32_t col, uint32_t row, const sp<Tile>& tile, con
     sp<RenderableTile> renderableTile = ro ? sp<RenderableTile>::make(_stub, std::move(tileDup), ro, V3(dx, dy, 0.0)) : nullptr;
     sp<RenderableTile>& targetTile = _layer_tiles[index];
     if(targetTile)
-        targetTile->_renderable->dispose();
+        targetTile->dispose();
     if(_layer_context)
         _layer_context->add(renderableTile);
-    _layer_tiles[index] = std::move(renderableTile);
+    targetTile = std::move(renderableTile);
 }
 
 const sp<CollisionFilter>& TilemapLayer::collisionFilter() const
@@ -262,13 +262,21 @@ TilemapLayer::RenderableTile::RenderableTile(const sp<Stub>& stub, sp<Tile> tile
 
 Renderable::StateBits TilemapLayer::RenderableTile::updateState(const RenderRequest& renderRequest)
 {
-    return _renderable->updateState(renderRequest);
+    return _renderable ? _renderable->updateState(renderRequest) : Renderable::RENDERABLE_STATE_DISPOSED;
 }
 
 Renderable::Snapshot TilemapLayer::RenderableTile::snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest, const V3& postTranslate, StateBits state)
 {
+    if(!_renderable)
+        return Renderable::Snapshot();
+
     const V3 tileTranslate = _position + V3(0, 0, _stub->_zorder);
     return _renderable->snapshot(pipelineInput, renderRequest, postTranslate + tileTranslate, state);
+}
+
+void TilemapLayer::RenderableTile::dispose()
+{
+    _renderable = nullptr;
 }
 
 TilemapLayer::Stub::Stub(size_t colCount, size_t rowCount, sp<Tileset> tileset, SafeVar<Vec3> position, float zorder)

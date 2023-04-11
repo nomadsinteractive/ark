@@ -27,6 +27,7 @@ android {
             jniLibs.srcDirs = ['libs']
         }
     }
+    namespace 'com.nomadsinteractive.launchpad'
 }
 
 dependencies {

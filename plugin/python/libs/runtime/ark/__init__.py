@@ -1955,7 +1955,7 @@ class TilemapLayer(Renderer):
     def set_tile(self, col: int, row: int, tile: Union[int, RenderObject, Tile, None]):
         pass
 
-    def set_tile_rect(self, tiles: List[int], dest: TYPE_RECTI):
+    def set_tile_rect(self, tiles: list[int], dest: TYPE_RECTI):
         pass
 
     def foreach_tile(self, callback: Callable[[int, int, Tile], bool]):
