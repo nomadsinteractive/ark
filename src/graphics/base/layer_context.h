@@ -22,7 +22,7 @@ namespace ark {
 class ARK_API LayerContext : public Updatable, public Holder {
 public:
     struct ElementState {
-        element_index_t _index;
+        Optional<element_index_t> _index;
     };
 
     struct Snapshot {

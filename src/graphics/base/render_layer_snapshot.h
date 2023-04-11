@@ -50,7 +50,7 @@ public:
 
     void snapshot(RenderRequest& renderRequest, std::vector<sp<LayerContext>>& layerContexts);
 
-    void addDisposedState(LayerContext& lc, void* stateKey);
+    bool addDisposedState(LayerContext& lc, void* stateKey);
 
     void addDisposedLayerContext(LayerContext& lc);
     void addDisposedLayerContexts(const std::vector<sp<LayerContext>>& layerContexts);

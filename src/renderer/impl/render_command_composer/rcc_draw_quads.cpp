@@ -41,7 +41,8 @@ sp<RenderCommand> RCCDrawQuads::compose(const RenderRequest& renderRequest, Rend
     bool hasNewCreatedSnapshot = false;
 
     for(const LayerContext::ElementState& i : snapshot._item_deleted)
-        _strips->free(i._index);
+        if(i._index)
+            _strips->free(i._index.value());
 
     for(RenderLayerSnapshot::Droplet& i : snapshot._droplets)
     {
@@ -56,7 +57,7 @@ sp<RenderCommand> RCCDrawQuads::compose(const RenderRequest& renderRequest, Rend
                 hasNewCreatedSnapshot = true;
                 i._element_state._index = _strips->allocate(vertexCount);
             }
-            model.writeRenderable(buf.makeVertexWriter(renderRequest, vertexCount, i._element_state._index), i._snapshot);
+            model.writeRenderable(buf.makeVertexWriter(renderRequest, vertexCount, i._element_state._index.value()), i._snapshot);
         }
     }
 
@@ -69,7 +70,7 @@ sp<RenderCommand> RCCDrawQuads::compose(const RenderRequest& renderRequest, Rend
         {
             Model& model = i._snapshot._model;
             if(i._snapshot._state.hasState(Renderable::RENDERABLE_STATE_VISIBLE))
-                offset += model.writeIndices(indices.data() + offset, i._element_state._index);
+                offset += model.writeIndices(indices.data() + offset, i._element_state._index.value());
             else
                 offset += static_cast<element_index_t>(model.indices()->size() / sizeof(element_index_t));
         }

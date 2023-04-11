@@ -52,6 +52,7 @@ public:
 
         const Buffer& buffer() const;
 
+        [[nodiscard]]
         element_index_t allocate(uint32_t unitVertexCount);
         void free(element_index_t idx);
 

@@ -142,21 +142,10 @@ LayerContext::Snapshot LayerContext::snapshot(RenderRequest& renderRequest, cons
     return Snapshot{dirty, _position.val(), _visible.val(), _disposed.val(), varyings};
 }
 
-//bool LayerContext::ensureState(void* stateKey)
-//{
-//    const auto iter = _element_states.find(stateKey);
-//    if(iter == _element_states.end())
-//    {
-//        _element_states.insert(std::make_pair(stateKey, ElementState{0}));
-//        return true;
-//    }
-//    return false;
-//}
-
 LayerContext::ElementState& LayerContext::addElementState(void* key)
 {
     DASSERT(_element_states.find(key) == _element_states.end());
-    return _element_states.insert(std::make_pair(key, ElementState{0})).first->second;
+    return _element_states.insert(std::make_pair(key, ElementState{})).first->second;
 }
 
 LayerContext::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, Layer::Type layerType)
