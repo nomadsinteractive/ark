@@ -122,7 +122,7 @@ element_index_t GraphicsBufferAllocator::Strips::allocate(uint32_t unitVertexCou
         _size += sizeNeedAllocate;
         return idx;
     }
-    FATAL("Unimplemented");
+    FATAL("Unimplemented: Available %d", _page->available());
     return 0;
 }
 

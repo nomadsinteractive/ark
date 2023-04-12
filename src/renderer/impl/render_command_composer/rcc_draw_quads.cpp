@@ -37,7 +37,6 @@ void RCCDrawQuads::postSnapshot(RenderController& renderController, RenderLayerS
 sp<RenderCommand> RCCDrawQuads::compose(const RenderRequest& renderRequest, RenderLayerSnapshot& snapshot)
 {
     DrawingBuffer buf(snapshot._stub->_shader_bindings, snapshot._stub->_stride);
-    const Buffer& vertices = snapshot._stub->_shader_bindings->vertices();
     bool hasNewCreatedSnapshot = false;
 
     for(const LayerContext::ElementState& i : snapshot._item_deleted)
@@ -77,6 +76,7 @@ sp<RenderCommand> RCCDrawQuads::compose(const RenderRequest& renderRequest, Rend
         indexUploader = sp<UploaderArray<element_index_t>>::make(std::move(indices));
     }
 
+    const Buffer& vertices = snapshot._stub->_shader_bindings->vertices();
     return snapshot.toRenderCommand(renderRequest, buf.vertices().toSnapshot(vertices), _indices.snapshot(indexUploader), DrawingContextParams::DrawElements(0, snapshot._index_count));
 }
 

@@ -11,7 +11,7 @@ Licensed under the Apache 2.0 license.
 
 System requirements
 --------------
-1. CMake 3.7+
+1. CMake 3.15+
 2. Vcpkg
 3. Python 3.6+
 4. MSVC 2017+
@@ -60,7 +60,11 @@ Plugins
 --------------
 * assimp
 * box2d
+* bullet
+* dear imgui
+* PBR
 * noise
-* portaudio
+* optick
 * python
 * vorbis
+* yoga layout

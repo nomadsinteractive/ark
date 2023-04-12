@@ -226,7 +226,7 @@ void TilemapLayer::setTile(uint32_t col, uint32_t row, const sp<Tile>& tile, con
     sp<RenderableTile>& targetTile = _layer_tiles[index];
     if(targetTile)
         targetTile->dispose();
-    if(_layer_context)
+    if(_layer_context && renderableTile)
         _layer_context->add(renderableTile);
     targetTile = std::move(renderableTile);
 }
