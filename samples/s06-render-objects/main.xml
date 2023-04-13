@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<import name="pre" src="prefab.xml"/>
+	<view id="@root_view" size="960, 540" layout="frame"/>
+	<renderer id="@imgui" ref="@pre:imgui"/>
+	<arena id="main" view="@root_view">
+		<render-layer ref="@pre:rl001"/>
+		<render-layer ref="@pre:rl003"/>
+		<layer id="@l03" render-layer="@pre:rl003"/>
+		<renderer ref="@imgui"/>
+		<renderer ref="@pre:fps-counter"/>
+	</arena>
+</resources>
