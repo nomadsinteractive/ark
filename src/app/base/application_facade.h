@@ -1,5 +1,4 @@
-#ifndef ARK_BASE_APP_APPLICATION_FACADE_H_
-#define ARK_BASE_APP_APPLICATION_FACADE_H_
+#pragma once
 
 #include <vector>
 
@@ -24,24 +23,24 @@ public:
     sp<Vec2> cursorPosition() const;
 //  [[script::bindings::property]]
     const sp<Size>& surfaceSize() const;
-// [[script::bindings::property]]
+//  [[script::bindings::property]]
     const sp<ApplicationController>& applicationController() const;
-// [[script::bindings::property]]
+//  [[script::bindings::property]]
     const sp<ApplicationBundle>& applicationBundle() const;
-// [[script::bindings::property]]
+//  [[script::bindings::property]]
     const sp<RenderController>& renderController() const;
-// [[script::bindings::property]]
+//  [[script::bindings::property]]
     const sp<SurfaceController>& surfaceController() const;
-// [[script::bindings::property]]
+//  [[script::bindings::property]]
     const sp<Camera>& camera() const;
-// [[script::bindings::property]]
+//  [[script::bindings::property]]
     const sp<ApplicationManifest>& manifest() const;
-// [[script::bindings::property]]
+//  [[script::bindings::property]]
     const sp<ResourceLoader>& resourceLoader() const;
 
-// [[script::bindings::property]]
+//  [[script::bindings::property]]
     const sp<Arena>& arena() const;
-// [[script::bindings::property]]
+//  [[script::bindings::property]]
     void setArena(sp<Arena> arena);
 
 //  [[script::bindings::auto]]
@@ -111,5 +110,3 @@ private:
 };
 
 }
-
-#endif

@@ -1,6 +1,5 @@
 import random
 
-import ark
 from ark import RenderObject, Transform, Rotation, ApplicationFacade, Integer, Arena, dear_imgui, Vec2, Numeric, Observer
 
 

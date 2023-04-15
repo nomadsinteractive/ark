@@ -528,7 +528,7 @@ class ApplicationFacade:
     def schedule(self, task: Callable, interval: float, canceled: Optional['Boolean'] = None):
         pass
 
-    def expect(self, condition: 'Boolean', observer: 'Observer', canceled: Optional['Boolean']) -> Future:
+    def expect(self, condition: 'Boolean', observer: 'Observer', canceled: Optional['Boolean'] = None) -> Future:
         pass
 
 
@@ -2477,7 +2477,15 @@ class Graph:
 class GraphNode:
 
     @property
-    def position(self) -> Vec3:
+    def position(self) -> tuple[float, float, float]:
+        return 0, 0, 0
+
+    @property
+    def tag(self) -> Any:
+        return None
+
+    @tag.setter
+    def tag(self, tag: Any):
         pass
 
     def add_route(self, to_node: 'GraphNode', length: float):

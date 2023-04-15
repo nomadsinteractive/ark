@@ -15,14 +15,20 @@ class ARK_API Graph {
 public:
 //  [[script::bindings::auto]]
     Graph();
+    ~Graph();
 
 //  [[script::bindings::property]]
-    const std::set<sp<GraphNode>>& nodes() const;
+    const std::vector<sp<GraphNode>>& nodes() const;
 //  [[script::bindings::auto]]
     sp<GraphNode> makeNode(const V3& position, Box tag = nullptr);
 
+//  [[script::bindings::auto]]
+    bool hasNode(const GraphNode& node) const;
+
+    sp<GraphNode> toSharedPtr(const GraphNode& node) const;
+
 private:
-    std::set<sp<GraphNode>> _nodes;
+    std::vector<sp<GraphNode>> _nodes;
 };
 
 }

@@ -14,11 +14,14 @@ public:
     GraphNode& exit();
 
     float length() const;
+    bool isExternal() const;
 
 private:
-    GraphNode& _entry;
-    GraphNode& _exit;
+    GraphNode* _entry;
+    GraphNode* _exit;
     float _length;
+
+    bool _external;
 };
 
 }

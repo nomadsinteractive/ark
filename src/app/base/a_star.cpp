@@ -2,6 +2,8 @@
 
 #include <unordered_set>
 
+#include "core/util/strings.h"
+
 #include "app/base/graph_node.h"
 #include "app/base/graph_route.h"
 
@@ -41,7 +43,7 @@ public:
 
 private:
     static bool _routingCompare(const SearchingRoute& a, const SearchingRoute& b) {
-        return a._score <= b._score;
+        return a._score < b._score;
     }
 
     void inflate(SearchingRoute& route, std::vector<SearchingRoute>& newRoutes) {
@@ -53,7 +55,7 @@ private:
                 next._score += i.length();
                 next._score += getHeuristicValue(node);
                 next._route_path.push_back(&node);
-                newRoutes.insert(std::upper_bound(newRoutes.begin(), newRoutes.end(), next, _routingCompare), std::move(next));
+                newRoutes.insert(std::lower_bound(newRoutes.begin(), newRoutes.end(), next, _routingCompare), std::move(next));
             }
         }
     }
