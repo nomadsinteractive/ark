@@ -158,7 +158,8 @@ ark_find_vcpkg_package(libzip LIBRARIES libzip::zip)
 
 ark_find_vcpkg_package(glm LIBRARIES glm::glm)
 
-ark_include_directories(3rdparty/cute_headers)
+find_path(CUTE_HEADERS_INCLUDE_DIRS "cute_alloc.h")
+ark_include_directories(main PRIVATE ${CUTE_HEADERS_INCLUDE_DIRS})
 
 ark_find_vcpkg_package(nlohmann_json LIBRARIES nlohmann_json::nlohmann_json)
 ark_find_vcpkg_package(spdlog LIBRARIES spdlog::spdlog spdlog::spdlog_header_only)

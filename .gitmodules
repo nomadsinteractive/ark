@@ -1,6 +1,3 @@
-[submodule "3rdparty/cute_headers"]
-	path = 3rdparty/cute_headers
-	url = https://github.com/RandyGaul/cute_headers.git
 [submodule "plugin/python/3rdparty/Python"]
 	path = plugin/python/3rdparty/Python
 	url = https://github.com/python/cpython.git
