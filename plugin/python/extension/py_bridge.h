@@ -1,5 +1,4 @@
-#ifndef ARK_PLUGIN_PYTHON_EXTENSION_PY_BRIDGE_H_
-#define ARK_PLUGIN_PYTHON_EXTENSION_PY_BRIDGE_H_
+#pragma once
 
 #include <Python.h>
 
@@ -18,6 +17,7 @@ public:
     static PyObject* PyModule_Create2(struct PyModuleDef* moduleDef, int32_t apiver);
     static int32_t PyModule_AddObject(PyObject* mod, const char* name, PyObject* value);
     static int32_t PyList_SetItem(PyObject* obj, Py_ssize_t idx, PyObject* item);
+    static int32_t PyTuple_SetItem(PyObject* obj, Py_ssize_t idx, PyObject* item);
     static PyObject* PyLong_FromLong(long);
     static PyObject* PyLong_FromLongLong(long long value);
     static PyObject* PyLong_FromUnsignedLong(unsigned long);
@@ -31,6 +31,10 @@ public:
     static PyObject* PyList_New(Py_ssize_t size);
     static PyObject* PyList_GetItem(PyObject* obj, Py_ssize_t idx);
     static Py_ssize_t PyList_Size(PyObject* obj);
+
+    static PyObject* PyTuple_New(Py_ssize_t size);
+    static PyObject* PyTuple_GetItem(PyObject* obj, Py_ssize_t idx);
+    static Py_ssize_t PyTuple_Size(PyObject* obj);
 
     static PyObject* PyIter_Next(PyObject* iter);
 
@@ -66,5 +70,3 @@ public:
 }
 }
 }
-
-#endif

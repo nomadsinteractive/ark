@@ -72,6 +72,7 @@ private:
                 bestRoute = &i;
         return bestRoute;
     }
+
 private:
     GraphNode* _goal;
     std::unordered_set<GraphNode*> _close_set;

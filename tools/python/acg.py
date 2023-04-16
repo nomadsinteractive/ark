@@ -64,9 +64,13 @@ def match_header_patterns(paths, find_main_class, *args):
 
 
 def _process_header(filename, find_main_class, *args):
-    with open(filename, 'rt') as fp:
+    with open(filename, 'rt', encoding='utf8') as fp:
         filename = filename.lstrip(r'.\/').replace('\\', '/')
-        content = fp.read()
+        try:
+            content = fp.read()
+        except UnicodeDecodeError as e:
+            print(f'Error reading {filename}')
+            raise e
         main_class = findMainClass(content) if find_main_class else None
         if main_class or not find_main_class:
             for j in args:

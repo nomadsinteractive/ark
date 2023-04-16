@@ -24,6 +24,11 @@ int32_t PyBridge::PyList_SetItem(PyObject* obj, Py_ssize_t idx, PyObject* item)
     return ::PyList_SetItem(obj, idx, item);
 }
 
+int32_t PyBridge::PyTuple_SetItem(PyObject* obj, Py_ssize_t idx, PyObject* item)
+{
+    return ::PyTuple_SetItem(obj, idx, item);
+}
+
 PyObject* PyBridge::PyList_New(Py_ssize_t size)
 {
     return ::PyList_New(size);
@@ -72,6 +77,21 @@ PyObject* PyBridge::PyObject_GetIter(PyObject* obj)
 Py_ssize_t PyBridge::PyList_Size(PyObject* obj)
 {
     return ::PyList_Size(obj);
+}
+
+PyObject* PyBridge::PyTuple_New(Py_ssize_t size)
+{
+    return ::PyTuple_New(size);
+}
+
+PyObject* PyBridge::PyTuple_GetItem(PyObject* obj, Py_ssize_t idx)
+{
+    return ::PyTuple_GetItem(obj, idx);
+}
+
+Py_ssize_t PyBridge::PyTuple_Size(PyObject* obj)
+{
+    return ::PyTuple_Size(obj);
 }
 
 PyObject* PyBridge::PyIter_Next(PyObject* iter)

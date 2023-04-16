@@ -1,6 +1,6 @@
-#ifndef ARK_PLUGIN_PYTHON_EXTENSION_PY_CAST_H_
-#define ARK_PLUGIN_PYTHON_EXTENSION_PY_CAST_H_
+#pragma once
 
+#include <array>
 #include <functional>
 #include <map>
 #include <optional>
@@ -129,10 +129,18 @@ private:
     }
 
     template<typename T> static PyObject* fromIterable_sfinae(const T& list, typename std::remove_reference<decltype(list.front())>::type*) {
-        PyObject* pyList = PyBridge::PyList_New(list.size());
+        constexpr bool isArray = std::is_same_v<T, std::array<typename T::value_type, sizeof(T) / sizeof(typename T::value_type)>>;
+        PyObject* pyList;
+        if constexpr(isArray)
+            pyList = PyBridge::PyTuple_New(list.size());
+        else
+            pyList = PyBridge::PyList_New(list.size());
         Py_ssize_t index = 0;
         for(const auto& i : list)
-            PyBridge::PyList_SetItem(pyList, index++, toPyObject(i));
+            if constexpr(isArray)
+                PyBridge::PyTuple_SetItem(pyList, index++, toPyObject(i));
+            else
+                PyBridge::PyList_SetItem(pyList, index++, toPyObject(i));
         return pyList;
     }
 
@@ -240,6 +248,15 @@ private:
         T col;
         if(copyToCppObject<U>(obj, std::back_inserter(col)))
             return col;
+        return Optional<T>();
+    }
+    template<typename T, typename U> static Optional<T> toCppCollectionObject_sfinae(PyObject* obj, std::enable_if_t<std::is_same_v<T, typename std::array<U, sizeof(T) / sizeof(U)>>>*) {
+        Py_ssize_t len = !PyBridge::isPyDictExact(obj) ? PyBridge::PyObject_Size(obj) : -1;
+        if(len != sizeof(T) / sizeof(U))
+            return Optional<T>();
+        std::array<U, sizeof(T) / sizeof(U)> array;
+        if(copyToCppObject<U>(obj, array.begin()))
+            return array;
         return Optional<T>();
     }
     template<typename T, typename U> static Optional<T> toCppCollectionObject_sfinae(PyObject* obj, ...) {
@@ -383,5 +400,3 @@ template<> inline Optional<sp<ByteArray>> PyCast::toSharedPtrImpl<ByteArray>(PyO
 }
 }
 }
-
-#endif

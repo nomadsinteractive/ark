@@ -2491,7 +2491,15 @@ class GraphNode:
     def add_route(self, to_node: 'GraphNode', length: float):
         pass
 
-    def find_route(self, goal: 'GraphNode') -> list:
+    def find_route(self, goal: 'GraphNode') -> list['GraphNode']:
+        pass
+
+
+class ConvexHullResolver:
+    def __init__(self, check_error: bool = True):
+        pass
+
+    def resolve(self, points: Optional[list[tuple[float, float]]]) -> list[tuple[float, float]]:
         pass
 
 
