@@ -7,10 +7,12 @@
 	<resource-loader src="app.xml"/>
     <application title="s01 - Hello World">
 		<arena>
+			<view layout="frame">
+				<text text="Hello World" render-layer="@pre:rl002"/>
+				<renderer ref="@pre:fps-counter" style="position:0, 470"/>
+			</view>
             <render-layer ref="@pre:rl001"/>
             <render-layer ref="@pre:rl002"/>
-            <renderer class="label" text="Hello World" render-layer="@pre:rl002"/>
-            <renderer ref="@pre:fps-counter" style="position:0, 470"/>
 		</arena>
 	</application>
 </manifest>
