@@ -6,6 +6,50 @@
 
 namespace ark {
 
+namespace {
+
+class SearchingGraphNode {
+public:
+    SearchingGraphNode(GraphNode& graphNode)
+        : _graph_node(graphNode) {
+    }
+
+    const V3& position() const {
+        return _graph_node.position();
+    }
+
+    void visitAdjacentNodes(const std::function<void(SearchingGraphNode, float)>& visitor) {
+        for(GraphRoute& i : _graph_node.outRoutes())
+            visitor(i.exit(), i.weight());
+    }
+
+    bool operator == (const SearchingGraphNode& other) const {
+        return &_graph_node == &other._graph_node;
+    }
+
+    bool operator != (const SearchingGraphNode& other) const {
+        return &_graph_node != &other._graph_node;
+    }
+
+    GraphNode& _graph_node;
+};
+
+}
+
+}
+
+namespace std {
+
+template <> struct hash<ark::SearchingGraphNode> {
+    size_t operator()(const ark::SearchingGraphNode& str) const {
+        return reinterpret_cast<size_t>(&str._graph_node);
+    }
+};
+
+}
+
+namespace ark {
+
 GraphNode::GraphNode(Graph& graph, const V3& position, Box tag)
     : _graph(graph), _position(position), _tag(std::move(tag))
 {
@@ -45,12 +89,13 @@ void GraphNode::setTag(Box tag)
     _tag = std::move(tag);
 }
 
-std::vector<sp<GraphNode> > GraphNode::findRoute(GraphNode& goal)
+std::vector<sp<GraphNode>> GraphNode::findRoute(GraphNode& goal)
 {
-    std::vector<sp<GraphNode>> routes;
-    for(GraphNode* i : astar(*this, goal))
-        routes.push_back(i->toSharedPtr());
-    return routes;
+    std::vector<sp<GraphNode>> result;
+    AStar<SearchingGraphNode> searchingGraph(*this, goal);
+    for(const SearchingGraphNode& i : searchingGraph.findRoute())
+        result.push_back(i._graph_node.toSharedPtr());
+    return result;
 }
 
 sp<GraphNode> GraphNode::toSharedPtr() const

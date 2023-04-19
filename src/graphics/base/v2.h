@@ -24,6 +24,8 @@ public:
     V2& operator *=(const V2& other);
     V2& operator /=(const V2& other);
 
+    bool operator <(const V2& other) const;
+
     friend ARK_API V2 operator +(const V2& lvalue, const V2& rvalue);
     friend ARK_API V2 operator -(const V2& lvalue, const V2& rvalue);
     friend ARK_API V2 operator *(const V2& lvalue, const V2& rvalue);
@@ -36,7 +38,6 @@ public:
 
     float x() const;
     float y() const;
-    float z() const;
 
     float dot(const V2& other) const;
     float hypot() const;

@@ -5,7 +5,8 @@
 namespace ark {
 
 template<typename T, size_t N> std::deque<std::array<T, N>> resolveConvexHull(const std::deque<std::array<T, N>>& points, bool checkResult) {
-    typedef quick_hull<typename std::deque<std::array<T, N>>::const_iterator, T> QuickHull;
+    typedef std::deque<std::array<T, N>>::const_iterator PointIterator;
+    typedef quick_hull<PointIterator, T> QuickHull;
     const auto eps = std::numeric_limits<T>::epsilon();
     QuickHull qh{N, eps};
     qh.add_points(std::cbegin(points), std::cend(points));
@@ -17,15 +18,23 @@ template<typename T, size_t N> std::deque<std::array<T, N>> resolveConvexHull(co
     if(checkResult)
         ASSERT(qh.check());
 
-    std::deque<std::array<T, N>> convexHulls;
+    ASSERT(qh.facets_.size() > 0);
+    std::map<std::array<T, N>, PointIterator> facetMap;
     for(const QuickHull::facet& i : qh.facets_) {
         ASSERT(i.vertices_.size() == 2);
-        convexHulls.push_back(*i.vertices_.at(0));
+        facetMap[*i.vertices_.at(0)] = i.vertices_.at(1);
     }
 
-    return convexHulls;
+    std::deque<std::array<T, N>> convexHull;
+    std::array<T, N> hullPoint = *qh.facets_.at(0).vertices_.at(0);
+    for(size_t i = 0; i < qh.facets_.size(); ++i) {
+        convexHull.push_back(hullPoint);
+        const auto iter = facetMap.find(hullPoint);
+        ASSERT(iter != facetMap.end());
+        hullPoint = *(iter->second);
+    }
+    return convexHull;
 }
-
 
 ConvexHullResolver::ConvexHullResolver(bool checkError)
     : _check_error(checkError)

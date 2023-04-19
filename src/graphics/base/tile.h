@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_BASE_TILE_H_
-#define ARK_GRAPHICS_BASE_TILE_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/base/string.h"
@@ -42,5 +41,3 @@ private:
 };
 
 }
-
-#endif

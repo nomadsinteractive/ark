@@ -8,18 +8,18 @@ namespace ark {
 
 class GraphRoute {
 public:
-    GraphRoute(GraphNode& entry, GraphNode& exit, float length);
+    GraphRoute(GraphNode& entry, GraphNode& exit, float weight);
 
     GraphNode& entry();
     GraphNode& exit();
 
-    float length() const;
+    float weight() const;
     bool isExternal() const;
 
 private:
     GraphNode* _entry;
     GraphNode* _exit;
-    float _length;
+    float _weight;
 
     bool _external;
 };

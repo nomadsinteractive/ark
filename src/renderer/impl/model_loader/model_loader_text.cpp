@@ -64,7 +64,7 @@ ModelLoaderText::GlyphBundle::GlyphBundle(AtlasAttachment& atlasAttachment, sp<A
 {
 }
 
-bool ModelLoaderText::GlyphBundle::prepareOne(uint64_t timestamp, int32_t c, int32_t kc)
+bool ModelLoaderText::GlyphBundle::prepareOne(uint64_t timestamp, int32_t c, int32_t ckey)
 {
     Optional<Alphabet::Metrics> optMetrics = _alphabet->measure(c);
     if(optMetrics)
@@ -86,12 +86,12 @@ bool ModelLoaderText::GlyphBundle::prepareOne(uint64_t timestamp, int32_t c, int
         V3 xyz = V3(static_cast<float>(metrics.bitmap_x), static_cast<float>(metrics.bitmap_y), 0);
         sp<Metrics> bounds = sp<Metrics>::make(xyz, V3(charSize, 0), xyz);
         sp<Metrics> occupies = sp<Metrics>::make(V3(0), V3(static_cast<float>(width), static_cast<float>(height), 0), xyz);
-        _glyphs[kc] = GlyphModel(sp<Model>::make(_atlas_attachment._unit_model.indices(), sp<VerticesQuad>::make(item), std::move(bounds), std::move(occupies)), timestamp);
+        _glyphs[ckey] = GlyphModel(sp<Model>::make(_atlas_attachment._unit_model.indices(), sp<VerticesQuad>::make(item), std::move(bounds), std::move(occupies)), timestamp);
     }
     else
     {
         LOGW("Error loading character %d", c);
-        return kc == c && kc != ' ' ? prepareOne(timestamp, ' ', kc) : false;
+        return ckey == c && ckey != ' ' ? prepareOne(timestamp, ' ', ckey) : false;
     }
     return true;
 }

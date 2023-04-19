@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_BASE_V3_H_
-#define ARK_GRAPHICS_BASE_V3_H_
+#pragma once
 
 #include "core/base/api.h"
 
@@ -53,5 +52,3 @@ protected:
 };
 
 }
-
-#endif

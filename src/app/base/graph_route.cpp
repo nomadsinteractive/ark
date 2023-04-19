@@ -5,8 +5,8 @@
 
 namespace ark {
 
-GraphRoute::GraphRoute(GraphNode& entry, GraphNode& exit, float length)
-    : _entry(&entry), _exit(&exit), _length(length), _external(!entry.graph().hasNode(exit))
+GraphRoute::GraphRoute(GraphNode& entry, GraphNode& exit, float weight)
+    : _entry(&entry), _exit(&exit), _weight(weight), _external(!entry.graph().hasNode(exit))
 {
 }
 
@@ -20,9 +20,9 @@ GraphNode& GraphRoute::exit()
     return *_exit;
 }
 
-float GraphRoute::length() const
+float GraphRoute::weight() const
 {
-    return _length;
+    return _weight;
 }
 
 bool GraphRoute::isExternal() const

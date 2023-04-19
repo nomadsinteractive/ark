@@ -64,6 +64,11 @@ V2& V2::operator /=(const V2& other)
     return *this;
 }
 
+bool V2::operator <(const V2& other) const
+{
+    return _x < other._x ? true : (_x == other._x ? _y < other._y : false);
+}
+
 V2 V2::operator -() const
 {
     return V2(-_x, -_y);
@@ -112,11 +117,6 @@ float V2::x() const
 float V2::y() const
 {
     return _y;
-}
-
-float V2::z() const
-{
-    return 0;
 }
 
 float V2::dot(const V2& other) const

@@ -64,7 +64,7 @@ private:
 
         GlyphModel& ensureGlyphModel(uint64_t timestamp, int32_t c, bool reload);
 
-        bool prepareOne(uint64_t timestamp, int32_t c, int32_t kc);
+        bool prepareOne(uint64_t timestamp, int32_t c, int32_t ckey);
 
         void update(uint64_t timestamp);
 
