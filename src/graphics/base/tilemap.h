@@ -52,6 +52,9 @@ public:
     void jsonLoad(const Json& json);
     Json jsonDump() const;
 
+//  [[script::bindings::auto]]
+    std::vector<std::array<int32_t, 2>> findRoute(const std::array<int32_t, 2>& start, const std::array<int32_t, 2>& goal);
+
 //  [[plugin::builder]]
     class BUILDER : public Builder<Tilemap> {
     public:

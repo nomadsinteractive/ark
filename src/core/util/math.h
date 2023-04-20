@@ -131,6 +131,11 @@ public:
         return std::make_pair(nearest, ldmin);
     }
 
+    template<typename T> static void hashCombine(std::size_t& seed, const T& v) {
+        std::hash<T> hasher;
+        seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    }
+
     static ARK_API uint32_t log2(uint32_t x);
 
     static ARK_API float abs(float x);
