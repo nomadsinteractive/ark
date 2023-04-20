@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_TYPES_OPTIONAL_H_
-#define ARK_CORE_TYPES_OPTIONAL_H_
+#pragma once
 
 #include <optional>
 
@@ -43,6 +42,7 @@ private:
         Stub(T value)
             : _value(std::move(value)) {
         }
+        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Stub);
 
         T _value;
     };
@@ -62,5 +62,3 @@ private:
 };
 
 }
-
-#endif

@@ -7,6 +7,7 @@
 #include "core/base/json.h"
 #include "core/inf/storage.h"
 #include "core/inf/variable.h"
+#include "core/util/math.h"
 
 #include "graphics/base/layer_context.h"
 #include "graphics/base/tile.h"
@@ -16,10 +17,92 @@
 #include "graphics/impl/frame/scrollable.h"
 
 #include "app/base/collision_filter.h"
+#include "app/base/a_star.h"
 
 namespace ark {
 
 namespace {
+
+typedef std::pair<int32_t, int32_t> Coordinate;
+
+size_t getCoordinateHasher(int32_t col, int32_t row) {
+    std::size_t seed = 0;
+    Math::hashCombine(seed, col);
+    Math::hashCombine(seed, row);
+    return seed;
+}
+
+struct CoordinateHasher {
+    size_t operator()(const Coordinate& str) const {
+        return getCoordinateHasher(str.first, str.second);
+    }
+};
+
+struct SearchingTilemap {
+    SearchingTilemap(Tilemap& tilemap)
+        : _tilemap(tilemap) {
+    }
+
+    bool isBlockage(int32_t col, int32_t row) {
+        return false;
+        const auto iter = _blockages.find({col, row});
+        if(iter != _blockages.end())
+            return iter->second;
+
+        for(TilemapLayer& i : _tilemap.layers())
+            if(i.collisionFilter()) {
+                const V3 layerPosition = i.position().val();
+                int32_t dcol = col - static_cast<int32_t>(layerPosition.x());
+                int32_t drow = row - static_cast<int32_t>(layerPosition.y());
+                if(dcol >= 0 && drow >= 0 && dcol < i.colCount() && drow < i.rowCount()) {
+                    if(static_cast<bool>(i.getTile(dcol, drow))) {
+                        _blockages.insert(std::make_pair(Coordinate{col, row}, true));
+                        return true;
+                    }
+            }
+        }
+        _blockages.insert(std::make_pair(Coordinate{col, row}, false));
+        return false;
+    }
+
+    Tilemap& _tilemap;
+    std::unordered_map<Coordinate, bool, CoordinateHasher> _blockages;
+};
+
+struct SearchingTilemapNode {
+    SearchingTilemapNode(SearchingTilemap& searchingTilemap, int32_t col, int32_t row)
+        : _searching_tilemap(searchingTilemap), _col(col), _row(row) {
+    }
+
+    V3 position() const {
+        return V3(static_cast<float>(_col), static_cast<float>(_row), 0);
+    }
+
+    void visitAdjacentNodes(const std::function<void(SearchingTilemapNode, float)>& visitor) {
+        for(int32_t i = -1; i < 2; ++i)
+            for(int32_t j = -1; j < 2; ++j)
+                if((i != 0 || j != 0) && !_searching_tilemap.isBlockage(_col + i, _row + j))
+                    visitor(SearchingTilemapNode(_searching_tilemap, _col + i, _row + j), std::abs(i) + std::abs(j));
+    }
+
+    bool operator == (const SearchingTilemapNode& other) const {
+        return _col == other._col && _row == other._row;
+    }
+
+    bool operator != (const SearchingTilemapNode& other) const {
+        return _col != other._col || _row != other._row;
+    }
+
+    SearchingTilemap& _searching_tilemap;
+    int32_t _col;
+    int32_t _row;
+};
+
+struct SearchingTilemapNodeHasher {
+    size_t operator()(const SearchingTilemapNode& str) const {
+        return getCoordinateHasher(str._col, str._row);
+    }
+};
 
 class TilemapLayerMaker : public RendererMaker {
 public:
@@ -229,6 +312,16 @@ Json Tilemap::jsonDump() const
     Json jTilemap;
     jTilemap.set("layers", jLayers);
     return jTilemap;
+}
+
+std::vector<std::array<int32_t, 2>> Tilemap::findRoute(const std::array<int32_t, 2>& start, const std::array<int32_t, 2>& goal)
+{
+    std::vector<std::array<int32_t, 2>> result;
+    SearchingTilemap searchingTilemap(*this);
+    AStar<SearchingTilemapNode, SearchingTilemapNodeHasher> astar(SearchingTilemapNode(searchingTilemap, start[0], start[1]), SearchingTilemapNode(searchingTilemap, goal[0], goal[1]));
+    for(const SearchingTilemapNode& i : astar.findRoute())
+        result.push_back({i._col, i._row});
+    return result;
 }
 
 const std::vector<sp<TilemapLayer>>& Tilemap::layers() const

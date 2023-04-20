@@ -2014,6 +2014,9 @@ class Tilemap:
     def load(self, src: Union[Readable, str]):
         pass
 
+    def find_route(self, start: tuple[int, int], goal: tuple[int, int]) -> list[tuple[int, int]]:
+        pass
+
 
 class Function:
     def __init__(self, d):

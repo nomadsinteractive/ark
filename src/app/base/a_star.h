@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+#include <set>
 #include <unordered_set>
 #include <vector>
 
@@ -7,73 +9,74 @@
 
 namespace ark {
 
-template<typename T> class AStar {
+template<typename T, typename H = std::hash<T>> class AStar {
 private:
     struct SearchingRoute {
         float _score;
+        float _weight;
         std::vector<T> _route_path;
+
+        bool operator < (const SearchingRoute& other) const {
+            return _score < other._score;
+        }
     };
 
 public:
     AStar(T start, T goal)
-        : _start(std::move(start)), _goal(std::move(goal)) {
+        : _start(std::move(start)), _goal(std::move(goal)), _routes{ SearchingRoute{getHeuristicValue(_start), 0, {_start}} } {
     }
 
     std::vector<T> findRoute() {
-        std::vector<SearchingRoute> routes;
-        std::vector<SearchingRoute> newRoutes;
-        routes.push_back(SearchingRoute{getHeuristicValue(_start), {_start}});
-        while(routes.front()._route_path.back() != _goal) {
+        while(_routes.size() > 0) {
+            if(_routes.begin()->_route_path.back() == _goal)
+                return _routes.begin()->_route_path;
 
-            for(SearchingRoute& i : routes)
-                inflate(i, newRoutes);
-
-            if(newRoutes.empty()) {
-                const SearchingRoute* bestRoute = findBestSearchingRoute(routes);
-                return bestRoute ? bestRoute->_route_path : std::vector<T>{};
-            }
-
-            routes = std::move(newRoutes);
+            Optional<SearchingRoute> inflated = inflate();
+            if(inflated)
+                _routes.insert(std::move(inflated.value()));
+            else
+                _routes.erase(_routes.begin());
         }
-        return routes.front()._route_path;
+        return {};
     }
 
 private:
-    static bool _routingCompare(const SearchingRoute& a, const SearchingRoute& b) {
-        return a._score < b._score;
-    }
-
-    void inflate(SearchingRoute& route, std::vector<SearchingRoute>& newRoutes) {
-        const auto visitor = [this, &route, &newRoutes] (T node, float weight) {
+    Optional<SearchingRoute> inflate() {
+        std::unique_ptr<T> nextNode;
+        float nextWeight;
+        float nextScore;
+        float bestScore = std::numeric_limits<float>::max();
+        const auto visitor = [this, &nextNode, &nextWeight, &nextScore, &bestScore] (T node, float weight) {
             if(_close_set.find(node) == _close_set.end()) {
-                _close_set.insert(node);
-                SearchingRoute next = route;
-                next._score += weight;
-                next._score += getHeuristicValue(node);
-                next._route_path.push_back(node);
-                newRoutes.insert(std::lower_bound(newRoutes.begin(), newRoutes.end(), next, _routingCompare), std::move(next));
+                const SearchingRoute& next = *_routes.begin();
+                nextWeight = next._weight + weight;
+                nextScore = nextWeight + getHeuristicValue(node);
+                if(bestScore > nextScore) {
+                    bestScore = nextScore;
+                    nextNode = std::make_unique<T>(std::move(node));
+                }
             }
         };
 
-        route._route_path.back().visitAdjacentNodes(visitor);
+        T(_routes.begin()->_route_path.back()).visitAdjacentNodes(visitor);
+        if(nextNode) {
+            SearchingRoute bestRoute{nextScore, nextWeight, _routes.begin()->_route_path};
+            _close_set.insert(*nextNode);
+            bestRoute._route_path.push_back(std::move(*nextNode));
+            return bestRoute;
+        }
+        return Optional<SearchingRoute>();
     }
 
-    float getHeuristicValue(T& from) {
+    float getHeuristicValue(T& from) const {
         const V3 d = from.position() - _goal.position();
         return d.dot(d);
     }
 
-    const SearchingRoute* findBestSearchingRoute(const std::vector<SearchingRoute>& routes) const {
-        const SearchingRoute* bestRoute = nullptr;
-        for(const SearchingRoute& i : routes)
-            if(i._route_path.back() == _goal && (bestRoute == nullptr || bestRoute->_score > i._score))
-                bestRoute = &i;
-        return bestRoute;
-    }
-
 private:
     T _start, _goal;
-    std::unordered_set<T> _close_set;
+    std::multiset<SearchingRoute> _routes;
+    std::unordered_set<T, H> _close_set;
 };
 
 }
