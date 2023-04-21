@@ -199,7 +199,7 @@ template<> Texture::Flag StringConvert::to<String, Texture::Flag>(const String& 
     return Texture::FLAG_FOR_INPUT;
 }
 
-Texture::Parameters::Parameters(Type type, int, const document& parameters, Format format, Texture::Feature features)
+Texture::Parameters::Parameters(Type type, const document& parameters, Format format, Texture::Feature features)
     : _type(type), _usage(parameters ? Documents::getAttribute<Texture::Usage>(parameters, "usage", Texture::USAGE_COLOR_ATTACHMENT) : Texture::USAGE_COLOR_ATTACHMENT),
       _format(parameters ? Documents::getAttribute<Texture::Format>(parameters, "format", format) : format),
       _features(parameters ? Documents::getAttribute<Texture::Feature>(parameters, "feature", features) : features),
@@ -255,7 +255,7 @@ Texture::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const 
 sp<Texture> Texture::BUILDER::build(const Scope& args)
 {
     Type type = Documents::getAttribute<Type>(_manifest, Constants::Attributes::TYPE, TYPE_2D);
-    const sp<Texture::Parameters> parameters = sp<Texture::Parameters>::make(type, 0, _manifest);
+    const sp<Texture::Parameters> parameters = sp<Texture::Parameters>::make(type, _manifest);
     parameters->loadParameters(_manifest, _factory, args);
     const sp<String> src = _src->build(args);
     if(src)

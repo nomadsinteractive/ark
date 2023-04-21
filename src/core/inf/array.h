@@ -72,6 +72,7 @@ public:
     class Allocated;
     class Borrowed;
     class Vector;
+    class Sliced;
 
     template<size_t LEN> class Fixed;
 
@@ -202,6 +203,27 @@ public:
 private:
     sp<Array<U>> _data;
 };
+
+template<typename T> class Array<T>::Sliced : public Array<T> {
+public:
+    Sliced(sp<Array<T>> data, size_t offset, size_t length)
+        : _data(std::move(data)), _offset(offset), _length(length) {
+    }
+
+    virtual size_t length() override {
+        return _length;
+    }
+
+    virtual T* buf() override {
+        return _data->buf() + _offset;
+    }
+
+private:
+    sp<Array<T>> _data;
+    size_t _offset;
+    size_t _length;
+};
+
 
 }
 

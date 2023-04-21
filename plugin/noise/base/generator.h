@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include "noise/api.h"
 #include "FastNoise/FastNoise.h"
 
@@ -16,21 +14,21 @@ class ARK_PLUGIN_NOISE_API Generator {
 public:
 //  [[script::bindings::enumeration]]
     enum NoiseType {
-        NOISE_TYPE_PERLIN,
-        NOISE_TYPE_PERLIN_FRACTAL,
         NOISE_TYPE_SIMPLEX,
-        NOISE_TYPE_SIMPLEX_FRACTAL
+        NOISE_TYPE_PERLIN
     };
 
 public:
 //  [[script::bindings::auto]]
-    Generator(uint32_t seed, Generator::NoiseType type);
+    Generator(Generator::NoiseType type = Generator::NoiseType::NOISE_TYPE_SIMPLEX, int32_t seed = 0);
 
 //  [[script::bindings::property]]
     int32_t seed() const;
 //  [[script::bindings::property]]
     void setSeed(int32_t seed);
 
+//  [[script::bindings::property]]
+    float frequency();
 //  [[script::bindings::property]]
     void setFrequency(float frequency);
 
@@ -40,6 +38,8 @@ public:
     void setFractalGain(float gain);
 //  [[script::bindings::property]]
     void setFractalLacunarity(float lacunarity);
+//  [[script::bindings::property]]
+    void setFractalWeightedStrength(float weightedStrength);
 
 //  [[script::bindings::auto]]
     float noise2d(float x, float y);
@@ -47,12 +47,17 @@ public:
     float noise3d(float x, float y, float z);
 
 //  [[script::bindings::auto]]
-    std::vector<array<float>> noiseMap2d(uint32_t rows, uint32_t cols, float x1, float x2, float y1, float y2);
+    sp<FloatArray> noiseMap2d(uint32_t rows, uint32_t cols);
 
 private:
-    FastNoise::SmartNode<FastNoise::Generator> _noise_generator;
+    void ensureFractalGenerator();
+
+private:
     int32_t _seed;
     float _frequency;
+
+    FastNoise::SmartNode<FastNoise::Generator> _noise_generator;
+    FastNoise::SmartNode<FastNoise::Fractal<>> _fractal_generator;
 };
 
 }

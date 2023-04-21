@@ -101,7 +101,7 @@ public:
         return _delegate->id();
     }
 
-    virtual void upload(GraphicsContext& graphicsContext, const ark::sp<Texture::Uploader>& uploader) override {
+    virtual void upload(GraphicsContext& graphicsContext, const sp<Texture::Uploader>& uploader) override {
         _delegate->upload(graphicsContext, uploader);
     }
 

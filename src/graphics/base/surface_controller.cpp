@@ -53,7 +53,7 @@ void SurfaceController::onRenderFrame(const Color& backgroundColor, RenderView& 
 
     RenderRequest renderRequest;
     do {
-        std::this_thread::sleep_for(std::chrono::milliseconds(4));
+        std::this_thread::yield();
     } while(!_render_requests->pop(renderRequest));
 
     renderRequest.onRenderFrame(backgroundColor, renderView);

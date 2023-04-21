@@ -6,10 +6,14 @@ namespace ark {
 namespace plugin {
 namespace noise {
 
-Generator::Generator(uint32_t seed, NoiseType type)
-    : _noise_generator(FastNoise::New<FastNoise::Simplex>())
+Generator::Generator(NoiseType type, int32_t seed)
+    : _seed(seed), _frequency(200.0f)
 {
-//    _noise_generator.SetNoiseType(static_cast<FastNoise::NoiseType>(type));
+    if(type == NOISE_TYPE_SIMPLEX)
+        _noise_generator = FastNoise::New<FastNoise::Simplex>();
+    else if(type == NOISE_TYPE_PERLIN)
+        _noise_generator = FastNoise::New<FastNoise::Perlin>();
+    CHECK(_noise_generator, "Unknow noise type: %d", type);
 }
 
 int32_t Generator::seed() const
@@ -22,6 +26,11 @@ void Generator::setSeed(int32_t seed)
     _seed = seed;
 }
 
+float Generator::frequency()
+{
+    return _frequency;
+}
+
 void Generator::setFrequency(float frequency)
 {
     _frequency = frequency;
@@ -29,17 +38,26 @@ void Generator::setFrequency(float frequency)
 
 void Generator::setFractalOctaves(int32_t octaves)
 {
-//    _noise_generator.SetFractalOctaves(octaves);
+    ensureFractalGenerator();
+    _fractal_generator->SetOctaveCount(octaves);
 }
 
 void Generator::setFractalGain(float gain)
 {
-//    _noise_generator.SetFractalGain(gain);
+    ensureFractalGenerator();
+    _fractal_generator->SetGain(gain);
 }
 
 void Generator::setFractalLacunarity(float lacunarity)
 {
-//    _noise_generator.SetFractalLacunarity(lacunarity);
+    ensureFractalGenerator();
+    _fractal_generator->SetLacunarity(lacunarity);
+}
+
+void Generator::setFractalWeightedStrength(float weightedStrength)
+{
+    ensureFractalGenerator();
+    _fractal_generator->SetWeightedStrength(weightedStrength);
 }
 
 float Generator::noise2d(float x, float y)
@@ -52,22 +70,20 @@ float Generator::noise3d(float x, float y, float z)
     return _noise_generator->GenSingle3D(x, y, z, _seed);
 }
 
-std::vector<array<float> > Generator::noiseMap2d(uint32_t rows, uint32_t cols, float x1, float x2, float y1, float y2)
+sp<FloatArray> Generator::noiseMap2d(uint32_t rows, uint32_t cols)
 {
-    return {};
-//    float dx = (x2 - x1) / cols;
-//    float dy = (y2 - y1) / rows;
-//    array<array<float>> s = sp<Array<array<float>>::Allocated>::make(rows);
-//    for(uint32_t i = 0; i < rows; ++i)
-//    {
-//        const array<float> t = sp<FloatArray::Allocated>::make(cols);
-//        float* buf = t->buf();
-//        float y = y1 + dy * i;
-//        for(uint32_t j = 0; j < cols; ++j)
-//            buf[j] = _noise_generator.GetNoise(x1 + dx * j, y);
-//        s->buf()[i] = t;
-//    }
-//    return s;
+    std::vector<float> output(rows * cols);
+    _noise_generator->GenUniformGrid2D(output.data(), 0, 0, cols, rows, _frequency, _seed);
+    return sp<FloatArray::Vector>::make(std::move(output));
+}
+
+void Generator::ensureFractalGenerator()
+{
+    if(_fractal_generator)
+        return;
+
+    _fractal_generator = FastNoise::New<FastNoise::FractalFBm>();
+    _fractal_generator->SetSource(_noise_generator);
 }
 
 }

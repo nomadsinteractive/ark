@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_BASE_SURFACE_CONTROLLER_H_
-#define ARK_GRAPHICS_BASE_SURFACE_CONTROLLER_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/base/allocator.h"
@@ -39,5 +38,3 @@ private:
 };
 
 }
-
-#endif

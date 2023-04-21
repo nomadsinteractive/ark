@@ -406,6 +406,36 @@ class Buffer:
         pass
 
 
+class Texture:
+    FORMAT_AUTO = 0x8000
+    FORMAT_R = 0
+    FORMAT_RG = 1
+    FORMAT_RGB = 2
+    FORMAT_RGBA = 3
+    FORMAT_SIGNED = 8
+    FORMAT_F16 = 16
+    FORMAT_F32 = 32
+    FORMAT_I8 = 64
+    FORMAT_I16 = 128
+    FORMAT_I32 = 192
+
+    @property
+    def width(self) -> int:
+        return 0
+
+    @property
+    def height(self) -> int:
+        return 0
+
+    @property
+    def depth(self) -> int:
+        return 0
+
+    @property
+    def size(self) -> 'Size':
+        return Size(0, 0)
+
+
 class RenderController:
     US_ONCE = 0
     US_RELOAD = 1
@@ -429,6 +459,10 @@ class RenderController:
         pass
 
     def make_index_buffer(self, buffer_usage: int = Buffer.USAGE_DYNAMIC, input_: Optional['Uploader'] = None) -> Buffer:
+        pass
+
+    def create_texture_2d(self, bitmap: 'Bitmap', texture_format: int = Texture.FORMAT_AUTO, upload_strategy: int = US_ONCE_AND_ON_SURFACE_READY,
+                          future: Optional[Future] = None) -> Texture:
         pass
 
 
@@ -2390,25 +2424,6 @@ class StateMachine:
 
     def transit(self, next_state: State):
         pass
-
-
-class Texture:
-
-    @property
-    def width(self) -> int:
-        return 0
-
-    @property
-    def height(self) -> int:
-        return 0
-
-    @property
-    def depth(self) -> int:
-        return 0
-
-    @property
-    def size(self) -> Size:
-        return Size(0, 0)
 
 
 class Emitter:

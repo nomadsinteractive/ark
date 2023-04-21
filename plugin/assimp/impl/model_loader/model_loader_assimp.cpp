@@ -90,7 +90,7 @@ bitmap ModelImporterAssimp::loadBitmap(const sp<BitmapLoaderBundle>& imageResour
 void ModelImporterAssimp::loadSceneTexture(const ResourceLoaderContext& resourceLoaderContext, const aiTexture* tex)
 {
     bitmap bitmap = loadBitmap(resourceLoaderContext.bitmapBundle(), tex);
-    _textures.push_back(resourceLoaderContext.renderController()->createTexture2D(sp<Size>::make(static_cast<float>(bitmap->width()), static_cast<float>(bitmap->height())), std::move(bitmap)));
+    _textures.push_back(resourceLoaderContext.renderController()->createTexture2d(std::move(bitmap)));
 }
 
 std::vector<sp<Material>> ModelImporterAssimp::loadMaterials(const aiScene* scene, MaterialBundle& materialBundle) const

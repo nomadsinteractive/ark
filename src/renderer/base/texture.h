@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_BASE_TEXTURE_H_
-#define ARK_RENDERER_BASE_TEXTURE_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/base/string.h"
@@ -17,6 +16,7 @@ namespace ark {
 
 class ARK_API Texture final : public Resource {
 public:
+//  [[script::bindings::enumeration]]
     enum Format {
         FORMAT_AUTO = 0x8000,
         FORMAT_R = 0,
@@ -69,7 +69,7 @@ public:
     };
 
     struct Parameters {
-        Parameters(Type type, int, const document& parameters = nullptr, Format format = FORMAT_AUTO, Feature features = FEATURE_DEFAULT);
+        Parameters(Type type, const document& parameters = nullptr, Format format = FORMAT_AUTO, Feature features = FEATURE_DEFAULT);
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Parameters);
 
         void loadParameters(const document& parameters, BeanFactory& factory, const Scope& args);
@@ -203,5 +203,3 @@ private:
 };
 
 }
-
-#endif
