@@ -4,3 +4,6 @@
 [submodule "plugin/audio-android/3rdparty/oboe"]
 	path = plugin/audio-android/3rdparty/oboe
 	url = https://github.com/google/oboe.git
+[submodule "plugin/noise/3rdparty/FastNoise2"]
+	path = plugin/noise/3rdparty/FastNoise2
+	url = https://github.com/Auburn/FastNoise2.git
