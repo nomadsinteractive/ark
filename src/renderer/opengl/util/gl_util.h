@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_OPENGL_UTIL_GL_UTIL_H_
-#define ARK_RENDERER_OPENGL_UTIL_GL_UTIL_H_
+#pragma once
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
@@ -33,6 +32,7 @@ public:
     static GLenum getEnum(const document& manifest, const String& name, GLenum defValue);
 
     static GLenum getTextureInternalFormat(Texture::Usage usage, Texture::Format format, const Bitmap& bitmap);
+    static GLenum getTextureInternalFormat(Texture::Usage usage, Texture::Format format, uint32_t channelSize, uint32_t componentSize);
     static GLenum getTextureFormat(Texture::Usage usage, Texture::Format format, uint8_t channels);
     static GLenum getPixelType(int32_t format, const Bitmap& bitmap);
 
@@ -54,5 +54,3 @@ private:
 };
 
 }
-
-#endif

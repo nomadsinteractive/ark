@@ -67,7 +67,7 @@ private:
     };
 
     struct IndirectCmds {
-        DrawingContextParams::DrawElementsIndirectCommand _command;
+        DrawingParams::DrawElementsIndirectCommand _command;
         std::vector<sp<NodeInstance>> _node_instances;
     };
 

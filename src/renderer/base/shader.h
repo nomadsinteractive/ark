@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_BASE_SHADER_H_
-#define ARK_RENDERER_BASE_SHADER_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
@@ -71,5 +70,3 @@ private:
 };
 
 }
-
-#endif

@@ -90,22 +90,22 @@ Attribute RenderUtil::makePredefinedAttribute(const String& name, const String& 
 
 Model RenderUtil::makeUnitQuadModel()
 {
-    return Model(InputType::makeElementIndexInput(std::initializer_list<element_index_t>({0, 2, 1, 2, 3, 1})), sp<VerticesQuad>::make(), sp<Metrics>::make(Metrics::unit()));
+    return Model(UploaderType::makeElementIndexInput(std::initializer_list<element_index_t>({0, 2, 1, 2, 3, 1})), sp<VerticesQuad>::make(), sp<Metrics>::make(Metrics::unit()));
 }
 
 Model RenderUtil::makeUnitNinePatchTriangleStripsModel()
 {
-    return Model(InputType::makeElementIndexInput(std::initializer_list<element_index_t>({0, 4, 1, 5, 2, 6, 3, 7, 7, 4, 4, 8, 5, 9, 6, 10, 7, 11, 11, 8, 8, 12, 9, 13, 10, 14, 11, 15})), sp<VerticesNinePatchTriangleStrips>::make(), sp<Metrics>::make(Metrics::unit()));
+    return Model(UploaderType::makeElementIndexInput(std::initializer_list<element_index_t>({0, 4, 1, 5, 2, 6, 3, 7, 7, 4, 4, 8, 5, 9, 6, 10, 7, 11, 11, 8, 8, 12, 9, 13, 10, 14, 11, 15})), sp<VerticesNinePatchTriangleStrips>::make(), sp<Metrics>::make(Metrics::unit()));
 }
 
 Model RenderUtil::makeUnitNinePatchQuadsModel()
 {
-    return Model(InputType::makeElementIndexInput(std::initializer_list<element_index_t>({0, 2, 1, 2, 3, 1, 4, 6, 5, 6, 7, 5, 8, 10, 9, 10, 11, 9, 12, 14, 13, 14, 15, 13, 16, 18, 17, 18, 19, 17, 20, 22, 21, 22, 23, 21, 24, 26, 25, 26, 27, 25, 28, 30, 29, 30, 31, 29, 32, 34, 33, 34, 35, 33})), sp<VerticesNinePatchQuads>::make(), sp<Metrics>::make(Metrics::unit()));
+    return Model(UploaderType::makeElementIndexInput(std::initializer_list<element_index_t>({0, 2, 1, 2, 3, 1, 4, 6, 5, 6, 7, 5, 8, 10, 9, 10, 11, 9, 12, 14, 13, 14, 15, 13, 16, 18, 17, 18, 19, 17, 20, 22, 21, 22, 23, 21, 24, 26, 25, 26, 27, 25, 28, 30, 29, 30, 31, 29, 32, 34, 33, 34, 35, 33})), sp<VerticesNinePatchQuads>::make(), sp<Metrics>::make(Metrics::unit()));
 }
 
 Model RenderUtil::makeUnitPointModel()
 {
-    return Model(InputType::makeElementIndexInput(std::initializer_list<element_index_t>({0})), sp<VerticesPoint>::make(), sp<Metrics>::make(V3(0), V3(0)));
+    return Model(UploaderType::makeElementIndexInput(std::initializer_list<element_index_t>({0})), sp<VerticesPoint>::make(), sp<Metrics>::make(V3(0), V3(0)));
 }
 
 uint32_t RenderUtil::hash(const element_index_t* buf, size_t len)
@@ -124,18 +124,28 @@ String RenderUtil::outAttributeName(const String& name, PipelineInput::ShaderSta
     return name.startsWith(prefix) ? name : prefix + Strings::capitalizeFirst(name);
 }
 
-uint32_t RenderUtil::getComponentSize(Texture::Format format)
+uint32_t RenderUtil::getChannelSize(Texture::Format format)
+{
+    return (format & Texture::FORMAT_RGBA) + 1;
+}
+
+uint32_t RenderUtil::getPixelSize(Texture::Format format)
 {
     if(format == Texture::FORMAT_AUTO)
         return 4;
 
-    uint32_t unitSize = 1;
-    if(format & Texture::FORMAT_F16 || (format & Texture::FORMAT_I16) == Texture::FORMAT_I16)
-        unitSize = 2;
-    else if(format & Texture::FORMAT_F32 || (format & Texture::FORMAT_I32) == Texture::FORMAT_I32)
-        unitSize = 4;
+    return (static_cast<uint32_t>(format & Texture::FORMAT_RGBA) + 1) * getComponentSize(format);
+}
 
-    return (static_cast<uint32_t>(format & Texture::FORMAT_RGBA) + 1) * unitSize;
+uint32_t RenderUtil::getComponentSize(Texture::Format format)
+{
+    const uint32_t componentFormat = format & Texture::FORMAT_32_BIT;
+    if(componentFormat == Texture::FORMAT_8_BIT || componentFormat == 0)
+        return 1;
+    if(componentFormat == Texture::FORMAT_16_BIT)
+        return 2;
+    CHECK((format & Texture::FORMAT_32_BIT) == Texture::FORMAT_32_BIT, "Unknown component format %d", format);
+    return 4;
 }
 
 }

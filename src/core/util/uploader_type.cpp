@@ -56,102 +56,102 @@ static sp<InputImpl> ensureImpl(const sp<Uploader>& self)
 }
 
 
-sp<Uploader> InputType::create(sp<ByteArray> value, size_t size)
+sp<Uploader> UploaderType::create(sp<ByteArray> value, size_t size)
 {
     return reserve(sp<UploaderArray<uint8_t>>::make(std::move(value)), size);
 }
 
-sp<Uploader> InputType::create(sp<IntArray> value, size_t size)
+sp<Uploader> UploaderType::create(sp<IntArray> value, size_t size)
 {
     return reserve(sp<UploaderArray<int32_t>>::make(std::move(value)), size);
 }
 
-sp<Uploader> InputType::create(sp<Integer> value, size_t size)
+sp<Uploader> UploaderType::create(sp<Integer> value, size_t size)
 {
     return reserve(sp<InputVariable<int32_t>>::make(std::move(value)), size);
 }
 
-sp<Uploader> InputType::create(sp<Numeric> value, size_t size)
+sp<Uploader> UploaderType::create(sp<Numeric> value, size_t size)
 {
     return reserve(sp<InputVariable<float>>::make(std::move(value)), size);
 }
 
-sp<Uploader> InputType::create(sp<Vec2> value, size_t size)
+sp<Uploader> UploaderType::create(sp<Vec2> value, size_t size)
 {
     return reserve(sp<InputVariable<V2>>::make(std::move(value)), size);
 }
 
-sp<Uploader> InputType::create(sp<Vec3> value, size_t size)
+sp<Uploader> UploaderType::create(sp<Vec3> value, size_t size)
 {
     return reserve(sp<InputVariable<V3>>::make(std::move(value)), size);
 }
 
-sp<Uploader> InputType::create(sp<Vec4> value, size_t size)
+sp<Uploader> UploaderType::create(sp<Vec4> value, size_t size)
 {
     return reserve(sp<InputVariable<V4>>::make(std::move(value)), size);
 }
 
-sp<Uploader> InputType::create(std::map<size_t, sp<Uploader>> value, size_t size)
+sp<Uploader> UploaderType::create(std::map<size_t, sp<Uploader>> value, size_t size)
 {
     return sp<InputImpl>::make(std::move(value), size);
 }
 
-sp<Uploader> InputType::create(std::vector<sp<Mat4>> value, size_t size)
+sp<Uploader> UploaderType::create(std::vector<sp<Mat4>> value, size_t size)
 {
     return reserve(sp<InputVariableArray<M4>>::make(std::move(value)), size);
 }
 
-sp<Uploader> InputType::create(std::vector<sp<Uploader>> value, size_t size)
+sp<Uploader> UploaderType::create(std::vector<sp<Uploader>> value, size_t size)
 {
     return reserve(sp<InputArray>::make(std::move(value)), size);
 }
 
-sp<Uploader> InputType::create(std::vector<V3> value, size_t size)
+sp<Uploader> UploaderType::create(std::vector<V3> value, size_t size)
 {
     return reserve(sp<UploaderArray<V3>>::make(std::move(value)), size);
 }
 
-sp<Uploader> InputType::create(std::vector<V4> value, size_t size)
+sp<Uploader> UploaderType::create(std::vector<V4> value, size_t size)
 {
     return reserve(sp<UploaderArray<V4>>::make(std::move(value)), size);
 }
 
-sp<Uploader> InputType::create(std::vector<uint32_t> value, size_t size)
+sp<Uploader> UploaderType::create(std::vector<uint32_t> value, size_t size)
 {
     return reserve(sp<UploaderArray<uint32_t>>::make(std::move(value)), size);
 }
 
-sp<Uploader> InputType::create(const std::set<uint32_t>& value, size_t size)
+sp<Uploader> UploaderType::create(const std::set<uint32_t>& value, size_t size)
 {
     return reserve(sp<UploaderArray<uint32_t>>::make(std::vector<uint32_t>(value.begin(), value.end())), size);
 }
 
-sp<Uploader> InputType::wrap(sp<Uploader> self)
+sp<Uploader> UploaderType::wrap(sp<Uploader> self)
 {
     return sp<UploaderWrapper>::make(std::move(self));
 }
 
-sp<Uploader> InputType::makeElementIndexInput(std::vector<element_index_t> value)
+sp<Uploader> UploaderType::makeElementIndexInput(std::vector<element_index_t> value)
 {
     return sp<UploaderArray<element_index_t>>::make(std::move(value));
 }
 
-sp<Uploader> InputType::blank(size_t size, int32_t fill)
+sp<Uploader> UploaderType::blank(size_t size, int32_t fill)
 {
     return sp<UploaderArray<int8_t>>::make(std::vector<int8_t>(size, static_cast<int8_t>(fill)));
 }
 
-void InputType::reset(const sp<Uploader>& self, sp<Uploader> delegate)
+void UploaderType::reset(const sp<Uploader>& self, sp<Uploader> delegate)
 {
     ensureWrapper(self)->setDelegate(std::move(delegate));
 }
 
-size_t InputType::size(const sp<Uploader>& self)
+size_t UploaderType::size(const sp<Uploader>& self)
 {
     return self->size();
 }
 
-sp<Uploader> InputType::reserve(sp<Uploader> self, size_t size)
+sp<Uploader> UploaderType::reserve(sp<Uploader> self, size_t size)
 {
     if(size == 0)
         return self;
@@ -163,7 +163,7 @@ sp<Uploader> InputType::reserve(sp<Uploader> self, size_t size)
     return inputImpl;
 }
 
-sp<Uploader> InputType::remap(sp<Uploader> self, size_t size, size_t offset)
+sp<Uploader> UploaderType::remap(sp<Uploader> self, size_t size, size_t offset)
 {
     sp<InputImpl> inputImpl = sp<InputImpl>::make(size);
     if(self->size() > 0)
@@ -171,27 +171,27 @@ sp<Uploader> InputType::remap(sp<Uploader> self, size_t size, size_t offset)
     return inputImpl;
 }
 
-sp<Uploader> InputType::repeat(sp<Uploader> self, size_t length, size_t stride)
+sp<Uploader> UploaderType::repeat(sp<Uploader> self, size_t length, size_t stride)
 {
     return sp<InputRepeat>::make(std::move(self), length, stride);
 }
 
-void InputType::addInput(const sp<Uploader>& self, size_t offset, sp<Uploader> input)
+void UploaderType::addInput(const sp<Uploader>& self, size_t offset, sp<Uploader> input)
 {
     ensureImpl(self)->addInput(offset, std::move(input));
 }
 
-void InputType::removeInput(const sp<Uploader>& self, size_t offset)
+void UploaderType::removeInput(const sp<Uploader>& self, size_t offset)
 {
     ensureImpl(self)->removeInput(offset);
 }
 
-void InputType::markDirty(const sp<Uploader>& self)
+void UploaderType::markDirty(const sp<Uploader>& self)
 {
     ensureImpl(self)->markDirty();
 }
 
-sp<UploaderWrapper> InputType::ensureWrapper(const sp<Uploader>& self)
+sp<UploaderWrapper> UploaderType::ensureWrapper(const sp<Uploader>& self)
 {
     const sp<UploaderWrapper> wrapper = self.as<UploaderWrapper>();
     CHECK(wrapper, "This Input object is not a InputWrapper instance");

@@ -394,7 +394,7 @@ template<> inline Optional<sp<ByteArray>> PyCast::toSharedPtrImpl<ByteArray>(PyO
         PyBuffer_Release(&buf);
         return arr;
     }
-    return Optional<sp<ByteArray>>();
+    return toSharedPtrDefault<ByteArray>(object);
 }
 
 }

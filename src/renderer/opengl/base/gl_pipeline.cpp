@@ -515,9 +515,9 @@ GLPipeline::GLDrawArrays::GLDrawArrays(GLenum mode)
 
 void GLPipeline::GLDrawArrays::draw(GraphicsContext& /*graphicsContext*/, const DrawingContext& drawingContext)
 {
-    const DrawingContextParams::DrawElements& param = drawingContext._parameters._draw_elements;
-    DASSERT(param._count);
-    glDrawArrays(_mode, param._start * sizeof(element_index_t), static_cast<GLsizei>(param._count));
+    const DrawingParams::DrawElements& param = drawingContext._parameters._draw_elements;
+    DASSERT(drawingContext._draw_count);
+    glDrawArrays(_mode, param._start * sizeof(element_index_t), static_cast<GLsizei>(drawingContext._draw_count));
 }
 
 GLPipeline::GLDrawElements::GLDrawElements(GLenum mode)
@@ -527,9 +527,9 @@ GLPipeline::GLDrawElements::GLDrawElements(GLenum mode)
 
 void GLPipeline::GLDrawElements::draw(GraphicsContext& /*graphicsContext*/, const DrawingContext& drawingContext)
 {
-    const DrawingContextParams::DrawElements& param = drawingContext._parameters._draw_elements;
-    DASSERT(param._count);
-    glDrawElements(_mode, static_cast<GLsizei>(param._count), GLIndexType, reinterpret_cast<GLvoid*>(param._start * sizeof(element_index_t)));
+    const DrawingParams::DrawElements& param = drawingContext._parameters._draw_elements;
+    DASSERT(drawingContext._draw_count);
+    glDrawElements(_mode, static_cast<GLsizei>(drawingContext._draw_count), GLIndexType, reinterpret_cast<GLvoid*>(param._start * sizeof(element_index_t)));
 }
 
 GLPipeline::GLDrawElementsInstanced::GLDrawElementsInstanced(GLenum mode)
@@ -539,15 +539,16 @@ GLPipeline::GLDrawElementsInstanced::GLDrawElementsInstanced(GLenum mode)
 
 void GLPipeline::GLDrawElementsInstanced::draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
-    const DrawingContextParams::DrawElementsInstanced& param = drawingContext._parameters._draw_elements_instanced;
+    const DrawingParams::DrawElementsInstanced& param = drawingContext._parameters._draw_elements_instanced;
     DASSERT(param.isActive());
     DASSERT(param._count);
-    for(const auto& i : param._instanced_array_snapshots)
+    DASSERT(drawingContext._draw_count);
+    for(const auto& i : param._divided_buffer_snapshots)
     {
         i.second.upload(graphicsContext);
         DCHECK(i.second.id(), "Invaild Instanced Array Buffer: %d", i.first);
     }
-    glDrawElementsInstanced(_mode, static_cast<GLsizei>(param._count), GLIndexType, nullptr, param._instance_count);
+    glDrawElementsInstanced(_mode, static_cast<GLsizei>(param._count), GLIndexType, nullptr, drawingContext._draw_count);
 }
 
 GLPipeline::GLMultiDrawElementsIndirect::GLMultiDrawElementsIndirect(GLenum mode)
@@ -557,19 +558,19 @@ GLPipeline::GLMultiDrawElementsIndirect::GLMultiDrawElementsIndirect(GLenum mode
 
 void GLPipeline::GLMultiDrawElementsIndirect::draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
-    const DrawingContextParams::DrawMultiElementsIndirect& param = drawingContext._parameters._draw_multi_elements_indirect;
+    const DrawingParams::DrawMultiElementsIndirect& param = drawingContext._parameters._draw_multi_elements_indirect;
     DASSERT(param.isActive());
 
-    for(const auto& i : param._instanced_array_snapshots)
+    for(const auto& i : param._divided_buffer_snapshots)
     {
         i.second.upload(graphicsContext);
-        DCHECK(i.second.id(), "Invaild Instanced Array Buffer: %d", i.first);
+        DCHECK(i.second.id(), "Invaild Divided Buffer Buffer: %d", i.first);
     }
     param._indirect_cmds.upload(graphicsContext);
 
     const volatile GLBufferBinder binder(GL_DRAW_INDIRECT_BUFFER, static_cast<GLuint>(param._indirect_cmds.id()));
 #ifndef ANDROID
-    glMultiDrawElementsIndirect(_mode, GLIndexType, nullptr, static_cast<GLsizei>(param._draw_count), sizeof(DrawingContextParams::DrawElementsIndirectCommand));
+    glMultiDrawElementsIndirect(_mode, GLIndexType, nullptr, static_cast<GLsizei>(param._indirect_cmd_count), sizeof(DrawingParams::DrawElementsIndirectCommand));
 #else
     for(uint32_t i = 0; i < param._draw_count; ++i)
         glDrawElementsIndirect(_mode, GLIndexType, reinterpret_cast<const void *>(i * sizeof(DrawingContext::DrawElementsIndirectCommand)));
@@ -699,6 +700,10 @@ void GLPipeline::Stub::bindUniform(const uint8_t* ptr, uint32_t size, const Unif
         DCHECK(size % 64 == 0, "Wrong mat4fv size: %d", size);
         glUniform.setUniformMatrix4fv(size / 64, GL_FALSE, ptrf);
         break;
+    case Uniform::TYPE_IMAGE2D:
+    case Uniform::TYPE_UIMAGE2D:
+    case Uniform::TYPE_IIMAGE2D:
+        break;
     default:
         DFATAL("Unimplemented");
     }
@@ -708,8 +713,12 @@ void GLPipeline::Stub::bindImage(const Texture& texture, uint32_t name)
 {
     char uniformName[16] = {'u', '_', 'I', 'm', 'a', 'g', 'e', static_cast<char>('0' + name)};
     const GLPipeline::GLUniform& uImage = getUniform(uniformName);
+    const Texture::Format textureFormat = texture.parameters()->_format;
+    const uint32_t channelSize = RenderUtil::getChannelSize(textureFormat);
+    const uint32_t componentSize = RenderUtil::getComponentSize(textureFormat);
+    const GLenum format = GLUtil::getTextureInternalFormat(Texture::USAGE_COLOR_ATTACHMENT, texture.parameters()->_format, channelSize, componentSize);
     uImage.setUniform1i(static_cast<GLint>(name));
-    glBindImageTexture(name, static_cast<GLuint>(texture.delegate()->id()), 0, GL_FALSE, 0, GL_READ_WRITE, GL_R16I);
+    glBindImageTexture(name, static_cast<GLuint>(texture.delegate()->id()), 0, GL_FALSE, 0, GL_READ_WRITE, format);
 }
 
 void GLPipeline::Stub::activeTexture(const Texture& texture, const String& name, uint32_t binding)

@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_BASE_BITMAP_H_
-#define ARK_GRAPHICS_BASE_BITMAP_H_
+#pragma once
 
 #include <array>
 
@@ -16,8 +15,8 @@ namespace ark {
 
 class ARK_API Bitmap {
 public:
-//  [[script::bindings::auto]]
     Bitmap(uint32_t width, uint32_t height, uint32_t rowBytes, uint8_t channels, bool allocate);
+//  [[script::bindings::auto]]
     Bitmap(uint32_t width, uint32_t height, uint32_t rowBytes, uint8_t channels, sp<ByteArray> bytes);
     ~Bitmap();
 
@@ -161,6 +160,3 @@ private:
 };
 
 }
-
-
-#endif

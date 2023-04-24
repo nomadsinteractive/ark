@@ -508,41 +508,41 @@ VkPipelineRasterizationStateCreateInfo VKPipeline::makeRasterizationState() cons
 
 void VKPipeline::VKDrawArrays::draw(GraphicsContext& /*graphicsContext*/, const DrawingContext& drawingContext, VkCommandBuffer commandBuffer)
 {
-    const DrawingContextParams::DrawElements& param = drawingContext._parameters._draw_elements;
+    const DrawingParams::DrawElements& param = drawingContext._parameters._draw_elements;
     DASSERT(param.isActive());
-    vkCmdDraw(commandBuffer, param._count, 1, param._start, 0);
+    vkCmdDraw(commandBuffer, drawingContext._draw_count, 1, param._start, 0);
 }
 
 void VKPipeline::VKDrawElements::draw(GraphicsContext& /*graphicsContext*/, const DrawingContext& drawingContext, VkCommandBuffer commandBuffer)
 {
-    const DrawingContextParams::DrawElements& param = drawingContext._parameters._draw_elements;
+    const DrawingParams::DrawElements& param = drawingContext._parameters._draw_elements;
     DASSERT(param.isActive());
-    vkCmdDrawIndexed(commandBuffer, param._count, 1, param._start, 0, 0);
+    vkCmdDrawIndexed(commandBuffer, drawingContext._draw_count, 1, param._start, 0, 0);
 }
 
 void VKPipeline::VKDrawElementsInstanced::draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext, VkCommandBuffer commandBuffer)
 {
-    const DrawingContextParams::DrawElementsInstanced& param = drawingContext._parameters._draw_elements_instanced;
+    const DrawingParams::DrawElementsInstanced& param = drawingContext._parameters._draw_elements_instanced;
     DASSERT(param.isActive());
 
     VkDeviceSize offsets = 0;
-    for(const auto& i : param._instanced_array_snapshots)
+    for(const auto& i : param._divided_buffer_snapshots)
     {
         i.second.upload(graphicsContext);
         DCHECK(i.second.id(), "Invaild Instanced Array Buffer: %d", i.first);
         VkBuffer vkInstanceVertexBuffer = (VkBuffer) (i.second.id());
         vkCmdBindVertexBuffers(commandBuffer, i.first, 1, &vkInstanceVertexBuffer, &offsets);
     }
-    vkCmdDrawIndexed(commandBuffer, param._count, static_cast<uint32_t>(param._instance_count), param._start, 0, 0);
+    vkCmdDrawIndexed(commandBuffer, param._count, static_cast<uint32_t>(drawingContext._draw_count), param._start, 0, 0);
 }
 
 void VKPipeline::VKMultiDrawElementsIndirect::draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext, VkCommandBuffer commandBuffer)
 {
-    const DrawingContextParams::DrawMultiElementsIndirect& param = drawingContext._parameters._draw_multi_elements_indirect;
+    const DrawingParams::DrawMultiElementsIndirect& param = drawingContext._parameters._draw_multi_elements_indirect;
     DASSERT(param.isActive());
 
     VkDeviceSize offsets = 0;
-    for(const auto& i : param._instanced_array_snapshots)
+    for(const auto& i : param._divided_buffer_snapshots)
     {
         i.second.upload(graphicsContext);
         DCHECK(i.second.id(), "Invaild Instanced Array Buffer: %d", i.first);
@@ -551,7 +551,7 @@ void VKPipeline::VKMultiDrawElementsIndirect::draw(GraphicsContext& graphicsCont
     }
 
     param._indirect_cmds.upload(graphicsContext);
-    vkCmdDrawIndexedIndirect(commandBuffer, (VkBuffer) (param._indirect_cmds.id()), 0, param._draw_count, sizeof(DrawingContextParams::DrawElementsIndirectCommand));
+    vkCmdDrawIndexedIndirect(commandBuffer, (VkBuffer) (param._indirect_cmds.id()), 0, param._indirect_cmd_count, sizeof(DrawingParams::DrawElementsIndirectCommand));
 }
 
 }

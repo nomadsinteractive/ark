@@ -91,10 +91,10 @@ void RenderLayerSnapshot::addDisposedLayerContexts(const std::vector<sp<LayerCon
         addDisposedLayerContext(lc);
 }
 
-sp<RenderCommand> RenderLayerSnapshot::toRenderCommand(const RenderRequest& renderRequest, Buffer::Snapshot vertices, Buffer::Snapshot indices, DrawingContextParams::Parameters params)
+sp<RenderCommand> RenderLayerSnapshot::toRenderCommand(const RenderRequest& renderRequest, Buffer::Snapshot vertices, Buffer::Snapshot indices, uint32_t drawCount, DrawingParams params)
 {
     DrawingContext drawingContext(_stub->_shader_bindings, _stub->_shader_bindings->attachments(), std::move(_ubos), std::move(_ssbos), std::move(vertices), std::move(indices),
-                                  std::move(params));
+                                  drawCount, std::move(params));
 
     if(_stub->_scissor)
         drawingContext._scissor = _stub->_render_controller->renderEngine()->toRendererRect(_scissor);

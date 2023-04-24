@@ -28,7 +28,7 @@ VertexWriter DrawingBuffer::makeVertexWriter(const RenderRequest& renderRequest,
 
 VertexWriter DrawingBuffer::makeDividedVertexWriter(const RenderRequest& renderRequest, size_t length, size_t offset, uint32_t divisor)
 {
-    Buffer::Factory& builder = getInstancedBufferBuilder(divisor);
+    Buffer::Factory& builder = getDividedBufferBuilder(divisor);
 
     size_t size = length * builder._stride;
     ByteArray::Borrowed content = renderRequest.allocator().sbrkSpan(size);
@@ -66,7 +66,7 @@ bool DrawingBuffer::isInstanced() const
     return _is_instanced;
 }
 
-Buffer::Factory& DrawingBuffer::getInstancedBufferBuilder(uint32_t divisor)
+Buffer::Factory& DrawingBuffer::getDividedBufferBuilder(uint32_t divisor)
 {
     auto iter = _divided_buffer_builders.find(divisor);
     DCHECK(iter != _divided_buffer_builders.end(), "No instance buffer builder(%d) found", divisor);

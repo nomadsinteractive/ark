@@ -51,13 +51,14 @@ private:
 }
 
 
-DrawingContext::DrawingContext(sp<ShaderBindings> shaderBindings, sp<ByType> attachments, std::vector<RenderLayerSnapshot::UBOSnapshot> ubo, std::vector<std::pair<uint32_t, Buffer::Snapshot> > ssbos)
+DrawingContext::DrawingContext(sp<ShaderBindings> shaderBindings, sp<ByType> attachments, std::vector<RenderLayerSnapshot::UBOSnapshot> ubo, std::vector<std::pair<uint32_t, Buffer::Snapshot>> ssbos)
     : PipelineContext(std::move(shaderBindings), std::move(ubo), std::move(ssbos)), _attachments(std::move(attachments))
 {
 }
 
-DrawingContext::DrawingContext(sp<ShaderBindings> shaderBindings, sp<ByType> attachments, std::vector<RenderLayerSnapshot::UBOSnapshot> ubo, std::vector<std::pair<uint32_t, Buffer::Snapshot> > ssbos, Buffer::Snapshot vertices, Buffer::Snapshot indices, DrawingContextParams::Parameters parameters)
-    : PipelineContext(std::move(shaderBindings), std::move(ubo), std::move(ssbos)), _attachments(std::move(attachments)), _vertices(std::move(vertices)), _indices(std::move(indices)), _parameters(std::move(parameters))
+DrawingContext::DrawingContext(sp<ShaderBindings> shaderBindings, sp<ByType> attachments, std::vector<RenderLayerSnapshot::UBOSnapshot> ubo, std::vector<std::pair<uint32_t, Buffer::Snapshot>> ssbos,
+                               Buffer::Snapshot vertices, Buffer::Snapshot indices, uint32_t drawCount, DrawingParams parameters)
+    : PipelineContext(std::move(shaderBindings), std::move(ubo), std::move(ssbos)), _attachments(std::move(attachments)), _vertices(std::move(vertices)), _indices(std::move(indices)), _draw_count(drawCount), _parameters(std::move(parameters))
 {
 }
 

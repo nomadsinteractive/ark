@@ -6,14 +6,15 @@ namespace ark {
 namespace plugin {
 namespace noise {
 
-Generator::Generator(NoiseType type, int32_t seed)
-    : _seed(seed), _frequency(200.0f)
+Generator::Generator(NoiseType type, int32_t seed, float frequence)
+    : _seed(seed), _frequency(frequence)
 {
     if(type == NOISE_TYPE_SIMPLEX)
-        _noise_generator = FastNoise::New<FastNoise::Simplex>();
+        _source_generator = FastNoise::New<FastNoise::Simplex>();
     else if(type == NOISE_TYPE_PERLIN)
-        _noise_generator = FastNoise::New<FastNoise::Perlin>();
-    CHECK(_noise_generator, "Unknow noise type: %d", type);
+        _source_generator = FastNoise::New<FastNoise::Perlin>();
+    CHECK(_source_generator, "Unknow noise type: %d", type);
+    _generator = _source_generator;
 }
 
 int32_t Generator::seed() const
@@ -62,18 +63,18 @@ void Generator::setFractalWeightedStrength(float weightedStrength)
 
 float Generator::noise2d(float x, float y)
 {
-    return _noise_generator->GenSingle2D(x, y, _seed);
+    return _generator->GenSingle2D(x, y, _seed);
 }
 
 float Generator::noise3d(float x, float y, float z)
 {
-    return _noise_generator->GenSingle3D(x, y, z, _seed);
+    return _generator->GenSingle3D(x, y, z, _seed);
 }
 
 sp<FloatArray> Generator::noiseMap2d(uint32_t rows, uint32_t cols)
 {
     std::vector<float> output(rows * cols);
-    _noise_generator->GenUniformGrid2D(output.data(), 0, 0, cols, rows, _frequency, _seed);
+    _generator->GenUniformGrid2D(output.data(), 0, 0, cols, rows, _frequency, _seed);
     return sp<FloatArray::Vector>::make(std::move(output));
 }
 
@@ -83,7 +84,8 @@ void Generator::ensureFractalGenerator()
         return;
 
     _fractal_generator = FastNoise::New<FastNoise::FractalFBm>();
-    _fractal_generator->SetSource(_noise_generator);
+    _fractal_generator->SetSource(_source_generator);
+    _generator = _fractal_generator;
 }
 
 }

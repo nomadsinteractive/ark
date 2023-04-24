@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_IMPL_RENDERER_RENDER_PASS_H_
-#define ARK_RENDERER_IMPL_RENDERER_RENDER_PASS_H_
+#pragma once
 
 #include "core/inf/builder.h"
 #include "core/types/shared_ptr.h"
@@ -43,5 +42,3 @@ private:
 };
 
 }
-
-#endif

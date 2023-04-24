@@ -1,6 +1,6 @@
 from typing import Optional, Union
 
-from ark import Renderer, Boolean, Observer, String, Integer, Numeric
+from ark import Renderer, Boolean, Observer, String, Integer, Numeric, Texture, Vec2, Vec4
 
 
 class Widget:
@@ -54,6 +54,10 @@ class WidgetBuilder:
         pass
 
     def input_text(self, label: str, text: String, max_length: int = 64, flags: int = 0):
+        pass
+
+    def image(self, texture: Texture, size: Optional[Vec2] = None, uv0: tuple[float, float] = (0, 0), uv1: tuple[float, float] = (1, 1),
+              color: Optional[Vec4] = None, border_color: Optional[Vec4] = None):
         pass
 
     def separator(self):

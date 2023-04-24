@@ -110,14 +110,14 @@ sp<RenderCommand> RCCMultiDrawElementsIndirect::compose(const RenderRequest& ren
 
     writeModelMatices(renderRequest, buf, snapshot, reload);
 
-    DrawingContextParams::DrawMultiElementsIndirect drawParams(buf.toDividedBufferSnapshots(), reload ? _draw_indirect.snapshot(makeIndirectBuffer(renderRequest)) : _draw_indirect.snapshot(), static_cast<uint32_t>(_indirect_cmds.size()));
-    return snapshot.toRenderCommand(renderRequest, vertices.snapshot(), _indices.snapshot(), std::move(drawParams));
+    DrawingParams::DrawMultiElementsIndirect drawParams(buf.toDividedBufferSnapshots(), reload ? _draw_indirect.snapshot(makeIndirectBuffer(renderRequest)) : _draw_indirect.snapshot(), static_cast<uint32_t>(_indirect_cmds.size()));
+    return snapshot.toRenderCommand(renderRequest, vertices.snapshot(), _indices.snapshot(), 0, std::move(drawParams));
 }
 
 ByteArray::Borrowed RCCMultiDrawElementsIndirect::makeIndirectBuffer(const RenderRequest& renderRequest) const
 {
-    ByteArray::Borrowed cmds = renderRequest.allocator().sbrkSpan(_indirect_cmds.size() * sizeof(DrawingContextParams::DrawElementsIndirectCommand));
-    DrawingContextParams::DrawElementsIndirectCommand* pcmds = reinterpret_cast<DrawingContextParams::DrawElementsIndirectCommand*>(cmds.buf());
+    ByteArray::Borrowed cmds = renderRequest.allocator().sbrkSpan(_indirect_cmds.size() * sizeof(DrawingParams::DrawElementsIndirectCommand));
+    DrawingParams::DrawElementsIndirectCommand* pcmds = reinterpret_cast<DrawingParams::DrawElementsIndirectCommand*>(cmds.buf());
     uint32_t baseInstance = 0;
     for(const IndirectCmds& i : _indirect_cmds.values())
     {

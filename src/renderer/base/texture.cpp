@@ -25,7 +25,7 @@ namespace {
 class BlankUploader : public Texture::Uploader {
 public:
     BlankUploader(Size& size, Texture::Format format)
-        : _bitmap(static_cast<uint32_t>(size.widthAsFloat()), static_cast<uint32_t>(size.heightAsFloat()), static_cast<uint32_t>(size.widthAsFloat()) * RenderUtil::getComponentSize(format),
+        : _bitmap(static_cast<uint32_t>(size.widthAsFloat()), static_cast<uint32_t>(size.heightAsFloat()), static_cast<uint32_t>(size.widthAsFloat()) * RenderUtil::getPixelSize(format),
                   (format & Texture::FORMAT_RGBA) + 1, false) {
     }
 
@@ -272,7 +272,7 @@ sp<Texture::Uploader> Texture::BUILDER::makeBlankUploader(const sp<Size>& size, 
     return sp<BlankUploader>::make(size, params._format);
 }
 
-Texture::UploaderBitmap::UploaderBitmap(bitmap bitmap)
+Texture::UploaderBitmap::UploaderBitmap(sp<Bitmap> bitmap)
     : _bitmap(std::move(bitmap))
 {
 }
@@ -288,12 +288,13 @@ template<> ARK_API void Enums<Texture::Format>::initialize(std::map<String, Text
     enums["rg"] = Texture::FORMAT_RG;
     enums["rgb"] = Texture::FORMAT_RGB;
     enums["rgba"] = Texture::FORMAT_RGBA;
-    enums["f16"] = Texture::FORMAT_F16;
-    enums["f32"] = Texture::FORMAT_F32;
     enums["signed"] = Texture::FORMAT_SIGNED;
-    enums["i8"] = Texture::FORMAT_I8;
-    enums["i16"] = Texture::FORMAT_I16;
-    enums["i32"] = Texture::FORMAT_I32;
+    enums["normalized"] = Texture::FORMAT_NORMALIZED;
+    enums["integer"] = Texture::FORMAT_INTEGER;
+    enums["float"] = Texture::FORMAT_FLOAT;
+    enums["8bit"] = Texture::FORMAT_8_BIT;
+    enums["16bit"] = Texture::FORMAT_16_BIT;
+    enums["32bit"] = Texture::FORMAT_32_BIT;
 }
 
 template<> ARK_API void Enums<Texture::Usage>::initialize(std::map<String, Texture::Usage>& enums)

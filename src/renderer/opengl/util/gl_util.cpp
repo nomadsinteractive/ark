@@ -132,11 +132,17 @@ GLenum GLUtil::getEnum(const document& manifest, const String& name, GLenum defV
 
 GLenum GLUtil::getTextureInternalFormat(Texture::Usage usage, Texture::Format format, const Bitmap& bitmap)
 {
+    return getTextureInternalFormat(usage, format, bitmap.channels(), bitmap.rowBytes() / bitmap.width() / bitmap.channels());
+}
+
+GLenum GLUtil::getTextureInternalFormat(Texture::Usage usage, Texture::Format format, uint32_t channelSize, uint32_t componentSize)
+{
     struct GLComponentFormat {
-        GLenum f8;
-        GLenum f16;
-        GLenum f32;
+        GLenum bit8;
+        GLenum bit16;
+        GLenum bit32;
     };
+
     static const GLComponentFormat uFormats[] = {
         {GL_R8UI, GL_R16UI, GL_R32UI},
         {GL_RG8UI, GL_RG16UI, GL_RG32UI},
@@ -149,31 +155,55 @@ GLenum GLUtil::getTextureInternalFormat(Texture::Usage usage, Texture::Format fo
         {GL_RGB8I, GL_RGB16I, GL_RGB32I},
         {GL_RGBA8I, GL_RGBA16I, GL_RGBA32I}
     };
+    static const GLComponentFormat fFormats[] = {
+        {GL_ZERO, GL_R16F, GL_R32F},
+        {GL_ZERO, GL_RG16F, GL_RG32F},
+        {GL_ZERO, GL_RGB16F, GL_RGB32F},
+        {GL_ZERO, GL_RGBA16F, GL_RGBA32F}
+    };
+    static const GLComponentFormat nFormats[] = {
+        {GL_R8_SNORM, GL_R16_SNORM, GL_ZERO},
+        {GL_RG8_SNORM, GL_RG16_SNORM, GL_ZERO},
+        {GL_RGB8_SNORM, GL_RGB16_SNORM, GL_ZERO},
+        {GL_RGBA8_SNORM, GL_RGBA16_SNORM, GL_ZERO}
+    };
 
-    static const GLenum formats[] = {GL_R8, GL_R8_SNORM, GL_R16, GL_R16_SNORM, GL_R8, GL_R8, GL_R16F, GL_R16F,
-                                     GL_RG8, GL_RG8_SNORM, GL_RG16, GL_RG16_SNORM, GL_RG16F, GL_RG16F, GL_RG16F, GL_RG16F,
-                                     GL_RGB8, GL_RGB8_SNORM, GL_RGB16, GL_RGB16_SNORM, GL_RGB16F, GL_RGB16F, GL_RGB16F, GL_RGB16F,
-                                     GL_RGBA8, GL_RGBA8_SNORM, GL_RGBA16, GL_RGBA16_SNORM, GL_RGBA16F, GL_RGBA16F, GL_RGBA16F, GL_RGBA16F};
     switch(usage & Texture::USAGE_DEPTH_STENCIL_ATTACHMENT)
     {
     case Texture::USAGE_COLOR_ATTACHMENT: {
         bool isSigned = format & Texture::FORMAT_SIGNED;
-        uint32_t cs = bitmap.channels() - 1;
+        uint32_t cs = channelSize - 1;
 
-        if(format & Texture::FORMAT_I32)
+        CHECK(componentSize == 1 || componentSize == 2 || componentSize == 4, "Illegal color component size %d", componentSize);
+        if(format & Texture::FORMAT_AUTO)
         {
-            if((format & Texture::FORMAT_I8) == Texture::FORMAT_I8)
-                return isSigned ? iFormats[cs].f8 : uFormats[cs].f8;
-            if((format & Texture::FORMAT_I16) == Texture::FORMAT_I16)
-                return isSigned ? iFormats[cs].f16 : uFormats[cs].f16;
-            return isSigned ? iFormats[cs].f32 : uFormats[cs].f32;
+            if(componentSize == 1)
+                return nFormats[cs].bit8;
+            if(componentSize == 2)
+                return fFormats[cs].bit16;
+            return fFormats[cs].bit32;
         }
 
-        uint32_t signedOffset = isSigned ? 1 : ((format & Texture::FORMAT_F16) == Texture::FORMAT_F16 ? 4 : 0);
-        uint32_t byteCount = bitmap.rowBytes() / bitmap.width() / bitmap.channels();
-        uint32_t channel8 = cs * 8;
-        DCHECK(byteCount > 0 && byteCount <= 4, "Unsupported color depth: %d", byteCount * 8);
-        return formats[channel8 + (byteCount - 1) * 2 + signedOffset];
+        if(format & Texture::FORMAT_INTEGER)
+        {
+            if(componentSize == 1)
+                return isSigned ? iFormats[cs].bit8 : uFormats[cs].bit8;
+            if(componentSize == 2)
+                return isSigned ? iFormats[cs].bit16 : uFormats[cs].bit16;
+            return isSigned ? iFormats[cs].bit32 : uFormats[cs].bit32;
+        }
+
+        if(format & Texture::FORMAT_FLOAT)
+        {
+            if(componentSize == 2)
+                return fFormats[cs].bit16;
+            return fFormats[cs].bit32;
+        }
+
+        if(componentSize == 1)
+            return nFormats[cs].bit8;
+        ASSERT(componentSize == 2);
+        return nFormats[cs].bit16;
     }
     case Texture::USAGE_DEPTH_ATTACHMENT:
         return GL_DEPTH_COMPONENT;
@@ -190,7 +220,7 @@ GLenum GLUtil::getTextureFormat(Texture::Usage usage, Texture::Format format, ui
     switch(usage & Texture::USAGE_DEPTH_STENCIL_ATTACHMENT)
     {
     case Texture::USAGE_COLOR_ATTACHMENT: {
-        bool isInteger = format & Texture::FORMAT_I32;
+        bool isInteger = format & Texture::FORMAT_INTEGER;
         const static GLenum fChannels[] = {GL_RED, GL_RG, GL_RGB, GL_RGBA};
         const static GLenum iChannels[] = {GL_RED_INTEGER, GL_RG_INTEGER, GL_RGB_INTEGER, GL_RGBA_INTEGER};
         const GLenum* formatByChannels = isInteger ? iChannels : fChannels;
@@ -209,17 +239,17 @@ GLenum GLUtil::getTextureFormat(Texture::Usage usage, Texture::Format format, ui
 GLenum GLUtil::getPixelType(int32_t format, const Bitmap& bitmap)
 {
     bool flagSigned = (format & Texture::FORMAT_SIGNED) == Texture::FORMAT_SIGNED;
-    uint32_t byteCount = bitmap.rowBytes() / bitmap.width() / bitmap.channels();
-    if(byteCount == 1)
+    uint32_t componentSize = bitmap.rowBytes() / bitmap.width() / bitmap.channels();
+    if(componentSize == 1)
         return flagSigned ? GL_BYTE : GL_UNSIGNED_BYTE;
-    if(byteCount == 2)
+    if(componentSize == 2)
     {
-        if(format == Texture::FORMAT_AUTO || format & Texture::FORMAT_F16)
+        if(format == Texture::FORMAT_AUTO || format & Texture::FORMAT_FLOAT)
             return GL_HALF_FLOAT;
         return flagSigned ? GL_SHORT: GL_UNSIGNED_SHORT;
     }
-    DCHECK(byteCount == 4, "Unsupported component size: %d, only [1, 2, 4] are allowed here", byteCount);
-    if(format == Texture::FORMAT_AUTO || format & Texture::FORMAT_F32)
+    DCHECK(componentSize == 4, "Unsupported component size: %d, only [1, 2, 4] are allowed here", componentSize);
+    if(format == Texture::FORMAT_AUTO || format & Texture::FORMAT_FLOAT)
         return GL_FLOAT;
     return flagSigned ? GL_INT : GL_UNSIGNED_INT;
 }
@@ -262,7 +292,7 @@ void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, Render
     Buffer vertexBuffer = renderController.makeVertexBuffer(Buffer::USAGE_STATIC);
     Buffer::Snapshot indexBufferSnapshot = renderController.getSharedIndices(RenderController::SHARED_INDICES_QUAD)->snapshot(renderController, 6, 6);
 
-    const Buffer::Snapshot vertexBufferSnapshot = vertexBuffer.snapshot(InputType::create(RenderUtil::makeUnitCubeVertices(false)));
+    const Buffer::Snapshot vertexBufferSnapshot = vertexBuffer.snapshot(UploaderType::create(RenderUtil::makeUnitCubeVertices(false)));
     vertexBufferSnapshot.upload(graphicsContext);
     glBindBuffer(GL_ARRAY_BUFFER, static_cast<GLuint>(vertexBuffer.id()));
     glEnableVertexAttribArray(0);

@@ -134,7 +134,7 @@ class BaseWindow:
     def hide(self):
         self._is_open.set(False)
 
-    def on_show(self, builder: dear_imgui.WidgetBuilder, *args, **kwargs):
+    def on_show(self, builder: dear_imgui.WidgetBuilder, **kwargs):
         pass
 
 
@@ -280,6 +280,20 @@ class PropertiesWindow(BaseWindow):
             i.build_input(builder)
 
 
+class ResourceWindow(BaseWindow):
+    def __init__(self, imgui: Renderer, is_open: Optional[bool]):
+        super().__init__(imgui, is_open)
+        self._textures = []
+
+    @property
+    def textures(self):
+        return self._textures
+
+    def on_show(self, builder: dear_imgui.WidgetBuilder, **kwargs):
+        for i in self._textures:
+            builder.image(i)
+
+
 class MarkStudio:
 
     class CommandDelegate:
@@ -294,21 +308,26 @@ class MarkStudio:
         def close(self):
             self._mark_studio.close()
 
-    def __init__(self, application_facade: ApplicationFacade, imgui_renderer: Renderer, resolution: Vec2):
+    def __init__(self, application_facade: ApplicationFacade, imgui: Renderer, resolution: Vec2):
         self._application_facade = application_facade
-        self._imgui_renderer = imgui_renderer.make_disposable()
+        self._imgui = imgui.make_disposable()
         self._disposed = None
         self._renderer_quickbar = None
         self._renderer_properties = None
         self._layer_editor_visibility = Boolean(False)
-        self._main_window = MainWindow(self, self._imgui_renderer, None)
-        self._console_window = ConsoleWindow(self._imgui_renderer, True)
-        self._properties_window = PropertiesWindow(self._imgui_renderer, True)
+        self._main_window = MainWindow(self, self._imgui, None)
+        self._console_window = ConsoleWindow(self._imgui, True)
+        self._properties_window = PropertiesWindow(self._imgui, True)
+        self._resource_window = ResourceWindow(self._imgui, True)
         self._resolution = resolution
 
     @property
     def properties_window(self) -> PropertiesWindow:
         return self._properties_window
+
+    @property
+    def resource_window(self) -> ResourceWindow:
+        return self._resource_window
 
     def show(self, quick_bar_items: Optional[list[QuickBarItem]] = None, console_cmds: Optional[list[ConsoleCommand]] = None,
              properties: Optional[list[Property]] = None):
@@ -327,12 +346,12 @@ class MarkStudio:
             self._disposed.set(True)
         self._disposed = Boolean(False)
 
-        self._application_facade.surface_controller.add_control_layer(self._imgui_renderer)
-        self._application_facade.push_event_listener(self._imgui_renderer, self._disposed)
+        self._application_facade.surface_controller.add_control_layer(self._imgui)
+        self._application_facade.push_event_listener(self._imgui, self._disposed)
 
     def close(self):
-        self._imgui_renderer.dispose()
-        self._imgui_renderer = None
+        self._imgui.dispose()
+        self._imgui = None
         self._disposed.set(True)
         self._renderer_quickbar = None
         self._renderer_properties = None

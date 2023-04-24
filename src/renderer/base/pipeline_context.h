@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_BASE_PIPELINE_CONTEXT_H_
-#define ARK_RENDERER_BASE_PIPELINE_CONTEXT_H_
+#pragma once
 
 #include <vector>
 
@@ -24,5 +23,3 @@ public:
 };
 
 }
-
-#endif

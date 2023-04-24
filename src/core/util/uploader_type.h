@@ -13,7 +13,7 @@
 namespace ark {
 
 //[[script::bindings::class("Uploader")]]
-class ARK_API InputType {
+class ARK_API UploaderType {
 public:
 //  [[script::bindings::constructor]]
     static sp<Uploader> create(sp<ByteArray> value, size_t size = 0);

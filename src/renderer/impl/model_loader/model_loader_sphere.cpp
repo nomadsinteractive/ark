@@ -74,7 +74,7 @@ static sp<Uploader> makeIndices(uint32_t sampleCount)
         (*buf++) = static_cast<element_index_t>(offset + sampleCount);
         (*buf++) = static_cast<element_index_t>(offset + sampleCount - 1);
     }
-    return InputType::makeElementIndexInput(std::move(indices));
+    return UploaderType::makeElementIndexInput(std::move(indices));
 }
 
 namespace {

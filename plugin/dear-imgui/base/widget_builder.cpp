@@ -12,6 +12,7 @@
 #include "graphics/impl/vec/vec2_impl.h"
 #include "graphics/impl/vec/vec3_impl.h"
 #include "graphics/impl/vec/vec4_impl.h"
+#include "graphics/util/vec3_type.h"
 
 #include "dear-imgui/base/renderer_context.h"
 #include "dear-imgui/renderer/renderer_imgui.h"
@@ -96,10 +97,11 @@ private:
 class Image : public Widget {
 public:
     Image(sp<Texture> texture, sp<Vec2> size, const V2& uv0, const V2& uv1, sp<Vec4> color, sp<Vec4> borderColor, sp<RendererContext> rendererContext)
-        : _texture(std::move(texture)), _size(std::move(size)), _uv0(*reinterpret_cast<const ImVec2*>(&uv0)), _uv1(*reinterpret_cast<const ImVec2*>(&uv1)),
+        : _texture(std::move(texture)), _size(!size && _texture ? Vec3Type::xy(_texture->size()) : std::move(size)), _uv0(*reinterpret_cast<const ImVec2*>(&uv0)), _uv1(*reinterpret_cast<const ImVec2*>(&uv1)),
           _color(std::move(color)), _border_color(std::move(borderColor)), _renderer_context(std::move(rendererContext)) {
         if(_texture)
             _renderer_context->addTextureRefCount(_texture.get());
+        ASSERT(_size);
     }
     ~Image() override {
         if(_texture)
@@ -451,9 +453,9 @@ void WidgetBuilder::popID()
     addFunctionCall(ImGui::PopID);
 }
 
-void WidgetBuilder::image(const sp<Texture>& texture, const sp<Vec2>& size, const V2& uv0, const V2& uv1, const sp<Vec4>& color, const sp<Vec4>& borderColor)
+void WidgetBuilder::image(sp<Texture> texture, sp<Vec2> size, const V2& uv0, const V2& uv1, const sp<Vec4>& color, const sp<Vec4>& borderColor)
 {
-    addWidget(sp<Image>::make(texture, size, uv0, uv1, color ? color : sp<Vec4>::make<Vec4::Const>(V4(1.0f)), borderColor ? borderColor : sp<Vec4>::make<Vec4::Const>(V4(0)), _renderer_context));
+    addWidget(sp<Image>::make(std::move(texture), std::move(size), uv0, uv1, color ? color : sp<Vec4>::make<Vec4::Const>(V4(1.0f)), borderColor ? borderColor : sp<Vec4>::make<Vec4::Const>(V4(0)), _renderer_context));
 }
 
 void WidgetBuilder::sameLine(float localPosX, float spacingW)

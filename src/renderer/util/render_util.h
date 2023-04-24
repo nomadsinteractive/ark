@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_UTIL_RENDER_UTIL_H_
-#define ARK_RENDERER_UTIL_RENDER_UTIL_H_
+#pragma once
 
 #include "core/forwarding.h"
 #include "core/inf/array.h"
@@ -27,10 +26,10 @@ public:
 
     static bool isScissorEnabled(const Rect& scissor);
 
+    static uint32_t getChannelSize(Texture::Format format);
+    static uint32_t getPixelSize(Texture::Format format);
     static uint32_t getComponentSize(Texture::Format format);
 
 };
 
 }
-
-#endif

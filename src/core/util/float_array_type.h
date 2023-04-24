@@ -42,6 +42,8 @@ public:
 
 //  [[script::bindings::classmethod]]
     static Span toBytes(const sp<FloatArray>& self);
+//  [[script::bindings::classmethod]]
+    static sp<ByteArray> toByteArray(sp<FloatArray> self);
 */
 
 };

@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_BASE_MAT_H_
-#define ARK_GRAPHICS_BASE_MAT_H_
+#pragma once
 
 #include <cstring>
 
@@ -23,7 +22,7 @@ public:
     }
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Mat);
 
-    static Mat<S> identity() {
+    static const Mat<S>& identity() {
         static Mat<S> m;
         return m;
     }
@@ -93,4 +92,3 @@ private:
 };
 
 }
-#endif

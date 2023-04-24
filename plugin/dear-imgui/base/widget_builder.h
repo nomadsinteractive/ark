@@ -1,5 +1,4 @@
-#ifndef ARK_PLUGIN_DEAR_IMGUI_BASE_RENDERER_BUILDER_H_
-#define ARK_PLUGIN_DEAR_IMGUI_BASE_RENDERER_BUILDER_H_
+#pragma once
 
 #include <functional>
 #include <stack>
@@ -117,7 +116,7 @@ public:
     void popID();
 
 // [[script::bindings::auto]]
-    void image(const sp<Texture>& texture, const sp<Vec2>& size, const V2& uv0 = V2(0), const V2& uv1 = V2(1.0f), const sp<Vec4>& color = nullptr, const sp<Vec4>& borderColor = nullptr);
+    void image(sp<Texture> texture, sp<Vec2> size = nullptr, const V2& uv0 = V2(0), const V2& uv1 = V2(1.0f), const sp<Vec4>& color = nullptr, const sp<Vec4>& borderColor = nullptr);
 
 // [[script::bindings::auto]]
     sp<Widget> makeAboutWidget(sp<Boolean> isOpen = BooleanType::create(true));
@@ -227,5 +226,3 @@ private:
 }
 }
 }
-
-#endif

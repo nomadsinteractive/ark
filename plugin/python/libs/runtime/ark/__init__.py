@@ -116,6 +116,9 @@ class _Array:
     def to_bytes(self) -> bytes:
         pass
 
+    def to_byte_array(self) -> 'ByteArray':
+        pass
+
     def __len__(self) -> int:
         return 0
 
@@ -127,6 +130,11 @@ class _Array:
 
 
 class IntArray(_Array):
+    def __init__(self, size: int, fill: int = 0):
+        pass
+
+
+class FloatArray(_Array):
     def __init__(self, size: int, fill: int = 0):
         pass
 
@@ -413,11 +421,12 @@ class Texture:
     FORMAT_RGB = 2
     FORMAT_RGBA = 3
     FORMAT_SIGNED = 8
-    FORMAT_F16 = 16
-    FORMAT_F32 = 32
-    FORMAT_I8 = 64
-    FORMAT_I16 = 128
-    FORMAT_I32 = 192
+    FORMAT_NORMALIZED = 16
+    FORMAT_INTEGER = 32
+    FORMAT_FLOAT = 64
+    FORMAT_8_BIT = 128
+    FORMAT_16_BIT = 256
+    FORMAT_32_BIT = FORMAT_8_BIT | FORMAT_16_BIT
 
     @property
     def width(self) -> int:
@@ -461,8 +470,8 @@ class RenderController:
     def make_index_buffer(self, buffer_usage: int = Buffer.USAGE_DYNAMIC, input_: Optional['Uploader'] = None) -> Buffer:
         pass
 
-    def create_texture_2d(self, bitmap: 'Bitmap', texture_format: int = Texture.FORMAT_AUTO, upload_strategy: int = US_ONCE_AND_ON_SURFACE_READY,
-                          future: Optional[Future] = None) -> Texture:
+    def create_texture2d(self, bitmap: 'Bitmap', texture_format: int = Texture.FORMAT_AUTO, upload_strategy: int = US_ONCE_AND_ON_SURFACE_READY,
+                         future: Optional[Future] = None) -> Texture:
         pass
 
 
@@ -633,6 +642,8 @@ class AudioPlayer:
 
 
 class Bitmap:
+    def __init__(self, width: int, height: int, row_bytes: int, channels: int, data: Optional[ByteArray]):
+        pass
 
     @property
     def width(self) -> int:
@@ -2518,6 +2529,14 @@ class ConvexHullResolver:
         pass
 
     def resolve(self, points: Optional[list[tuple[float, float]]]) -> list[tuple[float, float]]:
+        pass
+
+
+class PrimitiveModelFactory:
+    def __init__(self):
+        pass
+
+    def make_plane(self, subdivisons: int) -> Model:
         pass
 
 

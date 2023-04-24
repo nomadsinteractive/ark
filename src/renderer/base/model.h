@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_BASE_MODEL_H_
-#define ARK_RENDERER_BASE_MODEL_H_
+#pragma once
 
 #include "core/forwarding.h"
 #include "core/collection/table.h"
@@ -23,26 +22,28 @@ public:
     Model(std::vector<sp<Material>> materials, std::vector<sp<Mesh>> meshes, sp<Node> rootNode, sp<Metrics> bounds, sp<Metrics> occupies = nullptr);
     DEFAULT_COPY_AND_ASSIGN(Model);
 
+//  [[script::bindings::property]]
     const sp<Uploader>& indices() const;
+//  [[script::bindings::property]]
     const sp<Vertices>& vertices() const;
 
     element_index_t writeIndices(element_index_t* buf, element_index_t baseIndex = 0) const;
 
-//[[script::bindings::property]]
+//  [[script::bindings::property]]
     const std::vector<sp<Material>>& materials() const;
-//[[script::bindings::property]]
+//  [[script::bindings::property]]
     const std::vector<sp<Mesh>>& meshes() const;
-//[[script::bindings::property]]
+//  [[script::bindings::property]]
     const sp<Node>& rootNode() const;
 
-//[[script::bindings::property]]
+//  [[script::bindings::property]]
     const sp<Metrics>& bounds() const;
-//[[script::bindings::property]]
+//  [[script::bindings::property]]
     const sp<Metrics>& occupies() const;
 
-//[[script::bindings::property]]
+//  [[script::bindings::property]]
     size_t indexCount() const;
-//[[script::bindings::property]]
+//  [[script::bindings::property]]
     size_t vertexCount() const;
 
 //  [[script::bindings::property]]
@@ -123,5 +124,3 @@ private:
 };
 
 }
-
-#endif

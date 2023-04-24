@@ -1,7 +1,6 @@
 #include "renderer/vulkan/util/vk_util.h"
 
 #include <array>
-//#include <xutility>
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -20,6 +19,7 @@
 #include "renderer/base/attribute.h"
 #include "renderer/base/render_engine_context.h"
 #include "renderer/base/render_controller.h"
+#include "renderer/util/render_util.h"
 
 #include "renderer/vulkan/base/vk_buffer.h"
 #include "renderer/vulkan/base/vk_command_pool.h"
@@ -289,19 +289,17 @@ static VkFormat toVkChannelFormat(const VkFormat* channelFormat, uint32_t compon
 */
     if(componentSize == 1)
     {
-        CHECK(!(format & (Texture::FORMAT_F16 | Texture::FORMAT_F32)), "Component size one doesn't support float format");
+        CHECK(!(format & Texture::FORMAT_FLOAT), "Component size one doesn't support float format");
         return channelFormat[0];
     }
     if(componentSize == 2)
     {
-        DCHECK(!(format & Texture::FORMAT_F32), "Component size two doesn't support float32 format");
-        if(format & Texture::FORMAT_F16)
+        if(format & Texture::FORMAT_FLOAT)
             return channelFormat[4];
         return format & Texture::FORMAT_SIGNED ? channelFormat[3] : channelFormat[2];
     }
     DCHECK(componentSize == 4, "Unsupported color-depth: %d", componentSize * 8);
-    DCHECK(!(format & Texture::FORMAT_F16), "Component size four doesn't support float16 format");
-    if(format & Texture::FORMAT_F32)
+    if(format & Texture::FORMAT_FLOAT)
         return channelFormat[5];
     return format & Texture::FORMAT_SIGNED ? channelFormat[7] : channelFormat[6];
 }
@@ -314,8 +312,7 @@ VkFormat VKUtil::toTextureFormat(uint32_t componentSize, uint8_t channels, Textu
         VK_FORMAT_R8G8B8_UNORM, VK_FORMAT_R8G8B8_SNORM, VK_FORMAT_R16G16B16_UNORM, VK_FORMAT_R16G16B16_SNORM, VK_FORMAT_R16G16B16_SFLOAT, VK_FORMAT_R32G32B32_SFLOAT, VK_FORMAT_R32G32B32_UINT, VK_FORMAT_R32G32B32_SINT,
         VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_R8G8B8A8_SNORM, VK_FORMAT_R16G16B16A16_UNORM, VK_FORMAT_R16G16B16A16_SNORM, VK_FORMAT_R16G16B16A16_SFLOAT, VK_FORMAT_R32G32B32A32_SFLOAT, VK_FORMAT_R32G32B32A32_UINT, VK_FORMAT_R32G32B32A32_SINT
     };
-    CHECK(!(format & Texture::FORMAT_SIGNED && format & Texture::FORMAT_F16), "FORMAT_SIGNED format can not combined with FORMAT_F16");
-    CHECK(!(format & Texture::FORMAT_SIGNED && format & Texture::FORMAT_F32), "FORMAT_SIGNED format can not combined with FORMAT_F32");
+    CHECK(!(format & Texture::FORMAT_SIGNED && format & Texture::FORMAT_FLOAT), "FORMAT_SIGNED format can not combined with FORMAT_FLOAT");
     uint32_t channel8 = (channels - 1) * 8;
     CHECK_WARN(channels != 3, "RGB texture format may not be supported by all the graphics drivers");
     return toVkChannelFormat(vkFormats + channel8, componentSize, format);
@@ -329,7 +326,7 @@ VkFormat VKUtil::toTextureFormat(const Bitmap& bitmap, Texture::Format format)
 VkFormat VKUtil::toTextureFormat(Texture::Format format)
 {
     DCHECK(format != Texture::FORMAT_AUTO, "Cannot determine texture format(auto) without a bitmap");
-    return toTextureFormat((format & Texture::FORMAT_F16) ? 2 : (format & Texture::FORMAT_F32 ? 4 : 1), (format & Texture::FORMAT_RGBA) + 1, format);
+    return toTextureFormat(RenderUtil::getComponentSize(format), (format & Texture::FORMAT_RGBA) + 1, format);
 }
 
 VkFrontFace VKUtil::toFrontFace(PipelineBindings::FrontFace frontFace)

@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_VULKAN_UTIL_VULKAN_UTIL_H_
-#define ARK_RENDERER_VULKAN_UTIL_VULKAN_UTIL_H_
+#pragma once
 
 #include <vector>
 
@@ -46,5 +45,3 @@ public:
 
 }
 }
-
-#endif

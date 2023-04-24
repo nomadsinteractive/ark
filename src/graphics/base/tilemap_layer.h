@@ -55,7 +55,7 @@ public:
 // [[script::bindings::auto]]
     sp<Tile> getTile(uint32_t colId, uint32_t rowId) const;
 // [[script::bindings::auto]]
-    const sp<Tile>& getTileByPosition(float x, float y) const;
+    sp<Tile> getTileByPosition(float x, float y) const;
 // [[script::bindings::auto]]
     void setTile(uint32_t col, uint32_t row, const sp<RenderObject>& renderObject);
 // [[script::bindings::auto]]

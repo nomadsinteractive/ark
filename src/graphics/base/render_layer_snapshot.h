@@ -11,7 +11,7 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/base/buffer.h"
-#include "renderer/base/drawing_context_params.h"
+#include "renderer/base/drawing_params.h"
 
 namespace ark {
 
@@ -55,7 +55,7 @@ public:
     void addDisposedLayerContext(LayerContext& lc);
     void addDisposedLayerContexts(const std::vector<sp<LayerContext>>& layerContexts);
 
-    sp<RenderCommand> toRenderCommand(const RenderRequest& renderRequest, Buffer::Snapshot vertices, Buffer::Snapshot indices, DrawingContextParams::Parameters params);
+    sp<RenderCommand> toRenderCommand(const RenderRequest& renderRequest, Buffer::Snapshot vertices, Buffer::Snapshot indices, uint32_t drawCount, DrawingParams params);
 
     sp<RenderLayer::Stub> _stub;
 

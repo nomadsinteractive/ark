@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_INF_VERTICES_H_
-#define ARK_RENDERER_INF_VERTICES_H_
+#pragma once
 
 #include "core/base/api.h"
 
@@ -18,10 +17,11 @@ public:
 
     size_t length() const;
 
+//  [[script::bindings::classmethod]]
+    static sp<Uploader> toUploader(sp<Vertices> self, Shader& shader, const V3& bounds);
+
 private:
     size_t _length;
 };
 
 }
-
-#endif

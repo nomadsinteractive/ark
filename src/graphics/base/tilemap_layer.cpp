@@ -126,7 +126,7 @@ std::vector<int32_t> TilemapLayer::getTileRect(const RectI& rect) const
     return tiles;
 }
 
-const sp<Tile>& TilemapLayer::getTileByPosition(float x, float y) const
+sp<Tile> TilemapLayer::getTileByPosition(float x, float y) const
 {
     return getTile(static_cast<uint32_t>(x / _stub->_tileset->tileWidth()), static_cast<uint32_t>(y / _stub->_tileset->tileHeight()));
 }

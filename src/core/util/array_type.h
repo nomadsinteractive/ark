@@ -115,6 +115,10 @@ public:
         return Span(reinterpret_cast<const char*>(self->buf()), self->size());
     }
 
+    static sp<ByteArray> toByteArray(sp<Array<T>> self) {
+        return sp<typename ByteArray::Casted<T>>::make(std::move(self));
+    }
+
 private:
     static T* getSubscriptionPtr(Array<T>& self, ptrdiff_t index) {
         CHECK(std::abs(index) <= static_cast<ptrdiff_t>(self.length()) && index != static_cast<ptrdiff_t>(self.length()), "Subscription index(%d) out of bounds, array size: %zd", index, self.length());

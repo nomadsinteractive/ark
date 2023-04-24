@@ -1,4 +1,4 @@
-#include "renderer/base/drawing_context_params.h"
+#include "renderer/base/drawing_params.h"
 
 #include "graphics/base/camera.h"
 #include "graphics/inf/render_command.h"
@@ -10,17 +10,17 @@
 
 namespace ark {
 
-DrawingContextParams::DrawElements::DrawElements(uint32_t start, uint32_t count)
-    : _count(count), _start(start)
+DrawingParams::DrawElements::DrawElements(uint32_t start)
+    : _start(start)
 {
 }
 
-DrawingContextParams::Parameters::Parameters()
-    : _draw_elements(0, 0)
+DrawingParams::DrawingParams()
+    : _draw_elements(0)
 {
 }
 
-DrawingContextParams::Parameters::Parameters(DrawingContextParams::Parameters&& other)
+DrawingParams::DrawingParams(DrawingParams&& other)
 {
     if(other._draw_elements.isActive())
         _draw_elements = std::move(other._draw_elements);
@@ -32,7 +32,7 @@ DrawingContextParams::Parameters::Parameters(DrawingContextParams::Parameters&& 
         DFATAL("Shouldn't be here");
 }
 
-DrawingContextParams::Parameters::Parameters(const DrawingContextParams::Parameters& other)
+DrawingParams::DrawingParams(const DrawingParams& other)
 {
     if(other._draw_elements.isActive())
         _draw_elements = other._draw_elements;
@@ -44,22 +44,22 @@ DrawingContextParams::Parameters::Parameters(const DrawingContextParams::Paramet
         DFATAL("Shouldn't be here");
 }
 
-DrawingContextParams::Parameters::Parameters(const DrawingContextParams::DrawElements& drawElements)
-    : _draw_elements(drawElements)
+DrawingParams::DrawingParams(DrawElements drawElements)
+    : _draw_elements(std::move(drawElements))
 {
 }
 
-DrawingContextParams::Parameters::Parameters(DrawingContextParams::DrawElementsInstanced drawElementsInstanced)
+DrawingParams::DrawingParams(DrawingParams::DrawElementsInstanced drawElementsInstanced)
     : _draw_elements_instanced(std::move(drawElementsInstanced))
 {
 }
 
-DrawingContextParams::Parameters::Parameters(DrawMultiElementsIndirect drawMultiElementsIndirect)
+DrawingParams::DrawingParams(DrawMultiElementsIndirect drawMultiElementsIndirect)
     : _draw_multi_elements_indirect(std::move(drawMultiElementsIndirect))
 {
 }
 
-DrawingContextParams::Parameters::~Parameters()
+DrawingParams::~DrawingParams()
 {
     if(_draw_elements.isActive())
         _draw_elements.~DrawElements();
@@ -71,7 +71,7 @@ DrawingContextParams::Parameters::~Parameters()
         DFATAL("Shouldn't be here");
 }
 
-DrawingContextParams::Parameters& DrawingContextParams::Parameters::operator =(const DrawingContextParams::Parameters& other)
+DrawingParams& DrawingParams::operator =(const DrawingParams& other)
 {
     if(other._draw_elements.isActive())
         _draw_elements = other._draw_elements;
@@ -84,7 +84,7 @@ DrawingContextParams::Parameters& DrawingContextParams::Parameters::operator =(c
     return *this;
 }
 
-DrawingContextParams::Parameters& DrawingContextParams::Parameters::operator =(DrawingContextParams::Parameters&& other)
+DrawingParams& DrawingParams::operator =(DrawingParams&& other)
 {
     if(other._draw_elements.isActive())
         _draw_elements = other._draw_elements;
@@ -97,13 +97,13 @@ DrawingContextParams::Parameters& DrawingContextParams::Parameters::operator =(D
     return *this;
 }
 
-DrawingContextParams::DrawElementsInstanced::DrawElementsInstanced(uint32_t start, uint32_t count, int32_t instanceCount, std::vector<std::pair<uint32_t, Buffer::Snapshot>> snapshots)
-    : _count(count), _start(start), _instance_count(instanceCount), _instanced_array_snapshots(std::move(snapshots))
+DrawingParams::DrawElementsInstanced::DrawElementsInstanced(uint32_t start, uint32_t count, std::vector<std::pair<uint32_t, Buffer::Snapshot>> snapshots)
+    : _count(count), _start(start), _divided_buffer_snapshots(std::move(snapshots))
 {
 }
 
-DrawingContextParams::DrawMultiElementsIndirect::DrawMultiElementsIndirect(std::vector<std::pair<uint32_t, Buffer::Snapshot>> snapshots, Buffer::Snapshot indirectCmds, uint32_t drawCount)
-    : _instanced_array_snapshots(std::move(snapshots)), _indirect_cmds(std::move(indirectCmds)), _draw_count(drawCount)
+DrawingParams::DrawMultiElementsIndirect::DrawMultiElementsIndirect(std::vector<std::pair<uint32_t, Buffer::Snapshot>> snapshots, Buffer::Snapshot indirectCmds, uint32_t indirectCmdCount)
+    : _divided_buffer_snapshots(std::move(snapshots)), _indirect_cmds(std::move(indirectCmds)), _indirect_cmd_count(indirectCmdCount)
 {
 }
 

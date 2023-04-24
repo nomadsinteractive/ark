@@ -192,6 +192,10 @@ private:
 
 template<typename T> template<typename U> class Array<T>::Casted : public Array<T> {
 public:
+    Casted(sp<Array<U>> data)
+        : _data(std::move(data)) {
+    }
+
     virtual size_t length() override {
         return _data->size() / sizeof(U);
     }

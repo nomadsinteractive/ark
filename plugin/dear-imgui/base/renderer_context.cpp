@@ -30,7 +30,7 @@ const sp<DrawCommandPool>& RendererContext::obtainDrawCommandPool(void* texture)
 
 void RendererContext::addTextureRefCount(Texture* texture)
 {
-    DCHECK(!texture, "May not add default texture refcount");
+    ASSERT(texture);
     sp<DrawCommandPool>& pool = _draw_commands[texture];
     if(!pool)
         pool = sp<DrawCommandPool>::make(_shader, _render_controller, sp<Texture>::make(*texture));
@@ -39,7 +39,7 @@ void RendererContext::addTextureRefCount(Texture* texture)
 
 void RendererContext::relTextureRefCount(Texture* texture)
 {
-    DCHECK(!texture, "May not release default texture refcount");
+    ASSERT(texture);
     const auto iter = _draw_commands.find(texture);
     DASSERT(iter != _draw_commands.end());
     sp<DrawCommandPool>& pool = iter->second;

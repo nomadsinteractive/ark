@@ -20,7 +20,7 @@ public:
 
 public:
 //  [[script::bindings::auto]]
-    Generator(Generator::NoiseType type = Generator::NoiseType::NOISE_TYPE_SIMPLEX, int32_t seed = 0);
+    Generator(Generator::NoiseType type = Generator::NoiseType::NOISE_TYPE_SIMPLEX, int32_t seed = 0, float frequence = 1.0f);
 
 //  [[script::bindings::property]]
     int32_t seed() const;
@@ -32,13 +32,13 @@ public:
 //  [[script::bindings::property]]
     void setFrequency(float frequency);
 
-//  [[script::bindings::property]]
+//  [[script::bindings::auto]]
     void setFractalOctaves(int32_t octaves);
-//  [[script::bindings::property]]
+//  [[script::bindings::auto]]
     void setFractalGain(float gain);
-//  [[script::bindings::property]]
+//  [[script::bindings::auto]]
     void setFractalLacunarity(float lacunarity);
-//  [[script::bindings::property]]
+//  [[script::bindings::auto]]
     void setFractalWeightedStrength(float weightedStrength);
 
 //  [[script::bindings::auto]]
@@ -56,7 +56,8 @@ private:
     int32_t _seed;
     float _frequency;
 
-    FastNoise::SmartNode<FastNoise::Generator> _noise_generator;
+    FastNoise::SmartNode<FastNoise::Generator> _generator;
+    FastNoise::SmartNode<FastNoise::Generator> _source_generator;
     FastNoise::SmartNode<FastNoise::Fractal<>> _fractal_generator;
 };
 

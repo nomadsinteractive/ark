@@ -24,7 +24,7 @@ void RenderPass::render(RenderRequest& renderRequest, const V3& /*position*/)
     {
         const Buffer& vertices = _shader_bindings->vertices();
         DrawingContext drawingContext(_shader_bindings, _shader_bindings->attachments(), _shader->takeUBOSnapshot(renderRequest), _shader->takeSSBOSnapshot(renderRequest), vertices.snapshot(),
-                                      _index_buffer.snapshot(), DrawingContextParams::DrawElements(0, drawCount));
+                                      _index_buffer.snapshot(), drawCount, DrawingParams::DrawElements());
         renderRequest.addRenderCommand(drawingContext.toRenderCommand(renderRequest));
     }
 }

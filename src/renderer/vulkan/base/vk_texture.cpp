@@ -8,6 +8,7 @@
 
 #include "renderer/base/render_controller.h"
 #include "renderer/base/recycler.h"
+#include "renderer/util/render_util.h"
 
 #include "renderer/vulkan/base/vk_device.h"
 #include "renderer/vulkan/base/vk_command_pool.h"
@@ -51,8 +52,8 @@ void VKTexture::upload(GraphicsContext& graphicsContext, const sp<Texture::Uploa
         else
         {
             uint8_t channels = format & Texture::FORMAT_RGBA;
-            uint32_t pixelbytes = format == Texture::FORMAT_F16 ? 2 : (format == Texture::FORMAT_F32 ? 4 : 1);
-            uploadBitmap(graphicsContext, Bitmap(_width, _height, _width * channels * pixelbytes, channels, false), imagedata);
+            uint32_t componentSize = RenderUtil::getComponentSize(format);
+            uploadBitmap(graphicsContext, Bitmap(_width, _height, _width * channels * componentSize, channels, false), imagedata);
         }
     }
     _notifier.notify();

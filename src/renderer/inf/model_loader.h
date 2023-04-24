@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_INF_MODEL_LOADER_H_
-#define ARK_RENDERER_INF_MODEL_LOADER_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/forwarding.h"
@@ -49,5 +48,3 @@ private:
 };
 
 }
-
-#endif

@@ -24,11 +24,12 @@ public:
         FORMAT_RGB = 2,
         FORMAT_RGBA = 3,
         FORMAT_SIGNED = 8,
-        FORMAT_F16 = 16,
-        FORMAT_F32 = 32,
-        FORMAT_I8 = 64,
-        FORMAT_I16 = 128,
-        FORMAT_I32 = 192,
+        FORMAT_NORMALIZED = 16,
+        FORMAT_INTEGER = 32,
+        FORMAT_FLOAT = 64,
+        FORMAT_8_BIT = 128,
+        FORMAT_16_BIT = 256,
+        FORMAT_32_BIT = FORMAT_8_BIT | FORMAT_16_BIT
     };
 
     enum Usage {
@@ -123,7 +124,7 @@ public:
 
     class UploaderBitmap : public Uploader {
     public:
-        UploaderBitmap(bitmap bitmap);
+        UploaderBitmap(sp<Bitmap> bitmap);
 
         virtual void initialize(GraphicsContext& graphicsContext, Delegate& delegate) override;
 

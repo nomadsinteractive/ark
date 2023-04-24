@@ -9,6 +9,7 @@ namespace ark {
 
 class ModelLoaderSphere : public ModelLoader {
 public:
+[[deprecated]]
     ModelLoaderSphere(const sp<Atlas>& atlas, uint32_t sampleCount);
 
     virtual sp<RenderCommandComposer> makeRenderCommandComposer() override;
