@@ -110,7 +110,7 @@ sp<RenderCommand> RCCMultiDrawElementsIndirect::compose(const RenderRequest& ren
 
     writeModelMatices(renderRequest, buf, snapshot, reload);
 
-    DrawingParams::DrawMultiElementsIndirect drawParams(buf.toDividedBufferSnapshots(), reload ? _draw_indirect.snapshot(makeIndirectBuffer(renderRequest)) : _draw_indirect.snapshot(), static_cast<uint32_t>(_indirect_cmds.size()));
+    DrawingParams::DrawMultiElementsIndirect drawParams{buf.toDividedBufferSnapshots(), reload ? _draw_indirect.snapshot(makeIndirectBuffer(renderRequest)) : _draw_indirect.snapshot(), static_cast<uint32_t>(_indirect_cmds.size())};
     return snapshot.toRenderCommand(renderRequest, vertices.snapshot(), _indices.snapshot(), 0, std::move(drawParams));
 }
 

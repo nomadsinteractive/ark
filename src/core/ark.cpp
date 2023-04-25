@@ -205,9 +205,9 @@ void Ark::initialize(const sp<ApplicationManifest>& manifest)
 
     sp<BeanFactory> factory = createBeanFactory(sp<DictionaryImpl<document>>::make());
     _asset_bundle = sp<ArkAssetBundle>::make(AssetBundleType::createBuiltInAssetBundle(_manifest->assetDir(), _manifest->appDir()), factory, _manifest->assets());
-    sp<ApplicationBundle> appResource = sp<ApplicationBundle>::make(_asset_bundle->getAssetBundle("/"));
-    sp<RenderEngine> renderEngine = createRenderEngine(_manifest->renderer()._version, _manifest->renderer()._coordinate_system, appResource);
-    _application_context = createApplicationContext(_manifest, std::move(appResource), std::move(renderEngine));
+    sp<ApplicationBundle> applicationBundle = sp<ApplicationBundle>::make(_asset_bundle->getAssetBundle("/"));
+    sp<RenderEngine> renderEngine = createRenderEngine(_manifest->renderer()._version, _manifest->renderer()._coordinate_system, applicationBundle);
+    _application_context = createApplicationContext(_manifest, std::move(applicationBundle), std::move(renderEngine));
 }
 
 sp<BeanFactory> Ark::createBeanFactory(const String& src) const
@@ -302,14 +302,14 @@ void Ark::deferUnref(Box box)
     _application_context->renderController()->deferUnref(std::move(box));
 }
 
-sp<RenderEngine> Ark::createRenderEngine(RendererVersion version, RendererCoordinateSystem coordinateSystem, const sp<ApplicationBundle>& appResource)
+sp<RenderEngine> Ark::createRenderEngine(RendererVersion version, RendererCoordinateSystem coordinateSystem, const sp<ApplicationBundle>& applicationBundle)
 {
     if(version != Ark::RENDERER_VERSION_AUTO)
-        return doCreateRenderEngine(version, coordinateSystem, appResource);
+        return doCreateRenderEngine(version, coordinateSystem, applicationBundle);
 
     for(const Ark::RendererVersion i : Platform::getRendererVersionPreferences())
     {
-        sp<RenderEngine> renderEngine = doCreateRenderEngine(i, coordinateSystem, appResource);
+        sp<RenderEngine> renderEngine = doCreateRenderEngine(i, coordinateSystem, applicationBundle);
         if(renderEngine)
             return renderEngine;
     }
@@ -328,7 +328,7 @@ sp<ApplicationContext> Ark::createApplicationContext(const ApplicationManifest& 
     return applicationContext;
 }
 
-sp<RenderEngine> Ark::doCreateRenderEngine(RendererVersion version, RendererCoordinateSystem coordinateSystem, const sp<ApplicationBundle>& appResource)
+sp<RenderEngine> Ark::doCreateRenderEngine(RendererVersion version, RendererCoordinateSystem coordinateSystem, const sp<ApplicationBundle>& applicationBundle)
 {
     switch(version) {
     case RENDERER_VERSION_AUTO:
@@ -346,12 +346,12 @@ sp<RenderEngine> Ark::doCreateRenderEngine(RendererVersion version, RendererCoor
     case RENDERER_VERSION_OPENGL_45:
     case RENDERER_VERSION_OPENGL_46:
 #ifdef ARK_USE_OPEN_GL
-        return sp<RenderEngine>::make(version, coordinateSystem, sp<opengl::RendererFactoryOpenGL>::make(appResource->recycler()));
+        return sp<RenderEngine>::make(version, coordinateSystem, sp<opengl::RendererFactoryOpenGL>::make(applicationBundle->recycler()));
 #endif
     case RENDERER_VERSION_VULKAN_11:
     case RENDERER_VERSION_VULKAN_12:
 #ifdef ARK_USE_VULKAN
-        return sp<RenderEngine>::make(version, coordinateSystem, sp<vulkan::RendererFactoryVulkan>::make(appResource->recycler()));
+        return sp<RenderEngine>::make(version, coordinateSystem, sp<vulkan::RendererFactoryVulkan>::make(applicationBundle->recycler()));
 #endif
         break;
     }

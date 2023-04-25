@@ -500,32 +500,28 @@ VkPipelineRasterizationStateCreateInfo VKPipeline::makeRasterizationState() cons
     {
         const PipelineBindings::TraitCullFaceTest& cullFaceTest = _bindings.parameters()._traits.at(PipelineBindings::TRAIT_TYPE_CULL_FACE_TEST)._configure._cull_face_test;
         return vks::initializers::pipelineRasterizationStateCreateInfo(
-                VK_POLYGON_MODE_FILL, cullFaceTest._enabled ? VK_CULL_MODE_FRONT_BIT : VK_CULL_MODE_NONE,
+                VK_POLYGON_MODE_FILL, cullFaceTest._enabled ? VK_CULL_MODE_BACK_BIT : VK_CULL_MODE_NONE,
                 VKUtil::toFrontFace(cullFaceTest._front_face), 0);
     }
-    return vks::initializers::pipelineRasterizationStateCreateInfo(VK_POLYGON_MODE_FILL, VK_CULL_MODE_FRONT_BIT, VK_FRONT_FACE_COUNTER_CLOCKWISE, 0);
+    return vks::initializers::pipelineRasterizationStateCreateInfo(VK_POLYGON_MODE_FILL, VK_CULL_MODE_BACK_BIT, VK_FRONT_FACE_COUNTER_CLOCKWISE, 0);
 }
 
 void VKPipeline::VKDrawArrays::draw(GraphicsContext& /*graphicsContext*/, const DrawingContext& drawingContext, VkCommandBuffer commandBuffer)
 {
-    const DrawingParams::DrawElements& param = drawingContext._parameters._draw_elements;
-    DASSERT(param.isActive());
+    const DrawingParams::DrawElements& param = drawingContext._parameters.drawElements();
     vkCmdDraw(commandBuffer, drawingContext._draw_count, 1, param._start, 0);
 }
 
 void VKPipeline::VKDrawElements::draw(GraphicsContext& /*graphicsContext*/, const DrawingContext& drawingContext, VkCommandBuffer commandBuffer)
 {
-    const DrawingParams::DrawElements& param = drawingContext._parameters._draw_elements;
-    DASSERT(param.isActive());
+    const DrawingParams::DrawElements& param = drawingContext._parameters.drawElements();
     vkCmdDrawIndexed(commandBuffer, drawingContext._draw_count, 1, param._start, 0, 0);
 }
 
 void VKPipeline::VKDrawElementsInstanced::draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext, VkCommandBuffer commandBuffer)
 {
-    const DrawingParams::DrawElementsInstanced& param = drawingContext._parameters._draw_elements_instanced;
-    DASSERT(param.isActive());
-
     VkDeviceSize offsets = 0;
+    const DrawingParams::DrawElementsInstanced& param = drawingContext._parameters.drawElementsInstanced();
     for(const auto& i : param._divided_buffer_snapshots)
     {
         i.second.upload(graphicsContext);
@@ -538,10 +534,8 @@ void VKPipeline::VKDrawElementsInstanced::draw(GraphicsContext& graphicsContext,
 
 void VKPipeline::VKMultiDrawElementsIndirect::draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext, VkCommandBuffer commandBuffer)
 {
-    const DrawingParams::DrawMultiElementsIndirect& param = drawingContext._parameters._draw_multi_elements_indirect;
-    DASSERT(param.isActive());
-
     VkDeviceSize offsets = 0;
+    const DrawingParams::DrawMultiElementsIndirect& param = drawingContext._parameters.drawMultiElementsIndirect();
     for(const auto& i : param._divided_buffer_snapshots)
     {
         i.second.upload(graphicsContext);

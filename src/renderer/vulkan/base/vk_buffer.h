@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_VULKAN_BASE_VK_BUFFER_H_
-#define ARK_RENDERER_VULKAN_BASE_VK_BUFFER_H_
+#pragma once
 
 #include "core/base/notifier.h"
 #include "core/types/shared_ptr.h"
@@ -67,5 +66,3 @@ private:
 
 }
 }
-
-#endif

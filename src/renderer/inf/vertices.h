@@ -15,8 +15,8 @@ public:
 
     virtual void write(VertexWriter& buf, const V3& size) = 0;
 
+//  [[script::bindings::property]]
     size_t length() const;
-
 //  [[script::bindings::classmethod]]
     static sp<Uploader> toUploader(sp<Vertices> self, Shader& shader, const V3& bounds);
 

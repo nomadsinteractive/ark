@@ -1300,11 +1300,11 @@ class Model:
         return []
 
     @property
-    def index_length(self) -> int:
+    def index_count(self) -> int:
         return 0
 
     @property
-    def vertex_length(self) -> int:
+    def vertex_count(self) -> int:
         return 0
 
     @property
@@ -1317,6 +1317,14 @@ class Model:
 
     @property
     def root_node(self) -> Optional[Node]:
+        return None
+
+    @property
+    def indices(self) -> Uploader:
+        return Uploader(None)
+
+    @property
+    def vertices(self):
         return None
 
     def get_animation(self, name: str) -> Animation:

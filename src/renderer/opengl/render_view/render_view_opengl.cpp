@@ -15,6 +15,11 @@
 
 namespace ark {
 
+static void _glDebugCallbackProc(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam)
+{
+    LOGD(message);
+}
+
 RenderViewOpenGL::RenderViewOpenGL(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController)
     : _graphics_context(new GraphicsContext(renderContext, renderController))
 {
@@ -64,6 +69,8 @@ void RenderViewOpenGL::onRenderFrame(const Color& backgroundColor, RenderCommand
 void RenderViewOpenGL::initialize(uint32_t width, uint32_t height)
 {
     LOGD("Width: %d, Height: %d", width, height);
+
+    glDebugMessageCallback(_glDebugCallbackProc, nullptr);
 
     glViewport(0, 0, static_cast<GLsizei>(width), static_cast<GLsizei>(height));
 

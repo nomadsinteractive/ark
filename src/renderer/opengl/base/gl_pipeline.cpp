@@ -18,6 +18,7 @@
 #include "renderer/inf/resource.h"
 #include "renderer/util/render_util.h"
 
+#include "renderer/opengl/util/gl_debug.h"
 #include "renderer/opengl/util/gl_util.h"
 
 #include "platform/platform.h"
@@ -451,11 +452,6 @@ void GLPipeline::GLUniform::setUniform4fv(GLsizei count, const GLfloat* value) c
     glUniform4fv(_location, count, value);
 }
 
-//void GLPipeline::GLUniform::setUniformColor4f(const Color& color) const
-//{
-//    glUniform4f(_location, color.r(), color.g(), color.b(), color.a());
-//}
-
 void GLPipeline::GLUniform::setUniformMatrix4fv(GLsizei count, GLboolean transpose, const GLfloat* value) const
 {
     glUniformMatrix4fv(_location, count, transpose, value);
@@ -515,7 +511,7 @@ GLPipeline::GLDrawArrays::GLDrawArrays(GLenum mode)
 
 void GLPipeline::GLDrawArrays::draw(GraphicsContext& /*graphicsContext*/, const DrawingContext& drawingContext)
 {
-    const DrawingParams::DrawElements& param = drawingContext._parameters._draw_elements;
+    const DrawingParams::DrawElements& param = drawingContext._parameters.drawElements();
     DASSERT(drawingContext._draw_count);
     glDrawArrays(_mode, param._start * sizeof(element_index_t), static_cast<GLsizei>(drawingContext._draw_count));
 }
@@ -527,7 +523,7 @@ GLPipeline::GLDrawElements::GLDrawElements(GLenum mode)
 
 void GLPipeline::GLDrawElements::draw(GraphicsContext& /*graphicsContext*/, const DrawingContext& drawingContext)
 {
-    const DrawingParams::DrawElements& param = drawingContext._parameters._draw_elements;
+    const DrawingParams::DrawElements& param = drawingContext._parameters.drawElements();
     DASSERT(drawingContext._draw_count);
     glDrawElements(_mode, static_cast<GLsizei>(drawingContext._draw_count), GLIndexType, reinterpret_cast<GLvoid*>(param._start * sizeof(element_index_t)));
 }
@@ -539,14 +535,13 @@ GLPipeline::GLDrawElementsInstanced::GLDrawElementsInstanced(GLenum mode)
 
 void GLPipeline::GLDrawElementsInstanced::draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
-    const DrawingParams::DrawElementsInstanced& param = drawingContext._parameters._draw_elements_instanced;
-    DASSERT(param.isActive());
+    const DrawingParams::DrawElementsInstanced& param = drawingContext._parameters.drawElementsInstanced();
     DASSERT(param._count);
     DASSERT(drawingContext._draw_count);
     for(const auto& i : param._divided_buffer_snapshots)
     {
         i.second.upload(graphicsContext);
-        DCHECK(i.second.id(), "Invaild Instanced Array Buffer: %d", i.first);
+        DCHECK(i.second.id(), "Invaild Divided Buffer: %d", i.first);
     }
     glDrawElementsInstanced(_mode, static_cast<GLsizei>(param._count), GLIndexType, nullptr, drawingContext._draw_count);
 }
@@ -558,8 +553,7 @@ GLPipeline::GLMultiDrawElementsIndirect::GLMultiDrawElementsIndirect(GLenum mode
 
 void GLPipeline::GLMultiDrawElementsIndirect::draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
-    const DrawingParams::DrawMultiElementsIndirect& param = drawingContext._parameters._draw_multi_elements_indirect;
-    DASSERT(param.isActive());
+    const DrawingParams::DrawMultiElementsIndirect& param = drawingContext._parameters.drawMultiElementsIndirect();
 
     for(const auto& i : param._divided_buffer_snapshots)
     {

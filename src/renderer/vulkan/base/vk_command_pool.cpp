@@ -62,7 +62,7 @@ std::vector<VkCommandBuffer> VKCommandPool::makeCommandBuffers(uint32_t count) c
 
 void VKCommandPool::flushCommandBuffer(VkCommandBuffer commandBuffer, bool free) const
 {
-    if (commandBuffer == VK_NULL_HANDLE)
+    if(commandBuffer == VK_NULL_HANDLE)
         return;
 
     VKUtil::checkResult(vkEndCommandBuffer(commandBuffer));
@@ -75,7 +75,7 @@ void VKCommandPool::flushCommandBuffer(VkCommandBuffer commandBuffer, bool free)
     VKUtil::checkResult(vkQueueSubmit(_queue, 1, &submitInfo, VK_NULL_HANDLE));
     VKUtil::checkResult(vkQueueWaitIdle(_queue));
 
-    if (free)
+    if(free)
         vkFreeCommandBuffers(_logical_device, _command_pool, 1, &commandBuffer);
 }
 

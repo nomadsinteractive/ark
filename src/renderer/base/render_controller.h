@@ -107,7 +107,7 @@ public:
 
 //  [[script::bindings::auto]]
     Buffer makeBuffer(Buffer::Type type, Buffer::Usage usage, sp<Uploader> uploader, RenderController::UploadStrategy us, sp<Future> future = nullptr);
-    Buffer makeBuffer(Buffer::Type type, Buffer::Usage usage, sp<Uploader> input);
+    Buffer makeBuffer(Buffer::Type type, Buffer::Usage usage, sp<Uploader> uploader);
 //  [[script::bindings::auto]]
     Buffer makeVertexBuffer(Buffer::Usage usage = Buffer::USAGE_DYNAMIC, sp<Uploader> input = nullptr);
 //  [[script::bindings::auto]]

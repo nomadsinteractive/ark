@@ -44,6 +44,7 @@ public:
         virtual void downloadBuffer(GraphicsContext& graphicsContext, size_t offset, size_t size, void* ptr) = 0;
 
         size_t size() const;
+        void setSize(size_t size);
 
     protected:
         size_t _size;

@@ -42,20 +42,18 @@ GLBuffer::~GLBuffer()
     _recycler->recycle(recycle());
 }
 
-void GLBuffer::doUpload(GraphicsContext& /*graphicsContext*/, Uploader& input)
+void GLBuffer::doUpload(GraphicsContext& /*graphicsContext*/, Uploader& uploader)
 {
-    DCHECK_WARN(_usage != GL_STATIC_DRAW || _size == 0, "Uploading transient data to GL_STATIC_DRAW GLBuffer");
-
-    const volatile GLBufferBinder glBinder(_type, _id);
-
     GLint bufsize = 0;
+    const volatile GLBufferBinder glBinder(_type, _id);
     glGetBufferParameteriv(_type, GL_BUFFER_SIZE, &bufsize);
+    DCHECK_WARN(_usage != GL_STATIC_DRAW || bufsize == 0, "Uploading transient data to GL_STATIC_DRAW GLBuffer");
 
-    _size = input.size();
+    _size = uploader.size();
     if(static_cast<size_t>(bufsize) < _size)
         glBufferData(_type, static_cast<GLsizeiptr>(_size), nullptr, _usage);
     WritableGLBuffer writer(_type, _size);
-    input.upload(writer);
+    uploader.upload(writer);
 }
 
 uint64_t GLBuffer::id()

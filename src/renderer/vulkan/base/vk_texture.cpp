@@ -26,7 +26,8 @@ VKTexture::VKTexture(sp<Recycler> recycler, sp<VKRenderer> renderer, uint32_t wi
 
 VKTexture::~VKTexture()
 {
-    _recycler->recycle(doRecycle());
+    if(_image)
+        _recycler->recycle(doRecycle());
 }
 
 uint64_t VKTexture::id()

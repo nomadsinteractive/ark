@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_BASE_ATTRIBUTE_H_
-#define ARK_RENDERER_BASE_ATTRIBUTE_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/base/string.h"
@@ -20,7 +19,7 @@ public:
 
     Attribute();
     Attribute(const String& name, Type type, const String& declareType, uint32_t length, bool normalized);
-    DEFAULT_COPY_AND_ASSIGN(Attribute);
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Attribute);
 
     const String& name() const;
     Type type() const;
@@ -53,5 +52,3 @@ private:
 };
 
 }
-
-#endif

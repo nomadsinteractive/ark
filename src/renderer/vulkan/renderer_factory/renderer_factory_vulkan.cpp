@@ -48,7 +48,7 @@ RendererFactoryVulkan::~RendererFactoryVulkan()
 
 sp<RenderEngineContext> RendererFactoryVulkan::initialize(Ark::RendererVersion version)
 {
-    const sp<RenderEngineContext> vkContext = sp<RenderEngineContext>::make(version, Ark::COORDINATE_SYSTEM_LHS, Viewport(0, 0.0f, 1.0f, 1.0f, 0, 1.0f));
+    sp<RenderEngineContext> vkContext = sp<RenderEngineContext>::make(version, Ark::COORDINATE_SYSTEM_LHS, Viewport(0, 0.0f, 1.0f, 1.0f, 0, 1.0f));
     if(version != Ark::RENDERER_VERSION_AUTO)
         setVersion(version, vkContext);
     return vkContext;
@@ -58,7 +58,7 @@ void RendererFactoryVulkan::onSurfaceCreated(RenderEngineContext& vkContext)
 {
     DTHREAD_CHECK(THREAD_ID_RENDERER);
 
-    setVersion(Ark::RENDERER_VERSION_VULKAN_11, vkContext);
+    setVersion(Ark::RENDERER_VERSION_VULKAN_12, vkContext);
 
     Platform::vkInitialize();
 

@@ -168,6 +168,11 @@ size_t Buffer::Delegate::size() const
     return _size;
 }
 
+void Buffer::Delegate::setSize(size_t size)
+{
+    _size = size;
+}
+
 Buffer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _resource_loader_context(resourceLoaderContext), _input(factory.getBuilder<Uploader>(manifest, "input")), _usage(Documents::getAttribute<Usage>(manifest, "usage", USAGE_DYNAMIC))
 {

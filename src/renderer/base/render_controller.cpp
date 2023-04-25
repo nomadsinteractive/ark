@@ -152,17 +152,18 @@ void RenderController::upload(sp<Resource> resource, UploadStrategy strategy, sp
         _uploading_resources.push(UploadingRenderResource(RenderResource(std::move(resource), std::move(future)), strategy, priority));
 }
 
-void RenderController::uploadBuffer(Buffer& buffer, sp<Uploader> input, RenderController::UploadStrategy strategy, sp<Future> future, RenderController::UploadPriority priority)
+void RenderController::uploadBuffer(Buffer& buffer, sp<Uploader> uploader, RenderController::UploadStrategy strategy, sp<Future> future, RenderController::UploadPriority priority)
 {
-    ASSERT(input);
+    ASSERT(uploader);
     if(!future)
         future = sp<Future>::make(sp<BooleanByWeakRef<Buffer::Delegate>>::make(buffer.delegate(), 1));
-    sp<Updatable> updatable = strategy & RenderController::US_ON_CHANGE ? sp<Updatable>::make<BufferUpdatable>(*this, input, buffer.delegate()) : nullptr;
+    sp<Updatable> updatable = strategy & RenderController::US_ON_CHANGE ? sp<Updatable>::make<BufferUpdatable>(*this, uploader, buffer.delegate()) : nullptr;
+    buffer.delegate()->setSize(uploader->size());
     //TODO: make this mess a bit more cleaner
     if(strategy == RenderController::US_ON_CHANGE)
         upload(nullptr, strategy, std::move(updatable), std::move(future), priority);
     else
-        upload(sp<ResourceUploadBufferSnapshot>::make(buffer.delegate(), std::move(input)), strategy, std::move(updatable), std::move(future), priority);
+        upload(sp<ResourceUploadBufferSnapshot>::make(buffer.delegate(), std::move(uploader)), strategy, std::move(updatable), std::move(future), priority);
 }
 
 const sp<Recycler>& RenderController::recycler() const
@@ -201,19 +202,19 @@ sp<Texture> RenderController::createTexture2d(sp<Bitmap> bitmap, Texture::Format
     return createTexture(std::move(size), sp<Texture::Parameters>::make(Texture::TYPE_2D, nullptr, format), sp<Texture::UploaderBitmap>::make(std::move(bitmap)), us, std::move(future));
 }
 
-Buffer RenderController::makeBuffer(Buffer::Type type, Buffer::Usage usage, sp<Uploader> input, UploadStrategy us, sp<Future> future)
+Buffer RenderController::makeBuffer(Buffer::Type type, Buffer::Usage usage, sp<Uploader> uploader, UploadStrategy us, sp<Future> future)
 {
     DTHREAD_CHECK(THREAD_ID_CORE);
     Buffer buffer(_render_engine->rendererFactory()->createBuffer(type, usage));
-    if(input)
-        uploadBuffer(buffer, std::move(input), us, std::move(future));
+    if(uploader)
+        uploadBuffer(buffer, std::move(uploader), us, std::move(future));
     return buffer;
 }
 
-Buffer RenderController::makeBuffer(Buffer::Type type, Buffer::Usage usage, sp<Uploader> input)
+Buffer RenderController::makeBuffer(Buffer::Type type, Buffer::Usage usage, sp<Uploader> uploader)
 {
-    RenderController::UploadStrategy us = input ? RenderController::US_ONCE_AND_ON_SURFACE_READY : RenderController::US_ON_SURFACE_READY;
-    return makeBuffer(type, usage, std::move(input), us);
+    RenderController::UploadStrategy us = uploader ? RenderController::US_ONCE_AND_ON_SURFACE_READY : RenderController::US_ON_SURFACE_READY;
+    return makeBuffer(type, usage, std::move(uploader), us);
 }
 
 Buffer RenderController::makeVertexBuffer(Buffer::Usage usage, sp<Uploader> input)

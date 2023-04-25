@@ -66,7 +66,14 @@ public:
 private:
     uint32_t getNextLayoutLocation(const ShaderPreprocessor::Declaration& declar, uint32_t& counter) const {
         uint32_t location = counter;
-        Uniform::Type type = Uniform::toType(declar.type());
+        //TODO: Consider merge uniform type and attribute type into one, something like ShaderDataType.
+        Uniform::Type type;
+        if(declar.type() == "vec4b")
+            type = Uniform::TYPE_I4;
+        else if(declar.type() == "vec3b")
+            type = Uniform::TYPE_I3;
+        else
+            type = Uniform::toType(declar.type());
         switch(type)
         {
             case Uniform::TYPE_MAT3:
