@@ -60,8 +60,8 @@ public:
 
     const String& declaredType() const;
 
-    const sp<Uploader>& input() const;
-    void setInput(const sp<Uploader>& flatable);
+    const sp<Uploader>& uploader() const;
+    void setUploader(const sp<Uploader>& uploader);
 
     int32_t binding() const;
     void setBinding(int32_t binding);
@@ -75,7 +75,7 @@ private:
     Type _type;
     size_t _component_size;
     uint32_t _length;
-    sp<Uploader> _input;
+    sp<Uploader> _uploader;
     int32_t _binding;
 };
 

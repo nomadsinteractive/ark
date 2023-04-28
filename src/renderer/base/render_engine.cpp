@@ -11,8 +11,8 @@
 
 namespace ark {
 
-RenderEngine::RenderEngine(Ark::RendererVersion version, Ark::RendererCoordinateSystem coordinateSystem, const sp<RendererFactory>& rendererFactory)
-    : _coordinate_system(coordinateSystem), _renderer_factory(rendererFactory), _render_context(_renderer_factory->initialize(version))
+RenderEngine::RenderEngine(Ark::RendererVersion version, Ark::RendererCoordinateSystem coordinateSystem, sp<RendererFactory> rendererFactory)
+    : _coordinate_system(coordinateSystem), _renderer_factory(std::move(rendererFactory)), _render_context(_renderer_factory->initialize(version))
 {
 }
 

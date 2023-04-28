@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_INF_RENDERER_FACTORY_H_
-#define ARK_RENDERER_INF_RENDERER_FACTORY_H_
+#pragma once
 
 #include "core/ark.h"
 #include "core/base/api.h"
@@ -30,5 +29,3 @@ public:
 };
 
 }
-
-#endif

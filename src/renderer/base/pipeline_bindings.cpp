@@ -122,8 +122,8 @@ PipelineBindings::Parameters::Parameters(Optional<Rect> scissor, PipelineBinding
 {
 }
 
-PipelineBindings::Parameters::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _render_controller(resourceLoaderContext->renderController()), _pipeline_bindings_scissor(factory.getBuilder<Vec4>(manifest, "scissor")), _pipeline_bindings_flags(Documents::getAttribute<PipelineBindings::Flag>(manifest, "flags", PipelineBindings::FLAG_DEFAULT_VALUE))
+PipelineBindings::Parameters::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const ResourceLoaderContext& resourceLoaderContext)
+    : _render_controller(resourceLoaderContext.renderController()), _pipeline_bindings_scissor(factory.getBuilder<Vec4>(manifest, "scissor")), _pipeline_bindings_flags(Documents::getAttribute<PipelineBindings::Flag>(manifest, "flags", PipelineBindings::FLAG_DEFAULT_VALUE))
 {
     for(const document& i : manifest->children("trait"))
         _traits.push_back(Documents::ensureAttribute<TraitType>(i, Constants::Attributes::TYPE), i);

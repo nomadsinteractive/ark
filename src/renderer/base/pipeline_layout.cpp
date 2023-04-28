@@ -10,10 +10,11 @@
 
 namespace ark {
 
-PipelineLayout::PipelineLayout(const sp<PipelineBuildingContext>& buildingContext, const Camera& camera)
-    : _building_context(buildingContext), _input(_building_context->_input), _snippet(_building_context->makePipelineSnippet()), _color_attachment_count(0), _definitions(_building_context->toDefinitions())
+PipelineLayout::PipelineLayout(sp<PipelineBuildingContext> buildingContext, sp<Camera> camera)
+    : _building_context(std::move(buildingContext)), _camera(std::move(camera)), _input(_building_context->_input), _snippet(_building_context->makePipelineSnippet()),
+      _color_attachment_count(0), _definitions(_building_context->toDefinitions())
 {
-    initialize(camera);
+    initialize();
 }
 
 void PipelineLayout::preCompile(GraphicsContext& graphicsContext)
@@ -60,7 +61,7 @@ const std::vector<sp<Texture>>& PipelineLayout::images() const
     return _images;
 }
 
-void PipelineLayout::initialize(const Camera& camera)
+void PipelineLayout::initialize()
 {
     DCHECK(_building_context, "PipelineLayout should not be initialized more than once");
 
@@ -70,9 +71,9 @@ void PipelineLayout::initialize(const Camera& camera)
     ShaderPreprocessor* vertex = _building_context->tryGetStage(PipelineInput::SHADER_STAGE_VERTEX);
     ShaderPreprocessor* compute = _building_context->tryGetStage(PipelineInput::SHADER_STAGE_COMPUTE);
     if(vertex)
-        tryBindCamera(*vertex, camera);
+        tryBindCamera(*vertex, _camera);
     if(compute)
-        tryBindCamera(*compute, camera);
+        tryBindCamera(*compute, _camera);
 
     ShaderPreprocessor* fragment = _building_context->tryGetStage(PipelineInput::SHADER_STAGE_FRAGMENT);
     if(fragment)
@@ -88,10 +89,10 @@ void PipelineLayout::initialize(const Camera& camera)
 
 void PipelineLayout::tryBindUniform(const ShaderPreprocessor& shaderPreprocessor, const String& name, const sp<Uploader>& input)
 {
-    sp<Uniform> uniform = shaderPreprocessor.getUniformInput(name, Uniform::TYPE_MAT4);
+    sp<Uniform> uniform = shaderPreprocessor.makeUniformInput(name, Uniform::TYPE_MAT4);
     if(uniform)
     {
-        uniform->setInput(input);
+        uniform->setUploader(input);
         _building_context->addUniform(std::move(uniform));
     }
 }

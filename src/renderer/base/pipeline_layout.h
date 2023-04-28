@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_BASE_PIPELINE_LAYOUT_H_
-#define ARK_RENDERER_BASE_PIPELINE_LAYOUT_H_
+#pragma once
 
 #include <map>
 #include <vector>
@@ -13,19 +12,19 @@
 #include "renderer/base/pipeline_input.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/base/shader_preprocessor.h"
-#include "renderer/base/uniform.h"
 
 namespace ark {
 
 class PipelineLayout {
 public:
-    PipelineLayout(const sp<PipelineBuildingContext>& buildingContext, const Camera& camera);
+    PipelineLayout(sp<PipelineBuildingContext> buildingContext, sp<Camera> camera);
+
+    void initialize();
 
     const sp<Snippet>& snippet() const;
+    const sp<PipelineInput>& input() const;
 
     void preCompile(GraphicsContext& graphicsContext);
-
-    const sp<PipelineInput>& input() const;
 
     std::map<PipelineInput::ShaderStage, String> getPreprocessedShaders(const RenderEngineContext& renderEngineContext) const;
 
@@ -35,7 +34,6 @@ public:
     const std::vector<sp<Texture>>& images() const;
 
 private:
-    void initialize(const Camera& camera);
     void tryBindUniform(const ShaderPreprocessor& shaderPreprocessor, const String& name, const sp<Uploader>& input);
     void tryBindCamera(const ShaderPreprocessor& shaderPreprocessor, const Camera& camera);
 
@@ -45,6 +43,7 @@ private:
 private:
     sp<PipelineBuildingContext> _building_context;
 
+    sp<Camera> _camera;
     sp<PipelineInput> _input;
     sp<Snippet> _snippet;
 
@@ -57,9 +56,8 @@ private:
     std::map<String, String> _definitions;
 
     friend class PipelineBuildingContext;
+    friend class Shader;
 
 };
 
 }
-
-#endif

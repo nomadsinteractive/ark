@@ -11,7 +11,7 @@
 namespace ark {
 
 Uniform::Uniform(String name, String declaredType, Uniform::Type type, size_t size, uint32_t length, sp<Uploader> input, int32_t binding)
-    : _name(std::move(name)), _declared_type(std::move(declaredType)), _type(type), _component_size(size), _length(length), _input(std::move(input)), _binding(binding)
+    : _name(std::move(name)), _declared_type(std::move(declaredType)), _type(type), _component_size(size), _length(length), _uploader(std::move(input)), _binding(binding)
 {
 }
 
@@ -43,8 +43,8 @@ uint32_t Uniform::length() const
 size_t Uniform::size() const
 {
     size_t s = _component_size * _length;
-    DCHECK(!_input || _input->size() <= s, "Uniform buffer overflow, name: \"%s\", size: %d, input size: %d", _name.c_str(), s, _input->size());
-    DCHECK_WARN(!_input || _input->size() == s, "Uniform buffer size mismatch, name: \"%s\", size: %d, input size: %d", _name.c_str(), s, _input->size());
+    DCHECK(!_uploader || _uploader->size() <= s, "Uniform buffer overflow, name: \"%s\", size: %d, input size: %d", _name.c_str(), s, _uploader->size());
+    DCHECK_WARN(!_uploader || _uploader->size() == s, "Uniform buffer size mismatch, name: \"%s\", size: %d, input size: %d", _name.c_str(), s, _uploader->size());
     return s;
 }
 
@@ -189,14 +189,14 @@ const String& Uniform::declaredType() const
     return _declared_type;
 }
 
-const sp<Uploader>& Uniform::input() const
+const sp<Uploader>& Uniform::uploader() const
 {
-    return _input;
+    return _uploader;
 }
 
-void Uniform::setInput(const sp<Uploader>& flatable)
+void Uniform::setUploader(const sp<Uploader>& uploader)
 {
-    _input = flatable;
+    _uploader = uploader;
 }
 
 String Uniform::declaration(const String& descriptor) const

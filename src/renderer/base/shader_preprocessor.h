@@ -175,7 +175,7 @@ public:
 
     Preprocessed preprocess();
 
-    sp<Uniform> getUniformInput(const String& name, Uniform::Type type) const;
+    sp<Uniform> makeUniformInput(const String& name, Uniform::Type type) const;
 
     String outputName() const;
 

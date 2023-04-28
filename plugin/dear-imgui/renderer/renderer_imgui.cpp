@@ -274,17 +274,13 @@ sp<RendererImgui::DrawCommandRecycler> RendererImgui::obtainDrawCommandRecycler(
 }
 
 RendererImgui::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _manifest(manifest), _resource_loader_context(resourceLoaderContext), _camera(sp<Camera>::make()), _shader(Shader::fromDocument(factory, manifest, resourceLoaderContext, "shaders/imgui.vert", "shaders/imgui.frag", _camera))
+    : _manifest(manifest), _resource_loader_context(resourceLoaderContext), _camera(sp<Camera>::make(_resource_loader_context->renderController()->createCamera(Ark::COORDINATE_SYSTEM_LHS))),
+      _shader(Shader::fromDocument(factory, manifest, resourceLoaderContext, "shaders/imgui.vert", "shaders/imgui.frag", _camera))
 {
 }
 
 sp<Renderer> RendererImgui::BUILDER::build(const Scope& args)
 {
-    const Viewport& viewport = _resource_loader_context->renderController()->renderEngine()->viewport();
-
-    Ark::RendererCoordinateSystem coordinateSystem = _resource_loader_context->renderController()->renderEngine()->context()->coordinateSystem();
-    _camera->ortho(0, viewport.width(), 0, viewport.height(), viewport.clipNear(), viewport.clipFar(), static_cast<Ark::RendererCoordinateSystem>(-coordinateSystem));
-
     const Global<ImguiContext> context;
     ImGuiIO& io = ImGui::GetIO();
 
@@ -314,8 +310,12 @@ sp<Renderer> RendererImgui::BUILDER::build(const Scope& args)
     io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height, &bytesPerPixel);
     sp<Bitmap> bitmap = sp<Bitmap>::make(width, height, bytesPerPixel * width, 4, sp<ByteArray::Borrowed>::make(reinterpret_cast<uint8_t*>(pixels), width * height * bytesPerPixel));
     sp<Texture> texture = _resource_loader_context->renderController()->createTexture2d(std::move(bitmap));
-
-    return sp<RendererImgui>::make(_resource_loader_context, _shader->build(args), texture);
+    sp<Shader> shader = _shader->build(args);
+    const RenderEngine& renderEngine = _resource_loader_context->renderController()->renderEngine();
+    const Viewport& viewport = renderEngine.viewport();
+    _camera->ortho(0, viewport.width(), viewport.height(), 0, viewport.clipNear(), viewport.clipFar(), renderEngine.context()->coordinateSystem());
+    shader->camera()->assign(_camera);
+    return sp<RendererImgui>::make(_resource_loader_context, std::move(shader), texture);
 }
 
 RendererImgui::DrawCommand::DrawCommand(RenderController& renderController)

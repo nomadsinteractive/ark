@@ -64,22 +64,11 @@ Shader::Shader(sp<PipelineFactory> pipelineFactory, sp<RenderController> renderC
 {
 }
 
-sp<Builder<Shader>> Shader::fromDocument(BeanFactory& factory, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext, const String& defVertex, const String& defFragment, const sp<Camera>& defaultCamera)
+sp<Builder<Shader>> Shader::fromDocument(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext, const String& defVertex, const String& defFragment, const sp<Camera>& defaultCamera)
 {
     const Global<StringTable> stringTable;
-    const sp<Builder<Shader>> shader = factory.getBuilder<Shader>(doc, Constants::Attributes::SHADER);
-    return shader ? shader : sp<Builder<Shader>>::make<ShaderBuilderImpl>(factory, doc, resourceLoaderContext, stringTable->getString(defVertex, true), stringTable->getString(defFragment, true), defaultCamera);
-}
-
-sp<Shader> Shader::fromStringTable(const String& vertex, const String& fragment, const sp<Snippet>& snippet, const sp<ResourceLoaderContext>& resourceLoaderContext)
-{
-    const Global<StringTable> stringTable;
-    const sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(resourceLoaderContext->renderController(), stringTable->getString(vertex, true), stringTable->getString(fragment, true));
-    if(snippet)
-        buildingContext->addSnippet(snippet);
-
-    const sp<RenderController>& renderController = resourceLoaderContext->renderController();
-    return sp<Shader>::make(renderController->createPipelineFactory(), renderController, sp<PipelineLayout>::make(buildingContext, Camera::getDefaultCamera()), PipelineBindings::Parameters(Optional<Rect>(), PipelineBindings::PipelineTraitTable(), PipelineBindings::FLAG_DEFAULT_VALUE));
+    sp<Builder<Shader>> shader = factory.getBuilder<Shader>(manifest, Constants::Attributes::SHADER);
+    return shader ? shader : sp<Builder<Shader>>::make<ShaderBuilderImpl>(factory, manifest, resourceLoaderContext, stringTable->getString(defVertex, true), stringTable->getString(defFragment, true), defaultCamera);
 }
 
 std::vector<RenderLayerSnapshot::UBOSnapshot> Shader::takeUBOSnapshot(const RenderRequest& renderRequest) const
@@ -113,6 +102,11 @@ const sp<RenderController>& Shader::renderController() const
     return _render_controller;
 }
 
+const sp<Camera>& Shader::camera() const
+{
+    return _pipeline_layout->_camera;
+}
+
 const sp<PipelineLayout>& Shader::layout() const
 {
     return _pipeline_layout;
@@ -123,34 +117,33 @@ sp<ShaderBindings> Shader::makeBindings(Buffer vertices, ModelLoader::RenderMode
     return sp<ShaderBindings>::make(std::move(vertices), _pipeline_factory, sp<PipelineBindings>::make(mode, renderProcedure, _binding_params, _pipeline_layout), _render_controller);
 }
 
-Shader::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _factory(factory), _manifest(manifest), _resource_loader_context(resourceLoaderContext), _stages(loadStages(factory, manifest)),
-      _snippets(factory.makeBuilderList<Snippet>(manifest, "snippet")), _camera(factory.getBuilder<Camera>(manifest, Constants::Attributes::CAMERA)),
+Shader::BUILDER_IMPL::BUILDER_IMPL(BeanFactory& factory, const document& manifest, const ResourceLoaderContext& resourceLoaderContext, sp<Builder<Camera>> camera, Optional<StageManifest> stages, Optional<SnippetManifest> snippets)
+    : _factory(factory), _manifest(manifest), _render_controller(resourceLoaderContext.renderController()), _stages(stages ? std::move(stages.value()) : loadStages(factory, manifest)),
+      _snippets(snippets ? std::move(snippets.value()) : factory.makeBuilderList<Snippet>(manifest, "snippet")), _camera(camera ? std::move(camera) : factory.getBuilder<Camera>(manifest, Constants::Attributes::CAMERA)),
       _parameters(factory, manifest, resourceLoaderContext)
 {
 }
 
-sp<Shader> Shader::BUILDER::build(const Scope& args)
+sp<Shader> Shader::BUILDER_IMPL::build(const Scope& args)
 {
-    const sp<PipelineBuildingContext> buildingContext = makePipelineBuildingContext(args);
+    sp<PipelineBuildingContext> buildingContext = makePipelineBuildingContext(args);
     buildingContext->loadManifest(_manifest, _factory, args);
 
     for(const sp<Builder<Snippet>>& i : _snippets)
         buildingContext->addSnippet(i->build(args));
 
-    const sp<RenderController>& renderController = _resource_loader_context->renderController();
     const sp<Camera> camera = _camera->build(args);
-    return sp<Shader>::make(renderController->createPipelineFactory(), renderController, sp<PipelineLayout>::make(buildingContext, camera ? camera : Camera::getDefaultCamera()), _parameters.build(args));
+    return sp<Shader>::make(_render_controller->createPipelineFactory(), _render_controller, sp<PipelineLayout>::make(buildingContext, camera ? camera : Camera::getDefaultCamera()), _parameters.build(args));
 }
 
-std::map<PipelineInput::ShaderStage, sp<Builder<String>>> Shader::BUILDER::loadStages(BeanFactory& factory, const document& manifest) const
+Shader::StageManifest Shader::BUILDER_IMPL::loadStages(BeanFactory& factory, const document& manifest) const
 {
-    std::map<PipelineInput::ShaderStage, sp<Builder<String>>> stages;
+    Shader::StageManifest stages;
 
     for(const document& i : manifest->children("stage"))
     {
         PipelineInput::ShaderStage type = Documents::ensureAttribute<PipelineInput::ShaderStage>(i, Constants::Attributes::TYPE);
-        DCHECK(stages.find(type) == stages.end(), "Stage duplicated: %s", Documents::getAttribute(i, Constants::Attributes::TYPE).c_str());
+        CHECK(stages.find(type) == stages.end(), "Stage duplicated: %s", Documents::getAttribute(i, Constants::Attributes::TYPE).c_str());
         stages[type] = factory.ensureBuilder<String>(i, Constants::Attributes::SRC);
     }
 
@@ -163,9 +156,9 @@ std::map<PipelineInput::ShaderStage, sp<Builder<String>>> Shader::BUILDER::loadS
     return stages;
 }
 
-sp<PipelineBuildingContext> Shader::BUILDER::makePipelineBuildingContext(const Scope& args) const
+sp<PipelineBuildingContext> Shader::BUILDER_IMPL::makePipelineBuildingContext(const Scope& args) const
 {
-    sp<PipelineBuildingContext> context = sp<PipelineBuildingContext>::make(_resource_loader_context->renderController());
+    sp<PipelineBuildingContext> context = sp<PipelineBuildingContext>::make(_render_controller);
     PipelineInput::ShaderStage prestage = PipelineInput::SHADER_STAGE_NONE;
     for(const auto& i : _stages)
     {
@@ -183,8 +176,18 @@ template<> ARK_API PipelineInput::ShaderStage StringConvert::to<String, Pipeline
         return PipelineInput::SHADER_STAGE_FRAGMENT;
     if(val == "compute")
         return PipelineInput::SHADER_STAGE_COMPUTE;
-    DCHECK(val.empty(), "Unknown stage: '%s'", val.c_str());
+    CHECK(val.empty(), "Unknown stage: \"%s\"", val.c_str());
     return PipelineInput::SHADER_STAGE_NONE;
+}
+
+Shader::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
+    : _impl(factory, manifest, resourceLoaderContext)
+{
+}
+
+sp<Shader> Shader::BUILDER::build(const Scope& args)
+{
+    return _impl.build(args);
 }
 
 

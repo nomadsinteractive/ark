@@ -158,7 +158,7 @@ public:
 
         class BUILDER {
         public:
-            BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
+            BUILDER(BeanFactory& factory, const document& manifest, const ResourceLoaderContext& resourceLoaderContext);
 
             Parameters build(const Scope& args) const;
 

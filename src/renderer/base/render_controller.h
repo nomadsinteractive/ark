@@ -1,9 +1,9 @@
-#ifndef ARK_RENDERER_BASE_RENDER_CONTROLLER_H_
-#define ARK_RENDERER_BASE_RENDER_CONTROLLER_H_
+#pragma once
 
 #include <vector>
 #include <unordered_map>
 
+#include "core/ark.h"
 #include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/collection/list.h"
@@ -97,7 +97,7 @@ public:
 
     const sp<RenderEngine>& renderEngine() const;
 
-    sp<Camera> createCamera() const;
+    Camera createCamera(Ark::RendererCoordinateSystem coordinateSystem = Ark::COORDINATE_SYSTEM_DEFAULT) const;
     sp<PipelineFactory> createPipelineFactory() const;
 
     sp<Texture> createTexture(sp<Size> size, sp<Texture::Parameters> parameters, sp<Texture::Uploader> uploader, RenderController::UploadStrategy us = US_ONCE_AND_ON_SURFACE_READY, sp<Future> future = nullptr);
@@ -210,5 +210,3 @@ private:
 };
 
 }
-
-#endif

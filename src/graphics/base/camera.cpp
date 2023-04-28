@@ -229,6 +229,13 @@ sp<Mat4> Camera::matrixViewProjection() const
     return _vp;
 }
 
+void Camera::assign(const Camera& other)
+{
+    _view->setMatrix(other._view);
+    _projection->setMatrix(other._projection);
+    _vp->setMatrix(other._vp);
+}
+
 const sp<Camera::Holder>& Camera::view() const
 {
     return _view;

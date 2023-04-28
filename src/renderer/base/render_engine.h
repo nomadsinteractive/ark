@@ -13,7 +13,7 @@ namespace ark {
 
 class ARK_API RenderEngine {
 public:
-    RenderEngine(Ark::RendererVersion version, Ark::RendererCoordinateSystem coordinateSystem, const sp<RendererFactory>& rendererFactory);
+    RenderEngine(Ark::RendererVersion version, Ark::RendererCoordinateSystem coordinateSystem, sp<RendererFactory> rendererFactory);
 
     Ark::RendererVersion version() const;
 

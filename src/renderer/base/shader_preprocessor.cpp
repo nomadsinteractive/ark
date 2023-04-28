@@ -262,7 +262,7 @@ void ShaderPreprocessor::linkPreStage(const ShaderPreprocessor& preStage, std::s
     linkParameters(_main_block->_args, preStage, passThroughVars);
 }
 
-sp<Uniform> ShaderPreprocessor::getUniformInput(const String& name, Uniform::Type type) const
+sp<Uniform> ShaderPreprocessor::makeUniformInput(const String& name, Uniform::Type type) const
 {
     if(!_declaration_uniforms.has(name))
         return nullptr;

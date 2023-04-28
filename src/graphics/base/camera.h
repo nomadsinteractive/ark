@@ -114,6 +114,8 @@ public:
 //  [[script::bindings::property]]
     sp<Mat4> matrixViewProjection() const;
 
+    void assign(const Camera& other);
+
     const sp<Holder>& view() const;
     const sp<Holder>& projection() const;
     const sp<Holder>& vp() const;
@@ -129,7 +131,6 @@ private:
 
     sp<Holder> _view;
     sp<Holder> _projection;
-
     sp<Holder> _vp;
 
     sp<VariableWrapper<V3>> _position;

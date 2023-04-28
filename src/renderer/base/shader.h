@@ -17,14 +17,16 @@
 
 namespace ark {
 
-//[[script::bindings::auto]]
 class ARK_API Shader {
 public:
-    Shader(sp<PipelineFactory> pipelineFactory, sp<RenderController> renderController, sp<PipelineLayout> layout, PipelineBindings::Parameters bindingParams);
-    DEFAULT_COPY_AND_ASSIGN(Shader);
+    typedef std::map<PipelineInput::ShaderStage, sp<Builder<String>>> StageManifest;
+    typedef std::vector<sp<Builder<Snippet>>> SnippetManifest;
 
-    static sp<Builder<Shader>> fromDocument(BeanFactory& factory, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext, const String& defVertex = "shaders/default.vert", const String& defFragment = "shaders/texture.frag", const sp<Camera>& defaultCamera = nullptr);
-    static sp<Shader> fromStringTable(const String& vertex = "shaders/default.vert", const String& fragment = "shaders/texture.frag", const sp<Snippet>& snippet = nullptr, const sp<ResourceLoaderContext>& resourceLoaderContext = nullptr);
+public:
+    Shader(sp<PipelineFactory> pipelineFactory, sp<RenderController> renderController, sp<PipelineLayout> layout, PipelineBindings::Parameters bindingParams);
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Shader);
+
+    static sp<Builder<Shader>> fromDocument(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext, const String& defVertex = "shaders/default.vert", const String& defFragment = "shaders/texture.frag", const sp<Camera>& defaultCamera = nullptr);
 
     std::vector<RenderLayerSnapshot::UBOSnapshot> takeUBOSnapshot(const RenderRequest& renderRequest) const;
     std::vector<std::pair<uint32_t, Buffer::Snapshot>> takeSSBOSnapshot(const RenderRequest& renderRequest) const;
@@ -32,10 +34,35 @@ public:
     const sp<PipelineFactory>& pipelineFactory() const;
     const sp<RenderController>& renderController() const;
 
+//  [[script::bindings::property]]
+    const sp<Camera>& camera() const;
     const sp<PipelineInput>& input() const;
     const sp<PipelineLayout>& layout() const;
 
     sp<ShaderBindings> makeBindings(Buffer vertices, ModelLoader::RenderMode mode, PipelineBindings::RenderProcedure renderProcedure) const;
+
+    class BUILDER_IMPL : public Builder<Shader> {
+    public:
+        BUILDER_IMPL(BeanFactory& factory, const document& manifest, const ResourceLoaderContext& resourceLoaderContext, sp<Builder<Camera>> camera = nullptr,
+                     Optional<StageManifest> stages = Optional<StageManifest>(), Optional<SnippetManifest> snippets = Optional<SnippetManifest>());
+
+        virtual sp<Shader> build(const Scope& args) override;
+
+    private:
+        StageManifest loadStages(BeanFactory& factory, const document& manifest) const;
+
+        sp<PipelineBuildingContext> makePipelineBuildingContext(const Scope& args) const;
+
+    private:
+        BeanFactory _factory;
+        document _manifest;
+        sp<RenderController> _render_controller;
+
+        StageManifest _stages;
+        SnippetManifest _snippets;
+        SafePtr<Builder<Camera>> _camera;
+        PipelineBindings::Parameters::BUILDER _parameters;
+    };
 
 //  [[plugin::resource-loader]]
     class BUILDER : public Builder<Shader> {
@@ -45,19 +72,7 @@ public:
         virtual sp<Shader> build(const Scope& args) override;
 
     private:
-        std::map<PipelineInput::ShaderStage, sp<Builder<String>>> loadStages(BeanFactory& factory, const document& manifest) const;
-
-        sp<PipelineBuildingContext> makePipelineBuildingContext(const Scope& args) const;
-
-    private:
-        BeanFactory _factory;
-        document _manifest;
-        sp<ResourceLoaderContext> _resource_loader_context;
-
-        std::map<PipelineInput::ShaderStage, sp<Builder<String>>> _stages;
-        std::vector<sp<Builder<Snippet>>> _snippets;
-        SafePtr<Builder<Camera>> _camera;
-        PipelineBindings::Parameters::BUILDER _parameters;
+        BUILDER_IMPL _impl;
     };
 
 private:
