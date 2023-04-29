@@ -197,7 +197,7 @@ public:
     }
 
     virtual size_t length() override {
-        return _data->size() / sizeof(U);
+        return _data->size() / sizeof(T);
     }
 
     virtual T* buf() override {

@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_VULKAN_BASE_PIPELINE_H_
-#define ARK_RENDERER_VULKAN_BASE_PIPELINE_H_
+#pragma once
 
 #include <vector>
 
@@ -119,5 +118,3 @@ private:
 
 }
 }
-
-#endif
