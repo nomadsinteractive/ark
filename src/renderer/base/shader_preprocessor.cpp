@@ -45,10 +45,10 @@ static char _STAGE_ATTR_PREFIX[PipelineInput::SHADER_STAGE_COUNT + 1][4] = {"a_"
 
 
 ShaderPreprocessor::ShaderPreprocessor(sp<String> source, PipelineInput::ShaderStage shaderStage, PipelineInput::ShaderStage preShaderStage)
-    : _source(std::move(source)), _shader_stage(shaderStage), _pre_shader_stage(preShaderStage), _version(0), _declaration_ins(_attribute_declarations, shaderStage == PipelineInput::SHADER_STAGE_VERTEX ? ANNOTATION_VERT_IN : ANNOTATION_FRAG_IN),
-      _declaration_outs(_attribute_declarations, shaderStage == PipelineInput::SHADER_STAGE_VERTEX ? ANNOTATION_VERT_OUT : ANNOTATION_FRAG_OUT),
-      _declaration_uniforms(_uniform_declarations, "uniform"), _declaration_samplers(_uniform_declarations, "uniform"), _pre_main(sp<String>::make()),
-      _post_main(sp<String>::make())
+    : _source(std::move(source)), _shader_stage(shaderStage), _pre_shader_stage(preShaderStage), _version(0), _declaration_ins(_attribute_declaration_codes, shaderStage == PipelineInput::SHADER_STAGE_VERTEX ? ANNOTATION_VERT_IN : ANNOTATION_FRAG_IN),
+      _declaration_outs(_attribute_declaration_codes, shaderStage == PipelineInput::SHADER_STAGE_VERTEX ? ANNOTATION_VERT_OUT : ANNOTATION_FRAG_OUT),
+      _declaration_uniforms(_uniform_declaration_codes, "uniform"), _declaration_samplers(_uniform_declaration_codes, "uniform"), _declaration_images(_uniform_declaration_codes, "uniform"),
+      _pre_main(sp<String>::make()), _post_main(sp<String>::make())
 {
 }
 
@@ -125,17 +125,16 @@ void ShaderPreprocessor::parseDeclarations()
 
     auto structPatternReplacer = [this](const std::smatch& m) {
         const sp<String> declaration = sp<String>::make(m.str());
-        this->_struct_declarations.push_back(declaration);
+        this->_struct_declaration_codes.push_back(declaration);
         this->_struct_definitions.push_back(m[1].str(), m[2].str());
         return nullptr;
     };
-    _includes.replace(_STRUCT_PATTERN, structPatternReplacer);
+    _include_declaration_codes.replace(_STRUCT_PATTERN, structPatternReplacer);
     _main.replace(_STRUCT_PATTERN, structPatternReplacer);
 
     _main.replace(_UNIFORM_PATTERN, [this](const std::smatch& m) {
-        const sp<String> declaration = sp<String>::make(m.str());
         uint32_t length = m[4].str().empty() ? 1 : Strings::parse<uint32_t>(m[4].str());
-        this->addUniform(m[2].str(), m[3].str(), length, declaration);
+        this->addUniform(m[2].str(), m[3].str(), length, sp<String>::make(m.str()));
         return nullptr;
     });
 
@@ -143,7 +142,7 @@ void ShaderPreprocessor::parseDeclarations()
         _ssbos[m[2].str()] = Strings::parse<int32_t>(m[1].str());
         return true;
     };
-    _includes.search(_SSBO_PATTERN, ssboPattern);
+    _include_declaration_codes.search(_SSBO_PATTERN, ssboPattern);
     _main.search(_SSBO_PATTERN, ssboPattern);
 
     if(!_main_block)
@@ -207,7 +206,7 @@ void ShaderPreprocessor::setupUniforms(Table<String, sp<Uniform>>& uniforms, int
                 sp<String> declaration = sp<String>::make(i->declaration("uniform "));
                 _declaration_uniforms.vars().push_back(i->name(), Declaration(i->name(), type, i->length(), declaration));
                 if(pos == String::npos)
-                    _uniform_declarations.push_back(std::move(declaration));
+                    _uniform_declaration_codes.push_back(std::move(declaration));
             }
         }
     }
@@ -291,14 +290,17 @@ size_t ShaderPreprocessor::parseFunctionBody(const String& s, String& body) cons
     return end + 1;
 }
 
-void ShaderPreprocessor::addUniform(const String& type, const String& name, uint32_t length, const sp<String>& declaration)
+void ShaderPreprocessor::addUniform(const String& type, const String& name, uint32_t length, sp<String> declaration)
 {
     Declaration uniform(name, type, length, declaration);
+    const auto imageTypePos = type.find("image");
     if(type.startsWith("sampler"))
         _declaration_samplers.vars().push_back(name, std::move(uniform));
+    else if(imageTypePos == 0 || imageTypePos == 1)
+        _declaration_images.vars().push_back(name, std::move(uniform));
     else
         _declaration_uniforms.vars().push_back(name, std::move(uniform));
-    _uniform_declarations.push_back(declaration);
+    _uniform_declaration_codes.push_back(std::move(declaration));
 }
 
 uint32_t ShaderPreprocessor::getUniformSize(Uniform::Type type, const String& declaredType) const
@@ -345,10 +347,10 @@ String ShaderPreprocessor::genDeclarations(const String& mainFunc) const
         sb << '\n';
     }
 
-    sb << _struct_declarations.str('\n');
-    sb << _includes.str('\n');
-    sb << _uniform_declarations.str('\n');
-    sb << _attribute_declarations.str('\n');
+    sb << _struct_declaration_codes.str('\n');
+    sb << _include_declaration_codes.str('\n');
+    sb << _uniform_declaration_codes.str('\n');
+    sb << _attribute_declaration_codes.str('\n');
     sb << mainFunc;
     return sb.str();
 }
@@ -363,7 +365,7 @@ void ShaderPreprocessor::addInclude(const String& source, const String& filepath
     else
         content = stringtable->getString(filepath.substr(0, pos), filepath.substr(pos + 1).lstrip('/'), false);
     CHECK(content, "Can't open include file \"%s\"", filepath.c_str());
-    _includes.push_back(content ? std::move(content) : sp<String>::make(source));
+    _include_declaration_codes.push_back(content ? std::move(content) : sp<String>::make(source));
 }
 
 ShaderPreprocessor::Function::Function(String name, String params, String returnType, String body, sp<String> placeHolder)

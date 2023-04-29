@@ -23,17 +23,20 @@ public:
 
         setLayoutDescriptor(setupLayoutLocation(context, firstStage._declaration_ins), sLocation, 0);
 
-        const sp<PipelineInput>& pipelineInput = pipelineLayout.input();
+        const PipelineInput& pipelineInput = pipelineLayout.input();
 
         ShaderPreprocessor* vertex = context.tryGetStage(PipelineInput::SHADER_STAGE_VERTEX);
         if(vertex)
+        {
+            setLayoutDescriptor(vertex->_declaration_images, "binding", static_cast<uint32_t>(pipelineInput.ubos().size() + pipelineInput.ssbos().size() + pipelineInput.samplerCount()));
             vertex->_predefined_macros.push_back("#define gl_InstanceID gl_InstanceIndex");
+        }
 
         ShaderPreprocessor* fragment = context.tryGetStage(PipelineInput::SHADER_STAGE_FRAGMENT);
         if(fragment)
         {
             fragment->linkNextStage("FragColor");
-            setLayoutDescriptor(fragment->_declaration_samplers, "binding", static_cast<uint32_t>(pipelineInput->ubos().size() + pipelineInput->ssbos().size()));
+            setLayoutDescriptor(fragment->_declaration_samplers, "binding", static_cast<uint32_t>(pipelineInput.ubos().size() + pipelineInput.ssbos().size()));
             fragment->_predefined_macros.push_back("#define texture2D texture");
             fragment->_predefined_macros.push_back("#define textureCube texture");
         }
@@ -114,33 +117,33 @@ private:
         return setLayoutDescriptor(declarations.vars().values(), descriptor, start);
     }
 
-    uint32_t setLayoutDescriptor(const std::vector<ShaderPreprocessor::Declaration>& declarations, const String& descriptor, uint32_t start) {
+    uint32_t setLayoutDescriptor(const std::vector<ShaderPreprocessor::Declaration>& declarations, const String& qualifierName, uint32_t start) {
         uint32_t counter = start;
-        for(const ShaderPreprocessor::Declaration& i : declarations) {
-            StringBuffer sb;
-            sb << "layout (" << descriptor << " = " << getNextLayoutLocation(i, counter) << ") " << *i.source();
-            *i.source() = sb.str();
-        }
+        for(const ShaderPreprocessor::Declaration& i : declarations)
+            setLayoutQualifierBinding(i, qualifierName, getNextLayoutLocation(i, counter));
         return counter;
     }
 
-    uint32_t setLayoutDescriptor(const ShaderPreprocessor::DeclarationList& ins, const ShaderPreprocessor::DeclarationList& outs, const String& descriptor, uint32_t start) {
+    uint32_t setLayoutDescriptor(const ShaderPreprocessor::DeclarationList& ins, const ShaderPreprocessor::DeclarationList& outs, const String& qualifierName, uint32_t start) {
         uint32_t counter = start;
         DCHECK_WARN(ins.vars().size() == outs.vars().size(), "Output/Input mismatch, output and input have different numbers of items: [%s] vs [%s]",
                Strings::join(&ins.vars().keys().at(0), 0, ins.vars().keys().size()).c_str(), Strings::join(&outs.vars().keys().at(0), 0, outs.vars().keys().size()).c_str());
         for(const ShaderPreprocessor::Declaration& i : ins.vars().values()) {
-            const String prefix = Strings::sprintf("layout (%s = %d) ", descriptor.c_str(), getNextLayoutLocation(i, counter));
-            *i.source() = prefix + *i.source();
-
+            uint32_t binding = getNextLayoutLocation(i, counter);
+            setLayoutQualifierBinding(i, qualifierName, binding);
             const String outName = Strings::capitalizeFirst(i.name().startsWith("v_") ? i.name().substr(2) : i.name());
             bool hasOutName = outs.vars().has(outName);
             DCHECK_WARN(hasOutName, "Output/Input mismatch, \"%s\" exists in input but not found in next stage of shader", outName.c_str());
-            if(hasOutName) {
-                const sp<String>& os = outs.vars().at(outName).source();
-                *os = prefix + *os;
-            }
+            if(hasOutName)
+                setLayoutQualifierBinding(outs.vars().at(outName), qualifierName, binding);
         }
         return counter;
+    }
+
+    void setLayoutQualifierBinding(const ShaderPreprocessor::Declaration& declaration, const String& qualifierName, uint32_t binding) {
+        StringBuffer sb;
+        sb << "layout (" << qualifierName << " = " << binding << ") " << *declaration.source();
+        *declaration.source() = sb.str();
     }
 
     void declareUBOStruct(ShaderPreprocessor& shader, const PipelineInput& piplineInput) {
@@ -160,7 +163,7 @@ private:
             sb << i->declaration("") << '\n';
         }
         sb << "} ubo" << ubo.binding() << ";\n\n";
-        shader._uniform_declarations.push_back(sp<String>::make(sb.str()));
+        shader._uniform_declaration_codes.push_back(sp<String>::make(sb.str()));
     }
 
     bool hasUBO(ShaderPreprocessor& shader, PipelineInput::UBO& ubo) const {

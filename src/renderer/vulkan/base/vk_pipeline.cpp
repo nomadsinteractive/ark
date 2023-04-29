@@ -255,7 +255,21 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
             _texture_observers.push_back(texture->notifier().createDirtyFlag());
             writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
                                           _descriptor_set,
-                                          VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                                          VK_DESCRIPTOR_TYPE_SAMPLER,
+                                          ++binding,
+                                          &texture->vkDescriptor()));
+        }
+    }
+    for(const sp<Texture>& i : bindings.images())
+    {
+        DCHECK_WARN(i, "Pipeline has unbound image");
+        if(i)
+        {
+            const sp<VKTexture> texture = i->delegate();
+            _texture_observers.push_back(texture->notifier().createDirtyFlag());
+            writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
+                                          _descriptor_set,
+                                          VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
                                           ++binding,
                                           &texture->vkDescriptor()));
         }
@@ -428,7 +442,9 @@ sp<VKDescriptorPool> VKPipeline::makeDescriptorPool() const
     if(_bindings.input()->ssbos().size())
         poolSizes[VK_DESCRIPTOR_TYPE_STORAGE_BUFFER] = static_cast<uint32_t>(_bindings.input()->ssbos().size());
     if(_bindings.samplers().size())
-        poolSizes[VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER] = static_cast<uint32_t>(_bindings.samplers().size());
+        poolSizes[VK_DESCRIPTOR_TYPE_SAMPLER] = static_cast<uint32_t>(_bindings.samplers().size());
+    if(_bindings.images().size())
+        poolSizes[VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE] = static_cast<uint32_t>(_bindings.images().size());
     return sp<VKDescriptorPool>::make(_recycler, _renderer->device(), std::move(poolSizes));
 }
 

@@ -625,10 +625,12 @@ GLPipeline::Stub::Stub()
 void GLPipeline::Stub::bind(GraphicsContext& /*graphicsContext*/, const PipelineContext& pipelineContext)
 {
     glUseProgram(_id);
-    bindUBOSnapshots(pipelineContext._ubos, pipelineContext._shader_bindings->pipelineInput());
+
+    const ShaderBindings& shaderBindings = pipelineContext._shader_bindings;
+    bindUBOSnapshots(pipelineContext._ubos, shaderBindings.pipelineInput());
 
     uint32_t binding = 0;
-    for(const auto& [i, j] : pipelineContext._shader_bindings->pipelineBindings()->samplers())
+    for(const auto& [i, j] : shaderBindings.pipelineBindings()->samplers())
     {
         CHECK_WARN(j, "Pipeline has unbound sampler \"%s\"", i.c_str());
         if(j)
@@ -636,7 +638,7 @@ void GLPipeline::Stub::bind(GraphicsContext& /*graphicsContext*/, const Pipeline
         ++ binding;
     }
 
-    const std::vector<sp<Texture>>& images = pipelineContext._shader_bindings->pipelineBindings()->images();
+    const std::vector<sp<Texture>>& images = shaderBindings.pipelineBindings()->images();
     for(size_t i = 0; i < images.size(); ++i)
     {
         const sp<Texture>& image = images.at(i);
