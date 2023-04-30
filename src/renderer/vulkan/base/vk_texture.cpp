@@ -132,7 +132,7 @@ void VKTexture::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap& 
         // Set initial layout of the image to undefined
         imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         imageCreateInfo.extent = { _width, _height, 1 };
-        imageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+        imageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
         imageCreateInfo.flags = isCubemap ? VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT : 0;
         if(!imagedata)
             imageCreateInfo.usage |= VKUtil::toTextureUsage(_parameters->_usage);
@@ -328,11 +328,14 @@ void VKTexture::doUploadBitmap(const Bitmap& bitmap, size_t imageDataSize, const
                 static_cast<uint32_t>(bufferCopyRegions.size()),
                 bufferCopyRegions.data());
 
+    //TODO: Pick up the most appropriate image layout by usage parameter.
+    const VkImageLayout finalImageLayout = VK_IMAGE_LAYOUT_GENERAL;
+
     // Once the data has been uploaded we transfer to the texture image to the shader read layout, so it can be sampled from
     imageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
     imageMemoryBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
     imageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-    imageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    imageMemoryBarrier.newLayout = finalImageLayout;
 
     // Insert a memory dependency at the proper pipeline stages that will execute the image layout transition
     // Source pipeline stage stage is copy command exection (VK_PIPELINE_STAGE_TRANSFER_BIT)
@@ -347,7 +350,7 @@ void VKTexture::doUploadBitmap(const Bitmap& bitmap, size_t imageDataSize, const
                 1, &imageMemoryBarrier);
 
     // Store current layout for later reuse
-    _descriptor.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    _descriptor.imageLayout = finalImageLayout;
 
     _renderer->commandPool()->flushCommandBuffer(copyCmd, true);
 

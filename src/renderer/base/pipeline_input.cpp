@@ -55,9 +55,30 @@ void PipelineInput::initialize(const PipelineBuildingContext& buildingContext)
         _ubos.push_back(std::move(i.second));
     }
 
-    ShaderPreprocessor* fragment = buildingContext.tryGetStage(SHADER_STAGE_FRAGMENT);
     ShaderPreprocessor* compute = buildingContext.tryGetStage(SHADER_STAGE_COMPUTE);
-    _sampler_names = fragment ? fragment->_declaration_samplers.vars().keys() : (compute ? compute->_declaration_samplers.vars().keys() : std::vector<String>());
+    if(compute)
+    {
+        _sampler_names = compute->_declaration_samplers.vars().keys();
+        _image_names = compute->_declaration_images.vars().keys();
+    }
+    else
+    {
+        std::set<String> imageNames;
+        ShaderPreprocessor* vertex = buildingContext.tryGetStage(SHADER_STAGE_VERTEX);
+        if(vertex)
+        {
+            const std::vector<String>& vertexImageNames = vertex->_declaration_images.vars().keys();
+            imageNames.insert(vertexImageNames.begin(), vertexImageNames.end());
+        }
+        ShaderPreprocessor* fragment = buildingContext.tryGetStage(SHADER_STAGE_FRAGMENT);
+        if(fragment)
+        {
+            const std::vector<String>& fragmentImageNames = fragment->_declaration_images.vars().keys();
+            imageNames.insert(fragmentImageNames.begin(), fragmentImageNames.end());
+            _sampler_names = fragment->_declaration_samplers.vars().keys();
+        }
+        _image_names.insert(_image_names.end(), imageNames.begin(), imageNames.end());
+    }
 }
 
 const std::vector<sp<PipelineInput::UBO>>& PipelineInput::ubos() const
@@ -93,6 +114,11 @@ size_t PipelineInput::samplerCount() const
 const std::vector<String>& PipelineInput::samplerNames() const
 {
     return _sampler_names;
+}
+
+const std::vector<String>& PipelineInput::imageNames() const
+{
+    return _image_names;
 }
 
 void PipelineInput::addAttribute(String name, Attribute attribute)

@@ -191,6 +191,9 @@ void VKPipeline::setupDescriptorSetLayout(const PipelineInput& pipelineInput)
     for(size_t i = 0; i < pipelineInput.samplerCount(); ++i)
         setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, ++binding));
 
+    for(size_t i = 0; i < pipelineInput.imageNames().size(); ++i)
+        setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_VERTEX_BIT, ++binding));
+
     VkDescriptorSetLayoutCreateInfo descriptorLayout =
             vks::initializers::descriptorSetLayoutCreateInfo(
                 setLayoutBindings.data(),
@@ -255,7 +258,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
             _texture_observers.push_back(texture->notifier().createDirtyFlag());
             writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
                                           _descriptor_set,
-                                          VK_DESCRIPTOR_TYPE_SAMPLER,
+                                          VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
                                           ++binding,
                                           &texture->vkDescriptor()));
         }
@@ -269,7 +272,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
             _texture_observers.push_back(texture->notifier().createDirtyFlag());
             writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
                                           _descriptor_set,
-                                          VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
+                                          VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
                                           ++binding,
                                           &texture->vkDescriptor()));
         }
@@ -441,10 +444,10 @@ sp<VKDescriptorPool> VKPipeline::makeDescriptorPool() const
         poolSizes[VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER] = static_cast<uint32_t>(_bindings.input()->ubos().size());
     if(_bindings.input()->ssbos().size())
         poolSizes[VK_DESCRIPTOR_TYPE_STORAGE_BUFFER] = static_cast<uint32_t>(_bindings.input()->ssbos().size());
-    if(_bindings.samplers().size())
-        poolSizes[VK_DESCRIPTOR_TYPE_SAMPLER] = static_cast<uint32_t>(_bindings.samplers().size());
+    if(_bindings.samplers().size() + _bindings.images().size())
+        poolSizes[VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER] = static_cast<uint32_t>(_bindings.samplers().size() + _bindings.images().size());
     if(_bindings.images().size())
-        poolSizes[VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE] = static_cast<uint32_t>(_bindings.images().size());
+        poolSizes[VK_DESCRIPTOR_TYPE_STORAGE_IMAGE] = static_cast<uint32_t>(_bindings.images().size());
     return sp<VKDescriptorPool>::make(_recycler, _renderer->device(), std::move(poolSizes));
 }
 
@@ -519,7 +522,7 @@ VkPipelineRasterizationStateCreateInfo VKPipeline::makeRasterizationState() cons
                 VK_POLYGON_MODE_FILL, cullFaceTest._enabled ? VK_CULL_MODE_BACK_BIT : VK_CULL_MODE_NONE,
                 VKUtil::toFrontFace(cullFaceTest._front_face), 0);
     }
-    return vks::initializers::pipelineRasterizationStateCreateInfo(VK_POLYGON_MODE_FILL, VK_CULL_MODE_BACK_BIT, VK_FRONT_FACE_COUNTER_CLOCKWISE, 0);
+    return vks::initializers::pipelineRasterizationStateCreateInfo(VK_POLYGON_MODE_FILL, VK_CULL_MODE_BACK_BIT, VK_FRONT_FACE_CLOCKWISE, 0);
 }
 
 void VKPipeline::VKDrawArrays::draw(GraphicsContext& /*graphicsContext*/, const DrawingContext& drawingContext, VkCommandBuffer commandBuffer)

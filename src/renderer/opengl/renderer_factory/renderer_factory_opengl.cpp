@@ -21,7 +21,6 @@
 #include "renderer/opengl/pipeline_factory/pipeline_factory_opengl.h"
 #include "renderer/opengl/renderer/gl_framebuffer_renderer.h"
 #include "renderer/opengl/render_view/render_view_opengl.h"
-#include "renderer/opengl/es20/snippet_factory/snippet_factory_gles20.h"
 #include "renderer/opengl/es30/snippet_factory/snippet_factory_gles30.h"
 #include "renderer/opengl/util/gl_util.h"
 
@@ -72,12 +71,7 @@ void RendererFactoryOpenGL::setVersion(Ark::RendererVersion version, RenderEngin
     std::map<String, String>& annotations = glContext.definitions();
     if(version == Ark::RENDERER_VERSION_OPENGL_20 || version == Ark::RENDERER_VERSION_OPENGL_21)
     {
-        annotations["vert.in"] = "attribute";
-        annotations["vert.out"] = "varying";
-        annotations["frag.in"] = "varying";
-        annotations["frag.out"] = "varying";
-        annotations["frag.color"] = "gl_FragColor";
-        glContext.setSnippetFactory(sp<gles20::SnippetFactoryGLES20>::make());
+        FATAL("Deprecated");
     }
     else
     {

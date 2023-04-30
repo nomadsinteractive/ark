@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_IMPL_IMPORTER_ATLAS_IMPORTER_GENERIC_XML_H_
-#define ARK_RENDERER_IMPL_IMPORTER_ATLAS_IMPORTER_GENERIC_XML_H_
+#pragma once
 
 #include "core/base/string.h"
 #include "core/inf/builder.h"
@@ -36,5 +35,3 @@ private:
 };
 
 }
-
-#endif

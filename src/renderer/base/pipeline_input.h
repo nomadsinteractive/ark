@@ -131,6 +131,8 @@ public:
     size_t samplerCount() const;
     const std::vector<String>& samplerNames() const;
 
+    const std::vector<String>& imageNames() const;
+
     void addAttribute(String name, Attribute attribute);
 
     const PipelineInput::Stream& getStream(uint32_t divisor) const;
@@ -145,6 +147,7 @@ private:
 
     std::map<uint32_t, Stream> _streams;
     std::vector<String> _sampler_names;
+    std::vector<String> _image_names;
 
     friend class PipelineLayout;
 };

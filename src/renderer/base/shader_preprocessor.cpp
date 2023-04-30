@@ -17,8 +17,9 @@
 #define ARRAY_PATTERN           "(?:\\[\\s*(\\d+)\\s*\\])?"
 #define STD_TYPE_PATTERN        "int|uint8|float|[bi]?vec[234]|mat3|mat4"
 #define ATTRIBUTE_PATTERN       "\\s+(" STD_TYPE_PATTERN ")\\s+" "(?:a_|v_)(\\w+)" ARRAY_PATTERN ";"
-#define UNIFORM_PATTERN         "\\s+(\\w+)\\s+" "(\\w+)" ARRAY_PATTERN ";"
+#define UNIFORM_PATTERN         "(\\w+)\\s+" "(\\w+)" ARRAY_PATTERN ";"
 #define LAYOUT_PATTERN          "layout\\((?:std140|binding\\s*=\\s*(\\d+)|r\\d+[uif]*|[\\s,])+\\)\\s+"
+#define ACCESSIBILITY_PATTERN   "(?:(?:read|write)only\\s+)?"
 
 #define INDENT_STR "    "
 
@@ -34,8 +35,8 @@ const char* ShaderPreprocessor::ANNOTATION_FRAG_COLOR = "${frag.color}";
 static std::regex _INCLUDE_PATTERN("#include\\s*[<\"]([^>\"]+)[>\"]");
 static std::regex _STRUCT_PATTERN("struct\\s+(\\w+)\\s*\\{([^}]+)\\}\\s*;");
 static std::regex _IN_PATTERN("(?:attribute|varying|in)" ATTRIBUTE_PATTERN);
-static std::regex _UNIFORM_PATTERN("(?:" LAYOUT_PATTERN ")?uniform" UNIFORM_PATTERN);
-static std::regex _SSBO_PATTERN(LAYOUT_PATTERN "(?:(?:read|write)only\\s+)?buffer\\s+(\\w+)");
+static std::regex _UNIFORM_PATTERN("(?:" LAYOUT_PATTERN ")?uniform\\s+" ACCESSIBILITY_PATTERN UNIFORM_PATTERN);
+static std::regex _SSBO_PATTERN(LAYOUT_PATTERN ACCESSIBILITY_PATTERN "buffer\\s+(\\w+)");
 
 #ifndef ANDROID
 static char _STAGE_ATTR_PREFIX[PipelineInput::SHADER_STAGE_COUNT + 1][4] = {"a_", "v_", "t_", "e_", "g_", "f_", "c_"};
@@ -50,6 +51,9 @@ ShaderPreprocessor::ShaderPreprocessor(sp<String> source, PipelineInput::ShaderS
       _declaration_uniforms(_uniform_declaration_codes, "uniform"), _declaration_samplers(_uniform_declaration_codes, "uniform"), _declaration_images(_uniform_declaration_codes, "uniform"),
       _pre_main(sp<String>::make()), _post_main(sp<String>::make())
 {
+    _predefined_macros.push_back("#define texture2D texture");
+    _predefined_macros.push_back("#define textureCube texture");
+    _predefined_macros.push_back(Strings::sprintf("#define ARK_Z_DIRECTION %.2f", Ark::instance().renderController()->renderEngine()->toLayoutDirection(-1.0f)));
 }
 
 void ShaderPreprocessor::addPreMainSource(const String& source)

@@ -53,11 +53,8 @@ public:
             vertex->_predefined_macros.push_back("#define gl_InstanceIndex gl_InstanceID");
 
         ShaderPreprocessor* fragment = context.tryGetStage(PipelineInput::SHADER_STAGE_FRAGMENT);
-        if(fragment) {
+        if(fragment)
             fragment->linkNextStage("FragColor");
-            fragment->_predefined_macros.push_back("#define texture2D texture");
-            fragment->_predefined_macros.push_back("#define textureCube texture");
-        }
     }
 
     virtual sp<DrawEvents> makeDrawEvents() override {
