@@ -1,10 +1,9 @@
 #pragma once
 
-#include <vector>
+#include <map>
 
 #include "core/inf/builder.h"
 #include "core/types/shared_ptr.h"
-#include "core/types/safe_ptr.h"
 
 #include "graphics/inf/renderer.h"
 #include "graphics/forwarding.h"
@@ -17,7 +16,7 @@ namespace ark {
 
 class RenderPass : public Renderer {
 public:
-    RenderPass(sp<Shader> shader, Buffer vertexBuffer, Buffer indexBuffer, ModelLoader::RenderMode mode, sp<Integer> drawCount, std::vector<std::pair<uint32_t, Buffer>> dividedBuffers);
+    RenderPass(sp<Shader> shader, Buffer vertexBuffer, Buffer indexBuffer, ModelLoader::RenderMode mode, sp<Integer> drawCount, const std::map<uint32_t, sp<Uploader>>& dividedUploaders);
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
@@ -31,10 +30,10 @@ public:
     private:
         sp<Builder<Shader>> _shader;
         sp<Builder<Buffer>> _vertex_buffer;
-        SafePtr<Builder<Buffer>> _index_buffer;
+        sp<Builder<Buffer>> _index_buffer;
         ModelLoader::RenderMode _mode;
         sp<Builder<Integer>> _draw_count;
-        std::vector<std::pair<uint32_t, sp<Builder<Uploader>>>> _divided_buffer_uploaders;
+        std::map<uint32_t, sp<Builder<Uploader>>> _divided_uploaders;
         sp<RenderController> _render_controller;
     };
 
@@ -43,7 +42,6 @@ private:
     Buffer _index_buffer;
     sp<Integer> _draw_count;
     sp<ShaderBindings> _shader_bindings;
-    std::vector<std::pair<uint32_t, Buffer>> _divided_buffers;
 };
 
 }

@@ -1,5 +1,4 @@
-#ifndef ARK_PLUGIN_DEAR_IMGUI_BASE_DRAW_COMMAND_POOL_H_
-#define ARK_PLUGIN_DEAR_IMGUI_BASE_DRAW_COMMAND_POOL_H_
+#pragma once
 
 #include "core/types/shared_ptr.h"
 
@@ -29,5 +28,3 @@ public:
 }
 }
 }
-
-#endif

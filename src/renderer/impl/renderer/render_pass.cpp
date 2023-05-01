@@ -11,10 +11,16 @@
 
 namespace ark {
 
-RenderPass::RenderPass(sp<Shader> shader, Buffer vertexBuffer, Buffer indexBuffer, ModelLoader::RenderMode mode, sp<Integer> drawCount, std::vector<std::pair<uint32_t, Buffer>> dividedBuffers)
-    : _shader(std::move(shader)), _index_buffer(std::move(indexBuffer)), _draw_count(std::move(drawCount)),
-      _shader_bindings(_shader->makeBindings(std::move(vertexBuffer), mode, _index_buffer ? (dividedBuffers.size() > 0 ? PipelineBindings::RENDER_PROCEDURE_DRAW_ELEMENTS_INSTANCED : PipelineBindings::RENDER_PROCEDURE_DRAW_ELEMENTS) : PipelineBindings::RENDER_PROCEDURE_DRAW_ARRAYS)),
-      _divided_buffers(std::move(dividedBuffers))
+namespace {
+
+PipelineBindings::RenderProcedure toRenderProcedure(const Buffer& indexBuffer, const std::map<uint32_t, sp<Uploader>>& dividedUploaders) {
+    return indexBuffer ? (dividedUploaders.size() > 0 ? PipelineBindings::RENDER_PROCEDURE_DRAW_ELEMENTS_INSTANCED : PipelineBindings::RENDER_PROCEDURE_DRAW_ELEMENTS) : PipelineBindings::RENDER_PROCEDURE_DRAW_ARRAYS;
+}
+
+}
+
+RenderPass::RenderPass(sp<Shader> shader, Buffer vertexBuffer, Buffer indexBuffer, ModelLoader::RenderMode mode, sp<Integer> drawCount, const std::map<uint32_t, sp<Uploader>>& dividedUploaders)
+    : _shader(std::move(shader)), _index_buffer(std::move(indexBuffer)), _draw_count(std::move(drawCount)), _shader_bindings(_shader->makeBindings(std::move(vertexBuffer), mode, toRenderProcedure(_index_buffer, dividedUploaders), dividedUploaders))
 {
 }
 
@@ -25,10 +31,10 @@ void RenderPass::render(RenderRequest& renderRequest, const V3& /*position*/)
     {
         DrawingParams drawParam;
         const Buffer& vertices = _shader_bindings->vertices();
-        if(_divided_buffers.size() > 0)
+        if(_shader_bindings->divisors()->size() > 0)
         {
             std::vector<std::pair<uint32_t, Buffer::Snapshot>> dividedBufferSnapshots;
-            for(const auto& [i, j] : _divided_buffers)
+            for(const auto& [i, j] : *_shader_bindings->divisors())
                 dividedBufferSnapshots.emplace_back(i, j.snapshot(j.size()));
             drawParam = DrawingParams::DrawElementsInstanced{0, static_cast<uint32_t>(_index_buffer.size() / sizeof(element_index_t)), std::move(dividedBufferSnapshots)};
         }
@@ -49,16 +55,16 @@ RenderPass::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, con
     {
         uint32_t divisor = Documents::ensureAttribute<uint32_t>(i, "divisor");
         sp<Builder<Uploader>> uploader = factory.ensureBuilder<Uploader>(i, "uploader");
-        _divided_buffer_uploaders.emplace_back(divisor, std::move(uploader));
+        _divided_uploaders.insert({divisor, std::move(uploader)});
     }
 }
 
 sp<Renderer> RenderPass::BUILDER::build(const Scope& args)
 {
-    std::vector<std::pair<uint32_t, Buffer>> dividedBuffers;
-    for(const auto& [i, j] : _divided_buffer_uploaders)
-        dividedBuffers.emplace_back(i, _render_controller->makeVertexBuffer(Buffer::USAGE_DYNAMIC, j->build(args)));
-    return sp<RenderPass>::make(_shader->build(args), _vertex_buffer->build(args), _index_buffer ? _index_buffer->build(args) : Buffer(), _mode, _draw_count->build(args), std::move(dividedBuffers));
+    std::map<uint32_t, sp<Uploader>> dividedUploaders;
+    for(const auto& [i, j] : _divided_uploaders)
+        dividedUploaders.insert({i, j->build(args)});
+    return sp<RenderPass>::make(_shader->build(args), _vertex_buffer->build(args), _index_buffer ? _index_buffer->build(args) : Buffer(), _mode, _draw_count->build(args), dividedUploaders);
 }
 
 }

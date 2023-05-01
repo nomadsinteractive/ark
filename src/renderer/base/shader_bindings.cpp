@@ -8,9 +8,9 @@
 
 namespace ark {
 
-ShaderBindings::ShaderBindings(Buffer vertices, sp<PipelineFactory> pipelineFactory, sp<PipelineBindings> pipelineBindings, RenderController& renderController)
+ShaderBindings::ShaderBindings(Buffer vertices, sp<PipelineFactory> pipelineFactory, sp<PipelineBindings> pipelineBindings, std::map<uint32_t, Buffer> dividedBuffers)
     : _vertices(std::move(vertices)), _pipeline_factory(std::move(pipelineFactory)), _pipeline_bindings(std::move(pipelineBindings)), _snippet(_pipeline_bindings->layout()->snippet()),
-      _divisors(makeDivisors(renderController)), _attachments(sp<ByType>::make())
+      _divided_buffers(sp<std::map<uint32_t, Buffer>>::make(std::move(dividedBuffers))), _attachments(sp<ByType>::make())
 {
 }
 
@@ -57,7 +57,7 @@ const sp<PipelineInput>& ShaderBindings::pipelineInput() const
 
 const sp<std::map<uint32_t, Buffer>>& ShaderBindings::divisors() const
 {
-    return _divisors;
+    return _divided_buffers;
 }
 
 const sp<ByType>& ShaderBindings::attachments() const
@@ -72,31 +72,16 @@ const sp<Pipeline>& ShaderBindings::getPipeline(GraphicsContext& graphicsContext
     return _pipeline;
 }
 
-std::map<uint32_t, Buffer::Factory> ShaderBindings::makeDividedBufferBuilders() const
+std::map<uint32_t, Buffer::Factory> ShaderBindings::makeDividedBufferFactories() const
 {
     std::map<uint32_t, Buffer::Factory> builders;
     const sp<PipelineInput>& pipelineInput = _pipeline_bindings->input();
-    for(const auto& i : *_divisors)
+    for(const auto& i : *_divided_buffers)
     {
         const PipelineInput::Stream& stream = pipelineInput->getStream(i.first);
         builders.insert(std::make_pair(i.first, Buffer::Factory(stream.stride())));
     }
     return builders;
-}
-
-sp<std::map<uint32_t, Buffer>> ShaderBindings::makeDivisors(RenderController& renderController) const
-{
-    sp<std::map<uint32_t, Buffer>> divisors = sp<std::map<uint32_t, Buffer>>::make();
-    for(const auto& i : pipelineInput()->streams())
-    {
-        uint32_t divisor = i.first;
-        if(divisor != 0)
-        {
-            DCHECK(divisors->find(divisor) == divisors->end(), "Duplicated stream divisor: %d", divisor);
-            divisors->insert(std::make_pair(divisor, renderController.makeVertexBuffer()));
-        }
-    }
-    return divisors;
 }
 
 }

@@ -109,9 +109,9 @@ public:
     Buffer makeBuffer(Buffer::Type type, Buffer::Usage usage, sp<Uploader> uploader, RenderController::UploadStrategy us, sp<Future> future = nullptr);
     Buffer makeBuffer(Buffer::Type type, Buffer::Usage usage, sp<Uploader> uploader);
 //  [[script::bindings::auto]]
-    Buffer makeVertexBuffer(Buffer::Usage usage = Buffer::USAGE_DYNAMIC, sp<Uploader> input = nullptr);
+    Buffer makeVertexBuffer(Buffer::Usage usage = Buffer::USAGE_DYNAMIC, sp<Uploader> uploader = nullptr);
 //  [[script::bindings::auto]]
-    Buffer makeIndexBuffer(Buffer::Usage usage = Buffer::USAGE_DYNAMIC, sp<Uploader> input = nullptr);
+    Buffer makeIndexBuffer(Buffer::Usage usage = Buffer::USAGE_DYNAMIC, sp<Uploader> uploader = nullptr);
 
     sp<Framebuffer> makeFramebuffer(sp<Renderer> renderer, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask);
 

@@ -60,7 +60,7 @@ private:
 }
 
 Shader::Shader(sp<PipelineFactory> pipelineFactory, sp<RenderController> renderController, sp<PipelineLayout> pipelineLayout, PipelineBindings::Parameters bindingParams)
-    : _pipeline_factory(std::move(pipelineFactory)), _render_controller(std::move(renderController)), _pipeline_layout(std::move(pipelineLayout)), _input(_pipeline_layout->input()), _binding_params(std::move(bindingParams))
+    : _pipeline_factory(std::move(pipelineFactory)), _render_controller(std::move(renderController)), _pipeline_layout(std::move(pipelineLayout)), _pipeline_input(_pipeline_layout->input()), _binding_params(std::move(bindingParams))
 {
 }
 
@@ -74,7 +74,7 @@ sp<Builder<Shader>> Shader::fromDocument(BeanFactory& factory, const document& m
 std::vector<RenderLayerSnapshot::UBOSnapshot> Shader::takeUBOSnapshot(const RenderRequest& renderRequest) const
 {
     std::vector<RenderLayerSnapshot::UBOSnapshot> uboSnapshot;
-    for(const sp<PipelineInput::UBO>& i : _input->ubos())
+    for(const sp<PipelineInput::UBO>& i : _pipeline_input->ubos())
         uboSnapshot.push_back(i->snapshot(renderRequest));
     return uboSnapshot;
 }
@@ -82,7 +82,7 @@ std::vector<RenderLayerSnapshot::UBOSnapshot> Shader::takeUBOSnapshot(const Rend
 std::vector<std::pair<uint32_t, Buffer::Snapshot>> Shader::takeSSBOSnapshot(const RenderRequest& /*renderRequest*/) const
 {
     std::vector<std::pair<uint32_t, Buffer::Snapshot>> ssboSnapshot;
-    for(const PipelineInput::SSBO& i : _input->ssbos())
+    for(const PipelineInput::SSBO& i : _pipeline_input->ssbos())
         ssboSnapshot.push_back(std::make_pair(i._binding, i._buffer.snapshot()));
     return ssboSnapshot;
 }
@@ -94,7 +94,7 @@ const sp<PipelineFactory>& Shader::pipelineFactory() const
 
 const sp<PipelineInput>& Shader::input() const
 {
-    return _input;
+    return _pipeline_input;
 }
 
 const sp<RenderController>& Shader::renderController() const
@@ -112,9 +112,25 @@ const sp<PipelineLayout>& Shader::layout() const
     return _pipeline_layout;
 }
 
-sp<ShaderBindings> Shader::makeBindings(Buffer vertices, ModelLoader::RenderMode mode, PipelineBindings::RenderProcedure renderProcedure) const
+sp<ShaderBindings> Shader::makeBindings(Buffer vertices, ModelLoader::RenderMode mode, PipelineBindings::RenderProcedure renderProcedure, const std::map<uint32_t, sp<Uploader>>& uploaders) const
 {
-    return sp<ShaderBindings>::make(std::move(vertices), _pipeline_factory, sp<PipelineBindings>::make(mode, renderProcedure, _binding_params, _pipeline_layout), _render_controller);
+    return sp<ShaderBindings>::make(std::move(vertices), _pipeline_factory, sp<PipelineBindings>::make(mode, renderProcedure, _binding_params, _pipeline_layout), makeDivivedBuffers(uploaders));
+}
+
+std::map<uint32_t, Buffer> Shader::makeDivivedBuffers(const std::map<uint32_t, sp<Uploader>>& uploaders) const
+{
+    std::map<uint32_t, Buffer> dividedBuffers;
+    for(const auto& i : _pipeline_input->streams())
+    {
+        uint32_t divisor = i.first;
+        if(divisor != 0)
+        {
+            CHECK(dividedBuffers.find(divisor) == dividedBuffers.end(), "Duplicated stream divisor: %d", divisor);
+            const auto iter = uploaders.find(divisor);
+            dividedBuffers.insert(std::make_pair(divisor, _render_controller->makeVertexBuffer(Buffer::USAGE_DYNAMIC, iter != uploaders.end() ? iter->second : nullptr)));
+        }
+    }
+    return dividedBuffers;
 }
 
 Shader::BUILDER_IMPL::BUILDER_IMPL(BeanFactory& factory, const document& manifest, const ResourceLoaderContext& resourceLoaderContext, sp<Builder<Camera>> camera, Optional<StageManifest> stages, Optional<SnippetManifest> snippets)

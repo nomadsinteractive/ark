@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_GLES30_GL_VERTEX_ARRAY_H_
-#define ARK_RENDERER_GLES30_GL_VERTEX_ARRAY_H_
+#pragma once
 
 #include "renderer/forwarding.h"
 #include "renderer/base/buffer.h"
@@ -29,5 +28,3 @@ private:
 
 }
 }
-
-#endif

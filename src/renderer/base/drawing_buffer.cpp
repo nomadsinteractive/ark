@@ -13,7 +13,7 @@ namespace ark {
 
 DrawingBuffer::DrawingBuffer(sp<ShaderBindings> shaderBindings, uint32_t stride)
     : _shader_bindings(std::move(shaderBindings)), _pipeline_bindings(_shader_bindings->pipelineBindings()), _vertices(stride),
-      _divided_buffer_builders(_shader_bindings->makeDividedBufferBuilders()),
+      _divided_buffer_builders(_shader_bindings->makeDividedBufferFactories()),
       _is_instanced(_pipeline_bindings->hasDivisors())
 {
 }
@@ -78,8 +78,8 @@ std::vector<std::pair<uint32_t, Buffer::Snapshot>> DrawingBuffer::toDividedBuffe
     std::vector<std::pair<uint32_t, Buffer::Snapshot>> snapshots;
     DCHECK(_divided_buffer_builders.size() == _shader_bindings->divisors()->size(), "Instanced buffer size mismatch: %d, %d", _divided_buffer_builders.size(), _shader_bindings->divisors()->size());
 
-    for(const auto& i : *(_shader_bindings->divisors()))
-        snapshots.emplace_back(i.first, _divided_buffer_builders.at(i.first).toSnapshot(i.second));
+    for(const auto& [i, j] : *(_shader_bindings->divisors()))
+        snapshots.emplace_back(i, _divided_buffer_builders.at(i).toSnapshot(j));
 
     _divided_buffer_builders.clear();
     return snapshots;

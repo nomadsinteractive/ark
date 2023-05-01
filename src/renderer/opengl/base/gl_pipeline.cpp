@@ -303,7 +303,7 @@ void GLPipeline::bindBuffer(GraphicsContext& graphicsContext, const PipelineInpu
         if(!j.id())
             j.upload(graphicsContext);
 
-        const GLBufferBinder binder(GL_ARRAY_BUFFER, static_cast<GLuint>(j.id()));
+        const volatile GLBufferBinder binder(GL_ARRAY_BUFFER, static_cast<GLuint>(j.id()));
         bindBuffer(graphicsContext, input, i);
     }
 }
@@ -401,7 +401,6 @@ void GLPipeline::GLAttribute::bind(const Attribute& attribute, GLsizei stride) c
 void GLPipeline::GLAttribute::setVertexPointer(const Attribute& attribute, GLuint location, GLsizei stride, uint32_t length, uint32_t offset) const
 {
     static const GLenum glTypes[Attribute::TYPE_COUNT] = {GL_BYTE, GL_FLOAT, GL_INT, GL_SHORT, GL_UNSIGNED_BYTE, GL_UNSIGNED_SHORT};
-
     glEnableVertexAttribArray(location);
     if(attribute.type() == Attribute::TYPE_FLOAT || attribute.normalized())
         glVertexAttribPointer(location, length, glTypes[attribute.type()], attribute.normalized() ? GL_TRUE : GL_FALSE, stride, reinterpret_cast<void*>(offset));
@@ -538,10 +537,10 @@ void GLPipeline::GLDrawElementsInstanced::draw(GraphicsContext& graphicsContext,
     const DrawingParams::DrawElementsInstanced& param = drawingContext._parameters.drawElementsInstanced();
     DASSERT(param._count);
     DASSERT(drawingContext._draw_count);
-    for(const auto& i : param._divided_buffer_snapshots)
+    for(const auto& [i, j] : param._divided_buffer_snapshots)
     {
-        i.second.upload(graphicsContext);
-        DCHECK(i.second.id(), "Invaild Divided Buffer: %d", i.first);
+        j.upload(graphicsContext);
+        DCHECK(j.id(), "Invaild Divided Buffer: %d", i);
     }
     glDrawElementsInstanced(_mode, static_cast<GLsizei>(param._count), GLIndexType, nullptr, drawingContext._draw_count);
 }

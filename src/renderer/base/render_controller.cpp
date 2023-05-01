@@ -217,14 +217,14 @@ Buffer RenderController::makeBuffer(Buffer::Type type, Buffer::Usage usage, sp<U
     return makeBuffer(type, usage, std::move(uploader), us);
 }
 
-Buffer RenderController::makeVertexBuffer(Buffer::Usage usage, sp<Uploader> input)
+Buffer RenderController::makeVertexBuffer(Buffer::Usage usage, sp<Uploader> uploader)
 {
-    return makeBuffer(Buffer::TYPE_VERTEX, usage, std::move(input));
+    return makeBuffer(Buffer::TYPE_VERTEX, usage, std::move(uploader));
 }
 
-Buffer RenderController::makeIndexBuffer(Buffer::Usage usage, sp<Uploader> input)
+Buffer RenderController::makeIndexBuffer(Buffer::Usage usage, sp<Uploader> uploader)
 {
-    return makeBuffer(Buffer::TYPE_INDEX, usage, input);
+    return makeBuffer(Buffer::TYPE_INDEX, usage, uploader);
 }
 
 sp<Framebuffer> RenderController::makeFramebuffer(sp<Renderer> renderer, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask)

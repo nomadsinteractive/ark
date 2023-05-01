@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_BASE_SHADER_BINDINGS_H_
-#define ARK_RENDERER_BASE_SHADER_BINDINGS_H_
+#pragma once
 
 #include <map>
 #include <vector>
@@ -18,7 +17,7 @@ namespace ark {
 
 class ARK_API ShaderBindings {
 public:
-    ShaderBindings(Buffer vertices, sp<PipelineFactory> pipelineFactory, sp<PipelineBindings> pipelineBindings, RenderController& renderController);
+    ShaderBindings(Buffer vertices, sp<PipelineFactory> pipelineFactory, sp<PipelineBindings> pipelineBindings, std::map<uint32_t, Buffer> dividedBuffers);
 
     const Buffer& vertices() const;
     Buffer& vertices();
@@ -37,10 +36,7 @@ public:
 
     const sp<Pipeline>& getPipeline(GraphicsContext& graphicsContext);
 
-    std::map<uint32_t, Buffer::Factory> makeDividedBufferBuilders() const;
-
-private:
-    sp<std::map<uint32_t, Buffer>> makeDivisors(RenderController& renderController) const;
+    std::map<uint32_t, Buffer::Factory> makeDividedBufferFactories() const;
 
 private:
     Buffer _vertices;
@@ -48,7 +44,7 @@ private:
     sp<PipelineBindings> _pipeline_bindings;
     sp<Snippet> _snippet;
 
-    sp<std::map<uint32_t, Buffer>> _divisors;
+    sp<std::map<uint32_t, Buffer>> _divided_buffers;
 
     sp<Pipeline> _pipeline;
 
@@ -57,5 +53,3 @@ private:
 };
 
 }
-
-#endif

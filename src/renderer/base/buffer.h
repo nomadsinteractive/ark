@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_BASE_BUFFER_H_
-#define ARK_RENDERER_BASE_BUFFER_H_
+#pragma once
 
 #include <vector>
 
@@ -134,10 +133,6 @@ public:
 private:
     sp<RenderController> _render_controller;
     sp<Delegate> _delegate;
-
-    friend class ResourceManager;
 };
 
 }
-
-#endif

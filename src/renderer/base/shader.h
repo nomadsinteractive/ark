@@ -39,7 +39,7 @@ public:
     const sp<PipelineInput>& input() const;
     const sp<PipelineLayout>& layout() const;
 
-    sp<ShaderBindings> makeBindings(Buffer vertices, ModelLoader::RenderMode mode, PipelineBindings::RenderProcedure renderProcedure) const;
+    sp<ShaderBindings> makeBindings(Buffer vertices, ModelLoader::RenderMode mode, PipelineBindings::RenderProcedure renderProcedure, const std::map<uint32_t, sp<Uploader>>& uploaders = {}) const;
 
     class BUILDER_IMPL : public Builder<Shader> {
     public:
@@ -76,10 +76,13 @@ public:
     };
 
 private:
+    std::map<uint32_t, Buffer> makeDivivedBuffers(const std::map<uint32_t, sp<Uploader>>& uploaders) const;
+
+private:
     sp<PipelineFactory> _pipeline_factory;
     sp<RenderController> _render_controller;
     sp<PipelineLayout> _pipeline_layout;
-    sp<PipelineInput> _input;
+    sp<PipelineInput> _pipeline_input;
 
     PipelineBindings::Parameters _binding_params;
 };
