@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_VULKAN_BASE_VK_GRAPHICS_CONTEXT_H_
-#define ARK_RENDERER_VULKAN_BASE_VK_GRAPHICS_CONTEXT_H_
+#pragma once
 
 #include <stack>
 #include <vector>
@@ -25,6 +24,7 @@ public:
     void begin(uint32_t imageId, const Color& backgroundColor);
     void end();
 
+    VKSubmitQueue& submitQueue();
 
     class RenderPassPhrase {
     public:
@@ -62,7 +62,7 @@ public:
     void addSubmitInfo(uint32_t commandBufferCount, const VkCommandBuffer* pCommandBuffers);
     void addWaitSemaphore(VkSemaphore semaphore);
 
-    VkSemaphore semaphoreRenderComplete(size_t n) const;
+    VkSemaphore semaphoreRenderComplete() const;
     VkSemaphore semaphorePresentComplete() const;
 
 private:
@@ -72,13 +72,11 @@ private:
     sp<VKCommandBuffers> _command_buffers;
 
     VKSubmitQueue _submit_queue;
+    VkSemaphore _semaphore_render_complete;
+    VkSemaphore _semaphore_present_complete;
 
     std::stack<State> _state_stack;
-
-    VkSemaphore _semaphore_present_complete;
 };
 
 }
 }
-
-#endif

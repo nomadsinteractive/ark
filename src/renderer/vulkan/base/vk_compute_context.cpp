@@ -18,15 +18,15 @@ namespace ark {
 namespace vulkan {
 
 VKComputeContext::VKComputeContext(GraphicsContext& graphicsContext, sp<VKRenderer> renderer)
-    : _renderer(std::move(renderer)), _command_pool(_renderer->device()->makeComputeCommandPool()),
-      _submit_queue(_renderer, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 1), _command_buffer(VK_NULL_HANDLE),
-      _semaphore_render_complete(graphicsContext.attachments().ensure<VKGraphicsContext>()->semaphoreRenderComplete(1))
+    : _renderer(std::move(renderer)), _command_pool(_renderer->device()->makeComputeCommandPool()), _submit_queue(_renderer, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT), _command_buffer(VK_NULL_HANDLE),
+      _semaphore_render_complete(VK_NULL_HANDLE), _semaphore_compute_complete(_submit_queue.createSignalSemaphore())
 {
 }
 
 void VKComputeContext::begin()
 {
     DTHREAD_CHECK(THREAD_ID_RENDERER);
+    DASSERT(_semaphore_render_complete);
     _command_buffer = _command_pool->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
     _submit_queue.begin(_semaphore_render_complete);
 }
@@ -45,8 +45,10 @@ void VKComputeContext::submit()
     _command_buffer = VK_NULL_HANDLE;
 }
 
-VkCommandBuffer VKComputeContext::start()
+VkCommandBuffer VKComputeContext::start(GraphicsContext& graphicsContext)
 {
+    if(_semaphore_render_complete == VK_NULL_HANDLE)
+        _semaphore_render_complete = graphicsContext.attachments().ensure<VKGraphicsContext>()->submitQueue().createSignalSemaphore();
     if(_command_buffer == VK_NULL_HANDLE)
         begin();
     return _command_buffer;
@@ -60,7 +62,7 @@ VkCommandBuffer VKComputeContext::vkCommandBuffer() const
 
 VkSemaphore VKComputeContext::semaphoreComputeComplete() const
 {
-    return _submit_queue.signalSemaphores().at(0);
+    return _semaphore_compute_complete;
 }
 
 }

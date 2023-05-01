@@ -25,7 +25,7 @@ public:
     void end();
     void submit();
 
-    VkCommandBuffer start();
+    VkCommandBuffer start(GraphicsContext& graphicsContext);
     VkCommandBuffer vkCommandBuffer() const;
 
     VkSemaphore semaphoreComputeComplete() const;
@@ -38,6 +38,7 @@ private:
     VkCommandBuffer _command_buffer;
 
     VkSemaphore _semaphore_render_complete;
+    VkSemaphore _semaphore_compute_complete;
 };
 
 }

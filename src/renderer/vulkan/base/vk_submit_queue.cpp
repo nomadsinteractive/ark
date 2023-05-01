@@ -13,12 +13,9 @@
 namespace ark {
 namespace vulkan {
 
-VKSubmitQueue::VKSubmitQueue(const sp<VKRenderer>& renderer, VkPipelineStageFlags stageFlags, size_t numOfSignalSemaphores)
-    : _renderer(renderer), _stage_flags(stageFlags), _signal_semaphores(numOfSignalSemaphores)
+VKSubmitQueue::VKSubmitQueue(const sp<VKRenderer>& renderer, VkPipelineStageFlags stageFlags)
+    : _renderer(renderer), _stage_flags(stageFlags)
 {
-    VkSemaphoreCreateInfo semaphoreCreateInfo = vks::initializers::semaphoreCreateInfo();
-    for(VkSemaphore& i : _signal_semaphores)
-        VKUtil::checkResult(vkCreateSemaphore(_renderer->vkLogicalDevice(), &semaphoreCreateInfo, nullptr, &i));
 }
 
 VKSubmitQueue::~VKSubmitQueue()
@@ -29,9 +26,13 @@ VKSubmitQueue::~VKSubmitQueue()
         vkDestroySemaphore(vkLogicalDevice, i, nullptr);
 }
 
-const std::vector<VkSemaphore>& VKSubmitQueue::signalSemaphores() const
+VkSemaphore VKSubmitQueue::createSignalSemaphore()
 {
-    return _signal_semaphores;
+    VkSemaphore semaphore = VK_NULL_HANDLE;
+    VkSemaphoreCreateInfo semaphoreCreateInfo = vks::initializers::semaphoreCreateInfo();
+    VKUtil::checkResult(vkCreateSemaphore(_renderer->vkLogicalDevice(), &semaphoreCreateInfo, nullptr, &semaphore));
+    _signal_semaphores.push_back(semaphore);
+    return semaphore;
 }
 
 void VKSubmitQueue::begin(VkSemaphore waitSemaphore)

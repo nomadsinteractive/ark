@@ -14,7 +14,14 @@ namespace ark {
 
 class ARK_API RendererFactory {
 public:
+    RendererFactory(Ark::RendererCoordinateSystem defaultCoordinateSystem)
+        : _default_coordinate_system(defaultCoordinateSystem) {
+    }
     virtual ~RendererFactory() = default;
+
+    Ark::RendererCoordinateSystem defaultCoordinateSystem() const {
+        return _default_coordinate_system;
+    }
 
     virtual sp<RenderEngineContext> initialize(Ark::RendererVersion version) = 0;
 
@@ -26,6 +33,9 @@ public:
     virtual sp<PipelineFactory> createPipelineFactory() = 0;
     virtual sp<RenderView> createRenderView(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController) = 0;
     virtual sp<Texture::Delegate> createTexture(sp<Size> size, sp<Texture::Parameters> parameters) = 0;
+
+protected:
+    Ark::RendererCoordinateSystem _default_coordinate_system;
 };
 
 }

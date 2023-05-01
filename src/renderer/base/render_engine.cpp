@@ -12,7 +12,8 @@
 namespace ark {
 
 RenderEngine::RenderEngine(Ark::RendererVersion version, Ark::RendererCoordinateSystem coordinateSystem, sp<RendererFactory> rendererFactory)
-    : _coordinate_system(coordinateSystem), _renderer_factory(std::move(rendererFactory)), _render_context(_renderer_factory->initialize(version))
+    : _coordinate_system(coordinateSystem == Ark::COORDINATE_SYSTEM_DEFAULT ? rendererFactory->defaultCoordinateSystem() : coordinateSystem), _renderer_factory(std::move(rendererFactory)),
+      _render_context(_renderer_factory->initialize(version))
 {
 }
 
@@ -39,6 +40,11 @@ const Viewport& RenderEngine::viewport() const
 float RenderEngine::toLayoutDirection(float direction) const
 {
     return _coordinate_system == Ark::COORDINATE_SYSTEM_RHS ? -direction : direction;
+}
+
+bool RenderEngine::isLHS() const
+{
+    return _coordinate_system == Ark::COORDINATE_SYSTEM_LHS;
 }
 
 Rect RenderEngine::toViewportRect(const Rect& rect, Ark::RendererCoordinateSystem cs) const

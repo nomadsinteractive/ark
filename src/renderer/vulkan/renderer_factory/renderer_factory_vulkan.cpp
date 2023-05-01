@@ -36,7 +36,7 @@ namespace ark {
 namespace vulkan {
 
 RendererFactoryVulkan::RendererFactoryVulkan(const sp<Recycler>& recycler)
-    : _recycler(recycler), _renderer(sp<VKRenderer>::make())
+    : RendererFactory(Ark::COORDINATE_SYSTEM_LHS), _recycler(recycler), _renderer(sp<VKRenderer>::make())
 {
     const Global<PluginManager> pm;
     pm->addPlugin(sp<VulkanPlugin>::make());

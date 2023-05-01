@@ -33,7 +33,7 @@ namespace ark {
 namespace opengl {
 
 RendererFactoryOpenGL::RendererFactoryOpenGL(const sp<Recycler>& recycler)
-    : _recycler(recycler)
+    : RendererFactory(Ark::COORDINATE_SYSTEM_RHS), _recycler(recycler)
 {
     const Global<PluginManager> pluginManager;
     pluginManager->addPlugin(sp<opengl::OpenglPlugin>::make());

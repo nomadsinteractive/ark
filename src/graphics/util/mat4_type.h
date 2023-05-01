@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_UTIL_MAT4_TYPE_H_
-#define ARK_GRAPHICS_UTIL_MAT4_TYPE_H_
+#pragma once
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
@@ -45,6 +44,8 @@ public:
 
 //  [[script::bindings::classmethod]]
     static sp<Mat4> translate(sp<Mat4> self, sp<Vec3> translation);
+//  [[script::bindings::classmethod]]
+    static sp<Mat4> rotate(sp<Mat4> self, sp<Vec4> quaternion);
 
 //  [[script::bindings::classmethod]]
     static sp<Mat4> freeze(const sp<Mat4>& self);
@@ -58,5 +59,3 @@ private:
 };
 
 }
-
-#endif

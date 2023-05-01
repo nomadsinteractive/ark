@@ -65,7 +65,7 @@ private:
 
 VKGraphicsContext::VKGraphicsContext(GraphicsContext& graphicsContext, const sp<VKRenderer>& renderer)
     : _renderer(renderer), _render_target(_renderer->renderTarget()), _command_buffers(sp<VKCommandBuffers>::make(graphicsContext.recycler(), _render_target)),
-      _submit_queue(_renderer, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, 2)
+      _submit_queue(_renderer, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT), _semaphore_render_complete(_submit_queue.createSignalSemaphore())
 {
     VkDevice vkLogicalDevice = _renderer->vkLogicalDevice();
     // Create synchronization objects
@@ -98,6 +98,11 @@ void VKGraphicsContext::end()
 {
     DASSERT(_state_stack.size() == 1);
     popState();
+}
+
+VKSubmitQueue& VKGraphicsContext::submitQueue()
+{
+    return _submit_queue;
 }
 
 VKGraphicsContext::State& VKGraphicsContext::getCurrentState()
@@ -146,9 +151,9 @@ void VKGraphicsContext::addWaitSemaphore(VkSemaphore semaphore)
     _submit_queue.addWaitSemaphore(semaphore);
 }
 
-VkSemaphore VKGraphicsContext::semaphoreRenderComplete(size_t n) const
+VkSemaphore VKGraphicsContext::semaphoreRenderComplete() const
 {
-    return _submit_queue.signalSemaphores().at(n);
+    return _semaphore_render_complete;
 }
 
 VkSemaphore VKGraphicsContext::semaphorePresentComplete() const

@@ -24,6 +24,13 @@ public:
         }
     };
 
+    class Rotate {
+    public:
+        M4 operator()(const M4& v1, const V4& v2) {
+            return MatrixUtil::rotate(v1, v2);
+        }
+    };
+
 };
 
 }
@@ -97,6 +104,11 @@ sp<Mat4> Mat4Type::identity()
 sp<Mat4> Mat4Type::translate(sp<Mat4> self, sp<Vec3> translation)
 {
     return sp<VariableOP2<sp<Mat4>, sp<Vec3>, MatrixOperators::Translate>>::make(std::move(self), std::move(translation));
+}
+
+sp<Mat4> Mat4Type::rotate(sp<Mat4> self, sp<Vec4> quaternion)
+{
+    return sp<VariableOP2<sp<Mat4>, sp<Vec4>, MatrixOperators::Rotate>>::make(std::move(self), std::move(quaternion));
 }
 
 sp<Mat4> Mat4Type::freeze(const sp<Mat4>& self)

@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_INF_RENDER_ENGINE_H_
-#define ARK_RENDERER_INF_RENDER_ENGINE_H_
+#pragma once
 
 #include "core/ark.h"
 #include "core/base/api.h"
@@ -23,6 +22,7 @@ public:
     const Viewport& viewport() const;
 
     float toLayoutDirection(float direction) const;
+    bool isLHS() const;
 
     Rect toViewportRect(const Rect& rect, Ark::RendererCoordinateSystem cs = Ark::COORDINATE_SYSTEM_DEFAULT) const;
     V2 toViewportPosition(const V2& position, Ark::RendererCoordinateSystem cs = Ark::COORDINATE_SYSTEM_DEFAULT) const;
@@ -42,5 +42,3 @@ private:
 };
 
 }
-
-#endif

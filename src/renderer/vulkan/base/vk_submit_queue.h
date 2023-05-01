@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_VULKAN_BASE_VK_SUBMIT_QUEUE_H_
-#define ARK_RENDERER_VULKAN_BASE_VK_SUBMIT_QUEUE_H_
+#pragma once
 
 #include <vector>
 
@@ -17,15 +16,13 @@ namespace vulkan {
 
 class VKSubmitQueue {
 public:
-    VKSubmitQueue(const sp<VKRenderer>& renderer, VkPipelineStageFlags stageFlags, size_t numOfSignalSemaphores);
+    VKSubmitQueue(const sp<VKRenderer>& renderer, VkPipelineStageFlags stageFlags);
     ~VKSubmitQueue();
 
-    const std::vector<VkSemaphore>& signalSemaphores() const;
+    VkSemaphore createSignalSemaphore();
 
     void begin(VkSemaphore waitSemaphore);
-
     void submitCommandBuffer(VkCommandBuffer commandBuffer);
-
     void submit(VkQueue queue);
 
     void addSubmitInfo(uint32_t commandBufferCount, const VkCommandBuffer* pCommandBuffers);
@@ -46,5 +43,3 @@ private:
 
 }
 }
-
-#endif

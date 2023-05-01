@@ -53,7 +53,7 @@ ShaderPreprocessor::ShaderPreprocessor(sp<String> source, PipelineInput::ShaderS
 {
     _predefined_macros.push_back("#define texture2D texture");
     _predefined_macros.push_back("#define textureCube texture");
-    _predefined_macros.push_back(Strings::sprintf("#define ARK_Z_DIRECTION %.2f", Ark::instance().renderController()->renderEngine()->toLayoutDirection(-1.0f)));
+    _predefined_macros.push_back(Strings::sprintf("#define ARK_Z_DIRECTION %.2f", Ark::instance().renderController()->renderEngine()->toLayoutDirection(1.0f)));
 }
 
 void ShaderPreprocessor::addPreMainSource(const String& source)

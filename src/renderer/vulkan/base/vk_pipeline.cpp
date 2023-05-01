@@ -403,7 +403,7 @@ void VKPipeline::buildComputeCommandBuffer(GraphicsContext& graphicsContext, con
 {
     const sp<VKComputeContext>& vkContext = graphicsContext.attachments().ensure<VKComputeContext>();
 
-    VkCommandBuffer commandBuffer = vkContext->start();
+    VkCommandBuffer commandBuffer = vkContext->start(graphicsContext);
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, _pipeline);
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, _layout, 0, 1, &_descriptor_set, 0, nullptr);
     vkCmdDispatch(commandBuffer, computeContext._num_work_groups.at(0), computeContext._num_work_groups.at(1), computeContext._num_work_groups.at(2));
@@ -522,7 +522,8 @@ VkPipelineRasterizationStateCreateInfo VKPipeline::makeRasterizationState() cons
                 VK_POLYGON_MODE_FILL, cullFaceTest._enabled ? VK_CULL_MODE_BACK_BIT : VK_CULL_MODE_NONE,
                 VKUtil::toFrontFace(cullFaceTest._front_face), 0);
     }
-    return vks::initializers::pipelineRasterizationStateCreateInfo(VK_POLYGON_MODE_FILL, VK_CULL_MODE_BACK_BIT, VK_FRONT_FACE_CLOCKWISE, 0);
+    const VkFrontFace frontFace = Ark::instance().renderController()->renderEngine()->isLHS() ? VK_FRONT_FACE_CLOCKWISE : VK_FRONT_FACE_COUNTER_CLOCKWISE;
+    return vks::initializers::pipelineRasterizationStateCreateInfo(VK_POLYGON_MODE_FILL, VK_CULL_MODE_BACK_BIT, frontFace, 0);
 }
 
 void VKPipeline::VKDrawArrays::draw(GraphicsContext& /*graphicsContext*/, const DrawingContext& drawingContext, VkCommandBuffer commandBuffer)
