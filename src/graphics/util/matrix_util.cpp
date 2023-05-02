@@ -95,7 +95,7 @@ M4 MatrixUtil::rotate(const M4& lvalue, const V3& direction, float radian)
 
 M4 MatrixUtil::rotate(const M4& lvalue, const V4& quaternion)
 {
-    return M4(glm::toMat4(glm::quat(quaternion.w(), quaternion.x(), quaternion.y(), quaternion.z())) * lvalue.mat<glm::mat4>());
+    return M4(lvalue.mat<glm::mat4>() * glm::toMat4(glm::quat(quaternion.w(), quaternion.x(), quaternion.y(), quaternion.z())));
 }
 
 M4 MatrixUtil::scale(const M4& lvalue, const V3& rvalue)

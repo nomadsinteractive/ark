@@ -600,19 +600,18 @@ void GLPipeline::PipelineOperationDraw::compute(GraphicsContext& /*graphicsConte
 sp<GLPipeline::BakedRenderer> GLPipeline::PipelineOperationDraw::makeBakedRenderer(const PipelineBindings& bindings) const
 {
     GLenum mode = GLUtil::toEnum(bindings.mode());
-    switch(bindings.renderProcedure())
+    switch(bindings.drawProcedure())
     {
-    case PipelineBindings::RENDER_PROCEDURE_DRAW_ARRAYS:
+    case PipelineBindings::DRAW_PROCEDURE_DRAW_ARRAYS:
         return sp<GLDrawArrays>::make(mode);
-    case PipelineBindings::RENDER_PROCEDURE_DRAW_ELEMENTS:
+    case PipelineBindings::DRAW_PROCEDURE_DRAW_ELEMENTS:
         return sp<GLDrawElements>::make(mode);
-    case PipelineBindings::RENDER_PROCEDURE_DRAW_ELEMENTS_INSTANCED:
-        DASSERT(bindings.hasDivisors());
+    case PipelineBindings::DRAW_PROCEDURE_DRAW_INSTANCED:
         return sp<GLDrawElementsInstanced>::make(mode);
-    case PipelineBindings::RENDER_PROCEDURE_DRAW_MULTI_ELEMENTS_INDIRECT:
+    case PipelineBindings::DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT:
         return sp<GLMultiDrawElementsIndirect>::make(mode);
     }
-    DFATAL("Not render procedure creator for %d", bindings.renderProcedure());
+    DFATAL("Not render procedure creator for %d", bindings.drawProcedure());
     return nullptr;
 }
 

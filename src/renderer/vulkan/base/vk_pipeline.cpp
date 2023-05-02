@@ -421,19 +421,19 @@ bool VKPipeline::isDirty(const ByteArray::Borrowed& dirtyFlags) const
 
 sp<VKPipeline::BakedRenderer> VKPipeline::makeBakedRenderer(const PipelineBindings& bindings) const
 {
-    switch(bindings.renderProcedure())
+    switch(bindings.drawProcedure())
     {
-        case PipelineBindings::RENDER_PROCEDURE_DRAW_ARRAYS:
+        case PipelineBindings::DRAW_PROCEDURE_DRAW_ARRAYS:
             return sp<VKDrawArrays>::make();
-        case PipelineBindings::RENDER_PROCEDURE_DRAW_ELEMENTS:
+        case PipelineBindings::DRAW_PROCEDURE_DRAW_ELEMENTS:
             return sp<VKDrawElements>::make();
-        case PipelineBindings::RENDER_PROCEDURE_DRAW_ELEMENTS_INSTANCED:
+        case PipelineBindings::DRAW_PROCEDURE_DRAW_INSTANCED:
             DASSERT(bindings.hasDivisors());
             return sp<VKDrawElementsInstanced>::make();
-        case PipelineBindings::RENDER_PROCEDURE_DRAW_MULTI_ELEMENTS_INDIRECT:
+        case PipelineBindings::DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT:
             return sp<VKMultiDrawElementsIndirect>::make();
         }
-    DFATAL("Not render procedure creator for %d", bindings.renderProcedure());
+    DFATAL("Not render procedure creator for %d", bindings.drawProcedure());
     return nullptr;
 }
 

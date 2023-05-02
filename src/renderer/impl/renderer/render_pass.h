@@ -10,13 +10,14 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/base/buffer.h"
+#include "renderer/base/pipeline_bindings.h"
 #include "renderer/inf/model_loader.h"
 
 namespace ark {
 
 class RenderPass : public Renderer {
 public:
-    RenderPass(sp<Shader> shader, Buffer vertexBuffer, Buffer indexBuffer, ModelLoader::RenderMode mode, sp<Integer> drawCount, const std::map<uint32_t, sp<Uploader>>& dividedUploaders);
+    RenderPass(sp<Shader> shader, Buffer vertexBuffer, Buffer indexBuffer, ModelLoader::RenderMode mode, sp<Integer> drawCount, PipelineBindings::DrawProcedure drawProcedure, const std::map<uint32_t, sp<Uploader>>& dividedUploaders);
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
@@ -34,6 +35,7 @@ public:
         ModelLoader::RenderMode _mode;
         sp<Builder<Integer>> _draw_count;
         std::map<uint32_t, sp<Builder<Uploader>>> _divided_uploaders;
+        PipelineBindings::DrawProcedure _draw_precedure;
         sp<RenderController> _render_controller;
     };
 
@@ -41,6 +43,7 @@ private:
     sp<Shader> _shader;
     Buffer _index_buffer;
     sp<Integer> _draw_count;
+    PipelineBindings::DrawProcedure _draw_procedure;
     sp<ShaderBindings> _shader_bindings;
 };
 

@@ -6,6 +6,8 @@
 #include "core/forwarding.h"
 #include "core/types/shared_ptr.h"
 
+#include "graphics/forwarding.h"
+
 namespace ark {
 namespace plugin {
 namespace noise {
@@ -47,7 +49,7 @@ public:
     float noise3d(float x, float y, float z);
 
 //  [[script::bindings::auto]]
-    sp<FloatArray> noiseMap2d(uint32_t rows, uint32_t cols);
+    sp<FloatArray> noiseMap2d(const RectI& bounds);
 
 private:
     void ensureFractalGenerator();

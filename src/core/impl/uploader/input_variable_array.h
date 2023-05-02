@@ -23,7 +23,6 @@ public:
     virtual void upload(Writable& buf) override {
         for(size_t i = 0; i < _vector.size(); ++i)
             buf.writeObject(_vector[i]->val(), sizeof(T), i * ALIGN);
-//            *reinterpret_cast<T*>(reinterpret_cast<uint8_t*>(buf) + i * ALIGN) = _vector[i]->val();
     }
 
     virtual bool update(uint64_t timestamp) override {

@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_BASE_PIPELINE_BINDINGS_H_
-#define ARK_RENDERER_BASE_PIPELINE_BINDINGS_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/forwarding.h"
@@ -26,11 +25,12 @@ public:
         FLAG_DEFAULT_VALUE = FLAG_CULL_MODE_CCW
     };
 
-    enum RenderProcedure {
-        RENDER_PROCEDURE_DRAW_ARRAYS,
-        RENDER_PROCEDURE_DRAW_ELEMENTS,
-        RENDER_PROCEDURE_DRAW_ELEMENTS_INSTANCED,
-        RENDER_PROCEDURE_DRAW_MULTI_ELEMENTS_INDIRECT
+    enum DrawProcedure {
+        DRAW_PROCEDURE_AUTO,
+        DRAW_PROCEDURE_DRAW_ARRAYS,
+        DRAW_PROCEDURE_DRAW_ELEMENTS,
+        DRAW_PROCEDURE_DRAW_INSTANCED,
+        DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT
     };
 
     enum TraitType {
@@ -173,11 +173,11 @@ public:
     };
 
 public:
-    PipelineBindings(ModelLoader::RenderMode mode, RenderProcedure renderProcedure, Parameters parameters, sp<PipelineLayout> pipelineLayout);
+    PipelineBindings(ModelLoader::RenderMode mode, DrawProcedure renderProcedure, Parameters parameters, sp<PipelineLayout> pipelineLayout);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(PipelineBindings);
 
     ModelLoader::RenderMode mode() const;
-    RenderProcedure renderProcedure() const;
+    DrawProcedure drawProcedure() const;
     const Optional<Rect>& scissor() const;
     const Parameters& parameters() const;
 
@@ -201,10 +201,10 @@ public:
 
 private:
     struct Stub {
-        Stub(ModelLoader::RenderMode mode, RenderProcedure renderProcedure, Parameters parameters, sp<PipelineLayout> pipelineLayout);
+        Stub(ModelLoader::RenderMode mode, DrawProcedure renderProcedure, Parameters parameters, sp<PipelineLayout> pipelineLayout);
 
         ModelLoader::RenderMode _mode;
-        RenderProcedure _render_procedure;
+        DrawProcedure _render_procedure;
 
         Parameters _parameters;
 
@@ -224,5 +224,3 @@ private:
 };
 
 }
-
-#endif

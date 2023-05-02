@@ -9,6 +9,29 @@
 
 namespace ark {
 
+
+namespace {
+
+class BindingNames {
+public:
+
+    void addBindings(const std::vector<String>& names) {
+        _names.insert(names.begin(), names.end());
+    }
+
+    std::vector<String> toVector() const {
+        std::vector<String> names;
+        names.insert(names.end(), _names.begin(), _names.end());
+        return names;
+    }
+
+private:
+    std::set<String> _names;
+};
+
+}
+
+
 PipelineInput::AttributeOffsets::AttributeOffsets()
 {
     for(uint32_t i = 0; i < ATTRIBUTE_NAME_COUNT; ++i)
@@ -63,21 +86,22 @@ void PipelineInput::initialize(const PipelineBuildingContext& buildingContext)
     }
     else
     {
-        std::set<String> imageNames;
+        BindingNames samplerNames;
+        BindingNames imageNames;
         ShaderPreprocessor* vertex = buildingContext.tryGetStage(SHADER_STAGE_VERTEX);
         if(vertex)
         {
-            const std::vector<String>& vertexImageNames = vertex->_declaration_images.vars().keys();
-            imageNames.insert(vertexImageNames.begin(), vertexImageNames.end());
+            samplerNames.addBindings(vertex->_declaration_samplers.vars().keys());
+            imageNames.addBindings(vertex->_declaration_images.vars().keys());
         }
         ShaderPreprocessor* fragment = buildingContext.tryGetStage(SHADER_STAGE_FRAGMENT);
         if(fragment)
         {
-            const std::vector<String>& fragmentImageNames = fragment->_declaration_images.vars().keys();
-            imageNames.insert(fragmentImageNames.begin(), fragmentImageNames.end());
-            _sampler_names = fragment->_declaration_samplers.vars().keys();
+            samplerNames.addBindings(fragment->_declaration_samplers.vars().keys());
+            imageNames.addBindings(fragment->_declaration_images.vars().keys());
         }
-        _image_names.insert(_image_names.end(), imageNames.begin(), imageNames.end());
+        _sampler_names = samplerNames.toVector();
+        _image_names = imageNames.toVector();
     }
 }
 

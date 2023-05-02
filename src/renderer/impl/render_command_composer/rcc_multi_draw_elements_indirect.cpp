@@ -92,7 +92,7 @@ sp<ShaderBindings> RCCMultiDrawElementsIndirect::makeShaderBindings(Shader& shad
 {
     _indices = renderController.makeIndexBuffer(Buffer::USAGE_STATIC, sp<IndicesUploader>::make(_model_bundle));
     _draw_indirect = renderController.makeBuffer(Buffer::TYPE_DRAW_INDIRECT, Buffer::USAGE_DYNAMIC, nullptr);
-    return shader.makeBindings(renderController.makeVertexBuffer(Buffer::USAGE_STATIC, sp<VerticesUploader>::make(_model_bundle, shader.input())), renderMode, PipelineBindings::RENDER_PROCEDURE_DRAW_MULTI_ELEMENTS_INDIRECT);
+    return shader.makeBindings(renderController.makeVertexBuffer(Buffer::USAGE_STATIC, sp<VerticesUploader>::make(_model_bundle, shader.input())), renderMode, PipelineBindings::DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT);
 }
 
 void RCCMultiDrawElementsIndirect::postSnapshot(RenderController& /*renderController*/, RenderLayerSnapshot& /*snapshot*/)

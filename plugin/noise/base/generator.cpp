@@ -2,6 +2,8 @@
 
 #include "core/inf/array.h"
 
+#include "graphics/base/rect.h"
+
 namespace ark {
 namespace plugin {
 namespace noise {
@@ -71,10 +73,10 @@ float Generator::noise3d(float x, float y, float z)
     return _generator->GenSingle3D(x, y, z, _seed);
 }
 
-sp<FloatArray> Generator::noiseMap2d(uint32_t rows, uint32_t cols)
+sp<FloatArray> Generator::noiseMap2d(const RectI& bounds)
 {
-    std::vector<float> output(rows * cols);
-    _generator->GenUniformGrid2D(output.data(), 0, 0, cols, rows, _frequency, _seed);
+    std::vector<float> output(bounds.width() * bounds.height());
+    _generator->GenUniformGrid2D(output.data(), bounds.left(), bounds.top(), bounds.width(), bounds.height(), _frequency, _seed);
     return sp<FloatArray::Vector>::make(std::move(output));
 }
 

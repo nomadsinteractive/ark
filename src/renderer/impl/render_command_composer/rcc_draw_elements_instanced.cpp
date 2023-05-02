@@ -24,7 +24,7 @@ RCCDrawElementsInstanced::RCCDrawElementsInstanced(Model model)
 sp<ShaderBindings> RCCDrawElementsInstanced::makeShaderBindings(Shader& shader, RenderController& renderController, ModelLoader::RenderMode renderMode)
 {
     _indices = renderController.makeIndexBuffer(Buffer::USAGE_STATIC, _model.indices());
-    return shader.makeBindings(renderController.makeVertexBuffer(), renderMode, PipelineBindings::RENDER_PROCEDURE_DRAW_ELEMENTS_INSTANCED);
+    return shader.makeBindings(renderController.makeVertexBuffer(), renderMode, PipelineBindings::DRAW_PROCEDURE_DRAW_INSTANCED);
 }
 
 void RCCDrawElementsInstanced::postSnapshot(RenderController& /*renderController*/, RenderLayerSnapshot& snapshot)

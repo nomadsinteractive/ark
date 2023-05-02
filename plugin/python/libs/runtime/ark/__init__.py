@@ -457,17 +457,17 @@ class RenderController:
     UPLOAD_PRIORITY_NORMAL = 1
     UPLOAD_PRIORITY_HIGH = 2
 
-    def upload_buffer(self, buffer: Buffer, input_: 'Uploader', upload_strategy: int, future: Optional[Future] = None,
+    def upload_buffer(self, buffer: Buffer, uploader: 'Uploader', upload_strategy: int, future: Optional[Future] = None,
                       upload_priority: int = UPLOAD_PRIORITY_NORMAL):
         pass
 
-    def make_buffer(self, buffer_type: int, buffer_usage: int, input_: Optional['Uploader'], upload_strategy: int, future: Optional[Future] = None) -> Buffer:
+    def make_buffer(self, buffer_type: int, buffer_usage: int, uploader: Optional['Uploader'], upload_strategy: int, future: Optional[Future] = None) -> Buffer:
         pass
 
-    def make_vertex_buffer(self, buffer_usage: int = Buffer.USAGE_DYNAMIC, input_: Optional['Uploader'] = None) -> Buffer:
+    def make_vertex_buffer(self, buffer_usage: int = Buffer.USAGE_DYNAMIC, uploader: Optional['Uploader'] = None) -> Buffer:
         pass
 
-    def make_index_buffer(self, buffer_usage: int = Buffer.USAGE_DYNAMIC, input_: Optional['Uploader'] = None) -> Buffer:
+    def make_index_buffer(self, buffer_usage: int = Buffer.USAGE_DYNAMIC, uploader: Optional['Uploader'] = None) -> Buffer:
         pass
 
     def create_texture2d(self, bitmap: 'Bitmap', texture_format: int = Texture.FORMAT_AUTO, upload_strategy: int = US_ONCE_AND_ON_SURFACE_READY,

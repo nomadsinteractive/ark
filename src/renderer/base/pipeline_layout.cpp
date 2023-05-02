@@ -104,7 +104,7 @@ void PipelineLayout::tryBindCamera(const ShaderPreprocessor& shaderPreprocessor,
     tryBindUniform(shaderPreprocessor, "u_Projection", camera.projection());
 }
 
-Table<String, sp<Texture> > PipelineLayout::makeBindingSamplers() const
+Table<String, sp<Texture>> PipelineLayout::makeBindingSamplers() const
 {
     DASSERT(_building_context);
     const PipelineInput& pipelineInput = _input;

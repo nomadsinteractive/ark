@@ -24,7 +24,7 @@ RCCDrawElements::RCCDrawElements(Model model)
 sp<ShaderBindings> RCCDrawElements::makeShaderBindings(Shader& shader, RenderController& renderController, ModelLoader::RenderMode renderMode)
 {
     _shared_buffer = renderController.getSharedIndices(_model, renderMode == ModelLoader::RENDER_MODE_TRIANGLE_STRIP);
-    return shader.makeBindings(renderController.makeVertexBuffer(), renderMode, PipelineBindings::RENDER_PROCEDURE_DRAW_ELEMENTS);
+    return shader.makeBindings(renderController.makeVertexBuffer(), renderMode, PipelineBindings::DRAW_PROCEDURE_DRAW_ELEMENTS);
 }
 
 void RCCDrawElements::postSnapshot(RenderController& renderController, RenderLayerSnapshot& snapshot)

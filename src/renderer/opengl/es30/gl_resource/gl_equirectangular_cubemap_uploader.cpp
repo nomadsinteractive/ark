@@ -11,7 +11,7 @@
 namespace ark {
 
 GLEquirectangularCubemapUploader::GLEquirectangularCubemapUploader(const sp<RenderController>& renderController, const Shader& shader, const sp<Texture>& texture, const sp<Size>& size)
-    : _render_controller(renderController), _shader_bindings(shader.makeBindings(Buffer(), ModelLoader::RENDER_MODE_TRIANGLES, PipelineBindings::RENDER_PROCEDURE_DRAW_ELEMENTS)), _texture(texture), _size(size)
+    : _render_controller(renderController), _shader_bindings(shader.makeBindings(Buffer(), ModelLoader::RENDER_MODE_TRIANGLES, PipelineBindings::DRAW_PROCEDURE_DRAW_ELEMENTS)), _texture(texture), _size(size)
 {
 }
 

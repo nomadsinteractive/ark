@@ -39,7 +39,7 @@ public:
     const sp<PipelineInput>& input() const;
     const sp<PipelineLayout>& layout() const;
 
-    sp<ShaderBindings> makeBindings(Buffer vertices, ModelLoader::RenderMode mode, PipelineBindings::RenderProcedure renderProcedure, const std::map<uint32_t, sp<Uploader>>& uploaders = {}) const;
+    sp<ShaderBindings> makeBindings(Buffer vertices, ModelLoader::RenderMode mode, PipelineBindings::DrawProcedure renderProcedure, const std::map<uint32_t, sp<Uploader>>& uploaders = {}) const;
 
     class BUILDER_IMPL : public Builder<Shader> {
     public:
