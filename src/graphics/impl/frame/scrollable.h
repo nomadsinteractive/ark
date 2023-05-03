@@ -11,11 +11,10 @@
 #include "graphics/inf/renderer.h"
 #include "graphics/inf/block.h"
 #include "graphics/inf/tile_maker.h"
-#include "graphics/util/tiles.h"
 
 namespace ark {
 
-class ARK_API Scrollable : public Block {
+class Scrollable : public Block {
 public:
     struct ARK_API Params {
         Params(int32_t rowCount, int32_t colCount, int32_t rowIndex, int32_t colIndex, int32_t rendererWidth, int32_t rendererHeight);

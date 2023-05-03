@@ -1,5 +1,4 @@
-#ifndef ARK_APP_VIEW_VIEW_HIERARCHY_H_
-#define ARK_APP_VIEW_VIEW_HIERARCHY_H_
+#pragma once
 
 #include <vector>
 
@@ -13,7 +12,6 @@
 
 #include "app/forwarding.h"
 #include "app/inf/layout.h"
-#include "app/inf/layout_event_listener.h"
 
 namespace ark {
 
@@ -68,5 +66,3 @@ private:
 };
 
 }
-
-#endif

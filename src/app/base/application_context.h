@@ -44,6 +44,7 @@ public:
 
     const sp<Clock>& sysClock() const;
     const sp<Clock>& appClock() const;
+    const sp<Numeric::Impl>& appClockInterval() const;
     const sp<Vec2Impl>& cursorPosition() const;
 
     bool onEvent(const Event& event);
@@ -140,6 +141,7 @@ private:
     sp<RenderEngine> _render_engine;
     sp<RenderController> _render_controller;
     sp<Variable<uint64_t>::Impl> _app_clock_ticker;
+    sp<Numeric::Impl> _app_clock_interval;
     sp<Clock> _sys_clock;
     sp<Clock> _app_clock;
     sp<ExecutorWorkerStrategy> _worker_strategy;

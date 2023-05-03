@@ -103,7 +103,9 @@ sp<Alphabet> Platform::getSystemAlphabet(const Font& font, const String& lang)
 
 void Platform::glInitialize()
 {
+#ifdef ARK_USE_OPEN_GL
     glbinding::Binding::initialize(nullptr);
+#endif
 }
 
 void Platform::vkInitialize()

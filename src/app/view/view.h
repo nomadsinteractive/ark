@@ -21,7 +21,6 @@
 #include "graphics/forwarding.h"
 
 #include "app/forwarding.h"
-#include "app/inf/layout_event_listener.h"
 #include "app/inf/layout.h"
 
 namespace ark {

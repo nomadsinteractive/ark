@@ -485,6 +485,10 @@ class ApplicationFacade:
         return Clock()
 
     @property
+    def clock_interval(self) -> 'Numeric':
+        return Numeric(0)
+
+    @property
     def cursor_position(self) -> 'Vec2':
         return Vec2(0, 0)
 
@@ -513,8 +517,8 @@ class ApplicationFacade:
         return Camera()
 
     @property
-    def manifest(self) -> 'Manifest':
-        return Manifest()
+    def manifest(self) -> 'ApplicationManifest':
+        return ApplicationManifest()
 
     @property
     def resource_loader(self) -> 'ResourceLoader':
@@ -785,7 +789,7 @@ class Camera:
     def perspective(self, fov, aspect, near, far):
         pass
 
-    def look_at(self, position, target, up):
+    def look_at(self, position: TYPE_VEC3, target: TYPE_VEC3, up: TYPE_VEC3):
         pass
 
     def to_world_position(self, screen_x: float, screen_y: float, z: float) -> tuple:

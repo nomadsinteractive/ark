@@ -20,6 +20,8 @@ public:
 //  [[script::bindings::property]]
     const sp<Clock>& clock() const;
 //  [[script::bindings::property]]
+    sp<Numeric> clockInterval() const;
+//  [[script::bindings::property]]
     sp<Vec2> cursorPosition() const;
 //  [[script::bindings::property]]
     const sp<Size>& surfaceSize() const;

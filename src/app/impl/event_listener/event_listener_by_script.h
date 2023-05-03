@@ -1,5 +1,4 @@
-#ifndef ARK_APP_IMPL_EVENT_LISTENER_EVENT_LISTENER_BY_SCRIPT_H_
-#define ARK_APP_IMPL_EVENT_LISTENER_EVENT_LISTENER_BY_SCRIPT_H_
+#pragma once
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
@@ -10,7 +9,7 @@
 
 namespace ark {
 
-class ARK_API EventListenerByScript : public EventListener {
+class EventListenerByScript : public EventListener {
 public:
     EventListenerByScript(const sp<Script>& script, const String& eventName);
 
@@ -22,5 +21,3 @@ private:
 };
 
 }
-
-#endif

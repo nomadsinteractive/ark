@@ -7,9 +7,9 @@
 #include "core/base/scope.h"
 
 #include "graphics/base/render_request.h"
+#include "graphics/base/v3.h"
 #include "graphics/inf/renderer.h"
 #include "graphics/inf/tile_maker.h"
-#include "graphics/impl/renderer/vertical_scrollable.h"
 
 #include "platform/platform.h"
 

@@ -10,7 +10,7 @@
 namespace ark {
 namespace opengl {
 
-class ARK_API GLCubemap : public GLTexture {
+class GLCubemap : public GLTexture {
 public:
     GLCubemap(sp<Recycler> recycler, sp<Size> size, sp<Texture::Parameters> parameters);
 

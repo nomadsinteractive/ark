@@ -10,6 +10,7 @@
 #include "core/impl/variable/variable_op2.h"
 #include "core/impl/variable/variable_ternary.h"
 #include "core/inf/array.h"
+#include "core/util/log.h"
 
 namespace ark {
 

@@ -24,6 +24,7 @@ private:
     sp<SurfaceController> _surface_controller;
     sp<RenderController> _render_controller;
     sp<Variable<uint64_t>::Impl> _app_clock_ticker;
+    sp<Numeric::Impl> _app_clock_interval;
     uint64_t _pre_frame_timestamp;
 };
 

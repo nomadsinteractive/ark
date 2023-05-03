@@ -1,5 +1,4 @@
-#ifndef ARK_APP_BASE_APPLICATION_MANIFEST_H_
-#define ARK_APP_BASE_APPLICATION_MANIFEST_H_
+#pragma once
 
 #include <vector>
 
@@ -110,5 +109,3 @@ private:
 };
 
 }
-
-#endif

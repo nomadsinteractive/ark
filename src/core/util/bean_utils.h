@@ -12,7 +12,7 @@
 
 namespace ark {
 
-class ARK_API BeanUtils {
+class BeanUtils {
 public:
     static float toFloat(BeanFactory& args, const String& value, float defValue = 0);
     static float toFloat(const sp<Builder<Numeric>>& t, const Scope& args, float defValue = 0);

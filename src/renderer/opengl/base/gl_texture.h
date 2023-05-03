@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_OPENGL_BASE_TEXTURE_H_
-#define ARK_RENDERER_OPENGL_BASE_TEXTURE_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/types/shared_ptr.h"
@@ -14,7 +13,7 @@
 namespace ark {
 namespace opengl {
 
-class ARK_API GLTexture : public Texture::Delegate {
+class GLTexture : public Texture::Delegate {
 public:
     GLTexture(sp<Recycler> recycler, sp<Size> size, uint32_t target, Texture::Type type, sp<Texture::Parameters> parameters);
     virtual ~GLTexture() override;
@@ -50,5 +49,3 @@ protected:
 
 }
 }
-
-#endif

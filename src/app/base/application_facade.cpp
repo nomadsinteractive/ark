@@ -47,6 +47,11 @@ const sp<Clock>& ApplicationFacade::clock() const
     return _context->appClock();
 }
 
+sp<Numeric> ApplicationFacade::clockInterval() const
+{
+    return _context->appClockInterval();
+}
+
 sp<Vec2> ApplicationFacade::cursorPosition() const
 {
     return _context->cursorPosition();
