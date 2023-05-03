@@ -135,8 +135,9 @@ public:
         TraitBlend _blend;
     };
 
-    struct PipelineTraitMeta {
+    struct ARK_API PipelineTraitMeta {
         PipelineTraitMeta(const document& manifest);
+        PipelineTraitMeta(TraitType type, const TraitConfigure& configure);
 
         TraitType _type;
         TraitConfigure _configure;
@@ -146,7 +147,7 @@ public:
 
     };
 
-    typedef Table<int32_t, PipelineTraitMeta> PipelineTraitTable;
+    typedef Table<TraitType, PipelineTraitMeta> PipelineTraitTable;
 
     struct ARK_API Parameters {
         Parameters(Optional<Rect> scissor, PipelineTraitTable tests, uint32_t flags);
@@ -178,9 +179,9 @@ public:
 
     ModelLoader::RenderMode mode() const;
     DrawProcedure drawProcedure() const;
-    const Optional<Rect>& scissor() const;
-    const Parameters& parameters() const;
 
+    const Parameters& parameters() const;
+    const Optional<Rect>& scissor() const;
     const sp<PipelineLayout>& layout() const;
     const sp<PipelineInput>& input() const;
     const sp<Snippet>& snippet() const;

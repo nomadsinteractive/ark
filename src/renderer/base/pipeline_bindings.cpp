@@ -201,6 +201,11 @@ PipelineBindings::PipelineTraitMeta::PipelineTraitMeta(const document& manifest)
     }
 }
 
+PipelineBindings::PipelineTraitMeta::PipelineTraitMeta(TraitType type, const TraitConfigure& configure)
+    : _type(type), _configure(configure)
+{
+}
+
 PipelineBindings::TraitStencilTestSeparate PipelineBindings::PipelineTraitMeta::loadStencilTestSeparate(const document& manifest, bool allowDefaultFace) const
 {
     PipelineBindings::TraitStencilTestSeparate face;

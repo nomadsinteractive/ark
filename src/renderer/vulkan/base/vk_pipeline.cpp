@@ -428,7 +428,6 @@ sp<VKPipeline::BakedRenderer> VKPipeline::makeBakedRenderer(const PipelineBindin
         case PipelineBindings::DRAW_PROCEDURE_DRAW_ELEMENTS:
             return sp<VKDrawElements>::make();
         case PipelineBindings::DRAW_PROCEDURE_DRAW_INSTANCED:
-            DASSERT(bindings.hasDivisors());
             return sp<VKDrawElementsInstanced>::make();
         case PipelineBindings::DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT:
             return sp<VKMultiDrawElementsIndirect>::make();

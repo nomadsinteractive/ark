@@ -155,7 +155,7 @@ ARK_PY_ARGUMENTS = (
     (r'std::wstring\s*&?', GenArgumentMeta('PyObject*', 'std::wstring', 'O')),
     (r'Box\s*&?', GenArgumentMeta('PyObject*', 'Box', 'O')),
     (r'sp<([^>]+|\w+<\w+>)>(?:\s*&|$)', GenArgumentMeta('PyObject*', 'sp<${0}>', 'O')),
-    (r'(Optional<[^\s]+>)[&\s]+', GenArgumentMeta('PyObject*', '${0}', 'O')),
+    (r'(Optional<[^\s]+>)(?:\s*&)?', GenArgumentMeta('PyObject*', '${0}', 'O')),
     (r'(document|element|attribute)\s*&', GenArgumentMeta('PyObject*', '${0}', 'O')),
     (r'(V2|V3|V4)', GenArgumentMeta('PyObject*', '${0}', 'O')),
     (r'([^>]+|\w+<\w+>)\s*&', GenArgumentMeta('PyObject*', 'sp<${0}>', 'O')),

@@ -4,8 +4,10 @@
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
+#include "core/types/optional.h"
 
 #include "graphics/forwarding.h"
+#include "graphics/base/rect.h"
 
 #include "renderer/forwarding.h"
 
@@ -17,7 +19,7 @@ public:
     PrimitiveModelFactory();
 
 //  [[script::bindings::auto]]
-    sp<Model> makePlane(uint32_t subdivisons);
+    sp<Model> makePlane(uint32_t subdivisons, Optional<Rect> texCoords);
 
 };
 

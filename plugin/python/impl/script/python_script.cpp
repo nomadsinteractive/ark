@@ -181,8 +181,8 @@ PyObject* PythonScript::arkModule()
     return _ark_module;
 }
 
-PythonScript::BUILDER::BUILDER(BeanFactory& /*parent*/, const document& doc)
-    : _manifest(doc)
+PythonScript::BUILDER::BUILDER(BeanFactory& /*parent*/, const document& manifest)
+    : _manifest(manifest)
 {
 }
 

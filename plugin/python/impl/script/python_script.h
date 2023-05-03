@@ -1,5 +1,4 @@
-#ifndef ARK_PLUGIN_PYTHON_IMPL_SCRIPT_INTERPRETER_PYTHON_SCRIPT_H_
-#define ARK_PLUGIN_PYTHON_IMPL_SCRIPT_INTERPRETER_PYTHON_SCRIPT_H_
+#pragma once
 
 #include <Python.h>
 
@@ -31,7 +30,7 @@ public:
 //  [[plugin::builder("python")]]
     class BUILDER : public Builder<Script> {
     public:
-        BUILDER(BeanFactory& parent, const document& doc);
+        BUILDER(BeanFactory& factory, const document& manifest);
 
         virtual sp<Script> build(const Scope& args) override;
 
@@ -51,5 +50,3 @@ private:
 }
 }
 }
-
-#endif

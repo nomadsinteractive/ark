@@ -21,10 +21,10 @@ public:
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
-//  [[plugin::resource-loader("render-pass")]]
+//  [[plugin::builder("render-pass")]]
     class BUILDER : public Builder<Renderer> {
     public:
-        BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
+        BUILDER(BeanFactory& factory, const document& manifest);
 
         virtual sp<Renderer> build(const Scope& args) override;
 

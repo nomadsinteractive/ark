@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_PLUGIN_SCRIPT_H_
-#define ARK_CORE_PLUGIN_SCRIPT_H_
+#pragma once
 
 #include <vector>
 
@@ -20,5 +19,3 @@ public:
 };
 
 }
-
-#endif

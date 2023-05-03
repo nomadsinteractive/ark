@@ -2544,7 +2544,7 @@ class PrimitiveModelFactory:
     def __init__(self):
         pass
 
-    def make_plane(self, subdivisons: int) -> Model:
+    def make_plane(self, subdivisons: int, tex_coordinate: Optional[tuple[float, float, float, float]]) -> Model:
         pass
 
 

@@ -47,11 +47,10 @@ void RenderPass::render(RenderRequest& renderRequest, const V3& /*position*/)
     }
 }
 
-RenderPass::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
+RenderPass::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _shader(factory.ensureBuilder<Shader>(manifest, Constants::Attributes::SHADER)), _vertex_buffer(factory.ensureBuilder<Buffer>(manifest, "vertex-buffer")),
       _index_buffer(factory.getBuilder<Buffer>(manifest, "index-buffer")), _mode(Documents::getAttribute<ModelLoader::RenderMode>(manifest, "mode", ModelLoader::RENDER_MODE_TRIANGLES)),
-      _draw_count(factory.ensureBuilder<Integer>(manifest, "draw-count")), _draw_precedure(Enums<PipelineBindings::DrawProcedure>::instance().toEnumOrDefault(Documents::getAttribute(manifest, "draw-precedure"), PipelineBindings::DRAW_PROCEDURE_AUTO)),
-      _render_controller(resourceLoaderContext->renderController())
+      _draw_count(factory.ensureBuilder<Integer>(manifest, "draw-count")), _draw_precedure(Enums<PipelineBindings::DrawProcedure>::instance().toEnumOrDefault(Documents::getAttribute(manifest, "draw-precedure"), PipelineBindings::DRAW_PROCEDURE_AUTO))
 {
     for(const document& i : manifest->children("buffer"))
     {

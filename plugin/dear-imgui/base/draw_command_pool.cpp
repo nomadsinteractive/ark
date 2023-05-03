@@ -8,9 +8,21 @@ namespace ark {
 namespace plugin {
 namespace dear_imgui {
 
+namespace {
+
+PipelineBindings::Parameters makePipelineBindingParameters() {
+    PipelineBindings::PipelineTraitTable traits;
+    PipelineBindings::TraitConfigure configure;
+    configure._cull_face_test = PipelineBindings::TraitCullFaceTest{false, PipelineBindings::FRONT_FACE_DEFAULT};
+    traits.push_back(PipelineBindings::TRAIT_TYPE_CULL_FACE_TEST, PipelineBindings::PipelineTraitMeta(PipelineBindings::TRAIT_TYPE_CULL_FACE_TEST, configure));
+    return PipelineBindings::Parameters(Optional<Rect>(), std::move(traits), PipelineBindings::FLAG_DYNAMIC_SCISSOR);
+}
+
+}
+
 DrawCommandPool::DrawCommandPool(const Shader& shader, const sp<RenderController>& renderController, sp<Texture> texture)
     : _refcount(0), _draw_commands(sp<LFStack<sp<RendererImgui::DrawCommand>>>::make()), _render_controller(renderController),
-      _shader_bindings(sp<ShaderBindings>::make(Buffer(), shader.pipelineFactory(), sp<PipelineBindings>::make(ModelLoader::RENDER_MODE_TRIANGLES, PipelineBindings::DRAW_PROCEDURE_DRAW_ELEMENTS, PipelineBindings::Parameters(Optional<Rect>(), PipelineBindings::PipelineTraitTable(), PipelineBindings::FLAG_CULL_MODE_NONE | PipelineBindings::FLAG_DYNAMIC_SCISSOR), shader.layout()), std::map<uint32_t, Buffer>{}))
+      _shader_bindings(sp<ShaderBindings>::make(Buffer(), shader.pipelineFactory(), sp<PipelineBindings>::make(ModelLoader::RENDER_MODE_TRIANGLES, PipelineBindings::DRAW_PROCEDURE_DRAW_ELEMENTS, makePipelineBindingParameters(), shader.layout()), std::map<uint32_t, Buffer>{}))
 {
     _shader_bindings->pipelineBindings()->bindSampler(std::move(texture));
 }
