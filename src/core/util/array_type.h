@@ -5,6 +5,7 @@
 #include "core/base/wrapper.h"
 #include "core/inf/array.h"
 #include "core/types/implements.h"
+#include "core/types/optional.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -75,8 +76,8 @@ public:
         return self->length();
     }
 
-    static T getItem(const sp<Array<T>>& self, ptrdiff_t index) {
-        return *getSubscriptionPtr(self, index);
+    static Optional<T> getItem(const sp<Array<T>>& self, ptrdiff_t index) {
+        return index >= 0 && static_cast<size_t>(index) < self->length() ? *getSubscriptionPtr(self, index) : Optional<T>();
     }
 
     static int32_t setItem(const sp<Array<T>>& self, ptrdiff_t index, T value) {
@@ -84,7 +85,7 @@ public:
         return 0;
     }
 
-    static T subscribe(const sp<Array<T>>& self, ptrdiff_t index) {
+    static Optional<T> subscribe(const sp<Array<T>>& self, ptrdiff_t index) {
         return getItem(self, index);
     }
 

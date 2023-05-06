@@ -9,23 +9,23 @@
 
 namespace ark {
 
-class InputImpl : public Uploader {
+class UploaderImpl : public Uploader {
 public:
-    InputImpl(size_t size);
-    InputImpl(const std::map<size_t, sp<Uploader>>& inputMap, size_t size = 0);
+    UploaderImpl(size_t size);
+    UploaderImpl(const std::map<size_t, sp<Uploader>>& inputMap, size_t size = 0);
 
     virtual bool update(uint64_t timestamp) override;
-
     virtual void upload(Writable& writable) override;
 
     void addInput(size_t offset, sp<Uploader> input);
     void removeInput(size_t offset);
 
+    void reset(sp<Uploader> uploader);
     void markDirty();
 
 private:
-    struct InputStub {
-        InputStub(size_t offset, sp<Uploader> input, sp<Boolean> disposed);
+    struct UploaderStub {
+        UploaderStub(size_t offset, sp<Uploader> input, sp<Boolean> disposed);
 
         bool isDisposed() const;
 
@@ -39,8 +39,8 @@ private:
     size_t calculateUploaderSize();
 
 private:
-    std::map<size_t, sp<Boolean::Impl>> _inputs_disposed;
-    List<InputStub, ListFilters::Disposable<InputStub>> _inputs;
+    std::map<size_t, sp<Boolean::Impl>> _uploader_states;
+    List<UploaderStub, ListFilters::Disposable<UploaderStub>> _uploaders;
 };
 
 }

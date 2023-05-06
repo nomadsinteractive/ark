@@ -17,40 +17,52 @@ namespace ark {
 
 namespace {
 
-class InputArray : public Uploader {
+class UploaderList : public Uploader {
+private:
+    struct Node {
+        size_t _offset;
+        sp<Uploader> _uploader;
+        bool _dirty;
+    };
+
 public:
-    InputArray(std::vector<sp<Uploader>> inputs)
+    UploaderList(const std::vector<sp<Uploader>>& uploaders)
         : Uploader(0) {
-        for(sp<Uploader>& i : inputs) {
+        for(const sp<Uploader>& i : uploaders) {
             size_t size = i->size();
-            _inputs.emplace_back(_size, std::move(i));
+            _uploaders.push_back(Node{_size, i, true});
             _size += size;
         }
     }
 
     virtual bool update(uint64_t timestamp) override {
         bool dirty = false;
-        for(const auto& i : _inputs)
-            dirty = i.second->update(timestamp) || dirty;
+        for(Node& i : _uploaders) {
+            i._dirty = i._uploader->update(timestamp) || i._dirty;
+            if(i._dirty && !dirty)
+                dirty = true;
+        }
         return dirty;
     }
 
     virtual void upload(Writable& buf) override {
-        for(const auto& i : _inputs) {
-            WritableWithOffset wwo(buf, i.first);
-            i.second->upload(wwo);
-        }
+        for(Node& i : _uploaders)
+            if(i._dirty) {
+                WritableWithOffset wwo(buf, i._offset);
+                i._uploader->upload(wwo);
+                i._dirty = false;
+            }
     }
 
 private:
-    std::vector<std::pair<size_t, sp<Uploader>>> _inputs;
+    std::vector<Node> _uploaders;
 };
 
 }
 
-static sp<InputImpl> ensureImpl(const sp<Uploader>& self)
+static sp<UploaderImpl> ensureImpl(const sp<Uploader>& self)
 {
-    const sp<InputImpl> impl = self.as<InputImpl>();
+    const sp<UploaderImpl> impl = self.as<UploaderImpl>();
     CHECK(impl, "This object is not a InputImpl instance. Use \"reserve\" method to create an InputImpl instance.");
     return impl;
 }
@@ -93,7 +105,7 @@ sp<Uploader> UploaderType::create(sp<Vec4> value, size_t size)
 
 sp<Uploader> UploaderType::create(std::map<size_t, sp<Uploader>> value, size_t size)
 {
-    return sp<InputImpl>::make(std::move(value), size);
+    return sp<UploaderImpl>::make(std::move(value), size);
 }
 
 sp<Uploader> UploaderType::create(std::vector<sp<Mat4>> value, size_t size)
@@ -101,9 +113,9 @@ sp<Uploader> UploaderType::create(std::vector<sp<Mat4>> value, size_t size)
     return reserve(sp<InputVariableArray<M4>>::make(std::move(value)), size);
 }
 
-sp<Uploader> UploaderType::create(std::vector<sp<Uploader>> value, size_t size)
+sp<Uploader> UploaderType::create(const std::vector<sp<Uploader>>& value, size_t size)
 {
-    return reserve(sp<InputArray>::make(std::move(value)), size);
+    return reserve(sp<UploaderList>::make(value), size);
 }
 
 sp<Uploader> UploaderType::create(std::vector<V3> value, size_t size)
@@ -136,14 +148,13 @@ sp<Uploader> UploaderType::makeElementIndexInput(std::vector<element_index_t> va
     return sp<UploaderArray<element_index_t>>::make(std::move(value));
 }
 
-sp<Uploader> UploaderType::blank(size_t size, int32_t fill)
-{
-    return sp<UploaderArray<int8_t>>::make(std::vector<int8_t>(size, static_cast<int8_t>(fill)));
-}
-
 void UploaderType::reset(const sp<Uploader>& self, sp<Uploader> delegate)
 {
-    ensureWrapper(self)->setDelegate(std::move(delegate));
+    const sp<UploaderImpl> impl = self.as<UploaderImpl>();
+    if(impl)
+        impl->reset(std::move(delegate));
+    else
+        ensureWrapper(self)->setDelegate(std::move(delegate));
 }
 
 size_t UploaderType::size(const sp<Uploader>& self)
@@ -157,7 +168,7 @@ sp<Uploader> UploaderType::reserve(sp<Uploader> self, size_t size)
         return self;
 
     ASSERT(size >= self->size());
-    sp<InputImpl> inputImpl = sp<InputImpl>::make(size);
+    sp<UploaderImpl> inputImpl = sp<UploaderImpl>::make(size);
     if(self->size() > 0)
         inputImpl->addInput(0,  std::move(self));
     return inputImpl;
@@ -165,7 +176,7 @@ sp<Uploader> UploaderType::reserve(sp<Uploader> self, size_t size)
 
 sp<Uploader> UploaderType::remap(sp<Uploader> self, size_t size, size_t offset)
 {
-    sp<InputImpl> inputImpl = sp<InputImpl>::make(size);
+    sp<UploaderImpl> inputImpl = sp<UploaderImpl>::make(size);
     if(self->size() > 0)
         inputImpl->addInput(offset,  std::move(self));
     return inputImpl;

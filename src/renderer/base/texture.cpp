@@ -205,7 +205,7 @@ Texture::Parameters::Parameters(Type type, const document& parameters, Format fo
       _features(parameters ? Documents::getAttribute<Texture::Feature>(parameters, "feature", features) : features),
       _flags(parameters ? Documents::getAttribute<Texture::Flag>(parameters, "flags", FLAG_FOR_INPUT) : FLAG_FOR_INPUT),
       _min_filter((features & Texture::FEATURE_MIPMAPS) ? CONSTANT_LINEAR_MIPMAP : CONSTANT_LINEAR), _mag_filter(CONSTANT_LINEAR),
-      _wrap_s(CONSTANT_CLAMP_TO_EDGE), _wrap_t(CONSTANT_CLAMP_TO_EDGE), _wrap_r(CONSTANT_CLAMP_TO_EDGE)
+      _wrap_s(CONSTANT_REPEAT), _wrap_t(CONSTANT_REPEAT), _wrap_r(CONSTANT_REPEAT)
 {
 }
 

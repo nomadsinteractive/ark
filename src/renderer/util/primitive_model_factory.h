@@ -19,7 +19,10 @@ public:
     PrimitiveModelFactory();
 
 //  [[script::bindings::auto]]
-    sp<Model> makePlane(uint32_t subdivisons, Optional<Rect> texCoords);
+    sp<Model> makeTriangle(Optional<Rect> texCoords = Optional<Rect>());
+
+//  [[script::bindings::auto]]
+    sp<Model> makePlane(uint32_t cols, uint32_t rows, Optional<Rect> texCoords = Optional<Rect>());
 
 };
 

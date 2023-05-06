@@ -244,7 +244,8 @@ void RenderController::addPreComposeUpdatable(sp<Updatable> updatable, sp<Boolea
 
 void RenderController::addPreComposeRunnable(sp<Runnable> task, sp<Boolean> canceled)
 {
-    DASSERT(task && canceled);
+    ASSERT(task);
+    CHECK_WARN(canceled, "Adding an undisposable task to application");
     _on_pre_compose_runnable.emplace_back(std::move(task), std::move(canceled));
 }
 

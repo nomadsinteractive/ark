@@ -5,12 +5,12 @@
 
 namespace ark {
 
-InputImpl::InputImpl(size_t size)
+UploaderImpl::UploaderImpl(size_t size)
     : Uploader(size)
 {
 }
 
-InputImpl::InputImpl(const std::map<size_t, sp<Uploader>>& inputMap, size_t size)
+UploaderImpl::UploaderImpl(const std::map<size_t, sp<Uploader>>& inputMap, size_t size)
     : Uploader(size)
 {
     for(const auto& [i, j] : inputMap)
@@ -22,10 +22,10 @@ InputImpl::InputImpl(const std::map<size_t, sp<Uploader>>& inputMap, size_t size
         CHECK(calculateUploaderSize() <= _size, "Input size overflow, size %zd is not long enough to fit all the inputs", _size);
 }
 
-bool InputImpl::update(uint64_t timestamp)
+bool UploaderImpl::update(uint64_t timestamp)
 {
     bool dirty = false;
-    for(InputStub& i : _inputs)
+    for(UploaderStub& i : _uploaders)
     {
         i._dirty_updated = i._input->update(timestamp);
         dirty = dirty || i._dirty_updated || i._dirty_marked;
@@ -33,10 +33,10 @@ bool InputImpl::update(uint64_t timestamp)
     return dirty;
 }
 
-void InputImpl::upload(Writable& writable)
+void UploaderImpl::upload(Writable& writable)
 {
     THREAD_CHECK(THREAD_ID_CORE);
-    for(InputStub& i : _inputs)
+    for(UploaderStub& i : _uploaders)
         if(i._dirty_updated || i._dirty_marked)
         {
             WritableWithOffset wwo(writable, i._offset);
@@ -45,36 +45,45 @@ void InputImpl::upload(Writable& writable)
         }
 }
 
-void InputImpl::addInput(size_t offset, sp<Uploader> input)
+void UploaderImpl::addInput(size_t offset, sp<Uploader> input)
 {
     LOGD("[%p] offset: %zd, size: %zd", this, offset, input->size());
-    sp<Boolean::Impl>& disposed = _inputs_disposed[offset];
+    sp<Boolean::Impl>& disposed = _uploader_states[offset];
     CHECK(disposed == nullptr, "Input offset(%zd) was occupied already", offset);
     CHECK(_size >= offset + input->size(), "Input size overflow, size(%zd) is not big enough to fit this one(offset: %zd, size: %zd)", _size, offset, input->size());
     if(!disposed)
         disposed = sp<Boolean::Impl>::make(false);
-    _inputs.emplace_back(InputStub(offset, std::move(input), disposed));
+    _uploaders.emplace_back(UploaderStub(offset, std::move(input), disposed));
 }
 
-void InputImpl::removeInput(size_t offset)
+void UploaderImpl::removeInput(size_t offset)
 {
     LOGD("[%p] offset: %zd", this, offset);
-    const auto iter = _inputs_disposed.find(offset);
-    CHECK(iter != _inputs_disposed.end(), "Input offset(%zd) unoccupied", offset);
+    const auto iter = _uploader_states.find(offset);
+    CHECK(iter != _uploader_states.end(), "Input offset(%zd) unoccupied", offset);
     iter->second->set(true);
-    _inputs_disposed.erase(iter);
+    _uploader_states.erase(iter);
 }
 
-void InputImpl::markDirty()
+void UploaderImpl::reset(sp<Uploader> uploader)
 {
-    for(InputStub& i : _inputs)
+    _size = uploader->size();
+    for(auto& [i, j] : _uploader_states)
+        j->set(true);
+    _uploader_states.clear();
+    addInput(0, std::move(uploader));
+}
+
+void UploaderImpl::markDirty()
+{
+    for(UploaderStub& i : _uploaders)
         i._dirty_marked = true;
 }
 
-size_t InputImpl::calculateUploaderSize()
+size_t UploaderImpl::calculateUploaderSize()
 {
     size_t size = 0;
-    for(const InputStub& i : _inputs)
+    for(const UploaderStub& i : _uploaders)
     {
         size_t maxSize = i._offset + i._input->size();
         if(maxSize > size)
@@ -83,13 +92,13 @@ size_t InputImpl::calculateUploaderSize()
     return size;
 }
 
-InputImpl::InputStub::InputStub(size_t offset, sp<Uploader> input, sp<Boolean> disposed)
+UploaderImpl::UploaderStub::UploaderStub(size_t offset, sp<Uploader> input, sp<Boolean> disposed)
     : _offset(offset), _input(std::move(input)), _dirty_updated(true), _dirty_marked(true), _disposed(disposed)
 {
     DASSERT(_input);
 }
 
-bool InputImpl::InputStub::isDisposed() const
+bool UploaderImpl::UploaderStub::isDisposed() const
 {
     return _disposed->val();
 }

@@ -14,19 +14,21 @@ namespace {
 
 class BindingNames {
 public:
-
-    void addBindings(const std::vector<String>& names) {
-        _names.insert(names.begin(), names.end());
+    BindingNames(std::vector<String>& names)
+        : _names(names) {
     }
 
-    std::vector<String> toVector() const {
-        std::vector<String> names;
-        names.insert(names.end(), _names.begin(), _names.end());
-        return names;
+    void addBindings(const std::vector<String>& names) {
+        for(const String& i : names)
+            if(_name_set.find(i) == _name_set.end()) {
+                _name_set.insert(i);
+                _names.push_back(i);
+            }
     }
 
 private:
-    std::set<String> _names;
+    std::vector<String>& _names;
+    std::set<String> _name_set;
 };
 
 }
@@ -86,8 +88,8 @@ void PipelineInput::initialize(const PipelineBuildingContext& buildingContext)
     }
     else
     {
-        BindingNames samplerNames;
-        BindingNames imageNames;
+        BindingNames samplerNames(_sampler_names);
+        BindingNames imageNames(_image_names);
         ShaderPreprocessor* vertex = buildingContext.tryGetStage(SHADER_STAGE_VERTEX);
         if(vertex)
         {
@@ -100,8 +102,6 @@ void PipelineInput::initialize(const PipelineBuildingContext& buildingContext)
             samplerNames.addBindings(fragment->_declaration_samplers.vars().keys());
             imageNames.addBindings(fragment->_declaration_images.vars().keys());
         }
-        _sampler_names = samplerNames.toVector();
-        _image_names = imageNames.toVector();
     }
 }
 

@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_UTIL_BYTE_ARRAY_TYPE_H_
-#define ARK_CORE_UTIL_BYTE_ARRAY_TYPE_H_
+#pragma once
 
 #include "core/forwarding.h"
 #include "core/util/array_type.h"
@@ -11,7 +10,6 @@ namespace ark {
 //[[script::bindings::class("ByteArray")]]
 class ARK_API ByteArrayType final : public ArrayType<uint8_t> {
 public:
-
 /*
 //  [[script::bindings::constructor]]
     static sp<ByteArray> create(size_t length, uint8_t fill = 0);
@@ -27,12 +25,12 @@ public:
 //  [[script::bindings::seq(len)]]
     static size_t len(const sp<ByteArray>& self);
 //  [[script::bindings::seq(get)]]
-    static uint8_t getItem(const sp<ByteArray>& self, ptrdiff_t index);
+    static Optional<uint8_t> getItem(const sp<ByteArray>& self, ptrdiff_t index);
 //  [[script::bindings::seq(set)]]
     static int32_t setItem(const sp<ByteArray>& self, ptrdiff_t index, uint8_t value);
 
 //  [[script::bindings::map(get)]]
-    static uint8_t subscribe(const sp<ByteArray>& self, ptrdiff_t index);
+    static Optional<uint8_t> subscribe(const sp<ByteArray>& self, ptrdiff_t index);
 //  [[script::bindings::map(get)]]
     static sp<ByteArray> subscribe(const sp<ByteArray>& self, const Slice& slice);
 //  [[script::bindings::map(set)]]
@@ -43,7 +41,6 @@ public:
 //  [[script::bindings::classmethod]]
     static Span toBytes(const sp<ByteArray>& self);
 */
-
 
 //  [[script::bindings::classmethod]]
     static sp<Integer> toInteger(sp<ByteArray> self);
@@ -57,8 +54,8 @@ public:
 //  [[script::bindings::classmethod]]
     static sp<Vec4> toVec4(sp<ByteArray> self);
 
+//  [[script::bindings::classmethod]]
+    static sp<Runnable> makeWatcher(sp<ByteArray> self, size_t stride, size_t offset, std::function<void (const std::vector<uintptr_t>&)> callback);
 };
 
 }
-
-#endif

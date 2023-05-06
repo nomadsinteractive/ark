@@ -64,7 +64,7 @@ bool AlphabetTrueType::draw(uint32_t c, Bitmap& image, int32_t x, int32_t y)
     return true;
 }
 
-void ark::AlphabetTrueType::setFontSize(const Font::TextSize& textSize)
+void AlphabetTrueType::setFontSize(const Font::TextSize& textSize)
 {
     if(textSize._unit == Font::FONT_SIZE_UNIT_PT)
         FT_Set_Char_Size(_ft_font_face, FreeTypes::ftF26Dot6(textSize._value, 0), 0, 96, 0);

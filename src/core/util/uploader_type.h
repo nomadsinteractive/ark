@@ -34,7 +34,7 @@ public:
 //  [[script::bindings::constructor]]
     static sp<Uploader> create(std::vector<sp<Mat4>> value, size_t size = 0);
 //  [[script::bindings::constructor]]
-    static sp<Uploader> create(std::vector<sp<Uploader>> value, size_t size = 0);
+    static sp<Uploader> create(const std::vector<sp<Uploader>>& value, size_t size = 0);
 //  [[script::bindings::constructor]]
     static sp<Uploader> create(std::vector<V3> value, size_t size = 0);
 //  [[script::bindings::constructor]]
@@ -68,8 +68,6 @@ public:
 
 //  [[script::bindings::auto]]
     static sp<Uploader> makeElementIndexInput(std::vector<element_index_t> value);
-//  [[script::bindings::auto]]
-    static sp<Uploader> blank(size_t size, int32_t fill = 0);
 
 private:
     static sp<UploaderWrapper> ensureWrapper(const sp<Uploader>& self);

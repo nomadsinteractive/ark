@@ -45,7 +45,10 @@ void StateMachine::activateCommand(Command& command)
     if(command.commandGroup())
         command.commandGroup()->resolveConflicts(command, Command::STATE_ACTIVATED, Command::STATE_SUPPRESSED);
     if(command.mask())
+    {
+        ASSERT(_active_state);
         _active_state->resolveConflicts(command, Command::STATE_ACTIVATED, Command::STATE_SUPPRESSED);
+    }
 }
 
 void StateMachine::deactivateCommand(Command& command)

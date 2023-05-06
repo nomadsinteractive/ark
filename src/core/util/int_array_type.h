@@ -27,12 +27,12 @@ public:
 //  [[script::bindings::seq(len)]]
     static size_t len(const sp<IntArray>& self);
 //  [[script::bindings::seq(get)]]
-    static int32_t getItem(const sp<IntArray>& self, ptrdiff_t index);
+    static Optional<int32_t> getItem(const sp<IntArray>& self, ptrdiff_t index);
 //  [[script::bindings::seq(set)]]
     static int32_t setItem(const sp<IntArray>& self, ptrdiff_t index, int32_t value);
 
 //  [[script::bindings::map(get)]]
-    static int32_t subscribe(const sp<IntArray>& self, ptrdiff_t index);
+    static Optional<int32_t> subscribe(const sp<IntArray>& self, ptrdiff_t index);
 //  [[script::bindings::map(get)]]
     static sp<IntArray> subscribe(const sp<IntArray>& self, const Slice& slice);
 //  [[script::bindings::map(set)]]

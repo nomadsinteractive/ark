@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_BASE_CAMERA_H_
-#define ARK_GRAPHICS_BASE_CAMERA_H_
+#pragma once
 
 #include "core/ark.h"
 #include "core/forwarding.h"
@@ -138,5 +137,3 @@ private:
 };
 
 }
-
-#endif
