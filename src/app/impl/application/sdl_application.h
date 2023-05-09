@@ -35,6 +35,7 @@ private:
     uint32_t _window_flag;
 
     bool _use_open_gl;
+    bool _vsync;
 };
 
 }

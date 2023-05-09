@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_BASE_ENUMS_H_
-#define ARK_CORE_BASE_ENUMS_H_
+#pragma once
 
 #include <map>
 #include <optional>
@@ -10,9 +9,9 @@
 
 namespace ark {
 
-template<typename T> class Enums {
+template<typename T> class EnumMap {
 public:
-    Enums() {
+    EnumMap() {
         initialize(_values);
     }
 
@@ -42,8 +41,8 @@ public:
         return static_cast<T>(v);
     }
 
-    static const Enums<T>& instance() {
-        const Global<Enums<T>> inst;
+    static const EnumMap<T>& instance() {
+        const Global<EnumMap<T>> inst;
         return inst;
     }
 
@@ -65,5 +64,3 @@ private:
 };
 
 }
-
-#endif

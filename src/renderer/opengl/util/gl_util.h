@@ -18,7 +18,7 @@ namespace ark {
 
 class GLUtil {
 public:
-    static GLenum toEnum(ModelLoader::RenderMode renderMode);
+    static GLenum toEnum(Enum::RenderMode renderMode);
     static GLenum toBufferType(Buffer::Type type);
     static GLenum toShaderType(PipelineInput::ShaderStage stage);
     static GLenum toCompareFunc(PipelineBindings::CompareFunc func);

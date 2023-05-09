@@ -112,7 +112,7 @@ const sp<PipelineLayout>& Shader::layout() const
     return _pipeline_layout;
 }
 
-sp<ShaderBindings> Shader::makeBindings(Buffer vertices, ModelLoader::RenderMode mode, PipelineBindings::DrawProcedure drawProcedure, const std::map<uint32_t, sp<Uploader>>& uploaders) const
+sp<ShaderBindings> Shader::makeBindings(Buffer vertices, Enum::RenderMode mode, Enum::DrawProcedure drawProcedure, const std::map<uint32_t, sp<Uploader>>& uploaders) const
 {
     return sp<ShaderBindings>::make(std::move(vertices), _pipeline_factory, sp<PipelineBindings>::make(mode, drawProcedure, _binding_params, _pipeline_layout), makeDivivedBuffers(uploaders));
 }

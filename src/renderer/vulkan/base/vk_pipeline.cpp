@@ -423,13 +423,13 @@ sp<VKPipeline::BakedRenderer> VKPipeline::makeBakedRenderer(const PipelineBindin
 {
     switch(bindings.drawProcedure())
     {
-        case PipelineBindings::DRAW_PROCEDURE_DRAW_ARRAYS:
+        case Enum::DRAW_PROCEDURE_DRAW_ARRAYS:
             return sp<VKDrawArrays>::make();
-        case PipelineBindings::DRAW_PROCEDURE_DRAW_ELEMENTS:
+        case Enum::DRAW_PROCEDURE_DRAW_ELEMENTS:
             return sp<VKDrawElements>::make();
-        case PipelineBindings::DRAW_PROCEDURE_DRAW_INSTANCED:
+        case Enum::DRAW_PROCEDURE_DRAW_INSTANCED:
             return sp<VKDrawElementsInstanced>::make();
-        case PipelineBindings::DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT:
+        case Enum::DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT:
             return sp<VKMultiDrawElementsIndirect>::make();
         }
     DFATAL("Not render procedure creator for %d", bindings.drawProcedure());

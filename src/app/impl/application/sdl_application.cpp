@@ -258,7 +258,7 @@ private:
 
 SDLApplication::SDLApplication(sp<ApplicationDelegate> applicationDelegate, sp<ApplicationContext> applicationContext, uint32_t width, uint32_t height, const ApplicationManifest& manifest)
     : Application(std::move(applicationDelegate), applicationContext, width, height, manifest.renderer().toViewport()), _main_window(nullptr), _cond(SDL_CreateCond()), _lock(SDL_CreateMutex()),
-      _controller(sp<SDLApplicationController>::make(std::move(applicationContext))), _window_flag(manifest.application()._window_flag)
+      _controller(sp<SDLApplicationController>::make(std::move(applicationContext))), _window_flag(manifest.application()._window_flag), _vsync(manifest.renderer()._vsync)
 {
 }
 
@@ -310,7 +310,7 @@ int SDLApplication::run()
     SDL_GLContext maincontext = _use_open_gl ? SDL_GL_CreateContext(_main_window) : nullptr;
 
     /* This makes our buffer swap syncronized with the monitor's vertical refresh */
-    if(_use_open_gl)
+    if(_use_open_gl && _vsync)
         SDL_GL_SetSwapInterval(1);
 
     onCreate();
@@ -329,7 +329,9 @@ int SDLApplication::run()
         onSurfaceUpdate();
         if(_use_open_gl)
             SDL_GL_SwapWindow(_main_window);
-        SDL_Delay(1);
+
+        if(_vsync)
+            SDL_Delay(1);
     }
 
     onDestroy();

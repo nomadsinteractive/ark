@@ -1,7 +1,7 @@
 #include "renderer/base/render_controller.h"
 
 #include "core/base/future.h"
-#include "core/base/enums.h"
+#include "core/base/enum_map.h"
 #include "core/inf/runnable.h"
 #include "core/inf/writable.h"
 #include "core/impl/uploader/uploader_snapshot.h"
@@ -400,7 +400,7 @@ void RenderController::RenderResourceList::foreach(GraphicsContext& graphicsCont
         }
 }
 
-template<> void Enums<RenderController::UploadStrategy>::initialize(std::map<String, RenderController::UploadStrategy>& enums)
+template<> void EnumMap<RenderController::UploadStrategy>::initialize(std::map<String, RenderController::UploadStrategy>& enums)
 {
     enums["reload"] = RenderController::US_RELOAD;
     enums["once"] = RenderController::US_ONCE;

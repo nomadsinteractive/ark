@@ -17,6 +17,7 @@ _BUILDABLE_TYPES = TypeVar('_BUILDABLE_TYPES', 'Arena', 'AudioPlayer', 'Boolean'
 
 
 TYPE_INTEGER = Union[int, 'Integer']
+TYPE_ENUM = Union[int, 'Enum']
 TYPE_INT_OR_FLOAT = Union[int, float]
 TYPE_NUMERIC = Union[TYPE_INT_OR_FLOAT, 'Numeric']
 TYPE_RECT = tuple[TYPE_INT_OR_FLOAT, TYPE_INT_OR_FLOAT, TYPE_INT_OR_FLOAT, TYPE_INT_OR_FLOAT]
@@ -66,6 +67,25 @@ def is_debug_build():
 
 def is_publishing_build():
     return False
+
+
+class Enum:
+
+    RENDER_MODE_NONE = -1
+    RENDER_MODE_LINES = 0
+    RENDER_MODE_POINTS = 1
+    RENDER_MODE_TRIANGLES = 2
+    RENDER_MODE_TRIANGLE_STRIP = 3
+    RENDER_MODE_COUNT = 4
+
+    DRAW_PROCEDURE_AUTO = 0
+    DRAW_PROCEDURE_DRAW_ARRAYS = 1
+    DRAW_PROCEDURE_DRAW_ELEMENTS = 2
+    DRAW_PROCEDURE_DRAW_INSTANCED = 3
+    DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT = 4
+
+    def __int__(self) -> int:
+        return 0
 
 
 class Readable:
@@ -140,6 +160,8 @@ class FloatArray(_Array):
 
 
 class ByteArray(_Array):
+    def __init__(self, size: int, fill: int = 0):
+        pass
 
     def to_integer(self) -> 'Integer':
         pass
@@ -733,6 +755,12 @@ class Renderer:
 
     def make_auto_release(self, ref_count: int = 1) -> 'Renderer':
         pass
+
+
+class RenderPass(Renderer):
+    def __init__(self, shader: Shader, vertex_buffer: Buffer, index_buffer: Buffer, draw_count: 'Integer', render_mode: TYPE_ENUM, draw_procedure: TYPE_ENUM,
+                 divided_uploaders: dict[int, 'Uploader']):
+        super().__init__()
 
 
 class ResourceLoader:
@@ -2548,7 +2576,10 @@ class PrimitiveModelFactory:
     def __init__(self):
         pass
 
-    def make_plane(self, subdivisons: int, tex_coordinate: Optional[tuple[float, float, float, float]]) -> Model:
+    def make_triangle(self, tex_coordinate: Optional[tuple[float, float, float, float]] = None) -> Model:
+        pass
+
+    def make_plane(self, cols: int, rows: int, tex_coordinate: Optional[tuple[float, float, float, float]] = None) -> Model:
         pass
 
 

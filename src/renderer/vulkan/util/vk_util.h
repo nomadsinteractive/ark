@@ -37,7 +37,7 @@ public:
     static VkImageUsageFlags toTextureUsage(Texture::Usage usage);
     static VkImageAspectFlags toTextureAspect(Texture::Usage usage);
     static VkShaderStageFlagBits toStage(PipelineInput::ShaderStage stage);
-    static VkPrimitiveTopology toPrimitiveTopology(ModelLoader::RenderMode mode);
+    static VkPrimitiveTopology toPrimitiveTopology(Enum::RenderMode mode);
 
     static std::vector<uint32_t> compileSPIR(const String& source, PipelineInput::ShaderStage stage);
 

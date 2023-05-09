@@ -193,7 +193,10 @@ private:
             PyInstance result = PyInstance::steal(pyObj.call(tuple.pyObject()));
             if(result.isNullptr())
                 PythonInterpreter::instance()->logErr();
-            return ensureCppObject<R>(result.pyObject());
+            if constexpr(std::is_same_v<R, void>)
+                return;
+            else
+                return ensureCppObject<R>(result.pyObject());
         });
     }
     template<typename T> static Optional<T> toCppObject_sfinae(PyObject* obj, typename T::result_type*) {

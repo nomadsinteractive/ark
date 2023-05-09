@@ -1,6 +1,6 @@
 #include "renderer/base/texture.h"
 
-#include "core/base/enums.h"
+#include "core/base/enum_map.h"
 #include "core/inf/array.h"
 #include "core/inf/variable.h"
 #include "core/impl/dictionary/dictionary_by_attribute_name.h"
@@ -139,14 +139,14 @@ template<> ARK_API Texture::Type StringConvert::to<String, Texture::Type>(const 
 template<> ARK_API Texture::Format StringConvert::to<String, Texture::Format>(const String& str)
 {
     if(str)
-        return Enums<Texture::Format>::instance().toEnumCombo(str);
+        return EnumMap<Texture::Format>::instance().toEnumCombo(str);
     return Texture::FORMAT_AUTO;
 }
 
 template<> ARK_API Texture::Usage StringConvert::to<String, Texture::Usage>(const String& str)
 {
     if(str)
-        return Enums<Texture::Usage>::instance().toEnumCombo(str);
+        return EnumMap<Texture::Usage>::instance().toEnumCombo(str);
     return Texture::USAGE_COLOR_ATTACHMENT;
 }
 
@@ -195,7 +195,7 @@ template<> ARK_API Texture::CONSTANT StringConvert::to<String, Texture::CONSTANT
 template<> Texture::Flag StringConvert::to<String, Texture::Flag>(const String& str)
 {
     if(str)
-        return Enums<Texture::Flag>::instance().toEnumCombo(str);
+        return EnumMap<Texture::Flag>::instance().toEnumCombo(str);
     return Texture::FLAG_FOR_INPUT;
 }
 
@@ -282,7 +282,7 @@ void Texture::UploaderBitmap::initialize(GraphicsContext& graphicsContext, Textu
     delegate.uploadBitmap(graphicsContext, _bitmap, {_bitmap->byteArray()});
 }
 
-template<> ARK_API void Enums<Texture::Format>::initialize(std::map<String, Texture::Format>& enums)
+template<> ARK_API void EnumMap<Texture::Format>::initialize(std::map<String, Texture::Format>& enums)
 {
     enums["r"] = Texture::FORMAT_R;
     enums["rg"] = Texture::FORMAT_RG;
@@ -297,14 +297,14 @@ template<> ARK_API void Enums<Texture::Format>::initialize(std::map<String, Text
     enums["32bit"] = Texture::FORMAT_32_BIT;
 }
 
-template<> ARK_API void Enums<Texture::Usage>::initialize(std::map<String, Texture::Usage>& enums)
+template<> ARK_API void EnumMap<Texture::Usage>::initialize(std::map<String, Texture::Usage>& enums)
 {
     enums["color"] = Texture::USAGE_COLOR_ATTACHMENT;
     enums["depth"] = Texture::USAGE_DEPTH_ATTACHMENT;
     enums["stencil"] = Texture::USAGE_DEPTH_STENCIL_ATTACHMENT;
 }
 
-template<> void Enums<Texture::Flag>::initialize(std::map<String, Texture::Flag>& enums)
+template<> void EnumMap<Texture::Flag>::initialize(std::map<String, Texture::Flag>& enums)
 {
     enums["for_input"] = Texture::FLAG_FOR_INPUT;
     enums["for_output"] = Texture::FLAG_FOR_OUTPUT;

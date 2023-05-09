@@ -2,7 +2,7 @@
 
 #include <unordered_map>
 
-#include "core/base/enums.h"
+#include "core/base/enum_map.h"
 #include "core/types/global.h"
 #include "core/util/uploader_type.h"
 #include "core/util/math.h"
@@ -28,10 +28,10 @@
 
 namespace ark {
 
-GLenum GLUtil::toEnum(ModelLoader::RenderMode renderMode)
+GLenum GLUtil::toEnum(Enum::RenderMode renderMode)
 {
-    static const GLenum models[ModelLoader::RENDER_MODE_COUNT] = {GL_LINES, GL_POINTS, GL_TRIANGLES, GL_TRIANGLE_STRIP};
-    DCHECK(renderMode >= 0 && renderMode < ModelLoader::RENDER_MODE_COUNT, "Unknown Mode: %d", renderMode);
+    static const GLenum models[Enum::RENDER_MODE_COUNT] = {GL_LINES, GL_POINTS, GL_TRIANGLES, GL_TRIANGLE_STRIP};
+    DCHECK(renderMode >= 0 && renderMode < Enum::RENDER_MODE_COUNT, "Unknown Mode: %d", renderMode);
     return models[renderMode];
 }
 
@@ -112,12 +112,12 @@ GLenum GLUtil::toFrontFaceType(PipelineBindings::FrontFaceType face)
 
 GLenum GLUtil::getEnum(const String& name)
 {
-    return Enums<GLenum>::instance().ensureEnum(name);
+    return EnumMap<GLenum>::instance().ensureEnum(name);
 }
 
 GLenum GLUtil::getEnum(const String& name, GLenum defValue)
 {
-    return Enums<GLenum>::instance().toEnumOrDefault(name, defValue);
+    return EnumMap<GLenum>::instance().toEnumOrDefault(name, defValue);
 }
 
 GLenum GLUtil::getEnum(const document& manifest, const String& name)
@@ -328,7 +328,7 @@ void GLUtil::glTexImage2D(uint32_t index, int32_t n, void* data)
     ::glTexImage2D(static_cast<GLenum>(GL_TEXTURE_CUBE_MAP_POSITIVE_X + index), 0, static_cast<GLint>(GL_RGBA8), n, n, 0, GL_RGBA, GL_FLOAT, data);
 }
 
-template<> ARK_API void Enums<GLenum>::initialize(std::map<String, GLenum>& enums)
+template<> ARK_API void EnumMap<GLenum>::initialize(std::map<String, GLenum>& enums)
 {
     enums["nearest"] = GL_NEAREST;
     enums["linear"] = GL_LINEAR;

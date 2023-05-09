@@ -11,7 +11,7 @@
 namespace ark {
 
 ModelLoaderQuad::ModelLoaderQuad(sp<Atlas> atlas)
-    : ModelLoader(ModelLoader::RENDER_MODE_TRIANGLES), _atlas(std::move(atlas)), _unit_model(RenderUtil::makeUnitQuadModel())
+    : ModelLoader(Enum::RENDER_MODE_TRIANGLES), _atlas(std::move(atlas)), _unit_model(RenderUtil::makeUnitQuadModel())
 {
 }
 

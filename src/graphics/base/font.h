@@ -18,7 +18,8 @@ public:
     enum Style {
         FONT_STYLE_REGULAR = 0,
         FONT_STYLE_BOLD = 1,
-        FONT_STYLE_ITALIC = 2
+        FONT_STYLE_ITALIC = 2,
+        FONT_STYLE_MONOCHROME = 4
     };
 
     enum SizeUnit {

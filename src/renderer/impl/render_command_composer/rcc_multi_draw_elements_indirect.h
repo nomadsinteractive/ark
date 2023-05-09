@@ -20,7 +20,7 @@ class ARK_API RCCMultiDrawElementsIndirect : public RenderCommandComposer {
 public:
     RCCMultiDrawElementsIndirect(sp<ModelBundle> multiModels);
 
-    virtual sp<ShaderBindings> makeShaderBindings(Shader& shader, RenderController& renderController, ModelLoader::RenderMode renderMode) override;
+    virtual sp<ShaderBindings> makeShaderBindings(Shader& shader, RenderController& renderController, Enum::RenderMode renderMode) override;
 
     virtual void postSnapshot(RenderController& renderController, RenderLayerSnapshot& snapshot) override;
     virtual sp<RenderCommand> compose(const RenderRequest& renderRequest, RenderLayerSnapshot& snapshot) override;

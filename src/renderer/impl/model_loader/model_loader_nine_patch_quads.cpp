@@ -10,7 +10,7 @@
 namespace ark {
 
 ModelLoaderNinePatchQuads::ModelLoaderNinePatchQuads(sp<Atlas> atlas)
-    : ModelLoader(ModelLoader::RENDER_MODE_TRIANGLES), _atlas(std::move(atlas)), _nine_patch_attachment(_atlas->attachments().ensure<Atlas::AttachmentNinePatch>()),
+    : ModelLoader(Enum::RENDER_MODE_TRIANGLES), _atlas(std::move(atlas)), _nine_patch_attachment(_atlas->attachments().ensure<Atlas::AttachmentNinePatch>()),
       _unit_model(RenderUtil::makeUnitNinePatchQuadsModel())
 {
 }

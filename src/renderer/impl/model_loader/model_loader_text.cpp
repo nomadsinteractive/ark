@@ -26,7 +26,7 @@
 namespace ark {
 
 ModelLoaderText::ModelLoaderText(sp<RenderController> renderController, sp<Alphabet> alphabet, sp<Atlas> atlas, const Font::TextSize& textSize)
-    : ModelLoader(ModelLoader::RENDER_MODE_TRIANGLES), _atlas(std::move(atlas)), _atlas_attachment(_atlas->attachments().ensure<AtlasAttachment>(*_atlas, std::move(renderController))),
+    : ModelLoader(Enum::RENDER_MODE_TRIANGLES), _atlas(std::move(atlas)), _atlas_attachment(_atlas->attachments().ensure<AtlasAttachment>(*_atlas, std::move(renderController))),
       _glyph_bundle(_atlas_attachment->makeGlyphBundle(std::move(alphabet), textSize))
 {
 }

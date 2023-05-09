@@ -1,6 +1,6 @@
 #include "renderer/base/pipeline_bindings.h"
 
-#include "core/base/enums.h"
+#include "core/base/enum_map.h"
 #include "core/util/string_convert.h"
 
 #include "renderer/base/graphics_context.h"
@@ -13,17 +13,17 @@
 
 namespace ark {
 
-PipelineBindings::PipelineBindings(ModelLoader::RenderMode mode, DrawProcedure renderProcedure, Parameters parameters, sp<PipelineLayout> pipelineLayout)
+PipelineBindings::PipelineBindings(Enum::RenderMode mode, Enum::DrawProcedure renderProcedure, Parameters parameters, sp<PipelineLayout> pipelineLayout)
     : _stub(sp<Stub>::make(mode, renderProcedure, std::move(parameters), std::move(pipelineLayout)))
 {
 }
 
-ModelLoader::RenderMode PipelineBindings::mode() const
+Enum::RenderMode PipelineBindings::mode() const
 {
     return _stub->_mode;
 }
 
-PipelineBindings::DrawProcedure PipelineBindings::drawProcedure() const
+Enum::DrawProcedure PipelineBindings::drawProcedure() const
 {
     return _stub->_render_procedure;
 }
@@ -111,7 +111,7 @@ sp<Pipeline> PipelineBindings::getPipeline(GraphicsContext& graphicsContext, con
     return _pipeline;
 }
 
-PipelineBindings::Stub::Stub(ModelLoader::RenderMode mode, DrawProcedure renderProcedure, Parameters parameters, sp<PipelineLayout> pipelineLayout)
+PipelineBindings::Stub::Stub(Enum::RenderMode mode, Enum::DrawProcedure renderProcedure, Parameters parameters, sp<PipelineLayout> pipelineLayout)
     : _mode(mode), _render_procedure(renderProcedure), _parameters(std::move(parameters)), _layout(std::move(pipelineLayout)), _input(_layout->input()), _attributes(_input),
       _samplers(_layout->samplers()), _images(_layout->images())
 {
@@ -292,7 +292,7 @@ template<> ARK_API PipelineBindings::FrontFaceType StringConvert::to<String, Pip
     return PipelineBindings::FRONT_FACE_TYPE_BACK;
 }
 
-template<> ARK_API void Enums<PipelineBindings::BlendFactor>::initialize(std::map<String, PipelineBindings::BlendFactor>& enums)
+template<> ARK_API void EnumMap<PipelineBindings::BlendFactor>::initialize(std::map<String, PipelineBindings::BlendFactor>& enums)
 {
     enums["default"] = PipelineBindings::BLEND_FACTOR_DEFAULT;
     enums["zero"] = PipelineBindings::BLEND_FACTOR_ZERO;
@@ -309,17 +309,9 @@ template<> ARK_API void Enums<PipelineBindings::BlendFactor>::initialize(std::ma
     enums["const_alpha"] = PipelineBindings::BLEND_FACTOR_CONST_ALPHA;
 }
 
-template<> void Enums<PipelineBindings::DrawProcedure>::initialize(std::map<String, PipelineBindings::DrawProcedure>& enums)
-{
-    enums["auto"] = PipelineBindings::DRAW_PROCEDURE_AUTO;
-    enums["draw_arrays"] = PipelineBindings::DRAW_PROCEDURE_DRAW_ARRAYS;
-    enums["draw_elements"] = PipelineBindings::DRAW_PROCEDURE_DRAW_ELEMENTS;
-    enums["draw_instanced"] = PipelineBindings::DRAW_PROCEDURE_DRAW_INSTANCED;
-}
-
 template<> ARK_API PipelineBindings::BlendFactor StringConvert::to<String, PipelineBindings::BlendFactor>(const String& str)
 {
-    return Enums<PipelineBindings::BlendFactor>::instance().ensureEnum(str);
+    return EnumMap<PipelineBindings::BlendFactor>::instance().ensureEnum(str);
 }
 
 }

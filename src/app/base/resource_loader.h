@@ -1,5 +1,4 @@
-#ifndef ARK_APP_BASE_RESOURCE_LOADER_H_
-#define ARK_APP_BASE_RESOURCE_LOADER_H_
+#pragma once
 
 #include <unordered_map>
 
@@ -130,5 +129,3 @@ private:
 };
 
 }
-
-#endif

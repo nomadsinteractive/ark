@@ -48,6 +48,7 @@ void ApplicationManifest::load(const String& src)
                                                    Documents::ensureAttribute<float>(resolution, Constants::Attributes::HEIGHT));
         _renderer._version = Documents::getAttribute<Ark::RendererVersion>(renderer, "version", Ark::RENDERER_VERSION_AUTO);
         _renderer._coordinate_system = Documents::getAttribute<Ark::RendererCoordinateSystem>(renderer, "coordinate-system", Ark::COORDINATE_SYSTEM_DEFAULT);
+        _renderer._vsync = Documents::getAttribute<bool>(renderer, "vsync", false);
     }
 
     _heap._device_unit_size = toSize(Documents::getAttributeValue(_content, "heap/device/unit-size", "8M"));

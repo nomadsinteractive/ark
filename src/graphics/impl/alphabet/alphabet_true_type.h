@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_IMPL_ALPHABET_TRUE_TYPE_ALPHABET_H_
-#define ARK_GRAPHICS_IMPL_ALPHABET_TRUE_TYPE_ALPHABET_H_
+#pragma once
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -15,7 +14,7 @@ namespace ark {
 
 class AlphabetTrueType : public Alphabet {
 public:
-    AlphabetTrueType(const String& src, const Font::TextSize& textSize);
+    AlphabetTrueType(const String& src, const Font& font);
     ~AlphabetTrueType() override;
 
     virtual void setTextSize(const Font::TextSize& size) override;
@@ -40,7 +39,7 @@ private:
 
 private:
     sp<FreeTypes> _free_types;
-    Font::TextSize _text_size;
+    Font _font;
 
     FT_Face _ft_font_face;
     int32_t _base_line_position;
@@ -48,5 +47,3 @@ private:
 };
 
 }
-
-#endif

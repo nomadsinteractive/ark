@@ -11,13 +11,13 @@
 
 namespace ark {
 
-AlphabetTrueType::AlphabetTrueType(const String& src, const Font::TextSize& textSize)
-    : _free_types(Global<FreeTypes>()), _text_size(textSize)
+AlphabetTrueType::AlphabetTrueType(const String& src, const Font& font)
+    : _free_types(Global<FreeTypes>()), _font(font)
 {
     sp<Readable> readable = getFontResource(src);
     CHECK(readable, "Font \"%s\" does not exists", src.c_str());
     _free_types->ftNewFaceFromReadable(std::move(readable), 0, &_ft_font_face);
-    setFontSize(textSize);
+    setFontSize(_font.size());
 }
 
 AlphabetTrueType::~AlphabetTrueType()
@@ -27,7 +27,7 @@ AlphabetTrueType::~AlphabetTrueType()
 
 void AlphabetTrueType::setTextSize(const Font::TextSize& size)
 {
-    setFontSize(size._value > 0 ? size : _text_size);
+    setFontSize(size._value > 0 ? size : _font.size());
 }
 
 Optional<Alphabet::Metrics> AlphabetTrueType::measure(int32_t c)
@@ -56,11 +56,29 @@ bool AlphabetTrueType::draw(uint32_t c, Bitmap& image, int32_t x, int32_t y)
     FT_UInt glyphIndex = FT_Get_Char_Index(_ft_font_face, c);
     if(!glyphIndex)
         return false;
-    if(FT_Load_Glyph(_ft_font_face, glyphIndex, FT_LOAD_RENDER | FT_LOAD_TARGET_NORMAL) != 0)
+
+    const bool isMonochrome = _font.style() & Font::FONT_STYLE_MONOCHROME;
+    if(FT_Load_Glyph(_ft_font_face, glyphIndex, FT_LOAD_RENDER | (isMonochrome ? FT_LOAD_TARGET_MONO : FT_LOAD_TARGET_NORMAL)) != 0)
         DFATAL("Error loading glyph, character: %d", c);
     FT_GlyphSlot slot = _ft_font_face->glyph;
     DCHECK(slot, "Glyph not loaded");
-    image.draw(x, y, slot->bitmap.buffer, slot->bitmap.width, slot->bitmap.rows, static_cast<uint32_t>(slot->bitmap.pitch));
+
+    if(isMonochrome)
+    {
+        std::vector<uint8_t> pixels(slot->bitmap.width);
+        for(uint32_t i = 0; i < slot->bitmap.rows; ++i)
+        {
+            const uint8_t* rowbuf = slot->bitmap.buffer + slot->bitmap.pitch * i;
+            for(uint32_t j = 0; j < slot->bitmap.width; ++j)
+            {
+                uint8_t pv = rowbuf[j / sizeof(uint8_t)];
+                pixels[j] = pv & (1 << (7 - (j % sizeof(uint8_t)))) ? std::numeric_limits<uint8_t>::max() : 0;
+            }
+            image.draw(x, y + i, pixels.data(), slot->bitmap.width, 1, pixels.size());
+        }
+    }
+    else
+        image.draw(x, y, slot->bitmap.buffer, slot->bitmap.width, slot->bitmap.rows, static_cast<uint32_t>(slot->bitmap.pitch));
     return true;
 }
 
@@ -93,7 +111,7 @@ AlphabetTrueType::BUILDER::BUILDER(BeanFactory& factory, const document manifest
 
 sp<Alphabet> AlphabetTrueType::BUILDER::build(const Scope& args)
 {
-    return sp<AlphabetTrueType>::make(_src->build(args), Font::TextSize(_text_size->build(args)));
+    return sp<AlphabetTrueType>::make(_src->build(args), Font(Font::TextSize(_text_size->build(args))));
 }
 
 }

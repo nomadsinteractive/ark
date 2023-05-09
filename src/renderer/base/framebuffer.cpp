@@ -77,10 +77,10 @@ sp<Renderer> Framebuffer::RENDERER_BUILDER::build(const Scope& args)
 
 template<> ARK_API Framebuffer::ClearMask StringConvert::to<String, Framebuffer::ClearMask>(const String& str)
 {
-    return Enums<Framebuffer::ClearMask>::instance().toEnumCombo(str);
+    return EnumMap<Framebuffer::ClearMask>::instance().toEnumCombo(str);
 }
 
-template<> void Enums<Framebuffer::ClearMask>::initialize(std::map<String, Framebuffer::ClearMask>& enums)
+template<> void EnumMap<Framebuffer::ClearMask>::initialize(std::map<String, Framebuffer::ClearMask>& enums)
 {
     enums["none"] = Framebuffer::CLEAR_MASK_NONE;
     enums["all"] = Framebuffer::CLEAR_MASK_ALL;

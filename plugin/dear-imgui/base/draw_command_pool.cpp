@@ -22,7 +22,7 @@ PipelineBindings::Parameters makePipelineBindingParameters() {
 
 DrawCommandPool::DrawCommandPool(const Shader& shader, const sp<RenderController>& renderController, sp<Texture> texture)
     : _refcount(0), _draw_commands(sp<LFStack<sp<RendererImgui::DrawCommand>>>::make()), _render_controller(renderController),
-      _shader_bindings(sp<ShaderBindings>::make(Buffer(), shader.pipelineFactory(), sp<PipelineBindings>::make(ModelLoader::RENDER_MODE_TRIANGLES, PipelineBindings::DRAW_PROCEDURE_DRAW_ELEMENTS, makePipelineBindingParameters(), shader.layout()), std::map<uint32_t, Buffer>{}))
+      _shader_bindings(sp<ShaderBindings>::make(Buffer(), shader.pipelineFactory(), sp<PipelineBindings>::make(Enum::RENDER_MODE_TRIANGLES, Enum::DRAW_PROCEDURE_DRAW_ELEMENTS, makePipelineBindingParameters(), shader.layout()), std::map<uint32_t, Buffer>{}))
 {
     _shader_bindings->pipelineBindings()->bindSampler(std::move(texture));
 }

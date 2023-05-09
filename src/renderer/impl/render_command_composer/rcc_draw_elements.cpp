@@ -21,10 +21,10 @@ RCCDrawElements::RCCDrawElements(Model model)
 {
 }
 
-sp<ShaderBindings> RCCDrawElements::makeShaderBindings(Shader& shader, RenderController& renderController, ModelLoader::RenderMode renderMode)
+sp<ShaderBindings> RCCDrawElements::makeShaderBindings(Shader& shader, RenderController& renderController, Enum::RenderMode renderMode)
 {
-    _shared_buffer = renderController.getSharedIndices(_model, renderMode == ModelLoader::RENDER_MODE_TRIANGLE_STRIP);
-    return shader.makeBindings(renderController.makeVertexBuffer(), renderMode, PipelineBindings::DRAW_PROCEDURE_DRAW_ELEMENTS);
+    _shared_buffer = renderController.getSharedIndices(_model, renderMode == Enum::RENDER_MODE_TRIANGLE_STRIP);
+    return shader.makeBindings(renderController.makeVertexBuffer(), renderMode, Enum::DRAW_PROCEDURE_DRAW_ELEMENTS);
 }
 
 void RCCDrawElements::postSnapshot(RenderController& renderController, RenderLayerSnapshot& snapshot)

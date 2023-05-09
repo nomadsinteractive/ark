@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/base/api.h"
+#include "core/base/enum.h"
 #include "core/forwarding.h"
 
 #include "renderer/forwarding.h"
@@ -10,26 +11,16 @@ namespace ark {
 
 class ARK_API ModelLoader {
 public:
-//  [[script::bindings::enumeration]]
-    enum RenderMode {
-        RENDER_MODE_NONE = -1,
-        RENDER_MODE_LINES,
-        RENDER_MODE_POINTS,
-        RENDER_MODE_TRIANGLES,
-        RENDER_MODE_TRIANGLE_STRIP,
-        RENDER_MODE_COUNT,
-    };
-
     enum ModelTrait {
         MODEL_TRAIT_NONE = 0,
         MODEL_TRAIT_FIXED_VERTEX_COUNT = 1
     };
 
-    ModelLoader(RenderMode renderMode);
+    ModelLoader(Enum::RenderMode renderMode);
     virtual ~ModelLoader() = default;
 
 //[[script::bindings::property]]
-    ModelLoader::RenderMode renderMode() const;
+    Enum::RenderMode renderMode() const;
 //[[script::bindings::auto]]
     virtual sp<Model> loadModel(int32_t type) = 0;
 
@@ -44,7 +35,7 @@ public:
     };
 
 private:
-    RenderMode _render_mode;
+    Enum::RenderMode _render_mode;
 };
 
 }

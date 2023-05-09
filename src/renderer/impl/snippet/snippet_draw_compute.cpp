@@ -33,7 +33,7 @@ private:
 }
 
 SnippetDrawCompute::SnippetDrawCompute(sp<Shader> shader, std::array<sp<Integer>, 3> numWorkGroups)
-    : _shader(std::move(shader)), _num_work_groups(std::move(numWorkGroups)), _shader_bindings(_shader->makeBindings(Buffer(), ModelLoader::RENDER_MODE_NONE, PipelineBindings::DRAW_PROCEDURE_DRAW_ARRAYS))
+    : _shader(std::move(shader)), _num_work_groups(std::move(numWorkGroups)), _shader_bindings(_shader->makeBindings(Buffer(), Enum::RENDER_MODE_NONE, Enum::DRAW_PROCEDURE_DRAW_ARRAYS))
 {
 }
 

@@ -602,13 +602,13 @@ sp<GLPipeline::BakedRenderer> GLPipeline::PipelineOperationDraw::makeBakedRender
     GLenum mode = GLUtil::toEnum(bindings.mode());
     switch(bindings.drawProcedure())
     {
-    case PipelineBindings::DRAW_PROCEDURE_DRAW_ARRAYS:
+    case Enum::DRAW_PROCEDURE_DRAW_ARRAYS:
         return sp<GLDrawArrays>::make(mode);
-    case PipelineBindings::DRAW_PROCEDURE_DRAW_ELEMENTS:
+    case Enum::DRAW_PROCEDURE_DRAW_ELEMENTS:
         return sp<GLDrawElements>::make(mode);
-    case PipelineBindings::DRAW_PROCEDURE_DRAW_INSTANCED:
+    case Enum::DRAW_PROCEDURE_DRAW_INSTANCED:
         return sp<GLDrawElementsInstanced>::make(mode);
-    case PipelineBindings::DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT:
+    case Enum::DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT:
         return sp<GLMultiDrawElementsIndirect>::make(mode);
     }
     DFATAL("Not render procedure creator for %d", bindings.drawProcedure());

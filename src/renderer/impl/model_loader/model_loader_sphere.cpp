@@ -92,7 +92,7 @@ public:
 }
 
 ModelLoaderSphere::ModelLoaderSphere(const sp<Atlas>& atlas, uint32_t sampleCount)
-    : ModelLoader(ModelLoader::RENDER_MODE_TRIANGLES), _atlas(atlas), _indices(makeIndices(sampleCount)), _vertices(makeVertices(sampleCount))
+    : ModelLoader(Enum::RENDER_MODE_TRIANGLES), _atlas(atlas), _indices(makeIndices(sampleCount)), _vertices(makeVertices(sampleCount))
 {
 }
 

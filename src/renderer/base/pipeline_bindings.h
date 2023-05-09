@@ -2,6 +2,7 @@
 
 #include "core/base/api.h"
 #include "core/forwarding.h"
+#include "core/base/enum.h"
 #include "core/collection/table.h"
 #include "core/types/shared_ptr.h"
 #include "core/types/optional.h"
@@ -23,14 +24,6 @@ public:
         FLAG_DYNAMIC_SCISSOR = 4,
         FLAG_DYNAMIC_SCISSOR_BITMASK = 4,
         FLAG_DEFAULT_VALUE = FLAG_CULL_MODE_CCW
-    };
-
-    enum DrawProcedure {
-        DRAW_PROCEDURE_AUTO,
-        DRAW_PROCEDURE_DRAW_ARRAYS,
-        DRAW_PROCEDURE_DRAW_ELEMENTS,
-        DRAW_PROCEDURE_DRAW_INSTANCED,
-        DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT
     };
 
     enum TraitType {
@@ -174,11 +167,11 @@ public:
     };
 
 public:
-    PipelineBindings(ModelLoader::RenderMode mode, DrawProcedure renderProcedure, Parameters parameters, sp<PipelineLayout> pipelineLayout);
+    PipelineBindings(Enum::RenderMode mode, Enum::DrawProcedure renderProcedure, Parameters parameters, sp<PipelineLayout> pipelineLayout);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(PipelineBindings);
 
-    ModelLoader::RenderMode mode() const;
-    DrawProcedure drawProcedure() const;
+    Enum::RenderMode mode() const;
+    Enum::DrawProcedure drawProcedure() const;
 
     const Parameters& parameters() const;
     const Optional<Rect>& scissor() const;
@@ -202,10 +195,10 @@ public:
 
 private:
     struct Stub {
-        Stub(ModelLoader::RenderMode mode, DrawProcedure renderProcedure, Parameters parameters, sp<PipelineLayout> pipelineLayout);
+        Stub(Enum::RenderMode mode, Enum::DrawProcedure renderProcedure, Parameters parameters, sp<PipelineLayout> pipelineLayout);
 
-        ModelLoader::RenderMode _mode;
-        DrawProcedure _render_procedure;
+        Enum::RenderMode _mode;
+        Enum::DrawProcedure _render_procedure;
 
         Parameters _parameters;
 

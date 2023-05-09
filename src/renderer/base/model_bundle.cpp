@@ -20,12 +20,12 @@
 namespace ark {
 
 ModelBundle::ModelBundle(sp<MaterialBundle> materialBundle, sp<Importer> importer)
-    : ModelLoader(RENDER_MODE_TRIANGLES), _stub(sp<Stub>::make(std::move(materialBundle), std::move(importer)))
+    : ModelLoader(Enum::RENDER_MODE_TRIANGLES), _stub(sp<Stub>::make(std::move(materialBundle), std::move(importer)))
 {
 }
 
 ModelBundle::ModelBundle(const sp<ModelBundle::Stub>& stub)
-    : ModelLoader(RENDER_MODE_TRIANGLES), _stub(stub)
+    : ModelLoader(Enum::RENDER_MODE_TRIANGLES), _stub(stub)
 {
 }
 

@@ -3,6 +3,7 @@
 #include <map>
 
 #include "core/inf/builder.h"
+#include "core/base/enum.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/inf/renderer.h"
@@ -10,14 +11,14 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/base/buffer.h"
-#include "renderer/base/pipeline_bindings.h"
-#include "renderer/inf/model_loader.h"
 
 namespace ark {
 
-class RenderPass : public Renderer {
+//[[script::bindings::extends(Renderer)]]
+class ARK_API RenderPass : public Renderer {
 public:
-    RenderPass(sp<Shader> shader, Buffer vertexBuffer, Buffer indexBuffer, ModelLoader::RenderMode mode, sp<Integer> drawCount, PipelineBindings::DrawProcedure drawProcedure, const std::map<uint32_t, sp<Uploader>>& dividedUploaders);
+//  [[script::bindings::auto]]
+    RenderPass(sp<Shader> shader, Buffer vertexBuffer, Buffer indexBuffer, sp<Integer> drawCount, Enum::RenderMode mode, Enum::DrawProcedure drawProcedure, const std::map<uint32_t, sp<Uploader>>& dividedUploaders);
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
@@ -32,18 +33,17 @@ public:
         sp<Builder<Shader>> _shader;
         sp<Builder<Buffer>> _vertex_buffer;
         sp<Builder<Buffer>> _index_buffer;
-        ModelLoader::RenderMode _mode;
         sp<Builder<Integer>> _draw_count;
+        Enum::RenderMode _mode;
+        Enum::DrawProcedure _draw_precedure;
         std::map<uint32_t, sp<Builder<Uploader>>> _divided_uploaders;
-        PipelineBindings::DrawProcedure _draw_precedure;
-        sp<RenderController> _render_controller;
     };
 
 private:
     sp<Shader> _shader;
     Buffer _index_buffer;
     sp<Integer> _draw_count;
-    PipelineBindings::DrawProcedure _draw_procedure;
+    Enum::DrawProcedure _draw_procedure;
     sp<ShaderBindings> _shader_bindings;
 };
 
