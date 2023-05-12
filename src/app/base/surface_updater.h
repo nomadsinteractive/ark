@@ -1,5 +1,4 @@
-#ifndef ARK_APP_BASE_SURFACE_UPDATER_H_
-#define ARK_APP_BASE_SURFACE_UPDATER_H_
+#pragma once
 
 #include "core/forwarding.h"
 #include "core/inf/runnable.h"
@@ -29,5 +28,3 @@ private:
 };
 
 }
-
-#endif

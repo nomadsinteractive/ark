@@ -8,6 +8,7 @@
 #include "core/types/optional.h"
 #include "core/types/shared_ptr.h"
 
+#include "graphics/base/camera.h"
 #include "graphics/base/render_layer_snapshot.h"
 
 #include "renderer/forwarding.h"
@@ -120,6 +121,8 @@ public:
 
     void initialize(const PipelineBuildingContext& buildingContext);
 
+    Camera& camera();
+    const Camera& camera() const;
     const std::vector<sp<UBO>>& ubos() const;
 
     std::vector<SSBO>& ssbos();
@@ -142,6 +145,8 @@ public:
     sp<Uniform> getUniform(const String& name) const;
 
 private:
+    Camera _camera;
+
     std::vector<sp<UBO>> _ubos;
     std::vector<SSBO> _ssbos;
 
@@ -150,6 +155,7 @@ private:
     std::vector<String> _image_names;
 
     friend class PipelineLayout;
+    friend class Shader;
 };
 
 }

@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_BASE_TRANSFORM_H_
-#define ARK_GRAPHICS_BASE_TRANSFORM_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/base/timestamp.h"
@@ -148,5 +147,3 @@ private:
 };
 
 }
-
-#endif

@@ -194,9 +194,9 @@ const sp<Uploader>& Uniform::uploader() const
     return _uploader;
 }
 
-void Uniform::setUploader(const sp<Uploader>& uploader)
+void Uniform::setUploader(sp<Uploader> uploader)
 {
-    _uploader = uploader;
+    _uploader = std::move(uploader);
 }
 
 String Uniform::declaration(const String& descriptor) const

@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_UTIL_LOG_H_
-#define ARK_CORE_UTIL_LOG_H_
+#pragma once
 
 #include <chrono>
 
@@ -69,5 +68,3 @@ template<uint32_t Id, uint32_t Interval> uint64_t Trace<Id, Interval>::_TRACE_MI
 #endif
 #define  LOGW(...)     ark::Log::w(ark::Log::func(__ARK_FUNCTION__).c_str(), ark::Strings::sprintf(__VA_ARGS__).c_str())
 #define  LOGE(...)     ark::Log::e(ark::Log::func(__ARK_FUNCTION__).c_str(), ark::Strings::sprintf(__VA_ARGS__).c_str())
-
-#endif

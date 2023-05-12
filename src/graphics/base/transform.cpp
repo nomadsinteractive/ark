@@ -25,7 +25,7 @@ namespace {
 class TransformMat4 : public Mat4 {
 public:
     TransformMat4(sp<Transform> transform)
-        : _transform(std::move(transform)) {
+        : _transform(std::move(transform)), _value(_transform->snapshot(V3(0)).toMatrix()) {
     }
 
     virtual bool update(uint64_t timestamp) override {

@@ -345,7 +345,7 @@ class Manifest:
 
 
 class IDHeap:
-    def __init__(self, heap_size: int, heap_size_l2: int = 0, chunk_size_l2: int = 0):
+    def __init__(self, heap_size: int):
         pass
 
     def allocate(self, size: int, alignment: int = 1) -> int:
@@ -641,13 +641,20 @@ class AtlasImporter:
 
 class Atlas:
 
+    @property
+    def texture(self) -> Texture:
+        pass
+
     def has(self, c: int) -> bool:
         pass
 
-    def get_original_size(self, c:  int) -> Tuple[float, float]:
+    def get_item_uv(self, c: int) -> TYPE_RECT:
         pass
 
-    def get_pivot(self, c:  int) -> Tuple[float, float]:
+    def get_original_size(self, c:  int) -> tuple[float, float]:
+        pass
+
+    def get_pivot(self, c:  int) -> tuple[float, float]:
         pass
 
     def add_importer(self, importer: AtlasImporter, readable: Optional[Readable] = None):
@@ -2573,7 +2580,7 @@ class ConvexHullResolver:
 
 
 class PrimitiveModelFactory:
-    def __init__(self):
+    def __init__(self, mat4: Optional[Mat4] = None):
         pass
 
     def make_triangle(self, tex_coordinate: Optional[tuple[float, float, float, float]] = None) -> Model:

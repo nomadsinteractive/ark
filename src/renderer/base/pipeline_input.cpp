@@ -105,6 +105,16 @@ void PipelineInput::initialize(const PipelineBuildingContext& buildingContext)
     }
 }
 
+Camera& PipelineInput::camera()
+{
+    return _camera;
+}
+
+const Camera& PipelineInput::camera() const
+{
+    return _camera;
+}
+
 const std::vector<sp<PipelineInput::UBO>>& PipelineInput::ubos() const
 {
     return _ubos;

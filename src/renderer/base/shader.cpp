@@ -41,7 +41,8 @@ public:
         sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(_render_controller, _vertex, _fragment);
         buildingContext->loadManifest(_manifest, _factory, args);
         sp<Camera> camera = _camera->build(args);
-        return sp<Shader>::make(_render_controller->createPipelineFactory(), _render_controller, sp<PipelineLayout>::make(buildingContext, camera ? camera : _default_camera), _parameters.build(args));
+        buildingContext->_input->camera().assign(camera ? camera : _default_camera);
+        return sp<Shader>::make(_render_controller->createPipelineFactory(), _render_controller, sp<PipelineLayout>::make(buildingContext), _parameters.build(args));
     }
 
 private:
@@ -102,9 +103,9 @@ const sp<RenderController>& Shader::renderController() const
     return _render_controller;
 }
 
-const sp<Camera>& Shader::camera() const
+void Shader::setCamera(const Camera& camera)
 {
-    return _pipeline_layout->_camera;
+    _pipeline_input->_camera.assign(camera);
 }
 
 const sp<PipelineLayout>& Shader::layout() const
@@ -149,7 +150,8 @@ sp<Shader> Shader::BUILDER_IMPL::build(const Scope& args)
         buildingContext->addSnippet(i->build(args));
 
     const sp<Camera> camera = _camera->build(args);
-    return sp<Shader>::make(_render_controller->createPipelineFactory(), _render_controller, sp<PipelineLayout>::make(buildingContext, camera ? camera : Camera::getDefaultCamera()), _parameters.build(args));
+    buildingContext->_input->camera().assign(camera ? camera : Camera::getDefaultCamera());
+    return sp<Shader>::make(_render_controller->createPipelineFactory(), _render_controller, sp<PipelineLayout>::make(buildingContext), _parameters.build(args));
 }
 
 Shader::StageManifest Shader::BUILDER_IMPL::loadStages(BeanFactory& factory, const document& manifest) const

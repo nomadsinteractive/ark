@@ -314,7 +314,7 @@ sp<Renderer> RendererImgui::BUILDER::build(const Scope& args)
     const RenderEngine& renderEngine = _resource_loader_context->renderController()->renderEngine();
     const Viewport& viewport = renderEngine.viewport();
     _camera->ortho(0, viewport.width(), viewport.height(), 0, viewport.clipNear(), viewport.clipFar(), renderEngine.context()->coordinateSystem());
-    shader->camera()->assign(_camera);
+    shader->setCamera(_camera);
     return sp<RendererImgui>::make(_resource_loader_context, std::move(shader), texture);
 }
 

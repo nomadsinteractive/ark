@@ -18,6 +18,11 @@ void writeCoordinate(VertexWriter& buf, float u, float v) {
     buf.writeTexCoordinate(static_cast<uint16_t>(u * std::numeric_limits<uint16_t>::max()), static_cast<uint16_t>(v * std::numeric_limits<uint16_t>::max()));
 }
 
+V3 toV3(const V4& v4) {
+    float w = v4.w() == 0 ? 0.00000001f : v4.w();
+    return V3(v4.x() / w, v4.y() / w, v4.z() / w);
+}
+
 class VerticesTriangle : public Vertices {
 public:
     VerticesTriangle(Optional<Rect> texCoords)
@@ -50,8 +55,8 @@ private:
 
 class VerticesPlane : public Vertices {
 public:
-    VerticesPlane(uint32_t cols, uint32_t rows, Optional<Rect> texCoords)
-        : Vertices((cols + 1) * (rows + 1)), _cols(cols), _rows(rows), _tex_coords(std::move(texCoords)) {
+    VerticesPlane(uint32_t cols, uint32_t rows, Optional<Rect> texCoords, const sp<Mat4>& matrix)
+        : Vertices((cols + 1) * (rows + 1)), _cols(cols), _rows(rows), _tex_coords(std::move(texCoords)), _matrix(matrix ? Optional<M4>(matrix->val()) : Optional<M4>()) {
     }
 
     virtual void write(VertexWriter& buf, const V3& /*size*/) override {
@@ -63,18 +68,19 @@ public:
         float ustep = texCoords.width() / _cols;
         float vstep = texCoords.height() / _rows;
         float v = texCoords.top();
+        CHECK(hasTexCoords || !buf.hasAttribute(PipelineInput::ATTRIBUTE_NAME_TEX_COORDINATE), "Plane doesn't have a tex coordinate configured, but the shader needs one");
         for(size_t i = 0; i < _rows + 1; ++i) {
-            z += gridSize;
             float x0 = x;
             float u = texCoords.left();
             for(size_t j = 0; j < _cols + 1; ++j) {
                 buf.next();
-                buf.writePosition(V3(x0, 0, z));
+                buf.writePosition(_matrix ? toV3(_matrix.value() * V4(V3(x0, 0, z), 1.0f)) : V3(x0, 0, z));
                 if(hasTexCoords)
                     writeCoordinate(buf, u, v);
                 x0 += gridSize;
                 u += ustep;
             }
+            z += gridSize;
             v += vstep;
         }
     }
@@ -83,6 +89,7 @@ private:
     uint32_t _cols;
     uint32_t _rows;
     Optional<Rect> _tex_coords;
+    Optional<M4> _matrix;
 };
 
 
@@ -140,7 +147,8 @@ private:
 }
 
 
-PrimitiveModelFactory::PrimitiveModelFactory()
+PrimitiveModelFactory::PrimitiveModelFactory(sp<Mat4> transform)
+    : _transform(std::move(transform))
 {
 }
 
@@ -151,7 +159,7 @@ sp<Model> PrimitiveModelFactory::makeTriangle(Optional<Rect> texCoords)
 
 sp<Model> PrimitiveModelFactory::makePlane(uint32_t cols, uint32_t rows, Optional<Rect> texCoords)
 {
-    return sp<Model>::make(sp<UploaderPlane>::make(cols, rows), sp<VerticesPlane>::make(cols, rows, std::move(texCoords)), sp<Metrics>::make(V3(0), V3(cols, rows, 0), V3(0)));
+    return sp<Model>::make(sp<UploaderPlane>::make(cols, rows), sp<VerticesPlane>::make(cols, rows, std::move(texCoords), _transform), sp<Metrics>::make(V3(0), V3(cols, rows, 0), V3(0)));
 }
 
 }

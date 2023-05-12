@@ -36,10 +36,10 @@ const sp<Size>& ShaderFrame::size()
 
 ByteArray::Borrowed ShaderFrame::getVertexBuffer(RenderRequest& renderRequest, const V3& position) const
 {
-    float x = position.x(), y = position.y();
+    float x = position.x(), y = position.y(), z = position.z();
     float top = y + _size->heightAsFloat(), bottom = y;
     uint16_t uvtop = 0xffff, uvbottom = 0;
-    Array<float>::Fixed<16> buffer({x, bottom, 0, 0, x, top, 0, 0, x + _size->widthAsFloat(), bottom, 0, 0, x + _size->widthAsFloat(), top, 0, 0});
+    Array<float>::Fixed<16> buffer({x, bottom, z, 0, x, top, z, 0, x + _size->widthAsFloat(), bottom, z, 0, x + _size->widthAsFloat(), top, z, 0});
     uint16_t* ip = reinterpret_cast<uint16_t*>(buffer.buf());
     ip[6] = 0;
     ip[7] = uvbottom;

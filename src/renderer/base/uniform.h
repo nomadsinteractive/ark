@@ -61,7 +61,7 @@ public:
     const String& declaredType() const;
 
     const sp<Uploader>& uploader() const;
-    void setUploader(const sp<Uploader>& uploader);
+    void setUploader(sp<Uploader> uploader);
 
     int32_t binding() const;
     void setBinding(int32_t binding);

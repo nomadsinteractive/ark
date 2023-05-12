@@ -17,7 +17,7 @@ namespace ark {
 
 class PipelineLayout {
 public:
-    PipelineLayout(sp<PipelineBuildingContext> buildingContext, sp<Camera> camera);
+    PipelineLayout(sp<PipelineBuildingContext> buildingContext);
 
     void initialize();
 
@@ -34,7 +34,7 @@ public:
     const std::vector<sp<Texture>>& images() const;
 
 private:
-    void tryBindUniform(const ShaderPreprocessor& shaderPreprocessor, const String& name, const sp<Uploader>& input);
+    void tryBindUniform(const ShaderPreprocessor& shaderPreprocessor, const String& name, sp<Uploader> input);
     void tryBindCamera(const ShaderPreprocessor& shaderPreprocessor, const Camera& camera);
 
     Table<String, sp<Texture>> makeBindingSamplers() const;
@@ -43,7 +43,6 @@ private:
 private:
     sp<PipelineBuildingContext> _building_context;
 
-    sp<Camera> _camera;
     sp<PipelineInput> _input;
     sp<Snippet> _snippet;
 

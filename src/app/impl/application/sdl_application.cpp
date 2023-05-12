@@ -310,8 +310,8 @@ int SDLApplication::run()
     SDL_GLContext maincontext = _use_open_gl ? SDL_GL_CreateContext(_main_window) : nullptr;
 
     /* This makes our buffer swap syncronized with the monitor's vertical refresh */
-    if(_use_open_gl && _vsync)
-        SDL_GL_SetSwapInterval(1);
+    if(_use_open_gl)
+        SDL_GL_SetSwapInterval(_vsync ? 1 : 0);
 
     onCreate();
     onSurfaceCreated();

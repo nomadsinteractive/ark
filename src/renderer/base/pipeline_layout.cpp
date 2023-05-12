@@ -10,8 +10,8 @@
 
 namespace ark {
 
-PipelineLayout::PipelineLayout(sp<PipelineBuildingContext> buildingContext, sp<Camera> camera)
-    : _building_context(std::move(buildingContext)), _camera(std::move(camera)), _input(_building_context->_input), _snippet(_building_context->makePipelineSnippet()),
+PipelineLayout::PipelineLayout(sp<PipelineBuildingContext> buildingContext)
+    : _building_context(std::move(buildingContext)), _input(_building_context->_input), _snippet(_building_context->makePipelineSnippet()),
       _color_attachment_count(0), _definitions(_building_context->toDefinitions())
 {
     initialize();
@@ -71,9 +71,9 @@ void PipelineLayout::initialize()
     ShaderPreprocessor* vertex = _building_context->tryGetStage(PipelineInput::SHADER_STAGE_VERTEX);
     ShaderPreprocessor* compute = _building_context->tryGetStage(PipelineInput::SHADER_STAGE_COMPUTE);
     if(vertex)
-        tryBindCamera(*vertex, _camera);
+        tryBindCamera(*vertex, _input->_camera);
     if(compute)
-        tryBindCamera(*compute, _camera);
+        tryBindCamera(*compute, _input->_camera);
 
     ShaderPreprocessor* fragment = _building_context->tryGetStage(PipelineInput::SHADER_STAGE_FRAGMENT);
     if(fragment)
@@ -87,12 +87,12 @@ void PipelineLayout::initialize()
     _images = makeBindingImages();
 }
 
-void PipelineLayout::tryBindUniform(const ShaderPreprocessor& shaderPreprocessor, const String& name, const sp<Uploader>& input)
+void PipelineLayout::tryBindUniform(const ShaderPreprocessor& shaderPreprocessor, const String& name, sp<Uploader> input)
 {
     sp<Uniform> uniform = shaderPreprocessor.makeUniformInput(name, Uniform::TYPE_MAT4);
     if(uniform)
     {
-        uniform->setUploader(input);
+        uniform->setUploader(std::move(input));
         _building_context->addUniform(std::move(uniform));
     }
 }

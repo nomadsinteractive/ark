@@ -16,13 +16,16 @@ namespace ark {
 class ARK_API PrimitiveModelFactory {
 public:
 //  [[script::bindings::constructor]]
-    PrimitiveModelFactory();
+    PrimitiveModelFactory(sp<Mat4> transform = nullptr);
 
 //  [[script::bindings::auto]]
     sp<Model> makeTriangle(Optional<Rect> texCoords = Optional<Rect>());
 
 //  [[script::bindings::auto]]
     sp<Model> makePlane(uint32_t cols, uint32_t rows, Optional<Rect> texCoords = Optional<Rect>());
+
+private:
+    sp<Mat4> _transform;
 
 };
 

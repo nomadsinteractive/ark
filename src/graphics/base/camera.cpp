@@ -231,6 +231,8 @@ sp<Mat4> Camera::matrixViewProjection() const
 
 void Camera::assign(const Camera& other)
 {
+    _coordinate_system = other._coordinate_system;
+    _delegate = other._delegate;
     _view->setMatrix(other._view);
     _projection->setMatrix(other._projection);
     _vp->setMatrix(other._vp);

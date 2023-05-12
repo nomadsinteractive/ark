@@ -17,6 +17,7 @@
 
 namespace ark {
 
+//[[script::bindings::auto]]
 class ARK_API Shader {
 public:
     typedef std::map<PipelineInput::ShaderStage, sp<Builder<String>>> StageManifest;
@@ -34,8 +35,7 @@ public:
     const sp<PipelineFactory>& pipelineFactory() const;
     const sp<RenderController>& renderController() const;
 
-//  [[script::bindings::property]]
-    const sp<Camera>& camera() const;
+    void setCamera(const Camera& camera);
     const sp<PipelineInput>& input() const;
     const sp<PipelineLayout>& layout() const;
 

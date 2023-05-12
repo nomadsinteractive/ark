@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_BASE_FRAMEBUFFER_H_
-#define ARK_RENDERER_BASE_FRAMEBUFFER_H_
+#pragma once
 
 #include <vector>
 
@@ -62,5 +61,3 @@ private:
 };
 
 }
-
-#endif

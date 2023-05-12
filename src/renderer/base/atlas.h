@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_BASE_ATLAS_H_
-#define ARK_RENDERER_BASE_ATLAS_H_
+#pragma once
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
@@ -137,5 +136,3 @@ private:
 };
 
 }
-
-#endif
