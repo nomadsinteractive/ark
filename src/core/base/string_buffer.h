@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_BASE_STRING_BUFFER_H_
-#define ARK_CORE_BASE_STRING_BUFFER_H_
+#pragma once
 
 #include <sstream>
 
@@ -28,5 +27,3 @@ private:
 };
 
 }
-
-#endif

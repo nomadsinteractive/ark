@@ -26,6 +26,7 @@
     "sdl2",
     "spdlog",
     "stb",
+    "tinygltf",
     "tinyxml2",
     "yoga",
     "zlib"

@@ -182,6 +182,7 @@ ark_find_vcpkg_package(freetype LIBRARIES freetype)
 
 ark_add_plugin_directory(python plugin/python)
 ark_add_plugin_directory(box2d plugin/box2d)
+ark_add_plugin_directory(gltf plugin/gltf)
 ark_add_plugin_directory(vorbis plugin/vorbis)
 ark_add_plugin_directory(miniaudio plugin/miniaudio)
 ark_add_plugin_directory(noise plugin/noise)
