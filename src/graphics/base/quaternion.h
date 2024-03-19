@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_BASE_QUATERNION_H_
-#define ARK_GRAPHICS_BASE_QUATERNION_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/inf/holder.h"
@@ -30,5 +29,3 @@ private:
 };
 
 }
-
-#endif

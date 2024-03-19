@@ -43,7 +43,7 @@ private:
 class RendererMakerImpl : public RendererMaker {
 public:
     virtual std::vector<Box> make(float x, float y) override {
-        printf("makeTile(%d, %d)\n", x, y);
+        printf("makeTile(%.2f, %.2f)\n", x, y);
         return {sp<TileRendererImpl>::make(x, y)};
     }
 

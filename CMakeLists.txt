@@ -8,6 +8,7 @@ set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libs")
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(ARK_SRC_DIR ${PROJECT_SOURCE_DIR})
 set(ARK_TOOLS_DIR ${ARK_SRC_DIR}/tools/cmake)
@@ -60,6 +61,7 @@ message("Building for ${ARK_SYSTEM_NAME} - ${CMAKE_BUILD_TYPE}; build-share-libs
 ark_compile_definitions(-DARK_SYSTEM_NAME="${ARK_SYSTEM_NAME}")
 ark_compile_definitions(-DARK_BINARY_POSTFIX="$<$<CONFIG:DEBUG>:${CMAKE_DEBUG_POSTFIX}>$<$<CONFIG:RELWITHDEBINFO>:${CMAKE_RELWITHDEBINFO_POSTFIX}>")
 add_compile_definitions(ARK_FLAG_DEBUG=$<IF:$<CONFIG:DEBUG>,1,$<IF:$<CONFIG:RELWITHDEBINFO>,2,0>>)
+add_compile_definitions(GLM_ENABLE_EXPERIMENTAL)
 
 ark_test_big_endian()
 

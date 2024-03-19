@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_BASE_MATERIAL_H_
-#define ARK_GRAPHICS_BASE_MATERIAL_H_
+#pragma once
 
 #include "core/forwarding.h"
 #include "core/base/string.h"
@@ -61,4 +60,3 @@ private:
 
 }
 
-#endif

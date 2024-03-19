@@ -24,8 +24,8 @@ Mesh::Mesh(uint32_t id, String name, std::vector<element_index_t> indices, std::
     : _id(id), _name(std::move(name)), _indices(std::move(indices)), _vertices(std::move(vertices)), _uvs(std::move(uvs)), _normals(std::move(normals)), _tangents(std::move(tangents)), _bone_infos(std::move(boneInfos)),
       _material(std::move(material))
 {
-    DASSERT(_vertices.size() == _uvs->length() && (!_normals || _vertices.size() == _normals->length()) && (!_tangents || _vertices.size() == _tangents->length())
-            && (!_bone_infos || _vertices.size() == _bone_infos->length()));
+    CHECK((!_uvs || _vertices.size() == _uvs->length()) && (!_normals || _vertices.size() == _normals->length()) && (!_tangents || _vertices.size() == _tangents->length()) &&
+          (!_bone_infos || _vertices.size() == _bone_infos->length()), "Invalid mesh \"%s\", id: %d", _name.c_str(), id);
 }
 
 uint32_t Mesh::id() const

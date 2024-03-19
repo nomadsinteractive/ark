@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_BASE_METRICS_H_
-#define ARK_GRAPHICS_BASE_METRICS_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "graphics/base/v3.h"
@@ -35,4 +34,4 @@ private:
 };
 
 }
-#endif
+

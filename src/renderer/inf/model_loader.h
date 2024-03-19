@@ -21,6 +21,7 @@ public:
 
 //[[script::bindings::property]]
     Enum::RenderMode renderMode() const;
+    [[nodiscard]]
 //[[script::bindings::auto]]
     virtual sp<Model> loadModel(int32_t type) = 0;
 
@@ -31,6 +32,7 @@ public:
     public:
         virtual ~Importer() = default;
 
+        [[nodiscard]]
         virtual Model import(const Manifest& manifest, MaterialBundle& materialBundle) = 0;
     };
 

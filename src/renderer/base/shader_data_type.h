@@ -19,14 +19,23 @@ public:
         TYPE_SHORT,
         TYPE_UBYTE,
         TYPE_USHORT,
+        TYPE_UINTEGER,
         TYPE_COUNT
     };
 
+public:
+    ShaderDataType();
+    ShaderDataType(ComponentType componentType, uint32_t numberOfComponents);
+
+    ComponentType componentType() const;
+
+    uint32_t size() const;
+    uint32_t sizeOfComponent() const;
+    uint32_t numberOfComponent() const;
+
 private:
     ComponentType _component_type;
-
-    uint32_t _component_size;
-    uint32_t _array_length;
+    uint32_t _number_of_components;
 };
 
 }

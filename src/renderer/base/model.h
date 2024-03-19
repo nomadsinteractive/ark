@@ -19,7 +19,7 @@ class ARK_API Model {
 public:
     Model() = default;
     Model(sp<Uploader> indices, sp<Vertices> vertices, sp<Metrics> bounds, sp<Metrics> occupies = nullptr);
-    Model(std::vector<sp<Material>> materials, std::vector<sp<Mesh>> meshes, sp<Node> rootNode, sp<Metrics> bounds, sp<Metrics> occupies = nullptr);
+    Model(std::vector<sp<Material>> materials, std::vector<sp<Mesh>> meshes, sp<Node> rootNode, sp<Metrics> bounds = nullptr, sp<Metrics> occupies = nullptr);
     DEFAULT_COPY_AND_ASSIGN(Model);
 
 //  [[script::bindings::property]]
@@ -80,7 +80,6 @@ public:
             loadFlatLayouts(childNode, layout, nodeLayouts);
     }
 
-
 private:
     class InputMeshIndices : public Uploader {
     public:
@@ -112,15 +111,19 @@ private:
     };
 
 private:
+    Metrics calcBoudingAABB() const;
+
+private:
     sp<Uploader> _indices;
     sp<Vertices> _vertices;
-    sp<Metrics> _bounds;
-    sp<Metrics> _occupies;
     sp<Node> _root_node;
     std::vector<sp<Material>> _materials;
     std::vector<sp<Mesh>> _meshes;
     Table<String, sp<Animation>> _animations;
     std::vector<String> _node_names;
+
+    sp<Metrics> _bounds;
+    sp<Metrics> _occupies;
 };
 
 }

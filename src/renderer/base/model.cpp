@@ -11,14 +11,51 @@
 
 namespace ark {
 
+namespace {
+
+struct NodeLayout {
+    NodeLayout()
+        : _node(nullptr), _transform(M4::identity()) {
+    }
+    NodeLayout(const Node& node, const NodeLayout& parentLayout)
+        : _node(&node), _transform(parentLayout._transform* node.transform()) {
+    }
+
+    void calcTransformedBoudingAABB(const V3& a0, const V3& a1, V3& aabbMin, V3& aabbMax) const {
+        calcTransformedPosition(a0, aabbMin, aabbMax);
+        calcTransformedPosition(V3(a0.x(), a0.y(), a1.z()), aabbMin, aabbMax);
+        calcTransformedPosition(V3(a0.x(), a1.y(), a0.z()), aabbMin, aabbMax);
+        calcTransformedPosition(V3(a0.x(), a1.y(), a1.z()), aabbMin, aabbMax);
+        calcTransformedPosition(a1, aabbMin, aabbMax);
+        calcTransformedPosition(V3(a1.x(), a0.y(), a1.z()), aabbMin, aabbMax);
+        calcTransformedPosition(V3(a1.x(), a1.y(), a0.z()), aabbMin, aabbMax);
+        calcTransformedPosition(V3(a1.x(), a1.y(), a1.z()), aabbMin, aabbMax);
+    }
+
+    void calcTransformedPosition(const V3& p0, V3& aabbMin, V3& aabbMax) const {
+        const V3 tp = _transform * p0;
+        for(size_t i = 0; i < 3; ++i) {
+            if(aabbMin[i] > tp[i])
+                aabbMin[i] = tp[i];
+            else if(aabbMax[i] < tp[i])
+                aabbMax[i] = tp[i];
+        }
+    }
+
+    const Node* _node;
+    M4 _transform;
+};
+
+}
+
 Model::Model(sp<Uploader> indices, sp<Vertices> vertices, sp<Metrics> bounds, sp<Metrics> occupies)
     : _indices(std::move(indices)), _vertices(std::move(vertices)), _bounds(std::move(bounds)), _occupies(occupies ? std::move(occupies) : sp<Metrics>(_bounds))
 {
 }
 
 Model::Model(std::vector<sp<Material>> materials, std::vector<sp<Mesh>> meshes, sp<Node> rootNode, sp<Metrics> bounds, sp<Metrics> occupies)
-    : _indices(sp<InputMeshIndices>::make(meshes)), _vertices(sp<MeshVertices>::make(meshes)), _bounds(std::move(bounds)), _occupies(occupies ? std::move(occupies) : sp<Metrics>(_bounds)),
-      _root_node(std::move(rootNode)), _materials(std::move(materials)),_meshes(std::move(meshes))
+    : _indices(sp<InputMeshIndices>::make(meshes)), _vertices(sp<MeshVertices>::make(meshes)), _root_node(std::move(rootNode)), _materials(std::move(materials)), _meshes(std::move(meshes)),
+      _bounds(bounds ? std::move(bounds) : sp<Metrics>::make(calcBoudingAABB())), _occupies(occupies ? std::move(occupies) : sp<Metrics>(_bounds))
 {
 }
 
@@ -125,6 +162,28 @@ void Model::dispose()
 bool Model::isDisposed() const
 {
     return !static_cast<bool>(_indices);
+}
+
+Metrics Model::calcBoudingAABB() const
+{
+    std::map<Mesh*, std::pair<V3, V3>> meshBounds;
+
+    for(const sp<Mesh>& i : _meshes)
+        meshBounds.insert(std::make_pair(i.get(), i->calcBoundingAABB()));
+
+    V3 aabbMin(std::numeric_limits<float>::max()), aabbMax(std::numeric_limits<float>::min());
+
+    std::vector<NodeLayout> nodeLayouts;
+    loadFlatLayouts(_root_node, NodeLayout(), nodeLayouts);
+
+    for(const NodeLayout& i : nodeLayouts)
+        for(const sp<Mesh>& j : i._node->meshes())
+        {
+            const auto& [p0, p1] = meshBounds.at(j.get());
+            i.calcTransformedBoudingAABB(p0, p1, aabbMin, aabbMax);
+        }
+
+    return Metrics(aabbMin, aabbMax);
 }
 
 Model::InputMeshIndices::InputMeshIndices(std::vector<sp<Mesh>> meshes)

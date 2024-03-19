@@ -1,7 +1,5 @@
 #include "graphics/base/rotation.h"
 
-#include <glm/gtx/quaternion.hpp>
-
 #include "core/base/bean_factory.h"
 #include "core/types/null.h"
 #include "core/util/holder_util.h"
@@ -50,7 +48,7 @@ void Rotation::traverse(const Holder::Visitor& visitor)
     HolderUtil::visit(_quaternion, visitor);
 }
 
-const sp<Numeric>& Rotation::theta()
+const sp<Numeric>& Rotation::theta() const
 {
     return _theta.ensure();
 }

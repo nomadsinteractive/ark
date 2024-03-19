@@ -1,5 +1,5 @@
 project(ark-python LANGUAGES C CXX ASM_MASM)
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.15)
 
 set(SRC_DIR ${ARK_SRC_DIR}/plugin/python/3rdparty/Python)
 
@@ -52,7 +52,7 @@ execute_process(
 include(${ARK_GENERATED_FILE_DIRECTORY}/py_ark_bindings.cmake)
 
 ark_find_vcpkg_package(expat LIBRARIES expat::expat)
-include(extensions.cmake)
+#include(extensions.cmake)
 if(WIN32)
     ark_link_libraries(ws2_32 iphlpapi)
 endif()
@@ -61,8 +61,11 @@ if(NOT (ANDROID OR IOS))
     if(Python3_LIBRARIES MATCHES "static")
         ark_compile_definitions(-DPy_NO_ENABLE_SHARED)
     endif()
-    ark_add_executable(_freeze_importlib ${SRC_DIR}/Programs/_freeze_importlib.c)
-    ark_add_generated_file(_freeze_importlib ${CMAKE_CURRENT_SOURCE_DIR}/extension/ark_py_importlib.h ${CMAKE_CURRENT_SOURCE_DIR}/extension extension/_ark_bootstrap.py ark_importlib _ark_bootstrap.py)
+    ark_add_executable(_freeze_module ${SRC_DIR}/Programs/_freeze_module.c)
+    target_include_directories(_freeze_module PRIVATE ${ARK_PYTHON_SRC_DIR}/Include/internal)
+    target_compile_definitions(_freeze_module PRIVATE Py_BUILD_CORE)
+    target_link_libraries(_freeze_module PRIVATE ${ARK_PYTHON_LIBRARIES})
+    ark_add_generated_file(_freeze_module ${CMAKE_CURRENT_SOURCE_DIR}/extension/ark_py_importlib.h ${CMAKE_CURRENT_SOURCE_DIR}/extension extension/_ark_bootstrap.py ark_importlib _ark_bootstrap.py)
 endif()
 
 ark_setup_tools(ark_gen_plugin_class)

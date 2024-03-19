@@ -1,5 +1,5 @@
 project(ark-optick)
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.15)
 
 include(${ARK_SRC_DIR}/tools/cmake/core.cmake)
 

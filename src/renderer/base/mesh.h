@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_BASE_MESH_H_
-#define ARK_RENDERER_BASE_MESH_H_
+#pragma once
 
 #include <array>
 #include <vector>
@@ -84,4 +83,3 @@ private:
 
 }
 
-#endif
