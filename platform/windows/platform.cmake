@@ -21,6 +21,7 @@ set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>${LOCAL_MSV
 
 if(ARK_USE_OPEN_GL)
     ark_find_vcpkg_package(glbinding LIBRARIES glbinding::glbinding glbinding::glbinding-aux)
+    ark_link_libraries(glbinding::glbinding)
 endif()
 
 if(ARK_USE_VULKAN)
@@ -32,7 +33,7 @@ aux_source_directory(platform/windows/impl/runtime LOCAL_RUNTIME_LIBRARY_SRC_LIS
 
 set_source_files_properties(${ARK_GENERATED_FILE_DIRECTORY}/framework_plugin.cpp PROPERTIES COMPILE_FLAGS /bigobj)
 
-set(CMAKE_SHARED_LINKER_FLAGS "/NODEFAULTLIB:python310_d.lib /NODEFAULTLIB:python310.lib /NODEFAULTLIB:python3.lib")
+#set(CMAKE_SHARED_LINKER_FLAGS "/NODEFAULTLIB:python310_d.lib /NODEFAULTLIB:python310.lib /NODEFAULTLIB:python3.lib")
 
 if(ARK_USE_VULKAN)
     ark_compile_definitions(-DVK_USE_PLATFORM_WIN32_KHR)
