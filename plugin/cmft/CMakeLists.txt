@@ -3,8 +3,6 @@ cmake_minimum_required(VERSION 3.15)
 
 include(${ARK_SRC_DIR}/tools/cmake/core.cmake)
 
-ark_ensure_dependency(3rdparty/cmft)
-
 list(APPEND LOCAL_INCLUDE_DIRS .)
 ark_include_directories(${ARK_INCLUDE_DIRS})
 

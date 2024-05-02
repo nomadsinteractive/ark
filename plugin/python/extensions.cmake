@@ -1,7 +1,7 @@
 ark_setup_tools(ark_add_python_extension)
 set(LOCAL_PYTHON_INCLUDE_DIRS ${ARK_PYTHON_INCLUDE_DIR} ${ARK_PYTHON_SRC_DIR}/Include/internal ${ARK_PYTHON_SRC_DIR}/Modules ${LOCAL_INCLUDE_DIRS})
 
-ark_find_vcpkg_package(libffi LIBRARIES libffi)
+ark_find_vcpkg_package(unofficial-libffi LIBRARIES unofficial::libffi::libffi)
 ark_add_python_extension(_ctypes
           SOURCES _ctypes/_ctypes.c
                   _ctypes/callbacks.c
@@ -13,7 +13,7 @@ ark_add_python_extension(_ctypes
           INCLUDEDIRS
               ${LOCAL_PYTHON_INCLUDE_DIRS} ${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include
           DEFINITIONS Py_ENABLE_SHARED Py_BUILD_CORE_MODULE FFI_BUILDING
-          LIBRARIES libffi ${ARK_PYTHON_LIBRARIES}
+          LIBRARIES unofficial::libffi::libffi ${ARK_PYTHON_LIBRARIES}
         )
 
 list(APPEND _decimal_SOURCES

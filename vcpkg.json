@@ -13,6 +13,7 @@
     "glm",
     "glslang",
     "imgui",
+    "libffi",
     "libpng",
     "libjpeg-turbo",
     "libvorbis",

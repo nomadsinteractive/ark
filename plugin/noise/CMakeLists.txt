@@ -14,7 +14,6 @@ list(APPEND LOCAL_INCLUDE_DIRS ${ARK_INCLUDE_DIRS})
 
 list(APPEND LOCAL_INCLUDE_DIRS ${ARK_PLUGIN_DIR})
 
-#ark_ensure_dependency(3rdparty/FastNoise)
 ark_include_directories(3rdparty/FastNoise2/include)
 add_subdirectory(3rdparty/FastNoise2)
 ark_link_libraries(FastNoise2)

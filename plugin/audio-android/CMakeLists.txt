@@ -12,7 +12,6 @@ ark_include_directories(${CMAKE_CURRENT_BINARY_DIR})
 aux_source_directory(. LOCAL_SRC_LIST)
 aux_source_directory(impl/audio_player LOCAL_SRC_LIST)
 
-ark_ensure_dependency(3rdparty/oboe)
 add_subdirectory(3rdparty/oboe)
 ark_include_directories(3rdparty/oboe/include)
 

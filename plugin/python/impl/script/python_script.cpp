@@ -15,8 +15,6 @@
 #include "python/extension/ark_py_importlib.h"
 #include "python/extension/py_instance.h"
 
-#include "platform/platform.h"
-
 
 #ifdef __cplusplus
 extern "C" {
@@ -96,7 +94,6 @@ PythonScript::PythonScript(const String& name, const document& libraries)
         strncpy(encodings, "utf-8", 8);
         Py_FileSystemDefaultEncoding = encodings;
     }
-    Py_SetProgramName(_name.c_str());
 #ifdef ARK_FLAG_PUBLISHING_BUILD
     Py_NoSiteFlag = 1;
 #endif
