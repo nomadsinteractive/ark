@@ -1,5 +1,4 @@
-#ifndef ARK_APP_UTIL_AUDIO_MIXER_H_
-#define ARK_APP_UTIL_AUDIO_MIXER_H_
+#pragma once
 
 #include <vector>
 
@@ -52,5 +51,3 @@ private:
 };
 
 }
-
-#endif

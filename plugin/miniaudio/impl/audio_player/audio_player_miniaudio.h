@@ -1,5 +1,4 @@
-#ifndef ARK_PLUGIN_MINIAUDIO_IMPL_AUDIO_PLAYER_AUDIO_PLAYER_MINIAUDIO_H_
-#define ARK_PLUGIN_MINIAUDIO_IMPL_AUDIO_PLAYER_AUDIO_PLAYER_MINIAUDIO_H_
+#pragma once
 
 #include "core/inf/builder.h"
 #include "core/types/weak_ptr.h"
@@ -58,5 +57,3 @@ private:
 }
 }
 }
-
-#endif

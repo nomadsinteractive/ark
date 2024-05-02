@@ -4,6 +4,7 @@
 #define MINIAUDIO_IMPLEMENTATION
 #endif
 #include <thread>
+#include <miniaudio.h>
 
 #include "core/base/future.h"
 #include "core/inf/executor.h"
@@ -16,16 +17,14 @@
 
 #include "app/util/audio_mixer.h"
 
-#include <miniaudio.h>
-
 
 namespace ark {
 namespace plugin {
 namespace miniaudio {
 
 
-static size_t _decoder_read_proc(ma_decoder* pDecoder, void* pBufferOut, size_t bytesToRead);
-static ma_bool32 _decoder_seek_proc(ma_decoder* pDecoder, int byteOffset, ma_seek_origin origin);
+static ma_result _decoder_read_proc(ma_decoder* pDecoder, void* pBufferOut, size_t bytesToRead, size_t* pBytesRead);
+static ma_result _decoder_seek_proc(ma_decoder* pDecoder, ma_int64 byteOffset, ma_seek_origin origin);
 static void _data_callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 frameCount);
 
 
@@ -47,17 +46,13 @@ public:
         inConfig.format = _device_config.playback.format;
         inConfig.channels = channels;
         inConfig.sampleRate = sampleRate;
-        result = ma_decoder_init_raw(_decoder_read_proc, _decoder_seek_proc, _audio_mixer.get(), &inConfig, nullptr, &_decoder);
+        result = ma_decoder_init(_decoder_read_proc, _decoder_seek_proc, _audio_mixer.get(), &inConfig, &_decoder);
         DCHECK(result == MA_SUCCESS, "Failed to create decoder. Error code: %d", result);
 
     }
     ~MADevice() override {
         ma_device_uninit(&_device);
         ma_decoder_uninit(&_decoder);
-    }
-
-    void data_callback(void* pOutput, const void* /*pInput*/, ma_uint32 frameCount) {
-        ma_decoder_read_pcm_frames(&_decoder, pOutput, frameCount);
     }
 
     virtual void run() override {
@@ -77,21 +72,23 @@ public:
 
 void _data_callback(ma_device* pDevice, void* pOutput, const void* /*pInput*/, ma_uint32 frameCount)
 {
+    ma_uint64 framesRead;
     AudioPlayerMiniAudio::MADevice* stub = reinterpret_cast<AudioPlayerMiniAudio::MADevice*>(pDevice->pUserData);
-    ma_decoder_read_pcm_frames(&stub->_decoder, pOutput, frameCount);
+    ma_decoder_read_pcm_frames(&stub->_decoder, pOutput, frameCount, &framesRead);
 }
 
-size_t _decoder_read_proc(ma_decoder* pDecoder, void* pBufferOut, size_t bytesToRead)
+ma_result _decoder_read_proc(ma_decoder* pDecoder, void* pBufferOut, size_t bytesToRead, size_t* pBytesRead)
 {
     AudioMixer* readable = reinterpret_cast<AudioMixer*>(pDecoder->pUserData);
-    return readable->read(pBufferOut, bytesToRead);
+    *pBytesRead = readable->read(pBufferOut, bytesToRead);
+    return MA_SUCCESS;
 }
 
-ma_bool32 _decoder_seek_proc(ma_decoder* pDecoder, int byteOffset, ma_seek_origin origin)
+ma_result _decoder_seek_proc(ma_decoder* pDecoder, ma_int64 byteOffset, ma_seek_origin origin)
 {
     AudioMixer* readable = reinterpret_cast<AudioMixer*>(pDecoder->pUserData);
     DCHECK(origin == ma_seek_origin_start || origin == ma_seek_origin_current, "ma_seek_origin should be either ma_seek_origin_start or ma_seek_origin_current");
-    return readable->seek(byteOffset, origin == ma_seek_origin_start ? SEEK_SET : SEEK_CUR) == 0;
+    return readable->seek(byteOffset, origin == ma_seek_origin_start ? SEEK_SET : SEEK_CUR) == 0 ? MA_SUCCESS : MA_ERROR;
 }
 
 AudioPlayerMiniAudio::AudioPlayerMiniAudio(const sp<ResourceLoaderContext>& resourceLoaderContext)

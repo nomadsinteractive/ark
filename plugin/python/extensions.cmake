@@ -1,4 +1,5 @@
 ark_setup_tools(ark_add_python_extension)
+set(LOCAL_PYTHON_INCLUDE_DIRS ${ARK_PYTHON_INCLUDE_DIR} ${ARK_PYTHON_SRC_DIR}/Include/internal ${ARK_PYTHON_SRC_DIR}/Modules ${LOCAL_INCLUDE_DIRS})
 
 ark_find_vcpkg_package(libffi LIBRARIES libffi)
 ark_add_python_extension(_ctypes
@@ -10,7 +11,7 @@ ark_add_python_extension(_ctypes
                   _ctypes/stgdict.c
           BUILTIN
           INCLUDEDIRS
-              ${ARK_PYTHON_INCLUDE_DIR} ${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include ${ARK_PYTHON_SRC_DIR}/Include/internal
+              ${LOCAL_PYTHON_INCLUDE_DIRS} ${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include
           DEFINITIONS Py_ENABLE_SHARED Py_BUILD_CORE_MODULE FFI_BUILDING
           LIBRARIES libffi ${ARK_PYTHON_LIBRARIES}
         )
@@ -52,7 +53,7 @@ ark_add_python_extension(_decimal SOURCES
     BUILTIN
     DEFINITIONS Py_ENABLE_SHARED Py_BUILD_CORE_MODULE ${_decimal_DEFINITIONS}
     INCLUDEDIRS
-        ${ARK_PYTHON_INCLUDE_DIR}
+        ${LOCAL_PYTHON_INCLUDE_DIRS}
         ${ARK_PYTHON_SRC_DIR}/Modules/_decimal
         ${ARK_PYTHON_SRC_DIR}/Modules/_decimal/libmpdec
 )
@@ -62,8 +63,7 @@ ark_add_python_extension(_socket
     BUILTIN
     DEFINITIONS Py_ENABLE_SHARED Py_BUILD_CORE_MODULE
     INCLUDEDIRS
-        ${ARK_PYTHON_INCLUDE_DIR}
-        ${ARK_PYTHON_SRC_DIR}/Modules
+        ${LOCAL_PYTHON_INCLUDE_DIRS}
 )
 
 ark_add_python_extension(select
@@ -71,8 +71,7 @@ ark_add_python_extension(select
     BUILTIN
     DEFINITIONS Py_ENABLE_SHARED Py_BUILD_CORE_MODULE
     INCLUDEDIRS
-        ${ARK_PYTHON_INCLUDE_DIR}
-        ${ARK_PYTHON_SRC_DIR}/Modules
+        ${LOCAL_PYTHON_INCLUDE_DIRS}
 )
 
 ark_add_python_extension(pyexpat
@@ -80,9 +79,7 @@ ark_add_python_extension(pyexpat
     BUILTIN
     DEFINITIONS Py_ENABLE_SHARED Py_BUILD_CORE_MODULE
     INCLUDEDIRS
-        ${LOCAL_INCLUDE_DIRS}
-        ${ARK_PYTHON_INCLUDE_DIR}
-        ${ARK_PYTHON_SRC_DIR}/Modules
+        ${LOCAL_PYTHON_INCLUDE_DIRS}
 )
 
 ark_add_python_extension(overlapped
@@ -90,6 +87,5 @@ ark_add_python_extension(overlapped
     BUILTIN
     DEFINITIONS Py_ENABLE_SHARED Py_BUILD_CORE_MODULE
     INCLUDEDIRS
-        ${ARK_PYTHON_INCLUDE_DIR}
-        ${ARK_PYTHON_SRC_DIR}/Modules
+        ${LOCAL_PYTHON_INCLUDE_DIRS}
 )

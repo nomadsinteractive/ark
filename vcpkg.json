@@ -21,6 +21,7 @@
       "name": "pthread",
       "platform": "osx"
     },
+    "miniaudio",
     "nlohmann-json",
     "python3",
     "sdl2",

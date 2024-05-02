@@ -1,5 +1,4 @@
-#ifndef ARK_PLUGIN_CMFT_UTIL_CMFT_UTIL_H_
-#define ARK_PLUGIN_CMFT_UTIL_CMFT_UTIL_H_
+#pragma once
 
 #include <cmft/cubemapfilter.h>
 
@@ -19,5 +18,3 @@ public:
 }
 }
 }
-
-#endif

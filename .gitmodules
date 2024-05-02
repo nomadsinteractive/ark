@@ -7,3 +7,6 @@
 [submodule "plugin/noise/3rdparty/FastNoise2"]
 	path = plugin/noise/3rdparty/FastNoise2
 	url = https://github.com/Auburn/FastNoise2.git
+[submodule "plugin/cmft/3rdparty/cmft"]
+	path = plugin/cmft/3rdparty/cmft
+	url = https://github.com/dariomanesku/cmft.git
