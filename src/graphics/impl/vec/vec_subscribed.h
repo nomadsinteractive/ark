@@ -15,7 +15,7 @@ public:
     typedef std::array<size_t, sizeof(T) / sizeof(float)> IndexType;
 
     VecSubscribed(sp<Variable<U>> delegate, IndexType indices)
-        : Wrapper(std::move(delegate)), _indices(std::move(indices)) {
+        : Wrapper<Variable<U>>(std::move(delegate)), _indices(std::move(indices)) {
     }
 
     virtual bool update(uint64_t timestamp) override {

@@ -5,7 +5,7 @@
 namespace ark {
 
 template<typename T, size_t N> std::deque<std::array<T, N>> resolveConvexHull(const std::deque<std::array<T, N>>& points, bool checkResult) {
-    typedef std::deque<std::array<T, N>>::const_iterator PointIterator;
+    typedef typename std::deque<std::array<T, N>>::const_iterator PointIterator;
     typedef quick_hull<PointIterator, T> QuickHull;
     const auto eps = std::numeric_limits<T>::epsilon();
     QuickHull qh{N, eps};
@@ -20,7 +20,7 @@ template<typename T, size_t N> std::deque<std::array<T, N>> resolveConvexHull(co
 
     ASSERT(qh.facets_.size() > 0);
     std::map<std::array<T, N>, PointIterator> facetMap;
-    for(const QuickHull::facet& i : qh.facets_) {
+    for(const typename QuickHull::facet& i : qh.facets_) {
         ASSERT(i.vertices_.size() == 2);
         facetMap[*i.vertices_.at(0)] = i.vertices_.at(1);
     }

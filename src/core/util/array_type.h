@@ -15,7 +15,7 @@ namespace ark {
 template<typename T> class ArrayType {
 private:
 
-    template<typename T> class ArraySliced : public Array<T> {
+    class ArraySliced : public Array<T> {
     public:
         ArraySliced(sp<Array<T>> array, size_t offset, size_t length)
             : _array(std::move(array)), _slice_offset(offset), _slice_length(length) {
@@ -36,7 +36,7 @@ private:
 
     };
 
-    template<typename T> class ArrayWrapper : public Wrapper<Array<T>>, public Array<T>, Implements<ArrayWrapper<T>, Array<T>> {
+    class ArrayWrapper : public Wrapper<Array<T>>, public Array<T>, Implements<ArrayWrapper, Array<T>> {
     public:
         ArrayWrapper(sp<Array<T>> delegate)
             : Wrapper<Array<T>>(std::move(delegate)) {
@@ -59,11 +59,11 @@ public:
     }
 
     static sp<Array<T>> wrap(sp<Array<T>> self) {
-        return sp<ArrayWrapper<T>>::make(std::move(self));
+        return sp<ArrayWrapper>::make(std::move(self));
     }
 
     static void reset(const sp<Array<T>>& self, sp<Array<T>> other) {
-        sp<ArrayWrapper<T>> wrapper = self.as<ArrayWrapper<T>>();
+        sp<ArrayWrapper> wrapper = self.template as<ArrayWrapper>();
         ASSERT(wrapper);
         wrapper->reset(std::move(other));
     }
@@ -93,7 +93,7 @@ public:
         Slice adjusted = slice.adjustIndices(self->length());
         CHECK(adjusted.begin() < adjusted.end() && adjusted.begin() >= 0 && adjusted.end() <= static_cast<ptrdiff_t>(self->length()), "Illegal slice(%d, %d)", slice.begin(), slice.end());
         CHECK(adjusted.step() == 1, "Non-continuous slicing is not supported");
-        return sp<ArraySliced<T>>::make(std::move(self), adjusted.begin(), adjusted.end() - adjusted.begin());
+        return sp<ArraySliced>::make(std::move(self), adjusted.begin(), adjusted.end() - adjusted.begin());
     }
 
     static int32_t subscribeAssign(const sp<Array<T>>& self, ptrdiff_t index, T value) {

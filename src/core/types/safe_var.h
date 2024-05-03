@@ -59,7 +59,7 @@ public:
             _wrapped = ensure_sfinae(std::move(delegate), nullptr);
         else {
             if constexpr(std::is_abstract_v<T>)
-                _wrapped.cast<WrapperType>()->reset(std::move(delegate));
+                _wrapped.template cast<WrapperType>()->reset(std::move(delegate));
             else
                 _wrapped->reset(std::move(delegate));
         }

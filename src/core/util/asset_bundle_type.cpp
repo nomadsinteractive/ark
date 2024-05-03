@@ -59,7 +59,7 @@ public:
     }
 
     virtual std::vector<sp<Asset>> listAssets(const String& regex) override {
-        DFATAL(false, "Unimplemented");
+        DFATAL("Unimplemented");
         return {};
     }
 

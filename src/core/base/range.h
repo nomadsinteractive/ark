@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_BASE_RANGE_H_
-#define ARK_CORE_BASE_RANGE_H_
+#pragma once
 
 #include "core/forwarding.h"
 #include "core/collection/iterable.h"
@@ -11,7 +10,7 @@ public:
     class iterator : public IteratorBase<T*> {
     public:
         iterator(T* ptr, T* end, ptrdiff_t step)
-            : IteratorBase(ptr), _end(end), _step(step) {
+            : IteratorBase<T*>(ptr), _end(end), _step(step) {
         }
 
         iterator& operator ++() {
@@ -38,10 +37,10 @@ public:
         ptrdiff_t _step;
     };
 
-    class const_iterator : public IteratorBase<const T*>{
+    class const_iterator : public IteratorBase<const T*> {
     public:
         const_iterator(const T* ptr, const T* end, ptrdiff_t step)
-            : IteratorBase(ptr), _end(end), _step(step) {
+            : IteratorBase<const T*>(ptr), _end(end), _step(step) {
         }
 
         iterator& operator ++() {
@@ -95,5 +94,3 @@ private:
 };
 
 }
-
-#endif

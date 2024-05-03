@@ -71,7 +71,8 @@ const sp<Vertices>& Model::vertices() const
 
 element_index_t Model::writeIndices(element_index_t* buf, element_index_t baseIndex) const
 {
-    _indices->upload(WritableMemory(buf));
+    WritableMemory memory(buf);
+    _indices->upload(memory);
     element_index_t length = static_cast<element_index_t>(_indices->size() / sizeof(element_index_t));
     if(baseIndex != 0)
         for(size_t i = 0; i < length; ++i)

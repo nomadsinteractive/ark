@@ -8,7 +8,6 @@
 #include "core/inf/array.h"
 #include "core/impl/readable/bytearray_readable.h"
 #include "core/types/shared_ptr.h"
-#include "core/util/strings.h"
 
 #include "platform/platform.h"
 
@@ -23,7 +22,7 @@ public:
     BundleAsset(String location, CFURLRef url)
         : _location(std::move(location)), _url(url) {
     }
-    ~BundleAsset() {
+    ~BundleAsset() override {
         CFRelease(_url);
     }
 
@@ -58,8 +57,8 @@ private:
 
 }
 
-AssetBundleDarwin::AssetBundleDarwin(const String& directory)
-    : _directory(directory)
+AssetBundleDarwin::AssetBundleDarwin(String directory)
+    : _directory(std::move(directory))
 {
 }
 
@@ -89,6 +88,11 @@ bool AssetBundleDarwin::exists(const String& location)
     if(url)
         CFRelease(url);
     return r;
+}
+
+std::vector<sp<Asset>> AssetBundleDarwin::listAssets(const String &regex)
+{
+    return {};
 }
 
 }

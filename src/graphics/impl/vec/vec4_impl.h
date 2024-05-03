@@ -42,8 +42,8 @@ public:
         virtual sp<Vec4> build(const Scope& args) override;
 
     private:
-        sp<Builder<Vec4>> _value;
         SafePtr<Builder<Numeric>> _x, _y, _z, _w;
+        sp<Builder<Vec4>> _value;
     };
 
 //  [[plugin::builder::by-value]]

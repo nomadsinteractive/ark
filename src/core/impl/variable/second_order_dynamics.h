@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_IMPL_SECOND_ORDER_DYNAMICS_H_
-#define ARK_CORE_IMPL_SECOND_ORDER_DYNAMICS_H_
+#pragma once
 
 #include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
@@ -10,7 +9,7 @@ namespace ark {
 
 template<typename T> class SecondOrderDynamics : public Variable<T>, Implements<SecondOrderDynamics<T>, Variable<T>> {
 public:
-    SecondOrderDynamics(sp<Variable<T>> x, const T& d0, sp<Numeric> t, float f, float z = 1.0f, float r = 0f)
+    SecondOrderDynamics(sp<Variable<T>> x, const T& d0, sp<Numeric> t, float f, float z = 1.0f, float r = 0)
          : _x(std::move(x)), _t(std::move(t)), _w(2 * Math::PI * f), _z(z), _d(_w * std::sqrt(std::abs(z * z - 1))), _k1(z / (Math::PI * f)), _k2(1 / _w / _w), _k3(r * z / _w),
            _last_t(_t->val()), _last_x(_x->val()), _y(d0), _dy(0) {
     }
@@ -58,5 +57,3 @@ private:
 };
 
 }
-
-#endif

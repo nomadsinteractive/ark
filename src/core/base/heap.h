@@ -321,7 +321,7 @@ public:
 
     void removeStrategy(const sp<Strategy>& strategy) {
         strategy->dispose(*this);
-        _strategies.erase(std::remove(std::execution::seq, _strategies.begin(), _strategies.end(), strategy));
+        _strategies.erase(std::remove(_strategies.begin(), _strategies.end(), strategy));
     }
 
     void extend(sp<Heap> other) {

@@ -56,12 +56,13 @@ sp<RenderCommand> RCCDrawQuads::compose(const RenderRequest& renderRequest, Rend
                 hasNewCreatedSnapshot = true;
                 i._element_state._index = _strips->allocate(vertexCount);
             }
-            model.writeRenderable(buf.makeVertexWriter(renderRequest, vertexCount, i._element_state._index.value()), i._snapshot);
+            VertexWriter writer = buf.makeVertexWriter(renderRequest, vertexCount, i._element_state._index.value());
+            model.writeRenderable(writer, i._snapshot);
         }
     }
 
     sp<Uploader> indexUploader;
-    if(hasNewCreatedSnapshot || snapshot._item_deleted.size() != 0)
+    if(hasNewCreatedSnapshot || !snapshot._item_deleted.empty())
     {
         element_index_t offset = 0;
         std::vector<element_index_t> indices(snapshot._index_count);

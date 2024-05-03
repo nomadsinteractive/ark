@@ -394,7 +394,7 @@ void GLPipeline::GLAttribute::bind(const Attribute& attribute, GLsizei stride) c
     }
     else
     {
-        FATAL("Unknow attribute \"%s %s\"", attribute.type(), attribute.name());
+        FATAL("Unknow attribute \"%s %s\"", attribute.type(), attribute.name().c_str());
     }
 }
 

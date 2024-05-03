@@ -122,7 +122,7 @@ sp<AssetBundle> AssetBundleZipFile::getBundle(const String& path)
 
 std::vector<ark::sp<Asset>> AssetBundleZipFile::listAssets(const String& regex)
 {
-    DFATAL(false, "Unimplemented");
+    DFATAL("Unimplemented");
     return {};
 }
 
