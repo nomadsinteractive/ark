@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_UTIL_DOCUMENTS_H_
-#define ARK_CORE_UTIL_DOCUMENTS_H_
+#pragma once
 
 #include <vector>
 
@@ -87,5 +86,3 @@ private:
 };
 
 }
-
-#endif

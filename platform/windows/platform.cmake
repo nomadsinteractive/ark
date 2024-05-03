@@ -38,4 +38,3 @@ if(ARK_USE_VULKAN)
 endif()
 
 ark_compile_definitions(-DARK_PLATFORM_WINDOWS)
-add_definitions(-DNOMINMAX)

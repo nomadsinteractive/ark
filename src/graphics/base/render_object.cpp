@@ -19,8 +19,8 @@ RenderObject::RenderObject(int32_t type, sp<Vec3> position, sp<Size> size, sp<Tr
 {
 }
 
-RenderObject::RenderObject(sp<Integer> type, sp<Vec3> position, sp<Size> size, sp<Transform> transform, sp<Varyings> varyings, sp<Boolean> visible, sp<Boolean> disposed)
-    : _type(sp<IntegerWrapper>::make(std::move(type))), _position(std::move(position)), _size(std::move(size)), _transform(std::move(transform)), _varyings(std::move(varyings)), _visible(std::move(visible), true), _disposed(std::move(disposed), false)
+RenderObject::RenderObject(sp<Integer> type, sp<Vec3> position, sp<Size> size, sp<Transform> transform, sp<Varyings> varyings, sp<Boolean> visible, sp<Boolean> discarded)
+    : _type(sp<IntegerWrapper>::make(std::move(type))), _position(std::move(position)), _size(std::move(size)), _transform(std::move(transform)), _varyings(std::move(varyings)), _visible(std::move(visible), true), _discarded(std::move(discarded), false)
 {
 }
 
@@ -52,7 +52,7 @@ void RenderObject::traverse(const Holder::Visitor& visitor)
     HolderUtil::visit(_size.wrapped(), visitor);
     HolderUtil::visit(_transform, visitor);
     HolderUtil::visit(_varyings, visitor);
-    HolderUtil::visit(_disposed.wrapped(), visitor);
+    HolderUtil::visit(_discarded.wrapped(), visitor);
     HolderUtil::visit(_visible.wrapped(), visitor);
 }
 
@@ -71,7 +71,7 @@ const sp<Varyings>& RenderObject::varyings()
 void RenderObject::setType(int32_t type)
 {
     _type->set(type);
-    _disposed.reset(nullptr);
+    _discarded.reset(nullptr);
     _timestamp.markDirty();
 }
 
@@ -184,12 +184,12 @@ void RenderObject::setTag(const Box& tag)
 
 sp<Boolean> RenderObject::disposed()
 {
-    return _disposed.ensure();
+    return _discarded.ensure();
 }
 
 void RenderObject::setDisposed(sp<Boolean> disposed)
 {
-    _disposed.reset(std::move(disposed));
+    _discarded.reset(std::move(disposed));
     _timestamp.markDirty();
 }
 
@@ -227,7 +227,7 @@ void RenderObject::hide()
 
 bool RenderObject::isDisposed() const
 {
-    return _type->val() < 0 || _disposed.val();
+    return _type->val() < 0 || _discarded.val();
 }
 
 bool RenderObject::isVisible() const
@@ -238,7 +238,7 @@ bool RenderObject::isVisible() const
 Renderable::StateBits RenderObject::updateState(const RenderRequest& renderRequest)
 {
     bool dirty = _timestamp.update(renderRequest.timestamp());
-    if((_disposed.update(renderRequest.timestamp()) || dirty) && _disposed.val())
+    if((_discarded.update(renderRequest.timestamp()) || dirty) && _discarded.val())
         return Renderable::RENDERABLE_STATE_DISPOSED;
 
     dirty = UpdatableUtil::update(renderRequest.timestamp(), _visible, _type, _position, _size, _transform, _varyings, _visible) || dirty;

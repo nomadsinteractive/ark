@@ -53,7 +53,7 @@ if __name__ == '__main__':
     stringtables = []
     stringitems = []
 
-    classname = acg.toCamelName(stringtablenames)
+    classname = acg.to_camel_name(stringtablenames)
     for i in args:
         category = path.splitext(path.basename(i))[0]
         stringtables.append('\nnamespace %s {\n' % category)

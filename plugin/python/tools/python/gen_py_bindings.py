@@ -157,7 +157,7 @@ ${includes}
 #include "python/extension/py_cast.h"
 
 ${0}
-''', acg.wrapByNamespaces(namespaces, '\n'.join(declares)), header_macro=header_macro,
+''', acg.wrap_by_namespaces(namespaces, '\n'.join(declares)), header_macro=header_macro,
                       includes='\n'.join(includes))
 
 
@@ -312,7 +312,7 @@ def gen_py_binding_cpp(name, namespaces, includes, lines):
 
 using namespace ark::plugin::python;
 
-''' % (name, '\n'.join(includes))) + acg.wrapByNamespaces(namespaces, '\n'.join(lines))
+''' % (name, '\n'.join(includes))) + acg.wrap_by_namespaces(namespaces, '\n'.join(lines))
 
 
 class GenConstructorMethod(GenMethod):

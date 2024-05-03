@@ -149,11 +149,6 @@ class Decorator(Annotation):
         return 'refBeanFactory.addBuilderDecorator<%s>("%s", [%s](%s)->sp<Builder<%s>> { return sp<Builder<%s>>::make<%s::%s>(%s); });' % (self._interface_class, self._name, capture_args, func_arguments, self._interface_class, self._interface_class, self._main_class, self._implement_class, passing_args)
 
 
-def find_main_class(content):
-    m = re.search(r'class\s+(?:[\w\d]+\s+)*?([\w\d]+)(?:\s+final\s*)?(?:\s*:[^{]+|\s*){', content)
-    return m.group(1) if m else None
-
-
 def parse_function_arguments(funcname, content):
     m = re.search(r'\b%s\(((?:[^,]*?,?)*)\)' % funcname, content)
     return parse_arguments(m.group(1)) if m else []
@@ -171,17 +166,17 @@ def parse_arguments(args):
 
 
 def get_plugin_arguments():
-    return ', '.join('const %s& %s' % (v, acg.camelName(k.split('_'))) for k, v in _class_members.items())
+    return ', '.join('const %s& %s' % (v, acg.camel_name(k.split('_'))) for k, v in _class_members.items())
 
 
 def get_plugin_arguments_assigment():
-    return ', ' + ', '.join('%s(%s)' % (k, acg.camelName(k.split('_'))) for k, v in _class_members.items()) if _class_members else ''
+    return ', ' + ', '.join('%s(%s)' % (k, acg.camel_name(k.split('_'))) for k, v in _class_members.items()) if _class_members else ''
 
 
 def get_member_declare():
     if not _class_members:
         return ''
-    getters = '\n    ' + '\n    '.join('const %s& get%s() const;' % (v, acg.toCamelName(k.split('_'))) for k, v in _class_members.items())
+    getters = '\n    ' + '\n    '.join('const %s& get%s() const;' % (v, acg.to_camel_name(k.split('_'))) for k, v in _class_members.items())
 
     return getters + '\n\nprivate:\n    ' + '\n    '.join('%s %s;' % (v, k) for k, v in _class_members.items()) + '\n'
 
@@ -190,7 +185,7 @@ def get_plugin_member_getter(plugin_name):
     if not _class_members:
         return ''
 
-    return '\n\n' + '\n\n'.join('const %s& %s::get%s() const\n{\n    return %s;\n}' % (v, plugin_name, acg.toCamelName(k.split('_')), k) for k, v in _class_members.items())
+    return '\n\n' + '\n\n'.join('const %s& %s::get%s() const\n{\n    return %s;\n}' % (v, plugin_name, acg.to_camel_name(k.split('_')), k) for k, v in _class_members.items())
 
 
 def output_to_file(output_file, content):
@@ -321,7 +316,7 @@ def main():
     file_path = 'stdout'
     if output_file:
         file_dir, file_path = os.path.split(output_file)
-    plugin_name = config['plugin_name'] if 'plugin_name' in config else acg.toCamelName(file_path.split('_'))
+    plugin_name = config['plugin_name'] if 'plugin_name' in config else acg.to_camel_name(file_path.split('_'))
     ark_namespace = 'ark::' if 'ark' not in config['namespace'] else ''
 
     ref_builder = generate_method_def('refBuilder', result, REF_BUILDER_TEMPLATE, plugin_name=plugin_name)

@@ -24,21 +24,21 @@ class HeaderPattern:
         return self._callback
 
 
-def toCamelName(namespaces):
+def to_camel_name(namespaces: list[str]):
     return ''.join([i[0].upper() + i[1:] for i in namespaces if i])
 
 
-def camelName(namespaces):
-    name = ''.join([i[0].upper() + i[1:] for i in namespaces if i])
+def camel_name(namespaces: list[str]):
+    name = to_camel_name(namespaces)
     return name[0].lower() + name[1:] if name else ''
 
 
-def findMainClass(content):
-    m = re.search(r'class\s+(?:[\w\d]+\s+)*?([\w\d]+)(?:\s+final\s*)?(?:\s*:[^{]+|\s*)\{', content)
+def find_main_class_in_source(content: str):
+    m = re.search(r'class\s+(?:\w+\s+)*?(\w+)(?:\s+final\s*)?(?:\s*:[^{]+|\s*)\{', content)
     return m.group(1) if m else None
 
 
-def camel_case_to_snake_case(name):
+def camel_case_to_snake_case(name: str):
     s1 = FIRST_CAP_RE.sub(r'\1_\2', name)
     return ALL_CAP_RE.sub(r'\1_\2', s1).lower()
 
@@ -52,7 +52,7 @@ def format(str, *args, **kwargs):
     return re.sub(r'\$\{([^}]+)\}', repl, str)
 
 
-def match_header_patterns(paths, find_main_class, *args):
+def match_header_patterns(paths, find_main_class: bool, *args):
     for src_code_path in paths:
         if os.path.isfile(src_code_path):
             _process_header(src_code_path, find_main_class, *args)
@@ -63,7 +63,7 @@ def match_header_patterns(paths, find_main_class, *args):
                     _process_header(filename, find_main_class, *args)
 
 
-def _process_header(filename, find_main_class, *args):
+def _process_header(filename, find_main_class: bool, *args):
     with open(filename, 'rt', encoding='utf8') as fp:
         filename = filename.lstrip(r'.\/').replace('\\', '/')
         try:
@@ -71,15 +71,14 @@ def _process_header(filename, find_main_class, *args):
         except UnicodeDecodeError as e:
             print(f'Error reading {filename}')
             raise e
-        main_class = findMainClass(content) if find_main_class else None
+        main_class = find_main_class_in_source(content) if find_main_class else None
         if main_class or not find_main_class:
             for j in args:
                 for k in j.pattern.findall(content):
                     j.callback(filename, content, main_class, k)
 
 
-
-def wrapByNamespaces(namespaces, source):
+def wrap_by_namespaces(namespaces, source):
     return '\n'.join(['namespace %s {' % i for i in namespaces]) + '\n' + source + '\n\n' + '\n'.join(['}'] * len(namespaces))
 
 

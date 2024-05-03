@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_INF_ANIMATION_H_
-#define ARK_RENDERER_INF_ANIMATION_H_
+#pragma once
 
 #include <vector>
 
@@ -37,5 +36,3 @@ protected:
 };
 
 }
-
-#endif

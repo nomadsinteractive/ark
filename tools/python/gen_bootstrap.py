@@ -18,12 +18,12 @@ if __name__ == '__main__':
     invokes = '\n    '.join('%s();' % i for i in args)
     file_directory, file_name = os.path.split(output_file or 'stdout')
     function_name = file_name
-    header = 'void __%s__();' % function_name
-    source = acg.format("""${declares}
+    header = f'void __{function_name}__();'
+    source = f"""{declares}
 
-void __${function_name}__()
-{
-    ${invokes}
-}
-""", function_name=function_name, declares=declares, invokes=invokes)
+void __{function_name}__()
+{{
+    {invokes}
+}}
+"""
     acg.write_to_unit(output_file, header, source)

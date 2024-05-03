@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_TYPES_SAFE_VAR_H_
-#define ARK_CORE_TYPES_SAFE_VAR_H_
+#pragma once
 
 #include "core/inf/variable.h"
 #include "core/impl/variable/variable_wrapper.h"
@@ -86,5 +85,3 @@ private:
 };
 
 }
-
-#endif

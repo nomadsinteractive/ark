@@ -10,3 +10,6 @@
 [submodule "plugin/cmft/3rdparty/cmft"]
 	path = plugin/cmft/3rdparty/cmft
 	url = https://github.com/dariomanesku/cmft.git
+[submodule "plugin/optick/3rdparty/optick"]
+	path = plugin/optick/3rdparty/optick
+	url = https://github.com/bombomby/optick.git

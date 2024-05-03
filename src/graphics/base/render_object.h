@@ -19,9 +19,9 @@ namespace ark {
 //[[script::bindings::holder]]
 class ARK_API RenderObject : public Holder, public Renderable {
 public:
-    RenderObject(int32_t type, sp<Vec3> position = nullptr, sp<Size> size = nullptr, sp<Transform> transform = nullptr, sp<Varyings> varyings = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> disposed = nullptr);
+    RenderObject(int32_t type, sp<Vec3> position = nullptr, sp<Size> size = nullptr, sp<Transform> transform = nullptr, sp<Varyings> varyings = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> discarded = nullptr);
 //  [[script::bindings::auto]]
-    RenderObject(sp<Integer> type, sp<Vec3> position = nullptr, sp<Size> size = nullptr, sp<Transform> transform = nullptr, sp<Varyings> varyings = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> disposed = nullptr);
+    RenderObject(sp<Integer> type, sp<Vec3> position = nullptr, sp<Size> size = nullptr, sp<Transform> transform = nullptr, sp<Varyings> varyings = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> discarded = nullptr);
 
     virtual void traverse(const Visitor& visitor) override;
 
@@ -135,7 +135,7 @@ private:
     sp<Varyings> _varyings;
 
     SafeVar<Boolean> _visible;
-    SafeVar<Boolean> _disposed;
+    SafeVar<Boolean> _discarded;
 
     Box _tag;
 
