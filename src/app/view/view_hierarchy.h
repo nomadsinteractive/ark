@@ -23,7 +23,7 @@ public:
 
         virtual void traverse(const Visitor& visitor) override;
 
-        bool isDisposed() const;
+        bool isDiscarded() const;
         bool isVisible() const;
 
         void updateLayout();

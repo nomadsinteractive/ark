@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_BASE_TIMESTAMP_H_
-#define ARK_CORE_BASE_TIMESTAMP_H_
+#pragma once
 
 #include "core/base/api.h"
 
@@ -19,4 +18,3 @@ private:
 };
 
 }
-#endif

@@ -17,7 +17,7 @@ public:
     SurfaceController();
 
 // [[script::bindings::auto]]
-    void addRenderer(const sp<Renderer>& renderer);
+    void addRenderer(sp<Renderer> renderer, sp<Boolean> discarded = nullptr, sp<Boolean> visible = nullptr);
 // [[script::bindings::auto]]
     void addControlLayer(const sp<Renderer>& controller);
 // [[script::bindings::auto]]
@@ -30,9 +30,9 @@ public:
 private:
     sp<Allocator::Pool> _allocator_pool;
 
-    sp<RendererGroup> _renderers;
-    sp<RendererGroup> _controls;
-    sp<RendererGroup> _layers;
+    sp<RendererGroup> _renderer_group;
+    sp<RendererGroup> _control_group;
+    sp<RendererGroup> _layer_group;
 
     sp<OCSQueue<RenderRequest>> _render_requests;
 };

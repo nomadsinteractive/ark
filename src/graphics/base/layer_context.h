@@ -54,7 +54,7 @@ public:
     Layer::Type layerType() const;
 
 //  [[script::bindings::auto]]
-    void add(sp<Renderable> renderable, sp<Updatable> isDirty = nullptr, sp<Boolean> isDisposed = nullptr);
+    void add(sp<Renderable> renderable, sp<Updatable> isDirty = nullptr, sp<Boolean> discarded = nullptr);
 //  [[script::bindings::auto]]
     void clear();
     void dispose();
@@ -89,7 +89,7 @@ public:
 
     SafeVar<Vec3> _position;
     SafeVar<Boolean> _visible;
-    SafeVar<Boolean> _disposed;
+    SafeVar<Boolean> _discarded;
 
     sp<Varyings> _varyings;
 

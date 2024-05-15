@@ -13,7 +13,7 @@ class ARK_API Renderable {
 public:
     enum StateBits {
         RENDERABLE_STATE_NONE = 0,
-        RENDERABLE_STATE_DISPOSED = 1,
+        RENDERABLE_STATE_DISCARDED = 1,
         RENDERABLE_STATE_DIRTY = 2,
         RENDERABLE_STATE_VISIBLE = 4,
         RENDERABLE_STATE_NEW = 8
@@ -38,7 +38,7 @@ public:
     };
 
     struct Snapshot {
-        Snapshot(State state = RENDERABLE_STATE_DISPOSED, int32_t type = 0);
+        Snapshot(State state = RENDERABLE_STATE_DISCARDED, int32_t type = 0);
         Snapshot(State state, int32_t type, const V3& position, const V3& size, const Transform::Snapshot& transform, const Varyings::Snapshot& varyings);
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Snapshot);
 

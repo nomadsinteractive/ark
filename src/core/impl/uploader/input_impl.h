@@ -27,7 +27,7 @@ private:
     struct UploaderStub {
         UploaderStub(size_t offset, sp<Uploader> input, sp<Boolean> disposed);
 
-        bool isDisposed() const;
+        bool isDiscarded() const;
 
         size_t _offset;
         sp<Uploader> _input;

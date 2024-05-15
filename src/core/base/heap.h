@@ -5,6 +5,7 @@
 #include <list>
 #include <map>
 #include <queue>
+#include <unordered_set>
 
 #include "core/collection/bitwise_trie.h"
 #include "core/types/optional.h"

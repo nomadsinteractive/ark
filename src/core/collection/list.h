@@ -35,7 +35,7 @@ public:
         Disposable() = default;
 
         FilterAction operator() (const T& item) const {
-            return item.isDisposed() ? FILTER_ACTION_REMOVE : FILTER_ACTION_NONE;
+            return item.isDiscarded() ? FILTER_ACTION_REMOVE : FILTER_ACTION_NONE;
         }
 
     };
@@ -79,9 +79,9 @@ public:
         V _op2;
     };
 
-    template <typename T> using IsDisposed = IsTrue<T, FILTER_ACTION_REMOVE, FILTER_ACTION_NONE, false>;
+    template <typename T> using IsDiscarded = IsTrue<T, FILTER_ACTION_REMOVE, FILTER_ACTION_NONE, false>;
     template <typename T> using IsVisible = IsTrue<T, FILTER_ACTION_NONE, FILTER_ACTION_SKIP, true>;
-    template <typename T> using IsDV = IsBoth<T, IsDisposed<T>, IsVisible<T>>;
+    template <typename T> using IsDV = IsBoth<T, IsDiscarded<T>, IsVisible<T>>;
 };
 
 template<typename T, typename Filter> class List {
@@ -210,7 +210,7 @@ private:
 
 
 template <typename T> using UList = List<T, typename ListFilters::Unique<T>>;
-template <typename T> using DList = List<T, typename ListFilters::IsDisposed<T>>;
+template <typename T> using DList = List<T, typename ListFilters::IsDiscarded<T>>;
 template <typename T> using DVList = List<T, typename ListFilters::IsDV<T>>;
 
 }

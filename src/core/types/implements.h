@@ -1,7 +1,6 @@
 #pragma once
 
 #include <set>
-#include <unordered_set>
 
 #include "core/base/api.h"
 #include "core/types/box.h"
@@ -12,7 +11,7 @@ namespace ark {
 
 namespace _internal {
 
-template<typename T = void, typename... INTERFACES> void _add_types(std::unordered_set<TypeId>& interfaces) {
+template<typename T = void, typename... INTERFACES> void _add_types(std::set<TypeId>& interfaces) {
     interfaces.insert(Type<T>::id());
     Class* clazz = Class::getClass(Type<T>::id());
     if(clazz)
@@ -21,8 +20,8 @@ template<typename T = void, typename... INTERFACES> void _add_types(std::unorder
         _add_types<INTERFACES...>(interfaces);
 }
 
-template<typename... INTERFACES> std::unordered_set<TypeId> _make_types() {
-    std::unordered_set<TypeId> interfaces;
+template<typename... INTERFACES> std::set<TypeId> _make_types() {
+    std::set<TypeId> interfaces;
     _add_types<INTERFACES...>(interfaces);
     return interfaces;
 }

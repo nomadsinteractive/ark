@@ -11,7 +11,7 @@ namespace ark {
 
 template<typename T> class RectT {
 public:
-    _CONSTEXPR RectT() noexcept
+    constexpr RectT() noexcept
         : _left(0), _top(0), _right(0), _bottom(0) {
     }
     RectT(T left, T top, T right, T bottom) noexcept

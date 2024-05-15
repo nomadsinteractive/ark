@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_UTIL_RENDERER_TYPE_H_
-#define ARK_GRAPHICS_UTIL_RENDERER_TYPE_H_
+#pragma once
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
@@ -41,5 +40,3 @@ public:
 };
 
 }
-
-#endif

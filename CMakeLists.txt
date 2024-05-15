@@ -45,7 +45,6 @@ if(WIN32)
     ark_compile_definition_option(ARK_USE_LIBJPEG_TURBO "Use libjpeg-turbo decoding library" OFF)
 endif()
 
-ark_compile_definition_option(ARK_USE_CONSTEXPR  "Use constexpr wherever possible" ON)
 ark_compile_definition_option(ARK_USE_LIBPNG "Use libpng decoding library" ON)
 ark_compile_definition_option(ARK_USE_STB_IMAGE "Use stb image decoding library" ON)
 

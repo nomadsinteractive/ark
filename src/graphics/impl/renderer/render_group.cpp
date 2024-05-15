@@ -16,13 +16,18 @@ RendererGroup::~RendererGroup()
 void RendererGroup::addRenderer(const sp<Renderer>& renderer)
 {
     ASSERT(renderer);
-    _renderers.emplace_back(renderer, renderer.as<Disposed>(), renderer.as<Visibility>());
+    add(renderer, renderer.as<Disposed>(), renderer.as<Visibility>());
 }
 
 void RendererGroup::render(RenderRequest& renderRequest, const V3& position)
 {
     for(const sp<Renderer>& i : _renderers.update(renderRequest.timestamp()))
         i->render(renderRequest, position);
+}
+
+void RendererGroup::add(sp<Renderer> renderer, sp<Boolean> discarded, sp<Boolean> visible)
+{
+    _renderers.emplace_back(std::move(renderer), std::move(discarded), std::move(visible));
 }
 
 RendererGroup::BUILDER::BUILDER(BeanFactory& beanFactory, const document& manifest)

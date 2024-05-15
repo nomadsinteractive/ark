@@ -47,7 +47,7 @@ const char* Class::name() const
     return _name;
 }
 
-const std::unordered_set<TypeId>& Class::implements() const
+const std::set<TypeId>& Class::implements() const
 {
     return _implements;
 }
@@ -62,7 +62,7 @@ Box Class::cast(const Box& box, TypeId id)
     return _delegate->cast(box, id);
 }
 
-void Class::setImplementation(std::unordered_set<TypeId>&& implementation)
+void Class::setImplementation(std::set<TypeId>&& implementation)
 {
     _implements = implementation;
 }

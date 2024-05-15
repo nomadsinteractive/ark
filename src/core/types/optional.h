@@ -8,7 +8,7 @@ namespace ark {
 
 template<typename T> class Optional {
 public:
-    _CONSTEXPR Optional() noexcept {
+    constexpr Optional() noexcept {
     }
     Optional(T value) noexcept
         : _optional(Stub(std::move(value))) {

@@ -1,7 +1,6 @@
-#ifndef ARK_CORE_COLLECTION_BY_TYPE_H_
-#define ARK_CORE_COLLECTION_BY_TYPE_H_
+#pragma once
 
-#include <unordered_map>
+#include <map>
 
 #include "core/base/api.h"
 #include "core/types/box.h"
@@ -17,18 +16,18 @@ public:
     DEFAULT_COPY_AND_ASSIGN(ByType);
 
     template<typename T> bool has() {
-        return _items.find(Type<T>::id()) != _items.end();
+        return _components.find(Type<T>::id()) != _components.end();
     }
 
-    template<typename T> const Box& put(sp<T> item) {
-        Box& slot = _items[Type<T>::id()];
-        slot = std::move(item);
+    template<typename T> const Box& put(sp<T> cmp) {
+        Box& slot = _components[Type<T>::id()];
+        slot = std::move(cmp);
         return slot;
     }
 
     template<typename T> const sp<T>& get() const {
-        const auto iter = _items.find(Type<T>::id());
-        return iter != _items.end() ? iter->second.template unpack<T>() : sp<T>::null();
+        const auto iter = _components.find(Type<T>::id());
+        return iter != _components.end() ? iter->second.template unpack<T>() : sp<T>::null();
     }
 
     template<typename T, typename... Args> const sp<T>& ensure(Args&&... args) {
@@ -50,9 +49,7 @@ private:
     }
 
 private:
-    std::unordered_map<TypeId, Box> _items;
+    std::map<TypeId, Box> _components;
 };
 
 }
-
-#endif

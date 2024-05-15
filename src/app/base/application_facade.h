@@ -109,6 +109,7 @@ private:
     sp<ApplicationManifest> _manifest;
 
     sp<Arena> _arena;
+    sp<Disposed> _arena_discarded;
 };
 
 }

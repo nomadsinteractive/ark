@@ -98,7 +98,7 @@ UploaderImpl::UploaderStub::UploaderStub(size_t offset, sp<Uploader> input, sp<B
     DASSERT(_input);
 }
 
-bool UploaderImpl::UploaderStub::isDisposed() const
+bool UploaderImpl::UploaderStub::isDiscarded() const
 {
     return _disposed->val();
 }

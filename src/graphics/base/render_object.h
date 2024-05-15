@@ -104,7 +104,7 @@ public:
 //  [[script::bindings::auto]]
     void hide();
 
-    bool isDisposed() const;
+    bool isDiscarded() const;
     bool isVisible() const;
 
     virtual StateBits updateState(const RenderRequest& renderRequest) override;

@@ -112,17 +112,17 @@ void ApplicationFacade::setArena(sp<Arena> arena)
 
     if(_arena)
     {
-        _arena.as<Disposed>()->dispose();
+        _arena_discarded->dispose();
         _context->deferUnref(std::move(_arena));
     }
 
     ASSERT(arena);
     CHECK_WARN(!arena.is<Disposed>(), "Application main arena's lifecycle should be managed by application itself");
     _arena = std::move(arena);
-    _arena.absorb<Disposed>(sp<Disposed>::make());
+    _arena_discarded = sp<Disposed>::make();
 
-    _surface_controller->addRenderer(_arena);
-    _context->addEventListener(_arena, _arena.as<Disposed>());
+    _surface_controller->addRenderer(_arena, _arena_discarded);
+    _context->addEventListener(_arena, _arena_discarded);
 }
 
 sp<ResourceLoader> ApplicationFacade::createResourceLoader(const String& name, const Scope& args)

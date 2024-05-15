@@ -1,7 +1,5 @@
-#ifndef ARK_CORE_TYPES_BOX_H_
-#define ARK_CORE_TYPES_BOX_H_
+#pragma once
 
-#include <functional>
 #include <memory>
 
 #include "core/base/api.h"
@@ -16,12 +14,11 @@ class ARK_API Box {
 public:
     typedef void(*Destructor)(const void*);
 
-    Box() noexcept = default;
-    Box(std::nullptr_t);
+    constexpr Box() noexcept = default;
+    constexpr Box(std::nullptr_t) noexcept {}
     template<typename T> Box(sp<T> sharedPtr) noexcept
         : Box(sharedPtr ? new SharedPtr<T>(std::move(sharedPtr)) : nullptr) {
     }
-
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Box);
 
     explicit operator bool() const;
@@ -94,5 +91,3 @@ private:
 };
 
 }
-
-#endif

@@ -84,12 +84,6 @@
 #define ASSERT(x) CHECK(x, "Assertion failed")
 #define DASSERT(x) DCHECK(x, "Assertion failed")
 
-#ifdef ARK_USE_CONSTEXPR
-#   define _CONSTEXPR   constexpr
-#else
-#   define _CONSTEXPR
-#endif
-
 namespace ark {
 
 template<typename T> using remove_cv_t = typename std::remove_cv<T>::type;

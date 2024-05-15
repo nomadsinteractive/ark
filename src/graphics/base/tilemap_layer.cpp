@@ -262,7 +262,7 @@ TilemapLayer::RenderableTile::RenderableTile(const sp<Stub>& stub, sp<Tile> tile
 
 Renderable::StateBits TilemapLayer::RenderableTile::updateState(const RenderRequest& renderRequest)
 {
-    return _renderable ? _renderable->updateState(renderRequest) : Renderable::RENDERABLE_STATE_DISPOSED;
+    return _renderable ? _renderable->updateState(renderRequest) : Renderable::RENDERABLE_STATE_DISCARDED;
 }
 
 Renderable::Snapshot TilemapLayer::RenderableTile::snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest, const V3& postTranslate, StateBits state)

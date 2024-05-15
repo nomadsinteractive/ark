@@ -14,10 +14,10 @@ namespace ark {
 
 template<typename T> class SharedPtr {
 public:
-    _CONSTEXPR SharedPtr() noexcept
+    constexpr SharedPtr() noexcept
         : _ptr(nullptr), _interfaces(nullptr) {
     }
-    _CONSTEXPR SharedPtr(std::nullptr_t null) noexcept
+    constexpr SharedPtr(std::nullptr_t null) noexcept
         : _ptr(null), _interfaces(null) {
     }
     SharedPtr(std::shared_ptr<T> ptr, std::shared_ptr<Interfaces> interfaces) noexcept
@@ -89,6 +89,7 @@ public:
         return SharedPtr<U>(std::static_pointer_cast<U>(_ptr), ensureInterfaces());
     }
 
+//  [[deprecated]]
     template<typename U> const SharedPtr<T>& absorb(const SharedPtr<U>& beingAbsorbed) const {
         ensureInterfaces();
         if(beingAbsorbed._interfaces != _interfaces)

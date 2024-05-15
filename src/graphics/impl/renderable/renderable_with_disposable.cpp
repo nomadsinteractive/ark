@@ -14,7 +14,7 @@ Renderable::StateBits RenderableWithDisposable::updateState(const RenderRequest&
     StateBits stateBits = _wrapped->updateState(renderRequest);
     _disposed->update(renderRequest.timestamp());
     if(_disposed->val())
-        return static_cast<StateBits>(RENDERABLE_STATE_DISPOSED | stateBits);
+        return static_cast<StateBits>(RENDERABLE_STATE_DISCARDED | stateBits);
     return stateBits;
 }
 

@@ -1,8 +1,6 @@
-#ifndef ARK_CORE_TYPES_CLASS_H_
-#define ARK_CORE_TYPES_CLASS_H_
+#pragma once
 
 #include <set>
-#include <unordered_set>
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
@@ -27,7 +25,7 @@ public:
 
     TypeId id() const;
     const char* name() const;
-    const std::unordered_set<TypeId>& implements() const;
+    const std::set<TypeId>& implements() const;
 
     bool isInstance(TypeId id) const;
 
@@ -36,7 +34,7 @@ public:
 
     Box cast(const Box& box, TypeId id);
 
-    void setImplementation(std::unordered_set<TypeId>&& implementation);
+    void setImplementation(std::set<TypeId>&& implementation);
 
     template<typename T> static Class* getClass() {
         return getClass(Type<T>::id());
@@ -56,12 +54,10 @@ private:
 private:
     TypeId _id;
     const char* _name;
-    std::unordered_set<TypeId> _implements;
+    std::set<TypeId> _implements;
     IClass* _delegate;
 
     friend class ClassManager;
 };
 
 }
-
-#endif

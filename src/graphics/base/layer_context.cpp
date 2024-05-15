@@ -30,7 +30,7 @@ static sp<Renderable> makeRenderable(sp<Renderable> renderable, sp<Updatable> up
 }
 
 LayerContext::LayerContext(sp<ModelLoader> models, sp<Vec3> position, sp<Boolean> visible, sp<Boolean> disposed, sp<Varyings> varyings)
-    : _model_loader(std::move(models)), _position(position), _visible(std::move(visible), true), _disposed(disposed ? std::move(disposed) : nullptr, false),
+    : _model_loader(std::move(models)), _position(position), _visible(std::move(visible), true), _discarded(disposed ? std::move(disposed) : nullptr, false),
       _varyings(std::move(varyings)), _layer_type(Layer::TYPE_DYNAMIC), _reload_requested(false)
 {
 }
@@ -70,7 +70,7 @@ const SafeVar<Boolean>& LayerContext::visible() const
 
 const SafeVar<Boolean>& LayerContext::disposed() const
 {
-    return _disposed;
+    return _discarded;
 }
 
 const sp<ModelLoader>& LayerContext::modelLoader() const
@@ -88,21 +88,21 @@ Layer::Type LayerContext::layerType() const
     return _layer_type;
 }
 
-void LayerContext::add(sp<Renderable> renderable, sp<Updatable> isDirty, sp<Boolean> isDisposed)
+void LayerContext::add(sp<Renderable> renderable, sp<Updatable> isDirty, sp<Boolean> discarded)
 {
     ASSERT(renderable);
-    _renderable_created.push_back(makeRenderable(std::move(renderable), std::move(isDirty), std::move(isDisposed)));
+    _renderable_created.push_back(makeRenderable(std::move(renderable), std::move(isDirty), std::move(discarded)));
 }
 
 void LayerContext::clear()
 {
     for(auto& [i, j] : _renderables)
-        j = Renderable::RENDERABLE_STATE_DISPOSED;
+        j = Renderable::RENDERABLE_STATE_DISCARDED;
 }
 
 void LayerContext::dispose()
 {
-    _disposed = SafeVar<Boolean>(nullptr, true);
+    _discarded = SafeVar<Boolean>(nullptr, true);
 }
 
 const sp<Varyings>& LayerContext::varyings() const
@@ -137,9 +137,9 @@ bool LayerContext::processNewCreated()
 
 LayerContext::Snapshot LayerContext::snapshot(RenderRequest& renderRequest, const PipelineInput& pipelineInput) const
 {
-    bool dirty = UpdatableUtil::update(renderRequest.timestamp(), _position, _visible, _disposed, _varyings);
+    bool dirty = UpdatableUtil::update(renderRequest.timestamp(), _position, _visible, _discarded, _varyings);
     Varyings::Snapshot varyings = _varyings ? _varyings->snapshot(pipelineInput, renderRequest.allocator()) : Varyings::Snapshot();
-    return Snapshot{dirty, _position.val(), _visible.val(), _disposed.val(), varyings};
+    return Snapshot{dirty, _position.val(), _visible.val(), _discarded.val(), varyings};
 }
 
 LayerContext::ElementState& LayerContext::addElementState(void* key)

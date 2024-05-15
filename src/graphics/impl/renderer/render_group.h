@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_IMPL_RENDERER_RENDER_GROUP_H_
-#define ARK_GRAPHICS_IMPL_RENDERER_RENDER_GROUP_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
@@ -16,6 +15,8 @@ public:
 
     virtual void addRenderer(const sp<Renderer>& renderer) override;
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
+
+    void add(sp<Renderer> renderer, sp<Boolean> discarded = nullptr, sp<Boolean> visible = nullptr);
 
 //  [[plugin::builder("render-group")]]
     class BUILDER : public Builder<Renderer> {
@@ -38,5 +39,3 @@ private:
 };
 
 }
-
-#endif

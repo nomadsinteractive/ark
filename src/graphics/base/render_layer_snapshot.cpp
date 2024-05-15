@@ -119,7 +119,7 @@ bool RenderLayerSnapshot::addLayerContext(RenderRequest& renderRequest, LayerCon
         s.setState(renderable.updateState(renderRequest));
         ASSERT(s);
         Renderable::State state = s;
-        if(!state || state.hasState(Renderable::RENDERABLE_STATE_DISPOSED))
+        if(!state || state.hasState(Renderable::RENDERABLE_STATE_DISCARDED))
         {
             LOGD("delete: %p", &renderable);
             dirty = true;

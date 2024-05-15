@@ -1,10 +1,8 @@
-#ifndef ARK_CORE_TYPES_INTERFACES_H_
-#define ARK_CORE_TYPES_INTERFACES_H_
+#pragma once
 
 #include <memory>
 #include <map>
-#include <unordered_map>
-#include <unordered_set>
+#include <set>
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
@@ -31,7 +29,7 @@ public:
 
     void absorb(const Box& other);
     TypeId typeId() const;
-    const std::unordered_set<TypeId>& implements() const;
+    const std::set<TypeId>& implements() const;
     Box as(const Box& box, TypeId id) const;
     bool is(TypeId id) const;
     bool isInstance(TypeId id) const;
@@ -46,5 +44,3 @@ private:
 };
 
 }
-
-#endif

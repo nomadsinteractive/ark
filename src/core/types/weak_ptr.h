@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_TYPES_WEAK_PTR_H_
-#define ARK_CORE_TYPES_WEAK_PTR_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/types/shared_ptr.h"
@@ -8,8 +7,7 @@ namespace ark {
 
 template<typename T> class WeakPtr {
 public:
-    _CONSTEXPR WeakPtr() noexcept {
-    }
+    constexpr WeakPtr() noexcept = default;
     WeakPtr(const SharedPtr<T>& sharedPtr) noexcept
         : _weak_ptr(sharedPtr._ptr), _weak_interfaces(sharedPtr.ensureInterfaces()) {
     }
@@ -52,5 +50,3 @@ private:
 };
 
 }
-
-#endif

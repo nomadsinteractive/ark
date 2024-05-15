@@ -1,5 +1,4 @@
-#ifndef ARK_APP_VIEW_STAGE_H_
-#define ARK_APP_VIEW_STAGE_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/collection/list.h"
@@ -101,5 +100,3 @@ private:
 };
 
 }
-
-#endif

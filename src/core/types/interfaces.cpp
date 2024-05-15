@@ -23,7 +23,7 @@ TypeId Interfaces::typeId() const
     return _class->id();
 }
 
-const std::unordered_set<TypeId>& Interfaces::implements() const
+const std::set<TypeId>& Interfaces::implements() const
 {
     return _class->implements();
 }

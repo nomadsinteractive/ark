@@ -41,7 +41,7 @@ void ViewHierarchy::Slot::updateLayoutPosition(const V2& position)
     }
 }
 
-bool ViewHierarchy::Slot::isDisposed() const
+bool ViewHierarchy::Slot::isDiscarded() const
 {
     return _view->disposed()->val();
 }
@@ -98,7 +98,7 @@ bool ViewHierarchy::isInflateNeeded()
     for(auto iter = _slots.begin(); iter != _slots.end(); )
     {
         const sp<Slot>& i = *iter;
-        if(i->isDisposed())
+        if(i->isDiscarded())
         {
             iter = _slots.erase(iter);
             inflateNeeded = true;
