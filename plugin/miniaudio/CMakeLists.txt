@@ -28,7 +28,7 @@ else()
 endif()
 
 ark_setup_tools(ark_gen_plugin_class)
-ark_gen_plugin_class(miniaudio core ark::plugin::miniaudio miniaudio_plugin impl)
+ark_gen_plugin_class(miniaudio core ark::plugin::miniaudio impl)
 
 ark_add_plugin_library(${PROJECT_NAME} ${LOCAL_SRC_LIST} ${LOCAL_GENERATED_SRC_LIST})
 

@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_BASE_LIBRARY_H_
-#define ARK_CORE_BASE_LIBRARY_H_
+#pragma once
 
 #include <functional>
 #include <unordered_map>
@@ -37,8 +36,8 @@ public:
         return iter != _callables.end() ? iter->second.template unpack<Callable<T>>() : sp<Callable<T>>::null();
     }
 
-    template<typename T> void addCallable(const String& name, const std::function<T>& func) {
-        addCallable(name, sp<Callable<T>>::make(func));
+    template<typename T> void addCallable(const String& name, std::function<T> func) {
+        addCallable(name, sp<Callable<T>>::make(std::move(func)));
     }
 
     template<typename T> void addCallable(const String& name, const sp<Callable<T>>& callable) {
@@ -51,5 +50,3 @@ private:
 };
 
 }
-
-#endif

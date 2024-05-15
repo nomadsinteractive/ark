@@ -11,7 +11,7 @@
 #include "graphics/forwarding.h"
 #include "graphics/inf/renderer.h"
 
-#include "app/base/resource_loader.h"
+#include "core/base/resource_loader.h"
 #include "app/forwarding.h"
 #include "app/inf/event_listener.h"
 

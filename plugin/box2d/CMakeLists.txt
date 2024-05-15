@@ -24,7 +24,7 @@ aux_source_directory(impl/shapes LOCAL_SRC_LIST)
 aux_source_directory(impl/importer LOCAL_SRC_LIST)
 
 ark_setup_tools(ark_gen_plugin_class)
-ark_gen_plugin_class(box2d core ark::plugin::box2d box2d_plugin impl)
+ark_gen_plugin_class(box2d core ark::plugin::box2d impl)
 
 ark_add_plugin_library(${PROJECT_NAME} ${LOCAL_SRC_LIST} ${LOCAL_GENERATED_SRC_LIST})
 target_compile_definitions(${PROJECT_NAME} PRIVATE -DARK_FLAG_BUILDING_PLUGIN_BOX2D)

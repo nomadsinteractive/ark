@@ -1,5 +1,4 @@
-#ifndef ARK_APP_VIEW_VIEW_H_
-#define ARK_APP_VIEW_VIEW_H_
+#pragma once
 
 #include <vector>
 
@@ -289,5 +288,3 @@ protected:
 };
 
 }
-
-#endif

@@ -37,8 +37,8 @@ Box::operator bool() const
     return _stub && _stub->ptr() != nullptr;
 }
 
-Box::Stub::Stub(const void* instance, const void* ptr, TypeId typeId, const std::shared_ptr<Interfaces>& interfaces, Destructor destructor)
-    : _shared_ptr(instance), _instance_ptr(ptr), _type_id(typeId), _interfaces(interfaces), _destructor(destructor)
+Box::Stub::Stub(const void* sharedPtr, const void* instancePtr, TypeId typeId, std::shared_ptr<Interfaces> interfaces, Destructor destructor)
+    : _shared_ptr(sharedPtr), _instance_ptr(instancePtr), _type_id(typeId), _interfaces(std::move(interfaces)), _destructor(destructor)
 {
 }
 

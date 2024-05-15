@@ -1,5 +1,6 @@
-#ifndef ARK_PLUGIN_BOX2D_IMPL_RIGID_BODY_BOX2D_H_
-#define ARK_PLUGIN_BOX2D_IMPL_RIGID_BODY_BOX2D_H_
+#pragma once
+
+#include <unordered_set>
 
 #include <Box2D/Box2D.h>
 
@@ -130,5 +131,3 @@ private:
 }
 }
 }
-
-#endif

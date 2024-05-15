@@ -4,7 +4,6 @@
 
 #include "core/base/api.h"
 #include "core/types/box.h"
-#include "core/types/null.h"
 #include "core/types/shared_ptr.h"
 #include "core/types/type.h"
 
@@ -14,6 +13,14 @@ class ARK_API ByType {
 public:
     ByType() = default;
     DEFAULT_COPY_AND_ASSIGN(ByType);
+
+    const std::map<TypeId, Box>& components() const {
+        return _components;
+    }
+
+    std::map<TypeId, Box>& components() {
+        return _components;
+    }
 
     template<typename T> bool has() {
         return _components.find(Type<T>::id()) != _components.end();

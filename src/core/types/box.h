@@ -57,7 +57,7 @@ private:
 
     class ARK_API Stub {
     public:
-        Stub(const void* instance, const void* ptr, TypeId typeId, const std::shared_ptr<Interfaces>& interfaces, Destructor destructor);
+        Stub(const void* sharedPtr, const void* instancePtr, TypeId typeId, std::shared_ptr<Interfaces> interfaces, Destructor destructor);
         ~Stub();
 
         const void* ptr() const;

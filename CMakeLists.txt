@@ -204,17 +204,15 @@ ark_setup_tools(ark_gen_plugin_class)
 ark_setup_tools(ark_gen_bootstrap)
 ark_setup_tools(ark_gen_class_hierarchy)
 
-ark_gen_builtin_plugin_class(ark ark framework_plugin src/core src/graphics src/renderer/base src/renderer/impl src/renderer/util)
-
 if(ARK_USE_OPEN_GL)
-    ark_gen_plugin_class(opengl builtin ark::opengl opengl_plugin src/renderer/opengl)
+    ark_gen_plugin_class(opengl builtin ark::opengl src/renderer/opengl)
 endif()
 
 if(ARK_USE_VULKAN)
     include(src/renderer/vulkan/include.cmake)
 endif()
 
-ark_gen_plugin_class(app builtin ark application_plugin src/app)
+ark_gen_plugin_class(base builtin ark src/core src/graphics src/renderer/base src/renderer/impl src/renderer/util src/app)
 
 ark_gen_class_hierarchy(ark ark ${ARK_SRC_DIR}/src core graphics renderer/base renderer/impl renderer/inf app)
 

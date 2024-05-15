@@ -29,7 +29,7 @@
 #include "renderer/inf/model_loader.h"
 
 #include "app/base/application_context.h"
-#include "app/base/resource_loader.h"
+#include "core/base/resource_loader.h"
 #include "app/view/layout_param.h"
 
 

@@ -1,5 +1,4 @@
-#ifndef ARK_APP_VIEW_LAYOUT_PARAM_H_
-#define ARK_APP_VIEW_LAYOUT_PARAM_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/base/timestamp.h"
@@ -272,5 +271,3 @@ private:
 };
 
 }
-
-#endif

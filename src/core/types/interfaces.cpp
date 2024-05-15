@@ -47,9 +47,4 @@ bool Interfaces::isInstance(TypeId id) const
     return is(id) || _class->isInstance(id) || _attachments.find(id) != _attachments.end();
 }
 
-void Interfaces::reset()
-{
-    _attachments.clear();
-}
-
 }

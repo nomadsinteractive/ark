@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_TYPES_NULL_H_
-#define ARK_CORE_TYPES_NULL_H_
+#pragma once
 
 #include "core/base/api.h"
 
@@ -25,5 +24,3 @@ private:
 };
 
 }
-
-#endif

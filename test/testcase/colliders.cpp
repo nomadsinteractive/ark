@@ -16,7 +16,7 @@
 #include "graphics/base/v2.h"
 
 #include "app/base/application_context.h"
-#include "app/base/resource_loader.h"
+#include "core/base/resource_loader.h"
 #include "app/base/rigid_body.h"
 #include "app/inf/collider.h"
 #include "app/inf/collision_callback.h"

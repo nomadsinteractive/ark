@@ -20,7 +20,7 @@ aux_source_directory(impl/model_loader LOCAL_SRC_LIST)
 aux_source_directory(util LOCAL_SRC_LIST)
 
 ark_setup_tools(ark_gen_plugin_class)
-ark_gen_plugin_class(assimp core ark::plugin::assimp assimp_plugin impl)
+ark_gen_plugin_class(assimp core ark::plugin::assimp impl)
 
 ark_add_plugin_library(${PROJECT_NAME} ${LOCAL_SRC_LIST} ${LOCAL_GENERATED_SRC_LIST})
 ark_export_dependency_libraries(${PROJECT_NAME} assimp::assimp ${IRRXML_LIBRARY})

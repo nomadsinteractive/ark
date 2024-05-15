@@ -27,7 +27,7 @@ aux_source_directory(. LOCAL_SRC_LIST)
 aux_source_directory(impl/audio_player LOCAL_SRC_LIST)
 
 ark_setup_tools(ark_gen_plugin_class)
-ark_gen_plugin_class(fmod core ark::plugin::fmod fmod_plugin impl)
+ark_gen_plugin_class(fmod core ark::plugin::fmod impl)
 
 ark_add_plugin_library(${PROJECT_NAME} ${LOCAL_SRC_LIST} ${LOCAL_GENERATED_SRC_LIST})
 ark_export_dependency_libraries(${PROJECT_NAME})

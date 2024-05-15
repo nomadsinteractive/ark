@@ -1,5 +1,4 @@
-#ifndef ARK_APP_INF_LAYOUT_H_
-#define ARK_APP_INF_LAYOUT_H_
+#pragma once
 
 #include <vector>
 
@@ -59,5 +58,3 @@ public:
 };
 
 }
-
-#endif

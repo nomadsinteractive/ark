@@ -11,10 +11,6 @@
 #include "core/types/shared_ptr.h"
 #include "core/util/holder_util.h"
 
-#include "renderer/forwarding.h"
-
-#include "app/forwarding.h"
-
 namespace ark {
 
 //[[script::bindings::holder]]

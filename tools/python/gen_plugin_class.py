@@ -338,10 +338,10 @@ public:
 ${member_declare}
 };
 ''', plugin_name=plugin_name, ns=ark_namespace, member_declare=get_member_declare(), plugin_arguments=get_plugin_arguments(), refBuilderDeclare=ref_builder_declare, resBuilderDeclare=res_builder_declare, functionDeclare=function_declare)
-    content = acg.format('''#ifndef ${header_macro}_PLUGIN_H_
-#define ${header_macro}_PLUGIN_H_
+    content = acg.format('''#pragma once
 
 #include "core/base/plugin.h"
+#include "core/base/resource_loader.h"
 #include "core/forwarding.h"
 
 #include "graphics/forwarding.h"
@@ -349,11 +349,9 @@ ${member_declare}
 #include "renderer/forwarding.h"
 
 #include "app/forwarding.h"
-#include "app/base/resource_loader.h"
 
 ${classdeclare}
 
-#endif
 ''', header_macro=file_path.upper(), classdeclare=declare_namespaces(config['namespace'], classdeclare))
     acg.write_to_file(output_file + '.h' if output_file else None, content)
 

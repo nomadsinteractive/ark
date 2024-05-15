@@ -52,7 +52,7 @@ limitations under the License.
 #include "platform/platform.h"
 
 #include "generated/ark_bootstrap.h"
-#include "generated/application_plugin.h"
+#include "generated/base_plugin.h"
 
 #include "platform/platform.h"
 
@@ -321,7 +321,7 @@ sp<ApplicationContext> Ark::createApplicationContext(const ApplicationManifest& 
 {
     const Global<PluginManager> pluginManager;
     const sp<ApplicationContext> applicationContext = sp<ApplicationContext>::make(std::move(appResource), std::move(renderEngine));
-    pluginManager->addPlugin(sp<ApplicationPlugin>::make(applicationContext));
+    pluginManager->addPlugin(sp<BasePlugin>::make(applicationContext));
     applicationContext->initResourceLoader(manifest.resourceLoader());
     _application_profiler = applicationContext->resourceLoader()->beanFactory().build<ApplicationProfiler>(document::make("root"), Scope());
     applicationContext->initMessageLoop();

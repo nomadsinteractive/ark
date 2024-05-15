@@ -18,6 +18,6 @@ ark_include_directories(3rdparty/oboe/include)
 ark_link_libraries(oboe aaudio)
 
 ark_setup_tools(ark_gen_plugin_class)
-ark_gen_plugin_class(audio_android core ark::plugin::audio_android audio_android_plugin impl)
+ark_gen_plugin_class(audio_android core ark::plugin::audio_android impl)
 
 ark_add_plugin_library(${PROJECT_NAME} ${LOCAL_SRC_LIST} ${LOCAL_GENERATED_SRC_LIST})

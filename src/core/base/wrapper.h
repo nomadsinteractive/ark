@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_BASE_WRAPPER_H_
-#define ARK_CORE_BASE_WRAPPER_H_
+#pragma once
 
 #include "core/forwarding.h"
 #include "core/types/shared_ptr.h"
@@ -30,5 +29,3 @@ protected:
 };
 
 }
-
-#endif

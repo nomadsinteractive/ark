@@ -12,7 +12,7 @@
 
 #include "graphics/base/v3.h"
 
-#include "app/base/resource_loader.h"
+#include "core/base/resource_loader.h"
 
 #include "platform/platform.h"
 

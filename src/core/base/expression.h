@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_BASE_EXPRESSION_H_
-#define ARK_CORE_BASE_EXPRESSION_H_
+#pragma once
 
 #include "core/forwarding.h"
 #include "core/base/bean_factory.h"
@@ -265,5 +264,3 @@ template<typename T> Expression::Operator<T> NumericOperation<T>::OPS[4] = {
 };
 
 }
-
-#endif

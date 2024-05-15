@@ -14,7 +14,7 @@
 #include "core/types/global.h"
 
 #include "app/base/application_context.h"
-#include "app/base/resource_loader.h"
+#include "core/base/resource_loader.h"
 
 #include "platform/platform.h"
 

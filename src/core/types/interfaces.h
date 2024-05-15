@@ -33,7 +33,6 @@ public:
     Box as(const Box& box, TypeId id) const;
     bool is(TypeId id) const;
     bool isInstance(TypeId id) const;
-    void reset();
 
 private:
     Class* _class;

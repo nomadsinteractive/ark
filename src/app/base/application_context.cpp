@@ -4,6 +4,7 @@
 #include "core/base/clock.h"
 #include "core/base/message_loop.h"
 #include "core/base/plugin_manager.h"
+#include "core/base/resource_loader.h"
 #include "core/base/string_table.h"
 #include "core/base/thread.h"
 #include "core/impl/dictionary/dictionary_by_attribute_name.h"
@@ -25,7 +26,6 @@
 #include "app/base/application_manifest.h"
 #include "app/base/event.h"
 #include "app/base/message_loop_thread.h"
-#include "app/base/resource_loader.h"
 #include "app/impl/event_listener/event_listener_list.h"
 
 #include "platform/platform.h"

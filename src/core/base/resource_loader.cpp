@@ -1,4 +1,4 @@
-#include "app/base/resource_loader.h"
+#include "resource_loader.h"
 
 #include "core/util/documents.h"
 #include "core/util/log.h"

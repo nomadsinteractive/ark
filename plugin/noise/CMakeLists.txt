@@ -30,7 +30,7 @@ aux_source_directory(. LOCAL_SRC_LIST)
 aux_source_directory(base LOCAL_SRC_LIST)
 
 ark_setup_tools(gen_plugin_class)
-ark_gen_plugin_class(noise core ark::plugin::noise noise_plugin impl)
+ark_gen_plugin_class(noise core ark::plugin::noise impl)
 
 ark_add_plugin_library(${PROJECT_NAME} ${LOCAL_SRC_LIST} ${LOCAL_GENERATED_SRC_LIST})
 target_compile_definitions(${PROJECT_NAME} PRIVATE -DARK_FLAG_BUILDING_PLUGIN_NOISE)

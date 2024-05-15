@@ -2,10 +2,9 @@
 
 #include "core/ark.h"
 #include "core/base/bean_factory.h"
-#include "core/types/shared_ptr.h"
+#include "core/base/resource_loader.h"
 
 #include "app/base/application_context.h"
-#include "app/base/resource_loader.h"
 
 namespace ark {
 

@@ -1,11 +1,9 @@
-#ifndef ARK_CORE_BASE_CALLABLE_H_
-#define ARK_CORE_BASE_CALLABLE_H_
+#pragma once
 
 #include <functional>
 #include <type_traits>
 
 #include "core/forwarding.h"
-#include "core/util/string_convert.h"
 
 namespace ark {
 
@@ -13,20 +11,17 @@ template<typename T> class Callable;
 
 template<typename R, typename... Args> class Callable<R(Args...)> {
 public:
-    Callable(const std::function<R(Args...)>& callable)
-        : _callable(callable) {
+    Callable(std::function<R(Args...)> callable)
+        : _callable(std::move(callable)) {
     }
     DEFAULT_COPY_AND_ASSIGN(Callable);
 
-    template<typename... Params> R call(Params&&... params) const {
-        return _callable(std::forward<Params>(params)...);
+    R call(Args&&... args) const {
+        return _callable(std::forward<Args>(args)...);
     }
 
 private:
     std::function<R(Args...)> _callable;
-
 };
 
 }
-
-#endif

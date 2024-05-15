@@ -18,7 +18,7 @@ add_library(log STATIC android_dummy.cpp)
 ark_find_vcpkg_package(yoga LIBRARIES yoga::yogacore)
 
 ark_setup_tools(ark_gen_plugin_class)
-ark_gen_plugin_class(yoga core ark::plugin::yoga yoga_plugin -i yoga impl/layout)
+ark_gen_plugin_class(yoga core ark::plugin::yoga -i yoga impl/layout)
 
 ark_add_plugin_library(${PROJECT_NAME} ${LOCAL_SRC_LIST} ${LOCAL_GENERATED_SRC_LIST})
 ark_export_dependency_libraries(${PROJECT_NAME})

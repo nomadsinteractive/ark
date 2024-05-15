@@ -20,7 +20,7 @@ aux_source_directory(importer LOCAL_SRC_LIST)
 aux_source_directory(rigid_body LOCAL_SRC_LIST)
 
 ark_setup_tools(ark_gen_plugin_class)
-ark_gen_plugin_class(bullet core ark::plugin::bullet bullet_plugin base rigid_body importer)
+ark_gen_plugin_class(bullet core ark::plugin::bullet base rigid_body importer)
 
 ark_link_libraries(BulletDynamics BulletCollision Bullet3Common LinearMath)
 

@@ -14,7 +14,7 @@
 #include "graphics/base/render_request.h"
 #include "graphics/base/size.h"
 #include "graphics/inf/render_command.h"
-#include "graphics/impl/renderer/render_group.h"
+#include "graphics/impl/renderer/renderer_group.h"
 
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/pipeline_bindings.h"

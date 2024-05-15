@@ -20,7 +20,7 @@ aux_source_directory(. LOCAL_SRC_LIST)
 aux_source_directory(impl/readable LOCAL_SRC_LIST)
 
 ark_setup_tools(ark_gen_plugin_class)
-ark_gen_plugin_class(vorbis core ark::plugin::vorbis vorbis_plugin impl)
+ark_gen_plugin_class(vorbis core ark::plugin::vorbis impl)
 
 ark_add_plugin_library(${PROJECT_NAME} ${LOCAL_SRC_LIST} ${LOCAL_GENERATED_SRC_LIST})
 #ark_export_dependency_libraries(${PROJECT_NAME} ${OGG_LIBRARIES} vorbisfile)

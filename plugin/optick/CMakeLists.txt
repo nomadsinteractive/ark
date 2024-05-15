@@ -18,7 +18,7 @@ endif()
 ark_add_denpendency(3rdparty/optick OptickCore 3rdparty/optick/src)
 
 ark_setup_tools(ark_gen_plugin_class)
-ark_gen_plugin_class(optick core ark::plugin::optick optick_plugin -i optick impl/application_profiler)
+ark_gen_plugin_class(optick core ark::plugin::optick -i optick impl/application_profiler)
 
 ark_add_plugin_library(${PROJECT_NAME} ${LOCAL_SRC_LIST} ${LOCAL_GENERATED_SRC_LIST})
 ark_export_dependency_libraries(${PROJECT_NAME})
