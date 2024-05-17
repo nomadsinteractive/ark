@@ -143,7 +143,7 @@ void Atlas::addImporter(const sp<AtlasImporter>& importer, const sp<Readable>& /
     importer->import(*this, nullptr);
 }
 
-ByType& Atlas::attachments()
+Traits& Atlas::attachments()
 {
     return _attachments;
 }

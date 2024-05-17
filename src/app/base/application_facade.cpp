@@ -1,7 +1,7 @@
 #include "app/base/application_facade.h"
 
 #include "core/base/future.h"
-#include "core/epi/disposed.h"
+#include "core/traits/disposed.h"
 
 #include "graphics/base/camera.h"
 #include "graphics/base/surface_controller.h"

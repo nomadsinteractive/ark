@@ -10,7 +10,7 @@ namespace ark {
 
 ShaderBindings::ShaderBindings(Buffer vertices, sp<PipelineFactory> pipelineFactory, sp<PipelineBindings> pipelineBindings, std::map<uint32_t, Buffer> dividedBuffers)
     : _vertices(std::move(vertices)), _pipeline_factory(std::move(pipelineFactory)), _pipeline_bindings(std::move(pipelineBindings)), _snippet(_pipeline_bindings->layout()->snippet()),
-      _divided_buffers(sp<std::map<uint32_t, Buffer>>::make(std::move(dividedBuffers))), _attachments(sp<ByType>::make())
+      _divided_buffers(sp<std::map<uint32_t, Buffer>>::make(std::move(dividedBuffers))), _attachments(sp<Traits>::make())
 {
 }
 
@@ -60,7 +60,7 @@ const sp<std::map<uint32_t, Buffer>>& ShaderBindings::divisors() const
     return _divided_buffers;
 }
 
-const sp<ByType>& ShaderBindings::attachments() const
+const sp<Traits>& ShaderBindings::attachments() const
 {
     return _attachments;
 }

@@ -10,7 +10,7 @@
 #include "core/inf/runnable.h"
 #include "core/concurrent/lf_stack.h"
 #include "core/concurrent/one_consumer_synchronized.h"
-#include "core/epi/disposed.h"
+#include "core/traits/disposed.h"
 #include "core/types/shared_ptr.h"
 
 #include "core/base/thread.h"

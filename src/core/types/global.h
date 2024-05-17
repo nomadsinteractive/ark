@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_TYPES_GLOBAL_H_
-#define ARK_CORE_TYPES_GLOBAL_H_
+#pragma once
 
 #include "core/ark.h"
 
@@ -37,5 +36,3 @@ private:
 };
 
 }
-
-#endif

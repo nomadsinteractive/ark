@@ -13,8 +13,8 @@ class ARK_API RendererGroup : public Renderer, public Renderer::Group {
 public:
     ~RendererGroup() override;
 
-    virtual void addRenderer(const sp<Renderer>& renderer) override;
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
+    virtual void addRenderer(sp<Renderer> renderer, const Traits& traits = Traits()) override;
 
     void add(sp<Renderer> renderer, sp<Boolean> discarded = nullptr, sp<Boolean> visible = nullptr);
 

@@ -57,12 +57,11 @@ private:
             return visit(delegate->wrapped(), visitor);
     }
 
-    template<typename T = void, typename... Args> static void visit_box(const Box& packed, const Holder::Visitor& visitor) {
-        if(!std::is_same<T, void>::value) {
-            if(Type<T>::id() == packed.typeId())
-                doVisit(packed.unpack<T>(), visitor);
+    template<typename T, typename... Args> static void visit_box(const Box& packed, const Holder::Visitor& visitor) {
+        if(Type<T>::id() == packed.typeId())
+            doVisit(packed.unpack<T>(), visitor);
+        if constexpr(sizeof...(Args) != 0)
             visit_box<Args...>(packed, visitor);
-        }
     }
 
     template<typename T> static void doVisit(const sp<T>& obj, const Holder::Visitor& visitor) {

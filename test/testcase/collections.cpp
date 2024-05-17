@@ -7,7 +7,7 @@
 #include "core/collection/list.h"
 #include "core/collection/bitwise_trie.h"
 #include "core/concurrent/lf_stack.h"
-#include "core/epi/disposed.h"
+#include "core/traits/disposed.h"
 
 #include "test/base/test_case.h"
 

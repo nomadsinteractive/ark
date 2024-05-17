@@ -27,7 +27,7 @@ Arena::~Arena()
     LOGD("");
 }
 
-void Arena::addRenderer(const sp<Renderer>& renderer)
+void Arena::addRenderer(sp<Renderer> renderer, const Traits& traits)
 {
     _renderers.emplace_back(renderer, renderer.as<Disposed>());
 }
@@ -60,8 +60,8 @@ void Arena::traverse(const Holder::Visitor& visitor)
 
 sp<Renderer> Arena::loadRenderer(const String& name, const Scope& args)
 {
-    const sp<Renderer> renderer = load<Renderer>(name, args);
-    addRenderer(renderer);
+    sp<Renderer> renderer = load<Renderer>(name, args);
+    addRenderer(renderer, Traits());
     return renderer;
 }
 
@@ -162,7 +162,7 @@ sp<Arena> Arena::BUILDER::build(const Scope& args)
         else if(name != Constants::Attributes::VIEW)
         {
             CHECK_WARN(name == Constants::Attributes::RENDERER, "['Renderer', 'RenderLayer', 'Layer'] expected, \"%s\" found", name.c_str());
-            arena->addRenderer(factory.ensure<Renderer>(i, args));
+            arena->addRenderer(factory.ensure<Renderer>(i, args), Traits());
         }
     }
     return arena;

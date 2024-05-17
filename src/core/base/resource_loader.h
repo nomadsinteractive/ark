@@ -5,7 +5,7 @@
 #include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
-#include "core/collection/by_type.h"
+#include "core/collection/traits.h"
 #include "core/inf/holder.h"
 #include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
@@ -118,7 +118,7 @@ public:
 
 private:
     BeanFactory _bean_factory;
-    ByType _builder_refs;
+    Traits _builder_refs;
 
     sp<PackageRefs> _packages;
 

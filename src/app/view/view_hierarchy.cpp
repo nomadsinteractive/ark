@@ -1,7 +1,7 @@
 #include "app/view/view_hierarchy.h"
 
-#include "core/epi/disposed.h"
-#include "core/epi/visibility.h"
+#include "core/traits/disposed.h"
+#include "core/traits/visibility.h"
 #include "core/util/holder_util.h"
 #include "core/util/updatable_util.h"
 #include "core/util/updatable_util.h"

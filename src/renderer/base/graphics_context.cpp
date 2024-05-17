@@ -48,12 +48,12 @@ const sp<Recycler>& GraphicsContext::recycler() const
     return _render_controller->recycler();
 }
 
-ByType& GraphicsContext::attachments()
+Traits& GraphicsContext::attachments()
 {
     return _attachments;
 }
 
-const ByType& GraphicsContext::attachments() const
+const Traits& GraphicsContext::attachments() const
 {
     return _attachments;
 }

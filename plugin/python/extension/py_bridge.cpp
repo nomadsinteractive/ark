@@ -1,8 +1,6 @@
 #include "python/extension/py_bridge.h"
 
-namespace ark {
-namespace plugin {
-namespace python {
+namespace ark::plugin::python {
 
 PyObject* PyBridge::PyObject_GetItem(PyObject* obj, PyObject* key)
 {
@@ -217,6 +215,4 @@ bool PyBridge::isPyUnicodeExact(PyObject* obj)
     return PyUnicode_CheckExact(obj);
 }
 
-}
-}
 }

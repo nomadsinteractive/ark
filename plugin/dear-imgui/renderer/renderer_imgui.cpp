@@ -135,9 +135,9 @@ void RendererImgui::render(RenderRequest& renderRequest, const V3& position)
     MyImGuiRenderFunction(renderRequest, ImGui::GetDrawData());
 }
 
-void RendererImgui::addRenderer(const sp<Renderer>& renderer)
+void RendererImgui::addRenderer(sp<Renderer> renderer, const Traits& traits)
 {
-    _renderer_group->addRenderer(renderer);
+    _renderer_group->addRenderer(std::move(renderer), traits);
 }
 
 bool RendererImgui::onEvent(const Event& event)
@@ -319,7 +319,7 @@ sp<Renderer> RendererImgui::BUILDER::build(const Scope& args)
 }
 
 RendererImgui::DrawCommand::DrawCommand(RenderController& renderController)
-    : _vertex_buffer(renderController.makeVertexBuffer()), _index_buffer(renderController.makeIndexBuffer()), _attachments(sp<ByType>::make())
+    : _vertex_buffer(renderController.makeVertexBuffer()), _index_buffer(renderController.makeIndexBuffer()), _attachments(sp<Traits>::make())
 {
 }
 

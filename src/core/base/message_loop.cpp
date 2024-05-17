@@ -2,13 +2,13 @@
 
 #include "core/ark.h"
 
-#include "core/epi/disposed.h"
 #include "core/base/future.h"
 #include "core/inf/runnable.h"
 #include "core/inf/variable.h"
 #include "core/impl/executor/executor_this_thread.h"
 #include "core/impl/runnable/runnable_by_function.h"
 #include "core/impl/runnable/runnable_composite.h"
+#include "core/traits/disposed.h"
 #include "core/util/log.h"
 
 namespace ark {

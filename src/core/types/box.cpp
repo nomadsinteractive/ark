@@ -5,62 +5,36 @@
 
 namespace ark {
 
-Box::Box(const void* sharedPtr, const void* instancePtr, TypeId typeId, const std::shared_ptr<Interfaces>& interfaces, Destructor destructor) noexcept
-    : _stub(std::make_shared<Stub>(sharedPtr, instancePtr, typeId, interfaces, destructor))
+Box::Box(TypeId typeId, const void* sharedPtr, const void* instancePtr, std::shared_ptr<Interfaces> interfaces, Destructor destructor) noexcept
+    : _stub(std::make_shared<_StubVariant>(PtrStub(typeId, sharedPtr, instancePtr, std::move(interfaces), destructor)))
 {
 }
 
 TypeId Box::typeId() const
 {
-    return _stub ? _stub->typeId() : 0;
+    return _stub ? std::get<PtrStub>(*_stub)._type_id : 0;
 }
 
 Box Box::toConcrete() const
 {
     DASSERT(_stub);
-    return _stub->_interfaces->as(*this, _stub->_interfaces->typeId());
+    return std::get<PtrStub>(*_stub)._interfaces->as(*this, std::get<PtrStub>(*_stub)._interfaces->typeId());
 }
 
 const void* Box::ptr() const
 {
-    return _stub ? _stub->ptr() : nullptr;
+    return _stub ? std::get<PtrStub>(*_stub)._instance_ptr : nullptr;
 }
 
 const std::shared_ptr<Interfaces>& Box::interfaces() const
 {
     DASSERT(_stub);
-    return _stub->_interfaces;
+    return std::get<PtrStub>(*_stub)._interfaces;
 }
 
 Box::operator bool() const
 {
-    return _stub && _stub->ptr() != nullptr;
-}
-
-Box::Stub::Stub(const void* sharedPtr, const void* instancePtr, TypeId typeId, std::shared_ptr<Interfaces> interfaces, Destructor destructor)
-    : _shared_ptr(sharedPtr), _instance_ptr(instancePtr), _type_id(typeId), _interfaces(std::move(interfaces)), _destructor(destructor)
-{
-}
-
-Box::Stub::~Stub()
-{
-    if(_shared_ptr)
-        _destructor(_shared_ptr);
-}
-
-const void* Box::Stub::ptr() const
-{
-    return _instance_ptr;
-}
-
-TypeId Box::Stub::typeId() const
-{
-    return _type_id;
-}
-
-const std::shared_ptr<Interfaces>& Box::Stub::interfaces() const
-{
-    return _interfaces;
+    return _stub && std::get<PtrStub>(*_stub)._instance_ptr != nullptr;
 }
 
 }

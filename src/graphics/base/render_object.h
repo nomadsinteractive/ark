@@ -4,7 +4,7 @@
 #include "core/base/timestamp.h"
 #include "core/inf/builder.h"
 #include "core/inf/holder.h"
-#include "core/epi/visibility.h"
+#include "core/traits/visibility.h"
 #include "core/types/box.h"
 #include "core/types/shared_ptr.h"
 #include "core/types/safe_ptr.h"
@@ -123,7 +123,7 @@ public:
         SafePtr<Builder<Size>> _size;
         SafePtr<Builder<Transform>> _transform;
         SafePtr<Builder<Varyings>> _varyings;
-        SafePtr<Builder<Boolean>> _disposed;
+        SafePtr<Builder<Boolean>> _discarded;
     };
 
 private:

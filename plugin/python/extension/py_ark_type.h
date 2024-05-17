@@ -5,8 +5,8 @@
 #include <Python.h>
 
 #include "core/forwarding.h"
-#include "core/collection/by_type.h"
 #include "core/base/string.h"
+#include "core/collection/traits.h"
 #include "core/types/class.h"
 #include "core/types/shared_ptr.h"
 

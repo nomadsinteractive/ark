@@ -1,8 +1,8 @@
 #include "graphics/base/layer_context.h"
 
 #include "core/ark.h"
-#include "core/epi/disposed.h"
 #include "core/base/notifier.h"
+#include "core/traits/disposed.h"
 #include "core/util/holder_util.h"
 #include "core/util/log.h"
 #include "core/util/updatable_util.h"

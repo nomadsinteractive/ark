@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <filesystem>
 #include <iostream>
+#include <variant>
 
 #include "core/ark.h"
 #include "core/types/shared_ptr.h"

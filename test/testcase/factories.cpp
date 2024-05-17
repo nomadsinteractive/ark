@@ -8,10 +8,10 @@
 #include "core/base/clock.h"
 #include "core/base/scope.h"
 #include "core/base/thread.h"
-#include "core/epi/disposed.h"
 #include "core/inf/dictionary.h"
 #include "core/inf/variable.h"
 #include "core/impl/dictionary/dictionary_by_attribute_name.h"
+#include "core/traits/disposed.h"
 #include "core/types/weak_ptr.h"
 #include "core/util/math.h"
 

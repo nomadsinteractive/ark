@@ -1,4 +1,4 @@
-#include "core/epi/disposed.h"
+#include "core/traits/disposed.h"
 
 #include "core/base/bean_factory.h"
 #include "core/impl/variable/variable_observer.h"

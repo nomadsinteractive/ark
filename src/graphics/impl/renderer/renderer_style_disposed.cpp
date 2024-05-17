@@ -1,7 +1,7 @@
 #include "graphics/impl/renderer/renderer_style_disposed.h"
 
 #include "core/base/bean_factory.h"
-#include "core/epi/disposed.h"
+#include "core/traits/disposed.h"
 
 namespace ark {
 

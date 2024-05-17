@@ -1,7 +1,7 @@
 #include "graphics/impl/renderer/renderer_style_visibility.h"
 
 #include "core/base/bean_factory.h"
-#include "core/epi/visibility.h"
+#include "core/traits/visibility.h"
 
 #include "graphics/base/render_request.h"
 

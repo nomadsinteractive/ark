@@ -1,5 +1,4 @@
-#ifndef ARK_PLUGIN_DEAR_IMGUI_RENDERER_RENDERER_IMGUI_H_
-#define ARK_PLUGIN_DEAR_IMGUI_RENDERER_RENDERER_IMGUI_H_
+#pragma once
 
 #include "core/inf/builder.h"
 #include "core/concurrent/lf_stack.h"
@@ -28,7 +27,7 @@ public:
     RendererImgui(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Shader>& shader, const sp<Texture>& texture);
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
-    virtual void addRenderer(const sp<Renderer>& renderer) override;
+    virtual void addRenderer(sp<Renderer> renderer, const Traits& traits) override;
     virtual bool onEvent(const Event& event) override;
 
     const sp<RendererContext>& rendererContext() const;
@@ -53,7 +52,7 @@ public:
 
         Buffer _vertex_buffer;
         Buffer _index_buffer;
-        sp<ByType> _attachments;
+        sp<Traits> _attachments;
     };
 
     class DrawCommandRecycler {
@@ -89,5 +88,3 @@ private:
 }
 }
 }
-
-#endif

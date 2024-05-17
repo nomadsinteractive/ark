@@ -18,8 +18,8 @@ namespace ark {
 
 class ARK_API DrawingContext : public PipelineContext {
 public:
-    DrawingContext(sp<ShaderBindings> shaderBindings, sp<ByType> attachments, std::vector<RenderLayerSnapshot::UBOSnapshot> ubo, std::vector<std::pair<uint32_t, Buffer::Snapshot>> ssbos);
-    DrawingContext(sp<ShaderBindings> shaderBindings, sp<ByType> attachments, std::vector<RenderLayerSnapshot::UBOSnapshot> ubo, std::vector<std::pair<uint32_t, Buffer::Snapshot>> ssbos,
+    DrawingContext(sp<ShaderBindings> shaderBindings, sp<Traits> attachments, std::vector<RenderLayerSnapshot::UBOSnapshot> ubo, std::vector<std::pair<uint32_t, Buffer::Snapshot>> ssbos);
+    DrawingContext(sp<ShaderBindings> shaderBindings, sp<Traits> attachments, std::vector<RenderLayerSnapshot::UBOSnapshot> ubo, std::vector<std::pair<uint32_t, Buffer::Snapshot>> ssbos,
                    Buffer::Snapshot vertexBuffer, Buffer::Snapshot indexBuffer, uint32_t drawCount, DrawingParams parameters);
     DEFAULT_COPY_AND_ASSIGN(DrawingContext);
 
@@ -28,7 +28,7 @@ public:
 
     void upload(GraphicsContext& graphicsContext);
 
-    sp<ByType> _attachments;
+    sp<Traits> _attachments;
     Optional<Rect> _scissor;
 
     Buffer::Snapshot _vertices;

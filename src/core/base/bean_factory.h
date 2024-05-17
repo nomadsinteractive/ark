@@ -8,7 +8,7 @@
 
 #include "core/base/api.h"
 #include "core/base/identifier.h"
-#include "core/collection/by_type.h"
+#include "core/collection/traits.h"
 #include "core/dom/dom_document.h"
 #include "core/inf/builder.h"
 #include "core/inf/dictionary.h"
@@ -207,7 +207,7 @@ public:
         WeakPtr<Scope> _references;
         sp<Dictionary<document>> _document_by_id;
 
-        ByType _workers;
+        Traits _workers;
     };
 
     struct Stub {

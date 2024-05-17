@@ -4,11 +4,11 @@
 #include <stdint.h>
 
 #include "core/forwarding.h"
-#include "core/epi/disposed.h"
-#include "core/epi/visibility.h"
 #include "core/inf/variable.h"
 #include "core/collection/iterable.h"
 #include "core/types/safe_var.h"
+#include "core/traits/disposed.h"
+#include "core/traits/visibility.h"
 
 namespace ark {
 

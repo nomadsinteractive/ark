@@ -1,7 +1,7 @@
-#ifndef ARK_GRAPHICS_INF_RENDERER_H_
-#define ARK_GRAPHICS_INF_RENDERER_H_
+#pragma once
 
 #include "core/base/api.h"
+#include "core/collection/traits.h"
 
 #include "graphics/forwarding.h"
 
@@ -17,11 +17,9 @@ public:
     public:
         virtual ~Group() = default;
 
-        virtual void addRenderer(const sp<Renderer>& renderer) = 0;
+        virtual void addRenderer(sp<Renderer> renderer, const Traits& traits = Traits()) = 0;
     };
 
 };
 
 }
-
-#endif

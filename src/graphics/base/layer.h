@@ -1,11 +1,10 @@
-#ifndef ARK_GRAPHICS_BASE_LAYER_H_
-#define ARK_GRAPHICS_BASE_LAYER_H_
+#pragma once
 
 #include <vector>
 
 #include "core/inf/builder.h"
 #include "core/inf/holder.h"
-#include "core/epi/visibility.h"
+#include "core/traits/visibility.h"
 #include "core/types/shared_ptr.h"
 #include "core/types/safe_ptr.h"
 #include "core/types/safe_var.h"
@@ -90,5 +89,3 @@ private:
 };
 
 }
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_EPI_VISIBILITY_H_
-#define ARK_CORE_EPI_VISIBILITY_H_
+#pragma once
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
@@ -48,5 +47,3 @@ protected:
 };
 
 }
-
-#endif

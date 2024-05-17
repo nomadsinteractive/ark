@@ -1,6 +1,6 @@
 #include "renderer/opengl/es30/snippet_factory/snippet_factory_gles30.h"
 
-#include "core/collection/by_type.h"
+#include "core/collection/traits.h"
 
 #include "renderer/inf/snippet.h"
 

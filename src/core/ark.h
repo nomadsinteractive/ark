@@ -5,7 +5,7 @@
 #include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/base/string.h"
-#include "core/collection/by_type.h"
+#include "core/collection/traits.h"
 #include "core/types/shared_ptr.h"
 
 #include "renderer/forwarding.h"
@@ -106,7 +106,7 @@ private:
 
     sp<ApplicationContext> _application_context;
     sp<ApplicationProfiler> _application_profiler;
-    ByType _interfaces;
+    Traits _interfaces;
 
     sp<ArkAssetBundle> _asset_bundle;
 

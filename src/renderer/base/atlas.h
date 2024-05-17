@@ -4,7 +4,7 @@
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
 #include "core/collection/by_index.h"
-#include "core/collection/by_type.h"
+#include "core/collection/traits.h"
 #include "core/inf/builder.h"
 #include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
@@ -72,7 +72,7 @@ public:
 //  [[script::bindings::auto]]
     void addImporter(const sp<AtlasImporter>& importer, const sp<Readable>& readable = nullptr);
 
-    ByType& attachments();
+    Traits& attachments();
 
     const std::unordered_map<int32_t, Item>& items() const;
     std::unordered_map<int32_t, Item>& items();
@@ -128,7 +128,7 @@ private:
 
     std::unordered_map<int32_t, Item> _items;
 
-    ByType _attachments;
+    Traits _attachments;
 
     friend class BUILDER;
 

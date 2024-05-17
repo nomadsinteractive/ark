@@ -14,8 +14,8 @@
 
 namespace ark {
 
-RenderObject::RenderObject(int32_t type, sp<Vec3> position, sp<Size> size, sp<Transform> transform, sp<Varyings> varyings, sp<Boolean> visible, sp<Boolean> disposed)
-    : RenderObject(sp<IntegerWrapper>::make(type), std::move(position), std::move(size), std::move(transform), std::move(varyings), std::move(visible), std::move(disposed))
+RenderObject::RenderObject(int32_t type, sp<Vec3> position, sp<Size> size, sp<Transform> transform, sp<Varyings> varyings, sp<Boolean> visible, sp<Boolean> discarded)
+    : RenderObject(sp<IntegerWrapper>::make(type), std::move(position), std::move(size), std::move(transform), std::move(varyings), std::move(visible), std::move(discarded))
 {
 }
 
@@ -259,13 +259,13 @@ RenderObject::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
       _size(factory.getBuilder<Size>(manifest, Constants::Attributes::SIZE)),
       _transform(factory.getBuilder<Transform>(manifest, Constants::Attributes::TRANSFORM)),
       _varyings(factory.getConcreteClassBuilder<Varyings>(manifest, Constants::Attributes::VARYINGS)),
-      _disposed(factory.getBuilder<Boolean>(manifest, Constants::Attributes::DISPOSED))
+      _discarded(factory.getBuilder<Boolean>(manifest, Constants::Attributes::DISPOSED))
 {
 }
 
 sp<RenderObject> RenderObject::BUILDER::build(const Scope& args)
 {
-    return sp<RenderObject>::make(_type->build(args), _position->build(args), _size->build(args), _transform->build(args), _varyings->build(args), nullptr, _disposed->build(args));
+    return sp<RenderObject>::make(_type->build(args), _position->build(args), _size->build(args), _transform->build(args), _varyings->build(args), nullptr, _discarded->build(args));
 }
 
 }

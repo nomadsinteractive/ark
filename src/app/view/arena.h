@@ -24,7 +24,7 @@ public:
     ~Arena() override;
 
 //  [[script::bindings::auto]]
-    virtual void addRenderer(const sp<Renderer>& renderer) override;
+    virtual void addRenderer(sp<Renderer> renderer, const Traits& traits) override;
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
     virtual bool onEvent(const Event& event) override;

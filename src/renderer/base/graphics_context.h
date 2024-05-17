@@ -1,8 +1,7 @@
-#ifndef ARK_RENDERER_BASE_GRAPHICS_CONTEXT_H_
-#define ARK_RENDERER_BASE_GRAPHICS_CONTEXT_H_
+#pragma once
 
 #include "core/base/api.h"
-#include "core/collection/by_type.h"
+#include "core/collection/traits.h"
 #include "core/types/shared_ptr.h"
 #include "core/types/weak_ptr.h"
 
@@ -27,8 +26,8 @@ public:
     const sp<RenderController>& renderController() const;
     const sp<Recycler>& recycler() const;
 
-    ByType& attachments();
-    const ByType& attachments() const;
+    Traits& attachments();
+    const Traits& attachments() const;
 
     uint32_t tick() const;
 
@@ -37,10 +36,8 @@ private:
     sp<RenderController> _render_controller;
     uint32_t _tick;
 
-    ByType _attachments;
+    Traits _attachments;
 
 };
 
 }
-
-#endif

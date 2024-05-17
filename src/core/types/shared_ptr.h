@@ -4,7 +4,6 @@
 #include <memory>
 
 #include "core/forwarding.h"
-#include "core/inf/duck.h"
 #include "core/types/box.h"
 #include "core/types/class.h"
 #include "core/types/interfaces.h"
@@ -103,7 +102,7 @@ public:
 
     template<typename U> SharedPtr<U> as() const {
         if(_ptr) {
-            Box self(this, get(), Type<T>::id(), ensureInterfaces(), [](const void*) {});
+            Box self(Type<T>::id(), this, get(), ensureInterfaces(), [](const void*) {});
             return self.as<U>();
         }
         return nullptr;
