@@ -85,8 +85,8 @@ def gen_cast_call(targettype, name):
 
 
 def gen_method_call_arg(name, targettype, argtype):
-    ctype = remove_crv(argtype)
-    equals = acg.typeCompare(targettype, ctype)
+    ctype = acg.remove_crv(argtype)
+    equals = acg.type_compare(targettype, ctype)
     argname = name if equals else gen_cast_call(targettype, name)
     return 'std::move(%s)' % argname if 'std::vector' in argtype else argname
     if ctype in ARK_PY_ARGUMENT_CHECKERS:
@@ -209,8 +209,8 @@ class GenArgument:
     def has_defvalue(self):
         return self._default_value is not None or self._meta.has_defvalue
 
-    def type_compare(self, typename):
-        return acg.typeCompare(typename, self._str)
+    def type_compare(self, *typenames) -> bool:
+        return any(acg.type_compare(i, self._str) for i in typenames)
 
     def gen_type_check(self, varname):
         if self._accept_type in ARK_PY_ARGUMENT_CHECKERS:
@@ -236,7 +236,7 @@ class GenArgument:
             return self._gen_var_declare(m, objname, to_cpp_object, m, argname, False, optional_check)
         if m in TYPE_DEFINED_SP:
             return self._gen_var_declare(m, objname, to_cpp_object, m, argname, False, optional_check)
-        typename = remove_crv(typename)
+        typename = acg.remove_crv(typename)
         if m != self._accept_type and not typename.startswith('std::'):
             return self._gen_var_declare('sp<%s>' % m, objname, '%sSharedPtr' % optional_cast_prefix, m, argname, extract_cast, optional_check)
         functype = acg.get_template_type(typename, 'Optional') if is_optional_type else typename

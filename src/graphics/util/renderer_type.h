@@ -12,6 +12,16 @@ namespace ark {
 //[[script::bindings::class("Renderer")]]
 class ARK_API RendererType final {
 public:
+//  [[script::bindings::enumeration]]
+    enum Phrase {
+        PHRASE_DEFAULT,
+        PHRASE_WIDGET,
+        PHRASE_LAYER,
+        PHRASE_RENDER_LAYER,
+        PHRASE_COUNT
+    };
+
+public:
 //[[script::bindings::constructor]]
     static sp<Renderer> create(const sp<Renderer>& delegate = nullptr);
 

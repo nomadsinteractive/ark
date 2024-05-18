@@ -1,5 +1,4 @@
-#ifndef ARK_PLUGIN_PYTHON_EXTENSION_PYTHON_INTERPRETER_H_
-#define ARK_PLUGIN_PYTHON_EXTENSION_PYTHON_INTERPRETER_H_
+#pragma once
 
 #include <map>
 #include <type_traits>
@@ -20,9 +19,7 @@
 #include "python/extension/py_ark_type.h"
 #include "python/extension/py_bridge.h"
 
-namespace ark {
-namespace plugin {
-namespace python {
+namespace ark::plugin::python {
 
 class ARK_PLUGIN_PYTHON_API PythonInterpreter {
 public:
@@ -52,12 +49,13 @@ public:
         return _type_by_id.find(typeId) != _type_by_id.end() ? toPyObject(object.ensureInterfaces()->as(object, typeId)) : getPyArkType<T>()->create(object);
     }
 
-    template<typename T, typename P> void pyModuleAddType(PyObject* module, const char* moduleName, const char* typeName, PyTypeObject* base, long flags) {
+    template<typename T, typename P> T* pyModuleAddType(PyObject* module, const char* moduleName, const char* typeName, PyTypeObject* base, long flags) {
         static T pyType(Strings::sprintf("%s.%s", moduleName, typeName), Strings::sprintf("%s.%s Type", moduleName, typeName), base, flags);
         int ret = addPyArkType<P>(&pyType);
         DCHECK(!ret, "PyArkType init failed");
         if(!ret)
             PyBridge::PyModule_AddObject(module, typeName, pyType.getPyObject());
+        return &pyType;
     }
 
     bool isPyArkTypeObject(void* pyTypeObject) const;
@@ -96,7 +94,3 @@ private:
 };
 
 }
-}
-}
-
-#endif

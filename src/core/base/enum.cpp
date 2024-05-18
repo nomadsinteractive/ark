@@ -6,11 +6,6 @@
 
 namespace ark {
 
-Enum::Enum(int32_t value)
-    : _value(value)
-{
-}
-
 template<> Enum::RenderMode StringConvert::to<String, Enum::RenderMode>(const String& str)
 {
     if(str == "lines")
@@ -31,6 +26,11 @@ template<> void EnumMap<Enum::DrawProcedure>::initialize(std::map<String, Enum::
     enums["draw_arrays"] = Enum::DRAW_PROCEDURE_DRAW_ARRAYS;
     enums["draw_elements"] = Enum::DRAW_PROCEDURE_DRAW_ELEMENTS;
     enums["draw_instanced"] = Enum::DRAW_PROCEDURE_DRAW_INSTANCED;
+}
+
+int32_t Enum::toInteger(const Box& self)
+{
+    return self.toInteger();
 }
 
 }

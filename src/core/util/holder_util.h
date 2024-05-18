@@ -59,7 +59,7 @@ private:
 
     template<typename T, typename... Args> static void visit_box(const Box& packed, const Holder::Visitor& visitor) {
         if(Type<T>::id() == packed.typeId())
-            doVisit(packed.unpack<T>(), visitor);
+            doVisit(packed.toPtr<T>(), visitor);
         if constexpr(sizeof...(Args) != 0)
             visit_box<Args...>(packed, visitor);
     }

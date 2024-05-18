@@ -39,12 +39,18 @@ public:
 
     template<typename T> const sp<T>& get() const {
         const Optional<Box> optBox = get(Type<T>::id());
-        return optBox ? optBox->template unpack<T>() : sp<T>::null();
+        return optBox ? optBox->template toPtr<T>() : sp<T>::null();
     }
 
     Optional<Box> get(TypeId typeId) const {
         const auto iter = _traits.find(typeId);
         return iter != _traits.end() ? Optional<Box>(iter->second) : Optional<Box>();
+    }
+
+    template<typename T> T getEnum(T defaultValue) const {
+        static_assert(std::is_enum_v<T>);
+        const auto iter = _traits.find(Type<T>::id());
+        return iter != _traits.end() ? iter->second.toEnum<T>() : defaultValue;
     }
 
     template<typename T, typename... Args> const sp<T>& ensure(Args&&... args) {
@@ -56,7 +62,7 @@ private:
         const sp<T>& inst = get<T>();
         if(inst)
             return inst;
-        return put<T>(sp<T>::make(std::forward<Args>(args)...)).template unpack<T>();
+        return put<T>(sp<T>::make(std::forward<Args>(args)...)).template toPtr<T>();
     }
 
     template<typename T> const sp<T>& instance_sfinae(...) {

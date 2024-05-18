@@ -29,19 +29,14 @@ Arena::~Arena()
 
 void Arena::addRenderer(sp<Renderer> renderer, const Traits& traits)
 {
-    _renderers.emplace_back(renderer, renderer.as<Disposed>());
+    _renderer_phrase.addRenderer(renderer, traits);
 }
 
 void Arena::render(RenderRequest& renderRequest, const V3& position)
 {
     ASSERT(_view);
     _view->render(renderRequest, position);
-    for(const sp<Renderer>& i : _renderers.update(renderRequest.timestamp()))
-        i->render(renderRequest, position);
-    for(const sp<Renderer>& i : _layers.update(renderRequest.timestamp()))
-        i->render(renderRequest, position);
-    for(const sp<Renderer>& i : _render_layers.update(renderRequest.timestamp()))
-        i->render(renderRequest, position);
+    _renderer_phrase.render(renderRequest, position);
 }
 
 bool Arena::onEvent(const Event& event)
@@ -52,10 +47,6 @@ bool Arena::onEvent(const Event& event)
 void Arena::traverse(const Holder::Visitor& visitor)
 {
     HolderUtil::visit(_view, visitor);
-    for(const auto& i : _layers.items())
-        HolderUtil::visit(i._item, visitor);
-    for(const auto& i : _render_layers.items())
-        HolderUtil::visit(i._item, visitor);
 }
 
 sp<Renderer> Arena::loadRenderer(const String& name, const Scope& args)
@@ -110,16 +101,14 @@ void Arena::pushEventListener(sp<EventListener> eventListener, sp<Boolean> dispo
     _event_listeners->pushEventListener(std::move(eventListener), std::move(disposed));
 }
 
-void Arena::addLayer(sp<Renderer> layer)
+void Arena::addLayer(sp<Renderer> layer, sp<Boolean> discarded)
 {
-    sp<Boolean> disposed = layer.as<Disposed>();
-    _layers.emplace_back(std::move(layer), std::move(disposed));
+    _renderer_phrase.add(RendererType::PHRASE_LAYER, std::move(layer), discarded ? std::move(discarded) : layer.as<Disposed>().cast<Boolean>());
 }
 
-void Arena::addRenderLayer(sp<Renderer> renderLayer)
+void Arena::addRenderLayer(sp<Renderer> renderLayer, sp<Boolean> discarded)
 {
-    sp<Boolean> disposed = renderLayer.as<Disposed>();
-    _render_layers.emplace_back(std::move(renderLayer), std::move(disposed));
+    _renderer_phrase.add(RendererType::PHRASE_RENDER_LAYER, std::move(renderLayer), discarded ? std::move(discarded) : renderLayer.as<Disposed>().cast<Boolean>());
 }
 
 void Arena::setView(sp<View> view)

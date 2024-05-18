@@ -55,8 +55,8 @@ public:
         return _interfaces.get<T>();
     }
 
-    template<typename T, typename... Args> const sp<T>& ensure(Args&&... args) {
-        return _interfaces.ensure<T>(std::forward<Args>(args)...);
+    template<typename T, typename... Args> const sp<T>& ensure() {
+        return _interfaces.ensure<T>();
     }
 
     sp<BeanFactory> createBeanFactory(const String& src) const;

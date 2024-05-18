@@ -15,11 +15,7 @@
 #include "python/api.h"
 #include "python/forwarding.h"
 
-namespace ark {
-namespace plugin {
-namespace python {
-
-class PyGarbageCollector;
+namespace ark::plugin::python {
 
 class ARK_PLUGIN_PYTHON_API PyArkType {
 public:
@@ -31,7 +27,7 @@ public:
         template<typename T> const sp<T>& unpack() const {
             DCHECK(box, "PyObject \"%s\" has not been initialized", ob_base.ob_type->tp_name);
             CHECK(typeCheck<T>(), "PyObject \"%s\" cannot being casted to %s", ob_base.ob_type->tp_name, Class::getClass<T>()->name());
-            return box->unpack<T>();
+            return box->toPtr<T>();
         }
 
         template<typename T> sp<T> as() const {
@@ -53,7 +49,7 @@ public:
 
     template<typename T> int ready() {
         _type_id = Type<T>::id();
-        return doReady();
+        return PyType_Ready(&_py_type_object);
     }
 
     TypeId typeId() const;
@@ -68,15 +64,13 @@ public:
     typedef Box (*LoaderFunction)(Instance&, const String&, const Scope&);
     std::map<TypeId, LoaderFunction>& ensureLoader(const String& name);
 
-protected:
-    std::map<String, int32_t> _enum_constants;
-    std::map<String, String> _string_constants;
+    void onReady();
 
+protected:
+    std::map<String, Box> _enum_constants;
     std::map<String, std::map<TypeId, LoaderFunction>> _loaders;
 
 private:
-    int32_t doReady();
-
     const std::map<TypeId, LoaderFunction>& getLoader(const String& name) const;
 
     static PyTypeObject* basetype();
@@ -96,6 +90,4 @@ private:
     PyTypeObject _py_type_object;
 };
 
-}
-}
 }

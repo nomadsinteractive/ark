@@ -12,24 +12,23 @@
 namespace ark {
 
 SurfaceController::SurfaceController()
-    : _allocator_pool(sp<Allocator::Pool>::make()), _renderer_group(sp<RendererGroup>::make()), _control_group(sp<RendererGroup>::make()), _layer_group(sp<RendererGroup>::make()),
-      _render_requests(sp<OCSQueue<RenderRequest>>::make())
+    : _allocator_pool(sp<Allocator::Pool>::make()), _render_requests(sp<OCSQueue<RenderRequest>>::make())
 {
 }
 
 void SurfaceController::addRenderer(sp<Renderer> renderer, sp<Boolean> discarded, sp<Boolean> visible)
 {
-    _renderer_group->add(std::move(renderer), std::move(discarded), std::move(visible));
+    _renderer_phrase.add(RendererType::PHRASE_DEFAULT, std::move(renderer), std::move(discarded), std::move(visible));
 }
 
 void SurfaceController::addControlLayer(const sp<Renderer>& controller)
 {
-    _control_group->addRenderer(controller);
+    _renderer_phrase.add(RendererType::PHRASE_WIDGET, controller);
 }
 
 void SurfaceController::addLayer(const sp<Renderer>& layer)
 {
-    _layer_group->addRenderer(layer);
+    _renderer_phrase.add(RendererType::PHRASE_LAYER, layer);
 }
 
 void SurfaceController::requestUpdate(uint64_t timestamp)
@@ -39,9 +38,7 @@ void SurfaceController::requestUpdate(uint64_t timestamp)
     {
         const V3 position(0);
         RenderRequest renderRequest(timestamp, _allocator_pool);
-        _renderer_group->render(renderRequest, position);
-        _control_group->render(renderRequest, position);
-        _layer_group->render(renderRequest, position);
+        _renderer_phrase.render(renderRequest, position);
         _render_requests->add(std::move(renderRequest));
     }
     DCHECK_WARN(size < 3, "Frame skipped. RenderCommand size: %d. Rendering thread busy?", size);

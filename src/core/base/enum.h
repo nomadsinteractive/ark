@@ -26,10 +26,10 @@ public:
     };
 
 public:
-    Enum(int32_t value);
 
-private:
-    int32_t _value;
+//  [[script::bindings::operator(int)]]
+    static int32_t toInteger(const Box& self);
+
 };
 
 }

@@ -7,6 +7,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
+#include "graphics/impl/renderer/renderer_phrase.h"
 
 #include "app/forwarding.h"
 
@@ -29,12 +30,8 @@ public:
 
 private:
     sp<Allocator::Pool> _allocator_pool;
-
-    sp<RendererGroup> _renderer_group;
-    sp<RendererGroup> _control_group;
-    sp<RendererGroup> _layer_group;
-
     sp<OCSQueue<RenderRequest>> _render_requests;
+    RendererPhrase _renderer_phrase;
 };
 
 }

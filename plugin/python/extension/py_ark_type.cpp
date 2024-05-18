@@ -9,9 +9,7 @@
 #include "python/extension/py_cast.h"
 #include "python/extension/py_instance_ref.h"
 
-namespace ark {
-namespace plugin {
-namespace python {
+namespace ark::plugin::python {
 
 static PyObject* __richcmp__(PyArkType::Instance* obj1, PyObject* obj2, int op)
 {
@@ -129,14 +127,11 @@ std::map<TypeId, PyArkType::LoaderFunction>& PyArkType::ensureLoader(const Strin
     return _loaders[name];
 }
 
-int32_t plugin::python::PyArkType::doReady()
+void PyArkType::onReady()
 {
-    int32_t r = PyType_Ready(&_py_type_object);
+    PyArkType* enumType = PythonInterpreter::instance()->getPyArkType<Enum>();
     for(const auto& [name, value] : _enum_constants)
-        PyDict_SetItemString(_py_type_object.tp_dict, name.c_str(), PyLong_FromLong(value));
-    for(const auto& [name, value] : _string_constants)
-        PyDict_SetItemString(_py_type_object.tp_dict, name.c_str(), PyCast::toPyObject<String>(value));
-    return r;
+        PyDict_SetItemString(_py_type_object.tp_dict, name.c_str(), enumType->create(value));
 }
 
 const std::map<TypeId, PyArkType::LoaderFunction>& PyArkType::getLoader(const String& name) const
@@ -249,6 +244,4 @@ PyObject* PyArkType::__dispose__(PyArkType::Instance* self, PyObject* /*args*/, 
     Py_RETURN_NONE;
 }
 
-}
-}
 }

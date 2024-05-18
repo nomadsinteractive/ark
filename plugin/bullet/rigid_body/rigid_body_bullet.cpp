@@ -22,13 +22,14 @@ RigidBodyBullet::Stub::~Stub()
 }
 
 RigidBodyBullet::RigidBodyBullet(int32_t id, Collider::BodyType type, ColliderBullet world, sp<CollisionShape> collisionShape, sp<Vec3> position, sp<Transform> transform, sp<BtRigidBodyRef> rigidBody)
-    : RigidBody(sp<RigidBody::Stub>::make(id, type, 0, 0, std::move(position), nullptr, std::move(transform), sp<Stub>::make(std::move(world), std::move(collisionShape), std::move(rigidBody)))), _stub(stub()->_impl.unpack<Stub>())
+    : RigidBody(sp<RigidBody::Stub>::make(id, type, 0, 0, std::move(position), nullptr, std::move(transform), sp<Stub>::make(std::move(world), std::move(collisionShape), std::move(rigidBody)))),
+      _stub(stub()->_impl.toPtr<Stub>())
 {
     _stub->_rigid_body->collisionObject()->setUserPointer(reinterpret_cast<void*>(new WeakPtr<RigidBody::Stub>(stub())));
 }
 
 RigidBodyBullet::RigidBodyBullet(sp<RigidBody::Stub> other)
-    : RigidBody(std::move(other)), _stub(stub()->_impl.unpack<Stub>())
+    : RigidBody(std::move(other)), _stub(stub()->_impl.toPtr<Stub>())
 {
 }
 

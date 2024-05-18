@@ -113,10 +113,10 @@ public:
         TESTCASE_VALIDATE(locked && locked->a == 1);
 
         const sp<Node> n1 = sp<Node>::adopt(new Node());
-        const sp<B> castedB = nodeClass->cast(n1, Type<B>::id()).unpack<B>();
+        const sp<B> castedB = nodeClass->cast(n1, Type<B>::id()).toPtr<B>();
         TESTCASE_VALIDATE(castedB && castedB->d == 4);
 
-        const sp<D> castedD = nodeClass->cast(n1, Type<D>::id()).unpack<D>();
+        const sp<D> castedD = nodeClass->cast(n1, Type<D>::id()).toPtr<D>();
         TESTCASE_VALIDATE(castedD && castedD->h == 8);
 
         sp<B> nodeB = node;

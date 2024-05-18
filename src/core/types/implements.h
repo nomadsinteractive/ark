@@ -41,7 +41,7 @@ template<typename T, typename U = void, typename... INTERFACES> Box _dynamic_dow
 
 template<typename T, typename U = void, typename... INTERFACES> Box _dynamic_up_cast(const Box& box) {
     if(Type<U>::id() == box.typeId()) {
-        const sp<U>& unpacked = box.unpack<U>();
+        const sp<U>& unpacked = box.toPtr<U>();
         return unpacked.template cast<T>();
     }
     if(sizeof...(INTERFACES) != 0)
@@ -57,13 +57,13 @@ public:
 
     virtual Box cast(const Box& box, TypeId id) override {
         if(box.typeId() == _id) {
-            const sp<T>& ptr = box.unpack<T>();
+            const sp<T>& ptr = box.toPtr<T>();
             return id == Type<T>::id() ? Box(ptr) : _dynamic_down_cast<T, INTERFACES...>(ptr, id);
         }
         const Box inst = _dynamic_up_cast<T, INTERFACES...>(box);
         if(id == Type<T>::id())
             return inst;
-        return _dynamic_down_cast<T, INTERFACES...>(inst.unpack<T>(), id);
+        return _dynamic_down_cast<T, INTERFACES...>(inst.toPtr<T>(), id);
     }
 
 private:

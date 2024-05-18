@@ -19,7 +19,7 @@ public:
         {
             sp<TestA> i32 = sp<TestA>::make();
             Box box(i32);
-            box.unpack<TestA>();
+            box.toPtr<TestA>();
         }
         return TestA::refCount() == 0 ? 0 : 1;
     }

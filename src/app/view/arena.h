@@ -10,6 +10,7 @@
 
 #include "graphics/forwarding.h"
 #include "graphics/inf/renderer.h"
+#include "graphics/impl/renderer/renderer_phrase.h"
 
 #include "core/base/resource_loader.h"
 #include "app/forwarding.h"
@@ -33,7 +34,7 @@ public:
 
 //  [[script::bindings::loader]]
     template<typename T> const sp<T> load(const String& name, const Scope& args) {
-        DCHECK(_resource_loader, "Trying to load objects on a disposed Arena");
+        DCHECK(_resource_loader, "Trying to load objects on a discarded Arena");
         const sp<T> bean = _resource_loader->load<T>(name, args);
         DCHECK(bean, "Cannot build object \"%s\"", name.c_str());
         return bean;
@@ -57,13 +58,13 @@ public:
     sp<BoxBundle> packages() const;
 
 //  [[script::bindings::auto]]
-    void addEventListener(sp<EventListener> eventListener, sp<Boolean> disposed = nullptr);
+    void addEventListener(sp<EventListener> eventListener, sp<Boolean> discarded = nullptr);
 //  [[script::bindings::auto]]
-    void pushEventListener(sp<EventListener> eventListener, sp<Boolean> disposed = nullptr);
+    void pushEventListener(sp<EventListener> eventListener, sp<Boolean> discarded = nullptr);
 //  [[script::bindings::auto]]
-    void addLayer(sp<Renderer> layer);
+    void addLayer(sp<Renderer> layer, sp<Boolean> discarded = nullptr);
 //  [[script::bindings::auto]]
-    void addRenderLayer(sp<Renderer> renderLayer);
+    void addRenderLayer(sp<Renderer> renderLayer, sp<Boolean> discarded = nullptr);
 
 //  [[script::bindings::property]]
     void setView(sp<View> view);
@@ -93,10 +94,7 @@ private:
     sp<View> _view;
     sp<ResourceLoader> _resource_loader;
     op<EventListenerList> _event_listeners;
-
-    DList<sp<Renderer>> _renderers;
-    DList<sp<Renderer>> _layers;
-    DList<sp<Renderer>> _render_layers;
+    RendererPhrase _renderer_phrase;
 };
 
 }

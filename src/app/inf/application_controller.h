@@ -1,5 +1,4 @@
-#ifndef ARK_APP_INF_APPLICATION_CONTROLLER_H_
-#define ARK_APP_INF_APPLICATION_CONTROLLER_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/forwarding.h"
@@ -49,5 +48,3 @@ public:
 };
 
 }
-
-#endif

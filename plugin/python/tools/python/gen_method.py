@@ -1,6 +1,6 @@
 import sys
 
-from gen_core import parse_method_arguments, acg, remove_crv, gen_cast_call, INDENT, gen_method_call_arg, GenArgumentMeta, GenArgument, \
+from gen_core import parse_method_arguments, acg, gen_cast_call, INDENT, gen_method_call_arg, GenArgumentMeta, GenArgument, \
     create_overloaded_method_type
 
 TP_AS_NUMBER_TEMPLATE = [
@@ -107,7 +107,7 @@ class GenMethod(object):
         declares = {}
         for i, j in enumerate(self._arguments):
             typename = j.typename
-            realtypename = remove_crv(typename)
+            realtypename = acg.remove_crv(typename)
             if typename in declares:
                 declares[typename] = '%s, %sarg%d' % (declares[typename], '*' if typename.endswith('*') else '', i)
             else:
@@ -162,7 +162,7 @@ class GenMethod(object):
         return calling_lines
 
     def gen_return_statement(self, return_type, py_return):
-        if acg.typeCompare(return_type, py_return):
+        if acg.type_compare(return_type, py_return):
             return ['return ret;']
 
         if py_return != 'PyObject*':
@@ -210,16 +210,18 @@ class GenMethod(object):
         return all(i.argname is not None for i in self._arguments)
 
     def need_unpack_statement(self):
-        return True
+        return not (self._self_argument and self._self_argument.type_compare('Box'))
 
     def gen_py_type_constructor_codes(self, lines, genclass):
         pass
 
     def gen_self_statement(self, genclass):
-        cast_statement = ''
-        if self._self_argument and not self._self_argument.type_compare('sp<%s>' % genclass.binding_classname):
-            cast_statement = '.cast<%s>()' % acg.get_shared_ptr_type(self._self_argument.accept_type)
-        return 'unpacked' + cast_statement
+        if self._self_argument:
+            if self._self_argument.type_compare('Box'):
+                return '*self->box'
+            if not self._self_argument.type_compare(f'sp<{genclass.binding_classname}>'):
+                return f'unpacked.cast<{acg.get_shared_ptr_type(self._self_argument.accept_type)}>()'
+        return 'unpacked'
 
     def gen_declaration(self):
         return [
@@ -239,8 +241,8 @@ class GenMethod(object):
             self._gen_parse_tuple_code(lines, self.gen_local_var_declarations(), self._arguments)
 
         if self.need_unpack_statement():
-            lines.append(acg.format('sp<${class_name}> unpacked = self->as<${class_name}>();',
-                                    class_name=genclass.binding_classname))
+            class_name = genclass.binding_classname
+            lines.append(f'sp<{class_name}> unpacked = self->as<{class_name}>();')
         self.gen_definition_body(genclass, lines, self._arguments, [None] * len(self._arguments), not self.check_argument_type,
                                  not self.check_argument_type)
 
@@ -253,8 +255,8 @@ class GenMethod(object):
         argdeclare = [j.gen_declare('obj%d' % i, 'arg%d' % i, exact_cast, optional_check) for i, j in args]
         self_type_checks = []
         if self._self_argument:
-            if not self._self_argument.type_compare('sp<%s>' % genclass.binding_classname):
-                self_type_checks.append('unpacked.is<%s>()' % acg.get_shared_ptr_type(self._self_argument.accept_type))
+            if not self._self_argument.type_compare(f'sp<{genclass.binding_classname}>', 'Box'):
+                self_type_checks.append(f'unpacked.is<{acg.get_shared_ptr_type(self._self_argument.accept_type)}>()')
         self._gen_convert_args_code(bodylines, argdeclare, optional_check)
 
         if check_args and args:
@@ -383,7 +385,7 @@ class GenOperatorMethod(GenMethod):
         return 'int32_t' if self._return_int else 'PyObject*'
 
     def need_unpack_statement(self):
-        return not self._is_static
+        return not self._is_static and super().need_unpack_statement()
 
     @property
     def check_argument_type(self):

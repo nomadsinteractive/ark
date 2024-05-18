@@ -29,7 +29,6 @@ ANNOTATION_PATTERN = r'(?:\s*(?://)?\s*\[\[[^]]+]])*'
 METHOD_PATTERN = r'([^(\r\n]+)\(([^\r\n]*)\)[^;\r\n]*;'
 DECLARATION_PATTERN = r'(static\s+)?(const\s+)?([\w\s]+);'
 
-AUTOBIND_CONSTANT_PATTERN = re.compile(r'\[\[script::bindings::constant]][\r\n\s]+%s' % DECLARATION_PATTERN)
 AUTOBIND_ENUMERATION_PATTERN = re.compile(r'\[\[script::bindings::enumeration]]\s*enum\s+(\w+)\s*{([^}]+)};')
 AUTOBIND_PROPERTY_PATTERN = re.compile(r'\[\[script::bindings::property]]\s+%s' % METHOD_PATTERN)
 AUTOBIND_GETPROP_PATTERN = re.compile(r'\[\[script::bindings::getprop]]\s+%s' % METHOD_PATTERN)
@@ -162,7 +161,7 @@ ${0}
 
 
 def gen_module_type_declarations(modulename, results):
-    line_pattern = 'pi->pyModuleAddType<%s, %s>(module, "%s", "%s", %s, Py_TPFLAGS_DEFAULT%s);'
+    line_pattern = 'pi->pyModuleAddType<%s, %s>(module, "%s", "%s", %s, Py_TPFLAGS_DEFAULT%s)'
     genclasses = list(results.values())
     class_names = set(i.binding_classname for i in genclasses)
     class_declared = set()
@@ -203,11 +202,14 @@ def gen_body_source(filename, output_dir, output_file, namespaces, modulename, r
     if not gen_bindingcpp:
         return None
 
-    add_types = '\n    '.join(gen_module_type_declarations(modulename, results))
+    add_types = '\n    '.join([f'moduletypes.push_back({i});' for i in gen_module_type_declarations(modulename, results)])
     lines.append('\n' + '''void __init_%s__(PyObject* module)
 {
+    std::vector<PyArkType*> moduletypes;
     const sp<ark::plugin::python::PythonInterpreter>& pi = ark::plugin::python::PythonInterpreter::instance();
     %s
+    for(PyArkType* i : moduletypes)
+        i->onReady();
 }''' % (name.replace('-', '_'), add_types))
 
     return gen_py_binding_cpp(name, namespaces, includes, lines)
@@ -259,10 +261,6 @@ def gen_class_body_source(genclass, includes, lines, buildables):
 
         rich_compare_defs = genclass.gen_rich_compare_defs()
         gen_constructor_definition_source(genclass.py_class_name, 'richcompare', rich_compare_defs, lines, tp_method_lines, 'richcmpfunc')
-        # if rich_compare_defs:
-        #     lines.extend(rich_compare_defs)
-        #     # TODO: Wrap with runtime exception checker function
-        #     tp_method_lines.append('pyTypeObject->tp_richcompare = reinterpret_cast<richcmpfunc>(%s_tp_richcompare);' % genclass.py_class_name)
 
         property_defs = genclass.gen_property_defs()
         if property_defs:
@@ -283,8 +281,7 @@ def gen_class_body_source(genclass, includes, lines, buildables):
 
     genclass.gen_py_type_constructor_codes(tp_method_lines)
 
-    tp_method_lines.extend('_enum_constants["%s"] = %s;' % (i, j) for i, j in genclass.enum_constants.items())
-    tp_method_lines.extend('_string_constants["%s"] = %s;' % (i, j) for i, j in genclass.string_constants.items())
+    tp_method_lines.extend(f'_enum_constants["{k}"] = Box({v});' for k, v in genclass.enum_constants.items())
 
     constructor = acg.format('''${py_class_name}::${py_class_name}(const String& name, const String& doc, PyTypeObject* base, unsigned long flags)
     : PyArkType(name, doc, base, flags)
@@ -504,7 +501,6 @@ class GenClass(object):
         self._is_container = is_container
         self._methods = {}
         self._enum_constants = {}
-        self._string_constants = {}
 
     @property
     def classname(self):
@@ -554,10 +550,6 @@ class GenClass(object):
         return self._enum_constants
 
     @property
-    def string_constants(self):
-        return self._string_constants
-
-    @property
     def filename(self):
         return self._filename
 
@@ -577,9 +569,6 @@ class GenClass(object):
 
     def add_enum_constant(self, name, value):
         self._enum_constants[name] = value
-
-    def add_string_constant(self, name, value):
-        self._string_constants[name] = value
 
     def has_methods(self):
         return len(self._methods) > 0
@@ -749,16 +738,6 @@ def main(params, paths):
     def autotypedef(filename, content, m, x):
         results[x] = GenClass(filename, x, False)
 
-    def autoconstant(filename, content, main_class, x):
-        genclass = get_result_class(results, filename, main_class)
-        type_name, _, var_name = x[2].rpartition(' ')
-        assert type_name in ('String', 'int32_t'), f'Unsupported type "{type_name}". Only string and int supported now'
-        value_name = f'{genclass.classname}::{var_name}'
-        if type_name == 'String':
-            genclass.add_string_constant(var_name, value_name)
-        else:
-            genclass.add_enum_constant(var_name, value_name)
-
     def autobindable(filename, content, main_class, x):
         bindables.add(x)
 
@@ -782,7 +761,6 @@ def main(params, paths):
                               HeaderPattern(AUTOBIND_PROPERTY_PATTERN, AutoMethodCall(GenPropertyMethod)),
                               HeaderPattern(AUTOBIND_GETPROP_PATTERN, AutoMethodCall(GenGetPropMethod, 3)),
                               HeaderPattern(AUTOBIND_SETPROP_PATTERN, AutoMethodCall(GenSetPropMethod, 3)),
-                              HeaderPattern(AUTOBIND_CONSTANT_PATTERN, autoconstant),
                               HeaderPattern(AUTOBIND_ENUMERATION_PATTERN, autoenumeration),
                               HeaderPattern(BUILDABLE_PATTERN, autobindable))
 

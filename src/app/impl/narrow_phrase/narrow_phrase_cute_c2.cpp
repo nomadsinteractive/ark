@@ -170,7 +170,7 @@ sp<NarrowPhraseCuteC2::BodyDefCuteC2> NarrowPhraseCuteC2::findBodyDef(int32_t sh
 sp<NarrowPhraseCuteC2::BodyDefCuteC2> NarrowPhraseCuteC2::ensureBodyDef(const BroadPhrase::Candidate& candidate) const
 {
     if(candidate._body_def)
-        return candidate._body_def.unpack<BodyDefCuteC2>();
+        return candidate._body_def.toPtr<BodyDefCuteC2>();
     sp<BodyDefCuteC2> bodyDef = findBodyDef(candidate._shape_id);
     CHECK(bodyDef, "Shape %d not found", candidate._shape_id);
     return bodyDef;

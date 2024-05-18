@@ -20,6 +20,9 @@ public:
     template<typename T> Box(sp<T> sharedPtr) noexcept
         : _stub(sharedPtr ? _make_ptr_stub(new SharedPtr<T>(std::move(sharedPtr))) : nullptr) {
     }
+    template<typename T> Box(T enumValue) noexcept
+        : _stub(_make_enum_stub<T>(enumValue)) {
+    }
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Box);
 
     explicit operator bool() const;
@@ -27,7 +30,7 @@ public:
 //  [[script::bindings::property]]
     TypeId typeId() const;
 
-    template<typename T> const sp<T>& unpack() const {
+    template<typename T> const sp<T>& toPtr() const {
         return _stub ? std::get<PtrStub>(*_stub).template unpack<T>() : sp<T>::null();
     }
 
@@ -36,15 +39,19 @@ public:
         return _stub ? std::get<EnumStub>(*_stub).template unpack<T>() : static_cast<T>(0);
     }
 
+    int32_t toInteger() const {
+        return _stub ? std::get<EnumStub>(*_stub)._value : 0;
+    }
+
     template<typename T> sp<T> as() const {
         if(!_stub)
             return sp<T>::null();
 
         const PtrStub& ptrStub = std::get<PtrStub>(*_stub);
         TypeId typeId = Type<T>::id();
-        sp<T> inst = typeId == ptrStub._type_id ? ptrStub.unpack<T>() : ptrStub._interfaces->as(*this, typeId).unpack<T>();
+        sp<T> inst = typeId == ptrStub._type_id ? ptrStub.unpack<T>() : ptrStub._interfaces->as(*this, typeId).toPtr<T>();
         if(!inst) {
-            const sp<Duck<T>> duck = ptrStub._interfaces->as(*this, Type<Duck<T>>::id()).template unpack<Duck<T>>();
+            const sp<Duck<T>> duck = ptrStub._interfaces->as(*this, Type<Duck<T>>::id()).template toPtr<Duck<T>>();
             if(duck)
                 duck->to(inst);
         }
@@ -110,6 +117,7 @@ private:
     }
 
     template<typename T> std::shared_ptr<_StubVariant> _make_enum_stub(T enumValue)  {
+        static_assert(std::is_enum_v<T>);
         return std::make_shared<_StubVariant>(EnumStub(Type<T>::id(), enumValue));
     }
 

@@ -86,15 +86,6 @@
 
 namespace ark {
 
-template<typename T> using remove_cv_t = typename std::remove_cv<T>::type;
-template<typename T> using remove_reference_t = typename std::remove_reference<T>::type;
-
-template<class T> struct remove_cvref {
-    typedef remove_cv_t<remove_reference_t<T>> type;
-};
-
-template<typename T> using remove_cvref_t = typename remove_cvref<T>::type;
-
 namespace Constants {
 
 const size_t npos = std::numeric_limits<size_t>::max();

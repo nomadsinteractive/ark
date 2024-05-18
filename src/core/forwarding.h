@@ -57,6 +57,7 @@ class DOMAttribute;
 class DOMElement;
 class Disposed;
 class Duration;
+class Enum;
 class Executor;
 class Uploader;
 class Function;

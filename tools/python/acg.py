@@ -82,7 +82,7 @@ def wrap_by_namespaces(namespaces, source):
     return '\n'.join(['namespace %s {' % i for i in namespaces]) + '\n' + source + '\n\n' + '\n'.join(['}'] * len(namespaces))
 
 
-def strip_key_words(statement, keywords):
+def strip_key_words(statement, keywords: list[str]):
     splitted_statement = statement.split() if type(statement) is str else statement
     while splitted_statement:
         if splitted_statement[0] in keywords:
@@ -96,12 +96,16 @@ def get_shared_ptr_type(typename):
     return get_template_type(typename, 'sp')
 
 
-def get_template_type(typename, template_name):
-    t = strip_key_words(typename, ['const']).replace('&', '').strip()
+def get_template_type(typename: str, template_name: str):
+    t = remove_crv(typename)
     return t[len(template_name) + 1:-1] if t.startswith(f'{template_name}<') and t.endswith('>') else t
 
 
-def get_argument_type(statement):
+def remove_crv(typename: str):
+    return strip_key_words(typename, ['const', 'volatile']).strip().rstrip('&')
+
+
+def get_argument_type(statement: str):
     s = statement.split()
     if len(s) > 1:
         s = s[:-1]
@@ -113,11 +117,11 @@ def get_argument_name(statement):
     return s[-1]
 
 
-def typeCompare(t1, t2):
-    t1 = strip_key_words(t1, ['static', 'const', 'virtual']).replace('&', '').strip()
-    t2 = strip_key_words(t2, ['static', 'const', 'virtual']).replace('&', '').strip()
-    l = min(len(t1), len(t2))
-    return t1[:l] == t2[:l]
+def type_compare(t1, t2):
+    t1 = strip_key_words(t1, ['static', 'const', 'virtual']).strip().rstrip('&')
+    t2 = strip_key_words(t2, ['static', 'const', 'virtual']).strip().rstrip('&')
+    complen = min(len(t1), len(t2))
+    return t1[:complen] == t2[:complen]
 
 
 def write_to_unit(unit_name, header, source):
