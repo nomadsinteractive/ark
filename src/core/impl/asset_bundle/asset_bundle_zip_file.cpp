@@ -101,8 +101,8 @@ static zip_int64_t _local_zip_source_callback(void *userdata, void *data, zip_ui
     return -1;
 }
 
-AssetBundleZipFile::AssetBundleZipFile(const sp<Readable>& zipReadable, const String& zipLocation)
-    : _stub(sp<Stub>::make(zipReadable, zipLocation))
+AssetBundleZipFile::AssetBundleZipFile(sp<Readable> zipReadable, const String& zipLocation)
+    : _stub(sp<Stub>::make(std::move(zipReadable), zipLocation))
 {
 }
 
@@ -131,8 +131,8 @@ bool AssetBundleZipFile::hasEntry(const String& name) const
     return zip_name_locate(_stub->archive(), name.c_str(), 0) != -1;
 }
 
-AssetBundleZipFile::Stub::Stub(const sp<Readable>& zipReadable, const String& zipLocation)
-    : _zip_readable(zipReadable), _zip_location(Platform::getRealPath(zipLocation)), _size(_zip_readable ? _zip_readable->remaining() : 0)
+AssetBundleZipFile::Stub::Stub(sp<Readable> zipReadable, const String& zipLocation)
+    : _zip_readable(std::move(zipReadable)), _zip_location(Platform::getRealPath(zipLocation)), _size(_zip_readable ? _zip_readable->remaining() : 0)
 {
     CHECK(_zip_readable, "Cannot open file %s", _zip_location.c_str());
     zip_error_t error = {0};

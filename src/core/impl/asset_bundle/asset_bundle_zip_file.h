@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_IMPL_ASSET_BUNDLE_ZIP_FILE_H_
-#define ARK_CORE_IMPL_ASSET_BUNDLE_ZIP_FILE_H_
+#pragma once
 
 #include <zip.h>
 
@@ -13,7 +12,7 @@ namespace ark {
 
 class AssetBundleZipFile : public AssetBundle {
 public:
-    AssetBundleZipFile(const sp<Readable>& zipReadable, const String& zipLocation);
+    AssetBundleZipFile(sp<Readable> zipReadable, const String& zipLocation);
 
     virtual sp<Asset> getAsset(const String& name) override;
     virtual sp<AssetBundle> getBundle(const String& path) override;
@@ -24,7 +23,7 @@ public:
 public:
     class Stub {
     public:
-        Stub(const sp<Readable>& zipReadable, const String& zipLocation);
+        Stub(sp<Readable> zipReadable, const String& zipLocation);
         ~Stub();
 
         const sp<Readable>& readable() const;
@@ -49,5 +48,3 @@ public:
 };
 
 }
-
-#endif

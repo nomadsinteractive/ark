@@ -9,7 +9,7 @@ UpdatableWrapper::UpdatableWrapper(sp<Updatable> updatable)
 
 bool UpdatableWrapper::update(uint64_t timestamp)
 {
-    return (_wrapped ? _wrapped->update(timestamp) : false) | _timestamp.update(timestamp);
+    return (_wrapped && _wrapped->update(timestamp)) || _timestamp.update(timestamp);
 }
 
 void UpdatableWrapper::reset(sp<Updatable> delegate)

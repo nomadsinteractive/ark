@@ -50,7 +50,7 @@ public:
     template<typename T> T getEnum(T defaultValue) const {
         static_assert(std::is_enum_v<T>);
         const auto iter = _traits.find(Type<T>::id());
-        return iter != _traits.end() ? iter->second.toEnum<T>() : defaultValue;
+        return iter != _traits.end() ? iter->second.template toEnum<T>() : defaultValue;
     }
 
     template<typename T, typename... Args> const sp<T>& ensure(Args&&... args) {

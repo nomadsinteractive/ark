@@ -37,23 +37,24 @@ public:
 
         const sp<Asset> asset = getAsset(path);
         if(asset) {
-            const sp<Readable> readable = asset->open();
+            sp<Readable> readable = asset->open();
             if(readable)
-                return sp<AssetBundleZipFile>::make(asset->open(), path);
+                return sp<AssetBundleZipFile>::make(std::move(readable), path);
         }
 
         String filename;
         do {
             const auto [dirnameOpt, name] = s.rcut('/');
+            String dirname = dirnameOpt ? dirnameOpt.value() : "";
             filename = filename.empty() ? name : name + "/" + filename;
-            const sp<Asset> asset = dirnameOpt ? nullptr : getAsset(dirnameOpt ? dirnameOpt.value() : "");
+            const sp<Asset> asset = getAsset(dirname);
             sp<Readable> readable = asset ? asset->open() : nullptr;
             if(readable) {
-                sp<AssetBundleZipFile> zip = sp<AssetBundleZipFile>::make(std::move(readable), dirnameOpt.value());
+                sp<AssetBundleZipFile> zip = sp<AssetBundleZipFile>::make(std::move(readable), dirname);
                 String entryName = filename + "/";
                 return zip->hasEntry(entryName) ? sp<AssetBundleWithPrefix>::make(std::move(zip), std::move(entryName)) : nullptr;
             }
-            s = dirnameOpt ? dirnameOpt.value() : "";
+            s = std::move(dirname);
         } while(!s.empty());
         return nullptr;
     }

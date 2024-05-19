@@ -27,22 +27,23 @@ PyMODINIT_FUNC PyInit__decimal(void);
 PyMODINIT_FUNC PyInit__socket(void);
 PyMODINIT_FUNC PyInit_select(void);
 PyMODINIT_FUNC PyInit_pyexpat(void);
+#ifdef WIN32
 PyMODINIT_FUNC PyInit__overlapped(void);
 #endif
+#endif
 
+PyAPI_DATA(const struct _frozen *) _PyImport_FrozenBootstrap;
 #ifdef __cplusplus
 }
 #endif
 
-namespace ark {
-namespace plugin {
-namespace python {
+namespace ark::plugin::python {
 
 static struct _frozen _injected_frozen[10];
 
 static bool hasInjected()
 {
-    for(const struct _frozen* pt = PyImport_FrozenModules, *i = _injected_frozen; pt->name; pt ++, i ++)
+    for(const struct _frozen* pt = _PyImport_FrozenBootstrap, *i = _injected_frozen; pt->name; pt ++, i ++)
         if(strcmp(pt->name, "_frozen_importlib_org") == 0)
             return true;
     return false;
@@ -59,27 +60,27 @@ PythonScript::PythonScript(const String& name, const document& libraries)
     PyImport_AppendInittab("_socket", PyInit__socket);
     PyImport_AppendInittab("select", PyInit_select);
     PyImport_AppendInittab("pyexpat", PyInit_pyexpat);
-    PyImport_AppendInittab("_overlapped", PyInit__overlapped);
+#ifdef WIN32
+   PyImport_AppendInittab("_overlapped", PyInit__overlapped);
+#endif
 #endif
     if(!hasInjected())
     {
         memset(_injected_frozen, 0, sizeof(_injected_frozen));
-        for(struct _frozen* pt = (struct _frozen *) PyImport_FrozenModules, *i = _injected_frozen; pt->name; pt ++, i ++)
+        for(struct _frozen* pt = (struct _frozen *) _PyImport_FrozenBootstrap, *i = _injected_frozen; pt->name; pt ++, i ++)
         {
-            i->code = pt->code;
-            i->size = pt->size;
-            i->name = pt->name;
+            *i = *pt;
             if(strcmp(pt->name, "_frozen_importlib") == 0)
             {
                 i->code = _Py_M__ark_importlib;
                 i->size = sizeof(_Py_M__ark_importlib);
+                i->get_code = nullptr;
                 i++;
-                i->code = pt->code;
-                i->size = pt->size;
+                *i = *pt;
                 i->name = "_frozen_importlib_org";
             }
         }
-        PyImport_FrozenModules = _injected_frozen;
+        _PyImport_FrozenBootstrap = _injected_frozen;
     }
     std::vector<String> paths;
     for(const document& i : libraries->children("library"))
@@ -196,6 +197,4 @@ sp<Script> PythonScript::BUILDER::build(const Scope& args)
     return script;
 }
 
-}
-}
 }

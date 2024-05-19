@@ -35,8 +35,9 @@ public:
     }
 
     template<typename T> T toEnum() const {
-        DCHECK(_stub);
-        return _stub ? std::get<EnumStub>(*_stub).template unpack<T>() : static_cast<T>(0);
+        const EnumStub* enumStub = _stub ? std::get_if<EnumStub>(_stub.get()) : nullptr;
+        DCHECK(enumStub, "This variant doesn't contain an enum value");
+        return enumStub ? enumStub->unpack<T>() : static_cast<T>(0);
     }
 
     int32_t toInteger() const {

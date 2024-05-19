@@ -169,7 +169,7 @@ Optional<sp<StringVar>> PyCast::toStringVar(PyObject* object)
 {
     Optional<String> opt = toStringExact(object);
     if(opt)
-        return sp<StringVar::Const>::make(sp<String>::make(opt.value()));
+        return sp<StringVar>::make<StringVar::Const>(sp<String>::make(opt.value()));
 
     return toSharedPtrDefault<StringVar>(object);
 }

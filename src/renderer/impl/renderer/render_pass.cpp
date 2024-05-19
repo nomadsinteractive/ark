@@ -49,8 +49,8 @@ void RenderPass::render(RenderRequest& renderRequest, const V3& /*position*/)
 
 RenderPass::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _shader(factory.ensureBuilder<Shader>(manifest, Constants::Attributes::SHADER)), _vertex_buffer(factory.ensureBuilder<Buffer>(manifest, "vertex-buffer")),
-      _index_buffer(factory.getBuilder<Buffer>(manifest, "index-buffer")), _mode(Documents::getAttribute<Enum::RenderMode>(manifest, "mode", Enum::RENDER_MODE_TRIANGLES)),
-      _draw_count(factory.ensureBuilder<Integer>(manifest, "draw-count")), _draw_precedure(EnumMap<Enum::DrawProcedure>::instance().toEnumOrDefault(Documents::getAttribute(manifest, "draw-precedure"), Enum::DRAW_PROCEDURE_AUTO))
+      _index_buffer(factory.getBuilder<Buffer>(manifest, "index-buffer")), _draw_count(factory.ensureBuilder<Integer>(manifest, "draw-count")),
+      _mode(Documents::getAttribute<Enum::RenderMode>(manifest, "mode", Enum::RENDER_MODE_TRIANGLES)), _draw_precedure(EnumMap<Enum::DrawProcedure>::instance().toEnumOrDefault(Documents::getAttribute(manifest, "draw-precedure"), Enum::DRAW_PROCEDURE_AUTO))
 {
     for(const document& i : manifest->children("buffer"))
     {

@@ -69,9 +69,9 @@ void RenderViewOpenGL::onRenderFrame(const Color& backgroundColor, RenderCommand
 void RenderViewOpenGL::initialize(uint32_t width, uint32_t height)
 {
     LOGD("Width: %d, Height: %d", width, height);
-
+#if !defined(__APPLE__)
     glDebugMessageCallback(_glDebugCallbackProc, nullptr);
-
+#endif
     glViewport(0, 0, static_cast<GLsizei>(width), static_cast<GLsizei>(height));
 
     glEnable(GL_CULL_FACE);

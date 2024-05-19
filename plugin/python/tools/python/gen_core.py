@@ -78,20 +78,25 @@ def remove_crv(typename):
     return (t1[:-1] if t1.endswith('&') else t1).strip()
 
 
-def gen_cast_call(targettype, name):
+def gen_cast_call(targettype: str, name: str) -> str:
     if targettype == 'bool':
-        return '%s != 0' % name
-    return 'static_cast<%s>(%s)' % (targettype, name)
+        return f'{name} != 0'
+    return f'static_cast<{targettype}>({name})'
 
 
-def gen_method_call_arg(name, targettype, argtype):
-    ctype = acg.remove_crv(argtype)
-    equals = acg.type_compare(targettype, ctype)
-    argname = name if equals else gen_cast_call(targettype, name)
-    return 'std::move(%s)' % argname if 'std::vector' in argtype else argname
-    if ctype in ARK_PY_ARGUMENT_CHECKERS:
-        return ARK_PY_ARGUMENT_CHECKERS[ctype].cast(argname)
-    return argname
+def gen_method_call_arg(name: str, targettype: str, argtype: str):
+    targettype = acg.remove_crv(targettype)
+    argtype = acg.remove_crv(argtype)
+    if argtype.startswith('sp<') and acg.get_shared_ptr_type(argtype) == targettype:
+        return f'*{name}'
+    if targettype != argtype:
+        return gen_cast_call(targettype, name)
+    if any(targettype.startswith(i) for i in ('std::vector', 'std::map', 'sp<', 'Box')):
+        return f'std::move({name})'
+    return name
+    # if ctype in ARK_PY_ARGUMENT_CHECKERS:
+    #     return ARK_PY_ARGUMENT_CHECKERS[ctype].cast(argname)
+    # return argname
 
 
 class GenConverter:
@@ -225,8 +230,7 @@ class GenArgument:
             return '%s %s = %s;' % (typename, objname, argname)
         m = acg.get_shared_ptr_type(self._accept_type)
         if m == 'Scope':
-            return acg.format('const Scope ${objname} = PyCast::toScope(kws);',
-                              objname=objname, argname=argname)
+            return f'const Scope {objname} = PyCast::toScope(kws);'
         is_optional_type = 'Optional<' in m
         optional_cast_prefix = 'to' if optional_check or is_optional_type else 'ensure'
         to_cpp_object = '%sCppObject' % optional_cast_prefix

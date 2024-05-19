@@ -27,9 +27,7 @@
 #include "python/extension/python_interpreter.h"
 #include "python/extension/py_bridge.h"
 
-namespace ark {
-namespace plugin {
-namespace python {
+namespace ark::plugin::python {
 
 class ARK_PLUGIN_PYTHON_API PyCast {
 public:
@@ -88,6 +86,12 @@ public:
         Optional<sp<T>> opt = toSharedPtr<T>(object, alert);
         CHECK(opt, "Casting \"%s\" to class \"%s\" failed", Py_TYPE(object)->tp_name, Class::getClass<T>()->name());
         return opt.value();
+    }
+
+    template<> Optional<long> toCppObject_impl<long>(PyObject* object) {
+        if(PyLong_Check(object))
+            return static_cast<long>(PyLong_AsLong(object));
+        return {};
     }
 
     static PyObject* toPyObject(const Box& box);
@@ -400,6 +404,4 @@ template<> inline Optional<sp<ByteArray>> PyCast::toSharedPtrImpl<ByteArray>(PyO
     return toSharedPtrDefault<ByteArray>(object);
 }
 
-}
-}
 }

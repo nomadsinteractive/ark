@@ -165,8 +165,9 @@ enum THREAD_ID {
 typedef void(*fnTraceCallback)(const char* func, const char* condition, const char* message);
 
 void ARK_API __message__(fnTraceCallback callback, const char* func, const char* condition, const char* format = "", ...);
-
+#ifndef ARK_FLAG_DEBUG
 [[noreturn]]
+#endif
 void ARK_API __fatal__(const char* func, const char* condition, const char* message);
 void ARK_API __warning__(const char* func, const char* condition, const char* message);
 void ARK_API __trace__(const char* func, const char* condition, const char* message);

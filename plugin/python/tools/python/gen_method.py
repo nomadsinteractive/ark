@@ -263,7 +263,7 @@ class GenMethod(object):
             bodylines.append("if(%s) %s;" % (' || '.join(['!obj%d' % i for i, j in args]), self.err_return_value))
 
         r = acg.strip_key_words(self._return_type, ['virtual', 'const', '&'])
-        argtypes = [i.gen_declare('t', 't').split()[0] for i in self._arguments]
+        argtypes = [' '.join(i.gen_declare('t', 't').split('=')[0].strip().split()[:-1]) for i in self._arguments]
         argvalues = ', '.join(gen_method_call_arg('obj%d.value()' % i if optional_check and i in args_set else 'obj%d' % i, j.str(), argtypes[i]) for i, j in enumerate(self._arguments))
         callstatement = self._gen_calling_statement(genclass, argvalues)
         py_return = self.gen_py_return()

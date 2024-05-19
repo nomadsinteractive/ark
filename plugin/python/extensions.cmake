@@ -82,10 +82,12 @@ ark_add_python_extension(pyexpat
         ${LOCAL_PYTHON_INCLUDE_DIRS}
 )
 
-ark_add_python_extension(overlapped
-    SOURCES overlapped.c
-    BUILTIN
-    DEFINITIONS Py_ENABLE_SHARED Py_BUILD_CORE_MODULE
-    INCLUDEDIRS
-        ${LOCAL_PYTHON_INCLUDE_DIRS}
-)
+if(WIN32)
+    ark_add_python_extension(overlapped
+        SOURCES overlapped.c
+        BUILTIN
+        DEFINITIONS Py_ENABLE_SHARED Py_BUILD_CORE_MODULE
+        INCLUDEDIRS
+            ${LOCAL_PYTHON_INCLUDE_DIRS}
+    )
+endif()
