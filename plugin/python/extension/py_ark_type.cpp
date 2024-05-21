@@ -134,6 +134,12 @@ void PyArkType::onReady()
         PyDict_SetItemString(_py_type_object.tp_dict, name.c_str(), enumType->create(value));
 }
 
+int32_t PyArkType::doReady(TypeId typeId)
+{
+    _type_id = typeId;
+    return PyType_Ready(&_py_type_object);
+}
+
 const std::map<TypeId, PyArkType::LoaderFunction>& PyArkType::getLoader(const String& name) const
 {
     auto iter = _loaders.find(name);

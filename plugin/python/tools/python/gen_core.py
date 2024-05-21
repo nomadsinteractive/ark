@@ -100,28 +100,24 @@ def gen_method_call_arg(name: str, targettype: str, argtype: str):
 
 
 class GenConverter:
-    def __init__(self, check_func, cast_func):
+    def __init__(self, check_func: str):
         self._check_func = check_func
-        self._cast_func = cast_func
 
     def check(self, var):
         return self._check_func.format(var)
 
-    def cast(self, var):
-        return self._cast_func.format(var)
-
 
 ARK_PY_ARGUMENT_CHECKERS = {
-    'bool': GenConverter('(PyBridge::isPyLongExact({0}) || PyBridge::isPyBool({0}))', '{0}'),
-    'int32_t': GenConverter('PyBridge::isPyLongExact({0})', '{0}'),
-    'uint32_t': GenConverter('PyBridge::isPyLongExact({0})', '{0}'),
-    'float': GenConverter('(PyBridge::isPyLongExact({0}) || PyBridge::isPyFloatExact({0}))', '{0}'),
-    'std::vector<float>': GenConverter('(PyBridge::isPyListExact({0}) || PyBridge::isPyTupleExact({0}))', 'std::move({0})'),
-    'std::vector<int32_t>': GenConverter('(PyBridge::isPyListExact({0}) || PyBridge::isPyTupleExact({0}))', 'std::move({0})'),
-    'V2': GenConverter('(PyBridge::isPyTupleExact({0}) && PyBridge::PyObject_Size({0}) == 2)', '{0}'),
-    'V3': GenConverter('(PyBridge::isPyTupleExact({0}) && PyBridge::PyObject_Size({0}) == 3)', '{0}'),
-    'V4': GenConverter('(PyBridge::isPyTupleExact({0}) && PyBridge::PyObject_Size({0}) == 4)', '{0}'),
-    'std::wstring': GenConverter('PyBridge::isPyUnicodeExact({0})', '{0}')
+    'bool': GenConverter('(PyBridge::isPyLongExact({0}) || PyBridge::isPyBool({0}))'),
+    'int32_t': GenConverter('PyBridge::isPyLongExact({0})'),
+    'uint32_t': GenConverter('PyBridge::isPyLongExact({0})'),
+    'float': GenConverter('(PyBridge::isPyLongExact({0}) || PyBridge::isPyFloatExact({0}))'),
+    'std::vector<float>': GenConverter('(PyBridge::isPyListExact({0}) || PyBridge::isPyTupleExact({0}))'),
+    'std::vector<int32_t>': GenConverter('(PyBridge::isPyListExact({0}) || PyBridge::isPyTupleExact({0}))'),
+    'V2': GenConverter('(PyBridge::isPyTupleExact({0}) && PyBridge::PyObject_Size({0}) == 2)'),
+    'V3': GenConverter('(PyBridge::isPyTupleExact({0}) && PyBridge::PyObject_Size({0}) == 3)'),
+    'V4': GenConverter('(PyBridge::isPyTupleExact({0}) && PyBridge::PyObject_Size({0}) == 4)'),
+    'std::wstring': GenConverter('PyBridge::isPyUnicodeExact({0})')
 }
 
 

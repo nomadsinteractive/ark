@@ -48,8 +48,7 @@ public:
     PyArkType(const String& name, const String& doc, PyTypeObject* base, unsigned long flags);
 
     template<typename T> int ready() {
-        _type_id = Type<T>::id();
-        return PyType_Ready(&_py_type_object);
+        return doReady(Type<T>::id());
     }
 
     TypeId typeId() const;
@@ -71,6 +70,7 @@ protected:
     std::map<String, std::map<TypeId, LoaderFunction>> _loaders;
 
 private:
+    int32_t doReady(TypeId typeId);
     const std::map<TypeId, LoaderFunction>& getLoader(const String& name) const;
 
     static PyTypeObject* basetype();
@@ -78,7 +78,7 @@ private:
     static PyObject* __new__(PyTypeObject *type, PyObject *args, PyObject *kwds);
     static int __init__(Instance* self, PyObject* args, PyObject* kwds);
     static void __dealloc__(Instance* self);
-
+[[deprecated]]
     static PyObject* __absorb__(Instance* self, PyObject* args, PyObject* kwargs);
     static PyObject* __dispose__(Instance* self, PyObject* args, PyObject* kwargs);
 

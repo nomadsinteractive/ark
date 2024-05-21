@@ -78,8 +78,9 @@ def _process_header(filename, find_main_class: bool, *args):
                     j.callback(filename, content, main_class, k)
 
 
-def wrap_by_namespaces(namespaces, source):
-    return '\n'.join(['namespace %s {' % i for i in namespaces]) + '\n' + source + '\n\n' + '\n'.join(['}'] * len(namespaces))
+def wrap_by_namespaces(namespaces: list[str], source: str):
+    return f'namespace {"::".join(namespaces)} {{\n{source}\n\n}}'
+    # return '\n'.join(['namespace %s {' % i for i in namespaces]) + '\n' + source + '\n\n' + '\n'.join(['}'] * len(namespaces))
 
 
 def strip_key_words(statement, keywords: list[str]):

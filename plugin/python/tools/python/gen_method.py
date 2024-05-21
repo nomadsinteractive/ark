@@ -38,7 +38,7 @@ TP_AS_NUMBER_TEMPLATE = [
     '    (binaryfunc) ${nb_true_divide}, /* binaryfunc nb_true_divide;         */ /* __div__ */',
     '    nullptr, /* binaryfunc nb_inplace_floor_divide;*/',
     '    (binaryfunc) ${nb_inplace_true_divide}, /* binaryfunc nb_inplace_true_divide  */ /* __idiv__ */',
-    '    nullptr, /* unaryfunc nb_index;  */',
+    '    (unaryfunc) ${nb_index}, /* unaryfunc nb_index;  */ /* __index__ */',
     '    (binaryfunc) ${nb_matrix_multiply}, /* binaryfunc nb_matrix_multiply */ /* __matmul__ */',
     '    (binaryfunc) ${nb_inplace_matrix_multiply} /* binaryfunc nb_inplace_matrix_multiply */ /* __imatmul__ */',
     '};'
@@ -57,6 +57,7 @@ TP_AS_NUMBER_TEMPLATE_OPERATOR = {
     '&&': 'nb_and',
     '||': 'nb_or',
     'int': 'nb_int',
+    'index': 'nb_index',
     'float': 'nb_float',
     '+=': 'nb_inplace_add',
     '-=': 'nb_inplace_subtract',

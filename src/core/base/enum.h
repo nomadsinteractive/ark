@@ -27,7 +27,7 @@ public:
 
 public:
 
-//  [[script::bindings::operator(int)]]
+//  [[script::bindings::operator(index)]]
     static int32_t toInteger(const Box& self);
 
 };
