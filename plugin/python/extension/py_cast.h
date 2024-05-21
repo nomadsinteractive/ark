@@ -171,11 +171,12 @@ private:
     template<typename T> static Optional<T> toCppObject_sfinae(PyObject* obj, typename T::value_type*) {
         return toCppCollectionObject_sfinae<T, typename T::value_type>(obj, nullptr);
     }
-    template<typename T> static Optional<T> toCppObject_sfinae(PyObject* obj, typename std::enable_if<std::is_enum<T>::value>::type*) {
-        Optional<int32_t> opt = toCppObject_impl<int32_t>(obj);
-        if(!opt)
-            return Optional<T>();
-        return static_cast<T>(opt.value());
+    template<typename T> static Optional<T> toCppObject_sfinae(PyObject* obj, std::enable_if_t<std::is_enum_v<T>>*) {
+        PyInstance pyObj(PyInstance::steal(PyBridge::PyNumber_Index(obj)));
+        if(pyObj) {
+            return Optional<T>(static_cast<T>(PyBridge::PyLong_AsLong(pyObj.pyObject())));
+        }
+        return Optional<T>();
     }
     template<typename... Args> static PyObject* makeArgumentTuple(Args... args) {
         PyObject* tuple = PyTuple_New(sizeof...(Args));

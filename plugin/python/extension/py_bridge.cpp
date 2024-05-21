@@ -57,6 +57,16 @@ PyObject* PyBridge::PyFloat_FromDouble(double value)
     return ::PyFloat_FromDouble(value);
 }
 
+long PyBridge::PyLong_AsLong(PyObject* obj)
+{
+    return ::PyLong_AsLong(obj);
+}
+
+PyObject* PyBridge::PyNumber_Index(PyObject* obj)
+{
+    return ::PyNumber_Index(obj);
+}
+
 Py_ssize_t PyBridge::PyObject_Size(PyObject* obj)
 {
     return ::PyObject_Size(obj);

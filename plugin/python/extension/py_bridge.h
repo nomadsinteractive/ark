@@ -24,6 +24,9 @@ public:
     static PyObject* PyLong_FromUnsignedLongLong(unsigned long long);
     static PyObject* PyFloat_FromDouble(double);
 
+    static long PyLong_AsLong(PyObject* obj);
+    static PyObject* PyNumber_Index(PyObject* obj);
+
     static Py_ssize_t PyObject_Size(PyObject* obj);
     static PyObject* PyObject_Type(PyObject* obj);
     static PyObject* PyObject_GetIter(PyObject *obj);

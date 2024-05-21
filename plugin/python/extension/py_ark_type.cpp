@@ -13,6 +13,17 @@ namespace ark::plugin::python {
 
 static PyObject* __richcmp__(PyArkType::Instance* obj1, PyObject* obj2, int op)
 {
+    if(PyIndex_Check(reinterpret_cast<PyObject*>(obj1)) && PyIndex_Check(obj2))
+    {
+        PyObject* idx1 = PyNumber_Index(reinterpret_cast<PyObject*>(obj1));
+        PyObject* idx2 = PyNumber_Index(reinterpret_cast<PyObject*>(obj2));
+        long value1 = PyLong_AsLong(idx1);
+        long value2 = PyLong_AsLong(idx2);
+        Py_XDECREF(idx1);
+        Py_XDECREF(idx2);
+        Py_RETURN_RICHCOMPARE(value1, value2, op);
+    }
+
     bool obj2IsNone = obj2 == Py_None;
     if(!(obj2IsNone || PythonInterpreter::instance()->isPyArkTypeObject(Py_TYPE(obj2))))
     {

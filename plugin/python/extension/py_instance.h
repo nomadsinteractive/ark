@@ -1,20 +1,18 @@
-#ifndef ARK_PLUGIN_PYTHON_EXTENSION_PY_INSTANCE_H_
-#define ARK_PLUGIN_PYTHON_EXTENSION_PY_INSTANCE_H_
+#pragma once
 
 #include <Python.h>
 
 #include "core/forwarding.h"
+#include "core/base/api.h"
 #include "core/types/implements.h"
 #include "core/types/shared_ptr.h"
 
 #include "python/forwarding.h"
 #include "python/extension/py_instance_ref.h"
 
-namespace ark {
-namespace plugin {
-namespace python {
+namespace ark::plugin::python {
 
-class PyInstance {
+class ARK_PLUGIN_PYTHON_API PyInstance {
 public:
     PyInstance();
     PyInstance(sp<PyInstanceRef> ref);
@@ -75,7 +73,3 @@ private:
 };
 
 }
-}
-}
-
-#endif
