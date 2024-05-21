@@ -16,9 +16,9 @@ public:
 //[[script::bindings::constructor]]
     static sp<Boolean> create(bool value);
 
-//[[script::bindings::operator(&&)]]
+//[[script::bindings::operator(&)]]
     static sp<Boolean> __and__(sp<Boolean> self, sp<Boolean> rvalue);
-//[[script::bindings::operator(||)]]
+//[[script::bindings::operator(|)]]
     static sp<Boolean> __or__(sp<Boolean> self, sp<Boolean> rvalue);
 //[[script::bindings::operator(bool)]]
     static bool toBool(const sp<Boolean>& self);

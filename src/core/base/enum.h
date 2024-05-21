@@ -29,7 +29,10 @@ public:
 
 //  [[script::bindings::operator(index)]]
     static int32_t toInteger(const Box& self);
-
+//[[script::bindings::operator(&)]]
+    static int32_t __and__(const Box& lvalue, const Box& rvalue);
+//[[script::bindings::operator(|)]]
+    static int32_t __or__(const Box& lvalue, const Box& rvalue);
 };
 
 }

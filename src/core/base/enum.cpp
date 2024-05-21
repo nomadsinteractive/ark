@@ -33,4 +33,14 @@ int32_t Enum::toInteger(const Box& self)
     return self.toInteger();
 }
 
+int32_t Enum::__and__(const Box& lvalue, const Box& rvalue)
+{
+    return lvalue.toInteger() & rvalue.toInteger();
+}
+
+int32_t Enum::__or__(const Box& lvalue, const Box& rvalue)
+{
+    return lvalue.toInteger() | rvalue.toInteger();
+}
+
 }
