@@ -6,24 +6,21 @@
 #include "core/forwarding.h"
 #include "core/types/box.h"
 #include "core/types/class.h"
-#include "core/types/interfaces.h"
 #include "core/types/type.h"
 
 namespace ark {
 
 template<typename T> class SharedPtr {
 public:
-    constexpr SharedPtr() noexcept
-        : _ptr(nullptr), _interfaces(nullptr) {
+    constexpr SharedPtr() noexcept = default;
+    constexpr SharedPtr(std::nullptr_t) noexcept
+        : _ptr(nullptr), _class(nullptr) {
     }
-    constexpr SharedPtr(std::nullptr_t null) noexcept
-        : _ptr(null), _interfaces(null) {
-    }
-    SharedPtr(std::shared_ptr<T> ptr, std::shared_ptr<Interfaces> interfaces) noexcept
-        : _ptr(std::move(ptr)), _interfaces(std::move(interfaces)) {
+    SharedPtr(std::shared_ptr<T> ptr, const Class* clazz) noexcept
+        : _ptr(std::move(ptr)), _class(clazz) {
     }
     template<typename U> SharedPtr(const SharedPtr<U>& ptr) noexcept
-        : SharedPtr(std::static_pointer_cast<T>(ptr._ptr), ptr.ensureInterfaces()) {
+        : SharedPtr(std::static_pointer_cast<T>(ptr._ptr), ptr.ensureClass()) {
     }
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(SharedPtr);
 
@@ -78,23 +75,27 @@ public:
         return _ptr.get();
     }
 
-    const std::shared_ptr<Interfaces>& ensureInterfaces() const {
-        if(!_interfaces)
-            _interfaces.reset(new Interfaces(Class::getClass<T>()));
-        return _interfaces;
+    const Class* getClass() const {
+        return _class;
+    }
+
+    const Class* ensureClass() const {
+        if(!_class)
+            _class = Class::getClass<T>();
+        return _class;
     }
 
     template<typename U> SharedPtr<U> cast() const {
-        return SharedPtr<U>(std::static_pointer_cast<U>(_ptr), ensureInterfaces());
+        return SharedPtr<U>(std::static_pointer_cast<U>(_ptr), ensureClass());
     }
 
-    template<typename U> bool is() const {
-        return _interfaces ? _interfaces->isInstance<U>() : std::is_same<T, U>::value;
+    template<typename U> bool isInstance() const {
+        return _class ? _class->isInstance(Type<U>::id()) : std::is_same_v<T, U>;
     }
 
     template<typename U> SharedPtr<U> as() const {
         if(_ptr) {
-            Box self(Type<T>::id(), this, get(), ensureInterfaces(), [](const void*) {});
+            Box self(Type<T>::id(), ensureClass(), this, _ptr.get(), [](const void*) {});
             return self.as<U>();
         }
         return nullptr;
@@ -106,10 +107,10 @@ public:
 
 private:
     SharedPtr(T* instance) noexcept
-        : _ptr(instance) {
+        : _ptr(instance), _class(nullptr) {
     }
-    SharedPtr(T* ptr, std::shared_ptr<Interfaces> interfaces, std::function<void(T*)> deleter) noexcept
-        : _ptr(ptr, std::move(deleter)), _interfaces(std::move(interfaces)) {
+    SharedPtr(T* ptr, const Class* clazz, std::function<void(T*)> deleter) noexcept
+        : _ptr(ptr, std::move(deleter)), _class(clazz) {
     }
 
     template<typename U> friend class SharedPtr;
@@ -117,7 +118,7 @@ private:
 
 private:
     std::shared_ptr<T> _ptr;
-    mutable std::shared_ptr<Interfaces> _interfaces;
+    mutable const Class* _class;
 };
 
 template<> class SharedPtr<void> {
@@ -130,7 +131,7 @@ public:
         DFATAL("Illegal SharedPtr<void> class instance creation");
     }
 
-    SharedPtr(std::shared_ptr<void>, std::shared_ptr<Interfaces>) {
+    SharedPtr(std::shared_ptr<void>, const Class*) {
         DFATAL("Illegal SharedPtr<void> class instance creation");
     }
 
@@ -146,12 +147,12 @@ public:
         return SharedPtr<U>();
     }
 
-    const std::shared_ptr<Interfaces>& interfaces() const {
-        return _interfaces;
+    const Class* getClass() const {
+        return nullptr;
     }
 
-    const std::shared_ptr<Interfaces>& ensureInterfaces() const {
-        return _interfaces;
+    const Class* ensureClass() const {
+        return nullptr;
     }
 
     template<typename U> sp<U> as() const {
@@ -166,9 +167,6 @@ public:
         static SharedPtr<void> s;
         return s;
     }
-
-private:
-    std::shared_ptr<Interfaces> _interfaces;
 
 };
 

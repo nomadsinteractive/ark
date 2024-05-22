@@ -10,12 +10,12 @@
 namespace ark {
 namespace _internal {
 
-template<typename T = void, typename... INTERFACES> void _add_types(std::set<TypeId>& interfaces) {
+template<typename T, typename... INTERFACES> void _add_types(std::set<TypeId>& interfaces) {
     interfaces.insert(Type<T>::id());
     Class* clazz = Class::getClass(Type<T>::id());
     if(clazz)
         interfaces.insert(clazz->implements().begin(), clazz->implements().end());
-    if(sizeof...(INTERFACES) != 0)
+    if constexpr(sizeof...(INTERFACES) > 0)
         _add_types<INTERFACES...>(interfaces);
 }
 
@@ -81,6 +81,7 @@ template<typename T, typename... INTERFACES> class Implements {
 public:
     Implements() {
         static Class* clazz = _internal::_make_class<T, INTERFACES...>();
+        (void) clazz;
     }
 };
 

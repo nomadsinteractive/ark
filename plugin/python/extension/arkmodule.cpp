@@ -23,11 +23,7 @@
 
 using namespace ark;
 
-namespace ark {
-namespace plugin {
-namespace python {
-
-class PyContainer;
+namespace ark::plugin::python {
 
 static PyObject* ark_log(Log::LogLevel level, PyObject* args);
 static PyObject* ark_logd(PyObject* self, PyObject* args);
@@ -136,10 +132,7 @@ PyObject* ark_loadAssetBundle(PyObject* /*self*/, PyObject* args)
     const char* arg0;
     if(!PyArg_ParseTuple(args, "s", &arg0))
         Py_RETURN_NONE;
-    const sp<AssetBundle> assetBundle = Ark::instance().getAssetBundle(*arg0 ? arg0 : "/");
-    if(assetBundle)
-        return PythonInterpreter::instance()->toPyObject(assetBundle);
-    Py_RETURN_NONE;
+    return PyCast::toPyObject(Ark::instance().getAssetBundle(*arg0 ? arg0 : "/"));
 }
 
 PyObject* ark_isDirectory(PyObject* /*self*/, PyObject* args)
@@ -229,8 +222,6 @@ void setPythonPath(const std::vector<String>& paths)
     _PYTHON_PATH = paths;
 }
 
-}
-}
 }
 
 PyMODINIT_FUNC PyInit_ark(void)

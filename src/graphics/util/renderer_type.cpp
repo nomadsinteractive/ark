@@ -19,7 +19,7 @@ sp<Renderer> RendererType::create(const sp<Renderer>& delegate)
 
 void RendererType::addRenderer(const sp<Renderer>& self, const sp<Renderer>& renderer)
 {
-    DCHECK(self.template is<Renderer::Group>(), "Cannot call addRenderer on a none-group renderer");
+    DCHECK(self.template isInstance<Renderer::Group>(), "Cannot call addRenderer on a none-group renderer");
     const sp<Renderer::Group> rendererGroup = self.template as<Renderer::Group>();
     rendererGroup->addRenderer(renderer);
 }
@@ -49,7 +49,7 @@ sp<Renderer> RendererType::makeAutoRelease(const sp<Renderer>& self, int32_t ref
 
 SafePtr<Size> RendererType::size(const sp<Renderer>& self)
 {
-    if(self.template is<Block>())
+    if(self.template isInstance<Block>())
     {
         sp<Block> block = self.template as<Block>();
         if(block)

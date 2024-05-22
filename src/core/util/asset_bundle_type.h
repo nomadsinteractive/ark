@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_UTIL_ASSET_BUNDLE_TYPE_H_
-#define ARK_CORE_UTIL_ASSET_BUNDLE_TYPE_H_
+#pragma once
 
 #include <vector>
 
@@ -54,5 +53,3 @@ public:
 };
 
 }
-
-#endif

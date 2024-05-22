@@ -1,8 +1,10 @@
-#ifndef ARK_CORE_BASE_STRING_TABLE_H_
-#define ARK_CORE_BASE_STRING_TABLE_H_
+#pragma once
+
+#include <map>
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
+#include "core/base/string.h"
 #include "core/types/shared_ptr.h"
 
 namespace ark {
@@ -25,5 +27,3 @@ private:
 };
 
 }
-
-#endif

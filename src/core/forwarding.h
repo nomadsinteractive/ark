@@ -63,7 +63,6 @@ class Uploader;
 class Function;
 class Future;
 class Holder;
-class Interfaces;
 class Json;
 class Notifier;
 class Manifest;

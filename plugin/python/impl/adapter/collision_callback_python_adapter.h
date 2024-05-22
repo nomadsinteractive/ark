@@ -1,5 +1,4 @@
-#ifndef ARK_PLUGIN_PYTHON_IMPL_ADAPTER_COLLISION_CALLBACK_PYTHON_ADAPTER_H_
-#define ARK_PLUGIN_PYTHON_IMPL_ADAPTER_COLLISION_CALLBACK_PYTHON_ADAPTER_H_
+#pragma once
 
 #include "core/inf/holder.h"
 #include "core/types/shared_ptr.h"
@@ -8,9 +7,7 @@
 
 #include "python/extension/py_instance.h"
 
-namespace ark {
-namespace plugin {
-namespace python {
+namespace ark::plugin::python {
 
 //[[script::bindings::holder]]
 class CollisionCallbackPythonAdapter : public CollisionCallback, public Holder, Implements<CollisionCallbackPythonAdapter, CollisionCallback, Holder> {
@@ -34,7 +31,3 @@ private:
 };
 
 }
-}
-}
-
-#endif

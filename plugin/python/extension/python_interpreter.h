@@ -45,8 +45,9 @@ public:
     }
 
     template<typename T> PyObject* pyNewObject(const sp<T>& object) {
-        TypeId typeId = object.ensureInterfaces()->typeId();
-        return _type_by_id.find(typeId) != _type_by_id.end() ? toPyObject(object.ensureInterfaces()->as(object, typeId)) : getPyArkType<T>()->create(object);
+        const Class* objClass = object.ensureClass();
+        const TypeId typeId = objClass->id();
+        return _type_by_id.find(typeId) != _type_by_id.end() ? toPyObject(objClass->cast(object, typeId)) : getPyArkType<T>()->create(object);
     }
 
     template<typename T, typename P> T* pyModuleAddType(PyObject* module, const char* moduleName, const char* typeName, PyTypeObject* base, long flags) {

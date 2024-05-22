@@ -26,9 +26,9 @@ public:
         pluginManager->load("ark-box2d");
         const sp<ResourceLoader> resourceLoader = getResourceLoader();
 
-        const Scope args;
+        Scope args;
         const sp<Collider> world = resourceLoader->load<Collider>("world", args);
-        if(!world.is<Runnable>())
+        if(!world.isInstance<Runnable>())
             return 1;
 
         const sp<Runnable> worldRunnable = world.as<Runnable>();

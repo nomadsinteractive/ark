@@ -5,11 +5,9 @@
 #include "app/base/collision_manifold.h"
 
 #include "python/api.h"
-#include "python/extension/python_interpreter.h"
+#include "python/extension/py_cast.h"
 
-namespace ark {
-namespace plugin {
-namespace python {
+namespace ark::plugin::python {
 
 CollisionCallbackPythonAdapter::CollisionCallbackPythonAdapter(const PyInstance& callback)
     : _on_begin_contact(callback.hasAttr("on_begin_contact") ? callback.getAttr("on_begin_contact")
@@ -76,12 +74,10 @@ void CollisionCallbackPythonAdapter::traverse(const Holder::Visitor& visitor)
 
 PyObject* CollisionCallbackPythonAdapter::toPyObject(const sp<RigidBody>& rigidBody) const
 {
-    TypeId concreteTypeId = rigidBody.ensureInterfaces()->typeId();
-    if(PythonInterpreter::instance()->isPyObject(concreteTypeId))
-        return PythonInterpreter::instance()->toPyObject(Box(rigidBody).toConcrete());
-    return PythonInterpreter::instance()->toPyObject(rigidBody);
+    const Class* objClass = rigidBody.ensureClass();
+    if(PythonInterpreter::instance()->isPyObject(objClass->id()))
+        return PythonInterpreter::instance()->toPyObject(objClass->cast(Box(rigidBody), objClass->id()));
+    return PyCast::toPyObject(rigidBody);
 }
 
-}
-}
 }

@@ -87,7 +87,7 @@ public:
             factory.addDictionaryFactory<uint32_t>([](BeanFactory& factory, const String& value) {return sp<ValueDictionaryImpl<uint32_t>>::make(factory, value);});
             beanFactory->add(factory);
             beanFactory->addPackage("self", beanFactory);
-            const Scope args;
+            Scope args;
             if((*beanFactory->build<uint8_t>("@a", args).get()) != 1)
                 return 1;
             if((*beanFactory->build<uint16_t>("@a", args).get()) != 2)

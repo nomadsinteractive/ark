@@ -117,7 +117,6 @@ void ApplicationFacade::setArena(sp<Arena> arena)
     }
 
     ASSERT(arena);
-    CHECK_WARN(!arena.is<Disposed>(), "Application main arena's lifecycle should be managed by application itself");
     _arena = std::move(arena);
     _arena_discarded = sp<Disposed>::make();
 

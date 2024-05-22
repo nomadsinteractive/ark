@@ -17,9 +17,7 @@
 #include "dear-imgui/base/renderer_context.h"
 #include "dear-imgui/renderer/renderer_imgui.h"
 
-namespace ark {
-namespace plugin {
-namespace dear_imgui {
+namespace ark::plugin::dear_imgui {
 
 class WidgetGroup : public Widget {
 public:
@@ -265,7 +263,7 @@ WidgetBuilder::WidgetBuilder(const sp<Renderer>& imguiRenderer)
 
 bool WidgetBuilder::begin(String name, sp<Boolean> isOpen)
 {
-    CHECK(isOpen == nullptr || isOpen.is<BooleanWrapper>(), "isOpen parameter must be either BooleanWrapper instance or nullptr");
+    CHECK(isOpen == nullptr || isOpen.isInstance<BooleanWrapper>(), "isOpen parameter must be either BooleanWrapper instance or nullptr");
     sp<WidgetGroup> window = isOpen ? sp<WidgetGroup>::make<Window>(std::move(name), std::move(isOpen)) : sp<WidgetGroup>::make<WindowNoClose>(std::move(name));
     addWidget(window);
     push(std::move(window));
@@ -514,6 +512,4 @@ const sp<WidgetGroup>& WidgetBuilder::current() const
     return _stub->_states.top();
 }
 
-}
-}
 }

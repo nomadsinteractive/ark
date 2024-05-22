@@ -33,7 +33,7 @@ public:
     bool is(TypeId id) const;
     bool isInstance(TypeId id) const;
 
-    Box cast(const Box& box, TypeId id);
+    Box cast(const Box& box, TypeId id) const;
 
     void setImplementation(std::set<TypeId>&& implementation);
 

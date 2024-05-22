@@ -31,7 +31,7 @@ public:
         if(!resourceLoader)
             return -1;
 
-        const Scope args;
+        Scope args;
         const sp<Script> script = resourceLoader->load<Script>("script", args);
         if(!script) {
             puts("No script interpreter installed");

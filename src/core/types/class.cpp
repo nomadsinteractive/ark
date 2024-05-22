@@ -58,7 +58,7 @@ bool Class::isInstance(TypeId id) const
     return _implements.find(id) != _implements.end();
 }
 
-Box Class::cast(const Box& box, TypeId id)
+Box Class::cast(const Box& box, TypeId id) const
 {
     return _delegate->cast(box, id);
 }

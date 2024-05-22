@@ -26,7 +26,7 @@ class VorbisTestCase : public TestCase {
 public:
     virtual int launch() override {
         const sp<ResourceLoader> resourceLoader = getResourceLoader();
-        const Scope args;
+        Scope args;
         const sp<AudioPlayer> portaudioPlayer = resourceLoader->load<AudioPlayer>("audio_player", args);
         const sp<Future> f1 = AudioPlayer::play(portaudioPlayer, "test.ogg", AudioPlayer::PLAY_OPTION_DEFAULT);
         std::this_thread::sleep_for(std::chrono::milliseconds(800));

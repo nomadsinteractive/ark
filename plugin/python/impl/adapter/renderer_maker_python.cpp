@@ -4,9 +4,7 @@
 
 #include "python/api.h"
 
-namespace ark {
-namespace plugin {
-namespace python {
+namespace ark::plugin::python {
 
 RendererMakerPython::RendererMakerPython(PyInstance maker)
     : _maker(std::move(maker))
@@ -63,6 +61,4 @@ void RendererMakerPython::traverse(const Holder::Visitor& visitor)
         visitor(_recycler.ref());
 }
 
-}
-}
 }

@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_INF_STRING_BUNDLE_H_
-#define ARK_CORE_INF_STRING_BUNDLE_H_
+#pragma once
 
 #include <vector>
 
@@ -18,5 +17,3 @@ public:
 };
 
 }
-
-#endif

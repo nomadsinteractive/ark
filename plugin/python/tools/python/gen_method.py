@@ -257,7 +257,7 @@ class GenMethod(object):
         self_type_checks = []
         if self._self_argument:
             if not self._self_argument.type_compare(f'sp<{genclass.binding_classname}>', 'Box'):
-                self_type_checks.append(f'unpacked.is<{acg.get_shared_ptr_type(self._self_argument.accept_type)}>()')
+                self_type_checks.append(f'unpacked.isInstance<{acg.get_shared_ptr_type(self._self_argument.accept_type)}>()')
         self._gen_convert_args_code(bodylines, argdeclare, optional_check)
 
         if check_args and args:

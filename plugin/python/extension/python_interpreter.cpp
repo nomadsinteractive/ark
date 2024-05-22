@@ -25,9 +25,7 @@
 #include "python/impl/duck/py_object_duck_type.h"
 #include "python/impl/duck/py_vec_duck_type.h"
 
-namespace ark {
-namespace plugin {
-namespace python {
+namespace ark::plugin::python {
 
 const sp<ReferenceManager>& PythonInterpreter::referenceManager() const
 {
@@ -110,6 +108,4 @@ bool PythonInterpreter::exceptErr(PyObject* type) const
     return false;
 }
 
-}
-}
 }
