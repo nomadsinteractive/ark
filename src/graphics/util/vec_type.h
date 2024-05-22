@@ -151,7 +151,7 @@ public:
     }
 
     static sp<Numeric> x(const sp<VarType>& self) {
-        const sp<IMPL> impl = self.template as<IMPL>();
+        const sp<IMPL> impl = self.template tryCast<IMPL>();
         return impl ? static_cast<sp<Numeric>>(impl->x()) : sp<Numeric>::make<VariableOP1<float, T>>(Operators::Subscript<T, float>(0), self);
     }
 
@@ -164,7 +164,7 @@ public:
     }
 
     static sp<Numeric> y(const sp<VarType>& self) {
-        const sp<IMPL> impl = self.template as<IMPL>();
+        const sp<IMPL> impl = self.template tryCast<IMPL>();
         return impl ? static_cast<sp<Numeric>>(impl->y()) : sp<Numeric>::make<VariableOP1<float, T>>(Operators::Subscript<T, float>(1), self);
     }
 
@@ -220,12 +220,12 @@ public:
 
     [[deprecated]]
     static void fix(const sp<VarType>& self) {
-        sp<VariableWrapper<T>> wrapper = self.template as<VariableWrapper<T>>();
+        sp<VariableWrapper<T>> wrapper = self.template tryCast<VariableWrapper<T>>();
         if(wrapper) {
             wrapper->fix();
             return;
         }
-        sp<Vec2Impl> impl = self.template as<Vec2Impl>();
+        sp<Vec2Impl> impl = self.template tryCast<Vec2Impl>();
         CHECK(impl, "Object is not an instance of neither VariableWrapper<T> or Vec%dImpl", DIMENSION);
         ensureImpl(self)->fix();
     }
@@ -275,7 +275,7 @@ public:
     }
 
     static sp<VarType> wrapped(const sp<VarType>& self) {
-        sp<VariableWrapper<T>> wrapper = self.template as<VariableWrapper<T>>();
+        sp<VariableWrapper<T>> wrapper = self.template tryCast<VariableWrapper<T>>();
         CHECK_WARN(wrapper, "Non-Vec%dWrapper instance has no delegate attribute. This should be an error unless you're inspecting it.", DIMENSION);
         return wrapper ? wrapper->wrapped() : nullptr;
     }
@@ -302,11 +302,11 @@ public:
 
 protected:
     static sp<IMPL> toImpl(const sp<VarType>& self) {
-        return self.template as<IMPL>();
+        return self.template tryCast<IMPL>();
     }
 
     static sp<IMPL> ensureImpl(const sp<VarType>& self) {
-        sp<IMPL> impl = self.template as<IMPL>();
+        sp<IMPL> impl = self.template tryCast<IMPL>();
         CHECK(impl, "This Vec%d object is not a Vec%dImpl instance", DIMENSION, DIMENSION);
         return impl;
     }

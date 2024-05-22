@@ -44,7 +44,7 @@ public:
     void setVisible(sp<Boolean> visible);
 
 //  [[script::bindings::property]]
-    const sp<ModelLoader>& modelLoader() const;
+    sp<ModelLoader> modelLoader() const;
 
 // [[script::bindings::property]]
     const sp<LayerContext>& context() const;

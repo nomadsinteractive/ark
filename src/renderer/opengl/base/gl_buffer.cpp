@@ -7,8 +7,7 @@
 
 #include "renderer/opengl/util/gl_util.h"
 
-namespace ark {
-namespace opengl {
+namespace ark::opengl {
 
 namespace {
 
@@ -91,5 +90,4 @@ ResourceRecycleFunc GLBuffer::recycle()
     };
 }
 
-}
 }

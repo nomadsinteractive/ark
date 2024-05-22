@@ -124,7 +124,7 @@ public:
         sp<LayoutV3::Node> _layout_node;
 
         SafeVar<Boolean> _visible;
-        SafeVar<Boolean> _disposed;
+        SafeVar<Boolean> _discarded;
 
         WeakPtr<Stub> _parent_stub;
         bool _top_view;

@@ -35,9 +35,7 @@ void ClassManager::updateHierarchy()
 
 ClassManager& ClassManager::instance()
 {
-//    return Ark::instance().classManager();
-    static ClassManager INSTANCE;
-    return INSTANCE;
+    return Ark::instance()._class_manager;
 }
 
 }

@@ -22,7 +22,7 @@ void RendererGroup::render(RenderRequest& renderRequest, const V3& position)
 void RendererGroup::addRenderer(sp<Renderer> renderer, const Traits& traits)
 {
     ASSERT(renderer);
-    add(renderer, renderer.as<Disposed>(), renderer.as<Visibility>());
+    add(renderer, renderer.tryCast<Disposed>(), renderer.tryCast<Visibility>());
 }
 
 void RendererGroup::add(sp<Renderer> renderer, sp<Boolean> discarded, sp<Boolean> visible)

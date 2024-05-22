@@ -148,7 +148,7 @@ public:
                 DFATAL("Unsupported parameter number: %d", paramList.size());
                 return nullptr;
             }
-            return compilePhrase ? compile(factory, expr) : V::null();
+            return compilePhrase ? compile(factory, expr) : V();
         }
 
         V reduce(const Operator<T>& op, const String& rexpr, BeanFactory& args, Operator<T>& op1, String& remaining) const {

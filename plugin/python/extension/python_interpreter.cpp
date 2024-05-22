@@ -32,10 +32,10 @@ const sp<ReferenceManager>& PythonInterpreter::referenceManager() const
     return _reference_manager;
 }
 
-const sp<PythonInterpreter>& PythonInterpreter::instance()
+PythonInterpreter& PythonInterpreter::instance()
 {
-    const Global<PythonInterpreter> instance;
-    return static_cast<const sp<PythonInterpreter>&>(instance);
+    Global<PythonInterpreter> instance;
+    return static_cast<PythonInterpreter&>(instance);
 }
 
 PythonInterpreter::PythonInterpreter()

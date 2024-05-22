@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_BASE_COLOR_H_
-#define ARK_GRAPHICS_BASE_COLOR_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/inf/variable.h"
@@ -54,10 +53,6 @@ public:
     bool operator == (const Color& other) const;
     bool operator != (const Color& other) const;
 
-    static const Color NONE;
-    static const Color WHITE;
-    static const Color BLACK;
-
     virtual V4 val() override;
     virtual bool update(uint64_t timestamp) override;
 
@@ -69,4 +64,3 @@ private:
 };
 
 }
-#endif

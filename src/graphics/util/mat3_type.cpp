@@ -59,7 +59,7 @@ sp<Mat3> Mat3Type::freeze(const sp<Mat3>& self)
 
 sp<Mat3> Mat3Type::ensureImpl(const sp<Mat3>& self)
 {
-    const sp<Mat3Impl> impl = self.as<Mat3Impl>();
+    const sp<Mat3Impl> impl = self.tryCast<Mat3Impl>();
     DCHECK(impl, "This Vec3 object is not a Mat3Impl instance");
     return impl;
 }

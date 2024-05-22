@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_UTIL_INTEGER_TYPE_H_
-#define ARK_CORE_UTIL_INTEGER_TYPE_H_
+#pragma once
 
 #include <vector>
 
@@ -81,7 +80,7 @@ public:
 //[[script::bindings::property]]
     static void setVal(const sp<IntegerWrapper>& self, int32_t value);
 //[[script::bindings::property]]
-    static const sp<Integer>& delegate(const sp<Integer>& self);
+    static sp<Integer> delegate(const sp<Integer>& self);
 //[[script::bindings::property]]
     static void setDelegate(const sp<Integer>& self, const sp<Integer>& delegate);
 
@@ -121,8 +120,6 @@ public:
 //[[script::bindings::classmethod]]
     static sp<Integer> dye(sp<Integer> self, sp<Boolean> condition = nullptr, String message = "");
 
-    static const sp<Integer> ZERO;
-
 //  [[plugin::builder::by-value]]
     class DICTIONARY : public Builder<Integer> {
     public:
@@ -148,5 +145,3 @@ public:
 };
 
 }
-
-#endif

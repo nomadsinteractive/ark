@@ -20,7 +20,7 @@ sp<Renderer> RendererType::create(const sp<Renderer>& delegate)
 void RendererType::addRenderer(const sp<Renderer>& self, const sp<Renderer>& renderer)
 {
     DCHECK(self.template isInstance<Renderer::Group>(), "Cannot call addRenderer on a none-group renderer");
-    const sp<Renderer::Group> rendererGroup = self.template as<Renderer::Group>();
+    const sp<Renderer::Group> rendererGroup = self.template tryCast<Renderer::Group>();
     rendererGroup->addRenderer(renderer);
 }
 
@@ -51,23 +51,23 @@ SafePtr<Size> RendererType::size(const sp<Renderer>& self)
 {
     if(self.template isInstance<Block>())
     {
-        sp<Block> block = self.template as<Block>();
+        sp<Block> block = self.template tryCast<Block>();
         if(block)
             return block->size();
     }
     return SafePtr<Size>();
 }
 
-const sp<Renderer>& RendererType::wrapped(const sp<Renderer>& self)
+sp<Renderer> RendererType::wrapped(const sp<Renderer>& self)
 {
-    const sp<Wrapper<Renderer>> rd = self.as<Wrapper<Renderer>>();
+    const sp<Wrapper<Renderer>> rd = self.tryCast<Wrapper<Renderer>>();
     CHECK_WARN(rd, "Renderer is not an instance of Wrapper<Renderer>");
-    return rd ? rd->wrapped() : sp<Renderer>::null();
+    return rd ? rd->wrapped() : nullptr;
 }
 
 void RendererType::setWrapped(const sp<Renderer>& self, sp<Renderer> wrapped)
 {
-    const sp<Wrapper<Renderer>> rd = self.as<Wrapper<Renderer>>();
+    const sp<Wrapper<Renderer>> rd = self.tryCast<Wrapper<Renderer>>();
     CHECK(rd, "Renderer is not an instance of Wrapper<Renderer>");
     rd->reset(std::move(wrapped));
 }

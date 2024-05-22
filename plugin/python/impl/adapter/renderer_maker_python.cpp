@@ -34,7 +34,7 @@ std::vector<Box> RendererMakerPython::make(float x, float y)
         return {PyCast::ensureSharedPtr<Box>(ret.pyObject())};
     }
     else
-        PythonInterpreter::instance()->logErr();
+        PythonInterpreter::instance().logErr();
 
     return {};
 }
@@ -45,12 +45,12 @@ void RendererMakerPython::recycle(const Box& renderer)
     if(_recycler)
     {
         PyInstance args(PyInstance::steal(PyTuple_New(1)));
-        PyTuple_SetItem(args.pyObject(), 0, PythonInterpreter::instance()->toPyObject(renderer));
+        PyTuple_SetItem(args.pyObject(), 0, PythonInterpreter::instance().toPyObject(renderer));
         PyObject* ret = _recycler.call(args.pyObject());
         if(ret)
             Py_DECREF(ret);
         else
-            PythonInterpreter::instance()->logErr();
+            PythonInterpreter::instance().logErr();
     }
 }
 

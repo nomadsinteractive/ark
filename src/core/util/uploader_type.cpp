@@ -62,7 +62,7 @@ private:
 
 static sp<UploaderImpl> ensureImpl(const sp<Uploader>& self)
 {
-    const sp<UploaderImpl> impl = self.as<UploaderImpl>();
+    const sp<UploaderImpl> impl = self.tryCast<UploaderImpl>();
     CHECK(impl, "This object is not a InputImpl instance. Use \"reserve\" method to create an InputImpl instance.");
     return impl;
 }
@@ -150,7 +150,7 @@ sp<Uploader> UploaderType::makeElementIndexInput(std::vector<element_index_t> va
 
 void UploaderType::reset(const sp<Uploader>& self, sp<Uploader> delegate)
 {
-    const sp<UploaderImpl> impl = self.as<UploaderImpl>();
+    const sp<UploaderImpl> impl = self.tryCast<UploaderImpl>();
     if(impl)
         impl->reset(std::move(delegate));
     else
@@ -204,7 +204,7 @@ void UploaderType::markDirty(const sp<Uploader>& self)
 
 sp<UploaderWrapper> UploaderType::ensureWrapper(const sp<Uploader>& self)
 {
-    const sp<UploaderWrapper> wrapper = self.as<UploaderWrapper>();
+    const sp<UploaderWrapper> wrapper = self.tryCast<UploaderWrapper>();
     CHECK(wrapper, "This Input object is not a InputWrapper instance");
     return wrapper;
 }

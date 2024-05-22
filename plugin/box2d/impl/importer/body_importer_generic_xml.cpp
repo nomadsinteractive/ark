@@ -86,7 +86,7 @@ void RigidBodyImporterGenericXML::import(ColliderBox2D& world, const sp<Readable
         bodyManifest.category = Strings::parse<uint16_t>(fixture->ensureChild("filter_categoryBits")->value());
         bodyManifest.group = Strings::parse<int16_t>(fixture->ensureChild("filter_groupIndex")->value());
         bodyManifest.mask = Strings::parse<uint16_t>(fixture->ensureChild("filter_maskBits")->value());
-        bodyManifest.is_sensor = fixture->getChild("isSensor") != document::null();
+        bodyManifest.is_sensor = fixture->getChild("isSensor") != nullptr;
         world.setBodyManifest(id, bodyManifest);
     }
 }

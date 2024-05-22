@@ -43,10 +43,10 @@ void Tileset::addTile(sp<Tile> t)
     tile = std::move(t);
 }
 
-const sp<Tile>& Tileset::getTile(int32_t id) const
+sp<Tile> Tileset::getTile(int32_t id) const
 {
     const auto iter = _tiles.find(id);
-    return iter != _tiles.end() ? iter->second : sp<Tile>::null();
+    return iter != _tiles.end() ? iter->second : nullptr;
 }
 
 void Tileset::load(const sp<Readable>& readable)

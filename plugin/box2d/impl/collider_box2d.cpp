@@ -48,7 +48,7 @@ sp<RigidBody> ColliderBox2D::createBody(Collider::BodyType type, int32_t shape, 
     const auto iter = _stub->_body_manifests.find(shape);
     DCHECK(iter != _stub->_body_manifests.end(), "RigidBody shape-id: %d not found", shape);
     const BodyCreateInfo& manifest = iter->second;
-    const sp<RigidBodyBox2D> body = sp<RigidBodyBox2D>::make(*this, type, position, size, rotation ? rotation->theta() : sp<Numeric>::null(), manifest);
+    const sp<RigidBodyBox2D> body = sp<RigidBodyBox2D>::make(*this, type, position, size, rotation ? rotation->theta() : sp<Numeric>(), manifest);
     if(rotation)
         body->setAngle(rotation->theta()->val());
     DCHECK(!disposed, "Unimplemented");

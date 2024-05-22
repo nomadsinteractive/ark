@@ -63,7 +63,7 @@ public:
     }
 
     static void reset(const sp<Array<T>>& self, sp<Array<T>> other) {
-        sp<ArrayWrapper> wrapper = self.template as<ArrayWrapper>();
+        sp<ArrayWrapper> wrapper = self.template tryCast<ArrayWrapper>();
         ASSERT(wrapper);
         wrapper->reset(std::move(other));
     }

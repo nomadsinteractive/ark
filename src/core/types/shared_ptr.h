@@ -20,7 +20,7 @@ public:
         : _ptr(std::move(ptr)), _class(clazz) {
     }
     template<typename U> SharedPtr(const SharedPtr<U>& ptr) noexcept
-        : SharedPtr(std::static_pointer_cast<T>(ptr._ptr), ptr.ensureClass()) {
+        : SharedPtr(std::static_pointer_cast<T>(ptr._ptr), ptr.getClass()) {
     }
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(SharedPtr);
 
@@ -33,11 +33,6 @@ public:
 
     template<typename U = T, typename... Args> static SharedPtr<T> make(Args&&... args) {
         return SharedPtr<T>(new U(std::forward<Args>(args)...));
-    }
-
-    static const SharedPtr<T>& null() {
-        static SharedPtr<T> inst = nullptr;
-        return inst;
     }
 
     bool operator == (const SharedPtr<T>& sp) const {
@@ -76,26 +71,22 @@ public:
     }
 
     const Class* getClass() const {
-        return _class;
-    }
-
-    const Class* ensureClass() const {
         if(!_class)
             _class = Class::getClass<T>();
         return _class;
     }
 
     template<typename U> SharedPtr<U> cast() const {
-        return SharedPtr<U>(std::static_pointer_cast<U>(_ptr), ensureClass());
+        return SharedPtr<U>(std::static_pointer_cast<U>(_ptr), getClass());
     }
 
     template<typename U> bool isInstance() const {
         return _class ? _class->isInstance(Type<U>::id()) : std::is_same_v<T, U>;
     }
 
-    template<typename U> SharedPtr<U> as() const {
+    template<typename U> SharedPtr<U> tryCast() const {
         if(_ptr) {
-            Box self(Type<T>::id(), ensureClass(), this, _ptr.get(), [](const void*) {});
+            Box self(Type<T>::id(), getClass(), this, _ptr.get(), [](const void*) {});
             return self.as<U>();
         }
         return nullptr;
@@ -151,23 +142,13 @@ public:
         return nullptr;
     }
 
-    const Class* ensureClass() const {
-        return nullptr;
-    }
-
-    template<typename U> sp<U> as() const {
+    template<typename U> sp<U> tryCast() const {
         return nullptr;
     }
 
     template<typename U> bool is() const {
         return false;
     }
-
-    static const SharedPtr<void>& null() {
-        static SharedPtr<void> s;
-        return s;
-    }
-
 };
 
 }

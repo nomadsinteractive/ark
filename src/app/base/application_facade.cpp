@@ -82,7 +82,7 @@ const sp<SurfaceController>& ApplicationFacade::surfaceController() const
     return _surface_controller;
 }
 
-const sp<Camera>& ApplicationFacade::camera() const
+sp<Camera> ApplicationFacade::camera() const
 {
     return Camera::getDefaultCamera();
 }

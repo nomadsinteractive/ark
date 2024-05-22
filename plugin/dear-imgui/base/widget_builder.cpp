@@ -142,7 +142,7 @@ private:
 template<typename T> class Input : public Widget {
 public:
     Input(std::function<bool(const char*, T*)> func, String label, const sp<Variable<T>>& value)
-        : _func(std::move(func)), _label(std::move(label)), _value(value.template as<VariableWrapper<T>>()) {
+        : _func(std::move(func)), _label(std::move(label)), _value(value.template tryCast<VariableWrapper<T>>()) {
         DCHECK(_value, "Value should be a Wrapper class");
     }
 
@@ -168,11 +168,11 @@ public:
         T v = _value->val();
         if(_func(_label.c_str(), &v))
         {
-            sp<VariableWrapper<T>> wrapper = _value.template as<VariableWrapper<T>>();
+            sp<VariableWrapper<T>> wrapper = _value.template tryCast<VariableWrapper<T>>();
             if(wrapper)
                 return wrapper->set(v);
 
-            sp<U> impl = _value.template as<U>();
+            sp<U> impl = _value.template tryCast<U>();
             CHECK(impl, "Mutablable variable required.");
             impl->set(v);
         }
@@ -256,7 +256,7 @@ static bool Items_VectorGetter(void* data, int idx, const char** out_text)
 }
 
 WidgetBuilder::WidgetBuilder(const sp<Renderer>& imguiRenderer)
-    : _renderer_context(imguiRenderer.as<RendererImgui>()->rendererContext()), _stub(sp<Stub>::make())
+    : _renderer_context(imguiRenderer.tryCast<RendererImgui>()->rendererContext()), _stub(sp<Stub>::make())
 {
     push(sp<WidgetGroup>::make());
 }

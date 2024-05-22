@@ -23,7 +23,7 @@ public:
 //  [[script::bindings::property]]
     static String val(const sp<StringVar>& self);
 //  [[script::bindings::property]]
-    static const sp<StringVar>& wrapped(const sp<StringVar>& self);
+    static sp<StringVar> wrapped(const sp<StringVar>& self);
 
 //  [[script::bindings::classmethod]]
     static void set(const sp<StringVar::Impl>& self, sp<String> value);

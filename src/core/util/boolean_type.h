@@ -26,7 +26,7 @@ public:
 //[[script::bindings::property]]
     static bool val(const sp<Boolean>& self);
 //[[script::bindings::property]]
-    static const sp<Boolean>& wrapped(const sp<Boolean>& self);
+    static sp<Boolean> wrapped(const sp<Boolean>& self);
 
 //[[script::bindings::classmethod]]
     static sp<Boolean> negative(sp<Boolean> self);
@@ -51,9 +51,6 @@ public:
 
 //[[script::bindings::classmethod]]
     static void fix(const sp<Boolean>& self);
-
-    static const sp<Boolean> TRUE;
-    static const sp<Boolean> FALSE;
 
 //  [[plugin::builder::by-value]]
     class DICTIONARY : public Builder<Boolean> {

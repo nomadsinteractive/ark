@@ -15,7 +15,7 @@ public:
         return _inst.get();
     }
 
-    operator const sp<T>& () const {
+    operator sp<T> () const {
         return _inst;
     }
 
@@ -32,7 +32,7 @@ public:
     }
 
 private:
-    const sp<T>& _inst;
+    sp<T> _inst;
 };
 
 }

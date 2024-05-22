@@ -119,7 +119,7 @@ public:
     const sp<Holder>& projection() const;
     const sp<Holder>& vp() const;
 
-    static const sp<Camera>& getDefaultCamera();
+    static sp<Camera> getDefaultCamera();
 
 private:
     void updateViewProjection();

@@ -63,7 +63,7 @@ public:
     template<typename T> static PyObject* toPyObject_SharedPtr_sfinae(const sp<T>& object, std::nullptr_t ) {
         if(!object)
             return PyBridge::incRefNone();
-        return PythonInterpreter::instance()->pyNewObject<T>(object);
+        return PythonInterpreter::instance().pyNewObject<T>(object);
     }
 
     template<typename T> static Optional<T> toCppObject_impl(PyObject* object);
@@ -71,7 +71,7 @@ public:
 
     template<typename T> static Optional<sp<T>> toSharedPtr(PyObject* object, bool alert = true) {
         if(PyBridge::isPyNone(object))
-            return sp<T>::null();
+            return sp<T>();
         return toSharedPtrImpl<T>(object, alert);
     }
 
@@ -120,10 +120,10 @@ private:
 
     template<typename T> static Optional<sp<T>> toSharedPtrDefault(PyObject* object) {
         if(PyBridge::isPyNone(object))
-            return Optional<sp<T>>(sp<T>::null());
+            return Optional<sp<T>>(sp<T>());
 
         PyTypeObject* pyType = reinterpret_cast<PyTypeObject*>(PyBridge::PyObject_Type(object));
-        if(PythonInterpreter::instance()->isPyArkTypeObject(pyType)) {
+        if(PythonInterpreter::instance().isPyArkTypeObject(pyType)) {
             PyArkType::Instance* instance = reinterpret_cast<PyArkType::Instance*>(object);
             DASSERT(instance->box);
             sp<T> s = instance->box->as<T>();
@@ -197,7 +197,7 @@ private:
             PyInstance tuple = PyInstance::steal(makeArgumentTuple<Args...>(args...));
             PyInstance result = PyInstance::steal(pyObj.call(tuple.pyObject()));
             if(result.isNullptr())
-                PythonInterpreter::instance()->logErr();
+                PythonInterpreter::instance().logErr();
             if constexpr(std::is_same_v<R, void>)
                 return;
             else

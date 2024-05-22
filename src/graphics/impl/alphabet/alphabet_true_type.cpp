@@ -3,7 +3,6 @@
 #include "core/base/bean_factory.h"
 #include "core/impl/readable/file_readable.h"
 #include "core/types/global.h"
-#include "core/util/documents.h"
 
 #include "graphics/base/bitmap.h"
 

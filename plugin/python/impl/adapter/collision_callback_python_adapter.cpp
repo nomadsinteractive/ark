@@ -28,7 +28,7 @@ void CollisionCallbackPythonAdapter::onBeginContact(const sp<RigidBody>& rigidBo
         PyObject* args = PyTuple_New(2);
 
         PyTuple_SetItem(args, 0, toPyObject(rigidBody));
-        PyTuple_SetItem(args, 1, PythonInterpreter::instance()->toPyObject(_collision_manifold));
+        PyTuple_SetItem(args, 1, PythonInterpreter::instance().toPyObject(_collision_manifold));
 
 /* Check again, in case of GC */
         if(_on_begin_contact)
@@ -37,7 +37,7 @@ void CollisionCallbackPythonAdapter::onBeginContact(const sp<RigidBody>& rigidBo
             if(ret)
                 Py_DECREF(ret);
             else
-                PythonInterpreter::instance()->logErr();
+                PythonInterpreter::instance().logErr();
         }
 
         Py_DECREF(args);
@@ -59,7 +59,7 @@ void CollisionCallbackPythonAdapter::onEndContact(const sp<RigidBody>& rigidBody
             if(ret)
                 Py_DECREF(ret);
             else
-                PythonInterpreter::instance()->logErr();
+                PythonInterpreter::instance().logErr();
         }
 
         Py_DECREF(args);
@@ -74,9 +74,9 @@ void CollisionCallbackPythonAdapter::traverse(const Holder::Visitor& visitor)
 
 PyObject* CollisionCallbackPythonAdapter::toPyObject(const sp<RigidBody>& rigidBody) const
 {
-    const Class* objClass = rigidBody.ensureClass();
-    if(PythonInterpreter::instance()->isPyObject(objClass->id()))
-        return PythonInterpreter::instance()->toPyObject(objClass->cast(Box(rigidBody), objClass->id()));
+    const Class* objClass = rigidBody.getClass();
+    if(PythonInterpreter::instance().isPyObject(objClass->id()))
+        return PythonInterpreter::instance().toPyObject(objClass->cast(Box(rigidBody), objClass->id()));
     return PyCast::toPyObject(rigidBody);
 }
 

@@ -31,12 +31,10 @@ const std::vector<sp<DOMAttribute>>& DOMElement::attributes() const
     return _attributes.values();
 }
 
-const sp<DOMAttribute>& DOMElement::getAttribute(const String& name) const
+sp<DOMAttribute> DOMElement::getAttribute(const String& name) const
 {
     const auto iter = _attributes.find(name);
-    if(iter != _attributes.end())
-        return iter->second;
-    return attribute::null();
+    return iter != _attributes.end() ? iter->second : nullptr;
 }
 
 void DOMElement::setAttribute(const String& name, const String& value)

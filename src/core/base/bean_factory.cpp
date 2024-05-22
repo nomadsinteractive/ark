@@ -33,11 +33,11 @@ void BeanFactory::extend(const BeanFactory& other)
         _stub->_factories.push_back(i);
 }
 
-const sp<BeanFactory>& BeanFactory::getPackage(const String& name) const
+sp<BeanFactory> BeanFactory::getPackage(const String& name) const
 {
     DCHECK(name, "Empty package name");
-    auto iter = _stub->_packages.find(name);
-    return iter == _stub->_packages.end() ? sp<BeanFactory>::null() : iter->second;
+    const auto iter = _stub->_packages.find(name);
+    return iter != _stub->_packages.end() ? iter->second : nullptr;
 }
 
 const sp<Scope>& BeanFactory::references() const

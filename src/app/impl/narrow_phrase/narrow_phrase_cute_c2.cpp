@@ -271,7 +271,7 @@ NarrowPhraseCuteC2::BodyDefCuteC2::BodyDefCuteC2(const document& manifest, float
     }
     else
     {
-        const document anchorpoint = manifest->getChild("anchorpoint");
+        const document& anchorpoint = manifest->getChild("anchorpoint");
         const document& fixtures = manifest->ensureChild("fixtures");
         if(anchorpoint)
             _pivot = Strings::parse<V2>(anchorpoint->value());
@@ -288,11 +288,11 @@ NarrowPhraseCuteC2::BodyDefCuteC2::BodyDefCuteC2(const document& manifest, float
                 shape._collision_filter.setCategoryBits(Documents::getValue<uint32_t>(j, "filter_categoryBits", 1));
                 shape._collision_filter.setMaskBits(Documents::getValue<uint32_t>(j, "filter_maskBits", 0xffffffff));
                 shape._collision_filter.setGroupIndex(Documents::getValue<int32_t>(j, "filter_groupIndex", 0));
-                for(size_t k = 0; k < values.size(); k += 2)
+                for(size_t l = 0; l < values.size(); l += 2)
                 {
-                    CHECK(k / 2 < C2_MAX_POLYGON_VERTS, "Unable to add more vertex, max count: %d", C2_MAX_POLYGON_VERTS);
-                    shape.s.poly.verts[k / 2].x = Strings::parse<float>(values.at(k)) / ppu;
-                    shape.s.poly.verts[k / 2].y = Strings::parse<float>(values.at(k + 1)) / ppu;
+                    CHECK(l / 2 < C2_MAX_POLYGON_VERTS, "Unable to add more vertex, max count: %d", C2_MAX_POLYGON_VERTS);
+                    shape.s.poly.verts[l / 2].x = Strings::parse<float>(values.at(l)) / ppu;
+                    shape.s.poly.verts[l / 2].y = Strings::parse<float>(values.at(l + 1)) / ppu;
                 }
                 shape.t = C2_TYPE_POLY;
                 shape.s.poly.count = static_cast<int32_t>(values.size() / 2);

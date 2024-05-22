@@ -24,7 +24,7 @@ public:
         Box* box;
         PyObject* weakreflist;
 
-        template<typename T> const sp<T>& unpack() const {
+        template<typename T> sp<T> unpack() const {
             DCHECK(box, "PyObject \"%s\" has not been initialized", ob_base.ob_type->tp_name);
             CHECK(typeCheck<T>(), "PyObject \"%s\" cannot being casted to %s", ob_base.ob_type->tp_name, Class::getClass<T>()->name());
             return box->toPtr<T>();

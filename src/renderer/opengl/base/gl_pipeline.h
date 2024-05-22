@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_OPENGL_BASE_GL_PIPELINE_H_
-#define ARK_RENDERER_OPENGL_BASE_GL_PIPELINE_H_
+#pragma once
 
 #include <map>
 
@@ -19,8 +18,7 @@
 
 #include "platform/gl/gl.h"
 
-namespace ark {
-namespace opengl {
+namespace ark::opengl {
 
 class GLPipeline : public Pipeline {
 public:
@@ -233,6 +231,3 @@ private:
 };
 
 }
-}
-
-#endif

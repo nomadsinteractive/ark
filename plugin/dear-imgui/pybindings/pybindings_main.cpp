@@ -23,7 +23,7 @@ public:
     }
 
     virtual void createScriptModule(const sp<Script>& script) override {
-        PythonInterpreter::instance()->addModulePlugin<DearImguiPybindingsPlugin>(*this, script, "dear_imgui", "ark.dear_imgui module", ARK_DEAR_IMGUI_METHODS);
+        PythonInterpreter::instance().addModulePlugin<DearImguiPybindingsPlugin>(*this, script, "dear_imgui", "ark.dear_imgui module", ARK_DEAR_IMGUI_METHODS);
     }
 
     void initialize(PyObject* dearimguimodule) {

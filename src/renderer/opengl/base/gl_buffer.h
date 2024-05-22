@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_OPENGL_BASE_GL_BUFFER_H_
-#define ARK_RENDERER_OPENGL_BASE_GL_BUFFER_H_
+#pragma once
 
 #include "renderer/forwarding.h"
 #include "renderer/base/buffer.h"
@@ -7,8 +6,7 @@
 
 #include "platform/gl/gl.h"
 
-namespace ark {
-namespace opengl {
+namespace ark::opengl {
 
 class GLBuffer : public Buffer::Delegate {
 public:
@@ -34,8 +32,4 @@ private:
 
 };
 
-
 }
-}
-
-#endif

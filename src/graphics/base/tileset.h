@@ -29,7 +29,7 @@ public:
 //  [[script::bindings::auto]]
     void addTile(sp<Tile> t);
 //  [[script::bindings::auto]]
-    const sp<Tile>& getTile(int32_t id) const;
+    sp<Tile> getTile(int32_t id) const;
 
 //  [[script::bindings::auto]]
     void load(const sp<Readable>& readable);

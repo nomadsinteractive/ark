@@ -24,7 +24,7 @@ public:
     }
 
     virtual void createScriptModule(const sp<Script>& script) override {
-        PythonInterpreter::instance()->addModulePlugin<NoisePybindingsPlugin>(*this, script, "noise", "ark.noise module", ARK_NOISE_METHODS);
+        PythonInterpreter::instance().addModulePlugin<NoisePybindingsPlugin>(*this, script, "noise", "ark.noise module", ARK_NOISE_METHODS);
     }
 
     void initialize(PyObject* noisemodule) {

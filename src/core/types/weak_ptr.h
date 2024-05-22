@@ -9,12 +9,12 @@ template<typename T> class WeakPtr {
 public:
     constexpr WeakPtr() noexcept = default;
     WeakPtr(SharedPtr<T> sharedPtr) noexcept
-        : _weak_ptr(std::move(sharedPtr._ptr)), _weak_class(sharedPtr.ensureClass()) {
+        : _weak_ptr(std::move(sharedPtr._ptr)), _weak_class(sharedPtr.getClass()) {
     }
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(WeakPtr);
 
     void reset(SharedPtr<T> sharedPtr) {
-        _weak_class = sharedPtr.ensureClass();
+        _weak_class = sharedPtr.getClass();
         _weak_ptr = std::move(sharedPtr._ptr);
     }
 

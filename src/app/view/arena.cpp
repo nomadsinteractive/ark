@@ -103,12 +103,12 @@ void Arena::pushEventListener(sp<EventListener> eventListener, sp<Boolean> dispo
 
 void Arena::addLayer(sp<Renderer> layer, sp<Boolean> discarded)
 {
-    _renderer_phrase.add(RendererType::PHRASE_LAYER, std::move(layer), discarded ? std::move(discarded) : layer.as<Disposed>().cast<Boolean>());
+    _renderer_phrase.add(RendererType::PHRASE_LAYER, std::move(layer), discarded ? std::move(discarded) : layer.tryCast<Disposed>().cast<Boolean>());
 }
 
 void Arena::addRenderLayer(sp<Renderer> renderLayer, sp<Boolean> discarded)
 {
-    _renderer_phrase.add(RendererType::PHRASE_RENDER_LAYER, std::move(renderLayer), discarded ? std::move(discarded) : renderLayer.as<Disposed>().cast<Boolean>());
+    _renderer_phrase.add(RendererType::PHRASE_RENDER_LAYER, std::move(renderLayer), discarded ? std::move(discarded) : renderLayer.tryCast<Disposed>().cast<Boolean>());
 }
 
 void Arena::setView(sp<View> view)

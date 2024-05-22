@@ -34,7 +34,7 @@ public:
 //  [[script::bindings::property]]
     const sp<SurfaceController>& surfaceController() const;
 //  [[script::bindings::property]]
-    const sp<Camera>& camera() const;
+    sp<Camera> camera() const;
 //  [[script::bindings::property]]
     const sp<ApplicationManifest>& manifest() const;
 //  [[script::bindings::property]]

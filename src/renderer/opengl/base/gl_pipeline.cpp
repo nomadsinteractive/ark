@@ -23,8 +23,7 @@
 
 #include "platform/platform.h"
 
-namespace ark {
-namespace opengl {
+namespace ark::opengl {
 
 namespace {
 
@@ -356,9 +355,9 @@ sp<GLPipeline::Stage> GLPipeline::makeShader(GraphicsContext& graphicsContext, u
 {
     typedef std::unordered_map<GLenum, std::map<String, WeakPtr<Stage>>> ShaderPool;
 
-    ShaderPool& shaders = *graphicsContext.attachments().ensure<ShaderPool>();
-    const auto iter = shaders[type].find(source);
-    if(iter != shaders[type].end())
+    const sp<ShaderPool>& shaders = graphicsContext.attachments().ensure<ShaderPool>();
+    const auto iter = (*shaders)[type].find(source);
+    if(iter != (*shaders)[type].end())
     {
         const sp<GLPipeline::Stage> shader = iter->second.lock();
         if(shader)
@@ -366,7 +365,7 @@ sp<GLPipeline::Stage> GLPipeline::makeShader(GraphicsContext& graphicsContext, u
     }
 
     const sp<Stage> shader = sp<Stage>::make(graphicsContext.renderController()->recycler(), version, type, source);
-    shaders[type][source] = shader;
+    (*shaders)[type][source] = shader;
     return shader;
 }
 
@@ -403,9 +402,9 @@ void GLPipeline::GLAttribute::setVertexPointer(const Attribute& attribute, GLuin
     static const GLenum glTypes[Attribute::TYPE_COUNT] = {GL_BYTE, GL_FLOAT, GL_INT, GL_SHORT, GL_UNSIGNED_BYTE, GL_UNSIGNED_SHORT};
     glEnableVertexAttribArray(location);
     if(attribute.type() == Attribute::TYPE_FLOAT || attribute.normalized())
-        glVertexAttribPointer(location, length, glTypes[attribute.type()], attribute.normalized() ? GL_TRUE : GL_FALSE, stride, reinterpret_cast<void*>(offset));
+        glVertexAttribPointer(location, length, glTypes[attribute.type()], attribute.normalized() ? GL_TRUE : GL_FALSE, stride, reinterpret_cast<const void*>(static_cast<uintptr_t>(offset)));
     else
-        glVertexAttribIPointer(location, length, glTypes[attribute.type()], stride, reinterpret_cast<void*>(offset));
+        glVertexAttribIPointer(location, length, glTypes[attribute.type()], stride, reinterpret_cast<const void*>(static_cast<uintptr_t>(offset)));
 
     if(attribute.divisor())
         glVertexAttribDivisor(location, attribute.divisor());
@@ -585,7 +584,7 @@ void GLPipeline::PipelineOperationDraw::draw(GraphicsContext& graphicsContext, c
     const volatile GLScissor scissor(drawingContext._scissor ? drawingContext._scissor : _scissor);
 
     for(const auto& [i, j] : drawingContext._ssbos)
-        _ssbo_binders.emplace_back(GL_SHADER_STORAGE_BUFFER, i, j.id());
+        _ssbo_binders.emplace_back(GL_SHADER_STORAGE_BUFFER, static_cast<GLuint>(i), static_cast<GLuint>(j.id()));
 
     _renderer->draw(graphicsContext, drawingContext);
 
@@ -786,7 +785,7 @@ void GLPipeline::PipelineOperationCompute::compute(GraphicsContext& graphicsCont
     _stub->bind(graphicsContext, computeContext);
 
     for(const auto& [i, j] : computeContext._ssbos)
-        _ssbo_binders.emplace_back(GL_SHADER_STORAGE_BUFFER, i, j.id());
+        _ssbo_binders.emplace_back(GL_SHADER_STORAGE_BUFFER, static_cast<GLuint>(i), static_cast<GLuint>(j.id()));
 
     glDispatchCompute(computeContext._num_work_groups.at(0), computeContext._num_work_groups.at(1), computeContext._num_work_groups.at(2));
 
@@ -811,5 +810,4 @@ GLPipeline::GLBufferBaseBinder::~GLBufferBaseBinder()
         glBindBufferBase(_target, _base, 0);
 }
 
-}
 }

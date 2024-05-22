@@ -115,7 +115,7 @@ void PythonScript::addScopeToDict(PyObject* dict, const Scope& scope)
     {
         const String& name = iter.first;
         const Box& box = iter.second;
-        PyObject* pyInstance = PythonInterpreter::instance()->toPyObject(box);
+        PyObject* pyInstance = PythonInterpreter::instance().toPyObject(box);
         PyDict_SetItemString(dict, name.c_str(), pyInstance);
     }
 }
@@ -125,7 +125,7 @@ PyObject* PythonScript::argumentsToTuple(const Script::Arguments& args)
     PyObject* tuple = PyTuple_New(args.size());
     uint32_t i = 0;
     for(const Box& arg : args)
-        PyTuple_SetItem(tuple, i++, PythonInterpreter::instance()->toPyObject(arg));
+        PyTuple_SetItem(tuple, i++, PythonInterpreter::instance().toPyObject(arg));
     return tuple;
 }
 
@@ -142,7 +142,7 @@ void PythonScript::run(const sp<Asset>& script, const Scope& vars)
     PyInstance v = PyInstance::steal(PyEval_EvalCode(co.pyObject(), globals, globals));
     if (v.isNullptr() || v.pyObject() == nullptr)
     {
-        PythonInterpreter::instance()->logErr();
+        PythonInterpreter::instance().logErr();
         return;
     }
 }
@@ -163,7 +163,7 @@ Box PythonScript::call(const String& function, const Script::Arguments& args)
         if(ret)
         {
             PyObject* type = reinterpret_cast<PyObject*>(ret->ob_type);
-            if(PythonInterpreter::instance()->isPyArkTypeObject(type))
+            if(PythonInterpreter::instance().isPyArkTypeObject(type))
             {
                 PyArkType::Instance* inst = reinterpret_cast<PyArkType::Instance*>(ret);
                 r = Box(*inst->box);
@@ -174,7 +174,7 @@ Box PythonScript::call(const String& function, const Script::Arguments& args)
         }
     }
     if(PyErr_Occurred())
-        PythonInterpreter::instance()->logErr();
+        PythonInterpreter::instance().logErr();
     return r;
 }
 

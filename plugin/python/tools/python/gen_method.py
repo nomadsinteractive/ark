@@ -341,7 +341,7 @@ class GenGetPropMethod(GenMethod):
         return ['PyObject* attr = PyObject_GenericGetAttr(reinterpret_cast<PyObject*>(self), arg0);',
                 'if(attr)',
                 INDENT + 'return attr;',
-                'if(!PythonInterpreter::instance()->exceptErr(PyExc_AttributeError))',
+                'if(!PythonInterpreter::instance().exceptErr(PyExc_AttributeError))',
                 f'{INDENT}{PY_RETURN_NONE};'
                 '\n',
                 'try {'] + [INDENT + i for i in calling_lines] + [

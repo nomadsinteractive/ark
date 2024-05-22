@@ -30,7 +30,7 @@ if __name__ == '__main__':
     for j in [i for i in os.listdir(sys.argv[1]) if i.endswith('.cpp')]:
         module = j[0: -4]
         externals.append('extern ark::unittest::TestCase* %s_create();' % module)
-        testcases.append('''if(isTestCaseEnabled("%s", argc, argv)) {
+        testcases.append('''if(isTestCaseEnabled("%s", _argc, _argv)) {
         printf("--------------------------------- [%s] ---------------------------------\\n");
         ark::unittest::TestCase* testcase = %s_create();
         int result = testcase->launch();
@@ -153,7 +153,9 @@ public:
 
 namespace ark {
 
-int32_t Ark::runTests(int argc, const char* argv[]) const {
+int32_t Ark::runTests(sp<ApplicationManifest> manifest) {
+    initialize(std::move(manifest));
+
     const Global<PluginManager> pluginManager;
     pluginManager->addPlugin(sp<TestcasePlugin>::make());
     %s

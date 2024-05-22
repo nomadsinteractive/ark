@@ -78,30 +78,30 @@ public:
 #endif
 
         const sp<B> node = sp<Node>::make();
-        TESTCASE_VALIDATE(node.as<Node>() && node.as<A>() && node.as<D>());
-        TESTCASE_VALIDATE(node.as<Node>()->a == 1 && node.as<Node>()->b == 2);
-        TESTCASE_VALIDATE(node.as<A>()->a == 1 && node.as<A>()->b == 2);
+        TESTCASE_VALIDATE(node.tryCast<Node>() && node.tryCast<A>() && node.tryCast<D>());
+        TESTCASE_VALIDATE(node.tryCast<Node>()->a == 1 && node.tryCast<Node>()->b == 2);
+        TESTCASE_VALIDATE(node.tryCast<A>()->a == 1 && node.tryCast<A>()->b == 2);
         sp<A> a = node;
-        TESTCASE_VALIDATE(a.as<Node>() && a.as<A>() && a.as<D>());
-        TESTCASE_VALIDATE(a.as<Node>()->a == 1 && a.as<Node>()->b == 2);
+        TESTCASE_VALIDATE(a.tryCast<Node>() && a.tryCast<A>() && a.tryCast<D>());
+        TESTCASE_VALIDATE(a.tryCast<Node>()->a == 1 && a.tryCast<Node>()->b == 2);
         TESTCASE_VALIDATE(a->a == 1 && a->b == 2);
 
         sp<E> e = sp<E>::make();
 //        a.absorb(e);
         TESTCASE_VALIDATE(a.isInstance<Node>() && a.isInstance<A>() && a.isInstance<D>());
-        TESTCASE_VALIDATE(a.as<Node>()->a == 1 && a.as<Node>()->b == 2);
+        TESTCASE_VALIDATE(a.tryCast<Node>()->a == 1 && a.tryCast<Node>()->b == 2);
         TESTCASE_VALIDATE(a->a == 1 && a->b == 2);
         TESTCASE_VALIDATE(e.isInstance<E>());
-        TESTCASE_VALIDATE(a.isInstance<E>() && a.as<E>()->i == 9);
+        TESTCASE_VALIDATE(a.isInstance<E>() && a.tryCast<E>()->i == 9);
 
 //        a.absorb<H>(sp<I>::make());
         TESTCASE_VALIDATE(a.isInstance<H>());
 
         sp<D> d = sp<D>::make();
 //        d.absorb(a);
-        TESTCASE_VALIDATE(d.isInstance<D>() && d.as<D>()->g == 7);
-        TESTCASE_VALIDATE(d.isInstance<Node>() && d.as<Node>()->h == 8);
-        TESTCASE_VALIDATE(d.isInstance<E>() && d.as<E>()->i == 9);
+        TESTCASE_VALIDATE(d.isInstance<D>() && d.tryCast<D>()->g == 7);
+        TESTCASE_VALIDATE(d.isInstance<Node>() && d.tryCast<Node>()->h == 8);
+        TESTCASE_VALIDATE(d.isInstance<E>() && d.tryCast<E>()->i == 9);
 
         Class* nodeClass = Class::getClass<Node>();
         TESTCASE_VALIDATE(nodeClass);
@@ -128,7 +128,7 @@ public:
         TESTCASE_VALIDATE(renderLayerClass->isInstance(Type<Renderer>::id()));
         TESTCASE_VALIDATE(String(renderLayerClass->name()) == "RenderLayer");
 
-        const sp<Numeric> duckType = node.as<Numeric>();
+        const sp<Numeric> duckType = node.tryCast<Numeric>();
         TESTCASE_VALIDATE(duckType);
 
         return 0;

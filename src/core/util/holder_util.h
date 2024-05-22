@@ -38,7 +38,7 @@ public:
 private:
     template<typename T> static void traverse(const sp<T>& inst, const Holder::Visitor& visitor) {
         if(inst) {
-            const sp<Holder> holder = inst.template as<Holder>();
+            const sp<Holder> holder = inst.template tryCast<Holder>();
             if(holder) {
                 holder->traverse(visitor);
                 return;
@@ -52,7 +52,7 @@ private:
     }
 
     template<typename T> static void traverse_delegate_sfinae(const sp<T>& inst, const Holder::Visitor& visitor, ...) {
-        const sp<Wrapper<T>> delegate = inst.template as<Wrapper<T>>();
+        const sp<Wrapper<T>> delegate = inst.template tryCast<Wrapper<T>>();
         if(delegate)
             return visit(delegate->wrapped(), visitor);
     }

@@ -123,7 +123,7 @@ sp<Mat4> Mat4Type::dye(sp<Mat4> self, sp<Boolean> condition, String message)
 
 sp<Mat4Impl> Mat4Type::ensureImpl(const sp<Mat4>& self)
 {
-    const sp<Mat4Impl> impl = self.as<Mat4Impl>();
+    const sp<Mat4Impl> impl = self.tryCast<Mat4Impl>();
     CHECK(impl, "This Mat4 object is not a Mat4Impl instance");
     return impl;
 }

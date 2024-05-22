@@ -30,8 +30,8 @@ public:
 //  [[script::bindings::property]]
     TypeId typeId() const;
 
-    template<typename T> const sp<T>& toPtr() const {
-        return _stub ? std::get<PtrStub>(*_stub).template unpack<T>() : sp<T>::null();
+    template<typename T> sp<T> toPtr() const {
+        return _stub ? std::get<PtrStub>(*_stub).template unpack<T>() : nullptr;
     }
 
     template<typename T> T toEnum() const {
@@ -46,7 +46,7 @@ public:
 
     template<typename T> sp<T> as() const {
         if(!_stub)
-            return sp<T>::null();
+            return nullptr;
 
         const PtrStub& ptrStub = std::get<PtrStub>(*_stub);
         TypeId typeId = Type<T>::id();
@@ -77,9 +77,9 @@ private:
                 destructor(shared_ptr);
         }
 
-        template<typename T> const sp<T>& unpack() const {
+        template<typename T> sp<T> unpack() const {
             DCHECK(type_id == Type<T>::id(), "Wrong type being unpacked");
-            return shared_ptr ? *reinterpret_cast<const sp<T>*>(shared_ptr) : sp<T>::null();
+            return shared_ptr ? *reinterpret_cast<const sp<T>*>(shared_ptr) : nullptr;
         }
 
         TypeId type_id;
@@ -111,7 +111,7 @@ private:
 
 private:
     template<typename T> std::shared_ptr<_StubVariant> _make_ptr_stub(const sp<T>* sharedPtr)  {
-        return sharedPtr ? std::make_shared<_StubVariant>(PtrStub(Type<T>::id(), sharedPtr->ensureClass(), sharedPtr, sharedPtr->get(), _shared_ptr_destructor<T>)) : nullptr;
+        return sharedPtr ? std::make_shared<_StubVariant>(PtrStub(Type<T>::id(), sharedPtr->getClass(), sharedPtr, sharedPtr->get(), _shared_ptr_destructor<T>)) : nullptr;
     }
 
     template<typename T> std::shared_ptr<_StubVariant> _make_enum_stub(T enumValue)  {

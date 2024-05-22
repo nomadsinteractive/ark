@@ -47,7 +47,9 @@ limitations under the License.
 
 #include "app/base/application_bundle.h"
 #include "app/base/application_context.h"
+#include "app/base/application_delegate_impl.h"
 #include "app/base/application_manifest.h"
+#include "app/impl/application/sdl_application.h"
 
 #include "platform/platform.h"
 
@@ -166,12 +168,6 @@ Ark::Ark(int32_t argc, const char** argv)
     __ark_bootstrap__();
 }
 
-Ark::Ark(int32_t argc, const char** argv, const sp<ApplicationManifest>& manifest)
-    : Ark(argc, argv)
-{
-    initialize(manifest);
-}
-
 Ark::~Ark()
 {
     for(auto iter = _instance_stack.begin(); iter != _instance_stack.end(); ++iter)
@@ -197,7 +193,7 @@ void Ark::push()
     _instance = this;
 }
 
-void Ark::initialize(const sp<ApplicationManifest>& manifest)
+void Ark::initialize(sp<ApplicationManifest> manifest)
 {
     _manifest = manifest;
 
@@ -234,6 +230,12 @@ const char** Ark::argv() const
     return _argv;
 }
 
+sp<Application> Ark::makeApplication(sp<ApplicationManifest> manifest, uint32_t width, uint32_t height)
+{
+    initialize(std::move(manifest));
+    return sp<SDLApplication>::make(sp<ApplicationDelegateImpl>::make(_manifest), _application_context, width, height, _manifest);
+}
+
 const sp<ApplicationManifest>& Ark::manifest() const
 {
     return _manifest;
@@ -259,7 +261,7 @@ sp<Readable> Ark::openAsset(const String& path) const
 sp<Readable> Ark::tryOpenAsset(const String& path) const
 {
     const sp<Asset> asset = _asset_bundle->getAsset(path);
-    return asset ? asset->open() : sp<Readable>::null();
+    return asset ? asset->open() : sp<Readable>();
 }
 
 const sp<Clock>& Ark::appClock() const
@@ -365,11 +367,6 @@ void Ark::loadPlugins(const ApplicationManifest& manifest) const
 
     for(const String& i : manifest.plugins())
         pluginManager->load(i);
-}
-
-ClassManager& Ark::classManager()
-{
-    return _class_manager;
 }
 
 }

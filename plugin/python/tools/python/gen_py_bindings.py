@@ -161,7 +161,7 @@ ${0}
 
 
 def gen_module_type_declarations(modulename, results):
-    line_pattern = 'pi->pyModuleAddType<%s, %s>(module, "%s", "%s", %s, Py_TPFLAGS_DEFAULT%s)'
+    line_pattern = 'pi.pyModuleAddType<%s, %s>(module, "%s", "%s", %s, Py_TPFLAGS_DEFAULT%s)'
     genclasses = list(results.values())
     class_names = set(i.binding_classname for i in genclasses)
     class_declared = set()
@@ -171,7 +171,7 @@ def gen_module_type_declarations(modulename, results):
         i = genclasses[0]
         genclasses = genclasses[1:]
         if not i.base_classname or i.base_classname in class_declared or i.base_classname not in class_names:
-            base_type = 'pi->getPyArkType<%s>()->getPyTypeObject()' % i.base_classname if i.base_classname else 'nullptr'
+            base_type = 'pi.getPyArkType<%s>()->getPyTypeObject()' % i.base_classname if i.base_classname else 'nullptr'
             declarations.append(line_pattern % (i.py_class_name, i.binding_classname, modulename, i.name, base_type,
                                                 '|Py_TPFLAGS_HAVE_GC' if i.is_container else ''))
             class_declared.add(i.binding_classname)
@@ -206,7 +206,7 @@ def gen_body_source(filename, output_dir, output_file, namespaces, modulename, r
     lines.append('\n' + '''void __init_%s__(PyObject* module)
 {
     std::vector<PyArkType*> moduletypes;
-    const sp<ark::plugin::python::PythonInterpreter>& pi = ark::plugin::python::PythonInterpreter::instance();
+    ark::plugin::python::PythonInterpreter& pi = ark::plugin::python::PythonInterpreter::instance();
     %s
     for(PyArkType* i : moduletypes)
         i->onReady();
@@ -416,7 +416,7 @@ class GenLoaderMethod(GenMethod):
         return self.gen_py_method_def_tp(genclass)
 
     def _gen_calling_statement(self, genclass, argnames):
-        return 'PythonInterpreter::instance()->ensurePyArkType(reinterpret_cast<PyObject*>(self))->load(*self, "%s", %s);' % (self._name, argnames)
+        return 'PythonInterpreter::instance().ensurePyArkType(reinterpret_cast<PyObject*>(self))->load(*self, "%s", %s);' % (self._name, argnames)
 
     def need_unpack_statement(self):
         return False

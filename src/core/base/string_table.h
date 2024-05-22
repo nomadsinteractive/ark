@@ -13,10 +13,10 @@ class ARK_API StringTable {
 public:
 
     void addStringBundle(const String& name, const sp<StringBundle>& stringTable);
-    const sp<StringBundle>& getStringBundle(const String& name);
+    sp<StringBundle> getStringBundle(const String& name) const;
 
-    sp<String> getString(const String& stringTableName, const String& stringName, bool alert);
-    sp<String> getString(const String& name, bool alert);
+    sp<String> getString(const String& stringTableName, const String& stringName, bool alert) const;
+    sp<String> getString(const String& name, bool alert) const;
 
     std::vector<String> getStringArray(const String& stringTableName, const String& name, bool alert);
     std::vector<String> getStringArray(const String& name, bool alert);

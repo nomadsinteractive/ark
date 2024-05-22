@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_BASE_QUERIES_H_
-#define ARK_CORE_BASE_QUERIES_H_
+#pragma once
 
 #include "core/base/bean_factory_weak_ref.h"
 #include "core/base/string.h"
@@ -20,5 +19,3 @@ private:
 };
 
 }
-
-#endif

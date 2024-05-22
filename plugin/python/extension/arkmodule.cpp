@@ -187,7 +187,7 @@ PyObject* ark_dirSeparator(PyObject* /*self*/, PyObject* /*args*/)
 
 PyObject* ark_getRefManager(PyObject* /*self*/, PyObject* /*args*/)
 {
-    return PyCast::toPyObject(PythonInterpreter::instance()->referenceManager());
+    return PyCast::toPyObject(PythonInterpreter::instance().referenceManager());
 }
 
 PyObject* ark_trace_(PyObject* /*self*/, PyObject* /*args*/)

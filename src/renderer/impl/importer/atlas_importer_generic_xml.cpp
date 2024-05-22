@@ -40,8 +40,8 @@ void AtlasImporterGenericXML::import(Atlas& atlas, const sp<Readable>& /*readabl
         if(s9)
         {
             const Rect s9Rect = Strings::parse<Rect>(s9.value());
-            Atlas::AttachmentNinePatch& aNinePatch = atlas.attachments().ensure<Atlas::AttachmentNinePatch>();
-            aNinePatch.addNinePatch(n, atlas.width(), atlas.height(), Rect(s9Rect.left(), s9Rect.top(), s9Rect.left() + s9Rect.right(), s9Rect.top() + s9Rect.bottom()), atlas);
+            const sp<Atlas::AttachmentNinePatch>& aNinePatch = atlas.attachments().ensure<Atlas::AttachmentNinePatch>();
+            aNinePatch->addNinePatch(n, atlas.width(), atlas.height(), Rect(s9Rect.left(), s9Rect.top(), s9Rect.left() + s9Rect.right(), s9Rect.top() + s9Rect.bottom()), atlas);
         }
     }
 }

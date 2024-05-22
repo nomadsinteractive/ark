@@ -32,7 +32,7 @@ public:
         TESTCASE_VALIDATE(rectf.left() == 0 && rectf.top() == 0 && rectf.width() == 20.0f && rectf.height() == 30.0f);
 
         Color white = Strings::parse<Color>("#ffffff");
-        TESTCASE_VALIDATE(white == Color::WHITE);
+        TESTCASE_VALIDATE(white == Color(1.0f, 1.0f, 1.0f));
 
         TESTCASE_VALIDATE(Strings::parse<LayoutParam::Gravity>("right") == LayoutParam::GRAVITY_RIGHT);
 

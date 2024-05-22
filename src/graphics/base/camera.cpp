@@ -253,7 +253,7 @@ const sp<Camera::Holder>& Camera::vp() const
     return _vp;
 }
 
-const sp<Camera>& Camera::getDefaultCamera()
+sp<Camera> Camera::getDefaultCamera()
 {
     const Global<Camera> camera;
     DCHECK(camera->vp(), "Default camera has not been uninitialized");

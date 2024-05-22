@@ -18,7 +18,7 @@ public:
     }
 
     virtual sp<Snippet> build(const Scope& args) override {
-        sp<Vec4> textColor = _text_color ? _text_color->build(args) : sp<Vec4>::make<Color>(Color::WHITE);
+        sp<Vec4> textColor = _text_color ? _text_color->build(args) : sp<Vec4>::make<Color>(1.0f, 1.0f, 1.0f);
         return sp<SnippetUColor>::make(textColor);
     }
 

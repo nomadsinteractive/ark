@@ -36,7 +36,7 @@ public:
             return glyphs;
         }
         else
-            PythonInterpreter::instance()->logErr();
+            PythonInterpreter::instance().logErr();
 
         return {};
     }

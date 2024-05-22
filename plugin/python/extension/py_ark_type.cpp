@@ -25,7 +25,7 @@ static PyObject* __richcmp__(PyArkType::Instance* obj1, PyObject* obj2, int op)
     }
 
     bool obj2IsNone = obj2 == Py_None;
-    if(!(obj2IsNone || PythonInterpreter::instance()->isPyArkTypeObject(Py_TYPE(obj2))))
+    if(!(obj2IsNone || PythonInterpreter::instance().isPyArkTypeObject(Py_TYPE(obj2))))
     {
         LOGW("Comparing Ark-Type object \"%s\" with non-Ark-Type object \"%s\"", Py_TYPE(obj1)->tp_name, Py_TYPE(obj2)->tp_name);
         Py_RETURN_NOTIMPLEMENTED;
@@ -140,7 +140,7 @@ std::map<TypeId, PyArkType::LoaderFunction>& PyArkType::ensureLoader(const Strin
 
 void PyArkType::onReady()
 {
-    PyArkType* enumType = PythonInterpreter::instance()->getPyArkType<Enum>();
+    PyArkType* enumType = PythonInterpreter::instance().getPyArkType<Enum>();
     for(const auto& [name, value] : _enum_constants)
         PyDict_SetItemString(_py_type_object.tp_dict, name.c_str(), enumType->create(value));
 }
@@ -163,7 +163,7 @@ PyObject* PyArkType::load(Instance& inst, const String& loader, TypeId typeId, c
     const std::map<TypeId, LoaderFunction>& functions = getLoader(loader);
     const auto iter = functions.find(typeId);
     DCHECK(iter != functions.end(), "Loader \"%s\" has no LoaderFunction for %d", loader.c_str(), typeId);
-    return PythonInterpreter::instance()->toPyObject(iter->second(inst, id, args));
+    return PythonInterpreter::instance().toPyObject(iter->second(inst, id, args));
 }
 
 PyTypeObject* PyArkType::basetype()

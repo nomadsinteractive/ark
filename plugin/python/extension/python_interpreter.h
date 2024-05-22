@@ -24,7 +24,7 @@ namespace ark::plugin::python {
 class ARK_PLUGIN_PYTHON_API PythonInterpreter {
 public:
 
-    static const sp<PythonInterpreter>& instance();
+    static PythonInterpreter& instance();
 
     PythonInterpreter();
 
@@ -45,7 +45,7 @@ public:
     }
 
     template<typename T> PyObject* pyNewObject(const sp<T>& object) {
-        const Class* objClass = object.ensureClass();
+        const Class* objClass = object.getClass();
         const TypeId typeId = objClass->id();
         return _type_by_id.find(typeId) != _type_by_id.end() ? toPyObject(objClass->cast(object, typeId)) : getPyArkType<T>()->create(object);
     }
@@ -72,7 +72,7 @@ public:
     bool exceptErr(PyObject* type) const;
 
     template<typename T> void addModulePlugin(T& plugin, const sp<Script>& script, const char* name, const char* documentation, const PyMethodDef* methods) {
-        const sp<PythonScript> pythonScript = script.as<PythonScript>();
+        const sp<PythonScript> pythonScript = script.tryCast<PythonScript>();
         ASSERT(pythonScript);
         static struct PyModuleDef cPluginModuleDef = {
             PyModuleDef_HEAD_INIT,

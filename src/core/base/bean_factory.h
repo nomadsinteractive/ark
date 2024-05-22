@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_BEAN_FACTORY_H_
-#define ARK_CORE_BEAN_FACTORY_H_
+#pragma once
 
 #include <list>
 #include <type_traits>
@@ -8,6 +7,9 @@
 
 #include "core/base/api.h"
 #include "core/base/identifier.h"
+#include "core/base/queries.h"
+#include "core/base/scope.h"
+
 #include "core/collection/traits.h"
 #include "core/dom/dom_document.h"
 #include "core/inf/builder.h"
@@ -197,7 +199,7 @@ public:
         }
 
     private:
-        template<typename T> const sp<Worker<T>>& ensureWorker() {
+        template<typename T> sp<Worker<T>> ensureWorker() {
             if(!_workers.has<Worker<T>>())
                 _workers.put<Worker<T>>(sp<Worker<T>>::make(_references, _document_by_id));
             return _workers.get<Worker<T>>();
@@ -228,7 +230,7 @@ public:
     template<typename T> sp<Builder<T>> createBuilderByRef(const Identifier& id) {
         sp<Builder<T>> builder;
         if(id.package()) {
-            const sp<BeanFactory>& factory = getPackage(id.package());
+            sp<BeanFactory> factory = getPackage(id.package());
             CHECK(factory, "Id: \"%s\"'s package \"%s\" not found", id.toString().c_str(), id.package().c_str());
             builder = factory ? factory->getBuilderByRef<T>(id.withouPackage(), *this) : nullptr;
             CHECK_WARN(builder, "Cannot build \"%s\" from package \"%s\"", id.toString().c_str(), id.package().c_str());
@@ -414,7 +416,7 @@ public:
     void addPackage(const String& name, const BeanFactory& package);
 
     void extend(const BeanFactory& other);
-    const sp<BeanFactory>& getPackage(const String& name) const;
+    sp<BeanFactory> getPackage(const String& name) const;
 
     const sp<Scope>& references() const;
 
@@ -479,18 +481,6 @@ private:
     friend class WeakRef;
     friend class BeanFactoryWeakRef;
 };
-
-}
-
-#endif
-
-#ifndef ARK_CORE_BEAN_FACTORY_H_APPENDIX_
-#define ARK_CORE_BEAN_FACTORY_H_APPENDIX_
-
-#include "core/base/scope.h"
-#include "core/base/queries.h"
-
-namespace ark {
 
 namespace  {
 
@@ -602,5 +592,3 @@ template<typename T> sp<T> BeanFactory::buildWithQueries(const String& name, con
 }
 
 }
-
-#endif

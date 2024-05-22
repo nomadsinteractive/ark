@@ -44,9 +44,9 @@ void Layer::setVisible(sp<Boolean> visible)
     _layer_context->visible().reset(std::move(visible));
 }
 
-const sp<ModelLoader>& Layer::modelLoader() const
+sp<ModelLoader> Layer::modelLoader() const
 {
-    return _layer_context ? _layer_context->modelLoader() : sp<ModelLoader>::null();
+    return _layer_context ? _layer_context->modelLoader() : nullptr;
 }
 
 const sp<LayerContext>& Layer::context() const

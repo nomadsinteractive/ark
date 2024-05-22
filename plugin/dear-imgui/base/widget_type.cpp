@@ -77,14 +77,14 @@ sp<Widget> WidgetType::before(sp<Widget> self, sp<Widget> after)
 
 sp<Widget> WidgetType::wrapped(sp<Widget> self)
 {
-    sp<Wrapper<Widget>> wrapper = self.as<Wrapper<Widget>>();
+    sp<Wrapper<Widget>> wrapper = self.tryCast<Wrapper<Widget>>();
     CHECK_WARN(wrapper, "Must be a Wrapper<Widget> instance to get its wrapped attribute");
     return wrapper ? wrapper->wrapped() : nullptr;
 }
 
 void WidgetType::setWrapped(const sp<Widget>& self, sp<Widget> wrapped)
 {
-    sp<Wrapper<Widget>> wrapper = self.as<Wrapper<Widget>>();
+    sp<Wrapper<Widget>> wrapper = self.tryCast<Wrapper<Widget>>();
     CHECK(wrapper, "Must be a Wrapper<Widget> instance to set its wrapped attribute");
     Ark::instance().applicationContext()->deferUnref(wrapper->reset(std::move(wrapped)));
 }

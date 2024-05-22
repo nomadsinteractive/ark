@@ -1,5 +1,4 @@
-#ifndef ARK_BASE_APP_APPLICATION_H_
-#define ARK_BASE_APP_APPLICATION_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/types/shared_ptr.h"
@@ -61,5 +60,3 @@ private:
 };
 
 }
-
-#endif

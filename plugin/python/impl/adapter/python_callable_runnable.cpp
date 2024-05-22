@@ -28,7 +28,7 @@ void PythonCallableRunnable::run()
         if(ret)
             Py_DECREF(ret);
         else
-            PythonInterpreter::instance()->logErr();
+            PythonInterpreter::instance().logErr();
     }
 }
 

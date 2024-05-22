@@ -37,9 +37,9 @@ public:
         return slot;
     }
 
-    template<typename T> const sp<T>& get() const {
+    template<typename T> sp<T> get() const {
         const Optional<Box> optBox = get(Type<T>::id());
-        return optBox ? optBox->template toPtr<T>() : sp<T>::null();
+        return optBox ? optBox->template toPtr<T>() : nullptr;
     }
 
     Optional<Box> get(TypeId typeId) const {
@@ -53,20 +53,20 @@ public:
         return iter != _traits.end() ? iter->second.template toEnum<T>() : defaultValue;
     }
 
-    template<typename T, typename... Args> const sp<T>& ensure(Args&&... args) {
+    template<typename T, typename... Args> sp<T> ensure(Args&&... args) {
         return instance_sfinae<T, Args...>(0, std::forward<Args>(args)...);
     }
 
 private:
-    template<typename T, typename... Args> const sp<T>& instance_sfinae(std::enable_if_t<std::is_constructible_v<T, Args...>, int32_t>, Args&&... args) {
-        const sp<T>& inst = get<T>();
+    template<typename T, typename... Args> sp<T> instance_sfinae(std::enable_if_t<std::is_constructible_v<T, Args...>, int32_t>, Args&&... args) {
+        sp<T> inst = get<T>();
         if(inst)
             return inst;
         return put<T>(sp<T>::make(std::forward<Args>(args)...)).template toPtr<T>();
     }
 
-    template<typename T> const sp<T>& instance_sfinae(...) {
-        const sp<T>& inst = get<T>();
+    template<typename T> sp<T> instance_sfinae(...) {
+        sp<T> inst = get<T>();
         DCHECK(inst, "Cannot get instance and there is no way to build one(it is abstract or has no default constructor)");
         return inst;
     }

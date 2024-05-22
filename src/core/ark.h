@@ -44,19 +44,15 @@ public:
     };
 
     Ark(int32_t argc, const char** argv);
-    Ark(int32_t argc, const char** argv, const sp<ApplicationManifest>& manifest);
     ~Ark();
 
     static Ark& instance();
 
-    void push();
-    void initialize(const sp<ApplicationManifest>& manifest);
-
-    template<typename T> const sp<T>& query() const {
+    template<typename T> sp<T> query() const {
         return _interfaces.get<T>();
     }
 
-    template<typename T, typename... Args> const sp<T>& ensure() {
+    template<typename T, typename... Args> sp<T> ensure() {
         return _interfaces.ensure<T>();
     }
 
@@ -66,7 +62,7 @@ public:
     int32_t argc() const;
     const char** argv() const;
 
-    ClassManager& classManager();
+    sp<Application> makeApplication(sp<ApplicationManifest> manifest, uint32_t width, uint32_t height);
 
     const sp<ApplicationManifest>& manifest() const;
 
@@ -88,9 +84,13 @@ public:
 
     void deferUnref(Box box);
 
-    int32_t runTests(int argc, const char* argv[]) const;
+    int32_t runTests(sp<ApplicationManifest> manifest);
 
 private:
+    void push();
+
+    void initialize(sp<ApplicationManifest> manifest);
+
     sp<RenderEngine> createRenderEngine(RendererVersion version, RendererCoordinateSystem coordinateSystem, const sp<ApplicationBundle>& applicationBundle);
 
     sp<ApplicationContext> createApplicationContext(const ApplicationManifest& manifest, sp<ApplicationBundle> resource, sp<RenderEngine> renderEngine);
@@ -110,11 +110,11 @@ private:
     ClassManager _class_manager;
     sp<ApplicationContext> _application_context;
     sp<ApplicationProfiler> _application_profiler;
+    sp<ArkAssetBundle> _asset_bundle;
+    sp<ApplicationManifest> _manifest;
     Traits _interfaces;
 
-    sp<ArkAssetBundle> _asset_bundle;
-
-    sp<ApplicationManifest> _manifest;
+    friend class ClassManager;
 };
 
 }

@@ -27,7 +27,7 @@ bool PythonCallableEventListener::onEvent(const Event& event)
         Py_DECREF(ret);
     }
     else
-        PythonInterpreter::instance()->logErr();
+        PythonInterpreter::instance().logErr();
 
     return consumed;
 }

@@ -81,8 +81,6 @@ private:
 
 }
 
-const sp<Integer> IntegerType::ZERO = sp<Integer::Const>::make(0);
-
 sp<IntegerWrapper> IntegerType::create(sp<Integer> value)
 {
     return sp<IntegerWrapper>::make(std::move(value));
@@ -96,7 +94,7 @@ sp<IntegerWrapper> IntegerType::create(sp<Numeric> value)
 
 sp<Integer> IntegerType::create(std::vector<sp<Integer>> values)
 {
-    return sp<IntegerSubscribed>::make(std::move(values), ZERO);
+    return sp<IntegerSubscribed>::make(std::move(values), sp<Integer::Const>::make(0));
 }
 
 sp<IntegerWrapper> IntegerType::create(int32_t value)
@@ -186,14 +184,14 @@ sp<Boolean> IntegerType::ne(const sp<Integer>& self, const sp<Integer>& other)
 
 size_t IntegerType::len(const sp<Integer>& self)
 {
-    sp<IntegerSubscribed> is = self.as<IntegerSubscribed>();
+    sp<IntegerSubscribed> is = self.tryCast<IntegerSubscribed>();
     ASSERT(is);
     return is->values().size();
 }
 
 sp<Integer> IntegerType::subscribe(const sp<Integer>& self, sp<Integer> index)
 {
-    sp<IntegerSubscribed> is = self.as<IntegerSubscribed>();
+    sp<IntegerSubscribed> is = self.tryCast<IntegerSubscribed>();
     ASSERT(is);
     return sp<IntegerSubscribed>::make(is->values(), std::move(index));
 }
@@ -213,16 +211,16 @@ void IntegerType::setVal(const sp<IntegerWrapper>& self, int32_t value)
     self->set(value);
 }
 
-const sp<Integer>& IntegerType::delegate(const sp<Integer>& self)
+sp<Integer> IntegerType::delegate(const sp<Integer>& self)
 {
-    const sp<IntegerWrapper> iw = self.as<IntegerWrapper>();
+    const sp<IntegerWrapper>& iw = self.tryCast<IntegerWrapper>();
     DCHECK_WARN(iw, "Non-IntegerWrapper instance has no delegate attribute. This should be an error unless you're inspecting it.");
-    return iw ? iw->wrapped() : sp<Integer>::null();
+    return iw ? iw->wrapped() : nullptr;
 }
 
 void IntegerType::setDelegate(const sp<Integer>& self, const sp<Integer>& delegate)
 {
-    const sp<IntegerWrapper> iw = self.as<IntegerWrapper>();
+    const sp<IntegerWrapper> iw = self.tryCast<IntegerWrapper>();
     DCHECK(iw, "Must be an IntegerWrapper instance to set its delegate attribute");
     iw->set(delegate);
 }

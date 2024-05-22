@@ -120,7 +120,7 @@ sp<StringVar> StringType::create(sp<StringVar> value)
 
 sp<StringVar> StringType::create()
 {
-    return sp<StringVar::Impl>::make(sp<String>::null());
+    return sp<StringVar::Impl>::make(sp<String>());
 }
 
 String StringType::val(const sp<StringVar>& self)
@@ -128,11 +128,11 @@ String StringType::val(const sp<StringVar>& self)
     return self->val();
 }
 
-const sp<StringVar>& StringType::wrapped(const sp<StringVar>& self)
+sp<StringVar> StringType::wrapped(const sp<StringVar>& self)
 {
-    const sp<StringVarWrapper> ib = self.as<StringVarWrapper>();
+    const sp<StringVarWrapper>& ib = self.tryCast<StringVarWrapper>();
     DCHECK_WARN(ib, "Non-TextWrapper instance has no wrapped attribute. This should be an error unless you're inspecting it.");
-    return ib ? ib->wrapped() : sp<StringVar>::null();
+    return ib ? ib->wrapped() : nullptr;
 }
 
 void StringType::set(const sp<StringVar::Impl>& self, sp<String> value)

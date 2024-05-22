@@ -1,8 +1,6 @@
-#ifndef ARK_CORE_BASE_PLUGIN_MANAGER_H_
-#define ARK_CORE_BASE_PLUGIN_MANAGER_H_
+#pragma once
 
 #include <functional>
-#include <map>
 #include <vector>
 
 #include "core/base/api.h"
@@ -19,7 +17,7 @@ public:
 
     template<typename T> sp<Callable<T>> getCallable(const String& name) const {
         for(const sp<Plugin>& i : _plugins) {
-            const sp<Callable<T>> callable = i->library().getCallable<T>(name);
+            sp<Callable<T>> callable = i->library().getCallable<T>(name);
             if(callable)
                 return callable;
         }
@@ -40,5 +38,3 @@ private:
 };
 
 }
-
-#endif

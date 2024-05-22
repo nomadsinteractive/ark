@@ -17,7 +17,7 @@ public:
         return _components.has<T>();
     }
 
-    template<typename T, typename... Args> const sp<T>& addComponent(Args&&... args) {
+    template<typename T, typename... Args> sp<T> addComponent(Args&&... args) {
         return _components.ensure<T>(std::forward<Args>(args)...);
     }
 

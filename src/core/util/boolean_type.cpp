@@ -111,9 +111,6 @@ static bool _operator_not(bool val)
 
 }
 
-const sp<Boolean> BooleanType::TRUE = sp<Boolean::Const>::make(true);
-const sp<Boolean> BooleanType::FALSE = sp<Boolean::Const>::make(false);
-
 sp<Boolean> BooleanType::create(const sp<Boolean>& value)
 {
     return sp<BooleanWrapper>::make(value);
@@ -149,11 +146,11 @@ bool BooleanType::val(const sp<Boolean>& self)
     return self->val();
 }
 
-const sp<Boolean>& BooleanType::wrapped(const sp<Boolean>& self)
+sp<Boolean> BooleanType::wrapped(const sp<Boolean>& self)
 {
-    const sp<BooleanWrapper> ib = self.as<BooleanWrapper>();
+    const sp<BooleanWrapper>& ib = self.tryCast<BooleanWrapper>();
     DCHECK_WARN(ib, "Non-BooleanWrapper instance has no wrapped attribute. This should be an error unless you're inspecting it.");
-    return ib ? ib->wrapped() : sp<Boolean>::null();
+    return ib ? ib->wrapped() : nullptr;
 }
 
 void BooleanType::set(const sp<Boolean::Impl>& self, bool value)
@@ -197,7 +194,7 @@ sp<Boolean> BooleanType::dye(sp<Boolean> self, sp<Boolean> condition, String mes
 
 void BooleanType::fix(const sp<Boolean>& self)
 {
-    const sp<BooleanWrapper> ib = self.as<BooleanWrapper>();
+    const sp<BooleanWrapper>& ib = self.tryCast<BooleanWrapper>();
     DCHECK_WARN(ib, "Calling fix on non-BooleanWrapper has no effect.");
     if(ib)
         ib->fix();

@@ -21,7 +21,7 @@ DictionaryByAttributeName::DictionaryByAttributeName(const document& doc, const 
 
 document DictionaryByAttributeName::get(const String& name)
 {
-    return _by_names.find(name) == _by_names.end() ? document::null() : _by_names.at(name);
+    return _by_names.find(name) == _by_names.end() ? nullptr : _by_names.at(name);
 }
 
 }

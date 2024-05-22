@@ -40,7 +40,7 @@ public:
 //[[script::bindings::property]]
     static SafePtr<Size> size(const sp<Renderer>& self);
 //[[script::bindings::property]]
-    static const sp<Renderer>& wrapped(const sp<Renderer>& self);
+    static sp<Renderer> wrapped(const sp<Renderer>& self);
 //[[script::bindings::property]]
     static void setWrapped(const sp<Renderer>& self, sp<Renderer> wrapped);
 

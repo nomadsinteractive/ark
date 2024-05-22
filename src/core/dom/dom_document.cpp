@@ -12,7 +12,7 @@ DOMDocument::DOMDocument(const String& name, const String& value, ElementType ty
 {
 }
 
-const document& DOMDocument::getChild(const String& name) const
+document DOMDocument::getChild(const String& name) const
 {
     auto iter = _children_by_name.find(name);
     if(iter != _children_by_name.end()) {
@@ -20,12 +20,12 @@ const document& DOMDocument::getChild(const String& name) const
         if(!list.empty())
             return list.front();
     }
-    return document::null();
+    return nullptr;
 }
 
-const document& DOMDocument::ensureChild(const String& name) const
+document DOMDocument::ensureChild(const String& name) const
 {
-    const document& child = getChild(name);
+    document child = getChild(name);
     DCHECK(child, "Document has no child \"%s\"", name.c_str());
     return child;
 }

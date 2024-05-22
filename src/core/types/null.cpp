@@ -23,7 +23,7 @@ template<> ARK_API sp<Boolean> Null::safePtr()
 
 template<> ARK_API sp<StringVar> Null::safePtr()
 {
-    return sp<StringVar>::make<StringVar::Const>(sp<String>::null());
+    return sp<StringVar>::make<StringVar::Const>(nullptr);
 }
 
 }

@@ -16,9 +16,9 @@ public:
     DOMDocument(const String& name, const String& value = "", DOMElement::ElementType type = DOMElement::ELEMENT_TYPE_ELEMENT);
 
 //  [[script::bindings::auto]]
-    const document& getChild(const String& name) const;
+    document getChild(const String& name) const;
 //  [[script::bindings::auto]]
-    const document& ensureChild(const String& name) const;
+    document ensureChild(const String& name) const;
 //  [[script::bindings::auto]]
     void addChild(const sp<DOMDocument>& doc);
 

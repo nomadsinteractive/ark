@@ -88,8 +88,8 @@ private:
 
 class ManualRotation : public Numeric {
 public:
-    ManualRotation(const sp<RigidBodyBox2D::Stub>& stub, const sp<Numeric>& delegate)
-        : _stub(stub), _delegate(delegate) {
+    ManualRotation(sp<RigidBodyBox2D::Stub> stub, sp<Numeric> delegate)
+        : _stub(std::move(stub)), _delegate(std::move(delegate)) {
     }
 
     virtual float val() override {
@@ -201,8 +201,8 @@ void RigidBodyBox2D::bind(const sp<RenderObject>& renderObject)
     renderObject->setTransform(transform());
     if(type() & Collider::BODY_FLAG_MANUAL_ROTATION)
     {
-        const sp<Numeric> r = transform()->rotation() ? transform()->rotation()->theta().cast<_RigidBodyRotation>()->_delegate : sp<Numeric>::null();
-        transform()->rotation()->setRotation(sp<ManualRotation>::make(_stub, r), nullptr);
+        sp<Numeric> r = transform()->rotation() ? transform()->rotation()->theta().cast<_RigidBodyRotation>()->_delegate : sp<Numeric>();
+        transform()->rotation()->setRotation(sp<ManualRotation>::make(_stub, std::move(r)), nullptr);
     }
 }
 

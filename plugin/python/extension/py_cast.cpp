@@ -175,7 +175,7 @@ Optional<sp<StringVar>> PyCast::toStringVar(PyObject* object)
 Optional<sp<Numeric>> PyCast::toNumeric(PyObject* object, bool alert)
 {
     if(isNoneOrNull(object))
-        return sp<Numeric>::null();
+        return sp<Numeric>();
 
     if(PyLong_Check(object))
         return sp<Numeric>::make<Numeric::Const>(static_cast<float>(PyLong_AsLong(object)));
@@ -274,7 +274,7 @@ std::wstring PyCast::pyUnicodeToWString(PyObject* unicode)
 
 PyObject* PyCast::toPyObject(const Box& box)
 {
-    return PythonInterpreter::instance()->toPyObject(box);
+    return PythonInterpreter::instance().toPyObject(box);
 }
 
 bool PyCast::isNoneOrNull(PyObject* pyObject)
@@ -300,7 +300,7 @@ template<> ARK_PLUGIN_PYTHON_API Optional<Json> PyCast::toCppObject_impl<Json>(P
 
 template<> ARK_PLUGIN_PYTHON_API Optional<Box> PyCast::toCppObject_impl<Box>(PyObject* object)
 {
-    if(PythonInterpreter::instance()->isPyArkTypeObject(Py_TYPE(object)))
+    if(PythonInterpreter::instance().isPyArkTypeObject(Py_TYPE(object)))
         return *reinterpret_cast<PyArkType::Instance*>(object)->box;
     return object != Py_None ? Box(PyInstance::track(object).ref()) : Box();
 }

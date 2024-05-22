@@ -5,8 +5,8 @@
 namespace ark {
 
 struct BeanFactoryWeakRef::WeakRef {
-    WeakRef(const sp<BeanFactory::Stub>& beanFactory)
-        : _bean_factory(beanFactory) {
+    WeakRef(sp<BeanFactory::Stub> beanFactory)
+        : _bean_factory(std::move(beanFactory)) {
     }
 
     WeakPtr<BeanFactory::Stub> _bean_factory;

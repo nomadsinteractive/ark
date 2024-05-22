@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_DOM_ELEMENT_H_
-#define ARK_CORE_DOM_ELEMENT_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/dom/dom_attribute.h"
@@ -30,7 +29,7 @@ public:
     const std::vector<sp<DOMAttribute>>& attributes() const;
 
 //  [[script::bindings::auto]]
-    const sp<DOMAttribute>& getAttribute(const String& name) const;
+    sp<DOMAttribute> getAttribute(const String& name) const;
 //  [[script::bindings::auto]]
     void setAttribute(const String& name, const String& value);
 //  [[script::bindings::auto]]
@@ -43,5 +42,3 @@ private:
 };
 
 }
-
-#endif

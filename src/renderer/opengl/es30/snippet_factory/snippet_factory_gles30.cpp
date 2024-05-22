@@ -14,8 +14,7 @@
 
 #include "platform/gl/gl.h"
 
-namespace ark {
-namespace gles30 {
+namespace ark::gles30 {
 
 namespace {
 
@@ -69,5 +68,4 @@ sp<Snippet> SnippetFactoryGLES30::createCoreSnippet()
     return sp<SnippetGLES30>::make();
 }
 
-}
 }

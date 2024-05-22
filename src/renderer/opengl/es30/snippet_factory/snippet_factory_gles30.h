@@ -1,10 +1,8 @@
-#ifndef ARK_RENDERER_OPENGL_ES30_SNIPPET_FACTORY_SNIPPET_FACTORY_GLES30_H_
-#define ARK_RENDERER_OPENGL_ES30_SNIPPET_FACTORY_SNIPPET_FACTORY_GLES30_H_
+#pragma once
 
 #include "renderer/inf/snippet_factory.h"
 
-namespace ark {
-namespace gles30 {
+namespace ark::gles30 {
 
 class SnippetFactoryGLES30 : public SnippetFactory {
 public:
@@ -12,6 +10,3 @@ public:
 };
 
 }
-}
-
-#endif

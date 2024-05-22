@@ -31,7 +31,7 @@ public:
         if(!world.isInstance<Runnable>())
             return 1;
 
-        const sp<Runnable> worldRunnable = world.as<Runnable>();
+        const sp<Runnable> worldRunnable = world.tryCast<Runnable>();
         const sp<Vec3> position = resourceLoader->load<Vec3>("position", args);
         const sp<Numeric> rotation = resourceLoader->load<Numeric>("rotation", args);
         for(uint32_t i = 0; i < 100; ++i)

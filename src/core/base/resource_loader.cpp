@@ -58,9 +58,9 @@ void ResourceLoader::import(const document& manifest, BeanFactory& parent)
         const Identifier id(Identifier::parse(src));
         if(id.isRef())
         {
-            const sp<BeanFactory>& package = parent.getPackage(id.ref());
+            sp<BeanFactory> package = parent.getPackage(id.ref());
             DCHECK(package, "Package \"%s\" does not exist", src.c_str());
-            _bean_factory.addPackage(name, package);
+            _bean_factory.addPackage(name, *package);
         }
         else
             _bean_factory.addPackage(name, parent.ensure<ResourceLoader>(src, {})->beanFactory());
@@ -109,9 +109,9 @@ Box ResourceLoader::PackageRefs::get(const String& name)
     if(iter != _packages.end())
         return iter->second;
 
-    const sp<BeanFactory>& package = _bean_factory.getPackage(name);
+    sp<BeanFactory> package = _bean_factory.getPackage(name);
     DCHECK(package, "ResourceLoader has no package named \"%s\"", name.c_str());
-    const sp<ResourceLoader> resourceLoader = sp<ResourceLoader>::make(package);
+    const sp<ResourceLoader> resourceLoader = sp<ResourceLoader>::make(std::move(package));
     _packages.insert(std::make_pair(name, resourceLoader));
     return resourceLoader;
 }

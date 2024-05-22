@@ -35,8 +35,8 @@ void Button::render(RenderRequest& renderRequest, const V3& position)
         const sp<Renderer>& fg = _foreground->getRendererByCurrentStatus();
         if(fg)
         {
-            const sp<Block> block = fg.as<Block>();
-            const sp<Size>& size = block ? static_cast<const sp<Size>&>(block->size()) : sp<Size>::null();
+            const sp<Block> block = fg.tryCast<Block>();
+            const sp<Size> size = block ? block->size() : nullptr;
             if(size)
             {
                 Rect available(position.x(), position.y(), position.x() + _stub->_layout_param->size()->widthAsFloat(), position.y() + _stub->_layout_param->size()->heightAsFloat());

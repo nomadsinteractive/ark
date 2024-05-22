@@ -37,7 +37,7 @@ void ApplicationDelegateImpl::onCreate(Application& application, const sp<Surfac
     const sp<ApplicationFacade> applicationFacade = sp<ApplicationFacade>::make(application, surface, _manifest);
     vars->put("_application", applicationFacade);
 
-    applicationFacade->setBackgroundColor(Documents::getAttribute<Color>(appManifest, "background-color", Color::BLACK));
+    applicationFacade->setBackgroundColor(Documents::getAttribute<Color>(appManifest, "background-color", Color(0, 0, 0)));
 
     const sp<Arena> arena = appResourceLoader->beanFactory().build<Arena>(appManifest, "arena", {});
     if(arena)

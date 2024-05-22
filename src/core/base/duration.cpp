@@ -38,7 +38,7 @@ Duration::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 
 sp<Duration> Duration::BUILDER::build(const Scope& args)
 {
-    const sp<Numeric> util = _until ? _until->build(args) : sp<Numeric>::null();
+    const sp<Numeric> util = _until ? _until->build(args) : nullptr;
     if(_delegate)
     {
         const sp<Numeric> delegate = _delegate->build(args);

@@ -25,7 +25,7 @@ public:
 
         Library library;
         library.addCallable<int(int)>("test", &test);
-        const sp<Callable<int(int)>>& callable = library.getCallable<int(int)>("test");
+        const sp<Callable<int(int)>> callable = library.getCallable<int(int)>("test");
         if(callable->call(0) != 1)
             return 4;
         return 0;

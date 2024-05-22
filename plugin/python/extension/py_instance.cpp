@@ -35,7 +35,7 @@ PyInstance PyInstance::own(PyObject* object)
 PyInstance PyInstance::track(PyObject* object)
 {
     const sp<PyInstanceRef> ref = sp<Owned>::make(object);
-    PythonInterpreter::instance()->referenceManager()->track(ref);
+    PythonInterpreter::instance().referenceManager()->track(ref);
     return ref;
 }
 
@@ -67,7 +67,7 @@ bool PyInstance::hasAttr(const char* name) const
 PyInstance PyInstance::getAttr(const char* name) const
 {
     const sp<PyInstanceRef> attr = sp<Stolen>::make(PyObject_GetAttrString(_ref->instance(), name));
-    PythonInterpreter::instance()->referenceManager()->track(attr);
+    PythonInterpreter::instance().referenceManager()->track(attr);
     return attr;
 }
 

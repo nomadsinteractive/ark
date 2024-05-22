@@ -40,22 +40,22 @@ void StringTable::addStringBundle(const String& name, const sp<StringBundle>& st
         _string_bundle_by_name[name] = stringTable;
 }
 
-const sp<StringBundle>& StringTable::getStringBundle(const String& name)
+sp<StringBundle> StringTable::getStringBundle(const String& name) const
 {
     const auto iter = _string_bundle_by_name.find(name);
-    return iter != _string_bundle_by_name.end() ? iter->second : sp<StringBundle>::null();
+    return iter != _string_bundle_by_name.end() ? iter->second : nullptr;
 }
 
-sp<String> StringTable::getString(const String& stringTableName, const String& stringName, bool alert)
+sp<String> StringTable::getString(const String& stringTableName, const String& stringName, bool alert) const
 {
-    const sp<StringBundle>& sb = getStringBundle(stringTableName);
+    sp<StringBundle> sb = getStringBundle(stringTableName);
     CHECK(!alert || sb, "String bundle \"%s\" does not exist", stringTableName.c_str());
-    const sp<String> str = sb ? sb->getString(stringName) : sp<String>::null();
+    const sp<String> str = sb ? sb->getString(stringName) : nullptr;
     CHECK(!alert || str, "String bundle \"%s\" has no resource \"%s\"", stringTableName.c_str(), stringName.c_str());
     return str;
 }
 
-sp<String> StringTable::getString(const String& name, bool alert)
+sp<String> StringTable::getString(const String& name, bool alert) const
 {
     auto pos = name.find('/');
     CHECK(pos != String::npos, "The name \"%s\" doest follow [stringtablename/stringname] pattern", name.c_str());
@@ -64,7 +64,7 @@ sp<String> StringTable::getString(const String& name, bool alert)
 
 std::vector<String> StringTable::getStringArray(const String& stringTableName, const String& name, bool alert)
 {
-    const sp<StringBundle>& sb = getStringBundle(stringTableName);
+    sp<StringBundle> sb = getStringBundle(stringTableName);
     CHECK(!alert || sb, "String bundle \"%s\" does not exist", stringTableName.c_str());
     if(sb)
         return sb->getStringArray(name);

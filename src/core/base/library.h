@@ -30,10 +30,10 @@ public:
     Library() = default;
     DEFAULT_COPY_AND_ASSIGN(Library);
 
-    template<typename T> const sp<Callable<T>>& getCallable(const String& name) const {
+    template<typename T> sp<Callable<T>> getCallable(const String& name) const {
         Function<T> func;
         const auto iter = _callables.find(func.name(name));
-        return iter != _callables.end() ? iter->second.template toPtr<Callable<T>>() : sp<Callable<T>>::null();
+        return iter != _callables.end() ? iter->second.template toPtr<Callable<T>>() : nullptr;
     }
 
     template<typename T> void addCallable(const String& name, std::function<T> func) {
