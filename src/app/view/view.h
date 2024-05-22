@@ -46,7 +46,6 @@ public:
     virtual void traverse(const Visitor& visitor) override;
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
-//    virtual void addRenderer(const sp<Renderer>& renderer) override;
 
     void addRenderObjectWithLayer(sp<RenderObjectWithLayer> ro, bool isBackground);
 
@@ -100,90 +99,6 @@ public:
         SafePtr<Builder<RenderObjectWithLayer>> _background;
         SafePtr<Builder<Text>> _text;
         sp<Builder<LayoutParam>> _layout_param;
-    };
-
-//  [[plugin::builder("view")]]
-    class BUILDER_VIEW : public Builder<Renderer> {
-    public:
-        BUILDER_VIEW(BeanFactory& factory, const document& manifest);
-
-        virtual sp<Renderer> build(const Scope& args) override;
-
-    private:
-        BUILDER _impl;
-    };
-
-//  [[plugin::style("layout-weight")]]
-    class STYLE_LAYOUT_WEIGHT : public Builder<Renderer> {
-    public:
-        STYLE_LAYOUT_WEIGHT(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
-
-        virtual sp<Renderer> build(const Scope& args) override;
-
-    private:
-        sp<Builder<Renderer>> _delegate;
-        sp<Builder<Numeric>> _layout_weight;
-    };
-
-//  [[plugin::style("margins")]]
-    class STYLE_MARGINS : public Builder<Renderer> {
-    public:
-        STYLE_MARGINS(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
-
-        virtual sp<Renderer> build(const Scope& args) override;
-
-    private:
-        sp<Builder<Renderer>> _delegate;
-        sp<Builder<Vec4>> _margins;
-    };
-
-//  [[plugin::style("margin-left")]]
-    class STYLE_MARGIN_LEFT : public Builder<Renderer> {
-    public:
-        STYLE_MARGIN_LEFT(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
-
-        virtual sp<Renderer> build(const Scope& args) override;
-
-    private:
-        sp<Builder<Renderer>> _delegate;
-        sp<Builder<Numeric>> _margin_left;
-
-    };
-
-//  [[plugin::style("margin-right")]]
-    class STYLE_MARGIN_RIGHT : public Builder<Renderer> {
-    public:
-        STYLE_MARGIN_RIGHT(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
-
-        virtual sp<Renderer> build(const Scope& args) override;
-
-    private:
-        sp<Builder<Renderer>> _delegate;
-        sp<Builder<Numeric>> _margin_right;
-    };
-
-//  [[plugin::style("margin-top")]]
-    class STYLE_MARGIN_TOP : public Builder<Renderer> {
-    public:
-        STYLE_MARGIN_TOP(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
-
-        virtual sp<Renderer> build(const Scope& args) override;
-
-    private:
-        sp<Builder<Renderer>> _delegate;
-        sp<Builder<Numeric>> _margin_top;
-    };
-
-//  [[plugin::style("margin-bottom")]]
-    class STYLE_MARGIN_BOTTOM : public Builder<Renderer> {
-    public:
-        STYLE_MARGIN_BOTTOM(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style);
-
-        virtual sp<Renderer> build(const Scope& args) override;
-
-    private:
-        sp<Builder<Renderer>> _delegate;
-        sp<Builder<Numeric>> _margin_bottom;
     };
 
     struct Stub : public Updatable {

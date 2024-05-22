@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_BASE_BOUNDS_H_
-#define ARK_GRAPHICS_BASE_BOUNDS_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/inf/updatable.h"
@@ -32,5 +31,3 @@ private:
 };
 
 }
-
-#endif

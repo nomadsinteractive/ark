@@ -6,9 +6,7 @@
 #include "extension/python_interpreter.h"
 #include "extension/reference_manager.h"
 
-namespace ark {
-namespace plugin {
-namespace python {
+namespace ark::plugin::python {
 
 PyInstance::PyInstance()
 {
@@ -109,11 +107,6 @@ PyObject* PyInstance::pyObject() const
     return _ref->instance();
 }
 
-void PyInstance::clear()
-{
-    _ref = nullptr;
-}
-
 PyInstance::Borrowed::Borrowed(PyObject* object)
     : PyInstanceRef(object)
 {
@@ -145,6 +138,4 @@ PyInstance::Stolen::~Stolen()
     Py_XDECREF(_instance);
 }
 
-}
-}
 }

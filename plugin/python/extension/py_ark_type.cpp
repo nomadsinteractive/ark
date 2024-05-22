@@ -169,7 +169,6 @@ PyObject* PyArkType::load(Instance& inst, const String& loader, TypeId typeId, c
 PyTypeObject* PyArkType::basetype()
 {
     static PyMethodDef PyArkType_methods[] = {
-        {"absorb", reinterpret_cast<PyCFunction>(__absorb__), METH_VARARGS, nullptr},
         {"dispose", reinterpret_cast<PyCFunction>(__dispose__), METH_VARARGS, nullptr},
         {nullptr, nullptr, 0, nullptr}
     };
@@ -239,19 +238,6 @@ void PyArkType::__dealloc__(Instance* self)
 int PyArkType::__init__(Instance* /*self*/, PyObject* /*args*/, PyObject* /*kwds*/)
 {
     return 0;
-}
-
-PyObject* PyArkType::__absorb__(PyArkType::Instance* self, PyObject* args, PyObject* /*kwargs*/)
-{
-    PyObject* arg1;
-    if(PyArg_ParseTuple(args, "O", &arg1)) {
-        if(PythonInterpreter::instance()->isInstance<Disposed>(arg1)) {
-            typename PyArkType::Instance* instance = reinterpret_cast<PyArkType::Instance*>(arg1);
-            self->box->interfaces()->absorb(*instance->box);
-        }
-    }
-    Py_INCREF(self);
-    return reinterpret_cast<PyObject*>(self);
 }
 
 PyObject* PyArkType::__dispose__(PyArkType::Instance* self, PyObject* /*args*/, PyObject* /*kwargs*/)

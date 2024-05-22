@@ -29,7 +29,7 @@ public:
     static void addRenderer(const sp<Renderer>& self, const sp<Renderer>& renderer);
 //[[script::bindings::classmethod]]
     static sp<Renderer> wrap(const sp<Renderer>& self);
-
+[[deprecated]]
 //[[script::bindings::classmethod]]
     static sp<Renderer> makeDisposable(const sp<Renderer>& self, const sp<Boolean>& disposed = nullptr);
 //[[script::bindings::classmethod]]

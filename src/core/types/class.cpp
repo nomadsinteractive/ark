@@ -24,17 +24,13 @@ Class::Class()
 }
 
 Class::Class(TypeId id)
-    : _id(id), _name("<Unknown>")
+    : _id(id), _name("<Unknown>"), _implements{id}, _delegate(new DefaultClassImpl())
 {
-    static DefaultClassImpl impl;
-    _delegate = &impl;
-    _implements.insert(id);
 }
 
 Class::Class(TypeId id, const char* name, IClass* delegate)
-    : _id(id), _name(name), _delegate(delegate)
+    : _id(id), _name(name), _implements{id}, _delegate(delegate)
 {
-    _implements.insert(id);
 }
 
 TypeId Class::id() const
@@ -50,6 +46,11 @@ const char* Class::name() const
 const std::set<TypeId>& Class::implements() const
 {
     return _implements;
+}
+
+bool Class::is(TypeId id) const
+{
+    return _id == id;
 }
 
 bool Class::isInstance(TypeId id) const

@@ -8,8 +8,8 @@
 
 namespace ark {
 
-RendererStylePosition::RendererStylePosition(const sp<Renderer>& renderer, const sp<Vec3>& position)
-    : _renderer(renderer), _position(position)
+RendererStylePosition::RendererStylePosition(sp<Renderer> renderer, sp<Vec3> position)
+    : _renderer(std::move(renderer)), _position(std::move(position))
 {
     DCHECK(_renderer && _position, "Arguments must not be null");
 }
@@ -27,8 +27,7 @@ RendererStylePosition::STYLE::STYLE(BeanFactory& factory, const sp<Builder<Rende
 
 sp<Renderer> RendererStylePosition::STYLE::build(const Scope& args)
 {
-    const sp<Renderer> bean = _delegate->build(args);
-    return sp<Renderer>::make<RendererStylePosition>(bean, _position->build(args)).absorb(bean);
+    return sp<Renderer>::make<RendererStylePosition>(_delegate->build(args), _position->build(args));
 }
 
 }

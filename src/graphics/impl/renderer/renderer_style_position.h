@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_IMPL_RENDERER_RENDERER_STYLE_POSITION_H_
-#define ARK_GRAPHICS_IMPL_RENDERER_RENDERER_STYLE_POSITION_H_
+#pragma once
 
 #include "core/forwarding.h"
 #include "core/inf/builder.h"
@@ -12,7 +11,7 @@ namespace ark {
 
 class RendererStylePosition : public Renderer {
 public:
-    RendererStylePosition(const sp<Renderer>& renderer, const sp<Vec3>& position);
+    RendererStylePosition(sp<Renderer> renderer, sp<Vec3> position);
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
@@ -35,5 +34,3 @@ private:
 };
 
 }
-
-#endif

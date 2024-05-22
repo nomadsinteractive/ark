@@ -43,14 +43,14 @@ void Emitter::render(RenderRequest& /*renderRequest*/, const V3& /*x*/)
 
 bool Emitter::active()
 {
-    return !_disposed->val();
+    return !_discarded->val();
 }
 
 void Emitter::setActive(bool active)
 {
-    if(_disposed->val() == active)
+    if(_discarded->val() == active)
     {
-        _disposed->set(!active);
+        _discarded->set(!active);
         if(active)
             doActivate();
     }
@@ -58,23 +58,23 @@ void Emitter::setActive(bool active)
 
 void Emitter::activate()
 {
-    DCHECK_WARN(_disposed->val(), "Emitter activated already");
-    if(_disposed->val())
+    DCHECK_WARN(_discarded->val(), "Emitter activated already");
+    if(_discarded->val())
     {
         doActivate();
-        _disposed->set(false);
+        _discarded->set(false);
     }
 }
 
 void Emitter::deactivate()
 {
-    DCHECK_WARN(!_disposed->val(), "Emitter has not been activated");
-    _disposed->set(true);
+    DCHECK_WARN(!_discarded->val(), "Emitter has not been activated");
+    _discarded->set(true);
 }
 
 void Emitter::doActivate()
 {
-    _render_controller->addPreComposeRunnable(_stub, BooleanType::__or__(_disposed, sp<BooleanByWeakRef<Boolean>>::make(_disposed, 1)));
+    _render_controller->addPreComposeRunnable(_stub, BooleanType::__or__(_discarded, sp<BooleanByWeakRef<Boolean>>::make(_discarded, 1)));
 }
 
 Emitter::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext, bool disposed)

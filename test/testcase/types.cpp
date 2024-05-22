@@ -87,18 +87,18 @@ public:
         TESTCASE_VALIDATE(a->a == 1 && a->b == 2);
 
         sp<E> e = sp<E>::make();
-        a.absorb(e);
+//        a.absorb(e);
         TESTCASE_VALIDATE(a.is<Node>() && a.is<A>() && a.is<D>());
         TESTCASE_VALIDATE(a.as<Node>()->a == 1 && a.as<Node>()->b == 2);
         TESTCASE_VALIDATE(a->a == 1 && a->b == 2);
         TESTCASE_VALIDATE(e.is<E>());
         TESTCASE_VALIDATE(a.is<E>() && a.as<E>()->i == 9);
 
-        a.absorb<H>(sp<I>::make());
+//        a.absorb<H>(sp<I>::make());
         TESTCASE_VALIDATE(a.is<H>());
 
         sp<D> d = sp<D>::make();
-        d.absorb(a);
+//        d.absorb(a);
         TESTCASE_VALIDATE(d.is<D>() && d.as<D>()->g == 7);
         TESTCASE_VALIDATE(d.is<Node>() && d.as<Node>()->h == 8);
         TESTCASE_VALIDATE(d.is<E>() && d.as<E>()->i == 9);

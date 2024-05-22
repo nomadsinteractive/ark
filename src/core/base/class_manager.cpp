@@ -7,8 +7,13 @@ namespace ark {
 Class* ClassManager::addClass(TypeId id, const char* name, IClass* impl)
 {
     const std::scoped_lock<std::mutex> guard(_mutex);
-    _classes[id] = Class(id, name, impl);
-    return &_classes[id];
+    const auto iter = _classes.find(id);
+    if(iter != _classes.end())
+        return iter->second.get();
+
+    Class* clazz = new Class(id, name, impl);
+    _classes[id] = std::unique_ptr<Class>(clazz);
+    return clazz;
 }
 
 Class* ClassManager::obtain(TypeId id)
@@ -17,10 +22,11 @@ Class* ClassManager::obtain(TypeId id)
 
     const auto iter = _classes.find(id);
     if(iter != _classes.end())
-        return &iter->second;
+        return iter->second.get();
 
-    _classes[id] = Class(id);
-    return &_classes[id];
+    Class* clazz = new Class(id);
+    _classes[id] = std::unique_ptr<Class>(clazz);
+    return clazz;
 }
 
 void ClassManager::updateHierarchy()
@@ -29,6 +35,7 @@ void ClassManager::updateHierarchy()
 
 ClassManager& ClassManager::instance()
 {
+//    return Ark::instance().classManager();
     static ClassManager INSTANCE;
     return INSTANCE;
 }

@@ -8,7 +8,6 @@
 #include "core/types/type.h"
 
 namespace ark {
-
 namespace _internal {
 
 template<typename T = void, typename... INTERFACES> void _add_types(std::set<TypeId>& interfaces) {
@@ -70,14 +69,18 @@ private:
     TypeId _id;
 };
 
+template<typename T, typename... INTERFACES> Class* _make_class() {
+    Class* clazz = Class::putClass(Type<T>::id(), "<Unknown>", new _ClassImpl<T, INTERFACES...>());
+    clazz->setImplementation(_make_types<T, INTERFACES...>());
+    return clazz;
+}
+
 }
 
 template<typename T, typename... INTERFACES> class Implements {
 public:
     Implements() {
-        static _internal::_ClassImpl<T, INTERFACES...> _CLASS_IMPL;
-        Class* clazz = Class::putClass(Type<T>::id(), "<Unknown>", &_CLASS_IMPL);
-        clazz->setImplementation(_internal::_make_types<T, INTERFACES...>());
+        static Class* clazz = _internal::_make_class<T, INTERFACES...>();
     }
 };
 

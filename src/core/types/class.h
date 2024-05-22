@@ -1,6 +1,7 @@
 #pragma once
 
 #include <set>
+#include <memory>
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
@@ -20,17 +21,17 @@ public:
     Class();
     Class(TypeId id);
     Class(TypeId id, const char* name, IClass* delegate);
-    Class(const Class& other) = default;
-    Class(Class&& other) = default;
+    DISALLOW_COPY_AND_ASSIGN(Class);
 
     TypeId id() const;
     const char* name() const;
     const std::set<TypeId>& implements() const;
 
+    template<typename T> bool is() const {
+        return is(Type<T>::id());
+    }
+    bool is(TypeId id) const;
     bool isInstance(TypeId id) const;
-
-    Class& operator =(const Class& other) = default;
-    Class& operator =(Class&& other) = default;
 
     Box cast(const Box& box, TypeId id);
 
@@ -43,19 +44,17 @@ public:
     static Class* putClass(TypeId id, const char* name, IClass* impl);
 
 private:
-    template<typename T = void, typename... Args> void setImplementation() {
-        TypeId id = Type<T>::id();
-        if(id != Type<void>::id()) {
-            _implements.insert(Type<T>::id());
+    template<typename T, typename... Args> void setImplementation() {
+        _implements.insert(Type<T>::id());
+        if constexpr(sizeof...(Args) > 0)
             setImplementation<Args...>();
-        }
     }
 
 private:
     TypeId _id;
     const char* _name;
     std::set<TypeId> _implements;
-    IClass* _delegate;
+    std::unique_ptr<IClass> _delegate;
 
     friend class ClassManager;
 };

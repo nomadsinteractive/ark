@@ -7,43 +7,43 @@
 namespace ark {
 
 Disposed::Disposed(bool disposed)
-    : _disposed(sp<BooleanWrapper>::make(disposed))
+    : _discarded(sp<BooleanWrapper>::make(disposed))
 {
 }
 
 Disposed::Disposed(sp<Boolean> disposed)
-    : _disposed(sp<BooleanWrapper>::make(disposed))
+    : _discarded(sp<BooleanWrapper>::make(disposed))
 {
 }
 
 bool Disposed::val()
 {
-    return _disposed->val();
+    return _discarded->val();
 }
 
 bool Disposed::update(uint64_t timestamp)
 {
-    return _disposed->update(timestamp);
+    return _discarded->update(timestamp);
 }
 
 void Disposed::dispose()
 {
-    _disposed->set(true);
+    _discarded->set(true);
 }
 
 void Disposed::set(bool disposed)
 {
-    _disposed->set(disposed);
+    _discarded->set(disposed);
 }
 
 void Disposed::set(sp<Boolean> disposed)
 {
-    _disposed->set(std::move(disposed));
+    _discarded->set(std::move(disposed));
 }
 
 const sp<Boolean>& Disposed::wrapped() const
 {
-    return _disposed->wrapped();
+    return _discarded->wrapped();
 }
 
 Disposed::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)

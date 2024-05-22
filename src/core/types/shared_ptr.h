@@ -88,14 +88,6 @@ public:
         return SharedPtr<U>(std::static_pointer_cast<U>(_ptr), ensureInterfaces());
     }
 
-//  [[deprecated]]
-    template<typename U> const SharedPtr<T>& absorb(const SharedPtr<U>& beingAbsorbed) const {
-        ensureInterfaces();
-        if(beingAbsorbed._interfaces != _interfaces)
-            _interfaces->absorb(beingAbsorbed);
-        return *this;
-    }
-
     template<typename U> bool is() const {
         return _interfaces ? _interfaces->isInstance<U>() : std::is_same<T, U>::value;
     }

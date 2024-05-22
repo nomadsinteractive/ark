@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_BASE_CLASS_MANAGER_H_
-#define ARK_CORE_BASE_CLASS_MANAGER_H_
+#pragma once
 
 #include <mutex>
 #include <unordered_map>
@@ -16,10 +15,10 @@ public:
     Class* addClass(TypeId id, const char* name, IClass* impl);
 
     template<typename T, typename... Args> void addClass(const char* name) {
-        static _internal::_ClassImpl<T, Args...> delegate;
-        Class clazz(Type<T>::id(), name, &delegate);
-        clazz.setImplementation<Args...>();
-        _classes[Type<T>::id()] = clazz;
+        Class* clazz = new Class(Type<T>::id(), name, new _internal::_ClassImpl<T, Args...>());
+        if constexpr(sizeof...(Args) > 0)
+            clazz->setImplementation<Args...>();
+        _classes[Type<T>::id()] = std::unique_ptr<Class>(clazz);
     }
 
     Class* obtain(TypeId id);
@@ -30,9 +29,7 @@ public:
 
 private:
     std::mutex _mutex;
-    std::unordered_map<TypeId, Class> _classes;
+    std::unordered_map<TypeId, std::unique_ptr<Class>> _classes;
 };
 
 }
-
-#endif

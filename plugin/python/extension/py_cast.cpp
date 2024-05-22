@@ -32,9 +32,7 @@
 #include "python/impl/duck/py_object_duck_type.h"
 #include "python/impl/duck/py_vec_duck_type.h"
 
-namespace ark {
-namespace plugin {
-namespace python {
+namespace ark::plugin::python {
 
 Optional<sp<Runnable>> PyCast::toRunnable(PyObject* object, bool alert)
 {
@@ -592,6 +590,4 @@ template<> ARK_PLUGIN_PYTHON_API PyObject* PyCast::toPyObject_impl<Span>(const S
     return PyBytes_FromStringAndSize(strview.data(), static_cast<size_t>(strview.size()));
 }
 
-}
-}
 }

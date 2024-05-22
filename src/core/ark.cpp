@@ -367,4 +367,9 @@ void Ark::loadPlugins(const ApplicationManifest& manifest) const
         pluginManager->load(i);
 }
 
+ClassManager& Ark::classManager()
+{
+    return _class_manager;
+}
+
 }

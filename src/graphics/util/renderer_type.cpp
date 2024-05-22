@@ -8,7 +8,6 @@
 #include "graphics/inf/block.h"
 #include "graphics/inf/renderer.h"
 #include "graphics/impl/renderer/renderer_style_position.h"
-#include "graphics/impl/renderer/renderer_style_visibility.h"
 #include "graphics/impl/renderer/renderer_wrapper.h"
 
 namespace ark {
@@ -32,17 +31,20 @@ sp<Renderer> RendererType::wrap(const sp<Renderer>& self)
 
 sp<Renderer> RendererType::makeDisposable(const sp<Renderer>& self, const sp<Boolean>& disposed)
 {
-    return self.absorb(disposed ? sp<Disposed>::make(disposed) : sp<Disposed>::make());
+    WARN("makeDisposable is deprecated");
+    return self;
 }
 
 sp<Renderer> RendererType::makeVisible(const sp<Renderer>& self, const sp<Boolean>& visibility)
 {
-    return self.absorb(sp<Visibility>::make(visibility));
+    WARN("makeVisible is deprecated");
+    return self;
 }
 
 sp<Renderer> RendererType::makeAutoRelease(const sp<Renderer>& self, int32_t refCount)
 {
-    return makeDisposable(self, sp<BooleanByWeakRef<Renderer>>::make(self, refCount));
+    WARN("makeAutoRelease is deprecated");
+    return self;
 }
 
 SafePtr<Size> RendererType::size(const sp<Renderer>& self)

@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_TYPES_SAFE_PTR_H_
-#define ARK_CORE_TYPES_SAFE_PTR_H_
+#pragma once
 
 #include "core/types/null.h"
 #include "core/types/shared_ptr.h"
@@ -51,5 +50,3 @@ private:
 };
 
 }
-
-#endif

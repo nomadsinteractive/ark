@@ -42,7 +42,7 @@ public:
     };
 
 protected:
-    sp<BooleanWrapper> _disposed;
+    sp<BooleanWrapper> _discarded;
 
 };
 

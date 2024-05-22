@@ -225,96 +225,6 @@ void View::markAsTopView()
     _stub->_parent_stub.reset(nullptr);
 }
 
-namespace {
-
-sp<View> bindView(sp<Renderer>& decorated)
-{
-    const sp<View> view = decorated.as<View>();
-    if(view)
-        return view;
-
-    const sp<Block> block = decorated.as<Block>();
-    const sp<View> decoratedView = sp<View>::make(block ? static_cast<const sp<Size>&>(block->size()) : sp<Size>::null());
-    decorated.absorb(decoratedView);
-    return decoratedView;
-}
-
-}
-
-View::STYLE_MARGINS::STYLE_MARGINS(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style)
-    : _delegate(delegate), _margins(beanFactory.ensureBuilder<Vec4>(style))
-{
-}
-
-sp<Renderer> View::STYLE_MARGINS::build(const Scope& args)
-{
-    sp<Renderer> renderer = _delegate->build(args);
-    const sp<View> view = bindView(renderer);
-    if(view)
-        view->layoutParam()->setMargins(_margins->build(args));
-    return renderer;
-}
-
-View::STYLE_MARGIN_TOP::STYLE_MARGIN_TOP(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style)
-    : _delegate(delegate), _margin_top(beanFactory.ensureBuilder<Numeric>(style))
-{
-}
-
-sp<Renderer> View::STYLE_MARGIN_TOP::build(const Scope& args)
-{
-    sp<Renderer> renderer = _delegate->build(args);
-    bindView(renderer)->layoutParam()->setMargins(Vec4Type::create(_margin_top->build(args), nullptr, nullptr, nullptr));
-    return renderer;
-}
-
-View::STYLE_MARGIN_LEFT::STYLE_MARGIN_LEFT(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style)
-    : _delegate(delegate), _margin_left(beanFactory.ensureBuilder<Numeric>(style))
-{
-}
-
-sp<Renderer> View::STYLE_MARGIN_LEFT::build(const Scope& args)
-{
-    sp<Renderer> renderer = _delegate->build(args);
-    bindView(renderer)->layoutParam()->setMargins(Vec4Type::create(nullptr, nullptr, nullptr, _margin_left->build(args)));
-    return renderer;
-}
-
-View::STYLE_MARGIN_RIGHT::STYLE_MARGIN_RIGHT(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style)
-    : _delegate(delegate), _margin_right(beanFactory.ensureBuilder<Numeric>(style))
-{
-}
-
-sp<Renderer> View::STYLE_MARGIN_RIGHT::build(const Scope& args)
-{
-    sp<Renderer> renderer = _delegate->build(args);
-    bindView(renderer)->layoutParam()->setMargins(Vec4Type::create(nullptr, _margin_right->build(args), nullptr, nullptr));
-    return renderer;
-}
-
-View::STYLE_MARGIN_BOTTOM::STYLE_MARGIN_BOTTOM(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style)
-    : _delegate(delegate), _margin_bottom(beanFactory.ensureBuilder<Numeric>(style))
-{
-}
-
-sp<Renderer> View::STYLE_MARGIN_BOTTOM::build(const Scope& args)
-{
-    sp<Renderer> renderer = _delegate->build(args);
-    bindView(renderer)->layoutParam()->setMargins(Vec4Type::create(nullptr, nullptr, _margin_bottom->build(args), nullptr));
-    return renderer;
-}
-
-View::STYLE_LAYOUT_WEIGHT::STYLE_LAYOUT_WEIGHT(BeanFactory& beanFactory, const sp<Builder<Renderer>>& delegate, const String& style)
-    : _delegate(delegate), _layout_weight(beanFactory.ensureBuilder<Numeric>(style))
-{
-}
-
-sp<Renderer> View::STYLE_LAYOUT_WEIGHT::build(const Scope& args)
-{
-    sp<Renderer> renderer = _delegate->build(args);
-    bindView(renderer)->layoutParam()->setFlexGrow(_layout_weight->build(args)->val());
-    return renderer;
-}
-
 View::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _factory(factory), _manifest(manifest), _disposed(factory.getBuilder<Boolean>(manifest, Constants::Attributes::DISPOSED)), _visible(factory.getBuilder<Boolean>(manifest, Constants::Attributes::VISIBLE)),
       _layout(factory.getBuilder<Layout>(manifest, Constants::Attributes::LAYOUT)), _layout_v3(factory.getBuilder<LayoutV3>(manifest, "layout-v3")),
@@ -337,16 +247,6 @@ sp<View> View::BUILDER::build(const Scope& args)
             CHECK_WARN(name == Constants::Attributes::TEXT || name == Constants::Attributes::BACKGROUND, "Ignoring unknown view child: %s", Documents::toString(i).c_str());
     }
     return view;
-}
-
-View::BUILDER_VIEW::BUILDER_VIEW(BeanFactory& factory, const document& manifest)
-    : _impl(factory, manifest)
-{
-}
-
-sp<Renderer> View::BUILDER_VIEW::build(const Scope& args)
-{
-    return _impl.build(args);
 }
 
 View::Stub::Stub()

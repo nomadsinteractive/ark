@@ -5,11 +5,10 @@
 
 #include "graphics/base/render_request.h"
 
-
 namespace ark {
 
-RendererStyleVisibility::RendererStyleVisibility(const sp<Renderer>& renderer, const sp<Visibility>& visibility)
-    : _renderer(renderer), _visibility(visibility)
+RendererStyleVisibility::RendererStyleVisibility(sp<Renderer> renderer, sp<Visibility> visibility)
+    : _renderer(std::move(renderer)), _visibility(std::move(visibility))
 {
     DASSERT(_renderer);
     DASSERT(_visibility);
@@ -30,9 +29,7 @@ RendererStyleVisibility::STYLE::STYLE(BeanFactory& factory, const sp<Builder<Ren
 
 sp<Renderer> RendererStyleVisibility::STYLE::build(const Scope& args)
 {
-    const sp<Renderer> delegate = _delegate->build(args);
-    const sp<Visibility> visibility =  _visibility->build(args);
-    return sp<RendererStyleVisibility>::make(delegate, visibility).absorb(visibility).absorb(delegate);
+    return sp<RendererStyleVisibility>::make(_delegate->build(args), _visibility->build(args));
 }
 
 }

@@ -1,5 +1,4 @@
-#ifndef ARK_PLUGIN_PYTHON_EXTENSION_REFERENCE_MANAGER_H_
-#define ARK_PLUGIN_PYTHON_EXTENSION_REFERENCE_MANAGER_H_
+#pragma once
 
 #include <vector>
 
@@ -8,9 +7,7 @@
 
 #include "python/forwarding.h"
 
-namespace ark {
-namespace plugin {
-namespace python {
+namespace ark::plugin::python {
 
 class ReferenceManager {
 public:
@@ -24,7 +21,3 @@ private:
 };
 
 }
-}
-}
-
-#endif

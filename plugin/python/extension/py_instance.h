@@ -43,8 +43,6 @@ public:
     bool isNone() const;
     bool isNullptr() const;
 
-    void clear();
-
 private:
     class Borrowed : public PyInstanceRef, Implements<Borrowed, PyInstanceRef> {
     public:

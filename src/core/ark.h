@@ -4,6 +4,7 @@
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
+#include "core/base/class_manager.h"
 #include "core/base/string.h"
 #include "core/collection/traits.h"
 #include "core/types/shared_ptr.h"
@@ -65,6 +66,8 @@ public:
     int32_t argc() const;
     const char** argv() const;
 
+    ClassManager& classManager();
+
     const sp<ApplicationManifest>& manifest() const;
 
     sp<AssetBundle> getAssetBundle(const String& path) const;
@@ -104,6 +107,7 @@ private:
     int32_t _argc;
     const char** _argv;
 
+    ClassManager _class_manager;
     sp<ApplicationContext> _application_context;
     sp<ApplicationProfiler> _application_profiler;
     Traits _interfaces;

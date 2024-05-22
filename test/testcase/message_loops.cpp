@@ -55,7 +55,7 @@ public:
 
         messageLoopThread->post(task, 0.2f);
         messageLoopThread->schedule(task1, 0.3f);
-        messageLoopThread->schedule(task2.absorb(expirable), 0.3f);
+//        messageLoopThread->schedule(task2.absorb(expirable), 0.3f);
         expirable->dispose();
         std::this_thread::sleep_for(std::chrono::seconds(1));
         messageLoopThread->thread().terminate();
