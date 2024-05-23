@@ -24,7 +24,7 @@
 namespace ark {
 
 Emitter::Emitter(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Source>& source, const sp<Clock>& clock, const sp<LayerContext>& layerContext, const std::vector<document>& particleDescriptor, BeanFactory& beanFactory, bool disposed)
-    : Disposed(disposed), _stub(sp<Stub>::make(clock, layerContext, source, particleDescriptor, beanFactory)), _render_controller(resourceLoaderContext->renderController())
+    : _stub(sp<Stub>::make(clock, layerContext, source, particleDescriptor, beanFactory)), _render_controller(resourceLoaderContext->renderController())
 {
 }
 
@@ -43,38 +43,23 @@ void Emitter::render(RenderRequest& /*renderRequest*/, const V3& /*x*/)
 
 bool Emitter::active()
 {
-    return !_discarded->val();
+    return false;
 }
 
 void Emitter::setActive(bool active)
 {
-    if(_discarded->val() == active)
-    {
-        _discarded->set(!active);
-        if(active)
-            doActivate();
-    }
 }
 
 void Emitter::activate()
 {
-    DCHECK_WARN(_discarded->val(), "Emitter activated already");
-    if(_discarded->val())
-    {
-        doActivate();
-        _discarded->set(false);
-    }
 }
 
 void Emitter::deactivate()
 {
-    DCHECK_WARN(!_discarded->val(), "Emitter has not been activated");
-    _discarded->set(true);
 }
 
 void Emitter::doActivate()
 {
-    _render_controller->addPreComposeRunnable(_stub, BooleanType::__or__(_discarded, sp<BooleanByWeakRef<Boolean>>::make(_discarded, 1)));
 }
 
 Emitter::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext, bool disposed)

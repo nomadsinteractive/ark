@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_INF_HOLDER_H_
-#define ARK_CORE_INF_HOLDER_H_
+#pragma once
 
 #include <functional>
 
@@ -18,5 +17,3 @@ public:
 };
 
 }
-
-#endif

@@ -107,13 +107,16 @@ class GenMethod(object):
     def gen_local_var_declarations(self):
         declares = {}
         for i, j in enumerate(self._arguments):
+            if j.meta.parse_signature == '*':
+                continue
+
             typename = j.typename
             realtypename = acg.remove_crv(typename)
             if typename in declares:
                 declares[typename] = '%s, %sarg%d' % (declares[typename], '*' if typename.endswith('*') else '', i)
             else:
                 declares[typename] = '%s arg%d' % (typename, i)
-            if not j.meta.parse_signature:
+            if j.meta.parse_signature == '**':
                 declares[typename] += ' = kws'
             else:
                 dvalue = None
@@ -188,18 +191,19 @@ class GenMethod(object):
                 sys.exit(-1)
             parse_format = ts[0] + '|' + ''.join(ts[1:])
 
-        parse_arg_refnames = ', '.join('&arg%d' % i for i, j in enumerate(args) if j.meta.parse_signature)
+        parse_arg_refnames = ', '.join(f'&arg{i}' for i, j in enumerate(args) if j.parse_signature)
         # TODO: to all possible methods
         if self._has_keyword_arguments() and self._name == '__init__':
             lines.append(self._make_argname_declares())
-            parsestatement = '''if(!PyBridge::PyArg_ParseTupleAndKeywords(args, kws, "%s", const_cast<char**>(argnames), %s))
-        %s;
-    ''' % (parse_format, parse_arg_refnames, self.err_return_value)
+            parsestatement = f'''if(!PyBridge::PyArg_ParseTupleAndKeywords(args, kws, "{parse_format}", const_cast<char**>(argnames), {parse_arg_refnames}))
+        {self.err_return_value};
+    '''
         else:
-            parsestatement = '''if(!PyBridge::PyArg_ParseTuple(args, "%s", %s))
-        %s;
-    ''' % (parse_format, parse_arg_refnames, self.err_return_value)
-        lines.append(parsestatement)
+            parsestatement = f'''if(!PyBridge::PyArg_ParseTuple(args, "{parse_format}", {parse_arg_refnames}))
+        {self.err_return_value};
+    '''
+        if parse_format:
+            lines.append(parsestatement)
 
     def _make_argname_declares(self):
         return '''const char* argnames[] = {
@@ -328,7 +332,7 @@ class GenGetPropMethod(GenMethod):
         if argdeclare:
             arg0 = self._arguments[0]
             meta = GenArgumentMeta('PyObject*', arg0.accept_type, 'O')
-            ga = GenArgument(arg0.accept_type, arg0.default_value, meta, str(arg0))
+            ga = GenArgument(0, arg0.accept_type, arg0.default_value, meta, str(arg0))
             lines.append(ga.gen_declare('obj0', 'arg0'))
 
     def gen_py_arguments(self):
@@ -479,7 +483,7 @@ class GenMappingMethod(GenSubscribableMethod):
         if argdeclare and not self._is_len_func:
             for i, j in enumerate(self._arguments):
                 meta = GenArgumentMeta('PyObject*', j.accept_type, 'O')
-                ga = GenArgument(j.accept_type, j.default_value, meta, str(j))
+                ga = GenArgument(j.index, j.accept_type, j.default_value, meta, str(j))
                 lines.append(ga.gen_declare(f'obj{i}', f'arg{i}', False, optional_check))
 
     def gen_py_arguments(self):
@@ -501,7 +505,7 @@ class GenSequenceMethod(GenSubscribableMethod):
             lines.append(f'{arg0.accept_type} obj0 = static_cast<{arg0.accept_type}>(arg0);')
             for i, j in enumerate(self._arguments[1:]):
                 meta = GenArgumentMeta('PyObject*', j.accept_type, 'O')
-                ga = GenArgument(j.accept_type, j.default_value, meta, str(j))
+                ga = GenArgument(j.index, j.accept_type, j.default_value, meta, str(j))
                 lines.append(ga.gen_declare(f'obj{i + 1}', f'arg{i + 1}', False, optional_check))
 
     def gen_py_arguments(self):

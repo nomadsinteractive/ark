@@ -41,7 +41,7 @@ public:
         return getClass(Type<T>::id());
     }
     static Class* getClass(TypeId id);
-    static Class* putClass(TypeId id, const char* name, IClass* impl);
+    static Class* addClass(TypeId id, const char* name, IClass* impl);
 
 private:
     template<typename T, typename... Args> void setImplementation() {

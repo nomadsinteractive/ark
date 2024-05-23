@@ -5,13 +5,13 @@
 namespace ark {
 
 Box::Box(TypeId typeId, const Class* clazz, const void* sharedPtr, const void* instancePtr, Destructor destructor) noexcept
-    : _stub(std::make_shared<_StubVariant>(PtrStub(typeId, clazz, sharedPtr, instancePtr, destructor)))
+    : _type_id(typeId), _stub(std::make_shared<_StubVariant>(PtrStub(clazz, sharedPtr, instancePtr, destructor)))
 {
 }
 
 TypeId Box::typeId() const
 {
-    return _stub ? std::get<PtrStub>(*_stub).type_id : 0;
+    return _type_id;
 }
 
 const void* Box::ptr() const
@@ -21,7 +21,12 @@ const void* Box::ptr() const
 
 Box::operator bool() const
 {
-    return _stub && std::get<PtrStub>(*_stub).instance_ptr != nullptr;
+    if(_stub)
+    {
+        const PtrStub* ptrStub = std::get_if<PtrStub>(_stub.get());
+        return !ptrStub || ptrStub->instance_ptr != nullptr;
+    }
+    return false;
 }
 
 }

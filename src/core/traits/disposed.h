@@ -9,12 +9,12 @@
 namespace ark {
 
 //[[script::bindings::extends(Boolean)]]
-class ARK_API Disposed : public Boolean {
+class ARK_API Disposed final : public Boolean {
 public:
 //  [[script::bindings::auto]]
-    Disposed(bool disposed = false);
+    Disposed(bool discarded = false);
 //  [[script::bindings::auto]]
-    Disposed(sp<Boolean> disposed);
+    Disposed(sp<Boolean> discarded);
 
     virtual bool val() override;
     virtual bool update(uint64_t timestamp) override;

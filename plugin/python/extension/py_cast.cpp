@@ -233,6 +233,11 @@ Scope PyCast::toScope(PyObject* kws)
     return scope;
 }
 
+Traits PyCast::toTraits(PyObject *args, size_t offset)
+{
+    return Traits();
+}
+
 PyObject* PyCast::toPyObject_SharedPtr(const sp<PyInstanceRef>& inst)
 {
     PyObject* obj = inst->instance();

@@ -9,9 +9,7 @@
 #include "app/view/layout_param.h"
 #include "app/view/view_hierarchy.h"
 
-namespace ark {
-namespace plugin {
-namespace yoga {
+namespace ark::plugin::yoga {
 
 static YGFlexDirection toYGFlexDirection(LayoutParam::FlexDirection flexDirection)
 {
@@ -107,19 +105,19 @@ void YogaLayout::inflate(sp<Node> rootNode)
         YGNodeFreeRecursive(_yg_node);
 
     _yg_node = doInflate(Global<YogaConfig>(), rootNode, nullptr);
-    _layout_node = std::move(rootNode);
+    _root_node = std::move(rootNode);
 }
 
 bool YogaLayout::update(uint64_t timestamp)
 {
-    if(!_layout_node)
+    if(!_root_node)
         return false;
 
-    const LayoutParam& layoutParam = _layout_node->_layout_param;
+    const LayoutParam& layoutParam = _root_node->_layout_param;
     ASSERT(layoutParam.widthType() != LayoutParam::LENGTH_TYPE_PERCENTAGE && layoutParam.heightType() != LayoutParam::LENGTH_TYPE_PERCENTAGE);
-    doUpdate(_layout_node, timestamp);
+    doUpdate(_root_node, timestamp);
     YGNodeCalculateLayout(_yg_node, layoutParam.size()->widthAsFloat(), layoutParam.size()->heightAsFloat(), YGDirectionLTR);
-    updateLayoutResult(_layout_node);
+    updateLayoutResult(_root_node);
     return YGNodeIsDirty(_yg_node);
 }
 
@@ -217,9 +215,9 @@ void YogaLayout::updateLayoutResult(Node& layoutNode)
             updateLayoutResult(i.layoutNode());
 }
 
-YGNodeRef YogaLayout::doInflate(const Global<YogaLayout::YogaConfig>& config, Node& layoutNode, YGNodeRef parentNode)
+YGNodeRef YogaLayout::doInflate(const YogaConfig& config, Node& layoutNode, YGNodeRef parentNode)
 {
-    YGNodeRef ygNode = config->newNode();
+    YGNodeRef ygNode = config.newNode();
     layoutNode._tag = reinterpret_cast<void*>(ygNode);
 
     if(parentNode)
@@ -269,6 +267,4 @@ YGNodeRef YogaLayout::YogaConfig::newNode() const
     return YGNodeNewWithConfig(_config);
 }
 
-}
-}
 }

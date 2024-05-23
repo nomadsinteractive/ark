@@ -1,7 +1,6 @@
 #pragma once
 
 #include "core/base/api.h"
-#include "core/collection/list.h"
 #include "core/inf/builder.h"
 #include "core/inf/holder.h"
 #include "core/types/owned_ptr.h"
@@ -31,6 +30,8 @@ public:
     virtual bool onEvent(const Event& event) override;
 
     virtual void traverse(const Visitor& visitor) override;
+
+    sp<Entity> makeEntity(Traits components = Traits()) const;
 
 //  [[script::bindings::loader]]
     template<typename T> const sp<T> load(const String& name, const Scope& args) {

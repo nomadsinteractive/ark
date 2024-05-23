@@ -38,6 +38,7 @@ public:
     static Optional<String> toStringExact(PyObject* object, const char* encoding = nullptr, const char* error = nullptr);
     static String toString(PyObject* object, const char* encoding = nullptr, const char* error = nullptr);
     static Scope toScope(PyObject* kws);
+    static Traits toTraits(PyObject* args, size_t offset);
 
     template<typename T> static PyObject* toPyObject(const T& obj) {
         return toPyObject_sfinae<T>(obj, nullptr);

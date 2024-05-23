@@ -73,7 +73,7 @@ Class* Class::getClass(TypeId id)
     return ClassManager::instance().obtain(id);
 }
 
-Class* Class::putClass(TypeId id, const char* name, IClass* impl)
+Class* Class::addClass(TypeId id, const char* name, IClass* impl)
 {
     return ClassManager::instance().addClass(id, name, impl);
 }

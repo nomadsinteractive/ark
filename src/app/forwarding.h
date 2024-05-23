@@ -16,6 +16,7 @@ class Collider;
 class CollisionCallback;
 class CollisionFilter;
 class CollisionManifold;
+class Entity;
 class Event;
 class EventDispatcher;
 class EventListener;
@@ -39,6 +40,5 @@ class RigidBodyDef;
 class Surface;
 class SurfaceUpdater;
 class View;
-class ViewGroup;
 
 }

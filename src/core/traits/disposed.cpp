@@ -1,18 +1,17 @@
 #include "core/traits/disposed.h"
 
 #include "core/base/bean_factory.h"
-#include "core/impl/variable/variable_observer.h"
 #include "core/impl/variable/variable_wrapper.h"
 
 namespace ark {
 
-Disposed::Disposed(bool disposed)
-    : _discarded(sp<BooleanWrapper>::make(disposed))
+Disposed::Disposed(bool discarded)
+    : _discarded(sp<BooleanWrapper>::make(discarded))
 {
 }
 
-Disposed::Disposed(sp<Boolean> disposed)
-    : _discarded(sp<BooleanWrapper>::make(disposed))
+Disposed::Disposed(sp<Boolean> discarded)
+    : _discarded(sp<BooleanWrapper>::make(discarded))
 {
 }
 

@@ -15,13 +15,17 @@ class ARK_API Box {
 public:
     typedef void(*Destructor)(const void*);
 
-    constexpr Box() noexcept = default;
-    constexpr Box(std::nullptr_t) noexcept {}
+    constexpr Box() noexcept
+        : _type_id(0) {
+    }
+    constexpr Box(std::nullptr_t) noexcept
+        : _type_id(0) {
+    }
     template<typename T> Box(sp<T> sharedPtr) noexcept
-        : _stub(sharedPtr ? _make_ptr_stub(new SharedPtr<T>(std::move(sharedPtr))) : nullptr) {
+        : _type_id(Type<T>::id()), _stub(sharedPtr ? _make_ptr_stub(new SharedPtr<T>(std::move(sharedPtr))) : nullptr) {
     }
     template<typename T> Box(T enumValue) noexcept
-        : _stub(_make_enum_stub<T>(enumValue)) {
+        : _type_id(Type<T>::id()), _stub(_make_enum_stub<T>(enumValue)) {
     }
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Box);
 
@@ -31,13 +35,15 @@ public:
     TypeId typeId() const;
 
     template<typename T> sp<T> toPtr() const {
-        return _stub ? std::get<PtrStub>(*_stub).template unpack<T>() : nullptr;
+        if(!_stub)
+            return nullptr;
+        _type_check<T>();
+        return std::get<PtrStub>(*_stub).template unpack<T>();
     }
 
     template<typename T> T toEnum() const {
-        const EnumStub* enumStub = _stub ? std::get_if<EnumStub>(_stub.get()) : nullptr;
-        DCHECK(enumStub, "This variant doesn't contain an enum value");
-        return enumStub ? enumStub->unpack<T>() : static_cast<T>(0);
+        _type_check<T>();
+        return static_cast<T>(toInteger());
     }
 
     int32_t toInteger() const {
@@ -48,9 +54,9 @@ public:
         if(!_stub)
             return nullptr;
 
-        const PtrStub& ptrStub = std::get<PtrStub>(*_stub);
         TypeId typeId = Type<T>::id();
-        sp<T> inst = typeId == ptrStub.type_id ? ptrStub.unpack<T>() : ptrStub.clazz->cast(*this, typeId).toPtr<T>();
+        const PtrStub& ptrStub = std::get<PtrStub>(*_stub);
+        sp<T> inst = typeId == _type_id ? ptrStub.unpack<T>() : ptrStub.clazz->cast(*this, typeId).toPtr<T>();
         if(!inst) {
             const sp<Duck<T>> duck = ptrStub.clazz->cast(*this, Type<Duck<T>>::id()).template toPtr<Duck<T>>();
             if(duck)
@@ -65,11 +71,11 @@ private:
     Box(TypeId typeId, const Class* clazz, const void* sharedPtr, const void* instancePtr, Destructor destructor) noexcept;
 
     struct PtrStub {
-        PtrStub(TypeId typeId, const Class* clazz, const void* sharedPtr, const void* instancePtr, Destructor destructor)
-            : type_id(typeId), clazz(clazz), shared_ptr(sharedPtr), instance_ptr(instancePtr), destructor(std::move(destructor)) {
+        PtrStub(const Class* clazz, const void* sharedPtr, const void* instancePtr, Destructor destructor)
+            : clazz(clazz), shared_ptr(sharedPtr), instance_ptr(instancePtr), destructor(std::move(destructor)) {
         }
         PtrStub(PtrStub&& other)
-            : type_id(other.type_id), clazz(other.clazz), shared_ptr(other.shared_ptr), instance_ptr(other.instance_ptr), destructor(std::move(other.destructor)) {
+            : clazz(other.clazz), shared_ptr(other.shared_ptr), instance_ptr(other.instance_ptr), destructor(std::move(other.destructor)) {
             other.shared_ptr = nullptr;
         }
         ~PtrStub() {
@@ -78,11 +84,9 @@ private:
         }
 
         template<typename T> sp<T> unpack() const {
-            DCHECK(type_id == Type<T>::id(), "Wrong type being unpacked");
             return shared_ptr ? *reinterpret_cast<const sp<T>*>(shared_ptr) : nullptr;
         }
 
-        TypeId type_id;
         const Class* clazz;
         const void* shared_ptr;
         const void* instance_ptr;
@@ -90,16 +94,14 @@ private:
     };
 
     struct EnumStub {
-        EnumStub(TypeId typeId, int32_t value)
-            : _type_id(typeId), _value(value) {
+        EnumStub(int32_t value)
+            : _value(value) {
         }
 
         template<typename T> T unpack() const {
-            DCHECK(_type_id == Type<T>::id(), "Wrong type being unpacked");
             return static_cast<T>(_value);
         }
 
-        TypeId _type_id;
         int32_t _value;
     };
 
@@ -107,19 +109,24 @@ private:
         delete reinterpret_cast<const SharedPtr<T>*>(inst);
     }
 
+    template<typename T> void _type_check() const {
+        DCHECK(_type_id == Type<T>::id(), "Wrong type being unpacked");
+    }
+
     typedef std::variant<PtrStub, EnumStub> _StubVariant;
 
 private:
-    template<typename T> std::shared_ptr<_StubVariant> _make_ptr_stub(const sp<T>* sharedPtr)  {
-        return sharedPtr ? std::make_shared<_StubVariant>(PtrStub(Type<T>::id(), sharedPtr->getClass(), sharedPtr, sharedPtr->get(), _shared_ptr_destructor<T>)) : nullptr;
+    template<typename T> static std::shared_ptr<_StubVariant> _make_ptr_stub(const sp<T>* sharedPtr) {
+        return sharedPtr ? std::make_shared<_StubVariant>(PtrStub(sharedPtr->getClass(), sharedPtr, sharedPtr->get(), _shared_ptr_destructor<T>)) : nullptr;
     }
 
-    template<typename T> std::shared_ptr<_StubVariant> _make_enum_stub(T enumValue)  {
+    template<typename T> static std::shared_ptr<_StubVariant> _make_enum_stub(T enumValue)  {
         static_assert(std::is_enum_v<T>);
-        return std::make_shared<_StubVariant>(EnumStub(Type<T>::id(), enumValue));
+        return std::make_shared<_StubVariant>(EnumStub(enumValue));
     }
 
 private:
+    TypeId _type_id;
     std::shared_ptr<_StubVariant> _stub;
 
     template<typename T> friend class SharedPtr;

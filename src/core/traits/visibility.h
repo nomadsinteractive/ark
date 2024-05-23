@@ -9,7 +9,7 @@
 namespace ark {
 
 //[[script::bindings::extends(Boolean)]]
-class ARK_API Visibility : public Boolean {
+class ARK_API Visibility final : public Boolean {
 public:
 //  [[script::bindings::auto]]
     Visibility(bool visible = false);

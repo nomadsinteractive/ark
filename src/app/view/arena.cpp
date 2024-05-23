@@ -10,6 +10,7 @@
 #include "graphics/base/render_layer.h"
 
 #include "app/base/application_context.h"
+#include "app/base/entity.h"
 #include "app/impl/event_listener/event_listener_list.h"
 #include "app/view/view.h"
 
@@ -47,6 +48,12 @@ bool Arena::onEvent(const Event& event)
 void Arena::traverse(const Holder::Visitor& visitor)
 {
     HolderUtil::visit(_view, visitor);
+}
+
+sp<Entity> Arena::makeEntity(Traits components) const
+{
+    components.put(_resource_loader);
+    return sp<Entity>::make(std::move(components));
 }
 
 sp<Renderer> Arena::loadRenderer(const String& name, const Scope& args)

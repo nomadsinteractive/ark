@@ -363,7 +363,7 @@ public:
         return getBuilderByRef<T>(id, *this);
     }
 
-    template<typename T> sp<Builder<T>> getBuilderByArg(const String& argname);
+    template<typename T> sp<Builder<T>> getBuilderByArg(String argname);
     template<typename T> sp<Builder<T>> getBuilderByArg(const Identifier& id);
     template<typename T> sp<Builder<T>> getBuilderByRef(const Identifier& id, BeanFactory& factory);
 
@@ -558,8 +558,8 @@ template<typename T> sp<Builder<T>> BeanFactory::Worker<T>::makeWrappedBuilder(s
     return builder;
 }
 
-template<typename T> sp<Builder<T>> BeanFactory::getBuilderByArg(const String& argname) {
-    return sp<BuilderByArgument<T>>::make(_stub->_references, argname);
+template<typename T> sp<Builder<T>> BeanFactory::getBuilderByArg(String argname) {
+    return sp<BuilderByArgument<T>>::make(_stub->_references, std::move(argname));
 }
 
 template<typename T> sp<Builder<T>> BeanFactory::getBuilderByArg(const Identifier& id) {

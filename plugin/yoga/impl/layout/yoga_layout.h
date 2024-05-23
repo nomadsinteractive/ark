@@ -1,5 +1,4 @@
-#ifndef ARK_PLUGIN_YOGA_IMPL_LAYOUT_YOGA_LAYOUT_H_
-#define ARK_PLUGIN_YOGA_IMPL_LAYOUT_YOGA_LAYOUT_H_
+#pragma once
 
 #include <yoga/YGNode.h>
 #include <yoga/Yoga.h>
@@ -10,9 +9,7 @@
 
 #include "app/inf/layout.h"
 
-namespace ark {
-namespace plugin {
-namespace yoga {
+namespace ark::plugin::yoga {
 
 class YogaLayout : public LayoutV3 {
 public:
@@ -29,6 +26,7 @@ public:
 
         virtual sp<LayoutV3> build(const Scope& args) override;
     };
+
 private:
     class YogaConfig {
     public:
@@ -39,23 +37,18 @@ private:
 
     private:
         YGConfigRef _config;
-
     };
 
 private:
     static void applyLayoutParam(const LayoutParam& layoutParam, YGNodeRef node, uint64_t timestamp);
     static void updateLayoutResult(LayoutV3::Node& layoutNode);
 
-    static YGNodeRef doInflate(const Global<YogaConfig>& config, LayoutV3::Node& layoutNode, YGNodeRef parentNode);
+    static YGNodeRef doInflate(const YogaConfig& config, LayoutV3::Node& layoutNode, YGNodeRef parentNode);
     static void doUpdate(LayoutV3::Node& layoutNode, uint64_t timestamp);
 
 private:
     YGNodeRef _yg_node;
-    sp<Node> _layout_node;
+    sp<Node> _root_node;
 };
 
 }
-}
-}
-
-#endif

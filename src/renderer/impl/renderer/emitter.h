@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_IMPL_RENDERER_EMITTER_H_
-#define ARK_RENDERER_IMPL_RENDERER_EMITTER_H_
+#pragma once
 
 #include <vector>
 
@@ -21,7 +20,7 @@
 namespace ark {
 
 //[[script::bindings::holder]]
-class ARK_API Emitter : public Holder, public Renderer, public Disposed {
+class ARK_API Emitter : public Holder, public Renderer {
 private:
     struct Source {
         Source(const sp<Integer>& type, const sp<Vec3>& position, const sp<Size>& size, const Scope& arguments);
@@ -137,5 +136,3 @@ private:
 };
 
 }
-
-#endif

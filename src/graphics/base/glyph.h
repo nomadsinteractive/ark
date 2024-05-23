@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_BASE_GLYPH_H_
-#define ARK_GRAPHICS_BASE_GLYPH_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/types/shared_ptr.h"
@@ -55,5 +54,3 @@ private:
 };
 
 }
-
-#endif

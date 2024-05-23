@@ -70,7 +70,7 @@ private:
 };
 
 template<typename T, typename... INTERFACES> Class* _make_class() {
-    Class* clazz = Class::putClass(Type<T>::id(), "<Unknown>", new _ClassImpl<T, INTERFACES...>());
+    Class* clazz = Class::addClass(Type<T>::id(), "<Unknown>", new _ClassImpl<T, INTERFACES...>());
     clazz->setImplementation(_make_types<T, INTERFACES...>());
     return clazz;
 }
@@ -80,8 +80,7 @@ template<typename T, typename... INTERFACES> Class* _make_class() {
 template<typename T, typename... INTERFACES> class Implements {
 public:
     Implements() {
-        static Class* clazz = _internal::_make_class<T, INTERFACES...>();
-        (void) clazz;
+        [[maybe_unused]] static Class* clazz = _internal::_make_class<T, INTERFACES...>();
     }
 };
 

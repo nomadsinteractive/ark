@@ -48,15 +48,14 @@ get_param_and_paths()
 def parse_method_arguments(arguments):
     args = []
     for i, j in enumerate(arguments):
-        argstr = acg.strip_key_words(j, ['const', '&'])
-        default_value = None
-        pos = argstr.find('=')
-        if pos != -1:
+        argstr = acg.remove_crv(j)
+        argstr, _, default_value = argstr.strip().partition('=')
+        if default_value:
             if not argstr.startswith('Scope'):
-                default_value = argstr[pos + 1:].strip()
+                default_value = default_value.strip()
                 if default_value.endswith('('):
                     default_value += ')'
-            argstr = argstr[:pos - 1].strip()
+            argstr = argstr.strip()
         argsplit = argstr.split()
         argtype = ' '.join(argsplit[:-1])
         argname = argsplit[-1]
@@ -65,10 +64,10 @@ def parse_method_arguments(arguments):
             if m:
                 cast_signature = acg.format(l.cast_signature, *m.groups())
                 argument_meta = GenArgumentMeta(l.typename, cast_signature, l.parse_signature, l.is_base_type)
-                args.append(GenArgument(cast_signature, default_value, argument_meta, argtype, argname))
+                args.append(GenArgument(i, cast_signature, default_value, argument_meta, argtype, argname))
                 break
         else:
-            print('Undefined method argument: "%s"' % arguments[i])
+            print(f'Undefined method argument: "{arguments[i]}"')
             sys.exit(-1)
     return args
 
@@ -91,7 +90,7 @@ def gen_method_call_arg(name: str, targettype: str, argtype: str):
         return f'*{name}'
     if targettype != argtype:
         return gen_cast_call(targettype, name)
-    if any(targettype.startswith(i) for i in ('std::vector', 'std::map', 'sp<', 'Box')):
+    if any(targettype.startswith(i) for i in ('std::vector', 'std::map', 'sp<', 'Box', 'Traits')):
         return f'std::move({name})'
     return name
     # if ctype in ARK_PY_ARGUMENT_CHECKERS:
@@ -122,7 +121,7 @@ ARK_PY_ARGUMENT_CHECKERS = {
 
 
 class GenArgumentMeta:
-    def __init__(self, typename, castsig, parsetuplesig, is_base_type=False, has_defvalue=False):
+    def __init__(self, typename: str, castsig: str, parsetuplesig: str, is_base_type: bool = False, has_defvalue: bool = False):
         self._typename = typename
         self._cast_signature = castsig
         self._parse_signature = parsetuplesig
@@ -152,7 +151,8 @@ class GenArgumentMeta:
 
 ARK_PY_ARGUMENTS = (
     (r'String\s*&?', GenArgumentMeta('const char*', 'const char*', 's')),
-    (r'Scope\s*&', GenArgumentMeta('PyObject*', 'Scope', '')),
+    (r'Scope\s*&', GenArgumentMeta('PyObject*', 'Scope', '**')),
+    (r'Traits\s*&?', GenArgumentMeta('PyObject*', 'Traits', '*')),
     (r'std::wstring\s*&?', GenArgumentMeta('PyObject*', 'std::wstring', 'O')),
     (r'Box\s*&?', GenArgumentMeta('PyObject*', 'Box', 'O')),
     (r'sp<([^>]+|\w+<\w+>)>(?:\s*&|$)', GenArgumentMeta('PyObject*', 'sp<${0}>', 'O')),
@@ -174,12 +174,17 @@ ARK_PY_ARGUMENTS = (
 
 
 class GenArgument:
-    def __init__(self, accept_type, default_value, meta, argtype, argname: Optional[str] = None):
+    def __init__(self, index: int, accept_type: str, default_value: str, meta: GenArgumentMeta, argtype: str, argname: Optional[str] = None):
+        self._index = index
         self._accept_type = accept_type
         self._default_value = default_value
         self._meta = meta
         self._str = argtype
         self._argname = argname
+
+    @property
+    def index(self):
+        return self._index
 
     @property
     def argname(self):
@@ -190,7 +195,7 @@ class GenArgument:
         return self._accept_type
 
     @property
-    def default_value(self):
+    def default_value(self) -> str:
         return self._default_value
 
     @property
@@ -202,13 +207,15 @@ class GenArgument:
         return self._meta.typename
 
     @property
-    def parse_signature(self):
+    def parse_signature(self) -> str:
         s = self._meta.parse_signature
-        return s if not self.has_defvalue else '|' + s
+        if s.startswith('*'):
+            return ''
+        return '|' + s if self.has_defvalue else s
 
     @property
     def has_defvalue(self):
-        return self._default_value is not None or self._meta.has_defvalue
+        return self._default_value or self._meta.has_defvalue
 
     def type_compare(self, *typenames) -> bool:
         return any(acg.type_compare(i, self._str) for i in typenames)
@@ -227,6 +234,9 @@ class GenArgument:
         m = acg.get_shared_ptr_type(self._accept_type)
         if m == 'Scope':
             return f'const Scope {objname} = PyCast::toScope(kws);'
+        elif m == 'Traits':
+            return f'Traits {objname} = PyCast::toTraits(args, {self._index});'
+
         is_optional_type = 'Optional<' in m
         optional_cast_prefix = 'to' if optional_check or is_optional_type else 'ensure'
         to_cpp_object = '%sCppObject' % optional_cast_prefix
@@ -304,7 +314,6 @@ def create_overloaded_method_type(base_type, **kwargs):
         @staticmethod
         def _replace_arguments(args1, args2):
             assert len(args1) == len(args2)
-            return [
-                GenArgument(i.accept_type, i.default_value, GenArgumentMeta('PyObject*', i.meta.cast_signature, 'O', False, i.has_defvalue or j.has_defvalue), i.str()) for i, j in zip(args1, args2)]
+            return [GenArgument(i.index, i.accept_type, i.default_value, GenArgumentMeta('PyObject*', i.meta.cast_signature, 'O', False, i.has_defvalue or j.has_defvalue), i.str()) for i, j in zip(args1, args2)]
 
     return GenOverloadedMethod
