@@ -35,7 +35,7 @@ void Platform::log(Log::LogLevel /*logLevel*/, const char* tag, const char* cont
 
 sp<AssetBundle> Platform::getAssetBundle(const String& path, const String& appPath)
 {
-    sp<AssetBundle> bundle = AssetBundleDarwin::exists(path) ? sp<AssetBundle>::adopt(new AssetBundleDarwin(path)) : sp<AssetBundle>::null();
+    sp<AssetBundle> bundle = AssetBundleDarwin::exists(path) ? sp<AssetBundle>::make<AssetBundleDarwin>(path) : nullptr;
     if(isDirectory(path))
     {
         const sp<AssetBundle> pathBundle = sp<AssetBundleDirectory>::make(path);

@@ -591,4 +591,11 @@ template<typename T> sp<T> BeanFactory::buildWithQueries(const String& name, con
     return nullptr;
 }
 
+template<typename T> sp<T> Scope::build(const String& name, const Scope& args) const {
+    const sp<T> obj = getObject(name).template as<T>();
+    if(!obj && _queries)
+        return _queries->_bean_factory.ensure().buildWithQueries<T>(name, _queries, args);
+    return obj;
+}
+
 }

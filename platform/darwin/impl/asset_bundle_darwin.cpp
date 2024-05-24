@@ -70,7 +70,7 @@ sp<Asset> AssetBundleDarwin::getAsset(const String& name)
     CFURLRef url = CFBundleCopyResourceURL(bundle, cfName, nullptr, cfDirectory);
     CFRelease(cfDirectory);
     CFRelease(cfName);
-    return url ? sp<BundleAsset>::make(Platform::pathJoin(_directory, name), url) : sp<BundleAsset>::null();
+    return url ? sp<BundleAsset>::make(Platform::pathJoin(_directory, name), url) : nullptr;
 }
 
 sp<AssetBundle> AssetBundleDarwin::getBundle(const String& path)

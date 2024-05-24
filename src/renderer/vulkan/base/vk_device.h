@@ -1,6 +1,6 @@
-#ifndef ARK_RENDERER_VULKAN_BASE_VK_DEVICE_H_
-#define ARK_RENDERER_VULKAN_BASE_VK_DEVICE_H_
+#pragma once
 
+#include <map>
 #include <vector>
 
 #include "core/types/owned_ptr.h"
@@ -11,8 +11,7 @@
 
 #include "platform/vulkan/vulkan.h"
 
-namespace ark {
-namespace vulkan {
+namespace ark::vulkan {
 
 class VKDevice {
 public:
@@ -58,6 +57,3 @@ private:
 };
 
 }
-}
-
-#endif

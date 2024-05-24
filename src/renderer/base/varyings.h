@@ -11,6 +11,7 @@
 #include "core/inf/holder.h"
 #include "core/impl/uploader/input_variable.h"
 #include "core/types/shared_ptr.h"
+#include "core/util/strings.h"
 
 #include "graphics/forwarding.h"
 
