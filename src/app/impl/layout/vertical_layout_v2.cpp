@@ -53,7 +53,7 @@ std::vector<V2> VerticalLayoutV2::place(const std::vector<sp<LayoutParam>>& slot
 }
 
 VerticalLayoutV2::BUILDER::BUILDER(const String& gravity)
-    : _layout_gravity(Strings::parse<LayoutParam::Gravity>(gravity))
+    : _layout_gravity(Strings::eval<LayoutParam::Gravity>(gravity))
 {
 }
 

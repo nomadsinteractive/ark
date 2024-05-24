@@ -159,7 +159,7 @@ template<> ARK_API sp<Transform> Null::safePtr()
     return sp<Transform>::make();
 }
 
-template<> ARK_API Transform::Type StringConvert::to<String, Transform::Type>(const String& str)
+template<> ARK_API Transform::Type StringConvert::eval<Transform::Type>(const String& str)
 {
     if(str == "2d")
         return Transform::TYPE_LINEAR_2D;

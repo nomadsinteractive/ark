@@ -9,7 +9,7 @@ namespace ark {
 float BeanUtils::toFloat(BeanFactory& args, const String& value, float defValue)
 {
     if(Strings::isNumeric(value))
-        return Strings::parse<float>(value);
+        return Strings::eval<float>(value);
 
     const sp<Numeric> var = value.empty() ? nullptr : args.build<Numeric>(value, {});
     return var ? var->val() : defValue;

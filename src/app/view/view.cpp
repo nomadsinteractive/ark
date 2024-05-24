@@ -47,7 +47,7 @@ private:
 
 }
 
-template<> ARK_API View::State StringConvert::to<String, View::State>(const String& str)
+template<> ARK_API View::State StringConvert::eval<View::State>(const String& str)
 {
     if(str == "default")
         return View::STATE_DEFAULT;
@@ -255,9 +255,9 @@ View::Stub::Stub()
 {
 }
 
-View::Stub::Stub(sp<LayoutParam> layoutParam, sp<ViewHierarchy> viewHierarchy, sp<Boolean> visible, sp<Boolean> disposed)
+View::Stub::Stub(sp<LayoutParam> layoutParam, sp<ViewHierarchy> viewHierarchy, sp<Boolean> visible, sp<Boolean> discarded)
     : _layout_param(std::move(layoutParam)), _layout_node(sp<LayoutV3::Node>::make(_layout_param, std::move(viewHierarchy))), _visible(std::move(visible), true),
-      _discarded(std::move(disposed), false), _parent_stub(static_cast<sp<Stub>>(Global<Stub>())), _top_view(false)
+      _discarded(std::move(discarded), false), _top_view(false)
 {
 }
 

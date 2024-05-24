@@ -27,7 +27,7 @@ void TilemapImporterTmx::import(Tilemap& tilemap, const sp<Readable>& src)
         uint32_t row = 1;
         uint32_t col = 0;
         data->value().split(',', false, [&layer, &row, &col, rowCount, colCount](const String& idx) {
-            int32_t type = Strings::parse<int32_t>(idx);
+            int32_t type = Strings::eval<int32_t>(idx);
             if(type > 0) {
                 layer->setTile(col, rowCount - row, type - 1);
             }

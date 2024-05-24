@@ -195,7 +195,7 @@ bool Strings::parseArrayAndIndex(const String& expr, String& name, int32_t& inde
         return false;
 
     name = expr.substr(0, s1 - 1);
-    index = parse<int32_t>(expr.substr(s1 + 1, s2));
+    index = eval<int32_t>(expr.substr(s1 + 1, s2));
     return true;
 }
 

@@ -77,7 +77,7 @@ sp<Button> Button::BUILDER::build(const Scope& args)
     sp<Size> builtSize = _size->build(args);
     const String style = Documents::getAttribute(_manifest, Constants::Attributes::STYLE);
     sp<Size> size = builtSize ? builtSize : static_cast<const sp<Size>&>(RendererType::size(background));
-    sp<Button> button = sp<Button>::make(std::move(foreground), std::move(background), std::move(size), _gravity ? Strings::parse<LayoutParam::Gravity>(_gravity) : LayoutParam::GRAVITY_CENTER);
+    sp<Button> button = sp<Button>::make(std::move(foreground), std::move(background), std::move(size), _gravity ? Strings::eval<LayoutParam::Gravity>(_gravity) : LayoutParam::GRAVITY_CENTER);
 //    loadStatus(button, _manifest, _factory, args);
     if(style)
         _factory.decorate<Renderer>(sp<Builder<Renderer>::Prebuilt>::make(button), style)->build(args);

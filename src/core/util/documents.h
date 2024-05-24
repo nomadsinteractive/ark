@@ -31,18 +31,18 @@ public:
 
     template<typename T> static T getValue(const document& doc, const String& name, const T& defValue) {
         const document& child = doc->getChild(name);
-        return child ? Strings::parse<T>(child->value()) : defValue;
+        return child ? Strings::eval<T>(child->value()) : defValue;
     }
     template<typename T> static T getAttribute(const document& doc, const String& name, const T& defValue) {
         const attribute& attr = doc->getAttribute(name);
-        return attr ? Strings::parse<T>(attr->value()) : defValue;
+        return attr ? Strings::eval<T>(attr->value()) : defValue;
     }
     template<typename T> static Optional<T> getAttributeOptional(const document& doc, const String& name) {
         const attribute& attr = doc->getAttribute(name);
-        return attr ? Optional<T>(Strings::parse<T>(attr->value())) : Optional<T>();
+        return attr ? Optional<T>(Strings::eval<T>(attr->value())) : Optional<T>();
     }
     template<typename T> static T ensureAttribute(const document& doc, const String& name) {
-        return Strings::parse<T>(ensureAttribute(doc, name));
+        return Strings::eval<T>(ensureAttribute(doc, name));
     }
     template<typename T> static T getAttributeEnum(const document& doc, const String& name, const T& defValue) {
         const attribute& attr = doc->getAttribute(name);
@@ -72,7 +72,7 @@ public:
 
     template<typename T> static T getAttributeValue(const document& doc, const String& path, const T& defValue) {
         const attribute& attr = findAttribute(doc, path.split('/'));
-        return attr ? Strings::parse<T>(attr->value()) : defValue;
+        return attr ? Strings::eval<T>(attr->value()) : defValue;
     }
 
     static String getAttributeValue(const document& doc, const String& path, const String& defValue = String());

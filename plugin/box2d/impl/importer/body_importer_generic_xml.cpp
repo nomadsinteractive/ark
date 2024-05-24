@@ -29,8 +29,8 @@ public:
 
             std::vector<V2> vec2s;
             for(size_t j = 0; j < splitted.size(); j += 2) {
-                float x = Strings::parse<float>(splitted.at(j)) / size.x();
-                float y = Strings::parse<float>(splitted.at(j + 1)) / size.y();
+                float x = Strings::eval<float>(splitted.at(j)) / size.x();
+                float y = Strings::eval<float>(splitted.at(j + 1)) / size.y();
                 vec2s.push_back(V2(x, y));
             }
             _polygons.push_back(std::move(vec2s));
@@ -69,10 +69,10 @@ void RigidBodyImporterGenericXML::import(ColliderBox2D& world, const sp<Readable
     for(const document& i : bodies->children("body"))
     {
         const String& name = Documents::ensureAttribute(i, Constants::Attributes::NAME);
-        int32_t id = Strings::parse<int32_t>(name);
+        int32_t id = Strings::eval<int32_t>(name);
         DCHECK(id >= 0, "Illegal body id: %d, \"%s\" must be a postive integer", id, name.c_str());
 
-        const V2 size = Strings::parse<V2>(i->ensureChild("size")->value());
+        const V2 size = Strings::eval<V2>(i->ensureChild("size")->value());
         const document& fixtures = i->ensureChild("fixtures");
         const document& fixture = fixtures->ensureChild("fixture");
         const document& fixture_type = fixture->ensureChild("fixture_type");
@@ -82,10 +82,10 @@ void RigidBodyImporterGenericXML::import(ColliderBox2D& world, const sp<Readable
         const document& friction = fixture->ensureChild("friction");
 
         const sp<ShapePolygon> polygons = sp<ShapePolygon>::make(fixture->ensureChild("polygons"), size);
-        BodyCreateInfo bodyManifest(polygons, Strings::parse<float>(density->value()), Strings::parse<float>(friction->value()));
-        bodyManifest.category = Strings::parse<uint16_t>(fixture->ensureChild("filter_categoryBits")->value());
-        bodyManifest.group = Strings::parse<int16_t>(fixture->ensureChild("filter_groupIndex")->value());
-        bodyManifest.mask = Strings::parse<uint16_t>(fixture->ensureChild("filter_maskBits")->value());
+        BodyCreateInfo bodyManifest(polygons, Strings::eval<float>(density->value()), Strings::eval<float>(friction->value()));
+        bodyManifest.category = Strings::eval<uint16_t>(fixture->ensureChild("filter_categoryBits")->value());
+        bodyManifest.group = Strings::eval<int16_t>(fixture->ensureChild("filter_groupIndex")->value());
+        bodyManifest.mask = Strings::eval<uint16_t>(fixture->ensureChild("filter_maskBits")->value());
         bodyManifest.is_sensor = fixture->getChild("isSensor") != nullptr;
         world.setBodyManifest(id, bodyManifest);
     }

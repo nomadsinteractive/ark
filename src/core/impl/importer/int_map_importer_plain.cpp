@@ -11,8 +11,8 @@ void IntMapImporterPlain::import(IntMap& obj, const sp<Readable>& src)
     {
         for(const auto& iter : Strings::parseProperties(i.strip()))
         {
-            int32_t key = Strings::parse<int32_t>(iter.first);
-            int32_t val = Strings::parse<int32_t>(iter.second);
+            int32_t key = Strings::eval<int32_t>(iter.first);
+            int32_t val = Strings::eval<int32_t>(iter.second);
             obj[key] = val;
         }
     }

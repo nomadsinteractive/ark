@@ -16,18 +16,15 @@ int test(int i) {
 class CallablesTestCase : public TestCase {
 public:
     virtual int launch() override {
-        if(StringConvert::to<String, uint32_t>("16") != 16)
-            return 1;
-        if(StringConvert::to<String, int32_t>("7") != 7)
-            return 2;
-        if(StringConvert::to<String, int16_t>("3") != 3)
-            return 3;
+        TESTCASE_VALIDATE(StringConvert::eval<uint32_t>("16") != 16);
+        TESTCASE_VALIDATE(StringConvert::eval<int32_t>("7") != 7);
+        TESTCASE_VALIDATE(StringConvert::eval<int16_t>("3") != 3);
 
         Library library;
         library.addCallable<int(int)>("test", &test);
         const sp<Callable<int(int)>> callable = library.getCallable<int(int)>("test");
-        if(callable->call(0) != 1)
-            return 4;
+        TESTCASE_VALIDATE(callable->call(0) != 1);
+
         return 0;
     }
 };

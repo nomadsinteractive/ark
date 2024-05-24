@@ -186,7 +186,7 @@ sp<PipelineBuildingContext> Shader::BUILDER_IMPL::makePipelineBuildingContext(co
     return context;
 }
 
-template<> ARK_API PipelineInput::ShaderStage StringConvert::to<String, PipelineInput::ShaderStage>(const String& val)
+template<> ARK_API PipelineInput::ShaderStage StringConvert::eval<PipelineInput::ShaderStage>(const String& val)
 {
     if(val == "vertex")
         return PipelineInput::SHADER_STAGE_VERTEX;

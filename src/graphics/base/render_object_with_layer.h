@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_BASE_RENDER_OBJECT_WITH_LAYER_H_
-#define ARK_GRAPHICS_BASE_RENDER_OBJECT_WITH_LAYER_H_
+#pragma once
 
 #include "core/inf/builder.h"
 #include "core/types/class.h"
@@ -47,5 +46,3 @@ private:
 };
 
 }
-
-#endif

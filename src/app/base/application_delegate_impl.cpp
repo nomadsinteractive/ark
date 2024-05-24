@@ -107,7 +107,7 @@ sp<EventListener> ApplicationDelegateImpl::ScriptTag::makeEventListener() const
     return sp<EventListenerByScript>::make(_script, _function_name);
 }
 
-template<> ApplicationDelegateImpl::ScriptRunOn StringConvert::to<String, ApplicationDelegateImpl::ScriptRunOn>(const String& str)
+template<> ApplicationDelegateImpl::ScriptRunOn StringConvert::eval<ApplicationDelegateImpl::ScriptRunOn>(const String& str)
 {
     if(str == "create")
         return ApplicationDelegateImpl::SCRIPT_RUN_ON_CREATE;

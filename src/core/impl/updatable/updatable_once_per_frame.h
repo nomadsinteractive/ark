@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_IMPL_UPDATABLE_UPDATABLE_ONCE_PER_FRAME_H_
-#define ARK_CORE_IMPL_UPDATABLE_UPDATABLE_ONCE_PER_FRAME_H_
+#pragma once
 
 #include "core/inf/updatable.h"
 #include "core/types/shared_ptr.h"
@@ -20,5 +19,3 @@ private:
 };
 
 }
-
-#endif

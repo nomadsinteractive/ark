@@ -32,7 +32,7 @@ std::vector<V2> GravityLayoutV2::place(const std::vector<sp<LayoutParam>>& slots
 }
 
 GravityLayoutV2::STYLE::STYLE(const String& gravity)
-    : _gravity(Strings::parse<LayoutParam::Gravity>(gravity)) {
+    : _gravity(Strings::eval<LayoutParam::Gravity>(gravity)) {
 }
 
 sp<Layout> GravityLayoutV2::STYLE::build(const Scope& /*args*/)

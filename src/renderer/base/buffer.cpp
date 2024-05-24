@@ -184,7 +184,7 @@ sp<Buffer> Buffer::BUILDER::build(const Scope& args)
     return sp<Buffer>::make(renderController->makeBuffer(Buffer::TYPE_STORAGE, _usage, _input->build(args)));
 }
 
-template<> ARK_API Buffer::Usage StringConvert::to<String, Buffer::Usage>(const String& str)
+template<> ARK_API Buffer::Usage StringConvert::eval<Buffer::Usage>(const String& str)
 {
     if(str == "dynamic")
         return Buffer::USAGE_DYNAMIC;

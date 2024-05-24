@@ -133,7 +133,7 @@ template<> sp<Mat4> Null::safePtr()
     return sp<Mat4Impl>::make();
 }
 
-template<> String StringConvert::to<M4, String>(const M4& val)
+template<> String StringConvert::repr<M4>(const M4& val)
 {
     const float* buf = val.value();
     StringBuffer sb;

@@ -16,43 +16,43 @@
 
 namespace ark {
 
-template<> ARK_API String StringConvert::to<String, String>(const String& str)
+template<> ARK_API String StringConvert::eval<String>(const String& str)
 {
     return str;
 }
 
-template<> ARK_API uint32_t StringConvert::to<String, uint32_t>(const String& str)
+template<> ARK_API uint32_t StringConvert::eval<uint32_t>(const String& str)
 {
     return atoi(str.c_str());
 }
 
-template<> ARK_API int32_t StringConvert::to<String, int32_t>(const String& str)
+template<> ARK_API int32_t StringConvert::eval<int32_t>(const String& str)
 {
     return atoi(str.c_str());
 }
 
-template<> ARK_API uint16_t StringConvert::to<String, uint16_t>(const String& str)
+template<> ARK_API uint16_t StringConvert::eval<uint16_t>(const String& str)
 {
     return static_cast<uint16_t>(atoi(str.c_str()));
 }
 
-template<> ARK_API int16_t StringConvert::to<String, int16_t>(const String& str)
+template<> ARK_API int16_t StringConvert::eval<int16_t>(const String& str)
 {
     return static_cast<int16_t>(atoi(str.c_str()));
 }
 
-template<> ARK_API float StringConvert::to<String, float>(const String& str)
+template<> ARK_API float StringConvert::eval<float>(const String& str)
 {
     if(str == "match_parent")
         return static_cast<float>(LayoutParam::SIZE_CONSTRAINT_MATCH_PARENT);
     if(str == "wrap_content")
         return static_cast<float>(LayoutParam::SIZE_CONSTRAINT_WRAP_CONTENT);
     if(str.endsWith("s"))
-        return StringConvert::to<String, Clock::Interval>(str).sec();
+        return StringConvert::eval<Clock::Interval>(str).sec();
     return static_cast<float>(atof(str.c_str()));
 }
 
-template<> Ark::RendererVersion StringConvert::to<String, Ark::RendererVersion>(const String& str)
+template<> Ark::RendererVersion StringConvert::eval<Ark::RendererVersion>(const String& str)
 {
     const String version = str.toLower();
     if(version.startsWith("opengl_"))
@@ -63,7 +63,7 @@ template<> Ark::RendererVersion StringConvert::to<String, Ark::RendererVersion>(
     return Ark::RENDERER_VERSION_AUTO;
 }
 
-template<> Ark::RendererCoordinateSystem StringConvert::to<String, Ark::RendererCoordinateSystem>(const String& str)
+template<> Ark::RendererCoordinateSystem StringConvert::eval<Ark::RendererCoordinateSystem>(const String& str)
 {
     const String cs = str.toLower();
     if(cs == "lhs")
@@ -72,32 +72,32 @@ template<> Ark::RendererCoordinateSystem StringConvert::to<String, Ark::Renderer
     return Ark::COORDINATE_SYSTEM_RHS;
 }
 
-template<> ARK_API String StringConvert::to<uint32_t, String>(const uint32_t& val)
+template<> ARK_API String StringConvert::repr<uint32_t>(const uint32_t& val)
 {
     return Strings::sprintf("%d", val);
 }
 
-template<> ARK_API String StringConvert::to<int32_t, String>(const int32_t& val)
+template<> ARK_API String StringConvert::repr<int32_t>(const int32_t& val)
 {
     return Strings::sprintf("%d", val);
 }
 
-template<> ARK_API String StringConvert::to<uint16_t, String>(const uint16_t& val)
+template<> ARK_API String StringConvert::repr<uint16_t>(const uint16_t& val)
 {
     return Strings::sprintf("%d", val);
 }
 
-template<> ARK_API String StringConvert::to<int16_t, String>(const int16_t& val)
+template<> ARK_API String StringConvert::repr<int16_t>(const int16_t& val)
 {
     return Strings::sprintf("%d", val);
 }
 
-template<> ARK_API String StringConvert::to<float, String>(const float& val)
+template<> ARK_API String StringConvert::repr<float>(const float& val)
 {
     return Strings::sprintf("%.2f", val);
 }
 
-template<> ARK_API bool StringConvert::to<String, bool>(const String& str)
+template<> ARK_API bool StringConvert::eval<bool>(const String& str)
 {
     if(str == "true")
         return true;
@@ -106,56 +106,56 @@ template<> ARK_API bool StringConvert::to<String, bool>(const String& str)
     return !str.empty();
 }
 
-template<> ARK_API String StringConvert::to<bool, String>(const bool& val)
+template<> ARK_API String StringConvert::repr<bool>(const bool& val)
 {
     return val ? "true" : "false";
 }
 
-template<> ARK_API String StringConvert::to<V2, String>(const V2& val)
+template<> ARK_API String StringConvert::repr<V2>(const V2& val)
 {
     return Strings::sprintf("(%.2f, %.2f)", val.x(), val.y());
 }
 
-template<> ARK_API String StringConvert::to<V3, String>(const V3& val)
+template<> ARK_API String StringConvert::repr<V3>(const V3& val)
 {
     return Strings::sprintf("(%.2f, %.2f, %.2f)", val.x(), val.y(), val.z());
 }
 
-template<> ARK_API String StringConvert::to<V4, String>(const V4& val)
+template<> ARK_API String StringConvert::repr<V4>(const V4& val)
 {
     return Strings::sprintf("(%.2f, %.2f, %.2f, %.2f)", val.x(), val.y(), val.z(), val.w());
 }
 
-template<> ARK_API String StringConvert::to<sp<String>, String>(const sp<String>& val)
+template<> ARK_API String StringConvert::repr<sp<String>>(const sp<String>& val)
 {
     return *val;
 }
 
-template<> ARK_API std::wstring StringConvert::to<String, std::wstring>(const String& str)
+template<> ARK_API std::wstring StringConvert::eval<std::wstring>(const String& str)
 {
     return Strings::fromUTF8(str);
 }
 
-template<> ARK_API String StringConvert::to<std::wstring, String>(const std::wstring& str)
+template<> ARK_API String StringConvert::repr<std::wstring>(const std::wstring& str)
 {
     return Strings::toUTF8(str);
 }
 
-template<> String StringConvert::to<floatarray, String>(const floatarray& val)
+template<> String StringConvert::repr<floatarray>(const floatarray& val)
 {
     StringBuffer sb;
     sb << '[' << Strings::join<float>(val->buf(), 0, val->length()) << ']';
     return sb.str();
 }
 
-template<> String StringConvert::to<indexarray, String>(const indexarray& val)
+template<> String StringConvert::repr<indexarray>(const indexarray& val)
 {
     StringBuffer sb;
     sb << '[' << Strings::join<uint16_t>(val->buf(), 0, val->length()) << ']';
     return sb.str();
 }
 
-template<> String StringConvert::to<bytearray, String>(const bytearray& val)
+template<> String StringConvert::repr<bytearray>(const bytearray& val)
 {
     return Strings::dumpMemory(val->buf(), val->size());
 }

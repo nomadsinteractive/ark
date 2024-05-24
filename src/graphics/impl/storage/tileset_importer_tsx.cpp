@@ -26,7 +26,7 @@ void TilesetImporterTsx::import(Tileset& tileset, const sp<Readable>& src)
         Strings::rcut(source, path, name, '/');
         String stem, ext;
         Strings::rcut(name, stem, ext, '.');
-        tileset.addTile(sp<Tile>::make(id, std::move(type), shapeId, sp<RenderObject>::make(Strings::parse<int32_t>(stem), nullptr, tileset.tileSize())));
+        tileset.addTile(sp<Tile>::make(id, std::move(type), shapeId, sp<RenderObject>::make(Strings::eval<int32_t>(stem), nullptr, tileset.tileSize())));
     }
 }
 

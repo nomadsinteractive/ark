@@ -32,8 +32,14 @@ public:
         float contentWidth() const;
         float contentHeight() const;
 
+        float occupyWidth() const;
+        float occupyHeight() const;
+
         const V4& paddings() const;
         void setPaddings(const V4& paddings);
+
+        const V4& margins() const;
+        void setMargins(const V4& margins);
 
         const WithTimestamp<V2>& offsetPosition() const;
         void setOffsetPosition(const V2& offsetPosition);
@@ -47,6 +53,7 @@ public:
 
     private:
         V4 _paddings;
+        V4 _margins;
         WithTimestamp<V2> _offset_position;
         WithTimestamp<V2> _size;
     };

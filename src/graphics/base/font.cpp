@@ -42,12 +42,12 @@ Font::TextSize::TextSize(const String& size)
     if(size.endsWith("px"))
     {
         _unit = FONT_SIZE_UNIT_PX;
-        _value = Strings::parse<uint32_t>(size.substr(0, size.length() - 2));
+        _value = Strings::eval<uint32_t>(size.substr(0, size.length() - 2));
     }
     else if(size.endsWith("pt"))
-        _value = Strings::parse<uint32_t>(size.substr(0, size.length() - 2));
+        _value = Strings::eval<uint32_t>(size.substr(0, size.length() - 2));
     else
-        _value = Strings::parse<uint32_t>(size);
+        _value = Strings::eval<uint32_t>(size);
 }
 
 Font::TextSize::TextSize(uint32_t value, Font::SizeUnit unit)
@@ -60,7 +60,7 @@ bool Font::TextSize::operator <(const TextSize& other) const
     return _value < other._value || _unit < other._unit;
 }
 
-template<> ARK_API Font::TextSize StringConvert::to<String, Font::TextSize>(const String& str)
+template<> ARK_API Font::TextSize StringConvert::eval<Font::TextSize>(const String& str)
 {
     return Font::TextSize(str);
 }

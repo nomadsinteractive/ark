@@ -52,7 +52,7 @@ std::vector<V2> HorizontalLayoutV2::place(const std::vector<sp<LayoutParam>>& sl
 }
 
 HorizontalLayoutV2::BUILDER::BUILDER(const String& gravity)
-    : _layout_gravity(Strings::parse<LayoutParam::Gravity>(gravity)) {
+    : _layout_gravity(Strings::eval<LayoutParam::Gravity>(gravity)) {
 }
 
 sp<Layout> HorizontalLayoutV2::BUILDER::build(const Scope& /*args*/)

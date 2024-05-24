@@ -137,13 +137,13 @@ void ShaderPreprocessor::parseDeclarations()
     _main.replace(_STRUCT_PATTERN, structPatternReplacer);
 
     _main.replace(_UNIFORM_PATTERN, [this](const std::smatch& m) {
-        uint32_t length = m[4].str().empty() ? 1 : Strings::parse<uint32_t>(m[4].str());
+        uint32_t length = m[4].str().empty() ? 1 : Strings::eval<uint32_t>(m[4].str());
         this->addUniform(m[2].str(), m[3].str(), length, sp<String>::make(m.str()));
         return nullptr;
     });
 
     auto ssboPattern = [this](const std::smatch& m) {
-        _ssbos[m[2].str()] = Strings::parse<int32_t>(m[1].str());
+        _ssbos[m[2].str()] = Strings::eval<int32_t>(m[1].str());
         return true;
     };
     _include_declaration_codes.search(_SSBO_PATTERN, ssboPattern);

@@ -274,7 +274,7 @@ NarrowPhraseCuteC2::BodyDefCuteC2::BodyDefCuteC2(const document& manifest, float
         const document& anchorpoint = manifest->getChild("anchorpoint");
         const document& fixtures = manifest->ensureChild("fixtures");
         if(anchorpoint)
-            _pivot = Strings::parse<V2>(anchorpoint->value());
+            _pivot = Strings::eval<V2>(anchorpoint->value());
         for(const document& j : fixtures->children("fixture"))
         {
             const document& fixture_type = j->ensureChild("fixture_type");
@@ -291,8 +291,8 @@ NarrowPhraseCuteC2::BodyDefCuteC2::BodyDefCuteC2(const document& manifest, float
                 for(size_t l = 0; l < values.size(); l += 2)
                 {
                     CHECK(l / 2 < C2_MAX_POLYGON_VERTS, "Unable to add more vertex, max count: %d", C2_MAX_POLYGON_VERTS);
-                    shape.s.poly.verts[l / 2].x = Strings::parse<float>(values.at(l)) / ppu;
-                    shape.s.poly.verts[l / 2].y = Strings::parse<float>(values.at(l + 1)) / ppu;
+                    shape.s.poly.verts[l / 2].x = Strings::eval<float>(values.at(l)) / ppu;
+                    shape.s.poly.verts[l / 2].y = Strings::eval<float>(values.at(l + 1)) / ppu;
                 }
                 shape.t = C2_TYPE_POLY;
                 shape.s.poly.count = static_cast<int32_t>(values.size() / 2);

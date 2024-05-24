@@ -63,7 +63,7 @@ public:
     }
 
     template<typename T> static String toString(const T& value) {
-        return StringConvert::to<T, String>(value);
+        return StringConvert::repr<T>(value);
     }
 
     template<typename T> static T toEnum(const String& str) {
@@ -76,8 +76,8 @@ public:
         return enums->toEnumCombo(str);
     }
 
-    template<typename T> static T parse(const String& str) {
-        return StringConvert::to<String, T>(str);
+    template<typename T> static T eval(const String& str) {
+        return StringConvert::eval<T>(str);
     }
 
     static String sprintf(const char* format, ...);

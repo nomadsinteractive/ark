@@ -1,5 +1,4 @@
-#ifndef ARK_APP_IMPL_LAYOUT_VERTICAL_LAYOUT_V2_H_
-#define ARK_APP_IMPL_LAYOUT_VERTICAL_LAYOUT_V2_H_
+#pragma once
 
 #include "core/inf/builder.h"
 
@@ -35,5 +34,3 @@ private:
 };
 
 }
-
-#endif

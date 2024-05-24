@@ -160,7 +160,7 @@ const sp<RigidBody::Callback>& RigidBody::callback() const
     return _stub->_callback;
 }
 
-template<> ARK_API Collider::BodyType StringConvert::to<String, Collider::BodyType>(const String& str)
+template<> ARK_API Collider::BodyType StringConvert::eval<Collider::BodyType>(const String& str)
 {
     if(str == "static")
         return Collider::BODY_TYPE_STATIC;

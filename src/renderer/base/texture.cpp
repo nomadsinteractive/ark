@@ -128,7 +128,7 @@ const sp<Texture::Uploader>& Texture::uploader() const
     return _uploader;
 }
 
-template<> ARK_API Texture::Type StringConvert::to<String, Texture::Type>(const String& str)
+template<> ARK_API Texture::Type StringConvert::eval<Texture::Type>(const String& str)
 {
     if(str == "cubemap")
         return Texture::TYPE_CUBEMAP;
@@ -136,21 +136,21 @@ template<> ARK_API Texture::Type StringConvert::to<String, Texture::Type>(const 
     return Texture::TYPE_2D;
 }
 
-template<> ARK_API Texture::Format StringConvert::to<String, Texture::Format>(const String& str)
+template<> ARK_API Texture::Format StringConvert::eval<Texture::Format>(const String& str)
 {
     if(str)
         return EnumMap<Texture::Format>::instance().toEnumCombo(str);
     return Texture::FORMAT_AUTO;
 }
 
-template<> ARK_API Texture::Usage StringConvert::to<String, Texture::Usage>(const String& str)
+template<> ARK_API Texture::Usage StringConvert::eval<Texture::Usage>(const String& str)
 {
     if(str)
         return EnumMap<Texture::Usage>::instance().toEnumCombo(str);
     return Texture::USAGE_COLOR_ATTACHMENT;
 }
 
-template<> ARK_API Texture::Feature StringConvert::to<String, Texture::Feature>(const String& str)
+template<> ARK_API Texture::Feature StringConvert::eval<Texture::Feature>(const String& str)
 {
     if(str)
     {
@@ -167,7 +167,7 @@ template<> ARK_API Texture::Feature StringConvert::to<String, Texture::Feature>(
     return Texture::FEATURE_DEFAULT;
 }
 
-template<> ARK_API Texture::CONSTANT StringConvert::to<String, Texture::CONSTANT>(const String& str)
+template<> ARK_API Texture::CONSTANT StringConvert::eval<Texture::CONSTANT>(const String& str)
 {
     if(str)
     {
@@ -192,7 +192,7 @@ template<> ARK_API Texture::CONSTANT StringConvert::to<String, Texture::CONSTANT
     return Texture::CONSTANT_NEAREST;
 }
 
-template<> Texture::Flag StringConvert::to<String, Texture::Flag>(const String& str)
+template<> Texture::Flag StringConvert::eval<Texture::Flag>(const String& str)
 {
     if(str)
         return EnumMap<Texture::Flag>::instance().toEnumCombo(str);
@@ -222,7 +222,7 @@ void Texture::Parameters::loadParameters(const document& parameters, BeanFactory
 Texture::CONSTANT Texture::Parameters::getEnumValue(Dictionary<document>& dict, const String& name, BeanFactory& factory, const Scope& args, Texture::CONSTANT defValue)
 {
     const document doc = dict.get(name);
-    return doc ? Strings::parse<Texture::CONSTANT>(factory.ensure<String>(doc, Constants::Attributes::VALUE, args)) : defValue;
+    return doc ? Strings::eval<Texture::CONSTANT>(factory.ensure<String>(doc, Constants::Attributes::VALUE, args)) : defValue;
 }
 
 Texture::Delegate::Delegate(Texture::Type type)

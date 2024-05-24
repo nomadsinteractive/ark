@@ -119,7 +119,7 @@ public:
 
         V toPhrase(const String& expr, BeanFactory& factory, bool compilePhrase = false) const {
             if(OP::isConstant(expr))
-                return sp<typename Builder<N>::Prebuilt>::make(sp<typename N::Impl>::make(Strings::parse<T>(expr)));
+                return sp<typename Builder<N>::Prebuilt>::make(sp<typename N::Impl>::make(Strings::eval<T>(expr)));
 
             const V vBuilder = getVariableBuilder(factory, expr);
             if(vBuilder)
@@ -249,7 +249,7 @@ public:
     }
 
     static BuilderType eval(BeanFactory& /*factory*/, const String& expr) {
-        return sp<typename Builder<Variable<T>>::Prebuilt>::make(sp<typename Variable<T>::Const>::make(Strings::parse<T>(expr)));
+        return sp<typename Builder<Variable<T>>::Prebuilt>::make(sp<typename Variable<T>::Const>::make(Strings::eval<T>(expr)));
     }
 
     static Expression::Operator<T> OPS[4];

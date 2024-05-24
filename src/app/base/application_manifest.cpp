@@ -132,8 +132,8 @@ uint32_t ApplicationManifest::toSize(const String& sizestr) const
     const std::pair<String, uint32_t> suffixs[] = {{"k", 10}, {"kb", 10}, {"m", 20}, {"mb", 20}, {"g", 30}, {"gb", 30}};
     for(const std::pair<String, uint32_t>& i : suffixs)
         if(s.endsWith(i.first))
-            return Strings::parse<uint32_t>(s.substr(0, s.length() - i.first.length())) << i.second;
-    return Strings::parse<uint32_t>(s);
+            return Strings::eval<uint32_t>(s.substr(0, s.length() - i.first.length())) << i.second;
+    return Strings::eval<uint32_t>(s);
 }
 
 ApplicationManifest::Renderer::Renderer()
@@ -164,7 +164,7 @@ static ApplicationManifest::WindowFlag toOneWindowFlag(const String& val)
     return ApplicationManifest::WINDOW_FLAG_NONE;
 }
 
-template<> ARK_API ApplicationManifest::WindowFlag StringConvert::to<String, ApplicationManifest::WindowFlag>(const String& val)
+template<> ARK_API ApplicationManifest::WindowFlag StringConvert::eval<ApplicationManifest::WindowFlag>(const String& val)
 {
     uint32_t v = ApplicationManifest::WINDOW_FLAG_NONE;
     for(const String& i : val.split('|'))

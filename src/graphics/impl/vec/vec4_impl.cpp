@@ -103,7 +103,7 @@ Vec4Impl::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& str)
     : _is_color(str.startsWith("#"))
 {
     if(_is_color)
-        _color = Strings::parse<Color>(str);
+        _color = Strings::eval<Color>(str);
     else
         BeanUtils::split(factory, str, _x, _y, _z, _w);
 }

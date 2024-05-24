@@ -1,5 +1,4 @@
-#ifndef ARK_APP_IMPL_LAYOUT_FRAME_LAYOUT_V2_H_
-#define ARK_APP_IMPL_LAYOUT_FRAME_LAYOUT_V2_H_
+#pragma once
 
 #include "core/inf/builder.h"
 
@@ -25,5 +24,3 @@ public:
 };
 
 }
-
-#endif

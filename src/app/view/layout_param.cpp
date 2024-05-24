@@ -10,7 +10,7 @@
 
 namespace ark {
 
-template<> ARK_API LayoutParam::Display StringConvert::to<String, LayoutParam::Display>(const String& str)
+template<> ARK_API LayoutParam::Display StringConvert::eval<LayoutParam::Display>(const String& str)
 {
     if(str == "float")
         return LayoutParam::DISPLAY_FLOAT;
@@ -330,9 +330,9 @@ static sp<Builder<LayoutParam::Length>> getLengthBuilder(BeanFactory& factory, c
         if(s == "auto")
             return sp<typename Builder<LayoutParam::Length>::Prebuilt>::make(sp<LayoutParam::Length>::make());
         if(s.endsWith("px"))
-            return sp<typename Builder<LayoutParam::Length>::Prebuilt>::make(sp<LayoutParam::Length>::make(LayoutParam::LENGTH_TYPE_PIXEL, Strings::parse<float>(s.substr(0, s.length() - 2))));
+            return sp<typename Builder<LayoutParam::Length>::Prebuilt>::make(sp<LayoutParam::Length>::make(LayoutParam::LENGTH_TYPE_PIXEL, Strings::eval<float>(s.substr(0, s.length() - 2))));
         if(s.endsWith("%"))
-            return sp<typename Builder<LayoutParam::Length>::Prebuilt>::make(sp<LayoutParam::Length>::make(LayoutParam::LENGTH_TYPE_PERCENTAGE, Strings::parse<float>(s.substr(0, s.length() - 1))));
+            return sp<typename Builder<LayoutParam::Length>::Prebuilt>::make(sp<LayoutParam::Length>::make(LayoutParam::LENGTH_TYPE_PERCENTAGE, Strings::eval<float>(s.substr(0, s.length() - 1))));
         return sp<BuilderLengthVar>::make(LayoutParam::LENGTH_TYPE_PIXEL, factory.ensureBuilder<Numeric>(s));
     }
     return nullptr;
@@ -366,7 +366,7 @@ template<> ARK_API sp<LayoutParam> Null::safePtr()
     return sp<LayoutParam>::make(sp<Size>::make(static_cast<float>(LayoutParam::SIZE_CONSTRAINT_MATCH_PARENT), static_cast<float>(LayoutParam::SIZE_CONSTRAINT_MATCH_PARENT)));
 }
 
-template<> ARK_API LayoutParam::Gravity StringConvert::to<String, LayoutParam::Gravity>(const String& s)
+template<> ARK_API LayoutParam::Gravity StringConvert::eval<LayoutParam::Gravity>(const String& s)
 {
     if(s == "default")
         return LayoutParam::GRAVITY_DEFAULT;
@@ -395,7 +395,7 @@ template<> ARK_API LayoutParam::Gravity StringConvert::to<String, LayoutParam::G
     return static_cast<LayoutParam::Gravity>(gravity);
 }
 
-template<> ARK_API LayoutParam::FlexDirection StringConvert::to<String, LayoutParam::FlexDirection>(const String& s)
+template<> ARK_API LayoutParam::FlexDirection StringConvert::eval<LayoutParam::FlexDirection>(const String& s)
 {
     if(s == "column")
         return LayoutParam::FLEX_DIRECTION_COLUMN;
@@ -409,7 +409,7 @@ template<> ARK_API LayoutParam::FlexDirection StringConvert::to<String, LayoutPa
     return LayoutParam::FLEX_DIRECTION_ROW_REVERSE;
 }
 
-template<> ARK_API LayoutParam::FlexWrap StringConvert::to<String, LayoutParam::FlexWrap>(const String& s)
+template<> ARK_API LayoutParam::FlexWrap StringConvert::eval<LayoutParam::FlexWrap>(const String& s)
 {
     if(s == "nowrap")
         return LayoutParam::FLEX_WRAP_NOWRAP;
@@ -419,7 +419,7 @@ template<> ARK_API LayoutParam::FlexWrap StringConvert::to<String, LayoutParam::
     return LayoutParam::FLEX_WRAP_WRAP_REVERSE;
 }
 
-template<> ARK_API LayoutParam::JustifyContent StringConvert::to<String, LayoutParam::JustifyContent>(const String& s)
+template<> ARK_API LayoutParam::JustifyContent StringConvert::eval<LayoutParam::JustifyContent>(const String& s)
 {
     if(s == "flex_start")
         return LayoutParam::JUSTIFY_CONTENT_FLEX_START;
@@ -435,7 +435,7 @@ template<> ARK_API LayoutParam::JustifyContent StringConvert::to<String, LayoutP
     return LayoutParam::JUSTIFY_CONTENT_SPACE_EVENLY;
 }
 
-template<> ARK_API LayoutParam::Align StringConvert::to<String, LayoutParam::Align>(const String& s)
+template<> ARK_API LayoutParam::Align StringConvert::eval<LayoutParam::Align>(const String& s)
 {
     if(s == "auto")
         return LayoutParam::ALIGN_AUTO;

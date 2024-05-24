@@ -25,16 +25,16 @@ public:
 
         TESTCASE_VALIDATE(properties["abc"].empty() && !properties["left"].empty());
 
-        Rect rect = Strings::parse<Rect>("(0, 0, 20, 30)");
+        Rect rect = Strings::eval<Rect>("(0, 0, 20, 30)");
         TESTCASE_VALIDATE(rect.left() == 0 && rect.top() == 0 && rect.width() == 20 && rect.height() == 30);
 
-        Rect rectf = Strings::parse<Rect>("0, 0, 20.0, 30.0");
+        Rect rectf = Strings::eval<Rect>("0, 0, 20.0, 30.0");
         TESTCASE_VALIDATE(rectf.left() == 0 && rectf.top() == 0 && rectf.width() == 20.0f && rectf.height() == 30.0f);
 
-        Color white = Strings::parse<Color>("#ffffff");
+        Color white = Strings::eval<Color>("#ffffff");
         TESTCASE_VALIDATE(white == Color(1.0f, 1.0f, 1.0f));
 
-        TESTCASE_VALIDATE(Strings::parse<LayoutParam::Gravity>("right") == LayoutParam::GRAVITY_RIGHT);
+        TESTCASE_VALIDATE(Strings::eval<LayoutParam::Gravity>("right") == LayoutParam::GRAVITY_RIGHT);
 
 
         const String formatted = Strings::sprintf("hello %s %d", "world", 123);

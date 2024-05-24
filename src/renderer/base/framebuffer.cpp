@@ -75,7 +75,7 @@ sp<Renderer> Framebuffer::RENDERER_BUILDER::build(const Scope& args)
     return _framebuffer->build(args);
 }
 
-template<> ARK_API Framebuffer::ClearMask StringConvert::to<String, Framebuffer::ClearMask>(const String& str)
+template<> ARK_API Framebuffer::ClearMask StringConvert::eval<Framebuffer::ClearMask>(const String& str)
 {
     return EnumMap<Framebuffer::ClearMask>::instance().toEnumCombo(str);
 }

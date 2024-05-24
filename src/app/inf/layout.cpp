@@ -1,5 +1,7 @@
 #include "app/inf/layout.h"
 
+#include "app/view/layout_param.h"
+
 namespace ark {
 
 LayoutV3::Node::Node(sp<LayoutParam> layoutParam, sp<ViewHierarchy> viewHierarchy, void* tag)
@@ -17,6 +19,16 @@ float LayoutV3::Node::contentHeight() const
     return _size->y() + _paddings.x() + _paddings.z();
 }
 
+float LayoutV3::Node::occupyWidth() const
+{
+    return contentWidth() + _margins.y() + _margins.w();
+}
+
+float LayoutV3::Node::occupyHeight() const
+{
+    return contentHeight() + _margins.x() + _margins.z();
+}
+
 const V4& LayoutV3::Node::paddings() const
 {
     return _paddings;
@@ -25,6 +37,16 @@ const V4& LayoutV3::Node::paddings() const
 void LayoutV3::Node::setPaddings(const V4& paddings)
 {
     _paddings = paddings;
+}
+
+const V4& LayoutV3::Node::margins() const
+{
+    return _margins;
+}
+
+void LayoutV3::Node::setMargins(const V4& margins)
+{
+    _margins = margins;
 }
 
 const WithTimestamp<V2>& LayoutV3::Node::offsetPosition() const

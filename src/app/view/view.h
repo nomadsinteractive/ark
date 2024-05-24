@@ -103,7 +103,7 @@ public:
 
     struct Stub : public Updatable {
         Stub();
-        Stub(sp<LayoutParam> layoutParam, sp<ViewHierarchy> viewHierarchy, sp<Boolean> visible, sp<Boolean> disposed);
+        Stub(sp<LayoutParam> layoutParam, sp<ViewHierarchy> viewHierarchy, sp<Boolean> visible, sp<Boolean> discarded);
 
         virtual bool update(uint64_t timestamp) override;
 

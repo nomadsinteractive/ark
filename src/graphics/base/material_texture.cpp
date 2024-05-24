@@ -30,7 +30,7 @@ const sp<VariableWrapper<sp<Bitmap>>>& MaterialTexture::bitmapWrapper() const
     return _bitmap_wrapper;
 }
 
-template<> ARK_API MaterialTexture::Type StringConvert::to<String, MaterialTexture::Type>(const String& str)
+template<> ARK_API MaterialTexture::Type StringConvert::eval<MaterialTexture::Type>(const String& str)
 {
     if(str == "base_color")
         return MaterialTexture::TYPE_BASE_COLOR;

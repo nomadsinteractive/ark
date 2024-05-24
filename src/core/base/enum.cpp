@@ -6,7 +6,7 @@
 
 namespace ark {
 
-template<> Enum::RenderMode StringConvert::to<String, Enum::RenderMode>(const String& str)
+template<> Enum::RenderMode StringConvert::eval<Enum::RenderMode>(const String& str)
 {
     if(str == "lines")
         return Enum::RENDER_MODE_LINES;

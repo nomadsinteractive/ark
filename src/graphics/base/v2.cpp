@@ -177,11 +177,11 @@ void V2::initialize(const std::initializer_list<float>& values, size_t len)
         (*this)[idx++] = i;
 }
 
-template<> ARK_API V2 StringConvert::to<String, V2>(const String& str)
+template<> ARK_API V2 StringConvert::eval<V2>(const String& str)
 {
     std::vector<String> sst = str.split(',');
     DCHECK(sst.size() == 2, "Illegal size: %s", str.c_str());
-    return V2(Strings::parse<float>(sst.at(0)), Strings::parse<float>(sst.at(1)));
+    return V2(Strings::eval<float>(sst.at(0)), Strings::eval<float>(sst.at(1)));
 }
 
 }

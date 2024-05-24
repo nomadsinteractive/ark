@@ -350,7 +350,7 @@ Text::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 
 sp<Text> Text::BUILDER::build(const Scope& args)
 {
-    float textScale = _text_scale ? Strings::parse<float>(_text_scale->build(args)) : 1.0f;
+    float textScale = _text_scale ? Strings::eval<float>(_text_scale->build(args)) : 1.0f;
     return sp<Text>::make(_render_layer->build(args), _text->build(args), _glyph_maker->build(args), textScale, BeanUtils::toFloat(_letter_spacing, args, 0.0f), _line_height, _line_indent);
 }
 

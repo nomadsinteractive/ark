@@ -180,16 +180,16 @@ void Clock::resume() const
     _ticker->resume();
 }
 
-template<> ARK_API Clock::Interval StringConvert::to<String, Clock::Interval>(const String& val)
+template<> ARK_API Clock::Interval StringConvert::eval<Clock::Interval>(const String& val)
 {
     size_t len = val.length();
     if(val.endsWith("ms"))
-        return static_cast<uint64_t>(Strings::parse<float>(val.substr(0, len - 2)) * 1000.0f);
+        return static_cast<uint64_t>(Strings::eval<float>(val.substr(0, len - 2)) * 1000.0f);
     else if(val.endsWith("us"))
-        return static_cast<uint64_t>(Strings::parse<float>(val.substr(0, len - 2)));
+        return static_cast<uint64_t>(Strings::eval<float>(val.substr(0, len - 2)));
     else if(val.endsWith("s"))
-        return static_cast<uint64_t>(Strings::parse<float>(val.substr(0, len - 1)) * 1000000.0f);
-    return static_cast<uint64_t>(Strings::parse<float>(val) * 1000000.0f);
+        return static_cast<uint64_t>(Strings::eval<float>(val.substr(0, len - 1)) * 1000000.0f);
+    return static_cast<uint64_t>(Strings::eval<float>(val) * 1000000.0f);
 }
 
 }
