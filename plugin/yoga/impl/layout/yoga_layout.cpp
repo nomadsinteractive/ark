@@ -114,14 +114,14 @@ bool YogaLayout::update(uint64_t timestamp)
         return false;
 
     const LayoutParam& layoutParam = _root_node->_layout_param;
-    ASSERT(layoutParam.widthType() != LayoutParam::LENGTH_TYPE_PERCENTAGE && layoutParam.heightType() != LayoutParam::LENGTH_TYPE_PERCENTAGE);
+    ASSERT(layoutParam.widthType() != LayoutParam::LENGTH_TYPE_PERCENTAGE && layoutParam.height()._type != LayoutParam::LENGTH_TYPE_PERCENTAGE);
     doUpdate(_root_node, timestamp);
-    YGNodeCalculateLayout(_yg_node, layoutParam.size()->widthAsFloat(), layoutParam.size()->heightAsFloat(), YGDirectionLTR);
+    YGNodeCalculateLayout(_yg_node, layoutParam.contentWidth(), layoutParam.contentHeight(), YGDirectionLTR);
     updateLayoutResult(_root_node);
     return YGNodeIsDirty(_yg_node);
 }
 
-template<typename T> Optional<T> updateVar(uint64_t timestamp, Variable<T>& var)
+template<typename T, typename U> Optional<T> updateVar(uint64_t timestamp, U& var)
 {
     if(!timestamp || var.update(timestamp))
         return var.val();
@@ -130,7 +130,7 @@ template<typename T> Optional<T> updateVar(uint64_t timestamp, Variable<T>& var)
 
 void YogaLayout::applyLayoutParam(const LayoutParam& layoutParam, YGNodeRef node, uint64_t timestamp)
 {
-    const Optional<float> width = updateVar<float>(timestamp, layoutParam.width());
+    const Optional<float> width = updateVar<float>(timestamp, layoutParam.width()._value);
     if(width)
     {
         if(layoutParam.widthType() == LayoutParam::LENGTH_TYPE_AUTO)
@@ -144,16 +144,16 @@ void YogaLayout::applyLayoutParam(const LayoutParam& layoutParam, YGNodeRef node
         }
     }
 
-    const Optional<float> height = updateVar<float>(timestamp, layoutParam.height());
+    const Optional<float> height = updateVar<float>(timestamp, layoutParam.height()._value);
     if(height)
     {
-        if(layoutParam.heightType() == LayoutParam::LENGTH_TYPE_AUTO)
+        if(layoutParam.height()._type == LayoutParam::LENGTH_TYPE_AUTO)
             YGNodeStyleSetHeightAuto(node);
-        else if(layoutParam.heightType() == LayoutParam::LENGTH_TYPE_PIXEL)
+        else if(layoutParam.height()._type == LayoutParam::LENGTH_TYPE_PIXEL)
             YGNodeStyleSetHeight(node, height.value());
         else
         {
-            ASSERT(layoutParam.heightType() == LayoutParam::LENGTH_TYPE_PERCENTAGE);
+            ASSERT(layoutParam.height()._type == LayoutParam::LENGTH_TYPE_PERCENTAGE);
             YGNodeStyleSetHeightPercent(node, height.value());
         }
     }
@@ -161,7 +161,7 @@ void YogaLayout::applyLayoutParam(const LayoutParam& layoutParam, YGNodeRef node
     YGNodeStyleSetFlexDirection(node, toYGFlexDirection(layoutParam.flexDirection()));
     YGNodeStyleSetFlexGrow(node, layoutParam.flexGrow());
 
-    const Optional<float> flexBasis = updateVar<float>(timestamp, layoutParam.flexBasis());
+    const Optional<float> flexBasis = updateVar<float, Numeric>(timestamp, layoutParam.flexBasis());
     if(flexBasis)
     {
         if(layoutParam.flexBasisType() == LayoutParam::LENGTH_TYPE_AUTO)

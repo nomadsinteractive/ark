@@ -157,9 +157,9 @@ private:
         bool _is_background;
     };
 
-    class IsDisposed : public Boolean {
+    class IsDiscarded : public Boolean {
     public:
-        IsDisposed(sp<Stub> stub);
+        IsDiscarded(sp<Stub> stub);
 
         virtual bool update(uint64_t timestamp) override;
         virtual bool val() override;
@@ -191,7 +191,7 @@ protected:
     sp<State> _state;
 
     sp<EventListener> _on_move;
-    sp<IsDisposed> _is_disposed;
+    sp<IsDiscarded> _is_discarded;
     sp<Updatable> _is_stub_dirty;
     sp<Updatable> _is_layout_dirty;
 

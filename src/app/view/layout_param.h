@@ -9,7 +9,6 @@
 #include "core/types/safe_var.h"
 
 #include "graphics/forwarding.h"
-#include "graphics/base/size.h"
 #include "graphics/base/v4.h"
 
 namespace ark {
@@ -108,8 +107,8 @@ public:
 
     virtual bool update(uint64_t timestamp) override;
 
-    float calcLayoutWidth(float available) const;
-    float calcLayoutHeight(float available) const;
+    float calcLayoutWidth(float available);
+    float calcLayoutHeight(float available);
 
 //  [[script::bindings::property]]
     float contentWidth() const;
@@ -124,9 +123,6 @@ public:
     float offsetWidth() const;
     float offsetHeight() const;
 
-//  [[script::bindings::property]]
-    const sp<Size>& size() const;
-
     const sp<Boolean>& stopPropagation() const;
     void setStopPropagation(sp<Boolean> stopPropagation);
 
@@ -134,9 +130,10 @@ public:
     LayoutParam::Display display() const;
 //  [[script::bindings::property]]
     void setDisplay(LayoutParam::Display display);
-
+[[deprecated]]
 //  [[script::bindings::property]]
     LayoutParam::Gravity gravity() const;
+[[deprecated]]
 //  [[script::bindings::property]]
     void setGravity(LayoutParam::Gravity gravity);
 
@@ -156,23 +153,16 @@ public:
 
     bool hasFlexGrow() const;
 
-//  [[script::bindings::property]]
-    sp<Numeric> width() const;
-//  [[script::bindings::property]]
+    const Length& width() const;
     void setWidth(sp<Numeric> width);
 
-//  [[script::bindings::property]]
     LayoutParam::LengthType widthType() const;
 //  [[script::bindings::property]]
     void setWidthType(LayoutParam::LengthType widthType);
 
-//  [[script::bindings::property]]
-    sp<Numeric> height() const;
-//  [[script::bindings::property]]
+    const Length& height() const;
     void setHeight(sp<Numeric> height);
 
-//  [[script::bindings::property]]
-    LayoutParam::LengthType heightType() const;
 //  [[script::bindings::property]]
     void setHeightType(LayoutParam::LengthType heightType);
 
@@ -210,8 +200,8 @@ public:
     bool isWidthMatchParent() const;
     bool isHeightMatchParent() const;
 
-    static bool isMatchParent(float unit);
-    static bool isWrapContent(float unit);
+    static bool isMatchParent(const Length& length);
+    static bool isWrapContent(const Length& length);
 
 //  [[plugin::builder]]
     class BUILDER : public Builder<LayoutParam> {
@@ -240,12 +230,8 @@ public:
     };
 
 private:
-    LengthType _width_type;
-    LengthType _height_type;
-    sp<Size> _size;
-
-    SafeVar<Size> _size_min;
-    SafeVar<Size> _size_max;
+    Length _width;
+    Length _height;
 
     FlexDirection _flex_direction;
     FlexWrap _flex_wrap;

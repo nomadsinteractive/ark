@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_BASE_SIZE_H_
-#define ARK_GRAPHICS_BASE_SIZE_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/inf/builder.h"
@@ -91,5 +90,3 @@ private:
 };
 
 }
-
-#endif

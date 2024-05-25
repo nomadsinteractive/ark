@@ -11,7 +11,7 @@ namespace ark {
 
 class VerticalLayout : public LayoutV3 {
 public:
-    VerticalLayout(LayoutParam::FlexDirection flexDirection);
+    VerticalLayout(LayoutParam::Align alignItems);
 
     virtual bool update(uint64_t timestamp) override;
     virtual void inflate(sp<Node> rootNode) override;
@@ -24,15 +24,16 @@ public:
         virtual sp<LayoutV3> build(const Scope& args) override;
 
     private:
-        LayoutParam::FlexDirection _flex_direction;
+        LayoutParam::Align _align_items;
     };
 
 private:
     float calcChildNodesTotalHeight() const;
+    float calcItemOffsetPosition(const Node& rootNode, Node& item) const;
 
 private:
     sp<Node> _root_node;
-    LayoutParam::FlexDirection _flex_direction;
+    LayoutParam::Align _align_items;
 };
 
 }

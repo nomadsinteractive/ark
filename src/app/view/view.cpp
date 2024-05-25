@@ -75,7 +75,7 @@ static V2 toPivotPosition(const sp<Metrics>& occupies, const V2& size)
 
 View::View(const sp<LayoutParam>& layoutParam, sp<RenderObjectWithLayer> background, sp<Text> text, sp<Layout> layout, sp<LayoutV3> layoutV3, sp<Boolean> visible, sp<Boolean> disposed)
     : _stub(sp<Stub>::make(layoutParam, (layout || layoutV3) ? sp<ViewHierarchy>::make(std::move(layout), std::move(layoutV3)) : nullptr, std::move(visible), std::move(disposed))),
-      _background(std::move(background)), _text(std::move(text)), _state(sp<State>::make(STATE_DEFAULT)), _is_disposed(sp<IsDisposed>::make(_stub)), _is_stub_dirty(sp<UpdatableOncePerFrame>::make(_stub)),
+      _background(std::move(background)), _text(std::move(text)), _state(sp<State>::make(STATE_DEFAULT)), _is_discarded(sp<IsDiscarded>::make(_stub)), _is_stub_dirty(sp<UpdatableOncePerFrame>::make(_stub)),
       _is_layout_dirty(sp<UpdatableOncePerFrame>::make(sp<UpdatableIsolatedLayout>::make(_stub))), _size(sp<Size>::make(sp<LayoutSize<0>>::make(_stub), sp<LayoutSize<1>>::make(_stub))),
       _position(sp<LayoutPosition>::make(_stub, _is_layout_dirty, true, true))
 {
@@ -91,7 +91,7 @@ View::View(const sp<LayoutParam>& layoutParam, sp<RenderObjectWithLayer> backgro
             _text->setLayoutSize(_size);
         else
             updateTextLayout(0);
-        _text->show(_is_disposed);
+        _text->show(_is_discarded);
     }
 }
 
@@ -123,7 +123,7 @@ void View::render(RenderRequest& renderRequest, const V3& position)
 
 void View::addRenderObjectWithLayer(sp<RenderObjectWithLayer> ro, bool isBackground)
 {
-    ro->layerContext()->add(sp<RenderableViewSlot>::make(_stub, ro->renderObject(), ro->layerContext()->modelLoader(), isBackground), _is_layout_dirty, _is_disposed);
+    ro->layerContext()->add(sp<RenderableViewSlot>::make(_stub, ro->renderObject(), ro->layerContext()->modelLoader(), isBackground), _is_layout_dirty, _is_discarded);
 }
 
 const sp<Vec3>& View::position() const
@@ -147,7 +147,7 @@ void View::updateTextLayout(uint64_t timestamp)
             layoutParam.setWidthType(LayoutParam::LENGTH_TYPE_PIXEL);
             layoutParam.setWidth(size.width());
         }
-        if(layoutParam.heightType() == LayoutParam::LENGTH_TYPE_AUTO)
+        if(layoutParam.height()._type == LayoutParam::LENGTH_TYPE_AUTO)
         {
             layoutParam.setHeightType(LayoutParam::LENGTH_TYPE_PIXEL);
             layoutParam.setHeight(size.height());
@@ -354,12 +354,12 @@ Renderable::Snapshot View::RenderableViewSlot::snapshot(const PipelineInput& pip
     return Renderable::Snapshot(Renderable::RENDERABLE_STATE_NONE);
 }
 
-View::IsDisposed::IsDisposed(sp<Stub> stub)
+View::IsDiscarded::IsDiscarded(sp<Stub> stub)
     : _stub(std::move(stub))
 {
 }
 
-bool View::IsDisposed::update(uint64_t timestamp)
+bool View::IsDiscarded::update(uint64_t timestamp)
 {
     bool dirty = false;
     sp<Stub> stub = _stub;
@@ -371,7 +371,7 @@ bool View::IsDisposed::update(uint64_t timestamp)
     return dirty;
 }
 
-bool View::IsDisposed::val()
+bool View::IsDiscarded::val()
 {
     return _stub->isDisposed();
 }

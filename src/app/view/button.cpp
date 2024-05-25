@@ -39,7 +39,7 @@ void Button::render(RenderRequest& renderRequest, const V3& position)
             const sp<Size> size = block ? block->size() : nullptr;
             if(size)
             {
-                Rect available(position.x(), position.y(), position.x() + _stub->_layout_param->size()->widthAsFloat(), position.y() + _stub->_layout_param->size()->heightAsFloat());
+                Rect available(position.x(), position.y(), position.x() + _stub->_layout_param->contentWidth(), position.y() + _stub->_layout_param->contentHeight());
                 const V2 pos = LayoutUtil::place(_gravity, V2(size->widthAsFloat(), size->heightAsFloat()), available);
                 fg->render(renderRequest, V3(pos, 0));
             }

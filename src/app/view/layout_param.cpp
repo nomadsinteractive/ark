@@ -20,48 +20,47 @@ template<> ARK_API LayoutParam::Display StringConvert::eval<LayoutParam::Display
 }
 
 LayoutParam::LayoutParam(const sp<Size>& size, Display display, Gravity gravity, float grow)
-    : _width_type(LayoutParam::LENGTH_TYPE_PIXEL), _height_type(LayoutParam::LENGTH_TYPE_PIXEL), _size(Null::toSafePtr(size)), _display(display), _gravity(gravity), _flex_grow(grow)
+    : _width(LayoutParam::LENGTH_TYPE_PIXEL, size->width()), _height(LayoutParam::LENGTH_TYPE_PIXEL, size->height()), _display(display), _gravity(gravity), _flex_grow(grow)
 {
 }
 
 LayoutParam::LayoutParam(Length width, Length height, FlexDirection flexDirection, FlexWrap flexWrap, JustifyContent justifyContent, Align alignItems, Align alignSelf,
                          Align alignContent, Display display, float flexGrow, Length flexBasis, sp<Vec4> margins, sp<Vec4> paddings, sp<Vec3> position)
-    : _width_type(width._type), _height_type(height._type), _size(sp<Size>::make(width._value.ensure(), height._value.ensure())), _size_min(nullptr, V3(NAN)), _size_max(nullptr, V3(NAN)),
-      _flex_direction(flexDirection), _flex_wrap(flexWrap), _justify_content(justifyContent), _align_items(alignItems), _align_self(alignSelf), _align_content(alignContent),
+    : _width(std::move(width)), _height(std::move(height)), _flex_direction(flexDirection), _flex_wrap(flexWrap), _justify_content(justifyContent), _align_items(alignItems), _align_self(alignSelf), _align_content(alignContent),
       _display(display), _flex_basis(std::move(flexBasis)), _flex_grow(flexGrow), _margins(std::move(margins)), _paddings(std::move(paddings)), _position(std::move(position))
 {
 }
 
 bool LayoutParam::update(uint64_t timestamp)
 {
-    return _timestamp.update(timestamp) || UpdatableUtil::update(timestamp, _size, _size_min, _size_max, _margins, _paddings, _flex_basis);
+    return _timestamp.update(timestamp) || UpdatableUtil::update(timestamp, _width, _height, _margins, _paddings, _flex_basis);
 }
 
-float LayoutParam::calcLayoutWidth(float available) const
+float LayoutParam::calcLayoutWidth(float available)
 {
     const V4 margins = _margins.val();
-    if(isMatchParent(_size->widthAsFloat()))
+    if(isMatchParent(_width))
     {
-        _size->setWidth(available - margins.w() - margins.y());
+        _width._value.reset(sp<Numeric::Const>::make(available - margins.w() - margins.y()));
         return available;
     }
-    return _size->widthAsFloat() + margins.w() + margins.y();
+    return _width._value.val() + margins.w() + margins.y();
 }
 
-float LayoutParam::calcLayoutHeight(float available) const
+float LayoutParam::calcLayoutHeight(float available)
 {
     const V4 margins = _margins.val();
-    if(isMatchParent(_size->heightAsFloat()))
+    if(isMatchParent(_height))
     {
-        _size->setHeight(available - margins.x() - margins.z());
+        _height._value.reset(sp<Numeric::Const>::make(available - margins.x() - margins.z()));
         return available;
     }
-    return _size->heightAsFloat() + margins.x() + margins.z();
+    return _height._value.val() + margins.x() + margins.z();
 }
 
 float LayoutParam::contentWidth() const
 {
-    return std::max(_size->widthAsFloat(), 0.0f);
+    return std::max(_width._value.val(), 0.0f);
 }
 
 float LayoutParam::offsetWidth() const
@@ -72,12 +71,12 @@ float LayoutParam::offsetWidth() const
 
 void LayoutParam::setContentWidth(float contentWidth)
 {
-    _size->setWidth(contentWidth);
+    _width._value.reset(sp<Numeric::Const>::make(contentWidth));
 }
 
 float LayoutParam::contentHeight() const
 {
-    return std::max(_size->heightAsFloat(), 0.0f);
+    return std::max(_height._value.val(), 0.0f);
 }
 
 float LayoutParam::offsetHeight() const
@@ -88,12 +87,7 @@ float LayoutParam::offsetHeight() const
 
 void LayoutParam::setContentHeight(float contentHeight)
 {
-    _size->setHeight(contentHeight);
-}
-
-const sp<Size>& LayoutParam::size() const
-{
-    return _size;
+    _height._value.reset(sp<Numeric::Const>::make(contentHeight));
 }
 
 const sp<Boolean>& LayoutParam::stopPropagation() const
@@ -162,45 +156,40 @@ bool LayoutParam::hasFlexGrow() const
     return _flex_grow != 0.0f;
 }
 
-sp<Numeric> LayoutParam::width() const
+const LayoutParam::Length& LayoutParam::width() const
 {
-    return _size->width();
+    return _width;
 }
 
 void LayoutParam::setWidth(sp<Numeric> width)
 {
-    _size->setWidth(std::move(width));
+    _width._value.reset(width);
 }
 
 LayoutParam::LengthType LayoutParam::widthType() const
 {
-    return _width_type;
+    return _width._type;
 }
 
 void LayoutParam::setWidthType(LengthType widthType)
 {
-    _width_type = widthType;
+    _width._type = widthType;
     _timestamp.markDirty();
 }
 
-sp<Numeric> LayoutParam::height() const
+const LayoutParam::Length& LayoutParam::height() const
 {
-    return _size->height();
+    return _height;
 }
 
 void LayoutParam::setHeight(sp<Numeric> height)
 {
-    _size->setHeight(std::move(height));
-}
-
-LayoutParam::LengthType LayoutParam::heightType() const
-{
-    return _height_type;
+    _height._value.reset(std::move(height));
 }
 
 void LayoutParam::setHeightType(LengthType heightType)
 {
-    _height_type = heightType;
+    _height._type = heightType;
     _timestamp.markDirty();
 }
 
@@ -271,12 +260,12 @@ bool LayoutParam::isWrapContent() const
 
 bool LayoutParam::isWidthWrapContent() const
 {
-    return isWrapContent(_size->widthAsFloat());
+    return isWrapContent(_width);
 }
 
 bool LayoutParam::isHeightWrapContent() const
 {
-    return isWrapContent(_size->heightAsFloat());
+    return isWrapContent(_height);
 }
 
 bool LayoutParam::isMatchParent() const
@@ -286,22 +275,22 @@ bool LayoutParam::isMatchParent() const
 
 bool LayoutParam::isWidthMatchParent() const
 {
-    return isMatchParent(_size->widthAsFloat());
+    return isMatchParent(_width);
 }
 
 bool LayoutParam::isHeightMatchParent() const
 {
-    return isMatchParent(_size->heightAsFloat());
+    return isMatchParent(_height);
 }
 
-bool LayoutParam::isMatchParent(float unit)
+bool LayoutParam::isMatchParent(const Length& length)
 {
-    return static_cast<int32_t>(unit) == SIZE_CONSTRAINT_MATCH_PARENT;
+    return length._type == LENGTH_TYPE_PERCENTAGE && length._value.val() == 100.0f;
 }
 
-bool LayoutParam::isWrapContent(float unit)
+bool LayoutParam::isWrapContent(const Length& length)
 {
-    return static_cast<int32_t>(unit) == SIZE_CONSTRAINT_WRAP_CONTENT;
+    return length._type == LENGTH_TYPE_AUTO;
 }
 
 namespace {

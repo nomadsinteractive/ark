@@ -134,7 +134,7 @@ bool ViewHierarchy::updateLayout(const LayoutParam& layoutParam, const sp<Layout
             const auto [slots, layoutParamSlots] = getLayoutItems();
             const V2 contentSize = _layout->inflate(layoutParamSlots);
 
-            layoutNode->setSize(layoutParam.size()->val());
+            layoutNode->setSize(V2(layoutParam.contentWidth(), layoutParam.contentHeight()));
             const std::vector<V2> positions = _layout->place(layoutParamSlots, layoutParam, contentSize);
             DASSERT(positions.size() == slots.size());
 

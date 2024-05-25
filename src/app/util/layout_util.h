@@ -1,5 +1,4 @@
-#ifndef ARK_APP_UTIL_LAYOUT_UTIL_H_
-#define ARK_APP_UTIL_LAYOUT_UTIL_H_
+#pragma once
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
@@ -28,5 +27,3 @@ private:
 };
 
 }
-
-#endif

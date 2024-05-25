@@ -42,7 +42,7 @@ std::vector<V2> VerticalLayoutV2::place(const std::vector<sp<LayoutParam>>& slot
     Rect r = hasWeight ? Rect(0, 0, parent.contentWidth(), parent.contentWidth()) : Rect(layoutPos.x(), layoutPos.y(), contentSize.x(), contentSize.y());
 
     LayoutParam::FlexDirection ff = LayoutParam::FLEX_DIRECTION_ROW;
-    for(const LayoutParam& i : slots)
+    for(LayoutParam& i : slots)
     {
         float width = i.calcLayoutWidth(parent.contentWidth());
         float height = i.calcLayoutHeight(i.hasFlexGrow() ? i.flexGrow() * unitWeight : parent.contentHeight());
