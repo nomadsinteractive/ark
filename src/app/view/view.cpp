@@ -48,19 +48,6 @@ private:
 
 }
 
-template<> ARK_API View::State StringConvert::eval<View::State>(const String& str)
-{
-    if(str == "default")
-        return View::STATE_DEFAULT;
-    if(str == "moving")
-        return View::STATE_MOVING;
-    if(str == "pushing")
-        return View::STATE_PUSHING;
-    if(str == "actived")
-        return View::STATE_ACTIVED;
-    return View::STATE_DEFAULT;
-}
-
 static V2 toViewportPosition(const V2& position)
 {
     return Ark::instance().applicationContext()->toViewportPosition(position);
@@ -77,7 +64,7 @@ static V2 toPivotPosition(const sp<Metrics>& occupies, const V2& size)
 
 View::View(const sp<LayoutParam>& layoutParam, sp<RenderObjectWithLayer> background, sp<Text> text, sp<Layout> layout, sp<LayoutV3> layoutV3, sp<Boolean> visible, sp<Boolean> disposed)
     : _stub(sp<Stub>::make(layoutParam, (layout || layoutV3) ? sp<ViewHierarchy>::make(std::move(layout), std::move(layoutV3)) : nullptr, std::move(visible), std::move(disposed))),
-      _background(std::move(background)), _text(std::move(text)), _state(sp<State>::make(STATE_DEFAULT)), _is_discarded(sp<IsDiscarded>::make(_stub)), _is_stub_dirty(sp<UpdatableOncePerFrame>::make(_stub)),
+      _background(std::move(background)), _text(std::move(text)), _is_discarded(sp<IsDiscarded>::make(_stub)), _is_stub_dirty(sp<UpdatableOncePerFrame>::make(_stub)),
       _is_layout_dirty(sp<UpdatableOncePerFrame>::make(sp<UpdatableIsolatedLayout>::make(_stub))), _size(sp<Size>::make(sp<LayoutSize<0>>::make(_stub), sp<LayoutSize<1>>::make(_stub))),
       _position(sp<LayoutPosition>::make(_stub, _is_layout_dirty, true, true))
 {
@@ -200,21 +187,6 @@ void View::addView(sp<View> view, sp<Boolean> disposable)
 void View::setParent(const View& view)
 {
     _stub->_parent_stub = view._stub;
-}
-
-View::State View::state() const
-{
-    return _state;
-}
-
-void View::addState(View::State state)
-{
-    *_state = static_cast<State>(*_state | state);
-}
-
-void View::removeState(View::State state)
-{
-    *_state = static_cast<State>(*_state & ~(state));
 }
 
 void View::markAsTopView()

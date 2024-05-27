@@ -1,11 +1,9 @@
-#ifndef ARK_APP_IMPL_RENDERER_FPS_COUNTER_H_
-#define ARK_APP_IMPL_RENDERER_FPS_COUNTER_H_
+#pragma once
 
 #include "core/base/string.h"
 #include "core/inf/builder.h"
 #include "core/types/shared_ptr.h"
 
-#include "graphics/inf/block.h"
 #include "graphics/inf/renderer.h"
 #include "graphics/forwarding.h"
 
@@ -13,12 +11,10 @@
 
 namespace ark {
 
-class FPSCounter : public Renderer, public Block {
+class FPSCounter : public Renderer {
 public:
 [[deprecated]]
     FPSCounter(const sp<Clock>& clock, float refreshInterval, const sp<Text>& characters, const String& message);
-
-    virtual const sp<Size>& size() override;
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
@@ -49,5 +45,3 @@ private:
 };
 
 }
-
-#endif

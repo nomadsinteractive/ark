@@ -9,7 +9,6 @@
 
 #include "graphics/forwarding.h"
 #include "graphics/base/render_layer.h"
-#include "graphics/inf/block.h"
 #include "graphics/inf/renderer.h"
 #include "graphics/inf/render_batch.h"
 

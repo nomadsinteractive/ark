@@ -13,13 +13,13 @@ std::pair<float, float> calcFlowDirection(LayoutParam::JustifyContent justifyCon
 {
     switch(justifyContent) {
         case LayoutParam::JUSTIFY_CONTENT_FLEX_START:
-            return {0, 0};
+            return {0.0f, 0.0f};
         case LayoutParam::JUSTIFY_CONTENT_FLEX_END:
-            return {totalSpace - childrenSpace, 0};
+            return {totalSpace - childrenSpace, 0.0f};
         case LayoutParam::JUSTIFY_CONTENT_CENTER:
-            return {(totalSpace - childrenSpace) / 2, 0};
+            return {(totalSpace - childrenSpace) / 2, 0.0f};
         case LayoutParam::JUSTIFY_CONTENT_SPACE_BETWEEN:
-            return {0, (totalSpace - childrenSpace) / (childCount - 1)};
+            return {0.0f, (totalSpace - childrenSpace) / (childCount - 1)};
         case LayoutParam::JUSTIFY_CONTENT_SPACE_AROUND: {
             float space = (totalSpace - childrenSpace) / childCount;
             return {space / 2, space};
@@ -29,7 +29,7 @@ std::pair<float, float> calcFlowDirection(LayoutParam::JustifyContent justifyCon
             return {space, space};
         }
     }
-    return {0, 0};
+    return {0.0f, 0.0f};
 }
 
 bool VerticalLayout::update(uint64_t timestamp)

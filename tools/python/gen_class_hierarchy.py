@@ -8,12 +8,12 @@ import sys
 import acg
 from acg import HeaderPattern
 
-CLASS_PATTERN = re.compile(r'(\[\[core::class\]\])?([\w<():=,>\s]+)class\s+(ARK_API\s+)?([\w\d_]+)(?:\s+final)?\s+(:[^{;]+)?[{;]')
+CLASS_PATTERN = re.compile(r'(\[\[core::class\]\])?([\w<():=,>\s]+)class\s+(ARK_API\s+)?(\w+)(?:\s+final)?\s+(:[^{;]+)?[{;]')
 
 INDENT = '\n    '
 
 
-CORE_INTERFACES = ('Numeric', 'Integer', 'Resource', 'EventListener', 'Uploader', 'Renderer', 'Notifier', 'Block', 'ModelLoader',
+CORE_INTERFACES = ('Numeric', 'Integer', 'Resource', 'EventListener', 'Uploader', 'Renderer', 'Notifier', 'ModelLoader',
                    'Boolean', 'Runnable', 'Vec2', 'Vec3', 'Vec4', 'Mat3', 'Mat4', 'Holder', 'Wirable')
 
 

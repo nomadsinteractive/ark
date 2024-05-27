@@ -71,11 +71,6 @@ public:
         FLEX_WRAP_WRAP_REVERSE
     };
 
-    enum SizeConstraint {
-        SIZE_CONSTRAINT_MATCH_PARENT = -1,
-        SIZE_CONSTRAINT_WRAP_CONTENT = -2
-    };
-
 //  [[script::bindings::enumeration]]
     enum LengthType {
         LENGTH_TYPE_AUTO,

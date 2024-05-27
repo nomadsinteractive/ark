@@ -9,12 +9,11 @@
 
 #include "graphics/forwarding.h"
 #include "graphics/inf/renderer.h"
-#include "graphics/inf/block.h"
 #include "graphics/inf/tile_maker.h"
 
 namespace ark {
 
-class Scrollable : public Block {
+class Scrollable {
 public:
     struct ARK_API Params {
         Params(int32_t rowCount, int32_t colCount, int32_t rowIndex, int32_t colIndex, int32_t rendererWidth, int32_t rendererHeight);
@@ -48,7 +47,7 @@ private:
 public:
     Scrollable(sp<Vec3> scroller, sp<RendererMaker> rendererMaker, sp<Size> size, const Scrollable::Params& params);
 
-    virtual const sp<Size>& size() override;
+    const sp<Size>& size();
 
     const std::vector<Box>& cull(uint64_t timestamp);
 

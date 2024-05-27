@@ -5,7 +5,6 @@
 #include "core/types/safe_ptr.h"
 #include "core/impl/boolean/boolean_by_weak_ref.h"
 
-#include "graphics/inf/block.h"
 #include "graphics/inf/renderer.h"
 #include "graphics/impl/renderer/renderer_style_position.h"
 #include "graphics/impl/renderer/renderer_wrapper.h"
@@ -49,12 +48,6 @@ sp<Renderer> RendererType::makeAutoRelease(const sp<Renderer>& self, int32_t ref
 
 SafePtr<Size> RendererType::size(const sp<Renderer>& self)
 {
-    if(self.template isInstance<Block>())
-    {
-        sp<Block> block = self.template tryCast<Block>();
-        if(block)
-            return block->size();
-    }
     return SafePtr<Size>();
 }
 

@@ -12,7 +12,6 @@
 #include "core/types/safe_var.h"
 #include "core/types/weak_ptr.h"
 
-#include "graphics/inf/block.h"
 #include "graphics/inf/renderer.h"
 #include "graphics/inf/renderable.h"
 #include "graphics/forwarding.h"
@@ -22,23 +21,14 @@
 
 namespace ark {
 
-class ARK_API View : public Block, public Holder, Implements<View, Block, Holder> {
-public:
-    enum State {
-        STATE_DEFAULT = 0,
-        STATE_PUSHING = 1,
-        STATE_MOVING = 2,
-        STATE_ACTIVED = 4,
-        STATE_COUNT = 4
-    };
-
+class ARK_API View : public Holder {
 public:
     View(const sp<LayoutParam>& layoutParam, sp<RenderObjectWithLayer> background = nullptr, sp<Text> text = nullptr, sp<Layout> layout = nullptr, sp<LayoutV3> layoutV3 = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> disposed = nullptr);
     View(sp<Size> size);
     ~View() override;
 
 //  [[script::bindings::property]]
-    virtual const sp<Size>& size() override;
+    const sp<Size>& size();
 
     virtual void traverse(const Visitor& visitor) override;
 
@@ -71,10 +61,6 @@ public:
     void addView(sp<View> view, sp<Boolean> disposable = nullptr);
 
     void setParent(const View& view);
-
-    State state() const;
-    void addState(State state);
-    void removeState(State state);
 
 //  [[plugin::builder]]
     class BUILDER : public Builder<View> {
@@ -182,8 +168,6 @@ protected:
     sp<Stub> _stub;
     sp<RenderObjectWithLayer> _background;
     sp<Text> _text;
-
-    sp<State> _state;
 
     sp<EventListener> _on_move;
     sp<IsDiscarded> _is_discarded;

@@ -6,19 +6,18 @@
 #include "core/types/safe_ptr.h"
 
 #include "graphics/forwarding.h"
-#include "graphics/inf/block.h"
 #include "graphics/inf/renderable.h"
 #include "graphics/inf/renderer.h"
 
 namespace ark {
 
 //[[core::class]]
-class RenderObjectWithLayer : public Block {
+class RenderObjectWithLayer {
 public:
     RenderObjectWithLayer(sp<LayerContext> layerContext, sp<RenderObject> renderObject);
-    ~RenderObjectWithLayer() override;
+    ~RenderObjectWithLayer();
 
-    virtual const sp<Size>& size() override;
+    const sp<Size>& size();
 
     const sp<LayerContext>& layerContext() const;
     const sp<RenderObject>& renderObject() const;

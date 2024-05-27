@@ -352,7 +352,7 @@ sp<LayoutParam> LayoutParam::BUILDER::build(const Scope& args)
 
 template<> ARK_API sp<LayoutParam> Null::safePtr()
 {
-    return sp<LayoutParam>::make(sp<Size>::make(static_cast<float>(LayoutParam::SIZE_CONSTRAINT_MATCH_PARENT), static_cast<float>(LayoutParam::SIZE_CONSTRAINT_MATCH_PARENT)));
+    return sp<LayoutParam>::make(sp<Size>::make(0, 0, 0));
 }
 
 template<> ARK_API LayoutParam::Gravity StringConvert::eval<LayoutParam::Gravity>(const String& s)

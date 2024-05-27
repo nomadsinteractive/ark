@@ -1,11 +1,9 @@
-#ifndef ARK_RENDERER_IMPL_RENDERER_SHADER_FRAME_H_
-#define ARK_RENDERER_IMPL_RENDERER_SHADER_FRAME_H_
+#pragma once
 
 #include "core/inf/builder.h"
 #include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
 
-#include "graphics/inf/block.h"
 #include "graphics/inf/renderer.h"
 #include "graphics/forwarding.h"
 
@@ -15,14 +13,14 @@
 namespace ark {
 
 //[[core::class]]
-class ShaderFrame : public Renderer, public Block {
+class ShaderFrame : public Renderer {
 public:
     [[deprecated]]
     ShaderFrame(const sp<Size>& size, const sp<Shader>& shader, RenderController& renderController);
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
-    virtual const sp<Size>& size() override;
+    const sp<Size>& size();
 
 //  [[plugin::resource-loader("shader-frame")]]
     class BUILDER : public Builder<Renderer> {
@@ -53,5 +51,3 @@ private:
 };
 
 }
-
-#endif

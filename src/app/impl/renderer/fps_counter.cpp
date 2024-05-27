@@ -22,11 +22,6 @@ FPSCounter::FPSCounter(const sp<Clock>& clock, float refreshInterval, const sp<T
 {
 }
 
-const sp<Size>& FPSCounter::size()
-{
-    return _characters->size();
-}
-
 void FPSCounter::render(RenderRequest& renderequest, const V3& position)
 {
     ++ _frame_rendered;
