@@ -36,7 +36,6 @@ void Arena::addRenderer(sp<Renderer> renderer, const Traits& traits)
 void Arena::render(RenderRequest& renderRequest, const V3& position)
 {
     ASSERT(_view);
-    _view->render(renderRequest, position);
     _renderer_phrase.render(renderRequest, position);
 }
 

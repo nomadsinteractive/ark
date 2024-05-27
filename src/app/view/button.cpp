@@ -27,30 +27,6 @@ Button::~Button()
 {
 }
 
-void Button::render(RenderRequest& renderRequest, const V3& position)
-{
-    _background->render(renderRequest, position);
-    if(_gravity != LayoutParam::GRAVITY_DEFAULT)
-    {
-        const sp<Renderer>& fg = _foreground->getRendererByCurrentStatus();
-        if(fg)
-        {
-            const sp<Block> block = fg.tryCast<Block>();
-            const sp<Size> size = block ? block->size() : nullptr;
-            if(size)
-            {
-                Rect available(position.x(), position.y(), position.x() + _stub->_layout_param->contentWidth(), position.y() + _stub->_layout_param->contentHeight());
-                const V2 pos = LayoutUtil::place(_gravity, V2(size->widthAsFloat(), size->heightAsFloat()), available);
-                fg->render(renderRequest, V3(pos, 0));
-            }
-            else
-                fg->render(renderRequest, position);
-        }
-    }
-    else
-        _foreground->render(renderRequest, position);
-}
-
 void Button::setForeground(View::State status, sp<Renderer> foreground, const sp<Boolean>& enabled)
 {
     _foreground->setStateRenderer(status, std::move(foreground), enabled);
@@ -75,41 +51,9 @@ sp<Button> Button::BUILDER::build(const Scope& args)
     sp<Renderer> foreground = _foreground->build(args);
     sp<Renderer> background = _background->build(args);
     sp<Size> builtSize = _size->build(args);
-    const String style = Documents::getAttribute(_manifest, Constants::Attributes::STYLE);
     sp<Size> size = builtSize ? builtSize : static_cast<const sp<Size>&>(RendererType::size(background));
     sp<Button> button = sp<Button>::make(std::move(foreground), std::move(background), std::move(size), _gravity ? Strings::eval<LayoutParam::Gravity>(_gravity) : LayoutParam::GRAVITY_CENTER);
-//    loadStatus(button, _manifest, _factory, args);
-    if(style)
-        _factory.decorate<Renderer>(sp<Builder<Renderer>::Prebuilt>::make(button), style)->build(args);
     return button;
-}
-
-//void Button::BUILDER::loadStatus(const sp<Button>& button, const document& doc, BeanFactory& factory, const Scope& args)
-//{
-//    for(const document& node : doc->children("state"))
-//    {
-//        View::State status = Documents::ensureAttribute<View::State>(node, Constants::Attributes::NAME);
-//        sp<Renderer> foreground = factory.build<Renderer>(node, Constants::Attributes::FOREGROUND, args);
-//        sp<Renderer> background = factory.build<Renderer>(node, Constants::Attributes::BACKGROUND, args);
-//        const sp<Boolean> enabled = factory.build<Boolean>(node, "enabled", args);
-//        if(enabled)
-//            button->addState(status);
-
-//        if(foreground)
-//            button->setForeground(status, std::move(foreground), enabled);
-//        if(background)
-//            button->setBackground(status, std::move(background), enabled);
-//    }
-//}
-
-Button::BUILDER_IMPL2::BUILDER_IMPL2(BeanFactory& parent, const document& doc)
-    : _delegate(parent, doc)
-{
-}
-
-sp<Renderer> Button::BUILDER_IMPL2::build(const Scope& args)
-{
-    return _delegate.build(args);
 }
 
 }

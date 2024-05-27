@@ -119,10 +119,6 @@ void View::traverse(const Holder::Visitor& visitor)
         _stub->viewHierarchy()->traverse(visitor);
 }
 
-void View::render(RenderRequest& renderRequest, const V3& position)
-{
-}
-
 void View::addRenderObjectWithLayer(sp<RenderObjectWithLayer> ro, bool isBackground)
 {
     ro->layerContext()->add(sp<RenderableViewSlot>::make(_stub, ro->renderObject(), ro->layerContext()->modelLoader(), isBackground), _is_layout_dirty, _is_discarded);

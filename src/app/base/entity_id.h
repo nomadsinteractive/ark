@@ -1,10 +1,12 @@
 #pragma once
 
+#include "core/base/api.h"
+
 #include "app/base/entity.h"
 
 namespace ark {
 
-class EntityId {
+class ARK_API EntityId {
 public:
     EntityId(const Entity& entity);
 

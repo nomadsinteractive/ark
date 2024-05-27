@@ -1,5 +1,4 @@
-#ifndef ARK_APP_INF_EVENT_LISTENER_H_
-#define ARK_APP_INF_EVENT_LISTENER_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "app/forwarding.h"
@@ -14,5 +13,3 @@ public:
 };
 
 }
-
-#endif

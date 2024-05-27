@@ -1,5 +1,4 @@
-#ifndef ARK_APP_VIEW_BUTTON_H_
-#define ARK_APP_VIEW_BUTTON_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/forwarding.h"
@@ -18,12 +17,10 @@
 
 namespace ark {
 
-class Button final : public View, Implements<Button, View, Renderer> {
+class Button final : public View, Implements<Button, View> {
 public:
     Button(sp<Renderer> foreground, sp<Renderer> background, sp<Size> block, LayoutParam::Gravity gravity);
     ~Button() override;
-
-    virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
     void setForeground(View::State status, sp<Renderer> foreground, const sp<Boolean>& enabled);
     void setBackground(View::State status, sp<Renderer> background, const sp<Boolean>& enabled);
@@ -46,17 +43,6 @@ public:
         String _gravity;
     };
 
-//  [[plugin::builder("button")]]
-    class BUILDER_IMPL2 : public Builder<Renderer> {
-    public:
-        BUILDER_IMPL2(BeanFactory& parent, const document& doc);
-
-        virtual sp<Renderer> build(const Scope& args) override;
-
-    private:
-        BUILDER _delegate;
-    };
-
 private:
     op<RendererWithState> _foreground;
     op<RendererWithState> _background;
@@ -66,5 +52,3 @@ private:
 };
 
 }
-
-#endif

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
@@ -24,8 +22,7 @@
 
 namespace ark {
 
-//[[script::bindings::extends(Renderer)]]
-class ARK_API View : public Block, public Renderer, public Holder, Implements<View, Block, Renderer, Holder> {
+class ARK_API View : public Block, public Holder, Implements<View, Block, Holder> {
 public:
     enum State {
         STATE_DEFAULT = 0,
@@ -44,8 +41,6 @@ public:
     virtual const sp<Size>& size() override;
 
     virtual void traverse(const Visitor& visitor) override;
-
-    virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
     void addRenderObjectWithLayer(sp<RenderObjectWithLayer> ro, bool isBackground);
 

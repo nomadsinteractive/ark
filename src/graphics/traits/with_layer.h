@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/base/api.h"
 #include "core/inf/wirable.h"
 #include "core/types/shared_ptr.h"
 
@@ -7,7 +8,7 @@
 
 namespace ark {
 
-class WithLayer : public Wirable {
+class ARK_API WithLayer : public Wirable {
 public:
 //  [[script::bindings::auto]]
     WithLayer(sp<Layer> layer);

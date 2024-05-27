@@ -21,7 +21,7 @@ public:
 
     template<typename T> void addComponent(sp<T> cmp) {
         wireComponent<T>(cmp);
-        return _components.put(std::move(cmp));
+        _components.put(std::move(cmp));
     }
 
     template<typename T, typename... Args> sp<T> makeComponent(Args&&... args) {
