@@ -51,8 +51,8 @@ ShaderPreprocessor::ShaderPreprocessor(sp<String> source, PipelineInput::ShaderS
       _declaration_uniforms(_uniform_declaration_codes, "uniform"), _declaration_samplers(_uniform_declaration_codes, "uniform"), _declaration_images(_uniform_declaration_codes, "uniform"),
       _pre_main(sp<String>::make()), _post_main(sp<String>::make())
 {
-    _predefined_macros.push_back("#define texture2D texture");
-    _predefined_macros.push_back("#define textureCube texture");
+    _predefined_macros.emplace_back("#define texture2D texture");
+    _predefined_macros.emplace_back("#define textureCube texture");
     _predefined_macros.push_back(Strings::sprintf("#define ARK_Z_DIRECTION %.2f", Ark::instance().renderController()->renderEngine()->toLayoutDirection(1.0f)));
 }
 

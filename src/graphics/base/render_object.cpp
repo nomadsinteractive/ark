@@ -182,14 +182,14 @@ void RenderObject::setTag(const Box& tag)
     _tag = tag;
 }
 
-sp<Boolean> RenderObject::disposed()
+sp<Boolean> RenderObject::discarded() const
 {
     return _discarded.ensure();
 }
 
-void RenderObject::setDisposed(sp<Boolean> disposed)
+void RenderObject::setDiscarded(sp<Boolean> discarded)
 {
-    _discarded.reset(std::move(disposed));
+    _discarded.reset(std::move(discarded));
     _timestamp.markDirty();
 }
 
@@ -212,7 +212,7 @@ void RenderObject::setVisible(sp<Boolean> visible)
 
 void RenderObject::dispose()
 {
-    setDisposed(sp<Boolean::Const>::make(true));
+    setDiscarded(sp<Boolean::Const>::make(true));
 }
 
 void RenderObject::show()

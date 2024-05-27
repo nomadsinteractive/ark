@@ -1,8 +1,6 @@
 #include "python/extension/reference_manager.h"
 
-namespace ark {
-namespace plugin {
-namespace python {
+namespace ark::plugin::python {
 
 std::vector<sp<PyInstanceRef>> ReferenceManager::refs()
 {
@@ -28,6 +26,4 @@ void ReferenceManager::track(const WeakPtr<PyInstanceRef>& ref)
     _refs.push_back(ref);
 }
 
-}
-}
 }

@@ -420,7 +420,7 @@ template<> ARK_API LayoutParam::JustifyContent StringConvert::eval<LayoutParam::
         return LayoutParam::JUSTIFY_CONTENT_SPACE_BETWEEN;
     if(s == "space_around")
         return LayoutParam::JUSTIFY_CONTENT_SPACE_AROUND;
-    CHECK(s == "space_evently", "Unknow enum %s(\"%s\"), possible values are: [%s]", s.c_str(), "JustifyContent", "'flex_start', 'flex_end', 'center', 'space_between', 'space_around', 'space_evently'");
+    CHECK(s == "space_evenly", "Unknow enum %s(\"%s\"), possible values are: [%s]", s.c_str(), "JustifyContent", "'flex_start', 'flex_end', 'center', 'space_between', 'space_around', 'space_evenly'");
     return LayoutParam::JUSTIFY_CONTENT_SPACE_EVENLY;
 }
 

@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_INF_BLOCK_H_
-#define ARK_GRAPHICS_INF_BLOCK_H_
+#pragma once
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
@@ -16,5 +15,3 @@ public:
 };
 
 }
-
-#endif

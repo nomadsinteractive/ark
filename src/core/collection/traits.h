@@ -57,6 +57,10 @@ public:
         return instance_sfinae<T, Args...>(0, std::forward<Args>(args)...);
     }
 
+    const std::map<TypeId, Box>& traits() const {
+        return _traits;
+    }
+
 private:
     template<typename T, typename... Args> sp<T> instance_sfinae(std::enable_if_t<std::is_constructible_v<T, Args...>, int32_t>, Args&&... args) {
         sp<T> inst = get<T>();

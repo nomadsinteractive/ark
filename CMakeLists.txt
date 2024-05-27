@@ -106,6 +106,7 @@ aux_source_directory(src/graphics/impl/renderer LOCAL_SRC_LIST)
 aux_source_directory(src/graphics/impl/storage LOCAL_SRC_LIST)
 aux_source_directory(src/graphics/impl/transform LOCAL_SRC_LIST)
 aux_source_directory(src/graphics/impl/vec LOCAL_SRC_LIST)
+aux_source_directory(src/graphics/traits LOCAL_SRC_LIST)
 aux_source_directory(src/graphics/util LOCAL_SRC_LIST)
 
 aux_source_directory(src/renderer/base LOCAL_SRC_LIST)

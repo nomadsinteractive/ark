@@ -16,24 +16,29 @@
 
 namespace ark {
 
-template<> ARK_API String StringConvert::eval<String>(const String& str)
+template<> ARK_API String StringConvert::eval<String>(const String& repr)
 {
-    return str;
+    return repr;
 }
 
-template<> ARK_API uint32_t StringConvert::eval<uint32_t>(const String& str)
+template<> ARK_API String StringConvert::repr<String>(const String& obj)
 {
-    return atoi(str.c_str());
+    return obj;
 }
 
-template<> ARK_API int32_t StringConvert::eval<int32_t>(const String& str)
+template<> ARK_API uint32_t StringConvert::eval<uint32_t>(const String& repr)
 {
-    return atoi(str.c_str());
+    return atoi(repr.c_str());
 }
 
-template<> ARK_API uint16_t StringConvert::eval<uint16_t>(const String& str)
+template<> ARK_API int32_t StringConvert::eval<int32_t>(const String& repr)
 {
-    return static_cast<uint16_t>(atoi(str.c_str()));
+    return atoi(repr.c_str());
+}
+
+template<> ARK_API uint16_t StringConvert::eval<uint16_t>(const String& repr)
+{
+    return static_cast<uint16_t>(atoi(repr.c_str()));
 }
 
 template<> ARK_API int16_t StringConvert::eval<int16_t>(const String& str)
@@ -41,25 +46,21 @@ template<> ARK_API int16_t StringConvert::eval<int16_t>(const String& str)
     return static_cast<int16_t>(atoi(str.c_str()));
 }
 
-template<> ARK_API float StringConvert::eval<float>(const String& str)
+template<> ARK_API float StringConvert::eval<float>(const String& repr)
 {
-    if(str == "match_parent")
-        return static_cast<float>(LayoutParam::SIZE_CONSTRAINT_MATCH_PARENT);
-    if(str == "wrap_content")
-        return static_cast<float>(LayoutParam::SIZE_CONSTRAINT_WRAP_CONTENT);
-    if(str.endsWith("s"))
-        return StringConvert::eval<Clock::Interval>(str).sec();
-    return static_cast<float>(atof(str.c_str()));
+    if(repr.endsWith("s"))
+        return StringConvert::eval<Clock::Interval>(repr).sec();
+    return static_cast<float>(atof(repr.c_str()));
 }
 
-template<> Ark::RendererVersion StringConvert::eval<Ark::RendererVersion>(const String& str)
+template<> Ark::RendererVersion StringConvert::eval<Ark::RendererVersion>(const String& repr)
 {
-    const String version = str.toLower();
+    const String version = repr.toLower();
     if(version.startsWith("opengl_"))
         return static_cast<Ark::RendererVersion>(atoi(version.c_str() + 7));
     if(version.startsWith("vulkan_"))
         return static_cast<Ark::RendererVersion>(atoi(version.c_str() + 7) + 100);
-    CHECK(str == "auto", "Unknow RendererVersion: \"%s, supported values are [\"opengl_21\", \"opengl_46\", \"vulkan_11\", ...]", str.c_str());
+    CHECK(repr == "auto", "Unknow RendererVersion: \"%s, supported values are [\"opengl_21\", \"opengl_46\", \"vulkan_11\", ...]", repr.c_str());
     return Ark::RENDERER_VERSION_AUTO;
 }
 

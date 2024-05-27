@@ -4,9 +4,9 @@
 
 namespace ark {
 
-Rect LayoutUtil::flow(LayoutParam::FlexDirection flexFlow, const V2& size, Rect& available)
+Rect LayoutUtil::flow(LayoutParam::FlexDirection flexDirection, const V2& size, Rect& available)
 {
-    switch(flexFlow) {
+    switch(flexDirection) {
         case LayoutParam::FLEX_DIRECTION_COLUMN: {
             Rect allocated(available.left(), available.top(), available.left() + size.x(), available.bottom());
             available.setLeft(allocated.right());
@@ -49,10 +49,10 @@ V2 LayoutUtil::place(LayoutParam::Gravity gravity, const V2& size, const Rect& a
     return V2(x + available.left(), y + available.top());
 }
 
-V2 LayoutUtil::place(LayoutParam::Gravity gravity, LayoutParam::FlexDirection flexFlow, const V2& size, Rect& available)
+V2 LayoutUtil::place(LayoutParam::Gravity gravity, LayoutParam::FlexDirection flexDirection, const V2& size, Rect& available)
 {
-    const Rect allocated = flow(flexFlow, size, available);
-    switch(flexFlow) {
+    const Rect allocated = flow(flexDirection, size, available);
+    switch(flexDirection) {
         case LayoutParam::FLEX_DIRECTION_COLUMN:
         case LayoutParam::FLEX_DIRECTION_COLUMN_REVERSE:
             return place(static_cast<LayoutParam::Gravity>(gravity & LayoutParam::GRAVITY_CENTER_VERTICAL), size, allocated);

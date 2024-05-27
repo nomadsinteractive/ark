@@ -56,7 +56,7 @@ const sp<LayerContext>& Layer::context() const
 
 void Layer::addRenderObject(const sp<RenderObject>& renderObject, const sp<Boolean>& disposed)
 {
-    _layer_context->add(renderObject, nullptr, disposed);
+    _layer_context->add(renderObject, nullptr, disposed ? disposed : renderObject->discarded());
 }
 
 void Layer::clear()

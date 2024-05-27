@@ -1,9 +1,13 @@
 #include "entity.h"
 
+#include "core/inf/wirable.h"
+
 namespace ark {
 
 Entity::Entity(Traits components)
-    : _ref(sp<Ref>::make(*this)), _components(std::move(components)) {
+    : _ref(sp<Ref>::make(*this)), _components(std::move(components))
+{
+    doWire();
 }
 
 Entity::~Entity()
@@ -13,6 +17,13 @@ Entity::~Entity()
 
 Entity::Ref::Ref(Entity& entity)
     : _entity(entity), _discarded(false) {
+}
+
+void Entity::doWire() const
+{
+    for(const auto& [k, v] : _components.traits())
+        if(const sp<Wirable> wirable = v.as<Wirable>())
+            wirable->onWire(_components);
 }
 
 uintptr_t Entity::id() const
@@ -32,6 +43,8 @@ sp<RenderObject> Entity::renderObject() const {
 void Entity::addComponent(Box box)
 {
     TypeId typeId = box.typeId();
+    if(const sp<Wirable> wirable = box.as<Wirable>())
+        wirable->onWire(_components);
     _components.put(typeId, std::move(box));
 }
 

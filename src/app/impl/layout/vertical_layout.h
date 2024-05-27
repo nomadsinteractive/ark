@@ -6,6 +6,7 @@
 
 #include "app/inf/layout.h"
 #include "app/view/layout_param.h"
+#include "app/view/view_hierarchy.h"
 
 namespace ark {
 
@@ -28,7 +29,7 @@ public:
     };
 
 private:
-    float calcChildNodesTotalHeight() const;
+    static float calcChildNodesTotalHeight(const std::vector<sp<ViewHierarchy::Slot>>& childNodes);
     float calcItemOffsetPosition(const Node& rootNode, Node& item) const;
 
 private:

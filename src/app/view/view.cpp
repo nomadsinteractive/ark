@@ -16,6 +16,7 @@
 #include "graphics/util/renderer_type.h"
 
 #include "renderer/base/model.h"
+#include "renderer/base/render_engine.h"
 
 #include "app/base/application_context.h"
 #include "app/view/layout_param.h"
@@ -67,8 +68,9 @@ static V2 toViewportPosition(const V2& position)
 
 static V2 toPivotPosition(const sp<Metrics>& occupies, const V2& size)
 {
+    const RenderEngine& renderEngine = *Ark::instance().applicationContext()->renderEngine();
     if(!occupies)
-        return V2(0, size.y());
+        return renderEngine.isLHS() ? V2(0, size.y()) : V2(0, 0);
 
     return size * V2(Math::lerp(0, size.x(), occupies->aabbMin().x(), occupies->aabbMax().x(), 0), Math::lerp(0, size.y(), occupies->aabbMin().y(), occupies->aabbMax().y(), 0));
 }
@@ -392,9 +394,10 @@ V3 View::LayoutPosition::val()
     const V2& size = layoutNode.size();
     const V4& paddings = layoutNode.paddings();
     const V3 offsetPosition = _stub->getTopViewOffsetPosition(false);
+    float yOffset = Ark::instance().applicationContext()->renderEngine()->isLHS() ? size.y() : 0;
     float x = offsetPosition.x() + (_is_background ? 0 : paddings.w()) + (_is_center ? size.x() / 2 : 0);
-    float y = (offsetPosition.y() + (_is_background ? 0 : paddings.x())) + (_is_center ? size.y() / 2 : size.y());
-    return V3(toViewportPosition(V2(x, y)), offsetPosition.z());
+    float y = (offsetPosition.y() + (_is_background ? 0 : paddings.x())) + (_is_center ? size.y() / 2 : yOffset);
+    return {toViewportPosition(V2(x, y)), offsetPosition.z()};
 }
 
 View::UpdatableIsolatedLayout::UpdatableIsolatedLayout(sp<Stub> stub)

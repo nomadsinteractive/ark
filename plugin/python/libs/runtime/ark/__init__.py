@@ -2590,5 +2590,17 @@ class PrimitiveModelFactory:
         pass
 
 
+class Entity:
+    def __init__(self, *components):
+        pass
+
+    @property
+    def id(self) -> int:
+        return 0
+
+    def dispose(self):
+        pass
+
+
 def __trace__():
     pass
