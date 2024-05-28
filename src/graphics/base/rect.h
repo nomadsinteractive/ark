@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_BASE_RECT_H_
-#define ARK_GRAPHICS_BASE_RECT_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/util/documents.h"
@@ -167,4 +166,3 @@ private:
 };
 
 }
-#endif

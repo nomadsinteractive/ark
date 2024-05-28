@@ -12,8 +12,7 @@ namespace _internal {
 
 template<typename T, typename... INTERFACES> void _add_types(std::set<TypeId>& interfaces) {
     interfaces.insert(Type<T>::id());
-    Class* clazz = Class::getClass(Type<T>::id());
-    if(clazz)
+    if(const Class* clazz = Class::getClass(Type<T>::id()))
         interfaces.insert(clazz->implements().begin(), clazz->implements().end());
     if constexpr(sizeof...(INTERFACES) > 0)
         _add_types<INTERFACES...>(interfaces);
@@ -30,8 +29,7 @@ template<typename T, typename U = void, typename... INTERFACES> Box _dynamic_dow
         const sp<U> casted = ptr.template cast<U>();
         return casted;
     }
-    Class* clazz = Class::getClass(Type<U>::id());
-    if(clazz && clazz->isInstance(id))
+    if(const Class* clazz = Class::getClass(Type<U>::id()); clazz && clazz->isInstance(id))
         return clazz->cast(ptr.template cast<U>(), id);
     if(sizeof...(INTERFACES) != 0)
        return _dynamic_down_cast<T, INTERFACES...>(ptr, id);
@@ -48,13 +46,13 @@ template<typename T, typename U = void, typename... INTERFACES> Box _dynamic_up_
     return Box();
 }
 
-template<typename T, typename... INTERFACES> class _ClassImpl : public IClass {
+template<typename T, typename... INTERFACES> class ClassImpl : public IClass {
 public:
-    _ClassImpl()
+    ClassImpl()
         : _id(Type<T>::id()) {
     }
 
-    virtual Box cast(const Box& box, TypeId id) override {
+    Box cast(const Box& box, TypeId id) override {
         if(box.typeId() == _id) {
             const sp<T>& ptr = box.toPtr<T>();
             return id == Type<T>::id() ? Box(ptr) : _dynamic_down_cast<T, INTERFACES...>(ptr, id);
@@ -70,7 +68,7 @@ private:
 };
 
 template<typename T, typename... INTERFACES> Class* _make_class() {
-    Class* clazz = Class::addClass(Type<T>::id(), "<Unknown>", new _ClassImpl<T, INTERFACES...>());
+    Class* clazz = Class::addClass(Type<T>::id(), "<Unknown>", new ClassImpl<T, INTERFACES...>());
     clazz->setImplementation(_make_types<T, INTERFACES...>());
     return clazz;
 }

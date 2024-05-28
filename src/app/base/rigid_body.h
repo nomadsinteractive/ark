@@ -1,9 +1,7 @@
-#ifndef ARK_APP_BASE_RIGID_BODY_H_
-#define ARK_APP_BASE_RIGID_BODY_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/inf/builder.h"
-#include "core/inf/holder.h"
 #include "core/types/box.h"
 #include "core/types/weak_ptr.h"
 #include "core/types/safe_ptr.h"
@@ -17,8 +15,7 @@
 
 namespace ark {
 
-//[[script::bindings::holder]]
-class ARK_API RigidBody : public Holder {
+class ARK_API RigidBody {
 public:
     class ARK_API Callback {
     public:
@@ -61,7 +58,7 @@ public:
     };
 
 public:
-    virtual ~RigidBody() override = default;
+    virtual ~RigidBody() = default;
 
     RigidBody(int32_t id, Collider::BodyType type, int32_t shapeId, sp<Vec3> position, sp<Size> size, sp<Rotation> rotate, Box impl, sp<Disposed> disposed);
     RigidBody(sp<Stub> stub);
@@ -71,8 +68,6 @@ public:
     virtual void dispose() = 0;
 //  [[script::bindings::auto]]
     virtual void bind(const sp<RenderObject>& renderObject);
-
-    virtual void traverse(const Visitor& visitor) override;
 
 //  [[script::bindings::property]]
     int32_t id() const;
@@ -134,5 +129,3 @@ private:
 };
 
 }
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef ARK_PLUGIN_BULLET_RIGID_BODY_RIGID_BODY_BULLET_H_
-#define ARK_PLUGIN_BULLET_RIGID_BODY_RIGID_BODY_BULLET_H_
+#pragma once
 
 #include "core/base/timestamp.h"
 #include "core/inf/variable.h"
@@ -15,18 +14,16 @@
 #include "bullet/base/collider_bullet.h"
 #include "bullet/forwarding.h"
 
-namespace ark {
-namespace plugin {
-namespace bullet {
+namespace ark::plugin::bullet {
 
 //[[script::bindings::extends(RigidBody)]]
 //[[script::bindings::name("RigidBody")]]
-class ARK_PLUGIN_BULLET_API RigidBodyBullet : public RigidBody, Implements<RigidBodyBullet, RigidBody, Holder>  {
+class ARK_PLUGIN_BULLET_API RigidBodyBullet : public RigidBody, Implements<RigidBodyBullet, RigidBody>  {
 public:
     RigidBodyBullet(int32_t id, Collider::BodyType type, ColliderBullet world, sp<CollisionShape> collisionShape, sp<Vec3> position, sp<Transform> transform, sp<BtRigidBodyRef> rigidBody);
     RigidBodyBullet(sp<Stub> other);
 
-    virtual void dispose() override;
+    void dispose() override;
 
 //  [[script::bindings::auto]]
     void applyCentralForce(const V3& force);
@@ -64,7 +61,3 @@ private:
 };
 
 }
-}
-}
-
-#endif

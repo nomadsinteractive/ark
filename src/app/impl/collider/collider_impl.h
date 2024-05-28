@@ -1,5 +1,4 @@
-#ifndef ARK_APP_IMPL_COLLIDER_COLLIDER_IMPL_H_
-#define ARK_APP_IMPL_COLLIDER_COLLIDER_IMPL_H_
+#pragma once
 
 #include <vector>
 #include <unordered_set>
@@ -120,7 +119,7 @@ public:
         friend class RigidBodyImpl;
     };
 
-    class RigidBodyImpl : public RigidBody, Implements<RigidBodyImpl, RigidBody, Holder> {
+    class RigidBodyImpl : public RigidBody, Implements<RigidBodyImpl, RigidBody> {
     public:
         RigidBodyImpl(sp<RigidBodyShadow> shadow);
 
@@ -139,5 +138,3 @@ private:
 };
 
 }
-
-#endif

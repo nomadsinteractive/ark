@@ -21,10 +21,9 @@ namespace ark {
 namespace plugin {
 namespace box2d {
 
-//[[script::bindings::holder]]
 //[[script::bindings::extends(RigidBody)]]
 //[[script::bindings::name("RigidBody")]]
-class ARK_PLUGIN_BOX2D_API RigidBodyBox2D : public RigidBody, Implements<RigidBodyBox2D, RigidBody, Holder> {
+class ARK_PLUGIN_BOX2D_API RigidBodyBox2D : public RigidBody, Implements<RigidBodyBox2D, RigidBody> {
 public:
     struct Stub {
         Stub(const ColliderBox2D& world, b2Body* body);
@@ -59,8 +58,8 @@ public:
     RigidBodyBox2D(const sp<Stub>& stub, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Numeric>& rotate);
     RigidBodyBox2D(const sp<Stub>& stub, const sp<RigidBody::Stub>& rigidbody);
 
-    virtual void bind(const sp<RenderObject>& renderObject) override;
-    virtual void dispose() override;
+    void bind(const sp<RenderObject>& renderObject) override;
+    void dispose() override;
 
     static sp<RigidBodyBox2D> obtain(const Shadow* shadow);
 

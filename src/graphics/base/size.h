@@ -12,9 +12,8 @@
 
 namespace ark {
 
-//[[script::bindings::holder]]
 //[[script::bindings::extends(Vec3)]]
-class ARK_API Size : public Vec3, public Holder {
+class ARK_API Size : public Vec3 {
 public:
     Size();
     Size(const V3& size);
@@ -25,8 +24,6 @@ public:
 
     virtual V3 val() override;
     virtual bool update(uint64_t timestamp) override;
-
-    virtual void traverse(const Visitor& visitor) override;
 
     float widthAsFloat() const;
     float heightAsFloat() const;

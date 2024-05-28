@@ -9,7 +9,7 @@ namespace {
 
 class DefaultClassImpl : public IClass {
 public:
-    virtual Box cast(const Box& box, TypeId id) override {
+    Box cast(const Box& box, TypeId id) override {
         if(box.typeId() == id)
             return box;
         return Box();

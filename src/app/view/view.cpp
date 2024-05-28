@@ -4,7 +4,6 @@
 #include "core/impl/updatable/updatable_once_per_frame.h"
 #include "core/util/boolean_type.h"
 #include "core/util/math.h"
-#include "core/util/string_convert.h"
 
 #include "graphics/base/layer.h"
 #include "graphics/base/layer_context.h"

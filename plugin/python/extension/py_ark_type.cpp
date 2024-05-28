@@ -16,7 +16,7 @@ static PyObject* __richcmp__(PyArkType::Instance* obj1, PyObject* obj2, int op)
     if(PyIndex_Check(reinterpret_cast<PyObject*>(obj1)) && PyIndex_Check(obj2))
     {
         PyObject* idx1 = PyNumber_Index(reinterpret_cast<PyObject*>(obj1));
-        PyObject* idx2 = PyNumber_Index(reinterpret_cast<PyObject*>(obj2));
+        PyObject* idx2 = PyNumber_Index(obj2);
         long value1 = PyLong_AsLong(idx1);
         long value2 = PyLong_AsLong(idx2);
         Py_XDECREF(idx1);
@@ -52,17 +52,13 @@ struct BreakException {
 
 static int __traverse__(PyArkType::Instance* self, visitproc visitor, void* args)
 {
-    const sp<Holder> holder = self->box->as<Holder>();
-    if(holder)
+    if(const sp<Holder> holder = self->box->as<Holder>())
         try {
             holder->traverse([&visitor, args](const Box& packed) {
-                const sp<PyInstanceRef> pi = packed.as<PyInstanceRef>();
-                if(pi) {
-                    int32_t vret = visitor(pi->instance(), args);
-                    if(vret)
+                if(const sp<PyInstanceRef> pi = packed.as<PyInstanceRef>())
+                    if(int32_t vret = visitor(pi->instance(), args))
                         throw BreakException(vret);
                     return true;
-                }
                 return false;
             });
         } catch(const BreakException& e) {
@@ -73,11 +69,9 @@ static int __traverse__(PyArkType::Instance* self, visitproc visitor, void* args
 
 static int __clear__(PyArkType::Instance* self)
 {
-    const sp<Holder> holder = self->box->as<Holder>();
-    if(holder)
+    if(const sp<Holder> holder = self->box->as<Holder>())
         holder->traverse([](const Box& packed) {
-                const sp<PyInstanceRef> pi = packed.as<PyInstanceRef>();
-                if(pi) {
+                if(const sp<PyInstanceRef> pi = packed.as<PyInstanceRef>()) {
                     pi->clear();
                     return true;
                 }

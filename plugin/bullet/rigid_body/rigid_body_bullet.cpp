@@ -3,9 +3,7 @@
 #include "bullet/base/collision_shape.h"
 #include "bullet/base/bt_rigid_body_ref.h"
 
-namespace ark {
-namespace plugin {
-namespace bullet {
+namespace ark::plugin::bullet {
 
 RigidBodyBullet::Stub::Stub(ColliderBullet world, sp<CollisionShape> collisionShape, sp<BtRigidBodyRef> rigidBody)
     : _world(std::move(world)), _collision_shape(std::move(collisionShape)), _rigid_body(std::move(rigidBody))
@@ -16,7 +14,7 @@ RigidBodyBullet::Stub::~Stub()
 {
     btCollisionObject* collisionObject = _rigid_body->collisionObject();
     _world.btDynamicWorld()->removeCollisionObject(collisionObject);
-    delete reinterpret_cast<WeakPtr<RigidBody::Stub>*>(collisionObject->getUserPointer());
+    delete static_cast<WeakPtr<RigidBody::Stub>*>(collisionObject->getUserPointer());
     collisionObject->setUserPointer(nullptr);
     _rigid_body->reset();
 }
@@ -25,7 +23,7 @@ RigidBodyBullet::RigidBodyBullet(int32_t id, Collider::BodyType type, ColliderBu
     : RigidBody(sp<RigidBody::Stub>::make(id, type, 0, 0, std::move(position), nullptr, std::move(transform), sp<Stub>::make(std::move(world), std::move(collisionShape), std::move(rigidBody)))),
       _stub(stub()->_impl.toPtr<Stub>())
 {
-    _stub->_rigid_body->collisionObject()->setUserPointer(reinterpret_cast<void*>(new WeakPtr<RigidBody::Stub>(stub())));
+    _stub->_rigid_body->collisionObject()->setUserPointer(new WeakPtr<RigidBody::Stub>(stub()));
 }
 
 RigidBodyBullet::RigidBodyBullet(sp<RigidBody::Stub> other)
@@ -80,6 +78,4 @@ const sp<BtRigidBodyRef>& RigidBodyBullet::rigidBody() const
     return _stub->_rigid_body;
 }
 
-}
-}
 }

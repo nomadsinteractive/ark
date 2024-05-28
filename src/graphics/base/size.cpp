@@ -41,11 +41,6 @@ bool Size::update(uint64_t timestamp)
     return _impl->update(timestamp);
 }
 
-void Size::traverse(const Holder::Visitor& visitor)
-{
-    HolderUtil::visit(_impl, visitor);
-}
-
 float Size::widthAsFloat() const
 {
     return _impl->x()->val();

@@ -15,7 +15,7 @@ public:
     Class* addClass(TypeId id, const char* name, IClass* impl);
 
     template<typename T, typename... Args> void addClass(const char* name) {
-        Class* clazz = new Class(Type<T>::id(), name, new _internal::_ClassImpl<T, Args...>());
+        Class* clazz = new Class(Type<T>::id(), name, new _internal::ClassImpl<T, Args...>());
         if constexpr(sizeof...(Args) > 0)
             clazz->setImplementation<Args...>();
         _classes[Type<T>::id()] = std::unique_ptr<Class>(clazz);

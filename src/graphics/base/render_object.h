@@ -3,7 +3,6 @@
 #include "core/base/api.h"
 #include "core/base/timestamp.h"
 #include "core/inf/builder.h"
-#include "core/inf/holder.h"
 #include "core/inf/wirable.h"
 #include "core/types/box.h"
 #include "core/types/shared_ptr.h"
@@ -16,15 +15,13 @@
 
 namespace ark {
 
-//[[script::bindings::holder]]
-class ARK_API RenderObject : public Holder, public Renderable, public Wirable {
+class ARK_API RenderObject : public Renderable, public Wirable {
 public:
     RenderObject(int32_t type, sp<Vec3> position = nullptr, sp<Size> size = nullptr, sp<Transform> transform = nullptr, sp<Varyings> varyings = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> discarded = nullptr);
 //  [[script::bindings::auto]]
     RenderObject(sp<Integer> type, sp<Vec3> position = nullptr, sp<Size> size = nullptr, sp<Transform> transform = nullptr, sp<Varyings> varyings = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> discarded = nullptr);
 
     std::vector<std::pair<TypeId, Box>> onWire(const Traits& components) override;
-    virtual void traverse(const Visitor& visitor) override;
 
 //  [[script::bindings::property]]
     sp<Integer> type() const;

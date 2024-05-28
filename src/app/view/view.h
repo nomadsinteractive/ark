@@ -153,8 +153,8 @@ private:
     public:
         LayoutPosition(sp<Stub> stub, sp<Updatable> updatable, bool isBackground, bool isCenter);
 
-        virtual bool update(uint64_t timestamp) override;
-        virtual V3 val() override;
+        bool update(uint64_t timestamp) override;
+        V3 val() override;
 
     private:
         sp<Stub> _stub;

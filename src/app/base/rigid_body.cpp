@@ -1,7 +1,6 @@
 #include "app/base/rigid_body.h"
 
 #include <algorithm>
-#include <iterator>
 
 #include "core/ark.h"
 
@@ -37,12 +36,6 @@ void RigidBody::bind(const sp<RenderObject>& renderObject)
     renderObject->setPosition(position());
     renderObject->setTransform(_stub->_transform);
     setRenderObject(renderObject);
-}
-
-void RigidBody::traverse(const Holder::Visitor& visitor)
-{
-    visitor(_stub->_tag);
-    HolderUtil::visit(_stub->_callback->_collision_callback, visitor);
 }
 
 int32_t RigidBody::id() const
