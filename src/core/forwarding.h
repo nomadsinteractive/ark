@@ -55,7 +55,7 @@ class CommandGroup;
 class DOMDocument;
 class DOMAttribute;
 class DOMElement;
-class Disposed;
+class Expendable;
 class Duration;
 class Enum;
 class Executor;

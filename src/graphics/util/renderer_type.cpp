@@ -1,6 +1,6 @@
 #include "graphics/util/renderer_type.h"
 
-#include "core/traits/disposed.h"
+#include "core/traits/expendable.h"
 #include "core/traits/visibility.h"
 #include "core/types/safe_ptr.h"
 #include "core/impl/boolean/boolean_by_weak_ref.h"

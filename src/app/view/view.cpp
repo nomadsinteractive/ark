@@ -4,6 +4,7 @@
 #include "core/impl/updatable/updatable_once_per_frame.h"
 #include "core/util/boolean_type.h"
 #include "core/util/math.h"
+#include "core/util/updatable_util.h"
 
 #include "graphics/base/layer.h"
 #include "graphics/base/layer_context.h"
@@ -11,8 +12,7 @@
 #include "graphics/base/render_object_with_layer.h"
 #include "graphics/base/size.h"
 #include "graphics/base/text.h"
-#include "graphics/util/vec4_type.h"
-#include "graphics/util/renderer_type.h"
+#include "graphics/traits/bounds.h"
 
 #include "renderer/base/model.h"
 #include "renderer/base/render_engine.h"
@@ -55,7 +55,7 @@ static V2 toPivotPosition(const sp<Metrics>& occupies, const V2& size)
 {
     const RenderEngine& renderEngine = *Ark::instance().applicationContext()->renderEngine();
     if(!occupies)
-        return renderEngine.isLHS() ? V2(0, size.y()) : V2(0, 0);
+        return renderEngine.isLHS() ? V2(0, 0) : V2(0, size.y());
 
     return size * V2(Math::lerp(0, size.x(), occupies->aabbMin().x(), occupies->aabbMax().x(), 0), Math::lerp(0, size.y(), occupies->aabbMin().y(), occupies->aabbMax().y(), 0));
 }
@@ -63,8 +63,7 @@ static V2 toPivotPosition(const sp<Metrics>& occupies, const V2& size)
 View::View(const sp<LayoutParam>& layoutParam, sp<RenderObjectWithLayer> background, sp<Text> text, sp<Layout> layout, sp<LayoutV3> layoutV3, sp<Boolean> visible, sp<Boolean> disposed)
     : _stub(sp<Stub>::make(layoutParam, (layout || layoutV3) ? sp<ViewHierarchy>::make(std::move(layout), std::move(layoutV3)) : nullptr, std::move(visible), std::move(disposed))),
       _background(std::move(background)), _text(std::move(text)), _is_discarded(sp<IsDiscarded>::make(_stub)), _is_stub_dirty(sp<UpdatableOncePerFrame>::make(_stub)),
-      _is_layout_dirty(sp<UpdatableOncePerFrame>::make(sp<UpdatableIsolatedLayout>::make(_stub))), _size(sp<Size>::make(sp<LayoutSize<0>>::make(_stub), sp<LayoutSize<1>>::make(_stub))),
-      _position(sp<LayoutPosition>::make(_stub, _is_layout_dirty, true, true))
+      _is_layout_dirty(sp<UpdatableOncePerFrame>::make(sp<UpdatableIsolatedLayout>::make(_stub)))
 {
     if(_background)
         addRenderObjectWithLayer(_background, true);
@@ -75,7 +74,7 @@ View::View(const sp<LayoutParam>& layoutParam, sp<RenderObjectWithLayer> backgro
     {
         _text->setPosition(sp<LayoutPosition>::make(_stub, _is_layout_dirty, false, false));
         if(_stub->_layout_param->flexWrap() == LayoutParam::FLEX_WRAP_WRAP)
-            _text->setLayoutSize(_size);
+            _text->setLayoutSize(sp<Size>::make(sp<LayoutSize<0>>::make(_stub), sp<LayoutSize<1>>::make(_stub)));
         else
             updateTextLayout(0);
         _text->show(_is_discarded);
@@ -88,30 +87,22 @@ View::~View()
     LOGD("");
 }
 
-const sp<Size>& View::size()
-{
-    return _size;
-}
-
 std::vector<std::pair<TypeId, Box>> View::onWire(const Traits& components)
 {
-    return {{Type<Size>::id(), _size}, {Type<Vec3>::id(), _position.cast<Vec3>()}};
-}
-
-void View::traverse(const Holder::Visitor& visitor)
-{
-    if(_stub->viewHierarchy())
-        _stub->viewHierarchy()->traverse(visitor);
+    sp<Vec3> center = sp<LayoutPosition>::make(_stub, _is_layout_dirty, true, true);
+    sp<Size> size = sp<Size>::make(sp<LayoutSize<0>>::make(_stub), sp<LayoutSize<1>>::make(_stub));
+    if(const sp<Bounds>& bounds = components.get<Bounds>())
+    {
+        bounds->setCenter(std::move(center));
+        bounds->setSize(std::move(size));
+        return {};
+    }
+    return {{Type<Bounds>::id(), sp<Bounds>::make(std::move(center), std::move(size))}};
 }
 
 void View::addRenderObjectWithLayer(sp<RenderObjectWithLayer> ro, bool isBackground)
 {
-    ro->layerContext()->add(sp<RenderableViewSlot>::make(_stub, ro->renderObject(), ro->layerContext()->modelLoader(), isBackground), _is_layout_dirty, _is_discarded);
-}
-
-const sp<Vec3>& View::position() const
-{
-    return _position;
+    ro->layerContext()->add(sp<RenderableView>::make(_stub, ro->renderObject(), ro->layerContext()->modelLoader(), isBackground), _is_layout_dirty, _is_discarded);
 }
 
 bool View::updateLayout(uint64_t timestamp) const
@@ -259,7 +250,7 @@ bool View::Stub::isDisposed() const
 V3 View::Stub::getTopViewOffsetPosition(bool includePaddings) const
 {
     const LayoutV3::Node& layoutNode = _layout_node;
-    const V3 layoutOffset = V3(layoutNode.offsetPosition(), 0);
+    const V3 layoutOffset(layoutNode.offsetPosition(), 0);
     const sp<Stub> parentStub = _parent_stub.lock();
     V3 offset = parentStub ? parentStub->getTopViewOffsetPosition(false) + layoutOffset : layoutOffset;
     if(includePaddings)
@@ -288,12 +279,12 @@ ViewHierarchy& View::Stub::ensureViewHierarchy()
     return _layout_node->_view_hierarchy;
 }
 
-View::RenderableViewSlot::RenderableViewSlot(sp<Stub> viewStub, sp<Renderable> renderable, sp<ModelLoader> modelLoader, bool isBackground)
+View::RenderableView::RenderableView(sp<Stub> viewStub, sp<Renderable> renderable, sp<ModelLoader> modelLoader, bool isBackground)
     : _view_stub(viewStub), _renderable(std::move(renderable)), _model_loader(std::move(modelLoader)), _is_background(isBackground)
 {
 }
 
-Renderable::StateBits View::RenderableViewSlot::updateState(const RenderRequest& renderRequest)
+Renderable::StateBits View::RenderableView::updateState(const RenderRequest& renderRequest)
 {
     Renderable::State state = _renderable->updateState(renderRequest);
     if(state.hasState(Renderable::RENDERABLE_STATE_VISIBLE))
@@ -301,10 +292,9 @@ Renderable::StateBits View::RenderableViewSlot::updateState(const RenderRequest&
     return state.stateBits();
 }
 
-Renderable::Snapshot View::RenderableViewSlot::snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest, const V3& postTranslate, StateBits state)
+Renderable::Snapshot View::RenderableView::snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest, const V3& postTranslate, StateBits state)
 {
-    sp<LayoutV3::Node> topViewLayoutNode = _view_stub->getTopViewLayoutNode();
-    if(topViewLayoutNode)
+    if(const sp<LayoutV3::Node> topViewLayoutNode = _view_stub->getTopViewLayoutNode())
     {
         const LayoutV3::Node& layoutNode = _view_stub->_layout_node;
         const V4& paddings = layoutNode.paddings();

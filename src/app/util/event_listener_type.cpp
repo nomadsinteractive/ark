@@ -1,6 +1,6 @@
 #include "app/util/event_listener_type.h"
 
-#include "core/traits/disposed.h"
+#include "core/traits/expendable.h"
 #include "core/impl/boolean/boolean_by_weak_ref.h"
 
 #include "app/impl/event_listener/event_listener_list.h"

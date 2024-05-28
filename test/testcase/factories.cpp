@@ -11,7 +11,7 @@
 #include "core/inf/dictionary.h"
 #include "core/inf/variable.h"
 #include "core/impl/dictionary/dictionary_by_attribute_name.h"
-#include "core/traits/disposed.h"
+#include "core/traits/expendable.h"
 #include "core/types/weak_ptr.h"
 #include "core/util/math.h"
 
@@ -31,14 +31,14 @@ class FactoriesCase : public TestCase {
 public:
     virtual int launch() {
         Ark& ark = Ark::instance();
-        WeakPtr<Disposed> we1;
+        WeakPtr<Expendable> we1;
 
         Scope args;
         const sp<ResourceLoader> resourceLoader = ark.applicationContext()->createResourceLoader("application.xml", args);
         BeanFactory& beanFactory = resourceLoader->beanFactory();
         ark.applicationContext()->sysClock()->setTicker(Platform::getSteadyClock());
 
-        const sp<Disposed> e1 = beanFactory.build<Disposed>("@e1", args);
+        const sp<Expendable> e1 = beanFactory.build<Expendable>("@e1", args);
 
         TESTCASE_VALIDATE(e1 && !e1->val());
 
@@ -96,8 +96,8 @@ public:
         sp<Transform> t4 = beanFactory.build<Transform>("@t4", args);
         TESTCASE_VALIDATE(t4 && t4->rotation()->theta()->val() == 1.0f);
 
-        const sp<Disposed> e004 = beanFactory.build<Disposed>("@e004", args);
-        const sp<Disposed> e004Copy = beanFactory.build<Disposed>("@e004", args);
+        const sp<Expendable> e004 = beanFactory.build<Expendable>("@e004", args);
+        const sp<Expendable> e004Copy = beanFactory.build<Expendable>("@e004", args);
         TESTCASE_VALIDATE(e004 == e004Copy);
 
         const sp<Numeric> g8 = beanFactory.build<Numeric>("@g8", args);
@@ -138,7 +138,7 @@ public:
                           && g18->val() == 2 && g18->val() == 1
                           && g18->val() == 2 && g18->val() == 3);
 
-        const sp<Disposed> disposed = we1.lock();
+        const sp<Expendable> disposed = we1.lock();
         TESTCASE_VALIDATE(!disposed);
 
         return 0;

@@ -7,7 +7,7 @@
 #include "core/collection/list.h"
 #include "core/collection/bitwise_trie.h"
 #include "core/concurrent/lf_stack.h"
-#include "core/traits/disposed.h"
+#include "core/traits/expendable.h"
 
 #include "test/base/test_case.h"
 
@@ -17,12 +17,12 @@ namespace unittest {
 class CollectionsTestCase : public TestCase {
 public:
     virtual int launch() override {
-        sp<Disposed> expirable = sp<Disposed>::make();
+        sp<Expendable> expirable = sp<Expendable>::make();
         DList<uint32_t> expirableList;
 
         for(uint32_t i = 0; i < 10; i++)
             expirableList.emplace_back(i, i % 4 == 1 ? expirable : nullptr);
-        expirable->dispose();
+        expirable->discard();
 
         uint32_t sum = 0;
         for(uint32_t i : expirableList.update(0))

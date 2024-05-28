@@ -4,14 +4,12 @@
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
 #include "core/inf/builder.h"
-#include "core/inf/holder.h"
 #include "core/inf/updatable.h"
 #include "core/inf/wirable.h"
 #include "core/types/safe_ptr.h"
 #include "core/types/safe_var.h"
 #include "core/types/weak_ptr.h"
 
-#include "graphics/inf/renderer.h"
 #include "graphics/inf/renderable.h"
 #include "graphics/forwarding.h"
 
@@ -20,21 +18,14 @@
 
 namespace ark {
 
-class ARK_API View : public Wirable, public Holder {
+class ARK_API View final : public Wirable {
 public:
     View(const sp<LayoutParam>& layoutParam, sp<RenderObjectWithLayer> background = nullptr, sp<Text> text = nullptr, sp<Layout> layout = nullptr, sp<LayoutV3> layoutV3 = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> disposed = nullptr);
     ~View() override;
 
-//  [[script::bindings::property]]
-    const sp<Size>& size();
-
     std::vector<std::pair<TypeId, Box>> onWire(const Traits& components) override;
-    virtual void traverse(const Visitor& visitor) override;
 
     void addRenderObjectWithLayer(sp<RenderObjectWithLayer> ro, bool isBackground);
-
-//  [[script::bindings::property]]
-    const sp<Vec3>& position() const;
 
     bool updateLayout(uint64_t timestamp) const;
     void updateTextLayout(uint64_t timestamp);
@@ -124,12 +115,12 @@ private:
     void markAsTopView();
 
 private:
-    class RenderableViewSlot : public Renderable {
+    class RenderableView : public Renderable {
     public:
-        RenderableViewSlot(sp<Stub> viewStub, sp<Renderable> renderable, sp<ModelLoader> modelLoader, bool isBackground);
+        RenderableView(sp<Stub> viewStub, sp<Renderable> renderable, sp<ModelLoader> modelLoader, bool isBackground);
 
-        virtual StateBits updateState(const RenderRequest& renderRequest) override;
-        virtual Snapshot snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest, const V3& postTranslate, StateBits state) override;
+        StateBits updateState(const RenderRequest& renderRequest) override;
+        Snapshot snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest, const V3& postTranslate, StateBits state) override;
 
     private:
         sp<Stub> _view_stub;
@@ -175,7 +166,6 @@ protected:
     sp<Updatable> _is_layout_dirty;
 
     sp<Size> _size;
-    sp<Vec3> _position;
 
     friend class Arena;
     friend class ViewHierarchy;

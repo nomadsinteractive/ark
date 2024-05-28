@@ -39,7 +39,7 @@ sp<RigidBody> ColliderImpl::createBody(Collider::BodyType type, int32_t shape, c
     ASSERT(size);
     CHECK(type == Collider::BODY_TYPE_KINEMATIC || type == Collider::BODY_TYPE_DYNAMIC || type == Collider::BODY_TYPE_STATIC || type == Collider::BODY_TYPE_SENSOR, "Unknown BodyType: %d", type);
 
-    sp<Disposed> disp = sp<Disposed>::make(std::move(disposed));
+    sp<Expendable> disp = sp<Expendable>::make(std::move(disposed));
     return _stub->createRigidBody(_stub->generateRigidBodyId(), type, shape, position, size, rotate, std::move(disp));
 }
 
@@ -140,7 +140,7 @@ int32_t ColliderImpl::Stub::generateRigidBodyId()
     return ++_rigid_body_base_id;
 }
 
-sp<ColliderImpl::RigidBodyImpl> ColliderImpl::Stub::createRigidBody(int32_t rigidBodyId, Collider::BodyType type, int32_t shape, sp<Vec3> position, sp<Size> size, sp<Rotation> rotate, sp<Disposed> disposed)
+sp<ColliderImpl::RigidBodyImpl> ColliderImpl::Stub::createRigidBody(int32_t rigidBodyId, Collider::BodyType type, int32_t shape, sp<Vec3> position, sp<Size> size, sp<Rotation> rotate, sp<Expendable> disposed)
 {
     const V3 posVal = position->val();
     sp<RigidBodyShadow> rigidBodyShadow = sp<RigidBodyShadow>::make(*this, rigidBodyId, type, 0, shape, std::move(position), size, std::move(rotate), std::move(disposed));
@@ -264,7 +264,7 @@ void ColliderImpl::RigidBodyImpl::dispose()
     doDispose();
 }
 
-ColliderImpl::RigidBodyShadow::RigidBodyShadow(const ColliderImpl::Stub& stub, uint32_t id, Collider::BodyType type, uint32_t metaId, int32_t shapeId, sp<Vec3> position, sp<Size> size, sp<Rotation> rotation, sp<Disposed> disposed)
+ColliderImpl::RigidBodyShadow::RigidBodyShadow(const ColliderImpl::Stub& stub, uint32_t id, Collider::BodyType type, uint32_t metaId, int32_t shapeId, sp<Vec3> position, sp<Size> size, sp<Rotation> rotation, sp<Expendable> disposed)
     : RigidBody(sp<RigidBody::Stub>::make(id, type, metaId, shapeId, std::move(position), std::move(size), sp<Transform>::make(Transform::TYPE_LINEAR_2D, std::move(rotation)), Box(),
                                           std::move(disposed))), _collider_stub(stub), _position_updated(true), _size_updated(false)
 {
@@ -272,7 +272,7 @@ ColliderImpl::RigidBodyShadow::RigidBodyShadow(const ColliderImpl::Stub& stub, u
 
 void ColliderImpl::RigidBodyShadow::dispose()
 {
-    stub()->_disposed->dispose();
+    stub()->_disposed->discard();
 }
 
 bool ColliderImpl::RigidBodyShadow::update(uint64_t timestamp)

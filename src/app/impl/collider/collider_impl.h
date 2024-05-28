@@ -54,7 +54,7 @@ public:
 
         int32_t generateRigidBodyId();
 
-        sp<RigidBodyImpl> createRigidBody(int32_t rigidBodyId, Collider::BodyType type, int32_t shape, sp<Vec3> position, sp<Size> size, sp<Rotation> rotate, sp<Disposed> disposed);
+        sp<RigidBodyImpl> createRigidBody(int32_t rigidBodyId, Collider::BodyType type, int32_t shape, sp<Vec3> position, sp<Size> size, sp<Rotation> rotate, sp<Expendable> disposed);
 
         const sp<RigidBodyShadow>& ensureRigidBody(int32_t id) const;
         sp<RigidBodyShadow> ensureRigidBody(int32_t id, uint32_t metaId, int32_t shapeId, const V3& position, bool isDynamicRigidBody) const;
@@ -92,7 +92,7 @@ public:
 
     class RigidBodyShadow : public RigidBody, public Updatable {
     public:
-        RigidBodyShadow(const ColliderImpl::Stub& stub, uint32_t id, Collider::BodyType type, uint32_t metaId, int32_t shape, sp<Vec3> position, sp<Size> size, sp<Rotation> rotation, sp<Disposed> disposed);
+        RigidBodyShadow(const ColliderImpl::Stub& stub, uint32_t id, Collider::BodyType type, uint32_t metaId, int32_t shape, sp<Vec3> position, sp<Size> size, sp<Rotation> rotation, sp<Expendable> disposed);
 
         virtual void dispose() override;
         virtual bool update(uint64_t timestamp) override;

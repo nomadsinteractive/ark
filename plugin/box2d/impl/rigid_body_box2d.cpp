@@ -9,7 +9,6 @@
 #include "core/util/numeric_type.h"
 #include "core/util/log.h"
 
-#include "graphics/base/bounds.h"
 #include "graphics/base/rect.h"
 #include "graphics/base/render_object.h"
 #include "graphics/base/quaternion.h"
@@ -379,7 +378,7 @@ void RigidBodyBox2D::Stub::dispose()
 
     delete reinterpret_cast<RigidBodyBox2D::Shadow*>(_body->GetUserData().pointer);
     _body->GetUserData().pointer = 0;
-    _disposed->dispose();
+    _disposed->discard();
 
     if(_world.world().IsLocked())
         Ark::instance().applicationContext()->deferUnref(sp<BodyDisposer>::make(_world, _body));

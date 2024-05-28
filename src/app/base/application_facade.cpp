@@ -1,7 +1,7 @@
 #include "app/base/application_facade.h"
 
 #include "core/base/future.h"
-#include "core/traits/disposed.h"
+#include "core/traits/expendable.h"
 
 #include "graphics/base/camera.h"
 #include "graphics/base/surface_controller.h"
@@ -112,13 +112,13 @@ void ApplicationFacade::setArena(sp<Arena> arena)
 
     if(_arena)
     {
-        _arena_discarded->dispose();
+        _arena_discarded->discard();
         _context->deferUnref(std::move(_arena));
     }
 
     ASSERT(arena);
     _arena = std::move(arena);
-    _arena_discarded = sp<Disposed>::make();
+    _arena_discarded = sp<Expendable>::make();
 
     _surface_controller->addRenderer(_arena, _arena_discarded);
     _context->addEventListener(_arena, _arena_discarded);

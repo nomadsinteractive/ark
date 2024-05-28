@@ -34,7 +34,7 @@ public:
     };
 
     struct ARK_API Stub {
-        Stub(int32_t id, Collider::BodyType type, uint32_t metaId, int32_t shapeId, sp<Vec3> position, sp<Size> size, sp<Transform> transform, Box impl, sp<Disposed> disposed = nullptr);
+        Stub(int32_t id, Collider::BodyType type, uint32_t metaId, int32_t shapeId, sp<Vec3> position, sp<Size> size, sp<Transform> transform, Box impl, sp<Expendable> disposed = nullptr);
         ~Stub();
 
         DISALLOW_COPY_AND_ASSIGN(Stub);
@@ -48,7 +48,7 @@ public:
         sp<Transform> _transform;
 
         Box _impl;
-        SafePtr<Disposed> _disposed;
+        SafePtr<Expendable> _disposed;
 
         sp<Callback> _callback;
         sp<CollisionFilter> _collision_filter;
@@ -60,7 +60,7 @@ public:
 public:
     virtual ~RigidBody() = default;
 
-    RigidBody(int32_t id, Collider::BodyType type, int32_t shapeId, sp<Vec3> position, sp<Size> size, sp<Rotation> rotate, Box impl, sp<Disposed> disposed);
+    RigidBody(int32_t id, Collider::BodyType type, int32_t shapeId, sp<Vec3> position, sp<Size> size, sp<Rotation> rotate, Box impl, sp<Expendable> disposed);
     RigidBody(sp<Stub> stub);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(RigidBody);
 
@@ -108,7 +108,7 @@ public:
     void setRenderObject(const sp<RenderObject>& renderObject);
 
 //  [[script::bindings::property]]
-    const sp<Disposed>& disposed() const;
+    const sp<Expendable>& disposed() const;
 
 //  [[script::bindings::property]]
     const sp<CollisionCallback>& collisionCallback() const;

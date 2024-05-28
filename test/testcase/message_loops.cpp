@@ -10,7 +10,7 @@
 #include "core/inf/runnable.h"
 #include "core/concurrent/lf_stack.h"
 #include "core/concurrent/one_consumer_synchronized.h"
-#include "core/traits/disposed.h"
+#include "core/traits/expendable.h"
 #include "core/types/shared_ptr.h"
 
 #include "core/base/thread.h"
@@ -51,12 +51,12 @@ public:
         sp<RunnableImpl> task = sp<RunnableImpl>::make("a");
         sp<RunnableImpl> task1 = sp<RunnableImpl>::make("b");
         sp<RunnableImpl> task2 = sp<RunnableImpl>::make("c");
-        sp<Disposed> expirable = sp<Disposed>::make();
+        sp<Expendable> expirable = sp<Expendable>::make();
 
         messageLoopThread->post(task, 0.2f);
         messageLoopThread->schedule(task1, 0.3f);
 //        messageLoopThread->schedule(task2.absorb(expirable), 0.3f);
-        expirable->dispose();
+        expirable->discard();
         std::this_thread::sleep_for(std::chrono::seconds(1));
         messageLoopThread->thread().terminate();
         messageLoopThread->thread().join();

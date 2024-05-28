@@ -3,8 +3,8 @@
 #include "core/base/bean_factory.h"
 #include "core/util/updatable_util.h"
 
-#include "graphics/base/bounds.h"
 #include "graphics/base/v3.h"
+#include "graphics/traits/bounds.h"
 
 namespace ark {
 

@@ -1,6 +1,6 @@
 #include "app/view/view_hierarchy.h"
 
-#include "core/traits/disposed.h"
+#include "core/traits/expendable.h"
 #include "core/traits/visibility.h"
 #include "core/util/holder_util.h"
 #include "core/util/updatable_util.h"

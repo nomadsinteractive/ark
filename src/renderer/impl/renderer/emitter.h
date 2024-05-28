@@ -7,7 +7,7 @@
 #include "core/inf/builder.h"
 #include "core/inf/holder.h"
 #include "core/inf/runnable.h"
-#include "core/traits/disposed.h"
+#include "core/traits/expendable.h"
 #include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
 

@@ -6,11 +6,11 @@
 #include "core/util/boolean_type.h"
 #include "core/util/log.h"
 
-#include "graphics/base/bounds.h"
 #include "graphics/base/quaternion.h"
 #include "graphics/base/rect.h"
 #include "graphics/base/rotation.h"
 #include "graphics/base/v2.h"
+#include "graphics/traits/bounds.h"
 
 #include "renderer/base/resource_loader_context.h"
 

@@ -1,4 +1,4 @@
-#include "graphics/base/bounds.h"
+#include "graphics/traits/bounds.h"
 
 #include "core/util/math.h"
 #include "core/util/updatable_util.h"
@@ -7,8 +7,8 @@
 
 namespace ark {
 
-Bounds::Bounds(const sp<Vec3>& position, const sp<Size>& size)
-    : _center(position), _size(size)
+Bounds::Bounds(sp<Vec3> position, sp<Size> size)
+    : _center(std::move(position)), _size(std::move(size))
 {
 }
 
@@ -27,9 +27,19 @@ const sp<Vec3>& Bounds::center() const
     return _center;
 }
 
+void Bounds::setCenter(sp<Vec3> center)
+{
+    _center = std::move(center);
+}
+
 const sp<Size>& Bounds::size()
 {
     return _size;
+}
+
+void Bounds::setSize(sp<Size> size)
+{
+    _size = std::move(size);
 }
 
 bool Bounds::update(uint64_t timestamp)
@@ -38,4 +48,3 @@ bool Bounds::update(uint64_t timestamp)
 }
 
 }
-

@@ -204,7 +204,7 @@ void YogaLayout::applyLayoutParam(const LayoutParam& layoutParam, YGNodeRef node
 
 void YogaLayout::updateLayoutResult(Node& layoutNode)
 {
-    YGNodeRef ygNode = reinterpret_cast<YGNodeRef>(layoutNode._tag);
+    const auto ygNode = static_cast<YGNodeRef>(layoutNode._tag);
     layoutNode.setPaddings(V4(YGNodeLayoutGetPadding(ygNode, YGEdgeTop), YGNodeLayoutGetPadding(ygNode, YGEdgeRight),
                               YGNodeLayoutGetPadding(ygNode, YGEdgeBottom), YGNodeLayoutGetPadding(ygNode, YGEdgeLeft)));
     layoutNode.setOffsetPosition(V2(YGNodeLayoutGetLeft(ygNode), YGNodeLayoutGetTop(ygNode)));
@@ -218,7 +218,7 @@ void YogaLayout::updateLayoutResult(Node& layoutNode)
 YGNodeRef YogaLayout::doInflate(const YogaConfig& config, Node& layoutNode, YGNodeRef parentNode)
 {
     YGNodeRef ygNode = config.newNode();
-    layoutNode._tag = reinterpret_cast<void*>(ygNode);
+    layoutNode._tag = ygNode;
 
     if(parentNode)
         YGNodeInsertChild(parentNode, ygNode, YGNodeGetChildCount(parentNode));

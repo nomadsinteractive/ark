@@ -23,7 +23,7 @@ const sp<ModelLoader>& WithLayer::modelLoader() const
 std::vector<std::pair<TypeId, Box>> WithLayer::onWire(const Traits& components)
 {
     if(sp<Renderable> renderable = components.get<Renderable>())
-        _layer_context->add(std::move(renderable), components.get<Updatable>(), components.get<Disposed>());
+        _layer_context->add(std::move(renderable), components.get<Updatable>(), components.get<Expendable>());
     return {};
 }
 

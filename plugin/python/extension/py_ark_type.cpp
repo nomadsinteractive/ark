@@ -1,7 +1,7 @@
 #include "python/extension/py_ark_type.h"
 
 #include "core/base/scope.h"
-#include "core/traits/disposed.h"
+#include "core/traits/expendable.h"
 #include "core/inf/holder.h"
 #include "core/inf/variable.h"
 #include "core/util/log.h"
@@ -236,8 +236,8 @@ int PyArkType::__init__(Instance* /*self*/, PyObject* /*args*/, PyObject* /*kwds
 
 PyObject* PyArkType::__dispose__(PyArkType::Instance* self, PyObject* /*args*/, PyObject* /*kwargs*/)
 {
-    const sp<Disposed> disposed = PyCast::ensureSharedPtr<Disposed>(reinterpret_cast<PyObject*>(self));
-    disposed->dispose();
+    const sp<Expendable> expendable = PyCast::ensureSharedPtr<Expendable>(reinterpret_cast<PyObject*>(self));
+    expendable->discard();
     Py_RETURN_NONE;
 }
 

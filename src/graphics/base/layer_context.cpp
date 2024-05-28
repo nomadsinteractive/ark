@@ -2,7 +2,7 @@
 
 #include "core/ark.h"
 #include "core/base/notifier.h"
-#include "core/traits/disposed.h"
+#include "core/traits/expendable.h"
 #include "core/util/holder_util.h"
 #include "core/util/log.h"
 #include "core/util/updatable_util.h"

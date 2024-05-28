@@ -940,7 +940,7 @@ class Integer(_Var):
         pass
 
 
-class Disposed(Boolean):
+class Expendable(Boolean):
     def __init__(self, disposed=False):
         pass
 
