@@ -38,7 +38,7 @@ public:
     }
 
 //  [[script::bindings::property]]
-    uintptr_t id() const;
+    sp<EntityId> id() const;
 
 //  [[script::bindings::auto]]
     void dispose();

@@ -15,7 +15,6 @@ public:
 
 private:
     sp<Entity::Ref> _ref;
-
 };
 
 }

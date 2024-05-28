@@ -32,18 +32,17 @@ public:
         : _stub(std::move(stub)) {
     }
 
-    virtual bool update(uint64_t timestamp) override {
+    bool update(uint64_t timestamp) override {
         return _stub->_layout_node->size().update(timestamp);
     }
 
-    virtual float val() override {
+    float val() override {
         const V2& size = _stub->_layout_node->size();
         return size[IDX];
     }
 
 private:
     sp<View::Stub> _stub;
-
 };
 
 }

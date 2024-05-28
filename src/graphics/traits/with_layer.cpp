@@ -2,7 +2,6 @@
 
 #include "graphics/base/layer.h"
 #include "graphics/base/layer_context.h"
-#include "graphics/base/render_object.h"
 
 namespace ark {
 

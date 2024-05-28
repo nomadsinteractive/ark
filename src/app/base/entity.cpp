@@ -2,6 +2,8 @@
 
 #include "core/inf/wirable.h"
 
+#include "app/base/entity_id.h"
+
 namespace ark {
 
 Entity::Entity(Traits components)
@@ -25,9 +27,9 @@ void Entity::doWire()
         onWireOne(v);
 }
 
-uintptr_t Entity::id() const
+sp<EntityId> Entity::id() const
 {
-    return reinterpret_cast<uintptr_t>(_ref.get());
+    return sp<EntityId>::make(*this);
 }
 
 void Entity::dispose()
