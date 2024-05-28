@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_IMPL_RENDER_COMMAND_COMPOSER_RCC_MULTI_DRAW_ELEMENTS_INDIRECT_H_
-#define ARK_RENDERER_IMPL_RENDER_COMMAND_COMPOSER_RCC_MULTI_DRAW_ELEMENTS_INDIRECT_H_
+#pragma once
 
 #include <mutex>
 #include <vector>
@@ -89,5 +88,3 @@ private:
 };
 
 }
-
-#endif

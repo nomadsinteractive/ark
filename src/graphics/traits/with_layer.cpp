@@ -2,26 +2,30 @@
 
 #include "graphics/base/layer.h"
 #include "graphics/base/layer_context.h"
+#include "graphics/base/render_object.h"
 
 namespace ark {
 
-WithLayer::WithLayer(sp<Layer> layer)
-    : _layer(std::move(layer))
+WithLayer::WithLayer(const sp<Layer>& layer)
+    : _layer_context(layer->context())
 {
 }
 
-void WithLayer::onWire(const Traits& components)
+WithLayer::WithLayer(const sp<RenderLayer>& renderLayer)
+    : _layer_context(renderLayer->context())
 {
-    if(const sp<RenderObject> renderObject = components.get<RenderObject>())
-    {
-        _layer->addRenderObject(renderObject);
-    }
-    else if(sp<Renderable> renderable = components.get<Renderable>())
-    {
-        const sp<Disposed> discarded = components.get<Disposed>();
-        sp<Updatable> updatable = components.get<Updatable>();
-        _layer->context()->add(std::move(renderable), std::move(updatable), discarded);
-    }
+}
+
+const sp<ModelLoader>& WithLayer::modelLoader() const
+{
+    return _layer_context->modelLoader();
+}
+
+std::vector<std::pair<TypeId, Box>> WithLayer::onWire(const Traits& components)
+{
+    if(sp<Renderable> renderable = components.get<Renderable>())
+        _layer_context->add(std::move(renderable), components.get<Updatable>(), components.get<Disposed>());
+    return {};
 }
 
 }

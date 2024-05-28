@@ -1,6 +1,6 @@
-#ifndef ARK_CORE_COLLECTION_TABLE_H_
-#define ARK_CORE_COLLECTION_TABLE_H_
+#pragma once
 
+#include <map>
 #include <memory>
 #include <unordered_map>
 #include <vector>
@@ -9,12 +9,12 @@
 
 namespace ark {
 
-template<typename T, typename U> class Table {
+template<typename T, typename U, bool Ordered> class Table {
 public:
     template<bool IS_CONSTANT> struct Iterator {
 
-        template <typename V> using PType = typename std::conditional<IS_CONSTANT, const V&, V&>::type;
-        template <typename V> using VType = typename std::conditional<IS_CONSTANT, const std::vector<V>&, std::vector<V>&>::type;
+        template <typename V> using PType = std::conditional_t<IS_CONSTANT, const V&, V&>;
+        template <typename V> using VType = std::conditional_t<IS_CONSTANT, const std::vector<V>&, std::vector<V>&>;
 
         typedef std::pair<PType<T>, PType<U>> PairType;
 
@@ -77,6 +77,7 @@ public:
 
     typedef Iterator<false> iterator;
     typedef Iterator<true>  const_iterator;
+    typedef std::conditional_t<Ordered, std::map<T, size_t>, std::unordered_map<T, size_t>> IndexType;
 
 public:
     Table() = default;
@@ -158,11 +159,9 @@ public:
     }
 
 private:
-    std::unordered_map<T, size_t> _indices;
     std::vector<T> _keys;
     std::vector<U> _values;
+    IndexType _indices;
 };
 
 }
-
-#endif

@@ -3,11 +3,10 @@
 #include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
-#include "core/impl/updatable/updatable_wrapper.h"
 #include "core/inf/builder.h"
 #include "core/inf/holder.h"
 #include "core/inf/updatable.h"
-#include "core/types/implements.h"
+#include "core/inf/wirable.h"
 #include "core/types/safe_ptr.h"
 #include "core/types/safe_var.h"
 #include "core/types/weak_ptr.h"
@@ -21,15 +20,15 @@
 
 namespace ark {
 
-class ARK_API View : public Holder {
+class ARK_API View : public Wirable, public Holder {
 public:
     View(const sp<LayoutParam>& layoutParam, sp<RenderObjectWithLayer> background = nullptr, sp<Text> text = nullptr, sp<Layout> layout = nullptr, sp<LayoutV3> layoutV3 = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> disposed = nullptr);
-    View(sp<Size> size);
     ~View() override;
 
 //  [[script::bindings::property]]
     const sp<Size>& size();
 
+    std::vector<std::pair<TypeId, Box>> onWire(const Traits& components) override;
     virtual void traverse(const Visitor& visitor) override;
 
     void addRenderObjectWithLayer(sp<RenderObjectWithLayer> ro, bool isBackground);
@@ -124,6 +123,7 @@ public:
 private:
     void markAsTopView();
 
+private:
     class RenderableViewSlot : public Renderable {
     public:
         RenderableViewSlot(sp<Stub> viewStub, sp<Renderable> renderable, sp<ModelLoader> modelLoader, bool isBackground);

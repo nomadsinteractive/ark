@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_BASE_MODEL_BUNDLE_H_
-#define ARK_RENDERER_BASE_MODEL_BUNDLE_H_
+#pragma once
 
 #include "core/base/bean_factory.h"
 #include "core/base/manifest.h"
@@ -146,5 +145,3 @@ private:
 };
 
 }
-
-#endif

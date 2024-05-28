@@ -84,11 +84,6 @@ View::View(const sp<LayoutParam>& layoutParam, sp<RenderObjectWithLayer> backgro
     }
 }
 
-View::View(sp<Size> size)
-    : View(sp<LayoutParam>::make(std::move(size)))
-{
-}
-
 View::~View()
 {
     _stub->dispose();
@@ -98,6 +93,11 @@ View::~View()
 const sp<Size>& View::size()
 {
     return _size;
+}
+
+std::vector<std::pair<TypeId, Box>> View::onWire(const Traits& components)
+{
+    return {{Type<Size>::id(), _size}, {Type<Vec3>::id(), _position.cast<Vec3>()}};
 }
 
 void View::traverse(const Holder::Visitor& visitor)

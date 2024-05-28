@@ -19,11 +19,10 @@ Entity::Ref::Ref(Entity& entity)
     : _entity(entity), _discarded(false) {
 }
 
-void Entity::doWire() const
+void Entity::doWire()
 {
     for(const auto& [k, v] : _components.traits())
-        if(const sp<Wirable> wirable = v.as<Wirable>())
-            wirable->onWire(_components);
+        onWireOne(v);
 }
 
 uintptr_t Entity::id() const
@@ -34,18 +33,13 @@ uintptr_t Entity::id() const
 void Entity::dispose()
 {
     _ref->_discarded = true;
+    _components.traits().clear();
 }
 
-sp<RenderObject> Entity::renderObject() const {
-    return _components.get<RenderObject>();
-}
-
-void Entity::addComponent(Box box)
+void Entity::addComponent(Box component)
 {
-    TypeId typeId = box.typeId();
-    if(const sp<Wirable> wirable = box.as<Wirable>())
-        wirable->onWire(_components);
-    _components.put(typeId, std::move(box));
+    onWireOne(component);
+    _components.put(component.typeId(), std::move(component));
 }
 
 bool Entity::hasComponent(TypeId typeId) const
@@ -61,6 +55,13 @@ Optional<Box> Entity::getComponent(TypeId typeId) const
 const Traits& Entity::components() const
 {
     return _components;
+}
+
+void Entity::onWireOne(const Box& component)
+{
+    if(const sp<Wirable> wirable = component.as<Wirable>())
+        for(auto& [k, v] : wirable->onWire(_components))
+            _components.put(k, v ? std::move(v) : component);
 }
 
 }

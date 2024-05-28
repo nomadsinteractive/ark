@@ -8,8 +8,11 @@
 #include "core/util/numeric_type.h"
 #include "core/util/updatable_util.h"
 
+#include "graphics/traits/with_layer.h"
+
 #include "graphics/util/vec3_type.h"
 
+#include "renderer/base/model.h"
 #include "renderer/base/varyings.h"
 
 namespace ark {
@@ -251,6 +254,21 @@ Renderable::Snapshot RenderObject::snapshot(const PipelineInput& pipelineInput, 
     if(state & Renderable::RENDERABLE_STATE_DIRTY)
         return Renderable::Snapshot(state, _type->val(), _position.val(), _size.val(), _transform->snapshot(postTranslate), _varyings ? _varyings->snapshot(pipelineInput, renderRequest.allocator()) : Varyings::Snapshot());
     return Renderable::Snapshot(state, _type->val());
+}
+
+std::vector<std::pair<TypeId, Box>> RenderObject::onWire(const Traits& components)
+{
+    if(sp<Vec3> position = components.get<Vec3>())
+        _position.reset(std::move(position));
+    if(!_size)
+    {
+        if(sp<Size> size = components.get<Size>())
+            _size.reset(std::move(size));
+        else if(const sp<WithLayer> withLayer = components.get<WithLayer>())
+            if(const sp<Metrics>& metrics = withLayer->modelLoader()->loadModel(_type->val())->bounds())
+                _size.reset(sp<Size>::make(metrics->size()));
+    }
+    return {{Type<Renderable>::id(), nullptr}};
 }
 
 RenderObject::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

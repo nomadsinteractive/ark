@@ -1,8 +1,7 @@
 #pragma once
 
-#include <map>
-
 #include "core/base/api.h"
+#include "core/collection/table.h"
 #include "core/types/box.h"
 #include "core/types/optional.h"
 #include "core/types/shared_ptr.h"
@@ -17,6 +16,8 @@ public:
         _add_trait(std::forward<Args>(args)...);
     }
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Traits);
+
+    typedef Table<TypeId, Box> TableType;
 
     template<typename T> bool has() const {
         return has(Type<T>::id());
@@ -39,7 +40,7 @@ public:
 
     template<typename T> sp<T> get() const {
         const Optional<Box> optBox = get(Type<T>::id());
-        return optBox ? optBox->template toPtr<T>() : nullptr;
+        return optBox ? optBox->as<T>() : nullptr;
     }
 
     Optional<Box> get(TypeId typeId) const {
@@ -57,7 +58,11 @@ public:
         return instance_sfinae<T, Args...>(0, std::forward<Args>(args)...);
     }
 
-    const std::map<TypeId, Box>& traits() const {
+    const TableType& traits() const {
+        return _traits;
+    }
+
+    TableType& traits() {
         return _traits;
     }
 
@@ -82,7 +87,7 @@ private:
     }
 
 private:
-    std::map<TypeId, Box> _traits;
+    TableType _traits;
 };
 
 }

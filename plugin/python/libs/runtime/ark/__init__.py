@@ -2602,5 +2602,10 @@ class Entity:
         pass
 
 
+class WithLayer:
+    def __init__(self, layer: RenderLayer | Layer):
+        pass
+
+
 def __trace__():
     pass

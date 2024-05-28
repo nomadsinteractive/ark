@@ -1,8 +1,8 @@
 #pragma once
 
 #include "core/base/api.h"
+#include "core/forwarding.h"
 #include "core/collection/traits.h"
-#include "core/inf/wirable.h"
 #include "core/types/shared_ptr.h"
 
 #include "core/base/resource_loader.h"
@@ -20,12 +20,12 @@ public:
     }
 
     template<typename T> void addComponent(sp<T> cmp) {
-        wireComponent<T>(cmp);
-        _components.put(std::move(cmp));
+        addComponent(Box(std::move(cmp)));
     }
 
     template<typename T, typename... Args> sp<T> makeComponent(Args&&... args) {
-        return wireComponent<T>(_components.ensure<T>(std::forward<Args>(args)...));
+        sp<T> component = _components.ensure<T>(std::forward<Args>(args)...);
+        onWireOne(Box(component));
     }
 
 //  [[script::bindings::loader]]
@@ -34,7 +34,7 @@ public:
         CHECK(resourceLoader, "An Entity doesn't have a ResourceLoader component can't load anything.");
         sp<T> cmp = resourceLoader->load<T>(name, args);
         addComponent<T>(cmp);
-        return wireComponent<T>(cmp);
+        return cmp;
     }
 
 //  [[script::bindings::property]]
@@ -42,9 +42,6 @@ public:
 
 //  [[script::bindings::auto]]
     void dispose();
-
-//  [[script::bindings::property]]
-    sp<RenderObject> renderObject() const;
 
 //  [[script::bindings::auto]]
     bool hasComponent(TypeId typeId) const;
@@ -64,13 +61,9 @@ public:
     };
 
 private:
-    void doWire() const;
+    void doWire();
 
-    template<typename T> sp<T> wireComponent(sp<T> cmp) const {
-        if(const sp<Wirable> wirable = cmp.template tryCast<Wirable>())
-            wirable->onWire(_components);
-        return cmp;
-    }
+    void onWireOne(const Box& component);
 
 private:
     sp<Ref> _ref;

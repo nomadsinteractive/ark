@@ -81,7 +81,7 @@ public:
     }
 
     template<typename U> bool isInstance() const {
-        return _class ? _class->isInstance(Type<U>::id()) : std::is_same_v<T, U>;
+        return std::is_same_v<T, U> || getClass()->isInstance(Type<U>::id());
     }
 
     template<typename U> SharedPtr<U> tryCast() const {

@@ -27,7 +27,7 @@ template<typename T> class Range;
 template<typename T> class SafePtr;
 template<typename T> class SafeVar;
 template<typename T> class SharedPtr;
-template<typename T, typename U> class Table;
+template<typename T, typename U, bool Ordered = true> class Table;
 template<typename T> class Type;
 template<typename T> class Variable;
 template<typename T> class VariableWrapper;
@@ -91,6 +91,7 @@ class Updatable;
 class UpdatableWrapper;
 class UploaderWrapper;
 class Visibility;
+class Wirable;
 class Writable;
 
 typedef Dictionary<Box> BoxBundle;
