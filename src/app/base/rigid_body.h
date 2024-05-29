@@ -35,7 +35,7 @@ public:
     };
 
     struct ARK_API Stub {
-        Stub(int32_t id, Collider::BodyType type, uint32_t metaId, int32_t shapeId, sp<Vec3> position, sp<Size> size, sp<Transform> transform, Box impl, SafeVar<Boolean> discarded = nullptr);
+        Stub(int32_t id, Collider::BodyType type, uint32_t metaId, sp<Shape> shape, sp<Vec3> position, sp<Transform> transform, Box impl, SafeVar<Boolean> discarded = nullptr);
         ~Stub();
 
         DISALLOW_COPY_AND_ASSIGN(Stub);
@@ -43,9 +43,8 @@ public:
         int32_t _id;
         Collider::BodyType _type;
         uint32_t _meta_id;
-        int32_t _shape_id;
+        sp<Shape> _shape;
         SafePtr<Vec3> _position;
-        SafePtr<Size> _size;
         sp<Transform> _transform;
 
         Box _impl;
@@ -61,7 +60,7 @@ public:
 public:
     virtual ~RigidBody() = default;
 
-    RigidBody(int32_t id, Collider::BodyType type, int32_t shapeId, sp<Vec3> position, sp<Size> size, sp<Rotation> rotate, Box impl, SafeVar<Boolean> discarded);
+    RigidBody(int32_t id, Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Rotation> rotate, Box impl, SafeVar<Boolean> discarded);
     RigidBody(sp<Stub> stub);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(RigidBody);
 
@@ -77,14 +76,12 @@ public:
 //  [[script::bindings::property]]
     Collider::BodyType rigidType() const;
 //  [[script::bindings::property]]
-    int32_t shapeId() const;
-//  [[script::bindings::property]]
     uint32_t metaId() const;
 
 //  [[script::bindings::property]]
-    const sp<Vec3>& position() const;
+    const sp<Shape>& shape() const;
 //  [[script::bindings::property]]
-    const sp<Size>& size() const;
+    const sp<Vec3>& position() const;
 //  [[script::bindings::property]]
     const sp<Transform>& transform() const;
 

@@ -18,6 +18,7 @@
 #include "app/base/rigid_body.h"
 #include "app/inf/broad_phrase.h"
 #include "app/inf/narrow_phrase.h"
+#include "app/traits/shape.h"
 #include "app/util/rigid_body_def.h"
 
 namespace ark {
@@ -143,7 +144,7 @@ sp<ColliderImpl::RigidBodyImpl> ColliderImpl::Stub::createRigidBody(int32_t rigi
 {
     const V3 posVal = position->val();
     sp<RigidBodyShadow> rigidBodyShadow = sp<RigidBodyShadow>::make(*this, rigidBodyId, type, 0, shape, std::move(position), size, std::move(rotate), std::move(discarded));
-    const RigidBodyDef& rigidBodyDef = rigidBodyShadow->updateBodyDef(_narrow_phrase, size);
+    const RigidBodyDef& rigidBodyDef = rigidBodyShadow->updateBodyDef(_narrow_phrase, sp<Vec3>::make<Vec3::Const>(size->val()));
     _rigid_bodies[rigidBodyShadow->id()] = rigidBodyShadow;
 
     float s = rigidBodyDef.occupyRadius() * 2;
@@ -264,7 +265,7 @@ void ColliderImpl::RigidBodyImpl::dispose()
 }
 
 ColliderImpl::RigidBodyShadow::RigidBodyShadow(const ColliderImpl::Stub& stub, uint32_t id, Collider::BodyType type, uint32_t metaId, int32_t shapeId, sp<Vec3> position, sp<Size> size, sp<Rotation> rotation, SafeVar<Boolean> discarded)
-    : RigidBody(sp<RigidBody::Stub>::make(id, type, metaId, shapeId, std::move(position), std::move(size), sp<Transform>::make(Transform::TYPE_LINEAR_2D, std::move(rotation)), Box(),
+    : RigidBody(sp<RigidBody::Stub>::make(id, type, metaId, sp<Shape>::make(shapeId, static_cast<sp<Vec3>>(size)), std::move(position), sp<Transform>::make(Transform::TYPE_LINEAR_2D, std::move(rotation)), Box(),
                                           std::move(discarded))), _collider_stub(stub), _position_updated(true), _size_updated(false)
 {
 }
@@ -276,14 +277,14 @@ void ColliderImpl::RigidBodyShadow::dispose()
 
 bool ColliderImpl::RigidBodyShadow::update(uint64_t timestamp)
 {
-    if(size())
-        _size_updated = size()->update(timestamp) | _size_updated;
+    if(const SafeVar<Vec3>& size = stub()->_shape->size())
+        _size_updated = size.update(timestamp) | _size_updated;
     _position_updated = position()->update(timestamp) | _position_updated;
 
     const V3 pos = position()->val();
     if(_size_updated || _position_updated) {
         if(_size_updated) {
-            updateBodyDef(_collider_stub.narrowPhrase(), size());
+            updateBodyDef(_collider_stub.narrowPhrase(), stub()->_shape->size());
             _size_updated = false;
         }
         float r = bodyDef().occupyRadius();
@@ -329,15 +330,15 @@ const RigidBodyDef& ColliderImpl::RigidBodyShadow::bodyDef() const
     return _body_def;
 }
 
-const RigidBodyDef& ColliderImpl::RigidBodyShadow::updateBodyDef(NarrowPhrase& narrowPhrase, const sp<Size>& size)
+const RigidBodyDef& ColliderImpl::RigidBodyShadow::updateBodyDef(NarrowPhrase& narrowPhrase, const SafeVar<Vec3>& size)
 {
-    _body_def = narrowPhrase.makeBodyDef(shapeId(), size);
+    _body_def = narrowPhrase.makeBodyDef(stub()->_shape->id(), size);
     return _body_def;
 }
 
 BroadPhrase::Candidate ColliderImpl::RigidBodyShadow::toBroadPhraseCandidate() const
 {
-    return BroadPhrase::Candidate(id(), position()->val(), transform()->rotation()->theta()->val(), metaId(), shapeId(), collisionFilter(), bodyDef().impl());
+    return BroadPhrase::Candidate(id(), position()->val(), transform()->rotation()->theta()->val(), metaId(), stub()->_shape->id(), collisionFilter(), bodyDef().impl());
 }
 
 ColliderImpl::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

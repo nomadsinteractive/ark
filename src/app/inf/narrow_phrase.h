@@ -1,5 +1,4 @@
-#ifndef ARK_APP_INF_NARROW_PHRASE_H_
-#define ARK_APP_INF_NARROW_PHRASE_H_
+#pragma once
 
 #include <vector>
 
@@ -34,7 +33,7 @@ public:
 public:
     virtual ~NarrowPhrase() = default;
 
-    virtual RigidBodyDef makeBodyDef(int32_t shapeId, const sp<Size>& size) = 0;
+    virtual RigidBodyDef makeBodyDef(int32_t shapeId, const SafeVar<Vec3>& size) = 0;
 
     virtual Ray toRay(const V2& from, const V2& to) = 0;
 
@@ -43,5 +42,3 @@ public:
 };
 
 }
-
-#endif

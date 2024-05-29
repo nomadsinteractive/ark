@@ -2264,6 +2264,19 @@ class Platform:
         pass
 
 
+class Shape:
+    def __init__(self, _id: int, size: Optional[Vec3]):
+        pass
+
+    @property
+    def id(self) -> int:
+        return 0
+
+    @property
+    def size(self) -> Optional[Vec3]:
+        return None
+
+
 class RigidBody:
 
     def __init__(self):

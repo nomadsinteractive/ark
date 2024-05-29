@@ -1,5 +1,7 @@
 #include "bullet/rigid_body/rigid_body_bullet.h"
 
+#include "app/traits/shape.h"
+
 #include "bullet/base/collision_shape.h"
 #include "bullet/base/bt_rigid_body_ref.h"
 
@@ -20,7 +22,7 @@ RigidBodyBullet::Stub::~Stub()
 }
 
 RigidBodyBullet::RigidBodyBullet(int32_t id, Collider::BodyType type, ColliderBullet world, sp<CollisionShape> collisionShape, sp<Vec3> position, sp<Transform> transform, sp<BtRigidBodyRef> rigidBody)
-    : RigidBody(sp<RigidBody::Stub>::make(id, type, 0, 0, std::move(position), nullptr, std::move(transform), sp<Stub>::make(std::move(world), std::move(collisionShape), std::move(rigidBody)))),
+    : RigidBody(sp<RigidBody::Stub>::make(id, type, 0, nullptr, std::move(position), std::move(transform), sp<Stub>::make(std::move(world), std::move(collisionShape), std::move(rigidBody)))),
       _stub(stub()->_impl.toPtr<Stub>())
 {
     _stub->_rigid_body->collisionObject()->setUserPointer(new WeakPtr<RigidBody::Stub>(stub()));

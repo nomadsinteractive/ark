@@ -48,7 +48,7 @@ sp<NarrowPhraseCuteC2::BodyDefCuteC2> NarrowPhraseCuteC2::makeBodyCapsule(const 
     return sp<BodyDefCuteC2>::make(size, V2(0.5f), toCuteC2Shapes(makeCapsuleShapeImpl(p1, p2, radius)));
 }
 
-RigidBodyDef NarrowPhraseCuteC2::makeBodyDef(int32_t shapeId, const sp<Size>& size)
+RigidBodyDef NarrowPhraseCuteC2::makeBodyDef(int32_t shapeId, const SafeVar<Vec3>& size)
 {
     V3 sizeVal;
     sp<BodyDefCuteC2> bodyDef = findBodyDef(shapeId);
@@ -58,7 +58,7 @@ RigidBodyDef NarrowPhraseCuteC2::makeBodyDef(int32_t shapeId, const sp<Size>& si
             sizeVal = V3(bodyDef->size(), 0);
         else
         {
-            sizeVal = size->val();
+            sizeVal = size.val();
             if(bodyDef->size() != V2(sizeVal.x(), sizeVal.y()))
             {
                 bodyDef = sp<BodyDefCuteC2>::make(*bodyDef);
@@ -69,7 +69,7 @@ RigidBodyDef NarrowPhraseCuteC2::makeBodyDef(int32_t shapeId, const sp<Size>& si
     else
     {
         CHECK(size, "Size required for predefined shapes");
-        sizeVal = size->val();
+        sizeVal = size.val();
 
         const Rect bounds(sizeVal.x() / -2.0f, sizeVal.y() / -2.0f, sizeVal.x() / 2.0f, sizeVal.y() / 2.0f);
         switch(shapeId)

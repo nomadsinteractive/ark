@@ -25,7 +25,7 @@ BroadPhraseTilemap::BroadPhraseTilemap(sp<Tilemap> tilemap, NarrowPhrase& narrow
     : _tilemap(std::move(tilemap))
 {
     const Tileset& tileset = _tilemap->tileset();
-    _body_def_tile = narrowPhrase.makeBodyDef(Shape::SHAPE_ID_AABB, sp<Size>::make(tileset.tileWidth(), tileset.tileHeight())).impl();
+    _body_def_tile = narrowPhrase.makeBodyDef(Shape::SHAPE_ID_AABB,  sp<Vec3>::make<Vec3::Const>(tileset.tileSize()->val())).impl();
 }
 
 void BroadPhraseTilemap::create(int32_t /*id*/, const V3& /*position*/, const V3& /*aabb*/)

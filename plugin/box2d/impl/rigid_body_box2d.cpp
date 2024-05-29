@@ -16,12 +16,11 @@
 #include "graphics/base/v3.h"
 
 #include "app/base/application_context.h"
+#include "app/traits/shape.h"
 
 #include "box2d/impl/collider_box2d.h"
 
-namespace ark {
-namespace plugin {
-namespace box2d {
+namespace ark::plugin::box2d {
 
 namespace {
 
@@ -182,7 +181,7 @@ RigidBodyBox2D::RigidBodyBox2D(const ColliderBox2D& world, Collider::BodyType ty
 }
 
 RigidBodyBox2D::RigidBodyBox2D(const sp<Stub>& stub, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Numeric>& rotation)
-    : RigidBody(stub->_id, type, 0, sp<_RigidBodyPosition>::make(stub, position), size,
+    : RigidBody(stub->_id, type, sp<ark::Shape>::make(0, static_cast<sp<Vec3>>(size)), sp<_RigidBodyPosition>::make(stub, position),
                 sp<Rotation>::make(sp<_RigidBodyRotation>::make(stub, rotation)), Box(), stub->_disposed), _stub(stub)
 {
     _stub->_callback = callback();
@@ -222,9 +221,8 @@ sp<RigidBodyBox2D> RigidBodyBox2D::obtain(const Shadow* shadow)
                     (s._body->GetType() == b2_kinematicBody ? Collider::BODY_TYPE_KINEMATIC : Collider::BODY_TYPE_DYNAMIC);
         const b2Vec2& position = s._body->GetPosition();
         float rotation = s._body->GetTransform().q.GetAngle();
-        const sp<Vec3> p = sp<Vec3::Const>::make(V3(position.x, position.y, 0));
-        const sp<Rotation> rotate = sp<Rotation>::make(sp<Numeric::Const>::make(rotation));
-        rigidBodyStub = sp<RigidBody::Stub>::make(s._id, bodyType, 0, 0, p, nullptr, sp<Transform>::make(Transform::TYPE_LINEAR_2D, rotate), Box(), s._disposed);
+        sp<Rotation> rotate = sp<Rotation>::make(sp<Numeric::Const>::make(rotation));
+        rigidBodyStub = sp<RigidBody::Stub>::make(s._id, bodyType, 0, sp<ark::Shape>::make(0, sp<Vec3>::make<Vec3::Const>(V3(position.x, position.y, 0))), nullptr, sp<Transform>::make(Transform::TYPE_LINEAR_2D, std::move(rotate)), Box(), s._disposed);
         rigidBodyStub->_tag = shadow->_tag;
     }
     return sp<RigidBodyBox2D>::make(shadow->_body.ensure(), rigidBodyStub);
@@ -378,7 +376,7 @@ void RigidBodyBox2D::Stub::dispose()
 
     delete reinterpret_cast<RigidBodyBox2D::Shadow*>(_body->GetUserData().pointer);
     _body->GetUserData().pointer = 0;
-    _disposed->discard();
+    _disposed.reset(true);
 
     if(_world.world().IsLocked())
         Ark::instance().applicationContext()->deferUnref(sp<BodyDisposer>::make(_world, _body));
@@ -400,6 +398,4 @@ RigidBodyBox2D::Shadow::Shadow(const sp<RigidBodyBox2D::Stub>& body, const sp<Ri
 {
 }
 
-}
-}
 }

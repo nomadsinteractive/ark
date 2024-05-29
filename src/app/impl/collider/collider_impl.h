@@ -102,7 +102,7 @@ public:
         void doDispose(ColliderImpl::Stub& stub);
 
         const RigidBodyDef& bodyDef() const;
-        const RigidBodyDef& updateBodyDef(NarrowPhrase& narrowPhrase, const sp<Size>& size);
+        const RigidBodyDef& updateBodyDef(NarrowPhrase& narrowPhrase, const SafeVar<Vec3>& size);
 
         BroadPhrase::Candidate toBroadPhraseCandidate() const;
 

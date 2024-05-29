@@ -1,8 +1,9 @@
 #pragma once
 
-#include "core/types/shared_ptr.h"
+#include "core/types/safe_var.h"
 
 #include "graphics/forwarding.h"
+#include "graphics/base/v3.h"
 
 namespace ark {
 
@@ -18,22 +19,19 @@ public:
     };
 
 public:
-//  [[script::bindings::auto]]
-    Shape(int32_t id = Shape::SHAPE_ID_NONE, sp<Size> size = nullptr);
+    Shape(int32_t id = Shape::SHAPE_ID_NONE, SafeVar<Vec3> size = nullptr);
 
 //  [[script::bindings::property]]
     int32_t id() const;
 //  [[script::bindings::property]]
     void setId(int32_t id);
 
-//  [[script::bindings::property]]
-    const sp<Size>& size() const;
-//  [[script::bindings::property]]
-    void setSize(sp<Size> size);
+    const SafeVar<Vec3>& size() const;
+    void setSize(SafeVar<Vec3> size);
 
 private:
     int32_t _id;
-    sp<Size> _size;
+    SafeVar<Vec3> _size;
 };
 
 }

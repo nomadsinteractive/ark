@@ -12,7 +12,7 @@
 #include "graphics/base/render_object_with_layer.h"
 #include "graphics/base/size.h"
 #include "graphics/base/text.h"
-#include "graphics/traits/bounds.h"
+#include "graphics/util/vec3_type.h"
 
 #include "renderer/base/model.h"
 #include "renderer/base/render_engine.h"
@@ -91,7 +91,7 @@ View::~View()
 std::vector<std::pair<TypeId, Box>> View::onWire(const Traits& components)
 {
     sp<Vec3> position = sp<LayoutPosition>::make(_stub, _is_layout_dirty, true, true);
-    sp<Size> size = sp<Size>::make(sp<LayoutSize<0>>::make(_stub), sp<LayoutSize<1>>::make(_stub));
+    sp<Vec3> size = Vec3Type::create(sp<LayoutSize<0>>::make(_stub), sp<LayoutSize<1>>::make(_stub), nullptr);
     if(const sp<Shape>& shape = components.get<Shape>())
     {
         shape->setId(Shape::SHAPE_ID_AABB);

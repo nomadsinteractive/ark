@@ -18,11 +18,12 @@
 #include "app/base/application_context.h"
 #include "app/base/collision_manifold.h"
 #include "app/inf/collision_callback.h"
+#include "app/traits/shape.h"
 
 namespace ark {
 
-RigidBody::RigidBody(int32_t id, Collider::BodyType type, int32_t shapeId, sp<Vec3> position, sp<Size> size, sp<Rotation> rotate, Box impl, SafeVar<Boolean> disposed)
-    : _stub(sp<Stub>::make(id, type, 0, shapeId, std::move(position), std::move(size), sp<Transform>::make(Transform::TYPE_LINEAR_3D, rotate), std::move(impl), std::move(disposed)))
+RigidBody::RigidBody(int32_t id, Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Rotation> rotate, Box impl, SafeVar<Boolean> discarded)
+    : _stub(sp<Stub>::make(id, type, 0, std::move(shape), std::move(position), sp<Transform>::make(Transform::TYPE_LINEAR_3D, rotate), std::move(impl), std::move(discarded)))
 {
 }
 
@@ -52,9 +53,9 @@ Collider::BodyType RigidBody::rigidType() const
     return static_cast<Collider::BodyType>(_stub->_type & Collider::BODY_TYPE_RIGID);
 }
 
-int32_t RigidBody::shapeId() const
+const sp<Shape>& RigidBody::shape() const
 {
-    return _stub->_shape_id;
+    return _stub->_shape;
 }
 
 uint32_t RigidBody::metaId() const
@@ -65,11 +66,6 @@ uint32_t RigidBody::metaId() const
 const sp<Vec3>& RigidBody::position() const
 {
     return _stub->_position;
-}
-
-const sp<Size>& RigidBody::size() const
-{
-    return _stub->_size;
 }
 
 const sp<Transform>& RigidBody::transform() const
@@ -119,8 +115,8 @@ template<> ARK_API Collider::BodyType StringConvert::eval<Collider::BodyType>(co
     return Collider::BODY_TYPE_STATIC;
 }
 
-RigidBody::Stub::Stub(int32_t id, Collider::BodyType type, uint32_t metaId, int32_t shapeId, sp<Vec3> position, sp<Size> size, sp<Transform> transform, Box impl, SafeVar<Boolean> discarded)
-    : _id(id), _type(type), _meta_id(metaId), _shape_id(shapeId), _position(std::move(position)), _size(std::move(size)), _transform(std::move(transform)), _impl(std::move(impl)), _discarded(std::move(discarded)), _callback(sp<Callback>::make())
+RigidBody::Stub::Stub(int32_t id, Collider::BodyType type, uint32_t metaId, sp<Shape> shape, sp<Vec3> position, sp<Transform> transform, Box impl, SafeVar<Boolean> discarded)
+    : _id(id), _type(type), _meta_id(metaId), _shape(std::move(shape)), _position(std::move(position)), _transform(std::move(transform)), _impl(std::move(impl)), _discarded(std::move(discarded)), _callback(sp<Callback>::make())
 {
 }
 

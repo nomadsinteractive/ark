@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_IMPL_VEC_VEC3_H_
-#define ARK_GRAPHICS_IMPL_VEC_VEC3_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/base/string.h"
@@ -64,5 +63,3 @@ private:
 };
 
 }
-
-#endif

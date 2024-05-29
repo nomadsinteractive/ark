@@ -1,5 +1,4 @@
-#ifndef ARK_APP_IMPL_NARROW_PHRASE_NARROW_PHRASE_CUTE_C2_H_
-#define ARK_APP_IMPL_NARROW_PHRASE_NARROW_PHRASE_CUTE_C2_H_
+#pragma once
 
 #include <unordered_map>
 #include <vector>
@@ -19,12 +18,12 @@ class NarrowPhraseCuteC2 : public NarrowPhrase {
 public:
     NarrowPhraseCuteC2(const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-    virtual RigidBodyDef makeBodyDef(int32_t shapeId, const sp<Size>& size) override;
+    RigidBodyDef makeBodyDef(int32_t shapeId, const SafeVar<Vec3>& size) override;
 
-    virtual Ray toRay(const V2& from, const V2& to) override;
+    Ray toRay(const V2& from, const V2& to) override;
 
-    virtual bool collisionManifold(const BroadPhrase::Candidate& candidateOne, const BroadPhrase::Candidate& candidateOther, CollisionManifold& collisionManifold) override;
-    virtual bool rayCastManifold(const Ray& ray, const BroadPhrase::Candidate& candidate, RayCastManifold& rayCastManifold) override;
+    bool collisionManifold(const BroadPhrase::Candidate& candidateOne, const BroadPhrase::Candidate& candidateOther, CollisionManifold& collisionManifold) override;
+    bool rayCastManifold(const Ray& ray, const BroadPhrase::Candidate& candidate, RayCastManifold& rayCastManifold) override;
 
 public:
 //  [[plugin::resource-loader("cute-c2")]]
@@ -89,5 +88,3 @@ private:
 };
 
 }
-
-#endif
