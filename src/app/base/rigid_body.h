@@ -20,11 +20,11 @@ class ARK_API RigidBody : public Wirable {
 public:
     class ARK_API Callback {
     public:
-        void onBeginContact(const sp<RigidBody>& rigidBody, const CollisionManifold& manifold);
-        void onEndContact(const sp<RigidBody>& rigidBody);
+        void onBeginContact(const RigidBody& rigidBody, const CollisionManifold& manifold);
+        void onEndContact(const RigidBody& rigidBody);
 
-        void onBeginContact(const sp<RigidBody>& self, const sp<RigidBody>& rigidBody, const CollisionManifold& manifold);
-        void onEndContact(const sp<RigidBody>& self, const sp<RigidBody>& rigidBody);
+        void onBeginContact(const RigidBody& self, const RigidBody& rigidBody, const CollisionManifold& manifold);
+        void onEndContact(const RigidBody& self, const RigidBody& rigidBody);
 
         bool hasCallback() const;
 

@@ -115,30 +115,30 @@ template<> ARK_API Collider::BodyType StringConvert::eval<Collider::BodyType>(co
     return Collider::BODY_TYPE_STATIC;
 }
 
-void RigidBody::Callback::onBeginContact(const sp<RigidBody>& rigidBody, const CollisionManifold& manifold)
+void RigidBody::Callback::onBeginContact(const RigidBody& rigidBody, const CollisionManifold& manifold)
 {
-    if(_collision_callback && rigidBody->type() != Collider::BODY_TYPE_SENSOR)
+    if(_collision_callback && rigidBody.type() != Collider::BODY_TYPE_SENSOR)
         _collision_callback->onBeginContact(rigidBody, manifold);
 }
 
-void RigidBody::Callback::onEndContact(const sp<RigidBody>& rigidBody)
+void RigidBody::Callback::onEndContact(const RigidBody& rigidBody)
 {
-    if(_collision_callback && rigidBody->type() != Collider::BODY_TYPE_SENSOR)
+    if(_collision_callback && rigidBody.type() != Collider::BODY_TYPE_SENSOR)
         _collision_callback->onEndContact(rigidBody);
 }
 
-void RigidBody::Callback::onBeginContact(const sp<RigidBody>& self, const sp<RigidBody>& rigidBody, const CollisionManifold& manifold)
+void RigidBody::Callback::onBeginContact(const RigidBody& self, const RigidBody& rigidBody, const CollisionManifold& manifold)
 {
     onBeginContact(rigidBody, manifold);
-    if(rigidBody->rigidType() == Collider::BODY_TYPE_STATIC)
-        rigidBody->callback()->onBeginContact(self, CollisionManifold(manifold.contactPoint(), -manifold.normal()));
+    if(rigidBody.rigidType() == Collider::BODY_TYPE_STATIC)
+        rigidBody.callback()->onBeginContact(self, CollisionManifold(manifold.contactPoint(), -manifold.normal()));
 }
 
-void RigidBody::Callback::onEndContact(const sp<RigidBody>& self, const sp<RigidBody>& rigidBody)
+void RigidBody::Callback::onEndContact(const RigidBody& self, const RigidBody& rigidBody)
 {
     onEndContact(rigidBody);
-    if(rigidBody->rigidType() == Collider::BODY_TYPE_STATIC)
-        rigidBody->callback()->onEndContact(self);
+    if(rigidBody.rigidType() == Collider::BODY_TYPE_STATIC)
+        rigidBody.callback()->onEndContact(self);
 }
 
 bool RigidBody::Callback::hasCallback() const

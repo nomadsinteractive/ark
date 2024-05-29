@@ -1,5 +1,4 @@
-#ifndef ARK_APP_BASE_RACAST_MANIFOLD_H_
-#define ARK_APP_BASE_RACAST_MANIFOLD_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/types/shared_ptr.h"
@@ -14,7 +13,7 @@ namespace ark {
 class ARK_API RayCastManifold {
 public:
     RayCastManifold() = default;
-    RayCastManifold(float distance, const V3& normal, sp<RigidBody> rigidBody);
+    RayCastManifold(float distance, const V3& normal, sp<RigidBodyRef> rigidBody);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(RayCastManifold);
 
 //  [[script::bindings::property]]
@@ -22,14 +21,13 @@ public:
 //  [[script::bindings::property]]
     const V3& normal() const;
 //  [[script::bindings::property]]
-    const sp<RigidBody>& rigidBody() const;
+    const sp<RigidBodyRef>& rigidBody() const;
 
 private:
     float _distance;
     V3 _normal;
-    sp<RigidBody> _rigid_body;
+    sp<RigidBodyRef> _rigid_body;
 };
 
 }
 
-#endif

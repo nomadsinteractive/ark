@@ -63,7 +63,7 @@ public:
         std::vector<sp<RigidBodyShadow>> toRigidBodyShadows(const std::unordered_set<BroadPhrase::IdType>& candidateSet, uint32_t filter) const;
         std::vector<BroadPhrase::Candidate> toBroadPhraseCandidates(const std::unordered_set<BroadPhrase::IdType>& candidateSet, uint32_t filter) const;
 
-        void resolveCandidates(const sp<RigidBody>& self, const BroadPhrase::Candidate& candidateSelf, const std::vector<BroadPhrase::Candidate>& candidates, bool isDynamicCandidates, RigidBody::Callback& callback, std::set<int32_t>& c);
+        void resolveCandidates(const RigidBody& self, const BroadPhrase::Candidate& candidateSelf, const std::vector<BroadPhrase::Candidate>& candidates, bool isDynamicCandidates, RigidBody::Callback& callback, std::set<BroadPhrase::IdType>& c);
 
         const sp<NarrowPhrase>& narrowPhrase() const;
 
@@ -109,8 +109,8 @@ public:
 
     private:
         const ColliderImpl::Stub& _collider_stub;
-        std::set<int32_t> _dynamic_contacts;
-        std::set<int32_t> _static_contacts;
+        std::set<BroadPhrase::IdType> _dynamic_contacts;
+        std::set<BroadPhrase::IdType> _static_contacts;
 
         RigidBodyDef _body_def;
 

@@ -10,6 +10,10 @@ public:
         : _instance(instance), _discarded(false) {
     }
 
+    explicit operator bool() const {
+        return !_discarded;
+    }
+
     void discard() {
         _discarded = true;
     }
@@ -17,6 +21,14 @@ public:
     T& instance() {
         ASSERT(!_discarded);
         return _instance;
+    }
+
+    uintptr_t id() const {
+        return reinterpret_cast<uintptr_t>(this);
+    }
+
+    static Ref& toRef(uintptr_t id) {
+        return *reinterpret_cast<Ref*>(id);
     }
 
 private:
