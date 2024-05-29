@@ -1,5 +1,4 @@
-#ifndef ARK_APP_BASE_COLLISION_MANIFOLD_H_
-#define ARK_APP_BASE_COLLISION_MANIFOLD_H_
+#pragma once
 
 #include "core/base/api.h"
 
@@ -25,5 +24,3 @@ private:
 };
 
 }
-
-#endif

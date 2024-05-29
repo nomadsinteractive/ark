@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_BASE_ROTATION_H_
-#define ARK_GRAPHICS_BASE_ROTATION_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/base/timestamp.h"
@@ -84,5 +83,3 @@ private:
 };
 
 }
-
-#endif

@@ -1,10 +1,6 @@
-#ifndef ARK_APP_INF_COLLISION_CALLBACK_H_
-#define ARK_APP_INF_COLLISION_CALLBACK_H_
+#pragma once
 
 #include "core/base/api.h"
-
-#include "graphics/forwarding.h"
-#include "graphics/base/v3.h"
 
 #include "app/forwarding.h"
 
@@ -20,5 +16,3 @@ public:
 };
 
 }
-
-#endif

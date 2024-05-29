@@ -145,6 +145,7 @@ aux_source_directory(src/app/impl/layout LOCAL_SRC_LIST)
 aux_source_directory(src/app/impl/narrow_phrase LOCAL_SRC_LIST)
 aux_source_directory(src/app/impl/renderer LOCAL_SRC_LIST)
 aux_source_directory(src/app/inf LOCAL_SRC_LIST)
+aux_source_directory(src/app/traits LOCAL_SRC_LIST)
 aux_source_directory(src/app/util LOCAL_SRC_LIST)
 aux_source_directory(src/app/view LOCAL_SRC_LIST)
 

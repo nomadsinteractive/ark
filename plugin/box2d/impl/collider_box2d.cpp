@@ -17,23 +17,22 @@
 #include "app/base/collision_manifold.h"
 #include "app/base/raycast_manifold.h"
 #include "app/inf/collision_callback.h"
+#include "app/traits/shape.h"
 
 #include "box2d/impl/rigid_body_box2d.h"
 #include "box2d/impl/joint.h"
 #include "box2d/impl/shapes/ball.h"
 #include "box2d/impl/shapes/box.h"
 
-namespace ark {
-namespace plugin {
-namespace box2d {
+namespace ark::plugin::box2d {
 
 ColliderBox2D::ColliderBox2D(const b2Vec2& gravity, const V2& pixelPerMeter)
     : _stub(sp<Stub>::make(gravity, pixelPerMeter))
 {
     const BodyCreateInfo box(sp<Box>::make(), 1.0f, 0.2f);
-    _stub->_body_manifests[Collider::BODY_SHAPE_AABB] = box;
-    _stub->_body_manifests[Collider::BODY_SHAPE_BALL] = BodyCreateInfo(sp<Ball>::make(), 1.0f, 0.2f);
-    _stub->_body_manifests[Collider::BODY_SHAPE_BOX] = box;
+    _stub->_body_manifests[ark::Shape::SHAPE_ID_AABB] = box;
+    _stub->_body_manifests[ark::Shape::SHAPE_ID_BALL] = BodyCreateInfo(sp<Ball>::make(), 1.0f, 0.2f);
+    _stub->_body_manifests[ark::Shape::SHAPE_ID_BOX] = box;
     _stub->_world.SetContactListener(&_stub->_contact_listener);
     _stub->_world.SetDestructionListener(&_stub->_destruction_listener);
 }
@@ -279,6 +278,4 @@ void ColliderBox2D::DestructionListenerImpl::track(const sp<Joint::Stub>& joint)
     _joints[joint->_joint] = joint;
 }
 
-}
-}
 }

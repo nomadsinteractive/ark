@@ -16,14 +16,13 @@
 #include "app/base/application_context.h"
 #include "app/base/collision_manifold.h"
 #include "app/inf/collision_callback.h"
+#include "app/traits//shape.h"
 
 #include "bullet/base/bt_rigid_body_ref.h"
 #include "bullet/base/collision_shape.h"
 #include "bullet/rigid_body/rigid_body_bullet.h"
 
-namespace ark {
-namespace plugin {
-namespace bullet {
+namespace ark::plugin::bullet {
 
 ColliderBullet::ColliderBullet(const V3& gravity, sp<ModelLoader> modelLoader)
     : _stub(sp<Stub>::make(gravity, std::move(modelLoader)))
@@ -49,13 +48,13 @@ sp<RigidBody> ColliderBullet::createBody(Collider::BodyType type, int32_t shapeI
         btCollisionShape* btShape;
         switch(shapeId)
         {
-        case Collider::BODY_SHAPE_BOX:
+        case Shape::SHAPE_ID_BOX:
             btShape = new btBoxShape(btVector3(size->widthAsFloat() / 2, size->heightAsFloat() / 2, size->depthAsFloat() / 2));
             break;
-        case Collider::BODY_SHAPE_BALL:
+        case Shape::SHAPE_ID_BALL:
             btShape = new btSphereShape(size->widthAsFloat() / 2);
             break;
-        case Collider::BODY_SHAPE_CAPSULE:
+        case Shape::SHAPE_ID_CAPSULE:
             DCHECK_WARN(size->heightAsFloat() > size->widthAsFloat(), "When constructing a capsule shape, its height(%.2f) needs be greater than its width(%.2f)", size->heightAsFloat(), size->widthAsFloat());
             btShape = new btCapsuleShapeZ(size->widthAsFloat() / 2, size->heightAsFloat() - size->widthAsFloat());
             break;
@@ -388,6 +387,4 @@ FilterAction ColliderBullet::KinematicObject::ListFilter::operator() (const Kine
     return item._rigid_body.unique() ? FILTER_ACTION_REMOVE : FILTER_ACTION_NONE;
 }
 
-}
-}
 }

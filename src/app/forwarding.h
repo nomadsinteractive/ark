@@ -39,6 +39,7 @@ class RendererWithState;
 class ResourceLoader;
 class RigidBody;
 class RigidBodyDef;
+class Shape;
 class Surface;
 class SurfaceUpdater;
 class View;

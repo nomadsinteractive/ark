@@ -33,9 +33,8 @@ RigidBody::RigidBody(sp<Stub> stub)
 
 void RigidBody::bind(const sp<RenderObject>& renderObject)
 {
-    renderObject->setPosition(position());
+    renderObject->setPosition(_stub->_position);
     renderObject->setTransform(_stub->_transform);
-    setRenderObject(renderObject);
 }
 
 int32_t RigidBody::id() const
@@ -63,26 +62,6 @@ uint32_t RigidBody::metaId() const
     return _stub->_meta_id;
 }
 
-V2 RigidBody::xy() const
-{
-    return _stub->_position->val();
-}
-
-V3 RigidBody::xyz() const
-{
-    return _stub->_position->val();
-}
-
-float RigidBody::width() const
-{
-    return _stub->_size->widthAsFloat();
-}
-
-float RigidBody::height() const
-{
-    return _stub->_size->heightAsFloat();
-}
-
 const sp<Vec3>& RigidBody::position() const
 {
     return _stub->_position;
@@ -98,29 +77,9 @@ const sp<Transform>& RigidBody::transform() const
     return _stub->_transform;
 }
 
-const Box& RigidBody::tag() const
-{
-    return _stub->_tag;
-}
-
-void RigidBody::setTag(const Box& box) const
-{
-    _stub->_tag = box;
-}
-
-sp<RenderObject> RigidBody::renderObject() const
-{
-    return _stub->_render_object.lock();
-}
-
-void RigidBody::setRenderObject(const sp<RenderObject>& renderObject)
-{
-    _stub->_render_object = renderObject;
-}
-
 const sp<Expendable>& RigidBody::disposed() const
 {
-    return _stub->_disposed;
+    return _stub->_discarded;
 }
 
 const sp<CollisionCallback>& RigidBody::collisionCallback() const
@@ -166,13 +125,13 @@ template<> ARK_API Collider::BodyType StringConvert::eval<Collider::BodyType>(co
 }
 
 RigidBody::Stub::Stub(int32_t id, Collider::BodyType type, uint32_t metaId, int32_t shapeId, sp<Vec3> position, sp<Size> size, sp<Transform> transform, Box impl, sp<Expendable> disposed)
-    : _id(id), _type(type), _meta_id(metaId), _shape_id(shapeId), _position(std::move(position)), _size(std::move(size)), _transform(std::move(transform)), _impl(std::move(impl)), _disposed(std::move(disposed)), _callback(sp<Callback>::make())
+    : _id(id), _type(type), _meta_id(metaId), _shape_id(shapeId), _position(std::move(position)), _size(std::move(size)), _transform(std::move(transform)), _impl(std::move(impl)), _discarded(std::move(disposed)), _callback(sp<Callback>::make())
 {
 }
 
 RigidBody::Stub::~Stub()
 {
-    _disposed->discard();
+    _discarded->discard();
     LOGD("RigidBody(%d) disposed", _id);
 }
 

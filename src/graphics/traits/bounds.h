@@ -11,7 +11,7 @@ namespace ark {
 class ARK_API Bounds : public Updatable {
 public:
 //  [[script::bindings::auto]]
-    Bounds(sp<Vec3> center, sp<Size> size);
+    Bounds(sp<Vec3> position, sp<Size> size);
 
 //  [[script::bindings::auto]]
     bool ptin(const V3& pt) const;

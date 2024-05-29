@@ -272,7 +272,7 @@ ColliderImpl::RigidBodyShadow::RigidBodyShadow(const ColliderImpl::Stub& stub, u
 
 void ColliderImpl::RigidBodyShadow::dispose()
 {
-    stub()->_disposed->discard();
+    stub()->_discarded->discard();
 }
 
 bool ColliderImpl::RigidBodyShadow::update(uint64_t timestamp)
@@ -297,7 +297,7 @@ bool ColliderImpl::RigidBodyShadow::update(uint64_t timestamp)
 void ColliderImpl::RigidBodyShadow::collisionTest(const sp<RigidBodyShadow>& self, ColliderImpl::Stub& collider, const V3& position, const V3& size, const std::set<int32_t>& removingIds)
 {
     const Stub& shadowStub = stub();
-    if(shadowStub._disposed->val())
+    if(shadowStub._discarded->val())
         return doDispose(collider);
 
     BroadPhrase::Result result;

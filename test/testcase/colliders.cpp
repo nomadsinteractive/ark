@@ -21,11 +21,11 @@
 #include "app/inf/collider.h"
 #include "app/inf/collision_callback.h"
 #include "app/inf/broad_phrase.h"
+#include "app/traits/shape.h"
 
 #include "platform/platform.h"
 
-namespace ark {
-namespace unittest {
+namespace ark::unittest {
 
 namespace {
 
@@ -81,9 +81,9 @@ public:
         const auto r = bp2->search(V3(220, 0, 0), V3(16, 32, 0));
 
         const sp<RenderObject> c001 = resourceLoader->load<RenderObject>("c001", args);
-        const sp<RigidBody> rigidBody001 = collider->createBody(Collider::BODY_TYPE_DYNAMIC, Collider::BODY_SHAPE_AABB, c001->position(), c001->size());
+        const sp<RigidBody> rigidBody001 = collider->createBody(Collider::BODY_TYPE_DYNAMIC, Shape::SHAPE_ID_AABB, c001->position(), c001->size());
         const sp<RenderObject> c002 = resourceLoader->load<RenderObject>("c002", args);
-        const sp<RigidBody> rigidBody002 = collider->createBody(Collider::BODY_TYPE_STATIC, Collider::BODY_SHAPE_AABB, c002->position(), c002->size());
+        const sp<RigidBody> rigidBody002 = collider->createBody(Collider::BODY_TYPE_STATIC, Shape::SHAPE_ID_AABB, c002->position(), c002->size());
         const sp<RenderObject> c003 = resourceLoader->load<RenderObject>("c003", args);
         const sp<RigidBody> rigidBody003 = collider->createBody(Collider::BODY_TYPE_DYNAMIC, 1, c003->position(), c003->size(), c003->transform()->rotation());
         const sp<CollisionCallbackImpl> collisionCallbackImpl001 = sp<CollisionCallbackImpl>::make(c001);
@@ -100,8 +100,6 @@ public:
         while(duration->val() < 3.0f) {
             applicationContext->updateRenderState();
             applicationContext->renderController()->onPreCompose(clock->tick());
-            rigidBody001->xy();
-            rigidBody003->xy();
             std::this_thread::sleep_for(std::chrono::milliseconds(16));
         }
         TESTCASE_VALIDATE(collisionCallbackImpl001->successed());
@@ -110,7 +108,6 @@ public:
     }
 };
 
-}
 }
 
 ark::unittest::TestCase* colliders_create()

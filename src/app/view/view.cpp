@@ -18,6 +18,7 @@
 #include "renderer/base/render_engine.h"
 
 #include "app/base/application_context.h"
+#include "app/traits/shape.h"
 #include "app/view/layout_param.h"
 #include "app/view/view_hierarchy.h"
 
@@ -89,15 +90,15 @@ View::~View()
 
 std::vector<std::pair<TypeId, Box>> View::onWire(const Traits& components)
 {
-    sp<Vec3> center = sp<LayoutPosition>::make(_stub, _is_layout_dirty, true, true);
+    sp<Vec3> position = sp<LayoutPosition>::make(_stub, _is_layout_dirty, true, true);
     sp<Size> size = sp<Size>::make(sp<LayoutSize<0>>::make(_stub), sp<LayoutSize<1>>::make(_stub));
-    if(const sp<Bounds>& bounds = components.get<Bounds>())
+    if(const sp<Shape>& shape = components.get<Shape>())
     {
-        bounds->setCenter(std::move(center));
-        bounds->setSize(std::move(size));
+        shape->setId(Shape::SHAPE_ID_AABB);
+        shape->setSize(std::move(size));
         return {};
     }
-    return {{Type<Bounds>::id(), sp<Bounds>::make(std::move(center), std::move(size))}};
+    return {{Type<Vec3>::id(), std::move(position)}, {Type<Shape>::id(), sp<Shape>::make(Shape::SHAPE_ID_AABB, std::move(size))}};
 }
 
 void View::addRenderObjectWithLayer(sp<RenderObjectWithLayer> ro, bool isBackground)

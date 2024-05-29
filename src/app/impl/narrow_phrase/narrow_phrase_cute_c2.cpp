@@ -9,6 +9,7 @@
 #include "renderer/base/resource_loader_context.h"
 
 #include "app/inf/collider.h"
+#include "app/traits/shape.h"
 #include "app/util/rigid_body_def.h"
 
 namespace ark {
@@ -73,13 +74,13 @@ RigidBodyDef NarrowPhraseCuteC2::makeBodyDef(int32_t shapeId, const sp<Size>& si
         const Rect bounds(sizeVal.x() / -2.0f, sizeVal.y() / -2.0f, sizeVal.x() / 2.0f, sizeVal.y() / 2.0f);
         switch(shapeId)
         {
-            case Collider::BODY_SHAPE_BALL:
+            case Shape::SHAPE_ID_BALL:
                 bodyDef = makeBodyBall(V2(0, 0), sizeVal.x());
             break;
-            case Collider::BODY_SHAPE_AABB:
+            case Shape::SHAPE_ID_AABB:
                 bodyDef = makeBodyAABB(bounds);
             break;
-            case Collider::BODY_SHAPE_CAPSULE:
+            case Shape::SHAPE_ID_CAPSULE:
             {
                 float radius = bounds.width() / 2;
                 float x = (bounds.left() + bounds.right()) / 2;
@@ -87,7 +88,7 @@ RigidBodyDef NarrowPhraseCuteC2::makeBodyDef(int32_t shapeId, const sp<Size>& si
                 bodyDef = makeBodyCapsule(V2(x, bounds.top() + radius), V2(x, bounds.bottom() - radius), radius);
                 break;
             }
-            case Collider::BODY_SHAPE_BOX:
+            case Shape::SHAPE_ID_BOX:
                 bodyDef = makeBodyBox(bounds);
             break;
             default:

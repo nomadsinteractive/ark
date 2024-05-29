@@ -14,15 +14,6 @@ namespace ark {
 class ARK_API Collider {
 public:
 //  [[script::bindings::enumeration]]
-    enum BodyShape {
-        BODY_SHAPE_NONE = 0,
-        BODY_SHAPE_AABB = -1,
-        BODY_SHAPE_BALL = -2,
-        BODY_SHAPE_BOX = -3,
-        BODY_SHAPE_CAPSULE = -4
-    };
-
-//  [[script::bindings::enumeration]]
     enum BodyType {
         BODY_TYPE_KINEMATIC = 1,
         BODY_TYPE_DYNAMIC = 2,

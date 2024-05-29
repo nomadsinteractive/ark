@@ -48,7 +48,7 @@ public:
         sp<Transform> _transform;
 
         Box _impl;
-        SafePtr<Expendable> _disposed;
+        SafePtr<Expendable> _discarded;
 
         sp<Callback> _callback;
         sp<CollisionFilter> _collision_filter;
@@ -81,32 +81,11 @@ public:
     uint32_t metaId() const;
 
 //  [[script::bindings::property]]
-    V2 xy() const;
-//  [[script::bindings::property]]
-    V3 xyz() const;
-
-//  [[script::bindings::property]]
-    float width() const;
-//  [[script::bindings::property]]
-    float height() const;
-
-//  [[script::bindings::property]]
     const sp<Vec3>& position() const;
 //  [[script::bindings::property]]
     const sp<Size>& size() const;
 //  [[script::bindings::property]]
     const sp<Transform>& transform() const;
-
-//  [[script::bindings::property]]
-    const Box& tag() const;
-//  [[script::bindings::property]]
-    void setTag(const Box& box) const;
-
-//  [[script::bindings::property]]
-    sp<RenderObject> renderObject() const;
-//  [[script::bindings::property]]
-    void setRenderObject(const sp<RenderObject>& renderObject);
-
 //  [[script::bindings::property]]
     const sp<Expendable>& disposed() const;
 
