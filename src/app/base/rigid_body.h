@@ -5,6 +5,7 @@
 #include "core/types/box.h"
 #include "core/types/weak_ptr.h"
 #include "core/types/safe_ptr.h"
+#include "core/types/safe_var.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -34,7 +35,7 @@ public:
     };
 
     struct ARK_API Stub {
-        Stub(int32_t id, Collider::BodyType type, uint32_t metaId, int32_t shapeId, sp<Vec3> position, sp<Size> size, sp<Transform> transform, Box impl, sp<Expendable> disposed = nullptr);
+        Stub(int32_t id, Collider::BodyType type, uint32_t metaId, int32_t shapeId, sp<Vec3> position, sp<Size> size, sp<Transform> transform, Box impl, SafeVar<Boolean> discarded = nullptr);
         ~Stub();
 
         DISALLOW_COPY_AND_ASSIGN(Stub);
@@ -48,7 +49,7 @@ public:
         sp<Transform> _transform;
 
         Box _impl;
-        SafePtr<Expendable> _discarded;
+        SafeVar<Boolean> _discarded;
 
         sp<Callback> _callback;
         sp<CollisionFilter> _collision_filter;
@@ -60,7 +61,7 @@ public:
 public:
     virtual ~RigidBody() = default;
 
-    RigidBody(int32_t id, Collider::BodyType type, int32_t shapeId, sp<Vec3> position, sp<Size> size, sp<Rotation> rotate, Box impl, sp<Expendable> disposed);
+    RigidBody(int32_t id, Collider::BodyType type, int32_t shapeId, sp<Vec3> position, sp<Size> size, sp<Rotation> rotate, Box impl, SafeVar<Boolean> discarded);
     RigidBody(sp<Stub> stub);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(RigidBody);
 
@@ -86,8 +87,6 @@ public:
     const sp<Size>& size() const;
 //  [[script::bindings::property]]
     const sp<Transform>& transform() const;
-//  [[script::bindings::property]]
-    const sp<Expendable>& disposed() const;
 
 //  [[script::bindings::property]]
     const sp<CollisionCallback>& collisionCallback() const;

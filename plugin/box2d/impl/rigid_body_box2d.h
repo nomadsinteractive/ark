@@ -37,7 +37,7 @@ public:
         ColliderBox2D _world;
         b2Body* _body;
 
-        SafePtr<Expendable> _disposed;
+        SafePtr<Boolean> _disposed;
         sp<RigidBody::Callback> _callback;
 
         std::unordered_set<int32_t> _contacts;

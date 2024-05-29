@@ -39,8 +39,7 @@ sp<RigidBody> ColliderImpl::createBody(Collider::BodyType type, int32_t shape, c
     ASSERT(size);
     CHECK(type == Collider::BODY_TYPE_KINEMATIC || type == Collider::BODY_TYPE_DYNAMIC || type == Collider::BODY_TYPE_STATIC || type == Collider::BODY_TYPE_SENSOR, "Unknown BodyType: %d", type);
 
-    sp<Expendable> disp = sp<Expendable>::make(std::move(disposed));
-    return _stub->createRigidBody(_stub->generateRigidBodyId(), type, shape, position, size, rotate, std::move(disp));
+    return _stub->createRigidBody(_stub->generateRigidBodyId(), type, shape, position, size, rotate, std::move(disposed));
 }
 
 std::vector<RayCastManifold> ColliderImpl::rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter)
@@ -105,14 +104,14 @@ bool ColliderImpl::Stub::update(uint64_t timestamp)
 
     for(const auto& [id, shadow] : _rigid_bodies)
     {
-        bool isDisposed = shadow->disposed()->val();
+        const bool isDiscarded = shadow->stub()->_discarded.val();
         if(shadow->type() != Collider::BODY_TYPE_STATIC)
         {
             shadow->update(timestamp);
-            if(!isDisposed)
+            if(!isDiscarded)
                 _rigid_body_refs.push_back(shadow);
         }
-        if(isDisposed)
+        if(isDiscarded)
             _phrase_remove.insert(id);
     }
 
@@ -140,10 +139,10 @@ int32_t ColliderImpl::Stub::generateRigidBodyId()
     return ++_rigid_body_base_id;
 }
 
-sp<ColliderImpl::RigidBodyImpl> ColliderImpl::Stub::createRigidBody(int32_t rigidBodyId, Collider::BodyType type, int32_t shape, sp<Vec3> position, sp<Size> size, sp<Rotation> rotate, sp<Expendable> disposed)
+sp<ColliderImpl::RigidBodyImpl> ColliderImpl::Stub::createRigidBody(int32_t rigidBodyId, Collider::BodyType type, int32_t shape, sp<Vec3> position, sp<Size> size, sp<Rotation> rotate, SafeVar<Boolean> discarded)
 {
     const V3 posVal = position->val();
-    sp<RigidBodyShadow> rigidBodyShadow = sp<RigidBodyShadow>::make(*this, rigidBodyId, type, 0, shape, std::move(position), size, std::move(rotate), std::move(disposed));
+    sp<RigidBodyShadow> rigidBodyShadow = sp<RigidBodyShadow>::make(*this, rigidBodyId, type, 0, shape, std::move(position), size, std::move(rotate), std::move(discarded));
     const RigidBodyDef& rigidBodyDef = rigidBodyShadow->updateBodyDef(_narrow_phrase, size);
     _rigid_bodies[rigidBodyShadow->id()] = rigidBodyShadow;
 
@@ -264,15 +263,15 @@ void ColliderImpl::RigidBodyImpl::dispose()
     doDispose();
 }
 
-ColliderImpl::RigidBodyShadow::RigidBodyShadow(const ColliderImpl::Stub& stub, uint32_t id, Collider::BodyType type, uint32_t metaId, int32_t shapeId, sp<Vec3> position, sp<Size> size, sp<Rotation> rotation, sp<Expendable> disposed)
+ColliderImpl::RigidBodyShadow::RigidBodyShadow(const ColliderImpl::Stub& stub, uint32_t id, Collider::BodyType type, uint32_t metaId, int32_t shapeId, sp<Vec3> position, sp<Size> size, sp<Rotation> rotation, SafeVar<Boolean> discarded)
     : RigidBody(sp<RigidBody::Stub>::make(id, type, metaId, shapeId, std::move(position), std::move(size), sp<Transform>::make(Transform::TYPE_LINEAR_2D, std::move(rotation)), Box(),
-                                          std::move(disposed))), _collider_stub(stub), _position_updated(true), _size_updated(false)
+                                          std::move(discarded))), _collider_stub(stub), _position_updated(true), _size_updated(false)
 {
 }
 
 void ColliderImpl::RigidBodyShadow::dispose()
 {
-    stub()->_discarded->discard();
+    stub()->_discarded.reset(true);
 }
 
 bool ColliderImpl::RigidBodyShadow::update(uint64_t timestamp)
@@ -297,7 +296,7 @@ bool ColliderImpl::RigidBodyShadow::update(uint64_t timestamp)
 void ColliderImpl::RigidBodyShadow::collisionTest(const sp<RigidBodyShadow>& self, ColliderImpl::Stub& collider, const V3& position, const V3& size, const std::set<int32_t>& removingIds)
 {
     const Stub& shadowStub = stub();
-    if(shadowStub._discarded->val())
+    if(shadowStub._discarded.val())
         return doDispose(collider);
 
     BroadPhrase::Result result;

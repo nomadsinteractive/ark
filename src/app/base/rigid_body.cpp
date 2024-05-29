@@ -21,7 +21,7 @@
 
 namespace ark {
 
-RigidBody::RigidBody(int32_t id, Collider::BodyType type, int32_t shapeId, sp<Vec3> position, sp<Size> size, sp<Rotation> rotate, Box impl, sp<Expendable> disposed)
+RigidBody::RigidBody(int32_t id, Collider::BodyType type, int32_t shapeId, sp<Vec3> position, sp<Size> size, sp<Rotation> rotate, Box impl, SafeVar<Boolean> disposed)
     : _stub(sp<Stub>::make(id, type, 0, shapeId, std::move(position), std::move(size), sp<Transform>::make(Transform::TYPE_LINEAR_3D, rotate), std::move(impl), std::move(disposed)))
 {
 }
@@ -77,11 +77,6 @@ const sp<Transform>& RigidBody::transform() const
     return _stub->_transform;
 }
 
-const sp<Expendable>& RigidBody::disposed() const
-{
-    return _stub->_discarded;
-}
-
 const sp<CollisionCallback>& RigidBody::collisionCallback() const
 {
     return _stub->_callback->_collision_callback;
@@ -124,14 +119,14 @@ template<> ARK_API Collider::BodyType StringConvert::eval<Collider::BodyType>(co
     return Collider::BODY_TYPE_STATIC;
 }
 
-RigidBody::Stub::Stub(int32_t id, Collider::BodyType type, uint32_t metaId, int32_t shapeId, sp<Vec3> position, sp<Size> size, sp<Transform> transform, Box impl, sp<Expendable> disposed)
-    : _id(id), _type(type), _meta_id(metaId), _shape_id(shapeId), _position(std::move(position)), _size(std::move(size)), _transform(std::move(transform)), _impl(std::move(impl)), _discarded(std::move(disposed)), _callback(sp<Callback>::make())
+RigidBody::Stub::Stub(int32_t id, Collider::BodyType type, uint32_t metaId, int32_t shapeId, sp<Vec3> position, sp<Size> size, sp<Transform> transform, Box impl, SafeVar<Boolean> discarded)
+    : _id(id), _type(type), _meta_id(metaId), _shape_id(shapeId), _position(std::move(position)), _size(std::move(size)), _transform(std::move(transform)), _impl(std::move(impl)), _discarded(std::move(discarded)), _callback(sp<Callback>::make())
 {
 }
 
 RigidBody::Stub::~Stub()
 {
-    _discarded->discard();
+    _discarded.reset(true);
     LOGD("RigidBody(%d) disposed", _id);
 }
 

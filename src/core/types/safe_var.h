@@ -13,7 +13,10 @@ public:
     typedef T _PtrType;
 
     SafeVar() noexcept
-        : _wrapped(nullptr) {
+        : _default_val(), _wrapped(nullptr) {
+    }
+    SafeVar(nullptr_t) noexcept
+        : _default_val(), _wrapped(nullptr) {
     }
     SafeVar(sp<T> delegate) noexcept
         : SafeVar(std::move(delegate), ValType()) {
@@ -63,6 +66,11 @@ public:
             else
                 _wrapped->reset(std::move(delegate));
         }
+    }
+
+    void reset(ValType value) {
+        _default_val = value;
+        _wrapped = nullptr;
     }
 
 private:
