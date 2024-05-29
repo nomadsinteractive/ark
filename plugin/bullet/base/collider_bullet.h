@@ -1,5 +1,4 @@
-#ifndef ARK_PLUGIN_BULLET_BASE_COLLIDER_BULLET_H_
-#define ARK_PLUGIN_BULLET_BASE_COLLIDER_BULLET_H_
+#pragma once
 
 #include <map>
 #include <vector>
@@ -25,9 +24,7 @@
 
 #include "btBulletDynamicsCommon.h"
 
-namespace ark {
-namespace plugin {
-namespace bullet {
+namespace ark::plugin::bullet {
 
 //[[script::bindings::name("World")]]
 class ARK_PLUGIN_BULLET_API ColliderBullet : public Runnable, public Collider, Implements<ColliderBullet, Runnable, Collider> {
@@ -43,7 +40,7 @@ public:
     ColliderBullet(const V3& gravity, sp<ModelLoader> modelLoader);
 
 //  [[script::bindings::auto]]
-    virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size = nullptr, const sp<Rotation>& rotate = nullptr, sp<Boolean> disposed = nullptr) override;
+    virtual sp<RigidBody> createBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Rotation> rotate = nullptr, sp<Boolean> discarded = nullptr) override;
 //  [[script::bindings::auto]]
     virtual std::vector<RayCastManifold> rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter = nullptr) override;
 
@@ -173,7 +170,3 @@ private:
 };
 
 }
-}
-}
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef ARK_PLUGIN_BOX2D_IMPL_SHAPES_POLYGON_H_
-#define ARK_PLUGIN_BOX2D_IMPL_SHAPES_POLYGON_H_
+#pragma once
 
 #include <vector>
 
@@ -10,15 +9,13 @@
 
 #include "box2d/inf/shape.h"
 
-namespace ark {
-namespace plugin {
-namespace box2d {
+namespace ark::plugin::box2d {
 
 class Polygon : public Shape {
 public:
     Polygon(const std::vector<V2>& vertices);
 
-    virtual void apply(b2Body* body, const sp<Size>& size, const BodyCreateInfo& createInfo) override;
+    virtual void apply(b2Body* body, const V3& size, const BodyCreateInfo& createInfo) override;
 
 //  [[plugin::builder("polygon")]]
     class BUILDER : public Builder<Shape> {
@@ -37,7 +34,3 @@ private:
 };
 
 }
-}
-}
-
-#endif

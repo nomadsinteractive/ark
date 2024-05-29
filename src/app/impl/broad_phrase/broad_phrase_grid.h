@@ -1,12 +1,10 @@
-#ifndef ARK_APP_IMPL_BROAD_PHRASE_BROAD_PHRASE_GRID_H_
-#define ARK_APP_IMPL_BROAD_PHRASE_BROAD_PHRASE_GRID_H_
+#pragma once
 
 #include <unordered_map>
 
 #include "core/inf/builder.h"
 #include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
-#include "core/util/updatable_util.h"
 
 #include "graphics/forwarding.h"
 #include "graphics/base/v3.h"
@@ -19,23 +17,23 @@ class BroadPhraseGrid : public BroadPhrase {
 public:
     BroadPhraseGrid(int32_t dimension, const V3& cell);
 
-    virtual void create(int32_t id, const V3& position, const V3& aabb) override;
-    virtual void update(int32_t id, const V3& position, const V3& aabb) override;
-    virtual void remove(int32_t id) override;
+    void create(IdType id, const V3& position, const V3& aabb) override;
+    void update(IdType id, const V3& position, const V3& aabb) override;
+    void remove(IdType id) override;
 
-    virtual Result search(const V3& position, const V3& size) override;
-    virtual Result rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter) override;
+    Result search(const V3& position, const V3& size) override;
+    Result rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter) override;
 
 public:
     class Stub;
 
     class Axis {
     public:
-        void create(int32_t id, float position, float low, float high);
-        void update(int32_t id, float position, float low, float high);
-        void remove(int32_t id);
+        void create(IdType id, float position, float low, float high);
+        void update(IdType id, float position, float low, float high);
+        void remove(IdType id);
 
-        std::unordered_set<int32_t> search(float low, float high) const;
+        std::unordered_set<IdType> search(float low, float high) const;
 
     private:
         struct Range {
@@ -50,12 +48,12 @@ public:
             int32_t _end;
         };
 
-        void updateRange(int32_t id, const Range& cur, const Range& prev);
-        void remove(int32_t id, int32_t rangeId);
+        void updateRange(IdType id, const Range& cur, const Range& prev);
+        void remove(IdType id, int32_t rangeId);
 
     private:
-        std::unordered_map<int32_t, Range> _trackee_ranges;
-        std::unordered_multimap<int32_t, int32_t> _trackee_range_ids;
+        std::unordered_map<IdType, Range> _trackee_ranges;
+        std::unordered_multimap<int32_t, IdType> _trackee_range_ids;
         int32_t _stride;
 
         friend class Stub;
@@ -66,11 +64,11 @@ public:
         Stub(int32_t dimension, const V3& cell);
         ~Stub();
 
-        void remove(int32_t id);
-        void create(int32_t id, const V3& position, const V3& size);
-        void update(int32_t id, const V3& position, const V3& size);
+        void remove(IdType id);
+        void create(IdType id, const V3& position, const V3& size);
+        void update(IdType id, const V3& position, const V3& size);
 
-        std::unordered_set<int32_t> search(const V3& position, const V3& size) const;
+        std::unordered_set<IdType> search(const V3& position, const V3& size) const;
 
     private:
         int32_t _dimension;
@@ -95,5 +93,3 @@ private:
 };
 
 }
-
-#endif

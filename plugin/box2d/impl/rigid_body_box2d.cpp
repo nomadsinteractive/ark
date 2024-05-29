@@ -170,18 +170,18 @@ private:
 
 }
 
-RigidBodyBox2D::RigidBodyBox2D(const ColliderBox2D& world, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Numeric>& rotate, const sp<Shape>& shape, float density, float friction)
+RigidBodyBox2D::RigidBodyBox2D(const ColliderBox2D& world, Collider::BodyType type, const sp<Vec3>& position, const V3& size, const sp<Numeric>& rotate, const sp<Shape>& shape, float density, float friction)
     : RigidBodyBox2D(world, type, position, size, rotate, BodyCreateInfo(shape, density, friction, type & Collider::BODY_TYPE_SENSOR))
 {
 }
 
-RigidBodyBox2D::RigidBodyBox2D(const ColliderBox2D& world, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Numeric>& rotate, const BodyCreateInfo& createInfo)
+RigidBodyBox2D::RigidBodyBox2D(const ColliderBox2D& world, Collider::BodyType type, const sp<Vec3>& position, const V3& size, const sp<Numeric>& rotate, const BodyCreateInfo& createInfo)
     : RigidBodyBox2D(sp<Stub>::make(world, world.createBody(type, position->val(), size, createInfo)), type, position, size, rotate)
 {
 }
 
-RigidBodyBox2D::RigidBodyBox2D(const sp<Stub>& stub, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Numeric>& rotation)
-    : RigidBody(stub->_id, type, sp<ark::Shape>::make(0, static_cast<sp<Vec3>>(size)), sp<_RigidBodyPosition>::make(stub, position),
+RigidBodyBox2D::RigidBodyBox2D(const sp<Stub>& stub, Collider::BodyType type, const sp<Vec3>& position, const V3& size, const sp<Numeric>& rotation)
+    : RigidBody(stub->_id, type, sp<ark::Shape>::make(0, sp<Vec3>::make<Vec3::Const>(size)), sp<_RigidBodyPosition>::make(stub, position),
                 sp<Rotation>::make(sp<_RigidBodyRotation>::make(stub, rotation)), Box(), stub->_disposed), _stub(stub)
 {
     _stub->_callback = callback();
@@ -193,16 +193,16 @@ RigidBodyBox2D::RigidBodyBox2D(const sp<RigidBodyBox2D::Stub>& stub, const sp<Ri
 {
 }
 
-void RigidBodyBox2D::bind(const sp<RenderObject>& renderObject)
-{
-    renderObject->setPosition(sp<RenderObjectPosition>::make(_stub));
-    renderObject->setTransform(transform());
-    if(type() & Collider::BODY_FLAG_MANUAL_ROTATION)
-    {
-        sp<Numeric> r = transform()->rotation() ? transform()->rotation()->theta().cast<_RigidBodyRotation>()->_delegate : sp<Numeric>();
-        transform()->rotation()->setRotation(sp<ManualRotation>::make(_stub, std::move(r)), nullptr);
-    }
-}
+// void RigidBodyBox2D::bind(const sp<RenderObject>& renderObject)
+// {
+//     renderObject->setPosition(sp<RenderObjectPosition>::make(_stub));
+//     renderObject->setTransform(transform());
+//     if(type() & Collider::BODY_FLAG_MANUAL_ROTATION)
+//     {
+//         sp<Numeric> r = transform()->rotation() ? transform()->rotation()->theta().cast<_RigidBodyRotation>()->_delegate : sp<Numeric>();
+//         transform()->rotation()->setRotation(sp<ManualRotation>::make(_stub, std::move(r)), nullptr);
+//     }
+// }
 
 void RigidBodyBox2D::dispose()
 {
@@ -394,7 +394,7 @@ b2Body* RigidBodyBox2D::Stub::body()
 }
 
 RigidBodyBox2D::Shadow::Shadow(const sp<RigidBodyBox2D::Stub>& body, const sp<RigidBody::Stub>& rigidBody)
-    : _body(body), _rigid_body(rigidBody), _tag(rigidBody->_tag)
+    : _body(body), _rigid_body(rigidBody)
 {
 }
 

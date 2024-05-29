@@ -3,6 +3,7 @@
 #include "core/base/api.h"
 #include "core/forwarding.h"
 #include "core/collection/traits.h"
+#include "core/types/ref.h"
 #include "core/types/shared_ptr.h"
 
 #include "core/base/resource_loader.h"
@@ -52,22 +53,13 @@ public:
 
     const Traits& components() const;
 
-public:
-    struct Ref {
-        Ref(Entity& entity);
-
-        Entity& _entity;
-        bool _discarded;
-    };
-
 private:
     void doWire();
 
     void onWireOne(const Box& component);
 
 private:
-    sp<Ref> _ref;
-
+    sp<EntityRef> _ref;
     Traits _components;
 
     friend class EntityId;

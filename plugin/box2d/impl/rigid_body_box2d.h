@@ -17,9 +17,7 @@
 #include "box2d/impl/collider_box2d.h"
 #include "box2d/inf/shape.h"
 
-namespace ark {
-namespace plugin {
-namespace box2d {
+namespace ark::plugin::box2d {
 
 //[[script::bindings::extends(RigidBody)]]
 //[[script::bindings::name("RigidBody")]]
@@ -48,17 +46,15 @@ public:
 
         WeakPtr<Stub> _body;
         WeakPtr<RigidBody::Stub> _rigid_body;
-        Box _tag;
     };
 
 public:
 //  [[script::bindings::auto]]
-    RigidBodyBox2D(const ColliderBox2D& world, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Numeric>& rotate, const sp<Shape>& shape, float density, float friction);
-    RigidBodyBox2D(const ColliderBox2D& world, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Numeric>& rotate, const BodyCreateInfo& createInfo);
-    RigidBodyBox2D(const sp<Stub>& stub, Collider::BodyType type, const sp<Vec3>& position, const sp<Size>& size, const sp<Numeric>& rotate);
+    RigidBodyBox2D(const ColliderBox2D& world, Collider::BodyType type, const sp<Vec3>& position, const V3& size, const sp<Numeric>& rotate, const sp<Shape>& shape, float density, float friction);
+    RigidBodyBox2D(const ColliderBox2D& world, Collider::BodyType type, const sp<Vec3>& position, const V3& size, const sp<Numeric>& rotate, const BodyCreateInfo& createInfo);
+    RigidBodyBox2D(const sp<Stub>& stub, Collider::BodyType type, const sp<Vec3>& position, const V3& size, const sp<Numeric>& rotate);
     RigidBodyBox2D(const sp<Stub>& stub, const sp<RigidBody::Stub>& rigidbody);
 
-    void bind(const sp<RenderObject>& renderObject) override;
     void dispose() override;
 
     static sp<RigidBodyBox2D> obtain(const Shadow* shadow);
@@ -127,6 +123,4 @@ private:
     friend class ColliderBox2D;
 };
 
-}
-}
 }

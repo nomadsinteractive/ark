@@ -1,5 +1,4 @@
-#ifndef ARK_PLUGIN_BOX2D_IMPL_SHAPES_ARC_H_
-#define ARK_PLUGIN_BOX2D_IMPL_SHAPES_ARC_H_
+#pragma once
 
 #include "core/inf/builder.h"
 #include "core/types/shared_ptr.h"
@@ -8,15 +7,13 @@
 
 #include "box2d/inf/shape.h"
 
-namespace ark {
-namespace plugin {
-namespace box2d {
+namespace ark::plugin::box2d {
 
 class Arc : public Shape {
 public:
     Arc(uint32_t sampleCount, float a, float b);
 
-    virtual void apply(b2Body* body, const sp<Size>& size, const BodyCreateInfo& createInfo) override;
+    void apply(b2Body* body, const V3& size, const BodyCreateInfo& createInfo) override;
 
 //  [[plugin::builder("arc")]]
     class BUILDER : public Builder<Shape> {
@@ -38,7 +35,3 @@ private:
 };
 
 }
-}
-}
-
-#endif

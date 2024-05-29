@@ -1,9 +1,7 @@
-#ifndef ARK_APP_IMPL_BROAD_PHRASE_BROAD_PHRASE_TRIE_H_
-#define ARK_APP_IMPL_BROAD_PHRASE_BROAD_PHRASE_TRIE_H_
+#pragma once
 
 #include "core/inf/builder.h"
 #include "core/types/shared_ptr.h"
-#include "core/util/updatable_util.h"
 
 #include "graphics/forwarding.h"
 #include "graphics/base/v3.h"
@@ -16,12 +14,12 @@ class BroadPhraseTrie : public BroadPhrase {
 public:
     BroadPhraseTrie(int32_t dimension);
 
-    virtual void create(int32_t id, const V3& position, const V3& aabb) override;
-    virtual void update(int32_t id, const V3& position, const V3& aabb) override;
-    virtual void remove(int32_t id) override;
+    void create(IdType id, const V3& position, const V3& aabb) override;
+    void update(IdType id, const V3& position, const V3& aabb) override;
+    void remove(IdType id) override;
 
-    virtual Result search(const V3& position, const V3& size) override;
-    virtual Result rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter) override;
+    Result search(const V3& position, const V3& size) override;
+    Result rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter) override;
 
 public:
     class Stub;
@@ -30,7 +28,7 @@ public:
     private:
         struct Boundary {
             int32_t key;
-            std::set<int32_t> items;
+            std::set<IdType> items;
         };
 
         struct Range {
@@ -42,16 +40,16 @@ public:
         };
 
     public:
-        void create(int32_t id, float low, float high);
-        void update(int32_t id, float low, float high);
-        void remove(int32_t id);
+        void create(IdType id, float low, float high);
+        void update(IdType id, float low, float high);
+        void remove(IdType id);
 
-        std::unordered_set<int32_t> search(float low, float high) const;
+        std::unordered_set<IdType> search(float low, float high) const;
 
     private:
-        Boundary* boundaryCreate(std::map<int32_t, Boundary>& boundaries, int32_t id, int32_t key);
-        Boundary* boundaryUpdate(std::map<int32_t, Boundary>& boundaries, Boundary* boundary, int32_t key, int32_t id);
-        void boundaryRemove(std::map<int32_t, Boundary>& boundaries, Boundary* boundary, int32_t id);
+        Boundary* boundaryCreate(std::map<int32_t, Boundary>& boundaries, IdType id, int32_t key);
+        Boundary* boundaryUpdate(std::map<int32_t, Boundary>& boundaries, Boundary* boundary, int32_t key, IdType id);
+        void boundaryRemove(std::map<int32_t, Boundary>& boundaries, Boundary* boundary, IdType id);
 
         Range& ensureRange(int32_t id);
 
@@ -67,11 +65,11 @@ public:
         Stub(int32_t dimension);
         ~Stub();
 
-        void remove(int32_t id);
-        void create(int32_t id, const V3& position, const V3& size);
-        void update(int32_t id, const V3& position, const V3& size);
+        void remove(IdType id);
+        void create(IdType id, const V3& position, const V3& size);
+        void update(IdType id, const V3& position, const V3& size);
 
-        std::unordered_set<int32_t> search(const V3& position, const V3& size) const;
+        std::unordered_set<IdType> search(const V3& position, const V3& size) const;
 
     private:
         int32_t _dimension;
@@ -95,5 +93,3 @@ private:
 };
 
 }
-
-#endif

@@ -8,23 +8,19 @@
 
 namespace ark {
 
-BroadPhraseAll::BroadPhraseAll()
-{
-}
-
-void BroadPhraseAll::create(int32_t id, const V3& /*position*/, const V3& /*aabb*/)
+void BroadPhraseAll::create(IdType id, const V3& /*position*/, const V3& /*aabb*/)
 {
     _candidates.insert(id);
 }
 
-void BroadPhraseAll::update(int32_t /*id*/, const V3& /*position*/, const V3& /*aabb*/)
+void BroadPhraseAll::update(IdType /*id*/, const V3& /*position*/, const V3& /*aabb*/)
 {
 }
 
-void BroadPhraseAll::remove(int32_t id)
+void BroadPhraseAll::remove(IdType id)
 {
     const auto iter = _candidates.find(id);
-    DCHECK(iter != _candidates.end(), "RigidBody(%d) not registered", id);
+    DCHECK(iter != _candidates.end(), "RigidBody(%uz) not registered", id);
     _candidates.erase(iter);
 }
 

@@ -13,9 +13,7 @@
 #include "box2d/impl/body_create_info.h"
 #include "box2d/inf/shape.h"
 
-namespace ark {
-namespace plugin {
-namespace box2d {
+namespace ark::plugin::box2d {
 
 namespace {
 
@@ -37,14 +35,13 @@ public:
         }
     }
 
-    virtual void apply(b2Body* body, const sp<Size>& size, const BodyCreateInfo& createInfo) override {
+    void apply(b2Body* body, const V3& size, const BodyCreateInfo& createInfo) override {
         for(const std::vector<V2>& i : _polygons) {
             b2PolygonShape shape;
 
             std::vector<b2Vec2> vec2s;
-            float width = size->widthAsFloat(), height = size->heightAsFloat();
             for(const V2& j : i)
-                vec2s.push_back(b2Vec2(j.x() * width, j.y() * height));
+                vec2s.push_back(b2Vec2(j.x() * size.x(), j.y() * size.y()));
 
             shape.Set(vec2s.data(), static_cast<int32_t>(vec2s.size()));
 
@@ -96,6 +93,4 @@ sp<ColliderBox2D::RigidBodyImporter> RigidBodyImporterGenericXML::BUILDER::build
     return sp<RigidBodyImporterGenericXML>::make();
 }
 
-}
-}
 }

@@ -2265,6 +2265,13 @@ class Platform:
 
 
 class Shape:
+
+    SHAPE_ID_NONE = 0
+    SHAPE_ID_AABB = -1
+    SHAPE_ID_BALL = -2
+    SHAPE_ID_BOX = -3
+    SHAPE_ID_CAPSULE = -4
+
     def __init__(self, _id: int, size: Optional[Vec3]):
         pass
 
@@ -2442,7 +2449,7 @@ class Collider:
     BODY_FLAG_MANUAL_POSITION = 8
     BODY_FLAG_MANUAL_ROTATION = 16
 
-    def create_body(self, type_: int | Integer, shape, position, size=None, rotate=None, disposed: Optional[Boolean] = None) -> RigidBody:
+    def create_body(self, type_: int | Integer, shape: Optional[Shape], position, rotate=None, disposed: Optional[Boolean] = None) -> RigidBody:
         pass
 
     def ray_cast(self, ray_from, ray_to, collision_filter: Optional[CollisionFilter] = None) -> List[RayCastManifold]:

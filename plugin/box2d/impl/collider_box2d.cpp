@@ -42,15 +42,15 @@ void ColliderBox2D::run()
     _stub->run();
 }
 
-sp<RigidBody> ColliderBox2D::createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotation, sp<Boolean> disposed)
+sp<RigidBody> ColliderBox2D::createBody(Collider::BodyType type, sp<ark::Shape> shape, sp<Vec3> position, sp<Rotation> rotation, sp<Boolean> discarded)
 {
-    const auto iter = _stub->_body_manifests.find(shape);
+    const auto iter = _stub->_body_manifests.find(shape->id());
     DCHECK(iter != _stub->_body_manifests.end(), "RigidBody shape-id: %d not found", shape);
     const BodyCreateInfo& manifest = iter->second;
-    const sp<RigidBodyBox2D> body = sp<RigidBodyBox2D>::make(*this, type, position, size, rotation ? rotation->theta() : sp<Numeric>(), manifest);
+    const sp<RigidBodyBox2D> body = sp<RigidBodyBox2D>::make(*this, type, position, shape->size().val(), rotation ? rotation->theta() : sp<Numeric>(), manifest);
     if(rotation)
         body->setAngle(rotation->theta()->val());
-    DCHECK(!disposed, "Unimplemented");
+    DCHECK(!discarded, "Unimplemented");
 
     if(manifest.category || manifest.mask || manifest.group)
     {
@@ -81,7 +81,7 @@ b2Body* ColliderBox2D::createBody(const b2BodyDef& bodyDef) const
     return _stub->_world.CreateBody(&bodyDef);
 }
 
-b2Body* ColliderBox2D::createBody(Collider::BodyType type, const V3& position, const sp<Size>& size, const BodyCreateInfo& createInfo) const
+b2Body* ColliderBox2D::createBody(Collider::BodyType type, const V3& position, const V3& size, const BodyCreateInfo& createInfo) const
 {
     b2BodyDef bodyDef;
     switch(type & Collider::BODY_TYPE_RIGID)

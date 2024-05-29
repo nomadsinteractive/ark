@@ -10,17 +10,17 @@ BroadPhraseGrid::BroadPhraseGrid(int32_t dimension, const V3& cell)
 {
 }
 
-void BroadPhraseGrid::create(int32_t id, const V3& position, const V3& aabb)
+void BroadPhraseGrid::create(IdType id, const V3& position, const V3& aabb)
 {
     _stub->create(id, position, aabb);
 }
 
-void BroadPhraseGrid::update(int32_t id, const V3& position, const V3& aabb)
+void BroadPhraseGrid::update(IdType id, const V3& position, const V3& aabb)
 {
     _stub->update(id, position, aabb);
 }
 
-void BroadPhraseGrid::remove(int32_t id)
+void BroadPhraseGrid::remove(IdType id)
 {
     _stub->remove(id);
 }
@@ -52,13 +52,13 @@ BroadPhraseGrid::Stub::~Stub()
     delete[] _axes;
 }
 
-void BroadPhraseGrid::Stub::remove(int32_t id)
+void BroadPhraseGrid::Stub::remove(IdType id)
 {
     for(int32_t i = 0; i < _dimension; i++)
         _axes[i].remove(id);
 }
 
-void BroadPhraseGrid::Stub::create(int32_t id, const V3& position, const V3& size)
+void BroadPhraseGrid::Stub::create(IdType id, const V3& position, const V3& size)
 {
     for(int32_t i = 0; i < _dimension; i++)
     {
@@ -68,7 +68,7 @@ void BroadPhraseGrid::Stub::create(int32_t id, const V3& position, const V3& siz
     }
 }
 
-void BroadPhraseGrid::Stub::update(int32_t id, const V3& position, const V3& size)
+void BroadPhraseGrid::Stub::update(IdType id, const V3& position, const V3& size)
 {
     for(int32_t i = 0; i < _dimension; i++)
     {
@@ -78,13 +78,13 @@ void BroadPhraseGrid::Stub::update(int32_t id, const V3& position, const V3& siz
     }
 }
 
-std::unordered_set<int32_t> BroadPhraseGrid::Stub::search(const V3& position, const V3& size) const
+std::unordered_set<BroadPhrase::IdType> BroadPhraseGrid::Stub::search(const V3& position, const V3& size) const
 {
-    std::unordered_set<int32_t> candidates = _axes[0].search(position[0] - size[0] / 2.0f, position[0] + size[0] / 2.0f);
+    std::unordered_set<IdType> candidates = _axes[0].search(position[0] - size[0] / 2.0f, position[0] + size[0] / 2.0f);
     for(int32_t i = 1; i < _dimension && !candidates.empty(); i++)
     {
-        const std::unordered_set<int32_t> s1 = std::move(candidates);
-        const std::unordered_set<int32_t> s2 = _axes[i].search(position[i] - size[i] / 2.0f, position[i] + size[i] / 2.0f);
+        const std::unordered_set<IdType> s1 = std::move(candidates);
+        const std::unordered_set<IdType> s2 = _axes[i].search(position[i] - size[i] / 2.0f, position[i] + size[i] / 2.0f);
         for(int32_t i : s1)
             if(s2.find(i) != s2.end())
                 candidates.insert(i);
@@ -92,7 +92,7 @@ std::unordered_set<int32_t> BroadPhraseGrid::Stub::search(const V3& position, co
     return candidates;
 }
 
-void BroadPhraseGrid::Axis::create(int32_t id, float position, float low, float high)
+void BroadPhraseGrid::Axis::create(IdType id, float position, float low, float high)
 {
     int32_t mp = Math::modFloor(static_cast<int32_t>(position), _stride);
     int32_t remainder;
@@ -102,7 +102,7 @@ void BroadPhraseGrid::Axis::create(int32_t id, float position, float low, float 
     updateRange(id, cur, Range());
 }
 
-void BroadPhraseGrid::Axis::update(int32_t id, float position, float low, float high)
+void BroadPhraseGrid::Axis::update(IdType id, float position, float low, float high)
 {
     int32_t mp = Math::modFloor(static_cast<int32_t>(position), _stride);
     const auto iter = _trackee_ranges.find(id);
@@ -117,7 +117,7 @@ void BroadPhraseGrid::Axis::update(int32_t id, float position, float low, float 
     }
 }
 
-void BroadPhraseGrid::Axis::updateRange(int32_t id, const Range& cur, const Range& prev)
+void BroadPhraseGrid::Axis::updateRange(IdType id, const Range& cur, const Range& prev)
 {
     for(int32_t i = prev._begin; i < prev._end; i++)
         if(!cur.within(i))
@@ -130,9 +130,9 @@ void BroadPhraseGrid::Axis::updateRange(int32_t id, const Range& cur, const Rang
     _trackee_ranges[id] = cur;
 }
 
-std::unordered_set<int32_t> BroadPhraseGrid::Axis::search(float low, float high) const
+std::unordered_set<BroadPhrase::IdType> BroadPhraseGrid::Axis::search(float low, float high) const
 {
-    std::unordered_set<int32_t> candidates;
+    std::unordered_set<IdType> candidates;
     int32_t remainder;
     int32_t begin = Math::divmod(static_cast<int32_t>(low), _stride, remainder);
     int32_t end = Math::divmod(static_cast<int32_t>(high), _stride, remainder) + 1;
@@ -145,7 +145,7 @@ std::unordered_set<int32_t> BroadPhraseGrid::Axis::search(float low, float high)
     return candidates;
 }
 
-void BroadPhraseGrid::Axis::remove(int32_t id)
+void BroadPhraseGrid::Axis::remove(IdType id)
 {
     const auto it1 = _trackee_ranges.find(id);
     if(it1 != _trackee_ranges.end())
@@ -159,7 +159,7 @@ void BroadPhraseGrid::Axis::remove(int32_t id)
     }
 }
 
-void BroadPhraseGrid::Axis::remove(int32_t id, int32_t rangeId)
+void BroadPhraseGrid::Axis::remove(IdType id, int32_t rangeId)
 {
     const auto range = _trackee_range_ids.equal_range(rangeId);
     for(auto iter = range.first; iter != range.second; ++iter)

@@ -14,6 +14,7 @@
 #include "app/base/application_bundle.h"
 #include "app/base/rigid_body.h"
 #include "app/inf/collider.h"
+#include "app/traits/shape.h"
 
 
 namespace ark {
@@ -134,9 +135,8 @@ sp<RigidBody> Level::makeRigidBody(const Library& library, const sp<RenderObject
         return nullptr;
 
     const V3& dimension = library._dimensions;
-    sp<RigidBody> rigidBody = rigidBodyLibray->_object->createBody(Collider::BODY_TYPE_STATIC, rigidBodyLibray->_type, renderObject->position(), sp<Size>::make(dimension.x(), dimension.y(), dimension.z()), renderObject->transform()->rotation());
-    rigidBody->bind(renderObject);
-    return rigidBody;
+    return rigidBodyLibray->_object->createBody(Collider::BODY_TYPE_STATIC, sp<Shape>::make(rigidBodyLibray->_type, sp<Vec3>::make<Vec3::Const>(V3(dimension.x(), dimension.y(), dimension.z()))), renderObject->position(),
+                                                renderObject->transform()->rotation());
 }
 
 sp<Transform> Level::makeTransform(const String& rotation, const String& scale) const

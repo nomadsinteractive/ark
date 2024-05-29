@@ -8,21 +8,19 @@
 
 #include "box2d/impl/body_create_info.h"
 
-namespace ark {
-namespace plugin {
-namespace box2d {
+namespace ark::plugin::box2d {
 
 Arc::Arc(uint32_t sampleCount, float a, float b)
     : _sample_count(sampleCount), _a(a), _b(b)
 {
 }
 
-void Arc::apply(b2Body* body, const sp<Size>& size, const BodyCreateInfo& createInfo)
+void Arc::apply(b2Body* body, const V3& size, const BodyCreateInfo& createInfo)
 {
-    DCHECK_WARN(Math::almostEqual<float>(size->widthAsFloat(), size->heightAsFloat()), "RigidBody size: (%.2f, %.2f) is not a circle", size->widthAsFloat(), size->heightAsFloat());
+    DCHECK_WARN(Math::almostEqual<float>(size.x(), size.y()), "RigidBody size: (%.2f, %.2f) is not a circle", size.x(), size.y());
 
     b2ChainShape shape;
-    float radius = (size->widthAsFloat() + size->heightAsFloat()) / 4.0f;
+    float radius = (size.x() + size.y()) / 4.0f;
 
     if(_b < _a)
         _b += 360.0f;
@@ -56,6 +54,4 @@ sp<Shape> Arc::BUILDER::build(const Scope& args)
     return sp<Arc>::make(sampleCount, a, b);
 }
 
-}
-}
 }

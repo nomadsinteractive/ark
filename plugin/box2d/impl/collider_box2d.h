@@ -1,5 +1,4 @@
-#ifndef ARK_PLUGIN_BOX2D_IMPL_COLLIDER_BOX2D_H_
-#define ARK_PLUGIN_BOX2D_IMPL_COLLIDER_BOX2D_H_
+#pragma once
 
 #include <unordered_map>
 #include <vector>
@@ -23,9 +22,7 @@
 #include "box2d/impl/body_create_info.h"
 #include "box2d/impl/joint.h"
 
-namespace ark {
-namespace plugin {
-namespace box2d {
+namespace ark::plugin::box2d {
 
 //[[script::bindings::name("World")]]
 class ARK_PLUGIN_BOX2D_API ColliderBox2D : public Runnable, public Collider, Implements<ColliderBox2D, Runnable, Collider> {
@@ -39,14 +36,14 @@ public:
     virtual void run() override;
 
 //  [[script::bindings::auto]]
-    virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size = nullptr, const sp<Rotation>& rotation = nullptr, sp<Boolean> disposed = nullptr) override;
+    sp<RigidBody> createBody(Collider::BodyType type, sp<ark::Shape> shape, sp<Vec3> position, sp<Rotation> rotate = nullptr, sp<Boolean> discarded = nullptr) override;
 //  [[script::bindings::auto]]
-    virtual std::vector<RayCastManifold> rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter) override;
+    std::vector<RayCastManifold> rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter) override;
 
     b2World& world() const;
 
     b2Body* createBody(const b2BodyDef& bodyDef) const;
-    b2Body* createBody(Collider::BodyType type, const V3& position, const sp<Size>& size, const BodyCreateInfo& createInfo) const;
+    b2Body* createBody(Collider::BodyType type, const V3& position, const V3& size, const BodyCreateInfo& createInfo) const;
 
 //  [[script::bindings::auto]]
     float toPixelX(float meterX) const;
@@ -146,7 +143,3 @@ private:
 };
 
 }
-}
-}
-
-#endif

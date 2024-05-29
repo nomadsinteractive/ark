@@ -44,4 +44,7 @@ class Surface;
 class SurfaceUpdater;
 class View;
 
+typedef Ref<Entity> EntityRef;
+typedef Ref<RigidBody> RigidBodyRef;
+
 }

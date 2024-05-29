@@ -10,97 +10,97 @@
 #include "core/util/string_convert.h"
 #include "core/util/holder_util.h"
 
-#include "graphics/base/size.h"
-#include "graphics/base/v3.h"
-#include "graphics/base/render_object.h"
-#include "graphics/util/vec3_type.h"
-
 #include "app/base/application_context.h"
 #include "app/base/collision_manifold.h"
 #include "app/inf/collision_callback.h"
 #include "app/traits/shape.h"
+#include "core/types/ref.h"
 
 namespace ark {
 
-RigidBody::RigidBody(int32_t id, Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Rotation> rotate, Box impl, SafeVar<Boolean> discarded)
-    : _stub(sp<Stub>::make(id, type, 0, std::move(shape), std::move(position), sp<Transform>::make(Transform::TYPE_LINEAR_3D, rotate), std::move(impl), std::move(discarded)))
+RigidBody::RigidBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Rotation> rotation, Box impl, SafeVar<Boolean> discarded)
+    : _ref(sp<RigidBodyRef>::make(*this)), _type(type), _meta_id(0), _shape(std::move(shape)), _position(std::move(position)), _rotation(std::move(rotation)), _impl(std::move(impl)), _discarded(std::move(discarded)), _callback(sp<Callback>::make())
 {
 }
 
-RigidBody::RigidBody(sp<Stub> stub)
-    : _stub(std::move(stub))
+RigidBody::~RigidBody()
 {
+    LOGD("RigidBody(%uz) disposed", id());
+    _ref->discard();
 }
 
-void RigidBody::bind(const sp<RenderObject>& renderObject)
+std::vector<std::pair<TypeId, Box>> RigidBody::onWire(const Traits& components)
 {
-    renderObject->setPosition(_stub->_position);
-    renderObject->setTransform(_stub->_transform);
+    if(sp<Vec3> position = components.get<Vec3>())
+        _position.reset(std::move(position));
+
+    if(sp<Shape> shape = components.get<Shape>())
+    {
+        _shape = std::move(shape);
+        _timestamp.markDirty();
+    }
+
+    return {};
 }
 
-int32_t RigidBody::id() const
+uintptr_t RigidBody::id() const
 {
-    return _stub->_id;
+    return reinterpret_cast<uintptr_t>(_ref.get());
 }
 
 Collider::BodyType RigidBody::type() const
 {
-    return _stub->_type;
+    return _type;
 }
 
 Collider::BodyType RigidBody::rigidType() const
 {
-    return static_cast<Collider::BodyType>(_stub->_type & Collider::BODY_TYPE_RIGID);
+    return static_cast<Collider::BodyType>(_type & Collider::BODY_TYPE_RIGID);
 }
 
 const sp<Shape>& RigidBody::shape() const
 {
-    return _stub->_shape;
+    return _shape;
 }
 
 uint32_t RigidBody::metaId() const
 {
-    return _stub->_meta_id;
+    return _meta_id;
 }
 
 const sp<Vec3>& RigidBody::position() const
 {
-    return _stub->_position;
+    return _position.wrapped();
 }
 
-const sp<Transform>& RigidBody::transform() const
+const sp<Rotation>& RigidBody::rotation() const
 {
-    return _stub->_transform;
+    return _rotation;
 }
 
 const sp<CollisionCallback>& RigidBody::collisionCallback() const
 {
-    return _stub->_callback->_collision_callback;
+    return _callback->_collision_callback;
 }
 
 void RigidBody::setCollisionCallback(sp<CollisionCallback> collisionCallback)
 {
-    _stub->_callback->_collision_callback = std::move(collisionCallback);
+    _callback->_collision_callback = std::move(collisionCallback);
 }
 
 const sp<CollisionFilter>& RigidBody::collisionFilter() const
 {
-    return _stub->_collision_filter;
+    return _collision_filter;
 }
 
 void RigidBody::setCollisionFilter(sp<CollisionFilter> collisionFilter)
 {
-    _stub->_collision_filter = std::move(collisionFilter);
-}
-
-const sp<RigidBody::Stub>& RigidBody::stub() const
-{
-    return _stub;
+    _collision_filter = std::move(collisionFilter);
 }
 
 const sp<RigidBody::Callback>& RigidBody::callback() const
 {
-    return _stub->_callback;
+    return _callback;
 }
 
 template<> ARK_API Collider::BodyType StringConvert::eval<Collider::BodyType>(const String& str)
@@ -113,17 +113,6 @@ template<> ARK_API Collider::BodyType StringConvert::eval<Collider::BodyType>(co
         return Collider::BODY_TYPE_DYNAMIC;
     FATAL("Unknow body type \"%s\"", str.c_str());
     return Collider::BODY_TYPE_STATIC;
-}
-
-RigidBody::Stub::Stub(int32_t id, Collider::BodyType type, uint32_t metaId, sp<Shape> shape, sp<Vec3> position, sp<Transform> transform, Box impl, SafeVar<Boolean> discarded)
-    : _id(id), _type(type), _meta_id(metaId), _shape(std::move(shape)), _position(std::move(position)), _transform(std::move(transform)), _impl(std::move(impl)), _discarded(std::move(discarded)), _callback(sp<Callback>::make())
-{
-}
-
-RigidBody::Stub::~Stub()
-{
-    _discarded.reset(true);
-    LOGD("RigidBody(%d) disposed", _id);
 }
 
 void RigidBody::Callback::onBeginContact(const sp<RigidBody>& rigidBody, const CollisionManifold& manifold)

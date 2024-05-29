@@ -1,10 +1,10 @@
 #pragma once
 
 #include "core/base/api.h"
+#include "core/base/timestamp.h"
 #include "core/inf/builder.h"
+#include "core/inf/wirable.h"
 #include "core/types/box.h"
-#include "core/types/weak_ptr.h"
-#include "core/types/safe_ptr.h"
 #include "core/types/safe_var.h"
 #include "core/types/shared_ptr.h"
 
@@ -16,7 +16,7 @@
 
 namespace ark {
 
-class ARK_API RigidBody {
+class ARK_API RigidBody : public Wirable {
 public:
     class ARK_API Callback {
     public:
@@ -34,43 +34,18 @@ public:
         friend class RigidBody;
     };
 
-    struct ARK_API Stub {
-        Stub(int32_t id, Collider::BodyType type, uint32_t metaId, sp<Shape> shape, sp<Vec3> position, sp<Transform> transform, Box impl, SafeVar<Boolean> discarded = nullptr);
-        ~Stub();
-
-        DISALLOW_COPY_AND_ASSIGN(Stub);
-
-        int32_t _id;
-        Collider::BodyType _type;
-        uint32_t _meta_id;
-        sp<Shape> _shape;
-        SafePtr<Vec3> _position;
-        sp<Transform> _transform;
-
-        Box _impl;
-        SafeVar<Boolean> _discarded;
-
-        sp<Callback> _callback;
-        sp<CollisionFilter> _collision_filter;
-        WeakPtr<RenderObject> _render_object;
-
-        Box _tag;
-    };
-
 public:
-    virtual ~RigidBody() = default;
-
-    RigidBody(int32_t id, Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Rotation> rotate, Box impl, SafeVar<Boolean> discarded);
-    RigidBody(sp<Stub> stub);
-    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(RigidBody);
+    RigidBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Rotation> rotation, Box impl, SafeVar<Boolean> discarded);
+    ~RigidBody() override;
+    DISALLOW_COPY_AND_ASSIGN(RigidBody);
 
 //  [[script::bindings::auto]]
     virtual void dispose() = 0;
-//  [[script::bindings::auto]]
-    virtual void bind(const sp<RenderObject>& renderObject);
+
+    std::vector<std::pair<TypeId, Box>> onWire(const Traits& components) override;
 
 //  [[script::bindings::property]]
-    int32_t id() const;
+    uintptr_t id() const;
 //  [[script::bindings::property]]
     Collider::BodyType type() const;
 //  [[script::bindings::property]]
@@ -83,7 +58,7 @@ public:
 //  [[script::bindings::property]]
     const sp<Vec3>& position() const;
 //  [[script::bindings::property]]
-    const sp<Transform>& transform() const;
+    const sp<Rotation>& rotation() const;
 
 //  [[script::bindings::property]]
     const sp<CollisionCallback>& collisionCallback() const;
@@ -95,12 +70,23 @@ public:
 //  [[script::bindings::property]]
     void setCollisionFilter(sp<CollisionFilter> collisionFilter);
 
-    const sp<Stub>& stub() const;
     const sp<Callback>& callback() const;
 
 private:
-    sp<Stub> _stub;
+    sp<RigidBodyRef> _ref;
 
+    Collider::BodyType _type;
+    uint32_t _meta_id;
+    sp<Shape> _shape;
+    SafeVar<Vec3> _position;
+    sp<Rotation> _rotation;
+
+    Box _impl;
+    SafeVar<Boolean> _discarded;
+
+    sp<Callback> _callback;
+    sp<CollisionFilter> _collision_filter;
+    Timestamp _timestamp;
 };
 
 }

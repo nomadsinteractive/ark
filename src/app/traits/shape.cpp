@@ -2,7 +2,7 @@
 
 namespace ark {
 
-Shape::Shape(int32_t id, SafeVar<Vec3> size)
+Shape::Shape(int32_t id, sp<Vec3> size)
     : _id(id), _size(std::move(size))
 {
 }

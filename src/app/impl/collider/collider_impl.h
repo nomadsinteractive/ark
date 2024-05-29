@@ -25,8 +25,8 @@ class ColliderImpl : public Collider {
 public:
     ColliderImpl(std::vector<std::pair<sp<BroadPhrase>, sp<CollisionFilter>>> broadPhrase, sp<NarrowPhrase> narrowPhrase, RenderController& renderController);
 
-    virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shape, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate, sp<Boolean> disposed) override;
-    virtual std::vector<RayCastManifold> rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter) override;
+    sp<RigidBody> createBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Rotation> rotate, sp<Boolean> discarded) override;
+    std::vector<RayCastManifold> rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter) override;
 
 //  [[plugin::resource-loader]]
     class BUILDER : public Builder<Collider> {
@@ -54,14 +54,14 @@ public:
 
         int32_t generateRigidBodyId();
 
-        sp<RigidBodyImpl> createRigidBody(int32_t rigidBodyId, Collider::BodyType type, int32_t shape, sp<Vec3> position, sp<Size> size, sp<Rotation> rotate, SafeVar<Boolean> discarded);
+        sp<RigidBodyImpl> createRigidBody(int32_t rigidBodyId, Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Rotation> rotate, sp<Boolean> discarded);
 
         const sp<RigidBodyShadow>& ensureRigidBody(int32_t id) const;
         sp<RigidBodyShadow> ensureRigidBody(int32_t id, uint32_t metaId, int32_t shapeId, const V3& position, bool isDynamicRigidBody) const;
         sp<RigidBodyShadow> findRigidBody(int32_t id) const;
 
-        std::vector<sp<RigidBodyShadow>> toRigidBodyShadows(const std::unordered_set<int32_t>& candidateSet, uint32_t filter) const;
-        std::vector<BroadPhrase::Candidate> toBroadPhraseCandidates(const std::unordered_set<int32_t>& candidateSet, uint32_t filter) const;
+        std::vector<sp<RigidBodyShadow>> toRigidBodyShadows(const std::unordered_set<BroadPhrase::IdType>& candidateSet, uint32_t filter) const;
+        std::vector<BroadPhrase::Candidate> toBroadPhraseCandidates(const std::unordered_set<BroadPhrase::IdType>& candidateSet, uint32_t filter) const;
 
         void resolveCandidates(const sp<RigidBody>& self, const BroadPhrase::Candidate& candidateSelf, const std::vector<BroadPhrase::Candidate>& candidates, bool isDynamicCandidates, RigidBody::Callback& callback, std::set<int32_t>& c);
 
@@ -70,7 +70,7 @@ public:
         void updateBroadPhraseCandidate(int32_t id, const V3& position, const V3& aabb) const;
         void removeBroadPhraseCandidate(int32_t id);
 
-        virtual bool update(uint64_t timestamp) override;
+        bool update(uint64_t timestamp) override;
 
     private:
         BroadPhrase::Result broadPhraseSearch(const V3& position, const V3& aabb, const sp<CollisionFilter>& collisionFilter) const;
@@ -80,7 +80,8 @@ public:
         int32_t _rigid_body_base_id;
         std::vector<std::pair<sp<BroadPhrase>, sp<CollisionFilter>>> _broad_phrases;
         sp<NarrowPhrase> _narrow_phrase;
-        std::unordered_map<int32_t, sp<RigidBodyShadow>> _rigid_bodies;
+
+        std::unordered_map<uintptr_t, sp<RigidBodyShadow>> _rigid_bodies;
 
         std::vector<sp<RigidBodyShadow>> _rigid_body_refs;
 
@@ -92,10 +93,10 @@ public:
 
     class RigidBodyShadow : public RigidBody, public Updatable {
     public:
-        RigidBodyShadow(const ColliderImpl::Stub& stub, uint32_t id, Collider::BodyType type, uint32_t metaId, int32_t shape, sp<Vec3> position, sp<Size> size, sp<Rotation> rotation, SafeVar<Boolean> discarded);
+        RigidBodyShadow(const ColliderImpl::Stub& stub, uint32_t id, Collider::BodyType type, uint32_t metaId, sp<Shape> shape, sp<Vec3> position, sp<Rotation> rotation, SafeVar<Boolean> discarded);
 
-        virtual void dispose() override;
-        virtual bool update(uint64_t timestamp) override;
+        void dispose() override;
+        bool update(uint64_t timestamp) override;
 
         void collisionTest(const sp<RigidBodyShadow>& self, ColliderImpl::Stub& collider, const V3& position, const V3& size, const std::set<int32_t>& removingIds);
 
@@ -119,11 +120,11 @@ public:
         friend class RigidBodyImpl;
     };
 
-    class RigidBodyImpl : public RigidBody, Implements<RigidBodyImpl, RigidBody> {
+    class RigidBodyImpl : public RigidBody, Implements<RigidBodyImpl, RigidBody, Wirable> {
     public:
         RigidBodyImpl(sp<RigidBodyShadow> shadow);
 
-        virtual void dispose() override;
+        void dispose() override;
 
     private:
         void doDispose();

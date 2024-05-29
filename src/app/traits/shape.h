@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/forwarding.h"
 #include "core/types/safe_var.h"
 
 #include "graphics/forwarding.h"
@@ -19,7 +20,8 @@ public:
     };
 
 public:
-    Shape(int32_t id = Shape::SHAPE_ID_NONE, SafeVar<Vec3> size = nullptr);
+//  [[script::bindings::auto]]
+    Shape(int32_t id = Shape::SHAPE_ID_NONE, sp<Vec3> size = nullptr);
 
 //  [[script::bindings::property]]
     int32_t id() const;

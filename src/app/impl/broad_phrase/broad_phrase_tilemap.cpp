@@ -28,15 +28,15 @@ BroadPhraseTilemap::BroadPhraseTilemap(sp<Tilemap> tilemap, NarrowPhrase& narrow
     _body_def_tile = narrowPhrase.makeBodyDef(Shape::SHAPE_ID_AABB,  sp<Vec3>::make<Vec3::Const>(tileset.tileSize()->val())).impl();
 }
 
-void BroadPhraseTilemap::create(int32_t /*id*/, const V3& /*position*/, const V3& /*aabb*/)
+void BroadPhraseTilemap::create(IdType /*id*/, const V3& /*position*/, const V3& /*aabb*/)
 {
 }
 
-void BroadPhraseTilemap::update(int32_t /*id*/, const V3& /*position*/, const V3& /*aabb*/)
+void BroadPhraseTilemap::update(IdType /*id*/, const V3& /*position*/, const V3& /*aabb*/)
 {
 }
 
-void BroadPhraseTilemap::remove(int32_t /*id*/)
+void BroadPhraseTilemap::remove(IdType /*id*/)
 {
 }
 
@@ -132,7 +132,7 @@ BroadPhrase::Result BroadPhraseTilemap::rayCast(const V3& from, const V3& to, co
     return BroadPhrase::Result({}, std::move(candidates));
 }
 
-int32_t BroadPhraseTilemap::toCandidateId(int32_t layerId, int32_t row, int32_t col) const
+BroadPhrase::IdType BroadPhraseTilemap::toCandidateId(int32_t layerId, int32_t row, int32_t col) const
 {
     return layerId << 16 | ((row << 8) & 0xff00) | (col & 0xff);
 }

@@ -4,7 +4,6 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
-#include "graphics/base/v3.h"
 
 #include "app/forwarding.h"
 #include "app/base/raycast_manifold.h"
@@ -30,7 +29,7 @@ public:
     virtual ~Collider() = default;
 
 //  [[script::bindings::auto]]
-    virtual sp<RigidBody> createBody(Collider::BodyType type, int32_t shapeId, const sp<Vec3>& position, const sp<Size>& size = nullptr, const sp<Rotation>& rotate = nullptr, sp<Boolean> disposed = nullptr) = 0;
+    virtual sp<RigidBody> createBody(Collider::BodyType type, sp<Shape> shape = nullptr, sp<Vec3> position = nullptr, sp<Rotation> rotate = nullptr, sp<Boolean> discarded = nullptr) = 0;
 //  [[script::bindings::auto]]
     virtual std::vector<RayCastManifold> rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter = nullptr) = 0;
 

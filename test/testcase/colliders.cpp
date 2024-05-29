@@ -81,20 +81,20 @@ public:
         const auto r = bp2->search(V3(220, 0, 0), V3(16, 32, 0));
 
         const sp<RenderObject> c001 = resourceLoader->load<RenderObject>("c001", args);
-        const sp<RigidBody> rigidBody001 = collider->createBody(Collider::BODY_TYPE_DYNAMIC, Shape::SHAPE_ID_AABB, c001->position(), c001->size());
+        const sp<RigidBody> rigidBody001 = collider->createBody(Collider::BODY_TYPE_DYNAMIC, sp<Shape>::make(Shape::SHAPE_ID_AABB, static_cast<sp<Vec3>>(c001->size())), c001->position());
         const sp<RenderObject> c002 = resourceLoader->load<RenderObject>("c002", args);
-        const sp<RigidBody> rigidBody002 = collider->createBody(Collider::BODY_TYPE_STATIC, Shape::SHAPE_ID_AABB, c002->position(), c002->size());
+        const sp<RigidBody> rigidBody002 = collider->createBody(Collider::BODY_TYPE_STATIC, sp<Shape>::make(Shape::SHAPE_ID_AABB, c002->size()), c002->position());
         const sp<RenderObject> c003 = resourceLoader->load<RenderObject>("c003", args);
-        const sp<RigidBody> rigidBody003 = collider->createBody(Collider::BODY_TYPE_DYNAMIC, 1, c003->position(), c003->size(), c003->transform()->rotation());
+        const sp<RigidBody> rigidBody003 = collider->createBody(Collider::BODY_TYPE_DYNAMIC, sp<Shape>::make(1, c003->size()), c003->position(), c003->transform()->rotation());
         const sp<CollisionCallbackImpl> collisionCallbackImpl001 = sp<CollisionCallbackImpl>::make(c001);
         const sp<CollisionCallbackImpl> collisionCallbackImpl003 = sp<CollisionCallbackImpl>::make(c003);
         rigidBody001->setCollisionCallback(collisionCallbackImpl001);
         rigidBody003->setCollisionCallback(collisionCallbackImpl003);
-        const std::unordered_set<int32_t> s1 = bp1->search(V3(120, 380, 0), V3(60, 60, 0))._dynamic_candidates;
+        const auto s1 = bp1->search(V3(120, 380, 0), V3(60, 60, 0))._dynamic_candidates;
         TESTCASE_VALIDATE(s1.find(rigidBody001->id()) != s1.end());
-        const std::unordered_set<int32_t> s2 = bp1->search(V3(40, 380, 0), V3(60, 60, 0))._dynamic_candidates;
+        const auto s2 = bp1->search(V3(40, 380, 0), V3(60, 60, 0))._dynamic_candidates;
         TESTCASE_VALIDATE(s2.find(rigidBody001->id()) == s2.end());
-        const std::unordered_set<int32_t> s3 = bp1->search(V3(120, 450, 0), V3(60, 60, 0))._dynamic_candidates;
+        const auto s3 = bp1->search(V3(120, 450, 0), V3(60, 60, 0))._dynamic_candidates;
         TESTCASE_VALIDATE(s3.find(rigidBody001->id()) == s3.end());
 
         while(duration->val() < 3.0f) {

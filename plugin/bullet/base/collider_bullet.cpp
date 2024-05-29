@@ -31,7 +31,7 @@ ColliderBullet::ColliderBullet(const V3& gravity, sp<ModelLoader> modelLoader)
     _stub->_dynamics_world->setInternalTickCallback(myInternalTickCallback, this);
 }
 
-sp<RigidBody> ColliderBullet::createBody(Collider::BodyType type, int32_t shapeId, const sp<Vec3>& position, const sp<Size>& size, const sp<Rotation>& rotate, sp<Boolean> disposed)
+sp<RigidBody> ColliderBullet::createBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Rotation> rotate, sp<Boolean> discarded)
 {
     btTransform transform;
     const V3 pos = position->val();
@@ -39,27 +39,28 @@ sp<RigidBody> ColliderBullet::createBody(Collider::BodyType type, int32_t shapeI
     transform.setIdentity();
     transform.setOrigin(btVector3(pos.x(), pos.y(), pos.z()));
     transform.setRotation(btQuaternion(quat.x(), quat.y(), quat.z(), quat.w()));
-    DCHECK(!disposed, "Unimplemented");
+    DCHECK(!discarded, "Unimplemented");
 
     sp<CollisionShape> cs;
-    const auto iter = _stub->_collision_shapes.find(shapeId);
+    const auto iter = _stub->_collision_shapes.find(shape->id());
     if(iter == _stub->_collision_shapes.end())
     {
         btCollisionShape* btShape;
-        switch(shapeId)
+        const V3 size = shape->size().val();
+        switch(shape->id())
         {
         case Shape::SHAPE_ID_BOX:
-            btShape = new btBoxShape(btVector3(size->widthAsFloat() / 2, size->heightAsFloat() / 2, size->depthAsFloat() / 2));
+            btShape = new btBoxShape(btVector3(size.x() / 2, size.y() / 2, size.z() / 2));
             break;
         case Shape::SHAPE_ID_BALL:
-            btShape = new btSphereShape(size->widthAsFloat() / 2);
+            btShape = new btSphereShape(size.x() / 2);
             break;
         case Shape::SHAPE_ID_CAPSULE:
-            DCHECK_WARN(size->heightAsFloat() > size->widthAsFloat(), "When constructing a capsule shape, its height(%.2f) needs be greater than its width(%.2f)", size->heightAsFloat(), size->widthAsFloat());
-            btShape = new btCapsuleShapeZ(size->widthAsFloat() / 2, size->heightAsFloat() - size->widthAsFloat());
+            DCHECK_WARN(size.y() > size.x(), "When constructing a capsule shape, its height(%.2f) needs be greater than its width(%.2f)", size.y() > size.x());
+            btShape = new btCapsuleShapeZ(size.x() / 2, size.y() - size.x());
             break;
         default:
-            DFATAL("Undefined RigidBody(%d) in this world", shapeId);
+            DFATAL("Undefined RigidBody(%d) in this world", shape->id());
             break;
         }
         cs = sp<CollisionShape>::make(btShape, 1.0f);

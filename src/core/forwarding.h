@@ -24,6 +24,7 @@ template<typename T> class LoaderBundle;
 template<typename T> class LFStack;
 template<typename T> class LFQueue;
 template<typename T> class Range;
+template<typename T> class Ref;
 template<typename T> class SafePtr;
 template<typename T> class SafeVar;
 template<typename T> class SharedPtr;

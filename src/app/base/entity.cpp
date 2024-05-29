@@ -7,7 +7,7 @@
 namespace ark {
 
 Entity::Entity(Traits components)
-    : _ref(sp<Ref>::make(*this)), _components(std::move(components))
+    : _ref(sp<EntityRef>::make(*this)), _components(std::move(components))
 {
     doWire();
 }
@@ -15,10 +15,6 @@ Entity::Entity(Traits components)
 Entity::~Entity()
 {
     dispose();
-}
-
-Entity::Ref::Ref(Entity& entity)
-    : _entity(entity), _discarded(false) {
 }
 
 void Entity::doWire()
@@ -34,7 +30,7 @@ sp<EntityId> Entity::id() const
 
 void Entity::dispose()
 {
-    _ref->_discarded = true;
+    _ref->discard();
     _components.traits().clear();
 }
 

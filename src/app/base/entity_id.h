@@ -14,7 +14,7 @@ public:
     static uintptr_t toInteger(const EntityId& self);
 
 private:
-    sp<Entity::Ref> _ref;
+    sp<EntityRef> _ref;
 };
 
 }

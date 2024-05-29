@@ -6,14 +6,12 @@
 
 #include "box2d/impl/body_create_info.h"
 
-namespace ark {
-namespace plugin {
-namespace box2d {
+namespace ark::plugin::box2d {
 
-void Box::apply(b2Body* body, const sp<Size>& size, const BodyCreateInfo& createInfo)
+void Box::apply(b2Body* body, const V3& size, const BodyCreateInfo& createInfo)
 {
     b2PolygonShape shape;
-    shape.SetAsBox(size->widthAsFloat() / 2.0f, size->heightAsFloat() / 2.0f);
+    shape.SetAsBox(size.x() / 2.0f, size.y() / 2.0f);
 
     b2FixtureDef fixtureDef = createInfo.toFixtureDef(&shape);
     body->CreateFixture(&fixtureDef);
@@ -28,6 +26,4 @@ sp<Shape> Box::BUILDER::build(const Scope& /*args*/)
     return sp<Box>::make();
 }
 
-}
-}
 }
