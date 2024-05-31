@@ -8,7 +8,7 @@
 
 namespace ark {
 
-class ARK_API Shape {
+class ARK_API Shape final {
 public:
 //  [[script::bindings::enumeration]]
     enum ShapeId {
@@ -27,9 +27,10 @@ public:
     int32_t id() const;
 //  [[script::bindings::property]]
     void setId(int32_t id);
-
+//  [[script::bindings::property]]
     const SafeVar<Vec3>& size() const;
-    void setSize(SafeVar<Vec3> size);
+//  [[script::bindings::property]]
+    void setSize(sp<Vec3> size);
 
 private:
     int32_t _id;

@@ -1,5 +1,7 @@
 #include "app/traits/shape.h"
 
+#include "core/impl/variable/variable_dirty.h"
+
 namespace ark {
 
 Shape::Shape(int32_t id, sp<Vec3> size)
@@ -22,9 +24,9 @@ const SafeVar<Vec3>& Shape::size() const
     return _size;
 }
 
-void Shape::setSize(SafeVar<Vec3> size)
+void Shape::setSize(sp<Vec3> size)
 {
-    _size = std::move(size);
+    _size = sp<Vec3>::make<VariableDirty<V3>>(std::move(size), _size);
 }
 
 }

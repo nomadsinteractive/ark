@@ -94,7 +94,6 @@ std::vector<std::pair<TypeId, Box>> View::onWire(const Traits& components)
     sp<Vec3> size = Vec3Type::create(sp<LayoutSize<0>>::make(_stub), sp<LayoutSize<1>>::make(_stub), nullptr);
     if(const sp<Shape>& shape = components.get<Shape>())
     {
-        shape->setId(Shape::SHAPE_ID_AABB);
         shape->setSize(std::move(size));
         return {};
     }

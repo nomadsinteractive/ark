@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_IMPL_VARIABLE_VARIABLE_OP1_H_
-#define ARK_CORE_IMPL_VARIABLE_VARIABLE_OP1_H_
+#pragma once
 
 #include <functional>
 
@@ -19,15 +18,15 @@ public:
         : _func(std::move(func)), _arg(std::move(arg)) {
     }
 
-    virtual T val() override {
+    T val() override {
         return _func(_arg->val());
     }
 
-    virtual bool update(uint64_t timestamp) override {
+    bool update(uint64_t timestamp) override {
         return _arg->update(timestamp);
     }
 
-    virtual void traverse(const Visitor& visitor) override {
+    void traverse(const Visitor& visitor) override {
         HolderUtil::visit(_arg, visitor);
     }
 
@@ -37,5 +36,3 @@ private:
 };
 
 }
-
-#endif

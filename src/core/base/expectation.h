@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_BASE_EXPECTATION_H_
-#define ARK_CORE_BASE_EXPECTATION_H_
+#pragma once
 
 #include <vector>
 
@@ -20,15 +19,15 @@ public:
         : Wrapper<Variable<T>>(std::move(delegate)), _notifier(std::move(notifier)) {
     }
 
-    virtual T val() override {
+    T val() override {
         return this->_wrapped->val();
     }
 
-    virtual bool update(uint64_t timestamp) override {
+    bool update(uint64_t timestamp) override {
         return this->_wrapped->update(timestamp);
     }
 
-    virtual void traverse(const Visitor& visitor) override {
+    void traverse(const Visitor& visitor) override {
         for(const sp<Observer>& i : _observers)
             i->traverse(visitor);
     }
@@ -52,5 +51,3 @@ private:
 };
 
 }
-
-#endif

@@ -18,7 +18,7 @@ CollisionCallbackPythonAdapter::CollisionCallbackPythonAdapter(const PyInstance&
 {
 }
 
-void CollisionCallbackPythonAdapter::onBeginContact(const sp<RigidBody>& rigidBody, const CollisionManifold& manifold)
+void CollisionCallbackPythonAdapter::onBeginContact(const RigidBody& rigidBody, const CollisionManifold& manifold)
 {
     DCHECK_THREAD_FLAG();
     if(_on_begin_contact)
@@ -27,14 +27,13 @@ void CollisionCallbackPythonAdapter::onBeginContact(const sp<RigidBody>& rigidBo
 
         PyObject* args = PyTuple_New(2);
 
-        PyTuple_SetItem(args, 0, toPyObject(rigidBody));
-        PyTuple_SetItem(args, 1, PythonInterpreter::instance().toPyObject(_collision_manifold));
+        PyTuple_SetItem(args, 0, toPyObject(sp<RigidBody>(std::shared_ptr<RigidBody>(&const_cast<RigidBody&>(rigidBody), [](void*){}), nullptr)));
+        PyTuple_SetItem(args, 1, PyCast::toPyObject(_collision_manifold));
 
 /* Check again, in case of GC */
         if(_on_begin_contact)
         {
-            PyObject* ret = _on_begin_contact.call(args);
-            if(ret)
+            if(PyObject* ret = _on_begin_contact.call(args))
                 Py_DECREF(ret);
             else
                 PythonInterpreter::instance().logErr();
@@ -44,19 +43,18 @@ void CollisionCallbackPythonAdapter::onBeginContact(const sp<RigidBody>& rigidBo
     }
 }
 
-void CollisionCallbackPythonAdapter::onEndContact(const sp<RigidBody>& rigidBody)
+void CollisionCallbackPythonAdapter::onEndContact(const RigidBody& rigidBody)
 {
     DCHECK_THREAD_FLAG();
     if(_on_end_contact)
     {
         PyObject* args = PyTuple_New(1);
-        PyTuple_SetItem(args, 0, toPyObject(rigidBody));
+        PyTuple_SetItem(args, 0, toPyObject(sp<RigidBody>(std::shared_ptr<RigidBody>(&const_cast<RigidBody&>(rigidBody), [](void*){}), nullptr)));
 
 /* Check again, in case of GC */
         if(_on_end_contact)
         {
-            PyObject* ret = _on_end_contact.call(args);
-            if(ret)
+            if(PyObject* ret = _on_end_contact.call(args))
                 Py_DECREF(ret);
             else
                 PythonInterpreter::instance().logErr();

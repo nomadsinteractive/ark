@@ -32,7 +32,7 @@ public:
     virtual void traverse(const Visitor& visitor) override;
 
 //  [[script::bindings::property]]
-    const sp<Numeric>& theta() const;
+    const sp<Numeric>& theta();
 //  [[script::bindings::property]]
     void setTheta(const sp<Numeric>& theta);
 //  [[script::bindings::property]]

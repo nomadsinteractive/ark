@@ -173,7 +173,7 @@ void RenderObject::setTag(const Box& tag)
     _tag = tag;
 }
 
-sp<Boolean> RenderObject::discarded() const
+const sp<Boolean>& RenderObject::discarded()
 {
     return _discarded.ensure();
 }

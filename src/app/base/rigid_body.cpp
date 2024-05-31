@@ -25,7 +25,7 @@ RigidBody::RigidBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position
 
 RigidBody::~RigidBody()
 {
-    LOGD("RigidBody(%uz) disposed", id());
+    LOGD("RigidBody(%uz) disposed", _ref->id());
     _ref->discard();
 }
 
@@ -35,17 +35,22 @@ std::vector<std::pair<TypeId, Box>> RigidBody::onWire(const Traits& components)
         _position.reset(std::move(position));
 
     if(sp<Shape> shape = components.get<Shape>())
-    {
         _shape = std::move(shape);
-        _timestamp.markDirty();
-    }
+
+    if(sp<Boolean> expendable = components.get<Expendable>())
+        _discarded.reset(std::move(expendable));
 
     return {};
 }
 
 uintptr_t RigidBody::id() const
 {
-    return reinterpret_cast<uintptr_t>(_ref.get());
+    return _ref->id();
+}
+
+const sp<RigidBodyRef>& RigidBody::ref() const
+{
+    return _ref;
 }
 
 Collider::BodyType RigidBody::type() const
@@ -68,14 +73,19 @@ uint32_t RigidBody::metaId() const
     return _meta_id;
 }
 
-const sp<Vec3>& RigidBody::position() const
+const SafeVar<Vec3>& RigidBody::position() const
 {
-    return _position.wrapped();
+    return _position;
 }
 
 const sp<Rotation>& RigidBody::rotation() const
 {
     return _rotation;
+}
+
+const SafeVar<Boolean>& RigidBody::discarded() const
+{
+    return _discarded;
 }
 
 const sp<CollisionCallback>& RigidBody::collisionCallback() const

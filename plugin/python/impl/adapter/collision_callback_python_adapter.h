@@ -14,10 +14,10 @@ class CollisionCallbackPythonAdapter : public CollisionCallback, public Holder, 
 public:
     CollisionCallbackPythonAdapter(const PyInstance& callback);
 
-    virtual void onBeginContact(const sp<RigidBody>& rigidBody, const CollisionManifold& manifold) override;
-    virtual void onEndContact(const sp<RigidBody>& rigidBody) override;
+    void onBeginContact(const RigidBody& rigidBody, const CollisionManifold& manifold) override;
+    void onEndContact(const RigidBody& rigidBody) override;
 
-    virtual void traverse(const Visitor& visitor) override;
+    void traverse(const Visitor& visitor) override;
 
 private:
     PyObject* toPyObject(const sp<RigidBody>& rigidBody) const;

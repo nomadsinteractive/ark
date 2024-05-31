@@ -161,7 +161,7 @@ void YogaLayout::applyLayoutParam(const LayoutParam& layoutParam, YGNodeRef node
     YGNodeStyleSetFlexDirection(node, toYGFlexDirection(layoutParam.flexDirection()));
     YGNodeStyleSetFlexGrow(node, layoutParam.flexGrow());
 
-    const Optional<float> flexBasis = updateVar<float, Numeric>(timestamp, layoutParam.flexBasis());
+    const Optional<float> flexBasis = updateVar<float, const SafeVar<Numeric>>(timestamp, layoutParam.flexBasis());
     if(flexBasis)
     {
         if(layoutParam.flexBasisType() == LayoutParam::LENGTH_TYPE_AUTO)

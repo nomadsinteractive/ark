@@ -1,95 +1,72 @@
 #pragma once
 
 #include "core/inf/variable.h"
-#include "core/impl/variable/variable_wrapper.h"
+#include "core/base/wrapper.h"
 #include "core/types/shared_ptr.h"
 
 namespace ark {
 
-template<typename T> class SafeVar {
+template<typename T> class SafeVar : public Wrapper<T> {
 public:
     typedef decltype(std::declval<T>().val()) ValType;
-    typedef VariableWrapper<ValType> WrapperType;
+    typedef typename Variable<ValType>::Const WrapperType;
     typedef T _PtrType;
 
     SafeVar() noexcept
-        : _default_val(), _wrapped(nullptr) {
+        : Wrapper<T>(nullptr), _default_val() {
     }
     SafeVar(nullptr_t) noexcept
-        : _default_val(), _wrapped(nullptr) {
+        : Wrapper<T>(nullptr), _default_val() {
     }
     SafeVar(sp<T> delegate) noexcept
         : SafeVar(std::move(delegate), ValType()) {
     }
     SafeVar(sp<T> delegate, const ValType& defaultVal) noexcept
-        : _default_val(defaultVal), _wrapped(delegate ? ensure_sfinae(std::move(delegate), nullptr) : nullptr) {
+        : Wrapper<T>(std::move(delegate)), _default_val(defaultVal) {
     }
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(SafeVar);
 
     explicit operator bool() const {
-        return static_cast<bool>(_wrapped);
+        return static_cast<bool>(this->_wrapped);
     }
 
     ValType val() const {
-        return _wrapped ? _wrapped->val() : _default_val;
+        return this->_wrapped ? this->_wrapped->val() : _default_val;
     }
 
     bool update(uint64_t timestamp) const {
-        return _wrapped ? _wrapped->update(timestamp) : false;
+        return this->_wrapped ? this->_wrapped->update(timestamp) : false;
     }
 
     explicit operator const sp<T>&() const {
-        return _wrapped;
+        return this->_wrapped;
     }
 
-    const sp<T>& ensure() const {
-        if(!_wrapped)
-            _wrapped = ensure_sfinae(nullptr, nullptr);
-        return _wrapped;
-    }
-
-    const sp<T>& wrapped() const {
-        return _wrapped;
+    const sp<T>& ensure() {
+        if(!this->_wrapped)
+            this->_wrapped = ensure_sfinae(nullptr);
+        return this->_wrapped;
     }
 
     void reset(sp<T> delegate) {
-        if(!delegate) {
-            _wrapped = nullptr;
-            return;
-        }
-
-        if(!_wrapped)
-            _wrapped = ensure_sfinae(std::move(delegate), nullptr);
-        else {
-            if constexpr(std::is_abstract_v<T>)
-                _wrapped.template cast<WrapperType>()->reset(std::move(delegate));
-            else
-                _wrapped->reset(std::move(delegate));
-        }
+        Wrapper<T>::reset(std::move(delegate));
     }
 
     void reset(ValType value) {
-        _default_val = value;
-        _wrapped = nullptr;
+        _default_val = std::move(value);
+        this->_wrapped = nullptr;
     }
 
 private:
-    template<typename U = T> sp<T> ensure_sfinae(sp<T> delegate, std::enable_if_t<std::is_abstract_v<U>>*) const {
-        return delegate ? sp<WrapperType>::make(std::move(delegate)) : sp<WrapperType>::make(_default_val);
-    }
-
-    template<typename U = T> sp<T> ensure_sfinae(sp<T> delegate, std::enable_if_t<!std::is_abstract_v<U>>*) const {
-        return delegate ? sp<U>::make(*delegate) : sp<U>::make(_default_val);
-    }
-
-    template<typename U = T> sp<T> ensure_sfinae(...) const {
-        DFATAL("Constructor for default value required");
-        return nullptr;
+    sp<T> ensure_sfinae(void*) const {
+        if constexpr(std::is_abstract_v<T>)
+            return sp<WrapperType>::make(_default_val);
+        else
+            return sp<T>::make(_default_val);
     }
 
 private:
     ValType _default_val;
-    mutable sp<T> _wrapped;
 };
 
 }

@@ -83,7 +83,7 @@ public:
     void setTag(const Box& tag);
 
 //  [[script::bindings::property]]
-    sp<Boolean> discarded() const;
+    const sp<Boolean>& discarded();
 //  [[script::bindings::property]]
     void setDiscarded(sp<Boolean> discarded);
 

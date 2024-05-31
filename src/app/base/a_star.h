@@ -1,9 +1,10 @@
 #pragma once
 
 #include <memory>
-#include <set>
 #include <unordered_set>
 #include <vector>
+
+#include "core/types/optional.h"
 
 #include "graphics/base/v3.h"
 
@@ -31,8 +32,7 @@ public:
             if(_routes.begin()->_route_path.back() == _goal)
                 return _routes.begin()->_route_path;
 
-            Optional<SearchingRoute> inflated = inflate();
-            if(inflated)
+            if(Optional<SearchingRoute> inflated = inflate())
                 _routes.insert(std::move(inflated.value()));
             else
                 _routes.erase(_routes.begin());

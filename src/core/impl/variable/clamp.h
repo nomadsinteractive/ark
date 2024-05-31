@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_IMPL_VARIABLE_CLAMP_H_
-#define ARK_CORE_IMPL_VARIABLE_CLAMP_H_
+#pragma once
 
 #include "core/forwarding.h"
 #include "core/base/notifier.h"
@@ -46,5 +45,3 @@ private:
 };
 
 }
-
-#endif

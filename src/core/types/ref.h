@@ -1,6 +1,9 @@
 #pragma once
 
+#include "core/forwarding.h"
 #include "core/base/api.h"
+#include "core/types/class.h"
+#include "core/types/shared_ptr.h"
 
 namespace ark {
 
@@ -9,18 +12,28 @@ public:
     Ref(T& instance)
         : _instance(instance), _discarded(false) {
     }
+    DISALLOW_COPY_AND_ASSIGN(Ref);
 
     explicit operator bool() const {
         return !_discarded;
+    }
+
+    bool isDiscarded() const {
+        return _discarded;
     }
 
     void discard() {
         _discarded = true;
     }
 
-    T& instance() {
+    template<typename U = T> U& instance() {
         ASSERT(!_discarded);
-        return _instance;
+        return static_cast<U&>(_instance);
+    }
+
+    template<typename U = T> const U& instance() const {
+        ASSERT(!_discarded);
+        return static_cast<const U&>(_instance);
     }
 
     uintptr_t id() const {

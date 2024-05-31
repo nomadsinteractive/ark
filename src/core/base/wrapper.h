@@ -20,7 +20,7 @@ public:
     }
 
 protected:
-    Wrapper(sp<T> delegate)
+    Wrapper(sp<T> delegate) noexcept
         : _wrapped(std::move(delegate)) {
     }
 

@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_IMPL_VARIABLE_VARIABLE_OBSERVER_H_
-#define ARK_CORE_IMPL_VARIABLE_VARIABLE_OBSERVER_H_
+#pragma once
 
 #include "core/base/observer.h"
 #include "core/inf/variable.h"
@@ -36,5 +35,3 @@ private:
 };
 
 }
-
-#endif

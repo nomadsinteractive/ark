@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_BASE_OBSERVER_H_
-#define ARK_CORE_BASE_OBSERVER_H_
+#pragma once
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
@@ -30,5 +29,3 @@ private:
 };
 
 }
-
-#endif

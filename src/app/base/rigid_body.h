@@ -46,6 +46,7 @@ public:
 
 //  [[script::bindings::property]]
     uintptr_t id() const;
+    const sp<RigidBodyRef>& ref() const;
 //  [[script::bindings::property]]
     Collider::BodyType type() const;
 //  [[script::bindings::property]]
@@ -56,9 +57,12 @@ public:
 //  [[script::bindings::property]]
     const sp<Shape>& shape() const;
 //  [[script::bindings::property]]
-    const sp<Vec3>& position() const;
+    const SafeVar<Vec3>& position() const;
 //  [[script::bindings::property]]
     const sp<Rotation>& rotation() const;
+
+//  [[script::bindings::property]]
+    const SafeVar<Boolean>& discarded() const;
 
 //  [[script::bindings::property]]
     const sp<CollisionCallback>& collisionCallback() const;
@@ -72,7 +76,7 @@ public:
 
     const sp<Callback>& callback() const;
 
-private:
+protected:
     sp<RigidBodyRef> _ref;
 
     Collider::BodyType _type;
@@ -86,7 +90,6 @@ private:
 
     sp<Callback> _callback;
     sp<CollisionFilter> _collision_filter;
-    Timestamp _timestamp;
 };
 
 }

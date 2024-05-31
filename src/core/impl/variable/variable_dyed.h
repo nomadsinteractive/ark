@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_IMPL_VARIABLE_VARIABLE_DYED_H_
-#define ARK_CORE_IMPL_VARIABLE_VARIABLE_DYED_H_
+#pragma once
 
 #include "core/forwarding.h"
 #include "core/base/wrapper.h"
@@ -17,12 +16,12 @@ public:
         :  Wrapper<Variable<T>>(std::move(delegate)), _condition(std::move(condition), true), _message(std::move(message)) {
     }
 
-    virtual bool update(uint64_t timestamp) override {
+    bool update(uint64_t timestamp) override {
         _condition.update(timestamp);
         return this->_wrapped->update(timestamp);
     }
 
-    virtual T val() override {
+    T val() override {
         T v = this->_wrapped->val();
         TRACE(_condition.val(), Strings::sprintf("%s: %s", _message.c_str(), Strings::toString(v).c_str()).c_str());
         return v;
@@ -35,5 +34,3 @@ private:
 };
 
 }
-
-#endif

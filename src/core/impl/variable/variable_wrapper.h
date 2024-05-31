@@ -20,11 +20,11 @@ public:
     }
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(VariableWrapper);
 
-    virtual T val() override {
+    T val() override {
         return this->_wrapped->val();
     }
 
-    virtual bool update(uint64_t timestamp) override {
+    bool update(uint64_t timestamp) override {
         return this->_wrapped->update(timestamp) || _timestamp.update(timestamp);
     }
 

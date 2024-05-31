@@ -6,6 +6,8 @@
 
 #include "graphics/base/v3.h"
 
+#include "app/forwarding.h"
+
 namespace ark {
 
 class ARK_API GraphNode {

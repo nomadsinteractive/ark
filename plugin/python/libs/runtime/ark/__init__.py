@@ -2627,5 +2627,14 @@ class WithLayer:
         pass
 
 
+class Tag:
+    def __init__(self, info: Any):
+        pass
+
+    @property
+    def info(self) -> Any:
+        return None
+
+
 def __trace__():
     pass

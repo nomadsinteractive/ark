@@ -137,7 +137,7 @@ public:
 //  [[script::bindings::property]]
     void setFlexBasisType(LayoutParam::LengthType basisType);
 //  [[script::bindings::property]]
-    const sp<Numeric>& flexBasis() const;
+    const SafeVar<Numeric>& flexBasis() const;
 //  [[script::bindings::property]]
     void setFlexBasis(sp<Numeric> flexBasis);
 

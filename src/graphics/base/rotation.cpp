@@ -48,7 +48,7 @@ void Rotation::traverse(const Holder::Visitor& visitor)
     HolderUtil::visit(_quaternion, visitor);
 }
 
-const sp<Numeric>& Rotation::theta() const
+const sp<Numeric>& Rotation::theta()
 {
     return _theta.ensure();
 }
