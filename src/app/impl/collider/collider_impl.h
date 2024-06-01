@@ -51,8 +51,6 @@ public:
 
         void requestRigidBodyRemoval(int32_t rigidBodyId);
 
-        int32_t generateRigidBodyId();
-
         sp<RigidBodyImpl> createRigidBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Rotation> rotate, sp<Boolean> discarded);
 
         std::vector<sp<RigidBodyRef>> toRigidBodyRefs(const std::unordered_set<BroadPhrase::IdType>& candidateSet, uint32_t filter) const;
@@ -62,8 +60,8 @@ public:
 
         const sp<NarrowPhrase>& narrowPhrase() const;
 
-        void updateBroadPhraseCandidate(int32_t id, const V3& position, const V3& aabb) const;
-        void removeBroadPhraseCandidate(int32_t id);
+        void updateBroadPhraseCandidate(BroadPhrase::IdType id, const V3& position, const V3& aabb) const;
+        void removeBroadPhraseCandidate(BroadPhrase::IdType id);
 
         bool update(uint64_t timestamp) override;
 
@@ -72,7 +70,6 @@ public:
         BroadPhrase::Result broadPhraseRayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter) const;
 
     private:
-        int32_t _rigid_body_base_id;
         std::vector<std::pair<sp<BroadPhrase>, sp<CollisionFilter>>> _broad_phrases;
         sp<NarrowPhrase> _narrow_phrase;
 

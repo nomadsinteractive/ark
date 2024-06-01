@@ -185,9 +185,9 @@ void View::markAsTopView()
 }
 
 View::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _factory(factory), _manifest(manifest), _disposed(factory.getBuilder<Boolean>(manifest, Constants::Attributes::DISPOSED)), _visible(factory.getBuilder<Boolean>(manifest, Constants::Attributes::VISIBLE)),
-      _layout(factory.getBuilder<Layout>(manifest, Constants::Attributes::LAYOUT)), _layout_v3(factory.getBuilder<LayoutV3>(manifest, "layout-v3")),
-      _background(factory.getBuilder<RenderObjectWithLayer>(manifest, Constants::Attributes::BACKGROUND)), _text(factory.getBuilder<Text>(manifest, Constants::Attributes::TEXT)),
+    : _factory(factory), _manifest(manifest), _disposed(factory.getBuilder<Boolean>(manifest, constants::DISPOSED)), _visible(factory.getBuilder<Boolean>(manifest, constants::VISIBLE)),
+      _layout(factory.getBuilder<Layout>(manifest, constants::LAYOUT)), _layout_v3(factory.getBuilder<LayoutV3>(manifest, "layout-v3")),
+      _background(factory.getBuilder<RenderObjectWithLayer>(manifest, constants::BACKGROUND)), _text(factory.getBuilder<Text>(manifest, constants::TEXT)),
       _layout_param(factory.ensureConcreteClassBuilder<LayoutParam>(manifest, "layout-param"))
 {
 }
@@ -198,12 +198,12 @@ sp<View> View::BUILDER::build(const Scope& args)
     for(const document& i : _manifest->children())
     {
         const String& name = i->name();
-        if(name == Constants::Attributes::VIEW)
+        if(name == constants::VIEW)
             view->addView(_factory.ensure<View>(i, args));
-        else if(name == Constants::Attributes::RENDER_OBJECT)
+        else if(name == constants::RENDER_OBJECT)
             view->addRenderObjectWithLayer(_factory.ensure<RenderObjectWithLayer>(i, args), false);
         else
-            CHECK_WARN(name == Constants::Attributes::TEXT || name == Constants::Attributes::BACKGROUND, "Ignoring unknown view child: %s", Documents::toString(i).c_str());
+            CHECK_WARN(name == constants::TEXT || name == constants::BACKGROUND, "Ignoring unknown view child: %s", Documents::toString(i).c_str());
     }
     return view;
 }

@@ -29,7 +29,7 @@ sp<Numeric> Duration::duration()
 }
 
 Duration::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _clock(factory.getBuilder<Clock>(manifest, Constants::Attributes::CLOCK)),
+    : _clock(factory.getBuilder<Clock>(manifest, constants::CLOCK)),
       _delegate(factory.getBuilder<Numeric>(manifest, "t")),
       _until(factory.getBuilder<Numeric>(manifest, "until"))
 {

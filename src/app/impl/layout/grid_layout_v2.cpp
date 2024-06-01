@@ -41,7 +41,7 @@ std::vector<V2> GridLayoutV2::place(const std::vector<sp<LayoutParam>>& slots, c
 
 GridLayoutV2::BUILDER::BUILDER(BeanFactory& parent, const document& doc)
     : _rows(parent.ensureBuilder<Numeric>(doc, "rows")), _cols(parent.ensureBuilder<Numeric>(doc, "cols")),
-      _gravity(Documents::ensureAttribute<LayoutParam::Gravity>(doc, Constants::Attributes::GRAVITY))
+      _gravity(Documents::ensureAttribute<LayoutParam::Gravity>(doc, constants::GRAVITY))
 {
 }
 

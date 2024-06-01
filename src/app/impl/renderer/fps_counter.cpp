@@ -46,7 +46,7 @@ void FPSCounter::updateFPS(float fps)
 FPSCounter::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _characters(factory.ensureConcreteClassBuilder<Text>(manifest, "characters")),
       _message(Documents::getAttribute(manifest, "message", "FPS %.1f")),
-      _interval(Documents::getAttribute<Clock::Interval>(manifest, Constants::Attributes::INTERVAL, 2000000).sec())
+      _interval(Documents::getAttribute<Clock::Interval>(manifest, constants::INTERVAL, 2000000).sec())
 {
 }
 

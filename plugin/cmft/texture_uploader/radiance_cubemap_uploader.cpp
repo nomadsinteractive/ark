@@ -77,7 +77,7 @@ void RadianceCubemapUploader::initialize(GraphicsContext& graphicsContext, Textu
 }
 
 RadianceCubemapUploader::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _bitmap(factory.ensureConcreteClassBuilder<Bitmap>(manifest, Constants::Attributes::BITMAP)), _size(factory.ensureConcreteClassBuilder<Size>(manifest, Constants::Attributes::SIZE))
+    : _bitmap(factory.ensureConcreteClassBuilder<Bitmap>(manifest, constants::BITMAP)), _size(factory.ensureConcreteClassBuilder<Size>(manifest, constants::SIZE))
 {
 }
 

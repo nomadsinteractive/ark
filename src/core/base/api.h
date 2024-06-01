@@ -86,11 +86,9 @@
 
 namespace ark {
 
-namespace Constants {
+namespace constants {
 
 const size_t npos = std::numeric_limits<size_t>::max();
-
-namespace Attributes {
 
 const char* const ID = "id";
 const char* const ALPHA = "alpha";
@@ -152,7 +150,6 @@ const char* const TEXT_SIZE = "text-size";
 
 const char* const NINE_PATCH_PADDINGS = "paddings";
 
-}
 }
 
 enum THREAD_ID {

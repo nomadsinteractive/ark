@@ -41,7 +41,7 @@ sp<ModelLoader> ModelLoaderNinePatchQuads::BUILDER::build(const Scope& args)
 }
 
 ModelLoaderNinePatchQuads::BUILDER_IMPL::BUILDER_IMPL(BeanFactory& factory, const document& manifest)
-    : _builder(factory, Documents::ensureAttribute(manifest, Constants::Attributes::ATLAS))
+    : _builder(factory, Documents::ensureAttribute(manifest, constants::ATLAS))
 {
 }
 

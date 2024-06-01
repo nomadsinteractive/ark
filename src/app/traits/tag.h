@@ -8,6 +8,7 @@ namespace ark {
 
 class ARK_API Tag final {
 public:
+//  [[script::bindings::auto]]
     Tag(Box info);
 
 //  [[script::bindings::property]]

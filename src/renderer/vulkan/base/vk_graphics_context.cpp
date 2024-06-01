@@ -11,12 +11,11 @@
 #include "renderer/vulkan/base/vk_render_target.h"
 #include "renderer/vulkan/util/vk_util.h"
 
-namespace ark {
-namespace vulkan {
+namespace ark::vulkan {
 
 static VkClearColorValue toVkClearColorValue(const V4& rgba)
 {
-    return {rgba.x(), rgba.y(), rgba.z(), rgba.w()};
+    return {{rgba.x(), rgba.y(), rgba.z(), rgba.w()}};
 }
 
 namespace {
@@ -185,5 +184,4 @@ VkCommandBuffer VKGraphicsContext::State::startRecording()
     return _command_buffer;
 }
 
-}
 }

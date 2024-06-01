@@ -46,9 +46,9 @@ void RendererGroup::BUILDER::loadGroup(RendererGroup& rendererGroup, const Scope
 {
     for(const document& i : _manifest->children())
     {
-        if(i->name() == Constants::Attributes::RENDER_LAYER)
+        if(i->name() == constants::RENDER_LAYER)
             rendererGroup.addRenderer(_factory.ensureDecorated<Renderer, RenderLayer>(i, args));
-        else if(i->name() == Constants::Attributes::LAYER)
+        else if(i->name() == constants::LAYER)
             rendererGroup.addRenderer(_factory.ensureDecorated<Renderer, Layer>(i, args));
         else
             rendererGroup.addRenderer(_factory.ensure<Renderer>(i, args));

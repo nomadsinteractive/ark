@@ -37,15 +37,15 @@ void ApplicationManifest::load(const String& src)
     for(const document& i : _content->children("asset"))
         _assets.push_back(Asset(i));
 
-    _plugins = Documents::getSystemSpecificList<std::vector<String>>(_content->children("plugin"), Constants::Attributes::NAME);
+    _plugins = Documents::getSystemSpecificList<std::vector<String>>(_content->children("plugin"), constants::NAME);
 
     const document& renderer = _content->getChild("renderer");
     if(renderer)
     {
         const document& resolution = renderer->getChild("resolution");
         if(resolution)
-            _renderer._resolution = sp<Size>::make(Documents::ensureAttribute<float>(resolution, Constants::Attributes::WIDTH),
-                                                   Documents::ensureAttribute<float>(resolution, Constants::Attributes::HEIGHT));
+            _renderer._resolution = sp<Size>::make(Documents::ensureAttribute<float>(resolution, constants::WIDTH),
+                                                   Documents::ensureAttribute<float>(resolution, constants::HEIGHT));
         _renderer._version = Documents::getAttribute<Ark::RendererVersion>(renderer, "version", Ark::RENDERER_VERSION_AUTO);
         _renderer._coordinate_system = Documents::getAttribute<Ark::RendererCoordinateSystem>(renderer, "coordinate-system", Ark::COORDINATE_SYSTEM_DEFAULT);
         _renderer._vsync = Documents::getAttribute<bool>(renderer, "vsync", false);
@@ -174,7 +174,7 @@ template<> ARK_API ApplicationManifest::WindowFlag StringConvert::eval<Applicati
 
 ApplicationManifest::Asset::Asset(const document& manifest)
     : _protocol(Documents::getAttribute(manifest, "protocol")), _root(Documents::getAttribute(manifest, "root", "/")),
-      _src(Documents::getAttribute(manifest, Constants::Attributes::SRC))
+      _src(Documents::getAttribute(manifest, constants::SRC))
 {
 }
 

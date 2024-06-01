@@ -100,7 +100,7 @@ sp<Snippet> SnippetLinkedChain::BUILDER::build(const Scope& args)
 {
     sp<Snippet> snippet;
     sp<SnippetLinkedChain> chain;
-    for(const document& i : _manifest->children(Constants::Attributes::SNIPPET))
+    for(const document& i : _manifest->children(constants::SNIPPET))
     {
         if(!chain && snippet)
             chain = sp<SnippetLinkedChain>::make(snippet, _build(i, args));
@@ -117,8 +117,8 @@ sp<Snippet> SnippetLinkedChain::BUILDER::build(const Scope& args)
 
 sp<Snippet> SnippetLinkedChain::BUILDER::_build(const document& manifest, const Scope& args)
 {
-    const String type = Documents::getAttribute(manifest, Constants::Attributes::TYPE);
-    const String value = Documents::getAttribute(manifest, Constants::Attributes::VALUE);
+    const String type = Documents::getAttribute(manifest, constants::TYPE);
+    const String value = Documents::getAttribute(manifest, constants::VALUE);
     if(type)
         return _factory.ensureBuilderByTypeValue<Snippet>(type, value)->build(args);
     return _factory.ensure<Snippet>(manifest, args);

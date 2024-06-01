@@ -27,7 +27,7 @@ const sp<Size>& Paragraph::size()
 }
 
 Paragraph::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _characters(factory.ensureConcreteClassBuilder<Text>(manifest, "characters")), _string(factory.getBuilder<String>(manifest, Constants::Attributes::TEXT))
+    : _characters(factory.ensureConcreteClassBuilder<Text>(manifest, "characters")), _string(factory.getBuilder<String>(manifest, constants::TEXT))
 {
 }
 

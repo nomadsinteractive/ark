@@ -134,7 +134,7 @@ void Arena::addView(sp<View> view, sp<Boolean> disposable)
 
 Arena::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _factory(factory), _manifest(manifest), _resource_loader(factory.getBuilder<ResourceLoader>(manifest, "resource-loader")),
-      _view(factory.getBuilder<View>(manifest, Constants::Attributes::VIEW))
+      _view(factory.getBuilder<View>(manifest, constants::VIEW))
 {
 }
 
@@ -148,15 +148,15 @@ sp<Arena> Arena::BUILDER::build(const Scope& args)
     for(const document& i : _manifest->children())
     {
         const String& name = i->name();
-        if(name == Constants::Attributes::EVENT_LISTENER)
+        if(name == constants::EVENT_LISTENER)
             arena->addEventListener(factory.ensure<EventListener>(i, args));
-        else if(name == Constants::Attributes::RENDER_LAYER)
+        else if(name == constants::RENDER_LAYER)
             arena->addRenderLayer(factory.ensureDecorated<Renderer, RenderLayer>(i, args));
-        else if(name == Constants::Attributes::LAYER)
+        else if(name == constants::LAYER)
             arena->addLayer(factory.ensureDecorated<Renderer, Layer>(i, args));
-        else if(name != Constants::Attributes::VIEW)
+        else if(name != constants::VIEW)
         {
-            CHECK_WARN(name == Constants::Attributes::RENDERER, "['Renderer', 'RenderLayer', 'Layer'] expected, \"%s\" found", name.c_str());
+            CHECK_WARN(name == constants::RENDERER, "['Renderer', 'RenderLayer', 'Layer'] expected, \"%s\" found", name.c_str());
             arena->addRenderer(factory.ensure<Renderer>(i, args), Traits());
         }
     }

@@ -55,7 +55,7 @@ ByteArray::Borrowed ShaderFrame::getVertexBuffer(RenderRequest& renderRequest, c
 }
 
 ShaderFrame::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _resource_loader_context(resourceLoaderContext), _size(factory.ensureConcreteClassBuilder<Size>(manifest, Constants::Attributes::SIZE)),
+    : _resource_loader_context(resourceLoaderContext), _size(factory.ensureConcreteClassBuilder<Size>(manifest, constants::SIZE)),
       _shader(Shader::fromDocument(factory, manifest, resourceLoaderContext))
 {
 }

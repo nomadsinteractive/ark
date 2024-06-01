@@ -200,7 +200,7 @@ void Bitmap::dump(const String& filename) const
 }
 
 Bitmap::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _src(factory.ensureBuilder<String>(manifest, Constants::Attributes::SRC)), _bitmap_bundle(resourceLoaderContext->bitmapBundle())
+    : _src(factory.ensureBuilder<String>(manifest, constants::SRC)), _bitmap_bundle(resourceLoaderContext->bitmapBundle())
 {
 }
 

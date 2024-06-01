@@ -222,9 +222,9 @@ sp<Boolean> BooleanType::BUILDER::build(const Scope& args)
 
 String BooleanType::BUILDER::getValue(const document& manifest) const
 {
-    DCHECK(!manifest->getAttribute(Constants::Attributes::CLASS), "Document \"%s\" has class named \"%s\", which cannot been built into a Boolean object",
-           Documents::toString(manifest).c_str(), manifest->getAttribute(Constants::Attributes::CLASS)->value().c_str());
-    return Documents::ensureAttribute(manifest, Constants::Attributes::VALUE).strip();
+    DCHECK(!manifest->getAttribute(constants::CLASS), "Document \"%s\" has class named \"%s\", which cannot been built into a Boolean object",
+           Documents::toString(manifest).c_str(), manifest->getAttribute(constants::CLASS)->value().c_str());
+    return Documents::ensureAttribute(manifest, constants::VALUE).strip();
 }
 
 }

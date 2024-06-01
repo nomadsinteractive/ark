@@ -3,10 +3,7 @@
 #include <glm/gtx/quaternion.hpp>
 
 #include "core/ark.h"
-#include "core/base/bean_factory.h"
-#include "core/impl/variable/variable_wrapper.h"
-#include "core/types/null.h"
-#include "core/util/holder_util.h"
+#include "core/impl/variable/variable_dirty.h"
 #include "core/util/updatable_util.h"
 #include "core/util/math.h"
 
@@ -19,11 +16,11 @@ namespace {
 
 class AxisRotation : public Vec4 {
 public:
-    AxisRotation(const sp<Numeric>& theta, const sp<Vec3>& axis)
-        : _theta(theta), _axis(Vec3Type::normalize(axis)), _val(updateQuaternion()) {
+    AxisRotation(sp<Numeric> theta, sp<Vec3> axis)
+        : _theta(std::move(theta)), _axis(axis ? Vec3Type::normalize(std::move(axis)) : sp<Vec3>::make<Vec3::Const>(AXIS_Z)), _val(updateQuaternion()) {
     }
 
-    virtual bool update(uint64_t timestamp) override {
+    bool update(uint64_t timestamp) override {
         if(UpdatableUtil::update(timestamp, _theta, _axis)) {
             _val = updateQuaternion();
             return true;
@@ -31,7 +28,7 @@ public:
         return false;
     }
 
-    virtual V4 val() override {
+    V4 val() override {
         return _val;
     }
 
@@ -41,23 +38,22 @@ private:
         const float rad = _theta->val();
         const float s = Math::sin(rad / 2);
         const float c = Math::cos(rad / 2);
-        return V4(axis.x() * s, axis.y() * s, axis.z() * s, c);
+        return {axis.x() * s, axis.y() * s, axis.z() * s, c};
     }
 
 private:
     sp<Numeric> _theta;
     sp<Vec3> _axis;
-
     V4 _val;
 };
 
 class EulerRotation : public Vec4 {
 public:
-    EulerRotation(const sp<Numeric>& pitch, const sp<Numeric>& yaw, const sp<Numeric>& roll)
-        : _pitch(pitch), _yaw(yaw), _roll(roll), _val(updateQuaternion()) {
+    EulerRotation(sp<Numeric> pitch, sp<Numeric> yaw, sp<Numeric> roll)
+        : _pitch(std::move(pitch)), _yaw(std::move(yaw)), _roll(std::move(roll)), _val(updateQuaternion()) {
     }
 
-    virtual bool update(uint64_t timestamp) override {
+    bool update(uint64_t timestamp) override {
         if(UpdatableUtil::update(timestamp, _pitch, _yaw, _roll)) {
             _val = updateQuaternion();
             return true;
@@ -65,60 +61,54 @@ public:
         return false;
     }
 
-    virtual V4 val() override {
+    V4 val() override {
         return _val;
     }
 
 private:
     V4 updateQuaternion() const {
         const glm::quat quat = glm::quat(glm::vec3(_pitch->val(), _yaw->val(), _roll->val()));
-        return V4(quat.x, quat.y, quat.z, quat.w);
+        return {quat.x, quat.y, quat.z, quat.w};
     }
 
 private:
     sp<Numeric> _pitch;
     sp<Numeric> _yaw;
     sp<Numeric> _roll;
-
     V4 _val;
 };
 
 }
 
 
-Quaternion::Quaternion(const sp<Numeric>& rad, const sp<Vec3>& axis)
-    : _delegate(sp<AxisRotation>::make(rad, axis))
+Quaternion::Quaternion(sp<Numeric> theta, sp<Vec3> axis)
+    : Wrapper(sp<AxisRotation>::make(std::move(theta), std::move(axis)))
 {
 }
 
-Quaternion::Quaternion(const sp<Numeric>& pitch, const sp<Numeric>& yaw, const sp<Numeric>& roll)
-    : _delegate(sp<EulerRotation>::make(pitch, yaw, roll))
+Quaternion::Quaternion(sp<Numeric> pitch, sp<Numeric> yaw, sp<Numeric> roll)
+    : Wrapper(sp<EulerRotation>::make(std::move(pitch), std::move(yaw), std::move(roll)))
 {
 }
 
 V4 Quaternion::val()
 {
-    return _delegate->val();
+    return _wrapped->val();
 }
 
 bool Quaternion::update(uint64_t timestamp)
 {
-    return _delegate->update(timestamp);
+    return _wrapped->update(timestamp);
 }
 
-void Quaternion::traverse(const Holder::Visitor& visitor)
+void Quaternion::setRotation(sp<Numeric> theta, sp<Vec3> axis)
 {
-    HolderUtil::visit(_delegate, visitor);
+    _wrapped = sp<VariableDirty<V4>>::make(sp<Vec4>::make<AxisRotation>(std::move(theta), std::move(axis)), *this);
 }
 
-void Quaternion::setRotation(const sp<Numeric>& rad, const sp<Vec3>& axis)
+void Quaternion::setEuler(sp<Numeric> pitch, sp<Numeric> yaw, sp<Numeric> roll)
 {
-    _delegate = sp<AxisRotation>::make(rad, axis);
-}
-
-void Quaternion::setEuler(const sp<Numeric>& pitch, const sp<Numeric>& yaw, const sp<Numeric>& roll)
-{
-    _delegate = sp<EulerRotation>::make(pitch, yaw, roll);
+    _wrapped = sp<VariableDirty<V4>>::make(sp<Vec4>::make<EulerRotation>(std::move(pitch), std::move(yaw), std::move(roll)), *this);
 }
 
 }

@@ -34,7 +34,7 @@ class ShaderBuilderImpl : public Builder<Shader> {
 public:
     ShaderBuilderImpl(BeanFactory& factory, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext, sp<String> vertex, sp<String> fragment, sp<Camera> defaultCamera)
         : _factory(factory), _manifest(doc), _render_controller(resourceLoaderContext->renderController()), _vertex(std::move(vertex)), _fragment(std::move(fragment)), _default_camera(defaultCamera ? std::move(defaultCamera) : Camera::getDefaultCamera()),
-          _camera(factory.getBuilder<Camera>(doc, Constants::Attributes::CAMERA)), _parameters(factory, doc, resourceLoaderContext) {
+          _camera(factory.getBuilder<Camera>(doc, constants::CAMERA)), _parameters(factory, doc, resourceLoaderContext) {
     }
 
     virtual sp<Shader> build(const Scope& args) override {
@@ -68,7 +68,7 @@ Shader::Shader(sp<PipelineFactory> pipelineFactory, sp<RenderController> renderC
 sp<Builder<Shader>> Shader::fromDocument(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext, const String& defVertex, const String& defFragment, const sp<Camera>& defaultCamera)
 {
     const Global<StringTable> stringTable;
-    sp<Builder<Shader>> shader = factory.getBuilder<Shader>(manifest, Constants::Attributes::SHADER);
+    sp<Builder<Shader>> shader = factory.getBuilder<Shader>(manifest, constants::SHADER);
     return shader ? shader : sp<Builder<Shader>>::make<ShaderBuilderImpl>(factory, manifest, resourceLoaderContext, stringTable->getString(defVertex, true), stringTable->getString(defFragment, true), defaultCamera);
 }
 
@@ -136,7 +136,7 @@ std::map<uint32_t, Buffer> Shader::makeDivivedBuffers(const std::map<uint32_t, s
 
 Shader::BUILDER_IMPL::BUILDER_IMPL(BeanFactory& factory, const document& manifest, const ResourceLoaderContext& resourceLoaderContext, sp<Builder<Camera>> camera, Optional<StageManifest> stages, Optional<SnippetManifest> snippets)
     : _factory(factory), _manifest(manifest), _render_controller(resourceLoaderContext.renderController()), _stages(stages ? std::move(stages.value()) : loadStages(factory, manifest)),
-      _snippets(snippets ? std::move(snippets.value()) : factory.makeBuilderList<Snippet>(manifest, "snippet")), _camera(camera ? std::move(camera) : factory.getBuilder<Camera>(manifest, Constants::Attributes::CAMERA)),
+      _snippets(snippets ? std::move(snippets.value()) : factory.makeBuilderList<Snippet>(manifest, "snippet")), _camera(camera ? std::move(camera) : factory.getBuilder<Camera>(manifest, constants::CAMERA)),
       _parameters(factory, manifest, resourceLoaderContext)
 {
 }
@@ -160,9 +160,9 @@ Shader::StageManifest Shader::BUILDER_IMPL::loadStages(BeanFactory& factory, con
 
     for(const document& i : manifest->children("stage"))
     {
-        PipelineInput::ShaderStage type = Documents::ensureAttribute<PipelineInput::ShaderStage>(i, Constants::Attributes::TYPE);
-        CHECK(stages.find(type) == stages.end(), "Stage duplicated: %s", Documents::getAttribute(i, Constants::Attributes::TYPE).c_str());
-        stages[type] = factory.ensureBuilder<String>(i, Constants::Attributes::SRC);
+        PipelineInput::ShaderStage type = Documents::ensureAttribute<PipelineInput::ShaderStage>(i, constants::TYPE);
+        CHECK(stages.find(type) == stages.end(), "Stage duplicated: %s", Documents::getAttribute(i, constants::TYPE).c_str());
+        stages[type] = factory.ensureBuilder<String>(i, constants::SRC);
     }
 
     if(stages.empty())

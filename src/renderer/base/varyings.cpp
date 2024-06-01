@@ -175,8 +175,8 @@ Varyings::Slot::Slot(sp<Uploader> input, uint32_t divisor, int32_t offset)
 }
 
 Varyings::BUILDER::InputBuilder::InputBuilder(BeanFactory& factory, const document& manifest)
-    : _name(Documents::ensureAttribute(manifest, Constants::Attributes::NAME)), _input(factory.ensureBuilderByTypeValue<Uploader>(Documents::ensureAttribute(manifest, Constants::Attributes::TYPE),
-                                                                                                                               Documents::ensureAttribute(manifest, Constants::Attributes::VALUE)))
+    : _name(Documents::ensureAttribute(manifest, constants::NAME)), _input(factory.ensureBuilderByTypeValue<Uploader>(Documents::ensureAttribute(manifest, constants::TYPE),
+                                                                                                                               Documents::ensureAttribute(manifest, constants::VALUE)))
 {
 }
 

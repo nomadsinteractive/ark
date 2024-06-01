@@ -74,15 +74,15 @@ private:
         }
 
         sp<Builder<T>> createBuilder(BeanFactory& factory, const document& doc, bool wrapBuilder) const {
-            const String className = Documents::getAttribute(doc, Constants::Attributes::CLASS);
+            const String className = Documents::getAttribute(doc, constants::CLASS);
             return createBuilder(factory, className, doc, wrapBuilder);
         }
 
         sp<Builder<T>> createBuilder(BeanFactory& factory, const String& className, const document& doc, bool wrapBuilder) const {
-            const String id = Documents::getAttribute(doc, Constants::Attributes::ID);
+            const String id = Documents::getAttribute(doc, constants::ID);
             const String wrappedId = wrapBuilder ? id : "";
-            const String ref = Documents::getAttribute(doc, Constants::Attributes::REF);
-            const String style = Documents::getAttribute(doc, Constants::Attributes::STYLE);
+            const String ref = Documents::getAttribute(doc, constants::REF);
+            const String style = Documents::getAttribute(doc, constants::STYLE);
             if(className.empty()) {
                 do {
                     if(ref) {
@@ -283,7 +283,7 @@ public:
         if(!builder)
             return nullptr;
 
-        const String style = Documents::getAttribute(doc, Constants::Attributes::STYLE);
+        const String style = Documents::getAttribute(doc, constants::STYLE);
         if(style)
             return decorate<T>(sp<typename Builder<T>::template Wrapper<U>>::make(builder), style)->build(args);
         return builder->build(args);
@@ -426,7 +426,7 @@ public:
     }
 
     template<typename T> sp<Builder<T>> findBuilderByDocument(const document& doc, bool wrapBuilder) {
-        const String className = Documents::getAttribute(doc, Constants::Attributes::CLASS);
+        const String className = Documents::getAttribute(doc, constants::CLASS);
         return findBuilderByDocument<T>(doc, className, wrapBuilder);
     }
 

@@ -32,7 +32,6 @@ public:
     }
 
     Box& put(TypeId typeId, Box trait) {
-        DCHECK_WARN(!has(typeId), "Overriding trait TypeId(%d)", typeId);
         Box& slot = _traits[typeId];
         slot = std::move(trait);
         return slot;

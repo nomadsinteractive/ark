@@ -90,9 +90,9 @@ void ModelBundle::Stub::import(BeanFactory& factory, const document& manifest, c
 {
     for(const document& i : manifest->children("model"))
     {
-        int32_t type = Documents::ensureAttribute<int32_t>(i, Constants::Attributes::TYPE);
+        int32_t type = Documents::ensureAttribute<int32_t>(i, constants::TYPE);
         const String importer = Documents::getAttribute(i, "importer");
-        const Manifest manifest(Documents::getAttribute(i, Constants::Attributes::SRC, ""), i);
+        const Manifest manifest(Documents::getAttribute(i, constants::SRC, ""), i);
         addModel(type, importModel(manifest, importer ? factory.build<Importer>(importer, args) : nullptr));
     }
 }

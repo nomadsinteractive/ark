@@ -64,9 +64,9 @@ void Emitter::doActivate()
 
 Emitter::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext, bool disposed)
     : _factory(factory), _manifest(manifest), _resource_loader_context(resourceLoaderContext),
-      _type(factory.getBuilder<Integer>(manifest, Constants::Attributes::TYPE)),
-      _position(factory.getBuilder<Vec3>(manifest, Constants::Attributes::POSITION)),
-      _size(factory.getBuilder<Size>(manifest, Constants::Attributes::SIZE)),
+      _type(factory.getBuilder<Integer>(manifest, constants::TYPE)),
+      _position(factory.getBuilder<Vec3>(manifest, constants::POSITION)),
+      _size(factory.getBuilder<Size>(manifest, constants::SIZE)),
       _layer_context(sp<LayerContext::BUILDER>::make(factory, manifest, Layer::TYPE_DYNAMIC)),
       _disposed(disposed)
 {
@@ -81,15 +81,15 @@ sp<Emitter> Emitter::BUILDER::build(const Scope& args)
 Emitter::Particale::Particale(const sp<Source>& stub, const document& manifest, BeanFactory& factory)
     : _stub(stub), _last_emit_tick(0)
 {
-    _interval = Documents::ensureAttribute<Clock::Interval>(manifest, Constants::Attributes::INTERVAL).usec();
+    _interval = Documents::ensureAttribute<Clock::Interval>(manifest, constants::INTERVAL).usec();
     DCHECK(_interval, "Interval must be greater than 0");
 
-    _type = factory.getBuilder<Integer>(manifest, Constants::Attributes::TYPE);
-    _position = factory.getBuilder<Vec3>(manifest, Constants::Attributes::POSITION);
-    _size = factory.getBuilder<Size>(manifest, Constants::Attributes::SIZE);
-    _transform = factory.getBuilder<Transform>(manifest, Constants::Attributes::TRANSFORM);
-    _varyings = factory.getBuilder<Varyings>(manifest, Constants::Attributes::VARYINGS);
-    _disposed = factory.ensureBuilder<Boolean>(manifest, Constants::Attributes::DISPOSED);
+    _type = factory.getBuilder<Integer>(manifest, constants::TYPE);
+    _position = factory.getBuilder<Vec3>(manifest, constants::POSITION);
+    _size = factory.getBuilder<Size>(manifest, constants::SIZE);
+    _transform = factory.getBuilder<Transform>(manifest, constants::TRANSFORM);
+    _varyings = factory.getBuilder<Varyings>(manifest, constants::VARYINGS);
+    _disposed = factory.ensureBuilder<Boolean>(manifest, constants::DISPOSED);
 }
 
 uint64_t Emitter::Particale::show(const V3& position, uint64_t tick, const sp<LayerContext>& layerContext)

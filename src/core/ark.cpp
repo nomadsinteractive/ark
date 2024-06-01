@@ -211,7 +211,7 @@ sp<BeanFactory> Ark::createBeanFactory(const String& src) const
     const Global<Dictionary<document>> resources;
     const document doc = resources->get(src);
     CHECK(doc, "Resource \"%s\" not found", src.c_str());
-    return createBeanFactory(sp<DictionaryByAttributeName>::make(doc, Constants::Attributes::ID));
+    return createBeanFactory(sp<DictionaryByAttributeName>::make(doc, constants::ID));
 }
 
 sp<BeanFactory> Ark::createBeanFactory(const sp<Dictionary<document>>& dictionary) const

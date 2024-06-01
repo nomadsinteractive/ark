@@ -46,7 +46,7 @@ std::vector<RayCastManifold> ColliderImpl::rayCast(const V3& from, const V3& to,
 }
 
 ColliderImpl::Stub::Stub(std::vector<std::pair<sp<BroadPhrase>, sp<CollisionFilter>>> broadPhrases, sp<NarrowPhrase> narrowPhrase)
-    : _rigid_body_base_id(0), _broad_phrases(std::move(broadPhrases)), _narrow_phrase(std::move(narrowPhrase))
+    : _broad_phrases(std::move(broadPhrases)), _narrow_phrase(std::move(narrowPhrase))
 {
 }
 
@@ -81,13 +81,13 @@ BroadPhrase::Result ColliderImpl::Stub::broadPhraseRayCast(const V3& from, const
     return result;
 }
 
-void ColliderImpl::Stub::updateBroadPhraseCandidate(int32_t id, const V3& position, const V3& aabb) const
+void ColliderImpl::Stub::updateBroadPhraseCandidate(BroadPhrase::IdType id, const V3& position, const V3& aabb) const
 {
     for(const auto& [i, j] : _broad_phrases)
         i->update(id, position, aabb);
 }
 
-void ColliderImpl::Stub::removeBroadPhraseCandidate(int32_t id)
+void ColliderImpl::Stub::removeBroadPhraseCandidate(BroadPhrase::IdType id)
 {
     for(const auto& [i, j] : _broad_phrases)
         i->remove(id);
@@ -132,11 +132,6 @@ bool ColliderImpl::Stub::update(uint64_t timestamp)
 void ColliderImpl::Stub::requestRigidBodyRemoval(int32_t rigidBodyId)
 {
     _phrase_dispose.insert(rigidBodyId);
-}
-
-int32_t ColliderImpl::Stub::generateRigidBodyId()
-{
-    return ++_rigid_body_base_id;
 }
 
 sp<ColliderImpl::RigidBodyImpl> ColliderImpl::Stub::createRigidBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Rotation> rotate, sp<Boolean> discarded)
@@ -304,7 +299,7 @@ const RigidBodyDef& ColliderImpl::RigidBodyImpl::updateBodyDef(NarrowPhrase& nar
 
 BroadPhrase::Candidate ColliderImpl::RigidBodyImpl::toBroadPhraseCandidate() const
 {
-    return BroadPhrase::Candidate(id(), position().val(), rotation()->theta()->val(), metaId(), _shape->id(), collisionFilter(), bodyDef().impl());
+    return BroadPhrase::Candidate(id(), position().val(), quaternion().val(), metaId(), _shape->id(), collisionFilter(), bodyDef().impl());
 }
 
 ColliderImpl::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

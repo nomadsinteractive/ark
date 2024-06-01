@@ -8,8 +8,8 @@ namespace ark {
 void TransformTRS::snapshot(const Transform& transform, const V3& postTranslate, Transform::Snapshot& snapshot) const
 {
     Snapshot* data = snapshot.makeData<Snapshot>();
-    const sp<Numeric>& theta = transform._rotation.wrapped()->theta();
-    data->matrix = MatrixUtil::translate(MatrixUtil::rotate(MatrixUtil::scale(M3::identity(), V2(transform._scale.val())), theta->val()), V2(transform._translation.val()));
+    const SafeVar<Numeric>& theta = transform._rotation.wrapped()->theta();
+    data->matrix = MatrixUtil::translate(MatrixUtil::rotate(MatrixUtil::scale(M3::identity(), V2(transform._scale.val())), theta.val()), V2(transform._translation.val()));
 }
 
 V3 TransformTRS::transform(const Transform::Snapshot& snapshot, const V3& position) const

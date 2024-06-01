@@ -34,7 +34,7 @@ sp<Model> ModelLoaderPoint::loadModel(int32_t type)
 }
 
 ModelLoaderPoint::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _atlas(factory.ensureConcreteClassBuilder<Atlas>(manifest, Constants::Attributes::ATLAS))
+    : _atlas(factory.ensureConcreteClassBuilder<Atlas>(manifest, constants::ATLAS))
 {
 }
 

@@ -171,7 +171,7 @@ String Documents::toString(const document& doc, const String& indent, uint16_t i
 
 String Documents::getId(const document& doc, const String& defValue)
 {
-    const String id = getAttribute(doc, Constants::Attributes::ID, defValue);
+    const String id = getAttribute(doc, constants::ID, defValue);
     return id ? Strings::stripReference(id) : "";
 }
 

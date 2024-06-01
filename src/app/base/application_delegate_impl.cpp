@@ -81,7 +81,7 @@ ApplicationDelegateImpl::ScriptTag::ScriptTag(ResourceLoader& resourceLoader, co
       _function_name(Documents::getAttribute(manifest, "function")),
       _script(resourceLoader.beanFactory().ensure<Script>(manifest, vars)), _vars(vars)
 {
-    const String src = Documents::getAttribute(manifest, Constants::Attributes::SRC);
+    const String src = Documents::getAttribute(manifest, constants::SRC);
     if(src)
     {
         _source = Ark::instance().getAsset(src);

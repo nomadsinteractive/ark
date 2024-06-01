@@ -49,7 +49,7 @@ sp<StringBundle> StringBundleImpl::split(const String& resid, String& remains)
 StringBundleImpl::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 {
     for(const document& i : manifest->children("directory"))
-        _directories.insert(std::make_pair(Documents::getAttribute(i, Constants::Attributes::NAME, "."), factory.ensureBuilder<StringBundle>(i)));
+        _directories.insert(std::make_pair(Documents::getAttribute(i, constants::NAME, "."), factory.ensureBuilder<StringBundle>(i)));
 }
 
 sp<StringBundle> StringBundleImpl::BUILDER::build(const Scope& args)

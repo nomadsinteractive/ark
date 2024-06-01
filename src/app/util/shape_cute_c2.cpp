@@ -30,10 +30,10 @@ ShapeCuteC2::ShapeCuteC2()
     memset(&x, 0, sizeof(x));
 }
 
-ShapeCuteC2::ShapeCuteC2(const ShapeCuteC2& other, const V2& translate, float rotation)
+ShapeCuteC2::ShapeCuteC2(const ShapeCuteC2& other, const V2& translate, const V4& quaternion)
     : t(other.t), s(other.s), _collision_filter(other._collision_filter)
 {
-    doTransform(translate, rotation);
+    doTransform(translate, quaternion);
 }
 
 bool ShapeCuteC2::collideManifold(const ShapeCuteC2& other, CollisionManifold& collisionManifold) const
@@ -58,9 +58,9 @@ bool ShapeCuteC2::rayCastManifold(const c2Ray& ray, RayCastManifold& rayCastMani
     return r;
 }
 
-ShapeCuteC2 ShapeCuteC2::transform(const V2& position, float rotation) const
+ShapeCuteC2 ShapeCuteC2::transform(const V2& position, const V4& quaternion) const
 {
-    return ShapeCuteC2(*this, position, rotation);
+    return ShapeCuteC2(*this, position, quaternion);
 }
 
 void ShapeCuteC2::resize(const V2& scale)
@@ -97,7 +97,7 @@ void ShapeCuteC2::resize(const V2& scale)
     }
 }
 
-void ShapeCuteC2::doTransform(const V2& position, float rotation)
+void ShapeCuteC2::doTransform(const V2& position, const V4& quaternion)
 {
     switch(t)
     {
@@ -113,10 +113,11 @@ void ShapeCuteC2::doTransform(const V2& position, float rotation)
         translate(s.capsule.b.x, s.capsule.b.y, position, s.capsule.b.x, s.capsule.b.y);
         break;
     case C2_TYPE_POLY:
+        DCHECK(quaternion.y() == 0 && quaternion.z() == 0, "Only 2D quaternion supported(cos(t), 0, 0, sin(t))");
         x.p.x = position.x();
         x.p.y = position.y();
-        x.r.c = Math::cos(rotation);
-        x.r.s = Math::sin(rotation);
+        x.r.c = quaternion.w() * quaternion.w() - 1.0f;
+        x.r.s = 2.0f * quaternion.x() * quaternion.w();
         break;
     case C2_TYPE_NONE:
         break;

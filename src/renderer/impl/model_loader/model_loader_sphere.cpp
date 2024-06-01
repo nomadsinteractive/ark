@@ -112,7 +112,7 @@ sp<Model> ModelLoaderSphere::loadModel(int32_t type)
 }
 
 ModelLoaderSphere::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _atlas(factory.ensureConcreteClassBuilder<Atlas>(manifest, Constants::Attributes::ATLAS)), _sample_count(Documents::getAttribute<uint32_t>(manifest, "sample-count", 10))
+    : _atlas(factory.ensureConcreteClassBuilder<Atlas>(manifest, constants::ATLAS)), _sample_count(Documents::getAttribute<uint32_t>(manifest, "sample-count", 10))
 {
 }
 

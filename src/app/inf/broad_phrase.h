@@ -10,7 +10,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
-#include "graphics/base/v3.h"
+#include "graphics/base/v4.h"
 
 #include "app/forwarding.h"
 
@@ -22,13 +22,13 @@ public:
 
     struct Candidate {
         Candidate() = default;
-        Candidate(IdType id, const V2& position, float rotation, uint32_t metaId, int32_t shapeId, sp<CollisionFilter> collisionFilter, Box bodyDef)
-            : _id(id), _position(position), _rotation(rotation), _meta_id(metaId), _shape_id(shapeId), _collision_filter(std::move(collisionFilter)), _body_def(std::move(bodyDef)) {
+        Candidate(IdType id, const V2& position, const V4& quaternion, uint32_t metaId, int32_t shapeId, sp<CollisionFilter> collisionFilter, Box bodyDef)
+            : _id(id), _position(position), _quaternion(quaternion), _meta_id(metaId), _shape_id(shapeId), _collision_filter(std::move(collisionFilter)), _body_def(std::move(bodyDef)) {
         }
 
         IdType _id;
         V2 _position;
-        float _rotation;
+        V4 _quaternion;
         uint32_t _meta_id;
         int32_t _shape_id;
         sp<CollisionFilter> _collision_filter;

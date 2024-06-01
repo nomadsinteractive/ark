@@ -134,10 +134,10 @@ sp<Size> Size::DICTIONARY::build(const Scope& args)
 }
 
 Size::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _size(factory.getBuilder<Size>(manifest, Constants::Attributes::SIZE)),
-      _width(_size ? sp<Builder<Numeric>>() : factory.getBuilder<Numeric>(manifest, Constants::Attributes::WIDTH)),
-      _height(_size ? sp<Builder<Numeric>>() : factory.getBuilder<Numeric>(manifest, Constants::Attributes::HEIGHT)),
-      _depth(_size ? sp<Builder<Numeric>>() : factory.getBuilder<Numeric>(manifest, Constants::Attributes::DEPTH))
+    : _size(factory.getBuilder<Size>(manifest, constants::SIZE)),
+      _width(_size ? sp<Builder<Numeric>>() : factory.getBuilder<Numeric>(manifest, constants::WIDTH)),
+      _height(_size ? sp<Builder<Numeric>>() : factory.getBuilder<Numeric>(manifest, constants::HEIGHT)),
+      _depth(_size ? sp<Builder<Numeric>>() : factory.getBuilder<Numeric>(manifest, constants::DEPTH))
 {
 }
 

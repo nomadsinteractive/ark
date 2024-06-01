@@ -44,7 +44,7 @@ void AtlasImporterTiles::import(Atlas& atlas, const sp<Readable>& /*readable*/)
 }
 
 AtlasImporterTiles::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _manifest(manifest), _type(factory.getBuilder<Integer>(_manifest, Constants::Attributes::TYPE)), _tile_width(factory.ensureBuilder<Integer>(_manifest, "tile-width")),
+    : _manifest(manifest), _type(factory.getBuilder<Integer>(_manifest, constants::TYPE)), _tile_width(factory.ensureBuilder<Integer>(_manifest, "tile-width")),
       _tile_height(factory.ensureBuilder<Integer>(_manifest, "tile-height")), _pivot_x(factory.getBuilder<Numeric>(_manifest, "pivot-x")), _pivot_y(factory.getBuilder<Numeric>(_manifest, "pivot-y"))
 {
 }

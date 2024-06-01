@@ -66,7 +66,7 @@ public:
         template<typename T> std::vector<NamedType<T>> loadNamedTypes(BeanFactory& factory, const document& manifest, const String& name, const String& builderName) const {
             std::vector<NamedType<T>> namedTypes;
             for(const document& i : manifest->children(name))
-                namedTypes.push_back({Documents::ensureAttribute(i, Constants::Attributes::NAME), Documents::ensureAttribute<int32_t>(i, Constants::Attributes::TYPE),
+                namedTypes.push_back({Documents::ensureAttribute(i, constants::NAME), Documents::ensureAttribute<int32_t>(i, constants::TYPE),
                                       factory.ensureBuilder<T>(i, builderName)});
             return namedTypes;
         }

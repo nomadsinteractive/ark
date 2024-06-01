@@ -23,9 +23,9 @@ void GLEquirectangularCubemapUploader::initialize(GraphicsContext& graphicsConte
 }
 
 GLEquirectangularCubemapUploader::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _render_controller(resourceLoaderContext->renderController()), _size(factory.ensureConcreteClassBuilder<Size>(manifest, Constants::Attributes::SIZE)),
+    : _render_controller(resourceLoaderContext->renderController()), _size(factory.ensureConcreteClassBuilder<Size>(manifest, constants::SIZE)),
       _shader(Shader::fromDocument(factory, manifest, resourceLoaderContext, "shaders/equirectangular.vert", "shaders/equirectangular.frag")),
-      _texture(factory.ensureBuilder<Texture>(manifest, Constants::Attributes::TEXTURE))
+      _texture(factory.ensureBuilder<Texture>(manifest, constants::TEXTURE))
 {
 }
 

@@ -228,8 +228,8 @@ Model ModelImporterAssimp::loadModel(const aiScene* scene, MaterialBundle& mater
         for(const auto& i : animateManifests)
         {
             Assimp::Importer importer;
-            const String& src = Documents::ensureAttribute(i, Constants::Attributes::SRC);
-            String name = Documents::getAttribute(i, Constants::Attributes::NAME);
+            const String& src = Documents::ensureAttribute(i, constants::SRC);
+            String name = Documents::getAttribute(i, constants::NAME);
             String alias = Documents::getAttribute(i, "alias");
             float tps = Documents::getAttribute<float>(i, "tps", defaultTps);
             const aiScene* animateScene = loadScene(importer, src, false);

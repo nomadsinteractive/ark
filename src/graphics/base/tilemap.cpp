@@ -329,7 +329,7 @@ const std::vector<sp<TilemapLayer>>& Tilemap::layers() const
 }
 
 Tilemap::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _tileset(factory.ensureBuilder<Tileset>(manifest, "tileset")), _render_layer(factory.getBuilder<RenderLayer>(manifest, Constants::Attributes::RENDER_LAYER)),
+    : _tileset(factory.ensureBuilder<Tileset>(manifest, "tileset")), _render_layer(factory.getBuilder<RenderLayer>(manifest, constants::RENDER_LAYER)),
       _importer(factory.getBuilder<Importer<Tilemap>>(manifest, "importer")), _outputer(factory.getBuilder<Outputer<Tilemap>>(manifest, "outputer")),
       _scrollable(factory.getBuilder<Scrollable>(manifest, "scrollable"))
 {

@@ -149,10 +149,10 @@ void ColliderBox2D::setBodyManifest(int32_t id, const BodyCreateInfo& bodyManife
 
 ColliderBox2D::BUILDER_IMPL1::BUILDER_IMPL1(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _factory(factory), _manifest(manifest), _resource_loader_context(resourceLoaderContext), _ppm(factory.ensureBuilder<Vec2>(manifest, "pixel-per-meter")),
-      _gravity(factory.ensureBuilder<Vec2>(manifest, "gravity")), _disposed(factory.getBuilder<Boolean>(manifest, Constants::Attributes::DISPOSED))
+      _gravity(factory.ensureBuilder<Vec2>(manifest, "gravity")), _disposed(factory.getBuilder<Boolean>(manifest, constants::DISPOSED))
 {
     for(const document& i : _manifest->children("import"))
-        _importers.push_back({_factory.ensureBuilder<RigidBodyImporter>(i), Documents::ensureAttribute(i, Constants::Attributes::SRC)});
+        _importers.push_back({_factory.ensureBuilder<RigidBodyImporter>(i), Documents::ensureAttribute(i, constants::SRC)});
 }
 
 sp<ColliderBox2D> ColliderBox2D::BUILDER_IMPL1::build(const Scope& args)
@@ -162,7 +162,7 @@ sp<ColliderBox2D> ColliderBox2D::BUILDER_IMPL1::build(const Scope& args)
     const sp<ColliderBox2D> world = sp<ColliderBox2D>::make(gravity, _ppm->build(args)->val());
     for(const document& i : _manifest->children("rigid-body"))
     {
-        int32_t type = Documents::ensureAttribute<int32_t>(i, Constants::Attributes::TYPE);
+        int32_t type = Documents::ensureAttribute<int32_t>(i, constants::TYPE);
 
         BodyCreateInfo bodyCreateInfo(_factory.ensure<Shape>(i, "shape", args), Documents::getAttribute<float>(i, "density", 1.0f),
                                       Documents::getAttribute<float>(i, "friction", 0.2f), Documents::getAttribute<bool>(i, "is-sensor", false));

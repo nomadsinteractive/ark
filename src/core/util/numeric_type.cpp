@@ -361,7 +361,7 @@ sp<Numeric> NumericType::DICTIONARY::build(const Scope& args)
 }
 
 NumericType::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _value(Expression::Compiler<float, NumericOperation<float>>().compile(factory, Documents::ensureAttribute(manifest, Constants::Attributes::VALUE)))
+    : _value(Expression::Compiler<float, NumericOperation<float>>().compile(factory, Documents::ensureAttribute(manifest, constants::VALUE)))
 {
 }
 

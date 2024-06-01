@@ -41,7 +41,7 @@ bool Between::update(uint64_t timestamp)
 }
 
 Between::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _delegate(factory.ensureBuilder<Numeric>(manifest, Constants::Attributes::DELEGATE)),
+    : _delegate(factory.ensureBuilder<Numeric>(manifest, constants::DELEGATE)),
       _min(factory.ensureBuilder<Numeric>(manifest, "min")),
       _max(factory.ensureBuilder<Numeric>(manifest, "max")),
       _observer(factory.ensureBuilder<Observer>(manifest, "observer"))

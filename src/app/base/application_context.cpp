@@ -107,7 +107,7 @@ sp<ResourceLoader> ApplicationContext::createResourceLoader(const document& mani
 sp<ResourceLoader> ApplicationContext::createResourceLoaderImpl(const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
 {
     const document doc = createResourceLoaderManifest(manifest);
-    const sp<DictionaryByAttributeName> documentDictionary = sp<DictionaryByAttributeName>::make(doc, Constants::Attributes::ID);
+    const sp<DictionaryByAttributeName> documentDictionary = sp<DictionaryByAttributeName>::make(doc, constants::ID);
     const sp<BeanFactory> beanFactory = Ark::instance().createBeanFactory(documentDictionary);
     const sp<ResourceLoaderContext> context = resourceLoaderContext ? resourceLoaderContext : sp<ResourceLoaderContext>::make(_application_bundle->documents(), _application_bundle->bitmapBundle(), _application_bundle->bitmapBoundsBundle(), _executor_thread_pool, _render_controller);
 
@@ -123,7 +123,7 @@ sp<ResourceLoader> ApplicationContext::createResourceLoaderImpl(const document& 
 document ApplicationContext::createResourceLoaderManifest(const document& manifest)
 {
     DASSERT(manifest);
-    const String src = Documents::getAttribute(manifest, Constants::Attributes::SRC);
+    const String src = Documents::getAttribute(manifest, constants::SRC);
     const document doc = src ? _application_bundle->loadDocument(src) : manifest;
     DCHECK_WARN(doc == manifest || manifest->children().size() == 0, "\"%s\" has already specified a ResourceLoader src \"%s\", its content will be ignored", Documents::toString(manifest).c_str(), src.c_str());
     return doc;

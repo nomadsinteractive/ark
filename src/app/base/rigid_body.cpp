@@ -78,7 +78,7 @@ const SafeVar<Vec3>& RigidBody::position() const
     return _position;
 }
 
-const sp<Rotation>& RigidBody::rotation() const
+const SafeVar<Vec4>& RigidBody::quaternion() const
 {
     return _rotation;
 }

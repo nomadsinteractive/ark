@@ -27,7 +27,7 @@ bool OutOfBounds::update(uint64_t timestamp)
 }
 
 OutOfBounds::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _bounds(factory.ensureBuilder<Bounds>(manifest, Constants::Attributes::BOUNDS)), _position(factory.ensureBuilder<Vec3>(manifest, Constants::Attributes::POSITION))
+    : _bounds(factory.ensureBuilder<Bounds>(manifest, constants::BOUNDS)), _position(factory.ensureBuilder<Vec3>(manifest, constants::POSITION))
 {
 }
 

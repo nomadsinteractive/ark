@@ -133,11 +133,11 @@ public:
     }
 
     static RectT parse(const document& manifest) {
-        const String rect = Documents::getAttribute(manifest, Constants::Attributes::RECT);
+        const String rect = Documents::getAttribute(manifest, constants::RECT);
         if(rect)
             return Strings::eval<RectT>(rect);
 
-        const RectT bounds = Strings::eval<RectT>(Documents::ensureAttribute(manifest, Constants::Attributes::BOUNDS));
+        const RectT bounds = Strings::eval<RectT>(Documents::ensureAttribute(manifest, constants::BOUNDS));
         return RectT(bounds.left(), bounds.top(), bounds.left() + bounds.right(), bounds.top() + bounds.bottom());
     }
 

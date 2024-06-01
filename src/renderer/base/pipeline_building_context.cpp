@@ -259,11 +259,11 @@ void PipelineBuildingContext::loadPredefinedAttribute(const document& manifest)
 {
     for(const document& i : manifest->children("attribute"))
     {
-        const String& name = Documents::ensureAttribute(i, Constants::Attributes::NAME);
+        const String& name = Documents::ensureAttribute(i, constants::NAME);
         DCHECK(!name.empty(), "Empty name");
         CHECK_WARN(isupper(name[0]) || name.startsWith("a_"), "Attribute name \"%s\" should be capital first or started with a_", name.c_str());
         const String attrName = name.startsWith("a_") ? name.substr(2) : name;
-        const String& type = Documents::ensureAttribute(i, Constants::Attributes::TYPE);
+        const String& type = Documents::ensureAttribute(i, constants::TYPE);
         uint32_t divisor = Documents::getAttribute<uint32_t>(i, "divisor", 0);
         addPredefinedAttribute(attrName, type, PipelineInput::SHADER_STAGE_VERTEX).setDivisor(divisor);
     }
@@ -273,10 +273,10 @@ void PipelineBuildingContext::loadPredefinedUniform(BeanFactory& factory, const 
 {
     for(const document& i : manifest->children("uniform"))
     {
-        const String& name = Documents::ensureAttribute(i, Constants::Attributes::NAME);
-        const String& type = Documents::ensureAttribute(i, Constants::Attributes::TYPE);
-        const String& value = Documents::ensureAttribute(i, Constants::Attributes::VALUE);
-        int32_t binding = Documents::getAttribute<int32_t>(i, Constants::Attributes::BINDING, -1);
+        const String& name = Documents::ensureAttribute(i, constants::NAME);
+        const String& type = Documents::ensureAttribute(i, constants::TYPE);
+        const String& value = Documents::ensureAttribute(i, constants::VALUE);
+        int32_t binding = Documents::getAttribute<int32_t>(i, constants::BINDING, -1);
         sp<Builder<Uploader>> builder = factory.findBuilderByTypeValue<Uploader>(type, value);
         sp<Uploader> input = builder ? builder->build(args) : factory.ensure<Uploader>(value, args);
         uint32_t size = static_cast<uint32_t>(input->size());
@@ -292,7 +292,7 @@ void PipelineBuildingContext::loadPredefinedSampler(BeanFactory& factory, const 
     uint32_t binding = 0;
     for(const document& i : manifest->children("sampler"))
     {
-        String name = Documents::getAttribute(i, Constants::Attributes::NAME);
+        String name = Documents::getAttribute(i, constants::NAME);
         sp<Texture> texture = factory.ensure<Texture>(i, args);
         if(!name)
             name = Strings::sprintf("u_Texture%d", binding);
@@ -307,7 +307,7 @@ void PipelineBuildingContext::loadPredefinedImage(BeanFactory& factory, const Sc
     uint32_t binding = 0;
     for(const document& i : manifest->children("image"))
     {
-        String name = Documents::getAttribute(i, Constants::Attributes::NAME);
+        String name = Documents::getAttribute(i, constants::NAME);
         sp<Texture> texture = factory.ensure<Texture>(i, args);
         if(!name)
             name = Strings::sprintf("u_Image%d", binding);
@@ -321,7 +321,7 @@ void PipelineBuildingContext::loadPredefinedBuffer(BeanFactory& factory, const S
 {
     for(const document& i : manifest->children("buffer"))
     {
-        String name = Documents::getAttribute(i, Constants::Attributes::NAME);
+        String name = Documents::getAttribute(i, constants::NAME);
         CHECK(!_ssbos.has(name), "Buffer object \"%s\" redefined", name.c_str());
         _ssbos.push_back(name, factory.ensure<Buffer>(i, args));
     }
@@ -354,9 +354,9 @@ void PipelineBuildingContext::loadDefinitions(BeanFactory& factory, const Scope&
 {
     for(const document& i : manifest->children("define"))
     {
-        String name = Documents::getAttribute(i, Constants::Attributes::NAME);
+        String name = Documents::getAttribute(i, constants::NAME);
         CHECK_WARN(_definitions.find(name) == _definitions.end(), "Definition \"%s\" redefined", name.c_str());
-        _definitions.insert(std::make_pair(name, factory.ensureBuilder<StringVar>(i, Constants::Attributes::VALUE)->build(args)));
+        _definitions.insert(std::make_pair(name, factory.ensureBuilder<StringVar>(i, constants::VALUE)->build(args)));
     }
 }
 

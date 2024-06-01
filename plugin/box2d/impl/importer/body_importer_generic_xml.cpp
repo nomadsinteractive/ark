@@ -65,7 +65,7 @@ void RigidBodyImporterGenericXML::import(ColliderBox2D& world, const sp<Readable
 
     for(const document& i : bodies->children("body"))
     {
-        const String& name = Documents::ensureAttribute(i, Constants::Attributes::NAME);
+        const String& name = Documents::ensureAttribute(i, constants::NAME);
         int32_t id = Strings::eval<int32_t>(name);
         DCHECK(id >= 0, "Illegal body id: %d, \"%s\" must be a postive integer", id, name.c_str());
 

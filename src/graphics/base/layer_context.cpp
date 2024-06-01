@@ -149,8 +149,8 @@ LayerContext::ElementState& LayerContext::addElementState(void* key)
 }
 
 LayerContext::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, Layer::Type layerType)
-    : _layer(factory.getBuilder<Layer>(manifest, Constants::Attributes::LAYER)),
-      _render_layer(_layer ? nullptr : factory.getBuilder<RenderLayer>(manifest, Constants::Attributes::RENDER_LAYER)), _layer_type(layerType)
+    : _layer(factory.getBuilder<Layer>(manifest, constants::LAYER)),
+      _render_layer(_layer ? nullptr : factory.getBuilder<RenderLayer>(manifest, constants::RENDER_LAYER)), _layer_type(layerType)
 {
     CHECK(_layer || _render_layer, "LayerContext must be associated with one Layer or RenderLayer");
 }

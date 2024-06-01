@@ -31,9 +31,9 @@ void Level::load(const String& src)
 
     for(const document& i : manifest->children("library"))
     {
-        const String& name = Documents::ensureAttribute(i, Constants::Attributes::NAME);
+        const String& name = Documents::ensureAttribute(i, constants::NAME);
         const String& dimensions = Documents::ensureAttribute(i, "dimensions");
-        const int32_t id = Documents::ensureAttribute<int32_t>(i, Constants::Attributes::ID);
+        const int32_t id = Documents::ensureAttribute<int32_t>(i, constants::ID);
         DCHECK_WARN(libraryMapping.find(id) == libraryMapping.end(), "Overwriting instance library mapping(%d), originally mapped to type(%d)", id, libraryMapping.find(id)->second._render_object_instance->_type);
 
         const auto it1 = _render_object_libraries.find(name);
@@ -91,12 +91,12 @@ void Level::load(const String& src)
             }
             else if(clazz == "LIGHT")
             {
-                const String& name = Documents::ensureAttribute(j, Constants::Attributes::NAME);
+                const String& name = Documents::ensureAttribute(j, constants::NAME);
                 const sp<Vec3> light = getLight(name);
                 DCHECK_WARN(light, "Undefined light(%s) in \"%s\"", name.c_str(), src.c_str());
                 if(light)
                 {
-                    const V3 position = parseVector<V3>(Documents::ensureAttribute(j, Constants::Attributes::POSITION));
+                    const V3 position = parseVector<V3>(Documents::ensureAttribute(j, constants::POSITION));
                     Vec3Type::set(light, position);
                 }
             }
@@ -142,18 +142,18 @@ sp<RigidBody> Level::makeRigidBody(const Library& library, const sp<RenderObject
 sp<Transform> Level::makeTransform(const String& rotation, const String& scale) const
 {
     const V3 s = scale ? parseVector<V3>(scale) : V3(1.0f);
-    const V4 rot = parseVector<V4>(rotation);
-    return sp<Transform>::make(Transform::TYPE_LINEAR_3D, sp<Rotation>::make(nullptr, nullptr, sp<Vec4::Const>::make(V4(rot.y(), rot.z(), rot.w(), rot.x()))), sp<Vec3::Const>::make(s));
+    const V4 quat = parseVector<V4>(rotation);
+    return sp<Transform>::make(Transform::TYPE_LINEAR_3D, sp<Rotation>::make(quat), sp<Vec3::Const>::make(s));
 }
 
 Level::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _render_object_libraries(loadNamedTypes<Layer>(factory, manifest, Constants::Attributes::RENDER_OBJECT, Constants::Attributes::LAYER)),
+    : _render_object_libraries(loadNamedTypes<Layer>(factory, manifest, constants::RENDER_OBJECT, constants::LAYER)),
       _rigid_object_libraries(loadNamedTypes<Collider>(factory, manifest, "rigid-body", "collider"))
 {
     for(const document& i : manifest->children("camera"))
-        _cameras.push_back({Documents::ensureAttribute(i, Constants::Attributes::NAME), factory.ensureBuilder<Camera>(i, Constants::Attributes::REF)});
+        _cameras.push_back({Documents::ensureAttribute(i, constants::NAME), factory.ensureBuilder<Camera>(i, constants::REF)});
     for(const document& i : manifest->children("light"))
-        _lights.push_back({Documents::ensureAttribute(i, Constants::Attributes::NAME), factory.ensureBuilder<Vec3>(i, Constants::Attributes::REF)});
+        _lights.push_back({Documents::ensureAttribute(i, constants::NAME), factory.ensureBuilder<Vec3>(i, constants::REF)});
 }
 
 sp<Level> Level::BUILDER::build(const Scope& args)

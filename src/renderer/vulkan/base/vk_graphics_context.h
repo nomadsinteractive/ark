@@ -1,7 +1,6 @@
 #pragma once
 
 #include <stack>
-#include <vector>
 
 #include "core/types/shared_ptr.h"
 
@@ -13,8 +12,7 @@
 
 #include "platform/vulkan/vulkan.h"
 
-namespace ark {
-namespace vulkan {
+namespace ark::vulkan {
 
 class VKGraphicsContext {
 public:
@@ -78,5 +76,4 @@ private:
     std::stack<State> _state_stack;
 };
 
-}
 }

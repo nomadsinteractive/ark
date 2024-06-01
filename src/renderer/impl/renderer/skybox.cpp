@@ -47,9 +47,9 @@ sp<ByteArray> Skybox::makeUnitCubeVertices(RenderController& renderController) c
 }
 
 Skybox::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _resource_loader_context(resourceLoaderContext), _size(factory.ensureBuilder<Size>(manifest, Constants::Attributes::SIZE)),
+    : _resource_loader_context(resourceLoaderContext), _size(factory.ensureBuilder<Size>(manifest, constants::SIZE)),
       _shader(Shader::fromDocument(factory, manifest, resourceLoaderContext, "shaders/skybox.vert", "shaders/skybox.frag")),
-      _texture(factory.ensureBuilder<Texture>(manifest, Constants::Attributes::TEXTURE))
+      _texture(factory.ensureBuilder<Texture>(manifest, constants::TEXTURE))
 {
 }
 

@@ -1,9 +1,9 @@
 #pragma once
 
 #include "core/base/api.h"
-#include "core/base/timestamp.h"
+#include "core/base/constants.h"
+#include "core/base/wrapper.h"
 #include "core/inf/builder.h"
-#include "core/inf/holder.h"
 #include "core/inf/variable.h"
 #include "core/types/safe_ptr.h"
 #include "core/types/safe_var.h"
@@ -14,39 +14,36 @@
 
 namespace ark {
 
-//[[script::bindings::holder]]
 //[[script::bindings::extends(Vec4)]]
-class ARK_API Rotation : public Holder, public Vec4 {
+class ARK_API Rotation final : public Vec4, public Wrapper<Vec4> {
 public:
     Rotation(const V4& quat);
+    Rotation(sp<Vec4> quaternion);
 //  [[script::bindings::auto]]
-    Rotation(float theta, const V3& axis = Rotation::Z_AXIS);
+    Rotation(float theta, const V3& axis = AXIS_Z);
 //  [[script::bindings::auto]]
-    Rotation(const sp<Numeric>& theta, const sp<Vec3>& axis = nullptr);
-    Rotation(sp<Numeric> theta, sp<Vec3> axis, sp<Vec4> quaternion);
+    Rotation(sp<Numeric> theta, sp<Vec3> axis = nullptr);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Rotation);
 
-    virtual V4 val() override;
-    virtual bool update(uint64_t timestamp) override;
-
-    virtual void traverse(const Visitor& visitor) override;
+    V4 val() override;
+    bool update(uint64_t timestamp) override;
 
 //  [[script::bindings::property]]
-    const sp<Numeric>& theta();
+    const SafeVar<Numeric>& theta() const;
 //  [[script::bindings::property]]
-    void setTheta(const sp<Numeric>& theta);
+    void setTheta(sp<Numeric> theta);
 //  [[script::bindings::property]]
-    const sp<Vec3>& axis();
+    const SafeVar<Vec3>& axis() const;
 
 //  [[script::bindings::auto]]
     void setRotation(float theta, const V3& axis);
 //  [[script::bindings::auto]]
-    void setRotation(const sp<Numeric>& theta, const sp<Vec3>& axis);
+    void setRotation(sp<Numeric> theta, sp<Vec3> axis);
 
 //  [[script::bindings::auto]]
     void setEuler(float pitch, float yaw, float roll);
 //  [[script::bindings::auto]]
-    void setEuler(const sp<Numeric>& pitch, const sp<Numeric>& yaw, const sp<Numeric>& roll);
+    void setEuler(sp<Numeric> pitch, sp<Numeric> yaw, sp<Numeric> roll);
 
 //[[plugin::builder]]
     class BUILDER : public Builder<Rotation> {
@@ -71,15 +68,9 @@ public:
         SafePtr<Builder<Numeric>> _theta;
     };
 
-    static const V3 Z_AXIS;
-
 private:
     SafeVar<Numeric> _theta;
     SafeVar<Vec3> _axis;
-
-    sp<Vec4> _quaternion;
-
-    Timestamp _timestamp;
 };
 
 }

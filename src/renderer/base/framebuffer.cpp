@@ -26,10 +26,10 @@ const sp<Resource>& Framebuffer::delegate() const
 }
 
 Framebuffer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _render_controller(resourceLoaderContext->renderController()), _renderer(factory.ensureBuilder<Renderer>(manifest, Constants::Attributes::DELEGATE)),
+    : _render_controller(resourceLoaderContext->renderController()), _renderer(factory.ensureBuilder<Renderer>(manifest, constants::DELEGATE)),
       _clear_mask(Documents::getAttribute<Framebuffer::ClearMask>(manifest, "clear-mask", Framebuffer::CLEAR_MASK_ALL))
 {
-    for(const document& i : manifest->children(Constants::Attributes::TEXTURE))
+    for(const document& i : manifest->children(constants::TEXTURE))
         _textures.emplace_back(factory.ensureBuilder<Texture>(i), i);
 
     CHECK(_textures.size(), "No texture attachment defined in manifest: \"%s\"", Documents::toString(manifest).c_str());

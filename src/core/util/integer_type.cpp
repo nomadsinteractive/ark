@@ -335,7 +335,7 @@ sp<Integer> IntegerType::DICTIONARY::build(const Scope& args)
 }
 
 IntegerType::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _delegate(factory, Documents::ensureAttribute(manifest, Constants::Attributes::VALUE))
+    : _delegate(factory, Documents::ensureAttribute(manifest, constants::VALUE))
 {
 }
 

@@ -9,7 +9,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
-#include "graphics/base/v3.h"
+#include "graphics/base/v4.h"
 
 #include "app/forwarding.h"
 #include "app/inf/collider.h"
@@ -59,7 +59,7 @@ public:
 //  [[script::bindings::property]]
     const SafeVar<Vec3>& position() const;
 //  [[script::bindings::property]]
-    const sp<Rotation>& rotation() const;
+    const SafeVar<Vec4>& quaternion() const;
 
 //  [[script::bindings::property]]
     const SafeVar<Boolean>& discarded() const;
@@ -83,7 +83,7 @@ protected:
     uint32_t _meta_id;
     sp<Shape> _shape;
     SafeVar<Vec3> _position;
-    sp<Rotation> _rotation;
+    SafeVar<Vec4> _rotation;
 
     Box _impl;
     SafeVar<Boolean> _discarded;

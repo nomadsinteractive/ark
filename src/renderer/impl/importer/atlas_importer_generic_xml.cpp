@@ -47,7 +47,7 @@ void AtlasImporterGenericXML::import(Atlas& atlas, const sp<Readable>& /*readabl
 }
 
 AtlasImporterGenericXML::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _src(factory.ensureBuilder<String>(manifest, Constants::Attributes::SRC)), _px(Documents::getAttribute<float>(manifest, "px", 0.5f)),
+    : _src(factory.ensureBuilder<String>(manifest, constants::SRC)), _px(Documents::getAttribute<float>(manifest, "px", 0.5f)),
       _py(Documents::getAttribute<float>(manifest, "py", 0.5f))
 {
 }

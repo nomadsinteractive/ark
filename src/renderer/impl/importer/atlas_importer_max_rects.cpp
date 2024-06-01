@@ -27,8 +27,8 @@ void AtlasImporterMaxRects::import(Atlas& atlas, const sp<Readable>& /*readable*
     {
         DCHECK(i->name() == "item", "No rule to import item \"%s\"", Documents::toString(i).c_str());
 
-        const String& src = Documents::ensureAttribute(i, Constants::Attributes::SRC);
-        int32_t type = Documents::ensureAttribute<int32_t>(i, Constants::Attributes::TYPE);
+        const String& src = Documents::ensureAttribute(i, constants::SRC);
+        int32_t type = Documents::ensureAttribute<int32_t>(i, constants::TYPE);
         const RectI rect = texturePacker.addBitmap(binPack, src);
         atlas.add(type, rect.left(), rect.top(), rect.right(), rect.bottom(), Rect(0, 0, 1.0f, 1.0f), V2(static_cast<float>(rect.width()), static_cast<float>(rect.height())), V2(0.5f, 0.5f));
     }

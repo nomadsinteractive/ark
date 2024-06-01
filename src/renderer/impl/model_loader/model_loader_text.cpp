@@ -48,8 +48,8 @@ sp<Model> ModelLoaderText::loadModel(int32_t type)
 }
 
 ModelLoaderText::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _resource_loader_context(resourceLoaderContext), _alphabet(factory.ensureBuilder<Alphabet>(manifest, Constants::Attributes::ALPHABET)),
-      _atlas(factory.ensureBuilder<Atlas>(manifest, Constants::Attributes::ATLAS)), _text_size(factory.getBuilder<String>(manifest, Constants::Attributes::TEXT_SIZE))
+    : _resource_loader_context(resourceLoaderContext), _alphabet(factory.ensureBuilder<Alphabet>(manifest, constants::ALPHABET)),
+      _atlas(factory.ensureBuilder<Atlas>(manifest, constants::ATLAS)), _text_size(factory.getBuilder<String>(manifest, constants::TEXT_SIZE))
 {
 }
 

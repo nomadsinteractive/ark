@@ -103,8 +103,8 @@ sp<Readable> AlphabetTrueType::getFontResource(const String& name) const
 }
 
 AlphabetTrueType::BUILDER::BUILDER(BeanFactory& factory, const document manifest)
-    : _src(factory.ensureBuilder<String>(manifest, Constants::Attributes::SRC)),
-      _text_size(factory.ensureBuilder<String>(manifest, Constants::Attributes::TEXT_SIZE))
+    : _src(factory.ensureBuilder<String>(manifest, constants::SRC)),
+      _text_size(factory.ensureBuilder<String>(manifest, constants::TEXT_SIZE))
 {
 }
 

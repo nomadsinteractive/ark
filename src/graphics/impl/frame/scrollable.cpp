@@ -110,7 +110,7 @@ Scrollable::Params::Params(int32_t rowCount, int32_t colCount, int32_t rowIndex,
 
 Scrollable::BUILDER_SCROLLABLE::BUILDER_SCROLLABLE(BeanFactory& factory, const document& manifest)
     : _scroller(factory.getBuilder<Vec3>(manifest, "scroller")), _renderer_maker(factory.ensureBuilder<RendererMaker>(manifest, "renderer-maker")),
-      _size(factory.ensureBuilder<Size>(manifest, Constants::Attributes::SIZE)), _row_count(Documents::ensureAttribute<int32_t>(manifest, "rows")),
+      _size(factory.ensureBuilder<Size>(manifest, constants::SIZE)), _row_count(Documents::ensureAttribute<int32_t>(manifest, "rows")),
       _col_count(Documents::ensureAttribute<int32_t>(manifest, "cols")), _renderer_width(factory.ensureBuilder<Numeric>(manifest, "renderer-width")),
       _renderer_height(factory.ensureBuilder<Numeric>(manifest, "renderer-height"))
 {

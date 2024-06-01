@@ -30,7 +30,7 @@ Atlas::Atlas(sp<Texture> texture, bool allowDefaultItem)
 void Atlas::loadItem(const document& manifest)
 {
     DCHECK(manifest->name() == "item", "No rule to import item \"%s\"", Documents::toString(manifest).c_str());
-    int32_t type = Documents::getAttribute<int32_t>(manifest, Constants::Attributes::TYPE, 0);
+    int32_t type = Documents::getAttribute<int32_t>(manifest, constants::TYPE, 0);
     float px = Documents::getAttribute<float>(manifest, "pivot-x", 0);
     float py = Documents::getAttribute<float>(manifest, "pivot-x", 0);
     if(has(type))
@@ -188,7 +188,7 @@ void Atlas::AttachmentNinePatch::import(Atlas& atlas, const document& manifest)
     for(const document& i : manifest->children())
     {
         const String name = i->name();
-        const Rect paddings = Documents::ensureAttribute<Rect>(i, Constants::Attributes::NINE_PATCH_PADDINGS);
+        const Rect paddings = Documents::ensureAttribute<Rect>(i, constants::NINE_PATCH_PADDINGS);
         if(name == "default")
         {
             for(const auto& i : atlas.items())
@@ -197,7 +197,7 @@ void Atlas::AttachmentNinePatch::import(Atlas& atlas, const document& manifest)
         else
         {
             CHECK_WARN(name == "nine-patch", "\"%s\" nodeName should be \"nine-patch\"", Documents::toString(i).c_str());
-            int32_t type = Documents::ensureAttribute<int32_t>(i, Constants::Attributes::TYPE);
+            int32_t type = Documents::ensureAttribute<int32_t>(i, constants::TYPE);
             add(type, textureWidth, textureHeight, paddings, atlas);
         }
     }
@@ -236,12 +236,12 @@ const sp<Vertices>& Atlas::AttachmentNinePatch::ensureVerticesQuads(int32_t type
 }
 
 Atlas::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _texture(factory.ensureConcreteClassBuilder<Texture>(manifest, Constants::Attributes::TEXTURE))
+    : _texture(factory.ensureConcreteClassBuilder<Texture>(manifest, constants::TEXTURE))
 {
     for(const document& i : manifest->children())
         if(i->name() == "import")
             _importers.push_back(factory.ensureBuilder<AtlasImporter>(i));
-        else if(i->name() != Constants::Attributes::TEXTURE)
+        else if(i->name() != constants::TEXTURE)
         {
             DCHECK(i->name() == "item", "No rule to import item \"%s\"", Documents::toString(i).c_str());
             _items.push_back(i);

@@ -48,7 +48,7 @@ sp<Snippet::DrawEvents> SnippetDrawCompute::makeDrawEvents(const RenderRequest& 
 }
 
 SnippetDrawCompute::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _shader(factory.ensureBuilder<Shader>(manifest, Constants::Attributes::SHADER))
+    : _shader(factory.ensureBuilder<Shader>(manifest, constants::SHADER))
 {
     BeanUtils::split(factory, manifest, "num-work-groups", _num_work_groups[0], _num_work_groups[1], _num_work_groups[2]);
 }

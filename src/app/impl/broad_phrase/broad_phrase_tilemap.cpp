@@ -1,6 +1,7 @@
 #include "app/impl/broad_phrase/broad_phrase_tilemap.h"
 
 #include "core/base/bean_factory.h"
+#include "core/base/constants.h"
 #include "core/inf/storage.h"
 #include "core/util/math.h"
 
@@ -159,7 +160,7 @@ void BroadPhraseTilemap::addCandidate(const TilemapLayer& tilemapLayer, std::set
 BroadPhrase::Candidate BroadPhraseTilemap::makeCandidate(int32_t candidateId, uint32_t metaId, int32_t shapeId, const V2& position, sp<CollisionFilter> collisionFilter) const
 {
     Box bodyDef = shapeId == Shape::SHAPE_ID_AABB ? _body_def_tile : Box();
-    return Candidate(candidateId, position, 0.0f, metaId, shapeId, std::move(collisionFilter), std::move(bodyDef));
+    return Candidate(candidateId, position, QUATERNION_ZERO, metaId, shapeId, std::move(collisionFilter), std::move(bodyDef));
 }
 
 BroadPhraseTilemap::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

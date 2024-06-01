@@ -53,8 +53,8 @@ void ResourceLoader::import(const document& manifest, BeanFactory& parent)
 {
     for(const document& i : manifest->children("import"))
     {
-        const String name = Documents::getAttribute(i, Constants::Attributes::NAME, Documents::getId(i));
-        const String& src = Documents::ensureAttribute(i, Constants::Attributes::SRC);
+        const String name = Documents::getAttribute(i, constants::NAME, Documents::getId(i));
+        const String& src = Documents::ensureAttribute(i, constants::SRC);
         const Identifier id(Identifier::parse(src));
         if(id.isRef())
         {
@@ -79,7 +79,7 @@ BeanFactory& ResourceLoader::beanFactory()
 
 ResourceLoader::BUILDER::BUILDER(BeanFactory& factory, const document& doc, const sp<ApplicationContext>& applicationContext)
     : _factory(factory), _application_context(applicationContext), _manifest(doc),
-      _src(Documents::ensureAttribute(doc, Constants::Attributes::SRC))
+      _src(Documents::ensureAttribute(doc, constants::SRC))
 {
 }
 

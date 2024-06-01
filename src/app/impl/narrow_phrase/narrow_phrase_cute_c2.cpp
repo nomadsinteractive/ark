@@ -21,7 +21,7 @@ NarrowPhraseCuteC2::NarrowPhraseCuteC2(const document& manifest, const sp<Resour
     loadShapes(manifest, ppu);
     for(const document& i : manifest->children("import"))
     {
-        const String& src = Documents::ensureAttribute(i, Constants::Attributes::SRC);
+        const String& src = Documents::ensureAttribute(i, constants::SRC);
         document content = resourceLoaderContext->documents()->get(src);
         loadShapes(content->ensureChild("bodies"), ppu);
     }
@@ -110,11 +110,11 @@ bool NarrowPhraseCuteC2::collisionManifold(const BroadPhrase::Candidate& candida
 {
     for(const ShapeCuteC2& i : ensureBodyDef(candidateOne)->shapes())
     {
-        const ShapeCuteC2 transformed = i.transform(candidateOne._position, candidateOne._rotation);
+        const ShapeCuteC2 transformed = i.transform(candidateOne._position, candidateOne._quaternion);
         const CollisionFilter& oneFilter = getCollisionFilter(transformed._collision_filter, candidateOne._collision_filter);
         for(const ShapeCuteC2& j : ensureBodyDef(candidateOther)->shapes())
             if(oneFilter.collisionTest(getCollisionFilter(j._collision_filter, candidateOther._collision_filter)) &&
-                    transformed.collideManifold(j.transform(candidateOther._position, candidateOther._rotation), collisionManifold))
+                    transformed.collideManifold(j.transform(candidateOther._position, candidateOther._quaternion), collisionManifold))
                 return true;
     }
     return false;
@@ -124,7 +124,7 @@ bool NarrowPhraseCuteC2::rayCastManifold(const Ray& ray, const BroadPhrase::Cand
 {
     for(const ShapeCuteC2& i : ensureBodyDef(candidate)->shapes())
     {
-        const ShapeCuteC2 transformed = i.transform(candidate._position, candidate._rotation);
+        const ShapeCuteC2 transformed = i.transform(candidate._position, candidate._quaternion);
         if(transformed.rayCastManifold(*ray.data<c2Ray>(), rayCastManifold))
             return true;
     }

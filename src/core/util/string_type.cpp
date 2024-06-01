@@ -202,7 +202,7 @@ sp<StringVar> StringType::DICTIONARY::build(const Scope& args)
 }
 
 StringType::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _value(factory.ensureBuilder<String>(manifest, Constants::Attributes::VALUE)) {
+    : _value(factory.ensureBuilder<String>(manifest, constants::VALUE)) {
 }
 
 sp<StringVar> StringType::BUILDER::build(const Scope& args)

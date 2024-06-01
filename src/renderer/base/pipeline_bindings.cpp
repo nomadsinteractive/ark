@@ -126,7 +126,7 @@ PipelineBindings::Parameters::BUILDER::BUILDER(BeanFactory& factory, const docum
     : _render_controller(resourceLoaderContext.renderController()), _pipeline_bindings_scissor(factory.getBuilder<Vec4>(manifest, "scissor")), _pipeline_bindings_flags(Documents::getAttribute<PipelineBindings::Flag>(manifest, "flags", PipelineBindings::FLAG_DEFAULT_VALUE))
 {
     for(const document& i : manifest->children("trait"))
-        _traits.push_back(Documents::ensureAttribute<TraitType>(i, Constants::Attributes::TYPE), i);
+        _traits.push_back(Documents::ensureAttribute<TraitType>(i, constants::TYPE), i);
 }
 
 PipelineBindings::Parameters PipelineBindings::Parameters::BUILDER::build(const Scope& args) const
@@ -163,7 +163,7 @@ template<> ARK_API PipelineBindings::Flag StringConvert::eval<PipelineBindings::
 }
 
 PipelineBindings::PipelineTraitMeta::PipelineTraitMeta(const document& manifest)
-    : _type(Documents::ensureAttribute<TraitType>(manifest, Constants::Attributes::TYPE))
+    : _type(Documents::ensureAttribute<TraitType>(manifest, constants::TYPE))
 {
     switch(_type) {
     case TRAIT_TYPE_DEPTH_TEST:

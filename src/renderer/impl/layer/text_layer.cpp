@@ -14,7 +14,7 @@ namespace  {
 class SnippetBuilder : public Builder<Snippet> {
 public:
     SnippetBuilder(BeanFactory& factory, const document& manifest)
-        : _text_color(factory.getBuilder<Vec4>(manifest, Constants::Attributes::TEXT_COLOR)) {
+        : _text_color(factory.getBuilder<Vec4>(manifest, constants::TEXT_COLOR)) {
     }
 
     virtual sp<Snippet> build(const Scope& args) override {

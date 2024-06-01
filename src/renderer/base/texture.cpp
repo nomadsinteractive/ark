@@ -211,7 +211,7 @@ Texture::Parameters::Parameters(Type type, const document& parameters, Format fo
 
 void Texture::Parameters::loadParameters(const document& parameters, BeanFactory& factory, const Scope& args)
 {
-    DictionaryByAttributeName byName(parameters, Constants::Attributes::NAME);
+    DictionaryByAttributeName byName(parameters, constants::NAME);
     _min_filter = getEnumValue(byName, "min_filter", factory, args, _min_filter);
     _mag_filter = getEnumValue(byName, "mag_filter", factory, args, _mag_filter);
     _wrap_s = getEnumValue(byName, "wrap_s", factory, args, _wrap_s);
@@ -222,7 +222,7 @@ void Texture::Parameters::loadParameters(const document& parameters, BeanFactory
 Texture::CONSTANT Texture::Parameters::getEnumValue(Dictionary<document>& dict, const String& name, BeanFactory& factory, const Scope& args, Texture::CONSTANT defValue)
 {
     const document doc = dict.get(name);
-    return doc ? Strings::eval<Texture::CONSTANT>(factory.ensure<String>(doc, Constants::Attributes::VALUE, args)) : defValue;
+    return doc ? Strings::eval<Texture::CONSTANT>(factory.ensure<String>(doc, constants::VALUE, args)) : defValue;
 }
 
 Texture::Delegate::Delegate(Texture::Type type)
@@ -247,21 +247,21 @@ sp<Texture> Texture::DICTIONARY::build(const Scope& /*args*/)
 
 
 Texture::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _resource_loader_context(resourceLoaderContext), _factory(factory), _manifest(manifest), _src(factory.getBuilder<String>(manifest, Constants::Attributes::SRC)),
+    : _resource_loader_context(resourceLoaderContext), _factory(factory), _manifest(manifest), _src(factory.getBuilder<String>(manifest, constants::SRC)),
       _uploader(factory.getBuilder<Texture::Uploader>(manifest, "uploader")), _upload_strategy(Documents::getAttributeEnumCombo(manifest, "upload-strategy", RenderController::US_ONCE_AND_ON_SURFACE_READY))
 {
 }
 
 sp<Texture> Texture::BUILDER::build(const Scope& args)
 {
-    Type type = Documents::getAttribute<Type>(_manifest, Constants::Attributes::TYPE, TYPE_2D);
+    Type type = Documents::getAttribute<Type>(_manifest, constants::TYPE, TYPE_2D);
     const sp<Texture::Parameters> parameters = sp<Texture::Parameters>::make(type, _manifest);
     parameters->loadParameters(_manifest, _factory, args);
     const sp<String> src = _src->build(args);
     if(src)
        return _resource_loader_context->textureBundle()->createTexture(*src, parameters);
 
-    const sp<Size> size = _factory.ensureConcreteClassBuilder<Size>(_manifest, Constants::Attributes::SIZE)->build(args);
+    const sp<Size> size = _factory.ensureConcreteClassBuilder<Size>(_manifest, constants::SIZE)->build(args);
     DCHECK(size->widthAsFloat() != 0 && size->heightAsFloat() != 0, "Cannot build texture from \"%s\"", Documents::toString(_manifest).c_str());
     sp<Texture::Uploader> uploader = _uploader->build(args);
     return _resource_loader_context->renderController()->createTexture(size, parameters, uploader ? std::move(uploader) : makeBlankUploader(size, parameters), static_cast<RenderController::UploadStrategy>(_upload_strategy));

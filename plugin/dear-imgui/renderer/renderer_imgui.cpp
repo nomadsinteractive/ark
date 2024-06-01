@@ -287,8 +287,8 @@ sp<Renderer> RendererImgui::BUILDER::build(const Scope& args)
     for(const document& i : _manifest->children("font"))
     {
         ImFontConfig fontConfig;
-        const String& src = Documents::getAttribute(i, Constants::Attributes::SRC);
-        fontConfig.SizePixels = Documents::getAttribute<float>(i, Constants::Attributes::SIZE, 18.0f);
+        const String& src = Documents::getAttribute(i, constants::SRC);
+        fontConfig.SizePixels = Documents::getAttribute<float>(i, constants::SIZE, 18.0f);
         if(src.empty())
             io.Fonts->AddFontDefault(&fontConfig);
         else

@@ -260,12 +260,12 @@ std::vector<std::pair<TypeId, Box>> RenderObject::onWire(const Traits& component
 }
 
 RenderObject::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _type(factory.getBuilder<Integer>(manifest, Constants::Attributes::TYPE)),
-      _position(factory.getBuilder<Vec3>(manifest, Constants::Attributes::POSITION)),
-      _size(factory.getBuilder<Size>(manifest, Constants::Attributes::SIZE)),
-      _transform(factory.getBuilder<Transform>(manifest, Constants::Attributes::TRANSFORM)),
-      _varyings(factory.getConcreteClassBuilder<Varyings>(manifest, Constants::Attributes::VARYINGS)),
-      _discarded(factory.getBuilder<Boolean>(manifest, Constants::Attributes::DISPOSED))
+    : _type(factory.getBuilder<Integer>(manifest, constants::TYPE)),
+      _position(factory.getBuilder<Vec3>(manifest, constants::POSITION)),
+      _size(factory.getBuilder<Size>(manifest, constants::SIZE)),
+      _transform(factory.getBuilder<Transform>(manifest, constants::TRANSFORM)),
+      _varyings(factory.getConcreteClassBuilder<Varyings>(manifest, constants::VARYINGS)),
+      _discarded(factory.getBuilder<Boolean>(manifest, constants::DISPOSED))
 {
 }
 
