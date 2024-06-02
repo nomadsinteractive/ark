@@ -35,7 +35,7 @@ public:
     };
 
 public:
-    RigidBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Rotation> rotation, Box impl, SafeVar<Boolean> discarded);
+    RigidBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, Box impl, sp<Boolean> discarded);
     ~RigidBody() override;
     DISALLOW_COPY_AND_ASSIGN(RigidBody);
 

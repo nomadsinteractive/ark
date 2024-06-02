@@ -2272,7 +2272,7 @@ class Shape:
     SHAPE_ID_BOX = -3
     SHAPE_ID_CAPSULE = -4
 
-    def __init__(self, _id: int, size: Optional[Vec3]):
+    def __init__(self, _id: int, size: Optional[Vec3] = None):
         pass
 
     @property

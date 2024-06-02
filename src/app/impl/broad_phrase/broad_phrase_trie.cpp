@@ -82,9 +82,9 @@ std::unordered_set<BroadPhrase::IdType> BroadPhraseTrie::Stub::search(const V3& 
     {
         const std::unordered_set<IdType> s1 = std::move(candidates);
         const std::unordered_set<IdType> s2 = _axes[i].search(position[i] - size[i] / 2.0f, position[i] + size[i] / 2.0f);
-        for(int32_t i : s1)
-            if(s2.find(i) != s2.end())
-                candidates.insert(i);
+        for(const IdType j : s1)
+            if(s2.find(j) != s2.end())
+                candidates.insert(j);
     }
     return candidates;
 }
@@ -133,14 +133,14 @@ std::unordered_set<BroadPhrase::IdType> BroadPhraseTrie::Axis::search(float low,
 {
     std::set<IdType> c1;
     std::unordered_set<IdType> c3;
-    int32_t keyLower = static_cast<int32_t>(std::floor(low));
-    int32_t keyUpper = static_cast<int32_t>(std::ceil(high));
+    const auto keyLower = static_cast<int32_t>(std::floor(low));
+    const auto keyUpper = static_cast<int32_t>(std::ceil(high));
 
     for(auto iter = _lower_bounds.begin(); iter != _lower_bounds.upper_bound(keyUpper); ++iter)
         c1.insert(iter->second.items.begin(), iter->second.items.end());
 
     for(auto iter = _upper_bounds.lower_bound(keyLower); iter != _upper_bounds.end(); ++iter)
-        for(int32_t i : iter->second.items)
+        for(const IdType i : iter->second.items)
             if(c1.find(i) != c1.end())
                 c3.insert(c3.begin(), i);
 
@@ -150,7 +150,7 @@ std::unordered_set<BroadPhrase::IdType> BroadPhraseTrie::Axis::search(float low,
 BroadPhraseTrie::Axis::Boundary* BroadPhraseTrie::Axis::boundaryCreate(std::map<int32_t, Boundary>& boundaries, IdType id, int32_t key)
 {
     Boundary& boundary = boundaries[key];
-    if(boundary.items.size() == 0)
+    if(boundary.items.empty())
         boundary.key = key;
     boundary.items.insert(id);
     return &boundary;

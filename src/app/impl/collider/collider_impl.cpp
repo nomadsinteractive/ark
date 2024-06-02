@@ -118,7 +118,7 @@ bool ColliderImpl::Stub::update(uint64_t timestamp)
     for(RigidBodyRef& i : _rigid_body_refs)
         i.instance<RigidBodyImpl>().collisionTest(*this, i.instance<RigidBodyImpl>().position().val(), V3(i.instance<RigidBodyImpl>().bodyDef().occupyRadius() * 2), _phrase_remove);
 
-    for(int32_t i : _phrase_remove)
+    for(const int32_t i : _phrase_remove)
     {
         const auto iter = _rigid_bodies.find(i);
         DCHECK(iter != _rigid_bodies.end(), "RigidBody(%d) not found", i);
@@ -193,7 +193,7 @@ std::vector<RayCastManifold> ColliderImpl::Stub::rayCast(const V2& from, const V
     return manifolds;
 }
 
-void ColliderImpl::Stub::resolveCandidates(const RigidBody& self, const BroadPhrase::Candidate& candidateSelf, const std::vector<BroadPhrase::Candidate>& candidates, bool isDynamicCandidates, RigidBody::Callback& callback, std::set<BroadPhrase::IdType>& c)
+void ColliderImpl::Stub::resolveCandidates(const RigidBody& self, const BroadPhrase::Candidate& candidateSelf, const std::vector<BroadPhrase::Candidate>& candidates, RigidBody::Callback& callback, std::set<BroadPhrase::IdType>& c)
 {
     std::set<BroadPhrase::IdType> contacts = std::move(c);
     std::set<BroadPhrase::IdType> contactsOut;
@@ -202,8 +202,7 @@ void ColliderImpl::Stub::resolveCandidates(const RigidBody& self, const BroadPhr
         CollisionManifold manifold;
         if(_narrow_phrase->collisionManifold(candidateSelf, i, manifold))
         {
-            auto iter = contacts.find(i._id);
-            if(iter == contacts.end())
+            if(const auto iter = contacts.find(i._id); iter == contacts.end())
             {
                 if(const RigidBodyRef& ref = RigidBodyRef::toRef(i._id))
                     callback.onBeginContact(self, ref.instance(), manifold);
@@ -213,7 +212,7 @@ void ColliderImpl::Stub::resolveCandidates(const RigidBody& self, const BroadPhr
             contactsOut.insert(i._id);
         }
     }
-    for(int32_t i : contacts)
+    for(const BroadPhrase::IdType i : contacts)
     {
         if(contactsOut.find(i) == contactsOut.end())
             if(const RigidBodyRef& ref = RigidBodyRef::toRef(i))
@@ -227,7 +226,7 @@ const sp<NarrowPhrase>& ColliderImpl::Stub::narrowPhrase() const
     return _narrow_phrase;
 }
 
-ColliderImpl::RigidBodyImpl::RigidBodyImpl(const ColliderImpl::Stub& stub, Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Rotation> rotation, SafeVar<Boolean> discarded)
+ColliderImpl::RigidBodyImpl::RigidBodyImpl(const ColliderImpl::Stub& stub, Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<Boolean> discarded)
     : RigidBody(type, std::move(shape), std::move(position), std::move(rotation), Box(), std::move(discarded)), _collider_stub(stub), _position_updated(true), _size_updated(false)
 {
 }
@@ -249,7 +248,7 @@ bool ColliderImpl::RigidBodyImpl::update(uint64_t timestamp)
             updateBodyDef(_collider_stub.narrowPhrase(), _shape->size());
             _size_updated = false;
         }
-        float r = bodyDef().occupyRadius();
+        const float r = bodyDef().occupyRadius();
         _collider_stub.updateBroadPhraseCandidate(id(), pos, V3(r * 2));
         _position_updated = false;
     }
@@ -269,15 +268,15 @@ void ColliderImpl::RigidBodyImpl::collisionTest(ColliderImpl::Stub& collider, co
         result = collider.broadPhraseSearch(position, size, collisionFilter());
         dynamicCandidates = std::move(result._dynamic_candidates);
         dynamicCandidates.erase(id());
-        for(int32_t i : removingIds)
+        for(const BroadPhrase::IdType i : removingIds)
             dynamicCandidates.erase(i);
     }
 
     {
         DPROFILER_TRACE("NarrowPhrase");
         const BroadPhrase::Candidate candidateSelf = toBroadPhraseCandidate();
-        collider.resolveCandidates(*this, candidateSelf, collider.toBroadPhraseCandidates(dynamicCandidates, Collider::BODY_TYPE_ALL), true, _callback, _dynamic_contacts);
-        collider.resolveCandidates(*this, candidateSelf, result._static_candidates, false, _callback, _static_contacts);
+        collider.resolveCandidates(*this, candidateSelf, collider.toBroadPhraseCandidates(dynamicCandidates, Collider::BODY_TYPE_ALL), _callback, _dynamic_contacts);
+        collider.resolveCandidates(*this, candidateSelf, result._static_candidates, _callback, _static_contacts);
     }
 }
 

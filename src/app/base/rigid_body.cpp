@@ -18,7 +18,7 @@
 
 namespace ark {
 
-RigidBody::RigidBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Rotation> rotation, Box impl, SafeVar<Boolean> discarded)
+RigidBody::RigidBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, Box impl, sp<Boolean> discarded)
     : _ref(sp<RigidBodyRef>::make(*this)), _type(type), _meta_id(0), _shape(std::move(shape)), _position(std::move(position)), _rotation(std::move(rotation)), _impl(std::move(impl)), _discarded(std::move(discarded)), _callback(sp<Callback>::make())
 {
 }
