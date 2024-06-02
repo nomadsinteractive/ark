@@ -1,14 +1,9 @@
 #include "app/base/rigid_body.h"
 
-#include <algorithm>
-
-#include "core/ark.h"
-
 #include "core/base/bean_factory.h"
 #include "core/base/string.h"
 #include "core/inf/variable.h"
 #include "core/util/string_convert.h"
-#include "core/util/holder_util.h"
 
 #include "app/base/application_context.h"
 #include "app/base/collision_manifold.h"
@@ -18,8 +13,8 @@
 
 namespace ark {
 
-RigidBody::RigidBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, Box impl, sp<Boolean> discarded)
-    : _ref(sp<RigidBodyRef>::make(*this)), _type(type), _meta_id(0), _shape(std::move(shape)), _position(std::move(position)), _rotation(std::move(rotation)), _impl(std::move(impl)), _discarded(std::move(discarded)), _callback(sp<Callback>::make())
+RigidBody::RigidBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> quaternion, Box impl, sp<Boolean> discarded)
+    : _ref(sp<RigidBodyRef>::make(*this)), _type(type), _meta_id(0), _shape(std::move(shape)), _position(std::move(position)), _quaternion(std::move(quaternion)), _impl(std::move(impl)), _discarded(std::move(discarded))
 {
 }
 
@@ -27,6 +22,11 @@ RigidBody::~RigidBody()
 {
     LOGD("RigidBody(%uz) disposed", _ref->id());
     _ref->discard();
+}
+
+void RigidBody::dispose()
+{
+    _discarded.reset(true);
 }
 
 std::vector<std::pair<TypeId, Box>> RigidBody::onWire(const Traits& components)
@@ -80,7 +80,7 @@ const SafeVar<Vec3>& RigidBody::position() const
 
 const SafeVar<Vec4>& RigidBody::quaternion() const
 {
-    return _rotation;
+    return _quaternion;
 }
 
 const SafeVar<Boolean>& RigidBody::discarded() const
@@ -90,12 +90,12 @@ const SafeVar<Boolean>& RigidBody::discarded() const
 
 const sp<CollisionCallback>& RigidBody::collisionCallback() const
 {
-    return _callback->_collision_callback;
+    return _collision_callback;
 }
 
 void RigidBody::setCollisionCallback(sp<CollisionCallback> collisionCallback)
 {
-    _callback->_collision_callback = std::move(collisionCallback);
+    _collision_callback = std::move(collisionCallback);
 }
 
 const sp<CollisionFilter>& RigidBody::collisionFilter() const
@@ -108,9 +108,11 @@ void RigidBody::setCollisionFilter(sp<CollisionFilter> collisionFilter)
     _collision_filter = std::move(collisionFilter);
 }
 
-const sp<RigidBody::Callback>& RigidBody::callback() const
+sp<RigidBody> RigidBody::makeShadow() const
 {
-    return _callback;
+    sp<RigidBody> shadow = sp<RigidBody>::make(_type, _shape, _position.wrapped(), _quaternion.wrapped(), _impl, _discarded.wrapped());
+    shadow->_ref = sp<RigidBodyRef>::make(*shadow->_ref);
+    return shadow;
 }
 
 template<> ARK_API Collider::BodyType StringConvert::eval<Collider::BodyType>(const String& str)
@@ -125,35 +127,30 @@ template<> ARK_API Collider::BodyType StringConvert::eval<Collider::BodyType>(co
     return Collider::BODY_TYPE_STATIC;
 }
 
-void RigidBody::Callback::onBeginContact(const RigidBody& rigidBody, const CollisionManifold& manifold)
+void RigidBody::onBeginContact(const RigidBody& rigidBody, const CollisionManifold& manifold) const
 {
     if(_collision_callback && rigidBody.type() != Collider::BODY_TYPE_SENSOR)
         _collision_callback->onBeginContact(rigidBody, manifold);
 }
 
-void RigidBody::Callback::onEndContact(const RigidBody& rigidBody)
+void RigidBody::onEndContact(const RigidBody& rigidBody) const
 {
     if(_collision_callback && rigidBody.type() != Collider::BODY_TYPE_SENSOR)
         _collision_callback->onEndContact(rigidBody);
 }
 
-void RigidBody::Callback::onBeginContact(const RigidBody& self, const RigidBody& rigidBody, const CollisionManifold& manifold)
+void RigidBody::onBeginContact(const RigidBody& self, const RigidBody& rigidBody, const CollisionManifold& manifold) const
 {
     onBeginContact(rigidBody, manifold);
     if(rigidBody.rigidType() == Collider::BODY_TYPE_STATIC)
-        rigidBody.callback()->onBeginContact(self, CollisionManifold(manifold.contactPoint(), -manifold.normal()));
+        rigidBody.onBeginContact(self, CollisionManifold(manifold.contactPoint(), -manifold.normal()));
 }
 
-void RigidBody::Callback::onEndContact(const RigidBody& self, const RigidBody& rigidBody)
+void RigidBody::onEndContact(const RigidBody& self, const RigidBody& rigidBody) const
 {
     onEndContact(rigidBody);
     if(rigidBody.rigidType() == Collider::BODY_TYPE_STATIC)
-        rigidBody.callback()->onEndContact(self);
-}
-
-bool RigidBody::Callback::hasCallback() const
-{
-    return static_cast<bool>(_collision_callback);
+        rigidBody.onEndContact(self);
 }
 
 }

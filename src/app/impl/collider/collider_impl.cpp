@@ -193,7 +193,7 @@ std::vector<RayCastManifold> ColliderImpl::Stub::rayCast(const V2& from, const V
     return manifolds;
 }
 
-void ColliderImpl::Stub::resolveCandidates(const RigidBody& self, const BroadPhrase::Candidate& candidateSelf, const std::vector<BroadPhrase::Candidate>& candidates, RigidBody::Callback& callback, std::set<BroadPhrase::IdType>& c)
+void ColliderImpl::Stub::resolveCandidates(const RigidBody& self, const BroadPhrase::Candidate& candidateSelf, const std::vector<BroadPhrase::Candidate>& candidates, const RigidBody& callback, std::set<BroadPhrase::IdType>& c)
 {
     std::set<BroadPhrase::IdType> contacts = std::move(c);
     std::set<BroadPhrase::IdType> contactsOut;
@@ -229,11 +229,6 @@ const sp<NarrowPhrase>& ColliderImpl::Stub::narrowPhrase() const
 ColliderImpl::RigidBodyImpl::RigidBodyImpl(const ColliderImpl::Stub& stub, Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<Boolean> discarded)
     : RigidBody(type, std::move(shape), std::move(position), std::move(rotation), Box(), std::move(discarded)), _collider_stub(stub), _position_updated(true), _size_updated(false)
 {
-}
-
-void ColliderImpl::RigidBodyImpl::dispose()
-{
-    _discarded.reset(true);
 }
 
 bool ColliderImpl::RigidBodyImpl::update(uint64_t timestamp)
@@ -275,8 +270,8 @@ void ColliderImpl::RigidBodyImpl::collisionTest(ColliderImpl::Stub& collider, co
     {
         DPROFILER_TRACE("NarrowPhrase");
         const BroadPhrase::Candidate candidateSelf = toBroadPhraseCandidate();
-        collider.resolveCandidates(*this, candidateSelf, collider.toBroadPhraseCandidates(dynamicCandidates, Collider::BODY_TYPE_ALL), _callback, _dynamic_contacts);
-        collider.resolveCandidates(*this, candidateSelf, result._static_candidates, _callback, _static_contacts);
+        collider.resolveCandidates(*this, candidateSelf, collider.toBroadPhraseCandidates(dynamicCandidates, Collider::BODY_TYPE_ALL), *this, _dynamic_contacts);
+        collider.resolveCandidates(*this, candidateSelf, result._static_candidates, *this, _static_contacts);
     }
 }
 

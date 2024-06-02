@@ -17,29 +17,12 @@ namespace ark {
 
 class ARK_API RigidBody : public Wirable {
 public:
-    class ARK_API Callback {
-    public:
-        void onBeginContact(const RigidBody& rigidBody, const CollisionManifold& manifold);
-        void onEndContact(const RigidBody& rigidBody);
-
-        void onBeginContact(const RigidBody& self, const RigidBody& rigidBody, const CollisionManifold& manifold);
-        void onEndContact(const RigidBody& self, const RigidBody& rigidBody);
-
-        bool hasCallback() const;
-
-    private:
-        sp<CollisionCallback> _collision_callback;
-
-        friend class RigidBody;
-    };
-
-public:
-    RigidBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, Box impl, sp<Boolean> discarded);
+    RigidBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> quaternion, Box impl, sp<Boolean> discarded);
     ~RigidBody() override;
     DISALLOW_COPY_AND_ASSIGN(RigidBody);
 
 //  [[script::bindings::auto]]
-    virtual void dispose() = 0;
+    virtual void dispose();
 
     std::vector<std::pair<TypeId, Box>> onWire(const Traits& components) override;
 
@@ -73,7 +56,13 @@ public:
 //  [[script::bindings::property]]
     void setCollisionFilter(sp<CollisionFilter> collisionFilter);
 
-    const sp<Callback>& callback() const;
+    void onBeginContact(const RigidBody& rigidBody, const CollisionManifold& manifold) const;
+    void onEndContact(const RigidBody& rigidBody) const;
+
+    void onBeginContact(const RigidBody& self, const RigidBody& rigidBody, const CollisionManifold& manifold) const;
+    void onEndContact(const RigidBody& self, const RigidBody& rigidBody) const;
+
+    sp<RigidBody> makeShadow() const;
 
 protected:
     sp<RigidBodyRef> _ref;
@@ -82,12 +71,12 @@ protected:
     uint32_t _meta_id;
     sp<Shape> _shape;
     SafeVar<Vec3> _position;
-    SafeVar<Vec4> _rotation;
+    SafeVar<Vec4> _quaternion;
 
     Box _impl;
     SafeVar<Boolean> _discarded;
 
-    sp<Callback> _callback;
+    sp<CollisionCallback> _collision_callback;
     sp<CollisionFilter> _collision_filter;
 };
 

@@ -3,23 +3,24 @@
 #include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/types/class.h"
-#include "core/types/shared_ptr.h"
 
 namespace ark {
 
 template<typename T> class Ref {
 public:
     Ref(T& instance)
-        : _instance(instance), _discarded(false) {
+        : _instance(instance), _discarded(false), _origin(*this) {
     }
-    DISALLOW_COPY_AND_ASSIGN(Ref);
+    Ref(const Ref& other)
+        : _instance(other._instance), _discarded(other._discarded), _origin(other) {
+    }
 
     explicit operator bool() const {
-        return !_discarded;
+        return !isDiscarded();
     }
 
     bool isDiscarded() const {
-        return _discarded;
+        return _origin._discarded;
     }
 
     void discard() {
@@ -27,17 +28,17 @@ public:
     }
 
     template<typename U = T> U& instance() {
-        ASSERT(!_discarded);
+        ASSERT(!isDiscarded());
         return static_cast<U&>(_instance);
     }
 
     template<typename U = T> const U& instance() const {
-        ASSERT(!_discarded);
+        ASSERT(!isDiscarded());
         return static_cast<const U&>(_instance);
     }
 
     uintptr_t id() const {
-        return reinterpret_cast<uintptr_t>(this);
+        return reinterpret_cast<uintptr_t>(&_origin);
     }
 
     static Ref& toRef(uintptr_t id) {
@@ -47,6 +48,7 @@ public:
 private:
     T& _instance;
     bool _discarded;
+    const Ref& _origin;
 };
 
 }

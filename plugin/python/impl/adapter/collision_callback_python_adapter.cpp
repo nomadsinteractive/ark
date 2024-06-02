@@ -3,6 +3,7 @@
 #include "core/util/holder_util.h"
 
 #include "app/base/collision_manifold.h"
+#include "app/base/rigid_body.h"
 
 #include "python/api.h"
 #include "python/extension/py_cast.h"
@@ -13,8 +14,7 @@ CollisionCallbackPythonAdapter::CollisionCallbackPythonAdapter(const PyInstance&
     : _on_begin_contact(callback.hasAttr("on_begin_contact") ? callback.getAttr("on_begin_contact")
                                                              : callback.isCallable() ? PyInstance::own(callback.pyObject()) : PyInstance()),
       _on_end_contact(callback.hasAttr("on_end_contact") ? callback.getAttr("on_end_contact")
-                                                           : PyInstance()),
-      _collision_manifold(sp<CollisionManifold>::make(V3(), V3()))
+                                                           : PyInstance())
 {
 }
 
@@ -23,12 +23,10 @@ void CollisionCallbackPythonAdapter::onBeginContact(const RigidBody& rigidBody, 
     DCHECK_THREAD_FLAG();
     if(_on_begin_contact)
     {
-        *_collision_manifold = manifold;
-
         PyObject* args = PyTuple_New(2);
 
-        PyTuple_SetItem(args, 0, toPyObject(sp<RigidBody>(std::shared_ptr<RigidBody>(&const_cast<RigidBody&>(rigidBody), [](void*){}), nullptr)));
-        PyTuple_SetItem(args, 1, PyCast::toPyObject(_collision_manifold));
+        PyTuple_SetItem(args, 0, toPyObject(rigidBody.makeShadow()));
+        PyTuple_SetItem(args, 1, PyCast::toPyObject(sp<CollisionManifold>::make(manifold)));
 
 /* Check again, in case of GC */
         if(_on_begin_contact)
@@ -49,7 +47,7 @@ void CollisionCallbackPythonAdapter::onEndContact(const RigidBody& rigidBody)
     if(_on_end_contact)
     {
         PyObject* args = PyTuple_New(1);
-        PyTuple_SetItem(args, 0, toPyObject(sp<RigidBody>(std::shared_ptr<RigidBody>(&const_cast<RigidBody&>(rigidBody), [](void*){}), nullptr)));
+        PyTuple_SetItem(args, 0, toPyObject(rigidBody.makeShadow()));
 
 /* Check again, in case of GC */
         if(_on_end_contact)

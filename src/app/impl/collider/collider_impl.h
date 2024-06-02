@@ -56,7 +56,7 @@ public:
         std::vector<sp<RigidBodyRef>> toRigidBodyRefs(const std::unordered_set<BroadPhrase::IdType>& candidateSet, uint32_t filter) const;
         std::vector<BroadPhrase::Candidate> toBroadPhraseCandidates(const std::unordered_set<BroadPhrase::IdType>& candidateSet, uint32_t filter) const;
 
-        void resolveCandidates(const RigidBody& self, const BroadPhrase::Candidate& candidateSelf, const std::vector<BroadPhrase::Candidate>& candidates, RigidBody::Callback& callback, std::set<BroadPhrase::IdType>& c);
+        void resolveCandidates(const RigidBody& self, const BroadPhrase::Candidate& candidateSelf, const std::vector<BroadPhrase::Candidate>& candidates, const RigidBody& callback, std::set<BroadPhrase::IdType>& c);
 
         const sp<NarrowPhrase>& narrowPhrase() const;
 
@@ -86,7 +86,6 @@ public:
     public:
         RigidBodyImpl(const ColliderImpl::Stub& stub, Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<Boolean> discarded);
 
-        void dispose() override;
         bool update(uint64_t timestamp);
 
         void collisionTest(ColliderImpl::Stub& collider, const V3& position, const V3& size, const std::set<BroadPhrase::IdType>& removingIds);

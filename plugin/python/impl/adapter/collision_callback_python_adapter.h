@@ -1,7 +1,6 @@
 #pragma once
 
 #include "core/inf/holder.h"
-#include "core/types/shared_ptr.h"
 
 #include "app/inf/collision_callback.h"
 
@@ -25,9 +24,6 @@ private:
 private:
     PyInstance _on_begin_contact;
     PyInstance _on_end_contact;
-
-    sp<CollisionManifold> _collision_manifold;
-
 };
 
 }
