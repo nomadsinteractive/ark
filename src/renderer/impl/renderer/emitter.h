@@ -5,7 +5,6 @@
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
 #include "core/inf/builder.h"
-#include "core/inf/holder.h"
 #include "core/inf/runnable.h"
 #include "core/traits/expendable.h"
 #include "core/types/safe_ptr.h"
@@ -19,8 +18,7 @@
 
 namespace ark {
 
-//[[script::bindings::holder]]
-class ARK_API Emitter : public Holder, public Renderer {
+class ARK_API Emitter : public Renderer {
 private:
     struct Source {
         Source(const sp<Integer>& type, const sp<Vec3>& position, const sp<Size>& size, const Scope& arguments);
@@ -35,8 +33,7 @@ private:
 public:
     Emitter(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Source>& source, const sp<Clock>& clock, const sp<LayerContext>& layerContext, const std::vector<document>& particleDescriptor, BeanFactory& beanFactory, bool disposed);
 
-    virtual void traverse(const Visitor& visitor) override;
-    virtual void render(RenderRequest& renderRequest, const V3& position) override;
+    void render(RenderRequest& renderRequest, const V3& position) override;
 
 //  [[script::bindings::property]]
     bool active();

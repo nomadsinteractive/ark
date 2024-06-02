@@ -1,4 +1,4 @@
-#include "graphics/base/rotation.h"
+#include "graphics/traits/rotation.h"
 
 #include "core/base/bean_factory.h"
 #include "core/impl/variable/variable_dirty.h"

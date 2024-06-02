@@ -1,5 +1,6 @@
 #include "graphics/util/renderer_type.h"
 
+#include "core/collection/traits.h"
 #include "core/traits/expendable.h"
 #include "core/traits/visibility.h"
 #include "core/types/safe_ptr.h"
@@ -16,11 +17,11 @@ sp<Renderer> RendererType::create(const sp<Renderer>& delegate)
     return wrap(delegate);
 }
 
-void RendererType::addRenderer(const sp<Renderer>& self, const sp<Renderer>& renderer)
+void RendererType::addRenderer(const sp<Renderer>& self, const sp<Renderer>& renderer, Traits traits)
 {
-    DCHECK(self.template isInstance<Renderer::Group>(), "Cannot call addRenderer on a none-group renderer");
-    const sp<Renderer::Group> rendererGroup = self.template tryCast<Renderer::Group>();
-    rendererGroup->addRenderer(renderer);
+    DCHECK(self.isInstance<Renderer::Group>(), "Cannot call addRenderer on a none-group renderer");
+    const sp<Renderer::Group> rendererGroup = self.tryCast<Renderer::Group>();
+    rendererGroup->addRenderer(renderer, std::move(traits));
 }
 
 sp<Renderer> RendererType::wrap(const sp<Renderer>& self)

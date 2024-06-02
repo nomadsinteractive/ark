@@ -2,18 +2,16 @@
 
 #include <vector>
 
-#include "core/base/api.h"
 #include "core/base/wrapper.h"
 #include "core/base/observer.h"
 #include "core/base/notifier.h"
-#include "core/inf/holder.h"
 #include "core/inf/variable.h"
 #include "core/types/implements.h"
 #include "core/types/shared_ptr.h"
 
 namespace ark {
 
-template<typename T> class Expectation : public Variable<T>, public Wrapper<Variable<T>>, public Holder, public Implements<Expectation<T>, Variable<T>, Wrapper<Variable<T>>, Holder> {
+template<typename T> class Expectation : public Variable<T>, public Wrapper<Variable<T>>, public Implements<Expectation<T>, Variable<T>, Wrapper<Variable<T>>> {
 public:
     Expectation(sp<Variable<T>> delegate, Notifier notifier)
         : Wrapper<Variable<T>>(std::move(delegate)), _notifier(std::move(notifier)) {
@@ -25,11 +23,6 @@ public:
 
     bool update(uint64_t timestamp) override {
         return this->_wrapped->update(timestamp);
-    }
-
-    void traverse(const Visitor& visitor) override {
-        for(const sp<Observer>& i : _observers)
-            i->traverse(visitor);
     }
 
     sp<Observer> createObserver(const sp<Runnable>& callback, bool oneshot = true) {

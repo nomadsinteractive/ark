@@ -23,12 +23,6 @@ void Layer::render(RenderRequest& /*renderRequest*/, const V3& position)
 {
 }
 
-void Layer::traverse(const Holder::Visitor& visitor)
-{
-    if(_layer_context)
-        _layer_context->traverse(visitor);
-}
-
 void Layer::dispose()
 {
     _layer_context = nullptr;

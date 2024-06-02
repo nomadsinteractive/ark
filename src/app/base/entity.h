@@ -10,11 +10,14 @@
 
 namespace ark {
 
-class ARK_API Entity {
+//[[script::bindings::holder]]
+class ARK_API Entity : public Holder {
 public:
 //  [[script::bindings::constructor]]
     Entity(Traits components = Traits());
-    ~Entity();
+    ~Entity() override;
+
+    void traverse(const Visitor& visitor) override;
 
     template<typename T> bool hasComponent() const {
         return _components.has<T>();

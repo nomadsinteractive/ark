@@ -13,8 +13,7 @@
 
 namespace ark {
 
-//[[script::bindings::holder]]
-class ARK_API ResourceLoader : public Holder {
+class ARK_API ResourceLoader {
 private:
     template<typename T> class BuilderRefs : public BoxBundle {
     public:
@@ -63,7 +62,7 @@ private:
 
 public:
     ResourceLoader(const BeanFactory& beanFactory);
-    ~ResourceLoader() override;
+    ~ResourceLoader();
 
 //  [[script::bindings::loader]]
     template<typename T> sp<T> load(const String& name, const Scope& args) {
@@ -73,8 +72,6 @@ public:
         const Identifier id = name.at(0) == Identifier::ID_TYPE_REFERENCE ? Identifier::parse(name) : Identifier::parseRef(name);
         return _builder_refs.ensure<BuilderRefs<T>>(_bean_factory)->getBuilder(id)->build(args);
     }
-
-    virtual void traverse(const Visitor& visitor) override;
 
 //  [[script::bindings::property]]
     sp<BoxBundle> refs() const;

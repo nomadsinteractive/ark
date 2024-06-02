@@ -1,5 +1,4 @@
-#ifndef ARK_APP_BASE_COLLISION_FILTER_H_
-#define ARK_APP_BASE_COLLISION_FILTER_H_
+#pragma once
 
 #include "core/base/api.h"
 
@@ -38,5 +37,3 @@ private:
 };
 
 }
-
-#endif

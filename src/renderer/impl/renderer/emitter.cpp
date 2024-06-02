@@ -28,14 +28,6 @@ Emitter::Emitter(const sp<ResourceLoaderContext>& resourceLoaderContext, const s
 {
 }
 
-void Emitter::traverse(const Holder::Visitor& visitor)
-{
-    HolderUtil::visit(_stub->_source->_position, visitor);
-    HolderUtil::visit(_stub->_source->_size, visitor);
-    HolderUtil::visit(_stub->_source->_type, visitor);
-    HolderUtil::visit(_stub->_source->_arguments, visitor);
-}
-
 void Emitter::render(RenderRequest& /*renderRequest*/, const V3& /*x*/)
 {
     _stub->run();

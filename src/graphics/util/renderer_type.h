@@ -26,7 +26,7 @@ public:
     static sp<Renderer> create(const sp<Renderer>& delegate = nullptr);
 
 //[[script::bindings::classmethod]]
-    static void addRenderer(const sp<Renderer>& self, const sp<Renderer>& renderer);
+    static void addRenderer(const sp<Renderer>& self, const sp<Renderer>& renderer, Traits traits);
 //[[script::bindings::classmethod]]
     static sp<Renderer> wrap(const sp<Renderer>& self);
 [[deprecated]]

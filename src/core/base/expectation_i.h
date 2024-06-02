@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_BASE_EXPECTATION_I_H_
-#define ARK_CORE_BASE_EXPECTATION_I_H_
+#pragma once
 
 #include "core/base/expectation.h"
 
@@ -9,9 +8,8 @@ typedef Expectation<int32_t> ExpectationI;
 
 /*
 
-//[[script::bindings::holder]]
 //[[script::bindings::extends(Integer)]]
-class ARK_API ExpectationI : public Integer, public Wrapper<Integer>, public Holder {
+class ARK_API ExpectationI : public Integer, public Wrapper<Integer> {
  public:
     ExpectationI(sp<Integer> delegate, Notifier notifier);
 
@@ -30,5 +28,3 @@ class ARK_API ExpectationI : public Integer, public Wrapper<Integer>, public Hol
 */
 
 }
-
-#endif

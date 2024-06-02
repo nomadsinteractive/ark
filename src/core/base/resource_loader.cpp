@@ -7,8 +7,6 @@
 #include "renderer/base/texture_bundle.h"
 #include "renderer/base/resource_loader_context.h"
 
-#include "graphics/inf/renderer.h"
-
 #include "app/base/application_context.h"
 #include "app/view/arena.h"
 
@@ -22,11 +20,6 @@ ResourceLoader::ResourceLoader(const BeanFactory& beanFactory)
 ResourceLoader::~ResourceLoader()
 {
     LOGD("");
-}
-
-void ResourceLoader::traverse(const Holder::Visitor& visitor)
-{
-    HolderUtil::visit(_bean_factory.references(), visitor);
 }
 
 sp<BoxBundle> ResourceLoader::refs() const

@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_BASE_EXPECTATION_F_H_
-#define ARK_CORE_BASE_EXPECTATION_F_H_
+#pragma once
 
 #include "core/base/expectation.h"
 
@@ -9,9 +8,8 @@ typedef Expectation<float> ExpectationF;
 
 /*
 
-//[[script::bindings::holder]]
 //[[script::bindings::extends(Numeric)]]
-class ARK_API ExpectationF : public Numeric, public Wrapper<Numeric>, public Holder {
+class ARK_API ExpectationF : public Numeric, public Wrapper<Numeric> {
  public:
     ExpectationF(sp<Numeric> delegate, Notifier notifier);
 
@@ -30,5 +28,3 @@ class ARK_API ExpectationF : public Numeric, public Wrapper<Numeric>, public Hol
 */
 
 }
-
-#endif

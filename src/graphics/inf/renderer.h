@@ -1,7 +1,6 @@
 #pragma once
 
 #include "core/base/api.h"
-#include "core/collection/traits.h"
 
 #include "graphics/forwarding.h"
 
@@ -17,7 +16,7 @@ public:
     public:
         virtual ~Group() = default;
 
-        virtual void addRenderer(sp<Renderer> renderer, const Traits& traits = Traits()) = 0;
+        virtual void addRenderer(sp<Renderer> renderer, const Traits& traits) = 0;
     };
 
 };

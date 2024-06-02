@@ -4,7 +4,6 @@
 
 #include "core/inf/builder.h"
 #include "core/inf/holder.h"
-#include "core/traits/visibility.h"
 #include "core/types/shared_ptr.h"
 #include "core/types/safe_ptr.h"
 #include "core/types/safe_var.h"
@@ -16,9 +15,8 @@
 
 namespace ark {
 
-//[[script::bindings::holder]]
 //[[script::bindings::extends(Renderer)]]
-class ARK_API Layer : public Renderer, public Holder {
+class ARK_API Layer : public Renderer {
 public:
 //  [[script::bindings::enumeration]]
     enum Type {
@@ -33,7 +31,6 @@ public:
     Layer(sp<LayerContext> layerContext = nullptr);
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
-    virtual void traverse(const Visitor& visitor) override;
 
 // [[script::bindings::auto]]
     void dispose();

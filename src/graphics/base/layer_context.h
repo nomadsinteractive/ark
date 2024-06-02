@@ -6,7 +6,6 @@
 #include "core/base/api.h"
 #include "core/base/timestamp.h"
 #include "core/inf/builder.h"
-#include "core/inf/holder.h"
 
 #include "graphics/forwarding.h"
 #include "graphics/base/layer.h"
@@ -18,8 +17,7 @@
 
 namespace ark {
 
-//[[script::bindings::holder]]
-class ARK_API LayerContext : public Updatable, public Holder {
+class ARK_API LayerContext : public Updatable {
 public:
     struct ElementState {
         Optional<element_index_t> _index;
@@ -37,7 +35,6 @@ public:
     LayerContext(sp<ModelLoader> modelLoader = nullptr, sp<Vec3> position = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> disposed = nullptr, sp<Varyings> varyings = nullptr);
 
     virtual bool update(uint64_t timestamp) override;
-    virtual void traverse(const Visitor& visitor) override;
 
     const SafeVar<Vec3>& position() const;
     void setPosition(sp<Vec3> position);

@@ -17,6 +17,13 @@ Entity::~Entity()
     dispose();
 }
 
+void Entity::traverse(const Visitor& visitor)
+{
+    for(const auto& [k, v] : _components.traits())
+        if(const sp<Holder>& holder = v.as<Holder>())
+            holder->traverse(visitor);
+}
+
 void Entity::doWire()
 {
     for(const auto& [k, v] : _components.traits())

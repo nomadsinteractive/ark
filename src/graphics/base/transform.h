@@ -3,22 +3,18 @@
 #include "core/base/api.h"
 #include "core/base/timestamp.h"
 #include "core/forwarding.h"
-#include "core/inf/builder.h"
-#include "core/inf/holder.h"
 #include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
-#include "core/types/safe_ptr.h"
 #include "core/types/safe_var.h"
 
 #include "graphics/forwarding.h"
 #include "graphics/base/mat.h"
-#include "graphics/base/rotation.h"
+#include "graphics/traits/rotation.h"
 #include "graphics/base/v3.h"
 
 namespace ark {
 
-//[[script::bindings::holder]]
-class ARK_API Transform : public Holder {
+class ARK_API Transform {
 public:
     class Snapshot;
 
@@ -43,8 +39,6 @@ public:
 //  [[script::bindings::auto]]
     Transform(Transform::Type type = Transform::TYPE_LINEAR_3D, sp<Rotation> rotation = nullptr, sp<Vec3> scale = nullptr, sp<Vec3> translation = nullptr);
     Transform(sp<Delegate> delegate);
-
-    virtual void traverse(const Visitor& visitor) override;
 
     class ARK_API Snapshot {
     public:

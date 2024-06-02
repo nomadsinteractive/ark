@@ -44,11 +44,6 @@ bool Arena::onEvent(const Event& event)
     return _event_listeners->onEvent(event);
 }
 
-void Arena::traverse(const Holder::Visitor& visitor)
-{
-    HolderUtil::visit(_view, visitor);
-}
-
 sp<Entity> Arena::makeEntity(Traits components) const
 {
     components.put(_resource_loader);

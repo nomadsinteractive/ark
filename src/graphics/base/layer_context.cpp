@@ -40,13 +40,6 @@ bool LayerContext::update(uint64_t timestamp)
     return _timestamp.update(timestamp);
 }
 
-void LayerContext::traverse(const Holder::Visitor& visitor)
-{
-    if(_layer_type != Layer::TYPE_TRANSIENT)
-        for(const auto& i : _renderables)
-            HolderUtil::visit(i.first, visitor);
-}
-
 const SafeVar<Vec3>& LayerContext::position() const
 {
     return _position;

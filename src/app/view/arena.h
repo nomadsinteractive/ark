@@ -2,7 +2,6 @@
 
 #include "core/base/api.h"
 #include "core/inf/builder.h"
-#include "core/inf/holder.h"
 #include "core/types/owned_ptr.h"
 #include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
@@ -17,19 +16,16 @@
 
 namespace ark {
 
-//[[script::bindings::holder]]
-class ARK_API Arena final : public EventListener, public Renderer, public Renderer::Group, public Holder {
+class ARK_API Arena final : public EventListener, public Renderer, public Renderer::Group {
 public:
     Arena(sp<View> view, sp<ResourceLoader> resourceLoader);
     ~Arena() override;
 
 //  [[script::bindings::auto]]
-    virtual void addRenderer(sp<Renderer> renderer, const Traits& traits) override;
+    void addRenderer(sp<Renderer> renderer, const Traits& traits) override;
 
-    virtual void render(RenderRequest& renderRequest, const V3& position) override;
-    virtual bool onEvent(const Event& event) override;
-
-    virtual void traverse(const Visitor& visitor) override;
+    void render(RenderRequest& renderRequest, const V3& position) override;
+    bool onEvent(const Event& event) override;
 
     sp<Entity> makeEntity(Traits components = Traits()) const;
 
