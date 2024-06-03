@@ -52,13 +52,15 @@ static V2 toViewportPosition(const V2& position)
     return Ark::instance().applicationContext()->toViewportPosition(position);
 }
 
-static V2 toPivotPosition(const sp<Metrics>& occupies, const V2& size)
+static V2 toPivotPosition(const sp<Boundaries>& occupies, const V2& size)
 {
     const RenderEngine& renderEngine = *Ark::instance().applicationContext()->renderEngine();
     if(!occupies)
         return renderEngine.isLHS() ? V2(0, 0) : V2(0, size.y());
 
-    return size * V2(Math::lerp(0, size.x(), occupies->aabbMin().x(), occupies->aabbMax().x(), 0), Math::lerp(0, size.y(), occupies->aabbMin().y(), occupies->aabbMax().y(), 0));
+    const V3& occupyAABBMin = occupies->aabbMin()->val();
+    const V3& occupyAABBMax = occupies->aabbMax()->val();
+    return size * V2(Math::lerp(0, size.x(), occupyAABBMin.x(), occupyAABBMax.x(), 0), Math::lerp(0, size.y(), occupyAABBMin.y(), occupyAABBMax.y(), 0));
 }
 
 View::View(const sp<LayoutParam>& layoutParam, sp<RenderObjectWithLayer> background, sp<Text> text, sp<Layout> layout, sp<LayoutV3> layoutV3, sp<Boolean> visible, sp<Boolean> disposed)

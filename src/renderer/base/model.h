@@ -5,7 +5,7 @@
 #include "core/base/string.h"
 #include "core/types/shared_ptr.h"
 
-#include "graphics/base/metrics.h"
+#include "graphics/base/boundaries.h"
 #include "graphics/base/v3.h"
 #include "graphics/inf/renderable.h"
 
@@ -18,8 +18,8 @@ namespace ark {
 class ARK_API Model {
 public:
     Model() = default;
-    Model(sp<Uploader> indices, sp<Vertices> vertices, sp<Metrics> bounds, sp<Metrics> occupies = nullptr);
-    Model(std::vector<sp<Material>> materials, std::vector<sp<Mesh>> meshes, sp<Node> rootNode, sp<Metrics> bounds = nullptr, sp<Metrics> occupies = nullptr);
+    Model(sp<Uploader> indices, sp<Vertices> vertices, sp<Boundaries> cover, sp<Boundaries> occupy = nullptr);
+    Model(std::vector<sp<Material>> materials, std::vector<sp<Mesh>> meshes, sp<Node> rootNode, sp<Boundaries> bounds = nullptr, sp<Boundaries> occupies = nullptr);
     DEFAULT_COPY_AND_ASSIGN(Model);
 
 //  [[script::bindings::property]]
@@ -37,9 +37,9 @@ public:
     const sp<Node>& rootNode() const;
 
 //  [[script::bindings::property]]
-    const sp<Metrics>& bounds() const;
+    const sp<Boundaries>& boundaries() const;
 //  [[script::bindings::property]]
-    const sp<Metrics>& occupies() const;
+    const sp<Boundaries>& occupies() const;
 
 //  [[script::bindings::property]]
     size_t indexCount() const;
@@ -62,7 +62,7 @@ public:
     void writeRenderable(VertexWriter& buf, const Renderable::Snapshot& renderable) const;
 
     void dispose();
-    bool isDisposed() const;
+    bool isDiscarded() const;
 
     template<typename T> std::vector<T> toFlatLayouts() const {
         std::vector<T> nodeLayouts;
@@ -111,7 +111,7 @@ private:
     };
 
 private:
-    Metrics calcBoudingAABB() const;
+    Boundaries calcBoundingAABB() const;
 
 private:
     sp<Uploader> _indices;
@@ -122,8 +122,8 @@ private:
     Table<String, sp<Animation>> _animations;
     std::vector<String> _node_names;
 
-    sp<Metrics> _bounds;
-    sp<Metrics> _occupies;
+    sp<Boundaries> _cover;
+    sp<Boundaries> _occupy;
 };
 
 }

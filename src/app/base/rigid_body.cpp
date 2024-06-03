@@ -20,7 +20,7 @@ RigidBody::RigidBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position
 
 RigidBody::~RigidBody()
 {
-    LOGD("RigidBody(%uz) disposed", _ref->id());
+    LOGD("RigidBody(%p) disposed", _ref->id());
     _ref->discard();
 }
 

@@ -48,14 +48,14 @@ struct NodeLayout {
 
 }
 
-Model::Model(sp<Uploader> indices, sp<Vertices> vertices, sp<Metrics> bounds, sp<Metrics> occupies)
-    : _indices(std::move(indices)), _vertices(std::move(vertices)), _bounds(std::move(bounds)), _occupies(occupies ? std::move(occupies) : sp<Metrics>(_bounds))
+Model::Model(sp<Uploader> indices, sp<Vertices> vertices, sp<Boundaries> cover, sp<Boundaries> occupy)
+    : _indices(std::move(indices)), _vertices(std::move(vertices)), _cover(std::move(cover)), _occupy(occupy ? std::move(occupy) : sp<Boundaries>(_cover))
 {
 }
 
-Model::Model(std::vector<sp<Material>> materials, std::vector<sp<Mesh>> meshes, sp<Node> rootNode, sp<Metrics> bounds, sp<Metrics> occupies)
+Model::Model(std::vector<sp<Material>> materials, std::vector<sp<Mesh>> meshes, sp<Node> rootNode, sp<Boundaries> bounds, sp<Boundaries> occupies)
     : _indices(sp<InputMeshIndices>::make(meshes)), _vertices(sp<MeshVertices>::make(meshes)), _root_node(std::move(rootNode)), _materials(std::move(materials)), _meshes(std::move(meshes)),
-      _bounds(bounds ? std::move(bounds) : sp<Metrics>::make(calcBoudingAABB())), _occupies(occupies ? std::move(occupies) : sp<Metrics>(_bounds))
+      _cover(bounds ? std::move(bounds) : sp<Boundaries>::make(calcBoundingAABB())), _occupy(occupies ? std::move(occupies) : sp<Boundaries>(_cover))
 {
 }
 
@@ -95,14 +95,14 @@ const sp<Node>& Model::rootNode() const
     return _root_node;
 }
 
-const sp<Metrics>& Model::bounds() const
+const sp<Boundaries>& Model::boundaries() const
 {
-    return _bounds;
+    return _cover;
 }
 
-const sp<Metrics>& Model::occupies() const
+const sp<Boundaries>& Model::occupies() const
 {
-    return _occupies;
+    return _occupy;
 }
 
 size_t Model::indexCount() const
@@ -143,7 +143,7 @@ const sp<Animation>& Model::getAnimation(const String& name) const
 
 void Model::writeToStream(VertexWriter& buf, const V3& size) const
 {
-    _vertices->write(buf, size == V3(0) && _bounds ? _bounds->size() : size);
+    _vertices->write(buf, size == V3(0) && _cover ? _cover->size()->val() : size);
 }
 
 void Model::writeRenderable(VertexWriter& writer, const Renderable::Snapshot& renderable) const
@@ -160,12 +160,12 @@ void Model::dispose()
     _animations.clear();
 }
 
-bool Model::isDisposed() const
+bool Model::isDiscarded() const
 {
     return !static_cast<bool>(_indices);
 }
 
-Metrics Model::calcBoudingAABB() const
+Boundaries Model::calcBoundingAABB() const
 {
     std::map<Mesh*, std::pair<V3, V3>> meshBounds;
 
@@ -184,7 +184,7 @@ Metrics Model::calcBoudingAABB() const
             i.calcTransformedBoudingAABB(p0, p1, aabbMin, aabbMax);
         }
 
-    return Metrics(aabbMin, aabbMax);
+    return Boundaries(aabbMin, aabbMax);
 }
 
 Model::InputMeshIndices::InputMeshIndices(std::vector<sp<Mesh>> meshes)

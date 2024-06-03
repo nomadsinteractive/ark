@@ -13,7 +13,7 @@
 
 namespace ark {
 
-class ARK_API Vec3Impl final : public Vec3, public Holder {
+class ARK_API Vec3Impl final : public Vec3 {
 public:
     Vec3Impl() noexcept;
     Vec3Impl(sp<Numeric> v) noexcept;
@@ -21,9 +21,8 @@ public:
     Vec3Impl(sp<Numeric> x, sp<Numeric> y, sp<Numeric> z) noexcept;
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Vec3Impl);
 
-    virtual V3 val() override;
-    virtual bool update(uint64_t timestamp) override;
-    virtual void traverse(const Visitor& visitor) override;
+    V3 val() override;
+    bool update(uint64_t timestamp) override;
 
     const sp<NumericWrapper>& x() const;
     const sp<NumericWrapper>& y() const;

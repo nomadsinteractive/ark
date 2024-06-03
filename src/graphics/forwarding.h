@@ -7,6 +7,7 @@ namespace ark {
 class Alphabet;
 class Bitmap;
 class Block;
+class Boundaries;
 class Bounds;
 class Camera;
 class GlyphMaker;

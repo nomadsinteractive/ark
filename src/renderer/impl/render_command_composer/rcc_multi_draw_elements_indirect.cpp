@@ -165,7 +165,7 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
             if(reload || snapshot._state.hasState(Renderable::RENDERABLE_STATE_DIRTY))
             {
                 const ModelBundle::ModelLayout& modelInfo = _model_bundle->ensureModelLayout(snapshot._type);
-                const Metrics& metrics = modelInfo._model->bounds();
+                const Boundaries& metrics = modelInfo._model->boundaries();
                 VertexWriter writer = buf.makeDividedVertexWriter(renderRequest, 1, offset, 1);
                 writer.next();
                 writer.write(MatrixUtil::translate(M4::identity(), snapshot._position) * MatrixUtil::scale(snapshot._transform.toMatrix(), toScale(snapshot._size, metrics)) * j.globalTransform());
@@ -177,9 +177,9 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
         }
 }
 
-V3 RCCMultiDrawElementsIndirect::toScale(const V3& displaySize, const Metrics& metrics) const
+V3 RCCMultiDrawElementsIndirect::toScale(const V3& displaySize, const Boundaries& metrics) const
 {
-    const V3& size = metrics.size();
+    const V3& size = metrics.size()->val();
     return V3(displaySize.x() != 0 ? displaySize.x() / size.x() : 1.0f,
               displaySize.y() != 0 ? displaySize.y() / size.y() : 1.0f,
               displaySize.z() != 0 ? displaySize.z() /  size.z() : 1.0f);

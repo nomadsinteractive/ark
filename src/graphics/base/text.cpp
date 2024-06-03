@@ -215,7 +215,7 @@ void Text::Content::createLayerContent(float width, float height)
 float Text::Content::doLayoutWithBoundary(GlyphContents& cm, float& flowx, float& flowy, float boundary)
 {
     const std::vector<LayoutChar> layoutChars = toLayoutCharacters(cm);
-    float fontHeight = layoutChars.size() > 0 ? layoutChars.at(0)._model->occupies()->size().y() * _text_scale : 0;
+    float fontHeight = layoutChars.size() > 0 ? layoutChars.at(0)._model->occupies()->size()->val().y() * _text_scale : 0;
     size_t begin = 0;
     for(size_t i = 0; i < layoutChars.size(); ++i)
     {
@@ -274,19 +274,16 @@ void Text::Content::place(GlyphContents& cm, const std::vector<Text::LayoutChar>
 void Text::Content::placeOne(Glyph& glyph, const Model& model, float& flowx, float flowy, float* fontHeight)
 {
     const V2 scale = V2(_text_scale, _text_scale);
-    const Metrics& bounds = model.bounds();
-    const Metrics& occupies = model.occupies();
-    float bitmapWidth = scale.x() * bounds.width();
-    float bitmapHeight = scale.y() * bounds.height();
-    float width = scale.x() * occupies.width();
-    float height = scale.y() * occupies.height();
-    float bitmapX = - scale.x() * occupies.aabbMin().x();
-    float bitmapY = - scale.y() * occupies.aabbMin().y();
+    const Boundaries& bounds = model.boundaries();
+    const Boundaries& occupies = model.occupies();
+    const V2 bitmapCoverSize = scale * bounds.size()->val();
+    const V2 bitmapOccupySize = scale * occupies.size()->val();
+    const V2 bitmapPos = -scale * occupies.aabbMin()->val();
     if(fontHeight)
-        *fontHeight = std::max(height, *fontHeight);
-    glyph.setLayoutPosition(V3(flowx + bitmapX, flowy + height - bitmapY - bitmapHeight, 0));
-    glyph.setLayoutSize(V2(bitmapWidth, bitmapHeight));
-    flowx += width;
+        *fontHeight = std::max(bitmapOccupySize.y(), *fontHeight);
+    glyph.setLayoutPosition(V3(flowx + bitmapPos.x(), flowy + bitmapOccupySize.y() - bitmapPos.y() - bitmapCoverSize.y(), 0));
+    glyph.setLayoutSize(bitmapCoverSize);
+    flowx += bitmapOccupySize.x();
 }
 
 void Text::Content::nextLine(float fontHeight, float& flowx, float& flowy) const
@@ -314,21 +311,21 @@ std::vector<Text::LayoutChar> Text::Content::toLayoutCharacters(const GlyphConte
     {
         const wchar_t c = i->character();
         const bool isLineBreak = c == '\n';
-        const auto iter = mmap.find(c);
-        if(iter != mmap.end())
+        if(const auto iter = mmap.find(c); iter != mmap.end())
         {
-            const std::tuple<sp<Model>, bool, bool>& val = iter->second;
-            integral += xScale * std::get<0>(val)->occupies()->width();
-            layoutChars.emplace_back(std::get<0>(val), integral, std::get<1>(val), std::get<2>(val), isLineBreak);
+            const auto& [model, iscjk, iswordbreak] = iter->second;
+            const V3& occupy = model->occupies()->size()->val();
+            integral += xScale * occupy.x();
+            layoutChars.emplace_back(model, integral, iscjk, iswordbreak, isLineBreak);
         }
         else
         {
             int32_t type = static_cast<int32_t>(c);
             sp<Model> model = modelLoader.loadModel(type);
-            const Metrics& m = model->occupies();
+            const Boundaries& m = model->occupies();
             bool iscjk = isCJK(c);
             bool iswordbreak = isWordBreaker(c);
-            integral += xScale * m.size().x();
+            integral += xScale * m.size()->val().x();
             mmap.insert(std::make_pair(c, std::make_tuple(model, iscjk, iswordbreak)));
             layoutChars.emplace_back(std::move(model), integral, iscjk, iswordbreak, isLineBreak);
         }

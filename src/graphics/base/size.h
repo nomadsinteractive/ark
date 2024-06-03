@@ -2,7 +2,6 @@
 
 #include "core/base/api.h"
 #include "core/inf/builder.h"
-#include "core/inf/holder.h"
 #include "core/inf/variable.h"
 #include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
@@ -13,7 +12,7 @@
 namespace ark {
 
 //[[script::bindings::extends(Vec3)]]
-class ARK_API Size : public Vec3 {
+class ARK_API Size final : public Vec3 {
 public:
     Size();
     Size(const V3& size);
@@ -22,8 +21,8 @@ public:
 //  [[script::bindings::auto]]
     Size(sp<Numeric> width, sp<Numeric> height, sp<Numeric> depth = nullptr);
 
-    virtual V3 val() override;
-    virtual bool update(uint64_t timestamp) override;
+    V3 val() override;
+    bool update(uint64_t timestamp) override;
 
     float widthAsFloat() const;
     float heightAsFloat() const;

@@ -381,7 +381,7 @@ Model ModelImporterGltf::import(const Manifest& manifest, MaterialBundle& materi
     for(int32_t i : scene.nodes)
         rootNode->childNodes().push_back(loadNodeHierarchy(gltfModel, gltfModel.nodes.at(i), meshes, primitives));
 
-    return Model(std::move(materials), std::move(meshes), std::move(rootNode), sp<Metrics>::make(V3(0), V3(0)));
+    return Model(std::move(materials), std::move(meshes), std::move(rootNode), sp<Boundaries>::make(V3(0), V3(0)));
 }
 
 sp<ModelLoader::Importer> ModelImporterGltf::BUILDER::build(const Scope& args)

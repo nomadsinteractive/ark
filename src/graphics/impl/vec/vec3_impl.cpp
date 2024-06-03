@@ -41,13 +41,6 @@ bool Vec3Impl::update(uint64_t timestamp)
     return UpdatableUtil::update(timestamp, _x, _y, _z);
 }
 
-void Vec3Impl::traverse(const Holder::Visitor& visitor)
-{
-    HolderUtil::visit(_x, visitor);
-    HolderUtil::visit(_y, visitor);
-    HolderUtil::visit(_z, visitor);
-}
-
 const sp<NumericWrapper>& Vec3Impl::x() const
 {
     return _x;

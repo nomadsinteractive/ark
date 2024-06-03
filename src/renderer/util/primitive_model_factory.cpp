@@ -2,7 +2,7 @@
 
 #include "core/util/uploader_type.h"
 
-#include "graphics/base/metrics.h"
+#include "graphics/base/boundaries.h"
 
 #include "renderer/base/model.h"
 #include "renderer/base/render_controller.h"
@@ -154,12 +154,12 @@ PrimitiveModelFactory::PrimitiveModelFactory(sp<Mat4> transform)
 
 sp<Model> PrimitiveModelFactory::makeTriangle(Optional<Rect> texCoords)
 {
-    return sp<Model>::make(UploaderType::makeElementIndexInput(std::vector<element_index_t>{0, 1, 2}), sp<VerticesTriangle>::make(std::move(texCoords)), sp<Metrics>::make(V3(0), V3(1., 1., 0), V3(0)));
+    return sp<Model>::make(UploaderType::makeElementIndexInput(std::vector<element_index_t>{0, 1, 2}), sp<VerticesTriangle>::make(std::move(texCoords)), sp<Boundaries>::make(V3(0), V3(1., 1., 0), V3(0)));
 }
 
 sp<Model> PrimitiveModelFactory::makePlane(uint32_t cols, uint32_t rows, Optional<Rect> texCoords)
 {
-    return sp<Model>::make(sp<UploaderPlane>::make(cols, rows), sp<VerticesPlane>::make(cols, rows, std::move(texCoords), _transform), sp<Metrics>::make(V3(0), V3(cols, rows, 0), V3(0)));
+    return sp<Model>::make(sp<UploaderPlane>::make(cols, rows), sp<VerticesPlane>::make(cols, rows, std::move(texCoords), _transform), sp<Boundaries>::make(V3(0), V3(cols, rows, 0), V3(0)));
 }
 
 }

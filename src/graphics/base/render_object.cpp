@@ -34,17 +34,17 @@ sp<Integer> RenderObject::type() const
 
 float RenderObject::width()
 {
-    return _size.ensure()->widthAsFloat();
+    return _size.val().x();
 }
 
 float RenderObject::height()
 {
-    return _size.ensure()->heightAsFloat();
+    return _size.val().y();
 }
 
-const sp<Size>& RenderObject::size()
+const SafeVar<Vec3>& RenderObject::size()
 {
-    return _size.ensure();
+    return _size;
 }
 
 const SafePtr<Transform>& RenderObject::transform() const
@@ -145,9 +145,9 @@ void RenderObject::setPosition(const sp<Vec3>& position)
     _timestamp.markDirty();
 }
 
-void RenderObject::setSize(const sp<Size>& size)
+void RenderObject::setSize(sp<Vec3> size)
 {
-    _size = size;
+    _size.reset(std::move(size));
     _timestamp.markDirty();
 }
 
@@ -253,8 +253,8 @@ std::vector<std::pair<TypeId, Box>> RenderObject::onWire(const Traits& component
         if(sp<Size> size = components.get<Size>())
             _size.reset(std::move(size));
         else if(const sp<WithLayer> withLayer = components.get<WithLayer>())
-            if(const sp<Metrics>& metrics = withLayer->modelLoader()->loadModel(_type->val())->bounds())
-                _size.reset(sp<Size>::make(metrics->size()));
+            if(const sp<Boundaries>& metrics = withLayer->modelLoader()->loadModel(_type->val())->boundaries())
+                _size.reset(metrics->size());
     }
     return {{Type<Renderable>::id(), nullptr}};
 }

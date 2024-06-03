@@ -84,8 +84,8 @@ bool ModelLoaderText::GlyphBundle::prepareOne(uint64_t timestamp, int32_t c, int
         const V2 charSize(static_cast<float>(metrics.bitmap_width), static_cast<float>(metrics.bitmap_height));
         Atlas::Item item = _atlas_attachment._atlas.makeItem(cx, cy, cx + metrics.bitmap_width, cy + metrics.bitmap_height, Rect(0, 0, 1.0f, 1.0f), charSize, V2(0));
         V3 xyz = V3(static_cast<float>(metrics.bitmap_x), static_cast<float>(metrics.bitmap_y), 0);
-        sp<Metrics> bounds = sp<Metrics>::make(xyz, V3(charSize, 0), xyz);
-        sp<Metrics> occupies = sp<Metrics>::make(V3(0), V3(static_cast<float>(width), static_cast<float>(height), 0), xyz);
+        sp<Boundaries> bounds = sp<Boundaries>::make(xyz, V3(charSize, 0), xyz);
+        sp<Boundaries> occupies = sp<Boundaries>::make(V3(0), V3(static_cast<float>(width), static_cast<float>(height), 0), xyz);
         _glyphs[ckey] = GlyphModel(sp<Model>::make(_atlas_attachment._unit_model.indices(), sp<VerticesQuad>::make(item), std::move(bounds), std::move(occupies)), timestamp);
     }
     else
