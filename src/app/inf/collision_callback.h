@@ -6,7 +6,6 @@
 
 namespace ark {
 
-//[[script::bindings::auto]]
 class ARK_API CollisionCallback {
 public:
     virtual ~CollisionCallback() = default;

@@ -118,14 +118,14 @@ list(APPEND LOCAL_GENERATED_SRC_LIST ${output_files})
 
 def gen_header_source(filename, output_dir, output_file, results, namespaces):
     filedir, name = path.split(filename)
-    declares = ['\nvoid __init_%s__(PyObject* module);' % name.replace('-', '_')]
+    declares = [f'\nvoid __init_{name.replace("-", "_")}__(PyObject* module);']
     includes = []
     for k, genclass in results.items():
         if output_dir is None:
             declares.append(CLASS_DELIMITER)
             gen_class_header_source(genclass, declares)
         else:
-            includes.append('#include "%s.h"' % genclass.py_src_name)
+            includes.append(f'#include "{genclass.py_src_name}.h"')
             if output_file is None:
                 local_declares = []
                 gen_class_header_source(genclass, local_declares)
@@ -644,7 +644,7 @@ def get_result_class(results, filename, classname):
 
 
 def main(params, paths):
-    results = {}
+    binding_classes = {}
     bindables = set(ARK_CORE_BUILDABLES)
 
     namespaces = params['p'].replace('::', ':').split(':')
@@ -655,7 +655,7 @@ def main(params, paths):
     bindable_paths = params['b'] if 'b' in params else None
 
     def automethod(filename, content, main_class, x):
-        genclass = get_result_class(results, filename, main_class)
+        genclass = get_result_class(binding_classes, filename, main_class)
         method_modifier = x[0]
         name, args, return_type, is_static = GenMethod.split(x[1:])
         if is_static and method_modifier == 'auto':
@@ -669,7 +669,7 @@ def main(params, paths):
         genclass.add_method(genmethod)
 
     def autooperator(filename, content, main_class, x):
-        genclass = get_result_class(results, filename, main_class)
+        genclass = get_result_class(binding_classes, filename, main_class)
         operator = x[0]
         name, args, return_type, is_static = GenMethod.split(x[1:])
         assert is_static
@@ -679,19 +679,19 @@ def main(params, paths):
             genclass.add_method(GenOperatorMethod(name, args, return_type, operator))
 
     def autoasmapping(filename, content, main_class, x):
-        genclass = get_result_class(results, filename, main_class)
+        genclass = get_result_class(binding_classes, filename, main_class)
         operator = x[0]
         name, args, return_type, is_static = GenMethod.split(x[1:])
         genclass.add_method(GenMappingMethod(name, args, return_type, operator, is_static))
 
     def autoassequence(filename, content, main_class, x):
-        genclass = get_result_class(results, filename, main_class)
+        genclass = get_result_class(binding_classes, filename, main_class)
         operator = x[0]
         name, args, return_type, is_static = GenMethod.split(x[1:])
         genclass.add_method(GenSequenceMethod(name, args, return_type, operator, is_static))
 
     def autoclass(filename, content, main_class, x):
-        genclass = get_result_class(results, filename, main_class)
+        genclass = get_result_class(binding_classes, filename, main_class)
         args = [i.strip() for i in x[1].replace('"', '').split(',')]
         assert x[0] in ('class', 'name') and len(args) in (1, 2)
         if x[0] == 'class':
@@ -702,7 +702,7 @@ def main(params, paths):
             genclass.name = args[0]
 
     def autoextends(filename, content, main_class, x):
-        genclass = get_result_class(results, filename, main_class)
+        genclass = get_result_class(binding_classes, filename, main_class)
         genclass.base_classname = x
 
     class AutoMethodCall:
@@ -711,38 +711,38 @@ def main(params, paths):
             self._argc = argc
 
         def __call__(self, filename, content, main_class, x):
-            genclass = get_result_class(results, filename, main_class)
+            genclass = get_result_class(binding_classes, filename, main_class)
             splitted = GenMethod.split(x)
             genclass.add_method(self._auto_method_type(*splitted[:self._argc]))
 
     def autoloader(filename, content, main_class, x):
-        genclass = get_result_class(results, filename, main_class)
+        genclass = get_result_class(binding_classes, filename, main_class)
         name, args, return_type, is_static = GenMethod.split(x)
         genclass.add_method(GenLoaderMethod(name, args))
 
     def autoproperty(filename, content, main_class, x):
-        genclass = get_result_class(results, filename, main_class)
+        genclass = get_result_class(binding_classes, filename, main_class)
         name, args, return_type, is_static = GenMethod.split(x)
         genclass.add_method(GenPropertyMethod(name, args, return_type, is_static))
 
     def autogetprop(filename, content, main_class, x):
-        genclass = get_result_class(results, filename, main_class)
+        genclass = get_result_class(binding_classes, filename, main_class)
         name, args, return_type, is_static = GenMethod.split(x)
         genclass.add_method(GenGetPropMethod(name, args, return_type))
 
     def autoannotation(filename, content, m, x):
         names = [i for i in x[1].split(':', 2)[0].split() if i not in ('ARK_API', 'final')]
         if len(names) >= 1:
-            results[names[-1]] = GenClass(filename, names[-1], x[0].strip() in ('container', 'holder'))
+            binding_classes[names[-1]] = GenClass(filename, names[-1], x[0].strip() in ('container', 'holder'))
 
     def autotypedef(filename, content, m, x):
-        results[x] = GenClass(filename, x, False)
+        binding_classes[x] = GenClass(filename, x, False)
 
     def autobindable(filename, content, main_class, x):
         bindables.add(x)
 
     def autoenumeration(filename, content, main_class, x):
-        genclass = get_result_class(results, filename, main_class)
+        genclass = get_result_class(binding_classes, filename, main_class)
         for i in x[1].split(',\n'):
             varname = i.split('=')[0].strip()
             if varname:
@@ -771,11 +771,11 @@ def main(params, paths):
         acg.match_header_patterns(bindable_paths.split(path.pathsep), True, HeaderPattern(BUILDABLE_PATTERN, autobindable))
 
     if output_cmakelist:
-        return acg.write_to_file(_just_print_flag and output_cmakelist, gen_cmakelist_source(params, paths, output_dir, output_file or 'stdout', results))
+        return acg.write_to_file(_just_print_flag and output_cmakelist, gen_cmakelist_source(params, paths, output_dir, output_file or 'stdout', binding_classes))
 
     gen_bindingcpp = output_file or _just_print_flag is None
-    head_src = gen_header_source(output_file or 'stdout', output_dir, output_file, results, namespaces)
-    cpp_src = gen_body_source(output_file or 'stdout', output_dir, output_file, namespaces, modulename, results, bindables, gen_bindingcpp)
+    head_src = gen_header_source(output_file or 'stdout', output_dir, output_file, binding_classes, namespaces)
+    cpp_src = gen_body_source(output_file or 'stdout', output_dir, output_file, namespaces, modulename, binding_classes, bindables, gen_bindingcpp)
     if gen_bindingcpp:
         acg.write_to_file(_just_print_flag and output_file + '.h', head_src)
         acg.write_to_file(_just_print_flag and output_file + '.cpp', cpp_src)

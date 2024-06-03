@@ -2636,5 +2636,10 @@ class Tag:
         return None
 
 
+class CollisionCallback:
+    def __init__(self, callback_obj):
+        pass
+
+
 def __trace__():
     pass

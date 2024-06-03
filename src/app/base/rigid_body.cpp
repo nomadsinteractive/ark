@@ -40,6 +40,11 @@ std::vector<std::pair<TypeId, Box>> RigidBody::onWire(const Traits& components)
     if(sp<Boolean> expendable = components.get<Expendable>())
         _discarded.reset(std::move(expendable));
 
+    if(sp<CollisionCallback> collisionCallback = components.get<CollisionCallback>())
+        _collision_callback = std::move(collisionCallback);
+    else if(_collision_callback)
+        return {{Type<CollisionCallback>::id(), _collision_callback}};
+
     return {};
 }
 

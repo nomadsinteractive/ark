@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_INF_IMPORTER_H_
-#define ARK_CORE_INF_IMPORTER_H_
+#pragma once
 
 #include "core/forwarding.h"
 
@@ -13,5 +12,3 @@ public:
 };
 
 }
-
-#endif

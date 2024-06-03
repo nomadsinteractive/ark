@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_UTIL_HOLDER_UTIL_H_
-#define ARK_CORE_UTIL_HOLDER_UTIL_H_
+#pragma once
 
 #include "core/base/wrapper.h"
 #include "core/base/scope.h"
@@ -74,5 +73,3 @@ private:
 };
 
 }
-
-#endif

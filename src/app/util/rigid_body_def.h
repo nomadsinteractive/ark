@@ -1,5 +1,4 @@
-#ifndef ARK_APP_UTIL_RIGID_BODY_DEF_H_
-#define ARK_APP_UTIL_RIGID_BODY_DEF_H_
+#pragma once
 
 #include "core/types/box.h"
 
@@ -38,5 +37,3 @@ private:
 };
 
 }
-
-#endif
