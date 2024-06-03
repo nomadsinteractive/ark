@@ -15,8 +15,7 @@
 
 namespace ark {
 
-//[[script::bindings::extends(Renderer)]]
-class ARK_API Layer : public Renderer {
+class ARK_API Layer final {
 public:
 //  [[script::bindings::enumeration]]
     enum Type {
@@ -29,8 +28,6 @@ public:
 public:
 // [[script::bindings::auto]]
     Layer(sp<LayerContext> layerContext = nullptr);
-
-    virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
 // [[script::bindings::auto]]
     void dispose();
@@ -67,22 +64,10 @@ public:
         std::vector<sp<Builder<RenderObject>>> _render_objects;
     };
 
-//  [[plugin::builder("layer")]]
-    class BUILDER_IMPL2 : public Builder<Renderer> {
-    public:
-        BUILDER_IMPL2(BeanFactory& factory, const document& manifest);
-
-        virtual sp<Renderer> build(const Scope& args) override;
-
-    private:
-        BUILDER _builder_impl;
-    };
-
 private:
     sp<LayerContext> _layer_context;
 
     friend class RenderLayer;
-
 };
 
 }

@@ -4,7 +4,6 @@
 #include "core/base/timestamp.h"
 #include "core/inf/builder.h"
 #include "core/inf/updatable.h"
-#include "core/types/optional.h"
 #include "core/types/safe_ptr.h"
 #include "core/types/safe_var.h"
 
@@ -100,7 +99,7 @@ public:
                 sp<Vec3> position = nullptr);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(LayoutParam);
 
-    virtual bool update(uint64_t timestamp) override;
+    bool update(uint64_t timestamp) override;
 
     float calcLayoutWidth(float available);
     float calcLayoutHeight(float available);

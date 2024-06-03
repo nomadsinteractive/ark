@@ -6,14 +6,11 @@
 
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
-#include "core/base/bean_factory_weak_ref.h"
 #include "core/inf/builder.h"
 #include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
-#include "graphics/base/metrics.h"
-#include "graphics/inf/renderer.h"
 #include "graphics/inf/renderable.h"
 #include "graphics/inf/render_batch.h"
 
@@ -59,7 +56,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Text> build(const Scope& args) override;
+        sp<Text> build(const Scope& args) override;
 
     private:
         sp<Builder<RenderLayer>> _render_layer;

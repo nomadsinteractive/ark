@@ -42,8 +42,8 @@ RenderLayer::RenderLayer(sp<RenderController> renderController, sp<ModelLoader> 
 {
 }
 
-RenderLayer::RenderLayer(const sp<RenderLayer::Stub>& stub)
-    : _stub(stub), _render_batch(sp<RenderBatchImpl>::make()), _render_batches{_render_batch}
+RenderLayer::RenderLayer(sp<RenderLayer::Stub> stub)
+    : _stub(std::move(stub)), _render_batch(sp<RenderBatchImpl>::make()), _render_batches{_render_batch}
 {
 }
 
@@ -61,7 +61,7 @@ RenderLayerSnapshot RenderLayer::snapshot(RenderRequest& renderRequest)
     {
         const sp<RenderBatch>& i = *iter;
         std::vector<sp<LayerContext>>& layerContexts = i->snapshot(renderRequest);
-        if(i->disposed() ? i->disposed()->val() : i.unique())
+        if(i->discarded() ? i->discarded()->val() : i.unique())
         {
             renderLayerSnapshot.addDisposedLayerContexts(layerContexts);
             iter = _render_batches.erase(iter);

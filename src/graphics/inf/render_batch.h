@@ -10,15 +10,15 @@ namespace ark {
 
 class ARK_API RenderBatch {
 public:
-    RenderBatch(sp<Boolean> disposed = nullptr);
+    RenderBatch(sp<Boolean> discarded = nullptr);
     virtual ~RenderBatch() = default;
 
-    const sp<Boolean>& disposed() const;
+    const sp<Boolean>& discarded() const;
 
     virtual std::vector<sp<LayerContext>>& snapshot(const RenderRequest& renderRequest) = 0;
 
 protected:
-    sp<Boolean> _disposed;
+    sp<Boolean> _discarded;
 };
 
 }

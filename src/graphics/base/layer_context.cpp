@@ -1,9 +1,8 @@
 #include "graphics/base/layer_context.h"
 
-#include "core/ark.h"
+#include "core/base/constants.h"
 #include "core/base/notifier.h"
-#include "core/traits/expendable.h"
-#include "core/util/holder_util.h"
+#include "core/types/global.h"
 #include "core/util/log.h"
 #include "core/util/updatable_util.h"
 
@@ -11,7 +10,6 @@
 #include "graphics/base/render_object.h"
 #include "graphics/impl/renderable/renderable_with_disposable.h"
 #include "graphics/impl/renderable/renderable_with_updatable.h"
-#include "graphics/impl/render_batch/render_batch_impl.h"
 
 #include "renderer/base/model.h"
 #include "renderer/base/pipeline_input.h"
@@ -29,8 +27,8 @@ static sp<Renderable> makeRenderable(sp<Renderable> renderable, sp<Updatable> up
     return renderable;
 }
 
-LayerContext::LayerContext(sp<ModelLoader> models, sp<Vec3> position, sp<Boolean> visible, sp<Boolean> disposed, sp<Varyings> varyings)
-    : _model_loader(std::move(models)), _position(position), _visible(std::move(visible), true), _discarded(disposed ? std::move(disposed) : nullptr, false),
+LayerContext::LayerContext(sp<ModelLoader> modelLoader, sp<Vec3> position, sp<Boolean> visible, sp<Boolean> discarded, sp<Varyings> varyings)
+    : _model_loader(std::move(modelLoader)), _position(std::move(position)), _visible(std::move(visible), true), _discarded(discarded ? std::move(discarded) : nullptr, false),
       _varyings(std::move(varyings)), _layer_type(Layer::TYPE_DYNAMIC), _reload_requested(false)
 {
 }
@@ -61,7 +59,7 @@ const SafeVar<Boolean>& LayerContext::visible() const
     return _visible;
 }
 
-const SafeVar<Boolean>& LayerContext::disposed() const
+const SafeVar<Boolean>& LayerContext::discarded() const
 {
     return _discarded;
 }
@@ -95,7 +93,7 @@ void LayerContext::clear()
 
 void LayerContext::dispose()
 {
-    _discarded = SafeVar<Boolean>(nullptr, true);
+    _discarded.reset(Global<Constants>()->BOOLEAN_TRUE);
 }
 
 const sp<Varyings>& LayerContext::varyings() const

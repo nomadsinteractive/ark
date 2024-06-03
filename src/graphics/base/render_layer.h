@@ -1,9 +1,7 @@
 #pragma once
 
-#include <set>
 #include <deque>
 #include <vector>
-#include <unordered_map>
 
 #include "core/collection/list.h"
 #include "core/types/shared_ptr.h"
@@ -11,7 +9,6 @@
 
 #include "graphics/forwarding.h"
 #include "graphics/base/layer.h"
-#include "graphics/base/rect.h"
 #include "graphics/impl/render_batch/render_batch_impl.h"
 #include "graphics/inf/renderable.h"
 #include "graphics/inf/renderer.h"
@@ -47,7 +44,7 @@ private:
 public:
     RenderLayer(sp<RenderController> renderController, sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Boolean> visible, sp<Boolean> disposed, sp<Varyings> varyings, sp<Vec4> scissor);
 
-    virtual void render(RenderRequest& renderRequest, const V3& position) override;
+    void render(RenderRequest& renderRequest, const V3& position) override;
 
     RenderLayerSnapshot snapshot(RenderRequest& renderRequest);
 
@@ -96,7 +93,7 @@ public:
     };
 
 private:
-    RenderLayer(const sp<Stub>& stub);
+    RenderLayer(sp<Stub> stub);
 
 private:
     sp<Stub> _stub;

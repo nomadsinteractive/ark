@@ -48,7 +48,7 @@ void RenderLayerSnapshot::snapshot(RenderRequest& renderRequest, std::vector<sp<
     for(auto iter = layerContexts.begin(); iter != layerContexts.end(); )
     {
         const sp<LayerContext>& layerContext = *iter;
-        const SafeVar<Boolean>& disposed = layerContext->disposed();
+        const SafeVar<Boolean>& disposed = layerContext->discarded();
         if((!disposed && layerContext.unique()) || disposed.val())
         {
             addDisposedLayerContext(layerContext);

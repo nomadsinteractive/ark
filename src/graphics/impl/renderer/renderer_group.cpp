@@ -48,10 +48,11 @@ void RendererGroup::BUILDER::loadGroup(RendererGroup& rendererGroup, const Scope
     {
         if(i->name() == constants::RENDER_LAYER)
             rendererGroup.addRenderer(_factory.ensureDecorated<Renderer, RenderLayer>(i, args));
-        else if(i->name() == constants::LAYER)
-            rendererGroup.addRenderer(_factory.ensureDecorated<Renderer, Layer>(i, args));
         else
+        {
+            DASSERT(i->name() == "renderer");
             rendererGroup.addRenderer(_factory.ensure<Renderer>(i, args));
+        }
     }
 }
 

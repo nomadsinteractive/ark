@@ -30,7 +30,7 @@ public:
     sp<Entity> makeEntity(Traits components = Traits()) const;
 
 //  [[script::bindings::loader]]
-    template<typename T> const sp<T> load(const String& name, const Scope& args) {
+    template<typename T> sp<T> load(const String& name, const Scope& args) {
         DCHECK(_resource_loader, "Trying to load objects on a discarded Arena");
         const sp<T> bean = _resource_loader->load<T>(name, args);
         DCHECK(bean, "Cannot build object \"%s\"", name.c_str());

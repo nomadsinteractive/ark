@@ -1,14 +1,12 @@
 #include "graphics/base/layer.h"
 
 #include "core/base/bean_factory.h"
-#include "core/util/holder_util.h"
 
 #include "graphics/base/layer_context.h"
 #include "graphics/base/render_command_pipeline.h"
 #include "graphics/base/render_layer.h"
 #include "graphics/base/render_object.h"
 #include "graphics/base/layer_context.h"
-#include "graphics/impl/render_batch/render_batch_impl.h"
 
 #include "renderer/impl/model_loader/model_loader_cached.h"
 
@@ -16,10 +14,6 @@ namespace ark {
 
 Layer::Layer(sp<LayerContext> layerContext)
     : _layer_context(layerContext ? std::move(layerContext) : sp<LayerContext>::make())
-{
-}
-
-void Layer::render(RenderRequest& /*renderRequest*/, const V3& position)
 {
 }
 
@@ -75,16 +69,6 @@ sp<Layer> Layer::BUILDER::build(const Scope& args)
     for(const sp<Builder<RenderObject>>& i : _render_objects)
         layerContext.add(i->build(args));
     return layer;
-}
-
-Layer::BUILDER_IMPL2::BUILDER_IMPL2(BeanFactory& factory, const document& manifest)
-    : _builder_impl(factory, manifest)
-{
-}
-
-sp<Renderer> Layer::BUILDER_IMPL2::build(const Scope& args)
-{
-    return _builder_impl.build(args);
 }
 
 template<> ARK_API Layer::Type StringConvert::eval<Layer::Type>(const String& str)

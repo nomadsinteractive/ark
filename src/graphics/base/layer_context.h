@@ -10,7 +10,6 @@
 #include "graphics/forwarding.h"
 #include "graphics/base/layer.h"
 #include "graphics/base/render_layer.h"
-#include "graphics/inf/render_batch.h"
 #include "graphics/inf/renderable.h"
 
 #include "renderer/forwarding.h"
@@ -32,17 +31,19 @@ public:
     };
 
 public:
-    LayerContext(sp<ModelLoader> modelLoader = nullptr, sp<Vec3> position = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> disposed = nullptr, sp<Varyings> varyings = nullptr);
+    LayerContext(sp<ModelLoader> modelLoader = nullptr, sp<Vec3> position = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> discarded = nullptr, sp<Varyings> varyings = nullptr);
 
-    virtual bool update(uint64_t timestamp) override;
+    bool update(uint64_t timestamp) override;
 
+//  [[script::bindings::property]]
     const SafeVar<Vec3>& position() const;
+//  [[script::bindings::property]]
     void setPosition(sp<Vec3> position);
 
     SafeVar<Boolean>& visible();
     const SafeVar<Boolean>& visible() const;
 
-    const SafeVar<Boolean>& disposed() const;
+    const SafeVar<Boolean>& discarded() const;
 
 //  [[script::bindings::property]]
     const sp<ModelLoader>& modelLoader() const;

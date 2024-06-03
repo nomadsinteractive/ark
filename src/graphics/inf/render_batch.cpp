@@ -4,14 +4,14 @@
 
 namespace ark {
 
-RenderBatch::RenderBatch(sp<Boolean> disposed)
-    : _disposed(std::move(disposed))
+RenderBatch::RenderBatch(sp<Boolean> discarded)
+    : _discarded(std::move(discarded))
 {
 }
 
-const sp<Boolean>& RenderBatch::disposed() const
+const sp<Boolean>& RenderBatch::discarded() const
 {
-    return _disposed;
+    return _discarded;
 }
 
 }
