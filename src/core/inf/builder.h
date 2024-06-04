@@ -18,14 +18,14 @@ public:
     template<typename... Args> class Lazy;
 };
 
-template<typename T> class Builder<T>::Null final : public Builder<T> {
+template<typename T> class Builder<T>::Null final : public Builder {
 public:
     sp<T> build(const Scope& /*args*/) override {
         return nullptr;
     }
 };
 
-template<typename T> class Builder<T>::Prebuilt final : public Builder<T> {
+template<typename T> class Builder<T>::Prebuilt final : public Builder {
 public:
     Prebuilt(sp<T> instance)
         : _instance(std::move(instance)) {
@@ -39,7 +39,7 @@ private:
     sp<T> _instance;
 };
 
-template<typename T> template<typename U> class Builder<T>::Wrapper final : public Builder<T> {
+template<typename T> template<typename U> class Builder<T>::Wrapper final : public Builder {
 public:
     Wrapper(sp<Builder<U>> delegate)
         : _delegate(std::move(delegate)) {
@@ -53,18 +53,22 @@ private:
     sp<Builder<U>> _delegate;
 };
 
-template<typename T> template<typename... Args> class Builder<T>::Lazy final : public Builder<T> {
+template<typename T> template<typename... Args> class Builder<T>::Lazy final : public Builder {
 public:
     Lazy(Args&&... args)
         : _args(std::forward<Args>(args)...) {
     }
 
     sp<T> build(const Scope& /*args*/) override {
-        typedef sp<T> (*pfnMakeSharedPtr)(Args&&...);
-        return std::apply(static_cast<pfnMakeSharedPtr>(sp<T>::template make<T, Args...>), _args);
+        if(!_lazy_instance) {
+            typedef sp<T> (*pfnMakeSharedPtr)(Args&&...);
+            _lazy_instance = std::apply(static_cast<pfnMakeSharedPtr>(sp<T>::template make<T, Args...>), std::move(_args));
+        }
+        return _lazy_instance;
     }
 
 private:
+    sp<T> _lazy_instance;
     std::tuple<Args...> _args;
 };
 

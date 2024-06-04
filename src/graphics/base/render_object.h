@@ -21,7 +21,7 @@ public:
 //  [[script::bindings::auto]]
     RenderObject(sp<Integer> type, sp<Vec3> position = nullptr, sp<Size> size = nullptr, sp<Transform> transform = nullptr, sp<Varyings> varyings = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> discarded = nullptr);
 
-    std::vector<std::pair<TypeId, Box>> onWire(const Traits& components) override;
+    TypeId onWire(WiringContext& context) override;
 
 //  [[script::bindings::property]]
     sp<Integer> type() const;

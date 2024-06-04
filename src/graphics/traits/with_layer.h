@@ -20,7 +20,7 @@ public:
 //  [[script::bindings::property]]
     const sp<ModelLoader>& modelLoader() const;
 
-    std::vector<std::pair<TypeId, Box>> onWire(const Traits& components) override;
+    TypeId onWire(WiringContext& context) override;
 
 private:
     sp<LayerContext> _layer_context;

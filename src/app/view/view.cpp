@@ -90,16 +90,15 @@ View::~View()
     LOGD("");
 }
 
-std::vector<std::pair<TypeId, Box>> View::onWire(const Traits& components)
+TypeId View::onWire(WiringContext& context)
 {
     sp<Vec3> position = sp<LayoutPosition>::make(_stub, _is_layout_dirty, true, true);
     sp<Vec3> size = Vec3Type::create(sp<LayoutSize<0>>::make(_stub), sp<LayoutSize<1>>::make(_stub), nullptr);
-    if(const sp<Shape>& shape = components.get<Shape>())
-    {
+    if(const sp<Shape>& shape = context.getComponent<Shape>())
         shape->setSize(std::move(size));
-        return {};
-    }
-    return {{Type<Vec3>::id(), std::move(position)}, {Type<Shape>::id(), sp<Shape>::make(Shape::SHAPE_ID_AABB, std::move(size))}};
+    context.addComponentBuilder<Vec3>(sp<Builder<Vec3>::Prebuilt>::make(std::move(position)));
+    context.addComponentBuilder<Shape>(sp<Builder<Shape>::Lazy<int32_t, sp<Vec3>>>::make(Shape::SHAPE_ID_AABB, std::move(size)));
+    return TYPE_ID_NONE;
 }
 
 void View::addRenderObjectWithLayer(sp<RenderObjectWithLayer> ro, bool isBackground)

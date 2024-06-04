@@ -29,23 +29,23 @@ void RigidBody::dispose()
     _discarded.reset(true);
 }
 
-std::vector<std::pair<TypeId, Box>> RigidBody::onWire(const Traits& components)
+TypeId RigidBody::onWire(WiringContext& context)
 {
-    if(sp<Vec3> position = components.get<Vec3>())
+    if(sp<Vec3> position = context.getComponent<Vec3>())
         _position.reset(std::move(position));
 
-    if(sp<Shape> shape = components.get<Shape>())
+    if(sp<Shape> shape = context.getComponent<Shape>())
         _shape = std::move(shape);
 
-    if(sp<Boolean> expendable = components.get<Expendable>())
+    if(sp<Boolean> expendable = context.getComponent<Expendable>())
         _discarded.reset(std::move(expendable));
 
-    if(sp<CollisionCallback> collisionCallback = components.get<CollisionCallback>())
+    if(sp<CollisionCallback> collisionCallback = context.getComponent<CollisionCallback>())
         _collision_callback = std::move(collisionCallback);
     else if(_collision_callback)
-        return {{Type<CollisionCallback>::id(), _collision_callback}};
+        context.addComponentBuilder(sp<Builder<CollisionCallback>>::make<Builder<CollisionCallback>::Prebuilt>(_collision_callback));
 
-    return {};
+    return TYPE_ID_NONE;
 }
 
 uintptr_t RigidBody::id() const

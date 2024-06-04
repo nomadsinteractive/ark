@@ -5,7 +5,7 @@
 
 #include "graphics/forwarding.h"
 
-#include "layout_param.h"
+#include "app/forwarding.h"
 
 namespace ark {
 
@@ -14,7 +14,7 @@ public:
 //  [[script::bindings::auto]]
     Label(sp<Text> text, sp<LayoutParam> layoutParam);
 
-    std::vector<std::pair<TypeId, Box>> onWire(const Traits& components) override;
+    TypeId onWire(WiringContext& context) override;
 
 private:
     sp<Text> _text;

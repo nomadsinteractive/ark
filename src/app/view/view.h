@@ -23,7 +23,7 @@ public:
     View(const sp<LayoutParam>& layoutParam, sp<RenderObjectWithLayer> background = nullptr, sp<Text> text = nullptr, sp<Layout> layout = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> disposed = nullptr);
     ~View() override;
 
-    std::vector<std::pair<TypeId, Box>> onWire(const Traits& components) override;
+    TypeId onWire(WiringContext& context) override;
 
     void addRenderObjectWithLayer(sp<RenderObjectWithLayer> ro, bool isBackground);
 

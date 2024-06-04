@@ -1,10 +1,10 @@
 #pragma once
 
 #include <map>
-#include <vector>
 
 #include "core/forwarding.h"
 #include "core/collection/traits.h"
+#include "core/inf/builder.h"
 
 namespace ark {
 
@@ -17,14 +17,20 @@ public:
         }
 
         template<typename T> sp<T> getComponent() const {
-            return _components.get<T>();
+            if(sp<T> component = _components.get<T>())
+                return component;
+            if(const auto iter = _component_builders.find(Type<T>::id()); iter != _component_builders.end())
+                return iter->second.toPtr<Builder<T>>()->build(Scope());
+            return nullptr;
         }
 
         template<typename T> sp<T> addComponent(sp<T> component) {
+            _components.put(std::move(component));
         }
 
-    private:
-        ~WiringContext() = default;
+        template<typename T> void addComponentBuilder(sp<Builder<T>> componentBuilder) {
+            _component_builders.insert_or_assign(Type<T>::id(), Box(std::move(componentBuilder)));
+        }
 
     private:
         Traits& _components;
@@ -34,7 +40,7 @@ public:
 public:
     virtual ~Wirable() = default;
 
-    virtual std::vector<std::pair<TypeId, Box>> onWire(const Traits& components) = 0;
+    virtual TypeId onWire(WiringContext& context) = 0;
 
 };
 

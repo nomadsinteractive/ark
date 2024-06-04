@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/base/api.h"
+#include "core/inf/wirable.h"
 #include "core/forwarding.h"
 #include "core/collection/traits.h"
 #include "core/types/ref.h"
@@ -59,7 +60,7 @@ public:
 private:
     void doWire();
 
-    void onWireOne(const Box& component);
+    void onWireOne(Wirable::WiringContext& wiringContext, const Box& component);
 
 private:
     sp<EntityRef> _ref;

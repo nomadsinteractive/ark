@@ -24,7 +24,7 @@ public:
 //  [[script::bindings::auto]]
     virtual void dispose();
 
-    std::vector<std::pair<TypeId, Box>> onWire(const Traits& components) override;
+    TypeId onWire(WiringContext& context) override;
 
 //  [[script::bindings::property]]
     uintptr_t id() const;

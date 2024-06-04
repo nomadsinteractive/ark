@@ -20,11 +20,11 @@ const sp<ModelLoader>& WithLayer::modelLoader() const
     return _layer_context->modelLoader();
 }
 
-std::vector<std::pair<TypeId, Box>> WithLayer::onWire(const Traits& components)
+TypeId WithLayer:: onWire(WiringContext& context)
 {
-    if(sp<Renderable> renderable = components.get<Renderable>())
-        _layer_context->add(std::move(renderable), components.get<Updatable>(), components.get<Expendable>());
-    return {};
+    if(sp<Renderable> renderable = context.getComponent<Renderable>())
+        _layer_context->add(std::move(renderable), context.getComponent<Updatable>(), context.getComponent<Expendable>());
+    return TYPE_ID_NONE;
 }
 
 }

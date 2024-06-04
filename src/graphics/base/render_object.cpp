@@ -244,19 +244,19 @@ Renderable::Snapshot RenderObject::snapshot(const PipelineInput& pipelineInput, 
     return Renderable::Snapshot(state, _type->val());
 }
 
-std::vector<std::pair<TypeId, Box>> RenderObject::onWire(const Traits& components)
+TypeId RenderObject::onWire(WiringContext& context)
 {
-    if(sp<Vec3> position = components.get<Vec3>())
+    if(sp<Vec3> position = context.getComponent<Vec3>())
         _position.reset(std::move(position));
     if(!_size)
     {
-        if(sp<Size> size = components.get<Size>())
+        if(sp<Size> size = context.getComponent<Size>())
             _size.reset(std::move(size));
-        else if(const sp<WithLayer> withLayer = components.get<WithLayer>())
+        else if(const sp<WithLayer> withLayer = context.getComponent<WithLayer>())
             if(const sp<Boundaries>& metrics = withLayer->modelLoader()->loadModel(_type->val())->content())
                 _size.reset(metrics->size());
     }
-    return {{Type<Renderable>::id(), nullptr}};
+    return Type<Renderable>::id();
 }
 
 RenderObject::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

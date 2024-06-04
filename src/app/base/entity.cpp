@@ -3,6 +3,7 @@
 #include "core/inf/wirable.h"
 
 #include "app/base/entity_id.h"
+#include "core/base/constants.h"
 
 namespace ark {
 
@@ -26,8 +27,9 @@ void Entity::traverse(const Visitor& visitor)
 
 void Entity::doWire()
 {
+    Wirable::WiringContext context(_components);
     for(const auto& [k, v] : _components.traits())
-        onWireOne(v);
+        onWireOne(context, v);
 }
 
 sp<EntityId> Entity::id() const
@@ -43,7 +45,9 @@ void Entity::dispose()
 
 void Entity::addComponent(Box component)
 {
-    onWireOne(component);
+    Wirable::WiringContext context(_components);
+    onWireOne(context, component);
+
     _components.put(component.typeId(), std::move(component));
 }
 
@@ -62,11 +66,11 @@ const Traits& Entity::components() const
     return _components;
 }
 
-void Entity::onWireOne(const Box& component)
+void Entity::onWireOne(Wirable::WiringContext& wiringContext, const Box& component)
 {
     if(const sp<Wirable> wirable = component.as<Wirable>())
-        for(auto& [k, v] : wirable->onWire(_components))
-            _components.put(k, v ? std::move(v) : component);
+        if(const TypeId typeId = wirable->onWire(wiringContext); typeId != TYPE_ID_NONE)
+            _components.put(typeId, component);
 }
 
 }

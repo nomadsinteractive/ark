@@ -1,5 +1,7 @@
 #include "app/traits/label.h"
 
+#include "core/base/constants.h"
+
 namespace ark {
 
 Label::Label(sp<Text> text, sp<LayoutParam> layoutParam)
@@ -7,9 +9,9 @@ Label::Label(sp<Text> text, sp<LayoutParam> layoutParam)
 {
 }
 
-std::vector<std::pair<TypeId, Box>> Label::onWire(const Traits& components)
+TypeId Label::onWire(WiringContext& context)
 {
-    return {};
+    return TYPE_ID_NONE;
 }
 
 }
