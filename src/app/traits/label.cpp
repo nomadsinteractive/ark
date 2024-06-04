@@ -11,4 +11,5 @@ std::vector<std::pair<TypeId, Box>> Label::onWire(const Traits& components)
 {
     return {};
 }
+
 }
