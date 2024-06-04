@@ -6,7 +6,7 @@
 #include "graphics/base/size.h"
 
 #include "app/inf/layout.h"
-#include "app/view/layout_param.h"
+#include "app/traits/layout_param.h"
 
 #include "test/base/test_case.h"
 

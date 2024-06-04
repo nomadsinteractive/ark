@@ -1,4 +1,4 @@
-#include "app/impl/layout/vertical_layout.h"
+#include "app/impl/layout/horizontal_layout.h"
 
 #include "app/util/layout_util.h"
 #include "app/view/view.h"
@@ -6,47 +6,47 @@
 
 namespace ark {
 
-VerticalLayout::VerticalLayout(LayoutParam::Align alignItems)
+HorizontalLayout::HorizontalLayout(LayoutParam::Align alignItems)
     : _align_items(alignItems)
 {
 }
 
-bool VerticalLayout::update(uint64_t timestamp)
+bool HorizontalLayout::update(uint64_t timestamp)
 {
     DCHECK(_root_node->_view_hierarchy, "");
 
     const Node& rootNode = *_root_node;
     const std::vector<sp<ViewHierarchy::Slot>>& childNodes = rootNode._view_hierarchy->updateSlotsAndLayoutNodes();
 
-    float totalHeight = 0;
+    float totalWidth = 0;
     for(const ViewHierarchy::Slot& i : childNodes)
-        totalHeight += i.layoutNode()->occupyHeight();
+        totalWidth += i.layoutNode()->occupyWidth();
 
     const V2 layoutOffsetPos = rootNode.offsetPosition();
     LayoutParam::JustifyContent justifyContent = rootNode._layout_param->justifyContent();
-    const auto [start, space] = LayoutUtil::calcFlowDirection(justifyContent, rootNode.contentHeight(), totalHeight, childNodes.size());
-    float y = start;
+    const auto [start, space] = LayoutUtil::calcFlowDirection(justifyContent, rootNode.contentWidth(), totalWidth, childNodes.size());
+    float x = start;
     for(const ViewHierarchy::Slot& i : childNodes)
     {
         Node& layoutNode = i.layoutNode();
-        float x = LayoutUtil::calcItemOffsetX(_align_items, rootNode, layoutNode);
+        float y = LayoutUtil::calcItemOffsetY(_align_items, rootNode, layoutNode);
         layoutNode.setOffsetPosition(layoutOffsetPos + V2(x, y));
-        y += (layoutNode.occupyHeight() + space);
+        x += (layoutNode.occupyWidth() + space);
     }
     return true;
 }
 
-void VerticalLayout::inflate(sp<Node> rootNode)
+void HorizontalLayout::inflate(sp<Node> rootNode)
 {
     _root_node = std::move(rootNode);
 }
 
-sp<Layout> VerticalLayout::BUILDER::build(const Scope& /*args*/)
+sp<Layout> HorizontalLayout::BUILDER::build(const Scope& /*args*/)
 {
-    return sp<VerticalLayout>::make(_align_items);
+    return sp<HorizontalLayout>::make(_align_items);
 }
 
-VerticalLayout::BUILDER::BUILDER(const String& alignItems)
+HorizontalLayout::BUILDER::BUILDER(const String& alignItems)
     : _align_items(Strings::eval<LayoutParam::Align>(alignItems))
 {
 }

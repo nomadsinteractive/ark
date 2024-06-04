@@ -30,7 +30,7 @@
 
 #include "app/base/application_context.h"
 #include "core/base/resource_loader.h"
-#include "app/view/layout_param.h"
+#include "app/traits/layout_param.h"
 
 
 namespace ark {
@@ -215,7 +215,7 @@ void Text::Content::createLayerContent(float width, float height)
 float Text::Content::doLayoutWithBoundary(GlyphContents& cm, float& flowx, float& flowy, float boundary)
 {
     const std::vector<LayoutChar> layoutChars = toLayoutCharacters(cm);
-    float fontHeight = layoutChars.size() > 0 ? layoutChars.at(0)._model->occupies()->size()->val().y() * _text_scale : 0;
+    float fontHeight = layoutChars.size() > 0 ? layoutChars.at(0)._model->occupy()->size()->val().y() * _text_scale : 0;
     size_t begin = 0;
     for(size_t i = 0; i < layoutChars.size(); ++i)
     {
@@ -274,8 +274,8 @@ void Text::Content::place(GlyphContents& cm, const std::vector<Text::LayoutChar>
 void Text::Content::placeOne(Glyph& glyph, const Model& model, float& flowx, float flowy, float* fontHeight)
 {
     const V2 scale = V2(_text_scale, _text_scale);
-    const Boundaries& bounds = model.boundaries();
-    const Boundaries& occupies = model.occupies();
+    const Boundaries& bounds = model.content();
+    const Boundaries& occupies = model.occupy();
     const V2 bitmapCoverSize = scale * bounds.size()->val();
     const V2 bitmapOccupySize = scale * occupies.size()->val();
     const V2 bitmapPos = -scale * occupies.aabbMin()->val();
@@ -314,7 +314,7 @@ std::vector<Text::LayoutChar> Text::Content::toLayoutCharacters(const GlyphConte
         if(const auto iter = mmap.find(c); iter != mmap.end())
         {
             const auto& [model, iscjk, iswordbreak] = iter->second;
-            const V3& occupy = model->occupies()->size()->val();
+            const V3& occupy = model->occupy()->size()->val();
             integral += xScale * occupy.x();
             layoutChars.emplace_back(model, integral, iscjk, iswordbreak, isLineBreak);
         }
@@ -322,7 +322,7 @@ std::vector<Text::LayoutChar> Text::Content::toLayoutCharacters(const GlyphConte
         {
             int32_t type = static_cast<int32_t>(c);
             sp<Model> model = modelLoader.loadModel(type);
-            const Boundaries& m = model->occupies();
+            const Boundaries& m = model->occupy();
             bool iscjk = isCJK(c);
             bool iswordbreak = isWordBreaker(c);
             integral += xScale * m.size()->val().x();

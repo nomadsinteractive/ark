@@ -1,70 +1,70 @@
 #include "app/inf/layout.h"
 
-#include "app/view/layout_param.h"
+#include "../traits/layout_param.h"
 
 namespace ark {
 
-LayoutV3::Node::Node(sp<LayoutParam> layoutParam, sp<ViewHierarchy> viewHierarchy, void* tag)
+Layout::Node::Node(sp<LayoutParam> layoutParam, sp<ViewHierarchy> viewHierarchy, void* tag)
     : _layout_param(std::move(layoutParam)), _view_hierarchy(std::move(viewHierarchy)), _tag(tag)
 {
 }
 
-float LayoutV3::Node::contentWidth() const
+float Layout::Node::contentWidth() const
 {
     return _size->x() + _paddings.y() + _paddings.w();
 }
 
-float LayoutV3::Node::contentHeight() const
+float Layout::Node::contentHeight() const
 {
     return _size->y() + _paddings.x() + _paddings.z();
 }
 
-float LayoutV3::Node::occupyWidth() const
+float Layout::Node::occupyWidth() const
 {
     return contentWidth() + _margins.y() + _margins.w();
 }
 
-float LayoutV3::Node::occupyHeight() const
+float Layout::Node::occupyHeight() const
 {
     return contentHeight() + _margins.x() + _margins.z();
 }
 
-const V4& LayoutV3::Node::paddings() const
+const V4& Layout::Node::paddings() const
 {
     return _paddings;
 }
 
-void LayoutV3::Node::setPaddings(const V4& paddings)
+void Layout::Node::setPaddings(const V4& paddings)
 {
     _paddings = paddings;
 }
 
-const V4& LayoutV3::Node::margins() const
+const V4& Layout::Node::margins() const
 {
     return _margins;
 }
 
-void LayoutV3::Node::setMargins(const V4& margins)
+void Layout::Node::setMargins(const V4& margins)
 {
     _margins = margins;
 }
 
-const WithTimestamp<V2>& LayoutV3::Node::offsetPosition() const
+const WithTimestamp<V2>& Layout::Node::offsetPosition() const
 {
     return _offset_position;
 }
 
-void LayoutV3::Node::setOffsetPosition(const V2& offsetPosition)
+void Layout::Node::setOffsetPosition(const V2& offsetPosition)
 {
     _offset_position.reset(offsetPosition);
 }
 
-const WithTimestamp<V2>& LayoutV3::Node::size() const
+const WithTimestamp<V2>& Layout::Node::size() const
 {
     return _size;
 }
 
-void LayoutV3::Node::setSize(const V2& size)
+void Layout::Node::setSize(const V2& size)
 {
     _size.reset(size);
 }

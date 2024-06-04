@@ -19,17 +19,12 @@ RenderObjectWithLayer::RenderObjectWithLayer(sp<LayerContext> layerContext, sp<R
 {
     DASSERT(_layer_context);
     if(!_render_object->_size)
-        if(const sp<Boundaries>& boundaries = _layer_context->modelLoader()->loadModel(_render_object->type()->val())->boundaries())
+        if(const sp<Boundaries>& boundaries = _layer_context->modelLoader()->loadModel(_render_object->type()->val())->content())
             _render_object->setSize(boundaries->size());
 }
 
 RenderObjectWithLayer::~RenderObjectWithLayer()
 {
-}
-
-const sp<Size>& RenderObjectWithLayer::size()
-{
-    return _render_object->_size.ensure();
 }
 
 const sp<LayerContext>& RenderObjectWithLayer::layerContext() const

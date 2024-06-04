@@ -1,22 +1,18 @@
 #pragma once
 
-#include "core/inf/builder.h"
-
-#include "graphics/forwarding.h"
-
 #include "app/inf/layout.h"
 #include "app/traits/layout_param.h"
 
 namespace ark {
 
-class VerticalLayout : public Layout {
+class HorizontalLayout : public Layout {
 public:
-    VerticalLayout(LayoutParam::Align alignItems);
+    HorizontalLayout(LayoutParam::Align alignItems);
 
     bool update(uint64_t timestamp) override;
     void inflate(sp<Node> rootNode) override;
 
-//  [[plugin::builder::by-value("vertical")]]
+//  [[plugin::builder::by-value("horizontal")]]
     class BUILDER : public Builder<Layout> {
     public:
         BUILDER(const String& flexDirection);

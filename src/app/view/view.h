@@ -20,7 +20,7 @@ namespace ark {
 
 class ARK_API View final : public Wirable {
 public:
-    View(const sp<LayoutParam>& layoutParam, sp<RenderObjectWithLayer> background = nullptr, sp<Text> text = nullptr, sp<Layout> layout = nullptr, sp<LayoutV3> layoutV3 = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> disposed = nullptr);
+    View(const sp<LayoutParam>& layoutParam, sp<RenderObjectWithLayer> background = nullptr, sp<Text> text = nullptr, sp<Layout> layout = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> disposed = nullptr);
     ~View() override;
 
     std::vector<std::pair<TypeId, Box>> onWire(const Traits& components) override;
@@ -30,17 +30,17 @@ public:
     bool updateLayout(uint64_t timestamp) const;
     void updateTextLayout(uint64_t timestamp);
 
-    const sp<LayoutV3::Node>& layoutNode() const;
+    const sp<Layout::Node>& layoutNode() const;
 
 //  [[script::bindings::property]]
-    const sp<Boolean>& visible() const;
+    const SafeVar<Boolean>& visible() const;
 //  [[script::bindings::property]]
     void setVisbile(sp<Boolean> visible);
 
 //  [[script::bindings::property]]
-    sp<Boolean> disposed() const;
+    const SafeVar<Boolean>& discarded() const;
 //  [[script::bindings::property]]
-    void setDisposed(sp<Boolean> disposed);
+    void setDiscarded(sp<Boolean> discarded);
 
 //  [[script::bindings::property]]
     const sp<LayoutParam>& layoutParam() const;
@@ -48,7 +48,7 @@ public:
     void setLayoutParam(sp<LayoutParam> layoutParam);
 
 //  [[script::bindings::auto]]
-    void addView(sp<View> view, sp<Boolean> disposable = nullptr);
+    void addView(sp<View> view, sp<Boolean> discarded = nullptr);
 
     void setParent(const View& view);
 
@@ -63,10 +63,9 @@ public:
         BeanFactory _factory;
         document _manifest;
 
-        SafePtr<Builder<Boolean>> _disposed;
+        SafePtr<Builder<Boolean>> _discarded;
         SafePtr<Builder<Boolean>> _visible;
         SafePtr<Builder<Layout>> _layout;
-        SafePtr<Builder<LayoutV3>> _layout_v3;
         SafePtr<Builder<RenderObjectWithLayer>> _background;
         SafePtr<Builder<Text>> _text;
         sp<Builder<LayoutParam>> _layout_param;
@@ -76,7 +75,7 @@ public:
         Stub();
         Stub(sp<LayoutParam> layoutParam, sp<ViewHierarchy> viewHierarchy, sp<Boolean> visible, sp<Boolean> discarded);
 
-        virtual bool update(uint64_t timestamp) override;
+        bool update(uint64_t timestamp) override;
 
         void updateLayout(uint64_t timestamp);
 
@@ -86,13 +85,13 @@ public:
         bool isDisposed() const;
 
         V3 getTopViewOffsetPosition(bool includePaddings) const;
-        sp<LayoutV3::Node> getTopViewLayoutNode() const;
+        sp<Layout::Node> getTopViewLayoutNode() const;
 
         const sp<ViewHierarchy>& viewHierarchy() const;
         ViewHierarchy& ensureViewHierarchy();
 
         sp<LayoutParam> _layout_param;
-        sp<LayoutV3::Node> _layout_node;
+        sp<Layout::Node> _layout_node;
 
         SafeVar<Boolean> _visible;
         SafeVar<Boolean> _discarded;

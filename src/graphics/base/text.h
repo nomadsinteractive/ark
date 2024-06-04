@@ -148,7 +148,7 @@ private:
     public:
         RenderBatchContent(sp<Content> content, sp<Boolean> disposed);
 
-        virtual std::vector<sp<LayerContext>>& snapshot(const RenderRequest& renderRequest) override;
+        std::vector<sp<LayerContext>>& snapshot(const RenderRequest& renderRequest) override;
 
     private:
         sp<Content> _content;

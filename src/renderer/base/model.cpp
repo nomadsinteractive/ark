@@ -48,14 +48,14 @@ struct NodeLayout {
 
 }
 
-Model::Model(sp<Uploader> indices, sp<Vertices> vertices, sp<Boundaries> cover, sp<Boundaries> occupy)
-    : _indices(std::move(indices)), _vertices(std::move(vertices)), _cover(std::move(cover)), _occupy(occupy ? std::move(occupy) : sp<Boundaries>(_cover))
+Model::Model(sp<Uploader> indices, sp<Vertices> vertices, sp<Boundaries> content, sp<Boundaries> occupy)
+    : _indices(std::move(indices)), _vertices(std::move(vertices)), _content(std::move(content)), _occupy(occupy ? std::move(occupy) : sp<Boundaries>(_content))
 {
 }
 
 Model::Model(std::vector<sp<Material>> materials, std::vector<sp<Mesh>> meshes, sp<Node> rootNode, sp<Boundaries> bounds, sp<Boundaries> occupies)
     : _indices(sp<InputMeshIndices>::make(meshes)), _vertices(sp<MeshVertices>::make(meshes)), _root_node(std::move(rootNode)), _materials(std::move(materials)), _meshes(std::move(meshes)),
-      _cover(bounds ? std::move(bounds) : sp<Boundaries>::make(calcBoundingAABB())), _occupy(occupies ? std::move(occupies) : sp<Boundaries>(_cover))
+      _content(bounds ? std::move(bounds) : sp<Boundaries>::make(calcBoundingAABB())), _occupy(occupies ? std::move(occupies) : sp<Boundaries>(_content))
 {
 }
 
@@ -95,12 +95,12 @@ const sp<Node>& Model::rootNode() const
     return _root_node;
 }
 
-const sp<Boundaries>& Model::boundaries() const
+const sp<Boundaries>& Model::content() const
 {
-    return _cover;
+    return _content;
 }
 
-const sp<Boundaries>& Model::occupies() const
+const sp<Boundaries>& Model::occupy() const
 {
     return _occupy;
 }
@@ -143,7 +143,7 @@ const sp<Animation>& Model::getAnimation(const String& name) const
 
 void Model::writeToStream(VertexWriter& buf, const V3& size) const
 {
-    _vertices->write(buf, size == V3(0) && _cover ? _cover->size()->val() : size);
+    _vertices->write(buf, size == V3(0) && _content ? _content->size()->val() : size);
 }
 
 void Model::writeRenderable(VertexWriter& writer, const Renderable::Snapshot& renderable) const

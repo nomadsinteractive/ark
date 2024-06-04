@@ -10,7 +10,7 @@
 #include "graphics/base/color.h"
 
 #include "app/view/view.h"
-#include "app/view/layout_param.h"
+#include "src/app/traits/layout_param.h"
 
 #include "test/base/test_case.h"
 

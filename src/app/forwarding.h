@@ -27,7 +27,6 @@ class Graph;
 class GraphNode;
 class GraphRoute;
 class Layout;
-class LayoutV3;
 class LayoutParam;
 class ViewHierarchy;
 class Level;

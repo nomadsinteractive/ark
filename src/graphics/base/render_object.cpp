@@ -253,7 +253,7 @@ std::vector<std::pair<TypeId, Box>> RenderObject::onWire(const Traits& component
         if(sp<Size> size = components.get<Size>())
             _size.reset(std::move(size));
         else if(const sp<WithLayer> withLayer = components.get<WithLayer>())
-            if(const sp<Boundaries>& metrics = withLayer->modelLoader()->loadModel(_type->val())->boundaries())
+            if(const sp<Boundaries>& metrics = withLayer->modelLoader()->loadModel(_type->val())->content())
                 _size.reset(metrics->size());
     }
     return {{Type<Renderable>::id(), nullptr}};

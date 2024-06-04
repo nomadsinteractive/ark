@@ -18,7 +18,7 @@ namespace ark {
 class ARK_API Model {
 public:
     Model() = default;
-    Model(sp<Uploader> indices, sp<Vertices> vertices, sp<Boundaries> cover, sp<Boundaries> occupy = nullptr);
+    Model(sp<Uploader> indices, sp<Vertices> vertices, sp<Boundaries> content, sp<Boundaries> occupy = nullptr);
     Model(std::vector<sp<Material>> materials, std::vector<sp<Mesh>> meshes, sp<Node> rootNode, sp<Boundaries> bounds = nullptr, sp<Boundaries> occupies = nullptr);
     DEFAULT_COPY_AND_ASSIGN(Model);
 
@@ -37,9 +37,9 @@ public:
     const sp<Node>& rootNode() const;
 
 //  [[script::bindings::property]]
-    const sp<Boundaries>& boundaries() const;
+    const sp<Boundaries>& content() const;
 //  [[script::bindings::property]]
-    const sp<Boundaries>& occupies() const;
+    const sp<Boundaries>& occupy() const;
 
 //  [[script::bindings::property]]
     size_t indexCount() const;
@@ -122,7 +122,7 @@ private:
     Table<String, sp<Animation>> _animations;
     std::vector<String> _node_names;
 
-    sp<Boundaries> _cover;
+    sp<Boundaries> _content;
     sp<Boundaries> _occupy;
 };
 

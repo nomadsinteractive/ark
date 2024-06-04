@@ -165,7 +165,7 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
             if(reload || snapshot._state.hasState(Renderable::RENDERABLE_STATE_DIRTY))
             {
                 const ModelBundle::ModelLayout& modelInfo = _model_bundle->ensureModelLayout(snapshot._type);
-                const Boundaries& metrics = modelInfo._model->boundaries();
+                const Boundaries& metrics = modelInfo._model->content();
                 VertexWriter writer = buf.makeDividedVertexWriter(renderRequest, 1, offset, 1);
                 writer.next();
                 writer.write(MatrixUtil::translate(M4::identity(), snapshot._position) * MatrixUtil::scale(snapshot._transform.toMatrix(), toScale(snapshot._size, metrics)) * j.globalTransform());

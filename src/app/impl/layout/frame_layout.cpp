@@ -1,6 +1,6 @@
 #include "app/impl/layout/frame_layout.h"
 
-#include "app/view/layout_param.h"
+#include "app/traits/layout_param.h"
 #include "app/util/layout_util.h"
 
 namespace ark {
@@ -14,9 +14,9 @@ void FrameLayout::inflate(sp<Node> rootNode)
 {
 }
 
-sp<LayoutV3> FrameLayout::BUILDER::build(const Scope& /*args*/)
+sp<Layout> FrameLayout::BUILDER::build(const Scope& /*args*/)
 {
-    return sp<LayoutV3>::make<FrameLayout>();
+    return sp<Layout>::make<FrameLayout>();
 }
 
 }

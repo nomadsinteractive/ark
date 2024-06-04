@@ -13,7 +13,7 @@
 
 #include "app/base/event.h"
 #include "app/inf/layout.h"
-#include "app/view/layout_param.h"
+#include "../traits/layout_param.h"
 #include "app/view/view.h"
 
 namespace ark {
@@ -24,17 +24,12 @@ ViewHierarchy::Slot::Slot(sp<View> view)
     DASSERT(_view);
 }
 
-void ViewHierarchy::Slot::traverse(const Holder::Visitor& visitor)
-{
-    HolderUtil::visit(_view, visitor);
-}
-
 void ViewHierarchy::Slot::updateLayoutPosition(const V2& position)
 {
     const LayoutParam& layoutParam = _view->layoutParam();
     if(layoutParam.display() == LayoutParam::DISPLAY_BLOCK)
     {
-        LayoutV3::Node& layoutNode = _view->layoutNode();
+        Layout::Node& layoutNode = _view->layoutNode();
         const V4 margins = layoutParam.margins().val();
         layoutNode.setPaddings(layoutParam.paddings().val());
         layoutNode.setOffsetPosition(V2(position.x() + margins.w(), position.y() + margins.x()));
@@ -43,12 +38,12 @@ void ViewHierarchy::Slot::updateLayoutPosition(const V2& position)
 
 bool ViewHierarchy::Slot::isDiscarded() const
 {
-    return _view->disposed()->val();
+    return _view->discarded().val();
 }
 
 bool ViewHierarchy::Slot::isVisible() const
 {
-    return _view->visible()->val();
+    return _view->visible().val();
 }
 
 const sp<LayoutParam>& ViewHierarchy::Slot::layoutParam() const
@@ -56,28 +51,19 @@ const sp<LayoutParam>& ViewHierarchy::Slot::layoutParam() const
     return _view->layoutParam();
 }
 
-const sp<LayoutV3::Node>& ViewHierarchy::Slot::layoutNode() const
+const sp<Layout::Node>& ViewHierarchy::Slot::layoutNode() const
 {
     return _view->layoutNode();
 }
 
-ViewHierarchy::ViewHierarchy(sp<Layout> layout, sp<LayoutV3> layoutV3)
-    : _layout(std::move(layout)), _layout_v3(std::move(layoutV3))
+ViewHierarchy::ViewHierarchy(sp<Layout> layout)
+    : _layout(std::move(layout))
 {
-}
-
-void ViewHierarchy::traverse(const Holder::Visitor& visitor)
-{
-    for(const sp<Slot>& i : _slots)
-        i->traverse(visitor);
-    for(const sp<Slot>& i : _incremental)
-        i->traverse(visitor);
 }
 
 bool ViewHierarchy::isIsolatedLayout() const
 {
-//TODO: return its value when LayoutV3 is ready
-    return false;
+    return static_cast<bool>(_layout);
 }
 
 bool ViewHierarchy::updateDescendantLayout(uint64_t timestamp)
@@ -124,32 +110,20 @@ std::pair<std::vector<sp<ViewHierarchy::Slot>>, std::vector<sp<LayoutParam>>> Vi
     return items;
 }
 
-bool ViewHierarchy::updateLayout(const LayoutParam& layoutParam, const sp<LayoutV3::Node>& layoutNode, uint64_t timestamp, bool isDirty)
+bool ViewHierarchy::updateLayout(const sp<Layout::Node>& layoutNode, uint64_t timestamp, bool isDirty)
 {
     bool inflateNeeded = isInflateNeeded();
     if(inflateNeeded || isDirty)
     {
         if(_layout)
         {
-            const auto [slots, layoutParamSlots] = getLayoutItems();
-            const V2 contentSize = _layout->inflate(layoutParamSlots);
-
-            layoutNode->setSize(V2(layoutParam.contentWidth(), layoutParam.contentHeight()));
-            const std::vector<V2> positions = _layout->place(layoutParamSlots, layoutParam, contentSize);
-            DASSERT(positions.size() == slots.size());
-
-            for(size_t i = 0; i < positions.size(); ++i)
-                slots.at(i)->updateLayoutPosition(positions.at(i));
-        }
-        else if(_layout_v3)
-        {
             if(inflateNeeded)
             {
-                _layout_v3->inflate(layoutNode);
+                _layout->inflate(layoutNode);
                 timestamp = 0;
             }
 
-            _layout_v3->update(timestamp);
+            _layout->update(timestamp);
         }
         isDirty = true;
     }
@@ -162,6 +136,17 @@ const std::vector<sp<ViewHierarchy::Slot>>& ViewHierarchy::updateSlots()
     for(sp<Slot>& i : _incremental)
         _slots.push_back(std::move(i));
     _incremental.clear();
+    return _slots;
+}
+
+const std::vector<sp<ViewHierarchy::Slot>>& ViewHierarchy::updateSlotsAndLayoutNodes()
+{
+    for(const Slot& i : updateSlots())
+    {
+        const sp<Layout::Node>& layoutNode = i.layoutNode();
+        layoutNode->setPaddings(i.layoutParam()->paddings().val());
+        layoutNode->setMargins(i.layoutParam()->margins().val());
+    }
     return _slots;
 }
 

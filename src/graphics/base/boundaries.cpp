@@ -16,8 +16,13 @@ Boundaries::Boundaries(sp<Vec3> aabbMin, sp<Vec3> aabbMax)
 {
 }
 
+Boundaries::Boundaries(sp<Vec3> aabbMin, sp<Vec3> aabbMax, sp<Vec3> size)
+    : _aabb_min(std::move(aabbMin)), _aabb_max(std::move(aabbMax)), _size(std::move(size))
+{
+}
+
 Boundaries::Boundaries(const V3& aabbMin, const V3& aabbMax)
-    : Boundaries(sp<Vec3::Const>::make(aabbMin), sp<Vec3::Const>::make(aabbMax))
+    : Boundaries(sp<Vec3::Const>::make(aabbMin), sp<Vec3::Const>::make(aabbMax), sp<Vec3::Const>::make(aabbMax - aabbMin))
 {
 }
 

@@ -8,18 +8,18 @@
 
 namespace ark {
 
-class FrameLayout : public LayoutV3 {
+class FrameLayout : public Layout {
 public:
 
     virtual bool update(uint64_t timestamp) override;
     virtual void inflate(sp<Node> rootNode) override;
 
 //  [[plugin::builder::by-value("frame")]]
-    class BUILDER : public Builder<LayoutV3> {
+    class BUILDER : public Builder<Layout> {
     public:
         BUILDER() = default;
 
-        virtual sp<LayoutV3> build(const Scope& args) override;
+        virtual sp<Layout> build(const Scope& args) override;
     };
 
 private:

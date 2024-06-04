@@ -17,8 +17,6 @@ public:
     RenderObjectWithLayer(sp<LayerContext> layerContext, sp<RenderObject> renderObject);
     ~RenderObjectWithLayer();
 
-    const sp<Size>& size();
-
     const sp<LayerContext>& layerContext() const;
     const sp<RenderObject>& renderObject() const;
 

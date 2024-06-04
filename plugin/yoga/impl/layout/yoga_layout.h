@@ -11,7 +11,7 @@
 
 namespace ark::plugin::yoga {
 
-class YogaLayout : public LayoutV3 {
+class YogaLayout : public Layout {
 public:
     YogaLayout();
     virtual ~YogaLayout() override;
@@ -20,11 +20,11 @@ public:
     virtual bool update(uint64_t timestamp) override;
 
 //  [[plugin::builder::by-value("yoga")]]
-    class BUILDER : public Builder<LayoutV3> {
+    class BUILDER : public Builder<Layout> {
     public:
         BUILDER(BeanFactory& factory);
 
-        virtual sp<LayoutV3> build(const Scope& args) override;
+        virtual sp<Layout> build(const Scope& args) override;
     };
 
 private:
@@ -41,10 +41,10 @@ private:
 
 private:
     static void applyLayoutParam(const LayoutParam& layoutParam, YGNodeRef node, uint64_t timestamp);
-    static void updateLayoutResult(LayoutV3::Node& layoutNode);
+    static void updateLayoutResult(Layout::Node& layoutNode);
 
-    static YGNodeRef doInflate(const YogaConfig& config, LayoutV3::Node& layoutNode, YGNodeRef parentNode);
-    static void doUpdate(LayoutV3::Node& layoutNode, uint64_t timestamp);
+    static YGNodeRef doInflate(const YogaConfig& config, Layout::Node& layoutNode, YGNodeRef parentNode);
+    static void doUpdate(Layout::Node& layoutNode, uint64_t timestamp);
 
 private:
     YGNodeRef _yg_node;

@@ -1,4 +1,4 @@
-#include "app/view/layout_param.h"
+#include "app/traits/layout_param.h"
 
 #include "core/inf/variable.h"
 #include "core/util/bean_utils.h"
@@ -20,7 +20,7 @@ template<> ARK_API LayoutParam::Display StringConvert::eval<LayoutParam::Display
 }
 
 LayoutParam::LayoutParam(const sp<Size>& size, Display display, Gravity gravity, float grow)
-    : _width(LayoutParam::LENGTH_TYPE_PIXEL, size->width()), _height(LayoutParam::LENGTH_TYPE_PIXEL, size->height()), _display(display), _gravity(gravity), _flex_grow(grow)
+    : _width(LENGTH_TYPE_PIXEL, size->width()), _height(LENGTH_TYPE_PIXEL, size->height()), _display(display), _gravity(gravity), _flex_grow(grow)
 {
 }
 

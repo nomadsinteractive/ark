@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include "core/base/api.h"
 #include "core/base/with_timestamp.h"
 #include "core/inf/updatable.h"
@@ -14,16 +12,7 @@
 
 namespace ark {
 
-class ARK_API Layout {
-public:
-    virtual ~Layout() = default;
-
-    virtual V2 inflate(const std::vector<sp<LayoutParam>>& slots) = 0;
-    virtual std::vector<V2> place(const std::vector<sp<LayoutParam>>& slots, const LayoutParam& parent, const V2& contentSize) = 0;
-
-};
-
-class ARK_API LayoutV3 : public Updatable {
+class ARK_API Layout : public Updatable {
 public:
     class ARK_API Node {
     public:
@@ -59,7 +48,7 @@ public:
     };
 
 public:
-    virtual ~LayoutV3() = default;
+    ~Layout() override = default;
 
     virtual void inflate(sp<Node> rootNode) = 0;
 };

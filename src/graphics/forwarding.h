@@ -48,6 +48,7 @@ class Tile;
 class Tilemap;
 class TilemapLayer;
 class Tileset;
+class Text;
 class Vec2Impl;
 class Vec3Impl;
 class Vec4Impl;

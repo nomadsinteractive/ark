@@ -6,7 +6,7 @@
 
 #include "graphics/base/v2.h"
 
-#include "app/view/layout_param.h"
+#include "app/traits/layout_param.h"
 #include "app/view/view_hierarchy.h"
 
 namespace ark::plugin::yoga {
@@ -246,7 +246,7 @@ YogaLayout::BUILDER::BUILDER(BeanFactory& factory)
 {
 }
 
-sp<LayoutV3> YogaLayout::BUILDER::build(const Scope& args)
+sp<Layout> YogaLayout::BUILDER::build(const Scope& args)
 {
     return sp<YogaLayout>::make();
 }

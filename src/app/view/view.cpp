@@ -19,7 +19,7 @@
 
 #include "app/base/application_context.h"
 #include "app/traits/shape.h"
-#include "app/view/layout_param.h"
+#include "../traits/layout_param.h"
 #include "app/view/view_hierarchy.h"
 
 namespace ark {
@@ -63,8 +63,8 @@ static V2 toPivotPosition(const sp<Boundaries>& occupies, const V2& size)
     return size * V2(Math::lerp(0, size.x(), occupyAABBMin.x(), occupyAABBMax.x(), 0), Math::lerp(0, size.y(), occupyAABBMin.y(), occupyAABBMax.y(), 0));
 }
 
-View::View(const sp<LayoutParam>& layoutParam, sp<RenderObjectWithLayer> background, sp<Text> text, sp<Layout> layout, sp<LayoutV3> layoutV3, sp<Boolean> visible, sp<Boolean> disposed)
-    : _stub(sp<Stub>::make(layoutParam, (layout || layoutV3) ? sp<ViewHierarchy>::make(std::move(layout), std::move(layoutV3)) : nullptr, std::move(visible), std::move(disposed))),
+View::View(const sp<LayoutParam>& layoutParam, sp<RenderObjectWithLayer> background, sp<Text> text, sp<Layout> layout, sp<Boolean> visible, sp<Boolean> disposed)
+    : _stub(sp<Stub>::make(layoutParam, layout ? sp<ViewHierarchy>::make(std::move(layout)) : nullptr, std::move(visible), std::move(disposed))),
       _background(std::move(background)), _text(std::move(text)), _is_discarded(sp<IsDiscarded>::make(_stub)), _is_stub_dirty(sp<UpdatableOncePerFrame>::make(_stub)),
       _is_layout_dirty(sp<UpdatableOncePerFrame>::make(sp<UpdatableIsolatedLayout>::make(_stub)))
 {
@@ -131,14 +131,14 @@ void View::updateTextLayout(uint64_t timestamp)
     }
 }
 
-const sp<LayoutV3::Node>& View::layoutNode() const
+const sp<Layout::Node>& View::layoutNode() const
 {
     return _stub->_layout_node;
 }
 
-const sp<Boolean>& View::visible() const
+const SafeVar<Boolean>& View::visible() const
 {
-    return _stub->_visible.ensure();
+    return _stub->_visible;
 }
 
 void View::setVisbile(sp<Boolean> visible)
@@ -146,14 +146,14 @@ void View::setVisbile(sp<Boolean> visible)
     _stub->_visible.reset(std::move(visible));
 }
 
-sp<Boolean> View::disposed() const
+const SafeVar<Boolean>& View::discarded() const
 {
-    return _stub->_discarded.ensure();
+    return _stub->_discarded;
 }
 
-void View::setDisposed(sp<Boolean> disposed)
+void View::setDiscarded(sp<Boolean> discarded)
 {
-    _stub->_discarded.reset(std::move(disposed));
+    _stub->_discarded.reset(std::move(discarded));
 }
 
 const sp<LayoutParam>& View::layoutParam() const
@@ -166,10 +166,10 @@ void View::setLayoutParam(sp<LayoutParam> layoutParam)
     _stub->_layout_param = std::move(layoutParam);
 }
 
-void View::addView(sp<View> view, sp<Boolean> disposable)
+void View::addView(sp<View> view, sp<Boolean> discarded)
 {
-    if(disposable)
-        view->setDisposed(std::move(disposable));
+    if(discarded)
+        view->setDiscarded(std::move(discarded));
 
     view->setParent(*this);
     _stub->ensureViewHierarchy().addView(std::move(view));
@@ -187,16 +187,15 @@ void View::markAsTopView()
 }
 
 View::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _factory(factory), _manifest(manifest), _disposed(factory.getBuilder<Boolean>(manifest, constants::DISPOSED)), _visible(factory.getBuilder<Boolean>(manifest, constants::VISIBLE)),
-      _layout(factory.getBuilder<Layout>(manifest, constants::LAYOUT)), _layout_v3(factory.getBuilder<LayoutV3>(manifest, "layout-v3")),
-      _background(factory.getBuilder<RenderObjectWithLayer>(manifest, constants::BACKGROUND)), _text(factory.getBuilder<Text>(manifest, constants::TEXT)),
+    : _factory(factory), _manifest(manifest), _discarded(factory.getBuilder<Boolean>(manifest, constants::DISPOSED)), _visible(factory.getBuilder<Boolean>(manifest, constants::VISIBLE)),
+      _layout(factory.getBuilder<Layout>(manifest, "layout")), _background(factory.getBuilder<RenderObjectWithLayer>(manifest, constants::BACKGROUND)), _text(factory.getBuilder<Text>(manifest, constants::TEXT)),
       _layout_param(factory.ensureConcreteClassBuilder<LayoutParam>(manifest, "layout-param"))
 {
 }
 
 sp<View> View::BUILDER::build(const Scope& args)
 {
-    sp<View> view = sp<View>::make(_layout_param->build(args), _background->build(args), _text->build(args), _layout->build(args), _layout_v3->build(args), _visible->build(args), _disposed->build(args));
+    sp<View> view = sp<View>::make(_layout_param->build(args), _background->build(args), _text->build(args), _layout->build(args), _visible->build(args), _discarded->build(args));
     for(const document& i : _manifest->children())
     {
         const String& name = i->name();
@@ -211,13 +210,13 @@ sp<View> View::BUILDER::build(const Scope& args)
 }
 
 View::Stub::Stub()
-    : _layout_param(sp<LayoutParam>::make(LayoutParam::Length(), LayoutParam::Length())), _layout_node(sp<LayoutV3::Node>::make(_layout_param, nullptr)), _visible(nullptr, false),
+    : _layout_param(sp<LayoutParam>::make(LayoutParam::Length(), LayoutParam::Length())), _layout_node(sp<Layout::Node>::make(_layout_param, nullptr)), _visible(nullptr, false),
       _discarded(nullptr, false), _top_view(true)
 {
 }
 
 View::Stub::Stub(sp<LayoutParam> layoutParam, sp<ViewHierarchy> viewHierarchy, sp<Boolean> visible, sp<Boolean> discarded)
-    : _layout_param(std::move(layoutParam)), _layout_node(sp<LayoutV3::Node>::make(_layout_param, std::move(viewHierarchy))), _visible(std::move(visible), true),
+    : _layout_param(std::move(layoutParam)), _layout_node(sp<Layout::Node>::make(_layout_param, std::move(viewHierarchy))), _visible(std::move(visible), true),
       _discarded(std::move(discarded), false), _top_view(false)
 {
 }
@@ -226,7 +225,7 @@ bool View::Stub::update(uint64_t timestamp)
 {
     bool dirty = UpdatableUtil::update(timestamp, _layout_param, _discarded, _visible);
     if(viewHierarchy())
-        dirty = viewHierarchy()->updateLayout(_layout_param, _layout_node, timestamp, dirty);
+        dirty = viewHierarchy()->updateLayout(_layout_node, timestamp, dirty);
     return dirty;
 }
 
@@ -251,7 +250,7 @@ bool View::Stub::isDisposed() const
 
 V3 View::Stub::getTopViewOffsetPosition(bool includePaddings) const
 {
-    const LayoutV3::Node& layoutNode = _layout_node;
+    const Layout::Node& layoutNode = _layout_node;
     const V3 layoutOffset(layoutNode.offsetPosition(), 0);
     const sp<Stub> parentStub = _parent_stub.lock();
     V3 offset = parentStub ? parentStub->getTopViewOffsetPosition(false) + layoutOffset : layoutOffset;
@@ -260,7 +259,7 @@ V3 View::Stub::getTopViewOffsetPosition(bool includePaddings) const
     return _layout_param->position().val() + offset;
 }
 
-sp<LayoutV3::Node> View::Stub::getTopViewLayoutNode() const
+sp<Layout::Node> View::Stub::getTopViewLayoutNode() const
 {
     if(_top_view)
         return _layout_node;
@@ -276,7 +275,7 @@ const sp<ViewHierarchy>& View::Stub::viewHierarchy() const
 ViewHierarchy& View::Stub::ensureViewHierarchy()
 {
     if(!_layout_node->_view_hierarchy)
-        _layout_node->_view_hierarchy = sp<ViewHierarchy>::make(nullptr, nullptr);
+        _layout_node->_view_hierarchy = sp<ViewHierarchy>::make(nullptr);
 
     return _layout_node->_view_hierarchy;
 }
@@ -296,9 +295,9 @@ Renderable::StateBits View::RenderableView::updateState(const RenderRequest& ren
 
 Renderable::Snapshot View::RenderableView::snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest, const V3& postTranslate, StateBits state)
 {
-    if(const sp<LayoutV3::Node> topViewLayoutNode = _view_stub->getTopViewLayoutNode())
+    if(const sp<Layout::Node> topViewLayoutNode = _view_stub->getTopViewLayoutNode())
     {
-        const LayoutV3::Node& layoutNode = _view_stub->_layout_node;
+        const Layout::Node& layoutNode = _view_stub->_layout_node;
         const V4& paddings = layoutNode.paddings();
         const V2& layoutSize = layoutNode.size();
         const V2 size = _is_background ? layoutSize : layoutSize - V2(paddings.y() + paddings.w(), paddings.x() + paddings.z());
@@ -307,7 +306,7 @@ Renderable::Snapshot View::RenderableView::snapshot(const PipelineInput& pipelin
         Renderable::Snapshot snapshot = _renderable->snapshot(pipelineInput, renderRequest, postTranslate, state);
         if(!snapshot._model)
             snapshot._model = _model_loader->loadModel(snapshot._type);
-        snapshot._position += V3(toViewportPosition(toPivotPosition(snapshot._model->occupies(), size) + V2(offset.x(), offset.y())), offset.z());
+        snapshot._position += V3(toViewportPosition(toPivotPosition(snapshot._model->occupy(), size) + V2(offset.x(), offset.y())), offset.z());
         snapshot._size = V3(size, 0);
         return snapshot;
     }
@@ -348,7 +347,7 @@ bool View::LayoutPosition::update(uint64_t timestamp)
 
 V3 View::LayoutPosition::val()
 {
-    const LayoutV3::Node& layoutNode = _stub->_layout_node;
+    const Layout::Node& layoutNode = _stub->_layout_node;
     const V2& size = layoutNode.size();
     const V4& paddings = layoutNode.paddings();
     const V3 offsetPosition = _stub->getTopViewOffsetPosition(false);
