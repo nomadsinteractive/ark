@@ -13,7 +13,7 @@
 
 #include "app/base/event.h"
 #include "app/inf/layout.h"
-#include "../traits/layout_param.h"
+#include "app/traits/layout_param.h"
 #include "app/view/view.h"
 
 namespace ark {

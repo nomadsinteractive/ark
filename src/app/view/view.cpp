@@ -18,8 +18,8 @@
 #include "renderer/base/render_engine.h"
 
 #include "app/base/application_context.h"
+#include "app/traits/layout_param.h"
 #include "app/traits/shape.h"
-#include "../traits/layout_param.h"
 #include "app/view/view_hierarchy.h"
 
 namespace ark {
