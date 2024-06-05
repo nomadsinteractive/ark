@@ -381,8 +381,8 @@ void Text::Content::reload()
         _layer_context->add(i);
 }
 
-Text::RenderBatchContent::RenderBatchContent(sp<Content> content, sp<Boolean> disposed)
-    : RenderBatch(std::move(disposed)), _content(std::move(content))
+Text::RenderBatchContent::RenderBatchContent(sp<Content> content, sp<Boolean> discarded)
+    : RenderBatch(std::move(discarded)), _content(std::move(content))
 {
 }
 

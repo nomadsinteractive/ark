@@ -3,6 +3,7 @@
 #include <map>
 
 #include "core/forwarding.h"
+#include "core/base/scope.h"
 #include "core/collection/traits.h"
 #include "core/inf/builder.h"
 
@@ -24,8 +25,15 @@ public:
             return nullptr;
         }
 
-        template<typename T> sp<T> addComponent(sp<T> component) {
+        template<typename T> void addComponent(sp<T> component) {
             _components.put(std::move(component));
+        }
+
+        template<typename T> void shareComponent(sp<T>& component) {
+            if(sp<T> other = getComponent<T>())
+                component = std::move(other);
+            else
+                addComponent(component);
         }
 
         template<typename T> void addComponentBuilder(sp<Builder<T>> componentBuilder) {

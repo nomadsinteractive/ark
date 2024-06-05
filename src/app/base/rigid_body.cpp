@@ -34,17 +34,11 @@ TypeId RigidBody::onWire(WiringContext& context)
     if(sp<Vec3> position = context.getComponent<Vec3>())
         _position.reset(std::move(position));
 
-    if(sp<Shape> shape = context.getComponent<Shape>())
-        _shape = std::move(shape);
-
     if(sp<Boolean> expendable = context.getComponent<Expendable>())
         _discarded.reset(std::move(expendable));
 
-    if(sp<CollisionCallback> collisionCallback = context.getComponent<CollisionCallback>())
-        _collision_callback = std::move(collisionCallback);
-    else if(_collision_callback)
-        context.addComponentBuilder(sp<Builder<CollisionCallback>>::make<Builder<CollisionCallback>::Prebuilt>(_collision_callback));
-
+    context.shareComponent(_shape);
+    context.shareComponent(_collision_callback);
     return TYPE_ID_NONE;
 }
 

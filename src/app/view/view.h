@@ -104,7 +104,7 @@ public:
     public:
         UpdatableIsolatedLayout(sp<Stub> stub);
 
-        virtual bool update(uint64_t timestamp) override;
+        bool update(uint64_t timestamp) override;
 
     private:
         sp<Stub> _stub;
@@ -132,8 +132,8 @@ private:
     public:
         IsDiscarded(sp<Stub> stub);
 
-        virtual bool update(uint64_t timestamp) override;
-        virtual bool val() override;
+        bool update(uint64_t timestamp) override;
+        bool val() override;
 
     private:
         sp<Stub> _stub;

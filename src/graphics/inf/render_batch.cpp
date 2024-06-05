@@ -1,7 +1,5 @@
 #include "graphics/inf/render_batch.h"
 
-#include "core/inf/variable.h"
-
 namespace ark {
 
 RenderBatch::RenderBatch(sp<Boolean> discarded)
