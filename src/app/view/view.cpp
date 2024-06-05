@@ -63,8 +63,8 @@ static V2 toPivotPosition(const sp<Boundaries>& occupies, const V2& size)
     return size * V2(Math::lerp(0, size.x(), occupyAABBMin.x(), occupyAABBMax.x(), 0), Math::lerp(0, size.y(), occupyAABBMin.y(), occupyAABBMax.y(), 0));
 }
 
-View::View(const sp<LayoutParam>& layoutParam, sp<RenderObjectWithLayer> background, sp<Text> text, sp<Layout> layout, sp<Boolean> visible, sp<Boolean> disposed)
-    : _stub(sp<Stub>::make(layoutParam, layout ? sp<ViewHierarchy>::make(std::move(layout)) : nullptr, std::move(visible), std::move(disposed))),
+View::View(const sp<LayoutParam>& layoutParam, sp<RenderObjectWithLayer> background, sp<Text> text, sp<Layout> layout, sp<Boolean> visible, sp<Boolean> discarded)
+    : _stub(sp<Stub>::make(layoutParam, layout ? sp<ViewHierarchy>::make(std::move(layout)) : nullptr, std::move(visible), std::move(discarded))),
       _background(std::move(background)), _text(std::move(text)), _is_discarded(sp<IsDiscarded>::make(_stub)), _is_stub_dirty(sp<UpdatableOncePerFrame>::make(_stub)),
       _is_layout_dirty(sp<UpdatableOncePerFrame>::make(sp<UpdatableIsolatedLayout>::make(_stub)))
 {
@@ -72,16 +72,6 @@ View::View(const sp<LayoutParam>& layoutParam, sp<RenderObjectWithLayer> backgro
         addRenderObjectWithLayer(_background, true);
 
     _stub->_layout_node->setSize(V2(layoutParam->contentWidth(), layoutParam->contentHeight()));
-
-    // if(_text)
-    // {
-    //     _text->setPosition(sp<LayoutPosition>::make(_stub, _is_layout_dirty, false, false));
-    //     if(_stub->_layout_param->flexWrap() == LayoutParam::FLEX_WRAP_WRAP)
-    //         _text->setLayoutSize(sp<Size>::make(sp<LayoutSize<0>>::make(_stub), sp<LayoutSize<1>>::make(_stub)));
-    //     else
-    //         updateTextLayout(0);
-    //     _text->show(_is_discarded);
-    // }
 }
 
 View::~View()
@@ -243,10 +233,10 @@ bool View::Stub::isVisible() const
     return _visible.val() && (_top_view || (parentStub ? parentStub->isVisible() : false));
 }
 
-bool View::Stub::isDisposed() const
+bool View::Stub::isDiscarded() const
 {
     const sp<Stub> parentStub = _parent_stub.lock();
-    return _discarded.val() || (parentStub ? parentStub->isDisposed() : !_top_view);
+    return _discarded.val() || (parentStub ? parentStub->isDiscarded() : !_top_view);
 }
 
 V3 View::Stub::getTopViewOffsetPosition(bool includePaddings) const
@@ -282,7 +272,7 @@ ViewHierarchy& View::Stub::ensureViewHierarchy()
 }
 
 View::RenderableView::RenderableView(sp<Stub> viewStub, sp<Renderable> renderable, sp<ModelLoader> modelLoader, bool isBackground)
-    : _view_stub(viewStub), _renderable(std::move(renderable)), _model_loader(std::move(modelLoader)), _is_background(isBackground)
+    : _view_stub(std::move(viewStub)), _renderable(std::move(renderable)), _model_loader(std::move(modelLoader)), _is_background(isBackground)
 {
 }
 
@@ -333,7 +323,7 @@ bool View::IsDiscarded::update(uint64_t timestamp)
 
 bool View::IsDiscarded::val()
 {
-    return _stub->isDisposed();
+    return _stub->isDiscarded();
 }
 
 View::LayoutPosition::LayoutPosition(sp<Stub> stub, sp<Updatable> updatable, bool isBackground, bool isCenter)

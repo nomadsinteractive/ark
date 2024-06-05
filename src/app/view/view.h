@@ -20,7 +20,7 @@ namespace ark {
 
 class ARK_API View final : public Wirable {
 public:
-    View(const sp<LayoutParam>& layoutParam, sp<RenderObjectWithLayer> background = nullptr, sp<Text> text = nullptr, sp<Layout> layout = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> disposed = nullptr);
+    View(const sp<LayoutParam>& layoutParam, sp<RenderObjectWithLayer> background = nullptr, sp<Text> text = nullptr, sp<Layout> layout = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> discarded = nullptr);
     ~View() override;
 
     TypeId onWire(WiringContext& context) override;
@@ -82,7 +82,7 @@ public:
         void dispose();
 
         bool isVisible() const;
-        bool isDisposed() const;
+        bool isDiscarded() const;
 
         V3 getTopViewOffsetPosition(bool includePaddings) const;
         sp<Layout::Node> getTopViewLayoutNode() const;

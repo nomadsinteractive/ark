@@ -16,17 +16,17 @@ bool HorizontalLayout::update(uint64_t timestamp)
     DCHECK(_root_node->_view_hierarchy, "");
 
     const Node& rootNode = *_root_node;
-    const std::vector<sp<ViewHierarchy::Slot>>& childNodes = rootNode._view_hierarchy->updateSlotsAndLayoutNodes();
+    const std::vector<sp<View>>& childNodes = rootNode._view_hierarchy->updateSlotsAndLayoutNodes();
 
     float totalWidth = 0;
-    for(const ViewHierarchy::Slot& i : childNodes)
+    for(const View& i : childNodes)
         totalWidth += i.layoutNode()->occupyWidth();
 
     const V2 layoutOffsetPos = rootNode.offsetPosition();
     LayoutParam::JustifyContent justifyContent = rootNode._layout_param->justifyContent();
     const auto [start, space] = LayoutUtil::calcFlowDirection(justifyContent, rootNode.contentWidth(), totalWidth, childNodes.size());
     float x = start;
-    for(const ViewHierarchy::Slot& i : childNodes)
+    for(const View& i : childNodes)
     {
         Node& layoutNode = i.layoutNode();
         float y = LayoutUtil::calcItemOffsetY(_align_items, rootNode, layoutNode);

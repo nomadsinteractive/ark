@@ -7,6 +7,7 @@
 #include "graphics/base/v2.h"
 
 #include "app/traits/layout_param.h"
+#include "app/view/view.h"
 #include "app/view/view_hierarchy.h"
 
 namespace ark::plugin::yoga {
@@ -211,7 +212,7 @@ void YogaLayout::updateLayoutResult(Node& layoutNode)
     layoutNode.setSize(V2(YGNodeLayoutGetWidth(ygNode), YGNodeLayoutGetHeight(ygNode)));
 
     if(layoutNode._view_hierarchy)
-        for(const ViewHierarchy::Slot& i : layoutNode._view_hierarchy->updateSlots())
+        for(const View& i : layoutNode._view_hierarchy->updateSlots())
             updateLayoutResult(i.layoutNode());
 }
 
@@ -224,7 +225,7 @@ YGNodeRef YogaLayout::doInflate(const YogaConfig& config, Node& layoutNode, YGNo
         YGNodeInsertChild(parentNode, ygNode, YGNodeGetChildCount(parentNode));
 
     if(layoutNode._view_hierarchy)
-        for(const ViewHierarchy::Slot& i : layoutNode._view_hierarchy->updateSlots())
+        for(const View& i : layoutNode._view_hierarchy->updateSlots())
             doInflate(config, i.layoutNode(), ygNode);
 
     return ygNode;
@@ -238,7 +239,7 @@ void YogaLayout::doUpdate(Node& layoutNode, uint64_t timestamp)
         applyLayoutParam(layoutNode._layout_param, ygNode, timestamp);
 
     if(layoutNode._view_hierarchy)
-        for(const ViewHierarchy::Slot& i : layoutNode._view_hierarchy->updateSlots())
+        for(const View& i : layoutNode._view_hierarchy->updateSlots())
             doUpdate(i.layoutNode(), timestamp);
 }
 
