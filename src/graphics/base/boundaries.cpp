@@ -7,12 +7,12 @@
 namespace ark {
 
 Boundaries::Boundaries()
-    : Boundaries(V3(-0.5), V3(0.5))
+    : Boundaries(V3(-0.5f), V3(0.5f))
 {
 }
 
 Boundaries::Boundaries(sp<Vec3> size)
-    : _aabb_max(Vec3Type::sub(size, V3(2.0f))), _aabb_min(Vec3Type::negative(_aabb_max)), _size(std::move(size))
+    : _aabb_max(Vec3Type::mul(size, V3(0.5f))), _aabb_min(Vec3Type::negative(_aabb_max)), _size(std::move(size))
 {
 }
 

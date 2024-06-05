@@ -34,9 +34,9 @@ public:
     const sp<Size>& size() const;
 
 //  [[script::bindings::property]]
-    const sp<Size>& layoutSize() const;
+    const sp<Boundaries>& boundaries() const;
 //  [[script::bindings::property]]
-    void setLayoutSize(sp<Size> layoutSize);
+    void setBoundaries(sp<Boundaries> boundaries);
 
 //  [[script::bindings::property]]
     const std::wstring& text() const;
@@ -44,7 +44,7 @@ public:
     void setText(std::wstring text);
 
 //  [[script::bindings::auto]]
-    void show(sp<Boolean> disposed = nullptr);
+    void show(sp<Boolean> discarded = nullptr);
 
 //  [[script::bindings::auto]]
     void setRichText(std::wstring richText, const sp<ResourceLoader>& resourceLoader = nullptr, const Scope& args = Scope());
@@ -133,7 +133,7 @@ private:
         float _line_indent;
 
         sp<Size> _size;
-        sp<Size> _layout_size;
+        sp<Boundaries> _boundaries;
 
         std::wstring _text_unicode;
         std::vector<sp<Glyph>> _glyphs;

@@ -12,7 +12,7 @@ namespace ark {
 class ARK_API Label final : public Wirable {
 public:
 //  [[script::bindings::auto]]
-    Label(sp<Text> text, sp<LayoutParam> layoutParam);
+    Label(sp<Text> text, sp<LayoutParam> layoutParam = nullptr);
 
     TypeId onWire(WiringContext& context) override;
 

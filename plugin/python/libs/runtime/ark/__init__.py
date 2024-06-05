@@ -2641,5 +2641,10 @@ class CollisionCallback:
         pass
 
 
+class Label:
+    def __init__(self, text: Text, layout_param: Optional[LayoutParam] = None):
+        pass
+
+
 def __trace__():
     pass

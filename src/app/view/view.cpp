@@ -73,15 +73,15 @@ View::View(const sp<LayoutParam>& layoutParam, sp<RenderObjectWithLayer> backgro
 
     _stub->_layout_node->setSize(V2(layoutParam->contentWidth(), layoutParam->contentHeight()));
 
-    if(_text)
-    {
-        _text->setPosition(sp<LayoutPosition>::make(_stub, _is_layout_dirty, false, false));
-        if(_stub->_layout_param->flexWrap() == LayoutParam::FLEX_WRAP_WRAP)
-            _text->setLayoutSize(sp<Size>::make(sp<LayoutSize<0>>::make(_stub), sp<LayoutSize<1>>::make(_stub)));
-        else
-            updateTextLayout(0);
-        _text->show(_is_discarded);
-    }
+    // if(_text)
+    // {
+    //     _text->setPosition(sp<LayoutPosition>::make(_stub, _is_layout_dirty, false, false));
+    //     if(_stub->_layout_param->flexWrap() == LayoutParam::FLEX_WRAP_WRAP)
+    //         _text->setLayoutSize(sp<Size>::make(sp<LayoutSize<0>>::make(_stub), sp<LayoutSize<1>>::make(_stub)));
+    //     else
+    //         updateTextLayout(0);
+    //     _text->show(_is_discarded);
+    // }
 }
 
 View::~View()
@@ -94,7 +94,7 @@ TypeId View::onWire(WiringContext& context)
 {
     sp<Vec3> size = Vec3Type::create(sp<LayoutSize<0>>::make(_stub), sp<LayoutSize<1>>::make(_stub), nullptr);
     if(const sp<Shape>& shape = context.getComponent<Shape>())
-        shape->setSize(std::move(size));
+        shape->setSize(size);
     else
         context.addComponentBuilder(make_lazy_builder<Shape>(Shape::SHAPE_ID_AABB, sp<Vec3>(size)));
 

@@ -14,7 +14,6 @@
 #include "graphics/base/layer_context.h"
 #include "graphics/base/glyph.h"
 #include "graphics/base/render_layer.h"
-#include "graphics/base/render_layer_snapshot.h"
 #include "graphics/base/render_object.h"
 #include "graphics/base/render_request.h"
 #include "graphics/base/size.h"
@@ -60,14 +59,14 @@ const sp<Size>& Text::size() const
     return _content->_size;
 }
 
-const sp<Size>& Text::layoutSize() const
+const sp<Boundaries>& Text::boundaries() const
 {
-    return _content->_layout_size;
+    return _content->_boundaries;
 }
 
-void Text::setLayoutSize(sp<Size> layoutSize)
+void Text::setBoundaries(sp<Boundaries> boundaries)
 {
-    _content->_layout_size = std::move(layoutSize);
+    _content->_boundaries = std::move(boundaries);
     _content->layoutContent();
 }
 
@@ -81,11 +80,11 @@ void Text::setText(std::wstring text)
     _content->setText(std::move(text));
 }
 
-void Text::show(sp<Boolean> disposed)
+void Text::show(sp<Boolean> discarded)
 {
     if(_render_batch)
         _content->reload();
-    _render_batch = sp<RenderBatchContent>::make(_content, disposed);
+    _render_batch = sp<RenderBatchContent>::make(_content, discarded);
     _render_layer->addRenderBatch(_render_batch);
 }
 
@@ -136,7 +135,7 @@ bool Text::Content::update(uint64_t timestamp)
 {
     bool positionDirty = _position->update(timestamp);
     bool contentDirty = _string->update(timestamp);
-    bool sizeDirty = _layout_size && _layout_size->update(timestamp);
+    bool sizeDirty = _boundaries && _boundaries->update(timestamp);
     if(contentDirty)
         setText(Strings::fromUTF8(*_string->val()));
     if(sizeDirty)
@@ -294,9 +293,9 @@ void Text::Content::nextLine(float fontHeight, float& flowx, float& flowy) const
 
 float Text::Content::getFlowY() const
 {
-    if(!_layout_size || _layout_direction > 0)
+    if(!_boundaries || _layout_direction > 0)
         return 0;
-    return _layout_size->heightAsFloat() + _line_height;
+    return _boundaries->size()->val().y() + _line_height;
 }
 
 std::vector<Text::LayoutChar> Text::Content::toLayoutCharacters(const GlyphContents& glyphs) const
@@ -335,7 +334,7 @@ std::vector<Text::LayoutChar> Text::Content::toLayoutCharacters(const GlyphConte
 
 float Text::Content::getLayoutBoundary() const
 {
-    return _layout_size ? _layout_size->widthAsFloat() : 0;
+    return _boundaries ? _boundaries->size()->val().x() : 0;
 }
 
 Text::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
