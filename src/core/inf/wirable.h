@@ -21,7 +21,7 @@ public:
             if(sp<T> component = _components.get<T>())
                 return component;
             if(const auto iter = _component_builders.find(Type<T>::id()); iter != _component_builders.end())
-                return iter->second.toPtr<Builder<T>>()->build(Scope());
+                return iter->second.template toPtr<Builder<T>>()->build(Scope());
             return nullptr;
         }
 

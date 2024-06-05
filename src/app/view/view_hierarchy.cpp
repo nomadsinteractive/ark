@@ -77,7 +77,7 @@ bool ViewHierarchy::updateDescendantLayout(uint64_t timestamp)
 
 bool ViewHierarchy::isInflateNeeded()
 {
-    bool inflateNeeded = _incremental.size() > 0;
+    bool inflateNeeded = !_incremental.empty();
     if(inflateNeeded)
         updateSlots();
 
@@ -99,21 +99,17 @@ std::pair<std::vector<sp<ViewHierarchy::Slot>>, std::vector<sp<LayoutParam>>> Vi
 {
     std::pair<std::vector<sp<ViewHierarchy::Slot>>, std::vector<sp<LayoutParam>>> items = std::make_pair(std::vector<sp<ViewHierarchy::Slot>>(), std::vector<sp<LayoutParam>>());
     for(const sp<Slot>& i : _slots)
-    {
-        sp<LayoutParam> lp = i->layoutParam();
-        if(lp && lp->display() == LayoutParam::DISPLAY_BLOCK)
+        if(sp<LayoutParam> lp = i->layoutParam(); lp && lp->display() == LayoutParam::DISPLAY_BLOCK)
         {
             items.first.push_back(i);
             items.second.push_back(std::move(lp));
         }
-    }
     return items;
 }
 
 bool ViewHierarchy::updateLayout(const sp<Layout::Node>& layoutNode, uint64_t timestamp, bool isDirty)
 {
-    bool inflateNeeded = isInflateNeeded();
-    if(inflateNeeded || isDirty)
+    if(const bool inflateNeeded = isInflateNeeded(); inflateNeeded || isDirty)
     {
         if(_layout)
         {

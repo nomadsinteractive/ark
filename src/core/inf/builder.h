@@ -73,11 +73,11 @@ private:
 };
 
 template<typename T, typename U = T, typename... Args> sp<Builder<T>> make_lazy_builder(Args&&... args) {
-    sp<Builder<U>> builder = sp<Builder<U>::Lazy<Args...>>::make(std::forward<Args>(args)...);
+    sp<Builder<U>> builder = sp<typename Builder<U>::template Lazy<Args...>>::make(std::forward<Args>(args)...);
     if constexpr(std::is_same_v<T, U>)
         return builder;
     else
-        return sp<Builder<T>::Wrapper<U>>::make(builder);
+        return sp<typename Builder<T>::template Wrapper<U>>::make(builder);
 }
 
 }

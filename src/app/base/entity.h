@@ -28,11 +28,6 @@ public:
         addComponent(Box(std::move(cmp)));
     }
 
-    template<typename T, typename... Args> sp<T> makeComponent(Args&&... args) {
-        sp<T> component = _components.ensure<T>(std::forward<Args>(args)...);
-        onWireOne(Box(component));
-    }
-
 //  [[script::bindings::loader]]
     template<typename T> sp<T> loadComponent(const String& name, const Scope& args) {
         const sp<ResourceLoader>& resourceLoader = _components.get<ResourceLoader>();
