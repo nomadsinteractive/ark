@@ -1,11 +1,9 @@
 #include "app/view/view_hierarchy.h"
 
-#include "core/util/holder_util.h"
-
 #include "graphics/base/render_request.h"
 
-#include "app/inf/layout.h"
-#include "app/traits/layout_param.h"
+#include "graphics/inf/layout.h"
+#include "graphics/traits/layout_param.h"
 #include "app/view/view.h"
 
 namespace ark {
@@ -29,10 +27,10 @@ bool ViewHierarchy::updateDescendantLayout(uint64_t timestamp)
     return isDirty;
 }
 
-bool ViewHierarchy::isInflateNeeded()
+bool ViewHierarchy::updateHierarchy()
 {
-    bool inflateNeeded = !_incremental.empty();
-    if(inflateNeeded)
+    bool hierarchyChanged = !_incremental.empty();
+    if(hierarchyChanged)
         updateSlots();
 
     for(auto iter = _slots.begin(); iter != _slots.end(); )
@@ -41,36 +39,39 @@ bool ViewHierarchy::isInflateNeeded()
         if(i->discarded().val())
         {
             iter = _slots.erase(iter);
-            inflateNeeded = true;
+            hierarchyChanged = true;
         }
         else
             ++iter;
     }
-    return inflateNeeded;
+    return hierarchyChanged;
 }
 
-std::vector<sp<View>> ViewHierarchy::getLayoutItems() const
+Layout::Hierarchy ViewHierarchy::toLayoutHierarchy(sp<Layout::Node> layoutNode) const
 {
-    std::vector<sp<View>> items;
+    Layout::Hierarchy hierarchy{std::move(layoutNode)};
     for(const sp<View>& i : _slots)
-        if(sp<LayoutParam> lp = i->layoutParam(); lp && lp->display() == LayoutParam::DISPLAY_BLOCK)
-            items.push_back(i);
-    return items;
+    {
+        const sp<ViewHierarchy>& viewHierarchy = i->hierarchy();
+        hierarchy._child_nodes.push_back(viewHierarchy && !viewHierarchy->_layout ? viewHierarchy->toLayoutHierarchy(i->layoutNode()) : Layout::Hierarchy{i->layoutNode()});
+    }
+    return hierarchy;
 }
 
 bool ViewHierarchy::updateLayout(const sp<Layout::Node>& layoutNode, uint64_t timestamp, bool isDirty)
 {
-    if(const bool inflateNeeded = isInflateNeeded(); inflateNeeded || isDirty)
+    if(const bool hierarchyChanged = updateHierarchy(); hierarchyChanged || isDirty)
     {
         if(_layout)
         {
-            if(inflateNeeded)
+            if(hierarchyChanged)
             {
-                _layout->inflate(layoutNode);
+                _updatable_layout = _layout->inflate(toLayoutHierarchy(layoutNode));
                 timestamp = 0;
             }
 
-            _layout->update(timestamp);
+            if(_updatable_layout)
+                _updatable_layout->update(timestamp);
         }
         isDirty = true;
     }
@@ -83,17 +84,6 @@ const std::vector<sp<View>>& ViewHierarchy::updateSlots()
     for(sp<View>& i : _incremental)
         _slots.push_back(std::move(i));
     _incremental.clear();
-    return _slots;
-}
-
-const std::vector<sp<View>>& ViewHierarchy::updateSlotsAndLayoutNodes()
-{
-    for(const View& i : updateSlots())
-    {
-        const sp<Layout::Node>& layoutNode = i.layoutNode();
-        layoutNode->setPaddings(i.layoutParam()->paddings().val());
-        layoutNode->setMargins(i.layoutParam()->margins().val());
-    }
     return _slots;
 }
 

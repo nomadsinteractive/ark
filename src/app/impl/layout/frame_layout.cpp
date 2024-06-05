@@ -1,17 +1,25 @@
 #include "app/impl/layout/frame_layout.h"
 
-#include "app/traits/layout_param.h"
+#include "graphics/traits/layout_param.h"
+
 #include "app/util/layout_util.h"
 
 namespace ark {
 
-bool FrameLayout::update(uint64_t timestamp)
-{
-    return false;
+namespace {
+
+class UpdatableFrameLayout : public Updatable {
+public:
+    bool update(uint64_t timestamp) override {
+        return false;
+    }
+};
+
 }
 
-void FrameLayout::inflate(sp<Node> rootNode)
+sp<Updatable> FrameLayout::inflate(Hierarchy hierarchy)
 {
+    return sp<UpdatableFrameLayout>::make();
 }
 
 sp<Layout> FrameLayout::BUILDER::build(const Scope& /*args*/)

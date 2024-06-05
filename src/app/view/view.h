@@ -10,11 +10,11 @@
 #include "core/types/safe_var.h"
 #include "core/types/weak_ptr.h"
 
-#include "graphics/inf/renderable.h"
 #include "graphics/forwarding.h"
+#include "graphics/inf/layout.h"
+#include "graphics/inf/renderable.h"
 
 #include "app/forwarding.h"
-#include "app/inf/layout.h"
 
 namespace ark {
 
@@ -49,6 +49,8 @@ public:
 
 //  [[script::bindings::auto]]
     void addView(sp<View> view, sp<Boolean> discarded = nullptr);
+
+    const sp<ViewHierarchy>& hierarchy() const;
 
     void setParent(const View& view);
 
@@ -90,7 +92,7 @@ public:
         const sp<ViewHierarchy>& viewHierarchy() const;
         ViewHierarchy& ensureViewHierarchy();
 
-        sp<LayoutParam> _layout_param;
+        sp<ViewHierarchy> _hierarchy;
         sp<Layout::Node> _layout_node;
 
         SafeVar<Boolean> _visible;
@@ -161,8 +163,8 @@ protected:
 
     sp<EventListener> _on_move;
     sp<IsDiscarded> _is_discarded;
-    sp<Updatable> _is_stub_dirty;
-    sp<Updatable> _is_layout_dirty;
+    sp<Updatable> _updatable_view;
+    sp<Updatable> _updatable_layout;
 
     sp<Size> _size;
 

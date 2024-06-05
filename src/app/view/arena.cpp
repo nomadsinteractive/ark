@@ -3,7 +3,6 @@
 #include "core/ark.h"
 #include "core/base/bean_factory.h"
 #include "core/util/bean_utils.h"
-#include "core/util/holder_util.h"
 #include "core/util/log.h"
 
 #include "graphics/base/layer.h"

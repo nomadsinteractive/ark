@@ -4,22 +4,21 @@
 
 #include "graphics/forwarding.h"
 
-#include "app/inf/layout.h"
+#include "graphics/inf/layout.h"
 
 namespace ark {
 
 class FrameLayout : public Layout {
 public:
 
-    virtual bool update(uint64_t timestamp) override;
-    virtual void inflate(sp<Node> rootNode) override;
+    sp<Updatable> inflate(Hierarchy hierarchy) override;
 
 //  [[plugin::builder::by-value("frame")]]
     class BUILDER : public Builder<Layout> {
     public:
         BUILDER() = default;
 
-        virtual sp<Layout> build(const Scope& args) override;
+        sp<Layout> build(const Scope& args) override;
     };
 
 private:

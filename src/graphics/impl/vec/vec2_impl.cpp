@@ -4,7 +4,6 @@
 #include "core/base/bean_factory.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/util/bean_utils.h"
-#include "core/util/holder_util.h"
 #include "core/util/numeric_type.h"
 #include "core/util/strings.h"
 #include "core/util/updatable_util.h"
@@ -49,12 +48,6 @@ V2 Vec2Impl::val()
 bool Vec2Impl::update(uint64_t timestamp)
 {
     return UpdatableUtil::update(timestamp, _x, _y);
-}
-
-void Vec2Impl::traverse(const Holder::Visitor& visitor)
-{
-    HolderUtil::visit(_x, visitor);
-    HolderUtil::visit(_y, visitor);
 }
 
 const sp<NumericWrapper>& Vec2Impl::x() const

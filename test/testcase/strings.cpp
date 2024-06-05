@@ -3,14 +3,13 @@
 #include <vector>
 
 #include "core/inf/array.h"
-#include "core/types/null.h"
 #include "core/util/strings.h"
 
 #include "graphics/base/rect.h"
 #include "graphics/base/color.h"
+#include "graphics/traits/layout_param.h"
 
 #include "app/view/view.h"
-#include "src/app/traits/layout_param.h"
 
 #include "test/base/test_case.h"
 

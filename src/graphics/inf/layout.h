@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "core/base/api.h"
 #include "core/base/with_timestamp.h"
 #include "core/inf/updatable.h"
@@ -8,15 +10,13 @@
 #include "graphics/forwarding.h"
 #include "graphics/base/v4.h"
 
-#include "app/forwarding.h"
-
 namespace ark {
 
-class ARK_API Layout : public Updatable {
+class ARK_API Layout {
 public:
     class ARK_API Node {
     public:
-        Node(sp<LayoutParam> layoutParam, sp<ViewHierarchy> viewHierarchy, void* tag = nullptr);
+        Node(sp<LayoutParam> layoutParam, void* tag = nullptr);
 
         float contentWidth() const;
         float contentHeight() const;
@@ -36,8 +36,9 @@ public:
         const WithTimestamp<V2>& size() const;
         void setSize(const V2& size);
 
+        bool update(uint32_t timestamp);
+
         sp<LayoutParam> _layout_param;
-        sp<ViewHierarchy> _view_hierarchy;
         void* _tag;
 
     private:
@@ -47,10 +48,15 @@ public:
         WithTimestamp<V2> _size;
     };
 
-public:
-    ~Layout() override = default;
+    struct Hierarchy {
+        sp<Node> _node;
+        std::vector<Hierarchy> _child_nodes;
+    };
 
-    virtual void inflate(sp<Node> rootNode) = 0;
+public:
+    ~Layout() = default;
+
+    virtual sp<Updatable> inflate(Hierarchy hierarchy) = 0;
 };
 
 }

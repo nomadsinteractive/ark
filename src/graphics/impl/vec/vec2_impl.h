@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_IMPL_VEC_VEC2_IMPL_H_
-#define ARK_GRAPHICS_IMPL_VEC_VEC2_IMPL_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/forwarding.h"
@@ -14,7 +13,7 @@
 
 namespace ark {
 
-class ARK_API Vec2Impl final : public Vec2, public Holder {
+class ARK_API Vec2Impl final : public Vec2 {
 public:
     Vec2Impl() noexcept;
     Vec2Impl(float x, float y) noexcept;
@@ -23,10 +22,8 @@ public:
     Vec2Impl(sp<Numeric> x, sp<Numeric> y) noexcept;
     Vec2Impl(Vec2& other) noexcept;
 
-    virtual V2 val() override;
-    virtual bool update(uint64_t timestamp) override;
-
-    virtual void traverse(const Visitor& visitor) override;
+    V2 val() override;
+    bool update(uint64_t timestamp) override;
 
     const sp<NumericWrapper>& x() const;
     const sp<NumericWrapper>& y() const;
@@ -65,5 +62,3 @@ private:
 };
 
 }
-
-#endif

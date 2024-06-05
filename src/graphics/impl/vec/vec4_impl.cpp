@@ -4,7 +4,6 @@
 #include "core/base/bean_factory.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/util/bean_utils.h"
-#include "core/util/holder_util.h"
 #include "core/util/updatable_util.h"
 
 #include "graphics/base/color.h"
@@ -39,14 +38,6 @@ V4 Vec4Impl::val()
 bool Vec4Impl::update(uint64_t timestamp)
 {
     return UpdatableUtil::update(timestamp, _x, _y, _z, _w);
-}
-
-void Vec4Impl::traverse(const Holder::Visitor& visitor)
-{
-    HolderUtil::visit(_x, visitor);
-    HolderUtil::visit(_y, visitor);
-    HolderUtil::visit(_z, visitor);
-    HolderUtil::visit(_w, visitor);
 }
 
 const sp<NumericWrapper>& Vec4Impl::x() const

@@ -4,7 +4,6 @@
 #include "core/base/bean_factory.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/util/bean_utils.h"
-#include "core/util/holder_util.h"
 #include "core/util/updatable_util.h"
 
 #include "graphics/base/v3.h"

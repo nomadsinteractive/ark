@@ -3,8 +3,6 @@
 #include "core/base/bean_factory.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/inf/variable.h"
-#include "core/util/bean_utils.h"
-#include "core/util/holder_util.h"
 #include "core/util/numeric_type.h"
 #include "core/util/updatable_util.h"
 
@@ -265,7 +263,7 @@ RenderObject::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
       _size(factory.getBuilder<Size>(manifest, constants::SIZE)),
       _transform(factory.getBuilder<Transform>(manifest, constants::TRANSFORM)),
       _varyings(factory.getConcreteClassBuilder<Varyings>(manifest, constants::VARYINGS)),
-      _discarded(factory.getBuilder<Boolean>(manifest, constants::DISPOSED))
+      _discarded(factory.getBuilder<Boolean>(manifest, constants::DISCARDED))
 {
 }
 

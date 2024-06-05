@@ -1,18 +1,23 @@
 #include "yoga/impl/layout/yoga_layout.h"
 
+#include <yoga/YGNode.h>
+#include <yoga/Yoga.h>
+
 #include "core/ark.h"
 #include "core/types/global.h"
 #include "core/base/bean_factory.h"
 
 #include "graphics/base/v2.h"
+#include "graphics/traits/layout_param.h"
 
-#include "app/traits/layout_param.h"
 #include "app/view/view.h"
 #include "app/view/view_hierarchy.h"
 
 namespace ark::plugin::yoga {
 
-static YGFlexDirection toYGFlexDirection(LayoutParam::FlexDirection flexDirection)
+namespace {
+
+YGFlexDirection toYGFlexDirection(LayoutParam::FlexDirection flexDirection)
 {
     switch(flexDirection)
     {
@@ -29,7 +34,7 @@ static YGFlexDirection toYGFlexDirection(LayoutParam::FlexDirection flexDirectio
     return YGFlexDirectionColumn;
 }
 
-static YGWrap toYGWrap(LayoutParam::FlexWrap flexWrap)
+YGWrap toYGWrap(LayoutParam::FlexWrap flexWrap)
 {
     switch(flexWrap)
     {
@@ -44,7 +49,7 @@ static YGWrap toYGWrap(LayoutParam::FlexWrap flexWrap)
     return YGWrapNoWrap;
 }
 
-static YGJustify toYGJustify(LayoutParam::JustifyContent justifyContent)
+YGJustify toYGJustify(LayoutParam::JustifyContent justifyContent)
 {
     switch(justifyContent)
     {
@@ -65,7 +70,7 @@ static YGJustify toYGJustify(LayoutParam::JustifyContent justifyContent)
     return YGJustifyFlexStart;
 }
 
-static YGAlign toYGAlign(LayoutParam::Align align)
+YGAlign toYGAlign(LayoutParam::Align align)
 {
     switch(align)
     {
@@ -89,37 +94,36 @@ static YGAlign toYGAlign(LayoutParam::Align align)
     return YGAlignStretch;
 }
 
-YogaLayout::YogaLayout()
-    : _yg_node(nullptr)
+class YogaConfig {
+public:
+    YogaConfig()
+        : _config(YGConfigNew()) {
+        YGConfigSetUseWebDefaults(_config, true);
+    }
+    ~YogaConfig() {
+        YGConfigFree(_config);
+    }
+
+    YGNodeRef newNode() const {
+        return YGNodeNewWithConfig(_config);
+    }
+
+private:
+    YGConfigRef _config;
+};
+
+YGNodeRef doInflate(const YogaConfig& config, const Layout::Hierarchy& hierarchy, YGNodeRef parentNode)
 {
-}
+    const YGNodeRef ygNode = config.newNode();
+    hierarchy._node->_tag = ygNode;
 
-YogaLayout::~YogaLayout()
-{
-    if(_yg_node)
-        YGNodeFreeRecursive(_yg_node);
-}
+    if(parentNode)
+        YGNodeInsertChild(parentNode, ygNode, YGNodeGetChildCount(parentNode));
 
-void YogaLayout::inflate(sp<Node> rootNode)
-{
-    if(_yg_node)
-        YGNodeFreeRecursive(_yg_node);
+    for(const Layout::Hierarchy& i : hierarchy._child_nodes)
+        doInflate(config, i, ygNode);
 
-    _yg_node = doInflate(Global<YogaConfig>(), rootNode, nullptr);
-    _root_node = std::move(rootNode);
-}
-
-bool YogaLayout::update(uint64_t timestamp)
-{
-    if(!_root_node)
-        return false;
-
-    const LayoutParam& layoutParam = _root_node->_layout_param;
-    ASSERT(layoutParam.widthType() != LayoutParam::LENGTH_TYPE_PERCENTAGE && layoutParam.height()._type != LayoutParam::LENGTH_TYPE_PERCENTAGE);
-    doUpdate(_root_node, timestamp);
-    YGNodeCalculateLayout(_yg_node, layoutParam.contentWidth(), layoutParam.contentHeight(), YGDirectionLTR);
-    updateLayoutResult(_root_node);
-    return YGNodeIsDirty(_yg_node);
+    return ygNode;
 }
 
 template<typename T, typename U> Optional<T> updateVar(uint64_t timestamp, U& var)
@@ -129,10 +133,9 @@ template<typename T, typename U> Optional<T> updateVar(uint64_t timestamp, U& va
     return Optional<T>();
 }
 
-void YogaLayout::applyLayoutParam(const LayoutParam& layoutParam, YGNodeRef node, uint64_t timestamp)
+void applyLayoutParam(const LayoutParam& layoutParam, YGNodeRef node, uint64_t timestamp)
 {
-    const Optional<float> width = updateVar<float>(timestamp, layoutParam.width()._value);
-    if(width)
+    if(const Optional<float> width = updateVar<float>(timestamp, layoutParam.width()._value))
     {
         if(layoutParam.widthType() == LayoutParam::LENGTH_TYPE_AUTO)
             YGNodeStyleSetWidthAuto(node);
@@ -145,8 +148,7 @@ void YogaLayout::applyLayoutParam(const LayoutParam& layoutParam, YGNodeRef node
         }
     }
 
-    const Optional<float> height = updateVar<float>(timestamp, layoutParam.height()._value);
-    if(height)
+    if(const Optional<float> height = updateVar<float>(timestamp, layoutParam.height()._value))
     {
         if(layoutParam.height()._type == LayoutParam::LENGTH_TYPE_AUTO)
             YGNodeStyleSetHeightAuto(node);
@@ -162,8 +164,7 @@ void YogaLayout::applyLayoutParam(const LayoutParam& layoutParam, YGNodeRef node
     YGNodeStyleSetFlexDirection(node, toYGFlexDirection(layoutParam.flexDirection()));
     YGNodeStyleSetFlexGrow(node, layoutParam.flexGrow());
 
-    const Optional<float> flexBasis = updateVar<float, const SafeVar<Numeric>>(timestamp, layoutParam.flexBasis());
-    if(flexBasis)
+    if(const Optional<float> flexBasis = updateVar<float, const SafeVar<Numeric>>(timestamp, layoutParam.flexBasis()))
     {
         if(layoutParam.flexBasisType() == LayoutParam::LENGTH_TYPE_AUTO)
             YGNodeStyleSetFlexBasisAuto(node);
@@ -203,44 +204,59 @@ void YogaLayout::applyLayoutParam(const LayoutParam& layoutParam, YGNodeRef node
         }
 }
 
-void YogaLayout::updateLayoutResult(Node& layoutNode)
+void updateLayoutResult(const Layout::Hierarchy& hierarchy)
 {
+    Layout::Node& layoutNode = hierarchy._node;
     const auto ygNode = static_cast<YGNodeRef>(layoutNode._tag);
     layoutNode.setPaddings(V4(YGNodeLayoutGetPadding(ygNode, YGEdgeTop), YGNodeLayoutGetPadding(ygNode, YGEdgeRight),
                               YGNodeLayoutGetPadding(ygNode, YGEdgeBottom), YGNodeLayoutGetPadding(ygNode, YGEdgeLeft)));
     layoutNode.setOffsetPosition(V2(YGNodeLayoutGetLeft(ygNode), YGNodeLayoutGetTop(ygNode)));
     layoutNode.setSize(V2(YGNodeLayoutGetWidth(ygNode), YGNodeLayoutGetHeight(ygNode)));
 
-    if(layoutNode._view_hierarchy)
-        for(const View& i : layoutNode._view_hierarchy->updateSlots())
-            updateLayoutResult(i.layoutNode());
+    for(const Layout::Hierarchy& i : hierarchy._child_nodes)
+        updateLayoutResult(i);
 }
 
-YGNodeRef YogaLayout::doInflate(const YogaConfig& config, Node& layoutNode, YGNodeRef parentNode)
+void doUpdate(const Layout::Hierarchy& hierarchy, uint64_t timestamp)
 {
-    YGNodeRef ygNode = config.newNode();
-    layoutNode._tag = ygNode;
-
-    if(parentNode)
-        YGNodeInsertChild(parentNode, ygNode, YGNodeGetChildCount(parentNode));
-
-    if(layoutNode._view_hierarchy)
-        for(const View& i : layoutNode._view_hierarchy->updateSlots())
-            doInflate(config, i.layoutNode(), ygNode);
-
-    return ygNode;
-}
-
-void YogaLayout::doUpdate(Node& layoutNode, uint64_t timestamp)
-{
-    YGNodeRef ygNode = reinterpret_cast<YGNodeRef>(layoutNode._tag);
+    Layout::Node& layoutNode = hierarchy._node;
+    YGNodeRef ygNode = static_cast<YGNodeRef>(layoutNode._tag);
 
     if(layoutNode._layout_param)
         applyLayoutParam(layoutNode._layout_param, ygNode, timestamp);
 
-    if(layoutNode._view_hierarchy)
-        for(const View& i : layoutNode._view_hierarchy->updateSlots())
-            doUpdate(i.layoutNode(), timestamp);
+    for(const Layout::Hierarchy& i : hierarchy._child_nodes)
+        doUpdate(i, timestamp);
+}
+
+class UpdatableYogaLayout : public Updatable {
+public:
+    UpdatableYogaLayout(Layout::Hierarchy hierarchy)
+        : _hierarchy(std::move(hierarchy)), _yg_node(doInflate(Global<YogaConfig>(), _hierarchy, nullptr)) {
+    }
+    ~UpdatableYogaLayout() override {
+        YGNodeFreeRecursive(_yg_node);
+    }
+
+    bool update(uint64_t timestamp) override {
+        const LayoutParam& layoutParam = _hierarchy._node->_layout_param;
+        ASSERT(layoutParam.widthType() != LayoutParam::LENGTH_TYPE_PERCENTAGE && layoutParam.height()._type != LayoutParam::LENGTH_TYPE_PERCENTAGE);
+        doUpdate(_hierarchy, timestamp);
+        YGNodeCalculateLayout(_yg_node, layoutParam.contentWidth(), layoutParam.contentHeight(), YGDirectionLTR);
+        updateLayoutResult(_hierarchy);
+        return YGNodeIsDirty(_yg_node);
+    }
+
+private:
+    Layout::Hierarchy _hierarchy;
+    YGNodeRef _yg_node;
+};
+
+}
+
+sp<Updatable> YogaLayout::inflate(Hierarchy hierarchy)
+{
+    return sp<Updatable>::make<UpdatableYogaLayout>(std::move(hierarchy));
 }
 
 YogaLayout::BUILDER::BUILDER(BeanFactory& factory)
@@ -250,22 +266,6 @@ YogaLayout::BUILDER::BUILDER(BeanFactory& factory)
 sp<Layout> YogaLayout::BUILDER::build(const Scope& args)
 {
     return sp<YogaLayout>::make();
-}
-
-YogaLayout::YogaConfig::YogaConfig()
-    : _config(YGConfigNew())
-{
-    YGConfigSetUseWebDefaults(_config, true);
-}
-
-YogaLayout::YogaConfig::~YogaConfig()
-{
-    YGConfigFree(_config);
-}
-
-YGNodeRef YogaLayout::YogaConfig::newNode() const
-{
-    return YGNodeNewWithConfig(_config);
 }
 
 }

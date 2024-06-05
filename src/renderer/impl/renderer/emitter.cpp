@@ -8,7 +8,6 @@
 #include "core/impl/variable/variable_op2.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/util/boolean_type.h"
-#include "core/util/holder_util.h"
 #include "core/util/operators.h"
 
 #include "graphics/base/layer.h"
@@ -81,7 +80,7 @@ Emitter::Particale::Particale(const sp<Source>& stub, const document& manifest, 
     _size = factory.getBuilder<Size>(manifest, constants::SIZE);
     _transform = factory.getBuilder<Transform>(manifest, constants::TRANSFORM);
     _varyings = factory.getBuilder<Varyings>(manifest, constants::VARYINGS);
-    _disposed = factory.ensureBuilder<Boolean>(manifest, constants::DISPOSED);
+    _disposed = factory.ensureBuilder<Boolean>(manifest, constants::DISCARDED);
 }
 
 uint64_t Emitter::Particale::show(const V3& position, uint64_t tick, const sp<LayerContext>& layerContext)

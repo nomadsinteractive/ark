@@ -15,6 +15,8 @@ class Color;
 class Font;
 class Glyph;
 class Layer;
+class Layout;
+class LayoutParam;
 class Mat2Impl;
 class Mat3Impl;
 class Mat4Impl;

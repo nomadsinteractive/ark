@@ -90,6 +90,7 @@ public:
     };
 
 public:
+[[deprecated]]
 //  [[script::bindings::auto]]
     LayoutParam(const sp<Size>& size, LayoutParam::Display display = LayoutParam::DISPLAY_BLOCK, LayoutParam::Gravity gravity = LayoutParam::GRAVITY_DEFAULT, float grow = 0);
     LayoutParam(Length width, Length height, LayoutParam::FlexDirection flexDirection = LayoutParam::FLEX_DIRECTION_ROW, LayoutParam::FlexWrap flexWrap = LayoutParam::FLEX_WRAP_NOWRAP,
@@ -124,12 +125,6 @@ public:
     LayoutParam::Display display() const;
 //  [[script::bindings::property]]
     void setDisplay(LayoutParam::Display display);
-[[deprecated]]
-//  [[script::bindings::property]]
-    LayoutParam::Gravity gravity() const;
-[[deprecated]]
-//  [[script::bindings::property]]
-    void setGravity(LayoutParam::Gravity gravity);
 
 //  [[script::bindings::property]]
     LayoutParam::LengthType flexBasisType() const;

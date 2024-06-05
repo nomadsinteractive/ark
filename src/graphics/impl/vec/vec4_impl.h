@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_IMPL_VEC_VEC4_H_
-#define ARK_GRAPHICS_IMPL_VEC_VEC4_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/inf/builder.h"
@@ -14,7 +13,7 @@
 
 namespace ark {
 
-class ARK_API Vec4Impl final : public Vec4, public Holder {
+class ARK_API Vec4Impl final : public Vec4 {
 public:
     Vec4Impl() noexcept;
     Vec4Impl(sp<Numeric> v) noexcept;
@@ -22,9 +21,8 @@ public:
     Vec4Impl(sp<Numeric> x, sp<Numeric> y, sp<Numeric> z, sp<Numeric> w) noexcept;
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Vec4Impl);
 
-    virtual V4 val() override;
-    virtual bool update(uint64_t timestamp) override;
-    virtual void traverse(const Visitor& visitor) override;
+    V4 val() override;
+    bool update(uint64_t timestamp) override;
 
     const sp<NumericWrapper>& x() const;
     const sp<NumericWrapper>& y() const;
@@ -39,7 +37,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Vec4> build(const Scope& args) override;
+        sp<Vec4> build(const Scope& args) override;
 
     private:
         SafePtr<Builder<Numeric>> _x, _y, _z, _w;
@@ -51,7 +49,7 @@ public:
     public:
         DICTIONARY(BeanFactory& parent, const String& str);
 
-        virtual sp<Vec4> build(const Scope& args) override;
+        sp<Vec4> build(const Scope& args) override;
 
     private:
         sp<Builder<Numeric>> _x, _y, _z, _w;
@@ -68,5 +66,3 @@ private:
 };
 
 }
-
-#endif

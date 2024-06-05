@@ -5,10 +5,8 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
-
-#include "app/forwarding.h"
-#include "app/inf/layout.h"
-#include "app/traits/layout_param.h"
+#include "graphics/inf/layout.h"
+#include "graphics/traits/layout_param.h"
 
 namespace ark {
 

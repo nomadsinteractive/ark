@@ -69,12 +69,10 @@ public:
         float _line_indent;
     };
 
-private:
     typedef std::vector<sp<Glyph>> GlyphContents;
 
     struct LayoutChar {
-        LayoutChar(sp<Model> model, float widthIntegral, bool isCJK, bool isWordBreak, bool isLineBreak);
-
+        sp<Glyph> _glyph;
         sp<Model> _model;
         float _width_integral;
         bool _is_cjk;
@@ -82,6 +80,7 @@ private:
         bool _is_line_break;
     };
 
+private:
     static bool isCJK(int32_t c);
     static bool isWordBreaker(wchar_t c);
     static GlyphContents makeGlyphs(GlyphMaker& gm, const std::wstring& text);
@@ -110,8 +109,7 @@ private:
         float doLayoutWithoutBoundary(GlyphContents& cm, float& flowx, float flowy);
 
         void createLayerContent(float width, float height);
-        void place(GlyphContents& cm, const std::vector<Text::LayoutChar>& layouts, size_t begin, size_t end, float& flowx, float flowy);
-        void placeOne(Glyph& glyph, const Model& model, float& flowx, float flowy, float* fontHeight = nullptr);
+        void place(const std::vector<Text::LayoutChar>& layouts, size_t begin, size_t end, float& flowx, float flowy);
 
         void nextLine(float fontHeight, float& flowx, float& flowy) const;
 

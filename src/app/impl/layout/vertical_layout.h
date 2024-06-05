@@ -3,9 +3,9 @@
 #include "core/inf/builder.h"
 
 #include "graphics/forwarding.h"
+#include "graphics/traits/layout_param.h"
 
-#include "app/inf/layout.h"
-#include "app/traits/layout_param.h"
+#include "graphics/inf/layout.h"
 
 namespace ark {
 
@@ -13,10 +13,9 @@ class VerticalLayout : public Layout {
 public:
     VerticalLayout(LayoutParam::Align alignItems);
 
-    bool update(uint64_t timestamp) override;
-    void inflate(sp<Node> rootNode) override;
+    sp<Updatable> inflate(Hierarchy hierarchy) override;
 
-//  [[plugin::builder::by-value("vertical")]]
+    //  [[plugin::builder::by-value("vertical")]]
     class BUILDER : public Builder<Layout> {
     public:
         BUILDER(const String& flexDirection);
@@ -28,7 +27,6 @@ public:
     };
 
 private:
-    sp<Node> _root_node;
     LayoutParam::Align _align_items;
 };
 

@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_INF_GLYPH_MAKER_H_
-#define ARK_GRAPHICS_INF_GLYPH_MAKER_H_
+#pragma once
 
 #include <vector>
 #include <string>
@@ -17,5 +16,3 @@ public:
 };
 
 }
-
-#endif

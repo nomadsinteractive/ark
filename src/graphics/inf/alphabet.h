@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_INF_ALPHABET_H_
-#define ARK_GRAPHICS_INF_ALPHABET_H_
+#pragma once
 
 #include "core/types/optional.h"
 
@@ -28,5 +27,3 @@ public:
 };
 
 }
-
-#endif

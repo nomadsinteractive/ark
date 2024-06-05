@@ -4,9 +4,8 @@
 
 #include "graphics/base/rect.h"
 #include "graphics/base/size.h"
-
-#include "app/inf/layout.h"
-#include "app/traits/layout_param.h"
+#include "graphics/inf/layout.h"
+#include "graphics/traits/layout_param.h"
 
 #include "test/base/test_case.h"
 

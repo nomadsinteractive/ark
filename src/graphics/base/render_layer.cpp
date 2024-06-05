@@ -122,7 +122,7 @@ RenderLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, co
 RenderLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext, sp<Builder<ModelLoader>> modelLoader, sp<Builder<Shader>> shader)
     : _resource_loader_context(resourceLoaderContext), _layers(factory.makeBuilderList<Layer>(manifest, constants::LAYER)), _model_loader(std::move(modelLoader)), _shader(shader ? std::move(shader) : Shader::fromDocument(factory, manifest, resourceLoaderContext)),
       _varyings(factory.getConcreteClassBuilder<Varyings>(manifest, constants::VARYINGS)), _visible(factory.getBuilder<Boolean>(manifest, constants::VISIBLE)),
-      _disposed(factory.getBuilder<Boolean>(manifest, constants::DISPOSED)), _scissor(factory.getBuilder<Vec4>(manifest, "scissor"))
+      _disposed(factory.getBuilder<Boolean>(manifest, constants::DISCARDED)), _scissor(factory.getBuilder<Vec4>(manifest, "scissor"))
 {
 }
 

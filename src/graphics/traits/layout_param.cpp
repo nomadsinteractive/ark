@@ -1,4 +1,4 @@
-#include "app/traits/layout_param.h"
+#include "graphics/traits/layout_param.h"
 
 #include "core/inf/variable.h"
 #include "core/util/bean_utils.h"
@@ -108,16 +108,6 @@ LayoutParam::Display LayoutParam::display() const
 void LayoutParam::setDisplay(Display display)
 {
     _display = display;
-}
-
-LayoutParam::Gravity LayoutParam::gravity() const
-{
-    return _gravity;
-}
-
-void LayoutParam::setGravity(LayoutParam::Gravity gravity)
-{
-    _gravity = gravity;
 }
 
 LayoutParam::LengthType LayoutParam::flexBasisType() const

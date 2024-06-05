@@ -7,7 +7,6 @@
 #include "core/types/null.h"
 #include "core/util/string_convert.h"
 #include "core/util/documents.h"
-#include "core/util/holder_util.h"
 #include "core/util/updatable_util.h"
 
 #include "graphics/base/v3.h"

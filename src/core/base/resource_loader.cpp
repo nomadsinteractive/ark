@@ -2,7 +2,6 @@
 
 #include "core/util/documents.h"
 #include "core/util/log.h"
-#include "core/util/holder_util.h"
 
 #include "renderer/base/texture_bundle.h"
 #include "renderer/base/resource_loader_context.h"

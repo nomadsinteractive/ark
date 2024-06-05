@@ -1,11 +1,13 @@
-#include "app/inf/layout.h"
+#include "graphics/inf/layout.h"
 
-#include "app/traits/layout_param.h"
+#include "core/util/updatable_util.h"
+
+#include "graphics/traits/layout_param.h"
 
 namespace ark {
 
-Layout::Node::Node(sp<LayoutParam> layoutParam, sp<ViewHierarchy> viewHierarchy, void* tag)
-    : _layout_param(std::move(layoutParam)), _view_hierarchy(std::move(viewHierarchy)), _tag(tag)
+Layout::Node::Node(sp<LayoutParam> layoutParam, void* tag)
+    : _layout_param(std::move(layoutParam)), _tag(tag)
 {
 }
 
@@ -67,6 +69,17 @@ const WithTimestamp<V2>& Layout::Node::size() const
 void Layout::Node::setSize(const V2& size)
 {
     _size.reset(size);
+}
+
+bool Layout::Node::update(uint32_t timestamp)
+{
+    const bool dirty = UpdatableUtil::update(timestamp, _layout_param->margins(), _layout_param->paddings());
+    if(dirty)
+    {
+        _paddings = _layout_param->paddings().val();
+        _margins = _layout_param->margins().val();
+    }
+    return dirty;
 }
 
 }

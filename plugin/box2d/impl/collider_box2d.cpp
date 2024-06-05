@@ -149,7 +149,7 @@ void ColliderBox2D::setBodyManifest(int32_t id, const BodyCreateInfo& bodyManife
 
 ColliderBox2D::BUILDER_IMPL1::BUILDER_IMPL1(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _factory(factory), _manifest(manifest), _resource_loader_context(resourceLoaderContext), _ppm(factory.ensureBuilder<Vec2>(manifest, "pixel-per-meter")),
-      _gravity(factory.ensureBuilder<Vec2>(manifest, "gravity")), _disposed(factory.getBuilder<Boolean>(manifest, constants::DISPOSED))
+      _gravity(factory.ensureBuilder<Vec2>(manifest, "gravity")), _disposed(factory.getBuilder<Boolean>(manifest, constants::DISCARDED))
 {
     for(const document& i : _manifest->children("import"))
         _importers.push_back({_factory.ensureBuilder<RigidBodyImporter>(i), Documents::ensureAttribute(i, constants::SRC)});

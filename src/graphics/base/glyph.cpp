@@ -6,8 +6,8 @@
 
 namespace ark {
 
-Glyph::Glyph(sp<Integer> type, sp<Vec3> position, sp<Transform> transform, sp<Varyings> varyings, sp<Boolean> visible, sp<Boolean> disposed)
-    : _type(type), _position(std::move(position)), _transform(std::move(transform)), _varyings(std::move(varyings)), _visible(std::move(visible)), _disposed(std::move(disposed)), _character(0)
+Glyph::Glyph(sp<Integer> type, sp<Vec3> position, sp<Transform> transform, sp<Varyings> varyings, sp<Boolean> visible, sp<Boolean> discarded)
+    : _type(type), _position(std::move(position)), _transform(std::move(transform)), _varyings(std::move(varyings)), _visible(std::move(visible)), _discarded(std::move(discarded)), _character(0)
 {
 }
 
@@ -36,9 +36,9 @@ void Glyph::setVaryings(const sp<Varyings>& varyings)
     _varyings = varyings;
 }
 
-const sp<Boolean>& Glyph::disposed() const
+const sp<Boolean>& Glyph::discarded() const
 {
-    return _disposed;
+    return _discarded;
 }
 
 const sp<Boolean>& Glyph::visible() const
@@ -48,7 +48,7 @@ const sp<Boolean>& Glyph::visible() const
 
 sp<RenderObject> Glyph::toRenderObject() const
 {
-    return sp<RenderObject>::make(_type, toRenderObjectPosition(), sp<Size>::make(_layout_size.x(), _layout_size.y()), _transform, _varyings, _visible, _disposed);
+    return sp<RenderObject>::make(_type, toRenderObjectPosition(), sp<Size>::make(_layout_size.x(), _layout_size.y()), _transform, _varyings, _visible, _discarded);
 }
 
 sp<Vec3> Glyph::toRenderObjectPosition() const

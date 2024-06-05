@@ -11,7 +11,7 @@ namespace ark {
 class ARK_API Glyph {
 public:
 //  [[script::bindings::auto]]
-    Glyph(sp<Integer> type, sp<Vec3> position = nullptr, sp<Transform> transform = nullptr, sp<Varyings> varyings = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> disposed = nullptr);
+    Glyph(sp<Integer> type, sp<Vec3> position = nullptr, sp<Transform> transform = nullptr, sp<Varyings> varyings = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> discarded = nullptr);
 
 //  [[script::bindings::property]]
     const sp<Integer>& type() const;
@@ -24,7 +24,7 @@ public:
 //  [[script::bindings::property]]
     void setVaryings(const sp<Varyings>& varyings);
 //  [[script::bindings::property]]
-    const sp<Boolean>& disposed() const;
+    const sp<Boolean>& discarded() const;
 //  [[script::bindings::property]]
     const sp<Boolean>& visible() const;
 
@@ -46,7 +46,7 @@ private:
     sp<Transform> _transform;
     sp<Varyings> _varyings;
     sp<Boolean> _visible;
-    sp<Boolean> _disposed;
+    sp<Boolean> _discarded;
 
     wchar_t _character;
     V3 _layout_position;

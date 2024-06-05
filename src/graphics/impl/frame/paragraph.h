@@ -9,7 +9,6 @@
 
 #include "renderer/forwarding.h"
 
-#include "app/traits/layout_param.h"
 
 namespace ark {
 

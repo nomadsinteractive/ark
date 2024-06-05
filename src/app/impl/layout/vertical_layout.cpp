@@ -6,39 +6,51 @@
 
 namespace ark {
 
+namespace {
+
+class UpdatableVerticalLayout : public Updatable {
+public:
+    UpdatableVerticalLayout(Layout::Hierarchy hierarchy, LayoutParam::Align alignItems)
+        : _hierarchy(std::move(hierarchy)), _align_items(alignItems) {
+    }
+
+    bool update(uint64_t timestamp) override {
+        float totalHeight = 0;
+        for(const auto& [node, child_nodes] : _hierarchy._child_nodes) {
+            DCHECK_WARN(child_nodes.empty(), "VerticalLayout is not a recursively layout for now");
+            node->update(timestamp);
+            totalHeight += node->occupyHeight();
+        }
+
+        const Layout::Node& rootNode = *_hierarchy._node;
+        const V2 layoutOffsetPos = rootNode.offsetPosition();
+        LayoutParam::JustifyContent justifyContent = rootNode._layout_param->justifyContent();
+        const auto [start, space] = LayoutUtil::calcFlowDirection(justifyContent, rootNode.contentHeight(), totalHeight, _hierarchy._child_nodes.size());
+        float y = start;
+        for(const auto& [node, child_nodes] : _hierarchy._child_nodes) {
+            Layout::Node& layoutNode = *node;
+            float x = LayoutUtil::calcItemOffsetX(_align_items, rootNode, layoutNode);
+            layoutNode.setOffsetPosition(layoutOffsetPos + V2(x, y));
+            y += (layoutNode.occupyHeight() + space);
+        }
+        return true;
+    }
+
+private:
+    Layout::Hierarchy _hierarchy;
+    LayoutParam::Align _align_items;
+};
+
+}
+
 VerticalLayout::VerticalLayout(LayoutParam::Align alignItems)
     : _align_items(alignItems)
 {
 }
 
-bool VerticalLayout::update(uint64_t timestamp)
+sp<Updatable> VerticalLayout::inflate(Hierarchy hierarchy)
 {
-    DCHECK(_root_node->_view_hierarchy, "");
-
-    const Node& rootNode = *_root_node;
-    const std::vector<sp<View>>& childNodes = rootNode._view_hierarchy->updateSlotsAndLayoutNodes();
-
-    float totalHeight = 0;
-    for(const View& i : childNodes)
-        totalHeight += i.layoutNode()->occupyHeight();
-
-    const V2 layoutOffsetPos = rootNode.offsetPosition();
-    LayoutParam::JustifyContent justifyContent = rootNode._layout_param->justifyContent();
-    const auto [start, space] = LayoutUtil::calcFlowDirection(justifyContent, rootNode.contentHeight(), totalHeight, childNodes.size());
-    float y = start;
-    for(const View& i : childNodes)
-    {
-        Node& layoutNode = i.layoutNode();
-        float x = LayoutUtil::calcItemOffsetX(_align_items, rootNode, layoutNode);
-        layoutNode.setOffsetPosition(layoutOffsetPos + V2(x, y));
-        y += (layoutNode.occupyHeight() + space);
-    }
-    return true;
-}
-
-void VerticalLayout::inflate(sp<Node> rootNode)
-{
-    _root_node = std::move(rootNode);
+    return sp<Updatable>::make<UpdatableVerticalLayout>(std::move(hierarchy), _align_items);
 }
 
 sp<Layout> VerticalLayout::BUILDER::build(const Scope& /*args*/)

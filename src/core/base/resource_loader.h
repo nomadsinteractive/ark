@@ -9,7 +9,6 @@
 #include "core/inf/holder.h"
 #include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
-#include "core/util/holder_util.h"
 
 namespace ark {
 
