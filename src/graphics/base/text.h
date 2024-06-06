@@ -71,22 +71,7 @@ public:
 
     typedef std::vector<sp<Glyph>> GlyphContents;
 
-    struct LayoutChar {
-        sp<Glyph> _glyph;
-        sp<Model> _model;
-        float _width_integral;
-        bool _is_cjk;
-        bool _is_word_break;
-        bool _is_line_break;
-    };
-
-private:
-    static bool isCJK(int32_t c);
-    static bool isWordBreaker(wchar_t c);
-    static GlyphContents makeGlyphs(GlyphMaker& gm, const std::wstring& text);
-
-    class Content {
-    public:
+    struct Content {
         Content(sp<RenderLayer> renderLayer, sp<StringVar> string, sp<GlyphMaker> glyphMaker, float textScale, float letterSpacing, float lineHeight, float lineIndent);
 
         bool update(uint64_t timestamp);
@@ -102,23 +87,18 @@ private:
         void createContent();
         void createRichContent(const Scope& args, BeanFactory& factory);
 
-    private:
         float doLayoutContent(GlyphContents& cm, float& flowx, float& flowy, float boundary);
         float doCreateRichContent(GlyphContents& cm, GlyphMaker& gm, const document& richtext, BeanFactory& factory, const Scope& args, float& flowx, float& flowy, float boundary);
         float doLayoutWithBoundary(GlyphContents& cm, float& flowx, float& flowy, float boundary);
         float doLayoutWithoutBoundary(GlyphContents& cm, float& flowx, float flowy);
 
         void createLayerContent(float width, float height);
-        void place(const std::vector<Text::LayoutChar>& layouts, size_t begin, size_t end, float& flowx, float flowy);
 
         void nextLine(float fontHeight, float& flowx, float& flowy) const;
 
         float getFlowY() const;
         float getLayoutBoundary() const;
 
-        std::vector<Text::LayoutChar> toLayoutCharacters(const GlyphContents& glyphs) const;
-
-    private:
         sp<RenderLayer> _render_layer;
         sp<StringVar> _string;
         sp<LayerContext> _layer_context;
@@ -138,19 +118,6 @@ private:
 
         sp<VariableWrapper<V3>> _position;
         std::vector<sp<RenderObject>> _render_objects;
-
-        friend class Text;
-    };
-
-    class RenderBatchContent : public RenderBatch {
-    public:
-        RenderBatchContent(sp<Content> content, sp<Boolean> discarded);
-
-        std::vector<sp<LayerContext>>& snapshot(const RenderRequest& renderRequest) override;
-
-    private:
-        sp<Content> _content;
-        std::vector<sp<LayerContext>> _layer_contexts;
     };
 
 private:

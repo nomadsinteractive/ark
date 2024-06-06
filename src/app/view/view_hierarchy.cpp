@@ -90,7 +90,7 @@ const std::vector<sp<View>>& ViewHierarchy::updateSlots()
 void ViewHierarchy::addView(sp<View> view)
 {
     ASSERT(view);
-    _incremental.push_back(sp<View>::make(std::move(view)));
+    _incremental.push_back(std::move(view));
 }
 
 }
