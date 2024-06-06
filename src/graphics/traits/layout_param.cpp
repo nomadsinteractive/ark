@@ -19,14 +19,9 @@ template<> ARK_API LayoutParam::Display StringConvert::eval<LayoutParam::Display
     return LayoutParam::DISPLAY_BLOCK;
 }
 
-LayoutParam::LayoutParam(const sp<Size>& size, Display display, Gravity gravity, float grow)
-    : _width(LENGTH_TYPE_PIXEL, size->width()), _height(LENGTH_TYPE_PIXEL, size->height()), _display(display), _gravity(gravity), _flex_grow(grow)
-{
-}
-
-LayoutParam::LayoutParam(Length width, Length height, FlexDirection flexDirection, FlexWrap flexWrap, JustifyContent justifyContent, Align alignItems, Align alignSelf,
+LayoutParam::LayoutParam(Length width, Length height, sp<Layout> layout, FlexDirection flexDirection, FlexWrap flexWrap, JustifyContent justifyContent, Align alignItems, Align alignSelf,
                          Align alignContent, Display display, float flexGrow, Length flexBasis, sp<Vec4> margins, sp<Vec4> paddings, sp<Vec3> position)
-    : _width(std::move(width)), _height(std::move(height)), _flex_direction(flexDirection), _flex_wrap(flexWrap), _justify_content(justifyContent), _align_items(alignItems), _align_self(alignSelf), _align_content(alignContent),
+    : _width(std::move(width)), _height(std::move(height)), _layout(std::move(layout)), _flex_direction(flexDirection), _flex_wrap(flexWrap), _justify_content(justifyContent), _align_items(alignItems), _align_self(alignSelf), _align_content(alignContent),
       _display(display), _flex_basis(std::move(flexBasis)), _flex_grow(flexGrow), _margins(std::move(margins)), _paddings(std::move(paddings)), _position(std::move(position))
 {
 }
@@ -36,12 +31,22 @@ bool LayoutParam::update(uint64_t timestamp)
     return _timestamp.update(timestamp) || UpdatableUtil::update(timestamp, _width, _height, _margins, _paddings, _flex_basis);
 }
 
+const sp<Layout>& LayoutParam::layout() const
+{
+    return _layout;
+}
+
+void LayoutParam::setLayout(sp<Layout> layout)
+{
+    _layout = std::move(layout);
+}
+
 float LayoutParam::calcLayoutWidth(float available)
 {
     const V4 margins = _margins.val();
     if(isMatchParent(_width))
     {
-        _width._value.reset(sp<Numeric::Const>::make(available - margins.w() - margins.y()));
+        _width._value.reset(sp<Numeric>::make<Numeric::Const>(available - margins.w() - margins.y()));
         return available;
     }
     return _width._value.val() + margins.w() + margins.y();
@@ -52,7 +57,7 @@ float LayoutParam::calcLayoutHeight(float available)
     const V4 margins = _margins.val();
     if(isMatchParent(_height))
     {
-        _height._value.reset(sp<Numeric::Const>::make(available - margins.x() - margins.z()));
+        _height._value.reset(sp<Numeric>::make<Numeric::Const>(available - margins.x() - margins.z()));
         return available;
     }
     return _height._value.val() + margins.x() + margins.z();
@@ -63,7 +68,7 @@ float LayoutParam::contentWidth() const
     return std::max(_width._value.val(), 0.0f);
 }
 
-float LayoutParam::offsetWidth() const
+float LayoutParam::occupyWidth() const
 {
     const V4 margins = _margins.val();
     return contentWidth() + margins.w() + margins.y();
@@ -79,7 +84,7 @@ float LayoutParam::contentHeight() const
     return std::max(_height._value.val(), 0.0f);
 }
 
-float LayoutParam::offsetHeight() const
+float LayoutParam::occupyHeight() const
 {
     const V4 margins = _margins.val();
     return contentHeight() + margins.x() + margins.z();
@@ -318,7 +323,7 @@ static sp<Builder<LayoutParam::Length>> getLengthBuilder(BeanFactory& factory, c
 }
 
 LayoutParam::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _width(getLengthBuilder(factory, manifest, "width")), _height(getLengthBuilder(factory, manifest, "height")),
+    : _width(getLengthBuilder(factory, manifest, "width")), _height(getLengthBuilder(factory, manifest, "height")), _layout(factory.getBuilder<Layout>(manifest, constants::LAYOUT)),
       _flex_direction(Documents::getAttribute<FlexDirection>(manifest, "flex-direction", FLEX_DIRECTION_ROW)), _flex_wrap(Documents::getAttribute<FlexWrap>(manifest, "flex-wrap", FLEX_WRAP_NOWRAP)),
       _justify_content(Documents::getAttribute<JustifyContent>(manifest, "justify-content", JUSTIFY_CONTENT_FLEX_START)), _align_items(Documents::getAttribute<Align>(manifest, "align-items", ALIGN_STRETCH)),
       _align_self(Documents::getAttribute<Align>(manifest, "align-self", ALIGN_AUTO)), _align_content(Documents::getAttribute<Align>(manifest, "align-content", ALIGN_FLEX_START)),
@@ -336,13 +341,8 @@ sp<LayoutParam> LayoutParam::BUILDER::build(const Scope& args)
     sp<Vec3> position = _position->build(args);
     Length width = size ? Length(LENGTH_TYPE_PIXEL, size->width()) : _width ? _width->build(args) : Length();
     Length height = size ? Length(LENGTH_TYPE_PIXEL, size->height()) : _height ? _height->build(args) : Length();
-    return sp<LayoutParam>::make(std::move(width), std::move(height), _flex_direction, _flex_wrap, _justify_content, _align_items, _align_self, _align_content, _display, _flex_grow,
+    return sp<LayoutParam>::make(std::move(width), std::move(height), _layout->build(args), _flex_direction, _flex_wrap, _justify_content, _align_items, _align_self, _align_content, _display, _flex_grow,
                                  LayoutParam::Length(), std::move(margins), std::move(paddings), std::move(position));
-}
-
-template<> ARK_API sp<LayoutParam> Null::safePtr()
-{
-    return sp<LayoutParam>::make(sp<Size>::make(0, 0, 0));
 }
 
 template<> ARK_API LayoutParam::Gravity StringConvert::eval<LayoutParam::Gravity>(const String& s)

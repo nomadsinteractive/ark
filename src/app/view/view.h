@@ -20,7 +20,7 @@ namespace ark {
 
 class ARK_API View final : public Wirable {
 public:
-    View(const sp<LayoutParam>& layoutParam, sp<RenderObjectWithLayer> background = nullptr, sp<Text> text = nullptr, sp<Layout> layout = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> discarded = nullptr);
+    View(sp<LayoutParam> layoutParam, sp<RenderObjectWithLayer> background = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> discarded = nullptr);
     ~View() override;
 
     TypeId onWire(WiringContext& context) override;
@@ -59,7 +59,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<View> build(const Scope& args) override;
+        sp<View> build(const Scope& args) override;
 
     private:
         BeanFactory _factory;
@@ -67,15 +67,12 @@ public:
 
         SafePtr<Builder<Boolean>> _discarded;
         SafePtr<Builder<Boolean>> _visible;
-        SafePtr<Builder<Layout>> _layout;
         SafePtr<Builder<RenderObjectWithLayer>> _background;
-        SafePtr<Builder<Text>> _text;
         sp<Builder<LayoutParam>> _layout_param;
     };
 
-    struct Stub : public Updatable {
-        Stub();
-        Stub(sp<LayoutParam> layoutParam, sp<ViewHierarchy> viewHierarchy, sp<Boolean> visible, sp<Boolean> discarded);
+    struct Stub : Updatable {
+        Stub(sp<LayoutParam> layoutParam, sp<Boolean> visible, sp<Boolean> discarded);
 
         bool update(uint64_t timestamp) override;
 
@@ -159,7 +156,6 @@ private:
 protected:
     sp<Stub> _stub;
     sp<RenderObjectWithLayer> _background;
-    sp<Text> _text;
 
     sp<EventListener> _on_move;
     sp<IsDiscarded> _is_discarded;

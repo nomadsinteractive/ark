@@ -48,13 +48,7 @@ const sp<Boolean>& Glyph::visible() const
 
 sp<RenderObject> Glyph::toRenderObject() const
 {
-    return sp<RenderObject>::make(_type, toRenderObjectPosition(), sp<Size>::make(_occupy_size.x(), _occupy_size.y()), _transform, _varyings, _visible, _discarded);
-}
-
-sp<Vec3> Glyph::toRenderObjectPosition() const
-{
-    sp<Vec3> layoutPosition = sp<Vec3>::make<Vec3::Const>(_layout_position);
-    return _position ? Vec3Type::add(_position, std::move(layoutPosition)) : layoutPosition;
+    return sp<RenderObject>::make(_type, _position, sp<Size>::make(_occupy_size.x(), _occupy_size.y()), _transform, _varyings, _visible, _discarded);
 }
 
 wchar_t Glyph::character() const
@@ -65,16 +59,6 @@ wchar_t Glyph::character() const
 void Glyph::setCharacter(wchar_t character)
 {
     _character = character;
-}
-
-const V3& Glyph::layoutPosition() const
-{
-    return _layout_position;
-}
-
-void Glyph::setLayoutPosition(const V3& layoutPosition)
-{
-    _layout_position = layoutPosition;
 }
 
 const V2& Glyph::occupySize() const

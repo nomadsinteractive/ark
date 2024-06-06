@@ -29,13 +29,9 @@ public:
     const sp<Boolean>& visible() const;
 
     sp<RenderObject> toRenderObject() const;
-    sp<Vec3> toRenderObjectPosition() const;
 
     wchar_t character() const;
     void setCharacter(wchar_t character);
-
-    const V3& layoutPosition() const;
-    void setLayoutPosition(const V3& layoutPosition);
 
     const V2& occupySize() const;
     void setOccupySize(const V2& layoutSize);
@@ -49,7 +45,6 @@ private:
     sp<Boolean> _discarded;
 
     wchar_t _character;
-    V3 _layout_position;
     V2 _occupy_size;
 };
 

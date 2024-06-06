@@ -15,8 +15,7 @@ namespace unittest {
 class LayoutsTestCase : public TestCase {
 public:
     LayoutsTestCase()
-        : TestCase("layouts.xml"), _client_layout_param(sp<Size>::make(100.0f, 100.0f)), _layout_param(sp<Size>::make(20.0f, 20.0f)) {
-
+        : TestCase("layouts.xml") {
     }
 
     virtual int launch() {
@@ -133,8 +132,8 @@ private:
 */
 
 private:
-    LayoutParam _client_layout_param;
-    LayoutParam _layout_param;
+    // LayoutParam _client_layout_param;
+    // LayoutParam _layout_param;
 };
 
 }

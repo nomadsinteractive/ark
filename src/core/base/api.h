@@ -110,6 +110,7 @@ const char* const VARYINGS = "varyings";
 const char* const FOREGROUND = "foreground";
 const char* const GRAVITY = "gravity";
 const char* const LAYOUT = "layout";
+const char* const LAYOUT_PARAM = "layout-param";
 const char* const LAYER = "layer";
 const char* const MODEL = "model";
 const char* const NAME = "name";

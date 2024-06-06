@@ -91,10 +91,7 @@ public:
     };
 
 public:
-[[deprecated]]
-//  [[script::bindings::auto]]
-    LayoutParam(const sp<Size>& size, LayoutParam::Display display = LayoutParam::DISPLAY_BLOCK, LayoutParam::Gravity gravity = LayoutParam::GRAVITY_DEFAULT, float grow = 0);
-    LayoutParam(Length width, Length height, LayoutParam::FlexDirection flexDirection = LayoutParam::FLEX_DIRECTION_ROW, LayoutParam::FlexWrap flexWrap = LayoutParam::FLEX_WRAP_NOWRAP,
+    LayoutParam(Length width, Length height, sp<Layout> layout = nullptr, LayoutParam::FlexDirection flexDirection = LayoutParam::FLEX_DIRECTION_ROW, LayoutParam::FlexWrap flexWrap = LayoutParam::FLEX_WRAP_NOWRAP,
                 LayoutParam::JustifyContent justifyContent = LayoutParam::JUSTIFY_CONTENT_FLEX_START, LayoutParam::Align alignItems = LayoutParam::ALIGN_STRETCH,
                 LayoutParam::Align alignSelf = LayoutParam::ALIGN_AUTO, LayoutParam::Align alignContent = LayoutParam::ALIGN_STRETCH,
                 LayoutParam::Display display = LayoutParam::DISPLAY_BLOCK, float flexGrow = 0, Length flexBasis = Length(), sp<Vec4> margins = nullptr, sp<Vec4> paddings = nullptr,
@@ -102,6 +99,9 @@ public:
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(LayoutParam);
 
     bool update(uint64_t timestamp) override;
+
+    const sp<Layout>& layout() const;
+    void setLayout(sp<Layout> layout);
 
     float calcLayoutWidth(float available);
     float calcLayoutHeight(float available);
@@ -116,8 +116,8 @@ public:
 //  [[script::bindings::property]]
     void setContentHeight(float contentHeight);
 
-    float offsetWidth() const;
-    float offsetHeight() const;
+    float occupyWidth() const;
+    float occupyHeight() const;
 
     const sp<Boolean>& stopPropagation() const;
     void setStopPropagation(sp<Boolean> stopPropagation);
@@ -198,11 +198,12 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<LayoutParam> build(const Scope& args) override;
+        sp<LayoutParam> build(const Scope& args) override;
 
     private:
         sp<Builder<Length>> _width;
         sp<Builder<Length>> _height;
+        SafePtr<Builder<Layout>> _layout;
         FlexDirection _flex_direction;
         FlexWrap _flex_wrap;
         JustifyContent _justify_content;
@@ -222,6 +223,7 @@ public:
 private:
     Length _width;
     Length _height;
+    sp<Layout> _layout;
 
     FlexDirection _flex_direction;
     FlexWrap _flex_wrap;

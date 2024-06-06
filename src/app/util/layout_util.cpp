@@ -36,8 +36,8 @@ V2 LayoutUtil::inflate(const std::vector<sp<LayoutParam>>& slots)
     float width = 0, height = 0;
     for(const LayoutParam& i : slots)
     {
-        width = std::max(width, i.offsetWidth());
-        height = std::max(height, i.offsetHeight());
+        width = std::max(width, i.occupyWidth());
+        height = std::max(height, i.occupyHeight());
     }
     return V2(width, height);
 }

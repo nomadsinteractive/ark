@@ -9,6 +9,8 @@ namespace ark {
 Layout::Node::Node(sp<LayoutParam> layoutParam, void* tag)
     : _layout_param(std::move(layoutParam)), _tag(tag)
 {
+    if(_layout_param)
+        setSize(V2(_layout_param->contentWidth(), _layout_param->contentHeight()));
 }
 
 float Layout::Node::contentWidth() const

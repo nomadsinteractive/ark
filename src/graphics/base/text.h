@@ -1,7 +1,5 @@
 #pragma once
 
-#include <deque>
-#include <string>
 #include <vector>
 
 #include "core/base/api.h"
@@ -20,7 +18,7 @@ namespace ark {
 class ARK_API Text {
 public:
 //  [[script::bindings::auto]]
-    Text(sp<RenderLayer> renderLayer, sp<StringVar> content = nullptr, sp<GlyphMaker> glyphMaker = nullptr, float letterScale = 1.0f, float letterSpacing = 0.0f, float lineHeight = 0.0f, float lineIndent = 0.0f);
+    Text(sp<RenderLayer> renderLayer, sp<StringVar> content = nullptr, sp<LayoutParam> layoutParam = nullptr, sp<GlyphMaker> glyphMaker = nullptr, float letterScale = 1.0f, float letterSpacing = 0.0f, float lineHeight = 0.0f, float lineIndent = 0.0f);
 
 //  [[script::bindings::property]]
     const std::vector<sp<RenderObject>>& contents() const;
@@ -61,6 +59,7 @@ public:
     private:
         sp<Builder<RenderLayer>> _render_layer;
         SafePtr<Builder<StringVar>> _text;
+        SafePtr<Builder<LayoutParam>> _layout_param;
         SafePtr<Builder<GlyphMaker>> _glyph_maker;
 
         sp<Builder<String>> _text_scale;

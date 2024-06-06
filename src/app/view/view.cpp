@@ -63,15 +63,12 @@ static V2 toPivotPosition(const sp<Boundaries>& occupies, const V2& size)
     return size * V2(Math::lerp(0, size.x(), occupyAABBMin.x(), occupyAABBMax.x(), 0), Math::lerp(0, size.y(), occupyAABBMin.y(), occupyAABBMax.y(), 0));
 }
 
-View::View(const sp<LayoutParam>& layoutParam, sp<RenderObjectWithLayer> background, sp<Text> text, sp<Layout> layout, sp<Boolean> visible, sp<Boolean> discarded)
-    : _stub(sp<Stub>::make(layoutParam, layout ? sp<ViewHierarchy>::make(std::move(layout)) : nullptr, std::move(visible), std::move(discarded))),
-      _background(std::move(background)), _text(std::move(text)), _is_discarded(sp<IsDiscarded>::make(_stub)), _updatable_view(sp<UpdatableOncePerFrame>::make(_stub)),
-      _updatable_layout(sp<UpdatableOncePerFrame>::make(sp<UpdatableIsolatedLayout>::make(_stub)))
+View::View(sp<LayoutParam> layoutParam, sp<RenderObjectWithLayer> background, sp<Boolean> visible, sp<Boolean> discarded)
+    : _stub(sp<Stub>::make(std::move(layoutParam), std::move(visible), std::move(discarded))), _background(std::move(background)), _is_discarded(sp<IsDiscarded>::make(_stub)),
+      _updatable_view(sp<UpdatableOncePerFrame>::make(_stub)), _updatable_layout(sp<UpdatableOncePerFrame>::make(sp<UpdatableIsolatedLayout>::make(_stub)))
 {
     if(_background)
         addRenderObjectWithLayer(_background, true);
-
-    _stub->_layout_node->setSize(V2(layoutParam->contentWidth(), layoutParam->contentHeight()));
 }
 
 View::~View()
@@ -101,25 +98,6 @@ void View::addRenderObjectWithLayer(sp<RenderObjectWithLayer> ro, bool isBackgro
 bool View::updateLayout(uint64_t timestamp) const
 {
     return _updatable_view->update(timestamp);
-}
-
-void View::updateTextLayout(uint64_t timestamp)
-{
-    if(_text && (!timestamp || _text->update(timestamp)))
-    {
-        LayoutParam& layoutParam = _stub->_layout_node->_layout_param;
-        Size& size = _text->size();
-        if(layoutParam.widthType() == LayoutParam::LENGTH_TYPE_AUTO)
-        {
-            layoutParam.setWidthType(LayoutParam::LENGTH_TYPE_PIXEL);
-            layoutParam.setWidth(size.width());
-        }
-        if(layoutParam.height()._type == LayoutParam::LENGTH_TYPE_AUTO)
-        {
-            layoutParam.setHeightType(LayoutParam::LENGTH_TYPE_PIXEL);
-            layoutParam.setHeight(size.height());
-        }
-    }
 }
 
 const sp<Layout::Node>& View::layoutNode() const
@@ -184,14 +162,13 @@ void View::markAsTopView()
 
 View::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _factory(factory), _manifest(manifest), _discarded(factory.getBuilder<Boolean>(manifest, constants::DISCARDED)), _visible(factory.getBuilder<Boolean>(manifest, constants::VISIBLE)),
-      _layout(factory.getBuilder<Layout>(manifest, "layout")), _background(factory.getBuilder<RenderObjectWithLayer>(manifest, constants::BACKGROUND)), _text(factory.getBuilder<Text>(manifest, constants::TEXT)),
-      _layout_param(factory.ensureConcreteClassBuilder<LayoutParam>(manifest, "layout-param"))
+      _background(factory.getBuilder<RenderObjectWithLayer>(manifest, constants::BACKGROUND)), _layout_param(factory.ensureConcreteClassBuilder<LayoutParam>(manifest, "layout-param"))
 {
 }
 
 sp<View> View::BUILDER::build(const Scope& args)
 {
-    sp<View> view = sp<View>::make(_layout_param->build(args), _background->build(args), _text->build(args), _layout->build(args), _visible->build(args), _discarded->build(args));
+    sp<View> view = sp<View>::make(_layout_param->build(args), _background->build(args), _visible->build(args), _discarded->build(args));
     for(const document& i : _manifest->children())
     {
         const String& name = i->name();
@@ -205,13 +182,8 @@ sp<View> View::BUILDER::build(const Scope& args)
     return view;
 }
 
-View::Stub::Stub()
-    : _layout_node(sp<Layout::Node>::make(sp<LayoutParam>::make(LayoutParam::Length(), LayoutParam::Length()), nullptr)), _visible(nullptr, false), _discarded(nullptr, false), _top_view(true)
-{
-}
-
-View::Stub::Stub(sp<LayoutParam> layoutParam, sp<ViewHierarchy> viewHierarchy, sp<Boolean> visible, sp<Boolean> discarded)
-    : _hierarchy(std::move(viewHierarchy)), _layout_node(sp<Layout::Node>::make(std::move(layoutParam))), _visible(std::move(visible), true), _discarded(std::move(discarded), false), _top_view(false)
+View::Stub::Stub(sp<LayoutParam> layoutParam, sp<Boolean> visible, sp<Boolean> discarded)
+    : _hierarchy(layoutParam->layout() ? sp<ViewHierarchy>::make(layoutParam->layout()) : nullptr), _layout_node(sp<Layout::Node>::make(std::move(layoutParam))), _visible(std::move(visible), true), _discarded(std::move(discarded), false), _top_view(false)
 {
 }
 
