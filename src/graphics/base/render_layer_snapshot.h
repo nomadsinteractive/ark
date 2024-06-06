@@ -53,7 +53,7 @@ public:
     bool addDisposedState(LayerContext& lc, void* stateKey);
 
     void addDisposedLayerContext(LayerContext& lc);
-    void addDisposedLayerContexts(const std::vector<sp<LayerContext>>& layerContexts);
+    void addDiscardedLayerContexts(const std::vector<sp<LayerContext>>& layerContexts);
 
     sp<RenderCommand> toRenderCommand(const RenderRequest& renderRequest, Buffer::Snapshot vertices, Buffer::Snapshot indices, uint32_t drawCount, DrawingParams params);
 

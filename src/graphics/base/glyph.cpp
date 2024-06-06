@@ -48,7 +48,7 @@ const sp<Boolean>& Glyph::visible() const
 
 sp<RenderObject> Glyph::toRenderObject() const
 {
-    return sp<RenderObject>::make(_type, toRenderObjectPosition(), sp<Size>::make(_layout_size.x(), _layout_size.y()), _transform, _varyings, _visible, _discarded);
+    return sp<RenderObject>::make(_type, toRenderObjectPosition(), sp<Size>::make(_occupy_size.x(), _occupy_size.y()), _transform, _varyings, _visible, _discarded);
 }
 
 sp<Vec3> Glyph::toRenderObjectPosition() const
@@ -77,14 +77,14 @@ void Glyph::setLayoutPosition(const V3& layoutPosition)
     _layout_position = layoutPosition;
 }
 
-const V2& Glyph::layoutSize() const
+const V2& Glyph::occupySize() const
 {
-    return _layout_size;
+    return _occupy_size;
 }
 
-void Glyph::setLayoutSize(const V2& layoutSize)
+void Glyph::setOccupySize(const V2& layoutSize)
 {
-    _layout_size = layoutSize;
+    _occupy_size = layoutSize;
 }
 
 }

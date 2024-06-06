@@ -86,7 +86,7 @@ public:
     public:
         RENDERER_BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<Renderer> build(const Scope& args) override;
+        sp<Renderer> build(const Scope& args) override;
 
     private:
         BUILDER _impl;

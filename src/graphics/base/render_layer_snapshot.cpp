@@ -85,7 +85,7 @@ void RenderLayerSnapshot::addDisposedLayerContext(LayerContext& lc)
     lc._element_states.clear();
 }
 
-void RenderLayerSnapshot::addDisposedLayerContexts(const std::vector<sp<LayerContext>>& layerContexts)
+void RenderLayerSnapshot::addDiscardedLayerContexts(const std::vector<sp<LayerContext>>& layerContexts)
 {
     for(LayerContext& lc : layerContexts)
         addDisposedLayerContext(lc);

@@ -6,6 +6,7 @@
 #include "core/base/resource_loader.h"
 #include "core/inf/array.h"
 #include "core/inf/variable.h"
+#include "core/types/global.h"
 #include "core/util/bean_utils.h"
 #include "core/util/math.h"
 #include "core/util/string_type.h"
@@ -28,9 +29,11 @@
 #include "renderer/inf/model_loader.h"
 
 #include "app/base/application_context.h"
+#include "graphics/traits/layout_param.h"
 
 namespace ark {
 
+typedef std::vector<sp<Glyph>> GlyphContents;
 namespace {
 
 struct LayoutChar {
@@ -54,7 +57,7 @@ bool isWordBreaker(wchar_t c)
     return c != '_' && !std::iswalpha(c);
 }
 
-std::vector<LayoutChar> toLayoutCharacters(const Text::GlyphContents& glyphs, float letterScale, ModelLoader& modelLoader)
+std::vector<LayoutChar> toLayoutCharacters(const GlyphContents& glyphs, float letterScale, ModelLoader& modelLoader)
 {
     std::unordered_map<wchar_t, std::tuple<sp<Model>, bool, bool>> mmap;
     const float xScale = letterScale;
@@ -87,9 +90,9 @@ std::vector<LayoutChar> toLayoutCharacters(const Text::GlyphContents& glyphs, fl
     return layoutChars;
 }
 
-Text::GlyphContents makeGlyphs(GlyphMaker& gm, const std::wstring& text)
+GlyphContents makeGlyphs(GlyphMaker& gm, const std::wstring& text)
 {
-    Text::GlyphContents glyphs = gm.makeGlyphs(text);
+    GlyphContents glyphs = gm.makeGlyphs(text);
     CHECK(glyphs.size() == text.size(), "Bad GlyphMaker result returned, size mismatch(%d, %d), text: %s", glyphs.size(), text.size(), Strings::toUTF8(text).c_str());
     for(size_t i = 0; i < text.size(); ++i)
         glyphs.at(i)->setCharacter(text.at(i));
@@ -102,15 +105,15 @@ void placeOne(float letterScale, const LayoutChar& layoutChar , float& flowx, fl
     const V2 scale = V2(letterScale);
     const Boundaries& bounds = model.content();
     const Boundaries& occupies = model.occupy();
-    const V2 bitmapCoverSize = scale * bounds.size()->val();
+    const V2 bitmapContentSize = scale * bounds.size()->val();
     const V2 bitmapOccupySize = scale * occupies.size()->val();
     const V2 bitmapPos = -scale * occupies.aabbMin()->val();
     if(fontHeight)
         *fontHeight = std::max(bitmapOccupySize.y(), *fontHeight);
 
     Glyph& glyph = layoutChar._glyph;
-    glyph.setLayoutPosition(V3(flowx + bitmapPos.x(), flowy + bitmapOccupySize.y() - bitmapPos.y() - bitmapCoverSize.y(), 0));
-    glyph.setLayoutSize(bitmapCoverSize);
+    glyph.setLayoutPosition(V3(flowx + bitmapPos.x(), flowy + bitmapOccupySize.y() - bitmapPos.y() - bitmapContentSize.y(), 0));
+    glyph.setOccupySize(bitmapOccupySize);
     flowx += bitmapOccupySize.x();
 }
 
@@ -124,18 +127,39 @@ void place(const std::vector<LayoutChar>& layouts, float letterSpacing, float le
     }
 }
 
-class UpdatableLabel : public Updatable {
-public:
-    UpdatableLabel(Layout::Hierarchy hierarchy, std::vector<LayoutChar> layoutChars, float lineHeight, float letterScale, float letterSpacing)
-        : _hierarchy((std::move(hierarchy))), _layout_chars(std::move(layoutChars)), _line_height(lineHeight), _letter_scale(letterScale), _letter_spacing(letterSpacing) {
+struct RenderableCharacter : Renderable {
+    RenderableCharacter(sp<Renderable> delegate, sp<Layout::Node> layoutNode)
+        : _delegate(std::move(delegate)), _layout_node(std::move(layoutNode)) {
+    }
+
+    StateBits updateState(const RenderRequest& renderRequest) override {
+        StateBits stateBits = _delegate->updateState(renderRequest);
+        if(_layout_node->update(renderRequest.timestamp()))
+            stateBits = static_cast<StateBits>(stateBits | RENDERABLE_STATE_DIRTY);
+        return stateBits;
+    }
+
+    Snapshot snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest, const V3& postTranslate, StateBits state) override {
+        Snapshot snapshot = _delegate->snapshot(pipelineInput, renderRequest, postTranslate, state);
+        snapshot._position += V3(_layout_node->offsetPosition(), 0);
+        return snapshot;
+    }
+
+    sp<Renderable> _delegate;
+    sp<Layout::Node> _layout_node;
+};
+
+struct UpdatableLabel : Updatable {
+    UpdatableLabel(Layout::Hierarchy hierarchy, float lineHeight, float letterScale, float letterSpacing)
+        : _hierarchy((std::move(hierarchy))), _line_height(lineHeight), _letter_scale(letterScale), _letter_spacing(letterSpacing) {
     }
 
     bool update(uint64_t timestamp) override {
         float fontHeight = 0;
         float flowX = _hierarchy._child_nodes.empty() ? 0 : -_letter_spacing, flowY = 0;
-        for(size_t i = 0; i < _hierarchy._child_nodes.size(); ++i) {
-            Layout::Node& node = _hierarchy._child_nodes.at(i)._node;
-            const LayoutChar& layoutChar = _layout_chars.at(i);
+        for(const Layout::Hierarchy& i : _hierarchy._child_nodes) {
+            Layout::Node& node = i._node;
+            const LayoutChar& layoutChar = *static_cast<const LayoutChar*>(node._tag);
             flowX += _letter_spacing;
             node.setOffsetPosition(V2(flowX, flowY));
             placeOne(_letter_scale, layoutChar, flowX, flowY, &fontHeight);
@@ -143,11 +167,10 @@ public:
 
         Layout::Node& rootNode = _hierarchy._node;
         rootNode.setSize(V2(flowX, fontHeight));
+        return false;
     }
 
-private:
     Layout::Hierarchy _hierarchy;
-    std::vector<LayoutChar> _layout_chars;
     float _line_height;
     float _letter_scale;
     float _letter_spacing;
@@ -160,6 +183,7 @@ public:
     }
 
     sp<Updatable> inflate(Hierarchy hierarchy) override {
+        return sp<Updatable>::make<UpdatableLabel>(std::move(hierarchy), _line_height, _letter_scale, _letter_spacing);
     }
 
 private:
@@ -168,24 +192,83 @@ private:
     float _letter_spacing;
 };
 
+}
+
+struct Text::Content {
+    Content(sp<RenderLayer> renderLayer, sp<StringVar> string, sp<GlyphMaker> glyphMaker, float textScale, float letterSpacing, float lineHeight, float lineIndent);
+
+    bool update(uint64_t timestamp);
+
+    void setText(std::wstring text);
+    void setRichText(std::wstring richText, const sp<ResourceLoader>& resourceLoader, const Scope& args);
+
+    void layoutContent();
+
+    void createContent();
+    void createRichContent(const Scope& args, BeanFactory& factory);
+
+    float doLayoutContent(GlyphContents& cm, float& flowx, float& flowy, float boundary);
+    float doCreateRichContent(GlyphContents& cm, GlyphMaker& gm, const document& richtext, BeanFactory& factory, const Scope& args, float& flowx, float& flowy, float boundary);
+    float doLayoutWithBoundary(GlyphContents& cm, float& flowx, float& flowy, float boundary);
+    float doLayoutWithoutBoundary(GlyphContents& cm, float& flowx, float flowy);
+
+    void createLayerContent(float width, float height);
+
+    void nextLine(float fontHeight, float& flowx, float& flowy) const;
+
+    float getFlowY() const;
+    float getLayoutBoundary() const;
+
+    Layout::Hierarchy makeHierarchy() {
+        Layout::Hierarchy hierarchy{sp<Layout::Node>::make(sp<LayoutParam>::make(LayoutParam::Length(LayoutParam::LENGTH_TYPE_PIXEL, _size->width()), LayoutParam::Length(LayoutParam::LENGTH_TYPE_PIXEL, _size->height())))};
+        for(LayoutChar& i : _layout_chars) {
+            sp<Layout::Node> node = sp<Layout::Node>::make(sp<LayoutParam>::make(i._glyph->occupySize().x(), i._glyph->occupySize().y()), &i);
+            hierarchy._child_nodes.push_back({std::move(node)});
+        }
+        return hierarchy;
+    }
+
+    sp<RenderLayer> _render_layer;
+    sp<StringVar> _string;
+    sp<LayerContext> _layer_context;
+    sp<GlyphMaker> _glyph_maker;
+    sp<Layout> _layout;
+    sp<Updatable> _updatable_layout;
+
+    float _text_scale;
+    float _letter_spacing;
+    float _layout_direction;
+    float _line_height;
+    float _line_indent;
+
+    sp<Size> _size;
+    sp<Boundaries> _boundaries;
+
+    std::wstring _text_unicode;
+    std::vector<sp<Glyph>> _glyphs;
+
+    sp<VariableWrapper<V3>> _position;
+    std::vector<sp<RenderObject>> _render_objects;
+    std::vector<LayoutChar> _layout_chars;
+};
+
 class RenderBatchContent : public RenderBatch {
 public:
     RenderBatchContent(sp<Text::Content> content, sp<Boolean> discarded)
         : RenderBatch(std::move(discarded)), _content(std::move(content)) {
     }
 
-    std::vector<sp<LayerContext>>& snapshot(const RenderRequest& renderRequest) {
+    std::vector<sp<LayerContext>>& snapshot(const RenderRequest& renderRequest) override {
         _layer_contexts.clear();
         _content->update(renderRequest.timestamp());
         _layer_contexts.push_back(_content->_layer_context);
         return _layer_contexts;
     }
+
 private:
     sp<Text::Content> _content;
     std::vector<sp<LayerContext>> _layer_contexts;
 };
-
-}
 
 Text::Text(sp<RenderLayer> renderLayer, sp<StringVar> content, sp<GlyphMaker> glyphMaker, float textScale, float letterSpacing, float lineHeight, float lineIndent)
     : _render_layer(std::move(renderLayer)), _content(sp<Content>::make(_render_layer, std::move(content), std::move(glyphMaker), textScale, letterSpacing, lineHeight, lineIndent))
@@ -236,7 +319,8 @@ void Text::setText(std::wstring text)
 void Text::show(sp<Boolean> discarded)
 {
     if(_render_batch)
-        _content->reload();
+        _render_batch->setDiscarded(Global<Constants>()->BOOLEAN_TRUE);
+
     _render_batch = sp<RenderBatchContent>::make(_content, std::move(discarded));
     _render_layer->addRenderBatch(_render_batch);
 }
@@ -268,11 +352,12 @@ bool Text::Content::update(uint64_t timestamp)
     bool positionDirty = _position->update(timestamp);
     bool contentDirty = _string->update(timestamp);
     bool sizeDirty = _boundaries && _boundaries->update(timestamp);
+    bool layoutDirty = _updatable_layout ? _updatable_layout->update(timestamp) : false;
     if(contentDirty)
         setText(Strings::fromUTF8(*_string->val()));
     if(sizeDirty)
         layoutContent();
-    return positionDirty || contentDirty || sizeDirty;
+    return positionDirty || contentDirty || sizeDirty || layoutDirty;
 }
 
 void Text::Content::createContent()
@@ -332,30 +417,47 @@ void Text::Content::layoutContent()
 
 void Text::Content::createLayerContent(float width, float height)
 {
-    std::vector<sp<RenderObject>> renderObjects;
-
+    _render_objects.clear();
     for(const sp<Glyph>& i : _glyphs)
-        renderObjects.push_back(i->toRenderObject());
+        _render_objects.push_back(i->toRenderObject());
 
     _size->setWidth(width);
     _size->setHeight(height);
 
-    setRenderObjects(std::move(renderObjects));
+    if(_layer_context)
+        _layer_context->clear();
+    else
+        _layer_context = _render_layer->makeLayerContext(nullptr, _position, nullptr, nullptr);
+
+    _layout = sp<LayoutLabel>::make(_line_height, _text_scale, _letter_spacing);
+    if(_layout)
+    {
+        Layout::Hierarchy hierarchy = makeHierarchy();
+        DASSERT(_render_objects.size() == hierarchy._child_nodes.size());
+        for(size_t i = 0; i < _render_objects.size(); ++i)
+            _layer_context->add(sp<RenderableCharacter>::make(_render_objects.at(i), hierarchy._child_nodes.at(i)._node));
+
+        _updatable_layout = _layout->inflate(std::move(hierarchy));
+    }
+    else
+        for(const sp<RenderObject>& i : _render_objects)
+            _layer_context->add(i);
 }
 
 float Text::Content::doLayoutWithBoundary(GlyphContents& cm, float& flowx, float& flowy, float boundary)
 {
-    const std::vector<LayoutChar> layoutChars = toLayoutCharacters(cm, _text_scale, _render_layer->context()->modelLoader());
-    float fontHeight = layoutChars.size() > 0 ? layoutChars.at(0)._model->occupy()->size()->val().y() * _text_scale : 0;
+    _layout_chars = toLayoutCharacters(cm, _text_scale, _render_layer->context()->modelLoader());
+
+    const float fontHeight = _layout_chars.size() > 0 ? _layout_chars.at(0)._model->occupy()->size()->val().y() * _text_scale : 0;
     size_t begin = 0;
-    for(size_t i = 0; i < layoutChars.size(); ++i)
+    for(size_t i = 0; i < _layout_chars.size(); ++i)
     {
         size_t end = i + 1;
-        const LayoutChar& currentChar = layoutChars.at(i);
+        const LayoutChar& currentChar = _layout_chars.at(i);
         bool allowLineBreak = currentChar._is_cjk || currentChar._is_word_break;
-        if(end == layoutChars.size() || allowLineBreak)
+        if(end == _layout_chars.size() || allowLineBreak)
         {
-            float beginWidth = begin > 0 ? layoutChars.at(begin - 1)._width_integral : 0;
+            float beginWidth = begin > 0 ? _layout_chars.at(begin - 1)._width_integral : 0;
             float placingWidth = currentChar._width_integral - beginWidth;
             if(flowx + placingWidth > boundary && allowLineBreak)
             {
@@ -368,7 +470,7 @@ float Text::Content::doLayoutWithBoundary(GlyphContents& cm, float& flowx, float
             if(end - begin == 1)
                 placeOne(_text_scale, currentChar, flowx, flowy);
             else
-                place(layoutChars, _letter_spacing, _text_scale, begin, end, flowx, flowy);
+                place(_layout_chars, _letter_spacing, _text_scale, begin, end, flowx, flowy);
 
             begin = i + 1;
         }
@@ -380,8 +482,9 @@ float Text::Content::doLayoutWithBoundary(GlyphContents& cm, float& flowx, float
 float Text::Content::doLayoutWithoutBoundary(GlyphContents& cm, float& flowx, float flowy)
 {
     float fontHeight = 0;
-    const std::vector<LayoutChar> layoutChars = toLayoutCharacters(cm, _text_scale, _render_layer->context()->modelLoader());
-    for(const LayoutChar& i : layoutChars)
+    _layout_chars = toLayoutCharacters(cm, _text_scale, _render_layer->context()->modelLoader());
+
+    for(const LayoutChar& i : _layout_chars)
     {
         flowx += _letter_spacing;
         placeOne(_text_scale, i, flowx, flowy, &fontHeight);
@@ -427,27 +530,6 @@ Text::Content::Content(sp<RenderLayer> renderLayer, sp<StringVar> string, sp<Gly
 {
     if(_string->val() && !_string->val()->empty())
         setText(Strings::fromUTF8(*_string->val()));
-}
-
-void Text::Content::setRenderObjects(std::vector<sp<RenderObject>> renderObjects)
-{
-    _render_objects = std::move(renderObjects);
-    reload();
-}
-
-sp<Renderable> toRenderableCharacter(const sp<RenderObject>& i)
-{
-    return i;
-}
-
-void Text::Content::reload()
-{
-    if(_layer_context)
-        _layer_context->clear();
-    else
-        _layer_context = _render_layer->makeLayerContext(nullptr, _position, nullptr, nullptr);
-    for(const sp<RenderObject>& i : _render_objects)
-        _layer_context->add(toRenderableCharacter(i));
 }
 
 }

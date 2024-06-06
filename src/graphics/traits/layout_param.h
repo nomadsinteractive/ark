@@ -79,6 +79,7 @@ public:
 
     struct Length {
         Length();
+        Length(float pixels);
         Length(LengthType type, float value);
         Length(LengthType type, sp<Numeric> value);
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Length);

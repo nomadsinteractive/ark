@@ -20,7 +20,7 @@ namespace ark {
 class ARK_API Text {
 public:
 //  [[script::bindings::auto]]
-    Text(sp<RenderLayer> renderLayer, sp<StringVar> content = nullptr, sp<GlyphMaker> glyphMaker = nullptr, float textScale = 1.0f, float letterSpacing = 0.0f, float lineHeight = 0.0f, float lineIndent = 0.0f);
+    Text(sp<RenderLayer> renderLayer, sp<StringVar> content = nullptr, sp<GlyphMaker> glyphMaker = nullptr, float letterScale = 1.0f, float letterSpacing = 0.0f, float lineHeight = 0.0f, float lineIndent = 0.0f);
 
 //  [[script::bindings::property]]
     const std::vector<sp<RenderObject>>& contents() const;
@@ -69,60 +69,10 @@ public:
         float _line_indent;
     };
 
-    typedef std::vector<sp<Glyph>> GlyphContents;
-
-    struct Content {
-        Content(sp<RenderLayer> renderLayer, sp<StringVar> string, sp<GlyphMaker> glyphMaker, float textScale, float letterSpacing, float lineHeight, float lineIndent);
-
-        bool update(uint64_t timestamp);
-
-        void setText(std::wstring text);
-        void setRichText(std::wstring richText, const sp<ResourceLoader>& resourceLoader, const Scope& args);
-
-        void setRenderObjects(std::vector<sp<RenderObject>> renderObjects);
-        void reload();
-
-        void layoutContent();
-
-        void createContent();
-        void createRichContent(const Scope& args, BeanFactory& factory);
-
-        float doLayoutContent(GlyphContents& cm, float& flowx, float& flowy, float boundary);
-        float doCreateRichContent(GlyphContents& cm, GlyphMaker& gm, const document& richtext, BeanFactory& factory, const Scope& args, float& flowx, float& flowy, float boundary);
-        float doLayoutWithBoundary(GlyphContents& cm, float& flowx, float& flowy, float boundary);
-        float doLayoutWithoutBoundary(GlyphContents& cm, float& flowx, float flowy);
-
-        void createLayerContent(float width, float height);
-
-        void nextLine(float fontHeight, float& flowx, float& flowy) const;
-
-        float getFlowY() const;
-        float getLayoutBoundary() const;
-
-        sp<RenderLayer> _render_layer;
-        sp<StringVar> _string;
-        sp<LayerContext> _layer_context;
-        sp<GlyphMaker> _glyph_maker;
-
-        float _text_scale;
-        float _letter_spacing;
-        float _layout_direction;
-        float _line_height;
-        float _line_indent;
-
-        sp<Size> _size;
-        sp<Boundaries> _boundaries;
-
-        std::wstring _text_unicode;
-        std::vector<sp<Glyph>> _glyphs;
-
-        sp<VariableWrapper<V3>> _position;
-        std::vector<sp<RenderObject>> _render_objects;
-    };
+    struct Content;
 
 private:
     sp<RenderLayer> _render_layer;
-
     sp<Content> _content;
     sp<RenderBatch> _render_batch;
 };

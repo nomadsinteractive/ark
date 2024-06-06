@@ -14,6 +14,7 @@ public:
     virtual ~RenderBatch() = default;
 
     const sp<Boolean>& discarded() const;
+    void setDiscarded(sp<Boolean> discarded);
 
     virtual std::vector<sp<LayerContext>>& snapshot(const RenderRequest& renderRequest) = 0;
 

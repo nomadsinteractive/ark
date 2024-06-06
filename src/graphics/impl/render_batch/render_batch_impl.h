@@ -8,7 +8,7 @@ namespace ark {
 class RenderBatchImpl : public RenderBatch {
 public:
 
-    virtual std::vector<sp<LayerContext>>& snapshot(const RenderRequest& renderRequest) override;
+    std::vector<sp<LayerContext>>& snapshot(const RenderRequest& renderRequest) override;
 
     void addLayerContext(sp<LayerContext> layerContext);
 

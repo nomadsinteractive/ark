@@ -439,6 +439,11 @@ LayoutParam::Length::Length()
 {
 }
 
+LayoutParam::Length::Length(float pixels)
+    : Length(LENGTH_TYPE_PIXEL, pixels)
+{
+}
+
 LayoutParam::Length::Length(LengthType type, float value)
     : _type(type), _value(sp<Numeric::Const>::make(value))
 {

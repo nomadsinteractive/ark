@@ -375,9 +375,9 @@ class GenPropertyMethod(GenMethod):
     def gen_py_getset_def(self, properties, genclass):
         property_def = self._ensure_property_def(properties)
         if self._is_setter:
-            property_def[2] = '(setter) %s::%s_r' % (genclass.py_class_name, self._name)
+            property_def[2] = f'(setter) {genclass.py_class_name}::{self._name}_r'
         else:
-            property_def[1] = '(getter) %s::%s_r' % (genclass.py_class_name, self._name)
+            property_def[1] = f'(getter) {genclass.py_class_name}::{self._name}_r'
 
     def _gen_calling_statement(self, genclass, argnames):
         self_statement = self.gen_self_statement(genclass)

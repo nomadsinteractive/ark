@@ -63,7 +63,7 @@ RenderLayerSnapshot RenderLayer::snapshot(RenderRequest& renderRequest)
         std::vector<sp<LayerContext>>& layerContexts = i->snapshot(renderRequest);
         if(i->discarded() ? i->discarded()->val() : i.unique())
         {
-            renderLayerSnapshot.addDisposedLayerContexts(layerContexts);
+            renderLayerSnapshot.addDiscardedLayerContexts(layerContexts);
             iter = _render_batches.erase(iter);
         }
         else

@@ -37,8 +37,8 @@ public:
     const V3& layoutPosition() const;
     void setLayoutPosition(const V3& layoutPosition);
 
-    const V2& layoutSize() const;
-    void setLayoutSize(const V2& layoutSize);
+    const V2& occupySize() const;
+    void setOccupySize(const V2& layoutSize);
 
 private:
     sp<Integer> _type;
@@ -50,7 +50,7 @@ private:
 
     wchar_t _character;
     V3 _layout_position;
-    V2 _layout_size;
+    V2 _occupy_size;
 };
 
 }
