@@ -1,7 +1,7 @@
 import sys
 
 from gen_core import parse_method_arguments, acg, gen_cast_call, INDENT, gen_method_call_arg, GenArgumentMeta, GenArgument, \
-    create_overloaded_method_type
+    create_overloaded_method_type, get_options
 
 TP_AS_NUMBER_TEMPLATE = [
     'static PyNumberMethods ${py_class_name}_tp_as_number = {',
@@ -93,7 +93,8 @@ class GenMethod(object):
         return None
 
     def gen_py_method_def_tp(self, genclass):
-        return '{"%s", (PyCFunction) %s::%s_r, %s, nullptr}' % (acg.camel_case_to_snake_case(self._name), genclass.py_class_name, self._name, self._flags)
+        trycatch_suffix = '_r' if 't' in get_options() else ''
+        return f'{{"{acg.camel_case_to_snake_case(self._name)}", (PyCFunction) {genclass.py_class_name}::{self._name}{trycatch_suffix}, {self._flags}, nullptr}}'
 
     def gen_py_return(self):
         return 'PyObject*'
@@ -573,7 +574,7 @@ def gen_template_defs(py_class_name: str, methods, code_templates: list[str], op
     code_lines = []
     if methods:
         args = {'py_class_name': py_class_name}
-        methods_dict = dict((i.operator, '%s::%s_r' % (py_class_name, i.name)) for i in methods)
+        methods_dict = dict((i.operator, f'{py_class_name}::{i.name}_r') for i in methods)
         args.update((j, methods_dict[i] if i in methods_dict else 'nullptr') for i, j in operator_templates.items())
         code_lines.extend(acg.format(i, **args) for i in code_templates)
     return code_lines

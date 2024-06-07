@@ -7,7 +7,7 @@ import sys
 from os import path
 from typing import Optional
 
-from gen_core import get_param_and_paths, import_acg, INDENT, GenArgumentMeta, GenArgument, create_overloaded_method_type
+from gen_core import get_param_and_paths, import_acg, INDENT, GenArgumentMeta, GenArgument, create_overloaded_method_type, get_options
 from gen_method import GenMethod, GenGetPropMethod, GenSetPropMethod, GenMappingMethod, gen_operator_defs, gen_as_mapping_defs, GenOperatorMethod, \
     GenSequenceMethod, gen_as_sequence_defs
 
@@ -228,15 +228,14 @@ def gen_constructor_definition_source(py_class_name: str, tp_name: str, definiti
 
 def gen_class_body_source(genclass, includes, lines, buildables):
     tp_method_lines = []
-    includes.append('#include "%s"' % genclass.filename)
+    includes.append(f'#include "{genclass.filename}"')
     if genclass.has_methods():
         tp_method_lines.append('PyTypeObject* pyTypeObject = getPyTypeObject();')
         method_defs = [i.gen_py_method_def(genclass) for i in genclass.methods]
         methoddeclare = ',\n    '.join(i for i in method_defs if i)
         if methoddeclare:
-            lines.append('\nstatic PyMethodDef %s_methods[] = {\n    %s,\n    {nullptr}\n};' % (
-                genclass.py_class_name, methoddeclare))
-            tp_method_lines.append('pyTypeObject->tp_methods = %s_methods;' % genclass.py_class_name)
+            lines.append('\nstatic PyMethodDef %s_methods[] = {\n    %s,\n    {nullptr}\n};' % (genclass.py_class_name, methoddeclare))
+            tp_method_lines.append(f'pyTypeObject->tp_methods = {genclass.py_class_name}_methods;')
 
         getprop_methods = genclass.getprop_methods()
         if getprop_methods:
@@ -373,11 +372,13 @@ class GenPropertyMethod(GenMethod):
         return 0
 
     def gen_py_getset_def(self, properties, genclass):
+        trycatch_suffix = '_r' if 't' in get_options() else ''
         property_def = self._ensure_property_def(properties)
+        func = f'{genclass.py_class_name}::{self._name}{trycatch_suffix}'
         if self._is_setter:
-            property_def[2] = f'(setter) {genclass.py_class_name}::{self._name}_r'
+            property_def[2] = f'(setter) {func}'
         else:
-            property_def[1] = f'(getter) {genclass.py_class_name}::{self._name}_r'
+            property_def[1] = f'(getter) {func}'
 
     def _gen_calling_statement(self, genclass, argnames):
         self_statement = self.gen_self_statement(genclass)

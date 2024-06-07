@@ -17,12 +17,12 @@ TYPE_DEFINED_OBJ = ('V2', 'V3', 'V4', 'M3', 'M4', 'Rect', 'RectI', 'RectF', 'Sli
 TYPE_DEFINED_SP = ('document', 'element', 'attribute', 'bitmap')
 
 
-def get_param_and_paths() -> 'tuple[dict[str, str], list[str]]':
+def get_param_and_paths() -> tuple[dict[str, str], list[str]]:
     global _opts, _paths, _params
 
     if _opts is None and _paths is None:
 
-        _opts, _paths = getopt.getopt(sys.argv[1:], 'b:c:p:n:o:l:m:d:j')
+        _opts, _paths = getopt.getopt(sys.argv[1:], 'b:c:p:n:o:l:m:d:jt')
         _params = dict((i.lstrip('-'), j) for i, j in _opts)
         if any(i not in _params for i in ['p', 'm']) or len(_paths) == 0:
             print('Usage: %s -p namespace -m modulename [-c cmakefile] [-o output_file] [-l library_path] dir_paths...' % sys.argv[0])
@@ -36,6 +36,10 @@ def get_param_and_paths() -> 'tuple[dict[str, str], list[str]]':
         acg = import_acg()
 
     return _params, _paths
+
+
+def get_options() -> dict[str, str]:
+    return _opts
 
 
 def import_acg():
