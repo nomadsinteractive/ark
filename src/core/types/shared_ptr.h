@@ -28,11 +28,11 @@ public:
     typedef typename std::remove_extent<T>::type element_type;
 
     static SharedPtr<T> adopt(T* instance) {
-        return SharedPtr<T>(instance);
+        return SharedPtr<T>(instance, nullptr);
     }
 
     template<typename U = T, typename... Args> static SharedPtr<T> make(Args&&... args) {
-        return SharedPtr<T>(new U(std::forward<Args>(args)...));
+        return SharedPtr<T>(new U(std::forward<Args>(args)...), std::is_same_v<T, U> ? nullptr : Class::getClass<U>());
     }
 
     bool operator == (const SharedPtr<T>& sp) const {
@@ -97,8 +97,8 @@ public:
     }
 
 private:
-    SharedPtr(T* instance) noexcept
-        : _ptr(instance), _class(nullptr) {
+    SharedPtr(T* instance, const Class* clazz) noexcept
+        : _ptr(instance), _class(clazz) {
     }
     SharedPtr(T* ptr, const Class* clazz, std::function<void(T*)> deleter) noexcept
         : _ptr(ptr, std::move(deleter)), _class(clazz) {

@@ -227,7 +227,14 @@ struct Text::Content {
             setText(Strings::fromUTF8(*_string->val()));
     }
 
-    bool update(uint64_t timestamp);
+    bool update(uint64_t timestamp)
+    {
+        bool contentDirty = _string->update(timestamp);
+        if(contentDirty)
+            setText(Strings::fromUTF8(*_string->val()));
+        bool layoutDirty = _updatable_layout ? _updatable_layout->update(timestamp) : false;
+        return contentDirty || layoutDirty;
+    }
 
     void setText(std::wstring text);
     void setRichText(std::wstring richText, const sp<ResourceLoader>& resourceLoader, const Scope& args);
@@ -261,6 +268,11 @@ struct Text::Content {
         _size->setWidth(layoutSize.x());
         _size->setHeight(layoutSize.y());
 
+        updateLayoutContent();
+    }
+
+    void updateLayoutContent()
+    {
         if(_layer_context)
             _layer_context->clear();
         else
@@ -275,7 +287,11 @@ struct Text::Content {
         _updatable_layout = layout->inflate(std::move(hierarchy));
     }
 
-    void nextLine(float fontHeight, float& flowx, float& flowy) const;
+    void nextLine(float fontHeight, float& flowx, float& flowy) const
+    {
+        flowy += (_line_height != 0 ? _line_height : (fontHeight * _layout_direction));
+        flowx = _line_indent;
+    }
 
     float getFlowY() const;
     float getLayoutBoundary() const;
@@ -350,7 +366,7 @@ const sp<LayoutParam>& Text::layoutParam() const
 void Text::setLayoutParam(sp<LayoutParam> layoutParam)
 {
     _content->_layout_param = std::move(layoutParam);
-    _content->createContent();
+    _content->updateLayoutContent();
 }
 
 sp<Vec3> Text::position() const
@@ -425,15 +441,6 @@ void Text::Content::setRichText(std::wstring richText, const sp<ResourceLoader>&
     createRichContent(args, resourceLoader ? resourceLoader->beanFactory() : Ark::instance().applicationContext()->resourceLoader()->beanFactory());
 }
 
-bool Text::Content::update(uint64_t timestamp)
-{
-    bool contentDirty = _string->update(timestamp);
-    if(contentDirty)
-        setText(Strings::fromUTF8(*_string->val()));
-    bool layoutDirty = _updatable_layout ? _updatable_layout->update(timestamp) : false;
-    return contentDirty || layoutDirty;
-}
-
 void Text::Content::createContent()
 {
     _glyphs = makeGlyphs(_glyph_maker, _text_unicode);
@@ -504,12 +511,6 @@ float Text::Content::doCreateRichContent(GlyphContents& cm, GlyphMaker& gm, cons
 //
 //     return std::abs(flowy) + fontHeight;
 // }
-
-void Text::Content::nextLine(float fontHeight, float& flowx, float& flowy) const
-{
-    flowy += (_line_height != 0 ? _line_height : (fontHeight * _layout_direction));
-    flowx = _line_indent;
-}
 
 float Text::Content::getFlowY() const
 {

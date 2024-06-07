@@ -31,15 +31,15 @@ static PyObject* __richcmp__(PyArkType::Instance* obj1, PyObject* obj2, int op)
         Py_RETURN_NOTIMPLEMENTED;
     }
 
-    Py_hash_t hash1 = reinterpret_cast<Py_hash_t>(obj1->box->ptr());
-    Py_hash_t hash2 = obj2IsNone ? PyObject_Hash(obj2) : reinterpret_cast<Py_hash_t>(reinterpret_cast<PyArkType::Instance*>(obj2)->box->ptr());
+    Py_hash_t hash1 = static_cast<Py_hash_t>(obj1->box->id());
+    Py_hash_t hash2 = obj2IsNone ? PyObject_Hash(obj2) : static_cast<Py_hash_t>(reinterpret_cast<PyArkType::Instance*>(obj2)->box->id());
 
     Py_RETURN_RICHCOMPARE(hash1, hash2, op);
 }
 
 static Py_hash_t __hash__(PyArkType::Instance* self)
 {
-    return reinterpret_cast<Py_hash_t>(self->box->ptr());
+    return static_cast<Py_hash_t>(self->box->id());
 }
 
 struct BreakException {

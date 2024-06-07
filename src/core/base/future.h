@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_BASE_FUTURE_H_
-#define ARK_CORE_BASE_FUTURE_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/impl/variable/variable_wrapper.h"
@@ -32,5 +31,3 @@ private:
 };
 
 }
-
-#endif

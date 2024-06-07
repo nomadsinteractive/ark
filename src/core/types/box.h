@@ -32,13 +32,15 @@ public:
     explicit operator bool() const;
 
 //  [[script::bindings::property]]
+    uintptr_t id() const;
+//  [[script::bindings::property]]
     TypeId typeId() const;
 
     template<typename T> sp<T> toPtr() const {
         if(!_stub)
             return nullptr;
         _type_check<T>();
-        return std::get<PtrStub>(*_stub).template unpack<T>();
+        return std::get<PtrStub>(*_stub).unpack<T>();
     }
 
     template<typename T> T toEnum() const {
@@ -47,7 +49,7 @@ public:
     }
 
     int32_t toInteger() const {
-        return _stub ? std::get<EnumStub>(*_stub)._value : 0;
+        return _stub ? _ensure_enum_stub()->_value : 0;
     }
 
     template<typename T> sp<T> as() const {
@@ -64,8 +66,6 @@ public:
         }
         return inst;
     }
-
-    const void* ptr() const;
 
 private:
     Box(TypeId typeId, const Class* clazz, const void* sharedPtr, const void* instancePtr, Destructor destructor) noexcept;
@@ -123,6 +123,18 @@ private:
     template<typename T> static std::shared_ptr<_StubVariant> _make_enum_stub(T enumValue)  {
         static_assert(std::is_enum_v<T>);
         return std::make_shared<_StubVariant>(EnumStub(enumValue));
+    }
+
+    PtrStub* _ensure_ptr_stub() const {
+        PtrStub* stub = std::get_if<PtrStub>(_stub.get());
+        DASSERT(stub);
+        return stub;
+    }
+
+    EnumStub* _ensure_enum_stub() const {
+        EnumStub* stub = std::get_if<EnumStub>(_stub.get());
+        DASSERT(stub);
+        return stub;
     }
 
 private:

@@ -14,17 +14,18 @@ TypeId Box::typeId() const
     return _type_id;
 }
 
-const void* Box::ptr() const
+uintptr_t Box::id() const
 {
-    return _stub ? std::get<PtrStub>(*_stub).instance_ptr : nullptr;
+    return _stub ? reinterpret_cast<uintptr_t>(_stub.get()) : 0;
 }
 
 Box::operator bool() const
 {
     if(_stub)
     {
-        const PtrStub* ptrStub = std::get_if<PtrStub>(_stub.get());
-        return !ptrStub || ptrStub->instance_ptr != nullptr;
+        if(const PtrStub* ptrStub = std::get_if<PtrStub>(_stub.get()))
+            return !ptrStub || ptrStub->instance_ptr != nullptr;
+        return _ensure_enum_stub()->_value != 0;
     }
     return false;
 }

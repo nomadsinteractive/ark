@@ -12,7 +12,6 @@
 #include "graphics/inf/renderable.h"
 #include "graphics/inf/render_batch.h"
 
-
 namespace ark {
 
 class ARK_API Text {
@@ -45,7 +44,6 @@ public:
     const std::wstring& text() const;
 //  [[script::bindings::property]]
     void setText(std::wstring text);
-
 
 //  [[script::bindings::auto]]
     void show(sp<Boolean> discarded = nullptr);

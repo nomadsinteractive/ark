@@ -1,6 +1,5 @@
 #pragma once
 
-#include "core/forwarding.h"
 #include "core/base/api.h"
 
 namespace ark {
