@@ -89,6 +89,7 @@ void LayerContext::clear()
 {
     for(auto& [i, j] : _renderables)
         j = Renderable::RENDERABLE_STATE_DISCARDED;
+    _renderable_created.clear();
 }
 
 void LayerContext::dispose()

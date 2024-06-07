@@ -112,6 +112,15 @@ GlyphContents makeGlyphs(GlyphMaker& gm, const std::wstring& text)
     return glyphs;
 }
 
+void doFlowLayout(std::vector<Layout::Hierarchy>& childNodes, float letterSpacing, float flowX, float flowY)
+{
+    for(const Layout::Hierarchy& i : childNodes) {
+        Layout::Node& node = i._node;
+        node.setOffsetPosition(V2(flowX, flowY));
+        flowX += letterSpacing + node.size()->x();
+    }
+}
+
 struct RenderableCharacter : Renderable {
     RenderableCharacter(sp<Renderable> delegate, sp<Layout::Node> layoutNode, const V2& letterOffset)
         : _delegate(std::move(delegate)), _layout_node(std::move(layoutNode)), _letter_offset(letterOffset) {
@@ -135,18 +144,13 @@ struct RenderableCharacter : Renderable {
     V2 _letter_offset;
 };
 
-struct UpdatableFlowX : Updatable {
-    UpdatableFlowX(Layout::Hierarchy hierarchy, float letterSpacing)
+struct UpdatableFlexStart : Updatable {
+    UpdatableFlexStart(Layout::Hierarchy hierarchy, float letterSpacing)
         : _hierarchy((std::move(hierarchy))), _letter_spacing(letterSpacing) {
     }
 
     bool update(uint64_t timestamp) override {
-        float flowX = 0;
-        for(const Layout::Hierarchy& i : _hierarchy._child_nodes) {
-            Layout::Node& node = i._node;
-            node.setOffsetPosition(V2(flowX, 0));
-            flowX += _letter_spacing + node.size()->x();
-        }
+        doFlowLayout(_hierarchy._child_nodes, _letter_spacing, 0, 0);
         return false;
     }
 
@@ -156,23 +160,36 @@ struct UpdatableFlowX : Updatable {
 
 struct UpdatableCenter : Updatable {
     UpdatableCenter(Layout::Hierarchy hierarchy, Size size, float letterSpacing)
-        : _hierarchy((std::move(hierarchy))), _size(std::move(size)), _letter_spacing(letterSpacing) {
+        : _hierarchy((std::move(hierarchy))), _letter_spacing(letterSpacing), _size(std::move(size)) {
     }
 
     bool update(uint64_t timestamp) override {
-        float flowX = (_size.widthAsFloat() - _hierarchy._node->size()->x()) / 2;
-        float flowY = (_size.heightAsFloat() - _hierarchy._node->size()->y()) / 2;
-        for(const Layout::Hierarchy& i : _hierarchy._child_nodes) {
-            Layout::Node& node = i._node;
-            node.setOffsetPosition(V2(flowX, flowY));
-            flowX += _letter_spacing + node.size()->x();
-        }
+        const float flowX = (_size.widthAsFloat() - _hierarchy._node->size()->x()) / 2;
+        const float flowY = (_size.heightAsFloat() - _hierarchy._node->size()->y()) / 2;
+        doFlowLayout(_hierarchy._child_nodes, _letter_spacing, flowX, flowY);
         return false;
     }
 
     Layout::Hierarchy _hierarchy;
-    Size _size;
     float _letter_spacing;
+    Size _size;
+};
+
+struct UpdatableFlexEnd : Updatable {
+    UpdatableFlexEnd(Layout::Hierarchy hierarchy, Size size, float letterSpacing)
+        : _hierarchy((std::move(hierarchy))), _letter_spacing(letterSpacing), _size(std::move(size)) {
+    }
+
+    bool update(uint64_t timestamp) override {
+        const float flowX = _size.widthAsFloat() - _hierarchy._node->size()->x();
+        const float flowY = (_size.heightAsFloat() - _hierarchy._node->size()->y()) / 2;
+        doFlowLayout(_hierarchy._child_nodes, _letter_spacing, flowX, flowY);
+        return false;
+    }
+
+    Layout::Hierarchy _hierarchy;
+    float _letter_spacing;
+    Size _size;
 };
 
 struct LayoutLabel : Layout {
@@ -182,17 +199,17 @@ struct LayoutLabel : Layout {
 
     sp<Updatable> inflate(Hierarchy hierarchy) override {
         const LayoutParam& lp = hierarchy._node->_layout_param;
+        Size size(lp.width()._value.val(), lp.height()._value.val());
         switch(lp.justifyContent()) {
-            case LayoutParam::JUSTIFY_CONTENT_FLEX_END:
-            case LayoutParam::JUSTIFY_CONTENT_CENTER: {
-                Size size(lp.width()._value.val(), lp.height()._value.val());
+            case LayoutParam::JUSTIFY_CONTENT_CENTER:
                 return sp<Updatable>::make<UpdatableCenter>(std::move(hierarchy), std::move(size), _letter_spacing);
-            }
+            case LayoutParam::JUSTIFY_CONTENT_FLEX_END:
+                return sp<Updatable>::make<UpdatableFlexEnd>(std::move(hierarchy), std::move(size), _letter_spacing);
             case LayoutParam::JUSTIFY_CONTENT_FLEX_START:
             default:
                 break;
         }
-        return sp<Updatable>::make<UpdatableFlowX>(std::move(hierarchy), _letter_spacing);
+        return sp<Updatable>::make<UpdatableFlexStart>(std::move(hierarchy), _letter_spacing);
     }
 
     float _letter_spacing;
