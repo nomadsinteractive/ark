@@ -1,5 +1,6 @@
 #include "app/traits/label.h"
 
+#include "app/view/view.h"
 #include "core/base/constants.h"
 #include "core/traits/expendable.h"
 
@@ -21,7 +22,10 @@ TypeId Label::onWire(WiringContext& context)
         position = Vec3Type::add(position, boundaries->aabbMin());
     if(position)
         _text->setPosition(std::move(position));
-    sp<LayoutParam> layoutParam = context.getComponent<LayoutParam>();
+    if(sp<LayoutParam> layoutParam = context.getComponent<LayoutParam>())
+        _text->setLayoutParam(std::move(layoutParam));
+    else if(const sp<View>& view = context.getComponent<View>())
+        _text->setLayoutParam(view->layoutParam());
     _text->show(context.getComponent<Expendable>());
     return TYPE_ID_NONE;
 }

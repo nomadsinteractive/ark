@@ -24,6 +24,11 @@ public:
     const std::vector<sp<RenderObject>>& contents() const;
 
 //  [[script::bindings::property]]
+    const sp<LayoutParam>& layoutParam() const;
+//  [[script::bindings::property]]
+    void setLayoutParam(sp<LayoutParam> layoutParam);
+
+//  [[script::bindings::property]]
     sp<Vec3> position() const;
 //  [[script::bindings::property]]
     void setPosition(sp<Vec3> position);
@@ -41,8 +46,11 @@ public:
 //  [[script::bindings::property]]
     void setText(std::wstring text);
 
+
 //  [[script::bindings::auto]]
     void show(sp<Boolean> discarded = nullptr);
+//  [[script::bindings::auto]]
+    void hide();
 
 //  [[script::bindings::auto]]
     void setRichText(std::wstring richText, const sp<ResourceLoader>& resourceLoader = nullptr, const Scope& args = Scope());

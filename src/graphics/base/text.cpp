@@ -112,37 +112,6 @@ GlyphContents makeGlyphs(GlyphMaker& gm, const std::wstring& text)
     return glyphs;
 }
 
-// V2 placeOne(float letterScale, const LayoutChar& layoutChar, float& flowx, float flowy, float* fontHeight = nullptr)
-// {
-//     const Model& model = layoutChar._model;
-//     const V2 scale(letterScale);
-//     const Boundaries& bounds = model.content();
-//     const Boundaries& occupies = model.occupy();
-//     const V2 bitmapContentSize = scale * bounds.size()->val();
-//     const V2 bitmapOccupySize = scale * occupies.size()->val();
-//     const V2 bitmapPos = -scale * occupies.aabbMin()->val();
-//     if(fontHeight)
-//         *fontHeight = std::max(bitmapOccupySize.y(), *fontHeight);
-//
-//     Glyph& glyph = layoutChar._glyph;
-//     const V2 letterPosition(bitmapPos.x(), bitmapOccupySize.y() - bitmapPos.y() - bitmapContentSize.y());
-//     const V2 layoutPosition = V2(flowx, flowy) + letterPosition;
-//     glyph.setOccupySize(bitmapOccupySize);
-//     flowx += bitmapOccupySize.x();
-//
-//     return layoutPosition;
-// }
-
-// void place(const std::vector<LayoutChar>& layouts, float letterSpacing, float letterScale, size_t begin, size_t end, float& flowx, float flowy)
-// {
-//     for(size_t i = begin; i < end; ++i)
-//     {
-//         if(begin > 0)
-//             flowx += letterSpacing;
-//         placeOne(letterScale, layouts.at(i), flowx, flowy);
-//     }
-// }
-
 struct RenderableCharacter : Renderable {
     RenderableCharacter(sp<Renderable> delegate, sp<Layout::Node> layoutNode, const V2& letterOffset)
         : _delegate(std::move(delegate)), _layout_node(std::move(layoutNode)), _letter_offset(letterOffset) {
@@ -185,12 +154,44 @@ struct UpdatableFlowX : Updatable {
     float _letter_spacing;
 };
 
+struct UpdatableCenter : Updatable {
+    UpdatableCenter(Layout::Hierarchy hierarchy, Size size, float letterSpacing)
+        : _hierarchy((std::move(hierarchy))), _size(std::move(size)), _letter_spacing(letterSpacing) {
+    }
+
+    bool update(uint64_t timestamp) override {
+        float flowX = (_size.widthAsFloat() - _hierarchy._node->size()->x()) / 2;
+        float flowY = (_size.heightAsFloat() - _hierarchy._node->size()->y()) / 2;
+        for(const Layout::Hierarchy& i : _hierarchy._child_nodes) {
+            Layout::Node& node = i._node;
+            node.setOffsetPosition(V2(flowX, flowY));
+            flowX += _letter_spacing + node.size()->x();
+        }
+        return false;
+    }
+
+    Layout::Hierarchy _hierarchy;
+    Size _size;
+    float _letter_spacing;
+};
+
 struct LayoutLabel : Layout {
     LayoutLabel(float letterSpacing)
         : _letter_spacing(letterSpacing) {
     }
 
     sp<Updatable> inflate(Hierarchy hierarchy) override {
+        const LayoutParam& lp = hierarchy._node->_layout_param;
+        switch(lp.justifyContent()) {
+            case LayoutParam::JUSTIFY_CONTENT_FLEX_END:
+            case LayoutParam::JUSTIFY_CONTENT_CENTER: {
+                Size size(lp.width()._value.val(), lp.height()._value.val());
+                return sp<Updatable>::make<UpdatableCenter>(std::move(hierarchy), std::move(size), _letter_spacing);
+            }
+            case LayoutParam::JUSTIFY_CONTENT_FLEX_START:
+            default:
+                break;
+        }
         return sp<Updatable>::make<UpdatableFlowX>(std::move(hierarchy), _letter_spacing);
     }
 
@@ -221,20 +222,18 @@ struct Text::Content {
     float doLayoutWithBoundary(GlyphContents& cm, float& flowx, float& flowy, float boundary);
 
     V2 doLayoutWithoutBoundary() const {
+        float lineHeight = 0;
         float flowx = _layout_chars.empty() ? 0 : -_letter_spacing;
-        float fontHeight = 0;
-        const V2 scale(_text_scale);
         for(const Character& i : _layout_chars) {
-            flowx += _letter_spacing;
             const Model& model = i._model;
             const Boundaries& occupies = model.occupy();
-            const V2 bitmapOccupySize = scale * occupies.size()->val();
-            fontHeight = std::max(bitmapOccupySize.y(), fontHeight);
+            const V2 bitmapOccupySize = V2(occupies.size()->val()) * _text_scale;
+            lineHeight = std::max(bitmapOccupySize.y(), lineHeight);
             Glyph& glyph = i._glyph;
             glyph.setOccupySize(bitmapOccupySize);
-            flowx += bitmapOccupySize.x();
+            flowx += bitmapOccupySize.x() + _letter_spacing;
         }
-        return V2(flowx, fontHeight);
+        return V2(flowx, lineHeight);
     }
 
     void createLayerContent(const V2& layoutSize) {
@@ -255,7 +254,7 @@ struct Text::Content {
         for(size_t i = 0; i < _render_objects.size(); ++i)
             _layer_context->add(sp<RenderableCharacter>::make(_render_objects.at(i), hierarchy._child_nodes.at(i)._node, _layout_chars.at(i)._offset));
 
-        const sp<Layout>& layout = _layout_param && _layout_param->layout() ? _layout_param->layout() : sp<LayoutLabel>::make(_letter_spacing);
+        const sp<Layout>& layout = _layout_param && _layout_param->layout() ? _layout_param->layout() : sp<Layout>::make<LayoutLabel>(_letter_spacing);
         _updatable_layout = layout->inflate(std::move(hierarchy));
     }
 
@@ -265,7 +264,8 @@ struct Text::Content {
     float getLayoutBoundary() const;
 
     Layout::Hierarchy makeHierarchy() {
-        Layout::Hierarchy hierarchy{sp<Layout::Node>::make(sp<LayoutParam>::make(LayoutParam::Length(LayoutParam::LENGTH_TYPE_PIXEL, _size->width()), LayoutParam::Length(LayoutParam::LENGTH_TYPE_PIXEL, _size->height())))};
+        Layout::Hierarchy hierarchy{sp<Layout::Node>::make(_layout_param)};
+        hierarchy._node->setSize(_size->val());
         for(Character& i : _layout_chars) {
             sp<Layout::Node> node = sp<Layout::Node>::make(sp<LayoutParam>::make(i._glyph->occupySize().x(), i._glyph->occupySize().y()), &i);
             hierarchy._child_nodes.push_back({std::move(node)});
@@ -325,6 +325,17 @@ const std::vector<sp<RenderObject>>& Text::contents() const
     return _content->_render_objects;
 }
 
+const sp<LayoutParam>& Text::layoutParam() const
+{
+    return _content->_layout_param;
+}
+
+void Text::setLayoutParam(sp<LayoutParam> layoutParam)
+{
+    _content->_layout_param = std::move(layoutParam);
+    _content->createContent();
+}
+
 sp<Vec3> Text::position() const
 {
     return _content->_position;
@@ -362,11 +373,17 @@ void Text::setText(std::wstring text)
 
 void Text::show(sp<Boolean> discarded)
 {
-    if(_render_batch)
-        _render_batch->setDiscarded(Global<Constants>()->BOOLEAN_TRUE);
+    hide();
 
     _render_batch = sp<RenderBatchContent>::make(_content, std::move(discarded));
     _render_layer->addRenderBatch(_render_batch);
+}
+
+void Text::hide()
+{
+    if(_render_batch)
+        _render_batch->setDiscarded(Global<Constants>()->BOOLEAN_TRUE);
+    _render_batch = nullptr;
 }
 
 void Text::setRichText(std::wstring richText, const sp<ResourceLoader>& resourceLoader, const Scope& args)

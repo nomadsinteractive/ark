@@ -236,7 +236,6 @@ private:
     sp<Boolean> _stop_propagation;
 
     Display _display;
-    Gravity _gravity;
 
     Length _flex_basis;
     float _flex_grow;
