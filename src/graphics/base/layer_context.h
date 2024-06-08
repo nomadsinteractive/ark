@@ -22,14 +22,6 @@ public:
         Optional<element_index_t> _index;
     };
 
-    struct Snapshot {
-        bool _dirty;
-        V3 _position;
-        bool _visible;
-        bool _disposed;
-        Varyings::Snapshot _varyings;
-    };
-
 public:
     LayerContext(sp<ModelLoader> modelLoader = nullptr, sp<Vec3> position = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> discarded = nullptr, sp<Varyings> varyings = nullptr);
 
@@ -65,7 +57,7 @@ public:
 
     bool processNewCreated();
 
-    Snapshot snapshot(RenderRequest& renderRequest, const PipelineInput& pipelineInput) const;
+    LayerContextSnapshot snapshot(RenderLayer renderLayer, RenderRequest& renderRequest, const PipelineInput& pipelineInput) const;
 
     bool ensureState(void* stateKey);
     ElementState& addElementState(void* key);

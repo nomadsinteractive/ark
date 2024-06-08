@@ -133,8 +133,8 @@ struct RenderableCharacter : Renderable {
         return stateBits;
     }
 
-    Snapshot snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest, const V3& postTranslate, StateBits state) override {
-        Snapshot snapshot = _delegate->snapshot(pipelineInput, renderRequest, postTranslate, state);
+    Snapshot snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, const V3& postTranslate, StateBits state) override {
+        Snapshot snapshot = _delegate->snapshot(snapshotContext, renderRequest, postTranslate, state);
         snapshot._position += V3(_layout_node->offsetPosition() + _letter_offset, 0);
         return snapshot;
     }

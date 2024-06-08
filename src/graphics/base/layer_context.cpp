@@ -8,6 +8,7 @@
 
 #include "graphics/base/layer.h"
 #include "graphics/base/render_object.h"
+#include "graphics/base/layer_context_snapshot.h"
 #include "graphics/impl/renderable/renderable_with_disposable.h"
 #include "graphics/impl/renderable/renderable_with_updatable.h"
 
@@ -127,11 +128,11 @@ bool LayerContext::processNewCreated()
     return true;
 }
 
-LayerContext::Snapshot LayerContext::snapshot(RenderRequest& renderRequest, const PipelineInput& pipelineInput) const
+LayerContextSnapshot LayerContext::snapshot(RenderLayer renderLayer, RenderRequest& renderRequest, const PipelineInput& pipelineInput) const
 {
     bool dirty = UpdatableUtil::update(renderRequest.timestamp(), _position, _visible, _discarded, _varyings);
     Varyings::Snapshot varyings = _varyings ? _varyings->snapshot(pipelineInput, renderRequest.allocator()) : Varyings::Snapshot();
-    return Snapshot{dirty, _position.val(), _visible.val(), _discarded.val(), varyings};
+    return LayerContextSnapshot{dirty, _position.val(), _visible.val(), _discarded.val(), varyings, std::move(renderLayer)};
 }
 
 LayerContext::ElementState& LayerContext::addElementState(void* key)

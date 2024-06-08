@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_BASE_ALLOCATOR_H_
-#define ARK_CORE_BASE_ALLOCATOR_H_
+#pragma once
 
 #include <vector>
 
@@ -53,5 +52,3 @@ private:
 };
 
 }
-
-#endif

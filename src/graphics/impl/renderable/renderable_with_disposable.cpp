@@ -5,22 +5,22 @@
 namespace ark {
 
 RenderableWithDisposable::RenderableWithDisposable(sp<Renderable> delegate, sp<Boolean> disposed)
-    : Wrapper(std::move(delegate)), _disposed(std::move(disposed))
+    : Wrapper(std::move(delegate)), _discarded(std::move(disposed))
 {
 }
 
 Renderable::StateBits RenderableWithDisposable::updateState(const RenderRequest& renderRequest)
 {
     StateBits stateBits = _wrapped->updateState(renderRequest);
-    _disposed->update(renderRequest.timestamp());
-    if(_disposed->val())
+    _discarded->update(renderRequest.timestamp());
+    if(_discarded->val())
         return static_cast<StateBits>(RENDERABLE_STATE_DISCARDED | stateBits);
     return stateBits;
 }
 
-Renderable::Snapshot RenderableWithDisposable::snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest, const V3& postTranslate, StateBits state)
+Renderable::Snapshot RenderableWithDisposable::snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, const V3& postTranslate, StateBits state)
 {
-    return _wrapped->snapshot(pipelineInput, renderRequest, postTranslate, state);
+    return _wrapped->snapshot(snapshotContext, renderRequest, postTranslate, state);
 }
 
 }

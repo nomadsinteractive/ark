@@ -54,9 +54,8 @@ static V2 toViewportPosition(const V2& position)
 
 static V2 toPivotPosition(const sp<Boundaries>& occupies, const V2& size)
 {
-    const RenderEngine& renderEngine = *Ark::instance().applicationContext()->renderEngine();
     if(!occupies)
-        return renderEngine.isLHS() ? V2(0, 0) : V2(0, size.y());
+        return Ark::instance().applicationContext()->renderEngine()->isLHS() ? V2(0, 0) : V2(0, size.y());
 
     const V3& occupyAABBMin = occupies->aabbMin()->val();
     const V3& occupyAABBMax = occupies->aabbMax()->val();
@@ -259,7 +258,7 @@ Renderable::StateBits View::RenderableView::updateState(const RenderRequest& ren
     return state.stateBits();
 }
 
-Renderable::Snapshot View::RenderableView::snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest, const V3& postTranslate, StateBits state)
+Renderable::Snapshot View::RenderableView::snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, const V3& postTranslate, StateBits state)
 {
     if(const sp<Layout::Node> topViewLayoutNode = _view_stub->getTopViewLayoutNode())
     {
@@ -269,7 +268,7 @@ Renderable::Snapshot View::RenderableView::snapshot(const PipelineInput& pipelin
         const V2 size = _is_background ? layoutSize : layoutSize - V2(paddings.y() + paddings.w(), paddings.x() + paddings.z());
         const V3 topViewOffset = _view_stub->getTopViewOffsetPosition(false);
         const V3 offset = _is_background ? topViewOffset : topViewOffset + V3(paddings.w(), paddings.x(), 0);
-        Renderable::Snapshot snapshot = _renderable->snapshot(pipelineInput, renderRequest, postTranslate, state);
+        Renderable::Snapshot snapshot = _renderable->snapshot(snapshotContext, renderRequest, postTranslate, state);
         if(!snapshot._model)
             snapshot._model = _model_loader->loadModel(snapshot._type);
         snapshot._position += V3(toViewportPosition(toPivotPosition(snapshot._model->occupy(), size) + V2(offset.x(), offset.y())), offset.z());

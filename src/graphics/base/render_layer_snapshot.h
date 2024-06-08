@@ -5,6 +5,7 @@
 
 #include "graphics/forwarding.h"
 #include "graphics/base/layer_context.h"
+#include "graphics/base/layer_context_snapshot.h"
 #include "graphics/base/render_layer.h"
 #include "graphics/base/rect.h"
 #include "graphics/inf/renderable.h"
@@ -30,12 +31,12 @@ public:
     };
 
     struct Droplet {
-        Droplet(Renderable& renderable, const LayerContext::Snapshot& layerContext, LayerContext::ElementState& state, const Renderable::Snapshot& snapshot);
+        Droplet(Renderable& renderable, const LayerContextSnapshot& layerContext, LayerContext::ElementState& state, const Renderable::Snapshot& snapshot);
 
-        const Renderable::Snapshot& ensureDirtySnapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest);
+        const Renderable::Snapshot& ensureDirtySnapshot(const RenderRequest& renderRequest);
 
         Renderable& _renderable;
-        const LayerContext::Snapshot& _layer_context;
+        const LayerContextSnapshot& _layer_context;
         LayerContext::ElementState& _element_state;
         Renderable::Snapshot _snapshot;
     };
@@ -52,7 +53,7 @@ public:
 
     bool addDisposedState(LayerContext& lc, void* stateKey);
 
-    void addDisposedLayerContext(LayerContext& lc);
+    void addDiscardedLayerContext(LayerContext& lc);
     void addDiscardedLayerContexts(const std::vector<sp<LayerContext>>& layerContexts);
 
     sp<RenderCommand> toRenderCommand(const RenderRequest& renderRequest, Buffer::Snapshot vertices, Buffer::Snapshot indices, uint32_t drawCount, DrawingParams params);
@@ -64,7 +65,7 @@ public:
     std::vector<UBOSnapshot> _ubos;
     std::vector<std::pair<uint32_t, Buffer::Snapshot>> _ssbos;
 
-    std::vector<LayerContext::Snapshot> _layer_contexts;
+    std::vector<LayerContextSnapshot> _layer_context_snapshots;
 
     std::deque<Droplet> _droplets;
     std::deque<LayerContext::ElementState> _item_deleted;

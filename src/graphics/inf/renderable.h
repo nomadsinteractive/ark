@@ -54,7 +54,7 @@ public:
     };
 
     virtual StateBits updateState(const RenderRequest& renderRequest) = 0;
-    virtual Snapshot snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest, const V3& postTranslate, StateBits state) = 0;
+    virtual Snapshot snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, const V3& postTranslate, StateBits state) = 0;
 };
 
 }

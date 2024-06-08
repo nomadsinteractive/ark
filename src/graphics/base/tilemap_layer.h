@@ -86,7 +86,7 @@ private:
         RenderableTile(const sp<Stub>& stub, sp<Tile> tile, sp<RenderObject> renderable, const V3& position);
 
         virtual StateBits updateState(const RenderRequest& renderRequest) override;
-        virtual Snapshot snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest, const V3& postTranslate, StateBits state) override;
+        virtual Snapshot snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, const V3& postTranslate, StateBits state) override;
 
         void dispose();
 

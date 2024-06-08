@@ -1,5 +1,6 @@
 #include "graphics/impl/renderable/renderable_with_visible.h"
 
+#include "graphics/base/layer_context_snapshot.h"
 #include "graphics/base/render_request.h"
 
 namespace ark {
@@ -18,9 +19,9 @@ Renderable::StateBits RenderableWithVisible::updateState(const RenderRequest& re
     return state.stateBits();
 }
 
-Renderable::Snapshot RenderableWithVisible::snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest, const V3& postTranslate, StateBits state)
+Renderable::Snapshot RenderableWithVisible::snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, const V3& postTranslate, StateBits state)
 {
-    return _wrapped->snapshot(pipelineInput, renderRequest, postTranslate, state);
+    return _wrapped->snapshot(snapshotContext, renderRequest, postTranslate, state);
 }
 
 }

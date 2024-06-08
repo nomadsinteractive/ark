@@ -235,10 +235,10 @@ Renderable::StateBits RenderObject::updateState(const RenderRequest& renderReque
                                               (_visible.val() ? Renderable::RENDERABLE_STATE_VISIBLE : 0));
 }
 
-Renderable::Snapshot RenderObject::snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest, const V3& postTranslate, StateBits state)
+Renderable::Snapshot RenderObject::snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, const V3& postTranslate, StateBits state)
 {
     if(state & Renderable::RENDERABLE_STATE_DIRTY)
-        return Renderable::Snapshot(state, _type->val(), _position.val(), _size.val(), _transform->snapshot(postTranslate), _varyings ? _varyings->snapshot(pipelineInput, renderRequest.allocator()) : Varyings::Snapshot());
+        return Renderable::Snapshot(state, _type->val(), _position.val(), _size.val(), _transform->snapshot(postTranslate), _varyings ? _varyings->snapshot(snapshotContext.pipelineInput(), renderRequest.allocator()) : Varyings::Snapshot());
     return Renderable::Snapshot(state, _type->val());
 }
 

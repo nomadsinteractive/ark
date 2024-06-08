@@ -15,6 +15,7 @@ class Color;
 class Font;
 class Glyph;
 class Layer;
+class LayerContextSnapshot;
 class Layout;
 class LayoutParam;
 class Mat2Impl;

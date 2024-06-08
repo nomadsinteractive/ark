@@ -68,7 +68,7 @@ public:
         BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
         BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext, sp<Builder<ModelLoader>> modelLoader, sp<Builder<Shader>> shader = nullptr);
 
-        virtual sp<RenderLayer> build(const Scope& args) override;
+        sp<RenderLayer> build(const Scope& args) override;
 
     private:
         sp<ResourceLoaderContext> _resource_loader_context;
@@ -103,6 +103,7 @@ private:
 
     friend class Layer;
     friend class RenderLayerSnapshot;
+    friend class LayerContextSnapshot;
 };
 
 }

@@ -12,10 +12,10 @@ public:
     RenderableWithDisposable(sp<Renderable> delegate, sp<Boolean> disposed);
 
     virtual StateBits updateState(const RenderRequest& renderRequest) override;
-    virtual Snapshot snapshot(const PipelineInput& pipelineInput, const RenderRequest& renderRequest, const V3& postTranslate, StateBits state) override;
+    virtual Snapshot snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, const V3& postTranslate, StateBits state) override;
 
 private:
-    sp<Boolean> _disposed;
+    sp<Boolean> _discarded;
 };
 
 }

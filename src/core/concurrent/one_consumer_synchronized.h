@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_CONCURRENT_ONE_CONSUMER_SYNCHRONIZED_H_
-#define ARK_CORE_CONCURRENT_ONE_CONSUMER_SYNCHRONIZED_H_
+#pragma once
 
 #include <list>
 #include <queue>
@@ -8,9 +7,8 @@
 #include "core/concurrent/internal.h"
 
 namespace ark {
-namespace internal {
-namespace concurrent {
 
+namespace internal::concurrent {
 
 template<typename T, typename Container, typename Synchronizer> class _OneConsumerSynchronized {
 private:
@@ -77,7 +75,6 @@ public:
 };
 
 }
-}
 
 template<typename T> class OCSQueue : public internal::concurrent::_OneConsumerSynchronized<T, std::queue<T>, internal::concurrent::_QueueSynchronizer<T>> {
 public:
@@ -103,5 +100,3 @@ public:
 };
 
 }
-
-#endif

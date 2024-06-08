@@ -135,7 +135,7 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
     for(size_t i = 0; i < renderLayerItems.size(); ++i)
     {
         RenderLayerSnapshot::Droplet& s = renderLayerItems.at(i);
-        const Renderable::Snapshot& snapshot = reload ? s.ensureDirtySnapshot(renderLayerSnapshot.pipelineInput(), renderRequest) : s._snapshot;
+        const Renderable::Snapshot& snapshot = reload ? s.ensureDirtySnapshot(renderRequest) : s._snapshot;
         if(reload || s._snapshot._state.hasState(Renderable::RENDERABLE_STATE_DIRTY))
         {
             if(snapshot._varyings._sub_properties.size() > 0)
