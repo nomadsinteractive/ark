@@ -265,13 +265,15 @@ Renderable::StateBits TilemapLayer::RenderableTile::updateState(const RenderRequ
     return _renderable ? _renderable->updateState(renderRequest) : Renderable::RENDERABLE_STATE_DISCARDED;
 }
 
-Renderable::Snapshot TilemapLayer::RenderableTile::snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, const V3& postTranslate, StateBits state)
+Renderable::Snapshot TilemapLayer::RenderableTile::snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, StateBits state)
 {
     if(!_renderable)
         return Renderable::Snapshot();
 
     const V3 tileTranslate = _position + V3(0, 0, _stub->_zorder);
-    return _renderable->snapshot(snapshotContext, renderRequest, postTranslate + tileTranslate, state);
+    Renderable::Snapshot snapshot = _renderable->snapshot(snapshotContext, renderRequest, state);
+    snapshot._position += tileTranslate;
+    return snapshot;
 }
 
 void TilemapLayer::RenderableTile::dispose()

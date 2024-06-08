@@ -54,7 +54,7 @@ public:
     };
 
 public:
-    ~Layout() = default;
+    virtual ~Layout() = default;
 
     virtual sp<Updatable> inflate(Hierarchy hierarchy) = 0;
 };

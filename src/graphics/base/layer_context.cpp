@@ -9,8 +9,7 @@
 #include "graphics/base/layer.h"
 #include "graphics/base/render_object.h"
 #include "graphics/base/layer_context_snapshot.h"
-#include "graphics/impl/renderable/renderable_with_disposable.h"
-#include "graphics/impl/renderable/renderable_with_updatable.h"
+#include "graphics/util/renderable_type.h"
 
 #include "renderer/base/model.h"
 #include "renderer/base/pipeline_input.h"
@@ -18,15 +17,7 @@
 
 namespace ark {
 
-static sp<Renderable> makeRenderable(sp<Renderable> renderable, sp<Updatable> updatable, sp<Boolean> disposed)
-{
-    ASSERT(renderable);
-    if(updatable)
-        renderable = sp<RenderableWithUpdatable>::make(std::move(renderable), std::move(updatable));
-    if(disposed)
-        renderable = sp<RenderableWithDisposable>::make(std::move(renderable), std::move(disposed));
-    return renderable;
-}
+
 
 LayerContext::LayerContext(sp<ModelLoader> modelLoader, sp<Vec3> position, sp<Boolean> visible, sp<Boolean> discarded, sp<Varyings> varyings)
     : _model_loader(std::move(modelLoader)), _position(std::move(position)), _visible(std::move(visible), true), _discarded(discarded ? std::move(discarded) : nullptr, false),
@@ -82,8 +73,7 @@ Layer::Type LayerContext::layerType() const
 
 void LayerContext::add(sp<Renderable> renderable, sp<Updatable> isDirty, sp<Boolean> discarded)
 {
-    ASSERT(renderable);
-    _renderable_created.push_back(makeRenderable(std::move(renderable), std::move(isDirty), std::move(discarded)));
+    _renderable_created.push_back(RenderableType::create(std::move(renderable), std::move(isDirty), std::move(discarded)));
 }
 
 void LayerContext::clear()

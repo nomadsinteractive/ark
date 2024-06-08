@@ -55,14 +55,15 @@ private:
 
 template<typename T> template<typename... Args> class Builder<T>::Lazy final : public Builder {
 public:
-    Lazy(Args&&... args)
-        : _args(std::forward<Args>(args)...) {
+    typedef std::function<sp<T>(Args&&...)> MakeSharedPtrType;
+
+    Lazy(MakeSharedPtrType makerFunc, Args&&... args)
+        : _args(std::forward<Args>(args)...), _maker_func(std::move(makerFunc)) {
     }
 
     sp<T> build(const Scope& /*args*/) override {
         if(!_lazy_instance) {
-            typedef sp<T> (*pfnMakeSharedPtr)(Args&&...);
-            _lazy_instance = std::apply(static_cast<pfnMakeSharedPtr>(sp<T>::template make<T, Args...>), std::move(_args));
+            _lazy_instance = std::apply(_maker_func, std::move(_args));
         }
         return _lazy_instance;
     }
@@ -70,14 +71,15 @@ public:
 private:
     sp<T> _lazy_instance;
     std::tuple<Args...> _args;
+    MakeSharedPtrType _maker_func;
 };
 
 template<typename T, typename U = T, typename... Args> sp<Builder<T>> make_lazy_builder(Args&&... args) {
-    sp<Builder<U>> builder = sp<typename Builder<U>::template Lazy<Args...>>::make(std::forward<Args>(args)...);
-    if constexpr(std::is_same_v<T, U>)
-        return builder;
-    else
-        return sp<typename Builder<T>::template Wrapper<U>>::make(builder);
+    return sp<Builder<T>>::template make<typename Builder<T>::template Lazy<Args...>>(sp<T>::template make<U, Args...>, std::forward<Args>(args)...);
+}
+
+template<typename T, typename U, typename... Args> sp<Builder<T>> to_lazy_builder(U makerFunc, Args&&... args) {
+    return sp<Builder<T>>::template make<typename Builder<T>::template Lazy<Args...>>(std::move(makerFunc), std::forward<Args>(args)...);
 }
 
 }

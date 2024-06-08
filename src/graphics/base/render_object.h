@@ -21,7 +21,8 @@ public:
 //  [[script::bindings::auto]]
     RenderObject(sp<Integer> type, sp<Vec3> position = nullptr, sp<Size> size = nullptr, sp<Transform> transform = nullptr, sp<Varyings> varyings = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> discarded = nullptr);
 
-    TypeId onWire(WiringContext& context) override;
+    TypeId onPoll(WiringContext& context) override;
+    void onWire(const WiringContext& context) override;
 
 //  [[script::bindings::property]]
     sp<Integer> type() const;
@@ -106,7 +107,7 @@ public:
     bool isVisible() const;
 
     StateBits updateState(const RenderRequest& renderRequest) override;
-    Renderable::Snapshot snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, const V3& postTranslate, StateBits state) override;
+    Renderable::Snapshot snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, StateBits state) override;
 
     //  [[plugin::builder]]
     class BUILDER : public Builder<RenderObject> {

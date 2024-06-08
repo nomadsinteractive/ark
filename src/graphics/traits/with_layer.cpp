@@ -15,16 +15,25 @@ WithLayer::WithLayer(const sp<RenderLayer>& renderLayer)
 {
 }
 
-const sp<ModelLoader>& WithLayer::modelLoader() const
+TypeId WithLayer::onPoll(WiringContext& context)
 {
-    return _layer_context->modelLoader();
+    return TYPE_ID_NONE;
 }
 
-TypeId WithLayer:: onWire(WiringContext& context)
+void WithLayer:: onWire(const WiringContext& context)
 {
     if(sp<Renderable> renderable = context.getComponent<Renderable>())
         _layer_context->add(std::move(renderable), context.getComponent<Updatable>(), context.getComponent<Expendable>());
-    return TYPE_ID_NONE;
+}
+
+const sp<LayerContext>& WithLayer::layerContext() const
+{
+    return _layer_context;
+}
+
+const sp<ModelLoader>& WithLayer::modelLoader() const
+{
+    return _layer_context->modelLoader();
 }
 
 }

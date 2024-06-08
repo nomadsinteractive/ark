@@ -23,12 +23,12 @@ public:
     View(sp<LayoutParam> layoutParam, sp<RenderObjectWithLayer> background = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> discarded = nullptr);
     ~View() override;
 
-    TypeId onWire(WiringContext& context) override;
+    TypeId onPoll(WiringContext& context) override;
+    void onWire(const WiringContext& context) override;
 
     void addRenderObjectWithLayer(sp<RenderObjectWithLayer> ro, bool isBackground);
 
     bool updateLayout(uint64_t timestamp) const;
-    void updateTextLayout(uint64_t timestamp);
 
     const sp<Layout::Node>& layoutNode() const;
 
@@ -113,20 +113,6 @@ private:
     void markAsTopView();
 
 private:
-    class RenderableView : public Renderable {
-    public:
-        RenderableView(sp<Stub> viewStub, sp<Renderable> renderable, sp<ModelLoader> modelLoader, bool isBackground);
-
-        StateBits updateState(const RenderRequest& renderRequest) override;
-        Snapshot snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, const V3& postTranslate, StateBits state) override;
-
-    private:
-        sp<Stub> _view_stub;
-        sp<Renderable> _renderable;
-        sp<ModelLoader> _model_loader;
-        bool _is_background;
-    };
-
     class IsDiscarded : public Boolean {
     public:
         IsDiscarded(sp<Stub> stub);

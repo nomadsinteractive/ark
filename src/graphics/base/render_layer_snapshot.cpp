@@ -137,7 +137,7 @@ bool RenderLayerSnapshot::addLayerContext(RenderRequest& renderRequest, LayerCon
                 state.setState(Renderable::RENDERABLE_STATE_DIRTY, true);
                 s.setState(Renderable::RENDERABLE_STATE_NEW, false);
             }
-            Renderable::Snapshot snapshot = renderable.snapshot(layerSnapshot, renderRequest, V3(0), state.stateBits());
+            Renderable::Snapshot snapshot = renderable.snapshot(layerSnapshot, renderRequest, state.stateBits());
             snapshot._position += layerSnapshot._position;
             snapshot.applyVaryings(layerSnapshot._varyings);
             if(!snapshot._model)
@@ -163,7 +163,8 @@ const Renderable::Snapshot& RenderLayerSnapshot::Droplet::ensureDirtySnapshot(co
 {
     if(!_snapshot._state.hasState(Renderable::RENDERABLE_STATE_DIRTY))
     {
-        _snapshot =_renderable.snapshot(_layer_context, renderRequest, _layer_context._position, static_cast<Renderable::StateBits>(_snapshot._state.stateBits() | Renderable::RENDERABLE_STATE_DIRTY));
+        _snapshot =_renderable.snapshot(_layer_context, renderRequest, static_cast<Renderable::StateBits>(_snapshot._state.stateBits() | Renderable::RENDERABLE_STATE_DIRTY));
+        _snapshot._position += _layer_context._position;
         _snapshot.applyVaryings(_layer_context._varyings);
     }
     return _snapshot;

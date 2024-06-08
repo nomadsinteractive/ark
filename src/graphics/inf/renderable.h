@@ -38,8 +38,8 @@ public:
     };
 
     struct Snapshot {
-        Snapshot(State state = RENDERABLE_STATE_DISCARDED, int32_t type = 0);
-        Snapshot(State state, int32_t type, const V3& position, const V3& size, const Transform::Snapshot& transform, const Varyings::Snapshot& varyings);
+        Snapshot(State state = RENDERABLE_STATE_DISCARDED, int32_t type = 0, sp<Model> model = nullptr);
+        Snapshot(State state, int32_t type, sp<Model> model, const V3& position, const V3& size, const Transform::Snapshot& transform, const Varyings::Snapshot& varyings);
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Snapshot);
 
         void applyVaryings(const Varyings::Snapshot& defaultVaryingsSnapshot);
@@ -54,7 +54,7 @@ public:
     };
 
     virtual StateBits updateState(const RenderRequest& renderRequest) = 0;
-    virtual Snapshot snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, const V3& postTranslate, StateBits state) = 0;
+    virtual Snapshot snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, StateBits state) = 0;
 };
 
 }

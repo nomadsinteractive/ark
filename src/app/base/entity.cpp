@@ -29,7 +29,12 @@ void Entity::doWire()
 {
     Wirable::WiringContext context(_components);
     for(const auto& [k, v] : _components.traits())
-        onWireOne(context, v);
+        if(const sp<Wirable> wirable = v.as<Wirable>())
+            if(const TypeId typeId = wirable->onPoll(context); typeId != TYPE_ID_NONE)
+                _components.put(typeId, v);
+    for(const auto& [k, v] : _components.traits())
+        if(const sp<Wirable> wirable = v.as<Wirable>())
+            wirable->onWire(context);
 }
 
 sp<EntityId> Entity::id() const
@@ -46,7 +51,12 @@ void Entity::dispose()
 void Entity::addComponent(Box component)
 {
     Wirable::WiringContext context(_components);
-    onWireOne(context, component);
+
+    if(const sp<Wirable> wirable = component.as<Wirable>())
+        if(const TypeId typeId = wirable->onPoll(context); typeId != TYPE_ID_NONE)
+            _components.put(typeId, component);
+    if(const sp<Wirable> wirable = component.as<Wirable>())
+        wirable->onWire(context);
 
     _components.put(component.typeId(), std::move(component));
 }
@@ -64,13 +74,6 @@ Optional<Box> Entity::getComponent(TypeId typeId) const
 const Traits& Entity::components() const
 {
     return _components;
-}
-
-void Entity::onWireOne(Wirable::WiringContext& wiringContext, const Box& component)
-{
-    if(const sp<Wirable> wirable = component.as<Wirable>())
-        if(const TypeId typeId = wirable->onWire(wiringContext); typeId != TYPE_ID_NONE)
-            _components.put(typeId, component);
 }
 
 }

@@ -12,7 +12,7 @@ public:
     RenderableWithUpdatable(sp<Renderable> delegate, sp<Updatable> updatable);
 
     virtual StateBits updateState(const RenderRequest& renderRequest) override;
-    virtual Snapshot snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, const V3& postTranslate, StateBits state) override;
+    virtual Snapshot snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, StateBits state) override;
 
 private:
     sp<Updatable> _updatable;

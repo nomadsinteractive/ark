@@ -17,10 +17,14 @@ public:
 //  [[script::bindings::auto]]
     WithLayer(const sp<RenderLayer>& renderLayer);
 
+    TypeId onPoll(WiringContext& context) override;
+    void onWire(const WiringContext& context) override;
+
+//  [[script::bindings::property]]
+    const sp<LayerContext>& layerContext() const;
+
 //  [[script::bindings::property]]
     const sp<ModelLoader>& modelLoader() const;
-
-    TypeId onWire(WiringContext& context) override;
 
 private:
     sp<LayerContext> _layer_context;

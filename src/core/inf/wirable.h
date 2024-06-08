@@ -29,13 +29,6 @@ public:
             _components.put(std::move(component));
         }
 
-        template<typename T> void shareComponent(sp<T>& component) {
-            if(sp<T> other = getComponent<T>())
-                component = std::move(other);
-            else
-                addComponent(component);
-        }
-
         template<typename T> void addComponentBuilder(sp<Builder<T>> componentBuilder) {
             _component_builders.insert_or_assign(Type<T>::id(), Box(std::move(componentBuilder)));
         }
@@ -48,7 +41,8 @@ public:
 public:
     virtual ~Wirable() = default;
 
-    virtual TypeId onWire(WiringContext& context) = 0;
+    virtual TypeId onPoll(WiringContext& context) = 0;
+    virtual void onWire(const WiringContext& context) = 0;
 
 };
 

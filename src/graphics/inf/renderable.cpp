@@ -32,13 +32,13 @@ Renderable::StateBits Renderable::State::stateBits() const
     return _state_bits;
 }
 
-Renderable::Snapshot::Snapshot(State state, int32_t type)
-    : _state(state), _type(type)
+Renderable::Snapshot::Snapshot(State state, int32_t type, sp<Model> model)
+    : _state(state), _type(type), _model(std::move(model))
 {
 }
 
-Renderable::Snapshot::Snapshot(State state, int32_t type, const V3& position, const V3& size, const Transform::Snapshot& transform, const Varyings::Snapshot& varyings)
-    : _state(state), _type(type), _position(position), _size(size), _transform(transform), _varyings(varyings)
+Renderable::Snapshot::Snapshot(State state, int32_t type, sp<Model> model, const V3& position, const V3& size, const Transform::Snapshot& transform, const Varyings::Snapshot& varyings)
+    : _state(state), _type(type), _model(std::move(model)), _position(position), _size(size), _transform(transform), _varyings(varyings)
 {
 }
 

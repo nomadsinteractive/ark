@@ -15,10 +15,15 @@ Label::Label(sp<Text> text, sp<LayoutParam> layoutParam)
 {
 }
 
-TypeId Label::onWire(WiringContext& context)
+TypeId Label::onPoll(WiringContext& context)
+{
+    return TYPE_ID_NONE;
+}
+
+void Label::onWire(const WiringContext& context)
 {
     sp<Vec3> position = context.getComponent<Vec3>();
-    if(const sp<Boundaries> boundaries = context.getComponent<Boundaries>())
+    if(sp<Boundaries> boundaries = context.getComponent<Boundaries>())
     {
         if(position)
             position = Vec3Type::add(position, boundaries->aabbMin());
@@ -31,7 +36,6 @@ TypeId Label::onWire(WiringContext& context)
     else if(const sp<View>& view = context.getComponent<View>())
         _text->setLayoutParam(view->layoutParam());
     _text->show(context.getComponent<Expendable>());
-    return TYPE_ID_NONE;
 }
 
 }

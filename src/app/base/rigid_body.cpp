@@ -20,7 +20,7 @@ RigidBody::RigidBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position
 
 RigidBody::~RigidBody()
 {
-    LOGD("RigidBody(%p) disposed", _ref->id());
+    LOGD("RigidBody(%p) discarded", _ref->id());
     _ref->discard();
 }
 
@@ -29,17 +29,24 @@ void RigidBody::dispose()
     _discarded.reset(true);
 }
 
-TypeId RigidBody::onWire(WiringContext& context)
+TypeId RigidBody::onPoll(WiringContext& context)
 {
-    if(sp<Vec3> position = context.getComponent<Vec3>())
+    return TYPE_ID_NONE;
+}
+
+void RigidBody::onWire(const WiringContext& context)
+{
+    if(auto position = context.getComponent<Vec3>())
         _position.reset(std::move(position));
+
+    if(auto shape = context.getComponent<Shape>())
+        _shape = std::move(shape);
+
+    if(auto collisionCallback = context.getComponent<CollisionCallback>())
+        _collision_callback = std::move(collisionCallback);
 
     if(sp<Boolean> expendable = context.getComponent<Expendable>())
         _discarded.reset(std::move(expendable));
-
-    context.shareComponent(_shape);
-    context.shareComponent(_collision_callback);
-    return TYPE_ID_NONE;
 }
 
 uintptr_t RigidBody::id() const

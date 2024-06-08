@@ -14,7 +14,8 @@ public:
 //  [[script::bindings::auto]]
     Label(sp<Text> text, sp<LayoutParam> layoutParam = nullptr);
 
-    TypeId onWire(WiringContext& context) override;
+    TypeId onPoll(WiringContext& context) override;
+    void onWire(const WiringContext& context) override;
 
 private:
     sp<Text> _text;

@@ -18,9 +18,9 @@ Renderable::StateBits RenderableWithUpdatable::updateState(const RenderRequest& 
     return stateBits;
 }
 
-Renderable::Snapshot RenderableWithUpdatable::snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, const V3& postTranslate, StateBits state)
+Renderable::Snapshot RenderableWithUpdatable::snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, StateBits state)
 {
-    return _wrapped->snapshot(snapshotContext, renderRequest, postTranslate, state);
+    return _wrapped->snapshot(snapshotContext, renderRequest, state);
 }
 
 }

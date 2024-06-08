@@ -9,7 +9,7 @@ Renderable::StateBits RenderableNone::updateState(const RenderRequest& renderReq
     return Renderable::RENDERABLE_STATE_NONE;
 }
 
-Renderable::Snapshot RenderableNone::snapshot(const LayerContextSnapshot& /*snapshotContext*/, const RenderRequest& /*renderRequest*/, const V3& /*postTranslate*/, StateBits /*state*/)
+Renderable::Snapshot RenderableNone::snapshot(const LayerContextSnapshot& /*snapshotContext*/, const RenderRequest& /*renderRequest*/, StateBits /*state*/)
 {
     return Renderable::Snapshot(Renderable::RENDERABLE_STATE_NONE);
 }

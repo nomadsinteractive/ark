@@ -10,8 +10,6 @@
 #include "graphics/base/layer_context.h"
 #include "graphics/base/render_object.h"
 #include "graphics/base/render_object_with_layer.h"
-#include "graphics/base/size.h"
-#include "graphics/base/text.h"
 #include "graphics/util/vec3_type.h"
 
 #include "renderer/base/model.h"
@@ -21,10 +19,27 @@
 #include "graphics/traits/layout_param.h"
 #include "app/traits/shape.h"
 #include "app/view/view_hierarchy.h"
+#include "graphics/traits/with_layer.h"
+#include "graphics/util/renderable_type.h"
 
 namespace ark {
 
 namespace {
+
+V2 toViewportPosition(const V2& position)
+{
+    return Ark::instance().applicationContext()->toViewportPosition(position);
+}
+
+V2 toPivotPosition(const sp<Boundaries>& occupies, const V2& size)
+{
+    if(!occupies)
+        return Ark::instance().applicationContext()->renderEngine()->isLHS() ? V2(0, 0) : V2(0, size.y());
+
+    const V3& occupyAABBMin = occupies->aabbMin()->val();
+    const V3& occupyAABBMax = occupies->aabbMax()->val();
+    return size * V2(Math::lerp(0, size.x(), occupyAABBMin.x(), occupyAABBMax.x(), 0), Math::lerp(0, size.y(), occupyAABBMin.y(), occupyAABBMax.y(), 0));
+}
 
 template<size_t IDX> class LayoutSize : public Numeric {
 public:
@@ -45,21 +60,45 @@ private:
     sp<View::Stub> _stub;
 };
 
-}
+class RenderableView : public Renderable {
+public:
+    RenderableView(sp<View::Stub> viewStub, sp<Renderable> renderable, bool isBackground)
+        : _view_stub(std::move(viewStub)), _renderable(std::move(renderable)), _is_background(isBackground)
+    {
+    }
 
-static V2 toViewportPosition(const V2& position)
-{
-    return Ark::instance().applicationContext()->toViewportPosition(position);
-}
+    StateBits updateState(const RenderRequest& renderRequest) override
+    {
+        Renderable::State state = _renderable->updateState(renderRequest);
+        if(state.hasState(Renderable::RENDERABLE_STATE_VISIBLE))
+            state.setState(Renderable::RENDERABLE_STATE_VISIBLE, _view_stub->isVisible());
+        return state.stateBits();
+    }
 
-static V2 toPivotPosition(const sp<Boundaries>& occupies, const V2& size)
-{
-    if(!occupies)
-        return Ark::instance().applicationContext()->renderEngine()->isLHS() ? V2(0, 0) : V2(0, size.y());
+    Snapshot snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, StateBits state) override
+    {
+        if(const sp<Layout::Node> topViewLayoutNode = _view_stub->getTopViewLayoutNode())
+        {
+            const Layout::Node& layoutNode = _view_stub->_layout_node;
+            const V4& paddings = layoutNode.paddings();
+            const V2& layoutSize = layoutNode.size();
+            const V2 size = _is_background ? layoutSize : layoutSize - V2(paddings.y() + paddings.w(), paddings.x() + paddings.z());
+            const V3 topViewOffset = _view_stub->getTopViewOffsetPosition(false);
+            const V3 offset = _is_background ? topViewOffset : topViewOffset + V3(paddings.w(), paddings.x(), 0);
+            Snapshot snapshot = _renderable->snapshot(snapshotContext, renderRequest, state);
+            snapshot._position += V3(toViewportPosition(toPivotPosition(snapshot._model->occupy(), size) + V2(offset.x(), offset.y())), offset.z());
+            snapshot._size = V3(size, 0);
+            return snapshot;
+        }
+        return {RENDERABLE_STATE_NONE};
+    }
 
-    const V3& occupyAABBMin = occupies->aabbMin()->val();
-    const V3& occupyAABBMax = occupies->aabbMax()->val();
-    return size * V2(Math::lerp(0, size.x(), occupyAABBMin.x(), occupyAABBMax.x(), 0), Math::lerp(0, size.y(), occupyAABBMin.y(), occupyAABBMax.y(), 0));
+    private:
+        sp<View::Stub> _view_stub;
+        sp<Renderable> _renderable;
+        bool _is_background;
+};
+
 }
 
 View::View(sp<LayoutParam> layoutParam, sp<RenderObjectWithLayer> background, sp<Boolean> visible, sp<Boolean> discarded)
@@ -76,22 +115,24 @@ View::~View()
     LOGD("");
 }
 
-TypeId View::onWire(WiringContext& context)
+TypeId View::onPoll(WiringContext& context)
 {
     sp<Vec3> size = Vec3Type::create(sp<LayoutSize<0>>::make(_stub), sp<LayoutSize<1>>::make(_stub), nullptr);
-    if(const sp<Shape>& shape = context.getComponent<Shape>())
-        shape->setSize(size);
-    else
-        context.addComponentBuilder(make_lazy_builder<Shape>(Shape::SHAPE_ID_AABB, sp<Vec3>(size)));
-
+    context.addComponentBuilder(make_lazy_builder<Shape>(Shape::SHAPE_ID_AABB, sp<Vec3>(size)));
     context.addComponentBuilder(make_lazy_builder<Boundaries>(std::move(size)));
     context.addComponentBuilder(make_lazy_builder<Vec3, LayoutPosition>(_stub, _updatable_layout, true, true));
+    if(_background)
+        context.addComponentBuilder(to_lazy_builder<Renderable>(RenderableType::create, sp<Renderable>::make<RenderableView>(_stub, _background->renderObject(), true), _updatable_layout, _is_discarded));
     return Type<View>::id();
+}
+
+void View::onWire(const WiringContext& context)
+{
 }
 
 void View::addRenderObjectWithLayer(sp<RenderObjectWithLayer> ro, bool isBackground)
 {
-    ro->layerContext()->add(sp<RenderableView>::make(_stub, ro->renderObject(), ro->layerContext()->modelLoader(), isBackground), _updatable_layout, _is_discarded);
+    ro->layerContext()->add(sp<RenderableView>::make(_stub, ro->renderObject(), isBackground), _updatable_layout, _is_discarded);
 }
 
 bool View::updateLayout(uint64_t timestamp) const
@@ -168,16 +209,8 @@ View::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 sp<View> View::BUILDER::build(const Scope& args)
 {
     sp<View> view = sp<View>::make(_layout_param->build(args), _background->build(args), _visible->build(args), _discarded->build(args));
-    for(const document& i : _manifest->children())
-    {
-        const String& name = i->name();
-        if(name == constants::VIEW)
-            view->addView(_factory.ensure<View>(i, args));
-        else if(name == constants::RENDER_OBJECT)
-            view->addRenderObjectWithLayer(_factory.ensure<RenderObjectWithLayer>(i, args), false);
-        else
-            CHECK_WARN(name == constants::TEXT || name == constants::BACKGROUND, "Ignoring unknown view child: %s", Documents::toString(i).c_str());
-    }
+    for(const document& i : _manifest->children(constants::VIEW))
+        view->addView(_factory.ensure<View>(i, args));
     return view;
 }
 
@@ -243,39 +276,6 @@ ViewHierarchy& View::Stub::ensureViewHierarchy()
         _hierarchy = sp<ViewHierarchy>::make(nullptr);
 
     return _hierarchy;
-}
-
-View::RenderableView::RenderableView(sp<Stub> viewStub, sp<Renderable> renderable, sp<ModelLoader> modelLoader, bool isBackground)
-    : _view_stub(std::move(viewStub)), _renderable(std::move(renderable)), _model_loader(std::move(modelLoader)), _is_background(isBackground)
-{
-}
-
-Renderable::StateBits View::RenderableView::updateState(const RenderRequest& renderRequest)
-{
-    Renderable::State state = _renderable->updateState(renderRequest);
-    if(state.hasState(Renderable::RENDERABLE_STATE_VISIBLE))
-        state.setState(Renderable::RENDERABLE_STATE_VISIBLE, _view_stub->isVisible());
-    return state.stateBits();
-}
-
-Renderable::Snapshot View::RenderableView::snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, const V3& postTranslate, StateBits state)
-{
-    if(const sp<Layout::Node> topViewLayoutNode = _view_stub->getTopViewLayoutNode())
-    {
-        const Layout::Node& layoutNode = _view_stub->_layout_node;
-        const V4& paddings = layoutNode.paddings();
-        const V2& layoutSize = layoutNode.size();
-        const V2 size = _is_background ? layoutSize : layoutSize - V2(paddings.y() + paddings.w(), paddings.x() + paddings.z());
-        const V3 topViewOffset = _view_stub->getTopViewOffsetPosition(false);
-        const V3 offset = _is_background ? topViewOffset : topViewOffset + V3(paddings.w(), paddings.x(), 0);
-        Renderable::Snapshot snapshot = _renderable->snapshot(snapshotContext, renderRequest, postTranslate, state);
-        if(!snapshot._model)
-            snapshot._model = _model_loader->loadModel(snapshot._type);
-        snapshot._position += V3(toViewportPosition(toPivotPosition(snapshot._model->occupy(), size) + V2(offset.x(), offset.y())), offset.z());
-        snapshot._size = V3(size, 0);
-        return snapshot;
-    }
-    return Renderable::Snapshot(Renderable::RENDERABLE_STATE_NONE);
 }
 
 View::IsDiscarded::IsDiscarded(sp<Stub> stub)

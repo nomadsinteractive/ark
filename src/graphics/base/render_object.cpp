@@ -235,26 +235,27 @@ Renderable::StateBits RenderObject::updateState(const RenderRequest& renderReque
                                               (_visible.val() ? Renderable::RENDERABLE_STATE_VISIBLE : 0));
 }
 
-Renderable::Snapshot RenderObject::snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, const V3& postTranslate, StateBits state)
+Renderable::Snapshot RenderObject::snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, StateBits state)
 {
-    if(state & Renderable::RENDERABLE_STATE_DIRTY)
-        return Renderable::Snapshot(state, _type->val(), _position.val(), _size.val(), _transform->snapshot(postTranslate), _varyings ? _varyings->snapshot(snapshotContext.pipelineInput(), renderRequest.allocator()) : Varyings::Snapshot());
-    return Renderable::Snapshot(state, _type->val());
+    const int32_t typeId = _type->val();
+    sp<Model> model = snapshotContext._render_layer.context()->modelLoader()->loadModel(typeId);
+    if(state & RENDERABLE_STATE_DIRTY)
+        return {state, typeId, std::move(model), _position.val(), _size.val(), _transform->snapshot(V3(0)), _varyings ? _varyings->snapshot(snapshotContext.pipelineInput(), renderRequest.allocator()) : Varyings::Snapshot()};
+    return {state, typeId, std::move(model)};
 }
 
-TypeId RenderObject::onWire(WiringContext& context)
+TypeId RenderObject::onPoll(WiringContext& /*context*/)
+{
+    return Type<Renderable>::id();
+}
+
+void RenderObject::onWire(const WiringContext& context)
 {
     if(sp<Vec3> position = context.getComponent<Vec3>())
         _position.reset(std::move(position));
     if(!_size)
-    {
-        if(sp<Size> size = context.getComponent<Size>())
-            _size.reset(std::move(size));
-        else if(const sp<WithLayer> withLayer = context.getComponent<WithLayer>())
-            if(const sp<Boundaries>& metrics = withLayer->modelLoader()->loadModel(_type->val())->content())
-                _size.reset(metrics->size());
-    }
-    return Type<Renderable>::id();
+        if(const sp<Size> size = context.getComponent<Size>())
+            _size.reset(size);
 }
 
 RenderObject::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

@@ -55,8 +55,6 @@ public:
 private:
     void doWire();
 
-    void onWireOne(Wirable::WiringContext& wiringContext, const Box& component);
-
 private:
     sp<EntityRef> _ref;
     Traits _components;

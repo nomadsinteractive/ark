@@ -7,12 +7,12 @@
 
 namespace ark {
 
-class RenderableWithDisposable : public Wrapper<Renderable>, public Renderable {
+class RenderableWithDiscarded final : public Wrapper<Renderable>, public Renderable {
 public:
-    RenderableWithDisposable(sp<Renderable> delegate, sp<Boolean> disposed);
+    RenderableWithDiscarded(sp<Renderable> delegate, sp<Boolean> disposed);
 
-    virtual StateBits updateState(const RenderRequest& renderRequest) override;
-    virtual Snapshot snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, const V3& postTranslate, StateBits state) override;
+    StateBits updateState(const RenderRequest& renderRequest) override;
+    Snapshot snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, StateBits state) override;
 
 private:
     sp<Boolean> _discarded;

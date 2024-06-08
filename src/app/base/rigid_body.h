@@ -24,7 +24,8 @@ public:
 //  [[script::bindings::auto]]
     virtual void dispose();
 
-    TypeId onWire(WiringContext& context) override;
+    TypeId onPoll(WiringContext& context) override;
+    void onWire(const WiringContext& context) override;
 
 //  [[script::bindings::property]]
     uintptr_t id() const;

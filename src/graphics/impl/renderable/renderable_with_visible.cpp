@@ -19,9 +19,9 @@ Renderable::StateBits RenderableWithVisible::updateState(const RenderRequest& re
     return state.stateBits();
 }
 
-Renderable::Snapshot RenderableWithVisible::snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, const V3& postTranslate, StateBits state)
+Renderable::Snapshot RenderableWithVisible::snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, StateBits state)
 {
-    return _wrapped->snapshot(snapshotContext, renderRequest, postTranslate, state);
+    return _wrapped->snapshot(snapshotContext, renderRequest, state);
 }
 
 }

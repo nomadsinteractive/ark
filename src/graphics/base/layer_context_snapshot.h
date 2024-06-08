@@ -7,8 +7,8 @@
 
 namespace ark {
 
-struct LayerContextSnapshot {
-
+class LayerContextSnapshot {
+public:
     const PipelineInput& pipelineInput() const;
 
     bool _dirty;
