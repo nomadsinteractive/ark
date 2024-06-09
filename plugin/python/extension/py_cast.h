@@ -215,7 +215,7 @@ private:
         return toPyObject_SharedPtr(static_cast<sp<typename T::_PtrType>>(ptr));
     }
     template<typename T> static PyObject* toPyObject_sfinae(const T& ptr, typename T::OPT_TYPE*) {
-        return ptr ? toPyObject(ptr.value()) : nullptr;
+        return ptr ? toPyObject(ptr.value()) : PyBridge::incRefNone();
     }
     template<typename T> static PyObject* toPyObject_sfinae(const T& iterable, std::enable_if_t<!(std::is_same_v<T, std::string> || std::is_same_v<T, std::wstring> || std::is_same_v<T, Span>), decltype(iterable.begin())>*) {
         return fromIterable_sfinae<T>(iterable, nullptr);

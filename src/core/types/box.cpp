@@ -5,13 +5,18 @@
 namespace ark {
 
 Box::Box(TypeId typeId, const Class* clazz, const void* sharedPtr, const void* instancePtr, Destructor destructor) noexcept
-    : _type_id(typeId), _stub(std::make_shared<_StubVariant>(PtrStub(clazz, sharedPtr, instancePtr, destructor)))
+    : _type_id(typeId), _class(clazz), _stub(std::make_shared<_StubVariant>(PtrStub(sharedPtr, instancePtr, destructor)))
 {
 }
 
 TypeId Box::typeId() const
 {
     return _type_id;
+}
+
+const Class* Box::getClass() const
+{
+    return _class;
 }
 
 uintptr_t Box::id() const
@@ -24,7 +29,7 @@ Box::operator bool() const
     if(_stub)
     {
         if(const PtrStub* ptrStub = std::get_if<PtrStub>(_stub.get()))
-            return !ptrStub || ptrStub->instance_ptr != nullptr;
+            return ptrStub->instance_ptr != nullptr;
         return _ensure_enum_stub()->_value != 0;
     }
     return false;

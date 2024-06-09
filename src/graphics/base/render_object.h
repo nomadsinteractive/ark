@@ -109,12 +109,12 @@ public:
     StateBits updateState(const RenderRequest& renderRequest) override;
     Renderable::Snapshot snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, StateBits state) override;
 
-    //  [[plugin::builder]]
+//  [[plugin::builder]]
     class BUILDER : public Builder<RenderObject> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<RenderObject> build(const Scope& args) override;
+        sp<RenderObject> build(const Scope& args) override;
 
     private:
         SafePtr<Builder<Integer>> _type;
@@ -123,6 +123,17 @@ public:
         SafePtr<Builder<Transform>> _transform;
         SafePtr<Builder<Varyings>> _varyings;
         SafePtr<Builder<Boolean>> _discarded;
+    };
+
+//  [[plugin::builder("render_object")]]
+    class BUILDER_WIRABLE : public Builder<Wirable> {
+    public:
+        BUILDER_WIRABLE(BeanFactory& factory, const document& manifest);
+
+        sp<Wirable> build(const Scope& args) override;
+
+    private:
+        BUILDER _builder_impl;
     };
 
 private:

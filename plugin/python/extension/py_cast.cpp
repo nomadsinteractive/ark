@@ -209,7 +209,7 @@ Scope PyCast::toScope(PyObject* kws)
     Scope scope;
     if(kws)
     {
-        PythonInterpreter& pi = PythonInterpreter::instance();
+        const PythonInterpreter& pi = PythonInterpreter::instance();
         PyObject* keys = PyDict_Keys(kws);
         const Py_ssize_t size = PyList_Size(keys);
         for(Py_ssize_t i = 0; i < size; i ++)
@@ -222,7 +222,7 @@ Scope PyCast::toScope(PyObject* kws)
             else if(pi.isPyArkTypeObject(Py_TYPE(item)))
                 scope.put(sKey, *reinterpret_cast<PyArkType::Instance*>(item)->box);
             else if(PyBool_Check(item))
-                scope.put(sKey, sp<Boolean::Const>::make(PyObject_IsTrue(item) != 0));
+                scope.put(sKey, sp<Boolean>::make<Boolean::Const>(PyObject_IsTrue(item) != 0));
             else if(PyCallable_Check(item))
                 scope.put(sKey, sp<PyCallableDuckType>::make(PyInstance::track(item)));
             else

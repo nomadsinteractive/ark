@@ -15,6 +15,11 @@ WithLayer::WithLayer(const sp<RenderLayer>& renderLayer)
 {
 }
 
+WithLayer::WithLayer(sp<LayerContext> layerContext)
+    : _layer_context(std::move(layerContext))
+{
+}
+
 TypeId WithLayer::onPoll(WiringContext& context)
 {
     return TYPE_ID_NONE;
@@ -34,6 +39,16 @@ const sp<LayerContext>& WithLayer::layerContext() const
 const sp<ModelLoader>& WithLayer::modelLoader() const
 {
     return _layer_context->modelLoader();
+}
+
+WithLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+    : _layer_context(sp<LayerContext::BUILDER>::make(factory, manifest, Layer::TYPE_UNSPECIFIED))
+{
+}
+
+sp<Wirable> WithLayer::BUILDER::build(const Scope& args)
+{
+    return sp<Wirable>::make<WithLayer>(_layer_context->build(args));
 }
 
 }

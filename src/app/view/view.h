@@ -69,6 +69,17 @@ public:
         sp<Builder<LayoutParam>> _layout_param;
     };
 
+//  [[plugin::builder("view")]]
+    class BUILDER_WIRABLE : public Builder<Wirable> {
+    public:
+        BUILDER_WIRABLE(BeanFactory& factory, const document& manifest);
+
+        sp<Wirable> build(const Scope& args) override;
+
+    private:
+        BUILDER _builder_impl;
+    };
+
     struct Stub : Updatable {
         Stub(sp<LayoutParam> layoutParam, sp<Boolean> visible, sp<Boolean> discarded);
 
@@ -95,16 +106,6 @@ public:
 
         WeakPtr<Stub> _parent_stub;
         bool _top_view;
-    };
-
-    class UpdatableIsolatedLayout : public Updatable {
-    public:
-        UpdatableIsolatedLayout(sp<Stub> stub);
-
-        bool update(uint64_t timestamp) override;
-
-    private:
-        sp<Stub> _stub;
     };
 
 private:

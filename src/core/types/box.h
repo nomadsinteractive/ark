@@ -16,16 +16,16 @@ public:
     typedef void(*Destructor)(const void*);
 
     constexpr Box() noexcept
-        : _type_id(0) {
+        : _type_id(0), _class(nullptr) {
     }
     constexpr Box(std::nullptr_t) noexcept
-        : _type_id(0) {
+        : _type_id(0), _class(nullptr) {
     }
     template<typename T> Box(sp<T> sharedPtr) noexcept
-        : _type_id(Type<T>::id()), _stub(sharedPtr ? _make_ptr_stub(new SharedPtr<T>(std::move(sharedPtr))) : nullptr) {
+        : _type_id(Type<T>::id()), _class(sharedPtr.getClass()), _stub(sharedPtr ? _make_ptr_stub(new SharedPtr<T>(std::move(sharedPtr))) : nullptr) {
     }
     template<typename T> Box(T enumValue) noexcept
-        : _type_id(Type<T>::id()), _stub(_make_enum_stub<T>(enumValue)) {
+        : _type_id(Type<T>::id()), _class(Class::getClass<T>()), _stub(_make_enum_stub<T>(enumValue)) {
     }
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Box);
 
@@ -35,6 +35,8 @@ public:
     uintptr_t id() const;
 //  [[script::bindings::property]]
     TypeId typeId() const;
+
+    const Class* getClass() const;
 
     template<typename T> sp<T> toPtr() const {
         if(!_stub)
@@ -58,9 +60,9 @@ public:
 
         TypeId typeId = Type<T>::id();
         const PtrStub& ptrStub = std::get<PtrStub>(*_stub);
-        sp<T> inst = typeId == _type_id ? ptrStub.unpack<T>() : ptrStub.clazz->cast(*this, typeId).toPtr<T>();
+        sp<T> inst = typeId == _type_id ? ptrStub.unpack<T>() : _class->cast(*this, typeId).toPtr<T>();
         if(!inst) {
-            const sp<Duck<T>> duck = ptrStub.clazz->cast(*this, Type<Duck<T>>::id()).template toPtr<Duck<T>>();
+            const sp<Duck<T>> duck = _class->cast(*this, Type<Duck<T>>::id()).template toPtr<Duck<T>>();
             if(duck)
                 duck->to(inst);
         }
@@ -71,11 +73,11 @@ private:
     Box(TypeId typeId, const Class* clazz, const void* sharedPtr, const void* instancePtr, Destructor destructor) noexcept;
 
     struct PtrStub {
-        PtrStub(const Class* clazz, const void* sharedPtr, const void* instancePtr, Destructor destructor)
-            : clazz(clazz), shared_ptr(sharedPtr), instance_ptr(instancePtr), destructor(std::move(destructor)) {
+        PtrStub(const void* sharedPtr, const void* instancePtr, Destructor destructor)
+            : shared_ptr(sharedPtr), instance_ptr(instancePtr), destructor(std::move(destructor)) {
         }
         PtrStub(PtrStub&& other)
-            : clazz(other.clazz), shared_ptr(other.shared_ptr), instance_ptr(other.instance_ptr), destructor(std::move(other.destructor)) {
+            : shared_ptr(other.shared_ptr), instance_ptr(other.instance_ptr), destructor(other.destructor) {
             other.shared_ptr = nullptr;
         }
         ~PtrStub() {
@@ -87,7 +89,6 @@ private:
             return shared_ptr ? *reinterpret_cast<const sp<T>*>(shared_ptr) : nullptr;
         }
 
-        const Class* clazz;
         const void* shared_ptr;
         const void* instance_ptr;
         Destructor destructor;
@@ -117,7 +118,7 @@ private:
 
 private:
     template<typename T> static std::shared_ptr<_StubVariant> _make_ptr_stub(const sp<T>* sharedPtr) {
-        return sharedPtr ? std::make_shared<_StubVariant>(PtrStub(sharedPtr->getClass(), sharedPtr, sharedPtr->get(), _shared_ptr_destructor<T>)) : nullptr;
+        return sharedPtr ? std::make_shared<_StubVariant>(PtrStub(sharedPtr, sharedPtr->get(), _shared_ptr_destructor<T>)) : nullptr;
     }
 
     template<typename T> static std::shared_ptr<_StubVariant> _make_enum_stub(T enumValue)  {
@@ -139,6 +140,7 @@ private:
 
 private:
     TypeId _type_id;
+    const Class* _class;
     std::shared_ptr<_StubVariant> _stub;
 
     template<typename T> friend class SharedPtr;

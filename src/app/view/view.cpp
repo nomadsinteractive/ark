@@ -155,6 +155,33 @@ private:
     sp<View::Stub> _stub;
 };
 
+class UpdatableIsolatedLayout : public Updatable {
+public:
+    UpdatableIsolatedLayout(sp<View::Stub> stub)
+        : _stub(std::move(stub))
+    {
+    }
+
+    bool update(uint64_t timestamp) override
+    {
+        sp<View::Stub> stub = _stub;
+        while(stub)
+        {
+            if(stub->_top_view)
+                break;
+
+            if(const sp<ViewHierarchy>& viewHierarchy = stub->viewHierarchy(); viewHierarchy && viewHierarchy->isIsolatedLayout())
+                break;
+
+            stub = stub->_parent_stub.lock();
+        }
+        return stub ? stub->update(timestamp) : false;
+    }
+
+private:
+    sp<View::Stub> _stub;
+};
+
 }
 
 View::View(sp<LayoutParam> layoutParam, sp<RenderObject> background, sp<Boolean> visible, sp<Boolean> discarded)
@@ -263,6 +290,16 @@ sp<View> View::BUILDER::build(const Scope& args)
     return view;
 }
 
+View::BUILDER_WIRABLE::BUILDER_WIRABLE(BeanFactory& factory, const document& manifest)
+    : _builder_impl(factory, manifest)
+{
+}
+
+sp<Wirable> View::BUILDER_WIRABLE::build(const Scope& args)
+{
+    return _builder_impl.build(args);
+}
+
 View::Stub::Stub(sp<LayoutParam> layoutParam, sp<Boolean> visible, sp<Boolean> discarded)
     : _hierarchy(layoutParam->layout() ? sp<ViewHierarchy>::make(layoutParam->layout()) : nullptr), _layout_node(sp<Layout::Node>::make(std::move(layoutParam))), _visible(std::move(visible), true), _discarded(std::move(discarded), false), _top_view(false)
 {
@@ -325,27 +362,6 @@ ViewHierarchy& View::Stub::ensureViewHierarchy()
         _hierarchy = sp<ViewHierarchy>::make(nullptr);
 
     return _hierarchy;
-}
-
-View::UpdatableIsolatedLayout::UpdatableIsolatedLayout(sp<Stub> stub)
-    : _stub(std::move(stub))
-{
-}
-
-bool View::UpdatableIsolatedLayout::update(uint64_t timestamp)
-{
-    sp<Stub> stub = _stub;
-    while(stub)
-    {
-        if(stub->_top_view)
-            break;
-
-        if(const sp<ViewHierarchy>& viewHierarchy = stub->viewHierarchy(); viewHierarchy && viewHierarchy->isIsolatedLayout())
-            break;
-
-        stub = stub->_parent_stub.lock();
-    }
-    return stub ? stub->update(timestamp) : false;
 }
 
 }

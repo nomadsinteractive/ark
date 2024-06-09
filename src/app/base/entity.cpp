@@ -76,4 +76,20 @@ const Traits& Entity::components() const
     return _components;
 }
 
+Entity::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+    : _components(factory.makeBuilderList<Wirable>(manifest, "component"))
+{
+}
+
+sp<Entity> Entity::BUILDER::build(const Scope& args)
+{
+    Traits components;
+    for(const sp<Builder<Wirable>>& i : _components)
+    {
+        Box trait = i->build(args);
+        components.put(trait.getClass()->id(), std::move(trait));
+    }
+    return sp<Entity>::make(std::move(components));
+}
+
 }

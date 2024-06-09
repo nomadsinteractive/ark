@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_UTIL_BEAN_UTILS_H_
-#define ARK_CORE_UTIL_BEAN_UTILS_H_
+#pragma once
 
 #include <algorithm>
 
@@ -45,5 +44,3 @@ private:
 };
 
 }
-
-#endif

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "core/base/api.h"
-#include "core/inf/wirable.h"
+#include "core/inf/builder.h"
 #include "core/forwarding.h"
 #include "core/collection/traits.h"
 #include "core/types/ref.h"
@@ -51,6 +51,17 @@ public:
     Optional<Box> getComponent(TypeId typeId) const;
 
     const Traits& components() const;
+
+//  [[plugin::builder]]
+    class BUILDER : public Builder<Entity> {
+    public:
+        BUILDER(BeanFactory& factory, const document& manifest);
+
+        sp<Entity> build(const Scope& args) override;
+
+    private:
+        std::vector<sp<Builder<Wirable>>> _components;
+    };
 
 private:
     void doWire();

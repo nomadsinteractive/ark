@@ -38,4 +38,14 @@ void Label::onWire(const WiringContext& context)
     _text->show(context.getComponent<Expendable>());
 }
 
+Label::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+    : _text(factory.ensureBuilder<Text>(manifest, constants::TEXT))
+{
+}
+
+sp<Wirable> Label::BUILDER::build(const Scope& args)
+{
+    return sp<Label>::make(_text->build(args));
+}
+
 }
