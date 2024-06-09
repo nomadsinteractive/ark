@@ -9,18 +9,16 @@
 #include "graphics/base/layer.h"
 #include "graphics/base/layer_context.h"
 #include "graphics/base/render_object.h"
-#include "graphics/base/render_object_with_layer.h"
+#include "graphics/traits/layout_param.h"
 #include "graphics/util/vec3_type.h"
+#include "graphics/util/renderable_type.h"
 
 #include "renderer/base/model.h"
 #include "renderer/base/render_engine.h"
 
 #include "app/base/application_context.h"
-#include "graphics/traits/layout_param.h"
 #include "app/traits/shape.h"
 #include "app/view/view_hierarchy.h"
-#include "graphics/traits/with_layer.h"
-#include "graphics/util/renderable_type.h"
 
 namespace ark {
 
@@ -58,6 +56,37 @@ public:
 
 private:
     sp<View::Stub> _stub;
+};
+
+class LayoutPosition : public Vec3 {
+public:
+    LayoutPosition(sp<View::Stub> stub, sp<Updatable> updatable, bool isBackground, bool isCenter)
+        : _stub(std::move(stub)), _updatable(std::move(updatable)), _is_background(isBackground), _is_center(isCenter)
+    {
+    }
+
+    bool update(uint64_t timestamp) override
+    {
+        return _updatable->update(timestamp);
+    }
+
+    V3 val() override
+    {
+        const Layout::Node& layoutNode = _stub->_layout_node;
+        const V2& size = layoutNode.size();
+        const V4& paddings = layoutNode.paddings();
+        const V3 offsetPosition = _stub->getTopViewOffsetPosition(false);
+        float yOffset = Ark::instance().applicationContext()->renderEngine()->isLHS() ? size.y() : 0;
+        float x = offsetPosition.x() + (_is_background ? 0 : paddings.w()) + (_is_center ? size.x() / 2 : 0);
+        float y = (offsetPosition.y() + (_is_background ? 0 : paddings.x())) + (_is_center ? size.y() / 2 : yOffset);
+        return {toViewportPosition(V2(x, y)), offsetPosition.z()};
+    }
+
+private:
+    sp<View::Stub> _stub;
+    sp<Updatable> _updatable;
+    bool _is_background;
+    bool _is_center;
 };
 
 class RenderableView : public Renderable {
@@ -99,14 +128,39 @@ public:
         bool _is_background;
 };
 
+class IsDiscarded : public Boolean {
+public:
+    IsDiscarded(sp<View::Stub> stub)
+        : _stub(std::move(stub))
+    {
+    }
+
+    bool update(uint64_t timestamp) override
+    {
+        bool dirty = false;
+        sp<View::Stub> stub = _stub;
+        while(stub)
+        {
+            dirty = stub->_discarded.update(timestamp) || dirty;
+            stub = stub->_parent_stub.lock();
+        }
+        return dirty;
+    }
+    bool val() override
+    {
+        return _stub->isDiscarded();
+    }
+
+private:
+    sp<View::Stub> _stub;
+};
+
 }
 
-View::View(sp<LayoutParam> layoutParam, sp<RenderObjectWithLayer> background, sp<Boolean> visible, sp<Boolean> discarded)
-    : _stub(sp<Stub>::make(std::move(layoutParam), std::move(visible), std::move(discarded))), _background(std::move(background)), _is_discarded(sp<IsDiscarded>::make(_stub)),
+View::View(sp<LayoutParam> layoutParam, sp<RenderObject> background, sp<Boolean> visible, sp<Boolean> discarded)
+    : _stub(sp<Stub>::make(std::move(layoutParam), std::move(visible), std::move(discarded))), _background(std::move(background)), _is_discarded(sp<Boolean>::make<IsDiscarded>(_stub)),
       _updatable_view(sp<UpdatableOncePerFrame>::make(_stub)), _updatable_layout(sp<UpdatableOncePerFrame>::make(sp<UpdatableIsolatedLayout>::make(_stub)))
 {
-    if(_background)
-        addRenderObjectWithLayer(_background, true);
 }
 
 View::~View()
@@ -122,17 +176,12 @@ TypeId View::onPoll(WiringContext& context)
     context.addComponentBuilder(make_lazy_builder<Boundaries>(std::move(size)));
     context.addComponentBuilder(make_lazy_builder<Vec3, LayoutPosition>(_stub, _updatable_layout, true, true));
     if(_background)
-        context.addComponentBuilder(to_lazy_builder<Renderable>(RenderableType::create, sp<Renderable>::make<RenderableView>(_stub, _background->renderObject(), true), _updatable_layout, _is_discarded));
+        context.addComponentBuilder(to_lazy_builder<Renderable>(RenderableType::create, sp<Renderable>::make<RenderableView>(_stub, _background, true), _updatable_layout, _is_discarded));
     return Type<View>::id();
 }
 
 void View::onWire(const WiringContext& context)
 {
-}
-
-void View::addRenderObjectWithLayer(sp<RenderObjectWithLayer> ro, bool isBackground)
-{
-    ro->layerContext()->add(sp<RenderableView>::make(_stub, ro->renderObject(), isBackground), _updatable_layout, _is_discarded);
 }
 
 bool View::updateLayout(uint64_t timestamp) const
@@ -202,7 +251,7 @@ void View::markAsTopView()
 
 View::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _factory(factory), _manifest(manifest), _discarded(factory.getBuilder<Boolean>(manifest, constants::DISCARDED)), _visible(factory.getBuilder<Boolean>(manifest, constants::VISIBLE)),
-      _background(factory.getBuilder<RenderObjectWithLayer>(manifest, constants::BACKGROUND)), _layout_param(factory.ensureConcreteClassBuilder<LayoutParam>(manifest, "layout-param"))
+      _background(factory.getBuilder<RenderObject>(manifest, constants::BACKGROUND)), _layout_param(factory.ensureConcreteClassBuilder<LayoutParam>(manifest, "layout-param"))
 {
 }
 
@@ -276,50 +325,6 @@ ViewHierarchy& View::Stub::ensureViewHierarchy()
         _hierarchy = sp<ViewHierarchy>::make(nullptr);
 
     return _hierarchy;
-}
-
-View::IsDiscarded::IsDiscarded(sp<Stub> stub)
-    : _stub(std::move(stub))
-{
-}
-
-bool View::IsDiscarded::update(uint64_t timestamp)
-{
-    bool dirty = false;
-    sp<Stub> stub = _stub;
-    while(stub)
-    {
-        dirty = stub->_discarded.update(timestamp) || dirty;
-        stub = stub->_parent_stub.lock();
-    }
-    return dirty;
-}
-
-bool View::IsDiscarded::val()
-{
-    return _stub->isDiscarded();
-}
-
-View::LayoutPosition::LayoutPosition(sp<Stub> stub, sp<Updatable> updatable, bool isBackground, bool isCenter)
-    : _stub(std::move(stub)), _updatable(std::move(updatable)), _is_background(isBackground), _is_center(isCenter)
-{
-}
-
-bool View::LayoutPosition::update(uint64_t timestamp)
-{
-    return _updatable->update(timestamp);
-}
-
-V3 View::LayoutPosition::val()
-{
-    const Layout::Node& layoutNode = _stub->_layout_node;
-    const V2& size = layoutNode.size();
-    const V4& paddings = layoutNode.paddings();
-    const V3 offsetPosition = _stub->getTopViewOffsetPosition(false);
-    float yOffset = Ark::instance().applicationContext()->renderEngine()->isLHS() ? size.y() : 0;
-    float x = offsetPosition.x() + (_is_background ? 0 : paddings.w()) + (_is_center ? size.x() / 2 : 0);
-    float y = (offsetPosition.y() + (_is_background ? 0 : paddings.x())) + (_is_center ? size.y() / 2 : yOffset);
-    return {toViewportPosition(V2(x, y)), offsetPosition.z()};
 }
 
 View::UpdatableIsolatedLayout::UpdatableIsolatedLayout(sp<Stub> stub)

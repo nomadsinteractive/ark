@@ -139,8 +139,6 @@ private:
     Box _tag;
 
     Timestamp _timestamp;
-
-    friend class RenderObjectWithLayer;
 };
 
 }

@@ -20,13 +20,11 @@ namespace ark {
 
 class ARK_API View final : public Wirable {
 public:
-    View(sp<LayoutParam> layoutParam, sp<RenderObjectWithLayer> background = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> discarded = nullptr);
+    View(sp<LayoutParam> layoutParam, sp<RenderObject> background = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> discarded = nullptr);
     ~View() override;
 
     TypeId onPoll(WiringContext& context) override;
     void onWire(const WiringContext& context) override;
-
-    void addRenderObjectWithLayer(sp<RenderObjectWithLayer> ro, bool isBackground);
 
     bool updateLayout(uint64_t timestamp) const;
 
@@ -67,7 +65,7 @@ public:
 
         SafePtr<Builder<Boolean>> _discarded;
         SafePtr<Builder<Boolean>> _visible;
-        SafePtr<Builder<RenderObjectWithLayer>> _background;
+        SafePtr<Builder<RenderObject>> _background;
         sp<Builder<LayoutParam>> _layout_param;
     };
 
@@ -112,43 +110,12 @@ public:
 private:
     void markAsTopView();
 
-private:
-    class IsDiscarded : public Boolean {
-    public:
-        IsDiscarded(sp<Stub> stub);
-
-        bool update(uint64_t timestamp) override;
-        bool val() override;
-
-    private:
-        sp<Stub> _stub;
-    };
-
-    class LayoutPosition : public Vec3 {
-    public:
-        LayoutPosition(sp<Stub> stub, sp<Updatable> updatable, bool isBackground, bool isCenter);
-
-        bool update(uint64_t timestamp) override;
-        V3 val() override;
-
-    private:
-        sp<Stub> _stub;
-        sp<Updatable> _updatable;
-
-        bool _is_background;
-        bool _is_center;
-    };
-
 protected:
     sp<Stub> _stub;
-    sp<RenderObjectWithLayer> _background;
-
-    sp<EventListener> _on_move;
-    sp<IsDiscarded> _is_discarded;
+    sp<RenderObject> _background;
+    sp<Boolean> _is_discarded;
     sp<Updatable> _updatable_view;
     sp<Updatable> _updatable_layout;
-
-    sp<Size> _size;
 
     friend class Arena;
     friend class ViewHierarchy;

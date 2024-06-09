@@ -38,7 +38,6 @@ class RenderCommand;
 class RenderCommandPipeline;
 class RenderLayer;
 class RenderObject;
-class RenderObjectWithLayer;
 class RenderView;
 class RenderRequest;
 class Renderer;
