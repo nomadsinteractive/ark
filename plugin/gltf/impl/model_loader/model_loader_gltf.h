@@ -14,9 +14,7 @@
 #include "renderer/inf/model_loader.h"
 
 
-namespace ark {
-namespace plugin {
-namespace gltf {
+namespace ark::plugin::gltf {
 
 class ModelImporterGltf : public ModelLoader::Importer {
 public:
@@ -37,6 +35,4 @@ private:
 
 };
 
-}
-}
 }

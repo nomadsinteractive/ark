@@ -1,6 +1,7 @@
 #include "graphics/impl/alphabet/alphabet_system.h"
 
 #include "core/base/bean_factory.h"
+#include "core/base/constants.h"
 #include "core/util/documents.h"
 
 #include "graphics/base/font.h"
@@ -9,7 +10,7 @@
 
 namespace ark {
 
-AlphabetSystem::BUILDER::BUILDER(BeanFactory& factory, const document manifest)
+AlphabetSystem::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _text_size(Documents::getAttribute<Font::TextSize>(manifest, constants::TEXT_SIZE, Font::TextSize(24, Font::FONT_SIZE_UNIT_PT))),
       _lang(factory.getBuilder<String>(manifest, "lang"))
 {

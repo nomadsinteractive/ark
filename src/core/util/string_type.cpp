@@ -4,6 +4,7 @@
 #include <fmt/core.h>
 
 #include "core/base/bean_factory.h"
+#include "core/base/constants.h"
 #include "core/base/expression.h"
 #include "core/impl/variable/variable_dyed.h"
 #include "core/impl/variable/variable_observer.h"
@@ -45,11 +46,11 @@ public:
         : _value(std::move(value)), _format(Strings::sprintf("{%s}", format.c_str())), _formatted(sp<String>::make()) {
     }
 
-    virtual bool update(uint64_t timestamp) override {
+    bool update(uint64_t timestamp) override {
         return _value->update(timestamp);
     }
 
-    virtual sp<String> val() override {
+    sp<String> val() override {
         if constexpr(std::is_same_v<T, sp<String>>)
             *_formatted = fmt::format(_format.c_str(), _value->val()->c_str());
         else

@@ -1,6 +1,7 @@
 #include "graphics/impl/alphabet/alphabet_true_type.h"
 
 #include "core/base/bean_factory.h"
+#include "core/base/constants.h"
 #include "core/impl/readable/file_readable.h"
 #include "core/types/global.h"
 

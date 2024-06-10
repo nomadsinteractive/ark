@@ -14,7 +14,7 @@ INDENT = '\n    '
 
 
 CORE_INTERFACES = ('Numeric', 'Integer', 'Resource', 'EventListener', 'Uploader', 'Renderer', 'Notifier', 'ModelLoader',
-                   'Boolean', 'Runnable', 'Vec2', 'Vec3', 'Vec4', 'Mat3', 'Mat4', 'Holder', 'Wirable')
+                   'Boolean', 'Runnable', 'Vec2', 'Vec3', 'Vec4', 'Mat3', 'Mat4', 'Holder', 'Wirable', 'CollisionCallback')
 
 
 class GenClass:

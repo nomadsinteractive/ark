@@ -30,7 +30,7 @@ void Entity::doWire()
     Wirable::WiringContext context(_components);
     for(const auto& [k, v] : _components.traits())
         if(const sp<Wirable> wirable = v.as<Wirable>())
-            if(const TypeId typeId = wirable->onPoll(context); typeId != TYPE_ID_NONE)
+            if(const TypeId typeId = wirable->onPoll(context); typeId != constants::TYPE_ID_NONE)
                 _components.put(typeId, v);
     for(const auto& [k, v] : _components.traits())
         if(const sp<Wirable> wirable = v.as<Wirable>())
@@ -53,7 +53,7 @@ void Entity::addComponent(Box component)
     Wirable::WiringContext context(_components);
 
     if(const sp<Wirable> wirable = component.as<Wirable>())
-        if(const TypeId typeId = wirable->onPoll(context); typeId != TYPE_ID_NONE)
+        if(const TypeId typeId = wirable->onPoll(context); typeId != constants::TYPE_ID_NONE)
             _components.put(typeId, component);
     if(const sp<Wirable> wirable = component.as<Wirable>())
         wirable->onWire(context);

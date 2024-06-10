@@ -1,6 +1,7 @@
 #include "graphics/impl/boolean/out_of_bounds.h"
 
 #include "core/base/bean_factory.h"
+#include "core/base/constants.h"
 #include "core/util/updatable_util.h"
 
 #include "graphics/base/v3.h"

@@ -20,7 +20,7 @@ public:
     Rotation(const V4& quat);
     Rotation(sp<Vec4> quaternion);
 //  [[script::bindings::auto]]
-    Rotation(float theta, const V3& axis = AXIS_Z);
+    Rotation(float theta, const V3& axis = constants::AXIS_Z);
 //  [[script::bindings::auto]]
     Rotation(sp<Numeric> theta, sp<Vec3> axis = nullptr);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Rotation);

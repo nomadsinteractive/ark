@@ -2,8 +2,8 @@
 
 #include "core/base/bean_factory.h"
 #include "core/base/clock.h"
+#include "core/base/constants.h"
 #include "core/base/expression.h"
-#include "core/base/timestamp.h"
 #include "core/impl/integer/integer_by_array.h"
 #include "core/impl/variable/at_least.h"
 #include "core/impl/variable/at_most.h"
@@ -23,25 +23,6 @@
 namespace ark {
 
 namespace {
-
-class IntegerArray {
-public:
-    class BUILDER : public Builder<Integer> {
-    public:
-        BUILDER(std::vector<int32_t> values, IntegerType::Repeat repeat)
-            : _values(std::move(values)), _repeat(repeat) {
-        }
-
-        virtual sp<Integer> build(const Scope& /*args*/) override {
-            return sp<IntegerByArray>::make(sp<IntArray::Vector>::make(_values), _repeat, Notifier());
-        }
-
-    private:
-        std::vector<int32_t> _values;
-        IntegerType::Repeat _repeat;
-    };
-
-};
 
 class IntegerSubscribed : public Integer, Implements<IntegerSubscribed, Integer> {
 public:

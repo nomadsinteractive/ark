@@ -7,14 +7,14 @@
 
 namespace ark {
 
-template<typename T> class SecondOrderDynamics : public Variable<T>, Implements<SecondOrderDynamics<T>, Variable<T>> {
+template<typename T> class SecondOrderDynamics final : public Variable<T>, Implements<SecondOrderDynamics<T>, Variable<T>> {
 public:
     SecondOrderDynamics(sp<Variable<T>> x, const T& d0, sp<Numeric> t, float f, float z = 1.0f, float r = 0)
          : _x(std::move(x)), _t(std::move(t)), _w(2 * Math::PI * f), _z(z), _d(_w * std::sqrt(std::abs(z * z - 1))), _k1(z / (Math::PI * f)), _k2(1 / _w / _w), _k3(r * z / _w),
            _last_t(_t->val()), _last_x(_x->val()), _y(d0), _dy(0) {
     }
 
-    virtual T val() override {
+    T val() override {
         float t = _t->val();
         float dt = t - _last_t;
         if(dt > 0) {
@@ -41,7 +41,7 @@ public:
         return _y;
     }
 
-    virtual bool update(uint64_t timestamp) override {
+    bool update(uint64_t timestamp) override {
         return UpdatableUtil::update(timestamp, _x, _t);
     }
 

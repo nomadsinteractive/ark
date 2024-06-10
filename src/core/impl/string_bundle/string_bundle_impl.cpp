@@ -1,6 +1,7 @@
 #include "core/impl/string_bundle/string_bundle_impl.h"
 
 #include "core/base/bean_factory.h"
+#include "core/base/constants.h"
 #include "core/util/documents.h"
 #include "core/util/strings.h"
 

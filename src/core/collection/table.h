@@ -11,6 +11,8 @@ namespace ark {
 
 template<typename T, typename U, bool Ordered> class Table {
 public:
+    static constexpr size_t npos = std::numeric_limits<size_t>::max();
+
     template<bool IS_CONSTANT> struct Iterator {
 
         template <typename V> using PType = std::conditional_t<IS_CONSTANT, const V&, V&>;
@@ -19,7 +21,7 @@ public:
         typedef std::pair<PType<T>, PType<U>> PairType;
 
         Iterator(VType<T> keys, VType<U> values, size_t iterator)
-            : _keys(keys), _values(values), _iterator(iterator), _data(iterator != constants::npos ? new PairType(_keys.at(_iterator), _values.at(_iterator)) : nullptr) {
+            : _keys(keys), _values(values), _iterator(iterator), _data(iterator != npos ? new PairType(_keys.at(_iterator), _values.at(_iterator)) : nullptr) {
             DCHECK(keys.size() == values.size(), "Zipped iterator must be equal length");
         }
         Iterator(Iterator&& other)
@@ -58,11 +60,11 @@ public:
     private:
         void next() {
             DASSERT(_data);
-            DASSERT(_iterator != constants::npos);
+            DASSERT(_iterator != npos);
             DASSERT(_iterator < _keys.size());
             ++_iterator;
             if(_iterator == _keys.size())
-                _iterator = constants::npos;
+                _iterator = npos;
             else
                 _data.reset(new PairType(_keys.at(_iterator), _values.at(_iterator)));
         }
@@ -127,11 +129,11 @@ public:
     }
 
     iterator begin() {
-        return iterator(_keys, _values, _keys.empty() ? constants::npos : 0);
+        return iterator(_keys, _values, _keys.empty() ? npos : 0);
     }
 
     iterator end() {
-        return iterator(_keys, _values, constants::npos);
+        return iterator(_keys, _values, npos);
     }
 
     iterator find(const T& key) {
@@ -140,11 +142,11 @@ public:
     }
 
     const_iterator begin() const {
-        return const_iterator(_keys, _values, _keys.empty() ? constants::npos : 0);
+        return const_iterator(_keys, _values, _keys.empty() ? npos : 0);
     }
 
     const_iterator end() const {
-        return const_iterator(_keys, _values, constants::npos);
+        return const_iterator(_keys, _values, npos);
     }
 
     const_iterator find(const T& key) const {

@@ -3,6 +3,7 @@
 #include <glm/gtx/quaternion.hpp>
 
 #include "core/ark.h"
+#include "core/base/constants.h"
 #include "core/impl/variable/variable_dirty.h"
 #include "core/util/updatable_util.h"
 #include "core/util/math.h"
@@ -17,7 +18,7 @@ namespace {
 class AxisRotation : public Vec4 {
 public:
     AxisRotation(sp<Numeric> theta, sp<Vec3> axis)
-        : _theta(std::move(theta)), _axis(axis ? Vec3Type::normalize(std::move(axis)) : sp<Vec3>::make<Vec3::Const>(AXIS_Z)), _val(updateQuaternion()) {
+        : _theta(std::move(theta)), _axis(axis ? Vec3Type::normalize(std::move(axis)) : sp<Vec3>::make<Vec3::Const>(constants::AXIS_Z)), _val(updateQuaternion()) {
     }
 
     bool update(uint64_t timestamp) override {

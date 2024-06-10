@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_IMPL_ALPHABET_ALPHABET_SYSTEM_H_
-#define ARK_GRAPHICS_IMPL_ALPHABET_ALPHABET_SYSTEM_H_
+#pragma once
 
 #include "core/inf/builder.h"
 #include "core/types/shared_ptr.h"
@@ -15,9 +14,9 @@ public:
 //[[plugin::builder("system")]]
     class BUILDER : public Builder<Alphabet> {
     public:
-        BUILDER(BeanFactory& factory, const document manifest);
+        BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Alphabet> build(const Scope& args) override;
+        sp<Alphabet> build(const Scope& args) override;
 
     private:
         Font::TextSize _text_size;
@@ -27,5 +26,3 @@ public:
 };
 
 }
-
-#endif

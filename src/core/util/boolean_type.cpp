@@ -3,6 +3,7 @@
 #include <regex>
 
 #include "core/base/bean_factory.h"
+#include "core/base/constants.h"
 #include "core/base/expression.h"
 #include "core/impl/variable/variable_dyed.h"
 #include "core/impl/variable/variable_observer.h"

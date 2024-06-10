@@ -1,5 +1,6 @@
 #include "graphics/traits/layout_param.h"
 
+#include "core/base/constants.h"
 #include "core/inf/variable.h"
 #include "core/util/bean_utils.h"
 #include "core/util/string_convert.h"

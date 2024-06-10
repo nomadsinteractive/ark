@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/base/api.h"
+#include "core/base/constants.h"
 #include "core/util/documents.h"
 
 #include "graphics/forwarding.h"

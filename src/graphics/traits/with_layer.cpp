@@ -1,5 +1,7 @@
 #include "with_layer.h"
 
+#include "core/base/constants.h"
+
 #include "graphics/base/layer.h"
 #include "graphics/base/layer_context.h"
 
@@ -22,7 +24,7 @@ WithLayer::WithLayer(sp<LayerContext> layerContext)
 
 TypeId WithLayer::onPoll(WiringContext& context)
 {
-    return TYPE_ID_NONE;
+    return constants::TYPE_ID_NONE;
 }
 
 void WithLayer:: onWire(const WiringContext& context)

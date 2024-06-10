@@ -2,7 +2,6 @@
 
 #include "core/base/observer.h"
 #include "core/base/notifier.h"
-#include "core/impl/executor/executor_thread_pool.h"
 
 #include "graphics/base/camera.h"
 #include "graphics/base/layer_context.h"
@@ -20,7 +19,6 @@
 #include "renderer/base/shader.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/impl/model_loader/model_loader_cached.h"
-#include "renderer/inf/animation.h"
 #include "renderer/inf/model_loader.h"
 #include "renderer/inf/pipeline.h"
 #include "renderer/inf/pipeline_factory.h"
@@ -28,10 +26,10 @@
 
 namespace ark {
 
-RenderLayer::Stub::Stub(sp<RenderController> renderController, sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Boolean> visible, sp<Boolean> disposed, sp<Varyings> varyings, sp<Vec4> scissor)
+RenderLayer::Stub::Stub(sp<RenderController> renderController, sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Boolean> visible, sp<Boolean> discarded, sp<Varyings> varyings, sp<Vec4> scissor)
     : _render_controller(std::move(renderController)), _model_loader(ModelLoaderCached::ensureCached(std::move(modelLoader))), _shader(std::move(shader)), _scissor(std::move(scissor)),
       _render_command_composer(_model_loader->makeRenderCommandComposer()), _shader_bindings(_render_command_composer->makeShaderBindings(_shader, _render_controller, _model_loader->renderMode())),
-      _stride(_shader->input()->getStream(0).stride()), _layer_context(sp<LayerContext>::make(_model_loader, nullptr, std::move(visible), std::move(disposed), std::move(varyings)))
+      _stride(_shader->input()->getStream(0).stride()), _layer_context(sp<LayerContext>::make(_model_loader, nullptr, std::move(visible), std::move(discarded), std::move(varyings)))
 {
     _model_loader->initialize(_shader_bindings);
     CHECK(!_scissor || _shader_bindings->pipelineBindings()->hasFlag(PipelineBindings::FLAG_DYNAMIC_SCISSOR, PipelineBindings::FLAG_DYNAMIC_SCISSOR_BITMASK), "RenderLayer has a scissor while its Shader has no FLAG_DYNAMIC_SCISSOR set");
@@ -96,7 +94,7 @@ void RenderLayer::addLayerContext(sp<LayerContext> layerContext)
         layerContext->setModelLoader(_stub->_model_loader);
     if(!layerContext->varyings())
         layerContext->setVaryings(_stub->_layer_context->varyings());
-    _render_batch->addLayerContext(layerContext);
+    _render_batch->addLayerContext(std::move(layerContext));
 }
 
 void RenderLayer::addRenderBatch(sp<RenderBatch> renderBatch)
@@ -115,21 +113,21 @@ void RenderLayer::render(RenderRequest& renderRequest, const V3& position)
 }
 
 RenderLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : BUILDER(factory, manifest, resourceLoaderContext, factory.ensureBuilder<ModelLoader>(manifest, constants::MODEL))
+    : BUILDER(factory, manifest, resourceLoaderContext, factory.ensureBuilder<ModelLoader>(manifest, constants::MODEL_LOADER))
 {
 }
 
 RenderLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext, sp<Builder<ModelLoader>> modelLoader, sp<Builder<Shader>> shader)
     : _resource_loader_context(resourceLoaderContext), _layers(factory.makeBuilderList<Layer>(manifest, constants::LAYER)), _model_loader(std::move(modelLoader)), _shader(shader ? std::move(shader) : Shader::fromDocument(factory, manifest, resourceLoaderContext)),
       _varyings(factory.getConcreteClassBuilder<Varyings>(manifest, constants::VARYINGS)), _visible(factory.getBuilder<Boolean>(manifest, constants::VISIBLE)),
-      _disposed(factory.getBuilder<Boolean>(manifest, constants::DISCARDED)), _scissor(factory.getBuilder<Vec4>(manifest, "scissor"))
+      _discarded(factory.getBuilder<Boolean>(manifest, constants::DISCARDED)), _scissor(factory.getBuilder<Vec4>(manifest, "scissor"))
 {
 }
 
 sp<RenderLayer> RenderLayer::BUILDER::build(const Scope& args)
 {
     const sp<RenderLayer> renderLayer = sp<RenderLayer>::make(_resource_loader_context->renderController(), _model_loader->build(args), _shader->build(args), _visible->build(args),
-                                                              _disposed->build(args), _varyings->build(args), _scissor->build(args));
+                                                              _discarded->build(args), _varyings->build(args), _scissor->build(args));
     for(const sp<Builder<Layer>>& i : _layers)
     {
         const sp<Layer> layer = i->build(args);

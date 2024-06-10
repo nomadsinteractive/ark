@@ -17,7 +17,7 @@ Label::Label(sp<Text> text, sp<LayoutParam> layoutParam)
 
 TypeId Label::onPoll(WiringContext& context)
 {
-    return TYPE_ID_NONE;
+    return constants::TYPE_ID_NONE;
 }
 
 void Label::onWire(const WiringContext& context)

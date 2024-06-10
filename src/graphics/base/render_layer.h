@@ -22,7 +22,7 @@ namespace ark {
 class ARK_API RenderLayer : public Renderer {
 private:
     struct Stub {
-        Stub(sp<RenderController> renderController, sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Boolean> visible, sp<Boolean> disposed, sp<Varyings> varyings, sp<Vec4> scissor);
+        Stub(sp<RenderController> renderController, sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Boolean> visible, sp<Boolean> discarded, sp<Varyings> varyings, sp<Vec4> scissor);
 
         sp<RenderController> _render_controller;
         sp<ModelLoader> _model_loader;
@@ -77,7 +77,7 @@ public:
         sp<Builder<Shader>> _shader;
         sp<Builder<Varyings>> _varyings;
         SafePtr<Builder<Boolean>> _visible;
-        SafePtr<Builder<Boolean>> _disposed;
+        SafePtr<Builder<Boolean>> _discarded;
         SafePtr<Builder<Vec4>> _scissor;
     };
 

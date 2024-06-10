@@ -3,6 +3,7 @@
 #include <fstream>
 #include <tinyxml2.h>
 
+#include "core/base/constants.h"
 #include "core/base/string_buffer.h"
 #include "core/inf/readable.h"
 #include "core/util/strings.h"

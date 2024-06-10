@@ -3,6 +3,7 @@
 #include "core/ark.h"
 #include "core/base/bean_factory.h"
 #include "core/base/clock.h"
+#include "core/base/constants.h"
 #include "core/util/math.h"
 
 namespace ark {

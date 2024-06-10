@@ -54,7 +54,7 @@ void Layer::clear()
 
 Layer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _type(Documents::getAttribute(manifest, constants::TYPE, Layer::TYPE_DYNAMIC)), _render_layer(factory.getBuilder<RenderLayer>(manifest, constants::RENDER_LAYER)),
-      _model_loader(factory.getBuilder<ModelLoader>(manifest, constants::MODEL)), _visible(factory.getBuilder<Boolean>(manifest, constants::VISIBLE)),
+      _model_loader(factory.getBuilder<ModelLoader>(manifest, constants::MODEL_LOADER)), _visible(factory.getBuilder<Boolean>(manifest, constants::VISIBLE)),
       _position(factory.getBuilder<Vec3>(manifest, constants::POSITION)), _render_objects(factory.makeBuilderList<RenderObject>(manifest, constants::RENDER_OBJECT))
 {
 }

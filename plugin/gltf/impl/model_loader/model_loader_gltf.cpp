@@ -19,9 +19,7 @@
 #include "renderer/base/material_bundle.h"
 #include "renderer/base/shader_data_type.h"
 
-namespace ark {
-namespace plugin {
-namespace gltf {
+namespace ark::plugin::gltf {
 
 namespace {
 
@@ -389,6 +387,4 @@ sp<ModelLoader::Importer> ModelImporterGltf::BUILDER::build(const Scope& args)
     return sp<ModelImporterGltf>::make();
 }
 
-}
-}
 }

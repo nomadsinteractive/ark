@@ -1,6 +1,7 @@
 #include "graphics/traits/rotation.h"
 
 #include "core/base/bean_factory.h"
+#include "core/base/constants.h"
 #include "core/impl/variable/variable_dirty.h"
 
 #include "graphics/base/v3.h"
@@ -27,7 +28,7 @@ Rotation::Rotation(sp<Numeric> theta, sp<Vec3> axis)
     : Rotation(sp<Vec4>::make<Quaternion>(theta, axis))
 {
     _theta = SafeVar(std::move(theta), 0);
-    _axis = SafeVar(std::move(axis), AXIS_Z);
+    _axis = SafeVar(std::move(axis), constants::AXIS_Z);
 }
 
 V4 Rotation::val()

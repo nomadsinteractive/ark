@@ -4,10 +4,10 @@
 
 #include "core/ark.h"
 #include "core/base/bean_factory.h"
+#include "core/base/constants.h"
 #include "core/inf/asset.h"
 #include "core/inf/asset_bundle.h"
 #include "core/inf/readable.h"
-
 
 namespace ark {
 

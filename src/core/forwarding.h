@@ -117,7 +117,8 @@ typedef Array<int32_t>  IntArray;
 typedef Array<element_index_t>  IndexArray;
 typedef Array<float>    FloatArray;
 
-typedef uint32_t TypeId;
+typedef uint32_t HashId;
+typedef HashId TypeId;
 
 typedef sp<DOMAttribute> attribute;
 typedef sp<DOMElement> element;

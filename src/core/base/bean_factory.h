@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "core/base/api.h"
+#include "core/base/constants.h"
 #include "core/base/identifier.h"
 #include "core/base/queries.h"
 #include "core/base/scope.h"

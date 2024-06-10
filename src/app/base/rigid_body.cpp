@@ -31,7 +31,7 @@ void RigidBody::dispose()
 
 TypeId RigidBody::onPoll(WiringContext& context)
 {
-    return TYPE_ID_NONE;
+    return constants::TYPE_ID_NONE;
 }
 
 void RigidBody::onWire(const WiringContext& context)

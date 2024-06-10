@@ -2,6 +2,7 @@
 
 #include "core/ark.h"
 #include "core/base/bean_factory.h"
+#include "core/base/constants.h"
 #include "core/base/observer.h"
 #include "core/util/updatable_util.h"
 

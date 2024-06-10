@@ -1,10 +1,9 @@
 #include "graphics/base/size.h"
 
 #include "core/ark.h"
-
+#include "core/base/constants.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/util/bean_utils.h"
-#include "core/util/updatable_util.h"
 
 #include "graphics/base/v2.h"
 

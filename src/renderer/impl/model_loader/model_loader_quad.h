@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_IMPL_MODEL_LOADER_MODEL_LOADER_QUAD_H_
-#define ARK_RENDERER_IMPL_MODEL_LOADER_MODEL_LOADER_QUAD_H_
+#pragma once
 
 #include "core/types/shared_ptr.h"
 
@@ -12,11 +11,11 @@ class ModelLoaderQuad : public ModelLoader {
 public:
     ModelLoaderQuad(sp<Atlas> atlas);
 
-    virtual sp<RenderCommandComposer> makeRenderCommandComposer() override;
+    sp<RenderCommandComposer> makeRenderCommandComposer() override;
 
-    virtual void initialize(ShaderBindings& shaderBindings) override;
+    void initialize(ShaderBindings& shaderBindings) override;
 
-    virtual sp<Model> loadModel(int32_t type) override;
+    sp<Model> loadModel(int32_t type) override;
 
 //  [[plugin::builder::by-value("quad")]]
     class MAKER : public Builder<ModelLoader> {
@@ -36,5 +35,3 @@ private:
 };
 
 }
-
-#endif

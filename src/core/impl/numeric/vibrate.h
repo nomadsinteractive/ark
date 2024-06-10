@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_IMPL_NUMERIC_DAMPER_H_
-#define ARK_CORE_IMPL_NUMERIC_DAMPER_H_
+#pragma once
 
 #include "core/forwarding.h"
 #include "core/inf/builder.h"
@@ -8,19 +7,19 @@
 
 namespace ark {
 
-class Damper : public Numeric {
+class Vibrate : public Numeric {
 public:
-    Damper(const sp<Numeric>& t, float a, float c, float o);
+    Vibrate(const sp<Numeric>& t, float a, float c, float o);
 
-    virtual float val() override;
-    virtual bool update(uint64_t timestamp) override;
+    float val() override;
+    bool update(uint64_t timestamp) override;
 
-//  [[plugin::builder("damper")]]
+//  [[plugin::builder("vibrate")]]
     class BUILDER : public Builder<Numeric> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Numeric> build(const Scope& args) override;
+        sp<Numeric> build(const Scope& args) override;
 
     private:
         float v2c(float v, float a) const;
@@ -38,5 +37,3 @@ private:
 };
 
 }
-
-#endif
