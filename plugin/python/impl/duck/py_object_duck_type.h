@@ -1,5 +1,4 @@
-#ifndef ARK_PLUGIN_PYTHON_IMPL_DUCK_PY_OBJECT_DUCK_TYPE_H_
-#define ARK_PLUGIN_PYTHON_IMPL_DUCK_PY_OBJECT_DUCK_TYPE_H_
+#pragma once
 
 #include "core/inf/duck.h"
 #include "core/types/implements.h"
@@ -12,9 +11,7 @@
 #include "python/forwarding.h"
 #include "python/extension/py_instance.h"
 
-namespace ark {
-namespace plugin {
-namespace python {
+namespace ark::plugin::python {
 
 class PyObjectDuckType : public Duck<String>, public Duck<CollisionCallback>, public Duck<RendererMaker>, public Duck<Integer>, public Duck<Numeric>,
         public Implements<PyObjectDuckType, Duck<String>, Duck<CollisionCallback>, Duck<RendererMaker>, Duck<Integer>, Duck<Numeric>> {
@@ -33,7 +30,3 @@ private:
 };
 
 }
-}
-}
-
-#endif

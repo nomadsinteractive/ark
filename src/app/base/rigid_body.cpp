@@ -14,13 +14,18 @@
 namespace ark {
 
 RigidBody::RigidBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> quaternion, Box impl, sp<Boolean> discarded)
-    : _ref(sp<RigidBodyRef>::make(*this)), _type(type), _meta_id(0), _shape(std::move(shape)), _position(std::move(position)), _quaternion(std::move(quaternion)), _impl(std::move(impl)), _discarded(std::move(discarded))
+    : RigidBody(type, std::move(shape), std::move(position), std::move(quaternion), std::move(impl), std::move(discarded), sp<RigidBodyRef>::make(*this))
 {
 }
 
+RigidBody::RigidBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> quaternion, Box impl, sp<Boolean> discarded, sp<RigidBodyRef> ref)
+    : _ref(std::move(ref)), _type(type), _meta_id(0), _shape(std::move(shape)), _position(std::move(position)), _quaternion(std::move(quaternion)), _impl(std::move(impl)), _discarded(std::move(discarded))
+{
+}
+
+
 RigidBody::~RigidBody()
 {
-    LOGD("RigidBody(%p) discarded", _ref->id());
     _ref->discard();
 }
 
@@ -116,9 +121,7 @@ void RigidBody::setCollisionFilter(sp<CollisionFilter> collisionFilter)
 
 sp<RigidBody> RigidBody::makeShadow() const
 {
-    sp<RigidBody> shadow = sp<RigidBody>::make(_type, _shape, _position.wrapped(), _quaternion.wrapped(), _impl, _discarded.wrapped());
-    shadow->_ref = sp<RigidBodyRef>::make(*shadow->_ref);
-    return shadow;
+    return sp<RigidBody>::make(_type, _shape, _position.wrapped(), _quaternion.wrapped(), _impl, _discarded.wrapped(), sp<RigidBodyRef>::make(*_ref));
 }
 
 template<> ARK_API Collider::BodyType StringConvert::eval<Collider::BodyType>(const String& str)

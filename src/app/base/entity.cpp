@@ -77,19 +77,25 @@ const Traits& Entity::components() const
 }
 
 Entity::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _components(factory.makeBuilderList<Wirable>(manifest, "component"))
+    : _boxes(factory.getBuilder<std::vector<Box>>(manifest, "components")), _components(factory.makeBuilderList<Wirable>(manifest, "component"))
 {
 }
 
 sp<Entity> Entity::BUILDER::build(const Scope& args)
 {
-    Traits components;
+    Traits traits;
+    if(_boxes)
+    {
+        sp<std::vector<Box>> boxes = _boxes->build(args);
+        for(Box& i : *boxes)
+            traits.put(i.typeId(), std::move(i));
+    }
     for(const sp<Builder<Wirable>>& i : _components)
     {
         Box trait = i->build(args);
-        components.put(trait.getClass()->id(), std::move(trait));
+        traits.put(trait.getClass()->id(), std::move(trait));
     }
-    return sp<Entity>::make(std::move(components));
+    return sp<Entity>::make(std::move(traits));
 }
 
 }

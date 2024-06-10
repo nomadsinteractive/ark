@@ -60,6 +60,7 @@ public:
         sp<Entity> build(const Scope& args) override;
 
     private:
+        sp<Builder<std::vector<Box>>> _boxes;
         std::vector<sp<Builder<Wirable>>> _components;
     };
 

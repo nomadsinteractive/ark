@@ -1547,7 +1547,7 @@ class RenderLayer(Renderer):
         pass
 
 
-class Layer(Renderer):
+class Layer:
     TYPE_UNSPECIFIED = 0
     TYPE_DYNAMIC = 1
     TYPE_STATIC = 2
@@ -2540,10 +2540,10 @@ class LayoutParam:
         pass
 
 
-class View(Renderer):
+class View:
 
     @property
-    def disposed(self) -> Boolean:
+    def discarded(self) -> Boolean:
         return Boolean(False)
 
     @property

@@ -11,9 +11,7 @@
 
 #include "python/extension/py_cast.h"
 
-namespace ark {
-namespace plugin {
-namespace python {
+namespace ark::plugin::python {
 
 namespace {
 
@@ -23,7 +21,7 @@ public:
         : _callable(std::move(callable)) {
     }
 
-    virtual std::vector<sp<Glyph>> makeGlyphs(const std::wstring& text) override {
+    std::vector<sp<Glyph>> makeGlyphs(const std::wstring& text) override {
         DCHECK_THREAD_FLAG();
 
         PyInstance args(PyInstance::steal(PyTuple_New(1)));
@@ -78,6 +76,4 @@ void PyCallableDuckType::to(sp<RendererMaker>& inst)
     inst = sp<RendererMakerPython>::make(_instance);
 }
 
-}
-}
 }

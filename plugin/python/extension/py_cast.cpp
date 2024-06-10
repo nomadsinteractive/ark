@@ -28,6 +28,7 @@
 #include "python/impl/adapter/python_callable_event_listener.h"
 
 #include "python/impl/duck/py_callable_duck_type.h"
+#include "python/impl/duck/py_list_duck_type.h"
 #include "python/impl/duck/py_numeric_duck_type.h"
 #include "python/impl/duck/py_object_duck_type.h"
 #include "python/impl/duck/py_vec_duck_type.h"
@@ -219,6 +220,8 @@ Scope PyCast::toScope(PyObject* kws)
             const String sKey = toString(key);
             if(PyTuple_CheckExact(item) || pi.isInstance<Vec2>(item) || pi.isInstance<Vec3>(item) || pi.isInstance<Vec4>(item))
                 scope.put(sKey, sp<PyVecDuckType>::make(PyInstance::track(item)));
+            if(PyList_CheckExact(item))
+                scope.put(sKey, sp<PyListDuckType>::make(PyInstance::track(item)));
             else if(pi.isPyArkTypeObject(Py_TYPE(item)))
                 scope.put(sKey, *reinterpret_cast<PyArkType::Instance*>(item)->box);
             else if(PyBool_Check(item))

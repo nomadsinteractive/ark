@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/base/api.h"
+#include "core/util/log.h"
 
 namespace ark {
 
@@ -11,6 +12,10 @@ public:
     }
     Ref(const Ref& other)
         : _instance(other._instance), _discarded(other._discarded), _origin(other) {
+    }
+    ~Ref() {
+        if(&_origin == this)
+            LOGD("Ref(%p) destroyed", id());
     }
 
     explicit operator bool() const {
