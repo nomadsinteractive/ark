@@ -24,6 +24,7 @@ Mesh::Mesh(uint32_t id, String name, std::vector<element_index_t> indices, std::
     : _id(id), _name(std::move(name)), _indices(std::move(indices)), _vertices(std::move(vertices)), _uvs(std::move(uvs)), _normals(std::move(normals)), _tangents(std::move(tangents)), _bone_infos(std::move(boneInfos)),
       _material(std::move(material))
 {
+    CHECK_WARN(_uvs, "Null UV coordinates may not be supported in the future");
     CHECK((!_uvs || _vertices.size() == _uvs->length()) && (!_normals || _vertices.size() == _normals->length()) && (!_tangents || _vertices.size() == _tangents->length()) &&
           (!_bone_infos || _vertices.size() == _bone_infos->length()), "Invalid mesh \"%s\", id: %d", _name.c_str(), id);
 }
@@ -71,20 +72,25 @@ const sp<Array<Mesh::Tangent>>& Mesh::tangents() const
 void Mesh::write(VertexWriter& buf) const
 {
     const V3* vertice = _vertices.data();
-    UV* uv = _uvs->buf();
-    V3* normal = _normals ? _normals->buf() : nullptr;
-    Tangent* tangent = _tangents ? _tangents->buf() : nullptr;
-    BoneInfo* boneInfo = _bone_infos ? _bone_infos->buf() : nullptr;
-    bool hasMaterialId = buf.hasAttribute(PipelineInput::ATTRIBUTE_NAME_MATERIAL_ID);
-    size_t len = _vertices.size();
+    const UV* uv = _uvs ? _uvs->buf() : nullptr;
+    const V3* normal = _normals ? _normals->buf() : nullptr;
+    const Tangent* tangent = _tangents ? _tangents->buf() : nullptr;
+    const BoneInfo* boneInfo = _bone_infos ? _bone_infos->buf() : nullptr;
+    const bool hasMaterialId = buf.hasAttribute(PipelineInput::ATTRIBUTE_NAME_MATERIAL_ID);
+    const size_t len = _vertices.size();
 
     for(size_t i = 0; i < len; ++i)
     {
         buf.next();
         buf.writePosition(*vertice);
         ++vertice;
-        buf.writeTexCoordinate(uv->_u, uv->_v);
-        ++uv;
+        if(uv)
+        {
+            buf.writeTexCoordinate(uv->_u, uv->_v);
+            ++uv;
+        }
+        else
+            buf.writeTexCoordinate(0, 0);
         if(normal)
             buf.writeNormal(*(normal++));
         if(tangent)

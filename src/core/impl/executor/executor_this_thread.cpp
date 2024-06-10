@@ -5,7 +5,7 @@
 
 namespace ark {
 
-void ExecutorThisThread::execute(const sp<Runnable>& task)
+void ExecutorThisThread::execute(sp<Runnable> task)
 {
     task->run();
 }

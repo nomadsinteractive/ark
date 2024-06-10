@@ -212,37 +212,6 @@ template<typename T> sp<Array<T>> toArray(std::vector<T> vector) {
     return vector.size() ? sp<typename Array<T>::Vector>::make(std::move(vector)) : nullptr;
 }
 
-//void processPrimitive(const tinygltf::Model& gltfModel, const tinygltf::Primitive& primitive, const M4& TransformMatrix, std::vector<element_index_t>& indices, std::vector<V3>& vertices,
-//                      std::vector<V3>& normals, std::vector<Mesh::UV>& uvs) {
-//
-//    for(const auto& [attributeKey, attributeValue] : primitive.attributes)
-//    {
-//        if(attributeKey == "POSITION") {
-//            SBufferReadData bufferReadData = getAttributeData<V3>(gltfModel, TransformMatrix, attributeKey, attributeValue);
-//            vertices.insert(vertices.end(), bufferReadData.DstData.begin(), bufferReadData.DstData.end());
-//            
-//        }
-//        else if(attributeKey == "NORMAL") {
-//            SBufferReadData bufferReadData = getAttributeData<V3>(gltfModel, TransformMatrix, attributeKey, attributeValue);
-//            normals.insert(normals.end(), bufferReadData.DstData.begin(), bufferReadData.DstData.end());
-//        }
-//        else if(attributeKey == "TEXCOORD_0") {
-//            SBufferReadData bufferReadData = getAttributeData<V2>(gltfModel, TransformMatrix, attributeKey, attributeValue);
-//        }
-//        else {
-//            WARN("Ignoring primitive attribute \"%s\"", attributeKey.c_str());
-//        }
-//    }
-//
-//    {
-//        element_index_t baseIndex = indices.size();
-//        SBufferReadData bufferReadData = getAttributeData<element_index_t, element_index_t>(gltfModel, TransformMatrix, "", primitive.indices);
-//        indices.reserve(indices.size() + bufferReadData.DstData.size());
-//        for(element_index_t i : bufferReadData.DstData)
-//            indices.push_back(i + baseIndex);
-//    }
-//}
-
 Mesh processPrimitive(const tinygltf::Model& gltfModel, const std::vector<sp<Material>>& materials, const tinygltf::Primitive& primitive, const M4& TransformMatrix, uint32_t id, String name) {
     std::vector<element_index_t> indices;
     std::vector<V3> vertices;
@@ -275,29 +244,11 @@ Mesh processPrimitive(const tinygltf::Model& gltfModel, const std::vector<sp<Mat
         indices = std::move(bufferReadData.DstData);
     }
 
-    ASSERT(primitive.material < materials.size());
+    ASSERT(primitive.material == -1 || primitive.material < materials.size());
     sp<Material> material = primitive.material >= 0 ? materials.at(primitive.material) : nullptr;
 
     return Mesh(id, std::move(name), std::move(indices), std::move(vertices), toArray<Mesh::UV>(std::move(uvs)), toArray<V3>(std::move(normals)), nullptr, nullptr, std::move(material));
 }
-
-//Mesh processMesh(const tinygltf::Model& gltfModel, const std::vector<sp<Material>>& materials, const tinygltf::Mesh& mesh, const M4& transformMatrix, uint32_t id) {
-//    std::vector<element_index_t> indices;
-//    std::vector<V3> vertices;
-//    std::vector<Mesh::UV> uvs;
-//    std::vector<V3> normals;
-//    int32_t materialId = -1;
-//
-//    for (const tinygltf::Primitive& i : mesh.primitives) {
-//        CHECK_WARN(materialId == -1 || materialId == i.material, "Mesh \"%s\" has primitives with different material", mesh.name.c_str());
-//        processPrimitive(gltfModel, i, transformMatrix, indices, vertices, normals, uvs);
-//        materialId = i.material;
-//    }
-//
-//    ASSERT(materialId == -1 || materialId < materials.size());
-//    sp<Material> material = materialId == -1 ? nullptr : materials.at(materialId);
-//    return Mesh(id, mesh.name, std::move(indices), std::move(vertices), toArray<Mesh::UV>(std::move(uvs)), toArray<V3>(std::move(normals)), nullptr, nullptr, std::move(material));
-//}
 
 M4 getNodeLocalTransformMatrix(const tinygltf::Node& Node)
 {
@@ -319,17 +270,18 @@ M4 getNodeLocalTransformMatrix(const tinygltf::Node& Node)
     return translateMatrix * rotateMatrix * scaleMatrix;
 }
 
-sp<Node> loadNodeHierarchy(const tinygltf::Model& gltfModel, const tinygltf::Node& node, const std::vector<sp<Mesh>>& meshes, const std::vector<std::vector<uint32_t>>& primitives)
+sp<Node> loadNodeHierarchy(const tinygltf::Model& gltfModel, const tinygltf::Node& node, const std::vector<sp<Mesh>>& meshes)
 {
     sp<Node> n = sp<Node>::make(node.name, getNodeLocalTransformMatrix(node));
 
-    ASSERT(node.mesh < primitives.size());
+    if(node.mesh != -1)
+    {
+        ASSERT(node.mesh < meshes.size());
+        n->meshes().push_back(meshes.at(node.mesh));
+    }
 
-    for(uint32_t i : primitives.at(node.mesh))
-        n->meshes().push_back(meshes.at(i));
-
-    for(int32_t i : node.children)
-        n->childNodes().push_back(loadNodeHierarchy(gltfModel, gltfModel.nodes.at(i), meshes, primitives));
+    for(const int32_t i : node.children)
+        n->childNodes().push_back(loadNodeHierarchy(gltfModel, gltfModel.nodes.at(i), meshes));
     return n;
 }
 
@@ -360,9 +312,6 @@ Model ModelImporterGltf::import(const Manifest& manifest, MaterialBundle& materi
     std::vector<sp<Mesh>> meshes;
     std::vector<std::vector<uint32_t>> primitives;
 
-    //for(const tinygltf::Mesh& i : gltfModel.meshes)
-    //    meshes.push_back(sp<Mesh>::make(processMesh(gltfModel, materials, i, M4(), meshId++)));
-
     for(const tinygltf::Mesh& i : gltfModel.meshes) {
         uint32_t primitiveBase = 0;
         std::vector<uint32_t> primitiveIds;
@@ -377,7 +326,7 @@ Model ModelImporterGltf::import(const Manifest& manifest, MaterialBundle& materi
     sp<Node> rootNode = sp<Node>::make(scene.name, M4::identity());
 
     for(int32_t i : scene.nodes)
-        rootNode->childNodes().push_back(loadNodeHierarchy(gltfModel, gltfModel.nodes.at(i), meshes, primitives));
+        rootNode->childNodes().push_back(loadNodeHierarchy(gltfModel, gltfModel.nodes.at(i), meshes));
 
     return Model(std::move(materials), std::move(meshes), std::move(rootNode), sp<Boundaries>::make(V3(0), V3(0)));
 }

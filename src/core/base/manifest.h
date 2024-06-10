@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_BASE_MANIFEST_H_
-#define ARK_CORE_BASE_MANIFEST_H_
+#pragma once
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
@@ -16,7 +15,6 @@ public:
 
 //  [[script::bindings::property]]
     const String& src() const;
-
 //  [[script::bindings::property]]
     const document& descriptor() const;
 
@@ -30,5 +28,3 @@ private:
 };
 
 }
-
-#endif

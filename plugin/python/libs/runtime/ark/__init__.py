@@ -1391,7 +1391,7 @@ class ModelBundle:
     def get_model(self, t: int) -> Model:
         pass
 
-    def import_model(self, t: int, manifest: Union[str, Manifest], future: Optional[Future]):
+    def import_model(self, t: int, manifest: str | Manifest, future: Optional[Future] = None):
         pass
 
 

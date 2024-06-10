@@ -1,9 +1,7 @@
-#ifndef ARK_CORE_IMPL_EXECUTOR_EXECUTOR_THREAD_POOL_H_
-#define ARK_CORE_IMPL_EXECUTOR_EXECUTOR_THREAD_POOL_H_
+#pragma once
 
 #include "core/base/thread.h"
 #include "core/concurrent/lf_stack.h"
-#include "core/concurrent/lf_queue.h"
 #include "core/inf/executor.h"
 #include "core/inf/runnable.h"
 #include "core/impl/executor/executor_worker_thread.h"
@@ -15,7 +13,7 @@ class ExecutorThreadPool final : public Executor {
 public:
     ExecutorThreadPool(sp<Executor> exceptionExecutor = nullptr, uint32_t capacity = 0);
 
-    virtual void execute(const sp<Runnable>& task) override;
+    void execute(sp<Runnable> task) override;
 
     sp<ExecutorWorkerThread> obtainWorkerThread();
 
@@ -60,6 +58,4 @@ private:
     sp<Stub> _stub;
 };
 
-
 }
-#endif

@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_IMPL_EXECUTOR_WORKER_THREAD_H_
-#define ARK_CORE_IMPL_EXECUTOR_WORKER_THREAD_H_
+#pragma once
 
 #include "core/forwarding.h"
 #include "core/base/thread.h"
@@ -29,7 +28,7 @@ public:
 public:
     ExecutorWorkerThread(sp<Strategy> strategy, String name);
 
-    virtual void execute(const sp<Runnable>& task) override;
+    void execute(sp<Runnable> task) override;
 
     const sp<Strategy>& strategy() const;
 
@@ -62,5 +61,3 @@ private:
 };
 
 }
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_CONCURRENT_LF_QUEUE_H_
-#define ARK_CORE_CONCURRENT_LF_QUEUE_H_
+#pragma once
 
 #include "core/forwarding.h"
 
@@ -39,5 +38,3 @@ private:
 };
 
 }
-
-#endif

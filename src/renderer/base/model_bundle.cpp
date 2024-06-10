@@ -67,8 +67,8 @@ void ModelBundle::importModel(int32_t type, const String& src, sp<Future> future
 void ModelBundle::importModel(int32_t type, const Manifest& manifest, sp<Future> future)
 {
     ApplicationContext& applicationContext = Ark::instance().applicationContext();
-    sp<Runnable> task = sp<ImportModuleRunnable>::make(type, manifest, _stub, nullptr, applicationContext.executorMain(), std::move(future));
-    applicationContext.executorThreadPool()->execute(task);
+    sp<Runnable> task = sp<Runnable>::make<ImportModuleRunnable>(type, manifest, _stub, nullptr, applicationContext.executorMain(), std::move(future));
+    applicationContext.executorThreadPool()->execute(std::move(task));
 }
 
 const Table<int32_t, ModelBundle::ModelLayout>& ModelBundle::modelLayouts() const

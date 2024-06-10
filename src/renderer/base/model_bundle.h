@@ -60,7 +60,7 @@ private:
     public:
         AddModuleRunnable(int32_t type, sp<Stub> stub, sp<Model> model, sp<Future> future);
 
-        virtual void run() override;
+        void run() override;
 
     private:
         int32_t _type;
@@ -74,7 +74,7 @@ private:
     public:
         ImportModuleRunnable(int32_t type, Manifest manifest, const sp<Stub>& stub, sp<Importer> importer, sp<Executor> executor, sp<Future> future);
 
-        virtual void run() override;
+        void run() override;
 
     private:
         int32_t _type;
@@ -84,7 +84,6 @@ private:
         sp<Executor> _executor;
         sp<Future> _future;
     };
-
 
 public:
     ModelBundle(sp<MaterialBundle> materialBundle, sp<Importer> importer);
@@ -102,9 +101,9 @@ public:
     sp<Model> getModel(int32_t type);
 
 //[[script::bindings::auto]]
-    void importModel(int32_t type, const String& src, sp<Future> future);
+    void importModel(int32_t type, const String& src, sp<Future> future = nullptr);
 //[[script::bindings::auto]]
-    void importModel(int32_t type, const Manifest& manifest, sp<Future> future);
+    void importModel(int32_t type, const Manifest& manifest, sp<Future> future = nullptr);
 
 //[[script::bindings::property]]
     size_t vertexLength() const;

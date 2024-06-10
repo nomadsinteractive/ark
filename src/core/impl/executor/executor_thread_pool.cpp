@@ -27,9 +27,9 @@ ExecutorThreadPool::ExecutorThreadPool(sp<Executor> exceptionExecutor, uint32_t 
 {
 }
 
-void ExecutorThreadPool::execute(const sp<Runnable>& task)
+void ExecutorThreadPool::execute(sp<Runnable> task)
 {
-    obtainWorkerThread()->execute(task);
+    obtainWorkerThread()->execute(std::move(task));
 }
 
 sp<ExecutorWorkerThread> ExecutorThreadPool::obtainWorkerThread()
