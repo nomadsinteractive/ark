@@ -35,8 +35,8 @@ RenderLayer::Stub::Stub(sp<RenderController> renderController, sp<ModelLoader> m
     CHECK(!_scissor || _shader_bindings->pipelineBindings()->hasFlag(PipelineBindings::FLAG_DYNAMIC_SCISSOR, PipelineBindings::FLAG_DYNAMIC_SCISSOR_BITMASK), "RenderLayer has a scissor while its Shader has no FLAG_DYNAMIC_SCISSOR set");
 }
 
-RenderLayer::RenderLayer(sp<RenderController> renderController, sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Boolean> visible, sp<Boolean> disposed, sp<Varyings> varyings, sp<Vec4> scissor)
-    : RenderLayer(sp<Stub>::make(std::move(renderController), std::move(modelLoader), std::move(shader), std::move(visible), std::move(disposed), std::move(varyings), std::move(scissor)))
+RenderLayer::RenderLayer(sp<RenderController> renderController, sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Boolean> visible, sp<Boolean> discarded, sp<Varyings> varyings, sp<Vec4> scissor)
+    : RenderLayer(sp<Stub>::make(std::move(renderController), std::move(modelLoader), std::move(shader), std::move(visible), std::move(discarded), std::move(varyings), std::move(scissor)))
 {
 }
 
@@ -76,14 +76,14 @@ RenderLayerSnapshot RenderLayer::snapshot(RenderRequest& renderRequest)
     return renderLayerSnapshot;
 }
 
-sp<LayerContext> RenderLayer::makeLayerContext(sp<ModelLoader> modelLoader, sp<Vec3> position, sp<Boolean> visible, sp<Boolean> disposed) const
+sp<LayerContext> RenderLayer::makeLayerContext(sp<ModelLoader> modelLoader, sp<Vec3> position, sp<Boolean> visible, sp<Boolean> discarded) const
 {
-    return sp<LayerContext>::make(modelLoader ? sp<ModelLoader>::make<ModelLoaderCached>(std::move(modelLoader)) : _stub->_model_loader, std::move(position), std::move(visible), std::move(disposed), _stub->_layer_context->varyings());
+    return sp<LayerContext>::make(modelLoader ? sp<ModelLoader>::make<ModelLoaderCached>(std::move(modelLoader)) : _stub->_model_loader, std::move(position), std::move(visible), std::move(discarded), _stub->_layer_context->varyings());
 }
 
-sp<LayerContext> RenderLayer::addLayerContext(sp<ModelLoader> modelLoader, sp<Vec3> position, sp<Boolean> visible, sp<Boolean> disposed) const
+sp<LayerContext> RenderLayer::addLayerContext(sp<ModelLoader> modelLoader, sp<Vec3> position, sp<Boolean> visible, sp<Boolean> discarded) const
 {
-    sp<LayerContext> layerContext = makeLayerContext(std::move(modelLoader), std::move(position), std::move(visible), std::move(disposed));
+    sp<LayerContext> layerContext = makeLayerContext(std::move(modelLoader), std::move(position), std::move(visible), std::move(discarded));
     _render_batch->addLayerContext(layerContext);
     return layerContext;
 }
@@ -102,9 +102,9 @@ void RenderLayer::addRenderBatch(sp<RenderBatch> renderBatch)
     _render_batches.push_back(std::move(renderBatch));
 }
 
-sp<Layer> RenderLayer::makeLayer(sp<ModelLoader> modelLoader, sp<Vec3> position, sp<Boolean> visible, sp<Boolean> disposed) const
+sp<Layer> RenderLayer::makeLayer(sp<ModelLoader> modelLoader, sp<Vec3> position, sp<Boolean> visible, sp<Boolean> discarded) const
 {
-    return sp<Layer>::make(addLayerContext(std::move(modelLoader), std::move(position), std::move(visible), std::move(disposed)));
+    return sp<Layer>::make(addLayerContext(std::move(modelLoader), std::move(position), std::move(visible), std::move(discarded)));
 }
 
 void RenderLayer::render(RenderRequest& renderRequest, const V3& position)

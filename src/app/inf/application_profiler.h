@@ -1,5 +1,4 @@
-#ifndef ARK_APP_INF_APPLICATION_PROFILER_H_
-#define ARK_APP_INF_APPLICATION_PROFILER_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/base/string.h"
@@ -42,21 +41,21 @@ public:
         virtual void log(const void* data, DataType dataType) = 0;
 
     private:
-        template<typename T> void log_sfinae(const T& data, typename std::enable_if<std::is_integral<T>::value && !std::is_same<bool, T>::value>::type*) {
-            const bool isUnsigned = std::is_unsigned<T>::value;
+        template<typename T> void log_sfinae(const T& data, std::enable_if_t<std::is_integral_v<T> && !std::is_same_v<bool, T>>*) {
+            const bool isUnsigned = std::is_unsigned_v<T>;
             const bool isLongLong = sizeof(T) >= sizeof(int64_t);
             const DataType dataType = isUnsigned ? (isLongLong ? DATA_TYPE_UINT64 : DATA_TYPE_UINT32) : (isLongLong ? DATA_TYPE_UINT64 : DATA_TYPE_INT32);
-            log(reinterpret_cast<const void*>(&data), dataType);
+            log(static_cast<const void*>(&data), dataType);
         }
 
-        template<typename T> void log_sfinae(const T& data, typename std::enable_if<std::is_floating_point<T>::value>::type*) {
+        template<typename T> void log_sfinae(const T& data, std::enable_if_t<std::is_floating_point_v<T>>*) {
             const float logData = data;
-            log(reinterpret_cast<const void*>(&logData), DATA_TYPE_FLOAT);
+            log(&logData, DATA_TYPE_FLOAT);
         }
 
-        template<typename T> void log_sfinae(const T& data, typename std::enable_if<std::is_same<bool, T>::value>::type*) {
+        template<typename T> void log_sfinae(const T& data, std::enable_if_t<std::is_same_v<bool, T>>*) {
             const uint32_t logData = data ? 1 : 0;
-            log(reinterpret_cast<const void*>(&logData), DATA_TYPE_UINT32);
+            log(&logData, DATA_TYPE_UINT32);
         }
 
         void log_sfinae(const String& data, std::nullptr_t) {
@@ -97,5 +96,3 @@ public:
 };
 
 }
-
-#endif

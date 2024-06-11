@@ -195,6 +195,7 @@ ark_add_plugin_directory(cmft plugin/cmft)
 ark_add_plugin_directory(dear_imgui plugin/dear-imgui)
 ark_add_plugin_directory(bullet plugin/bullet)
 ark_add_plugin_directory(optick plugin/optick)
+ark_add_plugin_directory(tracy plugin/tracy)
 ark_add_plugin_directory(yoga plugin/yoga)
 
 if(NOT (ANDROID OR IOS))

@@ -18,7 +18,7 @@ public:
         : _context(std::move(context)) {
     }
 
-    virtual void draw(GraphicsContext& graphicsContext) override {
+    void draw(GraphicsContext& graphicsContext) override {
         const sp<Pipeline> pipeline = _context._shader_bindings->getPipeline(graphicsContext);
         pipeline->bind(graphicsContext, _context);
     }
@@ -33,7 +33,9 @@ public:
         : _context(std::move(context)), _snippet_draw(std::move(snippetDraw)) {
     }
 
-    virtual void draw(GraphicsContext& graphicsContext) override {
+    void draw(GraphicsContext& graphicsContext) override {
+        DPROFILER_TRACE("DrawCommand");
+
         _context.upload(graphicsContext);
 
         const sp<Pipeline> pipeline = _context._shader_bindings->getPipeline(graphicsContext);

@@ -10,8 +10,7 @@
 
 #include "renderer/opengl/base/gl_pipeline.h"
 
-namespace ark {
-namespace opengl {
+namespace ark::opengl {
 
 sp<Pipeline> PipelineFactoryOpenGL::buildPipeline(GraphicsContext& graphicsContext, const PipelineBindings& bindings)
 {
@@ -20,5 +19,4 @@ sp<Pipeline> PipelineFactoryOpenGL::buildPipeline(GraphicsContext& graphicsConte
     return sp<GLPipeline>::make(graphicsContext.recycler(), renderContext->getGLSLVersion(), pipelineLayout->getPreprocessedShaders(graphicsContext.renderContext()), bindings);
 }
 
-}
 }

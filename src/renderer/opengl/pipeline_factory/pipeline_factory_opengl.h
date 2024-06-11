@@ -1,13 +1,11 @@
-#ifndef ARK_RENDERER_OPENGL_PIPELINE_FACTORY_PIPELINE_FACTORY_OPENGL_H_
-#define ARK_RENDERER_OPENGL_PIPELINE_FACTORY_PIPELINE_FACTORY_OPENGL_H_
+#pragma once
 
 #include "core/forwarding.h"
 
 #include "renderer/base/shader.h"
 #include "renderer/inf/pipeline_factory.h"
 
-namespace ark {
-namespace opengl {
+namespace ark::opengl {
 
 class PipelineFactoryOpenGL : public PipelineFactory {
 public:
@@ -17,6 +15,3 @@ public:
 };
 
 }
-}
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef ARK_PLUGIN_OPTICK_IMPL_APPLICATION_PROFILER_APPLICATION_PROFILER_OPTICK_H_
-#define ARK_PLUGIN_OPTICK_IMPL_APPLICATION_PROFILER_APPLICATION_PROFILER_OPTICK_H_
+#pragma  once
 
 #include "core/inf/builder.h"
 
@@ -30,5 +29,3 @@ private:
 };
 
 }
-
-#endif

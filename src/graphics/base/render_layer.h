@@ -42,7 +42,7 @@ private:
     };
 
 public:
-    RenderLayer(sp<RenderController> renderController, sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Boolean> visible, sp<Boolean> disposed, sp<Varyings> varyings, sp<Vec4> scissor);
+    RenderLayer(sp<RenderController> renderController, sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Boolean> visible, sp<Boolean> discarded, sp<Varyings> varyings, sp<Vec4> scissor);
 
     void render(RenderRequest& renderRequest, const V3& position) override;
 
@@ -52,12 +52,12 @@ public:
     const sp<LayerContext>& context() const;
 
 //  [[script::bindings::auto]]
-    sp<Layer> makeLayer(sp<ModelLoader> modelLoader = nullptr, sp<Vec3> position = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> disposed = nullptr) const;
+    sp<Layer> makeLayer(sp<ModelLoader> modelLoader = nullptr, sp<Vec3> position = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> discarded = nullptr) const;
 
     void dispose();
 
-    sp<LayerContext> makeLayerContext(sp<ModelLoader> modelLoader, sp<Vec3> position, sp<Boolean> visible, sp<Boolean> disposed) const;
-    sp<LayerContext> addLayerContext(sp<ModelLoader> modelLoader = nullptr, sp<Vec3> position = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> disposed = nullptr) const;
+    sp<LayerContext> makeLayerContext(sp<ModelLoader> modelLoader, sp<Vec3> position, sp<Boolean> visible, sp<Boolean> discarded) const;
+    sp<LayerContext> addLayerContext(sp<ModelLoader> modelLoader = nullptr, sp<Vec3> position = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> discarded = nullptr) const;
     void addLayerContext(sp<LayerContext> layerContext);
 
     void addRenderBatch(sp<RenderBatch> renderBatch);

@@ -30,6 +30,7 @@
     "stb",
     "tinygltf",
     "tinyxml2",
+    "tracy",
     "yoga",
     "zlib"
   ]
