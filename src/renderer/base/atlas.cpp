@@ -20,7 +20,7 @@
 
 namespace ark {
 
-static const uint32_t UV_NORMALIZE_RANGE = static_cast<uint32_t>(std::numeric_limits<uint16_t>::max());
+constexpr uint32_t UV_NORMALIZE_RANGE = std::numeric_limits<uint16_t>::max();
 
 Atlas::Atlas(sp<Texture> texture, bool allowDefaultItem)
     : _texture(std::move(texture)), _allow_default_item(allowDefaultItem)
@@ -161,10 +161,15 @@ const Atlas::Item& Atlas::at(int32_t id) const
 
 Rect Atlas::getItemBounds(int32_t id) const
 {
-    const Atlas::Item& item = at(id);
-    float nw = _texture->width() / static_cast<float>(UV_NORMALIZE_RANGE);
-    float nh = _texture->height() / static_cast<float>(UV_NORMALIZE_RANGE);
+    const Item& item = at(id);
+    const float nw = _texture->width() / static_cast<float>(UV_NORMALIZE_RANGE);
+    const float nh = _texture->height() / static_cast<float>(UV_NORMALIZE_RANGE);
     return Rect(item.ux() * nw, item.vy() * nh, item.vx() * nw, item.uy() * nh);
+}
+
+uint16_t Atlas::unnormalize(float v)
+{
+    return std::min<uint16_t>(v * UV_NORMALIZE_RANGE, UV_NORMALIZE_RANGE);
 }
 
 uint16_t Atlas::unnormalize(uint32_t x, uint32_t s)

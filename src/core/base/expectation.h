@@ -26,11 +26,11 @@ public:
     }
 
     sp<Observer> createObserver(const sp<Runnable>& callback, bool oneshot = true) {
-        return _notifier.createObserver(callback, oneshot);
+        return _notifier.makeObserver(callback, oneshot);
     }
 
     const sp<Observer>& addObserver(const sp<Runnable>& callback, bool oneshot = true) {
-        _observers.push_back(_notifier.createObserver(callback, oneshot));
+        _observers.push_back(_notifier.makeObserver(callback, oneshot));
         return _observers.back();
     }
 

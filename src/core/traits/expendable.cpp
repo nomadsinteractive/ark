@@ -41,7 +41,7 @@ void Expendable::set(sp<Boolean> disposed)
 }
 
 Expendable::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)
-    : _disposed(value == "true")
+    : _discarded(value == "true")
 {
     if(value && (value.at(0) == '@' || value.at(0) == '$'))
         _delegate = factory.ensureBuilder<Boolean>(value);
@@ -49,7 +49,7 @@ Expendable::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)
 
 sp<Expendable> Expendable::DICTIONARY::build(const Scope& args)
 {
-    return _delegate ? sp<Expendable>::make(_delegate->build(args)) : sp<Expendable>::make(_disposed);
+    return _delegate ? sp<Expendable>::make(_delegate->build(args)) : sp<Expendable>::make(_discarded);
 }
 
 template<> ARK_API sp<Expendable> Null::safePtr()

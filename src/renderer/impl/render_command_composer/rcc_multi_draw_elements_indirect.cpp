@@ -36,7 +36,7 @@ public:
         for(const ModelBundle::ModelLayout& i : _model_bundle->modelLayouts().values())
         {
             const Model& model = i._model;
-            uint32_t size = static_cast<uint32_t>(model.vertexCount() * stride);
+            const uint32_t size = static_cast<uint32_t>(model.vertexCount() * stride);
             std::vector<uint8_t> buf(size);
             VertexWriter stream(attributes, false, buf.data(), size, stride);
             model.writeToStream(stream, V3(1.0f));
@@ -45,7 +45,7 @@ public:
         }
     }
 
-    virtual bool update(uint64_t /*timestamp*/) override {
+    bool update(uint64_t /*timestamp*/) override {
         return false;
     }
 
@@ -72,7 +72,7 @@ public:
         }
     }
 
-    virtual bool update(uint64_t /*timestamp*/) override {
+    bool update(uint64_t /*timestamp*/) override {
         return false;
     }
 
@@ -163,16 +163,17 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
             const RenderLayerSnapshot::Droplet& s = renderLayerItems.at(j.snapshotIndex());
             const Renderable::Snapshot& snapshot = s._snapshot;
             if(reload || snapshot._state.hasState(Renderable::RENDERABLE_STATE_DIRTY))
-            {
-                const ModelBundle::ModelLayout& modelInfo = _model_bundle->ensureModelLayout(snapshot._type);
-                const Boundaries& metrics = modelInfo._model->content();
-                VertexWriter writer = buf.makeDividedVertexWriter(renderRequest, 1, offset, 1);
-                writer.next();
-                writer.write(MatrixUtil::translate(M4::identity(), snapshot._position) * MatrixUtil::scale(snapshot._transform.toMatrix(), toScale(snapshot._size, metrics)) * j.globalTransform());
-                ByteArray::Borrowed divided = snapshot._varyings.getDivided(1)._content;
-                if(divided.length() > sizeof(M4))
-                    writer.write(divided.buf() + sizeof(M4), divided.length() - sizeof(M4), sizeof(M4));
-            }
+                if(snapshot._varyings._buffers.length() > 0)
+                {
+                    const ModelBundle::ModelLayout& modelInfo = _model_bundle->ensureModelLayout(snapshot._type);
+                    const Boundaries& metrics = modelInfo._model->content();
+                    VertexWriter writer = buf.makeDividedVertexWriter(renderRequest, 1, offset, 1);
+                    writer.next();
+                    writer.write(MatrixUtil::translate(M4::identity(), snapshot._position) * MatrixUtil::scale(snapshot._transform.toMatrix(), toScale(snapshot._size, metrics)) * j.globalTransform());
+                    ByteArray::Borrowed divided = snapshot._varyings.getDivided(1)._content;
+                    if(divided.length() > sizeof(M4))
+                        writer.write(divided.buf() + sizeof(M4), divided.length() - sizeof(M4), sizeof(M4));
+                }
             ++ offset;
         }
 }

@@ -3,6 +3,7 @@
 #include "core/base/bean_factory.h"
 #include "core/base/constants.h"
 #include "core/inf/storage.h"
+#include "core/util/log.h"
 #include "core/util/math.h"
 
 #include "graphics/base/rect.h"

@@ -1,7 +1,6 @@
 #include "core/base/api.h"
 
 #include <cstdarg>
-#include <map>
 #include <system_error>
 
 #include "core/util/strings.h"

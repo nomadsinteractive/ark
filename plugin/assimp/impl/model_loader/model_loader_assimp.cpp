@@ -5,6 +5,7 @@
 #include "core/inf/array.h"
 #include "core/inf/loader.h"
 #include "core/util/documents.h"
+#include "core/util/log.h"
 #include "core/util/math.h"
 
 #include "graphics/base/bitmap.h"
@@ -35,9 +36,7 @@
 #include "assimp/impl/io/ark_io_system.h"
 
 
-namespace ark {
-namespace plugin {
-namespace assimp {
+namespace ark::plugin::assimp {
 
 bitmap ModelImporterAssimp::loadBitmap(const sp<BitmapLoaderBundle>& imageResource, const aiTexture* tex) const
 {
@@ -293,6 +292,4 @@ sp<Node> ModelImporterAssimp::loadNodeHierarchy(const aiNode* node, const std::v
     return n;
 }
 
-}
-}
 }

@@ -21,7 +21,6 @@
 #include "renderer/base/texture.h"
 #include "renderer/inf/model_loader.h"
 
-#include "platform/platform.h"
 
 namespace ark {
 

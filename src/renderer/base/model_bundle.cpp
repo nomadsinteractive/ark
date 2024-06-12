@@ -104,6 +104,7 @@ sp<Model> ModelBundle::Stub::importModel(const Manifest& manifest, const sp<Impo
 
 ModelBundle::ModelLayout& ModelBundle::Stub::addModel(int32_t type, sp<Model> model)
 {
+    CHECK(_model_layouts.find(type) == _model_layouts.end(), "Model[%d] exists already", type);
     ModelLayout& modelInfo = _model_layouts[type];
     modelInfo._node_layouts = model->toFlatLayouts<NodeLayout>();
     modelInfo._vertex_offset = _vertex_length;

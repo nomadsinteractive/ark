@@ -2,23 +2,21 @@
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
-#include "core/inf/holder.h"
 #include "core/types/shared_ptr.h"
 
 namespace ark {
 
-class ARK_API Observer : public Holder {
+class ARK_API Observer {
 public:
-//  [[script::bindings::auto]]
     Observer(sp<Runnable> callback, bool oneshot = true);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Observer);
-
-    virtual void traverse(const Visitor& visitor) override;
 
 //  [[script::bindings::auto]]
     void notify();
 
-//  [[script::bindings::auto]]
+//  [[script::bindings::property]]
+    const sp<Runnable>& callback();
+//  [[script::bindings::property]]
     void setCallback(sp<Runnable> callback);
 
 private:

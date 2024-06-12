@@ -15,9 +15,9 @@ public:
 //  [[script::bindings::auto]]
     void notify() const;
 //  [[script::bindings::auto]]
-    sp<Observer> createObserver(const sp<Runnable>& handler, bool oneshot = false) const;
+    sp<Observer> makeObserver(const sp<Runnable>& handler, bool oneshot = false) const;
 //  [[script::bindings::auto]]
-    sp<Boolean> createDirtyFlag(bool dirty = false) const;
+    sp<Boolean> makeSignal(bool value = false) const;
 
 private:
     class ObserverFilter {
@@ -28,7 +28,6 @@ private:
 
     private:
         sp<Boolean> _dirty_flag;
-
     };
 
 private:

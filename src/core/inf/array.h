@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_INF_ARRAY_H_
-#define ARK_CORE_INF_ARRAY_H_
+#pragma once
 
 #include <array>
 #include <string_view>
@@ -95,11 +94,11 @@ public:
         delete[] _data;
     }
 
-    virtual size_t length() override {
+    size_t length() override {
         return _length;
     }
 
-    virtual T* buf() override {
+    T* buf() override {
         return _data;
     }
 
@@ -119,11 +118,11 @@ public:
     }
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Borrowed);
 
-    virtual size_t length() override {
+    size_t length() override {
         return _length;
     }
 
-    virtual T* buf() override {
+    T* buf() override {
         return _data;
     }
 
@@ -157,11 +156,11 @@ public:
         : _data(std::move(data)) {
     }
 
-    virtual size_t length() override {
+    size_t length() override {
         return _data.size();
     }
 
-    virtual T* buf() override {
+    T* buf() override {
         return _data.data();
     }
 
@@ -178,11 +177,11 @@ public:
     }
     DISALLOW_COPY_AND_ASSIGN(Fixed);
 
-    virtual size_t length() override {
+    size_t length() override {
         return _data.size();
     }
 
-    virtual T* buf() override {
+    T* buf() override {
         return _data.data();
     }
 
@@ -196,11 +195,11 @@ public:
         : _data(std::move(data)) {
     }
 
-    virtual size_t length() override {
+    size_t length() override {
         return _data->size() / sizeof(T);
     }
 
-    virtual T* buf() override {
+    T* buf() override {
         return reinterpret_cast<T*>(_data->buf());
     }
 
@@ -214,11 +213,11 @@ public:
         : _data(std::move(data)), _offset(offset), _length(length) {
     }
 
-    virtual size_t length() override {
+    size_t length() override {
         return _length;
     }
 
-    virtual T* buf() override {
+    T* buf() override {
         return _data->buf() + _offset;
     }
 
@@ -228,7 +227,4 @@ private:
     size_t _length;
 };
 
-
 }
-
-#endif

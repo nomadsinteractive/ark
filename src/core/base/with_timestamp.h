@@ -7,8 +7,8 @@ namespace ark {
 template<typename T> class WithTimestamp {
 public:
     WithTimestamp() = default;
-    WithTimestamp(const T& value)
-        : _value(value) {
+    WithTimestamp(T value)
+        : _value(std::move(value)) {
     }
     DISALLOW_COPY_AND_ASSIGN(WithTimestamp);
 
@@ -20,12 +20,16 @@ public:
         return _value;
     }
 
+    T value() const {
+        return _value;
+    }
+
     bool update(uint64_t timestamp) const {
         return _timestamp.update(timestamp);
     }
 
-    void reset(const T& other) {
-        _value = other;
+    void reset(T other) {
+        _value = std::move(other);
         _timestamp.markDirty();
     }
 

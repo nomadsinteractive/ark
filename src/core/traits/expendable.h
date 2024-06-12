@@ -32,14 +32,14 @@ public:
     public:
         DICTIONARY(BeanFactory& factory, const String& value);
 
-        virtual sp<Expendable> build(const Scope& args);
+        sp<Expendable> build(const Scope& args) override;
 
     private:
-        bool _disposed;
+        bool _discarded;
         sp<Builder<Boolean>> _delegate;
     };
 
-protected:
+private:
     sp<BooleanWrapper> _discarded;
 
 };

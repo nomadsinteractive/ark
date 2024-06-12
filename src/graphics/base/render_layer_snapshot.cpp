@@ -1,5 +1,7 @@
 #include "graphics/base/render_layer_snapshot.h"
 
+#include "core/util/log.h"
+
 #include "graphics/base/layer_context.h"
 #include "graphics/base/layer_context_snapshot.h"
 

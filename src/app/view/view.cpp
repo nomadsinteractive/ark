@@ -193,7 +193,6 @@ View::View(sp<LayoutParam> layoutParam, sp<RenderObject> background, sp<Boolean>
 View::~View()
 {
     _stub->dispose();
-    LOGD("");
 }
 
 TypeId View::onPoll(WiringContext& context)

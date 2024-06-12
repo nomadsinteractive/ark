@@ -85,6 +85,7 @@ public:
 
     void clear();
 
+    static uint16_t unnormalize(float v);
     static uint16_t unnormalize(uint32_t x, uint32_t s);
 
     class AttachmentNinePatch {

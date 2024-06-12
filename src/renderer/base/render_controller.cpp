@@ -5,8 +5,7 @@
 #include "core/inf/runnable.h"
 #include "core/inf/writable.h"
 #include "core/impl/uploader/uploader_snapshot.h"
-#include "core/util/boolean_type.h"
-#include "core/util/log.h"
+#include "platform/platform.h"
 
 #include "graphics/base/bitmap.h"
 #include "graphics/base/size.h"
@@ -22,8 +21,6 @@
 #include "renderer/inf/snippet_factory.h"
 #include "renderer/inf/vertices.h"
 #include "renderer/util/render_util.h"
-
-#include "app/base/application_manifest.h"
 
 namespace ark {
 

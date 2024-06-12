@@ -1,5 +1,6 @@
 #include "core/base/notifier.h"
 
+#include "core/base/with_timestamp.h"
 #include "core/base/observer.h"
 #include "core/inf/runnable.h"
 #include "core/inf/variable.h"
@@ -8,29 +9,26 @@ namespace ark {
 
 namespace {
 
-class DirtyFlag : public Boolean, public Runnable {
+class Signal : public Boolean, public Runnable {
 public:
-    DirtyFlag(bool dirty)
-        : _dirty(dirty) {
+    Signal(bool value)
+        : _value(value) {
     }
 
-    virtual void run() override {
-        _dirty = true;
+    void run() override {
+        _value.reset(!_value.value());
     }
 
-    virtual bool val() override {
-        bool d = _dirty;
-        _dirty = false;
-        return d;
+    bool val() override {
+        return _value.value();
     }
 
-    virtual bool update(uint64_t /*timestamp*/) override {
-        return true;
+    bool update(uint64_t timestamp) override {
+        return _value.update(timestamp);
     }
 
 private:
-    bool _dirty;
-
+    WithTimestamp<bool> _value;
 };
 
 }
@@ -48,16 +46,16 @@ void Notifier::notify() const
         i->notify();
 }
 
-sp<Observer> Notifier::createObserver(const sp<Runnable>& handler, bool oneshot) const
+sp<Observer> Notifier::makeObserver(const sp<Runnable>& handler, bool oneshot) const
 {
     sp<Observer> observer = sp<Observer>::make(handler, oneshot);
     _observers->emplace_back(observer, nullptr);
     return observer;
 }
 
-sp<Boolean> Notifier::createDirtyFlag(bool dirty) const
+sp<Boolean> Notifier::makeSignal(bool dirty) const
 {
-    sp<DirtyFlag> dirtyFlag = sp<DirtyFlag>::make(dirty);
+    sp<Signal> dirtyFlag = sp<Signal>::make(dirty);
     _observers->emplace_back(sp<Observer>::make(dirtyFlag, false), dirtyFlag);
     return dirtyFlag;
 }

@@ -16,6 +16,7 @@
 #include "graphics/base/material.h"
 #include "graphics/util/matrix_util.h"
 
+#include "renderer/base/atlas.h"
 #include "renderer/base/material_bundle.h"
 #include "renderer/base/shader_data_type.h"
 
@@ -223,7 +224,6 @@ Mesh processPrimitive(const tinygltf::Model& gltfModel, const std::vector<sp<Mat
         if(attributeKey == "POSITION") {
             SBufferReadData bufferReadData = getAttributeData<V3>(gltfModel, TransformMatrix, attributeKey, attributeValue);
             vertices = std::move(bufferReadData.DstData);
-
         }
         else if(attributeKey == "NORMAL") {
             SBufferReadData bufferReadData = getAttributeData<V3>(gltfModel, TransformMatrix, attributeKey, attributeValue);
@@ -232,6 +232,8 @@ Mesh processPrimitive(const tinygltf::Model& gltfModel, const std::vector<sp<Mat
         else if(attributeKey == "TEXCOORD_0") {
             SBufferReadData bufferReadData = getAttributeData<V2>(gltfModel, TransformMatrix, attributeKey, attributeValue);
             uvs.reserve(bufferReadData.DstData.size());
+            for(const V2& i : bufferReadData.DstData)
+                uvs.emplace_back(Atlas::unnormalize(i.x()), Atlas::unnormalize(i.y()));
         }
         else {
             WARN("Ignoring primitive attribute \"%s\"", attributeKey.c_str());
@@ -328,7 +330,21 @@ Model ModelImporterGltf::import(const Manifest& manifest, MaterialBundle& materi
     for(int32_t i : scene.nodes)
         rootNode->childNodes().push_back(loadNodeHierarchy(gltfModel, gltfModel.nodes.at(i), meshes));
 
-    return Model(std::move(materials), std::move(meshes), std::move(rootNode), sp<Boundaries>::make(V3(0), V3(0)));
+    float aabbMinX(std::numeric_limits<float>::max()), aabbMinY(std::numeric_limits<float>::max()), aabbMinZ(std::numeric_limits<float>::max());
+    float aabbMaxX(std::numeric_limits<float>::min()), aabbMaxY(std::numeric_limits<float>::min()), aabbMaxZ(std::numeric_limits<float>::min());
+    for(const sp<Mesh>& i : meshes)
+        for(const V3& j : i->vertices())
+        {
+            if(aabbMinX > j.x()) aabbMinX = j.x();
+            if(aabbMinY > j.y()) aabbMinY = j.y();
+            if(aabbMinZ > j.z()) aabbMinZ = j.z();
+
+            if(aabbMaxX < j.x()) aabbMaxX = j.x();
+            if(aabbMaxY < j.y()) aabbMaxY = j.y();
+            if(aabbMaxZ < j.z()) aabbMaxZ = j.z();
+        }
+
+    return Model(std::move(materials), std::move(meshes), std::move(rootNode), sp<Boundaries>::make(V3(aabbMinX, aabbMinY, aabbMinZ), V3(aabbMaxX, aabbMaxY, aabbMaxZ)));
 }
 
 sp<ModelLoader::Importer> ModelImporterGltf::BUILDER::build(const Scope& args)
