@@ -138,27 +138,10 @@ PipelineBindings::Parameters PipelineBindings::Parameters::BUILDER::build(const 
 template<> ARK_API PipelineBindings::Flag StringConvert::eval<PipelineBindings::Flag>(const String& str)
 {
     int32_t flag = 0;
-    for(const String& i : str.split('|'))
-        if(i == "cull_mode_none")
-        {
-            DCHECK((flag & PipelineBindings::FLAG_CULL_MODE_BITMASK) == 0, "Exclusive flag found in \"%s\"", str.c_str());
-            flag |= static_cast<int32_t>(PipelineBindings::FLAG_CULL_MODE_NONE);
-        }
-        else if(i == "cull_mode_cw")
-        {
-            DCHECK((flag & PipelineBindings::FLAG_CULL_MODE_BITMASK) == 0, "Exclusive flag found in \"%s\"", str.c_str());
-            flag |= static_cast<int32_t>(PipelineBindings::FLAG_CULL_MODE_CW);
-        }
-        else if(i == "cull_mode_ccw")
-        {
-            DCHECK((flag & PipelineBindings::FLAG_CULL_MODE_BITMASK) == 0, "Exclusive flag found in \"%s\"", str.c_str());
-            flag |= static_cast<int32_t>(PipelineBindings::FLAG_CULL_MODE_CCW);
-        }
-        else
-        {
-            DCHECK(i == "dynamic_scissor", "Unknow PipelineBindings flag: %s, available values are [\"cull_mode_none\", \"cull_mode_cw\", \"cull_mode_ccw\", \"dynamic_scissor\"]", i.c_str());
-            flag |= static_cast<int32_t>(PipelineBindings::FLAG_DYNAMIC_SCISSOR);
-        }
+    {
+        DCHECK(str == "dynamic_scissor", "Unknow PipelineBindings flag: %s, available values are [\"dynamic_scissor\"]", str.c_str());
+        flag |= static_cast<int32_t>(PipelineBindings::FLAG_DYNAMIC_SCISSOR);
+    }
     return static_cast<PipelineBindings::Flag>(flag);
 }
 
@@ -174,7 +157,7 @@ PipelineBindings::PipelineTraitMeta::PipelineTraitMeta(const document& manifest)
     case TRAIT_TYPE_STENCIL_TEST: {
         TraitStencilTest& stencilTest = _configure._stencil_test;
         const std::vector<document>& faces = manifest->children("face");
-        if(faces.size() == 0)
+        if(faces.empty())
             stencilTest._front = stencilTest._back = loadStencilTestSeparate(manifest, true);
         else
         {

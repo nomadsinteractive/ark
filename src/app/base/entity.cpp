@@ -86,7 +86,7 @@ sp<Entity> Entity::BUILDER::build(const Scope& args)
     Traits traits;
     if(_boxes)
     {
-        sp<std::vector<Box>> boxes = _boxes->build(args);
+        const sp<std::vector<Box>> boxes = _boxes->build(args);
         for(Box& i : *boxes)
             traits.put(i.typeId(), std::move(i));
     }

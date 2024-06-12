@@ -12,7 +12,6 @@
 #include "renderer/forwarding.h"
 #include "renderer/base/pipeline_bindings.h"
 #include "renderer/inf/model_loader.h"
-#include "renderer/inf/resource.h"
 #include "renderer/inf/pipeline_factory.h"
 
 namespace ark {
@@ -46,7 +45,7 @@ public:
         BUILDER_IMPL(BeanFactory& factory, const document& manifest, const ResourceLoaderContext& resourceLoaderContext, sp<Builder<Camera>> camera = nullptr,
                      Optional<StageManifest> stages = Optional<StageManifest>(), Optional<SnippetManifest> snippets = Optional<SnippetManifest>());
 
-        virtual sp<Shader> build(const Scope& args) override;
+        sp<Shader> build(const Scope& args) override;
 
     private:
         StageManifest loadStages(BeanFactory& factory, const document& manifest) const;
@@ -69,7 +68,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<Shader> build(const Scope& args) override;
+        sp<Shader> build(const Scope& args) override;
 
     private:
         BUILDER_IMPL _impl;

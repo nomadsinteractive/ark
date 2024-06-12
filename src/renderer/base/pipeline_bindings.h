@@ -17,13 +17,9 @@ namespace ark {
 class ARK_API PipelineBindings {
 public:
     enum Flag {
-        FLAG_CULL_MODE_CW = 1,
-        FLAG_CULL_MODE_CCW = 2,
-        FLAG_CULL_MODE_NONE = 3,
-        FLAG_CULL_MODE_BITMASK = 3,
         FLAG_DYNAMIC_SCISSOR = 4,
         FLAG_DYNAMIC_SCISSOR_BITMASK = 4,
-        FLAG_DEFAULT_VALUE = FLAG_CULL_MODE_CCW
+        FLAG_DEFAULT_VALUE = 0
     };
 
     enum TraitType {

@@ -2,8 +2,6 @@
 
 #include "core/inf/array.h"
 #include "core/inf/variable.h"
-#include "core/util/string_convert.h"
-#include "core/util/documents.h"
 #include "core/util/log.h"
 
 #include "graphics/base/bitmap.h"
@@ -16,8 +14,7 @@
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/opengl/util/gl_util.h"
 
-namespace ark {
-namespace opengl {
+namespace ark::opengl {
 
 GLTexture::GLTexture(sp<Recycler> recycler, sp<Size> size, uint32_t target, Texture::Type type, sp<Texture::Parameters> parameters)
     : Texture::Delegate(type), _recycler(std::move(recycler)), _size(std::move(size)), _target(target), _parameters(std::move(parameters)), _id(0), _fbo(0)
@@ -50,10 +47,12 @@ void GLTexture::upload(GraphicsContext& graphicsContext, const sp<Texture::Uploa
         glBindTexture(static_cast<GLenum>(_target), _id);
 
     if(uploader)
+    {
         if(uninitialized)
             uploader->initialize(graphicsContext, *this);
         else
             uploader->update(graphicsContext, *this);
+    }
 
     if(_parameters->_features & Texture::FEATURE_MIPMAPS)
         glGenerateMipmap(static_cast<GLenum>(_target));
@@ -127,5 +126,4 @@ uint64_t GLTexture::id()
     return _id;
 }
 
-}
 }
