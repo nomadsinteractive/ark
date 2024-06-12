@@ -195,7 +195,7 @@ void Ark::push()
 
 void Ark::initialize(sp<ApplicationManifest> manifest)
 {
-    _manifest = manifest;
+    _manifest = std::move(manifest);
 
     loadPlugins(_manifest);
 
@@ -324,9 +324,8 @@ sp<ApplicationContext> Ark::createApplicationContext(const ApplicationManifest& 
     const Global<PluginManager> pluginManager;
     const sp<ApplicationContext> applicationContext = sp<ApplicationContext>::make(std::move(appResource), std::move(renderEngine));
     pluginManager->addPlugin(sp<BasePlugin>::make(applicationContext));
-    applicationContext->initResourceLoader(manifest.resourceLoader());
+    applicationContext->initialize(manifest.resourceLoader());
     _application_profiler = applicationContext->resourceLoader()->beanFactory().build<ApplicationProfiler>(document::make("root"), Scope());
-    applicationContext->initMessageLoop();
     return applicationContext;
 }
 

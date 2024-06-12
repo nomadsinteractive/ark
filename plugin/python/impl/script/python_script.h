@@ -1,52 +1,51 @@
 #pragma once
 
+#include <vector>
+
 #include <Python.h>
 
 #include "core/ark.h"
 #include "core/base/api.h"
 #include "core/inf/builder.h"
-#include "core/inf/script.h"
+#include "core/inf/interpreter.h"
 #include "core/types/implements.h"
 #include "core/types/shared_ptr.h"
 
 #include "python/api.h"
 
-namespace ark {
-namespace plugin {
-namespace python {
+namespace ark::plugin::python {
 
 class PythonInterpreter;
 
-class ARK_PLUGIN_PYTHON_API PythonScript : public Script, public Implements<PythonScript, Script> {
+class ARK_PLUGIN_PYTHON_API PythonScript : public Interpreter, public Implements<PythonScript, Interpreter> {
 public:
     PythonScript(const String& name, const document& libraries);
-    ~PythonScript();
+    ~PythonScript() override;
 
-    virtual void run(const sp<Asset>& script, const Scope& vars) override;
-    virtual Box call(const String& function, const Arguments& args) override;
+    void initialize() override;
+
+    void execute(const sp<Asset>& source, const Scope& vars) override;
+    Box call(const Box& func, const Arguments& args) override;
+    Box attr(const Box& obj, const String& name) override;
 
     PyObject* arkModule();
+    const std::vector<String>& paths() const;
 
 //  [[plugin::builder("python")]]
-    class BUILDER : public Builder<Script> {
+    class BUILDER : public Builder<Interpreter> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Script> build(const Scope& args) override;
+        sp<Interpreter> build(const Scope& args) override;
 
     private:
         document _manifest;
     };
 
 private:
-    void addScopeToDict(PyObject* dict, const Scope& scope);
-    PyObject* argumentsToTuple(const Arguments& args);
-
-private:
     std::wstring _name;
+    std::vector<String> _paths;
     PyObject* _ark_module;
 };
 
-}
-}
 }

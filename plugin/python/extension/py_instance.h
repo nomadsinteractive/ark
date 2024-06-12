@@ -26,6 +26,8 @@ public:
 
     const sp<PyInstanceRef>& ref() const;
 
+    Box toBox() const;
+
     PyObject* pyObject() const;
     explicit operator bool();
 

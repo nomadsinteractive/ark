@@ -11,13 +11,13 @@ namespace ark {
 
 class EventListenerByScript : public EventListener {
 public:
-    EventListenerByScript(const sp<Script>& script, const String& eventName);
+    EventListenerByScript(const sp<Interpreter>& script, const String& eventName);
 
     virtual bool onEvent(const Event& event) override;
 
 private:
-    sp<Script> _script;
-    String _event_name;
+    sp<Interpreter> _script;
+    Box _func;
 };
 
 }

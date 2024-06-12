@@ -1,5 +1,4 @@
-#ifndef ARK_PLUGIN_PYTHON_API_H_
-#define ARK_PLUGIN_PYTHON_API_H_
+#pragma once
 
 #include "core/base/api.h"
 
@@ -13,9 +12,7 @@
 #   define ARK_PLUGIN_PYTHON_API
 #endif
 
-namespace ark {
-namespace plugin {
-namespace python {
+namespace ark::plugin::python {
 
 #if ARK_FLAG_DEBUG
 
@@ -37,7 +34,3 @@ void checkThreadFlag();
 #endif
 
 }
-}
-}
-
-#endif

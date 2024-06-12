@@ -1,5 +1,4 @@
-#ifndef ARK_APP_BASE_APPLICATION_DELEGATE_H_
-#define ARK_APP_BASE_APPLICATION_DELEGATE_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/types/shared_ptr.h"
@@ -14,7 +13,7 @@ namespace ark {
 class ARK_API ApplicationDelegate : public EventListener {
 public:
     ApplicationDelegate(const sp<ApplicationManifest>& manifest);
-    virtual ~ApplicationDelegate() = default;
+    ~ApplicationDelegate() override = default;
 
     virtual const char* name();
 
@@ -27,7 +26,7 @@ public:
     virtual void onSurfaceChanged(uint32_t width, uint32_t height);
     virtual void onSurfaceDraw();
 
-    virtual bool onEvent(const Event& event);
+    bool onEvent(const Event& event) override;
 
 protected:
     sp<ApplicationManifest> _manifest;
@@ -38,5 +37,3 @@ protected:
 };
 
 }
-
-#endif

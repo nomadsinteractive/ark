@@ -30,7 +30,7 @@ public:
         : Plugin("box2d-pybindings", Plugin::PLUGIN_TYPE_CORE) {
     }
 
-    virtual void createScriptModule(const sp<Script>& script) override {
+    void createScriptModule(Interpreter& script) override {
         PythonInterpreter::instance().addModulePlugin<Box2dPybindingsPlugin>(*this, script, "box2d", "ark.box2d module", ARK_BOX2D_METHODS);
 
         PyArkType* pyResourceLoaderType = PythonInterpreter::instance().getPyArkType<ResourceLoader>();

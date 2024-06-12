@@ -8,7 +8,7 @@
 #include "core/impl/dictionary/dictionary_by_attribute_name.h"
 #include "core/inf/dictionary.h"
 #include "core/inf/readable.h"
-#include "core/inf/script.h"
+#include "core/inf/interpreter.h"
 #include "core/types/shared_ptr.h"
 #include "core/util/strings.h"
 #include "core/types/global.h"
@@ -32,7 +32,7 @@ public:
             return -1;
 
         Scope args;
-        const sp<Script> script = resourceLoader->load<Script>("script", args);
+        const sp<Interpreter> script = resourceLoader->load<Interpreter>("script", args);
         if(!script) {
             puts("No script interpreter installed");
             return -1;
@@ -44,7 +44,7 @@ public:
         }
         const sp<Scope> vars = sp<Scope>::make();
         vars->put("_resource_loader", resourceLoader);
-        script->run(Ark::instance().getAsset("hello.py"), vars);
+        script->execute(Ark::instance().getAsset("hello.py"), vars);
         return 0;
     }
 };

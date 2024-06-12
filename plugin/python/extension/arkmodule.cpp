@@ -1,5 +1,3 @@
-#include "python/extension/arkmodule.h"
-
 #include "core/forwarding.h"
 #include "core/ark.h"
 #include "core/impl/readable/file_readable.h"
@@ -12,7 +10,9 @@
 #include "renderer/forwarding.h"
 
 #include "app/forwarding.h"
+#include "app/base/application_context.h"
 
+#include "python/impl/script/python_script.h"
 #include "python/extension/py_instance.h"
 #include "python/extension/py_cast.h"
 #include "python/extension/py_ark_type.h"
@@ -215,21 +215,15 @@ PyObject* initarkmodule()
     return module;
 }
 
-static std::vector<String> _PYTHON_PATH;
-
-void setPythonPath(const std::vector<String>& paths)
-{
-    _PYTHON_PATH = paths;
-}
-
 }
 
 PyMODINIT_FUNC PyInit_ark(void)
 {
+    const std::vector<String>& paths = static_cast<ark::plugin::python::PythonScript*>(Ark::instance().applicationContext()->interpreter().get())->paths();
     PyObject* module = ark::plugin::python::initarkmodule();
-    PyObject* path = PyList_New(static_cast<Py_ssize_t>(ark::plugin::python::_PYTHON_PATH.size()));
+    PyObject* path = PyList_New(static_cast<Py_ssize_t>(paths.size()));
     Py_ssize_t i = 0;
-    for(const String& str : ark::plugin::python::_PYTHON_PATH)
+    for(const String& str : paths)
         PyList_SetItem(path, i++, PyUnicode_FromString(str.c_str()));
     PyObject_SetAttrString(module, "path", path);
     Py_DECREF(path);

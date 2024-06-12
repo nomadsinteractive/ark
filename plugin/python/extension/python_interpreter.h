@@ -71,8 +71,8 @@ public:
     void logErr() const;
     bool exceptErr(PyObject* type) const;
 
-    template<typename T> void addModulePlugin(T& plugin, const sp<Script>& script, const char* name, const char* documentation, const PyMethodDef* methods) {
-        const sp<PythonScript> pythonScript = script.tryCast<PythonScript>();
+    template<typename T> void addModulePlugin(T& plugin, Interpreter& script, const char* name, const char* documentation, const PyMethodDef* methods) {
+        PythonScript* pythonScript = static_cast<PythonScript*>(&script);
         ASSERT(pythonScript);
         static struct PyModuleDef cPluginModuleDef = {
             PyModuleDef_HEAD_INIT,

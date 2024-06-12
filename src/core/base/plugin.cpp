@@ -28,7 +28,7 @@ Library Plugin::createLibrary()
     return Library();
 }
 
-void Plugin::createScriptModule(const sp<Script>& /*script*/)
+void Plugin::createScriptModule(Interpreter& /*script*/)
 {
 }
 

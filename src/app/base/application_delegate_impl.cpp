@@ -3,7 +3,7 @@
 #include "core/ark.h"
 #include "core/base/scope.h"
 #include "core/base/resource_loader.h"
-#include "core/inf/script.h"
+#include "core/inf/interpreter.h"
 #include "core/util/string_convert.h"
 #include "core/util/log.h"
 
@@ -39,14 +39,13 @@ void ApplicationDelegateImpl::onCreate(Application& application, const sp<Surfac
 
     applicationFacade->setBackgroundColor(Documents::getAttribute<Color>(appManifest, "background-color", Color(0, 0, 0)));
 
-    const sp<Arena> arena = appResourceLoader->beanFactory().build<Arena>(appManifest, "arena", {});
-    if(arena)
-        applicationFacade->setArena(arena);
+    if(sp<Arena> arena = appResourceLoader->beanFactory().build<Arena>(appManifest, "arena", {}))
+        applicationFacade->setArena(std::move(arena));
 
     bool defaultEventListenerSet = false;
     for(const document& i : appManifest->children("script"))
     {
-        const ScriptTag script(appResourceLoader, i, vars);
+        ScriptTag script(_application_context->interpreter(), i, vars);
         if(script._on == SCRIPT_RUN_ON_CREATE)
             script.run();
         else if(script._on == SCRIPT_RUN_ON_EVENT)
@@ -58,28 +57,28 @@ void ApplicationDelegateImpl::onCreate(Application& application, const sp<Surfac
             defaultEventListenerSet = true;
         }
         else
-            _scripts.push_back(script);
+            _interpreter.push_back(std::move(script));
     }
 }
 
 void ApplicationDelegateImpl::onPause()
 {
-    for(const auto& i: _scripts)
+    for(const auto& i: _interpreter)
         if(i._on == SCRIPT_RUN_ON_PAUSE)
             i.run();
 }
 
 void ApplicationDelegateImpl::onResume()
 {
-    for(const auto& i: _scripts)
+    for(const auto& i: _interpreter)
         if(i._on == SCRIPT_RUN_ON_RESUME)
             i.run();
 }
 
-ApplicationDelegateImpl::ScriptTag::ScriptTag(ResourceLoader& resourceLoader, const document& manifest, const sp<Scope>& vars)
+ApplicationDelegateImpl::ScriptTag::ScriptTag(sp<Interpreter> interpreter, const document& manifest, sp<Scope> vars)
     : _on(Documents::getAttribute(manifest, "on", SCRIPT_RUN_ON_CREATE)),
       _function_name(Documents::getAttribute(manifest, "function")),
-      _script(resourceLoader.beanFactory().ensure<Script>(manifest, vars)), _vars(vars)
+      _interpreter(std::move(interpreter)), _vars(std::move(vars))
 {
     const String src = Documents::getAttribute(manifest, constants::SRC);
     if(src)
@@ -91,20 +90,20 @@ ApplicationDelegateImpl::ScriptTag::ScriptTag(ResourceLoader& resourceLoader, co
 
 void ApplicationDelegateImpl::ScriptTag::run() const
 {
-    DASSERT(_script);
+    DASSERT(_interpreter);
     if(_source)
-        _script->run(_source, _vars);
+        _interpreter->execute(_source, _vars);
     if(_function_name)
     {
-        const Script::Arguments args;
-        _script->call(_function_name, args);
+        const Interpreter::Arguments args;
+        _interpreter->call(_interpreter->attr(nullptr, _function_name), args);
     }
 }
 
 sp<EventListener> ApplicationDelegateImpl::ScriptTag::makeEventListener() const
 {
     DCHECK(_function_name, "Application EventListener should be function, not script");
-    return sp<EventListenerByScript>::make(_script, _function_name);
+    return sp<EventListenerByScript>::make(_interpreter, _function_name);
 }
 
 template<> ApplicationDelegateImpl::ScriptRunOn StringConvert::eval<ApplicationDelegateImpl::ScriptRunOn>(const String& str)

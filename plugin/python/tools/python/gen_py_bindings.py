@@ -302,8 +302,6 @@ def gen_py_binding_cpp(name, namespaces, includes, lines):
 
 #include "core/ark.h"
 
-#include "python/extension/arkmodule.h"
-
 %s
 
 using namespace ark::plugin::python;

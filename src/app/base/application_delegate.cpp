@@ -6,6 +6,7 @@
 #include "app/base/application_context.h"
 #include "app/base/application_manifest.h"
 #include "app/base/surface.h"
+#include "core/inf/interpreter.h"
 
 #include "platform/platform.h"
 
@@ -24,6 +25,7 @@ const char* ApplicationDelegate::name()
 void ApplicationDelegate::onCreate(Application& application, const sp<Surface>& surface)
 {
     _application_context = application.context();
+    _application_context->interpreter()->initialize();
     _surface = surface;
 }
 

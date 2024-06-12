@@ -10,9 +10,9 @@
 
 #include "graphics/forwarding.h"
 
-#include "python/extension/arkmodule.h"
 #include "python/extension/python_interpreter.h"
 #include "python/extension/ark_py_importlib.h"
+#include "python/extension/py_cast.h"
 #include "python/extension/py_instance.h"
 
 
@@ -39,20 +39,50 @@ PyAPI_DATA(const struct _frozen *) _PyImport_FrozenBootstrap;
 
 namespace ark::plugin::python {
 
-static struct _frozen _injected_frozen[10];
+namespace {
 
-static bool hasInjected()
+_frozen _injected_frozen[10];
+
+bool hasInjected()
 {
-    for(const struct _frozen* pt = _PyImport_FrozenBootstrap, *i = _injected_frozen; pt->name; pt ++, i ++)
+    for(const _frozen* pt = _PyImport_FrozenBootstrap, *i = _injected_frozen; pt->name; pt ++, i ++)
         if(strcmp(pt->name, "_frozen_importlib_org") == 0)
             return true;
     return false;
 }
 
+void addScopeToDict(PyObject* dict, const Scope& scope)
+{
+    for(const auto& iter : scope.variables())
+    {
+        const String& name = iter.first;
+        const Box& box = iter.second;
+        PyObject* pyInstance = PythonInterpreter::instance().toPyObject(box);
+        PyDict_SetItemString(dict, name.c_str(), pyInstance);
+    }
+}
+
+PyObject* argumentsToTuple(const Interpreter::Arguments& args)
+{
+    PyObject* tuple = PyTuple_New(args.size());
+    uint32_t i = 0;
+    for(const Box& arg : args)
+        PyTuple_SetItem(tuple, i++, PythonInterpreter::instance().toPyObject(arg));
+    return tuple;
+}
+
+PyInstance getMainModuleAttr(const char* name)
+{
+    PyObject* m = PyImport_AddModule("__main__");
+    CHECK(m, "Module '__main__' does not exist");
+    return PyInstance::own(PyDict_GetItemString(PyModule_GetDict(m), name));
+}
+
+}
+
 PythonScript::PythonScript(const String& name, const document& libraries)
     : _name(Strings::fromUTF8(name))
 {
-    DSET_THREAD_FLAG();
     PyImport_AppendInittab("ark", PyInit_ark);
 #ifndef ARK_FLAG_PUBLISHING_BUILD
     PyImport_AppendInittab("_ctypes", PyInit__ctypes);
@@ -67,7 +97,7 @@ PythonScript::PythonScript(const String& name, const document& libraries)
     if(!hasInjected())
     {
         memset(_injected_frozen, 0, sizeof(_injected_frozen));
-        for(struct _frozen* pt = (struct _frozen *) _PyImport_FrozenBootstrap, *i = _injected_frozen; pt->name; pt ++, i ++)
+        for(_frozen* pt = const_cast<_frozen*>(_PyImport_FrozenBootstrap), *i = _injected_frozen; pt->name; pt ++, i ++)
         {
             *i = *pt;
             if(strcmp(pt->name, "_frozen_importlib") == 0)
@@ -82,13 +112,11 @@ PythonScript::PythonScript(const String& name, const document& libraries)
         }
         _PyImport_FrozenBootstrap = _injected_frozen;
     }
-    std::vector<String> paths;
     for(const document& i : libraries->children("library"))
     {
         const String& v = Documents::ensureAttribute(i, "path");
-        paths.push_back(v);
+        _paths.push_back(v);
     }
-    setPythonPath(paths);
     if(!Py_HasFileSystemDefaultEncoding)
     {
         char* encodings = reinterpret_cast<char*>(PyMem_RawMalloc(8));
@@ -98,9 +126,6 @@ PythonScript::PythonScript(const String& name, const document& libraries)
 #ifdef ARK_FLAG_PUBLISHING_BUILD
     Py_NoSiteFlag = 1;
 #endif
-    Py_InitializeEx(0);
-    _ark_module = PyImport_ImportModule("ark");
-    Py_XINCREF(_ark_module);
 }
 
 PythonScript::~PythonScript()
@@ -109,73 +134,65 @@ PythonScript::~PythonScript()
     Py_Finalize();
 }
 
-void PythonScript::addScopeToDict(PyObject* dict, const Scope& scope)
+void PythonScript::initialize()
 {
-    for(const auto& iter : scope.variables())
-    {
-        const String& name = iter.first;
-        const Box& box = iter.second;
-        PyObject* pyInstance = PythonInterpreter::instance().toPyObject(box);
-        PyDict_SetItemString(dict, name.c_str(), pyInstance);
-    }
+    DSET_THREAD_FLAG();
+
+    Py_InitializeEx(0);
+    _ark_module = PyImport_ImportModule("ark");
+    Py_XINCREF(_ark_module);
+
+    const Global<PluginManager> pluginManager;
+    for(Plugin& i : pluginManager->plugins())
+        i.createScriptModule(*this);
 }
 
-PyObject* PythonScript::argumentsToTuple(const Script::Arguments& args)
-{
-    PyObject* tuple = PyTuple_New(args.size());
-    uint32_t i = 0;
-    for(const Box& arg : args)
-        PyTuple_SetItem(tuple, i++, PythonInterpreter::instance().toPyObject(arg));
-    return tuple;
-}
-
-void PythonScript::run(const sp<Asset>& script, const Scope& vars)
+void PythonScript::execute(const sp<Asset>& source, const Scope& vars)
 {
     DCHECK_THREAD_FLAG();
     PyObject* m = PyImport_AddModule("__main__");
     DCHECK(m, "Module '__main__' does not exist");
 
     PyObject* globals = PyModule_GetDict(m);
-    LOGD("run script, location: %s", script->location().c_str());
+    LOGD("run script, location: %s", source->location().c_str());
     addScopeToDict(globals, vars);
-    PyInstance co = PyInstance::steal(Py_CompileStringExFlags(Strings::loadFromReadable(script->open()).c_str(), script->location().c_str(), Py_file_input, nullptr, -1));
-    PyInstance v = PyInstance::steal(PyEval_EvalCode(co.pyObject(), globals, globals));
-    if (v.isNullptr() || v.pyObject() == nullptr)
-    {
+    const PyInstance co = PyInstance::steal(Py_CompileStringExFlags(Strings::loadFromReadable(source->open()).c_str(), source->location().c_str(), Py_file_input, nullptr, -1));
+    const PyInstance v = PyInstance::steal(PyEval_EvalCode(co.pyObject(), globals, globals));
+    if(v.isNullptr() || v.pyObject() == nullptr)
         PythonInterpreter::instance().logErr();
-        return;
-    }
 }
 
-Box PythonScript::call(const String& function, const Script::Arguments& args)
+Box PythonScript::call(const Box& func, const Interpreter::Arguments& args)
 {
     DCHECK_THREAD_FLAG();
-    PyObject* m = PyImport_AddModule("__main__");
-    DCHECK(m, "Module '__main__' does not exist");
+    const PyInstance pyfunc = PyInstance::steal(PyCast::toPyObject(func));
+    ASSERT(!pyfunc.isNullptr() && pyfunc.isCallable());
 
-    PyObject* globals = PyModule_GetDict(m);
-    PyInstance tuple = PyInstance::steal(argumentsToTuple(args));
-    PyInstance func = PyInstance::borrow(PyDict_GetItemString(globals, function.c_str()));
-    Box r;
-    if(func && func.isCallable())
+    const PyInstance tuple = PyInstance::steal(argumentsToTuple(args));
+    if(PyObject* ret = pyfunc.call(tuple.pyObject()))
     {
-        PyObject* ret = func.call(tuple.pyObject());
-        if(ret)
-        {
-            PyObject* type = reinterpret_cast<PyObject*>(ret->ob_type);
-            if(PythonInterpreter::instance().isPyArkTypeObject(type))
-            {
-                PyArkType::Instance* inst = reinterpret_cast<PyArkType::Instance*>(ret);
-                r = Box(*inst->box);
-            }
-            else if(ret != Py_None && !PyBool_Check(ret))
-                DFATAL("Unknow PyObject");
-            Py_DECREF(ret);
-        }
+        if(PyErr_Occurred())
+            PythonInterpreter::instance().logErr();
+        Box r = std::move(PyCast::toCppObject<Box>(ret).value());
+        Py_DECREF(ret);
+        return r;
     }
+    PythonInterpreter::instance().logErr();
+    return Box();
+}
+
+Box PythonScript::attr(const Box& obj, const String& name)
+{
+    DCHECK_THREAD_FLAG();
+    if(!obj)
+        return getMainModuleAttr(name.c_str()).toBox();
+
+    const PyInstance pyobj = PyInstance::steal(PyCast::toPyObject(obj));
+    ASSERT(!pyobj.isNullptr());
+    const PyInstance pyattr = pyobj.getAttr(name.c_str());
     if(PyErr_Occurred())
         PythonInterpreter::instance().logErr();
-    return r;
+    return pyattr.toBox();
 }
 
 PyObject* PythonScript::arkModule()
@@ -183,17 +200,19 @@ PyObject* PythonScript::arkModule()
     return _ark_module;
 }
 
+const std::vector<String>& PythonScript::paths() const
+{
+    return _paths;
+}
+
 PythonScript::BUILDER::BUILDER(BeanFactory& /*parent*/, const document& manifest)
     : _manifest(manifest)
 {
 }
 
-sp<Script> PythonScript::BUILDER::build(const Scope& args)
+sp<Interpreter> PythonScript::BUILDER::build(const Scope& args)
 {
-    const sp<Script> script = sp<PythonScript>::make("ark-python", _manifest);
-    const Global<PluginManager> pluginManager;
-    for(Plugin& i : pluginManager->plugins())
-        i.createScriptModule(script);
+    const sp<Interpreter> script = sp<PythonScript>::make("ark-python", _manifest);
     return script;
 }
 

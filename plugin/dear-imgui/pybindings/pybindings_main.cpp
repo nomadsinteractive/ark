@@ -22,7 +22,7 @@ public:
         : Plugin("dear-imgui-pybindings", Plugin::PLUGIN_TYPE_CORE) {
     }
 
-    virtual void createScriptModule(const sp<Script>& script) override {
+    void createScriptModule(Interpreter& script) override {
         PythonInterpreter::instance().addModulePlugin<DearImguiPybindingsPlugin>(*this, script, "dear_imgui", "ark.dear_imgui module", ARK_DEAR_IMGUI_METHODS);
     }
 

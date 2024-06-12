@@ -23,7 +23,7 @@ public:
         : Plugin("noise-pybindings", Plugin::PLUGIN_TYPE_CORE) {
     }
 
-    virtual void createScriptModule(const sp<Script>& script) override {
+    void createScriptModule(Interpreter& script) override {
         PythonInterpreter::instance().addModulePlugin<NoisePybindingsPlugin>(*this, script, "noise", "ark.noise module", ARK_NOISE_METHODS);
     }
 

@@ -44,6 +44,11 @@ const sp<PyInstanceRef>& PyInstance::ref() const
     return _ref;
 }
 
+Box PyInstance::toBox() const
+{
+    return Box(_ref);
+}
+
 PyInstance::operator bool()
 {
     return _ref && !isNone();

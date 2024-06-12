@@ -39,11 +39,9 @@ void ApplicationManifest::load(const String& src)
 
     _plugins = Documents::getSystemSpecificList<std::vector<String>>(_content->children("plugin"), constants::NAME);
 
-    const document& renderer = _content->getChild("renderer");
-    if(renderer)
+    if(const document& renderer = _content->getChild("renderer"))
     {
-        const document& resolution = renderer->getChild("resolution");
-        if(resolution)
+        if(const document& resolution = renderer->getChild("resolution"))
             _renderer._resolution = sp<Size>::make(Documents::ensureAttribute<float>(resolution, constants::WIDTH),
                                                    Documents::ensureAttribute<float>(resolution, constants::HEIGHT));
         _renderer._version = Documents::getAttribute<Ark::RendererVersion>(renderer, "version", Ark::RENDERER_VERSION_AUTO);
@@ -53,6 +51,8 @@ void ApplicationManifest::load(const String& src)
 
     _heap._device_unit_size = toSize(Documents::getAttributeValue(_content, "heap/device/unit-size", "8M"));
     _heap._host_unit_size = toSize(Documents::getAttributeValue(_content, "heap/host/unit-size", "8M"));
+
+    _interpreter = _content->getChild("interpreter");
 
     _application._title = Documents::getAttributeValue(_content, "application/title");
     _application._window_flag = Documents::getAttributeValue<WindowFlag>(_content, "application/window-flag", WINDOW_FLAG_SHOW_CURSOR);
@@ -124,6 +124,11 @@ const document& ApplicationManifest::content() const
 const document& ApplicationManifest::resourceLoader() const
 {
     return _resource_loader;
+}
+
+const document& ApplicationManifest::interpreter() const
+{
+    return _interpreter;
 }
 
 uint32_t ApplicationManifest::toSize(const String& sizestr) const

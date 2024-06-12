@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_PLUGIN_PLUGIN_H_
-#define ARK_CORE_PLUGIN_PLUGIN_H_
+#pragma once
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
@@ -25,7 +24,7 @@ public:
     virtual BeanFactory::Factory createResourceLoader(const BeanFactory& beanFactory, const sp<Dictionary<document>>& documentById, const sp<ResourceLoaderContext>& resourceLoaderContext);
     virtual Library createLibrary();
 
-    virtual void createScriptModule(const sp<Script>& script);
+    virtual void createScriptModule(Interpreter& script);
 
     void loadBeanFactory(BeanFactory& beanFactory, const sp<Dictionary<document>>& documentById);
     void loadResourceLoader(BeanFactory& beanFactory, const sp<Dictionary<document>>& documentById, const sp<ResourceLoaderContext>& resourceLoaderContext);
@@ -46,5 +45,3 @@ private:
 };
 
 }
-
-#endif

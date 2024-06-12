@@ -89,6 +89,7 @@ public:
 
     const document& content() const;
     const document& resourceLoader() const;
+    const document& interpreter() const;
 
 private:
     uint32_t toSize(const String& sizestr) const;
@@ -107,6 +108,7 @@ private:
 
     document _content;
     document _resource_loader;
+    document _interpreter;
 };
 
 }

@@ -58,7 +58,7 @@ ApplicationContext::ApplicationContext(sp<ApplicationBundle> applicationBundle, 
       _executor_main(sp<ExecutorWorkerThread>::make(_worker_strategy, "Executor")), _executor_thread_pool(sp<ExecutorThreadPool>::make(_executor_main)), _event_listeners(new EventListenerList()), _string_table(Global<StringTable>()),
       _background_color(0, 0, 0), _paused(false)
 {
-    Ark& ark = Ark::instance();
+    const Ark& ark = Ark::instance();
 
     for(int32_t i = 0; i < ark.argc(); i++)
         _argv.push_back(ark.argv()[i]);
@@ -68,19 +68,18 @@ ApplicationContext::~ApplicationContext()
 {
 }
 
-void ApplicationContext::initResourceLoader(const document& manifest)
+void ApplicationContext::initialize(const document& manifest)
 {
+    const Ark& ark = Ark::instance();
     const document doc = createResourceLoaderManifest(manifest);
     _resource_loader = createResourceLoaderImpl(manifest, nullptr);
     _resource_loader->import(doc, _resource_loader->beanFactory());
-}
 
-void ApplicationContext::initMessageLoop()
-{
-    const Ark& ark = Ark::instance();
     _message_loop_renderer = sp<MessageLoop>::make(_ticker);
     _message_loop_core = ark.manifest()->application()._message_loop == ApplicationManifest::MESSAGE_LOOP_TYPE_RENDER ? _message_loop_renderer : _worker_strategy->_message_loop;
     _message_loop_app = makeMessageLoop(_app_clock);
+
+    _interpreter = _resource_loader->beanFactory().build<Interpreter>(ark.manifest()->interpreter(), Scope());
 }
 
 sp<ResourceLoader> ApplicationContext::createResourceLoader(const String& name, const Scope& args)
@@ -147,6 +146,11 @@ const sp<RenderController>& ApplicationContext::renderController() const
 const sp<ResourceLoader>& ApplicationContext::resourceLoader() const
 {
     return _resource_loader;
+}
+
+const sp<Interpreter>& ApplicationContext::interpreter() const
+{
+    return _interpreter;
 }
 
 const sp<Executor>& ApplicationContext::executorMain() const

@@ -40,7 +40,6 @@ public:
     virtual void traverse(const Visitor& visitor) override {
         HolderUtil::visit(_delegate, visitor);
         HolderUtil::visit(_plane, visitor);
-        _observer->traverse(visitor);
     }
 
 private:

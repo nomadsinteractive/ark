@@ -11,10 +11,8 @@
 namespace ark::plugin::python {
 
 CollisionCallbackPythonAdapter::CollisionCallbackPythonAdapter(const PyInstance& callback)
-    : _on_begin_contact(callback.hasAttr("on_begin_contact") ? callback.getAttr("on_begin_contact")
-                                                             : callback.isCallable() ? PyInstance::own(callback.pyObject()) : PyInstance()),
-      _on_end_contact(callback.hasAttr("on_end_contact") ? callback.getAttr("on_end_contact")
-                                                           : PyInstance())
+    : _on_begin_contact(callback.hasAttr("on_begin_contact") ? callback.getAttr("on_begin_contact") : PyInstance()),
+      _on_end_contact(callback.hasAttr("on_end_contact") ? callback.getAttr("on_end_contact") : PyInstance())
 {
 }
 

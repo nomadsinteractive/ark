@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_BASE_IDENTIFIER_H_
-#define ARK_CORE_BASE_IDENTIFIER_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/base/string.h"
@@ -65,5 +64,3 @@ private:
 };
 
 }
-
-#endif

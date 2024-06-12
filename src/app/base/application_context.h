@@ -1,5 +1,4 @@
-#ifndef ARK_APP_BASE_APPLICATION_CONTEXT_H_
-#define ARK_APP_BASE_APPLICATION_CONTEXT_H_
+#pragma once
 
 #include <map>
 
@@ -36,6 +35,7 @@ public:
     const sp<RenderEngine>& renderEngine() const;
     const sp<RenderController>& renderController() const;
     const sp<ResourceLoader>& resourceLoader() const;
+    const sp<Interpreter>& interpreter() const;
 
     const sp<Executor>& executorMain() const;
     const sp<ExecutorThreadPool>& executorThreadPool() const;
@@ -90,8 +90,7 @@ public:
     }
 
 private:
-    void initResourceLoader(const document& manifest);
-    void initMessageLoop();
+    void initialize(const document& manifest);
 
     sp<ResourceLoader> createResourceLoaderImpl(const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
     document createResourceLoaderManifest(const document& manifest);
@@ -120,13 +119,13 @@ private:
     public:
         ExecutorWorkerStrategy(sp<MessageLoop> messageLoop);
 
-        virtual void onStart() override;
-        virtual void onExit() override;
+        void onStart() override;
+        void onExit() override;
 
-        virtual uint64_t onBusy() override;
-        virtual uint64_t onIdle(Thread& thread) override;
+        uint64_t onBusy() override;
+        uint64_t onIdle(Thread& thread) override;
 
-        virtual void onException(const std::exception& e) override;
+        void onException(const std::exception& e) override;
 
         sp<MessageLoop> _message_loop;
         UList<sp<MessageLoop>> _app_message_loops;
@@ -158,6 +157,8 @@ private:
     sp<ResourceLoader> _resource_loader;
     sp<StringTable> _string_table;
 
+    sp<Interpreter> _interpreter;
+
     Color _background_color;
     bool _paused;
 
@@ -167,5 +168,3 @@ private:
 };
 
 }
-
-#endif

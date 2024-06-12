@@ -30,7 +30,7 @@ public:
         : Plugin("bullet-pybindings", Plugin::PLUGIN_TYPE_CORE) {
     }
 
-    virtual void createScriptModule(const sp<Script>& script) override {
+    void createScriptModule(Interpreter& script) override {
         PythonInterpreter::instance().addModulePlugin<BulletPybindingsPlugin>(*this, script, "bullet", "ark.bullet module", ARK_BULLET_METHODS);
 
         PyArkType* pyResourceLoaderType = PythonInterpreter::instance().getPyArkType<ResourceLoader>();

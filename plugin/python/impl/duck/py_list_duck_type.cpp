@@ -1,6 +1,6 @@
 #include "python/impl/duck/py_list_duck_type.h"
 
-#include "extension/python_interpreter.h"
+#include "python/extension/python_interpreter.h"
 
 namespace ark::plugin::python {
 

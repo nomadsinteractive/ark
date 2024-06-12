@@ -1,7 +1,6 @@
-#ifndef ARK_APP_BASE_APPLICATION_DELEGATE_IMPL_H_
-#define ARK_APP_BASE_APPLICATION_DELEGATE_IMPL_H_
+#pragma once
 
-#include <list>
+#include <vector>
 
 #include "core/base/api.h"
 #include "core/base/scope.h"
@@ -19,10 +18,10 @@ class ARK_API ApplicationDelegateImpl : public ApplicationDelegate {
 public:
     ApplicationDelegateImpl(const sp<ApplicationManifest>& manifest);
 
-    virtual void onCreate(Application& application, const sp<Surface>& surface) override;
+    void onCreate(Application& application, const sp<Surface>& surface) override;
 
-    virtual void onPause() override;
-    virtual void onResume() override;
+    void onPause() override;
+    void onResume() override;
 
     enum ScriptRunOn {
         SCRIPT_RUN_ON_CREATE,
@@ -34,7 +33,7 @@ public:
 
 private:
     struct ScriptTag {
-        ScriptTag(ResourceLoader& resourceLoader, const document& manifest, const sp<Scope>& vars);
+        ScriptTag(sp<Interpreter> interpreter, const document& manifest, sp<Scope> vars);
 
         void run() const;
 
@@ -44,15 +43,13 @@ private:
         String _function_name;
         sp<Asset> _source;
 
-        sp<Script> _script;
+        sp<Interpreter> _interpreter;
         sp<Scope> _vars;
     };
 
 private:
-    std::list<ScriptTag> _scripts;
+    std::vector<ScriptTag> _interpreter;
 
 };
 
 }
-
-#endif

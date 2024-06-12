@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_INF_RUNNABLE_H_
-#define ARK_CORE_INF_RUNNABLE_H_
+#pragma once
 
 #include "core/base/api.h"
 
@@ -14,5 +13,3 @@ public:
 };
 
 }
-
-#endif
