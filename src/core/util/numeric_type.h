@@ -104,8 +104,6 @@ public:
     static sp<Numeric> synchronize(const sp<Numeric>& self, const sp<Boolean>& disposed = nullptr);
 
 //  [[script::bindings::classmethod]]
-    static sp<ExpectationF> approach(const sp<Numeric>& self, const sp<Numeric>& a1);
-//  [[script::bindings::classmethod]]
     static sp<ExpectationF> atLeast(const sp<Numeric>& self, const sp<Numeric>& a1);
 //  [[script::bindings::classmethod]]
     static sp<ExpectationF> atMost(const sp<Numeric>& self, const sp<Numeric>& a1);

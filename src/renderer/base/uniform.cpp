@@ -1,7 +1,6 @@
 #include "renderer/base/uniform.h"
 
 #include "core/base/observer.h"
-#include "core/base/notifier.h"
 #include "core/inf/array.h"
 #include "core/inf/uploader.h"
 #include "core/inf/variable.h"

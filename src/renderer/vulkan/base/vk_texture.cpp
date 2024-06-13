@@ -57,7 +57,7 @@ void VKTexture::upload(GraphicsContext& graphicsContext, const sp<Texture::Uploa
             uploadBitmap(graphicsContext, Bitmap(_width, _height, _width * channels * componentSize, channels, false), imagedata);
         }
     }
-    _notifier.notify();
+    _observer.notify();
 }
 
 ResourceRecycleFunc VKTexture::recycle()
@@ -215,9 +215,9 @@ const VkDescriptorImageInfo& VKTexture::vkDescriptor() const
     return _descriptor;
 }
 
-const Notifier& VKTexture::notifier() const
+Observer& VKTexture::observer()
 {
-    return _notifier;
+    return _observer;
 }
 
 void VKTexture::doUploadBitmap(const Bitmap& bitmap, size_t imageDataSize, const std::vector<bytearray>& imagedata)

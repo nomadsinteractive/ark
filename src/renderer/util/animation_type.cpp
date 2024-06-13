@@ -1,7 +1,5 @@
 #include "renderer/util/animation_type.h"
 
-
-#include "core/base/notifier.h"
 #include "core/base/expectation.h"
 #include "core/util/numeric_type.h"
 
@@ -19,7 +17,7 @@ sp<AnimationInput> AnimationType::makeInput(const sp<Animation>& self, const sp<
         float animationDuration = AnimationType::ticks(self);
         DCHECK(t->val() <= animationDuration, "Animation has already completed");
         sp<ExpectationF> exp = NumericType::atMost(t, sp<Numeric::Const>::make(animationDuration));
-        exp->addObserver(onComplete, true);
+        exp->observer()->addCallback(onComplete, true);
         t = std::move(exp);
     }
 

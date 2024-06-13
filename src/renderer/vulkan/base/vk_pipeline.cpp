@@ -254,7 +254,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
         if(i)
         {
             const sp<VKTexture> texture = i->delegate();
-            _texture_observers.push_back(texture->notifier().makeSignal());
+            _texture_observers.push_back(texture->observer().addBooleanSignal());
             writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
                                           _descriptor_set,
                                           VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
@@ -268,7 +268,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
         if(i)
         {
             const sp<VKTexture> texture = i->delegate();
-            _texture_observers.push_back(texture->notifier().makeSignal());
+            _texture_observers.push_back(texture->observer().addBooleanSignal());
             writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
                                           _descriptor_set,
                                           VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,

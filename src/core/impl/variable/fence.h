@@ -1,21 +1,21 @@
-#ifndef ARK_CORE_IMPL_VARIABLE_FENCE_H_
-#define ARK_CORE_IMPL_VARIABLE_FENCE_H_
+#pragma once
 
 #include "core/forwarding.h"
-#include "core/base/notifier.h"
+#include "core/base/observer.h"
 #include "core/inf/variable.h"
+#include "core/traits/with_observer.h"
 #include "core/types/shared_ptr.h"
 #include "core/util/updatable_util.h"
 
 namespace ark {
 
-template<typename T> class Fence : public Variable<T>::ByUpdate {
+template<typename T> class Fence final : public Variable<T>::ByUpdate, public WithObserver {
 public:
-    Fence(const sp<Variable<T>>& delegate, const sp<Variable<T>>& expectation, Notifier notifier)
-        : Variable<T>::ByUpdate(delegate->val()), _delegate(delegate), _expectation(expectation), _notifer(std::move(notifier)), _is_greater(this->val() > expectation->val()) {
+    Fence(sp<Variable<T>> delegate, sp<Variable<T>> expectation, sp<Observer> observer)
+        : Variable<T>::ByUpdate(delegate->val()), WithObserver(std::move(observer)), _delegate(std::move(delegate)), _expectation(std::move(expectation)), _is_greater(this->val() > expectation->val()) {
     }
 
-    virtual bool doUpdate(uint64_t timestamp, T& value) override {
+    bool doUpdate(uint64_t timestamp, T& value) override {
         if(!UpdatableUtil::update(timestamp, _delegate, _expectation))
             return false;
 
@@ -25,7 +25,7 @@ public:
         if(isGreater != _is_greater)
         {
             _is_greater = isGreater;
-            _notifer.notify();
+            notify();
         }
         return true;
     }
@@ -34,12 +34,7 @@ private:
     sp<Variable<T>> _delegate;
     sp<Variable<T>> _expectation;
 
-    Notifier _notifer;
-
     bool _is_greater;
-
 };
 
 }
-
-#endif

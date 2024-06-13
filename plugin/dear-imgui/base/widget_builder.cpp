@@ -184,14 +184,14 @@ private:
     std::function<bool(const char*, T*)> _func;
 };
 
-template<typename T> class WidgetInputText : public Widget {
+template<typename T> class WidgetInputText final : public Widget {
 public:
     WidgetInputText(String label, sp<T> value, size_t maxLength, sp<StringVar> hint, sp<Observer> observer, ImGuiInputTextFlags flags)
         : _label(std::move(label)), _value(std::move(value)), _hint(std::move(hint)), _observer(std::move(observer)), _flags(flags), _text_buf(maxLength) {
         updateInputText();
     }
 
-    virtual void render() override {
+    void render() override {
         bool renderResult = ImGui::InputTextWithHint(_label.c_str(), _hint ? _hint->val()->c_str() : nullptr, &_text_buf[0], _text_buf.size(), _flags);
         if(renderResult) {
             StringType::set(_value, sp<String>::make(_text_buf.data()));

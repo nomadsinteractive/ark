@@ -1,40 +1,35 @@
-#ifndef ARK_CORE_IMPL_VARIABLE_AT_MOST_H_
-#define ARK_CORE_IMPL_VARIABLE_AT_MOST_H_
+#pragma once
 
 #include "core/base/wrapper.h"
-#include "core/base/notifier.h"
 #include "core/inf/variable.h"
+#include "core/traits/with_observer.h"
 #include "core/types/shared_ptr.h"
 #include "core/util/updatable_util.h"
 
 namespace ark {
 
-template<typename T> class AtMost : public Variable<T>, public Wrapper<Variable<T>>, Implements<AtMost<T>, Variable<T>, Wrapper<Variable<T>>> {
+template<typename T> class AtMost final : public Variable<T>, public Wrapper<Variable<T>>, public WithObserver, Implements<AtMost<T>, Variable<T>, Wrapper<Variable<T>>> {
 public:
-    AtMost(const sp<Variable<T>>& delegate, const sp<Variable<T>>& boundary, Notifier notifier)
-         : Wrapper<Variable<T>>(delegate), _boundary(boundary), _notifer(std::move(notifier)) {
+    AtMost(sp<Variable<T>> delegate, sp<Variable<T>> boundary, sp<Observer> observer)
+         : Wrapper<Variable<T>>(std::move(delegate)), WithObserver(std::move(observer)), _boundary(std::move(boundary)) {
     }
 
-    virtual T val() override {
+    T val() override {
         T value = this->_wrapped->val();
         T boundary = _boundary->val();
         if(value > boundary) {
-            _notifer.notify();
+            notify();
             return boundary;
         }
         return value;
     }
 
-    virtual bool update(uint64_t timestamp) override {
+    bool update(uint64_t timestamp) override {
         return UpdatableUtil::update(timestamp, this->_wrapped, _boundary);
     }
 
 private:
     sp<Variable<T>> _boundary;
-
-    Notifier _notifer;
 };
 
 }
-
-#endif

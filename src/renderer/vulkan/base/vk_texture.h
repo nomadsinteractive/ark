@@ -1,7 +1,6 @@
-#ifndef ARK_RENDERER_VULKAN_BASE_VK_TEXTURE_H_
-#define ARK_RENDERER_VULKAN_BASE_VK_TEXTURE_H_
+#pragma once
 
-#include "core/base/notifier.h"
+#include "core/base/observer.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -13,8 +12,7 @@
 
 #include "platform/vulkan/vulkan.h"
 
-namespace ark {
-namespace vulkan {
+namespace ark::vulkan {
 
 class VKTexture : public Texture::Delegate {
 public:
@@ -30,7 +28,7 @@ public:
     virtual void uploadBitmap(GraphicsContext& graphicsContext, const Bitmap& bitmap, const std::vector<sp<ByteArray>>& imagedata) override;
 
     const VkDescriptorImageInfo& vkDescriptor() const;
-    const Notifier& notifier() const;
+    Observer& observer();
 
 protected:
     void doUploadBitmap(const Bitmap& bitmap, size_t imageDataSize, const std::vector<bytearray>& imagedata);
@@ -52,11 +50,8 @@ private:
     uint32_t _mip_levels;
     VkDescriptorImageInfo _descriptor;
 
-    Notifier _notifier;
+    Observer _observer;
 };
 
 
 }
-}
-
-#endif

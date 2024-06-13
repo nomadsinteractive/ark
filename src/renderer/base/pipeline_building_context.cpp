@@ -3,7 +3,6 @@
 #include <regex>
 
 #include "core/base/string_buffer.h"
-#include "core/base/notifier.h"
 #include "core/inf/uploader.h"
 #include "core/util/strings.h"
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/base/notifier.h"
+#include "core/base/observer.h"
 #include "core/types/shared_ptr.h"
 
 #include "renderer/base/buffer.h"
@@ -9,8 +9,7 @@
 #include "renderer/vulkan/base/vk_memory_ptr.h"
 #include "renderer/vulkan/util/vulkan_buffer.hpp"
 
-namespace ark {
-namespace vulkan {
+namespace ark::vulkan {
 
 class VKBuffer : public Buffer::Delegate {
 public:
@@ -32,7 +31,7 @@ public:
 
     const VkDescriptorBufferInfo& vkDescriptor() const;
 
-    Notifier& notifier();
+    Observer& observer();
 
 private:
     void* map(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
@@ -61,8 +60,7 @@ private:
     VKMemoryPtr _memory;
     VkMemoryRequirements _memory_requirements;
 
-    Notifier _notifier;
+    Observer _observer;
 };
 
-}
 }

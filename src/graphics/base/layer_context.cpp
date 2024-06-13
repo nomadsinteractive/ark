@@ -1,7 +1,6 @@
 #include "graphics/base/layer_context.h"
 
 #include "core/base/constants.h"
-#include "core/base/notifier.h"
 #include "core/types/global.h"
 #include "core/util/log.h"
 #include "core/util/updatable_util.h"

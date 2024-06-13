@@ -10,19 +10,10 @@ typedef Expectation<int32_t> ExpectationI;
 
 //[[script::bindings::extends(Integer)]]
 class ARK_API ExpectationI : public Integer, public Wrapper<Integer> {
- public:
-    ExpectationI(sp<Integer> delegate, Notifier notifier);
 
-    virtual float val() override;
-    virtual bool update(uint64_t timestamp) override;
-    virtual void traverse(const Visitor& visitor) override;
+//  [[script::bindings::property]]
+    const sp<Observer>& observer() const;
 
-//[[script::bindings::auto]]
-    sp<Observer> createObserver(const sp<Runnable>& callback, bool oneshot = true);
-//[[script::bindings::auto]]
-    const sp<Observer>& addObserver(const sp<Runnable>& callback, bool oneshot = true);
-//[[script::bindings::auto]]
-    void clear();
 };
 
 */

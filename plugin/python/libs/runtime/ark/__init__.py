@@ -392,7 +392,7 @@ class ApplicationBundle:
 
 
 class Future:
-    def __init__(self):
+    def __init__(self, canceled: Optional['Boolean'] = None, observer: Optional['Observer'] = None):
         pass
 
     def cancel(self):
@@ -715,13 +715,13 @@ class ApplicationManifest:
 
 
 class Observer:
-    def __init__(self, callback, oneshot: bool = True):
+    def __init__(self, callback: Callable, oneshot: bool = True):
         pass
 
     def update(self):
         pass
 
-    def set_callback(self, callback: Callable):
+    def add_callback(self, callback: Callable):
         pass
 
 

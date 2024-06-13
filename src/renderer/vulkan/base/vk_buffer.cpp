@@ -9,8 +9,7 @@
 #include "renderer/vulkan/base/vk_renderer.h"
 #include "renderer/vulkan/util/vk_util.h"
 
-namespace ark {
-namespace vulkan {
+namespace ark::vulkan {
 
 VKBuffer::VKBuffer(sp<VKRenderer> renderer, sp<Recycler> recycler, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags)
     : _renderer(std::move(renderer)), _recycler(std::move(recycler)), _usage_flags(usageFlags), _memory_property_flags(memoryPropertyFlags), _descriptor{}, _memory_requirements{}
@@ -116,7 +115,7 @@ void VKBuffer::ensureSize(GraphicsContext& graphicsContext, size_t size)
         const VkBufferCreateInfo bufferCreateInfo = vks::initializers::bufferCreateInfo(isDeviceLocal() ? _usage_flags | VK_BUFFER_USAGE_TRANSFER_DST_BIT : _usage_flags, _size);
         VKUtil::checkResult(vkCreateBuffer(_renderer->vkLogicalDevice(), &bufferCreateInfo, nullptr, &_descriptor.buffer));
 
-        _notifier.notify();
+        _observer.notify();
 
         VkMemoryRequirements memReqs;
         vkGetBufferMemoryRequirements(_renderer->vkLogicalDevice(), _descriptor.buffer, &memReqs);
@@ -171,10 +170,9 @@ const VkDescriptorBufferInfo& VKBuffer::vkDescriptor() const
     return _descriptor;
 }
 
-Notifier& VKBuffer::notifier()
+Observer& VKBuffer::observer()
 {
-    return _notifier;
+    return _observer;
 }
 
-}
 }

@@ -256,9 +256,8 @@ int32_t IntegerType::toRepeat(const String& repeat)
 
 sp<ExpectationI> IntegerType::repeat(std::vector<int32_t> array, IntegerType::Repeat repeat)
 {
-    Notifier notifier;
-    sp<Integer> delegate = sp<IntegerByArray>::make(sp<IntArray::Vector>::make(std::move(array)), repeat, notifier);
-    return sp<ExpectationI>::make(std::move(delegate), std::move(notifier));
+    const sp<IntegerByArray> delegate = sp<IntegerByArray>::make(sp<IntArray::Vector>::make(std::move(array)), repeat, nullptr);
+    return sp<ExpectationI>::make(delegate, delegate.cast<WithObserver>());
 }
 
 sp<Integer> IntegerType::animate(const sp<Integer>& self, const sp<Numeric>& interval, const sp<Numeric>& duration)
@@ -268,30 +267,28 @@ sp<Integer> IntegerType::animate(const sp<Integer>& self, const sp<Numeric>& int
 
 sp<ExpectationI> IntegerType::atLeast(sp<Integer> self, sp<Integer> a1)
 {
-    Notifier notifier;
-    sp<Integer> delegate = sp<AtLeast<int32_t>>::make(std::move(self), std::move(a1), notifier);
-    return sp<ExpectationI>::make(std::move(delegate), std::move(notifier));
+    const sp<AtLeast<int32_t>> delegate = sp<AtLeast<int32_t>>::make(std::move(self), std::move(a1), nullptr);
+    return sp<ExpectationI>::make(std::move(delegate), delegate.cast<WithObserver>());
 }
 
 sp<ExpectationI> IntegerType::atMost(sp<Integer> self, sp<Integer> a1)
 {
-    Notifier notifier;
-    sp<Integer> delegate = sp<AtMost<int32_t>>::make(std::move(self), std::move(a1), notifier);
-    return sp<ExpectationI>::make(std::move(delegate), std::move(notifier));
+    const sp<AtMost<int32_t>> delegate = sp<AtMost<int32_t>>::make(std::move(self), std::move(a1), nullptr);
+    return sp<ExpectationI>::make(delegate, delegate.cast<WithObserver>());
 }
 
 sp<ExpectationI> IntegerType::clamp(const sp<Integer>& self, const sp<Integer>& min, const sp<Integer>& max)
 {
     DASSERT(self && min && max);
-    Notifier notifier;
-    return sp<ExpectationI>::make(sp<Clamp<int32_t>>::make(self, min, max, notifier), std::move(notifier));
+    const sp<Clamp<int32_t>> delegate = sp<Clamp<int32_t>>::make(self, min, max, nullptr);
+    return sp<ExpectationI>::make(delegate, delegate.cast<WithObserver>());
 }
 
 sp<ExpectationI> IntegerType::fence(const sp<Integer>& self, const sp<Integer>& a1)
 {
     DASSERT(self && a1);
-    Notifier notifier;
-    return sp<ExpectationI>::make(sp<Fence<int32_t>>::make(self, a1, notifier), std::move(notifier));
+    const sp<Fence<int32_t>> delegate = sp<Fence<int32_t>>::make(self, a1, nullptr);
+    return sp<ExpectationI>::make(delegate, delegate.cast<WithObserver>());
 }
 
 sp<Integer> IntegerType::ifElse(const sp<Integer>& self, const sp<Boolean>& condition, const sp<Integer>& negative)

@@ -1,28 +1,25 @@
-#ifndef ARK_CORE_IMPL_INTEGER_INTEGER_ARRAY_H_
-#define ARK_CORE_IMPL_INTEGER_INTEGER_ARRAY_H_
+#pragma once
 
 #include "core/forwarding.h"
 #include "core/base/wrapper.h"
-#include "core/base/notifier.h"
 #include "core/inf/variable.h"
 #include "core/util/integer_type.h"
 
 namespace ark {
 
-class IntegerByArray : public Wrapper<IntArray>, public Integer {
+class IntegerByArray : public Wrapper<IntArray>, public WithObserver, public Integer {
 public:
-    IntegerByArray(sp<IntArray> array, IntegerType::Repeat repeat, Notifier notifier);
+    IntegerByArray(sp<IntArray> array, IntegerType::Repeat repeat, sp<Observer> observer);
 
-    virtual int32_t val() override;
-    virtual bool update(uint64_t timestamp) override;
+    int32_t val() override;
+    bool update(uint64_t timestamp) override;
 
 private:
     IntegerType::Repeat _repeat;
     int32_t _position;
     int32_t _step;
-    Notifier _notifier;
+
+    sp<Observer> _observer;
 };
 
 }
-
-#endif

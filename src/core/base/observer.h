@@ -1,29 +1,38 @@
 #pragma once
 
+#include <vector>
+
 #include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/types/shared_ptr.h"
 
 namespace ark {
 
-class ARK_API Observer {
+class ARK_API Observer final {
 public:
+    Observer() = default;
+//  [[script::bindings::auto]]
     Observer(sp<Runnable> callback, bool oneshot = true);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Observer);
 
 //  [[script::bindings::auto]]
     void notify();
 
-//  [[script::bindings::property]]
-    const sp<Runnable>& callback();
-//  [[script::bindings::property]]
-    void setCallback(sp<Runnable> callback);
+//  [[script::bindings::auto]]
+    void addCallback(sp<Runnable> callback, bool oneshot = true);
+
+//  [[script::bindings::auto]]
+    sp<Boolean> addBooleanSignal(bool value = false);
 
 private:
-    sp<Runnable> _callback;
-    bool _oneshot;
+    struct Callback {
+        sp<Runnable> _func;
+        bool _oneshot;
+        bool _owned;
+    };
 
-    friend class Notifier;
+private:
+    std::vector<Callback> _callbacks;
 };
 
 }

@@ -5,8 +5,8 @@
 
 namespace ark {
 
-IntegerByArray::IntegerByArray(sp<IntArray> array, IntegerType::Repeat repeat, Notifier notifier)
-    : Wrapper(std::move(array)), _repeat(repeat), _position(0), _step(1), _notifier(std::move(notifier))
+IntegerByArray::IntegerByArray(sp<IntArray> array, IntegerType::Repeat repeat, sp<Observer> observer)
+    : Wrapper(std::move(array)), WithObserver(std::move(observer)), _repeat(repeat), _position(0), _step(1)
 {
     CHECK(_wrapped && _wrapped->length() > 0, "Empty array");
     CHECK(repeat != IntegerType::REPEAT_REVERSE || _wrapped->length() > 1, "A reversable array must have at least 2 elements");
@@ -45,7 +45,7 @@ int32_t IntegerByArray::val()
                     _position = 0;
 
                 if(_repeat & IntegerType::REPEAT_NOTIFY)
-                    _notifier.notify();
+                    notify();
             }
         }
         else if(_position == -1)
@@ -61,7 +61,7 @@ int32_t IntegerByArray::val()
                 _step = 1;
             }
             if(_repeat & IntegerType::REPEAT_NOTIFY)
-                _notifier.notify();
+                notify();
         }
     }
     return v;

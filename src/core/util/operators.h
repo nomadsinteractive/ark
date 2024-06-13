@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_UTIL_OPERATORS_H_
-#define ARK_CORE_UTIL_OPERATORS_H_
+#pragma once
 
 #include "core/util/math.h"
 
@@ -297,5 +296,3 @@ public:
 };
 
 }
-
-#endif

@@ -4,11 +4,10 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <glslang/Public/ShaderLang.h>
 #include <glslang/SPIRV/GlslangToSpv.h>
 
 #include "core/base/plugin_manager.h"
-#include "core/inf/array.h"
-#include "core/inf/dictionary.h"
 #include "core/inf/variable.h"
 #include "core/types/global.h"
 #include "core/util/log.h"
@@ -33,17 +32,13 @@
 #include "renderer/vulkan/util/vulkan_tools.h"
 #include "renderer/vulkan/util/vulkan_debug.h"
 
-#include "generated/vulkan_plugin.h"
-
 #define VERTEX_BUFFER_BIND_ID 0
 
-namespace ark {
-
-namespace vulkan {
+namespace ark::vulkan {
 
 namespace {
 
-static const TBuiltInResource DefaultTBuiltInResource = {
+constexpr TBuiltInResource DefaultTBuiltInResource = {
     /* .MaxLights = */ 32,
     /* .MaxClipPlanes = */ 6,
     /* .MaxTextureUnits = */ 32,
@@ -465,5 +460,4 @@ std::vector<uint32_t> VKUtil::compileSPIR(const String& source, PipelineInput::S
     return {};
 }
 
-}
 }

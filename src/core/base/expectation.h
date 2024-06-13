@@ -4,17 +4,17 @@
 
 #include "core/base/wrapper.h"
 #include "core/base/observer.h"
-#include "core/base/notifier.h"
 #include "core/inf/variable.h"
+#include "core/traits/with_observer.h"
 #include "core/types/implements.h"
 #include "core/types/shared_ptr.h"
 
 namespace ark {
 
-template<typename T> class Expectation : public Variable<T>, public Wrapper<Variable<T>>, public Implements<Expectation<T>, Variable<T>, Wrapper<Variable<T>>> {
+template<typename T> class Expectation final : public Variable<T>, public Wrapper<Variable<T>>, public Implements<Expectation<T>, Variable<T>, Wrapper<Variable<T>>> {
 public:
-    Expectation(sp<Variable<T>> delegate, Notifier notifier)
-        : Wrapper<Variable<T>>(std::move(delegate)), _notifier(std::move(notifier)) {
+    Expectation(sp<Variable<T>> delegate, sp<WithObserver> withObserver)
+        : Wrapper<Variable<T>>(std::move(delegate)), _with_observer(std::move(withObserver)) {
     }
 
     T val() override {
@@ -25,22 +25,12 @@ public:
         return this->_wrapped->update(timestamp);
     }
 
-    sp<Observer> createObserver(const sp<Runnable>& callback, bool oneshot = true) {
-        return _notifier.makeObserver(callback, oneshot);
-    }
-
-    const sp<Observer>& addObserver(const sp<Runnable>& callback, bool oneshot = true) {
-        _observers.push_back(_notifier.makeObserver(callback, oneshot));
-        return _observers.back();
-    }
-
-    void clear() {
-        _observers.clear();
+    const sp<Observer>& observer() const {
+        return _with_observer->observer();
     }
 
 private:
-    Notifier _notifier;
-    std::vector<sp<Observer>> _observers;
+    sp<WithObserver> _with_observer;
 };
 
 }
