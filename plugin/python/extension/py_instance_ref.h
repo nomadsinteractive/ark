@@ -1,5 +1,4 @@
-#ifndef ARK_PLUGIN_PYTHON_EXTENSION_PY_INSTANCE_REF_H_
-#define ARK_PLUGIN_PYTHON_EXTENSION_PY_INSTANCE_REF_H_
+#pragma once
 
 #include <Python.h>
 
@@ -7,26 +6,20 @@
 
 #include "python/api.h"
 
-namespace ark {
-namespace plugin {
-namespace python {
+namespace ark::plugin::python {
 
 class ARK_PLUGIN_PYTHON_API PyInstanceRef {
 public:
-    PyInstanceRef(PyObject* instance);
-    virtual ~PyInstanceRef() = default;
+    PyInstanceRef(PyObject* instance, bool deref);
+    ~PyInstanceRef();
+    DISALLOW_COPY_AND_ASSIGN(PyInstanceRef);
 
-    virtual void clear();
+    PyObject* instance() const;
+    void clear();
 
-    PyObject* instance();
-
-protected:
+private:
     PyObject* _instance;
-
+    bool _deref;
 };
 
 }
-}
-}
-
-#endif

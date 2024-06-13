@@ -27,8 +27,7 @@
 #include "renderer/vulkan/util/vulkan_tools.h"
 #include "renderer/vulkan/util/vk_util.h"
 
-namespace ark {
-namespace vulkan {
+namespace ark::vulkan {
 
 VKPipeline::VKPipeline(const PipelineBindings& bindings, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, std::map<PipelineInput::ShaderStage, String> shaders)
     : _bindings(bindings), _recycler(recycler), _renderer(renderer), _baked_renderer(makeBakedRenderer(bindings)), _layout(VK_NULL_HANDLE), _descriptor_set_layout(VK_NULL_HANDLE),
@@ -255,7 +254,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
         if(i)
         {
             const sp<VKTexture> texture = i->delegate();
-            _texture_observers.push_back(texture->notifier().createDirtyFlag());
+            _texture_observers.push_back(texture->notifier().makeSignal());
             writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
                                           _descriptor_set,
                                           VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
@@ -269,7 +268,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
         if(i)
         {
             const sp<VKTexture> texture = i->delegate();
-            _texture_observers.push_back(texture->notifier().createDirtyFlag());
+            _texture_observers.push_back(texture->notifier().makeSignal());
             writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
                                           _descriptor_set,
                                           VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
@@ -567,5 +566,4 @@ void VKPipeline::VKMultiDrawElementsIndirect::draw(GraphicsContext& graphicsCont
     vkCmdDrawIndexedIndirect(commandBuffer, (VkBuffer) (param._indirect_cmds.id()), 0, param._indirect_cmd_count, sizeof(DrawingParams::DrawElementsIndirectCommand));
 }
 
-}
 }

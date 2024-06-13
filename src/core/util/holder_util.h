@@ -46,7 +46,7 @@ private:
         }
     }
 
-    template<typename T> static void traverse_delegate_sfinae(const sp<T>& inst, const Holder::Visitor& visitor, typename std::remove_reference<typename std::remove_cv<decltype(inst->delegate())>::type>::type::_PtrType*) {
+    template<typename T> static void traverse_delegate_sfinae(const sp<T>& inst, const Holder::Visitor& visitor, typename std::remove_reference_t<std::remove_cv_t<decltype(inst->delegate())>>::_PtrType*) {
         return visit(inst->delegate(), visitor);
     }
 

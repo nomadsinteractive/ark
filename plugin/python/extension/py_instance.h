@@ -14,7 +14,7 @@ namespace ark::plugin::python {
 
 class ARK_PLUGIN_PYTHON_API PyInstance {
 public:
-    PyInstance();
+    PyInstance() = default;
     PyInstance(sp<PyInstanceRef> ref);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(PyInstance);
 
@@ -29,7 +29,7 @@ public:
     Box toBox() const;
 
     PyObject* pyObject() const;
-    explicit operator bool();
+    explicit operator bool() const;
 
     PyObject* type();
     const char* name();
@@ -44,29 +44,6 @@ public:
 
     bool isNone() const;
     bool isNullptr() const;
-
-private:
-    class Borrowed : public PyInstanceRef, Implements<Borrowed, PyInstanceRef> {
-    public:
-        Borrowed(PyObject* object);
-
-        virtual void clear();
-
-    };
-
-    class Owned : public PyInstanceRef, Implements<Owned, PyInstanceRef> {
-    public:
-        Owned(PyObject* object);
-        ~Owned() override;
-
-    };
-
-    class Stolen : public PyInstanceRef, Implements<Stolen, PyInstanceRef> {
-    public:
-        Stolen(PyObject* object);
-        ~Stolen() override;
-
-    };
 
 private:
     sp<PyInstanceRef> _ref;

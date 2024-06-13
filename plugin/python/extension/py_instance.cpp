@@ -8,10 +8,6 @@
 
 namespace ark::plugin::python {
 
-PyInstance::PyInstance()
-{
-}
-
 PyInstance::PyInstance(sp<PyInstanceRef> ref)
     : _ref(std::move(ref))
 {
@@ -19,22 +15,25 @@ PyInstance::PyInstance(sp<PyInstanceRef> ref)
 
 PyInstance PyInstance::borrow(PyObject* object)
 {
-    return PyInstance(object ? sp<Borrowed>::make(object) : nullptr);
+    return PyInstance(object ? sp<PyInstanceRef>::make(object, false) : nullptr);
 }
 
 PyInstance PyInstance::steal(PyObject* object)
 {
-    return PyInstance(object ? sp<Stolen>::make(object) : nullptr);
+    Py_XINCREF(object);
+    return PyInstance(object ? sp<PyInstanceRef>::make(object, true) : nullptr);
 }
 
 PyInstance PyInstance::own(PyObject* object)
 {
-    return PyInstance(object ? sp<Owned>::make(object) : nullptr);
+    Py_XINCREF(object);
+    return PyInstance(object ? sp<PyInstanceRef>::make(object, true) : nullptr);
 }
 
 PyInstance PyInstance::track(PyObject* object)
 {
-    const sp<PyInstanceRef> ref = sp<Owned>::make(object);
+    Py_XINCREF(object);
+    sp<PyInstanceRef> ref = sp<PyInstanceRef>::make(object, true);
     PythonInterpreter::instance().referenceManager()->track(ref);
     return ref;
 }
@@ -46,10 +45,10 @@ const sp<PyInstanceRef>& PyInstance::ref() const
 
 Box PyInstance::toBox() const
 {
-    return Box(_ref);
+    return {_ref};
 }
 
-PyInstance::operator bool()
+PyInstance::operator bool() const
 {
     return _ref && !isNone();
 }
@@ -71,7 +70,7 @@ bool PyInstance::hasAttr(const char* name) const
 
 PyInstance PyInstance::getAttr(const char* name) const
 {
-    const sp<PyInstanceRef> attr = sp<Stolen>::make(PyObject_GetAttrString(_ref->instance(), name));
+    const sp<PyInstanceRef> attr = sp<PyInstanceRef>::make(PyObject_GetAttrString(_ref->instance(), name), true);
     PythonInterpreter::instance().referenceManager()->track(attr);
     return attr;
 }
@@ -110,37 +109,6 @@ bool PyInstance::isNullptr() const
 PyObject* PyInstance::pyObject() const
 {
     return _ref->instance();
-}
-
-PyInstance::Borrowed::Borrowed(PyObject* object)
-    : PyInstanceRef(object)
-{
-}
-
-void PyInstance::Borrowed::clear()
-{
-    DFATAL("You cannot clear a borrowed instance");
-}
-
-PyInstance::Owned::Owned(PyObject* object)
-    : PyInstanceRef(object)
-{
-    Py_XINCREF(_instance);
-}
-
-PyInstance::Owned::~Owned()
-{
-    Py_XDECREF(_instance);
-}
-
-PyInstance::Stolen::Stolen(PyObject* object)
-    : PyInstanceRef(object)
-{
-}
-
-PyInstance::Stolen::~Stolen()
-{
-    Py_XDECREF(_instance);
 }
 
 }
