@@ -2370,13 +2370,13 @@ class RigidBody:
 
 class SurfaceController:
 
-    def add_renderer(self, renderer: Renderer):
+    def add_renderer(self, renderer: Renderer, discarded: Optional[Boolean] = None, visible: Optional[Boolean] = None):
         pass
 
-    def add_control_layer(self, renderer: Renderer):
+    def add_control_layer(self, renderer: Renderer, discarded: Optional[Boolean] = None, visible: Optional[Boolean] = None):
         pass
 
-    def add_layer(self, renderer: Renderer):
+    def add_layer(self, renderer: Renderer, discarded: Optional[Boolean] = None, visible: Optional[Boolean] = None):
         pass
 
 

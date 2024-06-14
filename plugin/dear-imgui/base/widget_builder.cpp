@@ -282,14 +282,14 @@ void WidgetBuilder::bulletText(const String& content)
 
 sp<Observer> WidgetBuilder::button(const String& label, const V2& size)
 {
-    sp<Observer> observer = sp<Observer>::make(nullptr, false);
+    sp<Observer> observer = sp<Observer>::make(false);
     addCallback<String>([size](const char* s) { return ImGui::Button(s, ImVec2(size.x(), size.y())); }, label, observer);
     return observer;
 }
 
 sp<Observer> WidgetBuilder::smallButton(const String& label)
 {
-    sp<Observer> observer = sp<Observer>::make(nullptr, false);
+    sp<Observer> observer = sp<Observer>::make(false);
     addCallback<String>(ImGui::SmallButton, label, observer);
     return observer;
 }
@@ -340,7 +340,7 @@ void WidgetBuilder::text(const String& content)
 
 sp<Observer> WidgetBuilder::inputText(String label, sp<StringVar::Impl> value, size_t maxLength, int32_t flags)
 {
-    sp<Observer> observer = sp<Observer>::make(nullptr, false);
+    sp<Observer> observer = sp<Observer>::make(false);
     addWidget(sp<WidgetInputText<StringVar::Impl>>::make(std::move(label), std::move(value), maxLength, nullptr, observer, flags));
     return observer;
 }

@@ -20,14 +20,14 @@ void SurfaceController::addRenderer(sp<Renderer> renderer, sp<Boolean> discarded
     _renderer_phrase.add(RendererType::PHRASE_DEFAULT, std::move(renderer), std::move(discarded), std::move(visible));
 }
 
-void SurfaceController::addControlLayer(const sp<Renderer>& controller)
+void SurfaceController::addControlLayer(sp<Renderer> controller, sp<Boolean> discarded, sp<Boolean> visible)
 {
-    _renderer_phrase.add(RendererType::PHRASE_WIDGET, controller);
+    _renderer_phrase.add(RendererType::PHRASE_WIDGET, std::move(controller), std::move(discarded), std::move(visible));
 }
 
-void SurfaceController::addLayer(const sp<Renderer>& layer)
+void SurfaceController::addLayer(sp<Renderer> layer, sp<Boolean> discarded, sp<Boolean> visible)
 {
-    _renderer_phrase.add(RendererType::PHRASE_LAYER, layer);
+    _renderer_phrase.add(RendererType::PHRASE_LAYER, std::move(layer), std::move(discarded), std::move(visible));
 }
 
 void SurfaceController::requestUpdate(uint64_t timestamp)

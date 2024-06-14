@@ -159,19 +159,19 @@ class MainWindow(BaseWindow):
 
     def on_show(self, builder: dear_imgui.WidgetBuilder, quick_bar_items: list[QuickBarItem]):
         builder.text('Debugger')
-        builder.small_button('Start').set_callback(self.pydevd_start)
+        builder.small_button('Start').add_callback(self.pydevd_start)
         builder.same_line()
-        builder.small_button('Stop').set_callback(self.pydevd_stop)
+        builder.small_button('Stop').add_callback(self.pydevd_stop)
         builder.separator()
 
         builder.text('Quick Bar')
         for i, j in enumerate(quick_bar_items):
             if i != 0:
                 builder.same_line()
-            builder.small_button(j.text).set_callback(self._make_quickbar_onclick(j))
+            builder.small_button(j.text).add_callback(self._make_quickbar_onclick(j))
 
         builder.separator()
-        builder.small_button('Close').set_callback(self._mark_studio.close)
+        builder.small_button('Close').add_callback(self._mark_studio.close)
 
         builder.add_widget(builder.make_demo_widget(self._imgui_demo_is_open))
         builder.add_widget(builder.make_about_widget(self._imgui_about_is_open))
@@ -209,12 +209,11 @@ class ConsoleWindow(BaseWindow):
             if cmd_splitted:
                 name_and_methods = cmd_splitted[0].split('.')
                 for i in console_cmds:
-                    executor = i.get_executor(name_and_methods)
-                    if executor:
+                    if executor := i.get_executor(name_and_methods):
                         executor(*cmd_splitted[1:])
             text_cmd.set('')
 
-        builder.input_text('Command', text_cmd, 64, 1 << 5).set_callback(execute_cmd)
+        builder.input_text('Command', text_cmd, 64, 1 << 5).add_callback(execute_cmd)
         builder.separator()
         builder.add_widget(self._make_cmd_tab_widget(console_cmds))
 
@@ -223,7 +222,7 @@ class ConsoleWindow(BaseWindow):
         tab_panel_wrapper = dear_imgui.Widget()
         console_cmds_count = len(console_cmds)
         for i, j in enumerate(console_cmds):
-            tab_title_builder.button(j.name).set_callback(self._make_tab_title_button_callback(j, tab_panel_wrapper))
+            tab_title_builder.button(j.name).add_callback(self._make_tab_title_button_callback(j, tab_panel_wrapper))
             if i != console_cmds_count - 1:
                 tab_title_builder.same_line()
 
@@ -240,7 +239,7 @@ class ConsoleWindow(BaseWindow):
         panel_row_width = 0
         for i, j in enumerate(public_properties):
             cmd_name, cmd = j
-            builder.button(cmd_name).set_callback(self._make_tab_panel_button_callback(cmd, tab_panel, sub_tab_panel))
+            builder.button(cmd_name).add_callback(self._make_tab_panel_button_callback(cmd, tab_panel, sub_tab_panel))
             panel_row_width += (len(cmd_name) + 4)
             if i != public_methods_len - 1:
                 if panel_row_width > panel_row_width_max:
@@ -310,8 +309,8 @@ class MarkStudio:
 
     def __init__(self, application_facade: ApplicationFacade, imgui: Renderer, resolution: Vec2):
         self._application_facade = application_facade
-        self._imgui = imgui.make_disposable()
-        self._disposed = None
+        self._imgui = imgui
+        self._discarded = None
         self._renderer_quickbar = None
         self._renderer_properties = None
         self._layer_editor_visibility = Boolean(False)
@@ -342,17 +341,16 @@ class MarkStudio:
         else:
             self._console_window.hide()
 
-        if self._disposed is not None:
-            self._disposed.set(True)
-        self._disposed = Boolean(False)
+        if self._discarded is not None:
+            self._discarded.set(True)
+        self._discarded = Boolean(False)
 
-        self._application_facade.surface_controller.add_control_layer(self._imgui)
-        self._application_facade.push_event_listener(self._imgui, self._disposed)
+        self._application_facade.surface_controller.add_control_layer(self._imgui, self._discarded)
+        self._application_facade.push_event_listener(self._imgui, self._discarded)
 
     def close(self):
-        self._imgui.dispose()
         self._imgui = None
-        self._disposed.set(True)
+        self._discarded.set(True)
         self._renderer_quickbar = None
         self._renderer_properties = None
         return True

@@ -319,7 +319,6 @@ private:
     static sp<Vec3> toVec3(PyObject* object, bool alert);
     static Optional<sp<Integer>> toInteger(PyObject* object, bool alert);
     static Optional<sp<Runnable>> toRunnable(PyObject* object, bool alert);
-    static Optional<sp<Observer>> toObserver(PyObject* object, bool alert);
     static sp<CollisionCallback> toCollisionCallback(PyObject* object);
     static sp<EventListener> toEventListener(PyObject* object);
 
@@ -361,11 +360,6 @@ template<> inline Optional<sp<Boolean>> PyCast::toSharedPtrImpl<Boolean>(PyObjec
 template<> inline Optional<sp<Runnable>> PyCast::toSharedPtrImpl<Runnable>(PyObject* object, bool alert)
 {
     return toRunnable(object, alert);
-}
-
-template<> inline Optional<sp<Observer>> PyCast::toSharedPtrImpl<Observer>(PyObject* object, bool alert)
-{
-    return toObserver(object, alert);
 }
 
 template<> inline Optional<sp<CollisionCallback>> PyCast::toSharedPtrImpl<CollisionCallback>(PyObject* object, bool alert)

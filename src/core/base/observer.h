@@ -10,16 +10,15 @@ namespace ark {
 
 class ARK_API Observer final {
 public:
-    Observer() = default;
 //  [[script::bindings::auto]]
-    Observer(sp<Runnable> callback, bool oneshot = true);
+    Observer(bool oneshot = true);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Observer);
 
 //  [[script::bindings::auto]]
     void notify();
 
 //  [[script::bindings::auto]]
-    void addCallback(sp<Runnable> callback, bool oneshot = true);
+    void addCallback(sp<Runnable> callback);
 
 //  [[script::bindings::auto]]
     sp<Boolean> addBooleanSignal(bool value = false);
@@ -33,6 +32,7 @@ private:
 
 private:
     std::vector<Callback> _callbacks;
+    bool _oneshot;
 };
 
 }

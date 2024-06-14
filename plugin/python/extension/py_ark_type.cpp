@@ -163,7 +163,6 @@ PyObject* PyArkType::load(Instance& inst, const String& loader, TypeId typeId, c
 PyTypeObject* PyArkType::basetype()
 {
     static PyMethodDef PyArkType_methods[] = {
-        {"dispose", reinterpret_cast<PyCFunction>(__dispose__), METH_VARARGS, nullptr},
         {nullptr, nullptr, 0, nullptr}
     };
 
@@ -232,13 +231,6 @@ void PyArkType::__dealloc__(Instance* self)
 int PyArkType::__init__(Instance* /*self*/, PyObject* /*args*/, PyObject* /*kwds*/)
 {
     return 0;
-}
-
-PyObject* PyArkType::__dispose__(PyArkType::Instance* self, PyObject* /*args*/, PyObject* /*kwargs*/)
-{
-    const sp<Expendable> expendable = PyCast::ensureSharedPtr<Expendable>(reinterpret_cast<PyObject*>(self));
-    expendable->discard();
-    Py_RETURN_NONE;
 }
 
 }

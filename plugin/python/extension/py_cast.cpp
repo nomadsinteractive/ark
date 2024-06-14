@@ -43,15 +43,6 @@ Optional<sp<Runnable>> PyCast::toRunnable(PyObject* object, bool alert)
     return toSharedPtrDefault<Runnable>(object);
 }
 
-Optional<sp<Observer>> PyCast::toObserver(PyObject* object, bool alert)
-{
-    Optional<sp<Runnable>> runnable = toRunnable(object, false);
-    if(runnable)
-        return sp<Observer>::make(std::move(runnable.value()));
-
-    return toSharedPtrDefault<Observer>(object);
-}
-
 sp<CollisionCallback> PyCast::toCollisionCallback(PyObject* object)
 {
     return sp<CollisionCallbackPythonAdapter>::make(PyInstance::borrow(object));

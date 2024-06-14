@@ -20,9 +20,9 @@ public:
 // [[script::bindings::auto]]
     void addRenderer(sp<Renderer> renderer, sp<Boolean> discarded = nullptr, sp<Boolean> visible = nullptr);
 // [[script::bindings::auto]]
-    void addControlLayer(const sp<Renderer>& controller);
+    void addControlLayer(sp<Renderer> controller, sp<Boolean> discarded = nullptr, sp<Boolean> visible = nullptr);
 // [[script::bindings::auto]]
-    void addLayer(const sp<Renderer>& layer);
+    void addLayer(sp<Renderer> layer, sp<Boolean> discarded = nullptr, sp<Boolean> visible = nullptr);
 
     void requestUpdate(uint64_t timestamp);
 

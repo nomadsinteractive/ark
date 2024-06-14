@@ -29,24 +29,6 @@ sp<Renderer> RendererType::wrap(const sp<Renderer>& self)
     return sp<RendererWrapper>::make(self);
 }
 
-sp<Renderer> RendererType::makeDisposable(const sp<Renderer>& self, const sp<Boolean>& disposed)
-{
-    WARN("makeDisposable is deprecated");
-    return self;
-}
-
-sp<Renderer> RendererType::makeVisible(const sp<Renderer>& self, const sp<Boolean>& visibility)
-{
-    WARN("makeVisible is deprecated");
-    return self;
-}
-
-sp<Renderer> RendererType::makeAutoRelease(const sp<Renderer>& self, int32_t refCount)
-{
-    WARN("makeAutoRelease is deprecated");
-    return self;
-}
-
 SafePtr<Size> RendererType::size(const sp<Renderer>& self)
 {
     return SafePtr<Size>();

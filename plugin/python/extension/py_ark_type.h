@@ -78,7 +78,6 @@ private:
     static PyObject* __new__(PyTypeObject *type, PyObject *args, PyObject *kwds);
     static int __init__(Instance* self, PyObject* args, PyObject* kwds);
     static void __dealloc__(Instance* self);
-    static PyObject* __dispose__(Instance* self, PyObject* args, PyObject* kwargs);
 
 private:
     String _name;

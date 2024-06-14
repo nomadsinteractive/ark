@@ -17,7 +17,7 @@ sp<AnimationInput> AnimationType::makeInput(const sp<Animation>& self, const sp<
         float animationDuration = AnimationType::ticks(self);
         DCHECK(t->val() <= animationDuration, "Animation has already completed");
         sp<ExpectationF> exp = NumericType::atMost(t, sp<Numeric::Const>::make(animationDuration));
-        exp->observer()->addCallback(onComplete, true);
+        exp->observer()->addCallback(onComplete);
         t = std::move(exp);
     }
 
