@@ -31,9 +31,7 @@
 #include "dear-imgui/base/imgui_context.h"
 #include "dear-imgui/base/renderer_context.h"
 
-namespace ark {
-namespace plugin {
-namespace dear_imgui {
+namespace ark::plugin::dear_imgui {
 
 namespace {
 
@@ -52,9 +50,7 @@ private:
     sp<RendererImgui::DrawCommandRecycler> _recycler;
 };
 
-}
-
-static ImGuiKey toImGuiKey(Event::Code code) {
+ImGuiKey toImGuiKey(Event::Code code) {
     switch(code)
     {
         case Event::CODE_KEYBOARD_LSHIFT:
@@ -112,6 +108,8 @@ static ImGuiKey toImGuiKey(Event::Code code) {
     }
     DFATAL("Unknow ImGui key: %d", code);
     return ImGuiKey_Tab;
+}
+
 }
 
 RendererImgui::RendererImgui(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Shader>& shader, const sp<Texture>& texture)
@@ -338,6 +336,4 @@ const sp<RendererImgui::DrawCommand>& RendererImgui::DrawCommandRecycler::drawCo
     return _draw_command;
 }
 
-}
-}
 }

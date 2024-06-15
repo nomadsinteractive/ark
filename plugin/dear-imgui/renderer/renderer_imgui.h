@@ -18,17 +18,15 @@
 struct ImDrawData;
 struct ImGuiIO;
 
-namespace ark {
-namespace plugin {
-namespace dear_imgui {
+namespace ark::plugin::dear_imgui {
 
 class RendererImgui : public Renderer, public Renderer::Group, public EventListener, public Implements<RendererImgui, Renderer, Renderer::Group, EventListener> {
 public:
     RendererImgui(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Shader>& shader, const sp<Texture>& texture);
 
-    virtual void render(RenderRequest& renderRequest, const V3& position) override;
-    virtual void addRenderer(sp<Renderer> renderer, const Traits& traits) override;
-    virtual bool onEvent(const Event& event) override;
+    void render(RenderRequest& renderRequest, const V3& position) override;
+    void addRenderer(sp<Renderer> renderer, const Traits& traits) override;
+    bool onEvent(const Event& event) override;
 
     const sp<RendererContext>& rendererContext() const;
 
@@ -84,7 +82,4 @@ private:
     sp<RendererContext> _renderer_context;
 };
 
-
-}
-}
 }
