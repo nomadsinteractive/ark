@@ -21,13 +21,13 @@ namespace ark::plugin::dear_imgui {
 
 class WidgetGroup : public Widget {
 public:
-    virtual ~WidgetGroup() override = default;
+    ~WidgetGroup() override = default;
 
     void addWidget(sp<Widget> widget) {
         _widgets.push_back(std::move(widget));
     }
 
-    virtual void render() override {
+    void render() override {
         for(const sp<Widget>& i : _widgets)
             i->render();
     }
@@ -44,7 +44,7 @@ public:
         : _name(std::move(name)), _is_open(std::move(isOpen)) {
     }
 
-    virtual void render() override {
+    void render() override {
         bool isOpen = _is_open->val();
         if(isOpen) {
             bool isOpenArg = isOpen;

@@ -10,9 +10,7 @@
 
 #include "dear-imgui/widget/widget_with_visibility.h"
 
-namespace ark {
-namespace plugin {
-namespace dear_imgui {
+namespace ark::plugin::dear_imgui {
 
 namespace {
 
@@ -48,7 +46,7 @@ public:
         : Wrapper(std::move(after)), _before(std::move(before)) {
     }
 
-    virtual void render() override {
+    void render() override {
         _before->render();
         if(_wrapped)
             _wrapped->render();
@@ -67,7 +65,7 @@ sp<Widget> WidgetType::create(sp<Widget> wrapped)
 
 sp<Widget> WidgetType::makeVisible(sp<Widget> self, sp<Boolean> visibility)
 {
-    return sp<WidgetWithVisibility>::make(self, visibility);
+    return sp<WidgetWithVisibility>::make(std::move(self), std::move(visibility));
 }
 
 sp<Widget> WidgetType::before(sp<Widget> self, sp<Widget> after)
@@ -75,16 +73,9 @@ sp<Widget> WidgetType::before(sp<Widget> self, sp<Widget> after)
     return sp<WidgetBefore>::make(std::move(self), std::move(after));
 }
 
-sp<Widget> WidgetType::wrapped(sp<Widget> self)
+void WidgetType::reset(const sp<Widget>& self, sp<Widget> wrapped)
 {
-    sp<Wrapper<Widget>> wrapper = self.tryCast<Wrapper<Widget>>();
-    CHECK_WARN(wrapper, "Must be a Wrapper<Widget> instance to get its wrapped attribute");
-    return wrapper ? wrapper->wrapped() : nullptr;
-}
-
-void WidgetType::setWrapped(const sp<Widget>& self, sp<Widget> wrapped)
-{
-    sp<Wrapper<Widget>> wrapper = self.tryCast<Wrapper<Widget>>();
+    const sp<Wrapper<Widget>> wrapper = self.tryCast<Wrapper<Widget>>();
     CHECK(wrapper, "Must be a Wrapper<Widget> instance to set its wrapped attribute");
     Ark::instance().applicationContext()->deferUnref(wrapper->reset(std::move(wrapped)));
 }
@@ -94,6 +85,4 @@ sp<Renderer> WidgetType::toRenderer(sp<Widget> self)
     return sp<RendererWidget>::make(std::move(self));
 }
 
-}
-}
 }

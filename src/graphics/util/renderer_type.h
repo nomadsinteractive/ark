@@ -32,10 +32,8 @@ public:
 
 //[[script::bindings::property]]
     static SafePtr<Size> size(const sp<Renderer>& self);
-//[[script::bindings::property]]
-    static sp<Renderer> wrapped(const sp<Renderer>& self);
-//[[script::bindings::property]]
-    static void setWrapped(const sp<Renderer>& self, sp<Renderer> wrapped);
+//[[script::bindings::classmethod]]
+    static sp<Renderer> reset(const sp<Renderer>& self, sp<Renderer> wrapped);
 
 //[[script::bindings::classmethod]]
     static sp<Renderer> translate(const sp<Renderer>& self, const sp<Vec3>& position);

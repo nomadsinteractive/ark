@@ -1,11 +1,8 @@
-#ifndef ARK_PLUGIN_DEAR_IMGUI_INF_WIDGET_H_
-#define ARK_PLUGIN_DEAR_IMGUI_INF_WIDGET_H_
+#pragma once
 
 #include "dear-imgui/api.h"
 
-namespace ark {
-namespace plugin {
-namespace dear_imgui {
+namespace ark::plugin::dear_imgui {
 
 // [[script::bindings::auto]]
 class ARK_PLUGIN_DEAR_IMGUI_API Widget {
@@ -16,8 +13,3 @@ public:
 };
 
 }
-}
-}
-
-
-#endif

@@ -20,9 +20,7 @@
 #include "dear-imgui/api.h"
 #include "dear-imgui/inf/widget.h"
 
-namespace ark {
-namespace plugin {
-namespace dear_imgui {
+namespace ark::plugin::dear_imgui {
 
 class ARK_PLUGIN_DEAR_IMGUI_API WidgetBuilder {
 public:
@@ -223,6 +221,4 @@ private:
 };
 
 
-}
-}
 }

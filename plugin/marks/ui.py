@@ -129,7 +129,7 @@ class BaseWindow:
         builder.begin(title, self._is_open)
         self.on_show(builder, *args, **kwargs)
         builder.end()
-        self._renderer.wrapped = builder.make_widget().to_renderer()
+        self._renderer.reset(builder.make_widget().to_renderer())
 
     def hide(self):
         self._is_open.set(False)
@@ -150,14 +150,25 @@ class MainWindow(BaseWindow):
         def imgui_show_about(self):
             self._toolbox._imgui_about_is_open.set(True)
 
-    def __init__(self, mark_studio: 'MarkStudio', imgui: Renderer, is_open: Optional[bool] = None):
+    def __init__(self, mark_studio: 'MarkStudio', imgui: Renderer, is_open: Optional[bool] = None, quick_bar_items: Optional[list[QuickBarItem]] = None):
         super().__init__(imgui, is_open)
         self._mark_studio = mark_studio
+        self._quick_bar_items = quick_bar_items or []
         self._imgui_demo_is_open = Boolean(False)
         self._imgui_about_is_open = Boolean(False)
         self._pydevd_started = Boolean(False)
+        self._quick_bar_widget = dear_imgui.Widget()
 
-    def on_show(self, builder: dear_imgui.WidgetBuilder, quick_bar_items: list[QuickBarItem]):
+    @property
+    def quick_bar_items(self) -> list[QuickBarItem]:
+        return self._quick_bar_items
+
+    @quick_bar_items.setter
+    def quick_bar_items(self, quick_bar_items: Optional[list[QuickBarItem]] = None):
+        self._quick_bar_items = quick_bar_items or []
+        self._build_quick_bar()
+
+    def on_show(self, builder: dear_imgui.WidgetBuilder):
         builder.text('Debugger')
         builder.small_button('Start').add_callback(self.pydevd_start)
         builder.same_line()
@@ -165,16 +176,24 @@ class MainWindow(BaseWindow):
         builder.separator()
 
         builder.text('Quick Bar')
-        for i, j in enumerate(quick_bar_items):
-            if i != 0:
-                builder.same_line()
-            builder.small_button(j.text).add_callback(self._make_quickbar_onclick(j))
+        builder.add_widget(self._quick_bar_widget)
+        self._build_quick_bar()
 
         builder.separator()
         builder.small_button('Close').add_callback(self._mark_studio.close)
 
         builder.add_widget(builder.make_demo_widget(self._imgui_demo_is_open))
         builder.add_widget(builder.make_about_widget(self._imgui_about_is_open))
+
+    def _build_quick_bar(self) -> dear_imgui.Widget:
+        quick_bar_builder = dear_imgui.WidgetBuilder(self._imgui)
+
+        for i, j in enumerate(self._quick_bar_items):
+            if i != 0:
+                quick_bar_builder.same_line()
+            quick_bar_builder.small_button(j.text).add_callback(self._make_quickbar_onclick(j))
+
+        self._quick_bar_widget.reset(quick_bar_builder.make_widget())
 
     def pydevd_start(self):
         pydevd_start()
@@ -253,7 +272,7 @@ class ConsoleWindow(BaseWindow):
     def _make_tab_title_button_callback(self, console_cmd: ConsoleCommand, tab_panel: dear_imgui.Widget):
 
         def _callback():
-            tab_panel.wrapped = self._make_tab_panel_widget(console_cmd, tab_panel)
+            tab_panel.reset(self._make_tab_panel_widget(console_cmd, tab_panel))
 
         return _callback
 
@@ -265,7 +284,7 @@ class ConsoleWindow(BaseWindow):
                 builder = dear_imgui.WidgetBuilder(self._imgui)
                 builder.separator()
                 builder.add_widget(self._make_tab_panel_widget(ConsoleCommand('', result), tab_panel))
-                sub_tab_panel.wrapped = builder.make_widget()
+                sub_tab_panel.reset(builder.make_widget())
 
         return _callback
 
@@ -307,18 +326,22 @@ class MarkStudio:
         def close(self):
             self._mark_studio.close()
 
-    def __init__(self, application_facade: ApplicationFacade, imgui: Renderer, resolution: Vec2):
+    def __init__(self, application_facade: ApplicationFacade, imgui: Renderer, resolution: Vec2, quick_bar_items: Optional[list[QuickBarItem]] = None):
         self._application_facade = application_facade
         self._imgui = imgui
         self._discarded = None
         self._renderer_quickbar = None
         self._renderer_properties = None
         self._layer_editor_visibility = Boolean(False)
-        self._main_window = MainWindow(self, self._imgui, None)
+        self._main_window = MainWindow(self, self._imgui, None, quick_bar_items)
         self._console_window = ConsoleWindow(self._imgui, True)
         self._properties_window = PropertiesWindow(self._imgui, True)
         self._resource_window = ResourceWindow(self._imgui, True)
         self._resolution = resolution
+
+    @property
+    def main_window(self) -> MainWindow:
+        return self._main_window
 
     @property
     def properties_window(self) -> PropertiesWindow:
@@ -328,9 +351,8 @@ class MarkStudio:
     def resource_window(self) -> ResourceWindow:
         return self._resource_window
 
-    def show(self, quick_bar_items: Optional[list[QuickBarItem]] = None, console_cmds: Optional[list[ConsoleCommand]] = None,
-             properties: Optional[list[Property]] = None):
-        self._main_window.show('My Ark Studio', quick_bar_items or [])
+    def show(self, console_cmds: Optional[list[ConsoleCommand]] = None, properties: Optional[list[Property]] = None):
+        self._main_window.show('My Ark Studio')
 
         if properties:
             self._properties_window.show('Properties', properties)

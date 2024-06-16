@@ -34,18 +34,11 @@ SafePtr<Size> RendererType::size(const sp<Renderer>& self)
     return SafePtr<Size>();
 }
 
-sp<Renderer> RendererType::wrapped(const sp<Renderer>& self)
-{
-    const sp<Wrapper<Renderer>> rd = self.tryCast<Wrapper<Renderer>>();
-    CHECK_WARN(rd, "Renderer is not an instance of Wrapper<Renderer>");
-    return rd ? rd->wrapped() : nullptr;
-}
-
-void RendererType::setWrapped(const sp<Renderer>& self, sp<Renderer> wrapped)
+sp<Renderer> RendererType::reset(const sp<Renderer>& self, sp<Renderer> wrapped)
 {
     const sp<Wrapper<Renderer>> rd = self.tryCast<Wrapper<Renderer>>();
     CHECK(rd, "Renderer is not an instance of Wrapper<Renderer>");
-    rd->reset(std::move(wrapped));
+    return rd->reset(std::move(wrapped));
 }
 
 sp<Renderer> ark::RendererType::translate(const sp<Renderer>& self, const sp<Vec3>& position)

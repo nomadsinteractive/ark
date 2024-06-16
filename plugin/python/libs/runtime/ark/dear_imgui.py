@@ -7,12 +7,7 @@ class Widget:
     def __init__(self, delegate: Optional['Widget'] = None):
         pass
 
-    @property
-    def wrapped(self) -> Optional['Widget']:
-        return None
-
-    @wrapped.setter
-    def wrapped(self, wrapped: Optional['Widget']):
+    def reset(self, wrapped: Optional['Widget'] = None):
         pass
 
     def before(self, after: Optional['Widget']) -> 'Widget':

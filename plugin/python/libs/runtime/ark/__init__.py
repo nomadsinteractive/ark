@@ -573,10 +573,10 @@ class ApplicationFacade:
     def add_control_layer(self, control: Union['Layer', 'Renderer']):
         pass
 
-    def add_event_listener(self, event_listener: Callable[['Event'], bool], disposed: Optional['Boolean'] = None):
+    def add_event_listener(self, event_listener: Callable[['Event'], bool], discarded: Optional['Boolean'] = None):
         pass
 
-    def push_event_listener(self, event_listener: Callable[['Event'], bool], disposed: Optional['Boolean'] = None):
+    def push_event_listener(self, event_listener: Callable[['Event'], bool], discarded: Optional['Boolean'] = None):
         pass
 
     def set_default_event_listener(self, event_listener: Callable[['Event'], bool]):
