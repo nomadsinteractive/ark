@@ -715,7 +715,7 @@ class ApplicationManifest:
 
 
 class Observer:
-    def __init__(self, callback: Callable, oneshot: bool = True):
+    def __init__(self, oneshot: bool = True):
         pass
 
     def update(self):
@@ -743,12 +743,7 @@ class Renderer:
     def size(self) -> 'Size':
         return Size(0, 0)
 
-    @property
-    def wrapped(self) -> 'Renderer':
-        return self
-
-    @wrapped.setter
-    def wrapped(self, v: 'Renderer'):
+    def reset(self, v: 'Renderer') -> Optional['Renderer']:
         pass
 
     def translate(self, position: Union[tuple, 'Vec2']) -> 'Renderer':

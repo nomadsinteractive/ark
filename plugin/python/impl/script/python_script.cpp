@@ -212,8 +212,7 @@ PythonScript::BUILDER::BUILDER(BeanFactory& /*parent*/, const document& manifest
 
 sp<Interpreter> PythonScript::BUILDER::build(const Scope& args)
 {
-    const sp<Interpreter> script = sp<PythonScript>::make("ark-python", _manifest);
-    return script;
+    return sp<Interpreter>::make<PythonScript>("ark-python", _manifest);
 }
 
 }

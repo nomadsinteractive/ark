@@ -37,40 +37,45 @@ class ArkModuleLoader:
 
 class ArkModuleFinder:
 
-    ASSET_PROTOCOL = 'asset://'
+    PROTOCOL_ASSET = 'asset://'
+    PROTOCOL_FILE = 'file://'
 
-    def __init__(self, ark, bootstrap, util, ark_asset_loader_type, path):
+    def __init__(self, ark, frozen_importlib, frozon_importlib_external, ark_asset_loader_type, path: list[str], sys_module):
         self._ark = ark
-        self._bootstrap = bootstrap
-        self._util = util
+        self._bootstrap = frozen_importlib
+        self._util = frozon_importlib_external
         self._ark_asset_loader_type = ark_asset_loader_type
         self._path = path
+        self._sys_module = sys_module
         self._asset_bundle_cache = {}
 
     def find_spec(self, fullname, path, target=None):
         paths = [i for i in fullname.split('.') if i]
         for i in self._path:
-            if i.startswith(self.ASSET_PROTOCOL):
-                filepath = '/'.join([j for j in i[len(self.ASSET_PROTOCOL):].split('/') if j] + paths)
+            if i.startswith(self.PROTOCOL_ASSET):
+                filepath = '/'.join([j for j in i[len(self.PROTOCOL_ASSET):].split('/') if j] + paths)
                 spec = self.find_asset_spec(fullname, filepath)
                 if spec:
                     return spec
+            elif i.startswith(self.PROTOCOL_FILE):
+                path = (path or self._sys_module.path) + [i[len(self.PROTOCOL_FILE):]]
+                return self._util.PathFinder.find_spec(fullname, path, target)
             else:
                 self._ark.logw('None-URL based protocol "%s" is no longer supported', i)
 
         return None
 
-    def find_asset_spec(self, fullname, filepath):
+    def find_asset_spec(self, fullname: str, filepath: str):
         module_path, module_name = self._parse_resource_path(fullname, filepath)
         asset = self._load_asset_bundle(module_path)
         if asset:
-            source = asset.get_string(module_name + '.py')
+            source = asset.get_string(f'{module_name}.py')
             package = fullname
             if not source:
-                source = asset.get_string(module_name + '/__init__.py')
+                source = asset.get_string(f'{module_name}/__init__.py')
                 if source is not None:
-                    path = self.ASSET_PROTOCOL + filepath
-                    filepath = asset.get_real_path(module_name + '/__init__.py')
+                    path = self.PROTOCOL_ASSET + filepath
+                    filepath = asset.get_real_path(f'{module_name}/__init__.py')
                     return self._create_module_spec(fullname, source, path, package, filepath)
             else:
                 package = '.'.join(fullname.split('.')[0:-1])
@@ -101,14 +106,13 @@ class ArkModuleFinder:
 
 def _install(sys_module, _imp_module):
 
-    _bootstrap = _imp_module.init_frozen('_frozen_importlib_org')
-    _ark = _imp_module.create_builtin(_bootstrap.ModuleSpec('ark', None))
+    _frozen_importlib = _imp_module.init_frozen('_frozen_importlib_org')
+    _ark = _imp_module.create_builtin(_frozen_importlib.ModuleSpec('ark', None))
 
-    __name__ = _bootstrap.__name__
-    __doc__ = _bootstrap.__doc__
-    globals().update(_bootstrap.__dict__)
-    _bootstrap._install(sys_module, _imp_module)
-    globals().update(_bootstrap.__dict__)
+    __name__ = _frozen_importlib.__name__
+    __doc__ = _frozen_importlib.__doc__
+    _frozen_importlib._install(sys_module, _imp_module)
+    globals().update(_frozen_importlib.__dict__)
 
-    _util = _imp_module.init_frozen('_frozen_importlib_external')
-    sys_module.meta_path.append(ArkModuleFinder(_ark, _bootstrap, _util, ArkModuleLoader, _ark.path))
+    _frozen_importlib_external = _imp_module.init_frozen('_frozen_importlib_external')
+    sys_module.meta_path.append(ArkModuleFinder(_ark, _frozen_importlib, _frozen_importlib_external, ArkModuleLoader, _ark.path, sys_module))

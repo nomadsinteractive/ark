@@ -1,6 +1,7 @@
 import inspect
 from typing import Callable, Any, Optional
 
+import ark
 from ark import Renderer, Vec2, Boolean, Vec3, Numeric, Vec4, String, Color, Integer, ApplicationFacade
 from ark import dear_imgui
 from marks import pydevd_start, pydevd_stop
@@ -25,10 +26,13 @@ class QuickBarItem:
         return self._close_main_window
 
 
-class Property:
-    def __init__(self, name: str, input_type: str, value: Any, *args):
+class InputField:
+    INTPUT_TYPE_MAPPING = {Numeric: 'input_float', Vec2: 'input_float2', Vec3: 'input_float3', Vec4: 'input_float4', Color: 'color_edit4',
+                                    Integer: 'input_int', Boolean: 'checkbox', String: 'input_text'}
+
+    def __init__(self, name: str, value: Any, input_type: Optional[str] = None, *args):
         self._name = name
-        self._input_type = input_type
+        self._input_type = input_type or self.INTPUT_TYPE_MAPPING[type(value)]
         self._value = value
         self._args = args
 
@@ -63,6 +67,8 @@ class ConsoleCommand:
     def get_public_properties(self) -> list[tuple[str, Any]]:
         if isinstance(self._delegate, dict):
             return list(self._delegate.items())
+        elif isinstance(self._delegate, list):
+            return [(i.name, i.delegate) for i in self._delegate]
 
         pms = []
         for i, j in inspect.getmembers(self._delegate, lambda x: type(x) is not type):
@@ -76,26 +82,23 @@ class ConsoleCommand:
 
 
 class PropertyBundle:
-    PROPERTY_INTPUT_TYPE_MAPPING = {Numeric: 'input_float', Vec2: 'input_float2', Vec3: 'input_float3', Vec4: 'input_float4', Color: 'color_edit4',
-                                    Integer: 'input_int', Boolean: 'checkbox', String: 'input_text'}
-
-    def __init__(self, property_items: list[Property]):
+    def __init__(self, input_fields: list[InputField]):
         self._items = []
-        self._property_items = property_items
+        self._input_fields = input_fields
 
     @property
-    def properties(self) -> list[Property]:
+    def input_fields(self) -> list[InputField]:
         return self._items
 
     def add_property(self, name: str, value: Any, input_type: Optional[str] = None, *args):
-        property_item = Property(name, input_type or PropertyBundle.PROPERTY_INTPUT_TYPE_MAPPING[type(value)], value, *args)
-        self._items.append(property_item)
-        self._property_items.append(property_item)
+        input_field = InputField(name, value, input_type, *args)
+        self._items.append(input_field)
+        self._input_fields.append(input_field)
         return value
 
     def dispose(self):
         for i in self._items:
-            self._property_items.remove(i)
+            self._input_fields.remove(i)
         self._items = []
 
 
@@ -293,7 +296,7 @@ class PropertiesWindow(BaseWindow):
     def __init__(self, imgui: Renderer, is_open: Optional[bool]):
         super().__init__(imgui, is_open)
 
-    def on_show(self, builder: dear_imgui.WidgetBuilder, properties: list[Property]):
+    def on_show(self, builder: dear_imgui.WidgetBuilder, properties: list[InputField]):
         for i in properties:
             i.build_input(builder)
 
@@ -351,7 +354,7 @@ class MarkStudio:
     def resource_window(self) -> ResourceWindow:
         return self._resource_window
 
-    def show(self, console_cmds: Optional[list[ConsoleCommand]] = None, properties: Optional[list[Property]] = None):
+    def show(self, console_cmds: Optional[list[ConsoleCommand]] = None, properties: Optional[list[InputField]] = None):
         self._main_window.show('My Ark Studio')
 
         if properties:
