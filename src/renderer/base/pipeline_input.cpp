@@ -54,8 +54,8 @@ PipelineInput::AttributeOffsets::AttributeOffsets(const PipelineInput& input)
 }
 
 PipelineInput::PipelineInput()
+    : _streams{{0, Stream()}}
 {
-    _streams.insert(std::make_pair(0, Stream()));
 }
 
 void PipelineInput::initialize(const PipelineBuildingContext& buildingContext)
@@ -170,11 +170,8 @@ const PipelineInput::Stream& PipelineInput::getStream(uint32_t divisor) const
 Optional<const Attribute&> PipelineInput::getAttribute(const String& name) const
 {
     for(const auto& i : _streams)
-    {
-        Optional<const Attribute&> opt = i.second.getAttribute(name);
-        if(opt)
+        if(Optional<const Attribute&> opt = i.second.getAttribute(name))
             return opt;
-    }
     return Optional<const Attribute&>();
 }
 

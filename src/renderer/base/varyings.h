@@ -19,7 +19,7 @@
 
 namespace ark {
 
-class ARK_API Varyings : public Holder {
+class ARK_API Varyings {
 private:
     struct SlotSnapshot {
         SlotSnapshot(void* content, uint32_t offset, uint32_t size);
@@ -31,10 +31,10 @@ private:
     };
 
     struct Slot {
-        Slot(sp<Uploader> input = nullptr, uint32_t divisor = 0, int32_t offset = -1);
+        Slot(sp<Uploader> uploader = nullptr, uint32_t divisor = 0, int32_t offset = -1);
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Slot);
 
-        sp<Uploader> _input;
+        sp<Uploader> _uploader;
         uint32_t _divisor;
         int32_t _offset;
     };
@@ -65,7 +65,7 @@ public:
         void apply(const Snapshot* defaults = nullptr);
 
         Array<Divided>::Borrowed _buffers;
-        std::map<size_t, Snapshot> _sub_properties;
+        std::map<HashId, Snapshot> _sub_properties;
 
         explicit operator bool() const;
 
@@ -76,8 +76,7 @@ public:
 public:
 //[[script::bindings::auto]]
     Varyings();
-
-    virtual void traverse(const Visitor& visitor) override;
+    Varyings(const PipelineInput& pipelineInput);
 
     bool update(uint64_t timestamp);
 
@@ -117,7 +116,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Varyings> build(const Scope& args) override;
+        sp<Varyings> build(const Scope& args) override;
 
     private:
         std::vector<InputBuilder> _input_builders;

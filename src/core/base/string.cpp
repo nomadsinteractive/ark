@@ -58,13 +58,9 @@ bool String::empty() const
     return _str.empty();
 }
 
-String::size_type String::hash() const
+HashId String::hash() const
 {
-    const char* str = _str.c_str();
-    size_type h = 0;
-    while(*str)
-        h = h * 101 + static_cast<size_type>(*str++);
-    return h;
+    return string_hash(_str.c_str());
 }
 
 String::size_type String::find(const String& str, size_type pos) const

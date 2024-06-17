@@ -111,7 +111,7 @@ private:
             PARAMETER_MODIFIER_INOUT = 3
         };
         Parameter();
-        Parameter(String type, String name, Modifier modifier);
+        Parameter(String type, String name, Modifier modifier, uint32_t divisor);
 
         DEFAULT_COPY_AND_ASSIGN(Parameter);
 
@@ -120,6 +120,7 @@ private:
         String _type;
         String _name;
         Modifier _modifier;
+        uint32_t _divisor;
     };
 
     struct Function {

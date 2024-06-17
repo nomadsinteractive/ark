@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_BASE_PIPELINE_BUILDING_CONTEXT_H_
-#define ARK_RENDERER_BASE_PIPELINE_BUILDING_CONTEXT_H_
+#pragma once
 
 #include <map>
 #include <set>
@@ -44,13 +43,13 @@ public:
 
     const std::map<PipelineInput::ShaderStage, op<ShaderPreprocessor>>& stages() const;
 
-    void addAttribute(const String& name, const String& type);
+    void addAttribute(String name, String type, uint32_t divisor);
     void addSnippet(const sp<Snippet>& snippet);
     void addUniform(String name, Uniform::Type type, uint32_t length, sp<Uploader> input, int32_t binding);
     void addUniform(sp<Uniform> uniform);
 
-    void addInputAttribute(const String& name, const String& type);
-    Attribute& addPredefinedAttribute(const String& name, const String& type, PipelineInput::ShaderStage stage);
+    void addInputAttribute(const String& name, const String& type, uint32_t divisor);
+    Attribute& addPredefinedAttribute(const String& name, const String& type, uint32_t divisor,PipelineInput::ShaderStage stage);
 
     bool hasStage(PipelineInput::ShaderStage shaderStage) const;
     ShaderPreprocessor* tryGetStage(PipelineInput::ShaderStage shaderStage) const;
@@ -76,5 +75,3 @@ private:
 };
 
 }
-
-#endif

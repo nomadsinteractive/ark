@@ -11,7 +11,7 @@ public:
     Uploader(size_t size)
         : _size(size) {
     }
-    virtual ~Uploader() override = default;
+    ~Uploader() override = default;
 
     virtual void upload(Writable& buf) = 0;
 
@@ -21,7 +21,6 @@ public:
 
 protected:
     size_t _size;
-
 };
 
 }

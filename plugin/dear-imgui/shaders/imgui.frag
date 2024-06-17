@@ -1,5 +1,5 @@
 
-#include <shaders/types.h>
+#include <shaders/defines.h>
 
 uniform sampler2D u_Texture0;
 

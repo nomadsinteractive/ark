@@ -18,14 +18,44 @@
 
 namespace ark {
 
+namespace {
+
+template<typename T> class UploaderSlotDefault : public Uploader {
+public:
+    UploaderSlotDefault(size_t length)
+        : Uploader(length * sizeof(T)), _data(length)
+    {
+    }
+
+    bool update(uint64_t timestamp) override
+    {
+        return false;
+    }
+
+    void upload(Writable& buf) override
+    {
+        buf.write(_data.data(), _data.size() * sizeof(T), 0);
+    }
+
+private:
+    std::vector<T> _data;
+};
+
+}
+
 Varyings::Varyings()
 {
 }
 
-void Varyings::traverse(const Holder::Visitor& visitor)
+Varyings::Varyings(const PipelineInput& pipelineInput)
 {
-    for(const auto& iter : _slots)
-        HolderUtil::visit(iter.second._input, visitor);
+    for(const auto& [k, v] : pipelineInput.streams())
+    {
+        for(const auto& [attrname, attr] : v.attributes())
+            if(!(k == 0 && (attr.offset() == 0 || attr.offset() == 12)))  // slots with offset 0 and 12 in divisor 0 will always be the "a_Position" & "a_UV" attribute, which don't need to be recorded here.
+                _slots.insert({attrname, Slot(sp<UploaderSlotDefault<uint8_t>>::make(attr.size()), k, attr.offset())});
+        _slot_strides[k] = v.stride();
+    }
 }
 
 bool Varyings::update(uint64_t timestamp)
@@ -35,7 +65,7 @@ bool Varyings::update(uint64_t timestamp)
         if(j->update(timestamp))
             dirty = true;
     for(const auto& i : _slots)
-        if(i.second._input->update(timestamp))
+        if(i.second._uploader->update(timestamp))
             dirty = true;
     return dirty;
 }
@@ -49,16 +79,15 @@ Box Varyings::getProperty(const String& name) const
 
 void Varyings::setSlotInput(const String& name, sp<Uploader> input)
 {
-    const auto iter = _slots.find(name);
-    if(iter == _slots.end())
+    if(const auto iter = _slots.find(name); iter == _slots.end())
     {
         _slots.emplace(name, std::move(input));
         _slot_strides.clear();
     }
     else
     {
-        Slot& preslot = iter->second;
-        CHECK(preslot._input->size() == input->size(), "Replacing existing varying \"%s\"(%d) with a different size value(%d)", name.c_str(), preslot._input->size(), input->size());
+        const Slot& preslot = iter->second;
+        CHECK(preslot._uploader->size() == input->size(), "Replacing existing varying \"%s\"(%d) with a different size value(%d)", name.c_str(), preslot._uploader->size(), input->size());
         iter->second = Slot(std::move(input), preslot._divisor, preslot._offset);
     }
 }
@@ -132,8 +161,8 @@ Varyings::Snapshot Varyings::snapshot(const PipelineInput& pipelineInput, Alloca
             j._divisor = attr->divisor();
             j._offset = attr->offset();
         }
-        for(const auto& i : pipelineInput.streams())
-            _slot_strides[i.first] = i.second.stride();
+        for(const auto& [k, v] : pipelineInput.streams())
+            _slot_strides[k] = v.stride();
     }
 
     Array<Divided>::Borrowed buffers(reinterpret_cast<Divided*>(allocator.sbrkSpan(sizeof(Divided) * _slot_strides.size()).buf()), _slot_strides.size());
@@ -169,8 +198,8 @@ sp<Varyings> Varyings::BUILDER::build(const Scope& args)
     return varyings;
 }
 
-Varyings::Slot::Slot(sp<Uploader> input, uint32_t divisor, int32_t offset)
-    : _input(std::move(input)), _divisor(divisor), _offset(offset)
+Varyings::Slot::Slot(sp<Uploader> uploader, uint32_t divisor, int32_t offset)
+    : _uploader(std::move(uploader)), _divisor(divisor), _offset(offset)
 {
 }
 
@@ -250,11 +279,11 @@ void Varyings::Divided::apply(const SlotSnapshot* slots)
 void Varyings::Divided::addSnapshot(Allocator& allocator, const Slot& slot)
 {
     DASSERT(slot._offset >= 0);
-    uint32_t size = static_cast<uint32_t>(slot._input->size());
+    uint32_t size = static_cast<uint32_t>(slot._uploader->size());
     void* content = allocator.sbrk(size);
 
     WritableMemory writer(content);
-    slot._input->upload(writer);
+    slot._uploader->upload(writer);
     memcpy(_content.buf() + slot._offset, content, size);
     addSlotSnapshot(new(allocator.sbrk(sizeof(SlotSnapshot))) SlotSnapshot(content, slot._offset, size));
 }

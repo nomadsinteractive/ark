@@ -28,7 +28,7 @@ public:
     size_type length() const;
     size_type size() const;
     bool empty() const;
-    size_type hash() const;
+    HashId hash() const;
     size_type find(const String& str, size_type pos = 0) const;
     size_type find(char c, size_type pos = 0) const;
     size_type rfind(char c) const;
@@ -89,12 +89,8 @@ private:
 
 }
 
-namespace std {
-
-template <> struct hash<ark::String> {
+template <> struct std::hash<ark::String> {
     size_t operator()(const ark::String& str) const {
-        return static_cast<size_t>(str.hash());
+        return str.hash();
     }
 };
-
-}

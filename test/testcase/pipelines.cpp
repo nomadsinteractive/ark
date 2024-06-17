@@ -21,13 +21,13 @@ namespace {
 
 class SnippetTest : public Snippet {
 public:
-    virtual void preInitialize(PipelineBuildingContext& context) override {
-        context.addAttribute("Alpha01", "float");
-        context.addAttribute("PointSize", "float");
+    void preInitialize(PipelineBuildingContext& context) override {
+        context.addAttribute("Alpha01", "float", 0);
+        context.addAttribute("PointSize", "float", 0);
         context.addUniform("u_Color01", Uniform::TYPE_F4, 1, nullptr, 0);
     }
 
-    virtual void preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context, const PipelineLayout& /*pipelineLayout*/) override {
+    void preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context, const PipelineLayout& /*pipelineLayout*/) override {
         ShaderPreprocessor& vertex = context.getStage(PipelineInput::SHADER_STAGE_VERTEX);
         ShaderPreprocessor& fragment = context.getStage(PipelineInput::SHADER_STAGE_FRAGMENT);
 

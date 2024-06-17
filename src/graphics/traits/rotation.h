@@ -45,12 +45,12 @@ public:
 //  [[script::bindings::auto]]
     void setEuler(sp<Numeric> pitch, sp<Numeric> yaw, sp<Numeric> roll);
 
-//[[plugin::builder]]
+//  [[plugin::builder]]
     class BUILDER : public Builder<Rotation> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Rotation> build(const Scope& args) override;
+        sp<Rotation> build(const Scope& args) override;
 
     private:
         SafePtr<Builder<Numeric>> _theta;
@@ -62,7 +62,7 @@ public:
     public:
         DICTIONARY(BeanFactory& factory, const String& str);
 
-        virtual sp<Rotation> build(const Scope& args) override;
+        sp<Rotation> build(const Scope& args) override;
 
     private:
         SafePtr<Builder<Numeric>> _theta;

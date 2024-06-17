@@ -68,7 +68,7 @@ void PipelineBuildingContext::initialize()
     ShaderPreprocessor& firstStage = _stages.begin()->second;
 
     for(const auto& i : firstStage._declaration_ins.vars().values())
-        addInputAttribute(i.name(), i.type());
+        addInputAttribute(i.name(), i.type(), 0);
 
     for(const auto& [i, j] : _stages)
         for(const ShaderPreprocessor::Parameter& k : j->args())
@@ -108,7 +108,7 @@ void PipelineBuildingContext::initialize()
                 && !firstStage._main_block->hasOutAttribute(i))
         {
             generated.push_back(i);
-            addAttribute(i, j);
+            addAttribute(i, j, 0);
         }
     }
 
@@ -173,11 +173,11 @@ const std::map<PipelineInput::ShaderStage, op<ShaderPreprocessor> >& PipelineBui
     return _stages;
 }
 
-void PipelineBuildingContext::addAttribute(const String& name, const String& type)
+void PipelineBuildingContext::addAttribute(String name, String type, uint32_t divisor)
 {
     //TODO: add attribute to specified stage
-    Attribute& attr = addPredefinedAttribute(name, type, PipelineInput::SHADER_STAGE_VERTEX);
-    _input->addAttribute(name, attr);
+    const Attribute& attr = addPredefinedAttribute(name, type, divisor, PipelineInput::SHADER_STAGE_VERTEX);
+    _input->addAttribute(std::move(name), attr);
 }
 
 void PipelineBuildingContext::addSnippet(const sp<Snippet>& snippet)
@@ -197,21 +197,25 @@ void PipelineBuildingContext::addUniform(sp<Uniform> uniform)
     _uniforms.push_back(std::move(name), std::move(uniform));
 }
 
-void PipelineBuildingContext::addInputAttribute(const String& name, const String& type)
+void PipelineBuildingContext::addInputAttribute(const String& name, const String& type, uint32_t divisor)
 {
     if(_input_vars.find(name) == _input_vars.end())
     {
         _input_vars.insert(name);
-        addAttribute(name, type);
+        addAttribute(name, type, divisor);
     }
 }
 
-Attribute& PipelineBuildingContext::addPredefinedAttribute(const String& name, const String& type, PipelineInput::ShaderStage stage)
+Attribute& PipelineBuildingContext::addPredefinedAttribute(const String& name, const String& type, uint32_t divisor, PipelineInput::ShaderStage stage)
 {
     if(_attributes.find(name) == _attributes.end())
-        _attributes[name] = makePredefinedAttribute(name, type);
+    {
+        Attribute attr = makePredefinedAttribute(name, type);
+        attr.setDivisor(divisor);
+        _attributes[name] = std::move(attr);
+    }
 
-    getStage(stage)->_predefined_parameters.push_back(ShaderPreprocessor::Parameter(type, name, ShaderPreprocessor::Parameter::PARAMETER_MODIFIER_IN));
+    getStage(stage)->_predefined_parameters.push_back(ShaderPreprocessor::Parameter(type, name, ShaderPreprocessor::Parameter::PARAMETER_MODIFIER_IN, divisor));
     return _attributes[name];
 }
 
@@ -263,8 +267,8 @@ void PipelineBuildingContext::loadPredefinedAttribute(const document& manifest)
         CHECK_WARN(isupper(name[0]) || name.startsWith("a_"), "Attribute name \"%s\" should be capital first or started with a_", name.c_str());
         const String attrName = name.startsWith("a_") ? name.substr(2) : name;
         const String& type = Documents::ensureAttribute(i, constants::TYPE);
-        uint32_t divisor = Documents::getAttribute<uint32_t>(i, "divisor", 0);
-        addPredefinedAttribute(attrName, type, PipelineInput::SHADER_STAGE_VERTEX).setDivisor(divisor);
+        const uint32_t divisor = Documents::getAttribute<uint32_t>(i, "divisor", 0);
+        addPredefinedAttribute(attrName, type, divisor, PipelineInput::SHADER_STAGE_VERTEX);
     }
 }
 

@@ -23,27 +23,29 @@
 
 #define INDENT_STR "    "
 
-
 namespace ark {
+
+namespace {
+
+std::regex _INCLUDE_PATTERN("#include\\s*[<\"]([^>\"]+)[>\"]");
+std::regex _STRUCT_PATTERN("struct\\s+(\\w+)\\s*\\{([^}]+)\\}\\s*;");
+std::regex _IN_PATTERN("(?:attribute|varying|in)" ATTRIBUTE_PATTERN);
+std::regex _UNIFORM_PATTERN("(?:" LAYOUT_PATTERN ")?uniform\\s+" ACCESSIBILITY_PATTERN UNIFORM_PATTERN);
+std::regex _SSBO_PATTERN(LAYOUT_PATTERN ACCESSIBILITY_PATTERN "buffer\\s+(\\w+)");
+
+#ifndef ANDROID
+char _STAGE_ATTR_PREFIX[PipelineInput::SHADER_STAGE_COUNT + 1][4] = {"a_", "v_", "t_", "e_", "g_", "f_", "c_"};
+#else
+char _STAGE_ATTR_PREFIX[PipelineInput::SHADER_STAGE_COUNT + 1][4] = {"a_", "v_", "f_", "c_"};
+#endif
+
+}
 
 const char* ShaderPreprocessor::ANNOTATION_VERT_IN = "${vert.in}";
 const char* ShaderPreprocessor::ANNOTATION_VERT_OUT = "${vert.out}";
 const char* ShaderPreprocessor::ANNOTATION_FRAG_IN = "${frag.in}";
 const char* ShaderPreprocessor::ANNOTATION_FRAG_OUT = "${frag.out}";
 const char* ShaderPreprocessor::ANNOTATION_FRAG_COLOR = "${frag.color}";
-
-static std::regex _INCLUDE_PATTERN("#include\\s*[<\"]([^>\"]+)[>\"]");
-static std::regex _STRUCT_PATTERN("struct\\s+(\\w+)\\s*\\{([^}]+)\\}\\s*;");
-static std::regex _IN_PATTERN("(?:attribute|varying|in)" ATTRIBUTE_PATTERN);
-static std::regex _UNIFORM_PATTERN("(?:" LAYOUT_PATTERN ")?uniform\\s+" ACCESSIBILITY_PATTERN UNIFORM_PATTERN);
-static std::regex _SSBO_PATTERN(LAYOUT_PATTERN ACCESSIBILITY_PATTERN "buffer\\s+(\\w+)");
-
-#ifndef ANDROID
-static char _STAGE_ATTR_PREFIX[PipelineInput::SHADER_STAGE_COUNT + 1][4] = {"a_", "v_", "t_", "e_", "g_", "f_", "c_"};
-#else
-static char _STAGE_ATTR_PREFIX[PipelineInput::SHADER_STAGE_COUNT + 1][4] = {"a_", "v_", "f_", "c_"};
-#endif
-
 
 ShaderPreprocessor::ShaderPreprocessor(sp<String> source, PipelineInput::ShaderStage shaderStage, PipelineInput::ShaderStage preShaderStage)
     : _source(std::move(source)), _shader_stage(shaderStage), _pre_shader_stage(preShaderStage), _version(0), _declaration_ins(_attribute_declaration_codes, shaderStage == PipelineInput::SHADER_STAGE_VERTEX ? ANNOTATION_VERT_IN : ANNOTATION_FRAG_IN),
@@ -82,11 +84,11 @@ void ShaderPreprocessor::initializeAsFirst(PipelineBuildingContext& context)
     initialize(context);
     for(const auto& i : _main_block->_args)
         if(i._modifier & ShaderPreprocessor::Parameter::PARAMETER_MODIFIER_IN)
-            context.addInputAttribute(Strings::capitalizeFirst(i._name), i._type);
+            context.addInputAttribute(Strings::capitalizeFirst(i._name), i._type, i._divisor);
 }
 
 static bool sanitizer(const std::smatch& match) {
-    DCHECK_WARN(false, match.str().c_str());
+    WARN(match.str().c_str());
     return false;
 }
 
@@ -100,7 +102,7 @@ void ShaderPreprocessor::parseMainBlock(const String& source, PipelineBuildingCo
 
     DCHECK_WARN(source.search(_IN_PATTERN, sanitizer), "Non-standard attribute declared above, move it into ark_main function's parameters will disable this warning.");
 
-    static const std::regex FUNC_PATTERN(R"((vec4|void)\s+ark_main\(([^)]*)\))");
+    static const std::regex FUNC_PATTERN(R"((vec4|void)\s+ark_main\((.*)\))");
 
     source.search(FUNC_PATTERN, [this] (const std::smatch& m)->bool {
         const String prefix = m.prefix().str();
@@ -391,7 +393,7 @@ void ShaderPreprocessor::Function::parse(PipelineBuildingContext& buildingContex
             stride += attr.size();
         }
         if(param._modifier & Parameter::PARAMETER_MODIFIER_IN)
-            buildingContext.addPredefinedAttribute(Strings::capitalizeFirst(param._name), param._type, PipelineInput::SHADER_STAGE_VERTEX);
+            buildingContext.addPredefinedAttribute(Strings::capitalizeFirst(param._name), param._type, param._divisor, PipelineInput::SHADER_STAGE_VERTEX);
 
         _args.push_back(std::move(param));
     }
@@ -399,8 +401,9 @@ void ShaderPreprocessor::Function::parse(PipelineBuildingContext& buildingContex
 
 ShaderPreprocessor::Parameter ShaderPreprocessor::Function::parseParameter(const String& param)
 {
-    int32_t modifier = Parameter::PARAMETER_MODIFIER_DEFAULT;
     String type, name;
+    uint32_t divisor = 0;
+    int32_t modifier = Parameter::PARAMETER_MODIFIER_DEFAULT;
     for(const String& i : param.split(' '))
     {
         if(i == "in")
@@ -421,6 +424,14 @@ ShaderPreprocessor::Parameter ShaderPreprocessor::Function::parseParameter(const
             modifier = Parameter::PARAMETER_MODIFIER_INOUT;
             continue;
         }
+        if(i.startsWith("divisor("))
+        {
+            constexpr size_t pBegin = string_length("divisor(");
+            const auto pEnd = i.find(')', pBegin);
+            ASSERT(pEnd != String::npos);
+            divisor = std::stoi(i.substr(pBegin, pEnd).c_str());
+            continue;
+        }
         if(!type)
         {
             type = i;
@@ -430,7 +441,7 @@ ShaderPreprocessor::Parameter ShaderPreprocessor::Function::parseParameter(const
         name = i;
     }
     DCHECK(type && name, "Cannot parse function arguments: %s", param.c_str());
-    return Parameter(std::move(type), std::move(name), static_cast<Parameter::Modifier>(modifier == Parameter::PARAMETER_MODIFIER_DEFAULT ? Parameter::PARAMETER_MODIFIER_IN : modifier));
+    return Parameter(std::move(type), std::move(name), static_cast<Parameter::Modifier>(modifier == Parameter::PARAMETER_MODIFIER_DEFAULT ? Parameter::PARAMETER_MODIFIER_IN : modifier), divisor);
 }
 
 void ShaderPreprocessor::Function::genDefinition()
@@ -678,12 +689,12 @@ const sp<String>& ShaderPreprocessor::Declaration::source() const
 }
 
 ShaderPreprocessor::Parameter::Parameter()
-    : _modifier(PARAMETER_MODIFIER_DEFAULT)
+    : _modifier(PARAMETER_MODIFIER_DEFAULT), _divisor(0)
 {
 }
 
-ShaderPreprocessor::Parameter::Parameter(String type, String name, ShaderPreprocessor::Parameter::Modifier modifier)
-    : _type(std::move(type)), _name(std::move(name)), _modifier(modifier)
+ShaderPreprocessor::Parameter::Parameter(String type, String name, ShaderPreprocessor::Parameter::Modifier modifier, uint32_t divisor)
+    : _type(std::move(type)), _name(std::move(name)), _modifier(modifier), _divisor(divisor)
 {
 }
 

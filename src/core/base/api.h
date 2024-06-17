@@ -126,6 +126,11 @@ template<THREAD_ID ID> void __thread_check__(const char* func) {
 bool ARK_API __trace_flag__();
 void ARK_API __set_trace_flag__();
 
+
+template<size_t N> constexpr size_t string_length(char const (&)[N]) {
+    return N - 1;
+}
+
 constexpr HashId string_hash(const char* s) {
     constexpr HashId some_prime_number = 101;
     return *s ? (*(s + 1) ? *s + (*(s + 1)) * some_prime_number + (*(s + 2) ? (*(s + 3) ? *(s + 2) + (*(s + 3)) * some_prime_number + string_hash(s + 4) * some_prime_number * some_prime_number : *(s + 2)) : 0) * some_prime_number * some_prime_number : *s) : 0;

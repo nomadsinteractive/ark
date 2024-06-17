@@ -16,8 +16,6 @@
 
 namespace ark {
 
-
-
 LayerContext::LayerContext(sp<ModelLoader> modelLoader, sp<Vec3> position, sp<Boolean> visible, sp<Boolean> discarded, sp<Varyings> varyings)
     : _model_loader(std::move(modelLoader)), _position(std::move(position)), _visible(std::move(visible), true), _discarded(discarded ? std::move(discarded) : nullptr, false),
       _varyings(std::move(varyings)), _layer_type(Layer::TYPE_DYNAMIC), _reload_requested(false)
@@ -117,11 +115,12 @@ bool LayerContext::processNewCreated()
     return true;
 }
 
-LayerContextSnapshot LayerContext::snapshot(RenderLayer renderLayer, RenderRequest& renderRequest, const PipelineInput& pipelineInput) const
+LayerContextSnapshot LayerContext::snapshot(RenderLayer renderLayer, RenderRequest& renderRequest, const PipelineInput& pipelineInput)
 {
     bool dirty = UpdatableUtil::update(renderRequest.timestamp(), _position, _visible, _discarded, _varyings);
-    Varyings::Snapshot varyings = _varyings ? _varyings->snapshot(pipelineInput, renderRequest.allocator()) : Varyings::Snapshot();
-    return LayerContextSnapshot{dirty, _position.val(), _visible.val(), _discarded.val(), varyings, std::move(renderLayer)};
+    if(!_varyings)
+        _varyings = sp<Varyings>::make(pipelineInput);
+    return LayerContextSnapshot{dirty, _position.val(), _visible.val(), _discarded.val(), _varyings->snapshot(pipelineInput, renderRequest.allocator()), std::move(renderLayer)};
 }
 
 LayerContext::ElementState& LayerContext::addElementState(void* key)

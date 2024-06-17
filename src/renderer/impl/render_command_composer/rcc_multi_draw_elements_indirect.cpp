@@ -147,11 +147,8 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
                     iter->second.toDynamicLayout();
 
                 for(const auto& [j, k] : snapshot._varyings._sub_properties)
-                {
-                    Varyings::Divided subProperty = k.getDivided(1);
-                    if(subProperty._content.length() > sizeof(M4))
+                    if(Varyings::Divided subProperty = k.getDivided(1); subProperty._content.length() > sizeof(M4))
                         iter->second.setNodeTransform(j, *reinterpret_cast<const M4*>(subProperty._content.buf()));
-                }
             }
         }
     }
@@ -227,7 +224,7 @@ sp<Mat4> RCCMultiDrawElementsIndirect::NodeLayoutInstance::makeGlobalTransform(s
 }
 
 RCCMultiDrawElementsIndirect::NodeLayoutInstance::NodeLayoutInstance(const Node& node, const M4& globalTransform)
-    : _node_id(node.name().hash()), _global_transform(sp<Mat4Impl>::make(globalTransform))
+    : _node_id(node.name().hash()), _global_transform(sp<Mat4>::make<Mat4Impl>(globalTransform))
 {
 }
 
