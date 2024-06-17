@@ -69,7 +69,7 @@ public:
 // [[script::bindings::auto]]
     void inputInt(const String& label, const sp<Integer>& value, int32_t step = 1, int32_t step_fast = 100, int32_t flags = 0);
 // [[script::bindings::auto]]
-    void sliderInt(const String& label, const sp<Integer>& value, int32_t vmin, int32_t vmax, const String& format = "%d");
+    void sliderInt(const String& label, const sp<Integer>& value, int32_t v_min, int32_t v_max, const String& format = "%d");
 
 // [[script::bindings::auto]]
     void inputFloat(const String& label, const sp<Numeric>& value, float step = 0.0f, float step_fast = 0.0f, const String& format = "%.3f");

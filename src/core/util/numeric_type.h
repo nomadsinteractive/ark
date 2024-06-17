@@ -92,7 +92,7 @@ public:
 //  [[script::bindings::classmethod]]
     static void set(const sp<NumericWrapper>& self, float value);
 //  [[script::bindings::classmethod]]
-    static void set(const sp<NumericWrapper>& self, const sp<Numeric>& delegate);
+    static void set(const sp<NumericWrapper>& self, sp<Numeric> value);
 
 //  [[script::bindings::classmethod]]
     static float fix(const sp<Numeric>& self);

@@ -174,7 +174,7 @@ void ApplicationFacade::post(sp<Runnable> task, float delay, sp<Boolean> cancele
     _context->messageLoopApp()->post(std::move(task), delay, std::move(canceled));
 }
 
-void ApplicationFacade::post(sp<Runnable> task, const std::vector<float>& delays, sp<Boolean> canceled)
+void ApplicationFacade::post(sp<Runnable> task, const std::vector<float>& delays, const sp<Boolean>& canceled)
 {
     for(float i : delays)
         post(task, i, canceled);

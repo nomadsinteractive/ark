@@ -215,9 +215,9 @@ void NumericType::set(const sp<NumericWrapper>& self, float value)
     self->set(value);
 }
 
-void NumericType::set(const sp<NumericWrapper>& self, const sp<Numeric>& delegate)
+void NumericType::set(const sp<NumericWrapper>& self, sp<Numeric> value)
 {
-    self->set(delegate);
+    self->set(std::move(value));
 }
 
 float NumericType::fix(const sp<Numeric>& self)

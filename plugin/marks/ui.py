@@ -30,15 +30,16 @@ class InputField:
     INTPUT_TYPE_MAPPING = {Numeric: 'input_float', Vec2: 'input_float2', Vec3: 'input_float3', Vec4: 'input_float4', Color: 'color_edit4',
                                     Integer: 'input_int', Boolean: 'checkbox', String: 'input_text'}
 
-    def __init__(self, name: str, value: Any, input_type: Optional[str] = None, *args):
+    def __init__(self, name: str, value: Any, input_type: Optional[str] = None, *args, **kwargs):
         self._name = name
         self._input_type = input_type or self.INTPUT_TYPE_MAPPING[type(value)]
         self._value = value
         self._args = args
+        self._kwargs = kwargs
 
     def build_input(self, builder: dear_imgui.WidgetBuilder):
         input_func = getattr(builder, self._input_type)
-        input_func(self._name, self._value, *self._args)
+        input_func(self._name, self._value, *self._args, **self._kwargs)
 
 
 class ConsoleCommand:

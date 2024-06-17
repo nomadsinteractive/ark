@@ -81,8 +81,9 @@ class GenMethod(object):
         self._return_type = return_type
         self._is_static = is_static
         self._arguments = parse_method_arguments(args)
-        self._has_keyvalue_arguments = args and self._arguments[-1].type_compare('Scope')
-        self._flags = ('METH_VARARGS|METH_KEYWORDS' if self._has_keyvalue_arguments else 'METH_VARARGS')
+        self._has_scope_or_traits_argument = args and (self._arguments[-1].type_compare('Scope') or self._arguments[-1].type_compare('Traits'))
+        self._has_keyword_arguments = self._has_scope_or_traits_argument or self._has_keyword_names()
+        self._flags = ('METH_VARARGS|METH_KEYWORDS' if self._has_keyword_arguments else 'METH_VARARGS')
         self._self_argument = None
 
     @property
@@ -100,7 +101,7 @@ class GenMethod(object):
         return 'PyObject*'
 
     def gen_py_arguments(self):
-        return 'Instance* self, PyObject* args' + (', PyObject* kws' if self._has_keyvalue_arguments else '')
+        return f'Instance* self, PyObject* args{", PyObject* kws" if self._has_keyword_arguments else ""}'
 
     def gen_py_argc(self):
         return 'PyBridge::PyObject_Size(args)'
@@ -193,8 +194,8 @@ class GenMethod(object):
             parse_format = ts[0] + '|' + ''.join(ts[1:])
 
         parse_arg_refnames = ', '.join(f'&arg{i}' for i, j in enumerate(args) if j.parse_signature)
-        # TODO: to all possible methods
-        if self._has_keyword_arguments() and self._name == '__init__':
+        # TODO: to all possible methods(only overloaded methods don't support keyword arguments for now, and they should be)
+        if self._has_keyword_names() and not self._has_scope_or_traits_argument:
             lines.append(self._make_argname_declares())
             parsestatement = f'''if(!PyBridge::PyArg_ParseTupleAndKeywords(args, kws, "{parse_format}", const_cast<char**>(argnames), {parse_arg_refnames}))
         {self.err_return_value};
@@ -212,7 +213,7 @@ class GenMethod(object):
         nullptr
     };''' % (f',\n{INDENT * 2}'.join(f'"{acg.camel_case_to_snake_case(i.argname)}"' for i in self._arguments), ',' if self._arguments else '')
 
-    def _has_keyword_arguments(self) -> bool:
+    def _has_keyword_names(self) -> bool:
         return all(i.argname is not None for i in self._arguments)
 
     def need_unpack_statement(self):
