@@ -1742,11 +1742,15 @@ class Event:
         return 0
 
 
-class Rotation:
+class Rotation(Vec4):
     def __init__(self, theta: Union[float, Numeric], axis: Union[Vec3, tuple] = None):
+        super().__init__(0, 0, 0, 0)
         self._theta = theta
         self._axis = axis
 
+
+    def reset(self, quaternion: Vec4):
+        pass
     @property
     def theta(self) -> Numeric:
         return self._theta

@@ -28,13 +28,15 @@ public:
     V4 val() override;
     bool update(uint64_t timestamp) override;
 
+//  [[script::bindings::auto]]
+    void reset(sp<Vec4> quaternion);
+
 //  [[script::bindings::property]]
     const SafeVar<Numeric>& theta() const;
 //  [[script::bindings::property]]
     void setTheta(sp<Numeric> theta);
 //  [[script::bindings::property]]
     const SafeVar<Vec3>& axis() const;
-
 //  [[script::bindings::auto]]
     void setRotation(float theta, const V3& axis);
 //  [[script::bindings::auto]]

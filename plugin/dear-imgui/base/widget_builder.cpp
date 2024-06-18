@@ -61,14 +61,14 @@ private:
     sp<BooleanWrapper> _is_open;
 };
 
-class Tab final : public WidgetGroup {
+class TabBar final : public WidgetGroup {
 public:
-    Tab(String name, ImGuiTabBarFlags flags, sp<BooleanWrapper> isOpen)
-        : _name(std::move(name)), _flags(flags), _is_open(std::move(isOpen)) {
+    TabBar(String name, ImGuiTabBarFlags flags, sp<BooleanWrapper> isOpen)
+        : _str_id(std::move(name)), _flags(flags), _is_open(std::move(isOpen)) {
     }
 
     void render() override {
-        const bool isOpen = ImGui::BeginTabBar(_name.c_str(), _flags);
+        const bool isOpen = ImGui::BeginTabBar(_str_id.c_str(), _flags);
         if(isOpen)
         {
             WidgetGroup::render();
@@ -79,34 +79,36 @@ public:
     }
 
 private:
-    String _name;
+    String _str_id;
     ImGuiTabBarFlags _flags;
     sp<BooleanWrapper> _is_open;
 };
 
 class TabItem final : public WidgetGroup {
 public:
-    TabItem(String title, ImGuiTabItemFlags flags, sp<BooleanWrapper> isOpen)
-        : _title(std::move(title)), _flags(flags), _is_open(std::move(isOpen)) {
+    TabItem(String title, ImGuiTabItemFlags flags, sp<BooleanWrapper> activated, sp<BooleanWrapper> opened)
+        : _title(std::move(title)), _flags(flags), _activated(std::move(activated)), _opened(std::move(opened)) {
     }
 
     void render() override {
-        if(const bool isOpen = _is_open->val()) {
-            bool isOpenArg = isOpen;
-            if(ImGui::BeginTabItem(_title.c_str(), &isOpenArg, _flags))
+        if(bool isOpen = _opened ? _opened->val() : true) {
+            const bool activated = ImGui::BeginTabItem(_title.c_str(), _opened ? &isOpen : nullptr, _flags);
+            if(activated)
             {
                 WidgetGroup::render();
                 ImGui::EndTabItem();
             }
-            if(isOpen != isOpenArg)
-                _is_open->set(isOpenArg);
+            _activated->set(activated);
+            if(_opened)
+                _opened->set(isOpen);
         }
     }
 
 private:
     String _title;
     ImGuiTabItemFlags _flags;
-    sp<BooleanWrapper> _is_open;
+    sp<BooleanWrapper> _activated;
+    sp<BooleanWrapper> _opened;
 };
 
 class WindowNoClose : public WidgetGroup {
@@ -517,10 +519,10 @@ void WidgetBuilder::spacing()
     addFunctionCall(ImGui::Spacing);
 }
 
-sp<Boolean> WidgetBuilder::beginTabBar(String title, int32_t flags)
+sp<Boolean> WidgetBuilder::beginTabBar(String strId, int32_t flags)
 {
     sp<BooleanWrapper> isOpen = sp<BooleanWrapper>::make(false);
-    addWidgetGroupAndPush(sp<WidgetGroup>::make<Tab>(std::move(title), flags, isOpen));
+    addWidgetGroupAndPush(sp<WidgetGroup>::make<TabBar>(std::move(strId), flags, isOpen));
     return isOpen;
 }
 
@@ -529,11 +531,12 @@ void WidgetBuilder::endTabBar()
     pop();
 }
 
-sp<Boolean> WidgetBuilder::beginTabItem(String title, int32_t flags)
+sp<Boolean> WidgetBuilder::beginTabItem(String label, const sp<Boolean>& pOpen, int32_t flags)
 {
-    sp<BooleanWrapper> isOpen = sp<BooleanWrapper>::make(true);
-    addWidgetGroupAndPush(sp<WidgetGroup>::make<TabItem>(std::move(title), flags, isOpen));
-    return isOpen;
+    DCHECK_WARN(!pOpen || pOpen.isInstance<BooleanWrapper>(), "p_open should be a BooleanWrapper instance");
+    sp<BooleanWrapper> activated = sp<BooleanWrapper>::make(false);
+    addWidgetGroupAndPush(sp<WidgetGroup>::make<TabItem>(std::move(label), flags, activated, pOpen.tryCast<BooleanWrapper>()));
+    return activated;
 }
 
 void WidgetBuilder::endTabItem()

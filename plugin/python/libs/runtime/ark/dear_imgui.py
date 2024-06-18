@@ -45,6 +45,15 @@ class WidgetBuilder:
     def slider_float(self, label: str, value: Numeric, v_min: float, v_max: float, prompt_format: str = '%.3f'):
         pass
 
+    def slider_float2(self, label: str, value: Vec2, v_min: float, v_max: float, prompt_format: str = '%.3f'):
+        pass
+
+    def slider_float3(self, label: str, value: Vec3, v_min: float, v_max: float, prompt_format: str = '%.3f'):
+        pass
+
+    def slider_float4(self, label: str, value: Vec4, v_min: float, v_max: float, prompt_format: str = '%.3f'):
+        pass
+
     def input_int(self, label: str, value: Integer, step: int = 1, step_fast: int = 100, flags: int = 0):
         pass
 
@@ -62,6 +71,18 @@ class WidgetBuilder:
         pass
 
     def small_button(self, label: str) -> Observer:
+        pass
+
+    def begin_tab_bar(self, str_id: str, flags: int = 0) -> Boolean:
+        pass
+
+    def end_tab_bar(self):
+        pass
+
+    def begin_tab_item(self, label: str, p_open: Optional[Boolean] = None, flags: int = 0) -> Boolean:
+        pass
+
+    def end_tab_item(self):
         pass
 
     def push_id(self, hashid: Union[str, int]):

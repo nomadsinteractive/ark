@@ -6,6 +6,7 @@
 
 #include "graphics/base/v3.h"
 #include "graphics/base/quaternion.h"
+#include "graphics/util/vec4_type.h"
 
 namespace ark {
 
@@ -39,6 +40,11 @@ V4 Rotation::val()
 bool Rotation::update(uint64_t timestamp)
 {
     return _wrapped->update(timestamp);
+}
+
+void Rotation::reset(sp<Vec4> quaternion)
+{
+    _wrapped = sp<VariableDirty<V4>>::make(Vec4Type::normalize(std::move(quaternion)), *this);
 }
 
 const SafeVar<Numeric>& Rotation::theta() const
