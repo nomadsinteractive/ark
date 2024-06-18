@@ -297,9 +297,12 @@ class PropertiesWindow(BaseWindow):
     def __init__(self, imgui: Renderer, is_open: Optional[bool]):
         super().__init__(imgui, is_open)
 
-    def on_show(self, builder: dear_imgui.WidgetBuilder, properties: list[InputField]):
-        for i in properties:
-            i.build(builder)
+    def on_show(self, builder: dear_imgui.WidgetBuilder, properties: Any):
+        if isinstance(properties, list):
+            for i in properties:
+                i.build(builder)
+        else:
+            properties.build(builder)
 
 
 class ResourceWindow(BaseWindow):
@@ -355,7 +358,7 @@ class MarkStudio:
     def resource_window(self) -> ResourceWindow:
         return self._resource_window
 
-    def show(self, console_cmds: Optional[list[ConsoleCommand]] = None, properties: Optional[list[InputField]] = None):
+    def show(self, console_cmds: Optional[list[ConsoleCommand]] = None, properties: Any = None):
         self._main_window.show('My Ark Studio')
 
         if properties:

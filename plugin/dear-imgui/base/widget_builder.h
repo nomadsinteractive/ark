@@ -117,10 +117,13 @@ public:
     void image(sp<Texture> texture, sp<Vec2> size = nullptr, const V2& uv0 = V2(0), const V2& uv1 = V2(1.0f), const sp<Vec4>& color = nullptr, const sp<Vec4>& borderColor = nullptr);
 
 // [[script::bindings::auto]]
-    sp<Boolean> beginTabBar(String title, int32_t flags);
+    sp<Boolean> beginTabBar(String title, int32_t flags = 0);
 // [[script::bindings::auto]]
     void endTabBar();
-
+// [[script::bindings::auto]]
+    sp<Boolean> beginTabItem(String title, int32_t flags = 0);
+// [[script::bindings::auto]]
+    void endTabItem();
 // [[script::bindings::auto]]
     sp<Widget> makeAboutWidget(sp<Boolean> isOpen = BooleanType::create(true));
 // [[script::bindings::auto]]

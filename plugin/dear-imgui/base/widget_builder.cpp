@@ -70,8 +70,10 @@ public:
     void render() override {
         const bool isOpen = ImGui::BeginTabBar(_name.c_str(), _flags);
         if(isOpen)
+        {
             WidgetGroup::render();
-        ImGui::EndTabBar();
+            ImGui::EndTabBar();
+        }
         if(isOpen != _is_open->val())
             _is_open->set(isOpen);
     }
@@ -79,6 +81,31 @@ public:
 private:
     String _name;
     ImGuiTabBarFlags _flags;
+    sp<BooleanWrapper> _is_open;
+};
+
+class TabItem final : public WidgetGroup {
+public:
+    TabItem(String title, ImGuiTabItemFlags flags, sp<BooleanWrapper> isOpen)
+        : _title(std::move(title)), _flags(flags), _is_open(std::move(isOpen)) {
+    }
+
+    void render() override {
+        if(const bool isOpen = _is_open->val()) {
+            bool isOpenArg = isOpen;
+            if(ImGui::BeginTabItem(_title.c_str(), &isOpenArg, _flags))
+            {
+                WidgetGroup::render();
+                ImGui::EndTabItem();
+            }
+            if(isOpen != isOpenArg)
+                _is_open->set(isOpenArg);
+        }
+    }
+
+private:
+    String _title;
+    ImGuiTabItemFlags _flags;
     sp<BooleanWrapper> _is_open;
 };
 
@@ -498,6 +525,18 @@ sp<Boolean> WidgetBuilder::beginTabBar(String title, int32_t flags)
 }
 
 void WidgetBuilder::endTabBar()
+{
+    pop();
+}
+
+sp<Boolean> WidgetBuilder::beginTabItem(String title, int32_t flags)
+{
+    sp<BooleanWrapper> isOpen = sp<BooleanWrapper>::make(true);
+    addWidgetGroupAndPush(sp<WidgetGroup>::make<TabItem>(std::move(title), flags, isOpen));
+    return isOpen;
+}
+
+void WidgetBuilder::endTabItem()
 {
     pop();
 }
