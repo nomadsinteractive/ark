@@ -1,9 +1,6 @@
-#ifndef ARK_PLUGIN_DEAR_IMGUI_FORWARDING_H_
-#define ARK_PLUGIN_DEAR_IMGUI_FORWARDING_H_
+#pragma once
 
-namespace ark {
-namespace plugin {
-namespace dear_imgui {
+namespace ark::plugin::dear_imgui {
 
 class DrawCommandPool;
 class ImguiContext;
@@ -12,7 +9,3 @@ class Widget;
 class WidgetGroup;
 
 }
-}
-}
-
-#endif

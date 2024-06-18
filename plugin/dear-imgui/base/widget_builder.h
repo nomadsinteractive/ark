@@ -117,6 +117,11 @@ public:
     void image(sp<Texture> texture, sp<Vec2> size = nullptr, const V2& uv0 = V2(0), const V2& uv1 = V2(1.0f), const sp<Vec4>& color = nullptr, const sp<Vec4>& borderColor = nullptr);
 
 // [[script::bindings::auto]]
+    sp<Boolean> beginTabBar(String title, int32_t flags);
+// [[script::bindings::auto]]
+    void endTabBar();
+
+// [[script::bindings::auto]]
     sp<Widget> makeAboutWidget(sp<Boolean> isOpen = BooleanType::create(true));
 // [[script::bindings::auto]]
     sp<Widget> makeDemoWidget(sp<Boolean> isOpen = BooleanType::create(true));
@@ -194,6 +199,8 @@ private:
     };
 
 private:
+    void addWidgetGroupAndPush(sp<WidgetGroup> widgetGroup);
+
     void addFunctionCall(std::function<void(void)> func);
 
     template<typename T> void addInvocation(std::function<void(typename Argument<T>::ArgType)> func, T arg) {

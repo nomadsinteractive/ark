@@ -37,7 +37,7 @@ class InputField:
         self._args = args
         self._kwargs = kwargs
 
-    def build_input(self, builder: dear_imgui.WidgetBuilder):
+    def build(self, builder: dear_imgui.WidgetBuilder):
         input_func = getattr(builder, self._input_type)
         input_func(self._name, self._value, *self._args, **self._kwargs)
 
@@ -299,7 +299,7 @@ class PropertiesWindow(BaseWindow):
 
     def on_show(self, builder: dear_imgui.WidgetBuilder, properties: list[InputField]):
         for i in properties:
-            i.build_input(builder)
+            i.build(builder)
 
 
 class ResourceWindow(BaseWindow):

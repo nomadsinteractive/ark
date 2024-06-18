@@ -61,13 +61,34 @@ private:
     sp<BooleanWrapper> _is_open;
 };
 
+class Tab final : public WidgetGroup {
+public:
+    Tab(String name, ImGuiTabBarFlags flags, sp<BooleanWrapper> isOpen)
+        : _name(std::move(name)), _flags(flags), _is_open(std::move(isOpen)) {
+    }
+
+    void render() override {
+        const bool isOpen = ImGui::BeginTabBar(_name.c_str(), _flags);
+        if(isOpen)
+            WidgetGroup::render();
+        ImGui::EndTabBar();
+        if(isOpen != _is_open->val())
+            _is_open->set(isOpen);
+    }
+
+private:
+    String _name;
+    ImGuiTabBarFlags _flags;
+    sp<BooleanWrapper> _is_open;
+};
+
 class WindowNoClose : public WidgetGroup {
 public:
     WindowNoClose(String name)
         : _name(std::move(name)) {
     }
 
-    virtual void render() override {
+    void render() override {
         if(ImGui::Begin(_name.c_str(), nullptr))
             WidgetGroup::render();
         ImGui::End();
@@ -244,15 +265,14 @@ private:
     sp<BooleanWrapper> _is_open;
 };
 
-}
-
-
-static bool Items_VectorGetter(void* data, int idx, const char** out_text)
+bool Items_VectorGetter(void* data, int idx, const char** out_text)
 {
-    const std::vector<String>* items = reinterpret_cast<const std::vector<String>*>(data);
+    const auto items = static_cast<const std::vector<String>*>(data);
     if (out_text)
         *out_text = items->at(static_cast<size_t>(idx)).c_str();
     return true;
+}
+
 }
 
 WidgetBuilder::WidgetBuilder(const sp<Renderer>& imguiRenderer)
@@ -265,8 +285,7 @@ bool WidgetBuilder::begin(String name, sp<Boolean> isOpen)
 {
     CHECK(isOpen == nullptr || isOpen.isInstance<BooleanWrapper>(), "isOpen parameter must be either BooleanWrapper instance or nullptr");
     sp<WidgetGroup> window = isOpen ? sp<WidgetGroup>::make<Window>(std::move(name), std::move(isOpen)) : sp<WidgetGroup>::make<WindowNoClose>(std::move(name));
-    addWidget(window);
-    push(std::move(window));
+    addWidgetGroupAndPush(window);
     return true;
 }
 
@@ -471,6 +490,18 @@ void WidgetBuilder::spacing()
     addFunctionCall(ImGui::Spacing);
 }
 
+sp<Boolean> WidgetBuilder::beginTabBar(String title, int32_t flags)
+{
+    sp<BooleanWrapper> isOpen = sp<BooleanWrapper>::make(false);
+    addWidgetGroupAndPush(sp<WidgetGroup>::make<Tab>(std::move(title), flags, isOpen));
+    return isOpen;
+}
+
+void WidgetBuilder::endTabBar()
+{
+    pop();
+}
+
 sp<Widget> WidgetBuilder::makeAboutWidget(sp<Boolean> isOpen)
 {
     return sp<DemoWindow>::make(ImGui::ShowAboutWindow, std::move(isOpen));
@@ -479,6 +510,12 @@ sp<Widget> WidgetBuilder::makeAboutWidget(sp<Boolean> isOpen)
 sp<Widget> WidgetBuilder::makeDemoWidget(sp<Boolean> isOpen)
 {
     return sp<DemoWindow>::make(ImGui::ShowDemoWindow, std::move(isOpen));
+}
+
+void WidgetBuilder::addWidgetGroupAndPush(sp<WidgetGroup> widgetGroup)
+{
+    addWidget(widgetGroup);
+    push(std::move(widgetGroup));
 }
 
 void WidgetBuilder::addFunctionCall(std::function<void()> func)
