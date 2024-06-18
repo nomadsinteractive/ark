@@ -2,11 +2,11 @@
 
 #include "core/ark.h"
 #include "core/base/bean_factory.h"
+#include "core/impl/variable/variable_dirty.h"
 #include "core/inf/variable.h"
 #include "core/types/global.h"
 #include "core/types/null.h"
 #include "core/util/string_convert.h"
-#include "core/util/documents.h"
 #include "core/util/updatable_util.h"
 
 #include "graphics/base/v3.h"
@@ -15,45 +15,46 @@
 #include "graphics/impl/transform/transform_simple_2d.h"
 #include "graphics/impl/transform/transform_linear_3d.h"
 #include "graphics/impl/transform/transform_simple_3d.h"
-#include "graphics/util/matrix_util.h"
 
 namespace ark {
 
 namespace {
 
-class TransformMat4 : public Mat4 {
+class TransformMat4 final : public Mat4 {
 public:
-    TransformMat4(sp<Transform> transform)
-        : _transform(std::move(transform)), _value(_transform->snapshot().toMatrix()) {
+    TransformMat4(const Transform& transform)
+        : _transform(transform), _value(_transform.snapshot().toMatrix()) {
     }
 
-    virtual bool update(uint64_t timestamp) override {
-        if(_transform->update(timestamp)) {
-            _value = _transform->snapshot().toMatrix();
+    bool update(uint64_t timestamp) override {
+        if(_transform.update(timestamp)) {
+            _value = _transform.snapshot().toMatrix();
             return true;
         }
         return false;
     }
 
-    virtual M4 val() override {
+    M4 val() override {
         return _value;
     }
 
 private:
-    sp<Transform> _transform;
+    Transform _transform;
     M4 _value;
 };
 
 }
 
 Transform::Transform(Type type, sp<Rotation> rotate, sp<Vec3> scale, sp<Vec3> translation)
-    : _type(type), _rotation(std::move(rotate), V4(0, 0, 0, 1.0f)), _scale(std::move(scale), V3(1.0f)), _translation(std::move(translation)), _delegate(makeDelegate())
+    : _type(type), _stub(sp<Stub>::make(Stub{{std::move(rotate), V4(0, 0, 0, 1.0f)}, {std::move(scale), V3(1.0f)}, {std::move(translation)}}))
 {
+    doUpdateDelegate();
 }
 
 Transform::Transform(sp<Transform::Delegate> delegate)
-    : _type(TYPE_DELEGATED), _delegate(std::move(delegate))
+    : _type(TYPE_DELEGATED), _stub(sp<Stub>::make(Stub{{nullptr, V4(0, 0, 0, 1.0f)}, {nullptr, V3(1.0f)}, {}})), _delegate(std::move(delegate))
 {
+    _wrapped = sp<VariableDirty<M4>>::make(sp<Mat4>::make<TransformMat4>(*this), *this);
 }
 
 Transform::Snapshot Transform::snapshot() const
@@ -63,61 +64,61 @@ Transform::Snapshot Transform::snapshot() const
 
 bool Transform::update(uint64_t timestamp)
 {
-    return UpdatableUtil::update(timestamp, _rotation, _scale, _translation) || _timestamp.update(timestamp);
+    return UpdatableUtil::update(timestamp, _stub->_rotation, _stub->_scale, _stub->_translation, _wrapped);
+}
+
+M4 Transform::val()
+{
+    return _wrapped->val();
 }
 
 const sp<Rotation>& Transform::rotation()
 {
-    return tryUpdateDelegate(_rotation);
+    return tryUpdateDelegate(_stub->_rotation);
 }
 
 void Transform::setRotation(sp<Rotation> rotation)
 {
-    _rotation = std::move(rotation);
+    _stub->_rotation.reset(std::move(rotation));
     doUpdateDelegate();
 }
 
 const sp<Vec3>& Transform::scale()
 {
-    return tryUpdateDelegate(_scale);
+    return tryUpdateDelegate(_stub->_scale);
 }
 
 void Transform::setScale(sp<Vec3> scale)
 {
-    _scale = std::move(scale);
+    _stub->_scale.reset(std::move(scale));
     doUpdateDelegate();
 }
 
 const sp<Vec3>& Transform::translation()
 {
-    return tryUpdateDelegate(_translation);
+    return tryUpdateDelegate(_stub->_translation);
 }
 
 void Transform::setTranslation(sp<Vec3> translation)
 {
-    _translation = std::move(translation);
+    _stub->_translation.reset(std::move(translation));
     doUpdateDelegate();
-}
-
-sp<Mat4> Transform::toMatrix(sp<Transform> self)
-{
-    return sp<TransformMat4>::make(std::move(self));
 }
 
 void Transform::doUpdateDelegate()
 {
     _delegate = makeDelegate();
-    _timestamp.markDirty();
+    _wrapped = sp<VariableDirty<M4>>::make(sp<Mat4>::make<TransformMat4>(*this), *this);
 }
 
 sp<Transform::Delegate> Transform::makeDelegate() const
 {
     DCHECK(_type != TYPE_DELEGATED, "Delegated Transform may not be updated");
 
-    if(!_rotation && !_scale && !_translation)
+    if(!_stub->_rotation && !_stub->_scale && !_stub->_translation)
         return Null::toSafePtr<Transform::Delegate>(nullptr);
 
-    return _rotation ? makeTransformLinear() : makeTransformSimple();
+    return _stub->_rotation ? makeTransformLinear() : makeTransformSimple();
 }
 
 sp<Transform::Delegate> Transform::makeTransformLinear() const
@@ -133,7 +134,7 @@ sp<Transform::Delegate> Transform::makeTransformSimple() const
 Transform::Snapshot::Snapshot(const Transform& transform)
     : _delegate(transform._delegate)
 {
-    _delegate->snapshot(transform, *this);
+    _delegate->snapshot(transform._stub, *this);
 }
 
 M4 Transform::Snapshot::toMatrix() const

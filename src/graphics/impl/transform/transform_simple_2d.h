@@ -8,7 +8,7 @@ namespace ark {
 class TransformSimple2D final : public Transform::Delegate {
 public:
 
-    void snapshot(const Transform& transform, Transform::Snapshot& snapshot) const override;
+    void snapshot(const Transform::Stub& transform, Transform::Snapshot& snapshot) const override;
     V3 transform(const Transform::Snapshot& snapshot, const V3& position) const override;
     M4 toMatrix(const Transform::Snapshot& snapshot) const override;
 
@@ -16,7 +16,7 @@ private:
     struct Snapshot {
         uint32_t magic;
         V2 scale;
-        V2 preTranslate;
+        V2 translate;
     };
 };
 

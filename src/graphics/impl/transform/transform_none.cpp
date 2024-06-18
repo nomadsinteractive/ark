@@ -8,7 +8,7 @@
 
 namespace ark {
 
-void TransformNone::snapshot(const Transform& /*transform*/, Transform::Snapshot& snapshot) const
+void TransformNone::snapshot(const Transform::Stub& /*transform*/, Transform::Snapshot& snapshot) const
 {
 }
 

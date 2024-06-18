@@ -5,7 +5,7 @@
 
 namespace ark {
 
-void TransformLinear2D::snapshot(const Transform& transform, Transform::Snapshot& snapshot) const
+void TransformLinear2D::snapshot(const Transform::Stub& transform, Transform::Snapshot& snapshot) const
 {
     Snapshot* data = snapshot.makeData<Snapshot>();
     const SafeVar<Numeric>& theta = transform._rotation.wrapped()->theta();

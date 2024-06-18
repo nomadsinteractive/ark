@@ -7,7 +7,7 @@
 
 namespace ark {
 
-void TransformLinear3D::snapshot(const Transform& transform, Transform::Snapshot& snapshot) const
+void TransformLinear3D::snapshot(const Transform::Stub& transform, Transform::Snapshot& snapshot) const
 {
     Snapshot* data = snapshot.makeData<Snapshot>();
     const V4 quat = transform._rotation.val();

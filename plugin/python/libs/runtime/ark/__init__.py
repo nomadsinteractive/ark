@@ -1770,7 +1770,7 @@ class Rotation(Vec4):
         pass
 
 
-class Transform:
+class Transform(Mat4):
     TYPE_LINEAR_2D = 0
     TYPE_LINEAR_3D = 1
 
@@ -1803,9 +1803,6 @@ class Transform:
     @translation.setter
     def translation(self, v):
         self._translation = v
-
-    def to_matrix(self) -> Mat4:
-        pass
 
 
 class Random:
@@ -2188,7 +2185,15 @@ class Text:
     def position(self, position):
         pass
 
-    def show(self, disposed: Optional[Boolean] = None):
+    @property
+    def transform(self) -> Optional[Mat4]:
+        pass
+
+    @transform.setter
+    def transform(self, transform: Optional[Mat4]):
+        pass
+
+    def show(self, discarded: Optional[Boolean] = None):
         pass
 
     def set_rich_text(self, text: str, **kwargs):

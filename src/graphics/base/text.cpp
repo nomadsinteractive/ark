@@ -29,6 +29,7 @@
 #include "renderer/inf/model_loader.h"
 
 #include "app/base/application_context.h"
+#include "graphics/impl/renderable/renderable_with_transform.h"
 #include "graphics/traits/layout_param.h"
 
 namespace ark {
@@ -174,7 +175,7 @@ struct UpdatableCenter final : Updatable {
     Size _size;
 };
 
-struct UpdatableFlexEnd : Updatable {
+struct UpdatableFlexEnd final : Updatable {
     UpdatableFlexEnd(Layout::Hierarchy hierarchy, Size size, float letterSpacing)
         : _hierarchy((std::move(hierarchy))), _letter_spacing(letterSpacing), _size(std::move(size)) {
     }
@@ -191,7 +192,7 @@ struct UpdatableFlexEnd : Updatable {
     Size _size;
 };
 
-struct LayoutLabel : Layout {
+struct LayoutLabel final : Layout {
     LayoutLabel(float letterSpacing)
         : _letter_spacing(letterSpacing) {
     }
@@ -280,7 +281,12 @@ struct Text::Content {
         Layout::Hierarchy hierarchy = makeHierarchy();
         DASSERT(_render_objects.size() == hierarchy._child_nodes.size());
         for(size_t i = 0; i < _render_objects.size(); ++i)
-            _layer_context->add(sp<RenderableCharacter>::make(_render_objects.at(i), hierarchy._child_nodes.at(i)._node, _layout_chars.at(i)._offset));
+        {
+            sp<Renderable> renderable = sp<Renderable>::make<RenderableCharacter>(_render_objects.at(i), hierarchy._child_nodes.at(i)._node, _layout_chars.at(i)._offset);
+            if(_transform)
+                renderable = sp<Renderable>::make<RenderableWithTransform>(std::move(renderable), _transform);
+            _layer_context->add(std::move(renderable));
+        }
 
         const sp<Layout>& layout = _layout_param && _layout_param->layout() ? _layout_param->layout() : sp<Layout>::make<LayoutLabel>(_letter_spacing);
         _updatable_layout = layout->inflate(std::move(hierarchy));
@@ -311,6 +317,7 @@ struct Text::Content {
     sp<LayerContext> _layer_context;
     sp<GlyphMaker> _glyph_maker;
     sp<Updatable> _updatable_layout;
+    sp<Mat4> _transform;
 
     float _text_scale;
     float _letter_spacing;
@@ -376,6 +383,17 @@ sp<Vec3> Text::position() const
 void Text::setPosition(sp<Vec3> position)
 {
     _content->_position->reset(std::move(position));
+}
+
+const sp<Mat4>& Text::transform() const
+{
+    return _content->_transform;
+}
+
+void Text::setTransform(sp<Mat4> transform)
+{
+    _content->_transform = std::move(transform);
+    _content->updateLayoutContent();
 }
 
 const sp<Size>& Text::size() const

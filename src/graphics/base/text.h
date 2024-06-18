@@ -33,6 +33,11 @@ public:
     void setPosition(sp<Vec3> position);
 
 //  [[script::bindings::property]]
+    const sp<Mat4>& transform() const;
+//  [[script::bindings::property]]
+    void setTransform(sp<Mat4> transform);
+
+//  [[script::bindings::property]]
     const sp<Size>& size() const;
 
 //  [[script::bindings::property]]

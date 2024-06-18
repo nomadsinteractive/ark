@@ -9,7 +9,7 @@ namespace ark {
 class TransformLinear3D final : public Transform::Delegate {
 public:
 
-    void snapshot(const Transform& transform, Transform::Snapshot& snapshot) const override;
+    void snapshot(const Transform::Stub& transform, Transform::Snapshot& snapshot) const override;
     V3 transform(const Transform::Snapshot& snapshot, const V3& position) const override;
     M4 toMatrix(const Transform::Snapshot& snapshot) const override;
 

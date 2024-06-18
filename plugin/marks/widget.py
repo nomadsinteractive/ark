@@ -12,7 +12,7 @@ class RotationEditor:
         self._euler_pitch = Numeric(0)
         self._euler_yaw = Numeric(0)
         self._euler_roll = Numeric(0)
-        self._quaternion = Vec4(1, 0, 0, 0)
+        self._quaternion = Vec4(0, 0, 0, 1)
         self._quaternion_real = Numeric(0)
         self._quaternion_ijk = Vec3(1, 0, 0)
 

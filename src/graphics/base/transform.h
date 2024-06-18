@@ -14,7 +14,11 @@
 
 namespace ark {
 
-class ARK_API Transform {
+//[[script::bindings::extends(Mat4)]]
+class ARK_API Transform final : public Wrapper<Mat4>, public Mat4 {
+private:
+    struct Stub;
+
 public:
     class Snapshot;
 
@@ -22,13 +26,12 @@ public:
     public:
         virtual ~Delegate() = default;
 
-        virtual void snapshot(const Transform& transform, Snapshot& snapshot) const = 0;
+        virtual void snapshot(const Transform::Stub& transform, Snapshot& snapshot) const = 0;
 
         virtual V3 transform(const Snapshot& snapshot, const V3& position) const = 0;
         virtual M4 toMatrix(const Snapshot& snapshot) const = 0;
     };
 
-public:
 //  [[script::bindings::enumeration]]
     enum Type {
         TYPE_LINEAR_2D,
@@ -39,6 +42,7 @@ public:
 //  [[script::bindings::auto]]
     Transform(Transform::Type type = Transform::TYPE_LINEAR_3D, sp<Rotation> rotation = nullptr, sp<Vec3> scale = nullptr, sp<Vec3> translation = nullptr);
     Transform(sp<Delegate> delegate);
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Transform);
 
     class ARK_API Snapshot {
     public:
@@ -70,7 +74,8 @@ public:
 
     Snapshot snapshot() const;
 
-    bool update(uint64_t timestamp);
+    bool update(uint64_t timestamp) override;
+    M4 val() override;
 
 //  [[script::bindings::property]]
     const sp<Rotation>& rotation();
@@ -87,28 +92,10 @@ public:
 //  [[script::bindings::property]]
     void setTranslation(sp<Vec3> translation);
 
-//  [[script::bindings::classmethod]]
-    static sp<Mat4> toMatrix(sp<Transform> self);
-
 private:
     sp<Delegate> makeDelegate() const;
     sp<Delegate> makeTransformLinear() const;
     sp<Delegate> makeTransformSimple() const;
-
-    class DelegateUpdater {
-    public:
-        DelegateUpdater(Transform& transform)
-            : _transform(transform) {
-        }
-
-        void operator() () const {
-            if(_transform._type != TYPE_DELEGATED)
-                _transform.doUpdateDelegate();
-        }
-
-    private:
-        Transform& _transform;
-    };
 
     template<typename T> const sp<T>& tryUpdateDelegate(SafeVar<T>& safevar) {
         if(safevar)
@@ -120,24 +107,25 @@ private:
         return var;
     }
 
+    struct Stub {
+        SafeVar<Rotation> _rotation;
+        SafeVar<Vec3> _scale;
+        SafeVar<Vec3> _translation;
+    };
+
     void doUpdateDelegate();
 
 private:
     Type _type;
-
-    SafeVar<Rotation> _rotation;
-    SafeVar<Vec3> _scale;
-    SafeVar<Vec3> _translation;
-
+    sp<Stub> _stub;
     sp<Delegate> _delegate;
-
-    Timestamp _timestamp;
 
     friend class TransformSimple2D;
     friend class TransformSimple3D;
     friend class TransformLinear2D;
     friend class TransformLinear3D;
     friend class TransformTRS;
+    friend class TransformNone;
 };
 
 }
