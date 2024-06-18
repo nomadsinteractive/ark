@@ -72,7 +72,6 @@ V2 getCharacterOffset(const Model& model)
 std::vector<Character> toLayoutCharacters(const GlyphContents& glyphs, float letterScale, ModelLoader& modelLoader)
 {
     std::unordered_map<wchar_t, std::tuple<sp<Model>, V2, bool, bool>> mmap;
-    const float xScale = letterScale;
     float integral = 0;
     std::vector<Character> layoutChars;
     layoutChars.reserve(glyphs.size());
@@ -84,7 +83,7 @@ std::vector<Character> toLayoutCharacters(const GlyphContents& glyphs, float let
         {
             const auto& [model, offset, iscjk, iswordbreak] = iter->second;
             const V3& occupy = model->occupy()->size()->val();
-            integral += xScale * occupy.x();
+            integral += occupy.x() * letterScale;
             layoutChars.push_back({i, model, offset, integral, iscjk, iswordbreak, isLineBreak});
         }
         else
@@ -95,7 +94,7 @@ std::vector<Character> toLayoutCharacters(const GlyphContents& glyphs, float let
             const Boundaries& m = model->occupy();
             bool iscjk = isCJK(c);
             bool iswordbreak = isWordBreaker(c);
-            integral += xScale * m.size()->val().x();
+            integral += m.size()->val().x() * letterScale;
             mmap.insert(std::make_pair(c, std::make_tuple(model, offset, iscjk, iswordbreak)));
             layoutChars.push_back({i, std::move(model), offset, integral, iscjk, iswordbreak, isLineBreak});
         }
@@ -121,7 +120,7 @@ void doFlowLayout(std::vector<Layout::Hierarchy>& childNodes, float letterSpacin
     }
 }
 
-struct RenderableCharacter : Renderable {
+struct RenderableCharacter final : Renderable {
     RenderableCharacter(sp<Renderable> delegate, sp<Layout::Node> layoutNode, const V2& letterOffset)
         : _delegate(std::move(delegate)), _layout_node(std::move(layoutNode)), _letter_offset(letterOffset) {
     }
@@ -144,7 +143,7 @@ struct RenderableCharacter : Renderable {
     V2 _letter_offset;
 };
 
-struct UpdatableFlexStart : Updatable {
+struct UpdatableFlexStart final : Updatable {
     UpdatableFlexStart(Layout::Hierarchy hierarchy, float letterSpacing)
         : _hierarchy((std::move(hierarchy))), _letter_spacing(letterSpacing) {
     }
@@ -158,7 +157,7 @@ struct UpdatableFlexStart : Updatable {
     float _letter_spacing;
 };
 
-struct UpdatableCenter : Updatable {
+struct UpdatableCenter final : Updatable {
     UpdatableCenter(Layout::Hierarchy hierarchy, Size size, float letterSpacing)
         : _hierarchy((std::move(hierarchy))), _letter_spacing(letterSpacing), _size(std::move(size)) {
     }

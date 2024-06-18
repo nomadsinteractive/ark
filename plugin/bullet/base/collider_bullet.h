@@ -142,13 +142,13 @@ private:
         bool _is_static_body;
     };
 
-    class DynamicTransform : public Transform::Delegate {
+    class DynamicTransform final : public Transform::Delegate {
     public:
         DynamicTransform(const sp<btMotionState>& motionState);
 
-        virtual void snapshot(const Transform& transform, const V3& postTranslate, Transform::Snapshot& snapshot) const override;
-        virtual V3 transform(const Transform::Snapshot& snapshot, const V3& position) const override;
-        virtual M4 toMatrix(const Transform::Snapshot& snapshot) const override;
+        void snapshot(const Transform& transform, Transform::Snapshot& snapshot) const override;
+        V3 transform(const Transform::Snapshot& snapshot, const V3& position) const override;
+        M4 toMatrix(const Transform::Snapshot& snapshot) const override;
 
     private:
         sp<btMotionState> _motion_state;

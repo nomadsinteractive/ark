@@ -6,18 +6,17 @@
 
 namespace ark {
 
-void TransformSimple2D::snapshot(const Transform& transform, const V3& postTranslate, Transform::Snapshot& snapshot) const
+void TransformSimple2D::snapshot(const Transform& transform, Transform::Snapshot& snapshot) const
 {
     Snapshot* data = snapshot.makeData<Snapshot>();
     data->scale = transform._scale.val();
     data->preTranslate = transform._translation.val();
-    data->postTranslate = V2(postTranslate.x(), postTranslate.y());
 }
 
 V3 TransformSimple2D::transform(const Transform::Snapshot& snapshot, const V3& position) const
 {
     const Snapshot* data = snapshot.getData<Snapshot>();
-    const V2 pos = (V2(position) + data->preTranslate) * data->scale + V2(data->postTranslate);
+    const V2 pos = (V2(position) + data->preTranslate) * data->scale;
     return V3(pos.x(), pos.y(), position.z());
 }
 

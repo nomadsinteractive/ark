@@ -8,14 +8,13 @@
 
 namespace ark {
 
-void TransformNone::snapshot(const Transform& /*transform*/, const V3& postTranslate, Transform::Snapshot& snapshot) const
+void TransformNone::snapshot(const Transform& /*transform*/, Transform::Snapshot& snapshot) const
 {
-    snapshot.makeData<Snapshot>()->postTranslate = postTranslate;
 }
 
 V3 TransformNone::transform(const Transform::Snapshot& snapshot, const V3& position) const
 {
-    return snapshot.getData<Snapshot>()->postTranslate + position;
+    return position;
 }
 
 M4 TransformNone::toMatrix(const Transform::Snapshot& /*snapshot*/) const

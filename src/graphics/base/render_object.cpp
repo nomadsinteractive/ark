@@ -240,7 +240,7 @@ Renderable::Snapshot RenderObject::snapshot(const LayerContextSnapshot& snapshot
     const int32_t typeId = _type->val();
     sp<Model> model = snapshotContext._render_layer.context()->modelLoader()->loadModel(typeId);
     if(state & RENDERABLE_STATE_DIRTY)
-        return {state, typeId, std::move(model), _position.val(), _size.val(), _transform->snapshot(V3(0)), _varyings ? _varyings->snapshot(snapshotContext.pipelineInput(), renderRequest.allocator()) : Varyings::Snapshot()};
+        return {state, typeId, std::move(model), _position.val(), _size.val(), _transform->snapshot(), _varyings ? _varyings->snapshot(snapshotContext.pipelineInput(), renderRequest.allocator()) : Varyings::Snapshot()};
     return {state, typeId, std::move(model)};
 }
 

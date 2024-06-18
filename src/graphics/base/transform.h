@@ -22,7 +22,7 @@ public:
     public:
         virtual ~Delegate() = default;
 
-        virtual void snapshot(const Transform& transform, const V3& postTranslate, Snapshot& snapshot) const = 0;
+        virtual void snapshot(const Transform& transform, Snapshot& snapshot) const = 0;
 
         virtual V3 transform(const Snapshot& snapshot, const V3& position) const = 0;
         virtual M4 toMatrix(const Snapshot& snapshot) const = 0;
@@ -42,7 +42,7 @@ public:
 
     class ARK_API Snapshot {
     public:
-        Snapshot(const Transform& transform, const V3& postTranslate);
+        Snapshot(const Transform& transform);
         Snapshot() = default;
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Snapshot);
 
@@ -68,7 +68,7 @@ public:
         alignas(64) uint8_t _data[72];
     };
 
-    Snapshot snapshot(const V3& postTranslate) const;
+    Snapshot snapshot() const;
 
     bool update(uint64_t timestamp);
 

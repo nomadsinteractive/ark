@@ -24,12 +24,12 @@ namespace {
 class TransformMat4 : public Mat4 {
 public:
     TransformMat4(sp<Transform> transform)
-        : _transform(std::move(transform)), _value(_transform->snapshot(V3(0)).toMatrix()) {
+        : _transform(std::move(transform)), _value(_transform->snapshot().toMatrix()) {
     }
 
     virtual bool update(uint64_t timestamp) override {
         if(_transform->update(timestamp)) {
-            _value = _transform->snapshot(V3(0)).toMatrix();
+            _value = _transform->snapshot().toMatrix();
             return true;
         }
         return false;
@@ -56,9 +56,9 @@ Transform::Transform(sp<Transform::Delegate> delegate)
 {
 }
 
-Transform::Snapshot Transform::snapshot(const V3& postTranslate) const
+Transform::Snapshot Transform::snapshot() const
 {
-    return Snapshot(*this, postTranslate);
+    return Snapshot(*this);
 }
 
 bool Transform::update(uint64_t timestamp)
@@ -130,10 +130,10 @@ sp<Transform::Delegate> Transform::makeTransformSimple() const
     return _type == TYPE_LINEAR_2D ? Global<TransformSimple2D>().cast<Transform::Delegate>() : Global<TransformSimple3D>().cast<Transform::Delegate>();
 }
 
-Transform::Snapshot::Snapshot(const Transform& transform, const V3& postTranslate)
+Transform::Snapshot::Snapshot(const Transform& transform)
     : _delegate(transform._delegate)
 {
-    _delegate->snapshot(transform, postTranslate, *this);
+    _delegate->snapshot(transform, *this);
 }
 
 M4 Transform::Snapshot::toMatrix() const

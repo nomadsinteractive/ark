@@ -14,7 +14,7 @@ Vec2WithTransform::Vec2WithTransform(const sp<Vec2>& delegate, const sp<Transfor
 
 V2 Vec2WithTransform::val()
 {
-    return _transform->snapshot(V3(0)).transform(V3(_delegate->val(), 0));
+    return _transform->snapshot().transform(V3(_delegate->val(), 0));
 }
 
 bool Vec2WithTransform::update(uint64_t timestamp)
