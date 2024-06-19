@@ -2,6 +2,7 @@
 
 #include "core/inf/variable.h"
 #include "core/base/wrapper.h"
+#include "core/types/shared_ptr.h"
 
 namespace ark {
 
@@ -24,6 +25,10 @@ public:
         else
             WARN("Trying to overwrite a wrapper which doesn't contain myself");
         return true;
+    }
+
+    static void reset(Wrapper<Variable<T>>& wrapper, sp<Variable<T>> delegate) {
+        wrapper.reset(sp<Variable<T>>::make<VariableDirty>(std::move(delegate), wrapper));
     }
 
 private:

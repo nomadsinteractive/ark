@@ -2,6 +2,7 @@
 
 #include "core/base/class_manager.h"
 #include "core/types/box.h"
+#include "graphics/forwarding.h"
 
 namespace ark {
 
@@ -28,8 +29,8 @@ Class::Class(TypeId id)
 {
 }
 
-Class::Class(TypeId id, const char* name, IClass* delegate)
-    : _id(id), _name(name), _implements{id}, _delegate(delegate)
+Class::Class(TypeId id, const char* name, std::unique_ptr<IClass> delegate)
+    : _id(id), _name(name), _implements{id}, _delegate(std::move(delegate))
 {
 }
 
@@ -73,9 +74,9 @@ Class* Class::getClass(TypeId id)
     return ClassManager::instance().obtain(id);
 }
 
-Class* Class::addClass(TypeId id, const char* name, IClass* impl)
+Class* Class::addClass(TypeId id, const char* name, std::unique_ptr<IClass> impl)
 {
-    return ClassManager::instance().addClass(id, name, impl);
+    return ClassManager::instance().addClass(id, name, std::move(impl));
 }
 
 }

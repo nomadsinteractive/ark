@@ -124,6 +124,12 @@ public:
     sp<Boolean> beginTabItem(String label, const sp<Boolean>& pOpen = nullptr, int32_t flags = 0);
 // [[script::bindings::auto]]
     void endTabItem();
+
+// [[script::bindings::auto]]
+    void guizmoTransformEdit(const sp<Transform>& transform, sp<Camera> camera);
+// [[script::bindings::auto]]
+    void guizmoViewEdit(const sp<Mat4>& view);
+
 // [[script::bindings::auto]]
     sp<Widget> makeAboutWidget(sp<Boolean> isOpen = BooleanType::create(true));
 // [[script::bindings::auto]]

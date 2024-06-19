@@ -81,6 +81,9 @@ typedef Variable<V2> Vec2;
 typedef Variable<V3> Vec3;
 typedef Variable<V4> Vec4;
 
+typedef VariableWrapper<M3> Mat3Wrapper;
+typedef VariableWrapper<M4> Mat4Wrapper;
+
 typedef Loader<sp<Bitmap>> BitmapLoader;
 typedef LoaderBundle<sp<Bitmap>> BitmapLoaderBundle;
 

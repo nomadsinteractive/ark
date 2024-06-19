@@ -34,7 +34,7 @@ public:
     const std::vector<sp<Texture>>& images() const;
 
 private:
-    void tryBindUniform(const ShaderPreprocessor& shaderPreprocessor, const String& name, sp<Uploader> input);
+    void tryBindUniformMatrix(const ShaderPreprocessor& shaderPreprocessor, String name, sp<Mat4> matrix);
     void tryBindCamera(const ShaderPreprocessor& shaderPreprocessor, const Camera& camera);
 
     Table<String, sp<Texture>> makeBindingSamplers() const;

@@ -1,7 +1,18 @@
 import math
+from typing import Optional
 
-from ark import Rotation, Vec3, Numeric, Vec4
+from ark import Rotation, Vec3, Numeric, Vec4, Camera, Transform
 from ark import dear_imgui
+
+
+class TransformEditor:
+    def __init__(self, transform: Transform, camera: Camera):
+        self._transform = transform
+        self._camera = camera
+
+    def build(self, builder: dear_imgui.WidgetBuilder):
+        builder.guizmo_view_edit(self._camera.view)
+        builder.guizmo_transform_edit(self._transform, self._camera)
 
 
 class RotationEditor:

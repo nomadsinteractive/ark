@@ -12,10 +12,10 @@ namespace ark {
 class ARK_API ClassManager {
 public:
 
-    Class* addClass(TypeId id, const char* name, IClass* impl);
+    Class* addClass(TypeId id, const char* name, std::unique_ptr<IClass> impl);
 
     template<typename T, typename... Args> void addClass(const char* name) {
-        Class* clazz = new Class(Type<T>::id(), name, new _internal::ClassImpl<T, Args...>());
+        Class* clazz = new Class(Type<T>::id(), name, std::make_unique<_internal::ClassImpl<T, Args...>>());
         if constexpr(sizeof...(Args) > 0)
             clazz->setImplementation<Args...>();
         _classes[Type<T>::id()] = std::unique_ptr<Class>(clazz);

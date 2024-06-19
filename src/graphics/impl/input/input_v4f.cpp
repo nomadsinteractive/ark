@@ -2,7 +2,7 @@
 
 #include "core/inf/variable.h"
 #include "core/base/bean_factory.h"
-#include "core/impl/uploader/input_variable.h"
+#include "core/impl/uploader/uploader_of_variable.h"
 
 #include "graphics/base/v4.h"
 
@@ -15,7 +15,7 @@ InputV4f::BUILDER::BUILDER(BeanFactory& factory, const String& value)
 
 sp<Uploader> InputV4f::BUILDER::build(const Scope& args)
 {
-    return sp<InputVariable<V4>>::make(_vec4->build(args));
+    return sp<UploaderOfVariable<V4>>::make(_vec4->build(args));
 }
 
 }

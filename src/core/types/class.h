@@ -20,7 +20,7 @@ class ARK_API Class {
 public:
     Class();
     Class(TypeId id);
-    Class(TypeId id, const char* name, IClass* delegate);
+    Class(TypeId id, const char* name, std::unique_ptr<IClass> delegate);
     DISALLOW_COPY_AND_ASSIGN(Class);
 
     TypeId id() const;
@@ -41,7 +41,7 @@ public:
         return getClass(Type<T>::id());
     }
     static Class* getClass(TypeId id);
-    static Class* addClass(TypeId id, const char* name, IClass* impl);
+    static Class* addClass(TypeId id, const char* name, std::unique_ptr<IClass> impl);
 
 private:
     template<typename T, typename... Args> void setImplementation() {

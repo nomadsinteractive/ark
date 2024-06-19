@@ -46,7 +46,7 @@ template<typename T, typename U = void, typename... INTERFACES> Box _dynamic_up_
     return Box();
 }
 
-template<typename T, typename... INTERFACES> class ClassImpl : public IClass {
+template<typename T, typename... INTERFACES> class ClassImpl final : public IClass {
 public:
     ClassImpl()
         : _id(Type<T>::id()) {
@@ -68,7 +68,7 @@ private:
 };
 
 template<typename T, typename... INTERFACES> Class* _make_class() {
-    Class* clazz = Class::addClass(Type<T>::id(), "<Unknown>", new ClassImpl<T, INTERFACES...>());
+    Class* clazz = Class::addClass(Type<T>::id(), "<Unknown>", std::make_unique<ClassImpl<T, INTERFACES...>>());
     clazz->setImplementation(_make_types<T, INTERFACES...>());
     return clazz;
 }
@@ -76,7 +76,7 @@ template<typename T, typename... INTERFACES> Class* _make_class() {
 }
 
 template<typename T, typename... INTERFACES> class Implements {
-public:
+protected:
     Implements() {
         [[maybe_unused]] static Class* clazz = _internal::_make_class<T, INTERFACES...>();
     }

@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_BASE_SHADER_PREPROCESSOR_H_
-#define ARK_RENDERER_BASE_SHADER_PREPROCESSOR_H_
+#pragma once
 
 #include <map>
 
@@ -176,7 +175,7 @@ public:
 
     Preprocessed preprocess();
 
-    sp<Uniform> makeUniformInput(const String& name, Uniform::Type type) const;
+    sp<Uniform> makeUniformInput(String name, Uniform::Type type) const;
 
     String outputName() const;
 
@@ -234,5 +233,3 @@ public:
 };
 
 }
-
-#endif

@@ -1,6 +1,6 @@
 #include "renderer/impl/snippet/snippet_ucolor.h"
 
-#include "core/impl/uploader/input_variable.h"
+#include "core/impl/uploader/uploader_of_variable.h"
 
 #include "renderer/base/pipeline_building_context.h"
 #include "renderer/base/pipeline_layout.h"
@@ -16,7 +16,7 @@ SnippetUColor::SnippetUColor(sp<Vec4> color)
 void SnippetUColor::preInitialize(PipelineBuildingContext& context)
 {
     ShaderPreprocessor& fragment = context.getStage(PipelineInput::SHADER_STAGE_FRAGMENT);
-    context.addUniform("u_Color", Uniform::TYPE_F4, 1, sp<InputVariable<V4>>::make(_color), -1);
+    context.addUniform("u_Color", Uniform::TYPE_F4, 1, sp<UploaderOfVariable<V4>>::make(_color), -1);
     fragment.addOutputVarModifier("u_Color");
 }
 

@@ -267,14 +267,14 @@ void ShaderPreprocessor::linkPreStage(const ShaderPreprocessor& preStage, std::s
     linkParameters(_main_block->_args, preStage, passThroughVars);
 }
 
-sp<Uniform> ShaderPreprocessor::makeUniformInput(const String& name, Uniform::Type type) const
+sp<Uniform> ShaderPreprocessor::makeUniformInput(String name, Uniform::Type type) const
 {
     if(!_declaration_uniforms.has(name))
         return nullptr;
 
     const Declaration& declaration = _declaration_uniforms.vars().at(name);
     DCHECK(Uniform::toType(declaration.type()) == type, "Uniform \"%s\" declared type: %s, but it should be %d", name.c_str(), declaration.type().c_str(), type);
-    return sp<Uniform>::make(name, type, 1, nullptr);
+    return sp<Uniform>::make(std::move(name), type, 1, nullptr);
 }
 
 String ShaderPreprocessor::outputName() const

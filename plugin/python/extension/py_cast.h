@@ -91,7 +91,7 @@ public:
 
     template<> Optional<long> toCppObject_impl<long>(PyObject* object) {
         if(PyLong_Check(object))
-            return static_cast<long>(PyLong_AsLong(object));
+            return {PyLong_AsLong(object)};
         return {};
     }
 
@@ -108,7 +108,7 @@ public:
             catch(const std::exception& e) {
                 PyBridge::setRuntimeErrString(e.what());
             }
-            return (R)(0);
+            return static_cast<R>(0);
         }
     };
 

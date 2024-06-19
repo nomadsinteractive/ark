@@ -3,6 +3,7 @@
 #include <cctype>
 
 #include <imgui.h>
+#include <ImGuizmo.h>
 
 #include "core/ark.h"
 #include "core/types/global.h"
@@ -127,6 +128,7 @@ void RendererImgui::render(RenderRequest& renderRequest, const V3& position)
     io.DisplaySize.y = _render_engine->viewport().height();
 
     ImGui::NewFrame();
+    ImGuizmo::BeginFrame();
     _renderer_group->render(renderRequest, position);
     ImGui::EndFrame();
     ImGui::Render();

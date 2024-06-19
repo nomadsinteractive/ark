@@ -87,21 +87,20 @@ void PipelineLayout::initialize()
     _images = makeBindingImages();
 }
 
-void PipelineLayout::tryBindUniform(const ShaderPreprocessor& shaderPreprocessor, const String& name, sp<Uploader> input)
+void PipelineLayout::tryBindUniformMatrix(const ShaderPreprocessor& shaderPreprocessor, String name, sp<Mat4> matrix)
 {
-    sp<Uniform> uniform = shaderPreprocessor.makeUniformInput(name, Uniform::TYPE_MAT4);
-    if(uniform)
+    if(sp<Uniform> uniform = shaderPreprocessor.makeUniformInput(std::move(name), Uniform::TYPE_MAT4))
     {
-        uniform->setUploader(std::move(input));
+        uniform->setUploader(sp<UploaderOfVariable<M4>>::make(std::move(matrix)));
         _building_context->addUniform(std::move(uniform));
     }
 }
 
 void PipelineLayout::tryBindCamera(const ShaderPreprocessor& shaderPreprocessor, const Camera& camera)
 {
-    tryBindUniform(shaderPreprocessor, "u_VP", camera.vp());
-    tryBindUniform(shaderPreprocessor, "u_View", camera.view());
-    tryBindUniform(shaderPreprocessor, "u_Projection", camera.projection());
+    tryBindUniformMatrix(shaderPreprocessor, "u_VP", camera.vp());
+    tryBindUniformMatrix(shaderPreprocessor, "u_View", camera.view());
+    tryBindUniformMatrix(shaderPreprocessor, "u_Projection", camera.projection());
 }
 
 Table<String, sp<Texture>> PipelineLayout::makeBindingSamplers() const

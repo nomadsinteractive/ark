@@ -6,7 +6,6 @@
 #include "core/ark.h"
 
 #include "core/impl/variable/variable_wrapper.h"
-#include "core/impl/writable/writable_memory.h"
 #include "core/inf/writable.h"
 #include "core/types/global.h"
 #include "core/util/updatable_util.h"
@@ -26,18 +25,18 @@ namespace ark {
 
 namespace {
 
-class OrthoMatrixVariable : public Mat4 {
+class OrthoMatrixVariable final : public Mat4 {
 public:
     OrthoMatrixVariable(sp<Camera::Delegate> delegate, sp<Vec2> leftTop, sp<Vec2> rightBottom, sp<Vec2> clip)
         : _delegate(std::move(delegate)), _left_top(std::move(leftTop)), _right_bottom(std::move(rightBottom)), _clip(std::move(clip)),
           _matrix(calcMatrix()) {
     }
 
-    virtual M4 val() override {
+    M4 val() override {
         return _matrix;
     }
 
-    virtual bool update(uint64_t timestamp) override {
+    bool update(uint64_t timestamp) override {
         if(UpdatableUtil::update(timestamp, _left_top, _right_bottom, _clip)) {
             _matrix = calcMatrix();
             return true;
@@ -63,18 +62,18 @@ private:
     M4 _matrix;
 };
 
-class FrustumMatrixVariable : public Mat4 {
+class FrustumMatrixVariable final : public Mat4 {
 public:
     FrustumMatrixVariable(sp<Camera::Delegate> delegate, sp<Vec3> position, sp<Vec3> target, sp<Vec3> up)
         : _delegate(std::move(delegate)), _position(std::move(position)), _target(std::move(target)), _up(std::move(up)),
           _matrix(_delegate->lookAt(_position->val(), _target->val(), _up->val())) {
     }
 
-    virtual M4 val() override {
+    M4 val() override {
         return _matrix;
     }
 
-    virtual bool update(uint64_t timestamp) override {
+    bool update(uint64_t timestamp) override {
         if(UpdatableUtil::update(timestamp, _position, _target, _up)) {
             _matrix = _delegate->lookAt(_position->val(), _target->val(), _up->val());
             return true;
@@ -92,17 +91,17 @@ private:
     M4 _matrix;
 };
 
-class MulMatrixVariable : public Mat4 {
+class MulMatrixVariable final : public Mat4 {
 public:
     MulMatrixVariable(sp<Mat4> lvalue, sp<Mat4> rvalue)
         : _lvalue(std::move(lvalue)), _rvalue(std::move(rvalue)), _matrix(MatrixUtil::mul(_lvalue->val(), _rvalue->val())) {
     }
 
-    virtual M4 val() override {
+    M4 val() override {
         return _matrix;
     }
 
-    virtual bool update(uint64_t timestamp) override {
+    bool update(uint64_t timestamp) override {
         if(UpdatableUtil::update(timestamp, _lvalue, _rvalue)) {
             _matrix = MatrixUtil::mul(_lvalue->val(), _rvalue->val());
             return true;
@@ -117,9 +116,9 @@ private:
     M4 _matrix;
 };
 
-}
+const char sclipNearclipFarPlaneWarning[] = "ClipNear: %.2f, ClipFar: %.2f. Far plane should be further than near plane, and distance to the near plane should be greater than zero.";
 
-static const char sclipNearclipFarPlaneWarning[] = "ClipNear: %.2f, ClipFar: %.2f. Far plane should be further than near plane, and distance to the near plane should be greater than zero.";
+}
 
 Camera::Camera()
     : Camera(Ark::instance().applicationContext()->renderController()->createCamera())
@@ -127,8 +126,8 @@ Camera::Camera()
 }
 
 Camera::Camera(Ark::RendererCoordinateSystem cs, sp<Delegate> delegate)
-    : _coordinate_system(cs), _delegate(std::move(delegate)), _view(sp<Holder>::make(sp<Mat4::Const>::make(M4()))), _projection(sp<Holder>::make(sp<Mat4::Const>::make(M4()))),
-      _vp(sp<Holder>::make(sp<Mat4::Const>::make(M4()))), _position(sp<VariableWrapper<V3>>::make(V3(0))), _target(sp<VariableWrapper<V3>>::make(V3(0)))
+    : _coordinate_system(cs), _delegate(std::move(delegate)), _view(sp<Mat4>::make<Mat4Wrapper>(M4())), _projection(sp<Mat4>::make<Mat4Wrapper>(M4())),
+      _vp(sp<Mat4>::make<Mat4Wrapper>(Mat4Type::matmul(_projection.cast<Mat4>(), _view.cast<Mat4>()))), _position(sp<VariableWrapper<V3>>::make(V3(0))), _target(sp<VariableWrapper<V3>>::make(V3(0)))
 {
 }
 
@@ -139,14 +138,12 @@ void Camera::ortho(const V2& leftTop, const V2& rightBottom, const V2& clip)
 
 void Camera::ortho(sp<Vec2> leftTop, sp<Vec2> rightBottom, sp<Vec2> clip)
 {
-    _projection->setMatrix(sp<OrthoMatrixVariable>::make(_delegate, std::move(leftTop), std::move(rightBottom), std::move(clip)));
-    updateViewProjection();
+    _projection->set(sp<Mat4>::make<OrthoMatrixVariable>(_delegate, std::move(leftTop), std::move(rightBottom), std::move(clip)));
 }
 
 void Camera::ortho(float left, float right, float bottom, float top, float clipNear, float clipFar)
 {
-    _projection->setMatrix(sp<Mat4::Const>::make(_delegate->ortho(left, right, bottom, top, clipNear, clipFar)));
-    updateViewProjection();
+    _projection->set(_delegate->ortho(left, right, bottom, top, clipNear, clipFar));
 }
 
 void Camera::ortho(float left, float right, float bottom, float top, float clipNear, float clipFar, Ark::RendererCoordinateSystem coordinateSystem)
@@ -162,39 +159,32 @@ void Camera::ortho(float left, float right, float bottom, float top, float clipN
 void Camera::frustum(float left, float right, float bottom, float top, float clipNear, float clipFar)
 {
     CHECK_WARN(clipFar > clipNear && clipNear > 0, sclipNearclipFarPlaneWarning, clipNear, clipFar);
-    _projection->setMatrix(sp<Mat4::Const>::make(_delegate->frustum(left, right, bottom, top, clipNear, clipFar)));
-    updateViewProjection();
+    _projection->set(_delegate->frustum(left, right, bottom, top, clipNear, clipFar));
 }
 
 void Camera::perspective(float fov, float aspect, float clipNear, float clipFar)
 {
     CHECK_WARN(clipFar > clipNear && clipNear > 0, sclipNearclipFarPlaneWarning, clipNear, clipFar);
-    _projection->setMatrix(sp<Mat4::Const>::make(_delegate->perspective(fov, aspect, clipNear, clipFar)));
-    updateViewProjection();
+    _projection->set(_delegate->perspective(fov, aspect, clipNear, clipFar));
 }
 
 void Camera::lookAt(const V3& position, const V3& target, const V3& up)
 {
     _position->set(position);
     _target->set(target);
-    _view->setMatrix(sp<Mat4::Const>::make(_delegate->lookAt(position, target, up)));
-    updateViewProjection();
+    _view->set(_delegate->lookAt(position, target, up));
 }
 
-void Camera::lookAt(const sp<Vec3>& position, const sp<Vec3>& target, const sp<Vec3>& up)
+void Camera::lookAt(sp<Vec3> position, sp<Vec3> target, sp<Vec3> up)
 {
     _position->set(position);
     _target->set(target);
-    _view->setMatrix(sp<FrustumMatrixVariable>::make(_delegate, position, target, up));
-    updateViewProjection();
+    _view->set(sp<Mat4>::make<FrustumMatrixVariable>(_delegate, std::move(position), std::move(target), std::move(up)));
 }
 
 V3 Camera::toWorldPosition(float screenX, float screenY, float z) const
 {
-    M4 vp;
-    WritableMemory wm(&vp);
-    _vp->upload(wm);
-    return Ark::instance().applicationContext()->renderEngine()->toWorldPosition(vp, screenX, screenY, z);
+    return Ark::instance().applicationContext()->renderEngine()->toWorldPosition(_vp->val(), screenX, screenY, z);
 }
 
 sp<Vec3> Camera::toViewportPosition(const sp<Vec3>& position) const
@@ -214,41 +204,36 @@ sp<Vec3> Camera::target() const
     return _target;
 }
 
-sp<Mat4> Camera::matrixView() const
-{
-    return _view;
-}
-
-sp<Mat4> Camera::matrixProjection() const
-{
-    return _projection;
-}
-
-sp<Mat4> Camera::matrixViewProjection() const
-{
-    return _vp;
-}
-
 void Camera::assign(const Camera& other)
 {
     _coordinate_system = other._coordinate_system;
     _delegate = other._delegate;
-    _view->setMatrix(other._view);
-    _projection->setMatrix(other._projection);
-    _vp->setMatrix(other._vp);
+    _view->set(other.view());
+    _projection->set(other.projection());
+    _vp->set(other.vp());
 }
 
-const sp<Camera::Holder>& Camera::view() const
+sp<Mat4> Camera::view() const
 {
     return _view;
 }
 
-const sp<Camera::Holder>& Camera::projection() const
+void Camera::setView(sp<Mat4> view)
+{
+    _view->set(std::move(view));
+}
+
+sp<Mat4> Camera::projection() const
 {
     return _projection;
 }
 
-const sp<Camera::Holder>& Camera::vp() const
+void Camera::setProjection(sp<Mat4> projection)
+{
+    _projection->set(std::move(projection));
+}
+
+sp<Mat4> Camera::vp() const
 {
     return _vp;
 }
@@ -258,41 +243,6 @@ sp<Camera> Camera::getDefaultCamera()
     const Global<Camera> camera;
     DCHECK(camera->vp(), "Default camera has not been uninitialized");
     return camera;
-}
-
-void Camera::updateViewProjection()
-{
-    _vp->setMatrix(sp<MulMatrixVariable>::make(_projection->matrix(), _view->matrix()));
-}
-
-Camera::Holder::Holder(sp<Mat4> value)
-    : Uploader(sizeof(M4)), _matrix(std::move(value)) {
-}
-
-void Camera::Holder::upload(Writable& buf)
-{
-    buf.writeObject(_matrix->val());
-}
-
-bool Camera::Holder::update(uint64_t timestamp)
-{
-    return _matrix->update(timestamp) || _timestamp.update(timestamp);
-}
-
-M4 Camera::Holder::val()
-{
-    return _matrix->val();
-}
-
-const sp<Mat4>& Camera::Holder::matrix() const
-{
-    return _matrix;
-}
-
-void Camera::Holder::setMatrix(sp<Mat4> matrix)
-{
-    _matrix = std::move(matrix);
-    _timestamp.markDirty();
 }
 
 M4 Camera::DelegateLH_ZO::frustum(float left, float right, float bottom, float top, float clipNear, float clipFar)

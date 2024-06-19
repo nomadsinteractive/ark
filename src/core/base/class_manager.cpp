@@ -4,14 +4,14 @@
 
 namespace ark {
 
-Class* ClassManager::addClass(TypeId id, const char* name, IClass* impl)
+Class* ClassManager::addClass(TypeId id, const char* name, std::unique_ptr<IClass> impl)
 {
     const std::scoped_lock<std::mutex> guard(_mutex);
 
     if(const auto iter = _classes.find(id); iter != _classes.end())
         return iter->second.get();
 
-    Class* clazz = new Class(id, name, impl);
+    Class* clazz = new Class(id, name, std::move(impl));
     _classes[id] = std::unique_ptr<Class>(clazz);
     return clazz;
 }

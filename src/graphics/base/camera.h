@@ -7,30 +7,12 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
-#include "graphics/base/viewport.h"
 #include "graphics/base/v3.h"
 
 namespace ark {
 
 class ARK_API Camera {
 public:
-    class Holder : public Uploader, public Mat4 {
-    public:
-        Holder(sp<Mat4> value);
-
-        virtual void upload(Writable& buf) override;
-        virtual bool update(uint64_t timestamp) override;
-
-        virtual M4 val() override;
-
-        const sp<Mat4>& matrix() const;
-        void setMatrix(sp<Mat4> matrix);
-
-    private:
-        sp<Mat4> _matrix;
-        Timestamp _timestamp;
-    };
-
     class Delegate {
     public:
         virtual ~Delegate() = default;
@@ -41,36 +23,36 @@ public:
         virtual M4 perspective(float fov, float aspect, float clipNear, float clipFar) = 0;
     };
 
-    class DelegateLH_ZO : public Delegate {
+    class DelegateLH_ZO final : public Delegate {
     public:
-        virtual M4 frustum(float left, float right, float bottom, float top, float clipNear, float clipFar) override;
-        virtual M4 lookAt(const V3& position, const V3& target, const V3& up) override;
-        virtual M4 ortho(float left, float right, float bottom, float top, float clipNear, float clipFar) override;
-        virtual M4 perspective(float fov, float aspect, float clipNear, float clipFar) override;
+        M4 frustum(float left, float right, float bottom, float top, float clipNear, float clipFar) override;
+        M4 lookAt(const V3& position, const V3& target, const V3& up) override;
+        M4 ortho(float left, float right, float bottom, float top, float clipNear, float clipFar) override;
+        M4 perspective(float fov, float aspect, float clipNear, float clipFar) override;
     };
 
-    class DelegateRH_ZO : public Delegate {
+    class DelegateRH_ZO final : public Delegate {
     public:
-        virtual M4 frustum(float left, float right, float bottom, float top, float clipNear, float clipFar) override;
-        virtual M4 lookAt(const V3& position, const V3& target, const V3& up) override;
-        virtual M4 ortho(float left, float right, float bottom, float top, float clipNear, float clipFar) override;
-        virtual M4 perspective(float fov, float aspect, float clipNear, float clipFar) override;
+        M4 frustum(float left, float right, float bottom, float top, float clipNear, float clipFar) override;
+        M4 lookAt(const V3& position, const V3& target, const V3& up) override;
+        M4 ortho(float left, float right, float bottom, float top, float clipNear, float clipFar) override;
+        M4 perspective(float fov, float aspect, float clipNear, float clipFar) override;
     };
 
-    class DelegateLH_NO : public Delegate {
+    class DelegateLH_NO final : public Delegate {
     public:
-        virtual M4 frustum(float left, float right, float bottom, float top, float clipNear, float clipFar) override;
-        virtual M4 lookAt(const V3& position, const V3& target, const V3& up) override;
-        virtual M4 ortho(float left, float right, float bottom, float top, float clipNear, float clipFar) override;
-        virtual M4 perspective(float fov, float aspect, float clipNear, float clipFar) override;
+        M4 frustum(float left, float right, float bottom, float top, float clipNear, float clipFar) override;
+        M4 lookAt(const V3& position, const V3& target, const V3& up) override;
+        M4 ortho(float left, float right, float bottom, float top, float clipNear, float clipFar) override;
+        M4 perspective(float fov, float aspect, float clipNear, float clipFar) override;
     };
 
-    class DelegateRH_NO : public Delegate {
+    class DelegateRH_NO final : public Delegate {
     public:
-        virtual M4 frustum(float left, float right, float bottom, float top, float clipNear, float clipFar) override;
-        virtual M4 lookAt(const V3& position, const V3& target, const V3& up) override;
-        virtual M4 ortho(float left, float right, float bottom, float top, float clipNear, float clipFar) override;
-        virtual M4 perspective(float fov, float aspect, float clipNear, float clipFar) override;
+        M4 frustum(float left, float right, float bottom, float top, float clipNear, float clipFar) override;
+        M4 lookAt(const V3& position, const V3& target, const V3& up) override;
+        M4 ortho(float left, float right, float bottom, float top, float clipNear, float clipFar) override;
+        M4 perspective(float fov, float aspect, float clipNear, float clipFar) override;
     };
 
 public:
@@ -94,7 +76,7 @@ public:
 //  [[script::bindings::auto]]
     void lookAt(const V3& position, const V3& target, const V3& up);
 //  [[script::bindings::auto]]
-    void lookAt(const sp<Vec3>& position, const sp<Vec3>& target, const sp<Vec3>& up);
+    void lookAt(sp<Vec3> position, sp<Vec3> target, sp<Vec3> up);
 
 //  [[script::bindings::auto]]
     V3 toWorldPosition(float screenX, float screenY, float z) const;
@@ -107,30 +89,27 @@ public:
     sp<Vec3> target() const;
 
 //  [[script::bindings::property]]
-    sp<Mat4> matrixView() const;
+    sp<Mat4> view() const;
 //  [[script::bindings::property]]
-    sp<Mat4> matrixProjection() const;
+    void setView(sp<Mat4> view);
 //  [[script::bindings::property]]
-    sp<Mat4> matrixViewProjection() const;
+    sp<Mat4> projection() const;
+//  [[script::bindings::property]]
+    void setProjection(sp<Mat4> projection);
+//  [[script::bindings::property]]
+    sp<Mat4> vp() const;
 
     void assign(const Camera& other);
 
-    const sp<Holder>& view() const;
-    const sp<Holder>& projection() const;
-    const sp<Holder>& vp() const;
-
     static sp<Camera> getDefaultCamera();
-
-private:
-    void updateViewProjection();
 
 private:
     Ark::RendererCoordinateSystem _coordinate_system;
     sp<Delegate> _delegate;
 
-    sp<Holder> _view;
-    sp<Holder> _projection;
-    sp<Holder> _vp;
+    sp<Mat4Wrapper> _view;
+    sp<Mat4Wrapper> _projection;
+    sp<Mat4Wrapper> _vp;
 
     sp<VariableWrapper<V3>> _position;
     sp<VariableWrapper<V3>> _target;

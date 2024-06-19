@@ -3,6 +3,7 @@
 #include <vector>
 
 #include <imgui.h>
+#include <ImGuizmo.h>
 
 #include "core/base/string_buffer.h"
 #include "core/impl/variable/variable_wrapper.h"
@@ -127,7 +128,7 @@ private:
     String _name;
 };
 
-class WidgetText : public Widget {
+class WidgetText final : public Widget {
 public:
     WidgetText(std::function<void(const char*)> func, String content)
         : _func(std::move(func)), _content(std::move(content)) {
@@ -142,7 +143,7 @@ private:
     String _content;
 };
 
-class Image : public Widget {
+class Image final : public Widget {
 public:
     Image(sp<Texture> texture, sp<Vec2> size, const V2& uv0, const V2& uv1, sp<Vec4> color, sp<Vec4> borderColor, sp<RendererContext> rendererContext)
         : _texture(std::move(texture)), _size(!size && _texture ? Vec3Type::xy(_texture->size()) : std::move(size)), _uv0(*reinterpret_cast<const ImVec2*>(&uv0)), _uv1(*reinterpret_cast<const ImVec2*>(&uv1)),
@@ -174,29 +175,28 @@ private:
 };
 
 
-class FunctionCall : public Widget {
+class FunctionCall final : public Widget {
 public:
-    FunctionCall(std::function<void(void)> func)
+    FunctionCall(std::function<void()> func)
         : _func(std::move(func)) {
     }
 
-    virtual void render() override {
+    void render() override {
         _func();
     }
 
 private:
-    std::function<void(void)> _func;
-
+    std::function<void()> _func;
 };
 
-template<typename T> class Input : public Widget {
+template<typename T> class Input final : public Widget {
 public:
     Input(std::function<bool(const char*, T*)> func, String label, const sp<Variable<T>>& value)
         : _func(std::move(func)), _label(std::move(label)), _value(value.template tryCast<VariableWrapper<T>>()) {
         DCHECK(_value, "Value should be a Wrapper class");
     }
 
-    virtual void render() override {
+    void render() override {
         T v = _value->val();
         if(_func(_label.c_str(), &v))
             _value->set(v);
@@ -214,7 +214,7 @@ public:
         : _label(std::move(label)), _value(std::move(value)), _func(std::move(func)) {
     }
 
-    virtual void render() override {
+    void render() override {
         T v = _value->val();
         if(_func(_label.c_str(), &v))
         {
@@ -273,7 +273,7 @@ private:
 };
 
 
-class DemoWindow : public Widget {
+class DemoWindow final : public Widget {
 public:
     DemoWindow(std::function<void(bool*)> func, sp<BooleanWrapper> isOpen)
         : _func(std::move(func)), _is_open(std::move(isOpen)) {
@@ -301,6 +301,99 @@ bool Items_VectorGetter(void* data, int idx, const char** out_text)
         *out_text = items->at(static_cast<size_t>(idx)).c_str();
     return true;
 }
+
+class GuizmoTransformEdit final : public Widget {
+public:
+    GuizmoTransformEdit(sp<Mat4::Impl> matrix, sp<Camera> camera)
+        : _matrix(std::move(matrix)), _camera(std::move(camera))
+    {
+        ImGuizmo::SetOrthographic(true);
+    }
+
+    void render() override
+    {
+        static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::ROTATE);
+        static ImGuizmo::MODE mCurrentGizmoMode(ImGuizmo::WORLD);
+        ImGui::PushID(this);
+        if (ImGui::IsKeyPressed(ImGuiKey_T))
+            mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
+        if (ImGui::IsKeyPressed(ImGuiKey_R))
+            mCurrentGizmoOperation = ImGuizmo::ROTATE;
+        if (ImGui::IsKeyPressed(ImGuiKey_E))
+            mCurrentGizmoOperation = ImGuizmo::SCALE;
+        if (ImGui::RadioButton("Translate", mCurrentGizmoOperation == ImGuizmo::TRANSLATE))
+            mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
+        ImGui::SameLine();
+        if (ImGui::RadioButton("Rotate", mCurrentGizmoOperation == ImGuizmo::ROTATE))
+            mCurrentGizmoOperation = ImGuizmo::ROTATE;
+        ImGui::SameLine();
+        if (ImGui::RadioButton("Scale", mCurrentGizmoOperation == ImGuizmo::SCALE))
+            mCurrentGizmoOperation = ImGuizmo::SCALE;
+
+        M4 matrix = _matrix->val();
+        float matrixTranslation[3], matrixRotation[3], matrixScale[3];
+        ImGuizmo::DecomposeMatrixToComponents(matrix.value(), matrixTranslation, matrixRotation, matrixScale);
+        ImGui::InputFloat3("Tr", matrixTranslation);
+        ImGui::InputFloat3("Rt", matrixRotation);
+        ImGui::InputFloat3("Sc", matrixScale);
+        ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale, matrix.value());
+
+        if (mCurrentGizmoOperation != ImGuizmo::SCALE)
+        {
+            if (ImGui::RadioButton("Local", mCurrentGizmoMode == ImGuizmo::LOCAL))
+                mCurrentGizmoMode = ImGuizmo::LOCAL;
+            ImGui::SameLine();
+            if (ImGui::RadioButton("World", mCurrentGizmoMode == ImGuizmo::WORLD))
+                mCurrentGizmoMode = ImGuizmo::WORLD;
+        }
+        const bool useSnap = ImGui::IsKeyDown(ImGuiMod_Ctrl);
+        float snapX = 0, snapY = 0;
+        switch (mCurrentGizmoOperation)
+        {
+        case ImGuizmo::TRANSLATE:
+            // snap = config.mSnapTranslation;
+            ImGui::InputFloat3("Snap", &snapX);
+            break;
+        case ImGuizmo::ROTATE:
+            // snap = config.mSnapRotation;
+            ImGui::InputFloat("Angle Snap", &snapX);
+            break;
+        case ImGuizmo::SCALE:
+            // snap = config.mSnapScale;
+            ImGui::InputFloat("Scale Snap", &snapX);
+            break;
+        }
+        ImGuiIO& io = ImGui::GetIO();
+        ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
+
+        M4 cameraView = _camera->view()->val();
+        M4 cameraProjection = _camera->projection()->val();
+        ImGuizmo::Manipulate(cameraView.value(), cameraProjection.value(), mCurrentGizmoOperation, mCurrentGizmoMode, matrix.value(), nullptr, useSnap ? &snapX : nullptr);
+        _matrix->set(matrix);
+        ImGui::PopID();
+    }
+
+private:
+    sp<Mat4::Impl> _matrix;
+    sp<Camera> _camera;
+};
+
+class GuizmoViewEdit final : public Widget {
+public:
+    GuizmoViewEdit(sp<Mat4::Impl> view)
+        : _view(std::move(view)) {
+    }
+
+    void render() override
+    {
+        M4 view = _view->val();
+        ImGuizmo::ViewManipulate(view.value(), 1, ImVec2(20, 20), ImVec2(50, 50), 0x888888);
+        _view->set(view);
+    }
+
+private:
+    sp<Mat4::Impl> _view;
+};
 
 }
 
@@ -542,6 +635,22 @@ sp<Boolean> WidgetBuilder::beginTabItem(String label, const sp<Boolean>& pOpen, 
 void WidgetBuilder::endTabItem()
 {
     pop();
+}
+
+void WidgetBuilder::guizmoTransformEdit(const sp<Transform>& transform, sp<Camera> camera)
+{
+    sp<Mat4::Impl> matrix = sp<Mat4::Impl>::make(transform->val());
+    transform->reset(matrix);
+    addWidget(sp<Widget>::make<GuizmoTransformEdit>(std::move(matrix), std::move(camera)));
+}
+
+void WidgetBuilder::guizmoViewEdit(const sp<Mat4>& view)
+{
+    const sp<Mat4Wrapper>& viewWrapper = view.tryCast<Mat4Wrapper>();
+    CHECK(viewWrapper, "Cannot edit non-wrapped view matrix");
+    sp<Mat4::Impl> viewImpl = sp<Mat4::Impl>::make(viewWrapper->val());
+    viewWrapper->reset(viewImpl);
+    addWidget(sp<Widget>::make<GuizmoViewEdit>(std::move(viewImpl)));
 }
 
 sp<Widget> WidgetBuilder::makeAboutWidget(sp<Boolean> isOpen)

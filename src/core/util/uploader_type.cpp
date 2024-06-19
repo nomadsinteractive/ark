@@ -5,7 +5,7 @@
 #include "core/impl/uploader/uploader_array.h"
 #include "core/impl/uploader/input_repeat.h"
 #include "core/impl/uploader/input_variable_array.h"
-#include "core/impl/uploader/input_variable.h"
+#include "core/impl/uploader/uploader_of_variable.h"
 #include "core/impl/writable/writable_memory.h"
 #include "core/impl/writable/writable_with_offset.h"
 #include "core/impl/uploader/uploader_wrapper.h"
@@ -80,27 +80,27 @@ sp<Uploader> UploaderType::create(sp<IntArray> value, size_t size)
 
 sp<Uploader> UploaderType::create(sp<Integer> value, size_t size)
 {
-    return reserve(sp<InputVariable<int32_t>>::make(std::move(value)), size);
+    return reserve(sp<UploaderOfVariable<int32_t>>::make(std::move(value)), size);
 }
 
 sp<Uploader> UploaderType::create(sp<Numeric> value, size_t size)
 {
-    return reserve(sp<InputVariable<float>>::make(std::move(value)), size);
+    return reserve(sp<UploaderOfVariable<float>>::make(std::move(value)), size);
 }
 
 sp<Uploader> UploaderType::create(sp<Vec2> value, size_t size)
 {
-    return reserve(sp<InputVariable<V2>>::make(std::move(value)), size);
+    return reserve(sp<UploaderOfVariable<V2>>::make(std::move(value)), size);
 }
 
 sp<Uploader> UploaderType::create(sp<Vec3> value, size_t size)
 {
-    return reserve(sp<InputVariable<V3>>::make(std::move(value)), size);
+    return reserve(sp<UploaderOfVariable<V3>>::make(std::move(value)), size);
 }
 
 sp<Uploader> UploaderType::create(sp<Vec4> value, size_t size)
 {
-    return reserve(sp<InputVariable<V4>>::make(std::move(value)), size);
+    return reserve(sp<UploaderOfVariable<V4>>::make(std::move(value)), size);
 }
 
 sp<Uploader> UploaderType::create(std::map<size_t, sp<Uploader>> value, size_t size)

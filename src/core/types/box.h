@@ -58,7 +58,7 @@ public:
         if(!_stub)
             return nullptr;
 
-        TypeId typeId = Type<T>::id();
+        const TypeId typeId = Type<T>::id();
         const PtrStub& ptrStub = std::get<PtrStub>(*_stub);
         sp<T> inst = typeId == _type_id ? ptrStub.unpack<T>() : _class->cast(*this, typeId).toPtr<T>();
         if(!inst) {

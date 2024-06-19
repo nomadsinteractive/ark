@@ -9,7 +9,7 @@
 #include "core/inf/array.h"
 #include "core/inf/builder.h"
 #include "core/inf/holder.h"
-#include "core/impl/uploader/input_variable.h"
+#include "core/impl/uploader/uploader_of_variable.h"
 #include "core/types/shared_ptr.h"
 #include "core/util/strings.h"
 
@@ -126,7 +126,7 @@ private:
     template<typename T> void setProperty(const String& name, sp<Variable<T>> var) {
         String cname = Strings::capitalizeFirst(name);
         _properties[cname] = var;
-        setSlotInput(std::move(cname), sp<Uploader>::make<InputVariable<T>>(std::move(var)));
+        setSlotInput(std::move(cname), sp<Uploader>::make<UploaderOfVariable<T>>(std::move(var)));
         _timestamp.markDirty();
     }
 

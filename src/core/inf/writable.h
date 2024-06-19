@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_INF_WRITABLE_INF_
-#define ARK_CORE_INF_WRITABLE_INF_
+#pragma once
 
 #include <stdint.h>
 
@@ -20,5 +19,3 @@ public:
 };
 
 }
-
-#endif

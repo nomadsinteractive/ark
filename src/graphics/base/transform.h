@@ -57,16 +57,16 @@ public:
 
         V3 transform(const V3& p) const;
 
-        template<typename T> T* makeData() {
+        template<typename T> T& makeData() {
             T* data = reinterpret_cast<T*>(_data);
             _magic = ark::Type<T>::id();
-            return data;
+            return *data;
         }
 
-        template<typename T> const T* getData() const {
+        template<typename T> const T& getData() const {
             DCHECK(_magic == ark::Type<T>::id(), "Transform magic mismatch, this Snapshot was taken by a different transform delegate");
             const T* data = reinterpret_cast<const T*>(_data);
-            return data;
+            return *data;
         }
 
         sp<Delegate> _delegate;
@@ -93,6 +93,8 @@ public:
     const sp<Vec3>& translation();
 //  [[script::bindings::property]]
     void setTranslation(sp<Vec3> translation);
+
+    void reset(sp<Mat4> transform);
 
 private:
     sp<Delegate> makeDelegate() const;

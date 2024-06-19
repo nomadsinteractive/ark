@@ -799,15 +799,23 @@ class Camera:
         return None
 
     @property
-    def matrix_view(self) -> 'Mat4':
-        return None
+    def view(self) -> 'Mat4':
+        pass
+
+    @view.setter
+    def view(self, view: 'Mat4'):
+        pass
 
     @property
-    def matrix_projection(self) -> 'Mat4':
-        return None
+    def projection(self) -> 'Mat4':
+        pass
+
+    @projection.setter
+    def projection(self, projection: 'Mat4'):
+        pass
 
     @property
-    def matrix_view_projection(self) -> 'Mat4':
+    def vp(self) -> 'Mat4':
         return None
 
     def ortho(self, left_top: TYPE_VEC2, right_bottom: TYPE_VEC2, clip: TYPE_VEC2):

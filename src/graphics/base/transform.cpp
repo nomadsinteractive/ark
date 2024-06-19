@@ -43,6 +43,31 @@ private:
     M4 _value;
 };
 
+class TransformDelegateMat4 final : public Transform::Delegate {
+public:
+    TransformDelegateMat4(sp<Mat4> matrix)
+        : _matrix(std::move(matrix)) {
+    }
+
+    void snapshot(const Transform::Stub& transform, Transform::Snapshot& snapshot) const override
+    {
+        snapshot.makeData<M4>() = _matrix->val();
+    }
+
+    V3 transform(const Transform::Snapshot& snapshot, const V3& position) const override
+    {
+        return MatrixUtil::mul(snapshot.getData<M4>(), position);
+    }
+
+    M4 toMatrix(const Transform::Snapshot& snapshot) const override
+    {
+        return snapshot.getData<M4>();
+    }
+
+private:
+    sp<Mat4> _matrix;
+};
+
 }
 
 Transform::Transform(Type type, sp<Rotation> rotate, sp<Vec3> scale, sp<Vec3> translation)
@@ -54,7 +79,7 @@ Transform::Transform(Type type, sp<Rotation> rotate, sp<Vec3> scale, sp<Vec3> tr
 Transform::Transform(sp<Transform::Delegate> delegate)
     : _type(TYPE_DELEGATED), _stub(sp<Stub>::make(Stub{{nullptr, V4(0, 0, 0, 1.0f)}, {nullptr, V3(1.0f)}, {}})), _delegate(std::move(delegate))
 {
-    _wrapped = sp<VariableDirty<M4>>::make(sp<Mat4>::make<TransformMat4>(*this), *this);
+    doUpdateDelegate();
 }
 
 Transform::Snapshot Transform::snapshot() const
@@ -105,15 +130,23 @@ void Transform::setTranslation(sp<Vec3> translation)
     doUpdateDelegate();
 }
 
+void Transform::reset(sp<Mat4> transform)
+{
+    _type = TYPE_DELEGATED;
+    _delegate = sp<Delegate>::make<TransformDelegateMat4>(std::move(transform));
+    doUpdateDelegate();
+}
+
 void Transform::doUpdateDelegate()
 {
-    _delegate = makeDelegate();
+    if(_type != TYPE_DELEGATED)
+        _delegate = makeDelegate();
     _wrapped = sp<VariableDirty<M4>>::make(sp<Mat4>::make<TransformMat4>(*this), *this);
 }
 
 sp<Transform::Delegate> Transform::makeDelegate() const
 {
-    DCHECK(_type != TYPE_DELEGATED, "Delegated Transform may not be updated");
+    CHECK(_type != TYPE_DELEGATED, "Delegated Transform may not be updated");
 
     if(!_stub->_rotation && !_stub->_scale && !_stub->_translation)
         return Null::toSafePtr<Transform::Delegate>(nullptr);
