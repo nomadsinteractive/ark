@@ -16,10 +16,13 @@ namespace ark {
 
 //[[script::bindings::extends(Mat4)]]
 class ARK_API Transform final : public Wrapper<Mat4>, public Mat4 {
-private:
-    struct Stub;
-
 public:
+    struct Stub {
+        SafeVar<Rotation> _rotation;
+        SafeVar<Vec3> _scale;
+        SafeVar<Vec3> _translation;
+    };
+
     class Snapshot;
 
     class Delegate {
@@ -66,7 +69,6 @@ public:
             return data;
         }
 
-    private:
         sp<Delegate> _delegate;
         TypeId _magic;
         alignas(64) uint8_t _data[72];
@@ -106,12 +108,6 @@ private:
             doUpdateDelegate();
         return var;
     }
-
-    struct Stub {
-        SafeVar<Rotation> _rotation;
-        SafeVar<Vec3> _scale;
-        SafeVar<Vec3> _translation;
-    };
 
     void doUpdateDelegate();
 
