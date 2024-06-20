@@ -279,7 +279,7 @@ public:
         : _func(std::move(func)), _is_open(std::move(isOpen)) {
     }
 
-    virtual void render() override {
+    void render() override {
         bool isOpen = _is_open->val();
         if(isOpen) {
             bool isOpenArg = isOpen;
@@ -307,7 +307,6 @@ public:
     GuizmoTransformEdit(sp<Mat4::Impl> matrix, sp<Camera> camera)
         : _matrix(std::move(matrix)), _camera(std::move(camera))
     {
-        ImGuizmo::SetOrthographic(true);
     }
 
     void render() override
@@ -380,19 +379,27 @@ private:
 
 class GuizmoViewEdit final : public Widget {
 public:
-    GuizmoViewEdit(sp<Mat4::Impl> view)
-        : _view(std::move(view)) {
+    GuizmoViewEdit(sp<Mat4::Impl> view, sp<Numeric> length, sp<Vec2> position, sp<Vec2> size, sp<Color> backgroundColor)
+        : _view(std::move(view)), _length(std::move(length)), _position(std::move(position)), _size(std::move(size)), _background_color(std::move(backgroundColor)) {
     }
 
     void render() override
     {
+        const float length = _length->val();
+        const V2 position = _position->val();
+        const V2 size = _size->val();
+        const uint32_t bgcolor = _background_color ? _background_color->value() : 0;
         M4 view = _view->val();
-        ImGuizmo::ViewManipulate(view.value(), 1, ImVec2(20, 20), ImVec2(50, 50), 0x888888);
+        ImGuizmo::ViewManipulate(view.value(), length, ImVec2(position.x(), position.y()), ImVec2(size.x(), size.y()), bgcolor);
         _view->set(view);
     }
 
 private:
     sp<Mat4::Impl> _view;
+    sp<Numeric> _length;
+    sp<Vec2> _position;
+    sp<Vec2> _size;
+    sp<Color> _background_color;
 };
 
 }
@@ -496,9 +503,9 @@ void WidgetBuilder::sliderInt(const String& label, const sp<Integer>& value, int
     addWidget(sp<Input<int32_t>>::make([vmin, vmax, format](const char* l, int32_t* v) { return ImGui::SliderInt(l, v, vmin, vmax, format.c_str()); }, label, value));
 }
 
-void WidgetBuilder::inputFloat(const String& label, const sp<Numeric>& value, float step, float step_fast, const String& format)
+void WidgetBuilder::inputFloat(const String& label, const sp<Numeric>& value, float step, float step_fast, const String& format, int32_t extra_flags)
 {
-    addWidget(sp<Input<float>>::make([step, step_fast, format](const char* l, float* v) { return ImGui::InputFloat(l, v, step, step_fast, format.c_str()); }, label, value));
+    addWidget(sp<Input<float>>::make([step, step_fast, format, extra_flags](const char* l, float* v) { return ImGui::InputFloat(l, v, step, step_fast, format.c_str(), extra_flags); }, label, value));
 }
 
 void WidgetBuilder::inputFloat2(const String& label, const sp<Vec2>& value, const String& format, int32_t flags)
@@ -644,13 +651,13 @@ void WidgetBuilder::guizmoTransformEdit(const sp<Transform>& transform, sp<Camer
     addWidget(sp<Widget>::make<GuizmoTransformEdit>(std::move(matrix), std::move(camera)));
 }
 
-void WidgetBuilder::guizmoViewEdit(const sp<Mat4>& view)
+void WidgetBuilder::guizmoViewEdit(const sp<Mat4>& view, sp<Numeric> length, sp<Vec2> position, sp<Vec2> size, sp<Color> backgroundColor)
 {
     const sp<Mat4Wrapper>& viewWrapper = view.tryCast<Mat4Wrapper>();
     CHECK(viewWrapper, "Cannot edit non-wrapped view matrix");
     sp<Mat4::Impl> viewImpl = sp<Mat4::Impl>::make(viewWrapper->val());
     viewWrapper->reset(viewImpl);
-    addWidget(sp<Widget>::make<GuizmoViewEdit>(std::move(viewImpl)));
+    addWidget(sp<Widget>::make<GuizmoViewEdit>(std::move(viewImpl), std::move(length), std::move(position), std::move(size), std::move(backgroundColor)));
 }
 
 sp<Widget> WidgetBuilder::makeAboutWidget(sp<Boolean> isOpen)

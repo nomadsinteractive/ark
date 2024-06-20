@@ -53,8 +53,8 @@ public:
     bool operator == (const Color& other) const;
     bool operator != (const Color& other) const;
 
-    virtual V4 val() override;
-    virtual bool update(uint64_t timestamp) override;
+    V4 val() override;
+    bool update(uint64_t timestamp) override;
 
     const sp<Vec4Impl>& wrapped() const;
 

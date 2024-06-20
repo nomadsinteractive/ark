@@ -12,8 +12,10 @@ namespace _internal {
 
 template<typename T, typename... INTERFACES> void _add_types(std::set<TypeId>& interfaces) {
     interfaces.insert(Type<T>::id());
-    if(const Class* clazz = Class::getClass(Type<T>::id()))
+    if(const Class* clazz = Class::getClass(Type<T>::id())) {
+        interfaces.insert(clazz->id());
         interfaces.insert(clazz->implements().begin(), clazz->implements().end());
+    }
     if constexpr(sizeof...(INTERFACES) > 0)
         _add_types<INTERFACES...>(interfaces);
 }

@@ -1,6 +1,6 @@
 from typing import Optional, Union
 
-from ark import Renderer, Boolean, Observer, String, Integer, Numeric, Texture, Vec2, Vec4
+from ark import Renderer, Boolean, Observer, String, Integer, Numeric, Texture, Vec2, Vec4, Vec3
 
 
 class Widget:
@@ -52,6 +52,18 @@ class WidgetBuilder:
         pass
 
     def slider_float4(self, label: str, value: Vec4, v_min: float, v_max: float, prompt_format: str = '%.3f'):
+        pass
+
+    def input_float(self, label: str, v: Numeric, step: float = 0, step_fast: float = 0, format: str = '%.3f', extra_flags: int = 0):
+        pass
+
+    def input_float2(self, label: str, v: Vec2, step: float = 0, step_fast: float = 0, format: str = '%.3f', extra_flags: int = 0):
+        pass
+
+    def input_float3(self, label: str, v: Vec3, step: float = 0, step_fast: float = 0, format: str = '%.3f', extra_flags: int = 0):
+        pass
+
+    def input_float4(self, label: str, v: Vec4, step: float = 0, step_fast: float = 0, format: str = '%.3f', extra_flags: int = 0):
         pass
 
     def input_int(self, label: str, value: Integer, step: int = 1, step_fast: int = 100, flags: int = 0):

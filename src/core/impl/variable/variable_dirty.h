@@ -28,7 +28,7 @@ public:
     }
 
     static void reset(Wrapper<Variable<T>>& wrapper, sp<Variable<T>> delegate) {
-        wrapper.reset(sp<Variable<T>>::make<VariableDirty>(std::move(delegate), wrapper));
+        wrapper.reset(sp<Variable<T>>::template make<VariableDirty>(std::move(delegate), wrapper));
     }
 
 private:

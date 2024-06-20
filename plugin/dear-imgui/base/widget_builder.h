@@ -72,7 +72,7 @@ public:
     void sliderInt(const String& label, const sp<Integer>& value, int32_t v_min, int32_t v_max, const String& format = "%d");
 
 // [[script::bindings::auto]]
-    void inputFloat(const String& label, const sp<Numeric>& value, float step = 0.0f, float step_fast = 0.0f, const String& format = "%.3f");
+    void inputFloat(const String& label, const sp<Numeric>& v, float step = 0.0f, float step_fast = 0.0f, const String& format = "%.3f", int32_t extra_flags = 0);
 // [[script::bindings::auto]]
     void inputFloat2(const String& label, const sp<Vec2>& value, const String& format = "%.3f", int32_t flags = 0);
 // [[script::bindings::auto]]
@@ -128,7 +128,7 @@ public:
 // [[script::bindings::auto]]
     void guizmoTransformEdit(const sp<Transform>& transform, sp<Camera> camera);
 // [[script::bindings::auto]]
-    void guizmoViewEdit(const sp<Mat4>& view);
+    void guizmoViewEdit(const sp<Mat4>& view, sp<Numeric> length, sp<Vec2> position, sp<Vec2> size, sp<Color> backgroundColor = nullptr);
 
 // [[script::bindings::auto]]
     sp<Widget> makeAboutWidget(sp<Boolean> isOpen = BooleanType::create(true));
