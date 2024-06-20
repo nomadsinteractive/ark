@@ -12,6 +12,11 @@ public:
         : _transform(std::move(transform)), _matrix(matrix) {
     }
 
+    bool update(const Transform::Stub& transform, uint64_t timestamp) override
+    {
+        return _transform->update(transform, timestamp);
+    }
+
     void snapshot(const Transform::Stub& transform, Transform::Snapshot& snapshot) const override {
         return _transform->snapshot(transform, snapshot);
     }

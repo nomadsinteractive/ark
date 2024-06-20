@@ -48,6 +48,9 @@ public:
     V2 floorDiv(const V2& other) const;
     V2 normalize() const;
 
+    const float* value() const;
+    float* value();
+
     const float& operator[](size_t idx) const;
     float& operator[](size_t idx);
 

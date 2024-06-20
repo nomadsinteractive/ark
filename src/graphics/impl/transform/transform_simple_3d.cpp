@@ -1,10 +1,17 @@
 #include "graphics/impl/transform/transform_simple_3d.h"
 
+#include "core/util/updatable_util.h"
+
 #include "graphics/base/mat.h"
 #include "graphics/base/v3.h"
 #include "graphics/util/matrix_util.h"
 
 namespace ark {
+
+bool TransformSimple3D::update(const Transform::Stub& transform, uint64_t timestamp)
+{
+    return UpdatableUtil::update(timestamp, transform._scale, transform._translation);
+}
 
 void TransformSimple3D::snapshot(const Transform::Stub& transform, Transform::Snapshot& snapshot) const
 {

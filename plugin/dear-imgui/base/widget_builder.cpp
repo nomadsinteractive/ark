@@ -39,7 +39,7 @@ private:
 
 namespace {
 
-class Window : public WidgetGroup {
+class Window final : public WidgetGroup {
 public:
     Window(String name, sp<BooleanWrapper> isOpen)
         : _name(std::move(name)), _is_open(std::move(isOpen)) {
@@ -112,7 +112,7 @@ private:
     sp<BooleanWrapper> _opened;
 };
 
-class WindowNoClose : public WidgetGroup {
+class WindowNoClose final : public WidgetGroup {
 public:
     WindowNoClose(String name)
         : _name(std::move(name)) {
@@ -134,7 +134,7 @@ public:
         : _func(std::move(func)), _content(std::move(content)) {
     }
 
-    virtual void render() override {
+    void render() override {
         _func(_content.c_str());
     }
 
@@ -208,7 +208,7 @@ private:
     sp<VariableWrapper<T>> _value;
 };
 
-template<typename T, typename U> class InputWithType : public Widget {
+template<typename T, typename U> class InputWithType final : public Widget {
 public:
     InputWithType(std::function<bool(const char*, T*)> func, String label, sp<Variable<T>> value)
         : _label(std::move(label)), _value(std::move(value)), _func(std::move(func)) {
@@ -345,29 +345,30 @@ public:
             if (ImGui::RadioButton("World", mCurrentGizmoMode == ImGuizmo::WORLD))
                 mCurrentGizmoMode = ImGuizmo::WORLD;
         }
-        const bool useSnap = ImGui::IsKeyDown(ImGuiMod_Ctrl);
-        float snapX = 0, snapY = 0;
+        const bool useSnap = ImGui::IsKeyDown(ImGuiKey_LeftCtrl);
+        ImGui::Text(useSnap ? "Snapping" : "(Hold Ctrl to snap)");
+        V2 snap;
         switch (mCurrentGizmoOperation)
         {
         case ImGuizmo::TRANSLATE:
             // snap = config.mSnapTranslation;
-            ImGui::InputFloat3("Snap", &snapX);
+            ImGui::InputFloat3("Snap", snap.value());
             break;
         case ImGuizmo::ROTATE:
             // snap = config.mSnapRotation;
-            ImGui::InputFloat("Angle Snap", &snapX);
+            ImGui::InputFloat("Angle Snap", snap.value());
             break;
         case ImGuizmo::SCALE:
             // snap = config.mSnapScale;
-            ImGui::InputFloat("Scale Snap", &snapX);
+            ImGui::InputFloat("Scale Snap", snap.value());
             break;
         }
-        ImGuiIO& io = ImGui::GetIO();
-        ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
-
         M4 cameraView = _camera->view()->val();
         M4 cameraProjection = _camera->projection()->val();
-        ImGuizmo::Manipulate(cameraView.value(), cameraProjection.value(), mCurrentGizmoOperation, mCurrentGizmoMode, matrix.value(), nullptr, useSnap ? &snapX : nullptr);
+
+        ImGuiIO& io = ImGui::GetIO();
+        ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
+        ImGuizmo::Manipulate(cameraView.value(), cameraProjection.value(), mCurrentGizmoOperation, mCurrentGizmoMode, matrix.value(), nullptr, useSnap ? snap.value() : nullptr);
         _matrix->set(matrix);
         ImGui::PopID();
     }

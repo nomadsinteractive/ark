@@ -5,8 +5,12 @@
 
 #include "graphics/base/mat.h"
 
-
 namespace ark {
+
+bool TransformNone::update(const Transform::Stub& transform, uint64_t timestamp)
+{
+    return false;
+}
 
 void TransformNone::snapshot(const Transform::Stub& /*transform*/, Transform::Snapshot& snapshot) const
 {
@@ -20,11 +24,6 @@ V3 TransformNone::transform(const Transform::Snapshot& snapshot, const V3& posit
 M4 TransformNone::toMatrix(const Transform::Snapshot& /*snapshot*/) const
 {
     return M4::identity();
-}
-
-template<> ARK_API sp<Transform::Delegate> Null::safePtr()
-{
-    return Global<TransformNone>().cast<Transform::Delegate>();
 }
 
 }

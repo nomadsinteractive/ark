@@ -150,6 +150,16 @@ V2 V2::normalize() const
     return V2(_x / length, _y / length);
 }
 
+const float* V2::value() const
+{
+    return &_x;
+}
+
+float* V2::value()
+{
+    return &_x;
+}
+
 const float& V2::operator[](size_t idx) const
 {
     return reinterpret_cast<const float*>(this)[idx];

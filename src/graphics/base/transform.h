@@ -29,7 +29,8 @@ public:
     public:
         virtual ~Delegate() = default;
 
-        virtual void snapshot(const Transform::Stub& transform, Snapshot& snapshot) const = 0;
+        virtual bool update(const Stub& transform, uint64_t timestamp) = 0;
+        virtual void snapshot(const Stub& transform, Snapshot& snapshot) const = 0;
 
         virtual V3 transform(const Snapshot& snapshot, const V3& position) const = 0;
         virtual M4 toMatrix(const Snapshot& snapshot) const = 0;
@@ -124,6 +125,8 @@ private:
     friend class TransformLinear3D;
     friend class TransformTRS;
     friend class TransformNone;
+
+    class TransformToMat4;
 };
 
 }

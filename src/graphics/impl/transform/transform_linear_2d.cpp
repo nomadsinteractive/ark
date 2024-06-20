@@ -1,9 +1,16 @@
 #include "graphics/impl/transform/transform_linear_2d.h"
 
+#include "core/util/updatable_util.h"
+
 #include "graphics/base/quaternion.h"
 #include "graphics/util/matrix_util.h"
 
 namespace ark {
+
+bool TransformLinear2D::update(const Transform::Stub& transform, uint64_t timestamp)
+{
+    return UpdatableUtil::update(timestamp, transform._rotation, transform._scale, transform._translation);
+}
 
 void TransformLinear2D::snapshot(const Transform::Stub& transform, Transform::Snapshot& snapshot) const
 {
