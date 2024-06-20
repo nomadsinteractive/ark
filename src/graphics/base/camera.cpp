@@ -91,31 +91,6 @@ private:
     M4 _matrix;
 };
 
-class MulMatrixVariable final : public Mat4 {
-public:
-    MulMatrixVariable(sp<Mat4> lvalue, sp<Mat4> rvalue)
-        : _lvalue(std::move(lvalue)), _rvalue(std::move(rvalue)), _matrix(MatrixUtil::mul(_lvalue->val(), _rvalue->val())) {
-    }
-
-    M4 val() override {
-        return _matrix;
-    }
-
-    bool update(uint64_t timestamp) override {
-        if(UpdatableUtil::update(timestamp, _lvalue, _rvalue)) {
-            _matrix = MatrixUtil::mul(_lvalue->val(), _rvalue->val());
-            return true;
-        }
-        return false;
-    }
-
-private:
-    sp<Mat4> _lvalue;
-    sp<Mat4> _rvalue;
-
-    M4 _matrix;
-};
-
 const char sclipNearclipFarPlaneWarning[] = "ClipNear: %.2f, ClipFar: %.2f. Far plane should be further than near plane, and distance to the near plane should be greater than zero.";
 
 }

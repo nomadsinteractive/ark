@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_OPENGL_RENDERER_FACTORY_RENDERER_FACTORY_OPENGL_H_
-#define ARK_RENDERER_OPENGL_RENDERER_FACTORY_RENDERER_FACTORY_OPENGL_H_
+#pragma once
 
 #include "core/ark.h"
 #include "core/types/shared_ptr.h"
@@ -7,23 +6,22 @@
 #include "renderer/inf/renderer_factory.h"
 #include "renderer/forwarding.h"
 
-namespace ark {
-namespace opengl {
+namespace ark::opengl {
 
 class RendererFactoryOpenGL : public RendererFactory {
 public:
     RendererFactoryOpenGL(const sp<Recycler>& recycler);
 
-    virtual sp<RenderEngineContext> initialize(Ark::RendererVersion version) override;
+    sp<RenderEngineContext> initialize(Ark::RendererVersion version) override;
 
-    virtual void onSurfaceCreated(RenderEngineContext& glContext) override;
+    void onSurfaceCreated(RenderEngineContext& glContext) override;
 
-    virtual sp<Buffer::Delegate> createBuffer(Buffer::Type type, Buffer::Usage usage) override;
-    virtual sp<Camera::Delegate> createCamera(Ark::RendererCoordinateSystem cs) override;
-    virtual sp<Framebuffer> createFramebuffer(sp<Renderer> renderer, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask) override;
-    virtual sp<RenderView> createRenderView(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController) override;
-    virtual sp<PipelineFactory> createPipelineFactory() override;
-    virtual sp<Texture::Delegate> createTexture(sp<Size> size, sp<Texture::Parameters> parameters) override;
+    sp<Buffer::Delegate> createBuffer(Buffer::Type type, Buffer::Usage usage) override;
+    sp<Camera::Delegate> createCamera(Ark::RendererCoordinateSystem cs) override;
+    sp<Framebuffer> createFramebuffer(sp<Renderer> renderer, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask) override;
+    sp<RenderView> createRenderView(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController) override;
+    sp<PipelineFactory> createPipelineFactory() override;
+    sp<Texture::Delegate> createTexture(sp<Size> size, sp<Texture::Parameters> parameters) override;
 
 private:
     void setVersion(Ark::RendererVersion version, RenderEngineContext& glContext);
@@ -34,6 +32,3 @@ private:
 };
 
 }
-}
-
-#endif

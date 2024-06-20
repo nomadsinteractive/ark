@@ -35,7 +35,7 @@
 
 namespace ark::plugin::python {
 
-Optional<sp<Runnable>> PyCast::toRunnable(PyObject* object, bool alert)
+Optional<sp<Runnable>> PyCast::toRunnable(PyObject* object)
 {
     if(PyCallable_Check(object))
         return sp<Runnable>::make<PythonCallableRunnable>(PyInstance::own(object));
@@ -67,7 +67,7 @@ Optional<String> PyCast::toStringExact(PyObject* object, const char* encoding, c
 {
     if(PyUnicode_Check(object))
         return unicodeToUTF8String(object, encoding, error);
-    else if (PyBytes_Check(object))
+    if (PyBytes_Check(object))
         return String(PyBytes_AS_STRING(object));
     return Optional<String>();
 }
@@ -143,8 +143,8 @@ sp<Vec3> PyCast::toVec3(PyObject* object, bool alert)
             return Vec3Type::create(toNumeric(x).value(), toNumeric(y).value(), toNumeric(z).value());
         PyErr_Clear();
     }
-    sp<Vec3> vec3 = toSharedPtrOrNull<Vec3>(object);
-    if(vec3)
+
+    if(sp<Vec3> vec3 = toSharedPtrOrNull<Vec3>(object))
         return vec3;
 
     sp<Vec2> vec2 = toSharedPtrOrNull<Vec2>(object);
@@ -152,19 +152,25 @@ sp<Vec3> PyCast::toVec3(PyObject* object, bool alert)
         return nullptr;
 
     CHECK(vec2, "Cannot cast \"%s\" to Vec3, possible candidates: tuple, Vec3, Vec2", Py_TYPE(object)->tp_name);
-    return Vec2Type::extend(vec2, sp<Numeric>::make<Numeric::Const>(0.0f));
+    return Vec2Type::extend(std::move(vec2), sp<Numeric>::make<Numeric::Const>(0.0f));
+}
+
+Optional<sp<Mat4>> PyCast::toMat4(PyObject* object)
+{
+    if(const Optional<M4> matrix = toCppObject<M4>(object))
+        return {sp<Mat4>::make<Mat4::Const>(matrix.value())};
+    return toSharedPtrDefault<Mat4>(object);
 }
 
 Optional<sp<StringVar>> PyCast::toStringVar(PyObject* object)
 {
-    Optional<String> opt = toStringExact(object);
-    if(opt)
+    if(Optional<String> opt = toStringExact(object))
         return sp<StringVar>::make<StringVar::Const>(sp<String>::make(opt.value()));
 
     return toSharedPtrDefault<StringVar>(object);
 }
 
-Optional<sp<Numeric>> PyCast::toNumeric(PyObject* object, bool alert)
+Optional<sp<Numeric>> PyCast::toNumeric(PyObject* object)
 {
     if(isNoneOrNull(object))
         return sp<Numeric>();
@@ -177,7 +183,7 @@ Optional<sp<Numeric>> PyCast::toNumeric(PyObject* object, bool alert)
     return toSharedPtrDefault<Numeric>(object);
 }
 
-Optional<sp<Boolean>> PyCast::toBoolean(PyObject* object, bool alert)
+Optional<sp<Boolean>> PyCast::toBoolean(PyObject* object)
 {
     if(isNoneOrNull(object))
         return sp<Boolean>::make<Boolean::Const>(false);
@@ -188,7 +194,7 @@ Optional<sp<Boolean>> PyCast::toBoolean(PyObject* object, bool alert)
     return toSharedPtrDefault<Boolean>(object);
 }
 
-Optional<sp<Integer>> PyCast::toInteger(PyObject* object, bool alert)
+Optional<sp<Integer>> PyCast::toInteger(PyObject* object)
 {
     if(PyLong_CheckExact(object))
         return sp<Integer>::make<Integer::Const>(PyLong_AsLong(object));

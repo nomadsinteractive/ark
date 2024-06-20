@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_IMPL_GLYPH_MAKER_GLYPH_MAKER_TEXT_COLOR_H_
-#define ARK_GRAPHICS_IMPL_GLYPH_MAKER_GLYPH_MAKER_TEXT_COLOR_H_
+#pragma once
 
 #include "core/inf/builder.h"
 
@@ -23,7 +22,6 @@ public:
     private:
         sp<Builder<GlyphMaker>> _delegate;
         sp<Builder<Vec4>> _color;
-
     };
 
 private:
@@ -33,5 +31,3 @@ private:
 };
 
 }
-
-#endif

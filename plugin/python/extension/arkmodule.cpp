@@ -33,7 +33,7 @@ static PyObject* ark_set_trace_flag(PyObject* self, PyObject* args);
 static PyObject* ark_loadAsset(PyObject* self, PyObject* args);
 static PyObject* ark_openAsset(PyObject* self, PyObject* args);
 static PyObject* ark_loadAssetBundle(PyObject* self, PyObject* args);
-static PyObject* ark_isDebugBuild(PyObject* self, PyObject* args);
+static PyObject* ark_buildType(PyObject* self, PyObject* args);
 static PyObject* ark_isPublishingBuild(PyObject* self, PyObject* args);
 static PyObject* ark_isDirectory(PyObject* self, PyObject* args);
 static PyObject* ark_isFile(PyObject* self, PyObject* args);
@@ -55,8 +55,7 @@ static PyMethodDef ARK_METHODS[] = {
     {"load_asset",  ark_loadAsset, METH_VARARGS, "loadAsset"},
     {"open_asset",  ark_openAsset, METH_VARARGS, "openAsset"},
     {"load_asset_bundle",  ark_loadAssetBundle, METH_VARARGS, "loadAssetBundle"},
-    {"is_debug_build",  ark_isDebugBuild, METH_VARARGS, "isDebugBuild"},
-    {"is_publishing_build",  ark_isPublishingBuild, METH_VARARGS, "isPublishingBuild"},
+    {"build_type",  ark_buildType, METH_VARARGS, "build_type"},
     {"is_directory",  ark_isDirectory, METH_VARARGS, "isDirectory"},
     {"is_file",  ark_isFile, METH_VARARGS, "isFile"},
     {"load_file",  ark_loadFile, METH_VARARGS, "loadFile"},
@@ -143,24 +142,14 @@ PyObject* ark_isDirectory(PyObject* /*self*/, PyObject* args)
     return PyCast::toPyObject_impl<bool>(Platform::isDirectory(arg0));
 }
 
-PyObject* ark_isDebugBuild(PyObject* /*self*/, PyObject* /*args*/)
+PyObject* ark_buildType(PyObject* /*self*/, PyObject* /*args*/)
 {
 #ifdef ARK_FLAG_DEBUG
-    Py_RETURN_TRUE;
+    return PyCast::toPyObject(static_cast<Enum::BuildType>(ARK_FLAG_DEBUG));
 #else
-    Py_RETURN_FALSE;
+    return PyCast::toPyObject(Enum::BUILD_TYPE_UNDEFINED);
 #endif
 }
-
-PyObject* ark_isPublishingBuild(PyObject* /*self*/, PyObject* /*args*/)
-{
-#ifdef ARK_FLAG_PUBLISHING_BUILD
-    Py_RETURN_TRUE;
-#else
-    Py_RETURN_FALSE;
-#endif
-}
-
 
 PyObject* ark_isFile(PyObject* /*self*/, PyObject* args)
 {

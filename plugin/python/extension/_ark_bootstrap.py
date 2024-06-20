@@ -84,7 +84,7 @@ class ArkModuleFinder:
         return None
 
     def _create_module_spec(self, fullname, source, path, package, filepath):
-        loader = self._ark_asset_loader_type(self._bootstrap, source, path, package, fullname, filepath, self._ark.is_publishing_build())
+        loader = self._ark_asset_loader_type(self._bootstrap, source, path, package, fullname, filepath, self._ark.build_type() == self._ark.Enum.BUILD_TYPE_PUBLISHED)
         spec = self._bootstrap.ModuleSpec(fullname, loader, origin=filepath, is_package=bool(path))
         spec.has_location = bool(filepath)
         return spec

@@ -7,6 +7,15 @@ namespace ark {
 class ARK_API Enum {
 public:
 //  [[script::bindings::enumeration]]
+    enum BuildType {
+        BUILD_TYPE_UNDEFINED,
+        BUILD_TYPE_DEBUG,
+        BUILD_TYPE_RELEASE,
+        BUILD_TYPE_RELEASE_WITH_DEBUG_INFO,
+        BUILD_TYPE_PUBLISHED = 100
+    };
+
+//  [[script::bindings::enumeration]]
     enum RenderMode {
         RENDER_MODE_NONE = -1,
         RENDER_MODE_LINES,

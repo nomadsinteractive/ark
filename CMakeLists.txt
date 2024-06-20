@@ -59,7 +59,7 @@ list(APPEND LOCAL_INCLUDE_DIRS src)
 message("Building for ${ARK_SYSTEM_NAME} - ${CMAKE_BUILD_TYPE}; build-share-libs: ${BUILD_SHARED_LIBS}\nCompiler: ${CMAKE_CXX_COMPILER_ID}-${CMAKE_CXX_COMPILER_VERSION}")
 ark_compile_definitions(-DARK_SYSTEM_NAME="${ARK_SYSTEM_NAME}")
 ark_compile_definitions(-DARK_BINARY_POSTFIX="$<$<CONFIG:DEBUG>:${CMAKE_DEBUG_POSTFIX}>$<$<CONFIG:RELWITHDEBINFO>:${CMAKE_RELWITHDEBINFO_POSTFIX}>")
-add_compile_definitions(ARK_FLAG_DEBUG=$<IF:$<CONFIG:DEBUG>,1,$<IF:$<CONFIG:RELWITHDEBINFO>,2,0>>)
+add_compile_definitions(ARK_FLAG_DEBUG=$<IF:$<CONFIG:DEBUG>,1,$<IF:$<CONFIG:RELWITHDEBINFO>,3,2>>)
 add_compile_definitions(GLM_ENABLE_EXPERIMENTAL)
 
 ark_test_big_endian()

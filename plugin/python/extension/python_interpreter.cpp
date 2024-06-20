@@ -20,11 +20,6 @@
 #include "python/impl/adapter/python_callable_runnable.h"
 #include "python/impl/adapter/python_callable_event_listener.h"
 
-#include "python/impl/duck/py_callable_duck_type.h"
-#include "python/impl/duck/py_numeric_duck_type.h"
-#include "python/impl/duck/py_object_duck_type.h"
-#include "python/impl/duck/py_vec_duck_type.h"
-
 namespace ark::plugin::python {
 
 const sp<ReferenceManager>& PythonInterpreter::referenceManager() const

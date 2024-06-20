@@ -45,8 +45,7 @@ sp<Node> Node::findChildNode(const String& name) const
     {
         if(i->name() == name)
             return i;
-        sp<Node> childHit = i->findChildNode(name);
-        if(childHit)
+        if(sp<Node> childHit = i->findChildNode(name))
             return childHit;
     }
     return nullptr;

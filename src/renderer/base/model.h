@@ -36,6 +36,9 @@ public:
 //  [[script::bindings::property]]
     const sp<Node>& rootNode() const;
 
+//  [[script::bindings::auto]]
+    sp<Node> findNode(const String& name) const;
+
 //  [[script::bindings::property]]
     const sp<Boundaries>& content() const;
 //  [[script::bindings::property]]
@@ -70,6 +73,7 @@ public:
         return nodeLayouts;
     }
 
+private:
     template<typename T> static void loadFlatLayouts(const sp<Node>& node, const T& parentLayout, std::vector<T>& nodeLayouts) {
         T layout(node, parentLayout);
 
@@ -80,37 +84,6 @@ public:
             loadFlatLayouts(childNode, layout, nodeLayouts);
     }
 
-private:
-    class InputMeshIndices : public Uploader {
-    public:
-        InputMeshIndices(std::vector<sp<Mesh>> meshes);
-
-        virtual void upload(Writable& uploader) override;
-        virtual bool update(uint64_t timestamp) override;
-
-    private:
-        size_t calcIndicesSize(const std::vector<sp<Mesh>>& meshes) const;
-
-    private:
-        std::vector<sp<Mesh>> _meshes;
-
-    };
-
-    class MeshVertices : public Vertices {
-    public:
-        MeshVertices(std::vector<sp<Mesh>> meshes);
-
-        virtual void write(VertexWriter& buf, const V3& size) override;
-
-    private:
-        size_t calcVertexLength(const std::vector<sp<Mesh>>& meshes) const;
-
-    private:
-        std::vector<sp<Mesh>> _meshes;
-        V3 _size;
-    };
-
-private:
     Boundaries calcBoundingAABB() const;
 
 private:

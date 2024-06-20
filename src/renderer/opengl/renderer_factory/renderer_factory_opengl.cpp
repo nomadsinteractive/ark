@@ -29,8 +29,7 @@
 #include "platform/platform.h"
 #include "platform/gl/gl.h"
 
-namespace ark {
-namespace opengl {
+namespace ark::opengl {
 
 RendererFactoryOpenGL::RendererFactoryOpenGL(const sp<Recycler>& recycler)
     : RendererFactory(Ark::COORDINATE_SYSTEM_RHS), _recycler(recycler)
@@ -125,5 +124,4 @@ sp<Texture::Delegate> RendererFactoryOpenGL::createTexture(sp<Size> size, sp<Tex
     return nullptr;
 }
 
-}
 }

@@ -61,15 +61,16 @@ def get_ref_manager():
     return None
 
 
-def is_debug_build():
-    return True
-
-
-def is_publishing_build():
-    return False
+def build_type() -> int:
+    return 0
 
 
 class Enum:
+    BUILD_TYPE_UNDEFINED = 0
+    BUILD_TYPE_DEBUG = 1
+    BUILD_TYPE_RELEASE = 2
+    BUILD_TYPE_RELEASE_WITH_DEBUG_INFO = 3
+    BUILD_TYPE_PUBLISHED = 100
 
     RENDER_MODE_NONE = -1
     RENDER_MODE_LINES = 0
@@ -83,6 +84,9 @@ class Enum:
     DRAW_PROCEDURE_DRAW_ELEMENTS = 2
     DRAW_PROCEDURE_DRAW_INSTANCED = 3
     DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT = 4
+
+    def __init__(self, value: int):
+        pass
 
     def __int__(self) -> int:
         return 0
@@ -1367,7 +1371,10 @@ class Model:
 
     @property
     def vertices(self):
-        return None
+        pass
+
+    def find_node(self, name: str) -> Optional[Node]:
+        pass
 
     def get_animation(self, name: str) -> Animation:
         pass

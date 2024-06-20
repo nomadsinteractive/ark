@@ -30,7 +30,7 @@ Box::operator bool() const
     {
         if(const PtrStub* ptrStub = std::get_if<PtrStub>(_stub.get()))
             return ptrStub->instance_ptr != nullptr;
-        return _ensure_enum_stub()->_value != 0;
+        return true;
     }
     return false;
 }

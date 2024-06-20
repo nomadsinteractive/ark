@@ -13,6 +13,68 @@ namespace ark {
 
 namespace {
 
+size_t calcIndicesSize(const std::vector<sp<Mesh>>& meshes)
+{
+    size_t size = 0;
+    for(const Mesh& i : meshes)
+        size += i.indices().size() * sizeof(element_index_t);
+    return size;
+}
+
+size_t calcVertexLength(const std::vector<sp<Mesh>>& meshes)
+{
+    size_t vertexLength = 0;
+    for(const Mesh& i : meshes)
+        vertexLength += i.vertexLength();
+    return vertexLength;
+}
+
+class InputMeshIndices final : public Uploader {
+public:
+    InputMeshIndices(std::vector<sp<Mesh>> meshes)
+        : Uploader(calcIndicesSize(meshes)), _meshes(std::move(meshes))
+    {
+    }
+
+    void upload(Writable& uploader) override
+    {
+        uint32_t offset = 0;
+        for(const Mesh& i : _meshes)
+        {
+            const std::vector<element_index_t>& indices = i.indices();
+            uint32_t size = static_cast<uint32_t>(indices.size() * sizeof(element_index_t));
+            uploader.write(indices.data(), size, offset);
+            offset += size;
+        }
+    }
+
+    bool update(uint64_t timestamp) override
+    {
+        return false;
+    }
+
+private:
+    std::vector<sp<Mesh>> _meshes;
+};
+
+class MeshVertices final : public Vertices {
+public:
+    MeshVertices(std::vector<sp<Mesh>> meshes)
+        : Vertices(calcVertexLength(meshes)), _meshes(std::move(meshes))
+    {
+    }
+
+    void write(VertexWriter& buf, const V3& size) override
+    {
+        for(const Mesh& m : _meshes)
+            m.write(buf);
+    }
+
+private:
+    std::vector<sp<Mesh>> _meshes;
+    V3 _size;
+};
+
 struct NodeLayout {
     NodeLayout()
         : _node(nullptr), _transform(M4::identity()) {
@@ -93,6 +155,12 @@ const std::vector<sp<Mesh>>& Model::meshes() const
 const sp<Node>& Model::rootNode() const
 {
     return _root_node;
+}
+
+sp<Node> Model::findNode(const String& name) const
+{
+    ASSERT(_root_node);
+    return _root_node->findChildNode(name);
 }
 
 const sp<Boundaries>& Model::content() const
@@ -185,55 +253,6 @@ Boundaries Model::calcBoundingAABB() const
         }
 
     return Boundaries(aabbMin, aabbMax);
-}
-
-Model::InputMeshIndices::InputMeshIndices(std::vector<sp<Mesh>> meshes)
-    : Uploader(calcIndicesSize(meshes)), _meshes(std::move(meshes))
-{
-}
-
-void Model::InputMeshIndices::upload(Writable& uploader)
-{
-    uint32_t offset = 0;
-    for(const Mesh& i : _meshes)
-    {
-        const std::vector<element_index_t>& indices = i.indices();
-        uint32_t size = static_cast<uint32_t>(indices.size() * sizeof(element_index_t));
-        uploader.write(indices.data(), size, offset);
-        offset += size;
-    }
-}
-
-bool Model::InputMeshIndices::update(uint64_t /*timestamp*/)
-{
-    return false;
-}
-
-size_t Model::InputMeshIndices::calcIndicesSize(const std::vector<sp<Mesh>>& meshes) const
-{
-    size_t size = 0;
-    for(const Mesh& i : meshes)
-        size += i.indices().size() * sizeof(element_index_t);
-    return size;
-}
-
-Model::MeshVertices::MeshVertices(std::vector<sp<Mesh>> meshes)
-    : Vertices(calcVertexLength(meshes)), _meshes(std::move(meshes))
-{
-}
-
-size_t Model::MeshVertices::calcVertexLength(const std::vector<sp<Mesh>>& meshes) const
-{
-    size_t vertexLength = 0;
-    for(const Mesh& i : meshes)
-        vertexLength += i.vertexLength();
-    return vertexLength;
-}
-
-void Model::MeshVertices::write(VertexWriter& buf, const V3& /*size*/)
-{
-    for(const Mesh& m : _meshes)
-        m.write(buf);
 }
 
 }

@@ -257,13 +257,12 @@ class GenArgument:
         return self._gen_var_declare(typename, objname, to_cpp_object, functype, argname, False, optional_check)
 
     def _gen_var_declare(self, typename, varname, funcname, functype, argname, extract_cast=False, optional_check=False):
-        argappendix = ', false' if extract_cast else ''
         if optional_check:
-            typename = 'Optional<%s>' % typename
+            typename = f'Optional<{typename}>'
         if self._default_value and (self._accept_type.startswith('sp<') or self._meta.parse_signature == 'O'):
-            return '%s %s = %s ? PyCast::%s<%s>(%s%s) : %s;' % (
-                typename, varname, argname, funcname, functype, argname, argappendix, '%s(%s)' % (typename, self._default_value) if optional_check else self._default_value)
-        return '%s %s = PyCast::%s<%s>(%s%s);' % (typename, varname, funcname, functype, argname, argappendix)
+            return '%s %s = %s ? PyCast::%s<%s>(%s) : %s;' % (
+                typename, varname, argname, funcname, functype, argname, '%s(%s)' % (typename, self._default_value) if optional_check else self._default_value)
+        return f'{typename} {varname} = PyCast::{funcname}<{functype}>({argname});'
 
     def str(self):
         return self._str
