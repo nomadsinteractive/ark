@@ -43,7 +43,7 @@ const sp<Size>& Skybox::size()
 
 sp<ByteArray> Skybox::makeUnitCubeVertices(RenderController& renderController) const
 {
-    return RenderUtil::makeUnitCubeVertices(renderController.renderEngine()->context()->coordinateSystem() == Ark::COORDINATE_SYSTEM_LHS);
+    return RenderUtil::makeUnitCubeVertices(renderController.renderEngine()->coordinateSystem() == Ark::COORDINATE_SYSTEM_LHS);
 }
 
 Skybox::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

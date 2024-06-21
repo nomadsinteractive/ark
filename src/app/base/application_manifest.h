@@ -65,7 +65,7 @@ public:
     };
 
 public:
-    ApplicationManifest();
+    ApplicationManifest() = default;
     ApplicationManifest(const String& src);
 
     void load(const String& src);

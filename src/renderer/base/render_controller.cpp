@@ -175,7 +175,7 @@ const sp<RenderEngine>& RenderController::renderEngine() const
 
 Camera RenderController::createCamera(Ark::RendererCoordinateSystem coordinateSystem) const
 {
-    Ark::RendererCoordinateSystem cs = coordinateSystem == Ark::COORDINATE_SYSTEM_DEFAULT ? _render_engine->context()->coordinateSystem() : coordinateSystem;
+    Ark::RendererCoordinateSystem cs = coordinateSystem == Ark::COORDINATE_SYSTEM_DEFAULT ? _render_engine->coordinateSystem() : coordinateSystem;
     return Camera(cs, _render_engine->rendererFactory()->createCamera(cs));
 }
 

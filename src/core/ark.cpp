@@ -289,6 +289,12 @@ const sp<ApplicationProfiler>& Ark::applicationProfiler() const
     return _application_profiler;
 }
 
+Camera Ark::createCamera(RendererCoordinateSystem coordinateSystem)
+{
+    Ark::RendererCoordinateSystem cs = coordinateSystem == COORDINATE_SYSTEM_DEFAULT ? _manifest->renderer()._coordinate_system : coordinateSystem;
+    return Camera(cs, _application_context->renderController()->renderEngine()->rendererFactory()->createCamera(cs));
+}
+
 op<ApplicationProfiler::Tracer> Ark::makeProfilerTracer(const char* func, const char* filename, int32_t lineno, const char* name, ApplicationProfiler::Category category) const
 {
     return _application_profiler ? _application_profiler->makeTracer(func, filename, lineno, name, category) : op<ApplicationProfiler::Tracer>();
@@ -310,11 +316,9 @@ sp<RenderEngine> Ark::createRenderEngine(RendererVersion version, RendererCoordi
         return doCreateRenderEngine(version, coordinateSystem, applicationBundle);
 
     for(const Ark::RendererVersion i : Platform::getRendererVersionPreferences())
-    {
-        sp<RenderEngine> renderEngine = doCreateRenderEngine(i, coordinateSystem, applicationBundle);
-        if(renderEngine)
+        if(sp<RenderEngine> renderEngine = doCreateRenderEngine(i, coordinateSystem, applicationBundle))
             return renderEngine;
-    }
+
     FATAL("Cannot create prefered RenderEngine");
     return nullptr;
 }

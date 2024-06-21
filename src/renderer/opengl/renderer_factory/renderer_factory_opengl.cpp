@@ -40,7 +40,7 @@ RendererFactoryOpenGL::RendererFactoryOpenGL(const sp<Recycler>& recycler)
 
 sp<RenderEngineContext> RendererFactoryOpenGL::initialize(Ark::RendererVersion version)
 {
-    const sp<RenderEngineContext> renderContext = sp<RenderEngineContext>::make(version, Ark::COORDINATE_SYSTEM_RHS, Viewport(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f));
+    const sp<RenderEngineContext> renderContext = sp<RenderEngineContext>::make(version, Viewport(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f));
     if(version != Ark::RENDERER_VERSION_AUTO)
         setVersion(version, renderContext);
     return renderContext;

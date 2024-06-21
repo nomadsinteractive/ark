@@ -54,7 +54,7 @@ public:
     const std::vector<String>& argv() const;
 
 //  [[script::bindings::auto]]
-    void addPreRenderTask(const sp<Runnable>& task, const sp<Boolean>& disposed = nullptr);
+    void addPreRenderTask(sp<Runnable> task, sp<Boolean> cancelled);
 //  [[script::bindings::auto]]
     void addControlLayer(const sp<Renderer>& controlLayer);
 //  [[script::bindings::auto]]

@@ -4,8 +4,8 @@
 
 namespace ark {
 
-RenderEngineContext::RenderEngineContext(Ark::RendererVersion version, Ark::RendererCoordinateSystem coordinateSystem, const Viewport& viewport)
-    : _version(version), _coordinate_system(coordinateSystem), _viewport(viewport)
+RenderEngineContext::RenderEngineContext(Ark::RendererVersion version, const Viewport& viewport)
+    : _version(version), _viewport(viewport)
 {
 }
 
@@ -17,11 +17,6 @@ Ark::RendererVersion RenderEngineContext::version() const
 void RenderEngineContext::setVersion(Ark::RendererVersion version)
 {
     _version = version;
-}
-
-Ark::RendererCoordinateSystem RenderEngineContext::coordinateSystem() const
-{
-    return _coordinate_system;
 }
 
 const std::map<String, String>& RenderEngineContext::definitions() const

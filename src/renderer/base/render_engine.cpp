@@ -22,6 +22,11 @@ Ark::RendererVersion RenderEngine::version() const
     return _render_context->version();
 }
 
+Ark::RendererCoordinateSystem RenderEngine::coordinateSystem() const
+{
+    return _renderer_factory->defaultCoordinateSystem();
+}
+
 const sp<RendererFactory>& RenderEngine::rendererFactory() const
 {
     return _renderer_factory;
@@ -47,18 +52,10 @@ bool RenderEngine::isLHS() const
     return _coordinate_system == Ark::COORDINATE_SYSTEM_LHS;
 }
 
-Rect RenderEngine::toViewportRect(const Rect& rect, Ark::RendererCoordinateSystem cs) const
+V2 RenderEngine::toViewportPosition(const V2& position) const
 {
-    Rect s(rect);
-    if(_render_context->coordinateSystem() != (cs == Ark::COORDINATE_SYSTEM_DEFAULT ? _coordinate_system : cs))
-        s.vflip(_render_context->viewport().height());
-    return s;
-}
-
-V2 RenderEngine::toViewportPosition(const V2& position, Ark::RendererCoordinateSystem cs) const
-{
-    if(_render_context->coordinateSystem() != (cs == Ark::COORDINATE_SYSTEM_DEFAULT ? _coordinate_system : cs))
-        return V2(position.x(), _render_context->viewport().height() - position.y());
+    if(coordinateSystem() != _coordinate_system)
+        return {position.x(), _render_context->viewport().height() - position.y()};
     return position;
 }
 
@@ -66,7 +63,7 @@ Rect RenderEngine::toRendererRect(const Rect& scissor, Ark::RendererCoordinateSy
 {
     Rect s(scissor);
     s.scale(_render_context->displayUnit());
-    if(_render_context->coordinateSystem() != (cs == Ark::COORDINATE_SYSTEM_DEFAULT ? _coordinate_system : cs))
+    if(coordinateSystem() != (cs == Ark::COORDINATE_SYSTEM_DEFAULT ? _coordinate_system : cs))
         s.vflip(static_cast<float>(_render_context->displayResolution().height));
     return s;
 }
@@ -78,8 +75,8 @@ V3 RenderEngine::toWorldPosition(const M4& vpMatrix, float screenX, float screen
     float ndcx = (screenX * 2 - viewport.width()) / viewport.width();
     float ndcy = (screenY * 2 - viewport.height()) / viewport.height();
     const M4 vpInverse = MatrixUtil::inverse(vpMatrix);
-    const V4 pos = MatrixUtil::mul(vpInverse, V4(ndcx, _coordinate_system != _render_context->coordinateSystem() ? -ndcy : ndcy, z, 1.0f));
-    return V3(pos.x() / pos.w(), pos.y() / pos.w(), pos.z() / pos.w());
+    const V4 pos = MatrixUtil::mul(vpInverse, V4(ndcx, _coordinate_system != coordinateSystem() ? -ndcy : ndcy, z, 1.0f));
+    return {pos.x() / pos.w(), pos.y() / pos.w(), pos.z() / pos.w()};
 }
 
 void RenderEngine::onSurfaceCreated()
@@ -90,7 +87,7 @@ void RenderEngine::onSurfaceCreated()
 sp<RenderView> RenderEngine::createRenderView(const sp<RenderController>& renderController, const Viewport& viewport) const
 {
     const Global<Camera> mainCamera;
-    mainCamera->ortho(viewport.left(), viewport.right(), viewport.top(), viewport.bottom(), viewport.clipNear(), viewport.clipFar(), _render_context->coordinateSystem());
+    mainCamera->ortho(viewport.left(), viewport.right(), viewport.top(), viewport.bottom(), viewport.clipNear(), viewport.clipFar(), coordinateSystem());
 
     _render_context->setViewport(viewport);
     return _renderer_factory->createRenderView(_render_context, renderController);

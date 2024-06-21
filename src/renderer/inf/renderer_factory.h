@@ -19,6 +19,7 @@ public:
     }
     virtual ~RendererFactory() = default;
 
+    [[nodiscard]]
     Ark::RendererCoordinateSystem defaultCoordinateSystem() const {
         return _default_coordinate_system;
     }

@@ -11,10 +11,6 @@
 
 namespace ark {
 
-ApplicationManifest::ApplicationManifest()
-{
-}
-
 ApplicationManifest::ApplicationManifest(const String& src)
 {
     load(src);

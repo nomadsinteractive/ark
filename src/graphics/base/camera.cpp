@@ -97,6 +97,7 @@ const char sclipNearclipFarPlaneWarning[] = "ClipNear: %.2f, ClipFar: %.2f. Far 
 
 Camera::Camera()
     : Camera(Ark::instance().applicationContext()->renderController()->createCamera())
+    // : Camera(Ark::instance().createCamera())
 {
 }
 

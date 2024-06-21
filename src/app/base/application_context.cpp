@@ -195,14 +195,14 @@ bool ApplicationContext::onEvent(const Event& event)
     return _event_listeners->onEvent(event) || (_default_event_listener && _default_event_listener->onEvent(event));
 }
 
-V2 ApplicationContext::toViewportPosition(const V2& position, Ark::RendererCoordinateSystem cs) const
+V2 ApplicationContext::toViewportPosition(const V2& position) const
 {
-    return _render_engine->toViewportPosition(position, cs);
+    return _render_engine->toViewportPosition(position);
 }
 
-void ApplicationContext::addPreRenderTask(const sp<Runnable>& task, const sp<Boolean>& disposed)
+void ApplicationContext::addPreRenderTask(sp<Runnable> task, sp<Boolean> cancelled)
 {
-    _render_controller->addPreComposeRunnable(task, disposed);
+    _render_controller->addPreComposeRunnable(std::move(task), std::move(cancelled));
 }
 
 void ApplicationContext::addEventListener(sp<EventListener> eventListener, sp<Boolean> disposed)

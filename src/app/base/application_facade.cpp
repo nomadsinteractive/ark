@@ -139,9 +139,9 @@ const std::vector<String>& ApplicationFacade::argv() const
     return _context->argv();
 }
 
-void ApplicationFacade::addPreRenderTask(const sp<Runnable>& task, const sp<Boolean>& disposed)
+void ApplicationFacade::addPreRenderTask(sp<Runnable> task, sp<Boolean> cancelled)
 {
-    _context->addPreRenderTask(task, disposed);
+    _context->addPreRenderTask(std::move(task), std::move(cancelled));
 }
 
 void ApplicationFacade::addControlLayer(const sp<Renderer>& controlLayer)

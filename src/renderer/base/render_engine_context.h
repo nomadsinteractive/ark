@@ -69,12 +69,10 @@ public:
     };
 
 public:
-    RenderEngineContext(Ark::RendererVersion version, Ark::RendererCoordinateSystem coordinateSystem, const Viewport& viewport);
+    RenderEngineContext(Ark::RendererVersion version, const Viewport& viewport);
 
     Ark::RendererVersion version() const;
     void setVersion(Ark::RendererVersion version);
-
-    Ark::RendererCoordinateSystem coordinateSystem() const;
 
     const std::map<String, String>& definitions() const;
     std::map<String, String>& definitions();
@@ -97,7 +95,6 @@ public:
 
 private:
     Ark::RendererVersion _version;
-    Ark::RendererCoordinateSystem _coordinate_system;
     Viewport _viewport;
 
     Info _info;
