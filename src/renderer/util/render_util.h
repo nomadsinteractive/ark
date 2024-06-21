@@ -15,11 +15,6 @@ public:
     static bytearray makeUnitCubeVertices(bool flipWindingOrder);
     static Attribute makePredefinedAttribute(const String& name, const String& type);
 
-    static Model makeUnitNinePatchTriangleStripsModel();
-    static Model makeUnitNinePatchQuadsModel();
-    static Model makeUnitPointModel();
-    static Model makeUnitQuadModel();
-
     static uint32_t hash(const element_index_t* buf, size_t len);
 
     static String outAttributeName(const String& name, PipelineInput::ShaderStage preStage);

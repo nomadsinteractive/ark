@@ -89,26 +89,6 @@ Attribute RenderUtil::makePredefinedAttribute(const String& name, const String& 
     return Attribute();
 }
 
-Model RenderUtil::makeUnitQuadModel()
-{
-    return Model(UploaderType::makeElementIndexInput(std::initializer_list<element_index_t>({0, 2, 1, 2, 3, 1})), sp<VerticesQuad>::make(), Global<Constants>()->BOUNDARIES_UNIT);
-}
-
-Model RenderUtil::makeUnitNinePatchTriangleStripsModel()
-{
-    return Model(UploaderType::makeElementIndexInput(std::initializer_list<element_index_t>({0, 4, 1, 5, 2, 6, 3, 7, 7, 4, 4, 8, 5, 9, 6, 10, 7, 11, 11, 8, 8, 12, 9, 13, 10, 14, 11, 15})), sp<VerticesNinePatchTriangleStrips>::make(), Global<Constants>()->BOUNDARIES_UNIT);
-}
-
-Model RenderUtil::makeUnitNinePatchQuadsModel()
-{
-    return Model(UploaderType::makeElementIndexInput(std::initializer_list<element_index_t>({0, 2, 1, 2, 3, 1, 4, 6, 5, 6, 7, 5, 8, 10, 9, 10, 11, 9, 12, 14, 13, 14, 15, 13, 16, 18, 17, 18, 19, 17, 20, 22, 21, 22, 23, 21, 24, 26, 25, 26, 27, 25, 28, 30, 29, 30, 31, 29, 32, 34, 33, 34, 35, 33})), sp<VerticesNinePatchQuads>::make(), Global<Constants>()->BOUNDARIES_UNIT);
-}
-
-Model RenderUtil::makeUnitPointModel()
-{
-    return Model(UploaderType::makeElementIndexInput(std::initializer_list<element_index_t>({0})), sp<VerticesPoint>::make(), sp<Boundaries>::make(V3(0), V3(0)));
-}
-
 uint32_t RenderUtil::hash(const element_index_t* buf, size_t len)
 {
     uint32_t h = 0;

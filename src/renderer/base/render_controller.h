@@ -1,7 +1,6 @@
 #pragma once
 
 #include <vector>
-#include <unordered_map>
 
 #include "core/ark.h"
 #include "core/forwarding.h"
@@ -44,16 +43,24 @@ public:
         UPLOAD_PRIORITY_COUNT
     };
 
-    enum SharedIndicesName {
-        SHARED_INDICES_NONE,
-        SHARED_INDICES_QUAD,
-        SHARED_INDICES_NINE_PATCH,
-        SHARED_INDICES_POINT,
-        SHARED_INDICES_COUNT
+    class PrimitiveIndexBuffer {
+    public:
+        PrimitiveIndexBuffer(std::vector<element_index_t> modelIndices, size_t modelVertexCount, bool degenerate, size_t primitiveCount);
+
+        size_t upload(RenderController& renderController);
+        Buffer::Snapshot snapshot(RenderController& renderController, size_t primitiveCountRequired);
+
+    private:
+        std::vector<element_index_t> _model_indices;
+        size_t _model_vertex_count;
+        size_t _primitive_count;
+
+        Buffer _buffer;
+        bool _degenerate;
     };
 
 private:
-    template<typename T> class UpdatableSynchronized : public Updatable {
+    template<typename T> class UpdatableSynchronized final : public Updatable {
     public:
         UpdatableSynchronized(sp<Variable<T>> delegate)
             : _delegate(std::move(delegate)), _synchronized(sp<typename Variable<T>::Impl>::make(_delegate->val())) {
@@ -63,7 +70,7 @@ private:
             return _synchronized;
         }
 
-        virtual bool update(uint64_t timestamp) override {
+        bool update(uint64_t timestamp) override {
             if(_delegate->update(timestamp)) {
                 _synchronized->set(_delegate->val());
                 return true;
@@ -111,6 +118,8 @@ public:
 //  [[script::bindings::auto]]
     Buffer makeIndexBuffer(Buffer::Usage usage = Buffer::USAGE_DYNAMIC, sp<Uploader> uploader = nullptr);
 
+    sp<PrimitiveIndexBuffer> getSharedPrimitiveIndexBuffer(const Model& model, bool degenerate);
+
     sp<Framebuffer> makeFramebuffer(sp<Renderer> renderer, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask);
 
     template<typename T> sp<Variable<T>> synchronize(sp<Variable<T>> delegate, sp<Boolean> disposed) {
@@ -127,9 +136,6 @@ public:
 
     void onPreCompose(uint64_t timestamp);
     void deferUnref(Box box);
-
-    sp<SharedIndices> getSharedIndices(SharedIndicesName name);
-    sp<SharedIndices> getSharedIndices(const Model& model, bool degenerate);
 
     GraphicsBufferAllocator& gba();
 
@@ -198,7 +204,7 @@ private:
     DList<sp<Runnable>> _on_pre_render_runnable;
 
     std::vector<Box> _defered_instances;
-    std::unordered_map<uint32_t, sp<SharedIndices>> _shared_indices;
+    std::map<uint32_t, sp<PrimitiveIndexBuffer>> _shared_primitive_index_buffer;
 
     GraphicsBufferAllocator _gba;
 

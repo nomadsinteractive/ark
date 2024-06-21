@@ -243,8 +243,8 @@ Mesh processPrimitive(const tinygltf::Model& gltfModel, const std::vector<sp<Mat
 
     SBufferReadData bufferReadData = getAttributeData<element_index_t, element_index_t>(gltfModel, TransformMatrix, "", primitive.indices);
     std::vector<element_index_t> indices = std::move(bufferReadData.DstData);
-
-    if(Ark::instance().renderController()->renderEngine()->isLHS())
+//TODO: temporarily disable this until I figure out this face orientation is consistent through all gltf models
+    if(Ark::instance().renderController()->renderEngine()->isLHS() && false)
     {
         const element_index_t indexSize = indices.size();
         ASSERT(indexSize % 3 == 0);
@@ -258,22 +258,22 @@ Mesh processPrimitive(const tinygltf::Model& gltfModel, const std::vector<sp<Mat
     return Mesh(id, std::move(name), std::move(indices), std::move(vertices), toArray<Mesh::UV>(std::move(uvs)), toArray<V3>(std::move(normals)), nullptr, nullptr, std::move(material));
 }
 
-M4 getNodeLocalTransformMatrix(const tinygltf::Node& Node)
+M4 getNodeLocalTransformMatrix(const tinygltf::Node& node)
 {
     V3 translation(0);
-    if(!Node.translation.empty())
-        translation = V3(static_cast<float>(Node.translation.at(0)), static_cast<float>(Node.translation.at(1)), static_cast<float>(Node.translation.at(2)));
+    if(!node.translation.empty())
+        translation = V3(static_cast<float>(node.translation.at(0)), static_cast<float>(node.translation.at(1)), static_cast<float>(node.translation.at(2)));
 
     V3 scale(1.0f);
-    if(!Node.scale.empty())
-        scale = V3(static_cast<float>(Node.scale.at(0)), static_cast<float>(Node.scale.at(1)), static_cast<float>(Node.scale.at(2)));
+    if(!node.scale.empty())
+        scale = V3(static_cast<float>(node.scale.at(0)), static_cast<float>(node.scale.at(1)), static_cast<float>(node.scale.at(2)));
 
-    V4 rotation(1.0f, 0, 0, 0);
-    if(!Node.rotation.empty())
-        rotation = V4(static_cast<float>(Node.rotation.at(0)), static_cast<float>(Node.rotation.at(1)), static_cast<float>(Node.rotation.at(2)), static_cast<float>(Node.rotation.at(3)));
+    V4 quaternion(0, 0, 0, 1.0f);
+    if(!node.rotation.empty())
+        quaternion = V4(static_cast<float>(node.rotation.at(0)), static_cast<float>(node.rotation.at(1)), static_cast<float>(node.rotation.at(2)), static_cast<float>(node.rotation.at(3)));
 
     const M4 translateMatrix = MatrixUtil::translate(M4::identity(), translation);
-    const M4 rotateMatrix = MatrixUtil::rotate(M4::identity(), rotation);
+    const M4 rotateMatrix = MatrixUtil::rotate(M4::identity(), quaternion);
     const M4 scaleMatrix = MatrixUtil::scale(M4::identity(), scale);
     return translateMatrix * rotateMatrix * scaleMatrix;
 }

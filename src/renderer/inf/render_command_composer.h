@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_INF_RENDER_COMMAND_COMPOSER_H_
-#define ARK_RENDERER_INF_RENDER_COMMAND_COMPOSER_H_
+#pragma once
 
 #include "core/base/api.h"
 
@@ -20,5 +19,3 @@ public:
 };
 
 }
-
-#endif

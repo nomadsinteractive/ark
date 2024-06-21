@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_IMPL_VERTICES_VERTICES_QUAD_H_
-#define ARK_RENDERER_IMPL_VERTICES_VERTICES_QUAD_H_
+#pragma once
 
 #include "graphics/base/rect.h"
 
@@ -8,12 +7,12 @@
 
 namespace ark {
 
-class VerticesQuad : public Vertices {
+class VerticesQuad final : public Vertices {
 public:
     VerticesQuad();
     VerticesQuad(const Atlas::Item& quad);
 
-    virtual void write(VertexWriter& buf, const V3& size) override;
+    void write(VertexWriter& buf, const V3& size) override;
 
 private:
     Rect _bounds;
@@ -22,6 +21,3 @@ private:
 };
 
 }
-
-
-#endif

@@ -15,6 +15,11 @@ struct Constants {
     sp<Boolean> BOOLEAN_FALSE;
 
     sp<Boundaries> BOUNDARIES_UNIT;
+
+    sp<Model> MODEL_UNIT_QUAD;
+    sp<Model> MODEL_UNIT_NINE_PATCH_TRIANGLE_STRIPS;
+    sp<Model> MODEL_UNIT_NINE_PATCH_QUADS;
+    sp<Model> MODEL_UNIT_POINT;
 };
 
 namespace constants {

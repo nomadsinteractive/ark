@@ -1,7 +1,5 @@
-#ifndef ARK_RENDERER_IMPL_MODEL_LOADER_MODEL_LOADER_NINE_PATCH_TRIANGLE_STRIPS_H_
-#define ARK_RENDERER_IMPL_MODEL_LOADER_MODEL_LOADER_NINE_PATCH_TRIANGLE_STRIPS_H_
+#pragma once
 
-#include "core/inf/storage.h"
 #include "core/types/shared_ptr.h"
 
 #include "renderer/forwarding.h"
@@ -15,11 +13,9 @@ class ModelLoaderNinePatchTriangleStrips : public ModelLoader {
 public:
     ModelLoaderNinePatchTriangleStrips(sp<Atlas> atlas);
 
-    virtual sp<RenderCommandComposer> makeRenderCommandComposer() override;
-
-    virtual void initialize(ShaderBindings& shaderBindings) override;
-
-    virtual sp<Model> loadModel(int32_t type) override;
+    sp<RenderCommandComposer> makeRenderCommandComposer() override;
+    void initialize(ShaderBindings& shaderBindings) override;
+    sp<Model> loadModel(int32_t type) override;
 
 //  [[plugin::builder::by-value("nine-patch-triangle-strips")]]
     class BUILDER : public Builder<ModelLoader> {
@@ -35,9 +31,7 @@ public:
 private:
     sp<Atlas> _atlas;
     sp<Atlas::AttachmentNinePatch> _nine_patch_attachment;
-    Model _unit_model;
+    sp<Model> _unit_model;
 };
 
 }
-
-#endif

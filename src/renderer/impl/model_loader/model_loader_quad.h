@@ -2,7 +2,6 @@
 
 #include "core/types/shared_ptr.h"
 
-#include "renderer/base/model.h"
 #include "renderer/inf/model_loader.h"
 
 namespace ark {
@@ -22,7 +21,7 @@ public:
     public:
         MAKER(BeanFactory& factory, const String& atlas);
 
-        virtual sp<ModelLoader> build(const Scope& args) override;
+        sp<ModelLoader> build(const Scope& args) override;
 
     private:
         sp<Builder<Atlas>> _atlas;
@@ -31,7 +30,7 @@ public:
 
 private:
     sp<Atlas> _atlas;
-    Model _unit_model;
+    sp<Model> _unit_model;
 };
 
 }

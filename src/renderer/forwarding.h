@@ -45,7 +45,6 @@ class Shader;
 class ShaderBindings;
 class Snippet;
 class ShaderPreprocessor;
-class SharedIndices;
 class SnippetFactory;
 class Texture;
 class TextureBundle;

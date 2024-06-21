@@ -18,7 +18,7 @@ ModelLoaderPoint::ModelLoaderPoint(const sp<Atlas>& atlas)
 
 sp<RenderCommandComposer> ModelLoaderPoint::makeRenderCommandComposer()
 {
-    return sp<RCCDrawElements>::make(RenderUtil::makeUnitPointModel());
+    return sp<RCCDrawElements>::make(Global<Constants>()->MODEL_UNIT_POINT);
 }
 
 void ModelLoaderPoint::initialize(ShaderBindings& shaderBindings)

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/inf/variable.h"
+#include "core/base/timestamp.h"
 #include "core/base/wrapper.h"
 #include "core/types/shared_ptr.h"
 
@@ -10,6 +11,7 @@ template<typename T> class VariableDirty final : public Variable<T> {
 public:
     VariableDirty(sp<Variable<T>> delegate, Wrapper<Variable<T>>& wrapper)
         : _delegate(std::move(delegate)), _wrapper(wrapper) {
+        _timestamp.markDirty();
     }
 
     T val() override {
@@ -24,7 +26,7 @@ public:
         }
         else
             WARN("Trying to overwrite a wrapper which doesn't contain myself");
-        return true;
+        return _timestamp.update(timestamp);
     }
 
     static void reset(Wrapper<Variable<T>>& wrapper, sp<Variable<T>> delegate) {
@@ -32,6 +34,7 @@ public:
     }
 
 private:
+    Timestamp _timestamp;
     sp<Variable<T>> _delegate;
     Wrapper<Variable<T>>& _wrapper;
 };

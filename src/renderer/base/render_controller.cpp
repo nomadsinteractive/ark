@@ -16,7 +16,6 @@
 #include "renderer/base/recycler.h"
 #include "renderer/base/render_engine.h"
 #include "renderer/base/render_engine_context.h"
-#include "renderer/base/shared_indices.h"
 #include "renderer/inf/renderer_factory.h"
 #include "renderer/inf/snippet_factory.h"
 #include "renderer/inf/vertices.h"
@@ -26,13 +25,13 @@ namespace ark {
 
 namespace {
 
-class WritableIndice : public Writable {
+class WritableIndice final : public Writable {
 public:
     WritableIndice(size_t size)
         : _hash(0), _indices(size) {
     }
 
-    virtual uint32_t write(const void* buffer, uint32_t size, uint32_t offset) override {
+    uint32_t write(const void* buffer, uint32_t size, uint32_t offset) override {
         _hash = _hash * 101 + RenderUtil::hash(reinterpret_cast<const element_index_t*>(buffer), size / sizeof(element_index_t));
         memcpy(_indices.data() + offset, buffer, size);
         return size;
@@ -48,15 +47,15 @@ public:
         : _buffer(std::move(buffer)), _input_snapshot(input) {
     }
 
-    virtual uint64_t id() override {
+    uint64_t id() override {
         return _buffer->id();
     }
 
-    virtual void upload(GraphicsContext& graphicsContext) override {
+    void upload(GraphicsContext& graphicsContext) override {
         _buffer->uploadBuffer(graphicsContext, _input_snapshot);
     }
 
-    virtual ResourceRecycleFunc recycle() override {
+    ResourceRecycleFunc recycle() override {
         return _buffer->recycle();
     }
 
@@ -71,7 +70,7 @@ public:
         : _render_controller(renderController), _buffer(std::move(buffer)), _input(std::move(input)) {
     }
 
-    virtual bool update(uint64_t timestamp) override {
+    bool update(uint64_t timestamp) override {
         bool dirty = _input->update(timestamp) || _buffer->id() == 0;
         if(dirty)
             _render_controller.upload(sp<ResourceUploadBufferSnapshot>::make(_buffer, _input), RenderController::US_ONCE);
@@ -84,6 +83,108 @@ private:
     sp<Uploader> _input;
 };
 
+class UploaderConcat final : public Uploader {
+public:
+    UploaderConcat(size_t primitiveCount, size_t vertexCount, std::vector<element_index_t> indices)
+        : Uploader(primitiveCount * indices.size() * sizeof(element_index_t)), _primitive_count(primitiveCount), _vertex_count(vertexCount), _indices(std::move(indices)) {
+    }
+
+    void upload(Writable& uploader) override {
+        size_t length = _indices.size();
+        size_t size = length * sizeof(element_index_t);
+        size_t offset = 0;
+        std::vector<element_index_t> indices(_indices);
+        element_index_t* buf = indices.data();
+
+        for(size_t i = 0; i < _primitive_count; ++i, offset += size)
+        {
+            if(i != 0)
+                for(size_t j = 0; j < length; ++j)
+                    buf[j] += static_cast<element_index_t>(_vertex_count);
+            uploader.write(buf, static_cast<uint32_t>(size), static_cast<uint32_t>(offset));
+        }
+    }
+
+    bool update(uint64_t /*timestamp*/) override {
+        return false;
+    }
+
+private:
+    size_t _primitive_count;
+    size_t _vertex_count;
+    std::vector<element_index_t> _indices;
+
+};
+
+class UploaderDegenerate final : public Uploader {
+public:
+    UploaderDegenerate(size_t primitiveCount, size_t vertexCount, std::vector<element_index_t> indices)
+        : Uploader(((indices.size() + 2) * primitiveCount - 2) *  sizeof(element_index_t)), _primitive_count(primitiveCount), _vertex_count(vertexCount), _indices(std::move(indices)) {
+    }
+
+    void upload(Writable& uploader) override {
+        size_t length = _indices.size();
+        size_t size = length * sizeof(element_index_t);
+        uint32_t offset = 0;
+        std::vector<element_index_t> indices(length + 2);
+        element_index_t* buf = indices.data();
+        memcpy(buf, _indices.data(), size);
+
+        for(size_t i = 0; i < _primitive_count; ++i, offset += (size + 2 * sizeof(element_index_t)))
+        {
+            if(i == _primitive_count - 1)
+                uploader.write(buf, static_cast<uint32_t>(size), offset);
+            else
+            {
+                buf[length] = buf[length - 1];
+                buf[length + 1] = static_cast<element_index_t>(buf[0] + _vertex_count);
+                uploader.write(buf, static_cast<uint32_t>(size + 2 * sizeof(element_index_t)), offset);
+                for(size_t j = 0; j < length; ++j)
+                    buf[j] += static_cast<element_index_t>(_vertex_count);
+            }
+        }
+    }
+
+    bool update(uint64_t /*timestamp*/) override {
+        return false;
+    }
+
+private:
+    size_t _primitive_count;
+    size_t _vertex_count;
+    std::vector<element_index_t> _indices;
+
+};
+
+}
+
+RenderController::PrimitiveIndexBuffer::PrimitiveIndexBuffer(std::vector<element_index_t> modelIndices, size_t modelVertexCount, bool degenerate, size_t primitiveCount)
+    : _model_indices(std::move(modelIndices)), _model_vertex_count(modelVertexCount), _primitive_count(primitiveCount), _degenerate(degenerate)
+{
+}
+
+size_t RenderController::PrimitiveIndexBuffer::upload(RenderController& renderController)
+{
+    sp<Uploader> uploader = _degenerate ? sp<Uploader>::make<UploaderDegenerate>(_primitive_count, _model_vertex_count, _model_indices) : sp<Uploader>::make<UploaderConcat>(_primitive_count, _model_vertex_count, _model_indices);
+    const size_t uploaderSize = uploader->size();
+    _buffer = renderController.makeBuffer(Buffer::TYPE_INDEX, Buffer::USAGE_STATIC, std::move(uploader));
+    return uploaderSize;
+}
+
+Buffer::Snapshot RenderController::PrimitiveIndexBuffer::snapshot(RenderController& renderController, size_t primitiveCountRequired)
+{
+    const size_t warningLimit = 20000;
+    DCHECK_WARN(primitiveCountRequired < warningLimit, "Object count(%d) exceeding warning limit(%d). You can make the limit larger if you know what you're doing", primitiveCountRequired, warningLimit);
+    const size_t size = (_degenerate ? (_model_indices.size() + 2) * primitiveCountRequired - 2 : _model_indices.size() * primitiveCountRequired) * sizeof(element_index_t);
+    if(_primitive_count < primitiveCountRequired)
+    {
+        while(_primitive_count < primitiveCountRequired)
+            _primitive_count *= 2;
+
+        const size_t uploaderSize = upload(renderController);
+        DCHECK(uploaderSize >= size, "Making Uploader failed, primitive-count: %d, uploader-size: %d, required-size: %d", _primitive_count, uploaderSize, size);
+    }
+    return _buffer.snapshot(size);
 }
 
 RenderController::RenderController(const sp<RenderEngine>& renderEngine, const sp<Recycler>& recycler, const sp<Dictionary<bitmap>>& bitmapLoader, const sp<Dictionary<bitmap>>& bitmapBoundsLoader)
@@ -94,7 +195,7 @@ RenderController::RenderController(const sp<RenderEngine>& renderEngine, const s
 void RenderController::reset()
 {
     DTHREAD_CHECK(THREAD_ID_CORE);
-    _shared_indices.clear();
+    _shared_primitive_index_buffer.clear();
 }
 
 void RenderController::onSurfaceReady(GraphicsContext& graphicsContext)
@@ -220,6 +321,25 @@ Buffer RenderController::makeIndexBuffer(Buffer::Usage usage, sp<Uploader> uploa
     return makeBuffer(Buffer::TYPE_INDEX, usage, uploader);
 }
 
+sp<RenderController::PrimitiveIndexBuffer> RenderController::getSharedPrimitiveIndexBuffer(const Model& model, bool degenerate)
+{
+    DTHREAD_CHECK(THREAD_ID_CORE);
+    const sp<Uploader>& indicesUploader = model.indices();
+
+    WritableIndice writer(indicesUploader->size() / sizeof(element_index_t));
+    indicesUploader->upload(writer);
+
+    const uint32_t hash = writer._hash;
+    std::vector<element_index_t> indices = std::move(writer._indices);
+    if(const auto iter = _shared_primitive_index_buffer.find(hash); iter != _shared_primitive_index_buffer.end())
+        return iter->second;
+
+    sp<PrimitiveIndexBuffer>& pib = _shared_primitive_index_buffer[hash];
+    pib = sp<PrimitiveIndexBuffer>::make(indices, model.vertexCount(), degenerate, 128);
+    pib->upload(*this);
+    return pib;
+}
+
 sp<Framebuffer> RenderController::makeFramebuffer(sp<Renderer> renderer, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask)
 {
     const sp<Framebuffer> framebuffer = renderEngine()->rendererFactory()->createFramebuffer(std::move(renderer), std::move(colorAttachments), std::move(depthStencilAttachments), clearMask);
@@ -276,44 +396,6 @@ void RenderController::onPreCompose(uint64_t timestamp)
 void RenderController::deferUnref(Box box)
 {
     _defered_instances.push_back(std::move(box));
-}
-
-sp<SharedIndices> RenderController::getSharedIndices(RenderController::SharedIndicesName name)
-{
-    DTHREAD_CHECK(THREAD_ID_CORE);
-    switch(name) {
-    case RenderController::SHARED_INDICES_QUAD:
-        return getSharedIndices(RenderUtil::makeUnitQuadModel(), false);
-    case RenderController::SHARED_INDICES_NINE_PATCH:
-        return getSharedIndices(RenderUtil::makeUnitNinePatchTriangleStripsModel(), true);
-    case RenderController::SHARED_INDICES_POINT:
-        return getSharedIndices(RenderUtil::makeUnitPointModel(), false);
-    default:
-        break;
-    }
-    DFATAL("Unsupported SharedBuffer: %d", name);
-    return nullptr;
-}
-
-sp<SharedIndices> RenderController::getSharedIndices(const Model& model, bool degenerate)
-{
-    DTHREAD_CHECK(THREAD_ID_CORE);
-    const sp<Uploader>& indicesUploader = model.indices();
-
-    WritableIndice writer(indicesUploader->size() / sizeof(element_index_t));
-    indicesUploader->upload(writer);
-
-    uint32_t hash = writer._hash;
-    std::vector<element_index_t> indices = std::move(writer._indices);
-    const auto iter = _shared_indices.find(hash);
-    if(iter != _shared_indices.end())
-        return iter->second;
-
-    size_t modelVertexCount = model.vertexCount();
-
-    sp<SharedIndices> sharedBuffer = sp<SharedIndices>::make(makeIndexBuffer(Buffer::USAGE_DYNAMIC), indices, modelVertexCount, degenerate);
-    _shared_indices.insert(std::make_pair(hash, sharedBuffer));
-    return sharedBuffer;
 }
 
 GraphicsBufferAllocator& RenderController::gba()

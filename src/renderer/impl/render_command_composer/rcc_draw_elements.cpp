@@ -1,40 +1,37 @@
 #include "renderer/impl/render_command_composer/rcc_draw_elements.h"
 
 #include "graphics/base/render_layer.h"
-#include "graphics/base/render_request.h"
 
 #include "renderer/base/drawing_buffer.h"
 #include "renderer/base/drawing_context.h"
+#include "renderer/base/model.h"
 #include "renderer/base/render_controller.h"
 #include "renderer/base/render_engine.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/base/shader.h"
-#include "renderer/base/shared_indices.h"
 #include "renderer/base/vertex_writer.h"
-#include "renderer/inf/model_loader.h"
-#include "renderer/inf/vertices.h"
 
 namespace ark {
 
-RCCDrawElements::RCCDrawElements(Model model)
+RCCDrawElements::RCCDrawElements(sp<Model> model)
     : _model(std::move(model))
 {
 }
 
 sp<ShaderBindings> RCCDrawElements::makeShaderBindings(Shader& shader, RenderController& renderController, Enum::RenderMode renderMode)
 {
-    _shared_buffer = renderController.getSharedIndices(_model, renderMode == Enum::RENDER_MODE_TRIANGLE_STRIP);
+    _primitive_index_buffer = renderController.getSharedPrimitiveIndexBuffer(_model, renderMode == Enum::RENDER_MODE_TRIANGLE_STRIP);
     return shader.makeBindings(renderController.makeVertexBuffer(), renderMode, Enum::DRAW_PROCEDURE_DRAW_ELEMENTS);
 }
 
 void RCCDrawElements::postSnapshot(RenderController& renderController, RenderLayerSnapshot& snapshot)
 {
-    snapshot._index_buffer = _shared_buffer->snapshot(renderController, snapshot._droplets.size(), snapshot._droplets.size());
+    snapshot._index_buffer = _primitive_index_buffer->snapshot(renderController, snapshot._droplets.size());
 }
 
 sp<RenderCommand> RCCDrawElements::compose(const RenderRequest& renderRequest, RenderLayerSnapshot& snapshot)
 {
-    size_t verticesLength = _model.vertices()->length();
+    const size_t verticesCount = _model->vertexCount();
     const Buffer& vertices = snapshot._stub->_shader_bindings->vertices();
 
     DrawingBuffer buf(snapshot._stub->_shader_bindings, snapshot._stub->_stride);
@@ -42,7 +39,7 @@ sp<RenderCommand> RCCDrawElements::compose(const RenderRequest& renderRequest, R
 
     if(snapshot.needsReload())
     {
-        VertexWriter writer = buf.makeVertexWriter(renderRequest, verticesLength * snapshot._droplets.size(), 0);
+        VertexWriter writer = buf.makeVertexWriter(renderRequest, verticesCount * snapshot._droplets.size(), 0);
         for(const RenderLayerSnapshot::Droplet& i : snapshot._droplets)
             i._snapshot._model->writeRenderable(writer, i._snapshot);
     }
@@ -53,10 +50,10 @@ sp<RenderCommand> RCCDrawElements::compose(const RenderRequest& renderRequest, R
         {
             if(i._snapshot._state.hasState(Renderable::RENDERABLE_STATE_DIRTY))
             {
-                VertexWriter writer = buf.makeVertexWriter(renderRequest, verticesLength, offset);
+                VertexWriter writer = buf.makeVertexWriter(renderRequest, verticesCount, offset);
                 i._snapshot._model->writeRenderable(writer, i._snapshot);
             }
-            offset += verticesLength;
+            offset += verticesCount;
         }
     }
 

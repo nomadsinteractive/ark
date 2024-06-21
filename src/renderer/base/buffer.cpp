@@ -158,11 +158,6 @@ void Buffer::Factory::addStrip(size_t offset, ByteArray::Borrowed& content)
     _size = std::max(_size, content.length() + offset);
 }
 
-Buffer::Delegate::Delegate()
-    :_size(0)
-{
-}
-
 size_t Buffer::Delegate::size() const
 {
     return _size;

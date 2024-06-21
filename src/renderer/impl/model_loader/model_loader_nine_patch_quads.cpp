@@ -11,7 +11,7 @@ namespace ark {
 
 ModelLoaderNinePatchQuads::ModelLoaderNinePatchQuads(sp<Atlas> atlas)
     : ModelLoader(Enum::RENDER_MODE_TRIANGLES), _atlas(std::move(atlas)), _nine_patch_attachment(_atlas->attachments().ensure<Atlas::AttachmentNinePatch>()),
-      _unit_model(RenderUtil::makeUnitNinePatchQuadsModel())
+      _unit_model(Global<Constants>()->MODEL_UNIT_NINE_PATCH_QUADS)
 {
 }
 
@@ -27,7 +27,7 @@ void ModelLoaderNinePatchQuads::initialize(ShaderBindings& shaderBindings)
 
 sp<Model> ModelLoaderNinePatchQuads::loadModel(int32_t type)
 {
-    return sp<Model>::make(_unit_model.indices(), _nine_patch_attachment->ensureVerticesQuads(type), _unit_model.content(), _unit_model.occupy());
+    return sp<Model>::make(_unit_model->indices(), _nine_patch_attachment->ensureVerticesQuads(type), _unit_model->content(), _unit_model->occupy());
 }
 
 ModelLoaderNinePatchQuads::BUILDER::BUILDER(BeanFactory& factory, const String& atlas)

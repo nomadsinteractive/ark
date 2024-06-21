@@ -1,7 +1,6 @@
 #pragma once
 
 #include "core/base/api.h"
-#include "core/base/timestamp.h"
 #include "core/forwarding.h"
 #include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"

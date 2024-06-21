@@ -11,7 +11,7 @@
 namespace ark {
 
 ModelLoaderQuad::ModelLoaderQuad(sp<Atlas> atlas)
-    : ModelLoader(Enum::RENDER_MODE_TRIANGLES), _atlas(std::move(atlas)), _unit_model(RenderUtil::makeUnitQuadModel())
+    : ModelLoader(Enum::RENDER_MODE_TRIANGLES), _atlas(std::move(atlas)), _unit_model(Global<Constants>()->MODEL_UNIT_QUAD)
 {
 }
 
@@ -29,7 +29,7 @@ sp<Model> ModelLoaderQuad::loadModel(int32_t type)
 {
     const Atlas::Item& texCoord = _atlas->at(type);
     const V2& size = texCoord.size();
-    return sp<Model>::make(_unit_model.indices(), sp<VerticesQuad>::make(texCoord), sp<Boundaries>::make(V3(0), V3(size, 0), V3(texCoord.pivot(), 0)));
+    return sp<Model>::make(_unit_model->indices(), sp<VerticesQuad>::make(texCoord), sp<Boundaries>::make(V3(0), V3(size, 0), V3(texCoord.pivot(), 0)));
 }
 
 ModelLoaderQuad::MAKER::MAKER(BeanFactory& factory, const String& atlas)

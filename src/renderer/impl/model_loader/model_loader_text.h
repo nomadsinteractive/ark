@@ -7,7 +7,6 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/base/font.h"
-#include "renderer/base/model.h"
 #include "graphics/util/max_rects_bin_pack.h"
 
 #include "renderer/forwarding.h"
@@ -16,22 +15,22 @@
 
 namespace ark {
 
-class ModelLoaderText : public ModelLoader {
+class ModelLoaderText final : public ModelLoader {
 public:
     ModelLoaderText(sp<RenderController> renderController, sp<Alphabet> alphabet, sp<Atlas> atlas, const Font::TextSize& textSize);
 
-    virtual sp<RenderCommandComposer> makeRenderCommandComposer() override;
+    sp<RenderCommandComposer> makeRenderCommandComposer() override;
 
-    virtual void initialize(ShaderBindings& shaderBindings) override;
+    void initialize(ShaderBindings& shaderBindings) override;
 
-    virtual sp<Model> loadModel(int32_t type) override;
+    sp<Model> loadModel(int32_t type) override;
 
 //  [[plugin::resource-loader("text")]]
     class BUILDER : public Builder<ModelLoader> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<ModelLoader> build(const Scope& args) override;
+        sp<ModelLoader> build(const Scope& args) override;
 
     private:
         sp<ResourceLoaderContext> _resource_loader_context;
@@ -91,7 +90,7 @@ private:
         bitmap _glyph_bitmap;
 
         MaxRectsBinPack _bin_pack;
-        Model _unit_model;
+        sp<Model> _unit_model;
         std::vector<sp<GlyphBundle>> _glyph_bundles;
 
         sp<Future> _texture_reload_future;

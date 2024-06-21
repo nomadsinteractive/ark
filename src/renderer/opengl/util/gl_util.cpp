@@ -17,7 +17,6 @@
 #include "renderer/base/render_engine_context.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/shader_bindings.h"
-#include "renderer/base/shared_indices.h"
 #include "renderer/base/texture.h"
 #include "renderer/util/render_util.h"
 
@@ -290,7 +289,7 @@ void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, Render
     glBindVertexArray(vao);
 
     Buffer vertexBuffer = renderController.makeVertexBuffer(Buffer::USAGE_STATIC);
-    Buffer::Snapshot indexBufferSnapshot = renderController.getSharedIndices(RenderController::SHARED_INDICES_QUAD)->snapshot(renderController, 6, 6);
+    Buffer::Snapshot indexBufferSnapshot = renderController.getSharedPrimitiveIndexBuffer(Global<Constants>()->MODEL_UNIT_QUAD, false)->snapshot(renderController, 6);
 
     const Buffer::Snapshot vertexBufferSnapshot = vertexBuffer.snapshot(UploaderType::create(RenderUtil::makeUnitCubeVertices(false)));
     vertexBufferSnapshot.upload(graphicsContext);

@@ -7,25 +7,22 @@
 
 #include "renderer/base/drawing_buffer.h"
 #include "renderer/base/drawing_context.h"
+#include "renderer/base/model.h"
 #include "renderer/base/render_controller.h"
-#include "renderer/base/render_engine.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/base/shader.h"
-#include "renderer/base/shared_indices.h"
 #include "renderer/base/vertex_writer.h"
-#include "renderer/inf/model_loader.h"
-#include "renderer/inf/vertices.h"
 
 namespace ark {
 
-RCCDrawQuads::RCCDrawQuads(Model model)
+RCCDrawQuads::RCCDrawQuads(sp<Model> model)
     : _model(std::move(model))
 {
 }
 
 sp<ShaderBindings> RCCDrawQuads::makeShaderBindings(Shader& shader, RenderController& renderController, Enum::RenderMode renderMode)
 {
-    _strips = renderController.gba().makeStrips(shader.input()->getStream(0).stride(), _model.vertexCount());
+    _strips = renderController.gba().makeStrips(shader.input()->getStream(0).stride(), _model->vertexCount());
     _indices = renderController.makeIndexBuffer();
     return shader.makeBindings(_strips->buffer(), renderMode, Enum::DRAW_PROCEDURE_DRAW_ELEMENTS);
 }
@@ -46,11 +43,10 @@ sp<RenderCommand> RCCDrawQuads::compose(const RenderRequest& renderRequest, Rend
     for(RenderLayerSnapshot::Droplet& i : snapshot._droplets)
     {
         const Renderable::State& s = i._snapshot._state;
-        bool isStateNew = s.hasState(Renderable::RENDERABLE_STATE_NEW);
-        if(isStateNew || s.hasState(Renderable::RENDERABLE_STATE_DIRTY))
+        if(const bool isStateNew = s.hasState(Renderable::RENDERABLE_STATE_NEW); isStateNew || s.hasState(Renderable::RENDERABLE_STATE_DIRTY))
         {
             Model& model = i._snapshot._model;
-            uint32_t vertexCount = static_cast<uint32_t>(model.vertexCount());
+            const uint32_t vertexCount = static_cast<uint32_t>(model.vertexCount());
             if(isStateNew)
             {
                 hasNewCreatedSnapshot = true;

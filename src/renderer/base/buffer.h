@@ -36,7 +36,7 @@ public:
 
     class ARK_API Delegate : public Resource {
     public:
-        Delegate();
+        Delegate() = default;
         virtual ~Delegate() = default;
 
         virtual void uploadBuffer(GraphicsContext& graphicsContext, Uploader& input) = 0;

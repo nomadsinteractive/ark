@@ -13,6 +13,7 @@
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/drawing_buffer.h"
 #include "renderer/base/pipeline_bindings.h"
+#include "renderer/base/model.h"
 #include "renderer/impl/render_command_composer/rcc_draw_quads.h"
 #include "renderer/base/render_controller.h"
 #include "renderer/base/resource_loader_context.h"
@@ -66,12 +67,11 @@ ModelLoaderText::GlyphBundle::GlyphBundle(AtlasAttachment& atlasAttachment, sp<A
 
 bool ModelLoaderText::GlyphBundle::prepareOne(uint64_t timestamp, int32_t c, int32_t ckey)
 {
-    Optional<Alphabet::Metrics> optMetrics = _alphabet->measure(c);
-    if(optMetrics)
+    if(Optional<Alphabet::Metrics> optMetrics = _alphabet->measure(c))
     {
         const Alphabet::Metrics& metrics = optMetrics.value();
-        int32_t width = metrics.width;
-        int32_t height = metrics.height;
+        const int32_t width = metrics.width;
+        const int32_t height = metrics.height;
         CHECK(width > 0 && height > 0, "Error loading character %d: width = %d, height = %d", c, width, height);
         const MaxRectsBinPack::Rect packedBounds = _atlas_attachment._bin_pack.Insert(metrics.bitmap_width, metrics.bitmap_height, MaxRectsBinPack::RectBestShortSideFit);
         if(packedBounds.height != metrics.bitmap_height)
@@ -86,7 +86,7 @@ bool ModelLoaderText::GlyphBundle::prepareOne(uint64_t timestamp, int32_t c, int
         V3 xyz = V3(static_cast<float>(metrics.bitmap_x), static_cast<float>(metrics.bitmap_y), 0);
         sp<Boundaries> bounds = sp<Boundaries>::make(xyz, V3(charSize, 0), xyz);
         sp<Boundaries> occupies = sp<Boundaries>::make(V3(0), V3(static_cast<float>(width), static_cast<float>(height), 0), xyz);
-        _glyphs[ckey] = GlyphModel(sp<Model>::make(_atlas_attachment._unit_model.indices(), sp<VerticesQuad>::make(item), std::move(bounds), std::move(occupies)), timestamp);
+        _glyphs[ckey] = GlyphModel(sp<Model>::make(_atlas_attachment._unit_model->indices(), sp<VerticesQuad>::make(item), std::move(bounds), std::move(occupies)), timestamp);
     }
     else
     {
@@ -121,8 +121,8 @@ ModelLoaderText::GlyphModel& ModelLoaderText::GlyphBundle::ensureGlyphModel(uint
 
         while(!prepareOne(timestamp, c, c))
         {
-            uint32_t width = _atlas_attachment._glyph_bitmap->width() * 2;
-            uint32_t height = _atlas_attachment._glyph_bitmap->height() * 2;
+            const uint32_t width = _atlas_attachment._glyph_bitmap->width() * 2;
+            const uint32_t height = _atlas_attachment._glyph_bitmap->height() * 2;
             LOGD("Glyph bitmap overflow, reallocating it to (%dx%d), characters length: %d", width, height, _glyphs.size());
             _atlas_attachment.resize(width, height);
         }
@@ -136,7 +136,7 @@ ModelLoaderText::GlyphModel& ModelLoaderText::GlyphBundle::ensureGlyphModel(uint
 }
 
 ModelLoaderText::AtlasAttachment::AtlasAttachment(Atlas& atlas, sp<RenderController> renderController)
-    : _atlas(atlas), _render_controller(std::move(renderController)), _unit_model(RenderUtil::makeUnitQuadModel())
+    : _atlas(atlas), _render_controller(std::move(renderController)), _unit_model(Global<Constants>()->MODEL_UNIT_QUAD)
 {
     initialize(_atlas.width(), _atlas.height());
 }

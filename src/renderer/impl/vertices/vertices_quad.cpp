@@ -16,8 +16,8 @@ VerticesQuad::VerticesQuad(const Atlas::Item& quad)
 
 void VerticesQuad::write(VertexWriter& buf, const V3& size)
 {
-    float width = size.x();
-    float height = size.y();
+    const float width = size.x();
+    const float height = size.y();
 
     buf.next();
     buf.writePosition(V3(_bounds.left() * width, _bounds.top() * height, 0));

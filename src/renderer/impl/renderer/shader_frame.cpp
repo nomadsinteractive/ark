@@ -12,13 +12,12 @@
 #include "renderer/base/render_controller.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/shader_bindings.h"
-#include "renderer/base/shared_indices.h"
 
 namespace ark {
 
 ShaderFrame::ShaderFrame(const sp<Size>& size, const sp<Shader>& shader, RenderController& renderController)
     : _size(size), _shader(shader), _shader_bindings(shader->makeBindings(Buffer(), Enum::RENDER_MODE_TRIANGLES, Enum::DRAW_PROCEDURE_DRAW_ELEMENTS)),
-      _vertex_buffer(renderController.makeVertexBuffer()), _ib_snapshot(renderController.getSharedIndices(RenderController::SHARED_INDICES_QUAD)->snapshot(renderController, 1))
+      _vertex_buffer(renderController.makeVertexBuffer()), _ib_snapshot(renderController.getSharedPrimitiveIndexBuffer(Global<Constants>()->MODEL_UNIT_QUAD, false)->snapshot(renderController, 1))
 {
 }
 
