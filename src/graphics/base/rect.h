@@ -73,12 +73,8 @@ public:
     RectT& scale(const V2& scale) {
         return this->scale(static_cast<T>(scale.x()), static_cast<T>(scale.y()));
     }
-    RectT& translate(T x, T y) {
-        _left += x;
-        _right += x;
-        _top += y;
-        _bottom += y;
-        return *this;
+    RectT translate(T x, T y) const {
+        return {_left + x, _top + y, _right + x, _bottom + y};
     }
 
     RectT& vflip(T height) {

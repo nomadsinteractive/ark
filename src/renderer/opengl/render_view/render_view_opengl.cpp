@@ -12,6 +12,8 @@
 
 #include "platform/gl/gl.h"
 #include "platform/platform.h"
+#include "renderer/base/render_controller.h"
+#include "renderer/base/render_engine.h"
 
 namespace ark {
 

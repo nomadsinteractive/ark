@@ -289,9 +289,9 @@ const sp<ApplicationProfiler>& Ark::applicationProfiler() const
     return _application_profiler;
 }
 
-Camera Ark::createCamera(RendererCoordinateSystem coordinateSystem)
+Camera Ark::createCamera(RendererCoordinateSystem coordinateSystem) const
 {
-    Ark::RendererCoordinateSystem cs = coordinateSystem == COORDINATE_SYSTEM_DEFAULT ? _manifest->renderer()._coordinate_system : coordinateSystem;
+    const RendererCoordinateSystem cs = coordinateSystem == COORDINATE_SYSTEM_DEFAULT ? _manifest->renderer()._coordinate_system : coordinateSystem;
     return Camera(cs, _application_context->renderController()->renderEngine()->rendererFactory()->createCamera(cs));
 }
 
@@ -312,10 +312,10 @@ void Ark::deferUnref(Box box)
 
 sp<RenderEngine> Ark::createRenderEngine(RendererVersion version, RendererCoordinateSystem coordinateSystem, const sp<ApplicationBundle>& applicationBundle)
 {
-    if(version != Ark::RENDERER_VERSION_AUTO)
+    if(version != RENDERER_VERSION_AUTO)
         return doCreateRenderEngine(version, coordinateSystem, applicationBundle);
 
-    for(const Ark::RendererVersion i : Platform::getRendererVersionPreferences())
+    for(const RendererVersion i : Platform::getRendererVersionPreferences())
         if(sp<RenderEngine> renderEngine = doCreateRenderEngine(i, coordinateSystem, applicationBundle))
             return renderEngine;
 

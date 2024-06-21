@@ -24,6 +24,7 @@ public:
 
     float toLayoutDirection(float direction) const;
     bool isLHS() const;
+    bool isViewportFlipped() const;
 
     V2 toViewportPosition(const V2& position) const;
     Rect toRendererRect(const Rect& scissor, Ark::RendererCoordinateSystem cs = Ark::COORDINATE_SYSTEM_DEFAULT) const;

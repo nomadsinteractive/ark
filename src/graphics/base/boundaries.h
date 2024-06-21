@@ -28,6 +28,11 @@ public:
 //  [[script::bindings::auto]]
     sp<Boundaries> translate(sp<Vec3> xyz) const;
 
+//  [[script::bindings::auto]]
+    V2 toPivotPosition(const V2& size) const;
+//  [[script::bindings::auto]]
+    V3 toPivotPosition(const V3& size) const;
+
     bool update(uint64_t timestamp) const;
 
 private:

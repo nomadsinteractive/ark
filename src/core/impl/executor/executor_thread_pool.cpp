@@ -6,13 +6,13 @@ namespace ark {
 
 namespace {
 
-class ThrowException : public Runnable {
+class ThrowException final : public Runnable {
 public:
     ThrowException(String what)
         : _what(std::move(what)) {
     }
 
-    virtual void run() override {
+    void run() override {
         FATAL("Unhanlded exception in thread: %s", _what.c_str());
     }
 
@@ -21,6 +21,66 @@ private:
 };
 
 }
+
+class ExecutorThreadPool::WorkerThreadStrategy final : public ExecutorWorkerThread::Strategy {
+public:
+    WorkerThreadStrategy(const sp<Stub>& stub)
+        : _stub(stub), _idled_cycle(0)
+    {
+    }
+
+    void onStart() override
+    {
+    }
+
+    void onExit() override
+    {
+        bool removed = false;
+        const volatile std::scoped_lock<std::mutex> guard(_stub->_mutex);
+        for(const sp<ExecutorWorkerThread>& i : _stub->_worker_threads.clear())
+            if(i->strategy().get() != this)
+                _stub->_worker_threads.push(i);
+            else
+                removed = true;
+
+        DCHECK(removed, "Unable to remove Worker: %p", this);
+        DCHECK(_stub->_worker_count > 0, "Worker count mismatch");
+        _stub->_worker_count --;
+    }
+
+    uint64_t onBusy() override
+    {
+        _idled_cycle = 0;
+        return 0;
+    }
+    uint64_t onIdle(Thread& thread) override
+    {
+        _idled_cycle ++;
+        if(_idled_cycle > 20000 && _stub->_worker_count.load(std::memory_order_relaxed) > _stub->_capacity)
+            thread.terminate();
+        return 20000;
+    }
+
+    void onException(const std::exception& e) override
+    {
+        if(_stub->_exception_executor)
+            _stub->_exception_executor->execute(sp<ThrowException>::make(e.what()));
+    }
+
+    bool isIdle() const
+    {
+        return _idled_cycle > 0;
+    }
+    void markBusy()
+    {
+        _idled_cycle = 0;
+    }
+
+private:
+    sp<Stub> _stub;
+
+    uint32_t _idled_cycle;
+};
 
 ExecutorThreadPool::ExecutorThreadPool(sp<Executor> exceptionExecutor, uint32_t capacity)
     : _stub(sp<Stub>::make(std::move(exceptionExecutor), std::max<uint32_t>(2, capacity ? capacity : std::thread::hardware_concurrency())))
@@ -58,60 +118,6 @@ sp<ExecutorWorkerThread> ExecutorThreadPool::createWorkerThread()
 ExecutorThreadPool::Stub::Stub(sp<Executor> exceptionExecutor, uint32_t capacity)
     : _exception_executor(std::move(exceptionExecutor)), _capacity(capacity), _worker_count(0)
 {
-}
-
-ExecutorThreadPool::WorkerThreadStrategy::WorkerThreadStrategy(const sp<ExecutorThreadPool::Stub>& stub)
-    : _stub(stub), _idled_cycle(0)
-{
-}
-
-void ExecutorThreadPool::WorkerThreadStrategy::onStart()
-{
-}
-
-uint64_t ExecutorThreadPool::WorkerThreadStrategy::onBusy()
-{
-    _idled_cycle = 0;
-    return 0;
-}
-
-void ExecutorThreadPool::WorkerThreadStrategy::onExit()
-{
-    bool removed = false;
-    const volatile std::scoped_lock<std::mutex> guard(_stub->_mutex);
-    for(const sp<ExecutorWorkerThread>& i : _stub->_worker_threads.clear())
-        if(i->strategy().get() != this)
-            _stub->_worker_threads.push(i);
-        else
-            removed = true;
-
-    DCHECK(removed, "Unable to remove Worker: %p", this);
-    DCHECK(_stub->_worker_count > 0, "Worker count mismatch");
-    _stub->_worker_count --;
-}
-
-void ExecutorThreadPool::WorkerThreadStrategy::onException(const std::exception& e)
-{
-    if(_stub->_exception_executor)
-        _stub->_exception_executor->execute(sp<ThrowException>::make(e.what()));
-}
-
-uint64_t ExecutorThreadPool::WorkerThreadStrategy::onIdle(Thread& thread)
-{
-    _idled_cycle ++;
-    if(_idled_cycle > 20000 && _stub->_worker_count.load(std::memory_order_relaxed) > _stub->_capacity)
-        thread.terminate();
-    return 20000;
-}
-
-bool ExecutorThreadPool::WorkerThreadStrategy::isIdle() const
-{
-    return _idled_cycle > 0;
-}
-
-void ExecutorThreadPool::WorkerThreadStrategy::markBusy()
-{
-    _idled_cycle = 0;
 }
 
 }

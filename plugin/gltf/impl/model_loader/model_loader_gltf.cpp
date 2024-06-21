@@ -18,6 +18,8 @@
 
 #include "renderer/base/atlas.h"
 #include "renderer/base/material_bundle.h"
+#include "renderer/base/render_controller.h"
+#include "renderer/base/render_engine.h"
 #include "renderer/base/shader_data_type.h"
 
 namespace ark::plugin::gltf {
@@ -214,7 +216,6 @@ template<typename T> sp<Array<T>> toArray(std::vector<T> vector) {
 }
 
 Mesh processPrimitive(const tinygltf::Model& gltfModel, const std::vector<sp<Material>>& materials, const tinygltf::Primitive& primitive, const M4& TransformMatrix, uint32_t id, String name) {
-    std::vector<element_index_t> indices;
     std::vector<V3> vertices;
     std::vector<V3> normals;
     std::vector<Mesh::UV> uvs;
@@ -240,10 +241,15 @@ Mesh processPrimitive(const tinygltf::Model& gltfModel, const std::vector<sp<Mat
         }
     }
 
+    SBufferReadData bufferReadData = getAttributeData<element_index_t, element_index_t>(gltfModel, TransformMatrix, "", primitive.indices);
+    std::vector<element_index_t> indices = std::move(bufferReadData.DstData);
+
+    if(Ark::instance().renderController()->renderEngine()->isLHS())
     {
-        element_index_t baseIndex = indices.size();
-        SBufferReadData bufferReadData = getAttributeData<element_index_t, element_index_t>(gltfModel, TransformMatrix, "", primitive.indices);
-        indices = std::move(bufferReadData.DstData);
+        const element_index_t indexSize = indices.size();
+        ASSERT(indexSize % 3 == 0);
+        for(size_t i = 0; i < indexSize; i += 3)
+            std::swap(indices[i + 1], indices[i + 2]);
     }
 
     ASSERT(primitive.material == -1 || primitive.material < materials.size());
@@ -266,9 +272,9 @@ M4 getNodeLocalTransformMatrix(const tinygltf::Node& Node)
     if(!Node.rotation.empty())
         rotation = V4(static_cast<float>(Node.rotation.at(0)), static_cast<float>(Node.rotation.at(1)), static_cast<float>(Node.rotation.at(2)), static_cast<float>(Node.rotation.at(3)));
 
-    M4 translateMatrix = MatrixUtil::translate(M4::identity(), translation);
-    M4 rotateMatrix = MatrixUtil::rotate(M4::identity(), rotation);
-    M4 scaleMatrix = MatrixUtil::scale(M4::identity(), scale);
+    const M4 translateMatrix = MatrixUtil::translate(M4::identity(), translation);
+    const M4 rotateMatrix = MatrixUtil::rotate(M4::identity(), rotation);
+    const M4 scaleMatrix = MatrixUtil::scale(M4::identity(), scale);
     return translateMatrix * rotateMatrix * scaleMatrix;
 }
 

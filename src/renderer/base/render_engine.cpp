@@ -52,9 +52,14 @@ bool RenderEngine::isLHS() const
     return _coordinate_system == Ark::COORDINATE_SYSTEM_LHS;
 }
 
+bool RenderEngine::isViewportFlipped() const
+{
+    return _coordinate_system != _renderer_factory->defaultCoordinateSystem();
+}
+
 V2 RenderEngine::toViewportPosition(const V2& position) const
 {
-    if(coordinateSystem() != _coordinate_system)
+    if(isViewportFlipped())
         return {position.x(), _render_context->viewport().height() - position.y()};
     return position;
 }
@@ -72,10 +77,10 @@ V3 RenderEngine::toWorldPosition(const M4& vpMatrix, float screenX, float screen
 {
     const Viewport& viewport = _render_context->viewport();
 
-    float ndcx = (screenX * 2 - viewport.width()) / viewport.width();
-    float ndcy = (screenY * 2 - viewport.height()) / viewport.height();
+    const float ndcx = (screenX * 2 - viewport.width()) / viewport.width();
+    const float ndcy = (screenY * 2 - viewport.height()) / viewport.height();
     const M4 vpInverse = MatrixUtil::inverse(vpMatrix);
-    const V4 pos = MatrixUtil::mul(vpInverse, V4(ndcx, _coordinate_system != coordinateSystem() ? -ndcy : ndcy, z, 1.0f));
+    const V4 pos = MatrixUtil::mul(vpInverse, V4(ndcx, isViewportFlipped() ? -ndcy : ndcy, z, 1.0f));
     return {pos.x() / pos.w(), pos.y() / pos.w(), pos.z() / pos.w()};
 }
 
@@ -87,7 +92,7 @@ void RenderEngine::onSurfaceCreated()
 sp<RenderView> RenderEngine::createRenderView(const sp<RenderController>& renderController, const Viewport& viewport) const
 {
     const Global<Camera> mainCamera;
-    mainCamera->ortho(viewport.left(), viewport.right(), viewport.top(), viewport.bottom(), viewport.clipNear(), viewport.clipFar(), coordinateSystem());
+    mainCamera->ortho(viewport.left(), viewport.right(), viewport.top(), viewport.bottom(), viewport.clipNear(), viewport.clipFar());
 
     _render_context->setViewport(viewport);
     return _renderer_factory->createRenderView(_render_context, renderController);

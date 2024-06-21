@@ -96,8 +96,7 @@ const char sclipNearclipFarPlaneWarning[] = "ClipNear: %.2f, ClipFar: %.2f. Far 
 }
 
 Camera::Camera()
-    : Camera(Ark::instance().applicationContext()->renderController()->createCamera())
-    // : Camera(Ark::instance().createCamera())
+    : Camera(Ark::instance().createCamera())
 {
 }
 
@@ -120,16 +119,6 @@ void Camera::ortho(sp<Vec2> leftTop, sp<Vec2> rightBottom, sp<Vec2> clip)
 void Camera::ortho(float left, float right, float bottom, float top, float clipNear, float clipFar)
 {
     _projection->set(_delegate->ortho(left, right, bottom, top, clipNear, clipFar));
-}
-
-void Camera::ortho(float left, float right, float bottom, float top, float clipNear, float clipFar, Ark::RendererCoordinateSystem coordinateSystem)
-{
-    if(coordinateSystem == Ark::COORDINATE_SYSTEM_LHS)
-    {
-        std::swap(top, bottom);
-        std::swap(clipNear, clipFar);
-    }
-    ortho(left, right, bottom, top, clipNear, clipFar);
 }
 
 void Camera::frustum(float left, float right, float bottom, float top, float clipNear, float clipFar)

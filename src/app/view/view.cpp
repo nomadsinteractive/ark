@@ -34,12 +34,10 @@ V2 toPivotPosition(const sp<Boundaries>& occupies, const V2& size)
     if(!occupies)
         return Ark::instance().applicationContext()->renderEngine()->isLHS() ? V2(0, 0) : V2(0, size.y());
 
-    const V3& occupyAABBMin = occupies->aabbMin()->val();
-    const V3& occupyAABBMax = occupies->aabbMax()->val();
-    return size * V2(Math::lerp(0, size.x(), occupyAABBMin.x(), occupyAABBMax.x(), 0), Math::lerp(0, size.y(), occupyAABBMin.y(), occupyAABBMax.y(), 0));
+    return occupies->toPivotPosition(size);
 }
 
-template<size_t IDX> class LayoutSize : public Numeric {
+template<size_t IDX> class LayoutSize final : public Numeric {
 public:
     LayoutSize(sp<View::Stub> stub)
         : _stub(std::move(stub)) {
@@ -89,7 +87,7 @@ private:
     bool _is_center;
 };
 
-class RenderableView : public Renderable {
+class RenderableView final : public Renderable {
 public:
     RenderableView(sp<View::Stub> viewStub, sp<Renderable> renderable, bool isBackground)
         : _view_stub(std::move(viewStub)), _renderable(std::move(renderable)), _is_background(isBackground)
@@ -128,7 +126,7 @@ public:
         bool _is_background;
 };
 
-class IsDiscarded : public Boolean {
+class IsDiscarded final : public Boolean {
 public:
     IsDiscarded(sp<View::Stub> stub)
         : _stub(std::move(stub))

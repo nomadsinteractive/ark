@@ -1,6 +1,7 @@
 #include "graphics/base/boundaries.h"
 
 #include "core/inf/variable.h"
+#include "core/util/math.h"
 
 #include "graphics/util/vec3_type.h"
 
@@ -27,7 +28,7 @@ Boundaries::Boundaries(sp<Vec3> aabbMin, sp<Vec3> aabbMax, sp<Vec3> size)
 }
 
 Boundaries::Boundaries(const V3& aabbMin, const V3& aabbMax)
-    : Boundaries(sp<Vec3::Const>::make(aabbMin), sp<Vec3::Const>::make(aabbMax), sp<Vec3::Const>::make(aabbMax - aabbMin))
+    : Boundaries(sp<Vec3>::make<Vec3::Const>(aabbMin), sp<Vec3>::make<Vec3::Const>(aabbMax), sp<Vec3>::make<Vec3::Const>(aabbMax - aabbMin))
 {
 }
 
@@ -55,6 +56,20 @@ sp<Boundaries> Boundaries::translate(sp<Vec3> xyz) const
 {
     sp<Vec3> aabbMin = Vec3Type::add(_aabb_min, xyz);
     return sp<Boundaries>::make(std::move(aabbMin), Vec3Type::add(_aabb_max, std::move(xyz)), _size);
+}
+
+V2 Boundaries::toPivotPosition(const V2& size) const
+{
+    const V3& occupyAABBMin = _aabb_min->val();
+    const V3& occupyAABBMax = _aabb_max->val();
+    return {Math::lerp(0, size.x(), occupyAABBMin.x(), occupyAABBMax.x(), 0), Math::lerp(0, size.y(), occupyAABBMin.y(), occupyAABBMax.y(), 0)};
+}
+
+V3 Boundaries::toPivotPosition(const V3& size) const
+{
+    const V3& occupyAABBMin = _aabb_min->val();
+    const V3& occupyAABBMax = _aabb_max->val();
+    return {Math::lerp(0, size.x(), occupyAABBMin.x(), occupyAABBMax.x(), 0), Math::lerp(0, size.y(), occupyAABBMin.y(), occupyAABBMax.y(), 0), Math::lerp(0, size.z(), occupyAABBMin.z(), occupyAABBMax.z(), 0)};
 }
 
 bool Boundaries::update(uint64_t timestamp) const

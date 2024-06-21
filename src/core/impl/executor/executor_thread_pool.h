@@ -31,27 +31,6 @@ private:
         std::mutex _mutex;
     };
 
-    class WorkerThreadStrategy : public ExecutorWorkerThread::Strategy {
-    public:
-        WorkerThreadStrategy(const sp<Stub>& stub);
-
-        virtual void onStart() override;
-        virtual void onExit() override;
-
-        virtual uint64_t onBusy() override;
-        virtual uint64_t onIdle(Thread& thread) override;
-
-        virtual void onException(const std::exception& e) override;
-
-        bool isIdle() const;
-        void markBusy();
-
-    private:
-        sp<Stub> _stub;
-
-        uint32_t _idled_cycle;
-    };
-
     sp<ExecutorWorkerThread> createWorkerThread();
 
 private:
