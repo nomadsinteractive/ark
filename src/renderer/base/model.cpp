@@ -21,12 +21,12 @@ size_t calcIndicesSize(const std::vector<sp<Mesh>>& meshes)
     return size;
 }
 
-size_t calcVertexLength(const std::vector<sp<Mesh>>& meshes)
+size_t calcVertexCount(const std::vector<sp<Mesh>>& meshes)
 {
-    size_t vertexLength = 0;
+    size_t vertexCount = 0;
     for(const Mesh& i : meshes)
-        vertexLength += i.vertexLength();
-    return vertexLength;
+        vertexCount += i.vertexCount();
+    return vertexCount;
 }
 
 class InputMeshIndices final : public Uploader {
@@ -60,7 +60,7 @@ private:
 class MeshVertices final : public Vertices {
 public:
     MeshVertices(std::vector<sp<Mesh>> meshes)
-        : Vertices(calcVertexLength(meshes)), _meshes(std::move(meshes))
+        : Vertices(calcVertexCount(meshes)), _meshes(std::move(meshes))
     {
     }
 

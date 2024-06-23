@@ -10,12 +10,13 @@
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/model_bundle.h"
 #include "renderer/base/model.h"
+#include "renderer/base/pipeline_input.h"
 #include "renderer/inf/render_command_composer.h"
 
 
 namespace ark {
 
-class ARK_API RCCMultiDrawElementsIndirect : public RenderCommandComposer {
+class ARK_API RCCMultiDrawElementsIndirect final : public RenderCommandComposer {
 public:
     RCCMultiDrawElementsIndirect(sp<ModelBundle> multiModels);
 
@@ -51,6 +52,11 @@ private:
         size_t _node_id;
     };
 
+    struct MeshInstance {
+        sp<NodeInstance> _node_instance;
+        sp<Mesh> _mesh;
+    };
+
     struct ModelInstance {
         ModelInstance() = default;
         ModelInstance(size_t snapshotIndex, const ModelBundle::ModelLayout& modelLayout);
@@ -67,7 +73,7 @@ private:
 
     struct IndirectCmds {
         DrawingParams::DrawElementsIndirectCommand _command;
-        std::vector<sp<NodeInstance>> _node_instances;
+        std::vector<MeshInstance> _mesh_instances;
     };
 
 private:

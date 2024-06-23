@@ -152,11 +152,16 @@ V3 Camera::toWorldPosition(float screenX, float screenY, float z) const
     return Ark::instance().applicationContext()->renderEngine()->toWorldPosition(_vp->val(), screenX, screenY, z);
 }
 
-sp<Vec3> Camera::toViewportPosition(const sp<Vec3>& position) const
+V3 Camera::toViewportPosition(const V3& worldPosition) const
+{
+    return MatrixUtil::mul(_vp->val(), worldPosition);
+}
+
+sp<Vec3> Camera::toViewportPosition(sp<Vec3> worldPosition) const
 {
     const Viewport& viewport = Ark::instance().applicationContext()->renderEngine()->viewport();
     const V3 scale = Ark::instance().manifest()->renderer()._coordinate_system == _coordinate_system ? V3(0.5f, 0.5f, 0.5f) : V3(0.5f, -0.5f, 0.5f);
-    return Vec3Type::mul(Vec3Type::add(Vec3Type::mul(Mat4Type::matmul(_vp, position), scale), V3(0.5f, 0.5f, 0.5f)), V3(viewport.width(), viewport.height(), 1.0f));
+    return Vec3Type::mul(Vec3Type::add(Vec3Type::mul(Mat4Type::matmul(_vp, std::move(worldPosition)), scale), V3(0.5f, 0.5f, 0.5f)), V3(viewport.width(), viewport.height(), 1.0f));
 }
 
 sp<Vec3> Camera::position() const

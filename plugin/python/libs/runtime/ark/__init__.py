@@ -1262,7 +1262,7 @@ class Mesh:
         return ''
 
     @property
-    def vertex_length(self) -> int:
+    def vertex_count(self) -> int:
         return 0
 
     @property

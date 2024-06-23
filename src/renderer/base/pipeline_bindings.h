@@ -200,7 +200,7 @@ private:
 
         sp<PipelineLayout> _layout;
         sp<PipelineInput> _input;
-
+//TODO: move it to stream
         PipelineInput::AttributeOffsets _attributes;
 
         Table<String, sp<Texture>> _samplers;

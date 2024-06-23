@@ -34,7 +34,6 @@ static PyObject* ark_loadAsset(PyObject* self, PyObject* args);
 static PyObject* ark_openAsset(PyObject* self, PyObject* args);
 static PyObject* ark_loadAssetBundle(PyObject* self, PyObject* args);
 static PyObject* ark_buildType(PyObject* self, PyObject* args);
-static PyObject* ark_isPublishingBuild(PyObject* self, PyObject* args);
 static PyObject* ark_isDirectory(PyObject* self, PyObject* args);
 static PyObject* ark_isFile(PyObject* self, PyObject* args);
 static PyObject* ark_loadFile(PyObject* self, PyObject* args);

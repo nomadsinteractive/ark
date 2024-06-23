@@ -15,8 +15,7 @@
 #include "renderer/vulkan/base/vk_renderer.h"
 #include "renderer/vulkan/util/vk_util.h"
 
-namespace ark {
-namespace vulkan {
+namespace ark::vulkan {
 
 VKTexture::VKTexture(sp<Recycler> recycler, sp<VKRenderer> renderer, uint32_t width, uint32_t height, sp<Texture::Parameters> parameters)
     : Texture::Delegate(parameters->_type), _recycler(std::move(recycler)), _renderer(std::move(renderer)), _width(width), _height(height), _parameters(std::move(parameters)),
@@ -399,5 +398,4 @@ void VKTexture::copyBitmap(uint8_t* buf, const Bitmap& bitmap, const bytearray& 
     }
 }
 
-}
 }

@@ -15,7 +15,7 @@ class ARK_API VertexWriter {
 public:
     class Writer : public Writable {
     public:
-        virtual ~Writer() override = default;
+        ~Writer() override = default;
 
         virtual void nextVertex() = 0;
     };
@@ -41,7 +41,6 @@ public:
     void writeBitangent(const V3& bitangent);
     void writeTexCoordinate(uint16_t u, uint16_t v);
     void writeBoneInfo(const Mesh::BoneInfo& boneInfo);
-    void writeNodeId(int32_t nodeId);
 
     void write(const void* buf, uint32_t size, uint32_t offset);
 
@@ -54,9 +53,9 @@ private:
     public:
         WriterMemory(uint8_t* ptr, uint32_t size, uint32_t stride);
 
-        virtual void nextVertex() override;
+        void nextVertex() override;
 
-        virtual uint32_t write(const void* ptr, uint32_t size, uint32_t offset) override;
+        uint32_t write(const void* ptr, uint32_t size, uint32_t offset) override;
 
     private:
         uint8_t* _ptr;

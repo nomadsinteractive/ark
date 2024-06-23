@@ -20,14 +20,14 @@ M2 MatrixUtil::mul(const M2& lvalue, const M2& rvalue)
 V2 MatrixUtil::mul(const M2& lvalue, const V2& rvalue)
 {
     const glm::vec2 r = lvalue.mat<glm::mat2>() * glm::vec2(rvalue.x(), rvalue.y());
-    return V2(r.x, r.y);
+    return {r.x, r.y};
 }
 
 M2 MatrixUtil::rotate(const M2& lvalue, float radian)
 {
-    float cos = Math::cos(radian);
-    float sin = Math::sin(radian);
-    float rot[4] = {cos, sin, -sin, cos};
+    const float cos = Math::cos(radian);
+    const float sin = Math::sin(radian);
+    const float rot[4] = {cos, sin, -sin, cos};
     return lvalue * M2(rot);
 }
 
@@ -45,14 +45,14 @@ M3 MatrixUtil::mul(const M3& lvalue, const M3& rvalue)
 V3 MatrixUtil::mul(const M3& lvalue, const V3& rvalue)
 {
     const glm::vec3 r = lvalue.mat<glm::mat3>() * glm::vec3(rvalue.x(), rvalue.y(), rvalue.z());
-    return V3(r.x, r.y, r.z);
+    return {r.x, r.y, r.z};
 }
 
 V2 MatrixUtil::mul(const M3& lvalue, const V2& rvalue)
 {
     const V3 r = mul(lvalue, V3(rvalue, 1.0f));
     DCHECK(r.z() != 0, "Division by zero");
-    return V2(r.x() / r.z(), r.y() / r.z());
+    return {r.x() / r.z(), r.y() / r.z()};
 }
 
 M3 MatrixUtil::rotate(const M3& lvalue, float radian)
@@ -78,19 +78,19 @@ M4 MatrixUtil::mul(const M4& lvalue, const M4& rvalue)
 V4 MatrixUtil::mul(const M4& lvalue, const V4& rvalue)
 {
     const glm::vec4 r = lvalue.mat<glm::mat4>() * glm::vec4(rvalue.x(), rvalue.y(), rvalue.z(), rvalue.w());
-    return V4(r.x, r.y, r.z, r.w);
+    return {r.x, r.y, r.z, r.w};
 }
 
-V3 MatrixUtil::mul(const M4& lvalue, const V3& rvalue)
+V3 MatrixUtil::mul(const M4& lhs, const V3& rhs)
 {
-    const glm::vec4 r = lvalue.mat<glm::mat4>() * glm::vec4(rvalue.x(), rvalue.y(), rvalue.z(), 1.0f);
+    const glm::vec4 r = lhs.mat<glm::mat4>() * glm::vec4(rhs.x(), rhs.y(), rhs.z(), 1.0f);
     CHECK(r.w != 0, "Division by zero");
-    return V3(r.x / r.w, r.y / r.w, r.z / r.w);
+    return {r.x / r.w, r.y / r.w, r.z / r.w};
 }
 
 M4 MatrixUtil::rotate(const M4& lvalue, const V3& direction, float radian)
 {
-    return M4(glm::rotate(lvalue.mat<glm::mat4>(), radian, *reinterpret_cast<const glm::vec3*>(&direction)));
+    return {glm::rotate(lvalue.mat<glm::mat4>(), radian, *reinterpret_cast<const glm::vec3*>(&direction))};
 }
 
 M4 MatrixUtil::rotate(const M4& lvalue, const V4& quaternion)

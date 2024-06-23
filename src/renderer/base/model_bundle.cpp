@@ -110,10 +110,12 @@ ModelBundle::ModelLayout& ModelBundle::Stub::addModel(int32_t type, sp<Model> mo
     modelInfo._vertex_offset = _vertex_length;
     modelInfo._index_offset = _index_length;
     size_t meshIndexOffset = _index_length;
+    size_t meshVertexOffset = _vertex_length;
     for(const sp<Mesh>& i : model->meshes())
     {
-        MeshLayout ml = {i, meshIndexOffset};
+        MeshLayout ml = {i, meshIndexOffset, meshVertexOffset};
         meshIndexOffset += i->indices().size();
+        meshVertexOffset += i->vertexCount();
         modelInfo._mesh_layouts.push_back(std::move(ml));
     }
     _vertex_length += model->vertexCount();

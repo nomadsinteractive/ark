@@ -39,7 +39,7 @@ const String& Mesh::name() const
     return _name;
 }
 
-size_t Mesh::vertexLength() const
+size_t Mesh::vertexCount() const
 {
     return _vertices.size();
 }
@@ -76,7 +76,7 @@ void Mesh::write(VertexWriter& buf) const
     const V3* normal = _normals ? _normals->buf() : nullptr;
     const Tangent* tangent = _tangents ? _tangents->buf() : nullptr;
     const BoneInfo* boneInfo = _bone_infos ? _bone_infos->buf() : nullptr;
-    const bool hasMaterialId = buf.hasAttribute(PipelineInput::ATTRIBUTE_NAME_MATERIAL_ID);
+    const bool hasMaterialId = false; //buf.hasAttribute(PipelineInput::ATTRIBUTE_NAME_MATERIAL_ID);
     const size_t len = _vertices.size();
 
     for(size_t i = 0; i < len; ++i)

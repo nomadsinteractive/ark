@@ -54,7 +54,7 @@ public:
 //  [[script::bindings::property]]
     const String& name() const;
 //  [[script::bindings::property]]
-    size_t vertexLength() const;
+    size_t vertexCount() const;
 //  [[script::bindings::property]]
     const sp<Material>& material() const;
 

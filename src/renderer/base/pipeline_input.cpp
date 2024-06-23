@@ -35,22 +35,55 @@ private:
 
 
 PipelineInput::AttributeOffsets::AttributeOffsets()
+    : _last_attribute(ATTRIBUTE_NAME_TEX_COORDINATE)
 {
-    for(uint32_t i = 0; i < ATTRIBUTE_NAME_COUNT; ++i)
-        _offsets[i] = -1;
+    std::fill_n(_offsets, ATTRIBUTE_NAME_COUNT, -1);
 }
 
 PipelineInput::AttributeOffsets::AttributeOffsets(const PipelineInput& input)
+    : AttributeOffsets()
 {
-    const PipelineInput::Stream& stream = input.streams().at(0);
+    const Stream& stream = input.streams().at(0);
     _offsets[ATTRIBUTE_NAME_TEX_COORDINATE] = stream.getAttributeOffset("TexCoordinate");
     _offsets[ATTRIBUTE_NAME_NORMAL] = stream.getAttributeOffset("Normal");
     _offsets[ATTRIBUTE_NAME_TANGENT] = stream.getAttributeOffset("Tangent");
     _offsets[ATTRIBUTE_NAME_BITANGENT] = stream.getAttributeOffset("Bitangent");
     _offsets[ATTRIBUTE_NAME_BONE_IDS] = stream.getAttributeOffset("BoneIds");
     _offsets[ATTRIBUTE_NAME_BONE_WEIGHTS] = stream.getAttributeOffset("BoneWeights");
-    _offsets[ATTRIBUTE_NAME_NODE_ID] = stream.getAttributeOffset("NodeId");
-    _offsets[ATTRIBUTE_NAME_MATERIAL_ID] = stream.getAttributeOffset("MaterialId");
+    if(input.streams().size() > 1)
+    {
+        const Stream& stream1 = input.streams().at(1);
+        _offsets[ATTRIBUTE_NAME_MODEL_MATRIX] = stream1.getAttributeOffset("Model");
+        _offsets[ATTRIBUTE_NAME_NODE_ID] = stream1.getAttributeOffset("NodeId");
+        _offsets[ATTRIBUTE_NAME_MATERIAL_ID] = stream1.getAttributeOffset("MaterialId");
+    }
+
+    int32_t lastOffset = -1;
+    for(int32_t i = ATTRIBUTE_NAME_TEX_COORDINATE; i < ATTRIBUTE_NAME_COUNT; ++i)
+    {
+        if(lastOffset < _offsets[i])
+        {
+            _last_attribute = static_cast<AttributeName>(i);
+            lastOffset = _offsets[i];
+        }
+    }
+}
+
+size_t PipelineInput::AttributeOffsets::stride() const
+{
+    if(_offsets[_last_attribute] < 0)
+        return 0;
+
+    switch(_last_attribute)
+    {
+        case ATTRIBUTE_NAME_MODEL_MATRIX:
+            return _offsets[ATTRIBUTE_NAME_MODEL_MATRIX] + sizeof(M4);
+        case ATTRIBUTE_NAME_NODE_ID:
+        case ATTRIBUTE_NAME_MATERIAL_ID:
+            return _offsets[_last_attribute] + sizeof(int32_t);
+        default:
+            return _offsets[_last_attribute];
+    }
 }
 
 PipelineInput::PipelineInput()

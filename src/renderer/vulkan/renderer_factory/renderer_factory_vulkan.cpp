@@ -32,18 +32,13 @@
 #include "generated/vulkan_plugin.h"
 
 
-namespace ark {
-namespace vulkan {
+namespace ark::vulkan {
 
-RendererFactoryVulkan::RendererFactoryVulkan(const sp<Recycler>& recycler)
-    : RendererFactory(Ark::COORDINATE_SYSTEM_LHS), _recycler(recycler), _renderer(sp<VKRenderer>::make())
+RendererFactoryVulkan::RendererFactoryVulkan(sp<Recycler> recycler)
+    : RendererFactory(Ark::COORDINATE_SYSTEM_LHS), _recycler(std::move(recycler)), _renderer(sp<VKRenderer>::make())
 {
     const Global<PluginManager> pm;
     pm->addPlugin(sp<VulkanPlugin>::make());
-}
-
-RendererFactoryVulkan::~RendererFactoryVulkan()
-{
 }
 
 sp<RenderEngineContext> RendererFactoryVulkan::initialize(Ark::RendererVersion version)
@@ -120,5 +115,4 @@ sp<Texture::Delegate> RendererFactoryVulkan::createTexture(sp<Size> size, sp<Tex
     return nullptr;
 }
 
-}
 }

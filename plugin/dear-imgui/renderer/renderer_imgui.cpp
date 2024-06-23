@@ -31,6 +31,7 @@
 #include "dear-imgui/base/draw_command_pool.h"
 #include "dear-imgui/base/imgui_context.h"
 #include "dear-imgui/base/renderer_context.h"
+#include "renderer/inf/renderer_factory.h"
 
 namespace ark::plugin::dear_imgui {
 
@@ -274,7 +275,7 @@ sp<RendererImgui::DrawCommandRecycler> RendererImgui::obtainDrawCommandRecycler(
 }
 
 RendererImgui::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _manifest(manifest), _resource_loader_context(resourceLoaderContext), _camera(sp<Camera>::make(Ark::instance().createCamera(Ark::COORDINATE_SYSTEM_LHS))),
+    : _manifest(manifest), _resource_loader_context(resourceLoaderContext), _camera(sp<Camera>::make(Ark::instance().createCamera())),
       _shader(Shader::fromDocument(factory, manifest, resourceLoaderContext, "shaders/imgui.vert", "shaders/imgui.frag"))
 {
 }
@@ -313,7 +314,10 @@ sp<Renderer> RendererImgui::BUILDER::build(const Scope& args)
     sp<Shader> shader = _shader->build(args);
     const RenderEngine& renderEngine = _resource_loader_context->renderController()->renderEngine();
     const Viewport& viewport = renderEngine.viewport();
-    _camera->ortho(0, viewport.width(), viewport.height(), 0, viewport.clipNear(), viewport.clipFar());
+    if(renderEngine.isRendererLHS())
+        _camera->ortho(0, viewport.width(), 0, viewport.height(), viewport.clipNear(), viewport.clipFar());
+    else
+        _camera->ortho(0, viewport.width(), viewport.height(), 0, viewport.clipNear(), viewport.clipFar());
     shader->setCamera(_camera);
     return sp<RendererImgui>::make(_resource_loader_context, std::move(shader), texture);
 }

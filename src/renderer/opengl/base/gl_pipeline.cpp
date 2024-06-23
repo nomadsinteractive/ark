@@ -564,8 +564,8 @@ void GLPipeline::GLMultiDrawElementsIndirect::draw(GraphicsContext& graphicsCont
 #ifndef ANDROID
     glMultiDrawElementsIndirect(_mode, GLIndexType, nullptr, static_cast<GLsizei>(param._indirect_cmd_count), sizeof(DrawingParams::DrawElementsIndirectCommand));
 #else
-    for(uint32_t i = 0; i < param._draw_count; ++i)
-        glDrawElementsIndirect(_mode, GLIndexType, reinterpret_cast<const void *>(i * sizeof(DrawingContext::DrawElementsIndirectCommand)));
+    for(uint32_t i = 0; i < param._indirect_cmd_count; ++i)
+        glDrawElementsIndirect(_mode, GLIndexType, reinterpret_cast<const void *>(i * sizeof(DrawingParams::DrawElementsIndirectCommand)));
 #endif
 }
 

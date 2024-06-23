@@ -1,6 +1,7 @@
 #include "renderer/impl/render_command_composer/rcc_multi_draw_elements_indirect.h"
 
 #include "core/impl/writable/writable_with_offset.h"
+#include "graphics/base/material.h"
 
 #include "graphics/base/render_layer.h"
 #include "graphics/base/render_request.h"
@@ -12,7 +13,6 @@
 #include "renderer/base/node.h"
 #include "renderer/base/pipeline_input.h"
 #include "renderer/base/render_controller.h"
-#include "renderer/base/render_engine.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/vertex_writer.h"
@@ -23,7 +23,7 @@ namespace ark {
 
 namespace {
 
-class VerticesUploader : public Uploader {
+class VerticesUploader final : public Uploader {
 public:
     VerticesUploader(sp<ModelBundle> multiModels, sp<PipelineInput> pipelineInput)
         : Uploader(multiModels->vertexLength() * pipelineInput->getStream(0).stride()), _model_bundle(std::move(multiModels)), _pipeline_input(std::move(pipelineInput)) {
@@ -55,7 +55,7 @@ private:
 
 };
 
-class IndicesUploader : public Uploader {
+class IndicesUploader final : public Uploader {
 public:
     IndicesUploader(sp<ModelBundle> multiModels)
         : Uploader(multiModels->indexLength() * sizeof(element_index_t)), _model_bundle(std::move(multiModels)) {
@@ -138,7 +138,7 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
         const Renderable::Snapshot& snapshot = reload ? s.ensureDirtySnapshot(renderRequest) : s._snapshot;
         if(reload || s._snapshot._state.hasState(Renderable::RENDERABLE_STATE_DIRTY))
         {
-            if(snapshot._varyings._sub_properties.size() > 0)
+            if(!snapshot._varyings._sub_properties.empty())
             {
                 const auto iter = _model_instances.find(i);
                 DASSERT(iter != _model_instances.end());
@@ -153,34 +153,41 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
         }
     }
 
-    size_t offset = 0;
+    size_t instanceId = 0;
+    const PipelineInput::AttributeOffsets& attributeOffsets = buf.shaderBindings()->pipelineBindings()->attributes();
+    const size_t attributeStride = attributeOffsets.stride();
+    const bool hasModelMatrix = attributeOffsets._offsets[PipelineInput::ATTRIBUTE_NAME_MODEL_MATRIX] != -1;
+    const bool hasMaterialId = attributeOffsets._offsets[PipelineInput::ATTRIBUTE_NAME_MATERIAL_ID] != -1;
     for(const IndirectCmds& i : _indirect_cmds.values())
-        for(const NodeInstance& j : i._node_instances)
+        for(const auto& [nodeInstance, mesh] : i._mesh_instances)
         {
-            const RenderLayerSnapshot::Droplet& s = renderLayerItems.at(j.snapshotIndex());
+            const RenderLayerSnapshot::Droplet& s = renderLayerItems.at(nodeInstance->snapshotIndex());
             const Renderable::Snapshot& snapshot = s._snapshot;
             if(reload || snapshot._state.hasState(Renderable::RENDERABLE_STATE_DIRTY))
                 if(snapshot._varyings._buffers.length() > 0)
                 {
                     const ModelBundle::ModelLayout& modelInfo = _model_bundle->ensureModelLayout(snapshot._type);
                     const Boundaries& metrics = modelInfo._model->content();
-                    VertexWriter writer = buf.makeDividedVertexWriter(renderRequest, 1, offset, 1);
+                    VertexWriter writer = buf.makeDividedVertexWriter(renderRequest, 1, instanceId, 1);
                     writer.next();
-                    writer.write(MatrixUtil::translate(M4::identity(), snapshot._position) * MatrixUtil::scale(snapshot._transform.toMatrix(), toScale(snapshot._size, metrics)) * j.globalTransform());
+                    if(hasModelMatrix)
+                        writer.writeAttribute(MatrixUtil::translate(M4::identity(), snapshot._position) * MatrixUtil::scale(snapshot._transform.toMatrix(), toScale(snapshot._size, metrics)) * nodeInstance->globalTransform(), PipelineInput::ATTRIBUTE_NAME_MODEL_MATRIX);
+                    if(hasMaterialId && mesh->material())
+                        writer.writeAttribute(mesh->material()->id(), PipelineInput::ATTRIBUTE_NAME_MATERIAL_ID);
                     ByteArray::Borrowed divided = snapshot._varyings.getDivided(1)._content;
-                    if(divided.length() > sizeof(M4))
-                        writer.write(divided.buf() + sizeof(M4), divided.length() - sizeof(M4), sizeof(M4));
+                    if(divided.length() > attributeStride)
+                        writer.write(divided.buf() + attributeStride, divided.length() - attributeStride, attributeStride);
                 }
-            ++ offset;
+            ++ instanceId;
         }
 }
 
 V3 RCCMultiDrawElementsIndirect::toScale(const V3& displaySize, const Boundaries& metrics) const
 {
     const V3& size = metrics.size()->val();
-    return V3(displaySize.x() != 0 ? displaySize.x() / size.x() : 1.0f,
+    return {displaySize.x() != 0 ? displaySize.x() / size.x() : 1.0f,
               displaySize.y() != 0 ? displaySize.y() / size.y() : 1.0f,
-              displaySize.z() != 0 ? displaySize.z() /  size.z() : 1.0f);
+              displaySize.z() != 0 ? displaySize.z() /  size.z() : 1.0f};
 }
 
 void RCCMultiDrawElementsIndirect::reloadIndirectCommands(const RenderLayerSnapshot& snapshot)
@@ -190,7 +197,7 @@ void RCCMultiDrawElementsIndirect::reloadIndirectCommands(const RenderLayerSnaps
     _model_instances.clear();
     for(const RenderLayerSnapshot::Droplet& i : snapshot._droplets)
     {
-        int32_t type = i._snapshot._type;
+        const int32_t type = i._snapshot._type;
         const ModelBundle::ModelLayout& modelLayout = _model_bundle->ensureModelLayout(type);
         ModelInstance& modelInstance = _model_instances[offset];
         modelInstance = ModelInstance(offset, modelLayout);
@@ -201,11 +208,11 @@ void RCCMultiDrawElementsIndirect::reloadIndirectCommands(const RenderLayerSnaps
             {
                 const ModelBundle::MeshLayout& meshLayout = modelLayout._mesh_layouts.at(k->id());
                 IndirectCmds& modelIndirect = _indirect_cmds[static_cast<uint64_t>(type) << 32 | k->id()];
-                if(modelIndirect._node_instances.empty())
-                    modelIndirect._command = {static_cast<uint32_t>(meshLayout._mesh->indices().size()), 0, static_cast<uint32_t>(meshLayout._index_offset), static_cast<uint32_t>(modelLayout._vertex_offset), 0};
+                if(modelIndirect._mesh_instances.empty())
+                    modelIndirect._command = {static_cast<uint32_t>(meshLayout._mesh->indices().size()), 0, static_cast<uint32_t>(meshLayout._index_offset), static_cast<uint32_t>(meshLayout._vertex_offset), 0};
 
                 ++ modelIndirect._command._instance_count;
-                modelIndirect._node_instances.push_back(nodeInstance);
+                modelIndirect._mesh_instances.push_back(MeshInstance{nodeInstance, meshLayout._mesh});
             }
         }
         offset ++;
@@ -217,15 +224,15 @@ RCCMultiDrawElementsIndirect::NodeLayoutInstance::NodeLayoutInstance(const Node&
 {
 }
 
+RCCMultiDrawElementsIndirect::NodeLayoutInstance::NodeLayoutInstance(const Node& node, const M4& globalTransform)
+    : _node_id(node.name().hash()), _global_transform(sp<Mat4>::make<Mat4Impl>(globalTransform))
+{
+}
+
 sp<Mat4> RCCMultiDrawElementsIndirect::NodeLayoutInstance::makeGlobalTransform(sp<Mat4> parentTransform, const M4& localTransform) const
 {
     sp<Mat4> nodeTransform = Mat4Type::matmul(sp<Mat4>::make<Mat4::Const>(localTransform), static_cast<sp<Mat4>>(_node_transform));
     return parentTransform ? Mat4Type::matmul(std::move(parentTransform), std::move(nodeTransform)) : nodeTransform;
-}
-
-RCCMultiDrawElementsIndirect::NodeLayoutInstance::NodeLayoutInstance(const Node& node, const M4& globalTransform)
-    : _node_id(node.name().hash()), _global_transform(sp<Mat4>::make<Mat4Impl>(globalTransform))
-{
 }
 
 RCCMultiDrawElementsIndirect::ModelInstance::ModelInstance(size_t snapshotIndex, const ModelBundle::ModelLayout& modelLayout)

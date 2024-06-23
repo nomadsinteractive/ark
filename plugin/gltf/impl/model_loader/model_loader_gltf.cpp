@@ -104,7 +104,7 @@ ShaderDataType getShaderDataTypeFromAccessor(const tinygltf::Accessor& accessor)
         FATAL("Unsupported data component type in gltf model!");
     }
 
-    return ShaderDataType(componentType, numOfComponents);
+    return {componentType, numOfComponents};
 }
 
 std::vector<sp<Material>> loadMaterials(tinygltf::Model const& gltfModel, MaterialBundle& materialBundle) {
@@ -240,11 +240,10 @@ Mesh processPrimitive(const tinygltf::Model& gltfModel, const std::vector<sp<Mat
             WARN("Ignoring primitive attribute \"%s\"", attributeKey.c_str());
         }
     }
-
+    DTRACE(name == "IconView", "");
     SBufferReadData bufferReadData = getAttributeData<element_index_t, element_index_t>(gltfModel, TransformMatrix, "", primitive.indices);
     std::vector<element_index_t> indices = std::move(bufferReadData.DstData);
-//TODO: temporarily disable this until I figure out this face orientation is consistent through all gltf models
-    if(Ark::instance().renderController()->renderEngine()->isLHS() && false)
+    if(Ark::instance().renderController()->renderEngine()->isRendererLHS())
     {
         const element_index_t indexSize = indices.size();
         ASSERT(indexSize % 3 == 0);

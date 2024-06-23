@@ -25,6 +25,7 @@ public:
         ATTRIBUTE_NAME_BITANGENT,
         ATTRIBUTE_NAME_BONE_IDS,
         ATTRIBUTE_NAME_BONE_WEIGHTS,
+        ATTRIBUTE_NAME_MODEL_MATRIX,
         ATTRIBUTE_NAME_NODE_ID,
         ATTRIBUTE_NAME_MATERIAL_ID,
         ATTRIBUTE_NAME_COUNT
@@ -47,7 +48,10 @@ public:
         AttributeOffsets();
         AttributeOffsets(const PipelineInput& input);
 
+        size_t stride() const;
+
         int32_t _offsets[ATTRIBUTE_NAME_COUNT];
+        AttributeName _last_attribute;
     };
 
     class Stream {

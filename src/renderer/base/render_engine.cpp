@@ -52,6 +52,11 @@ bool RenderEngine::isLHS() const
     return _coordinate_system == Ark::COORDINATE_SYSTEM_LHS;
 }
 
+bool RenderEngine::isRendererLHS() const
+{
+    return coordinateSystem() == Ark::COORDINATE_SYSTEM_LHS;
+}
+
 bool RenderEngine::isViewportFlipped() const
 {
     return _coordinate_system != _renderer_factory->defaultCoordinateSystem();

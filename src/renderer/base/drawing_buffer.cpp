@@ -20,7 +20,7 @@ DrawingBuffer::DrawingBuffer(sp<ShaderBindings> shaderBindings, uint32_t stride)
 
 VertexWriter DrawingBuffer::makeVertexWriter(const RenderRequest& renderRequest, size_t length, size_t offset)
 {
-    size_t size = length * _vertices._stride;
+    const size_t size = length * _vertices._stride;
     ByteArray::Borrowed content = renderRequest.allocator().sbrkSpan(size);
     _vertices.addStrip(offset * _vertices._stride, content);
     return VertexWriter(_pipeline_bindings->attributes(), !_is_instanced, content.buf(), size, _vertices._stride);

@@ -206,7 +206,7 @@ Model ModelImporterAssimp::loadModel(const aiScene* scene, MaterialBundle& mater
         const aiMesh* mesh = scene->mMeshes[i];
         sp<Mesh> m = sp<Mesh>::make(loadMesh(scene, mesh, materialBundle, i, vertexBase, bones, materials));
         meshes.push_back(std::move(m));
-        vertexBase += static_cast<element_index_t>(meshes.back()->vertexLength());
+        vertexBase += static_cast<element_index_t>(meshes.back()->vertexCount());
     }
 
     sp<Node> rootNode = loadNodeHierarchy(scene->mRootNode, meshes);

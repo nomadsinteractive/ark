@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_VULKAN_RENDERER_FACTORY_RENDERER_FACTORY_VULKAN_H_
-#define ARK_RENDERER_VULKAN_RENDERER_FACTORY_RENDERER_FACTORY_VULKAN_H_
+#pragma once
 
 #include "core/ark.h"
 #include "core/types/shared_ptr.h"
@@ -9,23 +8,22 @@
 
 #include "renderer/vulkan/forward.h"
 
-namespace ark {
-namespace vulkan {
+namespace ark::vulkan {
 
-class RendererFactoryVulkan : public RendererFactory {
+class RendererFactoryVulkan final : public RendererFactory {
 public:
-    RendererFactoryVulkan(const sp<Recycler>& recycler);
-    ~RendererFactoryVulkan() override;
+    RendererFactoryVulkan(sp<Recycler> recycler);
+    ~RendererFactoryVulkan() override = default;
 
-    virtual sp<RenderEngineContext> initialize(Ark::RendererVersion version) override;
-    virtual void onSurfaceCreated(RenderEngineContext& glContext) override;
+    sp<RenderEngineContext> initialize(Ark::RendererVersion version) override;
+    void onSurfaceCreated(RenderEngineContext& glContext) override;
 
-    virtual sp<Buffer::Delegate> createBuffer(Buffer::Type type, Buffer::Usage usage) override;
-    virtual sp<Camera::Delegate> createCamera(Ark::RendererCoordinateSystem cs) override;
-    virtual sp<Framebuffer> createFramebuffer(sp<Renderer> renderer, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask) override;
-    virtual sp<RenderView> createRenderView(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController) override;
-    virtual sp<PipelineFactory> createPipelineFactory() override;
-    virtual sp<Texture::Delegate> createTexture(sp<Size> size, sp<Texture::Parameters> parameters) override;
+    sp<Buffer::Delegate> createBuffer(Buffer::Type type, Buffer::Usage usage) override;
+    sp<Camera::Delegate> createCamera(Ark::RendererCoordinateSystem cs) override;
+    sp<Framebuffer> createFramebuffer(sp<Renderer> renderer, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask) override;
+    sp<RenderView> createRenderView(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController) override;
+    sp<PipelineFactory> createPipelineFactory() override;
+    sp<Texture::Delegate> createTexture(sp<Size> size, sp<Texture::Parameters> parameters) override;
 
 private:
     void setVersion(Ark::RendererVersion version, RenderEngineContext& vkContext);
@@ -40,6 +38,3 @@ private:
 };
 
 }
-}
-
-#endif

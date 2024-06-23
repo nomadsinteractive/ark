@@ -39,11 +39,6 @@ void VertexWriter::writeBoneInfo(const Mesh::BoneInfo& boneInfo)
     writeAttribute(boneInfo._weights, PipelineInput::ATTRIBUTE_NAME_BONE_WEIGHTS);
 }
 
-void VertexWriter::writeNodeId(int32_t nodeId)
-{
-    writeAttribute(nodeId, PipelineInput::ATTRIBUTE_NAME_NODE_ID);
-}
-
 void VertexWriter::write(const void* buf, uint32_t size, uint32_t offset)
 {
     _writer->write(buf, size, offset);

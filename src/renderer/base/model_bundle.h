@@ -12,11 +12,12 @@
 
 namespace ark {
 
-class ARK_API ModelBundle : public ModelLoader {
+class ARK_API ModelBundle final : public ModelLoader {
 public:
     struct MeshLayout {
         sp<Mesh> _mesh;
         size_t _index_offset;
+        size_t _vertex_offset;
     };
 
     struct NodeLayout {

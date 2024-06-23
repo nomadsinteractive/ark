@@ -292,7 +292,7 @@ const sp<ApplicationProfiler>& Ark::applicationProfiler() const
 Camera Ark::createCamera(RendererCoordinateSystem coordinateSystem) const
 {
     const RendererCoordinateSystem cs = coordinateSystem == COORDINATE_SYSTEM_DEFAULT ? _manifest->renderer()._coordinate_system : coordinateSystem;
-    return Camera(cs, _application_context->renderController()->renderEngine()->rendererFactory()->createCamera(cs));
+    return {cs, _application_context->renderController()->renderEngine()->rendererFactory()->createCamera(cs)};
 }
 
 op<ApplicationProfiler::Tracer> Ark::makeProfilerTracer(const char* func, const char* filename, int32_t lineno, const char* name, ApplicationProfiler::Category category) const

@@ -71,7 +71,7 @@
 #   define DFATAL(...) FATAL(__VA_ARGS__)
 #   define DCHECK(cond, ...) CHECK(cond, __VA_ARGS__)
 #   define DCHECK_WARN(cond, ...) CHECK_WARN(cond, __VA_ARGS__)
-#   define DTRACE(cond) TRACE(cond, __VA_ARGS__)
+#   define DTRACE(cond, ...) TRACE(cond, __VA_ARGS__)
 #   define DTHREAD_CHECK(threadId) THREAD_CHECK(threadId)
 #else
 #   define DFATAL(...)
