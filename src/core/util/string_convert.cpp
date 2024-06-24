@@ -58,8 +58,10 @@ template<> Ark::RendererVersion StringConvert::eval<Ark::RendererVersion>(const 
     const String version = repr.toLower();
     if(version.startsWith("opengl_"))
         return static_cast<Ark::RendererVersion>(atoi(version.c_str() + 7));
+    if(version == "vulkan")
+        return Ark::RENDERER_VERSION_VULKAN;
     if(version.startsWith("vulkan_"))
-        return static_cast<Ark::RendererVersion>(atoi(version.c_str() + 7) + 100);
+        return static_cast<Ark::RendererVersion>(atoi(version.c_str() + 7) + Ark::RENDERER_VERSION_VULKAN);
     CHECK(repr == "auto", "Unknow RendererVersion: \"%s, supported values are [\"opengl_21\", \"opengl_46\", \"vulkan_11\", ...]", repr.c_str());
     return Ark::RENDERER_VERSION_AUTO;
 }

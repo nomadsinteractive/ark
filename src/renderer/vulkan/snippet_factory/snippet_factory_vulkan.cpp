@@ -9,14 +9,13 @@
 
 #include "renderer/inf/snippet.h"
 
-namespace ark {
-namespace vulkan {
+namespace ark::vulkan {
 
 namespace {
 
-class CoreSnippetVulkan : public Snippet {
+class CoreSnippetVulkan final : public Snippet {
 public:
-    virtual void preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout) override {
+    void preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout) override {
         ShaderPreprocessor& firstStage = context.stages().begin()->second;
 
         const String sLocation = "location";
@@ -180,5 +179,4 @@ sp<Snippet> SnippetFactoryVulkan::createCoreSnippet()
     return sp<CoreSnippetVulkan>::make();
 }
 
-}
 }

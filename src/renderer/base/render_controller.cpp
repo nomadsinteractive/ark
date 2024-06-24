@@ -17,8 +17,6 @@
 #include "renderer/base/render_engine.h"
 #include "renderer/base/render_engine_context.h"
 #include "renderer/inf/renderer_factory.h"
-#include "renderer/inf/snippet_factory.h"
-#include "renderer/inf/vertices.h"
 #include "renderer/util/render_util.h"
 
 namespace ark {
@@ -41,7 +39,7 @@ public:
     std::vector<element_index_t> _indices;
 };
 
-class ResourceUploadBufferSnapshot : public Resource {
+class ResourceUploadBufferSnapshot final : public Resource {
 public:
     ResourceUploadBufferSnapshot(sp<Buffer::Delegate> buffer, Uploader& input)
         : _buffer(std::move(buffer)), _input_snapshot(input) {
@@ -64,14 +62,14 @@ private:
     InputSnapshot _input_snapshot;
 };
 
-class BufferUpdatable : public Updatable {
+class BufferUpdatable final : public Updatable {
 public:
     BufferUpdatable(RenderController& renderController, sp<Uploader> input, sp<Buffer::Delegate> buffer)
         : _render_controller(renderController), _buffer(std::move(buffer)), _input(std::move(input)) {
     }
 
     bool update(uint64_t timestamp) override {
-        bool dirty = _input->update(timestamp) || _buffer->id() == 0;
+        const bool dirty = _input->update(timestamp) || _buffer->id() == 0;
         if(dirty)
             _render_controller.upload(sp<ResourceUploadBufferSnapshot>::make(_buffer, _input), RenderController::US_ONCE);
         return dirty;
@@ -90,8 +88,8 @@ public:
     }
 
     void upload(Writable& uploader) override {
-        size_t length = _indices.size();
-        size_t size = length * sizeof(element_index_t);
+        const size_t length = _indices.size();
+        const size_t size = length * sizeof(element_index_t);
         size_t offset = 0;
         std::vector<element_index_t> indices(_indices);
         element_index_t* buf = indices.data();
@@ -123,8 +121,8 @@ public:
     }
 
     void upload(Writable& uploader) override {
-        size_t length = _indices.size();
-        size_t size = length * sizeof(element_index_t);
+        const size_t length = _indices.size();
+        const size_t size = length * sizeof(element_index_t);
         uint32_t offset = 0;
         std::vector<element_index_t> indices(length + 2);
         element_index_t* buf = indices.data();

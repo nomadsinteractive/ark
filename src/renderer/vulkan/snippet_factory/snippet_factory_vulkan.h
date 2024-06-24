@@ -1,17 +1,12 @@
-#ifndef ARK_RENDERER_VULKAN_SNIPPET_FACTORY_SNIPPET_FACTORY_VULKAN_H_
-#define ARK_RENDERER_VULKAN_SNIPPET_FACTORY_SNIPPET_FACTORY_VULKAN_H_
+#pragma once
 
 #include "renderer/inf/snippet_factory.h"
 
-namespace ark {
-namespace vulkan {
+namespace ark::vulkan {
 
-class SnippetFactoryVulkan : public SnippetFactory {
+class SnippetFactoryVulkan final : public SnippetFactory {
 public:
-    virtual sp<Snippet> createCoreSnippet() override;
+    sp<Snippet> createCoreSnippet() override;
 };
 
 }
-}
-
-#endif

@@ -20,6 +20,7 @@
 #include "platform/platform.h"
 
 #include "generated/py_ark_bindings.h"
+#include "renderer/base/render_engine.h"
 
 using namespace ark;
 
@@ -39,6 +40,7 @@ static PyObject* ark_isFile(PyObject* self, PyObject* args);
 static PyObject* ark_loadFile(PyObject* self, PyObject* args);
 static PyObject* ark_getRefManager(PyObject* self, PyObject* args);
 static PyObject* ark_dirSeparator(PyObject* self, PyObject* args);
+static PyObject* ark_is_NDC_Y_Up(PyObject* self, PyObject* args);
 static PyObject* ark_trace_(PyObject* self, PyObject* args);
 
 static int __traverse__(PyObject* module, visitproc visitor, void* args)
@@ -59,6 +61,7 @@ static PyMethodDef ARK_METHODS[] = {
     {"is_file",  ark_isFile, METH_VARARGS, "isFile"},
     {"load_file",  ark_loadFile, METH_VARARGS, "loadFile"},
     {"dir_separator",  ark_dirSeparator, METH_VARARGS, "dir_separator"},
+    {"is_ndc_y_up",  ark_is_NDC_Y_Up, METH_VARARGS, "is_ndc_y_up"},
     {"get_ref_manager",  ark_getRefManager, METH_VARARGS, "get_ref_manager"},
     {"__trace__",  ark_trace_, METH_VARARGS, "__trace__"},
     {nullptr, nullptr, 0, nullptr}
@@ -171,6 +174,13 @@ PyObject* ark_dirSeparator(PyObject* /*self*/, PyObject* /*args*/)
 {
     const char ds[2] = {Platform::dirSeparator(), 0};
     return PyCast::toPyObject_impl<String>(ds);
+}
+
+PyObject* ark_is_NDC_Y_Up(PyObject* /*self*/, PyObject* /*args*/)
+{
+    if(Ark::instance().renderController()->renderEngine()->isYUp())
+        Py_RETURN_TRUE;
+    Py_RETURN_FALSE;
 }
 
 PyObject* ark_getRefManager(PyObject* /*self*/, PyObject* /*args*/)

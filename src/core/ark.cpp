@@ -353,10 +353,11 @@ sp<RenderEngine> Ark::doCreateRenderEngine(RendererVersion version, RendererCoor
 #ifdef ARK_USE_OPEN_GL
         return sp<RenderEngine>::make(version, coordinateSystem, sp<opengl::RendererFactoryOpenGL>::make(applicationBundle->recycler()));
 #endif
+    case RENDERER_VERSION_VULKAN:
     case RENDERER_VERSION_VULKAN_11:
     case RENDERER_VERSION_VULKAN_12:
 #ifdef ARK_USE_VULKAN
-        return sp<RenderEngine>::make(version, coordinateSystem, sp<vulkan::RendererFactoryVulkan>::make(applicationBundle->recycler()));
+        return sp<RenderEngine>::make(version == RENDERER_VERSION_VULKAN ? RENDERER_VERSION_VULKAN_12 : version, coordinateSystem, sp<vulkan::RendererFactoryVulkan>::make(applicationBundle->recycler()));
 #endif
         break;
     }

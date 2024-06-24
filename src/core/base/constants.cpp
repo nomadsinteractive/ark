@@ -5,6 +5,8 @@
 #include "graphics/base/boundaries.h"
 
 #include "renderer/base/model.h"
+#include "renderer/base/render_controller.h"
+#include "renderer/base/render_engine.h"
 #include "renderer/impl/vertices/vertices_nine_patch_quads.h"
 #include "renderer/impl/vertices/vertices_nine_patch_triangle_strips.h"
 #include "renderer/impl/vertices/vertices_point.h"

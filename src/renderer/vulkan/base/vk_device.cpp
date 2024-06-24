@@ -7,24 +7,24 @@
 #include "renderer/vulkan/base/vk_instance.h"
 #include "renderer/vulkan/util/vk_util.h"
 
-namespace ark {
-namespace vulkan {
+namespace ark::vulkan {
 
 VKDevice::VKDevice(const sp<VKInstance>& instance, VkPhysicalDevice physicalDevice)
     : _instance(instance), _vulkan_device(new vks::VulkanDevice(physicalDevice))
 {
     _vulkan_device->enabledFeatures = {};
-    if (_vulkan_device->features.samplerAnisotropy) {
+    if(_vulkan_device->features.samplerAnisotropy)
         _vulkan_device->enabledFeatures.samplerAnisotropy = VK_TRUE;
-    };
+    if(_vulkan_device->features.multiDrawIndirect)
+        _vulkan_device->enabledFeatures.multiDrawIndirect = VK_TRUE;
 
     VKUtil::checkResult(_vulkan_device->createLogicalDevice(_vulkan_device->enabledFeatures, _enabled_extensions));
 
     initDeviceQueue(_vulkan_device->queueFamilyIndices.graphics);
     initDeviceQueue(_vulkan_device->queueFamilyIndices.compute);
 
-    VkBool32 validDepthFormat = vks::tools::getSupportedDepthFormat(_vulkan_device->physicalDevice, &_depth_format);
-    DASSERT(validDepthFormat);
+    const VkBool32 validDepthFormat = vks::tools::getSupportedDepthFormat(_vulkan_device->physicalDevice, &_depth_format);
+    ASSERT(validDepthFormat);
 
     createPipelineCache();
 }
@@ -112,5 +112,4 @@ void VKDevice::initDeviceQueue(uint32_t familyIndex)
         vkGetDeviceQueue(_vulkan_device->logicalDevice, familyIndex, 0, &_queue_families[familyIndex]);
 }
 
-}
 }

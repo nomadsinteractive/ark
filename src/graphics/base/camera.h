@@ -85,9 +85,11 @@ public:
     sp<Vec3> toViewportPosition(sp<Vec3> worldPosition) const;
 
 //  [[script::bindings::property]]
-    sp<Vec3> position() const;
+    const SafeVar<Vec3>& position() const;
 //  [[script::bindings::property]]
-    sp<Vec3> target() const;
+    const SafeVar<Vec3>& target() const;
+//  [[script::bindings::property]]
+    const SafeVar<Vec3>& up() const;
 
 //  [[script::bindings::property]]
     sp<Mat4> view() const;
@@ -104,6 +106,8 @@ public:
 
     static sp<Camera> getDefaultCamera();
 
+    struct Stub;
+
 private:
     Ark::RendererCoordinateSystem _coordinate_system;
     sp<Delegate> _delegate;
@@ -112,8 +116,7 @@ private:
     sp<Mat4Wrapper> _projection;
     sp<Mat4Wrapper> _vp;
 
-    sp<VariableWrapper<V3>> _position;
-    sp<VariableWrapper<V3>> _target;
+    sp<Stub> _stub;
 };
 
 }

@@ -52,9 +52,9 @@ bool RenderEngine::isLHS() const
     return _coordinate_system == Ark::COORDINATE_SYSTEM_LHS;
 }
 
-bool RenderEngine::isRendererLHS() const
+bool RenderEngine::isYUp() const
 {
-    return coordinateSystem() == Ark::COORDINATE_SYSTEM_LHS;
+    return coordinateSystem() == Ark::COORDINATE_SYSTEM_RHS;
 }
 
 bool RenderEngine::isViewportFlipped() const

@@ -1,13 +1,11 @@
 import math
-from typing import Optional
 
 from ark import Rotation, Vec3, Numeric, Vec4, Camera, Transform, Vec2, Color
 from ark import dear_imgui
 
 
-class TransformEditor:
-    def __init__(self, transform: Transform, camera: Camera):
-        self._transform = transform
+class CameraEditor:
+    def __init__(self, camera: Camera):
         self._camera = camera
         self._length = Numeric(1)
         self._position = Vec2(0, 0)
@@ -15,11 +13,15 @@ class TransformEditor:
         self._background_color = Color(0.4, 0.4, 0.4, 1)
 
     def build(self, builder: dear_imgui.WidgetBuilder):
-        builder.input_float('Length', self._length)
-        builder.input_float2('Postion', self._position)
-        builder.input_float2('Size', self._size)
-        builder.color_edit4('BackgroundColor', self._background_color)
         builder.guizmo_view_edit(self._camera.view, self._length, self._position, self._size, self._background_color)
+
+
+class TransformEditor:
+    def __init__(self, transform: Transform, camera: Camera):
+        self._transform = transform
+        self._camera = camera
+
+    def build(self, builder: dear_imgui.WidgetBuilder):
         builder.guizmo_transform_edit(self._transform, self._camera)
 
 

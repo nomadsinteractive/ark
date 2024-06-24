@@ -193,14 +193,14 @@ void VKPipeline::setupDescriptorSetLayout(const PipelineInput& pipelineInput)
     for(size_t i = 0; i < pipelineInput.imageNames().size(); ++i)
         setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_VERTEX_BIT, ++binding));
 
-    VkDescriptorSetLayoutCreateInfo descriptorLayout =
+    const VkDescriptorSetLayoutCreateInfo descriptorLayout =
             vks::initializers::descriptorSetLayoutCreateInfo(
                 setLayoutBindings.data(),
                 static_cast<uint32_t>(setLayoutBindings.size()));
 
     VKUtil::checkResult(vkCreateDescriptorSetLayout(device->vkLogicalDevice(), &descriptorLayout, nullptr, &_descriptor_set_layout));
 
-    VkPipelineLayoutCreateInfo pPipelineLayoutCreateInfo =
+    const VkPipelineLayoutCreateInfo pPipelineLayoutCreateInfo =
             vks::initializers::pipelineLayoutCreateInfo(
                 &_descriptor_set_layout,
                 1);
@@ -255,11 +255,12 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
         {
             const sp<VKTexture> texture = i->delegate();
             _texture_observers.push_back(texture->observer().addBooleanSignal());
-            writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
-                                          _descriptor_set,
-                                          VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                                          ++binding,
-                                          &texture->vkDescriptor()));
+            if(texture->vkDescriptor().imageView && texture->vkDescriptor().imageLayout)
+                writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
+                                              _descriptor_set,
+                                              VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                                              ++binding,
+                                              &texture->vkDescriptor()));
         }
     }
     for(const sp<Texture>& i : bindings.images())
@@ -269,11 +270,12 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
         {
             const sp<VKTexture> texture = i->delegate();
             _texture_observers.push_back(texture->observer().addBooleanSignal());
-            writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
-                                          _descriptor_set,
-                                          VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
-                                          ++binding,
-                                          &texture->vkDescriptor()));
+            if(texture->vkDescriptor().imageView && texture->vkDescriptor().imageLayout)
+                writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
+                                              _descriptor_set,
+                                              VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+                                              ++binding,
+                                              &texture->vkDescriptor()));
         }
     }
 
@@ -520,7 +522,8 @@ VkPipelineRasterizationStateCreateInfo VKPipeline::makeRasterizationState() cons
                 VK_POLYGON_MODE_FILL, cullFaceTest._enabled ? VK_CULL_MODE_BACK_BIT : VK_CULL_MODE_NONE,
                 VKUtil::toFrontFace(cullFaceTest._front_face), 0);
     }
-    const VkFrontFace frontFace = Ark::instance().renderController()->renderEngine()->isLHS() ? VK_FRONT_FACE_CLOCKWISE : VK_FRONT_FACE_COUNTER_CLOCKWISE;
+    const VkFrontFace frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+    // const VkFrontFace frontFace = Ark::instance().renderController()->renderEngine()->isLHS() ? VK_FRONT_FACE_CLOCKWISE : VK_FRONT_FACE_COUNTER_CLOCKWISE;
     return vks::initializers::pipelineRasterizationStateCreateInfo(VK_POLYGON_MODE_FILL, VK_CULL_MODE_BACK_BIT, frontFace, 0);
 }
 
@@ -547,7 +550,7 @@ void VKPipeline::VKDrawElementsInstanced::draw(GraphicsContext& graphicsContext,
         VkBuffer vkInstanceVertexBuffer = (VkBuffer) (i.second.id());
         vkCmdBindVertexBuffers(commandBuffer, i.first, 1, &vkInstanceVertexBuffer, &offsets);
     }
-    vkCmdDrawIndexed(commandBuffer, param._count, static_cast<uint32_t>(drawingContext._draw_count), param._start, 0, 0);
+    vkCmdDrawIndexed(commandBuffer, param._count, drawingContext._draw_count, param._start, 0, 0);
 }
 
 void VKPipeline::VKMultiDrawElementsIndirect::draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext, VkCommandBuffer commandBuffer)

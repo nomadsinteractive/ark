@@ -65,6 +65,10 @@ def build_type() -> int:
     return 0
 
 
+def is_ndc_y_up() -> bool:
+    return True
+
+
 class Enum:
     BUILD_TYPE_UNDEFINED = 0
     BUILD_TYPE_DEBUG = 1

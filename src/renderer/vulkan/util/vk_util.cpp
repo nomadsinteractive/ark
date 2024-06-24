@@ -131,22 +131,30 @@ constexpr TBuiltInResource DefaultTBuiltInResource = {
     /* .maxTaskWorkGroupSizeY_NV = */ 1,
     /* .maxTaskWorkGroupSizeZ_NV = */ 1,
     /* .maxMeshViewCountNV = */ 4,
+/* TODO: They are new in Vulkan 1.3
+    maxMeshOutputVerticesEXT					= 2048;
+    maxMeshOutputPrimitivesEXT					= 2048;
+    maxMeshWorkGroupSizeX_EXT					= 256;
+    maxMeshWorkGroupSizeY_EXT					= 256;
+    maxMeshWorkGroupSizeZ_EXT					= 256;
+    maxTaskWorkGroupSizeX_EXT					= 256;
+    maxTaskWorkGroupSizeY_EXT					= 256;
+    maxTaskWorkGroupSizeZ_EXT					= 256;
+    maxMeshViewCountEXT						= 4;
+*/
     /* .maxDualSourceDrawBuffersEXT = */ 1,
-#ifndef _MSC_VER
-     .limits =  {
-#endif
-        /* .nonInductiveForLoops = */ true,
-        /* .whileLoops = */ true,
-        /* .doWhileLoops = */ true,
-        /* .generalUniformIndexing = */ true,
-        /* .generalAttributeMatrixVectorIndexing = */ true,
-        /* .generalVaryingIndexing = */ true,
-        /* .generalSamplerIndexing = */ true,
-        /* .generalVariableIndexing = */ true,
-        /* .generalConstantMatrixVectorIndexing = */ true
-#ifndef _MSC_VER
-    }
-#endif
+};
+
+constexpr TLimits DefaultTBuiltInResourceLimits = {
+    /* .nonInductiveForLoops = */ true,
+    /* .whileLoops = */ true,
+    /* .doWhileLoops = */ true,
+    /* .generalUniformIndexing = */ true,
+    /* .generalAttributeMatrixVectorIndexing = */ true,
+    /* .generalVaryingIndexing = */ true,
+    /* .generalSamplerIndexing = */ true,
+    /* .generalVariableIndexing = */ true,
+    /* .generalConstantMatrixVectorIndexing = */ true
 };
 
 class GLSLLangInitializer {
@@ -158,6 +166,7 @@ public:
         : _languages{EShLangVertex, EShLangFragment, EShLangCompute},
 #endif
           _built_in_resource(DefaultTBuiltInResource) {
+        _built_in_resource.limits = DefaultTBuiltInResourceLimits;
         glslang::InitializeProcess();
     }
     ~GLSLLangInitializer() {

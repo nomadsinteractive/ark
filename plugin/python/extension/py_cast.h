@@ -2,10 +2,8 @@
 
 #include <array>
 #include <functional>
-#include <map>
 #include <optional>
 #include <type_traits>
-#include <vector>
 
 #include <Python.h>
 
@@ -14,12 +12,11 @@
 #include "core/inf/array.h"
 #include "core/types/box.h"
 #include "core/types/optional.h"
-#include "core/types/type.h"
 #include "core/types/shared_ptr.h"
+#include "core/types/safe_var.h"
 
 #include "graphics/forwarding.h"
 #include "graphics/base/rect.h"
-#include "graphics/base/mat.h"
 
 #include "app/forwarding.h"
 
@@ -135,7 +132,7 @@ private:
         return Optional<sp<T>>();
     }
 
-    template<typename T> static PyObject* fromIterable_sfinae(const T& list, typename std::remove_reference_t<decltype(list.front())>*) {
+    template<typename T> static PyObject* fromIterable_sfinae(const T& list, std::remove_reference_t<decltype(list.front())>*) {
         constexpr bool isArray = std::is_same_v<T, std::array<typename T::value_type, sizeof(T) / sizeof(typename T::value_type)>>;
         PyObject* pyList;
         if constexpr(isArray)
