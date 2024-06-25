@@ -29,6 +29,7 @@
 #include "renderer/inf/model_loader.h"
 
 #include "app/base/application_context.h"
+#include "core/util/updatable_util.h"
 #include "graphics/impl/renderable/renderable_with_transform.h"
 #include "graphics/traits/layout_param.h"
 
@@ -70,7 +71,7 @@ V2 getCharacterOffset(const Model& model)
     return V2(bitmapPos.x(), bitmapOccupySize.y() - bitmapPos.y() - bitmapContentSize.y());
 }
 
-std::vector<Character> toLayoutCharacters(const GlyphContents& glyphs, float letterScale, ModelLoader& modelLoader)
+std::vector<Character> toLayoutCharacters(const GlyphContents& glyphs, ModelLoader& modelLoader)
 {
     std::unordered_map<wchar_t, std::tuple<sp<Model>, V2, bool, bool>> mmap;
     float integral = 0;
@@ -84,18 +85,18 @@ std::vector<Character> toLayoutCharacters(const GlyphContents& glyphs, float let
         {
             const auto& [model, offset, iscjk, iswordbreak] = iter->second;
             const V3& occupy = model->occupy()->size()->val();
-            integral += occupy.x() * letterScale;
+            integral += occupy.x();
             layoutChars.push_back({i, model, offset, integral, iscjk, iswordbreak, isLineBreak});
         }
         else
         {
-            int32_t type = static_cast<int32_t>(c);
+            const int32_t type = static_cast<int32_t>(c);
             sp<Model> model = modelLoader.loadModel(type);
-            const V2 offset = getCharacterOffset(model) * letterScale;
+            const V2 offset = getCharacterOffset(model);
             const Boundaries& m = model->occupy();
             bool iscjk = isCJK(c);
             bool iswordbreak = isWordBreaker(c);
-            integral += m.size()->val().x() * letterScale;
+            integral += m.size()->val().x();
             mmap.insert(std::make_pair(c, std::make_tuple(model, offset, iscjk, iswordbreak)));
             layoutChars.push_back({i, std::move(model), offset, integral, iscjk, iswordbreak, isLineBreak});
         }
@@ -122,8 +123,8 @@ void doFlowLayout(std::vector<Layout::Hierarchy>& childNodes, float letterSpacin
 }
 
 struct RenderableCharacter final : Renderable {
-    RenderableCharacter(sp<Renderable> delegate, sp<Layout::Node> layoutNode, const V2& letterOffset)
-        : _delegate(std::move(delegate)), _layout_node(std::move(layoutNode)), _letter_offset(letterOffset) {
+    RenderableCharacter(sp<Renderable> delegate, sp<Layout::Node> layoutNode, sp<Numeric> textScale, const V2& offsetPosition)
+        : _delegate(std::move(delegate)), _layout_node(std::move(layoutNode)), _text_scale(std::move(textScale)), _offset_position(offsetPosition) {
     }
 
     StateBits updateState(const RenderRequest& renderRequest) override {
@@ -135,13 +136,15 @@ struct RenderableCharacter final : Renderable {
 
     Snapshot snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, StateBits state) override {
         Snapshot snapshot = _delegate->snapshot(snapshotContext, renderRequest, state);
-        snapshot._position += V3(_layout_node->offsetPosition() + _letter_offset, 0);
+        snapshot._position += V3(_layout_node->offsetPosition() * _text_scale->val() + _offset_position, 0);
+        snapshot._size = snapshot._size * _text_scale->val();
         return snapshot;
     }
 
     sp<Renderable> _delegate;
     sp<Layout::Node> _layout_node;
-    V2 _letter_offset;
+    sp<Numeric> _text_scale;
+    V2 _offset_position;
 };
 
 struct UpdatableFlexStart final : Updatable {
@@ -218,22 +221,23 @@ struct LayoutLabel final : Layout {
 }
 
 struct Text::Content {
-    Content(sp<RenderLayer> renderLayer, sp<StringVar> string, sp<LayoutParam> layoutParam, sp<GlyphMaker> glyphMaker, float textScale, float letterSpacing, float lineHeight, float lineIndent)
+    Content(sp<RenderLayer> renderLayer, sp<StringVar> string, sp<LayoutParam> layoutParam, sp<GlyphMaker> glyphMaker, sp<Numeric> textScale, sp<Mat4> transform, float letterSpacing, float lineHeight, float lineIndent)
         : _render_layer(std::move(renderLayer)), _string(string ? std::move(string) : StringType::create()), _layout_param(std::move(layoutParam)), _glyph_maker(glyphMaker ? std::move(glyphMaker) : sp<GlyphMaker>::make<GlyphMakerSpan>()),
-          _text_scale(textScale), _letter_spacing(letterSpacing), _layout_direction(Ark::instance().applicationContext()->renderEngine()->toLayoutDirection(1.0f)), _line_height(_layout_direction * lineHeight), _line_indent(lineIndent),
-          _size(sp<Size>::make(0.0f, 0.0f)), _position(sp<VariableWrapper<V3>>::make(V3()))
+          _transform(std::move(transform)), _text_scale(std::move(textScale)), _letter_spacing(letterSpacing), _layout_direction(Ark::instance().applicationContext()->renderEngine()->toLayoutDirection(1.0f)), _line_height(_layout_direction * lineHeight),
+          _line_indent(lineIndent), _size(sp<Size>::make(0.0f, 0.0f)), _position(sp<VariableWrapper<V3>>::make(V3()))
     {
+        if(!_text_scale)
+            _text_scale = Global<Constants>()->NUMERIC_ONE;
         if(_string->val() && !_string->val()->empty())
             setText(Strings::fromUTF8(*_string->val()));
     }
 
     bool update(uint64_t timestamp)
     {
-        bool contentDirty = _string->update(timestamp);
+        const bool contentDirty = _string->update(timestamp);
         if(contentDirty)
             setText(Strings::fromUTF8(*_string->val()));
-        bool layoutDirty = _updatable_layout ? _updatable_layout->update(timestamp) : false;
-        return contentDirty || layoutDirty;
+        return contentDirty || UpdatableUtil::update(timestamp, _updatable_layout, _text_scale);
     }
 
     void setText(std::wstring text);
@@ -251,7 +255,7 @@ struct Text::Content {
         for(const Character& i : _layout_chars) {
             const Model& model = i._model;
             const Boundaries& occupies = model.occupy();
-            const V2 bitmapOccupySize = V2(occupies.size()->val()) * _text_scale;
+            const V2 bitmapOccupySize = V2(occupies.size()->val());
             lineHeight = std::max(bitmapOccupySize.y(), lineHeight);
             Glyph& glyph = i._glyph;
             glyph.setOccupySize(bitmapOccupySize);
@@ -282,7 +286,7 @@ struct Text::Content {
         DASSERT(_render_objects.size() == hierarchy._child_nodes.size());
         for(size_t i = 0; i < _render_objects.size(); ++i)
         {
-            sp<Renderable> renderable = sp<Renderable>::make<RenderableCharacter>(_render_objects.at(i), hierarchy._child_nodes.at(i)._node, _layout_chars.at(i)._offset);
+            sp<Renderable> renderable = sp<Renderable>::make<RenderableCharacter>(_render_objects.at(i), hierarchy._child_nodes.at(i)._node, _text_scale, _layout_chars.at(i)._offset);
             if(_transform)
                 renderable = sp<Renderable>::make<RenderableWithTransform>(std::move(renderable), _transform);
             _layer_context->add(std::move(renderable));
@@ -314,12 +318,10 @@ struct Text::Content {
     sp<RenderLayer> _render_layer;
     sp<StringVar> _string;
     sp<LayoutParam> _layout_param;
-    sp<LayerContext> _layer_context;
     sp<GlyphMaker> _glyph_maker;
-    sp<Updatable> _updatable_layout;
     sp<Mat4> _transform;
+    sp<Numeric> _text_scale;
 
-    float _text_scale;
     float _letter_spacing;
     float _layout_direction;
     float _line_height;
@@ -330,10 +332,12 @@ struct Text::Content {
 
     std::wstring _text_unicode;
     std::vector<sp<Glyph>> _glyphs;
-
-    sp<VariableWrapper<V3>> _position;
-    std::vector<sp<RenderObject>> _render_objects;
     std::vector<Character> _layout_chars;
+    std::vector<sp<RenderObject>> _render_objects;
+
+    sp<LayerContext> _layer_context;
+    sp<Updatable> _updatable_layout;
+    sp<VariableWrapper<V3>> _position;
 };
 
 class RenderBatchContent : public RenderBatch {
@@ -354,8 +358,8 @@ private:
     std::vector<sp<LayerContext>> _layer_contexts;
 };
 
-Text::Text(sp<RenderLayer> renderLayer, sp<StringVar> content, sp<LayoutParam> layoutParam, sp<GlyphMaker> glyphMaker, float textScale, float letterSpacing, float lineHeight, float lineIndent)
-    : _render_layer(std::move(renderLayer)), _content(sp<Content>::make(_render_layer, std::move(content), std::move(layoutParam), std::move(glyphMaker), textScale, letterSpacing, lineHeight, lineIndent))
+Text::Text(sp<RenderLayer> renderLayer, sp<StringVar> content, sp<LayoutParam> layoutParam, sp<GlyphMaker> glyphMaker, sp<Numeric> textScale, sp<Mat4> transform, float letterSpacing, float lineHeight, float lineIndent)
+    : _render_layer(std::move(renderLayer)), _content(sp<Content>::make(_render_layer, std::move(content), std::move(layoutParam), std::move(glyphMaker), std::move(textScale), std::move(transform), letterSpacing, lineHeight, lineIndent))
 {
 }
 
@@ -461,7 +465,7 @@ void Text::Content::setRichText(std::wstring richText, const sp<ResourceLoader>&
 void Text::Content::createContent()
 {
     _glyphs = makeGlyphs(_glyph_maker, _text_unicode);
-    _layout_chars = toLayoutCharacters(_glyphs, _text_scale, _render_layer->context()->modelLoader());
+    _layout_chars = toLayoutCharacters(_glyphs, _render_layer->context()->modelLoader());
     createLayerContent(doLayoutWithoutBoundary());
 }
 
@@ -543,16 +547,15 @@ float Text::Content::getLayoutBoundary() const
 
 Text::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _render_layer(factory.ensureBuilder<RenderLayer>(manifest, constants::RENDER_LAYER)), _text(factory.getBuilder<StringVar>(manifest, constants::TEXT)), _layout_param(factory.getConcreteClassBuilder<LayoutParam>(manifest, constants::LAYOUT_PARAM)),
-      _glyph_maker(factory.getBuilder<GlyphMaker>(manifest, "glyph-maker")), _text_scale(factory.getBuilder<String>(manifest, "text-scale")), _letter_spacing(factory.getBuilder<Numeric>(manifest, "letter-spacing")),
+      _glyph_maker(factory.getBuilder<GlyphMaker>(manifest, "glyph-maker")), _transform(factory.getBuilder<Mat4>(manifest, constants::TRANSFORM)), _text_scale(factory.getBuilder<Numeric>(manifest, "text-scale")), _letter_spacing(factory.getBuilder<Numeric>(manifest, "letter-spacing")),
       _line_height(Documents::getAttribute<float>(manifest, "line-height", 0.0f)), _line_indent(Documents::getAttribute<float>(manifest, "line-indent", 0.0f))
 {
 }
 
 sp<Text> Text::BUILDER::build(const Scope& args)
 {
-    float textScale = _text_scale ? Strings::eval<float>(_text_scale->build(args)) : 1.0f;
     float letterSpacing = _letter_spacing ? _letter_spacing->build(args)->val() : 0.0f;
-    return sp<Text>::make(_render_layer->build(args), _text->build(args), _layout_param->build(args), _glyph_maker->build(args), textScale, letterSpacing, _line_height, _line_indent);
+    return sp<Text>::make(_render_layer->build(args), _text->build(args), _layout_param->build(args), _glyph_maker->build(args), _text_scale->build(args), _transform->build(args), letterSpacing, _line_height, _line_indent);
 }
 
 }

@@ -4,7 +4,7 @@
 
 namespace ark {
 
-class RenderableWithTransform : public Wrapper<Renderable>, public Renderable {
+class RenderableWithTransform final : public Wrapper<Renderable>, public Renderable {
 public:
     RenderableWithTransform(sp<Renderable> delegate, sp<Mat4> transform);
 

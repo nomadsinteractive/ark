@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_UTIL_MATRIX_UTIL_H_
-#define ARK_GRAPHICS_UTIL_MATRIX_UTIL_H_
+#pragma once
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
@@ -36,6 +35,7 @@ public:
 
     static V2 transform(const M3& matrix, const V2& pos);
     static V3 transform(const M4& matrix, const V3& pos);
+    static V3 transform(const M4& matrix, const V3& pos, const V3& org);
 
     static M3 transpose(const M3& matrix);
     static M4 transpose(const M4& matrix);
@@ -50,5 +50,3 @@ public:
 };
 
 }
-
-#endif

@@ -8,8 +8,8 @@ namespace {
 
 class TransformMatrix final : public Transform::Delegate {
 public:
-    TransformMatrix(sp<Delegate> transform, const M4& matrix)
-        : _transform(std::move(transform)), _matrix(matrix) {
+    TransformMatrix(sp<Delegate> transform, const M4& matrix, const V3& origin)
+        : _transform(std::move(transform)), _matrix(matrix), _origin(origin) {
     }
 
     bool update(const Transform::Stub& transform, uint64_t timestamp) override
@@ -22,7 +22,7 @@ public:
     }
 
     V3 transform(const Transform::Snapshot& snapshot, const V3& position) const override {
-        return MatrixUtil::transform(_matrix, _transform->transform(snapshot, position));
+        return MatrixUtil::transform(_matrix, _transform->transform(snapshot, position),_origin);
     }
 
     M4 toMatrix(const Transform::Snapshot& snapshot) const override {
@@ -32,6 +32,7 @@ public:
 private:
     sp<Delegate> _transform;
     M4 _matrix;
+    V3 _origin;
 };
 
 }
@@ -51,9 +52,7 @@ Renderable::StateBits RenderableWithTransform::updateState(const RenderRequest& 
 Renderable::Snapshot RenderableWithTransform::snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, StateBits state)
 {
     Snapshot snapshot = _wrapped->snapshot(snapshotContext, renderRequest, state);
-    const M4 matrix = _transform->val();
-    snapshot._transform._delegate = sp<Transform::Delegate>::make<TransformMatrix>(std::move(snapshot._transform._delegate), matrix);
-    snapshot._position = MatrixUtil::transform(matrix, snapshot._position);
+    snapshot._transform._delegate = sp<Transform::Delegate>::make<TransformMatrix>(std::move(snapshot._transform._delegate), _transform->val(), -snapshot._position);
     return snapshot;
 }
 

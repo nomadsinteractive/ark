@@ -44,7 +44,7 @@ void VertexWriter::write(const void* buf, uint32_t size, uint32_t offset)
     _writer->write(buf, size, offset);
 }
 
-void VertexWriter::setRenderObject(const Renderable::Snapshot& renderObject)
+void VertexWriter::setRenderable(const Renderable::Snapshot& renderObject)
 {
     _transform = &renderObject._transform;
     _translate = renderObject._position;

@@ -12,7 +12,7 @@
 namespace ark {
 
 //[[script::bindings::holder]]
-class ARK_API Entity : public Holder {
+class ARK_API Entity final : public Holder {
 public:
 //  [[script::bindings::constructor]]
     Entity(Traits components = Traits());

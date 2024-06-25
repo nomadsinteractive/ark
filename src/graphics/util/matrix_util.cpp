@@ -120,6 +120,11 @@ V3 MatrixUtil::transform(const M4& matrix, const V3& pos)
     return V3(p.x() / p.w(), p.y() / p.w(), p.z() / p.w());
 }
 
+V3 MatrixUtil::transform(const M4& matrix, const V3& pos, const V3& org)
+{
+    return transform(matrix, pos - org) + org;
+}
+
 M3 MatrixUtil::transpose(const M3& matrix)
 {
     return glm::transpose(glm::make_mat3(reinterpret_cast<const float*>(&matrix)));

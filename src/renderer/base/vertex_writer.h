@@ -44,7 +44,7 @@ public:
 
     void write(const void* buf, uint32_t size, uint32_t offset);
 
-    void setRenderObject(const Renderable::Snapshot& renderObject);
+    void setRenderable(const Renderable::Snapshot& renderObject);
 
     void next();
 

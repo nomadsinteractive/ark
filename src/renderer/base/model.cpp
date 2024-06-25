@@ -216,7 +216,7 @@ void Model::writeToStream(VertexWriter& buf, const V3& size) const
 
 void Model::writeRenderable(VertexWriter& writer, const Renderable::Snapshot& renderable) const
 {
-    writer.setRenderObject(renderable);
+    writer.setRenderable(renderable);
     writeToStream(writer, renderable._size);
 }
 
