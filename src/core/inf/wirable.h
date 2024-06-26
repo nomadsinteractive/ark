@@ -38,6 +38,30 @@ public:
         std::map<TypeId, Box> _component_builders;
     };
 
+    template<typename T, typename U> class BuilderWithRef final {
+    public:
+        BuilderWithRef(BeanFactory& factory, const document& manifest)
+            : _delegate(makeRefBuilder(factory, manifest)) {
+        }
+
+        sp<Wirable> build(const Scope& args) const {
+            return _delegate->build(args);
+        }
+
+    private:
+        static sp<Builder<Wirable>> makeRefBuilder(BeanFactory& factory, const document& manifest) {
+            sp<Builder<T>> delegate;
+            if(const String ref = Documents::getAttribute(manifest, constants::REF))
+                delegate = factory.ensureBuilder<T>(ref);
+            else
+                delegate = sp<U>::make(factory, manifest);
+            return sp<Builder<Wirable>>::make<Builder<Wirable>::Wrapper<Builder<T>>>(std::move(delegate));
+        }
+
+    private:
+        sp<Builder<Wirable>> _delegate;
+    };
+
 public:
     virtual ~Wirable() = default;
 

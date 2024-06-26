@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_TYPES_OWNED_PTR_H_
-#define ARK_CORE_TYPES_OWNED_PTR_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/forwarding.h"
@@ -70,5 +69,3 @@ private:
 };
 
 }
-
-#endif

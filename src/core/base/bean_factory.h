@@ -84,24 +84,18 @@ private:
             const String wrappedId = wrapBuilder ? id : "";
             const String ref = Documents::getAttribute(doc, constants::REF);
             const String style = Documents::getAttribute(doc, constants::STYLE);
-            if(className.empty()) {
-                do {
-                    if(ref) {
-                        const Identifier f = Identifier::parse(ref);
-                        if(f.isRef()) {
-                            if(f.package().empty() && (f.ref() == id || ref == id))
-                                break;
-                            const sp<Builder<T>> builder = factory.createBuilderByRef<T>(f);
-                            return makeWrappedBuilder(makeDecoratedBuilder(factory, builder, style), wrappedId);
-                        }
-                        if(f.isArg())
-                            return makeDecoratedBuilder(factory, factory.getBuilderByArg<T>(f), style);
-                    }
-                    return createBuilderInternal(factory, doc->name(), style, wrappedId, doc);
-                } while(false);
+            if(className.empty() && ref) {
+                const Identifier f = Identifier::parse(ref);
+                if(f.isRef()) {
+                    if(f.package().empty() && (f.ref() == id || ref == id))
+                        return createBuilderInternal(factory, className, style, ref, doc);
+                    const sp<Builder<T>> builder = factory.createBuilderByRef<T>(f);
+                    return makeWrappedBuilder(makeDecoratedBuilder(factory, builder, style), wrappedId);
+                }
+                if(f.isArg())
+                    return makeDecoratedBuilder(factory, factory.getBuilderByArg<T>(f), style);
             }
-            DCHECK_WARN(ref.empty() || ref.at(0) == '@', "Building class \"%s\" with reference \"%s\" has no effect", className.c_str(), ref.c_str());
-            return createBuilderInternal(factory, className, style, ref ? ref : wrappedId, doc);
+            return createBuilderInternal(factory, className.empty() ? doc->name() : className, style, wrappedId, doc);
         }
 
     private:
@@ -284,9 +278,8 @@ public:
         if(!builder)
             return nullptr;
 
-        const String style = Documents::getAttribute(doc, constants::STYLE);
-        if(style)
-            return decorate<T>(sp<typename Builder<T>::template Wrapper<U>>::make(builder), style)->build(args);
+        if(const String style = Documents::getAttribute(doc, constants::STYLE))
+            return decorate<T>(sp<typename Builder<T>::template Wrapper<Builder<U>>>::make(builder), style)->build(args);
         return builder->build(args);
     }
 
@@ -332,8 +325,7 @@ public:
 
     template<typename T, typename U = sp<Builder<T>>> std::vector<U> makeBuilderList(const document& doc, const String& nodeName, const String& defValue = "") {
         std::vector<U> list;
-        const String attrValue = Documents::getAttribute(doc, nodeName, defValue);
-        if(attrValue) {
+        if(const String attrValue = Documents::getAttribute(doc, nodeName, defValue)) {
             if constexpr(std::is_same_v<U, sp<Builder<T>>>)
                 list.push_back(ensureBuilder<T>(attrValue));
             else
@@ -348,9 +340,9 @@ public:
         }
         return list;
     }
-
+//TODO: deprecate this one, which brings chaos
     template<typename T> sp<Builder<T>> getConcreteClassBuilder(const document& doc, const String& attr) {
-        static_assert(!std::is_abstract<T>::value, "Not a concrete class");
+        static_assert(!std::is_abstract_v<T>, "Not a concrete class");
         const String attrValue = Documents::getAttribute(doc, attr);
         if(attrValue.empty()) {
             const document& child = doc->getChild(attr);
@@ -431,38 +423,30 @@ public:
     }
 
     template<typename T> sp<Builder<T>> findBuilderByDocument(const document& doc, const String& className, bool wrapBuilder) {
-        for(const Factory& i : _stub->_factories) {
-            const sp<Builder<T>> builder = i.createBuilder<T>(className, doc, *this, wrapBuilder);
-            if(builder)
+        for(const Factory& i : _stub->_factories)
+            if(sp<Builder<T>> builder = i.createBuilder<T>(className, doc, *this, wrapBuilder))
                 return builder;
-        }
         return nullptr;
     }
 
     template<typename T> sp<Builder<T>> findBuilderByValue(const String& value) {
-        for(const Factory& i : _stub->_factories) {
-            const sp<Builder<T>> builder = i.createValueBuilder<T>(*this, value);
-            if(builder)
+        for(const Factory& i : _stub->_factories)
+            if(sp<Builder<T>> builder = i.createValueBuilder<T>(*this, value))
                 return builder;
-        }
         return nullptr;
     }
 
     template<typename T> sp<Builder<T>> findBuilderByTypeValue(const String& type, const String& value) {
-        for(const Factory& i : _stub->_factories) {
-            const sp<Builder<T>> builder = i.createValueBuilder<T>(*this, type, value);
-            if(builder)
+        for(const Factory& i : _stub->_factories)
+            if(sp<Builder<T>> builder = i.createValueBuilder<T>(*this, type, value))
                 return builder;
-        }
         return nullptr;
     }
 
     template<typename T> sp<Builder<T>> decorate(const sp<Builder<T>>& builder, const String& style, const String& value) {
-        for(const Factory& i : _stub->_factories) {
-            const sp<Builder<T>> f = i.decorate<T>(*this, builder, style, value);
-            if(f)
+        for(const Factory& i : _stub->_factories)
+            if(sp<Builder<T>> f = i.decorate<T>(*this, builder, style, value))
                 return f;
-        }
         return builder;
     }
 
@@ -484,13 +468,13 @@ private:
 
 namespace  {
 
-template<typename T> class BuilderBySoftRef : public Builder<T> {
+template<typename T> class BuilderBySoftRef final : public Builder<T> {
 public:
     BuilderBySoftRef(String name, const WeakPtr<Scope>& references, sp<Builder<T>> delegate)
         : _name(std::move(name)), _references(references), _delegate(std::move(delegate)) {
     }
 
-    virtual sp<T> build(const Scope& args) override {
+    sp<T> build(const Scope& args) override {
         const sp<Scope> reference = _references.lock();
         CHECK(reference, "BeanFactory has been disposed");
         sp<T> inst = reference->build<T>(_name, args);

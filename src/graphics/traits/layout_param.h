@@ -12,7 +12,7 @@
 
 namespace ark {
 
-class ARK_API LayoutParam : public Updatable {
+class ARK_API LayoutParam final : public Updatable {
 public:
 //  [[script::bindings::enumeration]]
     enum Display {

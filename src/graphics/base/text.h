@@ -60,8 +60,8 @@ public:
 
     bool update(uint64_t timestamp) const;
 
-//[[plugin::builder]]
-    class BUILDER : public Builder<Text> {
+//  [[plugin::builder]]
+    class BUILDER final : public Builder<Text> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 

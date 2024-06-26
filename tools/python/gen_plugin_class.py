@@ -9,10 +9,10 @@ import acg
 from acg import HeaderPattern
 
 ANNOTATION_PATTERN = r'(?:\s*(?://)?\s*\[\[[^]]+\]\])*'
-BUILDER_PATTERN = re.compile(r'\[\[plugin::(builder|resource-loader)(?:\("([\w\d\-_]+)"\))?\]\]\s+class\s+([\w\d_]+)\s+:\s+public\s+Builder<([^{]+)>\s+\{')
-DICTIONARY_PATTERN = re.compile(r'\[\[plugin::(builder|resource-loader)::by-value(?:\("([\w\d\-_]+)"\))?\]\]\s+class\s+([\w\d_]+)\s+:\s+public\s+Builder<([^{]+)>\s+\{')
-FUNCTION_PATTERN = re.compile(r'\[\[plugin::function\("([\w\d\-_]+)"\)\]\]\s*%s\s*static\s+(?:ARK_API\s+)?([^(\r\n]+)\(([^)\r\n]*)\)[^;\r\n]*;' % ANNOTATION_PATTERN)
-STYLE_PATTERN = re.compile(r'\[\[plugin::style\("([\w\d\-_]+)"\)\]\]\s+class\s+([\w\d_]+)\s+:\s+public\s+Builder<([^{]+)>\s+\{')
+BUILDER_PATTERN = re.compile(r'\[\[plugin::(builder|resource-loader)(?:\("([\w\-_]+)"\))?\]\]\s+class\s+([\w_]+)\s*(?:final)?\s*:\s*public\s+Builder<([^{]+)>\s+\{')
+DICTIONARY_PATTERN = re.compile(r'\[\[plugin::(builder|resource-loader)::by-value(?:\("([\w\-_]+)"\))?\]\]\s+class\s+([\w_]+)\s+:\s+public\s+Builder<([^{]+)>\s+\{')
+FUNCTION_PATTERN = re.compile(r'\[\[plugin::function\("([\w\-_]+)"\)\]\]\s*%s\s*static\s+(?:ARK_API\s+)?([^(\r\n]+)\(([^)\r\n]*)\)[^;\r\n]*;' % ANNOTATION_PATTERN)
+STYLE_PATTERN = re.compile(r'\[\[plugin::style\("([\w\-_]+)"\)\]\]\s+class\s+([\w_]+)\s+:\s+public\s+Builder<([^{]+)>\s+\{')
 
 INDENT = '\n    '
 REF_BUILDER_TEMPLATE = '''BeanFactory::Factory ${plugin_name}::createBeanFactory(const BeanFactory& beanFactory, const sp<Dictionary<document>>& documentById)

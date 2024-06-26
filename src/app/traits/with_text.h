@@ -1,24 +1,21 @@
 #pragma once
 
 #include "core/inf/wirable.h"
-#include "core/types/shared_ptr.h"
 
-#include "graphics/forwarding.h"
-
-#include "app/forwarding.h"
+#include "graphics/base/text.h"
 
 namespace ark {
 
-class ARK_API Label final : public Wirable {
+class ARK_API WithText final : public Wirable {
 public:
 //  [[script::bindings::auto]]
-    Label(sp<Text> text, sp<LayoutParam> layoutParam = nullptr);
+    WithText(sp<Text> text, String transformNode = "");
 
     TypeId onPoll(WiringContext& context) override;
     void onWire(const WiringContext& context) override;
 
-//  [[plugin::builder("label")]]
-    class BUILDER : public Builder<Wirable> {
+//  [[plugin::builder("with_text")]]
+    class BUILDER final : public Builder<Wirable> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
@@ -26,11 +23,12 @@ public:
 
     private:
         sp<Builder<Text>> _text;
+        String _transform_node;
     };
 
 private:
     sp<Text> _text;
-    sp<LayoutParam> _layout_param;
+    String _transform_node;
 };
 
 }

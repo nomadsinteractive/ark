@@ -41,7 +41,7 @@ private:
 
 template<typename T> template<typename U> class Builder<T>::Wrapper final : public Builder {
 public:
-    Wrapper(sp<Builder<U>> delegate)
+    Wrapper(sp<U> delegate)
         : _delegate(std::move(delegate)) {
     }
 
@@ -50,7 +50,7 @@ public:
     }
 
 private:
-    sp<Builder<U>> _delegate;
+    sp<U> _delegate;
 };
 
 template<typename T> template<typename... Args> class Builder<T>::Lazy final : public Builder {

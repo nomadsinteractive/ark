@@ -4,12 +4,12 @@
 
 #include "core/ark.h"
 #include "core/base/resource_loader.h"
-#include "core/inf/array.h"
 #include "core/inf/variable.h"
 #include "core/types/global.h"
 #include "core/util/bean_utils.h"
 #include "core/util/math.h"
 #include "core/util/string_type.h"
+#include "core/util/updatable_util.h"
 
 #include "graphics/base/layer_context.h"
 #include "graphics/base/glyph.h"
@@ -19,8 +19,11 @@
 #include "graphics/base/size.h"
 #include "graphics/base/v3.h"
 #include "graphics/impl/glyph_maker/glyph_maker_span.h"
+#include "graphics/impl/renderable/renderable_with_transform.h"
 #include "graphics/inf/glyph_maker.h"
 #include "graphics/inf/layout.h"
+#include "graphics/traits/layout_param.h"
+#include "graphics/util/vec3_type.h"
 
 #include "renderer/base/atlas.h"
 #include "renderer/base/model.h"
@@ -29,9 +32,7 @@
 #include "renderer/inf/model_loader.h"
 
 #include "app/base/application_context.h"
-#include "core/util/updatable_util.h"
-#include "graphics/impl/renderable/renderable_with_transform.h"
-#include "graphics/traits/layout_param.h"
+#include "app/view/view.h"
 
 namespace ark {
 
@@ -200,17 +201,21 @@ struct LayoutLabel final : Layout {
         : _letter_spacing(letterSpacing) {
     }
 
-    sp<Updatable> inflate(Hierarchy hierarchy) override {
-        const LayoutParam& lp = hierarchy._node->_layout_param;
-        Size size(lp.width()._value.val(), lp.height()._value.val());
-        switch(lp.justifyContent()) {
-            case LayoutParam::JUSTIFY_CONTENT_CENTER:
-                return sp<Updatable>::make<UpdatableCenter>(std::move(hierarchy), std::move(size), _letter_spacing);
-            case LayoutParam::JUSTIFY_CONTENT_FLEX_END:
-                return sp<Updatable>::make<UpdatableFlexEnd>(std::move(hierarchy), std::move(size), _letter_spacing);
-            case LayoutParam::JUSTIFY_CONTENT_FLEX_START:
-            default:
-                break;
+    sp<Updatable> inflate(Hierarchy hierarchy) override
+    {
+        if(hierarchy._node->_layout_param)
+        {
+            const LayoutParam& lp = hierarchy._node->_layout_param;
+            Size size(lp.width()._value.val(), lp.height()._value.val());
+            switch(lp.justifyContent()) {
+                case LayoutParam::JUSTIFY_CONTENT_CENTER:
+                    return sp<Updatable>::make<UpdatableCenter>(std::move(hierarchy), std::move(size), _letter_spacing);
+                case LayoutParam::JUSTIFY_CONTENT_FLEX_END:
+                    return sp<Updatable>::make<UpdatableFlexEnd>(std::move(hierarchy), std::move(size), _letter_spacing);
+                case LayoutParam::JUSTIFY_CONTENT_FLEX_START:
+                default:
+                    break;
+            }
         }
         return sp<Updatable>::make<UpdatableFlexStart>(std::move(hierarchy), _letter_spacing);
     }
@@ -469,6 +474,7 @@ void Text::Content::createContent()
     createLayerContent(doLayoutWithoutBoundary());
 }
 
+//TODO: Make a GlyphMakerRichContent class to do this
 void Text::Content::createRichContent(const Scope& args, BeanFactory& factory)
 {
     float boundary = getLayoutBoundary();
@@ -546,7 +552,7 @@ float Text::Content::getLayoutBoundary() const
 }
 
 Text::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _render_layer(factory.ensureBuilder<RenderLayer>(manifest, constants::RENDER_LAYER)), _text(factory.getBuilder<StringVar>(manifest, constants::TEXT)), _layout_param(factory.getConcreteClassBuilder<LayoutParam>(manifest, constants::LAYOUT_PARAM)),
+    : _render_layer(factory.ensureBuilder<RenderLayer>(manifest, constants::RENDER_LAYER)), _text(factory.getBuilder<StringVar>(manifest, constants::TEXT)), _layout_param(factory.getBuilder<LayoutParam>(manifest, constants::LAYOUT_PARAM)),
       _glyph_maker(factory.getBuilder<GlyphMaker>(manifest, "glyph-maker")), _transform(factory.getBuilder<Mat4>(manifest, constants::TRANSFORM)), _text_scale(factory.getBuilder<Numeric>(manifest, "text-scale")), _letter_spacing(factory.getBuilder<Numeric>(manifest, "letter-spacing")),
       _line_height(Documents::getAttribute<float>(manifest, "line-height", 0.0f)), _line_indent(Documents::getAttribute<float>(manifest, "line-indent", 0.0f))
 {
