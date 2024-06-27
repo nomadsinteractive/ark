@@ -137,9 +137,9 @@ const sp<Vec3>& RenderObject::position()
     return _position.ensure();
 }
 
-void RenderObject::setPosition(const sp<Vec3>& position)
+void RenderObject::setPosition(sp<Vec3> position)
 {
-    _position = position;
+    _position.reset(std::move(position));
     _timestamp.markDirty();
 }
 
@@ -149,9 +149,9 @@ void RenderObject::setSize(sp<Vec3> size)
     _timestamp.markDirty();
 }
 
-void RenderObject::setTransform(const sp<Transform>& transform)
+void RenderObject::setTransform(sp<Transform> transform)
 {
-    _transform = transform;
+    _transform = std::move(transform);
     _timestamp.markDirty();
 }
 
@@ -252,10 +252,11 @@ TypeId RenderObject::onPoll(WiringContext& /*context*/)
 void RenderObject::onWire(const WiringContext& context)
 {
     if(sp<Vec3> position = context.getComponent<Vec3>())
-        _position.reset(std::move(position));
-    if(!_size)
-        if(const sp<Size> size = context.getComponent<Size>())
-            _size.reset(size);
+        setPosition(std::move(position));
+    if(sp<Transform> transform = context.getComponent<Transform>())
+        setTransform(std::move(transform));
+    if(const sp<Size> size = context.getComponent<Size>())
+        setSize(size);
 }
 
 RenderObject::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

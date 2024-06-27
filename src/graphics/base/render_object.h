@@ -64,7 +64,7 @@ public:
 //  [[script::bindings::property]]
     const sp<Vec3>& position();
 //  [[script::bindings::property]]
-    void setPosition(const sp<Vec3>& position);
+    void setPosition(sp<Vec3> position);
 //  [[script::bindings::property]]
     const SafeVar<Vec3>& size();
 //  [[script::bindings::property]]
@@ -72,7 +72,7 @@ public:
 //  [[script::bindings::property]]
     const SafePtr<Transform>& transform() const;
 //  [[script::bindings::property]]
-    void setTransform(const sp<Transform>& transform);
+    void setTransform(sp<Transform> transform);
 //  [[script::bindings::property]]
     const sp<Varyings>& varyings();
 //  [[script::bindings::property]]

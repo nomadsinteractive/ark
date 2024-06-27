@@ -2645,8 +2645,8 @@ class Entity:
         pass
 
 
-class WithLayer:
-    def __init__(self, layer: RenderLayer | Layer):
+class WithRenderable:
+    def __init__(self, renderable: 'Renderable', layer: RenderLayer | Layer):
         pass
 
 
@@ -2664,8 +2664,8 @@ class CollisionCallback:
         pass
 
 
-class Label:
-    def __init__(self, text: Text, layout_param: Optional[LayoutParam] = None):
+class WithText:
+    def __init__(self, text: Text, transform_node: Optional[str] = None):
         pass
 
 
