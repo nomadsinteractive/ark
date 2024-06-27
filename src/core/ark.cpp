@@ -356,8 +356,9 @@ sp<RenderEngine> Ark::doCreateRenderEngine(RendererVersion version, RendererCoor
     case RENDERER_VERSION_VULKAN:
     case RENDERER_VERSION_VULKAN_11:
     case RENDERER_VERSION_VULKAN_12:
+    case RENDERER_VERSION_VULKAN_13:
 #ifdef ARK_USE_VULKAN
-        return sp<RenderEngine>::make(version == RENDERER_VERSION_VULKAN ? RENDERER_VERSION_VULKAN_12 : version, coordinateSystem, sp<vulkan::RendererFactoryVulkan>::make(applicationBundle->recycler()));
+        return sp<RenderEngine>::make(version == RENDERER_VERSION_VULKAN ? RENDERER_VERSION_VULKAN_13 : version, coordinateSystem, sp<vulkan::RendererFactoryVulkan>::make(applicationBundle->recycler()));
 #endif
         break;
     }

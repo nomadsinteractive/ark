@@ -62,9 +62,9 @@ public:
     bool ensureState(void* stateKey);
     ElementState& addElementState(void* key);
 
-    class BUILDER : public Builder<LayerContext> {
+    class BUILDER final : public Builder<LayerContext> {
     public:
-        BUILDER(BeanFactory& factory, const document& manifest, Layer::Type layerType);
+        BUILDER(BeanFactory& factory, const document& manifest, Layer::Type layerType = Layer::TYPE_DYNAMIC);
 
         sp<LayerContext> build(const Scope& args) override;
 

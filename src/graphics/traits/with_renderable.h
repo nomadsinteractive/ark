@@ -9,7 +9,15 @@
 namespace ark {
 
 class WithRenderable final : public Wirable {
+private:
+    struct Manifest {
+        sp<Renderable> _renderable;
+        sp<LayerContext> _layer_context;
+        String _transform_node;
+    };
+
 public:
+    WithRenderable(std::vector<Manifest> manifests);
 
     TypeId onPoll(WiringContext& context) override;
     void onWire(const WiringContext& context) override;

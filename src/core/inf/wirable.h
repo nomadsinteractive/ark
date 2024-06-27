@@ -3,9 +3,12 @@
 #include <map>
 
 #include "core/forwarding.h"
+#include "core/base/constants.h"
+#include "core/base/bean_factory.h"
 #include "core/base/scope.h"
 #include "core/collection/traits.h"
 #include "core/inf/builder.h"
+#include "core/util/documents.h"
 
 namespace ark {
 

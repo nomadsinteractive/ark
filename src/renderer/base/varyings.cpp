@@ -189,7 +189,7 @@ Varyings::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 
 sp<Varyings> Varyings::BUILDER::build(const Scope& args)
 {
-    if(_input_builders.size() == 0)
+    if(_input_builders.empty())
         return nullptr;
 
     const sp<Varyings> varyings = sp<Varyings>::make();
