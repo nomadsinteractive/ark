@@ -183,7 +183,7 @@ Varyings::Snapshot Varyings::snapshot(const PipelineInput& pipelineInput, Alloca
 }
 
 Varyings::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _input_builders(factory.makeBuilderList<Uploader, InputBuilder>(manifest, "varying"))
+    : _input_builders(factory.makeBuilderListObject<InputBuilder>(manifest, "varying"))
 {
 }
 

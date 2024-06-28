@@ -323,21 +323,19 @@ public:
         return ensureBuilder<T>(attrValue);
     }
 
-    template<typename T, typename U = sp<Builder<T>>> std::vector<U> makeBuilderList(const document& doc, const String& nodeName, const String& defValue = "") {
-        std::vector<U> list;
-        if(const String attrValue = Documents::getAttribute(doc, nodeName, defValue)) {
-            if constexpr(std::is_same_v<U, sp<Builder<T>>>)
-                list.push_back(ensureBuilder<T>(attrValue));
-            else
-                WARN("User defined builder will ignore attribute \"%s\"", nodeName.c_str());
-        }
+    template<typename T> std::vector<sp<Builder<T>>> makeBuilderList(const document& doc, const String& nodeName) {
+        std::vector<sp<Builder<T>>> list;
+        if(const String attrValue = Documents::getAttribute(doc, nodeName))
+            list.push_back(ensureBuilder<T>(attrValue));
 
-        for(const document& i : doc->children(nodeName)) {
-            if constexpr(std::is_same_v<U, sp<Builder<T>>>)
-                list.push_back(ensureBuilder<T>(i));
-            else
-                list.emplace_back(*this, i);
-        }
+        for(const document& i : doc->children(nodeName))
+            list.push_back(ensureBuilder<T>(i));
+        return list;
+    }
+    template<typename T> std::vector<T> makeBuilderListObject(const document& doc, const String& nodeName) {
+        std::vector<T> list;
+        for(const document& i : doc->children(nodeName))
+            list.emplace_back(*this, i);
         return list;
     }
 //TODO: deprecate this one, which brings chaos

@@ -25,7 +25,7 @@ public:
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(SharedPtr);
 
     typedef T _PtrType;
-    typedef typename std::remove_extent<T>::type element_type;
+    typedef std::remove_extent_t<T> element_type;
 
     static SharedPtr<T> adopt(T* instance) {
         return SharedPtr<T>(instance, nullptr);

@@ -126,11 +126,22 @@ public:
     };
 
 //  [[plugin::builder("render_object")]]
-    class BUILDER_WIRABLE : public Builder<Wirable> {
+    class BUILDER_WIRABLE final : public Builder<Wirable> {
     public:
         BUILDER_WIRABLE(BeanFactory& factory, const document& manifest);
 
         sp<Wirable> build(const Scope& args) override;
+
+    private:
+        BUILDER _builder_impl;
+    };
+
+//  [[plugin::builder("render_object")]]
+    class BUILDER_RENDERABLE final : public Builder<Renderable> {
+    public:
+        BUILDER_RENDERABLE(BeanFactory& factory, const document& manifest);
+
+        sp<Renderable> build(const Scope& args) override;
 
     private:
         BUILDER _builder_impl;

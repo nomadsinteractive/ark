@@ -42,6 +42,8 @@ public:
         std::vector<ManifestFactory> _manifests;
     };
 
+private:
+    std::vector<Manifest> _manifests;
 };
 
 }

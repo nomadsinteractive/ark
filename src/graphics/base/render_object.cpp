@@ -284,4 +284,14 @@ sp<Wirable> RenderObject::BUILDER_WIRABLE::build(const Scope& args)
     return _builder_impl.build(args);
 }
 
+RenderObject::BUILDER_RENDERABLE::BUILDER_RENDERABLE(BeanFactory& factory, const document& manifest)
+    : _builder_impl(factory, manifest)
+{
+}
+
+sp<Renderable> RenderObject::BUILDER_RENDERABLE::build(const Scope& args)
+{
+    return _builder_impl.build(args);
+}
+
 }
