@@ -69,7 +69,7 @@ V2 getCharacterOffset(const Model& model)
     const V2 bitmapContentSize = bounds.size()->val();
     const V2 bitmapOccupySize = occupies.size()->val();
     const V2 bitmapPos = -occupies.aabbMin()->val();
-    return V2(bitmapPos.x(), bitmapOccupySize.y() - bitmapPos.y() - bitmapContentSize.y());
+    return {bitmapPos.x(), bitmapOccupySize.y() - bitmapPos.y() - bitmapContentSize.y()};
 }
 
 std::vector<Character> toLayoutCharacters(const GlyphContents& glyphs, ModelLoader& modelLoader)
@@ -114,7 +114,7 @@ GlyphContents makeGlyphs(GlyphMaker& gm, const std::wstring& text)
     return glyphs;
 }
 
-void doFlowLayout(std::vector<Layout::Hierarchy>& childNodes, float letterSpacing, float flowX, float flowY)
+void doFlowLayout(const std::vector<Layout::Hierarchy>& childNodes, float letterSpacing, float flowX, float flowY)
 {
     for(const Layout::Hierarchy& i : childNodes) {
         Layout::Node& node = i._node;
@@ -137,7 +137,7 @@ struct RenderableCharacter final : Renderable {
 
     Snapshot snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, StateBits state) override {
         Snapshot snapshot = _delegate->snapshot(snapshotContext, renderRequest, state);
-        snapshot._position += V3(_layout_node->offsetPosition() * _text_scale->val() + _offset_position, 0);
+        snapshot._position += V3((_layout_node->offsetPosition() + _offset_position) * _text_scale->val(), 0);
         snapshot._size = snapshot._size * _text_scale->val();
         return snapshot;
     }
@@ -196,6 +196,22 @@ struct UpdatableFlexEnd final : Updatable {
     Size _size;
 };
 
+struct UpdatableParagraph final : Updatable {
+    UpdatableParagraph(Layout::Hierarchy hierarchy, float letterSpacing, float lineHeight)
+        : _hierarchy((std::move(hierarchy))), _letter_spacing(letterSpacing), _line_height(lineHeight) {
+    }
+
+    bool update(uint64_t timestamp) override {
+        const V2 size = _hierarchy._node->size();
+        doFlowLayout(_hierarchy._child_nodes, _letter_spacing, 0, 0);
+        return false;
+    }
+
+    Layout::Hierarchy _hierarchy;
+    float _letter_spacing;
+    float _line_height;
+};
+
 struct LayoutLabel final : Layout {
     LayoutLabel(float letterSpacing)
         : _letter_spacing(letterSpacing) {
@@ -223,6 +239,20 @@ struct LayoutLabel final : Layout {
     float _letter_spacing;
 };
 
+struct LayoutParagraph final : Layout {
+    LayoutParagraph(float letterSpacing, float lineHeight)
+        : _letter_spacing(letterSpacing), _line_height(lineHeight) {
+    }
+
+    sp<Updatable> inflate(Hierarchy hierarchy) override
+    {
+        return sp<Updatable>::make<UpdatableParagraph>(std::move(hierarchy), _letter_spacing, _line_height);
+    }
+
+    float _letter_spacing;
+    float _line_height;
+};
+
 }
 
 struct Text::Content {
@@ -240,9 +270,12 @@ struct Text::Content {
     bool update(uint64_t timestamp)
     {
         const bool contentDirty = _string->update(timestamp);
+        const bool layoutDirty = _timestamp.update(timestamp);
         if(contentDirty)
             setText(Strings::fromUTF8(*_string->val()));
-        return contentDirty || UpdatableUtil::update(timestamp, _updatable_layout, _text_scale);
+        else if(layoutDirty)
+            updateLayoutContent();
+        return contentDirty || layoutDirty || UpdatableUtil::update(timestamp, _updatable_layout, _text_scale);
     }
 
     void setText(std::wstring text);
@@ -343,9 +376,11 @@ struct Text::Content {
     sp<LayerContext> _layer_context;
     sp<Updatable> _updatable_layout;
     sp<VariableWrapper<V3>> _position;
+
+    Timestamp _timestamp;
 };
 
-class RenderBatchContent : public RenderBatch {
+class RenderBatchContent final : public RenderBatch {
 public:
     RenderBatchContent(sp<Text::Content> content, sp<Boolean> discarded)
         : RenderBatch(std::move(discarded)), _content(std::move(content)) {
@@ -381,7 +416,7 @@ const sp<LayoutParam>& Text::layoutParam() const
 void Text::setLayoutParam(sp<LayoutParam> layoutParam)
 {
     _content->_layout_param = std::move(layoutParam);
-    _content->updateLayoutContent();
+    _content->_timestamp.markDirty();
 }
 
 sp<Vec3> Text::position() const
@@ -402,7 +437,7 @@ const sp<Mat4>& Text::transform() const
 void Text::setTransform(sp<Mat4> transform)
 {
     _content->_transform = std::move(transform);
-    _content->updateLayoutContent();
+    _content->_timestamp.markDirty();
 }
 
 const sp<Size>& Text::size() const
@@ -418,6 +453,7 @@ const sp<Boundaries>& Text::boundaries() const
 void Text::setBoundaries(sp<Boundaries> boundaries)
 {
     _content->_boundaries = std::move(boundaries);
+    _content->_timestamp.markDirty();
 }
 
 const std::wstring& Text::text() const

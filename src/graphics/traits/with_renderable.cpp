@@ -56,13 +56,14 @@ WithRenderable::ManifestFactory::ManifestFactory(BeanFactory& factory, const doc
 }
 
 WithRenderable::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _manifests(factory.makeBuilderListObject<ManifestFactory>(manifest, "render_object"))
+    : _manifests(factory.makeBuilderListObject<ManifestFactory>(manifest, constants::RENDER_OBJECT))
 {
 }
 
 sp<Wirable> WithRenderable::BUILDER::build(const Scope& args)
 {
     std::vector<Manifest> manifests;
+    manifests.reserve(_manifests.size());
     for(const auto& [renderable, layerContext, transformNode] : _manifests)
         manifests.push_back({renderable->build(args), layerContext->build(args), transformNode});
     return sp<Wirable>::make<WithRenderable>(std::move(manifests));
