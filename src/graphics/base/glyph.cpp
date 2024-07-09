@@ -48,7 +48,7 @@ const sp<Boolean>& Glyph::visible() const
 
 sp<RenderObject> Glyph::toRenderObject() const
 {
-    return sp<RenderObject>::make(_type, _position, sp<Size>::make(_occupy_size.x(), _occupy_size.y()), _transform, _varyings, _visible, _discarded);
+    return sp<RenderObject>::make(_type, _position, sp<Size>::make(_content_size.x(), _content_size.y()), _transform, _varyings, _visible, _discarded);
 }
 
 wchar_t Glyph::character() const
@@ -66,9 +66,10 @@ const V2& Glyph::occupySize() const
     return _occupy_size;
 }
 
-void Glyph::setOccupySize(const V2& layoutSize)
+void Glyph::setSize(const V2& occupySize, const V2& contentSize)
 {
-    _occupy_size = layoutSize;
+    _occupy_size = occupySize;
+    _content_size = contentSize;
 }
 
 }

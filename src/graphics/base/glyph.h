@@ -34,7 +34,9 @@ public:
     void setCharacter(wchar_t character);
 
     const V2& occupySize() const;
-    void setOccupySize(const V2& layoutSize);
+    const V2& contentSize() const;
+
+    void setSize(const V2& occupySize, const V2& contentSize);
 
 private:
     sp<Integer> _type;
@@ -46,6 +48,7 @@ private:
 
     wchar_t _character;
     V2 _occupy_size;
+    V2 _content_size;
 };
 
 }

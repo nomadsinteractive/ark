@@ -140,14 +140,12 @@ public:
     float flexGrow() const;
 //  [[script::bindings::property]]
     void setFlexGrow(float weight);
-
     bool hasFlexGrow() const;
 
     const Length& width() const;
     void setWidth(sp<Numeric> width);
 
     LayoutParam::LengthType widthType() const;
-//  [[script::bindings::property]]
     void setWidthType(LayoutParam::LengthType widthType);
 
     const Length& height() const;
@@ -189,9 +187,6 @@ public:
     bool isMatchParent() const;
     bool isWidthMatchParent() const;
     bool isHeightMatchParent() const;
-
-    static bool isMatchParent(const Length& length);
-    static bool isWrapContent(const Length& length);
 
 //  [[plugin::builder]]
     class BUILDER : public Builder<LayoutParam> {

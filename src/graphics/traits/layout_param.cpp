@@ -11,6 +11,50 @@
 
 namespace ark {
 
+namespace {
+
+bool isLengthMatchParent(const LayoutParam::Length& length)
+{
+    return length._type == LayoutParam::LENGTH_TYPE_PERCENTAGE && length._value.val() == 100.0f;
+}
+
+bool isLengthWrapContent(const LayoutParam::Length& length)
+{
+    return length._type == LayoutParam::LENGTH_TYPE_AUTO;
+}
+
+class BuilderLengthVar final : public Builder<LayoutParam::Length> {
+public:
+    BuilderLengthVar(LayoutParam::LengthType varType, sp<Builder<Numeric>> var)
+        : _var_type(varType), _var(std::move(var)) {
+    }
+
+    sp<LayoutParam::Length> build(const Scope& args) override {
+        return sp<LayoutParam::Length>::make(_var_type, _var->build(args));
+    }
+
+private:
+    LayoutParam::LengthType _var_type;
+    sp<Builder<Numeric>> _var;
+};
+
+sp<Builder<LayoutParam::Length>> getLengthBuilder(BeanFactory& factory, const document& manifest, const String& attrName) {
+    const Optional<String> attrOpt = Documents::getAttributeOptional<String>(manifest, attrName);
+    if(attrOpt) {
+        const String& s = attrOpt.value();
+        if(s == "auto")
+            return sp<typename Builder<LayoutParam::Length>::Prebuilt>::make(sp<LayoutParam::Length>::make());
+        if(s.endsWith("px"))
+            return sp<typename Builder<LayoutParam::Length>::Prebuilt>::make(sp<LayoutParam::Length>::make(LayoutParam::LENGTH_TYPE_PIXEL, Strings::eval<float>(s.substr(0, s.length() - 2))));
+        if(s.endsWith("%"))
+            return sp<typename Builder<LayoutParam::Length>::Prebuilt>::make(sp<LayoutParam::Length>::make(LayoutParam::LENGTH_TYPE_PERCENTAGE, Strings::eval<float>(s.substr(0, s.length() - 1))));
+        return sp<BuilderLengthVar>::make(LayoutParam::LENGTH_TYPE_PIXEL, factory.ensureBuilder<Numeric>(s));
+    }
+    return nullptr;
+}
+
+}
+
 template<> ARK_API LayoutParam::Display StringConvert::eval<LayoutParam::Display>(const String& str)
 {
     if(str == "float")
@@ -45,7 +89,7 @@ void LayoutParam::setLayout(sp<Layout> layout)
 float LayoutParam::calcLayoutWidth(float available)
 {
     const V4 margins = _margins.val();
-    if(isMatchParent(_width))
+    if(isLengthMatchParent(_width))
     {
         _width._value.reset(sp<Numeric>::make<Numeric::Const>(available - margins.w() - margins.y()));
         return available;
@@ -56,7 +100,7 @@ float LayoutParam::calcLayoutWidth(float available)
 float LayoutParam::calcLayoutHeight(float available)
 {
     const V4 margins = _margins.val();
-    if(isMatchParent(_height))
+    if(isLengthMatchParent(_height))
     {
         _height._value.reset(sp<Numeric>::make<Numeric::Const>(available - margins.x() - margins.z()));
         return available;
@@ -256,12 +300,12 @@ bool LayoutParam::isWrapContent() const
 
 bool LayoutParam::isWidthWrapContent() const
 {
-    return isWrapContent(_width);
+    return isLengthWrapContent(_width);
 }
 
 bool LayoutParam::isHeightWrapContent() const
 {
-    return isWrapContent(_height);
+    return isLengthWrapContent(_height);
 }
 
 bool LayoutParam::isMatchParent() const
@@ -271,56 +315,12 @@ bool LayoutParam::isMatchParent() const
 
 bool LayoutParam::isWidthMatchParent() const
 {
-    return isMatchParent(_width);
+    return isLengthMatchParent(_width);
 }
 
 bool LayoutParam::isHeightMatchParent() const
 {
-    return isMatchParent(_height);
-}
-
-bool LayoutParam::isMatchParent(const Length& length)
-{
-    return length._type == LENGTH_TYPE_PERCENTAGE && length._value.val() == 100.0f;
-}
-
-bool LayoutParam::isWrapContent(const Length& length)
-{
-    return length._type == LENGTH_TYPE_AUTO;
-}
-
-namespace {
-
-class BuilderLengthVar : public Builder<LayoutParam::Length> {
-public:
-    BuilderLengthVar(LayoutParam::LengthType varType, sp<Builder<Numeric>> var)
-        : _var_type(varType), _var(std::move(var)) {
-    }
-
-    virtual sp<LayoutParam::Length> build(const Scope& args) override {
-        return sp<LayoutParam::Length>::make(_var_type, _var->build(args));
-    }
-
-private:
-    LayoutParam::LengthType _var_type;
-    sp<Builder<Numeric>> _var;
-};
-
-}
-
-static sp<Builder<LayoutParam::Length>> getLengthBuilder(BeanFactory& factory, const document& manifest, const String& attrName) {
-    const Optional<String> attrOpt = Documents::getAttributeOptional<String>(manifest, attrName);
-    if(attrOpt) {
-        const String& s = attrOpt.value();
-        if(s == "auto")
-            return sp<typename Builder<LayoutParam::Length>::Prebuilt>::make(sp<LayoutParam::Length>::make());
-        if(s.endsWith("px"))
-            return sp<typename Builder<LayoutParam::Length>::Prebuilt>::make(sp<LayoutParam::Length>::make(LayoutParam::LENGTH_TYPE_PIXEL, Strings::eval<float>(s.substr(0, s.length() - 2))));
-        if(s.endsWith("%"))
-            return sp<typename Builder<LayoutParam::Length>::Prebuilt>::make(sp<LayoutParam::Length>::make(LayoutParam::LENGTH_TYPE_PERCENTAGE, Strings::eval<float>(s.substr(0, s.length() - 1))));
-        return sp<BuilderLengthVar>::make(LayoutParam::LENGTH_TYPE_PIXEL, factory.ensureBuilder<Numeric>(s));
-    }
-    return nullptr;
+    return isLengthMatchParent(_height);
 }
 
 LayoutParam::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
