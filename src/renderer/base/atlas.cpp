@@ -3,7 +3,6 @@
 #include "core/base/bean_factory.h"
 #include "core/dom/dom_document.h"
 #include "core/inf/storage.h"
-#include "core/inf/dictionary.h"
 #include "core/util/math.h"
 #include "core/util/documents.h"
 
@@ -20,7 +19,50 @@
 
 namespace ark {
 
+namespace {
+
+class GetTextureBitmap final : public Texture::Delegate {
+public:
+    GetTextureBitmap(sp<Texture::Delegate> delegate)
+        : Texture::Delegate(delegate->type()), _delegate(std::move(delegate)) {
+    }
+
+    uint64_t id() override {
+        return _delegate->id();
+    }
+
+    void upload(GraphicsContext& graphicsContext, const sp<Texture::Uploader>& uploader) override {
+        _delegate->upload(graphicsContext, uploader);
+    }
+
+    ResourceRecycleFunc recycle() override {
+        return _delegate->recycle();
+    }
+
+    void clear(GraphicsContext& graphicsContext) override {
+        _delegate->clear(graphicsContext);
+    }
+
+    bool download(GraphicsContext& graphicsContext, Bitmap& bitmap) override {
+        return _delegate->download(graphicsContext, bitmap);
+    }
+
+    void uploadBitmap(GraphicsContext& /*graphicsContext*/, const Bitmap& bitmap, const std::vector<ark::sp<ByteArray>>& imagedata) override {
+        _bitmap = sp<Bitmap>::make(bitmap.width(), bitmap.height(), bitmap.rowBytes(), bitmap.channels(), imagedata.at(0));
+    }
+
+    const sp<Bitmap>& bitmap() const {
+        return _bitmap;
+    }
+
+private:
+    sp<Texture::Delegate> _delegate;
+    sp<Bitmap> _bitmap;
+};
+
 constexpr uint32_t UV_NORMALIZE_RANGE = std::numeric_limits<uint16_t>::max();
+
+}
 
 Atlas::Atlas(sp<Texture> texture, bool allowDefaultItem)
     : _texture(std::move(texture)), _allow_default_item(allowDefaultItem)
@@ -91,45 +133,6 @@ Rect Atlas::getItemUV(int32_t c) const
     return at(c).uv();
 }
 
-class GetTextureBitmap : public Texture::Delegate {
-public:
-    GetTextureBitmap(sp<Texture::Delegate> delegate)
-        : Texture::Delegate(delegate->type()), _delegate(std::move(delegate)) {
-    }
-
-    virtual uint64_t id() override {
-        return _delegate->id();
-    }
-
-    virtual void upload(GraphicsContext& graphicsContext, const sp<Texture::Uploader>& uploader) override {
-        _delegate->upload(graphicsContext, uploader);
-    }
-
-    virtual ResourceRecycleFunc recycle() override {
-        return _delegate->recycle();
-    }
-
-    virtual void clear(GraphicsContext& graphicsContext) override {
-        _delegate->clear(graphicsContext);
-    }
-
-    virtual bool download(GraphicsContext& graphicsContext, Bitmap& bitmap) override {
-        return _delegate->download(graphicsContext, bitmap);
-    }
-
-    virtual void uploadBitmap(GraphicsContext& /*graphicsContext*/, const Bitmap& bitmap, const std::vector<ark::sp<ByteArray>>& imagedata) override {
-        _bitmap = sp<Bitmap>::make(bitmap.width(), bitmap.height(), bitmap.rowBytes(), bitmap.channels(), imagedata.at(0));
-    }
-
-    const sp<Bitmap>& bitmap() const {
-        return _bitmap;
-    }
-
-private:
-    sp<Texture::Delegate> _delegate;
-    sp<Bitmap> _bitmap;
-};
-
 sp<BitmapBundle> Atlas::makeBitmapBundle() const
 {
     GetTextureBitmap textureBitmap(_texture->delegate());
@@ -188,8 +191,8 @@ Atlas::Item Atlas::makeItem(uint32_t ux, uint32_t uy, uint32_t vx, uint32_t vy, 
 
 void Atlas::AttachmentNinePatch::import(Atlas& atlas, const document& manifest)
 {
-    uint32_t textureWidth = atlas.width();
-    uint32_t textureHeight = atlas.height();
+    const uint32_t textureWidth = atlas.width();
+    const uint32_t textureHeight = atlas.height();
     for(const document& i : manifest->children())
     {
         const String name = i->name();
@@ -202,7 +205,7 @@ void Atlas::AttachmentNinePatch::import(Atlas& atlas, const document& manifest)
         else
         {
             CHECK_WARN(name == "nine-patch", "\"%s\" nodeName should be \"nine-patch\"", Documents::toString(i).c_str());
-            int32_t type = Documents::ensureAttribute<int32_t>(i, constants::TYPE);
+            const int32_t type = Documents::ensureAttribute<int32_t>(i, constants::TYPE);
             add(type, textureWidth, textureHeight, paddings, atlas);
         }
     }
@@ -241,16 +244,8 @@ const sp<Vertices>& Atlas::AttachmentNinePatch::ensureVerticesQuads(int32_t type
 }
 
 Atlas::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _texture(factory.ensureConcreteClassBuilder<Texture>(manifest, constants::TEXTURE))
+    : _texture(factory.ensureConcreteClassBuilder<Texture>(manifest, constants::TEXTURE)), _importers(factory.makeBuilderList<AtlasImporter>(manifest, "import"))
 {
-    for(const document& i : manifest->children())
-        if(i->name() == "import")
-            _importers.push_back(factory.ensureBuilder<AtlasImporter>(i));
-        else if(i->name() != constants::TEXTURE)
-        {
-            DCHECK(i->name() == "item", "No rule to import item \"%s\"", Documents::toString(i).c_str());
-            _items.push_back(i);
-        }
 }
 
 sp<Atlas> Atlas::BUILDER::build(const Scope& args)
@@ -258,9 +253,6 @@ sp<Atlas> Atlas::BUILDER::build(const Scope& args)
     sp<Texture> texture = _texture->build(args);
     DASSERT(texture);
     const sp<Atlas> atlas = sp<Atlas>::make(std::move(texture));
-
-    for(const document& i : _items)
-        atlas->loadItem(i);
 
     for(const sp<Builder<AtlasImporter>>& i : _importers)
         i->build(args)->import(atlas, nullptr);

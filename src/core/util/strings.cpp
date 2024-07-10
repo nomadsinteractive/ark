@@ -527,11 +527,8 @@ bool Strings::isNumeric(const String& value)
 {
     const char* str = value.c_str();
     while(*str)
-    {
-        char c = *(str++);
-        if(c < '+' || c > '9' || c == '/')
+        if(char c = *(str++); c < '+' || c > '9' || c == '/')
             return false;
-    }
     return true;
 }
 

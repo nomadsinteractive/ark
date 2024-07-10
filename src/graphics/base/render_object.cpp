@@ -1,6 +1,7 @@
 #include "graphics/base/render_object.h"
 
 #include "core/base/bean_factory.h"
+#include "core/impl/integer/name_hash_type_id.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/inf/variable.h"
 #include "core/util/numeric_type.h"
@@ -260,11 +261,8 @@ void RenderObject::onWire(const WiringContext& context)
 }
 
 RenderObject::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _type(factory.getBuilder<Integer>(manifest, constants::TYPE)),
-      _position(factory.getBuilder<Vec3>(manifest, constants::POSITION)),
-      _size(factory.getBuilder<Size>(manifest, constants::SIZE)),
-      _transform(factory.getBuilder<Transform>(manifest, constants::TRANSFORM)),
-      _varyings(factory.getConcreteClassBuilder<Varyings>(manifest, constants::VARYINGS)),
+    : _type(factory.getBuilder<Integer>(manifest, constants::TYPE)), _position(factory.getBuilder<Vec3>(manifest, constants::POSITION)), _size(factory.getBuilder<Size>(manifest, constants::SIZE)),
+      _transform(factory.getBuilder<Transform>(manifest, constants::TRANSFORM)), _varyings(factory.getConcreteClassBuilder<Varyings>(manifest, constants::VARYINGS)),
       _discarded(factory.getBuilder<Boolean>(manifest, constants::DISCARDED))
 {
 }

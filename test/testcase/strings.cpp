@@ -33,9 +33,6 @@ public:
         Color white = Strings::eval<Color>("#ffffff");
         TESTCASE_VALIDATE(white == Color(1.0f, 1.0f, 1.0f));
 
-        TESTCASE_VALIDATE(Strings::eval<LayoutParam::Gravity>("right") == LayoutParam::GRAVITY_RIGHT);
-
-
         const String formatted = Strings::sprintf("hello %s %d", "world", 123);
         TESTCASE_VALIDATE(formatted == "hello world 123");
 

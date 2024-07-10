@@ -18,30 +18,31 @@ AtlasImporterGenericXML::AtlasImporterGenericXML(String src, float px, float py)
 void AtlasImporterGenericXML::import(Atlas& atlas, const sp<Readable>& /*readable*/)
 {
     const document src = Documents::loadFromReadable(Ark::instance().openAsset(_src));
-    DCHECK(src, "Cannot load %s", _src.c_str());
+    CHECK(src, "Cannot load %s", _src.c_str());
     for(const document& i : src->children())
     {
-        int32_t n = Documents::ensureAttribute<int32_t>(i, "n");
-        uint32_t x = Documents::getAttribute<uint32_t>(i, "x", 0);
-        uint32_t y = Documents::getAttribute<uint32_t>(i, "y", 0);
-        uint32_t w = Documents::getAttribute<uint32_t>(i, "w", 0);
-        uint32_t h = Documents::getAttribute<uint32_t>(i, "h", 0);
-        uint32_t ox = Documents::getAttribute<uint32_t>(i, "oX", 0);
-        uint32_t oy = Documents::getAttribute<uint32_t>(i, "oY", 0);
-        float ow = static_cast<float>(Documents::getAttribute<uint32_t>(i, "oW", w));
-        float oh = static_cast<float>(Documents::getAttribute<uint32_t>(i, "oH", h));
-        float px = Documents::getAttribute<float>(i, "pX", _px);
-        float py = Documents::getAttribute<float>(i, "pY", _py);
+        const String& n = Documents::ensureAttribute(i, "n");
+        const uint32_t x = Documents::getAttribute<uint32_t>(i, "x", 0);
+        const uint32_t y = Documents::getAttribute<uint32_t>(i, "y", 0);
+        const uint32_t w = Documents::getAttribute<uint32_t>(i, "w", 0);
+        const uint32_t h = Documents::getAttribute<uint32_t>(i, "h", 0);
+        const uint32_t ox = Documents::getAttribute<uint32_t>(i, "oX", 0);
+        const uint32_t oy = Documents::getAttribute<uint32_t>(i, "oY", 0);
+        const float ow = static_cast<float>(Documents::getAttribute<uint32_t>(i, "oW", w));
+        const float oh = static_cast<float>(Documents::getAttribute<uint32_t>(i, "oH", h));
+        const float px = Documents::getAttribute<float>(i, "pX", _px);
+        const float py = Documents::getAttribute<float>(i, "pY", _py);
         Rect bounds(static_cast<float>(ox) / ow, static_cast<float>(oy) / oh, static_cast<float>(ox + w) / ow, static_cast<float>(oy + h) / oh);
         bounds.vflip(1.0f);
-        atlas.add(n, x, y, x + w, y + h, bounds, V2(ow, oh), V2(px, 1.0f - py));
 
-        const Optional<String> s9 = Documents::getAttributeOptional<String>(i, "s9");
-        if(s9)
+        const int32_t nid = Strings::isNumeric(n) ? Strings::eval<int32_t>(n) : static_cast<int32_t>(string_hash(n.c_str()));
+        atlas.add(nid, x, y, x + w, y + h, bounds, V2(ow, oh), V2(px, 1.0f - py));
+
+        if(const Optional<String> s9 = Documents::getAttributeOptional<String>(i, "s9"))
         {
             const Rect s9Rect = Strings::eval<Rect>(s9.value());
             const sp<Atlas::AttachmentNinePatch>& aNinePatch = atlas.attachments().ensure<Atlas::AttachmentNinePatch>();
-            aNinePatch->addNinePatch(n, atlas.width(), atlas.height(), Rect(s9Rect.left(), s9Rect.top(), s9Rect.left() + s9Rect.right(), s9Rect.top() + s9Rect.bottom()), atlas);
+            aNinePatch->addNinePatch(nid, atlas.width(), atlas.height(), Rect(s9Rect.left(), s9Rect.top(), s9Rect.left() + s9Rect.right(), s9Rect.top() + s9Rect.bottom()), atlas);
         }
     }
 }

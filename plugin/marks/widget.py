@@ -54,6 +54,6 @@ class RotationEditor:
         builder.end_tab_item()
         quaternion_activated = builder.begin_tab_item("Quaternion")
         builder.slider_float4('Quaternion', self._quaternion, -1, 1)
-        builder.end_tab_bar()
+        builder.end_tab_item()
         builder.end_tab_bar()
         self._rotation.reset(self._rotation_axis.if_else(axis_activated, self._rotation_euler.if_else(euler_activated, self._quaternion)))

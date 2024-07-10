@@ -121,22 +121,22 @@ public:
     static sp<Integer> dye(sp<Integer> self, sp<Boolean> condition = nullptr, String message = "");
 
 //  [[plugin::builder::by-value]]
-    class DICTIONARY : public Builder<Integer> {
+    class DICTIONARY final : public Builder<Integer> {
     public:
-        DICTIONARY(BeanFactory& factory, const String& expr);
+        DICTIONARY(BeanFactory& factory, const String& value);
 
-        virtual sp<Integer> build(const Scope& args) override;
+        sp<Integer> build(const Scope& args) override;
 
     private:
         sp<Builder<Integer>> _value;
     };
 
 //  [[plugin::builder]]
-    class BUILDER : public Builder<Integer> {
+    class BUILDER final : public Builder<Integer> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Integer> build(const Scope& args) override;
+        sp<Integer> build(const Scope& args) override;
 
     private:
         DICTIONARY _delegate;

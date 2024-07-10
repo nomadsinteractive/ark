@@ -42,27 +42,6 @@ V2 LayoutUtil::inflate(const std::vector<sp<LayoutParam>>& slots)
     return V2(width, height);
 }
 
-V2 LayoutUtil::place(LayoutParam::Gravity gravity, const V2& size, const Rect& available)
-{
-    float x = placeOneDimension(static_cast<LayoutParam::Gravity>(gravity & LayoutParam::GRAVITY_CENTER_HORIZONTAL), size.x(), available.width());
-    float y = placeOneDimension(static_cast<LayoutParam::Gravity>(gravity & LayoutParam::GRAVITY_CENTER_VERTICAL), size.y(), available.height());
-    return V2(x + available.left(), y + available.top());
-}
-
-V2 LayoutUtil::place(LayoutParam::Gravity gravity, LayoutParam::FlexDirection flexDirection, const V2& size, Rect& available)
-{
-    const Rect allocated = flow(flexDirection, size, available);
-    switch(flexDirection) {
-        case LayoutParam::FLEX_DIRECTION_COLUMN:
-        case LayoutParam::FLEX_DIRECTION_COLUMN_REVERSE:
-            return place(static_cast<LayoutParam::Gravity>(gravity & LayoutParam::GRAVITY_CENTER_VERTICAL), size, allocated);
-        case LayoutParam::FLEX_DIRECTION_ROW:
-        case LayoutParam::FLEX_DIRECTION_ROW_REVERSE:
-            return place(static_cast<LayoutParam::Gravity>(gravity & LayoutParam::GRAVITY_CENTER_HORIZONTAL), size, allocated);
-    }
-    return place(gravity, size, allocated);
-}
-
 std::pair<float, float> LayoutUtil::calcFlowDirection(LayoutParam::JustifyContent justifyContent, float totalSpace, float childrenSpace, size_t childCount)
 {
     switch(justifyContent) {
@@ -130,25 +109,6 @@ float LayoutUtil::calcItemOffsetY(LayoutParam::Align align, const Layout::Node& 
             break;
     }
     return offset;
-}
-
-float LayoutUtil::placeOneDimension(LayoutParam::Gravity gravity, float size, float available)
-{
-    switch(gravity)
-    {
-        case LayoutParam::GRAVITY_LEFT:
-        case LayoutParam::GRAVITY_TOP:
-            return 0;
-        case LayoutParam::GRAVITY_RIGHT:
-        case LayoutParam::GRAVITY_BOTTOM:
-            return available - size;
-        case LayoutParam::GRAVITY_CENTER_HORIZONTAL:
-        case LayoutParam::GRAVITY_CENTER_VERTICAL:
-            return (available - size) / 2;
-        default:
-        break;
-    }
-    return 0;
 }
 
 }

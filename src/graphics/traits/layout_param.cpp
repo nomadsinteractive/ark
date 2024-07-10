@@ -346,35 +346,6 @@ sp<LayoutParam> LayoutParam::BUILDER::build(const Scope& args)
                                  LayoutParam::Length(), std::move(margins), std::move(paddings), std::move(position));
 }
 
-template<> ARK_API LayoutParam::Gravity StringConvert::eval<LayoutParam::Gravity>(const String& s)
-{
-    if(s == "default")
-        return LayoutParam::GRAVITY_DEFAULT;
-
-    uint32_t gravity = 0;
-    for(const String& i : s.split('|'))
-    {
-        const String str = i.strip();
-        if(str == "left")
-            gravity |= LayoutParam::GRAVITY_LEFT;
-        else if(str == "right")
-            gravity |= LayoutParam::GRAVITY_RIGHT;
-        else if(str == "top")
-            gravity |= LayoutParam::GRAVITY_TOP;
-        else if(str == "bottom")
-            gravity |= LayoutParam::GRAVITY_BOTTOM;
-        else if(str == "center")
-            gravity |= LayoutParam::GRAVITY_CENTER;
-        else if(str == "center_horizontal")
-            gravity |= LayoutParam::GRAVITY_CENTER_HORIZONTAL;
-        else if(str == "center_vertical")
-            gravity |= LayoutParam::GRAVITY_CENTER_VERTICAL;
-        else
-            DFATAL("Unknown gravity value: \"%s\"", i.c_str());
-    }
-    return static_cast<LayoutParam::Gravity>(gravity);
-}
-
 template<> ARK_API LayoutParam::FlexDirection StringConvert::eval<LayoutParam::FlexDirection>(const String& s)
 {
     if(s == "column")

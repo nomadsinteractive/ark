@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_BASE_JSON_H_
-#define ARK_CORE_BASE_JSON_H_
+#pragma once
 
 #include "core/forwarding.h"
 #include "core/base/string.h"
@@ -7,7 +6,7 @@
 
 namespace ark {
 
-class ARK_API Json {
+class ARK_API Json final {
 public:
     struct Stub;
 
@@ -108,5 +107,3 @@ private:
 };
 
 }
-
-#endif

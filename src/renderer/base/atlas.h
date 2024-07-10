@@ -114,9 +114,8 @@ public:
         virtual sp<Atlas> build(const Scope& args) override;
 
     private:
-        std::vector<document> _items;
-        std::vector<sp<Builder<AtlasImporter>>> _importers;
         SafePtr<Builder<Texture>> _texture;
+        std::vector<sp<Builder<AtlasImporter>>> _importers;
     };
 
 private:
