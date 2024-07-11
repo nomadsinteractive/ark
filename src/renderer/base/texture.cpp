@@ -29,11 +29,11 @@ public:
                   (format & Texture::FORMAT_RGBA) + 1, false) {
     }
 
-    virtual void initialize(GraphicsContext& graphicsContext, Texture::Delegate& delegate) override {
+    void initialize(GraphicsContext& graphicsContext, Texture::Delegate& delegate) override {
         delegate.uploadBitmap(graphicsContext, _bitmap, {nullptr});
     }
 
-    virtual void update(GraphicsContext& graphicsContext, Texture::Delegate& delegate) override {
+    void update(GraphicsContext& graphicsContext, Texture::Delegate& delegate) override {
         delegate.clear(graphicsContext);
     }
 

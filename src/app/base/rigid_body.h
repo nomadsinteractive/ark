@@ -17,8 +17,7 @@ namespace ark {
 
 class ARK_API RigidBody : public Wirable {
 public:
-    RigidBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> quaternion, Box impl, sp<Boolean> discarded);
-    RigidBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> quaternion, Box impl, sp<Boolean> discarded, sp<Ref> ref);
+    RigidBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> quaternion, Box impl, sp<Ref> ref);
     ~RigidBody() override;
     DISALLOW_COPY_AND_ASSIGN(RigidBody);
 
@@ -75,7 +74,6 @@ protected:
     SafeVar<Vec4> _quaternion;
 
     Box _impl;
-    SafeVar<Boolean> _discarded;
 
     sp<CollisionCallback> _collision_callback;
     sp<CollisionFilter> _collision_filter;

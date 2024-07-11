@@ -41,7 +41,7 @@ public:
     const sp<Ref>& id() const;
 
 //  [[script::bindings::auto]]
-    void dispose();
+    void discard();
 
 //  [[script::bindings::auto]]
     bool hasComponent(TypeId typeId) const;

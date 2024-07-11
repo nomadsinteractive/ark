@@ -14,7 +14,7 @@ Entity::Entity(Traits components)
 
 Entity::~Entity()
 {
-    dispose();
+    discard();
 }
 
 void Entity::traverse(const Visitor& visitor)
@@ -41,7 +41,7 @@ const sp<Ref>& Entity::id() const
     return _id;
 }
 
-void Entity::dispose()
+void Entity::discard()
 {
     _id->discard();
     _components.traits().clear();

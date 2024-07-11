@@ -227,7 +227,7 @@ const sp<NarrowPhrase>& ColliderImpl::Stub::narrowPhrase() const
 }
 
 ColliderImpl::RigidBodyImpl::RigidBodyImpl(const ColliderImpl::Stub& stub, Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<Boolean> discarded)
-    : RigidBody(type, std::move(shape), std::move(position), std::move(rotation), Box(), std::move(discarded)), _collider_stub(stub), _position_updated(true), _size_updated(false)
+    : RigidBody(type, std::move(shape), std::move(position), std::move(rotation), Box(), sp<Ref>::make(*this, std::move(discarded))), _collider_stub(stub), _position_updated(true), _size_updated(false)
 {
 }
 
@@ -252,7 +252,7 @@ bool ColliderImpl::RigidBodyImpl::update(uint64_t timestamp)
 
 void ColliderImpl::RigidBodyImpl::collisionTest(ColliderImpl::Stub& collider, const V3& position, const V3& size, const std::set<BroadPhrase::IdType>& removingIds)
 {
-    if(_discarded.val())
+    if(_ref->isDiscarded())
         return doDispose(collider);
 
     BroadPhrase::Result result;
