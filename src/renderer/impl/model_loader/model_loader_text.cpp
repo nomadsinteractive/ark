@@ -69,21 +69,19 @@ bool ModelLoaderText::GlyphBundle::prepareOne(uint64_t timestamp, int32_t c, int
 {
     if(Optional<Alphabet::Metrics> optMetrics = _alphabet->measure(c))
     {
-        const Alphabet::Metrics& metrics = optMetrics.value();
-        const int32_t width = metrics.width;
-        const int32_t height = metrics.height;
+        const auto& [width, height, bitmap_width, bitmap_height, bitmap_x, bitmap_y] = optMetrics.value();
         CHECK(width > 0 && height > 0, "Error loading character %d: width = %d, height = %d", c, width, height);
-        const MaxRectsBinPack::Rect packedBounds = _atlas_attachment._bin_pack.Insert(metrics.bitmap_width, metrics.bitmap_height, MaxRectsBinPack::RectBestShortSideFit);
-        if(packedBounds.height != metrics.bitmap_height)
+        const MaxRectsBinPack::Rect packedBounds = _atlas_attachment._bin_pack.Insert(bitmap_width + 2, bitmap_height + 2, MaxRectsBinPack::RectBestShortSideFit);
+        if(packedBounds.height == 0)
             return false;
 
-        uint32_t cx = packedBounds.x;
-        uint32_t cy = packedBounds.y;
+        const uint32_t cx = packedBounds.x + 1;
+        const uint32_t cy = packedBounds.y + 1;
         _alphabet->draw(c, _atlas_attachment._glyph_bitmap, cx, cy);
 
-        const V2 charSize(static_cast<float>(metrics.bitmap_width), static_cast<float>(metrics.bitmap_height));
-        Atlas::Item item = _atlas_attachment._atlas.makeItem(cx, cy, cx + metrics.bitmap_width, cy + metrics.bitmap_height, Rect(0, 0, 1.0f, 1.0f), charSize, V2(0));
-        V3 xyz = V3(static_cast<float>(metrics.bitmap_x), static_cast<float>(metrics.bitmap_y), 0);
+        const V2 charSize(static_cast<float>(bitmap_width), static_cast<float>(bitmap_height));
+        Atlas::Item item = _atlas_attachment._atlas.makeItem(cx, cy, cx + bitmap_width, cy + bitmap_height, Rect(0, 0, 1.0f, 1.0f), charSize, V2(0));
+        const V3 xyz(static_cast<float>(bitmap_x), static_cast<float>(bitmap_y), 0);
         sp<Boundaries> bounds = sp<Boundaries>::make(xyz, V3(charSize, 0), xyz);
         sp<Boundaries> occupies = sp<Boundaries>::make(V3(0), V3(static_cast<float>(width), static_cast<float>(height), 0), xyz);
         _glyphs[ckey] = GlyphModel(sp<Model>::make(_atlas_attachment._unit_model->indices(), sp<VerticesQuad>::make(item), std::move(bounds), std::move(occupies)), timestamp);
