@@ -207,12 +207,15 @@ struct UpdatableParagraph final : Updatable {
     {
         const V2 size = _hierarchy._node->size();
         const float layoutDirection = Ark::instance().applicationContext()->renderEngine()->toLayoutDirection(size.y() * _line_height_percentage);
-        doParagraphLayout(_hierarchy._child_nodes, 0, 0, _layout_param->contentWidth(), layoutDirection);
+        const float x = _layout_param->alignSelf() == LayoutParam::ALIGN_CENTER ? -_layout_param->contentWidth() / 2 : 0;
+        const float boundary = x + _layout_param->contentWidth();
+        doParagraphLayout(_hierarchy._child_nodes, x, 0, boundary, layoutDirection);
         return false;
     }
 
     void doParagraphLayout(const std::vector<Layout::Hierarchy>& childNodes, float flowx, float flowy, float boundary, float layoutDirection) const
     {
+        float paragraphX = flowx;
         size_t begin = 0, end = 1;
         for(const Layout::Hierarchy& i : childNodes)
         {
@@ -227,7 +230,7 @@ struct UpdatableParagraph final : Updatable {
                     if(flowx != _line_indent)
                     {
                         flowy += layoutDirection;
-                        flowx = _line_indent;
+                        flowx = paragraphX + _line_indent;
                     }
                     else
                         LOGW("No other choices, placing word out of boundary(%.2f)", boundary);
