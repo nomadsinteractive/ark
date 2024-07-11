@@ -5,53 +5,35 @@
 
 namespace ark {
 
-template<typename T> class Ref {
+class ARK_API Ref {
 public:
-    Ref(T& instance)
-        : _instance(instance), _discarded(false), _origin(*this) {
+    template<typename T> Ref(T& instance)
+        : _discarded(false), _instance(&instance), _instance_ref(*this) {
     }
-    Ref(const Ref& other)
-        : _instance(other._instance), _discarded(other._discarded), _origin(other) {
-    }
-    ~Ref() {
-        if(&_origin == this)
-            LOGD("Ref(%p) destroyed", id());
-    }
+    Ref(const Ref& other);
+    ~Ref();
 
-    explicit operator bool() const {
-        return !isDiscarded();
-    }
+    explicit operator bool() const;
 
-    bool isDiscarded() const {
-        return _origin._discarded;
-    }
-
-    void discard() {
-        _discarded = true;
-    }
-
-    template<typename U = T> U& instance() {
+    template<typename T> T& instance() const {
         ASSERT(!isDiscarded());
-        return static_cast<U&>(_instance);
+        return *static_cast<T*>(_instance);
     }
 
-    template<typename U = T> const U& instance() const {
-        ASSERT(!isDiscarded());
-        return static_cast<const U&>(_instance);
-    }
+    bool isDiscarded() const;
+//  [[script::bindings::auto]]
+    void discard();
 
-    uintptr_t id() const {
-        return reinterpret_cast<uintptr_t>(&_origin);
-    }
+//  [[script::bindings::operator(index)]]
+    uintptr_t toInt() const;
+    static Ref& toRef(uintptr_t id);
 
-    static Ref& toRef(uintptr_t id) {
-        return *reinterpret_cast<Ref*>(id);
-    }
+    static uintptr_t toInteger(const Ref& self);
 
 private:
-    T& _instance;
     bool _discarded;
-    const Ref& _origin;
+    void* _instance;
+    const Ref& _instance_ref;
 };
 
 }

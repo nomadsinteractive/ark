@@ -2,13 +2,12 @@
 
 #include "core/inf/wirable.h"
 
-#include "app/base/entity_id.h"
 #include "core/base/constants.h"
 
 namespace ark {
 
 Entity::Entity(Traits components)
-    : _ref(sp<EntityRef>::make(*this)), _components(std::move(components))
+    : _id(sp<Ref>::make(*this)), _components(std::move(components))
 {
     doWire();
 }
@@ -37,14 +36,14 @@ void Entity::doWire()
             wirable->onWire(context);
 }
 
-sp<EntityId> Entity::id() const
+const sp<Ref>& Entity::id() const
 {
-    return sp<EntityId>::make(*this);
+    return _id;
 }
 
 void Entity::dispose()
 {
-    _ref->discard();
+    _id->discard();
     _components.traits().clear();
 }
 

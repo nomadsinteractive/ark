@@ -70,8 +70,6 @@ TP_AS_NUMBER_TEMPLATE_OPERATOR = {
 }
 
 
-NO_STATIC_OPS = {'neg', 'abs', 'int', 'float', '+=', '-=', '*=', '/='}
-
 PY_RETURN_NONE = 'return PyBridge::incRefNone()'
 
 
@@ -380,9 +378,8 @@ class GenSetPropMethod(GenMethod):
 
 
 class GenOperatorMethod(GenMethod):
-    def __init__(self, name, args, return_type, operator):
-        GenMethod.__init__(self, name, args, return_type)
-        self._is_static = operator not in NO_STATIC_OPS
+    def __init__(self, name, args, return_type: str, operator: str, is_static: bool):
+        GenMethod.__init__(self, name, args, return_type, is_static)
         self._self_argument = None if self._is_static else self._arguments and self._arguments[0]
         self._arguments = self._arguments if self._is_static else self._arguments[1:]
         self._operator = operator
@@ -411,6 +408,7 @@ class GenOperatorMethod(GenMethod):
     def _gen_calling_statement(self, genclass, argnames):
         if self._is_static:
             return '%s::%s(%s);' % (genclass.classname, self._name, argnames)
+        return super()._gen_calling_statement(genclass, argnames)
         return '%s::%s(%s%s);' % (genclass.classname, self._name, self.gen_self_statement(genclass), argnames if not argnames else ', ' + argnames)
 
     def gen_return_statement(self, return_type, py_return):
@@ -434,7 +432,8 @@ class GenOperatorMethod(GenMethod):
             m1.add_overloaded_method(m2)
             return m1
         except AttributeError:
-            return create_overloaded_method_type(GenOperatorMethod, operator=m1.operator)(m1, m2)
+            assert m1.operator == m2.operator and m1.is_static == m2.is_static
+            return create_overloaded_method_type(GenOperatorMethod, operator=m1.operator, is_static=m1.is_static)(m1, m2)
 
 
 class GenSubscribableMethod(GenMethod):

@@ -43,7 +43,7 @@ AUTOBIND_EXTENDS_PATTERN = re.compile(r'\[\[script::bindings::extends\((\w+)\)]]
 AUTOBIND_TYPEDEF_PATTERN = re.compile(r'\[\[script::bindings::auto]]\s+typedef\s+\w[\w<>\s]+\s+(\w+);')
 AUTOBIND_ANNOTATION_PATTERN = re.compile(r'\[\[script::bindings::(auto|container|holder)]]%s\s+class\s+([^{\r\n]+)\s*{' % ANNOTATION_PATTERN)
 
-BUILDABLE_PATTERN = re.compile(r'\[\[plugin::(?:builder|resource-loader)[^]]*]]\s+class\s+\w+\s*:\s*public\s+Builder<([^{]+)>\s*{')
+BUILDABLE_PATTERN = re.compile(r'\[\[plugin::(?:builder|resource-loader)[^]]*]]\s+class\s+\w+\s*(?:final)?\s*:\s*public\s+Builder<([^{]+)>\s*{')
 
 CLASS_DELIMITER = '\n//%s\n' % ('-' * 120)
 ARK_CORE_BUILDABLES = {'AudioPlayer'}
@@ -671,11 +671,11 @@ def main(params, paths):
         genclass = get_result_class(binding_classes, filename, main_class)
         operator = x[0]
         name, args, return_type, is_static = GenMethod.split(x[1:])
-        assert is_static
         if operator in RICH_COMPARE_OPS:
+            assert is_static
             genclass.add_method(GenRichCompareMethod(name, args, return_type, operator))
         else:
-            genclass.add_method(GenOperatorMethod(name, args, return_type, operator))
+            genclass.add_method(GenOperatorMethod(name, args, return_type, operator, is_static))
 
     def autoasmapping(filename, content, main_class, x):
         genclass = get_result_class(binding_classes, filename, main_class)

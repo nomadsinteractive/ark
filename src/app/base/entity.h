@@ -38,7 +38,7 @@ public:
     }
 
 //  [[script::bindings::property]]
-    sp<EntityId> id() const;
+    const sp<Ref>& id() const;
 
 //  [[script::bindings::auto]]
     void dispose();
@@ -53,7 +53,7 @@ public:
     const Traits& components() const;
 
 //  [[plugin::builder]]
-    class BUILDER : public Builder<Entity> {
+    class BUILDER final : public Builder<Entity> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
@@ -68,7 +68,7 @@ private:
     void doWire();
 
 private:
-    sp<EntityRef> _ref;
+    sp<Ref> _id;
     Traits _components;
 
     friend class EntityId;

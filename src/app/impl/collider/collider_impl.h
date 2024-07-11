@@ -53,7 +53,7 @@ public:
 
         sp<RigidBodyImpl> createRigidBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Rotation> rotate, sp<Boolean> discarded);
 
-        std::vector<sp<RigidBodyRef>> toRigidBodyRefs(const std::unordered_set<BroadPhrase::IdType>& candidateSet, uint32_t filter) const;
+        std::vector<sp<Ref>> toRigidBodyRefs(const std::unordered_set<BroadPhrase::IdType>& candidateSet, uint32_t filter) const;
         std::vector<BroadPhrase::Candidate> toBroadPhraseCandidates(const std::unordered_set<BroadPhrase::IdType>& candidateSet, uint32_t filter) const;
 
         void resolveCandidates(const RigidBody& self, const BroadPhrase::Candidate& candidateSelf, const std::vector<BroadPhrase::Candidate>& candidates, const RigidBody& callback, std::set<BroadPhrase::IdType>& c);
@@ -73,8 +73,8 @@ public:
         std::vector<std::pair<sp<BroadPhrase>, sp<CollisionFilter>>> _broad_phrases;
         sp<NarrowPhrase> _narrow_phrase;
 
-        std::unordered_map<uintptr_t, sp<RigidBodyRef>> _rigid_bodies;
-        std::vector<sp<RigidBodyRef>> _rigid_body_refs;
+        std::unordered_map<uintptr_t, sp<Ref>> _rigid_bodies;
+        std::vector<sp<Ref>> _rigid_body_refs;
 
         std::set<BroadPhrase::IdType> _phrase_dispose;
         std::set<BroadPhrase::IdType> _phrase_remove;

@@ -17,7 +17,6 @@ class CollisionCallback;
 class CollisionFilter;
 class CollisionManifold;
 class Entity;
-class EntityId;
 class Event;
 class EventDispatcher;
 class EventListener;
@@ -40,8 +39,5 @@ class Shape;
 class Surface;
 class SurfaceUpdater;
 class View;
-
-typedef Ref<Entity> EntityRef;
-typedef Ref<RigidBody> RigidBodyRef;
 
 }

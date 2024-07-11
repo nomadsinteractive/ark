@@ -205,7 +205,7 @@ struct UpdatableParagraph final : Updatable {
 
     bool update(uint64_t timestamp) override
     {
-        const V2 size = _hierarchy._node->size();
+        const V2& size = _hierarchy._node->size();
         const float layoutDirection = Ark::instance().applicationContext()->renderEngine()->toLayoutDirection(size.y() * _line_height_percentage);
         const float x = _layout_param->alignSelf() == LayoutParam::ALIGN_CENTER ? -_layout_param->contentWidth() / 2 : 0;
         const float boundary = x + _layout_param->contentWidth();
@@ -215,8 +215,8 @@ struct UpdatableParagraph final : Updatable {
 
     void doParagraphLayout(const std::vector<Layout::Hierarchy>& childNodes, float flowx, float flowy, float boundary, float layoutDirection) const
     {
-        float paragraphX = flowx;
         size_t begin = 0, end = 1;
+        const float paragraphX = flowx;
         for(const Layout::Hierarchy& i : childNodes)
         {
             const Character& currentChar = *static_cast<Character*>(i._node->_tag);

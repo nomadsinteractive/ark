@@ -18,7 +18,7 @@ namespace ark {
 class ARK_API RigidBody : public Wirable {
 public:
     RigidBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> quaternion, Box impl, sp<Boolean> discarded);
-    RigidBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> quaternion, Box impl, sp<Boolean> discarded, sp<RigidBodyRef> ref);
+    RigidBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> quaternion, Box impl, sp<Boolean> discarded, sp<Ref> ref);
     ~RigidBody() override;
     DISALLOW_COPY_AND_ASSIGN(RigidBody);
 
@@ -29,8 +29,7 @@ public:
     void onWire(const WiringContext& context) override;
 
 //  [[script::bindings::property]]
-    uintptr_t id() const;
-    const sp<RigidBodyRef>& ref() const;
+    const sp<Ref>& id() const;
 //  [[script::bindings::property]]
     Collider::BodyType type() const;
 //  [[script::bindings::property]]
@@ -67,7 +66,7 @@ public:
     sp<RigidBody> makeShadow() const;
 
 protected:
-    sp<RigidBodyRef> _ref;
+    sp<Ref> _ref;
 
     Collider::BodyType _type;
     uint32_t _meta_id;

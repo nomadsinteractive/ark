@@ -13,7 +13,7 @@ namespace ark {
 class ARK_API RayCastManifold {
 public:
     RayCastManifold() = default;
-    RayCastManifold(float distance, const V3& normal, sp<RigidBodyRef> rigidBody);
+    RayCastManifold(float distance, const V3& normal, sp<Ref> rigidBody);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(RayCastManifold);
 
 //  [[script::bindings::property]]
@@ -21,12 +21,12 @@ public:
 //  [[script::bindings::property]]
     const V3& normal() const;
 //  [[script::bindings::property]]
-    const sp<RigidBodyRef>& rigidBody() const;
+    const sp<Ref>& rigidBody() const;
 
 private:
     float _distance;
     V3 _normal;
-    sp<RigidBodyRef> _rigid_body;
+    sp<Ref> _rigid_body;
 };
 
 }
