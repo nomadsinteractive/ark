@@ -312,6 +312,25 @@ V2 Math::projectile(float dx, float dy, float v, float g, uint32_t sid)
     return V2(dx > 0 ? vx : -vx, g < 0 ? vy : -vy);
 }
 
+uint32_t Math::hash32(uint32_t x)
+{
+    x = ((x >> 16) ^ x) * 0x45d9f3b;
+    x = ((x >> 16) ^ x) * 0x45d9f3b;
+    x = (x >> 16) ^ x;
+    return x;
+}
+
+uint32_t Math::hash64(uint64_t key)
+{
+    key = (~key) + (key << 18);
+    key = key ^ (key >> 31);
+    key = key * 21;
+    key = key ^ (key >> 11);
+    key = key + (key << 6);
+    key = key ^ (key >> 22);
+    return key;
+}
+
 V2 Math::normalize(const V2& v2)
 {
     const glm::vec2 n = glm::normalize(glm::vec2(v2.x(), v2.y()));

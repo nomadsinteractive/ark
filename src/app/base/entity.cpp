@@ -3,11 +3,15 @@
 #include "core/inf/wirable.h"
 
 #include "core/base/constants.h"
+#include "core/base/ref_manager.h"
+#include "core/traits/with_id.h"
+#include "core/types/global.h"
+
 
 namespace ark {
 
 Entity::Entity(Traits components)
-    : _id(sp<Ref>::make(*this)), _components(std::move(components))
+    : _ref(Global<RefManager>()->makeRef(this)), _components(std::move(components))
 {
     doWire();
 }
@@ -26,6 +30,9 @@ void Entity::traverse(const Visitor& visitor)
 
 void Entity::doWire()
 {
+    if(const sp<WithId>& withId = _components.get<WithId>())
+        withId->_id = _ref->id();
+
     Wirable::WiringContext context(_components);
     for(const auto& [k, v] : _components.traits())
         if(const sp<Wirable> wirable = v.as<Wirable>())
@@ -38,12 +45,12 @@ void Entity::doWire()
 
 const sp<Ref>& Entity::id() const
 {
-    return _id;
+    return _ref;
 }
 
 void Entity::discard()
 {
-    _id->discard();
+    _ref->discard();
     _components.traits().clear();
 }
 

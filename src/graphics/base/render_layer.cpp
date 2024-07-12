@@ -28,7 +28,7 @@ namespace ark {
 RenderLayer::Stub::Stub(sp<RenderController> renderController, sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Boolean> visible, sp<Boolean> discarded, sp<Varyings> varyings, sp<Vec4> scissor)
     : _render_controller(std::move(renderController)), _model_loader(ModelLoaderCached::ensureCached(std::move(modelLoader))), _shader(std::move(shader)), _scissor(std::move(scissor)),
       _render_command_composer(_model_loader->makeRenderCommandComposer()), _shader_bindings(_render_command_composer->makeShaderBindings(_shader, _render_controller, _model_loader->renderMode())),
-      _stride(_shader->input()->getStream(0).stride()), _layer_context(sp<LayerContext>::make(_model_loader, nullptr, std::move(visible), std::move(discarded), std::move(varyings)))
+      _stride(_shader->input()->getStream(0).stride()), _layer_context(sp<LayerContext>::make(_shader, _model_loader, nullptr, std::move(visible), std::move(discarded), std::move(varyings)))
 {
     _model_loader->initialize(_shader_bindings);
     CHECK(!_scissor || _shader_bindings->pipelineBindings()->hasFlag(PipelineBindings::FLAG_DYNAMIC_SCISSOR, PipelineBindings::FLAG_DYNAMIC_SCISSOR_BITMASK), "RenderLayer has a scissor while its Shader has no FLAG_DYNAMIC_SCISSOR set");
@@ -77,7 +77,7 @@ RenderLayerSnapshot RenderLayer::snapshot(RenderRequest& renderRequest)
 
 sp<LayerContext> RenderLayer::makeLayerContext(sp<ModelLoader> modelLoader, sp<Vec3> position, sp<Boolean> visible, sp<Boolean> discarded) const
 {
-    return sp<LayerContext>::make(modelLoader ? sp<ModelLoader>::make<ModelLoaderCached>(std::move(modelLoader)) : _stub->_model_loader, std::move(position), std::move(visible), std::move(discarded), _stub->_layer_context->varyings());
+    return sp<LayerContext>::make(_stub->_shader, modelLoader ? sp<ModelLoader>::make<ModelLoaderCached>(std::move(modelLoader)) : _stub->_model_loader, std::move(position), std::move(visible), std::move(discarded), _stub->_layer_context->varyings());
 }
 
 sp<LayerContext> RenderLayer::addLayerContext(sp<ModelLoader> modelLoader, sp<Vec3> position, sp<Boolean> visible, sp<Boolean> discarded) const

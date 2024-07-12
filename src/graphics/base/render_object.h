@@ -15,14 +15,11 @@
 
 namespace ark {
 
-class ARK_API RenderObject : public Renderable, public Wirable {
+class ARK_API RenderObject final : public Renderable {
 public:
     RenderObject(int32_t type, sp<Vec3> position = nullptr, sp<Size> size = nullptr, sp<Transform> transform = nullptr, sp<Varyings> varyings = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> discarded = nullptr);
 //  [[script::bindings::auto]]
     RenderObject(sp<Integer> type, sp<Vec3> position = nullptr, sp<Size> size = nullptr, sp<Transform> transform = nullptr, sp<Varyings> varyings = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> discarded = nullptr);
-
-    TypeId onPoll(WiringContext& context) override;
-    void onWire(const WiringContext& context) override;
 
 //  [[script::bindings::property]]
     sp<Integer> type() const;
@@ -110,7 +107,7 @@ public:
     Renderable::Snapshot snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, StateBits state) override;
 
 //  [[plugin::builder]]
-    class BUILDER : public Builder<RenderObject> {
+    class BUILDER final : public Builder<RenderObject> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
@@ -123,17 +120,6 @@ public:
         SafePtr<Builder<Transform>> _transform;
         SafePtr<Builder<Varyings>> _varyings;
         SafePtr<Builder<Boolean>> _discarded;
-    };
-
-//  [[plugin::builder("render_object")]]
-    class BUILDER_WIRABLE final : public Builder<Wirable> {
-    public:
-        BUILDER_WIRABLE(BeanFactory& factory, const document& manifest);
-
-        sp<Wirable> build(const Scope& args) override;
-
-    private:
-        BUILDER _builder_impl;
     };
 
 //  [[plugin::builder("render_object")]]

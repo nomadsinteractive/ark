@@ -12,7 +12,6 @@
 
 namespace ark {
 
-//[[core::class]]
 class ShaderFrame : public Renderer {
 public:
     [[deprecated]]

@@ -16,8 +16,8 @@
 
 namespace ark {
 
-LayerContext::LayerContext(sp<ModelLoader> modelLoader, sp<Vec3> position, sp<Boolean> visible, sp<Boolean> discarded, sp<Varyings> varyings)
-    : _model_loader(std::move(modelLoader)), _position(std::move(position)), _visible(std::move(visible), true), _discarded(discarded ? std::move(discarded) : nullptr, false),
+LayerContext::LayerContext(sp<Shader> shader, sp<ModelLoader> modelLoader, sp<Vec3> position, sp<Boolean> visible, sp<Boolean> discarded, sp<Varyings> varyings)
+    : _shader(std::move(shader)), _model_loader(std::move(modelLoader)), _position(std::move(position)), _visible(std::move(visible), true), _discarded(discarded ? std::move(discarded) : nullptr, false),
       _varyings(std::move(varyings)), _layer_type(Layer::TYPE_DYNAMIC), _reload_requested(false)
 {
 }
@@ -25,6 +25,11 @@ LayerContext::LayerContext(sp<ModelLoader> modelLoader, sp<Vec3> position, sp<Bo
 bool LayerContext::update(uint64_t timestamp)
 {
     return _timestamp.update(timestamp);
+}
+
+const sp<Shader>& LayerContext::shader() const
+{
+    return _shader;
 }
 
 const SafeVar<Vec3>& LayerContext::position() const

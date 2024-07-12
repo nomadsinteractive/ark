@@ -1,5 +1,6 @@
 #include "graphics/traits/with_renderable.h"
 
+#include "core/traits/with_id.h"
 #include "core/util/documents.h"
 
 #include "graphics/base/layer_context.h"
@@ -8,19 +9,9 @@
 #include "graphics/util/mat4_type.h"
 
 #include "renderer/base/model.h"
+#include "renderer/base/shader.h"
 
 namespace ark {
-
-namespace {
-
-sp<Builder<Renderable>> ensureRenderableBuilder(BeanFactory& factory, const document& manifest)
-{
-    if(manifest->name() == constants::RENDER_OBJECT)
-        return sp<Builder<Renderable>>::make<Builder<Renderable>::Wrapper<Builder<RenderObject>>>(factory.ensureBuilder<RenderObject>(manifest));
-    return factory.ensureBuilder<Renderable>(manifest, "renderable");
-}
-
-}
 
 WithRenderable::WithRenderable(std::vector<Manifest> manifests)
     : _manifests(std::move(manifests))
@@ -38,21 +29,32 @@ void WithRenderable::onWire(const WiringContext& context)
     const sp<Boolean> visible = context.getComponent<Visibility>();
     const sp<Model> model = context.getComponent<Model>();
     const sp<Transform> transform = context.getComponent<Transform>();
-    for(const auto& [renderable, layerContext, transformNode] : _manifests)
+    for(const auto& [renderable, renderObject, layerContext, transformNode] : _manifests)
     {
-        sp<Renderable> r = renderable;
+        sp<Renderable> r = renderObject ? renderObject.cast<Renderable>() : renderable;
         const sp<Node> node = model && transformNode ? model->findNode(transformNode) : nullptr;
         if(transform)
             r = sp<Renderable>::make<RenderableWithTransform>(std::move(r), node ? Mat4Type::matmul(transform, node->transform()) : transform.cast<Mat4>());
         else if(node)
             r = sp<Renderable>::make<RenderableWithTransform>(std::move(r), sp<Mat4>::make<Mat4::Const>(node->transform()));
+        if(renderObject)
+            //TODO: There are some name conventions that we should test the attribute name "id"
+            if(const sp<WithId>& withId = context.getComponent<WithId>(); withId && layerContext->shader() && layerContext->shader()->input()->getAttribute("Id"))
+                renderObject->varyings()->setProperty(constants::ID, sp<Integer>::make<Integer::Const>(withId->id()));
         layerContext->add(std::move(r), visible, discarded);
     }
 }
 
 WithRenderable::ManifestFactory::ManifestFactory(BeanFactory& factory, const document& manifest)
-    : _renderable(ensureRenderableBuilder(factory, manifest)), _layer_context(sp<LayerContext::BUILDER>::make(factory, manifest)), _transform_node(Documents::getAttribute(manifest, "transform-node"))
+    : _layer_context(sp<LayerContext::BUILDER>::make(factory, manifest)), _transform_node(Documents::getAttribute(manifest, "transform-node"))
 {
+    if(manifest->name() == constants::RENDER_OBJECT)
+        _render_object = factory.ensureBuilder<RenderObject>(manifest);
+    else
+    {
+        CHECK_WARN(manifest->name() == "renerable", "Name \"Renderable\" expected, found \"%s\"", manifest->name().c_str());
+        _renderable = factory.ensureBuilder<Renderable>(manifest, "renderable");
+    }
 }
 
 WithRenderable::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
@@ -64,8 +66,8 @@ sp<Wirable> WithRenderable::BUILDER::build(const Scope& args)
 {
     std::vector<Manifest> manifests;
     manifests.reserve(_manifests.size());
-    for(const auto& [renderable, layerContext, transformNode] : _manifests)
-        manifests.push_back({renderable->build(args), layerContext->build(args), transformNode});
+    for(const auto& [renderable, renderObject, layerContext, transformNode] : _manifests)
+        manifests.push_back({renderable ? renderable->build(args) : nullptr, renderObject ? renderObject->build(args) : nullptr, layerContext->build(args), transformNode});
     return sp<Wirable>::make<WithRenderable>(std::move(manifests));
 }
 

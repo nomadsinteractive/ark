@@ -2662,6 +2662,15 @@ class WithRenderable:
         pass
 
 
+class WithId:
+    def __init__(self):
+        pass
+
+    @property
+    def id(self) -> int:
+        return 0
+
+
 class Tag:
     def __init__(self, info: Any):
         pass

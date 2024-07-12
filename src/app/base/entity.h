@@ -46,7 +46,7 @@ public:
 //  [[script::bindings::auto]]
     bool hasComponent(TypeId typeId) const;
 //  [[script::bindings::auto]]
-    void addComponent(Box box);
+    void addComponent(Box component);
 //  [[script::bindings::auto]]
     Optional<Box> getComponent(TypeId typeId) const;
 
@@ -68,7 +68,7 @@ private:
     void doWire();
 
 private:
-    sp<Ref> _id;
+    sp<Ref> _ref;
     Traits _components;
 
     friend class EntityId;

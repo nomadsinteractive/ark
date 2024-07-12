@@ -1,9 +1,11 @@
 #include "app/impl/collider/collider_impl.h"
 
 #include <algorithm>
-#include <core/types/ref.h>
 
 #include "core/ark.h"
+#include "core/base/ref_manager.h"
+#include "core/types/global.h"
+#include "core/types/ref.h"
 #include "core/util/log.h"
 
 #include "graphics/base/size.h"
@@ -139,12 +141,12 @@ sp<ColliderImpl::RigidBodyImpl> ColliderImpl::Stub::createRigidBody(Collider::Bo
     const V3 size = shape->size().val();
     sp<RigidBodyImpl> rigidBody = sp<RigidBodyImpl>::make(*this, type, std::move(shape), std::move(position), std::move(rotate), std::move(discarded));
     const RigidBodyDef& rigidBodyDef = rigidBody->updateBodyDef(_narrow_phrase, sp<Vec3>::make<Vec3::Const>(size));
-    _rigid_bodies[rigidBody->id()->toInt()] = rigidBody->id();
+    _rigid_bodies[rigidBody->id()->id()] = rigidBody->id();
 
     const V3 posVal = rigidBody->position().val();
     float s = rigidBodyDef.occupyRadius() * 2;
     for(const auto& [i, j] : _broad_phrases)
-        i->create(rigidBody->id()->toInt(), posVal, V3(s));
+        i->create(rigidBody->id()->id(), posVal, V3(s));
 
     return rigidBody;
 }
@@ -162,9 +164,10 @@ std::vector<sp<Ref>> ColliderImpl::Stub::toRigidBodyRefs(const std::unordered_se
 std::vector<BroadPhrase::Candidate> ColliderImpl::Stub::toBroadPhraseCandidates(const std::unordered_set<BroadPhrase::IdType>& candidateSet, uint32_t filter) const
 {
     std::vector<BroadPhrase::Candidate> candidates;
+    RefManager& refManager = Global<RefManager>();
     for(BroadPhrase::IdType i : candidateSet)
     {
-        const RigidBodyImpl& rigidBody = Ref::toRef(i).instance<RigidBodyImpl>();
+        const RigidBodyImpl& rigidBody = refManager.toRef(i).instance<RigidBodyImpl>();
         if(rigidBody.type() & filter)
             candidates.emplace_back(rigidBody.toBroadPhraseCandidate());
     }
@@ -197,6 +200,7 @@ void ColliderImpl::Stub::resolveCandidates(const RigidBody& self, const BroadPhr
 {
     std::set<BroadPhrase::IdType> contacts = std::move(c);
     std::set<BroadPhrase::IdType> contactsOut;
+    RefManager& refManager = Global<RefManager>();
     for(const BroadPhrase::Candidate& i : candidates)
     {
         CollisionManifold manifold;
@@ -204,7 +208,7 @@ void ColliderImpl::Stub::resolveCandidates(const RigidBody& self, const BroadPhr
         {
             if(const auto iter = contacts.find(i._id); iter == contacts.end())
             {
-                if(const Ref& ref = Ref::toRef(i._id))
+                if(const Ref& ref = refManager.toRef(i._id))
                     callback.onBeginContact(self, ref.instance<RigidBody>(), manifold);
             }
             else
@@ -215,7 +219,7 @@ void ColliderImpl::Stub::resolveCandidates(const RigidBody& self, const BroadPhr
     for(const BroadPhrase::IdType i : contacts)
     {
         if(contactsOut.find(i) == contactsOut.end())
-            if(const Ref& ref = Ref::toRef(i))
+            if(const Ref& ref = refManager.toRef(i))
                 callback.onEndContact(self, ref.instance<RigidBody>());
     }
     c = std::move(contactsOut);
@@ -227,7 +231,7 @@ const sp<NarrowPhrase>& ColliderImpl::Stub::narrowPhrase() const
 }
 
 ColliderImpl::RigidBodyImpl::RigidBodyImpl(const ColliderImpl::Stub& stub, Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<Boolean> discarded)
-    : RigidBody(type, std::move(shape), std::move(position), std::move(rotation), Box(), sp<Ref>::make(*this, std::move(discarded))), _collider_stub(stub), _position_updated(true), _size_updated(false)
+    : RigidBody(type, std::move(shape), std::move(position), std::move(rotation), Box(), Global<RefManager>()->makeRef(this, std::move(discarded))), _collider_stub(stub), _position_updated(true), _size_updated(false)
 {
 }
 
@@ -244,7 +248,7 @@ bool ColliderImpl::RigidBodyImpl::update(uint64_t timestamp)
             _size_updated = false;
         }
         const float r = bodyDef().occupyRadius();
-        _collider_stub.updateBroadPhraseCandidate(id()->toInt(), pos, V3(r * 2));
+        _collider_stub.updateBroadPhraseCandidate(id()->id(), pos, V3(r * 2));
         _position_updated = false;
     }
     return true;
@@ -262,7 +266,7 @@ void ColliderImpl::RigidBodyImpl::collisionTest(ColliderImpl::Stub& collider, co
         DPROFILER_TRACE("BroadPhrase");
         result = collider.broadPhraseSearch(position, size, collisionFilter());
         dynamicCandidates = std::move(result._dynamic_candidates);
-        dynamicCandidates.erase(id()->toInt());
+        dynamicCandidates.erase(id()->id());
         for(const BroadPhrase::IdType i : removingIds)
             dynamicCandidates.erase(i);
     }
@@ -277,7 +281,7 @@ void ColliderImpl::RigidBodyImpl::collisionTest(ColliderImpl::Stub& collider, co
 
 void ColliderImpl::RigidBodyImpl::doDispose(ColliderImpl::Stub& stub)
 {
-    stub.requestRigidBodyRemoval(id()->toInt());
+    stub.requestRigidBodyRemoval(id()->id());
 }
 
 const RigidBodyDef& ColliderImpl::RigidBodyImpl::bodyDef() const
@@ -293,7 +297,7 @@ const RigidBodyDef& ColliderImpl::RigidBodyImpl::updateBodyDef(NarrowPhrase& nar
 
 BroadPhrase::Candidate ColliderImpl::RigidBodyImpl::toBroadPhraseCandidate() const
 {
-    return BroadPhrase::Candidate(id()->toInt(), position().val(), quaternion().val(), metaId(), _shape->id(), collisionFilter(), bodyDef().impl());
+    return BroadPhrase::Candidate(id()->id(), position().val(), quaternion().val(), metaId(), _shape->id(), collisionFilter(), bodyDef().impl());
 }
 
 ColliderImpl::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

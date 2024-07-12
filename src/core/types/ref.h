@@ -8,11 +8,8 @@ namespace ark {
 
 class ARK_API Ref {
 public:
-    template<typename T> Ref(T& instance, sp<Boolean> discarded = nullptr)
-        : _instance(&instance), _instance_ref(*this), _discarded(std::move(discarded), false) {
-    }
-    Ref(const Ref& other);
     ~Ref();
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Ref);
 
     explicit operator bool() const;
 
@@ -20,6 +17,9 @@ public:
         ASSERT(!isDiscarded());
         return *static_cast<T*>(_instance);
     }
+
+//  [[script::bindings::operator(index)]]
+    IdType id() const;
 
     bool isDiscarded() const;
 //  [[script::bindings::property]]
@@ -30,19 +30,15 @@ public:
 //  [[script::bindings::auto]]
     void discard();
 
-//  [[script::bindings::property]]
-    uint32_t hash() const;
-
-//  [[script::bindings::operator(index)]]
-    uintptr_t toInt() const;
-    static Ref& toRef(uintptr_t id);
-
-    static uintptr_t toInteger(const Ref& self);
+private:
+    Ref(IdType id, void* instance, sp<Boolean> discarded = nullptr);
 
 private:
+    uint32_t _id;
     void* _instance;
-    const Ref& _instance_ref;
     SafeVar<Boolean> _discarded;
+
+    friend class RefManager;
 };
 
 }

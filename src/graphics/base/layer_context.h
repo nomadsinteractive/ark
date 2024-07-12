@@ -23,9 +23,12 @@ public:
     };
 
 public:
-    LayerContext(sp<ModelLoader> modelLoader = nullptr, sp<Vec3> position = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> discarded = nullptr, sp<Varyings> varyings = nullptr);
+    LayerContext(sp<Shader> shader = nullptr, sp<ModelLoader> modelLoader = nullptr, sp<Vec3> position = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> discarded = nullptr, sp<Varyings> varyings = nullptr);
 
     bool update(uint64_t timestamp) override;
+
+//  [[script::bindings::property]]
+    const sp<Shader>& shader() const;
 
 //  [[script::bindings::property]]
     const SafeVar<Vec3>& position() const;
@@ -74,7 +77,8 @@ public:
         Layer::Type _layer_type;
     };
 
-public:
+private:
+    sp<Shader> _shader;
     sp<ModelLoader> _model_loader;
 
     SafeVar<Vec3> _position;
@@ -94,6 +98,7 @@ public:
 
     Timestamp _timestamp;
 
+    friend class RenderLayerSnapshot;
 };
 
 }

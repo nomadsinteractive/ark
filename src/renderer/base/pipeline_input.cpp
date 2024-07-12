@@ -100,9 +100,9 @@ void PipelineInput::initialize(const PipelineBuildingContext& buildingContext)
         CHECK_WARN(i->binding() >= 0, "Uniform \"%s\" has unspecified binding. (Declared but unused variables might be optimized out)", i->name().c_str());
         if(i->binding() >= 0)
         {
-            sp<PipelineInput::UBO>& ubo = ubos[i->binding()];
+            sp<UBO>& ubo = ubos[i->binding()];
             if(!ubo)
-                ubo = sp<PipelineInput::UBO>::make(i->binding());
+                ubo = sp<UBO>::make(i->binding());
             ubo->addUniform(i);
         }
     }
@@ -122,14 +122,12 @@ void PipelineInput::initialize(const PipelineBuildingContext& buildingContext)
     {
         BindingNames samplerNames(_sampler_names);
         BindingNames imageNames(_image_names);
-        ShaderPreprocessor* vertex = buildingContext.tryGetStage(SHADER_STAGE_VERTEX);
-        if(vertex)
+        if(const ShaderPreprocessor* vertex = buildingContext.tryGetStage(SHADER_STAGE_VERTEX))
         {
             samplerNames.addBindings(vertex->_declaration_samplers.vars().keys());
             imageNames.addBindings(vertex->_declaration_images.vars().keys());
         }
-        ShaderPreprocessor* fragment = buildingContext.tryGetStage(SHADER_STAGE_FRAGMENT);
-        if(fragment)
+        if(const ShaderPreprocessor* fragment = buildingContext.tryGetStage(SHADER_STAGE_FRAGMENT))
         {
             samplerNames.addBindings(fragment->_declaration_samplers.vars().keys());
             imageNames.addBindings(fragment->_declaration_images.vars().keys());

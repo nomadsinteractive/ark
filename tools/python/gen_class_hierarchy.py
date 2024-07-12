@@ -8,12 +8,12 @@ import sys
 import acg
 from acg import HeaderPattern
 
-CLASS_PATTERN = re.compile(r'(\[\[core::class\]\])?([\w<():=,>\s]+)class\s+(ARK_API\s+)?(\w+)(?:\s+final)?\s+(:[^{;]+)?[{;]')
+CLASS_PATTERN = re.compile(r'([\w<():=,>\s]+)class\s+(?:ARK_API\s+)?(\w+)(?:\s+final)?\s+(:[^{;]+)?[{;]')
 
 INDENT = '\n    '
 
 
-CORE_INTERFACES = ('Numeric', 'Integer', 'Resource', 'EventListener', 'Uploader', 'Renderer', 'Notifier', 'ModelLoader',
+CORE_INTERFACES = ('Numeric', 'Integer', 'Resource', 'EventListener', 'Uploader', 'Renderable', 'Renderer', 'Notifier', 'ModelLoader',
                    'Boolean', 'Runnable', 'Vec2', 'Vec3', 'Vec4', 'Mat3', 'Mat4', 'Holder', 'Wirable', 'CollisionCallback')
 
 
@@ -35,13 +35,13 @@ def search_for_classes(paths):
     result = []
 
     def match_class(filename, content, main_class, x):
-        core_class, class_pre, ark_api, class_name, impls = x
-        if core_class or (class_name == main_class and not class_name.startswith('_') and 'template<' not in class_pre):
+        class_pre, class_name, impls = x
+        if class_name == main_class and not class_name.startswith('_') and 'template<' not in class_pre:
             if impls.startswith(':'):
                 implements = [k for k in [j[6:].strip() for j in [i.strip() for i in impls[1:].split(',')] if j.startswith('public')] if not k.startswith('Class<')]
             else:
                 implements = []
-            if ([i for i in implements if i in CORE_INTERFACES]) or core_class:
+            if [i for i in implements if i in CORE_INTERFACES]:
                 result.append(GenClass(class_name, implements, filename))
 
     acg.match_header_patterns(paths, True, HeaderPattern(CLASS_PATTERN, match_class))

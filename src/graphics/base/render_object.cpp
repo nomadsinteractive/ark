@@ -4,10 +4,9 @@
 #include "core/impl/integer/name_hash_type_id.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/inf/variable.h"
+#include "core/traits/with_id.h"
 #include "core/util/numeric_type.h"
 #include "core/util/updatable_util.h"
-
-#include "graphics/traits/with_layer.h"
 
 #include "graphics/util/vec3_type.h"
 
@@ -245,21 +244,6 @@ Renderable::Snapshot RenderObject::snapshot(const LayerContextSnapshot& snapshot
     return {state, typeId, std::move(model)};
 }
 
-TypeId RenderObject::onPoll(WiringContext& /*context*/)
-{
-    return Type<Renderable>::id();
-}
-
-void RenderObject::onWire(const WiringContext& context)
-{
-    if(sp<Vec3> position = context.getComponent<Vec3>())
-        setPosition(std::move(position));
-    if(sp<Transform> transform = context.getComponent<Transform>())
-        setTransform(std::move(transform));
-    if(const sp<Size> size = context.getComponent<Size>())
-        setSize(size);
-}
-
 RenderObject::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _type(factory.getBuilder<Integer>(manifest, constants::TYPE)), _position(factory.getBuilder<Vec3>(manifest, constants::POSITION)), _size(factory.getBuilder<Size>(manifest, constants::SIZE)),
       _transform(factory.getBuilder<Transform>(manifest, constants::TRANSFORM)), _varyings(factory.getConcreteClassBuilder<Varyings>(manifest, constants::VARYINGS)),
@@ -270,16 +254,6 @@ RenderObject::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 sp<RenderObject> RenderObject::BUILDER::build(const Scope& args)
 {
     return sp<RenderObject>::make(_type->build(args), _position->build(args), _size->build(args), _transform->build(args), _varyings->build(args), nullptr, _discarded->build(args));
-}
-
-RenderObject::BUILDER_WIRABLE::BUILDER_WIRABLE(BeanFactory& factory, const document& manifest)
-    : _builder_impl(factory, manifest)
-{
-}
-
-sp<Wirable> RenderObject::BUILDER_WIRABLE::build(const Scope& args)
-{
-    return _builder_impl.build(args);
 }
 
 RenderObject::BUILDER_RENDERABLE::BUILDER_RENDERABLE(BeanFactory& factory, const document& manifest)

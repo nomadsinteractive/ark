@@ -1,20 +1,22 @@
 #include "app/base/rigid_body.h"
 
 #include "core/base/bean_factory.h"
+#include "core/base/ref_manager.h"
 #include "core/base/string.h"
 #include "core/inf/variable.h"
+#include "core/types/global.h"
+#include "core/types/ref.h"
 #include "core/util/string_convert.h"
 
 #include "app/base/application_context.h"
 #include "app/base/collision_manifold.h"
 #include "app/inf/collision_callback.h"
 #include "app/traits/shape.h"
-#include "core/types/ref.h"
 
 namespace ark {
 
 RigidBody::RigidBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> quaternion, Box impl, sp<Ref> ref)
-    : _ref(ref ? std::move(ref) : sp<Ref>::make(*this)), _type(type), _meta_id(0), _shape(std::move(shape)), _position(std::move(position)), _quaternion(std::move(quaternion)), _impl(std::move(impl))
+    : _ref(ref ? std::move(ref) : Global<RefManager>()->makeRef(this)), _type(type), _meta_id(0), _shape(std::move(shape)), _position(std::move(position)), _quaternion(std::move(quaternion)), _impl(std::move(impl))
 {
 }
 

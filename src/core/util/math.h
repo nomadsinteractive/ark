@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_UTIL_MATH_H_
-#define ARK_CORE_UTIL_MATH_H_
+#pragma once
 
 #include <algorithm>
 #include <cstdint>
@@ -237,6 +236,9 @@ public:
 //  [[script::bindings::auto]]
     static ARK_API V2 projectile(float dx, float dy, float v, float g, uint32_t sid);
 
+    static uint32_t hash32(uint32_t x);
+    static uint32_t hash64(uint64_t key);
+
     static V2 normalize(const V2& v2);
     static V3 normalize(const V3& v2);
     static V4 normalize(const V4& v2);
@@ -250,5 +252,3 @@ public:
 };
 
 }
-
-#endif

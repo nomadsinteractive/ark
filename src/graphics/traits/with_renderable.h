@@ -12,6 +12,7 @@ class WithRenderable final : public Wirable {
 private:
     struct Manifest {
         sp<Renderable> _renderable;
+        sp<RenderObject> _render_object;
         sp<LayerContext> _layer_context;
         String _transform_node;
     };
@@ -26,6 +27,7 @@ public:
         ManifestFactory(BeanFactory& factory, const document& manifest);
 
         sp<Builder<Renderable>> _renderable;
+        sp<Builder<RenderObject>> _render_object;
         sp<Builder<LayerContext>> _layer_context;
 
         String _transform_node;

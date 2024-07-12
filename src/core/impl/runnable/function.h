@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_IMPL_FUNCTION_H_
-#define ARK_CORE_IMPL_FUNCTION_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/inf/runnable.h"
@@ -7,7 +6,6 @@
 
 namespace ark {
 
-//[[core::class]]
 class ARK_API Function : public Runnable {
 public:
 //[[script::bindings::auto]]
@@ -31,5 +29,3 @@ private:
 };
 
 }
-
-#endif

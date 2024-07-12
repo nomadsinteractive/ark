@@ -9,9 +9,8 @@
 
 namespace ark {
 
-//[[core::class]]
 //[[script::bindings::extends(Vec4)]]
-class ARK_API Color : public Vec4 {
+class ARK_API Color final : public Vec4 {
 public:
     Color();
     Color(uint32_t value);

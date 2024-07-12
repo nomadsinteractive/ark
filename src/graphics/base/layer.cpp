@@ -64,7 +64,8 @@ sp<Layer> Layer::BUILDER::build(const Scope& args)
     sp<Vec3> position = _position->build(args);
     sp<ModelLoader> modelLoader = _model_loader->build(args);
     const sp<RenderLayer> renderLayer = _render_layer->build(args);
-    const sp<Layer> layer = sp<Layer>::make(renderLayer ? renderLayer->addLayerContext(std::move(modelLoader), std::move(position)) : sp<LayerContext>::make(ModelLoaderCached::ensureCached(std::move(modelLoader)), std::move(position), _visible->build(args)));
+    //TODO: Every Layer should have been associated with a RenderLayer
+    const sp<Layer> layer = sp<Layer>::make(renderLayer ? renderLayer->addLayerContext(std::move(modelLoader), std::move(position)) : sp<LayerContext>::make(nullptr, ModelLoaderCached::ensureCached(std::move(modelLoader)), std::move(position), _visible->build(args)));
     LayerContext& layerContext = layer->context();
     for(const sp<Builder<RenderObject>>& i : _render_objects)
         layerContext.add(i->build(args));

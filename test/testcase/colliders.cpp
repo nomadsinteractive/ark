@@ -92,11 +92,11 @@ public:
         rigidBody001->setCollisionCallback(collisionCallbackImpl001);
         rigidBody003->setCollisionCallback(collisionCallbackImpl003);
         const auto s1 = bp1->search(V3(120, 380, 0), V3(60, 60, 0))._dynamic_candidates;
-        TESTCASE_VALIDATE(s1.find(rigidBody001->id()->toInt()) != s1.end());
+        TESTCASE_VALIDATE(s1.find(rigidBody001->id()->id()) != s1.end());
         const auto s2 = bp1->search(V3(40, 380, 0), V3(60, 60, 0))._dynamic_candidates;
-        TESTCASE_VALIDATE(s2.find(rigidBody001->id()->toInt()) == s2.end());
+        TESTCASE_VALIDATE(s2.find(rigidBody001->id()->id()) == s2.end());
         const auto s3 = bp1->search(V3(120, 450, 0), V3(60, 60, 0))._dynamic_candidates;
-        TESTCASE_VALIDATE(s3.find(rigidBody001->id()->toInt()) == s3.end());
+        TESTCASE_VALIDATE(s3.find(rigidBody001->id()->id()) == s3.end());
 
         while(duration->val() < 3.0f) {
             applicationContext->updateRenderState();
