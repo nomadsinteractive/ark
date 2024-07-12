@@ -36,11 +36,10 @@ private:
             elems.pop_front();
             builder = beanFactory.getBuilder<T>(str);
         }
-        doSplit<Args...>(beanFactory, elems, args...);
+        if constexpr(sizeof...(args) > 0)
+            doSplit<Args...>(beanFactory, elems, args...);
     }
 
-    template<typename... Args> static void doSplit(BeanFactory& /*beanFactory*/, std::list<String>& /*elems*/) {
-    }
 };
 
 }

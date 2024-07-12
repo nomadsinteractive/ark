@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_BASE_COMPUTE_CONTEXT_H_
-#define ARK_RENDERER_BASE_COMPUTE_CONTEXT_H_
+#pragma once
 
 #include <array>
 #include <vector>
@@ -26,5 +25,3 @@ public:
 };
 
 }
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_IMPL_SNIPPET_DRAW_COMPUTE_H_
-#define ARK_RENDERER_IMPL_SNIPPET_DRAW_COMPUTE_H_
+#pragma once
 
 #include <array>
 
@@ -10,31 +9,30 @@
 
 namespace ark {
 
-class SnippetDrawCompute : public Snippet {
+class SnippetDrawCompute final : public Snippet {
 public:
-    SnippetDrawCompute(sp<Shader> shader, std::array<sp<Integer>, 3> numWorkGroups);
+    SnippetDrawCompute(sp<Shader> shader, std::array<sp<Integer>, 3> numWorkGroups, bool atPostDraw);
 
-    virtual sp<DrawEvents> makeDrawEvents(const RenderRequest& renderRequest) override;
+    sp<DrawEvents> makeDrawEvents(const RenderRequest& renderRequest) override;
 
 //  [[plugin::builder("compute")]]
-    class BUILDER : public Builder<Snippet> {
+    class BUILDER final : public Builder<Snippet> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Snippet> build(const Scope& args) override;
+        sp<Snippet> build(const Scope& args) override;
 
     private:
         sp<Builder<Shader>> _shader;
         std::array<sp<Builder<Integer>>, 3> _num_work_groups;
+        bool _at_post_draw;
     };
 
 private:
     sp<Shader> _shader;
     std::array<sp<Integer>, 3> _num_work_groups;
-
     sp<ShaderBindings> _shader_bindings;
+    bool _at_post_draw;
 };
 
 }
-
-#endif

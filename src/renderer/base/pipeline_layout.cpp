@@ -68,15 +68,11 @@ void PipelineLayout::initialize()
     _snippet->preInitialize(_building_context);
     _building_context->initialize();
 
-    ShaderPreprocessor* vertex = _building_context->tryGetStage(PipelineInput::SHADER_STAGE_VERTEX);
-    ShaderPreprocessor* compute = _building_context->tryGetStage(PipelineInput::SHADER_STAGE_COMPUTE);
-    if(vertex)
+    if(const ShaderPreprocessor* vertex = _building_context->tryGetStage(PipelineInput::SHADER_STAGE_VERTEX))
         tryBindCamera(*vertex, _input->_camera);
-    if(compute)
+    if(const ShaderPreprocessor* compute = _building_context->tryGetStage(PipelineInput::SHADER_STAGE_COMPUTE))
         tryBindCamera(*compute, _input->_camera);
-
-    ShaderPreprocessor* fragment = _building_context->tryGetStage(PipelineInput::SHADER_STAGE_FRAGMENT);
-    if(fragment)
+    if(const ShaderPreprocessor* fragment = _building_context->tryGetStage(PipelineInput::SHADER_STAGE_FRAGMENT))
         _color_attachment_count = fragment->_main_block->outArgumentCount() + (fragment->_main_block->hasReturnValue() ? 1 : 0);
 
     _building_context->setupUniforms();

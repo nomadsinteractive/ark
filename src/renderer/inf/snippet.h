@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_INF_SNIPPET_H_
-#define ARK_RENDERER_INF_SNIPPET_H_
+#pragma once
 
 #include "core/base/api.h"
 
@@ -29,5 +28,3 @@ public:
 };
 
 }
-
-#endif

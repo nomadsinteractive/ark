@@ -168,7 +168,7 @@ void PipelineBuildingContext::setupUniforms()
         i.second->setupUniforms(_uniforms, binding);
 }
 
-const std::map<PipelineInput::ShaderStage, op<ShaderPreprocessor> >& PipelineBuildingContext::stages() const
+const std::map<PipelineInput::ShaderStage, op<ShaderPreprocessor>>& PipelineBuildingContext::stages() const
 {
     return _stages;
 }

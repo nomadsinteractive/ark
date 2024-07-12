@@ -113,8 +113,7 @@ void PipelineInput::initialize(const PipelineBuildingContext& buildingContext)
         _ubos.push_back(std::move(i.second));
     }
 
-    ShaderPreprocessor* compute = buildingContext.tryGetStage(SHADER_STAGE_COMPUTE);
-    if(compute)
+    if(const ShaderPreprocessor* compute = buildingContext.tryGetStage(SHADER_STAGE_COMPUTE))
     {
         _sampler_names = compute->_declaration_samplers.vars().keys();
         _image_names = compute->_declaration_images.vars().keys();

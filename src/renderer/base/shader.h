@@ -40,7 +40,7 @@ public:
 
     sp<ShaderBindings> makeBindings(Buffer vertices, Enum::RenderMode mode, Enum::DrawProcedure renderProcedure, const std::map<uint32_t, sp<Uploader>>& uploaders = {}) const;
 
-    class BUILDER_IMPL : public Builder<Shader> {
+    class BUILDER_IMPL final : public Builder<Shader> {
     public:
         BUILDER_IMPL(BeanFactory& factory, const document& manifest, const ResourceLoaderContext& resourceLoaderContext, sp<Builder<Camera>> camera = nullptr,
                      Optional<StageManifest> stages = Optional<StageManifest>(), Optional<SnippetManifest> snippets = Optional<SnippetManifest>());
