@@ -7,10 +7,8 @@
 #include "renderer/vulkan/base/vk_memory_ptr.h"
 #include "renderer/vulkan/base/vk_renderer.h"
 #include "renderer/vulkan/util/vk_util.h"
-#include "renderer/vulkan/util/vulkan_initializers.hpp"
 
-namespace ark {
-namespace vulkan {
+namespace ark::vulkan {
 
 VKMemory::Stub::Stub(const sp<VKDevice>& device, const sp<Recycler>& recycler, VkDeviceSize size, uint32_t memoryType)
     : _device(device), _recycler(recycler), _memory(VK_NULL_HANDLE), _allocation_info{VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO, nullptr, size, memoryType}
@@ -92,5 +90,4 @@ VKMemoryPtr VKMemory::end() const
     return VKMemoryPtr(_stub, size(), 0);
 }
 
-}
 }

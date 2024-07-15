@@ -59,7 +59,22 @@ void VKBuffer::uploadBuffer(GraphicsContext& graphicsContext, Uploader& input)
 
 void VKBuffer::downloadBuffer(GraphicsContext& graphicsContext, size_t offset, size_t size, void* ptr)
 {
-    FATAL("Unimplemented");
+    if(isDeviceLocal())
+    {
+        VKBuffer stagingBuffer(_renderer, _recycler, VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        const VkCommandBuffer copyCmd = _renderer->commandPool()->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
+        const VkBufferCopy copyRegions{offset, 0, size};
+        vkCmdCopyBuffer(copyCmd, _descriptor.buffer, stagingBuffer.vkBuffer(), 1, &copyRegions);
+        _renderer->commandPool()->flushCommandBuffer(copyCmd, true);
+
+        memcpy(ptr, stagingBuffer.map(), size);
+        stagingBuffer.recycle()(graphicsContext);
+    }
+    else
+    {
+        memcpy(ptr, map(), size);
+        unmap();
+    }
 }
 
 ResourceRecycleFunc VKBuffer::recycle()
@@ -95,6 +110,18 @@ void VKBuffer::reload(GraphicsContext& /*graphicsContext*/, const ByteArray::Bor
 const VkBuffer& VKBuffer::vkBuffer() const
 {
     return _descriptor.buffer;
+}
+
+void* VKBuffer::map(VkDeviceSize size, VkDeviceSize offset)
+{
+    void* mapped = nullptr;
+    VKUtil::checkResult(vkMapMemory(_renderer->vkLogicalDevice(), _memory.vkMemory(), offset, size, 0, &mapped));
+    return mapped;
+}
+
+void VKBuffer::unmap()
+{
+    vkUnmapMemory(_renderer->vkLogicalDevice(), _memory.vkMemory());
 }
 
 void VKBuffer::allocateMemory(GraphicsContext& graphicsContext, const VkMemoryRequirements& memReqs)

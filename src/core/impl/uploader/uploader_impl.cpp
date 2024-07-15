@@ -1,4 +1,4 @@
-#include "core/impl/uploader/input_impl.h"
+#include "core/impl/uploader/uploader_impl.h"
 
 #include "core/impl/writable/writable_with_offset.h"
 #include "core/util/log.h"
@@ -92,15 +92,15 @@ size_t UploaderImpl::calculateUploaderSize()
     return size;
 }
 
-UploaderImpl::UploaderStub::UploaderStub(size_t offset, sp<Uploader> input, sp<Boolean> disposed)
-    : _offset(offset), _input(std::move(input)), _dirty_updated(true), _dirty_marked(true), _disposed(disposed)
+UploaderImpl::UploaderStub::UploaderStub(size_t offset, sp<Uploader> input, sp<Boolean> discarded)
+    : _offset(offset), _input(std::move(input)), _dirty_updated(true), _dirty_marked(true), _discarded(discarded)
 {
     DASSERT(_input);
 }
 
 bool UploaderImpl::UploaderStub::isDiscarded() const
 {
-    return _disposed->val();
+    return _discarded->val();
 }
 
 }

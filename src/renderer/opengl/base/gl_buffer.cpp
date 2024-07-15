@@ -11,13 +11,13 @@ namespace ark::opengl {
 
 namespace {
 
-class WritableGLBuffer : public Writable {
+class WritableGLBuffer final : public Writable {
 public:
     WritableGLBuffer(GLenum type, size_t size)
         : _type(type), _size(size) {
     }
 
-    virtual uint32_t write(const void* buffer, uint32_t size, uint32_t offset) override {
+    uint32_t write(const void* buffer, uint32_t size, uint32_t offset) override {
         DASSERT(buffer);
         DCHECK(offset + size <= _size, "GLBuffer data overflow");
         glBufferSubData(_type, static_cast<GLsizeiptr>(offset), static_cast<GLsizeiptr>(size), buffer);

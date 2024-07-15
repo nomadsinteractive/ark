@@ -5,8 +5,7 @@
 
 #include "renderer/vulkan/base/vk_memory.h"
 
-namespace ark {
-namespace vulkan {
+namespace ark::vulkan {
 
 VKMemoryPtr::VKMemoryPtr(std::nullptr_t)
 {
@@ -107,5 +106,4 @@ void VKMemoryPtr::Stub::upload(Uploader& input)
     unmap();
 }
 
-}
 }

@@ -1,7 +1,7 @@
 #include "core/util/uploader_type.h"
 
 #include "core/inf/array.h"
-#include "core/impl/uploader/input_impl.h"
+#include "core/impl/uploader/uploader_impl.h"
 #include "core/impl/uploader/uploader_array.h"
 #include "core/impl/uploader/input_repeat.h"
 #include "core/impl/uploader/input_variable_array.h"
@@ -17,7 +17,7 @@ namespace ark {
 
 namespace {
 
-class UploaderList : public Uploader {
+class UploaderList final : public Uploader {
 private:
     struct Node {
         size_t _offset;
@@ -35,7 +35,7 @@ public:
         }
     }
 
-    virtual bool update(uint64_t timestamp) override {
+    bool update(uint64_t timestamp) override {
         bool dirty = false;
         for(Node& i : _uploaders) {
             i._dirty = i._uploader->update(timestamp) || i._dirty;
@@ -45,7 +45,7 @@ public:
         return dirty;
     }
 
-    virtual void upload(Writable& buf) override {
+    void upload(Writable& buf) override {
         for(Node& i : _uploaders)
             if(i._dirty) {
                 WritableWithOffset wwo(buf, i._offset);
@@ -58,13 +58,13 @@ private:
     std::vector<Node> _uploaders;
 };
 
-}
-
-static sp<UploaderImpl> ensureImpl(const sp<Uploader>& self)
+sp<UploaderImpl> ensureImpl(const sp<Uploader>& self)
 {
     const sp<UploaderImpl> impl = self.tryCast<UploaderImpl>();
     CHECK(impl, "This object is not a InputImpl instance. Use \"reserve\" method to create an InputImpl instance.");
     return impl;
+}
+
 }
 
 
@@ -150,8 +150,7 @@ sp<Uploader> UploaderType::makeElementIndexInput(std::vector<element_index_t> va
 
 void UploaderType::reset(const sp<Uploader>& self, sp<Uploader> delegate)
 {
-    const sp<UploaderImpl> impl = self.tryCast<UploaderImpl>();
-    if(impl)
+    if(const sp<UploaderImpl> impl = self.tryCast<UploaderImpl>())
         impl->reset(std::move(delegate));
     else
         ensureWrapper(self)->setDelegate(std::move(delegate));

@@ -9,8 +9,7 @@
 
 #include "platform/vulkan/vulkan.h"
 
-namespace ark {
-namespace vulkan {
+namespace ark::vulkan {
 
 class VKMemoryPtr {
 public:
@@ -63,6 +62,4 @@ private:
     friend class VKHeap;
 };
 
-
-}
 }

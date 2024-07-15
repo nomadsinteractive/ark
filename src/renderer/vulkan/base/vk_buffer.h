@@ -11,17 +11,17 @@
 
 namespace ark::vulkan {
 
-class VKBuffer : public Buffer::Delegate {
+class VKBuffer final : public Buffer::Delegate {
 public:
     VKBuffer(sp<VKRenderer> renderer, sp<Recycler> recycler, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags);
     ~VKBuffer() override;
     DISALLOW_COPY_AND_ASSIGN(VKBuffer);
 
-    virtual uint64_t id() override;
-    virtual void upload(GraphicsContext& graphicsContext) override;
-    virtual void uploadBuffer(GraphicsContext& graphicsContext, Uploader& input) override;
-    virtual void downloadBuffer(GraphicsContext& graphicsContext, size_t offset, size_t size, void* ptr) override;
-    virtual ResourceRecycleFunc recycle() override;
+    uint64_t id() override;
+    void upload(GraphicsContext& graphicsContext) override;
+    void uploadBuffer(GraphicsContext& graphicsContext, Uploader& input) override;
+    void downloadBuffer(GraphicsContext& graphicsContext, size_t offset, size_t size, void* ptr) override;
+    ResourceRecycleFunc recycle() override;
 
     void reload(GraphicsContext& graphicsContext, const ByteArray::Borrowed& buf);
 

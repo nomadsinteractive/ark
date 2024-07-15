@@ -1,7 +1,6 @@
 #pragma once
 
 #include <map>
-#include <vector>
 
 #include "core/collection/list.h"
 #include "core/inf/uploader.h"
@@ -9,13 +8,13 @@
 
 namespace ark {
 
-class UploaderImpl : public Uploader {
+class UploaderImpl final : public Uploader {
 public:
     UploaderImpl(size_t size);
     UploaderImpl(const std::map<size_t, sp<Uploader>>& inputMap, size_t size = 0);
 
-    virtual bool update(uint64_t timestamp) override;
-    virtual void upload(Writable& writable) override;
+    bool update(uint64_t timestamp) override;
+    void upload(Writable& writable) override;
 
     void addInput(size_t offset, sp<Uploader> input);
     void removeInput(size_t offset);
@@ -25,7 +24,7 @@ public:
 
 private:
     struct UploaderStub {
-        UploaderStub(size_t offset, sp<Uploader> input, sp<Boolean> disposed);
+        UploaderStub(size_t offset, sp<Uploader> input, sp<Boolean> discarded);
 
         bool isDiscarded() const;
 
@@ -33,7 +32,7 @@ private:
         sp<Uploader> _input;
         bool _dirty_updated;
         bool _dirty_marked;
-        sp<Boolean> _disposed;
+        sp<Boolean> _discarded;
     };
 
     size_t calculateUploaderSize();
