@@ -129,7 +129,7 @@ void ShaderPreprocessor::parseDeclarations()
         return nullptr;
     });
 
-    auto structPatternReplacer = [this](const std::smatch& m) {
+    const auto structPatternReplacer = [this](const std::smatch& m) {
         const sp<String> declaration = sp<String>::make(m.str());
         this->_struct_declaration_codes.push_back(declaration);
         this->_struct_definitions.push_back(m[1].str(), m[2].str());
@@ -138,11 +138,12 @@ void ShaderPreprocessor::parseDeclarations()
     _include_declaration_codes.replace(_STRUCT_PATTERN, structPatternReplacer);
     _main.replace(_STRUCT_PATTERN, structPatternReplacer);
 
-    _main.replace(_UNIFORM_PATTERN, [this](const std::smatch& m) {
-        uint32_t length = m[4].str().empty() ? 1 : Strings::eval<uint32_t>(m[4].str());
-        this->addUniform(m[2].str(), m[3].str(), length, sp<String>::make(m.str()));
-        return nullptr;
-    });
+    const auto uniformPatternReplacer = [this](const std::smatch& m) {
+        const uint32_t length = m[4].str().empty() ? 1 : Strings::eval<uint32_t>(m[4].str());
+        return this->addUniform(m[2].str(), m[3].str(), length, m.str());
+    };
+    _include_declaration_codes.replace(_UNIFORM_PATTERN, uniformPatternReplacer);
+    _main.replace(_UNIFORM_PATTERN, uniformPatternReplacer);
 
     auto ssboPattern = [this](const std::smatch& m) {
         _ssbos[m[2].str()] = Strings::eval<int32_t>(m[1].str());
@@ -296,17 +297,22 @@ size_t ShaderPreprocessor::parseFunctionBody(const String& s, String& body) cons
     return end + 1;
 }
 
-void ShaderPreprocessor::addUniform(const String& type, const String& name, uint32_t length, sp<String> declaration)
+sp<String> ShaderPreprocessor::addUniform(const String& type, const String& name, uint32_t length, String declaration)
 {
-    Declaration uniform(name, type, length, declaration);
+    sp<String> declarationVar = sp<String>::make(std::move(declaration));
+    Declaration uniform(name, type, length, declarationVar);
     const auto imageTypePos = type.find("image");
     if(type.startsWith("sampler"))
         _declaration_samplers.vars().push_back(name, std::move(uniform));
     else if(imageTypePos == 0 || imageTypePos == 1)
         _declaration_images.vars().push_back(name, std::move(uniform));
     else
+    {
         _declaration_uniforms.vars().push_back(name, std::move(uniform));
-    _uniform_declaration_codes.push_back(std::move(declaration));
+        _uniform_declaration_codes.push_back(std::move(declarationVar));
+        return nullptr;
+    }
+    return declarationVar;
 }
 
 uint32_t ShaderPreprocessor::getUniformSize(Uniform::Type type, const String& declaredType) const
@@ -629,8 +635,7 @@ void ShaderPreprocessor::Source::replace(const std::regex& regexp, const std::fu
         const sp<String>& fragment = *iter;
         std::vector<sp<String>> inserting;
         fragment->search(regexp, [&inserting, replacer](const std::smatch& match) {
-            sp<String> replacement = replacer(match);
-            if(replacement)
+            if(sp<String> replacement = replacer(match))
                 inserting.push_back(std::move(replacement));
             return true;
         }, [&inserting](const String& unmatch) {

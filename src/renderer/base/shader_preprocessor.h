@@ -183,11 +183,11 @@ private:
     void parseMainBlock(const String& source, PipelineBuildingContext& buildingContext);
     void parseDeclarations();
     size_t parseFunctionBody(const String& s, String& body) const;
-
     String genDeclarations(const String& mainFunc) const;
 
     void addInclude(const String& source, const String& filepath);
-    void addUniform(const String& type, const String& name, uint32_t length, sp<String> declaration);
+
+    sp<String> addUniform(const String& type, const String& name, uint32_t length, String declaration);
     uint32_t getUniformSize(Uniform::Type type, const String& declaredType) const;
 
     void linkParameters(const std::vector<Parameter>& parameters, const ShaderPreprocessor& preStage, std::set<String>& passThroughVars);

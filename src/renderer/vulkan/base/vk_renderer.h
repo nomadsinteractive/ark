@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_VULKAN_BASE_VK_RENDERER_H_
-#define ARK_RENDERER_VULKAN_BASE_VK_RENDERER_H_
+#pragma once
 
 #include "core/types/shared_ptr.h"
 
@@ -8,8 +7,7 @@
 
 #include "platform/vulkan/vulkan.h"
 
-namespace ark {
-namespace vulkan {
+namespace ark::vulkan {
 
 class VKRenderer {
 public:
@@ -35,6 +33,3 @@ private:
 
 
 }
-}
-
-#endif

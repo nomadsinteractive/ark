@@ -3,8 +3,7 @@
 #include "renderer/vulkan/base/vk_device.h"
 #include "renderer/vulkan/base/vk_render_target.h"
 
-namespace ark {
-namespace vulkan {
+namespace ark::vulkan {
 
 VKRenderer::~VKRenderer()
 {
@@ -68,5 +67,4 @@ VkPhysicalDevice VKRenderer::vkPhysicalDevice() const
     return _device->vkPhysicalDevice();
 }
 
-}
 }

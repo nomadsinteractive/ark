@@ -24,21 +24,26 @@ public:
 
         const PipelineInput& pipelineInput = pipelineLayout.input();
 
-        ShaderPreprocessor* vertex = context.tryGetStage(PipelineInput::SHADER_STAGE_VERTEX);
-        if(vertex)
+        if(ShaderPreprocessor* vertex = context.tryGetStage(PipelineInput::SHADER_STAGE_VERTEX))
         {
             setLayoutDescriptor(vertex->_declaration_images, "binding", static_cast<uint32_t>(pipelineInput.ubos().size() + pipelineInput.ssbos().size() + pipelineInput.samplerCount()));
             vertex->_predefined_macros.push_back("#define gl_InstanceID gl_InstanceIndex");
         }
-
-        ShaderPreprocessor* fragment = context.tryGetStage(PipelineInput::SHADER_STAGE_FRAGMENT);
-        if(fragment)
+        if(ShaderPreprocessor* fragment = context.tryGetStage(PipelineInput::SHADER_STAGE_FRAGMENT))
         {
             fragment->linkNextStage("FragColor");
-            setLayoutDescriptor(fragment->_declaration_samplers, "binding", static_cast<uint32_t>(pipelineInput.ubos().size() + pipelineInput.ssbos().size()));
+            const uint32_t bindingOffset = static_cast<uint32_t>(pipelineInput.ubos().size() + pipelineInput.ssbos().size());
+            setLayoutDescriptor(fragment->_declaration_samplers, "binding", bindingOffset);
+            setLayoutDescriptor(fragment->_declaration_images, "binding", bindingOffset + static_cast<uint32_t>(fragment->_declaration_samplers.vars().size()));
         }
 
-        ShaderPreprocessor* prestage = nullptr;
+        if(const ShaderPreprocessor* compute = context.tryGetStage(PipelineInput::SHADER_STAGE_COMPUTE))
+        {
+            const uint32_t bindingOffset = static_cast<uint32_t>(pipelineInput.ubos().size() + pipelineInput.ssbos().size());
+            setLayoutDescriptor(compute->_declaration_images, "binding", bindingOffset);
+        }
+
+        const ShaderPreprocessor* prestage = nullptr;
         for(auto iter = context.stages().begin(); iter != context.stages().end(); ++iter)
         {
             if(iter != context.stages().begin())
@@ -49,9 +54,9 @@ public:
             prestage = iter->second.get();
         }
 
-        for(const auto& i : context.stages())
+        for(const auto& [_, v] : context.stages())
         {
-            ShaderPreprocessor& preprocessor = i.second;
+            ShaderPreprocessor& preprocessor = v;
             preprocessor._version = 450;
             declareUBOStruct(preprocessor, pipelineInput);
             preprocessor._predefined_macros.push_back("#extension GL_ARB_separate_shader_objects : enable");
@@ -59,7 +64,7 @@ public:
         }
     }
 
-    virtual sp<DrawEvents> makeDrawEvents() override {
+    sp<DrawEvents> makeDrawEvents() override {
         return sp<Snippet::DrawEvents>::make();
     }
 
