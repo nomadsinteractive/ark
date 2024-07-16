@@ -1,7 +1,4 @@
-#ifndef ARK_RENDERER_IMPL_RENDER_VIEW_RENDER_VIEW_OPENGL_H_
-#define ARK_RENDERER_IMPL_RENDER_VIEW_RENDER_VIEW_OPENGL_H_
-
-#include <vector>
+#pragma once
 
 #include "core/types/owned_ptr.h"
 #include "core/types/shared_ptr.h"
@@ -15,10 +12,7 @@
 #include "renderer/forwarding.h"
 #include "renderer/vulkan/forward.h"
 
-namespace ark {
-namespace vulkan {
-
-class VKUtil;
+namespace ark::vulkan {
 
 class RenderViewVulkan : public RenderView {
 public:
@@ -40,6 +34,3 @@ private:
 };
 
 }
-}
-
-#endif

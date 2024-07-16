@@ -127,7 +127,7 @@ bool ARK_API __trace_flag__();
 void ARK_API __set_trace_flag__();
 
 
-template<size_t N> constexpr size_t string_length(char const (&)[N]) {
+template<typename T, size_t N> constexpr size_t array_size(const T (&)[N]) {
     return N - 1;
 }
 

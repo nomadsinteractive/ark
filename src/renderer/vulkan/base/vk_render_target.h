@@ -13,12 +13,11 @@
 
 #include "renderer/vulkan/util/vulkan_swap_chain.hpp"
 
-namespace ark {
-namespace vulkan {
+namespace ark::vulkan {
 
 class VKRenderTarget {
 public:
-    VKRenderTarget(const RenderEngineContext& renderContext, sp<VKDevice>& device);
+    VKRenderTarget(const RenderEngineContext& renderContext, sp<VKDevice> device);
     ~VKRenderTarget();
 
     uint32_t width() const;
@@ -81,5 +80,4 @@ private:
     friend class VKGraphicsContext;
 };
 
-}
 }

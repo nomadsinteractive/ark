@@ -16,12 +16,10 @@
 struct NSView;
 #endif
 
-namespace ark {
+namespace ark::vulkan {
 
-namespace vulkan {
-
-VKRenderTarget::VKRenderTarget(const RenderEngineContext& renderContext, sp<VKDevice>& device)
-    : _device(device), _clear_values{}, _render_pass_begin_info(vks::initializers::renderPassBeginInfo()), _viewport{}, _aquired_image_id(0)
+VKRenderTarget::VKRenderTarget(const RenderEngineContext& renderContext, sp<VKDevice> device)
+    : _device(std::move(device)), _clear_values{}, _render_pass_begin_info(vks::initializers::renderPassBeginInfo()), _viewport{}, _aquired_image_id(0)
 {
     _swap_chain.connect(_device->vkInstance(), _device->vkPhysicalDevice(), _device->vkLogicalDevice());
 
@@ -41,7 +39,7 @@ VKRenderTarget::VKRenderTarget(const RenderEngineContext& renderContext, sp<VKDe
 
 VKRenderTarget::~VKRenderTarget()
 {
-    VkDevice logicalDevice = _device->vkLogicalDevice();
+    const VkDevice logicalDevice = _device->vkLogicalDevice();
     vkDestroyRenderPass(logicalDevice, _render_pass_begin_info.renderPass, nullptr);
 
     for(size_t i = 0; i < _frame_buffers.size(); i++)
@@ -243,6 +241,7 @@ void VKRenderTarget::setupRenderPass()
 
     VkSubpassDescription subpassDescription = {};
     subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+    //TODO: Should equal to attachmentCount in vkCreateGraphicsPipelines
     subpassDescription.colorAttachmentCount = 1;
     subpassDescription.pColorAttachments = &colorReference;
     subpassDescription.pDepthStencilAttachment = &depthReference;
@@ -308,5 +307,4 @@ void VKRenderTarget::setupFrameBuffer()
     }
 }
 
-}
 }

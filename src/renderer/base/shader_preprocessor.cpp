@@ -432,7 +432,7 @@ ShaderPreprocessor::Parameter ShaderPreprocessor::Function::parseParameter(const
         }
         if(i.startsWith("divisor("))
         {
-            constexpr size_t pBegin = string_length("divisor(");
+            constexpr size_t pBegin = array_size("divisor(");
             const auto pEnd = i.find(')', pBegin);
             ASSERT(pEnd != String::npos);
             divisor = std::stoi(i.substr(pBegin, pEnd).c_str());

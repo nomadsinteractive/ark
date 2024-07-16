@@ -14,8 +14,7 @@
 #include "renderer/vulkan/base/vk_render_target.h"
 #include "renderer/vulkan/util/vk_util.h"
 
-namespace ark {
-namespace vulkan {
+namespace ark::vulkan {
 
 VKComputeContext::VKComputeContext(GraphicsContext& graphicsContext, sp<VKRenderer> renderer)
     : _renderer(std::move(renderer)), _command_pool(_renderer->device()->makeComputeCommandPool()), _submit_queue(_renderer, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT), _command_buffer(VK_NULL_HANDLE),
@@ -65,5 +64,4 @@ VkSemaphore VKComputeContext::semaphoreComputeComplete() const
     return _semaphore_compute_complete;
 }
 
-}
 }

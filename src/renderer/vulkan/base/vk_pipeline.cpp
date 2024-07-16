@@ -341,8 +341,8 @@ void VKPipeline::setupGraphicsPipeline(GraphicsContext& graphicsContext, const V
                 0);
 
     std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
-    for(const auto& i : _shaders)
-        shaderStages.push_back(VKUtil::createShader(device->vkLogicalDevice(), i.second, i.first));
+    for(const auto& [k, v] : _shaders)
+        shaderStages.push_back(VKUtil::createShader(device->vkLogicalDevice(), v, k));
 
     const sp<VKGraphicsContext>& vkGraphicsContext = graphicsContext.attachments().ensure<VKGraphicsContext>();
     VKGraphicsContext::State& state = vkGraphicsContext->getCurrentState();

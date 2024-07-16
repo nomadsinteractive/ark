@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_VULKAN_BASE_VK_COMPUTE_CONTEXT_H_
-#define ARK_RENDERER_VULKAN_BASE_VK_COMPUTE_CONTEXT_H_
+#pragma once
 
 #include <vector>
 
@@ -12,8 +11,7 @@
 #include "renderer/vulkan/base/vk_submit_queue.h"
 #include "platform/vulkan/vulkan.h"
 
-namespace ark {
-namespace vulkan {
+namespace ark::vulkan {
 
 class VKComputeContext {
 public:
@@ -42,6 +40,3 @@ private:
 };
 
 }
-}
-
-#endif

@@ -14,8 +14,7 @@
 #include "renderer/vulkan/base/vk_render_target.h"
 #include "renderer/vulkan/util/vk_util.h"
 
-namespace ark {
-namespace vulkan {
+namespace ark::vulkan {
 
 RenderViewVulkan::RenderViewVulkan(const sp<VKRenderer>& renderer, const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController)
     : _renderer(renderer), _graphics_context(new GraphicsContext(renderContext, renderController))
@@ -59,9 +58,8 @@ void RenderViewVulkan::onRenderFrame(const Color& backgroundColor, RenderCommand
     {
         _vk_compute_context->end();
         _vk_compute_context->submit();
-        _vk_graphics_context->addWaitSemaphore(_vk_compute_context->semaphoreComputeComplete());
+        _vk_graphics_context->addWaitSemaphore(_vk_compute_context->semaphoreComputeComplete(), VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
     }
 }
 
-}
 }

@@ -11,8 +11,7 @@
 
 #include "platform/vulkan/vulkan.h"
 
-namespace ark {
-namespace vulkan {
+namespace ark::vulkan {
 
 class VKSubmitQueue {
 public:
@@ -26,14 +25,14 @@ public:
     void submit(VkQueue queue);
 
     void addSubmitInfo(uint32_t commandBufferCount, const VkCommandBuffer* pCommandBuffers);
-    void addWaitSemaphore(VkSemaphore semaphore);
+    void addWaitSemaphore(VkSemaphore semaphore, VkPipelineStageFlags waitStageFlag);
 
 private:
     VkSemaphore* aquireConnectorSemaphore();
 
 private:
     sp<VKRenderer> _renderer;
-    VkPipelineStageFlags _stage_flags;
+    VkPipelineStageFlags _stage_flags[8];
 
     std::vector<VkCommandBuffer> _submit_queue;
     std::vector<VkSubmitInfo> _submit_infos;
@@ -41,5 +40,4 @@ private:
     std::vector<VkSemaphore> _signal_semaphores;
 };
 
-}
 }

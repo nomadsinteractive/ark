@@ -1,7 +1,6 @@
 #include "renderer/vulkan/base/vk_submit_queue.h"
 
 #include "graphics/base/color.h"
-#include "graphics/inf/renderer.h"
 
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/render_controller.h"
@@ -10,11 +9,10 @@
 #include "renderer/vulkan/util/vk_util.h"
 #include "renderer/vulkan/util/vulkan_initializers.hpp"
 
-namespace ark {
-namespace vulkan {
+namespace ark::vulkan {
 
 VKSubmitQueue::VKSubmitQueue(const sp<VKRenderer>& renderer, VkPipelineStageFlags stageFlags)
-    : _renderer(renderer), _stage_flags(stageFlags)
+    : _renderer(renderer), _stage_flags{stageFlags}
 {
 }
 
@@ -22,7 +20,7 @@ VKSubmitQueue::~VKSubmitQueue()
 {
     VkDevice vkLogicalDevice = _renderer->vkLogicalDevice();
 
-    for(VkSemaphore& i : _signal_semaphores)
+    for(const VkSemaphore& i : _signal_semaphores)
         vkDestroySemaphore(vkLogicalDevice, i, nullptr);
 }
 
@@ -70,7 +68,7 @@ void VKSubmitQueue::addSubmitInfo(uint32_t commandBufferCount, const VkCommandBu
 {
     DTHREAD_CHECK(THREAD_ID_RENDERER);
     VkSubmitInfo submitInfo = vks::initializers::submitInfo();
-    submitInfo.pWaitDstStageMask = &_stage_flags;
+    submitInfo.pWaitDstStageMask = _stage_flags;
     submitInfo.commandBufferCount = commandBufferCount;
     submitInfo.pCommandBuffers = pCommandBuffers;
     submitInfo.signalSemaphoreCount = 0;
@@ -80,11 +78,12 @@ void VKSubmitQueue::addSubmitInfo(uint32_t commandBufferCount, const VkCommandBu
     _submit_infos.push_back(submitInfo);
 }
 
-void VKSubmitQueue::addWaitSemaphore(VkSemaphore semaphore)
+void VKSubmitQueue::addWaitSemaphore(VkSemaphore semaphore, VkPipelineStageFlags waitStageFlag)
 {
     DTHREAD_CHECK(THREAD_ID_RENDERER);
+    DCHECK(_wait_semaphores.size() <= array_size(_stage_flags), "Too many stages");
     _wait_semaphores.push_back(semaphore);
+    _stage_flags[_wait_semaphores.size()] = waitStageFlag;
 }
 
-}
 }

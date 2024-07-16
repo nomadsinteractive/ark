@@ -16,8 +16,7 @@
 #define ARK_VK_DEBUG_LAYER_ENABLED  0
 #endif
 
-namespace ark {
-namespace vulkan {
+namespace ark::vulkan {
 
 namespace {
 
@@ -26,7 +25,12 @@ VkBool32 vkDebugUtilsMessengerCallbackEXT(
     VkDebugUtilsMessageTypeFlagsEXT                  messageTypes,
     const VkDebugUtilsMessengerCallbackDataEXT*      pCallbackData,
     void*                                            pUserData) {
-    LOGD("[%s] %s", pCallbackData->pMessageIdName, pCallbackData->pMessage);
+    if(messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
+        LOGE("[%s] %s", pCallbackData->pMessageIdName, pCallbackData->pMessage);
+    else if(messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
+        LOGW("[%s] %s", pCallbackData->pMessageIdName, pCallbackData->pMessage);
+    else
+        LOGD("[%s] %s", pCallbackData->pMessageIdName, pCallbackData->pMessage);
     return VK_FALSE;
 }
 
@@ -156,7 +160,7 @@ const std::vector<VkPhysicalDevice>& VKInstance::physicalDevices() const
 void VKInstance::setupDebugMessageCallback()
 {
     // Must call extension functions through a function pointer:
-    PFN_vkCreateDebugUtilsMessengerEXT pfnCreateDebugUtilsMessengerEXT = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(_instance, "vkCreateDebugUtilsMessengerEXT");
+    PFN_vkCreateDebugUtilsMessengerEXT pfnCreateDebugUtilsMessengerEXT = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(vkGetInstanceProcAddr(_instance, "vkCreateDebugUtilsMessengerEXT"));
 
     VkDebugUtilsMessengerCreateInfoEXT callback1 = {
         VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,  // sType
@@ -169,7 +173,7 @@ void VKInstance::setupDebugMessageCallback()
         vkDebugUtilsMessengerCallbackEXT,                         // pfnUserCallback
         nullptr                                                   // pUserData
     };
-    VKUtil::checkResult(pfnCreateDebugUtilsMessengerEXT(_instance, &callback1, NULL, &_callback1));
+    VKUtil::checkResult(pfnCreateDebugUtilsMessengerEXT(_instance, &callback1, nullptr, &_callback1));
 
 //    callback1.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
 //    callback1.pfnUserCallback = myDebugBreak;
@@ -190,5 +194,4 @@ void VKInstance::setupDebugMessageCallback()
 //    VKUtil::checkResult(pfnCreateDebugUtilsMessengerEXT(instance, &callback3, NULL, &_callback3));
 }
 
-}
 }

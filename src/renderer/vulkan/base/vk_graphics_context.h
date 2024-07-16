@@ -58,7 +58,7 @@ public:
     void submit(VkQueue queue);
 
     void addSubmitInfo(uint32_t commandBufferCount, const VkCommandBuffer* pCommandBuffers);
-    void addWaitSemaphore(VkSemaphore semaphore);
+    void addWaitSemaphore(VkSemaphore semaphore, VkPipelineStageFlags waitStageFlag);
 
     VkSemaphore semaphoreRenderComplete() const;
     VkSemaphore semaphorePresentComplete() const;
