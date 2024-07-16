@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_VULKAN_BASE_VK_COMMAND_POOL_H_
-#define ARK_RENDERER_VULKAN_BASE_VK_COMMAND_POOL_H_
+#pragma once
 
 #include <vector>
 
@@ -9,8 +8,7 @@
 
 #include "platform/vulkan/vulkan.h"
 
-namespace ark {
-namespace vulkan {
+namespace ark::vulkan {
 
 class VKCommandPool {
 public:
@@ -35,6 +33,3 @@ private:
 };
 
 }
-}
-
-#endif

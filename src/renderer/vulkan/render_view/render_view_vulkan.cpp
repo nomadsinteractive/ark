@@ -11,7 +11,7 @@
 #include "renderer/vulkan/base/vk_compute_context.h"
 #include "renderer/vulkan/base/vk_graphics_context.h"
 #include "renderer/vulkan/base/vk_renderer.h"
-#include "renderer/vulkan/base/vk_render_target.h"
+#include "renderer/vulkan/base/vk_swap_chain.h"
 #include "renderer/vulkan/util/vk_util.h"
 
 namespace ark::vulkan {
@@ -45,7 +45,7 @@ void RenderViewVulkan::onRenderFrame(const Color& backgroundColor, RenderCommand
 {
     _graphics_context->onDrawFrame();
 
-    const sp<VKRenderTarget>& renderTarget = _renderer->renderTarget();
+    const sp<VKSwapChain>& renderTarget = _renderer->renderTarget();
     uint32_t imageId = renderTarget->acquire(_vk_graphics_context);
 
     _vk_graphics_context->begin(imageId, backgroundColor);
@@ -57,7 +57,6 @@ void RenderViewVulkan::onRenderFrame(const Color& backgroundColor, RenderCommand
     if(_vk_compute_context->vkCommandBuffer() != VK_NULL_HANDLE)
     {
         _vk_compute_context->end();
-        _vk_compute_context->submit();
         _vk_graphics_context->addWaitSemaphore(_vk_compute_context->semaphoreComputeComplete(), VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
     }
 }

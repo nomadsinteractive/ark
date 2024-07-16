@@ -14,7 +14,7 @@
 
 #include "renderer/vulkan/base/vk_instance.h"
 #include "renderer/vulkan/base/vk_device.h"
-#include "renderer/vulkan/base/vk_render_target.h"
+#include "renderer/vulkan/base/vk_swap_chain.h"
 #include "renderer/vulkan/render_view/render_view_vulkan.h"
 #include "renderer/vulkan/snippet_factory/snippet_factory_vulkan.h"
 #include "renderer/vulkan/pipeline_factory/pipeline_factory_vulkan.h"
@@ -62,7 +62,7 @@ void RendererFactoryVulkan::onSurfaceCreated(RenderEngineContext& vkContext)
 
     _renderer->_device = sp<VKDevice>::make(_renderer->_instance, _renderer->_instance->physicalDevices()[0]);
     _renderer->_heap = sp<VKHeap>::make(_renderer->_device);
-    _renderer->_render_target = sp<VKRenderTarget>::make(vkContext, _renderer->_device);
+    _renderer->_render_target = sp<VKSwapChain>::make(vkContext, _renderer->_device);
 }
 
 void RendererFactoryVulkan::setVersion(Ark::RendererVersion version, RenderEngineContext& vkContext)

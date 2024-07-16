@@ -21,9 +21,8 @@ public:
 
     void begin();
     void end();
-    void submit();
 
-    VkCommandBuffer start(GraphicsContext& graphicsContext);
+    VkCommandBuffer buildCommandBuffer(GraphicsContext& graphicsContext);
     VkCommandBuffer vkCommandBuffer() const;
 
     VkSemaphore semaphoreComputeComplete() const;

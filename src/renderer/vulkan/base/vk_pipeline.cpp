@@ -22,7 +22,7 @@
 #include "renderer/vulkan/base/vk_device.h"
 #include "renderer/vulkan/base/vk_graphics_context.h"
 #include "renderer/vulkan/base/vk_renderer.h"
-#include "renderer/vulkan/base/vk_render_target.h"
+#include "renderer/vulkan/base/vk_swap_chain.h"
 #include "renderer/vulkan/base/vk_texture.h"
 #include "renderer/vulkan/util/vulkan_tools.h"
 #include "renderer/vulkan/util/vk_util.h"
@@ -75,12 +75,12 @@ struct VKMultiDrawElementsIndirect final : VKPipeline::BakedRenderer {
     {
         VkDeviceSize offsets = 0;
         const DrawingParams::DrawMultiElementsIndirect& param = drawingContext._parameters.drawMultiElementsIndirect();
-        for(const auto& i : param._divided_buffer_snapshots)
+        for(const auto& [i, j] : param._divided_buffer_snapshots)
         {
-            i.second.upload(graphicsContext);
-            DCHECK(i.second.id(), "Invaild Instanced Array Buffer: %d", i.first);
-            VkBuffer vkInstanceVertexBuffer = (VkBuffer) (i.second.id());
-            vkCmdBindVertexBuffers(commandBuffer, i.first, 1, &vkInstanceVertexBuffer, &offsets);
+            j.upload(graphicsContext);
+            DCHECK(j.id(), "Invaild Instanced Array Buffer: %d", i);
+            VkBuffer vkInstanceVertexBuffer = (VkBuffer) (j.id());
+            vkCmdBindVertexBuffers(commandBuffer, i, 1, &vkInstanceVertexBuffer, &offsets);
         }
 
         param._indirect_cmds.upload(graphicsContext);
@@ -187,11 +187,10 @@ void VKPipeline::bind(GraphicsContext& graphicsContext, const DrawingContext& dr
 {
     for(const sp<Boolean>& i : _texture_observers)
         if(i->val())
-        {
-            setupDescriptorSet(graphicsContext, drawingContext._shader_bindings->pipelineBindings());
             _rebind_needed = true;
-            break;
-        }
+
+    if(_rebind_needed)
+        setupDescriptorSet(graphicsContext, drawingContext._shader_bindings->pipelineBindings());
 
     bindUBOShapshots(graphicsContext, drawingContext._ubos);
     _rebind_needed = false;
@@ -482,7 +481,7 @@ void VKPipeline::buildComputeCommandBuffer(GraphicsContext& graphicsContext, con
 {
     const sp<VKComputeContext>& vkContext = graphicsContext.attachments().ensure<VKComputeContext>();
 
-    VkCommandBuffer commandBuffer = vkContext->start(graphicsContext);
+    VkCommandBuffer commandBuffer = vkContext->buildCommandBuffer(graphicsContext);
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, _pipeline);
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, _layout, 0, 1, &_descriptor_set, 0, nullptr);
     vkCmdDispatch(commandBuffer, computeContext._num_work_groups.at(0), computeContext._num_work_groups.at(1), computeContext._num_work_groups.at(2));

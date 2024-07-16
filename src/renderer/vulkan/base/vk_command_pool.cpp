@@ -3,8 +3,7 @@
 #include "renderer/vulkan/base/vk_device.h"
 #include "renderer/vulkan/util/vk_util.h"
 
-namespace ark {
-namespace vulkan {
+namespace ark::vulkan {
 
 VKCommandPool::VKCommandPool(const VKDevice& device, uint32_t queueFamilyIndex)
     : _logical_device(device.vkLogicalDevice()), _queue(device.getQueueByFamilyIndex(queueFamilyIndex))
@@ -39,7 +38,7 @@ VkCommandBuffer VKCommandPool::createCommandBuffer(VkCommandBufferLevel level, b
 
     if(begin)
     {
-        VkCommandBufferBeginInfo cmdBufInfo = vks::initializers::commandBufferBeginInfo();
+        VkCommandBufferBeginInfo cmdBufInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
         VKUtil::checkResult(vkBeginCommandBuffer(cmdBuffer, &cmdBufInfo));
     }
 
@@ -67,8 +66,7 @@ void VKCommandPool::flushCommandBuffer(VkCommandBuffer commandBuffer, bool free)
 
     VKUtil::checkResult(vkEndCommandBuffer(commandBuffer));
 
-    VkSubmitInfo submitInfo = {};
-    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    VkSubmitInfo submitInfo = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &commandBuffer;
 
@@ -84,5 +82,4 @@ void VKCommandPool::destroyCommandBuffers(uint32_t commandBufferCount, const VkC
     vkFreeCommandBuffers(_logical_device, _command_pool, commandBufferCount, pCommandBuffers);
 }
 
-}
 }

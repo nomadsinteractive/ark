@@ -31,7 +31,7 @@ public:
     Observer& observer();
 
 protected:
-    void doUploadBitmap(const Bitmap& bitmap, size_t imageDataSize, const std::vector<bytearray>& imagedata);
+    void doUploadBitmap(const Bitmap& bitmap, size_t imageDataSize, const std::vector<bytearray>& imagedata, VkImageLayout finalImageLayout);
 
 private:
     ResourceRecycleFunc doRecycle();

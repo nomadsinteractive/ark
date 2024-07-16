@@ -1,7 +1,7 @@
 #include "renderer/vulkan/base/vk_renderer.h"
 
 #include "renderer/vulkan/base/vk_device.h"
-#include "renderer/vulkan/base/vk_render_target.h"
+#include "renderer/vulkan/base/vk_swap_chain.h"
 
 namespace ark::vulkan {
 
@@ -49,7 +49,7 @@ const sp<VKHeap>& VKRenderer::heap() const
     return _heap;
 }
 
-const sp<VKRenderTarget>& VKRenderer::renderTarget() const
+const sp<VKSwapChain>& VKRenderer::renderTarget() const
 {
     DCHECK(_render_target, "VKRenderer uninitialized");
     return _render_target;

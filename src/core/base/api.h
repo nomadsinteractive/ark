@@ -123,10 +123,6 @@ template<THREAD_ID ID> void __thread_check__(const char* func) {
         __message__(__fatal__, func, "", "ThreadId check failed: %d, should be %d", _internal::ThreadFlag<ID>::id(), ID);
 }
 
-bool ARK_API __trace_flag__();
-void ARK_API __set_trace_flag__();
-
-
 template<typename T, size_t N> constexpr size_t array_size(const T (&)[N]) {
     return N - 1;
 }

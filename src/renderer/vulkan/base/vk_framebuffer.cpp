@@ -126,14 +126,6 @@ VkRenderPass VKFramebuffer::Stub::create(const PipelineBindings& bindings)
     VkBool32 validDepthFormat = vks::tools::getSupportedDepthFormat(_renderer->vkPhysicalDevice(), &fbDepthFormat);
     DASSERT(validDepthFormat);
 
-    VkImageView depthstencilView = VK_NULL_HANDLE;
-
-    if(_depth_stencil_attachment)
-    {
-        const sp<VKTexture> vktex = _depth_stencil_attachment->delegate();
-        depthstencilView = vktex->vkDescriptor().imageView;
-    }
-
     std::vector<VkAttachmentDescription> attachmentDescriptions;
     std::vector<VkAttachmentReference> attachmentReferences;
     std::vector<VkImageView> attachments;
@@ -158,6 +150,7 @@ VkRenderPass VKFramebuffer::Stub::create(const PipelineBindings& bindings)
         attachments.push_back(vkTexture->vkDescriptor().imageView);
     }
 
+    VkImageView depthstencilView = _depth_stencil_attachment ? _depth_stencil_attachment->delegate().cast<VKTexture>()->vkDescriptor().imageView : VK_NULL_HANDLE;
     if(depthstencilView)
     {
         attachments.push_back(depthstencilView);
@@ -211,7 +204,7 @@ VkRenderPass VKFramebuffer::Stub::create(const PipelineBindings& bindings)
 
     VKUtil::checkResult(vkCreateRenderPass(device, &renderPassInfo, nullptr, &_render_pass_begin_info.renderPass));
 
-    VkFramebufferCreateInfo fbufCreateInfo = vks::initializers::framebufferCreateInfo();
+    VkFramebufferCreateInfo fbufCreateInfo{ VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO };
     fbufCreateInfo.renderPass = _render_pass_begin_info.renderPass;
     fbufCreateInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
     fbufCreateInfo.pAttachments = attachments.data();

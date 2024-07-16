@@ -30,7 +30,6 @@ static PyObject* ark_log(Log::LogLevel level, PyObject* args);
 static PyObject* ark_logd(PyObject* self, PyObject* args);
 static PyObject* ark_logw(PyObject* self, PyObject* args);
 static PyObject* ark_loge(PyObject* self, PyObject* args);
-static PyObject* ark_set_trace_flag(PyObject* self, PyObject* args);
 static PyObject* ark_loadAsset(PyObject* self, PyObject* args);
 static PyObject* ark_openAsset(PyObject* self, PyObject* args);
 static PyObject* ark_loadAssetBundle(PyObject* self, PyObject* args);
@@ -52,7 +51,6 @@ static PyMethodDef ARK_METHODS[] = {
     {"logd",  ark_logd, METH_VARARGS, "logd"},
     {"logw",  ark_logw, METH_VARARGS, "logw"},
     {"loge",  ark_loge, METH_VARARGS, "loge"},
-    {"set_trace_flag",  ark_set_trace_flag, METH_VARARGS, "ark_set_trace_flag"},
     {"load_asset",  ark_loadAsset, METH_VARARGS, "loadAsset"},
     {"open_asset",  ark_openAsset, METH_VARARGS, "openAsset"},
     {"load_asset_bundle",  ark_loadAssetBundle, METH_VARARGS, "loadAssetBundle"},
@@ -102,19 +100,12 @@ PyObject* ark_loge(PyObject* /*self*/, PyObject* args)
     return ark_log(Log::LOG_LEVEL_ERROR, args);
 }
 
-PyObject* ark_set_trace_flag(PyObject* /*self*/, PyObject* /*args*/)
-{
-    __set_trace_flag__();
-    Py_RETURN_NONE;
-}
-
 PyObject* ark_loadAsset(PyObject* /*self*/, PyObject* args)
 {
     const char* arg0;
     if(!PyArg_ParseTuple(args, "s", &arg0))
         Py_RETURN_NONE;
-    const sp<Readable> readable = Ark::instance().tryOpenAsset(arg0);
-    if(readable)
+    if(const sp<Readable> readable = Ark::instance().tryOpenAsset(arg0))
         return PyCast::toPyObject_impl<String>(Strings::loadFromReadable(readable));
     Py_RETURN_NONE;
 }

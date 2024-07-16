@@ -18,7 +18,7 @@ class VKMemory;
 class VKMemoryPtr;
 class VKPipeline;
 class VKRenderer;
-class VKRenderTarget;
+class VKSwapChain;
 class VKTexture;
 class VKUtil;
 

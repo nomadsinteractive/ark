@@ -18,16 +18,15 @@ VKSubmitQueue::VKSubmitQueue(const sp<VKRenderer>& renderer, VkPipelineStageFlag
 
 VKSubmitQueue::~VKSubmitQueue()
 {
-    VkDevice vkLogicalDevice = _renderer->vkLogicalDevice();
-
+    const VkDevice vkLogicalDevice = _renderer->vkLogicalDevice();
     for(const VkSemaphore& i : _signal_semaphores)
         vkDestroySemaphore(vkLogicalDevice, i, nullptr);
 }
 
 VkSemaphore VKSubmitQueue::createSignalSemaphore()
 {
+    constexpr VkSemaphoreCreateInfo semaphoreCreateInfo{ VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
     VkSemaphore semaphore = VK_NULL_HANDLE;
-    VkSemaphoreCreateInfo semaphoreCreateInfo = vks::initializers::semaphoreCreateInfo();
     VKUtil::checkResult(vkCreateSemaphore(_renderer->vkLogicalDevice(), &semaphoreCreateInfo, nullptr, &semaphore));
     _signal_semaphores.push_back(semaphore);
     return semaphore;

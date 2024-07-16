@@ -17,7 +17,7 @@ public:
     const sp<VKCommandPool>& commandPool() const;
     const sp<VKDevice>& device() const;
     const sp<VKHeap>& heap() const;
-    const sp<VKRenderTarget>& renderTarget() const;
+    const sp<VKSwapChain>& renderTarget() const;
 
     VkDevice vkLogicalDevice() const;
     VkPhysicalDevice vkPhysicalDevice() const;
@@ -26,7 +26,7 @@ private:
     sp<VKInstance> _instance;
     sp<VKDevice> _device;
     sp<VKHeap> _heap;
-    sp<VKRenderTarget> _render_target;
+    sp<VKSwapChain> _render_target;
 
     friend class RendererFactoryVulkan;
 };

@@ -8,7 +8,7 @@
 
 #include "renderer/vulkan/base/vk_command_buffers.h"
 #include "renderer/vulkan/base/vk_renderer.h"
-#include "renderer/vulkan/base/vk_render_target.h"
+#include "renderer/vulkan/base/vk_swap_chain.h"
 #include "renderer/vulkan/util/vk_util.h"
 
 namespace ark::vulkan {
@@ -31,7 +31,7 @@ public:
     }
 
     virtual VkRenderPass create(const PipelineBindings& /*bindings*/) override {
-        const VKRenderTarget& renderTarget = _renderer->renderTarget();
+        const VKSwapChain& renderTarget = _renderer->renderTarget();
         return renderTarget.vkRenderPassBeginInfo().renderPass;
     }
 
@@ -40,7 +40,7 @@ public:
         vkClearValues[0].color = _clear_color_value;
         vkClearValues[1].depthStencil = {1.0f, 0};
 
-        const VKRenderTarget& renderTarget = _renderer->renderTarget();
+        const VKSwapChain& renderTarget = _renderer->renderTarget();
         VkRenderPassBeginInfo renderPassBeginInfo = renderTarget.vkRenderPassBeginInfo();
 
         renderPassBeginInfo.framebuffer = _framebuffer;
@@ -81,13 +81,13 @@ VKGraphicsContext::~VKGraphicsContext()
 
 void VKGraphicsContext::begin(uint32_t imageId, const Color& backgroundColor)
 {
-    const VKRenderTarget& renderTarget = _renderer->renderTarget();
+    const VKSwapChain& renderTarget = _renderer->renderTarget();
     const std::vector<VkCommandBuffer>& commandBuffers = _command_buffers->vkCommandBuffers();
 
     VkCommandBuffer commandBuffer = commandBuffers.at(imageId);
     _state_stack.push(State(sp<MainRenderPassPhrase>::make(_renderer, commandBuffer, renderTarget.frameBuffers().at(imageId), backgroundColor), commandBuffer, false));
 
-    VkCommandBufferBeginInfo cmdBufInfo = vks::initializers::commandBufferBeginInfo();
+    const VkCommandBufferBeginInfo cmdBufInfo{ VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
     VKUtil::checkResult(vkBeginCommandBuffer(commandBuffer, &cmdBufInfo));
 
     _submit_queue.begin(_semaphore_present_complete);

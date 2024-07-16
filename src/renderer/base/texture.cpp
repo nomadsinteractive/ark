@@ -22,9 +22,9 @@ namespace ark {
 
 namespace {
 
-class BlankUploader : public Texture::Uploader {
+class BlankUploader final : public Texture::Uploader {
 public:
-    BlankUploader(Size& size, Texture::Format format)
+    BlankUploader(const Size& size, Texture::Format format)
         : _bitmap(static_cast<uint32_t>(size.widthAsFloat()), static_cast<uint32_t>(size.heightAsFloat()), static_cast<uint32_t>(size.widthAsFloat()) * RenderUtil::getPixelSize(format),
                   (format & Texture::FORMAT_RGBA) + 1, false) {
     }
@@ -254,11 +254,11 @@ Texture::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const 
 
 sp<Texture> Texture::BUILDER::build(const Scope& args)
 {
-    Type type = Documents::getAttribute<Type>(_manifest, constants::TYPE, TYPE_2D);
+    const Type type = Documents::getAttribute<Type>(_manifest, constants::TYPE, TYPE_2D);
     const sp<Texture::Parameters> parameters = sp<Texture::Parameters>::make(type, _manifest);
     parameters->loadParameters(_manifest, _factory, args);
-    const sp<String> src = _src->build(args);
-    if(src)
+
+    if(const sp<String> src = _src->build(args))
        return _resource_loader_context->textureBundle()->createTexture(*src, parameters);
 
     const sp<Size> size = _factory.ensureConcreteClassBuilder<Size>(_manifest, constants::SIZE)->build(args);

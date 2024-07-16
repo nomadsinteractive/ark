@@ -15,10 +15,10 @@
 
 namespace ark::vulkan {
 
-class VKRenderTarget {
+class VKSwapChain {
 public:
-    VKRenderTarget(const RenderEngineContext& renderContext, sp<VKDevice> device);
-    ~VKRenderTarget();
+    VKSwapChain(const RenderEngineContext& renderContext, sp<VKDevice> device);
+    ~VKSwapChain();
 
     uint32_t width() const;
     uint32_t height() const;
@@ -31,7 +31,6 @@ public:
     const sp<VKDevice>& device() const;
 
     const sp<VKCommandPool>& commandPool() const;
-    VkRenderPass vkRenderPass() const;
     const std::vector<VkFramebuffer>& frameBuffers() const;
 
     std::vector<VkCommandBuffer> makeCommandBuffers() const;

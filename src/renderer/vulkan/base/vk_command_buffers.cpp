@@ -5,23 +5,21 @@
 #include "renderer/base/recycler.h"
 
 #include "renderer/vulkan/base/vk_command_pool.h"
-#include "renderer/vulkan/base/vk_render_target.h"
-#include "renderer/vulkan/util/vk_util.h"
+#include "renderer/vulkan/base/vk_swap_chain.h"
 
-namespace ark {
-namespace vulkan {
+namespace ark::vulkan {
 
-VKCommandBuffers::VKCommandBuffers(const sp<Recycler>& recycler, const sp<VKRenderTarget>& renderTarget)
-    : _recycler(recycler), _render_target(renderTarget), _command_buffers(renderTarget->makeCommandBuffers())
+VKCommandBuffers::VKCommandBuffers(const sp<Recycler>& recycler, const VKSwapChain& renderTarget)
+    : _recycler(recycler), _command_pool(renderTarget.commandPool()), _command_buffers(renderTarget.makeCommandBuffers())
 {
 }
 
 VKCommandBuffers::~VKCommandBuffers()
 {
-    sp<VKRenderTarget> renderTarget = std::move(_render_target);
+    sp<VKCommandPool> commandPool = std::move(_command_pool);
     std::vector<VkCommandBuffer> commandBuffers = std::move(_command_buffers);
-    _recycler->recycle([renderTarget, commandBuffers](GraphicsContext&) {
-        renderTarget->commandPool()->destroyCommandBuffers(static_cast<uint32_t>(commandBuffers.size()), commandBuffers.data());
+    _recycler->recycle([commandPool, commandBuffers](GraphicsContext&) {
+        commandPool->destroyCommandBuffers(static_cast<uint32_t>(commandBuffers.size()), commandBuffers.data());
     });
 }
 
@@ -30,5 +28,4 @@ const std::vector<VkCommandBuffer>& VKCommandBuffers::vkCommandBuffers() const
     return _command_buffers;
 }
 
-}
 }

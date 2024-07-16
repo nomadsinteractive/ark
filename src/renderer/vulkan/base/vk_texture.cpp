@@ -69,7 +69,7 @@ void VKTexture::upload(GraphicsContext& graphicsContext, const sp<Texture::Uploa
     }
     else
     {
-        Texture::Format format = _parameters->_format;
+        const Texture::Format format = _parameters->_format;
         const std::vector<sp<ByteArray>> imagedata(_num_faces);
         if(format == Texture::FORMAT_AUTO)
             uploadBitmap(graphicsContext, Bitmap(_width, _height, _width * 4, 4, false), imagedata);
@@ -80,7 +80,6 @@ void VKTexture::upload(GraphicsContext& graphicsContext, const sp<Texture::Uploa
             uploadBitmap(graphicsContext, Bitmap(_width, _height, _width * channels * componentSize, channels, false), imagedata);
         }
     }
-    _observer.notify();
 }
 
 ResourceRecycleFunc VKTexture::recycle()
@@ -90,10 +89,12 @@ ResourceRecycleFunc VKTexture::recycle()
 
 void VKTexture::clear(GraphicsContext& /*graphicsContext*/)
 {
-    const VkCommandBuffer clearCmdBuf = _renderer->commandPool()->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
     const VkClearColorValue clearColorValue{0, 0, 0, 0};
     VkImageSubresourceRange subRange{VK_IMAGE_ASPECT_COLOR_BIT, 0, VK_REMAINING_MIP_LEVELS, 0, 1};
+
+    const VkCommandBuffer clearCmdBuf = _renderer->commandPool()->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
     vkCmdClearColorImage(clearCmdBuf, _image, _descriptor.imageLayout, &clearColorValue, 1, &subRange);
+    _renderer->commandPool()->flushCommandBuffer(clearCmdBuf, true);
 }
 
 bool VKTexture::download(GraphicsContext& graphicsContext, Bitmap& bitmap)
@@ -110,7 +111,9 @@ void VKTexture::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap& 
     DCHECK(_width == bitmap.width() && _height == bitmap.height(), "Uploading bitmap has different size(%d, %d) compared to Texture's(%d, %d)", bitmap.width(), bitmap.height(), _width, _height);
     _mip_levels = 1;
 
-    bool isCubemap = _num_faces == 6;
+    _observer.notify();
+
+    const bool isCubemap = _num_faces == 6;
 
     VkDevice logicalDevice = _renderer->vkLogicalDevice();
     if(_parameters->_usage & Texture::USAGE_DEPTH_STENCIL_ATTACHMENT)
@@ -180,8 +183,9 @@ void VKTexture::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap& 
         }
         VKUtil::createImage(_renderer->device(), imageCreateInfo, &_image, &_memory);
 
+        _descriptor.imageLayout = getFinalImageLayout(*_parameters);
         if(imagedata)
-            doUploadBitmap(bitmap, imageDataSize, images);
+            doUploadBitmap(bitmap, imageDataSize, images, _descriptor.imageLayout);
     }
 
     // Create a texture sampler
@@ -246,7 +250,7 @@ Observer& VKTexture::observer()
     return _observer;
 }
 
-void VKTexture::doUploadBitmap(const Bitmap& bitmap, size_t imageDataSize, const std::vector<bytearray>& imagedata)
+void VKTexture::doUploadBitmap(const Bitmap& bitmap, size_t imageDataSize, const std::vector<bytearray>& imagedata, VkImageLayout finalImageLayout)
 {
     VkMemoryAllocateInfo memAllocInfo = vks::initializers::memoryAllocateInfo();
     VkMemoryRequirements memReqs = {};
@@ -354,8 +358,6 @@ void VKTexture::doUploadBitmap(const Bitmap& bitmap, size_t imageDataSize, const
                 static_cast<uint32_t>(bufferCopyRegions.size()),
                 bufferCopyRegions.data());
 
-    const VkImageLayout finalImageLayout = getFinalImageLayout(*_parameters);
-
     // Once the data has been uploaded we transfer to the texture image to the shader read layout, so it can be sampled from
     imageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
     imageMemoryBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
@@ -373,9 +375,6 @@ void VKTexture::doUploadBitmap(const Bitmap& bitmap, size_t imageDataSize, const
                 0, nullptr,
                 0, nullptr,
                 1, &imageMemoryBarrier);
-
-    // Store current layout for later reuse
-    _descriptor.imageLayout = finalImageLayout;
 
     _renderer->commandPool()->flushCommandBuffer(copyCmd, true);
 

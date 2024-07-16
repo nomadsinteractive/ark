@@ -1,8 +1,5 @@
 #include "renderer/vulkan/base/vk_compute_context.h"
 
-#include "graphics/base/color.h"
-#include "graphics/inf/renderer.h"
-
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/render_controller.h"
 
@@ -11,7 +8,7 @@
 #include "renderer/vulkan/base/vk_device.h"
 #include "renderer/vulkan/base/vk_graphics_context.h"
 #include "renderer/vulkan/base/vk_renderer.h"
-#include "renderer/vulkan/base/vk_render_target.h"
+#include "renderer/vulkan/base/vk_swap_chain.h"
 #include "renderer/vulkan/util/vk_util.h"
 
 namespace ark::vulkan {
@@ -35,16 +32,15 @@ void VKComputeContext::end()
     DTHREAD_CHECK(THREAD_ID_RENDERER);
     VKUtil::checkResult(vkEndCommandBuffer(_command_buffer));
     _submit_queue.submitCommandBuffer(_command_buffer);
-}
 
-void VKComputeContext::submit()
-{
     _submit_queue.submit(_command_pool->vkQueue());
+//TODO: We could wait a bit later
+    vkQueueWaitIdle(_command_pool->vkQueue());
     _command_pool->destroyCommandBuffers(1, &_command_buffer);
     _command_buffer = VK_NULL_HANDLE;
 }
 
-VkCommandBuffer VKComputeContext::start(GraphicsContext& graphicsContext)
+VkCommandBuffer VKComputeContext::buildCommandBuffer(GraphicsContext& graphicsContext)
 {
     if(_semaphore_render_complete == VK_NULL_HANDLE)
         _semaphore_render_complete = graphicsContext.attachments().ensure<VKGraphicsContext>()->submitQueue().createSignalSemaphore();

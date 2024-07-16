@@ -65,7 +65,7 @@ public:
 
 private:
     sp<VKRenderer> _renderer;
-    sp<VKRenderTarget> _render_target;
+    sp<VKSwapChain> _render_target;
 
     sp<VKCommandBuffers> _command_buffers;
 

@@ -1,4 +1,4 @@
-#include "renderer/vulkan/base/vk_render_target.h"
+#include "renderer/vulkan/base/vk_swap_chain.h"
 
 #include <array>
 
@@ -18,7 +18,7 @@ struct NSView;
 
 namespace ark::vulkan {
 
-VKRenderTarget::VKRenderTarget(const RenderEngineContext& renderContext, sp<VKDevice> device)
+VKSwapChain::VKSwapChain(const RenderEngineContext& renderContext, sp<VKDevice> device)
     : _device(std::move(device)), _clear_values{}, _render_pass_begin_info(vks::initializers::renderPassBeginInfo()), _viewport{}, _aquired_image_id(0)
 {
     _swap_chain.connect(_device->vkInstance(), _device->vkPhysicalDevice(), _device->vkLogicalDevice());
@@ -37,7 +37,7 @@ VKRenderTarget::VKRenderTarget(const RenderEngineContext& renderContext, sp<VKDe
     _command_pool = sp<VKCommandPool>::make(_device, _swap_chain.queueNodeIndex);
 }
 
-VKRenderTarget::~VKRenderTarget()
+VKSwapChain::~VKSwapChain()
 {
     const VkDevice logicalDevice = _device->vkLogicalDevice();
     vkDestroyRenderPass(logicalDevice, _render_pass_begin_info.renderPass, nullptr);
@@ -52,57 +52,52 @@ VKRenderTarget::~VKRenderTarget()
     _swap_chain.cleanup();
 }
 
-uint32_t VKRenderTarget::width() const
+uint32_t VKSwapChain::width() const
 {
     return _width;
 }
 
-uint32_t VKRenderTarget::height() const
+uint32_t VKSwapChain::height() const
 {
     return _height;
 }
 
-const VkRect2D& VKRenderTarget::vkScissor() const
+const VkRect2D& VKSwapChain::vkScissor() const
 {
     return _scissor;
 }
 
-const VkViewport& VKRenderTarget::vkViewport() const
+const VkViewport& VKSwapChain::vkViewport() const
 {
     return _viewport;
 }
 
-const VkRenderPassBeginInfo& VKRenderTarget::vkRenderPassBeginInfo() const
+const VkRenderPassBeginInfo& VKSwapChain::vkRenderPassBeginInfo() const
 {
     return _render_pass_begin_info;
 }
 
-const sp<VKDevice>& VKRenderTarget::device() const
+const sp<VKDevice>& VKSwapChain::device() const
 {
     return _device;
 }
 
-const sp<VKCommandPool>& VKRenderTarget::commandPool() const
+const sp<VKCommandPool>& VKSwapChain::commandPool() const
 {
     return _command_pool;
 }
 
-VkRenderPass VKRenderTarget::vkRenderPass() const
-{
-    return _render_pass_begin_info.renderPass;
-}
-
-const std::vector<VkFramebuffer>& VKRenderTarget::frameBuffers() const
+const std::vector<VkFramebuffer>& VKSwapChain::frameBuffers() const
 {
     return _frame_buffers;
 }
 
-std::vector<VkCommandBuffer> VKRenderTarget::makeCommandBuffers() const
+std::vector<VkCommandBuffer> VKSwapChain::makeCommandBuffers() const
 {
     return _command_pool->makeCommandBuffers(_swap_chain.imageCount);
 }
 
-uint32_t VKRenderTarget::acquire(VKGraphicsContext& vkContext)
+uint32_t VKSwapChain::acquire(VKGraphicsContext& vkContext)
 {
     DTHREAD_CHECK(THREAD_ID_RENDERER);
     VkResult result = _swap_chain.acquireNextImage(vkContext.semaphorePresentComplete(), &_aquired_image_id);
@@ -115,12 +110,12 @@ uint32_t VKRenderTarget::acquire(VKGraphicsContext& vkContext)
     return _aquired_image_id;
 }
 
-uint32_t VKRenderTarget::aquiredImageId() const
+uint32_t VKSwapChain::aquiredImageId() const
 {
     return _aquired_image_id;
 }
 
-void VKRenderTarget::swap(VKGraphicsContext& vkGraphicsContext)
+void VKSwapChain::swap(VKGraphicsContext& vkGraphicsContext)
 {
     DTHREAD_CHECK(THREAD_ID_RENDERER);
     vkGraphicsContext.submit(_queue);
@@ -128,7 +123,7 @@ void VKRenderTarget::swap(VKGraphicsContext& vkGraphicsContext)
     vkQueueWaitIdle(_queue);
 }
 
-void VKRenderTarget::onSurfaceChanged(uint32_t width, uint32_t height)
+void VKSwapChain::onSurfaceChanged(uint32_t width, uint32_t height)
 {
     _width = width;
     _height = height;
@@ -144,7 +139,7 @@ void VKRenderTarget::onSurfaceChanged(uint32_t width, uint32_t height)
     _render_pass_begin_info.renderArea.extent.height = _height;
 }
 
-void VKRenderTarget::initSwapchain(const RenderEngineContext& renderContext)
+void VKSwapChain::initSwapchain(const RenderEngineContext& renderContext)
 {
     const RenderEngineContext::Info& info = renderContext.info();
 #if defined(_WIN32)
@@ -162,7 +157,7 @@ void VKRenderTarget::initSwapchain(const RenderEngineContext& renderContext)
 #endif
 }
 
-void VKRenderTarget::setupDepthStencil()
+void VKSwapChain::setupDepthStencil()
 {
     VkImageCreateInfo image = { VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO };
     image.pNext = nullptr;
@@ -206,7 +201,7 @@ void VKRenderTarget::setupDepthStencil()
     VKUtil::checkResult(vkCreateImageView(_device->vkLogicalDevice(), &depthStencilView, nullptr, &_depth_stencil.view));
 }
 
-void VKRenderTarget::setupRenderPass()
+void VKSwapChain::setupRenderPass()
 {
     std::array<VkAttachmentDescription, 2> attachments = {};
     // Color attachment
@@ -279,7 +274,7 @@ void VKRenderTarget::setupRenderPass()
     VKUtil::checkResult(vkCreateRenderPass(_device->vkLogicalDevice(), &renderPassInfo, nullptr, &_render_pass_begin_info.renderPass));
 }
 
-void VKRenderTarget::setupFrameBuffer()
+void VKSwapChain::setupFrameBuffer()
 {
     VkImageView attachments[2];
 

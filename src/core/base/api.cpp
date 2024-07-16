@@ -8,8 +8,6 @@
 
 namespace ark {
 
-static bool gTraceFlag = false;
-
 void __fatal__(const char* func, const char* condition, const char* message)
 {
     const String str = Strings::sprintf("%s%s", condition ? Strings::sprintf("\"%s\" failed! ", condition).c_str() : "", message);
@@ -33,17 +31,6 @@ void __trace__(const char* func, const char* /*condition*/, const char* message)
     Log::d(func, ">>>__TRACING__>>>");
     Log::d(func, message);
     Log::d(func, "<<<__TRACING__<<<");
-    gTraceFlag = false;
-}
-
-bool __trace_flag__()
-{
-    return gTraceFlag;
-}
-
-void __set_trace_flag__()
-{
-    gTraceFlag = true;
 }
 
 void __message__(fnTraceCallback callback, const char* func, const char* condition, const char* format, ...)
