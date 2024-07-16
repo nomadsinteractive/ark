@@ -16,10 +16,6 @@
 #include <stdio.h>
 #include <vector>
 
-#include "core/base/api.h"
-
-#include "platform/vulkan/vulkan.h"
-
 #include "vulkan_tools.h"
 
 // Macro to get a procedure address based on a vulkan instance
@@ -365,18 +361,18 @@ public:
 
 		VkSwapchainCreateInfoKHR swapchainCI = {};
 		swapchainCI.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-		swapchainCI.pNext = NULL;
+		swapchainCI.pNext = nullptr;
 		swapchainCI.surface = surface;
 		swapchainCI.minImageCount = desiredNumberOfSwapchainImages;
 		swapchainCI.imageFormat = colorFormat;
 		swapchainCI.imageColorSpace = colorSpace;
 		swapchainCI.imageExtent = { swapchainExtent.width, swapchainExtent.height };
 		swapchainCI.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-		swapchainCI.preTransform = (VkSurfaceTransformFlagBitsKHR)preTransform;
+		swapchainCI.preTransform = static_cast<VkSurfaceTransformFlagBitsKHR>(preTransform);
 		swapchainCI.imageArrayLayers = 1;
 		swapchainCI.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
 		swapchainCI.queueFamilyIndexCount = 0;
-		swapchainCI.pQueueFamilyIndices = NULL;
+		swapchainCI.pQueueFamilyIndices = nullptr;
 		swapchainCI.presentMode = swapchainPresentMode;
 		swapchainCI.oldSwapchain = oldSwapchain;
 		// Setting clipped to VK_TRUE allows the implementation to discard rendering outside of the surface area
@@ -417,7 +413,7 @@ public:
 		{
 			VkImageViewCreateInfo colorAttachmentView = {};
 			colorAttachmentView.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-			colorAttachmentView.pNext = NULL;
+			colorAttachmentView.pNext = nullptr;
 			colorAttachmentView.format = colorFormat;
 			colorAttachmentView.components = {
 				VK_COMPONENT_SWIZZLE_R,
@@ -471,7 +467,7 @@ public:
 	{
 		VkPresentInfoKHR presentInfo = {};
 		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-		presentInfo.pNext = NULL;
+		presentInfo.pNext = nullptr;
 		presentInfo.swapchainCount = 1;
 		presentInfo.pSwapchains = &swapChain;
 		presentInfo.pImageIndices = &imageIndex;

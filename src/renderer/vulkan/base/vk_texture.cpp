@@ -17,6 +17,30 @@
 
 namespace ark::vulkan {
 
+namespace {
+
+VkImageLayout getFinalImageLayout(const Texture::Parameters& parameters)
+{
+    switch(parameters._usage)
+    {
+        case Texture::USAGE_GENERAL:
+            break;
+        case Texture::USAGE_DEPTH_ATTACHMENT:
+            return VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
+        case Texture::USAGE_STENCIL_ATTACHMENT:
+            return VK_IMAGE_LAYOUT_STENCIL_ATTACHMENT_OPTIMAL;
+        case Texture::USAGE_DEPTH_STENCIL_ATTACHMENT:
+            return VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        case Texture::USAGE_SAMPLER:
+            return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        case Texture::USAGE_STORAGE:
+            return VK_IMAGE_LAYOUT_GENERAL;
+    }
+    return VK_IMAGE_LAYOUT_GENERAL;
+}
+
+}
+
 VKTexture::VKTexture(sp<Recycler> recycler, sp<VKRenderer> renderer, uint32_t width, uint32_t height, sp<Texture::Parameters> parameters)
     : Texture::Delegate(parameters->_type), _recycler(std::move(recycler)), _renderer(std::move(renderer)), _width(width), _height(height), _parameters(std::move(parameters)),
       _num_faces(_parameters->_type == Texture::TYPE_2D ? 1 : 6), _image(VK_NULL_HANDLE), _memory(VK_NULL_HANDLE), _descriptor{}
@@ -330,8 +354,7 @@ void VKTexture::doUploadBitmap(const Bitmap& bitmap, size_t imageDataSize, const
                 static_cast<uint32_t>(bufferCopyRegions.size()),
                 bufferCopyRegions.data());
 
-    //TODO: Pick up the most appropriate image layout by usage parameter.
-    const VkImageLayout finalImageLayout = VK_IMAGE_LAYOUT_GENERAL;
+    const VkImageLayout finalImageLayout = getFinalImageLayout(*_parameters);
 
     // Once the data has been uploaded we transfer to the texture image to the shader read layout, so it can be sampled from
     imageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;

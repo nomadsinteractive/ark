@@ -42,7 +42,7 @@ sp<Framebuffer> Framebuffer::BUILDER::build(const Scope& args)
     for(const auto& [i, j] : _textures)
     {
         sp<Texture> tex = i->build(args);
-        if(tex->usage() == Texture::USAGE_COLOR_ATTACHMENT)
+        if(tex->usage() == Texture::USAGE_GENERAL)
             colorAttachments.push_back(std::move(tex));
         else
         {

@@ -164,8 +164,7 @@ void VKRenderTarget::initSwapchain(const RenderEngineContext& renderContext)
 
 void VKRenderTarget::setupDepthStencil()
 {
-    VkImageCreateInfo image = {};
-    image.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+    VkImageCreateInfo image = { VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO };
     image.pNext = nullptr;
     image.imageType = VK_IMAGE_TYPE_2D;
     image.format = _device->vkDepthFormat();
@@ -177,14 +176,12 @@ void VKRenderTarget::setupDepthStencil()
     image.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
     image.flags = 0;
 
-    VkMemoryAllocateInfo mem_alloc = {};
-    mem_alloc.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    VkMemoryAllocateInfo mem_alloc = { VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO };
     mem_alloc.pNext = nullptr;
     mem_alloc.allocationSize = 0;
     mem_alloc.memoryTypeIndex = 0;
 
-    VkImageViewCreateInfo depthStencilView = {};
-    depthStencilView.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    VkImageViewCreateInfo depthStencilView = { VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO };
     depthStencilView.pNext = nullptr;
     depthStencilView.viewType = VK_IMAGE_VIEW_TYPE_2D;
     depthStencilView.format = _device->vkDepthFormat();
@@ -289,7 +286,7 @@ void VKRenderTarget::setupFrameBuffer()
     // Depth/Stencil attachment is the same for all frame buffers
     attachments[1] = _depth_stencil.view;
 
-    VkFramebufferCreateInfo frameBufferCreateInfo = vks::initializers::framebufferCreateInfo();
+    VkFramebufferCreateInfo frameBufferCreateInfo{ VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO };
     frameBufferCreateInfo.pNext = nullptr;
     frameBufferCreateInfo.renderPass = _render_pass_begin_info.renderPass;
     frameBufferCreateInfo.attachmentCount = 2;

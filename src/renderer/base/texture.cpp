@@ -147,7 +147,7 @@ template<> ARK_API Texture::Usage StringConvert::eval<Texture::Usage>(const Stri
 {
     if(str)
         return EnumMap<Texture::Usage>::instance().toEnumCombo(str);
-    return Texture::USAGE_COLOR_ATTACHMENT;
+    return Texture::USAGE_GENERAL;
 }
 
 template<> ARK_API Texture::Feature StringConvert::eval<Texture::Feature>(const String& str)
@@ -200,7 +200,7 @@ template<> Texture::Flag StringConvert::eval<Texture::Flag>(const String& str)
 }
 
 Texture::Parameters::Parameters(Type type, const document& parameters, Format format, Texture::Feature features)
-    : _type(type), _usage(parameters ? Documents::getAttribute<Texture::Usage>(parameters, "usage", Texture::USAGE_COLOR_ATTACHMENT) : Texture::USAGE_COLOR_ATTACHMENT),
+    : _type(type), _usage(parameters ? Documents::getAttribute<Texture::Usage>(parameters, "usage", Texture::USAGE_GENERAL) : Texture::USAGE_GENERAL),
       _format(parameters ? Documents::getAttribute<Texture::Format>(parameters, "format", format) : format),
       _features(parameters ? Documents::getAttribute<Texture::Feature>(parameters, "feature", features) : features),
       _flags(parameters ? Documents::getAttribute<Texture::Flag>(parameters, "flags", FLAG_FOR_INPUT) : FLAG_FOR_INPUT),

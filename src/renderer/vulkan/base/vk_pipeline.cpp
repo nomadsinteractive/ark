@@ -29,6 +29,84 @@
 
 namespace ark::vulkan {
 
+class VKPipeline::BakedRenderer {
+public:
+    virtual ~BakedRenderer() = default;
+
+    virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext, VkCommandBuffer commandBuffer) = 0;
+};
+
+namespace {
+
+struct VKDrawArrays final : VKPipeline::BakedRenderer {
+    void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext, VkCommandBuffer commandBuffer) override
+    {
+        const DrawingParams::DrawElements& param = drawingContext._parameters.drawElements();
+        vkCmdDraw(commandBuffer, drawingContext._draw_count, 1, param._start, 0);
+    }
+};
+
+struct VKDrawElements final : VKPipeline::BakedRenderer {
+    void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext, VkCommandBuffer commandBuffer) override
+    {
+        const DrawingParams::DrawElements& param = drawingContext._parameters.drawElements();
+        vkCmdDrawIndexed(commandBuffer, drawingContext._draw_count, 1, param._start, 0, 0);
+    }
+};
+
+struct VKDrawElementsInstanced final : VKPipeline::BakedRenderer {
+    void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext, VkCommandBuffer commandBuffer) override
+    {
+        VkDeviceSize offsets = 0;
+        const DrawingParams::DrawElementsInstanced& param = drawingContext._parameters.drawElementsInstanced();
+        for(const auto& i : param._divided_buffer_snapshots)
+        {
+            i.second.upload(graphicsContext);
+            DCHECK(i.second.id(), "Invaild Instanced Array Buffer: %d", i.first);
+            VkBuffer vkInstanceVertexBuffer = (VkBuffer) (i.second.id());
+            vkCmdBindVertexBuffers(commandBuffer, i.first, 1, &vkInstanceVertexBuffer, &offsets);
+        }
+        vkCmdDrawIndexed(commandBuffer, param._count, drawingContext._draw_count, param._start, 0, 0);
+    }
+};
+
+struct VKMultiDrawElementsIndirect final : VKPipeline::BakedRenderer {
+    void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext, VkCommandBuffer commandBuffer) override
+    {
+        VkDeviceSize offsets = 0;
+        const DrawingParams::DrawMultiElementsIndirect& param = drawingContext._parameters.drawMultiElementsIndirect();
+        for(const auto& i : param._divided_buffer_snapshots)
+        {
+            i.second.upload(graphicsContext);
+            DCHECK(i.second.id(), "Invaild Instanced Array Buffer: %d", i.first);
+            VkBuffer vkInstanceVertexBuffer = (VkBuffer) (i.second.id());
+            vkCmdBindVertexBuffers(commandBuffer, i.first, 1, &vkInstanceVertexBuffer, &offsets);
+        }
+
+        param._indirect_cmds.upload(graphicsContext);
+        vkCmdDrawIndexedIndirect(commandBuffer, (VkBuffer) (param._indirect_cmds.id()), 0, param._indirect_cmd_count, sizeof(DrawingParams::DrawElementsIndirectCommand));
+    }
+};
+
+sp<VKPipeline::BakedRenderer> makeBakedRenderer(const PipelineBindings& bindings)
+{
+    switch(bindings.drawProcedure())
+    {
+        case Enum::DRAW_PROCEDURE_DRAW_ARRAYS:
+            return sp<VKDrawArrays>::make();
+        case Enum::DRAW_PROCEDURE_DRAW_ELEMENTS:
+            return sp<VKDrawElements>::make();
+        case Enum::DRAW_PROCEDURE_DRAW_INSTANCED:
+            return sp<VKDrawElementsInstanced>::make();
+        case Enum::DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT:
+            return sp<VKMultiDrawElementsIndirect>::make();
+    }
+    DFATAL("Not render procedure creator for %d", bindings.drawProcedure());
+    return nullptr;
+}
+
+}
+
 VKPipeline::VKPipeline(const PipelineBindings& bindings, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, std::map<PipelineInput::ShaderStage, String> shaders)
     : _bindings(bindings), _recycler(recycler), _renderer(renderer), _baked_renderer(makeBakedRenderer(bindings)), _layout(VK_NULL_HANDLE), _descriptor_set_layout(VK_NULL_HANDLE),
       _descriptor_set(VK_NULL_HANDLE), _pipeline(VK_NULL_HANDLE), _shaders(std::move(shaders)), _rebind_needed(true), _is_compute_pipeline(false)
@@ -420,23 +498,6 @@ bool VKPipeline::isDirty(const ByteArray::Borrowed& dirtyFlags) const
     return false;
 }
 
-sp<VKPipeline::BakedRenderer> VKPipeline::makeBakedRenderer(const PipelineBindings& bindings) const
-{
-    switch(bindings.drawProcedure())
-    {
-        case Enum::DRAW_PROCEDURE_DRAW_ARRAYS:
-            return sp<VKDrawArrays>::make();
-        case Enum::DRAW_PROCEDURE_DRAW_ELEMENTS:
-            return sp<VKDrawElements>::make();
-        case Enum::DRAW_PROCEDURE_DRAW_INSTANCED:
-            return sp<VKDrawElementsInstanced>::make();
-        case Enum::DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT:
-            return sp<VKMultiDrawElementsIndirect>::make();
-        }
-    DFATAL("Not render procedure creator for %d", bindings.drawProcedure());
-    return nullptr;
-}
-
 sp<VKDescriptorPool> VKPipeline::makeDescriptorPool() const
 {
     std::map<VkDescriptorType, uint32_t> poolSizes;
@@ -525,48 +586,6 @@ VkPipelineRasterizationStateCreateInfo VKPipeline::makeRasterizationState() cons
     const VkFrontFace frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
     // const VkFrontFace frontFace = Ark::instance().renderController()->renderEngine()->isLHS() ? VK_FRONT_FACE_CLOCKWISE : VK_FRONT_FACE_COUNTER_CLOCKWISE;
     return vks::initializers::pipelineRasterizationStateCreateInfo(VK_POLYGON_MODE_FILL, VK_CULL_MODE_BACK_BIT, frontFace, 0);
-}
-
-void VKPipeline::VKDrawArrays::draw(GraphicsContext& /*graphicsContext*/, const DrawingContext& drawingContext, VkCommandBuffer commandBuffer)
-{
-    const DrawingParams::DrawElements& param = drawingContext._parameters.drawElements();
-    vkCmdDraw(commandBuffer, drawingContext._draw_count, 1, param._start, 0);
-}
-
-void VKPipeline::VKDrawElements::draw(GraphicsContext& /*graphicsContext*/, const DrawingContext& drawingContext, VkCommandBuffer commandBuffer)
-{
-    const DrawingParams::DrawElements& param = drawingContext._parameters.drawElements();
-    vkCmdDrawIndexed(commandBuffer, drawingContext._draw_count, 1, param._start, 0, 0);
-}
-
-void VKPipeline::VKDrawElementsInstanced::draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext, VkCommandBuffer commandBuffer)
-{
-    VkDeviceSize offsets = 0;
-    const DrawingParams::DrawElementsInstanced& param = drawingContext._parameters.drawElementsInstanced();
-    for(const auto& i : param._divided_buffer_snapshots)
-    {
-        i.second.upload(graphicsContext);
-        DCHECK(i.second.id(), "Invaild Instanced Array Buffer: %d", i.first);
-        VkBuffer vkInstanceVertexBuffer = (VkBuffer) (i.second.id());
-        vkCmdBindVertexBuffers(commandBuffer, i.first, 1, &vkInstanceVertexBuffer, &offsets);
-    }
-    vkCmdDrawIndexed(commandBuffer, param._count, drawingContext._draw_count, param._start, 0, 0);
-}
-
-void VKPipeline::VKMultiDrawElementsIndirect::draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext, VkCommandBuffer commandBuffer)
-{
-    VkDeviceSize offsets = 0;
-    const DrawingParams::DrawMultiElementsIndirect& param = drawingContext._parameters.drawMultiElementsIndirect();
-    for(const auto& i : param._divided_buffer_snapshots)
-    {
-        i.second.upload(graphicsContext);
-        DCHECK(i.second.id(), "Invaild Instanced Array Buffer: %d", i.first);
-        VkBuffer vkInstanceVertexBuffer = (VkBuffer) (i.second.id());
-        vkCmdBindVertexBuffers(commandBuffer, i.first, 1, &vkInstanceVertexBuffer, &offsets);
-    }
-
-    param._indirect_cmds.upload(graphicsContext);
-    vkCmdDrawIndexedIndirect(commandBuffer, (VkBuffer) (param._indirect_cmds.id()), 0, param._indirect_cmd_count, sizeof(DrawingParams::DrawElementsIndirectCommand));
 }
 
 }

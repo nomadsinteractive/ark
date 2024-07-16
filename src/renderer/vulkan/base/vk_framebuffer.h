@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_VULKAN_BASE_VK_FRAMEBUFFER_H_
-#define ARK_RENDERER_VULKAN_BASE_VK_FRAMEBUFFER_H_
+#pragma once
 
 #include <vector>
 
@@ -15,10 +14,9 @@
 
 #include "platform/vulkan/vulkan.h"
 
-namespace ark {
-namespace vulkan {
+namespace ark::vulkan {
 
-class VKFramebuffer : public Resource {
+class VKFramebuffer final : public Resource {
 public:
     VKFramebuffer(const sp<VKRenderer>& renderer, const sp<Recycler>& recycler, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask);
     ~VKFramebuffer() override;
@@ -70,6 +68,3 @@ private:
 };
 
 }
-}
-
-#endif

@@ -12,8 +12,7 @@
 
 #include "platform/gl/gl.h"
 
-namespace ark {
-namespace opengl {
+namespace ark::opengl {
 
 GLTexture2D::GLTexture2D(sp<Recycler> recycler, sp<Size> size, sp<Texture::Parameters> parameters)
     : GLTexture(std::move(recycler), std::move(size), static_cast<uint32_t>(GL_TEXTURE_2D), Texture::TYPE_2D, std::move(parameters))
@@ -29,7 +28,7 @@ bool GLTexture2D::download(GraphicsContext& /*graphicsContext*/, Bitmap& bitmap)
 {
     DCHECK(static_cast<uint32_t>(_size->widthAsFloat()) == bitmap.width() && static_cast<uint32_t>(_size->heightAsFloat()) == bitmap.height(), "Size mismatch: texture(%d, %d) vs bitmap(%d, %d)",
            static_cast<uint32_t>(_size->widthAsFloat()), static_cast<uint32_t>(_size->heightAsFloat()), bitmap.width(), bitmap.height());
-    GLenum textureFormat = GLUtil::getTextureFormat(Texture::USAGE_COLOR_ATTACHMENT, Texture::FORMAT_AUTO, bitmap.channels());
+    GLenum textureFormat = GLUtil::getTextureFormat(Texture::USAGE_GENERAL, Texture::FORMAT_AUTO, bitmap.channels());
     GLenum pixelType = GLUtil::getPixelType(Texture::FORMAT_AUTO, bitmap);
 #ifdef ARK_PLATFORM_ANDROID
     GLuint fbo;
@@ -59,5 +58,4 @@ void GLTexture2D::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap
     LOGD("Texture Uploaded, id = %d, width = %d, height = %d", static_cast<uint32_t>(id()), bitmap.width(), bitmap.height());
 }
 
-}
 }

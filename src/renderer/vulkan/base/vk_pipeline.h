@@ -15,10 +15,9 @@
 
 #include "platform/vulkan/vulkan.h"
 
-namespace ark {
-namespace vulkan {
+namespace ark::vulkan {
 
-class VKPipeline : public Pipeline {
+class VKPipeline final : public Pipeline {
 public:
     VKPipeline(const PipelineBindings& bindings, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, std::map<PipelineInput::ShaderStage, String> shaders);
     ~VKPipeline() override;
@@ -34,6 +33,8 @@ public:
     virtual void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
     virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
     virtual void compute(GraphicsContext& graphicsContext, const ComputeContext& computeContext) override;
+
+    class BakedRenderer;
 
 private:
     struct VertexLayout {
@@ -54,38 +55,6 @@ private:
 
     bool isDirty(const ByteArray::Borrowed& dirtyFlags) const;
 
-    class BakedRenderer {
-    public:
-        virtual ~BakedRenderer() = default;
-
-        virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext, VkCommandBuffer commandBuffer) = 0;
-    };
-
-    class VKDrawArrays : public BakedRenderer {
-    public:
-        virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext, VkCommandBuffer commandBuffer) override;
-
-    };
-
-    class VKDrawElements : public BakedRenderer {
-    public:
-        virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext, VkCommandBuffer commandBuffer) override;
-
-    };
-
-    class VKDrawElementsInstanced : public BakedRenderer {
-    public:
-        virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext, VkCommandBuffer commandBuffer) override;
-
-    };
-
-    class VKMultiDrawElementsIndirect : public BakedRenderer {
-    public:
-        virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext, VkCommandBuffer commandBuffer) override;
-
-    };
-
-    sp<BakedRenderer> makeBakedRenderer(const PipelineBindings& bindings) const;
     sp<VKDescriptorPool> makeDescriptorPool() const;
     void bindUBOShapshots(GraphicsContext& graphicsContext, const std::vector<RenderLayerSnapshot::UBOSnapshot>& uboSnapshots);
 
@@ -116,5 +85,4 @@ private:
     bool _is_compute_pipeline;
 };
 
-}
 }

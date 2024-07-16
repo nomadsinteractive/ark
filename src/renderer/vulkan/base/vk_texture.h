@@ -14,7 +14,7 @@
 
 namespace ark::vulkan {
 
-class VKTexture : public Texture::Delegate {
+class VKTexture final : public Texture::Delegate {
 public:
     VKTexture(sp<Recycler> recycler, sp<VKRenderer> renderer, uint32_t width, uint32_t height, sp<Texture::Parameters> parameters);
     ~VKTexture() override;
@@ -25,7 +25,7 @@ public:
 
     virtual void clear(GraphicsContext& graphicsContext) override;
     virtual bool download(GraphicsContext& graphicsContext, Bitmap& bitmap) override;
-    virtual void uploadBitmap(GraphicsContext& graphicsContext, const Bitmap& bitmap, const std::vector<sp<ByteArray>>& imagedata) override;
+    virtual void uploadBitmap(GraphicsContext& graphicsContext, const Bitmap& bitmap, const std::vector<sp<ByteArray>>& images) override;
 
     const VkDescriptorImageInfo& vkDescriptor() const;
     Observer& observer();
@@ -35,7 +35,6 @@ protected:
 
 private:
     ResourceRecycleFunc doRecycle();
-
     void copyBitmap(uint8_t* buf, const Bitmap& bitmap, const bytearray& imagedata, size_t imageDataSize);
 
 private:

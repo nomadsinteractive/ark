@@ -16,8 +16,7 @@
 #include "renderer/vulkan/util/vulkan_tools.h"
 #include "renderer/vulkan/util/vk_util.h"
 
-namespace ark {
-namespace vulkan {
+namespace ark::vulkan {
 
 VKFramebuffer::VKFramebuffer(const sp<VKRenderer>& renderer, const sp<Recycler>& recycler, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask)
     : _stub(sp<Stub>::make(renderer, recycler, std::move(colorAttachments), std::move(depthStencilAttachments), clearMask))
@@ -202,8 +201,7 @@ VkRenderPass VKFramebuffer::Stub::create(const PipelineBindings& bindings)
     dependencies[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
 
     // Create the actual renderpass
-    VkRenderPassCreateInfo renderPassInfo = {};
-    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+    VkRenderPassCreateInfo renderPassInfo = { VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO };
     renderPassInfo.attachmentCount = static_cast<uint32_t>(attachmentDescriptions.size());
     renderPassInfo.pAttachments = attachmentDescriptions.data();
     renderPassInfo.subpassCount = 1;
@@ -234,5 +232,4 @@ VkRenderPass VKFramebuffer::Stub::begin(VkCommandBuffer commandBuffer)
     return _render_pass_begin_info.renderPass;
 }
 
-}
 }

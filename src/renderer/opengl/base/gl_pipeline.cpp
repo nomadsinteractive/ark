@@ -704,12 +704,12 @@ void GLPipeline::Stub::bindUniform(const uint8_t* ptr, uint32_t size, const Unif
 
 void GLPipeline::Stub::bindImage(const Texture& texture, uint32_t name)
 {
-    char uniformName[16] = {'u', '_', 'I', 'm', 'a', 'g', 'e', static_cast<char>('0' + name)};
+    const char uniformName[16] = {'u', '_', 'I', 'm', 'a', 'g', 'e', static_cast<char>('0' + name)};
     const GLPipeline::GLUniform& uImage = getUniform(uniformName);
     const Texture::Format textureFormat = texture.parameters()->_format;
     const uint32_t channelSize = RenderUtil::getChannelSize(textureFormat);
     const uint32_t componentSize = RenderUtil::getComponentSize(textureFormat);
-    const GLenum format = GLUtil::getTextureInternalFormat(Texture::USAGE_COLOR_ATTACHMENT, texture.parameters()->_format, channelSize, componentSize);
+    const GLenum format = GLUtil::getTextureInternalFormat(Texture::USAGE_GENERAL, texture.parameters()->_format, channelSize, componentSize);
     uImage.setUniform1i(static_cast<GLint>(name));
     glBindImageTexture(name, static_cast<GLuint>(texture.delegate()->id()), 0, GL_FALSE, 0, GL_READ_WRITE, format);
 }

@@ -49,8 +49,8 @@ void GLFramebuffer::upload(GraphicsContext& graphicsContext)
 
     for(const sp<Texture>& i : _color_attachments)
     {
-        Texture::Usage usage = i->parameters()->_usage;
-        DASSERT(usage == Texture::USAGE_COLOR_ATTACHMENT);
+        const Texture::Usage usage = i->parameters()->_usage;
+        DASSERT(usage & Texture::USAGE_ATTACHMENT);
         DASSERT(i->id() != 0);
         GLenum attachment = static_cast<GLenum>(GL_COLOR_ATTACHMENT0 + (bindings++));
         attachments.push_back(i->id(), attachment);

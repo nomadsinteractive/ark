@@ -169,7 +169,7 @@ GLenum GLUtil::getTextureInternalFormat(Texture::Usage usage, Texture::Format fo
 
     switch(usage & Texture::USAGE_DEPTH_STENCIL_ATTACHMENT)
     {
-    case Texture::USAGE_COLOR_ATTACHMENT: {
+    case Texture::USAGE_GENERAL: {
         bool isSigned = format & Texture::FORMAT_SIGNED;
         uint32_t cs = channelSize - 1;
 
@@ -218,7 +218,7 @@ GLenum GLUtil::getTextureFormat(Texture::Usage usage, Texture::Format format, ui
 {
     switch(usage & Texture::USAGE_DEPTH_STENCIL_ATTACHMENT)
     {
-    case Texture::USAGE_COLOR_ATTACHMENT: {
+    case Texture::USAGE_GENERAL: {
         bool isInteger = format & Texture::FORMAT_INTEGER;
         const static GLenum fChannels[] = {GL_RED, GL_RG, GL_RGB, GL_RGBA};
         const static GLenum iChannels[] = {GL_RED_INTEGER, GL_RG_INTEGER, GL_RGB_INTEGER, GL_RGBA_INTEGER};
