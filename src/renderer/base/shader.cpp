@@ -30,14 +30,14 @@ namespace ark {
 
 namespace {
 
-class ShaderBuilderImpl : public Builder<Shader> {
+class ShaderBuilderImpl final : public Builder<Shader> {
 public:
     ShaderBuilderImpl(BeanFactory& factory, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext, sp<String> vertex, sp<String> fragment, sp<Camera> defaultCamera)
         : _factory(factory), _manifest(doc), _render_controller(resourceLoaderContext->renderController()), _vertex(std::move(vertex)), _fragment(std::move(fragment)), _default_camera(defaultCamera ? std::move(defaultCamera) : Camera::getDefaultCamera()),
           _camera(factory.getBuilder<Camera>(doc, constants::CAMERA)), _parameters(factory, doc, resourceLoaderContext) {
     }
 
-    virtual sp<Shader> build(const Scope& args) override {
+    sp<Shader> build(const Scope& args) override {
         sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(_render_controller, _vertex, _fragment);
         buildingContext->loadManifest(_manifest, _factory, args);
         sp<Camera> camera = _camera->build(args);
@@ -57,6 +57,26 @@ private:
     PipelineBindings::Parameters::BUILDER _parameters;
 
 };
+
+Shader::StageManifest loadStages(BeanFactory& factory, const document& manifest)
+{
+    Shader::StageManifest stages;
+
+    for(const document& i : manifest->children("stage"))
+    {
+        PipelineInput::ShaderStage type = Documents::ensureAttribute<PipelineInput::ShaderStage>(i, constants::TYPE);
+        CHECK(stages.find(type) == stages.end(), "Stage duplicated: %s", Documents::getAttribute(i, constants::TYPE).c_str());
+        stages[type] = factory.ensureBuilder<String>(i, constants::SRC);
+    }
+
+    if(stages.empty())
+    {
+        stages[PipelineInput::SHADER_STAGE_VERTEX] = factory.getBuilder<String>(manifest, "vertex", "@shaders:default.vert");
+        stages[PipelineInput::SHADER_STAGE_FRAGMENT] = factory.getBuilder<String>(manifest, "fragment", "@shaders:texture.frag");
+    }
+
+    return stages;
+}
 
 }
 
@@ -154,34 +174,14 @@ sp<Shader> Shader::BUILDER_IMPL::build(const Scope& args)
     return sp<Shader>::make(_render_controller->createPipelineFactory(), _render_controller, sp<PipelineLayout>::make(buildingContext), _parameters.build(args));
 }
 
-Shader::StageManifest Shader::BUILDER_IMPL::loadStages(BeanFactory& factory, const document& manifest) const
-{
-    Shader::StageManifest stages;
-
-    for(const document& i : manifest->children("stage"))
-    {
-        PipelineInput::ShaderStage type = Documents::ensureAttribute<PipelineInput::ShaderStage>(i, constants::TYPE);
-        CHECK(stages.find(type) == stages.end(), "Stage duplicated: %s", Documents::getAttribute(i, constants::TYPE).c_str());
-        stages[type] = factory.ensureBuilder<String>(i, constants::SRC);
-    }
-
-    if(stages.empty())
-    {
-        stages[PipelineInput::SHADER_STAGE_VERTEX] = factory.getBuilder<String>(manifest, "vertex", "@shaders:default.vert");
-        stages[PipelineInput::SHADER_STAGE_FRAGMENT] = factory.getBuilder<String>(manifest, "fragment", "@shaders:texture.frag");
-    }
-
-    return stages;
-}
-
 sp<PipelineBuildingContext> Shader::BUILDER_IMPL::makePipelineBuildingContext(const Scope& args) const
 {
-    sp<PipelineBuildingContext> context = sp<PipelineBuildingContext>::make(_render_controller);
     PipelineInput::ShaderStage prestage = PipelineInput::SHADER_STAGE_NONE;
-    for(const auto& i : _stages)
+    sp<PipelineBuildingContext> context = sp<PipelineBuildingContext>::make(_render_controller);
+    for(const auto& [k, v] : _stages)
     {
-        context->addStage(i.second->build(args), i.first, prestage);
-        prestage = i.first;
+        context->addStage(v->build(args), k, prestage);
+        prestage = k;
     }
     return context;
 }
@@ -207,6 +207,5 @@ sp<Shader> Shader::BUILDER::build(const Scope& args)
 {
     return _impl.build(args);
 }
-
 
 }

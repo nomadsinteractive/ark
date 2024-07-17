@@ -113,7 +113,7 @@ sp<Pipeline> PipelineBindings::getPipeline(GraphicsContext& graphicsContext, con
 
 PipelineBindings::Stub::Stub(Enum::RenderMode mode, Enum::DrawProcedure renderProcedure, Parameters parameters, sp<PipelineLayout> pipelineLayout)
     : _mode(mode), _render_procedure(renderProcedure), _parameters(std::move(parameters)), _layout(std::move(pipelineLayout)), _input(_layout->input()), _attributes(_input),
-      _samplers(_layout->samplers()), _images(_layout->images())
+      _samplers(_layout->makeBindingSamplers()), _images(_layout->makeBindingImages())
 {
 }
 

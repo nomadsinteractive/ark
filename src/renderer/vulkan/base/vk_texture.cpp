@@ -39,6 +39,30 @@ VkImageLayout getFinalImageLayout(const Texture::Parameters& parameters)
     return VK_IMAGE_LAYOUT_GENERAL;
 }
 
+void copyBitmap(uint8_t* buf, const Bitmap& bitmap, const bytearray& imagedata, size_t imageDataSize)
+{
+    if(imagedata == nullptr)
+        memset(buf, 0, imageDataSize);
+    else if(imageDataSize == imagedata->size())
+        memcpy(buf, imagedata->buf(), imageDataSize);
+    else
+    {
+        uint32_t steps = bitmap.width() * bitmap.height();
+        uint32_t pixelBytes = bitmap.rowBytes() / bitmap.width();
+        size_t newPixelBytes = imageDataSize / steps;
+        size_t padding = newPixelBytes - pixelBytes;
+        uint8_t* it1 = imagedata->buf();
+        uint8_t* it2 = buf;
+        for(uint32_t i = 0; i < steps; ++i)
+        {
+            memcpy(it2, it1, pixelBytes);
+            memset(it2 + pixelBytes, 0xff, padding);
+            it1 += pixelBytes;
+            it2 += newPixelBytes;
+        }
+    }
+}
+
 }
 
 VKTexture::VKTexture(sp<Recycler> recycler, sp<VKRenderer> renderer, uint32_t width, uint32_t height, sp<Texture::Parameters> parameters)
@@ -91,7 +115,6 @@ void VKTexture::clear(GraphicsContext& /*graphicsContext*/)
 {
     const VkClearColorValue clearColorValue{0, 0, 0, 0};
     VkImageSubresourceRange subRange{VK_IMAGE_ASPECT_COLOR_BIT, 0, VK_REMAINING_MIP_LEVELS, 0, 1};
-
     const VkCommandBuffer clearCmdBuf = _renderer->commandPool()->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
     vkCmdClearColorImage(clearCmdBuf, _image, _descriptor.imageLayout, &clearColorValue, 1, &subRange);
     _renderer->commandPool()->flushCommandBuffer(clearCmdBuf, true);
@@ -150,7 +173,7 @@ void VKTexture::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap& 
 
     {
         // Create optimal tiled target image on the device
-        VkImageCreateInfo imageCreateInfo = vks::initializers::imageCreateInfo();
+        VkImageCreateInfo imageCreateInfo{ VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO };
         imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
         imageCreateInfo.format = format;
         imageCreateInfo.mipLevels = _mip_levels;
@@ -166,8 +189,7 @@ void VKTexture::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap& 
         if(!imagedata)
             imageCreateInfo.usage |= VKUtil::toTextureUsage(_parameters->_usage);
 
-        size_t imageDataSize = imagedata ? imagedata->size() : 0;
-
+        size_t imageDataSize = imagedata ? imagedata->size() : bitmap.rowBytes() * bitmap.height();
         VkImageFormatProperties ifp;
         VkResult r = vkGetPhysicalDeviceImageFormatProperties(_renderer->device()->vkPhysicalDevice(), imageCreateInfo.format, imageCreateInfo.imageType, imageCreateInfo.tiling,
                                                               imageCreateInfo.usage, imageCreateInfo.flags, &ifp);
@@ -180,12 +202,13 @@ void VKTexture::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap& 
                 imageDataSize = rowBytes * bitmap.height();
                 format = imageCreateInfo.format = VKUtil::toTextureFormat(rowBytes / bitmap.width() / 4, 4, _parameters->_format);
             }
+            else
+                WARN("Format not supported");
         }
         VKUtil::createImage(_renderer->device(), imageCreateInfo, &_image, &_memory);
 
         _descriptor.imageLayout = getFinalImageLayout(*_parameters);
-        if(imagedata)
-            doUploadBitmap(bitmap, imageDataSize, images, _descriptor.imageLayout);
+        doUploadBitmap(bitmap, imageDataSize, images);
     }
 
     // Create a texture sampler
@@ -250,7 +273,7 @@ Observer& VKTexture::observer()
     return _observer;
 }
 
-void VKTexture::doUploadBitmap(const Bitmap& bitmap, size_t imageDataSize, const std::vector<bytearray>& imagedata, VkImageLayout finalImageLayout)
+void VKTexture::doUploadBitmap(const Bitmap& bitmap, size_t imageDataSize, const std::vector<bytearray>& imagedata)
 {
     VkMemoryAllocateInfo memAllocInfo = vks::initializers::memoryAllocateInfo();
     VkMemoryRequirements memReqs = {};
@@ -267,7 +290,7 @@ void VKTexture::doUploadBitmap(const Bitmap& bitmap, size_t imageDataSize, const
 
     DASSERT(imageDataSize > 0);
 
-    VkBufferCreateInfo bufferCreateInfo = vks::initializers::bufferCreateInfo();
+    VkBufferCreateInfo bufferCreateInfo{ VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
     bufferCreateInfo.size = imageDataSize * imagedata.size();
     // This buffer is used as a transfer source for the buffer copy
     bufferCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
@@ -362,7 +385,7 @@ void VKTexture::doUploadBitmap(const Bitmap& bitmap, size_t imageDataSize, const
     imageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
     imageMemoryBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
     imageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-    imageMemoryBarrier.newLayout = finalImageLayout;
+    imageMemoryBarrier.newLayout = _descriptor.imageLayout;
 
     // Insert a memory dependency at the proper pipeline stages that will execute the image layout transition
     // Source pipeline stage stage is copy command exection (VK_PIPELINE_STAGE_TRANSFER_BIT)
@@ -399,28 +422,6 @@ ResourceRecycleFunc VKTexture::doRecycle()
         vkDestroySampler(device->vkLogicalDevice(), descriptor.sampler, nullptr);
         vkFreeMemory(device->vkLogicalDevice(), memory, nullptr);
     };
-}
-
-void VKTexture::copyBitmap(uint8_t* buf, const Bitmap& bitmap, const bytearray& imagedata, size_t imageDataSize)
-{
-    if(imageDataSize == imagedata->size())
-        memcpy(buf, imagedata->buf(), imageDataSize);
-    else
-    {
-        uint32_t steps = bitmap.width() * bitmap.height();
-        uint32_t pixelBytes = bitmap.rowBytes() / bitmap.width();
-        size_t newPixelBytes = imageDataSize / steps;
-        size_t padding = newPixelBytes - pixelBytes;
-        uint8_t* it1 = imagedata->buf();
-        uint8_t* it2 = buf;
-        for(uint32_t i = 0; i < steps; ++i)
-        {
-            memcpy(it2, it1, pixelBytes);
-            memset(it2 + pixelBytes, 0xff, padding);
-            it1 += pixelBytes;
-            it2 += newPixelBytes;
-        }
-    }
 }
 
 }

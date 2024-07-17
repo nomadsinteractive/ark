@@ -68,7 +68,7 @@ VKGraphicsContext::VKGraphicsContext(GraphicsContext& graphicsContext, const sp<
 {
     VkDevice vkLogicalDevice = _renderer->vkLogicalDevice();
     // Create synchronization objects
-    VkSemaphoreCreateInfo semaphoreCreateInfo = vks::initializers::semaphoreCreateInfo();
+    constexpr VkSemaphoreCreateInfo semaphoreCreateInfo{ VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
     // Create a semaphore used to synchronize image presentation
     // Ensures that the image is displayed before we start submitting new commands to the queu
     VKUtil::checkResult(vkCreateSemaphore(vkLogicalDevice, &semaphoreCreateInfo, nullptr, &_semaphore_present_complete));
@@ -87,7 +87,7 @@ void VKGraphicsContext::begin(uint32_t imageId, const Color& backgroundColor)
     VkCommandBuffer commandBuffer = commandBuffers.at(imageId);
     _state_stack.push(State(sp<MainRenderPassPhrase>::make(_renderer, commandBuffer, renderTarget.frameBuffers().at(imageId), backgroundColor), commandBuffer, false));
 
-    const VkCommandBufferBeginInfo cmdBufInfo{ VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
+    constexpr VkCommandBufferBeginInfo cmdBufInfo{ VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
     VKUtil::checkResult(vkBeginCommandBuffer(commandBuffer, &cmdBufInfo));
 
     _submit_queue.begin(_semaphore_present_complete);
@@ -113,8 +113,8 @@ VKGraphicsContext::State& VKGraphicsContext::getCurrentState()
 void VKGraphicsContext::pushState(sp<RenderPassPhrase> starter)
 {
     DCHECK(!_state_stack.empty(), "First state must be push by VKGraphicsContext::begin");
-    bool beginCommandBuffer = _state_stack.top()._render_pass != VK_NULL_HANDLE;
-    VkCommandBuffer commandBuffer = beginCommandBuffer ? starter->vkCommandBuffer() : _state_stack.top()._command_buffer;
+    const bool beginCommandBuffer = _state_stack.top()._render_pass != VK_NULL_HANDLE;
+    const VkCommandBuffer commandBuffer = beginCommandBuffer ? starter->vkCommandBuffer() : _state_stack.top()._command_buffer;
     _state_stack.push(State(std::move(starter), commandBuffer, beginCommandBuffer));
 }
 
@@ -176,7 +176,7 @@ VkCommandBuffer VKGraphicsContext::State::startRecording()
     {
         if(_begin_command_buffer)
         {
-            VkCommandBufferBeginInfo cmdBufInfo = vks::initializers::commandBufferBeginInfo();
+            constexpr VkCommandBufferBeginInfo cmdBufInfo{ VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
             VKUtil::checkResult(vkBeginCommandBuffer(_command_buffer, &cmdBufInfo));
         }
         _render_pass = _render_pass_phrase->begin(_command_buffer);

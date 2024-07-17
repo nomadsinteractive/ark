@@ -9,9 +9,7 @@
 
 #include "cmft/util/cmft_util.h"
 
-namespace ark {
-namespace plugin {
-namespace cmft {
+namespace ark::plugin::cmft {
 
 IrradianceCubemapUploader::IrradianceCubemapUploader(sp<Bitmap> bitmap, sp<Size> size)
     : _bitmap(std::move(bitmap)), _size(std::move(size))
@@ -61,6 +59,4 @@ sp<Texture::Uploader> IrradianceCubemapUploader::BUILDER::build(const Scope& arg
     return sp<IrradianceCubemapUploader>::make(_bitmap->build(args), _size->build(args));
 }
 
-}
-}
 }

@@ -48,8 +48,6 @@ public:
         sp<Shader> build(const Scope& args) override;
 
     private:
-        StageManifest loadStages(BeanFactory& factory, const document& manifest) const;
-
         sp<PipelineBuildingContext> makePipelineBuildingContext(const Scope& args) const;
 
     private:

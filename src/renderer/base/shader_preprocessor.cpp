@@ -96,11 +96,11 @@ void ShaderPreprocessor::parseMainBlock(const String& source, PipelineBuildingCo
 {
     if(source.find("void main()") != String::npos)
     {
-        DCHECK_WARN(false, "Shader which contains main function will not be preprocessed by ark shader preprocessor. Try to replace it with \"vec4 ark_main(vec4 position, ...)\" for better flexibilty and compatibilty");
+        CHECK_WARN(false, "Shader which contains main function will not be preprocessed by ark shader preprocessor. Try to replace it with \"vec4 ark_main(vec4 position, ...)\" for better flexibilty and compatibilty");
         return;
     }
 
-    DCHECK_WARN(source.search(_IN_PATTERN, sanitizer), "Non-standard attribute declared above, move it into ark_main function's parameters will disable this warning.");
+    CHECK_WARN(source.search(_IN_PATTERN, sanitizer), "Non-standard attribute declared above, move it into ark_main function's parameters will disable this warning.");
 
     static const std::regex FUNC_PATTERN(R"((vec4|void)\s+ark_main\((.*)\))");
 

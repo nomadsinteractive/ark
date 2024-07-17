@@ -31,11 +31,10 @@ public:
     Observer& observer();
 
 protected:
-    void doUploadBitmap(const Bitmap& bitmap, size_t imageDataSize, const std::vector<bytearray>& imagedata, VkImageLayout finalImageLayout);
+    void doUploadBitmap(const Bitmap& bitmap, size_t imageDataSize, const std::vector<bytearray>& imagedata);
 
 private:
     ResourceRecycleFunc doRecycle();
-    void copyBitmap(uint8_t* buf, const Bitmap& bitmap, const bytearray& imagedata, size_t imageDataSize);
 
 private:
     sp<Recycler> _recycler;

@@ -627,21 +627,18 @@ void GLPipeline::Stub::bind(GraphicsContext& /*graphicsContext*/, const Pipeline
     bindUBOSnapshots(pipelineContext._ubos, shaderBindings.pipelineInput());
 
     uint32_t binding = 0;
-    for(const auto& [i, j] : shaderBindings.pipelineBindings()->samplers())
+    for(const auto& [k, v] : shaderBindings.pipelineBindings()->samplers())
     {
-        CHECK_WARN(j, "Pipeline has unbound sampler \"%s\"", i.c_str());
-        if(j)
-            activeTexture(j, i, binding);
+        CHECK_WARN(v, "Pipeline has unbound sampler \"%s\"", k.c_str());
+        if(v)
+            activeTexture(v, k, binding);
         ++ binding;
     }
 
     const std::vector<sp<Texture>>& images = shaderBindings.pipelineBindings()->images();
     for(size_t i = 0; i < images.size(); ++i)
-    {
-        const sp<Texture>& image = images.at(i);
-        if(image)
+        if(const sp<Texture>& image = images.at(i))
             bindImage(image, static_cast<uint32_t>(i));
-    }
 }
 
 void GLPipeline::Stub::bindUBO(const RenderLayerSnapshot::UBOSnapshot& uboSnapshot, const sp<PipelineInput::UBO>& ubo)

@@ -38,7 +38,7 @@ VkCommandBuffer VKCommandPool::createCommandBuffer(VkCommandBufferLevel level, b
 
     if(begin)
     {
-        VkCommandBufferBeginInfo cmdBufInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
+        constexpr VkCommandBufferBeginInfo cmdBufInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
         VKUtil::checkResult(vkBeginCommandBuffer(cmdBuffer, &cmdBufInfo));
     }
 

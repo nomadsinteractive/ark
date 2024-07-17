@@ -299,9 +299,12 @@ template<> ARK_API void EnumMap<Texture::Format>::initialize(std::map<String, Te
 
 template<> ARK_API void EnumMap<Texture::Usage>::initialize(std::map<String, Texture::Usage>& enums)
 {
-    enums["color"] = Texture::USAGE_COLOR_ATTACHMENT;
+    enums["general"] = Texture::USAGE_GENERAL;
     enums["depth"] = Texture::USAGE_DEPTH_ATTACHMENT;
     enums["stencil"] = Texture::USAGE_DEPTH_STENCIL_ATTACHMENT;
+    enums["color_attachment"] = Texture::USAGE_COLOR_ATTACHMENT;
+    enums["sampler"] = Texture::USAGE_SAMPLER;
+    enums["storage"] = Texture::USAGE_STORAGE;
 }
 
 template<> void EnumMap<Texture::Flag>::initialize(std::map<String, Texture::Flag>& enums)

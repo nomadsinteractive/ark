@@ -2,8 +2,8 @@
 
 #include <map>
 #include <set>
-#include <vector>
 
+#include "texture.h"
 #include "core/base/string.h"
 #include "core/base/string_buffer.h"
 #include "core/collection/table.h"
@@ -26,7 +26,12 @@ public:
 
     void initialize();
 
-    void setupUniforms();
+    struct LayoutBinding {
+        sp<Texture> _resource;
+        Texture::Usage _usage;
+        String _name;
+        int32_t _binding;
+    };
 
     sp<RenderController> _render_controller;
     sp<PipelineInput> _input;
@@ -34,6 +39,7 @@ public:
 
     std::map<String, Attribute> _attributes;
     std::map<String, sp<StringVar>> _definitions;
+    std::vector<LayoutBinding> _layout_bindings;
     Table<String, sp<Uniform>> _uniforms;
     Table<String, sp<Texture>> _samplers;
     Table<String, sp<Texture>> _images;
@@ -59,16 +65,22 @@ public:
     sp<Snippet> makePipelineSnippet() const;
     std::map<String, String> toDefinitions() const;
 
-private:
-    Attribute makePredefinedAttribute(const String& name, const String& type);
+    void tryBindCamera(const ShaderPreprocessor& shaderPreprocessor);
 
+private:
+    void initializeAttributes();
     void initializePipelines();
+    void initializeSSBO();
+    void initializeUniforms();
+
+    void tryBindUniformMatrix(const ShaderPreprocessor& shaderPreprocessor, String name, sp<Mat4> matrix);
 
     void loadPredefinedAttribute(const document& manifest);
     void loadPredefinedUniform(BeanFactory& factory, const Scope& args, const document& manifest);
     void loadPredefinedSampler(BeanFactory& factory, const Scope& args, const document& manifest);
     void loadPredefinedImage(BeanFactory& factory, const Scope& args, const document& manifest);
     void loadPredefinedBuffer(BeanFactory& factory, const Scope& args, const document& manifest);
+    void loadLayoutBindings(BeanFactory& factory, const Scope& args, const document& manifest);
     void loadDefinitions(BeanFactory& factory, const Scope& args, const document& manifest);
 
     std::map<PipelineInput::ShaderStage, op<ShaderPreprocessor>> _stages;

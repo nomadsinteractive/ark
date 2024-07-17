@@ -23,8 +23,8 @@ void PipelineLayout::preCompile(GraphicsContext& graphicsContext)
     {
         _snippet->preCompile(graphicsContext, _building_context, *this);
 
-        for(const auto& i : _building_context->stages())
-            _preprocessed_stages[i.first] = i.second->preprocess();
+        for(const auto& [stage, preprocessor] : _building_context->stages())
+            _preprocessed_stages[stage] = preprocessor->preprocess();
 
         _building_context = nullptr;
     }
@@ -51,52 +51,15 @@ size_t PipelineLayout::colorAttachmentCount() const
     return _color_attachment_count;
 }
 
-const Table<String, sp<Texture>>& PipelineLayout::samplers() const
-{
-    return _samplers;
-}
-
-const std::vector<sp<Texture>>& PipelineLayout::images() const
-{
-    return _images;
-}
-
 void PipelineLayout::initialize()
 {
-    DCHECK(_building_context, "PipelineLayout should not be initialized more than once");
-
     _snippet->preInitialize(_building_context);
     _building_context->initialize();
 
-    if(const ShaderPreprocessor* vertex = _building_context->tryGetStage(PipelineInput::SHADER_STAGE_VERTEX))
-        tryBindCamera(*vertex, _input->_camera);
-    if(const ShaderPreprocessor* compute = _building_context->tryGetStage(PipelineInput::SHADER_STAGE_COMPUTE))
-        tryBindCamera(*compute, _input->_camera);
     if(const ShaderPreprocessor* fragment = _building_context->tryGetStage(PipelineInput::SHADER_STAGE_FRAGMENT))
         _color_attachment_count = fragment->_main_block->outArgumentCount() + (fragment->_main_block->hasReturnValue() ? 1 : 0);
 
-    _building_context->setupUniforms();
-
     _input->initialize(_building_context);
-
-    _samplers = makeBindingSamplers();
-    _images = makeBindingImages();
-}
-
-void PipelineLayout::tryBindUniformMatrix(const ShaderPreprocessor& shaderPreprocessor, String name, sp<Mat4> matrix)
-{
-    if(sp<Uniform> uniform = shaderPreprocessor.makeUniformInput(std::move(name), Uniform::TYPE_MAT4))
-    {
-        uniform->setUploader(sp<UploaderOfVariable<M4>>::make(std::move(matrix)));
-        _building_context->addUniform(std::move(uniform));
-    }
-}
-
-void PipelineLayout::tryBindCamera(const ShaderPreprocessor& shaderPreprocessor, const Camera& camera)
-{
-    tryBindUniformMatrix(shaderPreprocessor, "u_VP", camera.vp());
-    tryBindUniformMatrix(shaderPreprocessor, "u_View", camera.view());
-    tryBindUniformMatrix(shaderPreprocessor, "u_Projection", camera.projection());
 }
 
 Table<String, sp<Texture>> PipelineLayout::makeBindingSamplers() const

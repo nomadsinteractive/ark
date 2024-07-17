@@ -17,18 +17,18 @@ namespace ark {
 
 namespace {
 
-class AlignedInput : public Uploader {
+class AlignedInput final : public Uploader {
 public:
     AlignedInput(sp<Uploader> delegate, size_t alignedSize)
         : Uploader(alignedSize), _delegate(std::move(delegate)), _aligned_size(alignedSize) {
         CHECK(_delegate->size() <= _aligned_size, "Alignment is lesser than delegate's size(%d)", _delegate->size());
     }
 
-    virtual void upload(Writable& buf) override {
+    void upload(Writable& buf) override {
         _delegate->upload(buf);
     }
 
-    virtual bool update(uint64_t timestamp) override {
+    bool update(uint64_t timestamp) override {
         return _delegate->update(timestamp);
     }
 
@@ -36,6 +36,20 @@ private:
     sp<Uploader> _delegate;
     size_t _aligned_size;
 };
+
+Attribute makePredefinedAttribute(const String& name, const String& type)
+{
+    if(name == "TexCoordinate")
+        return Attribute("a_TexCoordinate", Attribute::TYPE_USHORT, type, 2, true);
+    if(name == "Position")
+    {
+        if(type == "int")
+            return Attribute("a_Position", Attribute::TYPE_INTEGER, type, 1, false);
+        CHECK(type == "vec2" || type == "vec3" || type == "vec4", "Unacceptable Position type: '%s', must be in [int, vec2, vec3, vec4]", type.c_str());
+        return Attribute("a_Position", Attribute::TYPE_FLOAT, type, std::min<uint32_t>(3, static_cast<uint32_t>(type.at(3) - '0')), false);
+    }
+    return RenderUtil::makePredefinedAttribute("a_" + name, type);
+}
 
 }
 
@@ -56,15 +70,14 @@ void PipelineBuildingContext::loadManifest(const document& manifest, BeanFactory
     loadPredefinedUniform(factory, args, manifest);
     loadPredefinedSampler(factory, args, manifest);
     loadPredefinedImage(factory, args, manifest);
+    loadLayoutBindings(factory, args, manifest);
     loadPredefinedBuffer(factory, args, manifest);
     loadDefinitions(factory, args, manifest);
     loadPredefinedAttribute(manifest);
 }
 
-void PipelineBuildingContext::initialize()
+void PipelineBuildingContext::initializeAttributes()
 {
-    initializePipelines();
-
     ShaderPreprocessor& firstStage = _stages.begin()->second;
 
     for(const auto& i : firstStage._declaration_ins.vars().values())
@@ -73,9 +86,7 @@ void PipelineBuildingContext::initialize()
     for(const auto& [i, j] : _stages)
         for(const ShaderPreprocessor::Parameter& k : j->args())
             if(k._modifier & ShaderPreprocessor::Parameter::PARAMETER_MODIFIER_IN)
-            {
                 j->inDeclare(k._type, Strings::capitalizeFirst(k._name));
-            }
 
     std::set<String> passThroughVars;
     const ShaderPreprocessor* prestage = nullptr;
@@ -87,7 +98,6 @@ void PipelineBuildingContext::initialize()
     }
 
     Table<String, String> attributes;
-
     {
         auto iter = _stages.begin();
         for(++iter; iter != _stages.end(); ++iter)
@@ -104,8 +114,8 @@ void PipelineBuildingContext::initialize()
     for(const auto& [i, j] : attributes)
     {
         if(!firstStage._declaration_ins.has(i)
-                && !firstStage._declaration_outs.has(i)
-                && !firstStage._main_block->hasOutAttribute(i))
+           && !firstStage._declaration_outs.has(i)
+           && !firstStage._main_block->hasOutAttribute(i))
         {
             generated.push_back(i);
             addAttribute(i, j, 0);
@@ -138,26 +148,58 @@ void PipelineBuildingContext::initialize()
             firstStage.passThroughDeclare(i._type, Strings::capitalizeFirst(i._name));
         else if(i._modifier & ShaderPreprocessor::Parameter::PARAMETER_MODIFIER_OUT)
             firstStage.outDeclare(i._type, Strings::capitalizeFirst(i._name));
+}
 
+void PipelineBuildingContext::initializeSSBO()
+{
     Table<String, PipelineInput::SSBO> sobs;
-    for(const auto& i : _stages)
-    {
-        for(const auto& [name, bindings] : i.second->_ssbos)
+    for(const auto& [stage, preprocessor] : _stages)
+        for(const auto& [name, bindings] : preprocessor->_ssbos)
         {
             if(!sobs.has(name))
             {
                 CHECK(_ssbos.has(name), "SSBO \"%s\" does not exist", name.c_str());
                 sobs[name] = PipelineInput::SSBO(_ssbos.at(name), static_cast<uint32_t>(bindings));
             }
-            sobs[name]._stages.insert(i.first);
+            sobs[name]._stages.insert(stage);
         }
-    }
 
     for(const auto& i : sobs)
         _input->ssbos().push_back(i.second);
 }
 
-void PipelineBuildingContext::setupUniforms()
+void PipelineBuildingContext::tryBindCamera(const ShaderPreprocessor& shaderPreprocessor)
+{
+    const Camera& camera = _input->camera();
+    tryBindUniformMatrix(shaderPreprocessor, "u_VP", camera.vp());
+    tryBindUniformMatrix(shaderPreprocessor, "u_View", camera.view());
+    tryBindUniformMatrix(shaderPreprocessor, "u_Projection", camera.projection());
+}
+
+void PipelineBuildingContext::tryBindUniformMatrix(const ShaderPreprocessor& shaderPreprocessor, String name, sp<Mat4> matrix)
+{
+    if(sp<Uniform> uniform = shaderPreprocessor.makeUniformInput(std::move(name), Uniform::TYPE_MAT4))
+    {
+        uniform->setUploader(sp<Uploader>::make<UploaderOfVariable<M4>>(std::move(matrix)));
+        addUniform(std::move(uniform));
+    }
+}
+
+void PipelineBuildingContext::initialize()
+{
+    initializePipelines();
+    initializeAttributes();
+    initializeSSBO();
+
+    if(const ShaderPreprocessor* vertex = tryGetStage(PipelineInput::SHADER_STAGE_VERTEX))
+        tryBindCamera(*vertex);
+    if(const ShaderPreprocessor* compute = tryGetStage(PipelineInput::SHADER_STAGE_COMPUTE))
+        tryBindCamera(*compute);
+
+    initializeUniforms();
+}
+
+void PipelineBuildingContext::initializeUniforms()
 {
     int32_t binding = 0;
     for(const auto& i : _stages)
@@ -330,18 +372,15 @@ void PipelineBuildingContext::loadPredefinedBuffer(BeanFactory& factory, const S
     }
 }
 
-Attribute PipelineBuildingContext::makePredefinedAttribute(const String& name, const String& type)
+void PipelineBuildingContext::loadLayoutBindings(BeanFactory& factory, const Scope& args, const document& manifest)
 {
-    if(name == "TexCoordinate")
-        return Attribute("a_TexCoordinate", Attribute::TYPE_USHORT, type, 2, true);
-    if(name == "Position")
+    for(const document& i : manifest->children("layout"))
     {
-        if(type == "int")
-            return Attribute("a_Position", Attribute::TYPE_INTEGER, type, 1, false);
-        CHECK(type == "vec2" || type == "vec3" || type == "vec4", "Unacceptable Position type: '%s', must be in [int, vec2, vec3, vec4]", type.c_str());
-        return Attribute("a_Position", Attribute::TYPE_FLOAT, type, std::min<uint32_t>(3, static_cast<uint32_t>(type.at(3) - '0')), false);
+        String name = Documents::getAttribute(i, constants::NAME);
+        int32_t binding = Documents::getAttribute(i, "binding", -1);
+        Texture::Usage usage = Documents::getAttribute(i, "usage", Texture::USAGE_GENERAL);
+        _layout_bindings.push_back({factory.ensure<Texture>(i, args), usage, std::move(name), binding});
     }
-    return RenderUtil::makePredefinedAttribute("a_" + name, type);
 }
 
 void PipelineBuildingContext::initializePipelines()
