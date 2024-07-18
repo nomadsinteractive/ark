@@ -17,7 +17,7 @@ namespace ark {
 
 class PipelineLayout {
 public:
-    PipelineLayout(sp<PipelineBuildingContext> buildingContext);
+    PipelineLayout(sp<PipelineBuildingContext> buildingContext, sp<Snippet> snippet);
 
     const sp<Snippet>& snippet() const;
     const sp<PipelineInput>& input() const;

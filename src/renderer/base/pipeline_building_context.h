@@ -19,15 +19,24 @@ namespace ark {
 
 class PipelineBuildingContext {
 public:
-    PipelineBuildingContext(const sp<RenderController>& renderController);
-    PipelineBuildingContext(const sp<RenderController>& renderController, sp<String> vertex, sp<String> fragment);
+    PipelineBuildingContext(const sp<RenderController>& renderController, const sp<Camera>& camera);
+    PipelineBuildingContext(const sp<RenderController>& renderController, const sp<Camera>& camera, sp<String> vertex, sp<String> fragment);
 
     void loadManifest(const document& manifest, BeanFactory& factory, const Scope& args);
 
     void initialize();
 
+    enum LayoutBindingType {
+        LAYOUT_BINDING_TYPE_AUTO,
+        LAYOUT_BINDING_TYPE_IMAGE,
+        LAYOUT_BINDING_TYPE_SAMPLER,
+        LAYOUT_BINDING_TYPE_SSBO,
+        LAYOUT_BINDING_TYPE_UBO
+    };
+
     struct LayoutBinding {
-        sp<Texture> _resource;
+        LayoutBindingType _type;
+        sp<Texture> _texture;
         Texture::Usage _usage;
         String _name;
         int32_t _binding;
@@ -62,14 +71,14 @@ public:
     const op<ShaderPreprocessor>& getStage(PipelineInput::ShaderStage shaderStage) const;
     const op<ShaderPreprocessor>& addStage(sp<String> source, PipelineInput::ShaderStage shaderStage, PipelineInput::ShaderStage preShaderStage);
 
-    sp<Snippet> makePipelineSnippet() const;
+    sp<Snippet> makePipelineSnippet();
     std::map<String, String> toDefinitions() const;
 
     void tryBindCamera(const ShaderPreprocessor& shaderPreprocessor);
 
 private:
     void initializeAttributes();
-    void initializePipelines();
+    void initializeStages();
     void initializeSSBO();
     void initializeUniforms();
 

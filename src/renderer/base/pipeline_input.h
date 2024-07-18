@@ -117,11 +117,10 @@ public:
         uint32_t _binding;
 
         std::set<ShaderStage> _stages;
-
     };
 
 public:
-    PipelineInput();
+    PipelineInput(const sp<Camera>& camera);
 
     void initialize(const PipelineBuildingContext& buildingContext);
 
@@ -136,8 +135,10 @@ public:
     std::map<uint32_t, Stream>& streams();
 
     size_t samplerCount() const;
+    bool hasSampler(const String& name) const;
     const std::vector<String>& samplerNames() const;
 
+    bool hasImage(const String& name) const;
     const std::vector<String>& imageNames() const;
 
     void addAttribute(String name, Attribute attribute);
@@ -158,6 +159,7 @@ private:
     std::vector<String> _sampler_names;
     std::vector<String> _image_names;
 
+    friend class PipelineBuildingContext;
     friend class PipelineLayout;
     friend class Shader;
 };

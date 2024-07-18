@@ -17,6 +17,25 @@ namespace ark {
 
 namespace {
 
+class UniqueNameSet {
+public:
+    UniqueNameSet(std::vector<String>& names)
+        : _names(names) {
+    }
+
+    void addBindings(const std::vector<String>& names) {
+        for(const String& i : names)
+            if(_name_set.find(i) == _name_set.end()) {
+                _name_set.insert(i);
+                _names.push_back(i);
+            }
+    }
+
+private:
+    std::vector<String>& _names;
+    std::set<String> _name_set;
+};
+
 class AlignedInput final : public Uploader {
 public:
     AlignedInput(sp<Uploader> delegate, size_t alignedSize)
@@ -53,13 +72,13 @@ Attribute makePredefinedAttribute(const String& name, const String& type)
 
 }
 
-PipelineBuildingContext::PipelineBuildingContext(const sp<RenderController>& renderController)
-    : _render_controller(renderController), _input(sp<PipelineInput>::make())
+PipelineBuildingContext::PipelineBuildingContext(const sp<RenderController>& renderController, const sp<Camera>& camera)
+    : _render_controller(renderController), _input(sp<PipelineInput>::make(camera))
 {
 }
 
-PipelineBuildingContext::PipelineBuildingContext(const sp<RenderController>& renderController, sp<String> vertex, sp<String> fragment)
-    : PipelineBuildingContext(renderController)
+PipelineBuildingContext::PipelineBuildingContext(const sp<RenderController>& renderController, const sp<Camera>& camera, sp<String> vertex, sp<String> fragment)
+    : PipelineBuildingContext(renderController, camera)
 {
     addStage(std::move(vertex), PipelineInput::SHADER_STAGE_VERTEX, PipelineInput::SHADER_STAGE_NONE);
     addStage(std::move(fragment), PipelineInput::SHADER_STAGE_FRAGMENT, PipelineInput::SHADER_STAGE_VERTEX);
@@ -106,21 +125,19 @@ void PipelineBuildingContext::initializeAttributes()
                     attributes.push_back(i.name(), i.type());
     }
 
-    for(const auto& i : _attributes)
-        if(!attributes.has(i.first))
-            attributes.push_back(i.first, i.second.declareType());
+    for(const auto& [k, v] : _attributes)
+        if(!attributes.has(k))
+            attributes.push_back(k, v.declareType());
 
     std::vector<String> generated;
-    for(const auto& [i, j] : attributes)
-    {
-        if(!firstStage._declaration_ins.has(i)
-           && !firstStage._declaration_outs.has(i)
-           && !firstStage._main_block->hasOutAttribute(i))
+    for(const auto& [k, v] : attributes)
+        if(!firstStage._declaration_ins.has(k)
+           && !firstStage._declaration_outs.has(k)
+           && !firstStage._main_block->hasOutAttribute(k))
         {
-            generated.push_back(i);
-            addAttribute(i, j, 0);
+            generated.push_back(k);
+            addAttribute(k, v, 0);
         }
-    }
 
     for(auto iter : _input->streams())
         iter.second.align();
@@ -187,15 +204,7 @@ void PipelineBuildingContext::tryBindUniformMatrix(const ShaderPreprocessor& sha
 
 void PipelineBuildingContext::initialize()
 {
-    initializePipelines();
     initializeAttributes();
-    initializeSSBO();
-
-    if(const ShaderPreprocessor* vertex = tryGetStage(PipelineInput::SHADER_STAGE_VERTEX))
-        tryBindCamera(*vertex);
-    if(const ShaderPreprocessor* compute = tryGetStage(PipelineInput::SHADER_STAGE_COMPUTE))
-        tryBindCamera(*compute);
-
     initializeUniforms();
 }
 
@@ -268,13 +277,13 @@ bool PipelineBuildingContext::hasStage(PipelineInput::ShaderStage shaderStage) c
 
 ShaderPreprocessor* PipelineBuildingContext::tryGetStage(PipelineInput::ShaderStage shaderStage) const
 {
-    auto iter = _stages.find(shaderStage);
+    const auto iter = _stages.find(shaderStage);
     return iter != _stages.end() ? iter->second.get() : nullptr;
 }
 
 const op<ShaderPreprocessor>& PipelineBuildingContext::getStage(PipelineInput::ShaderStage shaderStage) const
 {
-    auto iter = _stages.find(shaderStage);
+    const auto iter = _stages.find(shaderStage);
     CHECK(iter != _stages.end(), "Stage '%d' not found", shaderStage);
     return iter->second;
 }
@@ -287,9 +296,13 @@ const op<ShaderPreprocessor>& PipelineBuildingContext::addStage(sp<String> sourc
     return stage;
 }
 
-sp<Snippet> PipelineBuildingContext::makePipelineSnippet() const
+sp<Snippet> PipelineBuildingContext::makePipelineSnippet()
 {
-    return sp<SnippetDelegate>::make(_snippet);
+    sp<Snippet> snippet = sp<Snippet>::make<SnippetDelegate>(_snippet);
+    snippet->preInitialize(*this);
+    initializeStages();
+    initializeSSBO();
+    return snippet;
 }
 
 std::map<String, String> PipelineBuildingContext::toDefinitions() const
@@ -321,10 +334,10 @@ void PipelineBuildingContext::loadPredefinedUniform(BeanFactory& factory, const 
         const String& name = Documents::ensureAttribute(i, constants::NAME);
         const String& type = Documents::ensureAttribute(i, constants::TYPE);
         const String& value = Documents::ensureAttribute(i, constants::VALUE);
-        int32_t binding = Documents::getAttribute<int32_t>(i, constants::BINDING, -1);
+        const int32_t binding = Documents::getAttribute<int32_t>(i, constants::BINDING, -1);
         sp<Builder<Uploader>> builder = factory.findBuilderByTypeValue<Uploader>(type, value);
         sp<Uploader> input = builder ? builder->build(args) : factory.ensure<Uploader>(value, args);
-        uint32_t size = static_cast<uint32_t>(input->size());
+        const uint32_t size = static_cast<uint32_t>(input->size());
         Uniform::Type uType = Uniform::toType(type);
         uint32_t componentSize = uType != Uniform::TYPE_STRUCT ? Uniform::getComponentSize(uType) : size;
         CHECK(componentSize, "Unknow type \"%s\"", type.c_str());
@@ -374,22 +387,52 @@ void PipelineBuildingContext::loadPredefinedBuffer(BeanFactory& factory, const S
 
 void PipelineBuildingContext::loadLayoutBindings(BeanFactory& factory, const Scope& args, const document& manifest)
 {
-    for(const document& i : manifest->children("layout"))
+    const std::vector<String>& samplerNames = _input->samplerNames();
+    const std::vector<String>& imageNames = _input->imageNames();
+    for(const document& i : manifest->children(constants::LAYOUT))
     {
+        const int32_t binding = Documents::getAttribute(i, "binding", -1);
         String name = Documents::getAttribute(i, constants::NAME);
-        int32_t binding = Documents::getAttribute(i, "binding", -1);
+        CHECK(name != "" || binding != -1, "Pipeline layout should have either name or binding defined: %s", Documents::toString(i).c_str());
+        const LayoutBindingType type = Documents::getAttribute(manifest, constants::TYPE, LAYOUT_BINDING_TYPE_AUTO);
         Texture::Usage usage = Documents::getAttribute(i, "usage", Texture::USAGE_GENERAL);
-        _layout_bindings.push_back({factory.ensure<Texture>(i, args), usage, std::move(name), binding});
+        _layout_bindings.push_back({type, factory.ensure<Texture>(i, args), usage, std::move(name), binding});
     }
 }
 
-void PipelineBuildingContext::initializePipelines()
+void PipelineBuildingContext::initializeStages()
 {
     for(auto iter = _stages.begin(); iter != _stages.end(); ++iter)
         if(iter == _stages.begin())
             iter->second->initializeAsFirst(*this);
         else
             iter->second->initialize(*this);
+
+    if(const ShaderPreprocessor* vertex = tryGetStage(PipelineInput::SHADER_STAGE_VERTEX))
+        tryBindCamera(*vertex);
+    if(const ShaderPreprocessor* compute = tryGetStage(PipelineInput::SHADER_STAGE_COMPUTE))
+        tryBindCamera(*compute);
+
+    if(const ShaderPreprocessor* compute = tryGetStage(PipelineInput::SHADER_STAGE_COMPUTE))
+    {
+        _input->_sampler_names = compute->_declaration_samplers.vars().keys();
+        _input->_image_names = compute->_declaration_images.vars().keys();
+    }
+    else
+    {
+        UniqueNameSet samplerNames(_input->_sampler_names);
+        UniqueNameSet imageNames(_input->_image_names);
+        if(const ShaderPreprocessor* vertex = tryGetStage(PipelineInput::SHADER_STAGE_VERTEX))
+        {
+            samplerNames.addBindings(vertex->_declaration_samplers.vars().keys());
+            imageNames.addBindings(vertex->_declaration_images.vars().keys());
+        }
+        if(const ShaderPreprocessor* fragment = tryGetStage(PipelineInput::SHADER_STAGE_FRAGMENT))
+        {
+            samplerNames.addBindings(fragment->_declaration_samplers.vars().keys());
+            imageNames.addBindings(fragment->_declaration_images.vars().keys());
+        }
+    }
 }
 
 void PipelineBuildingContext::loadDefinitions(BeanFactory& factory, const Scope& args, const document& manifest)
@@ -400,6 +443,20 @@ void PipelineBuildingContext::loadDefinitions(BeanFactory& factory, const Scope&
         CHECK_WARN(_definitions.find(name) == _definitions.end(), "Definition \"%s\" redefined", name.c_str());
         _definitions.insert(std::make_pair(name, factory.ensureBuilder<StringVar>(i, constants::VALUE)->build(args)));
     }
+}
+
+template<> PipelineBuildingContext::LayoutBindingType StringConvert::eval<PipelineBuildingContext::LayoutBindingType>(const String& repr)
+{
+    if(repr == "image")
+        return PipelineBuildingContext::LAYOUT_BINDING_TYPE_IMAGE;
+    if(repr == "sampler")
+        return PipelineBuildingContext::LAYOUT_BINDING_TYPE_SAMPLER;
+    if(repr == "ssbo")
+        return PipelineBuildingContext::LAYOUT_BINDING_TYPE_SSBO;
+    if(repr == "ubo")
+        return PipelineBuildingContext::LAYOUT_BINDING_TYPE_UBO;
+    CHECK(repr == "auto", "Unknow LayoutBindingType: \"%s, supported values are [\"image\", \"sampler\", \"ssbo\", \"ubo\", ...]", repr.c_str());
+    return PipelineBuildingContext::LAYOUT_BINDING_TYPE_AUTO;
 }
 
 }

@@ -2,16 +2,14 @@
 
 #include "core/inf/uploader.h"
 
-#include "graphics/base/camera.h"
-
 #include "renderer/base/pipeline_building_context.h"
 #include "renderer/base/shader_preprocessor.h"
 #include "renderer/inf/snippet.h"
 
 namespace ark {
 
-PipelineLayout::PipelineLayout(sp<PipelineBuildingContext> buildingContext)
-    : _building_context(std::move(buildingContext)), _input(_building_context->_input), _snippet(_building_context->makePipelineSnippet()),
+PipelineLayout::PipelineLayout(sp<PipelineBuildingContext> buildingContext, sp<Snippet> snippet)
+    : _building_context(std::move(buildingContext)), _input(_building_context->_input), _snippet(std::move(snippet)),
       _color_attachment_count(0), _definitions(_building_context->toDefinitions())
 {
     initialize();
@@ -53,7 +51,6 @@ size_t PipelineLayout::colorAttachmentCount() const
 
 void PipelineLayout::initialize()
 {
-    _snippet->preInitialize(_building_context);
     _building_context->initialize();
 
     if(const ShaderPreprocessor* fragment = _building_context->tryGetStage(PipelineInput::SHADER_STAGE_FRAGMENT))

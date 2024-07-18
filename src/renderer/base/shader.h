@@ -48,7 +48,7 @@ public:
         sp<Shader> build(const Scope& args) override;
 
     private:
-        sp<PipelineBuildingContext> makePipelineBuildingContext(const Scope& args) const;
+        sp<PipelineBuildingContext> makePipelineBuildingContext(const sp<Camera>& camera, const Scope& args) const;
 
     private:
         BeanFactory _factory;

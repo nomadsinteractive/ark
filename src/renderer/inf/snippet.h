@@ -2,7 +2,7 @@
 
 #include "core/base/api.h"
 
-#include "graphics/base/render_request.h"
+#include "graphics/forwarding.h"
 
 #include "renderer/forwarding.h"
 

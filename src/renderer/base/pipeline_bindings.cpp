@@ -48,11 +48,6 @@ const sp<PipelineInput>& PipelineBindings::input() const
     return _stub->_input;
 }
 
-const sp<Snippet>& PipelineBindings::snippet() const
-{
-    return _stub->_layout->snippet();
-}
-
 const PipelineInput::AttributeOffsets& PipelineBindings::attributes() const
 {
     return _stub->_attributes;

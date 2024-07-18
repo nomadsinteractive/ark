@@ -50,13 +50,12 @@ public:
 
         const sp<PipelineFactory> pipelineFactory = Ark::instance().applicationContext()->renderEngine()->rendererFactory()->createPipelineFactory();
         const sp<Snippet> snippet = sp<SnippetTest>::make();
-        const sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(Ark::instance().applicationContext()->renderController(), std::move(vert), std::move(frag));
+        const sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(Ark::instance().applicationContext()->renderController(), nullptr, std::move(vert), std::move(frag));
         buildingContext->addSnippet(snippet);
 
-        const sp<PipelineLayout> pipelineLayout = sp<PipelineLayout>::make(buildingContext);
+        const sp<PipelineLayout> pipelineLayout = sp<PipelineLayout>::make(buildingContext, buildingContext->makePipelineSnippet());
         const sp<PipelineInput>& pipelineInput = pipelineLayout->input();
 
-        buildingContext->initialize();
         TESTCASE_VALIDATE(pipelineInput->streams()[0].stride() != 0);
         TESTCASE_VALIDATE(pipelineInput->getAttribute("Position")->length());
         TESTCASE_VALIDATE(pipelineInput->getAttribute("TexCoordinate")->offset() != -1);

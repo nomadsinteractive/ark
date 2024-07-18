@@ -19,7 +19,7 @@
 namespace ark {
 
 //[[script::bindings::extends(Renderer)]]
-class ARK_API RenderLayer : public Renderer {
+class ARK_API RenderLayer final : public Renderer {
 private:
     struct Stub {
         Stub(sp<RenderController> renderController, sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Boolean> visible, sp<Boolean> discarded, sp<Varyings> varyings, sp<Vec4> scissor);

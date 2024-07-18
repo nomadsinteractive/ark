@@ -258,7 +258,7 @@ void VKPipeline::setupDescriptorSetLayout(const PipelineInput& pipelineInput)
     {
         VkShaderStageFlags stages = i._stages.empty() ? VK_SHADER_STAGE_ALL : static_cast<VkShaderStageFlags>(0);
         for(PipelineInput::ShaderStage j : i._stages)
-            stages = static_cast<VkShaderStageFlags>(stages | VKUtil::toStage(j));
+            stages = stages | VKUtil::toStage(j);
 
         binding = std::max(binding, i._binding);
         setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, stages, i._binding));

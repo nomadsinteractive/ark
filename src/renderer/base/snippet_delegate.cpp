@@ -12,25 +12,34 @@
 
 namespace ark {
 
-class CoreSnippet : public Snippet {
+namespace {
+
+sp<Snippet> createCoreSnippet(const GraphicsContext& graphicsContext, sp<Snippet> next)
+{
+    sp<Snippet> coreSnippet = graphicsContext.renderContext()->snippetFactory()->createCoreSnippet();
+    DASSERT(coreSnippet);
+    return next ? sp<Snippet>::make<SnippetLinkedChain>(std::move(coreSnippet), std::move(next)) : coreSnippet;
+}
+
+class CoreDrawEvents final : public Snippet::DrawEvents {
 public:
-    CoreSnippet(SnippetDelegate& wrapper, const sp<Snippet>& snippet);
+    CoreDrawEvents(SnippetDelegate& wrapper, const sp<Snippet>& snippet)
+        : _wrapper(wrapper), _snippet(snippet)
+    {
+    }
 
-    virtual void preInitialize(PipelineBuildingContext& context) override;
-    virtual void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout) override;
-    virtual sp<DrawEvents> makeDrawEvents() override;
+    void preDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override
+    {
+        const sp<Snippet> delegate = _wrapper.wrapped();
+        _wrapper.reset(createCoreSnippet(graphicsContext, _snippet));
+        _delegate = _wrapper.wrapped()->makeDrawEvents();
+        _delegate->preDraw(graphicsContext, context);
+    }
 
-private:
-    SnippetDelegate& _wrapper;
-    sp<Snippet> _snippet;
-};
-
-class CoreDrawEvents : public Snippet::DrawEvents {
-public:
-    CoreDrawEvents(SnippetDelegate& wrapper, const sp<Snippet>& snippet);
-
-    virtual void preDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override;
-    virtual void postDraw(GraphicsContext& graphicsContext) override;
+    void postDraw(GraphicsContext& graphicsContext) override
+    {
+        _delegate->postDraw(graphicsContext);
+    }
 
 private:
     SnippetDelegate& _wrapper;
@@ -39,78 +48,61 @@ private:
     sp<Snippet::DrawEvents> _delegate;
 };
 
-static sp<Snippet> createCoreSnippet(GraphicsContext& graphicsContext, sp<Snippet> next)
-{
-    const sp<Snippet> coreSnippet = graphicsContext.renderContext()->snippetFactory()->createCoreSnippet();
-    DASSERT(coreSnippet);
-    return next ? sp<Snippet>::make<SnippetLinkedChain>(std::move(coreSnippet), std::move(next)) : coreSnippet;
+class CoreSnippet final : public Snippet {
+public:
+    CoreSnippet(SnippetDelegate& wrapper, const sp<Snippet>& snippet)
+        : _wrapper(wrapper), _snippet(snippet)
+    {
+    }
+
+    void preInitialize(PipelineBuildingContext& context) override
+    {
+        if(_snippet)
+            _snippet->preInitialize(context);
+    }
+
+    void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout) override
+    {
+        const sp<Snippet> delegate = _wrapper.wrapped();
+        _wrapper.reset(createCoreSnippet(graphicsContext, _snippet));
+        _wrapper.preCompile(graphicsContext, context, pipelineLayout);
+    }
+
+    sp<DrawEvents> makeDrawEvents() override
+    {
+        return sp<CoreDrawEvents>::make(_wrapper, _snippet);
+    }
+
+private:
+    SnippetDelegate& _wrapper;
+    sp<Snippet> _snippet;
+};
+
 }
 
-
-CoreSnippet::CoreSnippet(SnippetDelegate& wrapper, const sp<Snippet>& snippet)
-    : _wrapper(wrapper), _snippet(snippet)
-{
-}
-
-void CoreSnippet::preInitialize(PipelineBuildingContext& context)
-{
-    if(_snippet)
-        _snippet->preInitialize(context);
-}
-
-void CoreSnippet::preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout)
-{
-    const sp<Snippet> delegate = _wrapper._core;
-    _wrapper._core = createCoreSnippet(graphicsContext, _snippet);
-    _wrapper.preCompile(graphicsContext, context, pipelineLayout);
-}
-
-sp<Snippet::DrawEvents> CoreSnippet::makeDrawEvents()
-{
-    return sp<CoreDrawEvents>::make(_wrapper, _snippet);
-}
-
-CoreDrawEvents::CoreDrawEvents(SnippetDelegate& wrapper, const sp<Snippet>& snippet)
-    : _wrapper(wrapper), _snippet(snippet)
-{
-}
-
-void CoreDrawEvents::preDraw(GraphicsContext& graphicsContext, const DrawingContext& context)
-{
-    const sp<Snippet> delegate = _wrapper._core;
-    _wrapper._core = createCoreSnippet(graphicsContext, _snippet);
-    _delegate = _wrapper._core->makeDrawEvents();
-    _delegate->preDraw(graphicsContext, context);
-}
-
-void CoreDrawEvents::postDraw(GraphicsContext& graphicsContext)
-{
-    _delegate->postDraw(graphicsContext);
-}
-
-SnippetDelegate::SnippetDelegate(const sp<Snippet>& snippet)
-    : _core(sp<CoreSnippet>::make(*this, snippet))
+SnippetDelegate::SnippetDelegate(sp<Snippet> snippet)
+    : Wrapper(sp<Snippet>::make<CoreSnippet>(*this, snippet))
 {
 }
 
 void SnippetDelegate::preInitialize(PipelineBuildingContext& context)
 {
-    _core->preInitialize(context);
+    _wrapped->preInitialize(context);
 }
 
 void SnippetDelegate::preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout)
 {
-    _core->preCompile(graphicsContext, context, pipelineLayout);
+    _wrapped->preCompile(graphicsContext, context, pipelineLayout);
 }
 
 sp<Snippet::DrawEvents> SnippetDelegate::makeDrawEvents(const RenderRequest& renderRequest)
 {
-    return _core->makeDrawEvents(renderRequest);
+    return _wrapped->makeDrawEvents(renderRequest);
 }
 
 sp<Snippet::DrawEvents> SnippetDelegate::makeDrawEvents()
 {
-    return _core->makeDrawEvents();
+    return _wrapped->makeDrawEvents();
 }
 
 }

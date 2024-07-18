@@ -38,11 +38,11 @@ public:
     }
 
     sp<Shader> build(const Scope& args) override {
-        sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(_render_controller, _vertex, _fragment);
+        const sp<Camera> camera = _camera->build(args);
+        sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(_render_controller, camera ? camera : _default_camera, _vertex, _fragment);
+        sp<Snippet> snippet = buildingContext->makePipelineSnippet();
         buildingContext->loadManifest(_manifest, _factory, args);
-        sp<Camera> camera = _camera->build(args);
-        buildingContext->_input->camera().assign(camera ? camera : _default_camera);
-        return sp<Shader>::make(_render_controller->createPipelineFactory(), _render_controller, sp<PipelineLayout>::make(buildingContext), _parameters.build(args));
+        return sp<Shader>::make(_render_controller->createPipelineFactory(), _render_controller, sp<PipelineLayout>::make(buildingContext, std::move(snippet)), _parameters.build(args));
     }
 
 private:
@@ -55,7 +55,6 @@ private:
 
     SafePtr<Builder<Camera>> _camera;
     PipelineBindings::Parameters::BUILDER _parameters;
-
 };
 
 Shader::StageManifest loadStages(BeanFactory& factory, const document& manifest)
@@ -163,21 +162,20 @@ Shader::BUILDER_IMPL::BUILDER_IMPL(BeanFactory& factory, const document& manifes
 
 sp<Shader> Shader::BUILDER_IMPL::build(const Scope& args)
 {
-    sp<PipelineBuildingContext> buildingContext = makePipelineBuildingContext(args);
-    buildingContext->loadManifest(_manifest, _factory, args);
+    sp<PipelineBuildingContext> buildingContext = makePipelineBuildingContext(_camera->build(args), args);
 
     for(const sp<Builder<Snippet>>& i : _snippets)
         buildingContext->addSnippet(i->build(args));
+    sp<Snippet> snippet = buildingContext->makePipelineSnippet();
 
-    const sp<Camera> camera = _camera->build(args);
-    buildingContext->_input->camera().assign(camera ? camera : Camera::getDefaultCamera());
-    return sp<Shader>::make(_render_controller->createPipelineFactory(), _render_controller, sp<PipelineLayout>::make(buildingContext), _parameters.build(args));
+    buildingContext->loadManifest(_manifest, _factory, args);
+    return sp<Shader>::make(_render_controller->createPipelineFactory(), _render_controller, sp<PipelineLayout>::make(buildingContext, std::move(snippet)), _parameters.build(args));
 }
 
-sp<PipelineBuildingContext> Shader::BUILDER_IMPL::makePipelineBuildingContext(const Scope& args) const
+sp<PipelineBuildingContext> Shader::BUILDER_IMPL::makePipelineBuildingContext(const sp<Camera>& camera, const Scope& args) const
 {
     PipelineInput::ShaderStage prestage = PipelineInput::SHADER_STAGE_NONE;
-    sp<PipelineBuildingContext> context = sp<PipelineBuildingContext>::make(_render_controller);
+    sp<PipelineBuildingContext> context = sp<PipelineBuildingContext>::make(_render_controller, camera);
     for(const auto& [k, v] : _stages)
     {
         context->addStage(v->build(args), k, prestage);

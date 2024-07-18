@@ -9,31 +9,6 @@
 
 namespace ark {
 
-
-namespace {
-
-class BindingNames {
-public:
-    BindingNames(std::vector<String>& names)
-        : _names(names) {
-    }
-
-    void addBindings(const std::vector<String>& names) {
-        for(const String& i : names)
-            if(_name_set.find(i) == _name_set.end()) {
-                _name_set.insert(i);
-                _names.push_back(i);
-            }
-    }
-
-private:
-    std::vector<String>& _names;
-    std::set<String> _name_set;
-};
-
-}
-
-
 PipelineInput::AttributeOffsets::AttributeOffsets()
     : _last_attribute(ATTRIBUTE_NAME_TEX_COORDINATE)
 {
@@ -86,8 +61,8 @@ size_t PipelineInput::AttributeOffsets::stride() const
     }
 }
 
-PipelineInput::PipelineInput()
-    : _streams{{0, Stream()}}
+PipelineInput::PipelineInput(const sp<Camera>& camera)
+    : _camera(*(camera ? camera : Camera::getDefaultCamera())), _streams{{0, Stream()}}
 {
 }
 
@@ -111,27 +86,6 @@ void PipelineInput::initialize(const PipelineBuildingContext& buildingContext)
     {
         i.second->initialize();
         _ubos.push_back(std::move(i.second));
-    }
-
-    if(const ShaderPreprocessor* compute = buildingContext.tryGetStage(SHADER_STAGE_COMPUTE))
-    {
-        _sampler_names = compute->_declaration_samplers.vars().keys();
-        _image_names = compute->_declaration_images.vars().keys();
-    }
-    else
-    {
-        BindingNames samplerNames(_sampler_names);
-        BindingNames imageNames(_image_names);
-        if(const ShaderPreprocessor* vertex = buildingContext.tryGetStage(SHADER_STAGE_VERTEX))
-        {
-            samplerNames.addBindings(vertex->_declaration_samplers.vars().keys());
-            imageNames.addBindings(vertex->_declaration_images.vars().keys());
-        }
-        if(const ShaderPreprocessor* fragment = buildingContext.tryGetStage(SHADER_STAGE_FRAGMENT))
-        {
-            samplerNames.addBindings(fragment->_declaration_samplers.vars().keys());
-            imageNames.addBindings(fragment->_declaration_images.vars().keys());
-        }
     }
 }
 
@@ -175,9 +129,19 @@ size_t PipelineInput::samplerCount() const
     return _sampler_names.size();
 }
 
+bool PipelineInput::hasSampler(const String& name) const
+{
+    return std::find(_sampler_names.begin(), _sampler_names.end(), name) != _sampler_names.end();
+}
+
 const std::vector<String>& PipelineInput::samplerNames() const
 {
     return _sampler_names;
+}
+
+bool PipelineInput::hasImage(const String& name) const
+{
+    return std::find(_image_names.begin(), _image_names.end(), name) != _image_names.end();
 }
 
 const std::vector<String>& PipelineInput::imageNames() const
@@ -200,7 +164,7 @@ const PipelineInput::Stream& PipelineInput::getStream(uint32_t divisor) const
 Optional<const Attribute&> PipelineInput::getAttribute(const String& name) const
 {
     for(const auto& i : _streams)
-        if(Optional<const Attribute&> opt = i.second.getAttribute(name))
+        if(const Optional<const Attribute&> opt = i.second.getAttribute(name))
             return opt;
     return Optional<const Attribute&>();
 }
@@ -208,11 +172,8 @@ Optional<const Attribute&> PipelineInput::getAttribute(const String& name) const
 sp<Uniform> PipelineInput::getUniform(const String& name) const
 {
     for(const sp<UBO>& i : _ubos)
-    {
-        const auto iter = i->uniforms().find(name);
-        if(iter != i->uniforms().end())
+        if(const auto iter = i->uniforms().find(name); iter != i->uniforms().end())
             return iter->second;
-    }
     return nullptr;
 }
 

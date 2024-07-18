@@ -173,7 +173,6 @@ public:
     const Optional<Rect>& scissor() const;
     const sp<PipelineLayout>& layout() const;
     const sp<PipelineInput>& input() const;
-    const sp<Snippet>& snippet() const;
 
     const PipelineInput::AttributeOffsets& attributes() const;
     const Table<String, sp<Texture>>& samplers() const;
