@@ -30,6 +30,7 @@
 #include "platform/platform.h"
 
 #include "generated/vulkan_plugin.h"
+#include "renderer/base/render_engine.h"
 
 
 namespace ark::vulkan {
@@ -41,7 +42,7 @@ RendererFactoryVulkan::RendererFactoryVulkan(sp<Recycler> recycler)
     pm->addPlugin(sp<VulkanPlugin>::make());
 }
 
-sp<RenderEngineContext> RendererFactoryVulkan::initialize(Ark::RendererVersion version)
+sp<RenderEngineContext> RendererFactoryVulkan::createRenderEngineContext(Ark::RendererVersion version)
 {
     sp<RenderEngineContext> vkContext = sp<RenderEngineContext>::make(version, Viewport(0, 0.0f, 1.0f, 1.0f, 0, 1.0f));
     if(version != Ark::RENDERER_VERSION_AUTO)
@@ -49,11 +50,11 @@ sp<RenderEngineContext> RendererFactoryVulkan::initialize(Ark::RendererVersion v
     return vkContext;
 }
 
-void RendererFactoryVulkan::onSurfaceCreated(RenderEngineContext& vkContext)
+void RendererFactoryVulkan::onSurfaceCreated(RenderEngine& renderEngine)
 {
     DTHREAD_CHECK(THREAD_ID_RENDERER);
 
-    setVersion(Ark::RENDERER_VERSION_VULKAN_12, vkContext);
+    setVersion(Ark::RENDERER_VERSION_VULKAN_12, renderEngine.context());
 
     Platform::vkInitialize();
 
@@ -62,7 +63,7 @@ void RendererFactoryVulkan::onSurfaceCreated(RenderEngineContext& vkContext)
 
     _renderer->_device = sp<VKDevice>::make(_renderer->_instance, _renderer->_instance->physicalDevices()[0]);
     _renderer->_heap = sp<VKHeap>::make(_renderer->_device);
-    _renderer->_render_target = sp<VKSwapChain>::make(vkContext, _renderer->_device);
+    _renderer->_render_target = sp<VKSwapChain>::make(renderEngine, _renderer->_device);
 }
 
 void RendererFactoryVulkan::setVersion(Ark::RendererVersion version, RenderEngineContext& vkContext)

@@ -1,15 +1,12 @@
 #pragma once
 
-#include <vector>
-
 #include "core/types/shared_ptr.h"
 
 #include "renderer/forwarding.h"
 #include "renderer/inf/pipeline_factory.h"
 #include "renderer/vulkan/forward.h"
 
-namespace ark {
-namespace vulkan {
+namespace ark::vulkan {
 
 class PipelineFactoryVulkan : public PipelineFactory {
 public:
@@ -22,5 +19,4 @@ private:
     sp<VKRenderer> _renderer;
 };
 
-}
 }

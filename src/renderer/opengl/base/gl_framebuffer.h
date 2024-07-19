@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_OPENGL_BASE_GL_FRAMEBUFFER_H_
-#define ARK_RENDERER_OPENGL_BASE_GL_FRAMEBUFFER_H_
+#pragma once
 
 #include <vector>
 
@@ -8,8 +7,7 @@
 #include "renderer/forwarding.h"
 #include "renderer/inf/resource.h"
 
-namespace ark {
-namespace opengl {
+namespace ark::opengl {
 
 class GLFramebuffer : public Resource {
 public:
@@ -30,6 +28,3 @@ private:
 };
 
 }
-}
-
-#endif

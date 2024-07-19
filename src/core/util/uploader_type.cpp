@@ -138,6 +138,14 @@ sp<Uploader> UploaderType::create(const std::set<uint32_t>& value, size_t size)
     return reserve(sp<UploaderArray<uint32_t>>::make(std::vector<uint32_t>(value.begin(), value.end())), size);
 }
 
+std::vector<uint8_t> UploaderType::toBytes(Uploader& self)
+{
+    std::vector<uint8_t> bytes(self.size());
+    WritableMemory writable(bytes.data());
+    self.upload(writable);
+    return bytes;
+}
+
 sp<Uploader> UploaderType::wrap(sp<Uploader> self)
 {
     return sp<UploaderWrapper>::make(std::move(self));

@@ -1,5 +1,22 @@
 #pragma once
 
+#ifdef ARK_PLATFORM_WINDOWS
+#include <windows.h>
+#endif
+
+#ifdef ARK_PLATFORM_ANDROID
+#include <android/native_window.h>
+#include <EGL/egl.h>
+#endif
+
+#ifdef ARK_PLATFORM_DARWIN
+#ifdef __OBJC__
+@class NSWindow;
+#else
+typedef struct _NSWindow NSWindow;
+#endif
+#endif
+
 #include "core/ark.h"
 #include "core/base/api.h"
 #include "core/types/shared_ptr.h"
@@ -11,6 +28,36 @@
 namespace ark {
 
 class ARK_API RenderEngine {
+public:
+    union PlatformInfo {
+#ifdef ARK_PLATFORM_WINDOWS
+        struct {
+            HWND window;                /**< The window handle */
+            HDC hdc;                    /**< The window device context */
+            HINSTANCE hinstance;        /**< The instance handle */
+        } windows;
+#endif
+#ifdef ARK_PLATFORM_LINUX
+        struct {
+            Display* display;           /**< The X11 display */
+            Window window;              /**< The X11 window */
+        } x11;
+#endif
+#ifdef ARK_PLATFORM_DARWIN
+        struct {
+            NSWindow* window;
+            void* view;
+        } darwin;
+#endif
+#ifdef ARK_PLATFORM_ANDROID
+        struct {
+            ANativeWindow* window;
+            EGLSurface surface;
+        } android;
+#endif
+        uint8_t dummy[64] = {0};
+    };
+
 public:
     RenderEngine(Ark::RendererVersion version, Ark::RendererCoordinateSystem coordinateSystem, sp<RendererFactory> rendererFactory);
 
@@ -35,7 +82,11 @@ public:
 
     sp<RenderView> createRenderView(const sp<RenderController>& renderController, const Viewport& viewport) const;
 
+    const PlatformInfo& info() const;
+    PlatformInfo& info();
+
 private:
+    PlatformInfo _info;
     Ark::RendererCoordinateSystem _coordinate_system;
 
     sp<RendererFactory> _renderer_factory;

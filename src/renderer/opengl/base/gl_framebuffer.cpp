@@ -11,8 +11,7 @@
 
 #include "platform/gl/gl.h"
 
-namespace ark {
-namespace opengl {
+namespace ark::opengl {
 
 GLFramebuffer::GLFramebuffer(sp<Recycler> recycler, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments)
     : _recycler(std::move(recycler)), _color_attachments(std::move(colorAttachments)), _depth_stencil_attachment(depthStencilAttachments), _id(0)
@@ -95,10 +94,10 @@ void GLFramebuffer::upload(GraphicsContext& graphicsContext)
 
     glBindFramebuffer(GL_FRAMEBUFFER, _id);
     glDrawBuffers(static_cast<uint32_t>(drawBuffers.size()), drawBuffers.data());
-    for(const auto& i : attachments)
+    for(const auto& [k, v] : attachments)
     {
-        glFramebufferTexture2D(GL_FRAMEBUFFER, i.second, GL_TEXTURE_2D, static_cast<GLuint>(i.first), 0);
-        LOGD("glFramebufferTexture2D, attachment: %d, id: %d", i.second, i.first);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, v, GL_TEXTURE_2D, static_cast<GLuint>(k), 0);
+        LOGD("glFramebufferTexture2D, attachment: %d, id: %d", v, k);
     }
 
     if(depthInputs.size() > 0 && depthTexture->parameters()->_flags & Texture::FLAG_FOR_OUTPUT)
@@ -132,5 +131,4 @@ ResourceRecycleFunc GLFramebuffer::recycle()
     };
 }
 
-}
 }

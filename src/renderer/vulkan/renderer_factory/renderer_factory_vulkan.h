@@ -15,8 +15,8 @@ public:
     RendererFactoryVulkan(sp<Recycler> recycler);
     ~RendererFactoryVulkan() override = default;
 
-    sp<RenderEngineContext> initialize(Ark::RendererVersion version) override;
-    void onSurfaceCreated(RenderEngineContext& glContext) override;
+    sp<RenderEngineContext> createRenderEngineContext(Ark::RendererVersion version) override;
+    void onSurfaceCreated(RenderEngine& renderEngine) override;
 
     sp<Buffer::Delegate> createBuffer(Buffer::Type type, Buffer::Usage usage) override;
     sp<Camera::Delegate> createCamera() override;

@@ -46,6 +46,9 @@ public:
 //  [[script::bindings::constructor]]
     static sp<Uploader> create(const std::set<uint32_t>& value, size_t size = 0);
 
+//  [[script::bindings::classmethod]]
+    static std::vector<uint8_t> toBytes(Uploader& self);
+
 //  [[script::bindings::property]]
     static size_t size(const sp<Uploader>& self);
 

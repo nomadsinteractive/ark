@@ -224,7 +224,7 @@ class GenMethod(object):
         if self._self_argument:
             if self._self_argument.type_compare('Box'):
                 return '*self->box'
-            if not self._self_argument.type_compare(f'sp<{genclass.binding_classname}>'):
+            if not self._self_argument.type_compare(f'sp<{genclass.binding_classname}>', f'{genclass.binding_classname}&'):
                 return f'unpacked.cast<{acg.get_shared_ptr_type(self._self_argument.accept_type)}>()'
         return 'unpacked'
 
@@ -232,7 +232,7 @@ class GenMethod(object):
         return [
             'static %s %s(%s);' % (self.gen_py_return(), self._name, self.gen_py_arguments()),
             'constexpr static auto %s_r = ark::plugin::python::PyCast::RuntimeFuncWrapper<decltype(&%s), %s>;' % (self._name, self._name, self._name)
-            ]
+        ]
 
     @staticmethod
     def _gen_convert_args_code(lines, argdeclare, optional_check=False):
@@ -260,7 +260,7 @@ class GenMethod(object):
         argdeclare = [j.gen_declare('obj%d' % i, 'arg%d' % i, exact_cast, optional_check) for i, j in args]
         self_type_checks = []
         if self._self_argument:
-            if not self._self_argument.type_compare(f'sp<{genclass.binding_classname}>', 'Box'):
+            if not self._self_argument.type_compare(f'sp<{genclass.binding_classname}>', f'{genclass.binding_classname}&', 'Box'):
                 self_type_checks.append(f'unpacked.isInstance<{acg.get_shared_ptr_type(self._self_argument.accept_type)}>()')
         self._gen_convert_args_code(bodylines, argdeclare, optional_check)
 

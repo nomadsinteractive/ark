@@ -12,7 +12,7 @@
 
 namespace ark {
 
-class Framebuffer : public Renderer {
+class Framebuffer final : public Renderer {
 public:
     enum ClearMask {
         CLEAR_MASK_NONE = 0,
@@ -27,7 +27,7 @@ public:
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
-    const sp<Resource>& delegate() const;
+    const sp<Resource>& resource() const;
 
 //  [[plugin::resource-loader]]
     class BUILDER : public Builder<Framebuffer> {
@@ -57,7 +57,7 @@ public:
 
 private:
     sp<Renderer> _renderer;
-    sp<Resource> _delegate;
+    sp<Resource> _resource;
 };
 
 }

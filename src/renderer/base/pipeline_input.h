@@ -54,10 +54,10 @@ public:
         AttributeName _last_attribute;
     };
 
-    class Stream {
+    class Layout {
     public:
-        Stream();
-        DEFAULT_COPY_AND_ASSIGN(Stream);
+        Layout();
+        DEFAULT_COPY_AND_ASSIGN(Layout);
 
         uint32_t stride() const;
 
@@ -70,9 +70,8 @@ public:
         void align();
 
     private:
-        uint32_t _stride;
-
         Table<String, Attribute> _attributes;
+        uint32_t _stride;
     };
 
     class UBO {
@@ -131,8 +130,8 @@ public:
     std::vector<SSBO>& ssbos();
     const std::vector<SSBO>& ssbos() const;
 
-    const std::map<uint32_t, Stream>& streams() const;
-    std::map<uint32_t, Stream>& streams();
+    const std::map<uint32_t, Layout>& layouts() const;
+    std::map<uint32_t, Layout>& layouts();
 
     size_t samplerCount() const;
     bool hasSampler(const String& name) const;
@@ -143,7 +142,7 @@ public:
 
     void addAttribute(String name, Attribute attribute);
 
-    const PipelineInput::Stream& getStream(uint32_t divisor) const;
+    const PipelineInput::Layout& getLayout(uint32_t divisor) const;
 
     Optional<const Attribute&> getAttribute(const String& name) const;
 
@@ -155,7 +154,7 @@ private:
     std::vector<sp<UBO>> _ubos;
     std::vector<SSBO> _ssbos;
 
-    std::map<uint32_t, Stream> _streams;
+    std::map<uint32_t, Layout> _layouts;
     std::vector<String> _sampler_names;
     std::vector<String> _image_names;
 

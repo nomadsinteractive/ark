@@ -4,7 +4,7 @@
 
 #include "graphics/base/color.h"
 
-#include "renderer/base/render_engine_context.h"
+#include "renderer/base/render_engine.h"
 
 #include "renderer/vulkan/base/vk_device.h"
 #include "renderer/vulkan/base/vk_command_pool.h"
@@ -18,7 +18,7 @@ struct NSView;
 
 namespace ark::vulkan {
 
-VKSwapChain::VKSwapChain(const RenderEngineContext& renderContext, sp<VKDevice> device)
+VKSwapChain::VKSwapChain(const RenderEngine& renderEngine, sp<VKDevice> device)
     : _device(std::move(device)), _clear_values{}, _render_pass_begin_info(vks::initializers::renderPassBeginInfo()), _viewport{}, _aquired_image_id(0)
 {
     _swap_chain.connect(_device->vkInstance(), _device->vkPhysicalDevice(), _device->vkLogicalDevice());
@@ -31,7 +31,7 @@ VKSwapChain::VKSwapChain(const RenderEngineContext& renderContext, sp<VKDevice> 
     _render_pass_begin_info.clearValueCount = 2;
     _render_pass_begin_info.pClearValues = _clear_values;
 
-    initSwapchain(renderContext);
+    initialize(renderEngine);
 
     _queue = _device->getQueueByFamilyIndex(_swap_chain.queueNodeIndex);
     _command_pool = sp<VKCommandPool>::make(_device, _swap_chain.queueNodeIndex);
@@ -139,9 +139,9 @@ void VKSwapChain::onSurfaceChanged(uint32_t width, uint32_t height)
     _render_pass_begin_info.renderArea.extent.height = _height;
 }
 
-void VKSwapChain::initSwapchain(const RenderEngineContext& renderContext)
+void VKSwapChain::initialize(const RenderEngine& renderContext)
 {
-    const RenderEngineContext::Info& info = renderContext.info();
+    const RenderEngine::PlatformInfo& info = renderContext.info();
 #if defined(_WIN32)
     _swap_chain.initSurface(info.windows.hinstance, info.windows.window);
 #elif defined(VK_USE_PLATFORM_ANDROID_KHR)

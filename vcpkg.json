@@ -3,6 +3,7 @@
   "version-string": "0.9.5",
   "dependencies": [
     "assimp",
+    "bgfx",
     "box2d",
     "bullet3",
     "cute-headers",

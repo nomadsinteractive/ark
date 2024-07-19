@@ -13,7 +13,7 @@ namespace ark {
 
 RenderEngine::RenderEngine(Ark::RendererVersion version, Ark::RendererCoordinateSystem coordinateSystem, sp<RendererFactory> rendererFactory)
     : _coordinate_system(coordinateSystem == Ark::COORDINATE_SYSTEM_DEFAULT ? rendererFactory->defaultCoordinateSystem() : coordinateSystem), _renderer_factory(std::move(rendererFactory)),
-      _render_context(_renderer_factory->initialize(version))
+      _render_context(_renderer_factory->createRenderEngineContext(version))
 {
 }
 
@@ -91,7 +91,7 @@ V3 RenderEngine::toWorldPosition(const M4& vpMatrix, float screenX, float screen
 
 void RenderEngine::onSurfaceCreated()
 {
-    _renderer_factory->onSurfaceCreated(_render_context);
+    _renderer_factory->onSurfaceCreated(*this);
 }
 
 sp<RenderView> RenderEngine::createRenderView(const sp<RenderController>& renderController, const Viewport& viewport) const
@@ -101,6 +101,16 @@ sp<RenderView> RenderEngine::createRenderView(const sp<RenderController>& render
 
     _render_context->setViewport(viewport);
     return _renderer_factory->createRenderView(_render_context, renderController);
+}
+
+const RenderEngine::PlatformInfo& RenderEngine::info() const
+{
+    return _info;
+}
+
+RenderEngine::PlatformInfo& RenderEngine::info()
+{
+    return _info;
 }
 
 }

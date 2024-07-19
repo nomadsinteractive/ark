@@ -319,7 +319,7 @@ const GLPipeline::GLUniform& GLPipeline::getUniform(const String& name)
 
 void GLPipeline::bindBuffer(GraphicsContext& /*graphicsContext*/, const PipelineInput& input, uint32_t divisor)
 {
-    const PipelineInput::Stream& stream = input.getStream(divisor);
+    const PipelineInput::Layout& stream = input.getLayout(divisor);
     for(const auto& i : stream.attributes().values())
     {
         const GLPipeline::GLAttribute& glAttribute = _stub->getAttribute(i.name());

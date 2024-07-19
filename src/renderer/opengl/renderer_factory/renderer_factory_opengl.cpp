@@ -10,6 +10,7 @@
 #include "graphics/base/viewport.h"
 
 #include "renderer/base/framebuffer.h"
+#include "renderer/base/render_engine.h"
 #include "renderer/base/render_engine_context.h"
 #include "renderer/base/render_controller.h"
 #include "renderer/base/texture.h"
@@ -38,7 +39,7 @@ RendererFactoryOpenGL::RendererFactoryOpenGL(const sp<Recycler>& recycler)
     pluginManager->addPlugin(sp<opengl::OpenglPlugin>::make());
 }
 
-sp<RenderEngineContext> RendererFactoryOpenGL::initialize(Ark::RendererVersion version)
+sp<RenderEngineContext> RendererFactoryOpenGL::createRenderEngineContext(Ark::RendererVersion version)
 {
     const sp<RenderEngineContext> renderContext = sp<RenderEngineContext>::make(version, Viewport(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f));
     if(version != Ark::RENDERER_VERSION_AUTO)
@@ -46,21 +47,21 @@ sp<RenderEngineContext> RendererFactoryOpenGL::initialize(Ark::RendererVersion v
     return renderContext;
 }
 
-void RendererFactoryOpenGL::onSurfaceCreated(RenderEngineContext& glContext)
+void RendererFactoryOpenGL::onSurfaceCreated(RenderEngine& renderEngine)
 {
     DTHREAD_CHECK(THREAD_ID_RENDERER);
 
     Platform::glInitialize();
 
-    if(glContext.version() == Ark::RENDERER_VERSION_AUTO)
+    if(renderEngine.version() == Ark::RENDERER_VERSION_AUTO)
     {
         int glMajorVersion = 0, glMinorVersion = 0;
         glGetIntegerv(GL_MAJOR_VERSION, &glMajorVersion);
         glGetIntegerv(GL_MINOR_VERSION, &glMinorVersion);
         if(glMajorVersion != 0)
-            setVersion(static_cast<Ark::RendererVersion>(glMajorVersion * 10 + glMinorVersion), glContext);
+            setVersion(static_cast<Ark::RendererVersion>(glMajorVersion * 10 + glMinorVersion), renderEngine.context());
         else
-            setVersion(Ark::RENDERER_VERSION_OPENGL_20, glContext);
+            setVersion(Ark::RENDERER_VERSION_OPENGL_20, renderEngine.context());
     }
 }
 

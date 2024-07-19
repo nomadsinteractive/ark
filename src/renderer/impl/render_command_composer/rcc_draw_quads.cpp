@@ -22,7 +22,7 @@ RCCDrawQuads::RCCDrawQuads(sp<Model> model)
 
 sp<ShaderBindings> RCCDrawQuads::makeShaderBindings(Shader& shader, RenderController& renderController, Enum::RenderMode renderMode)
 {
-    _strips = renderController.gba().makeStrips(shader.input()->getStream(0).stride(), _model->vertexCount());
+    _strips = renderController.gba().makeStrips(shader.input()->getLayout(0).stride(), _model->vertexCount());
     _indices = renderController.makeIndexBuffer();
     return shader.makeBindings(_strips->buffer(), renderMode, Enum::DRAW_PROCEDURE_DRAW_ELEMENTS);
 }

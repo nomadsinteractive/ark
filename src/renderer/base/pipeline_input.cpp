@@ -18,16 +18,16 @@ PipelineInput::AttributeOffsets::AttributeOffsets()
 PipelineInput::AttributeOffsets::AttributeOffsets(const PipelineInput& input)
     : AttributeOffsets()
 {
-    const Stream& stream = input.streams().at(0);
+    const Layout& stream = input.layouts().at(0);
     _offsets[ATTRIBUTE_NAME_TEX_COORDINATE] = stream.getAttributeOffset("TexCoordinate");
     _offsets[ATTRIBUTE_NAME_NORMAL] = stream.getAttributeOffset("Normal");
     _offsets[ATTRIBUTE_NAME_TANGENT] = stream.getAttributeOffset("Tangent");
     _offsets[ATTRIBUTE_NAME_BITANGENT] = stream.getAttributeOffset("Bitangent");
     _offsets[ATTRIBUTE_NAME_BONE_IDS] = stream.getAttributeOffset("BoneIds");
     _offsets[ATTRIBUTE_NAME_BONE_WEIGHTS] = stream.getAttributeOffset("BoneWeights");
-    if(input.streams().size() > 1)
+    if(input.layouts().size() > 1)
     {
-        const Stream& stream1 = input.streams().at(1);
+        const Layout& stream1 = input.layouts().at(1);
         _offsets[ATTRIBUTE_NAME_MODEL_MATRIX] = stream1.getAttributeOffset("Model");
         _offsets[ATTRIBUTE_NAME_NODE_ID] = stream1.getAttributeOffset("NodeId");
         _offsets[ATTRIBUTE_NAME_MATERIAL_ID] = stream1.getAttributeOffset("MaterialId");
@@ -62,7 +62,7 @@ size_t PipelineInput::AttributeOffsets::stride() const
 }
 
 PipelineInput::PipelineInput(const sp<Camera>& camera)
-    : _camera(*(camera ? camera : Camera::getDefaultCamera())), _streams{{0, Stream()}}
+    : _camera(*(camera ? camera : Camera::getDefaultCamera())), _layouts{{0, Layout()}}
 {
 }
 
@@ -114,14 +114,14 @@ const std::vector<PipelineInput::SSBO>& PipelineInput::ssbos() const
     return _ssbos;
 }
 
-const std::map<uint32_t, PipelineInput::Stream>& PipelineInput::streams() const
+const std::map<uint32_t, PipelineInput::Layout>& PipelineInput::layouts() const
 {
-    return _streams;
+    return _layouts;
 }
 
-std::map<uint32_t, PipelineInput::Stream>& PipelineInput::streams()
+std::map<uint32_t, PipelineInput::Layout>& PipelineInput::layouts()
 {
-    return _streams;
+    return _layouts;
 }
 
 size_t PipelineInput::samplerCount() const
@@ -151,19 +151,19 @@ const std::vector<String>& PipelineInput::imageNames() const
 
 void PipelineInput::addAttribute(String name, Attribute attribute)
 {
-    _streams[attribute.divisor()].addAttribute(std::move(name), std::move(attribute));
+    _layouts[attribute.divisor()].addAttribute(std::move(name), std::move(attribute));
 }
 
-const PipelineInput::Stream& PipelineInput::getStream(uint32_t divisor) const
+const PipelineInput::Layout& PipelineInput::getLayout(uint32_t divisor) const
 {
-    const auto iter = _streams.find(divisor);
-    DCHECK(iter != _streams.end(), "PipelineInput has no stream(%d)", divisor);
+    const auto iter = _layouts.find(divisor);
+    DCHECK(iter != _layouts.end(), "PipelineInput has no stream(%d)", divisor);
     return iter->second;
 }
 
 Optional<const Attribute&> PipelineInput::getAttribute(const String& name) const
 {
-    for(const auto& i : _streams)
+    for(const auto& i : _layouts)
         if(const Optional<const Attribute&> opt = i.second.getAttribute(name))
             return opt;
     return Optional<const Attribute&>();
@@ -177,22 +177,22 @@ sp<Uniform> PipelineInput::getUniform(const String& name) const
     return nullptr;
 }
 
-PipelineInput::Stream::Stream()
+PipelineInput::Layout::Layout()
     : _stride(0)
 {
 }
 
-uint32_t PipelineInput::Stream::stride() const
+uint32_t PipelineInput::Layout::stride() const
 {
     return _stride;
 }
 
-const Table<String, Attribute>& PipelineInput::Stream::attributes() const
+const Table<String, Attribute>& PipelineInput::Layout::attributes() const
 {
     return _attributes;
 }
 
-void PipelineInput::Stream::addAttribute(String name, Attribute attribute)
+void PipelineInput::Layout::addAttribute(String name, Attribute attribute)
 {
     DCHECK(!_attributes.has(name), "Attribute \"%s\" has been added already", name.c_str());
     attribute.setOffset(_stride);
@@ -200,17 +200,17 @@ void PipelineInput::Stream::addAttribute(String name, Attribute attribute)
     _attributes.push_back(std::move(name), std::move(attribute));
 }
 
-Optional<const Attribute&> PipelineInput::Stream::getAttribute(const String& name) const
+Optional<const Attribute&> PipelineInput::Layout::getAttribute(const String& name) const
 {
     return _attributes.has(name) ? Optional<const Attribute&>(_attributes.at(name)) : Optional<const Attribute&>();
 }
 
-int32_t PipelineInput::Stream::getAttributeOffset(const String& name) const
+int32_t PipelineInput::Layout::getAttributeOffset(const String& name) const
 {
     return _attributes.has(name) ? static_cast<int32_t>(_attributes.at(name).offset()) : -1;
 }
 
-void PipelineInput::Stream::align()
+void PipelineInput::Layout::align()
 {
     uint32_t mod = _stride % sizeof(float);
     if(mod != 0)

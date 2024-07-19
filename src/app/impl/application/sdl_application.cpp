@@ -42,9 +42,47 @@ extern "C" void* Cocoa_Metal_CreateView(SDL_VideoDevice* _this, SDL_Window* wind
 
 namespace ark {
 
-static bool gQuit = false;
+namespace {
 
-static Event::Code sdlScanCodeToEventCode(SDL_Scancode sc)
+void* sdlNativeWindowHandle(SDL_Window* _window)
+{
+    SDL_SysWMinfo wmi;
+    SDL_VERSION(&wmi.version);
+    if (!SDL_GetWindowWMInfo(_window, &wmi))
+        return nullptr;
+
+#	if BX_PLATFORM_LINUX
+#		if ENTRY_CONFIG_USE_WAYLAND
+    if (wmi.subsystem == SDL_SYSWM_WAYLAND)
+    {
+        wl_egl_window *win_impl = (wl_egl_window*)SDL_GetWindowData(_window, "wl_egl_window");
+        if(!win_impl)
+        {
+            int width, height;
+            SDL_GetWindowSize(_window, &width, &height);
+            struct wl_surface* surface = wmi.info.wl.surface;
+            if(!surface)
+                return nullptr;
+            win_impl = wl_egl_window_create(surface, width, height);
+            SDL_SetWindowData(_window, "wl_egl_window", win_impl);
+        }
+        return (void*)(uintptr_t)win_impl;
+    }
+    else
+#		endif // ENTRY_CONFIG_USE_WAYLAND
+        return (void*)wmi.info.x11.window;
+#	elif BX_PLATFORM_OSX || BX_PLATFORM_IOS || BX_PLATFORM_VISIONOS
+    return wmi.info.cocoa.window;
+#	elif BX_PLATFORM_WINDOWS
+    return wmi.info.win.window;
+#   elif BX_PLATFORM_ANDROID
+    return wmi.info.android.window;
+#	endif // BX_PLATFORM_
+}
+
+bool gQuit = false;
+
+Event::Code sdlScanCodeToEventCode(SDL_Scancode sc)
 {
     if(Math::between<SDL_Scancode>(SDL_SCANCODE_A, SDL_SCANCODE_Z, sc))
         return static_cast<Event::Code>(static_cast<int32_t>(Event::CODE_KEYBOARD_A) + sc - SDL_SCANCODE_A);
@@ -123,8 +161,6 @@ static Event::Code sdlScanCodeToEventCode(SDL_Scancode sc)
     return Event::CODE_NONE;
 }
 
-namespace {
-
 class SDLCursor {
 public:
     SDLCursor(SDL_Cursor* cursor)
@@ -144,13 +180,13 @@ private:
     SDL_Cursor* _cursor;
 };
 
-class SDLApplicationController : public ApplicationController {
+class SDLApplicationController final : public ApplicationController {
 public:
     SDLApplicationController(sp<ApplicationContext> applicationContext)
         : _application_context(std::move(applicationContext)) {
     }
 
-    virtual Box createCursor(const sp<Bitmap>& bitmap, int32_t hotX, int32_t hotY) override {
+    Box createCursor(const sp<Bitmap>& bitmap, int32_t hotX, int32_t hotY) override {
         Uint32 rmask, gmask, bmask, amask;
         #if SDL_BYTEORDER == SDL_BIG_ENDIAN
             rmask = 0xff000000;
@@ -170,43 +206,43 @@ public:
         return sp<SDLCursor>::make(cursor);
     }
 
-    virtual Box createSystemCursor(ApplicationController::SystemCursorName name) override {
+    Box createSystemCursor(SystemCursorName name) override {
         SDL_Cursor* cursor = nullptr;
         switch(name) {
-            case ApplicationController::SYSTEM_CURSOR_ARROW:
+            case SYSTEM_CURSOR_ARROW:
                 cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_ARROW);
             break;
-            case ApplicationController::SYSTEM_CURSOR_IBEAM:
+            case SYSTEM_CURSOR_IBEAM:
                 cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_IBEAM);
             break;
-            case ApplicationController::SYSTEM_CURSOR_WAIT:
+            case SYSTEM_CURSOR_WAIT:
                 cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_WAIT);
             break;
-            case ApplicationController::SYSTEM_CURSOR_CROSSHAIR:
+            case SYSTEM_CURSOR_CROSSHAIR:
                 cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_CROSSHAIR);
             break;
-            case ApplicationController::SYSTEM_CURSOR_WAITARROW:
+            case SYSTEM_CURSOR_WAITARROW:
                 cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_WAITARROW);
             break;
-            case ApplicationController::SYSTEM_CURSOR_SIZENWSE:
+            case SYSTEM_CURSOR_SIZENWSE:
                 cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENWSE);
             break;
-            case ApplicationController::SYSTEM_CURSOR_SIZENESW:
+            case SYSTEM_CURSOR_SIZENESW:
                 cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENESW);
             break;
-            case ApplicationController::SYSTEM_CURSOR_SIZEWE:
+            case SYSTEM_CURSOR_SIZEWE:
                 cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZEWE);
             break;
-            case ApplicationController::SYSTEM_CURSOR_SIZENS:
+            case SYSTEM_CURSOR_SIZENS:
                 cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENS);
             break;
-            case ApplicationController::SYSTEM_CURSOR_SIZEALL:
+            case SYSTEM_CURSOR_SIZEALL:
                 cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZEALL);
             break;
-            case ApplicationController::SYSTEM_CURSOR_NO:
+            case SYSTEM_CURSOR_NO:
                 cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_NO);
             break;
-            case ApplicationController::SYSTEM_CURSOR_HAND:
+            case SYSTEM_CURSOR_HAND:
                 cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_HAND);
             break;
         }
@@ -260,52 +296,11 @@ SDLApplication::SDLApplication(sp<ApplicationDelegate> applicationDelegate, sp<A
     : Application(std::move(applicationDelegate), applicationContext, width, height, manifest.renderer().toViewport()), _main_window(nullptr), _cond(SDL_CreateCond()), _lock(SDL_CreateMutex()),
       _controller(sp<SDLApplicationController>::make(std::move(applicationContext))), _window_flag(manifest.application()._window_flag), _vsync(manifest.renderer()._vsync)
 {
+    initialize();
 }
 
 int SDLApplication::run()
 {
-    /* Initialize SDL's Video subsystem */
-    if (SDL_Init(SDL_INIT_VIDEO) < 0)
-    {
-        DFATAL("Unable to initialize SDL");
-        return 1;
-    }
-
-    SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-
-    /* Turn on double buffering with a 24bit Z buffer.
-    * You may need to change this to 16 or 32 for your system */
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-
-    SDL_ShowCursor((_window_flag & ApplicationManifest::WINDOW_FLAG_SHOW_CURSOR) ? SDL_ENABLE : SDL_DISABLE);
-
-    _main_window = SDL_CreateWindow(name(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, static_cast<int32_t>(_surface_size->widthAsFloat()), static_cast<int32_t>(_surface_size->heightAsFloat()), toSDLWindowFlag(_application_context, _window_flag));
-    if(!_main_window)
-    {
-        /* Die if creation failed */
-        SDL_Quit();
-        FATAL(SDL_GetError());
-    }
-
-    SDL_SysWMinfo wmInfo;
-    SDL_VERSION(&wmInfo.version)
-
-    auto result = SDL_GetWindowWMInfo(_main_window, &wmInfo);
-    DASSERT(result);
-
-    RenderEngineContext::Info& info = _application_context->renderEngine()->context()->info();
-
-#if defined(ARK_PLATFORM_WINDOWS)
-    info.windows.hinstance = wmInfo.info.win.hinstance;
-    info.windows.hdc = wmInfo.info.win.hdc;
-    info.windows.window = wmInfo.info.win.window;
-#elif defined (ARK_PLATFORM_DARWIN)
-    info.darwin.window = wmInfo.info.cocoa.window;
-    info.darwin.view = Cocoa_Metal_CreateView(nullptr, _main_window);
-#endif
-
     /* Create our opengl context and attach it to our window */
     SDL_GLContext maincontext = _use_open_gl ? SDL_GL_CreateContext(_main_window) : nullptr;
 
@@ -360,6 +355,48 @@ void SDLApplication::onSurfaceChanged()
     int32_t w, h;
     SDL_GetWindowSize(_main_window, &w, &h);
     Application::onSurfaceChanged(static_cast<uint32_t>(w), static_cast<uint32_t>(h));
+}
+
+void SDLApplication::initialize()
+{
+    /* Initialize SDL's Video subsystem */
+    if (SDL_Init(SDL_INIT_VIDEO) < 0)
+    {
+        FATAL("Unable to initialize SDL");
+    }
+
+    SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+
+    /* Turn on double buffering with a 24bit Z buffer.
+    * You may need to change this to 16 or 32 for your system */
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+
+    SDL_ShowCursor((_window_flag & ApplicationManifest::WINDOW_FLAG_SHOW_CURSOR) ? SDL_ENABLE : SDL_DISABLE);
+
+    _main_window = SDL_CreateWindow(name(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, static_cast<int32_t>(_surface_size->widthAsFloat()), static_cast<int32_t>(_surface_size->heightAsFloat()), toSDLWindowFlag(_application_context, _window_flag));
+    if(!_main_window)
+    {
+        /* Die if creation failed */
+        SDL_Quit();
+        FATAL(SDL_GetError());
+    }
+
+    SDL_SysWMinfo wmInfo;
+    SDL_VERSION(&wmInfo.version)
+    const auto result = SDL_GetWindowWMInfo(_main_window, &wmInfo);
+    ASSERT(result);
+
+    RenderEngine::PlatformInfo& info = _application_context->renderEngine()->info();
+#if defined(ARK_PLATFORM_WINDOWS)
+    info.windows.hinstance = wmInfo.info.win.hinstance;
+    info.windows.hdc = wmInfo.info.win.hdc;
+    info.windows.window = wmInfo.info.win.window;
+#elif defined (ARK_PLATFORM_DARWIN)
+    info.darwin.window = wmInfo.info.cocoa.window;
+    info.darwin.view = Cocoa_Metal_CreateView(nullptr, _main_window);
+#endif
 }
 
 uint32_t SDLApplication::toSDLWindowFlag(const sp<ApplicationContext>& applicationContext, uint32_t appWindowFlag)

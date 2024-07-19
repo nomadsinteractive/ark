@@ -17,7 +17,7 @@ namespace ark::vulkan {
 
 class VKSwapChain {
 public:
-    VKSwapChain(const RenderEngineContext& renderContext, sp<VKDevice> device);
+    VKSwapChain(const RenderEngine& renderEngine, sp<VKDevice> device);
     ~VKSwapChain();
 
     uint32_t width() const;
@@ -43,7 +43,8 @@ public:
     void onSurfaceChanged(uint32_t width, uint32_t height);
 
 private:
-    void initSwapchain(const RenderEngineContext& renderContext);
+    void initialize(const RenderEngine& renderEngine);
+
     void createCommandPool();
     void setupDepthStencil();
     void setupRenderPass();

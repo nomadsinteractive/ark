@@ -23,7 +23,7 @@ public:
         virtual M4 perspective(float fov, float aspect, float clipNear, float clipFar) = 0;
     };
 
-    class DelegateLH_ZO final : public Delegate {
+    class ARK_API DelegateLH_ZO final : public Delegate {
     public:
         M4 frustum(float left, float right, float bottom, float top, float clipNear, float clipFar) override;
         M4 lookAt(const V3& position, const V3& target, const V3& up) override;
@@ -31,7 +31,7 @@ public:
         M4 perspective(float fov, float aspect, float clipNear, float clipFar) override;
     };
 
-    class DelegateRH_ZO final : public Delegate {
+    class ARK_API DelegateRH_ZO final : public Delegate {
     public:
         M4 frustum(float left, float right, float bottom, float top, float clipNear, float clipFar) override;
         M4 lookAt(const V3& position, const V3& target, const V3& up) override;
@@ -39,7 +39,7 @@ public:
         M4 perspective(float fov, float aspect, float clipNear, float clipFar) override;
     };
 
-    class DelegateLH_NO final : public Delegate {
+    class ARK_API DelegateLH_NO final : public Delegate {
     public:
         M4 frustum(float left, float right, float bottom, float top, float clipNear, float clipFar) override;
         M4 lookAt(const V3& position, const V3& target, const V3& up) override;
@@ -47,7 +47,7 @@ public:
         M4 perspective(float fov, float aspect, float clipNear, float clipFar) override;
     };
 
-    class DelegateRH_NO final : public Delegate {
+    class ARK_API DelegateRH_NO final : public Delegate {
     public:
         M4 frustum(float left, float right, float bottom, float top, float clipNear, float clipFar) override;
         M4 lookAt(const V3& position, const V3& target, const V3& up) override;

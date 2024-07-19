@@ -85,16 +85,6 @@ uint32_t RenderEngineContext::getGLSLVersion() const
     return 110;
 }
 
-const RenderEngineContext::Info& RenderEngineContext::info() const
-{
-    return _info;
-}
-
-RenderEngineContext::Info& RenderEngineContext::info()
-{
-    return _info;
-}
-
 void RenderEngineContext::setSnippetFactory(sp<SnippetFactory> snippetfactory)
 {
     _snippet_factory = std::move(snippetfactory);

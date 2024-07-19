@@ -24,10 +24,9 @@ public:
         return _default_coordinate_system;
     }
 
-    virtual sp<RenderEngineContext> initialize(Ark::RendererVersion version) = 0;
+    virtual void onSurfaceCreated(RenderEngine& renderEngine) = 0;
 
-    virtual void onSurfaceCreated(RenderEngineContext& renderContext) = 0;
-
+    virtual sp<RenderEngineContext> createRenderEngineContext(Ark::RendererVersion version) = 0;
     virtual sp<Buffer::Delegate> createBuffer(Buffer::Type type, Buffer::Usage usage) = 0;
     virtual sp<Camera::Delegate> createCamera() = 0;
     virtual sp<Framebuffer> createFramebuffer(sp<Renderer> renderer, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask) = 0;

@@ -10,7 +10,7 @@ namespace {
 class UploaderVertices : public Uploader {
 public:
     UploaderVertices(sp<PipelineInput> pipelineInput, sp<Vertices> vertices, const V3& bounds)
-        : Uploader(pipelineInput->getStream(0).stride() * vertices->length()), _pipeline_input(std::move(pipelineInput)), _vertices(std::move(vertices)), _bounds(bounds) {
+        : Uploader(pipelineInput->getLayout(0).stride() * vertices->length()), _pipeline_input(std::move(pipelineInput)), _vertices(std::move(vertices)), _bounds(bounds) {
     }
 
     virtual bool update(uint64_t /*timestamp*/) override {
@@ -19,7 +19,7 @@ public:
 
 public:
     virtual void upload(Writable& writable) override {
-        size_t stride = _pipeline_input->getStream(0).stride();
+        size_t stride = _pipeline_input->getLayout(0).stride();
         PipelineInput::AttributeOffsets attributes(_pipeline_input);
         uint32_t size = static_cast<uint32_t>(_vertices->length() * stride);
         std::vector<uint8_t> buf(size);

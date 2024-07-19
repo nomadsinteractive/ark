@@ -12,7 +12,7 @@ struct SDL_Window;
 
 namespace ark {
 
-class ARK_API SDLApplication : public Application {
+class ARK_API SDLApplication final : public Application {
 public:
     SDLApplication(sp<ApplicationDelegate> applicationDelegate, sp<ApplicationContext> applicationContext, uint32_t width, uint32_t height, const ApplicationManifest& manifest);
 
@@ -22,6 +22,8 @@ public:
     void onSurfaceChanged();
 
 private:
+    void initialize();
+
     void pollEvents(uint64_t timestamp);
     uint32_t toSDLWindowFlag(const sp<ApplicationContext>& applicationContext, uint32_t appWindowFlag);
 

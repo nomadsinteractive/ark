@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_INF_PIPELINE_FACTORY_H_
-#define ARK_RENDERER_INF_PIPELINE_FACTORY_H_
+#pragma once
 
 #include "core/base/api.h"
 
@@ -18,5 +17,3 @@ public:
 };
 
 }
-
-#endif

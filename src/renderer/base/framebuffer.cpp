@@ -11,7 +11,7 @@
 namespace ark {
 
 Framebuffer::Framebuffer(sp<Renderer> renderer, sp<Resource> delegate)
-    : _renderer(renderer), _delegate(std::move(delegate))
+    : _renderer(renderer), _resource(std::move(delegate))
 {
 }
 
@@ -20,9 +20,9 @@ void Framebuffer::render(RenderRequest& renderRequest, const V3& position)
     _renderer->render(renderRequest, position);
 }
 
-const sp<Resource>& Framebuffer::delegate() const
+const sp<Resource>& Framebuffer::resource() const
 {
-    return _delegate;
+    return _resource;
 }
 
 Framebuffer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

@@ -37,4 +37,4 @@ if(ARK_USE_VULKAN)
     ark_compile_definitions(-DVK_USE_PLATFORM_WIN32_KHR)
 endif()
 
-ark_compile_definitions(-DARK_PLATFORM_WINDOWS)
+list(APPEND ARK_COMPILE_DEFINITIONS -DARK_PLATFORM_WINDOWS)

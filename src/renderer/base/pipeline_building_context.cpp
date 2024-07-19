@@ -139,7 +139,7 @@ void PipelineBuildingContext::initializeAttributes()
             addAttribute(k, v, 0);
         }
 
-    for(auto iter : _input->streams())
+    for(auto iter : _input->layouts())
         iter.second.align();
 
     //TODO: link all outputs to next stage's inputs

@@ -1,5 +1,5 @@
 /**
-Copyright 2011 - 2019 Jason S Taylor
+Copyright 2011 - 2024 Jason S Taylor
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -63,7 +63,13 @@ namespace {
 Ark* _instance = nullptr;
 std::list<Ark*> _instance_stack;
 
-//TODO: finish other change hand side operations
+M4 changeProjectionHandSide(M4 projection)
+{
+    projection[0] = -projection[0];
+    projection[5] = -projection[5];
+    return projection;
+}
+
 struct CameraDelegateCHS final : Camera::Delegate {
 
     CameraDelegateCHS(sp<Delegate> delegate)
@@ -73,7 +79,7 @@ struct CameraDelegateCHS final : Camera::Delegate {
 
     M4 frustum(float left, float right, float bottom, float top, float clipNear, float clipFar) override
     {
-        return _delegate->frustum(left, right, bottom, top, clipNear, clipFar);
+        return changeProjectionHandSide(_delegate->frustum(left, right, bottom, top, clipNear, clipFar));
     }
 
     M4 lookAt(const V3& position, const V3& target, const V3& up) override
@@ -83,12 +89,12 @@ struct CameraDelegateCHS final : Camera::Delegate {
 
     M4 ortho(float left, float right, float bottom, float top, float clipNear, float clipFar) override
     {
-        return _delegate->ortho(left, right, bottom, top, clipNear, clipFar);
+        return changeProjectionHandSide(_delegate->ortho(left, right, bottom, top, clipNear, clipFar));
     }
 
     M4 perspective(float fov, float aspect, float clipNear, float clipFar) override
     {
-        return _delegate->perspective(-fov, aspect, clipNear, clipFar);
+        return changeProjectionHandSide(_delegate->perspective(fov, aspect, clipNear, clipFar));
     }
 
     sp<Delegate> _delegate;
@@ -316,7 +322,7 @@ const char** Ark::argv() const
 sp<Application> Ark::makeApplication(sp<ApplicationManifest> manifest, uint32_t width, uint32_t height)
 {
     initialize(std::move(manifest));
-    return sp<SDLApplication>::make(sp<ApplicationDelegateImpl>::make(_manifest), _application_context, width, height, _manifest);
+    return sp<SDLApplication>::make<SDLApplication>(sp<ApplicationDelegateImpl>::make(_manifest), _application_context, width, height, _manifest);
 }
 
 const sp<ApplicationManifest>& Ark::manifest() const

@@ -78,7 +78,7 @@ std::map<uint32_t, Buffer::Factory> ShaderBindings::makeDividedBufferFactories()
     const sp<PipelineInput>& pipelineInput = _pipeline_bindings->input();
     for(const auto& i : *_divided_buffers)
     {
-        const PipelineInput::Stream& stream = pipelineInput->getStream(i.first);
+        const PipelineInput::Layout& stream = pipelineInput->getLayout(i.first);
         builders.insert(std::make_pair(i.first, Buffer::Factory(stream.stride())));
     }
     return builders;

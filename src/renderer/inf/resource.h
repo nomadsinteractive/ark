@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_INF_RESOURCE_H_
-#define ARK_RENDERER_INF_RESOURCE_H_
+#pragma once
 
 #include <functional>
 
@@ -20,5 +19,3 @@ public:
 };
 
 }
-
-#endif

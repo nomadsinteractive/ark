@@ -140,7 +140,7 @@ sp<ShaderBindings> Shader::makeBindings(Buffer vertices, Enum::RenderMode mode, 
 std::map<uint32_t, Buffer> Shader::makeDivivedBuffers(const std::map<uint32_t, sp<Uploader>>& uploaders) const
 {
     std::map<uint32_t, Buffer> dividedBuffers;
-    for(const auto& i : _pipeline_input->streams())
+    for(const auto& i : _pipeline_input->layouts())
     {
         uint32_t divisor = i.first;
         if(divisor != 0)

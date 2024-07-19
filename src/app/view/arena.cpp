@@ -145,7 +145,7 @@ sp<Arena> Arena::BUILDER::build(const Scope& args)
         if(name == constants::EVENT_LISTENER)
             arena->addEventListener(factory.ensure<EventListener>(i, args));
         else if(name == constants::RENDER_LAYER)
-            arena->addRenderLayer(factory.ensureDecorated<Renderer, RenderLayer>(i, args));
+            arena->addRenderLayer(factory.ensure<RenderLayer>(i, args));
         else if(name != constants::VIEW)
         {
             CHECK_WARN(name == constants::RENDERER, "['Renderer', 'RenderLayer'] expected, \"%s\" found", name.c_str());

@@ -7,8 +7,7 @@
 
 #include "renderer/vulkan/base/vk_pipeline.h"
 
-namespace ark {
-namespace vulkan {
+namespace ark::vulkan {
 
 PipelineFactoryVulkan::PipelineFactoryVulkan(const sp<Recycler>& recycler, const sp<VKRenderer>& renderFactory)
     : _recycler(recycler), _renderer(renderFactory)
@@ -21,5 +20,4 @@ sp<Pipeline> PipelineFactoryVulkan::buildPipeline(GraphicsContext& graphicsConte
     return sp<VKPipeline>::make(bindings, _recycler, _renderer, std::move(shaders));
 }
 
-}
 }

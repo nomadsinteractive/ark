@@ -72,7 +72,7 @@ void PipelineBindings::bindSampler(sp<Texture> texture, uint32_t name)
 
 bool PipelineBindings::hasDivisors() const
 {
-    return _stub->_input->streams().size() > 1;
+    return _stub->_input->layouts().size() > 1;
 }
 
 PipelineBindings::Flag PipelineBindings::getFlag(PipelineBindings::Flag bitmask) const
