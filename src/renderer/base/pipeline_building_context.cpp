@@ -204,6 +204,7 @@ void PipelineBuildingContext::tryBindUniformMatrix(const ShaderPreprocessor& sha
 
 void PipelineBuildingContext::initialize()
 {
+    initializeSSBO();
     initializeAttributes();
     initializeUniforms();
 }
@@ -301,7 +302,6 @@ sp<Snippet> PipelineBuildingContext::makePipelineSnippet()
     sp<Snippet> snippet = sp<Snippet>::make<SnippetDelegate>(_snippet);
     snippet->preInitialize(*this);
     initializeStages();
-    initializeSSBO();
     return snippet;
 }
 
@@ -387,14 +387,16 @@ void PipelineBuildingContext::loadPredefinedBuffer(BeanFactory& factory, const S
 
 void PipelineBuildingContext::loadLayoutBindings(BeanFactory& factory, const Scope& args, const document& manifest)
 {
-    const std::vector<String>& samplerNames = _input->samplerNames();
-    const std::vector<String>& imageNames = _input->imageNames();
     for(const document& i : manifest->children(constants::LAYOUT))
     {
         const int32_t binding = Documents::getAttribute(i, "binding", -1);
         String name = Documents::getAttribute(i, constants::NAME);
         CHECK(name != "" || binding != -1, "Pipeline layout should have either name or binding defined: %s", Documents::toString(i).c_str());
-        const LayoutBindingType type = Documents::getAttribute(manifest, constants::TYPE, LAYOUT_BINDING_TYPE_AUTO);
+        const LayoutBindingType type = Documents::getAttribute(i, constants::TYPE, LAYOUT_BINDING_TYPE_AUTO);
+        if(type == LAYOUT_BINDING_TYPE_AUTO)
+        {
+            FATAL("LAYOUT_BINDING_TYPE_AUTO Unimplemented");
+        }
         Texture::Usage usage = Documents::getAttribute(i, "usage", Texture::USAGE_GENERAL);
         _layout_bindings.push_back({type, factory.ensure<Texture>(i, args), usage, std::move(name), binding});
     }

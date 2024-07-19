@@ -94,9 +94,9 @@ sp<Buffer::Delegate> RendererFactoryOpenGL::createBuffer(Buffer::Type type, Buff
     return sp<GLBuffer>::make(type, usage, _recycler);
 }
 
-sp<Camera::Delegate> RendererFactoryOpenGL::createCamera(Ark::RendererCoordinateSystem cs)
+sp<Camera::Delegate> RendererFactoryOpenGL::createCamera()
 {
-    return cs == Ark::COORDINATE_SYSTEM_RHS ? sp<Camera::Delegate>::make<Camera::DelegateRH_NO>() : sp<Camera::Delegate>::make<Camera::DelegateLH_NO>();
+    return sp<Camera::Delegate>::make<Camera::DelegateRH_NO>();
 }
 
 sp<Framebuffer> RendererFactoryOpenGL::createFramebuffer(sp<Renderer> renderer, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask)

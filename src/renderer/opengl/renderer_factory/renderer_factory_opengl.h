@@ -8,7 +8,7 @@
 
 namespace ark::opengl {
 
-class RendererFactoryOpenGL : public RendererFactory {
+class RendererFactoryOpenGL final : public RendererFactory {
 public:
     RendererFactoryOpenGL(const sp<Recycler>& recycler);
 
@@ -17,7 +17,7 @@ public:
     void onSurfaceCreated(RenderEngineContext& glContext) override;
 
     sp<Buffer::Delegate> createBuffer(Buffer::Type type, Buffer::Usage usage) override;
-    sp<Camera::Delegate> createCamera(Ark::RendererCoordinateSystem cs) override;
+    sp<Camera::Delegate> createCamera() override;
     sp<Framebuffer> createFramebuffer(sp<Renderer> renderer, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask) override;
     sp<RenderView> createRenderView(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController) override;
     sp<PipelineFactory> createPipelineFactory() override;

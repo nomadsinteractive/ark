@@ -95,18 +95,10 @@ private:
 
     void initialize(sp<ApplicationManifest> manifest);
 
-    sp<RenderEngine> createRenderEngine(RendererVersion version, RendererCoordinateSystem coordinateSystem, const sp<ApplicationBundle>& applicationBundle);
-
     sp<ApplicationContext> createApplicationContext(const ApplicationManifest& manifest, sp<ApplicationBundle> resource, sp<RenderEngine> renderEngine);
-    sp<RenderEngine> doCreateRenderEngine(RendererVersion version, RendererCoordinateSystem coordinateSystem, const sp<ApplicationBundle>& applicationBundle);
-
-    void loadPlugins(const ApplicationManifest& manifest) const;
 
 private:
     class ArkAssetBundle;
-
-    static Ark* _instance;
-    static std::list<Ark*> _instance_stack;
 
     int32_t _argc;
     const char** _argv;

@@ -243,13 +243,6 @@ Mesh processPrimitive(const tinygltf::Model& gltfModel, const std::vector<sp<Mat
 
     SBufferReadData bufferReadData = getAttributeData<element_index_t, element_index_t>(gltfModel, TransformMatrix, "", primitive.indices);
     std::vector<element_index_t> indices = std::move(bufferReadData.DstData);
-    if(Ark::instance().renderController()->renderEngine()->isViewportFlipped())
-    {
-        const element_index_t indexSize = indices.size();
-        ASSERT(indexSize % 3 == 0);
-        for(size_t i = 0; i < indexSize; i += 3)
-            std::swap(indices[i + 1], indices[i + 2]);
-    }
 
     ASSERT(primitive.material == -1 || primitive.material < materials.size());
     sp<Material> material = primitive.material >= 0 ? materials.at(primitive.material) : nullptr;

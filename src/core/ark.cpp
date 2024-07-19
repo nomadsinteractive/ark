@@ -56,30 +56,114 @@ limitations under the License.
 #include "generated/ark_bootstrap.h"
 #include "generated/base_plugin.h"
 
-#include "platform/platform.h"
-
 namespace ark {
 
-Ark* Ark::_instance = nullptr;
-std::list<Ark*> Ark::_instance_stack;
+namespace {
+
+Ark* _instance = nullptr;
+std::list<Ark*> _instance_stack;
+
+//TODO: finish other change hand side operations
+struct CameraDelegateCHS final : Camera::Delegate {
+
+    CameraDelegateCHS(sp<Delegate> delegate)
+        : _delegate(std::move(delegate))
+    {
+    }
+
+    M4 frustum(float left, float right, float bottom, float top, float clipNear, float clipFar) override
+    {
+        return _delegate->frustum(left, right, bottom, top, clipNear, clipFar);
+    }
+
+    M4 lookAt(const V3& position, const V3& target, const V3& up) override
+    {
+        return _delegate->lookAt(position, target, up);
+    }
+
+    M4 ortho(float left, float right, float bottom, float top, float clipNear, float clipFar) override
+    {
+        return _delegate->ortho(left, right, bottom, top, clipNear, clipFar);
+    }
+
+    M4 perspective(float fov, float aspect, float clipNear, float clipFar) override
+    {
+        return _delegate->perspective(-fov, aspect, clipNear, clipFar);
+    }
+
+    sp<Delegate> _delegate;
+};
+
+sp<RenderEngine> doCreateRenderEngine(Ark::RendererVersion version, Ark::RendererCoordinateSystem coordinateSystem, const sp<ApplicationBundle>& applicationBundle)
+{
+    switch(version) {
+        case Ark::RENDERER_VERSION_AUTO:
+        case Ark::RENDERER_VERSION_OPENGL_20:
+        case Ark::RENDERER_VERSION_OPENGL_21:
+        case Ark::RENDERER_VERSION_OPENGL_30:
+        case Ark::RENDERER_VERSION_OPENGL_31:
+        case Ark::RENDERER_VERSION_OPENGL_32:
+        case Ark::RENDERER_VERSION_OPENGL_33:
+        case Ark::RENDERER_VERSION_OPENGL_40:
+        case Ark::RENDERER_VERSION_OPENGL_41:
+        case Ark::RENDERER_VERSION_OPENGL_42:
+        case Ark::RENDERER_VERSION_OPENGL_43:
+        case Ark::RENDERER_VERSION_OPENGL_44:
+        case Ark::RENDERER_VERSION_OPENGL_45:
+        case Ark::RENDERER_VERSION_OPENGL_46:
+#ifdef ARK_USE_OPEN_GL
+            return sp<RenderEngine>::make(version, coordinateSystem, sp<opengl::RendererFactoryOpenGL>::make(applicationBundle->recycler()));
+#endif
+        case Ark::RENDERER_VERSION_VULKAN:
+        case Ark::RENDERER_VERSION_VULKAN_11:
+        case Ark::RENDERER_VERSION_VULKAN_12:
+        case Ark::RENDERER_VERSION_VULKAN_13:
+#ifdef ARK_USE_VULKAN
+            return sp<RenderEngine>::make(version == Ark::RENDERER_VERSION_VULKAN ? Ark::RENDERER_VERSION_VULKAN_13 : version, coordinateSystem, sp<vulkan::RendererFactoryVulkan>::make(applicationBundle->recycler()));
+#endif
+        break;
+    }
+    FATAL("Unknown engine type: %d", version);
+    return nullptr;
+}
+
+void loadPlugins(const ApplicationManifest& manifest)
+{
+    const Global<PluginManager> pluginManager;
+
+    for(const String& i : manifest.plugins())
+        pluginManager->load(i);
+}
+
+sp<RenderEngine> createRenderEngine(Ark::RendererVersion version, Ark::RendererCoordinateSystem coordinateSystem, const sp<ApplicationBundle>& applicationBundle)
+{
+    if(version != Ark::RENDERER_VERSION_AUTO)
+        return doCreateRenderEngine(version, coordinateSystem, applicationBundle);
+
+    for(const Ark::RendererVersion i : Platform::getRendererVersionPreferences())
+        if(sp<RenderEngine> renderEngine = doCreateRenderEngine(i, coordinateSystem, applicationBundle))
+            return renderEngine;
+
+    FATAL("Cannot create prefered RenderEngine");
+    return nullptr;
+}
+
+}
 
 class Ark::ArkAssetBundle {
 public:
     ArkAssetBundle(const sp<AssetBundle>& builtInAssetBundle, BeanFactory& factory, const std::vector<ApplicationManifest::Asset>& assets)
         : _builtin_asset_bundle(builtInAssetBundle) {
         for(const ApplicationManifest::Asset& i : assets) {
-            sp<AssetBundle> assetBundle = createAsset(factory, i);
-            if(assetBundle)
+            if(sp<AssetBundle> assetBundle = createAsset(factory, i))
                 _mounts.push_front(Mounted(i, assetBundle));
         }
     }
 
     sp<Asset> getAsset(const String& name) const {
         const URL url(name);
-
         for(const Mounted& i : _mounts) {
-            sp<Asset> asset = i.getAsset(url);
-            if(asset)
+            if(sp<Asset> asset = i.getAsset(url))
                 return asset;
         }
         return _builtin_asset_bundle->getAsset(name);
@@ -89,20 +173,19 @@ public:
         const URL url(path);
         sp<AssetBundle> asset;
 
-        for(const Mounted& i : _mounts) {
-            const sp<AssetBundle> ia = i.getBundle(url);
-            if(ia)
+        for(const Mounted& i : _mounts)
+            if(const sp<AssetBundle> ia = i.getBundle(url))
                 asset = asset ? sp<AssetBundle>::adopt(new AssetBundleWithFallback(asset, ia)) : ia;
-        }
-        const sp<AssetBundle> fallback = _builtin_asset_bundle->getBundle(path);
-        if(fallback)
+
+        if(const sp<AssetBundle> fallback = _builtin_asset_bundle->getBundle(path))
             return asset ? sp<AssetBundle>::adopt(new AssetBundleWithFallback(asset, fallback)) : fallback;
         CHECK(asset, "AssetBundle \"%s\" doesn't exists", path.c_str());
         return asset;
     }
 
 private:
-    sp<AssetBundle> createAsset(BeanFactory& factory, const ApplicationManifest::Asset& manifest) {
+    sp<AssetBundle> createAsset(BeanFactory& factory, const ApplicationManifest::Asset& manifest) const
+    {
         sp<AssetBundle> asset = manifest._protocol.empty() ? _builtin_asset_bundle->getBundle(manifest._src) :
                                                              factory.build<AssetBundle>(manifest._protocol, manifest._src, {});
         CHECK_WARN(asset, "Unable to load AssetBundle, protocol: %s, src: %s", manifest._protocol.c_str(), manifest._src.c_str());
@@ -292,7 +375,9 @@ const sp<ApplicationProfiler>& Ark::applicationProfiler() const
 Camera Ark::createCamera(RendererCoordinateSystem coordinateSystem) const
 {
     const RendererCoordinateSystem cs = coordinateSystem == COORDINATE_SYSTEM_DEFAULT ? _manifest->renderer()._coordinate_system : coordinateSystem;
-    return {cs, _application_context->renderController()->renderEngine()->rendererFactory()->createCamera(cs)};
+    RendererFactory& rendererFactory = _application_context->renderController()->renderEngine()->rendererFactory();
+    sp<Camera::Delegate> cameraDelegate = rendererFactory.createCamera();
+    return {cs, cs == rendererFactory.defaultCoordinateSystem() ? std::move(cameraDelegate) : sp<Camera::Delegate>::make<CameraDelegateCHS>(std::move(cameraDelegate))};
 }
 
 op<ApplicationProfiler::Tracer> Ark::makeProfilerTracer(const char* func, const char* filename, int32_t lineno, const char* name, ApplicationProfiler::Category category) const
@@ -310,19 +395,6 @@ void Ark::deferUnref(Box box)
     _application_context->renderController()->deferUnref(std::move(box));
 }
 
-sp<RenderEngine> Ark::createRenderEngine(RendererVersion version, RendererCoordinateSystem coordinateSystem, const sp<ApplicationBundle>& applicationBundle)
-{
-    if(version != RENDERER_VERSION_AUTO)
-        return doCreateRenderEngine(version, coordinateSystem, applicationBundle);
-
-    for(const RendererVersion i : Platform::getRendererVersionPreferences())
-        if(sp<RenderEngine> renderEngine = doCreateRenderEngine(i, coordinateSystem, applicationBundle))
-            return renderEngine;
-
-    FATAL("Cannot create prefered RenderEngine");
-    return nullptr;
-}
-
 sp<ApplicationContext> Ark::createApplicationContext(const ApplicationManifest& manifest, sp<ApplicationBundle> appResource, sp<RenderEngine> renderEngine)
 {
     const Global<PluginManager> pluginManager;
@@ -331,47 +403,6 @@ sp<ApplicationContext> Ark::createApplicationContext(const ApplicationManifest& 
     applicationContext->initialize(manifest.resourceLoader());
     _application_profiler = applicationContext->resourceLoader()->beanFactory().build<ApplicationProfiler>(document::make("root"), Scope());
     return applicationContext;
-}
-
-sp<RenderEngine> Ark::doCreateRenderEngine(RendererVersion version, RendererCoordinateSystem coordinateSystem, const sp<ApplicationBundle>& applicationBundle)
-{
-    switch(version) {
-    case RENDERER_VERSION_AUTO:
-    case RENDERER_VERSION_OPENGL_20:
-    case RENDERER_VERSION_OPENGL_21:
-    case RENDERER_VERSION_OPENGL_30:
-    case RENDERER_VERSION_OPENGL_31:
-    case RENDERER_VERSION_OPENGL_32:
-    case RENDERER_VERSION_OPENGL_33:
-    case RENDERER_VERSION_OPENGL_40:
-    case RENDERER_VERSION_OPENGL_41:
-    case RENDERER_VERSION_OPENGL_42:
-    case RENDERER_VERSION_OPENGL_43:
-    case RENDERER_VERSION_OPENGL_44:
-    case RENDERER_VERSION_OPENGL_45:
-    case RENDERER_VERSION_OPENGL_46:
-#ifdef ARK_USE_OPEN_GL
-        return sp<RenderEngine>::make(version, coordinateSystem, sp<opengl::RendererFactoryOpenGL>::make(applicationBundle->recycler()));
-#endif
-    case RENDERER_VERSION_VULKAN:
-    case RENDERER_VERSION_VULKAN_11:
-    case RENDERER_VERSION_VULKAN_12:
-    case RENDERER_VERSION_VULKAN_13:
-#ifdef ARK_USE_VULKAN
-        return sp<RenderEngine>::make(version == RENDERER_VERSION_VULKAN ? RENDERER_VERSION_VULKAN_13 : version, coordinateSystem, sp<vulkan::RendererFactoryVulkan>::make(applicationBundle->recycler()));
-#endif
-        break;
-    }
-    FATAL("Unknown engine type: %d", version);
-    return nullptr;
-}
-
-void Ark::loadPlugins(const ApplicationManifest& manifest) const
-{
-    const Global<PluginManager> pluginManager;
-
-    for(const String& i : manifest.plugins())
-        pluginManager->load(i);
 }
 
 }

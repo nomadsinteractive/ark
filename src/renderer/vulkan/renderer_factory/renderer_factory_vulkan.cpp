@@ -82,14 +82,14 @@ void RendererFactoryVulkan::setVersion(Ark::RendererVersion version, RenderEngin
 
 sp<Buffer::Delegate> RendererFactoryVulkan::createBuffer(Buffer::Type type, Buffer::Usage usage)
 {
-    static const VkBufferUsageFlags usagesFlags[Buffer::TYPE_COUNT] = {VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT};
+    constexpr VkBufferUsageFlags usagesFlags[Buffer::TYPE_COUNT] = {VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT};
     return sp<VKBuffer>::make(_renderer, _recycler, usagesFlags[type], usage == Buffer::USAGE_STATIC ? VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
                                                                                                      : VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 }
 
-sp<Camera::Delegate> RendererFactoryVulkan::createCamera(Ark::RendererCoordinateSystem cs)
+sp<Camera::Delegate> RendererFactoryVulkan::createCamera()
 {
-    return cs == Ark::COORDINATE_SYSTEM_LHS ? sp<Camera::Delegate>::make<Camera::DelegateLH_ZO>() : sp<Camera::Delegate>::make<Camera::DelegateRH_ZO>();
+    return sp<Camera::Delegate>::make<Camera::DelegateLH_ZO>();
 }
 
 sp<Framebuffer> RendererFactoryVulkan::createFramebuffer(sp<Renderer> renderer, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask)
