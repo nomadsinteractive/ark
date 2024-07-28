@@ -55,11 +55,12 @@ public:
     struct Renderer {
         Renderer();
 
+        Ark::RendererTarget _target;
         Ark::RendererVersion _version;
         Ark::RendererCoordinateSystem _coordinate_system;
 
         bool _vsync;
-        sp<Size> _resolution;
+        V2 _resolution;
 
         Viewport toViewport() const;
     };
@@ -82,7 +83,7 @@ public:
     const std::vector<String>& plugins() const;
 
 // [[script::bindings::property]]
-    const sp<Size>& rendererResolution() const;
+    const V2& rendererResolution() const;
 
     const Heap& heap() const;
     const Renderer& renderer() const;
@@ -90,9 +91,6 @@ public:
     const document& content() const;
     const document& resourceLoader() const;
     const document& interpreter() const;
-
-private:
-    uint32_t toSize(const String& sizestr) const;
 
 private:
     String _name;

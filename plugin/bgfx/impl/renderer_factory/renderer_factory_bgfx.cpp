@@ -4,42 +4,29 @@
 
 #include "core/util/uploader_type.h"
 
+#include "graphics/base/size.h"
+
 #include "renderer/base/render_engine.h"
+#include "renderer/base/render_engine_context.h"
 
 #include "app/base/application_context.h"
-#include "renderer/base/render_engine_context.h"
+
+#include "bgfx/impl/texture/texture_bgfx.h"
+#include "bgfx/base/resource_base.h"
+
 
 namespace ark::plugin::bgfx {
 
 namespace {
 
-template<typename T> class BGFXResourceBase : public Buffer::Delegate {
-public:
-    uint64_t id() override
-    {
-        return _buffer.idx;
-    }
-
-    ResourceRecycleFunc recycle() override
-    {
-        T vb = _buffer;
-        return [vb](GraphicsContext& context) {
-            ::bgfx::destroy(vb);
-        };
-    }
-
-protected:
-    T _buffer = { ::bgfx::kInvalidHandle };
-};
-
-class BufferDelegateVertex final : public virtual BGFXResourceBase<::bgfx::VertexBufferHandle> {
+class BufferDelegateVertex final : public ResourceBase<::bgfx::VertexBufferHandle, Buffer::Delegate> {
 public:
     void upload(GraphicsContext& graphicsContext) override
     {
-        if(!::bgfx::isValid(_buffer))
+        if(!::bgfx::isValid(_handle))
         {
             DASSERT(_size <= _data.size());
-            _buffer = ::bgfx::createVertexBuffer(::bgfx::makeRef(_data.data(), _size), _vertex_buffer_layout);
+            _handle = ::bgfx::createVertexBuffer(::bgfx::makeRef(_data.data(), _size), _vertex_buffer_layout);
         }
     }
 
@@ -58,23 +45,23 @@ private:
     ::bgfx::VertexLayout _vertex_buffer_layout;
 };
 
-class BufferDelegateIndex final : public virtual BGFXResourceBase<::bgfx::IndexBufferHandle> {
+class BufferDelegateIndex final : public ResourceBase<::bgfx::IndexBufferHandle, Buffer::Delegate> {
 public:
     void upload(GraphicsContext& graphicsContext) override
     {
-        if(!::bgfx::isValid(_buffer))
+        if(!::bgfx::isValid(_handle))
         {
             DASSERT(_size <= _indices.size());
-            _buffer = ::bgfx::createIndexBuffer(::bgfx::makeRef(_indices.data(), _size));
+            _handle = ::bgfx::createIndexBuffer(::bgfx::makeRef(_indices.data(), _size));
         }
     }
 
     void uploadBuffer(GraphicsContext& graphicsContext, Uploader& input) override
     {
-        if(!::bgfx::isValid(_buffer))
+        if(!::bgfx::isValid(_handle))
         {
             _indices = UploaderType::toBytes(input);
-            _buffer = ::bgfx::createIndexBuffer(::bgfx::makeRef(_indices.data(), _size));
+            _handle = ::bgfx::createIndexBuffer(::bgfx::makeRef(_indices.data(), _size));
         }
     }
 
@@ -85,21 +72,6 @@ public:
 
 private:
     std::vector<uint8_t> _indices;
-};
-
-class TextureDelegateBgfx final : public BGFXResourceBase<::bgfx::TextureHandle>, public Texture::Delegate {
-public:
-
-    void upload(GraphicsContext& graphicsContext, const sp<Texture::Uploader>& uploader) override;
-
-    void clear(GraphicsContext& graphicsContext) override;
-
-    bool download(GraphicsContext& graphicsContext, Bitmap& bitmap) override;
-
-    void uploadBitmap(GraphicsContext& graphicsContext, const Bitmap& bitmap, const std::vector<sp<ByteArray>>& imagedata) override;
-
-private:
-    ::bgfx::TextureHandle _texture;
 };
 
 }
@@ -150,8 +122,20 @@ sp<Framebuffer> RendererFactoryBgfx::createFramebuffer(sp<Renderer> renderer, st
     return nullptr;
 }
 
+sp<PipelineFactory> RendererFactoryBgfx::createPipelineFactory()
+{
+    return nullptr;
+}
+
+sp<RenderView> RendererFactoryBgfx::createRenderView(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController)
+{
+    return nullptr;
+}
+
 sp<Texture::Delegate> RendererFactoryBgfx::createTexture(sp<Size> size, sp<Texture::Parameters> parameters)
 {
+    if(parameters->_type == Texture::TYPE_2D || parameters->_type == Texture::TYPE_CUBEMAP)
+        return sp<Texture::Delegate>::make<TextureBgfx>(parameters->_type, static_cast<uint32_t>(size->widthAsFloat()), static_cast<uint32_t>(size->heightAsFloat()), std::move(parameters));
     return nullptr;
 }
 

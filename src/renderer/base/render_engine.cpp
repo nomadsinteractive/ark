@@ -11,9 +11,9 @@
 
 namespace ark {
 
-RenderEngine::RenderEngine(Ark::RendererVersion version, Ark::RendererCoordinateSystem coordinateSystem, sp<RendererFactory> rendererFactory)
-    : _coordinate_system(coordinateSystem == Ark::COORDINATE_SYSTEM_DEFAULT ? rendererFactory->defaultCoordinateSystem() : coordinateSystem), _renderer_factory(std::move(rendererFactory)),
-      _render_context(_renderer_factory->createRenderEngineContext(version))
+RenderEngine::RenderEngine(const ApplicationManifest::Renderer& renderer, sp<RendererFactory> rendererFactory)
+    : _coordinate_system(renderer._coordinate_system == Ark::COORDINATE_SYSTEM_DEFAULT ? rendererFactory->defaultCoordinateSystem() : renderer._coordinate_system), _renderer_factory(std::move(rendererFactory)),
+      _render_context(_renderer_factory->createRenderEngineContext(renderer._version))
 {
 }
 

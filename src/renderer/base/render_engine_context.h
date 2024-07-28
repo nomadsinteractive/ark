@@ -44,6 +44,7 @@ public:
     uint32_t getGLSLVersion() const;
 
 private:
+    Ark::RendererTarget _target;
     Ark::RendererVersion _version;
     Viewport _viewport;
 

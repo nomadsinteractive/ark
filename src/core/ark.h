@@ -18,6 +18,12 @@ namespace ark {
 
 class ARK_API Ark {
 public:
+    enum RendererTarget {
+        RENDERER_TARGET_AUTO,
+        RENDERER_TARGET_OPENGL,
+        RENDERER_TARGET_VULKAN
+   };
+
     enum RendererVersion {
         RENDERER_VERSION_AUTO = 0,
         RENDERER_VERSION_OPENGL_20 = 20,

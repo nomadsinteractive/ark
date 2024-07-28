@@ -1,5 +1,7 @@
 #pragma once
 
+#include <glslang/Public/ShaderLang.h>
+
 #include "core/forwarding.h"
 #include "core/inf/array.h"
 
@@ -25,6 +27,7 @@ public:
     static uint32_t getPixelSize(Texture::Format format);
     static uint32_t getComponentSize(Texture::Format format);
 
+    static std::vector<uint32_t> compileSPIR(const String& source, PipelineInput::ShaderStage stage);
 };
 
 }

@@ -18,8 +18,8 @@ int main(int argc, const char* argv[])
     try {
         Ark ark(argc, argv);
         sp<ApplicationManifest> manifest = sp<ApplicationManifest>::make("manifest.xml");
-        const sp<Size>& renderResolution = manifest->rendererResolution();
-        const sp<Application> app = ark.makeApplication(std::move(manifest), static_cast<uint32_t>(renderResolution->widthAsFloat() * scale), static_cast<uint32_t>(renderResolution->heightAsFloat() * scale));
+        const V2& renderResolution = manifest->rendererResolution();
+        const sp<Application> app = ark.makeApplication(std::move(manifest), static_cast<uint32_t>(renderResolution.x() * scale), static_cast<uint32_t>(renderResolution.y() * scale));
         return app->run();
     }
     catch(const std::exception& ex)

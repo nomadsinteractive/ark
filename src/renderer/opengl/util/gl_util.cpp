@@ -142,25 +142,25 @@ GLenum GLUtil::getTextureInternalFormat(Texture::Usage usage, Texture::Format fo
         GLenum bit32;
     };
 
-    static const GLComponentFormat uFormats[] = {
+    constexpr GLComponentFormat uFormats[] = {
         {GL_R8UI, GL_R16UI, GL_R32UI},
         {GL_RG8UI, GL_RG16UI, GL_RG32UI},
         {GL_RGB8UI, GL_RGB16UI, GL_RGB32UI},
         {GL_RGBA8UI, GL_RGBA16UI, GL_RGBA32UI}
     };
-    static const GLComponentFormat iFormats[] = {
+    constexpr GLComponentFormat iFormats[] = {
         {GL_R8I, GL_R16I, GL_R32I},
         {GL_RG8I, GL_RG16I, GL_RG32I},
         {GL_RGB8I, GL_RGB16I, GL_RGB32I},
         {GL_RGBA8I, GL_RGBA16I, GL_RGBA32I}
     };
-    static const GLComponentFormat fFormats[] = {
+    constexpr GLComponentFormat fFormats[] = {
         {GL_ZERO, GL_R16F, GL_R32F},
         {GL_ZERO, GL_RG16F, GL_RG32F},
         {GL_ZERO, GL_RGB16F, GL_RGB32F},
         {GL_ZERO, GL_RGBA16F, GL_RGBA32F}
     };
-    static const GLComponentFormat nFormats[] = {
+    constexpr GLComponentFormat nFormats[] = {
         {GL_R8_SNORM, GL_R16_SNORM, GL_ZERO},
         {GL_RG8_SNORM, GL_RG16_SNORM, GL_ZERO},
         {GL_RGB8_SNORM, GL_RGB16_SNORM, GL_ZERO},

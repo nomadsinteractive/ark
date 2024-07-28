@@ -212,10 +212,8 @@ void VKPipeline::compute(GraphicsContext& graphicsContext, const ComputeContext&
 void VKPipeline::setupVertexDescriptions(const PipelineInput& input, VKPipeline::VertexLayout& vertexLayout)
 {
     uint32_t location = 0;
-    for(const auto& i : input.layouts())
+    for(const auto& [divsor, stream] : input.layouts())
     {
-        uint32_t divsor = i.first;
-        const PipelineInput::Layout& stream = i.second;
         vertexLayout.bindingDescriptions.push_back(vks::initializers::vertexInputBindingDescription(
                                                    divsor,
                                                    stream.stride(),

@@ -40,9 +40,9 @@ void WithText::onWire(const WiringContext& context)
     if(_transform_node)
     {
         const sp<Model> model = context.getComponent<Model>();
-        CHECK(model, "Text with transform node \"\" has no model defined", _transform_node.c_str());
+        CHECK(model, "Text with transform node \"%s\" has no model defined", _transform_node.c_str());
         const sp<Node> node = model->findNode(_transform_node);
-        CHECK(node, "Text with transform node \"\" model has no node defined", _transform_node.c_str());
+        CHECK(node, "Text with transform node \"%s\" model has no node defined", _transform_node.c_str());
         matrix = matrix ? Mat4Type::matmul(matrix, node->transform()) : sp<Mat4>::make<Mat4::Const>(node->transform());
     }
     if(matrix)

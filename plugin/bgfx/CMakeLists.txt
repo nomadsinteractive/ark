@@ -9,7 +9,10 @@ ark_include_directories(${CMAKE_CURRENT_SOURCE_DIR}/..)
 ark_include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 aux_source_directory(. LOCAL_SRC_LIST)
+aux_source_directory(base LOCAL_SRC_LIST)
+aux_source_directory(impl/pipeline_factory LOCAL_SRC_LIST)
 aux_source_directory(impl/renderer_factory LOCAL_SRC_LIST)
+aux_source_directory(impl/texture LOCAL_SRC_LIST)
 
 ark_find_vcpkg_package(bgfx LIBRARIES bgfx::bx bgfx::bgfx bgfx::bimg bgfx::bimg_decode)
 

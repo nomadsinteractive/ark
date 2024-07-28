@@ -4,9 +4,6 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <glslang/Public/ShaderLang.h>
-#include <glslang/SPIRV/GlslangToSpv.h>
-
 #include "core/base/plugin_manager.h"
 #include "core/inf/variable.h"
 #include "core/types/global.h"
@@ -36,160 +33,6 @@
 
 namespace ark::vulkan {
 
-namespace {
-
-constexpr TBuiltInResource DefaultTBuiltInResource = {
-    /* .MaxLights = */ 32,
-    /* .MaxClipPlanes = */ 6,
-    /* .MaxTextureUnits = */ 32,
-    /* .MaxTextureCoords = */ 32,
-    /* .MaxVertexAttribs = */ 64,
-    /* .MaxVertexUniformComponents = */ 4096,
-    /* .MaxVaryingFloats = */ 64,
-    /* .MaxVertexTextureImageUnits = */ 32,
-    /* .MaxCombinedTextureImageUnits = */ 80,
-    /* .MaxTextureImageUnits = */ 32,
-    /* .MaxFragmentUniformComponents = */ 4096,
-    /* .MaxDrawBuffers = */ 32,
-    /* .MaxVertexUniformVectors = */ 128,
-    /* .MaxVaryingVectors = */ 8,
-    /* .MaxFragmentUniformVectors = */ 16,
-    /* .MaxVertexOutputVectors = */ 16,
-    /* .MaxFragmentInputVectors = */ 15,
-    /* .MinProgramTexelOffset = */ -8,
-    /* .MaxProgramTexelOffset = */ 7,
-    /* .MaxClipDistances = */ 8,
-    /* .MaxComputeWorkGroupCountX = */ 65535,
-    /* .MaxComputeWorkGroupCountY = */ 65535,
-    /* .MaxComputeWorkGroupCountZ = */ 65535,
-    /* .MaxComputeWorkGroupSizeX = */ 1024,
-    /* .MaxComputeWorkGroupSizeY = */ 1024,
-    /* .MaxComputeWorkGroupSizeZ = */ 64,
-    /* .MaxComputeUniformComponents = */ 1024,
-    /* .MaxComputeTextureImageUnits = */ 16,
-    /* .MaxComputeImageUniforms = */ 8,
-    /* .MaxComputeAtomicCounters = */ 8,
-    /* .MaxComputeAtomicCounterBuffers = */ 1,
-    /* .MaxVaryingComponents = */ 60,
-    /* .MaxVertexOutputComponents = */ 64,
-    /* .MaxGeometryInputComponents = */ 64,
-    /* .MaxGeometryOutputComponents = */ 128,
-    /* .MaxFragmentInputComponents = */ 128,
-    /* .MaxImageUnits = */ 8,
-    /* .MaxCombinedImageUnitsAndFragmentOutputs = */ 8,
-    /* .MaxCombinedShaderOutputResources = */ 8,
-    /* .MaxImageSamples = */ 0,
-    /* .MaxVertexImageUniforms = */ 0,
-    /* .MaxTessControlImageUniforms = */ 0,
-    /* .MaxTessEvaluationImageUniforms = */ 0,
-    /* .MaxGeometryImageUniforms = */ 0,
-    /* .MaxFragmentImageUniforms = */ 8,
-    /* .MaxCombinedImageUniforms = */ 8,
-    /* .MaxGeometryTextureImageUnits = */ 16,
-    /* .MaxGeometryOutputVertices = */ 256,
-    /* .MaxGeometryTotalOutputComponents = */ 1024,
-    /* .MaxGeometryUniformComponents = */ 1024,
-    /* .MaxGeometryVaryingComponents = */ 64,
-    /* .MaxTessControlInputComponents = */ 128,
-    /* .MaxTessControlOutputComponents = */ 128,
-    /* .MaxTessControlTextureImageUnits = */ 16,
-    /* .MaxTessControlUniformComponents = */ 1024,
-    /* .MaxTessControlTotalOutputComponents = */ 4096,
-    /* .MaxTessEvaluationInputComponents = */ 128,
-    /* .MaxTessEvaluationOutputComponents = */ 128,
-    /* .MaxTessEvaluationTextureImageUnits = */ 16,
-    /* .MaxTessEvaluationUniformComponents = */ 1024,
-    /* .MaxTessPatchComponents = */ 120,
-    /* .MaxPatchVertices = */ 32,
-    /* .MaxTessGenLevel = */ 64,
-    /* .MaxViewports = */ 16,
-    /* .MaxVertexAtomicCounters = */ 0,
-    /* .MaxTessControlAtomicCounters = */ 0,
-    /* .MaxTessEvaluationAtomicCounters = */ 0,
-    /* .MaxGeometryAtomicCounters = */ 0,
-    /* .MaxFragmentAtomicCounters = */ 8,
-    /* .MaxCombinedAtomicCounters = */ 8,
-    /* .MaxAtomicCounterBindings = */ 1,
-    /* .MaxVertexAtomicCounterBuffers = */ 0,
-    /* .MaxTessControlAtomicCounterBuffers = */ 0,
-    /* .MaxTessEvaluationAtomicCounterBuffers = */ 0,
-    /* .MaxGeometryAtomicCounterBuffers = */ 0,
-    /* .MaxFragmentAtomicCounterBuffers = */ 1,
-    /* .MaxCombinedAtomicCounterBuffers = */ 1,
-    /* .MaxAtomicCounterBufferSize = */ 16384,
-    /* .MaxTransformFeedbackBuffers = */ 4,
-    /* .MaxTransformFeedbackInterleavedComponents = */ 64,
-    /* .MaxCullDistances = */ 8,
-    /* .MaxCombinedClipAndCullDistances = */ 8,
-    /* .MaxSamples = */ 4,
-    /* .maxMeshOutputVerticesNV = */ 256,
-    /* .maxMeshOutputPrimitivesNV = */ 512,
-    /* .maxMeshWorkGroupSizeX_NV = */ 32,
-    /* .maxMeshWorkGroupSizeY_NV = */ 1,
-    /* .maxMeshWorkGroupSizeZ_NV = */ 1,
-    /* .maxTaskWorkGroupSizeX_NV = */ 32,
-    /* .maxTaskWorkGroupSizeY_NV = */ 1,
-    /* .maxTaskWorkGroupSizeZ_NV = */ 1,
-    /* .maxMeshViewCountNV = */ 4,
-/* TODO: They are new in Vulkan 1.3
-    maxMeshOutputVerticesEXT					= 2048;
-    maxMeshOutputPrimitivesEXT					= 2048;
-    maxMeshWorkGroupSizeX_EXT					= 256;
-    maxMeshWorkGroupSizeY_EXT					= 256;
-    maxMeshWorkGroupSizeZ_EXT					= 256;
-    maxTaskWorkGroupSizeX_EXT					= 256;
-    maxTaskWorkGroupSizeY_EXT					= 256;
-    maxTaskWorkGroupSizeZ_EXT					= 256;
-    maxMeshViewCountEXT						= 4;
-*/
-    /* .maxDualSourceDrawBuffersEXT = */ 1,
-};
-
-constexpr TLimits DefaultTBuiltInResourceLimits = {
-    /* .nonInductiveForLoops = */ true,
-    /* .whileLoops = */ true,
-    /* .doWhileLoops = */ true,
-    /* .generalUniformIndexing = */ true,
-    /* .generalAttributeMatrixVectorIndexing = */ true,
-    /* .generalVaryingIndexing = */ true,
-    /* .generalSamplerIndexing = */ true,
-    /* .generalVariableIndexing = */ true,
-    /* .generalConstantMatrixVectorIndexing = */ true
-};
-
-class GLSLLangInitializer {
-public:
-    GLSLLangInitializer()
-#ifndef ANDROID
-        : _languages{EShLangVertex, EShLangTessControl, EShLangTessEvaluation, EShLangGeometry, EShLangFragment, EShLangCompute},
-#else
-        : _languages{EShLangVertex, EShLangFragment, EShLangCompute},
-#endif
-          _built_in_resource(DefaultTBuiltInResource) {
-        _built_in_resource.limits = DefaultTBuiltInResourceLimits;
-        glslang::InitializeProcess();
-    }
-    ~GLSLLangInitializer() {
-        glslang::FinalizeProcess();
-    }
-
-    EShLanguage toShLanguage(PipelineInput::ShaderStage stage) const {
-        DCHECK(stage > PipelineInput::SHADER_STAGE_NONE && stage < PipelineInput::SHADER_STAGE_COUNT, "Illegal PipelineInput::ShaderStage: %d", stage);
-        return _languages[stage];
-    }
-
-    const TBuiltInResource& builtInResource() const {
-        return _built_in_resource;
-    }
-
-private:
-    EShLanguage _languages[PipelineInput::SHADER_STAGE_COUNT];
-    TBuiltInResource _built_in_resource;
-
-};
-
-}
-
 void VKUtil::checkResult(VkResult result)
 {
     CHECK(result == VK_SUCCESS, "Vulkan error: %s", vks::tools::errorString(result).c_str());
@@ -214,7 +57,7 @@ VkPipelineShaderStageCreateInfo VKUtil::loadShader(VkDevice device, const String
 
 VkPipelineShaderStageCreateInfo VKUtil::createShader(VkDevice device, const String& source, PipelineInput::ShaderStage stage)
 {
-    const std::vector<uint32_t> spirv = VKUtil::compileSPIR(source, stage);
+    const std::vector<uint32_t> spirv = RenderUtil::compileSPIR(source, stage);
     VkShaderModuleCreateInfo moduleCreateInfo{};
     moduleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
     moduleCreateInfo.codeSize = spirv.size() * sizeof(uint32_t);
@@ -402,71 +245,6 @@ VkPrimitiveTopology VKUtil::toPrimitiveTopology(Enum::RenderMode mode)
     static const VkPrimitiveTopology topologies[Enum::RENDER_MODE_COUNT] = {VK_PRIMITIVE_TOPOLOGY_LINE_LIST, VK_PRIMITIVE_TOPOLOGY_POINT_LIST, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP};
     CHECK(mode >= 0 && mode < Enum::RENDER_MODE_COUNT, "Unsupported render-mode: %d", mode);
     return topologies[mode];
-}
-
-std::vector<uint32_t> VKUtil::compileSPIR(const String& source, PipelineInput::ShaderStage stage)
-{
-    const Global<GLSLLangInitializer> initializer;
-    EShLanguage esStage = initializer->toShLanguage(stage);
-    glslang::TShader shader(esStage);
-    const char* sources[] = {source.c_str()};
-    shader.setStrings(sources, 1);
-
-    typedef std::map<uint32_t, uint32_t> TPerSetBaseBinding;
-    std::array<std::array<uint32_t, EShLangCount>, glslang::EResCount> baseBinding;
-    std::array<std::array<TPerSetBaseBinding, EShLangCount>, glslang::EResCount> baseBindingForSet;
-    std::array<std::vector<std::string>, EShLangCount> baseResourceSetBinding;
-    std::vector<std::pair<std::string, int32_t>> uniformLocationOverrides;
-
-    int32_t uniformBase = 0;
-
-    // Set IO mapper binding shift values
-    for (int32_t r = 0; r < glslang::EResCount; ++r) {
-        const glslang::TResourceType res = glslang::TResourceType(r);
-
-        // Set base bindings
-        shader.setShiftBinding(res, baseBinding[res][esStage]);
-
-        // Set bindings for particular resource sets
-        // TODO: use a range based for loop here, when available in all environments.
-        for (auto i = baseBindingForSet[res][esStage].begin();
-             i != baseBindingForSet[res][esStage].end(); ++i)
-            shader.setShiftBindingForSet(res, i->second, i->first);
-    }
-#ifdef ENABLE_HLSL
-    shader.setFlattenUniformArrays(false);
-#endif
-    shader.setNoStorageFormat(false);
-    shader.setResourceSetBinding(baseResourceSetBinding[esStage]);
-
-    shader.setUniformLocationBase(uniformBase);
-
-    shader.setEnvInput(glslang::EShSourceGlsl, esStage, glslang::EShClientVulkan, 100);
-    shader.setEnvClient(glslang::EShClientVulkan, glslang::EShTargetVulkan_1_0);
-    shader.setEnvTarget(glslang::EShTargetSpv, glslang::EShTargetSpv_1_0);
-
-    if(!shader.parse(&initializer->builtInResource(), 100, false, EShMsgDefault))
-        FATAL("Compile error: %s\n\n%s", source.c_str(), shader.getInfoLog());
-    {
-        glslang::TProgram program;
-        program.addShader(&shader);
-        if(!program.link(EShMsgDefault))
-            FATAL("Link error: %s\n\n%s", source.c_str(), shader.getInfoLog());
-
-        glslang::TIntermediate* intermedia = program.getIntermediate(esStage);
-        if (intermedia) {
-            std::vector<uint32_t> spirv;
-            spv::SpvBuildLogger logger;
-            glslang::SpvOptions spvOptions;
-            spvOptions.disableOptimizer = false;
-            spvOptions.optimizeSize = false;
-            spvOptions.disassemble = false;
-            spvOptions.validate = true;
-            glslang::GlslangToSpv(*intermedia, spirv, &logger, &spvOptions);
-            return spirv;
-        }
-    }
-    return {};
 }
 
 }

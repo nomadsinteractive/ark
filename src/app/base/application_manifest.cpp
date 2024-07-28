@@ -11,6 +11,37 @@
 
 namespace ark {
 
+namespace {
+
+uint32_t toSize(const String& sizestr)
+{
+    const String s = sizestr.toLower();
+    const std::pair<String, uint32_t> suffixs[] = {{"k", 10}, {"kb", 10}, {"m", 20}, {"mb", 20}, {"g", 30}, {"gb", 30}};
+    for(const std::pair<String, uint32_t>& i : suffixs)
+        if(s.endsWith(i.first))
+            return Strings::eval<uint32_t>(s.substr(0, s.length() - i.first.length())) << i.second;
+    return Strings::eval<uint32_t>(s);
+}
+
+ApplicationManifest::WindowFlag toOneWindowFlag(const String& val)
+{
+    const String s = val.toLower();
+    if(s == "show_cursor")
+        return ApplicationManifest::WINDOW_FLAG_SHOW_CURSOR;
+    if(s == "resizable")
+        return ApplicationManifest::WINDOW_FLAG_RESIZABLE;
+    if(s == "maxinized")
+        return ApplicationManifest::WINDOW_FLAG_MAXINIZED;
+    if(s == "full_screen")
+        return ApplicationManifest::WINDOW_FLAG_FULL_SCREEN;
+    if(s == "full_screen_windowed")
+        return ApplicationManifest::WINDOW_FLAG_FULL_SCREEN_WINDOWED;
+    DFATAL("Unknow window flag: %s", val.c_str());
+    return ApplicationManifest::WINDOW_FLAG_NONE;
+}
+
+}
+
 ApplicationManifest::ApplicationManifest(const String& src)
 {
     load(src);
@@ -23,7 +54,7 @@ void ApplicationManifest::load(const String& src)
         _application._dir = std::move(appDirOpt.value());
     _application._filename = std::move(appFileName);
 
-    const sp<ark::AssetBundle> appAsset = Platform::getAssetBundle(".", _application._dir);
+    const sp<AssetBundle> appAsset = Platform::getAssetBundle(".", _application._dir);
     DASSERT(appAsset);
     const sp<ark::Asset> asset = appAsset->getAsset(src);
     DCHECK(asset, "Cannot load application manifest \"%s\"", src.c_str());
@@ -31,15 +62,15 @@ void ApplicationManifest::load(const String& src)
     _content = asset ? Documents::loadFromReadable(asset->open()) : document::make("");
     _asset_dir = Documents::getAttribute(_content, "asset-dir");
     for(const document& i : _content->children("asset"))
-        _assets.push_back(Asset(i));
+        _assets.emplace_back(i);
 
     _plugins = Documents::getSystemSpecificList<std::vector<String>>(_content->children("plugin"), constants::NAME);
 
     if(const document& renderer = _content->getChild("renderer"))
     {
         if(const document& resolution = renderer->getChild("resolution"))
-            _renderer._resolution = sp<Size>::make(Documents::ensureAttribute<float>(resolution, constants::WIDTH),
-                                                   Documents::ensureAttribute<float>(resolution, constants::HEIGHT));
+            _renderer._resolution = {Documents::ensureAttribute<float>(resolution, constants::WIDTH), Documents::ensureAttribute<float>(resolution, constants::HEIGHT)};
+        _renderer._target = Documents::getAttribute<Ark::RendererTarget>(renderer, "target", Ark::RENDERER_TARGET_AUTO);
         _renderer._version = Documents::getAttribute<Ark::RendererVersion>(renderer, "version", Ark::RENDERER_VERSION_AUTO);
         _renderer._coordinate_system = Documents::getAttribute<Ark::RendererCoordinateSystem>(renderer, "coordinate-system", Ark::COORDINATE_SYSTEM_DEFAULT);
         _renderer._vsync = Documents::getAttribute<bool>(renderer, "vsync", false);
@@ -96,9 +127,8 @@ const std::vector<String>& ApplicationManifest::plugins() const
     return _plugins;
 }
 
-const sp<Size>& ApplicationManifest::rendererResolution() const
+const V2& ApplicationManifest::rendererResolution() const
 {
-    DCHECK(_renderer._resolution, "RenderResolution undefined in manifest");
     return _renderer._resolution;
 }
 
@@ -127,42 +157,15 @@ const document& ApplicationManifest::interpreter() const
     return _interpreter;
 }
 
-uint32_t ApplicationManifest::toSize(const String& sizestr) const
-{
-    const String s = sizestr.toLower();
-    const std::pair<String, uint32_t> suffixs[] = {{"k", 10}, {"kb", 10}, {"m", 20}, {"mb", 20}, {"g", 30}, {"gb", 30}};
-    for(const std::pair<String, uint32_t>& i : suffixs)
-        if(s.endsWith(i.first))
-            return Strings::eval<uint32_t>(s.substr(0, s.length() - i.first.length())) << i.second;
-    return Strings::eval<uint32_t>(s);
-}
-
 ApplicationManifest::Renderer::Renderer()
-    : _version(Ark::RENDERER_VERSION_AUTO)
+    : _target(Ark::RENDERER_TARGET_AUTO), _version(Ark::RENDERER_VERSION_AUTO), _coordinate_system(Ark::COORDINATE_SYSTEM_DEFAULT), _vsync(false),
+    _resolution(1920, 1080)
 {
 }
 
 Viewport ApplicationManifest::Renderer::toViewport() const
 {
-    DASSERT(_resolution);
-    return Viewport(0, 0, _resolution->widthAsFloat(), _resolution->heightAsFloat(), -1.0f, 1.0f);
-}
-
-static ApplicationManifest::WindowFlag toOneWindowFlag(const String& val)
-{
-    const String s = val.toLower();
-    if(s == "show_cursor")
-        return ApplicationManifest::WINDOW_FLAG_SHOW_CURSOR;
-    if(s == "resizable")
-        return ApplicationManifest::WINDOW_FLAG_RESIZABLE;
-    if(s == "maxinized")
-        return ApplicationManifest::WINDOW_FLAG_MAXINIZED;
-    if(s == "full_screen")
-        return ApplicationManifest::WINDOW_FLAG_FULL_SCREEN;
-    if(s == "full_screen_windowed")
-        return ApplicationManifest::WINDOW_FLAG_FULL_SCREEN_WINDOWED;
-    DFATAL("Unknow window flag: %s", val.c_str());
-    return ApplicationManifest::WINDOW_FLAG_NONE;
+    return {0, 0, _resolution.x(), _resolution.y(), -1.0f, 1.0f};
 }
 
 template<> ARK_API ApplicationManifest::WindowFlag StringConvert::eval<ApplicationManifest::WindowFlag>(const String& val)

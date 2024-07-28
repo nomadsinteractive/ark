@@ -12,33 +12,32 @@ namespace ark {
 
 namespace {
 
-class InputBufferSnapshot : public Uploader {
+class InputBufferSnapshot final : public Uploader {
 public:
     InputBufferSnapshot(size_t size, std::vector<Buffer::Strip> strips)
         : Uploader(size), _blocks(std::move(strips)) {
     }
 
-    virtual void upload(Writable& uploader) override {
+    void upload(Writable& uploader) override {
         for(const auto& [i, j] : _blocks)
             uploader.write(j.buf(), static_cast<uint32_t>(j.length()), static_cast<uint32_t>(i));
     }
 
-    virtual bool update(uint64_t /*timestamp*/) override {
+    bool update(uint64_t /*timestamp*/) override {
         return false;
     }
 
 private:
     std::vector<std::pair<size_t, ByteArray::Borrowed>> _blocks;
-
 };
 
-class RunnableBufferSynchronizer : public Runnable {
+class RunnableBufferSynchronizer final : public Runnable {
 public:
     RunnableBufferSynchronizer(Buffer buffer, sp<ByteArray> memory, size_t offset)
         : _buffer(std::move(buffer)), _memory(std::move(memory)), _offset(offset) {
     }
 
-    virtual void run() override {
+    void run() override {
         _buffer.delegate()->downloadBuffer(GraphicsContext::mocked(), _offset, _memory->size(), _memory->buf());
     }
 

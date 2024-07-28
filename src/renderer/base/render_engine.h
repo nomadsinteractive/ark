@@ -25,6 +25,8 @@ typedef struct _NSWindow NSWindow;
 
 #include "renderer/forwarding.h"
 
+#include "app/base/application_manifest.h"
+
 namespace ark {
 
 class ARK_API RenderEngine {
@@ -59,7 +61,7 @@ public:
     };
 
 public:
-    RenderEngine(Ark::RendererVersion version, Ark::RendererCoordinateSystem coordinateSystem, sp<RendererFactory> rendererFactory);
+    RenderEngine(const ApplicationManifest::Renderer& renderer, sp<RendererFactory> rendererFactory);
 
     Ark::RendererVersion version() const;
     Ark::RendererCoordinateSystem coordinateSystem() const;

@@ -100,9 +100,9 @@ struct CameraDelegateCHS final : Camera::Delegate {
     sp<Delegate> _delegate;
 };
 
-sp<RenderEngine> doCreateRenderEngine(Ark::RendererVersion version, Ark::RendererCoordinateSystem coordinateSystem, const sp<ApplicationBundle>& applicationBundle)
+sp<RenderEngine> doCreateRenderEngine(const ApplicationManifest::Renderer& renderer, const sp<ApplicationBundle>& applicationBundle)
 {
-    switch(version) {
+    switch(renderer._version) {
         case Ark::RENDERER_VERSION_AUTO:
         case Ark::RENDERER_VERSION_OPENGL_20:
         case Ark::RENDERER_VERSION_OPENGL_21:
@@ -118,18 +118,23 @@ sp<RenderEngine> doCreateRenderEngine(Ark::RendererVersion version, Ark::Rendere
         case Ark::RENDERER_VERSION_OPENGL_45:
         case Ark::RENDERER_VERSION_OPENGL_46:
 #ifdef ARK_USE_OPEN_GL
-            return sp<RenderEngine>::make(version, coordinateSystem, sp<opengl::RendererFactoryOpenGL>::make(applicationBundle->recycler()));
+            return sp<RenderEngine>::make(renderer, sp<opengl::RendererFactoryOpenGL>::make(applicationBundle->recycler()));
 #endif
         case Ark::RENDERER_VERSION_VULKAN:
         case Ark::RENDERER_VERSION_VULKAN_11:
         case Ark::RENDERER_VERSION_VULKAN_12:
         case Ark::RENDERER_VERSION_VULKAN_13:
+        {
+            ApplicationManifest::Renderer rendererInUse = renderer;
+            if(rendererInUse._version == Ark::RENDERER_VERSION_VULKAN)
+                rendererInUse._version = Ark::RENDERER_VERSION_VULKAN_13;
 #ifdef ARK_USE_VULKAN
-            return sp<RenderEngine>::make(version == Ark::RENDERER_VERSION_VULKAN ? Ark::RENDERER_VERSION_VULKAN_13 : version, coordinateSystem, sp<vulkan::RendererFactoryVulkan>::make(applicationBundle->recycler()));
+            return sp<RenderEngine>::make(rendererInUse, sp<vulkan::RendererFactoryVulkan>::make(applicationBundle->recycler()));
 #endif
+        }
         break;
     }
-    FATAL("Unknown engine type: %d", version);
+    FATAL("Unknown engine type: %d", renderer._version);
     return nullptr;
 }
 
@@ -141,14 +146,18 @@ void loadPlugins(const ApplicationManifest& manifest)
         pluginManager->load(i);
 }
 
-sp<RenderEngine> createRenderEngine(Ark::RendererVersion version, Ark::RendererCoordinateSystem coordinateSystem, const sp<ApplicationBundle>& applicationBundle)
+sp<RenderEngine> createRenderEngine(const ApplicationManifest::Renderer& renderer, const sp<ApplicationBundle>& applicationBundle)
 {
-    if(version != Ark::RENDERER_VERSION_AUTO)
-        return doCreateRenderEngine(version, coordinateSystem, applicationBundle);
+    if(renderer._version != Ark::RENDERER_VERSION_AUTO)
+        return doCreateRenderEngine(renderer, applicationBundle);
 
+    ApplicationManifest::Renderer rendererInUse = renderer;
     for(const Ark::RendererVersion i : Platform::getRendererVersionPreferences())
-        if(sp<RenderEngine> renderEngine = doCreateRenderEngine(i, coordinateSystem, applicationBundle))
+    {
+        rendererInUse._version = i;
+        if(sp<RenderEngine> renderEngine = doCreateRenderEngine(rendererInUse, applicationBundle))
             return renderEngine;
+    }
 
     FATAL("Cannot create prefered RenderEngine");
     return nullptr;
@@ -291,7 +300,7 @@ void Ark::initialize(sp<ApplicationManifest> manifest)
     sp<BeanFactory> factory = createBeanFactory(sp<DictionaryImpl<document>>::make());
     _asset_bundle = sp<ArkAssetBundle>::make(AssetBundleType::createBuiltInAssetBundle(_manifest->assetDir(), _manifest->appDir()), factory, _manifest->assets());
     sp<ApplicationBundle> applicationBundle = sp<ApplicationBundle>::make(_asset_bundle->getAssetBundle("/"));
-    sp<RenderEngine> renderEngine = createRenderEngine(_manifest->renderer()._version, _manifest->renderer()._coordinate_system, applicationBundle);
+    sp<RenderEngine> renderEngine = createRenderEngine(_manifest->renderer(), applicationBundle);
     _application_context = createApplicationContext(_manifest, std::move(applicationBundle), std::move(renderEngine));
 }
 

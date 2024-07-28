@@ -38,8 +38,6 @@ public:
     static VkShaderStageFlagBits toStage(PipelineInput::ShaderStage stage);
     static VkPrimitiveTopology toPrimitiveTopology(Enum::RenderMode mode);
 
-    static std::vector<uint32_t> compileSPIR(const String& source, PipelineInput::ShaderStage stage);
-
 };
 
 }
