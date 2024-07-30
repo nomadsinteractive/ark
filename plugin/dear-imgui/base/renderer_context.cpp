@@ -7,9 +7,7 @@
 #include "dear-imgui/base/draw_command_pool.h"
 
 
-namespace ark {
-namespace plugin {
-namespace dear_imgui {
+namespace ark::plugin::dear_imgui {
 
 RendererContext::RendererContext(const sp<Shader>& shader, const sp<RenderController>& renderController)
     : _shader(shader), _render_controller(renderController)
@@ -47,6 +45,4 @@ void RendererContext::relTextureRefCount(Texture* texture)
         _draw_commands.erase(iter);
 }
 
-}
-}
 }

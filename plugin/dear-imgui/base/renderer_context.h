@@ -1,5 +1,4 @@
-#ifndef ARK_PLUGIN_DEAR_IMGUI_BASE_RENDERER_CONTEXT_H_
-#define ARK_PLUGIN_DEAR_IMGUI_BASE_RENDERER_CONTEXT_H_
+#pragma once
 
 #include <map>
 
@@ -8,11 +7,8 @@
 #include "renderer/forwarding.h"
 
 #include "dear-imgui/forwarding.h"
-#include "dear-imgui/renderer/renderer_imgui.h"
 
-namespace ark {
-namespace plugin {
-namespace dear_imgui {
+namespace ark::plugin::dear_imgui {
 
 class RendererContext {
 public:
@@ -32,7 +28,3 @@ private:
 };
 
 }
-}
-}
-
-#endif

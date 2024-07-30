@@ -27,7 +27,7 @@ class ModelLoader;
 class ModelBundle;
 class Node;
 class Pipeline;
-class PipelineContext;
+class PipelineSnapshot;
 class PipelineFactory;
 class PipelineInput;
 class PipelineBindings;

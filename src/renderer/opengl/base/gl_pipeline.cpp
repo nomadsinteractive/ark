@@ -576,14 +576,14 @@ GLPipeline::PipelineOperationDraw::PipelineOperationDraw(sp<Stub> stub, const Pi
 
 void GLPipeline::PipelineOperationDraw::bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
-    _stub->bind(graphicsContext, drawingContext);
+    _stub->bind(graphicsContext, drawingContext._pipeline_context);
 }
 
 void GLPipeline::PipelineOperationDraw::draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
     const volatile GLScissor scissor(drawingContext._scissor ? drawingContext._scissor : _scissor);
 
-    for(const auto& [i, j] : drawingContext._ssbos)
+    for(const auto& [i, j] : drawingContext._pipeline_context._ssbos)
         _ssbo_binders.emplace_back(GL_SHADER_STORAGE_BUFFER, static_cast<GLuint>(i), static_cast<GLuint>(j.id()));
 
     _renderer->draw(graphicsContext, drawingContext);
@@ -619,7 +619,7 @@ GLPipeline::Stub::Stub()
 {
 }
 
-void GLPipeline::Stub::bind(GraphicsContext& /*graphicsContext*/, const PipelineContext& pipelineContext)
+void GLPipeline::Stub::bind(GraphicsContext& /*graphicsContext*/, const PipelineSnapshot& pipelineContext)
 {
     glUseProgram(_id);
 
@@ -779,9 +779,9 @@ void GLPipeline::PipelineOperationCompute::draw(GraphicsContext& /*graphicsConte
 
 void GLPipeline::PipelineOperationCompute::compute(GraphicsContext& graphicsContext, const ComputeContext& computeContext)
 {
-    _stub->bind(graphicsContext, computeContext);
+    _stub->bind(graphicsContext, computeContext._pipeline_context);
 
-    for(const auto& [i, j] : computeContext._ssbos)
+    for(const auto& [i, j] : computeContext._pipeline_context._ssbos)
         _ssbo_binders.emplace_back(GL_SHADER_STORAGE_BUFFER, static_cast<GLuint>(i), static_cast<GLuint>(j.id()));
 
     glDispatchCompute(computeContext._num_work_groups.at(0), computeContext._num_work_groups.at(1), computeContext._num_work_groups.at(2));

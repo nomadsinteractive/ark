@@ -158,7 +158,7 @@ private:
     struct Stub {
         Stub();
 
-        void bind(GraphicsContext& graphicsContext, const PipelineContext& pipelineContext);
+        void bind(GraphicsContext& graphicsContext, const PipelineSnapshot& pipelineContext);
 
         void bindUBO(const RenderLayerSnapshot::UBOSnapshot& uboSnapshot, const sp<PipelineInput::UBO>& ubo);
         void bindUniform(const uint8_t* ptr, uint32_t size, const Uniform& uniform);

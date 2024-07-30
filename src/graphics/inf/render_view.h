@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_INF_RENDER_VIEW_H_
-#define ARK_GRAPHICS_INF_RENDER_VIEW_H_
+#pragma once
 
 #include "core/forwarding.h"
 #include "core/types/shared_ptr.h"
@@ -19,5 +18,3 @@ public:
 };
 
 }
-
-#endif

@@ -41,7 +41,7 @@ void RenderPass::render(RenderRequest& renderRequest, const V3& /*position*/)
         }
         else
             drawParam = DrawingParams::DrawElements{0};
-        DrawingContext drawingContext(_shader_bindings, _shader_bindings->attachments(), _shader->takeUBOSnapshot(renderRequest), _shader->takeSSBOSnapshot(renderRequest), vertices.snapshot(),
+        DrawingContext drawingContext({_shader_bindings, _shader->takeUBOSnapshot(renderRequest), _shader->takeSSBOSnapshot(renderRequest)}, _shader_bindings->attachments(), vertices.snapshot(),
                                       _index_buffer.snapshot(), drawCount, std::move(drawParam));
         renderRequest.addRenderCommand(drawingContext.toRenderCommand(renderRequest));
     }

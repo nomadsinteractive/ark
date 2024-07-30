@@ -11,6 +11,7 @@
 
 #include "app/base/application_context.h"
 
+#include "bgfx/impl/pipeline_factory/pipeline_factory_bgfx.h"
 #include "bgfx/impl/texture/texture_bgfx.h"
 #include "bgfx/base/resource_base.h"
 
@@ -124,7 +125,7 @@ sp<Framebuffer> RendererFactoryBgfx::createFramebuffer(sp<Renderer> renderer, st
 
 sp<PipelineFactory> RendererFactoryBgfx::createPipelineFactory()
 {
-    return nullptr;
+    return sp<PipelineFactory>::make<PipelineFactoryBgfx>();
 }
 
 sp<RenderView> RendererFactoryBgfx::createRenderView(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController)

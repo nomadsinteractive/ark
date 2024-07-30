@@ -190,9 +190,9 @@ void VKPipeline::bind(GraphicsContext& graphicsContext, const DrawingContext& dr
             _rebind_needed = true;
 
     if(_rebind_needed)
-        setupDescriptorSet(graphicsContext, drawingContext._shader_bindings->pipelineBindings());
+        setupDescriptorSet(graphicsContext, drawingContext._pipeline_context._shader_bindings->pipelineBindings());
 
-    bindUBOShapshots(graphicsContext, drawingContext._ubos);
+    bindUBOShapshots(graphicsContext, drawingContext._pipeline_context._ubos);
     _rebind_needed = false;
 }
 
@@ -205,7 +205,7 @@ void VKPipeline::draw(GraphicsContext& graphicsContext, const DrawingContext& dr
 void VKPipeline::compute(GraphicsContext& graphicsContext, const ComputeContext& computeContext)
 {
     DCHECK(_is_compute_pipeline, "Not a compute pipeline");
-    bindUBOShapshots(graphicsContext, computeContext._ubos);
+    bindUBOShapshots(graphicsContext, computeContext._pipeline_context._ubos);
     buildComputeCommandBuffer(graphicsContext, computeContext);
 }
 
@@ -464,10 +464,9 @@ void VKPipeline::buildDrawCommandBuffer(GraphicsContext& graphicsContext, const 
     if(drawingContext._indices)
         vkCmdBindIndexBuffer(commandBuffer, (VkBuffer)(drawingContext._indices.id()), 0, kVKIndexType);
 
-    const Optional<Rect>& scissor = drawingContext._scissor;
-    if(scissor)
+    if(const Optional<Rect>& scissor = drawingContext._scissor)
     {
-        CHECK(drawingContext._shader_bindings->pipelineBindings()->hasFlag(PipelineBindings::FLAG_DYNAMIC_SCISSOR, PipelineBindings::FLAG_DYNAMIC_SCISSOR_BITMASK), "Pipeline has no DYNAMIC_SCISSOR flag set");
+        CHECK(drawingContext._pipeline_context._shader_bindings->pipelineBindings()->hasFlag(PipelineBindings::FLAG_DYNAMIC_SCISSOR, PipelineBindings::FLAG_DYNAMIC_SCISSOR_BITMASK), "Pipeline has no DYNAMIC_SCISSOR flag set");
         VkRect2D vkScissor{{static_cast<int32_t>(scissor->left()), static_cast<int32_t>(scissor->top())}, {static_cast<uint32_t>(scissor->width()), static_cast<uint32_t>(scissor->height())}};
         vkCmdSetScissor(commandBuffer, 0, 1, &vkScissor);
     }

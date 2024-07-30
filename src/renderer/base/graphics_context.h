@@ -3,7 +3,6 @@
 #include "core/base/api.h"
 #include "core/collection/traits.h"
 #include "core/types/shared_ptr.h"
-#include "core/types/weak_ptr.h"
 
 #include "graphics/forwarding.h"
 

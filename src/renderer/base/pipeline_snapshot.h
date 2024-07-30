@@ -2,7 +2,6 @@
 
 #include <vector>
 
-#include "core/base/api.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/base/render_layer_snapshot.h"
@@ -12,12 +11,8 @@
 
 namespace ark {
 
-class ARK_API PipelineContext {
-public:
-    PipelineContext(sp<ShaderBindings> shaderBindings, std::vector<RenderLayerSnapshot::UBOSnapshot> ubo, std::vector<std::pair<uint32_t, Buffer::Snapshot>> ssbos);
-
+struct PipelineSnapshot final {
     sp<ShaderBindings> _shader_bindings;
-
     std::vector<RenderLayerSnapshot::UBOSnapshot> _ubos;
     std::vector<std::pair<uint32_t, Buffer::Snapshot>> _ssbos;
 };

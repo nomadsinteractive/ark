@@ -6,16 +6,15 @@
 
 #include "renderer/opengl/base/gl_pipeline.h"
 
-namespace ark {
-namespace gles30 {
+namespace ark::gles30 {
 
-class GLVertexArray : public Resource {
+class GLVertexArray final : public Resource {
 public:
     GLVertexArray(sp<opengl::GLPipeline> pipeline, sp<Buffer::Delegate> vertices, const ShaderBindings& shaderBindings);
 
-    virtual uint64_t id() override;
-    virtual void upload(GraphicsContext& graphicsContext) override;
-    virtual ResourceRecycleFunc recycle() override;
+    uint64_t id() override;
+    void upload(GraphicsContext& graphicsContext) override;
+    ResourceRecycleFunc recycle() override;
 
 private:
     sp<opengl::GLPipeline> _pipeline;
@@ -26,5 +25,4 @@ private:
     uint32_t _id;
 };
 
-}
 }

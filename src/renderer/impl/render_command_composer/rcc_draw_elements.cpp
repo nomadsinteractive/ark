@@ -57,7 +57,7 @@ sp<RenderCommand> RCCDrawElements::compose(const RenderRequest& renderRequest, R
         }
     }
 
-    DrawingContext drawingContext(snapshot._stub->_shader_bindings, snapshot._stub->_shader_bindings->attachments(), std::move(snapshot._ubos), std::move(snapshot._ssbos),
+    DrawingContext drawingContext({snapshot._stub->_shader_bindings, std::move(snapshot._ubos), std::move(snapshot._ssbos)}, snapshot._stub->_shader_bindings->attachments(),
                                   buf.vertices().toSnapshot(vertices), buf.indices(), static_cast<uint32_t>(buf.indices().length<element_index_t>()), DrawingParams::DrawElements{0});
 
     if(snapshot._stub->_scissor)

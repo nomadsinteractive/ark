@@ -4,8 +4,6 @@
 #include "core/types/global.h"
 #include "core/util/strings.h"
 
-#include "graphics/base/camera.h"
-
 #include "renderer/base/render_controller.h"
 
 #include "platform/platform.h"

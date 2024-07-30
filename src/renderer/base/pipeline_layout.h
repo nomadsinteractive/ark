@@ -15,7 +15,7 @@
 
 namespace ark {
 
-class PipelineLayout {
+class ARK_API PipelineLayout {
 public:
     PipelineLayout(sp<PipelineBuildingContext> buildingContext, sp<Snippet> snippet);
 

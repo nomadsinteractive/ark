@@ -49,7 +49,6 @@ private:
     sp<Pipeline> _pipeline;
 
     sp<Traits> _attachments;
-
 };
 
 }

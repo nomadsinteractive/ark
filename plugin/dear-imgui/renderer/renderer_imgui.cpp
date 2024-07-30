@@ -37,13 +37,13 @@ namespace ark::plugin::dear_imgui {
 
 namespace {
 
-class ImguiRenderCommand : public RenderCommand {
+class ImguiRenderCommand final : public RenderCommand {
 public:
     ImguiRenderCommand(sp<RenderCommand> delegate, sp<RendererImgui::DrawCommandRecycler> recycler)
         : _delegate(std::move(delegate)), _recycler(std::move(recycler)) {
     }
 
-    virtual void draw(GraphicsContext& graphicsContext) override {
+    void draw(GraphicsContext& graphicsContext) override {
         _delegate->draw(graphicsContext);
     }
 
@@ -222,8 +222,8 @@ void RendererImgui::MyImGuiRenderFunction(const RenderRequest& renderRequest, Im
         memcpy(ib.buf(), cmd_list->IdxBuffer.Data, static_cast<size_t>(ib.length()));
 
         uint32_t offset = 0;
-        auto ubos = _shader->takeUBOSnapshot(renderRequest);
-        auto ssbos = _shader->takeSSBOSnapshot(renderRequest);
+        const auto ubos = _shader->takeUBOSnapshot(renderRequest);
+        const auto ssbos = _shader->takeSSBOSnapshot(renderRequest);
         for (int j = 0; j < cmd_list->CmdBuffer.Size; j++)
         {
             const ImDrawCmd* pcmd = &cmd_list->CmdBuffer[j];
@@ -248,12 +248,12 @@ void RendererImgui::MyImGuiRenderFunction(const RenderRequest& renderRequest, Im
                 // By default the indices ImDrawIdx are 16-bits, you can change them to 32-bits in imconfig.h if your engine doesn't support 16-bits indices.
                 const ImVec2& pos = draw_data->DisplayPos;
 
-                const sp<DrawCommandPool>& drawCommandPool = _renderer_context->obtainDrawCommandPool(reinterpret_cast<Texture*>(pcmd->TextureId));
+                const sp<DrawCommandPool>& drawCommandPool = _renderer_context->obtainDrawCommandPool(pcmd->TextureId);
                 sp<DrawCommandRecycler> recycler = drawCommandPool->obtainDrawCommandRecycler();
                 const sp<DrawCommand>& drawCommand = recycler->drawCommand();
                 Buffer::Snapshot vertexBuffer = drawCommand->_vertex_buffer.snapshot(vb);
                 Buffer::Snapshot indexBuffer = drawCommand->_index_buffer.snapshot(ib);
-                DrawingContext drawingContext(drawCommandPool->_shader_bindings, drawCommand->_attachments, ubos, ssbos, std::move(vertexBuffer), std::move(indexBuffer), pcmd->ElemCount, DrawingParams::DrawElements{offset});
+                DrawingContext drawingContext({drawCommandPool->_shader_bindings, ubos, ssbos}, drawCommand->_attachments, std::move(vertexBuffer), std::move(indexBuffer), pcmd->ElemCount, DrawingParams::DrawElements{offset});
                 drawingContext._scissor = _render_engine->toRendererRect(Rect(pcmd->ClipRect.x - pos.x, pcmd->ClipRect.y - pos.y, pcmd->ClipRect.z - pos.x, pcmd->ClipRect.w - pos.y), Ark::COORDINATE_SYSTEM_LHS);
                 renderRequest.addRenderCommand(sp<ImguiRenderCommand>::make(drawingContext.toRenderCommand(renderRequest), std::move(recycler)));
             }
