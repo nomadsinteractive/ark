@@ -7,7 +7,7 @@
 
 #include "renderer/base/atlas.h"
 #include "renderer/base/model.h"
-#include "renderer/base/pipeline_bindings.h"
+#include "renderer/base/pipeline_descriptor.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/base/texture.h"
 #include "renderer/impl/vertices/vertices_sphere.h"
@@ -103,7 +103,7 @@ sp<RenderCommandComposer> ModelLoaderSphere::makeRenderCommandComposer()
 
 void ModelLoaderSphere::initialize(ShaderBindings& shaderBindings)
 {
-    shaderBindings.pipelineBindings()->bindSampler(_atlas->texture());
+    shaderBindings.pipelineDescriptor()->bindSampler(_atlas->texture());
 }
 
 sp<Model> ModelLoaderSphere::loadModel(int32_t type)

@@ -3,7 +3,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "renderer/base/graphics_context.h"
-#include "renderer/base/pipeline_bindings.h"
+#include "renderer/base/pipeline_descriptor.h"
 #include "renderer/base/pipeline_layout.h"
 #include "renderer/base/render_engine_context.h"
 #include "renderer/base/render_controller.h"
@@ -12,7 +12,7 @@
 
 namespace ark::opengl {
 
-sp<Pipeline> PipelineFactoryOpenGL::buildPipeline(GraphicsContext& graphicsContext, const PipelineBindings& bindings)
+sp<Pipeline> PipelineFactoryOpenGL::buildPipeline(GraphicsContext& graphicsContext, const PipelineDescriptor& bindings)
 {
     const sp<PipelineLayout>& pipelineLayout = bindings.layout();
     const sp<RenderEngineContext>& renderContext = graphicsContext.renderContext();

@@ -37,7 +37,7 @@ private:
         void initialize();
 
         virtual VkCommandBuffer vkCommandBuffer() override;
-        virtual VkRenderPass create(const PipelineBindings& bindings) override;
+        virtual VkRenderPass create(const PipelineDescriptor& bindings) override;
         virtual VkRenderPass begin(VkCommandBuffer commandBuffer) override;
 
     private:

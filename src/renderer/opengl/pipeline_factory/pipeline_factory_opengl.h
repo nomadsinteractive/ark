@@ -10,7 +10,7 @@ namespace ark::opengl {
 class PipelineFactoryOpenGL : public PipelineFactory {
 public:
 
-    virtual sp<Pipeline> buildPipeline(GraphicsContext& graphicsContext, const PipelineBindings& bindings) override;
+    virtual sp<Pipeline> buildPipeline(GraphicsContext& graphicsContext, const PipelineDescriptor& bindings) override;
 
 };
 

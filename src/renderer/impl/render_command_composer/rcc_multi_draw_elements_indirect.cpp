@@ -26,12 +26,12 @@ namespace {
 class VerticesUploader final : public Uploader {
 public:
     VerticesUploader(sp<ModelBundle> multiModels, sp<PipelineInput> pipelineInput)
-        : Uploader(multiModels->vertexLength() * pipelineInput->getLayout(0).stride()), _model_bundle(std::move(multiModels)), _pipeline_input(std::move(pipelineInput)) {
+        : Uploader(multiModels->vertexLength() * pipelineInput->getStreamLayout(0).stride()), _model_bundle(std::move(multiModels)), _pipeline_input(std::move(pipelineInput)) {
     }
 
     void upload(Writable& uploader) override {
         uint32_t offset = 0;
-        size_t stride = _pipeline_input->getLayout(0).stride();
+        size_t stride = _pipeline_input->getStreamLayout(0).stride();
         PipelineInput::AttributeOffsets attributes(_pipeline_input);
         for(const ModelBundle::ModelLayout& i : _model_bundle->modelLayouts().values())
         {
@@ -154,7 +154,7 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
     }
 
     size_t instanceId = 0;
-    const PipelineInput::AttributeOffsets& attributeOffsets = buf.shaderBindings()->pipelineBindings()->attributes();
+    const PipelineInput::AttributeOffsets& attributeOffsets = buf.shaderBindings()->pipelineDescriptor()->attributes();
     const size_t attributeStride = attributeOffsets.stride();
     const bool hasModelMatrix = attributeOffsets._offsets[PipelineInput::ATTRIBUTE_NAME_MODEL_MATRIX] != -1;
     const bool hasMaterialId = attributeOffsets._offsets[PipelineInput::ATTRIBUTE_NAME_MATERIAL_ID] != -1;

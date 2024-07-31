@@ -35,7 +35,7 @@ void RenderPass::render(RenderRequest& renderRequest, const V3& /*position*/)
         if(_draw_procedure == Enum::DRAW_PROCEDURE_DRAW_INSTANCED)
         {
             std::vector<std::pair<uint32_t, Buffer::Snapshot>> dividedBufferSnapshots;
-            for(const auto& [i, j] : *_shader_bindings->divisors())
+            for(const auto& [i, j] : *_shader_bindings->streams())
                 dividedBufferSnapshots.emplace_back(i, j.snapshot(j.size()));
             drawParam = DrawingParams::DrawElementsInstanced{0, static_cast<uint32_t>(_index_buffer.size() / sizeof(element_index_t)), std::move(dividedBufferSnapshots)};
         }

@@ -12,7 +12,7 @@ class PipelineFactoryVulkan : public PipelineFactory {
 public:
     PipelineFactoryVulkan(const sp<Recycler>& recycler, const sp<VKRenderer>& renderFactory);
 
-    virtual sp<Pipeline> buildPipeline(GraphicsContext& graphicsContext, const PipelineBindings& bindings) override;
+    virtual sp<Pipeline> buildPipeline(GraphicsContext& graphicsContext, const PipelineDescriptor& bindings) override;
 
 private:
     sp<Recycler> _recycler;

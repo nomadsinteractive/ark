@@ -12,7 +12,7 @@
 #include "renderer/base/atlas.h"
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/drawing_buffer.h"
-#include "renderer/base/pipeline_bindings.h"
+#include "renderer/base/pipeline_descriptor.h"
 #include "renderer/base/model.h"
 #include "renderer/impl/render_command_composer/rcc_draw_quads.h"
 #include "renderer/base/render_controller.h"
@@ -39,7 +39,7 @@ sp<RenderCommandComposer> ModelLoaderText::makeRenderCommandComposer()
 
 void ModelLoaderText::initialize(ShaderBindings& shaderBindings)
 {
-    shaderBindings.pipelineBindings()->bindSampler(_atlas->texture());
+    shaderBindings.pipelineDescriptor()->bindSampler(_atlas->texture());
 }
 
 sp<Model> ModelLoaderText::loadModel(int32_t type)

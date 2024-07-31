@@ -14,7 +14,7 @@
 
 namespace ark {
 
-class ARK_API PipelineBindings {
+class ARK_API PipelineDescriptor {
 public:
     enum Flag {
         FLAG_DYNAMIC_SCISSOR = 4,
@@ -163,8 +163,8 @@ public:
     };
 
 public:
-    PipelineBindings(Enum::RenderMode mode, Enum::DrawProcedure renderProcedure, Parameters parameters, sp<PipelineLayout> pipelineLayout);
-    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(PipelineBindings);
+    PipelineDescriptor(Enum::RenderMode mode, Enum::DrawProcedure renderProcedure, Parameters parameters, sp<PipelineLayout> pipelineLayout);
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(PipelineDescriptor);
 
     Enum::RenderMode mode() const;
     Enum::DrawProcedure drawProcedure() const;
@@ -186,8 +186,6 @@ public:
     bool hasFlag(Flag flag, Flag bitmask) const;
     void setFlag(Flag flag, Flag bitmask) const;
 
-    sp<Pipeline> getPipeline(GraphicsContext& graphicsContext, const sp<PipelineFactory>& pipelineFactory);
-
 private:
     struct Stub {
         Stub(Enum::RenderMode mode, Enum::DrawProcedure renderProcedure, Parameters parameters, sp<PipelineLayout> pipelineLayout);
@@ -208,8 +206,6 @@ private:
 
 private:
     sp<Stub> _stub;
-
-    sp<Pipeline> _pipeline;
 };
 
 }

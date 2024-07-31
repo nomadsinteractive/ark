@@ -54,10 +54,10 @@ public:
         AttributeName _last_attribute;
     };
 
-    class Layout {
+    class StreamLayout {
     public:
-        Layout();
-        DEFAULT_COPY_AND_ASSIGN(Layout);
+        StreamLayout();
+        DEFAULT_COPY_AND_ASSIGN(StreamLayout);
 
         uint32_t stride() const;
 
@@ -130,8 +130,8 @@ public:
     std::vector<SSBO>& ssbos();
     const std::vector<SSBO>& ssbos() const;
 
-    const std::map<uint32_t, Layout>& layouts() const;
-    std::map<uint32_t, Layout>& layouts();
+    const std::map<uint32_t, StreamLayout>& layouts() const;
+    std::map<uint32_t, StreamLayout>& layouts();
 
     size_t samplerCount() const;
     bool hasSampler(const String& name) const;
@@ -142,7 +142,7 @@ public:
 
     void addAttribute(String name, Attribute attribute);
 
-    const PipelineInput::Layout& getLayout(uint32_t divisor) const;
+    const PipelineInput::StreamLayout& getStreamLayout(uint32_t divisor) const;
 
     Optional<const Attribute&> getAttribute(const String& name) const;
 
@@ -154,7 +154,7 @@ private:
     std::vector<sp<UBO>> _ubos;
     std::vector<SSBO> _ssbos;
 
-    std::map<uint32_t, Layout> _layouts;
+    std::map<uint32_t, StreamLayout> _stream_layouts;
     std::vector<String> _sampler_names;
     std::vector<String> _image_names;
 

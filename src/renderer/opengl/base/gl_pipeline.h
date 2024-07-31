@@ -22,7 +22,7 @@ namespace ark::opengl {
 
 class GLPipeline : public Pipeline {
 public:
-    GLPipeline(const sp<Recycler>& recycler, uint32_t version, std::map<PipelineInput::ShaderStage, String> shaders, const PipelineBindings& bindings);
+    GLPipeline(const sp<Recycler>& recycler, uint32_t version, std::map<PipelineInput::ShaderStage, String> shaders, const PipelineDescriptor& bindings);
     virtual ~GLPipeline() override;
 
     virtual uint64_t id() override;
@@ -136,14 +136,14 @@ private:
 
     class PipelineOperationDraw : public PipelineOperation {
     public:
-        PipelineOperationDraw(sp<Stub> stub, const PipelineBindings& bindings);
+        PipelineOperationDraw(sp<Stub> stub, const PipelineDescriptor& bindings);
 
         virtual void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
         virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
         virtual void compute(GraphicsContext& graphicsContext, const ComputeContext& computeContext) override;
 
     private:
-        sp<PipelineDrawCommand> makeBakedRenderer(const PipelineBindings& bindings) const;
+        sp<PipelineDrawCommand> makeBakedRenderer(const PipelineDescriptor& bindings) const;
 
     private:
         sp<Stub> _stub;
@@ -156,7 +156,7 @@ private:
 
     class PipelineOperationCompute : public PipelineOperation {
     public:
-        PipelineOperationCompute(const sp<Stub>& stub);
+        PipelineOperationCompute(sp<Stub> stub);
 
         virtual void bind(GraphicsContext& graphicsContext, const DrawingContext& computeContext) override;
         virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& computeContext) override;
@@ -168,7 +168,7 @@ private:
 
     };
 
-    sp<PipelineOperation> makePipelineOperation(const PipelineBindings& bindings) const;
+    sp<PipelineOperation> makePipelineOperation(const PipelineDescriptor& bindings) const;
 
 private:
     sp<Stub> _stub;
@@ -179,7 +179,7 @@ private:
     std::map<PipelineInput::ShaderStage, String> _shaders;
 
     sp<PipelineOperation> _pipeline_operation;
-    std::vector<sp<Snippet::DrawEvents>> _draw_traits;
+    std::vector<sp<Snippet::DrawEvents>> _draw_decorators;
 };
 
 }

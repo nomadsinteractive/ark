@@ -19,7 +19,7 @@ public:
     }
 
     void draw(GraphicsContext& graphicsContext) override {
-        const sp<Pipeline> pipeline = _context._pipeline_snapshot._shader_bindings->getPipeline(graphicsContext);
+        const sp<Pipeline> pipeline = _context._pipeline_snapshot._bindings->getPipeline(graphicsContext);
         pipeline->bind(graphicsContext, _context);
     }
 
@@ -38,7 +38,7 @@ public:
 
         _context.upload(graphicsContext);
 
-        const sp<Pipeline> pipeline = _context._pipeline_snapshot._shader_bindings->getPipeline(graphicsContext);
+        const sp<Pipeline> pipeline = _context._pipeline_snapshot._bindings->getPipeline(graphicsContext);
         _snippet_draw->preDraw(graphicsContext, _context);
         pipeline->bind(graphicsContext, _context);
         pipeline->draw(graphicsContext, _context);
@@ -64,13 +64,13 @@ DrawingContext::DrawingContext(PipelineSnapshot pipelineSnapshot, sp<Traits> att
 
 sp<RenderCommand> DrawingContext::toRenderCommand(const RenderRequest& renderRequest)
 {
-    DCHECK(_pipeline_snapshot._shader_bindings, "DrawingContext cannot be converted to RenderCommand more than once");
-    return sp<RenderCommand>::make<RenderCommandDraw>(std::move(*this), _pipeline_snapshot._shader_bindings->snippet()->makeDrawEvents(renderRequest));
+    DCHECK(_pipeline_snapshot._bindings, "DrawingContext cannot be converted to RenderCommand more than once");
+    return sp<RenderCommand>::make<RenderCommandDraw>(std::move(*this), _pipeline_snapshot._bindings->snippet()->makeDrawEvents(renderRequest));
 }
 
 sp<RenderCommand> DrawingContext::toBindCommand()
 {
-    DCHECK(_pipeline_snapshot._shader_bindings, "DrawingContext cannot be converted to RenderCommand more than once");
+    DCHECK(_pipeline_snapshot._bindings, "DrawingContext cannot be converted to RenderCommand more than once");
     return sp<RenderCommand>::make<RenderCommandBind>(std::move(*this));
 }
 

@@ -52,48 +52,48 @@ GLenum GLUtil::toShaderType(PipelineInput::ShaderStage stage)
     return types[stage];
 }
 
-GLenum GLUtil::toCompareFunc(PipelineBindings::CompareFunc func)
+GLenum GLUtil::toCompareFunc(PipelineDescriptor::CompareFunc func)
 {
-    const GLenum glFuncs[PipelineBindings::COMPARE_FUNC_LENGTH] = {GL_ZERO, GL_ALWAYS, GL_NEVER, GL_EQUAL, GL_NOTEQUAL, GL_LESS, GL_GREATER, GL_LEQUAL, GL_GEQUAL};
-    DCHECK(func < PipelineBindings::COMPARE_FUNC_LENGTH, "Unknow compare func: %d", func);
+    const GLenum glFuncs[PipelineDescriptor::COMPARE_FUNC_LENGTH] = {GL_ZERO, GL_ALWAYS, GL_NEVER, GL_EQUAL, GL_NOTEQUAL, GL_LESS, GL_GREATER, GL_LEQUAL, GL_GEQUAL};
+    DCHECK(func < PipelineDescriptor::COMPARE_FUNC_LENGTH, "Unknow compare func: %d", func);
     return glFuncs[func];
 }
 
-GLenum GLUtil::toStencilFunc(PipelineBindings::StencilFunc func)
+GLenum GLUtil::toStencilFunc(PipelineDescriptor::StencilFunc func)
 {
-    const GLenum glFuncs[PipelineBindings::STENCIL_FUNC_LENGTH] = {GL_KEEP, GL_ZERO, GL_REPLACE, GL_INCR, GL_INCR_WRAP, GL_DECR, GL_DECR_WRAP, GL_INVERT};
-    DCHECK(func < PipelineBindings::STENCIL_FUNC_LENGTH, "Unknow stencil func: %d", func);
+    const GLenum glFuncs[PipelineDescriptor::STENCIL_FUNC_LENGTH] = {GL_KEEP, GL_ZERO, GL_REPLACE, GL_INCR, GL_INCR_WRAP, GL_DECR, GL_DECR_WRAP, GL_INVERT};
+    DCHECK(func < PipelineDescriptor::STENCIL_FUNC_LENGTH, "Unknow stencil func: %d", func);
     return glFuncs[func];
 }
 
-GLenum GLUtil::toBlendFactor(PipelineBindings::BlendFactor blendFactor)
+GLenum GLUtil::toBlendFactor(PipelineDescriptor::BlendFactor blendFactor)
 {
     switch(blendFactor) {
-    case PipelineBindings::BLEND_FACTOR_DEFAULT:
+    case PipelineDescriptor::BLEND_FACTOR_DEFAULT:
         return std::numeric_limits<GLenum>::max();
-    case PipelineBindings::BLEND_FACTOR_ZERO:
+    case PipelineDescriptor::BLEND_FACTOR_ZERO:
         return GL_ZERO;
-    case PipelineBindings::BLEND_FACTOR_ONE:
+    case PipelineDescriptor::BLEND_FACTOR_ONE:
         return GL_ONE;
-    case PipelineBindings::BLEND_FACTOR_SRC_COLOR:
+    case PipelineDescriptor::BLEND_FACTOR_SRC_COLOR:
         return GL_SRC_COLOR;
-    case PipelineBindings::BLEND_FACTOR_ONE_MINUS_SRC_COLOR:
+    case PipelineDescriptor::BLEND_FACTOR_ONE_MINUS_SRC_COLOR:
         return GL_ONE_MINUS_SRC_COLOR;
-    case PipelineBindings::BLEND_FACTOR_DST_COLOR:
+    case PipelineDescriptor::BLEND_FACTOR_DST_COLOR:
         return GL_DST_COLOR;
-    case PipelineBindings::BLEND_FACTOR_ONE_MINUS_DST_COLOR:
+    case PipelineDescriptor::BLEND_FACTOR_ONE_MINUS_DST_COLOR:
         return GL_ONE_MINUS_DST_COLOR;
-    case PipelineBindings::BLEND_FACTOR_SRC_ALPHA:
+    case PipelineDescriptor::BLEND_FACTOR_SRC_ALPHA:
         return GL_SRC_ALPHA;
-    case PipelineBindings::BLEND_FACTOR_ONE_MINUS_SRC_ALPHA:
+    case PipelineDescriptor::BLEND_FACTOR_ONE_MINUS_SRC_ALPHA:
         return GL_ONE_MINUS_SRC_ALPHA;
-    case PipelineBindings::BLEND_FACTOR_DST_ALPHA:
+    case PipelineDescriptor::BLEND_FACTOR_DST_ALPHA:
         return GL_DST_ALPHA;
-    case PipelineBindings::BLEND_FACTOR_ONE_MINUS_DST_ALPHA:
+    case PipelineDescriptor::BLEND_FACTOR_ONE_MINUS_DST_ALPHA:
         return GL_ONE_MINUS_DST_ALPHA;
-    case PipelineBindings::BLEND_FACTOR_CONST_COLOR:
+    case PipelineDescriptor::BLEND_FACTOR_CONST_COLOR:
         return GL_CONSTANT_COLOR;
-    case PipelineBindings::BLEND_FACTOR_CONST_ALPHA:
+    case PipelineDescriptor::BLEND_FACTOR_CONST_ALPHA:
         return GL_CONSTANT_ALPHA;
     default:
         break;
@@ -102,10 +102,10 @@ GLenum GLUtil::toBlendFactor(PipelineBindings::BlendFactor blendFactor)
     return GL_ZERO;
 }
 
-GLenum GLUtil::toFrontFaceType(PipelineBindings::FrontFaceType face)
+GLenum GLUtil::toFrontFaceType(PipelineDescriptor::FrontFaceType face)
 {
-    const GLenum glFaceTypes[PipelineBindings::FRONT_FACE_TYPE_LENGTH] = {GL_FRONT_AND_BACK, GL_FRONT, GL_BACK};
-    DCHECK(face < PipelineBindings::FRONT_FACE_TYPE_LENGTH, "Unknow front face type: %d", face);
+    const GLenum glFaceTypes[PipelineDescriptor::FRONT_FACE_TYPE_LENGTH] = {GL_FRONT_AND_BACK, GL_FRONT, GL_BACK};
+    DCHECK(face < PipelineDescriptor::FRONT_FACE_TYPE_LENGTH, "Unknow front face type: %d", face);
     return glFaceTypes[face];
 }
 

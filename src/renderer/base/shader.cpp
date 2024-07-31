@@ -14,7 +14,7 @@
 #include "renderer/base/varyings.h"
 
 #include "renderer/base/graphics_context.h"
-#include "renderer/base/pipeline_bindings.h"
+#include "renderer/base/pipeline_descriptor.h"
 #include "renderer/base/pipeline_building_context.h"
 #include "renderer/base/pipeline_layout.h"
 #include "renderer/base/render_controller.h"
@@ -54,7 +54,7 @@ private:
     sp<Camera> _default_camera;
 
     SafePtr<Builder<Camera>> _camera;
-    PipelineBindings::Parameters::BUILDER _parameters;
+    PipelineDescriptor::Parameters::BUILDER _parameters;
 };
 
 Shader::StageManifest loadStages(BeanFactory& factory, const document& manifest)
@@ -79,7 +79,7 @@ Shader::StageManifest loadStages(BeanFactory& factory, const document& manifest)
 
 }
 
-Shader::Shader(sp<PipelineFactory> pipelineFactory, sp<RenderController> renderController, sp<PipelineLayout> pipelineLayout, PipelineBindings::Parameters bindingParams)
+Shader::Shader(sp<PipelineFactory> pipelineFactory, sp<RenderController> renderController, sp<PipelineLayout> pipelineLayout, PipelineDescriptor::Parameters bindingParams)
     : _pipeline_factory(std::move(pipelineFactory)), _render_controller(std::move(renderController)), _pipeline_layout(std::move(pipelineLayout)), _pipeline_input(_pipeline_layout->input()), _binding_params(std::move(bindingParams))
 {
 }
@@ -134,7 +134,7 @@ const sp<PipelineLayout>& Shader::layout() const
 
 sp<ShaderBindings> Shader::makeBindings(Buffer vertices, Enum::RenderMode mode, Enum::DrawProcedure drawProcedure, const std::map<uint32_t, sp<Uploader>>& uploaders) const
 {
-    return sp<ShaderBindings>::make(std::move(vertices), _pipeline_factory, sp<PipelineBindings>::make(mode, drawProcedure, _binding_params, _pipeline_layout), makeDivivedBuffers(uploaders));
+    return sp<ShaderBindings>::make(std::move(vertices), _pipeline_factory, sp<PipelineDescriptor>::make(mode, drawProcedure, _binding_params, _pipeline_layout), makeDivivedBuffers(uploaders));
 }
 
 std::map<uint32_t, Buffer> Shader::makeDivivedBuffers(const std::map<uint32_t, sp<Uploader>>& uploaders) const

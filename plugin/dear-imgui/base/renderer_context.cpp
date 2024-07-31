@@ -1,6 +1,6 @@
 #include "dear-imgui/base/renderer_context.h"
 
-#include "renderer/base/pipeline_bindings.h"
+#include "renderer/base/pipeline_descriptor.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/texture.h"
 

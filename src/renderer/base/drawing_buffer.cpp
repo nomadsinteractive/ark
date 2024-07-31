@@ -4,7 +4,7 @@
 
 #include "graphics/base/v3.h"
 
-#include "renderer/base/pipeline_bindings.h"
+#include "renderer/base/pipeline_descriptor.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/base/vertex_writer.h"
@@ -12,9 +12,9 @@
 namespace ark {
 
 DrawingBuffer::DrawingBuffer(sp<ShaderBindings> shaderBindings, uint32_t stride)
-    : _shader_bindings(std::move(shaderBindings)), _pipeline_bindings(_shader_bindings->pipelineBindings()), _vertices(stride),
+    : _shader_bindings(std::move(shaderBindings)), _pipeline_descriptor(_shader_bindings->pipelineDescriptor()), _vertices(stride),
       _divided_buffer_builders(_shader_bindings->makeDividedBufferFactories()),
-      _is_instanced(_pipeline_bindings->hasDivisors())
+      _is_instanced(_pipeline_descriptor->hasDivisors())
 {
 }
 
@@ -23,7 +23,7 @@ VertexWriter DrawingBuffer::makeVertexWriter(const RenderRequest& renderRequest,
     const size_t size = length * _vertices._stride;
     ByteArray::Borrowed content = renderRequest.allocator().sbrkSpan(size);
     _vertices.addStrip(offset * _vertices._stride, content);
-    return VertexWriter(_pipeline_bindings->attributes(), !_is_instanced, content.buf(), size, _vertices._stride);
+    return VertexWriter(_pipeline_descriptor->attributes(), !_is_instanced, content.buf(), size, _vertices._stride);
 }
 
 VertexWriter DrawingBuffer::makeDividedVertexWriter(const RenderRequest& renderRequest, size_t length, size_t offset, uint32_t divisor)
@@ -33,7 +33,7 @@ VertexWriter DrawingBuffer::makeDividedVertexWriter(const RenderRequest& renderR
     size_t size = length * builder._stride;
     ByteArray::Borrowed content = renderRequest.allocator().sbrkSpan(size);
     builder.addStrip(offset * builder._stride, content);
-    return VertexWriter(_pipeline_bindings->attributes(), !_is_instanced, content.buf(), size, builder._stride);
+    return VertexWriter(_pipeline_descriptor->attributes(), !_is_instanced, content.buf(), size, builder._stride);
 }
 
 const sp<ShaderBindings>& DrawingBuffer::shaderBindings() const
@@ -76,9 +76,9 @@ Buffer::Factory& DrawingBuffer::getDividedBufferBuilder(uint32_t divisor)
 std::vector<std::pair<uint32_t, Buffer::Snapshot>> DrawingBuffer::toDividedBufferSnapshots()
 {
     std::vector<std::pair<uint32_t, Buffer::Snapshot>> snapshots;
-    DCHECK(_divided_buffer_builders.size() == _shader_bindings->divisors()->size(), "Instanced buffer size mismatch: %d, %d", _divided_buffer_builders.size(), _shader_bindings->divisors()->size());
+    DCHECK(_divided_buffer_builders.size() == _shader_bindings->streams()->size(), "Instanced buffer size mismatch: %d, %d", _divided_buffer_builders.size(), _shader_bindings->streams()->size());
 
-    for(const auto& [i, j] : *(_shader_bindings->divisors()))
+    for(const auto& [i, j] : *(_shader_bindings->streams()))
         snapshots.emplace_back(i, _divided_buffer_builders.at(i).toSnapshot(j));
 
     _divided_buffer_builders.clear();

@@ -7,7 +7,7 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/base/buffer.h"
-#include "renderer/base/pipeline_bindings.h"
+#include "renderer/base/pipeline_descriptor.h"
 #include "renderer/base/shader.h"
 #include "renderer/inf/pipeline.h"
 
@@ -19,20 +19,20 @@ namespace ark::vulkan {
 
 class VKPipeline final : public Pipeline {
 public:
-    VKPipeline(const PipelineBindings& bindings, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, std::map<PipelineInput::ShaderStage, String> shaders);
+    VKPipeline(const PipelineDescriptor& bindings, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, std::map<PipelineInput::ShaderStage, String> shaders);
     ~VKPipeline() override;
 
     VkPipeline vkPipeline() const;
     VkPipelineLayout vkPipelineLayout() const;
     const VkDescriptorSet& vkDescriptorSet() const;
 
-    virtual uint64_t id() override;
-    virtual void upload(GraphicsContext& graphicsContext) override;
-    virtual ResourceRecycleFunc recycle() override;
+    uint64_t id() override;
+    void upload(GraphicsContext& graphicsContext) override;
+    ResourceRecycleFunc recycle() override;
 
-    virtual void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
-    virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
-    virtual void compute(GraphicsContext& graphicsContext, const ComputeContext& computeContext) override;
+    void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
+    void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
+    void compute(GraphicsContext& graphicsContext, const ComputeContext& computeContext) override;
 
     class BakedRenderer;
 
@@ -45,7 +45,7 @@ private:
 
     void setupVertexDescriptions(const PipelineInput& input, VertexLayout& vertexLayout);
     void setupDescriptorSetLayout(const PipelineInput& pipelineInput);
-    void setupDescriptorSet(GraphicsContext& graphicsContext, const PipelineBindings& bindings);
+    void setupDescriptorSet(GraphicsContext& graphicsContext, const PipelineDescriptor& bindings);
 
     void setupGraphicsPipeline(GraphicsContext& graphicsContext, const VertexLayout& vertexLayout);
     void setupComputePipeline(GraphicsContext& graphicsContext);
@@ -59,11 +59,11 @@ private:
     void bindUBOShapshots(GraphicsContext& graphicsContext, const std::vector<RenderLayerSnapshot::UBOSnapshot>& uboSnapshots);
 
     VkPipelineDepthStencilStateCreateInfo makeDepthStencilState() const;
-    VkStencilOpState makeStencilState(const PipelineBindings::TraitStencilTestSeparate& stencil) const;
+    VkStencilOpState makeStencilState(const PipelineDescriptor::TraitStencilTestSeparate& stencil) const;
     VkPipelineRasterizationStateCreateInfo makeRasterizationState() const;
 
 private:
-    PipelineBindings _bindings;
+    PipelineDescriptor _pipeline_descriptor;
 
     sp<Recycler> _recycler;
     sp<VKRenderer> _renderer;

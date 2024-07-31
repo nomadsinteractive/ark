@@ -29,9 +29,9 @@ public:
     static VkFormat toTextureFormat(uint32_t componentSize, uint8_t channels, Texture::Format format);
     static VkFormat toTextureFormat(const Bitmap& bitmap, Texture::Format format);
     static VkFormat toTextureFormat(Texture::Format format);
-    static VkFrontFace toFrontFace(PipelineBindings::FrontFace frontFace);
-    static VkCompareOp toCompareOp(PipelineBindings::CompareFunc func);
-    static VkStencilOp toStencilOp(PipelineBindings::StencilFunc func);
+    static VkFrontFace toFrontFace(PipelineDescriptor::FrontFace frontFace);
+    static VkCompareOp toCompareOp(PipelineDescriptor::CompareFunc func);
+    static VkStencilOp toStencilOp(PipelineDescriptor::StencilFunc func);
 
     static VkImageUsageFlags toTextureUsage(Texture::Usage usage);
     static VkImageAspectFlags toTextureAspect(Texture::Usage usage);

@@ -1,7 +1,7 @@
 #include "bgfx/impl/pipeline_factory/pipeline_factory_bgfx.h"
 
 #include "renderer/base/graphics_context.h"
-#include "renderer/base/pipeline_bindings.h"
+#include "renderer/base/pipeline_descriptor.h"
 #include "renderer/base/pipeline_layout.h"
 #include "renderer/base/pipeline_input.h"
 #include "renderer/inf/pipeline.h"
@@ -85,7 +85,7 @@ private:
 
 }
 
-sp<Pipeline> PipelineFactoryBgfx::buildPipeline(GraphicsContext& graphicsContext, const PipelineBindings& bindings)
+sp<Pipeline> PipelineFactoryBgfx::buildPipeline(GraphicsContext& graphicsContext, const PipelineDescriptor& bindings)
 {
     std::map<PipelineInput::ShaderStage, String> shaders = bindings.layout()->getPreprocessedShaders(graphicsContext.renderContext());
     if(const auto vIter = shaders.find(PipelineInput::SHADER_STAGE_VERTEX); vIter != shaders.end())

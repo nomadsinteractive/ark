@@ -30,7 +30,7 @@ class Pipeline;
 class PipelineSnapshot;
 class PipelineFactory;
 class PipelineInput;
-class PipelineBindings;
+class PipelineDescriptor;
 class PipelineBuildingContext;
 class PipelineLayout;
 class Recycler;

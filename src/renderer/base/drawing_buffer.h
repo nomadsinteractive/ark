@@ -44,7 +44,7 @@ public:
 
 private:
     sp<ShaderBindings> _shader_bindings;
-    sp<PipelineBindings> _pipeline_bindings;
+    sp<PipelineDescriptor> _pipeline_descriptor;
 
     Buffer::Factory _vertices;
     std::map<uint32_t, Buffer::Factory> _divided_buffer_builders;

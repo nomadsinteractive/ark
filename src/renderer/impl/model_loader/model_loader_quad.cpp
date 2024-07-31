@@ -2,7 +2,7 @@
 
 #include "renderer/base/atlas.h"
 #include "renderer/base/model.h"
-#include "renderer/base/pipeline_bindings.h"
+#include "renderer/base/pipeline_descriptor.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/impl/render_command_composer/rcc_draw_quads.h"
 #include "renderer/impl/vertices/vertices_quad.h"
@@ -22,7 +22,7 @@ sp<RenderCommandComposer> ModelLoaderQuad::makeRenderCommandComposer()
 
 void ModelLoaderQuad::initialize(ShaderBindings& shaderBindings)
 {
-    shaderBindings.pipelineBindings()->bindSampler(_atlas->texture());
+    shaderBindings.pipelineDescriptor()->bindSampler(_atlas->texture());
 }
 
 sp<Model> ModelLoaderQuad::loadModel(int32_t type)

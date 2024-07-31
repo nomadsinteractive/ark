@@ -20,7 +20,7 @@ public:
 
     void preDraw(GraphicsContext& graphicsContext, const DrawingContext& /*context*/) override
     {
-        _compute_context._pipeline_context._shader_bindings->getPipeline(graphicsContext)->compute(graphicsContext, _compute_context);
+        _compute_context._pipeline_context._bindings->getPipeline(graphicsContext)->compute(graphicsContext, _compute_context);
     }
 
     void postDraw(GraphicsContext& graphicsContext) override {}
@@ -40,7 +40,7 @@ public:
 
     void postDraw(GraphicsContext& graphicsContext) override
     {
-        _compute_context._pipeline_context._shader_bindings->getPipeline(graphicsContext)->compute(graphicsContext, _compute_context);
+        _compute_context._pipeline_context._bindings->getPipeline(graphicsContext)->compute(graphicsContext, _compute_context);
     }
 
 private:

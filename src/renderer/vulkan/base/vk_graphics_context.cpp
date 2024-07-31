@@ -30,7 +30,7 @@ public:
         return _command_buffer;
     }
 
-    virtual VkRenderPass create(const PipelineBindings& /*bindings*/) override {
+    virtual VkRenderPass create(const PipelineDescriptor& /*bindings*/) override {
         const VKSwapChain& renderTarget = _renderer->renderTarget();
         return renderTarget.vkRenderPassBeginInfo().renderPass;
     }
@@ -165,7 +165,7 @@ VKGraphicsContext::State::State(sp<VKGraphicsContext::RenderPassPhrase> renderPa
 {
 }
 
-VkRenderPass VKGraphicsContext::State::createRenderPass(const PipelineBindings& bindings)
+VkRenderPass VKGraphicsContext::State::createRenderPass(const PipelineDescriptor& bindings)
 {
     return _render_pass_phrase->create(bindings);
 }

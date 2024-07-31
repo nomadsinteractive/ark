@@ -87,7 +87,7 @@ struct VKMultiDrawElementsIndirect final : VKPipeline::BakedRenderer {
     }
 };
 
-sp<VKPipeline::BakedRenderer> makeBakedRenderer(const PipelineBindings& bindings)
+sp<VKPipeline::BakedRenderer> makeBakedRenderer(const PipelineDescriptor& bindings)
 {
     switch(bindings.drawProcedure())
     {
@@ -106,8 +106,8 @@ sp<VKPipeline::BakedRenderer> makeBakedRenderer(const PipelineBindings& bindings
 
 }
 
-VKPipeline::VKPipeline(const PipelineBindings& bindings, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, std::map<PipelineInput::ShaderStage, String> shaders)
-    : _bindings(bindings), _recycler(recycler), _renderer(renderer), _baked_renderer(makeBakedRenderer(bindings)), _layout(VK_NULL_HANDLE), _descriptor_set_layout(VK_NULL_HANDLE),
+VKPipeline::VKPipeline(const PipelineDescriptor& bindings, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, std::map<PipelineInput::ShaderStage, String> shaders)
+    : _pipeline_descriptor(bindings), _recycler(recycler), _renderer(renderer), _baked_renderer(makeBakedRenderer(bindings)), _layout(VK_NULL_HANDLE), _descriptor_set_layout(VK_NULL_HANDLE),
       _descriptor_set(VK_NULL_HANDLE), _pipeline(VK_NULL_HANDLE), _shaders(std::move(shaders)), _rebind_needed(true), _is_compute_pipeline(false)
 {
     for(const auto& i : _shaders)
@@ -115,7 +115,7 @@ VKPipeline::VKPipeline(const PipelineBindings& bindings, const sp<Recycler>& rec
         if(i.first == PipelineInput::SHADER_STAGE_COMPUTE)
         {
             _is_compute_pipeline = true;
-            DCHECK(_shaders.size() == 1, "Compute stage is exclusive");
+            CHECK(_shaders.size() == 1, "Compute stage is exclusive");
         }
     }
 }
@@ -147,19 +147,19 @@ uint64_t VKPipeline::id()
 
 void VKPipeline::upload(GraphicsContext& graphicsContext)
 {
-    setupDescriptorSetLayout(_bindings.input());
+    setupDescriptorSetLayout(_pipeline_descriptor.input());
 
     _descriptor_pool = makeDescriptorPool();
     _descriptor_pool->upload(graphicsContext);
 
-    setupDescriptorSet(graphicsContext, _bindings);
+    setupDescriptorSet(graphicsContext, _pipeline_descriptor);
 
     if(_is_compute_pipeline)
         setupComputePipeline(graphicsContext);
     else
     {
         VertexLayout vertexLayout;
-        setupVertexDescriptions(_bindings.input(), vertexLayout);
+        setupVertexDescriptions(_pipeline_descriptor.input(), vertexLayout);
         setupGraphicsPipeline(graphicsContext, vertexLayout);
     }
 }
@@ -189,7 +189,7 @@ void VKPipeline::bind(GraphicsContext& graphicsContext, const DrawingContext& dr
             _rebind_needed = true;
 
     if(_rebind_needed)
-        setupDescriptorSet(graphicsContext, drawingContext._pipeline_snapshot._shader_bindings->pipelineBindings());
+        setupDescriptorSet(graphicsContext, drawingContext._pipeline_snapshot._bindings->pipelineDescriptor());
 
     bindUBOShapshots(graphicsContext, drawingContext._pipeline_snapshot._ubos);
     _rebind_needed = false;
@@ -282,7 +282,7 @@ void VKPipeline::setupDescriptorSetLayout(const PipelineInput& pipelineInput)
     VKUtil::checkResult(vkCreatePipelineLayout(device->vkLogicalDevice(), &pPipelineLayoutCreateInfo, nullptr, &_layout));
 }
 
-void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const PipelineBindings& bindings)
+void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const PipelineDescriptor& bindings)
 {
     const sp<VKDevice>& device = _renderer->device();
 
@@ -362,14 +362,14 @@ void VKPipeline::setupGraphicsPipeline(GraphicsContext& graphicsContext, const V
 
     VkPipelineInputAssemblyStateCreateInfo inputAssemblyState =
             vks::initializers::pipelineInputAssemblyStateCreateInfo(
-                VKUtil::toPrimitiveTopology(_bindings.mode()),
+                VKUtil::toPrimitiveTopology(_pipeline_descriptor.mode()),
                 0,
                 VK_FALSE);
 
     VkPipelineRasterizationStateCreateInfo rasterizationState = makeRasterizationState();
 
     std::vector<VkPipelineColorBlendAttachmentState> blendAttachmentStates;
-    for(uint32_t i = 0; i < _bindings.layout()->colorAttachmentCount(); ++i)
+    for(uint32_t i = 0; i < _pipeline_descriptor.layout()->colorAttachmentCount(); ++i)
     {
         VkPipelineColorBlendAttachmentState state = vks::initializers::pipelineColorBlendAttachmentState(0xf, VK_TRUE);
         state.srcAlphaBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
@@ -391,7 +391,7 @@ void VKPipeline::setupGraphicsPipeline(GraphicsContext& graphicsContext, const V
     VkPipelineDepthStencilStateCreateInfo depthStencilState = makeDepthStencilState();
 
     const RenderEngineContext::Resolution& displayResolution = graphicsContext.renderContext()->displayResolution();
-    const Optional<Rect>& scissor = _bindings.scissor();
+    const Optional<Rect>& scissor = _pipeline_descriptor.scissor();
     const VkRect2D vkScissors = scissor ? VkRect2D({{static_cast<int32_t>(scissor->left()), static_cast<int32_t>(scissor->top())}, {static_cast<uint32_t>(scissor->width()), static_cast<uint32_t>(scissor->height())}})
                                                       : VkRect2D({{0, 0}, {displayResolution.width, displayResolution.height}});
     VkPipelineViewportStateCreateInfo viewportState = vks::initializers::pipelineViewportStateCreateInfo(1, 1, 0);
@@ -405,7 +405,7 @@ void VKPipeline::setupGraphicsPipeline(GraphicsContext& graphicsContext, const V
 
     std::vector<VkDynamicState> dynamicStateEnables = { VK_DYNAMIC_STATE_VIEWPORT };
 
-    if(_bindings.hasFlag(PipelineBindings::FLAG_DYNAMIC_SCISSOR, PipelineBindings::FLAG_DYNAMIC_SCISSOR_BITMASK))
+    if(_pipeline_descriptor.hasFlag(PipelineDescriptor::FLAG_DYNAMIC_SCISSOR, PipelineDescriptor::FLAG_DYNAMIC_SCISSOR_BITMASK))
         dynamicStateEnables.push_back(VK_DYNAMIC_STATE_SCISSOR);
 
     VkPipelineDynamicStateCreateInfo dynamicState =
@@ -420,7 +420,7 @@ void VKPipeline::setupGraphicsPipeline(GraphicsContext& graphicsContext, const V
 
     const sp<VKGraphicsContext>& vkGraphicsContext = graphicsContext.attachments().ensure<VKGraphicsContext>();
     VKGraphicsContext::State& state = vkGraphicsContext->getCurrentState();
-    VkGraphicsPipelineCreateInfo pipelineCreateInfo = vks::initializers::pipelineCreateInfo(_layout, state.createRenderPass(_bindings), 0);
+    VkGraphicsPipelineCreateInfo pipelineCreateInfo = vks::initializers::pipelineCreateInfo(_layout, state.createRenderPass(_pipeline_descriptor), 0);
 
     pipelineCreateInfo.pVertexInputState = &vertexLayout.inputState;
     pipelineCreateInfo.pInputAssemblyState = &inputAssemblyState;
@@ -465,7 +465,7 @@ void VKPipeline::buildDrawCommandBuffer(GraphicsContext& graphicsContext, const 
 
     if(const Optional<Rect>& scissor = drawingContext._scissor)
     {
-        CHECK(drawingContext._pipeline_snapshot._shader_bindings->pipelineBindings()->hasFlag(PipelineBindings::FLAG_DYNAMIC_SCISSOR, PipelineBindings::FLAG_DYNAMIC_SCISSOR_BITMASK), "Pipeline has no DYNAMIC_SCISSOR flag set");
+        CHECK(drawingContext._pipeline_snapshot._bindings->pipelineDescriptor()->hasFlag(PipelineDescriptor::FLAG_DYNAMIC_SCISSOR, PipelineDescriptor::FLAG_DYNAMIC_SCISSOR_BITMASK), "Pipeline has no DYNAMIC_SCISSOR flag set");
         VkRect2D vkScissor{{static_cast<int32_t>(scissor->left()), static_cast<int32_t>(scissor->top())}, {static_cast<uint32_t>(scissor->width()), static_cast<uint32_t>(scissor->height())}};
         vkCmdSetScissor(commandBuffer, 0, 1, &vkScissor);
     }
@@ -496,14 +496,14 @@ bool VKPipeline::isDirty(const ByteArray::Borrowed& dirtyFlags) const
 sp<VKDescriptorPool> VKPipeline::makeDescriptorPool() const
 {
     std::map<VkDescriptorType, uint32_t> poolSizes;
-    if(_bindings.input()->ubos().size())
-        poolSizes[VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER] = static_cast<uint32_t>(_bindings.input()->ubos().size());
-    if(_bindings.input()->ssbos().size())
-        poolSizes[VK_DESCRIPTOR_TYPE_STORAGE_BUFFER] = static_cast<uint32_t>(_bindings.input()->ssbos().size());
-    if(_bindings.samplers().size() + _bindings.images().size())
-        poolSizes[VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER] = static_cast<uint32_t>(_bindings.samplers().size() + _bindings.images().size());
-    if(_bindings.images().size())
-        poolSizes[VK_DESCRIPTOR_TYPE_STORAGE_IMAGE] = static_cast<uint32_t>(_bindings.images().size());
+    if(_pipeline_descriptor.input()->ubos().size())
+        poolSizes[VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER] = static_cast<uint32_t>(_pipeline_descriptor.input()->ubos().size());
+    if(_pipeline_descriptor.input()->ssbos().size())
+        poolSizes[VK_DESCRIPTOR_TYPE_STORAGE_BUFFER] = static_cast<uint32_t>(_pipeline_descriptor.input()->ssbos().size());
+    if(_pipeline_descriptor.samplers().size() + _pipeline_descriptor.images().size())
+        poolSizes[VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER] = static_cast<uint32_t>(_pipeline_descriptor.samplers().size() + _pipeline_descriptor.images().size());
+    if(_pipeline_descriptor.images().size())
+        poolSizes[VK_DESCRIPTOR_TYPE_STORAGE_IMAGE] = static_cast<uint32_t>(_pipeline_descriptor.images().size());
     return sp<VKDescriptorPool>::make(_recycler, _renderer->device(), std::move(poolSizes));
 }
 
@@ -531,32 +531,32 @@ VkPipelineDepthStencilStateCreateInfo VKPipeline::makeDepthStencilState() const
     state.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
     state.stencilTestEnable = false;
 
-    if(_bindings.parameters()._traits.has(PipelineBindings::TRAIT_TYPE_DEPTH_TEST))
+    if(_pipeline_descriptor.parameters()._traits.has(PipelineDescriptor::TRAIT_TYPE_DEPTH_TEST))
     {
-        const PipelineBindings::TraitDepthTest& depthTest = _bindings.parameters()._traits.at(PipelineBindings::TRAIT_TYPE_DEPTH_TEST)._configure._depth_test;
+        const PipelineDescriptor::TraitDepthTest& depthTest = _pipeline_descriptor.parameters()._traits.at(PipelineDescriptor::TRAIT_TYPE_DEPTH_TEST)._configure._depth_test;
         state.depthTestEnable = depthTest._enabled;
         state.depthWriteEnable = depthTest._write_enabled;
         state.depthCompareOp = VKUtil::toCompareOp(depthTest._func);
     }
 
-    if(_bindings.parameters()._traits.has(PipelineBindings::TRAIT_TYPE_STENCIL_TEST))
+    if(_pipeline_descriptor.parameters()._traits.has(PipelineDescriptor::TRAIT_TYPE_STENCIL_TEST))
     {
         state.stencilTestEnable = true;
-        const PipelineBindings::TraitStencilTest& stencilTest = _bindings.parameters()._traits.at(PipelineBindings::TRAIT_TYPE_STENCIL_TEST)._configure._stencil_test;
-        if(stencilTest._front._type == PipelineBindings::FRONT_FACE_TYPE_DEFAULT && stencilTest._front._type == stencilTest._back._type)
+        const PipelineDescriptor::TraitStencilTest& stencilTest = _pipeline_descriptor.parameters()._traits.at(PipelineDescriptor::TRAIT_TYPE_STENCIL_TEST)._configure._stencil_test;
+        if(stencilTest._front._type == PipelineDescriptor::FRONT_FACE_TYPE_DEFAULT && stencilTest._front._type == stencilTest._back._type)
             state.front = state.back = makeStencilState(stencilTest._front);
         else
         {
-            if(stencilTest._front._type == PipelineBindings::FRONT_FACE_TYPE_FRONT)
+            if(stencilTest._front._type == PipelineDescriptor::FRONT_FACE_TYPE_FRONT)
                 state.front = makeStencilState(stencilTest._front);
-            if(stencilTest._back._type == PipelineBindings::FRONT_FACE_TYPE_BACK)
+            if(stencilTest._back._type == PipelineDescriptor::FRONT_FACE_TYPE_BACK)
                 state.back = makeStencilState(stencilTest._back);
         }
     }
     return state;
 }
 
-VkStencilOpState VKPipeline::makeStencilState(const PipelineBindings::TraitStencilTestSeparate& stencil) const
+VkStencilOpState VKPipeline::makeStencilState(const PipelineDescriptor::TraitStencilTestSeparate& stencil) const
 {
     VkStencilOpState state{};
     state.failOp = VKUtil::toStencilOp(stencil._op);
@@ -571,9 +571,9 @@ VkStencilOpState VKPipeline::makeStencilState(const PipelineBindings::TraitStenc
 
 VkPipelineRasterizationStateCreateInfo VKPipeline::makeRasterizationState() const
 {
-    if(_bindings.parameters()._traits.has(PipelineBindings::TRAIT_TYPE_CULL_FACE_TEST))
+    if(_pipeline_descriptor.parameters()._traits.has(PipelineDescriptor::TRAIT_TYPE_CULL_FACE_TEST))
     {
-        const PipelineBindings::TraitCullFaceTest& cullFaceTest = _bindings.parameters()._traits.at(PipelineBindings::TRAIT_TYPE_CULL_FACE_TEST)._configure._cull_face_test;
+        const PipelineDescriptor::TraitCullFaceTest& cullFaceTest = _pipeline_descriptor.parameters()._traits.at(PipelineDescriptor::TRAIT_TYPE_CULL_FACE_TEST)._configure._cull_face_test;
         return vks::initializers::pipelineRasterizationStateCreateInfo(
                 VK_POLYGON_MODE_FILL, cullFaceTest._enabled ? VK_CULL_MODE_BACK_BIT : VK_CULL_MODE_NONE,
                 VKUtil::toFrontFace(cullFaceTest._front_face), 0);

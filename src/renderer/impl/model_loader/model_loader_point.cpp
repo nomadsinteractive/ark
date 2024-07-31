@@ -2,7 +2,7 @@
 
 #include "renderer/base/atlas.h"
 #include "renderer/base/model.h"
-#include "renderer/base/pipeline_bindings.h"
+#include "renderer/base/pipeline_descriptor.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/impl/render_command_composer/rcc_draw_elements.h"
 #include "renderer/impl/vertices/vertices_point.h"
@@ -23,7 +23,7 @@ sp<RenderCommandComposer> ModelLoaderPoint::makeRenderCommandComposer()
 
 void ModelLoaderPoint::initialize(ShaderBindings& shaderBindings)
 {
-    shaderBindings.pipelineBindings()->bindSampler(_atlas->texture());
+    shaderBindings.pipelineDescriptor()->bindSampler(_atlas->texture());
 }
 
 sp<Model> ModelLoaderPoint::loadModel(int32_t type)

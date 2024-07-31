@@ -2,7 +2,7 @@
 
 #include "core/util/log.h"
 
-#include "renderer/base/pipeline_bindings.h"
+#include "renderer/base/pipeline_descriptor.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/inf/pipeline_factory.h"
 
@@ -12,7 +12,7 @@ namespace ark {
 namespace gles30 {
 
 GLVertexArray::GLVertexArray(sp<opengl::GLPipeline> pipeline, sp<Buffer::Delegate> vertices, const ShaderBindings& shaderBindings)
-    : _pipeline(std::move(pipeline)), _vertex(std::move(vertices)), _pipeline_bindings(shaderBindings.pipelineBindings()), _divisors(shaderBindings.divisors()), _id(0)
+    : _pipeline(std::move(pipeline)), _vertex(std::move(vertices)), _pipeline_descriptor(shaderBindings.pipelineDescriptor()), _divisors(shaderBindings.streams()), _id(0)
 {
 }
 
@@ -27,7 +27,7 @@ void GLVertexArray::upload(GraphicsContext& graphicsContext)
     glBindVertexArray(_id);
     _vertex->upload(graphicsContext);
     glBindBuffer(GL_ARRAY_BUFFER, static_cast<GLuint>(_vertex->id()));
-    _pipeline->bindBuffer(graphicsContext, _pipeline_bindings->input(), _divisors);
+    _pipeline->bindBuffer(graphicsContext, _pipeline_descriptor->input(), _divisors);
     glBindVertexArray(0);
     LOGD("id = %d", _id);
 }

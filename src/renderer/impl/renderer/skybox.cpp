@@ -9,7 +9,7 @@
 #include "renderer/base/buffer.h"
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/graphics_context.h"
-#include "renderer/base/pipeline_bindings.h"
+#include "renderer/base/pipeline_descriptor.h"
 #include "renderer/base/render_controller.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/shader_bindings.h"
@@ -25,7 +25,7 @@ Skybox::Skybox(const sp<Size>& size, const sp<Shader>& shader, const sp<Texture>
     : _size(size), _shader(shader), _shader_bindings(shader->makeBindings(renderController.makeVertexBuffer(Buffer::USAGE_STATIC, UploaderType::create(makeUnitCubeVertices(renderController))), Enum::RENDER_MODE_TRIANGLES, Enum::DRAW_PROCEDURE_DRAW_ELEMENTS)),
       _ib_snapshot(renderController.getSharedPrimitiveIndexBuffer(Global<Constants>()->MODEL_UNIT_QUAD, false)->snapshot(renderController, 6))
 {
-    _shader_bindings->pipelineBindings()->bindSampler(texture);
+    _shader_bindings->pipelineDescriptor()->bindSampler(texture);
 }
 
 void Skybox::render(RenderRequest& renderRequest, const V3& /*position*/)

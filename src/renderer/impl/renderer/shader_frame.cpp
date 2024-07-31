@@ -7,7 +7,7 @@
 
 #include "renderer/base/buffer.h"
 #include "renderer/base/drawing_context.h"
-#include "renderer/base/pipeline_bindings.h"
+#include "renderer/base/pipeline_descriptor.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/base/render_controller.h"
 #include "renderer/base/shader.h"

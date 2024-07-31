@@ -18,7 +18,7 @@
 #include "graphics/impl/renderer/renderer_group.h"
 
 #include "renderer/base/drawing_context.h"
-#include "renderer/base/pipeline_bindings.h"
+#include "renderer/base/pipeline_descriptor.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/base/render_engine_context.h"
 #include "renderer/base/shader.h"

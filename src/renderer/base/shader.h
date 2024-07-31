@@ -10,7 +10,7 @@
 #include "graphics/base/render_layer.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/base/pipeline_bindings.h"
+#include "renderer/base/pipeline_descriptor.h"
 #include "renderer/inf/model_loader.h"
 #include "renderer/inf/pipeline_factory.h"
 
@@ -23,7 +23,7 @@ public:
     typedef std::vector<sp<Builder<Snippet>>> SnippetManifest;
 
 public:
-    Shader(sp<PipelineFactory> pipelineFactory, sp<RenderController> renderController, sp<PipelineLayout> layout, PipelineBindings::Parameters bindingParams);
+    Shader(sp<PipelineFactory> pipelineFactory, sp<RenderController> renderController, sp<PipelineLayout> layout, PipelineDescriptor::Parameters bindingParams);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Shader);
 
     static sp<Builder<Shader>> fromDocument(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext, const String& defVertex = "shaders/default.vert", const String& defFragment = "shaders/texture.frag", const sp<Camera>& defaultCamera = nullptr);
@@ -58,7 +58,7 @@ public:
         StageManifest _stages;
         SnippetManifest _snippets;
         SafePtr<Builder<Camera>> _camera;
-        PipelineBindings::Parameters::BUILDER _parameters;
+        PipelineDescriptor::Parameters::BUILDER _parameters;
     };
 
 //  [[plugin::resource-loader]]
@@ -81,7 +81,7 @@ private:
     sp<PipelineLayout> _pipeline_layout;
     sp<PipelineInput> _pipeline_input;
 
-    PipelineBindings::Parameters _binding_params;
+    PipelineDescriptor::Parameters _binding_params;
 };
 
 }

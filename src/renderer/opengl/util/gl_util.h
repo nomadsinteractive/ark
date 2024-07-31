@@ -7,7 +7,7 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/base/buffer.h"
-#include "renderer/base/pipeline_bindings.h"
+#include "renderer/base/pipeline_descriptor.h"
 #include "renderer/base/pipeline_input.h"
 #include "renderer/base/texture.h"
 #include "renderer/inf/model_loader.h"
@@ -21,10 +21,10 @@ public:
     static GLenum toEnum(Enum::RenderMode renderMode);
     static GLenum toBufferType(Buffer::Type type);
     static GLenum toShaderType(PipelineInput::ShaderStage stage);
-    static GLenum toCompareFunc(PipelineBindings::CompareFunc func);
-    static GLenum toStencilFunc(PipelineBindings::StencilFunc func);
-    static GLenum toBlendFactor(PipelineBindings::BlendFactor blendFactor);
-    static GLenum toFrontFaceType(PipelineBindings::FrontFaceType face);
+    static GLenum toCompareFunc(PipelineDescriptor::CompareFunc func);
+    static GLenum toStencilFunc(PipelineDescriptor::StencilFunc func);
+    static GLenum toBlendFactor(PipelineDescriptor::BlendFactor blendFactor);
+    static GLenum toFrontFaceType(PipelineDescriptor::FrontFaceType face);
 
     static GLenum getEnum(const String& name);
     static GLenum getEnum(const String& name, GLenum defValue);

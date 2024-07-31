@@ -29,7 +29,7 @@ public:
         virtual ~RenderPassPhrase() = default;
 
         virtual VkCommandBuffer vkCommandBuffer() = 0;
-        virtual VkRenderPass create(const PipelineBindings& bindings) = 0;
+        virtual VkRenderPass create(const PipelineDescriptor& bindings) = 0;
         virtual VkRenderPass begin(VkCommandBuffer commandBuffer) = 0;
     };
 
@@ -37,7 +37,7 @@ public:
     public:
         State(sp<RenderPassPhrase> renderPassPhrase, VkCommandBuffer commandBuffer, bool beginCommandBuffer);
 
-        VkRenderPass createRenderPass(const PipelineBindings& bindings);
+        VkRenderPass createRenderPass(const PipelineDescriptor& bindings);
         VkCommandBuffer startRecording();
 
     private:

@@ -116,7 +116,7 @@ VkCommandBuffer VKFramebuffer::Stub::vkCommandBuffer()
     return _command_buffer;
 }
 
-VkRenderPass VKFramebuffer::Stub::create(const PipelineBindings& bindings)
+VkRenderPass VKFramebuffer::Stub::create(const PipelineDescriptor& bindings)
 {
     VkDevice device = _renderer->vkLogicalDevice();
     uint32_t width = _scissor.extent.width;
