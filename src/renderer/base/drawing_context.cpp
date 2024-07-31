@@ -19,7 +19,7 @@ public:
     }
 
     void draw(GraphicsContext& graphicsContext) override {
-        const sp<Pipeline> pipeline = _context._pipeline_context._shader_bindings->getPipeline(graphicsContext);
+        const sp<Pipeline> pipeline = _context._pipeline_snapshot._shader_bindings->getPipeline(graphicsContext);
         pipeline->bind(graphicsContext, _context);
     }
 
@@ -38,7 +38,7 @@ public:
 
         _context.upload(graphicsContext);
 
-        const sp<Pipeline> pipeline = _context._pipeline_context._shader_bindings->getPipeline(graphicsContext);
+        const sp<Pipeline> pipeline = _context._pipeline_snapshot._shader_bindings->getPipeline(graphicsContext);
         _snippet_draw->preDraw(graphicsContext, _context);
         pipeline->bind(graphicsContext, _context);
         pipeline->draw(graphicsContext, _context);
@@ -52,25 +52,25 @@ private:
 
 }
 
-DrawingContext::DrawingContext(PipelineSnapshot pipelineContext, sp<Traits> attachments)
-    : _pipeline_context(std::move(pipelineContext)), _attachments(std::move(attachments))
+DrawingContext::DrawingContext(PipelineSnapshot pipelineSnapshot, sp<Traits> attachments)
+    : _pipeline_snapshot(std::move(pipelineSnapshot)), _attachments(std::move(attachments))
 {
 }
 
-DrawingContext::DrawingContext(PipelineSnapshot pipelineContext, sp<Traits> attachments, Buffer::Snapshot vertices, Buffer::Snapshot indices, uint32_t drawCount, DrawingParams parameters)
-    : _pipeline_context(std::move(pipelineContext)), _attachments(std::move(attachments)), _vertices(std::move(vertices)), _indices(std::move(indices)), _draw_count(drawCount), _parameters(std::move(parameters))
+DrawingContext::DrawingContext(PipelineSnapshot pipelineSnapshot, sp<Traits> attachments, Buffer::Snapshot vertices, Buffer::Snapshot indices, uint32_t drawCount, DrawingParams parameters)
+    : _pipeline_snapshot(std::move(pipelineSnapshot)), _attachments(std::move(attachments)), _vertices(std::move(vertices)), _indices(std::move(indices)), _draw_count(drawCount), _parameters(std::move(parameters))
 {
 }
 
 sp<RenderCommand> DrawingContext::toRenderCommand(const RenderRequest& renderRequest)
 {
-    DCHECK(_pipeline_context._shader_bindings, "DrawingContext cannot be converted to RenderCommand more than once");
-    return sp<RenderCommand>::make<RenderCommandDraw>(std::move(*this), _pipeline_context._shader_bindings->snippet()->makeDrawEvents(renderRequest));
+    DCHECK(_pipeline_snapshot._shader_bindings, "DrawingContext cannot be converted to RenderCommand more than once");
+    return sp<RenderCommand>::make<RenderCommandDraw>(std::move(*this), _pipeline_snapshot._shader_bindings->snippet()->makeDrawEvents(renderRequest));
 }
 
 sp<RenderCommand> DrawingContext::toBindCommand()
 {
-    DCHECK(_pipeline_context._shader_bindings, "DrawingContext cannot be converted to RenderCommand more than once");
+    DCHECK(_pipeline_snapshot._shader_bindings, "DrawingContext cannot be converted to RenderCommand more than once");
     return sp<RenderCommand>::make<RenderCommandBind>(std::move(*this));
 }
 

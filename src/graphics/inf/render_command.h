@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_INF_RENDER_COMMAND_H_
-#define ARK_GRAPHICS_INF_RENDER_COMMAND_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/forwarding.h"
@@ -17,5 +16,3 @@ public:
 };
 
 }
-
-#endif

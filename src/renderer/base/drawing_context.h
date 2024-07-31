@@ -18,8 +18,8 @@ namespace ark {
 
 class ARK_API DrawingContext {
 public:
-    DrawingContext(PipelineSnapshot pipelineContext, sp<Traits> attachments);
-    DrawingContext(PipelineSnapshot pipelineContext, sp<Traits> attachments, Buffer::Snapshot vertices, Buffer::Snapshot indices, uint32_t drawCount, DrawingParams parameters);
+    DrawingContext(PipelineSnapshot pipelineSnapshot, sp<Traits> attachments);
+    DrawingContext(PipelineSnapshot pipelineSnapshot, sp<Traits> attachments, Buffer::Snapshot vertices, Buffer::Snapshot indices, uint32_t drawCount, DrawingParams parameters);
     DEFAULT_COPY_AND_ASSIGN(DrawingContext);
 
     sp<RenderCommand> toRenderCommand(const RenderRequest& renderRequest);
@@ -27,7 +27,7 @@ public:
 
     void upload(GraphicsContext& graphicsContext) const;
 
-    PipelineSnapshot _pipeline_context;
+    PipelineSnapshot _pipeline_snapshot;
     sp<Traits> _attachments;
 
     Buffer::Snapshot _vertices;

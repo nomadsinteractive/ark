@@ -12,28 +12,31 @@
 #include "app/base/application_context.h"
 
 #include "bgfx/impl/pipeline_factory/pipeline_factory_bgfx.h"
+#include "bgfx/impl/render_view/render_view_bgfx.h"
 #include "bgfx/impl/texture/texture_bgfx.h"
 #include "bgfx/base/resource_base.h"
-
 
 namespace ark::plugin::bgfx {
 
 namespace {
 
-class BufferDelegateVertex final : public ResourceBase<::bgfx::VertexBufferHandle, Buffer::Delegate> {
+class StaticVertexBuffer final : public ResourceBase<::bgfx::VertexBufferHandle, Buffer::Delegate> {
 public:
     void upload(GraphicsContext& graphicsContext) override
     {
-        if(!::bgfx::isValid(_handle))
-        {
-            DASSERT(_size <= _data.size());
-            _handle = ::bgfx::createVertexBuffer(::bgfx::makeRef(_data.data(), _size), _vertex_buffer_layout);
-        }
+        if(::bgfx::isValid(_handle))
+            ::bgfx::destroy(_handle);
+
+        DASSERT(_size <= _data.size());
+        _handle = ::bgfx::createVertexBuffer(::bgfx::makeRef(_data.data(), _size), _vertex_buffer_layout);
     }
 
     void uploadBuffer(GraphicsContext& graphicsContext, Uploader& input) override
     {
-        FATAL("Cannot upload data into a static vertex");
+        CHECK(!::bgfx::isValid(_handle), "Cannot upload data into a static vertex buffer");
+        _data = UploaderType::toBytes(input);
+        _size = _data.size();
+        upload(graphicsContext);
     }
 
     void downloadBuffer(GraphicsContext& graphicsContext, size_t offset, size_t size, void* ptr) override
@@ -46,24 +49,78 @@ private:
     ::bgfx::VertexLayout _vertex_buffer_layout;
 };
 
-class BufferDelegateIndex final : public ResourceBase<::bgfx::IndexBufferHandle, Buffer::Delegate> {
+class DynamicVertexBuffer final : public ResourceBase<::bgfx::DynamicVertexBufferHandle, Buffer::Delegate> {
 public:
     void upload(GraphicsContext& graphicsContext) override
     {
         if(!::bgfx::isValid(_handle))
-        {
-            DASSERT(_size <= _indices.size());
-            _handle = ::bgfx::createIndexBuffer(::bgfx::makeRef(_indices.data(), _size));
-        }
+            _handle = ::bgfx::createDynamicVertexBuffer(_size, _vertex_buffer_layout);
+
+        DASSERT(_size <= _data.size());
+        ::bgfx::update(_handle, 0, ::bgfx::makeRef(_data.data(), _size));
     }
 
     void uploadBuffer(GraphicsContext& graphicsContext, Uploader& input) override
     {
+        _data = UploaderType::toBytes(input);
+        _size = _data.size();
+        upload(graphicsContext);
+    }
+
+    void downloadBuffer(GraphicsContext& graphicsContext, size_t offset, size_t size, void* ptr) override
+    {
+        FATAL("Unimplemented");
+    }
+
+private:
+    std::vector<uint8_t> _data;
+    ::bgfx::VertexLayout _vertex_buffer_layout;
+};
+
+class StaticIndexBuffer final : public ResourceBase<::bgfx::IndexBufferHandle, Buffer::Delegate> {
+public:
+    void upload(GraphicsContext& graphicsContext) override
+    {
+        if(::bgfx::isValid(_handle))
+            ::bgfx::destroy(_handle);
+
+        DASSERT(_size <= _indices.size());
+        _handle = ::bgfx::createIndexBuffer(::bgfx::makeRef(_indices.data(), _size));
+    }
+
+    void uploadBuffer(GraphicsContext& graphicsContext, Uploader& input) override
+    {
+        CHECK(!::bgfx::isValid(_handle), "Cannot upload data into a static index buffer");
+        _indices = UploaderType::toBytes(input);
+        _size = _indices.size();
+        upload(graphicsContext);
+    }
+
+    void downloadBuffer(GraphicsContext& graphicsContext, size_t offset, size_t size, void* ptr) override
+    {
+        FATAL("Unimplemented");
+    }
+
+private:
+    std::vector<uint8_t> _indices;
+};
+
+class DynamicIndexBuffer final : public ResourceBase<::bgfx::DynamicIndexBufferHandle, Buffer::Delegate> {
+public:
+    void upload(GraphicsContext& graphicsContext) override
+    {
         if(!::bgfx::isValid(_handle))
-        {
-            _indices = UploaderType::toBytes(input);
-            _handle = ::bgfx::createIndexBuffer(::bgfx::makeRef(_indices.data(), _size));
-        }
+            _handle = ::bgfx::createDynamicIndexBuffer(_size);
+
+        DASSERT(_size <= _indices.size());
+        ::bgfx::update(_handle, 0, ::bgfx::makeRef(_indices.data(), _size));
+    }
+
+    void uploadBuffer(GraphicsContext& graphicsContext, Uploader& input) override
+    {
+        _indices = UploaderType::toBytes(input);
+        _size = _indices.size();
+        upload(graphicsContext);
     }
 
     void downloadBuffer(GraphicsContext& graphicsContext, size_t offset, size_t size, void* ptr) override
@@ -105,9 +162,10 @@ sp<RenderEngineContext> RendererFactoryBgfx::createRenderEngineContext(Ark::Rend
 sp<Buffer::Delegate> RendererFactoryBgfx::createBuffer(Buffer::Type type, Buffer::Usage usage)
 {
     if(type == Buffer::TYPE_VERTEX)
-        return sp<Buffer::Delegate>::make<BufferDelegateVertex>();
+        return usage == Buffer::USAGE_STATIC ? sp<Buffer::Delegate>::make<StaticVertexBuffer>() : sp<Buffer::Delegate>::make<DynamicVertexBuffer>();
     if(type == Buffer::TYPE_INDEX)
-        return sp<Buffer::Delegate>::make<BufferDelegateIndex>();
+        return usage == Buffer::USAGE_STATIC ? sp<Buffer::Delegate>::make<StaticIndexBuffer>() : sp<Buffer::Delegate>::make<DynamicIndexBuffer>();
+    FATAL("Unknow buffer type: %d", type);
     return nullptr;
 }
 
@@ -130,7 +188,7 @@ sp<PipelineFactory> RendererFactoryBgfx::createPipelineFactory()
 
 sp<RenderView> RendererFactoryBgfx::createRenderView(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController)
 {
-    return nullptr;
+    return sp<RenderView>::make<RenderViewBgfx>(renderContext, renderController);
 }
 
 sp<Texture::Delegate> RendererFactoryBgfx::createTexture(sp<Size> size, sp<Texture::Parameters> parameters)

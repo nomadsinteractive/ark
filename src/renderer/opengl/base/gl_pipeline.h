@@ -108,53 +108,6 @@ private:
         GLuint _buffer;
     };
 
-    class BakedRenderer {
-    public:
-        virtual ~BakedRenderer() = default;
-
-        virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) = 0;
-    };
-
-    class GLDrawArrays : public BakedRenderer {
-    public:
-        GLDrawArrays(GLenum mode);
-
-        virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
-
-    private:
-        GLenum _mode;
-    };
-
-    class GLDrawElements : public BakedRenderer {
-    public:
-        GLDrawElements(GLenum mode);
-
-        virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
-
-    private:
-        GLenum _mode;
-    };
-
-    class GLDrawElementsInstanced : public BakedRenderer {
-    public:
-        GLDrawElementsInstanced(GLenum mode);
-
-        virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
-
-    private:
-        GLenum _mode;
-    };
-
-    class GLMultiDrawElementsIndirect : public BakedRenderer {
-    public:
-        GLMultiDrawElementsIndirect(GLenum mode);
-
-        virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
-
-    private:
-        GLenum _mode;
-    };
-
     struct Stub {
         Stub();
 
@@ -190,16 +143,15 @@ private:
         virtual void compute(GraphicsContext& graphicsContext, const ComputeContext& computeContext) override;
 
     private:
-        sp<GLPipeline::BakedRenderer> makeBakedRenderer(const PipelineBindings& bindings) const;
+        sp<PipelineDrawCommand> makeBakedRenderer(const PipelineBindings& bindings) const;
 
     private:
         sp<Stub> _stub;
 
         Optional<Rect> _scissor;
-        sp<BakedRenderer> _renderer;
+        sp<PipelineDrawCommand> _renderer;
 
         std::vector<GLBufferBaseBinder> _ssbo_binders;
-
     };
 
     class PipelineOperationCompute : public PipelineOperation {

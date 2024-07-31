@@ -10,8 +10,8 @@
 
 namespace ark {
 
-GraphicsContext::GraphicsContext(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController)
-    : _render_context(renderContext), _render_controller(renderController), _tick(0)
+GraphicsContext::GraphicsContext(sp<RenderEngineContext> renderContext, sp<RenderController> renderController)
+    : _render_context(std::move(renderContext)), _render_controller(std::move(renderController)), _tick(0)
 {
 }
 

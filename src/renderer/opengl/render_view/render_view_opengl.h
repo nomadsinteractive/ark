@@ -1,10 +1,7 @@
-#ifndef ARK_RENDERER_IMPL_RENDER_VIEW_RENDER_VIEW_OPENGL_H_
-#define ARK_RENDERER_IMPL_RENDER_VIEW_RENDER_VIEW_OPENGL_H_
+#pragma once
 
 #include "core/types/owned_ptr.h"
-#include "core/types/shared_ptr.h"
 
-#include "graphics/base/viewport.h"
 #include "graphics/forwarding.h"
 #include "graphics/inf/render_view.h"
 
@@ -12,14 +9,14 @@
 
 namespace ark {
 
-class RenderViewOpenGL : public RenderView {
+class RenderViewOpenGL final : public RenderView {
 public:
-    RenderViewOpenGL(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController);
+    RenderViewOpenGL(sp<RenderEngineContext> renderContext, sp<RenderController> renderController);
     ~RenderViewOpenGL() override;
 
-    virtual void onSurfaceCreated() override;
-    virtual void onSurfaceChanged(uint32_t width, uint32_t height) override;
-    virtual void onRenderFrame(const Color& backgroundColor, RenderCommand& renderCommand) override;
+    void onSurfaceCreated() override;
+    void onSurfaceChanged(uint32_t width, uint32_t height) override;
+    void onRenderFrame(const Color& backgroundColor, RenderCommand& renderCommand) override;
 
 private:
     void initialize(uint32_t width, uint32_t height);
@@ -29,5 +26,3 @@ private:
 };
 
 }
-
-#endif

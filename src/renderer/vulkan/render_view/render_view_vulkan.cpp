@@ -3,7 +3,6 @@
 #include "core/util/log.h"
 
 #include "graphics/inf/render_command.h"
-#include "graphics/base/viewport.h"
 
 #include "renderer/base/render_controller.h"
 
@@ -45,14 +44,14 @@ void RenderViewVulkan::onRenderFrame(const Color& backgroundColor, RenderCommand
 {
     _graphics_context->onDrawFrame();
 
-    const sp<VKSwapChain>& renderTarget = _renderer->renderTarget();
-    uint32_t imageId = renderTarget->acquire(_vk_graphics_context);
+    const sp<VKSwapChain>& swapChain = _renderer->renderTarget();
+    const uint32_t imageId = swapChain->acquire(_vk_graphics_context);
 
     _vk_graphics_context->begin(imageId, backgroundColor);
     renderCommand.draw(_graphics_context);
     _vk_graphics_context->end();
 
-    renderTarget->swap(_vk_graphics_context);
+    swapChain->swap(_vk_graphics_context);
 
     if(_vk_compute_context->vkCommandBuffer() != VK_NULL_HANDLE)
     {

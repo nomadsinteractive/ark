@@ -5,7 +5,7 @@
 namespace ark::plugin::bgfx {
 
 struct BgfxContext {
-    ::bgfx::ViewId _view_id;
+    ::bgfx::ViewId _view_id = 0;
 };
 
 }

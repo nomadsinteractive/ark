@@ -17,13 +17,17 @@
 
 namespace ark {
 
-static void _glDebugCallbackProc(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam)
+namespace {
+
+void _glDebugCallbackProc(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam)
 {
     LOGD(message);
 }
 
-RenderViewOpenGL::RenderViewOpenGL(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController)
-    : _graphics_context(new GraphicsContext(renderContext, renderController))
+}
+
+RenderViewOpenGL::RenderViewOpenGL(sp<RenderEngineContext> renderContext, sp<RenderController> renderController)
+    : _graphics_context(new GraphicsContext(std::move(renderContext), std::move(renderController)))
 {
 }
 

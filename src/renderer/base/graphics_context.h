@@ -13,7 +13,7 @@ namespace ark {
 class ARK_API GraphicsContext {
 public:
     GraphicsContext() = default;
-    GraphicsContext(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController);
+    GraphicsContext(sp<RenderEngineContext> renderContext, sp<RenderController> renderController);
     ~GraphicsContext();
 
     static GraphicsContext& mocked();
@@ -36,7 +36,6 @@ private:
     uint32_t _tick;
 
     Traits _attachments;
-
 };
 
 }

@@ -45,13 +45,13 @@ private:
     bool _enabled;
 };
 
-class GLCullFaceTest : public Snippet::DrawEvents {
+class GLCullFaceTest final : public Snippet::DrawEvents {
 public:
     GLCullFaceTest(const PipelineBindings::TraitCullFaceTest& trait)
         : _enabled(trait._enabled), _front_face(trait._front_face == PipelineBindings::FRONT_FACE_DEFAULT ? GL_ZERO : (trait._front_face == PipelineBindings::FRONT_FACE_CLOCK_WISE ? GL_CW : GL_CCW)), _pre_front_face(GL_ZERO) {
     }
 
-    virtual void preDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override {
+    void preDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override {
         if(_enabled) {
             if(_front_face != GL_ZERO) {
                 if(_pre_front_face == GL_ZERO)
@@ -63,7 +63,7 @@ public:
             glDisable(GL_CULL_FACE);
     }
 
-    virtual void postDraw(GraphicsContext& /*graphicsContext*/) override {
+    void postDraw(GraphicsContext& /*graphicsContext*/) override {
         if(_enabled) {
             if(_front_face != GL_ZERO)
                 glFrontFace(_pre_front_face);
@@ -79,13 +79,13 @@ private:
 };
 
 
-class GLDepthTest : public Snippet::DrawEvents {
+class GLDepthTest final : public Snippet::DrawEvents {
 public:
     GLDepthTest(const PipelineBindings::TraitDepthTest& trait)
         : _func(GLUtil::toCompareFunc(trait._func)), _pre_func(GL_ZERO), _enabled(trait._enabled), _read_only(!trait._write_enabled) {
     }
 
-    virtual void preDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override {
+    void preDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override {
         if(_enabled) {
             if(_func != GL_ZERO) {
                 if(_pre_func == GL_ZERO)
@@ -99,7 +99,7 @@ public:
             glDisable(GL_DEPTH_TEST);
     }
 
-    virtual void postDraw(GraphicsContext& /*graphicsContext*/) override {
+    void postDraw(GraphicsContext& /*graphicsContext*/) override {
         if(!_enabled)
             glEnable(GL_DEPTH_TEST);
         if(_func != GL_ZERO)
@@ -116,7 +116,7 @@ private:
 };
 
 
-class GLStencilTest : public Snippet::DrawEvents {
+class GLStencilTest final : public Snippet::DrawEvents {
 public:
     GLStencilTest(std::vector<sp<Snippet::DrawEvents>> delegate)
         : _delegate(std::move(delegate)) {
@@ -137,14 +137,14 @@ private:
     std::vector<sp<Snippet::DrawEvents>> _delegate;
 };
 
-class GLStencilTestSeparate : public Snippet::DrawEvents {
+class GLStencilTestSeparate final : public Snippet::DrawEvents {
 public:
     GLStencilTestSeparate(const PipelineBindings::TraitStencilTestSeparate& conf)
         : _face(GLUtil::toFrontFaceType(conf._type)), _mask(conf._mask), _func(GLUtil::toCompareFunc(conf._func)), _compare_mask(conf._compare_mask),
           _ref(conf._ref), _op(GLUtil::toStencilFunc(conf._op)), _op_dfail(GLUtil::toStencilFunc(conf._op_dfail)), _op_dpass(GLUtil::toStencilFunc(conf._op_dpass)) {
     }
 
-    virtual void preDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override {
+    void preDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override {
         glStencilMaskSeparate(_face, _mask);
         glStencilFuncSeparate(_face, _func, _ref, _compare_mask);
         glStencilOpSeparate(_face, _op, _op_dfail, _op_dpass);
@@ -160,14 +160,14 @@ private:
     GLenum _op, _op_dfail, _op_dpass;
 };
 
-class GLTraitBlend : public Snippet::DrawEvents {
+class GLTraitBlend final : public Snippet::DrawEvents {
 public:
     GLTraitBlend(const PipelineBindings::TraitBlend& conf)
         : _src_rgb_factor(GLUtil::toBlendFactor(conf._src_rgb_factor)), _dest_rgb_factor(GLUtil::toBlendFactor(conf._dst_rgb_factor)),
           _src_alpha_factor(GLUtil::toBlendFactor(conf._src_alpha_factor)), _dest_alpha_factor(GLUtil::toBlendFactor(conf._dst_alpha_factor)) {
     }
 
-    virtual void preDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override {
+    void preDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override {
         glGetIntegerv(GL_BLEND_SRC_RGB, &_src_rgb_factor_default);
         glGetIntegerv(GL_BLEND_SRC_ALPHA, &_src_alpha_factor_default);
         glGetIntegerv(GL_BLEND_DST_RGB, &_dest_rgb_factor_default);
@@ -176,7 +176,7 @@ public:
                             _src_alpha_factor != std::numeric_limits<GLenum>::max() ? _src_alpha_factor : _src_alpha_factor_default, _dest_alpha_factor != std::numeric_limits<GLenum>::max() ? _dest_alpha_factor : _dest_alpha_factor_default);
     }
 
-    virtual void postDraw(GraphicsContext& /*graphicsContext*/) override {
+    void postDraw(GraphicsContext& /*graphicsContext*/) override {
         glBlendFuncSeparate(_src_rgb_factor_default, _dest_rgb_factor_default, _src_alpha_factor_default, _dest_alpha_factor_default);
     }
 
@@ -190,6 +190,92 @@ private:
     GLenum _dest_rgb_factor_default;
     GLenum _src_alpha_factor_default;
     GLenum _dest_alpha_factor_default;
+};
+
+class GLDrawArrays final : public PipelineDrawCommand {
+public:
+    GLDrawArrays(GLenum mode)
+        : _mode(mode) {
+    }
+
+    void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override
+    {
+        const DrawingParams::DrawElements& param = drawingContext._parameters.drawElements();
+        DASSERT(drawingContext._draw_count);
+        glDrawArrays(_mode, param._start * sizeof(element_index_t), static_cast<GLsizei>(drawingContext._draw_count));
+    }
+
+private:
+    GLenum _mode;
+};
+
+class GLDrawElements final : public PipelineDrawCommand {
+public:
+    GLDrawElements(GLenum mode)
+        : _mode(mode) {
+    }
+
+    void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override
+    {
+        const DrawingParams::DrawElements& param = drawingContext._parameters.drawElements();
+        DASSERT(drawingContext._draw_count);
+        glDrawElements(_mode, static_cast<GLsizei>(drawingContext._draw_count), GLIndexType, reinterpret_cast<GLvoid*>(param._start * sizeof(element_index_t)));
+    }
+
+private:
+    GLenum _mode;
+};
+
+class GLDrawElementsInstanced final : public PipelineDrawCommand {
+public:
+    GLDrawElementsInstanced(GLenum mode)
+        : _mode(mode) {
+    }
+
+    void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override
+    {
+        const DrawingParams::DrawElementsInstanced& param = drawingContext._parameters.drawElementsInstanced();
+        DASSERT(param._count);
+        DASSERT(drawingContext._draw_count);
+        for(const auto& [i, j] : param._divided_buffer_snapshots)
+        {
+            j.upload(graphicsContext);
+            DCHECK(j.id(), "Invaild Divided Buffer: %d", i);
+        }
+        glDrawElementsInstanced(_mode, static_cast<GLsizei>(param._count), GLIndexType, nullptr, drawingContext._draw_count);
+    }
+private:
+    GLenum _mode;
+};
+
+class GLMultiDrawElementsIndirect final : public PipelineDrawCommand {
+public:
+    GLMultiDrawElementsIndirect(GLenum mode)
+        : _mode(mode)
+    {
+    }
+
+    void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override
+    {
+        const DrawingParams::DrawMultiElementsIndirect& param = drawingContext._parameters.drawMultiElementsIndirect();
+
+        for(const auto& [k, v] : param._divided_buffer_snapshots)
+        {
+            v.upload(graphicsContext);
+            DCHECK(v.id(), "Invaild Divided Buffer Buffer: %d", k);
+        }
+        param._indirect_cmds.upload(graphicsContext);
+
+        const volatile GLBufferBinder binder(GL_DRAW_INDIRECT_BUFFER, static_cast<GLuint>(param._indirect_cmds.id()));
+#ifndef ANDROID
+        glMultiDrawElementsIndirect(_mode, GLIndexType, nullptr, static_cast<GLsizei>(param._indirect_cmd_count), sizeof(DrawingParams::DrawElementsIndirectCommand));
+#else
+        for(uint32_t i = 0; i < param._indirect_cmd_count; ++i)
+            glDrawElementsIndirect(_mode, GLIndexType, reinterpret_cast<const void *>(i * sizeof(DrawingParams::DrawElementsIndirectCommand)));
+#endif
+    }
+private:
+    GLenum _mode;
 };
 
 }
@@ -502,73 +588,6 @@ GLuint GLPipeline::Stage::compile(uint32_t version, GLenum type, const String& s
     return id;
 }
 
-GLPipeline::GLDrawArrays::GLDrawArrays(GLenum mode)
-    : _mode(mode)
-{
-}
-
-void GLPipeline::GLDrawArrays::draw(GraphicsContext& /*graphicsContext*/, const DrawingContext& drawingContext)
-{
-    const DrawingParams::DrawElements& param = drawingContext._parameters.drawElements();
-    DASSERT(drawingContext._draw_count);
-    glDrawArrays(_mode, param._start * sizeof(element_index_t), static_cast<GLsizei>(drawingContext._draw_count));
-}
-
-GLPipeline::GLDrawElements::GLDrawElements(GLenum mode)
-    : _mode(mode)
-{
-}
-
-void GLPipeline::GLDrawElements::draw(GraphicsContext& /*graphicsContext*/, const DrawingContext& drawingContext)
-{
-    const DrawingParams::DrawElements& param = drawingContext._parameters.drawElements();
-    DASSERT(drawingContext._draw_count);
-    glDrawElements(_mode, static_cast<GLsizei>(drawingContext._draw_count), GLIndexType, reinterpret_cast<GLvoid*>(param._start * sizeof(element_index_t)));
-}
-
-GLPipeline::GLDrawElementsInstanced::GLDrawElementsInstanced(GLenum mode)
-    : _mode(mode)
-{
-}
-
-void GLPipeline::GLDrawElementsInstanced::draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
-{
-    const DrawingParams::DrawElementsInstanced& param = drawingContext._parameters.drawElementsInstanced();
-    DASSERT(param._count);
-    DASSERT(drawingContext._draw_count);
-    for(const auto& [i, j] : param._divided_buffer_snapshots)
-    {
-        j.upload(graphicsContext);
-        DCHECK(j.id(), "Invaild Divided Buffer: %d", i);
-    }
-    glDrawElementsInstanced(_mode, static_cast<GLsizei>(param._count), GLIndexType, nullptr, drawingContext._draw_count);
-}
-
-GLPipeline::GLMultiDrawElementsIndirect::GLMultiDrawElementsIndirect(GLenum mode)
-    : _mode(mode)
-{
-}
-
-void GLPipeline::GLMultiDrawElementsIndirect::draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
-{
-    const DrawingParams::DrawMultiElementsIndirect& param = drawingContext._parameters.drawMultiElementsIndirect();
-
-    for(const auto& i : param._divided_buffer_snapshots)
-    {
-        i.second.upload(graphicsContext);
-        DCHECK(i.second.id(), "Invaild Divided Buffer Buffer: %d", i.first);
-    }
-    param._indirect_cmds.upload(graphicsContext);
-
-    const volatile GLBufferBinder binder(GL_DRAW_INDIRECT_BUFFER, static_cast<GLuint>(param._indirect_cmds.id()));
-#ifndef ANDROID
-    glMultiDrawElementsIndirect(_mode, GLIndexType, nullptr, static_cast<GLsizei>(param._indirect_cmd_count), sizeof(DrawingParams::DrawElementsIndirectCommand));
-#else
-    for(uint32_t i = 0; i < param._indirect_cmd_count; ++i)
-        glDrawElementsIndirect(_mode, GLIndexType, reinterpret_cast<const void *>(i * sizeof(DrawingParams::DrawElementsIndirectCommand)));
-#endif
-}
-
 GLPipeline::PipelineOperationDraw::PipelineOperationDraw(sp<Stub> stub, const PipelineBindings& bindings)
     : _stub(std::move(stub)), _scissor(bindings.scissor()), _renderer(makeBakedRenderer(bindings))
 {
@@ -576,14 +595,14 @@ GLPipeline::PipelineOperationDraw::PipelineOperationDraw(sp<Stub> stub, const Pi
 
 void GLPipeline::PipelineOperationDraw::bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
-    _stub->bind(graphicsContext, drawingContext._pipeline_context);
+    _stub->bind(graphicsContext, drawingContext._pipeline_snapshot);
 }
 
 void GLPipeline::PipelineOperationDraw::draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
     const volatile GLScissor scissor(drawingContext._scissor ? drawingContext._scissor : _scissor);
 
-    for(const auto& [i, j] : drawingContext._pipeline_context._ssbos)
+    for(const auto& [i, j] : drawingContext._pipeline_snapshot._ssbos)
         _ssbo_binders.emplace_back(GL_SHADER_STORAGE_BUFFER, static_cast<GLuint>(i), static_cast<GLuint>(j.id()));
 
     _renderer->draw(graphicsContext, drawingContext);
@@ -596,7 +615,7 @@ void GLPipeline::PipelineOperationDraw::compute(GraphicsContext& /*graphicsConte
     DFATAL("This is a drawing pipeline, not compute");
 }
 
-sp<GLPipeline::BakedRenderer> GLPipeline::PipelineOperationDraw::makeBakedRenderer(const PipelineBindings& bindings) const
+sp<PipelineDrawCommand> GLPipeline::PipelineOperationDraw::makeBakedRenderer(const PipelineBindings& bindings) const
 {
     GLenum mode = GLUtil::toEnum(bindings.mode());
     switch(bindings.drawProcedure())

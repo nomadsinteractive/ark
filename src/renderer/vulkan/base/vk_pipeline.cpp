@@ -5,18 +5,17 @@
 
 #include "renderer/base/buffer.h"
 #include "renderer/base/compute_context.h"
+#include "renderer/base/drawing_context.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/pipeline_layout.h"
 #include "renderer/base/pipeline_input.h"
 #include "renderer/base/render_engine_context.h"
-#include "renderer/base/render_controller.h"
 #include "renderer/base/recycler.h"
 #include "renderer/base/shader_bindings.h"
 #include "renderer/util/render_util.h"
 
 #include "renderer/vulkan/base/vk_buffer.h"
 #include "renderer/vulkan/base/vk_command_buffers.h"
-#include "renderer/vulkan/base/vk_command_pool.h"
 #include "renderer/vulkan/base/vk_compute_context.h"
 #include "renderer/vulkan/base/vk_descriptor_pool.h"
 #include "renderer/vulkan/base/vk_device.h"
@@ -190,9 +189,9 @@ void VKPipeline::bind(GraphicsContext& graphicsContext, const DrawingContext& dr
             _rebind_needed = true;
 
     if(_rebind_needed)
-        setupDescriptorSet(graphicsContext, drawingContext._pipeline_context._shader_bindings->pipelineBindings());
+        setupDescriptorSet(graphicsContext, drawingContext._pipeline_snapshot._shader_bindings->pipelineBindings());
 
-    bindUBOShapshots(graphicsContext, drawingContext._pipeline_context._ubos);
+    bindUBOShapshots(graphicsContext, drawingContext._pipeline_snapshot._ubos);
     _rebind_needed = false;
 }
 
@@ -466,7 +465,7 @@ void VKPipeline::buildDrawCommandBuffer(GraphicsContext& graphicsContext, const 
 
     if(const Optional<Rect>& scissor = drawingContext._scissor)
     {
-        CHECK(drawingContext._pipeline_context._shader_bindings->pipelineBindings()->hasFlag(PipelineBindings::FLAG_DYNAMIC_SCISSOR, PipelineBindings::FLAG_DYNAMIC_SCISSOR_BITMASK), "Pipeline has no DYNAMIC_SCISSOR flag set");
+        CHECK(drawingContext._pipeline_snapshot._shader_bindings->pipelineBindings()->hasFlag(PipelineBindings::FLAG_DYNAMIC_SCISSOR, PipelineBindings::FLAG_DYNAMIC_SCISSOR_BITMASK), "Pipeline has no DYNAMIC_SCISSOR flag set");
         VkRect2D vkScissor{{static_cast<int32_t>(scissor->left()), static_cast<int32_t>(scissor->top())}, {static_cast<uint32_t>(scissor->width()), static_cast<uint32_t>(scissor->height())}};
         vkCmdSetScissor(commandBuffer, 0, 1, &vkScissor);
     }
