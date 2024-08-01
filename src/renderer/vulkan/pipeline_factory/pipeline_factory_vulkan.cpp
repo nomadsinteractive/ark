@@ -4,6 +4,7 @@
 #include "renderer/base/pipeline_descriptor.h"
 #include "renderer/base/pipeline_layout.h"
 #include "renderer/base/render_controller.h"
+#include "renderer/base/pipeline_bindings.h"
 
 #include "renderer/vulkan/base/vk_pipeline.h"
 
@@ -14,10 +15,10 @@ PipelineFactoryVulkan::PipelineFactoryVulkan(const sp<Recycler>& recycler, const
 {
 }
 
-sp<Pipeline> PipelineFactoryVulkan::buildPipeline(GraphicsContext& graphicsContext, const PipelineDescriptor& bindings)
+sp<Pipeline> PipelineFactoryVulkan::buildPipeline(GraphicsContext& graphicsContext, const PipelineBindings& bindings)
 {
-    std::map<PipelineInput::ShaderStage, String> shaders = bindings.layout()->getPreprocessedShaders(graphicsContext.renderContext());
-    return sp<VKPipeline>::make(bindings, _recycler, _renderer, std::move(shaders));
+    std::map<PipelineInput::ShaderStage, String> shaders = bindings.pipelineLayout()->getPreprocessedShaders(graphicsContext.renderContext());
+    return sp<Pipeline>::make<VKPipeline>(bindings.pipelineDescriptor(), _recycler, _renderer, std::move(shaders));
 }
 
 }

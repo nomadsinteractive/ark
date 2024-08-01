@@ -10,7 +10,7 @@
 #include "renderer/base/render_controller.h"
 #include "renderer/base/render_engine.h"
 #include "renderer/base/shader.h"
-#include "renderer/base/shader_bindings.h"
+#include "renderer/base/pipeline_bindings.h"
 #include "renderer/inf/render_command_composer.h"
 
 namespace ark {
@@ -32,13 +32,13 @@ sp<RenderCommand> RenderLayerSnapshot::compose(const RenderRequest& renderReques
     if(_droplets.size() > 0 && _stub->_layer_context->visible().val())
         return _stub->_render_command_composer->compose(renderRequest, *this);
 
-    DrawingContext drawingContext({_stub->_shader_bindings, std::move(_ubos), std::move(_ssbos)}, nullptr);
+    DrawingContext drawingContext({_stub->_pipeline_bindings, std::move(_ubos), std::move(_ssbos)}, nullptr);
     return drawingContext.toBindCommand();
 }
 
 bool RenderLayerSnapshot::needsReload() const
 {
-    return _needs_reload || _stub->_shader_bindings->vertices().size() == 0;
+    return _needs_reload || _stub->_pipeline_bindings->vertices().size() == 0;
 }
 
 const sp<PipelineInput>& RenderLayerSnapshot::pipelineInput() const
@@ -96,7 +96,7 @@ void RenderLayerSnapshot::addDiscardedLayerContexts(const std::vector<sp<LayerCo
 
 sp<RenderCommand> RenderLayerSnapshot::toRenderCommand(const RenderRequest& renderRequest, Buffer::Snapshot vertices, Buffer::Snapshot indices, uint32_t drawCount, DrawingParams params)
 {
-    DrawingContext drawingContext({_stub->_shader_bindings, std::move(_ubos), std::move(_ssbos)}, _stub->_shader_bindings->attachments(), std::move(vertices), std::move(indices),
+    DrawingContext drawingContext({_stub->_pipeline_bindings, std::move(_ubos), std::move(_ssbos)}, _stub->_pipeline_bindings->attachments(), std::move(vertices), std::move(indices),
                                   drawCount, std::move(params));
 
     if(_stub->_scissor)

@@ -9,7 +9,7 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/base/buffer.h"
-#include "renderer/base/shader_bindings.h"
+#include "renderer/base/pipeline_bindings.h"
 
 #include "app/inf/event_listener.h"
 

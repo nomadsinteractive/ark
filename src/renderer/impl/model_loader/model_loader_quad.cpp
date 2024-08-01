@@ -3,7 +3,7 @@
 #include "renderer/base/atlas.h"
 #include "renderer/base/model.h"
 #include "renderer/base/pipeline_descriptor.h"
-#include "renderer/base/shader_bindings.h"
+#include "renderer/base/pipeline_bindings.h"
 #include "renderer/impl/render_command_composer/rcc_draw_quads.h"
 #include "renderer/impl/vertices/vertices_quad.h"
 #include "renderer/util/render_util.h"
@@ -20,9 +20,9 @@ sp<RenderCommandComposer> ModelLoaderQuad::makeRenderCommandComposer()
     return sp<RCCDrawQuads>::make(_unit_model);
 }
 
-void ModelLoaderQuad::initialize(ShaderBindings& shaderBindings)
+void ModelLoaderQuad::initialize(PipelineBindings& pipelineBindings)
 {
-    shaderBindings.pipelineDescriptor()->bindSampler(_atlas->texture());
+    pipelineBindings.pipelineDescriptor()->bindSampler(_atlas->texture());
 }
 
 sp<Model> ModelLoaderQuad::loadModel(int32_t type)

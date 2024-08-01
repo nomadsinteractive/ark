@@ -3,7 +3,7 @@
 #include "graphics/base/size.h"
 
 #include "renderer/base/shader.h"
-#include "renderer/base/shader_bindings.h"
+#include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/resource_loader_context.h"
 
 #include "renderer/opengl/util/gl_util.h"
@@ -11,14 +11,14 @@
 namespace ark {
 
 GLEquirectangularCubemapUploader::GLEquirectangularCubemapUploader(const sp<RenderController>& renderController, const Shader& shader, const sp<Texture>& texture, const sp<Size>& size)
-    : _render_controller(renderController), _shader_bindings(shader.makeBindings(Buffer(), Enum::RENDER_MODE_TRIANGLES, Enum::DRAW_PROCEDURE_DRAW_ELEMENTS)), _texture(texture), _size(size)
+    : _render_controller(renderController), _pipeline_bindings(shader.makeBindings(Buffer(), Enum::RENDER_MODE_TRIANGLES, Enum::DRAW_PROCEDURE_DRAW_ELEMENTS)), _texture(texture), _size(size)
 {
 }
 
 void GLEquirectangularCubemapUploader::initialize(GraphicsContext& graphicsContext, Texture::Delegate& delegate)
 {
     DCHECK(delegate.type() == Texture::TYPE_CUBEMAP, "This uploader uploads bitmaps to a cubmap, not Texture::Type(%d)", delegate.type());
-    GLUtil::renderCubemap(graphicsContext, static_cast<uint32_t>(delegate.id()), _render_controller, _shader_bindings->getPipeline(graphicsContext), _texture,
+    GLUtil::renderCubemap(graphicsContext, static_cast<uint32_t>(delegate.id()), _render_controller, _pipeline_bindings->getPipeline(graphicsContext), _texture,
                           static_cast<int32_t>(_size->widthAsFloat()), static_cast<int32_t>(_size->heightAsFloat()));
 }
 

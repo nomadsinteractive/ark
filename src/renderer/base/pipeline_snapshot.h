@@ -12,7 +12,7 @@
 namespace ark {
 
 struct PipelineSnapshot final {
-    sp<ShaderBindings> _bindings;
+    sp<PipelineBindings> _bindings;
     std::vector<RenderLayerSnapshot::UBOSnapshot> _ubos;
     std::vector<std::pair<uint32_t, Buffer::Snapshot>> _ssbos;
 };

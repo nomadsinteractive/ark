@@ -14,7 +14,7 @@ public:
 
     virtual sp<RenderCommandComposer> makeRenderCommandComposer() override;
 
-    virtual void initialize(ShaderBindings& shaderBindings) override;
+    virtual void initialize(PipelineBindings& pipelineBindings) override;
 
     virtual sp<Model> loadModel(int32_t type) override;
 

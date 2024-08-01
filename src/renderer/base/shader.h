@@ -38,7 +38,7 @@ public:
     const sp<PipelineInput>& input() const;
     const sp<PipelineLayout>& layout() const;
 
-    sp<ShaderBindings> makeBindings(Buffer vertices, Enum::RenderMode mode, Enum::DrawProcedure renderProcedure, const std::map<uint32_t, sp<Uploader>>& uploaders = {}) const;
+    sp<PipelineBindings> makeBindings(Buffer vertices, Enum::RenderMode mode, Enum::DrawProcedure renderProcedure, const std::map<uint32_t, sp<Uploader>>& uploaders = {}) const;
 
     class BUILDER_IMPL final : public Builder<Shader> {
     public:

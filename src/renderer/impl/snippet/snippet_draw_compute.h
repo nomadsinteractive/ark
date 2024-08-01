@@ -31,7 +31,7 @@ public:
 private:
     sp<Shader> _shader;
     std::array<sp<Integer>, 3> _num_work_groups;
-    sp<ShaderBindings> _shader_bindings;
+    sp<PipelineBindings> _pipeline_bindings;
     bool _at_post_draw;
 };
 

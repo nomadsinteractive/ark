@@ -1,4 +1,4 @@
-#include "renderer/base/shader_bindings.h"
+#include "renderer/base/pipeline_bindings.h"
 
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/pipeline_descriptor.h"
@@ -9,64 +9,69 @@
 
 namespace ark {
 
-ShaderBindings::ShaderBindings(Buffer vertices, sp<PipelineFactory> pipelineFactory, sp<PipelineDescriptor> pipelineDescriptor, std::map<uint32_t, Buffer> dividedBuffers)
+PipelineBindings::PipelineBindings(Buffer vertices, sp<PipelineFactory> pipelineFactory, sp<PipelineDescriptor> pipelineDescriptor, std::map<uint32_t, Buffer> dividedBuffers)
     : _vertices(std::move(vertices)), _pipeline_factory(std::move(pipelineFactory)), _pipeline_descriptor(std::move(pipelineDescriptor)), _snippet(_pipeline_descriptor->layout()->snippet()),
       _streams(sp<std::map<uint32_t, Buffer>>::make(std::move(dividedBuffers))), _attachments(sp<Traits>::make())
 {
 }
 
-const Buffer& ShaderBindings::vertices() const
+const Buffer& PipelineBindings::vertices() const
 {
     return _vertices;
 }
 
-Buffer& ShaderBindings::vertices()
+Buffer& PipelineBindings::vertices()
 {
     return _vertices;
 }
 
-const sp<PipelineFactory>& ShaderBindings::pipelineFactory() const
+const sp<PipelineFactory>& PipelineBindings::pipelineFactory() const
 {
     return _pipeline_factory;
 }
 
-const sp<PipelineDescriptor>& ShaderBindings::pipelineDescriptor() const
+const sp<PipelineDescriptor>& PipelineBindings::pipelineDescriptor() const
 {
     return _pipeline_descriptor;
 }
 
-const sp<Snippet>& ShaderBindings::snippet() const
+const sp<Snippet>& PipelineBindings::snippet() const
 {
     return _snippet;
 }
 
-void ShaderBindings::addSnippet(sp<Snippet> snippet)
+void PipelineBindings::addSnippet(sp<Snippet> snippet)
 {
     DCHECK(!_pipeline, "Draw snippet can only be added before pipeline creation");
     _snippet = sp<SnippetLinkedChain>::make(std::move(_snippet), std::move(snippet));
 }
 
-const sp<PipelineLayout>& ShaderBindings::pipelineLayout() const
+const sp<PipelineLayout>& PipelineBindings::pipelineLayout() const
 {
     return _pipeline_descriptor->layout();
 }
 
-const sp<PipelineInput>& ShaderBindings::pipelineInput() const
+const sp<PipelineInput>& PipelineBindings::pipelineInput() const
 {
     return _pipeline_descriptor->input();
 }
 
-const sp<std::map<uint32_t, Buffer>>& ShaderBindings::streams() const
+const Table<String, sp<Texture>>& PipelineBindings::samplers() const
+{
+    return _pipeline_descriptor->samplers();
+}
+
+const sp<std::map<uint32_t, Buffer>>& PipelineBindings::streams() const
 {
     return _streams;
 }
 
-const sp<Traits>& ShaderBindings::attachments() const
+const sp<Traits>& PipelineBindings::attachments() const
 {
     return _attachments;
 }
 
-const sp<Pipeline>& ShaderBindings::getPipeline(GraphicsContext& graphicsContext)
+const sp<Pipeline>& PipelineBindings::getPipeline(GraphicsContext& graphicsContext)
 {
     if(_pipeline)
     {
@@ -76,13 +81,13 @@ const sp<Pipeline>& ShaderBindings::getPipeline(GraphicsContext& graphicsContext
     }
 
     _pipeline_descriptor->layout()->preCompile(graphicsContext);
-    _pipeline = _pipeline_factory->buildPipeline(graphicsContext, _pipeline_descriptor);
+    _pipeline = _pipeline_factory->buildPipeline(graphicsContext, *this);
     graphicsContext.renderController()->upload(_pipeline, RenderController::US_ON_SURFACE_READY, nullptr, nullptr, RenderController::UPLOAD_PRIORITY_HIGH);
     _pipeline->upload(graphicsContext);
     return _pipeline;
 }
 
-std::map<uint32_t, Buffer::Factory> ShaderBindings::makeDividedBufferFactories() const
+std::map<uint32_t, Buffer::Factory> PipelineBindings::makeDividedBufferFactories() const
 {
     std::map<uint32_t, Buffer::Factory> builders;
     const sp<PipelineInput>& pipelineInput = _pipeline_descriptor->input();

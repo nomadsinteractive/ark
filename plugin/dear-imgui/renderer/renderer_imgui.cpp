@@ -22,7 +22,7 @@
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/base/render_engine_context.h"
 #include "renderer/base/shader.h"
-#include "renderer/base/shader_bindings.h"
+#include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/render_engine.h"
 
 #include "app/base/application_context.h"
@@ -253,7 +253,7 @@ void RendererImgui::MyImGuiRenderFunction(const RenderRequest& renderRequest, Im
                 const sp<DrawCommand>& drawCommand = recycler->drawCommand();
                 Buffer::Snapshot vertexBuffer = drawCommand->_vertex_buffer.snapshot(vb);
                 Buffer::Snapshot indexBuffer = drawCommand->_index_buffer.snapshot(ib);
-                DrawingContext drawingContext({drawCommandPool->_shader_bindings, ubos, ssbos}, drawCommand->_attachments, std::move(vertexBuffer), std::move(indexBuffer), pcmd->ElemCount, DrawingParams::DrawElements{offset});
+                DrawingContext drawingContext({drawCommandPool->_pipeline_bindings, ubos, ssbos}, drawCommand->_attachments, std::move(vertexBuffer), std::move(indexBuffer), pcmd->ElemCount, DrawingParams::DrawElements{offset});
                 drawingContext._scissor = _render_engine->toRendererRect(Rect(pcmd->ClipRect.x - pos.x, pcmd->ClipRect.y - pos.y, pcmd->ClipRect.z - pos.x, pcmd->ClipRect.w - pos.y), Ark::COORDINATE_SYSTEM_LHS);
                 renderRequest.addRenderCommand(sp<ImguiRenderCommand>::make(drawingContext.toRenderCommand(renderRequest), std::move(recycler)));
             }

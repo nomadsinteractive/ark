@@ -1,6 +1,8 @@
 #include "bgfx/impl/pipeline_factory/pipeline_factory_bgfx.h"
 
+#include "renderer/base/drawing_context.h"
 #include "renderer/base/graphics_context.h"
+#include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/pipeline_descriptor.h"
 #include "renderer/base/pipeline_layout.h"
 #include "renderer/base/pipeline_input.h"
@@ -8,6 +10,9 @@
 
 #include "bgfx/base/bgfx_context.h"
 #include "bgfx/base/resource_base.h"
+#include "bgfx/impl/texture/texture_bgfx.h"
+
+
 
 namespace ark::plugin::bgfx {
 
@@ -31,6 +36,13 @@ public:
 
     void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override
     {
+        for(const auto& [name, texture] : drawingContext._pipeline_snapshot._bindings->samplers())
+        {
+            const sp<TextureBgfx> textureBgfx = texture->delegate().cast<TextureBgfx>();
+        }
+
+        for(const SamplerSlot& i : _sampler_slots)
+            ::bgfx::setTexture(i._stage, i._uniform, i._texture->handle());
     }
 
     void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override
@@ -45,8 +57,17 @@ public:
     }
 
 private:
+    struct SamplerSlot {
+        ::bgfx::UniformHandle _uniform;
+        sp<TextureBgfx> _texture;
+        uint8_t _stage;
+    };
+
+private:
     String _vertex_shader;
     String _fragment_shader;
+
+    std::vector<SamplerSlot> _sampler_slots;
 };
 
 class ComputePipelineBgfx final : public ResourceBase<::bgfx::ProgramHandle, Pipeline> {
@@ -85,9 +106,9 @@ private:
 
 }
 
-sp<Pipeline> PipelineFactoryBgfx::buildPipeline(GraphicsContext& graphicsContext, const PipelineDescriptor& bindings)
+sp<Pipeline> PipelineFactoryBgfx::buildPipeline(GraphicsContext& graphicsContext, const PipelineBindings& bindings)
 {
-    std::map<PipelineInput::ShaderStage, String> shaders = bindings.layout()->getPreprocessedShaders(graphicsContext.renderContext());
+    std::map<PipelineInput::ShaderStage, String> shaders = bindings.pipelineLayout()->getPreprocessedShaders(graphicsContext.renderContext());
     if(const auto vIter = shaders.find(PipelineInput::SHADER_STAGE_VERTEX); vIter != shaders.end())
     {
         const auto fIter = shaders.find(PipelineInput::SHADER_STAGE_FRAGMENT);

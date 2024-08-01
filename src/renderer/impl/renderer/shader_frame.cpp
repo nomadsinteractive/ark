@@ -11,19 +11,19 @@
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/base/render_controller.h"
 #include "renderer/base/shader.h"
-#include "renderer/base/shader_bindings.h"
+#include "renderer/base/pipeline_bindings.h"
 
 namespace ark {
 
 ShaderFrame::ShaderFrame(const sp<Size>& size, const sp<Shader>& shader, RenderController& renderController)
-    : _size(size), _shader(shader), _shader_bindings(shader->makeBindings(Buffer(), Enum::RENDER_MODE_TRIANGLES, Enum::DRAW_PROCEDURE_DRAW_ELEMENTS)),
+    : _size(size), _shader(shader), _pipeline_bindings(shader->makeBindings(Buffer(), Enum::RENDER_MODE_TRIANGLES, Enum::DRAW_PROCEDURE_DRAW_ELEMENTS)),
       _vertex_buffer(renderController.makeVertexBuffer()), _ib_snapshot(renderController.getSharedPrimitiveIndexBuffer(Global<Constants>()->MODEL_UNIT_QUAD, false)->snapshot(renderController, 1))
 {
 }
 
 void ShaderFrame::render(RenderRequest& renderRequest, const V3& position)
 {
-    DrawingContext drawingContext({_shader_bindings, _shader->takeUBOSnapshot(renderRequest), _shader->takeSSBOSnapshot(renderRequest)}, _shader_bindings->attachments(),
+    DrawingContext drawingContext({_pipeline_bindings, _shader->takeUBOSnapshot(renderRequest), _shader->takeSSBOSnapshot(renderRequest)}, _pipeline_bindings->attachments(),
                                   _vertex_buffer.snapshot(getVertexBuffer(renderRequest, position)), _ib_snapshot, 6, DrawingParams::DrawElements{0});
     renderRequest.addRenderCommand(drawingContext.toRenderCommand(renderRequest));
 }

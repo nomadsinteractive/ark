@@ -13,7 +13,7 @@ public:
     ModelLoaderCached(sp<ModelLoader> delegate);
 
     sp<RenderCommandComposer> makeRenderCommandComposer() override;
-    void initialize(ShaderBindings& shaderBindings) override;
+    void initialize(PipelineBindings& pipelineBindings) override;
     sp<Model> loadModel(int32_t type) override;
 
     static sp<ModelLoader> ensureCached(sp<ModelLoader> delegate);

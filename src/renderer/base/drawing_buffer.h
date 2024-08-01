@@ -21,14 +21,14 @@ namespace ark {
 
 class ARK_API DrawingBuffer {
 public:
-    DrawingBuffer(sp<ShaderBindings> shaderBindings, uint32_t stride);
+    DrawingBuffer(sp<PipelineBindings> pipelineBindings, uint32_t stride);
     DEFAULT_COPY_AND_ASSIGN(DrawingBuffer);
 
     VertexWriter makeVertexWriter(const RenderRequest& renderRequest, size_t length, size_t offset);
     [[deprecated]]
     VertexWriter makeDividedVertexWriter(const RenderRequest& renderRequest, size_t length, size_t offset, uint32_t divisor);
 
-    const sp<ShaderBindings>& shaderBindings() const;
+    const sp<PipelineBindings>& pipelineBindings() const;
 
     const Buffer::Factory& vertices() const;
     Buffer::Factory& vertices();
@@ -43,7 +43,7 @@ public:
     std::vector<std::pair<uint32_t, Buffer::Snapshot>> toDividedBufferSnapshots();
 
 private:
-    sp<ShaderBindings> _shader_bindings;
+    sp<PipelineBindings> _pipeline_bindings;
     sp<PipelineDescriptor> _pipeline_descriptor;
 
     Buffer::Factory _vertices;

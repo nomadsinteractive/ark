@@ -30,7 +30,7 @@ private:
         sp<Vec4> _scissor;
 
         sp<RenderCommandComposer> _render_command_composer;
-        sp<ShaderBindings> _shader_bindings;
+        sp<PipelineBindings> _pipeline_bindings;
 
         uint32_t _stride;
 

@@ -5,7 +5,7 @@
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/base/shader.h"
-#include "renderer/base/shader_bindings.h"
+#include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/vertex_writer.h"
 #include "renderer/inf/vertices.h"
 
@@ -21,7 +21,7 @@ Enum::DrawProcedure toDrawProcedure(const Buffer& indexBuffer, const std::map<ui
 
 RenderPass::RenderPass(sp<Shader> shader, Buffer vertexBuffer, Buffer indexBuffer, sp<Integer> drawCount, Enum::RenderMode mode, Enum::DrawProcedure drawProcedure, const std::map<uint32_t, sp<Uploader>>& dividedUploaders)
     : _shader(std::move(shader)), _index_buffer(std::move(indexBuffer)), _draw_count(std::move(drawCount)), _draw_procedure(drawProcedure),
-      _shader_bindings(_shader->makeBindings(std::move(vertexBuffer), mode, drawProcedure, dividedUploaders))
+      _pipeline_bindings(_shader->makeBindings(std::move(vertexBuffer), mode, drawProcedure, dividedUploaders))
 {
 }
 
@@ -31,17 +31,17 @@ void RenderPass::render(RenderRequest& renderRequest, const V3& /*position*/)
     if(drawCount > 0)
     {
         DrawingParams drawParam;
-        const Buffer& vertices = _shader_bindings->vertices();
+        const Buffer& vertices = _pipeline_bindings->vertices();
         if(_draw_procedure == Enum::DRAW_PROCEDURE_DRAW_INSTANCED)
         {
             std::vector<std::pair<uint32_t, Buffer::Snapshot>> dividedBufferSnapshots;
-            for(const auto& [i, j] : *_shader_bindings->streams())
+            for(const auto& [i, j] : *_pipeline_bindings->streams())
                 dividedBufferSnapshots.emplace_back(i, j.snapshot(j.size()));
             drawParam = DrawingParams::DrawElementsInstanced{0, static_cast<uint32_t>(_index_buffer.size() / sizeof(element_index_t)), std::move(dividedBufferSnapshots)};
         }
         else
             drawParam = DrawingParams::DrawElements{0};
-        DrawingContext drawingContext({_shader_bindings, _shader->takeUBOSnapshot(renderRequest), _shader->takeSSBOSnapshot(renderRequest)}, _shader_bindings->attachments(), vertices.snapshot(),
+        DrawingContext drawingContext({_pipeline_bindings, _shader->takeUBOSnapshot(renderRequest), _shader->takeSSBOSnapshot(renderRequest)}, _pipeline_bindings->attachments(), vertices.snapshot(),
                                       _index_buffer.snapshot(), drawCount, std::move(drawParam));
         renderRequest.addRenderCommand(drawingContext.toRenderCommand(renderRequest));
     }

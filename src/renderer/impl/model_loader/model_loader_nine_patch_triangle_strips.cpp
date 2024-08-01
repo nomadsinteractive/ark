@@ -3,7 +3,7 @@
 #include "renderer/base/atlas.h"
 #include "renderer/base/model.h"
 #include "renderer/base/pipeline_descriptor.h"
-#include "renderer/base/shader_bindings.h"
+#include "renderer/base/pipeline_bindings.h"
 #include "renderer/impl/render_command_composer/rcc_draw_elements.h"
 #include "renderer/util/render_util.h"
 
@@ -20,9 +20,9 @@ sp<RenderCommandComposer> ModelLoaderNinePatchTriangleStrips::makeRenderCommandC
     return sp<RCCDrawElements>::make(_unit_model);
 }
 
-void ModelLoaderNinePatchTriangleStrips::initialize(ShaderBindings& shaderBindings)
+void ModelLoaderNinePatchTriangleStrips::initialize(PipelineBindings& pipelineBindings)
 {
-    shaderBindings.pipelineDescriptor()->bindSampler(_atlas->texture());
+    pipelineBindings.pipelineDescriptor()->bindSampler(_atlas->texture());
 }
 
 sp<Model> ModelLoaderNinePatchTriangleStrips::loadModel(int32_t type)

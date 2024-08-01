@@ -9,7 +9,7 @@
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/model.h"
 #include "renderer/base/render_controller.h"
-#include "renderer/base/shader_bindings.h"
+#include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/vertex_writer.h"
 
@@ -20,7 +20,7 @@ RCCDrawQuads::RCCDrawQuads(sp<Model> model)
 {
 }
 
-sp<ShaderBindings> RCCDrawQuads::makeShaderBindings(Shader& shader, RenderController& renderController, Enum::RenderMode renderMode)
+sp<PipelineBindings> RCCDrawQuads::makeShaderBindings(Shader& shader, RenderController& renderController, Enum::RenderMode renderMode)
 {
     _strips = renderController.gba().makeStrips(shader.input()->getStreamLayout(0).stride(), _model->vertexCount());
     _indices = renderController.makeIndexBuffer();
@@ -33,7 +33,7 @@ void RCCDrawQuads::postSnapshot(RenderController& renderController, RenderLayerS
 
 sp<RenderCommand> RCCDrawQuads::compose(const RenderRequest& renderRequest, RenderLayerSnapshot& snapshot)
 {
-    DrawingBuffer buf(snapshot._stub->_shader_bindings, snapshot._stub->_stride);
+    DrawingBuffer buf(snapshot._stub->_pipeline_bindings, snapshot._stub->_stride);
     bool hasNewCreatedSnapshot = false;
 
     for(const LayerContext::ElementState& i : snapshot._item_deleted)
@@ -73,7 +73,7 @@ sp<RenderCommand> RCCDrawQuads::compose(const RenderRequest& renderRequest, Rend
         indexUploader = sp<UploaderArray<element_index_t>>::make(std::move(indices));
     }
 
-    const Buffer& vertices = snapshot._stub->_shader_bindings->vertices();
+    const Buffer& vertices = snapshot._stub->_pipeline_bindings->vertices();
     return snapshot.toRenderCommand(renderRequest, buf.vertices().toSnapshot(vertices), _indices.snapshot(indexUploader), snapshot._index_count, DrawingParams::DrawElements{0});
 }
 

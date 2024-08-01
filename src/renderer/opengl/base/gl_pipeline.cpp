@@ -12,7 +12,7 @@
 #include "renderer/base/pipeline_descriptor.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/render_controller.h"
-#include "renderer/base/shader_bindings.h"
+#include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/texture.h"
 #include "renderer/base/uniform.h"
 #include "renderer/inf/resource.h"
@@ -642,11 +642,11 @@ void GLPipeline::Stub::bind(GraphicsContext& /*graphicsContext*/, const Pipeline
 {
     glUseProgram(_id);
 
-    const ShaderBindings& shaderBindings = pipelineContext._bindings;
-    bindUBOSnapshots(pipelineContext._ubos, shaderBindings.pipelineInput());
+    const PipelineBindings& pipelineBindings = pipelineContext._bindings;
+    bindUBOSnapshots(pipelineContext._ubos, pipelineBindings.pipelineInput());
 
     uint32_t binding = 0;
-    for(const auto& [k, v] : shaderBindings.pipelineDescriptor()->samplers())
+    for(const auto& [k, v] : pipelineBindings.pipelineDescriptor()->samplers())
     {
         CHECK_WARN(v, "Pipeline has unbound sampler \"%s\"", k.c_str());
         if(v)
@@ -654,7 +654,7 @@ void GLPipeline::Stub::bind(GraphicsContext& /*graphicsContext*/, const Pipeline
         ++ binding;
     }
 
-    const std::vector<sp<Texture>>& images = shaderBindings.pipelineDescriptor()->images();
+    const std::vector<sp<Texture>>& images = pipelineBindings.pipelineDescriptor()->images();
     for(size_t i = 0; i < images.size(); ++i)
         if(const sp<Texture>& image = images.at(i))
             bindImage(image, static_cast<uint32_t>(i));

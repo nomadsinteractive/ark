@@ -16,7 +16,7 @@
 #include "renderer/base/render_controller.h"
 #include "renderer/base/render_engine_context.h"
 #include "renderer/base/shader.h"
-#include "renderer/base/shader_bindings.h"
+#include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/texture.h"
 #include "renderer/util/render_util.h"
 

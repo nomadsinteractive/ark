@@ -39,7 +39,7 @@ sp<RenderCommandComposer> ModelBundle::makeRenderCommandComposer()
     return sp<RCCMultiDrawElementsIndirect>::make(sp<ModelBundle>::make(_stub));
 }
 
-void ModelBundle::initialize(ShaderBindings& /*shaderBindings*/)
+void ModelBundle::initialize(PipelineBindings& /*pipelineBindings*/)
 {
 }
 

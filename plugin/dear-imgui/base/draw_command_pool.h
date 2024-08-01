@@ -22,7 +22,7 @@ public:
     sp<LFStack<sp<RendererImgui::DrawCommand>>> _draw_commands;
 
     sp<RenderController> _render_controller;
-    sp<ShaderBindings> _shader_bindings;
+    sp<PipelineBindings> _pipeline_bindings;
 };
 
 }

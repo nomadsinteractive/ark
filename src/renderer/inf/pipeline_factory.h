@@ -12,7 +12,7 @@ class ARK_API PipelineFactory {
 public:
     virtual ~PipelineFactory() = default;
 
-    virtual sp<Pipeline> buildPipeline(GraphicsContext& graphicsContext, const PipelineDescriptor& bindings) = 0;
+    virtual sp<Pipeline> buildPipeline(GraphicsContext& graphicsContext, const PipelineBindings& bindings) = 0;
 
 };
 

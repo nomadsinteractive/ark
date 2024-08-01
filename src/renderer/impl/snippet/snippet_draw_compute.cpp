@@ -4,7 +4,7 @@
 
 #include "renderer/base/compute_context.h"
 #include "renderer/base/shader.h"
-#include "renderer/base/shader_bindings.h"
+#include "renderer/base/pipeline_bindings.h"
 #include "renderer/inf/pipeline.h"
 
 namespace ark {
@@ -50,7 +50,7 @@ private:
 }
 
 SnippetDrawCompute::SnippetDrawCompute(sp<Shader> shader, std::array<sp<Integer>, 3> numWorkGroups, bool atPostDraw)
-    : _shader(std::move(shader)), _num_work_groups(std::move(numWorkGroups)), _shader_bindings(_shader->makeBindings(Buffer(), Enum::RENDER_MODE_NONE, Enum::DRAW_PROCEDURE_DRAW_ARRAYS)),
+    : _shader(std::move(shader)), _num_work_groups(std::move(numWorkGroups)), _pipeline_bindings(_shader->makeBindings(Buffer(), Enum::RENDER_MODE_NONE, Enum::DRAW_PROCEDURE_DRAW_ARRAYS)),
       _at_post_draw(atPostDraw)
 {
 }
@@ -62,7 +62,7 @@ sp<Snippet::DrawEvents> SnippetDrawCompute::makeDrawEvents(const RenderRequest& 
         _num_work_groups.at(1) ? _num_work_groups.at(1)->val() : 1,
         _num_work_groups.at(2) ? _num_work_groups.at(2)->val() : 1
     };
-    ComputeContext computeCtx({_shader_bindings, _shader->takeUBOSnapshot(renderRequest), _shader->takeSSBOSnapshot(renderRequest)}, std::move(numWorkGroups));
+    ComputeContext computeCtx({_pipeline_bindings, _shader->takeUBOSnapshot(renderRequest), _shader->takeSSBOSnapshot(renderRequest)}, std::move(numWorkGroups));
     return _at_post_draw ? sp<DrawEvents>::make<DrawEventsPostDrawCompute>(std::move(computeCtx)) : sp<DrawEvents>::make<DrawEventsPreDrawCompute>(std::move(computeCtx));
 }
 

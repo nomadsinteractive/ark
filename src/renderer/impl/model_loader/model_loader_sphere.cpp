@@ -8,7 +8,7 @@
 #include "renderer/base/atlas.h"
 #include "renderer/base/model.h"
 #include "renderer/base/pipeline_descriptor.h"
-#include "renderer/base/shader_bindings.h"
+#include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/texture.h"
 #include "renderer/impl/vertices/vertices_sphere.h"
 #include "renderer/impl/render_command_composer/rcc_draw_elements_instanced.h"
@@ -101,9 +101,9 @@ sp<RenderCommandComposer> ModelLoaderSphere::makeRenderCommandComposer()
     return sp<RCCDrawElementsInstanced>::make(Model(_indices, sp<VerticesSphere>::make(_vertices->size()), nullptr));
 }
 
-void ModelLoaderSphere::initialize(ShaderBindings& shaderBindings)
+void ModelLoaderSphere::initialize(PipelineBindings& pipelineBindings)
 {
-    shaderBindings.pipelineDescriptor()->bindSampler(_atlas->texture());
+    pipelineBindings.pipelineDescriptor()->bindSampler(_atlas->texture());
 }
 
 sp<Model> ModelLoaderSphere::loadModel(int32_t type)

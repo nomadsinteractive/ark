@@ -11,7 +11,7 @@ class RCCDrawElementsInstanced : public RenderCommandComposer {
 public:
     RCCDrawElementsInstanced(Model model);
 
-    virtual sp<ShaderBindings> makeShaderBindings(Shader& shader, RenderController& renderController, Enum::RenderMode renderMode) override;
+    virtual sp<PipelineBindings> makeShaderBindings(Shader& shader, RenderController& renderController, Enum::RenderMode renderMode) override;
 
     virtual void postSnapshot(RenderController& renderController, RenderLayerSnapshot& snapshot) override;
     virtual sp<RenderCommand> compose(const RenderRequest& renderRequest, RenderLayerSnapshot& snapshot) override;

@@ -33,7 +33,7 @@ public:
 
 private:
     sp<RenderController> _render_controller;
-    sp<ShaderBindings> _shader_bindings;
+    sp<PipelineBindings> _pipeline_bindings;
     sp<Texture> _texture;
     sp<Size> _size;
 

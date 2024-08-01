@@ -10,7 +10,7 @@ namespace ark::gles30 {
 
 class GLVertexArray final : public Resource {
 public:
-    GLVertexArray(sp<opengl::GLPipeline> pipeline, sp<Buffer::Delegate> vertices, const ShaderBindings& shaderBindings);
+    GLVertexArray(sp<opengl::GLPipeline> pipeline, sp<Buffer::Delegate> vertices, const PipelineBindings& pipelineBindings);
 
     uint64_t id() override;
     void upload(GraphicsContext& graphicsContext) override;

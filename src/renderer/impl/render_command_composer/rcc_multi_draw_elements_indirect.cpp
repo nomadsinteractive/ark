@@ -13,7 +13,7 @@
 #include "renderer/base/node.h"
 #include "renderer/base/pipeline_input.h"
 #include "renderer/base/render_controller.h"
-#include "renderer/base/shader_bindings.h"
+#include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/vertex_writer.h"
 #include "renderer/inf/model_loader.h"
@@ -88,7 +88,7 @@ RCCMultiDrawElementsIndirect::RCCMultiDrawElementsIndirect(sp<ModelBundle> multi
 {
 }
 
-sp<ShaderBindings> RCCMultiDrawElementsIndirect::makeShaderBindings(Shader& shader, RenderController& renderController, Enum::RenderMode renderMode)
+sp<PipelineBindings> RCCMultiDrawElementsIndirect::makeShaderBindings(Shader& shader, RenderController& renderController, Enum::RenderMode renderMode)
 {
     _indices = renderController.makeIndexBuffer(Buffer::USAGE_STATIC, sp<IndicesUploader>::make(_model_bundle));
     _draw_indirect = renderController.makeBuffer(Buffer::TYPE_DRAW_INDIRECT, Buffer::USAGE_DYNAMIC, nullptr);
@@ -101,8 +101,8 @@ void RCCMultiDrawElementsIndirect::postSnapshot(RenderController& /*renderContro
 
 sp<RenderCommand> RCCMultiDrawElementsIndirect::compose(const RenderRequest& renderRequest, RenderLayerSnapshot& snapshot)
 {
-    DrawingBuffer buf(snapshot._stub->_shader_bindings, snapshot._stub->_stride);
-    const Buffer& vertices = snapshot._stub->_shader_bindings->vertices();
+    DrawingBuffer buf(snapshot._stub->_pipeline_bindings, snapshot._stub->_stride);
+    const Buffer& vertices = snapshot._stub->_pipeline_bindings->vertices();
     bool reload = snapshot.needsReload();
 
     if(reload)
@@ -154,7 +154,7 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
     }
 
     size_t instanceId = 0;
-    const PipelineInput::AttributeOffsets& attributeOffsets = buf.shaderBindings()->pipelineDescriptor()->attributes();
+    const PipelineInput::AttributeOffsets& attributeOffsets = buf.pipelineBindings()->pipelineDescriptor()->attributes();
     const size_t attributeStride = attributeOffsets.stride();
     const bool hasModelMatrix = attributeOffsets._offsets[PipelineInput::ATTRIBUTE_NAME_MODEL_MATRIX] != -1;
     const bool hasMaterialId = attributeOffsets._offsets[PipelineInput::ATTRIBUTE_NAME_MATERIAL_ID] != -1;

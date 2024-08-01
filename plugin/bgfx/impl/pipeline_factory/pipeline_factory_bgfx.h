@@ -6,7 +6,7 @@ namespace ark::plugin::bgfx {
 
 class PipelineFactoryBgfx final : public PipelineFactory {
 public:
-    sp<Pipeline> buildPipeline(GraphicsContext& graphicsContext, const PipelineDescriptor& bindings) override;
+    sp<Pipeline> buildPipeline(GraphicsContext& graphicsContext, const PipelineBindings& bindings) override;
 };
 
 }

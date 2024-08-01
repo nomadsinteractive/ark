@@ -6,7 +6,7 @@
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/pipeline_input.h"
 #include "renderer/base/pipeline_layout.h"
-#include "renderer/base/shader_bindings.h"
+#include "renderer/base/pipeline_bindings.h"
 #include "renderer/inf/pipeline.h"
 #include "renderer/inf/pipeline_factory.h"
 #include "renderer/inf/snippet.h"

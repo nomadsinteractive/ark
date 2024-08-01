@@ -12,7 +12,6 @@ public:
         : U(std::forward<Args>(args)...) {
     }
 
-
     uint64_t id() override
     {
         return _handle.idx;
@@ -25,6 +24,11 @@ public:
         return [handle](GraphicsContext& context) {
             ::bgfx::destroy(handle);
         };
+    }
+
+    T handle() const
+    {
+        return _handle;
     }
 
 protected:

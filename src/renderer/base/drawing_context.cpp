@@ -4,7 +4,7 @@
 #include "graphics/inf/render_command.h"
 
 #include "renderer/base/shader.h"
-#include "renderer/base/shader_bindings.h"
+#include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/snippet_delegate.h"
 #include "renderer/inf/pipeline.h"
 

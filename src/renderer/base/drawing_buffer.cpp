@@ -6,14 +6,14 @@
 
 #include "renderer/base/pipeline_descriptor.h"
 #include "renderer/base/resource_loader_context.h"
-#include "renderer/base/shader_bindings.h"
+#include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/vertex_writer.h"
 
 namespace ark {
 
-DrawingBuffer::DrawingBuffer(sp<ShaderBindings> shaderBindings, uint32_t stride)
-    : _shader_bindings(std::move(shaderBindings)), _pipeline_descriptor(_shader_bindings->pipelineDescriptor()), _vertices(stride),
-      _divided_buffer_builders(_shader_bindings->makeDividedBufferFactories()),
+DrawingBuffer::DrawingBuffer(sp<PipelineBindings> pipelineBindings, uint32_t stride)
+    : _pipeline_bindings(std::move(pipelineBindings)), _pipeline_descriptor(_pipeline_bindings->pipelineDescriptor()), _vertices(stride),
+      _divided_buffer_builders(_pipeline_bindings->makeDividedBufferFactories()),
       _is_instanced(_pipeline_descriptor->hasDivisors())
 {
 }
@@ -36,9 +36,9 @@ VertexWriter DrawingBuffer::makeDividedVertexWriter(const RenderRequest& renderR
     return VertexWriter(_pipeline_descriptor->attributes(), !_is_instanced, content.buf(), size, builder._stride);
 }
 
-const sp<ShaderBindings>& DrawingBuffer::shaderBindings() const
+const sp<PipelineBindings>& DrawingBuffer::pipelineBindings() const
 {
-    return _shader_bindings;
+    return _pipeline_bindings;
 }
 
 const Buffer::Factory& DrawingBuffer::vertices() const
@@ -76,9 +76,9 @@ Buffer::Factory& DrawingBuffer::getDividedBufferBuilder(uint32_t divisor)
 std::vector<std::pair<uint32_t, Buffer::Snapshot>> DrawingBuffer::toDividedBufferSnapshots()
 {
     std::vector<std::pair<uint32_t, Buffer::Snapshot>> snapshots;
-    DCHECK(_divided_buffer_builders.size() == _shader_bindings->streams()->size(), "Instanced buffer size mismatch: %d, %d", _divided_buffer_builders.size(), _shader_bindings->streams()->size());
+    DCHECK(_divided_buffer_builders.size() == _pipeline_bindings->streams()->size(), "Instanced buffer size mismatch: %d, %d", _divided_buffer_builders.size(), _pipeline_bindings->streams()->size());
 
-    for(const auto& [i, j] : *(_shader_bindings->streams()))
+    for(const auto& [i, j] : *(_pipeline_bindings->streams()))
         snapshots.emplace_back(i, _divided_buffer_builders.at(i).toSnapshot(j));
 
     _divided_buffer_builders.clear();

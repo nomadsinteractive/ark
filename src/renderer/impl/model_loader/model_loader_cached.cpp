@@ -14,9 +14,9 @@ sp<RenderCommandComposer> ModelLoaderCached::makeRenderCommandComposer()
     return _delegate->makeRenderCommandComposer();
 }
 
-void ModelLoaderCached::initialize(ShaderBindings& shaderBindings)
+void ModelLoaderCached::initialize(PipelineBindings& pipelineBindings)
 {
-    _delegate->initialize(shaderBindings);
+    _delegate->initialize(pipelineBindings);
 }
 
 sp<Model> ModelLoaderCached::loadModel(int32_t type)

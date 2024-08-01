@@ -44,7 +44,7 @@ private:
     Buffer _index_buffer;
     sp<Integer> _draw_count;
     Enum::DrawProcedure _draw_procedure;
-    sp<ShaderBindings> _shader_bindings;
+    sp<PipelineBindings> _pipeline_bindings;
 };
 
 }

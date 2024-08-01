@@ -7,7 +7,7 @@
 #include "renderer/base/model.h"
 #include "renderer/base/render_controller.h"
 #include "renderer/base/render_engine.h"
-#include "renderer/base/shader_bindings.h"
+#include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/vertex_writer.h"
 
@@ -18,7 +18,7 @@ RCCDrawElements::RCCDrawElements(sp<Model> model)
 {
 }
 
-sp<ShaderBindings> RCCDrawElements::makeShaderBindings(Shader& shader, RenderController& renderController, Enum::RenderMode renderMode)
+sp<PipelineBindings> RCCDrawElements::makeShaderBindings(Shader& shader, RenderController& renderController, Enum::RenderMode renderMode)
 {
     _primitive_index_buffer = renderController.getSharedPrimitiveIndexBuffer(_model, renderMode == Enum::RENDER_MODE_TRIANGLE_STRIP);
     return shader.makeBindings(renderController.makeVertexBuffer(), renderMode, Enum::DRAW_PROCEDURE_DRAW_ELEMENTS);
@@ -32,9 +32,9 @@ void RCCDrawElements::postSnapshot(RenderController& renderController, RenderLay
 sp<RenderCommand> RCCDrawElements::compose(const RenderRequest& renderRequest, RenderLayerSnapshot& snapshot)
 {
     const size_t verticesCount = _model->vertexCount();
-    const Buffer& vertices = snapshot._stub->_shader_bindings->vertices();
+    const Buffer& vertices = snapshot._stub->_pipeline_bindings->vertices();
 
-    DrawingBuffer buf(snapshot._stub->_shader_bindings, snapshot._stub->_stride);
+    DrawingBuffer buf(snapshot._stub->_pipeline_bindings, snapshot._stub->_stride);
     buf.setIndices(snapshot._index_buffer);
 
     if(snapshot.needsReload())
@@ -57,7 +57,7 @@ sp<RenderCommand> RCCDrawElements::compose(const RenderRequest& renderRequest, R
         }
     }
 
-    DrawingContext drawingContext({snapshot._stub->_shader_bindings, std::move(snapshot._ubos), std::move(snapshot._ssbos)}, snapshot._stub->_shader_bindings->attachments(),
+    DrawingContext drawingContext({snapshot._stub->_pipeline_bindings, std::move(snapshot._ubos), std::move(snapshot._ssbos)}, snapshot._stub->_pipeline_bindings->attachments(),
                                   buf.vertices().toSnapshot(vertices), buf.indices(), static_cast<uint32_t>(buf.indices().length<element_index_t>()), DrawingParams::DrawElements{0});
 
     if(snapshot._stub->_scissor)

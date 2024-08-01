@@ -3,7 +3,7 @@
 #include "core/util/log.h"
 
 #include "renderer/base/pipeline_descriptor.h"
-#include "renderer/base/shader_bindings.h"
+#include "renderer/base/pipeline_bindings.h"
 #include "renderer/inf/pipeline_factory.h"
 
 #include "platform/gl/gl.h"
@@ -11,8 +11,8 @@
 namespace ark {
 namespace gles30 {
 
-GLVertexArray::GLVertexArray(sp<opengl::GLPipeline> pipeline, sp<Buffer::Delegate> vertices, const ShaderBindings& shaderBindings)
-    : _pipeline(std::move(pipeline)), _vertex(std::move(vertices)), _pipeline_descriptor(shaderBindings.pipelineDescriptor()), _divisors(shaderBindings.streams()), _id(0)
+GLVertexArray::GLVertexArray(sp<opengl::GLPipeline> pipeline, sp<Buffer::Delegate> vertices, const PipelineBindings& pipelineBindings)
+    : _pipeline(std::move(pipeline)), _vertex(std::move(vertices)), _pipeline_descriptor(pipelineBindings.pipelineDescriptor()), _divisors(pipelineBindings.streams()), _id(0)
 {
 }
 

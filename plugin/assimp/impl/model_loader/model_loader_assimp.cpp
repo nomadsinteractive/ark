@@ -25,7 +25,7 @@
 #include "renderer/base/render_engine.h"
 #include "renderer/base/render_engine_context.h"
 #include "renderer/base/resource_loader_context.h"
-#include "renderer/base/shader_bindings.h"
+#include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/uniform.h"
 #include "renderer/impl/render_command_composer/rcc_multi_draw_elements_indirect.h"

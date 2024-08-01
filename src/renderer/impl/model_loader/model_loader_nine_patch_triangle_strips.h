@@ -14,7 +14,7 @@ public:
     ModelLoaderNinePatchTriangleStrips(sp<Atlas> atlas);
 
     sp<RenderCommandComposer> makeRenderCommandComposer() override;
-    void initialize(ShaderBindings& shaderBindings) override;
+    void initialize(PipelineBindings& pipelineBindings) override;
     sp<Model> loadModel(int32_t type) override;
 
 //  [[plugin::builder::by-value("nine-patch-triangle-strips")]]

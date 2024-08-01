@@ -11,7 +11,7 @@
 #include "renderer/base/pipeline_input.h"
 #include "renderer/base/render_engine_context.h"
 #include "renderer/base/recycler.h"
-#include "renderer/base/shader_bindings.h"
+#include "renderer/base/pipeline_bindings.h"
 #include "renderer/util/render_util.h"
 
 #include "renderer/vulkan/base/vk_buffer.h"

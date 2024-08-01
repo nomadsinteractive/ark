@@ -12,7 +12,7 @@
 #include "renderer/base/pipeline_descriptor.h"
 #include "renderer/base/render_controller.h"
 #include "renderer/base/shader.h"
-#include "renderer/base/shader_bindings.h"
+#include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/snippet_delegate.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/base/render_engine.h"
@@ -22,15 +22,15 @@
 namespace ark {
 
 Skybox::Skybox(const sp<Size>& size, const sp<Shader>& shader, const sp<Texture>& texture, RenderController& renderController)
-    : _size(size), _shader(shader), _shader_bindings(shader->makeBindings(renderController.makeVertexBuffer(Buffer::USAGE_STATIC, UploaderType::create(makeUnitCubeVertices(renderController))), Enum::RENDER_MODE_TRIANGLES, Enum::DRAW_PROCEDURE_DRAW_ELEMENTS)),
+    : _size(size), _shader(shader), _pipeline_bindings(shader->makeBindings(renderController.makeVertexBuffer(Buffer::USAGE_STATIC, UploaderType::create(makeUnitCubeVertices(renderController))), Enum::RENDER_MODE_TRIANGLES, Enum::DRAW_PROCEDURE_DRAW_ELEMENTS)),
       _ib_snapshot(renderController.getSharedPrimitiveIndexBuffer(Global<Constants>()->MODEL_UNIT_QUAD, false)->snapshot(renderController, 6))
 {
-    _shader_bindings->pipelineDescriptor()->bindSampler(texture);
+    _pipeline_bindings->pipelineDescriptor()->bindSampler(texture);
 }
 
 void Skybox::render(RenderRequest& renderRequest, const V3& /*position*/)
 {
-    DrawingContext drawingContext({_shader_bindings, _shader->takeUBOSnapshot(renderRequest), _shader->takeSSBOSnapshot(renderRequest)}, _shader_bindings->attachments(), _shader_bindings->vertices().snapshot(),
+    DrawingContext drawingContext({_pipeline_bindings, _shader->takeUBOSnapshot(renderRequest), _shader->takeSSBOSnapshot(renderRequest)}, _pipeline_bindings->attachments(), _pipeline_bindings->vertices().snapshot(),
                                   _ib_snapshot, 36, DrawingParams::DrawElements{0});
     renderRequest.addRenderCommand(drawingContext.toRenderCommand(renderRequest));
 }

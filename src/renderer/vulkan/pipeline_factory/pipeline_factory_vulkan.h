@@ -8,11 +8,11 @@
 
 namespace ark::vulkan {
 
-class PipelineFactoryVulkan : public PipelineFactory {
+class PipelineFactoryVulkan final : public PipelineFactory {
 public:
     PipelineFactoryVulkan(const sp<Recycler>& recycler, const sp<VKRenderer>& renderFactory);
 
-    virtual sp<Pipeline> buildPipeline(GraphicsContext& graphicsContext, const PipelineDescriptor& bindings) override;
+    sp<Pipeline> buildPipeline(GraphicsContext& graphicsContext, const PipelineBindings& bindings) override;
 
 private:
     sp<Recycler> _recycler;

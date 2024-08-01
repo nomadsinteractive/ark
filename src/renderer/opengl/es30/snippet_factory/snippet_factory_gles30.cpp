@@ -8,7 +8,7 @@
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/pipeline_building_context.h"
 #include "renderer/base/render_controller.h"
-#include "renderer/base/shader_bindings.h"
+#include "renderer/base/pipeline_bindings.h"
 
 #include "renderer/opengl/es30/gl_resource/gl_vertex_array.h"
 

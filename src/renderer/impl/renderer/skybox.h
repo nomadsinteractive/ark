@@ -41,7 +41,7 @@ private:
 private:
     SafePtr<Size> _size;
     sp<Shader> _shader;
-    sp<ShaderBindings> _shader_bindings;
+    sp<PipelineBindings> _pipeline_bindings;
     Buffer::Snapshot _ib_snapshot;
 };
 

@@ -204,7 +204,6 @@ private:
         std::vector<sp<Texture>> _images;
     };
 
-private:
     sp<Stub> _stub;
 };
 

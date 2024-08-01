@@ -26,7 +26,7 @@ public:
     virtual sp<Model> loadModel(int32_t type) = 0;
     [[nodiscard]]
     virtual sp<RenderCommandComposer> makeRenderCommandComposer() = 0;
-    virtual void initialize(ShaderBindings& shaderBindings) = 0;
+    virtual void initialize(PipelineBindings& pipelineBindings) = 0;
 
     class ARK_API Importer {
     public:
