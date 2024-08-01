@@ -24,11 +24,11 @@ class StaticVertexBuffer final : public ResourceBase<::bgfx::VertexBufferHandle,
 public:
     void upload(GraphicsContext& graphicsContext) override
     {
-        if(::bgfx::isValid(_handle))
-            ::bgfx::destroy(_handle);
+        if(_handle)
+            _handle.destroy();
 
         DASSERT(_size <= _data.size());
-        _handle = ::bgfx::createVertexBuffer(::bgfx::makeRef(_data.data(), _size), _vertex_buffer_layout);
+        _handle.reset(::bgfx::createVertexBuffer(::bgfx::makeRef(_data.data(), _size), _vertex_buffer_layout));
     }
 
     void uploadBuffer(GraphicsContext& graphicsContext, Uploader& input) override
@@ -53,8 +53,8 @@ class DynamicVertexBuffer final : public ResourceBase<::bgfx::DynamicVertexBuffe
 public:
     void upload(GraphicsContext& graphicsContext) override
     {
-        if(!::bgfx::isValid(_handle))
-            _handle = ::bgfx::createDynamicVertexBuffer(_size, _vertex_buffer_layout);
+        if(!_handle)
+            _handle.reset(::bgfx::createDynamicVertexBuffer(_size, _vertex_buffer_layout));
 
         DASSERT(_size <= _data.size());
         ::bgfx::update(_handle, 0, ::bgfx::makeRef(_data.data(), _size));
@@ -81,11 +81,11 @@ class StaticIndexBuffer final : public ResourceBase<::bgfx::IndexBufferHandle, B
 public:
     void upload(GraphicsContext& graphicsContext) override
     {
-        if(::bgfx::isValid(_handle))
-            ::bgfx::destroy(_handle);
+        if(_handle)
+            _handle.destroy();
 
         DASSERT(_size <= _indices.size());
-        _handle = ::bgfx::createIndexBuffer(::bgfx::makeRef(_indices.data(), _size));
+        _handle.reset(::bgfx::createIndexBuffer(::bgfx::makeRef(_indices.data(), _size)));
     }
 
     void uploadBuffer(GraphicsContext& graphicsContext, Uploader& input) override
@@ -109,8 +109,8 @@ class DynamicIndexBuffer final : public ResourceBase<::bgfx::DynamicIndexBufferH
 public:
     void upload(GraphicsContext& graphicsContext) override
     {
-        if(!::bgfx::isValid(_handle))
-            _handle = ::bgfx::createDynamicIndexBuffer(_size);
+        if(!_handle)
+            _handle.reset(::bgfx::createDynamicIndexBuffer(_size));
 
         DASSERT(_size <= _indices.size());
         ::bgfx::update(_handle, 0, ::bgfx::makeRef(_indices.data(), _size));
@@ -132,6 +132,37 @@ private:
     std::vector<uint8_t> _indices;
 };
 
+class IndirectBuffer final : public ResourceBase<::bgfx::IndirectBufferHandle, Buffer::Delegate> {
+public:
+    void upload(GraphicsContext& graphicsContext) override
+    {
+        if(!_handle)
+            _handle.reset(::bgfx::createIndirectBuffer(_size));
+
+        DASSERT(_size <= _indices.size());
+    }
+
+    void uploadBuffer(GraphicsContext& graphicsContext, Uploader& input) override
+    {
+        _indices = UploaderType::toBytes(input);
+        _size = _indices.size();
+        upload(graphicsContext);
+    }
+
+    void downloadBuffer(GraphicsContext& graphicsContext, size_t offset, size_t size, void* ptr) override
+    {
+        FATAL("Unimplemented");
+    }
+
+private:
+    std::vector<uint8_t> _indices;
+};
+
+}
+
+RendererFactoryBgfx::RendererFactoryBgfx()
+    : RendererFactory(Ark::COORDINATE_SYSTEM_RHS)
+{
 }
 
 void RendererFactoryBgfx::onSurfaceCreated(RenderEngine& renderEngine)
@@ -161,11 +192,20 @@ sp<RenderEngineContext> RendererFactoryBgfx::createRenderEngineContext(Ark::Rend
 
 sp<Buffer::Delegate> RendererFactoryBgfx::createBuffer(Buffer::Type type, Buffer::Usage usage)
 {
-    if(type == Buffer::TYPE_VERTEX)
-        return usage == Buffer::USAGE_STATIC ? sp<Buffer::Delegate>::make<StaticVertexBuffer>() : sp<Buffer::Delegate>::make<DynamicVertexBuffer>();
-    if(type == Buffer::TYPE_INDEX)
-        return usage == Buffer::USAGE_STATIC ? sp<Buffer::Delegate>::make<StaticIndexBuffer>() : sp<Buffer::Delegate>::make<DynamicIndexBuffer>();
-    FATAL("Unknow buffer type: %d", type);
+    switch(type)
+    {
+        case Buffer::TYPE_VERTEX:
+            return usage == Buffer::USAGE_STATIC ? sp<Buffer::Delegate>::make<StaticVertexBuffer>() : sp<Buffer::Delegate>::make<DynamicVertexBuffer>();
+        case Buffer::TYPE_INDEX:
+            return usage == Buffer::USAGE_STATIC ? sp<Buffer::Delegate>::make<StaticIndexBuffer>() : sp<Buffer::Delegate>::make<DynamicIndexBuffer>();
+        case Buffer::TYPE_DRAW_INDIRECT:
+            return sp<Buffer::Delegate>::make<DynamicVertexBuffer>();
+        case Buffer::TYPE_STORAGE:
+            return sp<Buffer::Delegate>::make<DynamicVertexBuffer>();
+        default:
+            FATAL("Unknow buffer type: %d", type);
+            break;
+    }
     return nullptr;
 }
 
@@ -196,6 +236,11 @@ sp<Texture::Delegate> RendererFactoryBgfx::createTexture(sp<Size> size, sp<Textu
     if(parameters->_type == Texture::TYPE_2D || parameters->_type == Texture::TYPE_CUBEMAP)
         return sp<Texture::Delegate>::make<TextureBgfx>(parameters->_type, static_cast<uint32_t>(size->widthAsFloat()), static_cast<uint32_t>(size->heightAsFloat()), std::move(parameters));
     return nullptr;
+}
+
+sp<RendererFactory> RendererFactoryBgfx::BUILDER::build(const Scope& args)
+{
+    return sp<RendererFactory>::make<RendererFactoryBgfx>();
 }
 
 }

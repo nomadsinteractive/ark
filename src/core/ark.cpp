@@ -146,8 +146,11 @@ void loadPlugins(const ApplicationManifest& manifest)
         pluginManager->load(i);
 }
 
-sp<RenderEngine> createRenderEngine(const ApplicationManifest::Renderer& renderer, const sp<ApplicationBundle>& applicationBundle)
+sp<RenderEngine> createRenderEngine(BeanFactory& beanFactory, const ApplicationManifest::Renderer& renderer, const sp<ApplicationBundle>& applicationBundle)
 {
+    if(renderer._class)
+        return sp<RenderEngine>::make(renderer, beanFactory.ensure<RendererFactory>(renderer._class, Scope()));
+
     if(renderer._version != Ark::RENDERER_VERSION_AUTO)
         return doCreateRenderEngine(renderer, applicationBundle);
 
@@ -300,7 +303,7 @@ void Ark::initialize(sp<ApplicationManifest> manifest)
     sp<BeanFactory> factory = createBeanFactory(sp<DictionaryImpl<document>>::make());
     _asset_bundle = sp<ArkAssetBundle>::make(AssetBundleType::createBuiltInAssetBundle(_manifest->assetDir(), _manifest->appDir()), factory, _manifest->assets());
     sp<ApplicationBundle> applicationBundle = sp<ApplicationBundle>::make(_asset_bundle->getAssetBundle("/"));
-    sp<RenderEngine> renderEngine = createRenderEngine(_manifest->renderer(), applicationBundle);
+    sp<RenderEngine> renderEngine = createRenderEngine(factory, _manifest->renderer(), applicationBundle);
     _application_context = createApplicationContext(_manifest, std::move(applicationBundle), std::move(renderEngine));
 }
 

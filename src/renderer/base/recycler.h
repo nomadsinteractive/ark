@@ -1,12 +1,9 @@
-#ifndef ARK_RENDERER_BASE_RECYCLER_H_
-#define ARK_RENDERER_BASE_RECYCLER_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/concurrent/lf_stack.h"
-#include "core/types/shared_ptr.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/inf/resource.h"
 
 namespace ark {
 
@@ -27,5 +24,3 @@ private:
 };
 
 }
-
-#endif

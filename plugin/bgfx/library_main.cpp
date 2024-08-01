@@ -8,9 +8,9 @@
 using namespace ark;
 using namespace ark::plugin::bgfx;
 
-extern "C" ARK_API Plugin* __ark_yoga_initialize__(Ark&);
+extern "C" ARK_API Plugin* __ark_bgfx_initialize__(Ark&);
 
-Plugin* __ark_yoga_initialize__(Ark& /*ark*/)
+Plugin* __ark_bgfx_initialize__(Ark& /*ark*/)
 {
     return new BgfxPlugin();
 }

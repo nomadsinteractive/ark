@@ -101,21 +101,20 @@ private:
             fragment->_size = size;
             fragment->_state = FRAGMENT_STATE_ALLOCATED;
             return fragment;
-        } else {
-            const auto prev = iter != _fragments.begin() ? std::prev(iter) : _fragments.end();
-            if(prev == _fragments.end() || prev->second->_state != FRAGMENT_STATE_UNUSED) {
-                fragment->_size = position;
-            }
-            else {
-                const sp<Fragment>& prevFragment = prev->second;
-                fragment->_size = position + prevFragment->_size;
-                fragment->_offset = prevFragment->_offset;
-                _fragments.erase(prev);
-                _fragments[fragment->_offset] = fragment;
-            }
-            ensureFragmentQueue(fragment->_size).push(fragment);
-            return addFragment(FRAGMENT_STATE_ALLOCATED, fragment->_offset + position, size);
         }
+        const auto prev = iter != _fragments.begin() ? std::prev(iter) : _fragments.end();
+        if(prev == _fragments.end() || prev->second->_state != FRAGMENT_STATE_UNUSED) {
+            fragment->_size = position;
+        }
+        else {
+            const sp<Fragment>& prevFragment = prev->second;
+            fragment->_size = position + prevFragment->_size;
+            fragment->_offset = prevFragment->_offset;
+            _fragments.erase(prev);
+            _fragments[fragment->_offset] = fragment;
+        }
+        ensureFragmentQueue(fragment->_size).push(fragment);
+        return addFragment(FRAGMENT_STATE_ALLOCATED, fragment->_offset + position, size);
     }
 
     sp<Fragment> doAllocate(SizeType size, SizeType alignment) {
@@ -199,30 +198,30 @@ private:
         return *fragementQueue;
     }
 
-    class StrategyDefault : public Strategy {
+    class StrategyDefault final : public Strategy {
     public:
-        virtual Optional<Fragment> allocate(Heap& heap, SizeType size, SizeType alignment) {
+        Optional<Fragment> allocate(Heap& heap, SizeType size, SizeType alignment) override {
             sp<Fragment> fragment = heap.doAllocate(align(size, alignment), alignment);
             return fragment ? Optional<Fragment>(*fragment) : Optional<Fragment>();
         }
 
-        virtual Optional<SizeType> free(Heap& heap, SizeType offset) {
+        Optional<SizeType> free(Heap& heap, SizeType offset) override {
             return heap.doFree(offset);
         }
 
-        virtual void dispose(Heap& /*heap*/) {
+        void dispose(Heap& /*heap*/) override {
         }
     };
 
 public:
 
-    class StrategyFixSize : public Strategy {
+    class StrategyFixSize final : public Strategy {
     public:
         StrategyFixSize(SizeType sizeRequired)
             : _size_required(sizeRequired), _allocation_units(32), _allocation_units_max(_allocation_units << 4) {
         }
 
-        virtual Optional<Fragment> allocate(Heap& heap, SizeType size, SizeType alignment) {
+        Optional<Fragment> allocate(Heap& heap, SizeType size, SizeType alignment) override {
             if(size != _size_required)
                 return Optional<Fragment>();
 
@@ -244,7 +243,7 @@ public:
             return Fragment(FRAGMENT_STATE_ALLOCATED, offset, _size_required);
         }
 
-        virtual Optional<SizeType> free(Heap& /*heap*/, SizeType offset) {
+        Optional<SizeType> free(Heap& /*heap*/, SizeType offset) override {
             const auto iter = _allocated.find(offset);
             if(iter != _allocated.end()) {
                 _allocated.erase(iter);
@@ -254,7 +253,7 @@ public:
             return Optional<SizeType>();
         }
 
-        virtual void dispose(Heap& heap) {
+        void dispose(Heap& heap) override {
             for(const Fragment& i : _fragments)
                 heap.doFree(i._offset);
             _allocated.clear();

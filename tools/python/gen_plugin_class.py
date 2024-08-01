@@ -319,17 +319,18 @@ def main():
         file_dir, file_path = os.path.split(output_file)
     plugin_name = config['plugin_name'] if 'plugin_name' in config else acg.to_camel_name(file_path.split('_'))
     ark_namespace = 'ark::' if 'ark' not in config['namespace'] else ''
+    ns = ark_namespace
 
     ref_builder = generate_method_def('refBuilder', result, REF_BUILDER_TEMPLATE, plugin_name=plugin_name)
-    ref_builder_declare = acg.format('virtual ${ns}BeanFactory::Factory createBeanFactory(const ${ns}BeanFactory& beanFactory, const ${ns}sp<${ns}Dictionary<${ns}document>>& documentById) override;', ns=ark_namespace) if ref_builder else ''
+    ref_builder_declare = f'{ns}BeanFactory::Factory createBeanFactory(const {ns}BeanFactory& beanFactory, const {ns}sp<{ns}Dictionary<{ns}document>>& documentById) override;' if ref_builder else ''
 
     res_builder = generate_method_def('resBuilder', result, RES_BUILDER_TEMPLATE, plugin_name=plugin_name)
-    res_builder_declare = acg.format('virtual ${ns}BeanFactory::Factory createResourceLoader(const ${ns}BeanFactory& beanFactory, const ${ns}sp<${ns}Dictionary<${ns}document>>& documentById, const ${ns}sp<${ns}ResourceLoaderContext>& resourceLoaderContext) override;', ns=ark_namespace) if res_builder else ''
+    res_builder_declare = f'{ns}BeanFactory::Factory createResourceLoader(const {ns}BeanFactory& beanFactory, const {ns}sp<{ns}Dictionary<{ns}document>>& documentById, const {ns}sp<{ns}ResourceLoaderContext>& resourceLoaderContext) override;' if res_builder else ''
 
     func_builder = generate_method_def('func', result, FUNC_BUILDER_TEMPLATE, plugin_name=plugin_name)
-    function_declare = acg.format('virtual ${ns}Library createLibrary() override;', ns=ark_namespace) if func_builder else ''
+    function_declare = f'{ns}Library createLibrary() override;' if func_builder else ''
 
-    classdeclare = acg.format('''class ${plugin_name} : public ${ns}Plugin {
+    classdeclare = acg.format('''class ${plugin_name} final : public ${ns}Plugin {
 public:
     ${plugin_name}(${plugin_arguments});
 

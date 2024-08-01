@@ -4,8 +4,9 @@
 
 namespace ark::plugin::bgfx {
 
-class RendererFactoryBgfx : public RendererFactory {
+class RendererFactoryBgfx final : public RendererFactory {
 public:
+    RendererFactoryBgfx();
 
     void onSurfaceCreated(RenderEngine& renderEngine) override;
 
@@ -16,6 +17,14 @@ public:
     sp<PipelineFactory> createPipelineFactory() override;
     sp<RenderView> createRenderView(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController) override;
     sp<Texture::Delegate> createTexture(sp<Size> size, sp<Texture::Parameters> parameters) override;
+
+//  [[plugin::builder::by-value("bgfx")]]
+    class BUILDER final : public Builder<RendererFactory> {
+    public:
+        BUILDER() = default;
+
+        sp<RendererFactory> build(const Scope& args) override;
+    };
 
 };
 

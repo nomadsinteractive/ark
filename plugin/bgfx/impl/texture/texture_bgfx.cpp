@@ -107,7 +107,7 @@ void TextureBgfx::upload(GraphicsContext& graphicsContext, const sp<Texture::Upl
 {
     if(uploader)
     {
-        if(::bgfx::isValid(_handle))
+        if(_handle)
             uploader->update(graphicsContext, *this);
         else
             uploader->initialize(graphicsContext, *this);
@@ -115,11 +115,11 @@ void TextureBgfx::upload(GraphicsContext& graphicsContext, const sp<Texture::Upl
     else
     {
         const bool hasMips = _parameters->_features & Texture::FEATURE_MIPMAPS;
-        if(!::bgfx::isValid(_handle))
+        if(!_handle)
         {
             const uint32_t channelSize = getChannelSize(_parameters->_format);
             const uint32_t componentSize = getComponentSize(_parameters->_format);
-            _handle = ::bgfx::createTexture2D(_width, _height, hasMips, 1, getTextureInternalFormat(_parameters->_usage, _parameters->_format, channelSize, componentSize));
+            _handle.reset(::bgfx::createTexture2D(_width, _height, hasMips, 1, getTextureInternalFormat(_parameters->_usage, _parameters->_format, channelSize, componentSize)));
         }
     }
 }

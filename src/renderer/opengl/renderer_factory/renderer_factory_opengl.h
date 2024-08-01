@@ -10,7 +10,7 @@ namespace ark::opengl {
 
 class RendererFactoryOpenGL final : public RendererFactory {
 public:
-    RendererFactoryOpenGL(const sp<Recycler>& recycler);
+    RendererFactoryOpenGL(sp<Recycler> recycler);
 
     void onSurfaceCreated(RenderEngine& renderEngine) override;
 

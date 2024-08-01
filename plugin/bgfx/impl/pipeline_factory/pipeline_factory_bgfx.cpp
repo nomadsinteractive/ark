@@ -9,10 +9,9 @@
 #include "renderer/inf/pipeline.h"
 
 #include "bgfx/base/bgfx_context.h"
+#include "bgfx/base/handle.h"
 #include "bgfx/base/resource_base.h"
 #include "bgfx/impl/texture/texture_bgfx.h"
-
-
 
 namespace ark::plugin::bgfx {
 
@@ -26,11 +25,11 @@ public:
 
     void upload(GraphicsContext& graphicsContext) override
     {
-        if(!::bgfx::isValid(_handle))
+        if(!_handle)
         {
             const auto vHandle = ::bgfx::createShader(::bgfx::makeRef(_vertex_shader.c_str(), _vertex_shader.size()));
             const auto fHandle = ::bgfx::createShader(::bgfx::makeRef(_fragment_shader.c_str(), _fragment_shader.size()));
-            _handle = ::bgfx::createProgram(vHandle, fHandle, true);
+            _handle.reset(::bgfx::createProgram(vHandle, fHandle, true));
         }
     }
 
@@ -58,7 +57,7 @@ public:
 
 private:
     struct SamplerSlot {
-        ::bgfx::UniformHandle _uniform;
+        Handle<::bgfx::UniformHandle> _uniform;
         sp<TextureBgfx> _texture;
         uint8_t _stage;
     };
@@ -78,10 +77,10 @@ public:
 
     void upload(GraphicsContext& graphicsContext) override
     {
-        if(!::bgfx::isValid(_handle))
+        if(!_handle)
         {
             const auto cHandle = ::bgfx::createShader(::bgfx::makeRef(_compute_shader.c_str(), _compute_shader.size()));
-            _handle = ::bgfx::createProgram(cHandle, true);
+            _handle.reset(::bgfx::createProgram(cHandle, true));
         }
     }
 

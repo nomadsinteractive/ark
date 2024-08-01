@@ -67,14 +67,7 @@ void ApplicationManifest::load(const String& src)
     _plugins = Documents::getSystemSpecificList<std::vector<String>>(_content->children("plugin"), constants::NAME);
 
     if(const document& renderer = _content->getChild("renderer"))
-    {
-        if(const document& resolution = renderer->getChild("resolution"))
-            _renderer._resolution = {Documents::ensureAttribute<float>(resolution, constants::WIDTH), Documents::ensureAttribute<float>(resolution, constants::HEIGHT)};
-        _renderer._target = Documents::getAttribute<Ark::RendererTarget>(renderer, "target", Ark::RENDERER_TARGET_AUTO);
-        _renderer._version = Documents::getAttribute<Ark::RendererVersion>(renderer, "version", Ark::RENDERER_VERSION_AUTO);
-        _renderer._coordinate_system = Documents::getAttribute<Ark::RendererCoordinateSystem>(renderer, "coordinate-system", Ark::COORDINATE_SYSTEM_DEFAULT);
-        _renderer._vsync = Documents::getAttribute<bool>(renderer, "vsync", false);
-    }
+        _renderer = Renderer(renderer);
 
     _heap._device_unit_size = toSize(Documents::getAttributeValue(_content, "heap/device/unit-size", "8M"));
     _heap._host_unit_size = toSize(Documents::getAttributeValue(_content, "heap/host/unit-size", "8M"));
@@ -161,6 +154,16 @@ ApplicationManifest::Renderer::Renderer()
     : _target(Ark::RENDERER_TARGET_AUTO), _version(Ark::RENDERER_VERSION_AUTO), _coordinate_system(Ark::COORDINATE_SYSTEM_DEFAULT), _vsync(false),
     _resolution(1920, 1080)
 {
+}
+
+ApplicationManifest::Renderer::Renderer(const document& manifest)
+    : _class(Documents::getAttribute(manifest, "class")), _target(Documents::getAttribute(manifest, "target", Ark::RENDERER_TARGET_AUTO)), _version(Documents::getAttribute(manifest, "version", Ark::RENDERER_VERSION_AUTO)),
+    _coordinate_system(Documents::getAttribute(manifest, "coordinate-system", Ark::COORDINATE_SYSTEM_DEFAULT)), _vsync(Documents::getAttribute(manifest, "vsync", false))
+{
+    if(const document& resolution = manifest->getChild("resolution"))
+        _resolution = {Documents::ensureAttribute<float>(resolution, constants::WIDTH), Documents::ensureAttribute<float>(resolution, constants::HEIGHT)};
+    else
+        _resolution = {1920, 1080};
 }
 
 Viewport ApplicationManifest::Renderer::toViewport() const

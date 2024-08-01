@@ -18,7 +18,7 @@ aux_source_directory(impl/texture LOCAL_SRC_LIST)
 ark_find_vcpkg_package(bgfx LIBRARIES bgfx::bx bgfx::bgfx bgfx::bimg bgfx::bimg_decode)
 
 ark_setup_tools(ark_gen_plugin_class)
-ark_gen_plugin_class(bgfx core ark::plugin::bgfx -i bgfx impl/layout)
+ark_gen_plugin_class(bgfx core ark::plugin::bgfx -i bgfx impl)
 
 ark_add_plugin_library(${PROJECT_NAME} ${LOCAL_SRC_LIST} ${LOCAL_GENERATED_SRC_LIST})
 ark_export_dependency_libraries(${PROJECT_NAME})

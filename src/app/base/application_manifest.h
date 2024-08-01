@@ -54,6 +54,9 @@ public:
 
     struct Renderer {
         Renderer();
+        Renderer(const document& manifest);
+
+        String _class;
 
         Ark::RendererTarget _target;
         Ark::RendererVersion _version;

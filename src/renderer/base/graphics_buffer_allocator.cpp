@@ -9,19 +9,18 @@ namespace ark {
 
 namespace {
 
-class PageUploader : public Uploader {
+class PageUploader final : public Uploader {
 public:
     PageUploader(size_t size)
         : Uploader(size) {
     }
 
-    virtual bool update(uint64_t /*timestamp*/) override {
+    bool update(uint64_t /*timestamp*/) override {
         return false;
     }
 
-    virtual void upload(Writable& buf) override {
+    void upload(Writable& buf) override {
     }
-
 };
 
 }
@@ -34,11 +33,8 @@ GraphicsBufferAllocator::GraphicsBufferAllocator(RenderController& renderControl
 std::pair<sp<GraphicsBufferAllocator::Page>, uint32_t> GraphicsBufferAllocator::ensurePage(uint32_t size)
 {
     for(const sp<Page>& page : _pages)
-    {
-        const Optional<uint32_t> optPtr = page->_heap.allocate(size);
-        if(optPtr)
+        if(const Optional<uint32_t> optPtr = page->_heap.allocate(size))
             return {page, optPtr.value()};
-    }
 
     const sp<Page>& page = newPage();
     const Optional<uint32_t> optPtr = page->_heap.allocate(size);
@@ -96,7 +92,7 @@ void GraphicsBufferAllocator::Page::releaseStrideStrategy(uint32_t stride)
 }
 
 GraphicsBufferAllocator::Strips::Strips(sp<Page> page, uint32_t stride, element_index_t unitVertexCount)
-    : _page(std::move(page)), _heap_strategy_fix_size(stride * unitVertexCount), _size(0)
+    : _page(std::move(page)), _heap_strategy_fix_size(stride/* * unitVertexCount*/), _size(0)
 {
     _page->acquireStrideStrategy(_heap_strategy_fix_size);
 }
@@ -113,11 +109,10 @@ const Buffer& GraphicsBufferAllocator::Strips::buffer() const
 
 element_index_t GraphicsBufferAllocator::Strips::allocate(uint32_t unitVertexCount)
 {
-    uint32_t sizeNeedAllocate = unitVertexCount * _heap_strategy_fix_size;
-    Optional<uint32_t> ptr = _page->_heap.allocate(sizeNeedAllocate, _heap_strategy_fix_size);
-    if(ptr)
+    const uint32_t sizeNeedAllocate = unitVertexCount * _heap_strategy_fix_size;
+    if(Optional<uint32_t> ptr = _page->_heap.allocate(sizeNeedAllocate, _heap_strategy_fix_size))
     {
-        element_index_t idx = ptr.value() / _heap_strategy_fix_size;
+        const element_index_t idx = ptr.value() / _heap_strategy_fix_size;
         _allocations.insert(idx);
         _size += sizeNeedAllocate;
         return idx;
@@ -144,14 +139,14 @@ void GraphicsBufferAllocator::Strips::dispose()
 
 const sp<GraphicsBufferAllocator::Page>& GraphicsBufferAllocator::newPage()
 {
-    uint32_t pageSize = 65536 * 32;
+    constexpr uint32_t pageSize = 65536 * 32;
     _pages.push_front(sp<Page>::make(*this, _render_controller.makeVertexBuffer(Buffer::USAGE_DYNAMIC, sp<PageUploader>::make(pageSize)), pageSize));
     return _pages.front();
 }
 
 sp<GraphicsBufferAllocator::Strips> GraphicsBufferAllocator::makeStrips(uint32_t stride, uint32_t unitVertexCount)
 {
-    return sp<GraphicsBufferAllocator::Strips>::make(_pages.empty() ? newPage() :_pages.front(), stride, unitVertexCount);
+    return sp<Strips>::make(_pages.empty() ? newPage() :_pages.front(), stride, unitVertexCount);
 }
 
 }
