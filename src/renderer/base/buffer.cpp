@@ -55,7 +55,7 @@ Buffer::Snapshot::Snapshot(sp<Delegate> stub)
 }
 
 Buffer::Snapshot::Snapshot(sp<Delegate> stub, size_t size, sp<Uploader> input)
-    : _delegate(std::move(stub)), _input(std::move(input)), _size(size)
+    : _delegate(std::move(stub)), _uploader(std::move(input)), _size(size)
 {
 }
 
@@ -76,8 +76,8 @@ size_t Buffer::Snapshot::size() const
 
 void Buffer::Snapshot::upload(GraphicsContext& graphicsContext) const
 {
-    if(_input)
-        _delegate->uploadBuffer(graphicsContext, _input);
+    if(_uploader)
+        _delegate->uploadBuffer(graphicsContext, _uploader);
 }
 
 const sp<Buffer::Delegate>& Buffer::Snapshot::delegate() const

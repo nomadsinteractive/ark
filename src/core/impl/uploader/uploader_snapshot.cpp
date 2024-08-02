@@ -29,7 +29,7 @@ public:
 
 }
 
-InputSnapshot::InputSnapshot(Uploader& delegate)
+UploaderSnapshot::UploaderSnapshot(Uploader& delegate)
     : Uploader(delegate.size())
 {
     WritableSnapshot writable(_size);
@@ -37,13 +37,13 @@ InputSnapshot::InputSnapshot(Uploader& delegate)
     _strips = std::move(writable._strips);
 }
 
-void InputSnapshot::upload(Writable& writable)
+void UploaderSnapshot::upload(Writable& writable)
 {
     for(const auto& [i, j] : _strips)
         writable.write(j->buf(), j->length(), i);
 }
 
-bool InputSnapshot::update(uint64_t /*timestamp*/)
+bool UploaderSnapshot::update(uint64_t /*timestamp*/)
 {
     return false;
 }

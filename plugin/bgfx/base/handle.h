@@ -24,12 +24,17 @@ public:
         return isValid();
     }
 
+    Handle& operator=(Handle&& other) {
+        _handle = other.release();
+        return *this;
+    }
+
     operator T() const {
         return _handle;
     }
 
     uint64_t id() const {
-        return _handle.idx + 1;
+        return isValid() ? _handle.idx + 1 : 0;
     }
 
     bool isValid() const {

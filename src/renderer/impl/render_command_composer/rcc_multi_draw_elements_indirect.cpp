@@ -103,7 +103,7 @@ sp<RenderCommand> RCCMultiDrawElementsIndirect::compose(const RenderRequest& ren
 {
     DrawingBuffer buf(snapshot._stub->_pipeline_bindings, snapshot._stub->_stride);
     const Buffer& vertices = snapshot._stub->_pipeline_bindings->vertices();
-    bool reload = snapshot.needsReload();
+    const bool reload = snapshot.needsReload();
 
     if(reload)
         reloadIndirectCommands(snapshot);

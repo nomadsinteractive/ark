@@ -75,7 +75,7 @@ public:
         const sp<Delegate>& delegate() const;
 
         sp<Delegate> _delegate;
-        sp<Uploader> _input;
+        sp<Uploader> _uploader;
         size_t _size;
     };
 

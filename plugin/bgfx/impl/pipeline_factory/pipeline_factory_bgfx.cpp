@@ -11,6 +11,7 @@
 #include "bgfx/base/bgfx_context.h"
 #include "bgfx/base/handle.h"
 #include "bgfx/base/resource_base.h"
+#include "bgfx/impl/buffer/buffer_base.h"
 #include "bgfx/impl/texture/texture_bgfx.h"
 
 namespace ark::plugin::bgfx {
@@ -35,6 +36,14 @@ public:
 
     void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override
     {
+        const sp<BufferBase> vertices = drawingContext._vertices.delegate().cast<BufferBase>();
+        DASSERT(vertices->type() == Buffer::TYPE_VERTEX);
+        vertices->bind();
+
+        const sp<BufferBase> indices = drawingContext._indices.delegate().cast<BufferBase>();
+        DASSERT(indices->type() == Buffer::TYPE_INDEX);
+        indices->bind();
+
         for(const auto& [name, texture] : drawingContext._pipeline_snapshot._bindings->samplers())
         {
             const sp<TextureBgfx> textureBgfx = texture->delegate().cast<TextureBgfx>();

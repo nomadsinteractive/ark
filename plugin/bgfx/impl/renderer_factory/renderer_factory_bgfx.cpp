@@ -15,6 +15,10 @@
 
 #include "app/base/application_context.h"
 
+#include "bgfx/impl/buffer/static_index_buffer_bgfx.h"
+#include "bgfx/impl/buffer/dynamic_index_buffer_bgfx.h"
+#include "bgfx/impl/buffer/static_vertex_buffer_bgfx.h"
+#include "bgfx/impl/buffer/dynamic_vertex_buffer_bgfx.h"
 #include "bgfx/impl/pipeline_factory/pipeline_factory_bgfx.h"
 #include "bgfx/impl/render_view/render_view_bgfx.h"
 #include "bgfx/impl/texture/texture_bgfx.h"
@@ -23,188 +27,6 @@
 namespace ark::plugin::bgfx {
 
 namespace {
-
-::bgfx::Attrib::Enum toAttribEnum(Attribute::LayoutType layoutType, uint32_t customAttrIdx)
-{
-    switch(layoutType)
-    {
-        case Attribute::LAYOUT_TYPE_POSITION:
-            return ::bgfx::Attrib::Position;
-        case Attribute::LAYOUT_TYPE_TEX_COORD:
-            return ::bgfx::Attrib::TexCoord0;
-        case Attribute::LAYOUT_TYPE_COLOR:
-            return ::bgfx::Attrib::Color0;
-        case Attribute::LAYOUT_TYPE_NORMAL:
-            return ::bgfx::Attrib::Normal;
-        case Attribute::LAYOUT_TYPE_TANGENT:
-            return ::bgfx::Attrib::Tangent;
-        case Attribute::LAYOUT_TYPE_BITANGENT:
-            return ::bgfx::Attrib::Bitangent;
-        default:
-            break;
-    }
-    CHECK(customAttrIdx < 10, "Too many custom attributes");
-    return static_cast<::bgfx::Attrib::Enum>(customAttrIdx < 3 ? ::bgfx::Attrib::Color1 + customAttrIdx : ::bgfx::Attrib::TexCoord1 + (customAttrIdx - 3));
-}
-
-::bgfx::AttribType::Enum toAttribType(Attribute::Type type)
-{
-    switch(type)
-    {
-        case Attribute::TYPE_BYTE:
-            return ::bgfx::AttribType::Uint8;
-        case Attribute::TYPE_FLOAT:
-            return ::bgfx::AttribType::Float;
-        case Attribute::TYPE_INTEGER:
-            return ::bgfx::AttribType::Float;
-        case Attribute::TYPE_SHORT:
-            return ::bgfx::AttribType::Int16;
-        case Attribute::TYPE_UBYTE:
-            return ::bgfx::AttribType::Uint8;
-        case Attribute::TYPE_USHORT:
-            return ::bgfx::AttribType::Int16;
-        default:
-            break;
-    }
-    return ::bgfx::AttribType::Float;
-}
-
-void setupVertexBufferLayout(::bgfx::VertexLayout& vertexBufLayout, const PipelineDescriptor& pipelineDescriptor)
-{
-    vertexBufLayout.begin();
-    uint32_t customAttrIdx = 0;
-    for(const auto& [k, v] : pipelineDescriptor.input()->getStreamLayout(0).attributes())
-    {
-        const ::bgfx::Attrib::Enum attribEnum = toAttribEnum(v.layoutType(), v.layoutType() == Attribute::LAYOUT_TYPE_CUSTOM ? customAttrIdx++ : customAttrIdx);
-        vertexBufLayout.add(attribEnum, v.length(), toAttribType(v.type()), v.normalized());
-    }
-    vertexBufLayout.end();
-}
-
-class StaticVertexBufferBgfx final : public ResourceBase<::bgfx::VertexBufferHandle, Buffer::Delegate> {
-public:
-
-    void setupLayout(const PipelineDescriptor& pipelineDescriptor) override
-    {
-        setupVertexBufferLayout(_vertex_buffer_layout, pipelineDescriptor);
-    }
-
-    void upload(GraphicsContext& graphicsContext) override
-    {
-        if(_handle)
-            _handle.destroy();
-
-        DASSERT(_vertex_buffer_layout.m_stride > 0);
-        DASSERT(_size <= _data.size());
-        _handle.reset(::bgfx::createVertexBuffer(::bgfx::makeRef(_data.data(), _size), _vertex_buffer_layout));
-    }
-
-    void uploadBuffer(GraphicsContext& graphicsContext, Uploader& input) override
-    {
-        CHECK(!::bgfx::isValid(_handle), "Cannot upload data into a static vertex buffer");
-        _data = UploaderType::toBytes(input);
-        _size = _data.size();
-        upload(graphicsContext);
-    }
-
-    void downloadBuffer(GraphicsContext& graphicsContext, size_t offset, size_t size, void* ptr) override
-    {
-        FATAL("Unimplemented");
-    }
-
-private:
-    std::vector<uint8_t> _data;
-    ::bgfx::VertexLayout _vertex_buffer_layout;
-};
-
-class DynamicVertexBufferBgfx final : public ResourceBase<::bgfx::DynamicVertexBufferHandle, Buffer::Delegate> {
-public:
-
-    void setupLayout(const PipelineDescriptor& pipelineDescriptor) override
-    {
-        setupVertexBufferLayout(_vertex_buffer_layout, pipelineDescriptor);
-    }
-
-    void upload(GraphicsContext& graphicsContext) override
-    {
-        if(!_handle)
-            _handle.reset(::bgfx::createDynamicVertexBuffer(_size, _vertex_buffer_layout));
-
-        DASSERT(_size <= _data.size());
-        ::bgfx::update(_handle, 0, ::bgfx::makeRef(_data.data(), _size));
-    }
-
-    void uploadBuffer(GraphicsContext& graphicsContext, Uploader& input) override
-    {
-        _data = UploaderType::toBytes(input);
-        _size = _data.size();
-        upload(graphicsContext);
-    }
-
-    void downloadBuffer(GraphicsContext& graphicsContext, size_t offset, size_t size, void* ptr) override
-    {
-        FATAL("Unimplemented");
-    }
-
-private:
-    std::vector<uint8_t> _data;
-    ::bgfx::VertexLayout _vertex_buffer_layout;
-};
-
-class StaticIndexBuffer final : public ResourceBase<::bgfx::IndexBufferHandle, Buffer::Delegate> {
-public:
-    void upload(GraphicsContext& graphicsContext) override
-    {
-        if(_handle)
-            _handle.destroy();
-
-        DASSERT(_size <= _indices.size());
-        _handle.reset(::bgfx::createIndexBuffer(::bgfx::makeRef(_indices.data(), _size)));
-    }
-
-    void uploadBuffer(GraphicsContext& graphicsContext, Uploader& input) override
-    {
-        CHECK(!::bgfx::isValid(_handle), "Cannot upload data into a static index buffer");
-        _indices = UploaderType::toBytes(input);
-        _size = _indices.size();
-        upload(graphicsContext);
-    }
-
-    void downloadBuffer(GraphicsContext& graphicsContext, size_t offset, size_t size, void* ptr) override
-    {
-        FATAL("Unimplemented");
-    }
-
-private:
-    std::vector<uint8_t> _indices;
-};
-
-class DynamicIndexBuffer final : public ResourceBase<::bgfx::DynamicIndexBufferHandle, Buffer::Delegate> {
-public:
-    void upload(GraphicsContext& graphicsContext) override
-    {
-        if(!_handle)
-            _handle.reset(::bgfx::createDynamicIndexBuffer(_size));
-
-        DASSERT(_size <= _indices.size());
-        ::bgfx::update(_handle, 0, ::bgfx::makeRef(_indices.data(), _size));
-    }
-
-    void uploadBuffer(GraphicsContext& graphicsContext, Uploader& input) override
-    {
-        _indices = UploaderType::toBytes(input);
-        _size = _indices.size();
-        upload(graphicsContext);
-    }
-
-    void downloadBuffer(GraphicsContext& graphicsContext, size_t offset, size_t size, void* ptr) override
-    {
-        FATAL("Unimplemented");
-    }
-
-private:
-    std::vector<uint8_t> _indices;
-};
 
 class IndirectBuffer final : public ResourceBase<::bgfx::IndirectBufferHandle, Buffer::Delegate> {
 public:
@@ -318,7 +140,7 @@ sp<Buffer::Delegate> RendererFactoryBgfx::createBuffer(Buffer::Type type, Buffer
         case Buffer::TYPE_VERTEX:
             return usage == Buffer::USAGE_STATIC ? sp<Buffer::Delegate>::make<StaticVertexBufferBgfx>() : sp<Buffer::Delegate>::make<DynamicVertexBufferBgfx>();
         case Buffer::TYPE_INDEX:
-            return usage == Buffer::USAGE_STATIC ? sp<Buffer::Delegate>::make<StaticIndexBuffer>() : sp<Buffer::Delegate>::make<DynamicIndexBuffer>();
+            return usage == Buffer::USAGE_STATIC ? sp<Buffer::Delegate>::make<StaticIndexBufferBgfx>() : sp<Buffer::Delegate>::make<DynamicIndexBufferBgfx>();
         case Buffer::TYPE_DRAW_INDIRECT:
             return sp<Buffer::Delegate>::make<DynamicVertexBufferBgfx>();
         case Buffer::TYPE_STORAGE:

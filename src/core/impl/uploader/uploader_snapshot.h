@@ -6,16 +6,15 @@
 
 namespace ark {
 
-class InputSnapshot : public Uploader {
+class UploaderSnapshot final : public Uploader {
 public:
-    InputSnapshot(Uploader& delegate);
+    UploaderSnapshot(Uploader& delegate);
 
-    virtual void upload(Writable& writable) override;
-    virtual bool update(uint64_t timestamp) override;
+    void upload(Writable& writable) override;
+    bool update(uint64_t timestamp) override;
 
 private:
     std::vector<std::pair<size_t, sp<ByteArray>>> _strips;
-
 };
 
 }

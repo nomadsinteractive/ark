@@ -39,6 +39,7 @@ void RenderViewBgfx::onRenderFrame(const Color& backgroundColor, RenderCommand& 
 {
     ::bgfx::touch(0);
     ::bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH | BGFX_CLEAR_STENCIL, backgroundColor.value());
+    _graphics_context->onDrawFrame();
     renderCommand.draw(_graphics_context);
     ::bgfx::frame();
 }

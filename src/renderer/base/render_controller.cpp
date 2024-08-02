@@ -42,7 +42,7 @@ public:
 class ResourceUploadBufferSnapshot final : public Resource {
 public:
     ResourceUploadBufferSnapshot(sp<Buffer::Delegate> buffer, Uploader& input)
-        : _buffer(std::move(buffer)), _input_snapshot(input) {
+        : _buffer(std::move(buffer)), _uploader_snapshot(input) {
     }
 
     uint64_t id() override {
@@ -50,7 +50,7 @@ public:
     }
 
     void upload(GraphicsContext& graphicsContext) override {
-        _buffer->uploadBuffer(graphicsContext, _input_snapshot);
+        _buffer->uploadBuffer(graphicsContext, _uploader_snapshot);
     }
 
     ResourceRecycleFunc recycle() override {
@@ -59,26 +59,26 @@ public:
 
 private:
     sp<Buffer::Delegate> _buffer;
-    InputSnapshot _input_snapshot;
+    UploaderSnapshot _uploader_snapshot;
 };
 
 class BufferUpdatable final : public Updatable {
 public:
-    BufferUpdatable(RenderController& renderController, sp<Uploader> input, sp<Buffer::Delegate> buffer)
-        : _render_controller(renderController), _buffer(std::move(buffer)), _input(std::move(input)) {
+    BufferUpdatable(RenderController& renderController, sp<Uploader> uploader, sp<Buffer::Delegate> buffer)
+        : _render_controller(renderController), _buffer(std::move(buffer)), _uploader(std::move(uploader)) {
     }
 
     bool update(uint64_t timestamp) override {
-        const bool dirty = _input->update(timestamp) || _buffer->id() == 0;
+        const bool dirty = _uploader->update(timestamp) || _buffer->id() == 0;
         if(dirty)
-            _render_controller.upload(sp<ResourceUploadBufferSnapshot>::make(_buffer, _input), RenderController::US_ONCE);
+            _render_controller.upload(sp<Resource>::make<ResourceUploadBufferSnapshot>(_buffer, _uploader), RenderController::US_ONCE);
         return dirty;
     }
 
 private:
     RenderController& _render_controller;
     sp<Buffer::Delegate> _buffer;
-    sp<Uploader> _input;
+    sp<Uploader> _uploader;
 };
 
 class UploaderConcat final : public Uploader {
@@ -226,8 +226,7 @@ void RenderController::onDrawFrame(GraphicsContext& graphicsContext)
     prepare(graphicsContext, _uploading_resources);
     _on_every_frame.foreach(graphicsContext, false, true);
 
-    uint32_t tick = graphicsContext.tick() % 300;
-    if(tick == 0)
+    if(const uint32_t tick = graphicsContext.tick() % 300; tick == 0)
         _on_surface_ready.foreach(graphicsContext, false, false);
     else if (tick == 150)
         _recycler->doRecycling(graphicsContext);
@@ -253,13 +252,14 @@ void RenderController::uploadBuffer(Buffer& buffer, sp<Uploader> uploader, Rende
     ASSERT(uploader);
     if(!future)
         future = sp<Future>::make(sp<BooleanByWeakRef<Buffer::Delegate>>::make(buffer.delegate(), 1));
-    sp<Updatable> updatable = strategy & RenderController::US_ON_CHANGE ? sp<Updatable>::make<BufferUpdatable>(*this, uploader, buffer.delegate()) : nullptr;
     buffer.delegate()->setSize(uploader->size());
+    Uploader& uploaderInstance = *uploader;
+    sp<Updatable> updatable = strategy & US_ON_CHANGE ? sp<Updatable>::make<BufferUpdatable>(*this, std::move(uploader), buffer.delegate()) : nullptr;
     //TODO: make this mess a bit more cleaner
-    if(strategy == RenderController::US_ON_CHANGE)
+    if(strategy == US_ON_CHANGE)
         upload(nullptr, strategy, std::move(updatable), std::move(future), priority);
     else
-        upload(sp<ResourceUploadBufferSnapshot>::make(buffer.delegate(), std::move(uploader)), strategy, std::move(updatable), std::move(future), priority);
+        upload(sp<ResourceUploadBufferSnapshot>::make(buffer.delegate(), uploaderInstance), strategy, std::move(updatable), std::move(future), priority);
 }
 
 const sp<Recycler>& RenderController::recycler() const
