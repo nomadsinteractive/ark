@@ -39,13 +39,13 @@ char _STAGE_ATTR_PREFIX[PipelineInput::SHADER_STAGE_COUNT + 1][4] = {"a_", "v_",
 char _STAGE_ATTR_PREFIX[PipelineInput::SHADER_STAGE_COUNT + 1][4] = {"a_", "v_", "f_", "c_"};
 #endif
 
-}
+const char* ANNOTATION_VERT_IN = "${vert.in}";
+const char* ANNOTATION_VERT_OUT = "${vert.out}";
+const char* ANNOTATION_FRAG_IN = "${frag.in}";
+const char* ANNOTATION_FRAG_OUT = "${frag.out}";
+const char* ANNOTATION_FRAG_COLOR = "${frag.color}";
 
-const char* ShaderPreprocessor::ANNOTATION_VERT_IN = "${vert.in}";
-const char* ShaderPreprocessor::ANNOTATION_VERT_OUT = "${vert.out}";
-const char* ShaderPreprocessor::ANNOTATION_FRAG_IN = "${frag.in}";
-const char* ShaderPreprocessor::ANNOTATION_FRAG_OUT = "${frag.out}";
-const char* ShaderPreprocessor::ANNOTATION_FRAG_COLOR = "${frag.color}";
+}
 
 ShaderPreprocessor::ShaderPreprocessor(sp<String> source, PipelineInput::ShaderStage shaderStage, PipelineInput::ShaderStage preShaderStage)
     : _source(std::move(source)), _shader_stage(shaderStage), _pre_shader_stage(preShaderStage), _version(0), _declaration_ins(_attribute_declaration_codes, shaderStage == PipelineInput::SHADER_STAGE_VERTEX ? ANNOTATION_VERT_IN : ANNOTATION_FRAG_IN),

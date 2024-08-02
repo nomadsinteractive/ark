@@ -3,11 +3,15 @@
 #include <bgfx/bgfx.h>
 
 #include "core/util/uploader_type.h"
+#include "core/util/log.h"
 
 #include "graphics/base/size.h"
 
+#include "renderer/base/pipeline_descriptor.h"
 #include "renderer/base/render_engine.h"
 #include "renderer/base/render_engine_context.h"
+#include "renderer/inf/snippet_factory.h"
+#include "renderer/inf/snippet.h"
 
 #include "app/base/application_context.h"
 
@@ -20,13 +24,77 @@ namespace ark::plugin::bgfx {
 
 namespace {
 
-class StaticVertexBuffer final : public ResourceBase<::bgfx::VertexBufferHandle, Buffer::Delegate> {
+::bgfx::Attrib::Enum toAttribEnum(Attribute::LayoutType layoutType, uint32_t customAttrIdx)
+{
+    switch(layoutType)
+    {
+        case Attribute::LAYOUT_TYPE_POSITION:
+            return ::bgfx::Attrib::Position;
+        case Attribute::LAYOUT_TYPE_TEX_COORD:
+            return ::bgfx::Attrib::TexCoord0;
+        case Attribute::LAYOUT_TYPE_COLOR:
+            return ::bgfx::Attrib::Color0;
+        case Attribute::LAYOUT_TYPE_NORMAL:
+            return ::bgfx::Attrib::Normal;
+        case Attribute::LAYOUT_TYPE_TANGENT:
+            return ::bgfx::Attrib::Tangent;
+        case Attribute::LAYOUT_TYPE_BITANGENT:
+            return ::bgfx::Attrib::Bitangent;
+        default:
+            break;
+    }
+    CHECK(customAttrIdx < 10, "Too many custom attributes");
+    return static_cast<::bgfx::Attrib::Enum>(customAttrIdx < 3 ? ::bgfx::Attrib::Color1 + customAttrIdx : ::bgfx::Attrib::TexCoord1 + (customAttrIdx - 3));
+}
+
+::bgfx::AttribType::Enum toAttribType(Attribute::Type type)
+{
+    switch(type)
+    {
+        case Attribute::TYPE_BYTE:
+            return ::bgfx::AttribType::Uint8;
+        case Attribute::TYPE_FLOAT:
+            return ::bgfx::AttribType::Float;
+        case Attribute::TYPE_INTEGER:
+            return ::bgfx::AttribType::Float;
+        case Attribute::TYPE_SHORT:
+            return ::bgfx::AttribType::Int16;
+        case Attribute::TYPE_UBYTE:
+            return ::bgfx::AttribType::Uint8;
+        case Attribute::TYPE_USHORT:
+            return ::bgfx::AttribType::Int16;
+        default:
+            break;
+    }
+    return ::bgfx::AttribType::Float;
+}
+
+void setupVertexBufferLayout(::bgfx::VertexLayout& vertexBufLayout, const PipelineDescriptor& pipelineDescriptor)
+{
+    vertexBufLayout.begin();
+    uint32_t customAttrIdx = 0;
+    for(const auto& [k, v] : pipelineDescriptor.input()->getStreamLayout(0).attributes())
+    {
+        const ::bgfx::Attrib::Enum attribEnum = toAttribEnum(v.layoutType(), v.layoutType() == Attribute::LAYOUT_TYPE_CUSTOM ? customAttrIdx++ : customAttrIdx);
+        vertexBufLayout.add(attribEnum, v.length(), toAttribType(v.type()), v.normalized());
+    }
+    vertexBufLayout.end();
+}
+
+class StaticVertexBufferBgfx final : public ResourceBase<::bgfx::VertexBufferHandle, Buffer::Delegate> {
 public:
+
+    void setupLayout(const PipelineDescriptor& pipelineDescriptor) override
+    {
+        setupVertexBufferLayout(_vertex_buffer_layout, pipelineDescriptor);
+    }
+
     void upload(GraphicsContext& graphicsContext) override
     {
         if(_handle)
             _handle.destroy();
 
+        DASSERT(_vertex_buffer_layout.m_stride > 0);
         DASSERT(_size <= _data.size());
         _handle.reset(::bgfx::createVertexBuffer(::bgfx::makeRef(_data.data(), _size), _vertex_buffer_layout));
     }
@@ -49,8 +117,14 @@ private:
     ::bgfx::VertexLayout _vertex_buffer_layout;
 };
 
-class DynamicVertexBuffer final : public ResourceBase<::bgfx::DynamicVertexBufferHandle, Buffer::Delegate> {
+class DynamicVertexBufferBgfx final : public ResourceBase<::bgfx::DynamicVertexBufferHandle, Buffer::Delegate> {
 public:
+
+    void setupLayout(const PipelineDescriptor& pipelineDescriptor) override
+    {
+        setupVertexBufferLayout(_vertex_buffer_layout, pipelineDescriptor);
+    }
+
     void upload(GraphicsContext& graphicsContext) override
     {
         if(!_handle)
@@ -158,6 +232,50 @@ private:
     std::vector<uint8_t> _indices;
 };
 
+class SnippetBgfx final : public Snippet {
+public:
+
+    void preInitialize(PipelineBuildingContext& context) override
+    {
+    }
+    void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout) override
+    {
+    }
+
+    sp<DrawEvents> makeDrawEvents(const RenderRequest&) override
+    {
+        return sp<DrawEvents>::make();
+    }
+
+    sp<DrawEvents> makeDrawEvents() override
+    {
+        return sp<DrawEvents>::make();
+    }
+};
+
+class SnippetFactoryBgfx final : public SnippetFactory {
+public:
+    sp<Snippet> createCoreSnippet() override
+    {
+        return sp<Snippet>::make<SnippetBgfx>();
+    }
+};
+
+void setVersion(Ark::RendererVersion version, RenderEngineContext& vkContext)
+{
+    LOGD("Choose Bgfx Version = %d", version);
+    std::map<String, String>& definitions = vkContext.definitions();
+
+    definitions["vert.in"] = "in";
+    definitions["vert.out"] = "out";
+    definitions["frag.in"] = "in";
+    definitions["frag.out"] = "out";
+    definitions["frag.color"] = "f_FragColor";
+    vkContext.setSnippetFactory(sp<SnippetFactoryBgfx>::make());
+
+    vkContext.setVersion(version);
+}
+
 }
 
 RendererFactoryBgfx::RendererFactoryBgfx()
@@ -168,6 +286,9 @@ RendererFactoryBgfx::RendererFactoryBgfx()
 void RendererFactoryBgfx::onSurfaceCreated(RenderEngine& renderEngine)
 {
     const RenderEngine::PlatformInfo& info = Ark::instance().applicationContext()->renderEngine()->info();
+    Ark::RendererVersion version = renderEngine.version();
+    setVersion(version == Ark::RENDERER_VERSION_AUTO ? Ark::RENDERER_VERSION_VULKAN_13 : version, renderEngine.context());
+
     ::bgfx::Init init;
     init.type = renderEngine.version() >= Ark::RENDERER_VERSION_VULKAN ? ::bgfx::RendererType::Vulkan : ::bgfx::RendererType::OpenGL;
     init.vendorId = BGFX_PCI_ID_NONE;
@@ -184,9 +305,9 @@ void RendererFactoryBgfx::onSurfaceCreated(RenderEngine& renderEngine)
     ::bgfx::init(init);
 }
 
-sp<RenderEngineContext> RendererFactoryBgfx::createRenderEngineContext(Ark::RendererVersion version)
+sp<RenderEngineContext> RendererFactoryBgfx::createRenderEngineContext(const ApplicationManifest::Renderer& renderer)
 {
-    const sp<RenderEngineContext> renderContext = sp<RenderEngineContext>::make(version, Viewport(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f));
+    const sp<RenderEngineContext> renderContext = sp<RenderEngineContext>::make(renderer, Viewport(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f));
     return renderContext;
 }
 
@@ -195,13 +316,13 @@ sp<Buffer::Delegate> RendererFactoryBgfx::createBuffer(Buffer::Type type, Buffer
     switch(type)
     {
         case Buffer::TYPE_VERTEX:
-            return usage == Buffer::USAGE_STATIC ? sp<Buffer::Delegate>::make<StaticVertexBuffer>() : sp<Buffer::Delegate>::make<DynamicVertexBuffer>();
+            return usage == Buffer::USAGE_STATIC ? sp<Buffer::Delegate>::make<StaticVertexBufferBgfx>() : sp<Buffer::Delegate>::make<DynamicVertexBufferBgfx>();
         case Buffer::TYPE_INDEX:
             return usage == Buffer::USAGE_STATIC ? sp<Buffer::Delegate>::make<StaticIndexBuffer>() : sp<Buffer::Delegate>::make<DynamicIndexBuffer>();
         case Buffer::TYPE_DRAW_INDIRECT:
-            return sp<Buffer::Delegate>::make<DynamicVertexBuffer>();
+            return sp<Buffer::Delegate>::make<DynamicVertexBufferBgfx>();
         case Buffer::TYPE_STORAGE:
-            return sp<Buffer::Delegate>::make<DynamicVertexBuffer>();
+            return sp<Buffer::Delegate>::make<DynamicVertexBufferBgfx>();
         default:
             FATAL("Unknow buffer type: %d", type);
             break;

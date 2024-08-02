@@ -8,6 +8,7 @@
 #include "renderer/base/graphics_context.h"
 
 #include "bgfx/base/bgfx_context.h"
+#include "renderer/base/render_engine_context.h"
 
 namespace ark::plugin::bgfx {
 
@@ -23,9 +24,15 @@ void RenderViewBgfx::onSurfaceCreated()
 void RenderViewBgfx::onSurfaceChanged(uint32_t width, uint32_t height)
 {
     _bgfx_context = sp<BgfxContext>::make();
+
     _graphics_context.reset(new GraphicsContext(_graphics_context->renderContext(), _graphics_context->renderController()));
     _graphics_context->attachments().put(_bgfx_context);
-    ::bgfx::reset(width, height);
+
+    uint32_t flags = BGFX_RESET_NONE;
+    const sp<RenderEngineContext>& renderContext = _graphics_context->renderContext();
+    if(renderContext->renderer()._vsync)
+        flags |= BGFX_RESET_VSYNC;
+    ::bgfx::reset(width, height, flags);
 }
 
 void RenderViewBgfx::onRenderFrame(const Color& backgroundColor, RenderCommand& renderCommand)

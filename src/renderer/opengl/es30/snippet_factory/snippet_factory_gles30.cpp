@@ -47,12 +47,10 @@ public:
     }
 
     void preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context, const PipelineLayout& /*pipelineLayout*/) override {
-        ShaderPreprocessor* vertex = context.tryGetStage(PipelineInput::SHADER_STAGE_VERTEX);
-        if(vertex)
+        if(ShaderPreprocessor* vertex = context.tryGetStage(PipelineInput::SHADER_STAGE_VERTEX))
             vertex->_predefined_macros.push_back("#define gl_InstanceIndex gl_InstanceID");
 
-        ShaderPreprocessor* fragment = context.tryGetStage(PipelineInput::SHADER_STAGE_FRAGMENT);
-        if(fragment)
+        if(ShaderPreprocessor* fragment = context.tryGetStage(PipelineInput::SHADER_STAGE_FRAGMENT))
             fragment->linkNextStage("FragColor");
     }
 

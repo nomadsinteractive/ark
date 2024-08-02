@@ -3,18 +3,23 @@
 namespace ark {
 
 Attribute::Attribute()
-    : _offset(0), _length(0), _divisor(0)
+    : _layout_type(LAYOUT_TYPE_CUSTOM), _offset(0), _length(0), _divisor(0)
 {
 }
 
-Attribute::Attribute(const String& name, Type type, const String& declareType, uint32_t length, bool normalized)
-    : _name(name), _type(type), _declare_type(declareType), _offset(0), _length(length), _normalized(normalized), _divisor(0)
+Attribute::Attribute(LayoutType layoutType, const String& name, Type type, const String& declareType, uint32_t length, bool normalized)
+    : _layout_type(layoutType), _name(name), _type(type), _declare_type(declareType), _offset(0), _length(length), _normalized(normalized), _divisor(0)
 {
 }
 
 const String& Attribute::name() const
 {
     return _name;
+}
+
+Attribute::LayoutType Attribute::layoutType() const
+{
+    return _layout_type;
 }
 
 Attribute::Type Attribute::type() const

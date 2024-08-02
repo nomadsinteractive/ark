@@ -20,7 +20,7 @@ private:
     sp<opengl::GLPipeline> _pipeline;
     sp<Buffer::Delegate> _vertex;
     sp<PipelineDescriptor> _pipeline_descriptor;
-    sp<std::map<uint32_t, Buffer>> _divisors;
+    sp<std::map<uint32_t, Buffer>> _streams;
 
     uint32_t _id;
 };

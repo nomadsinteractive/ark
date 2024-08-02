@@ -4,19 +4,24 @@
 
 namespace ark {
 
-RenderEngineContext::RenderEngineContext(Ark::RendererVersion version, const Viewport& viewport)
-    : _version(version), _viewport(viewport)
+RenderEngineContext::RenderEngineContext(const ApplicationManifest::Renderer& renderer, const Viewport& viewport)
+    : _renderer(renderer), _viewport(viewport)
 {
+}
+
+const ApplicationManifest::Renderer& RenderEngineContext::renderer() const
+{
+    return _renderer;
 }
 
 Ark::RendererVersion RenderEngineContext::version() const
 {
-    return _version;
+    return _renderer._version;
 }
 
 void RenderEngineContext::setVersion(Ark::RendererVersion version)
 {
-    _version = version;
+    _renderer._version = version;
 }
 
 const std::map<String, String>& RenderEngineContext::definitions() const
@@ -58,7 +63,7 @@ const V2& RenderEngineContext::displayUnit() const
 
 uint32_t RenderEngineContext::getGLSLVersion() const
 {
-    switch(_version) {
+    switch(_renderer._version) {
     case Ark::RENDERER_VERSION_OPENGL_20:
         return 110;
     case Ark::RENDERER_VERSION_OPENGL_21:
@@ -77,11 +82,11 @@ uint32_t RenderEngineContext::getGLSLVersion() const
     case Ark::RENDERER_VERSION_OPENGL_44:
     case Ark::RENDERER_VERSION_OPENGL_45:
     case Ark::RENDERER_VERSION_OPENGL_46:
-        return static_cast<uint32_t>(_version) * 10;
+        return static_cast<uint32_t>(_renderer._version) * 10;
     default:
         break;
     }
-    FATAL("Unsupported OpenGL version: %d", _version);
+    FATAL("Unsupported OpenGL version: %d", _renderer._version);
     return 110;
 }
 

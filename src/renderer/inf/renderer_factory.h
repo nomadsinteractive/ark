@@ -10,6 +10,8 @@
 #include "renderer/base/buffer.h"
 #include "renderer/base/texture.h"
 
+#include "app/base/application_manifest.h"
+
 namespace ark {
 
 class ARK_API RendererFactory {
@@ -26,7 +28,7 @@ public:
 
     virtual void onSurfaceCreated(RenderEngine& renderEngine) = 0;
 
-    virtual sp<RenderEngineContext> createRenderEngineContext(Ark::RendererVersion version) = 0;
+    virtual sp<RenderEngineContext> createRenderEngineContext(const ApplicationManifest::Renderer& renderer) = 0;
     virtual sp<Buffer::Delegate> createBuffer(Buffer::Type type, Buffer::Usage usage) = 0;
     virtual sp<Camera::Delegate> createCamera() = 0;
     virtual sp<Framebuffer> createFramebuffer(sp<Renderer> renderer, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask) = 0;

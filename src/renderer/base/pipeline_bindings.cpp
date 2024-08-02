@@ -9,10 +9,12 @@
 
 namespace ark {
 
-PipelineBindings::PipelineBindings(Buffer vertices, sp<PipelineFactory> pipelineFactory, sp<PipelineDescriptor> pipelineDescriptor, std::map<uint32_t, Buffer> dividedBuffers)
+PipelineBindings::PipelineBindings(Buffer vertices, sp<PipelineFactory> pipelineFactory, sp<PipelineDescriptor> pipelineDescriptor, std::map<uint32_t, Buffer> streams)
     : _vertices(std::move(vertices)), _pipeline_factory(std::move(pipelineFactory)), _pipeline_descriptor(std::move(pipelineDescriptor)), _snippet(_pipeline_descriptor->layout()->snippet()),
-      _streams(sp<std::map<uint32_t, Buffer>>::make(std::move(dividedBuffers))), _attachments(sp<Traits>::make())
+      _streams(sp<std::map<uint32_t, Buffer>>::make(std::move(streams))), _attachments(sp<Traits>::make())
 {
+    if(_vertices)
+        _vertices.delegate()->setupLayout(_pipeline_descriptor);
 }
 
 const Buffer& PipelineBindings::vertices() const

@@ -14,7 +14,7 @@ public:
 
     void onSurfaceCreated(RenderEngine& renderEngine) override;
 
-    sp<RenderEngineContext> createRenderEngineContext(Ark::RendererVersion version) override;
+    sp<RenderEngineContext> createRenderEngineContext(const ApplicationManifest::Renderer& renderer) override;
     sp<Buffer::Delegate> createBuffer(Buffer::Type type, Buffer::Usage usage) override;
     sp<Camera::Delegate> createCamera() override;
     sp<Framebuffer> createFramebuffer(sp<Renderer> renderer, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask) override;

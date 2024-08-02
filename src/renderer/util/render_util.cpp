@@ -219,28 +219,28 @@ bytearray RenderUtil::makeUnitCubeVertices(bool flipWindingOrder)
     return sp<ByteArray::Borrowed>::make(reinterpret_cast<uint8_t*>(vertices), sizeof(vertices));
 }
 
-Attribute RenderUtil::makePredefinedAttribute(const String& name, const String& type)
+Attribute RenderUtil::makePredefinedAttribute(const String& name, const String& type, Attribute::LayoutType layoutType)
 {
     if(type == "vec3" || type == "v3f")
-        return Attribute(name, Attribute::TYPE_FLOAT, type, 3, false);
+        return {layoutType, name, Attribute::TYPE_FLOAT, type, 3, false};
     if(type == "vec2" || type == "v2f")
-        return Attribute(name, Attribute::TYPE_FLOAT, type, 2, false);
+        return {layoutType, name, Attribute::TYPE_FLOAT, type, 2, false};
     if(type == "float")
-        return Attribute(name, Attribute::TYPE_FLOAT, type, 1, false);
+        return {layoutType, name, Attribute::TYPE_FLOAT, type, 1, false};
     if(type == "int" || type == "uint")
-        return Attribute(name, Attribute::TYPE_INTEGER, type, 1, false);
+        return {layoutType, name, Attribute::TYPE_INTEGER, type, 1, false};
     if(type == "vec4" || type == "v4f")
-        return Attribute(name, Attribute::TYPE_FLOAT, type, 4, false);
+        return {layoutType, name, Attribute::TYPE_FLOAT, type, 4, false};
     if(type == "vec4b" || type == "v4b")
-        return Attribute(name, Attribute::TYPE_UBYTE, type, 4, true);
+        return {layoutType, name, Attribute::TYPE_UBYTE, type, 4, true};
     if(type == "vec3b" || type == "v3fb")
-        return Attribute(name, Attribute::TYPE_UBYTE, type, 3, true);
+        return {layoutType, name, Attribute::TYPE_UBYTE, type, 3, true};
     if(type == "uint8")
-        return Attribute(name, Attribute::TYPE_UBYTE, type, 1, false);
+        return {layoutType, name, Attribute::TYPE_UBYTE, type, 1, false};
     if(type == "mat4")
-        return Attribute(name, Attribute::TYPE_FLOAT, type, 16, false);
+        return {layoutType, name, Attribute::TYPE_FLOAT, type, 16, false};
     if(type == "ivec4")
-        return Attribute(name, Attribute::TYPE_INTEGER, type, 4, false);
+        return {layoutType, name, Attribute::TYPE_INTEGER, type, 4, false};
     DFATAL("Unknown attribute type \"%s\"", type.c_str());
     return {};
 }

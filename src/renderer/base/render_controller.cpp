@@ -303,9 +303,9 @@ Buffer RenderController::makeBuffer(Buffer::Type type, Buffer::Usage usage, sp<U
 
 Buffer RenderController::makeBuffer(Buffer::Type type, Buffer::Usage usage, sp<Uploader> uploader)
 {
-    RenderController::UploadStrategy us = uploader ? RenderController::US_ONCE_AND_ON_SURFACE_READY : RenderController::US_ON_SURFACE_READY;
+    UploadStrategy us = uploader ? US_ONCE_AND_ON_SURFACE_READY : US_ON_SURFACE_READY;
     if(usage == Buffer::USAGE_DYNAMIC && uploader)
-        us = static_cast<RenderController::UploadStrategy>(us | RenderController::US_ON_CHANGE);
+        us = static_cast<UploadStrategy>(us | US_ON_CHANGE);
     return makeBuffer(type, usage, std::move(uploader), us);
 }
 

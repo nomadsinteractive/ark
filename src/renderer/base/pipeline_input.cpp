@@ -19,10 +19,10 @@ PipelineInput::AttributeOffsets::AttributeOffsets(const PipelineInput& input)
     : AttributeOffsets()
 {
     const StreamLayout& stream = input.layouts().at(0);
-    _offsets[ATTRIBUTE_NAME_TEX_COORDINATE] = stream.getAttributeOffset("TexCoordinate");
-    _offsets[ATTRIBUTE_NAME_NORMAL] = stream.getAttributeOffset("Normal");
-    _offsets[ATTRIBUTE_NAME_TANGENT] = stream.getAttributeOffset("Tangent");
-    _offsets[ATTRIBUTE_NAME_BITANGENT] = stream.getAttributeOffset("Bitangent");
+    _offsets[ATTRIBUTE_NAME_TEX_COORDINATE] = stream.getAttributeOffset(Attribute::LAYOUT_TYPE_TEX_COORD);
+    _offsets[ATTRIBUTE_NAME_NORMAL] = stream.getAttributeOffset(Attribute::LAYOUT_TYPE_NORMAL);
+    _offsets[ATTRIBUTE_NAME_TANGENT] = stream.getAttributeOffset(Attribute::LAYOUT_TYPE_TANGENT);
+    _offsets[ATTRIBUTE_NAME_BITANGENT] = stream.getAttributeOffset(Attribute::LAYOUT_TYPE_BITANGENT);
     _offsets[ATTRIBUTE_NAME_BONE_IDS] = stream.getAttributeOffset("BoneIds");
     _offsets[ATTRIBUTE_NAME_BONE_WEIGHTS] = stream.getAttributeOffset("BoneWeights");
     if(input.layouts().size() > 1)
@@ -200,9 +200,24 @@ void PipelineInput::StreamLayout::addAttribute(String name, Attribute attribute)
     _attributes.push_back(std::move(name), std::move(attribute));
 }
 
+Optional<const Attribute&> PipelineInput::StreamLayout::getAttribute(Attribute::LayoutType layoutType) const
+{
+    DASSERT(layoutType != Attribute::LAYOUT_TYPE_CUSTOM);
+    for(const Attribute& i : _attributes.values())
+        if(i.layoutType() == layoutType)
+            return {i};
+    return {};
+}
+
 Optional<const Attribute&> PipelineInput::StreamLayout::getAttribute(const String& name) const
 {
     return _attributes.has(name) ? Optional<const Attribute&>(_attributes.at(name)) : Optional<const Attribute&>();
+}
+
+int32_t PipelineInput::StreamLayout::getAttributeOffset(Attribute::LayoutType layoutType) const
+{
+    const Optional<const Attribute&> attr = getAttribute(layoutType);
+    return attr ? static_cast<int32_t>(attr->offset()) : -1;
 }
 
 int32_t PipelineInput::StreamLayout::getAttributeOffset(const String& name) const

@@ -13,7 +13,7 @@ namespace ark {
 
 RenderEngine::RenderEngine(const ApplicationManifest::Renderer& renderer, sp<RendererFactory> rendererFactory)
     : _coordinate_system(renderer._coordinate_system == Ark::COORDINATE_SYSTEM_DEFAULT ? rendererFactory->defaultCoordinateSystem() : renderer._coordinate_system), _renderer_factory(std::move(rendererFactory)),
-      _render_context(_renderer_factory->createRenderEngineContext(renderer._version))
+      _render_context(_renderer_factory->createRenderEngineContext(renderer))
 {
 }
 

@@ -56,18 +56,56 @@ private:
     size_t _aligned_size;
 };
 
+Attribute::LayoutType toAttributeLayoutType(const String& name, const String& type)
+{
+    if(name.startsWith("TexCoordinate"))
+    {
+        CHECK(type == "int" || type == "vec2" || type == "vec3", "Unacceptable TexCoordinate type: '%s', must be in [int, vec2, vec3]", type.c_str());
+        return Attribute::LAYOUT_TYPE_TEX_COORD;
+    }
+    if(name.startsWith("Position"))
+    {
+        CHECK(type == "int" || type == "vec2" || type == "vec3" || type == "vec4", "Unacceptable Position type: '%s', must be in [int, vec2, vec3, vec4]", type.c_str());
+        return Attribute::LAYOUT_TYPE_POSITION;
+    }
+    if(name.startsWith("Color"))
+    {
+        CHECK(type == "int" || type == "vec3" || type == "vec4", "Unacceptable Color type: '%s', must be in [int, vec3, vec4]", type.c_str());
+        return Attribute::LAYOUT_TYPE_COLOR;
+    }
+    if(name == "Normal")
+    {
+        CHECK(type == "vec3", "Unacceptable Normal type: '%s', must be in [vec3]", type.c_str());
+        return Attribute::LAYOUT_TYPE_NORMAL;
+    }
+    if(name == "Tangent")
+    {
+        CHECK(type == "vec3", "Unacceptable Tangent type: '%s', must be in [vec3]", type.c_str());
+        return Attribute::LAYOUT_TYPE_TANGENT;
+    }
+    if(name == "Bitangent")
+    {
+        CHECK(type == "vec3", "Unacceptable Bitangent type: '%s', must be in [vec3]", type.c_str());
+        return Attribute::LAYOUT_TYPE_BITANGENT;
+    }
+    return Attribute::LAYOUT_TYPE_CUSTOM;
+}
+
 Attribute makePredefinedAttribute(const String& name, const String& type)
 {
-    if(name == "TexCoordinate")
-        return Attribute("a_TexCoordinate", Attribute::TYPE_USHORT, type, 2, true);
-    if(name == "Position")
+    const Attribute::LayoutType layoutType = toAttributeLayoutType(name, type);
+
+    if(layoutType == Attribute::LAYOUT_TYPE_TEX_COORD)
+        return Attribute(Attribute::LAYOUT_TYPE_TEX_COORD, "a_TexCoordinate", Attribute::TYPE_USHORT, type, 2, true);
+
+    if(layoutType == Attribute::LAYOUT_TYPE_POSITION)
     {
         if(type == "int")
-            return Attribute("a_Position", Attribute::TYPE_INTEGER, type, 1, false);
+            return Attribute(Attribute::LAYOUT_TYPE_POSITION, "a_Position", Attribute::TYPE_INTEGER, type, 1, false);
         CHECK(type == "vec2" || type == "vec3" || type == "vec4", "Unacceptable Position type: '%s', must be in [int, vec2, vec3, vec4]", type.c_str());
-        return Attribute("a_Position", Attribute::TYPE_FLOAT, type, std::min<uint32_t>(3, static_cast<uint32_t>(type.at(3) - '0')), false);
+        return Attribute(Attribute::LAYOUT_TYPE_POSITION, "a_Position", Attribute::TYPE_FLOAT, type, std::min<uint32_t>(3, static_cast<uint32_t>(type.at(3) - '0')), false);
     }
-    return RenderUtil::makePredefinedAttribute("a_" + name, type);
+    return RenderUtil::makePredefinedAttribute("a_" + name, type, layoutType);
 }
 
 }

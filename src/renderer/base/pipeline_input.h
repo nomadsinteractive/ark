@@ -18,6 +18,7 @@ namespace ark {
 
 class ARK_API PipelineInput {
 public:
+//TODO: Use Attribute::LayoutType instead
     enum AttributeName {
         ATTRIBUTE_NAME_TEX_COORDINATE,
         ATTRIBUTE_NAME_NORMAL,
@@ -54,7 +55,7 @@ public:
         AttributeName _last_attribute;
     };
 
-    class StreamLayout {
+    class ARK_API StreamLayout {
     public:
         StreamLayout();
         DEFAULT_COPY_AND_ASSIGN(StreamLayout);
@@ -64,7 +65,10 @@ public:
         const Table<String, Attribute>& attributes() const;
         void addAttribute(String name, Attribute attribute);
 
+        Optional<const Attribute&> getAttribute(Attribute::LayoutType layoutType) const;
         Optional<const Attribute&> getAttribute(const String& name) const;
+        int32_t getAttributeOffset(Attribute::LayoutType layoutType) const;
+        [[deprecated]]
         int32_t getAttributeOffset(const String& name) const;
 
         void align();
@@ -142,7 +146,7 @@ public:
 
     void addAttribute(String name, Attribute attribute);
 
-    const PipelineInput::StreamLayout& getStreamLayout(uint32_t divisor) const;
+    const StreamLayout& getStreamLayout(uint32_t divisor) const;
 
     Optional<const Attribute&> getAttribute(const String& name) const;
 

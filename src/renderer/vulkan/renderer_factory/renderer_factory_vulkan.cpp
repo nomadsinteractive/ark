@@ -35,6 +35,25 @@
 
 namespace ark::vulkan {
 
+namespace {
+
+void setVersion(Ark::RendererVersion version, RenderEngineContext& vkContext)
+{
+    LOGD("Choose Vulkan Version = %d", version);
+    std::map<String, String>& definitions = vkContext.definitions();
+
+    definitions["vert.in"] = "in";
+    definitions["vert.out"] = "out";
+    definitions["frag.in"] = "in";
+    definitions["frag.out"] = "out";
+    definitions["frag.color"] = "f_FragColor";
+    vkContext.setSnippetFactory(sp<SnippetFactoryVulkan>::make());
+
+    vkContext.setVersion(version);
+}
+
+}
+
 RendererFactoryVulkan::RendererFactoryVulkan(sp<Recycler> recycler)
     : RendererFactory(Ark::COORDINATE_SYSTEM_LHS), _recycler(std::move(recycler)), _renderer(sp<VKRenderer>::make())
 {
@@ -42,11 +61,11 @@ RendererFactoryVulkan::RendererFactoryVulkan(sp<Recycler> recycler)
     pm->addPlugin(sp<VulkanPlugin>::make());
 }
 
-sp<RenderEngineContext> RendererFactoryVulkan::createRenderEngineContext(Ark::RendererVersion version)
+sp<RenderEngineContext> RendererFactoryVulkan::createRenderEngineContext(const ApplicationManifest::Renderer& renderer)
 {
-    sp<RenderEngineContext> vkContext = sp<RenderEngineContext>::make(version, Viewport(0, 0.0f, 1.0f, 1.0f, 0, 1.0f));
-    if(version != Ark::RENDERER_VERSION_AUTO)
-        setVersion(version, vkContext);
+    sp<RenderEngineContext> vkContext = sp<RenderEngineContext>::make(renderer, Viewport(0, 0.0f, 1.0f, 1.0f, 0, 1.0f));
+    if(renderer._version != Ark::RENDERER_VERSION_AUTO)
+        setVersion(renderer._version, vkContext);
     return vkContext;
 }
 
@@ -64,21 +83,6 @@ void RendererFactoryVulkan::onSurfaceCreated(RenderEngine& renderEngine)
     _renderer->_device = sp<VKDevice>::make(_renderer->_instance, _renderer->_instance->physicalDevices()[0]);
     _renderer->_heap = sp<VKHeap>::make(_renderer->_device);
     _renderer->_render_target = sp<VKSwapChain>::make(renderEngine, _renderer->_device);
-}
-
-void RendererFactoryVulkan::setVersion(Ark::RendererVersion version, RenderEngineContext& vkContext)
-{
-    LOGD("Choose Vulkan Version = %d", version);
-    std::map<String, String>& definitions = vkContext.definitions();
-
-    definitions["vert.in"] = "in";
-    definitions["vert.out"] = "out";
-    definitions["frag.in"] = "in";
-    definitions["frag.out"] = "out";
-    definitions["frag.color"] = "f_FragColor";
-    vkContext.setSnippetFactory(sp<SnippetFactoryVulkan>::make());
-
-    vkContext.setVersion(version);
 }
 
 sp<Buffer::Delegate> RendererFactoryVulkan::createBuffer(Buffer::Type type, Buffer::Usage usage)

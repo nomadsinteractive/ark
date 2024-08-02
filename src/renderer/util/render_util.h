@@ -15,7 +15,7 @@ namespace ark {
 class RenderUtil {
 public:
     static bytearray makeUnitCubeVertices(bool flipWindingOrder);
-    static Attribute makePredefinedAttribute(const String& name, const String& type);
+    static Attribute makePredefinedAttribute(const String& name, const String& type, Attribute::LayoutType layoutType = Attribute::LAYOUT_TYPE_CUSTOM);
 
     static uint32_t hash(const element_index_t* buf, size_t len);
 

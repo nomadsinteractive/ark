@@ -22,11 +22,6 @@ private:
     class Source;
 
 public:
-    static const char* ANNOTATION_VERT_IN;
-    static const char* ANNOTATION_VERT_OUT;
-    static const char* ANNOTATION_FRAG_IN;
-    static const char* ANNOTATION_FRAG_OUT;
-    static const char* ANNOTATION_FRAG_COLOR;
 
     class Preprocessed {
     public:

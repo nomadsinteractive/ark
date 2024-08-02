@@ -29,7 +29,7 @@ public:
     }
 
     uint64_t id() const {
-        return _handle.idx;
+        return _handle.idx + 1;
     }
 
     bool isValid() const {
@@ -51,6 +51,13 @@ public:
         T handle = _handle;
         _handle = {::bgfx::kInvalidHandle};
         return handle;
+    }
+
+    ResourceRecycleFunc recycle() {
+        const T handle = release();
+        return [handle](GraphicsContext& /*context*/) {
+            ::bgfx::destroy(handle);
+        };
     }
 
 private:

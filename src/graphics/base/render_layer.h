@@ -1,6 +1,5 @@
 #pragma once
 
-#include <deque>
 #include <vector>
 
 #include "core/collection/list.h"

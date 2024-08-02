@@ -12,6 +12,8 @@
 
 #include "renderer/forwarding.h"
 
+#include "app/base/application_manifest.h"
+
 namespace ark {
 
 class ARK_API RenderEngineContext {
@@ -22,7 +24,9 @@ public:
     };
 
 public:
-    RenderEngineContext(Ark::RendererVersion version, const Viewport& viewport);
+    RenderEngineContext(const ApplicationManifest::Renderer& renderer, const Viewport& viewport);
+
+    const ApplicationManifest::Renderer& renderer() const;
 
     Ark::RendererVersion version() const;
     void setVersion(Ark::RendererVersion version);
@@ -44,8 +48,7 @@ public:
     uint32_t getGLSLVersion() const;
 
 private:
-    Ark::RendererTarget _target;
-    Ark::RendererVersion _version;
+    ApplicationManifest::Renderer _renderer;
     Viewport _viewport;
 
     std::map<String, String> _annotations;

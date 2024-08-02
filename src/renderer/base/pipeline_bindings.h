@@ -17,7 +17,7 @@ namespace ark {
 
 class ARK_API PipelineBindings {
 public:
-    PipelineBindings(Buffer vertices, sp<PipelineFactory> pipelineFactory, sp<PipelineDescriptor> pipelineDescriptor, std::map<uint32_t, Buffer> dividedBuffers);
+    PipelineBindings(Buffer vertices, sp<PipelineFactory> pipelineFactory, sp<PipelineDescriptor> pipelineDescriptor, std::map<uint32_t, Buffer> streams);
 
     const Buffer& vertices() const;
     Buffer& vertices();

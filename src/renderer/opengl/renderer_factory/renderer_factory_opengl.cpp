@@ -39,11 +39,11 @@ RendererFactoryOpenGL::RendererFactoryOpenGL(sp<Recycler> recycler)
     pluginManager->addPlugin(sp<opengl::OpenglPlugin>::make());
 }
 
-sp<RenderEngineContext> RendererFactoryOpenGL::createRenderEngineContext(Ark::RendererVersion version)
+sp<RenderEngineContext> RendererFactoryOpenGL::createRenderEngineContext(const ApplicationManifest::Renderer& renderer)
 {
-    const sp<RenderEngineContext> renderContext = sp<RenderEngineContext>::make(version, Viewport(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f));
-    if(version != Ark::RENDERER_VERSION_AUTO)
-        setVersion(version, renderContext);
+    const sp<RenderEngineContext> renderContext = sp<RenderEngineContext>::make(renderer, Viewport(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f));
+    if(renderer._version != Ark::RENDERER_VERSION_AUTO)
+        setVersion(renderer._version, renderContext);
     return renderContext;
 }
 

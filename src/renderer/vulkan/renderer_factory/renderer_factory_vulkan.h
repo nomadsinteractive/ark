@@ -15,7 +15,7 @@ public:
     RendererFactoryVulkan(sp<Recycler> recycler);
     ~RendererFactoryVulkan() override = default;
 
-    sp<RenderEngineContext> createRenderEngineContext(Ark::RendererVersion version) override;
+    sp<RenderEngineContext> createRenderEngineContext(const ApplicationManifest::Renderer& renderer) override;
     void onSurfaceCreated(RenderEngine& renderEngine) override;
 
     sp<Buffer::Delegate> createBuffer(Buffer::Type type, Buffer::Usage usage) override;
@@ -24,9 +24,6 @@ public:
     sp<RenderView> createRenderView(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController) override;
     sp<PipelineFactory> createPipelineFactory() override;
     sp<Texture::Delegate> createTexture(sp<Size> size, sp<Texture::Parameters> parameters) override;
-
-private:
-    void setVersion(Ark::RendererVersion version, RenderEngineContext& vkContext);
 
 private:
     sp<Recycler> _recycler;
