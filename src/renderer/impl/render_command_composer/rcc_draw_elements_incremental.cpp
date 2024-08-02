@@ -1,9 +1,8 @@
-#include "renderer/impl/render_command_composer/rcc_draw_quads.h"
+#include "renderer/impl/render_command_composer/rcc_draw_elements_incremental.h"
 
 #include "core/impl/uploader/uploader_array.h"
 
 #include "graphics/base/render_layer.h"
-#include "graphics/base/render_request.h"
 
 #include "renderer/base/drawing_buffer.h"
 #include "renderer/base/drawing_context.h"
@@ -15,23 +14,23 @@
 
 namespace ark {
 
-RCCDrawQuads::RCCDrawQuads(sp<Model> model)
+RCCDrawElementsIncremental::RCCDrawElementsIncremental(sp<Model> model)
     : _model(std::move(model))
 {
 }
 
-sp<PipelineBindings> RCCDrawQuads::makeShaderBindings(Shader& shader, RenderController& renderController, Enum::RenderMode renderMode)
+sp<PipelineBindings> RCCDrawElementsIncremental::makeShaderBindings(Shader& shader, RenderController& renderController, Enum::RenderMode renderMode)
 {
     _strips = renderController.gba().makeStrips(shader.input()->getStreamLayout(0).stride(), _model->vertexCount());
     _indices = renderController.makeIndexBuffer();
     return shader.makeBindings(_strips->buffer(), renderMode, Enum::DRAW_PROCEDURE_DRAW_ELEMENTS);
 }
 
-void RCCDrawQuads::postSnapshot(RenderController& renderController, RenderLayerSnapshot& snapshot)
+void RCCDrawElementsIncremental::postSnapshot(RenderController& renderController, RenderLayerSnapshot& snapshot)
 {
 }
 
-sp<RenderCommand> RCCDrawQuads::compose(const RenderRequest& renderRequest, RenderLayerSnapshot& snapshot)
+sp<RenderCommand> RCCDrawElementsIncremental::compose(const RenderRequest& renderRequest, RenderLayerSnapshot& snapshot)
 {
     DrawingBuffer buf(snapshot._stub->_pipeline_bindings, snapshot._stub->_stride);
     bool hasNewCreatedSnapshot = false;

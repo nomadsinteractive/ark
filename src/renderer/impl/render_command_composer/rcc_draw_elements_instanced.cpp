@@ -34,7 +34,7 @@ void RCCDrawElementsInstanced::postSnapshot(RenderController& /*renderController
 
 sp<RenderCommand> RCCDrawElementsInstanced::compose(const RenderRequest& renderRequest, RenderLayerSnapshot& snapshot)
 {
-    size_t verticesLength = _model.vertices()->length();
+    const size_t verticesLength = _model.vertices()->length();
     const sp<ModelLoader>& modelLoader = snapshot._stub->_model_loader;
     const Buffer& vertices = snapshot._stub->_pipeline_bindings->vertices();
 

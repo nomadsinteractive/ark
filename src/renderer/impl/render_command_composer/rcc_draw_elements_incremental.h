@@ -7,9 +7,9 @@
 
 namespace ark {
 
-class RCCDrawQuads : public RenderCommandComposer {
+class RCCDrawElementsIncremental final : public RenderCommandComposer {
 public:
-    RCCDrawQuads(sp<Model> model);
+    RCCDrawElementsIncremental(sp<Model> model);
 
     sp<PipelineBindings> makeShaderBindings(Shader& shader, RenderController& renderController, Enum::RenderMode renderMode) override;
 

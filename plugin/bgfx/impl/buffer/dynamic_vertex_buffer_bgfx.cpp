@@ -27,7 +27,10 @@ void DynamicVertexBufferBgfx::setupLayout(const PipelineDescriptor& pipelineDesc
 void DynamicVertexBufferBgfx::upload(GraphicsContext& graphicsContext)
 {
     if(!_handle)
+    {
+        ASSERT(_vertex_buffer_layout.m_stride);
         _handle.reset(::bgfx::createDynamicVertexBuffer(_size, _vertex_buffer_layout));
+    }
 
     DASSERT(_size <= _data.size());
     ::bgfx::update(_handle, 0, ::bgfx::makeRef(_data.data(), _size));

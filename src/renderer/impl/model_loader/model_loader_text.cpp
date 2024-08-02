@@ -14,7 +14,7 @@
 #include "renderer/base/drawing_buffer.h"
 #include "renderer/base/pipeline_descriptor.h"
 #include "renderer/base/model.h"
-#include "renderer/impl/render_command_composer/rcc_draw_quads.h"
+#include "renderer/impl/render_command_composer/rcc_draw_elements_incremental.h"
 #include "renderer/base/render_controller.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/base/pipeline_bindings.h"
@@ -34,7 +34,7 @@ ModelLoaderText::ModelLoaderText(sp<RenderController> renderController, sp<Alpha
 
 sp<RenderCommandComposer> ModelLoaderText::makeRenderCommandComposer()
 {
-    return sp<RCCDrawQuads>::make(_atlas_attachment->_unit_model);
+    return sp<RCCDrawElementsIncremental>::make(_atlas_attachment->_unit_model);
 }
 
 void ModelLoaderText::initialize(PipelineBindings& pipelineBindings)

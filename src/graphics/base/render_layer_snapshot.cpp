@@ -82,8 +82,8 @@ bool RenderLayerSnapshot::addDisposedState(LayerContext& lc, void* stateKey)
 
 void RenderLayerSnapshot::addDiscardedLayerContext(LayerContext& lc)
 {
-    for(const auto& [i, j] : lc._element_states)
-        _item_deleted.push_back(j);
+    for(const auto& [k, v] : lc._element_states)
+        _item_deleted.push_back(v);
     lc._renderables.clear();
     lc._element_states.clear();
 }
