@@ -396,7 +396,7 @@ struct Text::Content {
             if(_layout_param->layout())
                 return _layout_param->layout();
 
-            if(!_layout_param->isWidthWrapContent())
+            if(!(_layout_param->isWidthWrapContent() || _layout_param->flexWrap() == LayoutParam::FLEX_WRAP_NOWRAP))
                 return sp<Layout>::make<LayoutParagraph>(_layout_param, _letter_spacing, _line_height);
         }
         return sp<Layout>::make<LayoutLabel>(_letter_spacing);

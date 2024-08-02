@@ -95,10 +95,6 @@ sp<PipelineBindings> RCCMultiDrawElementsIndirect::makeShaderBindings(Shader& sh
     return shader.makeBindings(renderController.makeVertexBuffer(Buffer::USAGE_STATIC, sp<VerticesUploader>::make(_model_bundle, shader.input())), renderMode, Enum::DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT);
 }
 
-void RCCMultiDrawElementsIndirect::postSnapshot(RenderController& /*renderController*/, RenderLayerSnapshot& /*snapshot*/)
-{
-}
-
 sp<RenderCommand> RCCMultiDrawElementsIndirect::compose(const RenderRequest& renderRequest, RenderLayerSnapshot& snapshot)
 {
     DrawingBuffer buf(snapshot._stub->_pipeline_bindings, snapshot._stub->_stride);

@@ -21,8 +21,6 @@ public:
     RCCMultiDrawElementsIndirect(sp<ModelBundle> multiModels);
 
     sp<PipelineBindings> makeShaderBindings(Shader& shader, RenderController& renderController, Enum::RenderMode renderMode) override;
-
-    void postSnapshot(RenderController& renderController, RenderLayerSnapshot& snapshot) override;
     sp<RenderCommand> compose(const RenderRequest& renderRequest, RenderLayerSnapshot& snapshot) override;
 
 private:

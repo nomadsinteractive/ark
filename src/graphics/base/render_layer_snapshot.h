@@ -69,7 +69,6 @@ public:
 
     std::deque<Droplet> _droplets;
     std::deque<LayerContext::ElementState> _item_deleted;
-    Buffer::Snapshot _index_buffer;
     Rect _scissor;
     bool _needs_reload;
 

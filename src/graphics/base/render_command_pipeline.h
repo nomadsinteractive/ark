@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_BASE_RENDER_COMMAND_PIPELINE_H_
-#define ARK_GRAPHICS_BASE_RENDER_COMMAND_PIPELINE_H_
+#pragma once
 
 #include <vector>
 
@@ -10,17 +9,15 @@
 
 namespace ark {
 
-class RenderCommandPipeline : public RenderCommand {
+class RenderCommandPipeline final : public RenderCommand {
 public:
 
     void add(sp<RenderCommand> renderCommand);
 
-    virtual void draw(GraphicsContext& graphicsContext) override;
+    void draw(GraphicsContext& graphicsContext) override;
 
 private:
     std::vector<sp<RenderCommand>> _commands;
 };
 
 }
-
-#endif

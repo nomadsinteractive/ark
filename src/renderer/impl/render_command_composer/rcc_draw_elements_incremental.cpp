@@ -26,10 +26,6 @@ sp<PipelineBindings> RCCDrawElementsIncremental::makeShaderBindings(Shader& shad
     return shader.makeBindings(_strips->buffer(), renderMode, Enum::DRAW_PROCEDURE_DRAW_ELEMENTS);
 }
 
-void RCCDrawElementsIncremental::postSnapshot(RenderController& renderController, RenderLayerSnapshot& snapshot)
-{
-}
-
 sp<RenderCommand> RCCDrawElementsIncremental::compose(const RenderRequest& renderRequest, RenderLayerSnapshot& snapshot)
 {
     DrawingBuffer buf(snapshot._stub->_pipeline_bindings, snapshot._stub->_stride);

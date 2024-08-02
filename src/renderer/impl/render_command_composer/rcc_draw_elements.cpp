@@ -24,18 +24,13 @@ sp<PipelineBindings> RCCDrawElements::makeShaderBindings(Shader& shader, RenderC
     return shader.makeBindings(renderController.makeVertexBuffer(), renderMode, Enum::DRAW_PROCEDURE_DRAW_ELEMENTS);
 }
 
-void RCCDrawElements::postSnapshot(RenderController& renderController, RenderLayerSnapshot& snapshot)
-{
-    snapshot._index_buffer = _primitive_index_buffer->snapshot(renderController, snapshot._droplets.size());
-}
-
 sp<RenderCommand> RCCDrawElements::compose(const RenderRequest& renderRequest, RenderLayerSnapshot& snapshot)
 {
     const size_t verticesCount = _model->vertexCount();
     const Buffer& vertices = snapshot._stub->_pipeline_bindings->vertices();
 
     DrawingBuffer buf(snapshot._stub->_pipeline_bindings, snapshot._stub->_stride);
-    buf.setIndices(snapshot._index_buffer);
+    buf.setIndices(_primitive_index_buffer->snapshot(snapshot._stub->_render_controller, snapshot._droplets.size()));
 
     if(snapshot.needsReload())
     {

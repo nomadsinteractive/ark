@@ -7,14 +7,12 @@
 
 namespace ark {
 
-class RCCDrawElementsInstanced : public RenderCommandComposer {
+class RCCDrawElementsInstanced final : public RenderCommandComposer {
 public:
     RCCDrawElementsInstanced(Model model);
 
-    virtual sp<PipelineBindings> makeShaderBindings(Shader& shader, RenderController& renderController, Enum::RenderMode renderMode) override;
-
-    virtual void postSnapshot(RenderController& renderController, RenderLayerSnapshot& snapshot) override;
-    virtual sp<RenderCommand> compose(const RenderRequest& renderRequest, RenderLayerSnapshot& snapshot) override;
+    sp<PipelineBindings> makeShaderBindings(Shader& shader, RenderController& renderController, Enum::RenderMode renderMode) override;
+    sp<RenderCommand> compose(const RenderRequest& renderRequest, RenderLayerSnapshot& snapshot) override;
 
 private:
     Model _model;

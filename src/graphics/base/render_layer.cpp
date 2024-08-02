@@ -69,7 +69,6 @@ RenderLayerSnapshot RenderLayer::snapshot(RenderRequest& renderRequest)
             ++iter;
         }
     }
-    _stub->_render_command_composer->postSnapshot(_stub->_render_controller, renderLayerSnapshot);
 
     DPROFILER_LOG("NeedsReload", renderLayerSnapshot.needsReload());
     return renderLayerSnapshot;

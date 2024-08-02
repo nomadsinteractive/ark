@@ -38,9 +38,10 @@ private:
     sp<Builder<Numeric>> _var;
 };
 
-sp<Builder<LayoutParam::Length>> getLengthBuilder(BeanFactory& factory, const document& manifest, const String& attrName) {
-    const Optional<String> attrOpt = Documents::getAttributeOptional<String>(manifest, attrName);
-    if(attrOpt) {
+sp<Builder<LayoutParam::Length>> getLengthBuilder(BeanFactory& factory, const document& manifest, const String& attrName)
+{
+    if(const Optional<String> attrOpt = Documents::getAttributeOptional<String>(manifest, attrName))
+    {
         const String& s = attrOpt.value();
         if(s == "auto")
             return sp<typename Builder<LayoutParam::Length>::Prebuilt>::make(sp<LayoutParam::Length>::make());
@@ -417,7 +418,7 @@ LayoutParam::Length::Length(float pixels)
 }
 
 LayoutParam::Length::Length(LengthType type, float value)
-    : _type(type), _value(sp<Numeric::Const>::make(value))
+    : _type(type), _value(sp<Numeric>::make<Numeric::Const>(value))
 {
 }
 

@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_BASE_DRAWING_BUFFER_H_
-#define ARK_RENDERER_BASE_DRAWING_BUFFER_H_
+#pragma once
 
 #include <vector>
 #include <map>
@@ -54,5 +53,3 @@ private:
 };
 
 }
-
-#endif
