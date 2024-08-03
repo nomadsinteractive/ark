@@ -16,6 +16,8 @@
 #include "renderer/base/recycler.h"
 #include "renderer/base/render_engine.h"
 #include "renderer/base/render_engine_context.h"
+#include "renderer/impl/render_command_composer/rcc_draw_elements.h"
+#include "renderer/impl/render_command_composer/rcc_draw_elements_incremental.h"
 #include "renderer/inf/renderer_factory.h"
 #include "renderer/util/render_util.h"
 
@@ -237,13 +239,13 @@ void RenderController::onDrawFrame(GraphicsContext& graphicsContext)
 
 void RenderController::upload(sp<Resource> resource, UploadStrategy strategy, sp<Updatable> updatable, sp<Future> future, UploadPriority priority)
 {
-    if(strategy & RenderController::US_ON_CHANGE)
+    if(strategy & US_ON_CHANGE)
     {
         CHECK(updatable, "An updatable must be specified using \"on_change\" upload strategy");
         sp<Boolean> disposed = future ? future->canceled() : sp<Boolean>::make<BooleanByWeakRef<Resource>>(resource, 1);
         addPreComposeUpdatable(std::move(updatable), std::move(disposed));
     }
-    if(strategy != RenderController::US_ON_CHANGE)
+    if(strategy != US_ON_CHANGE)
         _uploading_resources.push(UploadingRenderResource(RenderResource(std::move(resource), std::move(future)), strategy, priority));
 }
 
@@ -343,6 +345,12 @@ sp<Framebuffer> RenderController::makeFramebuffer(sp<Renderer> renderer, std::ve
     const sp<Framebuffer> framebuffer = renderEngine()->rendererFactory()->createFramebuffer(std::move(renderer), std::move(colorAttachments), std::move(depthStencilAttachments), clearMask);
     upload(framebuffer->resource(), RenderController::US_ONCE_AND_ON_SURFACE_READY, nullptr, nullptr, UPLOAD_PRIORITY_LOW);
     return framebuffer;
+}
+
+sp<RenderCommandComposer> RenderController::makeDrawElementsIncremental(sp<Model> model) const
+{
+    const bool canDrawElementsIncremental = _render_engine->rendererFactory()->canDrawElementIncremental();
+    return canDrawElementsIncremental ? sp<RenderCommandComposer>::make<RCCDrawElementsIncremental>(std::move(model)) : sp<RenderCommandComposer>::make<RCCDrawElements>(std::move(model));
 }
 
 void RenderController::addPreComposeUpdatable(sp<Updatable> updatable, sp<Boolean> canceled)

@@ -18,9 +18,11 @@
 #include "renderer/base/render_controller.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/base/pipeline_bindings.h"
+#include "renderer/base/render_engine.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/texture.h"
 #include "renderer/impl/vertices/vertices_quad.h"
+#include "renderer/inf/renderer_factory.h"
 #include "renderer/util/render_util.h"
 
 
@@ -34,7 +36,7 @@ ModelLoaderText::ModelLoaderText(sp<RenderController> renderController, sp<Alpha
 
 sp<RenderCommandComposer> ModelLoaderText::makeRenderCommandComposer()
 {
-    return sp<RCCDrawElementsIncremental>::make(_atlas_attachment->_unit_model);
+    return Ark::instance().renderController()->makeDrawElementsIncremental(_atlas_attachment->_unit_model);
 }
 
 void ModelLoaderText::initialize(PipelineBindings& pipelineBindings)

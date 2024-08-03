@@ -16,14 +16,18 @@ namespace ark {
 
 class ARK_API RendererFactory {
 public:
-    RendererFactory(Ark::RendererCoordinateSystem defaultCoordinateSystem)
-        : _default_coordinate_system(defaultCoordinateSystem) {
+    RendererFactory(Ark::RendererCoordinateSystem defaultCoordinateSystem, bool canDrawElementIncremental)
+        : _default_coordinate_system(defaultCoordinateSystem), _can_draw_element_incremental(canDrawElementIncremental) {
     }
     virtual ~RendererFactory() = default;
 
     [[nodiscard]]
     Ark::RendererCoordinateSystem defaultCoordinateSystem() const {
         return _default_coordinate_system;
+    }
+    [[nodiscard]]
+    bool canDrawElementIncremental() const {
+        return _can_draw_element_incremental;
     }
 
     virtual void onSurfaceCreated(RenderEngine& renderEngine) = 0;
@@ -38,6 +42,7 @@ public:
 
 protected:
     Ark::RendererCoordinateSystem _default_coordinate_system;
+    bool _can_draw_element_incremental;
 };
 
 }

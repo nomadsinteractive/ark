@@ -101,14 +101,14 @@ void setVersion(Ark::RendererVersion version, RenderEngineContext& vkContext)
 }
 
 RendererFactoryBgfx::RendererFactoryBgfx()
-    : RendererFactory(Ark::COORDINATE_SYSTEM_RHS)
+    : RendererFactory(Ark::COORDINATE_SYSTEM_RHS, false)
 {
 }
 
 void RendererFactoryBgfx::onSurfaceCreated(RenderEngine& renderEngine)
 {
     const RenderEngine::PlatformInfo& info = Ark::instance().applicationContext()->renderEngine()->info();
-    Ark::RendererVersion version = renderEngine.version();
+    const Ark::RendererVersion version = renderEngine.version();
     setVersion(version == Ark::RENDERER_VERSION_AUTO ? Ark::RENDERER_VERSION_VULKAN_13 : version, renderEngine.context());
 
     ::bgfx::Init init;

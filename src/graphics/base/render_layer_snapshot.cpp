@@ -68,11 +68,10 @@ void RenderLayerSnapshot::snapshot(RenderRequest& renderRequest, std::vector<sp<
 
 bool RenderLayerSnapshot::addDisposedState(LayerContext& lc, void* stateKey)
 {
-    const auto iter = lc._element_states.find(stateKey);
-    if(iter != lc._element_states.end())
+    if(const auto iter = lc._element_states.find(stateKey); iter != lc._element_states.end())
     {
         const LayerContext::ElementState& elementState = iter->second;
-        bool v = static_cast<bool>(elementState._index);
+        const bool v = static_cast<bool>(elementState._index);
         _item_deleted.push_back(elementState);
         lc._element_states.erase(iter);
         return v;

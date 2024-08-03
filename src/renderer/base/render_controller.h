@@ -122,6 +122,8 @@ public:
 
     sp<Framebuffer> makeFramebuffer(sp<Renderer> renderer, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask);
 
+    sp<RenderCommandComposer> makeDrawElementsIncremental(sp<Model> model) const;
+
     template<typename T> sp<Variable<T>> synchronize(sp<Variable<T>> delegate, sp<Boolean> disposed) {
         const sp<UpdatableSynchronized<T>> s = sp<UpdatableSynchronized<T>>::make(std::move(delegate));
         const sp<Variable<T>>& var = s->synchronized();

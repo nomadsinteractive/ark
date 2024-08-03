@@ -1,30 +1,31 @@
-#include "bgfx/impl/buffer/dynamic_vertex_buffer_bgfx.h"
+#include "storage_buffer_bgfx.h"
 
 #include "core/util/uploader_type.h"
 
 namespace ark::plugin::bgfx {
 
-DynamicVertexBufferBgfx::DynamicVertexBufferBgfx()
-    : BufferBase(Buffer::TYPE_VERTEX, Buffer::USAGE_DYNAMIC)
+StorageBufferBgfx::StorageBufferBgfx()
+    : BufferBase(Buffer::TYPE_STORAGE, Buffer::USAGE_DYNAMIC)
 {
+    _vertex_buffer_layout.begin().add(::bgfx::Attrib::Position, 4, ::bgfx::AttribType::Float).end();
 }
 
-uint64_t DynamicVertexBufferBgfx::id()
+uint64_t StorageBufferBgfx::id()
 {
     return _handle.id();
 }
 
-ResourceRecycleFunc DynamicVertexBufferBgfx::recycle()
+ResourceRecycleFunc StorageBufferBgfx::recycle()
 {
     return _handle.recycle();
 }
 
-void DynamicVertexBufferBgfx::setupLayout(const PipelineDescriptor& pipelineDescriptor)
+void StorageBufferBgfx::setupLayout(const PipelineDescriptor& pipelineDescriptor)
 {
     setupVertexBufferLayout(_vertex_buffer_layout, pipelineDescriptor);
 }
 
-void DynamicVertexBufferBgfx::upload(GraphicsContext& graphicsContext)
+void StorageBufferBgfx::upload(GraphicsContext& graphicsContext)
 {
     if(!_handle)
     {
@@ -36,19 +37,19 @@ void DynamicVertexBufferBgfx::upload(GraphicsContext& graphicsContext)
     ::bgfx::update(_handle, 0, ::bgfx::makeRef(_data.data(), _size));
 }
 
-void DynamicVertexBufferBgfx::uploadBuffer(GraphicsContext& graphicsContext, Uploader& input)
+void StorageBufferBgfx::uploadBuffer(GraphicsContext& graphicsContext, Uploader& input)
 {
     _data = UploaderType::toBytes(input);
     _size = _data.size();
     upload(graphicsContext);
 }
 
-void DynamicVertexBufferBgfx::downloadBuffer(GraphicsContext& graphicsContext, size_t offset, size_t size, void* ptr)
+void StorageBufferBgfx::downloadBuffer(GraphicsContext& graphicsContext, size_t offset, size_t size, void* ptr)
 {
     FATAL("Unimplemented");
 }
 
-void DynamicVertexBufferBgfx::bind()
+void StorageBufferBgfx::bind()
 {
     ::bgfx::setVertexBuffer(0, _handle);
 }
