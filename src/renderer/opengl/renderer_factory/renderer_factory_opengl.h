@@ -23,9 +23,6 @@ public:
     sp<Texture::Delegate> createTexture(sp<Size> size, sp<Texture::Parameters> parameters) override;
 
 private:
-    void setVersion(Ark::RendererVersion version, RenderEngineContext& glContext);
-
-private:
     sp<Recycler> _recycler;
 
 };

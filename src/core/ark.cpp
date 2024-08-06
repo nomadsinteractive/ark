@@ -104,8 +104,6 @@ sp<RenderEngine> doCreateRenderEngine(const ApplicationManifest::Renderer& rende
 {
     switch(renderer._version) {
         case Ark::RENDERER_VERSION_AUTO:
-        case Ark::RENDERER_VERSION_OPENGL_20:
-        case Ark::RENDERER_VERSION_OPENGL_21:
         case Ark::RENDERER_VERSION_OPENGL_30:
         case Ark::RENDERER_VERSION_OPENGL_31:
         case Ark::RENDERER_VERSION_OPENGL_32:

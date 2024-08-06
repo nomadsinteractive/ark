@@ -57,7 +57,7 @@ VkPipelineShaderStageCreateInfo VKUtil::loadShader(VkDevice device, const String
 
 VkPipelineShaderStageCreateInfo VKUtil::createShader(VkDevice device, const String& source, PipelineInput::ShaderStage stage)
 {
-    const std::vector<uint32_t> spirv = RenderUtil::compileSPIR(source, stage);
+    const std::vector<uint32_t> spirv = RenderUtil::compileSPIR(source, stage, Ark::RENDERER_TARGET_VULKAN);
     VkShaderModuleCreateInfo moduleCreateInfo{};
     moduleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
     moduleCreateInfo.codeSize = spirv.size() * sizeof(uint32_t);

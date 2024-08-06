@@ -1,5 +1,7 @@
 #include "bgfx/impl/texture/texture_bgfx.h"
 
+#include "core/inf/array.h"
+
 namespace ark::plugin::bgfx {
 
 namespace {
@@ -101,6 +103,10 @@ uint32_t getComponentSize(Texture::Format format)
 TextureBgfx::TextureBgfx(Texture::Type type, uint32_t width, uint32_t height, sp<Texture::Parameters> parameters)
     : ResourceBase(type), _width(width), _height(height), _parameters(std::move(parameters))
 {
+    const bool hasMips = _parameters->_features & Texture::FEATURE_MIPMAPS;
+    const uint32_t channelSize = getChannelSize(_parameters->_format);
+    const uint32_t componentSize = getComponentSize(_parameters->_format);
+    _handle.reset(::bgfx::createTexture2D(_width, _height, hasMips, 1, getTextureInternalFormat(_parameters->_usage, _parameters->_format, channelSize, componentSize)));
 }
 
 void TextureBgfx::upload(GraphicsContext& graphicsContext, const sp<Texture::Uploader>& uploader)
@@ -111,16 +117,6 @@ void TextureBgfx::upload(GraphicsContext& graphicsContext, const sp<Texture::Upl
             uploader->update(graphicsContext, *this);
         else
             uploader->initialize(graphicsContext, *this);
-    }
-    else
-    {
-        const bool hasMips = _parameters->_features & Texture::FEATURE_MIPMAPS;
-        if(!_handle)
-        {
-            const uint32_t channelSize = getChannelSize(_parameters->_format);
-            const uint32_t componentSize = getComponentSize(_parameters->_format);
-            _handle.reset(::bgfx::createTexture2D(_width, _height, hasMips, 1, getTextureInternalFormat(_parameters->_usage, _parameters->_format, channelSize, componentSize)));
-        }
     }
 }
 
@@ -140,6 +136,8 @@ bool TextureBgfx::download(GraphicsContext& graphicsContext, Bitmap& bitmap)
 
 void TextureBgfx::uploadBitmap(GraphicsContext& graphicsContext, const Bitmap& bitmap, const std::vector<sp<ByteArray>>& imagedata)
 {
+    const sp<ByteArray>& data = imagedata.at(0);
+    ::bgfx::updateTexture2D(_handle, 0, 0, 0, 0, _width, _height, ::bgfx::copy(data->buf(), data->size()));
 }
 
 }

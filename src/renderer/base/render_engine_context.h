@@ -51,7 +51,7 @@ private:
     ApplicationManifest::Renderer _renderer;
     Viewport _viewport;
 
-    std::map<String, String> _annotations;
+    std::map<String, String> _definitions;
     sp<SnippetFactory> _snippet_factory;
     Resolution _display_resolution;
     V2 _display_unit;

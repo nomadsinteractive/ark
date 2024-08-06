@@ -32,6 +32,23 @@
 
 namespace ark::opengl {
 
+namespace {
+
+void setVersion(Ark::RendererVersion version, RenderEngineContext& glContext)
+{
+    LOGD("Choose GLVersion = %d", version);
+    std::map<String, String>& definitions = glContext.definitions();
+    definitions["vert.in"] = "in";
+    definitions["vert.out"] = "out";
+    definitions["frag.in"] = "in";
+    definitions["frag.out"] = "out";
+    definitions["frag.color"] = "f_FragColor";
+    glContext.setSnippetFactory(sp<gles30::SnippetFactoryGLES30>::make());
+    glContext.setVersion(version);
+}
+
+}
+
 RendererFactoryOpenGL::RendererFactoryOpenGL(sp<Recycler> recycler)
     : RendererFactory(Ark::COORDINATE_SYSTEM_RHS, true), _recycler(std::move(recycler))
 {
@@ -58,31 +75,8 @@ void RendererFactoryOpenGL::onSurfaceCreated(RenderEngine& renderEngine)
         int glMajorVersion = 0, glMinorVersion = 0;
         glGetIntegerv(GL_MAJOR_VERSION, &glMajorVersion);
         glGetIntegerv(GL_MINOR_VERSION, &glMinorVersion);
-        if(glMajorVersion != 0)
-            setVersion(static_cast<Ark::RendererVersion>(glMajorVersion * 10 + glMinorVersion), renderEngine.context());
-        else
-            setVersion(Ark::RENDERER_VERSION_OPENGL_20, renderEngine.context());
+        setVersion(static_cast<Ark::RendererVersion>(glMajorVersion * 10 + glMinorVersion), renderEngine.context());
     }
-}
-
-void RendererFactoryOpenGL::setVersion(Ark::RendererVersion version, RenderEngineContext& glContext)
-{
-    LOGD("Choose GLVersion = %d", version);
-    std::map<String, String>& annotations = glContext.definitions();
-    if(version == Ark::RENDERER_VERSION_OPENGL_20 || version == Ark::RENDERER_VERSION_OPENGL_21)
-    {
-        FATAL("Deprecated");
-    }
-    else
-    {
-        annotations["vert.in"] = "in";
-        annotations["vert.out"] = "out";
-        annotations["frag.in"] = "in";
-        annotations["frag.out"] = "out";
-        annotations["frag.color"] = "f_FragColor";
-        glContext.setSnippetFactory(sp<gles30::SnippetFactoryGLES30>::make());
-    }
-    glContext.setVersion(version);
 }
 
 sp<RenderView> RendererFactoryOpenGL::createRenderView(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController)

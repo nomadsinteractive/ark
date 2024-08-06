@@ -1,7 +1,5 @@
 #pragma once
 
-#include <glslang/Public/ShaderLang.h>
-
 #include "core/forwarding.h"
 #include "core/inf/array.h"
 
@@ -12,7 +10,7 @@
 
 namespace ark {
 
-class RenderUtil {
+class ARK_API RenderUtil {
 public:
     static bytearray makeUnitCubeVertices(bool flipWindingOrder);
     static Attribute makePredefinedAttribute(const String& name, const String& type, Attribute::LayoutType layoutType = Attribute::LAYOUT_TYPE_CUSTOM);
@@ -27,7 +25,7 @@ public:
     static uint32_t getPixelSize(Texture::Format format);
     static uint32_t getComponentSize(Texture::Format format);
 
-    static std::vector<uint32_t> compileSPIR(const String& source, PipelineInput::ShaderStage stage);
+    static std::vector<uint32_t> compileSPIR(const String& source, PipelineInput::ShaderStage stage, Ark::RendererTarget renderTarget);
 };
 
 }

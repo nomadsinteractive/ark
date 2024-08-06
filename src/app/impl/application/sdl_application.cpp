@@ -249,7 +249,7 @@ public:
         return cursor ? sp<SDLCursor>::make(cursor) : nullptr;
     }
 
-    virtual void showCursor(const Box& cursor) override {
+    void showCursor(const Box& cursor) override {
         if(SDL_ShowCursor(SDL_QUERY) == SDL_DISABLE)
             SDL_ShowCursor(SDL_ENABLE);
 
@@ -261,11 +261,11 @@ public:
         }
     }
 
-    virtual void hideCursor() override {
+    void hideCursor() override {
         SDL_ShowCursor(SDL_DISABLE);
     }
 
-    virtual void setMouseCapture(bool enabled) override {
+    void setMouseCapture(bool enabled) override {
 #ifdef _WIN32
         _application_context->messageLoopRenderer()->post([this, enabled] () {
             this->doSetMouseCapture(enabled);
@@ -275,7 +275,7 @@ public:
 #endif
     }
 
-    virtual void exit() override {
+    void exit() override {
         gQuit = true;
     }
 

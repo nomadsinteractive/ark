@@ -18,7 +18,7 @@
 #define STD_TYPE_PATTERN        "int|uint8|float|[bi]?vec[234]|mat3|mat4"
 #define ATTRIBUTE_PATTERN       "\\s+(" STD_TYPE_PATTERN ")\\s+" "(?:a_|v_)(\\w+)" ARRAY_PATTERN ";"
 #define UNIFORM_PATTERN         "(\\w+)\\s+" "(\\w+)" ARRAY_PATTERN ";"
-#define LAYOUT_PATTERN          "layout\\((?:std140|binding\\s*=\\s*(\\d+)|r\\d+[uif]*|[\\s,])+\\)\\s+"
+#define LAYOUT_PATTERN          R"--(layout\((?:std140|binding\s*=\s*(\d+)|r\d+[uif]*|location=\d+|[\s,])+\)\s+)--"
 #define ACCESSIBILITY_PATTERN   "(?:(?:read|write)only\\s+)?"
 
 #define INDENT_STR "    "
@@ -124,8 +124,9 @@ void ShaderPreprocessor::parseMainBlock(const String& source, PipelineBuildingCo
 
 void ShaderPreprocessor::parseDeclarations()
 {
+    this->addInclude("shaders/defines.h");
     _main.replace(_INCLUDE_PATTERN, [this](const std::smatch& m) {
-        this->addInclude(m.str(), m[1].str());
+        this->addInclude(m[1].str());
         return nullptr;
     });
 
@@ -367,7 +368,7 @@ String ShaderPreprocessor::genDeclarations(const String& mainFunc) const
     return sb.str();
 }
 
-void ShaderPreprocessor::addInclude(const String& source, const String& filepath)
+void ShaderPreprocessor::addInclude(const String& filepath)
 {
     const Global<StringTable> stringtable;
     sp<String> content;
@@ -377,7 +378,7 @@ void ShaderPreprocessor::addInclude(const String& source, const String& filepath
     else
         content = stringtable->getString(filepath.substr(0, pos), filepath.substr(pos + 1).lstrip('/'), false);
     CHECK(content, "Can't open include file \"%s\"", filepath.c_str());
-    _include_declaration_codes.push_back(content ? std::move(content) : sp<String>::make(source));
+    _include_declaration_codes.push_back(std::move(content));
 }
 
 ShaderPreprocessor::Function::Function(String name, String params, String returnType, String body, sp<String> placeHolder)
@@ -688,9 +689,14 @@ uint32_t ShaderPreprocessor::Declaration::length() const
     return _length;
 }
 
-const sp<String>& ShaderPreprocessor::Declaration::source() const
+const String& ShaderPreprocessor::Declaration::source() const
 {
-    return _source;
+    return *_source;
+}
+
+void ShaderPreprocessor::Declaration::setSource(String source) const
+{
+    *_source = std::move(source);
 }
 
 ShaderPreprocessor::Parameter::Parameter()

@@ -285,7 +285,7 @@ uint32_t RenderUtil::getComponentSize(Texture::Format format)
     return 4;
 }
 
-std::vector<uint32_t> RenderUtil::compileSPIR(const String& source, PipelineInput::ShaderStage stage)
+std::vector<uint32_t> RenderUtil::compileSPIR(const String& source, PipelineInput::ShaderStage stage, Ark::RendererTarget renderTarget)
 {
     const Global<GLSLLangInitializer> initializer;
     EShLanguage esStage = initializer->toShLanguage(stage);
@@ -307,10 +307,8 @@ std::vector<uint32_t> RenderUtil::compileSPIR(const String& source, PipelineInpu
         // Set base bindings
         shader.setShiftBinding(res, baseBinding[res][esStage]);
         // Set bindings for particular resource sets
-        // TODO: use a range based for loop here, when available in all environments.
-        for (auto i = baseBindingForSet[res][esStage].begin();
-             i != baseBindingForSet[res][esStage].end(); ++i)
-            shader.setShiftBindingForSet(res, i->second, i->first);
+        for(const auto& [k, v] : baseBindingForSet[res][esStage])
+            shader.setShiftBindingForSet(res, v, k);
     }
 #ifdef ENABLE_HLSL
     shader.setFlattenUniformArrays(false);
@@ -320,12 +318,22 @@ std::vector<uint32_t> RenderUtil::compileSPIR(const String& source, PipelineInpu
 
     shader.setUniformLocationBase(uniformBase);
 
-    shader.setEnvInput(glslang::EShSourceGlsl, esStage, glslang::EShClientVulkan, 100);
-    shader.setEnvClient(glslang::EShClientVulkan, glslang::EShTargetVulkan_1_0);
-    shader.setEnvTarget(glslang::EShTargetSpv, glslang::EShTargetSpv_1_0);
+    switch(renderTarget)
+    {
+        case Ark::RENDERER_TARGET_AUTO:
+        case Ark::RENDERER_TARGET_OPENGL:
+            shader.setEnvInput(glslang::EShSourceGlsl, esStage, glslang::EShClientOpenGL, 450);
+            shader.setEnvClient(glslang::EShClientOpenGL, glslang::EShTargetOpenGL_450);
+            break;
+        case Ark::RENDERER_TARGET_VULKAN:
+            shader.setEnvInput(glslang::EShSourceGlsl, esStage, glslang::EShClientVulkan, 100);
+            shader.setEnvClient(glslang::EShClientVulkan, glslang::EShTargetVulkan_1_0);
+            break;
+    }
+    shader.setEnvTarget(glslang::EShTargetSpv, glslang::EShTargetSpv_1_6);
 
     if(!shader.parse(&initializer->builtInResource(), 100, false, EShMsgDefault))
-        FATAL("Compile error: %s\n\n%s", source.c_str(), shader.getInfoLog());
+        FATAL("Compile error:\n%s\n\n%s", source.c_str(), shader.getInfoLog());
     {
         glslang::TProgram program;
         program.addShader(&shader);

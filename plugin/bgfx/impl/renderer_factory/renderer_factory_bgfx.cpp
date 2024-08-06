@@ -7,6 +7,7 @@
 
 #include "graphics/base/size.h"
 
+#include "renderer/base/pipeline_building_context.h"
 #include "renderer/base/pipeline_descriptor.h"
 #include "renderer/base/render_engine.h"
 #include "renderer/base/render_engine_context.h"
@@ -15,14 +16,15 @@
 
 #include "app/base/application_context.h"
 
+#include "bgfx/base/resource_base.h"
 #include "bgfx/impl/buffer/static_index_buffer_bgfx.h"
 #include "bgfx/impl/buffer/dynamic_index_buffer_bgfx.h"
 #include "bgfx/impl/buffer/static_vertex_buffer_bgfx.h"
 #include "bgfx/impl/buffer/dynamic_vertex_buffer_bgfx.h"
+#include "bgfx/impl/buffer/storage_buffer_bgfx.h"
 #include "bgfx/impl/pipeline_factory/pipeline_factory_bgfx.h"
 #include "bgfx/impl/render_view/render_view_bgfx.h"
 #include "bgfx/impl/texture/texture_bgfx.h"
-#include "bgfx/base/resource_base.h"
 
 namespace ark::plugin::bgfx {
 
@@ -60,8 +62,14 @@ public:
     void preInitialize(PipelineBuildingContext& context) override
     {
     }
+
     void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout) override
     {
+        for(const auto& [_, v] : context.stages())
+        {
+            ShaderPreprocessor& preprocessor = v;
+            preprocessor._version = 450;
+        }
     }
 
     sp<DrawEvents> makeDrawEvents(const RenderRequest&) override
@@ -93,6 +101,9 @@ void setVersion(Ark::RendererVersion version, RenderEngineContext& vkContext)
     definitions["frag.in"] = "in";
     definitions["frag.out"] = "out";
     definitions["frag.color"] = "f_FragColor";
+    definitions["camera.uVP"] = "u_viewProj";
+    definitions["camera.uView"] = "u_view";
+    definitions["camera.uProjection"] = "u_proj";
     vkContext.setSnippetFactory(sp<SnippetFactoryBgfx>::make());
 
     vkContext.setVersion(version);
@@ -107,13 +118,11 @@ RendererFactoryBgfx::RendererFactoryBgfx()
 
 void RendererFactoryBgfx::onSurfaceCreated(RenderEngine& renderEngine)
 {
-    const RenderEngine::PlatformInfo& info = Ark::instance().applicationContext()->renderEngine()->info();
-    const Ark::RendererVersion version = renderEngine.version();
-    setVersion(version == Ark::RENDERER_VERSION_AUTO ? Ark::RENDERER_VERSION_VULKAN_13 : version, renderEngine.context());
-
     ::bgfx::Init init;
     init.type = renderEngine.version() >= Ark::RENDERER_VERSION_VULKAN ? ::bgfx::RendererType::Vulkan : ::bgfx::RendererType::OpenGL;
     init.vendorId = BGFX_PCI_ID_NONE;
+
+    const RenderEngine::PlatformInfo& info = Ark::instance().applicationContext()->renderEngine()->info();
 #ifdef ARK_PLATFORM_WINDOWS
     init.platformData.nwh  = info.windows.window;
 #elif defined(ARK_PLATFORM_DARWIN)
@@ -121,15 +130,21 @@ void RendererFactoryBgfx::onSurfaceCreated(RenderEngine& renderEngine)
 #endif
     init.platformData.ndt  = nullptr;
     init.platformData.type = ::bgfx::NativeWindowHandleType::Default;
-    init.resolution.width  = renderEngine.context()->displayResolution().width;
-    init.resolution.height = renderEngine.context()->displayResolution().height;
+
+    const V2& resolution = Ark::instance().manifest()->rendererResolution();
+    init.resolution.width  = resolution.x();
+    init.resolution.height = resolution.y();
     init.resolution.reset  = 0;
+
     ::bgfx::init(init);
+
+    ::bgfx::setDebug(BGFX_DEBUG_STATS);
 }
 
 sp<RenderEngineContext> RendererFactoryBgfx::createRenderEngineContext(const ApplicationManifest::Renderer& renderer)
 {
     const sp<RenderEngineContext> renderContext = sp<RenderEngineContext>::make(renderer, Viewport(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f));
+    setVersion(renderer._version == Ark::RENDERER_VERSION_AUTO ? Ark::RENDERER_VERSION_VULKAN_13 : renderer._version, renderContext);
     return renderContext;
 }
 
@@ -144,7 +159,7 @@ sp<Buffer::Delegate> RendererFactoryBgfx::createBuffer(Buffer::Type type, Buffer
         case Buffer::TYPE_DRAW_INDIRECT:
             return sp<Buffer::Delegate>::make<DynamicVertexBufferBgfx>();
         case Buffer::TYPE_STORAGE:
-            return sp<Buffer::Delegate>::make<DynamicVertexBufferBgfx>();
+            return sp<Buffer::Delegate>::make<StorageBufferBgfx>();
         default:
             FATAL("Unknow buffer type: %d", type);
             break;

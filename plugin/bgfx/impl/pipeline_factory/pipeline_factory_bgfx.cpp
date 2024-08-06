@@ -7,6 +7,7 @@
 #include "renderer/base/pipeline_layout.h"
 #include "renderer/base/pipeline_input.h"
 #include "renderer/inf/pipeline.h"
+#include "renderer/util/render_util.h"
 
 #include "bgfx/base/bgfx_context.h"
 #include "bgfx/base/handle.h"
@@ -18,6 +19,12 @@ namespace ark::plugin::bgfx {
 
 namespace {
 
+::bgfx::ShaderHandle createShader(const String& source, PipelineInput::ShaderStage stage)
+{
+    const std::vector<uint32_t> binaries = RenderUtil::compileSPIR(source, stage, Ark::RENDERER_TARGET_OPENGL);
+    return ::bgfx::createShader(::bgfx::copy(binaries.data(), binaries.size() * sizeof(uint32_t)));
+}
+
 class DrawPipelineBgfx final : public ResourceBase<::bgfx::ProgramHandle, Pipeline> {
 public:
     DrawPipelineBgfx(String vertexShader, String fragmentShader)
@@ -28,14 +35,30 @@ public:
     {
         if(!_handle)
         {
-            const auto vHandle = ::bgfx::createShader(::bgfx::makeRef(_vertex_shader.c_str(), _vertex_shader.size()));
-            const auto fHandle = ::bgfx::createShader(::bgfx::makeRef(_fragment_shader.c_str(), _fragment_shader.size()));
+            const auto vHandle = createShader(_vertex_shader, PipelineInput::SHADER_STAGE_VERTEX);
+            const auto fHandle = createShader(_fragment_shader.c_str(), PipelineInput::SHADER_STAGE_FRAGMENT);
             _handle.reset(::bgfx::createProgram(vHandle, fHandle, true));
         }
     }
 
     void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override
     {
+        if(_sampler_slots.empty() && drawingContext._pipeline_snapshot._bindings->samplers().size())
+        {
+            uint8_t textureUint = 0;
+            for(const auto& [name, texture] : drawingContext._pipeline_snapshot._bindings->samplers())
+            {
+                const sp<TextureBgfx> textureBgfx = texture->delegate().cast<TextureBgfx>();
+                _sampler_slots.push_back({::bgfx::createUniform(name.c_str(), ::bgfx::UniformType::Sampler), std::move(textureBgfx), textureUint++});
+            }
+        }
+    }
+
+    void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override
+    {
+        DASSERT(drawingContext._vertices);
+        DASSERT(drawingContext._indices);
+
         const sp<BufferBase> vertices = drawingContext._vertices.delegate().cast<BufferBase>();
         DASSERT(vertices->type() == Buffer::TYPE_VERTEX);
         vertices->bind();
@@ -44,18 +67,14 @@ public:
         DASSERT(indices->type() == Buffer::TYPE_INDEX);
         indices->bind();
 
-        for(const auto& [name, texture] : drawingContext._pipeline_snapshot._bindings->samplers())
-        {
-            const sp<TextureBgfx> textureBgfx = texture->delegate().cast<TextureBgfx>();
-        }
+        for(const auto& [uniform, texture, stage] : _sampler_slots)
+            ::bgfx::setTexture(stage, uniform, texture->handle());
 
-        for(const SamplerSlot& i : _sampler_slots)
-            ::bgfx::setTexture(i._stage, i._uniform, i._texture->handle());
-    }
-
-    void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override
-    {
+        const Camera& camera = drawingContext._pipeline_snapshot._bindings->pipelineInput()->camera();
         const BgfxContext& ctx = graphicsContext.attachments().ensure<BgfxContext>();
+        const M4 view = camera.view()->val();
+        const M4 proj = camera.projection()->val();
+        ::bgfx::setViewTransform(ctx._view_id, &view, &proj);
         ::bgfx::submit(ctx._view_id, _handle);
     }
 

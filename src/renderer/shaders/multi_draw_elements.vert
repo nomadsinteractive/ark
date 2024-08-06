@@ -1,4 +1,3 @@
-#include <shaders/defines.h>
 
 uniform mat4 u_VP;
 

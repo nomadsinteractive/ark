@@ -5,7 +5,7 @@
 namespace ark {
 
 RenderEngineContext::RenderEngineContext(const ApplicationManifest::Renderer& renderer, const Viewport& viewport)
-    : _renderer(renderer), _viewport(viewport)
+    : _renderer(renderer), _viewport(viewport), _definitions{{"camera.uVP", "u_VP"}, {"camera.uView", "u_View"}, {"camera.uProjection", "u_Projection"}}
 {
 }
 
@@ -26,12 +26,12 @@ void RenderEngineContext::setVersion(Ark::RendererVersion version)
 
 const std::map<String, String>& RenderEngineContext::definitions() const
 {
-    return _annotations;
+    return _definitions;
 }
 
 std::map<String, String>& RenderEngineContext::definitions()
 {
-    return _annotations;
+    return _definitions;
 }
 
 const Viewport& RenderEngineContext::viewport() const
@@ -64,10 +64,6 @@ const V2& RenderEngineContext::displayUnit() const
 uint32_t RenderEngineContext::getGLSLVersion() const
 {
     switch(_renderer._version) {
-    case Ark::RENDERER_VERSION_OPENGL_20:
-        return 110;
-    case Ark::RENDERER_VERSION_OPENGL_21:
-        return 120;
     case Ark::RENDERER_VERSION_OPENGL_30:
         return 130;
     case Ark::RENDERER_VERSION_OPENGL_31:

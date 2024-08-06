@@ -3,24 +3,25 @@
 #include <map>
 #include <set>
 
-#include "texture.h"
+#include "core/base/api.h"
 #include "core/base/string.h"
-#include "core/base/string_buffer.h"
 #include "core/collection/table.h"
 #include "core/types/owned_ptr.h"
 
 #include "renderer/forwarding.h"
 #include "renderer/base/buffer.h"
 #include "renderer/base/shader_preprocessor.h"
-#include "renderer/base/render_engine.h"
+#include "renderer/base/texture.h"
 #include "renderer/base/uniform.h"
 
 namespace ark {
 
-class PipelineBuildingContext {
+class ARK_API PipelineBuildingContext {
 public:
     PipelineBuildingContext(const sp<RenderController>& renderController, const sp<Camera>& camera);
     PipelineBuildingContext(const sp<RenderController>& renderController, const sp<Camera>& camera, sp<String> vertex, sp<String> fragment);
+
+    DISALLOW_COPY_AND_ASSIGN(PipelineBuildingContext);
 
     void loadManifest(const document& manifest, BeanFactory& factory, const Scope& args);
 

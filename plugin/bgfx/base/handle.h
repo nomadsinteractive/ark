@@ -11,6 +11,9 @@ public:
     Handle()
         :_handle{::bgfx::kInvalidHandle} {
     }
+    Handle(T handle)
+        :_handle(handle) {
+    }
     Handle(Handle&& other)
         :_handle(other.release()) {
     }

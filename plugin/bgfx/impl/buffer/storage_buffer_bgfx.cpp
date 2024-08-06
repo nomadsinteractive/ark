@@ -46,7 +46,7 @@ void StorageBufferBgfx::uploadBuffer(GraphicsContext& graphicsContext, Uploader&
 
 void StorageBufferBgfx::downloadBuffer(GraphicsContext& graphicsContext, size_t offset, size_t size, void* ptr)
 {
-    FATAL("Unimplemented");
+    WARN("Unimplemented");
 }
 
 void StorageBufferBgfx::bind()

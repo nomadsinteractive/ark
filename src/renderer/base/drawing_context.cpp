@@ -19,7 +19,7 @@ public:
     }
 
     void draw(GraphicsContext& graphicsContext) override {
-        const sp<Pipeline> pipeline = _context._pipeline_snapshot._bindings->getPipeline(graphicsContext);
+        const sp<Pipeline>& pipeline = _context._pipeline_snapshot._bindings->getPipeline(graphicsContext);
         pipeline->bind(graphicsContext, _context);
     }
 

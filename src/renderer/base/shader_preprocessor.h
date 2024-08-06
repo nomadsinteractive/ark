@@ -4,9 +4,7 @@
 
 #include "core/base/api.h"
 #include "core/base/string.h"
-#include "core/base/string_buffer.h"
 #include "core/collection/table.h"
-#include "core/types/global.h"
 
 #include "renderer/forwarding.h"
 #include "renderer/base/attribute.h"
@@ -47,7 +45,8 @@ public:
         const String& type() const;
         uint32_t length() const;
 
-        const sp<String>& source() const;
+        const String& source() const;
+        void setSource(String source) const;
 
     private:
         String _name;
@@ -180,7 +179,7 @@ private:
     size_t parseFunctionBody(const String& s, String& body) const;
     String genDeclarations(const String& mainFunc) const;
 
-    void addInclude(const String& source, const String& filepath);
+    void addInclude(const String& filepath);
 
     sp<String> addUniform(const String& type, const String& name, uint32_t length, String declaration);
     uint32_t getUniformSize(Uniform::Type type, const String& declaredType) const;

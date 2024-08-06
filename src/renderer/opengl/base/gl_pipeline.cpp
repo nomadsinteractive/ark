@@ -669,8 +669,8 @@ void GLPipeline::Stub::bindUBO(const RenderLayerSnapshot::UBOSnapshot& uboSnapsh
         {
             const sp<Uniform>& uniform = uniforms.at(i);
             const uint8_t* buf = uboSnapshot._buffer.buf();
-            const auto pair = ubo->slots().at(i);
-            bindUniform(buf + pair.first, pair.second, uniform);
+            const auto& [offset, size] = ubo->slots().at(i);
+            bindUniform(buf + offset, size, uniform);
         }
     }
 }
