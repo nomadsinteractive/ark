@@ -12,11 +12,11 @@
 #include "renderer/base/render_engine_context.h"
 #include "renderer/base/render_controller.h"
 
+#include "renderer/impl/snippet_factory/snippet_factory_vulkan.h"
 #include "renderer/vulkan/base/vk_instance.h"
 #include "renderer/vulkan/base/vk_device.h"
 #include "renderer/vulkan/base/vk_swap_chain.h"
 #include "renderer/vulkan/render_view/render_view_vulkan.h"
-#include "renderer/vulkan/snippet_factory/snippet_factory_vulkan.h"
 #include "renderer/vulkan/pipeline_factory/pipeline_factory_vulkan.h"
 
 #include "renderer/vulkan/base/vk_buffer.h"

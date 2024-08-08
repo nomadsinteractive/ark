@@ -279,7 +279,7 @@ size_t PipelineInput::UBO::size() const
     return _buffer->length();
 }
 
-const Table<String, sp<Uniform> >& PipelineInput::UBO::uniforms() const
+const Table<String, sp<Uniform>>& PipelineInput::UBO::uniforms() const
 {
     return _uniforms;
 }

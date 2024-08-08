@@ -34,10 +34,6 @@ public:
         return _inst != nullptr;
     }
 
-    operator const T& () const {
-        return *_inst;
-    }
-
     operator T& () const {
         return *_inst;
     }

@@ -9,10 +9,13 @@
 
 #include "renderer/base/pipeline_building_context.h"
 #include "renderer/base/pipeline_descriptor.h"
+#include "renderer/base/pipeline_layout.h"
 #include "renderer/base/render_engine.h"
 #include "renderer/base/render_engine_context.h"
 #include "renderer/inf/snippet_factory.h"
 #include "renderer/inf/snippet.h"
+#include "renderer/impl/snippet_factory/snippet_factory_vulkan.h"
+#include "renderer/util/render_util.h"
 
 #include "app/base/application_context.h"
 
@@ -65,6 +68,45 @@ public:
 
     void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout) override
     {
+        const String sLocation = "location";
+        const ShaderPreprocessor& firstStage = context.stages().begin()->second;
+
+        RenderUtil::setLayoutDescriptor(RenderUtil::setupLayoutLocation(context, firstStage._declaration_ins), sLocation, 0);
+
+        uint32_t uniformBindingLocation = 0;
+        const PipelineInput& pipelineInput = pipelineLayout.input();
+        if(ShaderPreprocessor* vertex = context.tryGetStage(PipelineInput::SHADER_STAGE_VERTEX))
+        {
+            uniformBindingLocation = RenderUtil::setLayoutDescriptor(vertex->_declaration_uniforms, sLocation, 0);
+            RenderUtil::setLayoutDescriptor(vertex->_declaration_images, "binding", static_cast<uint32_t>(pipelineInput.ubos().size() + pipelineInput.ssbos().size() + pipelineInput.samplerCount()));
+            vertex->_predefined_macros.push_back("#define gl_InstanceID gl_InstanceIndex");
+        }
+        if(ShaderPreprocessor* fragment = context.tryGetStage(PipelineInput::SHADER_STAGE_FRAGMENT))
+        {
+            fragment->linkNextStage("FragColor");
+            uint32_t bindingOffset = static_cast<uint32_t>(pipelineInput.ubos().size() + pipelineInput.ssbos().size());
+            RenderUtil::setLayoutDescriptor(fragment->_declaration_uniforms, sLocation, uniformBindingLocation);
+            bindingOffset = RenderUtil::setLayoutDescriptor(fragment->_declaration_samplers, "binding", bindingOffset);
+            RenderUtil::setLayoutDescriptor(fragment->_declaration_images, "binding", bindingOffset);
+        }
+
+        if(const ShaderPreprocessor* compute = context.tryGetStage(PipelineInput::SHADER_STAGE_COMPUTE))
+        {
+            const uint32_t bindingOffset = RenderUtil::setLayoutDescriptor(compute->_declaration_uniforms, sLocation, 0);
+            RenderUtil::setLayoutDescriptor(compute->_declaration_images, "binding", bindingOffset);
+        }
+
+        const ShaderPreprocessor* prestage = nullptr;
+        for(auto iter = context.stages().begin(); iter != context.stages().end(); ++iter)
+        {
+            if(iter != context.stages().begin())
+            {
+                RenderUtil::setLayoutDescriptor(prestage->_declaration_outs, iter->second->_declaration_ins, sLocation, 0);
+                RenderUtil::setLayoutDescriptor(iter->second->_declaration_outs, sLocation, 0);
+            }
+            prestage = iter->second.get();
+        }
+
         for(const auto& [_, v] : context.stages())
         {
             ShaderPreprocessor& preprocessor = v;
@@ -104,7 +146,8 @@ void setVersion(Ark::RendererVersion version, RenderEngineContext& vkContext)
     definitions["camera.uVP"] = "u_viewProj";
     definitions["camera.uView"] = "u_view";
     definitions["camera.uProjection"] = "u_proj";
-    vkContext.setSnippetFactory(sp<SnippetFactoryBgfx>::make());
+    // vkContext.setSnippetFactory(sp<SnippetFactoryBgfx>::make());
+    vkContext.setSnippetFactory(sp<SnippetFactoryVulkan>::make());
 
     vkContext.setVersion(version);
 }

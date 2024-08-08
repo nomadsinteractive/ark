@@ -11,6 +11,7 @@
 #include "graphics/base/v3.h"
 
 #include "renderer/base/model.h"
+#include "renderer/base/pipeline_building_context.h"
 #include "renderer/impl/vertices/vertices_nine_patch_quads.h"
 #include "renderer/impl/vertices/vertices_nine_patch_triangle_strips.h"
 #include "renderer/impl/vertices/vertices_point.h"
@@ -169,6 +170,40 @@ private:
     EShLanguage _languages[PipelineInput::SHADER_STAGE_COUNT];
     TBuiltInResource _built_in_resource;
 };
+
+void setLayoutQualifierBinding(const ShaderPreprocessor::Declaration& declaration, const String& qualifierName, uint32_t binding)
+{
+    StringBuffer sb;
+    sb << "layout (" << qualifierName << " = " << binding << ") " << declaration.source();
+    declaration.setSource(sb.str());
+}
+
+uint32_t getNextLayoutLocation(const ShaderPreprocessor::Declaration& declar, uint32_t& counter)
+{
+    const uint32_t location = counter;
+    //TODO: Consider merge uniform type and attribute type into one, something like ShaderDataType.
+    Uniform::Type type;
+    if(declar.type() == "vec4b")
+        type = Uniform::TYPE_I4;
+    else if(declar.type() == "vec3b")
+        type = Uniform::TYPE_I3;
+    else
+        type = Uniform::toType(declar.type());
+    switch(type)
+    {
+        case Uniform::TYPE_MAT3:
+        case Uniform::TYPE_MAT3V:
+            counter += 3 * declar.length();
+        break;
+        case Uniform::TYPE_MAT4:
+        case Uniform::TYPE_MAT4V:
+            counter += 4 * declar.length();
+        break;
+        default:
+            counter ++;
+    }
+    return location;
+}
 
 }
 
@@ -354,4 +389,56 @@ std::vector<uint32_t> RenderUtil::compileSPIR(const String& source, PipelineInpu
     }
     return {};
 }
+
+std::vector<ShaderPreprocessor::Declaration> RenderUtil::setupLayoutLocation(const PipelineBuildingContext& context, const ShaderPreprocessor::DeclarationList& declarations)
+{
+    std::vector<ShaderPreprocessor::Declaration> locations;
+    std::map<uint32_t, std::vector<const ShaderPreprocessor::Declaration*>> divisors;
+
+    for(const ShaderPreprocessor::Declaration& i : declarations.vars().values()) {
+        const auto iter = context._attributes.find(i.name());
+        DCHECK(iter != context._attributes.end(), "Cannot find attribute %s", i.name().c_str());
+        const Attribute& attribute = iter->second;
+        divisors[attribute.divisor()].push_back(&i);
+    }
+
+    for(const auto& i : divisors)
+    {
+        for(const ShaderPreprocessor::Declaration* j : i.second)
+            locations.push_back(*j);
+    }
+
+    return locations;
+}
+
+uint32_t RenderUtil::setLayoutDescriptor(const std::vector<ShaderPreprocessor::Declaration>& declarations, const String& qualifierName, uint32_t start)
+{
+    uint32_t counter = start;
+    for(const ShaderPreprocessor::Declaration& i : declarations)
+        setLayoutQualifierBinding(i, qualifierName, getNextLayoutLocation(i, counter));
+    return counter;
+}
+
+uint32_t RenderUtil::setLayoutDescriptor(const ShaderPreprocessor::DeclarationList& declarations, const String& descriptor, uint32_t start)
+{
+    return setLayoutDescriptor(declarations.vars().values(), descriptor, start);
+}
+
+uint32_t RenderUtil::setLayoutDescriptor(const ShaderPreprocessor::DeclarationList& ins, const ShaderPreprocessor::DeclarationList& outs, const String& qualifierName, uint32_t start)
+{
+    uint32_t counter = start;
+    DCHECK_WARN(ins.vars().size() == outs.vars().size(), "Output/Input mismatch, output and input have different numbers of items: [%s] vs [%s]",
+                Strings::join(&ins.vars().keys().at(0), 0, ins.vars().keys().size()).c_str(), Strings::join(&outs.vars().keys().at(0), 0, outs.vars().keys().size()).c_str());
+    for(const ShaderPreprocessor::Declaration& i : ins.vars().values()) {
+        uint32_t binding = getNextLayoutLocation(i, counter);
+        setLayoutQualifierBinding(i, qualifierName, binding);
+        const String outName = Strings::capitalizeFirst(i.name().startsWith("v_") ? i.name().substr(2) : i.name());
+        bool hasOutName = outs.vars().has(outName);
+        DCHECK_WARN(hasOutName, "Output/Input mismatch, \"%s\" exists in input but not found in next stage of shader", outName.c_str());
+        if(hasOutName)
+            setLayoutQualifierBinding(outs.vars().at(outName), qualifierName, binding);
+    }
+    return counter;
+}
+
 }

@@ -78,7 +78,7 @@ public:
         uint32_t _stride;
     };
 
-    class UBO {
+    class ARK_API UBO {
     public:
         UBO(uint32_t binding);
 

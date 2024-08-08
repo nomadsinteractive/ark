@@ -117,6 +117,7 @@ aux_source_directory(src/renderer/impl/render_command_composer LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/impl/uploader LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/impl/vertices LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/impl/snippet LOCAL_SRC_LIST)
+aux_source_directory(src/renderer/impl/snippet_factory LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/inf LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/util LOCAL_SRC_LIST)
 

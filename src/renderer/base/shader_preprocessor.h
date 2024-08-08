@@ -15,7 +15,7 @@
 
 namespace ark {
 
-class ShaderPreprocessor {
+class ARK_API ShaderPreprocessor {
 private:
     class Source;
 
@@ -138,8 +138,7 @@ private:
         sp<String> _place_hoder;
 
     private:
-        Parameter parseParameter(const String& param);
-
+        static Parameter parseParameter(const String& param);
     };
 
 public:

@@ -6,6 +6,7 @@
 #include "graphics/forwarding.h"
 
 #include "renderer/base/pipeline_input.h"
+#include "renderer/base/shader_preprocessor.h"
 #include "renderer/base/texture.h"
 
 namespace ark {
@@ -26,6 +27,11 @@ public:
     static uint32_t getComponentSize(Texture::Format format);
 
     static std::vector<uint32_t> compileSPIR(const String& source, PipelineInput::ShaderStage stage, Ark::RendererTarget renderTarget);
+
+    static std::vector<ShaderPreprocessor::Declaration> setupLayoutLocation(const PipelineBuildingContext& context, const ShaderPreprocessor::DeclarationList& declarations);
+    static uint32_t setLayoutDescriptor(const std::vector<ShaderPreprocessor::Declaration>& declarations, const String& qualifierName, uint32_t start);
+    static uint32_t setLayoutDescriptor(const ShaderPreprocessor::DeclarationList& declarations, const String& descriptor, uint32_t start);
+    static uint32_t setLayoutDescriptor(const ShaderPreprocessor::DeclarationList& ins, const ShaderPreprocessor::DeclarationList& outs, const String& qualifierName, uint32_t start);
 };
 
 }
