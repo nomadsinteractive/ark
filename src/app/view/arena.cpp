@@ -29,7 +29,7 @@ Arena::~Arena()
 
 void Arena::addRenderer(sp<Renderer> renderer, const Traits& traits)
 {
-    _renderer_phrase.addRenderer(renderer, traits);
+    _renderer_phrase.addRenderer(std::move(renderer), traits);
 }
 
 void Arena::render(RenderRequest& renderRequest, const V3& position)
@@ -121,14 +121,14 @@ const sp<View>& Arena::view() const
     return _view;
 }
 
-void Arena::addView(sp<View> view, sp<Boolean> disposable)
+void Arena::addView(sp<View> view, sp<Boolean> discarded)
 {
-    _view->addView(std::move(view), std::move(disposable));
+    _view->addView(std::move(view), std::move(discarded));
 }
 
 Arena::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _factory(factory), _manifest(manifest), _resource_loader(factory.getBuilder<ResourceLoader>(manifest, "resource-loader")),
-      _view(factory.getBuilder<View>(manifest, constants::VIEW))
+      _root_view(factory.getBuilder<View>(manifest, "root-view"))
 {
 }
 
@@ -137,7 +137,7 @@ sp<Arena> Arena::BUILDER::build(const Scope& args)
     sp<ResourceLoader> r1 = _resource_loader->build(args);
     sp<ResourceLoader> resourceLoader = r1 ? std::move(r1) : sp<ResourceLoader>::make(_factory);
     BeanFactory& factory = resourceLoader->beanFactory();
-    sp<Arena> arena = sp<Arena>::make(_view->build(args), std::move(resourceLoader));
+    sp<Arena> arena = sp<Arena>::make(_root_view->build(args), std::move(resourceLoader));
 
     for(const document& i : _manifest->children())
     {
@@ -146,7 +146,9 @@ sp<Arena> Arena::BUILDER::build(const Scope& args)
             arena->addEventListener(factory.ensure<EventListener>(i, args));
         else if(name == constants::RENDER_LAYER)
             arena->addRenderLayer(factory.ensure<RenderLayer>(i, args));
-        else if(name != constants::VIEW)
+        else if(name == constants::VIEW)
+            arena->addView(factory.ensure<View>(i, args));
+        else if(name != "root-view")
         {
             CHECK_WARN(name == constants::RENDERER, "['Renderer', 'RenderLayer'] expected, \"%s\" found", name.c_str());
             arena->addRenderer(factory.ensure<Renderer>(i, args), Traits());

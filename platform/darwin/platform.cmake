@@ -28,9 +28,9 @@ if(ARK_USE_VULKAN)
 endif()
 
 if(IOS)
-    ark_compile_definitions(-DARK_PLATFORM_IOS)
+    list(APPEND ARK_COMPILE_DEFINITIONS -DARK_PLATFORM_IOS)
 endif()
 
-ark_compile_definitions(-DARK_PLATFORM_DARWIN)
+list(APPEND ARK_COMPILE_DEFINITIONS -DARK_PLATFORM_DARWIN)
 
 aux_source_directory(platform/darwin/impl LOCAL_SRC_LIST)

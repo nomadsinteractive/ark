@@ -13,9 +13,11 @@
 				font-width="32" font-height="64"/>
 	</atlas>
 	<atlas id="@atlas_01" width="512" height="512"/>
-	<render-layer id="@rl001" model="quad(@alphabets)"/>
-	<render-layer id="@rl002" class="text-layer" alphabet="@a001" text-color="#ffffffff" atlas="@atlas_01"/>
-	<render-layer id="@rl003" model="quad(@blocks)"/>
+	<render-layer id="@rl001" model-loader="quad(@alphabets)"/>
+	<render-layer id="@rl002" atlas="@atlas_01">
+		<model-loader class="text" alphabet="@a001" atlas="@atlas_01" text-color="#ffffffff"/>
+	</render-layer>
+	<render-layer id="@rl003" model-loader="quad(@blocks)"/>
 	<renderer id="fps-counter" class="fps-counter" render-layer="@rl001" message="%.2f / 60"/>
 	<renderer id="imgui" class="imgui">
 		<font src="fonts/Cousine-Regular.ttf" size="14"/>

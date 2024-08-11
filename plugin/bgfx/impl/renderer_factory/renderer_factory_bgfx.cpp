@@ -175,8 +175,8 @@ void RendererFactoryBgfx::onSurfaceCreated(RenderEngine& renderEngine)
     init.platformData.type = ::bgfx::NativeWindowHandleType::Default;
 
     const V2& resolution = Ark::instance().manifest()->rendererResolution();
-    init.resolution.width  = resolution.x();
-    init.resolution.height = resolution.y();
+    init.resolution.width  = static_cast<uint32_t>(resolution.x());
+    init.resolution.height = static_cast<uint32_t>(resolution.y());
     init.resolution.reset  = 0;
 
     ::bgfx::init(init);

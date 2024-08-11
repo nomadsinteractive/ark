@@ -65,7 +65,6 @@ public:
         sp<Builder<Wirable>> _delegate;
     };
 
-public:
     virtual ~Wirable() = default;
 
     virtual TypeId onPoll(WiringContext& context) = 0;

@@ -365,7 +365,11 @@ std::vector<uint32_t> RenderUtil::compileSPIR(const String& source, PipelineInpu
             shader.setEnvClient(glslang::EShClientVulkan, glslang::EShTargetVulkan_1_0);
             break;
     }
+#ifdef ARK_PLATFORM_DARWIN
+    shader.setEnvTarget(glslang::EShTargetSpv, glslang::EShTargetSpv_1_5);
+#else
     shader.setEnvTarget(glslang::EShTargetSpv, glslang::EShTargetSpv_1_6);
+#endif
 
     if(!shader.parse(&initializer->builtInResource(), 100, false, EShMsgDefault))
         FATAL("Compile error:\n%s\n\n%s", source.c_str(), shader.getInfoLog());

@@ -11,7 +11,6 @@
 #include "core/impl/executor/executor_worker_thread.h"
 #include "core/types/shared_ptr.h"
 #include "core/types/owned_ptr.h"
-#include "core/types/weak_ptr.h"
 
 #include "graphics/forwarding.h"
 #include "graphics/base/color.h"
@@ -20,13 +19,13 @@
 #include "renderer/base/render_controller.h"
 
 #include "app/forwarding.h"
+#include "app/inf/event_listener.h"
 
 namespace ark {
 
 class ARK_API ApplicationContext {
 public:
     ApplicationContext(sp<ApplicationBundle> applicationBundle, sp<RenderEngine> renderEngine);
-    ~ApplicationContext();
 
     sp<ResourceLoader> createResourceLoader(const String& name, const Scope& args);
     sp<ResourceLoader> createResourceLoader(const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);

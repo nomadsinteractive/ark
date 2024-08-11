@@ -6,7 +6,7 @@
 #include "core/base/ref_manager.h"
 #include "core/traits/with_id.h"
 #include "core/types/global.h"
-
+#include "core/util/wirable_type.h"
 
 namespace ark {
 
@@ -33,14 +33,7 @@ void Entity::doWire()
     if(const sp<WithId>& withId = _components.get<WithId>())
         withId->_id = _ref->id();
 
-    Wirable::WiringContext context(_components);
-    for(const auto& [k, v] : _components.traits())
-        if(const sp<Wirable> wirable = v.as<Wirable>())
-            if(const TypeId typeId = wirable->onPoll(context); typeId != constants::TYPE_ID_NONE)
-                _components.put(typeId, v);
-    for(const auto& [k, v] : _components.traits())
-        if(const sp<Wirable> wirable = v.as<Wirable>())
-            wirable->onWire(context);
+    WirableType::wireAll(_components);
 }
 
 const sp<Ref>& Entity::id() const

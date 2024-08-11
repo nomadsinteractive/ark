@@ -6,12 +6,11 @@
 #include "core/base/plugin_manager.h"
 #include "core/base/resource_loader.h"
 #include "core/base/string_table.h"
-#include "core/base/thread.h"
 #include "core/impl/dictionary/dictionary_by_attribute_name.h"
 #include "core/impl/executor/executor_worker_thread.h"
 #include "core/impl/executor/executor_thread_pool.h"
 #include "core/impl/runnable/runnable_by_function.h"
-
+#include "core/inf/interpreter.h"
 #include "core/inf/runnable.h"
 #include "core/types/global.h"
 
@@ -35,7 +34,7 @@ namespace ark {
 
 namespace {
 
-class DeferedRunnable : public Runnable {
+class DeferedRunnable final : public Runnable {
 public:
     DeferedRunnable(const sp<MessageLoop>& messageLoop, sp<Runnable> runnable)
         : _message_loop(messageLoop), _runnable(std::move(runnable)) {
@@ -50,6 +49,21 @@ private:
     sp<Runnable> _runnable;
 };
 
+class NoneInterpreter final : public Interpreter {
+public:
+    void initialize() override {}
+    void execute(const sp<Asset>& source, const Scope& vars) override {}
+
+    Box call(const Box& func, const Arguments& args) override
+    {
+        return nullptr;
+    }
+    Box attr(const Box& obj, const String& name) override
+    {
+        return nullptr;
+    }
+};
+
 }
 
 ApplicationContext::ApplicationContext(sp<ApplicationBundle> applicationBundle, sp<RenderEngine> renderEngine)
@@ -61,11 +75,7 @@ ApplicationContext::ApplicationContext(sp<ApplicationBundle> applicationBundle, 
     const Ark& ark = Ark::instance();
 
     for(int32_t i = 0; i < ark.argc(); i++)
-        _argv.push_back(ark.argv()[i]);
-}
-
-ApplicationContext::~ApplicationContext()
-{
+        _argv.emplace_back(ark.argv()[i]);
 }
 
 void ApplicationContext::initialize(const document& manifest)
@@ -79,7 +89,10 @@ void ApplicationContext::initialize(const document& manifest)
     _message_loop_core = ark.manifest()->application()._message_loop == ApplicationManifest::MESSAGE_LOOP_TYPE_RENDER ? _message_loop_renderer : _worker_strategy->_message_loop;
     _message_loop_app = makeMessageLoop(_app_clock);
 
-    _interpreter = _resource_loader->beanFactory().build<Interpreter>(ark.manifest()->interpreter(), Scope());
+    if(const document& interpreter = ark.manifest()->interpreter())
+        _interpreter = _resource_loader->beanFactory().build<Interpreter>(interpreter, Scope());
+    else
+        _interpreter = sp<Interpreter>::make<NoneInterpreter>();
 }
 
 sp<ResourceLoader> ApplicationContext::createResourceLoader(const String& name, const Scope& args)

@@ -72,7 +72,7 @@ void ApplicationManifest::load(const String& src)
     _heap._device_unit_size = toSize(Documents::getAttributeValue(_content, "heap/device/unit-size", "8M"));
     _heap._host_unit_size = toSize(Documents::getAttributeValue(_content, "heap/host/unit-size", "8M"));
 
-    _interpreter = _content->ensureChild("interpreter");
+    _interpreter = _content->getChild("interpreter");
 
     _application._title = Documents::getAttributeValue(_content, "application/title");
     _application._window_flag = Documents::getAttributeValue<WindowFlag>(_content, "application/window-flag", WINDOW_FLAG_SHOW_CURSOR);

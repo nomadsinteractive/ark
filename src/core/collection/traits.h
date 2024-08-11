@@ -4,7 +4,6 @@
 #include "core/collection/table.h"
 #include "core/types/box.h"
 #include "core/types/optional.h"
-#include "core/types/shared_ptr.h"
 #include "core/types/type.h"
 
 namespace ark {
@@ -67,8 +66,7 @@ public:
 
 private:
     template<typename T, typename... Args> sp<T> instance_sfinae(std::enable_if_t<std::is_constructible_v<T, Args...>, int32_t>, Args&&... args) {
-        sp<T> inst = get<T>();
-        if(inst)
+        if(sp<T> inst = get<T>())
             return inst;
         return put<T>(sp<T>::make(std::forward<Args>(args)...)).template toPtr<T>();
     }
@@ -79,8 +77,9 @@ private:
         return inst;
     }
 
-    template<typename T, typename... Args> void _add_trait(Box trait, Args&&... args) {
-        put(trait.typeId(), std::move(trait));
+    template<typename T, typename... Args> void _add_trait(T trait, Args&&... args) {
+        Box box(std::move(trait));
+        put(box.typeId(), std::move(box));
         if constexpr(sizeof...(Args) != 0)
             _add_trait(std::forward<Args>(args)...);
     }

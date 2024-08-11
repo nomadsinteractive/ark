@@ -323,8 +323,8 @@ public:
         return ensureBuilder<T>(attrValue);
     }
 
-    template<typename T> std::vector<sp<Builder<T>>> makeBuilderList(const document& doc, const String& nodeName) {
-        std::vector<sp<Builder<T>>> list;
+    template<typename T> std::vector<builder<T>> makeBuilderList(const document& doc, const String& nodeName) {
+        std::vector<builder<T>> list;
         if(const String attrValue = Documents::getAttribute(doc, nodeName))
             list.push_back(ensureBuilder<T>(attrValue));
 

@@ -92,7 +92,7 @@ std::vector<Character> toLayoutCharacters(const GlyphContents& glyphs, ModelLoad
         }
         else
         {
-            const int32_t type = static_cast<int32_t>(c);
+            const int32_t type = c;
             sp<Model> model = modelLoader.loadModel(type);
             const V2 offset = getCharacterOffset(model);
             const Boundaries& m = model->occupy();
@@ -577,7 +577,7 @@ void Text::Content::createRichContent(const Scope& args, BeanFactory& factory)
     float flowx = boundary > 0 ? 0 : -_letter_spacing, flowy = getFlowY();
     const document richtext = Documents::parseFull(Strings::toUTF8(_text_unicode));
     _glyphs.clear();
-    float height = doCreateRichContent(_glyphs, _glyph_maker, richtext, factory, args, flowx, flowy, boundary);
+    const float height = doCreateRichContent(_glyphs, _glyph_maker, richtext, factory, args, flowx, flowy, boundary);
     createLayerContent(V2(flowx, height));
 }
 
@@ -588,7 +588,7 @@ float Text::Content::doCreateRichContent(GlyphContents& cm, GlyphMaker& gm, cons
     {
         if(i->type() == DOMElement::ELEMENT_TYPE_TEXT)
         {
-            for(sp<Glyph> i : makeGlyphs(gm, Strings::fromUTF8(i->value())))
+            for(sp<Glyph>& i : makeGlyphs(gm, Strings::fromUTF8(i->value())))
                 cm.push_back(std::move(i));
         }
         else if(i->type() == DOMElement::ELEMENT_TYPE_ELEMENT)

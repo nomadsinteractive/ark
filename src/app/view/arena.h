@@ -69,22 +69,20 @@ public:
     const sp<View>& view() const;
 
 //  [[script::bindings::auto]]
-    void addView(sp<View> view, sp<Boolean> disposable = nullptr);
-
-    void dispose();
+    void addView(sp<View> view, sp<Boolean> discarded = nullptr);
 
 //  [[plugin::builder]]
-    class BUILDER : public Builder<Arena> {
+    class BUILDER final : public Builder<Arena> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Arena> build(const Scope& args) override;
+        sp<Arena> build(const Scope& args) override;
 
     private:
         BeanFactory _factory;
         document _manifest;
         SafePtr<Builder<ResourceLoader>> _resource_loader;
-        SafePtr<Builder<View>> _view;
+        builder<View> _root_view;
     };
 
 private:

@@ -43,6 +43,7 @@ const char* const COLOR = "color";
 const char* const COLLISION_CALLBACK = "collision-callback";
 const char* const DELEGATE = "delegate";
 const char* const DISCARDED = "discarded";
+const char* const ENTITY = "ENTITY";
 const char* const EVENT_LISTENER = "event-listener";
 const char* const VARYINGS = "varyings";
 const char* const FOREGROUND = "foreground";

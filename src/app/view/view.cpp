@@ -7,7 +7,6 @@
 #include "core/util/updatable_util.h"
 
 #include "graphics/base/layer.h"
-#include "graphics/base/layer_context.h"
 #include "graphics/base/render_object.h"
 #include "graphics/traits/layout_param.h"
 #include "graphics/util/vec3_type.h"
@@ -17,10 +16,82 @@
 #include "renderer/base/render_engine.h"
 
 #include "app/base/application_context.h"
+#include "app/base/entity.h"
 #include "app/traits/shape.h"
+#include "app/traits/with_text.h"
 #include "app/view/view_hierarchy.h"
+#include "core/util/wirable_type.h"
 
 namespace ark {
+
+struct View::Stub final : Updatable {
+    Stub(sp<LayoutParam> layoutParam, sp<Boolean> visible, sp<Boolean> discarded)
+        : _hierarchy(layoutParam->layout() ? sp<ViewHierarchy>::make(layoutParam->layout()) : nullptr), _layout_node(sp<Layout::Node>::make(std::move(layoutParam))), _visible(std::move(visible), true), _discarded(std::move(discarded), false), _top_view(false)
+    {
+    }
+
+    bool update(uint64_t timestamp) override
+    {
+        bool dirty = UpdatableUtil::update(timestamp, _layout_node->_layout_param, _discarded, _visible);
+        if(_hierarchy)
+            dirty = _hierarchy->updateLayout(_layout_node, timestamp, dirty);
+        return dirty;
+    }
+
+    void dispose()
+    {
+        _discarded.reset(sp<Boolean>::make<Boolean::Const>(true));
+        _layout_node->_layout_param = nullptr;
+        _layout_node = nullptr;
+    }
+
+    bool isVisible() const
+    {
+        const sp<Stub> parentStub = _parent_stub.lock();
+        return _visible.val() && (_top_view || (parentStub ? parentStub->isVisible() : false));
+    }
+
+    bool isDiscarded() const
+    {
+        const sp<Stub> parentStub = _parent_stub.lock();
+        return _discarded.val() || (parentStub ? parentStub->isDiscarded() : !_top_view);
+    }
+
+    V3 getTopViewOffsetPosition(bool includePaddings) const
+    {
+        const Layout::Node& layoutNode = _layout_node;
+        const V3 layoutOffset(layoutNode.offsetPosition(), 0);
+        const sp<Stub> parentStub = _parent_stub.lock();
+        V3 offset = parentStub ? parentStub->getTopViewOffsetPosition(false) + layoutOffset : layoutOffset;
+        if(includePaddings)
+            offset += V3(layoutNode.paddings().w(), layoutNode.paddings().x(), 0);
+        return layoutNode._layout_param->position().val() + offset;
+    }
+
+    sp<Layout::Node> getTopViewLayoutNode() const
+    {
+        if(_top_view)
+            return _layout_node;
+        const sp<Stub> parentStub = _parent_stub.lock();
+        return parentStub ? parentStub->getTopViewLayoutNode() : nullptr;
+    }
+
+    ViewHierarchy& ensureViewHierarchy()
+    {
+        if(!_hierarchy)
+            _hierarchy = sp<ViewHierarchy>::make(nullptr);
+        return _hierarchy;
+    }
+
+    sp<ViewHierarchy> _hierarchy;
+    sp<Layout::Node> _layout_node;
+
+    SafeVar<Boolean> _visible;
+    SafeVar<Boolean> _discarded;
+
+    WeakPtr<Stub> _parent_stub;
+    bool _top_view;
+};
 
 namespace {
 
@@ -167,8 +238,7 @@ public:
         {
             if(stub->_top_view)
                 break;
-
-            if(const sp<ViewHierarchy>& viewHierarchy = stub->viewHierarchy(); viewHierarchy && viewHierarchy->isIsolatedLayout())
+            if(stub->_hierarchy && stub->_hierarchy->isIsolatedLayout())
                 break;
 
             stub = stub->_parent_stub.lock();
@@ -297,68 +367,19 @@ sp<Wirable> View::BUILDER_WIRABLE::build(const Scope& args)
     return _builder_impl.build(args);
 }
 
-View::Stub::Stub(sp<LayoutParam> layoutParam, sp<Boolean> visible, sp<Boolean> discarded)
-    : _hierarchy(layoutParam->layout() ? sp<ViewHierarchy>::make(layoutParam->layout()) : nullptr), _layout_node(sp<Layout::Node>::make(std::move(layoutParam))), _visible(std::move(visible), true), _discarded(std::move(discarded), false), _top_view(false)
+View::BUILDER_VIEW::BUILDER_VIEW(BeanFactory& factory, const document& manifest)
+    : _builder_impl(factory, manifest), _builder_text(factory, manifest)
 {
 }
 
-bool View::Stub::update(uint64_t timestamp)
+sp<View> View::BUILDER_VIEW::build(const Scope& args)
 {
-    bool dirty = UpdatableUtil::update(timestamp, _layout_node->_layout_param, _discarded, _visible);
-    if(viewHierarchy())
-        dirty = viewHierarchy()->updateLayout(_layout_node, timestamp, dirty);
-    return dirty;
-}
-
-void View::Stub::dispose()
-{
-    _discarded.reset(sp<Boolean>::make<Boolean::Const>(true));
-    _layout_node->_layout_param = nullptr;
-    _layout_node = nullptr;
-}
-
-bool View::Stub::isVisible() const
-{
-    const sp<Stub> parentStub = _parent_stub.lock();
-    return _visible.val() && (_top_view || (parentStub ? parentStub->isVisible() : false));
-}
-
-bool View::Stub::isDiscarded() const
-{
-    const sp<Stub> parentStub = _parent_stub.lock();
-    return _discarded.val() || (parentStub ? parentStub->isDiscarded() : !_top_view);
-}
-
-V3 View::Stub::getTopViewOffsetPosition(bool includePaddings) const
-{
-    const Layout::Node& layoutNode = _layout_node;
-    const V3 layoutOffset(layoutNode.offsetPosition(), 0);
-    const sp<Stub> parentStub = _parent_stub.lock();
-    V3 offset = parentStub ? parentStub->getTopViewOffsetPosition(false) + layoutOffset : layoutOffset;
-    if(includePaddings)
-        offset += V3(layoutNode.paddings().w(), layoutNode.paddings().x(), 0);
-    return layoutNode._layout_param->position().val() + offset;
-}
-
-sp<Layout::Node> View::Stub::getTopViewLayoutNode() const
-{
-    if(_top_view)
-        return _layout_node;
-    const sp<Stub> parentStub = _parent_stub.lock();
-    return parentStub ? parentStub->getTopViewLayoutNode() : nullptr;
-}
-
-const sp<ViewHierarchy>& View::Stub::viewHierarchy() const
-{
-    return _hierarchy;
-}
-
-ViewHierarchy& View::Stub::ensureViewHierarchy()
-{
-    if(!_hierarchy)
-        _hierarchy = sp<ViewHierarchy>::make(nullptr);
-
-    return _hierarchy;
+    const sp<View> view = _builder_impl.build(args);
+    const sp<Text> text = _builder_text.build(args);
+    Traits traits(view, sp<Wirable>::make<WithText>(text));
+    WirableType::wireAll(traits);
+    text->show(sp<Boolean>::make<Boolean::Const>(false));
+    return view;
 }
 
 }

@@ -35,6 +35,7 @@ template<typename T> class WeakPtr;
 template<typename T> class Wrapper;
 
 
+template <typename T> using builder = SharedPtr<Builder<T>>;
 template <typename T> using sp = SharedPtr<T>;
 template <typename T> using op = OwnedPtr<T>;
 template <typename T> using array = sp<Array<T>>;

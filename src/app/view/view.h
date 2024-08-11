@@ -8,9 +8,9 @@
 #include "core/inf/wirable.h"
 #include "core/types/safe_ptr.h"
 #include "core/types/safe_var.h"
-#include "core/types/weak_ptr.h"
 
 #include "graphics/forwarding.h"
+#include "graphics/base/text.h"
 #include "graphics/inf/layout.h"
 #include "graphics/inf/renderable.h"
 
@@ -53,7 +53,7 @@ public:
     void setParent(const View& view);
 
 //  [[plugin::builder]]
-    class BUILDER : public Builder<View> {
+    class BUILDER final : public Builder<View> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
@@ -70,7 +70,7 @@ public:
     };
 
 //  [[plugin::builder("view")]]
-    class BUILDER_WIRABLE : public Builder<Wirable> {
+    class BUILDER_WIRABLE final : public Builder<Wirable> {
     public:
         BUILDER_WIRABLE(BeanFactory& factory, const document& manifest);
 
@@ -80,33 +80,19 @@ public:
         BUILDER _builder_impl;
     };
 
-    struct Stub : Updatable {
-        Stub(sp<LayoutParam> layoutParam, sp<Boolean> visible, sp<Boolean> discarded);
+//  [[plugin::builder("text")]]
+    class BUILDER_VIEW final : public Builder<View> {
+    public:
+        BUILDER_VIEW(BeanFactory& factory, const document& manifest);
 
-        bool update(uint64_t timestamp) override;
+        sp<View> build(const Scope& args) override;
 
-        void updateLayout(uint64_t timestamp);
-
-        void dispose();
-
-        bool isVisible() const;
-        bool isDiscarded() const;
-
-        V3 getTopViewOffsetPosition(bool includePaddings) const;
-        sp<Layout::Node> getTopViewLayoutNode() const;
-
-        const sp<ViewHierarchy>& viewHierarchy() const;
-        ViewHierarchy& ensureViewHierarchy();
-
-        sp<ViewHierarchy> _hierarchy;
-        sp<Layout::Node> _layout_node;
-
-        SafeVar<Boolean> _visible;
-        SafeVar<Boolean> _discarded;
-
-        WeakPtr<Stub> _parent_stub;
-        bool _top_view;
+    private:
+        BUILDER _builder_impl;
+        Text::BUILDER _builder_text;
     };
+
+    struct Stub;
 
 private:
     void markAsTopView();
