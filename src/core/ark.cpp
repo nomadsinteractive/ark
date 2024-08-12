@@ -393,7 +393,7 @@ Camera Ark::createCamera(RendererCoordinateSystem coordinateSystem) const
     const RendererCoordinateSystem cs = coordinateSystem == COORDINATE_SYSTEM_DEFAULT ? _manifest->renderer()._coordinate_system : coordinateSystem;
     RendererFactory& rendererFactory = _application_context->renderController()->renderEngine()->rendererFactory();
     sp<Camera::Delegate> cameraDelegate = rendererFactory.createCamera();
-    return {cs, cs == rendererFactory.defaultCoordinateSystem() ? std::move(cameraDelegate) : sp<Camera::Delegate>::make<CameraDelegateCHS>(std::move(cameraDelegate))};
+    return {cs, cs == COORDINATE_SYSTEM_DEFAULT || cs == rendererFactory.defaultCoordinateSystem() ? std::move(cameraDelegate) : sp<Camera::Delegate>::make<CameraDelegateCHS>(std::move(cameraDelegate))};
 }
 
 op<ApplicationProfiler::Tracer> Ark::makeProfilerTracer(const char* func, const char* filename, int32_t lineno, const char* name, ApplicationProfiler::Category category) const

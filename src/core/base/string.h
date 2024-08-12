@@ -25,6 +25,7 @@ public:
 
     char at(size_type i) const;
     const char* c_str() const;
+    const std::string& str() const;
     size_type length() const;
     size_type size() const;
     bool empty() const;

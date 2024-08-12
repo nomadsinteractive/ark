@@ -142,7 +142,7 @@ void PipelineBuildingContext::initializeAttributes()
 
     for(const auto& [i, j] : _stages)
         for(const ShaderPreprocessor::Parameter& k : j->args())
-            if(k._modifier & ShaderPreprocessor::Parameter::PARAMETER_MODIFIER_IN)
+            if(k._modifier & ShaderPreprocessor::Parameter::PARAMETER_ANNOTATION_IN)
                 j->inDeclare(k._type, Strings::capitalizeFirst(k._name));
 
     std::set<String> passThroughVars;
@@ -199,9 +199,9 @@ void PipelineBuildingContext::initializeAttributes()
     }
 
     for(const auto& i : firstStage._main_block->_args)
-        if(i._modifier == ShaderPreprocessor::Parameter::PARAMETER_MODIFIER_INOUT)
+        if(i._modifier == ShaderPreprocessor::Parameter::PARAMETER_ANNOTATION_INOUT)
             firstStage.passThroughDeclare(i._type, Strings::capitalizeFirst(i._name));
-        else if(i._modifier & ShaderPreprocessor::Parameter::PARAMETER_MODIFIER_OUT)
+        else if(i._modifier & ShaderPreprocessor::Parameter::PARAMETER_ANNOTATION_OUT)
             firstStage.outDeclare(i._type, Strings::capitalizeFirst(i._name));
 }
 
@@ -305,7 +305,7 @@ Attribute& PipelineBuildingContext::addPredefinedAttribute(const String& name, c
         _attributes[name] = std::move(attr);
     }
 
-    getStage(stage)->_predefined_parameters.push_back(ShaderPreprocessor::Parameter(type, name, ShaderPreprocessor::Parameter::PARAMETER_MODIFIER_IN, divisor));
+    getStage(stage)->_predefined_parameters.push_back(ShaderPreprocessor::Parameter(type, name, ShaderPreprocessor::Parameter::PARAMETER_ANNOTATION_IN, divisor));
     return _attributes[name];
 }
 

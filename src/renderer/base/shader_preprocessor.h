@@ -20,7 +20,6 @@ private:
     class Source;
 
 public:
-
     class Preprocessed {
     public:
         Preprocessed();
@@ -97,14 +96,14 @@ private:
     };
 
     struct Parameter {
-        enum Modifier {
-            PARAMETER_MODIFIER_DEFAULT = 0,
-            PARAMETER_MODIFIER_IN = 1,
-            PARAMETER_MODIFIER_OUT = 2,
-            PARAMETER_MODIFIER_INOUT = 3
+        enum Annotation {
+            PARAMETER_ANNOTATION_DEFAULT = 0,
+            PARAMETER_ANNOTATION_IN = 1,
+            PARAMETER_ANNOTATION_OUT = 2,
+            PARAMETER_ANNOTATION_INOUT = 3
         };
         Parameter();
-        Parameter(String type, String name, Modifier modifier, uint32_t divisor);
+        Parameter(String type, String name, Annotation modifier, uint32_t divisor);
 
         DEFAULT_COPY_AND_ASSIGN(Parameter);
 
@@ -112,7 +111,7 @@ private:
 
         String _type;
         String _name;
-        Modifier _modifier;
+        Annotation _modifier;
         uint32_t _divisor;
     };
 
@@ -146,7 +145,7 @@ public:
 
     void addPreMainSource(const String& source);
     void addPostMainSource(const String& source);
-    void addOutputVarModifier(String modifier);
+    void addOutputModifier(String preModifier, String postModifier);
 
     void initialize(PipelineBuildingContext& context);
     void initializeAsFirst(PipelineBuildingContext& context);
@@ -191,6 +190,11 @@ private:
     sp<String> _source;
     sp<Function> _main_block;
 
+    struct ResultModifer {
+        String _pre_modifier;
+        String _post_modifier;
+    };
+
     friend class PipelineBuildingContext;
     friend class PipelineLayout;
 
@@ -211,7 +215,7 @@ public:
 
     std::vector<String> _predefined_macros;
     std::vector<Parameter> _predefined_parameters;
-    std::vector<String> _output_var_modifiers;
+    std::vector<ResultModifer> _result_modifiers;
 
     std::map<std::string, int32_t> _ssbos;
 

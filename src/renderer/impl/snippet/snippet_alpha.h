@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_IMPL_SNIPPET_ALPHA_H_
-#define ARK_RENDERER_IMPL_SNIPPET_ALPHA_H_
+#pragma once
 
 #include "core/inf/builder.h"
 
@@ -7,21 +6,18 @@
 
 namespace ark {
 
-class SnippetAlpha : public Snippet {
+class SnippetAlpha final : public Snippet {
 public:
-    virtual void preInitialize(PipelineBuildingContext& context) override;
+    void preInitialize(PipelineBuildingContext& context) override;
 
 //  [[plugin::builder::by-value("alpha")]]
     class DICTIONARY : public Builder<Snippet> {
     public:
         DICTIONARY() = default;
 
-        virtual sp<Snippet> build(const Scope& args) override;
-
+        sp<Snippet> build(const Scope& args) override;
     };
 
 };
 
 }
-
-#endif

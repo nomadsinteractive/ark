@@ -58,8 +58,6 @@ public:
 //  [[script::bindings::auto]]
     void setRichText(std::wstring richText, const sp<ResourceLoader>& resourceLoader = nullptr, const Scope& args = Scope());
 
-    bool update(uint64_t timestamp) const;
-
 //  [[plugin::builder]]
     class BUILDER final : public Builder<Text> {
     public:

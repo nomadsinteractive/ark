@@ -546,11 +546,6 @@ void Text::setRichText(std::wstring richText, const sp<ResourceLoader>& resource
     _content->setRichText(std::move(richText), resourceLoader, args);
 }
 
-bool Text::update(uint64_t timestamp) const
-{
-    return _content->update(timestamp);
-}
-
 void Text::Content::setText(std::wstring text)
 {
     _text_unicode = std::move(text);

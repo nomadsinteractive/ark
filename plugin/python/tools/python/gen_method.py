@@ -409,7 +409,6 @@ class GenOperatorMethod(GenMethod):
         if self._is_static:
             return '%s::%s(%s);' % (genclass.classname, self._name, argnames)
         return super()._gen_calling_statement(genclass, argnames)
-        return '%s::%s(%s%s);' % (genclass.classname, self._name, self.gen_self_statement(genclass), argnames if not argnames else ', ' + argnames)
 
     def gen_return_statement(self, return_type, py_return):
         if self._operator in ('+=', '-=', '*=', '/='):

@@ -1,6 +1,7 @@
 #include "app/view/view.h"
 
 #include "core/base/bean_factory.h"
+#include "core/impl/boolean/boolean_by_weak_ref.h"
 #include "core/impl/updatable/updatable_once_per_frame.h"
 #include "core/util/boolean_type.h"
 #include "core/util/math.h"
@@ -378,7 +379,7 @@ sp<View> View::BUILDER_VIEW::build(const Scope& args)
     const sp<Text> text = _builder_text.build(args);
     Traits traits(view, sp<Wirable>::make<WithText>(text));
     WirableType::wireAll(traits);
-    text->show(sp<Boolean>::make<Boolean::Const>(false));
+    text->show(sp<Boolean>::make<BooleanByWeakRef<View>>(view, 0));
     return view;
 }
 

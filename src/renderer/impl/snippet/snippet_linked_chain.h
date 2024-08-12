@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_IMPL_SNIPPET_LINKED_CHAIN_H_
-#define ARK_RENDERER_IMPL_SNIPPET_LINKED_CHAIN_H_
+#pragma once
 
 #include "core/inf/builder.h"
 #include "core/base/bean_factory.h"
@@ -55,5 +54,3 @@ private:
 };
 
 }
-
-#endif

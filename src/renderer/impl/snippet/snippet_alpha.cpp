@@ -8,7 +8,7 @@ void SnippetAlpha::preInitialize(PipelineBuildingContext& context)
 {
     ShaderPreprocessor& fragment = context.getStage(PipelineInput::SHADER_STAGE_FRAGMENT);
     context.addPredefinedAttribute("Alpha", "float", 0, PipelineInput::SHADER_STAGE_FRAGMENT);
-    fragment.addOutputVarModifier("vec4(1.0, 1.0, 1.0, v_Alpha)");
+    fragment.addOutputModifier("", " * vec4(1.0, 1.0, 1.0, v_Alpha)");
 }
 
 sp<Snippet> SnippetAlpha::DICTIONARY::build(const Scope& /*args*/)

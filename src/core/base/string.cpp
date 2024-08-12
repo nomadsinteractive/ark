@@ -43,6 +43,11 @@ const char* String::c_str() const
     return _str.c_str();
 }
 
+const std::string& String::str() const
+{
+    return _str;
+}
+
 String::size_type String::length() const
 {
     return _str.size();

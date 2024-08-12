@@ -68,9 +68,9 @@ void ShaderPreprocessor::addPostMainSource(const String& source)
     *_post_main = Strings::sprintf("%s\n" INDENT_STR "%s", _post_main->c_str(), source.c_str());
 }
 
-void ShaderPreprocessor::addOutputVarModifier(String modifier)
+void ShaderPreprocessor::addOutputModifier(String preModifier, String postModifier)
 {
-    _output_var_modifiers.push_back(std::move(modifier));
+    _result_modifiers.push_back({std::move(preModifier), std::move(postModifier)});
 }
 
 void ShaderPreprocessor::initialize(PipelineBuildingContext& context)
@@ -83,7 +83,7 @@ void ShaderPreprocessor::initializeAsFirst(PipelineBuildingContext& context)
 {
     initialize(context);
     for(const auto& i : _main_block->_args)
-        if(i._modifier & ShaderPreprocessor::Parameter::PARAMETER_MODIFIER_IN)
+        if(i._modifier & ShaderPreprocessor::Parameter::PARAMETER_ANNOTATION_IN)
             context.addInputAttribute(Strings::capitalizeFirst(i._name), i._type, i._divisor);
 }
 
@@ -164,11 +164,14 @@ void ShaderPreprocessor::parseDeclarations()
         _main.push_back(_pre_main);
         if(outVar && _main_block->hasReturnValue())
             _main.push_back(sp<String>::make(Strings::sprintf(INDENT_STR "%s = ", outVar.c_str())));
+        const sp<String> preModifier = sp<String>::make();
+        _main.push_back(preModifier);
         _main.push_back(sp<String>::make(_main_block->genOutCall(_pre_shader_stage, _shader_stage)));
-        for(const String& i : _output_var_modifiers)
+        for(const auto& [pre, post] : _result_modifiers)
         {
-            _main.push_back(sp<String>::make(" * "));
-            _main.push_back(sp<String>::make(i));
+            if(pre)
+                *preModifier = *preModifier + pre;
+            _main.push_back(sp<String>::make(post));
         }
         _main.push_back(sp<String>::make(";"));
         _main.push_back(_post_main);
@@ -259,7 +262,7 @@ void ShaderPreprocessor::linkNextStage(const String& returnValueName)
     if(_main_block->hasReturnValue())
         _declaration_outs.declare(_main_block->_return_type, varPrefix, returnValueName, ++location);
     for(const Parameter& i : _main_block->_args)
-        if(i._modifier == ShaderPreprocessor::Parameter::PARAMETER_MODIFIER_OUT)
+        if(i._modifier == ShaderPreprocessor::Parameter::PARAMETER_ANNOTATION_OUT)
             _declaration_outs.declare(i._type, varPrefix, Strings::capitalizeFirst(i._name), ++location, i.getQualifierStr());
 }
 
@@ -336,7 +339,7 @@ uint32_t ShaderPreprocessor::getUniformSize(Uniform::Type type, const String& de
 void ShaderPreprocessor::linkParameters(const std::vector<ShaderPreprocessor::Parameter>& parameters, const ShaderPreprocessor& preStage, std::set<String>& passThroughVars)
 {
     for(const auto& i : parameters)
-        if(i._modifier & Parameter::PARAMETER_MODIFIER_IN)
+        if(i._modifier & Parameter::PARAMETER_ANNOTATION_IN)
             if(!preStage._main_block->hasOutAttribute(i._name))
                 passThroughVars.insert(Strings::capitalizeFirst(i._name));
 }
@@ -393,13 +396,13 @@ void ShaderPreprocessor::Function::parse(PipelineBuildingContext& buildingContex
     {
         const String s = i.strip();
         Parameter param = parseParameter(s);
-        if(param._modifier & Parameter::PARAMETER_MODIFIER_OUT)
+        if(param._modifier & Parameter::PARAMETER_ANNOTATION_OUT)
         {
             const Attribute attr = RenderUtil::makePredefinedAttribute(param._name, param._type);
             CHECK_WARN(attr.length() != 3 || stride % 16 == 0, "3-component out attribute \"%s\" ranged from %d to %d, some GPUs may not like this", attr.name().c_str(), stride, stride + attr.size());
             stride += attr.size();
         }
-        if(param._modifier & Parameter::PARAMETER_MODIFIER_IN)
+        if(param._modifier & Parameter::PARAMETER_ANNOTATION_IN)
             buildingContext.addPredefinedAttribute(Strings::capitalizeFirst(param._name), param._type, param._divisor, PipelineInput::SHADER_STAGE_VERTEX);
 
         _args.push_back(std::move(param));
@@ -410,25 +413,25 @@ ShaderPreprocessor::Parameter ShaderPreprocessor::Function::parseParameter(const
 {
     String type, name;
     uint32_t divisor = 0;
-    int32_t modifier = Parameter::PARAMETER_MODIFIER_DEFAULT;
+    int32_t modifier = Parameter::PARAMETER_ANNOTATION_DEFAULT;
     for(const String& i : param.split(' '))
     {
         if(i == "in")
         {
-            DCHECK(modifier == Parameter::PARAMETER_MODIFIER_DEFAULT, "Conflicts found in parameter(%s)'s qualifier", param.c_str());
-            modifier = Parameter::PARAMETER_MODIFIER_IN;
+            DCHECK(modifier == Parameter::PARAMETER_ANNOTATION_DEFAULT, "Conflicts found in parameter(%s)'s qualifier", param.c_str());
+            modifier = Parameter::PARAMETER_ANNOTATION_IN;
             continue;
         }
         if(i == "out")
         {
-            DCHECK(modifier == Parameter::PARAMETER_MODIFIER_DEFAULT, "Conflicts found in parameter(%s)'s qualifier", param.c_str());
-            modifier = Parameter::PARAMETER_MODIFIER_OUT;
+            DCHECK(modifier == Parameter::PARAMETER_ANNOTATION_DEFAULT, "Conflicts found in parameter(%s)'s qualifier", param.c_str());
+            modifier = Parameter::PARAMETER_ANNOTATION_OUT;
             continue;
         }
         if(i == "inout")
         {
-            DCHECK(modifier == Parameter::PARAMETER_MODIFIER_DEFAULT, "Conflicts found in parameter(%s)'s qualifier", param.c_str());
-            modifier = Parameter::PARAMETER_MODIFIER_INOUT;
+            DCHECK(modifier == Parameter::PARAMETER_ANNOTATION_DEFAULT, "Conflicts found in parameter(%s)'s qualifier", param.c_str());
+            modifier = Parameter::PARAMETER_ANNOTATION_INOUT;
             continue;
         }
         if(i.startsWith("divisor("))
@@ -448,7 +451,7 @@ ShaderPreprocessor::Parameter ShaderPreprocessor::Function::parseParameter(const
         name = i;
     }
     DCHECK(type && name, "Cannot parse function arguments: %s", param.c_str());
-    return Parameter(std::move(type), std::move(name), static_cast<Parameter::Modifier>(modifier == Parameter::PARAMETER_MODIFIER_DEFAULT ? Parameter::PARAMETER_MODIFIER_IN : modifier), divisor);
+    return Parameter(std::move(type), std::move(name), static_cast<Parameter::Annotation>(modifier == Parameter::PARAMETER_ANNOTATION_DEFAULT ? Parameter::PARAMETER_ANNOTATION_IN : modifier), divisor);
 }
 
 void ShaderPreprocessor::Function::genDefinition()
@@ -477,7 +480,7 @@ String ShaderPreprocessor::Function::genOutCall(PipelineInput::ShaderStage preSh
     {
         if(iter != begin)
             sb << ", ";
-        if(iter->_modifier & Parameter::PARAMETER_MODIFIER_OUT)
+        if(iter->_modifier & Parameter::PARAMETER_ANNOTATION_OUT)
             sb << getOutAttributePrefix(shaderStage);
         else
             sb << getOutAttributePrefix(preShaderStage);
@@ -491,7 +494,7 @@ String ShaderPreprocessor::Function::genOutCall(PipelineInput::ShaderStage preSh
 bool ShaderPreprocessor::Function::hasOutAttribute(const String& name) const
 {
     for(const auto& i : _args)
-        if(i._modifier & Parameter::PARAMETER_MODIFIER_OUT && Strings::capitalizeFirst(i._name) == name)
+        if(i._modifier & Parameter::PARAMETER_ANNOTATION_OUT && Strings::capitalizeFirst(i._name) == name)
             return true;
     return false;
 }
@@ -505,7 +508,7 @@ size_t ShaderPreprocessor::Function::outArgumentCount() const
 {
     size_t count = 0;
     for(const auto& i : _args)
-        if(i._modifier & Parameter::PARAMETER_MODIFIER_OUT)
+        if(i._modifier & Parameter::PARAMETER_ANNOTATION_OUT)
             count ++;
     return count;
 }
@@ -700,11 +703,11 @@ void ShaderPreprocessor::Declaration::setSource(String source) const
 }
 
 ShaderPreprocessor::Parameter::Parameter()
-    : _modifier(PARAMETER_MODIFIER_DEFAULT), _divisor(0)
+    : _modifier(PARAMETER_ANNOTATION_DEFAULT), _divisor(0)
 {
 }
 
-ShaderPreprocessor::Parameter::Parameter(String type, String name, ShaderPreprocessor::Parameter::Modifier modifier, uint32_t divisor)
+ShaderPreprocessor::Parameter::Parameter(String type, String name, ShaderPreprocessor::Parameter::Annotation modifier, uint32_t divisor)
     : _type(std::move(type)), _name(std::move(name)), _modifier(modifier), _divisor(divisor)
 {
 }
@@ -712,7 +715,7 @@ ShaderPreprocessor::Parameter::Parameter(String type, String name, ShaderPreproc
 const char* ShaderPreprocessor::Parameter::getQualifierStr() const
 {
     const char* qualifiers[] = {"in", "in", "out", "inout"};
-    DASSERT(_modifier >= PARAMETER_MODIFIER_DEFAULT && _modifier <= PARAMETER_MODIFIER_INOUT);
+    DASSERT(_modifier >= PARAMETER_ANNOTATION_DEFAULT && _modifier <= PARAMETER_ANNOTATION_INOUT);
     return qualifiers[_modifier];
 }
 
