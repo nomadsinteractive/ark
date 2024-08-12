@@ -25,7 +25,7 @@ void StaticIndexBufferBgfx::upload(GraphicsContext& graphicsContext)
         _handle.destroy();
 
     DASSERT(_size <= _indices.size());
-    _handle.reset(::bgfx::createIndexBuffer(::bgfx::makeRef(_indices.data(), _size)));
+    _handle.reset(::bgfx::createIndexBuffer(::bgfx::copy(_indices.data(), _size)));
 }
 
 void StaticIndexBufferBgfx::uploadBuffer(GraphicsContext& graphicsContext, Uploader& input)

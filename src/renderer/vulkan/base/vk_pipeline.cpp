@@ -211,7 +211,7 @@ void VKPipeline::compute(GraphicsContext& graphicsContext, const ComputeContext&
 void VKPipeline::setupVertexDescriptions(const PipelineInput& input, VKPipeline::VertexLayout& vertexLayout)
 {
     uint32_t location = 0;
-    for(const auto& [divsor, stream] : input.layouts())
+    for(const auto& [divsor, stream] : input.streamLayouts())
     {
         vertexLayout.bindingDescriptions.push_back(vks::initializers::vertexInputBindingDescription(
                                                    divsor,
@@ -245,7 +245,7 @@ void VKPipeline::setupDescriptorSetLayout(const PipelineInput& pipelineInput)
     for(const sp<PipelineInput::UBO>& i : pipelineInput.ubos())
     {
         VkShaderStageFlags stages = i->stages().empty() ? VK_SHADER_STAGE_ALL : static_cast<VkShaderStageFlags>(0);
-        for(PipelineInput::ShaderStage j : i->stages())
+        for(const PipelineInput::ShaderStage j : i->stages())
             stages = static_cast<VkShaderStageFlags>(stages | VKUtil::toStage(j));
 
         binding = std::max(binding, i->binding());

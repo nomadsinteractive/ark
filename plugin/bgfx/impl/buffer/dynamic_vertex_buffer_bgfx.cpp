@@ -33,7 +33,7 @@ void DynamicVertexBufferBgfx::upload(GraphicsContext& graphicsContext)
     }
 
     DASSERT(_size <= _data.size());
-    ::bgfx::update(_handle, 0, ::bgfx::makeRef(_data.data(), _size));
+    ::bgfx::update(_handle, 0, ::bgfx::copy(_data.data(), _size));
 }
 
 void DynamicVertexBufferBgfx::uploadBuffer(GraphicsContext& graphicsContext, Uploader& input)

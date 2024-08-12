@@ -56,7 +56,7 @@ public:
         const sp<PipelineLayout> pipelineLayout = sp<PipelineLayout>::make(buildingContext, buildingContext->makePipelineSnippet());
         const sp<PipelineInput>& pipelineInput = pipelineLayout->input();
 
-        TESTCASE_VALIDATE(pipelineInput->layouts()[0].stride() != 0);
+        TESTCASE_VALIDATE(pipelineInput->streamLayouts()[0].stride() != 0);
         TESTCASE_VALIDATE(pipelineInput->getAttribute("Position")->length());
         TESTCASE_VALIDATE(pipelineInput->getAttribute("TexCoordinate")->offset() != -1);
         TESTCASE_VALIDATE(pipelineInput->getAttribute("Alpha01")->offset() == -1);

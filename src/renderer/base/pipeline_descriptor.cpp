@@ -72,7 +72,7 @@ void PipelineDescriptor::bindSampler(sp<Texture> texture, uint32_t name)
 
 bool PipelineDescriptor::hasDivisors() const
 {
-    return _stub->_input->layouts().size() > 1;
+    return _stub->_input->streamLayouts().size() > 1;
 }
 
 PipelineDescriptor::Flag PipelineDescriptor::getFlag(PipelineDescriptor::Flag bitmask) const

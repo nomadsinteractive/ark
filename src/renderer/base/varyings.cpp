@@ -49,7 +49,7 @@ Varyings::Varyings()
 
 Varyings::Varyings(const PipelineInput& pipelineInput)
 {
-    for(const auto& [k, v] : pipelineInput.layouts())
+    for(const auto& [k, v] : pipelineInput.streamLayouts())
     {
         for(const auto& [attrname, attr] : v.attributes())
             if(!(k == 0 && (attr.offset() == 0 || attr.offset() == 12)))  // slots with offset 0 and 12 in divisor 0 will always be the "a_Position" & "a_UV" attribute, which don't need to be recorded here.
@@ -134,7 +134,7 @@ static String findNearestAttribute(const PipelineInput& pipelineInput, const Str
 {
     String nearest;
     size_t nd = std::numeric_limits<size_t>::max();
-    for(const auto& [i, j] : pipelineInput.layouts())
+    for(const auto& [i, j] : pipelineInput.streamLayouts())
     {
         const auto [value, distance] = Math::levensteinNearest(name, j.attributes().keys());
         if(distance < nd)
@@ -161,7 +161,7 @@ Varyings::Snapshot Varyings::snapshot(const PipelineInput& pipelineInput, Alloca
             j._divisor = attr->divisor();
             j._offset = attr->offset();
         }
-        for(const auto& [k, v] : pipelineInput.layouts())
+        for(const auto& [k, v] : pipelineInput.streamLayouts())
             _slot_strides[k] = v.stride();
     }
 

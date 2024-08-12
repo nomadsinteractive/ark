@@ -65,9 +65,9 @@ public:
         const Table<String, Attribute>& attributes() const;
         void addAttribute(String name, Attribute attribute);
 
-        Optional<const Attribute&> getAttribute(Attribute::LayoutType layoutType) const;
+        Optional<const Attribute&> getAttribute(Attribute::Usage layoutType) const;
         Optional<const Attribute&> getAttribute(const String& name) const;
-        int32_t getAttributeOffset(Attribute::LayoutType layoutType) const;
+        int32_t getAttributeOffset(Attribute::Usage layoutType) const;
         [[deprecated]]
         int32_t getAttributeOffset(const String& name) const;
 
@@ -134,8 +134,8 @@ public:
     std::vector<SSBO>& ssbos();
     const std::vector<SSBO>& ssbos() const;
 
-    const std::map<uint32_t, StreamLayout>& layouts() const;
-    std::map<uint32_t, StreamLayout>& layouts();
+    const std::map<uint32_t, StreamLayout>& streamLayouts() const;
+    std::map<uint32_t, StreamLayout>& streamLayouts();
 
     size_t samplerCount() const;
     bool hasSampler(const String& name) const;

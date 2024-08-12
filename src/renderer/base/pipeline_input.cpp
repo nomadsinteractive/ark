@@ -18,16 +18,16 @@ PipelineInput::AttributeOffsets::AttributeOffsets()
 PipelineInput::AttributeOffsets::AttributeOffsets(const PipelineInput& input)
     : AttributeOffsets()
 {
-    const StreamLayout& stream = input.layouts().at(0);
-    _offsets[ATTRIBUTE_NAME_TEX_COORDINATE] = stream.getAttributeOffset(Attribute::LAYOUT_TYPE_TEX_COORD);
-    _offsets[ATTRIBUTE_NAME_NORMAL] = stream.getAttributeOffset(Attribute::LAYOUT_TYPE_NORMAL);
-    _offsets[ATTRIBUTE_NAME_TANGENT] = stream.getAttributeOffset(Attribute::LAYOUT_TYPE_TANGENT);
-    _offsets[ATTRIBUTE_NAME_BITANGENT] = stream.getAttributeOffset(Attribute::LAYOUT_TYPE_BITANGENT);
+    const StreamLayout& stream = input.streamLayouts().at(0);
+    _offsets[ATTRIBUTE_NAME_TEX_COORDINATE] = stream.getAttributeOffset(Attribute::USAGE_TEX_COORD);
+    _offsets[ATTRIBUTE_NAME_NORMAL] = stream.getAttributeOffset(Attribute::USAGE_NORMAL);
+    _offsets[ATTRIBUTE_NAME_TANGENT] = stream.getAttributeOffset(Attribute::USAGE_TANGENT);
+    _offsets[ATTRIBUTE_NAME_BITANGENT] = stream.getAttributeOffset(Attribute::USAGE_BITANGENT);
     _offsets[ATTRIBUTE_NAME_BONE_IDS] = stream.getAttributeOffset("BoneIds");
     _offsets[ATTRIBUTE_NAME_BONE_WEIGHTS] = stream.getAttributeOffset("BoneWeights");
-    if(input.layouts().size() > 1)
+    if(input.streamLayouts().size() > 1)
     {
-        const StreamLayout& stream1 = input.layouts().at(1);
+        const StreamLayout& stream1 = input.streamLayouts().at(1);
         _offsets[ATTRIBUTE_NAME_MODEL_MATRIX] = stream1.getAttributeOffset("Model");
         _offsets[ATTRIBUTE_NAME_NODE_ID] = stream1.getAttributeOffset("NodeId");
         _offsets[ATTRIBUTE_NAME_MATERIAL_ID] = stream1.getAttributeOffset("MaterialId");
@@ -114,12 +114,12 @@ const std::vector<PipelineInput::SSBO>& PipelineInput::ssbos() const
     return _ssbos;
 }
 
-const std::map<uint32_t, PipelineInput::StreamLayout>& PipelineInput::layouts() const
+const std::map<uint32_t, PipelineInput::StreamLayout>& PipelineInput::streamLayouts() const
 {
     return _stream_layouts;
 }
 
-std::map<uint32_t, PipelineInput::StreamLayout>& PipelineInput::layouts()
+std::map<uint32_t, PipelineInput::StreamLayout>& PipelineInput::streamLayouts()
 {
     return _stream_layouts;
 }
@@ -200,11 +200,11 @@ void PipelineInput::StreamLayout::addAttribute(String name, Attribute attribute)
     _attributes.push_back(std::move(name), std::move(attribute));
 }
 
-Optional<const Attribute&> PipelineInput::StreamLayout::getAttribute(Attribute::LayoutType layoutType) const
+Optional<const Attribute&> PipelineInput::StreamLayout::getAttribute(Attribute::Usage layoutType) const
 {
-    DASSERT(layoutType != Attribute::LAYOUT_TYPE_CUSTOM);
+    DASSERT(layoutType != Attribute::USAGE_CUSTOM);
     for(const Attribute& i : _attributes.values())
-        if(i.layoutType() == layoutType)
+        if(i.usage() == layoutType)
             return {i};
     return {};
 }
@@ -214,7 +214,7 @@ Optional<const Attribute&> PipelineInput::StreamLayout::getAttribute(const Strin
     return _attributes.has(name) ? Optional<const Attribute&>(_attributes.at(name)) : Optional<const Attribute&>();
 }
 
-int32_t PipelineInput::StreamLayout::getAttributeOffset(Attribute::LayoutType layoutType) const
+int32_t PipelineInput::StreamLayout::getAttributeOffset(Attribute::Usage layoutType) const
 {
     const Optional<const Attribute&> attr = getAttribute(layoutType);
     return attr ? static_cast<int32_t>(attr->offset()) : -1;

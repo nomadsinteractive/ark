@@ -26,11 +26,11 @@ class BlankUploader final : public Texture::Uploader {
 public:
     BlankUploader(const Size& size, Texture::Format format)
         : _bitmap(static_cast<uint32_t>(size.widthAsFloat()), static_cast<uint32_t>(size.heightAsFloat()), static_cast<uint32_t>(size.widthAsFloat()) * RenderUtil::getPixelSize(format),
-                  (format & Texture::FORMAT_RGBA) + 1, false) {
+                  (format & Texture::FORMAT_RGBA) + 1, true) {
     }
 
     void initialize(GraphicsContext& graphicsContext, Texture::Delegate& delegate) override {
-        delegate.uploadBitmap(graphicsContext, _bitmap, {nullptr});
+        delegate.uploadBitmap(graphicsContext, _bitmap, {_bitmap.byteArray()});
     }
 
     void update(GraphicsContext& graphicsContext, Texture::Delegate& delegate) override {

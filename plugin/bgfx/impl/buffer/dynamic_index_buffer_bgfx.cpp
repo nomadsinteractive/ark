@@ -25,7 +25,7 @@ void DynamicIndexBufferBgfx::upload(GraphicsContext& graphicsContext)
         _handle.reset(::bgfx::createDynamicIndexBuffer(_size));
 
     DASSERT(_size <= _indices.size());
-    ::bgfx::update(_handle, 0, ::bgfx::makeRef(_indices.data(), _size));
+    ::bgfx::update(_handle, 0, ::bgfx::copy(_indices.data(), _size));
 }
 
 void DynamicIndexBufferBgfx::uploadBuffer(GraphicsContext& graphicsContext, Uploader& input)

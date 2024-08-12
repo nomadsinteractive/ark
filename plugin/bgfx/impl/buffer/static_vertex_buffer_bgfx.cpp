@@ -31,7 +31,7 @@ void StaticVertexBufferBgfx::upload(GraphicsContext& graphicsContext)
 
     DASSERT(_vertex_buffer_layout.m_stride > 0);
     DASSERT(_size <= _data.size());
-    _handle.reset(::bgfx::createVertexBuffer(::bgfx::makeRef(_data.data(), _size), _vertex_buffer_layout));
+    _handle.reset(::bgfx::createVertexBuffer(::bgfx::copy(_data.data(), _size), _vertex_buffer_layout));
 }
 
 void StaticVertexBufferBgfx::uploadBuffer(GraphicsContext& graphicsContext, Uploader& input)

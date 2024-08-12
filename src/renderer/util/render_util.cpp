@@ -254,7 +254,7 @@ bytearray RenderUtil::makeUnitCubeVertices(bool flipWindingOrder)
     return sp<ByteArray::Borrowed>::make(reinterpret_cast<uint8_t*>(vertices), sizeof(vertices));
 }
 
-Attribute RenderUtil::makePredefinedAttribute(const String& name, const String& type, Attribute::LayoutType layoutType)
+Attribute RenderUtil::makePredefinedAttribute(const String& name, const String& type, Attribute::Usage layoutType)
 {
     if(type == "vec3" || type == "v3f")
         return {layoutType, name, Attribute::TYPE_FLOAT, type, 3, false};

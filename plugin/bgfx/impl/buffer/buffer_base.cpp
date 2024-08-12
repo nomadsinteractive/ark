@@ -5,21 +5,21 @@
 namespace ark::plugin::bgfx {
 
 namespace {
-    ::bgfx::Attrib::Enum toAttribEnum(Attribute::LayoutType layoutType, uint32_t customAttrIdx)
+    ::bgfx::Attrib::Enum toAttribEnum(Attribute::Usage layoutType, uint32_t customAttrIdx)
     {
         switch(layoutType)
         {
-            case Attribute::LAYOUT_TYPE_POSITION:
+            case Attribute::USAGE_POSITION:
                 return ::bgfx::Attrib::Position;
-            case Attribute::LAYOUT_TYPE_TEX_COORD:
+            case Attribute::USAGE_TEX_COORD:
                 return ::bgfx::Attrib::TexCoord0;
-            case Attribute::LAYOUT_TYPE_COLOR:
+            case Attribute::USAGE_COLOR:
                 return ::bgfx::Attrib::Color0;
-            case Attribute::LAYOUT_TYPE_NORMAL:
+            case Attribute::USAGE_NORMAL:
                 return ::bgfx::Attrib::Normal;
-            case Attribute::LAYOUT_TYPE_TANGENT:
+            case Attribute::USAGE_TANGENT:
                 return ::bgfx::Attrib::Tangent;
-            case Attribute::LAYOUT_TYPE_BITANGENT:
+            case Attribute::USAGE_BITANGENT:
                 return ::bgfx::Attrib::Bitangent;
             default:
                 break;
@@ -73,7 +73,7 @@ void BufferBase::setupVertexBufferLayout(::bgfx::VertexLayout& vertexBufLayout, 
     uint32_t customAttrIdx = 0;
     for(const auto& [k, v] : pipelineDescriptor.input()->getStreamLayout(0).attributes())
     {
-        const ::bgfx::Attrib::Enum attribEnum = toAttribEnum(v.layoutType(), v.layoutType() == Attribute::LAYOUT_TYPE_CUSTOM ? customAttrIdx++ : customAttrIdx);
+        const ::bgfx::Attrib::Enum attribEnum = toAttribEnum(v.usage(), v.usage() == Attribute::USAGE_CUSTOM ? customAttrIdx++ : customAttrIdx);
         vertexBufLayout.add(attribEnum, v.length(), toAttribType(v.type()), v.normalized());
     }
     vertexBufLayout.end();

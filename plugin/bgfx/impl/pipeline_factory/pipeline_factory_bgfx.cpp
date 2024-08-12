@@ -60,6 +60,58 @@ uint8_t toBgfxUniformType(Uniform::Type type)
     return 0;
 }
 
+uint16_t toBgfxAttribId(Attribute::Usage usage)
+{
+/*
+static AttribToId s_attribToId[] =
+{
+    // NOTICE:
+    // Attrib must be in order how it appears in Attrib::Enum! id is
+    // unique and should not be changed if new Attribs are added.
+    { Attrib::Position,  0x0001 },
+    { Attrib::Normal,    0x0002 },
+    { Attrib::Tangent,   0x0003 },
+    { Attrib::Bitangent, 0x0004 },
+    { Attrib::Color0,    0x0005 },
+    { Attrib::Color1,    0x0006 },
+    { Attrib::Color2,    0x0018 },
+    { Attrib::Color3,    0x0019 },
+    { Attrib::Indices,   0x000e },
+    { Attrib::Weight,    0x000f },
+    { Attrib::TexCoord0, 0x0010 },
+    { Attrib::TexCoord1, 0x0011 },
+    { Attrib::TexCoord2, 0x0012 },
+    { Attrib::TexCoord3, 0x0013 },
+    { Attrib::TexCoord4, 0x0014 },
+    { Attrib::TexCoord5, 0x0015 },
+    { Attrib::TexCoord6, 0x0016 },
+    { Attrib::TexCoord7, 0x0017 },
+};
+*/
+    switch(usage)
+    {
+        case Attribute::USAGE_CUSTOM:
+            return 0;
+        case Attribute::USAGE_POSITION:
+            return 1;
+        case Attribute::USAGE_TEX_COORD:
+            return 0x10;
+        case Attribute::USAGE_COLOR:
+            return 0x05;
+        case Attribute::USAGE_NORMAL:
+            return 0x02;
+        case Attribute::USAGE_TANGENT:
+            return 0x03;
+        case Attribute::USAGE_BITANGENT:
+            return 0x04;
+        default:
+            FATAL("Unsupported uniform type: %d", usage);
+            break;
+    }
+    return 0;
+}
+
+
 String translatePredefinedName(const String& name)
 {
 //TODO: Maybe we can figure out the translation by the macros?
@@ -105,39 +157,73 @@ struct alignas(1) BgfxShaderAttributeChunk {
     const uint32_t bytecodeSize = binaries.size() * sizeof(uint32_t);
     // const void* bytecode = source.c_str();
     // const uint32_t bytecodeSize = source.size();
-    const ::bgfx::Memory* mem = ::bgfx::alloc(sizeof(BgfxShaderHeader) + bytecodeSize + 32);
     BgfxShaderHeader shaderHeader;
     shaderHeader.magic = *reinterpret_cast<const uint32_t*>(bgfxChunkMagic);
     std::vector<std::pair<String, BgfxShaderUniformChunk>> uniformChunks;
+    uint32_t uboSize = 0;
+    uint32_t ssboSize = 0;
+    uint32_t dynamicDataSize = 0;
     for(const PipelineInput::UBO& i : pipelineInput.ubos())
-    {
-        for(const auto& [name, uniform] : i.uniforms())
+//TODO: find out the ubo stages
+        // if(i.stages().find(stage) != i.stages().end())
         {
-            BgfxShaderUniformChunk uniformChunk;
-            uniformChunk.type = toBgfxUniformType(uniform->type());
-            uniformChunk.num = 1;
-            uniformChunk.regIndex = uniform->binding();
-            uniformChunk.regCount = uniform->length();
-            uniformChunk.texInfo = 0;
-            uniformChunks.emplace_back(std::make_pair(translatePredefinedName(name), uniformChunk));
+            for(const auto& [name, uniform] : i.uniforms())
+            {
+                String tname = translatePredefinedName(name);
+                uboSize += uniform->size();
+                dynamicDataSize += (tname.size() + 1);
+
+                BgfxShaderUniformChunk uniformChunk;
+                uniformChunk.type = toBgfxUniformType(uniform->type());
+                uniformChunk.num = 1;
+                uniformChunk.regIndex = uniform->binding();
+                uniformChunk.regCount = uniform->length();
+                uniformChunk.texInfo = 0;
+                uniformChunks.emplace_back(std::make_pair(std::move(tname), uniformChunk));
+            }
         }
-    }
+    uint32_t binding = 2;
+    if(stage == PipelineInput::SHADER_STAGE_FRAGMENT)
+        for(const String& i : pipelineInput.samplerNames())
+        {
+            dynamicDataSize += (i.size() + 1);
+
+            BgfxShaderUniformChunk uniformChunk;
+            uniformChunk.type = ::bgfx::UniformType::Sampler;
+            uniformChunk.num = 1;
+            uniformChunk.regIndex = binding++;
+            uniformChunk.regCount = 1;
+            uniformChunk.texInfo = 0;
+            uniformChunks.emplace_back(std::make_pair(i, uniformChunk));
+        }
+
+    for(const PipelineInput::SSBO& i : pipelineInput.ssbos())
+        ssboSize += i._buffer.size();
+
+    std::vector<BgfxShaderAttributeChunk> attributeChunks;
+    for(const auto&  [divisor, streamLayout]: pipelineInput.streamLayouts())
+        for(const auto& [name, attribute] : streamLayout.attributes())
+            attributeChunks.push_back({toBgfxAttribId(attribute.usage())});
 
     shaderHeader.count = uniformChunks.size();
     bx::Error err;
+    const ::bgfx::Memory* mem = ::bgfx::alloc(sizeof(BgfxShaderHeader) + bytecodeSize + 4 + 2 + dynamicDataSize + uniformChunks.size() * sizeof(BgfxShaderUniformChunk) + attributeChunks.size() * sizeof(BgfxShaderAttributeChunk) + 2);
     bx::StaticMemoryBlockWriter writer(mem->data, mem->size);
     writer.write(&shaderHeader, sizeof(shaderHeader), &err);
     for(const auto& [name, chunk] : uniformChunks)
     {
         uint8_t nameSize = name.size();
-        writer.write(&nameSize, sizeof(nameSize), &err);
+        bx::write(&writer, nameSize, &err);
         writer.write(name.c_str(), nameSize, &err);
         writer.write(&chunk, sizeof(chunk), &err);
     }
-    writer.write(&bytecodeSize, sizeof(bytecodeSize), &err);
+    bx::write(&writer, bytecodeSize, &err);
     writer.write(bytecode, bytecodeSize, &err);
-    uint8_t nul = 0;
-    writer.write(&nul, sizeof(nul), &err);
+    bx::write(&writer, static_cast<uint8_t>(0), &err);
+    bx::write(&writer, static_cast<uint8_t>(attributeChunks.size()), &err);
+    for(const auto& i: attributeChunks)
+        bx::write(&writer, i.id, &err);
+    bx::write(&writer, static_cast<uint16_t>(uboSize + ssboSize), &err);
     const ::bgfx::ShaderHandle handle = ::bgfx::createShader(mem);
     ASSERT(::bgfx::isValid(handle));
     return handle;

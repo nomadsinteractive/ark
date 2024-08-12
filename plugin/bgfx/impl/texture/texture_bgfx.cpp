@@ -103,10 +103,6 @@ uint32_t getComponentSize(Texture::Format format)
 TextureBgfx::TextureBgfx(Texture::Type type, uint32_t width, uint32_t height, sp<Texture::Parameters> parameters)
     : ResourceBase(type), _width(width), _height(height), _parameters(std::move(parameters))
 {
-    const bool hasMips = _parameters->_features & Texture::FEATURE_MIPMAPS;
-    const uint32_t channelSize = getChannelSize(_parameters->_format);
-    const uint32_t componentSize = getComponentSize(_parameters->_format);
-    _handle.reset(::bgfx::createTexture2D(_width, _height, hasMips, 1, getTextureInternalFormat(_parameters->_usage, _parameters->_format, channelSize, componentSize)));
 }
 
 void TextureBgfx::upload(GraphicsContext& graphicsContext, const sp<Texture::Uploader>& uploader)
@@ -136,6 +132,13 @@ bool TextureBgfx::download(GraphicsContext& graphicsContext, Bitmap& bitmap)
 
 void TextureBgfx::uploadBitmap(GraphicsContext& graphicsContext, const Bitmap& bitmap, const std::vector<sp<ByteArray>>& imagedata)
 {
+    if(!_handle)
+    {
+        const bool hasMips = _parameters->_features & Texture::FEATURE_MIPMAPS;
+        const uint32_t channelSize = getChannelSize(_parameters->_format);
+        const uint32_t componentSize = getComponentSize(_parameters->_format);
+        _handle.reset(::bgfx::createTexture2D(_width, _height, hasMips, 1, getTextureInternalFormat(_parameters->_usage, _parameters->_format, channelSize, componentSize)));
+    }
     const sp<ByteArray>& data = imagedata.at(0);
     ::bgfx::updateTexture2D(_handle, 0, 0, 0, 0, _width, _height, ::bgfx::copy(data->buf(), data->size()));
 }

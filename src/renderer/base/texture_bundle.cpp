@@ -11,13 +11,13 @@ namespace ark {
 
 namespace {
 
-class UploaderBitmapBundle : public Texture::Uploader {
+class UploaderBitmapBundle final : public Texture::Uploader {
 public:
     UploaderBitmapBundle(const sp<Dictionary<bitmap>>& bitmapLoader, const String& name)
         : _bitmap_loader(bitmapLoader), _name(name) {
     }
 
-    virtual void initialize(GraphicsContext& graphicContext, Texture::Delegate& delegate) override {
+    void initialize(GraphicsContext& graphicContext, Texture::Delegate& delegate) override {
         const bitmap bitmap = _bitmap_loader->get(_name);
         DCHECK(bitmap, "Texture resource \"%s\" not found", _name.c_str());
         delegate.uploadBitmap(graphicContext, bitmap, {bitmap->byteArray()});

@@ -68,7 +68,7 @@ Span Bitmap::bytes() const
     return _byte_array->toBytes();
 }
 
-const sp<Array<uint8_t>>& Bitmap::byteArray() const
+const sp<ByteArray>& Bitmap::byteArray() const
 {
     return _byte_array;
 }
