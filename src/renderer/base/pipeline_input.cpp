@@ -68,7 +68,7 @@ PipelineInput::PipelineInput(const sp<Camera>& camera)
 
 void PipelineInput::initialize(const PipelineBuildingContext& buildingContext)
 {
-    std::map<int32_t, sp<PipelineInput::UBO>> ubos;
+    std::map<int32_t, sp<UBO>> ubos;
 
     for(const sp<Uniform>& i : buildingContext._uniforms.values())
     {
@@ -305,7 +305,7 @@ void PipelineInput::UBO::initialize()
     for(const auto& i : _uniforms.values())
     {
         size_t s = i->size();
-        _slots.push_back(std::make_pair(offset, s));
+        _slots.emplace_back(offset, s);
         offset += s;
         DCHECK(offset % 4 == 0, "Uniform aligment error, offset: %d", offset);
     }

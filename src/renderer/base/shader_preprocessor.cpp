@@ -188,8 +188,7 @@ void ShaderPreprocessor::setupUniforms(Table<String, sp<Uniform>>& uniforms, int
 {
     for(const auto& i : _declaration_uniforms.vars())
     {
-        const String& name = i.first;
-        if(!uniforms.has(name))
+        if(const String& name = i.first; !uniforms.has(name))
         {
             const Declaration& declare = i.second;
             Uniform::Type type = Uniform::toType(declare.type());
@@ -201,7 +200,7 @@ void ShaderPreprocessor::setupUniforms(Table<String, sp<Uniform>>& uniforms, int
     int32_t next = binding;
     for(const sp<Uniform>& i : uniforms.values())
     {
-        String::size_type pos = i->name().find('[');
+        const String::size_type pos = i->name().find('[');
         DCHECK(pos != 0, "Illegal uniform name: %s", i->name().c_str());
         if(_main.contains(pos == String::npos ? i->name() : i->name().substr(0, pos)))
         {
