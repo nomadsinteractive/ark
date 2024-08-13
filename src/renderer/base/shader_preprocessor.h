@@ -37,7 +37,7 @@ public:
 
     class Declaration {
     public:
-        Declaration(const String& name, const String& type, uint32_t length, const sp<String>& source);
+        Declaration(const String& name, const String& type, uint32_t length, sp<String> source);
         DEFAULT_COPY_AND_ASSIGN(Declaration);
 
         const String& name() const;
@@ -55,7 +55,7 @@ public:
         sp<String> _source;
     };
 
-    class DeclarationList {
+    class ARK_API DeclarationList {
     public:
         DeclarationList(Source& source, const String& descriptor);
 
@@ -63,7 +63,8 @@ public:
         const Table<String, Declaration>& vars() const;
         Table<String, Declaration>& vars();
 
-        void declare(const String& type, const char* prefix, const String& name, int32_t location, const char* qualifier = nullptr, bool isFlat = false);
+        void declare(const String& type, const char* prefix, const String& name, const String& layout = "", const char* qualifier = nullptr, bool isFlat = false);
+        void clear();
 
     private:
         Source& _source;
@@ -157,17 +158,20 @@ public:
 
     const std::vector<Parameter>& args() const;
 
-    void inDeclare(const String& type, const String& name, int32_t location = -1);
-    void outDeclare(const String& type, const String& name, int32_t location = -1);
-    void passThroughDeclare(const String& type, const String& name, int32_t location = -1);
+    void inDeclare(const String& type, const String& name);
+    void outDeclare(const String& type, const String& name);
+    void passThroughDeclare(const String& type, const String& name);
 
     void linkNextStage(const String& returnValueName);
-
     void linkPreStage(const ShaderPreprocessor& preStage, std::set<String>& passThroughVars);
 
     Preprocessed preprocess();
 
     sp<Uniform> makeUniformInput(String name, Uniform::Type type) const;
+
+    void insertUBOStruct(const PipelineInput::UBO& ubo);
+    bool hasUBO(const PipelineInput::UBO& ubo) const;
+    void declareUBOStruct(const PipelineInput& piplineInput);
 
     String outputName() const;
 

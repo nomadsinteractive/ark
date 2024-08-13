@@ -61,38 +61,39 @@ private:
 
 class SnippetBgfx final : public Snippet {
 public:
-
-    void preInitialize(PipelineBuildingContext& context) override
-    {
-    }
-
-    void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout) override
-    {
+    void preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout) override {
         const String sLocation = "location";
         const ShaderPreprocessor& firstStage = context.stages().begin()->second;
 
         RenderUtil::setLayoutDescriptor(RenderUtil::setupLayoutLocation(context, firstStage._declaration_ins), sLocation, 0);
 
-        uint32_t uniformBindingLocation = 0;
         const PipelineInput& pipelineInput = pipelineLayout.input();
         if(ShaderPreprocessor* vertex = context.tryGetStage(PipelineInput::SHADER_STAGE_VERTEX))
         {
-            uniformBindingLocation = RenderUtil::setLayoutDescriptor(vertex->_declaration_uniforms, sLocation, 0);
             RenderUtil::setLayoutDescriptor(vertex->_declaration_images, "binding", static_cast<uint32_t>(pipelineInput.ubos().size() + pipelineInput.ssbos().size() + pipelineInput.samplerCount()));
             vertex->_predefined_macros.push_back("#define gl_InstanceID gl_InstanceIndex");
         }
         if(ShaderPreprocessor* fragment = context.tryGetStage(PipelineInput::SHADER_STAGE_FRAGMENT))
         {
             fragment->linkNextStage("FragColor");
-            uint32_t bindingOffset = static_cast<uint32_t>(pipelineInput.ubos().size() + pipelineInput.ssbos().size());
-            RenderUtil::setLayoutDescriptor(fragment->_declaration_uniforms, sLocation, uniformBindingLocation);
-            bindingOffset = RenderUtil::setLayoutDescriptor(fragment->_declaration_samplers, "binding", bindingOffset);
-            RenderUtil::setLayoutDescriptor(fragment->_declaration_images, "binding", bindingOffset);
+            const uint32_t bindingOffset = std::max<uint32_t>(2, pipelineInput.ubos().size() + pipelineInput.ssbos().size());
+            RenderUtil::setLayoutDescriptor(fragment->_declaration_images, "binding", bindingOffset + static_cast<uint32_t>(fragment->_declaration_samplers.vars().size()));
+
+            uint32_t binding = 0;
+            constexpr uint32_t samplerOffset = 16;
+            const std::vector<String> samplerNames = fragment->_declaration_samplers.vars().keys();
+            fragment->_declaration_samplers.clear();
+            for(const String& k : samplerNames)
+            {
+                fragment->_declaration_samplers.declare("sampler", "", k + "S", Strings::sprintf("binding = %d", bindingOffset + samplerOffset + binding));
+                fragment->_declaration_samplers.declare("texture2D", "", k + "T", Strings::sprintf("binding = %d", bindingOffset + binding++));
+                fragment->_predefined_macros.emplace_back(Strings::sprintf("#define %s sampler2D(%sT, %sS)", k.c_str(), k.c_str(), k.c_str()));
+            }
         }
 
         if(const ShaderPreprocessor* compute = context.tryGetStage(PipelineInput::SHADER_STAGE_COMPUTE))
         {
-            const uint32_t bindingOffset = RenderUtil::setLayoutDescriptor(compute->_declaration_uniforms, sLocation, 0);
+            const uint32_t bindingOffset = static_cast<uint32_t>(pipelineInput.ubos().size() + pipelineInput.ssbos().size());
             RenderUtil::setLayoutDescriptor(compute->_declaration_images, "binding", bindingOffset);
         }
 
@@ -111,18 +112,16 @@ public:
         {
             ShaderPreprocessor& preprocessor = v;
             preprocessor._version = 450;
+            preprocessor.declareUBOStruct(pipelineInput);
+            preprocessor._predefined_macros.push_back("#extension GL_ARB_separate_shader_objects : enable");
+            preprocessor._predefined_macros.push_back("#extension GL_ARB_shading_language_420pack : enable");
         }
     }
 
-    sp<DrawEvents> makeDrawEvents(const RenderRequest&) override
-    {
-        return sp<DrawEvents>::make();
+    sp<DrawEvents> makeDrawEvents() override {
+        return sp<Snippet::DrawEvents>::make();
     }
 
-    sp<DrawEvents> makeDrawEvents() override
-    {
-        return sp<DrawEvents>::make();
-    }
 };
 
 class SnippetFactoryBgfx final : public SnippetFactory {
@@ -146,8 +145,7 @@ void setVersion(Ark::RendererVersion version, RenderEngineContext& vkContext)
     definitions["camera.uVP"] = "u_viewProj";
     definitions["camera.uView"] = "u_view";
     definitions["camera.uProjection"] = "u_proj";
-    // vkContext.setSnippetFactory(sp<SnippetFactoryBgfx>::make());
-    vkContext.setSnippetFactory(sp<SnippetFactoryVulkan>::make());
+    vkContext.setSnippetFactory(sp<SnippetFactoryBgfx>::make());
 
     vkContext.setVersion(version);
 }

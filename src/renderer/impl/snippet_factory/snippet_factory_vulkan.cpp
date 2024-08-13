@@ -14,36 +14,6 @@ namespace ark {
 
 namespace {
 
-void insertUBOStruct(ShaderPreprocessor& shader, const PipelineInput::UBO& ubo)
-{
-    StringBuffer sb;
-    sb << "layout (binding = " << ubo.binding() << ") uniform UBO" << ubo.binding() << " {\n";
-    for(const auto& i : ubo.uniforms().values()) {
-        shader._main.replace(i->name(), Strings::sprintf("ubo%d.%s", ubo.binding(), i->name().c_str()));
-        sb << i->declaration("") << '\n';
-    }
-    sb << "} ubo" << ubo.binding() << ";\n\n";
-    shader._uniform_declaration_codes.push_back(sp<String>::make(sb.str()));
-}
-
-bool hasUBO(const ShaderPreprocessor& shader, const PipelineInput::UBO& ubo)
-{
-    for(const auto& i : ubo.uniforms().values())
-        if(shader._main.contains(i->name()))
-            return true;
-    return false;
-}
-
-void declareUBOStruct(ShaderPreprocessor& shader, const PipelineInput& piplineInput)
-{
-    for(const ShaderPreprocessor::Declaration& i : shader._declaration_uniforms.vars().values())
-        i.setSource("");
-
-    for(const sp<PipelineInput::UBO>& i : piplineInput.ubos())
-        if(hasUBO(shader, i))
-            insertUBOStruct(shader, i);
-}
-
 class CoreSnippetVulkan final : public Snippet {
 public:
     void preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout) override {
@@ -87,7 +57,7 @@ public:
         {
             ShaderPreprocessor& preprocessor = v;
             preprocessor._version = 450;
-            declareUBOStruct(preprocessor, pipelineInput);
+            preprocessor.declareUBOStruct(pipelineInput);
             preprocessor._predefined_macros.push_back("#extension GL_ARB_separate_shader_objects : enable");
             preprocessor._predefined_macros.push_back("#extension GL_ARB_shading_language_420pack : enable");
         }

@@ -111,6 +111,26 @@ static AttribToId s_attribToId[] =
     return 0;
 }
 
+uint8_t toBgfxTextureDimension(Texture::Type type)
+{
+// { TextureDimension::Dimension1D,        0x01 },
+// { TextureDimension::Dimension2D,        0x02 },
+// { TextureDimension::Dimension2DArray,   0x03 },
+// { TextureDimension::DimensionCube,      0x04 },
+// { TextureDimension::DimensionCubeArray, 0x05 },
+// { TextureDimension::Dimension3D,        0x06 },
+    switch(type)
+    {
+        case Texture::TYPE_2D:
+            return 0x02;
+        case Texture::TYPE_CUBEMAP:
+            return 0x04;
+        default:
+            FATAL("Unknown texture type: %d", type);
+        break;
+    }
+    return 0;
+}
 
 String translatePredefinedName(const String& name)
 {
@@ -139,7 +159,8 @@ struct alignas(1) BgfxShaderUniformChunk {
     uint8_t num;
     uint16_t regIndex;
     uint16_t regCount;
-    uint16_t texInfo;
+    uint8_t  texComponent = 0;
+    uint8_t  texDimension = 0;
     uint16_t texFormat = 0;
 };
 
@@ -166,6 +187,7 @@ struct alignas(1) BgfxShaderAttributeChunk {
     for(const PipelineInput::UBO& i : pipelineInput.ubos())
 //TODO: find out the ubo stages
         // if(i.stages().find(stage) != i.stages().end())
+        if(stage == PipelineInput::SHADER_STAGE_VERTEX)
         {
             for(const auto& [name, uniform] : i.uniforms())
             {
@@ -178,7 +200,6 @@ struct alignas(1) BgfxShaderAttributeChunk {
                 uniformChunk.num = 1;
                 uniformChunk.regIndex = uniform->binding();
                 uniformChunk.regCount = uniform->length();
-                uniformChunk.texInfo = 0;
                 uniformChunks.emplace_back(std::make_pair(std::move(tname), uniformChunk));
             }
         }
@@ -193,7 +214,7 @@ struct alignas(1) BgfxShaderAttributeChunk {
             uniformChunk.num = 1;
             uniformChunk.regIndex = binding++;
             uniformChunk.regCount = 1;
-            uniformChunk.texInfo = 0;
+            uniformChunk.texDimension = toBgfxTextureDimension(Texture::TYPE_2D);
             uniformChunks.emplace_back(std::make_pair(i, uniformChunk));
         }
 

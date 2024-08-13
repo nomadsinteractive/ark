@@ -53,7 +53,7 @@ ShaderPreprocessor::ShaderPreprocessor(sp<String> source, PipelineInput::ShaderS
       _declaration_uniforms(_uniform_declaration_codes, "uniform"), _declaration_samplers(_uniform_declaration_codes, "uniform"), _declaration_images(_uniform_declaration_codes, "uniform"),
       _pre_main(sp<String>::make()), _post_main(sp<String>::make())
 {
-    _predefined_macros.emplace_back("#define texture2D texture");
+    _predefined_macros.emplace_back("#define texture2D(x, y) texture(x, y)");
     _predefined_macros.emplace_back("#define textureCube texture");
     _predefined_macros.push_back(Strings::sprintf("#define ARK_Z_DIRECTION %.2f", Ark::instance().renderController()->renderEngine()->toLayoutDirection(1.0f)));
 }
@@ -238,19 +238,19 @@ const std::vector<ShaderPreprocessor::Parameter>& ShaderPreprocessor::args() con
     return _main_block->_args;
 }
 
-void ShaderPreprocessor::inDeclare(const String& type, const String& name, int32_t location)
+void ShaderPreprocessor::inDeclare(const String& type, const String& name)
 {
-    _declaration_ins.declare(type, inVarPrefix(), name, location, nullptr, _shader_stage == PipelineInput::SHADER_STAGE_FRAGMENT && (type == "int" || type == "uint"));
+    _declaration_ins.declare(type, inVarPrefix(), name, "", nullptr, _shader_stage == PipelineInput::SHADER_STAGE_FRAGMENT && (type == "int" || type == "uint"));
 }
 
-void ShaderPreprocessor::outDeclare(const String& type, const String& name, int32_t location)
+void ShaderPreprocessor::outDeclare(const String& type, const String& name)
 {
-    _declaration_outs.declare(type, outVarPrefix(), name, location, nullptr, type == "int");
+    _declaration_outs.declare(type, outVarPrefix(), name, "", nullptr, type == "int");
 }
 
-void ShaderPreprocessor::passThroughDeclare(const String& type, const String& name, int32_t location)
+void ShaderPreprocessor::passThroughDeclare(const String& type, const String& name)
 {
-    outDeclare(type, name, location);
+    outDeclare(type, name);
     addPreMainSource(Strings::sprintf("%s%s = %s%s;", outVarPrefix(), name.c_str(), inVarPrefix(), name.c_str()));
 }
 
@@ -259,10 +259,10 @@ void ShaderPreprocessor::linkNextStage(const String& returnValueName)
     const char* varPrefix = outVarPrefix();
     int32_t location = -1;
     if(_main_block->hasReturnValue())
-        _declaration_outs.declare(_main_block->_return_type, varPrefix, returnValueName, ++location);
+        _declaration_outs.declare(_main_block->_return_type, varPrefix, returnValueName, Strings::sprintf("location = %d", ++location));
     for(const Parameter& i : _main_block->_args)
-        if(i._modifier == ShaderPreprocessor::Parameter::PARAMETER_ANNOTATION_OUT)
-            _declaration_outs.declare(i._type, varPrefix, Strings::capitalizeFirst(i._name), ++location, i.getQualifierStr());
+        if(i._modifier == Parameter::PARAMETER_ANNOTATION_OUT)
+            _declaration_outs.declare(i._type, varPrefix, Strings::capitalizeFirst(i._name), Strings::sprintf("location = %d", ++location), i.getQualifierStr());
 }
 
 void ShaderPreprocessor::linkPreStage(const ShaderPreprocessor& preStage, std::set<String>& passThroughVars)
@@ -279,6 +279,36 @@ sp<Uniform> ShaderPreprocessor::makeUniformInput(String name, Uniform::Type type
     const Declaration& declaration = _declaration_uniforms.vars().at(name);
     DCHECK(Uniform::toType(declaration.type()) == type, "Uniform \"%s\" declared type: %s, but it should be %d", name.c_str(), declaration.type().c_str(), type);
     return sp<Uniform>::make(std::move(name), type, 1, nullptr);
+}
+
+void ShaderPreprocessor::insertUBOStruct(const PipelineInput::UBO& ubo)
+{
+    StringBuffer sb;
+    sb << "layout (binding = " << ubo.binding() << ") uniform UBO" << ubo.binding() << " {\n";
+    for(const auto& i : ubo.uniforms().values()) {
+        _main.replace(i->name(), Strings::sprintf("ubo%d.%s", ubo.binding(), i->name().c_str()));
+        sb << i->declaration("") << '\n';
+    }
+    sb << "} ubo" << ubo.binding() << ";\n\n";
+    _uniform_declaration_codes.push_back(sp<String>::make(sb.str()));
+}
+
+bool ShaderPreprocessor::hasUBO(const PipelineInput::UBO& ubo) const
+{
+    for(const auto& i : ubo.uniforms().values())
+        if(_main.contains(i->name()))
+            return true;
+    return false;
+}
+
+void ShaderPreprocessor::declareUBOStruct(const PipelineInput& piplineInput)
+{
+    for(const ShaderPreprocessor::Declaration& i : _declaration_uniforms.vars().values())
+        i.setSource("");
+
+    for(const sp<PipelineInput::UBO>& i : piplineInput.ubos())
+        if(hasUBO(i))
+            insertUBOStruct(i);
 }
 
 String ShaderPreprocessor::outputName() const
@@ -517,20 +547,27 @@ ShaderPreprocessor::DeclarationList::DeclarationList(Source& source, const Strin
 {
 }
 
-void ShaderPreprocessor::DeclarationList::declare(const String& type, const char* prefix, const String& name, int32_t location, const char* qualifier, bool isFlat)
+void ShaderPreprocessor::DeclarationList::declare(const String& type, const char* prefix, const String& name, const String& layout, const char* qualifier, bool isFlat)
 {
     if(!_vars.has(name))
     {
         sp<String> declared = sp<String>::make(Strings::sprintf("%s%s %s %s%s;", isFlat ? "flat " : "", qualifier ? qualifier : _descriptor.c_str(), type.c_str(), prefix, name.c_str()));
-        if(location >= 0)
-            _source.push_back(sp<String>::make(Strings::sprintf("layout (location = %d) %s", location, declared->c_str())));
+        if(layout)
+            _source.push_back(sp<String>::make(Strings::sprintf("layout (%s) %s", layout.c_str(), declared->c_str())));
         else
             _source.push_back(declared);
 
-        _vars.push_back(name, Declaration(name, type, 1, declared));
+        _vars.push_back(name, Declaration(name, type, 1, std::move(declared)));
     }
     else
         CHECK(_vars.at(name).type() == type, "Declared type \"\" and variable type \"\" mismatch", _vars.at(name).type().c_str(), type.c_str());
+}
+
+void ShaderPreprocessor::DeclarationList::clear()
+{
+    for(const Declaration& i : _vars.values())
+        i.setSource("");
+    _vars.clear();
 }
 
 bool ShaderPreprocessor::DeclarationList::has(const String& name) const
@@ -671,8 +708,8 @@ void ShaderPreprocessor::Source::insertBefore(const String& statement, const Str
     }
 }
 
-ShaderPreprocessor::Declaration::Declaration(const String& name, const String& type, uint32_t length, const sp<String>& source)
-    : _name(name), _type(type), _length(length), _source(source)
+ShaderPreprocessor::Declaration::Declaration(const String& name, const String& type, uint32_t length, sp<String> source)
+    : _name(name), _type(type), _length(length), _source(std::move(source))
 {
 }
 
