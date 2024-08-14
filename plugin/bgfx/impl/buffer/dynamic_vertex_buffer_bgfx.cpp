@@ -54,4 +54,9 @@ void DynamicVertexBufferBgfx::bind()
     ::bgfx::setVertexBuffer(0, _handle);
 }
 
+void DynamicVertexBufferBgfx::bindRange(uint32_t first, uint32_t count)
+{
+    ::bgfx::setVertexBuffer(0, _handle, first, count);
+}
+
 }

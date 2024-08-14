@@ -45,4 +45,9 @@ void DynamicIndexBufferBgfx::bind()
     ::bgfx::setIndexBuffer(_handle);
 }
 
+void DynamicIndexBufferBgfx::bindRange(uint32_t first, uint32_t count)
+{
+    ::bgfx::setIndexBuffer(_handle, first, count);
+}
+
 }

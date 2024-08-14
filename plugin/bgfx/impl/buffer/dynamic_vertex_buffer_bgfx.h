@@ -16,6 +16,7 @@ public:
     void downloadBuffer(GraphicsContext& graphicsContext, size_t offset, size_t size, void* ptr) override;
 
     void bind() override;
+    void bindRange(uint32_t first, uint32_t count) override;
 
 private:
     DynamicVertexBuffer _handle;

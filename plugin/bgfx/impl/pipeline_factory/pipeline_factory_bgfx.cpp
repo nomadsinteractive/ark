@@ -287,7 +287,7 @@ public:
 
         const sp<BufferBase> indices = drawingContext._indices.delegate().cast<BufferBase>();
         DASSERT(indices->type() == Buffer::TYPE_INDEX);
-        indices->bind();
+        indices->bindRange(0, drawingContext._draw_count);
 
         for(const auto& [uniform, texture, stage] : _sampler_slots)
             ::bgfx::setTexture(stage, uniform, texture->handle());
