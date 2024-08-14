@@ -93,9 +93,10 @@ public:
         void addStage(ShaderStage stage);
         const std::set<ShaderStage>& stages() const;
 
+        void addUniform(const sp<Uniform>& uniform);
+
     private:
         void initialize();
-        void addUniform(const sp<Uniform>& uniform);
         void doSnapshot(uint64_t timestamp, bool force) const;
 
     private:

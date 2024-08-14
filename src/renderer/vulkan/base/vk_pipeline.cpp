@@ -246,7 +246,7 @@ void VKPipeline::setupDescriptorSetLayout(const PipelineInput& pipelineInput)
     {
         VkShaderStageFlags stages = i->stages().empty() ? VK_SHADER_STAGE_ALL : static_cast<VkShaderStageFlags>(0);
         for(const PipelineInput::ShaderStage j : i->stages())
-            stages = static_cast<VkShaderStageFlags>(stages | VKUtil::toStage(j));
+            stages |= VKUtil::toStage(j);
 
         binding = std::max(binding, i->binding());
         setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, stages, i->binding()));
@@ -255,17 +255,17 @@ void VKPipeline::setupDescriptorSetLayout(const PipelineInput& pipelineInput)
     {
         VkShaderStageFlags stages = i._stages.empty() ? VK_SHADER_STAGE_ALL : static_cast<VkShaderStageFlags>(0);
         for(PipelineInput::ShaderStage j : i._stages)
-            stages = stages | VKUtil::toStage(j);
+            stages |= VKUtil::toStage(j);
 
         binding = std::max(binding, i._binding);
         setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, stages, i._binding));
     }
 
     for(size_t i = 0; i < pipelineInput.samplerCount(); ++i)
-        setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, ++binding));
+        setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _is_compute_pipeline ? VK_SHADER_STAGE_COMPUTE_BIT : VK_SHADER_STAGE_FRAGMENT_BIT, ++binding));
 
     for(size_t i = 0; i < pipelineInput.imageNames().size(); ++i)
-        setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_VERTEX_BIT, ++binding));
+        setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, _is_compute_pipeline ? VK_SHADER_STAGE_COMPUTE_BIT : VK_SHADER_STAGE_VERTEX_BIT, ++binding));
 
     const VkDescriptorSetLayoutCreateInfo descriptorLayout =
             vks::initializers::descriptorSetLayoutCreateInfo(
@@ -442,7 +442,7 @@ void VKPipeline::setupGraphicsPipeline(GraphicsContext& graphicsContext, const V
 void VKPipeline::setupComputePipeline(GraphicsContext& /*graphicsContext*/)
 {
     const sp<VKDevice>& device = _renderer->device();
-    VkPipelineShaderStageCreateInfo stage = VKUtil::createShader(device->vkLogicalDevice(), _shaders.begin()->second, _shaders.begin()->first);
+    const VkPipelineShaderStageCreateInfo stage = VKUtil::createShader(device->vkLogicalDevice(), _shaders.begin()->second, _shaders.begin()->first);
     VkComputePipelineCreateInfo computePipelineCreateInfo = vks::initializers::computePipelineCreateInfo(_layout, 0);
     computePipelineCreateInfo.stage = stage;
     vkCreateComputePipelines(device->vkLogicalDevice(), device->vkPipelineCache(), 1, &computePipelineCreateInfo, nullptr, &_pipeline);

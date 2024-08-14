@@ -352,7 +352,7 @@ std::vector<uint32_t> RenderUtil::compileSPIR(const String& source, PipelineInpu
     shader.setResourceSetBinding(baseResourceSetBinding[esStage]);
 
     shader.setUniformLocationBase(uniformBase);
-
+//TODO: Use the specified version
     switch(renderTarget)
     {
         case Ark::RENDERER_TARGET_AUTO:
@@ -362,13 +362,13 @@ std::vector<uint32_t> RenderUtil::compileSPIR(const String& source, PipelineInpu
             break;
         case Ark::RENDERER_TARGET_VULKAN:
             shader.setEnvInput(glslang::EShSourceGlsl, esStage, glslang::EShClientVulkan, 100);
-            shader.setEnvClient(glslang::EShClientVulkan, glslang::EShTargetVulkan_1_0);
+            shader.setEnvClient(glslang::EShClientVulkan, glslang::EShTargetVulkan_1_2);
             break;
     }
 #ifdef ARK_PLATFORM_DARWIN
     shader.setEnvTarget(glslang::EShTargetSpv, glslang::EShTargetSpv_1_5);
 #else
-    shader.setEnvTarget(glslang::EShTargetSpv, glslang::EShTargetSpv_1_6);
+    shader.setEnvTarget(glslang::EShTargetSpv, glslang::EShTargetSpv_1_5);
 #endif
 
     if(!shader.parse(&initializer->builtInResource(), 100, false, EShMsgDefault))

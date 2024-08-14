@@ -78,7 +78,7 @@ void RendererFactoryVulkan::onSurfaceCreated(RenderEngine& renderEngine)
     Platform::vkInitialize();
 
     _renderer->_instance = sp<VKInstance>::make();
-    _renderer->_instance->initialize();
+    _renderer->_instance->initialize(renderEngine);
 
     _renderer->_device = sp<VKDevice>::make(_renderer->_instance, _renderer->_instance->physicalDevices()[0]);
     _renderer->_heap = sp<VKHeap>::make(_renderer->_device);

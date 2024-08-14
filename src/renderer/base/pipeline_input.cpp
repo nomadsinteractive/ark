@@ -68,24 +68,10 @@ PipelineInput::PipelineInput(const sp<Camera>& camera)
 
 void PipelineInput::initialize(const PipelineBuildingContext& buildingContext)
 {
-    std::map<int32_t, sp<UBO>> ubos;
-
-    for(const sp<Uniform>& i : buildingContext._uniforms.values())
+    for(auto& [k, v] : buildingContext._ubos)
     {
-        CHECK_WARN(i->binding() >= 0, "Uniform \"%s\" has unspecified binding. (Declared but unused variables might be optimized out)", i->name().c_str());
-        if(i->binding() >= 0)
-        {
-            sp<UBO>& ubo = ubos[i->binding()];
-            if(!ubo)
-                ubo = sp<UBO>::make(i->binding());
-            ubo->addUniform(i);
-        }
-    }
-
-    for(auto& i : ubos)
-    {
-        i.second->initialize();
-        _ubos.push_back(std::move(i.second));
+        v->initialize();
+        _ubos.push_back(std::move(v));
     }
 }
 

@@ -254,8 +254,24 @@ void PipelineBuildingContext::initializeUniforms()
         for(const auto& j : i.second->_ssbos)
             binding = std::max(binding, j.second + 1);
 
-    for(auto& i : _stages)
-        i.second->setupUniforms(_uniforms, binding);
+    for(const auto& i : _stages)
+        i.second->setupUniforms(_uniforms);
+
+    for(const auto& [k, v] : _stages)
+        if(const std::vector<String>& uniformNames = v->_declaration_uniforms.vars().keys(); !uniformNames.empty())
+        {
+            const std::set<String> uniformNameSet(uniformNames.begin(), uniformNames.end());
+            HashId hash = 0;
+            for(const String& i : uniformNameSet)
+                hash += hash * 101 + i.hash();
+
+            sp<PipelineInput::UBO>& ubo = _ubos[hash];
+            if(ubo == nullptr)
+                ubo = sp<PipelineInput::UBO>::make(binding++);
+            ubo->addStage(k);
+            for(const String& i : uniformNames)
+                ubo->addUniform(_uniforms.at(i));
+        }
 }
 
 const std::map<PipelineInput::ShaderStage, op<ShaderPreprocessor>>& PipelineBuildingContext::stages() const
@@ -276,9 +292,9 @@ void PipelineBuildingContext::addSnippet(const sp<Snippet>& snippet)
     _snippet = _snippet ? sp<Snippet>::make<SnippetLinkedChain>(_snippet, snippet) : snippet;
 }
 
-void PipelineBuildingContext::addUniform(String name, Uniform::Type type, uint32_t length, sp<Uploader> input, int32_t binding)
+void PipelineBuildingContext::addUniform(String name, Uniform::Type type, uint32_t length, sp<Uploader> input)
 {
-    addUniform(sp<Uniform>::make(std::move(name), type, length, std::move(input), binding));
+    addUniform(sp<Uniform>::make(std::move(name), type, length, std::move(input)));
 }
 
 void PipelineBuildingContext::addUniform(sp<Uniform> uniform)
@@ -379,7 +395,7 @@ void PipelineBuildingContext::loadPredefinedUniform(BeanFactory& factory, const 
         Uniform::Type uType = Uniform::toType(type);
         uint32_t componentSize = uType != Uniform::TYPE_STRUCT ? Uniform::getComponentSize(uType) : size;
         CHECK(componentSize, "Unknow type \"%s\"", type.c_str());
-        addUniform(name, uType, size / componentSize, uType == Uniform::TYPE_F3 ? sp<Uploader>::make<AlignedInput>(input, 16) : input, binding);
+        addUniform(name, uType, size / componentSize, uType == Uniform::TYPE_F3 ? sp<Uploader>::make<AlignedInput>(input, 16) : input);
     }
 }
 

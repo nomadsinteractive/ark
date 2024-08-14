@@ -58,13 +58,11 @@ VkPipelineShaderStageCreateInfo VKUtil::loadShader(VkDevice device, const String
 VkPipelineShaderStageCreateInfo VKUtil::createShader(VkDevice device, const String& source, PipelineInput::ShaderStage stage)
 {
     const std::vector<uint32_t> spirv = RenderUtil::compileSPIR(source, stage, Ark::RENDERER_TARGET_VULKAN);
-    VkShaderModuleCreateInfo moduleCreateInfo{};
-    moduleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+    VkShaderModuleCreateInfo moduleCreateInfo = {VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
     moduleCreateInfo.codeSize = spirv.size() * sizeof(uint32_t);
     moduleCreateInfo.pCode = spirv.data();
 
-    VkPipelineShaderStageCreateInfo shaderStage = {};
-    shaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    VkPipelineShaderStageCreateInfo shaderStage = {VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO};
     shaderStage.stage = toStage(stage);
     checkResult(vkCreateShaderModule(device, &moduleCreateInfo, nullptr, &shaderStage.module));
     DASSERT(shaderStage.module != VK_NULL_HANDLE);
@@ -231,10 +229,10 @@ VkImageAspectFlags VKUtil::toTextureAspect(Texture::Usage usage)
 VkShaderStageFlagBits VKUtil::toStage(PipelineInput::ShaderStage stage)
 {
 #ifndef ANDROID
-    static const VkShaderStageFlagBits vkStages[PipelineInput::SHADER_STAGE_COUNT] = {VK_SHADER_STAGE_VERTEX_BIT, VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT, VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT,
-                                                                               VK_SHADER_STAGE_GEOMETRY_BIT, VK_SHADER_STAGE_FRAGMENT_BIT, VK_SHADER_STAGE_COMPUTE_BIT};
+    constexpr VkShaderStageFlagBits vkStages[PipelineInput::SHADER_STAGE_COUNT] = {VK_SHADER_STAGE_VERTEX_BIT, VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT, VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT,
+                                                                                   VK_SHADER_STAGE_GEOMETRY_BIT, VK_SHADER_STAGE_FRAGMENT_BIT, VK_SHADER_STAGE_COMPUTE_BIT};
 #else
-    static const VkShaderStageFlagBits vkStages[PipelineInput::SHADER_STAGE_COUNT] = {VK_SHADER_STAGE_VERTEX_BIT, VK_SHADER_STAGE_FRAGMENT_BIT, VK_SHADER_STAGE_COMPUTE_BIT};
+    constexpr VkShaderStageFlagBits vkStages[PipelineInput::SHADER_STAGE_COUNT] = {VK_SHADER_STAGE_VERTEX_BIT, VK_SHADER_STAGE_FRAGMENT_BIT, VK_SHADER_STAGE_COMPUTE_BIT};
 #endif
     DCHECK(stage > PipelineInput::SHADER_STAGE_NONE && stage < PipelineInput::SHADER_STAGE_COUNT, "Illegal PipelineInput::ShaderStage: %d", stage);
     return vkStages[stage];
@@ -242,7 +240,7 @@ VkShaderStageFlagBits VKUtil::toStage(PipelineInput::ShaderStage stage)
 
 VkPrimitiveTopology VKUtil::toPrimitiveTopology(Enum::RenderMode mode)
 {
-    static const VkPrimitiveTopology topologies[Enum::RENDER_MODE_COUNT] = {VK_PRIMITIVE_TOPOLOGY_LINE_LIST, VK_PRIMITIVE_TOPOLOGY_POINT_LIST, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP};
+    constexpr VkPrimitiveTopology topologies[Enum::RENDER_MODE_COUNT] = {VK_PRIMITIVE_TOPOLOGY_LINE_LIST, VK_PRIMITIVE_TOPOLOGY_POINT_LIST, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP};
     CHECK(mode >= 0 && mode < Enum::RENDER_MODE_COUNT, "Unsupported render-mode: %d", mode);
     return topologies[mode];
 }

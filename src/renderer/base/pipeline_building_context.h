@@ -54,6 +54,7 @@ public:
     Table<String, sp<Texture>> _samplers;
     Table<String, sp<Texture>> _images;
     Table<String, Buffer> _ssbos;
+    std::map<HashId, sp<PipelineInput::UBO>> _ubos;
 
     std::set<String> _input_vars;
 
@@ -61,7 +62,7 @@ public:
 
     void addAttribute(String name, String type, uint32_t divisor);
     void addSnippet(const sp<Snippet>& snippet);
-    void addUniform(String name, Uniform::Type type, uint32_t length, sp<Uploader> input, int32_t binding);
+    void addUniform(String name, Uniform::Type type, uint32_t length, sp<Uploader> input);
     void addUniform(sp<Uniform> uniform);
 
     void addInputAttribute(const String& name, const String& type, uint32_t divisor);

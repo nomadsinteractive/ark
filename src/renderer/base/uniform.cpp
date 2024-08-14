@@ -9,18 +9,61 @@
 
 namespace ark {
 
-Uniform::Uniform(String name, String declaredType, Uniform::Type type, size_t size, uint32_t length, sp<Uploader> input, int32_t binding)
-    : _name(std::move(name)), _declared_type(std::move(declaredType)), _type(type), _component_size(size), _length(length), _uploader(std::move(input)), _binding(binding)
+namespace {
+
+String toDeclaredType(Uniform::Type type)
+{
+    switch(type) {
+        case Uniform::TYPE_I1V:
+        case Uniform::TYPE_I1:
+            return "int";
+        case Uniform::TYPE_F1V:
+        case Uniform::TYPE_F1:
+            return "float";
+        case Uniform::TYPE_F2V:
+        case Uniform::TYPE_F2:
+            return "vec2";
+        case Uniform::TYPE_F3V:
+        case Uniform::TYPE_F3:
+            return "vec3";
+        case Uniform::TYPE_F4V:
+        case Uniform::TYPE_F4:
+            return "vec4";
+        case Uniform::TYPE_MAT4V:
+        case Uniform::TYPE_MAT4:
+            return "mat4";
+        case Uniform::TYPE_MAT3V:
+        case Uniform::TYPE_MAT3:
+            return "mat3";
+        case Uniform::TYPE_SAMPLER2D:
+            return "sampler2D";
+        case Uniform::TYPE_IMAGE2D:
+            return "image2D";
+        case Uniform::TYPE_UIMAGE2D:
+            return "uimage2D";
+        case Uniform::TYPE_IIMAGE2D:
+            return "iimage2D";
+        default:
+            break;
+    }
+    FATAL("Unsupported type: %d", type);
+    return "";
+}
+
+}
+
+Uniform::Uniform(String name, String declaredType, Uniform::Type type, size_t size, uint32_t length, sp<Uploader> uploader)
+    : _name(std::move(name)), _declared_type(std::move(declaredType)), _type(type), _component_size(size), _length(length), _uploader(std::move(uploader))
 {
 }
 
-Uniform::Uniform(String name, String type, uint32_t length, sp<Uploader> input, int32_t binding)
-    : Uniform(std::move(name), std::move(type), toType(type), getComponentSize(toType(type)), length, std::move(input), binding)
+Uniform::Uniform(String name, String type, uint32_t length, sp<Uploader> uploader)
+    : Uniform(std::move(name), std::move(type), toType(type), getComponentSize(toType(type)), length, std::move(uploader))
 {
 }
 
-Uniform::Uniform(String name, Uniform::Type type, uint32_t length, sp<Uploader> input, int32_t binding)
-    : Uniform(std::move(name), toDeclaredType(type), type, getComponentSize(type), length, std::move(input), binding)
+Uniform::Uniform(String name, Uniform::Type type, uint32_t length, sp<Uploader> uploader)
+    : Uniform(std::move(name), toDeclaredType(type), type, getComponentSize(type), length, std::move(uploader))
 {
 }
 
@@ -45,16 +88,6 @@ size_t Uniform::size() const
     DCHECK(!_uploader || _uploader->size() <= s, "Uniform buffer overflow, name: \"%s\", size: %d, input size: %d", _name.c_str(), s, _uploader->size());
     DCHECK_WARN(!_uploader || _uploader->size() == s, "Uniform buffer size mismatch, name: \"%s\", size: %d, input size: %d", _name.c_str(), s, _uploader->size());
     return s;
-}
-
-int32_t Uniform::binding() const
-{
-    return _binding;
-}
-
-void Uniform::setBinding(int32_t binding)
-{
-    _binding = binding;
 }
 
 static Optional<Uniform::Type> vecToUniformType(const String& declaredType, const String& vecPrefix, Uniform::Type baseType)
@@ -107,45 +140,6 @@ Uniform::Type Uniform::toType(const String& declaredType)
     if(declaredType == "image2D")
         return TYPE_IMAGE2D;
     return TYPE_STRUCT;
-}
-
-String Uniform::toDeclaredType(Type type)
-{
-    switch(type) {
-    case TYPE_I1V:
-    case TYPE_I1:
-        return "int";
-    case TYPE_F1V:
-    case TYPE_F1:
-        return "float";
-    case TYPE_F2V:
-    case TYPE_F2:
-        return "vec2";
-    case TYPE_F3V:
-    case TYPE_F3:
-        return "vec3";
-    case TYPE_F4V:
-    case TYPE_F4:
-        return "vec4";
-    case TYPE_MAT4V:
-    case TYPE_MAT4:
-        return "mat4";
-    case TYPE_MAT3V:
-    case TYPE_MAT3:
-        return "mat3";
-    case TYPE_SAMPLER2D:
-        return "sampler2D";
-    case TYPE_IMAGE2D:
-        return "image2D";
-    case TYPE_UIMAGE2D:
-        return "uimage2D";
-    case TYPE_IIMAGE2D:
-        return "iimage2D";
-    default:
-        break;
-    }
-    DFATAL("Unsupported type: %d", type);
-    return "";
 }
 
 uint32_t Uniform::getComponentSize(Uniform::Type type)

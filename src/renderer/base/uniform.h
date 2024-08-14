@@ -43,9 +43,9 @@ public:
         TYPE_COUNT
     };
 
-    Uniform(String name, String declaredType, Type type, size_t size, uint32_t length, sp<Uploader> input, int32_t binding = -1);
-    Uniform(String name, String type, uint32_t length, sp<Uploader> input, int32_t binding = -1);
-    Uniform(String name, Type type, uint32_t length, sp<Uploader> flatable, int32_t binding = -1);
+    Uniform(String name, String declaredType, Type type, size_t size, uint32_t length, sp<Uploader> uploader);
+    Uniform(String name, String type, uint32_t length, sp<Uploader> uploader);
+    Uniform(String name, Type type, uint32_t length, sp<Uploader> uploader);
     DEFAULT_COPY_AND_ASSIGN(Uniform);
 
     const String& name() const;
@@ -55,16 +55,12 @@ public:
     size_t size() const;
 
     static Type toType(const String& declaredType);
-    static String toDeclaredType(Type type);
     static uint32_t getComponentSize(Type type);
 
     const String& declaredType() const;
 
     const sp<Uploader>& uploader() const;
     void setUploader(sp<Uploader> uploader);
-
-    int32_t binding() const;
-    void setBinding(int32_t binding);
 
     String declaration(const String& descriptor) const;
     void notify() const;
@@ -76,7 +72,6 @@ private:
     size_t _component_size;
     uint32_t _length;
     sp<Uploader> _uploader;
-    int32_t _binding;
 };
 
 }

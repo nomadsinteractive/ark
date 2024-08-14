@@ -185,10 +185,7 @@ struct alignas(1) BgfxShaderAttributeChunk {
     uint32_t ssboSize = 0;
     uint32_t dynamicDataSize = 0;
     for(const PipelineInput::UBO& i : pipelineInput.ubos())
-//TODO: find out the ubo stages
-        // if(i.stages().find(stage) != i.stages().end())
-        if(stage == PipelineInput::SHADER_STAGE_VERTEX)
-        {
+        if(i.stages().find(stage) != i.stages().end())
             for(const auto& [name, uniform] : i.uniforms())
             {
                 String tname = translatePredefinedName(name);
@@ -198,11 +195,11 @@ struct alignas(1) BgfxShaderAttributeChunk {
                 BgfxShaderUniformChunk uniformChunk;
                 uniformChunk.type = toBgfxUniformType(uniform->type());
                 uniformChunk.num = 1;
-                uniformChunk.regIndex = uniform->binding();
+                uniformChunk.regIndex = i.binding();
                 uniformChunk.regCount = (uniform->size() + 15) >> 4;
                 uniformChunks.emplace_back(std::make_pair(std::move(tname), uniformChunk));
             }
-        }
+
     uint32_t binding = 2;
     if(stage == PipelineInput::SHADER_STAGE_FRAGMENT)
         for(const String& i : pipelineInput.samplerNames())

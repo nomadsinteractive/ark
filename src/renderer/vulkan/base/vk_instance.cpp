@@ -9,6 +9,8 @@
 #include "renderer/vulkan/util/vk_util.h"
 
 #include "app/base/application_manifest.h"
+#include "renderer/base/render_engine.h"
+#include "renderer/base/render_engine_context.h"
 
 #if defined(ARK_FLAG_DEBUG) && !defined(ARK_PLATFORM_DARWIN) && !defined(ARK_PLATFORM_ANDROID)
 #define ARK_VK_DEBUG_LAYER_ENABLED  1
@@ -44,7 +46,7 @@ std::vector<std::string> get_supported_extensions() {
     VKUtil::checkResult(vkEnumerateInstanceExtensionProperties(nullptr, &count, extensionProperties.data()));
 
     std::vector<std::string> extensions;
-    for(auto& extension : extensionProperties)
+    for(const auto& extension : extensionProperties)
         extensions.push_back(extension.extensionName);
 
     return extensions;
@@ -63,8 +65,8 @@ std::vector<VkLayerProperties> getInstanceLayerProperties() {
 }
 
 
-VKInstance::VKInstance(uint32_t apiVersion)
-    : _api_version(apiVersion), _extensions({VK_KHR_SURFACE_EXTENSION_NAME}), _callback1(VK_NULL_HANDLE), _callback2(VK_NULL_HANDLE), _callback3(VK_NULL_HANDLE)
+VKInstance::VKInstance()
+    : _extensions({VK_KHR_SURFACE_EXTENSION_NAME}), _callback1(VK_NULL_HANDLE), _callback2(VK_NULL_HANDLE), _callback3(VK_NULL_HANDLE)
 {
 }
 
@@ -82,14 +84,25 @@ VKInstance::~VKInstance()
     vkDestroyInstance(_instance, nullptr);
 }
 
-void VKInstance::initialize()
+void VKInstance::initialize(const RenderEngine& renderEngine)
 {
-    VkApplicationInfo appInfo = {};
-    appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+    VkApplicationInfo appInfo = {VK_STRUCTURE_TYPE_APPLICATION_INFO};
     appInfo.pApplicationName = Ark::instance().manifest()->name().c_str();
     appInfo.pEngineName = "ark";
-    appInfo.apiVersion = VK_API_VERSION_1_0;
-
+    switch(renderEngine.context()->renderer()._version)
+    {
+        case Ark::RENDERER_VERSION_VULKAN_11:
+            appInfo.apiVersion = VK_API_VERSION_1_1;
+        break;
+        case Ark::RENDERER_VERSION_VULKAN_12:
+            appInfo.apiVersion = VK_API_VERSION_1_2;
+        break;
+        case Ark::RENDERER_VERSION_VULKAN_13:
+            appInfo.apiVersion = VK_API_VERSION_1_3;
+        break;
+        default:
+            appInfo.apiVersion = VK_API_VERSION_1_0;
+    }
     VkInstanceCreateInfo instanceCreateInfo = {};
 #if defined(_WIN32)
     _extensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);

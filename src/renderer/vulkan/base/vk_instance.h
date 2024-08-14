@@ -1,19 +1,19 @@
-#ifndef ARK_RENDERER_VULKAN_BASE_VK_INSTANCE_H_
-#define ARK_RENDERER_VULKAN_BASE_VK_INSTANCE_H_
+#pragma once
 
 #include <vector>
 
+#include "renderer/forwarding.h"
+
 #include "platform/vulkan/vulkan.h"
 
-namespace ark {
-namespace vulkan {
+namespace ark::vulkan {
 
 class VKInstance {
 public:
-    VKInstance(uint32_t apiVersion = VK_API_VERSION_1_0);
+    VKInstance();
     ~VKInstance();
 
-    void initialize();
+    void initialize(const RenderEngine& renderEngine);
 
     VkInstance vkInstance() const;
 
@@ -23,7 +23,6 @@ private:
     void setupDebugMessageCallback();
 
 private:
-    uint32_t _api_version;
     std::vector<const char*> _extensions;
 
     std::vector<VkPhysicalDevice> _physical_devices;
@@ -35,6 +34,3 @@ private:
 };
 
 }
-}
-
-#endif

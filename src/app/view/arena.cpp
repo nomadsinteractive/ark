@@ -128,7 +128,7 @@ void Arena::addView(sp<View> view, sp<Boolean> discarded)
 
 Arena::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _factory(factory), _manifest(manifest), _resource_loader(factory.getBuilder<ResourceLoader>(manifest, "resource-loader")),
-      _root_view(factory.getBuilder<View>(manifest, "root-view"))
+      _root_view(factory.ensureBuilder<View>(manifest, "root-view"))
 {
 }
 

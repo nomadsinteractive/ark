@@ -184,7 +184,7 @@ ShaderPreprocessor::Preprocessed ShaderPreprocessor::preprocess()
     return Preprocessed(_shader_stage, genDeclarations(_main.str()));
 }
 
-void ShaderPreprocessor::setupUniforms(Table<String, sp<Uniform>>& uniforms, int32_t& binding)
+void ShaderPreprocessor::setupUniforms(Table<String, sp<Uniform>>& uniforms)
 {
     for(const auto& i : _declaration_uniforms.vars())
     {
@@ -197,30 +197,19 @@ void ShaderPreprocessor::setupUniforms(Table<String, sp<Uniform>>& uniforms, int
         }
     }
 
-    int32_t next = binding;
     for(const sp<Uniform>& i : uniforms.values())
     {
         const String::size_type pos = i->name().find('[');
         DCHECK(pos != 0, "Illegal uniform name: %s", i->name().c_str());
-        if(_main.contains(pos == String::npos ? i->name() : i->name().substr(0, pos)))
+        if(_main.contains(pos == String::npos ? i->name() : i->name().substr(0, pos)) && !_declaration_uniforms.has(i->name()))
         {
-            if(i->binding() == -1)
-            {
-                next = binding + 1;
-                i->setBinding(binding);
-            }
-
-            if(!_declaration_uniforms.has(i->name()))
-            {
-                const String type = i->declaredType();
-                sp<String> declaration = sp<String>::make(i->declaration("uniform "));
-                _declaration_uniforms.vars().push_back(i->name(), Declaration(i->name(), type, i->length(), declaration));
-                if(pos == String::npos)
-                    _uniform_declaration_codes.push_back(std::move(declaration));
-            }
+            const String type = i->declaredType();
+            sp<String> declaration = sp<String>::make(i->declaration("uniform "));
+            _declaration_uniforms.vars().push_back(i->name(), Declaration(i->name(), type, i->length(), declaration));
+            if(pos == String::npos)
+                _uniform_declaration_codes.push_back(std::move(declaration));
         }
     }
-    binding = next;
 }
 
 const char* ShaderPreprocessor::inVarPrefix() const
