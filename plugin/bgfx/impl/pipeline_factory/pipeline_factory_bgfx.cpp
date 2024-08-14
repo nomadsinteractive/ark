@@ -199,7 +199,7 @@ struct alignas(1) BgfxShaderAttributeChunk {
                 uniformChunk.type = toBgfxUniformType(uniform->type());
                 uniformChunk.num = 1;
                 uniformChunk.regIndex = uniform->binding();
-                uniformChunk.regCount = uniform->length();
+                uniformChunk.regCount = (uniform->size() + 15) >> 4;
                 uniformChunks.emplace_back(std::make_pair(std::move(tname), uniformChunk));
             }
         }
@@ -222,7 +222,7 @@ struct alignas(1) BgfxShaderAttributeChunk {
         ssboSize += i._buffer.size();
 
     std::vector<BgfxShaderAttributeChunk> attributeChunks;
-    for(const auto&  [divisor, streamLayout]: pipelineInput.streamLayouts())
+    for(const auto& [divisor, streamLayout]: pipelineInput.streamLayouts())
         for(const auto& [name, attribute] : streamLayout.attributes())
             attributeChunks.push_back({toBgfxAttribId(attribute.usage())});
 

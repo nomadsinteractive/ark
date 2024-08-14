@@ -17,7 +17,8 @@ public:
     Buffer::Usage usage() const;
 
 protected:
-    static void setupVertexBufferLayout(::bgfx::VertexLayout& vertexBufLayout, const PipelineDescriptor& pipelineDescriptor);
+    static void setupVertexBufferLayout(::bgfx::VertexLayout& vertexLayout, const PipelineDescriptor& pipelineDescriptor);
+    static void shiftTexCoords(const ::bgfx::VertexLayout& vertexLayout, void* data, size_t numberOfVertex);
 
 protected:
     Buffer::Type _type;

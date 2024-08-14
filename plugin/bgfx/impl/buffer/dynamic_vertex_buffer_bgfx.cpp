@@ -40,6 +40,7 @@ void DynamicVertexBufferBgfx::uploadBuffer(GraphicsContext& graphicsContext, Upl
 {
     _data = UploaderType::toBytes(input);
     _size = _data.size();
+    shiftTexCoords(_vertex_buffer_layout, _data.data(), _size / _vertex_buffer_layout.m_stride);
     upload(graphicsContext);
 }
 

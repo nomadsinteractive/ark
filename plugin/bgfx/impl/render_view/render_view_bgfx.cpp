@@ -37,7 +37,10 @@ void RenderViewBgfx::onSurfaceChanged(uint32_t width, uint32_t height)
 
 void RenderViewBgfx::onRenderFrame(const Color& backgroundColor, RenderCommand& renderCommand)
 {
+    const RenderEngineContext::Resolution& displayResolution = _graphics_context->renderContext()->displayResolution();
+    ::bgfx::setViewRect(0, 0, 0, static_cast<uint16_t>(displayResolution.width), static_cast<uint16_t>(displayResolution.height));
     ::bgfx::touch(0);
+    ::bgfx::setState(BGFX_STATE_DEFAULT | BGFX_STATE_BLEND_FUNC_SEPARATE(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA, BGFX_STATE_BLEND_ONE, BGFX_STATE_BLEND_ZERO));
     ::bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH | BGFX_CLEAR_STENCIL, backgroundColor.value());
     _graphics_context->onDrawFrame();
     renderCommand.draw(_graphics_context);

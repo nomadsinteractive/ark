@@ -39,6 +39,7 @@ void StaticVertexBufferBgfx::uploadBuffer(GraphicsContext& graphicsContext, Uplo
     CHECK(!_handle.isValid(), "Cannot upload data into a static vertex buffer");
     _data = UploaderType::toBytes(input);
     _size = _data.size();
+    shiftTexCoords(_vertex_buffer_layout, _data.data(), _size / _vertex_buffer_layout.m_stride);
     upload(graphicsContext);
 }
 

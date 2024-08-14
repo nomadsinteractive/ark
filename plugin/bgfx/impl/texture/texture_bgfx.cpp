@@ -33,10 +33,10 @@ namespace {
         {::bgfx::TextureFormat::Unknown, ::bgfx::TextureFormat::RGBA16F, ::bgfx::TextureFormat::RGBA32F}
     };
     constexpr ComponentFormat nFormats[] = {
-        {::bgfx::TextureFormat::R8S, ::bgfx::TextureFormat::R16S, ::bgfx::TextureFormat::Unknown},
-        {::bgfx::TextureFormat::RG8S, ::bgfx::TextureFormat::RG16S, ::bgfx::TextureFormat::Unknown},
-        {::bgfx::TextureFormat::RGB8S, ::bgfx::TextureFormat::Unknown, ::bgfx::TextureFormat::Unknown},
-        {::bgfx::TextureFormat::RGBA8S, ::bgfx::TextureFormat::RGBA16S, ::bgfx::TextureFormat::Unknown}
+        {::bgfx::TextureFormat::R8, ::bgfx::TextureFormat::R16, ::bgfx::TextureFormat::Unknown},
+        {::bgfx::TextureFormat::RG8, ::bgfx::TextureFormat::RG16, ::bgfx::TextureFormat::Unknown},
+        {::bgfx::TextureFormat::RGB8, ::bgfx::TextureFormat::Unknown, ::bgfx::TextureFormat::Unknown},
+        {::bgfx::TextureFormat::RGBA8, ::bgfx::TextureFormat::RGBA16, ::bgfx::TextureFormat::Unknown}
     };
 
     switch(usage & Texture::USAGE_DEPTH_STENCIL_ATTACHMENT)

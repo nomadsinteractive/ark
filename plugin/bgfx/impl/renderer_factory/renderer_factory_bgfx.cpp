@@ -179,7 +179,7 @@ void RendererFactoryBgfx::onSurfaceCreated(RenderEngine& renderEngine)
 
     ::bgfx::init(init);
 
-    ::bgfx::setDebug(BGFX_DEBUG_STATS);
+    // ::bgfx::setDebug(BGFX_DEBUG_STATS);
 }
 
 sp<RenderEngineContext> RendererFactoryBgfx::createRenderEngineContext(const ApplicationManifest::Renderer& renderer)

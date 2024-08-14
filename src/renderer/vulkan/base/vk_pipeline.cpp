@@ -220,7 +220,7 @@ void VKPipeline::setupVertexDescriptions(const PipelineInput& input, VKPipeline:
 
         for(const Attribute& j : stream.attributes().values())
         {
-            uint32_t slen = std::min<uint32_t>(4, j.length());
+            const uint32_t slen = std::min<uint32_t>(4, j.length());
             for(uint32_t offset = 0; offset < j.length(); offset += slen)
                 vertexLayout.attributeDescriptions.push_back(vks::initializers::vertexInputAttributeDescription(
                                                              divsor,
