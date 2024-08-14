@@ -63,11 +63,12 @@ namespace {
 Ark* _instance = nullptr;
 std::list<Ark*> _instance_stack;
 
-M4 changeProjectionHandSide(M4 projection)
+M4 changeProjectionHandSide(const M4& projection)
 {
-    projection[0] = -projection[0];
-    projection[5] = -projection[5];
-    return projection;
+    M4 flip;
+    flip[0] = -1;
+    flip[5] = -1;
+    return MatrixUtil::mul(flip, projection);
 }
 
 struct CameraDelegateCHS final : Camera::Delegate {
@@ -390,10 +391,13 @@ const sp<ApplicationProfiler>& Ark::applicationProfiler() const
 
 Camera Ark::createCamera(RendererCoordinateSystem coordinateSystem) const
 {
-    const RendererCoordinateSystem cs = coordinateSystem == COORDINATE_SYSTEM_DEFAULT ? _manifest->renderer()._coordinate_system : coordinateSystem;
+    if(coordinateSystem == COORDINATE_SYSTEM_DEFAULT)
+        coordinateSystem = _manifest->renderer()._coordinate_system;
+
     RendererFactory& rendererFactory = _application_context->renderController()->renderEngine()->rendererFactory();
+    const RendererCoordinateSystem cs = coordinateSystem == COORDINATE_SYSTEM_DEFAULT ? rendererFactory.defaultCoordinateSystem() : coordinateSystem;
     sp<Camera::Delegate> cameraDelegate = rendererFactory.createCamera();
-    return {cs, cs == COORDINATE_SYSTEM_DEFAULT || cs == rendererFactory.defaultCoordinateSystem() ? std::move(cameraDelegate) : sp<Camera::Delegate>::make<CameraDelegateCHS>(std::move(cameraDelegate))};
+    return {cs, cs == rendererFactory.defaultCoordinateSystem() ? std::move(cameraDelegate) : sp<Camera::Delegate>::make<CameraDelegateCHS>(std::move(cameraDelegate))};
 }
 
 op<ApplicationProfiler::Tracer> Ark::makeProfilerTracer(const char* func, const char* filename, int32_t lineno, const char* name, ApplicationProfiler::Category category) const
@@ -406,7 +410,7 @@ op<ApplicationProfiler::Logger> Ark::makeProfilerLogger(const char* func, const 
     return _application_profiler ? _application_profiler->makeLogger(func, filename, lineno, name) : op<ApplicationProfiler::Logger>();
 }
 
-void Ark::deferUnref(Box box)
+void Ark::deferUnref(Box box) const
 {
     _application_context->renderController()->deferUnref(std::move(box));
 }

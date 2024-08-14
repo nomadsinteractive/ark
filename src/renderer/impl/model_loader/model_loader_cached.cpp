@@ -5,18 +5,13 @@
 namespace ark {
 
 ModelLoaderCached::ModelLoaderCached(sp<ModelLoader> delegate)
-    : ModelLoader(delegate->renderMode()), _delegate(std::move(delegate))
+    : ModelLoader(delegate->renderMode(), delegate->texture()), _delegate(std::move(delegate))
 {
 }
 
-sp<RenderCommandComposer> ModelLoaderCached::makeRenderCommandComposer()
+sp<RenderCommandComposer> ModelLoaderCached::makeRenderCommandComposer(const Shader& shader)
 {
-    return _delegate->makeRenderCommandComposer();
-}
-
-void ModelLoaderCached::initialize(PipelineBindings& pipelineBindings)
-{
-    _delegate->initialize(pipelineBindings);
+    return _delegate->makeRenderCommandComposer(shader);
 }
 
 sp<Model> ModelLoaderCached::loadModel(int32_t type)

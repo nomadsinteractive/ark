@@ -40,7 +40,7 @@ sp<Model> makeUnitPointModel(const sp<Boundaries>& content)
 
 Constants::Constants()
     : BOOLEAN_TRUE(sp<Boolean>::make<Boolean::Const>(true)), BOOLEAN_FALSE(sp<Boolean>::make<Boolean::Const>(false)), BOUNDARIES_UNIT(sp<Boundaries>::make(V3(-0.5f), V3(0.5f))), MODEL_UNIT_QUAD(makeUnitQuadModel(BOUNDARIES_UNIT)),
-      MODEL_UNIT_NINE_PATCH_TRIANGLE_STRIPS(makeUnitNinePatchTriangleStripsModel(BOUNDARIES_UNIT)), MODEL_UNIT_NINE_PATCH_QUADS(makeUnitNinePatchQuadsModel(BOUNDARIES_UNIT)), MODEL_UNIT_POINT(makeUnitPointModel(BOUNDARIES_UNIT)),
+      MODEL_UNIT_NINE_PATCH_TRIANGLE_STRIPS(makeUnitNinePatchTriangleStripsModel(BOUNDARIES_UNIT)), MODEL_UNIT_NINE_PATCH_QUADS(makeUnitNinePatchQuadsModel(BOUNDARIES_UNIT)),
       NUMERIC_ZERO(sp<Numeric>::make<Numeric::Const>(0)), NUMERIC_ONE(sp<Numeric>::make<Numeric::Const>(1.0f))
 {
 }

@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_IMPL_MODEL_LOADER_MODEL_LOADER_SPHERE_H_
-#define ARK_RENDERER_IMPL_MODEL_LOADER_MODEL_LOADER_SPHERE_H_
+#pragma once
 
 #include "core/types/shared_ptr.h"
 
@@ -12,11 +11,8 @@ public:
 [[deprecated]]
     ModelLoaderSphere(const sp<Atlas>& atlas, uint32_t sampleCount);
 
-    virtual sp<RenderCommandComposer> makeRenderCommandComposer() override;
-
-    virtual void initialize(PipelineBindings& pipelineBindings) override;
-
-    virtual sp<Model> loadModel(int32_t type) override;
+    sp<RenderCommandComposer> makeRenderCommandComposer(const Shader& shader) override;
+    sp<Model> loadModel(int32_t type) override;
 
 //  [[plugin::builder("sphere")]]
     class BUILDER : public Builder<ModelLoader> {
@@ -54,5 +50,3 @@ private:
 };
 
 }
-
-#endif

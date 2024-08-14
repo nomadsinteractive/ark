@@ -19,10 +19,7 @@ class ModelLoaderText final : public ModelLoader {
 public:
     ModelLoaderText(sp<RenderController> renderController, sp<Alphabet> alphabet, sp<Atlas> atlas, const Font::TextSize& textSize);
 
-    sp<RenderCommandComposer> makeRenderCommandComposer() override;
-
-    void initialize(PipelineBindings& pipelineBindings) override;
-
+    sp<RenderCommandComposer> makeRenderCommandComposer(const Shader& shader) override;
     sp<Model> loadModel(int32_t type) override;
 
 //  [[plugin::resource-loader("text")]]
@@ -57,22 +54,22 @@ private:
         uint64_t _timestamp;
     };
 
-    class GlyphBundle {
-    public:
+    struct GlyphBundle {
         GlyphBundle(AtlasAttachment& atlasAttachment, sp<Alphabet> alphabet, const Font::TextSize& textSize);
 
         GlyphModel& ensureGlyphModel(uint64_t timestamp, int32_t c, bool reload);
 
         bool prepareOne(uint64_t timestamp, int32_t c, int32_t ckey);
 
-        void update(uint64_t timestamp);
+        void reload(uint64_t timestamp);
 
-    private:
         AtlasAttachment& _atlas_attachment;
 
         sp<Alphabet> _alphabet;
+        sp<Model> _unit_glyph_model;
         Font::TextSize _text_size;
         std::unordered_map<int32_t, GlyphModel> _glyphs;
+        bool _is_y_up = true;
     };
 
     struct AtlasAttachment {
@@ -90,7 +87,6 @@ private:
         bitmap _glyph_bitmap;
 
         MaxRectsBinPack _bin_pack;
-        sp<Model> _unit_model;
         std::vector<sp<GlyphBundle>> _glyph_bundles;
 
         sp<Future> _texture_reload_future;

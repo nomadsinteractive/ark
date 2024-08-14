@@ -16,17 +16,20 @@ public:
         MODEL_TRAIT_FIXED_VERTEX_COUNT = 1
     };
 
-    ModelLoader(Enum::RenderMode renderMode);
+    ModelLoader(Enum::RenderMode renderMode, sp<Texture> texture);
     virtual ~ModelLoader() = default;
 
 //[[script::bindings::property]]
     Enum::RenderMode renderMode() const;
+    void bind(const PipelineBindings& pipelineBindings) const;
+
+    const sp<Texture>& texture() const;
+
     [[nodiscard]]
 //[[script::bindings::auto]]
     virtual sp<Model> loadModel(int32_t type) = 0;
     [[nodiscard]]
-    virtual sp<RenderCommandComposer> makeRenderCommandComposer() = 0;
-    virtual void initialize(PipelineBindings& pipelineBindings) = 0;
+    virtual sp<RenderCommandComposer> makeRenderCommandComposer(const Shader& shader) = 0;
 
     class ARK_API Importer {
     public:
@@ -38,6 +41,7 @@ public:
 
 private:
     Enum::RenderMode _render_mode;
+    sp<Texture> _texture;
 };
 
 }

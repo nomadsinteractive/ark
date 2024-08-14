@@ -10,16 +10,13 @@ class ModelLoaderQuad : public ModelLoader {
 public:
     ModelLoaderQuad(sp<Atlas> atlas);
 
-    sp<RenderCommandComposer> makeRenderCommandComposer() override;
-
-    void initialize(PipelineBindings& pipelineBindings) override;
-
+    sp<RenderCommandComposer> makeRenderCommandComposer(const Shader& shader) override;
     sp<Model> loadModel(int32_t type) override;
 
 //  [[plugin::builder::by-value("quad")]]
-    class MAKER : public Builder<ModelLoader> {
+    class BUILDER final : public Builder<ModelLoader> {
     public:
-        MAKER(BeanFactory& factory, const String& atlas);
+        BUILDER(BeanFactory& factory, const String& atlas);
 
         sp<ModelLoader> build(const Scope& args) override;
 

@@ -20,12 +20,12 @@
 namespace ark {
 
 ModelBundle::ModelBundle(sp<MaterialBundle> materialBundle, sp<Importer> importer)
-    : ModelLoader(Enum::RENDER_MODE_TRIANGLES), _stub(sp<Stub>::make(std::move(materialBundle), std::move(importer)))
+    : ModelLoader(Enum::RENDER_MODE_TRIANGLES, nullptr), _stub(sp<Stub>::make(std::move(materialBundle), std::move(importer)))
 {
 }
 
 ModelBundle::ModelBundle(const sp<ModelBundle::Stub>& stub)
-    : ModelLoader(Enum::RENDER_MODE_TRIANGLES), _stub(stub)
+    : ModelLoader(Enum::RENDER_MODE_TRIANGLES, nullptr), _stub(stub)
 {
 }
 
@@ -34,13 +34,9 @@ void ModelBundle::import(BeanFactory& factory, const document& manifest, const S
     _stub->import(factory, manifest, args);
 }
 
-sp<RenderCommandComposer> ModelBundle::makeRenderCommandComposer()
+sp<RenderCommandComposer> ModelBundle::makeRenderCommandComposer(const Shader& /*shader*/)
 {
     return sp<RCCMultiDrawElementsIndirect>::make(sp<ModelBundle>::make(_stub));
-}
-
-void ModelBundle::initialize(PipelineBindings& /*pipelineBindings*/)
-{
 }
 
 const ModelBundle::ModelLayout& ModelBundle::ensureModelLayout(int32_t type) const

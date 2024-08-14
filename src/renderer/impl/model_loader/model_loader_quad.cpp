@@ -12,18 +12,13 @@
 namespace ark {
 
 ModelLoaderQuad::ModelLoaderQuad(sp<Atlas> atlas)
-    : ModelLoader(Enum::RENDER_MODE_TRIANGLES), _atlas(std::move(atlas)), _unit_model(Global<Constants>()->MODEL_UNIT_QUAD)
+    : ModelLoader(Enum::RENDER_MODE_TRIANGLES, atlas->texture()), _atlas(std::move(atlas)), _unit_model(Global<Constants>()->MODEL_UNIT_QUAD)
 {
 }
 
-sp<RenderCommandComposer> ModelLoaderQuad::makeRenderCommandComposer()
+sp<RenderCommandComposer> ModelLoaderQuad::makeRenderCommandComposer(const Shader& /*shader*/)
 {
     return Ark::instance().renderController()->makeDrawElementsIncremental(_unit_model);
-}
-
-void ModelLoaderQuad::initialize(PipelineBindings& pipelineBindings)
-{
-    pipelineBindings.pipelineDescriptor()->bindSampler(_atlas->texture());
 }
 
 sp<Model> ModelLoaderQuad::loadModel(int32_t type)
@@ -33,12 +28,12 @@ sp<Model> ModelLoaderQuad::loadModel(int32_t type)
     return sp<Model>::make(_unit_model->indices(), sp<VerticesQuad>::make(texCoord), sp<Boundaries>::make(V3(0), V3(size, 0), V3(texCoord.pivot(), 0)));
 }
 
-ModelLoaderQuad::MAKER::MAKER(BeanFactory& factory, const String& atlas)
+ModelLoaderQuad::BUILDER::BUILDER(BeanFactory& factory, const String& atlas)
     : _atlas(factory.ensureBuilder<Atlas>(atlas))
 {
 }
 
-sp<ModelLoader> ModelLoaderQuad::MAKER::build(const Scope& args)
+sp<ModelLoader> ModelLoaderQuad::BUILDER::build(const Scope& args)
 {
     return sp<ModelLoaderQuad>::make(_atlas->build(args));
 }

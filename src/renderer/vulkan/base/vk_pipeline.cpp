@@ -104,6 +104,19 @@ sp<VKPipeline::BakedRenderer> makeBakedRenderer(const PipelineDescriptor& bindin
     return nullptr;
 }
 
+VkStencilOpState makeStencilState(const PipelineDescriptor::TraitStencilTestSeparate& stencil)
+{
+    VkStencilOpState state = {};
+    state.failOp = VKUtil::toStencilOp(stencil._op);
+    state.passOp = VKUtil::toStencilOp(stencil._op_dpass);
+    state.depthFailOp = VKUtil::toStencilOp(stencil._op_dfail);
+    state.compareOp = VKUtil::toCompareOp(stencil._func);
+    state.reference = stencil._ref;
+    state.writeMask = stencil._mask;
+    state.compareMask = stencil._compare_mask;
+    return state;
+}
+
 }
 
 VKPipeline::VKPipeline(const PipelineDescriptor& bindings, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, std::map<PipelineInput::ShaderStage, String> shaders)
@@ -553,19 +566,6 @@ VkPipelineDepthStencilStateCreateInfo VKPipeline::makeDepthStencilState() const
                 state.back = makeStencilState(stencilTest._back);
         }
     }
-    return state;
-}
-
-VkStencilOpState VKPipeline::makeStencilState(const PipelineDescriptor::TraitStencilTestSeparate& stencil) const
-{
-    VkStencilOpState state{};
-    state.failOp = VKUtil::toStencilOp(stencil._op);
-    state.passOp = VKUtil::toStencilOp(stencil._op_dpass);
-    state.depthFailOp = VKUtil::toStencilOp(stencil._op_dfail);
-    state.compareOp = VKUtil::toCompareOp(stencil._func);
-    state.reference = stencil._ref;
-    state.writeMask = stencil._mask;
-    state.compareMask = stencil._compare_mask;
     return state;
 }
 

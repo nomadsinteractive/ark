@@ -10,19 +10,14 @@
 namespace ark {
 
 ModelLoaderNinePatchTriangleStrips::ModelLoaderNinePatchTriangleStrips(sp<Atlas> atlas)
-    : ModelLoader(Enum::RENDER_MODE_TRIANGLE_STRIP), _atlas(std::move(atlas)), _nine_patch_attachment(_atlas->attachments().ensure<Atlas::AttachmentNinePatch>()),
+    : ModelLoader(Enum::RENDER_MODE_TRIANGLE_STRIP, atlas->texture()), _atlas(std::move(atlas)), _nine_patch_attachment(_atlas->attachments().ensure<Atlas::AttachmentNinePatch>()),
       _unit_model(Global<Constants>()->MODEL_UNIT_NINE_PATCH_TRIANGLE_STRIPS)
 {
 }
 
-sp<RenderCommandComposer> ModelLoaderNinePatchTriangleStrips::makeRenderCommandComposer()
+sp<RenderCommandComposer> ModelLoaderNinePatchTriangleStrips::makeRenderCommandComposer(const Shader& /*shader*/)
 {
     return sp<RCCDrawElements>::make(_unit_model);
-}
-
-void ModelLoaderNinePatchTriangleStrips::initialize(PipelineBindings& pipelineBindings)
-{
-    pipelineBindings.pipelineDescriptor()->bindSampler(_atlas->texture());
 }
 
 sp<Model> ModelLoaderNinePatchTriangleStrips::loadModel(int32_t type)

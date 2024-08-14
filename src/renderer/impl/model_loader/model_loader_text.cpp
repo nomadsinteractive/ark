@@ -14,33 +14,28 @@
 #include "renderer/base/drawing_buffer.h"
 #include "renderer/base/pipeline_descriptor.h"
 #include "renderer/base/model.h"
-#include "renderer/impl/render_command_composer/rcc_draw_elements_incremental.h"
 #include "renderer/base/render_controller.h"
 #include "renderer/base/resource_loader_context.h"
-#include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/render_engine.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/texture.h"
+#include "renderer/impl/render_command_composer/rcc_draw_elements_incremental.h"
 #include "renderer/impl/vertices/vertices_quad.h"
-#include "renderer/util/render_util.h"
 
 
 namespace ark {
 
 ModelLoaderText::ModelLoaderText(sp<RenderController> renderController, sp<Alphabet> alphabet, sp<Atlas> atlas, const Font::TextSize& textSize)
-    : ModelLoader(Enum::RENDER_MODE_TRIANGLES), _atlas(std::move(atlas)), _atlas_attachment(_atlas->attachments().ensure<AtlasAttachment>(*_atlas, std::move(renderController))),
+    : ModelLoader(Enum::RENDER_MODE_TRIANGLES, atlas->texture()), _atlas(std::move(atlas)), _atlas_attachment(_atlas->attachments().ensure<AtlasAttachment>(*_atlas, std::move(renderController))),
       _glyph_bundle(_atlas_attachment->makeGlyphBundle(std::move(alphabet), textSize))
 {
 }
 
-sp<RenderCommandComposer> ModelLoaderText::makeRenderCommandComposer()
+sp<RenderCommandComposer> ModelLoaderText::makeRenderCommandComposer(const Shader& shader)
 {
-    return Ark::instance().renderController()->makeDrawElementsIncremental(_atlas_attachment->_unit_model);
-}
-
-void ModelLoaderText::initialize(PipelineBindings& pipelineBindings)
-{
-    pipelineBindings.pipelineDescriptor()->bindSampler(_atlas->texture());
+    const Camera& camera = shader.input()->camera();
+    _glyph_bundle->_is_y_up = camera.isYUp();
+    return Ark::instance().renderController()->makeDrawElementsIncremental(Global<Constants>()->MODEL_UNIT_QUAD);
 }
 
 sp<Model> ModelLoaderText::loadModel(int32_t type)
@@ -62,7 +57,7 @@ sp<ModelLoader> ModelLoaderText::BUILDER::build(const Scope& args)
 }
 
 ModelLoaderText::GlyphBundle::GlyphBundle(AtlasAttachment& atlasAttachment, sp<Alphabet> alphabet, const Font::TextSize& textSize)
-    : _atlas_attachment(atlasAttachment), _alphabet(std::move(alphabet)), _text_size(textSize)
+    : _atlas_attachment(atlasAttachment), _alphabet(std::move(alphabet)), _unit_glyph_model(Global<Constants>()->MODEL_UNIT_QUAD), _text_size(textSize)
 {
 }
 
@@ -80,12 +75,13 @@ bool ModelLoaderText::GlyphBundle::prepareOne(uint64_t timestamp, int32_t c, int
         const uint32_t cy = packedBounds.y + 1;
         _alphabet->draw(c, _atlas_attachment._glyph_bitmap, cx, cy);
 
+        const Rect bounds = _is_y_up ? Rect(0, 0, 1.0f, 1.0f) : Rect(0, static_cast<float>(bitmap_y) / bitmap_height + 1.0f, 1.0f, static_cast<float>(bitmap_y) / bitmap_height);
         const V2 charSize(static_cast<float>(bitmap_width), static_cast<float>(bitmap_height));
-        Atlas::Item item = _atlas_attachment._atlas.makeItem(cx, cy, cx + bitmap_width, cy + bitmap_height, Rect(0, 0, 1.0f, 1.0f), charSize, V2(0));
+        Atlas::Item item = _atlas_attachment._atlas.makeItem(cx, cy, cx + bitmap_width, cy + bitmap_height, bounds, charSize, V2(0));
         const V3 xyz(static_cast<float>(bitmap_x), static_cast<float>(bitmap_y), 0);
-        sp<Boundaries> bounds = sp<Boundaries>::make(xyz, V3(charSize, 0), xyz);
+        sp<Boundaries> content = sp<Boundaries>::make(xyz, V3(charSize, 0), xyz);
         sp<Boundaries> occupies = sp<Boundaries>::make(V3(0), V3(static_cast<float>(width), static_cast<float>(height), 0), xyz);
-        _glyphs[ckey] = GlyphModel(sp<Model>::make(_atlas_attachment._unit_model->indices(), sp<VerticesQuad>::make(item), std::move(bounds), std::move(occupies)), timestamp);
+        _glyphs[ckey] = GlyphModel(sp<Model>::make(_unit_glyph_model->indices(), sp<VerticesQuad>::make(item), std::move(content), std::move(occupies)), timestamp);
     }
     else
     {
@@ -95,18 +91,18 @@ bool ModelLoaderText::GlyphBundle::prepareOne(uint64_t timestamp, int32_t c, int
     return true;
 }
 
-void ModelLoaderText::GlyphBundle::update(uint64_t timestamp)
+void ModelLoaderText::GlyphBundle::reload(uint64_t timestamp)
 {
     std::vector<int32_t> reloadVector;
-    for(const auto& i : _glyphs)
+    for(const auto& [k, v] : _glyphs)
     {
-        i.second._model->dispose();
-        if(timestamp - i.second._timestamp < 1000000)
-            reloadVector.push_back(i.first);
+        v._model->dispose();
+        if(timestamp - v._timestamp < 1000000)
+            reloadVector.push_back(k);
     }
 
     _alphabet->setTextSize(_text_size);
-    for(int32_t i : reloadVector)
+    for(const int32_t i : reloadVector)
         ensureGlyphModel(timestamp, i, false);
 }
 
@@ -135,7 +131,7 @@ ModelLoaderText::GlyphModel& ModelLoaderText::GlyphBundle::ensureGlyphModel(uint
 }
 
 ModelLoaderText::AtlasAttachment::AtlasAttachment(Atlas& atlas, sp<RenderController> renderController)
-    : _atlas(atlas), _render_controller(std::move(renderController)), _unit_model(Global<Constants>()->MODEL_UNIT_QUAD)
+    : _atlas(atlas), _render_controller(std::move(renderController))
 {
     initialize(_atlas.width(), _atlas.height());
 }
@@ -161,7 +157,7 @@ bool ModelLoaderText::AtlasAttachment::resize(uint32_t textureWidth, uint32_t te
     initialize(textureWidth, textureHeight);
 
     for(const sp<GlyphBundle>& i : _glyph_bundles)
-        i->update(timestamp);
+        i->reload(timestamp);
 
     reloadTexture();
     return true;

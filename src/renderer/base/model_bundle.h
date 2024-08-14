@@ -92,9 +92,8 @@ public:
 
     void import(BeanFactory& factory, const document& manifest, const Scope& args);
 
-    virtual sp<RenderCommandComposer> makeRenderCommandComposer() override;
-    virtual void initialize(PipelineBindings& pipelineBindings) override;
-    virtual sp<Model> loadModel(int32_t type) override;
+    sp<RenderCommandComposer> makeRenderCommandComposer(const Shader& shader) override;
+    sp<Model> loadModel(int32_t type) override;
 
     const ModelLayout& ensureModelLayout(int32_t type) const;
 

@@ -90,7 +90,7 @@ public:
     op<ApplicationProfiler::Tracer> makeProfilerTracer(const char* func, const char* filename, int32_t lineno, const char* name, ApplicationProfiler::Category category = ApplicationProfiler::CATEGORY_DEFAULT) const;
     op<ApplicationProfiler::Logger> makeProfilerLogger(const char* func, const char* filename, int32_t lineno, const char* name) const;
 
-    void deferUnref(Box box);
+    void deferUnref(Box box) const;
 
     int32_t runTests(sp<ApplicationManifest> manifest);
 

@@ -27,10 +27,10 @@ namespace ark {
 
 RenderLayer::Stub::Stub(sp<RenderController> renderController, sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Boolean> visible, sp<Boolean> discarded, sp<Varyings> varyings, sp<Vec4> scissor)
     : _render_controller(std::move(renderController)), _model_loader(ModelLoaderCached::ensureCached(std::move(modelLoader))), _shader(std::move(shader)), _scissor(std::move(scissor)),
-      _render_command_composer(_model_loader->makeRenderCommandComposer()), _pipeline_bindings(_render_command_composer->makeShaderBindings(_shader, _render_controller, _model_loader->renderMode())),
+      _render_command_composer(_model_loader->makeRenderCommandComposer(_shader)), _pipeline_bindings(_render_command_composer->makeShaderBindings(_shader, _render_controller, _model_loader->renderMode())),
       _stride(_shader->input()->getStreamLayout(0).stride()), _layer_context(sp<LayerContext>::make(_shader, _model_loader, nullptr, std::move(visible), std::move(discarded), std::move(varyings)))
 {
-    _model_loader->initialize(_pipeline_bindings);
+    _model_loader->bind(_pipeline_bindings);
     CHECK(!_scissor || _pipeline_bindings->pipelineDescriptor()->hasFlag(PipelineDescriptor::FLAG_DYNAMIC_SCISSOR, PipelineDescriptor::FLAG_DYNAMIC_SCISSOR_BITMASK), "RenderLayer has a scissor while its Shader has no FLAG_DYNAMIC_SCISSOR set");
 }
 

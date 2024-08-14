@@ -11,19 +11,14 @@
 namespace ark {
 
 ModelLoaderNinePatchQuads::ModelLoaderNinePatchQuads(sp<Atlas> atlas)
-    : ModelLoader(Enum::RENDER_MODE_TRIANGLES), _atlas(std::move(atlas)), _nine_patch_attachment(_atlas->attachments().ensure<Atlas::AttachmentNinePatch>()),
+    : ModelLoader(Enum::RENDER_MODE_TRIANGLES, atlas->texture()), _atlas(std::move(atlas)), _nine_patch_attachment(_atlas->attachments().ensure<Atlas::AttachmentNinePatch>()),
       _unit_model(Global<Constants>()->MODEL_UNIT_NINE_PATCH_QUADS)
 {
 }
 
-sp<RenderCommandComposer> ModelLoaderNinePatchQuads::makeRenderCommandComposer()
+sp<RenderCommandComposer> ModelLoaderNinePatchQuads::makeRenderCommandComposer(const Shader& /*shader*/)
 {
     return Ark::instance().renderController()->makeDrawElementsIncremental(_unit_model);
-}
-
-void ModelLoaderNinePatchQuads::initialize(PipelineBindings& pipelineBindings)
-{
-    pipelineBindings.pipelineDescriptor()->bindSampler(_atlas->texture());
 }
 
 sp<Model> ModelLoaderNinePatchQuads::loadModel(int32_t type)

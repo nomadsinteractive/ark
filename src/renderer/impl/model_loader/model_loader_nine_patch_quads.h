@@ -1,6 +1,5 @@
 #pragma once
 
-#include "core/inf/storage.h"
 #include "core/types/shared_ptr.h"
 
 #include "renderer/forwarding.h"
@@ -13,8 +12,7 @@ class ModelLoaderNinePatchQuads final : public ModelLoader {
 public:
     ModelLoaderNinePatchQuads(sp<Atlas> atlas);
 
-    sp<RenderCommandComposer> makeRenderCommandComposer() override;
-    void initialize(PipelineBindings& pipelineBindings) override;
+    sp<RenderCommandComposer> makeRenderCommandComposer(const Shader& shader) override;
     sp<Model> loadModel(int32_t type) override;
 
 //  [[plugin::builder::by-value("nine-patch-quads")]]

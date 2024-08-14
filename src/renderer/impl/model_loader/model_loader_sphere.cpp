@@ -16,7 +16,9 @@
 
 namespace ark {
 
-static void buildVertex(float lng, float lat, ModelLoaderSphere::Vertex& vertex)
+namespace {
+
+void buildVertex(float lng, float lat, ModelLoaderSphere::Vertex& vertex)
 {
     float r = Math::cos(lat) / 2.0f;
     float px = r * Math::sin(lng);
@@ -27,13 +29,13 @@ static void buildVertex(float lng, float lat, ModelLoaderSphere::Vertex& vertex)
     vertex._tangent = std::abs(normal.x()) < 0.25f ? normal.cross(V3(1.0f, 0.0f, 0.0f)) : normal.cross(V3(0.0f, 1.0f, 0.0f));
 }
 
-static void buildTexture(float lng, float lat, ModelLoaderSphere::Vertex& vertex)
+void buildTexture(float lng, float lat, ModelLoaderSphere::Vertex& vertex)
 {
     vertex._u = static_cast<float>(lng / Math::PI / 2);
     vertex._v = static_cast<float>(lat / Math::PI);
 }
 
-static sp<std::vector<ModelLoaderSphere::Vertex>> makeVertices(uint32_t sampleCount)
+sp<std::vector<ModelLoaderSphere::Vertex>> makeVertices(uint32_t sampleCount)
 {
     std::vector<ModelLoaderSphere::Vertex> vertices((sampleCount * 2 + 1) * (sampleCount + 1));
 
@@ -52,7 +54,7 @@ static sp<std::vector<ModelLoaderSphere::Vertex>> makeVertices(uint32_t sampleCo
     return sp<std::vector<ModelLoaderSphere::Vertex>>::make(std::move(vertices));
 }
 
-static sp<Uploader> makeIndices(uint32_t sampleCount)
+sp<Uploader> makeIndices(uint32_t sampleCount)
 {
     std::vector<element_index_t> indices(2 * 6 * sampleCount * sampleCount);
     element_index_t* buf = indices.data();
@@ -77,9 +79,7 @@ static sp<Uploader> makeIndices(uint32_t sampleCount)
     return UploaderType::makeElementIndexInput(std::move(indices));
 }
 
-namespace {
-
-class ModelBundleImporterSphere : public ModelLoader::Importer {
+class ModelBundleImporterSphere final : public ModelLoader::Importer {
 public:
     virtual Model import(const Manifest& manifest, MaterialBundle& /*materialBundle*/) override {
         uint32_t sampleCount = Documents::ensureAttribute<uint32_t>(manifest.descriptor(), "sample-count");
@@ -92,18 +92,13 @@ public:
 }
 
 ModelLoaderSphere::ModelLoaderSphere(const sp<Atlas>& atlas, uint32_t sampleCount)
-    : ModelLoader(Enum::RENDER_MODE_TRIANGLES), _atlas(atlas), _indices(makeIndices(sampleCount)), _vertices(makeVertices(sampleCount))
+    : ModelLoader(Enum::RENDER_MODE_TRIANGLES, atlas->texture()), _atlas(atlas), _indices(makeIndices(sampleCount)), _vertices(makeVertices(sampleCount))
 {
 }
 
-sp<RenderCommandComposer> ModelLoaderSphere::makeRenderCommandComposer()
+sp<RenderCommandComposer> ModelLoaderSphere::makeRenderCommandComposer(const Shader& /*shader*/)
 {
     return sp<RCCDrawElementsInstanced>::make(Model(_indices, sp<VerticesSphere>::make(_vertices->size()), nullptr));
-}
-
-void ModelLoaderSphere::initialize(PipelineBindings& pipelineBindings)
-{
-    pipelineBindings.pipelineDescriptor()->bindSampler(_atlas->texture());
 }
 
 sp<Model> ModelLoaderSphere::loadModel(int32_t type)

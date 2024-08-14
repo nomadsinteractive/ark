@@ -59,7 +59,6 @@ private:
     void bindUBOShapshots(GraphicsContext& graphicsContext, const std::vector<RenderLayerSnapshot::UBOSnapshot>& uboSnapshots);
 
     VkPipelineDepthStencilStateCreateInfo makeDepthStencilState() const;
-    VkStencilOpState makeStencilState(const PipelineDescriptor::TraitStencilTestSeparate& stencil) const;
     VkPipelineRasterizationStateCreateInfo makeRasterizationState() const;
 
 private:

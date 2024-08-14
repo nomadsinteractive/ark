@@ -12,8 +12,7 @@ class ModelLoaderCached : public ModelLoader {
 public:
     ModelLoaderCached(sp<ModelLoader> delegate);
 
-    sp<RenderCommandComposer> makeRenderCommandComposer() override;
-    void initialize(PipelineBindings& pipelineBindings) override;
+    sp<RenderCommandComposer> makeRenderCommandComposer(const Shader& shader) override;
     sp<Model> loadModel(int32_t type) override;
 
     static sp<ModelLoader> ensureCached(sp<ModelLoader> delegate);
