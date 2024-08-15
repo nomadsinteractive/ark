@@ -65,11 +65,12 @@ bool isWordBreaker(wchar_t c)
 
 V2 getCharacterOffset(const Model& model)
 {
-    const Boundaries& bounds = model.content();
-    const Boundaries& occupies = model.occupy();
-    const V2 bitmapContentSize = bounds.size()->val();
-    const V2 bitmapOccupySize = occupies.size()->val();
-    const V2 bitmapPos = -occupies.aabbMin()->val();
+    const Boundaries& content = model.content();
+    const Boundaries& occupy = model.occupy();
+    const V2 bitmapContentSize = content.size()->val();
+    const V2 bitmapOccupySize = occupy.size()->val();
+    const V2 bitmapPos = -occupy.aabbMin()->val();
+    return {0, 0};
     return {bitmapPos.x(), bitmapOccupySize.y() - bitmapPos.y() - bitmapContentSize.y()};
 }
 

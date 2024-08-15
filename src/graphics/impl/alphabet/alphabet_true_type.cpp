@@ -34,10 +34,9 @@ Optional<Alphabet::Metrics> AlphabetTrueType::measure(int32_t c)
 {
     FT_UInt glyphIndex = FT_Get_Char_Index(_ft_font_face, c);
     if(!glyphIndex)
-        return Optional<Metrics>();
+        return {};
 
-    FT_Error err;
-    if((err = FT_Load_Glyph(_ft_font_face, glyphIndex, FT_LOAD_NO_BITMAP)) != 0)
+    if(const FT_Error err = FT_Load_Glyph(_ft_font_face, glyphIndex, FT_LOAD_NO_BITMAP); err != 0)
         CHECK_WARN(false, "Error loading metrics, character: %d. Error code: %d", c, err);
 
     FT_GlyphSlot slot = _ft_font_face->glyph;
