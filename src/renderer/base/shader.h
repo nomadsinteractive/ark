@@ -19,7 +19,7 @@ namespace ark {
 //[[script::bindings::auto]]
 class ARK_API Shader {
 public:
-    typedef std::map<PipelineInput::ShaderStage, sp<Builder<String>>> StageManifest;
+    typedef std::map<ShaderStage::BitSet, sp<Builder<String>>> StageManifest;
     typedef std::vector<sp<Builder<Snippet>>> SnippetManifest;
 
 public:

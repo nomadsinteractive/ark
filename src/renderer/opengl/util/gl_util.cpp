@@ -41,14 +41,14 @@ GLenum GLUtil::toBufferType(Buffer::Type type)
     return types[type];
 }
 
-GLenum GLUtil::toShaderType(PipelineInput::ShaderStage stage)
+GLenum GLUtil::toShaderType(ShaderStage::BitSet stage)
 {
 #ifndef ANDROID
-    static const GLenum types[PipelineInput::SHADER_STAGE_COUNT] = {GL_VERTEX_SHADER, GL_TESS_CONTROL_SHADER, GL_TESS_EVALUATION_SHADER, GL_GEOMETRY_SHADER, GL_FRAGMENT_SHADER, GL_COMPUTE_SHADER};
+    static const GLenum types[ShaderStage::SHADER_STAGE_COUNT] = {GL_VERTEX_SHADER, GL_TESS_CONTROL_SHADER, GL_TESS_EVALUATION_SHADER, GL_GEOMETRY_SHADER, GL_FRAGMENT_SHADER, GL_COMPUTE_SHADER};
 #else
-    static const GLenum types[PipelineInput::SHADER_STAGE_COUNT] = {GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, GL_COMPUTE_SHADER};
+    static const GLenum types[ShaderStage::SHADER_STAGE_COUNT] = {GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, GL_COMPUTE_SHADER};
 #endif
-    DASSERT(stage >= 0 && stage < PipelineInput::SHADER_STAGE_COUNT);
+    DASSERT(stage >= 0 && stage < ShaderStage::SHADER_STAGE_COUNT);
     return types[stage];
 }
 

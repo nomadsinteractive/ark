@@ -119,8 +119,8 @@ PipelineBuildingContext::PipelineBuildingContext(const sp<RenderController>& ren
 PipelineBuildingContext::PipelineBuildingContext(const sp<RenderController>& renderController, const sp<Camera>& camera, sp<String> vertex, sp<String> fragment)
     : PipelineBuildingContext(renderController, camera)
 {
-    addStage(std::move(vertex), PipelineInput::SHADER_STAGE_VERTEX, PipelineInput::SHADER_STAGE_NONE);
-    addStage(std::move(fragment), PipelineInput::SHADER_STAGE_FRAGMENT, PipelineInput::SHADER_STAGE_VERTEX);
+    addStage(std::move(vertex), ShaderStage::SHADER_STAGE_VERTEX, ShaderStage::SHADER_STAGE_NONE);
+    addStage(std::move(fragment), ShaderStage::SHADER_STAGE_FRAGMENT, ShaderStage::SHADER_STAGE_VERTEX);
 }
 
 void PipelineBuildingContext::loadManifest(const document& manifest, BeanFactory& factory, const Scope& args)
@@ -218,7 +218,7 @@ void PipelineBuildingContext::initializeSSBO()
                 CHECK(_ssbos.has(name), "SSBO \"%s\" does not exist", name.c_str());
                 sobs[name] = PipelineInput::SSBO(_ssbos.at(name), static_cast<uint32_t>(bindings));
             }
-            sobs[name]._stages.insert(stage);
+            sobs[name]._stages.add(stage);
         }
 
     for(const auto& i : sobs)
@@ -270,13 +270,13 @@ void PipelineBuildingContext::initializeUniforms()
             sp<PipelineInput::UBO>& ubo = _ubos[hash];
             if(ubo == nullptr)
                 ubo = sp<PipelineInput::UBO>::make(binding++);
-            ubo->addStage(k);
+            ubo->_stages.add(k);
             for(const String& i : uniformNames)
                 ubo->addUniform(_uniforms.at(i));
         }
 }
 
-const std::map<PipelineInput::ShaderStage, op<ShaderPreprocessor>>& PipelineBuildingContext::stages() const
+const std::map<ShaderStage::BitSet, op<ShaderPreprocessor>>& PipelineBuildingContext::stages() const
 {
     return _stages;
 }
@@ -284,7 +284,7 @@ const std::map<PipelineInput::ShaderStage, op<ShaderPreprocessor>>& PipelineBuil
 void PipelineBuildingContext::addAttribute(String name, String type, uint32_t divisor)
 {
     //TODO: add attribute to specified stage
-    const Attribute& attr = addPredefinedAttribute(name, type, divisor, PipelineInput::SHADER_STAGE_VERTEX);
+    const Attribute& attr = addPredefinedAttribute(name, type, divisor, ShaderStage::SHADER_STAGE_VERTEX);
     _input->addAttribute(std::move(name), attr);
 }
 
@@ -314,7 +314,7 @@ void PipelineBuildingContext::addInputAttribute(const String& name, const String
     }
 }
 
-Attribute& PipelineBuildingContext::addPredefinedAttribute(const String& name, const String& type, uint32_t divisor, PipelineInput::ShaderStage stage)
+Attribute& PipelineBuildingContext::addPredefinedAttribute(const String& name, const String& type, uint32_t divisor, ShaderStage::BitSet stage)
 {
     if(_attributes.find(name) == _attributes.end())
     {
@@ -327,25 +327,25 @@ Attribute& PipelineBuildingContext::addPredefinedAttribute(const String& name, c
     return _attributes[name];
 }
 
-bool PipelineBuildingContext::hasStage(PipelineInput::ShaderStage shaderStage) const
+bool PipelineBuildingContext::hasStage(ShaderStage::BitSet shaderStage) const
 {
     return _stages.find(shaderStage) != _stages.end();
 }
 
-ShaderPreprocessor* PipelineBuildingContext::tryGetStage(PipelineInput::ShaderStage shaderStage) const
+ShaderPreprocessor* PipelineBuildingContext::tryGetStage(ShaderStage::BitSet shaderStage) const
 {
     const auto iter = _stages.find(shaderStage);
     return iter != _stages.end() ? iter->second.get() : nullptr;
 }
 
-const op<ShaderPreprocessor>& PipelineBuildingContext::getStage(PipelineInput::ShaderStage shaderStage) const
+const op<ShaderPreprocessor>& PipelineBuildingContext::getStage(ShaderStage::BitSet shaderStage) const
 {
     const auto iter = _stages.find(shaderStage);
     CHECK(iter != _stages.end(), "Stage '%d' not found", shaderStage);
     return iter->second;
 }
 
-const op<ShaderPreprocessor>& PipelineBuildingContext::addStage(sp<String> source, PipelineInput::ShaderStage shaderStage, PipelineInput::ShaderStage preShaderStage)
+const op<ShaderPreprocessor>& PipelineBuildingContext::addStage(sp<String> source, ShaderStage::BitSet shaderStage, ShaderStage::BitSet preShaderStage)
 {
     op<ShaderPreprocessor>& stage = _stages[shaderStage];
     CHECK(!stage, "Stage '%d' has been initialized already", shaderStage);
@@ -379,7 +379,7 @@ void PipelineBuildingContext::loadPredefinedAttribute(const document& manifest)
         const String attrName = name.startsWith("a_") ? name.substr(2) : name;
         const String& type = Documents::ensureAttribute(i, constants::TYPE);
         const uint32_t divisor = Documents::getAttribute<uint32_t>(i, "divisor", 0);
-        addPredefinedAttribute(attrName, type, divisor, PipelineInput::SHADER_STAGE_VERTEX);
+        addPredefinedAttribute(attrName, type, divisor, ShaderStage::SHADER_STAGE_VERTEX);
     }
 }
 
@@ -466,12 +466,12 @@ void PipelineBuildingContext::initializeStages()
         else
             iter->second->initialize(*this);
 
-    if(const ShaderPreprocessor* vertex = tryGetStage(PipelineInput::SHADER_STAGE_VERTEX))
+    if(const ShaderPreprocessor* vertex = tryGetStage(ShaderStage::SHADER_STAGE_VERTEX))
         tryBindCamera(*vertex);
-    if(const ShaderPreprocessor* compute = tryGetStage(PipelineInput::SHADER_STAGE_COMPUTE))
+    if(const ShaderPreprocessor* compute = tryGetStage(ShaderStage::SHADER_STAGE_COMPUTE))
         tryBindCamera(*compute);
 
-    if(const ShaderPreprocessor* compute = tryGetStage(PipelineInput::SHADER_STAGE_COMPUTE))
+    if(const ShaderPreprocessor* compute = tryGetStage(ShaderStage::SHADER_STAGE_COMPUTE))
     {
         _input->_sampler_names = compute->_declaration_samplers.vars().keys();
         _input->_image_names = compute->_declaration_images.vars().keys();
@@ -480,12 +480,12 @@ void PipelineBuildingContext::initializeStages()
     {
         UniqueNameSet samplerNames(_input->_sampler_names);
         UniqueNameSet imageNames(_input->_image_names);
-        if(const ShaderPreprocessor* vertex = tryGetStage(PipelineInput::SHADER_STAGE_VERTEX))
+        if(const ShaderPreprocessor* vertex = tryGetStage(ShaderStage::SHADER_STAGE_VERTEX))
         {
             samplerNames.addBindings(vertex->_declaration_samplers.vars().keys());
             imageNames.addBindings(vertex->_declaration_images.vars().keys());
         }
-        if(const ShaderPreprocessor* fragment = tryGetStage(PipelineInput::SHADER_STAGE_FRAGMENT))
+        if(const ShaderPreprocessor* fragment = tryGetStage(ShaderStage::SHADER_STAGE_FRAGMENT))
         {
             samplerNames.addBindings(fragment->_declaration_samplers.vars().keys());
             imageNames.addBindings(fragment->_declaration_images.vars().keys());

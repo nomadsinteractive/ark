@@ -23,15 +23,15 @@ public:
     class Preprocessed {
     public:
         Preprocessed();
-        Preprocessed(PipelineInput::ShaderStage stage, String source);
+        Preprocessed(ShaderStage::BitSet stage, String source);
         DEFAULT_COPY_AND_ASSIGN(Preprocessed);
 
-        PipelineInput::ShaderStage stage() const;
+        ShaderStage::BitSet stage() const;
 
         String toSourceCode(const RenderEngineContext& renderEngineContext, const std::map<String, String>& definitions) const;
 
     private:
-        PipelineInput::ShaderStage _type;
+        ShaderStage::BitSet _type;
         String _source;
     };
 
@@ -123,7 +123,7 @@ private:
         void parse(PipelineBuildingContext& buildingContext);
 
         void genDefinition();
-        String genOutCall(PipelineInput::ShaderStage preShaderStage, PipelineInput::ShaderStage shaderStage) const;
+        String genOutCall(ShaderStage::BitSet preShaderStage, ShaderStage::BitSet shaderStage) const;
 
         bool hasOutAttribute(const String& name) const;
         bool hasReturnValue() const;
@@ -142,7 +142,7 @@ private:
     };
 
 public:
-    ShaderPreprocessor(sp<String> source, PipelineInput::ShaderStage shaderStage, PipelineInput::ShaderStage preShaderStage);
+    ShaderPreprocessor(sp<String> source, ShaderStage::BitSet shaderStage, ShaderStage::BitSet preShaderStage);
 
     void addPreMainSource(const String& source);
     void addPostMainSource(const String& source);
@@ -188,7 +188,7 @@ private:
 
     void linkParameters(const std::vector<Parameter>& parameters, const ShaderPreprocessor& preStage, std::set<String>& passThroughVars);
 
-    static const char* getOutAttributePrefix(PipelineInput::ShaderStage preStage);
+    static const char* getOutAttributePrefix(ShaderStage::BitSet preStage);
 
 private:
     sp<String> _source;
@@ -203,8 +203,8 @@ private:
     friend class PipelineLayout;
 
 public:
-    PipelineInput::ShaderStage _shader_stage;
-    PipelineInput::ShaderStage _pre_shader_stage;
+    ShaderStage::BitSet _shader_stage;
+    ShaderStage::BitSet _pre_shader_stage;
 
     Source _main;
 

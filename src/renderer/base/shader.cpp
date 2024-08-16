@@ -63,15 +63,15 @@ Shader::StageManifest loadStages(BeanFactory& factory, const document& manifest)
 
     for(const document& i : manifest->children("stage"))
     {
-        PipelineInput::ShaderStage type = Documents::ensureAttribute<PipelineInput::ShaderStage>(i, constants::TYPE);
+        ShaderStage::BitSet type = Documents::ensureAttribute<ShaderStage::BitSet>(i, constants::TYPE);
         CHECK(stages.find(type) == stages.end(), "Stage duplicated: %s", Documents::getAttribute(i, constants::TYPE).c_str());
         stages[type] = factory.ensureBuilder<String>(i, constants::SRC);
     }
 
     if(stages.empty())
     {
-        stages[PipelineInput::SHADER_STAGE_VERTEX] = factory.getBuilder<String>(manifest, "vertex", "@shaders:default.vert");
-        stages[PipelineInput::SHADER_STAGE_FRAGMENT] = factory.getBuilder<String>(manifest, "fragment", "@shaders:texture.frag");
+        stages[ShaderStage::SHADER_STAGE_VERTEX] = factory.getBuilder<String>(manifest, "vertex", "@shaders:default.vert");
+        stages[ShaderStage::SHADER_STAGE_FRAGMENT] = factory.getBuilder<String>(manifest, "fragment", "@shaders:texture.frag");
     }
 
     return stages;
@@ -174,7 +174,7 @@ sp<Shader> Shader::BUILDER_IMPL::build(const Scope& args)
 
 sp<PipelineBuildingContext> Shader::BUILDER_IMPL::makePipelineBuildingContext(const sp<Camera>& camera, const Scope& args) const
 {
-    PipelineInput::ShaderStage prestage = PipelineInput::SHADER_STAGE_NONE;
+    ShaderStage::BitSet prestage = ShaderStage::SHADER_STAGE_NONE;
     sp<PipelineBuildingContext> context = sp<PipelineBuildingContext>::make(_render_controller, camera);
     for(const auto& [k, v] : _stages)
     {
@@ -184,16 +184,16 @@ sp<PipelineBuildingContext> Shader::BUILDER_IMPL::makePipelineBuildingContext(co
     return context;
 }
 
-template<> ARK_API PipelineInput::ShaderStage StringConvert::eval<PipelineInput::ShaderStage>(const String& val)
+template<> ARK_API ShaderStage::BitSet StringConvert::eval<ShaderStage::BitSet>(const String& val)
 {
     if(val == "vertex")
-        return PipelineInput::SHADER_STAGE_VERTEX;
+        return ShaderStage::SHADER_STAGE_VERTEX;
     if(val == "fragment")
-        return PipelineInput::SHADER_STAGE_FRAGMENT;
+        return ShaderStage::SHADER_STAGE_FRAGMENT;
     if(val == "compute")
-        return PipelineInput::SHADER_STAGE_COMPUTE;
+        return ShaderStage::SHADER_STAGE_COMPUTE;
     CHECK(val.empty(), "Unknown stage: \"%s\"", val.c_str());
-    return PipelineInput::SHADER_STAGE_NONE;
+    return ShaderStage::SHADER_STAGE_NONE;
 }
 
 Shader::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

@@ -18,7 +18,7 @@ public:
 
     static uint32_t hash(const element_index_t* buf, size_t len);
 
-    static String outAttributeName(const String& name, PipelineInput::ShaderStage preStage);
+    static String outAttributeName(const String& name, ShaderStage::BitSet preStage);
 
     static bool isScissorEnabled(const Rect& scissor);
 
@@ -26,7 +26,7 @@ public:
     static uint32_t getPixelSize(Texture::Format format);
     static uint32_t getComponentSize(Texture::Format format);
 
-    static std::vector<uint32_t> compileSPIR(const String& source, PipelineInput::ShaderStage stage, Ark::RendererTarget renderTarget);
+    static std::vector<uint32_t> compileSPIR(const String& source, ShaderStage::BitSet stage, Ark::RendererTarget renderTarget);
 
     static std::vector<ShaderPreprocessor::Declaration> setupLayoutLocation(const PipelineBuildingContext& context, const ShaderPreprocessor::DeclarationList& declarations);
     static uint32_t setLayoutDescriptor(const std::vector<ShaderPreprocessor::Declaration>& declarations, const String& qualifierName, uint32_t start);

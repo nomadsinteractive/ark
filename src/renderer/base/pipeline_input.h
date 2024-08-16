@@ -1,6 +1,5 @@
 #pragma once
 
-#include <bitset>
 #include <map>
 #include <vector>
 
@@ -14,12 +13,13 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/base/attribute.h"
+#include "renderer/base/shader_stage.h"
 
 namespace ark {
 
 class ARK_API PipelineInput {
 public:
-//TODO: Use Attribute::LayoutType instead
+//TODO: Use Attribute::Usage instead
     enum AttributeName {
         ATTRIBUTE_NAME_TEX_COORDINATE,
         ATTRIBUTE_NAME_NORMAL,
@@ -31,19 +31,6 @@ public:
         ATTRIBUTE_NAME_NODE_ID,
         ATTRIBUTE_NAME_MATERIAL_ID,
         ATTRIBUTE_NAME_COUNT
-    };
-
-    enum ShaderStage {
-        SHADER_STAGE_NONE = -1,
-        SHADER_STAGE_VERTEX,
-#ifndef ANDROID
-        SHADER_STAGE_TESSELLATION_CTRL,
-        SHADER_STAGE_TESSELLATION_EVAL,
-        SHADER_STAGE_GEOMETRY,
-#endif
-        SHADER_STAGE_FRAGMENT,
-        SHADER_STAGE_COMPUTE,
-        SHADER_STAGE_COUNT
     };
 
     struct ARK_API AttributeOffsets {
@@ -89,13 +76,11 @@ public:
         size_t size() const;
 
         const Table<String, sp<Uniform>>& uniforms() const;
+        void addUniform(const sp<Uniform>& uniform);
+
         const std::vector<std::pair<uintptr_t, size_t>>& slots() const;
 
-        void addStage(ShaderStage stage);
-        bool inStage(ShaderStage stage) const;
-        const std::bitset<SHADER_STAGE_COUNT>& stages() const;
-
-        void addUniform(const sp<Uniform>& uniform);
+        const ShaderStage& stages() const;
 
     private:
         void initialize();
@@ -106,11 +91,12 @@ public:
         uint32_t _binding;
 
         std::vector<std::pair<uintptr_t, size_t>> _slots;
-        std::bitset<SHADER_STAGE_COUNT> _stages;
+        ShaderStage _stages;
 
         bytearray _dirty_flags;
         bytearray _buffer;
 
+        friend class PipelineBuildingContext;
         friend class PipelineInput;
     };
 
@@ -122,7 +108,7 @@ public:
         Buffer _buffer;
         uint32_t _binding;
 
-        std::set<ShaderStage> _stages;
+        ShaderStage _stages;
     };
 
 public:

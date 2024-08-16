@@ -23,12 +23,12 @@ public:
         RenderUtil::setLayoutDescriptor(RenderUtil::setupLayoutLocation(context, firstStage._declaration_ins), sLocation, 0);
 
         const PipelineInput& pipelineInput = pipelineLayout.input();
-        if(ShaderPreprocessor* vertex = context.tryGetStage(PipelineInput::SHADER_STAGE_VERTEX))
+        if(ShaderPreprocessor* vertex = context.tryGetStage(ShaderStage::SHADER_STAGE_VERTEX))
         {
             RenderUtil::setLayoutDescriptor(vertex->_declaration_images, "binding", static_cast<uint32_t>(pipelineInput.ubos().size() + pipelineInput.ssbos().size() + pipelineInput.samplerCount()));
             vertex->_predefined_macros.push_back("#define gl_InstanceID gl_InstanceIndex");
         }
-        if(ShaderPreprocessor* fragment = context.tryGetStage(PipelineInput::SHADER_STAGE_FRAGMENT))
+        if(ShaderPreprocessor* fragment = context.tryGetStage(ShaderStage::SHADER_STAGE_FRAGMENT))
         {
             fragment->linkNextStage("FragColor");
             const uint32_t bindingOffset = static_cast<uint32_t>(pipelineInput.ubos().size() + pipelineInput.ssbos().size());
@@ -36,7 +36,7 @@ public:
             RenderUtil::setLayoutDescriptor(fragment->_declaration_images, "binding", bindingOffset + static_cast<uint32_t>(fragment->_declaration_samplers.vars().size()));
         }
 
-        if(const ShaderPreprocessor* compute = context.tryGetStage(PipelineInput::SHADER_STAGE_COMPUTE))
+        if(const ShaderPreprocessor* compute = context.tryGetStage(ShaderStage::SHADER_STAGE_COMPUTE))
         {
             const uint32_t bindingOffset = static_cast<uint32_t>(pipelineInput.ubos().size() + pipelineInput.ssbos().size());
             RenderUtil::setLayoutDescriptor(compute->_declaration_images, "binding", bindingOffset);

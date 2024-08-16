@@ -26,15 +26,15 @@ namespace ark::plugin::bgfx {
 
 namespace {
 
-char toBgfxShaderTypeMagic(PipelineInput::ShaderStage stage)
+char toBgfxShaderTypeMagic(ShaderStage::BitSet stage)
 {
     switch(stage)
     {
-        case PipelineInput::SHADER_STAGE_VERTEX:
+        case ShaderStage::SHADER_STAGE_VERTEX:
             return 'V';
-        case PipelineInput::SHADER_STAGE_FRAGMENT:
+        case ShaderStage::SHADER_STAGE_FRAGMENT:
             return 'F';
-        case PipelineInput::SHADER_STAGE_COMPUTE:
+        case ShaderStage::SHADER_STAGE_COMPUTE:
             return 'C';
         default:
             FATAL("Unsupported shader type: %d", stage);
@@ -192,7 +192,7 @@ struct alignas(1) BgfxShaderAttributeChunk {
 
 #pragma pack(pop)
 
-::bgfx::ShaderHandle createShader(const PipelineInput& pipelineInput, const String& source, PipelineInput::ShaderStage stage)
+::bgfx::ShaderHandle createShader(const PipelineInput& pipelineInput, const String& source, ShaderStage::BitSet stage)
 {
     const char bgfxChunkMagic[4] = {toBgfxShaderTypeMagic(stage), 'S', 'H', 11};
     const std::vector<uint32_t> binaries = RenderUtil::compileSPIR(source, stage, Ark::RENDERER_TARGET_VULKAN);
@@ -207,7 +207,7 @@ struct alignas(1) BgfxShaderAttributeChunk {
     uint32_t ssboSize = 0;
     uint32_t dynamicDataSize = 0;
     for(const PipelineInput::UBO& i : pipelineInput.ubos())
-        if(i.inStage(stage))
+        if(i.stages().has(stage))
             for(const auto& [name, uniform] : i.uniforms())
             {
                 String tname = translatePredefinedName(name);
@@ -223,7 +223,7 @@ struct alignas(1) BgfxShaderAttributeChunk {
             }
 
     uint32_t binding = 2;
-    if(stage == PipelineInput::SHADER_STAGE_FRAGMENT)
+    if(stage == ShaderStage::SHADER_STAGE_FRAGMENT)
         for(const String& i : pipelineInput.samplerNames())
         {
             dynamicDataSize += (i.size() + 1);
@@ -242,9 +242,10 @@ struct alignas(1) BgfxShaderAttributeChunk {
 
     uint32_t customId = 0;
     std::vector<BgfxShaderAttributeChunk> attributeChunks;
-    for(const auto& [divisor, streamLayout]: pipelineInput.streamLayouts())
-        for(const auto& [name, attribute] : streamLayout.attributes())
-            attributeChunks.push_back({toBgfxAttribId(attribute.usage(), customId)});
+    if(stage == ShaderStage::SHADER_STAGE_VERTEX)
+        for(const auto& [divisor, streamLayout]: pipelineInput.streamLayouts())
+            for(const auto& [name, attribute] : streamLayout.attributes())
+                attributeChunks.push_back({toBgfxAttribId(attribute.usage(), customId)});
 
     shaderHeader.count = uniformChunks.size();
     bx::Error err;
@@ -279,8 +280,8 @@ struct DrawPipelineBgfx final : ResourceBase<::bgfx::ProgramHandle, Pipeline> {
     {
         if(!_handle)
         {
-            const auto vHandle = createShader(_pipeline_input, _vertex_shader, PipelineInput::SHADER_STAGE_VERTEX);
-            const auto fHandle = createShader(_pipeline_input, _fragment_shader, PipelineInput::SHADER_STAGE_FRAGMENT);
+            const auto vHandle = createShader(_pipeline_input, _vertex_shader, ShaderStage::SHADER_STAGE_VERTEX);
+            const auto fHandle = createShader(_pipeline_input, _fragment_shader, ShaderStage::SHADER_STAGE_FRAGMENT);
             _handle.reset(::bgfx::createProgram(vHandle, fHandle, true));
         }
     }
@@ -433,16 +434,16 @@ private:
 
 sp<Pipeline> PipelineFactoryBgfx::buildPipeline(GraphicsContext& graphicsContext, const PipelineBindings& bindings)
 {
-    std::map<PipelineInput::ShaderStage, String> shaders = bindings.pipelineLayout()->getPreprocessedShaders(graphicsContext.renderContext());
-    if(const auto vIter = shaders.find(PipelineInput::SHADER_STAGE_VERTEX); vIter != shaders.end())
+    std::map<ShaderStage::BitSet, String> shaders = bindings.pipelineLayout()->getPreprocessedShaders(graphicsContext.renderContext());
+    if(const auto vIter = shaders.find(ShaderStage::SHADER_STAGE_VERTEX); vIter != shaders.end())
     {
         const PipelineDescriptor& pipelineDescriptor = bindings.pipelineDescriptor();
         const Enum::DrawProcedure drawProcedure = pipelineDescriptor.drawProcedure();
-        const auto fIter = shaders.find(PipelineInput::SHADER_STAGE_FRAGMENT);
+        const auto fIter = shaders.find(ShaderStage::SHADER_STAGE_FRAGMENT);
         CHECK(fIter != shaders.end(), "Pipeline has no fragment shader(only vertex shader available)");
         return sp<Pipeline>::make<DrawPipelineBgfx>(drawProcedure, pipelineDescriptor.mode(), bindings.pipelineInput(), std::move(vIter->second), std::move(fIter->second));
     }
-    const auto cIter = shaders.find(PipelineInput::SHADER_STAGE_COMPUTE);
+    const auto cIter = shaders.find(ShaderStage::SHADER_STAGE_COMPUTE);
     CHECK(cIter != shaders.end(), "Pipeline has no compute shader");
     return sp<Pipeline>::make<ComputePipelineBgfx>(std::move(cIter->second));
 }

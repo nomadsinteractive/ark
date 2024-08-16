@@ -49,13 +49,13 @@ VkPipelineShaderStageCreateInfo VKUtil::loadShaderSPIR(VkDevice device, std::str
     return shaderStage;
 }
 
-VkPipelineShaderStageCreateInfo VKUtil::loadShader(VkDevice device, const String& resid, PipelineInput::ShaderStage stage)
+VkPipelineShaderStageCreateInfo VKUtil::loadShader(VkDevice device, const String& resid, ShaderStage::BitSet stage)
 {
     const String content = Strings::loadFromReadable(Ark::instance().openAsset(resid));
     return createShader(device, content, stage);
 }
 
-VkPipelineShaderStageCreateInfo VKUtil::createShader(VkDevice device, const String& source, PipelineInput::ShaderStage stage)
+VkPipelineShaderStageCreateInfo VKUtil::createShader(VkDevice device, const String& source, ShaderStage::BitSet stage)
 {
     const std::vector<uint32_t> spirv = RenderUtil::compileSPIR(source, stage, Ark::RENDERER_TARGET_VULKAN);
     VkShaderModuleCreateInfo moduleCreateInfo = {VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
@@ -226,15 +226,15 @@ VkImageAspectFlags VKUtil::toTextureAspect(Texture::Usage usage)
     return vkFlags;
 }
 
-VkShaderStageFlagBits VKUtil::toStage(PipelineInput::ShaderStage stage)
+VkShaderStageFlagBits VKUtil::toStage(ShaderStage::BitSet stage)
 {
 #ifndef ANDROID
-    constexpr VkShaderStageFlagBits vkStages[PipelineInput::SHADER_STAGE_COUNT] = {VK_SHADER_STAGE_VERTEX_BIT, VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT, VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT,
+    constexpr VkShaderStageFlagBits vkStages[ShaderStage::SHADER_STAGE_COUNT] = {VK_SHADER_STAGE_VERTEX_BIT, VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT, VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT,
                                                                                    VK_SHADER_STAGE_GEOMETRY_BIT, VK_SHADER_STAGE_FRAGMENT_BIT, VK_SHADER_STAGE_COMPUTE_BIT};
 #else
-    constexpr VkShaderStageFlagBits vkStages[PipelineInput::SHADER_STAGE_COUNT] = {VK_SHADER_STAGE_VERTEX_BIT, VK_SHADER_STAGE_FRAGMENT_BIT, VK_SHADER_STAGE_COMPUTE_BIT};
+    constexpr VkShaderStageFlagBits vkStages[ShaderStage::SHADER_STAGE_COUNT] = {VK_SHADER_STAGE_VERTEX_BIT, VK_SHADER_STAGE_FRAGMENT_BIT, VK_SHADER_STAGE_COMPUTE_BIT};
 #endif
-    DCHECK(stage > PipelineInput::SHADER_STAGE_NONE && stage < PipelineInput::SHADER_STAGE_COUNT, "Illegal PipelineInput::ShaderStage: %d", stage);
+    DCHECK(stage > ShaderStage::SHADER_STAGE_NONE && stage < ShaderStage::SHADER_STAGE_COUNT, "Illegal ShaderStage::BitSet: %d", stage);
     return vkStages[stage];
 }
 

@@ -7,7 +7,6 @@ namespace ark::plugin::bgfx {
 StorageBufferBgfx::StorageBufferBgfx()
     : BufferBase(Buffer::TYPE_STORAGE, Buffer::USAGE_DYNAMIC)
 {
-    _vertex_buffer_layout.begin().add(::bgfx::Attrib::Position, 4, ::bgfx::AttribType::Float).end();
 }
 
 uint64_t StorageBufferBgfx::id()
@@ -20,21 +19,14 @@ ResourceRecycleFunc StorageBufferBgfx::recycle()
     return _handle.recycle();
 }
 
-void StorageBufferBgfx::setupLayout(const PipelineDescriptor& pipelineDescriptor)
-{
-    setupVertexBufferLayout(_vertex_buffer_layout, pipelineDescriptor);
-}
-
 void StorageBufferBgfx::upload(GraphicsContext& graphicsContext)
 {
-    if(!_handle)
-    {
-        ASSERT(_vertex_buffer_layout.m_stride);
-        _handle.reset(::bgfx::createDynamicVertexBuffer(_size / _vertex_buffer_layout.m_stride, _vertex_buffer_layout));
-    }
-
     DASSERT(_size <= _data.size());
-    ::bgfx::update(_handle, 0, ::bgfx::copy(_data.data(), _size));
+    if(_handle)
+        ::bgfx::update(_handle, 0, ::bgfx::copy(_data.data(), _size));
+    else
+        _handle.reset(::bgfx::createDynamicIndexBuffer(::bgfx::copy(_data.data(), _size)));
+
 }
 
 void StorageBufferBgfx::uploadBuffer(GraphicsContext& graphicsContext, Uploader& input)
@@ -51,12 +43,12 @@ void StorageBufferBgfx::downloadBuffer(GraphicsContext& graphicsContext, size_t 
 
 void StorageBufferBgfx::bind()
 {
-    ::bgfx::setVertexBuffer(0, _handle);
+    ::bgfx::setBuffer(0, _handle, ::bgfx::Access::ReadWrite);
 }
 
 void StorageBufferBgfx::bindRange(uint32_t first, uint32_t count)
 {
-    ::bgfx::setVertexBuffer(0, _handle, first, count);
+    ::bgfx::setBuffer(0, _handle, ::bgfx::Access::ReadWrite);
 }
 
 }

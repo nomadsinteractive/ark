@@ -119,13 +119,13 @@ VkStencilOpState makeStencilState(const PipelineDescriptor::TraitStencilTestSepa
 
 }
 
-VKPipeline::VKPipeline(const PipelineDescriptor& bindings, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, std::map<PipelineInput::ShaderStage, String> shaders)
+VKPipeline::VKPipeline(const PipelineDescriptor& bindings, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, std::map<ShaderStage::BitSet, String> shaders)
     : _pipeline_descriptor(bindings), _recycler(recycler), _renderer(renderer), _baked_renderer(makeBakedRenderer(bindings)), _layout(VK_NULL_HANDLE), _descriptor_set_layout(VK_NULL_HANDLE),
       _descriptor_set(VK_NULL_HANDLE), _pipeline(VK_NULL_HANDLE), _shaders(std::move(shaders)), _rebind_needed(true), _is_compute_pipeline(false)
 {
     for(const auto& i : _shaders)
     {
-        if(i.first == PipelineInput::SHADER_STAGE_COMPUTE)
+        if(i.first == ShaderStage::SHADER_STAGE_COMPUTE)
         {
             _is_compute_pipeline = true;
             CHECK(_shaders.size() == 1, "Compute stage is exclusive");
@@ -257,20 +257,13 @@ void VKPipeline::setupDescriptorSetLayout(const PipelineInput& pipelineInput)
     uint32_t binding = 0;
     for(const sp<PipelineInput::UBO>& i : pipelineInput.ubos())
     {
-        VkShaderStageFlags stages = i->stages().none() ? VK_SHADER_STAGE_ALL : static_cast<VkShaderStageFlags>(0);
-        for(size_t j = 0; j < PipelineInput::SHADER_STAGE_COUNT; ++j)
-            if(i->inStage(static_cast<PipelineInput::ShaderStage>(j)))
-                stages |= VKUtil::toStage(static_cast<PipelineInput::ShaderStage>(j));
-
+        const VkShaderStageFlags stages = i->stages().toFlags<VkShaderStageFlagBits>(VKUtil::toStage);
         binding = std::max(binding, i->binding());
         setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, stages, i->binding()));
     }
     for(const PipelineInput::SSBO& i : pipelineInput.ssbos())
     {
-        VkShaderStageFlags stages = i._stages.empty() ? VK_SHADER_STAGE_ALL : static_cast<VkShaderStageFlags>(0);
-        for(PipelineInput::ShaderStage j : i._stages)
-            stages |= VKUtil::toStage(j);
-
+        const VkShaderStageFlags stages = i._stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage);
         binding = std::max(binding, i._binding);
         setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, stages, i._binding));
     }

@@ -34,9 +34,9 @@ std::regex _UNIFORM_PATTERN("(?:" LAYOUT_PATTERN ")?uniform\\s+" ACCESSIBILITY_P
 std::regex _SSBO_PATTERN(LAYOUT_PATTERN ACCESSIBILITY_PATTERN "buffer\\s+(\\w+)");
 
 #ifndef ANDROID
-char _STAGE_ATTR_PREFIX[PipelineInput::SHADER_STAGE_COUNT + 1][4] = {"a_", "v_", "t_", "e_", "g_", "f_", "c_"};
+char _STAGE_ATTR_PREFIX[ShaderStage::SHADER_STAGE_COUNT + 1][4] = {"a_", "v_", "t_", "e_", "g_", "f_", "c_"};
 #else
-char _STAGE_ATTR_PREFIX[PipelineInput::SHADER_STAGE_COUNT + 1][4] = {"a_", "v_", "f_", "c_"};
+char _STAGE_ATTR_PREFIX[ShaderStage::SHADER_STAGE_COUNT + 1][4] = {"a_", "v_", "f_", "c_"};
 #endif
 
 const char* ANNOTATION_VERT_IN = "${vert.in}";
@@ -47,9 +47,9 @@ const char* ANNOTATION_FRAG_COLOR = "${frag.color}";
 
 }
 
-ShaderPreprocessor::ShaderPreprocessor(sp<String> source, PipelineInput::ShaderStage shaderStage, PipelineInput::ShaderStage preShaderStage)
-    : _source(std::move(source)), _shader_stage(shaderStage), _pre_shader_stage(preShaderStage), _version(0), _declaration_ins(_attribute_declaration_codes, shaderStage == PipelineInput::SHADER_STAGE_VERTEX ? ANNOTATION_VERT_IN : ANNOTATION_FRAG_IN),
-      _declaration_outs(_attribute_declaration_codes, shaderStage == PipelineInput::SHADER_STAGE_VERTEX ? ANNOTATION_VERT_OUT : ANNOTATION_FRAG_OUT),
+ShaderPreprocessor::ShaderPreprocessor(sp<String> source, ShaderStage::BitSet shaderStage, ShaderStage::BitSet preShaderStage)
+    : _source(std::move(source)), _shader_stage(shaderStage), _pre_shader_stage(preShaderStage), _version(0), _declaration_ins(_attribute_declaration_codes, shaderStage == ShaderStage::SHADER_STAGE_VERTEX ? ANNOTATION_VERT_IN : ANNOTATION_FRAG_IN),
+      _declaration_outs(_attribute_declaration_codes, shaderStage == ShaderStage::SHADER_STAGE_VERTEX ? ANNOTATION_VERT_OUT : ANNOTATION_FRAG_OUT),
       _declaration_uniforms(_uniform_declaration_codes, "uniform"), _declaration_samplers(_uniform_declaration_codes, "uniform"), _declaration_images(_uniform_declaration_codes, "uniform"),
       _pre_main(sp<String>::make()), _post_main(sp<String>::make())
 {
@@ -108,7 +108,7 @@ void ShaderPreprocessor::parseMainBlock(const String& source, PipelineBuildingCo
         const String prefix = m.prefix().str();
         const String remaining = m.suffix().str();
         String body;
-        size_t prefixStart = parseFunctionBody(remaining, body);
+        const size_t prefixStart = parseFunctionBody(remaining, body);
         sp<String> fragment = sp<String>::make();
         _main.push_back(sp<String>::make(prefix));
         _main.push_back(fragment);
@@ -229,7 +229,7 @@ const std::vector<ShaderPreprocessor::Parameter>& ShaderPreprocessor::args() con
 
 void ShaderPreprocessor::inDeclare(const String& type, const String& name)
 {
-    _declaration_ins.declare(type, inVarPrefix(), name, "", nullptr, _shader_stage == PipelineInput::SHADER_STAGE_FRAGMENT && (type == "int" || type == "uint"));
+    _declaration_ins.declare(type, inVarPrefix(), name, "", nullptr, _shader_stage == ShaderStage::SHADER_STAGE_FRAGMENT && (type == "int" || type == "uint"));
 }
 
 void ShaderPreprocessor::outDeclare(const String& type, const String& name)
@@ -303,9 +303,9 @@ void ShaderPreprocessor::declareUBOStruct(const PipelineInput& piplineInput)
 String ShaderPreprocessor::outputName() const
 {
 #ifndef ANDROID
-    static const char* sOutputNames[PipelineInput::SHADER_STAGE_COUNT] = {"gl_Position", "", "", "", ANNOTATION_FRAG_COLOR, ""};
+    static const char* sOutputNames[ShaderStage::SHADER_STAGE_COUNT] = {"gl_Position", "", "", "", ANNOTATION_FRAG_COLOR, ""};
 #else
-    static const char* sOutputNames[PipelineInput::SHADER_STAGE_COUNT] = {"gl_Position", ANNOTATION_FRAG_COLOR, ""};
+    static const char* sOutputNames[ShaderStage::SHADER_STAGE_COUNT] = {"gl_Position", ANNOTATION_FRAG_COLOR, ""};
 #endif
     return sOutputNames[_shader_stage];
 }
@@ -362,7 +362,7 @@ void ShaderPreprocessor::linkParameters(const std::vector<ShaderPreprocessor::Pa
                 passThroughVars.insert(Strings::capitalizeFirst(i._name));
 }
 
-const char* ShaderPreprocessor::getOutAttributePrefix(PipelineInput::ShaderStage preStage)
+const char* ShaderPreprocessor::getOutAttributePrefix(ShaderStage::BitSet preStage)
 {
     return _STAGE_ATTR_PREFIX[preStage + 1];
 }
@@ -421,7 +421,7 @@ void ShaderPreprocessor::Function::parse(PipelineBuildingContext& buildingContex
             stride += attr.size();
         }
         if(param._modifier & Parameter::PARAMETER_ANNOTATION_IN)
-            buildingContext.addPredefinedAttribute(Strings::capitalizeFirst(param._name), param._type, param._divisor, PipelineInput::SHADER_STAGE_VERTEX);
+            buildingContext.addPredefinedAttribute(Strings::capitalizeFirst(param._name), param._type, param._divisor, ShaderStage::SHADER_STAGE_VERTEX);
 
         _args.push_back(std::move(param));
     }
@@ -489,7 +489,7 @@ void ShaderPreprocessor::Function::genDefinition()
     *_place_hoder = sb.str();
 }
 
-String ShaderPreprocessor::Function::genOutCall(PipelineInput::ShaderStage preShaderStage, PipelineInput::ShaderStage shaderStage) const
+String ShaderPreprocessor::Function::genOutCall(ShaderStage::BitSet preShaderStage, ShaderStage::BitSet shaderStage) const
 {
     StringBuffer sb;
     sb << "ark_main(";
@@ -575,16 +575,16 @@ Table<String, ShaderPreprocessor::Declaration>& ShaderPreprocessor::DeclarationL
 }
 
 ShaderPreprocessor::Preprocessed::Preprocessed()
-    : _type(PipelineInput::SHADER_STAGE_NONE)
+    : _type(ShaderStage::SHADER_STAGE_NONE)
 {
 }
 
-ShaderPreprocessor::Preprocessed::Preprocessed(PipelineInput::ShaderStage stage, String source)
+ShaderPreprocessor::Preprocessed::Preprocessed(ShaderStage::BitSet stage, String source)
     : _type(stage), _source(std::move(source))
 {
 }
 
-PipelineInput::ShaderStage ShaderPreprocessor::Preprocessed::stage() const
+ShaderStage::BitSet ShaderPreprocessor::Preprocessed::stage() const
 {
     return _type;
 }

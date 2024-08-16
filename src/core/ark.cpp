@@ -63,10 +63,11 @@ namespace {
 Ark* _instance = nullptr;
 std::list<Ark*> _instance_stack;
 
-M4 changeProjectionHandSide(const M4& projection)
+M4 changeProjectionHandSide(const M4& projection, bool flipx = true)
 {
     M4 flip;
-    flip[0] = -1;
+    if(flipx)
+        flip[0] = -1;
     flip[5] = -1;
     return MatrixUtil::mul(flip, projection);
 }
@@ -90,7 +91,7 @@ struct CameraDelegateCHS final : Camera::Delegate {
 
     M4 ortho(float left, float right, float bottom, float top, float clipNear, float clipFar) override
     {
-        return changeProjectionHandSide(_delegate->ortho(left, right, bottom, top, clipNear, clipFar));
+        return changeProjectionHandSide(_delegate->ortho(left, right, bottom, top, clipNear, clipFar), false);
     }
 
     M4 perspective(float fov, float aspect, float clipNear, float clipFar) override
