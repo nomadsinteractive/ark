@@ -275,12 +275,17 @@ const std::vector<std::pair<uintptr_t, size_t>>& PipelineInput::UBO::slots() con
     return _slots;
 }
 
-void PipelineInput::UBO::addStage(PipelineInput::ShaderStage stage)
+void PipelineInput::UBO::addStage(ShaderStage stage)
 {
-    _stages.insert(stage);
+    _stages.set(stage, true);
 }
 
-const std::set<PipelineInput::ShaderStage>& PipelineInput::UBO::stages() const
+bool PipelineInput::UBO::inStage(ShaderStage stage) const
+{
+    return _stages.test(stage);
+}
+
+const std::bitset<PipelineInput::SHADER_STAGE_COUNT>& PipelineInput::UBO::stages() const
 {
     return _stages;
 }

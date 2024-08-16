@@ -257,9 +257,10 @@ void VKPipeline::setupDescriptorSetLayout(const PipelineInput& pipelineInput)
     uint32_t binding = 0;
     for(const sp<PipelineInput::UBO>& i : pipelineInput.ubos())
     {
-        VkShaderStageFlags stages = i->stages().empty() ? VK_SHADER_STAGE_ALL : static_cast<VkShaderStageFlags>(0);
-        for(const PipelineInput::ShaderStage j : i->stages())
-            stages |= VKUtil::toStage(j);
+        VkShaderStageFlags stages = i->stages().none() ? VK_SHADER_STAGE_ALL : static_cast<VkShaderStageFlags>(0);
+        for(size_t j = 0; j < PipelineInput::SHADER_STAGE_COUNT; ++j)
+            if(i->inStage(static_cast<PipelineInput::ShaderStage>(j)))
+                stages |= VKUtil::toStage(static_cast<PipelineInput::ShaderStage>(j));
 
         binding = std::max(binding, i->binding());
         setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, stages, i->binding()));

@@ -10,8 +10,6 @@ namespace {
 {
     switch(layoutType)
     {
-        case Attribute::USAGE_CUSTOM:
-            return ::bgfx::Attrib::Count;
         case Attribute::USAGE_POSITION:
             return ::bgfx::Attrib::Position;
         case Attribute::USAGE_TEX_COORD:

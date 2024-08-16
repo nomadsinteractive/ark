@@ -64,7 +64,7 @@ uint8_t toBgfxUniformType(Uniform::Type type)
     return 0;
 }
 
-uint16_t toBgfxAttribId(Attribute::Usage usage)
+uint16_t toBgfxAttribId(Attribute::Usage usage, uint32_t& customId)
 {
 /*
 static AttribToId s_attribToId[] =
@@ -95,7 +95,14 @@ static AttribToId s_attribToId[] =
     switch(usage)
     {
         case Attribute::USAGE_CUSTOM:
-            return 0;
+            if(customId < 3)
+            {
+                constexpr uint16_t cs[3] = {0x0006, 0x0018, 0x0019};
+                return cs[customId ++];
+            }
+            if(customId < 10)
+                return 0x11 + (customId ++) - 3;
+            FATAL("Too many custom attributes");
         case Attribute::USAGE_POSITION:
             return 1;
         case Attribute::USAGE_TEX_COORD:
@@ -200,7 +207,7 @@ struct alignas(1) BgfxShaderAttributeChunk {
     uint32_t ssboSize = 0;
     uint32_t dynamicDataSize = 0;
     for(const PipelineInput::UBO& i : pipelineInput.ubos())
-        if(i.stages().find(stage) != i.stages().end())
+        if(i.inStage(stage))
             for(const auto& [name, uniform] : i.uniforms())
             {
                 String tname = translatePredefinedName(name);
@@ -233,10 +240,11 @@ struct alignas(1) BgfxShaderAttributeChunk {
     for(const PipelineInput::SSBO& i : pipelineInput.ssbos())
         ssboSize += i._buffer.size();
 
+    uint32_t customId = 0;
     std::vector<BgfxShaderAttributeChunk> attributeChunks;
     for(const auto& [divisor, streamLayout]: pipelineInput.streamLayouts())
         for(const auto& [name, attribute] : streamLayout.attributes())
-            attributeChunks.push_back({toBgfxAttribId(attribute.usage())});
+            attributeChunks.push_back({toBgfxAttribId(attribute.usage(), customId)});
 
     shaderHeader.count = uniformChunks.size();
     bx::Error err;

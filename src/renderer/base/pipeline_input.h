@@ -1,5 +1,6 @@
 #pragma once
 
+#include <bitset>
 #include <map>
 #include <vector>
 
@@ -91,7 +92,8 @@ public:
         const std::vector<std::pair<uintptr_t, size_t>>& slots() const;
 
         void addStage(ShaderStage stage);
-        const std::set<ShaderStage>& stages() const;
+        bool inStage(ShaderStage stage) const;
+        const std::bitset<SHADER_STAGE_COUNT>& stages() const;
 
         void addUniform(const sp<Uniform>& uniform);
 
@@ -104,7 +106,7 @@ public:
         uint32_t _binding;
 
         std::vector<std::pair<uintptr_t, size_t>> _slots;
-        std::set<ShaderStage> _stages;
+        std::bitset<SHADER_STAGE_COUNT> _stages;
 
         bytearray _dirty_flags;
         bytearray _buffer;
