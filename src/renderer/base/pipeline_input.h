@@ -71,7 +71,7 @@ public:
         [[deprecated]]
         int32_t getAttributeOffset(const String& name) const;
 
-        void align();
+        void align(uint32_t alignment);
 
     private:
         Table<String, Attribute> _attributes;

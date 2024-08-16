@@ -18,6 +18,8 @@ public:
     bool download(GraphicsContext& graphicsContext, Bitmap& bitmap) override;
     void uploadBitmap(GraphicsContext& graphicsContext, const Bitmap& bitmap, const std::vector<sp<ByteArray>>& imagedata) override;
 
+    const sp<Texture::Parameters>& parameters() const;
+
 private:
     uint32_t _width;
     uint32_t _height;

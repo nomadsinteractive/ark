@@ -20,10 +20,11 @@
 #include "app/base/application_context.h"
 
 #include "bgfx/base/resource_base.h"
-#include "bgfx/impl/buffer/static_index_buffer_bgfx.h"
 #include "bgfx/impl/buffer/dynamic_index_buffer_bgfx.h"
-#include "bgfx/impl/buffer/static_vertex_buffer_bgfx.h"
 #include "bgfx/impl/buffer/dynamic_vertex_buffer_bgfx.h"
+#include "bgfx/impl/buffer/indirect_buffer_bgfx.h"
+#include "bgfx/impl/buffer/static_index_buffer_bgfx.h"
+#include "bgfx/impl/buffer/static_vertex_buffer_bgfx.h"
 #include "bgfx/impl/buffer/storage_buffer_bgfx.h"
 #include "bgfx/impl/pipeline_factory/pipeline_factory_bgfx.h"
 #include "bgfx/impl/render_view/render_view_bgfx.h"
@@ -153,7 +154,7 @@ void setVersion(Ark::RendererVersion version, RenderEngineContext& vkContext)
 }
 
 RendererFactoryBgfx::RendererFactoryBgfx()
-    : RendererFactory(Ark::COORDINATE_SYSTEM_RHS, false)
+    : RendererFactory({Ark::COORDINATE_SYSTEM_RHS, false, 16})
 {
 }
 
@@ -198,7 +199,7 @@ sp<Buffer::Delegate> RendererFactoryBgfx::createBuffer(Buffer::Type type, Buffer
         case Buffer::TYPE_INDEX:
             return usage == Buffer::USAGE_STATIC ? sp<Buffer::Delegate>::make<StaticIndexBufferBgfx>() : sp<Buffer::Delegate>::make<DynamicIndexBufferBgfx>();
         case Buffer::TYPE_DRAW_INDIRECT:
-            return sp<Buffer::Delegate>::make<DynamicVertexBufferBgfx>();
+            return sp<Buffer::Delegate>::make<IndirectBufferBgfx>();
         case Buffer::TYPE_STORAGE:
             return sp<Buffer::Delegate>::make<StorageBufferBgfx>();
         default:

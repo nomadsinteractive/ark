@@ -298,6 +298,7 @@ String RenderUtil::outAttributeName(const String& name, PipelineInput::ShaderSta
 
 uint32_t RenderUtil::getChannelSize(Texture::Format format)
 {
+    DASSERT(format != Texture::FORMAT_AUTO);
     return (format & Texture::FORMAT_RGBA) + 1;
 }
 
@@ -316,7 +317,7 @@ uint32_t RenderUtil::getComponentSize(Texture::Format format)
         return 1;
     if(componentFormat == Texture::FORMAT_16_BIT)
         return 2;
-    CHECK((format & Texture::FORMAT_32_BIT) == Texture::FORMAT_32_BIT, "Unknown component format %d", format);
+    CHECK(componentFormat == Texture::FORMAT_32_BIT, "Unknown component format %d", format);
     return 4;
 }
 

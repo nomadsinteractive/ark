@@ -211,11 +211,11 @@ int32_t PipelineInput::StreamLayout::getAttributeOffset(const String& name) cons
     return _attributes.has(name) ? static_cast<int32_t>(_attributes.at(name).offset()) : -1;
 }
 
-void PipelineInput::StreamLayout::align()
+void PipelineInput::StreamLayout::align(uint32_t alignment)
 {
-    uint32_t mod = _stride % sizeof(float);
+    uint32_t mod = _stride % alignment;
     if(mod != 0)
-        _stride += (sizeof(float) - mod);
+        _stride += (alignment - mod);
 }
 
 PipelineInput::UBO::UBO(uint32_t binding)

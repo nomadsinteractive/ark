@@ -248,8 +248,7 @@ private:
     GLenum _mode;
 };
 
-class GLMultiDrawElementsIndirect final : public PipelineDrawCommand {
-public:
+struct GLMultiDrawElementsIndirect final : PipelineDrawCommand {
     GLMultiDrawElementsIndirect(GLenum mode)
         : _mode(mode)
     {
@@ -274,7 +273,7 @@ public:
             glDrawElementsIndirect(_mode, GLIndexType, reinterpret_cast<const void *>(i * sizeof(DrawingParams::DrawElementsIndirectCommand)));
 #endif
     }
-private:
+
     GLenum _mode;
 };
 

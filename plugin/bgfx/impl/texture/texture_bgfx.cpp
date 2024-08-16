@@ -2,6 +2,10 @@
 
 #include "core/inf/array.h"
 
+#include "graphics/base/bitmap.h"
+
+#include "renderer/util/render_util.h"
+
 namespace ark::plugin::bgfx {
 
 namespace {
@@ -88,16 +92,6 @@ namespace {
     return ::bgfx::TextureFormat::Unknown;
 }
 
-uint32_t getChannelSize(Texture::Format format)
-{
-    return (format & Texture::FORMAT_RGBA) + 1;
-}
-
-uint32_t getComponentSize(Texture::Format format)
-{
-    return format & Texture::FORMAT_32_BIT ? 4 : (format & Texture::FORMAT_16_BIT ? 2 : 1);
-}
-
 }
 
 TextureBgfx::TextureBgfx(Texture::Type type, uint32_t width, uint32_t height, sp<Texture::Parameters> parameters)
@@ -118,7 +112,7 @@ void TextureBgfx::upload(GraphicsContext& graphicsContext, const sp<Texture::Upl
 
 void TextureBgfx::clear(GraphicsContext& graphicsContext)
 {
-    const uint32_t bitmapSize = getChannelSize(_parameters->_format) * getComponentSize(_parameters->_format) * _width * _height;
+    const uint32_t bitmapSize = RenderUtil::getChannelSize(_parameters->_format) * RenderUtil::getComponentSize(_parameters->_format) * _width * _height;
     const ::bgfx::Memory* mem = ::bgfx::alloc(bitmapSize);
     memset(mem->data, 0, bitmapSize);
     ::bgfx::updateTexture2D(_handle, 0, 0, 0, 0, _width, _height, mem);
@@ -135,12 +129,17 @@ void TextureBgfx::uploadBitmap(GraphicsContext& graphicsContext, const Bitmap& b
     if(!_handle)
     {
         const bool hasMips = _parameters->_features & Texture::FEATURE_MIPMAPS;
-        const uint32_t channelSize = getChannelSize(_parameters->_format);
-        const uint32_t componentSize = getComponentSize(_parameters->_format);
+        const uint32_t channelSize = bitmap.channels();
+        const uint32_t componentSize = RenderUtil::getComponentSize(_parameters->_format);
         _handle.reset(::bgfx::createTexture2D(_width, _height, hasMips, 1, getTextureInternalFormat(_parameters->_usage, _parameters->_format, channelSize, componentSize)));
     }
     const sp<ByteArray>& data = imagedata.at(0);
     ::bgfx::updateTexture2D(_handle, 0, 0, 0, 0, _width, _height, ::bgfx::copy(data->buf(), data->size()));
+}
+
+const sp<Texture::Parameters>& TextureBgfx::parameters() const
+{
+    return _parameters;
 }
 
 }

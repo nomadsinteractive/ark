@@ -12,7 +12,7 @@
 namespace ark {
 
 RenderEngine::RenderEngine(const ApplicationManifest::Renderer& renderer, sp<RendererFactory> rendererFactory)
-    : _coordinate_system(renderer._coordinate_system == Ark::COORDINATE_SYSTEM_DEFAULT ? rendererFactory->defaultCoordinateSystem() : renderer._coordinate_system), _renderer_factory(std::move(rendererFactory)),
+    : _coordinate_system(renderer._coordinate_system == Ark::COORDINATE_SYSTEM_DEFAULT ? rendererFactory->features()._default_coordinate_system : renderer._coordinate_system), _renderer_factory(std::move(rendererFactory)),
       _render_context(_renderer_factory->createRenderEngineContext(renderer))
 {
 }
@@ -24,7 +24,7 @@ Ark::RendererVersion RenderEngine::version() const
 
 Ark::RendererCoordinateSystem RenderEngine::coordinateSystem() const
 {
-    return _renderer_factory->defaultCoordinateSystem();
+    return _renderer_factory->features()._default_coordinate_system;
 }
 
 const sp<RendererFactory>& RenderEngine::rendererFactory() const
@@ -59,7 +59,7 @@ bool RenderEngine::isYUp() const
 
 bool RenderEngine::isViewportFlipped() const
 {
-    return _coordinate_system != _renderer_factory->defaultCoordinateSystem();
+    return _coordinate_system != _renderer_factory->features()._default_coordinate_system;
 }
 
 V2 RenderEngine::toViewportPosition(const V2& position) const

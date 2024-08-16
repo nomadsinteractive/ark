@@ -16,18 +16,20 @@ namespace ark {
 
 class ARK_API RendererFactory {
 public:
-    RendererFactory(Ark::RendererCoordinateSystem defaultCoordinateSystem, bool canDrawElementIncremental)
-        : _default_coordinate_system(defaultCoordinateSystem), _can_draw_element_incremental(canDrawElementIncremental) {
+    struct Features {
+        Ark::RendererCoordinateSystem _default_coordinate_system;
+        bool _can_draw_element_incremental;
+        uint32_t _attribute_alignment;
+    };
+
+    RendererFactory(const Features& features)
+        : _features(features) {
     }
     virtual ~RendererFactory() = default;
 
     [[nodiscard]]
-    Ark::RendererCoordinateSystem defaultCoordinateSystem() const {
-        return _default_coordinate_system;
-    }
-    [[nodiscard]]
-    bool canDrawElementIncremental() const {
-        return _can_draw_element_incremental;
+    const Features& features() const {
+        return _features;
     }
 
     virtual void onSurfaceCreated(RenderEngine& renderEngine) = 0;
@@ -41,8 +43,7 @@ public:
     virtual sp<Texture::Delegate> createTexture(sp<Size> size, sp<Texture::Parameters> parameters) = 0;
 
 protected:
-    Ark::RendererCoordinateSystem _default_coordinate_system;
-    bool _can_draw_element_incremental;
+    Features _features;
 };
 
 }

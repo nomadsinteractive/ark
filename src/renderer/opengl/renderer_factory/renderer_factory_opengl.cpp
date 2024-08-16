@@ -50,7 +50,7 @@ void setVersion(Ark::RendererVersion version, RenderEngineContext& glContext)
 }
 
 RendererFactoryOpenGL::RendererFactoryOpenGL(sp<Recycler> recycler)
-    : RendererFactory(Ark::COORDINATE_SYSTEM_RHS, true), _recycler(std::move(recycler))
+    : RendererFactory({Ark::COORDINATE_SYSTEM_RHS, true, sizeof(float)}), _recycler(std::move(recycler))
 {
     const Global<PluginManager> pluginManager;
     pluginManager->addPlugin(sp<opengl::OpenglPlugin>::make());

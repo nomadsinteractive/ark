@@ -349,8 +349,8 @@ sp<Framebuffer> RenderController::makeFramebuffer(sp<Renderer> renderer, std::ve
 
 sp<RenderCommandComposer> RenderController::makeDrawElementsIncremental(sp<Model> model) const
 {
-    const bool canDrawElementsIncremental = _render_engine->rendererFactory()->canDrawElementIncremental();
-    return canDrawElementsIncremental ? sp<RenderCommandComposer>::make<RCCDrawElementsIncremental>(std::move(model)) : sp<RenderCommandComposer>::make<RCCDrawElements>(std::move(model));
+    return _render_engine->rendererFactory()->features()._can_draw_element_incremental ? sp<RenderCommandComposer>::make<RCCDrawElementsIncremental>(std::move(model))
+                                                                                       : sp<RenderCommandComposer>::make<RCCDrawElements>(std::move(model));
 }
 
 void RenderController::addPreComposeUpdatable(sp<Updatable> updatable, sp<Boolean> canceled)

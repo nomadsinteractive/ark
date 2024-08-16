@@ -10,6 +10,7 @@
 #include "renderer/base/render_engine_context.h"
 #include "renderer/base/snippet_delegate.h"
 #include "renderer/impl/snippet/snippet_linked_chain.h"
+#include "renderer/inf/renderer_factory.h"
 #include "renderer/util/render_util.h"
 
 
@@ -177,8 +178,9 @@ void PipelineBuildingContext::initializeAttributes()
             addAttribute(k, v, 0);
         }
 
-    for(auto iter : _input->streamLayouts())
-        iter.second.align();
+    const uint32_t alignment = _render_controller->renderEngine()->rendererFactory()->features()._attribute_alignment;
+    for(auto &[k, v] : _input->streamLayouts())
+        v.align(k == 0 ? 4 : alignment);
 
     //TODO: link all outputs to next stage's inputs
     {
