@@ -55,10 +55,12 @@ public:
     static Ark& instance();
 
     template<typename T> sp<T> query() const {
+        const std::lock_guard lg(_mutex);
         return _interfaces.get<T>();
     }
 
-    template<typename T, typename... Args> sp<T> ensure() {
+    template<typename T> sp<T> ensure() {
+        const std::lock_guard lg(_mutex);
         return _interfaces.ensure<T>();
     }
 
@@ -114,6 +116,7 @@ private:
     sp<ApplicationManifest> _manifest;
     Traits _interfaces;
 
+    std::mutex _mutex;
     friend class ClassManager;
 };
 

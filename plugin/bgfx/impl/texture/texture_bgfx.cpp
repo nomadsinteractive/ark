@@ -92,6 +92,17 @@ namespace {
     return ::bgfx::TextureFormat::Unknown;
 }
 
+uint32_t toBgfxTextureFlags(const Texture::Parameters& params)
+{
+    uint32_t flags = 0;
+    flags |= params._min_filter == Texture::CONSTANT_NEAREST ? BGFX_SAMPLER_MIN_POINT : BGFX_SAMPLER_MIN_ANISOTROPIC;
+    flags |= params._mag_filter == Texture::CONSTANT_NEAREST ? BGFX_SAMPLER_MAG_POINT : BGFX_SAMPLER_MAG_ANISOTROPIC;
+    flags |= params._wrap_r == Texture::CONSTANT_REPEAT ? BGFX_SAMPLER_U_BORDER : BGFX_SAMPLER_U_CLAMP;
+    flags |= params._wrap_s == Texture::CONSTANT_REPEAT ? BGFX_SAMPLER_V_BORDER : BGFX_SAMPLER_V_CLAMP;
+    flags |= params._wrap_t == Texture::CONSTANT_REPEAT ? BGFX_SAMPLER_W_BORDER : BGFX_SAMPLER_W_CLAMP;
+    return flags ? flags : UINT32_MAX;
+}
+
 }
 
 TextureBgfx::TextureBgfx(Texture::Type type, uint32_t width, uint32_t height, sp<Texture::Parameters> parameters)
@@ -131,15 +142,10 @@ void TextureBgfx::uploadBitmap(GraphicsContext& graphicsContext, const Bitmap& b
         const bool hasMips = _parameters->_features & Texture::FEATURE_MIPMAPS;
         const uint32_t channelSize = bitmap.channels();
         const uint32_t componentSize = RenderUtil::getComponentSize(_parameters->_format);
-        _handle.reset(::bgfx::createTexture2D(_width, _height, hasMips, 1, getTextureInternalFormat(_parameters->_usage, _parameters->_format, channelSize, componentSize)));
+        _handle.reset(::bgfx::createTexture2D(_width, _height, hasMips, 1, getTextureInternalFormat(_parameters->_usage, _parameters->_format, channelSize, componentSize), toBgfxTextureFlags(_parameters)));
     }
     const sp<ByteArray>& data = imagedata.at(0);
     ::bgfx::updateTexture2D(_handle, 0, 0, 0, 0, _width, _height, ::bgfx::copy(data->buf(), data->size()));
-}
-
-const sp<Texture::Parameters>& TextureBgfx::parameters() const
-{
-    return _parameters;
 }
 
 }

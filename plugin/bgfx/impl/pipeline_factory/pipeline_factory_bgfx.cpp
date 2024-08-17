@@ -143,17 +143,6 @@ uint8_t toBgfxTextureDimension(Texture::Type type)
     return 0;
 }
 
-uint32_t toBgfxTextureFlags(const Texture::Parameters& params)
-{
-    uint32_t flags = 0;
-    flags |= params._min_filter == Texture::CONSTANT_NEAREST ? BGFX_SAMPLER_MIN_POINT : BGFX_SAMPLER_MIN_ANISOTROPIC;
-    flags |= params._mag_filter == Texture::CONSTANT_NEAREST ? BGFX_SAMPLER_MAG_POINT : BGFX_SAMPLER_MAG_ANISOTROPIC;
-    flags |= params._wrap_r == Texture::CONSTANT_REPEAT ? BGFX_SAMPLER_U_BORDER : BGFX_SAMPLER_U_CLAMP;
-    flags |= params._wrap_s == Texture::CONSTANT_REPEAT ? BGFX_SAMPLER_V_BORDER : BGFX_SAMPLER_V_CLAMP;
-    flags |= params._wrap_t == Texture::CONSTANT_REPEAT ? BGFX_SAMPLER_W_BORDER : BGFX_SAMPLER_W_CLAMP;
-    return flags ? flags : UINT32_MAX;
-}
-
 String translatePredefinedName(const String& name)
 {
 //TODO: Maybe we can figure out the translation by the macros?
@@ -243,9 +232,8 @@ struct alignas(1) BgfxShaderAttributeChunk {
     uint32_t customId = 0;
     std::vector<BgfxShaderAttributeChunk> attributeChunks;
     if(stage == ShaderStage::SHADER_STAGE_VERTEX)
-        for(const auto& [divisor, streamLayout]: pipelineInput.streamLayouts())
-            for(const auto& [name, attribute] : streamLayout.attributes())
-                attributeChunks.push_back({toBgfxAttribId(attribute.usage(), customId)});
+        for(const auto& [name, attribute] : pipelineInput.getStreamLayout(0).attributes())
+            attributeChunks.push_back({toBgfxAttribId(attribute.usage(), customId)});
 
     shaderHeader.count = uniformChunks.size();
     bx::Error err;
@@ -307,10 +295,7 @@ struct DrawPipelineBgfx final : ResourceBase<::bgfx::ProgramHandle, Pipeline> {
         const BgfxContext& ctx = graphicsContext.attachments().ensure<BgfxContext>();
 
         for(const auto& [uniform, texture, stage] : _sampler_slots)
-        {
-            const Texture::Parameters& params = texture->parameters();
-            ::bgfx::setTexture(stage, uniform, texture->handle(), toBgfxTextureFlags(params));
-        }
+            ::bgfx::setTexture(stage, uniform, texture->handle());
 
         {
             const Camera& camera = drawingContext._pipeline_snapshot._bindings->pipelineInput()->camera();
@@ -357,11 +342,11 @@ struct DrawPipelineBgfx final : ResourceBase<::bgfx::ProgramHandle, Pipeline> {
                      memcpy(idb.data, instanceDataBuffers.data(), instanceDataBuffers.size());
                 }
 
+                ::bgfx::setInstanceDataBuffer(&idb);
                 for(size_t i = 0; i < param._indirect_cmd_count; ++i)
                 {
-                    vertices->bind();
+                    vertices->bindRange(ic[i]._base_vertex, UINT32_MAX);
                     indices->bindRange(ic[i]._first_index, ic[i]._count);
-                    ::bgfx::setInstanceDataBuffer(&idb);
                     ::bgfx::submit(ctx._view_id, _handle);
                 }
                 break;
@@ -374,6 +359,7 @@ struct DrawPipelineBgfx final : ResourceBase<::bgfx::ProgramHandle, Pipeline> {
             }
         }
     }
+//TODO: Move them to somewhere else
     std::vector<uint8_t> indirectCommands;
     std::vector<uint8_t> instanceDataBuffers;
     void compute(GraphicsContext& graphicsContext, const ComputeContext& computeContext) override
