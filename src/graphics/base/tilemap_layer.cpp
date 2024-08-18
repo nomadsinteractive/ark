@@ -268,10 +268,10 @@ Renderable::StateBits TilemapLayer::RenderableTile::updateState(const RenderRequ
 Renderable::Snapshot TilemapLayer::RenderableTile::snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, StateBits state)
 {
     if(!_renderable)
-        return Renderable::Snapshot();
+        return {RENDERABLE_STATE_NONE};
 
     const V3 tileTranslate = _position + V3(0, 0, _stub->_zorder);
-    Renderable::Snapshot snapshot = _renderable->snapshot(snapshotContext, renderRequest, state);
+    Snapshot snapshot = _renderable->snapshot(snapshotContext, renderRequest, state);
     snapshot._position += tileTranslate;
     return snapshot;
 }

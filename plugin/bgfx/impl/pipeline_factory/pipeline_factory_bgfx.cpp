@@ -276,10 +276,10 @@ struct DrawPipelineBgfx final : ResourceBase<::bgfx::ProgramHandle, Pipeline> {
 
     void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override
     {
-        if(_sampler_slots.empty() && drawingContext._pipeline_snapshot._bindings->samplers().size())
+        if(_sampler_slots.empty() && drawingContext._bindings->samplers().size())
         {
             uint8_t textureUint = 0;
-            for(const auto& [name, texture] : drawingContext._pipeline_snapshot._bindings->samplers())
+            for(const auto& [name, texture] : drawingContext._bindings->samplers())
             {
                 const sp<TextureBgfx> textureBgfx = texture->delegate().cast<TextureBgfx>();
                 _sampler_slots.push_back({::bgfx::createUniform(name.c_str(), ::bgfx::UniformType::Sampler), std::move(textureBgfx), textureUint++});
@@ -298,7 +298,7 @@ struct DrawPipelineBgfx final : ResourceBase<::bgfx::ProgramHandle, Pipeline> {
             ::bgfx::setTexture(stage, uniform, texture->handle());
 
         {
-            const Camera& camera = drawingContext._pipeline_snapshot._bindings->pipelineInput()->camera();
+            const Camera& camera = drawingContext._bindings->pipelineInput()->camera();
             const M4 view = camera.view()->val();
             const M4 proj = camera.projection()->val();
             ::bgfx::setViewTransform(ctx._view_id, &view, &proj);
@@ -334,7 +334,7 @@ struct DrawPipelineBgfx final : ResourceBase<::bgfx::ProgramHandle, Pipeline> {
                 ::bgfx::InstanceDataBuffer idb;
                 for(const auto& [divisor, buffer] : param._divided_buffer_snapshots)
                 {
-                    const PipelineInput::StreamLayout& sl = drawingContext._pipeline_snapshot._bindings->pipelineInput()->getStreamLayout(divisor);
+                    const PipelineInput::StreamLayout& sl = drawingContext._bindings->pipelineInput()->getStreamLayout(divisor);
                     const uint32_t availInstanceCount = ::bgfx::getAvailInstanceDataBuffer(instanceCount, sl.stride());
                     ::bgfx::allocInstanceDataBuffer(&idb, availInstanceCount, sl.stride());
                     if(buffer._uploader)

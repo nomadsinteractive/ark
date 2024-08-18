@@ -23,6 +23,11 @@ public:
         ByteArray::Borrowed _buffer;
     };
 
+    struct BufferObject {
+        std::vector<UBOSnapshot> _ubos;
+        std::vector<std::pair<uint32_t, Buffer::Snapshot>> _ssbos;
+    };
+
     enum SnapshotFlag {
         SNAPSHOT_FLAG_RELOAD,
         SNAPSHOT_FLAG_DYNAMIC_UPDATE,
@@ -51,34 +56,31 @@ public:
 
     void snapshot(RenderRequest& renderRequest, std::vector<sp<LayerContext>>& layerContexts);
 
-    bool addDisposedState(LayerContext& lc, void* stateKey);
-
+    bool addDiscardedState(LayerContext& lc, void* stateKey);
     void addDiscardedLayerContext(LayerContext& lc);
     void addDiscardedLayerContexts(const std::vector<sp<LayerContext>>& layerContexts);
 
-    sp<RenderCommand> toRenderCommand(const RenderRequest& renderRequest, Buffer::Snapshot vertices, Buffer::Snapshot indices, uint32_t drawCount, DrawingParams params);
+    sp<RenderCommand> toRenderCommand(const RenderRequest& renderRequest, Buffer::Snapshot vertices, Buffer::Snapshot indices, uint32_t drawCount, DrawingParams params) const;
 
     sp<RenderLayer::Stub> _stub;
 
     size_t _index_count;
-
-    std::vector<UBOSnapshot> _ubos;
-    std::vector<std::pair<uint32_t, Buffer::Snapshot>> _ssbos;
+    sp<BufferObject> _buffer_object;
 
     std::vector<LayerContextSnapshot> _layer_context_snapshots;
 
     std::deque<Droplet> _droplets;
     std::deque<LayerContext::ElementState> _item_deleted;
     Rect _scissor;
-    bool _needs_reload;
+    bool _vertices_dirty;
 
     DISALLOW_COPY_AND_ASSIGN(RenderLayerSnapshot);
 
 private:
     bool addLayerContext(RenderRequest& renderRequest, LayerContext& layerContext);
+    void doSnapshot(const RenderRequest& renderRequest, const LayerContextSnapshot& layerSnapshot);
 
 private:
-
     RenderLayerSnapshot(RenderRequest& renderRequest, const sp<RenderLayer::Stub>& stub);
 
     friend class RenderLayer;

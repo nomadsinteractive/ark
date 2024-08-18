@@ -27,7 +27,7 @@ RenderPass::RenderPass(sp<Shader> shader, Buffer vertexBuffer, Buffer indexBuffe
 
 void RenderPass::render(RenderRequest& renderRequest, const V3& /*position*/)
 {
-    uint32_t drawCount = static_cast<uint32_t>(_draw_count->val());
+    const uint32_t drawCount = static_cast<uint32_t>(_draw_count->val());
     if(drawCount > 0)
     {
         DrawingParams drawParam;
@@ -41,7 +41,7 @@ void RenderPass::render(RenderRequest& renderRequest, const V3& /*position*/)
         }
         else
             drawParam = DrawingParams::DrawElements{0};
-        DrawingContext drawingContext({_pipeline_bindings, _shader->takeUBOSnapshot(renderRequest), _shader->takeSSBOSnapshot(renderRequest)}, _pipeline_bindings->attachments(), vertices.snapshot(),
+        DrawingContext drawingContext(_pipeline_bindings, _shader->takeBufferSnapshot(renderRequest), _pipeline_bindings->attachments(), vertices.snapshot(),
                                       _index_buffer.snapshot(), drawCount, std::move(drawParam));
         renderRequest.addRenderCommand(drawingContext.toRenderCommand(renderRequest));
     }

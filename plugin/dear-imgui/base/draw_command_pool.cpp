@@ -4,9 +4,7 @@
 #include "renderer/base/shader.h"
 #include "renderer/base/texture.h"
 
-namespace ark {
-namespace plugin {
-namespace dear_imgui {
+namespace ark::plugin::dear_imgui {
 
 namespace {
 
@@ -15,7 +13,7 @@ PipelineDescriptor::Parameters makePipelineBindingParameters() {
     PipelineDescriptor::TraitConfigure configure;
     configure._cull_face_test = PipelineDescriptor::TraitCullFaceTest{false, PipelineDescriptor::FRONT_FACE_DEFAULT};
     traits.push_back(PipelineDescriptor::TRAIT_TYPE_CULL_FACE_TEST, PipelineDescriptor::PipelineTraitMeta(PipelineDescriptor::TRAIT_TYPE_CULL_FACE_TEST, configure));
-    return PipelineDescriptor::Parameters(Optional<Rect>(), std::move(traits), PipelineDescriptor::FLAG_DYNAMIC_SCISSOR);
+    return {Optional<Rect>(), std::move(traits), PipelineDescriptor::FLAG_DYNAMIC_SCISSOR};
 }
 
 }
@@ -35,6 +33,4 @@ sp<RendererImgui::DrawCommandRecycler> DrawCommandPool::obtainDrawCommandRecycle
     return sp<RendererImgui::DrawCommandRecycler>::make(_draw_commands, drawCommand);
 }
 
-}
-}
 }

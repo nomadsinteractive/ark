@@ -390,8 +390,7 @@ void PipelineBuildingContext::loadPredefinedUniform(BeanFactory& factory, const 
         const String& name = Documents::ensureAttribute(i, constants::NAME);
         const String& type = Documents::ensureAttribute(i, constants::TYPE);
         const String& value = Documents::ensureAttribute(i, constants::VALUE);
-        const int32_t binding = Documents::getAttribute<int32_t>(i, constants::BINDING, -1);
-        sp<Builder<Uploader>> builder = factory.findBuilderByTypeValue<Uploader>(type, value);
+        const builder<Uploader> builder = factory.findBuilderByTypeValue<Uploader>(type, value);
         sp<Uploader> input = builder ? builder->build(args) : factory.ensure<Uploader>(value, args);
         const uint32_t size = static_cast<uint32_t>(input->size());
         Uniform::Type uType = Uniform::toType(type);

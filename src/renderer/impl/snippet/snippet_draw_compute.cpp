@@ -20,7 +20,7 @@ public:
 
     void preDraw(GraphicsContext& graphicsContext, const DrawingContext& /*context*/) override
     {
-        _compute_context._pipeline_context._bindings->getPipeline(graphicsContext)->compute(graphicsContext, _compute_context);
+        _compute_context._bindings->getPipeline(graphicsContext)->compute(graphicsContext, _compute_context);
     }
 
     void postDraw(GraphicsContext& graphicsContext) override {}
@@ -40,7 +40,7 @@ public:
 
     void postDraw(GraphicsContext& graphicsContext) override
     {
-        _compute_context._pipeline_context._bindings->getPipeline(graphicsContext)->compute(graphicsContext, _compute_context);
+        _compute_context._bindings->getPipeline(graphicsContext)->compute(graphicsContext, _compute_context);
     }
 
 private:
@@ -62,7 +62,7 @@ sp<Snippet::DrawEvents> SnippetDrawCompute::makeDrawEvents(const RenderRequest& 
         _num_work_groups.at(1) ? _num_work_groups.at(1)->val() : 1,
         _num_work_groups.at(2) ? _num_work_groups.at(2)->val() : 1
     };
-    ComputeContext computeCtx({_pipeline_bindings, _shader->takeUBOSnapshot(renderRequest), _shader->takeSSBOSnapshot(renderRequest)}, std::move(numWorkGroups));
+    ComputeContext computeCtx(_pipeline_bindings, _shader->takeBufferSnapshot(renderRequest), numWorkGroups);
     return _at_post_draw ? sp<DrawEvents>::make<DrawEventsPostDrawCompute>(std::move(computeCtx)) : sp<DrawEvents>::make<DrawEventsPreDrawCompute>(std::move(computeCtx));
 }
 

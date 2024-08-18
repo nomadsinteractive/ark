@@ -14,9 +14,10 @@ public:
     enum StateBits {
         RENDERABLE_STATE_NONE = 0,
         RENDERABLE_STATE_DISCARDED = 1,
-        RENDERABLE_STATE_DIRTY = 2,
-        RENDERABLE_STATE_VISIBLE = 4,
-        RENDERABLE_STATE_NEW = 8
+        RENDERABLE_STATE_NEW = 2,
+        RENDERABLE_STATE_DIRTY = 4,
+        RENDERABLE_STATE_VISIBLE = 8,
+        RENDERABLE_STATE_OCCLUSION_QUERY = 16
     };
 
     virtual ~Renderable() = default;
@@ -27,9 +28,9 @@ public:
 
         explicit operator bool() const;
 
-        bool hasState(StateBits state) const;
-        void setState(StateBits state, bool enabled);
-        void setState(StateBits state);
+        bool has(StateBits state) const;
+        void set(StateBits state, bool enabled);
+        void reset(StateBits state);
 
         StateBits stateBits() const;
 
@@ -38,17 +39,14 @@ public:
     };
 
     struct Snapshot {
-        Snapshot(State state = RENDERABLE_STATE_DISCARDED, int32_t type = 0, sp<Model> model = nullptr);
-        Snapshot(State state, int32_t type, sp<Model> model, const V3& position, const V3& size, const Transform::Snapshot& transform, const Varyings::Snapshot& varyings);
-        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Snapshot);
 
         void applyVaryings(const Varyings::Snapshot& defaultVaryingsSnapshot);
 
-        State _state;
-        int32_t _type;
-        sp<Model> _model;
-        V3 _position;
-        V3 _size;
+        State _state = RENDERABLE_STATE_DISCARDED;
+        int32_t _type = 0;
+        sp<Model> _model = nullptr;
+        V3 _position{0};
+        V3 _size{1.0f};
         Transform::Snapshot _transform;
         Varyings::Snapshot _varyings;
     };

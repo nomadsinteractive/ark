@@ -96,11 +96,6 @@ PipelineDescriptor::Stub::Stub(Enum::RenderMode mode, Enum::DrawProcedure render
 {
 }
 
-PipelineDescriptor::Parameters::Parameters(Optional<Rect> scissor, PipelineDescriptor::PipelineTraitTable tests, uint32_t flags)
-    : _scissor(std::move(scissor)), _traits(std::move(tests)), _flags(flags)
-{
-}
-
 PipelineDescriptor::Parameters::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const ResourceLoaderContext& resourceLoaderContext)
     : _render_controller(resourceLoaderContext.renderController()), _pipeline_bindings_scissor(factory.getBuilder<Vec4>(manifest, "scissor")), _pipeline_bindings_flags(Documents::getAttribute<PipelineDescriptor::Flag>(manifest, "flags", PipelineDescriptor::FLAG_DEFAULT_VALUE))
 {
@@ -111,7 +106,7 @@ PipelineDescriptor::Parameters::BUILDER::BUILDER(BeanFactory& factory, const doc
 PipelineDescriptor::Parameters PipelineDescriptor::Parameters::BUILDER::build(const Scope& args) const
 {
     const sp<Vec4> scissor = _pipeline_bindings_scissor->build(args);
-    return Parameters(scissor ? Optional<Rect>(_render_controller->renderEngine()->toRendererRect(Rect(scissor->val()))) : Optional<Rect>(), _traits, _pipeline_bindings_flags);
+    return {scissor ? Optional<Rect>(_render_controller->renderEngine()->toRendererRect(Rect(scissor->val()))) : Optional<Rect>(), _traits, _pipeline_bindings_flags};
 }
 
 template<> ARK_API PipelineDescriptor::Flag StringConvert::eval<PipelineDescriptor::Flag>(const String& str)

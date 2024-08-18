@@ -7,9 +7,7 @@
 #include "dear-imgui/forwarding.h"
 #include "dear-imgui/renderer/renderer_imgui.h"
 
-namespace ark {
-namespace plugin {
-namespace dear_imgui {
+namespace ark::plugin::dear_imgui {
 
 class DrawCommandPool {
 public:
@@ -25,6 +23,4 @@ public:
     sp<PipelineBindings> _pipeline_bindings;
 };
 
-}
-}
 }

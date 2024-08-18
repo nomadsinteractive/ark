@@ -11,15 +11,15 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/base/buffer.h"
-#include "renderer/base/pipeline_snapshot.h"
+#include "renderer/base/pipeline_context.h"
 #include "renderer/base/drawing_params.h"
 
 namespace ark {
 
-class ARK_API DrawingContext {
+class ARK_API DrawingContext : public PipelineContext {
 public:
-    DrawingContext(PipelineSnapshot pipelineSnapshot, sp<Traits> attachments);
-    DrawingContext(PipelineSnapshot pipelineSnapshot, sp<Traits> attachments, Buffer::Snapshot vertices, Buffer::Snapshot indices, uint32_t drawCount, DrawingParams parameters);
+    DrawingContext(sp<PipelineBindings> pipelineBindings, sp<RenderLayerSnapshot::BufferObject> bufferObject, sp<Traits> attachments);
+    DrawingContext(sp<PipelineBindings> pipelineBindings, sp<RenderLayerSnapshot::BufferObject> bufferObject, sp<Traits> attachments, Buffer::Snapshot vertices, Buffer::Snapshot indices, uint32_t drawCount, DrawingParams parameters);
     DEFAULT_COPY_AND_ASSIGN(DrawingContext);
 
     sp<RenderCommand> toRenderCommand(const RenderRequest& renderRequest);
@@ -27,7 +27,6 @@ public:
 
     void upload(GraphicsContext& graphicsContext) const;
 
-    PipelineSnapshot _pipeline_snapshot;
     sp<Traits> _attachments;
 
     Buffer::Snapshot _vertices;

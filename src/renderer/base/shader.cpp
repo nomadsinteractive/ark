@@ -91,6 +91,11 @@ sp<Builder<Shader>> Shader::fromDocument(BeanFactory& factory, const document& m
     return shader ? shader : sp<Builder<Shader>>::make<ShaderBuilderImpl>(factory, manifest, resourceLoaderContext, stringTable->getString(defVertex, true), stringTable->getString(defFragment, true), defaultCamera);
 }
 
+sp<RenderLayerSnapshot::BufferObject> Shader::takeBufferSnapshot(const RenderRequest& renderRequest) const
+{
+    return sp<RenderLayerSnapshot::BufferObject>::make(RenderLayerSnapshot::BufferObject{takeUBOSnapshot(renderRequest), takeSSBOSnapshot(renderRequest)});
+}
+
 std::vector<RenderLayerSnapshot::UBOSnapshot> Shader::takeUBOSnapshot(const RenderRequest& renderRequest) const
 {
     std::vector<RenderLayerSnapshot::UBOSnapshot> uboSnapshot;
@@ -103,7 +108,7 @@ std::vector<std::pair<uint32_t, Buffer::Snapshot>> Shader::takeSSBOSnapshot(cons
 {
     std::vector<std::pair<uint32_t, Buffer::Snapshot>> ssboSnapshot;
     for(const PipelineInput::SSBO& i : _pipeline_input->ssbos())
-        ssboSnapshot.push_back(std::make_pair(i._binding, i._buffer.snapshot()));
+        ssboSnapshot.emplace_back(i._binding, i._buffer.snapshot());
     return ssboSnapshot;
 }
 

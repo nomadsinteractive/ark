@@ -16,12 +16,9 @@
 namespace ark {
 
 RenderLayerSnapshot::RenderLayerSnapshot(RenderRequest& renderRequest, const sp<RenderLayer::Stub>& stub)
-    : _stub(stub), _index_count(0)
+    : _stub(stub), _index_count(0), _buffer_object(sp<BufferObject>::make(BufferObject{_stub->_shader->takeUBOSnapshot(renderRequest), _stub->_shader->takeSSBOSnapshot(renderRequest)}))
 {
-    _needs_reload = addLayerContext(renderRequest, _stub->_layer_context);
-
-    _ubos = _stub->_shader->takeUBOSnapshot(renderRequest);
-    _ssbos = _stub->_shader->takeSSBOSnapshot(renderRequest);
+    _vertices_dirty = addLayerContext(renderRequest, _stub->_layer_context);
 
     if(_stub->_scissor && _stub->_scissor->update(renderRequest.timestamp()))
         _scissor = Rect(_stub->_scissor->val());
@@ -29,16 +26,16 @@ RenderLayerSnapshot::RenderLayerSnapshot(RenderRequest& renderRequest, const sp<
 
 sp<RenderCommand> RenderLayerSnapshot::compose(const RenderRequest& renderRequest)
 {
-    if(_droplets.size() > 0 && _stub->_layer_context->visible().val())
+    if(!_droplets.empty() && _stub->_layer_context->visible().val())
         return _stub->_render_command_composer->compose(renderRequest, *this);
 
-    DrawingContext drawingContext({_stub->_pipeline_bindings, std::move(_ubos), std::move(_ssbos)}, nullptr);
+    DrawingContext drawingContext(_stub->_pipeline_bindings, _buffer_object, nullptr);
     return drawingContext.toBindCommand();
 }
 
 bool RenderLayerSnapshot::needsReload() const
 {
-    return _needs_reload || _stub->_pipeline_bindings->vertices().size() == 0;
+    return _vertices_dirty || _stub->_pipeline_bindings->vertices().size() == 0;
 }
 
 const sp<PipelineInput>& RenderLayerSnapshot::pipelineInput() const
@@ -51,22 +48,22 @@ void RenderLayerSnapshot::snapshot(RenderRequest& renderRequest, std::vector<sp<
     for(auto iter = layerContexts.begin(); iter != layerContexts.end(); )
     {
         const sp<LayerContext>& layerContext = *iter;
-        const SafeVar<Boolean>& disposed = layerContext->discarded();
-        if((!disposed && layerContext.unique()) || disposed.val())
+        const SafeVar<Boolean>& discarded = layerContext->discarded();
+        if((!discarded && layerContext.unique()) || discarded.val())
         {
             addDiscardedLayerContext(layerContext);
             iter = layerContexts.erase(iter);
-            _needs_reload = true;
+            _vertices_dirty = true;
         }
         else
         {
-            _needs_reload = addLayerContext(renderRequest, layerContext) || _needs_reload;
+            _vertices_dirty = addLayerContext(renderRequest, layerContext) || _vertices_dirty;
             ++iter;
         }
     }
 }
 
-bool RenderLayerSnapshot::addDisposedState(LayerContext& lc, void* stateKey)
+bool RenderLayerSnapshot::addDiscardedState(LayerContext& lc, void* stateKey)
 {
     if(const auto iter = lc._element_states.find(stateKey); iter != lc._element_states.end())
     {
@@ -89,13 +86,13 @@ void RenderLayerSnapshot::addDiscardedLayerContext(LayerContext& lc)
 
 void RenderLayerSnapshot::addDiscardedLayerContexts(const std::vector<sp<LayerContext>>& layerContexts)
 {
-    for(LayerContext& lc : layerContexts)
+    for(const sp<LayerContext>& lc : layerContexts)
         addDiscardedLayerContext(lc);
 }
 
-sp<RenderCommand> RenderLayerSnapshot::toRenderCommand(const RenderRequest& renderRequest, Buffer::Snapshot vertices, Buffer::Snapshot indices, uint32_t drawCount, DrawingParams params)
+sp<RenderCommand> RenderLayerSnapshot::toRenderCommand(const RenderRequest& renderRequest, Buffer::Snapshot vertices, Buffer::Snapshot indices, uint32_t drawCount, DrawingParams params) const
 {
-    DrawingContext drawingContext({_stub->_pipeline_bindings, std::move(_ubos), std::move(_ssbos)}, _stub->_pipeline_bindings->attachments(), std::move(vertices), std::move(indices),
+    DrawingContext drawingContext(_stub->_pipeline_bindings, _buffer_object, _stub->_pipeline_bindings->attachments(), std::move(vertices), std::move(indices),
                                   drawCount, std::move(params));
 
     if(_stub->_scissor)
@@ -112,39 +109,41 @@ bool RenderLayerSnapshot::addLayerContext(RenderRequest& renderRequest, LayerCon
     const LayerContextSnapshot& layerSnapshot = _layer_context_snapshots.back();
 
     const bool reload = needsReload();
-    bool dirty = layerContext.processNewCreated();
+    bool verticesDirty = layerContext.processNewCreated();
 
     for(auto iter = layerContext._renderables.begin(); iter != layerContext._renderables.end(); )
     {
         Renderable& renderable = iter->first;
         Renderable::State& s = iter->second;
-        s.setState(renderable.updateState(renderRequest));
+        s.reset(renderable.updateState(renderRequest));
         ASSERT(s);
-        if(Renderable::State state = s; !state || state.hasState(Renderable::RENDERABLE_STATE_DISCARDED))
+        if(Renderable::State state = s; !state || state.has(Renderable::RENDERABLE_STATE_DISCARDED))
         {
             LOGD("delete: %p", &renderable);
-            dirty = true;
-            addDisposedState(layerContext, &renderable);
+            verticesDirty = true;
+            addDiscardedState(layerContext, &renderable);
             iter = layerContext._renderables.erase(iter);
         }
         else
         {
             if(reload)
-                state.setState(Renderable::RENDERABLE_STATE_DIRTY, true);
-            if(state.hasState(Renderable::RENDERABLE_STATE_VISIBLE))
-                state.setState(Renderable::RENDERABLE_STATE_VISIBLE, layerSnapshot._visible);
-            if(s.hasState(Renderable::RENDERABLE_STATE_NEW))
+                state.set(Renderable::RENDERABLE_STATE_DIRTY, true);
+            if(state.has(Renderable::RENDERABLE_STATE_VISIBLE))
+                state.set(Renderable::RENDERABLE_STATE_VISIBLE, layerSnapshot._visible);
+            if(s.has(Renderable::RENDERABLE_STATE_NEW))
             {
-                state.setState(Renderable::RENDERABLE_STATE_DIRTY, true);
-                s.setState(Renderable::RENDERABLE_STATE_NEW, false);
+                state.set(Renderable::RENDERABLE_STATE_DIRTY, true);
+                s.set(Renderable::RENDERABLE_STATE_NEW, false);
             }
             Renderable::Snapshot snapshot = renderable.snapshot(layerSnapshot, renderRequest, state.stateBits());
+            DASSERT(snapshot._model);
             snapshot._position += layerSnapshot._position;
             snapshot.applyVaryings(layerSnapshot._varyings);
             if(!snapshot._model)
                 snapshot._model = layerContext._model_loader->loadModel(snapshot._type);
             _index_count += snapshot._model->indexCount();
-            auto fiter = layerContext._element_states.find(&renderable);
+
+            const auto fiter = layerContext._element_states.find(&renderable);
             DASSERT(fiter != layerContext._element_states.end());
             _droplets.emplace_back(renderable, layerSnapshot, fiter->second, snapshot);
 
@@ -152,7 +151,18 @@ bool RenderLayerSnapshot::addLayerContext(RenderRequest& renderRequest, LayerCon
         }
     }
 
-    return dirty;
+    return verticesDirty;
+}
+
+void RenderLayerSnapshot::doSnapshot(const RenderRequest& renderRequest, const LayerContextSnapshot& layerSnapshot)
+{
+    for(Droplet& i : _droplets)
+    {
+        Renderable::Snapshot snapshot = i._renderable.snapshot(i._layer_context, renderRequest, i._snapshot._state.stateBits());
+        snapshot._position += layerSnapshot._position;
+        snapshot.applyVaryings(layerSnapshot._varyings);
+        _index_count += snapshot._model->indexCount();
+    }
 }
 
 RenderLayerSnapshot::Droplet::Droplet(Renderable& renderable, const LayerContextSnapshot& layerContext, LayerContext::ElementState& state, const Renderable::Snapshot& snapshot)
@@ -162,7 +172,7 @@ RenderLayerSnapshot::Droplet::Droplet(Renderable& renderable, const LayerContext
 
 const Renderable::Snapshot& RenderLayerSnapshot::Droplet::ensureDirtySnapshot(const RenderRequest& renderRequest)
 {
-    if(!_snapshot._state.hasState(Renderable::RENDERABLE_STATE_DIRTY))
+    if(!_snapshot._state.has(Renderable::RENDERABLE_STATE_DIRTY))
     {
         _snapshot =_renderable.snapshot(_layer_context, renderRequest, static_cast<Renderable::StateBits>(_snapshot._state.stateBits() | Renderable::RENDERABLE_STATE_DIRTY));
         _snapshot._position += _layer_context._position;

@@ -28,6 +28,7 @@ public:
 
     static sp<Builder<Shader>> fromDocument(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext, const String& defVertex = "shaders/default.vert", const String& defFragment = "shaders/texture.frag", const sp<Camera>& defaultCamera = nullptr);
 
+    sp<RenderLayerSnapshot::BufferObject> takeBufferSnapshot(const RenderRequest& renderRequest) const;
     std::vector<RenderLayerSnapshot::UBOSnapshot> takeUBOSnapshot(const RenderRequest& renderRequest) const;
     std::vector<std::pair<uint32_t, Buffer::Snapshot>> takeSSBOSnapshot(const RenderRequest& renderRequest) const;
 

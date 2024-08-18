@@ -4,16 +4,16 @@
 
 namespace ark {
 
-void EventListenerList::addEventListener(sp<EventListener> eventListener, sp<Boolean> disposed)
+void EventListenerList::addEventListener(sp<EventListener> eventListener, sp<Boolean> discarded)
 {
     ASSERT(eventListener);
-    _event_listeners.emplace_back(std::move(eventListener), std::move(disposed));
+    _event_listeners.emplace_back(std::move(eventListener), std::move(discarded));
 }
 
-void EventListenerList::pushEventListener(sp<EventListener> eventListener, sp<Boolean> disposed)
+void EventListenerList::pushEventListener(sp<EventListener> eventListener, sp<Boolean> discarded)
 {
     ASSERT(eventListener);
-    _event_listeners.emplace_front(std::move(eventListener), std::move(disposed));
+    _event_listeners.emplace_front(std::move(eventListener), std::move(discarded));
 }
 
 bool EventListenerList::onEvent(const Event& event)

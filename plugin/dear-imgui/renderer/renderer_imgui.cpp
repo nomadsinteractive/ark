@@ -222,8 +222,7 @@ void RendererImgui::MyImGuiRenderFunction(const RenderRequest& renderRequest, Im
         memcpy(ib.buf(), cmd_list->IdxBuffer.Data, static_cast<size_t>(ib.length()));
 
         uint32_t offset = 0;
-        const auto ubos = _shader->takeUBOSnapshot(renderRequest);
-        const auto ssbos = _shader->takeSSBOSnapshot(renderRequest);
+        const sp<RenderLayerSnapshot::BufferObject> bo = _shader->takeBufferSnapshot(renderRequest);
         for (int j = 0; j < cmd_list->CmdBuffer.Size; j++)
         {
             const ImDrawCmd* pcmd = &cmd_list->CmdBuffer[j];
@@ -253,7 +252,7 @@ void RendererImgui::MyImGuiRenderFunction(const RenderRequest& renderRequest, Im
                 const sp<DrawCommand>& drawCommand = recycler->drawCommand();
                 Buffer::Snapshot vertexBuffer = drawCommand->_vertex_buffer.snapshot(vb);
                 Buffer::Snapshot indexBuffer = drawCommand->_index_buffer.snapshot(ib);
-                DrawingContext drawingContext({drawCommandPool->_pipeline_bindings, ubos, ssbos}, drawCommand->_attachments, std::move(vertexBuffer), std::move(indexBuffer), pcmd->ElemCount, DrawingParams::DrawElements{offset});
+                DrawingContext drawingContext(drawCommandPool->_pipeline_bindings, bo, drawCommand->_attachments, std::move(vertexBuffer), std::move(indexBuffer), pcmd->ElemCount, DrawingParams::DrawElements{offset});
                 drawingContext._scissor = _render_engine->toRendererRect(Rect(pcmd->ClipRect.x - pos.x, pcmd->ClipRect.y - pos.y, pcmd->ClipRect.z - pos.x, pcmd->ClipRect.w - pos.y), Ark::COORDINATE_SYSTEM_LHS);
                 renderRequest.addRenderCommand(sp<ImguiRenderCommand>::make(drawingContext.toRenderCommand(renderRequest), std::move(recycler)));
             }

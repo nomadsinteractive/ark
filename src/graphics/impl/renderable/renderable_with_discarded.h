@@ -9,7 +9,7 @@ namespace ark {
 
 class RenderableWithDiscarded final : public Wrapper<Renderable>, public Renderable {
 public:
-    RenderableWithDiscarded(sp<Renderable> delegate, sp<Boolean> disposed);
+    RenderableWithDiscarded(sp<Renderable> delegate, sp<Boolean> discarded);
 
     StateBits updateState(const RenderRequest& renderRequest) override;
     Snapshot snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, StateBits state) override;

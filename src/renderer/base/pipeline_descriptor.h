@@ -138,10 +138,7 @@ public:
 
     typedef Table<TraitType, PipelineTraitMeta> PipelineTraitTable;
 
-    struct ARK_API Parameters {
-        Parameters(Optional<Rect> scissor, PipelineTraitTable tests, uint32_t flags);
-        DEFAULT_COPY_AND_ASSIGN(Parameters);
-
+    struct Parameters {
         Optional<Rect> _scissor;
         PipelineTraitTable _traits;
         uint32_t _flags;

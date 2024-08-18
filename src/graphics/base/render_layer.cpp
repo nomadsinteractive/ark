@@ -6,8 +6,6 @@
 #include "graphics/base/layer_context.h"
 #include "graphics/base/render_object.h"
 #include "graphics/base/render_request.h"
-#include "graphics/base/size.h"
-#include "graphics/base/v4.h"
 #include "graphics/impl/render_batch/render_batch_impl.h"
 
 #include "renderer/base/drawing_context.h"
@@ -19,8 +17,6 @@
 #include "renderer/base/pipeline_bindings.h"
 #include "renderer/impl/model_loader/model_loader_cached.h"
 #include "renderer/inf/model_loader.h"
-#include "renderer/inf/pipeline.h"
-#include "renderer/inf/pipeline_factory.h"
 #include "renderer/inf/render_command_composer.h"
 
 namespace ark {

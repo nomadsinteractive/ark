@@ -69,7 +69,7 @@ public:
 ApplicationContext::ApplicationContext(sp<ApplicationBundle> applicationBundle, sp<RenderEngine> renderEngine)
     : _ticker(sp<Ticker>::make()), _cursor_position(sp<Vec2Impl>::make()), _application_bundle(std::move(applicationBundle)), _render_engine(std::move(renderEngine)), _render_controller(sp<RenderController>::make(_render_engine, _application_bundle->recycler(), _application_bundle->bitmapBundle(), _application_bundle->bitmapBoundsBundle())),
       _app_clock_ticker(sp<Variable<uint64_t>::Impl>::make(0)), _app_clock_interval(sp<Numeric::Impl>::make(0)), _sys_clock(sp<Clock>::make(_ticker)), _app_clock(sp<Clock>::make(_app_clock_ticker)), _worker_strategy(sp<ExecutorWorkerStrategy>::make(sp<MessageLoop>::make(_ticker))),
-      _executor_main(sp<ExecutorWorkerThread>::make(_worker_strategy, "Executor")), _executor_thread_pool(sp<ExecutorThreadPool>::make(_executor_main)), _event_listeners(new EventListenerList()), _string_table(Global<StringTable>()),
+      _executor_main(sp<ExecutorWorkerThread>::make(_worker_strategy, "Executor")), _executor_thread_pool(sp<ExecutorThreadPool>::make(_executor_main)), _string_table(Global<StringTable>()),
       _background_color(0, 0, 0), _paused(false)
 {
     const Ark& ark = Ark::instance();
@@ -205,7 +205,7 @@ bool ApplicationContext::onEvent(const Event& event)
 {
     if(event.action() == Event::ACTION_UP || event.action() == Event::ACTION_DOWN || event.action() == Event::ACTION_MOVE)
         _cursor_position->set(event.xy());
-    return _event_listeners->onEvent(event) || (_default_event_listener && _default_event_listener->onEvent(event));
+    return _event_listeners.onEvent(event) || (_default_event_listener && _default_event_listener->onEvent(event));
 }
 
 V2 ApplicationContext::toViewportPosition(const V2& position) const
@@ -220,12 +220,12 @@ void ApplicationContext::addPreRenderTask(sp<Runnable> task, sp<Boolean> cancell
 
 void ApplicationContext::addEventListener(sp<EventListener> eventListener, sp<Boolean> disposed)
 {
-    _event_listeners->addEventListener(std::move(eventListener), std::move(disposed));
+    _event_listeners.addEventListener(std::move(eventListener), std::move(disposed));
 }
 
 void ApplicationContext::pushEventListener(sp<EventListener> eventListener, sp<Boolean> disposed)
 {
-    _event_listeners->pushEventListener(std::move(eventListener), std::move(disposed));
+    _event_listeners.pushEventListener(std::move(eventListener), std::move(disposed));
 }
 
 void ApplicationContext::setDefaultEventListener(sp<EventListener> eventListener)

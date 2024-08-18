@@ -17,7 +17,7 @@ public:
     }
 
     void draw(GraphicsContext& graphicsContext) override {
-        const sp<Pipeline>& pipeline = _context._pipeline_context._bindings->getPipeline(graphicsContext);
+        const sp<Pipeline>& pipeline = _context._bindings->getPipeline(graphicsContext);
         pipeline->compute(graphicsContext, _context);
     }
 
@@ -27,8 +27,8 @@ private:
 
 }
 
-ComputeContext::ComputeContext(PipelineSnapshot pipelineContext, std::array<int32_t, 3> numWorkGroups)
-    : _pipeline_context(std::move(pipelineContext)), _num_work_groups(std::move(numWorkGroups))
+ComputeContext::ComputeContext(sp<PipelineBindings> pipelineBindings, sp<RenderLayerSnapshot::BufferObject> bufferObject, std::array<int32_t, 3> numWorkGroups)
+    : PipelineContext{std::move(pipelineBindings), std::move(bufferObject)}, _num_work_groups(std::move(numWorkGroups))
 {
 }
 

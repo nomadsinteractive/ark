@@ -7,12 +7,12 @@
 
 namespace ark {
 
-class RenderableWithVisible : public Wrapper<Renderable>, public Renderable {
+class RenderableWithVisible final : public Wrapper<Renderable>, public Renderable {
 public:
     RenderableWithVisible(sp<Renderable> delegate, sp<Boolean> visible);
 
-    virtual StateBits updateState(const RenderRequest& renderRequest) override;
-    virtual Snapshot snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, StateBits state) override;
+    StateBits updateState(const RenderRequest& renderRequest) override;
+    Snapshot snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, StateBits state) override;
 
 private:
     sp<Boolean> _visible;

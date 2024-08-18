@@ -1,11 +1,11 @@
-#include "graphics/impl/renderable/renderable_with_disposable.h"
+#include "graphics/impl/renderable/renderable_with_discarded.h"
 
 #include "graphics/base/render_request.h"
 
 namespace ark {
 
-RenderableWithDiscarded::RenderableWithDiscarded(sp<Renderable> delegate, sp<Boolean> disposed)
-    : Wrapper(std::move(delegate)), _discarded(std::move(disposed))
+RenderableWithDiscarded::RenderableWithDiscarded(sp<Renderable> delegate, sp<Boolean> discarded)
+    : Wrapper(std::move(delegate)), _discarded(std::move(discarded))
 {
 }
 

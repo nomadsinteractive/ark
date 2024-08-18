@@ -10,7 +10,6 @@
 #include "core/inf/variable.h"
 #include "core/impl/executor/executor_worker_thread.h"
 #include "core/types/shared_ptr.h"
-#include "core/types/owned_ptr.h"
 
 #include "graphics/forwarding.h"
 #include "graphics/base/color.h"
@@ -19,6 +18,7 @@
 #include "renderer/base/render_controller.h"
 
 #include "app/forwarding.h"
+#include "app/impl/event_listener/event_listener_list.h"
 #include "app/inf/event_listener.h"
 
 namespace ark {
@@ -150,7 +150,6 @@ private:
     sp<MessageLoop> _message_loop_app;
     sp<ExecutorThreadPool> _executor_thread_pool;
 
-    op<EventListenerList> _event_listeners;
     sp<EventListener> _default_event_listener;
 
     sp<ResourceLoader> _resource_loader;
@@ -158,6 +157,7 @@ private:
 
     sp<Interpreter> _interpreter;
 
+    EventListenerList _event_listeners;
     Color _background_color;
     bool _paused;
 

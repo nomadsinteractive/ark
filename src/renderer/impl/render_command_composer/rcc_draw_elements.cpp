@@ -43,7 +43,7 @@ sp<RenderCommand> RCCDrawElements::compose(const RenderRequest& renderRequest, R
         size_t offset = 0;
         for(const RenderLayerSnapshot::Droplet& i : snapshot._droplets)
         {
-            if(i._snapshot._state.hasState(Renderable::RENDERABLE_STATE_DIRTY))
+            if(i._snapshot._state.has(Renderable::RENDERABLE_STATE_DIRTY))
             {
                 VertexWriter writer = buf.makeVertexWriter(renderRequest, verticesCount, offset);
                 i._snapshot._model->writeRenderable(writer, i._snapshot);
@@ -52,7 +52,7 @@ sp<RenderCommand> RCCDrawElements::compose(const RenderRequest& renderRequest, R
         }
     }
 
-    DrawingContext drawingContext({snapshot._stub->_pipeline_bindings, std::move(snapshot._ubos), std::move(snapshot._ssbos)}, snapshot._stub->_pipeline_bindings->attachments(),
+    DrawingContext drawingContext(snapshot._stub->_pipeline_bindings, snapshot._buffer_object, snapshot._stub->_pipeline_bindings->attachments(),
                                   buf.vertices().toSnapshot(vertices), buf.indices(), static_cast<uint32_t>(buf.indices().length<element_index_t>()), DrawingParams::DrawElements{0});
 
     if(snapshot._stub->_scissor)

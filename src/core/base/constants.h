@@ -20,8 +20,6 @@ struct Constants {
     sp<Model> MODEL_UNIT_NINE_PATCH_TRIANGLE_STRIPS;
     sp<Model> MODEL_UNIT_NINE_PATCH_QUADS;
 
-    sp<Model> MODEL_UNIT_QUAD_INVERT;
-
     sp<Numeric> NUMERIC_ZERO;
     sp<Numeric> NUMERIC_ONE;
 };

@@ -169,8 +169,8 @@ public:
     StateBits updateState(const RenderRequest& renderRequest) override
     {
         Renderable::State state = _renderable->updateState(renderRequest);
-        if(state.hasState(Renderable::RENDERABLE_STATE_VISIBLE))
-            state.setState(Renderable::RENDERABLE_STATE_VISIBLE, _view_stub->isVisible());
+        if(state.has(Renderable::RENDERABLE_STATE_VISIBLE))
+            state.set(Renderable::RENDERABLE_STATE_VISIBLE, _view_stub->isVisible());
         return state.stateBits();
     }
 

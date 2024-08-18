@@ -15,7 +15,7 @@ Renderable::StateBits RenderableWithVisible::updateState(const RenderRequest& re
 {
     State state = _wrapped->updateState(renderRequest);
     if(_visible->update(renderRequest.timestamp()) && !_visible->val())
-        state.setState(RENDERABLE_STATE_VISIBLE, false);
+        state.set(RENDERABLE_STATE_VISIBLE, false);
     return state.stateBits();
 }
 

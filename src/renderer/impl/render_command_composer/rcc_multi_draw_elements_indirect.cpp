@@ -132,7 +132,7 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
     {
         RenderLayerSnapshot::Droplet& s = renderLayerItems.at(i);
         const Renderable::Snapshot& snapshot = reload ? s.ensureDirtySnapshot(renderRequest) : s._snapshot;
-        if(reload || s._snapshot._state.hasState(Renderable::RENDERABLE_STATE_DIRTY))
+        if(reload || s._snapshot._state.has(Renderable::RENDERABLE_STATE_DIRTY))
         {
             if(!snapshot._varyings._sub_properties.empty())
             {
@@ -159,7 +159,7 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
         {
             const RenderLayerSnapshot::Droplet& s = renderLayerItems.at(nodeInstance->snapshotIndex());
             const Renderable::Snapshot& snapshot = s._snapshot;
-            if(reload || snapshot._state.hasState(Renderable::RENDERABLE_STATE_DIRTY))
+            if(reload || snapshot._state.has(Renderable::RENDERABLE_STATE_DIRTY))
                 if(snapshot._varyings._buffers.length() > 0)
                 {
                     const ModelBundle::ModelLayout& modelInfo = _model_bundle->ensureModelLayout(snapshot._type);

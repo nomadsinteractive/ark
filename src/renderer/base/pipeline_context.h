@@ -1,21 +1,17 @@
 #pragma once
 
-#include <vector>
-
 #include "core/types/shared_ptr.h"
 
 #include "graphics/base/render_layer_snapshot.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/base/buffer.h"
 
 namespace ark {
 
-class PipelineSnapshot {
+class PipelineContext {
 public:
     sp<PipelineBindings> _bindings;
-    std::vector<RenderLayerSnapshot::UBOSnapshot> _ubos;
-    std::vector<std::pair<uint32_t, Buffer::Snapshot>> _ssbos;
+    sp<RenderLayerSnapshot::BufferObject> _buffer_object;
 };
 
 }

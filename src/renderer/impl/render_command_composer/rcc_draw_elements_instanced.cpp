@@ -54,7 +54,7 @@ sp<RenderCommand> RCCDrawElementsInstanced::compose(const RenderRequest& renderR
             writer.write(vm.buf() + sizeof(M4), vm.length() - sizeof(M4), sizeof(M4));
     }
 
-    DrawingContext drawingContext({snapshot._stub->_pipeline_bindings, std::move(snapshot._ubos), std::move(snapshot._ssbos)}, snapshot._stub->_pipeline_bindings->attachments(),
+    DrawingContext drawingContext(snapshot._stub->_pipeline_bindings, snapshot._buffer_object, snapshot._stub->_pipeline_bindings->attachments(),
                                   buf.vertices().toSnapshot(vertices), buf.indices(), static_cast<uint32_t>(snapshot._droplets.size()), DrawingParams::DrawElementsInstanced{0, static_cast<uint32_t>(_model.indexCount()), buf.toDividedBufferSnapshots()});
 
     if(snapshot._stub->_scissor)

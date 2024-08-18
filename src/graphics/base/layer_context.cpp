@@ -107,7 +107,7 @@ void LayerContext::markDirty()
 
 bool LayerContext::processNewCreated()
 {
-    if(_renderable_created.size() == 0)
+    if(_renderable_created.empty())
         return false;
 
     for(sp<Renderable>& i : _renderable_created)

@@ -1,5 +1,4 @@
-#ifndef ARK_APP_IMPL_EVENT_LISTENER_EVENT_LISTENER_LIST_H_
-#define ARK_APP_IMPL_EVENT_LISTENER_EVENT_LISTENER_LIST_H_
+#pragma once
 
 #include "core/collection/list.h"
 
@@ -7,17 +6,15 @@
 
 namespace ark {
 
-class EventListenerList : public EventListener {
+class EventListenerList final : public EventListener {
 public:
     virtual bool onEvent(const Event& event);
 
-    void addEventListener(sp<EventListener> eventListener, sp<Boolean> disposed = nullptr);
-    void pushEventListener(sp<EventListener> eventListener, sp<Boolean> disposed = nullptr);
+    void addEventListener(sp<EventListener> eventListener, sp<Boolean> discarded = nullptr);
+    void pushEventListener(sp<EventListener> eventListener, sp<Boolean> discarded = nullptr);
 
 private:
     DList<sp<EventListener>> _event_listeners;
 };
 
 }
-
-#endif

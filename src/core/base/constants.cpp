@@ -31,11 +31,6 @@ sp<Model> makeUnitNinePatchQuadsModel(const sp<Boundaries>& content)
     return sp<Model>::make(UploaderType::makeElementIndexInput(std::initializer_list<element_index_t>({0, 2, 1, 2, 3, 1, 4, 6, 5, 6, 7, 5, 8, 10, 9, 10, 11, 9, 12, 14, 13, 14, 15, 13, 16, 18, 17, 18, 19, 17, 20, 22, 21, 22, 23, 21, 24, 26, 25, 26, 27, 25, 28, 30, 29, 30, 31, 29, 32, 34, 33, 34, 35, 33})), sp<VerticesNinePatchQuads>::make(), content);
 }
 
-sp<Model> makeUnitPointModel(const sp<Boundaries>& content)
-{
-    return sp<Model>::make(UploaderType::makeElementIndexInput(std::initializer_list<element_index_t>({0})), sp<VerticesPoint>::make(), content);
-}
-
 }
 
 Constants::Constants()

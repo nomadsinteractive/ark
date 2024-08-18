@@ -1,6 +1,6 @@
 #include "graphics/util/renderable_type.h"
 
-#include "graphics/impl/renderable/renderable_with_disposable.h"
+#include "graphics/impl/renderable/renderable_with_discarded.h"
 #include "graphics/impl/renderable/renderable_with_updatable.h"
 
 namespace ark {
