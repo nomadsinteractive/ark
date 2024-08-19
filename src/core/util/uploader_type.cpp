@@ -58,6 +58,23 @@ private:
     std::vector<Node> _uploaders;
 };
 
+struct WritableSnapshot final : Writable {
+    WritableSnapshot(size_t size)
+        : _size(size) {
+    }
+
+    uint32_t write(const void* buffer, uint32_t size, uint32_t offset) override {
+        CHECK(offset + size <= _size, "Buffer overflow, buffer size: %zd, writing offset: %d, writing size: %d", _size, offset, size);
+        sp<ByteArray> strip = sp<ByteArray::Allocated>::make(size);
+        memcpy(strip->buf(), buffer, size);
+        _strips.push_back(std::make_pair<size_t, sp<ByteArray>>(offset, std::move(strip)));
+        return size;
+    }
+
+    size_t _size;
+    std::vector<std::pair<size_t, sp<ByteArray>>> _strips;
+};
+
 sp<UploaderImpl> ensureImpl(const sp<Uploader>& self)
 {
     const sp<UploaderImpl> impl = self.tryCast<UploaderImpl>();
@@ -144,6 +161,13 @@ std::vector<uint8_t> UploaderType::toBytes(Uploader& self)
     WritableMemory writable(bytes.data());
     self.upload(writable);
     return bytes;
+}
+
+std::vector<std::pair<size_t, sp<ByteArray>>> UploaderType::record(Uploader& self)
+{
+    WritableSnapshot writable(self.size());
+    self.upload(writable);
+    return writable._strips;
 }
 
 sp<Uploader> UploaderType::wrap(sp<Uploader> self)

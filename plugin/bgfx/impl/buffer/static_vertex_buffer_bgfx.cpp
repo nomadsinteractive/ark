@@ -5,7 +5,7 @@
 namespace ark::plugin::bgfx {
 
 StaticVertexBufferBgfx::StaticVertexBufferBgfx()
-    : BufferBase(Buffer::TYPE_VERTEX, Buffer::USAGE_STATIC)
+    : BufferBase(Buffer::TYPE_VERTEX, {})
 {
 }
 

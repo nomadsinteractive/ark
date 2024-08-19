@@ -9,8 +9,7 @@
 
 #include "app/base/application_manifest.h"
 
-namespace ark {
-namespace vulkan {
+namespace ark::vulkan {
 
 VKHeap::VKHeap(const sp<VKDevice>& device)
     : _device(device)
@@ -65,5 +64,4 @@ VKMemory VKHeap::makeMemory(GraphicsContext& graphicsContext, VkDeviceSize size,
     return memory;
 }
 
-}
 }

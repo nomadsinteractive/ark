@@ -5,7 +5,7 @@
 namespace ark::plugin::bgfx {
 
 DynamicVertexBufferBgfx::DynamicVertexBufferBgfx()
-    : BufferBase(Buffer::TYPE_VERTEX, Buffer::USAGE_DYNAMIC)
+    : BufferBase(Buffer::TYPE_VERTEX, Buffer::USAGE_BIT_DYNAMIC)
 {
 }
 

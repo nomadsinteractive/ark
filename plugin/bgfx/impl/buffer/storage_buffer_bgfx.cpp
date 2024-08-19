@@ -5,7 +5,7 @@
 namespace ark::plugin::bgfx {
 
 StorageBufferBgfx::StorageBufferBgfx()
-    : BufferBase(Buffer::TYPE_STORAGE, Buffer::USAGE_DYNAMIC)
+    : BufferBase(Buffer::TYPE_STORAGE, Buffer::USAGE_BIT_DYNAMIC)
 {
 }
 

@@ -34,20 +34,7 @@ void VKBuffer::uploadBuffer(GraphicsContext& graphicsContext, Uploader& input)
 {
     ensureSize(graphicsContext, input.size());
 //TODO: Copy every strips instead of copying the whole buffer
-    if(isDeviceLocal())
-    {
-        VKBuffer stagingBuffer(_renderer, _recycler, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-        stagingBuffer.uploadBuffer(graphicsContext, input);
-
-        VkCommandBuffer copyCmd = _renderer->commandPool()->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
-        std::vector<VkBufferCopy> copyRegions;
-        copyRegions.push_back({0, 0, input.size()});
-        vkCmdCopyBuffer(copyCmd, stagingBuffer.vkBuffer(), _descriptor.buffer, static_cast<uint32_t>(copyRegions.size()), copyRegions.data());
-        _renderer->commandPool()->flushCommandBuffer(copyCmd, true);
-
-        stagingBuffer.recycle()(graphicsContext);
-    }
-    else
+    if(isHostVisible())
     {
         WritableMemory writable(_memory->map());
         input.upload(writable);
@@ -55,25 +42,41 @@ void VKBuffer::uploadBuffer(GraphicsContext& graphicsContext, Uploader& input)
             VKUtil::checkResult(flush());
         _memory->unmap();
     }
+    else
+    {
+        VKBuffer stagingBuffer(_renderer, _recycler, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        stagingBuffer.uploadBuffer(graphicsContext, input);
+
+        const VkCommandBuffer copyCmd = _renderer->commandPool()->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
+        std::vector<VkBufferCopy> copyRegions;
+        copyRegions.push_back({0, 0, input.size()});
+        vkCmdCopyBuffer(copyCmd, stagingBuffer.vkBuffer(), _descriptor.buffer, static_cast<uint32_t>(copyRegions.size()), copyRegions.data());
+        _renderer->commandPool()->flushCommandBuffer(copyCmd, true);
+
+        stagingBuffer.recycle()(graphicsContext);
+    }
 }
 
 void VKBuffer::downloadBuffer(GraphicsContext& graphicsContext, size_t offset, size_t size, void* ptr)
 {
-    if(isDeviceLocal())
+    if(isHostVisible())
+    {
+        memcpy(ptr, map(), size);
+        unmap();
+    }
+    else
     {
         VKBuffer stagingBuffer(_renderer, _recycler, VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        stagingBuffer.ensureSize(graphicsContext, size);
+
         const VkCommandBuffer copyCmd = _renderer->commandPool()->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
         const VkBufferCopy copyRegions{offset, 0, size};
         vkCmdCopyBuffer(copyCmd, _descriptor.buffer, stagingBuffer.vkBuffer(), 1, &copyRegions);
         _renderer->commandPool()->flushCommandBuffer(copyCmd, true);
 
         memcpy(ptr, stagingBuffer.map(), size);
+        stagingBuffer.unmap();
         stagingBuffer.recycle()(graphicsContext);
-    }
-    else
-    {
-        memcpy(ptr, map(), size);
-        unmap();
     }
 }
 
@@ -112,14 +115,15 @@ const VkBuffer& VKBuffer::vkBuffer() const
     return _descriptor.buffer;
 }
 
-void* VKBuffer::map(VkDeviceSize size, VkDeviceSize offset)
+void* VKBuffer::map(VkDeviceSize size, VkDeviceSize offset) const
 {
+    CHECK(isHostVisible(), "Buffer can't be mapped for host access if without VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT being set");
     void* mapped = nullptr;
     VKUtil::checkResult(vkMapMemory(_renderer->vkLogicalDevice(), _memory.vkMemory(), offset, size, 0, &mapped));
     return mapped;
 }
 
-void VKBuffer::unmap()
+void VKBuffer::unmap() const
 {
     vkUnmapMemory(_renderer->vkLogicalDevice(), _memory.vkMemory());
 }
@@ -182,10 +186,14 @@ bool VKBuffer::isHostCoherent() const
     return _memory_property_flags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
 }
 
+bool VKBuffer::isHostVisible() const
+{
+    return _memory_property_flags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
+}
+
 VkResult VKBuffer::invalidate()
 {
-    VkMappedMemoryRange mappedRange = {};
-    mappedRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
+    VkMappedMemoryRange mappedRange = {VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE};
     mappedRange.memory = _memory.vkMemory();
     mappedRange.offset = 0;
     mappedRange.size = _size;

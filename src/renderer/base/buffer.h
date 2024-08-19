@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "core/base/api.h"
+#include "core/base/bit_set.h"
 #include "core/forwarding.h"
 #include "core/inf/array.h"
 #include "core/inf/builder.h"
@@ -28,11 +29,12 @@ public:
     };
 
 //  [[script::bindings::enumeration]]
-    enum Usage {
-        USAGE_DYNAMIC,
-        USAGE_STATIC,
-        USAGE_COUNT
+    enum UsageBit {
+        USAGE_BIT_DYNAMIC = 1,
+        USAGE_BIT_HOST_VISIBLE = 2
     };
+
+    typedef BitSet<UsageBit> Usage;
 
     class ARK_API Delegate : public Resource {
     public:

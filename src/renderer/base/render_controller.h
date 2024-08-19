@@ -114,9 +114,9 @@ public:
     Buffer makeBuffer(Buffer::Type type, Buffer::Usage usage, sp<Uploader> uploader, RenderController::UploadStrategy us, sp<Future> future = nullptr);
     Buffer makeBuffer(Buffer::Type type, Buffer::Usage usage, sp<Uploader> uploader);
 //  [[script::bindings::auto]]
-    Buffer makeVertexBuffer(Buffer::Usage usage = Buffer::USAGE_DYNAMIC, sp<Uploader> uploader = nullptr);
+    Buffer makeVertexBuffer(Buffer::Usage usage = Buffer::USAGE_BIT_DYNAMIC, sp<Uploader> uploader = nullptr);
 //  [[script::bindings::auto]]
-    Buffer makeIndexBuffer(Buffer::Usage usage = Buffer::USAGE_DYNAMIC, sp<Uploader> uploader = nullptr);
+    Buffer makeIndexBuffer(Buffer::Usage usage = Buffer::USAGE_BIT_DYNAMIC, sp<Uploader> uploader = nullptr);
 
     sp<PrimitiveIndexBuffer> getSharedPrimitiveIndexBuffer(const Model& model, bool degenerate);
 

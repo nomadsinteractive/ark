@@ -167,7 +167,7 @@ size_t RenderController::PrimitiveIndexBuffer::upload(RenderController& renderCo
 {
     sp<Uploader> uploader = _degenerate ? sp<Uploader>::make<UploaderDegenerate>(_primitive_count, _model_vertex_count, _model_indices) : sp<Uploader>::make<UploaderConcat>(_primitive_count, _model_vertex_count, _model_indices);
     const size_t uploaderSize = uploader->size();
-    _buffer = renderController.makeBuffer(Buffer::TYPE_INDEX, Buffer::USAGE_STATIC, std::move(uploader));
+    _buffer = renderController.makeBuffer(Buffer::TYPE_INDEX, {}, std::move(uploader));
     return uploaderSize;
 }
 
@@ -306,7 +306,7 @@ Buffer RenderController::makeBuffer(Buffer::Type type, Buffer::Usage usage, sp<U
 Buffer RenderController::makeBuffer(Buffer::Type type, Buffer::Usage usage, sp<Uploader> uploader)
 {
     UploadStrategy us = uploader ? US_ONCE_AND_ON_SURFACE_READY : US_ON_SURFACE_READY;
-    if(usage == Buffer::USAGE_DYNAMIC && uploader)
+    if(usage.has(Buffer::USAGE_BIT_DYNAMIC) && uploader)
         us = static_cast<UploadStrategy>(us | US_ON_CHANGE);
     return makeBuffer(type, usage, std::move(uploader), us);
 }

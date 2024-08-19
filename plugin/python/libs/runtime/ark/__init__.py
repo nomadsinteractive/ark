@@ -425,9 +425,8 @@ class Buffer:
     TYPE_STORAGE = 3
     TYPE_COUNT = 4
 
-    USAGE_DYNAMIC = 0
-    USAGE_STATIC = 1
-    USAGE_COUNT = 2
+    USAGE_BIT_DYNAMIC = 1
+    USAGE_BIT_HOST_VISIBLE = 2
 
     @property
     def size(self) -> int:
@@ -494,10 +493,10 @@ class RenderController:
     def make_buffer(self, buffer_type: int, buffer_usage: int, uploader: Optional['Uploader'], upload_strategy: int, future: Optional[Future] = None) -> Buffer:
         pass
 
-    def make_vertex_buffer(self, buffer_usage: int = Buffer.USAGE_DYNAMIC, uploader: Optional['Uploader'] = None) -> Buffer:
+    def make_vertex_buffer(self, buffer_usage: int = Buffer.USAGE_BIT_DYNAMIC, uploader: Optional['Uploader'] = None) -> Buffer:
         pass
 
-    def make_index_buffer(self, buffer_usage: int = Buffer.USAGE_DYNAMIC, uploader: Optional['Uploader'] = None) -> Buffer:
+    def make_index_buffer(self, buffer_usage: int = Buffer.USAGE_BIT_DYNAMIC, uploader: Optional['Uploader'] = None) -> Buffer:
         pass
 
     def create_texture2d(self, bitmap: 'Bitmap', texture_format: int = Texture.FORMAT_AUTO, upload_strategy: int = US_ONCE_AND_ON_SURFACE_READY,

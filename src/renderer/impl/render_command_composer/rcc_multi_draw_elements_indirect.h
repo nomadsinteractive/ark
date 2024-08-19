@@ -21,7 +21,7 @@ public:
     RCCMultiDrawElementsIndirect(sp<ModelBundle> multiModels);
 
     sp<PipelineBindings> makeShaderBindings(Shader& shader, RenderController& renderController, Enum::RenderMode renderMode) override;
-    sp<RenderCommand> compose(const RenderRequest& renderRequest, RenderLayerSnapshot& snapshot) override;
+    sp<RenderCommand> compose(const RenderRequest& renderRequest, const RenderLayerSnapshot& snapshot) override;
 
 private:
     struct NodeLayoutInstance {
@@ -76,8 +76,7 @@ private:
 
 private:
     ByteArray::Borrowed makeIndirectBuffer(const RenderRequest& renderRequest) const;
-    void writeModelMatices(const RenderRequest& renderRequest, DrawingBuffer& buf, RenderLayerSnapshot& renderLayerSnapshot, bool reload);
-    V3 toScale(const V3& size, const Boundaries& metrics) const;
+    void writeModelMatices(const RenderRequest& renderRequest, DrawingBuffer& buf, const RenderLayerSnapshot& renderLayerSnapshot, bool reload);
 
     void reloadIndirectCommands(const RenderLayerSnapshot& snapshot);
 

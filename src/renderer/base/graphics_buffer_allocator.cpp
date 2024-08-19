@@ -140,7 +140,7 @@ void GraphicsBufferAllocator::Strips::dispose()
 const sp<GraphicsBufferAllocator::Page>& GraphicsBufferAllocator::newPage()
 {
     constexpr uint32_t pageSize = 65536 * 32;
-    _pages.push_front(sp<Page>::make(*this, _render_controller.makeVertexBuffer(Buffer::USAGE_DYNAMIC, sp<PageUploader>::make(pageSize)), pageSize));
+    _pages.push_front(sp<Page>::make(*this, _render_controller.makeVertexBuffer(Buffer::USAGE_BIT_DYNAMIC, sp<PageUploader>::make(pageSize)), pageSize));
     return _pages.front();
 }
 

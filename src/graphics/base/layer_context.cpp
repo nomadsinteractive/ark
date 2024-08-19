@@ -122,7 +122,7 @@ bool LayerContext::processNewCreated()
 
 LayerContextSnapshot LayerContext::snapshot(RenderLayer renderLayer, RenderRequest& renderRequest, const PipelineInput& pipelineInput)
 {
-    bool dirty = UpdatableUtil::update(renderRequest.timestamp(), _position, _visible, _discarded, _varyings);
+    const bool dirty = UpdatableUtil::update(renderRequest.timestamp(), _position, _visible, _discarded, _varyings);
     if(!_varyings)
         _varyings = sp<Varyings>::make(pipelineInput);
     return LayerContextSnapshot{dirty, _position.val(), _visible.val(), _discarded.val(), _varyings->snapshot(pipelineInput, renderRequest.allocator()), std::move(renderLayer)};

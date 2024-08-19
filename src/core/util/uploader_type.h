@@ -48,6 +48,7 @@ public:
 
 //  [[script::bindings::classmethod]]
     static std::vector<uint8_t> toBytes(Uploader& self);
+    static std::vector<std::pair<size_t, sp<ByteArray>>> record(Uploader& self);
 
 //  [[script::bindings::property]]
     static size_t size(const sp<Uploader>& self);

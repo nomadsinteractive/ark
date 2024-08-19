@@ -51,16 +51,6 @@ Buffer::Factory& DrawingBuffer::vertices()
     return _vertices;
 }
 
-const Buffer::Snapshot& DrawingBuffer::indices() const
-{
-    return _indices;
-}
-
-void DrawingBuffer::setIndices(Buffer::Snapshot indices)
-{
-    _indices = std::move(indices);
-}
-
 bool DrawingBuffer::isInstanced() const
 {
     return _is_instanced;

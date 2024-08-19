@@ -152,7 +152,7 @@ std::map<uint32_t, Buffer> Shader::makeDivivedBuffers(const std::map<uint32_t, s
         {
             CHECK(dividedBuffers.find(divisor) == dividedBuffers.end(), "Duplicated stream divisor: %d", divisor);
             const auto iter = uploaders.find(divisor);
-            dividedBuffers.insert(std::make_pair(divisor, _render_controller->makeVertexBuffer(Buffer::USAGE_DYNAMIC, iter != uploaders.end() ? iter->second : nullptr)));
+            dividedBuffers.insert(std::make_pair(divisor, _render_controller->makeVertexBuffer(Buffer::USAGE_BIT_DYNAMIC, iter != uploaders.end() ? iter->second : nullptr)));
         }
     }
     return dividedBuffers;

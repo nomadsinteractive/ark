@@ -56,7 +56,6 @@ namespace {
 BufferBase::BufferBase(Buffer::Type type, Buffer::Usage usage)
     : _type(type), _usage(usage)
 {
-    ASSERT(usage == Buffer::USAGE_STATIC || usage == Buffer::USAGE_DYNAMIC);
 }
 
 Buffer::Type BufferBase::type() const

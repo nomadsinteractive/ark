@@ -32,9 +32,6 @@ public:
     const Buffer::Factory& vertices() const;
     Buffer::Factory& vertices();
 
-    const Buffer::Snapshot& indices() const;
-    void setIndices(Buffer::Snapshot indices);
-
     bool isInstanced() const;
 
     Buffer::Factory& getDividedBufferBuilder(uint32_t divisor);
@@ -48,7 +45,6 @@ private:
     Buffer::Factory _vertices;
     std::map<uint32_t, Buffer::Factory> _divided_buffer_builders;
 
-    Buffer::Snapshot _indices;
     bool _is_instanced;
 };
 

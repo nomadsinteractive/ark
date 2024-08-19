@@ -195,9 +195,9 @@ sp<Buffer::Delegate> RendererFactoryBgfx::createBuffer(Buffer::Type type, Buffer
     switch(type)
     {
         case Buffer::TYPE_VERTEX:
-            return usage == Buffer::USAGE_STATIC ? sp<Buffer::Delegate>::make<StaticVertexBufferBgfx>() : sp<Buffer::Delegate>::make<DynamicVertexBufferBgfx>();
+            return usage.has(Buffer::USAGE_BIT_DYNAMIC) ? sp<Buffer::Delegate>::make<DynamicVertexBufferBgfx>() : sp<Buffer::Delegate>::make<StaticVertexBufferBgfx>();
         case Buffer::TYPE_INDEX:
-            return usage == Buffer::USAGE_STATIC ? sp<Buffer::Delegate>::make<StaticIndexBufferBgfx>() : sp<Buffer::Delegate>::make<DynamicIndexBufferBgfx>();
+            return usage.has(Buffer::USAGE_BIT_DYNAMIC) ? sp<Buffer::Delegate>::make<DynamicIndexBufferBgfx>() : sp<Buffer::Delegate>::make<StaticIndexBufferBgfx>();
         case Buffer::TYPE_DRAW_INDIRECT:
             return sp<Buffer::Delegate>::make<IndirectBufferBgfx>();
         case Buffer::TYPE_STORAGE:

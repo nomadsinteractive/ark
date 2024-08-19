@@ -1,5 +1,9 @@
 #pragma once
 
+#include <deque>
+#include <list>
+#include <vector>
+
 #include "core/base/api.h"
 #include "core/inf/array.h"
 
@@ -35,10 +39,10 @@ public:
         SNAPSHOT_FLAG_STATIC_REUSE
     };
 
-    struct Droplet {
-        Droplet(Renderable& renderable, const LayerContextSnapshot& layerContext, LayerContext::ElementState& state, const Renderable::Snapshot& snapshot);
+    struct Element {
+        Element(Renderable& renderable, const LayerContextSnapshot& layerContext, LayerContext::ElementState& state, const Renderable::Snapshot& snapshot);
 
-        const Renderable::Snapshot& ensureDirtySnapshot(const RenderRequest& renderRequest);
+        const Renderable::Snapshot& ensureSnapshot(const RenderRequest& renderRequest, bool reload);
 
         Renderable& _renderable;
         const LayerContextSnapshot& _layer_context;
@@ -54,11 +58,8 @@ public:
     bool needsReload() const;
     const sp<PipelineInput>& pipelineInput() const;
 
-    void snapshot(RenderRequest& renderRequest, std::vector<sp<LayerContext>>& layerContexts);
-
-    bool addDiscardedState(LayerContext& lc, void* stateKey);
-    void addDiscardedLayerContext(LayerContext& lc);
-    void addDiscardedLayerContexts(const std::vector<sp<LayerContext>>& layerContexts);
+    void addLayerContext(RenderRequest& renderRequest, std::vector<sp<LayerContext>>& layerContexts);
+    void snapshot(const RenderRequest& renderRequest);
 
     sp<RenderCommand> toRenderCommand(const RenderRequest& renderRequest, Buffer::Snapshot vertices, Buffer::Snapshot indices, uint32_t drawCount, DrawingParams params) const;
 
@@ -67,21 +68,23 @@ public:
     size_t _index_count;
     sp<BufferObject> _buffer_object;
 
-    std::vector<LayerContextSnapshot> _layer_context_snapshots;
-
-    std::deque<Droplet> _droplets;
-    std::deque<LayerContext::ElementState> _item_deleted;
+    std::deque<Element> _elements;
+    std::deque<LayerContext::ElementState> _elements_deleted;
     Rect _scissor;
     bool _vertices_dirty;
 
     DISALLOW_COPY_AND_ASSIGN(RenderLayerSnapshot);
 
 private:
-    bool addLayerContext(RenderRequest& renderRequest, LayerContext& layerContext);
-    void doSnapshot(const RenderRequest& renderRequest, const LayerContextSnapshot& layerSnapshot);
+    std::list<LayerContextSnapshot> _layer_context_snapshots;
 
 private:
     RenderLayerSnapshot(RenderRequest& renderRequest, const sp<RenderLayer::Stub>& stub);
+
+    bool doAddLayerContext(RenderRequest& renderRequest, LayerContext& layerContext);
+    bool addDiscardedState(LayerContext& lc, void* stateKey);
+    void addDiscardedLayerContext(LayerContext& lc);
+    void addDiscardedLayerContexts(const std::vector<sp<LayerContext>>& layerContexts);
 
     friend class RenderLayer;
 };

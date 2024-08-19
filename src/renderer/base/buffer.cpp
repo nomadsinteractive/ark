@@ -168,7 +168,7 @@ void Buffer::Delegate::setSize(size_t size)
 }
 
 Buffer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _resource_loader_context(resourceLoaderContext), _input(factory.getBuilder<Uploader>(manifest, "input")), _usage(Documents::getAttribute<Usage>(manifest, "usage", USAGE_DYNAMIC))
+    : _resource_loader_context(resourceLoaderContext), _input(factory.getBuilder<Uploader>(manifest, "input")), _usage(Documents::getAttribute<Usage>(manifest, "usage", USAGE_BIT_DYNAMIC))
 {
 }
 
@@ -180,10 +180,8 @@ sp<Buffer> Buffer::BUILDER::build(const Scope& args)
 
 template<> ARK_API Buffer::Usage StringConvert::eval<Buffer::Usage>(const String& str)
 {
-    if(str == "dynamic")
-        return Buffer::USAGE_DYNAMIC;
-    DCHECK(str == "static", "Unknown BufferUsage: \"%s\", possible values are [dynamic, static]", str.c_str());
-    return Buffer::USAGE_STATIC;
+    constexpr std::array<std::pair<const char*, Buffer::UsageBit>, 2> bits = {{{"dynamic", Buffer::USAGE_BIT_DYNAMIC}, {"host_visible", Buffer::USAGE_BIT_HOST_VISIBLE}}};
+    return Buffer::Usage::toBitSet(str, bits);
 }
 
 }

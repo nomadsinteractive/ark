@@ -61,10 +61,12 @@ RenderLayerSnapshot RenderLayer::snapshot(RenderRequest& renderRequest)
         }
         else
         {
-            renderLayerSnapshot.snapshot(renderRequest, layerContexts);
+            renderLayerSnapshot.addLayerContext(renderRequest, layerContexts);
             ++iter;
         }
     }
+
+    renderLayerSnapshot.snapshot(renderRequest);
 
     DPROFILER_LOG("NeedsReload", renderLayerSnapshot.needsReload());
     return renderLayerSnapshot;

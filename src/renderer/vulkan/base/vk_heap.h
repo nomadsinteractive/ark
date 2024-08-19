@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_VULKAN_BASE_VK_HEAP_H_
-#define ARK_RENDERER_VULKAN_BASE_VK_HEAP_H_
+#pragma once
 
 #include "core/base/heap.h"
 #include "core/types/shared_ptr.h"
@@ -11,8 +10,7 @@
 
 #include "platform/vulkan/vulkan.h"
 
-namespace ark {
-namespace vulkan {
+namespace ark::vulkan {
 
 class VKHeap {
 private:
@@ -39,6 +37,3 @@ private:
 
 
 }
-}
-
-#endif

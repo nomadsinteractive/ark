@@ -5,7 +5,7 @@
 namespace ark::plugin::bgfx {
 
 DynamicIndexBufferBgfx::DynamicIndexBufferBgfx()
-    : BufferBase(Buffer::TYPE_INDEX, Buffer::USAGE_DYNAMIC)
+    : BufferBase(Buffer::TYPE_INDEX, Buffer::USAGE_BIT_DYNAMIC)
 {
 }
 

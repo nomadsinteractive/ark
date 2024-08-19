@@ -35,6 +35,84 @@
 
 namespace ark::plugin::python {
 
+namespace {
+
+template<typename T> Optional<T> toCppInteger(PyObject* object)
+{
+    if(PyLong_Check(object))
+    {
+        if constexpr(sizeof(T) == sizeof(uint64_t))
+        {
+            if constexpr(std::is_unsigned_v<T>)
+                return {PyLong_AsUnsignedLongLong(object)};
+            else
+                return {PyLong_AsLongLong(object)};
+        }
+        if constexpr(std::is_unsigned_v<T>)
+            return {static_cast<T>(PyLong_AsUnsignedLong(object))};
+        else
+            return {static_cast<T>(PyLong_AsLong(object))};
+    }
+
+    if(PyIndex_Check(object))
+    {
+        PyObject* pyobj = PyNumber_Index(object);
+        Optional<T> opt = PyLong_AsUnsignedLong(pyobj);
+        Py_DECREF(pyobj);
+        return opt;
+    }
+    return {};
+}
+
+std::wstring pyUnicodeToWString(PyObject* unicode)
+{
+    PyUnicode_READY(unicode);
+    uint32_t k = PyUnicode_KIND(unicode);
+    void* data = PyUnicode_DATA(unicode);
+    if(k == sizeof(wchar_t))
+        return static_cast<wchar_t*>(data);
+    std::vector<wchar_t> buf;
+    if(k == 1)
+        for(char* i = static_cast<char*>(data); *i; ++i)
+            buf.push_back(static_cast<wchar_t>(*i));
+    if(k == 2)
+        for(uint16_t* i = static_cast<uint16_t*>(data); *i; ++i)
+            buf.push_back(static_cast<wchar_t>(*i));
+    if(k == 4)
+        for(uint32_t* i = static_cast<uint32_t*>(data); *i; ++i)
+            buf.push_back(static_cast<wchar_t>(*i));
+    return std::wstring(buf.begin(), buf.end());
+}
+
+std::wstring toWString(PyObject* object)
+{
+    if(PyUnicode_Check(object))
+        return pyUnicodeToWString(object);
+    else if (PyBytes_Check(object))
+    {
+        PyObject* unicode = PyUnicode_FromString(PyBytes_AsString(object));
+        const std::wstring r = pyUnicodeToWString(unicode);
+        Py_DECREF(unicode);
+        return r;
+    }
+    else
+    {
+        PyObject* unicode = PyObject_Str(object);
+        const std::wstring r = pyUnicodeToWString(unicode);
+        Py_DECREF(unicode);
+        return r;
+    }
+    return L"";
+}
+
+String unicodeToUTF8String(PyObject* object, const char* encoding, const char* error)
+{
+    DCHECK(PyUnicode_Check(object), "Expecting an unicode object");
+    return PyUnicode_AsUTF8(object);
+}
+
+}
+
 Optional<sp<Runnable>> PyCast::toRunnable(PyObject* object)
 {
     if(PyCallable_Check(object))
@@ -86,27 +164,6 @@ String PyCast::toString(PyObject* object, const char* encoding, const char* erro
         return r;
     }
     return "";
-}
-
-std::wstring PyCast::toWString(PyObject* object)
-{
-    if(PyUnicode_Check(object))
-        return pyUnicodeToWString(object);
-    else if (PyBytes_Check(object))
-    {
-        PyObject* unicode = PyUnicode_FromString(PyBytes_AsString(object));
-        const std::wstring r = pyUnicodeToWString(unicode);
-        Py_DECREF(unicode);
-        return r;
-    }
-    else
-    {
-        PyObject* unicode = PyObject_Str(object);
-        const std::wstring r = pyUnicodeToWString(unicode);
-        Py_DECREF(unicode);
-        return r;
-    }
-    return L"";
 }
 
 sp<Vec2> PyCast::toVec2(PyObject* object, bool alert)
@@ -261,32 +318,6 @@ PyObject* PyCast::toPyObject_SharedPtr(const sp<String>& inst) {
     Py_RETURN_NONE;
 }
 
-String PyCast::unicodeToUTF8String(PyObject* object, const char* encoding, const char* error)
-{
-    DCHECK(PyUnicode_Check(object), "Expecting an unicode object");
-    return PyUnicode_AsUTF8(object);
-}
-
-std::wstring PyCast::pyUnicodeToWString(PyObject* unicode)
-{
-    PyUnicode_READY(unicode);
-    uint32_t k = PyUnicode_KIND(unicode);
-    void* data = PyUnicode_DATA(unicode);
-    if(k == sizeof(wchar_t))
-        return reinterpret_cast<wchar_t*>(data);
-    std::vector<wchar_t> buf;
-    if(k == 1)
-        for(char* i = reinterpret_cast<char*>(data); *i; ++i)
-            buf.push_back(static_cast<wchar_t>(*i));
-    if(k == 2)
-        for(uint16_t* i = reinterpret_cast<uint16_t*>(data); *i; ++i)
-            buf.push_back(static_cast<wchar_t>(*i));
-    if(k == 4)
-        for(uint32_t* i = reinterpret_cast<uint32_t*>(data); *i; ++i)
-            buf.push_back(static_cast<wchar_t>(*i));
-    return std::wstring(buf.begin(), buf.end());
-}
-
 PyObject* PyCast::toPyObject(const Box& box)
 {
     return PythonInterpreter::instance().toPyObject(box);
@@ -348,51 +379,38 @@ template<> ARK_PLUGIN_PYTHON_API Optional<uint32_t> PyCast::toCppObject_impl<uin
         DCHECK(pyArkType, "Cannot convert PyObject to PyArkType");
         return pyArkType->typeId();
     }
-    if(PyLong_Check(object))
-        return PyLong_AsUnsignedLong(object);
-    return Optional<uint32_t>();
+    return toCppInteger<uint32_t>(object);
 }
 
 template<> ARK_PLUGIN_PYTHON_API Optional<int32_t> PyCast::toCppObject_impl<int32_t>(PyObject* object)
 {
-    if(PyLong_Check(object))
-        return static_cast<int32_t>(PyLong_AsLong(object));
-    return Optional<int32_t>();
+    return toCppInteger<int32_t>(object);
 }
 
 template<> ARK_PLUGIN_PYTHON_API Optional<uint16_t> PyCast::toCppObject_impl<uint16_t>(PyObject* object)
 {
-    if(PyLong_CheckExact(object))
-        return static_cast<uint16_t>(PyLong_AsUnsignedLong(object));
-    return Optional<uint16_t>();
+    return toCppInteger<uint16_t>(object);
 }
 
 template<> ARK_PLUGIN_PYTHON_API Optional<uint8_t> PyCast::toCppObject_impl<uint8_t>(PyObject* object)
 {
-    if(PyLong_Check(object))
-        return static_cast<uint8_t>(PyLong_AsLong(object));
-    return Optional<uint8_t>();
+    return toCppInteger<uint8_t>(object);
 }
 
 template<> ARK_PLUGIN_PYTHON_API Optional<int64_t> PyCast::toCppObject_impl<int64_t>(PyObject* object)
 {
-    if(PyLong_Check(object))
-        return static_cast<int64_t>(PyLong_AsLongLong(object));
-    return Optional<int64_t>();
+    return toCppInteger<int64_t>(object);
 }
 
 template<> ARK_PLUGIN_PYTHON_API Optional<uint64_t> PyCast::toCppObject_impl<uint64_t>(PyObject* object)
 {
-    if(PyLong_Check(object))
-        return static_cast<uint64_t>(PyLong_AsUnsignedLongLong(object));
-    return Optional<uint64_t>();
+    return toCppInteger<uint64_t>(object);
 }
 
 #ifdef __APPLE__
 template<> ARK_PLUGIN_PYTHON_API Optional<size_t> PyCast::toCppObject_impl<size_t>(PyObject* object)
 {
-    CHECK(PyNumber_Check(object), "Cannot cast Python object \"%s\" to size_t", object->ob_type->tp_name);
-    return static_cast<size_t>(PyLong_AsUnsignedLongLong(object));
+    return toInteger<size_t>(object);
 }
 #endif
 

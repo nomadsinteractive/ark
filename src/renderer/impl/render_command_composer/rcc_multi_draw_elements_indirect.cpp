@@ -81,6 +81,14 @@ private:
 
 };
 
+V3 toScale(const V3& displaySize, const Boundaries& metrics)
+{
+    const V3& size = metrics.size()->val();
+    return {displaySize.x() != 0 ? displaySize.x() / size.x() : 1.0f,
+              displaySize.y() != 0 ? displaySize.y() / size.y() : 1.0f,
+              displaySize.z() != 0 ? displaySize.z() /  size.z() : 1.0f};
+}
+
 }
 
 RCCMultiDrawElementsIndirect::RCCMultiDrawElementsIndirect(sp<ModelBundle> multiModels)
@@ -90,12 +98,12 @@ RCCMultiDrawElementsIndirect::RCCMultiDrawElementsIndirect(sp<ModelBundle> multi
 
 sp<PipelineBindings> RCCMultiDrawElementsIndirect::makeShaderBindings(Shader& shader, RenderController& renderController, Enum::RenderMode renderMode)
 {
-    _indices = renderController.makeIndexBuffer(Buffer::USAGE_STATIC, sp<IndicesUploader>::make(_model_bundle));
-    _draw_indirect = renderController.makeBuffer(Buffer::TYPE_DRAW_INDIRECT, Buffer::USAGE_DYNAMIC, nullptr);
-    return shader.makeBindings(renderController.makeVertexBuffer(Buffer::USAGE_STATIC, sp<VerticesUploader>::make(_model_bundle, shader.input())), renderMode, Enum::DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT);
+    _indices = renderController.makeIndexBuffer({}, sp<IndicesUploader>::make(_model_bundle));
+    _draw_indirect = renderController.makeBuffer(Buffer::TYPE_DRAW_INDIRECT, Buffer::USAGE_BIT_DYNAMIC, nullptr);
+    return shader.makeBindings(renderController.makeVertexBuffer({}, sp<VerticesUploader>::make(_model_bundle, shader.input())), renderMode, Enum::DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT);
 }
 
-sp<RenderCommand> RCCMultiDrawElementsIndirect::compose(const RenderRequest& renderRequest, RenderLayerSnapshot& snapshot)
+sp<RenderCommand> RCCMultiDrawElementsIndirect::compose(const RenderRequest& renderRequest, const RenderLayerSnapshot& snapshot)
 {
     DrawingBuffer buf(snapshot._stub->_pipeline_bindings, snapshot._stub->_stride);
     const Buffer& vertices = snapshot._stub->_pipeline_bindings->vertices();
@@ -125,13 +133,13 @@ ByteArray::Borrowed RCCMultiDrawElementsIndirect::makeIndirectBuffer(const Rende
     return cmds;
 }
 
-void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& renderRequest, DrawingBuffer& buf, RenderLayerSnapshot& renderLayerSnapshot, bool reload)
+void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& renderRequest, DrawingBuffer& buf, const RenderLayerSnapshot& renderLayerSnapshot, bool reload)
 {
-    auto& renderLayerItems = renderLayerSnapshot._droplets;
+    const auto& renderLayerItems = renderLayerSnapshot._elements;
     for(size_t i = 0; i < renderLayerItems.size(); ++i)
     {
-        RenderLayerSnapshot::Droplet& s = renderLayerItems.at(i);
-        const Renderable::Snapshot& snapshot = reload ? s.ensureDirtySnapshot(renderRequest) : s._snapshot;
+        const RenderLayerSnapshot::Element& s = renderLayerItems.at(i);
+        const Renderable::Snapshot& snapshot = s._snapshot;
         if(reload || s._snapshot._state.has(Renderable::RENDERABLE_STATE_DIRTY))
         {
             if(!snapshot._varyings._sub_properties.empty())
@@ -157,7 +165,7 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
     for(const IndirectCmds& i : _indirect_cmds.values())
         for(const auto& [nodeInstance, mesh] : i._mesh_instances)
         {
-            const RenderLayerSnapshot::Droplet& s = renderLayerItems.at(nodeInstance->snapshotIndex());
+            const RenderLayerSnapshot::Element& s = renderLayerItems.at(nodeInstance->snapshotIndex());
             const Renderable::Snapshot& snapshot = s._snapshot;
             if(reload || snapshot._state.has(Renderable::RENDERABLE_STATE_DIRTY))
                 if(snapshot._varyings._buffers.length() > 0)
@@ -178,20 +186,12 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
         }
 }
 
-V3 RCCMultiDrawElementsIndirect::toScale(const V3& displaySize, const Boundaries& metrics) const
-{
-    const V3& size = metrics.size()->val();
-    return {displaySize.x() != 0 ? displaySize.x() / size.x() : 1.0f,
-              displaySize.y() != 0 ? displaySize.y() / size.y() : 1.0f,
-              displaySize.z() != 0 ? displaySize.z() /  size.z() : 1.0f};
-}
-
 void RCCMultiDrawElementsIndirect::reloadIndirectCommands(const RenderLayerSnapshot& snapshot)
 {
     size_t offset = 0;
     _indirect_cmds.clear();
     _model_instances.clear();
-    for(const RenderLayerSnapshot::Droplet& i : snapshot._droplets)
+    for(const RenderLayerSnapshot::Element& i : snapshot._elements)
     {
         const int32_t type = i._snapshot._type;
         const ModelBundle::ModelLayout& modelLayout = _model_bundle->ensureModelLayout(type);

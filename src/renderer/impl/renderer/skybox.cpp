@@ -22,7 +22,7 @@
 namespace ark {
 
 Skybox::Skybox(const sp<Size>& size, const sp<Shader>& shader, const sp<Texture>& texture, RenderController& renderController)
-    : _size(size), _shader(shader), _pipeline_bindings(shader->makeBindings(renderController.makeVertexBuffer(Buffer::USAGE_STATIC, UploaderType::create(makeUnitCubeVertices(renderController))), Enum::RENDER_MODE_TRIANGLES, Enum::DRAW_PROCEDURE_DRAW_ELEMENTS)),
+    : _size(size), _shader(shader), _pipeline_bindings(shader->makeBindings(renderController.makeVertexBuffer({}, UploaderType::create(makeUnitCubeVertices(renderController))), Enum::RENDER_MODE_TRIANGLES, Enum::DRAW_PROCEDURE_DRAW_ELEMENTS)),
       _ib_snapshot(renderController.getSharedPrimitiveIndexBuffer(Global<Constants>()->MODEL_UNIT_QUAD, false)->snapshot(renderController, 6))
 {
     _pipeline_bindings->pipelineDescriptor()->bindSampler(texture);

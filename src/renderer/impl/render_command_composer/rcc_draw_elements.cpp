@@ -6,7 +6,6 @@
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/model.h"
 #include "renderer/base/render_controller.h"
-#include "renderer/base/render_engine.h"
 #include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/vertex_writer.h"
@@ -24,24 +23,22 @@ sp<PipelineBindings> RCCDrawElements::makeShaderBindings(Shader& shader, RenderC
     return shader.makeBindings(renderController.makeVertexBuffer(), renderMode, Enum::DRAW_PROCEDURE_DRAW_ELEMENTS);
 }
 
-sp<RenderCommand> RCCDrawElements::compose(const RenderRequest& renderRequest, RenderLayerSnapshot& snapshot)
+sp<RenderCommand> RCCDrawElements::compose(const RenderRequest& renderRequest, const RenderLayerSnapshot& snapshot)
 {
     const size_t verticesCount = _model->vertexCount();
     const Buffer& vertices = snapshot._stub->_pipeline_bindings->vertices();
 
     DrawingBuffer buf(snapshot._stub->_pipeline_bindings, snapshot._stub->_stride);
-    buf.setIndices(_primitive_index_buffer->snapshot(snapshot._stub->_render_controller, snapshot._droplets.size()));
-
     if(snapshot.needsReload())
     {
-        VertexWriter writer = buf.makeVertexWriter(renderRequest, verticesCount * snapshot._droplets.size(), 0);
-        for(const RenderLayerSnapshot::Droplet& i : snapshot._droplets)
+        VertexWriter writer = buf.makeVertexWriter(renderRequest, verticesCount * snapshot._elements.size(), 0);
+        for(const RenderLayerSnapshot::Element& i : snapshot._elements)
             i._snapshot._model->writeRenderable(writer, i._snapshot);
     }
     else
     {
         size_t offset = 0;
-        for(const RenderLayerSnapshot::Droplet& i : snapshot._droplets)
+        for(const RenderLayerSnapshot::Element& i : snapshot._elements)
         {
             if(i._snapshot._state.has(Renderable::RENDERABLE_STATE_DIRTY))
             {
@@ -52,13 +49,9 @@ sp<RenderCommand> RCCDrawElements::compose(const RenderRequest& renderRequest, R
         }
     }
 
-    DrawingContext drawingContext(snapshot._stub->_pipeline_bindings, snapshot._buffer_object, snapshot._stub->_pipeline_bindings->attachments(),
-                                  buf.vertices().toSnapshot(vertices), buf.indices(), static_cast<uint32_t>(buf.indices().length<element_index_t>()), DrawingParams::DrawElements{0});
-
-    if(snapshot._stub->_scissor)
-        drawingContext._scissor = snapshot._stub->_render_controller->renderEngine()->toRendererRect(snapshot._scissor);
-
-    return drawingContext.toRenderCommand(renderRequest);
+    Buffer::Snapshot indices = _primitive_index_buffer->snapshot(snapshot._stub->_render_controller, snapshot._elements.size());
+    const uint32_t drawCount = static_cast<uint32_t>(indices.length<element_index_t>());
+    return snapshot.toRenderCommand(renderRequest, buf.vertices().toSnapshot(vertices), std::move(indices), drawCount, DrawingParams::DrawElements{0});
 }
 
 }

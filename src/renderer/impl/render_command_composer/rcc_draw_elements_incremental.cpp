@@ -26,16 +26,16 @@ sp<PipelineBindings> RCCDrawElementsIncremental::makeShaderBindings(Shader& shad
     return shader.makeBindings(_strips->buffer(), renderMode, Enum::DRAW_PROCEDURE_DRAW_ELEMENTS);
 }
 
-sp<RenderCommand> RCCDrawElementsIncremental::compose(const RenderRequest& renderRequest, RenderLayerSnapshot& snapshot)
+sp<RenderCommand> RCCDrawElementsIncremental::compose(const RenderRequest& renderRequest, const RenderLayerSnapshot& snapshot)
 {
     DrawingBuffer buf(snapshot._stub->_pipeline_bindings, snapshot._stub->_stride);
     bool hasNewCreatedSnapshot = false;
 
-    for(const LayerContext::ElementState& i : snapshot._item_deleted)
+    for(const LayerContext::ElementState& i : snapshot._elements_deleted)
         if(i._index)
             _strips->free(i._index.value());
 
-    for(RenderLayerSnapshot::Droplet& i : snapshot._droplets)
+    for(const RenderLayerSnapshot::Element& i : snapshot._elements)
     {
         const Renderable::State& s = i._snapshot._state;
         if(const bool isStateNew = s.has(Renderable::RENDERABLE_STATE_NEW); isStateNew || s.has(Renderable::RENDERABLE_STATE_DIRTY))
@@ -53,11 +53,11 @@ sp<RenderCommand> RCCDrawElementsIncremental::compose(const RenderRequest& rende
     }
 
     sp<Uploader> indexUploader;
-    if(hasNewCreatedSnapshot || !snapshot._item_deleted.empty())
+    if(hasNewCreatedSnapshot || !snapshot._elements_deleted.empty())
     {
         element_index_t offset = 0;
         std::vector<element_index_t> indices(snapshot._index_count);
-        for(RenderLayerSnapshot::Droplet& i : snapshot._droplets)
+        for(const RenderLayerSnapshot::Element& i : snapshot._elements)
         {
             Model& model = i._snapshot._model;
             if(i._snapshot._state.has(Renderable::RENDERABLE_STATE_VISIBLE))

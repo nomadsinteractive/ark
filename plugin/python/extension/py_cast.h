@@ -172,11 +172,15 @@ private:
         return toCppCollectionObject_sfinae<T, typename T::value_type>(obj, nullptr);
     }
     template<typename T> static Optional<T> toCppObject_sfinae(PyObject* obj, std::enable_if_t<std::is_enum_v<T>>*) {
-        PyInstance pyObj(PyInstance::steal(PyBridge::PyNumber_Index(obj)));
-        if(pyObj) {
-            return Optional<T>(static_cast<T>(PyBridge::PyLong_AsLong(pyObj.pyObject())));
-        }
-        return Optional<T>();
+        const PyInstance pyObj(PyInstance::steal(PyBridge::PyNumber_Index(obj)));
+        if(pyObj)
+            return {static_cast<T>(PyBridge::PyLong_AsLong(pyObj.pyObject()))};
+        return {};
+    }
+    template<typename T> static Optional<T> toCppObject_sfinae(PyObject* obj, typename T::convertable_type*) {
+        if(Optional<T::convertable_type> value = toCppObject<T::convertable_type>(obj))
+            return {T(value.value())};
+        return {};
     }
     template<typename... Args> static PyObject* makeArgumentTuple(Args... args) {
         PyObject* tuple = PyTuple_New(sizeof...(Args));
@@ -322,12 +326,6 @@ private:
     static Optional<sp<Runnable>> toRunnable(PyObject* object);
     static sp<CollisionCallback> toCollisionCallback(PyObject* object);
     static sp<EventListener> toEventListener(PyObject* object);
-
-    static String unicodeToUTF8String(PyObject* object, const char* encoding, const char* error);
-
-    static std::wstring pyUnicodeToWString(PyObject* unicode);
-    static std::wstring toWString(PyObject* object);
-
 };
 
 template<> inline Optional<sp<String>> PyCast::toSharedPtrImpl<String>(PyObject* object)
