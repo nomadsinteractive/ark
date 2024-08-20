@@ -21,7 +21,7 @@ RCCDrawElementsIncremental::RCCDrawElementsIncremental(sp<Model> model)
 
 sp<PipelineBindings> RCCDrawElementsIncremental::makeShaderBindings(Shader& shader, RenderController& renderController, Enum::RenderMode renderMode)
 {
-    _strips = renderController.gba().makeStrips(shader.input()->getStreamLayout(0).stride(), _model->vertexCount());
+    _strips = renderController.gba().makeStrips(shader.input()->getStreamLayout(0).stride());
     _indices = renderController.makeIndexBuffer();
     return shader.makeBindings(_strips->buffer(), renderMode, Enum::DRAW_PROCEDURE_DRAW_ELEMENTS);
 }

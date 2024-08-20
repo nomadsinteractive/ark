@@ -69,8 +69,7 @@ uint32_t GraphicsBufferAllocator::Page::available() const
 
 void GraphicsBufferAllocator::Page::acquireStrideStrategy(uint32_t stride)
 {
-    auto iter = _stride_strategies.find(stride);
-    if(iter == _stride_strategies.end())
+    if(const auto iter = _stride_strategies.find(stride); iter == _stride_strategies.end())
     {
         sp<HeapType::Strategy> strategy = sp<HeapType::StrategyFixSize>::make(stride);
         _stride_strategies.insert(std::make_pair(stride, std::make_pair(1, strategy)));
@@ -91,8 +90,8 @@ void GraphicsBufferAllocator::Page::releaseStrideStrategy(uint32_t stride)
     }
 }
 
-GraphicsBufferAllocator::Strips::Strips(sp<Page> page, uint32_t stride, element_index_t unitVertexCount)
-    : _page(std::move(page)), _heap_strategy_fix_size(stride/* * unitVertexCount*/), _size(0)
+GraphicsBufferAllocator::Strips::Strips(sp<Page> page, uint32_t stride)
+    : _page(std::move(page)), _heap_strategy_fix_size(stride), _size(0)
 {
     _page->acquireStrideStrategy(_heap_strategy_fix_size);
 }
@@ -144,9 +143,9 @@ const sp<GraphicsBufferAllocator::Page>& GraphicsBufferAllocator::newPage()
     return _pages.front();
 }
 
-sp<GraphicsBufferAllocator::Strips> GraphicsBufferAllocator::makeStrips(uint32_t stride, uint32_t unitVertexCount)
+sp<GraphicsBufferAllocator::Strips> GraphicsBufferAllocator::makeStrips(uint32_t stride)
 {
-    return sp<Strips>::make(_pages.empty() ? newPage() :_pages.front(), stride, unitVertexCount);
+    return sp<Strips>::make(_pages.empty() ? newPage() :_pages.front(), stride);
 }
 
 }

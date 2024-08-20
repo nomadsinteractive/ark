@@ -47,7 +47,7 @@ public:
 
     class Strips {
     public:
-        Strips(sp<Page> page, uint32_t stride, element_index_t unitVertexCount);
+        Strips(sp<Page> page, uint32_t stride);
         ~Strips();
 
         const Buffer& buffer() const;
@@ -68,7 +68,7 @@ public:
 
     std::pair<sp<Page>, uint32_t> ensurePage(uint32_t size);
 
-    sp<Strips> makeStrips(uint32_t stride, uint32_t unitVertexCount);
+    sp<Strips> makeStrips(uint32_t stride);
 
 private:
     const sp<GraphicsBufferAllocator::Page>& newPage();

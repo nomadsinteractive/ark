@@ -178,7 +178,7 @@ private:
         return {};
     }
     template<typename T> static Optional<T> toCppObject_sfinae(PyObject* obj, typename T::convertable_type*) {
-        if(Optional<T::convertable_type> value = toCppObject<T::convertable_type>(obj))
+        if(Optional<typename T::convertable_type> value = toCppObject<typename T::convertable_type>(obj))
             return {T(value.value())};
         return {};
     }

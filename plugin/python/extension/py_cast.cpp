@@ -410,7 +410,7 @@ template<> ARK_PLUGIN_PYTHON_API Optional<uint64_t> PyCast::toCppObject_impl<uin
 #ifdef __APPLE__
 template<> ARK_PLUGIN_PYTHON_API Optional<size_t> PyCast::toCppObject_impl<size_t>(PyObject* object)
 {
-    return toInteger<size_t>(object);
+    return toCppInteger<size_t>(object);
 }
 #endif
 

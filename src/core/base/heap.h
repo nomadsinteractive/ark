@@ -27,10 +27,6 @@ public:
     typedef decltype(std::declval<MemoryType>().begin()) PtrType;
 
     struct Fragment {
-        Fragment(FragmentState state, SizeType offset, SizeType size)
-            : _state(state), _offset(offset), _size(size) {
-        }
-        Fragment(const Fragment& other) = default;
 
         void merge(const Fragment& other) {
             ASSERT(_state == FRAGMENT_STATE_UNUSED && other._state == FRAGMENT_STATE_UNUSED);
@@ -184,7 +180,7 @@ private:
     }
 
     sp<Fragment> addFragment(FragmentState state, SizeType offset, SizeType size) {
-        sp<Fragment> fragment = sp<Fragment>::make(state, offset, size);
+        sp<Fragment> fragment = sp<Fragment>::make(Fragment{state, offset, size});
         if(state == FRAGMENT_STATE_UNUSED)
             ensureFragmentQueue(size).push(fragment);
         _fragments[offset] = fragment;
@@ -240,12 +236,11 @@ public:
                 _recycled.erase(iter);
             }
             _allocated.insert(offset);
-            return Fragment(FRAGMENT_STATE_ALLOCATED, offset, _size_required);
+            return {{FRAGMENT_STATE_ALLOCATED, offset, _size_required}};
         }
 
         Optional<SizeType> free(Heap& /*heap*/, SizeType offset) override {
-            const auto iter = _allocated.find(offset);
-            if(iter != _allocated.end()) {
+            if(const auto iter = _allocated.find(offset); iter != _allocated.end()) {
                 _allocated.erase(iter);
                 _recycled.insert(offset);
                 return _size_required;

@@ -1,6 +1,7 @@
 #include "renderer/vulkan/base/vk_buffer.h"
 
 #include "core/impl/writable/writable_memory.h"
+#include "core/util/uploader_type.h"
 
 #include "renderer/base/recycler.h"
 
@@ -47,9 +48,12 @@ void VKBuffer::uploadBuffer(GraphicsContext& graphicsContext, Uploader& input)
         VKBuffer stagingBuffer(_renderer, _recycler, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
         stagingBuffer.uploadBuffer(graphicsContext, input);
 
-        const VkCommandBuffer copyCmd = _renderer->commandPool()->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
         std::vector<VkBufferCopy> copyRegions;
-        copyRegions.push_back({0, 0, input.size()});
+        const auto strips = UploaderType::record(input);
+        copyRegions.reserve(strips.size());
+        for(const auto& [k, v] : strips)
+            copyRegions.push_back({k, k, v->length()});
+        const VkCommandBuffer copyCmd = _renderer->commandPool()->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
         vkCmdCopyBuffer(copyCmd, stagingBuffer.vkBuffer(), _descriptor.buffer, static_cast<uint32_t>(copyRegions.size()), copyRegions.data());
         _renderer->commandPool()->flushCommandBuffer(copyCmd, true);
 
