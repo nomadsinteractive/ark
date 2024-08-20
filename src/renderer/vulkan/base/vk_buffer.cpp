@@ -34,7 +34,6 @@ void VKBuffer::upload(GraphicsContext& /*graphicsContext*/)
 void VKBuffer::uploadBuffer(GraphicsContext& graphicsContext, Uploader& input)
 {
     ensureSize(graphicsContext, input.size());
-//TODO: Copy every strips instead of copying the whole buffer
     if(isHostVisible())
     {
         WritableMemory writable(_memory->map());
@@ -43,20 +42,18 @@ void VKBuffer::uploadBuffer(GraphicsContext& graphicsContext, Uploader& input)
             VKUtil::checkResult(flush());
         _memory->unmap();
     }
-    else
+    else if(const auto records = UploaderType::recordRanges(input); !records.empty())
     {
         VKBuffer stagingBuffer(_renderer, _recycler, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
         stagingBuffer.uploadBuffer(graphicsContext, input);
 
         std::vector<VkBufferCopy> copyRegions;
-        const auto strips = UploaderType::record(input);
-        copyRegions.reserve(strips.size());
-        for(const auto& [k, v] : strips)
-            copyRegions.push_back({k, k, v->length()});
+        copyRegions.reserve(records.size());
+        for(const auto& [k, v] : records)
+            copyRegions.push_back({k, k, v});
         const VkCommandBuffer copyCmd = _renderer->commandPool()->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
         vkCmdCopyBuffer(copyCmd, stagingBuffer.vkBuffer(), _descriptor.buffer, static_cast<uint32_t>(copyRegions.size()), copyRegions.data());
         _renderer->commandPool()->flushCommandBuffer(copyCmd, true);
-
         stagingBuffer.recycle()(graphicsContext);
     }
 }

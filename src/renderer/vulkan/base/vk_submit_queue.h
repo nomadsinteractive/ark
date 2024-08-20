@@ -1,5 +1,6 @@
 #pragma once
 
+#include <list>
 #include <vector>
 
 #include "core/types/shared_ptr.h"
@@ -34,7 +35,7 @@ private:
     sp<VKRenderer> _renderer;
     VkPipelineStageFlags _stage_flags[8];
 
-    std::vector<VkCommandBuffer> _submit_queue;
+    std::list<VkCommandBuffer> _submit_queue;
     std::vector<VkSubmitInfo> _submit_infos;
     std::vector<VkSemaphore> _wait_semaphores;
     std::vector<VkSemaphore> _signal_semaphores;

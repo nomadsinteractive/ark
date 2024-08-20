@@ -157,7 +157,7 @@ public:
         glslang::FinalizeProcess();
     }
 
-    EShLanguage toShLanguage(ShaderStage::BitSet stage) const {
+    EShLanguage toShLanguage(ShaderStage::Set stage) const {
         DCHECK(stage > ShaderStage::SHADER_STAGE_NONE && stage < ShaderStage::SHADER_STAGE_COUNT, "Illegal ShaderStage::BitSet: %d", stage);
         return _languages[stage];
     }
@@ -288,7 +288,7 @@ uint32_t RenderUtil::hash(const element_index_t* buf, size_t len)
     return h;
 }
 
-String RenderUtil::outAttributeName(const String& name, ShaderStage::BitSet preStage)
+String RenderUtil::outAttributeName(const String& name, ShaderStage::Set preStage)
 {
     DCHECK(preStage == ShaderStage::SHADER_STAGE_NONE || preStage == ShaderStage::SHADER_STAGE_VERTEX, "Only none and vertex stage's out attribute name supported");
     const char sPrefix[][8] = {"a_", "v_"};
@@ -321,7 +321,7 @@ uint32_t RenderUtil::getComponentSize(Texture::Format format)
     return 4;
 }
 
-std::vector<uint32_t> RenderUtil::compileSPIR(const String& source, ShaderStage::BitSet stage, Ark::RendererTarget renderTarget)
+std::vector<uint32_t> RenderUtil::compileSPIR(const String& source, ShaderStage::Set stage, Ark::RendererTarget renderTarget)
 {
     const Global<GLSLLangInitializer> initializer;
     EShLanguage esStage = initializer->toShLanguage(stage);

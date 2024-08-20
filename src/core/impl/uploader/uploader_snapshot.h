@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vector>
+#include <map>
 
 #include "core/inf/uploader.h"
 
@@ -14,7 +14,7 @@ public:
     bool update(uint64_t timestamp) override;
 
 private:
-    std::vector<std::pair<size_t, sp<ByteArray>>> _strips;
+    std::map<size_t, std::vector<uint8_t>> _strips;
 };
 
 }

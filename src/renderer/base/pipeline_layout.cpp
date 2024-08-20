@@ -33,9 +33,9 @@ const sp<PipelineInput>& PipelineLayout::input() const
     return _input;
 }
 
-std::map<ShaderStage::BitSet, String> PipelineLayout::getPreprocessedShaders(const RenderEngineContext& renderEngineContext) const
+std::map<ShaderStage::Set, String> PipelineLayout::getPreprocessedShaders(const RenderEngineContext& renderEngineContext) const
 {
-    std::map<ShaderStage::BitSet, String> shaders;
+    std::map<ShaderStage::Set, String> shaders;
     const std::map<String, String>& definitions = _definitions;
 
     for(const auto& [i, j] : _preprocessed_stages)

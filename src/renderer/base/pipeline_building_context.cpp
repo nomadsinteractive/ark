@@ -276,7 +276,7 @@ void PipelineBuildingContext::initializeUniforms()
         }
 }
 
-const std::map<ShaderStage::BitSet, op<ShaderPreprocessor>>& PipelineBuildingContext::stages() const
+const std::map<ShaderStage::Set, op<ShaderPreprocessor>>& PipelineBuildingContext::stages() const
 {
     return _stages;
 }
@@ -314,7 +314,7 @@ void PipelineBuildingContext::addInputAttribute(const String& name, const String
     }
 }
 
-Attribute& PipelineBuildingContext::addPredefinedAttribute(const String& name, const String& type, uint32_t divisor, ShaderStage::BitSet stage)
+Attribute& PipelineBuildingContext::addPredefinedAttribute(const String& name, const String& type, uint32_t divisor, ShaderStage::Set stage)
 {
     if(_attributes.find(name) == _attributes.end())
     {
@@ -327,25 +327,25 @@ Attribute& PipelineBuildingContext::addPredefinedAttribute(const String& name, c
     return _attributes[name];
 }
 
-bool PipelineBuildingContext::hasStage(ShaderStage::BitSet shaderStage) const
+bool PipelineBuildingContext::hasStage(ShaderStage::Set shaderStage) const
 {
     return _stages.find(shaderStage) != _stages.end();
 }
 
-ShaderPreprocessor* PipelineBuildingContext::tryGetStage(ShaderStage::BitSet shaderStage) const
+ShaderPreprocessor* PipelineBuildingContext::tryGetStage(ShaderStage::Set shaderStage) const
 {
     const auto iter = _stages.find(shaderStage);
     return iter != _stages.end() ? iter->second.get() : nullptr;
 }
 
-const op<ShaderPreprocessor>& PipelineBuildingContext::getStage(ShaderStage::BitSet shaderStage) const
+const op<ShaderPreprocessor>& PipelineBuildingContext::getStage(ShaderStage::Set shaderStage) const
 {
     const auto iter = _stages.find(shaderStage);
     CHECK(iter != _stages.end(), "Stage '%d' not found", shaderStage);
     return iter->second;
 }
 
-const op<ShaderPreprocessor>& PipelineBuildingContext::addStage(sp<String> source, ShaderStage::BitSet shaderStage, ShaderStage::BitSet preShaderStage)
+const op<ShaderPreprocessor>& PipelineBuildingContext::addStage(sp<String> source, ShaderStage::Set shaderStage, ShaderStage::Set preShaderStage)
 {
     op<ShaderPreprocessor>& stage = _stages[shaderStage];
     CHECK(!stage, "Stage '%d' has been initialized already", shaderStage);
@@ -470,26 +470,30 @@ void PipelineBuildingContext::initializeStages()
     if(const ShaderPreprocessor* compute = tryGetStage(ShaderStage::SHADER_STAGE_COMPUTE))
         tryBindCamera(*compute);
 
+    Table<String, ShaderStage> images;
     if(const ShaderPreprocessor* compute = tryGetStage(ShaderStage::SHADER_STAGE_COMPUTE))
     {
         _input->_sampler_names = compute->_declaration_samplers.vars().keys();
-        _input->_image_names = compute->_declaration_images.vars().keys();
+        for(const String& i : compute->_declaration_images.vars().keys())
+            images[i].add(ShaderStage::SHADER_STAGE_COMPUTE);
     }
     else
     {
         UniqueNameSet samplerNames(_input->_sampler_names);
-        UniqueNameSet imageNames(_input->_image_names);
         if(const ShaderPreprocessor* vertex = tryGetStage(ShaderStage::SHADER_STAGE_VERTEX))
         {
             samplerNames.addBindings(vertex->_declaration_samplers.vars().keys());
-            imageNames.addBindings(vertex->_declaration_images.vars().keys());
+            for(const String& i : vertex->_declaration_images.vars().keys())
+                images[i].add(ShaderStage::SHADER_STAGE_VERTEX);
         }
         if(const ShaderPreprocessor* fragment = tryGetStage(ShaderStage::SHADER_STAGE_FRAGMENT))
         {
             samplerNames.addBindings(fragment->_declaration_samplers.vars().keys());
-            imageNames.addBindings(fragment->_declaration_images.vars().keys());
+            for(const String& i : fragment->_declaration_images.vars().keys())
+                images[i].add(ShaderStage::SHADER_STAGE_FRAGMENT);
         }
     }
+    _input->_images = images.flat<std::pair<String, ShaderStage>>();
 }
 
 void PipelineBuildingContext::loadDefinitions(BeanFactory& factory, const Scope& args, const document& manifest)

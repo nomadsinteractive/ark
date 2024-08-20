@@ -58,7 +58,7 @@ public:
 
     std::set<String> _input_vars;
 
-    const std::map<ShaderStage::BitSet, op<ShaderPreprocessor>>& stages() const;
+    const std::map<ShaderStage::Set, op<ShaderPreprocessor>>& stages() const;
 
     void addAttribute(String name, String type, uint32_t divisor);
     void addSnippet(const sp<Snippet>& snippet);
@@ -66,12 +66,12 @@ public:
     void addUniform(sp<Uniform> uniform);
 
     void addInputAttribute(const String& name, const String& type, uint32_t divisor);
-    Attribute& addPredefinedAttribute(const String& name, const String& type, uint32_t divisor,ShaderStage::BitSet stage);
+    Attribute& addPredefinedAttribute(const String& name, const String& type, uint32_t divisor,ShaderStage::Set stage);
 
-    bool hasStage(ShaderStage::BitSet shaderStage) const;
-    ShaderPreprocessor* tryGetStage(ShaderStage::BitSet shaderStage) const;
-    const op<ShaderPreprocessor>& getStage(ShaderStage::BitSet shaderStage) const;
-    const op<ShaderPreprocessor>& addStage(sp<String> source, ShaderStage::BitSet shaderStage, ShaderStage::BitSet preShaderStage);
+    bool hasStage(ShaderStage::Set shaderStage) const;
+    ShaderPreprocessor* tryGetStage(ShaderStage::Set shaderStage) const;
+    const op<ShaderPreprocessor>& getStage(ShaderStage::Set shaderStage) const;
+    const op<ShaderPreprocessor>& addStage(sp<String> source, ShaderStage::Set shaderStage, ShaderStage::Set preShaderStage);
 
     sp<Snippet> makePipelineSnippet();
     std::map<String, String> toDefinitions() const;
@@ -94,7 +94,7 @@ private:
     void loadLayoutBindings(BeanFactory& factory, const Scope& args, const document& manifest);
     void loadDefinitions(BeanFactory& factory, const Scope& args, const document& manifest);
 
-    std::map<ShaderStage::BitSet, op<ShaderPreprocessor>> _stages;
+    std::map<ShaderStage::Set, op<ShaderPreprocessor>> _stages;
 };
 
 }

@@ -25,7 +25,7 @@ VKSubmitQueue::~VKSubmitQueue()
 
 VkSemaphore VKSubmitQueue::createSignalSemaphore()
 {
-    constexpr VkSemaphoreCreateInfo semaphoreCreateInfo{ VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
+    constexpr VkSemaphoreCreateInfo semaphoreCreateInfo = {VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO};
     VkSemaphore semaphore = VK_NULL_HANDLE;
     VKUtil::checkResult(vkCreateSemaphore(_renderer->vkLogicalDevice(), &semaphoreCreateInfo, nullptr, &semaphore));
     _signal_semaphores.push_back(semaphore);
@@ -66,7 +66,7 @@ void VKSubmitQueue::submit(VkQueue queue)
 void VKSubmitQueue::addSubmitInfo(uint32_t commandBufferCount, const VkCommandBuffer* pCommandBuffers)
 {
     DTHREAD_CHECK(THREAD_ID_RENDERER);
-    VkSubmitInfo submitInfo = vks::initializers::submitInfo();
+    VkSubmitInfo submitInfo = {VK_STRUCTURE_TYPE_SUBMIT_INFO};
     submitInfo.pWaitDstStageMask = _stage_flags;
     submitInfo.commandBufferCount = commandBufferCount;
     submitInfo.pCommandBuffers = pCommandBuffers;

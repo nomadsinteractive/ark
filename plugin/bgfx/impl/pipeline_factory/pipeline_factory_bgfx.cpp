@@ -26,7 +26,7 @@ namespace ark::plugin::bgfx {
 
 namespace {
 
-char toBgfxShaderTypeMagic(ShaderStage::BitSet stage)
+char toBgfxShaderTypeMagic(ShaderStage::Set stage)
 {
     switch(stage)
     {
@@ -181,7 +181,7 @@ struct alignas(1) BgfxShaderAttributeChunk {
 
 #pragma pack(pop)
 
-::bgfx::ShaderHandle createShader(const PipelineInput& pipelineInput, const String& source, ShaderStage::BitSet stage)
+::bgfx::ShaderHandle createShader(const PipelineInput& pipelineInput, const String& source, ShaderStage::Set stage)
 {
     const char bgfxChunkMagic[4] = {toBgfxShaderTypeMagic(stage), 'S', 'H', 11};
     const std::vector<uint32_t> binaries = RenderUtil::compileSPIR(source, stage, Ark::RENDERER_TARGET_VULKAN);
@@ -420,7 +420,7 @@ private:
 
 sp<Pipeline> PipelineFactoryBgfx::buildPipeline(GraphicsContext& graphicsContext, const PipelineBindings& bindings)
 {
-    std::map<ShaderStage::BitSet, String> shaders = bindings.pipelineLayout()->getPreprocessedShaders(graphicsContext.renderContext());
+    std::map<ShaderStage::Set, String> shaders = bindings.pipelineLayout()->getPreprocessedShaders(graphicsContext.renderContext());
     if(const auto vIter = shaders.find(ShaderStage::SHADER_STAGE_VERTEX); vIter != shaders.end())
     {
         const PipelineDescriptor& pipelineDescriptor = bindings.pipelineDescriptor();

@@ -24,7 +24,7 @@ public:
 
     void preCompile(GraphicsContext& graphicsContext);
 
-    std::map<ShaderStage::BitSet, String> getPreprocessedShaders(const RenderEngineContext& renderEngineContext) const;
+    std::map<ShaderStage::Set, String> getPreprocessedShaders(const RenderEngineContext& renderEngineContext) const;
 
     size_t colorAttachmentCount() const;
 
@@ -38,7 +38,7 @@ private:
     sp<PipelineInput> _input;
     sp<Snippet> _snippet;
 
-    std::map<ShaderStage::BitSet, ShaderPreprocessor::Preprocessed> _preprocessed_stages;
+    std::map<ShaderStage::Set, ShaderPreprocessor::Preprocessed> _preprocessed_stages;
 
     size_t _color_attachment_count;
 

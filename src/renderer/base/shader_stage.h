@@ -1,15 +1,15 @@
 #pragma once
 
-#include <bitset>
 #include <functional>
 
 #include "core/base/api.h"
+#include "core/base/bit_set.h"
 
 namespace ark {
 
 class ARK_API ShaderStage {
 public:
-    enum BitSet {
+    enum Set {
         SHADER_STAGE_NONE = -1,
         SHADER_STAGE_VERTEX,
 #ifndef ANDROID
@@ -22,19 +22,19 @@ public:
         SHADER_STAGE_COUNT
     };
 
-    void add(BitSet stage);
-    bool has(BitSet stage) const;
+    void add(Set stage);
+    bool has(Set stage) const;
 
-    template<typename T> T toFlags(const std::function<T(BitSet)>& converter) const {
+    template<typename T> T toFlags(const std::function<T(Set)>& converter) const {
         T flags = static_cast<T>(0);
         for(size_t i = 0; i < SHADER_STAGE_COUNT; ++i)
-            if(_stages.test(i))
-                flags = static_cast<T>(flags | converter(static_cast<BitSet>(i)));
+            if(_stages.has(static_cast<Set>(1 << i)))
+                flags = static_cast<T>(flags | converter(static_cast<Set>(i)));
         return flags;
     }
 
 private:
-    std::bitset<SHADER_STAGE_COUNT> _stages;
+    BitSet<Set> _stages;
 };
 
 }

@@ -127,11 +127,9 @@ public:
     std::map<uint32_t, StreamLayout>& streamLayouts();
 
     size_t samplerCount() const;
-    bool hasSampler(const String& name) const;
     const std::vector<String>& samplerNames() const;
 
-    bool hasImage(const String& name) const;
-    const std::vector<String>& imageNames() const;
+    const std::vector<std::pair<String, ShaderStage>>& images() const;
 
     void addAttribute(String name, Attribute attribute);
 
@@ -149,7 +147,7 @@ private:
 
     std::map<uint32_t, StreamLayout> _stream_layouts;
     std::vector<String> _sampler_names;
-    std::vector<String> _image_names;
+    std::vector<std::pair<String, ShaderStage>> _images;
 
     friend class PipelineBuildingContext;
     friend class PipelineLayout;

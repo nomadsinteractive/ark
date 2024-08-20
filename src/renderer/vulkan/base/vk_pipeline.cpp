@@ -119,7 +119,7 @@ VkStencilOpState makeStencilState(const PipelineDescriptor::TraitStencilTestSepa
 
 }
 
-VKPipeline::VKPipeline(const PipelineDescriptor& bindings, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, std::map<ShaderStage::BitSet, String> shaders)
+VKPipeline::VKPipeline(const PipelineDescriptor& bindings, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, std::map<ShaderStage::Set, String> shaders)
     : _pipeline_descriptor(bindings), _recycler(recycler), _renderer(renderer), _baked_renderer(makeBakedRenderer(bindings)), _layout(VK_NULL_HANDLE), _descriptor_set_layout(VK_NULL_HANDLE),
       _descriptor_set(VK_NULL_HANDLE), _pipeline(VK_NULL_HANDLE), _shaders(std::move(shaders)), _rebind_needed(true), _is_compute_pipeline(false)
 {
@@ -271,8 +271,8 @@ void VKPipeline::setupDescriptorSetLayout(const PipelineInput& pipelineInput)
     for(size_t i = 0; i < pipelineInput.samplerCount(); ++i)
         setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _is_compute_pipeline ? VK_SHADER_STAGE_COMPUTE_BIT : VK_SHADER_STAGE_FRAGMENT_BIT, ++binding));
 
-    for(size_t i = 0; i < pipelineInput.imageNames().size(); ++i)
-        setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, _is_compute_pipeline ? VK_SHADER_STAGE_COMPUTE_BIT : VK_SHADER_STAGE_VERTEX_BIT, ++binding));
+    for(const auto& [k, v] : pipelineInput.images())
+        setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, v.toFlags<VkShaderStageFlagBits>(VKUtil::toStage), ++binding));
 
     const VkDescriptorSetLayoutCreateInfo descriptorLayout =
             vks::initializers::descriptorSetLayoutCreateInfo(
@@ -289,7 +289,7 @@ void VKPipeline::setupDescriptorSetLayout(const PipelineInput& pipelineInput)
     VKUtil::checkResult(vkCreatePipelineLayout(device->vkLogicalDevice(), &pPipelineLayoutCreateInfo, nullptr, &_layout));
 }
 
-void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const PipelineDescriptor& bindings)
+void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const PipelineDescriptor& pipelineDescriptor)
 {
     const sp<VKDevice>& device = _renderer->device();
 
@@ -305,7 +305,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
     uint32_t binding = 0;
 
     _ubos.clear();
-    for(const sp<PipelineInput::UBO>& i : bindings.input()->ubos())
+    for(const sp<PipelineInput::UBO>& i : pipelineDescriptor.input()->ubos())
     {
         sp<VKBuffer> ubo = sp<VKBuffer>::make(_renderer, _recycler, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
         ubo->uploadBuffer(graphicsContext, sp<UploaderArray<uint8_t>>::make(std::vector<uint8_t>(i->size(), 0)));
@@ -317,7 +317,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
                                           &ubo->vkDescriptor()));
         _ubos.push_back(std::move(ubo));
     }
-    for(const PipelineInput::SSBO& i : bindings.input()->ssbos())
+    for(const PipelineInput::SSBO& i : pipelineDescriptor.input()->ssbos())
     {
         binding = std::max(binding, i._binding);
         const sp<VKBuffer> sbo = i._buffer.delegate();
@@ -329,9 +329,9 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
     }
 
     _texture_observers.clear();
-    for(const sp<Texture>& i : bindings.samplers().values())
+    for(const sp<Texture>& i : pipelineDescriptor.samplers().values())
     {
-        DCHECK_WARN(i, "Pipeline has unbound sampler");
+        CHECK_WARN(i, "Pipeline has unbound sampler");
         if(i)
         {
             const sp<VKTexture> texture = i->delegate();
@@ -344,9 +344,9 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
                                               &texture->vkDescriptor()));
         }
     }
-    for(const sp<Texture>& i : bindings.images())
+    for(const sp<Texture>& i : pipelineDescriptor.images())
     {
-        DCHECK_WARN(i, "Pipeline has unbound image");
+        CHECK_WARN(i, "Pipeline has unbound image");
         if(i)
         {
             const sp<VKTexture> texture = i->delegate();
@@ -483,8 +483,7 @@ void VKPipeline::buildDrawCommandBuffer(GraphicsContext& graphicsContext, const 
 void VKPipeline::buildComputeCommandBuffer(GraphicsContext& graphicsContext, const ComputeContext& computeContext)
 {
     const sp<VKComputeContext>& vkContext = graphicsContext.attachments().ensure<VKComputeContext>();
-
-    VkCommandBuffer commandBuffer = vkContext->buildCommandBuffer(graphicsContext);
+    const VkCommandBuffer commandBuffer = vkContext->buildCommandBuffer(graphicsContext);
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, _pipeline);
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, _layout, 0, 1, &_descriptor_set, 0, nullptr);
     vkCmdDispatch(commandBuffer, computeContext._num_work_groups.at(0), computeContext._num_work_groups.at(1), computeContext._num_work_groups.at(2));
@@ -514,7 +513,7 @@ sp<VKDescriptorPool> VKPipeline::makeDescriptorPool() const
     return sp<VKDescriptorPool>::make(_recycler, _renderer->device(), std::move(poolSizes));
 }
 
-void VKPipeline::bindUBOShapshots(GraphicsContext& graphicsContext, const std::vector<RenderLayerSnapshot::UBOSnapshot>& uboSnapshots)
+void VKPipeline::bindUBOShapshots(GraphicsContext& graphicsContext, const std::vector<RenderLayerSnapshot::UBOSnapshot>& uboSnapshots) const
 {
     DCHECK(uboSnapshots.size() == _ubos.size(), "UBO Snapshot and UBO Layout mismatch: %d vs %d", uboSnapshots.size(), _ubos.size());
 

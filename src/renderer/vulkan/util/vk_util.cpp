@@ -49,13 +49,13 @@ VkPipelineShaderStageCreateInfo VKUtil::loadShaderSPIR(VkDevice device, std::str
     return shaderStage;
 }
 
-VkPipelineShaderStageCreateInfo VKUtil::loadShader(VkDevice device, const String& resid, ShaderStage::BitSet stage)
+VkPipelineShaderStageCreateInfo VKUtil::loadShader(VkDevice device, const String& resid, ShaderStage::Set stage)
 {
     const String content = Strings::loadFromReadable(Ark::instance().openAsset(resid));
     return createShader(device, content, stage);
 }
 
-VkPipelineShaderStageCreateInfo VKUtil::createShader(VkDevice device, const String& source, ShaderStage::BitSet stage)
+VkPipelineShaderStageCreateInfo VKUtil::createShader(VkDevice device, const String& source, ShaderStage::Set stage)
 {
     const std::vector<uint32_t> spirv = RenderUtil::compileSPIR(source, stage, Ark::RENDERER_TARGET_VULKAN);
     VkShaderModuleCreateInfo moduleCreateInfo = {VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
@@ -226,7 +226,7 @@ VkImageAspectFlags VKUtil::toTextureAspect(Texture::Usage usage)
     return vkFlags;
 }
 
-VkShaderStageFlagBits VKUtil::toStage(ShaderStage::BitSet stage)
+VkShaderStageFlagBits VKUtil::toStage(ShaderStage::Set stage)
 {
 #ifndef ANDROID
     constexpr VkShaderStageFlagBits vkStages[ShaderStage::SHADER_STAGE_COUNT] = {VK_SHADER_STAGE_VERTEX_BIT, VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT, VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT,

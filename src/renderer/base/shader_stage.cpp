@@ -2,14 +2,14 @@
 
 namespace ark {
 
-void ShaderStage::add(BitSet stage)
+void ShaderStage::add(Set stage)
 {
-    _stages.set(stage, true);
+    _stages.set(static_cast<Set>(1 << stage), true);
 }
 
-bool ShaderStage::has(BitSet stage) const
+bool ShaderStage::has(Set stage) const
 {
-    return _stages.test(stage);
+    return _stages.has(static_cast<Set>(1 << stage));
 }
 
 }

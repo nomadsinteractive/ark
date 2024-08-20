@@ -63,7 +63,7 @@ Shader::StageManifest loadStages(BeanFactory& factory, const document& manifest)
 
     for(const document& i : manifest->children("stage"))
     {
-        ShaderStage::BitSet type = Documents::ensureAttribute<ShaderStage::BitSet>(i, constants::TYPE);
+        ShaderStage::Set type = Documents::ensureAttribute<ShaderStage::Set>(i, constants::TYPE);
         CHECK(stages.find(type) == stages.end(), "Stage duplicated: %s", Documents::getAttribute(i, constants::TYPE).c_str());
         stages[type] = factory.ensureBuilder<String>(i, constants::SRC);
     }
@@ -179,7 +179,7 @@ sp<Shader> Shader::BUILDER_IMPL::build(const Scope& args)
 
 sp<PipelineBuildingContext> Shader::BUILDER_IMPL::makePipelineBuildingContext(const sp<Camera>& camera, const Scope& args) const
 {
-    ShaderStage::BitSet prestage = ShaderStage::SHADER_STAGE_NONE;
+    ShaderStage::Set prestage = ShaderStage::SHADER_STAGE_NONE;
     sp<PipelineBuildingContext> context = sp<PipelineBuildingContext>::make(_render_controller, camera);
     for(const auto& [k, v] : _stages)
     {
@@ -189,7 +189,7 @@ sp<PipelineBuildingContext> Shader::BUILDER_IMPL::makePipelineBuildingContext(co
     return context;
 }
 
-template<> ARK_API ShaderStage::BitSet StringConvert::eval<ShaderStage::BitSet>(const String& val)
+template<> ARK_API ShaderStage::Set StringConvert::eval<ShaderStage::Set>(const String& val)
 {
     if(val == "vertex")
         return ShaderStage::SHADER_STAGE_VERTEX;

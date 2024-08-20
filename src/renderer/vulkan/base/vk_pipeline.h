@@ -19,7 +19,7 @@ namespace ark::vulkan {
 
 class VKPipeline final : public Pipeline {
 public:
-    VKPipeline(const PipelineDescriptor& bindings, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, std::map<ShaderStage::BitSet, String> shaders);
+    VKPipeline(const PipelineDescriptor& bindings, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, std::map<ShaderStage::Set, String> shaders);
     ~VKPipeline() override;
 
     VkPipeline vkPipeline() const;
@@ -45,7 +45,7 @@ private:
 
     void setupVertexDescriptions(const PipelineInput& input, VertexLayout& vertexLayout);
     void setupDescriptorSetLayout(const PipelineInput& pipelineInput);
-    void setupDescriptorSet(GraphicsContext& graphicsContext, const PipelineDescriptor& bindings);
+    void setupDescriptorSet(GraphicsContext& graphicsContext, const PipelineDescriptor& pipelineDescriptor);
 
     void setupGraphicsPipeline(GraphicsContext& graphicsContext, const VertexLayout& vertexLayout);
     void setupComputePipeline(GraphicsContext& graphicsContext);
@@ -56,7 +56,7 @@ private:
     bool isDirty(const ByteArray::Borrowed& dirtyFlags) const;
 
     sp<VKDescriptorPool> makeDescriptorPool() const;
-    void bindUBOShapshots(GraphicsContext& graphicsContext, const std::vector<RenderLayerSnapshot::UBOSnapshot>& uboSnapshots);
+    void bindUBOShapshots(GraphicsContext& graphicsContext, const std::vector<RenderLayerSnapshot::UBOSnapshot>& uboSnapshots) const;
 
     VkPipelineDepthStencilStateCreateInfo makeDepthStencilState() const;
     VkPipelineRasterizationStateCreateInfo makeRasterizationState() const;
@@ -74,7 +74,7 @@ private:
     VkDescriptorSet _descriptor_set;
     VkPipeline _pipeline;
 
-    std::map<ShaderStage::BitSet, String> _shaders;
+    std::map<ShaderStage::Set, String> _shaders;
 
     std::vector<sp<VKBuffer>> _ubos;
 

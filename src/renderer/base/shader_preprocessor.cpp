@@ -47,7 +47,7 @@ const char* ANNOTATION_FRAG_COLOR = "${frag.color}";
 
 }
 
-ShaderPreprocessor::ShaderPreprocessor(sp<String> source, ShaderStage::BitSet shaderStage, ShaderStage::BitSet preShaderStage)
+ShaderPreprocessor::ShaderPreprocessor(sp<String> source, ShaderStage::Set shaderStage, ShaderStage::Set preShaderStage)
     : _source(std::move(source)), _shader_stage(shaderStage), _pre_shader_stage(preShaderStage), _version(0), _declaration_ins(_attribute_declaration_codes, shaderStage == ShaderStage::SHADER_STAGE_VERTEX ? ANNOTATION_VERT_IN : ANNOTATION_FRAG_IN),
       _declaration_outs(_attribute_declaration_codes, shaderStage == ShaderStage::SHADER_STAGE_VERTEX ? ANNOTATION_VERT_OUT : ANNOTATION_FRAG_OUT),
       _declaration_uniforms(_uniform_declaration_codes, "uniform"), _declaration_samplers(_uniform_declaration_codes, "uniform"), _declaration_images(_uniform_declaration_codes, "uniform"),
@@ -362,7 +362,7 @@ void ShaderPreprocessor::linkParameters(const std::vector<ShaderPreprocessor::Pa
                 passThroughVars.insert(Strings::capitalizeFirst(i._name));
 }
 
-const char* ShaderPreprocessor::getOutAttributePrefix(ShaderStage::BitSet preStage)
+const char* ShaderPreprocessor::getOutAttributePrefix(ShaderStage::Set preStage)
 {
     return _STAGE_ATTR_PREFIX[preStage + 1];
 }
@@ -489,7 +489,7 @@ void ShaderPreprocessor::Function::genDefinition()
     *_place_hoder = sb.str();
 }
 
-String ShaderPreprocessor::Function::genOutCall(ShaderStage::BitSet preShaderStage, ShaderStage::BitSet shaderStage) const
+String ShaderPreprocessor::Function::genOutCall(ShaderStage::Set preShaderStage, ShaderStage::Set shaderStage) const
 {
     StringBuffer sb;
     sb << "ark_main(";
@@ -579,12 +579,12 @@ ShaderPreprocessor::Preprocessed::Preprocessed()
 {
 }
 
-ShaderPreprocessor::Preprocessed::Preprocessed(ShaderStage::BitSet stage, String source)
+ShaderPreprocessor::Preprocessed::Preprocessed(ShaderStage::Set stage, String source)
     : _type(stage), _source(std::move(source))
 {
 }
 
-ShaderStage::BitSet ShaderPreprocessor::Preprocessed::stage() const
+ShaderStage::Set ShaderPreprocessor::Preprocessed::stage() const
 {
     return _type;
 }

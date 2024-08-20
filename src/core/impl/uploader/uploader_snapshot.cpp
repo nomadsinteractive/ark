@@ -15,7 +15,7 @@ UploaderSnapshot::UploaderSnapshot(Uploader& delegate)
 void UploaderSnapshot::upload(Writable& writable)
 {
     for(const auto& [i, j] : _strips)
-        writable.write(j->buf(), j->length(), i);
+        writable.write(j.data(), j.size(), i);
 }
 
 bool UploaderSnapshot::update(uint64_t /*timestamp*/)

@@ -124,7 +124,7 @@ void VKGraphicsContext::popState()
     State state = _state_stack.top();
     _state_stack.pop();
 
-    VkCommandBuffer commandBuffer = state._command_buffer;
+    const VkCommandBuffer commandBuffer = state._command_buffer;
     if(state._render_pass != VK_NULL_HANDLE)
         vkCmdEndRenderPass(commandBuffer);
 

@@ -115,24 +115,14 @@ size_t PipelineInput::samplerCount() const
     return _sampler_names.size();
 }
 
-bool PipelineInput::hasSampler(const String& name) const
-{
-    return std::find(_sampler_names.begin(), _sampler_names.end(), name) != _sampler_names.end();
-}
-
 const std::vector<String>& PipelineInput::samplerNames() const
 {
     return _sampler_names;
 }
 
-bool PipelineInput::hasImage(const String& name) const
+const std::vector<std::pair<String, ShaderStage>>& PipelineInput::images() const
 {
-    return std::find(_image_names.begin(), _image_names.end(), name) != _image_names.end();
-}
-
-const std::vector<String>& PipelineInput::imageNames() const
-{
-    return _image_names;
+    return _images;
 }
 
 void PipelineInput::addAttribute(String name, Attribute attribute)

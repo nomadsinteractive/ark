@@ -59,20 +59,43 @@ private:
 };
 
 struct WritableSnapshot final : Writable {
-    WritableSnapshot(size_t size)
-        : _size(size) {
-    }
 
     uint32_t write(const void* buffer, uint32_t size, uint32_t offset) override {
-        CHECK(offset + size <= _size, "Buffer overflow, buffer size: %zd, writing offset: %d, writing size: %d", _size, offset, size);
-        sp<ByteArray> strip = sp<ByteArray::Allocated>::make(size);
-        memcpy(strip->buf(), buffer, size);
-        _strips.push_back(std::make_pair<size_t, sp<ByteArray>>(offset, std::move(strip)));
+        const auto iter = _records.lower_bound(offset);
+        if(iter != _records.begin() && !_records.empty())
+            if(const auto previter = std::prev(iter); previter->first + previter->second.size() == offset)
+            {
+                std::vector<uint8_t>& prev = previter->second;
+                size_t prevsize = prev.size();
+                prev.resize(prevsize + size);
+                memcpy(prev.data() + prevsize, buffer, size);
+                return size;
+            }
+        std::vector<uint8_t> data(size);
+        memcpy(data.data(), buffer, size);
+        _records.insert(iter, {offset, std::move(data)});
         return size;
     }
 
-    size_t _size;
-    std::vector<std::pair<size_t, sp<ByteArray>>> _strips;
+    std::map<size_t, std::vector<uint8_t>> _records;
+};
+
+struct WritableRangeSnapshot final : Writable {
+
+    uint32_t write(const void* buffer, uint32_t size, uint32_t offset) override {
+        const auto iter = _records.lower_bound(offset);
+        if(iter != _records.begin() && !_records.empty())
+            if(const auto previter = std::prev(iter); previter->first + previter->second == offset)
+            {
+                size_t& prev = previter->second;
+                prev += size;
+                return size;
+            }
+        _records.insert(iter, {offset, size});
+        return size;
+    }
+
+    std::map<size_t, size_t> _records;
 };
 
 sp<UploaderImpl> ensureImpl(const sp<Uploader>& self)
@@ -163,11 +186,18 @@ std::vector<uint8_t> UploaderType::toBytes(Uploader& self)
     return bytes;
 }
 
-std::vector<std::pair<size_t, sp<ByteArray>>> UploaderType::record(Uploader& self)
+std::map<size_t, std::vector<uint8_t>> UploaderType::record(Uploader& self)
 {
-    WritableSnapshot writable(self.size());
+    WritableSnapshot writable;
     self.upload(writable);
-    return writable._strips;
+    return writable._records;
+}
+
+std::map<size_t, size_t> UploaderType::recordRanges(Uploader& self)
+{
+    WritableRangeSnapshot writable;
+    self.upload(writable);
+    return writable._records;
 }
 
 sp<Uploader> UploaderType::wrap(sp<Uploader> self)

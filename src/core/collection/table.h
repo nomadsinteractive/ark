@@ -160,6 +160,13 @@ public:
         _values.clear();
     }
 
+    template<typename V> std::vector<V> flat() const {
+        std::vector<V> flatted;
+        for(const auto& [k, v] : *this)
+            flatted.emplace_back(k, v);
+        return flatted;
+    }
+
 private:
     std::vector<T> _keys;
     std::vector<U> _values;

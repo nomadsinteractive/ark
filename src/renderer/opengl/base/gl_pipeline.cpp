@@ -279,7 +279,7 @@ struct GLMultiDrawElementsIndirect final : PipelineDrawCommand {
 
 }
 
-GLPipeline::GLPipeline(const sp<Recycler>& recycler, uint32_t version, std::map<ShaderStage::BitSet, String> shaders, const PipelineDescriptor& bindings)
+GLPipeline::GLPipeline(const sp<Recycler>& recycler, uint32_t version, std::map<ShaderStage::Set, String> shaders, const PipelineDescriptor& bindings)
     : _stub(sp<Stub>::make()), _recycler(recycler), _version(version), _shaders(std::move(shaders)), _pipeline_operation(makePipelineOperation(bindings))
 {
     for(const auto& i : bindings.parameters()._traits)
@@ -326,7 +326,7 @@ void GLPipeline::upload(GraphicsContext& graphicsContext)
     _stub->_rebind_needed = true;
     _stub->_id = id;
 
-    std::map<ShaderStage::BitSet, sp<GLPipeline::Stage>> compiledShaders;
+    std::map<ShaderStage::Set, sp<GLPipeline::Stage>> compiledShaders;
 
     for(const auto& i : _shaders)
     {

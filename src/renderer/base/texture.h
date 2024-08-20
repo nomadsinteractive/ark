@@ -185,10 +185,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<Texture> build(const Scope& args) override;
-
-    private:
-        sp<Texture::Uploader> makeBlankUploader(const sp<Size>& size, const Parameters& params);
+        sp<Texture> build(const Scope& args) override;
 
     private:
         sp<ResourceLoaderContext> _resource_loader_context;

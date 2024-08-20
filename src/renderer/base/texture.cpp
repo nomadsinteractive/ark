@@ -22,9 +22,9 @@ namespace ark {
 
 namespace {
 
-class BlankUploader final : public Texture::Uploader {
+class UploaderClear final : public Texture::Uploader {
 public:
-    BlankUploader(const Size& size, Texture::Format format)
+    UploaderClear(const Size& size, Texture::Format format)
         : _bitmap(static_cast<uint32_t>(size.widthAsFloat()), static_cast<uint32_t>(size.heightAsFloat()), static_cast<uint32_t>(size.widthAsFloat()) * RenderUtil::getPixelSize(format),
                   (format & Texture::FORMAT_RGBA) + 1, true) {
     }
@@ -262,14 +262,9 @@ sp<Texture> Texture::BUILDER::build(const Scope& args)
        return _resource_loader_context->textureBundle()->createTexture(*src, parameters);
 
     const sp<Size> size = _factory.ensureConcreteClassBuilder<Size>(_manifest, constants::SIZE)->build(args);
-    DCHECK(size->widthAsFloat() != 0 && size->heightAsFloat() != 0, "Cannot build texture from \"%s\"", Documents::toString(_manifest).c_str());
-    sp<Texture::Uploader> uploader = _uploader->build(args);
-    return _resource_loader_context->renderController()->createTexture(size, parameters, uploader ? std::move(uploader) : makeBlankUploader(size, parameters), static_cast<RenderController::UploadStrategy>(_upload_strategy));
-}
-
-sp<Texture::Uploader> Texture::BUILDER::makeBlankUploader(const sp<Size>& size, const Texture::Parameters& params)
-{
-    return sp<BlankUploader>::make(size, params._format);
+    CHECK(size->widthAsFloat() != 0 && size->heightAsFloat() != 0, "Cannot build texture from \"%s\"", Documents::toString(_manifest).c_str());
+    sp<Uploader> uploader = _uploader->build(args);
+    return _resource_loader_context->renderController()->createTexture(size, parameters, uploader ? std::move(uploader) : sp<Uploader>::make<UploaderClear>(size, parameters->_format), static_cast<RenderController::UploadStrategy>(_upload_strategy));
 }
 
 Texture::UploaderBitmap::UploaderBitmap(sp<Bitmap> bitmap)

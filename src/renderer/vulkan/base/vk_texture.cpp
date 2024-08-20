@@ -113,8 +113,8 @@ ResourceRecycleFunc VKTexture::recycle()
 
 void VKTexture::clear(GraphicsContext& /*graphicsContext*/)
 {
-    const VkClearColorValue clearColorValue{0, 0, 0, 0};
-    VkImageSubresourceRange subRange{VK_IMAGE_ASPECT_COLOR_BIT, 0, VK_REMAINING_MIP_LEVELS, 0, 1};
+    constexpr VkClearColorValue clearColorValue{0, 0, 0, 0};
+    constexpr VkImageSubresourceRange subRange{VK_IMAGE_ASPECT_COLOR_BIT, 0, VK_REMAINING_MIP_LEVELS, 0, 1};
     const VkCommandBuffer clearCmdBuf = _renderer->commandPool()->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
     vkCmdClearColorImage(clearCmdBuf, _image, _descriptor.imageLayout, &clearColorValue, 1, &subRange);
     _renderer->commandPool()->flushCommandBuffer(clearCmdBuf, true);

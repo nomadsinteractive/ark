@@ -18,7 +18,7 @@ VKHeap::VKHeap(const sp<VKDevice>& device)
 
 VKMemoryPtr VKHeap::allocate(GraphicsContext& graphicsContext, const VkMemoryRequirements& memReqs, VkMemoryPropertyFlags propertyFlags)
 {
-    uint32_t typeIndex = _device->getMemoryType(memReqs.memoryTypeBits, propertyFlags);
+    const uint32_t typeIndex = _device->getMemoryType(memReqs.memoryTypeBits, propertyFlags);
     return doAllocate(graphicsContext, memReqs.size, memReqs.alignment, typeIndex);
 }
 
