@@ -62,8 +62,8 @@ void VKBuffer::downloadBuffer(GraphicsContext& graphicsContext, size_t offset, s
 {
     if(isHostVisible())
     {
-        memcpy(ptr, map(), size);
-        unmap();
+        memcpy(ptr, _memory->map(), size);
+        _memory->unmap();
     }
     else
     {
@@ -75,8 +75,8 @@ void VKBuffer::downloadBuffer(GraphicsContext& graphicsContext, size_t offset, s
         vkCmdCopyBuffer(copyCmd, _descriptor.buffer, stagingBuffer.vkBuffer(), 1, &copyRegions);
         _renderer->commandPool()->flushCommandBuffer(copyCmd, true);
 
-        memcpy(ptr, stagingBuffer.map(), size);
-        stagingBuffer.unmap();
+        memcpy(ptr, stagingBuffer._memory->map(), size);
+        stagingBuffer._memory->unmap();
         stagingBuffer.recycle()(graphicsContext);
     }
 }
@@ -114,19 +114,6 @@ void VKBuffer::reload(GraphicsContext& /*graphicsContext*/, const ByteArray::Bor
 const VkBuffer& VKBuffer::vkBuffer() const
 {
     return _descriptor.buffer;
-}
-
-void* VKBuffer::map(VkDeviceSize size, VkDeviceSize offset) const
-{
-    CHECK(isHostVisible(), "Buffer can't be mapped for host access if without VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT being set");
-    void* mapped = nullptr;
-    VKUtil::checkResult(vkMapMemory(_renderer->vkLogicalDevice(), _memory.vkMemory(), offset, size, 0, &mapped));
-    return mapped;
-}
-
-void VKBuffer::unmap() const
-{
-    vkUnmapMemory(_renderer->vkLogicalDevice(), _memory.vkMemory());
 }
 
 void VKBuffer::allocateMemory(GraphicsContext& graphicsContext, const VkMemoryRequirements& memReqs)

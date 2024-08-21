@@ -52,12 +52,12 @@ VKMemory::VKMemory(const sp<VKMemory::Stub>& stub)
 {
 }
 
-void VKMemory::upload(GraphicsContext& graphicsContext)
+void VKMemory::upload(GraphicsContext& graphicsContext) const
 {
     _stub->upload(graphicsContext);
 }
 
-void* VKMemory::map(VkDeviceSize offset, VkDeviceSize size)
+void* VKMemory::map(VkDeviceSize offset, VkDeviceSize size) const
 {
     void* mapped = nullptr;
     DCHECK(_stub->_memory, "Mapping to NULL memory");
@@ -65,7 +65,7 @@ void* VKMemory::map(VkDeviceSize offset, VkDeviceSize size)
     return mapped;
 }
 
-void VKMemory::unmap()
+void VKMemory::unmap() const
 {
     vkUnmapMemory(_stub->_device->vkLogicalDevice(), _stub->_memory);
 }

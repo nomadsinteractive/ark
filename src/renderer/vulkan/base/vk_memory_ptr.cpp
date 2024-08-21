@@ -86,22 +86,22 @@ VKMemoryPtr::Stub::Stub(const VKMemory& memory, VkDeviceSize offset, VkDeviceSiz
 {
 }
 
-void* VKMemoryPtr::Stub::map()
+void* VKMemoryPtr::Stub::map() const
 {
     return _memory.map(_offset, _size);
 }
 
-void VKMemoryPtr::Stub::unmap()
+void VKMemoryPtr::Stub::unmap() const
 {
     _memory.unmap();
 }
 
-void VKMemoryPtr::Stub::upload(Uploader& input)
+void VKMemoryPtr::Stub::upload(Uploader& uploader) const
 {
-    CHECK(input.size() <= _size, "Uploader size: %d, memory size: %d", input.size(), _size);
+    CHECK(uploader.size() <= _size, "Uploader size: %d, memory size: %d", uploader.size(), _size);
 
     WritableMemory writer(map());
-    input.upload(writer);
+    uploader.upload(writer);
 
     unmap();
 }

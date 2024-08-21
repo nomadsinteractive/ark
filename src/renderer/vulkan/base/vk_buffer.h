@@ -34,9 +34,6 @@ public:
     Observer& observer();
 
 private:
-    void* map(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0) const;
-    void unmap() const;
-
     void allocateMemory(GraphicsContext& graphicsContext, const VkMemoryRequirements& memReqs);
     void ensureSize(GraphicsContext& graphicsContext, size_t size);
 

@@ -17,10 +17,10 @@ public:
     public:
         Stub(const VKMemory& memory, VkDeviceSize offset, VkDeviceSize size);
 
-        void* map();
-        void unmap();
+        void* map() const;
+        void unmap() const;
 
-        void upload(Uploader& input);
+        void upload(Uploader& uploader) const;
 
     private:
         VKMemory _memory;

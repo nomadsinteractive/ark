@@ -34,10 +34,10 @@ public:
 
     VkDeviceSize size() const;
 
-    void upload(GraphicsContext& graphicsContext);
+    void upload(GraphicsContext& graphicsContext) const;
 
-    void* map(VkDeviceSize offset, VkDeviceSize size);
-    void unmap();
+    void* map(VkDeviceSize offset, VkDeviceSize size) const;
+    void unmap() const;
 
     VkDeviceMemory vkMemory() const;
 
