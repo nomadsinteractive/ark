@@ -21,24 +21,24 @@ public:
     VKFramebuffer(const sp<VKRenderer>& renderer, const sp<Recycler>& recycler, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask);
     ~VKFramebuffer() override;
 
-    virtual uint64_t id() override;
+    uint64_t id() override;
 
-    virtual void upload(GraphicsContext& graphicsContext) override;
-    virtual ResourceRecycleFunc recycle() override;
+    void upload(GraphicsContext& graphicsContext) override;
+    ResourceRecycleFunc recycle() override;
 
     void beginCommandBuffer(GraphicsContext& graphicsContext);
     void endCommandBuffer(GraphicsContext& graphicsContext);
 
 private:
-    class Stub : public VKGraphicsContext::RenderPassPhrase {
+    class Stub final : public VKGraphicsContext::RenderPassPhrase {
     public:
         Stub(const sp<VKRenderer>& renderer, const sp<Recycler>& recycler, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask);
 
         void initialize();
 
-        virtual VkCommandBuffer vkCommandBuffer() override;
-        virtual VkRenderPass create(const PipelineDescriptor& bindings) override;
-        virtual VkRenderPass begin(VkCommandBuffer commandBuffer) override;
+        VkCommandBuffer vkCommandBuffer() override;
+        VkRenderPass acquire(const PipelineDescriptor& bindings) override;
+        VkRenderPass begin(VkCommandBuffer commandBuffer) override;
 
     private:
         VkRect2D getFramebufferScissor() const;

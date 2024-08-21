@@ -84,7 +84,6 @@ const sp<Pipeline>& PipelineBindings::getPipeline(GraphicsContext& graphicsConte
 
     _pipeline_descriptor->layout()->preCompile(graphicsContext);
     _pipeline = _pipeline_factory->buildPipeline(graphicsContext, *this);
-    graphicsContext.renderController()->upload(_pipeline, RenderController::US_ON_SURFACE_READY, nullptr, nullptr, RenderController::UPLOAD_PRIORITY_HIGH);
     _pipeline->upload(graphicsContext);
     return _pipeline;
 }

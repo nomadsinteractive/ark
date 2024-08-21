@@ -184,6 +184,7 @@ ResourceRecycleFunc VKPipeline::recycle()
     VkPipelineLayout layout = _layout;
     VkDescriptorSetLayout descriptorSetLayout = _descriptor_set_layout;
     VkPipeline pipeline = _pipeline;
+    _pipeline = VK_NULL_HANDLE;
 
     return [device, layout, descriptorSetLayout, pipeline](GraphicsContext&) {
         if(layout)
@@ -427,7 +428,7 @@ void VKPipeline::setupGraphicsPipeline(GraphicsContext& graphicsContext, const V
 
     const sp<VKGraphicsContext>& vkGraphicsContext = graphicsContext.attachments().ensure<VKGraphicsContext>();
     VKGraphicsContext::State& state = vkGraphicsContext->getCurrentState();
-    VkGraphicsPipelineCreateInfo pipelineCreateInfo = vks::initializers::pipelineCreateInfo(_layout, state.createRenderPass(_pipeline_descriptor), 0);
+    VkGraphicsPipelineCreateInfo pipelineCreateInfo = vks::initializers::pipelineCreateInfo(_layout, state.acquireRenderPass(_pipeline_descriptor), 0);
 
     pipelineCreateInfo.pVertexInputState = &vertexLayout.inputState;
     pipelineCreateInfo.pInputAssemblyState = &inputAssemblyState;
@@ -460,7 +461,7 @@ void VKPipeline::buildDrawCommandBuffer(GraphicsContext& graphicsContext, const 
 {
     const sp<VKGraphicsContext>& vkGraphicsContext = graphicsContext.attachments().ensure<VKGraphicsContext>();
     VKGraphicsContext::State& state = vkGraphicsContext->getCurrentState();
-    VkCommandBuffer commandBuffer = state.startRecording();
+    const VkCommandBuffer commandBuffer = state.startRecording();
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _layout, 0, 1, &_descriptor_set, 0, nullptr);
 

@@ -26,16 +26,16 @@ public:
         : _renderer(renderer), _command_buffer(commandBuffer), _framebuffer(framebuffer), _clear_color_value(toVkClearColorValue(backgroundColor.rgba())) {
     }
 
-    virtual VkCommandBuffer vkCommandBuffer() override {
+    VkCommandBuffer vkCommandBuffer() override {
         return _command_buffer;
     }
 
-    virtual VkRenderPass create(const PipelineDescriptor& /*bindings*/) override {
+    VkRenderPass acquire(const PipelineDescriptor& /*bindings*/) override {
         const VKSwapChain& renderTarget = _renderer->renderTarget();
         return renderTarget.vkRenderPassBeginInfo().renderPass;
     }
 
-    virtual VkRenderPass begin(VkCommandBuffer commandBuffer) override {
+    VkRenderPass begin(VkCommandBuffer commandBuffer) override {
         VkClearValue vkClearValues[2];
         vkClearValues[0].color = _clear_color_value;
         vkClearValues[1].depthStencil = {1.0f, 0};
@@ -85,7 +85,7 @@ void VKGraphicsContext::begin(uint32_t imageId, const Color& backgroundColor)
     const std::vector<VkCommandBuffer>& commandBuffers = _command_buffers->vkCommandBuffers();
 
     VkCommandBuffer commandBuffer = commandBuffers.at(imageId);
-    _state_stack.push(State(sp<MainRenderPassPhrase>::make(_renderer, commandBuffer, renderTarget.frameBuffers().at(imageId), backgroundColor), commandBuffer, false));
+    _state_stack.push(State(sp<RenderPassPhrase>::make<MainRenderPassPhrase>(_renderer, commandBuffer, renderTarget.frameBuffers().at(imageId), backgroundColor), commandBuffer, false));
 
     constexpr VkCommandBufferBeginInfo cmdBufInfo{ VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
     VKUtil::checkResult(vkBeginCommandBuffer(commandBuffer, &cmdBufInfo));
@@ -106,7 +106,7 @@ VKSubmitQueue& VKGraphicsContext::submitQueue()
 
 VKGraphicsContext::State& VKGraphicsContext::getCurrentState()
 {
-    DASSERT(!_state_stack.empty());
+    ASSERT(!_state_stack.empty());
     return _state_stack.top();
 }
 
@@ -165,9 +165,9 @@ VKGraphicsContext::State::State(sp<VKGraphicsContext::RenderPassPhrase> renderPa
 {
 }
 
-VkRenderPass VKGraphicsContext::State::createRenderPass(const PipelineDescriptor& bindings)
+VkRenderPass VKGraphicsContext::State::acquireRenderPass(const PipelineDescriptor& bindings)
 {
-    return _render_pass_phrase->create(bindings);
+    return _render_pass_phrase->acquire(bindings);
 }
 
 VkCommandBuffer VKGraphicsContext::State::startRecording()

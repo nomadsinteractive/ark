@@ -56,7 +56,7 @@ ResourceRecycleFunc VKFramebuffer::recycle()
     _stub->_render_pass_begin_info.renderPass = VK_NULL_HANDLE;
 
     return [=](GraphicsContext&) {
-        VkDevice logicalDevice = device->vkLogicalDevice();
+        const VkDevice logicalDevice = device->vkLogicalDevice();
         if(depthstencilImage) {
             vkDestroyImageView(logicalDevice, depthstencilView, nullptr);
             vkDestroyImage(logicalDevice, depthstencilImage, nullptr);
@@ -116,7 +116,7 @@ VkCommandBuffer VKFramebuffer::Stub::vkCommandBuffer()
     return _command_buffer;
 }
 
-VkRenderPass VKFramebuffer::Stub::create(const PipelineDescriptor& bindings)
+VkRenderPass VKFramebuffer::Stub::acquire(const PipelineDescriptor& bindings)
 {
     VkDevice device = _renderer->vkLogicalDevice();
     uint32_t width = _scissor.extent.width;
