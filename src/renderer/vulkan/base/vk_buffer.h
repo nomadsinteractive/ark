@@ -38,7 +38,7 @@ private:
     void ensureSize(GraphicsContext& graphicsContext, size_t size);
 
     void bind();
-    VkResult flush();
+    VkResult flush() const;
 
     bool isDeviceLocal() const;
     bool isHostCoherent() const;

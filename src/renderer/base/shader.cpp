@@ -145,16 +145,13 @@ sp<PipelineBindings> Shader::makeBindings(Buffer vertices, Enum::RenderMode mode
 std::map<uint32_t, Buffer> Shader::makeDivivedBuffers(const std::map<uint32_t, sp<Uploader>>& uploaders) const
 {
     std::map<uint32_t, Buffer> dividedBuffers;
-    for(const auto& i : _pipeline_input->streamLayouts())
-    {
-        uint32_t divisor = i.first;
+    for(const auto& [divisor, _] : _pipeline_input->streamLayouts())
         if(divisor != 0)
         {
             CHECK(dividedBuffers.find(divisor) == dividedBuffers.end(), "Duplicated stream divisor: %d", divisor);
             const auto iter = uploaders.find(divisor);
             dividedBuffers.insert(std::make_pair(divisor, _render_controller->makeVertexBuffer(Buffer::USAGE_BIT_DYNAMIC, iter != uploaders.end() ? iter->second : nullptr)));
         }
-    }
     return dividedBuffers;
 }
 

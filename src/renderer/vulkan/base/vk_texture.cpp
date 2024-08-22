@@ -415,6 +415,7 @@ ResourceRecycleFunc VKTexture::doRecycle()
 
     _image = VK_NULL_HANDLE;
     _memory = VK_NULL_HANDLE;
+    _observer.notify();
 
     return [device, descriptor, image, memory](GraphicsContext&) {
         vkDestroyImageView(device->vkLogicalDevice(), descriptor.imageView, nullptr);

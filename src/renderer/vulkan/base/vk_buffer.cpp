@@ -154,10 +154,9 @@ void VKBuffer::bind()
     _descriptor.range = _size;
 }
 
-VkResult VKBuffer::flush()
+VkResult VKBuffer::flush() const
 {
-    VkMappedMemoryRange mappedRange = {};
-    mappedRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
+    VkMappedMemoryRange mappedRange = {VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE};
     mappedRange.memory = _memory.vkMemory();
     mappedRange.offset = 0;
     mappedRange.size = _size;

@@ -71,7 +71,7 @@ Attribute::Usage toAttributeLayoutType(const String& name, const String& type)
     }
     if(name.startsWith("Color"))
     {
-        CHECK(type == "int" || type == "vec3" || type == "vec4", "Unacceptable Color type: '%s', must be in [int, vec3, vec4]", type.c_str());
+        CHECK(type == "int" || type == "vec3" || type == "vec4"|| type == "vec3b" || type == "vec4b", "Unacceptable Color type: '%s', must be in [int, vec3, vec4, vec3b, vec4b]", type.c_str());
         return Attribute::USAGE_COLOR;
     }
     if(name == "Normal")

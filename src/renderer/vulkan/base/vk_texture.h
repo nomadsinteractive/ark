@@ -19,13 +19,13 @@ public:
     VKTexture(sp<Recycler> recycler, sp<VKRenderer> renderer, uint32_t width, uint32_t height, sp<Texture::Parameters> parameters);
     ~VKTexture() override;
 
-    virtual uint64_t id() override;
-    virtual void upload(GraphicsContext& graphicsContext, const sp<Texture::Uploader>& uploader) override;
-    virtual ResourceRecycleFunc recycle() override;
+    uint64_t id() override;
+    void upload(GraphicsContext& graphicsContext, const sp<Texture::Uploader>& uploader) override;
+    ResourceRecycleFunc recycle() override;
 
-    virtual void clear(GraphicsContext& graphicsContext) override;
-    virtual bool download(GraphicsContext& graphicsContext, Bitmap& bitmap) override;
-    virtual void uploadBitmap(GraphicsContext& graphicsContext, const Bitmap& bitmap, const std::vector<sp<ByteArray>>& images) override;
+    void clear(GraphicsContext& graphicsContext) override;
+    bool download(GraphicsContext& graphicsContext, Bitmap& bitmap) override;
+    void uploadBitmap(GraphicsContext& graphicsContext, const Bitmap& bitmap, const std::vector<sp<ByteArray>>& images) override;
 
     const VkDescriptorImageInfo& vkDescriptor() const;
     Observer& observer();

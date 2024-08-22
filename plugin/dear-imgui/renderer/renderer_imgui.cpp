@@ -311,12 +311,8 @@ sp<Renderer> RendererImgui::BUILDER::build(const Scope& args)
     sp<Bitmap> bitmap = sp<Bitmap>::make(width, height, bytesPerPixel * width, 4, sp<ByteArray::Borrowed>::make(reinterpret_cast<uint8_t*>(pixels), width * height * bytesPerPixel));
     sp<Texture> texture = _resource_loader_context->renderController()->createTexture2d(std::move(bitmap));
     sp<Shader> shader = _shader->build(args);
-    const RenderEngine& renderEngine = _resource_loader_context->renderController()->renderEngine();
-    const Viewport& viewport = renderEngine.viewport();
-    if(renderEngine.isYUp())
-        _camera->ortho(0, viewport.width(), viewport.height(), 0, viewport.clipNear(), viewport.clipFar());
-    else
-        _camera->ortho(0, viewport.width(), 0, viewport.height(), viewport.clipNear(), viewport.clipFar());
+    const Viewport& viewport = _resource_loader_context->renderController()->renderEngine()->viewport();
+    _camera->ortho(0, viewport.width(), viewport.height(), 0, viewport.clipNear(), viewport.clipFar());
     shader->setCamera(_camera);
     return sp<RendererImgui>::make(_resource_loader_context, std::move(shader), texture);
 }
