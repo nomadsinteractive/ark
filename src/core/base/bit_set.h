@@ -7,7 +7,7 @@
 
 namespace ark {
 
-template<typename T> class BitSet {
+template<typename T, bool SHIFT = false> class BitSet {
 public:
     typedef uint32_t convertable_type;
 
@@ -21,15 +21,27 @@ public:
         return static_cast<bool>(_bits);
     }
 
+    bool operator ==(T other) const {
+        return _bits == toConvertableType(other);
+    }
+
     void set(T bits, bool enabled = true) {
         if(enabled)
-            _bits |= bits;
+            _bits |= toConvertableType(bits);
         else
-            _bits &= ~bits;
+            _bits &= ~toConvertableType(bits);
     }
 
     bool has(T bits) const {
-        return _bits & bits;
+        return _bits & toConvertableType(bits);
+    }
+
+    template<typename U> U toFlags(const std::function<U(T)>& converter, size_t count) const {
+        U flags = static_cast<U>(0);
+        for(size_t i = 0; i < count; ++i)
+            if(const T bits = static_cast<T>(SHIFT ? i : 1 << i); has(bits))
+                flags = static_cast<T>(flags | converter(bits));
+        return flags;
     }
 
     template<size_t N> static BitSet toBitSet(const String& value, const std::array<std::pair<const char*, T>, N>& bitNames) {
@@ -38,7 +50,7 @@ public:
             convertable_type bitvalue = 0;
             for(const auto [k, v] : bitNames)
                 if(i.strip() == k) {
-                    bitvalue = v;
+                    bitvalue = toConvertableType(v);
                     break;
                 }
             if(!bitvalue) {
@@ -53,6 +65,13 @@ public:
             bitsets |= bitvalue;
         }
         return {bitsets};
+    }
+
+private:
+    static convertable_type toConvertableType(T value) {
+        if constexpr(SHIFT)
+            return 1 << value;
+        return value;
     }
 
 private:

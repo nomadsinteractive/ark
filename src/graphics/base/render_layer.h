@@ -65,7 +65,6 @@ public:
     class BUILDER : public Builder<RenderLayer> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
-        BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext, sp<Builder<ModelLoader>> modelLoader, sp<Builder<Shader>> shader = nullptr);
 
         sp<RenderLayer> build(const Scope& args) override;
 

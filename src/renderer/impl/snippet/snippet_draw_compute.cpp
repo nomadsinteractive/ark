@@ -57,12 +57,12 @@ SnippetDrawCompute::SnippetDrawCompute(sp<Shader> shader, std::array<sp<Integer>
 
 sp<Snippet::DrawEvents> SnippetDrawCompute::makeDrawEvents(const RenderRequest& renderRequest)
 {
-    std::array<int32_t, 3> numWorkGroups = {
+    const std::array<int32_t, 3> numWorkGroups = {
         _num_work_groups.at(0) ? _num_work_groups.at(0)->val() : 1,
         _num_work_groups.at(1) ? _num_work_groups.at(1)->val() : 1,
         _num_work_groups.at(2) ? _num_work_groups.at(2)->val() : 1
     };
-    ComputeContext computeCtx(_pipeline_bindings, _shader->takeBufferSnapshot(renderRequest), numWorkGroups);
+    ComputeContext computeCtx(_pipeline_bindings, _shader->takeBufferSnapshot(renderRequest, true), numWorkGroups);
     return _at_post_draw ? sp<DrawEvents>::make<DrawEventsPostDrawCompute>(std::move(computeCtx)) : sp<DrawEvents>::make<DrawEventsPreDrawCompute>(std::move(computeCtx));
 }
 

@@ -1,19 +1,14 @@
 #include "renderer/base/shader.h"
 
-#include "core/base/string_buffer.h"
 #include "core/base/string_table.h"
-#include "core/inf/array.h"
 #include "core/types/safe_ptr.h"
 #include "core/types/global.h"
 #include "core/util/string_convert.h"
 #include "core/util/documents.h"
-#include "core/util/strings.h"
 
 #include "graphics/base/camera.h"
-#include "graphics/base/v4.h"
 #include "renderer/base/varyings.h"
 
-#include "renderer/base/graphics_context.h"
 #include "renderer/base/pipeline_descriptor.h"
 #include "renderer/base/pipeline_building_context.h"
 #include "renderer/base/pipeline_layout.h"
@@ -22,9 +17,6 @@
 #include "renderer/base/pipeline_bindings.h"
 #include "renderer/inf/renderer_factory.h"
 #include "renderer/inf/pipeline_factory.h"
-#include "renderer/inf/pipeline.h"
-
-#include "platform/platform.h"
 
 namespace ark {
 
@@ -57,26 +49,19 @@ private:
     PipelineDescriptor::Parameters::BUILDER _parameters;
 };
 
-Shader::StageManifest loadStages(BeanFactory& factory, const document& manifest)
+Optional<const Shader::StageManifest&> findStageManifest(ShaderStage::Set type, const std::vector<Shader::StageManifest>& stages)
 {
-    Shader::StageManifest stages;
-
-    for(const document& i : manifest->children("stage"))
-    {
-        ShaderStage::Set type = Documents::ensureAttribute<ShaderStage::Set>(i, constants::TYPE);
-        CHECK(stages.find(type) == stages.end(), "Stage duplicated: %s", Documents::getAttribute(i, constants::TYPE).c_str());
-        stages[type] = factory.ensureBuilder<String>(i, constants::SRC);
-    }
-
-    if(stages.empty())
-    {
-        stages[ShaderStage::SHADER_STAGE_VERTEX] = factory.getBuilder<String>(manifest, "vertex", "@shaders:default.vert");
-        stages[ShaderStage::SHADER_STAGE_FRAGMENT] = factory.getBuilder<String>(manifest, "fragment", "@shaders:texture.frag");
-    }
-
-    return stages;
+    for(const Shader::StageManifest& i : stages)
+        if(type == i._type)
+            return {i};
+    return {};
 }
 
+}
+
+Shader::StageManifest::StageManifest(BeanFactory& factory, const document& manifest)
+    : _type(Documents::ensureAttribute<ShaderStage::Set>(manifest, constants::TYPE)), _source(factory.ensureBuilder<String>(manifest, constants::SRC))
+{
 }
 
 Shader::Shader(sp<PipelineFactory> pipelineFactory, sp<RenderController> renderController, sp<PipelineLayout> pipelineLayout, PipelineDescriptor::Parameters bindingParams)
@@ -87,29 +72,21 @@ Shader::Shader(sp<PipelineFactory> pipelineFactory, sp<RenderController> renderC
 sp<Builder<Shader>> Shader::fromDocument(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext, const String& defVertex, const String& defFragment, const sp<Camera>& defaultCamera)
 {
     const Global<StringTable> stringTable;
-    sp<Builder<Shader>> shader = factory.getBuilder<Shader>(manifest, constants::SHADER);
-    return shader ? shader : sp<Builder<Shader>>::make<ShaderBuilderImpl>(factory, manifest, resourceLoaderContext, stringTable->getString(defVertex, true), stringTable->getString(defFragment, true), defaultCamera);
+    builder<Shader> shader = factory.getBuilder<Shader>(manifest, constants::SHADER);
+    return shader ? shader : builder<Shader>::make<ShaderBuilderImpl>(factory, manifest, resourceLoaderContext, stringTable->getString(defVertex, true), stringTable->getString(defFragment, true), defaultCamera);
 }
 
-sp<RenderLayerSnapshot::BufferObject> Shader::takeBufferSnapshot(const RenderRequest& renderRequest) const
-{
-    return sp<RenderLayerSnapshot::BufferObject>::make(RenderLayerSnapshot::BufferObject{takeUBOSnapshot(renderRequest), takeSSBOSnapshot(renderRequest)});
-}
-
-std::vector<RenderLayerSnapshot::UBOSnapshot> Shader::takeUBOSnapshot(const RenderRequest& renderRequest) const
+sp<RenderLayerSnapshot::BufferObject> Shader::takeBufferSnapshot(const RenderRequest& renderRequest, bool isComputeStage) const
 {
     std::vector<RenderLayerSnapshot::UBOSnapshot> uboSnapshot;
     for(const sp<PipelineInput::UBO>& i : _pipeline_input->ubos())
         uboSnapshot.push_back(i->snapshot(renderRequest));
-    return uboSnapshot;
-}
 
-std::vector<std::pair<uint32_t, Buffer::Snapshot>> Shader::takeSSBOSnapshot(const RenderRequest& /*renderRequest*/) const
-{
     std::vector<std::pair<uint32_t, Buffer::Snapshot>> ssboSnapshot;
     for(const PipelineInput::SSBO& i : _pipeline_input->ssbos())
         ssboSnapshot.emplace_back(i._binding, i._buffer.snapshot());
-    return ssboSnapshot;
+
+    return sp<RenderLayerSnapshot::BufferObject>::make(RenderLayerSnapshot::BufferObject{std::move(uboSnapshot), std::move(ssboSnapshot)});
 }
 
 const sp<PipelineFactory>& Shader::pipelineFactory() const
@@ -155,8 +132,8 @@ std::map<uint32_t, Buffer> Shader::makeDivivedBuffers(const std::map<uint32_t, s
     return dividedBuffers;
 }
 
-Shader::BUILDER_IMPL::BUILDER_IMPL(BeanFactory& factory, const document& manifest, const ResourceLoaderContext& resourceLoaderContext, sp<Builder<Camera>> camera, Optional<StageManifest> stages, Optional<SnippetManifest> snippets)
-    : _factory(factory), _manifest(manifest), _render_controller(resourceLoaderContext.renderController()), _stages(stages ? std::move(stages.value()) : loadStages(factory, manifest)),
+Shader::BUILDER_IMPL::BUILDER_IMPL(BeanFactory& factory, const document& manifest, const ResourceLoaderContext& resourceLoaderContext, sp<Builder<Camera>> camera, Optional<std::vector<StageManifest>> stages, Optional<SnippetManifest> snippets)
+    : _factory(factory), _manifest(manifest), _render_controller(resourceLoaderContext.renderController()), _stages(stages ? std::move(stages.value()) : factory.makeBuilderListObject<StageManifest>(manifest, "stage")),
       _snippets(snippets ? std::move(snippets.value()) : factory.makeBuilderList<Snippet>(manifest, "snippet")), _camera(camera ? std::move(camera) : factory.getBuilder<Camera>(manifest, constants::CAMERA)),
       _parameters(factory, manifest, resourceLoaderContext)
 {
@@ -176,13 +153,20 @@ sp<Shader> Shader::BUILDER_IMPL::build(const Scope& args)
 
 sp<PipelineBuildingContext> Shader::BUILDER_IMPL::makePipelineBuildingContext(const sp<Camera>& camera, const Scope& args) const
 {
-    ShaderStage::Set prestage = ShaderStage::SHADER_STAGE_NONE;
     sp<PipelineBuildingContext> context = sp<PipelineBuildingContext>::make(_render_controller, camera);
-    for(const auto& [k, v] : _stages)
+    const Optional<const StageManifest&> vertexOpt = findStageManifest(ShaderStage::SHADER_STAGE_VERTEX, _stages);
+    const Optional<const StageManifest&> fragmentOpt = findStageManifest(ShaderStage::SHADER_STAGE_FRAGMENT, _stages);
+    const Optional<const StageManifest&> computeOpt = findStageManifest(ShaderStage::SHADER_STAGE_COMPUTE, _stages);
+    if(vertexOpt || fragmentOpt || !computeOpt)
     {
-        context->addStage(v->build(args), k, prestage);
-        prestage = k;
+        const Global<StringTable> globalStringTable;
+        context->addStage(vertexOpt ? vertexOpt->_source->build(args) : globalStringTable->getString("shaders", "default.vert", true), ShaderStage::SHADER_STAGE_VERTEX, ShaderStage::SHADER_STAGE_NONE);
+        context->addStage(fragmentOpt ? fragmentOpt->_source->build(args) : globalStringTable->getString("shaders", "texture.frag", true), ShaderStage::SHADER_STAGE_FRAGMENT, ShaderStage::SHADER_STAGE_VERTEX);
     }
+    else
+        CHECK(computeOpt, "Shader must have at least one stage defined");
+    if(computeOpt)
+        context->addStage(computeOpt->_source->build(args), ShaderStage::SHADER_STAGE_COMPUTE, ShaderStage::SHADER_STAGE_NONE);
     return context;
 }
 

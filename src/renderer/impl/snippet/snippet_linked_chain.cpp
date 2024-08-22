@@ -8,19 +8,19 @@ namespace ark {
 
 namespace {
 
-class DrawEventsLinkedChain : public Snippet::DrawEvents {
+class DrawEventsLinkedChain final : public Snippet::DrawEvents {
 public:
     DrawEventsLinkedChain(sp<Snippet::DrawEvents> delegate, sp<Snippet::DrawEvents> next)
         : _delegate(std::move(delegate)), _next(std::move(next)) {
         DASSERT(_delegate && _next);
     }
 
-    virtual void preDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override {
+    void preDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override {
         _delegate->preDraw(graphicsContext, context);
         _next->preDraw(graphicsContext, context);
     }
 
-    virtual void postDraw(GraphicsContext& graphicsContext) override {
+    void postDraw(GraphicsContext& graphicsContext) override {
         _delegate->postDraw(graphicsContext);
         _next->postDraw(graphicsContext);
     }

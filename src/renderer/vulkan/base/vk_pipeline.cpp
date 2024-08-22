@@ -275,18 +275,10 @@ void VKPipeline::setupDescriptorSetLayout(const PipelineInput& pipelineInput)
     for(const auto& [k, v] : pipelineInput.images())
         setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, v.toFlags<VkShaderStageFlagBits>(VKUtil::toStage), ++binding));
 
-    const VkDescriptorSetLayoutCreateInfo descriptorLayout =
-            vks::initializers::descriptorSetLayoutCreateInfo(
-                setLayoutBindings.data(),
-                static_cast<uint32_t>(setLayoutBindings.size()));
-
+    const VkDescriptorSetLayoutCreateInfo descriptorLayout = vks::initializers::descriptorSetLayoutCreateInfo(setLayoutBindings.data(), static_cast<uint32_t>(setLayoutBindings.size()));
     VKUtil::checkResult(vkCreateDescriptorSetLayout(device->vkLogicalDevice(), &descriptorLayout, nullptr, &_descriptor_set_layout));
 
-    const VkPipelineLayoutCreateInfo pPipelineLayoutCreateInfo =
-            vks::initializers::pipelineLayoutCreateInfo(
-                &_descriptor_set_layout,
-                1);
-
+    const VkPipelineLayoutCreateInfo pPipelineLayoutCreateInfo = vks::initializers::pipelineLayoutCreateInfo(&_descriptor_set_layout, 1);
     VKUtil::checkResult(vkCreatePipelineLayout(device->vkLogicalDevice(), &pPipelineLayoutCreateInfo, nullptr, &_layout));
 }
 
@@ -294,11 +286,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
 {
     const sp<VKDevice>& device = _renderer->device();
 
-    VkDescriptorSetAllocateInfo allocInfo =
-            vks::initializers::descriptorSetAllocateInfo(
-                _descriptor_pool->vkDescriptorPool(),
-                &_descriptor_set_layout, 1);
-
+    const VkDescriptorSetAllocateInfo allocInfo = vks::initializers::descriptorSetAllocateInfo(_descriptor_pool->vkDescriptorPool(), &_descriptor_set_layout, 1);
     VKUtil::checkResult(vkResetDescriptorPool(device->vkLogicalDevice(), _descriptor_pool->vkDescriptorPool(), 0));
     VKUtil::checkResult(vkAllocateDescriptorSets(device->vkLogicalDevice(), &allocInfo, &_descriptor_set));
 

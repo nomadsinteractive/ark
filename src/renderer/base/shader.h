@@ -18,7 +18,13 @@ namespace ark {
 //[[script::bindings::auto]]
 class ARK_API Shader {
 public:
-    typedef std::map<ShaderStage::Set, sp<Builder<String>>> StageManifest;
+    struct StageManifest {
+        StageManifest(BeanFactory& factory, const document& manifest);
+
+        ShaderStage::Set _type;
+        builder<String> _source;
+    };
+
     typedef std::vector<sp<Builder<Snippet>>> SnippetManifest;
 
 public:
@@ -27,9 +33,7 @@ public:
 
     static sp<Builder<Shader>> fromDocument(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext, const String& defVertex = "shaders/default.vert", const String& defFragment = "shaders/texture.frag", const sp<Camera>& defaultCamera = nullptr);
 
-    sp<RenderLayerSnapshot::BufferObject> takeBufferSnapshot(const RenderRequest& renderRequest) const;
-    std::vector<RenderLayerSnapshot::UBOSnapshot> takeUBOSnapshot(const RenderRequest& renderRequest) const;
-    std::vector<std::pair<uint32_t, Buffer::Snapshot>> takeSSBOSnapshot(const RenderRequest& renderRequest) const;
+    sp<RenderLayerSnapshot::BufferObject> takeBufferSnapshot(const RenderRequest& renderRequest, bool isComputeStage) const;
 
     const sp<PipelineFactory>& pipelineFactory() const;
     const sp<RenderController>& renderController() const;
@@ -43,7 +47,7 @@ public:
     class BUILDER_IMPL final : public Builder<Shader> {
     public:
         BUILDER_IMPL(BeanFactory& factory, const document& manifest, const ResourceLoaderContext& resourceLoaderContext, sp<Builder<Camera>> camera = nullptr,
-                     Optional<StageManifest> stages = Optional<StageManifest>(), Optional<SnippetManifest> snippets = Optional<SnippetManifest>());
+                     Optional<std::vector<StageManifest>> stages = {}, Optional<SnippetManifest> snippets = Optional<SnippetManifest>());
 
         sp<Shader> build(const Scope& args) override;
 
@@ -55,7 +59,7 @@ public:
         document _manifest;
         sp<RenderController> _render_controller;
 
-        StageManifest _stages;
+        std::vector<StageManifest> _stages;
         SnippetManifest _snippets;
         SafePtr<Builder<Camera>> _camera;
         PipelineDescriptor::Parameters::BUILDER _parameters;
