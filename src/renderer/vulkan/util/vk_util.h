@@ -20,8 +20,8 @@ public:
     static void checkResult(VkResult result);
 
     static VkPipelineShaderStageCreateInfo loadShaderSPIR(VkDevice device, std::string fileName, VkShaderStageFlagBits stage);
-    static VkPipelineShaderStageCreateInfo loadShader(VkDevice device, const String& resid, ShaderStage::Set stage);
-    static VkPipelineShaderStageCreateInfo createShader(VkDevice device, const String& source, ShaderStage::Set stage);
+    static VkPipelineShaderStageCreateInfo loadShader(VkDevice device, const String& resid, Enum::ShaderStageBit stage);
+    static VkPipelineShaderStageCreateInfo createShader(VkDevice device, const String& source, Enum::ShaderStageBit stage);
 
     static void createImage(const VKDevice& device, const VkImageCreateInfo& imageCreateInfo, VkImage* image, VkDeviceMemory* memory, VkMemoryPropertyFlags propertyFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
@@ -35,7 +35,7 @@ public:
 
     static VkImageUsageFlags toTextureUsage(Texture::Usage usage);
     static VkImageAspectFlags toTextureAspect(Texture::Usage usage);
-    static VkShaderStageFlagBits toStage(ShaderStage::Set stage);
+    static VkShaderStageFlagBits toStage(Enum::ShaderStageBit stage);
     static VkPrimitiveTopology toPrimitiveTopology(Enum::RenderMode mode);
 
 };

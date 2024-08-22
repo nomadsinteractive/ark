@@ -20,7 +20,7 @@ class GLUtil {
 public:
     static GLenum toEnum(Enum::RenderMode renderMode);
     static GLenum toBufferType(Buffer::Type type);
-    static GLenum toShaderType(ShaderStage::Set stage);
+    static GLenum toShaderType(Enum::ShaderStageBit stage);
     static GLenum toCompareFunc(PipelineDescriptor::CompareFunc func);
     static GLenum toStencilFunc(PipelineDescriptor::StencilFunc func);
     static GLenum toBlendFactor(PipelineDescriptor::BlendFactor blendFactor);

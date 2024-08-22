@@ -23,15 +23,15 @@ public:
     class Preprocessed {
     public:
         Preprocessed();
-        Preprocessed(ShaderStage::Set stage, String source);
+        Preprocessed(Enum::ShaderStageBit stage, String source);
         DEFAULT_COPY_AND_ASSIGN(Preprocessed);
 
-        ShaderStage::Set stage() const;
+        Enum::ShaderStageBit stage() const;
 
         String toSourceCode(const RenderEngineContext& renderEngineContext, const std::map<String, String>& definitions) const;
 
     private:
-        ShaderStage::Set _type;
+        Enum::ShaderStageBit _type;
         String _source;
     };
 
@@ -123,7 +123,7 @@ private:
         void parse(PipelineBuildingContext& buildingContext);
 
         void genDefinition();
-        String genOutCall(ShaderStage::Set preShaderStage, ShaderStage::Set shaderStage) const;
+        String genOutCall(Enum::ShaderStageBit preShaderStage, Enum::ShaderStageBit shaderStage) const;
 
         bool hasOutAttribute(const String& name) const;
         bool hasReturnValue() const;
@@ -142,7 +142,7 @@ private:
     };
 
 public:
-    ShaderPreprocessor(sp<String> source, ShaderStage::Set shaderStage, ShaderStage::Set preShaderStage);
+    ShaderPreprocessor(sp<String> source, Enum::ShaderStageBit shaderStage, Enum::ShaderStageBit preShaderStage);
 
     void addPreMainSource(const String& source);
     void addPostMainSource(const String& source);
@@ -188,7 +188,7 @@ private:
 
     void linkParameters(const std::vector<Parameter>& parameters, const ShaderPreprocessor& preStage, std::set<String>& passThroughVars);
 
-    static const char* getOutAttributePrefix(ShaderStage::Set preStage);
+    static const char* getOutAttributePrefix(Enum::ShaderStageBit preStage);
 
 private:
     sp<String> _source;
@@ -203,8 +203,8 @@ private:
     friend class PipelineLayout;
 
 public:
-    ShaderStage::Set _shader_stage;
-    ShaderStage::Set _pre_shader_stage;
+    Enum::ShaderStageBit _shader_stage;
+    Enum::ShaderStageBit _pre_shader_stage;
 
     Source _main;
 

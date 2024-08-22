@@ -17,7 +17,7 @@ namespace ark::vulkan {
 
 class VKPipeline final : public Pipeline {
 public:
-    VKPipeline(const PipelineDescriptor& bindings, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, std::map<ShaderStage::Set, String> shaders);
+    VKPipeline(const PipelineDescriptor& bindings, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, std::map<Enum::ShaderStageBit, String> shaders);
     ~VKPipeline() override;
 
     VkPipeline vkPipeline() const;
@@ -72,7 +72,7 @@ private:
     VkDescriptorSet _descriptor_set;
     VkPipeline _pipeline;
 
-    std::map<ShaderStage::Set, String> _shaders;
+    std::map<Enum::ShaderStageBit, String> _shaders;
 
     std::vector<sp<VKBuffer>> _ubos;
 

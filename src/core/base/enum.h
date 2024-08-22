@@ -34,6 +34,19 @@ public:
         DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT
     };
 
+    enum ShaderStageBit {
+        SHADER_STAGE_BIT_NONE = -1,
+        SHADER_STAGE_BIT_VERTEX,
+#ifndef ANDROID
+        SHADER_STAGE_BIT_TESSELLATION_CTRL,
+        SHADER_STAGE_BIT_TESSELLATION_EVAL,
+        SHADER_STAGE_BIT_GEOMETRY,
+#endif
+        SHADER_STAGE_BIT_FRAGMENT,
+        SHADER_STAGE_BIT_COMPUTE,
+        SHADER_STAGE_BIT_COUNT
+    };
+
 public:
 
 //  [[script::bindings::operator(index)]]

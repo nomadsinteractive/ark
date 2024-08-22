@@ -24,6 +24,9 @@ public:
     bool operator ==(T other) const {
         return _bits == toConvertableType(other);
     }
+    bool operator !=(T other) const {
+        return _bits != toConvertableType(other);
+    }
 
     void set(T bits, bool enabled = true) {
         if(enabled)
@@ -40,7 +43,7 @@ public:
         U flags = static_cast<U>(0);
         for(size_t i = 0; i < count; ++i)
             if(const T bits = static_cast<T>(SHIFT ? i : 1 << i); has(bits))
-                flags = static_cast<T>(flags | converter(bits));
+                flags = static_cast<U>(flags | converter(bits));
         return flags;
     }
 

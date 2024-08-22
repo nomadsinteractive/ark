@@ -80,7 +80,7 @@ public:
 
         const std::vector<std::pair<uintptr_t, size_t>>& slots() const;
 
-        const ShaderStage& stages() const;
+        const ShaderStageSet& stages() const;
 
     private:
         void initialize();
@@ -91,7 +91,7 @@ public:
         uint32_t _binding;
 
         std::vector<std::pair<uintptr_t, size_t>> _slots;
-        ShaderStage _stages;
+        ShaderStageSet _stages;
 
         bytearray _dirty_flags;
         bytearray _buffer;
@@ -108,7 +108,7 @@ public:
         Buffer _buffer;
         uint32_t _binding;
 
-        ShaderStage _stages;
+        ShaderStageSet _stages;
     };
 
 public:
@@ -129,7 +129,7 @@ public:
     size_t samplerCount() const;
     const std::vector<String>& samplerNames() const;
 
-    const std::vector<std::pair<String, ShaderStage>>& images() const;
+    const std::vector<std::pair<String, ShaderStageSet>>& images() const;
 
     void addAttribute(String name, Attribute attribute);
 
@@ -147,7 +147,7 @@ private:
 
     std::map<uint32_t, StreamLayout> _stream_layouts;
     std::vector<String> _sampler_names;
-    std::vector<std::pair<String, ShaderStage>> _images;
+    std::vector<std::pair<String, ShaderStageSet>> _images;
 
     friend class PipelineBuildingContext;
     friend class PipelineLayout;

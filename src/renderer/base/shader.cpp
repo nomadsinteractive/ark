@@ -49,7 +49,7 @@ private:
     PipelineDescriptor::Parameters::BUILDER _parameters;
 };
 
-Optional<const Shader::StageManifest&> findStageManifest(ShaderStage::Set type, const std::vector<Shader::StageManifest>& stages)
+Optional<const Shader::StageManifest&> findStageManifest(Enum::ShaderStageBit type, const std::vector<Shader::StageManifest>& stages)
 {
     for(const Shader::StageManifest& i : stages)
         if(type == i._type)
@@ -60,7 +60,7 @@ Optional<const Shader::StageManifest&> findStageManifest(ShaderStage::Set type, 
 }
 
 Shader::StageManifest::StageManifest(BeanFactory& factory, const document& manifest)
-    : _type(Documents::ensureAttribute<ShaderStage::Set>(manifest, constants::TYPE)), _source(factory.ensureBuilder<String>(manifest, constants::SRC))
+    : _type(Documents::ensureAttribute<Enum::ShaderStageBit>(manifest, constants::TYPE)), _source(factory.ensureBuilder<String>(manifest, constants::SRC))
 {
 }
 
@@ -80,11 +80,13 @@ sp<RenderLayerSnapshot::BufferObject> Shader::takeBufferSnapshot(const RenderReq
 {
     std::vector<RenderLayerSnapshot::UBOSnapshot> uboSnapshot;
     for(const sp<PipelineInput::UBO>& i : _pipeline_input->ubos())
-        uboSnapshot.push_back(i->snapshot(renderRequest));
+        if(isComputeStage ? i->stages().has(Enum::SHADER_STAGE_BIT_COMPUTE) : i->stages() != Enum::SHADER_STAGE_BIT_COMPUTE)
+            uboSnapshot.push_back(i->snapshot(renderRequest));
 
     std::vector<std::pair<uint32_t, Buffer::Snapshot>> ssboSnapshot;
     for(const PipelineInput::SSBO& i : _pipeline_input->ssbos())
-        ssboSnapshot.emplace_back(i._binding, i._buffer.snapshot());
+        if(isComputeStage ? i._stages.has(Enum::SHADER_STAGE_BIT_COMPUTE) : i._stages != Enum::SHADER_STAGE_BIT_COMPUTE)
+            ssboSnapshot.emplace_back(i._binding, i._buffer.snapshot());
 
     return sp<RenderLayerSnapshot::BufferObject>::make(RenderLayerSnapshot::BufferObject{std::move(uboSnapshot), std::move(ssboSnapshot)});
 }
@@ -154,32 +156,32 @@ sp<Shader> Shader::BUILDER_IMPL::build(const Scope& args)
 sp<PipelineBuildingContext> Shader::BUILDER_IMPL::makePipelineBuildingContext(const sp<Camera>& camera, const Scope& args) const
 {
     sp<PipelineBuildingContext> context = sp<PipelineBuildingContext>::make(_render_controller, camera);
-    const Optional<const StageManifest&> vertexOpt = findStageManifest(ShaderStage::SHADER_STAGE_VERTEX, _stages);
-    const Optional<const StageManifest&> fragmentOpt = findStageManifest(ShaderStage::SHADER_STAGE_FRAGMENT, _stages);
-    const Optional<const StageManifest&> computeOpt = findStageManifest(ShaderStage::SHADER_STAGE_COMPUTE, _stages);
+    const Optional<const StageManifest&> vertexOpt = findStageManifest(Enum::SHADER_STAGE_BIT_VERTEX, _stages);
+    const Optional<const StageManifest&> fragmentOpt = findStageManifest(Enum::SHADER_STAGE_BIT_FRAGMENT, _stages);
+    const Optional<const StageManifest&> computeOpt = findStageManifest(Enum::SHADER_STAGE_BIT_COMPUTE, _stages);
     if(vertexOpt || fragmentOpt || !computeOpt)
     {
         const Global<StringTable> globalStringTable;
-        context->addStage(vertexOpt ? vertexOpt->_source->build(args) : globalStringTable->getString("shaders", "default.vert", true), ShaderStage::SHADER_STAGE_VERTEX, ShaderStage::SHADER_STAGE_NONE);
-        context->addStage(fragmentOpt ? fragmentOpt->_source->build(args) : globalStringTable->getString("shaders", "texture.frag", true), ShaderStage::SHADER_STAGE_FRAGMENT, ShaderStage::SHADER_STAGE_VERTEX);
+        context->addStage(vertexOpt ? vertexOpt->_source->build(args) : globalStringTable->getString("shaders", "default.vert", true), Enum::SHADER_STAGE_BIT_VERTEX, Enum::SHADER_STAGE_BIT_NONE);
+        context->addStage(fragmentOpt ? fragmentOpt->_source->build(args) : globalStringTable->getString("shaders", "texture.frag", true), Enum::SHADER_STAGE_BIT_FRAGMENT, Enum::SHADER_STAGE_BIT_VERTEX);
     }
     else
         CHECK(computeOpt, "Shader must have at least one stage defined");
     if(computeOpt)
-        context->addStage(computeOpt->_source->build(args), ShaderStage::SHADER_STAGE_COMPUTE, ShaderStage::SHADER_STAGE_NONE);
+        context->addStage(computeOpt->_source->build(args), Enum::SHADER_STAGE_BIT_COMPUTE, Enum::SHADER_STAGE_BIT_NONE);
     return context;
 }
 
-template<> ARK_API ShaderStage::Set StringConvert::eval<ShaderStage::Set>(const String& val)
+template<> ARK_API Enum::ShaderStageBit StringConvert::eval<Enum::ShaderStageBit>(const String& val)
 {
     if(val == "vertex")
-        return ShaderStage::SHADER_STAGE_VERTEX;
+        return Enum::SHADER_STAGE_BIT_VERTEX;
     if(val == "fragment")
-        return ShaderStage::SHADER_STAGE_FRAGMENT;
+        return Enum::SHADER_STAGE_BIT_FRAGMENT;
     if(val == "compute")
-        return ShaderStage::SHADER_STAGE_COMPUTE;
+        return Enum::SHADER_STAGE_BIT_COMPUTE;
     CHECK(val.empty(), "Unknown stage: \"%s\"", val.c_str());
-    return ShaderStage::SHADER_STAGE_NONE;
+    return Enum::SHADER_STAGE_BIT_NONE;
 }
 
 Shader::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

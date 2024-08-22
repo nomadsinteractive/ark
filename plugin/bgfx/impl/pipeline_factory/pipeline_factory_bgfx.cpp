@@ -26,15 +26,15 @@ namespace ark::plugin::bgfx {
 
 namespace {
 
-char toBgfxShaderTypeMagic(ShaderStage::Set stage)
+char toBgfxShaderTypeMagic(Enum::ShaderStageBit stage)
 {
     switch(stage)
     {
-        case ShaderStage::SHADER_STAGE_VERTEX:
+        case Enum::SHADER_STAGE_BIT_VERTEX:
             return 'V';
-        case ShaderStage::SHADER_STAGE_FRAGMENT:
+        case Enum::SHADER_STAGE_BIT_FRAGMENT:
             return 'F';
-        case ShaderStage::SHADER_STAGE_COMPUTE:
+        case Enum::SHADER_STAGE_BIT_COMPUTE:
             return 'C';
         default:
             FATAL("Unsupported shader type: %d", stage);
@@ -181,7 +181,7 @@ struct alignas(1) BgfxShaderAttributeChunk {
 
 #pragma pack(pop)
 
-::bgfx::ShaderHandle createShader(const PipelineInput& pipelineInput, const String& source, ShaderStage::Set stage)
+::bgfx::ShaderHandle createShader(const PipelineInput& pipelineInput, const String& source, Enum::ShaderStageBit stage)
 {
     const char bgfxChunkMagic[4] = {toBgfxShaderTypeMagic(stage), 'S', 'H', 11};
     const std::vector<uint32_t> binaries = RenderUtil::compileSPIR(source, stage, Ark::RENDERER_TARGET_VULKAN);
@@ -212,7 +212,7 @@ struct alignas(1) BgfxShaderAttributeChunk {
             }
 
     uint32_t binding = 2;
-    if(stage == ShaderStage::SHADER_STAGE_FRAGMENT)
+    if(stage == Enum::SHADER_STAGE_BIT_FRAGMENT)
         for(const String& i : pipelineInput.samplerNames())
         {
             dynamicDataSize += (i.size() + 1);
@@ -231,7 +231,7 @@ struct alignas(1) BgfxShaderAttributeChunk {
 
     uint32_t customId = 0;
     std::vector<BgfxShaderAttributeChunk> attributeChunks;
-    if(stage == ShaderStage::SHADER_STAGE_VERTEX)
+    if(stage == Enum::SHADER_STAGE_BIT_VERTEX)
         for(const auto& [name, attribute] : pipelineInput.getStreamLayout(0).attributes())
             attributeChunks.push_back({toBgfxAttribId(attribute.usage(), customId)});
 
@@ -268,8 +268,8 @@ struct DrawPipelineBgfx final : ResourceBase<::bgfx::ProgramHandle, Pipeline> {
     {
         if(!_handle)
         {
-            const auto vHandle = createShader(_pipeline_input, _vertex_shader, ShaderStage::SHADER_STAGE_VERTEX);
-            const auto fHandle = createShader(_pipeline_input, _fragment_shader, ShaderStage::SHADER_STAGE_FRAGMENT);
+            const auto vHandle = createShader(_pipeline_input, _vertex_shader, Enum::SHADER_STAGE_BIT_VERTEX);
+            const auto fHandle = createShader(_pipeline_input, _fragment_shader, Enum::SHADER_STAGE_BIT_FRAGMENT);
             _handle.reset(::bgfx::createProgram(vHandle, fHandle, true));
         }
     }
@@ -420,16 +420,16 @@ private:
 
 sp<Pipeline> PipelineFactoryBgfx::buildPipeline(GraphicsContext& graphicsContext, const PipelineBindings& bindings)
 {
-    std::map<ShaderStage::Set, String> shaders = bindings.pipelineLayout()->getPreprocessedShaders(graphicsContext.renderContext());
-    if(const auto vIter = shaders.find(ShaderStage::SHADER_STAGE_VERTEX); vIter != shaders.end())
+    std::map<Enum::ShaderStageBit, String> shaders = bindings.pipelineLayout()->getPreprocessedShaders(graphicsContext.renderContext());
+    if(const auto vIter = shaders.find(Enum::SHADER_STAGE_BIT_VERTEX); vIter != shaders.end())
     {
         const PipelineDescriptor& pipelineDescriptor = bindings.pipelineDescriptor();
         const Enum::DrawProcedure drawProcedure = pipelineDescriptor.drawProcedure();
-        const auto fIter = shaders.find(ShaderStage::SHADER_STAGE_FRAGMENT);
+        const auto fIter = shaders.find(Enum::SHADER_STAGE_BIT_FRAGMENT);
         CHECK(fIter != shaders.end(), "Pipeline has no fragment shader(only vertex shader available)");
         return sp<Pipeline>::make<DrawPipelineBgfx>(drawProcedure, pipelineDescriptor.mode(), bindings.pipelineInput(), std::move(vIter->second), std::move(fIter->second));
     }
-    const auto cIter = shaders.find(ShaderStage::SHADER_STAGE_COMPUTE);
+    const auto cIter = shaders.find(Enum::SHADER_STAGE_BIT_COMPUTE);
     CHECK(cIter != shaders.end(), "Pipeline has no compute shader");
     return sp<Pipeline>::make<ComputePipelineBgfx>(std::move(cIter->second));
 }

@@ -120,7 +120,7 @@ const std::vector<String>& PipelineInput::samplerNames() const
     return _sampler_names;
 }
 
-const std::vector<std::pair<String, ShaderStage>>& PipelineInput::images() const
+const std::vector<std::pair<String, ShaderStageSet>>& PipelineInput::images() const
 {
     return _images;
 }
@@ -265,7 +265,7 @@ const std::vector<std::pair<uintptr_t, size_t>>& PipelineInput::UBO::slots() con
     return _slots;
 }
 
-const ShaderStage& PipelineInput::UBO::stages() const
+const ShaderStageSet& PipelineInput::UBO::stages() const
 {
     return _stages;
 }

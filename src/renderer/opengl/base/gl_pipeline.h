@@ -22,7 +22,7 @@ namespace ark::opengl {
 
 class GLPipeline : public Pipeline {
 public:
-    GLPipeline(const sp<Recycler>& recycler, uint32_t version, std::map<ShaderStage::Set, String> shaders, const PipelineDescriptor& bindings);
+    GLPipeline(const sp<Recycler>& recycler, uint32_t version, std::map<Enum::ShaderStageBit, String> shaders, const PipelineDescriptor& bindings);
     virtual ~GLPipeline() override;
 
     virtual uint64_t id() override;
@@ -176,7 +176,7 @@ private:
 
     uint32_t _version;
 
-    std::map<ShaderStage::Set, String> _shaders;
+    std::map<Enum::ShaderStageBit, String> _shaders;
 
     sp<PipelineOperation> _pipeline_operation;
     std::vector<sp<Snippet::DrawEvents>> _draw_decorators;

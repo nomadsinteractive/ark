@@ -69,12 +69,12 @@ public:
         RenderUtil::setLayoutDescriptor(RenderUtil::setupLayoutLocation(context, firstStage._declaration_ins), sLocation, 0);
 
         const PipelineInput& pipelineInput = pipelineLayout.input();
-        if(ShaderPreprocessor* vertex = context.tryGetStage(ShaderStage::SHADER_STAGE_VERTEX))
+        if(ShaderPreprocessor* vertex = context.tryGetStage(Enum::SHADER_STAGE_BIT_VERTEX))
         {
             RenderUtil::setLayoutDescriptor(vertex->_declaration_images, "binding", static_cast<uint32_t>(pipelineInput.ubos().size() + pipelineInput.ssbos().size() + pipelineInput.samplerCount()));
             vertex->_predefined_macros.push_back("#define gl_InstanceID gl_InstanceIndex");
         }
-        if(ShaderPreprocessor* fragment = context.tryGetStage(ShaderStage::SHADER_STAGE_FRAGMENT))
+        if(ShaderPreprocessor* fragment = context.tryGetStage(Enum::SHADER_STAGE_BIT_FRAGMENT))
         {
             fragment->linkNextStage("FragColor");
             const uint32_t bindingOffset = std::max<uint32_t>(2, pipelineInput.ubos().size() + pipelineInput.ssbos().size());
@@ -92,7 +92,7 @@ public:
             }
         }
 
-        if(const ShaderPreprocessor* compute = context.tryGetStage(ShaderStage::SHADER_STAGE_COMPUTE))
+        if(const ShaderPreprocessor* compute = context.tryGetStage(Enum::SHADER_STAGE_BIT_COMPUTE))
         {
             const uint32_t bindingOffset = static_cast<uint32_t>(pipelineInput.ubos().size() + pipelineInput.ssbos().size());
             RenderUtil::setLayoutDescriptor(compute->_declaration_images, "binding", bindingOffset);

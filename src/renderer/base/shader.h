@@ -21,7 +21,7 @@ public:
     struct StageManifest {
         StageManifest(BeanFactory& factory, const document& manifest);
 
-        ShaderStage::Set _type;
+        Enum::ShaderStageBit _type;
         builder<String> _source;
     };
 

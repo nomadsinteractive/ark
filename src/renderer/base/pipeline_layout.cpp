@@ -33,9 +33,9 @@ const sp<PipelineInput>& PipelineLayout::input() const
     return _input;
 }
 
-std::map<ShaderStage::Set, String> PipelineLayout::getPreprocessedShaders(const RenderEngineContext& renderEngineContext) const
+std::map<Enum::ShaderStageBit, String> PipelineLayout::getPreprocessedShaders(const RenderEngineContext& renderEngineContext) const
 {
-    std::map<ShaderStage::Set, String> shaders;
+    std::map<Enum::ShaderStageBit, String> shaders;
     const std::map<String, String>& definitions = _definitions;
 
     for(const auto& [i, j] : _preprocessed_stages)
@@ -53,7 +53,7 @@ void PipelineLayout::initialize()
 {
     _building_context->initialize();
 
-    if(const ShaderPreprocessor* fragment = _building_context->tryGetStage(ShaderStage::SHADER_STAGE_FRAGMENT))
+    if(const ShaderPreprocessor* fragment = _building_context->tryGetStage(Enum::SHADER_STAGE_BIT_FRAGMENT))
         _color_attachment_count = fragment->_main_block->outArgumentCount() + (fragment->_main_block->hasReturnValue() ? 1 : 0);
 
     _input->initialize(_building_context);

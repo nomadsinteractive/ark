@@ -119,13 +119,13 @@ VkStencilOpState makeStencilState(const PipelineDescriptor::TraitStencilTestSepa
 
 }
 
-VKPipeline::VKPipeline(const PipelineDescriptor& bindings, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, std::map<ShaderStage::Set, String> shaders)
+VKPipeline::VKPipeline(const PipelineDescriptor& bindings, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, std::map<Enum::ShaderStageBit, String> shaders)
     : _pipeline_descriptor(bindings), _recycler(recycler), _renderer(renderer), _baked_renderer(makeBakedRenderer(bindings)), _layout(VK_NULL_HANDLE), _descriptor_set_layout(VK_NULL_HANDLE),
       _descriptor_set(VK_NULL_HANDLE), _pipeline(VK_NULL_HANDLE), _shaders(std::move(shaders)), _rebind_needed(true), _is_compute_pipeline(false)
 {
     for(const auto& i : _shaders)
     {
-        if(i.first == ShaderStage::SHADER_STAGE_COMPUTE)
+        if(i.first == Enum::SHADER_STAGE_BIT_COMPUTE)
         {
             _is_compute_pipeline = true;
             CHECK(_shaders.size() == 1, "Compute stage is exclusive");
@@ -258,13 +258,13 @@ void VKPipeline::setupDescriptorSetLayout(const PipelineInput& pipelineInput)
     uint32_t binding = 0;
     for(const sp<PipelineInput::UBO>& i : pipelineInput.ubos())
     {
-        const VkShaderStageFlags stages = i->stages().toFlags<VkShaderStageFlagBits>(VKUtil::toStage);
+        const VkShaderStageFlags stages = i->stages().toFlags<VkShaderStageFlagBits>(VKUtil::toStage, Enum::SHADER_STAGE_BIT_COUNT);
         binding = std::max(binding, i->binding());
         setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, stages, i->binding()));
     }
     for(const PipelineInput::SSBO& i : pipelineInput.ssbos())
     {
-        const VkShaderStageFlags stages = i._stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage);
+        const VkShaderStageFlags stages = i._stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, Enum::SHADER_STAGE_BIT_COUNT);
         binding = std::max(binding, i._binding);
         setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, stages, i._binding));
     }
@@ -273,7 +273,7 @@ void VKPipeline::setupDescriptorSetLayout(const PipelineInput& pipelineInput)
         setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _is_compute_pipeline ? VK_SHADER_STAGE_COMPUTE_BIT : VK_SHADER_STAGE_FRAGMENT_BIT, ++binding));
 
     for(const auto& [k, v] : pipelineInput.images())
-        setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, v.toFlags<VkShaderStageFlagBits>(VKUtil::toStage), ++binding));
+        setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, v.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, Enum::SHADER_STAGE_BIT_COUNT), ++binding));
 
     const VkDescriptorSetLayoutCreateInfo descriptorLayout = vks::initializers::descriptorSetLayoutCreateInfo(setLayoutBindings.data(), static_cast<uint32_t>(setLayoutBindings.size()));
     VKUtil::checkResult(vkCreateDescriptorSetLayout(device->vkLogicalDevice(), &descriptorLayout, nullptr, &_descriptor_set_layout));
