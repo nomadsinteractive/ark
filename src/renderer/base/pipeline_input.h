@@ -111,6 +111,12 @@ public:
         ShaderStageSet _stages;
     };
 
+    struct BindingSet {
+        uint32_t _binding;
+        ShaderStageSet _stages;
+
+        uint32_t addStage(Enum::ShaderStageBit stage, uint32_t binding);
+    };
 public:
     PipelineInput(const sp<Camera>& camera);
 
@@ -129,8 +135,6 @@ public:
     size_t samplerCount() const;
     const std::vector<String>& samplerNames() const;
 
-    const std::vector<std::pair<String, ShaderStageSet>>& images() const;
-
     void addAttribute(String name, Attribute attribute);
 
     const StreamLayout& getStreamLayout(uint32_t divisor) const;
@@ -147,7 +151,6 @@ private:
 
     std::map<uint32_t, StreamLayout> _stream_layouts;
     std::vector<String> _sampler_names;
-    std::vector<std::pair<String, ShaderStageSet>> _images;
 
     friend class PipelineBuildingContext;
     friend class PipelineLayout;

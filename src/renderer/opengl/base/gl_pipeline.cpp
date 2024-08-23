@@ -645,17 +645,22 @@ void GLPipeline::Stub::bind(GraphicsContext& /*graphicsContext*/, const Pipeline
     bindUBOSnapshots(pipelineContext._buffer_object->_ubos, pipelineBindings.pipelineInput());
 
     uint32_t binding = 0;
-    for(const auto& [k, v] : pipelineBindings.pipelineDescriptor()->samplers())
+    const std::vector<String>& samplerNames = pipelineBindings.pipelineInput()->samplerNames();
+    const std::vector<std::pair<sp<Texture>, PipelineInput::BindingSet>>& samplers = pipelineBindings.pipelineDescriptor()->samplers();
+    DASSERT(samplerNames.size() == samplers.size());
+    for(size_t i = 0; i < samplerNames.size(); ++i)
     {
-        CHECK_WARN(v, "Pipeline has unbound sampler \"%s\"", k.c_str());
-        if(v)
-            activeTexture(v, k, binding);
+        const String& name = samplerNames.at(i);
+        const sp<Texture>& texture = samplers.at(i).first;
+        CHECK_WARN(texture, "Pipeline has unbound sampler \"%s\"", name.c_str());
+        if(texture)
+            activeTexture(texture, name, binding);
         ++ binding;
     }
 
-    const std::vector<sp<Texture>>& images = pipelineBindings.pipelineDescriptor()->images();
+    const std::vector<std::pair<sp<Texture>, PipelineInput::BindingSet>>& images = pipelineBindings.pipelineDescriptor()->images();
     for(size_t i = 0; i < images.size(); ++i)
-        if(const sp<Texture>& image = images.at(i))
+        if(const sp<Texture>& image = images.at(i).first)
             bindImage(image, static_cast<uint32_t>(i));
 }
 

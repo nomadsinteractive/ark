@@ -28,8 +28,8 @@ public:
     }
 
     void preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context, const PipelineLayout& /*pipelineLayout*/) override {
-        ShaderPreprocessor& vertex = context.getStage(Enum::SHADER_STAGE_BIT_VERTEX);
-        ShaderPreprocessor& fragment = context.getStage(Enum::SHADER_STAGE_BIT_FRAGMENT);
+        ShaderPreprocessor& vertex = context.getRenderStage(Enum::SHADER_STAGE_BIT_VERTEX);
+        ShaderPreprocessor& fragment = context.getRenderStage(Enum::SHADER_STAGE_BIT_FRAGMENT);
 
         fragment.addOutputModifier("", " * vec4(1.0, 1.0, 1.0, v_Alpha01)");
         fragment.addOutputModifier("u_Color01", "");
@@ -51,9 +51,10 @@ public:
         const sp<PipelineFactory> pipelineFactory = Ark::instance().applicationContext()->renderEngine()->rendererFactory()->createPipelineFactory();
         const sp<Snippet> snippet = sp<SnippetTest>::make();
         const sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(Ark::instance().applicationContext()->renderController(), nullptr, std::move(vert), std::move(frag));
-        buildingContext->addSnippet(snippet);
 
-        const sp<PipelineLayout> pipelineLayout = sp<PipelineLayout>::make(buildingContext, buildingContext->makePipelineSnippet());
+        const sp<PipelineLayout> pipelineLayout = sp<PipelineLayout>::make(buildingContext);
+        pipelineLayout->addSnippet(snippet);
+        pipelineLayout->initialize();
         const sp<PipelineInput>& pipelineInput = pipelineLayout->input();
 
         TESTCASE_VALIDATE(pipelineInput->streamLayouts()[0].stride() != 0);

@@ -172,8 +172,9 @@ public:
     const sp<PipelineInput>& input() const;
 
     const PipelineInput::AttributeOffsets& attributes() const;
-    const Table<String, sp<Texture>>& samplers() const;
-    const std::vector<sp<Texture>>& images() const;
+
+    const std::vector<std::pair<sp<Texture>, PipelineInput::BindingSet>>& samplers() const;
+    const std::vector<std::pair<sp<Texture>, PipelineInput::BindingSet>>& images() const;
 
     void bindSampler(sp<Texture> texture, uint32_t name = 0);
 
@@ -184,23 +185,7 @@ public:
     void setFlag(Flag flag, Flag bitmask) const;
 
 private:
-    struct Stub {
-        Stub(Enum::RenderMode mode, Enum::DrawProcedure renderProcedure, Parameters parameters, sp<PipelineLayout> pipelineLayout);
-
-        Enum::RenderMode _mode;
-        Enum::DrawProcedure _render_procedure;
-
-        Parameters _parameters;
-
-        sp<PipelineLayout> _layout;
-        sp<PipelineInput> _input;
-//TODO: move it to stream
-        PipelineInput::AttributeOffsets _attributes;
-
-        Table<String, sp<Texture>> _samplers;
-        std::vector<sp<Texture>> _images;
-    };
-
+    struct Stub;
     sp<Stub> _stub;
 };
 

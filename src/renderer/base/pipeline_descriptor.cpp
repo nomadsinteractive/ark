@@ -6,12 +6,25 @@
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/pipeline_input.h"
 #include "renderer/base/pipeline_layout.h"
-#include "renderer/base/pipeline_bindings.h"
-#include "renderer/inf/pipeline.h"
-#include "renderer/inf/pipeline_factory.h"
-#include "renderer/inf/snippet.h"
 
 namespace ark {
+
+struct PipelineDescriptor::Stub {
+    Stub(Enum::RenderMode mode, Enum::DrawProcedure renderProcedure, Parameters parameters, sp<PipelineLayout> pipelineLayout);
+
+    Enum::RenderMode _mode;
+    Enum::DrawProcedure _render_procedure;
+
+    Parameters _parameters;
+
+    sp<PipelineLayout> _layout;
+    sp<PipelineInput> _input;
+    //TODO: move it to stream
+    PipelineInput::AttributeOffsets _attributes;
+
+    std::vector<std::pair<sp<Texture>, PipelineInput::BindingSet>> _samplers;
+    std::vector<std::pair<sp<Texture>, PipelineInput::BindingSet>> _images;
+};
 
 PipelineDescriptor::PipelineDescriptor(Enum::RenderMode mode, Enum::DrawProcedure renderProcedure, Parameters parameters, sp<PipelineLayout> pipelineLayout)
     : _stub(sp<Stub>::make(mode, renderProcedure, std::move(parameters), std::move(pipelineLayout)))
@@ -53,12 +66,12 @@ const PipelineInput::AttributeOffsets& PipelineDescriptor::attributes() const
     return _stub->_attributes;
 }
 
-const Table<String, sp<Texture>>& PipelineDescriptor::samplers() const
+const std::vector<std::pair<sp<Texture>, PipelineInput::BindingSet>>& PipelineDescriptor::samplers() const
 {
     return _stub->_samplers;
 }
 
-const std::vector<sp<Texture>>& PipelineDescriptor::images() const
+const std::vector<std::pair<sp<Texture>, PipelineInput::BindingSet>>& PipelineDescriptor::images() const
 {
     return _stub->_images;
 }
@@ -67,7 +80,7 @@ void PipelineDescriptor::bindSampler(sp<Texture> texture, uint32_t name)
 {
     CHECK_WARN(_stub->_samplers.size() > name, "Illegal sampler binding position: %d, sampler count: %d", name, _stub->_samplers.size());
     if(_stub->_samplers.size() > name)
-        _stub->_samplers.values()[name] = std::move(texture);
+        _stub->_samplers[name].first = std::move(texture);
 }
 
 bool PipelineDescriptor::hasDivisors() const

@@ -10,7 +10,6 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/base/pipeline_descriptor.h"
-#include "renderer/inf/model_loader.h"
 #include "renderer/inf/pipeline_factory.h"
 
 namespace ark {
@@ -19,6 +18,7 @@ namespace ark {
 class ARK_API Shader {
 public:
     struct StageManifest {
+        StageManifest(Enum::ShaderStageBit type, builder<String> source);
         StageManifest(BeanFactory& factory, const document& manifest);
 
         Enum::ShaderStageBit _type;
@@ -47,7 +47,7 @@ public:
     class BUILDER_IMPL final : public Builder<Shader> {
     public:
         BUILDER_IMPL(BeanFactory& factory, const document& manifest, const ResourceLoaderContext& resourceLoaderContext, sp<Builder<Camera>> camera = nullptr,
-                     Optional<std::vector<StageManifest>> stages = {}, Optional<SnippetManifest> snippets = Optional<SnippetManifest>());
+                     Optional<std::vector<StageManifest>> stages = {}, Optional<SnippetManifest> snippets = {});
 
         sp<Shader> build(const Scope& args) override;
 

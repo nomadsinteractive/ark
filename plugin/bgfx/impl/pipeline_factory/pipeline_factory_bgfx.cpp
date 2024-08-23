@@ -276,11 +276,13 @@ struct DrawPipelineBgfx final : ResourceBase<::bgfx::ProgramHandle, Pipeline> {
 
     void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override
     {
-        if(_sampler_slots.empty() && drawingContext._bindings->samplers().size())
+        if(_sampler_slots.empty() && !drawingContext._bindings->pipelineInput()->samplerNames().empty())
         {
             uint8_t textureUint = 0;
-            for(const auto& [name, texture] : drawingContext._bindings->samplers())
+            for(size_t i = 0; i < drawingContext._bindings->pipelineInput()->samplerNames().size(); ++i)
             {
+                const String& name = drawingContext._bindings->pipelineInput()->samplerNames().at(i);
+                const auto& [texture, bindingSet] = drawingContext._bindings->pipelineDescriptor()->samplers().at(i);
                 const sp<TextureBgfx> textureBgfx = texture->delegate().cast<TextureBgfx>();
                 _sampler_slots.push_back({::bgfx::createUniform(name.c_str(), ::bgfx::UniformType::Sampler), std::move(textureBgfx), textureUint++});
             }

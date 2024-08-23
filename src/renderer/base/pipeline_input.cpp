@@ -120,11 +120,6 @@ const std::vector<String>& PipelineInput::samplerNames() const
     return _sampler_names;
 }
 
-const std::vector<std::pair<String, ShaderStageSet>>& PipelineInput::images() const
-{
-    return _images;
-}
-
 void PipelineInput::addAttribute(String name, Attribute attribute)
 {
     _stream_layouts[attribute.divisor()].addAttribute(std::move(name), std::move(attribute));
@@ -296,6 +291,13 @@ void PipelineInput::UBO::addUniform(const sp<Uniform>& uniform)
 PipelineInput::SSBO::SSBO(Buffer buffer, uint32_t binding)
     : _buffer(std::move(buffer)), _binding(binding)
 {
+}
+
+uint32_t PipelineInput::BindingSet::addStage(Enum::ShaderStageBit stage, uint32_t binding)
+{
+    _binding = binding;
+    _stages.set(stage);
+    return binding + 1;
 }
 
 }

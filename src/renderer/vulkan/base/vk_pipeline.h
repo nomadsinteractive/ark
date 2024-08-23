@@ -42,7 +42,7 @@ private:
     };
 
     void setupVertexDescriptions(const PipelineInput& input, VertexLayout& vertexLayout);
-    void setupDescriptorSetLayout(const PipelineInput& pipelineInput);
+    void setupDescriptorSetLayout(const PipelineDescriptor& pipelineDescriptor);
     void setupDescriptorSet(GraphicsContext& graphicsContext, const PipelineDescriptor& pipelineDescriptor);
 
     void setupGraphicsPipeline(GraphicsContext& graphicsContext, const VertexLayout& vertexLayout);

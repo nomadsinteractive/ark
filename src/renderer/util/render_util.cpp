@@ -291,7 +291,7 @@ uint32_t RenderUtil::hash(const element_index_t* buf, size_t len)
 String RenderUtil::outAttributeName(const String& name, Enum::ShaderStageBit preStage)
 {
     DCHECK(preStage == Enum::SHADER_STAGE_BIT_NONE || preStage == Enum::SHADER_STAGE_BIT_VERTEX, "Only none and vertex stage's out attribute name supported");
-    const char sPrefix[][8] = {"a_", "v_"};
+    constexpr char sPrefix[][8] = {"a_", "v_"};
     const String prefix = sPrefix[preStage + 1];
     return name.startsWith(prefix) ? name : prefix + Strings::capitalizeFirst(name);
 }

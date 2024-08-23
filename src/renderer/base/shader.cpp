@@ -22,33 +22,6 @@ namespace ark {
 
 namespace {
 
-class ShaderBuilderImpl final : public Builder<Shader> {
-public:
-    ShaderBuilderImpl(BeanFactory& factory, const document& doc, const sp<ResourceLoaderContext>& resourceLoaderContext, sp<String> vertex, sp<String> fragment, sp<Camera> defaultCamera)
-        : _factory(factory), _manifest(doc), _render_controller(resourceLoaderContext->renderController()), _vertex(std::move(vertex)), _fragment(std::move(fragment)), _default_camera(defaultCamera ? std::move(defaultCamera) : Camera::getDefaultCamera()),
-          _camera(factory.getBuilder<Camera>(doc, constants::CAMERA)), _parameters(factory, doc, resourceLoaderContext) {
-    }
-
-    sp<Shader> build(const Scope& args) override {
-        const sp<Camera> camera = _camera->build(args);
-        sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(_render_controller, camera ? camera : _default_camera, _vertex, _fragment);
-        sp<Snippet> snippet = buildingContext->makePipelineSnippet();
-        buildingContext->loadManifest(_manifest, _factory, args);
-        return sp<Shader>::make(_render_controller->createPipelineFactory(), _render_controller, sp<PipelineLayout>::make(buildingContext, std::move(snippet)), _parameters.build(args));
-    }
-
-private:
-    BeanFactory _factory;
-    document _manifest;
-    sp<RenderController> _render_controller;
-
-    sp<String> _vertex, _fragment;
-    sp<Camera> _default_camera;
-
-    SafePtr<Builder<Camera>> _camera;
-    PipelineDescriptor::Parameters::BUILDER _parameters;
-};
-
 Optional<const Shader::StageManifest&> findStageManifest(Enum::ShaderStageBit type, const std::vector<Shader::StageManifest>& stages)
 {
     for(const Shader::StageManifest& i : stages)
@@ -57,6 +30,11 @@ Optional<const Shader::StageManifest&> findStageManifest(Enum::ShaderStageBit ty
     return {};
 }
 
+}
+
+Shader::StageManifest::StageManifest(Enum::ShaderStageBit type, builder<String> source)
+    : _type(type), _source(std::move(source))
+{
 }
 
 Shader::StageManifest::StageManifest(BeanFactory& factory, const document& manifest)
@@ -71,9 +49,13 @@ Shader::Shader(sp<PipelineFactory> pipelineFactory, sp<RenderController> renderC
 
 sp<Builder<Shader>> Shader::fromDocument(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext, const String& defVertex, const String& defFragment, const sp<Camera>& defaultCamera)
 {
+    if(builder<Shader> shader = factory.getBuilder<Shader>(manifest, constants::SHADER))
+        return shader;
     const Global<StringTable> stringTable;
-    builder<Shader> shader = factory.getBuilder<Shader>(manifest, constants::SHADER);
-    return shader ? shader : builder<Shader>::make<ShaderBuilderImpl>(factory, manifest, resourceLoaderContext, stringTable->getString(defVertex, true), stringTable->getString(defFragment, true), defaultCamera);
+    std::vector<StageManifest> stageManifests;
+    stageManifests.emplace_back(Enum::SHADER_STAGE_BIT_VERTEX, builder<String>::make<Builder<String>::Prebuilt>(stringTable->getString(defVertex, true)));
+    stageManifests.emplace_back(Enum::SHADER_STAGE_BIT_FRAGMENT, builder<String>::make<Builder<String>::Prebuilt>(stringTable->getString(defFragment, true)));
+    return builder<Shader>::make<BUILDER_IMPL>(factory, manifest, resourceLoaderContext, defaultCamera ? builder<Camera>::make<Builder<Camera>::Prebuilt>(defaultCamera) : nullptr, std::move(stageManifests));
 }
 
 sp<RenderLayerSnapshot::BufferObject> Shader::takeBufferSnapshot(const RenderRequest& renderRequest, bool isComputeStage) const
@@ -144,13 +126,14 @@ Shader::BUILDER_IMPL::BUILDER_IMPL(BeanFactory& factory, const document& manifes
 sp<Shader> Shader::BUILDER_IMPL::build(const Scope& args)
 {
     sp<PipelineBuildingContext> buildingContext = makePipelineBuildingContext(_camera->build(args), args);
-
-    for(const sp<Builder<Snippet>>& i : _snippets)
-        buildingContext->addSnippet(i->build(args));
-    sp<Snippet> snippet = buildingContext->makePipelineSnippet();
-
     buildingContext->loadManifest(_manifest, _factory, args);
-    return sp<Shader>::make(_render_controller->createPipelineFactory(), _render_controller, sp<PipelineLayout>::make(buildingContext, std::move(snippet)), _parameters.build(args));
+
+    sp<PipelineLayout> pipelineLayout = sp<PipelineLayout>::make(std::move(buildingContext));
+    for(const sp<Builder<Snippet>>& i : _snippets)
+        pipelineLayout->addSnippet(i->build(args));
+    pipelineLayout->initialize();
+
+    return sp<Shader>::make(_render_controller->createPipelineFactory(), _render_controller, std::move(pipelineLayout), _parameters.build(args));
 }
 
 sp<PipelineBuildingContext> Shader::BUILDER_IMPL::makePipelineBuildingContext(const sp<Camera>& camera, const Scope& args) const

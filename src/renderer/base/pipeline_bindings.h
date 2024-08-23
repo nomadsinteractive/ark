@@ -31,7 +31,6 @@ public:
     const sp<PipelineLayout>& pipelineLayout() const;
     const sp<PipelineInput>& pipelineInput() const;
 
-    const Table<String, sp<Texture>>& samplers() const;
     const sp<std::map<uint32_t, Buffer>>& streams() const;
     const sp<Traits>& attachments() const;
 

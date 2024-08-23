@@ -64,17 +64,17 @@ class SnippetBgfx final : public Snippet {
 public:
     void preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout) override {
         const String sLocation = "location";
-        const ShaderPreprocessor& firstStage = context.stages().begin()->second;
+        const ShaderPreprocessor& firstStage = context.renderStages().begin()->second;
 
         RenderUtil::setLayoutDescriptor(RenderUtil::setupLayoutLocation(context, firstStage._declaration_ins), sLocation, 0);
 
         const PipelineInput& pipelineInput = pipelineLayout.input();
-        if(ShaderPreprocessor* vertex = context.tryGetStage(Enum::SHADER_STAGE_BIT_VERTEX))
+        if(ShaderPreprocessor* vertex = context.tryGetRenderStage(Enum::SHADER_STAGE_BIT_VERTEX))
         {
             RenderUtil::setLayoutDescriptor(vertex->_declaration_images, "binding", static_cast<uint32_t>(pipelineInput.ubos().size() + pipelineInput.ssbos().size() + pipelineInput.samplerCount()));
             vertex->_predefined_macros.push_back("#define gl_InstanceID gl_InstanceIndex");
         }
-        if(ShaderPreprocessor* fragment = context.tryGetStage(Enum::SHADER_STAGE_BIT_FRAGMENT))
+        if(ShaderPreprocessor* fragment = context.tryGetRenderStage(Enum::SHADER_STAGE_BIT_FRAGMENT))
         {
             fragment->linkNextStage("FragColor");
             const uint32_t bindingOffset = std::max<uint32_t>(2, pipelineInput.ubos().size() + pipelineInput.ssbos().size());
@@ -92,16 +92,16 @@ public:
             }
         }
 
-        if(const ShaderPreprocessor* compute = context.tryGetStage(Enum::SHADER_STAGE_BIT_COMPUTE))
+        if(const ShaderPreprocessor* compute = context.computingStage().get())
         {
             const uint32_t bindingOffset = static_cast<uint32_t>(pipelineInput.ubos().size() + pipelineInput.ssbos().size());
             RenderUtil::setLayoutDescriptor(compute->_declaration_images, "binding", bindingOffset);
         }
 
         const ShaderPreprocessor* prestage = nullptr;
-        for(auto iter = context.stages().begin(); iter != context.stages().end(); ++iter)
+        for(auto iter = context.renderStages().begin(); iter != context.renderStages().end(); ++iter)
         {
-            if(iter != context.stages().begin())
+            if(prestage)
             {
                 RenderUtil::setLayoutDescriptor(prestage->_declaration_outs, iter->second->_declaration_ins, sLocation, 0);
                 RenderUtil::setLayoutDescriptor(iter->second->_declaration_outs, sLocation, 0);
@@ -109,7 +109,7 @@ public:
             prestage = iter->second.get();
         }
 
-        for(const auto& [_, v] : context.stages())
+        for(const auto& [_, v] : context.renderStages())
         {
             ShaderPreprocessor& preprocessor = v;
             preprocessor._version = 450;

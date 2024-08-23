@@ -18,17 +18,20 @@ class CoreSnippetVulkan final : public Snippet {
 public:
     void preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout) override {
         const String sLocation = "location";
-        const ShaderPreprocessor& firstStage = context.stages().begin()->second;
 
-        RenderUtil::setLayoutDescriptor(RenderUtil::setupLayoutLocation(context, firstStage._declaration_ins), sLocation, 0);
+        if(!context.renderStages().empty())
+        {
+            const ShaderPreprocessor& firstStage = context.renderStages().begin()->second;
+            RenderUtil::setLayoutDescriptor(RenderUtil::setupLayoutLocation(context, firstStage._declaration_ins), sLocation, 0);
+        }
 
         const PipelineInput& pipelineInput = pipelineLayout.input();
-        if(ShaderPreprocessor* vertex = context.tryGetStage(Enum::SHADER_STAGE_BIT_VERTEX))
+        if(ShaderPreprocessor* vertex = context.tryGetRenderStage(Enum::SHADER_STAGE_BIT_VERTEX))
         {
             RenderUtil::setLayoutDescriptor(vertex->_declaration_images, "binding", static_cast<uint32_t>(pipelineInput.ubos().size() + pipelineInput.ssbos().size() + pipelineInput.samplerCount()));
             vertex->_predefined_macros.push_back("#define gl_InstanceID gl_InstanceIndex");
         }
-        if(ShaderPreprocessor* fragment = context.tryGetStage(Enum::SHADER_STAGE_BIT_FRAGMENT))
+        if(ShaderPreprocessor* fragment = context.tryGetRenderStage(Enum::SHADER_STAGE_BIT_FRAGMENT))
         {
             fragment->linkNextStage("FragColor");
             const uint32_t bindingOffset = static_cast<uint32_t>(pipelineInput.ubos().size() + pipelineInput.ssbos().size());
@@ -36,30 +39,29 @@ public:
             RenderUtil::setLayoutDescriptor(fragment->_declaration_images, "binding", bindingOffset + static_cast<uint32_t>(fragment->_declaration_samplers.vars().size()));
         }
 
-        if(const ShaderPreprocessor* compute = context.tryGetStage(Enum::SHADER_STAGE_BIT_COMPUTE))
+        if(const ShaderPreprocessor* compute = context.computingStage().get())
         {
             const uint32_t bindingOffset = static_cast<uint32_t>(pipelineInput.ubos().size() + pipelineInput.ssbos().size());
             RenderUtil::setLayoutDescriptor(compute->_declaration_images, "binding", bindingOffset);
         }
 
         const ShaderPreprocessor* prestage = nullptr;
-        for(auto iter = context.stages().begin(); iter != context.stages().end(); ++iter)
+        for(const auto& [_, stage] : context.renderStages())
         {
-            if(iter != context.stages().begin())
+            if(prestage)
             {
-                RenderUtil::setLayoutDescriptor(prestage->_declaration_outs, iter->second->_declaration_ins, sLocation, 0);
-                RenderUtil::setLayoutDescriptor(iter->second->_declaration_outs, sLocation, 0);
+                RenderUtil::setLayoutDescriptor(prestage->_declaration_outs, stage->_declaration_ins, sLocation, 0);
+                RenderUtil::setLayoutDescriptor(stage->_declaration_outs, sLocation, 0);
             }
-            prestage = iter->second.get();
+            prestage = stage.get();
         }
 
-        for(const auto& [_, v] : context.stages())
+        for(ShaderPreprocessor* preprocessor : context.stages())
         {
-            ShaderPreprocessor& preprocessor = v;
-            preprocessor._version = 450;
-            preprocessor.declareUBOStruct(pipelineInput);
-            preprocessor._predefined_macros.emplace_back("#extension GL_ARB_separate_shader_objects : enable");
-            preprocessor._predefined_macros.emplace_back("#extension GL_ARB_shading_language_420pack : enable");
+            preprocessor->_version = 450;
+            preprocessor->declareUBOStruct(pipelineInput);
+            preprocessor->_predefined_macros.emplace_back("#extension GL_ARB_separate_shader_objects : enable");
+            preprocessor->_predefined_macros.emplace_back("#extension GL_ARB_shading_language_420pack : enable");
         }
     }
 

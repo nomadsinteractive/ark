@@ -8,14 +8,14 @@
 
 namespace ark {
 
-class SnippetLinkedChain : public Snippet {
+class SnippetLinkedChain final : public Snippet {
 public:
     SnippetLinkedChain(sp<Snippet> delegate, sp<Snippet> next);
 
-    virtual void preInitialize(PipelineBuildingContext& context) override;
-    virtual void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout) override;
-    virtual sp<DrawEvents> makeDrawEvents(const RenderRequest& renderRequest) override;
-    virtual sp<DrawEvents> makeDrawEvents() override;
+    void preInitialize(PipelineBuildingContext& context) override;
+    void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout) override;
+    sp<DrawEvents> makeDrawEvents(const RenderRequest& renderRequest) override;
+    sp<DrawEvents> makeDrawEvents() override;
 
 //  [[plugin::builder::by-value]]
     class DICTIONARY : public Builder<Snippet> {

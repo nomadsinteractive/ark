@@ -58,11 +58,6 @@ const sp<PipelineInput>& PipelineBindings::pipelineInput() const
     return _pipeline_descriptor->input();
 }
 
-const Table<String, sp<Texture>>& PipelineBindings::samplers() const
-{
-    return _pipeline_descriptor->samplers();
-}
-
 const sp<std::map<uint32_t, Buffer>>& PipelineBindings::streams() const
 {
     return _streams;

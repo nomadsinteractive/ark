@@ -160,7 +160,7 @@ uint64_t VKPipeline::id()
 
 void VKPipeline::upload(GraphicsContext& graphicsContext)
 {
-    setupDescriptorSetLayout(_pipeline_descriptor.input());
+    setupDescriptorSetLayout(_pipeline_descriptor);
 
     _descriptor_pool = makeDescriptorPool();
     _descriptor_pool->upload(graphicsContext);
@@ -250,10 +250,11 @@ void VKPipeline::setupVertexDescriptions(const PipelineInput& input, VKPipeline:
     vertexLayout.inputState.pVertexAttributeDescriptions = vertexLayout.attributeDescriptions.data();
 }
 
-void VKPipeline::setupDescriptorSetLayout(const PipelineInput& pipelineInput)
+void VKPipeline::setupDescriptorSetLayout(const PipelineDescriptor& pipelineDescriptor)
 {
     const sp<VKDevice>& device = _renderer->device();
 
+    const PipelineInput& pipelineInput = pipelineDescriptor.input();
     std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings;
     uint32_t binding = 0;
     for(const sp<PipelineInput::UBO>& i : pipelineInput.ubos())
@@ -272,8 +273,8 @@ void VKPipeline::setupDescriptorSetLayout(const PipelineInput& pipelineInput)
     for(size_t i = 0; i < pipelineInput.samplerCount(); ++i)
         setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _is_compute_pipeline ? VK_SHADER_STAGE_COMPUTE_BIT : VK_SHADER_STAGE_FRAGMENT_BIT, ++binding));
 
-    for(const auto& [k, v] : pipelineInput.images())
-        setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, v.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, Enum::SHADER_STAGE_BIT_COUNT), ++binding));
+    for(const auto& [_binding, _stages] : pipelineDescriptor.layout()->images())
+        setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, _stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, Enum::SHADER_STAGE_BIT_COUNT), ++binding));
 
     const VkDescriptorSetLayoutCreateInfo descriptorLayout = vks::initializers::descriptorSetLayoutCreateInfo(setLayoutBindings.data(), static_cast<uint32_t>(setLayoutBindings.size()));
     VKUtil::checkResult(vkCreateDescriptorSetLayout(device->vkLogicalDevice(), &descriptorLayout, nullptr, &_descriptor_set_layout));
@@ -318,7 +319,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
     }
 
     _texture_observers.clear();
-    for(const sp<Texture>& i : pipelineDescriptor.samplers().values())
+    for(const auto& [i, _] : pipelineDescriptor.samplers())
     {
         CHECK_WARN(i, "Pipeline has unbound sampler");
         if(i)
@@ -333,7 +334,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
                                               &texture->vkDescriptor()));
         }
     }
-    for(const sp<Texture>& i : pipelineDescriptor.images())
+    for(const auto& [i, _] : pipelineDescriptor.images())
     {
         CHECK_WARN(i, "Pipeline has unbound image");
         if(i)
