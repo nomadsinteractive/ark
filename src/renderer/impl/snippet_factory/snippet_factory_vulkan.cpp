@@ -58,8 +58,8 @@ public:
             ShaderPreprocessor& preprocessor = v;
             preprocessor._version = 450;
             preprocessor.declareUBOStruct(pipelineInput);
-            preprocessor._predefined_macros.push_back("#extension GL_ARB_separate_shader_objects : enable");
-            preprocessor._predefined_macros.push_back("#extension GL_ARB_shading_language_420pack : enable");
+            preprocessor._predefined_macros.emplace_back("#extension GL_ARB_separate_shader_objects : enable");
+            preprocessor._predefined_macros.emplace_back("#extension GL_ARB_shading_language_420pack : enable");
         }
     }
 

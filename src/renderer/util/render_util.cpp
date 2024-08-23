@@ -433,7 +433,7 @@ uint32_t RenderUtil::setLayoutDescriptor(const ShaderPreprocessor::DeclarationLi
 {
     uint32_t counter = start;
     DCHECK_WARN(ins.vars().size() == outs.vars().size(), "Output/Input mismatch, output and input have different numbers of items: [%s] vs [%s]",
-                Strings::join(&ins.vars().keys().at(0), 0, ins.vars().keys().size()).c_str(), Strings::join(&outs.vars().keys().at(0), 0, outs.vars().keys().size()).c_str());
+                Strings::join(ins.vars().keys().data(), 0, ins.vars().keys().size()).c_str(), Strings::join(outs.vars().keys().data(), 0, outs.vars().keys().size()).c_str());
     for(const ShaderPreprocessor::Declaration& i : ins.vars().values()) {
         uint32_t binding = getNextLayoutLocation(i, counter);
         setLayoutQualifierBinding(i, qualifierName, binding);

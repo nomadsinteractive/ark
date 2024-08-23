@@ -2,7 +2,6 @@
 
 #include <regex>
 
-#include "core/base/string_buffer.h"
 #include "core/inf/uploader.h"
 #include "core/util/strings.h"
 
@@ -97,14 +96,14 @@ Attribute makePredefinedAttribute(const String& name, const String& type)
     const Attribute::Usage layoutType = toAttributeLayoutType(name, type);
 
     if(layoutType == Attribute::USAGE_TEX_COORD)
-        return Attribute(Attribute::USAGE_TEX_COORD, "a_TexCoordinate", Attribute::TYPE_USHORT, type, 2, true);
+        return {Attribute::USAGE_TEX_COORD, "a_TexCoordinate", Attribute::TYPE_USHORT, type, 2, true};
 
     if(layoutType == Attribute::USAGE_POSITION)
     {
         if(type == "int")
-            return Attribute(Attribute::USAGE_POSITION, "a_Position", Attribute::TYPE_INTEGER, type, 1, false);
+            return {Attribute::USAGE_POSITION, "a_Position", Attribute::TYPE_INTEGER, type, 1, false};
         CHECK(type == "vec2" || type == "vec3" || type == "vec4", "Unacceptable Position type: '%s', must be in [int, vec2, vec3, vec4]", type.c_str());
-        return Attribute(Attribute::USAGE_POSITION, "a_Position", Attribute::TYPE_FLOAT, type, std::min<uint32_t>(3, static_cast<uint32_t>(type.at(3) - '0')), false);
+        return {Attribute::USAGE_POSITION, "a_Position", Attribute::TYPE_FLOAT, type, std::min<uint32_t>(3, static_cast<uint32_t>(type.at(3) - '0')), false};
     }
     return RenderUtil::makePredefinedAttribute("a_" + name, type, layoutType);
 }
@@ -149,14 +148,14 @@ void PipelineBuildingContext::initializeAttributes()
 
     std::set<String> passThroughVars;
     const ShaderPreprocessor* prestage = nullptr;
-    for(auto iter = _stages.begin(); iter != _stages.end(); ++iter)
+    for(const auto& [k, v] : _stages)
     {
-        if(iter->first == Enum::SHADER_STAGE_BIT_COMPUTE)
+        if(k == Enum::SHADER_STAGE_BIT_COMPUTE)
             break;
 
-        if(iter != _stages.begin())
-            iter->second->linkPreStage(*prestage, passThroughVars);
-        prestage = iter->second.get();
+        if(prestage)
+            v->linkPreStage(*prestage, passThroughVars);
+        prestage = v.get();
     }
 
     Table<String, String> attributes;

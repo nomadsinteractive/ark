@@ -443,6 +443,7 @@ bool Strings::splitFunction(const String& expr, String& func, String& args)
 
 String Strings::capitalizeFirst(const String& name)
 {
+    ASSERT(!name.empty());
     String s = name;
     s[0] = static_cast<char>(toupper(s[0]));
     return s;
