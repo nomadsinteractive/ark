@@ -295,8 +295,10 @@ PipelineInput::SSBO::SSBO(Buffer buffer, uint32_t binding)
 
 uint32_t PipelineInput::BindingSet::addStage(Enum::ShaderStageBit stage, uint32_t binding)
 {
-    _binding = binding;
     _stages.set(stage);
+    if(_binding != std::numeric_limits<uint32_t>::max())
+        return binding;
+    _binding = binding;
     return binding + 1;
 }
 

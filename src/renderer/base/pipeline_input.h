@@ -112,7 +112,7 @@ public:
     };
 
     struct BindingSet {
-        uint32_t _binding;
+        uint32_t _binding = std::numeric_limits<uint32_t>::max();
         ShaderStageSet _stages;
 
         uint32_t addStage(Enum::ShaderStageBit stage, uint32_t binding);

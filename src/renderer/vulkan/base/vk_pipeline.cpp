@@ -270,11 +270,12 @@ void VKPipeline::setupDescriptorSetLayout(const PipelineDescriptor& pipelineDesc
         setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, stages, i._binding));
     }
 
-    for(size_t i = 0; i < pipelineInput.samplerCount(); ++i)
-        setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _is_compute_pipeline ? VK_SHADER_STAGE_COMPUTE_BIT : VK_SHADER_STAGE_FRAGMENT_BIT, ++binding));
+    const uint32_t bindingBase = binding + 1;
+    for(const auto& [_binding, _stages] : pipelineDescriptor.layout()->samplers())
+        setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, Enum::SHADER_STAGE_BIT_COUNT), bindingBase + _binding));
 
     for(const auto& [_binding, _stages] : pipelineDescriptor.layout()->images())
-        setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, _stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, Enum::SHADER_STAGE_BIT_COUNT), ++binding));
+        setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, _stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, Enum::SHADER_STAGE_BIT_COUNT), bindingBase + _binding));
 
     const VkDescriptorSetLayoutCreateInfo descriptorLayout = vks::initializers::descriptorSetLayoutCreateInfo(setLayoutBindings.data(), static_cast<uint32_t>(setLayoutBindings.size()));
     VKUtil::checkResult(vkCreateDescriptorSetLayout(device->vkLogicalDevice(), &descriptorLayout, nullptr, &_descriptor_set_layout));
@@ -318,8 +319,9 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
                                           &sbo->vkDescriptor()));
     }
 
+    const uint32_t bindingBase = binding + 1;
     _texture_observers.clear();
-    for(const auto& [i, _] : pipelineDescriptor.samplers())
+    for(const auto& [i, bindingSet] : pipelineDescriptor.samplers())
     {
         CHECK_WARN(i, "Pipeline has unbound sampler");
         if(i)
@@ -330,11 +332,11 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
                 writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
                                               _descriptor_set,
                                               VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                                              ++binding,
+                                              bindingBase + bindingSet._binding,
                                               &texture->vkDescriptor()));
         }
     }
-    for(const auto& [i, _] : pipelineDescriptor.images())
+    for(const auto& [i, bindingSet] : pipelineDescriptor.images())
     {
         CHECK_WARN(i, "Pipeline has unbound image");
         if(i)
@@ -345,7 +347,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
                 writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
                                               _descriptor_set,
                                               VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
-                                              ++binding,
+                                              bindingBase + bindingSet._binding,
                                               &texture->vkDescriptor()));
         }
     }
@@ -520,8 +522,7 @@ void VKPipeline::bindUBOShapshots(GraphicsContext& graphicsContext, const std::v
 
 VkPipelineDepthStencilStateCreateInfo VKPipeline::makeDepthStencilState() const
 {
-    VkPipelineDepthStencilStateCreateInfo state{};
-    state.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+    VkPipelineDepthStencilStateCreateInfo state = {VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO};
     state.depthTestEnable = VK_TRUE;
     state.depthWriteEnable = VK_TRUE;
     state.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
@@ -561,9 +562,7 @@ VkPipelineRasterizationStateCreateInfo VKPipeline::makeRasterizationState() cons
                 VK_POLYGON_MODE_FILL, cullFaceTest._enabled ? VK_CULL_MODE_BACK_BIT : VK_CULL_MODE_NONE,
                 VKUtil::toFrontFace(cullFaceTest._front_face), 0);
     }
-    const VkFrontFace frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
-    // const VkFrontFace frontFace = Ark::instance().renderController()->renderEngine()->isLHS() ? VK_FRONT_FACE_CLOCKWISE : VK_FRONT_FACE_COUNTER_CLOCKWISE;
-    return vks::initializers::pipelineRasterizationStateCreateInfo(VK_POLYGON_MODE_FILL, VK_CULL_MODE_BACK_BIT, frontFace, 0);
+    return vks::initializers::pipelineRasterizationStateCreateInfo(VK_POLYGON_MODE_FILL, VK_CULL_MODE_BACK_BIT, VK_FRONT_FACE_COUNTER_CLOCKWISE, 0);
 }
 
 }
