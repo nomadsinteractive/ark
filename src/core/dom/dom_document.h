@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_DOM_DOCUMENT_H_
-#define ARK_CORE_DOM_DOCUMENT_H_
+#pragma once
 
 #include <map>
 
@@ -32,5 +31,3 @@ private:
 };
 
 }
-
-#endif

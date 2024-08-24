@@ -1,12 +1,35 @@
 #include "renderer/base/pipeline_layout.h"
 
 #include "renderer/base/pipeline_building_context.h"
+#include "renderer/base/render_engine_context.h"
 #include "renderer/base/shader_preprocessor.h"
 #include "renderer/base/snippet_delegate.h"
 #include "renderer/impl/snippet/snippet_linked_chain.h"
 #include "renderer/inf/snippet.h"
 
 namespace ark {
+
+namespace {
+
+String preprocess(const RenderEngineContext& renderEngineContext, const std::map<String, String>& definitions, const String& source)
+{
+    DCHECK(renderEngineContext.version() > 0, "Unintialized RenderEngineContext");
+
+    static std::regex var_pattern(R"(\$\{([\w.]+)\})");
+    const std::map<String, String>& engineDefinitions = renderEngineContext.definitions();
+
+    return source.replace(var_pattern, [&engineDefinitions, &definitions] (Array<String>& matches)->String {
+        const String& varName = matches.at(1);
+        auto iter = engineDefinitions.find(varName);
+        if(iter != engineDefinitions.end())
+            return iter->second;
+        iter = definitions.find(varName);
+        CHECK(iter != definitions.end(), "Undefinition \"%s\"", varName.c_str());
+        return iter->second;
+    });
+}
+
+}
 
 PipelineLayout::PipelineLayout(sp<PipelineBuildingContext> buildingContext)
     : _building_context(std::move(buildingContext)), _input(_building_context->_input), _color_attachment_count(0), _definitions(_building_context->toDefinitions())
@@ -26,7 +49,7 @@ void PipelineLayout::preCompile(GraphicsContext& graphicsContext)
         _snippet->preCompile(graphicsContext, _building_context, *this);
 
         for(ShaderPreprocessor* preprocessor : _building_context->stages())
-            _preprocessed_stages[preprocessor->_shader_stage] = preprocessor->preprocess();
+            _preprocessed_stages.push_back(preprocessor->preprocess());
 
         _building_context = nullptr;
     }
@@ -40,10 +63,9 @@ const sp<PipelineInput>& PipelineLayout::input() const
 std::map<Enum::ShaderStageBit, String> PipelineLayout::getPreprocessedShaders(const RenderEngineContext& renderEngineContext) const
 {
     std::map<Enum::ShaderStageBit, String> shaders;
-    const std::map<String, String>& definitions = _definitions;
 
-    for(const auto& [i, j] : _preprocessed_stages)
-        shaders[i] = j.toSourceCode(renderEngineContext, definitions);
+    for(const auto& [stage, source] : _preprocessed_stages)
+        shaders[stage] = preprocess(renderEngineContext, _definitions, source);
 
     return shaders;
 }

@@ -27,14 +27,14 @@ namespace ark {
 
 namespace {
 
-std::regex _INCLUDE_PATTERN("#include\\s*[<\"]([^>\"]+)[>\"]");
-std::regex _STRUCT_PATTERN("struct\\s+(\\w+)\\s*\\{([^}]+)\\}\\s*;");
-std::regex _IN_PATTERN("(?:attribute|varying|in)" ATTRIBUTE_PATTERN);
-std::regex _UNIFORM_PATTERN("(?:" LAYOUT_PATTERN ")?uniform\\s+" ACCESSIBILITY_PATTERN UNIFORM_PATTERN);
-std::regex _SSBO_PATTERN(LAYOUT_PATTERN ACCESSIBILITY_PATTERN "buffer\\s+(\\w+)");
+std::regex REGEX_INCLUDE_PATTERN(R"(#include\s*[<"]([^>"]+)[>"])");
+std::regex REGEX_STRUCT_PATTERN(R"(struct\s+(\w+)\s*\{([^}]+)\}\s*;)");
+std::regex REGEX_IN_PATTERN("(?:attribute|varying|in)" ATTRIBUTE_PATTERN);
+std::regex REGEX_UNIFORM_PATTERN("(?:" LAYOUT_PATTERN ")?uniform\\s+" ACCESSIBILITY_PATTERN UNIFORM_PATTERN);
+std::regex REGEX_SSBO_PATTERN(LAYOUT_PATTERN ACCESSIBILITY_PATTERN "buffer\\s+(\\w+)");
 
 #ifndef ANDROID
-char _STAGE_ATTR_PREFIX[Enum::SHADER_STAGE_BIT_COUNT + 1][4] = {"a_", "v_", "t_", "e_", "g_", "f_", "c_"};
+constexpr char STAGE_ATTR_PREFIX[Enum::SHADER_STAGE_BIT_COUNT + 1][4] = {"a_", "v_", "t_", "e_", "g_", "f_", "c_"};
 #else
 char _STAGE_ATTR_PREFIX[Enum::SHADER_STAGE_COUNT + 1][4] = {"a_", "v_", "f_", "c_"};
 #endif
@@ -53,8 +53,6 @@ ShaderPreprocessor::ShaderPreprocessor(sp<String> source, Enum::ShaderStageBit s
       _declaration_uniforms(_uniform_declaration_codes, "uniform"), _declaration_samplers(_uniform_declaration_codes, "uniform"), _declaration_images(_uniform_declaration_codes, "uniform"),
       _pre_main(sp<String>::make()), _post_main(sp<String>::make())
 {
-    _predefined_macros.emplace_back("#define texture2D(x, y) texture(x, y)");
-    _predefined_macros.emplace_back("#define textureCube texture");
     _predefined_macros.push_back(Strings::sprintf("#define ARK_Z_DIRECTION %.2f", Ark::instance().renderController()->renderEngine()->toLayoutDirection(1.0f)));
 }
 
@@ -100,7 +98,7 @@ void ShaderPreprocessor::parseMainBlock(const String& source, PipelineBuildingCo
         return;
     }
 
-    CHECK_WARN(source.search(_IN_PATTERN, sanitizer), "Non-standard attribute declared above, move it into ark_main function's parameters will disable this warning.");
+    CHECK_WARN(source.search(REGEX_IN_PATTERN, sanitizer), "Non-standard attribute declared above, move it into ark_main function's parameters will disable this warning.");
 
     static const std::regex FUNC_PATTERN(R"((vec4|void)\s+ark_main\((.*)\))");
 
@@ -125,7 +123,7 @@ void ShaderPreprocessor::parseMainBlock(const String& source, PipelineBuildingCo
 void ShaderPreprocessor::parseDeclarations()
 {
     this->addInclude("shaders/defines.h");
-    _main.replace(_INCLUDE_PATTERN, [this](const std::smatch& m) {
+    _main.replace(REGEX_INCLUDE_PATTERN, [this](const std::smatch& m) {
         this->addInclude(m[1].str());
         return nullptr;
     });
@@ -136,22 +134,22 @@ void ShaderPreprocessor::parseDeclarations()
         this->_struct_definitions.push_back(m[1].str(), m[2].str());
         return nullptr;
     };
-    _include_declaration_codes.replace(_STRUCT_PATTERN, structPatternReplacer);
-    _main.replace(_STRUCT_PATTERN, structPatternReplacer);
+    _include_declaration_codes.replace(REGEX_STRUCT_PATTERN, structPatternReplacer);
+    _main.replace(REGEX_STRUCT_PATTERN, structPatternReplacer);
 
     const auto uniformPatternReplacer = [this](const std::smatch& m) {
         const uint32_t length = m[4].str().empty() ? 1 : Strings::eval<uint32_t>(m[4].str());
         return this->addUniform(m[2].str(), m[3].str(), length, m.str());
     };
-    _include_declaration_codes.replace(_UNIFORM_PATTERN, uniformPatternReplacer);
-    _main.replace(_UNIFORM_PATTERN, uniformPatternReplacer);
+    _include_declaration_codes.replace(REGEX_UNIFORM_PATTERN, uniformPatternReplacer);
+    _main.replace(REGEX_UNIFORM_PATTERN, uniformPatternReplacer);
 
     auto ssboPattern = [this](const std::smatch& m) {
         _ssbos[m[2].str()] = Strings::eval<int32_t>(m[1].str());
         return true;
     };
-    _include_declaration_codes.search(_SSBO_PATTERN, ssboPattern);
-    _main.search(_SSBO_PATTERN, ssboPattern);
+    _include_declaration_codes.search(REGEX_SSBO_PATTERN, ssboPattern);
+    _main.search(REGEX_SSBO_PATTERN, ssboPattern);
 
     if(!_main_block)
         return;
@@ -179,9 +177,9 @@ void ShaderPreprocessor::parseDeclarations()
     }
 }
 
-ShaderPreprocessor::Preprocessed ShaderPreprocessor::preprocess()
+ShaderPreprocessor::Stage ShaderPreprocessor::preprocess() const
 {
-    return Preprocessed(_shader_stage, genDeclarations(_main.str()));
+    return {_shader_stage, genDeclarations(_main.str())};
 }
 
 void ShaderPreprocessor::setupUniforms(Table<String, sp<Uniform>>& uniforms)
@@ -214,12 +212,12 @@ void ShaderPreprocessor::setupUniforms(Table<String, sp<Uniform>>& uniforms)
 
 const char* ShaderPreprocessor::inVarPrefix() const
 {
-    return _STAGE_ATTR_PREFIX[_pre_shader_stage + 1];
+    return STAGE_ATTR_PREFIX[_pre_shader_stage + 1];
 }
 
 const char* ShaderPreprocessor::outVarPrefix() const
 {
-    return _STAGE_ATTR_PREFIX[_shader_stage + 1];
+    return STAGE_ATTR_PREFIX[_shader_stage + 1];
 }
 
 const std::vector<ShaderPreprocessor::Parameter>& ShaderPreprocessor::args() const
@@ -364,7 +362,7 @@ void ShaderPreprocessor::linkParameters(const std::vector<ShaderPreprocessor::Pa
 
 const char* ShaderPreprocessor::getOutAttributePrefix(Enum::ShaderStageBit preStage)
 {
-    return _STAGE_ATTR_PREFIX[preStage + 1];
+    return STAGE_ATTR_PREFIX[preStage + 1];
 }
 
 String ShaderPreprocessor::genDeclarations(const String& mainFunc) const
@@ -572,39 +570,6 @@ const Table<String, ShaderPreprocessor::Declaration>& ShaderPreprocessor::Declar
 Table<String, ShaderPreprocessor::Declaration>& ShaderPreprocessor::DeclarationList::vars()
 {
     return _vars;
-}
-
-ShaderPreprocessor::Preprocessed::Preprocessed()
-    : _type(Enum::SHADER_STAGE_BIT_NONE)
-{
-}
-
-ShaderPreprocessor::Preprocessed::Preprocessed(Enum::ShaderStageBit stage, String source)
-    : _type(stage), _source(std::move(source))
-{
-}
-
-Enum::ShaderStageBit ShaderPreprocessor::Preprocessed::stage() const
-{
-    return _type;
-}
-
-String ShaderPreprocessor::Preprocessed::toSourceCode(const RenderEngineContext& renderEngineContext, const std::map<String, String>& definitions) const
-{
-    DCHECK(renderEngineContext.version() > 0, "Unintialized RenderEngineContext");
-
-    static std::regex var_pattern("\\$\\{([\\w.]+)\\}");
-    const std::map<String, String>& engineDefinitions = renderEngineContext.definitions();
-
-    return _source.replace(var_pattern, [&engineDefinitions, &definitions] (Array<String>& matches)->String {
-        const String& varName = matches.at(1);
-        auto iter = engineDefinitions.find(varName);
-        if(iter != engineDefinitions.end())
-            return iter->second;
-        iter = definitions.find(varName);
-        CHECK(iter != definitions.end(), "Undefinition \"%s\"", varName.c_str());
-        return iter->second;
-    });
 }
 
 ShaderPreprocessor::Source::Source(String code)

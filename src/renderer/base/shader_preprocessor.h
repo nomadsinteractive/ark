@@ -7,7 +7,6 @@
 #include "core/collection/table.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/base/attribute.h"
 #include "renderer/base/pipeline_input.h"
 #include "renderer/base/render_engine.h"
 #include "renderer/base/shader.h"
@@ -20,17 +19,7 @@ private:
     class Source;
 
 public:
-    class Preprocessed {
-    public:
-        Preprocessed();
-        Preprocessed(Enum::ShaderStageBit stage, String source);
-        DEFAULT_COPY_AND_ASSIGN(Preprocessed);
-
-        Enum::ShaderStageBit stage() const;
-
-        String toSourceCode(const RenderEngineContext& renderEngineContext, const std::map<String, String>& definitions) const;
-
-    private:
+    struct Stage {
         Enum::ShaderStageBit _type;
         String _source;
     };
@@ -165,7 +154,7 @@ public:
     void linkNextStage(const String& returnValueName);
     void linkPreStage(const ShaderPreprocessor& preStage, std::set<String>& passThroughVars);
 
-    Preprocessed preprocess();
+    Stage preprocess() const;
 
     sp<Uniform> makeUniformInput(String name, Uniform::Type type) const;
 

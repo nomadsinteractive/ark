@@ -40,7 +40,7 @@ private:
     sp<PipelineInput> _input;
     sp<Snippet> _snippet;
 
-    std::map<Enum::ShaderStageBit, ShaderPreprocessor::Preprocessed> _preprocessed_stages;
+    std::vector<ShaderPreprocessor::Stage> _preprocessed_stages;
     std::vector<PipelineInput::BindingSet> _samplers;
     std::vector<PipelineInput::BindingSet> _images;
 

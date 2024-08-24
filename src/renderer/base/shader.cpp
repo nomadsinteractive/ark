@@ -33,12 +33,12 @@ Optional<const Shader::StageManifest&> findStageManifest(Enum::ShaderStageBit ty
 }
 
 Shader::StageManifest::StageManifest(Enum::ShaderStageBit type, builder<String> source)
-    : _type(type), _source(std::move(source))
+    : _type(type), _source(std::move(source)), _manifest(Global<Constants>()->DOCUMENT_NONE)
 {
 }
 
 Shader::StageManifest::StageManifest(BeanFactory& factory, const document& manifest)
-    : _type(Documents::ensureAttribute<Enum::ShaderStageBit>(manifest, constants::TYPE)), _source(factory.ensureBuilder<String>(manifest, constants::SRC))
+    : _type(Documents::ensureAttribute<Enum::ShaderStageBit>(manifest, constants::TYPE)), _source(factory.ensureBuilder<String>(manifest, constants::SRC)), _manifest(manifest)
 {
 }
 

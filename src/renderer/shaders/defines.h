@@ -10,4 +10,7 @@
 #define u_View   ${camera.uView}
 #define u_Projection   ${camera.uProjection}
 
+#define texture2D(x, y)   texture(x, y)
+#define textureCube(x, y) texture(x, y)
+
 #endif

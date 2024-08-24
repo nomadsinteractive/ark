@@ -12,7 +12,7 @@ namespace ark::vulkan {
 
 namespace {
 
-class PipelineComposite : public Pipeline {
+class PipelineComposite final : public Pipeline {
 public:
     PipelineComposite(sp<Pipeline> pipelineDraw, sp<Pipeline> pipelineCompute)
         : _pipeline_draw(std::move(pipelineDraw)), _pipeline_compute(std::move(pipelineCompute)) {

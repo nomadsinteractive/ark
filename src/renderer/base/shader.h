@@ -23,6 +23,7 @@ public:
 
         Enum::ShaderStageBit _type;
         builder<String> _source;
+        document _manifest;
     };
 
     typedef std::vector<sp<Builder<Snippet>>> SnippetManifest;

@@ -11,6 +11,8 @@ namespace ark {
 struct Constants {
     Constants();
 
+    document DOCUMENT_NONE;
+
     sp<Boolean> BOOLEAN_TRUE;
     sp<Boolean> BOOLEAN_FALSE;
 
