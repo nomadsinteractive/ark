@@ -100,6 +100,21 @@ const std::vector<PipelineInput::SSBO>& PipelineInput::ssbos() const
     return _ssbos;
 }
 
+sp<RenderLayerSnapshot::BufferObject> PipelineInput::takeBufferSnapshot(const RenderRequest& renderRequest, bool isComputeStage) const
+{
+    std::vector<RenderLayerSnapshot::UBOSnapshot> uboSnapshot;
+    for(const sp<UBO>& i : _ubos)
+        if(isComputeStage ? i->stages().has(Enum::SHADER_STAGE_BIT_COMPUTE) : i->stages() != Enum::SHADER_STAGE_BIT_COMPUTE)
+            uboSnapshot.push_back(i->snapshot(renderRequest));
+
+    std::vector<std::pair<uint32_t, Buffer::Snapshot>> ssboSnapshot;
+    for(const SSBO& i : _ssbos)
+        if(isComputeStage ? i._stages.has(Enum::SHADER_STAGE_BIT_COMPUTE) : i._stages != Enum::SHADER_STAGE_BIT_COMPUTE)
+            ssboSnapshot.emplace_back(i._binding, i._buffer.snapshot());
+
+    return sp<RenderLayerSnapshot::BufferObject>::make(RenderLayerSnapshot::BufferObject{std::move(uboSnapshot), std::move(ssboSnapshot)});
+}
+
 const std::map<uint32_t, PipelineInput::StreamLayout>& PipelineInput::streamLayouts() const
 {
     return _stream_layouts;

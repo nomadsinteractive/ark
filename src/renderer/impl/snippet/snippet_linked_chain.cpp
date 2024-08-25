@@ -20,9 +20,9 @@ public:
         _next->preDraw(graphicsContext, context);
     }
 
-    void postDraw(GraphicsContext& graphicsContext) override {
-        _delegate->postDraw(graphicsContext);
-        _next->postDraw(graphicsContext);
+    void postDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override {
+        _delegate->postDraw(graphicsContext, context);
+        _next->postDraw(graphicsContext, context);
     }
 
 private:

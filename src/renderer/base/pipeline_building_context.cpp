@@ -118,8 +118,8 @@ PipelineBuildingContext::PipelineBuildingContext(const sp<RenderController>& ren
 PipelineBuildingContext::PipelineBuildingContext(const sp<RenderController>& renderController, const sp<Camera>& camera, sp<String> vertex, sp<String> fragment)
     : PipelineBuildingContext(renderController, camera)
 {
-    addStage(std::move(vertex), Enum::SHADER_STAGE_BIT_VERTEX, Enum::SHADER_STAGE_BIT_NONE);
-    addStage(std::move(fragment), Enum::SHADER_STAGE_BIT_FRAGMENT, Enum::SHADER_STAGE_BIT_VERTEX);
+    addStage(std::move(vertex), nullptr, Enum::SHADER_STAGE_BIT_VERTEX, Enum::SHADER_STAGE_BIT_NONE);
+    addStage(std::move(fragment), nullptr, Enum::SHADER_STAGE_BIT_FRAGMENT, Enum::SHADER_STAGE_BIT_VERTEX);
 }
 
 void PipelineBuildingContext::loadManifest(const document& manifest, BeanFactory& factory, const Scope& args)
@@ -346,11 +346,11 @@ const op<ShaderPreprocessor>& PipelineBuildingContext::getRenderStage(Enum::Shad
     return iter->second;
 }
 
-const op<ShaderPreprocessor>& PipelineBuildingContext::addStage(sp<String> source, Enum::ShaderStageBit shaderStage, Enum::ShaderStageBit preShaderStage)
+const op<ShaderPreprocessor>& PipelineBuildingContext::addStage(sp<String> source, document manifest, Enum::ShaderStageBit shaderStage, Enum::ShaderStageBit preShaderStage)
 {
     op<ShaderPreprocessor>& stage = shaderStage == Enum::SHADER_STAGE_BIT_COMPUTE ? _computing_stage : _rendering_stages[shaderStage];
     CHECK(!stage, "Stage '%d' has been initialized already", shaderStage);
-    stage.reset(new ShaderPreprocessor(std::move(source), shaderStage, preShaderStage));
+    stage.reset(new ShaderPreprocessor(std::move(source), std::move(manifest), shaderStage, preShaderStage));
     _stages.emplace_back(stage.get());
     return stage;
 }

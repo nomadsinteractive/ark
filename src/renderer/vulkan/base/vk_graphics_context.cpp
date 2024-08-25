@@ -140,16 +140,6 @@ void VKGraphicsContext::submit(VkQueue queue)
     _submit_queue.submit(queue);
 }
 
-void VKGraphicsContext::addSubmitInfo(uint32_t commandBufferCount, const VkCommandBuffer* pCommandBuffers)
-{
-    _submit_queue.addSubmitInfo(commandBufferCount, pCommandBuffers);
-}
-
-void VKGraphicsContext::addWaitSemaphore(VkSemaphore semaphore, VkPipelineStageFlags waitStageFlag)
-{
-    _submit_queue.addWaitSemaphore(semaphore, waitStageFlag);
-}
-
 VkSemaphore VKGraphicsContext::semaphoreRenderComplete() const
 {
     return _semaphore_render_complete;

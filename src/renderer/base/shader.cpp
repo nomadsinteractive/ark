@@ -45,6 +45,7 @@ Shader::StageManifest::StageManifest(BeanFactory& factory, const document& manif
 Shader::Shader(sp<PipelineFactory> pipelineFactory, sp<RenderController> renderController, sp<PipelineLayout> pipelineLayout, PipelineDescriptor::Parameters bindingParams)
     : _pipeline_factory(std::move(pipelineFactory)), _render_controller(std::move(renderController)), _pipeline_layout(std::move(pipelineLayout)), _pipeline_input(_pipeline_layout->input()), _binding_params(std::move(bindingParams))
 {
+    _pipeline_layout->initialize(*this);
 }
 
 sp<Builder<Shader>> Shader::fromDocument(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext, const String& defVertex, const String& defFragment, const sp<Camera>& defaultCamera)
@@ -60,17 +61,7 @@ sp<Builder<Shader>> Shader::fromDocument(BeanFactory& factory, const document& m
 
 sp<RenderLayerSnapshot::BufferObject> Shader::takeBufferSnapshot(const RenderRequest& renderRequest, bool isComputeStage) const
 {
-    std::vector<RenderLayerSnapshot::UBOSnapshot> uboSnapshot;
-    for(const sp<PipelineInput::UBO>& i : _pipeline_input->ubos())
-        if(isComputeStage ? i->stages().has(Enum::SHADER_STAGE_BIT_COMPUTE) : i->stages() != Enum::SHADER_STAGE_BIT_COMPUTE)
-            uboSnapshot.push_back(i->snapshot(renderRequest));
-
-    std::vector<std::pair<uint32_t, Buffer::Snapshot>> ssboSnapshot;
-    for(const PipelineInput::SSBO& i : _pipeline_input->ssbos())
-        if(isComputeStage ? i._stages.has(Enum::SHADER_STAGE_BIT_COMPUTE) : i._stages != Enum::SHADER_STAGE_BIT_COMPUTE)
-            ssboSnapshot.emplace_back(i._binding, i._buffer.snapshot());
-
-    return sp<RenderLayerSnapshot::BufferObject>::make(RenderLayerSnapshot::BufferObject{std::move(uboSnapshot), std::move(ssboSnapshot)});
+    return _pipeline_input->takeBufferSnapshot(renderRequest, isComputeStage);
 }
 
 const sp<PipelineFactory>& Shader::pipelineFactory() const
@@ -131,7 +122,6 @@ sp<Shader> Shader::BUILDER_IMPL::build(const Scope& args)
     sp<PipelineLayout> pipelineLayout = sp<PipelineLayout>::make(std::move(buildingContext));
     for(const sp<Builder<Snippet>>& i : _snippets)
         pipelineLayout->addSnippet(i->build(args));
-    pipelineLayout->initialize();
 
     return sp<Shader>::make(_render_controller->createPipelineFactory(), _render_controller, std::move(pipelineLayout), _parameters.build(args));
 }
@@ -145,13 +135,14 @@ sp<PipelineBuildingContext> Shader::BUILDER_IMPL::makePipelineBuildingContext(co
     if(vertexOpt || fragmentOpt || !computeOpt)
     {
         const Global<StringTable> globalStringTable;
-        context->addStage(vertexOpt ? vertexOpt->_source->build(args) : globalStringTable->getString("shaders", "default.vert", true), Enum::SHADER_STAGE_BIT_VERTEX, Enum::SHADER_STAGE_BIT_NONE);
-        context->addStage(fragmentOpt ? fragmentOpt->_source->build(args) : globalStringTable->getString("shaders", "texture.frag", true), Enum::SHADER_STAGE_BIT_FRAGMENT, Enum::SHADER_STAGE_BIT_VERTEX);
+        document documentNone = Global<Constants>()->DOCUMENT_NONE;
+        context->addStage(vertexOpt ? vertexOpt->_source->build(args) : globalStringTable->getString("shaders", "default.vert", true), documentNone, Enum::SHADER_STAGE_BIT_VERTEX, Enum::SHADER_STAGE_BIT_NONE);
+        context->addStage(fragmentOpt ? fragmentOpt->_source->build(args) : globalStringTable->getString("shaders", "texture.frag", true), std::move(documentNone), Enum::SHADER_STAGE_BIT_FRAGMENT, Enum::SHADER_STAGE_BIT_VERTEX);
     }
     else
         CHECK(computeOpt, "Shader must have at least one stage defined");
     if(computeOpt)
-        context->addStage(computeOpt->_source->build(args), Enum::SHADER_STAGE_BIT_COMPUTE, Enum::SHADER_STAGE_BIT_NONE);
+        context->addStage(computeOpt->_source->build(args), computeOpt->_manifest, Enum::SHADER_STAGE_BIT_COMPUTE, Enum::SHADER_STAGE_BIT_NONE);
     return context;
 }
 

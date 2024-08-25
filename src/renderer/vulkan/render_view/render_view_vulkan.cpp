@@ -54,10 +54,9 @@ void RenderViewVulkan::onRenderFrame(const Color& backgroundColor, RenderCommand
     swapChain->swap(_vk_graphics_context);
 
     if(_vk_compute_context->vkCommandBuffer() != VK_NULL_HANDLE)
-    {
         _vk_compute_context->end();
-        _vk_graphics_context->addWaitSemaphore(_vk_compute_context->semaphoreComputeComplete(), VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
-    }
+
+    swapChain->waitIdle();
 }
 
 }

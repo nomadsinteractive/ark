@@ -39,13 +39,13 @@ public:
     uint32_t aquiredImageId() const;
 
     void swap(VKGraphicsContext& vkGraphicsContext);
+    void waitIdle() const;
 
     void onSurfaceChanged(uint32_t width, uint32_t height);
 
 private:
     void initialize(const RenderEngine& renderEngine);
 
-    void createCommandPool();
     void setupDepthStencil();
     void setupRenderPass();
     void setupFrameBuffer();

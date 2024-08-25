@@ -47,8 +47,8 @@ const char* ANNOTATION_FRAG_COLOR = "${frag.color}";
 
 }
 
-ShaderPreprocessor::ShaderPreprocessor(sp<String> source, Enum::ShaderStageBit shaderStage, Enum::ShaderStageBit preShaderStage)
-    : _source(std::move(source)), _shader_stage(shaderStage), _pre_shader_stage(preShaderStage), _version(0), _declaration_ins(_attribute_declaration_codes, shaderStage == Enum::SHADER_STAGE_BIT_VERTEX ? ANNOTATION_VERT_IN : ANNOTATION_FRAG_IN),
+ShaderPreprocessor::ShaderPreprocessor(sp<String> source, document manifest, Enum::ShaderStageBit shaderStage, Enum::ShaderStageBit preShaderStage)
+    : _source(std::move(source)), _manifest(std::move(manifest)), _shader_stage(shaderStage), _pre_shader_stage(preShaderStage), _version(0), _declaration_ins(_attribute_declaration_codes, shaderStage == Enum::SHADER_STAGE_BIT_VERTEX ? ANNOTATION_VERT_IN : ANNOTATION_FRAG_IN),
       _declaration_outs(_attribute_declaration_codes, shaderStage == Enum::SHADER_STAGE_BIT_VERTEX ? ANNOTATION_VERT_OUT : ANNOTATION_FRAG_OUT),
       _declaration_uniforms(_uniform_declaration_codes, "uniform"), _declaration_samplers(_uniform_declaration_codes, "uniform"), _declaration_images(_uniform_declaration_codes, "uniform"),
       _pre_main(sp<String>::make()), _post_main(sp<String>::make())
@@ -179,7 +179,7 @@ void ShaderPreprocessor::parseDeclarations()
 
 ShaderPreprocessor::Stage ShaderPreprocessor::preprocess() const
 {
-    return {_shader_stage, genDeclarations(_main.str())};
+    return {_manifest, _shader_stage, genDeclarations(_main.str())};
 }
 
 void ShaderPreprocessor::setupUniforms(Table<String, sp<Uniform>>& uniforms)

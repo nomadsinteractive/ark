@@ -63,7 +63,7 @@ public:
             glDisable(GL_CULL_FACE);
     }
 
-    void postDraw(GraphicsContext& /*graphicsContext*/) override {
+    void postDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override {
         if(_enabled) {
             if(_front_face != GL_ZERO)
                 glFrontFace(_pre_front_face);
@@ -99,7 +99,7 @@ public:
             glDisable(GL_DEPTH_TEST);
     }
 
-    void postDraw(GraphicsContext& /*graphicsContext*/) override {
+    void postDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override {
         if(!_enabled)
             glEnable(GL_DEPTH_TEST);
         if(_func != GL_ZERO)
@@ -122,13 +122,13 @@ public:
         : _delegate(std::move(delegate)) {
     }
 
-    virtual void preDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override {
+    void preDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override {
         glEnable(GL_STENCIL_TEST);
         for(const sp<Snippet::DrawEvents>& i : _delegate)
             i->preDraw(graphicsContext, context);
     }
 
-    virtual void postDraw(GraphicsContext& /*graphicsContext*/) override {
+    void postDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override {
         glStencilMask(0);
         glDisable(GL_STENCIL_TEST);
     }
@@ -176,7 +176,7 @@ public:
                             _src_alpha_factor != std::numeric_limits<GLenum>::max() ? _src_alpha_factor : _src_alpha_factor_default, _dest_alpha_factor != std::numeric_limits<GLenum>::max() ? _dest_alpha_factor : _dest_alpha_factor_default);
     }
 
-    void postDraw(GraphicsContext& /*graphicsContext*/) override {
+    void postDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override {
         glBlendFuncSeparate(_src_rgb_factor_default, _dest_rgb_factor_default, _src_alpha_factor_default, _dest_alpha_factor_default);
     }
 
@@ -279,8 +279,8 @@ struct GLMultiDrawElementsIndirect final : PipelineDrawCommand {
 
 }
 
-GLPipeline::GLPipeline(const sp<Recycler>& recycler, uint32_t version, std::map<Enum::ShaderStageBit, String> shaders, const PipelineDescriptor& bindings)
-    : _stub(sp<Stub>::make()), _recycler(recycler), _version(version), _shaders(std::move(shaders)), _pipeline_operation(makePipelineOperation(bindings))
+GLPipeline::GLPipeline(const sp<Recycler>& recycler, uint32_t version, std::map<Enum::ShaderStageBit, ShaderPreprocessor::Stage> stages, const PipelineDescriptor& bindings)
+    : _stub(sp<Stub>::make()), _recycler(recycler), _version(version), _stages(std::move(stages)), _pipeline_operation(makePipelineOperation(bindings))
 {
     for(const auto& i : bindings.parameters()._traits)
     {
@@ -326,18 +326,17 @@ void GLPipeline::upload(GraphicsContext& graphicsContext)
     _stub->_rebind_needed = true;
     _stub->_id = id;
 
-    std::map<Enum::ShaderStageBit, sp<GLPipeline::Stage>> compiledShaders;
-
-    for(const auto& i : _shaders)
+    std::map<Enum::ShaderStageBit, sp<Stage>> compiledStages;
+    for(const auto& [k, v] : _stages)
     {
-        sp<GLPipeline::Stage>& shader = compiledShaders[i.first];
-        shader = makeShader(graphicsContext, _version, GLUtil::toShaderType(i.first), i.second);
+        sp<Stage>& shader = compiledStages[k];
+        shader = makeShader(graphicsContext, _version, GLUtil::toShaderType(k), v._source);
         glAttachShader(id, shader->id());
     }
 
     glLinkProgram(id);
 
-    for(const auto& i : compiledShaders)
+    for(const auto& i : compiledStages)
         glDetachShader(id, i.second->id());
 
     GLint linkstatus = 0;
@@ -370,7 +369,7 @@ void GLPipeline::draw(GraphicsContext& graphicsContext, const DrawingContext& dr
         i->preDraw(graphicsContext, drawingContext);
     _pipeline_operation->draw(graphicsContext, drawingContext);
     for(const sp<Snippet::DrawEvents>& i : _draw_decorators)
-        i->postDraw(graphicsContext);
+        i->postDraw(graphicsContext, drawingContext);
 }
 
 void GLPipeline::compute(GraphicsContext& graphicsContext, const ComputeContext& computeContext)
@@ -414,10 +413,10 @@ void GLPipeline::bindBuffer(GraphicsContext& /*graphicsContext*/, const Pipeline
 
 sp<GLPipeline::PipelineOperation> GLPipeline::makePipelineOperation(const PipelineDescriptor& bindings) const
 {
-    for(const auto& i : _shaders)
+    for(const auto& i : _stages)
         if(i.first == Enum::SHADER_STAGE_BIT_COMPUTE)
         {
-            DCHECK(_shaders.size() == 1, "Compute shader is an exclusive stage");
+            DCHECK(_stages.size() == 1, "Compute shader is an exclusive stage");
             return sp<PipelineOperationCompute>::make(_stub);
         }
 

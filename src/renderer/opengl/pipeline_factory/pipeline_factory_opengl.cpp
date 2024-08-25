@@ -11,11 +11,11 @@
 
 namespace ark::opengl {
 
-sp<Pipeline> PipelineFactoryOpenGL::buildPipeline(GraphicsContext& graphicsContext, const PipelineBindings& bindings)
+sp<Pipeline> PipelineFactoryOpenGL::buildPipeline(GraphicsContext& graphicsContext, const PipelineDescriptor& pipelineDescriptor, std::map<Enum::ShaderStageBit, String> stages)
 {
-    const sp<PipelineLayout>& pipelineLayout = bindings.pipelineLayout();
+    const sp<PipelineLayout>& pipelineLayout = pipelineDescriptor.layout();
     const sp<RenderEngineContext>& renderContext = graphicsContext.renderContext();
-    return sp<Pipeline>::make<GLPipeline>(graphicsContext.recycler(), renderContext->getGLSLVersion(), pipelineLayout->getPreprocessedShaders(graphicsContext.renderContext()), bindings.pipelineDescriptor());
+    return sp<Pipeline>::make<GLPipeline>(graphicsContext.recycler(), renderContext->getGLSLVersion(), pipelineLayout->getPreprocessedStages(graphicsContext.renderContext()), pipelineDescriptor);
 }
 
 }

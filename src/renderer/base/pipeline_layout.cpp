@@ -4,6 +4,7 @@
 #include "renderer/base/render_engine_context.h"
 #include "renderer/base/shader_preprocessor.h"
 #include "renderer/base/snippet_delegate.h"
+#include "renderer/impl/snippet/snippet_draw_compute.h"
 #include "renderer/impl/snippet/snippet_linked_chain.h"
 #include "renderer/inf/snippet.h"
 
@@ -60,12 +61,12 @@ const sp<PipelineInput>& PipelineLayout::input() const
     return _input;
 }
 
-std::map<Enum::ShaderStageBit, String> PipelineLayout::getPreprocessedShaders(const RenderEngineContext& renderEngineContext) const
+std::map<Enum::ShaderStageBit, ShaderPreprocessor::Stage> PipelineLayout::getPreprocessedStages(const RenderEngineContext& renderEngineContext) const
 {
-    std::map<Enum::ShaderStageBit, String> shaders;
+    std::map<Enum::ShaderStageBit, ShaderPreprocessor::Stage> shaders;
 
-    for(const auto& [stage, source] : _preprocessed_stages)
-        shaders[stage] = preprocess(renderEngineContext, _definitions, source);
+    for(const auto& [manifest, stage, source] : _preprocessed_stages)
+        shaders[stage] = {manifest, stage, preprocess(renderEngineContext, _definitions, source)};
 
     return shaders;
 }
@@ -85,8 +86,16 @@ size_t PipelineLayout::colorAttachmentCount() const
     return _color_attachment_count;
 }
 
-void PipelineLayout::initialize()
+void PipelineLayout::initialize(const Shader& shader)
 {
+    if(const op<ShaderPreprocessor>& computeStage = _building_context->computingStage(); computeStage && !_building_context->renderStages().empty())
+    {
+        std::array<uint32_t, 3> numWorkGroupsArray = {};
+        const std::vector<String> numWorkGroups = Documents::getAttribute(computeStage->_manifest, "num-work-groups", "64").split(',');
+        for(size_t i = 0; i < std::min(numWorkGroups.size(), numWorkGroupsArray.size()); ++i)
+            numWorkGroupsArray[i] = Strings::eval<uint32_t>(numWorkGroups.at(i));
+        addSnippet(sp<Snippet>::make<SnippetDrawCompute>(shader.input(), numWorkGroupsArray, true));
+    }
     _snippet = sp<Snippet>::make<SnippetDelegate>(_snippet);
     _snippet->preInitialize(_building_context);
     _building_context->initialize(*this);

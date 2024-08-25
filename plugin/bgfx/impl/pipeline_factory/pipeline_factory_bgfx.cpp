@@ -208,7 +208,7 @@ struct alignas(1) BgfxShaderAttributeChunk {
                 uniformChunk.num = 1;
                 uniformChunk.regIndex = i.binding();
                 uniformChunk.regCount = (uniform->size() + 15) >> 4;
-                uniformChunks.emplace_back(std::make_pair(std::move(tname), uniformChunk));
+                uniformChunks.emplace_back(std::move(tname), uniformChunk);
             }
 
     uint32_t binding = 2;
@@ -223,7 +223,7 @@ struct alignas(1) BgfxShaderAttributeChunk {
             uniformChunk.regIndex = binding++;
             uniformChunk.regCount = 1;
             uniformChunk.texDimension = toBgfxTextureDimension(Texture::TYPE_2D);
-            uniformChunks.emplace_back(std::make_pair(i, uniformChunk));
+            uniformChunks.emplace_back(i, uniformChunk);
         }
 
     for(const PipelineInput::SSBO& i : pipelineInput.ssbos())
@@ -420,19 +420,17 @@ private:
 
 }
 
-sp<Pipeline> PipelineFactoryBgfx::buildPipeline(GraphicsContext& graphicsContext, const PipelineBindings& bindings)
+sp<Pipeline> PipelineFactoryBgfx::buildPipeline(GraphicsContext& graphicsContext, const PipelineDescriptor& pipelineDescriptor, std::map<Enum::ShaderStageBit, String> stages)
 {
-    std::map<Enum::ShaderStageBit, String> shaders = bindings.pipelineLayout()->getPreprocessedShaders(graphicsContext.renderContext());
-    if(const auto vIter = shaders.find(Enum::SHADER_STAGE_BIT_VERTEX); vIter != shaders.end())
+    if(const auto vIter = stages.find(Enum::SHADER_STAGE_BIT_VERTEX); vIter != stages.end())
     {
-        const PipelineDescriptor& pipelineDescriptor = bindings.pipelineDescriptor();
         const Enum::DrawProcedure drawProcedure = pipelineDescriptor.drawProcedure();
-        const auto fIter = shaders.find(Enum::SHADER_STAGE_BIT_FRAGMENT);
-        CHECK(fIter != shaders.end(), "Pipeline has no fragment shader(only vertex shader available)");
-        return sp<Pipeline>::make<DrawPipelineBgfx>(drawProcedure, pipelineDescriptor.mode(), bindings.pipelineInput(), std::move(vIter->second), std::move(fIter->second));
+        const auto fIter = stages.find(Enum::SHADER_STAGE_BIT_FRAGMENT);
+        CHECK(fIter != stages.end(), "Pipeline has no fragment shader(only vertex shader available)");
+        return sp<Pipeline>::make<DrawPipelineBgfx>(drawProcedure, pipelineDescriptor.mode(), pipelineDescriptor.input(), std::move(vIter->second), std::move(fIter->second));
     }
-    const auto cIter = shaders.find(Enum::SHADER_STAGE_BIT_COMPUTE);
-    CHECK(cIter != shaders.end(), "Pipeline has no compute shader");
+    const auto cIter = stages.find(Enum::SHADER_STAGE_BIT_COMPUTE);
+    CHECK(cIter != stages.end(), "Pipeline has no compute shader");
     return sp<Pipeline>::make<ComputePipelineBgfx>(std::move(cIter->second));
 }
 

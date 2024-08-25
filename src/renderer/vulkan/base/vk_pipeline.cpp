@@ -297,27 +297,30 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
 
     _ubos.clear();
     for(const sp<PipelineInput::UBO>& i : pipelineDescriptor.input()->ubos())
-    {
-        sp<VKBuffer> ubo = sp<VKBuffer>::make(_renderer, _recycler, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-        ubo->uploadBuffer(graphicsContext, sp<UploaderArray<uint8_t>>::make(std::vector<uint8_t>(i->size(), 0)));
-        binding = std::max(binding, i->binding());
-        writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
-                                          _descriptor_set,
-                                          VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                                          i->binding(),
-                                          &ubo->vkDescriptor()));
-        _ubos.push_back(std::move(ubo));
-    }
+        if(!_is_compute_pipeline || i->stages().has(Enum::SHADER_STAGE_BIT_COMPUTE))
+        {
+            sp<VKBuffer> ubo = sp<VKBuffer>::make(_renderer, _recycler, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+            ubo->uploadBuffer(graphicsContext, sp<UploaderArray<uint8_t>>::make(std::vector<uint8_t>(i->size(), 0)));
+            binding = std::max(binding, i->binding());
+            writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
+                                              _descriptor_set,
+                                              VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                                              i->binding(),
+                                              &ubo->vkDescriptor()));
+            _ubos.push_back(std::move(ubo));
+        }
+
     for(const PipelineInput::SSBO& i : pipelineDescriptor.input()->ssbos())
-    {
-        binding = std::max(binding, i._binding);
-        const sp<VKBuffer> sbo = i._buffer.delegate();
-        writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
-                                          _descriptor_set,
-                                          VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-                                          i._binding,
-                                          &sbo->vkDescriptor()));
-    }
+        if(!_is_compute_pipeline || i._stages.has(Enum::SHADER_STAGE_BIT_COMPUTE))
+        {
+            binding = std::max(binding, i._binding);
+            const sp<VKBuffer> sbo = i._buffer.delegate();
+            writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
+                                              _descriptor_set,
+                                              VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+                                              i._binding,
+                                              &sbo->vkDescriptor()));
+        }
 
     const uint32_t bindingBase = binding + 1;
     _texture_observers.clear();
@@ -494,13 +497,13 @@ bool VKPipeline::isDirty(const ByteArray::Borrowed& dirtyFlags) const
 sp<VKDescriptorPool> VKPipeline::makeDescriptorPool() const
 {
     std::map<VkDescriptorType, uint32_t> poolSizes;
-    if(_pipeline_descriptor.input()->ubos().size())
+    if(!_pipeline_descriptor.input()->ubos().empty())
         poolSizes[VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER] = static_cast<uint32_t>(_pipeline_descriptor.input()->ubos().size());
-    if(_pipeline_descriptor.input()->ssbos().size())
+    if(!_pipeline_descriptor.input()->ssbos().empty())
         poolSizes[VK_DESCRIPTOR_TYPE_STORAGE_BUFFER] = static_cast<uint32_t>(_pipeline_descriptor.input()->ssbos().size());
-    if(_pipeline_descriptor.samplers().size() + _pipeline_descriptor.images().size())
+    if(!(_pipeline_descriptor.samplers().empty() && _pipeline_descriptor.images().empty()))
         poolSizes[VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER] = static_cast<uint32_t>(_pipeline_descriptor.samplers().size() + _pipeline_descriptor.images().size());
-    if(_pipeline_descriptor.images().size())
+    if(!_pipeline_descriptor.images().empty())
         poolSizes[VK_DESCRIPTOR_TYPE_STORAGE_IMAGE] = static_cast<uint32_t>(_pipeline_descriptor.images().size());
     return sp<VKDescriptorPool>::make(_recycler, _renderer->device(), std::move(poolSizes));
 }

@@ -129,6 +129,8 @@ public:
     std::vector<SSBO>& ssbos();
     const std::vector<SSBO>& ssbos() const;
 
+    sp<RenderLayerSnapshot::BufferObject> takeBufferSnapshot(const RenderRequest& renderRequest, bool isComputeStage) const;
+
     const std::map<uint32_t, StreamLayout>& streamLayouts() const;
     std::map<uint32_t, StreamLayout>& streamLayouts();
 

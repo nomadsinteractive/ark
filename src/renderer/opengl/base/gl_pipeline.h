@@ -18,20 +18,22 @@
 
 #include "platform/gl/gl.h"
 
+#include "renderer/base/shader_preprocessor.h"
+
 namespace ark::opengl {
 
 class GLPipeline : public Pipeline {
 public:
-    GLPipeline(const sp<Recycler>& recycler, uint32_t version, std::map<Enum::ShaderStageBit, String> shaders, const PipelineDescriptor& bindings);
-    virtual ~GLPipeline() override;
+    GLPipeline(const sp<Recycler>& recycler, uint32_t version, std::map<Enum::ShaderStageBit, ShaderPreprocessor::Stage> stages, const PipelineDescriptor& bindings);
+    ~GLPipeline() override;
 
-    virtual uint64_t id() override;
-    virtual void upload(GraphicsContext& graphicsContext) override;
-    virtual ResourceRecycleFunc recycle() override;
+    uint64_t id() override;
+    void upload(GraphicsContext& graphicsContext) override;
+    ResourceRecycleFunc recycle() override;
 
-    virtual void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
-    virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
-    virtual void compute(GraphicsContext& graphicsContext, const ComputeContext& computeContext) override;
+    void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
+    void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
+    void compute(GraphicsContext& graphicsContext, const ComputeContext& computeContext) override;
 
     void bindBuffer(GraphicsContext& graphicsContext, const PipelineInput& input, const std::map<uint32_t, Buffer>& divisors);
 
@@ -176,7 +178,7 @@ private:
 
     uint32_t _version;
 
-    std::map<Enum::ShaderStageBit, String> _shaders;
+    std::map<Enum::ShaderStageBit, ShaderPreprocessor::Stage> _stages;
 
     sp<PipelineOperation> _pipeline_operation;
     std::vector<sp<Snippet::DrawEvents>> _draw_decorators;

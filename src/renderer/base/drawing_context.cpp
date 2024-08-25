@@ -42,7 +42,7 @@ public:
         _snippet_draw->preDraw(graphicsContext, _context);
         pipeline->bind(graphicsContext, _context);
         pipeline->draw(graphicsContext, _context);
-        _snippet_draw->postDraw(graphicsContext);
+        _snippet_draw->postDraw(graphicsContext, _context);
     }
 
 private:

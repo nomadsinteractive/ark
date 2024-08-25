@@ -20,6 +20,7 @@ private:
 
 public:
     struct Stage {
+        document _manifest;
         Enum::ShaderStageBit _type;
         String _source;
     };
@@ -131,7 +132,7 @@ private:
     };
 
 public:
-    ShaderPreprocessor(sp<String> source, Enum::ShaderStageBit shaderStage, Enum::ShaderStageBit preShaderStage);
+    ShaderPreprocessor(sp<String> source, document manifest, Enum::ShaderStageBit shaderStage, Enum::ShaderStageBit preShaderStage);
 
     void addPreMainSource(const String& source);
     void addPostMainSource(const String& source);
@@ -192,6 +193,7 @@ private:
     friend class PipelineLayout;
 
 public:
+    document _manifest;
     Enum::ShaderStageBit _shader_stage;
     Enum::ShaderStageBit _pre_shader_stage;
 

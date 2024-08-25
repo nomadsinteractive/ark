@@ -17,7 +17,7 @@ public:
         virtual ~DrawEvents() = default;
 
         virtual void preDraw(GraphicsContext& graphicsContext, const DrawingContext& context) {}
-        virtual void postDraw(GraphicsContext& graphicsContext) {}
+        virtual void postDraw(GraphicsContext& graphicsContext, const DrawingContext& context) {}
     };
 
     virtual void preInitialize(PipelineBuildingContext& context) {}

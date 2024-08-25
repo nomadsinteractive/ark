@@ -36,9 +36,9 @@ public:
         _delegate->preDraw(graphicsContext, context);
     }
 
-    void postDraw(GraphicsContext& graphicsContext) override
+    void postDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override
     {
-        _delegate->postDraw(graphicsContext);
+        _delegate->postDraw(graphicsContext, context);
     }
 
 private:

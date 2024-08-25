@@ -3,8 +3,9 @@
 #include "core/util/bean_utils.h"
 
 #include "renderer/base/compute_context.h"
-#include "renderer/base/shader.h"
+#include "renderer/base/drawing_context.h"
 #include "renderer/base/pipeline_bindings.h"
+#include "renderer/base/shader.h"
 #include "renderer/inf/pipeline.h"
 
 namespace ark {
@@ -23,7 +24,7 @@ public:
         _compute_context._bindings->getPipeline(graphicsContext)->compute(graphicsContext, _compute_context);
     }
 
-    void postDraw(GraphicsContext& graphicsContext) override {}
+    void postDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override {}
 
 private:
     ComputeContext _compute_context;
@@ -38,9 +39,9 @@ public:
 
     void preDraw(GraphicsContext& graphicsContext, const DrawingContext& /*context*/) override {}
 
-    void postDraw(GraphicsContext& graphicsContext) override
+    void postDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override
     {
-        _compute_context._bindings->getPipeline(graphicsContext)->compute(graphicsContext, _compute_context);
+        context._bindings->getPipeline(graphicsContext)->compute(graphicsContext, _compute_context);
     }
 
 private:
@@ -49,39 +50,15 @@ private:
 
 }
 
-SnippetDrawCompute::SnippetDrawCompute(sp<Shader> shader, std::array<sp<Integer>, 3> numWorkGroups, bool atPostDraw)
-    : _shader(std::move(shader)), _num_work_groups(std::move(numWorkGroups)), _pipeline_bindings(_shader->makeBindings(Buffer(), Enum::RENDER_MODE_NONE, Enum::DRAW_PROCEDURE_DRAW_ARRAYS)),
-      _at_post_draw(atPostDraw)
+SnippetDrawCompute::SnippetDrawCompute(sp<PipelineInput> pipelineInput, std::array<uint32_t, 3> numWorkGroups, bool atPostDraw)
+    : _pipeline_input(std::move(pipelineInput)), _num_work_groups(numWorkGroups), _at_post_draw(atPostDraw)
 {
 }
 
 sp<Snippet::DrawEvents> SnippetDrawCompute::makeDrawEvents(const RenderRequest& renderRequest)
 {
-    const std::array<int32_t, 3> numWorkGroups = {
-        _num_work_groups.at(0) ? _num_work_groups.at(0)->val() : 1,
-        _num_work_groups.at(1) ? _num_work_groups.at(1)->val() : 1,
-        _num_work_groups.at(2) ? _num_work_groups.at(2)->val() : 1
-    };
-    ComputeContext computeCtx(_pipeline_bindings, _shader->takeBufferSnapshot(renderRequest, true), numWorkGroups);
+    ComputeContext computeCtx(nullptr, _pipeline_input->takeBufferSnapshot(renderRequest, true), _num_work_groups);
     return _at_post_draw ? sp<DrawEvents>::make<DrawEventsPostDrawCompute>(std::move(computeCtx)) : sp<DrawEvents>::make<DrawEventsPreDrawCompute>(std::move(computeCtx));
-}
-
-SnippetDrawCompute::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _shader(factory.ensureBuilder<Shader>(manifest, constants::SHADER)),
-    //TODO: better configuration ideas?
-    _at_post_draw(Documents::getAttribute(manifest, "at") == "post_draw")
-{
-    BeanUtils::split(factory, manifest, "num-work-groups", _num_work_groups[0], _num_work_groups[1], _num_work_groups[2]);
-}
-
-sp<Snippet> SnippetDrawCompute::BUILDER::build(const Scope& args)
-{
-    std::array<sp<Integer>, 3> numWorkGroups = {
-        _num_work_groups.at(0) ? _num_work_groups.at(0)->build(args) : nullptr,
-        _num_work_groups.at(1) ? _num_work_groups.at(1)->build(args) : nullptr,
-        _num_work_groups.at(2) ? _num_work_groups.at(2)->build(args) : nullptr,
-    };
-    return sp<SnippetDrawCompute>::make(_shader->build(args), std::move(numWorkGroups), _at_post_draw);
 }
 
 }

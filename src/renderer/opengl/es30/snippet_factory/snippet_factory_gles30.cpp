@@ -35,7 +35,7 @@ public:
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLuint>(context._indices.id()));
     }
 
-    void postDraw(GraphicsContext& /*graphicsContext*/) override {
+    void postDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override {
         glBindVertexArray(0);
     }
 

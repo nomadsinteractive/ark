@@ -20,13 +20,13 @@ public:
 
     void addSnippet(sp<Snippet> snippet);
     const sp<Snippet>& snippet() const;
-    void initialize();
+    void initialize(const Shader& shader);
 
     const sp<PipelineInput>& input() const;
 
     void preCompile(GraphicsContext& graphicsContext);
 
-    std::map<Enum::ShaderStageBit, String> getPreprocessedShaders(const RenderEngineContext& renderEngineContext) const;
+    std::map<Enum::ShaderStageBit, ShaderPreprocessor::Stage> getPreprocessedStages(const RenderEngineContext& renderEngineContext) const;
     const std::vector<PipelineInput::BindingSet>& samplers() const;
     const std::vector<PipelineInput::BindingSet>& images() const;
 
