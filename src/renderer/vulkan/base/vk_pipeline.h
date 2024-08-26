@@ -17,7 +17,7 @@ namespace ark::vulkan {
 
 class VKPipeline final : public Pipeline {
 public:
-    VKPipeline(const PipelineDescriptor& bindings, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, std::map<Enum::ShaderStageBit, String> shaders);
+    VKPipeline(const PipelineDescriptor& bindings, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, std::map<Enum::ShaderStageBit, String> stages);
     ~VKPipeline() override;
 
     VkPipeline vkPipeline() const;
@@ -48,16 +48,16 @@ private:
     void setupGraphicsPipeline(GraphicsContext& graphicsContext, const VertexLayout& vertexLayout);
     void setupComputePipeline(GraphicsContext& graphicsContext);
 
-    void buildDrawCommandBuffer(GraphicsContext& graphicsContext, const DrawingContext& drawingContext);
+    void buildDrawCommandBuffer(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) const;
     void buildComputeCommandBuffer(GraphicsContext& graphicsContext, const ComputeContext& drawingContext);
-
-    bool isDirty(const ByteArray::Borrowed& dirtyFlags) const;
 
     sp<VKDescriptorPool> makeDescriptorPool() const;
     void bindUBOShapshots(GraphicsContext& graphicsContext, const std::vector<RenderLayerSnapshot::UBOSnapshot>& uboSnapshots) const;
 
     VkPipelineDepthStencilStateCreateInfo makeDepthStencilState() const;
     VkPipelineRasterizationStateCreateInfo makeRasterizationState() const;
+
+    bool shouldBind(const ShaderStageSet& stages) const;
 
 private:
     PipelineDescriptor _pipeline_descriptor;
@@ -72,7 +72,7 @@ private:
     VkDescriptorSet _descriptor_set;
     VkPipeline _pipeline;
 
-    std::map<Enum::ShaderStageBit, String> _shaders;
+    std::map<Enum::ShaderStageBit, String> _stages;
 
     std::vector<sp<VKBuffer>> _ubos;
 

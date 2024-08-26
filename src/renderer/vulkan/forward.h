@@ -1,8 +1,6 @@
-#ifndef ARK_RENDERER_VULKAN_FORWARD_H_
-#define ARK_RENDERER_VULKAN_FORWARD_H_
+#pragma once
 
-namespace ark {
-namespace vulkan {
+namespace ark::vulkan {
 
 class VKBuffer;
 class VKCommandBuffers;
@@ -18,6 +16,7 @@ class VKMemory;
 class VKMemoryPtr;
 class VKPipeline;
 class VKRenderer;
+class VKSemaphore;
 class VKSwapChain;
 class VKTexture;
 class VKUtil;
@@ -25,6 +24,3 @@ class VKUtil;
 class PipelineFactoryVulkan;
 
 }
-}
-
-#endif

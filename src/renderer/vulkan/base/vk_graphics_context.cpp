@@ -121,7 +121,7 @@ void VKGraphicsContext::pushState(sp<RenderPassPhrase> starter)
 void VKGraphicsContext::popState()
 {
     DASSERT(!_state_stack.empty());
-    State state = _state_stack.top();
+    const State state = _state_stack.top();
     _state_stack.pop();
 
     const VkCommandBuffer commandBuffer = state._command_buffer;
@@ -140,7 +140,7 @@ void VKGraphicsContext::submit(VkQueue queue)
     _submit_queue.submit(queue);
 }
 
-VkSemaphore VKGraphicsContext::semaphoreRenderComplete() const
+const sp<VKSemaphore>& VKGraphicsContext::semaphoreRenderComplete() const
 {
     return _semaphore_render_complete;
 }

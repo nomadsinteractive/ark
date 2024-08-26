@@ -117,20 +117,29 @@ VkStencilOpState makeStencilState(const PipelineDescriptor::TraitStencilTestSepa
     return state;
 }
 
+bool isDirty(const ByteArray::Borrowed& dirtyFlags)
+{
+    const size_t size = dirtyFlags.length();
+    const uint8_t* buf = dirtyFlags.buf();
+    for(size_t i = 0; i < size; ++i)
+        if(buf[i])
+            return true;
+    return false;
 }
 
-VKPipeline::VKPipeline(const PipelineDescriptor& bindings, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, std::map<Enum::ShaderStageBit, String> shaders)
+}
+
+VKPipeline::VKPipeline(const PipelineDescriptor& bindings, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, std::map<Enum::ShaderStageBit, String> stages)
     : _pipeline_descriptor(bindings), _recycler(recycler), _renderer(renderer), _baked_renderer(makeBakedRenderer(bindings)), _layout(VK_NULL_HANDLE), _descriptor_set_layout(VK_NULL_HANDLE),
-      _descriptor_set(VK_NULL_HANDLE), _pipeline(VK_NULL_HANDLE), _shaders(std::move(shaders)), _rebind_needed(true), _is_compute_pipeline(false)
+      _descriptor_set(VK_NULL_HANDLE), _pipeline(VK_NULL_HANDLE), _stages(std::move(stages)), _rebind_needed(true), _is_compute_pipeline(false)
 {
-    for(const auto& i : _shaders)
-    {
+    for(const auto& i : _stages)
         if(i.first == Enum::SHADER_STAGE_BIT_COMPUTE)
         {
             _is_compute_pipeline = true;
-            CHECK(_shaders.size() == 1, "Compute stage is exclusive");
+            CHECK(_stages.size() == 1, "Compute stage is exclusive");
+            break;
         }
-    }
 }
 
 VKPipeline::~VKPipeline()
@@ -259,23 +268,31 @@ void VKPipeline::setupDescriptorSetLayout(const PipelineDescriptor& pipelineDesc
     uint32_t binding = 0;
     for(const sp<PipelineInput::UBO>& i : pipelineInput.ubos())
     {
-        const VkShaderStageFlags stages = i->stages().toFlags<VkShaderStageFlagBits>(VKUtil::toStage, Enum::SHADER_STAGE_BIT_COUNT);
         binding = std::max(binding, i->binding());
-        setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, stages, i->binding()));
+        if(shouldBind(i->_stages))
+        {
+            const VkShaderStageFlags stages = i->stages().toFlags<VkShaderStageFlagBits>(VKUtil::toStage, Enum::SHADER_STAGE_BIT_COUNT);
+            setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, stages, i->binding()));
+        }
     }
     for(const PipelineInput::SSBO& i : pipelineInput.ssbos())
     {
-        const VkShaderStageFlags stages = i._stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, Enum::SHADER_STAGE_BIT_COUNT);
         binding = std::max(binding, i._binding);
-        setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, stages, i._binding));
+        if(shouldBind(i._stages))
+        {
+            const VkShaderStageFlags stages = i._stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, Enum::SHADER_STAGE_BIT_COUNT);
+            setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, stages, i._binding));
+        }
     }
 
     const uint32_t bindingBase = binding + 1;
     for(const auto& [_binding, _stages] : pipelineDescriptor.layout()->samplers())
-        setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, Enum::SHADER_STAGE_BIT_COUNT), bindingBase + _binding));
+        if(shouldBind(_stages))
+            setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, Enum::SHADER_STAGE_BIT_COUNT), bindingBase + _binding));
 
     for(const auto& [_binding, _stages] : pipelineDescriptor.layout()->images())
-        setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, _stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, Enum::SHADER_STAGE_BIT_COUNT), bindingBase + _binding));
+        if(shouldBind(_stages))
+            setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, _stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, Enum::SHADER_STAGE_BIT_COUNT), bindingBase + _binding));
 
     const VkDescriptorSetLayoutCreateInfo descriptorLayout = vks::initializers::descriptorSetLayoutCreateInfo(setLayoutBindings.data(), static_cast<uint32_t>(setLayoutBindings.size()));
     VKUtil::checkResult(vkCreateDescriptorSetLayout(device->vkLogicalDevice(), &descriptorLayout, nullptr, &_descriptor_set_layout));
@@ -297,11 +314,12 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
 
     _ubos.clear();
     for(const sp<PipelineInput::UBO>& i : pipelineDescriptor.input()->ubos())
-        if(!_is_compute_pipeline || i->stages().has(Enum::SHADER_STAGE_BIT_COMPUTE))
+    {
+        binding = std::max(binding, i->binding());
+        if(shouldBind(i->_stages))
         {
             sp<VKBuffer> ubo = sp<VKBuffer>::make(_renderer, _recycler, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
             ubo->uploadBuffer(graphicsContext, sp<UploaderArray<uint8_t>>::make(std::vector<uint8_t>(i->size(), 0)));
-            binding = std::max(binding, i->binding());
             writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
                                               _descriptor_set,
                                               VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
@@ -309,11 +327,13 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
                                               &ubo->vkDescriptor()));
             _ubos.push_back(std::move(ubo));
         }
+    }
 
     for(const PipelineInput::SSBO& i : pipelineDescriptor.input()->ssbos())
-        if(!_is_compute_pipeline || i._stages.has(Enum::SHADER_STAGE_BIT_COMPUTE))
+    {
+        binding = std::max(binding, i._binding);
+        if(shouldBind(i._stages))
         {
-            binding = std::max(binding, i._binding);
             const sp<VKBuffer> sbo = i._buffer.delegate();
             writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
                                               _descriptor_set,
@@ -321,39 +341,41 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
                                               i._binding,
                                               &sbo->vkDescriptor()));
         }
-
+    }
     const uint32_t bindingBase = binding + 1;
     _texture_observers.clear();
     for(const auto& [i, bindingSet] : pipelineDescriptor.samplers())
-    {
-        CHECK_WARN(i, "Pipeline has unbound sampler");
-        if(i)
+        if(shouldBind(bindingSet._stages))
         {
-            const sp<VKTexture> texture = i->delegate();
-            _texture_observers.push_back(texture->observer().addBooleanSignal());
-            if(texture->vkDescriptor().imageView && texture->vkDescriptor().imageLayout)
-                writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
-                                              _descriptor_set,
-                                              VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                                              bindingBase + bindingSet._binding,
-                                              &texture->vkDescriptor()));
+            CHECK_WARN(i, "Pipeline has unbound sampler");
+            if(i)
+            {
+                const sp<VKTexture> texture = i->delegate();
+                _texture_observers.push_back(texture->observer().addBooleanSignal());
+                if(texture->vkDescriptor().imageView && texture->vkDescriptor().imageLayout)
+                    writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
+                                                  _descriptor_set,
+                                                  VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                                                  bindingBase + bindingSet._binding,
+                                                  &texture->vkDescriptor()));
+            }
         }
-    }
     for(const auto& [i, bindingSet] : pipelineDescriptor.images())
-    {
-        CHECK_WARN(i, "Pipeline has unbound image");
-        if(i)
+        if(shouldBind(bindingSet._stages))
         {
-            const sp<VKTexture> texture = i->delegate();
-            _texture_observers.push_back(texture->observer().addBooleanSignal());
-            if(texture->vkDescriptor().imageView && texture->vkDescriptor().imageLayout)
-                writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
-                                              _descriptor_set,
-                                              VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
-                                              bindingBase + bindingSet._binding,
-                                              &texture->vkDescriptor()));
+            CHECK_WARN(i, "Pipeline has unbound image");
+            if(i)
+            {
+                const sp<VKTexture> texture = i->delegate();
+                _texture_observers.push_back(texture->observer().addBooleanSignal());
+                if(texture->vkDescriptor().imageView && texture->vkDescriptor().imageLayout)
+                    writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
+                                                  _descriptor_set,
+                                                  VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+                                                  bindingBase + bindingSet._binding,
+                                                  &texture->vkDescriptor()));
+            }
         }
-    }
 
     vkUpdateDescriptorSets(device->vkLogicalDevice(), static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
 }
@@ -417,7 +439,7 @@ void VKPipeline::setupGraphicsPipeline(GraphicsContext& graphicsContext, const V
                 0);
 
     std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
-    for(const auto& [k, v] : _shaders)
+    for(const auto& [k, v] : _stages)
         shaderStages.push_back(VKUtil::createShader(device->vkLogicalDevice(), v, k));
 
     const sp<VKGraphicsContext>& vkGraphicsContext = graphicsContext.attachments().ensure<VKGraphicsContext>();
@@ -444,14 +466,14 @@ void VKPipeline::setupGraphicsPipeline(GraphicsContext& graphicsContext, const V
 void VKPipeline::setupComputePipeline(GraphicsContext& /*graphicsContext*/)
 {
     const sp<VKDevice>& device = _renderer->device();
-    const VkPipelineShaderStageCreateInfo stage = VKUtil::createShader(device->vkLogicalDevice(), _shaders.begin()->second, _shaders.begin()->first);
+    const VkPipelineShaderStageCreateInfo stage = VKUtil::createShader(device->vkLogicalDevice(), _stages.begin()->second, _stages.begin()->first);
     VkComputePipelineCreateInfo computePipelineCreateInfo = vks::initializers::computePipelineCreateInfo(_layout, 0);
     computePipelineCreateInfo.stage = stage;
     vkCreateComputePipelines(device->vkLogicalDevice(), device->vkPipelineCache(), 1, &computePipelineCreateInfo, nullptr, &_pipeline);
     vkDestroyShaderModule(device->vkLogicalDevice(), stage.module, nullptr);
 }
 
-void VKPipeline::buildDrawCommandBuffer(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
+void VKPipeline::buildDrawCommandBuffer(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) const
 {
     const sp<VKGraphicsContext>& vkGraphicsContext = graphicsContext.attachments().ensure<VKGraphicsContext>();
     VKGraphicsContext::State& state = vkGraphicsContext->getCurrentState();
@@ -482,16 +504,6 @@ void VKPipeline::buildComputeCommandBuffer(GraphicsContext& graphicsContext, con
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, _pipeline);
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, _layout, 0, 1, &_descriptor_set, 0, nullptr);
     vkCmdDispatch(commandBuffer, computeContext._num_work_groups.at(0), computeContext._num_work_groups.at(1), computeContext._num_work_groups.at(2));
-}
-
-bool VKPipeline::isDirty(const ByteArray::Borrowed& dirtyFlags) const
-{
-    size_t size = dirtyFlags.length();
-    const uint8_t* buf = dirtyFlags.buf();
-    for(size_t i = 0; i < size; ++i)
-        if(buf[i])
-            return true;
-    return false;
 }
 
 sp<VKDescriptorPool> VKPipeline::makeDescriptorPool() const
@@ -566,6 +578,11 @@ VkPipelineRasterizationStateCreateInfo VKPipeline::makeRasterizationState() cons
                 VKUtil::toFrontFace(cullFaceTest._front_face), 0);
     }
     return vks::initializers::pipelineRasterizationStateCreateInfo(VK_POLYGON_MODE_FILL, VK_CULL_MODE_BACK_BIT, VK_FRONT_FACE_COUNTER_CLOCKWISE, 0);
+}
+
+bool VKPipeline::shouldBind(const ShaderStageSet& stages) const
+{
+    return !_is_compute_pipeline || stages.has(Enum::SHADER_STAGE_BIT_COMPUTE);
 }
 
 }

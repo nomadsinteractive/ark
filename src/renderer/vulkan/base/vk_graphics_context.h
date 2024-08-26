@@ -57,7 +57,7 @@ public:
 
     void submit(VkQueue queue);
 
-    VkSemaphore semaphoreRenderComplete() const;
+    const sp<VKSemaphore>& semaphoreRenderComplete() const;
     VkSemaphore semaphorePresentComplete() const;
 
 private:
@@ -67,7 +67,7 @@ private:
     sp<VKCommandBuffers> _command_buffers;
 
     VKSubmitQueue _submit_queue;
-    VkSemaphore _semaphore_render_complete;
+    sp<VKSemaphore> _semaphore_render_complete;
     VkSemaphore _semaphore_present_complete;
 
     std::stack<State> _state_stack;

@@ -66,8 +66,7 @@ public:
         uint32_t _stride;
     };
 
-    class ARK_API UBO {
-    public:
+    struct ARK_API UBO {
         UBO(uint32_t binding);
 
         RenderLayerSnapshot::UBOSnapshot snapshot(const RenderRequest& renderRequest) const;
@@ -82,13 +81,11 @@ public:
 
         const ShaderStageSet& stages() const;
 
-    private:
         void initialize();
         void doSnapshot(uint64_t timestamp, bool force) const;
 
-    private:
-        Table<String, sp<Uniform>> _uniforms;
         uint32_t _binding;
+        Table<String, sp<Uniform>> _uniforms;
 
         std::vector<std::pair<uintptr_t, size_t>> _slots;
         ShaderStageSet _stages;

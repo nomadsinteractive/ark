@@ -5,9 +5,9 @@
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/render_controller.h"
 
+#include "renderer/vulkan/base/vk_semaphore.h"
 #include "renderer/vulkan/base/vk_renderer.h"
 #include "renderer/vulkan/util/vk_util.h"
-#include "renderer/vulkan/util/vulkan_initializers.hpp"
 
 namespace ark::vulkan {
 
@@ -16,18 +16,9 @@ VKSubmitQueue::VKSubmitQueue(const sp<VKRenderer>& renderer, VkPipelineStageFlag
 {
 }
 
-VKSubmitQueue::~VKSubmitQueue()
+sp<VKSemaphore> VKSubmitQueue::createSignalSemaphore()
 {
-    const VkDevice vkLogicalDevice = _renderer->vkLogicalDevice();
-    for(const VkSemaphore& i : _signal_semaphores)
-        vkDestroySemaphore(vkLogicalDevice, i, nullptr);
-}
-
-VkSemaphore VKSubmitQueue::createSignalSemaphore()
-{
-    constexpr VkSemaphoreCreateInfo semaphoreCreateInfo = {VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO};
-    VkSemaphore semaphore = VK_NULL_HANDLE;
-    VKUtil::checkResult(vkCreateSemaphore(_renderer->vkLogicalDevice(), &semaphoreCreateInfo, nullptr, &semaphore));
+    sp<VKSemaphore> semaphore = sp<VKSemaphore>::make(_renderer);
     _signal_semaphores.push_back(semaphore);
     return semaphore;
 }
@@ -52,12 +43,23 @@ void VKSubmitQueue::submit(VkQueue queue)
     DTHREAD_CHECK(THREAD_ID_RENDERER);
     if(!_submit_infos.empty())
     {
+        std::vector<VkSemaphore> signalSemaphores;
+        signalSemaphores.reserve(_signal_semaphores.size());
+        for(auto iter = _signal_semaphores.begin(); iter != _signal_semaphores.end(); )
+            if(iter->unique())
+                iter = _signal_semaphores.erase(iter);
+            else
+            {
+                signalSemaphores.push_back(iter->get()->vkSemaphore());
+                ++iter;
+            }
+
         VkSubmitInfo& firstSubmitInfo = _submit_infos.front();
         VkSubmitInfo& lastSubmitInfo = _submit_infos.back();
         firstSubmitInfo.pWaitSemaphores = _wait_semaphores.data();
         firstSubmitInfo.waitSemaphoreCount = static_cast<uint32_t>(_wait_semaphores.size());
-        lastSubmitInfo.pSignalSemaphores = _signal_semaphores.data();
-        lastSubmitInfo.signalSemaphoreCount = static_cast<uint32_t>(_signal_semaphores.size());
+        lastSubmitInfo.pSignalSemaphores = signalSemaphores.data();
+        lastSubmitInfo.signalSemaphoreCount = static_cast<uint32_t>(signalSemaphores.size());
         VKUtil::checkResult(vkQueueSubmit(queue, static_cast<uint32_t>(_submit_infos.size()), _submit_infos.data(), VK_NULL_HANDLE));
     }
     _wait_semaphores.clear();

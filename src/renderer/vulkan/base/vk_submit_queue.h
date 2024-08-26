@@ -17,9 +17,8 @@ namespace ark::vulkan {
 class VKSubmitQueue {
 public:
     VKSubmitQueue(const sp<VKRenderer>& renderer, VkPipelineStageFlags stageFlags);
-    ~VKSubmitQueue();
 
-    VkSemaphore createSignalSemaphore();
+    sp<VKSemaphore> createSignalSemaphore();
 
     void begin(VkSemaphore waitSemaphore);
     void submitCommandBuffer(VkCommandBuffer commandBuffer);
@@ -38,7 +37,8 @@ private:
     std::list<VkCommandBuffer> _submit_queue;
     std::vector<VkSubmitInfo> _submit_infos;
     std::vector<VkSemaphore> _wait_semaphores;
-    std::vector<VkSemaphore> _signal_semaphores;
+
+    std::vector<sp<VKSemaphore>> _signal_semaphores;
 };
 
 }

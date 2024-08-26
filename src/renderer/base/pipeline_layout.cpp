@@ -90,7 +90,7 @@ void PipelineLayout::initialize(const Shader& shader)
 {
     if(const op<ShaderPreprocessor>& computeStage = _building_context->computingStage(); computeStage && !_building_context->renderStages().empty())
     {
-        std::array<uint32_t, 3> numWorkGroupsArray = {};
+        std::array<uint32_t, 3> numWorkGroupsArray = {1, 1, 1};
         const std::vector<String> numWorkGroups = Documents::getAttribute(computeStage->_manifest, "num-work-groups", "64").split(',');
         for(size_t i = 0; i < std::min(numWorkGroups.size(), numWorkGroupsArray.size()); ++i)
             numWorkGroupsArray[i] = Strings::eval<uint32_t>(numWorkGroups.at(i));

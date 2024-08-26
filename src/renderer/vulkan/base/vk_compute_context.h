@@ -25,7 +25,7 @@ public:
     VkCommandBuffer buildCommandBuffer(GraphicsContext& graphicsContext);
     VkCommandBuffer vkCommandBuffer() const;
 
-    VkSemaphore semaphoreComputeComplete() const;
+    sp<VKSemaphore> createCompleteSemaphore();
 
 private:
     sp<VKRenderer> _renderer;
@@ -34,8 +34,7 @@ private:
 
     VkCommandBuffer _command_buffer;
 
-    VkSemaphore _semaphore_render_complete;
-    VkSemaphore _semaphore_compute_complete;
+    sp<VKSemaphore> _semaphore_render_complete;
 };
 
 }

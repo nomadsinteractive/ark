@@ -4,7 +4,6 @@
 
 #include "renderer/base/pipeline_descriptor.h"
 #include "renderer/base/pipeline_bindings.h"
-#include "renderer/inf/pipeline_factory.h"
 
 #include "platform/gl/gl.h"
 

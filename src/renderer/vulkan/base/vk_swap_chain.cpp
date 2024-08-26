@@ -8,8 +8,8 @@
 
 #include "renderer/vulkan/base/vk_device.h"
 #include "renderer/vulkan/base/vk_command_pool.h"
-#include "renderer/vulkan/base/vk_descriptor_pool.h"
 #include "renderer/vulkan/base/vk_graphics_context.h"
+#include "renderer/vulkan/base/vk_semaphore.h"
 #include "renderer/vulkan/util/vk_util.h"
 
 #ifdef ARK_PLATFORM_DARWIN
@@ -119,7 +119,7 @@ void VKSwapChain::swap(VKGraphicsContext& vkGraphicsContext)
 {
     DTHREAD_CHECK(THREAD_ID_RENDERER);
     vkGraphicsContext.submit(_queue);
-    VKUtil::checkResult(_swap_chain.queuePresent(_queue, _aquired_image_id, vkGraphicsContext.semaphoreRenderComplete()));
+    VKUtil::checkResult(_swap_chain.queuePresent(_queue, _aquired_image_id, vkGraphicsContext.semaphoreRenderComplete()->vkSemaphore()));
 }
 
 void VKSwapChain::waitIdle() const

@@ -279,7 +279,7 @@ struct GLMultiDrawElementsIndirect final : PipelineDrawCommand {
 
 }
 
-GLPipeline::GLPipeline(const sp<Recycler>& recycler, uint32_t version, std::map<Enum::ShaderStageBit, ShaderPreprocessor::Stage> stages, const PipelineDescriptor& bindings)
+GLPipeline::GLPipeline(const sp<Recycler>& recycler, uint32_t version, std::map<Enum::ShaderStageBit, String> stages, const PipelineDescriptor& bindings)
     : _stub(sp<Stub>::make()), _recycler(recycler), _version(version), _stages(std::move(stages)), _pipeline_operation(makePipelineOperation(bindings))
 {
     for(const auto& i : bindings.parameters()._traits)
@@ -330,7 +330,7 @@ void GLPipeline::upload(GraphicsContext& graphicsContext)
     for(const auto& [k, v] : _stages)
     {
         sp<Stage>& shader = compiledStages[k];
-        shader = makeShader(graphicsContext, _version, GLUtil::toShaderType(k), v._source);
+        shader = makeShader(graphicsContext, _version, GLUtil::toShaderType(k), v);
         glAttachShader(id, shader->id());
     }
 
