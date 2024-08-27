@@ -16,10 +16,6 @@ public:
     static float toFloat(BeanFactory& args, const String& value, float defValue = 0);
     static float toFloat(const sp<Builder<Numeric>>& t, const Scope& args, float defValue = 0);
 
-    template<typename... Args> static void split(BeanFactory& beanFactory, const document& manifest, const String& attr, sp<Builder<Args>>&... args) {
-        split<Args...>(beanFactory, Documents::ensureAttribute(manifest, attr), args...);
-    }
-
     template<typename... Args> static void split(BeanFactory& beanFactory, const String& str, sp<Builder<Args>>&... args) {
         const String value = Strings::unwrap(str.strip(), '(', ')');
         DCHECK(value, "Empty value being built");

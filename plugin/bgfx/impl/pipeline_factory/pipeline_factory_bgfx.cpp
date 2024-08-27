@@ -196,7 +196,7 @@ struct alignas(1) BgfxShaderAttributeChunk {
     uint32_t ssboSize = 0;
     uint32_t dynamicDataSize = 0;
     for(const PipelineInput::UBO& i : pipelineInput.ubos())
-        if(i.stages().has(stage))
+        if(i._stages.has(stage))
             for(const auto& [name, uniform] : i.uniforms())
             {
                 String tname = translatePredefinedName(name);

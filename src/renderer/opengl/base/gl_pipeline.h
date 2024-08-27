@@ -7,18 +7,14 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
-#include "graphics/inf/render_command.h"
 
 #include "renderer/forwarding.h"
 #include "renderer/base/drawing_context.h"
-#include "renderer/base/pipeline_input.h"
+#include "renderer/base/shader_preprocessor.h"
 #include "renderer/inf/pipeline.h"
-#include "renderer/inf/resource.h"
 #include "renderer/inf/snippet.h"
 
 #include "platform/gl/gl.h"
-
-#include "renderer/base/shader_preprocessor.h"
 
 namespace ark::opengl {
 
@@ -59,117 +55,12 @@ public:
         GLint _location;
     };
 
-    const GLUniform& getUniform(const String& name);
+    const GLUniform& getUniform(const String& name) const;
+
+    struct Stub;
 
 private:
-    class GLAttribute {
-    public:
-        GLAttribute(GLint location = -1);
-        GLAttribute(const GLAttribute& other) = default;
-
-        void bind(const Attribute& attribute, GLsizei stride) const;
-
-    private:
-        void setVertexPointer(const Attribute& attribute, GLuint location, GLsizei stride, uint32_t length, uint32_t offset) const;
-
-    private:
-        GLint _location;
-    };
-
-    class Stage {
-    public:
-        Stage(const sp<Recycler>& recycler, uint32_t version, GLenum type, const String& source);
-        ~Stage();
-
-        uint32_t id();
-
-    private:
-        GLuint compile(uint32_t version, GLenum type, const String& source);
-
-    private:
-        sp<Recycler> _recycler;
-        uint32_t _id;
-    };
-
-private:
-    String getInformationLog(GLuint id) const;
-    sp<Stage> makeShader(GraphicsContext& graphicsContext, uint32_t version, GLenum type, const String& source) const;
-
-    void bindBuffer(GraphicsContext&, const PipelineInput& input, uint32_t divisor);
-
-    class GLBufferBaseBinder {
-    public:
-        GLBufferBaseBinder(GLenum target, GLuint base, GLuint buffer);
-        GLBufferBaseBinder(GLBufferBaseBinder&& other);
-        ~GLBufferBaseBinder();
-        DISALLOW_COPY_AND_ASSIGN(GLBufferBaseBinder);
-
-    private:
-        GLenum _target;
-        GLuint _base;
-        GLuint _buffer;
-    };
-
-    struct Stub {
-        Stub();
-
-        void bind(GraphicsContext& graphicsContext, const PipelineContext& pipelineContext);
-
-        void bindUBO(const RenderLayerSnapshot::UBOSnapshot& uboSnapshot, const sp<PipelineInput::UBO>& ubo);
-        void bindUniform(const uint8_t* ptr, uint32_t size, const Uniform& uniform);
-        void bindImage(const Texture& texture, uint32_t name);
-        void activeTexture(const Texture& texture, const String& name, uint32_t binding);
-
-        const GLPipeline::GLUniform& getUniform(const String& name);
-        GLint getUniformLocation(const String& name);
-
-        const GLPipeline::GLAttribute& getAttribute(const String& name);
-        GLint getAttribLocation(const String& name);
-
-        void bindUBOSnapshots(const std::vector<RenderLayerSnapshot::UBOSnapshot>& uboSnapshots, const PipelineInput& pipelineInput);
-
-        GLuint _id;
-
-        std::map<String, GLAttribute> _attributes;
-        std::map<String, GLUniform> _uniforms;
-
-        bool _rebind_needed;
-    };
-
-    class PipelineOperationDraw : public PipelineOperation {
-    public:
-        PipelineOperationDraw(sp<Stub> stub, const PipelineDescriptor& bindings);
-
-        virtual void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
-        virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
-        virtual void compute(GraphicsContext& graphicsContext, const ComputeContext& computeContext) override;
-
-    private:
-        sp<PipelineDrawCommand> makeBakedRenderer(const PipelineDescriptor& bindings) const;
-
-    private:
-        sp<Stub> _stub;
-
-        Optional<Rect> _scissor;
-        sp<PipelineDrawCommand> _renderer;
-
-        std::vector<GLBufferBaseBinder> _ssbo_binders;
-    };
-
-    class PipelineOperationCompute : public PipelineOperation {
-    public:
-        PipelineOperationCompute(sp<Stub> stub);
-
-        virtual void bind(GraphicsContext& graphicsContext, const DrawingContext& computeContext) override;
-        virtual void draw(GraphicsContext& graphicsContext, const DrawingContext& computeContext) override;
-        virtual void compute(GraphicsContext& graphicsContext, const ComputeContext& computeContext) override;
-
-    private:
-        sp<Stub> _stub;
-        std::vector<GLBufferBaseBinder> _ssbo_binders;
-
-    };
-
+    void bindBuffer(GraphicsContext&, const PipelineInput& input, uint32_t divisor) const;
     sp<PipelineOperation> makePipelineOperation(const PipelineDescriptor& bindings) const;
 
 private:

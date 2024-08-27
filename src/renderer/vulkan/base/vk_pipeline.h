@@ -57,7 +57,7 @@ private:
     VkPipelineDepthStencilStateCreateInfo makeDepthStencilState() const;
     VkPipelineRasterizationStateCreateInfo makeRasterizationState() const;
 
-    bool shouldBind(const ShaderStageSet& stages) const;
+    bool shouldBeBinded(const ShaderStageSet& stages) const;
 
 private:
     PipelineDescriptor _pipeline_descriptor;

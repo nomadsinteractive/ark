@@ -27,6 +27,226 @@ namespace ark::opengl {
 
 namespace {
 
+class GLAttribute {
+public:
+    GLAttribute(GLint location = -1)
+        : _location(location) {
+    }
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(GLAttribute);
+
+    void bind(const Attribute& attribute, GLsizei stride) const
+    {
+        CHECK_WARN(_location >= 0, "Attribute \"%s\" location: %d", attribute.name().c_str(), _location);
+        if(attribute.length() <= 4)
+            setVertexPointer(attribute, _location, stride, attribute.length(), attribute.offset());
+        else if(attribute.length() == 16)
+        {
+            uint32_t offset = attribute.size() / 4;
+            for(int32_t i = 0; i < 4; i++)
+                setVertexPointer(attribute, _location + i, stride, 4, attribute.offset() + offset * i);
+        }
+        else if(attribute.length() == 9)
+        {
+            uint32_t offset = attribute.size() / 3;
+            for(int32_t i = 0; i < 3; i++)
+                setVertexPointer(attribute, _location + i, stride, 3, attribute.offset() + offset * i);
+        }
+        else
+        {
+            FATAL("Unknow attribute \"%s %s\"", attribute.type(), attribute.name().c_str());
+        }
+    }
+
+private:
+    static void setVertexPointer(const Attribute& attribute, GLuint location, GLsizei stride, uint32_t length, uint32_t offset)
+    {
+        constexpr  GLenum glTypes[Attribute::TYPE_COUNT] = {GL_BYTE, GL_FLOAT, GL_INT, GL_SHORT, GL_UNSIGNED_BYTE, GL_UNSIGNED_SHORT};
+        glEnableVertexAttribArray(location);
+        if(attribute.type() == Attribute::TYPE_FLOAT || attribute.normalized())
+            glVertexAttribPointer(location, length, glTypes[attribute.type()], attribute.normalized() ? GL_TRUE : GL_FALSE, stride, reinterpret_cast<const void*>(static_cast<uintptr_t>(offset)));
+        else
+            glVertexAttribIPointer(location, length, glTypes[attribute.type()], stride, reinterpret_cast<const void*>(static_cast<uintptr_t>(offset)));
+
+        if(attribute.divisor())
+            glVertexAttribDivisor(location, attribute.divisor());
+    }
+
+private:
+    GLint _location;
+};
+
+}
+
+struct GLPipeline::Stub {
+    Stub(bool isComputePipeline)
+        : _is_compute_pipeline(isComputePipeline), _id(0), _rebind_needed(true) {
+    }
+
+    void bind(GraphicsContext& /*graphicsContext*/, const PipelineContext& pipelineContext)
+    {
+        glUseProgram(_id);
+
+        const PipelineBindings& pipelineBindings = pipelineContext._bindings;
+        bindUBOSnapshots(pipelineContext._buffer_object->_ubos, pipelineBindings.pipelineInput());
+
+        uint32_t binding = 0;
+        const std::vector<String>& samplerNames = pipelineBindings.pipelineInput()->samplerNames();
+        const std::vector<std::pair<sp<Texture>, PipelineInput::BindingSet>>& samplers = pipelineBindings.pipelineDescriptor()->samplers();
+        DASSERT(samplerNames.size() == samplers.size());
+        for(size_t i = 0; i < samplerNames.size(); ++i)
+        {
+            const String& name = samplerNames.at(i);
+            const sp<Texture>& texture = samplers.at(i).first;
+            CHECK_WARN(texture, "Pipeline has unbound sampler \"%s\"", name.c_str());
+            if(texture)
+                activeTexture(texture, name, binding);
+            ++ binding;
+        }
+
+        const std::vector<std::pair<sp<Texture>, PipelineInput::BindingSet>>& images = pipelineBindings.pipelineDescriptor()->images();
+        for(size_t i = 0; i < images.size(); ++i)
+            if(const sp<Texture>& image = images.at(i).first)
+                bindImage(image, static_cast<uint32_t>(i));
+    }
+
+    void bindUBO(const RenderLayerSnapshot::UBOSnapshot& uboSnapshot, const sp<PipelineInput::UBO>& ubo)
+    {
+        const std::vector<sp<Uniform>>& uniforms = ubo->uniforms().values();
+        for(size_t i = 0; i < uniforms.size(); ++i)
+        {
+            if(uboSnapshot._dirty_flags.buf()[i] || _rebind_needed)
+            {
+                const sp<Uniform>& uniform = uniforms.at(i);
+                const uint8_t* buf = uboSnapshot._buffer.buf();
+                const auto& [offset, size] = ubo->slots().at(i);
+                bindUniform(buf + offset, size, uniform);
+            }
+        }
+    }
+
+    void bindUniform(const uint8_t* ptr, uint32_t size, const Uniform& uniform)
+    {
+        const GLUniform& glUniform = getUniform(uniform.name());
+        const float* ptrf = reinterpret_cast<const float*>(ptr);
+        switch(uniform.type()) {
+            case Uniform::TYPE_I1:
+                DCHECK(size == 4, "Wrong uniform1i size: %d", size);
+            glUniform.setUniform1i(*reinterpret_cast<const int32_t*>(ptr));
+            break;
+            case Uniform::TYPE_F1:
+                DCHECK(size == 4, "Wrong uniform1f size: %d", size);
+            glUniform.setUniform1f(ptrf[0]);
+            break;
+            case Uniform::TYPE_F2:
+                DCHECK(size == 8, "Wrong uniform2f size: %d", size);
+            glUniform.setUniform2f(ptrf[0], ptrf[1]);
+            break;
+            case Uniform::TYPE_F3:
+                DCHECK(size >= 12, "Wrong uniform3f size: %d", size);
+            glUniform.setUniform3f(ptrf[0], ptrf[1], ptrf[2]);
+            break;
+            case Uniform::TYPE_F4:
+                DCHECK(size == 16, "Wrong uniform4f size: %d", size);
+            glUniform.setUniform4f(ptrf[0], ptrf[1], ptrf[2], ptrf[3]);
+            break;
+            case Uniform::TYPE_F4V:
+                DCHECK(size % 16 == 0, "Wrong uniform4fv size: %d", size);
+            glUniform.setUniform4fv(size / 16, ptrf);
+            break;
+            case Uniform::TYPE_MAT4:
+            case Uniform::TYPE_MAT4V:
+                DCHECK(size % 64 == 0, "Wrong mat4fv size: %d", size);
+            glUniform.setUniformMatrix4fv(size / 64, GL_FALSE, ptrf);
+            break;
+            case Uniform::TYPE_IMAGE2D:
+            case Uniform::TYPE_UIMAGE2D:
+            case Uniform::TYPE_IIMAGE2D:
+                break;
+            default:
+                DFATAL("Unimplemented");
+        }
+    }
+
+    void bindImage(const Texture& texture, uint32_t name)
+    {
+        const char uniformName[16] = {'u', '_', 'I', 'm', 'a', 'g', 'e', static_cast<char>('0' + name)};
+        const GLUniform& uImage = getUniform(uniformName);
+        const Texture::Format textureFormat = texture.parameters()->_format;
+        const uint32_t channelSize = RenderUtil::getChannelSize(textureFormat);
+        const uint32_t componentSize = RenderUtil::getComponentSize(textureFormat);
+        const GLenum format = GLUtil::getTextureInternalFormat(Texture::USAGE_GENERAL, texture.parameters()->_format, channelSize, componentSize);
+        uImage.setUniform1i(static_cast<GLint>(name));
+        glBindImageTexture(name, static_cast<GLuint>(texture.delegate()->id()), 0, GL_FALSE, 0, GL_READ_WRITE, format);
+    }
+
+    void activeTexture(const Texture& texture, const String& name, uint32_t binding)
+    {
+        static GLenum glTargets[Texture::TYPE_COUNT] = {GL_TEXTURE_2D, GL_TEXTURE_CUBE_MAP};
+        glActiveTexture(static_cast<GLenum>(GL_TEXTURE0 + binding));
+        glBindTexture(glTargets[texture.type()], static_cast<GLuint>(texture.delegate()->id()));
+
+        const GLUniform& uTexture = getUniform(name);
+        uTexture.setUniform1i(static_cast<GLint>(binding));
+    }
+
+    const GLUniform& getUniform(const String& name)
+    {
+        const auto iter = _uniforms.find(name);
+        if(iter != _uniforms.end())
+            return iter->second;
+        _uniforms[name] = getUniformLocation(name);
+        return _uniforms[name];
+    }
+
+    GLint getUniformLocation(const String& name) const
+    {
+        const GLint location = glGetUniformLocation(_id, name.c_str());
+        CHECK_WARN(location != -1, "Undefined uniform \"%s\". It might be optimized out, or something goes wrong.", name.c_str());
+        return location;
+    }
+
+    const GLAttribute& getAttribute(const String& name)
+    {
+        if(const auto iter = _attributes.find(name); iter != _attributes.end())
+            return iter->second;
+        _attributes[name] = getAttribLocation(name);
+        return _attributes[name];
+    }
+
+    GLint getAttribLocation(const String& name) const
+    {
+        return glGetAttribLocation(_id, name.c_str());
+    }
+
+    void bindUBOSnapshots(const std::vector<RenderLayerSnapshot::UBOSnapshot>& uboSnapshots, const PipelineInput& pipelineInput)
+    {
+        size_t binding = 0;
+        for(const sp<PipelineInput::UBO>& ubo : pipelineInput.ubos())
+            if(shouldBeBinded(ubo->_stages))
+            {
+                DCHECK(binding < uboSnapshots.size(), "UBO Snapshot and UBO Layout mismatch: %d vs %d", uboSnapshots.size(), pipelineInput.ubos().size());
+                const RenderLayerSnapshot::UBOSnapshot& uboSnapshot = uboSnapshots.at(binding++);
+                bindUBO(uboSnapshot, ubo);
+            }
+        _rebind_needed = false;
+    }
+
+    bool shouldBeBinded(const ShaderStageSet& stages) const
+    {
+        return !_is_compute_pipeline || stages.has(Enum::SHADER_STAGE_BIT_COMPUTE);
+    }
+
+    bool _is_compute_pipeline;
+    GLuint _id;
+
+    std::map<String, GLAttribute> _attributes;
+    std::map<String, GLUniform> _uniforms;
+
+    bool _rebind_needed;
+};
+
+namespace {
+
 class GLScissor {
 public:
     GLScissor(const Optional<Rect>& scissor)
@@ -78,7 +298,6 @@ private:
     GLenum _pre_front_face;
 };
 
-
 class GLDepthTest final : public Snippet::DrawEvents {
 public:
     GLDepthTest(const PipelineDescriptor::TraitDepthTest& trait)
@@ -114,7 +333,6 @@ private:
     bool _enabled;
     bool _read_only;
 };
-
 
 class GLStencilTest final : public Snippet::DrawEvents {
 public:
@@ -277,21 +495,221 @@ struct GLMultiDrawElementsIndirect final : PipelineDrawCommand {
     GLenum _mode;
 };
 
+class GLBufferBaseBinder {
+public:
+    GLBufferBaseBinder(GLenum target, GLuint base, GLuint buffer)
+        : _target(target), _base(base), _buffer(buffer) {
+        glBindBufferBase(_target, _base, _buffer);
+    }
+    GLBufferBaseBinder(GLBufferBaseBinder&& other)
+        : _target(other._target), _base(other._base), _buffer(other._buffer) {
+        other._buffer = 0;
+    }
+    ~GLBufferBaseBinder()
+    {
+        if(_buffer)
+            glBindBufferBase(_target, _base, 0);
+    }
+    DISALLOW_COPY_AND_ASSIGN(GLBufferBaseBinder);
+
+private:
+    GLenum _target;
+    GLuint _base;
+    GLuint _buffer;
+};
+
+class PipelineOperationDraw final : public PipelineOperation {
+public:
+    PipelineOperationDraw(sp<GLPipeline::Stub> stub, const PipelineDescriptor& bindings)
+        : _stub(std::move(stub)), _scissor(bindings.scissor()), _renderer(makeBakedRenderer(bindings)) {
+    }
+
+    void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override
+    {
+        _stub->bind(graphicsContext, drawingContext);
+    }
+
+    void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override
+    {
+        const volatile GLScissor scissor(drawingContext._scissor ? drawingContext._scissor : _scissor);
+
+        for(const auto& [i, j] : drawingContext._buffer_object->_ssbos)
+            _ssbo_binders.emplace_back(GL_SHADER_STORAGE_BUFFER, static_cast<GLuint>(i), static_cast<GLuint>(j.id()));
+
+        _renderer->draw(graphicsContext, drawingContext);
+
+        _ssbo_binders.clear();
+    }
+
+    void compute(GraphicsContext& graphicsContext, const ComputeContext& computeContext) override
+    {
+        DFATAL("This is a drawing pipeline, not compute");
+    }
+
+private:
+    static sp<PipelineDrawCommand> makeBakedRenderer(const PipelineDescriptor& bindings)
+    {
+        GLenum mode = GLUtil::toEnum(bindings.mode());
+        switch(bindings.drawProcedure())
+        {
+            case Enum::DRAW_PROCEDURE_DRAW_ARRAYS:
+                return sp<GLDrawArrays>::make(mode);
+            case Enum::DRAW_PROCEDURE_DRAW_ELEMENTS:
+                return sp<GLDrawElements>::make(mode);
+            case Enum::DRAW_PROCEDURE_DRAW_INSTANCED:
+                return sp<GLDrawElementsInstanced>::make(mode);
+            case Enum::DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT:
+                return sp<GLMultiDrawElementsIndirect>::make(mode);
+        }
+        DFATAL("Not render procedure creator for %d", bindings.drawProcedure());
+        return nullptr;
+    }
+
+private:
+    sp<GLPipeline::Stub> _stub;
+
+    Optional<Rect> _scissor;
+    sp<PipelineDrawCommand> _renderer;
+
+    std::vector<GLBufferBaseBinder> _ssbo_binders;
+};
+
+class PipelineOperationCompute final : public PipelineOperation {
+public:
+    PipelineOperationCompute(sp<GLPipeline::Stub> stub)
+        : _stub(std::move(stub)) {
+    }
+
+    void bind(GraphicsContext& graphicsContext, const DrawingContext& computeContext) override
+    {
+    }
+
+    void draw(GraphicsContext& graphicsContext, const DrawingContext& computeContext) override
+    {
+    }
+
+    void compute(GraphicsContext& graphicsContext, const ComputeContext& computeContext) override
+    {
+        _stub->bind(graphicsContext, computeContext);
+
+        for(const auto& [i, j] : computeContext._buffer_object->_ssbos)
+            _ssbo_binders.emplace_back(GL_SHADER_STORAGE_BUFFER, static_cast<GLuint>(i), static_cast<GLuint>(j.id()));
+
+        glDispatchCompute(computeContext._num_work_groups.at(0), computeContext._num_work_groups.at(1), computeContext._num_work_groups.at(2));
+
+        _ssbo_binders.clear();
+    }
+
+private:
+    sp<GLPipeline::Stub> _stub;
+    std::vector<GLBufferBaseBinder> _ssbo_binders;
+};
+
+class Stage {
+public:
+    Stage(sp<Recycler> recycler, uint32_t version, GLenum type, const String& source)
+        : _recycler(std::move(recycler)), _id(compile(version, type, source)) {
+    }
+    ~Stage()
+    {
+        uint32_t id = _id;
+        _recycler->recycle([id](GraphicsContext&) {
+            LOGD("glDeleteShader(%d)", id);
+            glDeleteShader(id);
+        });
+    }
+    DISALLOW_COPY_AND_ASSIGN(Stage);
+
+    uint32_t id() const
+    {
+        return _id;
+    }
+
+private:
+    static GLuint compile(uint32_t version, GLenum type, const String& source)
+    {
+        const String versionSrc = source.startsWith("#version ") ? "" : Platform::glShaderVersionDeclaration(version);
+        const GLuint id = glCreateShader(type);
+        const GLchar* src[16] = {versionSrc.c_str()};
+        uint32_t slen = Platform::glPreprocessShader(source, &src[1], 15);
+        glShaderSource(id, slen + 1, src, nullptr);
+        glCompileShader(id);
+        GLint compiled;
+        glGetShaderiv(id, GL_COMPILE_STATUS, &compiled);
+        if(!compiled)
+        {
+            GLint length;
+            glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
+
+            size_t len = static_cast<size_t>(length);
+            std::vector<GLchar> logs(len + 1);
+            glGetShaderInfoLog(id, length, &length, logs.data());
+            logs.back() = 0;
+            StringBuffer sb;
+            for(uint32_t i = 0; i <= slen; i++)
+                sb << src[i] << '\n';
+            FATAL("%s\n\n%s", logs.data(), sb.str().c_str());
+            return 0;
+        }
+        return id;
+    }
+
+private:
+    sp<Recycler> _recycler;
+    uint32_t _id;
+};
+
+bool isComputePipeline(const std::map<Enum::ShaderStageBit, String>& stages)
+{
+    if(const auto iter = stages.find(Enum::SHADER_STAGE_BIT_COMPUTE); iter != stages.end())
+    {
+        DCHECK(stages.size() == 1, "Compute shader is an exclusive stage");
+        return true;
+    }
+    return false;
+}
+
+String getInformationLog(GLuint id)
+{
+    GLint length = 0;
+    glGetProgramiv(id, GL_INFO_LOG_LENGTH, &length);
+
+    const size_t len = static_cast<size_t>(length);
+    std::vector<GLchar> infos(len + 1);
+    glGetProgramInfoLog(id, length, &length, infos.data());
+    infos.back() = 0;
+    return infos.data();
+}
+
+sp<Stage> makeShader(GraphicsContext& graphicsContext, uint32_t version, GLenum type, const String& source)
+{
+    typedef std::unordered_map<GLenum, std::map<String, WeakPtr<Stage>>> ShaderPool;
+
+    const sp<ShaderPool>& shaders = graphicsContext.attachments().ensure<ShaderPool>();
+    if(const auto iter = (*shaders)[type].find(source); iter != (*shaders)[type].end())
+        if(const sp<Stage> shader = iter->second.lock())
+            return shader;
+
+    const sp<Stage> shader = sp<Stage>::make(graphicsContext.renderController()->recycler(), version, type, source);
+    (*shaders)[type][source] = shader;
+    return shader;
+}
+
 }
 
 GLPipeline::GLPipeline(const sp<Recycler>& recycler, uint32_t version, std::map<Enum::ShaderStageBit, String> stages, const PipelineDescriptor& bindings)
-    : _stub(sp<Stub>::make()), _recycler(recycler), _version(version), _stages(std::move(stages)), _pipeline_operation(makePipelineOperation(bindings))
+    : _stub(sp<Stub>::make(isComputePipeline(stages))), _recycler(recycler), _version(version), _stages(std::move(stages)), _pipeline_operation(makePipelineOperation(bindings))
 {
-    for(const auto& i : bindings.parameters()._traits)
+    for(const auto& [k, v] : bindings.parameters()._traits)
     {
-        if(i.first == PipelineDescriptor::TRAIT_TYPE_CULL_FACE_TEST)
-            _draw_decorators.push_back(sp<GLCullFaceTest>::make(i.second._configure._cull_face_test));
-        else if(i.first == PipelineDescriptor::TRAIT_TYPE_DEPTH_TEST)
-            _draw_decorators.push_back(sp<GLDepthTest>::make(i.second._configure._depth_test));
-        else if(i.first == PipelineDescriptor::TRAIT_TYPE_STENCIL_TEST)
+        if(k == PipelineDescriptor::TRAIT_TYPE_CULL_FACE_TEST)
+            _draw_decorators.push_back(sp<GLCullFaceTest>::make(v._configure._cull_face_test));
+        else if(k == PipelineDescriptor::TRAIT_TYPE_DEPTH_TEST)
+            _draw_decorators.push_back(sp<GLDepthTest>::make(v._configure._depth_test));
+        else if(k == PipelineDescriptor::TRAIT_TYPE_STENCIL_TEST)
         {
             std::vector<sp<Snippet::DrawEvents>> delegate;
-            const PipelineDescriptor::TraitStencilTest& test = i.second._configure._stencil_test;
+            const PipelineDescriptor::TraitStencilTest& test = v._configure._stencil_test;
             if(test._front._type == PipelineDescriptor::FRONT_FACE_TYPE_DEFAULT && test._front._type == test._back._type)
                 delegate.push_back(sp<GLStencilTestSeparate>::make(test._front));
             else
@@ -304,8 +722,8 @@ GLPipeline::GLPipeline(const sp<Recycler>& recycler, uint32_t version, std::map<
             DASSERT(delegate.size() > 0);
             _draw_decorators.push_back(sp<GLStencilTest>::make(std::move(delegate)));
         }
-        else if(i.first == PipelineDescriptor::TRAIT_TYPE_BLEND)
-            _draw_decorators.push_back(sp<GLTraitBlend>::make(i.second._configure._blend));
+        else if(k == PipelineDescriptor::TRAIT_TYPE_BLEND)
+            _draw_decorators.push_back(sp<GLTraitBlend>::make(v._configure._blend));
     }
 }
 
@@ -321,7 +739,7 @@ uint64_t GLPipeline::id()
 
 void GLPipeline::upload(GraphicsContext& graphicsContext)
 {
-    GLuint id = glCreateProgram();
+    const GLuint id = glCreateProgram();
 
     _stub->_rebind_needed = true;
     _stub->_id = id;
@@ -396,102 +814,24 @@ void GLPipeline::activeTexture(const Texture& texture, const String& name, uint3
     _stub->activeTexture(texture, name, binding);
 }
 
-const GLPipeline::GLUniform& GLPipeline::getUniform(const String& name)
+const GLPipeline::GLUniform& GLPipeline::getUniform(const String& name) const
 {
     return _stub->getUniform(name);
 }
 
-void GLPipeline::bindBuffer(GraphicsContext& /*graphicsContext*/, const PipelineInput& input, uint32_t divisor)
+void GLPipeline::bindBuffer(GraphicsContext& /*graphicsContext*/, const PipelineInput& input, uint32_t divisor) const
 {
     const PipelineInput::StreamLayout& stream = input.getStreamLayout(divisor);
     for(const auto& i : stream.attributes().values())
     {
-        const GLPipeline::GLAttribute& glAttribute = _stub->getAttribute(i.name());
+        const GLAttribute& glAttribute = _stub->getAttribute(i.name());
         glAttribute.bind(i, stream.stride());
     }
 }
 
-sp<GLPipeline::PipelineOperation> GLPipeline::makePipelineOperation(const PipelineDescriptor& bindings) const
+sp<PipelineOperation> GLPipeline::makePipelineOperation(const PipelineDescriptor& bindings) const
 {
-    for(const auto& i : _stages)
-        if(i.first == Enum::SHADER_STAGE_BIT_COMPUTE)
-        {
-            DCHECK(_stages.size() == 1, "Compute shader is an exclusive stage");
-            return sp<PipelineOperationCompute>::make(_stub);
-        }
-
-    return sp<PipelineOperationDraw>::make(_stub, bindings);
-}
-
-String GLPipeline::getInformationLog(GLuint id) const
-{
-    GLint length = 0;
-    glGetProgramiv(id, GL_INFO_LOG_LENGTH, &length);
-
-    size_t len = static_cast<size_t>(length);
-    std::vector<GLchar> infos(len + 1);
-    glGetProgramInfoLog(id, length, &length, infos.data());
-    infos.back() = 0;
-    return infos.data();
-}
-
-sp<GLPipeline::Stage> GLPipeline::makeShader(GraphicsContext& graphicsContext, uint32_t version, GLenum type, const String& source) const
-{
-    typedef std::unordered_map<GLenum, std::map<String, WeakPtr<Stage>>> ShaderPool;
-
-    const sp<ShaderPool>& shaders = graphicsContext.attachments().ensure<ShaderPool>();
-    const auto iter = (*shaders)[type].find(source);
-    if(iter != (*shaders)[type].end())
-    {
-        const sp<GLPipeline::Stage> shader = iter->second.lock();
-        if(shader)
-            return shader;
-    }
-
-    const sp<Stage> shader = sp<Stage>::make(graphicsContext.renderController()->recycler(), version, type, source);
-    (*shaders)[type][source] = shader;
-    return shader;
-}
-
-GLPipeline::GLAttribute::GLAttribute(GLint location)
-    : _location(location)
-{
-}
-
-void GLPipeline::GLAttribute::bind(const Attribute& attribute, GLsizei stride) const
-{
-    CHECK_WARN(_location >= 0, "Attribute \"%s\" location: %d", attribute.name().c_str(), _location);
-    if(attribute.length() <= 4)
-        setVertexPointer(attribute, _location, stride, attribute.length(), attribute.offset());
-    else if(attribute.length() == 16)
-    {
-        uint32_t offset = attribute.size() / 4;
-        for(int32_t i = 0; i < 4; i++)
-            setVertexPointer(attribute, _location + i, stride, 4, attribute.offset() + offset * i);
-    }
-    else if(attribute.length() == 9)
-    {
-        uint32_t offset = attribute.size() / 3;
-        for(int32_t i = 0; i < 3; i++)
-            setVertexPointer(attribute, _location + i, stride, 3, attribute.offset() + offset * i);
-    }
-    else
-    {
-        FATAL("Unknow attribute \"%s %s\"", attribute.type(), attribute.name().c_str());
-    }
-}
-
-void GLPipeline::GLAttribute::setVertexPointer(const Attribute& attribute, GLuint location, GLsizei stride, uint32_t length, uint32_t offset) const
-{
-    static const GLenum glTypes[Attribute::TYPE_COUNT] = {GL_BYTE, GL_FLOAT, GL_INT, GL_SHORT, GL_UNSIGNED_BYTE, GL_UNSIGNED_SHORT};
-    glEnableVertexAttribArray(location);
-    if(attribute.type() == Attribute::TYPE_FLOAT || attribute.normalized())
-        glVertexAttribPointer(location, length, glTypes[attribute.type()], attribute.normalized() ? GL_TRUE : GL_FALSE, stride, reinterpret_cast<const void*>(static_cast<uintptr_t>(offset)));
-    else
-        glVertexAttribIPointer(location, length, glTypes[attribute.type()], stride, reinterpret_cast<const void*>(static_cast<uintptr_t>(offset)));
-
-    if(attribute.divisor())
-        glVertexAttribDivisor(location, attribute.divisor());
+    return _stub->_is_compute_pipeline ?  sp<PipelineOperation>::make<PipelineOperationCompute>(_stub) : sp<PipelineOperation>::make<PipelineOperationDraw>(_stub, bindings);
 }
 
 GLPipeline::GLUniform::GLUniform(GLint location)
@@ -537,296 +877,6 @@ void GLPipeline::GLUniform::setUniform4fv(GLsizei count, const GLfloat* value) c
 void GLPipeline::GLUniform::setUniformMatrix4fv(GLsizei count, GLboolean transpose, const GLfloat* value) const
 {
     glUniformMatrix4fv(_location, count, transpose, value);
-}
-
-GLPipeline::Stage::Stage(const sp<Recycler>& recycler, uint32_t version, GLenum type, const String& source)
-    : _recycler(recycler), _id(compile(version, type, source))
-{
-}
-
-GLPipeline::Stage::~Stage()
-{
-    uint32_t id = _id;
-    _recycler->recycle([id](GraphicsContext&) {
-        LOGD("glDeleteShader(%d)", id);
-        glDeleteShader(id);
-    });
-}
-
-uint32_t GLPipeline::Stage::id()
-{
-    return _id;
-}
-
-GLuint GLPipeline::Stage::compile(uint32_t version, GLenum type, const String& source)
-{
-    const String versionSrc = source.startsWith("#version ") ? "" : Platform::glShaderVersionDeclaration(version);
-    GLuint id = glCreateShader(type);
-    const GLchar* src[16] = {versionSrc.c_str()};
-    uint32_t slen = Platform::glPreprocessShader(source, &src[1], 15);
-    glShaderSource(id, slen + 1, src, nullptr);
-    glCompileShader(id);
-    GLint compiled;
-    glGetShaderiv(id, GL_COMPILE_STATUS, &compiled);
-    if(!compiled)
-    {
-        GLint length;
-        glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
-
-        size_t len = static_cast<size_t>(length);
-        std::vector<GLchar> logs(len + 1);
-        glGetShaderInfoLog(id, length, &length, logs.data());
-        logs.back() = 0;
-        StringBuffer sb;
-        for(uint32_t i = 0; i <= slen; i++)
-            sb << src[i] << '\n';
-        FATAL("%s\n\n%s", logs.data(), sb.str().c_str());
-        return 0;
-    }
-    return id;
-}
-
-GLPipeline::PipelineOperationDraw::PipelineOperationDraw(sp<Stub> stub, const PipelineDescriptor& bindings)
-    : _stub(std::move(stub)), _scissor(bindings.scissor()), _renderer(makeBakedRenderer(bindings))
-{
-}
-
-void GLPipeline::PipelineOperationDraw::bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
-{
-    _stub->bind(graphicsContext, drawingContext);
-}
-
-void GLPipeline::PipelineOperationDraw::draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
-{
-    const volatile GLScissor scissor(drawingContext._scissor ? drawingContext._scissor : _scissor);
-
-    for(const auto& [i, j] : drawingContext._buffer_object->_ssbos)
-        _ssbo_binders.emplace_back(GL_SHADER_STORAGE_BUFFER, static_cast<GLuint>(i), static_cast<GLuint>(j.id()));
-
-    _renderer->draw(graphicsContext, drawingContext);
-
-    _ssbo_binders.clear();
-}
-
-void GLPipeline::PipelineOperationDraw::compute(GraphicsContext& /*graphicsContext*/, const ComputeContext& /*computeContext*/)
-{
-    DFATAL("This is a drawing pipeline, not compute");
-}
-
-sp<PipelineDrawCommand> GLPipeline::PipelineOperationDraw::makeBakedRenderer(const PipelineDescriptor& bindings) const
-{
-    GLenum mode = GLUtil::toEnum(bindings.mode());
-    switch(bindings.drawProcedure())
-    {
-    case Enum::DRAW_PROCEDURE_DRAW_ARRAYS:
-        return sp<GLDrawArrays>::make(mode);
-    case Enum::DRAW_PROCEDURE_DRAW_ELEMENTS:
-        return sp<GLDrawElements>::make(mode);
-    case Enum::DRAW_PROCEDURE_DRAW_INSTANCED:
-        return sp<GLDrawElementsInstanced>::make(mode);
-    case Enum::DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT:
-        return sp<GLMultiDrawElementsIndirect>::make(mode);
-    }
-    DFATAL("Not render procedure creator for %d", bindings.drawProcedure());
-    return nullptr;
-}
-
-GLPipeline::Stub::Stub()
-    : _id(0), _rebind_needed(true)
-{
-}
-
-void GLPipeline::Stub::bind(GraphicsContext& /*graphicsContext*/, const PipelineContext& pipelineContext)
-{
-    glUseProgram(_id);
-
-    const PipelineBindings& pipelineBindings = pipelineContext._bindings;
-    bindUBOSnapshots(pipelineContext._buffer_object->_ubos, pipelineBindings.pipelineInput());
-
-    uint32_t binding = 0;
-    const std::vector<String>& samplerNames = pipelineBindings.pipelineInput()->samplerNames();
-    const std::vector<std::pair<sp<Texture>, PipelineInput::BindingSet>>& samplers = pipelineBindings.pipelineDescriptor()->samplers();
-    DASSERT(samplerNames.size() == samplers.size());
-    for(size_t i = 0; i < samplerNames.size(); ++i)
-    {
-        const String& name = samplerNames.at(i);
-        const sp<Texture>& texture = samplers.at(i).first;
-        CHECK_WARN(texture, "Pipeline has unbound sampler \"%s\"", name.c_str());
-        if(texture)
-            activeTexture(texture, name, binding);
-        ++ binding;
-    }
-
-    const std::vector<std::pair<sp<Texture>, PipelineInput::BindingSet>>& images = pipelineBindings.pipelineDescriptor()->images();
-    for(size_t i = 0; i < images.size(); ++i)
-        if(const sp<Texture>& image = images.at(i).first)
-            bindImage(image, static_cast<uint32_t>(i));
-}
-
-void GLPipeline::Stub::bindUBO(const RenderLayerSnapshot::UBOSnapshot& uboSnapshot, const sp<PipelineInput::UBO>& ubo)
-{
-    const std::vector<sp<Uniform>>& uniforms = ubo->uniforms().values();
-    for(size_t i = 0; i < uniforms.size(); ++i)
-    {
-        if(uboSnapshot._dirty_flags.buf()[i] || _rebind_needed)
-        {
-            const sp<Uniform>& uniform = uniforms.at(i);
-            const uint8_t* buf = uboSnapshot._buffer.buf();
-            const auto& [offset, size] = ubo->slots().at(i);
-            bindUniform(buf + offset, size, uniform);
-        }
-    }
-}
-
-void GLPipeline::Stub::bindUniform(const uint8_t* ptr, uint32_t size, const Uniform& uniform)
-{
-    const GLPipeline::GLUniform& glUniform = getUniform(uniform.name());
-    const float* ptrf = reinterpret_cast<const float*>(ptr);
-    switch(uniform.type()) {
-    case Uniform::TYPE_I1:
-        DCHECK(size == 4, "Wrong uniform1i size: %d", size);
-        glUniform.setUniform1i(*reinterpret_cast<const int32_t*>(ptr));
-        break;
-    case Uniform::TYPE_F1:
-        DCHECK(size == 4, "Wrong uniform1f size: %d", size);
-        glUniform.setUniform1f(ptrf[0]);
-        break;
-    case Uniform::TYPE_F2:
-        DCHECK(size == 8, "Wrong uniform2f size: %d", size);
-        glUniform.setUniform2f(ptrf[0], ptrf[1]);
-        break;
-    case Uniform::TYPE_F3:
-        DCHECK(size >= 12, "Wrong uniform3f size: %d", size);
-        glUniform.setUniform3f(ptrf[0], ptrf[1], ptrf[2]);
-        break;
-    case Uniform::TYPE_F4:
-        DCHECK(size == 16, "Wrong uniform4f size: %d", size);
-        glUniform.setUniform4f(ptrf[0], ptrf[1], ptrf[2], ptrf[3]);
-        break;
-    case Uniform::TYPE_F4V:
-        DCHECK(size % 16 == 0, "Wrong uniform4fv size: %d", size);
-        glUniform.setUniform4fv(size / 16, ptrf);
-        break;
-    case Uniform::TYPE_MAT4:
-    case Uniform::TYPE_MAT4V:
-        DCHECK(size % 64 == 0, "Wrong mat4fv size: %d", size);
-        glUniform.setUniformMatrix4fv(size / 64, GL_FALSE, ptrf);
-        break;
-    case Uniform::TYPE_IMAGE2D:
-    case Uniform::TYPE_UIMAGE2D:
-    case Uniform::TYPE_IIMAGE2D:
-        break;
-    default:
-        DFATAL("Unimplemented");
-    }
-}
-
-void GLPipeline::Stub::bindImage(const Texture& texture, uint32_t name)
-{
-    const char uniformName[16] = {'u', '_', 'I', 'm', 'a', 'g', 'e', static_cast<char>('0' + name)};
-    const GLPipeline::GLUniform& uImage = getUniform(uniformName);
-    const Texture::Format textureFormat = texture.parameters()->_format;
-    const uint32_t channelSize = RenderUtil::getChannelSize(textureFormat);
-    const uint32_t componentSize = RenderUtil::getComponentSize(textureFormat);
-    const GLenum format = GLUtil::getTextureInternalFormat(Texture::USAGE_GENERAL, texture.parameters()->_format, channelSize, componentSize);
-    uImage.setUniform1i(static_cast<GLint>(name));
-    glBindImageTexture(name, static_cast<GLuint>(texture.delegate()->id()), 0, GL_FALSE, 0, GL_READ_WRITE, format);
-}
-
-void GLPipeline::Stub::activeTexture(const Texture& texture, const String& name, uint32_t binding)
-{
-    static GLenum glTargets[Texture::TYPE_COUNT] = {GL_TEXTURE_2D, GL_TEXTURE_CUBE_MAP};
-    glActiveTexture(static_cast<GLenum>(GL_TEXTURE0 + binding));
-    glBindTexture(glTargets[texture.type()], static_cast<GLuint>(texture.delegate()->id()));
-
-    const GLPipeline::GLUniform& uTexture = getUniform(name);
-    uTexture.setUniform1i(static_cast<GLint>(binding));
-}
-
-const GLPipeline::GLUniform& GLPipeline::Stub::getUniform(const String& name)
-{
-    const auto iter = _uniforms.find(name);
-    if(iter != _uniforms.end())
-        return iter->second;
-    _uniforms[name] = getUniformLocation(name);
-    return _uniforms[name];
-}
-
-GLint GLPipeline::Stub::getUniformLocation(const String& name)
-{
-    GLint location = glGetUniformLocation(_id, name.c_str());
-    CHECK_WARN(location != -1, "Undefined uniform \"%s\". It might be optimized out, or something goes wrong.", name.c_str());
-    return location;
-}
-
-const GLPipeline::GLAttribute& GLPipeline::Stub::getAttribute(const String& name)
-{
-    const auto iter = _attributes.find(name);
-    if(iter != _attributes.end())
-        return iter->second;
-    _attributes[name] = getAttribLocation(name);
-    return _attributes[name];
-}
-
-GLint GLPipeline::Stub::getAttribLocation(const String& name)
-{
-    return glGetAttribLocation(_id, name.c_str());
-}
-
-void GLPipeline::Stub::bindUBOSnapshots(const std::vector<RenderLayerSnapshot::UBOSnapshot>& uboSnapshots, const PipelineInput& pipelineInput)
-{
-    DCHECK(uboSnapshots.size() == pipelineInput.ubos().size(), "UBO Snapshot and UBO Layout mismatch: %d vs %d", uboSnapshots.size(), pipelineInput.ubos().size());
-
-    for(size_t i = 0; i < uboSnapshots.size(); ++i)
-    {
-        const RenderLayerSnapshot::UBOSnapshot& uboSnapshot = uboSnapshots.at(i);
-        const sp<PipelineInput::UBO>& ubo = pipelineInput.ubos().at(i);
-        bindUBO(uboSnapshot, ubo);
-    }
-    _rebind_needed = false;
-}
-
-GLPipeline::PipelineOperationCompute::PipelineOperationCompute(sp<GLPipeline::Stub> stub)
-    : _stub(std::move(stub))
-{
-}
-
-void GLPipeline::PipelineOperationCompute::bind(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*computeContext*/)
-{
-}
-
-void GLPipeline::PipelineOperationCompute::draw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*computeContext*/)
-{
-}
-
-void GLPipeline::PipelineOperationCompute::compute(GraphicsContext& graphicsContext, const ComputeContext& computeContext)
-{
-    _stub->bind(graphicsContext, computeContext);
-
-    for(const auto& [i, j] : computeContext._buffer_object->_ssbos)
-        _ssbo_binders.emplace_back(GL_SHADER_STORAGE_BUFFER, static_cast<GLuint>(i), static_cast<GLuint>(j.id()));
-
-    glDispatchCompute(computeContext._num_work_groups.at(0), computeContext._num_work_groups.at(1), computeContext._num_work_groups.at(2));
-
-    _ssbo_binders.clear();
-}
-
-GLPipeline::GLBufferBaseBinder::GLBufferBaseBinder(GLenum target, GLuint base, GLuint buffer)
-    : _target(target), _base(base), _buffer(buffer)
-{
-    glBindBufferBase(_target, _base, _buffer);
-}
-
-GLPipeline::GLBufferBaseBinder::GLBufferBaseBinder(GLBufferBaseBinder&& other)
-    : _target(other._target), _base(other._base), _buffer(other._buffer)
-{
-    other._buffer = 0;
-}
-
-GLPipeline::GLBufferBaseBinder::~GLBufferBaseBinder()
-{
-    if(_buffer)
-        glBindBufferBase(_target, _base, 0);
 }
 
 }

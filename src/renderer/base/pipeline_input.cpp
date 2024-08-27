@@ -104,7 +104,7 @@ sp<RenderLayerSnapshot::BufferObject> PipelineInput::takeBufferSnapshot(const Re
 {
     std::vector<RenderLayerSnapshot::UBOSnapshot> uboSnapshot;
     for(const sp<UBO>& i : _ubos)
-        if(isComputeStage ? i->stages().has(Enum::SHADER_STAGE_BIT_COMPUTE) : i->stages() != Enum::SHADER_STAGE_BIT_COMPUTE)
+        if(isComputeStage ? i->_stages.has(Enum::SHADER_STAGE_BIT_COMPUTE) : i->_stages != Enum::SHADER_STAGE_BIT_COMPUTE)
             uboSnapshot.push_back(i->snapshot(renderRequest));
 
     std::vector<std::pair<uint32_t, Buffer::Snapshot>> ssboSnapshot;
@@ -273,11 +273,6 @@ const Table<String, sp<Uniform>>& PipelineInput::UBO::uniforms() const
 const std::vector<std::pair<uintptr_t, size_t>>& PipelineInput::UBO::slots() const
 {
     return _slots;
-}
-
-const ShaderStageSet& PipelineInput::UBO::stages() const
-{
-    return _stages;
 }
 
 void PipelineInput::UBO::initialize()

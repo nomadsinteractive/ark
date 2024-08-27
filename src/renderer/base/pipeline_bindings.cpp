@@ -95,7 +95,7 @@ const sp<Snippet>& PipelineBindings::snippet() const
 
 void PipelineBindings::addSnippet(sp<Snippet> snippet)
 {
-    DCHECK(!_pipeline, "Draw snippet can only be added before pipeline creation");
+    DCHECK(!_render_pipeline, "Draw snippet can only be added before pipeline creation");
     _snippet = sp<SnippetLinkedChain>::make(std::move(_snippet), std::move(snippet));
 }
 
@@ -119,33 +119,31 @@ const sp<Traits>& PipelineBindings::attachments() const
     return _attachments;
 }
 
-const sp<Pipeline>& PipelineBindings::getPipeline(GraphicsContext& graphicsContext)
+const sp<Pipeline>& PipelineBindings::ensureRenderPipeline(GraphicsContext& graphicsContext)
 {
-    if(_pipeline)
+    if(_render_pipeline)
     {
-        if(_pipeline->id() == 0)
-            _pipeline->upload(graphicsContext);
-        return _pipeline;
-    }
-
-    _pipeline_descriptor->layout()->preCompile(graphicsContext);
-
-    std::map<Enum::ShaderStageBit, ShaderPreprocessor::Stage> stages = _pipeline_descriptor->layout()->getPreprocessedStages(graphicsContext.renderContext());
-    std::map<Enum::ShaderStageBit, String> sources;
-    for(auto& [k, v] : stages)
-        sources.emplace(k, std::move(v._source));
-
-    if(const auto iter = sources.find(Enum::SHADER_STAGE_BIT_COMPUTE); iter != sources.end() && sources.size() > 1)
-    {
-        sp<Pipeline> pipelineCompute = _pipeline_factory->buildPipeline(graphicsContext, _pipeline_descriptor, std::map<Enum::ShaderStageBit, String>{{iter->first, iter->second}});
-        sources.erase(iter);
-        sp<Pipeline> pipelineDraw = _pipeline_factory->buildPipeline(graphicsContext, _pipeline_descriptor, std::move(sources));
-        _pipeline = sp<Pipeline>::make<PipelineComposite>(std::move(pipelineDraw), std::move(pipelineCompute));
+        if(_render_pipeline->id() == 0)
+            _render_pipeline->upload(graphicsContext);
     }
     else
-        _pipeline = _pipeline_factory->buildPipeline(graphicsContext, _pipeline_descriptor, std::move(sources));
-    _pipeline->upload(graphicsContext);
-    return _pipeline;
+        doEnsurePipeline(graphicsContext);
+
+    return _render_pipeline;
+}
+
+const sp<Pipeline>& PipelineBindings::ensureComputePipeline(GraphicsContext& graphicsContext)
+{
+    if(_compute_pipeline)
+    {
+        if(_compute_pipeline->id() == 0)
+            _compute_pipeline->upload(graphicsContext);
+    }
+    else
+        doEnsurePipeline(graphicsContext);
+
+    CHECK(_compute_pipeline, "Shader has no compute stage defined");
+    return _compute_pipeline;
 }
 
 std::map<uint32_t, Buffer::Factory> PipelineBindings::makeDividedBufferFactories() const
@@ -158,6 +156,28 @@ std::map<uint32_t, Buffer::Factory> PipelineBindings::makeDividedBufferFactories
         builders.insert(std::make_pair(i.first, Buffer::Factory(stream.stride())));
     }
     return builders;
+}
+
+void PipelineBindings::doEnsurePipeline(GraphicsContext& graphicsContext)
+{
+    _pipeline_descriptor->layout()->preCompile(graphicsContext);
+
+    std::map<Enum::ShaderStageBit, ShaderPreprocessor::Stage> stages = _pipeline_descriptor->layout()->getPreprocessedStages(graphicsContext.renderContext());
+    std::map<Enum::ShaderStageBit, String> sources;
+    for(auto& [k, v] : stages)
+        sources.emplace(k, std::move(v._source));
+
+    if(const auto iter = sources.find(Enum::SHADER_STAGE_BIT_COMPUTE); iter != sources.end() && sources.size() > 1)
+    {
+        _compute_pipeline = _pipeline_factory->buildPipeline(graphicsContext, _pipeline_descriptor, std::map<Enum::ShaderStageBit, String>{{iter->first, iter->second}});
+        sources.erase(iter);
+        _render_pipeline = _pipeline_factory->buildPipeline(graphicsContext, _pipeline_descriptor, std::move(sources));
+    }
+    else
+        _render_pipeline = _pipeline_factory->buildPipeline(graphicsContext, _pipeline_descriptor, std::move(sources));
+    _render_pipeline->upload(graphicsContext);
+    if(_compute_pipeline)
+        _compute_pipeline->upload(graphicsContext);
 }
 
 }

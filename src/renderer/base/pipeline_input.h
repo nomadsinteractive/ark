@@ -79,8 +79,6 @@ public:
 
         const std::vector<std::pair<uintptr_t, size_t>>& slots() const;
 
-        const ShaderStageSet& stages() const;
-
         void initialize();
         void doSnapshot(uint64_t timestamp, bool force) const;
 

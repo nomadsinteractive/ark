@@ -1,7 +1,5 @@
 #include "renderer/impl/snippet/snippet_draw_compute.h"
 
-#include "core/util/bean_utils.h"
-
 #include "renderer/base/compute_context.h"
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/pipeline_bindings.h"
@@ -19,9 +17,10 @@ public:
     {
     }
 
-    void preDraw(GraphicsContext& graphicsContext, const DrawingContext& /*context*/) override
+    void preDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override
     {
-        _compute_context._bindings->getPipeline(graphicsContext)->compute(graphicsContext, _compute_context);
+        _compute_context._bindings = context._bindings;
+        context._bindings->ensureComputePipeline(graphicsContext)->compute(graphicsContext, _compute_context);
     }
 
     void postDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override {}
@@ -41,7 +40,8 @@ public:
 
     void postDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override
     {
-        context._bindings->getPipeline(graphicsContext)->compute(graphicsContext, _compute_context);
+        _compute_context._bindings = context._bindings;
+        context._bindings->ensureComputePipeline(graphicsContext)->compute(graphicsContext, _compute_context);
     }
 
 private:

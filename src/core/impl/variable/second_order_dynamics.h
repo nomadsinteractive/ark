@@ -15,8 +15,8 @@ public:
     }
 
     T val() override {
-        float t = _t->val();
-        float dt = t - _last_t;
+        const float t = _t->val();
+        const float dt = t - _last_t;
         if(dt > 0) {
             const T x = _x->val();
             const T dx = (x - _last_x) / dt;
@@ -28,10 +28,10 @@ public:
                 k1Stable = _k1;
                 k2Stable = std::max(_k2, std::max(dt * dt / 2 + dt * _k1 / 2, dt * _k1));
             } else {
-                float t1 = std::exp(-_z * _w * dt);
-                float alpha = 2 * t1 * (_z <= 1 ? std::cos(dt * _d) : std::cosh(dt * _d));
-                float beta = t1 * t1;
-                float t2 = dt / (1 + beta - alpha);
+                const float t1 = std::exp(-_z * _w * dt);
+                const float alpha = 2 * t1 * (_z <= 1 ? std::cos(dt * _d) : std::cosh(dt * _d));
+                const float beta = t1 * t1;
+                const float t2 = dt / (1 + beta - alpha);
                 k1Stable = (1 - beta) * t2;
                 k2Stable = dt * t2;
             }

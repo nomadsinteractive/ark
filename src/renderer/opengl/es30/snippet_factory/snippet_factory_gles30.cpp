@@ -24,7 +24,7 @@ public:
         const sp<GLVertexArray>& vertexArray = context._attachments->get<GLVertexArray>();
         uint64_t vertexArrayId = vertexArray ? vertexArray->id() : 0;
         if(!vertexArrayId) {
-            sp<GLVertexArray> va = sp<GLVertexArray>::make(context._bindings->getPipeline(graphicsContext), context._vertices.delegate(), context._bindings);
+            sp<GLVertexArray> va = sp<GLVertexArray>::make(context._bindings->ensureRenderPipeline(graphicsContext), context._vertices.delegate(), context._bindings);
             va->upload(graphicsContext);
             graphicsContext.renderController()->upload(va, RenderController::US_ON_SURFACE_READY);
             vertexArrayId = va->id();

@@ -269,16 +269,16 @@ void VKPipeline::setupDescriptorSetLayout(const PipelineDescriptor& pipelineDesc
     for(const sp<PipelineInput::UBO>& i : pipelineInput.ubos())
     {
         binding = std::max(binding, i->binding());
-        if(shouldBind(i->_stages))
+        if(shouldBeBinded(i->_stages))
         {
-            const VkShaderStageFlags stages = i->stages().toFlags<VkShaderStageFlagBits>(VKUtil::toStage, Enum::SHADER_STAGE_BIT_COUNT);
+            const VkShaderStageFlags stages = i->_stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, Enum::SHADER_STAGE_BIT_COUNT);
             setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, stages, i->binding()));
         }
     }
     for(const PipelineInput::SSBO& i : pipelineInput.ssbos())
     {
         binding = std::max(binding, i._binding);
-        if(shouldBind(i._stages))
+        if(shouldBeBinded(i._stages))
         {
             const VkShaderStageFlags stages = i._stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, Enum::SHADER_STAGE_BIT_COUNT);
             setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, stages, i._binding));
@@ -287,11 +287,11 @@ void VKPipeline::setupDescriptorSetLayout(const PipelineDescriptor& pipelineDesc
 
     const uint32_t bindingBase = binding + 1;
     for(const auto& [_binding, _stages] : pipelineDescriptor.layout()->samplers())
-        if(shouldBind(_stages))
+        if(shouldBeBinded(_stages))
             setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, Enum::SHADER_STAGE_BIT_COUNT), bindingBase + _binding));
 
     for(const auto& [_binding, _stages] : pipelineDescriptor.layout()->images())
-        if(shouldBind(_stages))
+        if(shouldBeBinded(_stages))
             setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, _stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, Enum::SHADER_STAGE_BIT_COUNT), bindingBase + _binding));
 
     const VkDescriptorSetLayoutCreateInfo descriptorLayout = vks::initializers::descriptorSetLayoutCreateInfo(setLayoutBindings.data(), static_cast<uint32_t>(setLayoutBindings.size()));
@@ -316,7 +316,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
     for(const sp<PipelineInput::UBO>& i : pipelineDescriptor.input()->ubos())
     {
         binding = std::max(binding, i->binding());
-        if(shouldBind(i->_stages))
+        if(shouldBeBinded(i->_stages))
         {
             sp<VKBuffer> ubo = sp<VKBuffer>::make(_renderer, _recycler, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
             ubo->uploadBuffer(graphicsContext, sp<UploaderArray<uint8_t>>::make(std::vector<uint8_t>(i->size(), 0)));
@@ -332,7 +332,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
     for(const PipelineInput::SSBO& i : pipelineDescriptor.input()->ssbos())
     {
         binding = std::max(binding, i._binding);
-        if(shouldBind(i._stages))
+        if(shouldBeBinded(i._stages))
         {
             const sp<VKBuffer> sbo = i._buffer.delegate();
             writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
@@ -345,7 +345,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
     const uint32_t bindingBase = binding + 1;
     _texture_observers.clear();
     for(const auto& [i, bindingSet] : pipelineDescriptor.samplers())
-        if(shouldBind(bindingSet._stages))
+        if(shouldBeBinded(bindingSet._stages))
         {
             CHECK_WARN(i, "Pipeline has unbound sampler");
             if(i)
@@ -361,7 +361,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
             }
         }
     for(const auto& [i, bindingSet] : pipelineDescriptor.images())
-        if(shouldBind(bindingSet._stages))
+        if(shouldBeBinded(bindingSet._stages))
         {
             CHECK_WARN(i, "Pipeline has unbound image");
             if(i)
@@ -580,7 +580,7 @@ VkPipelineRasterizationStateCreateInfo VKPipeline::makeRasterizationState() cons
     return vks::initializers::pipelineRasterizationStateCreateInfo(VK_POLYGON_MODE_FILL, VK_CULL_MODE_BACK_BIT, VK_FRONT_FACE_COUNTER_CLOCKWISE, 0);
 }
 
-bool VKPipeline::shouldBind(const ShaderStageSet& stages) const
+bool VKPipeline::shouldBeBinded(const ShaderStageSet& stages) const
 {
     return !_is_compute_pipeline || stages.has(Enum::SHADER_STAGE_BIT_COMPUTE);
 }
