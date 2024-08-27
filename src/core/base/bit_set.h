@@ -28,6 +28,10 @@ public:
         return _bits != toConvertableType(other);
     }
 
+    convertable_type bits() const {
+        return _bits;
+    }
+
     void set(T bits, bool enabled = true) {
         if(enabled)
             _bits |= toConvertableType(bits);
@@ -50,13 +54,13 @@ public:
     template<size_t N> static BitSet toBitSet(const String& value, const std::array<std::pair<const char*, T>, N>& bitNames) {
         convertable_type bitsets = 0;
         for(const String& i : value.split('|')) {
-            convertable_type bitvalue = 0;
+            convertable_type bitvalue = std::numeric_limits<convertable_type>::max();
             for(const auto [k, v] : bitNames)
                 if(i.strip() == k) {
                     bitvalue = toConvertableType(v);
                     break;
                 }
-            if(!bitvalue) {
+            if(bitvalue == std::numeric_limits<convertable_type>::max()) {
                 StringBuffer sb;
                 for(size_t j = 0; j < N; ++j) {
                     sb << bitNames.at(j).first << '(' << bitNames.at(j).second << ')';

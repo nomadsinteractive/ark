@@ -1792,7 +1792,7 @@ class Transform(Mat4):
     TYPE_LINEAR_2D = 0
     TYPE_LINEAR_3D = 1
 
-    def __init__(self, t: int = TYPE_LINEAR_3D, rotation: Optional[Rotation] = None, scale: Vec3 | Vec2 | None = None, translation: Vec3 | Vec2 | None = None):
+    def __init__(self, t: int = TYPE_LINEAR_3D, rotation: Optional[Rotation] = None, scale: TYPE_VEC3 | None = None, translation: Vec3 | Vec2 | None = None):
         self._type = t
         self._rotation = rotation
         self._scale = scale

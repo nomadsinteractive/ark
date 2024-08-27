@@ -34,7 +34,7 @@ void Level::load(const String& src)
         const String& name = Documents::ensureAttribute(i, constants::NAME);
         const String& dimensions = Documents::ensureAttribute(i, "dimensions");
         const int32_t id = Documents::ensureAttribute<int32_t>(i, constants::ID);
-        DCHECK_WARN(libraryMapping.find(id) == libraryMapping.end(), "Overwriting instance library mapping(%d), originally mapped to type(%d)", id, libraryMapping.find(id)->second._render_object_instance->_type);
+        CHECK_WARN(libraryMapping.find(id) == libraryMapping.end(), "Overwriting instance library mapping(%d), originally mapped to type(%d)", id, libraryMapping.find(id)->second._render_object_instance->_type);
 
         const auto it1 = _render_object_libraries.find(name);
         DCHECK(it1 != _render_object_libraries.end(), "Cannot find instance library(%s)", name.c_str());
@@ -151,9 +151,9 @@ Level::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
       _rigid_object_libraries(loadNamedTypes<Collider>(factory, manifest, "rigid-body", "collider"))
 {
     for(const document& i : manifest->children("camera"))
-        _cameras.push_back({Documents::ensureAttribute(i, constants::NAME), factory.ensureBuilder<Camera>(i, constants::REF)});
+        _cameras.emplace_back(Documents::ensureAttribute(i, constants::NAME), factory.ensureBuilder<Camera>(i, constants::REF));
     for(const document& i : manifest->children("light"))
-        _lights.push_back({Documents::ensureAttribute(i, constants::NAME), factory.ensureBuilder<Vec3>(i, constants::REF)});
+        _lights.emplace_back(Documents::ensureAttribute(i, constants::NAME), factory.ensureBuilder<Vec3>(i, constants::REF));
 }
 
 sp<Level> Level::BUILDER::build(const Scope& args)

@@ -218,11 +218,11 @@ void RendererImgui::MyImGuiRenderFunction(const RenderRequest& renderRequest, Im
         ByteArray::Borrowed vb = renderRequest.allocator().sbrkSpan(static_cast<size_t>(cmd_list->VtxBuffer.size_in_bytes()));
         ByteArray::Borrowed ib = renderRequest.allocator().sbrkSpan(static_cast<size_t>(cmd_list->IdxBuffer.size_in_bytes()));
 
-        memcpy(vb.buf(), cmd_list->VtxBuffer.Data, static_cast<size_t>(vb.length()));
-        memcpy(ib.buf(), cmd_list->IdxBuffer.Data, static_cast<size_t>(ib.length()));
+        memcpy(vb.buf(), cmd_list->VtxBuffer.Data, vb.length());
+        memcpy(ib.buf(), cmd_list->IdxBuffer.Data, ib.length());
 
         uint32_t offset = 0;
-        const sp<RenderLayerSnapshot::BufferObject> bo = _shader->takeBufferSnapshot(renderRequest, false);
+        const sp<RenderLayerSnapshot::BufferObject> bo = _shader->input()->takeBufferSnapshot(renderRequest, false);
         for (int j = 0; j < cmd_list->CmdBuffer.Size; j++)
         {
             const ImDrawCmd* pcmd = &cmd_list->CmdBuffer[j];

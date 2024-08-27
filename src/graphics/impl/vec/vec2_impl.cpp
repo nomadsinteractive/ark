@@ -4,8 +4,6 @@
 #include "core/base/bean_factory.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/util/bean_utils.h"
-#include "core/util/numeric_type.h"
-#include "core/util/strings.h"
 #include "core/util/updatable_util.h"
 
 namespace ark {

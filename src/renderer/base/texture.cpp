@@ -138,15 +138,36 @@ template<> ARK_API Texture::Type StringConvert::eval<Texture::Type>(const String
 
 template<> ARK_API Texture::Format StringConvert::eval<Texture::Format>(const String& str)
 {
+    constexpr std::array<std::pair<const char*, Texture::Format>, 11> formats = { {
+            {"r", Texture::FORMAT_R},
+            {"rg", Texture::FORMAT_RG},
+            {"rgb", Texture::FORMAT_RGB},
+            {"rgba", Texture::FORMAT_RGBA},
+            {"signed", Texture::FORMAT_SIGNED},
+            {"normalized", Texture::FORMAT_NORMALIZED},
+            {"integer", Texture::FORMAT_INTEGER},
+            {"float", Texture::FORMAT_FLOAT},
+            {"8bit", Texture::FORMAT_8_BIT},
+            {"16bit", Texture::FORMAT_16_BIT},
+            {"32bit", Texture::FORMAT_32_BIT}
+        }};
     if(str)
-        return EnumMap<Texture::Format>::instance().toEnumCombo(str);
+        return static_cast<Texture::Format>(BitSet<Texture::Format>::toBitSet(str, formats).bits());
     return Texture::FORMAT_AUTO;
 }
 
 template<> ARK_API Texture::Usage StringConvert::eval<Texture::Usage>(const String& str)
 {
+    constexpr std::array<std::pair<const char*, Texture::Usage>, 6> usages = { {
+        {"general", Texture::USAGE_GENERAL},
+        {"depth", Texture::USAGE_DEPTH_ATTACHMENT},
+        {"stencil", Texture::USAGE_DEPTH_STENCIL_ATTACHMENT},
+        {"color_attachment", Texture::USAGE_COLOR_ATTACHMENT},
+        {"sampler", Texture::USAGE_SAMPLER},
+        {"storage", Texture::USAGE_STORAGE}
+    }};
     if(str)
-        return EnumMap<Texture::Usage>::instance().toEnumCombo(str);
+        return static_cast<Texture::Usage>(BitSet<Texture::Usage>::toBitSet(str, usages).bits());
     return Texture::USAGE_GENERAL;
 }
 
@@ -194,8 +215,12 @@ template<> ARK_API Texture::CONSTANT StringConvert::eval<Texture::CONSTANT>(cons
 
 template<> Texture::Flag StringConvert::eval<Texture::Flag>(const String& str)
 {
+    constexpr std::array<std::pair<const char*, Texture::Flag>, 2> flags = { {
+        {"for_input", Texture::FLAG_FOR_INPUT},
+        {"for_output", Texture::FLAG_FOR_OUTPUT},
+    }};
     if(str)
-        return EnumMap<Texture::Flag>::instance().toEnumCombo(str);
+        return static_cast<Texture::Flag>(BitSet<Texture::Flag>::toBitSet(str, flags).bits());
     return Texture::FLAG_FOR_INPUT;
 }
 
@@ -275,37 +300,6 @@ Texture::UploaderBitmap::UploaderBitmap(sp<Bitmap> bitmap)
 void Texture::UploaderBitmap::initialize(GraphicsContext& graphicsContext, Texture::Delegate& delegate)
 {
     delegate.uploadBitmap(graphicsContext, _bitmap, {_bitmap->byteArray()});
-}
-
-template<> ARK_API void EnumMap<Texture::Format>::initialize(std::map<String, Texture::Format>& enums)
-{
-    enums["r"] = Texture::FORMAT_R;
-    enums["rg"] = Texture::FORMAT_RG;
-    enums["rgb"] = Texture::FORMAT_RGB;
-    enums["rgba"] = Texture::FORMAT_RGBA;
-    enums["signed"] = Texture::FORMAT_SIGNED;
-    enums["normalized"] = Texture::FORMAT_NORMALIZED;
-    enums["integer"] = Texture::FORMAT_INTEGER;
-    enums["float"] = Texture::FORMAT_FLOAT;
-    enums["8bit"] = Texture::FORMAT_8_BIT;
-    enums["16bit"] = Texture::FORMAT_16_BIT;
-    enums["32bit"] = Texture::FORMAT_32_BIT;
-}
-
-template<> ARK_API void EnumMap<Texture::Usage>::initialize(std::map<String, Texture::Usage>& enums)
-{
-    enums["general"] = Texture::USAGE_GENERAL;
-    enums["depth"] = Texture::USAGE_DEPTH_ATTACHMENT;
-    enums["stencil"] = Texture::USAGE_DEPTH_STENCIL_ATTACHMENT;
-    enums["color_attachment"] = Texture::USAGE_COLOR_ATTACHMENT;
-    enums["sampler"] = Texture::USAGE_SAMPLER;
-    enums["storage"] = Texture::USAGE_STORAGE;
-}
-
-template<> void EnumMap<Texture::Flag>::initialize(std::map<String, Texture::Flag>& enums)
-{
-    enums["for_input"] = Texture::FLAG_FOR_INPUT;
-    enums["for_output"] = Texture::FLAG_FOR_OUTPUT;
 }
 
 void Texture::Uploader::update(GraphicsContext& graphicsContext, Delegate& delegate)

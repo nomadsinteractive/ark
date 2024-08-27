@@ -1,5 +1,4 @@
-#ifndef ARK_APP_BASE_LEVEL_H_
-#define ARK_APP_BASE_LEVEL_H_
+#pragma once
 
 #include <map>
 #include <vector>
@@ -42,16 +41,12 @@ public:
 
 //  [[script::bindings::auto]]
     void load(const String& src);
-
 //  [[script::bindings::auto]]
     sp<Camera> getCamera(const String& name) const;
-
 //  [[script::bindings::auto]]
     sp<Vec3> getLight(const String& name) const;
-
 //  [[script::bindings::auto]]
     sp<RenderObject> getRenderObject(const String& name) const;
-
 //  [[script::bindings::auto]]
     sp<RigidBody> getRigidBody(const String& name) const;
 
@@ -60,7 +55,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Level> build(const Scope& args) override;
+        sp<Level> build(const Scope& args) override;
 
     private:
         template<typename T> std::vector<NamedType<T>> loadNamedTypes(BeanFactory& factory, const document& manifest, const String& name, const String& builderName) const {
@@ -119,5 +114,3 @@ private:
 };
 
 }
-
-#endif

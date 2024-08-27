@@ -12,7 +12,7 @@
 #include "renderer/base/render_engine.h"
 #include "renderer/base/render_engine_context.h"
 
-#if defined(ARK_FLAG_DEBUG) && !defined(ARK_PLATFORM_DARWIN) && !defined(ARK_PLATFORM_ANDROID)
+#if defined(ARK_FLAG_DEBUG) && !defined(ARK_PLATFORM_ANDROID)
 #define ARK_VK_DEBUG_LAYER_ENABLED  1
 #else
 #define ARK_VK_DEBUG_LAYER_ENABLED  0
@@ -63,7 +63,6 @@ std::vector<VkLayerProperties> getInstanceLayerProperties() {
 }
 
 }
-
 
 VKInstance::VKInstance()
     : _extensions({VK_KHR_SURFACE_EXTENSION_NAME}), _callback1(VK_NULL_HANDLE), _callback2(VK_NULL_HANDLE), _callback3(VK_NULL_HANDLE)

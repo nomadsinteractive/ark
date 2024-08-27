@@ -37,6 +37,10 @@ class InputField:
         self._args = args
         self._kwargs = kwargs
 
+    @property
+    def name(self) -> str:
+        return self._name
+
     def build(self, builder: dear_imgui.WidgetBuilder):
         input_func = getattr(builder, self._input_type)
         input_func(self._name, self._value, *self._args, **self._kwargs)
@@ -357,6 +361,9 @@ class MarkStudio:
     @property
     def resource_window(self) -> ResourceWindow:
         return self._resource_window
+
+    def show_properties(self, properties: Any = None):
+        self.show(properties=properties)
 
     def show(self, console_cmds: Optional[list[ConsoleCommand]] = None, properties: Any = None):
         self._main_window.show('My Ark Studio')
