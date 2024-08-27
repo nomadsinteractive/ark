@@ -50,20 +50,6 @@ public:
     }
 };
 
-template<typename T> class ValueDictionaryImpl : public Builder<T> {
-public:
-    ValueDictionaryImpl(BeanFactory& factory, const String& value)
-        : _value(static_cast<T>(BeanUtils::toFloat(factory, value))) {
-    }
-
-    virtual sp<T> build(const Scope& /*args*/) override {
-        return sp<T>::make(_value);
-    }
-
-private:
-    T _value;
-};
-
 }
 
 class LinearBuilder : public Builder<Numeric> {
@@ -82,9 +68,6 @@ public:
             factory.addBuilderFactory<uint8_t>([](BeanFactory&, const document&) {return sp<BuilderImpl1>::make();});
             factory.addBuilderFactory<uint16_t>([](BeanFactory&, const document&) {return sp<BuilderImpl2>::make();});
             factory.addBuilderFactory<uint32_t>([](BeanFactory&, const document&) {return sp<BuilderImpl3>::make();});
-            factory.addDictionaryFactory<uint8_t>([](BeanFactory& factory, const String& value) {return sp<ValueDictionaryImpl<uint8_t>>::make(factory, value);});
-            factory.addDictionaryFactory<uint16_t>([](BeanFactory& factory, const String& value) {return sp<ValueDictionaryImpl<uint16_t>>::make(factory, value);});
-            factory.addDictionaryFactory<uint32_t>([](BeanFactory& factory, const String& value) {return sp<ValueDictionaryImpl<uint32_t>>::make(factory, value);});
             beanFactory->add(factory);
             beanFactory->addPackage("self", beanFactory);
             Scope args;

@@ -1,10 +1,7 @@
 #pragma once
 
-#include <algorithm>
-
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
-#include "core/util/documents.h"
 #include "core/util/strings.h"
 
 #include "core/forwarding.h"
@@ -13,8 +10,6 @@ namespace ark {
 
 class BeanUtils {
 public:
-    static float toFloat(BeanFactory& args, const String& value, float defValue = 0);
-    static float toFloat(const sp<Builder<Numeric>>& t, const Scope& args, float defValue = 0);
 
     template<typename... Args> static void split(BeanFactory& beanFactory, const String& str, sp<Builder<Args>>&... args) {
         const String value = Strings::unwrap(str.strip(), '(', ')');
