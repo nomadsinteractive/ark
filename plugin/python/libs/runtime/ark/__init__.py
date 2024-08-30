@@ -1409,6 +1409,8 @@ class ModelBundle:
 
 
 class Level:
+    def __init__(self, render_object_layers: dict[str, 'Layer'], rigid_body_layers: dict[str, 'Collider'] = None, cameras: dict[str, Camera] = None, lights: dict[str, Vec3] = None):
+        pass
 
     def load(self, src: str):
         pass
@@ -1421,11 +1423,11 @@ class Level:
 
 
 class RenderObject:
-    def __init__(self, t, pos=None, size=None, transform=None, varyings: Optional['Varyings'] = None, visible: Optional['Visibility'] = None, disposed: Optional[Disposed] = None):
+    def __init__(self, t, pos=None, size=None, transform=None, varyings: Optional['Varyings'] = None, visible: Optional['Visibility'] = None, discarded: Optional[Boolean] = None):
         self._position = pos
         self._size = size
         self._transform = transform
-        self._disposed = Boolean(False)
+        self._discarded = discarded
 
     @property
     def type(self):
@@ -1445,7 +1447,7 @@ class RenderObject:
 
     @property
     def disposed(self) -> Boolean:
-        return self._disposed
+        return self._discarded
 
     @disposed.setter
     def disposed(self, disposed: Boolean):

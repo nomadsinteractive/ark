@@ -261,8 +261,13 @@ class GenArgument:
             typename = f'Optional<{typename}>'
         if self._default_value and (self._accept_type.startswith('sp<') or self._meta.parse_signature == 'O'):
             return '%s %s = %s ? PyCast::%s<%s>(%s) : %s;' % (
-                typename, varname, argname, funcname, functype, argname, '%s(%s)' % (typename, self._default_value) if optional_check else self._default_value)
+                typename, varname, argname, funcname, functype, argname, self._gen_default_value_declare(typename, optional_check))
         return f'{typename} {varname} = PyCast::{funcname}<{functype}>({argname});'
+
+    def _gen_default_value_declare(self, typename: str, optional_check: bool):
+        if self._default_value.startswith('{') and self._default_value.endswith('}'):
+            return f'{typename}{self._default_value}'
+        return f'{typename}({self._default_value})' if optional_check else self._default_value
 
     def str(self):
         return self._str

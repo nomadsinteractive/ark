@@ -154,7 +154,7 @@ class ArkRenderObject:
         return '{\n%s\n}' % ',\n'.join(lines)
 
     def write(self, writer):
-        writer.begin_element('render-object')
+        writer.begin_element('object')
 
         if self._class or self._export_names:
             writer.write_property('name', self._object.name)
@@ -242,7 +242,7 @@ class ArkLevelManifestExporter(Operator, ExportHelper):
         name="Named Layers",
         options={'ENUM_FLAG'},
         items=make_layer_item_callback(),
-        description="Select the layers which will export their children's names"
+        description="Select the layers which will also export their children"
     )
 
     def draw(self, context):

@@ -33,7 +33,8 @@ String preprocess(const RenderEngineContext& renderEngineContext, const std::map
 }
 
 PipelineLayout::PipelineLayout(sp<PipelineBuildingContext> buildingContext)
-    : _building_context(std::move(buildingContext)), _input(_building_context->_input), _color_attachment_count(0), _definitions(_building_context->toDefinitions())
+    : _building_context(std::move(buildingContext)), _input(_building_context->_input), _predefined_samplers(std::move(_building_context->_samplers)), _predefined_images(std::move(_building_context->_images)), _color_attachment_count(0),
+      _definitions(_building_context->toDefinitions())
 {
 }
 
@@ -49,7 +50,7 @@ void PipelineLayout::preCompile(GraphicsContext& graphicsContext)
     {
         _snippet->preCompile(graphicsContext, _building_context, *this);
 
-        for(ShaderPreprocessor* preprocessor : _building_context->stages())
+        for(const ShaderPreprocessor* preprocessor : _building_context->stages())
             _preprocessed_stages.push_back(preprocessor->preprocess());
 
         _building_context = nullptr;
@@ -108,17 +109,15 @@ void PipelineLayout::initialize(const Shader& shader)
 
 std::vector<std::pair<sp<Texture>, PipelineInput::BindingSet>> PipelineLayout::makeBindingSamplers() const
 {
-    DASSERT(_building_context);
     const PipelineInput& pipelineInput = _input;
-    const Table<String, sp<Texture>>& predefinedSamplers = _building_context->_samplers;
-    CHECK_WARN(pipelineInput.samplerCount() >= predefinedSamplers.size(), "Predefined samplers(%d) is more than samplers(%d) in PipelineLayout", predefinedSamplers.size(), _input->samplerCount());
+    CHECK_WARN(pipelineInput.samplerCount() >= _predefined_samplers.size(), "Predefined samplers(%d) is more than samplers(%d) in PipelineLayout", _predefined_samplers.size(), _input->samplerCount());
 
     std::vector<std::pair<sp<Texture>, PipelineInput::BindingSet>> samplers;
     for(size_t i = 0; i < _samplers.size(); ++i)
     {
         const String& name = pipelineInput.samplerNames().at(i);
-        const auto iter = predefinedSamplers.find(name);
-        samplers.emplace_back(iter != predefinedSamplers.end() ? iter->second : (i < predefinedSamplers.size() ? predefinedSamplers.values().at(i) : nullptr), _samplers.at(i));
+        const auto iter = _predefined_samplers.find(name);
+        samplers.emplace_back(iter != _predefined_samplers.end() ? iter->second : (i < _predefined_samplers.size() ? _predefined_samplers.values().at(i) : nullptr), _samplers.at(i));
     }
 
     return samplers;
@@ -126,12 +125,11 @@ std::vector<std::pair<sp<Texture>, PipelineInput::BindingSet>> PipelineLayout::m
 
 std::vector<std::pair<sp<Texture>, PipelineInput::BindingSet>> PipelineLayout::makeBindingImages() const
 {
-    DASSERT(_building_context);
-    DASSERT(_building_context->_images.size() == _images.size());
+    DASSERT(_predefined_images.size() == _images.size());
 
     std::vector<std::pair<sp<Texture>, PipelineInput::BindingSet>> bindingImages;
     for(size_t i = 0; i < _images.size(); ++i)
-        bindingImages.emplace_back(_building_context->_images.values().at(i), _images.at(i));
+        bindingImages.emplace_back(_predefined_images.values().at(i), _images.at(i));
     return bindingImages;
 }
 

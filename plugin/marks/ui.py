@@ -362,7 +362,10 @@ class MarkStudio:
     def resource_window(self) -> ResourceWindow:
         return self._resource_window
 
-    def show_properties(self, properties: Any = None):
+    def show_properties(self, properties: Any = None, **kwargs):
+        if kwargs:
+            input_fields = [InputField(k, v) for k, v in kwargs.items()]
+            properties = [properties] + input_fields if properties else input_fields
         self.show(properties=properties)
 
     def show(self, console_cmds: Optional[list[ConsoleCommand]] = None, properties: Any = None):

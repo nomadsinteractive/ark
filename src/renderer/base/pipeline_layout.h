@@ -41,6 +41,10 @@ private:
     sp<Snippet> _snippet;
 
     std::vector<ShaderPreprocessor::Stage> _preprocessed_stages;
+
+    Table<String, sp<Texture>> _predefined_samplers;
+    Table<String, sp<Texture>> _predefined_images;
+
     std::vector<PipelineInput::BindingSet> _samplers;
     std::vector<PipelineInput::BindingSet> _images;
 
