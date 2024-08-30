@@ -19,6 +19,35 @@
 
 namespace ark {
 
+namespace {
+
+template<typename T> T parseVector(const String& value) {
+    T vector(0);
+    const std::vector<String> splitted = Strings::unwrap(value, '(', ')').split(',');
+    CHECK(splitted.size() <= sizeof(T) / sizeof(float), "Vector \"%s\" has more components than its target value(Vec%d)", value.c_str(), sizeof(T) / sizeof(float));
+    for(size_t i = 0; i < splitted.size(); ++i)
+        vector[i] = Strings::eval<float>(splitted.at(i));
+    return vector;
+}
+
+sp<Transform> makeTransform(const String& rotation, const String& scale)
+{
+    const V3 s = scale ? parseVector<V3>(scale) : V3(1.0f);
+    const V4 quat = parseVector<V4>(rotation);
+    return sp<Transform>::make(Transform::TYPE_LINEAR_3D, sp<Rotation>::make(quat), sp<Vec3::Const>::make(s));
+}
+
+sp<RenderObject> makeRenderObject(const document& manifest, int32_t type)
+{
+    const String& position = Documents::ensureAttribute(manifest, constants::POSITION);
+    const String& scale = Documents::ensureAttribute(manifest, "scale");
+    const String& rotation = Documents::ensureAttribute(manifest, constants::ROTATION);
+    sp<Transform> transform = makeTransform(rotation, scale);
+    return sp<RenderObject>::make(type, sp<Vec3::Const>::make(parseVector<V3>(position)), nullptr, std::move(transform));
+}
+
+}
+
 Level::Level(std::map<String, sp<Camera>> cameras, std::map<String, sp<Vec3>> lights, std::map<String, RenderObjectLibrary::Instance> renderObjects, std::map<String, RigidBodyLibrary::Instance> rigidBodies)
     : _cameras(std::move(cameras)), _lights(std::move(lights)), _render_object_libraries(std::move(renderObjects)), _rigid_body_libraries(std::move(rigidBodies))
 {
@@ -55,15 +84,13 @@ void Level::load(const String& src)
                 const Level::RenderObjectLibrary::Instance* instance = it1->second._render_object_instance;
                 int32_t type = instance->_type;
                 const sp<Layer>& layer = instance->_object;
-                String name = Documents::getAttribute(j, "name");
-                const String& position = Documents::ensureAttribute(j, "position");
-                const String& scale = Documents::ensureAttribute(j, "scale");
-                const String& rotation = Documents::ensureAttribute(j, "rotation");
-                sp<Transform> transform = makeTransform(rotation, scale);
-                sp<RenderObject> renderObject = sp<RenderObject>::make(type, sp<Vec3::Const>::make(parseVector<V3>(position)), nullptr, transform);
+                String name = Documents::getAttribute(j, constants::NAME);
+                sp<RenderObject> renderObject = makeRenderObject(j, type);
                 sp<RigidBody> rigidBody = makeRigidBody(it1->second, renderObject);
+
+                layer->addRenderObject(renderObject);
                 if(name)
-                    _render_objects[name] = renderObject;
+                    _render_objects[name] = std::move(renderObject);
                 if(rigidBody)
                 {
                     if(name)
@@ -71,14 +98,12 @@ void Level::load(const String& src)
                     else
                         _unnamed_rigid_objects.push_back(std::move(rigidBody));
                 }
-
-                layer->addRenderObject(renderObject);
             }
             else if(clazz == "CAMERA")
             {
-                const String& name = Documents::ensureAttribute(j, "name");
-                const String& position = Documents::ensureAttribute(j, "position");
-                const String& rotation = Documents::ensureAttribute(j, "rotation");
+                const String& name = Documents::ensureAttribute(j, constants::NAME);
+                const String& position = Documents::ensureAttribute(j, constants::POSITION);
+                const String& rotation = Documents::ensureAttribute(j, constants::ROTATION);
                 const sp<Transform> transform = makeTransform(rotation, "");
                 const sp<Camera> camera = getCamera(name);
                 DCHECK_WARN(camera, "Undefined camera(%s) in \"%s\"", name.c_str(), src.c_str());
@@ -137,13 +162,6 @@ sp<RigidBody> Level::makeRigidBody(const Library& library, const sp<RenderObject
     const V3& dimension = library._dimensions;
     return rigidBodyLibray->_object->createBody(Collider::BODY_TYPE_STATIC, sp<Shape>::make(rigidBodyLibray->_type, sp<Vec3>::make<Vec3::Const>(V3(dimension.x(), dimension.y(), dimension.z()))), renderObject->position(),
                                                 renderObject->transform()->rotation());
-}
-
-sp<Transform> Level::makeTransform(const String& rotation, const String& scale) const
-{
-    const V3 s = scale ? parseVector<V3>(scale) : V3(1.0f);
-    const V4 quat = parseVector<V4>(rotation);
-    return sp<Transform>::make(Transform::TYPE_LINEAR_3D, sp<Rotation>::make(quat), sp<Vec3::Const>::make(s));
 }
 
 Level::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
