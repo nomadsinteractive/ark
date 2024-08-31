@@ -15,8 +15,8 @@ public:
 //  [[script::bindings::enumeration]]
     enum Phrase {
         PHRASE_DEFAULT,
+        PHRASE_TEXT,
         PHRASE_WIDGET,
-        PHRASE_LAYER,
         PHRASE_RENDER_LAYER,
         PHRASE_COUNT
     };
@@ -24,9 +24,11 @@ public:
 public:
 //[[script::bindings::constructor]]
     static sp<Renderer> create(const sp<Renderer>& delegate = nullptr);
+//[[script::bindings::constructor]]
+    static sp<Renderer> create(const std::vector<sp<Renderer>>& renderers);
 
 //[[script::bindings::classmethod]]
-    static void addRenderer(const sp<Renderer>& self, const sp<Renderer>& renderer, Traits traits);
+    static void addRenderer(const sp<Renderer>& self, const sp<Renderer>& renderer, const Traits& traits);
 //[[script::bindings::classmethod]]
     static sp<Renderer> wrap(const sp<Renderer>& self);
 

@@ -18,7 +18,7 @@ public:
     void notify();
 
 //  [[script::bindings::auto]]
-    void addCallback(sp<Runnable> callback);
+    void addCallback(sp<Runnable> callback, uint32_t triggerAfter = 1);
 
 //  [[script::bindings::auto]]
     sp<Boolean> addBooleanSignal(bool value = false);
@@ -28,6 +28,7 @@ private:
         sp<Runnable> _func;
         bool _oneshot;
         bool _owned;
+        uint32_t _trigger_after;
     };
 
 private:

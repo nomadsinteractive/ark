@@ -728,7 +728,7 @@ class Observer:
     def update(self):
         pass
 
-    def add_callback(self, callback: Callable):
+    def add_callback(self, callback: Callable, trigger_after: int = 1):
         pass
 
 
@@ -737,7 +737,7 @@ class Shader:
 
 
 class Renderer:
-    def __init__(self, delegate: Optional['Renderer'] = None):
+    def __init__(self, delegate: Optional['Renderer'] | list['Renderer'] = None):
         self._delegate = delegate
 
     def add_renderer(self, renderer: 'Renderer'):

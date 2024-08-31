@@ -2,11 +2,11 @@
 
 #include "core/base/json.h"
 #include "core/base/observer.h"
+#include "core/base/named_type.h"
 #include "core/base/scope.h"
 #include "core/base/slice.h"
 #include "core/inf/variable.h"
 #include "core/types/box.h"
-#include "core/types/null.h"
 #include "core/util/log.h"
 
 #include "graphics/base/color.h"
@@ -21,7 +21,6 @@
 #include "python/api.h"
 #include "python/extension/python_interpreter.h"
 #include "python/extension/py_instance_ref.h"
-#include "python/extension/reference_manager.h"
 
 #include "python/impl/adapter/collision_callback_python_adapter.h"
 #include "python/impl/adapter/python_callable_runnable.h"
@@ -147,15 +146,14 @@ Optional<String> PyCast::toStringExact(PyObject* object, const char* encoding, c
         return unicodeToUTF8String(object, encoding, error);
     if (PyBytes_Check(object))
         return String(PyBytes_AS_STRING(object));
-    return Optional<String>();
+    return {};
 }
 
 String PyCast::toString(PyObject* object, const char* encoding, const char* error)
 {
     if(object)
     {
-        Optional<String> opt = toStringExact(object, encoding, error);
-        if(opt)
+        if(Optional<String> opt = toStringExact(object, encoding, error))
             return opt.value();
 
         PyObject* str = PyObject_Str(object);
@@ -336,6 +334,15 @@ template<> ARK_PLUGIN_PYTHON_API Optional<String> PyCast::toCppObject_impl<Strin
 template<> ARK_PLUGIN_PYTHON_API Optional<std::wstring> PyCast::toCppObject_impl<std::wstring>(PyObject* object)
 {
     return toWString(object);
+}
+
+template<> ARK_PLUGIN_PYTHON_API Optional<NamedType> PyCast::toCppObject_impl<NamedType>(PyObject* object)
+{
+    if(Optional<String> strOpt = toStringExact(object))
+        return NamedType(std::move(strOpt.value()));
+    if(Optional<int32_t> intOpt = toCppInteger<int32_t>(object))
+        return NamedType(intOpt.value());
+    return {};
 }
 
 template<> ARK_PLUGIN_PYTHON_API Optional<Json> PyCast::toCppObject_impl<Json>(PyObject* object)

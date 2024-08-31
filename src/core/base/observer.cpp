@@ -41,24 +41,25 @@ Observer::Observer(bool oneshot)
 void Observer::notify()
 {
     std::vector<Callback> callbacks = std::move(_callbacks);
-    for(const auto& [func, oneshot, owned] : callbacks)
+    for(const auto& [func, oneshot, owned, triggerAfter] : callbacks)
     {
-        func->run();
-        if(!(oneshot || (owned && func.unique())))
-            _callbacks.push_back({func, oneshot, owned});
+        if(triggerAfter < 2)
+            func->run();
+        if(triggerAfter > 1 || !(oneshot || (owned && func.unique())))
+            _callbacks.push_back({func, oneshot, owned, triggerAfter ? triggerAfter - 1 : 0});
     }
 }
 
-void Observer::addCallback(sp<Runnable> callback)
+void Observer::addCallback(sp<Runnable> callback, uint32_t triggerAfter)
 {
     ASSERT(callback);
-    _callbacks.push_back({std::move(callback), _oneshot, false});
+    _callbacks.push_back({std::move(callback), _oneshot, false, triggerAfter});
 }
 
 sp<Boolean> Observer::addBooleanSignal(bool value)
 {
     sp<Signal> signal = sp<Signal>::make(value, !value);
-    _callbacks.push_back({signal, _oneshot, true});
+    _callbacks.push_back({signal, _oneshot, true, 1});
     return signal;
 }
 

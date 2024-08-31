@@ -1,9 +1,7 @@
-#ifndef ARK_GRAPHICS_IMPL_RENDERER_RENDERER_WRAPPER_H_
-#define ARK_GRAPHICS_IMPL_RENDERER_RENDERER_WRAPPER_H_
+#pragma once
 
 #include "core/forwarding.h"
 #include "core/base/wrapper.h"
-#include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
 #include "graphics/inf/renderer.h"
@@ -19,5 +17,3 @@ public:
 };
 
 }
-
-#endif

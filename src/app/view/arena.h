@@ -47,6 +47,7 @@ public:
 
 //  [[script::bindings::property]]
     sp<BoxBundle> refs() const;
+    [[deprecated]]
 //  [[script::bindings::property]]
     sp<BoxBundle> layers() const;
 //  [[script::bindings::property]]
@@ -58,6 +59,7 @@ public:
     void addEventListener(sp<EventListener> eventListener, sp<Boolean> discarded = nullptr);
 //  [[script::bindings::auto]]
     void pushEventListener(sp<EventListener> eventListener, sp<Boolean> discarded = nullptr);
+    [[deprecated]]
 //  [[script::bindings::auto]]
     void addLayer(sp<Renderer> layer, sp<Boolean> discarded = nullptr);
 //  [[script::bindings::auto]]

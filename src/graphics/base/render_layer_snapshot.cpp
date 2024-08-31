@@ -16,7 +16,7 @@
 namespace ark {
 
 RenderLayerSnapshot::RenderLayerSnapshot(RenderRequest& renderRequest, const sp<RenderLayer::Stub>& stub)
-    : _stub(stub), _index_count(0), _buffer_object(_stub->_shader->takeBufferSnapshot(renderRequest, false))
+    : _stub(stub), _index_count(0), _buffer_object(_stub->_shader->input()->takeBufferSnapshot(renderRequest, false))
 {
     _vertices_dirty = doAddLayerContext(renderRequest, _stub->_layer_context);
 

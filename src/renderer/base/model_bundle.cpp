@@ -3,16 +3,14 @@
 #include "core/ark.h"
 #include "core/base/bean_factory.h"
 #include "core/base/future.h"
+#include "core/base/named_type.h"
 #include "core/inf/executor.h"
 #include "core/impl/executor/executor_thread_pool.h"
-#include "core/util/string_convert.h"
 
-#include "renderer/base/atlas.h"
 #include "renderer/base/material_bundle.h"
 #include "renderer/base/mesh.h"
 #include "renderer/base/node.h"
 #include "renderer/base/texture_packer.h"
-#include "renderer/inf/vertices.h"
 #include "renderer/impl/render_command_composer/rcc_multi_draw_elements_indirect.h"
 
 #include "app/base/application_context.h"
@@ -49,21 +47,21 @@ sp<Model> ModelBundle::loadModel(int32_t type)
     return ensureModelLayout(type)._model;
 }
 
-sp<Model> ModelBundle::getModel(int32_t type)
+sp<Model> ModelBundle::getModel(int32_t type) const
 {
     const auto iter = _stub->_model_layouts.find(type);
     return iter != _stub->_model_layouts.end() ? iter->second._model : nullptr;
 }
 
-void ModelBundle::importModel(int32_t type, const String& src, sp<Future> future)
+void ModelBundle::importModel(const NamedType& namedType, const String& src, sp<Future> future)
 {
-    importModel(type, Manifest(src), std::move(future));
+    importModel(namedType.type(), Manifest(src), std::move(future));
 }
 
-void ModelBundle::importModel(int32_t type, const Manifest& manifest, sp<Future> future)
+void ModelBundle::importModel(const NamedType& namedType, const Manifest& manifest, sp<Future> future)
 {
-    ApplicationContext& applicationContext = Ark::instance().applicationContext();
-    sp<Runnable> task = sp<Runnable>::make<ImportModuleRunnable>(type, manifest, _stub, nullptr, applicationContext.executorMain(), std::move(future));
+    const ApplicationContext& applicationContext = Ark::instance().applicationContext();
+    sp<Runnable> task = sp<Runnable>::make<ImportModuleRunnable>(namedType.type(), manifest, _stub, nullptr, applicationContext.executorMain(), std::move(future));
     applicationContext.executorThreadPool()->execute(std::move(task));
 }
 

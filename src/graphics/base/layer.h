@@ -8,7 +8,6 @@
 #include "core/types/safe_ptr.h"
 #include "core/types/safe_var.h"
 
-#include "graphics/inf/renderer.h"
 #include "graphics/forwarding.h"
 
 #include "renderer/forwarding.h"
@@ -44,7 +43,7 @@ public:
     const sp<LayerContext>& context() const;
 
 // [[script::bindings::auto]]
-    void addRenderObject(const sp<RenderObject>& renderObject, const sp<Boolean>& disposed = nullptr);
+    void addRenderObject(const sp<RenderObject>& renderObject, const sp<Boolean>& discarded = nullptr);
 // [[script::bindings::auto]]
     void clear();
 

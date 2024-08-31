@@ -24,6 +24,7 @@ class Mat4Impl;
 class Material;
 class MaterialTexture;
 class Model;
+class NamedType;
 class RenderLayer;
 class RenderLayerSnapshot;
 class LayerContext;

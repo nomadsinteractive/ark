@@ -4,6 +4,8 @@
 
 #include "core/ark.h"
 
+#include "core/base/named_type.h"
+
 #include "graphics/base/camera.h"
 #include "graphics/base/layer.h"
 #include "graphics/base/render_object.h"
@@ -35,16 +37,16 @@ template<typename T> T parseVector(const String& value) {
     return vector;
 }
 
-template<typename T> std::vector<Level::NamedType<T>> loadNamedTypes(BeanFactory& factory, const document& manifest, const String& name, const String& builderName) {
-    std::vector<Level::NamedType<T>> namedTypes;
+template<typename T> std::vector<Level::NamedLayerBuilder<T>> loadNamedTypes(BeanFactory& factory, const document& manifest, const String& name, const String& builderName) {
+    std::vector<Level::NamedLayerBuilder<T>> namedTypes;
     for(const document& i : manifest->children(name))
         namedTypes.push_back({Documents::ensureAttribute(i, constants::NAME), factory.ensureBuilder<T>(i, builderName)});
     return namedTypes;
 }
 
-template<typename T> std::map<String, sp<T>> loadNamedTypeInstances(const std::vector<Level::NamedType<T>>& namedTypes, const Scope& args) {
+template<typename T> std::map<String, sp<T>> loadNamedTypeInstances(const std::vector<Level::NamedLayerBuilder<T>>& namedTypes, const Scope& args) {
     std::map<String, sp<T>> instances;
-    for(const Level::NamedType<T>& i : namedTypes)
+    for(const Level::NamedLayerBuilder<T>& i : namedTypes)
         instances[i._name] = i._builder->build(args);
     return instances;
 }

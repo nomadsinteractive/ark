@@ -27,7 +27,7 @@ void SurfaceController::addControlLayer(sp<Renderer> controller, sp<Boolean> dis
 
 void SurfaceController::addLayer(sp<Renderer> layer, sp<Boolean> discarded, sp<Boolean> visible)
 {
-    _renderer_phrase.add(RendererType::PHRASE_LAYER, std::move(layer), std::move(discarded), std::move(visible));
+    _renderer_phrase.add(RendererType::PHRASE_TEXT, std::move(layer), std::move(discarded), std::move(visible));
 }
 
 void SurfaceController::requestUpdate(uint64_t timestamp)

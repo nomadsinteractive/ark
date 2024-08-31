@@ -19,13 +19,13 @@ namespace ark {
 
 class ARK_API Level {
 public:
-    template<typename T> struct NamedType {
+    template<typename T> struct NamedLayerBuilder {
         String _name;
         sp<Builder<T>> _builder;
     };
 
-    typedef NamedType<Layer> RenderObjectLayer;
-    typedef NamedType<Collider> RigidBodyLayer;
+    typedef NamedLayerBuilder<Layer> RenderObjectLayer;
+    typedef NamedLayerBuilder<Collider> RigidBodyLayer;
 
 public:
 //  [[script::bindings::constructor]]
