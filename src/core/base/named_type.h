@@ -14,6 +14,8 @@ public:
     const String& name() const;
     int32_t type() const;
 
+    static String reverse(int32_t type);
+
 private:
     String _name;
     int32_t _type;

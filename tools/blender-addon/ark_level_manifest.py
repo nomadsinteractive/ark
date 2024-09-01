@@ -10,7 +10,7 @@ from bpy_extras.io_utils import ExportHelper
 bl_info = {
     "name": "Ark Level Manifest",
     "author": "Nomads Interactive",
-    "version": (1, 0, 0),
+    "version": (1, 0, 1),
     "blender": (2, 81, 6),
     "location": "File > Export > Ark Level Manifest",
     "category": "Import-Export",
@@ -28,6 +28,16 @@ def to_json_field_value(name, value, indent):
 
 def to_xml_attr_value(name, value):
     return '%s="%s"' % (name, value)
+
+
+def to_y_up_position(position):
+    x, y, z = position
+    return x, z, y
+
+
+def to_y_up_quaternion(quaternion):
+    w, x, y, z = quaternion
+    return x, y, z, w
 
 
 class XmlWriter:
@@ -111,23 +121,23 @@ class ArkInstanceCollection:
 class ArkLayer:
     def __init__(self, scene: ArkScene, collection, export_names):
         self._name = collection.name
-        self._render_objects = [ArkRenderObject(scene, i, export_names) for i in collection.objects]
+        self._objects = [ArkObject(scene, i, export_names) for i in collection.objects]
 
     def to_json(self, indent):
-        lines = [i.to_json(indent) for i in self._render_objects]
+        lines = [i.to_json(indent) for i in self._objects]
         return ',\n'.join(lines)
 
     def to_xml(self, indent):
         lines = ['%s<layer name="%s">' % (_INDENT_BLOCK * indent, self._name)]
         xml_writer = XmlWriter(indent + 1)
-        for i in self._render_objects:
+        for i in self._objects:
             i.write(xml_writer)
         lines.append(xml_writer.to_str())
         lines.append('%s</layer>' % (_INDENT_BLOCK * indent))
         return '\n'.join(str(i) for i in lines)
 
 
-class ArkRenderObject:
+class ArkObject:
     def __init__(self, scene: ArkScene, obj, export_names: bool):
         self._object = obj
         self._export_names = export_names
@@ -137,7 +147,7 @@ class ArkRenderObject:
         if obj.rotation_mode == 'QUATERNION':
             self._rotation = obj.rotation_quaternion
         elif obj.rotation_mode == 'AXIS_ANGLE':
-            self._rotation = obj.rotation_euler
+            self._rotation = obj.rotation_euler.to_quaternion()
         else:
             self._rotation = obj.rotation_euler.to_quaternion()
         self._instance_of = obj.instance_collection and scene.find_library(obj.instance_collection)
@@ -165,9 +175,10 @@ class ArkRenderObject:
                 writer.write_property('clip-near', self._object.data.clip_start)
                 writer.write_property('clip-far', self._object.data.clip_end)
 
-        writer.write_property('position', self._position)
-        writer.write_property('scale', self._scale)
-        writer.write_property('rotation', self._rotation)
+        writer.write_property('position', to_y_up_position(self._position))
+        writer.write_property('scale', to_y_up_position(self._scale))
+        writer.write_property('rotation', to_y_up_quaternion(self._rotation))
+        writer.write_property('visible', self._object.visible_get() and 'true' or 'false')
         if self._instance_of:
             writer.write_property('instance-of', self._instance_of.id)
 

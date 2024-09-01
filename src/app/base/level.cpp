@@ -58,15 +58,16 @@ sp<Transform> makeTransform(const String& rotation, const String& scale)
     return sp<Transform>::make(Transform::TYPE_LINEAR_3D, sp<Rotation>::make(quat), sp<Vec3::Const>::make(s));
 }
 
-std::tuple<String, int32_t, sp<RenderObject>> makeRenderObject(const document& manifest)
+std::tuple<String, int32_t, sp<RenderObject>> makeRenderObject(const document& manifest, bool visible)
 {
+    const Global<Constants> globalConstants;
     String name = Documents::getAttribute(manifest, constants::NAME);
     int32_t type = name.hash();
     const String& position = Documents::ensureAttribute(manifest, constants::POSITION);
     const String& scale = Documents::ensureAttribute(manifest, "scale");
     const String& rotation = Documents::ensureAttribute(manifest, constants::ROTATION);
     sp<Transform> transform = makeTransform(rotation, scale);
-    return {std::move(name), type, sp<RenderObject>::make(type, sp<Vec3::Const>::make(parseVector<V3>(position)), nullptr, std::move(transform))};
+    return {std::move(name), type, sp<RenderObject>::make(type, sp<Vec3>::make<Vec3::Const>(parseVector<V3>(position)), nullptr, std::move(transform), nullptr, visible ? globalConstants->BOOLEAN_TRUE : globalConstants->BOOLEAN_FALSE)};
 }
 
 sp<RigidBody> makeRigidBody(const Library& library, const sp<RenderObject>& renderObject, int32_t shapeId)
@@ -89,8 +90,9 @@ Level::Level(std::map<String, sp<Layer>> renderObjectLayers, std::map<String, sp
 void Level::load(const String& src)
 {
     const document manifest = Ark::instance().applicationContext()->applicationBundle()->loadDocument(src);
-    std::unordered_map<int32_t, Library> libraryMapping;
+    CHECK(manifest, "Cannot load manifest \"%s\"", src.c_str());
 
+    std::unordered_map<int32_t, Library> libraryMapping;
     for(const document& i : manifest->children("library"))
     {
         const String& name = Documents::ensureAttribute(i, constants::NAME);
@@ -108,16 +110,15 @@ void Level::load(const String& src)
         {
             const int32_t instanceOf = Documents::getAttribute<int32_t>(j, "instance-of", -1);
             const String clazz = Documents::getAttribute(j, constants::CLASS);
+            const bool visible = Documents::getAttribute<bool>(j, constants::VISIBLE, true);
             if(instanceOf != -1)
             {
                 const auto iter = libraryMapping.find(instanceOf);
                 ASSERT(iter != libraryMapping.end());
-                const auto& [name, type, renderObject] = makeRenderObject(j);
+                auto [name, type, renderObject] = makeRenderObject(j, visible);
 
                 CHECK(layer, "Trying to load model instance into undefined Layer(%s)", layerName.c_str());
                 layer->addRenderObject(renderObject);
-                if(name)
-                    _render_objects[name] = std::move(renderObject);
 
                 if(sp<RigidBody> rigidBody = makeRigidBody(iter->second, renderObject, type))
                 {
@@ -126,10 +127,13 @@ void Level::load(const String& src)
                     else
                         _unnamed_rigid_objects.push_back(std::move(rigidBody));
                 }
+
+                if(name)
+                    _render_objects[name] = std::move(renderObject);
             }
             else if(clazz == "MESH")
             {
-                const auto& [name, type, renderObject] = makeRenderObject(j);
+                auto [name, type, renderObject] = makeRenderObject(j, visible);
                 CHECK(layer, "Trying to load model instance into undefined Layer(%s)", layerName.c_str());
                 layer->addRenderObject(renderObject);
                 if(name)
@@ -140,6 +144,9 @@ void Level::load(const String& src)
                 const String& name = Documents::ensureAttribute(j, constants::NAME);
                 const String& position = Documents::ensureAttribute(j, constants::POSITION);
                 const String& rotation = Documents::ensureAttribute(j, constants::ROTATION);
+                const float fov = Documents::ensureAttribute<float>(j, "fov");
+                const float clipNear = Documents::ensureAttribute<float>(j, "clip-near");
+                const float clipFar = Documents::ensureAttribute<float>(j, "clip-far");
                 const sp<Transform> transform = makeTransform(rotation, "");
                 const sp<Camera> camera = getCamera(name);
                 DCHECK_WARN(camera, "Undefined camera(%s) in \"%s\"", name.c_str(), src.c_str());
@@ -147,7 +154,8 @@ void Level::load(const String& src)
                 {
                     const V3 p = parseVector<V3>(position);
                     const Transform::Snapshot ts = transform->snapshot();
-                    camera->lookAt(p, ts.transform(V3(0, 0, -1)) + p, ts.transform(V3(0, 1, 0)));
+                    camera->perspective(fov, 16.0 / 9, clipNear, clipFar);
+                    camera->lookAt(p, ts.transform(V3(0, 0, 1)) + p, ts.transform(V3(0, 1, 0)));
                 }
             }
             else if(clazz == "LIGHT")

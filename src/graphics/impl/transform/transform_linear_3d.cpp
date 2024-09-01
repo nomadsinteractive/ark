@@ -25,7 +25,7 @@ V3 TransformLinear3D::transform(const Transform::Snapshot& snapshot, const V3& p
 {
     const M4& matrix = snapshot.getData<M4>();
     const V4 pos = MatrixUtil::mul(matrix, V4(position, 1.0f));
-    return V3(pos.x() / pos.w(), pos.y() / pos.w(), pos.z() / pos.w());
+    return {pos.x() / pos.w(), pos.y() / pos.w(), pos.z() / pos.w()};
 }
 
 M4 TransformLinear3D::toMatrix(const Transform::Snapshot& snapshot) const
