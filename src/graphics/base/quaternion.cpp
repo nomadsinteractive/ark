@@ -15,7 +15,7 @@ namespace ark {
 
 namespace {
 
-class AxisRotation : public Vec4 {
+class AxisRotation final : public Vec4 {
 public:
     AxisRotation(sp<Numeric> theta, sp<Vec3> axis)
         : _theta(std::move(theta)), _axis(axis ? Vec3Type::normalize(std::move(axis)) : sp<Vec3>::make<Vec3::Const>(constants::AXIS_Z)), _val(updateQuaternion()) {
@@ -48,7 +48,7 @@ private:
     V4 _val;
 };
 
-class EulerRotation : public Vec4 {
+class EulerRotation final : public Vec4 {
 public:
     EulerRotation(sp<Numeric> pitch, sp<Numeric> yaw, sp<Numeric> roll)
         : _pitch(std::move(pitch)), _yaw(std::move(yaw)), _roll(std::move(roll)), _val(updateQuaternion()) {
@@ -68,7 +68,7 @@ public:
 
 private:
     V4 updateQuaternion() const {
-        const glm::quat quat = glm::quat(glm::vec3(_pitch->val(), _yaw->val(), _roll->val()));
+        const glm::quat quat(glm::vec3(_pitch->val(), _yaw->val(), _roll->val()));
         return {quat.x, quat.y, quat.z, quat.w};
     }
 
@@ -79,16 +79,40 @@ private:
     V4 _val;
 };
 
+struct MatrixQuaternion final : Mat4 {
+    MatrixQuaternion(sp<Vec4> quaternion)
+        : _quaternion(std::move(quaternion)) {
+    }
+
+    bool update(uint64_t timestamp) override
+    {
+        return _quaternion->update(timestamp);
+    }
+
+    M4 val() override
+    {
+        const V4 quaternion = _quaternion->val();
+        return {glm::toMat4(glm::quat(quaternion.w(), quaternion.x(), quaternion.y(), quaternion.z()))};
+    }
+
+    sp<Vec4> _quaternion;
+};
+
 }
 
 
+Quaternion::Quaternion(sp<Vec4> quaternion)
+    : Wrapper(std::move(quaternion))
+{
+}
+
 Quaternion::Quaternion(sp<Numeric> theta, sp<Vec3> axis)
-    : Wrapper(sp<AxisRotation>::make(std::move(theta), std::move(axis)))
+    : Wrapper(sp<Vec4>::make<AxisRotation>(std::move(theta), std::move(axis)))
 {
 }
 
 Quaternion::Quaternion(sp<Numeric> pitch, sp<Numeric> yaw, sp<Numeric> roll)
-    : Wrapper(sp<EulerRotation>::make(std::move(pitch), std::move(yaw), std::move(roll)))
+    : Wrapper(sp<Vec4>::make<EulerRotation>(std::move(pitch), std::move(yaw), std::move(roll)))
 {
 }
 
@@ -110,6 +134,11 @@ void Quaternion::setRotation(sp<Numeric> theta, sp<Vec3> axis)
 void Quaternion::setEuler(sp<Numeric> pitch, sp<Numeric> yaw, sp<Numeric> roll)
 {
     _wrapped = sp<VariableDirty<V4>>::make(sp<Vec4>::make<EulerRotation>(std::move(pitch), std::move(yaw), std::move(roll)), *this);
+}
+
+sp<Mat4> Quaternion::toMatrix() const
+{
+    return sp<Mat4>::make<MatrixQuaternion>(_wrapped);
 }
 
 }
