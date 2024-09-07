@@ -233,11 +233,11 @@ void PipelineBuildingContext::tryBindCamera(const ShaderPreprocessor& shaderPrep
     tryBindUniformMatrix(shaderPreprocessor, "u_Projection", camera.projection());
 }
 
-void PipelineBuildingContext::tryBindUniformMatrix(const ShaderPreprocessor& shaderPreprocessor, String name, sp<Mat4> matrix)
+void PipelineBuildingContext::tryBindUniformMatrix(const ShaderPreprocessor& shaderPreprocessor, String name, const sp<Mat4>& matrix)
 {
     if(sp<Uniform> uniform = shaderPreprocessor.makeUniformInput(std::move(name), Uniform::TYPE_MAT4))
     {
-        uniform->setUploader(sp<Uploader>::make<UploaderOfVariable<M4>>(std::move(matrix)));
+        uniform->setUploader(sp<Uploader>::make<UploaderOfVariable<M4>>(matrix));
         addUniform(std::move(uniform));
     }
 }

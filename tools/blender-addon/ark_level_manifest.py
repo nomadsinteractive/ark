@@ -37,7 +37,7 @@ def to_y_up_position(position):
 
 def to_y_up_quaternion(quaternion):
     w, x, y, z = quaternion
-    return x, y, z, w
+    return x, z, y, w
 
 
 class XmlWriter:
@@ -171,7 +171,8 @@ class ArkObject:
         if self._class:
             writer.write_property('class', self._class)
             if self._object.type == 'CAMERA':
-                writer.write_property('fov', self._object.data.angle)
+                writer.write_property('fov_x', self._object.data.angle_x)
+                writer.write_property('fov_y', self._object.data.angle_y)
                 writer.write_property('clip-near', self._object.data.clip_start)
                 writer.write_property('clip-far', self._object.data.clip_end)
 

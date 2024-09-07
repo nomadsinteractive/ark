@@ -802,7 +802,15 @@ class Camera:
         pass
 
     @property
-    def position(self) -> 'Vec3':
+    def position(self) -> Optional['Vec3']:
+        return None
+
+    @property
+    def target(self) -> Optional['Vec3']:
+        return None
+
+    @property
+    def up(self) -> Optional['Vec3']:
         return None
 
     @property

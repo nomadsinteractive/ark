@@ -83,7 +83,7 @@ private:
     void initializeSSBO() const;
     void initializeUniforms();
 
-    void tryBindUniformMatrix(const ShaderPreprocessor& shaderPreprocessor, String name, sp<Mat4> matrix);
+    void tryBindUniformMatrix(const ShaderPreprocessor& shaderPreprocessor, String name, const sp<Mat4>& matrix);
 
     void loadPredefinedAttribute(const document& manifest);
     void loadPredefinedUniform(BeanFactory& factory, const Scope& args, const document& manifest);

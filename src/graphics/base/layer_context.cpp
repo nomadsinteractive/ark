@@ -112,7 +112,6 @@ bool LayerContext::processNewCreated()
 
     for(sp<Renderable>& i : _renderable_created)
     {
-        LOGD("create: %p", i.get());
         addElementState(i.get());
         _renderables.emplace_back(std::move(i), Renderable::State(Renderable::RENDERABLE_STATE_NEW));
     }

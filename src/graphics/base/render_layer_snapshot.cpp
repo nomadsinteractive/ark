@@ -116,7 +116,6 @@ bool RenderLayerSnapshot::doAddLayerContext(RenderRequest& renderRequest, LayerC
         Renderable& renderable = iter->first;
         Renderable::State& s = iter->second;
         s.reset(renderable.updateState(renderRequest));
-        ASSERT(s);
         if(Renderable::State state = s; !state || state.has(Renderable::RENDERABLE_STATE_DISCARDED))
         {
             LOGD("delete: %p", &renderable);

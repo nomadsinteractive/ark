@@ -8,6 +8,7 @@
 
 #include "graphics/base/camera.h"
 #include "graphics/base/layer.h"
+#include "graphics/base/quaternion.h"
 #include "graphics/base/render_object.h"
 #include "graphics/base/transform.h"
 #include "graphics/util/vec3_type.h"
@@ -24,6 +25,7 @@ namespace ark {
 namespace {
 
 struct Library {
+    int32_t _type;
     sp<Collider> _rigid_body_collider;
     V3 _dimensions;
 };
@@ -58,16 +60,14 @@ sp<Transform> makeTransform(const String& rotation, const String& scale)
     return sp<Transform>::make(Transform::TYPE_LINEAR_3D, sp<Rotation>::make(quat), sp<Vec3>::make<Vec3::Const>(s));
 }
 
-std::tuple<String, int32_t, sp<RenderObject>> makeRenderObject(const document& manifest, bool visible)
+sp<RenderObject> makeRenderObject(const document& manifest, int32_t type, bool visible)
 {
     const Global<Constants> globalConstants;
-    String name = Documents::getAttribute(manifest, constants::NAME);
-    int32_t type = name.hash();
     const String& position = Documents::ensureAttribute(manifest, constants::POSITION);
     const String& scale = Documents::ensureAttribute(manifest, "scale");
     const String& rotation = Documents::ensureAttribute(manifest, constants::ROTATION);
     sp<Transform> transform = makeTransform(rotation, scale);
-    return {std::move(name), type, sp<RenderObject>::make(type, sp<Vec3>::make<Vec3::Const>(parseVector<V3>(position)), nullptr, std::move(transform), nullptr, visible ? globalConstants->BOOLEAN_TRUE : globalConstants->BOOLEAN_FALSE)};
+    return sp<RenderObject>::make(type, sp<Vec3>::make<Vec3::Const>(parseVector<V3>(position)), nullptr, std::move(transform), nullptr, visible ? globalConstants->BOOLEAN_TRUE : globalConstants->BOOLEAN_FALSE);
 }
 
 sp<RigidBody> makeRigidBody(const Library& library, const sp<RenderObject>& renderObject, int32_t shapeId)
@@ -99,7 +99,7 @@ void Level::load(const String& src)
         const String& dimensions = Documents::ensureAttribute(i, "dimensions");
         const int32_t id = Documents::ensureAttribute<int32_t>(i, constants::ID);
         CHECK_WARN(libraryMapping.find(id) == libraryMapping.end(), "Overwriting instance library mapping(%d)", id);
-        libraryMapping.emplace(id, Library{getCollider(name), parseVector<V3>(dimensions)});
+        libraryMapping.emplace(id, Library{static_cast<int32_t>(name.hash()), getCollider(name), parseVector<V3>(dimensions)});
     }
 
     for(const document& i : manifest->children(constants::LAYER))
@@ -115,12 +115,14 @@ void Level::load(const String& src)
             {
                 const auto iter = libraryMapping.find(instanceOf);
                 ASSERT(iter != libraryMapping.end());
-                auto [name, type, renderObject] = makeRenderObject(j, visible);
+                const Library& library = iter->second;
+                String name = Documents::getAttribute(j, constants::NAME);
+                sp<RenderObject> renderObject = makeRenderObject(j, library._type, visible);
 
                 CHECK(layer, "Trying to load model instance into undefined Layer(%s)", layerName.c_str());
                 layer->addRenderObject(renderObject);
 
-                if(sp<RigidBody> rigidBody = makeRigidBody(iter->second, renderObject, type))
+                if(sp<RigidBody> rigidBody = makeRigidBody(library, renderObject, library._type))
                 {
                     if(name)
                         _rigid_objects[name] = std::move(rigidBody);
@@ -133,7 +135,9 @@ void Level::load(const String& src)
             }
             else if(clazz == "MESH")
             {
-                auto [name, type, renderObject] = makeRenderObject(j, visible);
+                const String& name = Documents::ensureAttribute(j, constants::NAME);
+                const int32_t type = name.hash();
+                sp<RenderObject> renderObject = makeRenderObject(j, type, visible);
                 CHECK(layer, "Trying to load model instance into undefined Layer(%s)", layerName.c_str());
                 layer->addRenderObject(renderObject);
                 if(name)
@@ -142,20 +146,22 @@ void Level::load(const String& src)
             else if(clazz == "CAMERA")
             {
                 const String& name = Documents::ensureAttribute(j, constants::NAME);
-                const String& position = Documents::ensureAttribute(j, constants::POSITION);
-                const String& rotation = Documents::ensureAttribute(j, constants::ROTATION);
-                const float fov = Documents::ensureAttribute<float>(j, "fov");
-                const float clipNear = Documents::ensureAttribute<float>(j, "clip-near");
-                const float clipFar = Documents::ensureAttribute<float>(j, "clip-far");
-                const sp<Transform> transform = makeTransform(rotation, "");
                 const sp<Camera> camera = getCamera(name);
                 DCHECK_WARN(camera, "Undefined camera(%s) in \"%s\"", name.c_str(), src.c_str());
                 if(camera)
                 {
+                    const String& position = Documents::ensureAttribute(j, constants::POSITION);
+                    const String& rotation = Documents::ensureAttribute(j, constants::ROTATION);
+                    const float fovy = Documents::ensureAttribute<float>(j, "fov_y");
+                    const float clipNear = Documents::ensureAttribute<float>(j, "clip-near");
+                    const float clipFar = Documents::ensureAttribute<float>(j, "clip-far");
                     const V3 p = parseVector<V3>(position);
-                    const Transform::Snapshot ts = transform->snapshot();
-                    camera->perspective(fov, 16.0 / 9, clipNear, clipFar);
-                    camera->lookAt(p, ts.transform(V3(0, 0, 1)) + p, ts.transform(V3(0, 1, 0)));
+                    const Quaternion quaternion(sp<Vec4>::make<Vec4::Const>(parseVector<V4>(rotation)));
+                    const M4 matrix = quaternion.toMatrix()->val();
+                    const V3 front = MatrixUtil::mul(matrix, V3(0, -1.0f, 0));
+                    const V3 up = MatrixUtil::mul(matrix, V3(0, 0, 1.0f));
+                    camera->perspective(fovy, 16.0f / 9, clipNear, clipFar);
+                    camera->lookAt(p, p + front, up);
                 }
             }
             else if(clazz == "LIGHT")

@@ -63,7 +63,7 @@ sp<Mat4> Mat4Type::create(const V4& t, const V4& b, const V4& n, const V4& w)
 
 sp<Mat4> Mat4Type::matmul(sp<Mat4> lvalue, sp<Mat4> rvalue)
 {
-    return sp<VariableOP2<sp<Mat4>, sp<Mat4>, Operators::Mul<M4, M4>>>::make(std::move(lvalue), rvalue);
+    return sp<VariableOP2<sp<Mat4>, sp<Mat4>, Operators::Mul<M4, M4>>>::make(std::move(lvalue), std::move(rvalue));
 }
 
 sp<Mat4> Mat4Type::matmul(sp<Mat4> lvalue, const M4& rvalue)
