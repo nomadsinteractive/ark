@@ -2,6 +2,7 @@
 
 #include "core/ark.h"
 #include "core/impl/variable/variable_dyed.h"
+#include "core/impl/variable/variable_op1.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/impl/variable/variable_op2.h"
 #include "core/util/operators.h"
@@ -17,16 +18,27 @@ namespace {
 class MatrixOperators {
 public:
 
+    class ToM4 {
+    public:
+        M4 operator()(const M3& m3) const {
+            M4 m4 = M4::identity();
+            *reinterpret_cast<V3*>(&m4[0]) = *reinterpret_cast<const V3*>(&m3[0]);
+            *reinterpret_cast<V3*>(&m4[4]) = *reinterpret_cast<const V3*>(&m3[3]);
+            *reinterpret_cast<V3*>(&m4[8]) = *reinterpret_cast<const V3*>(&m3[6]);
+            return m4;
+        }
+    };
+
     class Translate {
     public:
-        M4 operator()(const M4& v1, const V3& v2) {
+        M4 operator()(const M4& v1, const V3& v2) const {
             return MatrixUtil::translate(v1, v2);
         }
     };
 
     class Rotate {
     public:
-        M4 operator()(const M4& v1, const V4& v2) {
+        M4 operator()(const M4& v1, const V4& v2) const {
             return MatrixUtil::rotate(v1, v2);
         }
     };
@@ -48,7 +60,12 @@ M4 Mat4Type::val(const sp<Mat4>& self)
 
 sp<Mat4> Mat4Type::create(const M4& m)
 {
-    return sp<Mat4Impl>::make(m);
+    return sp<Mat4>::make<Mat4Impl>(m);
+}
+
+sp<Mat4> Mat4Type::create(sp<Mat3> other)
+{
+    return sp<VariableOP1<M4, M3>>::make(MatrixOperators::ToM4(), std::move(other));
 }
 
 sp<Mat4> Mat4Type::create(sp<Mat4> other)

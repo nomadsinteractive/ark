@@ -13,7 +13,7 @@ namespace ark {
 
 sp<Mat3> Mat3Type::create(sp<Vec3> t, sp<Vec3> b, sp<Vec3> n)
 {
-    DASSERT((t && b && n) || (!t && !b && !n));
+    ASSERT((t && b && n) || (!t && !b && !n));
     return t ? sp<Mat3>::make<Mat3Impl>(std::move(t), std::move(b), std::move(n)) : sp<Mat3>::make<Mat3::Const>(M3::identity());
 }
 

@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_IMPL_MAT_MAT3_H_
-#define ARK_GRAPHICS_IMPL_MAT_MAT3_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/inf/variable.h"
@@ -17,8 +16,8 @@ public:
     Mat3Impl(const sp<Vec3>& t, const sp<Vec3>& b, const sp<Vec3>& n) noexcept;
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Mat3Impl);
 
-    virtual M3 val() override;
-    virtual bool update(uint64_t timestamp) override;
+    M3 val() override;
+    bool update(uint64_t timestamp) override;
 
     void fix();
 
@@ -27,5 +26,3 @@ private:
 };
 
 }
-
-#endif

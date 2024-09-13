@@ -9,7 +9,7 @@
 
 namespace ark {
 
-template<typename T, typename U = T> class VariableOP1 : public Variable<T>, public Holder, Implements<VariableOP1<T>, Variable<T>, Holder> {
+template<typename T, typename U = T> class VariableOP1 final : public Variable<T>, public Holder, Implements<VariableOP1<T>, Variable<T>, Holder> {
 private:
     typedef std::function<T(U)> OPFunc;
 

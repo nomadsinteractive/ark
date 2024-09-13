@@ -9,13 +9,13 @@ namespace ark {
 
 namespace {
 
-class TBNMat3 : public Mat3 {
+class TBNMat3 final : public Mat3 {
 public:
     TBNMat3(const sp<Vec3>& t, const sp<Vec3>& b, const sp<Vec3>& n)
         : _t(t), _b(b), _n(n) {
     }
 
-    virtual M3 val() override {
+    M3 val() override {
         const V3 t = _t->val();
         const V3 b = _b->val();
         const V3 n = _n->val();
@@ -23,7 +23,7 @@ public:
         return M3(values);
     }
 
-    virtual bool update(uint64_t timestamp) override {
+    bool update(uint64_t timestamp) override {
         return UpdatableUtil::update(timestamp, _t, _b, _n);
     }
 
@@ -45,7 +45,7 @@ Mat3Impl::Mat3Impl() noexcept
 Mat3Impl::Mat3Impl(const V3& t, const V3& b, const V3& n) noexcept
     : Mat3Impl()
 {
-    float values[9] = {t.x(), b.x(), n.x(), t.y(), b.y(), n.y(), t.z(), b.z(), n.z()};
+    const float values[9] = {t.x(), b.x(), n.x(), t.y(), b.y(), n.y(), t.z(), b.z(), n.z()};
     _impl->set(M3(values));
 }
 

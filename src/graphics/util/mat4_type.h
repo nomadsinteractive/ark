@@ -17,6 +17,8 @@ public:
 //  [[script::bindings::constructor]]
     static sp<Mat4> create(const M4& m = M4::identity());
 //  [[script::bindings::constructor]]
+    static sp<Mat4> create(sp<Mat3> other);
+//  [[script::bindings::constructor]]
     static sp<Mat4> create(sp<Mat4> other);
     static sp<Mat4> create(const V4& t, const V4& b, const V4& n, const V4& w);
     static sp<Mat4> create(sp<Vec4> t = nullptr, sp<Vec4> b = nullptr, sp<Vec4> n = nullptr, sp<Vec4> w = nullptr);
