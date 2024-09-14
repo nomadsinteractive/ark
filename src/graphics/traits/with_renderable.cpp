@@ -6,6 +6,7 @@
 #include "graphics/base/layer_context.h"
 #include "graphics/base/render_object.h"
 #include "graphics/impl/renderable/renderable_with_transform.h"
+#include "graphics/traits/with_transform.h"
 #include "graphics/util/mat4_type.h"
 
 #include "renderer/base/model.h"
@@ -28,13 +29,13 @@ void WithRenderable::onWire(const WiringContext& context)
     const sp<Boolean> discarded = context.getComponent<Expendable>();
     const sp<Boolean> visible = context.getComponent<Visibility>();
     const sp<Model> model = context.getComponent<Model>();
-    const sp<Transform> transform = context.getComponent<Transform>();
+    const sp<WithTransform> withTransform = context.getComponent<WithTransform>();
     for(const auto& [renderable, renderObject, layerContext, transformNode] : _manifests)
     {
         sp<Renderable> r = renderObject ? renderObject.cast<Renderable>() : renderable;
         const sp<Node> node = model && transformNode ? model->findNode(transformNode) : nullptr;
-        if(transform)
-            r = sp<Renderable>::make<RenderableWithTransform>(std::move(r), node ? Mat4Type::matmul(transform, node->transform()) : transform.cast<Mat4>());
+        if(withTransform)
+            r = sp<Renderable>::make<RenderableWithTransform>(std::move(r), node ? Mat4Type::matmul(withTransform->transform(), node->transform()) : withTransform->transform());
         else if(node)
             r = sp<Renderable>::make<RenderableWithTransform>(std::move(r), sp<Mat4>::make<Mat4::Const>(node->transform()));
         if(renderObject)

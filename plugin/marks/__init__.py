@@ -20,11 +20,11 @@ def pydevd_stop():
 
 def import_pydevd_module():
     try:
-        import pydevd
-        return pydevd
+        import pydevd_pycharm
+        return pydevd_pycharm
     except ImportError:
         try:
-            import pydevd_pycharm
-            return pydevd_pycharm
+            import pydevd
+            return pydevd
         except ImportError:
             return None

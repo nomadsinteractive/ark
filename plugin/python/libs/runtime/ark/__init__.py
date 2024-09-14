@@ -2688,6 +2688,15 @@ class WithId:
         return 0
 
 
+class WithTransform:
+    def __init__(self, transform: Mat4):
+        pass
+
+    @property
+    def transform(self) -> Mat4:
+        pass
+
+
 class Tag:
     def __init__(self, info: Any):
         pass

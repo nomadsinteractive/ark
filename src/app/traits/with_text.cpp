@@ -1,12 +1,13 @@
 #include "app/traits/with_text.h"
 
 #include "graphics/base/boundaries.h"
+#include "graphics/traits/with_transform.h"
+#include "graphics/util/mat4_type.h"
 #include "graphics/util/vec3_type.h"
 
 #include "renderer/base/model.h"
 
 #include "app/view/view.h"
-#include "graphics/util/mat4_type.h"
 
 namespace ark {
 
@@ -35,15 +36,15 @@ void WithText::onWire(const WiringContext& context)
         if(const sp<View> view = context.getComponent<View>())
             _text->setLayoutParam(view->layoutParam());
     sp<Mat4> matrix;
-    if(const sp<Transform> transform = context.getComponent<Transform>())
-        matrix = transform;
+    if(const sp<WithTransform> transform = context.getComponent<WithTransform>())
+        matrix = transform->transform();
     if(_transform_node)
     {
         const sp<Model> model = context.getComponent<Model>();
         CHECK(model, "Text with transform node \"%s\" has no model defined", _transform_node.c_str());
         const sp<Node> node = model->findNode(_transform_node);
         CHECK(node, "Text with transform node \"%s\" model has no node defined", _transform_node.c_str());
-        matrix = matrix ? Mat4Type::matmul(matrix, node->transform()) : sp<Mat4>::make<Mat4::Const>(node->transform());
+        matrix = matrix ? Mat4Type::matmul(std::move(matrix), node->transform()) : sp<Mat4>::make<Mat4::Const>(node->transform());
     }
     if(matrix)
         _text->setTransform(std::move(matrix));

@@ -54,12 +54,12 @@ class ArkModuleFinder:
         for i in self._path:
             if i.startswith(self.PROTOCOL_ASSET):
                 filepath = '/'.join([j for j in i[len(self.PROTOCOL_ASSET):].split('/') if j] + paths)
-                spec = self.find_asset_spec(fullname, filepath)
-                if spec:
+                if spec := self.find_asset_spec(fullname, filepath):
                     return spec
             elif i.startswith(self.PROTOCOL_FILE):
                 path = (path or self._sys_module.path) + [i[len(self.PROTOCOL_FILE):]]
-                return self._util.PathFinder.find_spec(fullname, path, target)
+                if spec := self._util.PathFinder.find_spec(fullname, path, target):
+                    return spec
             else:
                 self._ark.logw('None-URL based protocol "%s" is no longer supported', i)
 
