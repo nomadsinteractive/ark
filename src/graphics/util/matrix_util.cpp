@@ -105,8 +105,7 @@ M4 MatrixUtil::scale(const M4& lvalue, const V3& rvalue)
 
 M4 MatrixUtil::translate(const M4& lvalue, const V3& rvalue)
 {
-    return glm::translate(glm::mat4(1.0f), *reinterpret_cast<const glm::vec3*>(&rvalue)) * lvalue.mat<glm::mat4>();
-    // return {glm::translate(lvalue.mat<glm::mat4>(), *reinterpret_cast<const glm::vec3*>(&rvalue))};
+    return {glm::translate(lvalue.mat<glm::mat4>(), *reinterpret_cast<const glm::vec3*>(&rvalue))};
 }
 
 V2 MatrixUtil::transform(const M3& matrix, const V2& pos)

@@ -1162,6 +1162,14 @@ class Mat4(_Mat):
         pass
 
 
+class Translation:
+    def __init__(self, translate: TYPE_VEC3):
+        pass
+
+    def to_matrix(self) -> Mat4:
+        pass
+
+
 class Uploader:
     def __init__(self, delegate: Union[Numeric, Vec2, Vec3, Vec4, list[_Mat], list[tuple], list[int], list['Uploader'], Any], size: int = 0):
         pass

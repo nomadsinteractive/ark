@@ -45,11 +45,6 @@ public:
     static sp<Mat4> identity();
 
 //  [[script::bindings::classmethod]]
-    static sp<Mat4> translate(sp<Mat4> self, sp<Vec3> translation);
-//  [[script::bindings::classmethod]]
-    static sp<Mat4> rotate(sp<Mat4> self, sp<Vec4> quaternion);
-
-//  [[script::bindings::classmethod]]
     static sp<Mat4> freeze(const sp<Mat4>& self);
 
 //  [[script::bindings::classmethod]]

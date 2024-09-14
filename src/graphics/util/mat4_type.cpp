@@ -118,16 +118,6 @@ sp<Mat4> Mat4Type::identity()
     return sp<Mat4Impl>::make();
 }
 
-sp<Mat4> Mat4Type::translate(sp<Mat4> self, sp<Vec3> translation)
-{
-    return sp<VariableOP2<sp<Mat4>, sp<Vec3>, MatrixOperators::Translate>>::make(std::move(self), std::move(translation));
-}
-
-sp<Mat4> Mat4Type::rotate(sp<Mat4> self, sp<Vec4> quaternion)
-{
-    return sp<VariableOP2<sp<Mat4>, sp<Vec4>, MatrixOperators::Rotate>>::make(std::move(self), std::move(quaternion));
-}
-
 sp<Mat4> Mat4Type::freeze(const sp<Mat4>& self)
 {
     return sp<Mat4::Const>::make(self->val());
