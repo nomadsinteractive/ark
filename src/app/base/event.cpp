@@ -38,6 +38,11 @@ V2 Event::xy() const
     return _info._button._xy;
 }
 
+V2 Event::xyRaw() const
+{
+    return _info._button._xy_raw;
+}
+
 uint64_t Event::timestamp() const
 {
     return _timestamp;
@@ -90,16 +95,6 @@ Event::EventInfo::EventInfo(const Event::ButtonInfo& button)
 
 Event::EventInfo::EventInfo(const Event::MotionInfo& motion)
     : _motion(motion)
-{
-}
-
-Event::ButtonInfo::ButtonInfo(const V2& xy, Event::Button which)
-    : _xy(xy), _which(which)
-{
-}
-
-Event::MotionInfo::MotionInfo(const V2& xy, Event::Button which, uint32_t states)
-    : _xy(xy), _which(which), _states(states)
 {
 }
 

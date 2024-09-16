@@ -1,5 +1,4 @@
-#ifndef ARK_APP_BASE_EVENT_H_
-#define ARK_APP_BASE_EVENT_H_
+#pragma once
 
 #include "core/base/api.h"
 
@@ -147,16 +146,14 @@ public:
     };
 
     struct ButtonInfo {
-        ButtonInfo(const V2& xy, Button which);
-
         V2 _xy;
+        V2 _xy_raw;
         Button _which;
     };
 
     struct MotionInfo {
-        MotionInfo(const V2& xy, Button which, uint32_t states);
-
         V2 _xy;
+        V2 _xy_raw;
         Button _which;
         uint32_t _states;
     };
@@ -187,6 +184,8 @@ public:
     float y() const;
 //  [[script::bindings::property]]
     V2 xy() const;
+//  [[script::bindings::property]]
+    V2 xyRaw() const;
 
 //  [[script::bindings::property]]
     uint64_t timestamp() const;
@@ -206,5 +205,3 @@ private:
 };
 
 }
-
-#endif

@@ -24,6 +24,8 @@ public:
 //  [[script::bindings::property]]
     sp<Vec2> cursorPosition() const;
 //  [[script::bindings::property]]
+    sp<Vec2> cursorPositionRaw() const;
+//  [[script::bindings::property]]
     const sp<Size>& surfaceSize() const;
 //  [[script::bindings::property]]
     const sp<ApplicationController>& applicationController() const;

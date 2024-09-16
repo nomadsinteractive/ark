@@ -3,8 +3,6 @@
 #include "core/ark.h"
 #include "core/types/shared_ptr.h"
 
-#include "graphics/base/size.h"
-
 #include "app/base/application.h"
 #include "app/base/application_manifest.h"
 
@@ -12,9 +10,7 @@ using namespace ark;
 
 int main(int argc, const char* argv[])
 {
-    float scale = argc > 1 ? static_cast<float>(atof(argv[1])) : 0.0f;
-    if(scale == 0.0f)
-        scale = 1.0f;
+    const float scale = argc > 1 ? static_cast<float>(atof(argv[1])) : 1.0f;
     try {
         Ark ark(argc, argv);
         sp<ApplicationManifest> manifest = sp<ApplicationManifest>::make("manifest.xml");

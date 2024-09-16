@@ -522,6 +522,10 @@ class ApplicationFacade:
         return Vec2(0, 0)
 
     @property
+    def cursor_position_raw(self) -> 'Vec2':
+        return Vec2(0, 0)
+
+    @property
     def surface_size(self) -> 'Size':
         return Size(0, 0)
 

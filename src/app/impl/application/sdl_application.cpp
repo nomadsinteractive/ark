@@ -431,24 +431,27 @@ void SDLApplication::pollEvents(uint64_t timestamp)
         case SDL_MOUSEBUTTONDOWN:
         case SDL_MOUSEBUTTONUP:
             {
-                Event::Button which = static_cast<Event::Button>(Event::BUTTON_MOUSE_LEFT + event.button.button - SDL_BUTTON_LEFT);
-                Event::ButtonInfo bi(toViewportPosition(V2(static_cast<float>(event.button.x), static_cast<float>(event.button.y))), which);
+                const V2 rawPosition(static_cast<float>(event.button.x), static_cast<float>(event.button.y));
+                const Event::Button which = static_cast<Event::Button>(Event::BUTTON_MOUSE_LEFT + event.button.button - SDL_BUTTON_LEFT);
+                Event::ButtonInfo bi{toViewportPosition(rawPosition), rawPosition, which};
                 Event e(event.type == SDL_MOUSEBUTTONDOWN ? Event::ACTION_DOWN : Event::ACTION_UP, timestamp, bi);
                 onEvent(e);
                 break;
             }
         case SDL_MOUSEMOTION:
             {
-                Event::Button which = static_cast<Event::Button>(Event::BUTTON_MOUSE_LEFT + event.button.button - SDL_BUTTON_LEFT);
-                Event::MotionInfo mi(toViewportPosition(V2(static_cast<float>(event.motion.x), static_cast<float>(event.motion.y))), which, event.motion.state);
+                const V2 rawPosition(static_cast<float>(event.motion.x), static_cast<float>(event.motion.y));
+                const Event::Button which = static_cast<Event::Button>(Event::BUTTON_MOUSE_LEFT + event.button.button - SDL_BUTTON_LEFT);
+                Event::MotionInfo mi{toViewportPosition(rawPosition), rawPosition, which, event.motion.state};
                 Event e(Event::ACTION_MOVE, timestamp, mi);
                 onEvent(e);
                 break;
             }
         case SDL_MOUSEWHEEL:
             {
-                Event::Button which = static_cast<Event::Button>(Event::BUTTON_MOUSE_LEFT + event.button.button - SDL_BUTTON_LEFT);
-                Event::MotionInfo mi(V2(static_cast<float>(event.motion.x), static_cast<float>(event.motion.y)), which, event.motion.state);
+                const V2 rawPosition(static_cast<float>(event.motion.x), static_cast<float>(event.motion.y));
+                const Event::Button which = static_cast<Event::Button>(Event::BUTTON_MOUSE_LEFT + event.button.button - SDL_BUTTON_LEFT);
+                Event::MotionInfo mi{rawPosition, rawPosition, which, event.motion.state};
                 Event e(Event::ACTION_WHEEL, timestamp, mi);
                 onEvent(e);
                 break;

@@ -45,6 +45,7 @@ public:
     const sp<Clock>& appClock() const;
     const sp<Numeric::Impl>& appClockInterval() const;
     const sp<Vec2Impl>& cursorPosition() const;
+    const sp<Vec2Impl>& cursorPositionRaw() const;
 
     bool onEvent(const Event& event);
 
@@ -92,48 +93,16 @@ private:
     void initialize(const document& manifest);
 
     sp<ResourceLoader> createResourceLoaderImpl(const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
-    document createResourceLoaderManifest(const document& manifest);
+    document createResourceLoaderManifest(const document& manifest) const;
 
-    class Ticker : public Variable<uint64_t> {
-    public:
-        Ticker();
-
-        virtual bool update(uint64_t timestamp) override;
-        virtual uint64_t val() override;
-
-    private:
-        sp<Variable<uint64_t>> _steady_clock;
-        std::atomic<uint64_t> _val;
-    };
-
-    class MessageLoopFilter {
-    public:
-        MessageLoopFilter() = default;
-
-        FilterAction operator() (const sp<MessageLoop>& messageLoop) const;
-
-    };
-
-    class ExecutorWorkerStrategy : public ExecutorWorkerThread::Strategy {
-    public:
-        ExecutorWorkerStrategy(sp<MessageLoop> messageLoop);
-
-        void onStart() override;
-        void onExit() override;
-
-        uint64_t onBusy() override;
-        uint64_t onIdle(Thread& thread) override;
-
-        void onException(const std::exception& e) override;
-
-        sp<MessageLoop> _message_loop;
-        UList<sp<MessageLoop>> _app_message_loops;
-    };
+    class Ticker;
+    class ExecutorWorkerStrategy;
 
 private:
     std::vector<String> _argv;
     sp<Ticker> _ticker;
     sp<Vec2Impl> _cursor_position;
+    sp<Vec2Impl> _cursor_position_raw;
 
     sp<ApplicationBundle> _application_bundle;
     sp<RenderEngine> _render_engine;

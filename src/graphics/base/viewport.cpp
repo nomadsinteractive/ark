@@ -30,7 +30,7 @@ float Viewport::toViewportX(float screenX, float surfaceWidth) const
 float Viewport::toViewportY(float screenY, float surfaceHeight) const
 {
     const float bt = bottom() - top();
-    return bt > 0.0f ? bt - bt * screenY / static_cast<float>(surfaceHeight) : - bt * screenY / static_cast<float>(surfaceHeight);
+    return bt > 0.0f ? bt - bt * screenY / surfaceHeight : - bt * screenY / surfaceHeight;
 }
 
 }

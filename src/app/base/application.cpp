@@ -11,7 +11,6 @@
 #include "graphics/base/camera.h"
 #include "graphics/base/size.h"
 #include "graphics/base/viewport.h"
-#include "graphics/base/render_command_pipeline.h"
 #include "graphics/inf/render_view.h"
 
 #include "renderer/base/render_engine.h"
@@ -29,25 +28,25 @@ namespace ark {
 
 namespace {
 
-class AssetStringBundle : public StringBundle {
+class AssetStringBundle final : public StringBundle {
 public:
-    virtual sp<String> getString(const String& name) override {
+    sp<String> getString(const String& name) override {
         const sp<Readable> readable = Ark::instance().openAsset(name);
         return sp<String>::make(Strings::loadFromReadable(readable));
     }
 
-    virtual std::vector<String> getStringArray(const String& /*resid*/) override {
+    std::vector<String> getStringArray(const String& /*resid*/) override {
         return {};
     }
 };
 
-class OnSurfaceUpdatePreCreated : public Runnable {
+class OnSurfaceUpdatePreCreated final : public Runnable {
 public:
     OnSurfaceUpdatePreCreated(sp<ApplicationContext> applicationContext)
         : _application_context(std::move(applicationContext)) {
     }
 
-    virtual void run() override {
+    void run() override {
         _application_context->updateRenderState();
     }
 
@@ -55,13 +54,13 @@ private:
     sp<ApplicationContext> _application_context;
 };
 
-class OnSurfaceUpdatePostCreated : public Runnable {
+class OnSurfaceUpdatePostCreated final : public Runnable {
 public:
     OnSurfaceUpdatePostCreated(sp<Runnable> runAtCore, sp<ApplicationContext> applicationContext, sp<ApplicationDelegate> applicationDelegate)
         : _run_at_core(std::move(runAtCore)), _application_context(std::move(applicationContext)), _application_delegate(std::move(applicationDelegate)) {
     }
 
-    virtual void run() override {
+    void run() override {
         DPROFILER_TRACE("MainFrame", ApplicationProfiler::CATEGORY_RENDER_FRAME);
         _application_context->runAtCoreThread(_run_at_core);
         _application_context->updateRenderState();
@@ -108,17 +107,17 @@ void Application::onCreateTask()
     setSurfaceUpdater(true);
 }
 
-void Application::onPauseTask()
+void Application::onPauseTask() const
 {
     _application_delegate->onPause();
 }
 
-void Application::onResumeTask()
+void Application::onResumeTask() const
 {
     _application_delegate->onResume();
 }
 
-void Application::onEventTask(const Event& event)
+void Application::onEventTask(const Event& event) const
 {
     _application_delegate->onEvent(event);
 }
@@ -169,7 +168,7 @@ void Application::onDestroy()
     const sp<ApplicationDelegate> applicationDelegate = _application_delegate;
     const sp<ApplicationContext> applicationContext = _application_context;
     _application_context->resume();
-    _application_context->runAtCoreThread([applicationDelegate, applicationContext] () {
+    _application_context->runAtCoreThread([applicationDelegate] () {
         applicationDelegate->onDestroy();
     });
 }

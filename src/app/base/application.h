@@ -35,8 +35,6 @@ public:
     const sp<ApplicationContext>& context() const;
     const sp<Size>& surfaceSize() const;
 
-    static void __parse_opt__(int32_t argc, const char* argv[]);
-
 protected:
     sp<ApplicationDelegate> _application_delegate;
     sp<ApplicationContext> _application_context;
@@ -46,10 +44,9 @@ protected:
 
 private:
     void onCreateTask();
-    void onPauseTask();
-    void onResumeTask();
-    void onDestroyTask();
-    void onEventTask(const Event& event);
+    void onPauseTask() const;
+    void onResumeTask() const;
+    void onEventTask(const Event& event) const;
 
     void setSurfaceUpdater(bool alive);
 
