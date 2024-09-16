@@ -1,7 +1,7 @@
 import sys
 
 from gen_core import parse_method_arguments, acg, gen_cast_call, INDENT, gen_method_call_arg, GenArgumentMeta, GenArgument, \
-    create_overloaded_method_type, get_options
+    create_overloaded_method_type, get_params
 
 TP_AS_NUMBER_TEMPLATE = [
     'static PyNumberMethods ${py_class_name}_tp_as_number = {',
@@ -92,7 +92,7 @@ class GenMethod(object):
         return None
 
     def gen_py_method_def_tp(self, genclass):
-        trycatch_suffix = '_r' if 't' in get_options() else ''
+        trycatch_suffix = '_r' if 't' in get_params() else ''
         return f'{{"{acg.camel_case_to_snake_case(self._name)}", (PyCFunction) {genclass.py_class_name}::{self._name}{trycatch_suffix}, {self._flags}, nullptr}}'
 
     def gen_py_return(self):

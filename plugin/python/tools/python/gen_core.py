@@ -6,8 +6,6 @@ from typing import Optional
 
 acg = None
 
-_opts = None
-
 _params = None
 _paths = None
 
@@ -18,12 +16,11 @@ TYPE_DEFINED_SP = ('document', 'element', 'attribute', 'bitmap')
 
 
 def get_param_and_paths() -> tuple[dict[str, str], list[str]]:
-    global _opts, _paths, _params
+    global _paths, _params
 
-    if _opts is None and _paths is None:
-
-        _opts, _paths = getopt.getopt(sys.argv[1:], 'b:c:p:n:o:l:m:d:jt')
-        _params = dict((i.lstrip('-'), j) for i, j in _opts)
+    if _params is None and _paths is None:
+        opts, _paths = getopt.getopt(sys.argv[1:], 'b:c:p:n:o:l:m:d:jt')
+        _params = dict((i.lstrip('-'), j) for i, j in opts)
         if any(i not in _params for i in ['p', 'm']) or len(_paths) == 0:
             print('Usage: %s -p namespace -m modulename [-c cmakefile] [-o output_file] [-l library_path] dir_paths...' % sys.argv[0])
             sys.exit(0)
@@ -38,8 +35,8 @@ def get_param_and_paths() -> tuple[dict[str, str], list[str]]:
     return _params, _paths
 
 
-def get_options() -> dict[str, str]:
-    return _opts
+def get_params() -> dict[str, str]:
+    return _params
 
 
 def import_acg():

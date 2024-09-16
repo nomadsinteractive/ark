@@ -7,7 +7,7 @@ import sys
 from os import path
 from typing import Optional
 
-from gen_core import get_param_and_paths, import_acg, INDENT, GenArgumentMeta, GenArgument, create_overloaded_method_type, get_options
+from gen_core import get_param_and_paths, import_acg, INDENT, GenArgumentMeta, GenArgument, create_overloaded_method_type, get_params
 from gen_method import GenMethod, GenGetPropMethod, GenSetPropMethod, GenMappingMethod, gen_operator_defs, gen_as_mapping_defs, GenOperatorMethod, \
     GenSequenceMethod, gen_as_sequence_defs
 
@@ -82,7 +82,7 @@ def gen_cmakelist_source(arguments, paths, output_dir, output_file, results):
     script_deps = ' '.join([f'{script_dir}/{i}' for i in ('gen_core.py', 'gen_method.py')])
     return acg.format('''macro(ark_add_py_binding SRC_PATH SRC_ABS_PATH)
     add_custom_command(OUTPUT #{ARGN}
-        COMMAND #{Python_EXECUTABLE} ${script_path} -b "${bindable_paths}" ${arguments_without_o} #{SRC_PATH}
+        COMMAND #{Python_EXECUTABLE} ${script_path} $<$<CONFIG:RELEASE>:-t> -b "${bindable_paths}" ${arguments_without_o} #{SRC_PATH}
         DEPENDS #{SRC_ABS_PATH} ${script_path} ${script_deps}
         WORKING_DIRECTORY ${working_dir})
     if(MSVC)
@@ -370,7 +370,7 @@ class GenPropertyMethod(GenMethod):
         return 0
 
     def gen_py_getset_def(self, properties, genclass):
-        trycatch_suffix = '_r' if 't' in get_options() else ''
+        trycatch_suffix = '_r' if 't' in get_params() else ''
         property_def = self._ensure_property_def(properties)
         func = f'{genclass.py_class_name}::{self._name}{trycatch_suffix}'
         if self._is_setter:
