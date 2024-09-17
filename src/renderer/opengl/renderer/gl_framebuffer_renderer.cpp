@@ -7,7 +7,7 @@
 #include "graphics/base/render_command_pipeline.h"
 
 #include "renderer/base/buffer.h"
-#include "renderer/base/framebuffer.h"
+#include "renderer/base/render_target.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/recycler.h"
 #include "renderer/base/render_controller.h"
@@ -36,17 +36,17 @@ public:
         glBindFramebuffer(GL_FRAMEBUFFER, static_cast<GLuint>(_fbo->id()));
         glViewport(0, 0, _width, _height);
         if(_clear_mask) {
-            uint32_t mds = _clear_mask & Framebuffer::CLEAR_MASK_DEPTH_STENCIL;
+            uint32_t mds = _clear_mask & RenderTarget::CLEAR_MASK_DEPTH_STENCIL;
             if(mds) {
-                if(mds == Framebuffer::CLEAR_MASK_DEPTH_STENCIL)
+                if(mds == RenderTarget::CLEAR_MASK_DEPTH_STENCIL)
                     glClearBufferfi(GL_DEPTH_STENCIL, 0, _clear_depth_value, _clear_stencil_value);
-                else if(mds == Framebuffer::CLEAR_MASK_DEPTH)
+                else if(mds == RenderTarget::CLEAR_MASK_DEPTH)
                     glClearBufferfv(GL_DEPTH, 0, &_clear_depth_value);
                 else
                     glClearBufferiv(GL_STENCIL, 0, &_clear_stencil_value);
             }
 
-            if(_clear_mask & Framebuffer::CLEAR_MASK_COLOR)
+            if(_clear_mask & RenderTarget::CLEAR_MASK_COLOR)
                 for(size_t i = 0; i < _draw_buffer_count; ++i)
                     glClearBufferfv(GL_COLOR, static_cast<GLint>(i), reinterpret_cast<GLfloat *>(&_clear_color_value));
         }

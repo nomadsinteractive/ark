@@ -2,7 +2,7 @@
 
 #include "graphics/inf/render_command.h"
 
-#include "renderer/base/framebuffer.h"
+#include "renderer/base/render_target.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/recycler.h"
 #include "renderer/base/texture.h"
@@ -95,10 +95,10 @@ VKFramebuffer::Stub::Stub(const sp<VKRenderer>& renderer, const sp<Recycler>& re
     clearColor.color = { { 0.0f, 0.0f, 0.0f, 0.0f } };
     clearDepthStencil.depthStencil = { 1.0f, 0 };
 
-    if(clearMask & Framebuffer::CLEAR_MASK_COLOR)
+    if(clearMask & RenderTarget::CLEAR_MASK_COLOR)
         for(uint32_t i = 0; i < _color_attachments.size(); ++i)
             _clear_values.push_back(clearColor);
-    if(clearMask & Framebuffer::CLEAR_MASK_DEPTH_STENCIL)
+    if(clearMask & RenderTarget::CLEAR_MASK_DEPTH_STENCIL)
         _clear_values.push_back(clearDepthStencil);
 
     _render_pass_begin_info.renderArea = _scissor;

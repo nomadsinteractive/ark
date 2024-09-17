@@ -15,12 +15,12 @@
 namespace ark {
 
 //[[script::bindings::extends(Renderer)]]
-class ARK_API RenderPass : public Renderer {
+class ARK_API RenderPass final : public Renderer {
 public:
 //  [[script::bindings::auto]]
     RenderPass(sp<Shader> shader, Buffer vertexBuffer, Buffer indexBuffer, sp<Integer> drawCount, Enum::RenderMode mode, Enum::DrawProcedure drawProcedure, const std::map<uint32_t, sp<Uploader>>& dividedUploaders);
 
-    virtual void render(RenderRequest& renderRequest, const V3& position) override;
+    void render(RenderRequest& renderRequest, const V3& position) override;
 
 //  [[plugin::builder("render-pass")]]
     class BUILDER : public Builder<Renderer> {

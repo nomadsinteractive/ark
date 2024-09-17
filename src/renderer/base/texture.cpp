@@ -270,7 +270,6 @@ sp<Texture> Texture::DICTIONARY::build(const Scope& /*args*/)
     return _resource_loader_context->textureBundle()->getTexture(_src);
 }
 
-
 Texture::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _resource_loader_context(resourceLoaderContext), _factory(factory), _manifest(manifest), _src(factory.getBuilder<String>(manifest, constants::SRC)),
       _uploader(factory.getBuilder<Texture::Uploader>(manifest, "uploader")), _upload_strategy(Documents::getAttribute<RenderController::UploadStrategy>(manifest, "upload-strategy", {RenderController::US_ONCE_AND_ON_SURFACE_READY}).bits())

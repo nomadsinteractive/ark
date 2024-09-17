@@ -58,32 +58,32 @@ private:
 
 Attribute::Usage toAttributeLayoutType(const String& name, const String& type)
 {
-    if(name.startsWith("TexCoordinate"))
+    if(name.startsWith("uv") || name.startsWith("texcoordinate"))
     {
         CHECK(type == "int" || type == "vec2" || type == "vec3", "Unacceptable TexCoordinate type: '%s', must be in [int, vec2, vec3]", type.c_str());
         return Attribute::USAGE_TEX_COORD;
     }
-    if(name.startsWith("Position"))
+    if(name.startsWith("position"))
     {
         CHECK(type == "int" || type == "vec2" || type == "vec3" || type == "vec4", "Unacceptable Position type: '%s', must be in [int, vec2, vec3, vec4]", type.c_str());
         return Attribute::USAGE_POSITION;
     }
-    if(name.startsWith("Color"))
+    if(name.startsWith("color"))
     {
         CHECK(type == "int" || type == "vec3" || type == "vec4"|| type == "vec3b" || type == "vec4b", "Unacceptable Color type: '%s', must be in [int, vec3, vec4, vec3b, vec4b]", type.c_str());
         return Attribute::USAGE_COLOR;
     }
-    if(name == "Normal")
+    if(name == "normal")
     {
         CHECK(type == "vec3", "Unacceptable Normal type: '%s', must be in [vec3]", type.c_str());
         return Attribute::USAGE_NORMAL;
     }
-    if(name == "Tangent")
+    if(name == "tangent")
     {
         CHECK(type == "vec3", "Unacceptable Tangent type: '%s', must be in [vec3]", type.c_str());
         return Attribute::USAGE_TANGENT;
     }
-    if(name == "Bitangent")
+    if(name == "bitangent")
     {
         CHECK(type == "vec3", "Unacceptable Bitangent type: '%s', must be in [vec3]", type.c_str());
         return Attribute::USAGE_BITANGENT;
@@ -93,10 +93,10 @@ Attribute::Usage toAttributeLayoutType(const String& name, const String& type)
 
 Attribute makePredefinedAttribute(const String& name, const String& type)
 {
-    const Attribute::Usage layoutType = toAttributeLayoutType(name, type);
+    const Attribute::Usage layoutType = toAttributeLayoutType(name.toLower(), type);
 
     if(layoutType == Attribute::USAGE_TEX_COORD)
-        return {Attribute::USAGE_TEX_COORD, "a_TexCoordinate", Attribute::TYPE_USHORT, type, 2, true};
+        return {Attribute::USAGE_TEX_COORD, Strings::sprintf("a_%s", name.c_str()), Attribute::TYPE_USHORT, type, 2, true};
 
     if(layoutType == Attribute::USAGE_POSITION)
     {

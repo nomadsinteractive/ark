@@ -8,7 +8,7 @@
 #include "graphics/base/size.h"
 #include "graphics/base/viewport.h"
 
-#include "renderer/base/framebuffer.h"
+#include "renderer/base/render_target.h"
 #include "renderer/base/render_engine_context.h"
 #include "renderer/base/render_controller.h"
 
@@ -103,10 +103,10 @@ sp<Camera::Delegate> RendererFactoryVulkan::createCamera()
     return sp<Camera::Delegate>::make<Camera::DelegateLH_ZO>();
 }
 
-sp<Framebuffer> RendererFactoryVulkan::createFramebuffer(sp<Renderer> renderer, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask)
+sp<RenderTarget> RendererFactoryVulkan::createRenderTarget(sp<Renderer> renderer, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask)
 {
     sp<VKFramebuffer> fbo = sp<VKFramebuffer>::make(_renderer, _recycler, std::move(colorAttachments), std::move(depthStencilAttachments), clearMask);
-    return sp<Framebuffer>::make(sp<VKFramebufferRenderer>::make(std::move(renderer), fbo), std::move(fbo));
+    return sp<RenderTarget>::make(sp<VKFramebufferRenderer>::make(std::move(renderer), fbo), std::move(fbo));
 }
 
 sp<RenderView> RendererFactoryVulkan::createRenderView(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController)

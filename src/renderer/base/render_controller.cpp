@@ -10,7 +10,7 @@
 #include "graphics/base/bitmap.h"
 #include "graphics/base/size.h"
 
-#include "renderer/base/framebuffer.h"
+#include "renderer/base/render_target.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/model.h"
 #include "renderer/base/recycler.h"
@@ -340,11 +340,11 @@ sp<RenderController::PrimitiveIndexBuffer> RenderController::getSharedPrimitiveI
     return pib;
 }
 
-sp<Framebuffer> RenderController::makeFramebuffer(sp<Renderer> renderer, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask)
+sp<RenderTarget> RenderController::makeRenderTarget(sp<Renderer> renderer, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask)
 {
-    const sp<Framebuffer> framebuffer = renderEngine()->rendererFactory()->createFramebuffer(std::move(renderer), std::move(colorAttachments), std::move(depthStencilAttachments), clearMask);
-    upload(framebuffer->resource(), RenderController::US_ONCE_AND_ON_SURFACE_READY, nullptr, nullptr, UPLOAD_PRIORITY_LOW);
-    return framebuffer;
+    const sp<RenderTarget> renderTarget = renderEngine()->rendererFactory()->createRenderTarget(std::move(renderer), std::move(colorAttachments), std::move(depthStencilAttachments), clearMask);
+    upload(renderTarget->resource(), US_ONCE_AND_ON_SURFACE_READY, nullptr, nullptr, UPLOAD_PRIORITY_LOW);
+    return renderTarget;
 }
 
 sp<RenderCommandComposer> RenderController::makeDrawElementsIncremental(sp<Model> model) const

@@ -67,6 +67,7 @@ const char* const REF = "ref";
 const char* const RENDERER = "renderer";
 const char* const RENDER_OBJECT = "render-object";
 const char* const RENDER_LAYER = "render-layer";
+const char* const RENDER_TARGET = "render-target";
 const char* const ROTATION = "rotation";
 const char* const SHADER = "shader";
 const char* const SIZE = "size";

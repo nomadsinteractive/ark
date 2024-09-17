@@ -16,7 +16,7 @@ class ComputeContext;
 class DrawingBuffer;
 class DrawingContext;
 class Emitter;
-class Framebuffer;
+class RenderTarget;
 class GraphicsBufferAllocator;
 class GraphicsContext;
 class Layer;

@@ -49,19 +49,19 @@ void GLFramebuffer::upload(GraphicsContext& graphicsContext)
     for(const sp<Texture>& i : _color_attachments)
     {
         const Texture::Usage usage = i->parameters()->_usage;
-        DASSERT(usage & Texture::USAGE_ATTACHMENT);
-        DASSERT(i->id() != 0);
-        GLenum attachment = static_cast<GLenum>(GL_COLOR_ATTACHMENT0 + (bindings++));
+        ASSERT(usage == Texture::USAGE_AUTO || usage == Texture::USAGE_COLOR_ATTACHMENT);
+        ASSERT(i->id() != 0);
+        const GLenum attachment = GL_COLOR_ATTACHMENT0 + (bindings++);
         attachments.push_back(i->id(), attachment);
-        drawBuffers.push_back(static_cast<GLenum>(GL_COLOR_ATTACHMENT0 + (idx++)));
+        drawBuffers.push_back(GL_COLOR_ATTACHMENT0 + (idx++));
     }
 
     if(_depth_stencil_attachment)
     {
-        uint32_t usage = _depth_stencil_attachment->parameters()->_usage & Texture::USAGE_DEPTH_STENCIL_ATTACHMENT;
+        const uint32_t usage = _depth_stencil_attachment->parameters()->_usage & Texture::USAGE_DEPTH_STENCIL_ATTACHMENT;
         DASSERT(_depth_stencil_attachment->id() != 0);
-        const GLenum glAttachments[] = {GL_COLOR_ATTACHMENT0, GL_DEPTH_ATTACHMENT, GL_STENCIL_ATTACHMENT, GL_DEPTH_STENCIL_ATTACHMENT};
-        DASSERT(usage & (Texture::USAGE_DEPTH_ATTACHMENT | Texture::USAGE_STENCIL_ATTACHMENT));
+        constexpr GLenum glAttachments[] = {GL_COLOR_ATTACHMENT0, GL_DEPTH_ATTACHMENT, GL_STENCIL_ATTACHMENT, GL_DEPTH_STENCIL_ATTACHMENT};
+        ASSERT(usage & Texture::USAGE_DEPTH_STENCIL_ATTACHMENT);
         if(_depth_stencil_attachment->parameters()->_flags & Texture::FLAG_FOR_INPUT)
         {
             depthTexture = _depth_stencil_attachment;

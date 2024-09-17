@@ -91,14 +91,14 @@ sp<BoxBundle> Arena::packages() const
     return _resource_loader->packages();
 }
 
-void Arena::addEventListener(sp<EventListener> eventListener, sp<Boolean> disposed)
+void Arena::addEventListener(sp<EventListener> eventListener, sp<Boolean> discarded)
 {
-    _event_listeners->addEventListener(std::move(eventListener), std::move(disposed));
+    _event_listeners->addEventListener(std::move(eventListener), std::move(discarded));
 }
 
-void Arena::pushEventListener(sp<EventListener> eventListener, sp<Boolean> disposed)
+void Arena::pushEventListener(sp<EventListener> eventListener, sp<Boolean> discarded)
 {
-    _event_listeners->pushEventListener(std::move(eventListener), std::move(disposed));
+    _event_listeners->pushEventListener(std::move(eventListener), std::move(discarded));
 }
 
 void Arena::addLayer(sp<Renderer> layer, sp<Boolean> discarded)
@@ -150,7 +150,7 @@ sp<Arena> Arena::BUILDER::build(const Scope& args)
             arena->addView(factory.ensure<View>(i, args));
         else if(name != "root-view")
         {
-            CHECK_WARN(name == constants::RENDERER, "['Renderer', 'RenderLayer'] expected, \"%s\" found", name.c_str());
+            CHECK_WARN(name == constants::RENDERER || name == constants::RENDER_TARGET, "['renderer', 'render-layer', 'render-target'] expected, \"%s\" found", name.c_str());
             arena->addRenderer(factory.ensure<Renderer>(i, args), Traits());
         }
     }

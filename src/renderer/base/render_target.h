@@ -13,7 +13,7 @@
 
 namespace ark {
 
-class Framebuffer final : public Renderer {
+class RenderTarget final : public Renderer {
 public:
     enum ClearMaskBits {
         CLEAR_MASK_NONE = 0,
@@ -23,21 +23,20 @@ public:
         CLEAR_MASK_DEPTH_STENCIL = 6,
         CLEAR_MASK_ALL = 7
     };
-
     typedef BitSet<ClearMaskBits> ClearMask;
 
-    Framebuffer(sp<Renderer> renderer, sp<Resource> delegate);
+    RenderTarget(sp<Renderer> renderer, sp<Resource> resource);
 
     void render(RenderRequest& renderRequest, const V3& position) override;
 
     const sp<Resource>& resource() const;
 
 //  [[plugin::resource-loader]]
-    class BUILDER final : public Builder<Framebuffer> {
+    class BUILDER final : public Builder<RenderTarget> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        sp<Framebuffer> build(const Scope& args) override;
+        sp<RenderTarget> build(const Scope& args) override;
 
     private:
         sp<RenderController> _render_controller;
@@ -46,7 +45,7 @@ public:
         ClearMask _clear_mask;
     };
 
-//  [[plugin::resource-loader("offscreen")]]
+//  [[plugin::resource-loader("render-target")]]
     class RENDERER_BUILDER final : public Builder<Renderer> {
     public:
         RENDERER_BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
@@ -54,8 +53,7 @@ public:
         sp<Renderer> build(const Scope& args) override;
 
     private:
-        sp<RenderController> _render_controller;
-        sp<Builder<Framebuffer>> _framebuffer;
+        BUILDER _impl;
     };
 
 private:

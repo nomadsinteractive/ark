@@ -32,7 +32,7 @@ void SurfaceController::addLayer(sp<Renderer> layer, sp<Boolean> discarded, sp<B
 
 void SurfaceController::requestUpdate(uint64_t timestamp)
 {
-    size_t size = _render_requests->size();
+    const size_t size = _render_requests->size();
     if(size < 3)
     {
         const V3 position(0);

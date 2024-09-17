@@ -9,7 +9,7 @@
 #include "graphics/base/size.h"
 #include "graphics/base/viewport.h"
 
-#include "renderer/base/framebuffer.h"
+#include "renderer/base/render_target.h"
 #include "renderer/base/render_engine.h"
 #include "renderer/base/render_engine_context.h"
 #include "renderer/base/render_controller.h"
@@ -94,14 +94,14 @@ sp<Camera::Delegate> RendererFactoryOpenGL::createCamera()
     return sp<Camera::Delegate>::make<Camera::DelegateRH_NO>();
 }
 
-sp<Framebuffer> RendererFactoryOpenGL::createFramebuffer(sp<Renderer> renderer, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask)
+sp<RenderTarget> RendererFactoryOpenGL::createRenderTarget(sp<Renderer> renderer, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask)
 {
     DCHECK(colorAttachments.size() > 0, "Framebuffer object should have at least one color attachment");
     int32_t width = colorAttachments.at(0)->width();
     int32_t height = colorAttachments.at(0)->height();
     uint32_t drawBufferCount = static_cast<uint32_t>(colorAttachments.size());
     sp<GLFramebuffer> fbo = sp<GLFramebuffer>::make(_recycler, std::move(colorAttachments), std::move(depthStencilAttachments));
-    return sp<Framebuffer>::make(sp<GLFramebufferRenderer>::make(fbo, width, height, std::move(renderer), drawBufferCount, clearMask), std::move(fbo));
+    return sp<RenderTarget>::make(sp<GLFramebufferRenderer>::make(fbo, width, height, std::move(renderer), drawBufferCount, clearMask), std::move(fbo));
 }
 
 sp<PipelineFactory> RendererFactoryOpenGL::createPipelineFactory()

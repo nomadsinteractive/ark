@@ -123,7 +123,7 @@ public:
 
     sp<PrimitiveIndexBuffer> getSharedPrimitiveIndexBuffer(const Model& model, bool degenerate);
 
-    sp<Framebuffer> makeFramebuffer(sp<Renderer> renderer, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask);
+    sp<RenderTarget> makeRenderTarget(sp<Renderer> renderer, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask);
 
     sp<RenderCommandComposer> makeDrawElementsIncremental(sp<Model> model) const;
 

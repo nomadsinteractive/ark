@@ -9,7 +9,7 @@
 
 namespace ark {
 
-class ARK_API RendererGroup : public Renderer, public Renderer::Group {
+class ARK_API RendererGroup final : public Renderer, public Renderer::Group {
 public:
     ~RendererGroup() override;
 
@@ -35,7 +35,6 @@ public:
 
 private:
     DVList<sp<Renderer>> _renderers;
-
 };
 
 }
