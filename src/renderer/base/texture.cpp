@@ -159,7 +159,7 @@ template<> ARK_API Texture::Format StringConvert::eval<Texture::Format>(const St
 template<> ARK_API Texture::Usage StringConvert::eval<Texture::Usage>(const String& str)
 {
     constexpr std::array<std::pair<const char*, Texture::Usage>, 6> usages = { {
-        {"general", Texture::USAGE_GENERAL},
+        {"general", Texture::USAGE_AUTO},
         {"depth", Texture::USAGE_DEPTH_ATTACHMENT},
         {"stencil", Texture::USAGE_DEPTH_STENCIL_ATTACHMENT},
         {"color_attachment", Texture::USAGE_COLOR_ATTACHMENT},
@@ -168,7 +168,7 @@ template<> ARK_API Texture::Usage StringConvert::eval<Texture::Usage>(const Stri
     }};
     if(str)
         return static_cast<Texture::Usage>(BitSet<Texture::Usage>::toBitSet(str, usages).bits());
-    return Texture::USAGE_GENERAL;
+    return Texture::USAGE_AUTO;
 }
 
 template<> ARK_API Texture::Feature StringConvert::eval<Texture::Feature>(const String& str)
@@ -225,7 +225,7 @@ template<> Texture::Flag StringConvert::eval<Texture::Flag>(const String& str)
 }
 
 Texture::Parameters::Parameters(Type type, const document& parameters, Format format, Texture::Feature features)
-    : _type(type), _usage(parameters ? Documents::getAttribute<Texture::Usage>(parameters, "usage", Texture::USAGE_GENERAL) : Texture::USAGE_GENERAL),
+    : _type(type), _usage(parameters ? Documents::getAttribute<Texture::Usage>(parameters, "usage", Texture::USAGE_AUTO) : Texture::USAGE_AUTO),
       _format(parameters ? Documents::getAttribute<Texture::Format>(parameters, "format", format) : format),
       _features(parameters ? Documents::getAttribute<Texture::Feature>(parameters, "feature", features) : features),
       _flags(parameters ? Documents::getAttribute<Texture::Flag>(parameters, "flags", FLAG_FOR_INPUT) : FLAG_FOR_INPUT),
@@ -273,7 +273,7 @@ sp<Texture> Texture::DICTIONARY::build(const Scope& /*args*/)
 
 Texture::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _resource_loader_context(resourceLoaderContext), _factory(factory), _manifest(manifest), _src(factory.getBuilder<String>(manifest, constants::SRC)),
-      _uploader(factory.getBuilder<Texture::Uploader>(manifest, "uploader")), _upload_strategy(Documents::getAttributeEnumCombo(manifest, "upload-strategy", RenderController::US_ONCE_AND_ON_SURFACE_READY))
+      _uploader(factory.getBuilder<Texture::Uploader>(manifest, "uploader")), _upload_strategy(Documents::getAttribute<RenderController::UploadStrategy>(manifest, "upload-strategy", {RenderController::US_ONCE_AND_ON_SURFACE_READY}).bits())
 {
 }
 
@@ -289,7 +289,7 @@ sp<Texture> Texture::BUILDER::build(const Scope& args)
     const sp<Size> size = _factory.ensureConcreteClassBuilder<Size>(_manifest, constants::SIZE)->build(args);
     CHECK(size->widthAsFloat() != 0 && size->heightAsFloat() != 0, "Cannot build texture from \"%s\"", Documents::toString(_manifest).c_str());
     sp<Uploader> uploader = _uploader->build(args);
-    return _resource_loader_context->renderController()->createTexture(size, parameters, uploader ? std::move(uploader) : sp<Uploader>::make<UploaderClear>(size, parameters->_format), static_cast<RenderController::UploadStrategy>(_upload_strategy));
+    return _resource_loader_context->renderController()->createTexture(size, parameters, uploader ? std::move(uploader) : sp<Uploader>::make<UploaderClear>(size, parameters->_format), _upload_strategy);
 }
 
 Texture::UploaderBitmap::UploaderBitmap(sp<Bitmap> bitmap)

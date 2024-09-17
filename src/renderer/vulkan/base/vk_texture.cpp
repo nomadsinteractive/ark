@@ -23,7 +23,7 @@ VkImageLayout getFinalImageLayout(const Texture::Parameters& parameters)
 {
     switch(parameters._usage)
     {
-        case Texture::USAGE_GENERAL:
+        case Texture::USAGE_AUTO:
             break;
         case Texture::USAGE_DEPTH_ATTACHMENT:
             return VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;

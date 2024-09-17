@@ -14,6 +14,7 @@ namespace ark {
 
 class Skybox : public Renderer {
 public:
+    [[deprecated]]
     Skybox(const sp<Size>& size, const sp<Shader>& shader, const sp<Texture>& texture, RenderController& renderController);
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;

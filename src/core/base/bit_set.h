@@ -27,6 +27,9 @@ public:
     bool operator !=(T other) const {
         return _bits != toConvertableType(other);
     }
+    BitSet operator |(T other) const {
+        return BitSet(_bits | other);
+    }
 
     convertable_type bits() const {
         return _bits;

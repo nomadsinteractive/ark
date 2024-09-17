@@ -174,7 +174,7 @@ struct GLPipeline::Stub {
         const Texture::Format textureFormat = texture.parameters()->_format;
         const uint32_t channelSize = RenderUtil::getChannelSize(textureFormat);
         const uint32_t componentSize = RenderUtil::getComponentSize(textureFormat);
-        const GLenum format = GLUtil::getTextureInternalFormat(Texture::USAGE_GENERAL, texture.parameters()->_format, channelSize, componentSize);
+        const GLenum format = GLUtil::getTextureInternalFormat(Texture::USAGE_AUTO, texture.parameters()->_format, channelSize, componentSize);
         uImage.setUniform1i(static_cast<GLint>(name));
         glBindImageTexture(name, static_cast<GLuint>(texture.delegate()->id()), 0, GL_FALSE, 0, GL_READ_WRITE, format);
     }

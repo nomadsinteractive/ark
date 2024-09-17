@@ -212,12 +212,12 @@ void RenderController::prepare(GraphicsContext& graphicsContext, LFQueue<Uploadi
             if(front._strategy == RenderController::US_RELOAD && front._resource.id() != 0)
                 front._resource.recycle(graphicsContext);
 
-            if((front._strategy & US_ONCE) || front._strategy == US_RELOAD)
+            if((front._strategy.has(US_ONCE)) || front._strategy == US_RELOAD)
                 front._resource.upload(graphicsContext);
 
-            if(front._strategy & RenderController::US_ON_EVERY_FRAME)
+            if(front._strategy.has(US_ON_EVERY_FRAME))
                 _on_every_frame.append(front._priority, std::move(front._resource));
-            else if(front._strategy & RenderController::US_ON_SURFACE_READY)
+            else if(front._strategy.has(US_ON_SURFACE_READY))
                 _on_surface_ready.append(front._priority, std::move(front._resource));
         }
     }
@@ -239,7 +239,7 @@ void RenderController::onDrawFrame(GraphicsContext& graphicsContext)
 
 void RenderController::upload(sp<Resource> resource, UploadStrategy strategy, sp<Updatable> updatable, sp<Future> future, UploadPriority priority)
 {
-    if(strategy & US_ON_CHANGE)
+    if(strategy.has(US_ON_CHANGE))
     {
         CHECK(updatable, "An updatable must be specified using \"on_change\" upload strategy");
         sp<Boolean> disposed = future ? future->canceled() : sp<Boolean>::make<BooleanByWeakRef<Resource>>(resource, 1);
@@ -256,7 +256,7 @@ void RenderController::uploadBuffer(Buffer& buffer, sp<Uploader> uploader, Rende
         future = sp<Future>::make(sp<BooleanByWeakRef<Buffer::Delegate>>::make(buffer.delegate(), 1));
     buffer.delegate()->setSize(uploader->size());
     Uploader& uploaderInstance = *uploader;
-    sp<Updatable> updatable = strategy & US_ON_CHANGE ? sp<Updatable>::make<BufferUpdatable>(*this, std::move(uploader), buffer.delegate()) : nullptr;
+    sp<Updatable> updatable = strategy.has(US_ON_CHANGE) ? sp<Updatable>::make<BufferUpdatable>(*this, std::move(uploader), buffer.delegate()) : nullptr;
     //TODO: make this mess a bit more cleaner
     if(strategy == US_ON_CHANGE)
         upload(nullptr, strategy, std::move(updatable), std::move(future), priority);
@@ -307,7 +307,7 @@ Buffer RenderController::makeBuffer(Buffer::Type type, Buffer::Usage usage, sp<U
 {
     UploadStrategy us = uploader ? US_ONCE_AND_ON_SURFACE_READY : US_ON_SURFACE_READY;
     if(usage.has(Buffer::USAGE_BIT_DYNAMIC) && uploader)
-        us = static_cast<UploadStrategy>(us | US_ON_CHANGE);
+        us = us | US_ON_CHANGE;
     return makeBuffer(type, usage, std::move(uploader), us);
 }
 
@@ -479,13 +479,16 @@ void RenderController::RenderResourceList::foreach(GraphicsContext& graphicsCont
         }
 }
 
-template<> void EnumMap<RenderController::UploadStrategy>::initialize(std::map<String, RenderController::UploadStrategy>& enums)
+template<> ARK_API RenderController::UploadStrategy StringConvert::eval<RenderController::UploadStrategy>(const String& str)
 {
-    enums["reload"] = RenderController::US_RELOAD;
-    enums["once"] = RenderController::US_ONCE;
-    enums["on_surface_ready"] = RenderController::US_ON_SURFACE_READY;
-    enums["on_change"] = RenderController::US_ON_CHANGE;
-    enums["on_every_frame"] = RenderController::US_ON_EVERY_FRAME;
+    constexpr std::array<std::pair<const char*, RenderController::UploadStrategyBit>, 5> uploadStrategies = {{
+        {"reload", RenderController::US_RELOAD},
+        {"once", RenderController::US_ONCE},
+        {"on_surface_ready", RenderController::US_ON_SURFACE_READY},
+        {"on_change", RenderController::US_ON_CHANGE},
+        {"on_every_frame", RenderController::US_ON_EVERY_FRAME}
+    }};
+    return RenderController::UploadStrategy::toBitSet(str, uploadStrategies);
 }
 
 }

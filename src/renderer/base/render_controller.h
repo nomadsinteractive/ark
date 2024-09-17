@@ -5,6 +5,7 @@
 #include "core/ark.h"
 #include "core/forwarding.h"
 #include "core/base/api.h"
+#include "core/base/bit_set.h"
 #include "core/collection/list.h"
 #include "core/concurrent/lf_queue.h"
 #include "core/inf/runnable.h"
@@ -26,7 +27,7 @@ namespace ark {
 class ARK_API RenderController {
 public:
 //  [[script::bindings::enumeration]]
-    enum UploadStrategy {
+    enum UploadStrategyBit {
         US_RELOAD = 0,
         US_ONCE = 1,
         US_ON_SURFACE_READY = 2,
@@ -34,6 +35,8 @@ public:
         US_ON_CHANGE = 4,
         US_ON_EVERY_FRAME = 8
     };
+
+    typedef BitSet<UploadStrategyBit> UploadStrategy;
 
 //  [[script::bindings::enumeration]]
     enum UploadPriority {

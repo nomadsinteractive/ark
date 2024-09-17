@@ -387,10 +387,10 @@ void PipelineBuildingContext::loadPredefinedUniform(BeanFactory& factory, const 
         const builder<Uploader> builder = factory.findBuilderByTypeValue<Uploader>(type, value);
         sp<Uploader> input = builder ? builder->build(args) : factory.ensure<Uploader>(value, args);
         const uint32_t size = static_cast<uint32_t>(input->size());
-        Uniform::Type uType = Uniform::toType(type);
-        uint32_t componentSize = uType != Uniform::TYPE_STRUCT ? Uniform::getComponentSize(uType) : size;
+        const Uniform::Type uType = Uniform::toType(type);
+        const uint32_t componentSize = uType != Uniform::TYPE_STRUCT ? Uniform::getComponentSize(uType) : size;
         CHECK(componentSize, "Unknow type \"%s\"", type.c_str());
-        addUniform(name, uType, size / componentSize, uType == Uniform::TYPE_F3 ? sp<Uploader>::make<AlignedInput>(input, 16) : input);
+        addUniform(name, uType, size / componentSize, uType == Uniform::TYPE_F3 ? sp<Uploader>::make<AlignedInput>(std::move(input), 16) : std::move(input));
     }
 }
 
@@ -446,7 +446,7 @@ void PipelineBuildingContext::loadLayoutBindings(BeanFactory& factory, const Sco
         {
             FATAL("LAYOUT_BINDING_TYPE_AUTO Unimplemented");
         }
-        const Texture::Usage usage = Documents::getAttribute(i, "usage", Texture::USAGE_GENERAL);
+        const Texture::Usage usage = Documents::getAttribute(i, "usage", Texture::USAGE_AUTO);
         _layout_bindings.push_back({type, factory.ensure<Texture>(i, args), usage, std::move(name), binding});
     }
 }

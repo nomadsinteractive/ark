@@ -33,7 +33,7 @@ public:
     };
 
     enum Usage {
-        USAGE_GENERAL = 0,
+        USAGE_AUTO = 0,
         USAGE_DEPTH_ATTACHMENT = 1,
         USAGE_STENCIL_ATTACHMENT = 2,
         USAGE_DEPTH_STENCIL_ATTACHMENT = 3,

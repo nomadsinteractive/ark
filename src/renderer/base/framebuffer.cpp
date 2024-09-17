@@ -27,7 +27,7 @@ const sp<Resource>& Framebuffer::resource() const
 
 Framebuffer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _render_controller(resourceLoaderContext->renderController()), _renderer(factory.ensureBuilder<Renderer>(manifest, constants::DELEGATE)),
-      _clear_mask(Documents::getAttribute<Framebuffer::ClearMaskBitSet>(manifest, "clear-mask", Framebuffer::CLEAR_MASK_ALL))
+      _clear_mask(Documents::getAttribute<Framebuffer::ClearMask>(manifest, "clear-mask", Framebuffer::CLEAR_MASK_ALL))
 {
     for(const document& i : manifest->children(constants::TEXTURE))
         _textures.emplace_back(factory.ensureBuilder<Texture>(i), i);
@@ -41,8 +41,7 @@ sp<Framebuffer> Framebuffer::BUILDER::build(const Scope& args)
     sp<Texture> depthStencilAttachments;
     for(const auto& [i, j] : _textures)
     {
-        sp<Texture> tex = i->build(args);
-        if(tex->usage() == Texture::USAGE_GENERAL)
+        if(sp<Texture> tex = i->build(args); tex->usage() == Texture::USAGE_AUTO)
             colorAttachments.push_back(std::move(tex));
         else
         {
@@ -74,16 +73,16 @@ sp<Renderer> Framebuffer::RENDERER_BUILDER::build(const Scope& args)
     return _framebuffer->build(args);
 }
 
-template<> ARK_API Framebuffer::ClearMaskBitSet StringConvert::eval<Framebuffer::ClearMaskBitSet>(const String& str)
+template<> ARK_API Framebuffer::ClearMask StringConvert::eval<Framebuffer::ClearMask>(const String& str)
 {
-    constexpr std::array<std::pair<const char*, Framebuffer::ClearMask>, 5> clearMasks = {{
+    constexpr std::array<std::pair<const char*, Framebuffer::ClearMaskBits>, 5> clearMasks = {{
             {"none", Framebuffer::CLEAR_MASK_NONE},
             {"color", Framebuffer::CLEAR_MASK_COLOR},
             {"depth", Framebuffer::CLEAR_MASK_DEPTH},
             {"stencil", Framebuffer::CLEAR_MASK_COLOR},
             {"all", Framebuffer::CLEAR_MASK_ALL}
         }};
-    return Framebuffer::ClearMaskBitSet::toBitSet(str, clearMasks);
+    return Framebuffer::ClearMask::toBitSet(str, clearMasks);
 }
 
 }

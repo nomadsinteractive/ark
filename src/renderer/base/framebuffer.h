@@ -15,7 +15,7 @@ namespace ark {
 
 class Framebuffer final : public Renderer {
 public:
-    enum ClearMask {
+    enum ClearMaskBits {
         CLEAR_MASK_NONE = 0,
         CLEAR_MASK_COLOR = 1,
         CLEAR_MASK_DEPTH = 2,
@@ -24,7 +24,7 @@ public:
         CLEAR_MASK_ALL = 7
     };
 
-    typedef BitSet<ClearMask> ClearMaskBitSet;
+    typedef BitSet<ClearMaskBits> ClearMask;
 
     Framebuffer(sp<Renderer> renderer, sp<Resource> delegate);
 
@@ -43,7 +43,7 @@ public:
         sp<RenderController> _render_controller;
         sp<Builder<Renderer>> _renderer;
         std::vector<std::pair<sp<Builder<Texture>>, document>> _textures;
-        ClearMaskBitSet _clear_mask;
+        ClearMask _clear_mask;
     };
 
 //  [[plugin::resource-loader("offscreen")]]

@@ -45,7 +45,7 @@ namespace {
 
     switch(usage & Texture::USAGE_DEPTH_STENCIL_ATTACHMENT)
     {
-    case Texture::USAGE_GENERAL: {
+    case Texture::USAGE_AUTO: {
         const bool isSigned = format & Texture::FORMAT_SIGNED;
         const uint32_t cs = channelSize - 1;
 

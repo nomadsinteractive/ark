@@ -71,11 +71,6 @@ public:
         return enums->ensureEnum(str);
     }
 
-    template<typename T> static T toEnumCombo(const String& str) {
-        Global<EnumMap<T>> enums;
-        return enums->toEnumCombo(str);
-    }
-
     template<typename T> static T eval(const String& str) {
         return StringConvert::eval<T>(str);
     }

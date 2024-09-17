@@ -207,7 +207,7 @@ VkStencilOp VKUtil::toStencilOp(PipelineDescriptor::StencilFunc func)
 VkImageUsageFlags VKUtil::toTextureUsage(Texture::Usage usage)
 {
     VkImageUsageFlags vkFlags = 0;
-    if(usage == Texture::USAGE_GENERAL)
+    if(usage == Texture::USAGE_AUTO)
         vkFlags |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
     if(usage & Texture::USAGE_DEPTH_STENCIL_ATTACHMENT)
         vkFlags |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
@@ -217,7 +217,7 @@ VkImageUsageFlags VKUtil::toTextureUsage(Texture::Usage usage)
 VkImageAspectFlags VKUtil::toTextureAspect(Texture::Usage usage)
 {
     VkImageAspectFlags vkFlags = 0;
-    if(usage == Texture::USAGE_GENERAL)
+    if(usage == Texture::USAGE_AUTO)
         vkFlags = VK_IMAGE_ASPECT_COLOR_BIT;
     if(usage & Texture::USAGE_DEPTH_ATTACHMENT)
         vkFlags |= VK_IMAGE_ASPECT_DEPTH_BIT;
