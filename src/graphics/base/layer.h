@@ -52,7 +52,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Layer> build(const Scope& args) override;
+        sp<Layer> build(const Scope& args) override;
 
     private:
         Layer::Type _type;

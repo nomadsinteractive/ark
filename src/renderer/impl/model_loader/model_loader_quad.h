@@ -6,7 +6,7 @@
 
 namespace ark {
 
-class ModelLoaderQuad : public ModelLoader {
+class ModelLoaderQuad final : public ModelLoader {
 public:
     ModelLoaderQuad(sp<Atlas> atlas);
 
@@ -22,7 +22,6 @@ public:
 
     private:
         sp<Builder<Atlas>> _atlas;
-
     };
 
 private:

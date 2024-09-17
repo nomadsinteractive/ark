@@ -33,6 +33,7 @@
 #include "app/inf/application_controller.h"
 
 #include "platform/platform.h"
+#include "renderer/inf/renderer_factory.h"
 
 #ifdef ARK_PLATFORM_DARWIN
 struct SDL_VideoDevice;
@@ -290,6 +291,13 @@ private:
 
 };
 
+V2 toFragCoordXY(const V2& xy, Ark::RendererCoordinateSystem rcs, float surfaceHeight)
+{
+    if(rcs == Ark::COORDINATE_SYSTEM_RHS)
+        return {xy.x(), surfaceHeight - xy.y()};
+    return xy;
+}
+
 }
 
 SDLApplication::SDLApplication(sp<ApplicationDelegate> applicationDelegate, sp<ApplicationContext> applicationContext, uint32_t width, uint32_t height, const ApplicationManifest& manifest)
@@ -420,6 +428,7 @@ uint32_t SDLApplication::toSDLWindowFlag(const sp<ApplicationContext>& applicati
 
 void SDLApplication::pollEvents(uint64_t timestamp)
 {
+    const Ark::RendererCoordinateSystem rcs = _application_context->renderController()->renderEngine()->rendererFactory()->features()._default_coordinate_system;
     SDL_Event event;
     while(SDL_PollEvent(&event))
     {
@@ -433,7 +442,7 @@ void SDLApplication::pollEvents(uint64_t timestamp)
             {
                 const V2 rawPosition(static_cast<float>(event.button.x), static_cast<float>(event.button.y));
                 const Event::Button which = static_cast<Event::Button>(Event::BUTTON_MOUSE_LEFT + event.button.button - SDL_BUTTON_LEFT);
-                Event::ButtonInfo bi{toViewportPosition(rawPosition), rawPosition, which};
+                Event::ButtonInfo bi{toViewportPosition(rawPosition), toFragCoordXY(rawPosition, rcs, _surface_size->heightAsFloat()), which};
                 Event e(event.type == SDL_MOUSEBUTTONDOWN ? Event::ACTION_DOWN : Event::ACTION_UP, timestamp, bi);
                 onEvent(e);
                 break;
@@ -442,7 +451,7 @@ void SDLApplication::pollEvents(uint64_t timestamp)
             {
                 const V2 rawPosition(static_cast<float>(event.motion.x), static_cast<float>(event.motion.y));
                 const Event::Button which = static_cast<Event::Button>(Event::BUTTON_MOUSE_LEFT + event.button.button - SDL_BUTTON_LEFT);
-                Event::MotionInfo mi{toViewportPosition(rawPosition), rawPosition, which, event.motion.state};
+                Event::MotionInfo mi{toViewportPosition(rawPosition), toFragCoordXY(rawPosition, rcs, _surface_size->heightAsFloat()), which, event.motion.state};
                 Event e(Event::ACTION_MOVE, timestamp, mi);
                 onEvent(e);
                 break;

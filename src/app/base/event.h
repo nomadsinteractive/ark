@@ -147,13 +147,13 @@ public:
 
     struct ButtonInfo {
         V2 _xy;
-        V2 _xy_raw;
+        V2 _xy_frag_coord;
         Button _which;
     };
 
     struct MotionInfo {
         V2 _xy;
-        V2 _xy_raw;
+        V2 _xy_frag_coord;
         Button _which;
         uint32_t _states;
     };
@@ -185,7 +185,7 @@ public:
 //  [[script::bindings::property]]
     V2 xy() const;
 //  [[script::bindings::property]]
-    V2 xyRaw() const;
+    V2 xyFragCoord() const;
 
 //  [[script::bindings::property]]
     uint64_t timestamp() const;

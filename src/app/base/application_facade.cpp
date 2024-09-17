@@ -57,9 +57,9 @@ sp<Vec2> ApplicationFacade::cursorPosition() const
     return _context->cursorPosition();
 }
 
-sp<Vec2> ApplicationFacade::cursorPositionRaw() const
+sp<Vec2> ApplicationFacade::cursorFragCoord() const
 {
-    return _context->cursorPositionRaw();
+    return _context->cursorFragCoord();
 }
 
 const sp<Size>& ApplicationFacade::surfaceSize() const

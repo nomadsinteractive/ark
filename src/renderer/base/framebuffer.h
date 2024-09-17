@@ -2,6 +2,7 @@
 
 #include <vector>
 
+#include "core/base/bit_set.h"
 #include "core/inf/builder.h"
 #include "core/types/shared_ptr.h"
 
@@ -23,32 +24,34 @@ public:
         CLEAR_MASK_ALL = 7
     };
 
+    typedef BitSet<ClearMask> ClearMaskBitSet;
+
     Framebuffer(sp<Renderer> renderer, sp<Resource> delegate);
 
-    virtual void render(RenderRequest& renderRequest, const V3& position) override;
+    void render(RenderRequest& renderRequest, const V3& position) override;
 
     const sp<Resource>& resource() const;
 
 //  [[plugin::resource-loader]]
-    class BUILDER : public Builder<Framebuffer> {
+    class BUILDER final : public Builder<Framebuffer> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<Framebuffer> build(const Scope& args) override;
+        sp<Framebuffer> build(const Scope& args) override;
 
     private:
         sp<RenderController> _render_controller;
         sp<Builder<Renderer>> _renderer;
         std::vector<std::pair<sp<Builder<Texture>>, document>> _textures;
-        ClearMask _clear_mask;
+        ClearMaskBitSet _clear_mask;
     };
 
 //  [[plugin::resource-loader("offscreen")]]
-    class RENDERER_BUILDER : public Builder<Renderer> {
+    class RENDERER_BUILDER final : public Builder<Renderer> {
     public:
         RENDERER_BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<Renderer> build(const Scope& args) override;
+        sp<Renderer> build(const Scope& args) override;
 
     private:
         sp<RenderController> _render_controller;

@@ -29,8 +29,6 @@ public:
         virtual sp<Renderer> build(const Scope& args) override;
 
     private:
-        document _manifest;
-
         sp<ResourceLoaderContext> _resource_loader_context;
 
         sp<Builder<Size>> _size;

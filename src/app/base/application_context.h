@@ -45,7 +45,7 @@ public:
     const sp<Clock>& appClock() const;
     const sp<Numeric::Impl>& appClockInterval() const;
     const sp<Vec2Impl>& cursorPosition() const;
-    const sp<Vec2Impl>& cursorPositionRaw() const;
+    const sp<Vec2Impl>& cursorFragCoord() const;
 
     bool onEvent(const Event& event);
 
@@ -102,7 +102,7 @@ private:
     std::vector<String> _argv;
     sp<Ticker> _ticker;
     sp<Vec2Impl> _cursor_position;
-    sp<Vec2Impl> _cursor_position_raw;
+    sp<Vec2Impl> _cursor_frag_coord;
 
     sp<ApplicationBundle> _application_bundle;
     sp<RenderEngine> _render_engine;

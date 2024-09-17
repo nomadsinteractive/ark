@@ -16,8 +16,7 @@ sp<RenderCommandComposer> ModelLoaderCached::makeRenderCommandComposer(const Sha
 
 sp<Model> ModelLoaderCached::loadModel(int32_t type)
 {
-    const auto iter = _cached_models.find(type);
-    if(!(iter == _cached_models.end() || iter->second->isDiscarded()))
+    if(const auto iter = _cached_models.find(type); !(iter == _cached_models.end() || iter->second->isDiscarded()))
         return iter->second;
 
     sp<Model>& model = _cached_models[type];

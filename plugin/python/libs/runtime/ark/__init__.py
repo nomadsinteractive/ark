@@ -522,7 +522,7 @@ class ApplicationFacade:
         return Vec2(0, 0)
 
     @property
-    def cursor_position_raw(self) -> 'Vec2':
+    def cursor_frag_coord(self) -> 'Vec2':
         return Vec2(0, 0)
 
     @property

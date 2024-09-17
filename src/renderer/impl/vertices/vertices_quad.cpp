@@ -5,7 +5,7 @@
 namespace ark {
 
 VerticesQuad::VerticesQuad()
-    : Vertices(4)
+    : Vertices(4), _bounds(-0.5f, -0.5f, 0.5f, 0.5f), _ux(0), _uy(0), _vx(std::numeric_limits<uint16_t>::max()), _vy(std::numeric_limits<uint16_t>::max())
 {
 }
 
