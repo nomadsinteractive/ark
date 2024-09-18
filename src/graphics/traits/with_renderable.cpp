@@ -34,6 +34,7 @@ void WithRenderable::onWire(const WiringContext& context)
     {
         sp<Renderable> r = renderObject ? renderObject.cast<Renderable>() : renderable;
         const sp<Node> node = model && transformNode ? model->findNode(transformNode) : nullptr;
+        CHECK(!transformNode || node, "Transform node \"%s\" doesn't exist", transformNode.c_str());
         if(withTransform)
             r = sp<Renderable>::make<RenderableWithTransform>(std::move(r), node ? Mat4Type::matmul(withTransform->transform(), node->transform()) : withTransform->transform());
         else if(node)
