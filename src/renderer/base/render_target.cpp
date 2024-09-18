@@ -25,7 +25,7 @@ const sp<Resource>& RenderTarget::resource() const
 }
 
 RenderTarget::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _render_controller(resourceLoaderContext->renderController()), _renderer(factory.ensureBuilder<Renderer>(manifest, constants::DELEGATE)),
+    : _render_controller(resourceLoaderContext->renderController()), _renderer(factory.ensureBuilder<RendererPhrase>(manifest)),
       _clear_mask(Documents::getAttribute<RenderTarget::ClearMask>(manifest, "clear-mask", CLEAR_MASK_ALL))
 {
     for(const document& i : manifest->children(constants::TEXTURE))

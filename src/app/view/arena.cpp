@@ -16,8 +16,8 @@
 
 namespace ark {
 
-Arena::Arena(sp<View> view, sp<ResourceLoader> resourceLoader)
-    : _view(std::move(view)), _resource_loader(std::move(resourceLoader)), _event_listeners(new EventListenerList())
+Arena::Arena(sp<View> view, sp<RendererPhrase> renderGroup, sp<ResourceLoader> resourceLoader)
+    : _view(std::move(view)), _render_group(std::move(renderGroup)), _resource_loader(std::move(resourceLoader)), _event_listeners(new EventListenerList())
 {
     _view->markAsTopView();
 }
@@ -29,13 +29,13 @@ Arena::~Arena()
 
 void Arena::addRenderer(sp<Renderer> renderer, const Traits& traits)
 {
-    _renderer_phrase.addRenderer(std::move(renderer), traits);
+    _render_group->addRenderer(std::move(renderer), traits);
 }
 
 void Arena::render(RenderRequest& renderRequest, const V3& position)
 {
     ASSERT(_view);
-    _renderer_phrase.render(renderRequest, position);
+    _render_group->render(renderRequest, position);
 }
 
 bool Arena::onEvent(const Event& event)
@@ -101,14 +101,9 @@ void Arena::pushEventListener(sp<EventListener> eventListener, sp<Boolean> disca
     _event_listeners->pushEventListener(std::move(eventListener), std::move(discarded));
 }
 
-void Arena::addLayer(sp<Renderer> layer, sp<Boolean> discarded)
-{
-    _renderer_phrase.add(RendererType::PHRASE_TEXT, std::move(layer), discarded ? std::move(discarded) : layer.tryCast<Expendable>().cast<Boolean>());
-}
-
 void Arena::addRenderLayer(sp<Renderer> renderLayer, sp<Boolean> discarded)
 {
-    _renderer_phrase.add(RendererType::PHRASE_RENDER_LAYER, std::move(renderLayer), discarded ? std::move(discarded) : renderLayer.tryCast<Expendable>().cast<Boolean>());
+    _render_group->add(RendererType::PHRASE_RENDER_LAYER, std::move(renderLayer), discarded ? std::move(discarded) : renderLayer.tryCast<Expendable>().cast<Boolean>());
 }
 
 void Arena::setView(sp<View> view)
@@ -137,22 +132,22 @@ sp<Arena> Arena::BUILDER::build(const Scope& args)
     sp<ResourceLoader> r1 = _resource_loader->build(args);
     sp<ResourceLoader> resourceLoader = r1 ? std::move(r1) : sp<ResourceLoader>::make(_factory);
     BeanFactory& factory = resourceLoader->beanFactory();
-    sp<Arena> arena = sp<Arena>::make(_root_view->build(args), std::move(resourceLoader));
+    sp<Arena> arena = sp<Arena>::make(_root_view->build(args), factory.ensure<RendererPhrase>(_manifest, args) ,std::move(resourceLoader));
 
     for(const document& i : _manifest->children())
     {
         const String& name = i->name();
         if(name == constants::EVENT_LISTENER)
             arena->addEventListener(factory.ensure<EventListener>(i, args));
-        else if(name == constants::RENDER_LAYER)
-            arena->addRenderLayer(factory.ensure<RenderLayer>(i, args));
+        // else if(name == constants::RENDER_LAYER)
+        //     arena->addRenderLayer(factory.ensure<RenderLayer>(i, args));
         else if(name == constants::VIEW)
             arena->addView(factory.ensure<View>(i, args));
-        else if(name != "root-view")
-        {
-            CHECK_WARN(name == constants::RENDERER || name == constants::RENDER_TARGET, "['renderer', 'render-layer', 'render-target'] expected, \"%s\" found", name.c_str());
-            arena->addRenderer(factory.ensure<Renderer>(i, args), Traits());
-        }
+        // else if(name != "root-view")
+        // {
+        //     CHECK_WARN(name == constants::RENDERER || name == constants::RENDER_TARGET, "['renderer', 'render-layer', 'render-target'] expected, \"%s\" found", name.c_str());
+        //     arena->addRenderer(factory.ensure<Renderer>(i, args), Traits());
+        // }
     }
     return arena;
 }

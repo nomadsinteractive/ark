@@ -18,7 +18,7 @@ namespace ark {
 
 class ARK_API Arena final : public EventListener, public Renderer, public Renderer::Group {
 public:
-    Arena(sp<View> view, sp<ResourceLoader> resourceLoader);
+    Arena(sp<View> view, sp<RendererPhrase> renderGroup, sp<ResourceLoader> resourceLoader);
     ~Arena() override;
 
 //  [[script::bindings::auto]]
@@ -59,9 +59,6 @@ public:
     void addEventListener(sp<EventListener> eventListener, sp<Boolean> discarded = nullptr);
 //  [[script::bindings::auto]]
     void pushEventListener(sp<EventListener> eventListener, sp<Boolean> discarded = nullptr);
-    [[deprecated]]
-//  [[script::bindings::auto]]
-    void addLayer(sp<Renderer> layer, sp<Boolean> discarded = nullptr);
 //  [[script::bindings::auto]]
     void addRenderLayer(sp<Renderer> renderLayer, sp<Boolean> discarded = nullptr);
 
@@ -89,9 +86,9 @@ public:
 
 private:
     sp<View> _view;
+    sp<RendererPhrase> _render_group;
     sp<ResourceLoader> _resource_loader;
     op<EventListenerList> _event_listeners;
-    RendererPhrase _renderer_phrase;
 };
 
 }

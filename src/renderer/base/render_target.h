@@ -7,6 +7,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
+#include "graphics/impl/renderer/renderer_phrase.h"
 #include "graphics/inf/renderer.h"
 
 #include "renderer/forwarding.h"
@@ -40,7 +41,7 @@ public:
 
     private:
         sp<RenderController> _render_controller;
-        sp<Builder<Renderer>> _renderer;
+        sp<Builder<RendererPhrase>> _renderer;
         std::vector<std::pair<sp<Builder<Texture>>, document>> _textures;
         ClearMask _clear_mask;
     };

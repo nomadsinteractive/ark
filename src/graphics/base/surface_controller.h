@@ -21,8 +21,6 @@ public:
     void addRenderer(sp<Renderer> renderer, sp<Boolean> discarded = nullptr, sp<Boolean> visible = nullptr);
 // [[script::bindings::auto]]
     void addControlLayer(sp<Renderer> controller, sp<Boolean> discarded = nullptr, sp<Boolean> visible = nullptr);
-// [[script::bindings::auto]]
-    void addLayer(sp<Renderer> layer, sp<Boolean> discarded = nullptr, sp<Boolean> visible = nullptr);
 
     void requestUpdate(uint64_t timestamp);
 

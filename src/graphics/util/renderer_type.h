@@ -15,7 +15,6 @@ public:
 //  [[script::bindings::enumeration]]
     enum Phrase {
         PHRASE_DEFAULT,
-        PHRASE_TEXT,
         PHRASE_WIDGET,
         PHRASE_RENDER_LAYER,
         PHRASE_COUNT

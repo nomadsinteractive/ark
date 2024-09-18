@@ -332,10 +332,10 @@ public:
             list.push_back(ensureBuilder<T>(i));
         return list;
     }
-    template<typename T> std::vector<T> makeBuilderListObject(const document& doc, const String& nodeName) {
+    template<typename T, typename... Args> std::vector<T> makeBuilderListObject(const document& doc, const String& nodeName, Args&&... args) {
         std::vector<T> list;
         for(const document& i : doc->children(nodeName))
-            list.emplace_back(*this, i);
+            list.emplace_back(*this, i, std::forward<Args>(args)...);
         return list;
     }
 //TODO: deprecate this one, which brings chaos
