@@ -40,18 +40,20 @@ sp<RenderTarget> RenderTarget::BUILDER::build(const Scope& args)
     sp<Texture> depthStencilAttachments;
     for(const auto& [i, j] : _textures)
     {
-        if(sp<Texture> tex = i->build(args); tex->usage() == Texture::USAGE_AUTO)
+        sp<Texture> tex = i->build(args);
+        const Texture::Usage usage = tex->usage();
+        if(usage == Texture::USAGE_AUTO || usage.has(Texture::USAGE_COLOR_ATTACHMENT))
             colorAttachments.push_back(std::move(tex));
         else
         {
             CHECK(depthStencilAttachments == nullptr, "Only one depth-stencil attachment allowed");
-            CHECK(tex->usage() & Texture::USAGE_DEPTH_STENCIL_ATTACHMENT, "Unknow Texture usage: %d", tex->usage());
+            CHECK(usage.has(Texture::USAGE_DEPTH_STENCIL_ATTACHMENT), "Unknow Texture usage: %d", usage);
             if(const Texture::Flag flags = Documents::getAttribute<Texture::Flag>(j, "flags", Texture::FLAG_NONE); flags != Texture::FLAG_NONE)
             {
                 sp<Texture::Parameters> tp = sp<Texture::Parameters>::make(*tex->parameters());
                 sp<Texture> newTexture = sp<Texture>::make(*tex);
                 tp->_flags = flags;
-                CHECK_WARN(!(flags == Texture::FLAG_FOR_INPUT && (tex->usage() & Texture::USAGE_DEPTH_STENCIL_ATTACHMENT) && _clear_mask.has(RenderTarget::CLEAR_MASK_DEPTH_STENCIL)),
+                CHECK_WARN(!(flags == Texture::FLAG_FOR_INPUT && usage.has(Texture::USAGE_DEPTH_STENCIL_ATTACHMENT) && _clear_mask.has(RenderTarget::CLEAR_MASK_DEPTH_STENCIL)),
                            "Depth-stencil texture marked \"for input\" would be cleared before rendering pass");
                 newTexture->setParameters(std::move(tp));
                 tex = std::move(newTexture);

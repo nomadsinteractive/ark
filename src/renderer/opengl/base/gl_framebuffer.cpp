@@ -58,7 +58,7 @@ void GLFramebuffer::upload(GraphicsContext& graphicsContext)
 
     if(_depth_stencil_attachment)
     {
-        const uint32_t usage = _depth_stencil_attachment->parameters()->_usage & Texture::USAGE_DEPTH_STENCIL_ATTACHMENT;
+        const uint32_t usage = _depth_stencil_attachment->parameters()->_usage.bits() & Texture::USAGE_DEPTH_STENCIL_ATTACHMENT;
         DASSERT(_depth_stencil_attachment->id() != 0);
         constexpr GLenum glAttachments[] = {GL_COLOR_ATTACHMENT0, GL_DEPTH_ATTACHMENT, GL_STENCIL_ATTACHMENT, GL_DEPTH_STENCIL_ATTACHMENT};
         ASSERT(usage & Texture::USAGE_DEPTH_STENCIL_ATTACHMENT);

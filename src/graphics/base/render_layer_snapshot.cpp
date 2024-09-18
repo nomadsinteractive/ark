@@ -167,7 +167,6 @@ const Renderable::Snapshot& RenderLayerSnapshot::Element::ensureSnapshot(const R
         _snapshot._state.set(Renderable::RENDERABLE_STATE_DIRTY, true);
     _snapshot =_renderable.snapshot(_layer_context, renderRequest, _snapshot._state.stateBits());
     ASSERT(_snapshot._model);
-    _snapshot._position += _layer_context._position;
     _snapshot.applyVaryings(_layer_context._varyings);
     return _snapshot;
 }

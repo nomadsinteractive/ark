@@ -4,8 +4,8 @@
 #include "core/base/clock.h"
 #include "core/base/constants.h"
 #include "core/base/expression.h"
+#include "core/base/named_type.h"
 #include "core/impl/integer/integer_by_array.h"
-#include "core/impl/integer/name_hash_type_id.h"
 #include "core/impl/variable/at_least.h"
 #include "core/impl/variable/at_most.h"
 #include "core/impl/variable/clamp.h"
@@ -303,7 +303,7 @@ sp<Integer> IntegerType::dye(sp<Integer> self, sp<Boolean> condition, String mes
 }
 
 IntegerType::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)
-    : _value(value && value.at(0) == '#' ? sp<Builder<Integer>>::make<Prebuilt>(sp<Integer>::make<NameHashTypeId>(value.substr(1))) : Expression::Compiler<int32_t, NumericOperation<int32_t>>().compile(factory, value))
+    : _value(value && value.at(0) == '#' ? sp<Builder<Integer>>::make<Prebuilt>(sp<Integer>::make<NamedType>(value.substr(1))) : Expression::Compiler<int32_t, NumericOperation<int32_t>>().compile(factory, value))
 {
     CHECK(_value, "Numeric expression compile failed: %s", value.c_str());
 }

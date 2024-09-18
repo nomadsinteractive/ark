@@ -21,21 +21,19 @@ namespace {
 
 VkImageLayout getFinalImageLayout(const Texture::Parameters& parameters)
 {
-    switch(parameters._usage)
+    switch(parameters._usage.bits() & Texture::USAGE_ATTACHMENT)
     {
-        case Texture::USAGE_AUTO:
-            break;
         case Texture::USAGE_DEPTH_ATTACHMENT:
             return VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
         case Texture::USAGE_STENCIL_ATTACHMENT:
             return VK_IMAGE_LAYOUT_STENCIL_ATTACHMENT_OPTIMAL;
         case Texture::USAGE_DEPTH_STENCIL_ATTACHMENT:
             return VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-        case Texture::USAGE_SAMPLER:
-            return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        case Texture::USAGE_STORAGE:
-            return VK_IMAGE_LAYOUT_GENERAL;
+        default:
+            break;
     }
+    if(parameters._usage.has(Texture::USAGE_SAMPLER))
+        return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
     return VK_IMAGE_LAYOUT_GENERAL;
 }
 
@@ -139,7 +137,7 @@ void VKTexture::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap& 
     const bool isCubemap = _num_faces == 6;
 
     VkDevice logicalDevice = _renderer->vkLogicalDevice();
-    if(_parameters->_usage & Texture::USAGE_DEPTH_STENCIL_ATTACHMENT)
+    if(_parameters->_usage.has(Texture::USAGE_DEPTH_STENCIL_ATTACHMENT))
     {
         VkFormat fbDepthFormat;
         VkBool32 validDepthFormat = vks::tools::getSupportedDepthFormat(_renderer->vkPhysicalDevice(), &fbDepthFormat);
@@ -184,6 +182,7 @@ void VKTexture::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap& 
         // Set initial layout of the image to undefined
         imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         imageCreateInfo.extent = { _width, _height, 1 };
+        const Texture::Usage usage = _parameters->_usage;
         imageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
         imageCreateInfo.flags = isCubemap ? VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT : 0;
         if(!imagedata)

@@ -120,7 +120,7 @@ sp<Mat4> Mat4Type::identity()
 
 sp<Mat4> Mat4Type::freeze(const sp<Mat4>& self)
 {
-    return sp<Mat4::Const>::make(self->val());
+    return sp<Mat4>::make<Mat4::Const>(self->val());
 }
 
 sp<Mat4> Mat4Type::dye(sp<Mat4> self, sp<Boolean> condition, String message)

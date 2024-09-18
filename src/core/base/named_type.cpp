@@ -33,6 +33,16 @@ NamedType::NamedType(int32_t type)
 {
 }
 
+bool NamedType::update(uint64_t timestamp)
+{
+    return _timestamp.update(timestamp);
+}
+
+int NamedType::val()
+{
+    return _type;
+}
+
 const String& NamedType::name() const
 {
     return _name;

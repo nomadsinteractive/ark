@@ -8,11 +8,20 @@ namespace ark::plugin::dear_imgui {
 
 namespace {
 
-PipelineDescriptor::Parameters makePipelineBindingParameters() {
-    PipelineDescriptor::PipelineTraitTable traits;
-    PipelineDescriptor::TraitConfigure configure;
-    configure._cull_face_test = PipelineDescriptor::TraitCullFaceTest{false, PipelineDescriptor::FRONT_FACE_DEFAULT};
-    traits.push_back(PipelineDescriptor::TRAIT_TYPE_CULL_FACE_TEST, PipelineDescriptor::PipelineTraitMeta(PipelineDescriptor::TRAIT_TYPE_CULL_FACE_TEST, configure));
+PipelineDescriptor::Parameters makePipelineBindingParameters(const PipelineDescriptor::Parameters& defaultParams) {
+    PipelineDescriptor::PipelineTraitTable traits = defaultParams._traits;
+    if(!traits.has(PipelineDescriptor::TRAIT_TYPE_CULL_FACE_TEST))
+    {
+        PipelineDescriptor::TraitConfigure configure;
+        configure._cull_face_test = PipelineDescriptor::TraitCullFaceTest{false, PipelineDescriptor::FRONT_FACE_DEFAULT};
+        traits.push_back(PipelineDescriptor::TRAIT_TYPE_CULL_FACE_TEST, PipelineDescriptor::PipelineTraitMeta(PipelineDescriptor::TRAIT_TYPE_CULL_FACE_TEST, configure));
+    }
+    if(!traits.has(PipelineDescriptor::TRAIT_TYPE_DEPTH_TEST))
+    {
+        PipelineDescriptor::TraitConfigure configure;
+        configure._depth_test = PipelineDescriptor::TraitDepthTest{false, false, PipelineDescriptor::COMPARE_FUNC_DEFAULT};
+        traits.push_back(PipelineDescriptor::TRAIT_TYPE_DEPTH_TEST, PipelineDescriptor::PipelineTraitMeta(PipelineDescriptor::TRAIT_TYPE_DEPTH_TEST, configure));
+    }
     return {Optional<Rect>(), std::move(traits), PipelineDescriptor::FLAG_DYNAMIC_SCISSOR};
 }
 
@@ -20,7 +29,7 @@ PipelineDescriptor::Parameters makePipelineBindingParameters() {
 
 DrawCommandPool::DrawCommandPool(const Shader& shader, const sp<RenderController>& renderController, sp<Texture> texture)
     : _refcount(0), _draw_commands(sp<LFStack<sp<RendererImgui::DrawCommand>>>::make()), _render_controller(renderController),
-      _pipeline_bindings(sp<PipelineBindings>::make(Buffer(), shader.pipelineFactory(), sp<PipelineDescriptor>::make(Enum::RENDER_MODE_TRIANGLES, Enum::DRAW_PROCEDURE_DRAW_ELEMENTS, makePipelineBindingParameters(), shader.layout()), std::map<uint32_t, Buffer>{}))
+      _pipeline_bindings(sp<PipelineBindings>::make(Buffer(), shader.pipelineFactory(), sp<PipelineDescriptor>::make(Enum::RENDER_MODE_TRIANGLES, Enum::DRAW_PROCEDURE_DRAW_ELEMENTS, makePipelineBindingParameters(shader.descriptorParams()), shader.layout()), std::map<uint32_t, Buffer>{}))
 {
     _pipeline_bindings->pipelineDescriptor()->bindSampler(std::move(texture));
 }

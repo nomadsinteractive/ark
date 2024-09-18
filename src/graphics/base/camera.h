@@ -8,6 +8,7 @@
 
 #include "graphics/forwarding.h"
 #include "graphics/base/v3.h"
+#include "graphics/base/mat.h"
 
 namespace ark {
 
@@ -58,8 +59,9 @@ public:
 public:
 //  [[script::bindings::auto]]
     Camera();
-    Camera(Ark::RendererCoordinateSystem cs, sp<Delegate> delegate);
-    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Camera);
+    Camera(const Camera& other);
+    Camera(Camera&& other);
+    Camera(Ark::RendererCoordinateSystem cs, sp<Delegate> delegate, sp<Mat4> view = nullptr, sp<Mat4> projection = nullptr);
 
 //  [[script::bindings::auto]]
     void ortho(const V2& leftTop, const V2& rightBottom, const V2& clip);
@@ -105,7 +107,7 @@ public:
     void assign(const Camera& other);
     bool isYUp() const;
 
-    static sp<Camera> getDefaultCamera();
+    static sp<Camera> createDefaultCamera();
 
     struct Stub;
 

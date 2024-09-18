@@ -43,7 +43,7 @@ namespace {
         {::bgfx::TextureFormat::RGBA8, ::bgfx::TextureFormat::RGBA16, ::bgfx::TextureFormat::Unknown}
     };
 
-    switch(usage & Texture::USAGE_DEPTH_STENCIL_ATTACHMENT)
+    switch(usage.bits() & Texture::USAGE_DEPTH_STENCIL_ATTACHMENT)
     {
     case Texture::USAGE_AUTO: {
         const bool isSigned = format & Texture::FORMAT_SIGNED;

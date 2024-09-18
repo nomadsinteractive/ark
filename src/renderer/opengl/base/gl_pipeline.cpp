@@ -1,6 +1,5 @@
 #include "renderer/opengl/base/gl_pipeline.h"
 
-#include "core/inf/uploader.h"
 #include "core/types/weak_ptr.h"
 #include "core/util/log.h"
 #include "core/util/strings.h"

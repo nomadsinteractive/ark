@@ -158,7 +158,7 @@ template<> ARK_API Texture::Format StringConvert::eval<Texture::Format>(const St
 
 template<> ARK_API Texture::Usage StringConvert::eval<Texture::Usage>(const String& str)
 {
-    constexpr std::array<std::pair<const char*, Texture::Usage>, 6> usages = { {
+    constexpr std::array<std::pair<const char*, Texture::UsageBits>, 6> usages = { {
         {"general", Texture::USAGE_AUTO},
         {"depth", Texture::USAGE_DEPTH_ATTACHMENT},
         {"stencil", Texture::USAGE_DEPTH_STENCIL_ATTACHMENT},
@@ -167,8 +167,8 @@ template<> ARK_API Texture::Usage StringConvert::eval<Texture::Usage>(const Stri
         {"storage", Texture::USAGE_STORAGE}
     }};
     if(str)
-        return static_cast<Texture::Usage>(BitSet<Texture::Usage>::toBitSet(str, usages).bits());
-    return Texture::USAGE_AUTO;
+        return Texture::Usage::toBitSet(str, usages);
+    return {Texture::USAGE_AUTO};
 }
 
 template<> ARK_API Texture::Feature StringConvert::eval<Texture::Feature>(const String& str)

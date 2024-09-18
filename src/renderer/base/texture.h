@@ -3,6 +3,7 @@
 #include "core/base/api.h"
 #include "core/base/string.h"
 #include "core/base/bean_factory.h"
+#include "core/base/bit_set.h"
 #include "core/inf/builder.h"
 #include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
@@ -32,7 +33,7 @@ public:
         FORMAT_32_BIT = FORMAT_8_BIT | FORMAT_16_BIT
     };
 
-    enum Usage {
+    enum UsageBits {
         USAGE_AUTO = 0,
         USAGE_DEPTH_ATTACHMENT = 1,
         USAGE_STENCIL_ATTACHMENT = 2,
@@ -42,6 +43,7 @@ public:
         USAGE_SAMPLER = 8,
         USAGE_STORAGE = 16
     };
+    typedef BitSet<UsageBits> Usage;
 
     enum Feature {
         FEATURE_DEFAULT,

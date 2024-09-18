@@ -446,7 +446,7 @@ void PipelineBuildingContext::loadLayoutBindings(BeanFactory& factory, const Sco
         {
             FATAL("LAYOUT_BINDING_TYPE_AUTO Unimplemented");
         }
-        const Texture::Usage usage = Documents::getAttribute(i, "usage", Texture::USAGE_AUTO);
+        const Texture::Usage usage = Documents::getAttribute<Texture::Usage>(i, "usage", {Texture::USAGE_AUTO});
         _layout_bindings.push_back({type, factory.ensure<Texture>(i, args), usage, std::move(name), binding});
     }
 }

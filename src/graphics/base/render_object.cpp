@@ -2,7 +2,6 @@
 
 #include "core/base/bean_factory.h"
 #include "core/base/named_type.h"
-#include "core/impl/integer/name_hash_type_id.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/inf/variable.h"
 #include "core/util/numeric_type.h"

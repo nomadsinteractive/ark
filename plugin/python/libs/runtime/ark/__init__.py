@@ -962,6 +962,15 @@ class Integer(_Var):
         pass
 
 
+class NamedType:
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def reverse(hashid: int) -> str:
+        pass
+
+
 class Expendable(Boolean):
     def __init__(self, disposed=False):
         pass

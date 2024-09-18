@@ -21,7 +21,7 @@ public:
 //  [[script::bindings::constructor]]
     static sp<Mat4> create(sp<Mat4> other);
     static sp<Mat4> create(const V4& t, const V4& b, const V4& n, const V4& w);
-    static sp<Mat4> create(sp<Vec4> t = nullptr, sp<Vec4> b = nullptr, sp<Vec4> n = nullptr, sp<Vec4> w = nullptr);
+    static sp<Mat4> create(sp<Vec4> t, sp<Vec4> b, sp<Vec4> n, sp<Vec4> w);
 
 //  [[script::bindings::property]]
     static M4 val(const sp<Mat4>& self);

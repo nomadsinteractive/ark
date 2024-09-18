@@ -130,10 +130,6 @@ public:
 
         TraitType _type;
         TraitConfigure _configure;
-
-    private:
-        TraitStencilTestSeparate loadStencilTestSeparate(const document& manifest, bool allowDefaultFace) const;
-
     };
 
     typedef Table<TraitType, PipelineTraitMeta> PipelineTraitTable;

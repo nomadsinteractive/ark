@@ -167,10 +167,10 @@ GLenum GLUtil::getTextureInternalFormat(Texture::Usage usage, Texture::Format fo
         {GL_RGBA8_SNORM, GL_RGBA16_SNORM, GL_ZERO}
     };
 
-    switch(usage & Texture::USAGE_DEPTH_STENCIL_ATTACHMENT)
+    switch(usage.bits() & Texture::USAGE_DEPTH_STENCIL_ATTACHMENT)
     {
     case Texture::USAGE_AUTO: {
-        bool isSigned = format & Texture::FORMAT_SIGNED;
+        const bool isSigned = format & Texture::FORMAT_SIGNED;
         uint32_t cs = channelSize - 1;
 
         CHECK(componentSize == 1 || componentSize == 2 || componentSize == 4, "Illegal color component size %d", componentSize);
@@ -216,7 +216,7 @@ GLenum GLUtil::getTextureInternalFormat(Texture::Usage usage, Texture::Format fo
 
 GLenum GLUtil::getTextureFormat(Texture::Usage usage, Texture::Format format, uint8_t channels)
 {
-    switch(usage & Texture::USAGE_DEPTH_STENCIL_ATTACHMENT)
+    switch(usage.bits() & Texture::USAGE_DEPTH_STENCIL_ATTACHMENT)
     {
     case Texture::USAGE_AUTO: {
         bool isInteger = format & Texture::FORMAT_INTEGER;

@@ -26,8 +26,8 @@ public:
     }
 
     bool update(uint64_t timestamp) override {
-        bool d1 = _update_sfinae(_lv, timestamp, nullptr);
-        bool d2 = _update_sfinae(_rv, timestamp, nullptr);
+        const bool d1 = _update_sfinae(_lv, timestamp, nullptr);
+        const bool d2 = _update_sfinae(_rv, timestamp, nullptr);
         return d1 || d2;
     }
 

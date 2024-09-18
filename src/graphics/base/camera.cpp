@@ -106,8 +106,21 @@ Camera::Camera()
 {
 }
 
-Camera::Camera(Ark::RendererCoordinateSystem cs, sp<Delegate> delegate)
-    : _coordinate_system(cs), _delegate(std::move(delegate)), _view(sp<Mat4>::make<Mat4Wrapper>(M4())), _projection(sp<Mat4>::make<Mat4Wrapper>(M4())),
+Camera::Camera(const Camera& other)
+    : Camera(other._coordinate_system, other._delegate, other._view->wrapped(), other._projection->wrapped())
+{
+    _stub->_position.reset(sp<Vec3>::make<Vec3::Const>(other._stub->_position.val()));
+    _stub->_target.reset(sp<Vec3>::make<Vec3::Const>(other._stub->_target.val()));
+    _stub->_up.reset(sp<Vec3>::make<Vec3::Const>(other._stub->_up.val()));
+}
+
+Camera::Camera(Camera&& other)
+    : _coordinate_system(other._coordinate_system), _delegate(std::move(other._delegate)), _view(std::move(other._view)), _projection(std::move(other._projection)), _vp(std::move(other._vp)), _stub(std::move(other._stub))
+{
+}
+
+Camera::Camera(Ark::RendererCoordinateSystem cs, sp<Delegate> delegate, sp<Mat4> view, sp<Mat4> projection)
+    : _coordinate_system(cs), _delegate(std::move(delegate)), _view(sp<Mat4>::make<Mat4Wrapper>(view ? std::move(view) : Mat4Type::create())), _projection(sp<Mat4>::make<Mat4Wrapper>(projection ? std::move(projection) : Mat4Type::create())),
       _vp(sp<Mat4>::make<Mat4Wrapper>(Mat4Type::matmul(_projection.cast<Mat4>(), _view.cast<Mat4>()))), _stub(sp<Stub>::make())
 {
     ASSERT(_coordinate_system != Ark::COORDINATE_SYSTEM_DEFAULT);
@@ -227,11 +240,10 @@ sp<Mat4> Camera::vp() const
     return _vp;
 }
 
-sp<Camera> Camera::getDefaultCamera()
+sp<Camera> Camera::createDefaultCamera()
 {
-    const Global<Camera> camera;
-    DCHECK(camera->vp(), "Default camera has not been uninitialized");
-    return camera;
+    const Camera& defaultCamera = Global<Camera>();
+    return sp<Camera>::make(defaultCamera);
 }
 
 M4 Camera::DelegateLH_ZO::frustum(float left, float right, float bottom, float top, float clipNear, float clipFar)

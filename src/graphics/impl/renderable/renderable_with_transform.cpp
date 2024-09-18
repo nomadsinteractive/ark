@@ -17,15 +17,18 @@ public:
         return _transform->update(transform, timestamp);
     }
 
-    void snapshot(const Transform::Stub& transform, Transform::Snapshot& snapshot) const override {
+    void snapshot(const Transform::Stub& transform, Transform::Snapshot& snapshot) const override
+    {
         return _transform->snapshot(transform, snapshot);
     }
 
-    V3 transform(const Transform::Snapshot& snapshot, const V3& position) const override {
+    V3 transform(const Transform::Snapshot& snapshot, const V3& position) const override
+    {
         return MatrixUtil::transform(_matrix, _transform->transform(snapshot, position),_origin);
     }
 
-    M4 toMatrix(const Transform::Snapshot& snapshot) const override {
+    M4 toMatrix(const Transform::Snapshot& snapshot) const override
+    {
         return _matrix * _transform->toMatrix(snapshot);
     }
 

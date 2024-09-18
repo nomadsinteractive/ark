@@ -62,7 +62,7 @@ size_t PipelineInput::AttributeOffsets::stride() const
 }
 
 PipelineInput::PipelineInput(const sp<Camera>& camera)
-    : _camera(*(camera ? camera : Camera::getDefaultCamera())), _stream_layouts{{0, StreamLayout()}}
+    : _camera(*(camera ? camera : Camera::createDefaultCamera())), _stream_layouts{{0, StreamLayout()}}
 {
 }
 

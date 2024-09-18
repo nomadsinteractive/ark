@@ -279,7 +279,7 @@ RendererImgui::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, 
 sp<Renderer> RendererImgui::BUILDER::build(const Scope& args)
 {
     const Global<ImguiContext> context;
-    ImGuiIO& io = ImGui::GetIO();
+    const ImGuiIO& io = ImGui::GetIO();
 
     for(const document& i : _manifest->children("font"))
     {
@@ -293,7 +293,7 @@ sp<Renderer> RendererImgui::BUILDER::build(const Scope& args)
             const sp<Asset> asset = Ark::instance().getAsset(src);
             DCHECK(asset, "Font \"%s\" not found", src.c_str());
             const sp<Readable> readable = asset->open();
-            int32_t datasize = readable->remaining();
+            const int32_t datasize = readable->remaining();
             void* data = malloc(static_cast<size_t>(datasize));
             readable->read(data, static_cast<uint32_t>(datasize));
             strncpy(fontConfig.Name, src.c_str(), sizeof(fontConfig.Name));
@@ -305,7 +305,7 @@ sp<Renderer> RendererImgui::BUILDER::build(const Scope& args)
     int32_t width, height, bytesPerPixel;
 
     io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height, &bytesPerPixel);
-    sp<Bitmap> bitmap = sp<Bitmap>::make(width, height, bytesPerPixel * width, 4, sp<ByteArray::Borrowed>::make(reinterpret_cast<uint8_t*>(pixels), width * height * bytesPerPixel));
+    sp<Bitmap> bitmap = sp<Bitmap>::make(width, height, bytesPerPixel * width, 4, sp<ByteArray>::make<ByteArray::Borrowed>(pixels, width * height * bytesPerPixel));
     sp<Texture> texture = _resource_loader_context->renderController()->createTexture2d(std::move(bitmap));
     sp<Shader> shader = _shader->build(args);
     const Viewport& viewport = _resource_loader_context->renderController()->renderEngine()->viewport();

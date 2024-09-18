@@ -9,6 +9,26 @@
 
 namespace ark {
 
+namespace {
+
+PipelineDescriptor::TraitStencilTestSeparate loadStencilTestSeparate(const document& manifest, bool allowDefaultFace)
+{
+    PipelineDescriptor::TraitStencilTestSeparate face;
+    face._type = Documents::getAttribute<PipelineDescriptor::FrontFaceType>(manifest, "face-type", PipelineDescriptor::FRONT_FACE_TYPE_DEFAULT);
+    if(!allowDefaultFace && face._type == PipelineDescriptor::FRONT_FACE_TYPE_DEFAULT)
+        return face;
+    face._func = Documents::ensureAttribute<PipelineDescriptor::CompareFunc>(manifest, "func");
+    face._mask = Documents::getAttribute<uint32_t>(manifest, "mask", 0xff);
+    face._compare_mask = Documents::getAttribute<uint32_t>(manifest, "compare-mask", 0xff);
+    face._ref = Documents::ensureAttribute<uint32_t>(manifest, "ref");
+    face._op = Documents::getAttribute<PipelineDescriptor::StencilFunc>(manifest, "op", PipelineDescriptor::STENCIL_FUNC_KEEP);
+    face._op_dfail = Documents::getAttribute<PipelineDescriptor::StencilFunc>(manifest, "op-dfail", PipelineDescriptor::STENCIL_FUNC_KEEP);
+    face._op_dpass = Documents::getAttribute<PipelineDescriptor::StencilFunc>(manifest, "op-dpass", PipelineDescriptor::STENCIL_FUNC_KEEP);
+    return face;
+}
+
+}
+
 struct PipelineDescriptor::Stub {
     Stub(Enum::RenderMode mode, Enum::DrawProcedure renderProcedure, Parameters parameters, sp<PipelineLayout> pipelineLayout);
 
@@ -138,8 +158,8 @@ PipelineDescriptor::PipelineTraitMeta::PipelineTraitMeta(const document& manifes
     switch(_type) {
     case TRAIT_TYPE_DEPTH_TEST:
         _configure._depth_test._enabled = Documents::getAttribute<bool>(manifest, "enabled", true);
-        _configure._depth_test._write_enabled = Documents::getAttribute<bool>(manifest, "write-enabled", true);
-        _configure._depth_test._func = Documents::getAttribute<CompareFunc>(manifest, "func", PipelineDescriptor::COMPARE_FUNC_DEFAULT);
+        _configure._depth_test._write_enabled = Documents::getAttribute<bool>(manifest, "write-enabled", _configure._depth_test._enabled);
+        _configure._depth_test._func = Documents::getAttribute<CompareFunc>(manifest, "func", COMPARE_FUNC_DEFAULT);
         break;
     case TRAIT_TYPE_STENCIL_TEST: {
         TraitStencilTest& stencilTest = _configure._stencil_test;
@@ -174,22 +194,6 @@ PipelineDescriptor::PipelineTraitMeta::PipelineTraitMeta(const document& manifes
 PipelineDescriptor::PipelineTraitMeta::PipelineTraitMeta(TraitType type, const TraitConfigure& configure)
     : _type(type), _configure(configure)
 {
-}
-
-PipelineDescriptor::TraitStencilTestSeparate PipelineDescriptor::PipelineTraitMeta::loadStencilTestSeparate(const document& manifest, bool allowDefaultFace) const
-{
-    PipelineDescriptor::TraitStencilTestSeparate face;
-    face._type = Documents::getAttribute<FrontFaceType>(manifest, "face-type", FRONT_FACE_TYPE_DEFAULT);
-    if(!allowDefaultFace && face._type == FRONT_FACE_TYPE_DEFAULT)
-        return face;
-    face._func = Documents::ensureAttribute<CompareFunc>(manifest, "func");
-    face._mask = Documents::getAttribute<uint32_t>(manifest, "mask", 0xff);
-    face._compare_mask = Documents::getAttribute<uint32_t>(manifest, "compare-mask", 0xff);
-    face._ref = Documents::ensureAttribute<uint32_t>(manifest, "ref");
-    face._op = Documents::getAttribute<StencilFunc>(manifest, "op", STENCIL_FUNC_KEEP);
-    face._op_dfail = Documents::getAttribute<StencilFunc>(manifest, "op-dfail", STENCIL_FUNC_KEEP);
-    face._op_dpass = Documents::getAttribute<StencilFunc>(manifest, "op-dpass", STENCIL_FUNC_KEEP);
-    return face;
 }
 
 template<> ARK_API PipelineDescriptor::TraitType StringConvert::eval<PipelineDescriptor::TraitType>(const String& str)

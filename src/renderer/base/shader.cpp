@@ -43,7 +43,7 @@ Shader::StageManifest::StageManifest(BeanFactory& factory, const document& manif
 }
 
 Shader::Shader(sp<PipelineFactory> pipelineFactory, sp<RenderController> renderController, sp<PipelineLayout> pipelineLayout, PipelineDescriptor::Parameters bindingParams)
-    : _pipeline_factory(std::move(pipelineFactory)), _render_controller(std::move(renderController)), _pipeline_layout(std::move(pipelineLayout)), _pipeline_input(_pipeline_layout->input()), _binding_params(std::move(bindingParams))
+    : _pipeline_factory(std::move(pipelineFactory)), _render_controller(std::move(renderController)), _pipeline_layout(std::move(pipelineLayout)), _pipeline_input(_pipeline_layout->input()), _descriptor_params(std::move(bindingParams))
 {
     _pipeline_layout->initialize(*this);
 }
@@ -89,9 +89,14 @@ const sp<PipelineLayout>& Shader::layout() const
     return _pipeline_layout;
 }
 
+const PipelineDescriptor::Parameters& Shader::descriptorParams() const
+{
+    return _descriptor_params;
+}
+
 sp<PipelineBindings> Shader::makeBindings(Buffer vertices, Enum::RenderMode mode, Enum::DrawProcedure drawProcedure, const std::map<uint32_t, sp<Uploader>>& uploaders) const
 {
-    return sp<PipelineBindings>::make(std::move(vertices), _pipeline_factory, sp<PipelineDescriptor>::make(mode, drawProcedure, _binding_params, _pipeline_layout), makeDivivedBuffers(uploaders));
+    return sp<PipelineBindings>::make(std::move(vertices), _pipeline_factory, sp<PipelineDescriptor>::make(mode, drawProcedure, _descriptor_params, _pipeline_layout), makeDivivedBuffers(uploaders));
 }
 
 std::map<uint32_t, Buffer> Shader::makeDivivedBuffers(const std::map<uint32_t, sp<Uploader>>& uploaders) const
