@@ -237,7 +237,6 @@ void VKSwapChain::setupRenderPass()
 
     VkSubpassDescription subpassDescription = {};
     subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-    //TODO: Should equal to attachmentCount in vkCreateGraphicsPipelines
     subpassDescription.colorAttachmentCount = 1;
     subpassDescription.pColorAttachments = &colorReference;
     subpassDescription.pDepthStencilAttachment = &depthReference;

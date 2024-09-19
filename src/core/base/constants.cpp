@@ -1,5 +1,6 @@
 #include "core/base/constants.h"
 
+#include "app/base/application_context.h"
 #include "core/util/uploader_type.h"
 
 #include "graphics/base/boundaries.h"
@@ -11,6 +12,7 @@
 #include "renderer/impl/vertices/vertices_nine_patch_triangle_strips.h"
 #include "renderer/impl/vertices/vertices_point.h"
 #include "renderer/impl/vertices/vertices_quad.h"
+#include "renderer/inf/renderer_factory.h"
 
 namespace ark {
 
@@ -18,7 +20,12 @@ namespace {
 
 sp<Model> makeUnitQuadModel(const sp<Boundaries>& content)
 {
-    return sp<Model>::make(UploaderType::makeElementIndexInput(std::initializer_list<element_index_t>({0, 2, 1, 2, 3, 1})), sp<VerticesQuad>::make(), content);
+    const RenderEngine& renderEngine = Ark::instance().applicationContext()->renderEngine();
+    const bool isBackendLHS = renderEngine.rendererFactory()->features()._default_coordinate_system == Ark::COORDINATE_SYSTEM_LHS;
+    const Rect bounds(-0.5f, -0.5f, 0.5f, 0.5f);
+    sp<Vertices> vertices = isBackendLHS ? sp<Vertices>::make<VerticesQuad>(bounds, std::numeric_limits<uint16_t>::max(), std::numeric_limits<uint16_t>::max(), 0, 0)
+                                         : sp<Vertices>::make<VerticesQuad>(bounds, 0, 0, std::numeric_limits<uint16_t>::max(), std::numeric_limits<uint16_t>::max());
+    return sp<Model>::make(UploaderType::makeElementIndexInput(std::initializer_list<element_index_t>({0, 2, 1, 2, 3, 1})), std::move(vertices), content);
 }
 
 sp<Model> makeUnitNinePatchTriangleStripsModel(const sp<Boundaries>& content)

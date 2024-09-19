@@ -391,52 +391,15 @@ void VKPipeline::setupGraphicsPipeline(GraphicsContext& graphicsContext, const V
                 VK_FALSE);
 
     VkPipelineRasterizationStateCreateInfo rasterizationState = makeRasterizationState();
-
-    std::vector<VkPipelineColorBlendAttachmentState> blendAttachmentStates;
-    for(uint32_t i = 0; i < _pipeline_descriptor.layout()->colorAttachmentCount(); ++i)
-    {
-        VkPipelineColorBlendAttachmentState state = vks::initializers::pipelineColorBlendAttachmentState(0xf, VK_TRUE);
-        state.srcAlphaBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
-        state.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-        state.alphaBlendOp = VK_BLEND_OP_SUBTRACT;
-        state.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
-        state.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-        state.colorBlendOp = VK_BLEND_OP_ADD;
-        blendAttachmentStates.push_back(state);
-    }
-
-    CHECK_WARN(blendAttachmentStates.size() > 0, "Graphics pipeline has no color attachment");
-
-    VkPipelineColorBlendStateCreateInfo colorBlendState =
-            vks::initializers::pipelineColorBlendStateCreateInfo(
-                static_cast<uint32_t>(blendAttachmentStates.size()),
-                blendAttachmentStates.data());
-
     VkPipelineDepthStencilStateCreateInfo depthStencilState = makeDepthStencilState();
 
-    const RenderEngineContext::Resolution& displayResolution = graphicsContext.renderContext()->displayResolution();
-    const Optional<Rect>& scissor = _pipeline_descriptor.scissor();
-    const VkRect2D vkScissors = scissor ? VkRect2D({{static_cast<int32_t>(scissor->left()), static_cast<int32_t>(scissor->top())}, {static_cast<uint32_t>(scissor->width()), static_cast<uint32_t>(scissor->height())}})
-                                                      : VkRect2D({{0, 0}, {displayResolution.width, displayResolution.height}});
-    VkPipelineViewportStateCreateInfo viewportState = vks::initializers::pipelineViewportStateCreateInfo(1, 1, 0);
-    viewportState.pScissors = &vkScissors;
-    viewportState.scissorCount = 1;
-
-    VkPipelineMultisampleStateCreateInfo multisampleState =
-            vks::initializers::pipelineMultisampleStateCreateInfo(
-                VK_SAMPLE_COUNT_1_BIT,
-                0);
+    const VkPipelineMultisampleStateCreateInfo multisampleState = vks::initializers::pipelineMultisampleStateCreateInfo(VK_SAMPLE_COUNT_1_BIT, 0);
 
     std::vector<VkDynamicState> dynamicStateEnables = { VK_DYNAMIC_STATE_VIEWPORT };
 
     if(_pipeline_descriptor.hasFlag(PipelineDescriptor::FLAG_DYNAMIC_SCISSOR, PipelineDescriptor::FLAG_DYNAMIC_SCISSOR_BITMASK))
         dynamicStateEnables.push_back(VK_DYNAMIC_STATE_SCISSOR);
-
-    VkPipelineDynamicStateCreateInfo dynamicState =
-            vks::initializers::pipelineDynamicStateCreateInfo(
-                dynamicStateEnables.data(),
-                static_cast<uint32_t>(dynamicStateEnables.size()),
-                0);
+    const VkPipelineDynamicStateCreateInfo dynamicState = vks::initializers::pipelineDynamicStateCreateInfo(dynamicStateEnables.data(), static_cast<uint32_t>(dynamicStateEnables.size()), 0);
 
     std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
     for(const auto& [k, v] : _stages)
@@ -445,6 +408,34 @@ void VKPipeline::setupGraphicsPipeline(GraphicsContext& graphicsContext, const V
     const sp<VKGraphicsContext>& vkGraphicsContext = graphicsContext.attachments().ensure<VKGraphicsContext>();
     VKGraphicsContext::State& state = vkGraphicsContext->getCurrentState();
     VkGraphicsPipelineCreateInfo pipelineCreateInfo = vks::initializers::pipelineCreateInfo(_layout, state.acquireRenderPass(_pipeline_descriptor), 0);
+
+    std::vector<VkPipelineColorBlendAttachmentState> blendAttachmentStates;
+    uint32_t colorAttachmentCount = std::max<uint32_t>(_pipeline_descriptor.layout()->colorAttachmentCount(), state.renderPassPhrase()->colorAttachmentCount());
+    for(uint32_t i = 0; i < colorAttachmentCount; ++i)
+    {
+        //TODO: MRT only albedo needs blending for now, what about the others?
+        VkPipelineColorBlendAttachmentState state = vks::initializers::pipelineColorBlendAttachmentState(0xf, i == 0);
+        state.srcAlphaBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+        state.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+        state.alphaBlendOp = VK_BLEND_OP_SUBTRACT;
+        state.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+        state.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+        state.colorBlendOp = VK_BLEND_OP_ADD;
+        blendAttachmentStates.push_back(state);
+    }
+    CHECK_WARN(blendAttachmentStates.size() > 0, "Graphics pipeline has no color attachment");
+    VkPipelineColorBlendStateCreateInfo colorBlendState =
+            vks::initializers::pipelineColorBlendStateCreateInfo(
+                static_cast<uint32_t>(blendAttachmentStates.size()),
+                blendAttachmentStates.data());
+
+    VkRect2D vkScissors;
+    VkPipelineViewportStateCreateInfo viewportState = vks::initializers::pipelineViewportStateCreateInfo(1, 1, 0);
+    viewportState.pScissors = &vkScissors;
+    if(const Optional<Rect>& scissor = _pipeline_descriptor.scissor())
+        vkScissors = VkRect2D({{static_cast<int32_t>(scissor->left()), static_cast<int32_t>(scissor->top())}, {static_cast<uint32_t>(scissor->width()), static_cast<uint32_t>(scissor->height())}});
+    else
+        vkScissors = VkRect2D({{0, 0}, {state.renderPassPhrase()->resolution().width, state.renderPassPhrase()->resolution().height}});
 
     pipelineCreateInfo.pVertexInputState = &vertexLayout.inputState;
     pipelineCreateInfo.pInputAssemblyState = &inputAssemblyState;

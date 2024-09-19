@@ -42,7 +42,7 @@ public:
     private:
         sp<RenderController> _render_controller;
         sp<Builder<RendererPhrase>> _renderer;
-        std::vector<std::pair<sp<Builder<Texture>>, document>> _textures;
+        std::vector<std::pair<sp<Builder<Texture>>, document>> _attachments;
         ClearMask _clear_mask;
     };
 

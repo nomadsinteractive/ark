@@ -69,8 +69,8 @@ public:
                     sb << bitNames.at(j).first << '(' << bitNames.at(j).second << ')';
                     if(j == N - 1)
                         sb << ", ";
-                FATAL("Unknow value %s, possible values are [%s]", i.c_str(), sb.str().c_str());
                 }
+                FATAL("Unknow value %s, possible values are [%s]", i.c_str(), sb.str().c_str());
             }
             bitsets |= bitvalue;
         }

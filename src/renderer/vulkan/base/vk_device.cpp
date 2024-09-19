@@ -19,6 +19,8 @@ VKDevice::VKDevice(const sp<VKInstance>& instance, VkPhysicalDevice physicalDevi
         _vulkan_device->enabledFeatures.multiDrawIndirect = VK_TRUE;
     if(_vulkan_device->features.fragmentStoresAndAtomics)
         _vulkan_device->enabledFeatures.fragmentStoresAndAtomics = VK_TRUE;
+    if(_vulkan_device->features.independentBlend)
+        _vulkan_device->enabledFeatures.independentBlend = VK_TRUE;
 
     VKUtil::checkResult(_vulkan_device->createLogicalDevice(_vulkan_device->enabledFeatures, _enabled_extensions));
 

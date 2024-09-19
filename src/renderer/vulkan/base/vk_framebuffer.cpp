@@ -18,6 +18,17 @@
 
 namespace ark::vulkan {
 
+namespace {
+
+RenderEngineContext::Resolution getFramebufferResolution(const std::vector<sp<Texture>>& colorAttachments)
+{
+    DASSERT(colorAttachments.size() > 0);
+    const sp<Texture>& texture = colorAttachments.at(0);
+    return {static_cast<uint32_t>(texture->width()), static_cast<uint32_t>(texture->height())};
+}
+
+}
+
 VKFramebuffer::VKFramebuffer(const sp<VKRenderer>& renderer, const sp<Recycler>& recycler, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask)
     : _stub(sp<Stub>::make(renderer, recycler, std::move(colorAttachments), std::move(depthStencilAttachments), clearMask))
 {
@@ -84,11 +95,10 @@ VkRect2D VKFramebuffer::Stub::getFramebufferScissor() const
     return vks::initializers::rect2D(texture->width(), texture->height(), 0, 0);
 }
 
-VKFramebuffer::Stub::Stub(const sp<VKRenderer>& renderer, const sp<Recycler>& recycler, std::vector<sp<Texture> > colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask)
-    : _renderer(renderer), _recycler(recycler), _color_attachments(std::move(colorAttachments)), _depth_stencil_attachment(std::move(depthStencilAttachments)),
-      _depthstencil_image(VK_NULL_HANDLE), _depthstencil_memory(VK_NULL_HANDLE), _depthstencil_view(VK_NULL_HANDLE), _command_buffer(VK_NULL_HANDLE),
-      _render_pass_begin_info(vks::initializers::renderPassBeginInfo()), _scissor(getFramebufferScissor()),
-      _viewport(vks::initializers::viewport(static_cast<float>(_scissor.extent.width), static_cast<float>(_scissor.extent.height), 0, 1.0f))
+VKFramebuffer::Stub::Stub(const sp<VKRenderer>& renderer, const sp<Recycler>& recycler, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask)
+    : RenderPassPhrase(getFramebufferResolution(colorAttachments), colorAttachments.size()), _renderer(renderer), _recycler(recycler), _color_attachments(std::move(colorAttachments)), _depth_stencil_attachment(std::move(depthStencilAttachments)),
+      _depthstencil_image(VK_NULL_HANDLE), _depthstencil_memory(VK_NULL_HANDLE), _depthstencil_view(VK_NULL_HANDLE), _render_pass_begin_info(vks::initializers::renderPassBeginInfo()), _scissor(vks::initializers::rect2D(_resolution.width, _resolution.height, 0, 0)),
+      _viewport(vks::initializers::viewport(static_cast<float>(_resolution.width), static_cast<float>(_resolution.height), 0, 1.0f))
 {
     VkClearValue clearColor;
     VkClearValue clearDepthStencil;
@@ -109,11 +119,6 @@ VKFramebuffer::Stub::Stub(const sp<VKRenderer>& renderer, const sp<Recycler>& re
 void VKFramebuffer::Stub::initialize()
 {
     _command_buffer = _renderer->commandPool()->createCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, false);
-}
-
-VkCommandBuffer VKFramebuffer::Stub::vkCommandBuffer()
-{
-    return _command_buffer;
 }
 
 VkRenderPass VKFramebuffer::Stub::acquire(const PipelineDescriptor& bindings)
@@ -139,8 +144,8 @@ VkRenderPass VKFramebuffer::Stub::acquire(const PipelineDescriptor& bindings)
         colorAttachmentDescription.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
         colorAttachmentDescription.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         colorAttachmentDescription.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        colorAttachmentDescription.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        colorAttachmentDescription.finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        colorAttachmentDescription.initialLayout = VKUtil::toImageLayout(i.usage());
+        colorAttachmentDescription.finalLayout = colorAttachmentDescription.initialLayout;
         attachmentDescriptions.push_back(colorAttachmentDescription);
 
         attachmentReferences.push_back({ static_cast<uint32_t>(attachmentReferences.size()), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL });
@@ -162,8 +167,8 @@ VkRenderPass VKFramebuffer::Stub::acquire(const PipelineDescriptor& bindings)
         depthAttachmentDescription.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
         depthAttachmentDescription.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         depthAttachmentDescription.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        depthAttachmentDescription.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        depthAttachmentDescription.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        depthAttachmentDescription.initialLayout = VKUtil::toImageLayout(_depth_stencil_attachment->usage());
+        depthAttachmentDescription.finalLayout = depthAttachmentDescription.initialLayout;
         attachmentDescriptions.push_back(depthAttachmentDescription);
     }
     VkAttachmentReference depthReference = { static_cast<uint32_t>(attachmentReferences.size()), VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL };

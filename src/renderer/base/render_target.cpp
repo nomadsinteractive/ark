@@ -29,16 +29,16 @@ RenderTarget::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, c
       _clear_mask(Documents::getAttribute<RenderTarget::ClearMask>(manifest, "clear-mask", CLEAR_MASK_ALL))
 {
     for(const document& i : manifest->children(constants::TEXTURE))
-        _textures.emplace_back(factory.ensureBuilder<Texture>(i), i);
+        _attachments.emplace_back(factory.ensureBuilder<Texture>(i), i);
 
-    CHECK(_textures.size(), "No texture attachment defined in manifest: \"%s\"", Documents::toString(manifest).c_str());
+    CHECK(_attachments.size(), "No texture attachment defined in manifest: \"%s\"", Documents::toString(manifest).c_str());
 }
 
 sp<RenderTarget> RenderTarget::BUILDER::build(const Scope& args)
 {
     std::vector<sp<Texture>> colorAttachments;
     sp<Texture> depthStencilAttachments;
-    for(const auto& [i, j] : _textures)
+    for(const auto& [i, j] : _attachments)
     {
         sp<Texture> tex = i->build(args);
         const Texture::Usage usage = tex->usage();

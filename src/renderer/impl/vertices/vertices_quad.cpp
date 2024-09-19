@@ -14,6 +14,11 @@ VerticesQuad::VerticesQuad(const Atlas::Item& quad)
 {
 }
 
+VerticesQuad::VerticesQuad(const Rect& bounds, uint16_t ux, uint16_t uy, uint16_t vx, uint16_t vy)
+    : Vertices(4), _bounds(bounds), _ux(ux), _uy(uy), _vx(vx), _vy(vy)
+{
+}
+
 void VerticesQuad::write(VertexWriter& buf, const V3& size)
 {
     const float width = size.x();

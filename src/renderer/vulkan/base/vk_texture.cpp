@@ -19,24 +19,6 @@ namespace ark::vulkan {
 
 namespace {
 
-VkImageLayout getFinalImageLayout(const Texture::Parameters& parameters)
-{
-    switch(parameters._usage.bits() & Texture::USAGE_ATTACHMENT)
-    {
-        case Texture::USAGE_DEPTH_ATTACHMENT:
-            return VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
-        case Texture::USAGE_STENCIL_ATTACHMENT:
-            return VK_IMAGE_LAYOUT_STENCIL_ATTACHMENT_OPTIMAL;
-        case Texture::USAGE_DEPTH_STENCIL_ATTACHMENT:
-            return VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-        default:
-            break;
-    }
-    if(parameters._usage.has(Texture::USAGE_SAMPLER))
-        return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    return VK_IMAGE_LAYOUT_GENERAL;
-}
-
 void copyBitmap(uint8_t* buf, const Bitmap& bitmap, const bytearray& imagedata, size_t imageDataSize)
 {
     if(imagedata == nullptr)
@@ -59,6 +41,20 @@ void copyBitmap(uint8_t* buf, const Bitmap& bitmap, const bytearray& imagedata, 
             it2 += newPixelBytes;
         }
     }
+}
+
+VkImageUsageFlags toTextureUsage(Texture::Usage usage)
+{
+    VkImageUsageFlags vkFlags = usage == Texture::USAGE_AUTO ? VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT : 0;
+    if(usage.has(Texture::USAGE_COLOR_ATTACHMENT))
+        vkFlags |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+    if(usage.has(Texture::USAGE_DEPTH_STENCIL_ATTACHMENT))
+        vkFlags |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+    if(usage.has(Texture::USAGE_SAMPLER))
+        vkFlags |= VK_IMAGE_USAGE_SAMPLED_BIT;
+    if(usage.has(Texture::USAGE_STORAGE))
+        vkFlags |= VK_IMAGE_USAGE_STORAGE_BIT;
+    return vkFlags;
 }
 
 }
@@ -182,11 +178,8 @@ void VKTexture::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap& 
         // Set initial layout of the image to undefined
         imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         imageCreateInfo.extent = { _width, _height, 1 };
-        const Texture::Usage usage = _parameters->_usage;
-        imageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
+        imageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | toTextureUsage(_parameters->_usage);
         imageCreateInfo.flags = isCubemap ? VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT : 0;
-        if(!imagedata)
-            imageCreateInfo.usage |= VKUtil::toTextureUsage(_parameters->_usage);
 
         size_t imageDataSize = imagedata ? imagedata->size() : bitmap.rowBytes() * bitmap.height();
         VkImageFormatProperties ifp;
@@ -206,7 +199,7 @@ void VKTexture::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap& 
         }
         VKUtil::createImage(_renderer->device(), imageCreateInfo, &_image, &_memory);
 
-        _descriptor.imageLayout = getFinalImageLayout(*_parameters);
+        _descriptor.imageLayout = VKUtil::toImageLayout(_parameters->_usage);
         doUploadBitmap(bitmap, imageDataSize, images);
     }
 

@@ -36,7 +36,6 @@ private:
 
         void initialize();
 
-        VkCommandBuffer vkCommandBuffer() override;
         VkRenderPass acquire(const PipelineDescriptor& bindings) override;
         VkRenderPass begin(VkCommandBuffer commandBuffer) override;
 
@@ -53,7 +52,6 @@ private:
         VkDeviceMemory _depthstencil_memory;
         VkImageView _depthstencil_view;
 
-        VkCommandBuffer _command_buffer;
         VkRenderPassBeginInfo _render_pass_begin_info;
         VkRect2D _scissor;
         VkViewport _viewport;

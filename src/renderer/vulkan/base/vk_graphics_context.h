@@ -11,6 +11,7 @@
 #include "renderer/vulkan/base/vk_submit_queue.h"
 
 #include "platform/vulkan/vulkan.h"
+#include "renderer/base/render_engine_context.h"
 
 namespace ark::vulkan {
 
@@ -26,18 +27,29 @@ public:
 
     class RenderPassPhrase {
     public:
+        RenderPassPhrase(const RenderEngineContext::Resolution& resolution, uint32_t colorAttachmentCount, VkCommandBuffer commandBuffer = VK_NULL_HANDLE);
         virtual ~RenderPassPhrase() = default;
 
-        virtual VkCommandBuffer vkCommandBuffer() = 0;
+        const RenderEngineContext::Resolution& resolution() const;
+        uint32_t colorAttachmentCount() const;
+        VkCommandBuffer vkCommandBuffer() const;
+
         virtual VkRenderPass acquire(const PipelineDescriptor& bindings) = 0;
         virtual VkRenderPass begin(VkCommandBuffer commandBuffer) = 0;
+
+    protected:
+        RenderEngineContext::Resolution _resolution;
+        uint32_t _color_attachment_count;
+        VkCommandBuffer _command_buffer;
     };
 
     class State {
     public:
         State(sp<RenderPassPhrase> renderPassPhrase, VkCommandBuffer commandBuffer, bool beginCommandBuffer);
 
-        VkRenderPass acquireRenderPass(const PipelineDescriptor& bindings);
+        const sp<RenderPassPhrase>& renderPassPhrase() const;
+
+        VkRenderPass acquireRenderPass(const PipelineDescriptor& bindings) const;
         VkCommandBuffer startRecording();
 
     private:

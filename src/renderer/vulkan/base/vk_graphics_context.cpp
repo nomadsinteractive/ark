@@ -22,12 +22,8 @@ VkClearColorValue toVkClearColorValue(const V4& rgba)
 
 class MainRenderPassPhrase final : public VKGraphicsContext::RenderPassPhrase {
 public:
-    MainRenderPassPhrase(const sp<VKRenderer>& renderer, VkCommandBuffer commandBuffer, VkFramebuffer framebuffer, const Color& backgroundColor)
-        : _renderer(renderer), _command_buffer(commandBuffer), _framebuffer(framebuffer), _clear_color_value(toVkClearColorValue(backgroundColor.rgba())) {
-    }
-
-    VkCommandBuffer vkCommandBuffer() override {
-        return _command_buffer;
+    MainRenderPassPhrase(const RenderEngineContext::Resolution& resolution, const sp<VKRenderer>& renderer, VkCommandBuffer commandBuffer, VkFramebuffer framebuffer, const Color& backgroundColor)
+        : RenderPassPhrase(resolution, 1, commandBuffer), _renderer(renderer), _framebuffer(framebuffer), _clear_color_value(toVkClearColorValue(backgroundColor.rgba())) {
     }
 
     VkRenderPass acquire(const PipelineDescriptor& /*bindings*/) override {
@@ -55,7 +51,6 @@ public:
 
 private:
     sp<VKRenderer> _renderer;
-    VkCommandBuffer _command_buffer;
     VkFramebuffer _framebuffer;
     VkClearColorValue _clear_color_value;
 };
@@ -85,7 +80,7 @@ void VKGraphicsContext::begin(uint32_t imageId, const Color& backgroundColor)
     const std::vector<VkCommandBuffer>& commandBuffers = _command_buffers->vkCommandBuffers();
 
     VkCommandBuffer commandBuffer = commandBuffers.at(imageId);
-    _state_stack.push(State(sp<RenderPassPhrase>::make<MainRenderPassPhrase>(_renderer, commandBuffer, renderTarget.frameBuffers().at(imageId), backgroundColor), commandBuffer, false));
+    _state_stack.push(State(sp<RenderPassPhrase>::make<MainRenderPassPhrase>(RenderEngineContext::Resolution{_render_target->width(), _render_target->height()}, _renderer, commandBuffer, renderTarget.frameBuffers().at(imageId), backgroundColor), commandBuffer, false));
 
     constexpr VkCommandBufferBeginInfo cmdBufInfo{ VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
     VKUtil::checkResult(vkBeginCommandBuffer(commandBuffer, &cmdBufInfo));
@@ -102,6 +97,26 @@ void VKGraphicsContext::end()
 VKSubmitQueue& VKGraphicsContext::submitQueue()
 {
     return _submit_queue;
+}
+
+VKGraphicsContext::RenderPassPhrase::RenderPassPhrase(const RenderEngineContext::Resolution& resolution, uint32_t colorAttachmentCount, VkCommandBuffer commandBuffer)
+    : _resolution(resolution), _color_attachment_count(colorAttachmentCount), _command_buffer(commandBuffer)
+{
+}
+
+const RenderEngineContext::Resolution& VKGraphicsContext::RenderPassPhrase::resolution() const
+{
+    return _resolution;
+}
+
+uint32_t VKGraphicsContext::RenderPassPhrase::colorAttachmentCount() const
+{
+    return _color_attachment_count;
+}
+
+VkCommandBuffer VKGraphicsContext::RenderPassPhrase::vkCommandBuffer() const
+{
+    return _command_buffer;
 }
 
 VKGraphicsContext::State& VKGraphicsContext::getCurrentState()
@@ -150,12 +165,17 @@ VkSemaphore VKGraphicsContext::semaphorePresentComplete() const
     return _semaphore_present_complete;
 }
 
-VKGraphicsContext::State::State(sp<VKGraphicsContext::RenderPassPhrase> renderPassPhrase, VkCommandBuffer commandBuffer, bool beginCommandBuffer)
+VKGraphicsContext::State::State(sp<RenderPassPhrase> renderPassPhrase, VkCommandBuffer commandBuffer, bool beginCommandBuffer)
     : _render_pass_phrase(std::move(renderPassPhrase)), _command_buffer(commandBuffer), _begin_command_buffer(beginCommandBuffer), _render_pass(VK_NULL_HANDLE)
 {
 }
 
-VkRenderPass VKGraphicsContext::State::acquireRenderPass(const PipelineDescriptor& bindings)
+const sp<VKGraphicsContext::RenderPassPhrase>& VKGraphicsContext::State::renderPassPhrase() const
+{
+    return _render_pass_phrase;
+}
+
+VkRenderPass VKGraphicsContext::State::acquireRenderPass(const PipelineDescriptor& bindings) const
 {
     return _render_pass_phrase->acquire(bindings);
 }

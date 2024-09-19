@@ -1,12 +1,6 @@
 #include "renderer/vulkan/util/vk_util.h"
 
-#include <array>
-
-#include <glm/gtc/matrix_transform.hpp>
-
 #include "core/base/plugin_manager.h"
-#include "core/inf/variable.h"
-#include "core/types/global.h"
 #include "core/util/log.h"
 
 #include "graphics/forwarding.h"
@@ -17,14 +11,9 @@
 #include "renderer/base/render_controller.h"
 #include "renderer/util/render_util.h"
 
-#include "renderer/vulkan/base/vk_buffer.h"
 #include "renderer/vulkan/base/vk_command_pool.h"
-#include "renderer/vulkan/base/vk_command_buffers.h"
 #include "renderer/vulkan/base/vk_device.h"
-#include "renderer/vulkan/base/vk_instance.h"
 #include "renderer/vulkan/base/vk_pipeline.h"
-#include "renderer/vulkan/base/vk_renderer.h"
-#include "renderer/vulkan/base/vk_swap_chain.h"
 #include "renderer/vulkan/pipeline_factory/pipeline_factory_vulkan.h"
 #include "renderer/vulkan/util/vulkan_tools.h"
 #include "renderer/vulkan/util/vulkan_debug.h"
@@ -36,17 +25,6 @@ namespace ark::vulkan {
 void VKUtil::checkResult(VkResult result)
 {
     CHECK(result == VK_SUCCESS, "Vulkan error: %s", vks::tools::errorString(result).c_str());
-}
-
-VkPipelineShaderStageCreateInfo VKUtil::loadShaderSPIR(VkDevice device, std::string fileName, VkShaderStageFlagBits stage)
-{
-    VkPipelineShaderStageCreateInfo shaderStage = {};
-    shaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-    shaderStage.stage = stage;
-    shaderStage.module = vks::tools::loadShader(fileName.c_str(), device);
-    shaderStage.pName = "main";
-    DASSERT(shaderStage.module != VK_NULL_HANDLE);
-    return shaderStage;
 }
 
 VkPipelineShaderStageCreateInfo VKUtil::loadShader(VkDevice device, const String& resid, Enum::ShaderStageBit stage)
@@ -82,6 +60,30 @@ void VKUtil::createImage(const VKDevice& device, const VkImageCreateInfo& imageC
     memAllocInfo.memoryTypeIndex = device.getMemoryType(memReqs.memoryTypeBits, propertyFlags);
     checkResult(vkAllocateMemory(logicalDevice, &memAllocInfo, nullptr, memory));
     checkResult(vkBindImageMemory(logicalDevice, *image, *memory, 0));
+}
+
+VkImageLayout VKUtil::toImageLayout(Texture::Usage usage)
+{
+    if(usage.has(Texture::USAGE_SAMPLER) || usage.has(Texture::USAGE_STORAGE))
+        return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+    return toAttachmentImageLayout(usage);
+}
+
+VkImageLayout VKUtil::toAttachmentImageLayout(Texture::Usage usage)
+{
+    switch(usage.bits() & Texture::USAGE_ATTACHMENT)
+    {
+        case Texture::USAGE_DEPTH_ATTACHMENT:
+            return VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
+        case Texture::USAGE_STENCIL_ATTACHMENT:
+            return VK_IMAGE_LAYOUT_STENCIL_ATTACHMENT_OPTIMAL;
+        case Texture::USAGE_DEPTH_STENCIL_ATTACHMENT:
+            return VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        default:
+            break;
+    }
+    return VK_IMAGE_LAYOUT_GENERAL;
 }
 
 VkFormat VKUtil::toAttributeFormat(Attribute::Type type, uint32_t length)
@@ -190,35 +192,23 @@ VkFrontFace VKUtil::toFrontFace(PipelineDescriptor::FrontFace frontFace)
 
 VkCompareOp VKUtil::toCompareOp(PipelineDescriptor::CompareFunc func)
 {
-    const VkCompareOp compareOps[] = {VK_COMPARE_OP_LESS_OR_EQUAL, VK_COMPARE_OP_ALWAYS, VK_COMPARE_OP_NEVER, VK_COMPARE_OP_EQUAL, VK_COMPARE_OP_NOT_EQUAL, VK_COMPARE_OP_LESS,
-                                      VK_COMPARE_OP_GREATER, VK_COMPARE_OP_LESS_OR_EQUAL, VK_COMPARE_OP_GREATER_OR_EQUAL};
+    constexpr VkCompareOp compareOps[] = {VK_COMPARE_OP_LESS_OR_EQUAL, VK_COMPARE_OP_ALWAYS, VK_COMPARE_OP_NEVER, VK_COMPARE_OP_EQUAL, VK_COMPARE_OP_NOT_EQUAL, VK_COMPARE_OP_LESS,
+                                          VK_COMPARE_OP_GREATER, VK_COMPARE_OP_LESS_OR_EQUAL, VK_COMPARE_OP_GREATER_OR_EQUAL};
     DASSERT(func < PipelineDescriptor::COMPARE_FUNC_LENGTH);
     return compareOps[func];
 }
 
 VkStencilOp VKUtil::toStencilOp(PipelineDescriptor::StencilFunc func)
 {
-    const VkStencilOp stencilOps[] = {VK_STENCIL_OP_KEEP, VK_STENCIL_OP_ZERO, VK_STENCIL_OP_REPLACE, VK_STENCIL_OP_INCREMENT_AND_CLAMP, VK_STENCIL_OP_INCREMENT_AND_WRAP,
-                                      VK_STENCIL_OP_DECREMENT_AND_CLAMP, VK_STENCIL_OP_DECREMENT_AND_WRAP, VK_STENCIL_OP_INVERT};
+    constexpr VkStencilOp stencilOps[] = {VK_STENCIL_OP_KEEP, VK_STENCIL_OP_ZERO, VK_STENCIL_OP_REPLACE, VK_STENCIL_OP_INCREMENT_AND_CLAMP, VK_STENCIL_OP_INCREMENT_AND_WRAP,
+                                          VK_STENCIL_OP_DECREMENT_AND_CLAMP, VK_STENCIL_OP_DECREMENT_AND_WRAP, VK_STENCIL_OP_INVERT};
     DASSERT(func < PipelineDescriptor::STENCIL_FUNC_LENGTH);
     return stencilOps[func];
 }
 
-VkImageUsageFlags VKUtil::toTextureUsage(Texture::Usage usage)
-{
-    VkImageUsageFlags vkFlags = 0;
-    if(usage == Texture::USAGE_AUTO)
-        vkFlags |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-    if(usage.has(Texture::USAGE_DEPTH_STENCIL_ATTACHMENT))
-        vkFlags |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
-    return vkFlags;
-}
-
 VkImageAspectFlags VKUtil::toTextureAspect(Texture::Usage usage)
 {
-    VkImageAspectFlags vkFlags = 0;
-    if(usage == Texture::USAGE_AUTO)
-        vkFlags = VK_IMAGE_ASPECT_COLOR_BIT;
+    VkImageAspectFlags vkFlags = usage.has(Texture::USAGE_DEPTH_STENCIL_ATTACHMENT) ? 0 : VK_IMAGE_ASPECT_COLOR_BIT;
     if(usage.has(Texture::USAGE_DEPTH_ATTACHMENT))
         vkFlags |= VK_IMAGE_ASPECT_DEPTH_BIT;
     if(usage.has(Texture::USAGE_STENCIL_ATTACHMENT))

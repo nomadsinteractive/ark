@@ -19,11 +19,13 @@ class VKUtil {
 public:
     static void checkResult(VkResult result);
 
-    static VkPipelineShaderStageCreateInfo loadShaderSPIR(VkDevice device, std::string fileName, VkShaderStageFlagBits stage);
     static VkPipelineShaderStageCreateInfo loadShader(VkDevice device, const String& resid, Enum::ShaderStageBit stage);
     static VkPipelineShaderStageCreateInfo createShader(VkDevice device, const String& source, Enum::ShaderStageBit stage);
 
     static void createImage(const VKDevice& device, const VkImageCreateInfo& imageCreateInfo, VkImage* image, VkDeviceMemory* memory, VkMemoryPropertyFlags propertyFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+    static VkImageLayout toImageLayout(Texture::Usage usage);
+    static VkImageLayout toAttachmentImageLayout(Texture::Usage usage);
 
     static VkFormat toAttributeFormat(Attribute::Type type, uint32_t length);
     static VkFormat toTextureFormat(uint32_t componentSize, uint8_t channels, Texture::Format format);
@@ -33,7 +35,6 @@ public:
     static VkCompareOp toCompareOp(PipelineDescriptor::CompareFunc func);
     static VkStencilOp toStencilOp(PipelineDescriptor::StencilFunc func);
 
-    static VkImageUsageFlags toTextureUsage(Texture::Usage usage);
     static VkImageAspectFlags toTextureAspect(Texture::Usage usage);
     static VkShaderStageFlagBits toStage(Enum::ShaderStageBit stage);
     static VkPrimitiveTopology toPrimitiveTopology(Enum::RenderMode mode);
