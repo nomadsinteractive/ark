@@ -2,10 +2,15 @@
 
 #include "core/base/future.h"
 #include "core/traits/expendable.h"
+#include "core/util/updatable_util.h"
 
 #include "graphics/base/camera.h"
+#include "graphics/base/size.h"
 #include "graphics/base/surface_controller.h"
 #include "graphics/impl/vec/vec2_impl.h"
+
+#include "renderer/base/render_engine.h"
+#include "renderer/inf/renderer_factory.h"
 
 #include "app/base/application.h"
 #include "app/base/application_context.h"
@@ -17,22 +22,62 @@ namespace ark {
 
 namespace {
 
-class UpdatableExpecting : public Updatable {
-public:
+struct UpdatableExpecting : Updatable {
     UpdatableExpecting(sp<Boolean> condition, sp<Future> future)
         : _condition(std::move(condition)), _future(std::move(future)) {
     }
 
-    virtual bool update(uint64_t timestamp) override {
+    bool update(uint64_t timestamp) override {
         bool dirty = _condition->update(timestamp);
         if(_condition->val())
             _future->done();
         return dirty;
     }
 
-private:
     sp<Boolean> _condition;
     sp<Future> _future;
+};
+
+struct FragCoordRevert final : Vec2 {
+    FragCoordRevert(sp<Vec2> xy, float height)
+        : _xy(std::move(xy)), _height(height) {
+    }
+
+    bool update(uint64_t timestamp) override
+    {
+        return UpdatableUtil::update(timestamp, _xy);
+    }
+
+    V2 val() override
+    {
+        const V2 xy = _xy->val();
+        return {xy.x(), _height - xy.y()};
+    }
+
+    sp<Vec2> _xy;
+    float _height;
+};
+
+struct FragCoordStretch final : Vec2 {
+    FragCoordStretch(sp<Vec2> xy, const V2& viewportXY, sp<Size> resolution)
+        : _xy(std::move(xy)), _viewport_xy(viewportXY), _resolution(std::move(resolution)) {
+    }
+
+    bool update(uint64_t timestamp) override
+    {
+        return UpdatableUtil::update(timestamp, _xy, _resolution);
+    }
+
+    V2 val() override
+    {
+        const V2 xy = _xy->val();
+        const V3 resolution = _resolution->val();
+        return xy / V2(_viewport_xy.x(), _viewport_xy.y()) * V2(resolution.x(), resolution.y());
+    }
+
+    sp<Vec2> _xy;
+    V2 _viewport_xy;
+    sp<Size> _resolution;
 };
 
 }
@@ -60,6 +105,15 @@ sp<Vec2> ApplicationFacade::cursorPosition() const
 sp<Vec2> ApplicationFacade::cursorFragCoord() const
 {
     return _context->cursorFragCoord();
+}
+
+sp<Vec2> ApplicationFacade::toFragCoord(sp<Vec2> xy, sp<Size> resolution) const
+{
+    const RenderEngine& renderEngine = _context->renderController()->renderEngine();
+    const Viewport& viewport = renderEngine.viewport();
+    if(renderEngine.isViewportFlipped())
+        xy = sp<Vec2>::make<FragCoordRevert>(std::move(xy), viewport.height());
+    return resolution ? sp<Vec2>::make<FragCoordStretch>(std::move(xy), V2(viewport.width(), viewport.height()), std::move(resolution)) : xy;
 }
 
 const sp<Size>& ApplicationFacade::surfaceSize() const

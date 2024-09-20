@@ -13,8 +13,8 @@
 
 namespace ark::opengl {
 
-GLFramebuffer::GLFramebuffer(sp<Recycler> recycler, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments)
-    : _recycler(std::move(recycler)), _color_attachments(std::move(colorAttachments)), _depth_stencil_attachment(depthStencilAttachments), _id(0)
+GLFramebuffer::GLFramebuffer(sp<Recycler> recycler, RenderTarget::CreateConfigure configure)
+    : _recycler(std::move(recycler)), _configure(std::move(configure)), _id(0)
 {
 }
 
@@ -46,7 +46,7 @@ void GLFramebuffer::upload(GraphicsContext& graphicsContext)
     uint32_t idx = 0;
     std::vector<GLenum> drawBuffers;
 
-    for(const sp<Texture>& i : _color_attachments)
+    for(const sp<Texture>& i : _configure._color_attachments)
     {
         const Texture::Usage usage = i->parameters()->_usage;
         ASSERT(usage == Texture::USAGE_AUTO || usage.has(Texture::USAGE_COLOR_ATTACHMENT));
@@ -56,40 +56,37 @@ void GLFramebuffer::upload(GraphicsContext& graphicsContext)
         drawBuffers.push_back(GL_COLOR_ATTACHMENT0 + (idx++));
     }
 
-    if(_depth_stencil_attachment)
+    if(_configure._depth_stencil_attachment)
     {
-        const uint32_t usage = _depth_stencil_attachment->parameters()->_usage.bits() & Texture::USAGE_DEPTH_STENCIL_ATTACHMENT;
-        DASSERT(_depth_stencil_attachment->id() != 0);
+        const uint32_t usage = _configure._depth_stencil_attachment->parameters()->_usage.bits() & Texture::USAGE_DEPTH_STENCIL_ATTACHMENT;
+        DASSERT(_configure._depth_stencil_attachment->id() != 0);
         constexpr GLenum glAttachments[] = {GL_COLOR_ATTACHMENT0, GL_DEPTH_ATTACHMENT, GL_STENCIL_ATTACHMENT, GL_DEPTH_STENCIL_ATTACHMENT};
         ASSERT(usage & Texture::USAGE_DEPTH_STENCIL_ATTACHMENT);
-        if(_depth_stencil_attachment->parameters()->_flags & Texture::FLAG_FOR_INPUT)
+        depthTexture = _configure._depth_stencil_attachment;
+        if(usage == Texture::USAGE_DEPTH_STENCIL_ATTACHMENT)
         {
-            depthTexture = _depth_stencil_attachment;
-            if(usage == Texture::USAGE_DEPTH_STENCIL_ATTACHMENT)
-            {
-                depthInputs.push_back(GL_DEPTH_ATTACHMENT);
-                depthInputs.push_back(GL_STENCIL_ATTACHMENT);
-                depthInternalformat = GL_DEPTH24_STENCIL8;
-            }
-            else if (usage & Texture::USAGE_DEPTH_ATTACHMENT)
-            {
-                depthInputs.push_back(glAttachments[usage]);
-                depthInternalformat = GL_DEPTH_COMPONENT;
-            }
-            else if (usage & Texture::USAGE_STENCIL_ATTACHMENT)
-            {
-#ifndef ANDROID
-                depthInputs.push_back(glAttachments[usage]);
-                depthInternalformat = GL_STENCIL_COMPONENTS;
-#else
-                LOGW("GL_STENCIL_COMPONENTS unsupported");
-                depthTexture = nullptr;
-#endif
-            }
-            else
-                LOGE("Unknow depth-stencil texture usage: %d", usage);
+            depthInputs.push_back(GL_DEPTH_ATTACHMENT);
+            depthInputs.push_back(GL_STENCIL_ATTACHMENT);
+            depthInternalformat = GL_DEPTH24_STENCIL8;
         }
-        attachments.push_back(_depth_stencil_attachment->id(), glAttachments[usage]);
+        else if (usage & Texture::USAGE_DEPTH_ATTACHMENT)
+        {
+            depthInputs.push_back(glAttachments[usage]);
+            depthInternalformat = GL_DEPTH_COMPONENT;
+        }
+        else if (usage & Texture::USAGE_STENCIL_ATTACHMENT)
+        {
+#ifndef ANDROID
+            depthInputs.push_back(glAttachments[usage]);
+            depthInternalformat = GL_STENCIL_COMPONENTS;
+#else
+            LOGW("GL_STENCIL_COMPONENTS unsupported");
+            depthTexture = nullptr;
+#endif
+        }
+        else
+            LOGE("Unknow depth-stencil texture usage: %d", usage);
+        attachments.push_back(_configure._depth_stencil_attachment->id(), glAttachments[usage]);
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, _id);
@@ -100,9 +97,9 @@ void GLFramebuffer::upload(GraphicsContext& graphicsContext)
         LOGD("glFramebufferTexture2D, attachment: %d, id: %d", v, k);
     }
 
-    if(depthInputs.size() > 0 && depthTexture->parameters()->_flags & Texture::FLAG_FOR_OUTPUT)
+    // if(depthInputs.size() > 0)
     {
-        sp<GLTexture> gltex = depthTexture->delegate();
+        const sp<GLTexture> gltex = depthTexture->delegate();
         sp<GLRenderbuffer> renderbuffer = gltex->renderbuffer();
         if(!renderbuffer)
         {
@@ -112,8 +109,8 @@ void GLFramebuffer::upload(GraphicsContext& graphicsContext)
         }
         glBindRenderbuffer(GL_RENDERBUFFER, static_cast<GLuint>(renderbuffer->id()));
         glRenderbufferStorage(GL_RENDERBUFFER, depthInternalformat, static_cast<GLsizei>(depthTexture->width()), static_cast<GLsizei>(depthTexture->height()));
-        for(GLenum i : depthInputs)
-            glFramebufferRenderbuffer(GL_FRAMEBUFFER, i, GL_RENDERBUFFER, static_cast<GLuint>(renderbuffer->id()));
+        for(const GLenum i : depthInputs)
+            glFramebufferRenderbuffer(_configure._depth_stencil_flags & Texture::FLAG_FOR_INPUT ? GL_READ_FRAMEBUFFER : GL_DRAW_FRAMEBUFFER, i, GL_RENDERBUFFER, static_cast<GLuint>(renderbuffer->id()));
     }
 
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)

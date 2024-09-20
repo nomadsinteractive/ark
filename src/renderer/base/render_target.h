@@ -11,6 +11,7 @@
 #include "graphics/inf/renderer.h"
 
 #include "renderer/forwarding.h"
+#include "renderer/base/texture.h"
 
 namespace ark {
 
@@ -25,6 +26,13 @@ public:
         CLEAR_MASK_ALL = 7
     };
     typedef BitSet<ClearMaskBits> ClearMask;
+
+    struct CreateConfigure {
+        std::vector<sp<Texture>> _color_attachments;
+        sp<Texture> _depth_stencil_attachment;
+        Texture::Flag _depth_stencil_flags;
+        ClearMask _clear_mask;
+    };
 
     RenderTarget(sp<Renderer> renderer, sp<Resource> resource);
 

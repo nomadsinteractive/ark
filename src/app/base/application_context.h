@@ -5,7 +5,6 @@
 #include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/base/message_loop.h"
-#include "core/collection/list.h"
 #include "core/inf/runnable.h"
 #include "core/inf/variable.h"
 #include "core/impl/executor/executor_worker_thread.h"
@@ -45,6 +44,7 @@ public:
     const sp<Clock>& appClock() const;
     const sp<Numeric::Impl>& appClockInterval() const;
     const sp<Vec2Impl>& cursorPosition() const;
+    [[deprecated]]
     const sp<Vec2Impl>& cursorFragCoord() const;
 
     bool onEvent(const Event& event);

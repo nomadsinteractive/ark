@@ -20,7 +20,7 @@ public:
 
     sp<Buffer::Delegate> createBuffer(Buffer::Type type, Buffer::Usage usage) override;
     sp<Camera::Delegate> createCamera() override;
-    sp<RenderTarget> createRenderTarget(sp<Renderer> renderer, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask) override;
+    sp<RenderTarget> createRenderTarget(sp<Renderer> renderer, RenderTarget::CreateConfigure configure) override;
     sp<RenderView> createRenderView(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController) override;
     sp<PipelineFactory> createPipelineFactory() override;
     sp<Texture::Delegate> createTexture(sp<Size> size, sp<Texture::Parameters> parameters) override;

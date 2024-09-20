@@ -69,10 +69,8 @@ public:
     };
 
     enum Flag {
-        FLAG_NONE = 0,
         FLAG_FOR_INPUT = 1,
-        FLAG_FOR_OUTPUT = 2,
-        FLAG_COUNT
+        FLAG_FOR_OUTPUT = 2
     };
 
     struct Parameters {
@@ -85,7 +83,6 @@ public:
         Usage _usage;
         Format _format;
         Feature _features;
-        Flag _flags;
 
         CONSTANT _min_filter;
         CONSTANT _mag_filter;

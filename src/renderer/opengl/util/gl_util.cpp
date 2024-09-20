@@ -219,9 +219,9 @@ GLenum GLUtil::getTextureFormat(Texture::Usage usage, Texture::Format format, ui
     switch(usage.bits() & Texture::USAGE_DEPTH_STENCIL_ATTACHMENT)
     {
     case Texture::USAGE_AUTO: {
-        bool isInteger = format & Texture::FORMAT_INTEGER;
-        const static GLenum fChannels[] = {GL_RED, GL_RG, GL_RGB, GL_RGBA};
-        const static GLenum iChannels[] = {GL_RED_INTEGER, GL_RG_INTEGER, GL_RGB_INTEGER, GL_RGBA_INTEGER};
+        const bool isInteger = format & Texture::FORMAT_INTEGER;
+        constexpr GLenum fChannels[] = {GL_RED, GL_RG, GL_RGB, GL_RGBA};
+        constexpr GLenum iChannels[] = {GL_RED_INTEGER, GL_RG_INTEGER, GL_RGB_INTEGER, GL_RGBA_INTEGER};
         const GLenum* formatByChannels = isInteger ? iChannels : fChannels;
         DCHECK(channels < 5, "Unknown bitmap format: (channels = %d)", static_cast<uint32_t>(channels));
         return format == Texture::FORMAT_AUTO ? formatByChannels[channels - 1] : formatByChannels[static_cast<uint32_t>(format & Texture::FORMAT_RGBA)];

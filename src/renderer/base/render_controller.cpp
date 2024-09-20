@@ -340,9 +340,9 @@ sp<RenderController::PrimitiveIndexBuffer> RenderController::getSharedPrimitiveI
     return pib;
 }
 
-sp<RenderTarget> RenderController::makeRenderTarget(sp<Renderer> renderer, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask)
+sp<RenderTarget> RenderController::makeRenderTarget(sp<Renderer> renderer, RenderTarget::CreateConfigure configure)
 {
-    const sp<RenderTarget> renderTarget = renderEngine()->rendererFactory()->createRenderTarget(std::move(renderer), std::move(colorAttachments), std::move(depthStencilAttachments), clearMask);
+    const sp<RenderTarget> renderTarget = renderEngine()->rendererFactory()->createRenderTarget(std::move(renderer), std::move(configure));
     upload(renderTarget->resource(), US_ONCE_AND_ON_SURFACE_READY, nullptr, nullptr, UPLOAD_PRIORITY_LOW);
     return renderTarget;
 }

@@ -29,8 +29,8 @@ RenderEngineContext::Resolution getFramebufferResolution(const std::vector<sp<Te
 
 }
 
-VKFramebuffer::VKFramebuffer(const sp<VKRenderer>& renderer, const sp<Recycler>& recycler, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask)
-    : _stub(sp<Stub>::make(renderer, recycler, std::move(colorAttachments), std::move(depthStencilAttachments), clearMask))
+VKFramebuffer::VKFramebuffer(const sp<VKRenderer>& renderer, const sp<Recycler>& recycler, RenderTarget::CreateConfigure configure)
+    : _stub(sp<Stub>::make(renderer, recycler, std::move(configure)))
 {
 }
 
@@ -90,14 +90,14 @@ void VKFramebuffer::endCommandBuffer(GraphicsContext& graphicsContext)
 
 VkRect2D VKFramebuffer::Stub::getFramebufferScissor() const
 {
-    DASSERT(_color_attachments.size() > 0);
-    const sp<Texture>& texture = _color_attachments.at(0);
+    ASSERT(!_configure._color_attachments.empty());
+    const sp<Texture>& texture = _configure._color_attachments.at(0);
     return vks::initializers::rect2D(texture->width(), texture->height(), 0, 0);
 }
 
-VKFramebuffer::Stub::Stub(const sp<VKRenderer>& renderer, const sp<Recycler>& recycler, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask)
-    : RenderPassPhrase(getFramebufferResolution(colorAttachments), colorAttachments.size()), _renderer(renderer), _recycler(recycler), _color_attachments(std::move(colorAttachments)), _depth_stencil_attachment(std::move(depthStencilAttachments)),
-      _depthstencil_image(VK_NULL_HANDLE), _depthstencil_memory(VK_NULL_HANDLE), _depthstencil_view(VK_NULL_HANDLE), _render_pass_begin_info(vks::initializers::renderPassBeginInfo()), _scissor(vks::initializers::rect2D(_resolution.width, _resolution.height, 0, 0)),
+VKFramebuffer::Stub::Stub(const sp<VKRenderer>& renderer, const sp<Recycler>& recycler, RenderTarget::CreateConfigure configure)
+    : RenderPassPhrase(getFramebufferResolution(configure._color_attachments), configure._color_attachments.size()), _renderer(renderer), _recycler(recycler), _configure(std::move(configure)), _depthstencil_image(VK_NULL_HANDLE),
+      _depthstencil_memory(VK_NULL_HANDLE), _depthstencil_view(VK_NULL_HANDLE), _render_pass_begin_info(vks::initializers::renderPassBeginInfo()), _scissor(vks::initializers::rect2D(_resolution.width, _resolution.height, 0, 0)),
       _viewport(vks::initializers::viewport(static_cast<float>(_resolution.width), static_cast<float>(_resolution.height), 0, 1.0f))
 {
     VkClearValue clearColor;
@@ -105,10 +105,10 @@ VKFramebuffer::Stub::Stub(const sp<VKRenderer>& renderer, const sp<Recycler>& re
     clearColor.color = { { 0.0f, 0.0f, 0.0f, 0.0f } };
     clearDepthStencil.depthStencil = { 1.0f, 0 };
 
-    if(clearMask & RenderTarget::CLEAR_MASK_COLOR)
-        for(uint32_t i = 0; i < _color_attachments.size(); ++i)
+    if(_configure._clear_mask.has(RenderTarget::CLEAR_MASK_COLOR))
+        for(uint32_t i = 0; i < _configure._color_attachments.size(); ++i)
             _clear_values.push_back(clearColor);
-    if(clearMask & RenderTarget::CLEAR_MASK_DEPTH_STENCIL)
+    if(_configure._clear_mask.has(RenderTarget::CLEAR_MASK_DEPTH_STENCIL))
         _clear_values.push_back(clearDepthStencil);
 
     _render_pass_begin_info.renderArea = _scissor;
@@ -135,7 +135,7 @@ VkRenderPass VKFramebuffer::Stub::acquire(const PipelineDescriptor& bindings)
     std::vector<VkAttachmentReference> attachmentReferences;
     std::vector<VkImageView> attachments;
 
-    for(const Texture& i : _color_attachments)
+    for(const Texture& i : _configure._color_attachments)
     {
         VkAttachmentDescription colorAttachmentDescription = {};
         colorAttachmentDescription.format = VKUtil::toTextureFormat(i.parameters()->_format);
@@ -155,7 +155,7 @@ VkRenderPass VKFramebuffer::Stub::acquire(const PipelineDescriptor& bindings)
         attachments.push_back(vkTexture->vkDescriptor().imageView);
     }
 
-    VkImageView depthstencilView = _depth_stencil_attachment ? _depth_stencil_attachment->delegate().cast<VKTexture>()->vkDescriptor().imageView : VK_NULL_HANDLE;
+    VkImageView depthstencilView = _configure._depth_stencil_attachment ? _configure._depth_stencil_attachment->delegate().cast<VKTexture>()->vkDescriptor().imageView : VK_NULL_HANDLE;
     if(depthstencilView)
     {
         attachments.push_back(depthstencilView);
@@ -167,7 +167,7 @@ VkRenderPass VKFramebuffer::Stub::acquire(const PipelineDescriptor& bindings)
         depthAttachmentDescription.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
         depthAttachmentDescription.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         depthAttachmentDescription.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        depthAttachmentDescription.initialLayout = VKUtil::toImageLayout(_depth_stencil_attachment->usage());
+        depthAttachmentDescription.initialLayout = VKUtil::toImageLayout(_configure._depth_stencil_attachment->usage());
         depthAttachmentDescription.finalLayout = depthAttachmentDescription.initialLayout;
         attachmentDescriptions.push_back(depthAttachmentDescription);
     }

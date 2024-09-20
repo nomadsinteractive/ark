@@ -18,6 +18,7 @@
 #include "renderer/forwarding.h"
 #include "renderer/base/buffer.h"
 #include "renderer/base/graphics_buffer_allocator.h"
+#include "renderer/base/render_target.h"
 #include "renderer/base/texture.h"
 #include "renderer/inf/model_loader.h"
 
@@ -123,7 +124,7 @@ public:
 
     sp<PrimitiveIndexBuffer> getSharedPrimitiveIndexBuffer(const Model& model, bool degenerate);
 
-    sp<RenderTarget> makeRenderTarget(sp<Renderer> renderer, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask);
+    sp<RenderTarget> makeRenderTarget(sp<Renderer> renderer, RenderTarget::CreateConfigure configure);
 
     sp<RenderCommandComposer> makeDrawElementsIncremental(sp<Model> model) const;
 

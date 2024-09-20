@@ -103,9 +103,9 @@ sp<Camera::Delegate> RendererFactoryVulkan::createCamera()
     return sp<Camera::Delegate>::make<Camera::DelegateLH_ZO>();
 }
 
-sp<RenderTarget> RendererFactoryVulkan::createRenderTarget(sp<Renderer> renderer, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask)
+sp<RenderTarget> RendererFactoryVulkan::createRenderTarget(sp<Renderer> renderer, RenderTarget::CreateConfigure configure)
 {
-    sp<VKFramebuffer> fbo = sp<VKFramebuffer>::make(_renderer, _recycler, std::move(colorAttachments), std::move(depthStencilAttachments), clearMask);
+    sp<VKFramebuffer> fbo = sp<VKFramebuffer>::make(_renderer, _recycler, std::move(configure));
     return sp<RenderTarget>::make(sp<VKFramebufferRenderer>::make(std::move(renderer), fbo), std::move(fbo));
 }
 

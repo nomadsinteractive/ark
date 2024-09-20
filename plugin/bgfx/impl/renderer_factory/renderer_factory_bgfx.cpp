@@ -214,7 +214,7 @@ sp<Camera::Delegate> RendererFactoryBgfx::createCamera()
     return sp<Camera::Delegate>::make<Camera::DelegateRH_NO>();
 }
 
-sp<RenderTarget> RendererFactoryBgfx::createRenderTarget(sp<Renderer> renderer, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask)
+sp<RenderTarget> RendererFactoryBgfx::createRenderTarget(sp<Renderer> renderer, RenderTarget::CreateConfigure configure)
 {
     std::vector<::bgfx::TextureHandle> textureHandles;
     ::bgfx::createFrameBuffer(textureHandles.size(), textureHandles.data(), false);

@@ -1,7 +1,5 @@
-#ifndef ARK_RENDERER_IMPL_RENDERER_FRAMEBUFFER_RENDERER_H_
-#define ARK_RENDERER_IMPL_RENDERER_FRAMEBUFFER_RENDERER_H_
+#pragma once
 
-#include "core/inf/builder.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -11,14 +9,13 @@
 
 #include "renderer/opengl/forwarding.h"
 
-namespace ark {
-namespace opengl {
+namespace ark::opengl {
 
-class GLFramebufferRenderer : public Renderer {
+class GLFramebufferRenderer final : public Renderer {
 public:
     GLFramebufferRenderer(sp<GLFramebuffer> fbo, int32_t width, int32_t height, sp<Renderer> delegate, uint32_t drawBufferCount, int32_t clearMask);
 
-    virtual void render(RenderRequest& renderRequest, const V3& position) override;
+    void render(RenderRequest& renderRequest, const V3& position) override;
 
 private:
     sp<Renderer> _delegate;
@@ -28,6 +25,3 @@ private:
 };
 
 }
-}
-
-#endif

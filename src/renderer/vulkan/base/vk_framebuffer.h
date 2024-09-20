@@ -7,6 +7,7 @@
 #include "graphics/forwarding.h"
 
 #include "renderer/forwarding.h"
+#include "renderer/base/render_target.h"
 #include "renderer/inf/resource.h"
 
 #include "renderer/vulkan/forward.h"
@@ -18,7 +19,7 @@ namespace ark::vulkan {
 
 class VKFramebuffer final : public Resource {
 public:
-    VKFramebuffer(const sp<VKRenderer>& renderer, const sp<Recycler>& recycler, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask);
+    VKFramebuffer(const sp<VKRenderer>& renderer, const sp<Recycler>& recycler, RenderTarget::CreateConfigure configure);
     ~VKFramebuffer() override;
 
     uint64_t id() override;
@@ -32,7 +33,7 @@ public:
 private:
     class Stub final : public VKGraphicsContext::RenderPassPhrase {
     public:
-        Stub(const sp<VKRenderer>& renderer, const sp<Recycler>& recycler, std::vector<sp<Texture>> colorAttachments, sp<Texture> depthStencilAttachments, int32_t clearMask);
+        Stub(const sp<VKRenderer>& renderer, const sp<Recycler>& recycler, RenderTarget::CreateConfigure configure);
 
         void initialize();
 
@@ -45,8 +46,7 @@ private:
     private:
         sp<VKRenderer> _renderer;
         sp<Recycler> _recycler;
-        std::vector<sp<Texture>> _color_attachments;
-        sp<Texture> _depth_stencil_attachment;
+        RenderTarget::CreateConfigure _configure;
 
         VkImage _depthstencil_image;
         VkDeviceMemory _depthstencil_memory;

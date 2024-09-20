@@ -25,6 +25,8 @@ public:
     sp<Vec2> cursorPosition() const;
 //  [[script::bindings::property]]
     sp<Vec2> cursorFragCoord() const;
+//  [[script::bindings::auto]]
+    sp<Vec2> toFragCoord(sp<Vec2> xy, sp<Size> resolution = nullptr) const;
 //  [[script::bindings::property]]
     const sp<Size>& surfaceSize() const;
 //  [[script::bindings::property]]

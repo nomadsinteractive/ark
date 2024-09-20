@@ -522,10 +522,6 @@ class ApplicationFacade:
         return Vec2(0, 0)
 
     @property
-    def cursor_frag_coord(self) -> 'Vec2':
-        return Vec2(0, 0)
-
-    @property
     def surface_size(self) -> 'Size':
         return Size(0, 0)
 
@@ -568,6 +564,9 @@ class ApplicationFacade:
     @property
     def argv(self) -> List[str]:
         return []
+
+    def to_frag_coord(self, xy: 'Vec2', resolution: Optional['Size'] = None) -> 'Vec2':
+        pass
 
     def add_string_bundle(self, name: str, string_bundle: 'StringBundle'):
         pass

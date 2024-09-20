@@ -221,14 +221,13 @@ template<> Texture::Flag StringConvert::eval<Texture::Flag>(const String& str)
     }};
     if(str)
         return static_cast<Texture::Flag>(BitSet<Texture::Flag>::toBitSet(str, flags).bits());
-    return Texture::FLAG_FOR_INPUT;
+    return Texture::FLAG_FOR_OUTPUT;
 }
 
 Texture::Parameters::Parameters(Type type, const document& parameters, Format format, Texture::Feature features)
     : _type(type), _usage(parameters ? Documents::getAttribute<Texture::Usage>(parameters, "usage", Texture::USAGE_AUTO) : Texture::USAGE_AUTO),
       _format(parameters ? Documents::getAttribute<Texture::Format>(parameters, "format", format) : format),
       _features(parameters ? Documents::getAttribute<Texture::Feature>(parameters, "feature", features) : features),
-      _flags(parameters ? Documents::getAttribute<Texture::Flag>(parameters, "flags", FLAG_FOR_INPUT) : FLAG_FOR_INPUT),
       _min_filter((features & Texture::FEATURE_MIPMAPS) ? CONSTANT_LINEAR_MIPMAP : CONSTANT_LINEAR), _mag_filter(CONSTANT_LINEAR),
       _wrap_s(CONSTANT_REPEAT), _wrap_t(CONSTANT_REPEAT), _wrap_r(CONSTANT_REPEAT)
 {

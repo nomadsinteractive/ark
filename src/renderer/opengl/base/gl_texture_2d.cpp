@@ -1,6 +1,5 @@
 #include "renderer/opengl/base/gl_texture_2d.h"
 
-#include "core/inf/variable.h"
 #include "core/util/log.h"
 
 #include "graphics/base/bitmap.h"

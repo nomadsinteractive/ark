@@ -36,32 +36,25 @@ RenderTarget::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, c
 
 sp<RenderTarget> RenderTarget::BUILDER::build(const Scope& args)
 {
-    std::vector<sp<Texture>> colorAttachments;
-    sp<Texture> depthStencilAttachments;
+    CreateConfigure configure;
     for(const auto& [i, j] : _attachments)
     {
         sp<Texture> tex = i->build(args);
-        const Texture::Usage usage = tex->usage();
-        if(usage == Texture::USAGE_AUTO || usage.has(Texture::USAGE_COLOR_ATTACHMENT))
-            colorAttachments.push_back(std::move(tex));
+        if(const Texture::Usage usage = tex->usage(); usage == Texture::USAGE_AUTO || usage.has(Texture::USAGE_COLOR_ATTACHMENT))
+            configure._color_attachments.push_back(std::move(tex));
         else
         {
-            CHECK(depthStencilAttachments == nullptr, "Only one depth-stencil attachment allowed");
+            CHECK(configure._depth_stencil_attachment == nullptr, "Only one depth-stencil attachment allowed");
             CHECK(usage.has(Texture::USAGE_DEPTH_STENCIL_ATTACHMENT), "Unknow Texture usage: %d", usage);
-            if(const Texture::Flag flags = Documents::getAttribute<Texture::Flag>(j, "flags", Texture::FLAG_NONE); flags != Texture::FLAG_NONE)
-            {
-                sp<Texture::Parameters> tp = sp<Texture::Parameters>::make(*tex->parameters());
-                sp<Texture> newTexture = sp<Texture>::make(*tex);
-                tp->_flags = flags;
-                CHECK_WARN(!(flags == Texture::FLAG_FOR_INPUT && usage.has(Texture::USAGE_DEPTH_STENCIL_ATTACHMENT) && _clear_mask.has(RenderTarget::CLEAR_MASK_DEPTH_STENCIL)),
-                           "Depth-stencil texture marked \"for input\" would be cleared before rendering pass");
-                newTexture->setParameters(std::move(tp));
-                tex = std::move(newTexture);
-            }
-            depthStencilAttachments = std::move(tex);
+            const Texture::Flag flags = Documents::getAttribute<Texture::Flag>(j, "flags", Texture::FLAG_FOR_OUTPUT);
+            CHECK_WARN(!(flags & Texture::FLAG_FOR_INPUT && usage.has(Texture::USAGE_DEPTH_STENCIL_ATTACHMENT) && _clear_mask.has(RenderTarget::CLEAR_MASK_DEPTH_STENCIL)),
+                       "Depth-stencil texture marked \"for input\" would be cleared before rendering pass");
+            configure._depth_stencil_flags = flags;
+            configure._depth_stencil_attachment = std::move(tex);
         }
     }
-    return _render_controller->makeRenderTarget(_renderer->build(args), std::move(colorAttachments), std::move(depthStencilAttachments), _clear_mask.bits());
+    configure._clear_mask = _clear_mask;
+    return _render_controller->makeRenderTarget(_renderer->build(args), std::move(configure));
 }
 
 RenderTarget::RENDERER_BUILDER::RENDERER_BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
