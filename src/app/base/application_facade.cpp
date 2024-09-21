@@ -22,13 +22,13 @@ namespace ark {
 
 namespace {
 
-struct UpdatableExpecting : Updatable {
+struct UpdatableExpecting final : Updatable {
     UpdatableExpecting(sp<Boolean> condition, sp<Future> future)
         : _condition(std::move(condition)), _future(std::move(future)) {
     }
 
     bool update(uint64_t timestamp) override {
-        bool dirty = _condition->update(timestamp);
+        const bool dirty = _condition->update(timestamp);
         if(_condition->val())
             _future->done();
         return dirty;
@@ -100,11 +100,6 @@ sp<Numeric> ApplicationFacade::clockInterval() const
 sp<Vec2> ApplicationFacade::cursorPosition() const
 {
     return _context->cursorPosition();
-}
-
-sp<Vec2> ApplicationFacade::cursorFragCoord() const
-{
-    return _context->cursorFragCoord();
 }
 
 sp<Vec2> ApplicationFacade::toFragCoord(sp<Vec2> xy, sp<Size> resolution) const

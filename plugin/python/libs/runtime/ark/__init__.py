@@ -962,7 +962,7 @@ class Integer(_Var):
 
 
 class NamedType:
-    def __init__(self):
+    def __init__(self, value):
         pass
 
     @staticmethod
@@ -2682,7 +2682,7 @@ class Entity:
     def id(self) -> int:
         return 0
 
-    def dispose(self):
+    def discard(self):
         pass
 
 

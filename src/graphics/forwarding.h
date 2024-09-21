@@ -27,6 +27,7 @@ class Model;
 class NamedType;
 class RenderLayer;
 class RenderLayerSnapshot;
+class RendererPhrase;
 class LayerContext;
 class Varyings;
 class RendererMaker;

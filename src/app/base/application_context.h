@@ -44,8 +44,6 @@ public:
     const sp<Clock>& appClock() const;
     const sp<Numeric::Impl>& appClockInterval() const;
     const sp<Vec2Impl>& cursorPosition() const;
-    [[deprecated]]
-    const sp<Vec2Impl>& cursorFragCoord() const;
 
     bool onEvent(const Event& event);
 

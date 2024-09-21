@@ -6,9 +6,7 @@
 #include "python/impl/adapter/collision_callback_python_adapter.h"
 #include "python/impl/adapter/renderer_maker_python.h"
 
-namespace ark {
-namespace plugin {
-namespace python {
+namespace ark::plugin::python {
 
 PyObjectDuckType::PyObjectDuckType(PyInstance inst)
     : _instance(std::move(inst))
@@ -41,6 +39,4 @@ void PyObjectDuckType::to(sp<Numeric>& inst)
     inst = PyCast::ensureCppObject<sp<Numeric>>(_instance.pyObject());
 }
 
-}
-}
 }

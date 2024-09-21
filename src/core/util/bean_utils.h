@@ -8,7 +8,7 @@
 
 namespace ark {
 
-class BeanUtils {
+class [[deprecated]] BeanUtils {
 public:
 
     template<typename... Args> static void split(BeanFactory& beanFactory, const String& str, sp<Builder<Args>>&... args) {

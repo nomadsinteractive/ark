@@ -8,7 +8,7 @@
 #include <algorithm>
 
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
-#include <stb_image_resize.h>
+#include <stb_image_resize2.h>
 
 #include "core/base/bean_factory.h"
 #include "core/base/string.h"
@@ -80,13 +80,13 @@ uint8_t* Bitmap::at(uint32_t x, uint32_t y) const
 
 Bitmap Bitmap::resize(uint32_t w, uint32_t h) const
 {
-    uint32_t d = depth();
-    DCHECK(d == 1 || d == 4, "Unsupported bitmap depth: %d", d);
+    const uint32_t d = depth();
+    CHECK(d == 1 || d == 4, "Unsupported bitmap depth: %d", d);
     Bitmap s(w, h, w * _channels * d, _channels, true);
     if(d == 1)
-        stbir_resize_uint8(_byte_array->buf(), _width, _height, _row_bytes, s.at(0, 0), w, h, s.rowBytes(), _channels);
+        stbir_resize_uint8_linear(_byte_array->buf(), _width, _height, _row_bytes, s.at(0, 0), w, h, s.rowBytes(), static_cast<stbir_pixel_layout>(_channels));
     else if (d == 4)
-        stbir_resize_float(reinterpret_cast<const float*>(_byte_array->buf()), _width, _height, _row_bytes, reinterpret_cast<float*>(s.at(0, 0)), w, h, s.rowBytes(), _channels);
+        stbir_resize_float_linear(reinterpret_cast<const float*>(_byte_array->buf()), _width, _height, _row_bytes, reinterpret_cast<float*>(s.at(0, 0)), w, h, s.rowBytes(), static_cast<stbir_pixel_layout>(_channels));
     return s;
 }
 

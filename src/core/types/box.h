@@ -62,8 +62,7 @@ public:
         const PtrStub& ptrStub = std::get<PtrStub>(*_stub);
         sp<T> inst = typeId == _type_id ? ptrStub.unpack<T>() : _class->cast(*this, typeId).toPtr<T>();
         if(!inst) {
-            const sp<Duck<T>> duck = _class->cast(*this, Type<Duck<T>>::id()).template toPtr<Duck<T>>();
-            if(duck)
+            if(const sp<Duck<T>> duck = _class->cast(*this, Type<Duck<T>>::id()).template toPtr<Duck<T>>())
                 duck->to(inst);
         }
         return inst;

@@ -259,11 +259,6 @@ const sp<Vec2Impl>& ApplicationContext::cursorPosition() const
     return _cursor_position;
 }
 
-const sp<Vec2Impl>& ApplicationContext::cursorFragCoord() const
-{
-    return _cursor_frag_coord;
-}
-
 bool ApplicationContext::onEvent(const Event& event)
 {
     if(event.action() == Event::ACTION_UP || event.action() == Event::ACTION_DOWN || event.action() == Event::ACTION_MOVE)

@@ -8,9 +8,11 @@
 namespace ark {
 
 //[[script::bindings::extends(Integer)]]
-class ARK_API NamedType : public Integer {
+class ARK_API NamedType final : public Integer {
 public:
+//  [[script::bindings::auto]]
     NamedType(String name);
+//  [[script::bindings::auto]]
     NamedType(int32_t type);
 
     bool update(uint64_t timestamp) override;
