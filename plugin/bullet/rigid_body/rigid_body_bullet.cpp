@@ -16,25 +16,15 @@ RigidBodyBullet::Stub::~Stub()
 {
     btCollisionObject* collisionObject = _rigid_body->collisionObject();
     _world.btDynamicWorld()->removeCollisionObject(collisionObject);
-    delete static_cast<WeakPtr<RigidBody::Stub>*>(collisionObject->getUserPointer());
     collisionObject->setUserPointer(nullptr);
     _rigid_body->reset();
 }
 
 RigidBodyBullet::RigidBodyBullet(int32_t id, Collider::BodyType type, ColliderBullet world, sp<CollisionShape> collisionShape, sp<Vec3> position, sp<Transform> transform, sp<BtRigidBodyRef> rigidBody)
-    : RigidBody(sp<RigidBody::Stub>::make(id, type, 0, nullptr, std::move(position), std::move(transform), sp<Stub>::make(std::move(world), std::move(collisionShape), std::move(rigidBody)))),
-      _stub(stub()->_impl.toPtr<Stub>())
+    : RigidBody(type, nullptr, std::move(position), transform->rotation(), sp<Stub>::make(std::move(world), std::move(collisionShape), std::move(rigidBody)), nullptr),
+      _stub(_impl.toPtr<Stub>())
 {
-    _stub->_rigid_body->collisionObject()->setUserPointer(new WeakPtr<RigidBody::Stub>(stub()));
-}
-
-RigidBodyBullet::RigidBodyBullet(sp<RigidBody::Stub> other)
-    : RigidBody(std::move(other)), _stub(stub()->_impl.toPtr<Stub>())
-{
-}
-
-void RigidBodyBullet::dispose()
-{
+    _stub->_rigid_body->collisionObject()->setUserPointer(this);
 }
 
 void RigidBodyBullet::applyCentralForce(const V3& force)

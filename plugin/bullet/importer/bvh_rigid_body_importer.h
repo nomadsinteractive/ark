@@ -1,11 +1,8 @@
-#ifndef ARK_PLUGIN_BULLET_IMPORTER_BVH_RIGID_BODY_IMPORTER_H_
-#define ARK_PLUGIN_BULLET_IMPORTER_BVH_RIGID_BODY_IMPORTER_H_
+#pragma once
 
 #include "plugin/bullet/base/collider_bullet.h"
 
-namespace ark {
-namespace plugin {
-namespace bullet {
+namespace ark::plugin::bullet {
 
 class BvhRigidBodyImporter : public ColliderBullet::RigidBodyImporter {
 public:
@@ -32,7 +29,3 @@ private:
 };
 
 }
-}
-}
-
-#endif

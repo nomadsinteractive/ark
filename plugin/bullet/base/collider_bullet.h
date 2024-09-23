@@ -11,7 +11,6 @@
 #include "core/types/implements.h"
 #include "core/types/owned_ptr.h"
 #include "core/types/safe_ptr.h"
-#include "core/types/weak_ptr.h"
 
 #include "graphics/base/transform.h"
 
@@ -82,10 +81,10 @@ public:
 
 private:
     struct KinematicObject {
-        KinematicObject(sp<Vec3> position, sp<Rotation> rotation, sp<BtRigidBodyRef> rigidBody);
+        KinematicObject(sp<Vec3> position, sp<Vec4> quaternion, sp<BtRigidBodyRef> rigidBody);
 
-        SafePtr<Vec3> _position;
-        SafePtr<Rotation> _rotation;
+        SafeVar<Vec3> _position;
+        SafeVar<Vec4> _quaternion;
         sp<BtRigidBodyRef> _rigid_body;
 
         class ListFilter {
@@ -146,7 +145,8 @@ private:
     public:
         DynamicTransform(const sp<btMotionState>& motionState);
 
-        void snapshot(const Transform& transform, Transform::Snapshot& snapshot) const override;
+        bool update(const Transform::Stub& transform, uint64_t timestamp) override;
+        void snapshot(const Transform::Stub& transform, Transform::Snapshot& snapshot) const override;
         V3 transform(const Transform::Snapshot& snapshot, const V3& position) const override;
         M4 toMatrix(const Transform::Snapshot& snapshot) const override;
 
@@ -160,7 +160,7 @@ private:
     static void myInternalPreTickCallback(btDynamicsWorld *dynamicsWorld, btScalar timeStep);
     static void myInternalTickCallback(btDynamicsWorld *dynamicsWorld, btScalar timeStep);
 
-    static RigidBodyBullet getRigidBodyFromCollisionObject(const btCollisionObject* collisionObject);
+    static const RigidBodyBullet& getRigidBodyFromCollisionObject(const btCollisionObject* collisionObject);
 
     void addTickContactInfo(const sp<BtRigidBodyRef>& rigidBody, const sp<CollisionCallback>& callback, const sp<BtRigidBodyRef>& contact, const V3& cp, const V3& normal);
 

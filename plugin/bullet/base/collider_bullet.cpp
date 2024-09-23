@@ -95,10 +95,10 @@ void ColliderBullet::rayCastClosest(const V3& from, const V3& to, const sp<Colli
     _stub->_dynamics_world->rayTest(btVector3(from.x(), from.y(), from.z()), btVector3(to.x(), to.y(), to.z()), closestResults);
     if(closestResults.hasHit())
     {
-        btVector3 p = btFrom.lerp(btTo, closestResults.m_closestHitFraction);
+        const btVector3 p = btFrom.lerp(btTo, closestResults.m_closestHitFraction);
         const btVector3& n = closestResults.m_hitNormalWorld;
-        CollisionManifold manifold(V3(p.x(), p.y(), p.z()), V3(n.x(), n.y(), n.z()));
-        callback->onBeginContact(sp<RigidBodyBullet>::make(getRigidBodyFromCollisionObject(closestResults.m_collisionObject)), manifold);
+        const CollisionManifold manifold(V3(p.x(), p.y(), p.z()), V3(n.x(), n.y(), n.z()));
+        callback->onBeginContact(getRigidBodyFromCollisionObject(closestResults.m_collisionObject), manifold);
     }
 }
 
@@ -117,8 +117,8 @@ std::vector<RayCastManifold> ColliderBullet::rayCast(const V3& from, const V3& t
         for(int32_t i = 0; i < allHitResults.m_hitFractions.size(); ++i)
         {
             const btVector3& n = allHitResults.m_hitNormalWorld.at(i);
-            sp<RigidBody> rigidBody = sp<RigidBodyBullet>::make(getRigidBodyFromCollisionObject(allHitResults.m_collisionObjects.at(i)));
-            manifolds.emplace_back(allHitResults.m_hitFractions.at(i), V3(n.x(), n.y(), n.z()), std::move(rigidBody));
+            const RigidBodyBullet& rigidBody = getRigidBodyFromCollisionObject(allHitResults.m_collisionObjects.at(i));
+            manifolds.emplace_back(allHitResults.m_hitFractions.at(i), V3(n.x(), n.y(), n.z()), rigidBody.ref());
         }
     }
     return manifolds;
@@ -146,14 +146,14 @@ std::unordered_map<int32_t, sp<CollisionShape>>& ColliderBullet::collisionShapes
 
 void ColliderBullet::myInternalPreTickCallback(btDynamicsWorld* dynamicsWorld, btScalar /*timeStep*/)
 {
-    ColliderBullet* self = reinterpret_cast<ColliderBullet*>(dynamicsWorld->getWorldUserInfo());
-    uint64_t tick = Ark::instance().applicationContext()->renderController()->tick();
+    ColliderBullet* self = static_cast<ColliderBullet*>(dynamicsWorld->getWorldUserInfo());
+    const uint64_t tick = Ark::instance().applicationContext()->renderController()->tick();
     for(const KinematicObject& i : self->_stub->_kinematic_objects)
     {
-        i._position->update(tick);
-        i._rotation->update(tick);
-        V3 pos = i._position->val();
-        const V4 quaternion = i._rotation->val();
+        i._position.update(tick);
+        i._quaternion.update(tick);
+        V3 pos = i._position.val();
+        const V4 quaternion = i._quaternion.val();
         btTransform transform;
         transform.setRotation(btQuaternion(quaternion.x(), quaternion.y(), quaternion.z(), quaternion.w()));
         transform.setOrigin(btVector3(pos.x(), pos.y(), pos.z()));
@@ -171,9 +171,9 @@ void ColliderBullet::myInternalTickCallback(btDynamicsWorld* dynamicsWorld, btSc
 
         if(contactManifold->getNumContacts() > 0)
         {
-            RigidBodyBullet objA(getRigidBodyFromCollisionObject(contactManifold->getBody0()));
+            const RigidBodyBullet& objA = getRigidBodyFromCollisionObject(contactManifold->getBody0());
             const sp<CollisionCallback>& ccObjA = objA.collisionCallback();
-            RigidBodyBullet objB(getRigidBodyFromCollisionObject(contactManifold->getBody1()));
+            const RigidBodyBullet& objB = getRigidBodyFromCollisionObject(contactManifold->getBody1());
             const sp<CollisionCallback>& ccObjB = objB.collisionCallback();
 
             const sp<BtRigidBodyRef>& refA = objA.rigidBody();
@@ -204,13 +204,13 @@ void ColliderBullet::myInternalTickCallback(btDynamicsWorld* dynamicsWorld, btSc
             contactInfo._last_tick.clear();
         else
         {
-            RigidBodyBullet obj = getRigidBodyFromCollisionObject(iter->first->collisionObject());
+            const RigidBodyBullet& obj = getRigidBodyFromCollisionObject(iter->first->collisionObject());
             for(const sp<BtRigidBodyRef>& i : contactInfo._last_tick)
                 if(i->collisionObject())
                 {
                     if(contactInfo._current_tick.find(i) == contactInfo._current_tick.end())
                         if(obj.collisionCallback())
-                            obj.collisionCallback()->onEndContact(sp<RigidBodyBullet>::make(getRigidBodyFromCollisionObject(i->collisionObject())));
+                            obj.collisionCallback()->onEndContact(getRigidBodyFromCollisionObject(i->collisionObject()));
                 }
 
             contactInfo._last_tick = std::move(contactInfo._current_tick);
@@ -221,12 +221,9 @@ void ColliderBullet::myInternalTickCallback(btDynamicsWorld* dynamicsWorld, btSc
     }
 }
 
-RigidBodyBullet ColliderBullet::getRigidBodyFromCollisionObject(const btCollisionObject* collisionObject)
+const RigidBodyBullet& ColliderBullet::getRigidBodyFromCollisionObject(const btCollisionObject* collisionObject)
 {
-    WeakPtr<RigidBody::Stub>* stubPtr = reinterpret_cast<WeakPtr<RigidBody::Stub>*>(collisionObject->getUserPointer());
-    sp<RigidBody::Stub> stub = stubPtr->lock();
-    DCHECK(stub, "Unable to aquire RigidBody reference, this could happen when you've not keep the reference of the RigidBody");
-    return RigidBodyBullet(std::move(stub));
+    return *static_cast<RigidBodyBullet*>(collisionObject->getUserPointer());
 }
 
 void ColliderBullet::addTickContactInfo(const sp<BtRigidBodyRef>& rigidBody, const sp<CollisionCallback>& callback, const sp<BtRigidBodyRef>& contact, const V3& cp, const V3& normal)
@@ -234,7 +231,7 @@ void ColliderBullet::addTickContactInfo(const sp<BtRigidBodyRef>& rigidBody, con
     ContactInfo& contactInfo = _contact_infos[rigidBody];
     contactInfo._current_tick.insert(contact);
     if(contactInfo._last_tick.find(contact) == contactInfo._last_tick.end())
-        callback->onBeginContact(sp<RigidBodyBullet>::make(getRigidBodyFromCollisionObject(contact->collisionObject())), CollisionManifold(cp, normal));
+        callback->onBeginContact(getRigidBodyFromCollisionObject(contact->collisionObject()), CollisionManifold(cp, normal));
 }
 
 ColliderBullet::Stub::Stub(const V3& gravity, sp<ModelLoader> modelLoader)
@@ -299,14 +296,19 @@ ColliderBullet::DynamicTransform::DynamicTransform(const sp<btMotionState>& moti
 {
 }
 
-void ColliderBullet::DynamicTransform::snapshot(const Transform& /*transform*/, Transform::Snapshot& snapshot) const
+bool ColliderBullet::DynamicTransform::update(const Transform::Stub& transform, uint64_t timestamp)
+{
+    return true;
+}
+
+void ColliderBullet::DynamicTransform::snapshot(const Transform::Stub& /*transform*/, Transform::Snapshot& snapshot) const
 {
     btTransform transform;
     _motion_state->getWorldTransform(transform);
     transform.setOrigin(btVector3(0, 0, 0));
     M4 matrix;
     transform.getOpenGLMatrix(reinterpret_cast<btScalar*>(&matrix));
-    *snapshot.makeData<M4>() = matrix;
+    snapshot.makeData<M4>() = matrix;
 }
 
 V3 ColliderBullet::DynamicTransform::transform(const Transform::Snapshot& /*snapshot*/, const V3& position) const
@@ -316,7 +318,7 @@ V3 ColliderBullet::DynamicTransform::transform(const Transform::Snapshot& /*snap
 
 M4 ColliderBullet::DynamicTransform::toMatrix(const Transform::Snapshot& snapshot) const
 {
-    return *snapshot.getData<M4>();
+    return snapshot.getData<M4>();
 }
 
 sp<BtRigidBodyRef> ColliderBullet::makeRigidBody(btDynamicsWorld* world, btCollisionShape* shape, btMotionState* motionState, Collider::BodyType bodyType, btScalar mass)
@@ -378,8 +380,8 @@ sp<Collider> ColliderBullet::BUILDER_IMPL2::build(const Scope& args)
     return _delegate.build(args);
 }
 
-ColliderBullet::KinematicObject::KinematicObject(sp<Vec3> position, sp<Rotation> rotation, sp<BtRigidBodyRef> rigidBody)
-    : _position(std::move(position)), _rotation(std::move(rotation)), _rigid_body(std::move(rigidBody))
+ColliderBullet::KinematicObject::KinematicObject(sp<Vec3> position, sp<Vec4> quaternion, sp<BtRigidBodyRef> rigidBody)
+    : _position(std::move(position)), _quaternion(std::move(quaternion), V4(0, 0, 0, 1.0f)), _rigid_body(std::move(rigidBody))
 {
 }
 

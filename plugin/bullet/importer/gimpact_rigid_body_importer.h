@@ -1,17 +1,14 @@
-#ifndef ARK_PLUGIN_BULLET_IMPORTER_GIMPACT_RIGID_BODY_IMPORTER_H_
-#define ARK_PLUGIN_BULLET_IMPORTER_GIMPACT_RIGID_BODY_IMPORTER_H_
+#pragma once
 
 #include "plugin/bullet/base/collider_bullet.h"
 
-namespace ark {
-namespace plugin {
-namespace bullet {
+namespace ark::plugin::bullet {
 
 class GImpactRigidBodyImporter : public ColliderBullet::RigidBodyImporter {
 public:
     GImpactRigidBodyImporter(sp<ModelLoader> modelLoader);
 
-    virtual void import(ColliderBullet& collider, const document& manifest) override;
+    void import(ColliderBullet& collider, const document& manifest) override;
 
 //  [[plugin::builder("GImpact")]]
     class BUILDER : public Builder<ColliderBullet::RigidBodyImporter> {
@@ -32,7 +29,3 @@ private:
 };
 
 }
-}
-}
-
-#endif

@@ -21,9 +21,6 @@ namespace ark::plugin::bullet {
 class ARK_PLUGIN_BULLET_API RigidBodyBullet : public RigidBody, Implements<RigidBodyBullet, RigidBody>  {
 public:
     RigidBodyBullet(int32_t id, Collider::BodyType type, ColliderBullet world, sp<CollisionShape> collisionShape, sp<Vec3> position, sp<Transform> transform, sp<BtRigidBodyRef> rigidBody);
-    RigidBodyBullet(sp<Stub> other);
-
-    void discard() override;
 
 //  [[script::bindings::auto]]
     void applyCentralForce(const V3& force);

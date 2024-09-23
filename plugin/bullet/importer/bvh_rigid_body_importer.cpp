@@ -12,10 +12,7 @@
 
 #include "plugin/bullet/base/collision_shape.h"
 
-namespace ark {
-namespace plugin {
-namespace bullet {
-
+namespace ark::plugin::bullet {
 
 namespace {
 
@@ -50,14 +47,14 @@ void BvhRigidBodyImporter::import(ColliderBullet& collider, const document& mani
 sp<CollisionShape> BvhRigidBodyImporter::makeCollisionShape(const Model& model)
 {
     btTriangleIndexVertexArray* tiva = new btTriangleIndexVertexArray();
-    DCHECK(model.meshes().size() > 0, "This model has no meshes data");
+    CHECK(!model.meshes().empty(), "This model has no meshes data");
     for(const Mesh& i : model.meshes())
     {
         btIndexedMesh indexedMesh;
         indexedMesh.m_numTriangles = static_cast<int32_t>(i.indices().size() / 3);
         indexedMesh.m_triangleIndexBase = reinterpret_cast<const unsigned char*>(i.indices().data());
         indexedMesh.m_triangleIndexStride = 3 * sizeof(element_index_t);
-        indexedMesh.m_numVertices = static_cast<int32_t>(i.vertexLength());
+        indexedMesh.m_numVertices = static_cast<int32_t>(i.vertexCount());
         indexedMesh.m_vertexBase = reinterpret_cast<const unsigned char*>(i.vertices().data());
         indexedMesh.m_vertexStride = sizeof(V3);
         tiva->addIndexedMesh(indexedMesh, sizeof(element_index_t) == 4 ? PHY_INTEGER : PHY_SHORT);
@@ -74,9 +71,7 @@ BvhRigidBodyImporter::BUILDER::BUILDER(BeanFactory& factory, const document& man
 
 sp<ColliderBullet::RigidBodyImporter> BvhRigidBodyImporter::BUILDER::build(const Scope& args)
 {
-    return sp<BvhRigidBodyImporter>::make(_model_loader->build(args));
+    return sp<RigidBodyImporter>::make<BvhRigidBodyImporter>(_model_loader->build(args));
 }
 
-}
-}
 }
