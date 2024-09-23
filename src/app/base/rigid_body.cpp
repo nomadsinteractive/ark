@@ -26,7 +26,7 @@ RigidBody::~RigidBody()
     _ref->discard();
 }
 
-void RigidBody::dispose()
+void RigidBody::discard()
 {
     _ref->discard();
 }
@@ -51,7 +51,7 @@ void RigidBody::onWire(const WiringContext& context)
         _ref->setDiscarded(std::move(expendable));
 }
 
-const sp<Ref>& RigidBody::id() const
+const sp<Ref>& RigidBody::ref() const
 {
     return _ref;
 }

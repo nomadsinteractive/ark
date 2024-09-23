@@ -1,4 +1,4 @@
-#include "graphics/impl/renderer/renderer_phrase.h"
+#include "graphics/impl/renderer/render_group.h"
 
 #include "core/base/bean_factory.h"
 #include "graphics/base/layer.h"

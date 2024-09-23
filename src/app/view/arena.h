@@ -8,7 +8,7 @@
 
 #include "graphics/forwarding.h"
 #include "graphics/inf/renderer.h"
-#include "graphics/impl/renderer/renderer_phrase.h"
+#include "graphics/impl/renderer/render_group.h"
 
 #include "core/base/resource_loader.h"
 #include "app/forwarding.h"

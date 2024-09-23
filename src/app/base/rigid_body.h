@@ -22,13 +22,13 @@ public:
     DISALLOW_COPY_AND_ASSIGN(RigidBody);
 
 //  [[script::bindings::auto]]
-    virtual void dispose();
+    virtual void discard();
 
     TypeId onPoll(WiringContext& context) override;
     void onWire(const WiringContext& context) override;
 
 //  [[script::bindings::property]]
-    const sp<Ref>& id() const;
+    const sp<Ref>& ref() const;
 //  [[script::bindings::property]]
     Collider::BodyType type() const;
 //  [[script::bindings::property]]

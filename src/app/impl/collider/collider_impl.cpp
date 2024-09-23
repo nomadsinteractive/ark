@@ -141,12 +141,12 @@ sp<ColliderImpl::RigidBodyImpl> ColliderImpl::Stub::createRigidBody(Collider::Bo
     const V3 size = shape->size().val();
     sp<RigidBodyImpl> rigidBody = sp<RigidBodyImpl>::make(*this, type, std::move(shape), std::move(position), std::move(rotate), std::move(discarded));
     const RigidBodyDef& rigidBodyDef = rigidBody->updateBodyDef(_narrow_phrase, sp<Vec3>::make<Vec3::Const>(size));
-    _rigid_bodies[rigidBody->id()->id()] = rigidBody->id();
+    _rigid_bodies[rigidBody->ref()->id()] = rigidBody->ref();
 
     const V3 posVal = rigidBody->position().val();
     float s = rigidBodyDef.occupyRadius() * 2;
     for(const auto& [i, j] : _broad_phrases)
-        i->create(rigidBody->id()->id(), posVal, V3(s));
+        i->create(rigidBody->ref()->id(), posVal, V3(s));
 
     return rigidBody;
 }
@@ -248,7 +248,7 @@ bool ColliderImpl::RigidBodyImpl::update(uint64_t timestamp)
             _size_updated = false;
         }
         const float r = bodyDef().occupyRadius();
-        _collider_stub.updateBroadPhraseCandidate(id()->id(), pos, V3(r * 2));
+        _collider_stub.updateBroadPhraseCandidate(ref()->id(), pos, V3(r * 2));
         _position_updated = false;
     }
     return true;
@@ -266,7 +266,7 @@ void ColliderImpl::RigidBodyImpl::collisionTest(ColliderImpl::Stub& collider, co
         DPROFILER_TRACE("BroadPhrase");
         result = collider.broadPhraseSearch(position, size, collisionFilter());
         dynamicCandidates = std::move(result._dynamic_candidates);
-        dynamicCandidates.erase(id()->id());
+        dynamicCandidates.erase(ref()->id());
         for(const BroadPhrase::IdType i : removingIds)
             dynamicCandidates.erase(i);
     }
@@ -281,7 +281,7 @@ void ColliderImpl::RigidBodyImpl::collisionTest(ColliderImpl::Stub& collider, co
 
 void ColliderImpl::RigidBodyImpl::doDispose(ColliderImpl::Stub& stub)
 {
-    stub.requestRigidBodyRemoval(id()->id());
+    stub.requestRigidBodyRemoval(ref()->id());
 }
 
 const RigidBodyDef& ColliderImpl::RigidBodyImpl::bodyDef() const
@@ -297,7 +297,7 @@ const RigidBodyDef& ColliderImpl::RigidBodyImpl::updateBodyDef(NarrowPhrase& nar
 
 BroadPhrase::Candidate ColliderImpl::RigidBodyImpl::toBroadPhraseCandidate() const
 {
-    return BroadPhrase::Candidate(id()->id(), position().val(), quaternion().val(), metaId(), _shape->id(), collisionFilter(), bodyDef().impl());
+    return BroadPhrase::Candidate(ref()->id(), position().val(), quaternion().val(), metaId(), _shape->id(), collisionFilter(), bodyDef().impl());
 }
 
 ColliderImpl::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

@@ -25,7 +25,7 @@
 namespace ark::plugin::box2d {
 
 //[[script::bindings::name("World")]]
-class ARK_PLUGIN_BOX2D_API ColliderBox2D : public Runnable, public Collider, Implements<ColliderBox2D, Runnable, Collider> {
+class ARK_PLUGIN_BOX2D_API ColliderBox2D final : public Runnable, public Collider, Implements<ColliderBox2D, Runnable, Collider> {
 public:
     typedef Importer<ColliderBox2D> RigidBodyImporter;
 
@@ -33,7 +33,7 @@ public:
     ColliderBox2D(const b2Vec2& gravity, const V2& pixelPerMeter);
     DEFAULT_COPY_AND_ASSIGN(ColliderBox2D);
 
-    virtual void run() override;
+    void run() override;
 
 //  [[script::bindings::auto]]
     sp<RigidBody> createBody(Collider::BodyType type, sp<ark::Shape> shape, sp<Vec3> position, sp<Rotation> rotate = nullptr, sp<Boolean> discarded = nullptr) override;

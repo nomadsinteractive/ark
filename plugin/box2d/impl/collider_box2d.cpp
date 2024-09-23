@@ -8,7 +8,6 @@
 
 #include "graphics/base/quaternion.h"
 #include "graphics/base/rect.h"
-#include "graphics/base/rotation.h"
 #include "graphics/base/v2.h"
 #include "graphics/traits/bounds.h"
 
@@ -23,6 +22,7 @@
 #include "box2d/impl/joint.h"
 #include "box2d/impl/shapes/ball.h"
 #include "box2d/impl/shapes/box.h"
+#include "core/types/ref.h"
 
 namespace ark::plugin::box2d {
 
@@ -206,17 +206,15 @@ void ColliderBox2D::Stub::run()
 
 void ColliderBox2D::ContactListenerImpl::BeginContact(b2Contact* contact)
 {
-    RigidBodyBox2D::Shadow* s1 = reinterpret_cast<RigidBodyBox2D::Shadow*>(contact->GetFixtureA()->GetBody()->GetUserData().pointer);
-    RigidBodyBox2D::Shadow* s2 = reinterpret_cast<RigidBodyBox2D::Shadow*>(contact->GetFixtureB()->GetBody()->GetUserData().pointer);
+    RigidBodyBox2D* s1 = reinterpret_cast<RigidBodyBox2D*>(contact->GetFixtureA()->GetBody()->GetUserData().pointer);
+    RigidBodyBox2D* s2 = reinterpret_cast<RigidBodyBox2D*>(contact->GetFixtureB()->GetBody()->GetUserData().pointer);
     if(s1 && s2)
     {
         b2WorldManifold worldManifold;
         contact->GetWorldManifold(&worldManifold);
         const V3 normal = V3(worldManifold.normal.x, worldManifold.normal.y, 0);
-        const sp<RigidBodyBox2D::Stub> body1 = s1->_body.ensure();
-        const sp<RigidBodyBox2D::Stub> body2 = s2->_body.ensure();
         const b2Vec2& contactPoint = worldManifold.points[0];
-        if(body1->_contacts.find(body2->_id) == body1->_contacts.end())
+        if(s1->_stub->_contacts.find(s2->id()->id()) == s1->_stub->_contacts.end())
         {
             body1->_contacts.insert(body2->_id);
             if(body1->_callback->hasCallback())
@@ -239,15 +237,13 @@ void ColliderBox2D::ContactListenerImpl::EndContact(b2Contact* contact)
     {
         const sp<RigidBodyBox2D::Stub> body1 = s1->_body.ensure();
         const sp<RigidBodyBox2D::Stub> body2 = s2->_body.ensure();
-        const auto it1 = body1->_contacts.find(body2->_id);
-        if(it1 != body1->_contacts.end())
+        if(const auto it1 = body1->_contacts.find(body2->_id); it1 != body1->_contacts.end())
         {
             body1->_contacts.erase(it1);
             if(body1->_callback->hasCallback())
                 body1->_callback->onEndContact(RigidBodyBox2D::obtain(s2));
         }
-        const auto it2 = body2->_contacts.find(body1->_id);
-        if(it2 != body2->_contacts.end())
+        if(const auto it2 = body2->_contacts.find(body1->_id); it2 != body2->_contacts.end())
         {
             body2->_contacts.erase(it2);
             if(body2->_callback->hasCallback())

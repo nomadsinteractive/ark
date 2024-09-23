@@ -23,7 +23,7 @@ public:
     RigidBodyBullet(int32_t id, Collider::BodyType type, ColliderBullet world, sp<CollisionShape> collisionShape, sp<Vec3> position, sp<Transform> transform, sp<BtRigidBodyRef> rigidBody);
     RigidBodyBullet(sp<Stub> other);
 
-    void dispose() override;
+    void discard() override;
 
 //  [[script::bindings::auto]]
     void applyCentralForce(const V3& force);

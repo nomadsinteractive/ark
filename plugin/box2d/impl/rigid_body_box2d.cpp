@@ -182,7 +182,7 @@ RigidBodyBox2D::RigidBodyBox2D(const ColliderBox2D& world, Collider::BodyType ty
 
 RigidBodyBox2D::RigidBodyBox2D(const sp<Stub>& stub, Collider::BodyType type, const sp<Vec3>& position, const V3& size, const sp<Numeric>& rotation)
     : RigidBody(stub->_id, type, sp<ark::Shape>::make(0, sp<Vec3>::make<Vec3::Const>(size)), sp<_RigidBodyPosition>::make(stub, position),
-                sp<Rotation>::make(sp<_RigidBodyRotation>::make(stub, rotation)), Box(), stub->_disposed), _stub(stub)
+                sp<Rotation>::make(sp<_RigidBodyRotation>::make(stub, rotation)), Box(), stub->_discarded), _stub(stub)
 {
     _stub->_callback = callback();
     _stub->_body->GetUserData().pointer = reinterpret_cast<uintptr_t>(new Shadow(stub, RigidBody::stub()));
@@ -204,7 +204,7 @@ RigidBodyBox2D::RigidBodyBox2D(const sp<RigidBodyBox2D::Stub>& stub, const sp<Ri
 //     }
 // }
 
-void RigidBodyBox2D::dispose()
+void RigidBodyBox2D::discard()
 {
     _stub->dispose();
 }
@@ -222,7 +222,7 @@ sp<RigidBodyBox2D> RigidBodyBox2D::obtain(const Shadow* shadow)
         const b2Vec2& position = s._body->GetPosition();
         float rotation = s._body->GetTransform().q.GetAngle();
         sp<Rotation> rotate = sp<Rotation>::make(sp<Numeric::Const>::make(rotation));
-        rigidBodyStub = sp<RigidBody::Stub>::make(s._id, bodyType, 0, sp<ark::Shape>::make(0, sp<Vec3>::make<Vec3::Const>(V3(position.x, position.y, 0))), nullptr, sp<Transform>::make(Transform::TYPE_LINEAR_2D, std::move(rotate)), Box(), s._disposed);
+        rigidBodyStub = sp<RigidBody::Stub>::make(s._id, bodyType, 0, sp<ark::Shape>::make(0, sp<Vec3>::make<Vec3::Const>(V3(position.x, position.y, 0))), nullptr, sp<Transform>::make(Transform::TYPE_LINEAR_2D, std::move(rotate)), Box(), s._discarded);
         rigidBodyStub->_tag = shadow->_tag;
     }
     return sp<RigidBodyBox2D>::make(shadow->_body.ensure(), rigidBodyStub);
@@ -376,7 +376,7 @@ void RigidBodyBox2D::Stub::dispose()
 
     delete reinterpret_cast<RigidBodyBox2D::Shadow*>(_body->GetUserData().pointer);
     _body->GetUserData().pointer = 0;
-    _disposed.reset(true);
+    _discarded.reset(true);
 
     if(_world.world().IsLocked())
         Ark::instance().applicationContext()->deferUnref(sp<BodyDisposer>::make(_world, _body));

@@ -35,17 +35,9 @@ public:
         ColliderBox2D _world;
         b2Body* _body;
 
-        SafeVar<Boolean> _disposed;
-        sp<RigidBody::Callback> _callback;
+        SafeVar<Boolean> _discarded;
 
-        std::unordered_set<int32_t> _contacts;
-    };
-
-    struct Shadow {
-        Shadow(const sp<Stub>& body, const sp<RigidBody::Stub>& rigidBody);
-
-        WeakPtr<Stub> _body;
-        WeakPtr<RigidBody::Stub> _rigid_body;
+        std::unordered_set<IdType> _contacts;
     };
 
 public:
@@ -55,9 +47,7 @@ public:
     RigidBodyBox2D(const sp<Stub>& stub, Collider::BodyType type, const sp<Vec3>& position, const V3& size, const sp<Numeric>& rotate);
     RigidBodyBox2D(const sp<Stub>& stub, const sp<RigidBody::Stub>& rigidbody);
 
-    void dispose() override;
-
-    static sp<RigidBodyBox2D> obtain(const Shadow* shadow);
+    void discard() override;
 
     b2Body* body() const;
 
