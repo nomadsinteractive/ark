@@ -47,10 +47,10 @@ sp<RigidBody> ColliderBox2D::createBody(Collider::BodyType type, sp<ark::Shape> 
     const auto iter = _stub->_body_manifests.find(shape->id());
     DCHECK(iter != _stub->_body_manifests.end(), "RigidBody shape-id: %d not found", shape);
     const BodyCreateInfo& manifest = iter->second;
-    const sp<RigidBodyBox2D> body = sp<RigidBodyBox2D>::make(*this, type, position, shape->size().val(), rotation ? rotation->theta() : sp<Numeric>(), manifest);
+    const sp<RigidBodyBox2D> body = sp<RigidBodyBox2D>::make(*this, type, position, shape->size().val(), rotation ? rotation->theta() : nullptr, manifest);
     if(rotation)
-        body->setAngle(rotation->theta()->val());
-    DCHECK(!discarded, "Unimplemented");
+        body->setAngle(rotation->theta().val());
+    CHECK(!discarded, "Unimplemented");
 
     if(manifest.category || manifest.mask || manifest.group)
     {
@@ -104,11 +104,6 @@ b2Body* ColliderBox2D::createBody(Collider::BodyType type, const V3& position, c
 
     createInfo.shape->apply(body, size, createInfo);
     return body;
-}
-
-int32_t ColliderBox2D::genRigidBodyId() const
-{
-    return ++_stub->_rigid_body_id_base;
 }
 
 float ColliderBox2D::toPixelX(float meter) const
@@ -195,7 +190,7 @@ sp<Collider> ColliderBox2D::BUILDER_IMPL2::build(const Scope& args)
 }
 
 ColliderBox2D::Stub::Stub(const b2Vec2& gravity, const V2& pixelPerMeter)
-    : _ppm_x(pixelPerMeter.x()), _ppm_y(pixelPerMeter.y()), _time_step(1.0f / 60.0f), _velocity_iterations(6), _position_iterations(2), _rigid_body_id_base(0), _world(gravity)
+    : _ppm_x(pixelPerMeter.x()), _ppm_y(pixelPerMeter.y()), _time_step(1.0f / 60.0f), _velocity_iterations(6), _position_iterations(2), _world(gravity)
 {
 }
 
@@ -214,40 +209,38 @@ void ColliderBox2D::ContactListenerImpl::BeginContact(b2Contact* contact)
         contact->GetWorldManifold(&worldManifold);
         const V3 normal = V3(worldManifold.normal.x, worldManifold.normal.y, 0);
         const b2Vec2& contactPoint = worldManifold.points[0];
-        if(s1->_stub->_contacts.find(s2->id()->id()) == s1->_stub->_contacts.end())
+        const IdType id1 = s1->ref()->id(), id2 = s2->ref()->id();
+        if(s1->_stub->_contacts.find(id2) == s1->_stub->_contacts.end())
         {
-            body1->_contacts.insert(body2->_id);
-            if(body1->_callback->hasCallback())
-                body1->_callback->onBeginContact(RigidBodyBox2D::obtain(s2), CollisionManifold(V3(contactPoint.x, contactPoint.y, 0), normal));
+            s1->_stub->_contacts.insert(id2);
+            s1->onBeginContact(*s2, CollisionManifold(V3(contactPoint.x, contactPoint.y, 0), normal));
         }
-        if(body2->_contacts.find(body1->_id) == body2->_contacts.end())
+        if(s2->_stub->_contacts.find(id1) == s2->_stub->_contacts.end())
         {
-            body2->_contacts.insert(body1->_id);
-            if(body2->_callback->hasCallback())
-                body2->_callback->onBeginContact(RigidBodyBox2D::obtain(s1), CollisionManifold(V3(contactPoint.x, contactPoint.y, 0), -normal));
+            s2->_stub->_contacts.insert(id1);
+            s2->onBeginContact(*s1, CollisionManifold(V3(contactPoint.x, contactPoint.y, 0), -normal));
         }
     }
 }
 
 void ColliderBox2D::ContactListenerImpl::EndContact(b2Contact* contact)
 {
-    RigidBodyBox2D::Shadow* s1 = reinterpret_cast<RigidBodyBox2D::Shadow*>(contact->GetFixtureA()->GetBody()->GetUserData().pointer);
-    RigidBodyBox2D::Shadow* s2 = reinterpret_cast<RigidBodyBox2D::Shadow*>(contact->GetFixtureB()->GetBody()->GetUserData().pointer);
+    RigidBodyBox2D* s1 = reinterpret_cast<RigidBodyBox2D*>(contact->GetFixtureA()->GetBody()->GetUserData().pointer);
+    RigidBodyBox2D* s2 = reinterpret_cast<RigidBodyBox2D*>(contact->GetFixtureB()->GetBody()->GetUserData().pointer);
     if(s1 && s2)
     {
-        const sp<RigidBodyBox2D::Stub> body1 = s1->_body.ensure();
-        const sp<RigidBodyBox2D::Stub> body2 = s2->_body.ensure();
-        if(const auto it1 = body1->_contacts.find(body2->_id); it1 != body1->_contacts.end())
+        const sp<RigidBodyBox2D::Stub>& body1 = s1->_stub;
+        const sp<RigidBodyBox2D::Stub>& body2 = s2->_stub;
+        const IdType id1 = s1->ref()->id(), id2 = s2->ref()->id();
+        if(const auto it1 = body1->_contacts.find(id2); it1 != body1->_contacts.end())
         {
             body1->_contacts.erase(it1);
-            if(body1->_callback->hasCallback())
-                body1->_callback->onEndContact(RigidBodyBox2D::obtain(s2));
+            s1->onEndContact(*s2);
         }
-        if(const auto it2 = body2->_contacts.find(body1->_id); it2 != body2->_contacts.end())
+        if(const auto it2 = body2->_contacts.find(id1); it2 != body2->_contacts.end())
         {
             body2->_contacts.erase(it2);
-            if(body2->_callback->hasCallback())
-                body2->_callback->onEndContact(RigidBodyBox2D::obtain(s1));
+            s2->onEndContact(*s1);
         }
     }
 }

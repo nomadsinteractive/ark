@@ -5,7 +5,6 @@
 #include <Box2D/Box2D.h>
 
 #include "core/types/shared_ptr.h"
-#include "core/types/weak_ptr.h"
 
 #include "graphics/forwarding.h"
 
@@ -28,24 +27,19 @@ public:
         ~Stub();
 
         void dispose();
-
         b2Body* body();
 
-        int32_t _id;
         ColliderBox2D _world;
         b2Body* _body;
-
         SafeVar<Boolean> _discarded;
-
         std::unordered_set<IdType> _contacts;
     };
 
 public:
 //  [[script::bindings::auto]]
-    RigidBodyBox2D(const ColliderBox2D& world, Collider::BodyType type, const sp<Vec3>& position, const V3& size, const sp<Numeric>& rotate, const sp<Shape>& shape, float density, float friction);
-    RigidBodyBox2D(const ColliderBox2D& world, Collider::BodyType type, const sp<Vec3>& position, const V3& size, const sp<Numeric>& rotate, const BodyCreateInfo& createInfo);
-    RigidBodyBox2D(const sp<Stub>& stub, Collider::BodyType type, const sp<Vec3>& position, const V3& size, const sp<Numeric>& rotate);
-    RigidBodyBox2D(const sp<Stub>& stub, const sp<RigidBody::Stub>& rigidbody);
+    RigidBodyBox2D(const ColliderBox2D& world, Collider::BodyType type, const sp<Vec3>& position, const V3& size, const SafeVar<Numeric>& rotate, const sp<Shape>& shape, float density, float friction);
+    RigidBodyBox2D(const ColliderBox2D& world, Collider::BodyType type, const sp<Vec3>& position, const V3& size, const SafeVar<Numeric>& rotate, const BodyCreateInfo& createInfo);
+    RigidBodyBox2D(const sp<Stub>& stub, Collider::BodyType type, const sp<Vec3>& position, const V3& size, const SafeVar<Numeric>& rotate);
 
     void discard() override;
 

@@ -34,7 +34,7 @@ private:
     Ref(IdType id, void* instance, sp<Boolean> discarded = nullptr);
 
 private:
-    uint32_t _id;
+    IdType _id;
     void* _instance;
     SafeVar<Boolean> _discarded;
 

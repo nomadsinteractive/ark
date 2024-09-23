@@ -24,23 +24,22 @@ namespace ark::plugin::box2d {
 
 namespace {
 
-class _RigidBodyRotation : public Numeric {
+class _RigidBodyRotation final : public Numeric {
 public:
-    _RigidBodyRotation(const sp<RigidBodyBox2D::Stub>& stub, const sp<Numeric>& delegate)
-        : _stub(stub), _delegate(delegate) {
+    _RigidBodyRotation(const sp<RigidBodyBox2D::Stub>& stub)
+        : _stub(stub) {
     }
 
-    virtual float val() override {
+    float val() override {
         DCHECK(_stub->_body, "Body has been disposed already");
         return _stub->_body->GetAngle();
     }
 
-    virtual bool update(uint64_t /*timestamp*/) override {
+    bool update(uint64_t /*timestamp*/) override {
         return true;
     }
 
     sp<RigidBodyBox2D::Stub> _stub;
-    sp<Numeric> _delegate;
 };
 
 class _RigidBodyPosition : public Vec3 {
@@ -170,62 +169,27 @@ private:
 
 }
 
-RigidBodyBox2D::RigidBodyBox2D(const ColliderBox2D& world, Collider::BodyType type, const sp<Vec3>& position, const V3& size, const sp<Numeric>& rotate, const sp<Shape>& shape, float density, float friction)
+RigidBodyBox2D::RigidBodyBox2D(const ColliderBox2D& world, Collider::BodyType type, const sp<Vec3>& position, const V3& size, const SafeVar<Numeric>& rotate, const sp<Shape>& shape, float density, float friction)
     : RigidBodyBox2D(world, type, position, size, rotate, BodyCreateInfo(shape, density, friction, type & Collider::BODY_TYPE_SENSOR))
 {
 }
 
-RigidBodyBox2D::RigidBodyBox2D(const ColliderBox2D& world, Collider::BodyType type, const sp<Vec3>& position, const V3& size, const sp<Numeric>& rotate, const BodyCreateInfo& createInfo)
+RigidBodyBox2D::RigidBodyBox2D(const ColliderBox2D& world, Collider::BodyType type, const sp<Vec3>& position, const V3& size, const SafeVar<Numeric>& rotate, const BodyCreateInfo& createInfo)
     : RigidBodyBox2D(sp<Stub>::make(world, world.createBody(type, position->val(), size, createInfo)), type, position, size, rotate)
 {
 }
 
-RigidBodyBox2D::RigidBodyBox2D(const sp<Stub>& stub, Collider::BodyType type, const sp<Vec3>& position, const V3& size, const sp<Numeric>& rotation)
-    : RigidBody(stub->_id, type, sp<ark::Shape>::make(0, sp<Vec3>::make<Vec3::Const>(size)), sp<_RigidBodyPosition>::make(stub, position),
-                sp<Rotation>::make(sp<_RigidBodyRotation>::make(stub, rotation)), Box(), stub->_discarded), _stub(stub)
+//TODO: Manual rotation
+RigidBodyBox2D::RigidBodyBox2D(const sp<Stub>& stub, Collider::BodyType type, const sp<Vec3>& position, const V3& size, const SafeVar<Numeric>& rotation)
+    : RigidBody(type, sp<ark::Shape>::make(0, sp<Vec3>::make<Vec3::Const>(size)), sp<_RigidBodyPosition>::make(stub, position),
+                sp<Rotation>::make(sp<Numeric>::make<_RigidBodyRotation>(stub)), Box(), nullptr), _stub(stub)
 {
-    _stub->_callback = callback();
-    _stub->_body->GetUserData().pointer = reinterpret_cast<uintptr_t>(new Shadow(stub, RigidBody::stub()));
+    _stub->_body->GetUserData().pointer = reinterpret_cast<uintptr_t>(this);
 }
-
-RigidBodyBox2D::RigidBodyBox2D(const sp<RigidBodyBox2D::Stub>& stub, const sp<RigidBody::Stub>& rigidbody)
-    : RigidBody(rigidbody), _stub(stub)
-{
-}
-
-// void RigidBodyBox2D::bind(const sp<RenderObject>& renderObject)
-// {
-//     renderObject->setPosition(sp<RenderObjectPosition>::make(_stub));
-//     renderObject->setTransform(transform());
-//     if(type() & Collider::BODY_FLAG_MANUAL_ROTATION)
-//     {
-//         sp<Numeric> r = transform()->rotation() ? transform()->rotation()->theta().cast<_RigidBodyRotation>()->_delegate : sp<Numeric>();
-//         transform()->rotation()->setRotation(sp<ManualRotation>::make(_stub, std::move(r)), nullptr);
-//     }
-// }
 
 void RigidBodyBox2D::discard()
 {
     _stub->dispose();
-}
-
-sp<RigidBodyBox2D> RigidBodyBox2D::obtain(const Shadow* shadow)
-{
-    const sp<Stub> bodyStub = shadow->_body.ensure();
-    sp<RigidBody::Stub> rigidBodyStub = shadow->_rigid_body.lock();
-    if(!rigidBodyStub)
-    {
-        const Stub& s = bodyStub;
-        Collider::BodyType bodyType = (s._body->GetType() == b2_staticBody) ?
-                    Collider::BODY_TYPE_STATIC :
-                    (s._body->GetType() == b2_kinematicBody ? Collider::BODY_TYPE_KINEMATIC : Collider::BODY_TYPE_DYNAMIC);
-        const b2Vec2& position = s._body->GetPosition();
-        float rotation = s._body->GetTransform().q.GetAngle();
-        sp<Rotation> rotate = sp<Rotation>::make(sp<Numeric::Const>::make(rotation));
-        rigidBodyStub = sp<RigidBody::Stub>::make(s._id, bodyType, 0, sp<ark::Shape>::make(0, sp<Vec3>::make<Vec3::Const>(V3(position.x, position.y, 0))), nullptr, sp<Transform>::make(Transform::TYPE_LINEAR_2D, std::move(rotate)), Box(), s._discarded);
-        rigidBodyStub->_tag = shadow->_tag;
-    }
-    return sp<RigidBodyBox2D>::make(shadow->_body.ensure(), rigidBodyStub);
 }
 
 b2Body* RigidBodyBox2D::body() const
@@ -359,7 +323,7 @@ sp<Future> RigidBodyBox2D::applyRotate(const sp<Numeric>& rotate)
 }
 
 RigidBodyBox2D::Stub::Stub(const ColliderBox2D& world, b2Body* body)
-    : _id(world.genRigidBodyId()), _world(world), _body(body)
+    : _world(world), _body(body)
 {
 }
 
@@ -371,10 +335,8 @@ RigidBodyBox2D::Stub::~Stub()
 
 void RigidBodyBox2D::Stub::dispose()
 {
-    DCHECK(_body, "Body has been disposed already");
-    LOGD("id = %d", _id);
+    CHECK(_body, "Body has been disposed already");
 
-    delete reinterpret_cast<RigidBodyBox2D::Shadow*>(_body->GetUserData().pointer);
     _body->GetUserData().pointer = 0;
     _discarded.reset(true);
 
@@ -384,18 +346,12 @@ void RigidBodyBox2D::Stub::dispose()
         BodyDisposer disposer(_world, _body);
 
     _body = nullptr;
-    _callback = nullptr;
 }
 
 b2Body* RigidBodyBox2D::Stub::body()
 {
-    DCHECK(_body, "Body has been disposed");
+    CHECK(_body, "Body has been disposed");
     return _body;
-}
-
-RigidBodyBox2D::Shadow::Shadow(const sp<RigidBodyBox2D::Stub>& body, const sp<RigidBody::Stub>& rigidBody)
-    : _body(body), _rigid_body(rigidBody)
-{
 }
 
 }
