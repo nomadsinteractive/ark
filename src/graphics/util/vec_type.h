@@ -8,7 +8,7 @@
 #include "core/impl/variable/variable_dyed.h"
 #include "core/impl/variable/integral.h"
 #include "core/impl/variable/integral_with_resistance.h"
-#include "core/impl/variable/interpolate.h"
+#include "core/impl/variable/lerp.h"
 #include "core/impl/variable/second_order_dynamics.h"
 #include "core/impl/variable/variable_op1.h"
 #include "core/impl/variable/variable_op2.h"
@@ -204,18 +204,18 @@ public:
     static sp<Vec2> xy(sp<VarType> self) {
         if constexpr(std::is_same_v<V2, T>)
             return self;
-        return sp<VecSubscribed<V2, T>>::make(std::move(self), std::array<size_t, 2>{0, 1});
+        return sp<VecSubscribed<V2, T>>::make(std::move(self), std::array<uint8_t, 2>{0, 1});
     }
 
     static sp<Vec2> yx(const sp<VarType>& self) {
-        return sp<VecSubscribed<V2, T>>::make(std::move(self), std::array<size_t, 2>{1, 0});
+        return sp<VecSubscribed<V2, T>>::make(std::move(self), std::array<uint8_t, 2>{1, 0});
     }
 
     static sp<Vec3> xyz(sp<VarType> self) {
         CHECK(2 < DIMENSION, "Index z(3) out of bounds");
         if constexpr(std::is_same_v<V3, T>)
             return self;
-        return sp<VecSubscribed<V3, T>>::make(std::move(self), std::array<size_t, 3>{0, 1, 2});
+        return sp<VecSubscribed<V3, T>>::make(std::move(self), std::array<uint8_t, 3>{0, 1, 2});
     }
 
     [[deprecated]]
@@ -287,7 +287,7 @@ public:
     static sp<VarType> lerp(sp<VarType> self, sp<VarType> b, sp<Numeric> t) {
         if(!t)
             t = Ark::instance().appClock()->duration();
-        return sp<Interpolate<T, float>>::make(std::move(self), std::move(b), std::move(t));
+        return sp<Lerp<T, float>>::make(std::move(self), std::move(b), std::move(t));
     }
 
     static sp<VarType> sod(sp<VarType> self, const T& d0, float k, float z, float r, sp<Numeric> t) {

@@ -5,11 +5,8 @@
 
 #include "python/api.h"
 #include "python/extension/python_interpreter.h"
-#include "python/extension/py_instance_ref.h"
 
-namespace ark {
-namespace plugin {
-namespace python {
+namespace ark::plugin::python {
 
 PythonCallableRunnable::PythonCallableRunnable(PyInstance callable)
     : _callable(std::move(callable))
@@ -32,11 +29,4 @@ void PythonCallableRunnable::run()
     }
 }
 
-void PythonCallableRunnable::traverse(const Holder::Visitor& visitor)
-{
-    visitor(_callable.ref());
-}
-
-}
-}
 }

@@ -1,22 +1,28 @@
 #include "app/traits/shape.h"
 
+#include "core/base/string.h"
 #include "core/impl/variable/variable_dirty.h"
 
 namespace ark {
 
-Shape::Shape(int32_t id, sp<Vec3> size)
-    : _id(id), _size(std::move(size))
+Shape::Shape(TypeId type, sp<Vec3> size)
+    : _type(type), _size(std::move(size))
 {
 }
 
-int32_t Shape::id() const
+TypeId Shape::type() const
 {
-    return _id;
+    return _type;
 }
 
-void Shape::setId(int32_t id)
+void Shape::setType(TypeId type)
 {
-    _id = id;
+    _type = type;
+}
+
+void Shape::setType(const String& type)
+{
+    _type = type.hash();
 }
 
 const SafeVar<Vec3>& Shape::size() const

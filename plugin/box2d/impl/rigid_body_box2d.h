@@ -32,7 +32,7 @@ public:
         ColliderBox2D _world;
         b2Body* _body;
         SafeVar<Boolean> _discarded;
-        std::unordered_set<IdType> _contacts;
+        std::unordered_set<RefId> _contacts;
     };
 
 public:

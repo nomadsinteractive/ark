@@ -13,10 +13,10 @@ public:
     void onWire(const WiringContext& context) override;
 
 //  [[script::bindings::auto]]
-    IdType id() const;
+    RefId id() const;
 
 private:
-    IdType _id;
+    RefId _id;
 
     friend class Entity;
 };

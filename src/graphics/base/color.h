@@ -41,13 +41,11 @@ public:
 //  [[script::bindings::auto]]
     sp<Vec3> toVec3() const;
 
-//  [[script::bindings::property]]
+//  [[script::bindings::operator(index)]]
     uint32_t value() const;
-//  [[script::bindings::property]]
-    void setValue(uint32_t value);
 
 //  [[script::bindings::auto]]
-    void assign(const Color& other);
+    void reset(uint32_t value);
 
     bool operator == (const Color& other) const;
     bool operator != (const Color& other) const;

@@ -20,7 +20,6 @@ private:
     ptrdiff_t _begin;
     ptrdiff_t _end;
     ptrdiff_t _step;
-
 };
 
 }

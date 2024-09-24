@@ -194,7 +194,7 @@ private:
     }
     template<typename R, typename... Args> static Optional<std::function<R(Args...)>> toCppObject_function(PyObject* obj, std::function<R(Args...)>*) {
         if(!PyCallable_Check(obj))
-            return Optional<std::function<R(Args...)>>();
+            return {};
         PyInstance pyObj(PyInstance::own(obj));
         return Optional<std::function<R(Args...)>>([pyObj](Args... args) -> R {
             PyInstance tuple = PyInstance::steal(makeArgumentTuple<Args...>(args...));

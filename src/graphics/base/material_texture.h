@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_BASE_MATERIAL_TEXTURE_H_
-#define ARK_GRAPHICS_BASE_MATERIAL_TEXTURE_H_
+#pragma once
 
 #include "core/forwarding.h"
 #include "core/types/shared_ptr.h"
@@ -33,11 +32,8 @@ public:
     const sp<VariableWrapper<sp<Bitmap>>>& bitmapWrapper() const;
 
 private:
-    Type _type;
     sp<Vec4> _color;
     sp<VariableWrapper<sp<Bitmap>>> _bitmap_wrapper;
 };
 
 }
-
-#endif

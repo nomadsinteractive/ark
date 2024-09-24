@@ -12,7 +12,7 @@ class RefManager {
 public:
 
     sp<Ref> makeRef(void* instance, sp<Boolean> discarded = nullptr);
-    Ref& toRef(IdType id);
+    Ref& toRef(RefId id);
 
 private:
     void recycle(void* ref);

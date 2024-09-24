@@ -86,17 +86,12 @@ uint32_t Color::value() const
     return *reinterpret_cast<uint32_t*>(v);
 }
 
-void Color::setValue(uint32_t value)
+void Color::reset(uint32_t value)
 {
     setR((value >> 24) / 255.0f);
     setG(((value >> 16) & 0xff) / 255.0f);
     setB(((value >> 8) & 0xff) / 255.0f);
     setA((value & 0xff) / 255.0f);
-}
-
-void Color::assign(const Color& other)
-{
-    _wrapped = other._wrapped;
 }
 
 bool Color::operator ==(const Color& other) const

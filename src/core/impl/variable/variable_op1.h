@@ -2,14 +2,12 @@
 
 #include <functional>
 
-#include "core/inf/holder.h"
 #include "core/inf/variable.h"
 #include "core/types/implements.h"
-#include "core/util/holder_util.h"
 
 namespace ark {
 
-template<typename T, typename U = T> class VariableOP1 final : public Variable<T>, public Holder, Implements<VariableOP1<T>, Variable<T>, Holder> {
+template<typename T, typename U = T> class VariableOP1 final : public Variable<T>, Implements<VariableOP1<T>, Variable<T>> {
 private:
     typedef std::function<T(U)> OPFunc;
 
@@ -24,10 +22,6 @@ public:
 
     bool update(uint64_t timestamp) override {
         return _arg->update(timestamp);
-    }
-
-    void traverse(const Visitor& visitor) override {
-        HolderUtil::visit(_arg, visitor);
     }
 
 private:

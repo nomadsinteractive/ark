@@ -17,7 +17,7 @@ void WithId::onWire(const WiringContext& context)
 {
 }
 
-IdType WithId::id() const
+RefId WithId::id() const
 {
     return _id;
 }

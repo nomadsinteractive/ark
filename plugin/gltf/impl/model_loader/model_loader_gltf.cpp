@@ -116,18 +116,15 @@ std::vector<sp<Material>> loadMaterials(tinygltf::Model const& gltfModel, Materi
         sp<Material>& material = materials[i];
         if(!(material = materialBundle.getMaterial(mName))) {
             material = sp<Material>::make(i, std::move(mName));
-            // Albedo
             if(gltfMaterial.pbrMetallicRoughness.baseColorTexture.index == -1) {
                 const std::vector<double>& vertexColorData = gltfMaterial.pbrMetallicRoughness.baseColorFactor;
-
                 V4 vertexColor(static_cast<float>(vertexColorData.at(0)), static_cast<float>(vertexColorData.at(1)),
                                static_cast<float>(vertexColorData.at(2)), static_cast<float>(vertexColorData.at(3)));
-                material->baseColor()->setColor(sp<Vec4::Const>::make(vertexColor));
+                material->baseColor()->setColor(sp<Vec4>::make<Vec4::Const>(vertexColor));
             }
 
             // TODO: Normals
             // TODO: MetallicRoughness
-
         }
     }
 
@@ -260,7 +257,7 @@ M4 getNodeLocalTransformMatrix(const tinygltf::Node& node)
     if(!node.scale.empty())
         scale = V3(static_cast<float>(node.scale.at(0)), static_cast<float>(node.scale.at(1)), static_cast<float>(node.scale.at(2)));
 
-    V4 quaternion(0, 0, 0, 1.0f);
+    V4 quaternion(constants::QUATERNION_ZERO);
     if(!node.rotation.empty())
         quaternion = V4(static_cast<float>(node.rotation.at(0)), static_cast<float>(node.rotation.at(1)), static_cast<float>(node.rotation.at(2)), static_cast<float>(node.rotation.at(3)));
 

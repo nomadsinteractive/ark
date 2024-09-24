@@ -17,13 +17,13 @@ namespace ark {
 
 namespace {
 
-class Vec2Fence : public Vec2, public Holder, Implements<Vec2Fence, Vec2, Holder> {
+class Vec2Fence final : public Vec2, Implements<Vec2Fence, Vec2> {
 public:
     Vec2Fence(sp<Vec2> delegate, sp<Vec3> plane, sp<Observer> observer)
         : _delegate(std::move(delegate)), _plane(std::move(plane)), _observer(std::move(observer)), _distance(getPlaneDistance(_delegate->val())) {
     }
 
-    virtual V2 val() override {
+    V2 val() override {
         V2 v = _delegate->val();
         float distance = getPlaneDistance(v);
         if(!Math::signEquals(_distance, distance)) {
@@ -33,13 +33,8 @@ public:
         return v;
     }
 
-    virtual bool update(uint64_t timestamp) override {
+    bool update(uint64_t timestamp) override {
         return UpdatableUtil::update(timestamp, _delegate, _plane);
-    }
-
-    virtual void traverse(const Visitor& visitor) override {
-        HolderUtil::visit(_delegate, visitor);
-        HolderUtil::visit(_plane, visitor);
     }
 
 private:

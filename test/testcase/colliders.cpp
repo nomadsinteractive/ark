@@ -82,9 +82,9 @@ public:
         const auto r = bp2->search(V3(220, 0, 0), V3(16, 32, 0));
 
         const sp<RenderObject> c001 = resourceLoader->load<RenderObject>("c001", args);
-        const sp<RigidBody> rigidBody001 = collider->createBody(Collider::BODY_TYPE_DYNAMIC, sp<Shape>::make(Shape::SHAPE_ID_AABB, static_cast<sp<Vec3>>(c001->size())), c001->position());
+        const sp<RigidBody> rigidBody001 = collider->createBody(Collider::BODY_TYPE_DYNAMIC, sp<Shape>::make(Shape::TYPE_AABB, static_cast<sp<Vec3>>(c001->size())), c001->position());
         const sp<RenderObject> c002 = resourceLoader->load<RenderObject>("c002", args);
-        const sp<RigidBody> rigidBody002 = collider->createBody(Collider::BODY_TYPE_STATIC, sp<Shape>::make(Shape::SHAPE_ID_AABB, static_cast<sp<Vec3>>(c002->size())), c002->position());
+        const sp<RigidBody> rigidBody002 = collider->createBody(Collider::BODY_TYPE_STATIC, sp<Shape>::make(Shape::TYPE_AABB, static_cast<sp<Vec3>>(c002->size())), c002->position());
         const sp<RenderObject> c003 = resourceLoader->load<RenderObject>("c003", args);
         const sp<RigidBody> rigidBody003 = collider->createBody(Collider::BODY_TYPE_DYNAMIC, sp<Shape>::make(1, static_cast<sp<Vec3>>(c003->size())), c003->position(), c003->transform()->rotation());
         const sp<CollisionCallbackImpl> collisionCallbackImpl001 = sp<CollisionCallbackImpl>::make(c001);

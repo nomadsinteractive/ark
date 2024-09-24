@@ -50,14 +50,12 @@ MaterialBundle::MaterialBundle(std::map<String, sp<Material>> materials, std::ar
             if(_texture_packers[j])
             {
                 const sp<MaterialTexture>& texture = material->getTexture(static_cast<MaterialTexture::Type>(j));
-                bitmap bitmap = texture->bitmap();
-                if(bitmap)
+                if(bitmap bitmap = texture->bitmap())
                 {
                     const auto biter = bitmapBounds[j].find(bitmap);
                     if(biter == bitmapBounds[j].end())
                     {
-                        const auto iter = _material_bounds.find(i.first);
-                        if(iter == _material_bounds.end())
+                        if(const auto iter = _material_bounds.find(i.first); iter == _material_bounds.end())
                             bitmapBounds[j][bitmap] = _material_bounds[i.first] = _texture_packers[j]->addBitmap(binPack, bitmap, texture->bitmapWrapper());
                         else
                         {

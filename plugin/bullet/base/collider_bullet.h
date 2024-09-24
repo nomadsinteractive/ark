@@ -50,8 +50,8 @@ public:
 
     btDiscreteDynamicsWorld* btDynamicWorld() const;
 
-    const std::unordered_map<int32_t, sp<CollisionShape>>& collisionShapes() const;
-    std::unordered_map<int32_t, sp<CollisionShape>>& collisionShapes();
+    const std::unordered_map<TypeId, sp<CollisionShape>>& collisionShapes() const;
+    std::unordered_map<TypeId, sp<CollisionShape>>& collisionShapes();
 
 //  [[plugin::resource-loader]]
     class BUILDER_IMPL1 : public Builder<ColliderBullet> {
@@ -104,7 +104,7 @@ private:
         void dispose();
 
         sp<ModelLoader> _model_loader;
-        std::unordered_map<int32_t, sp<CollisionShape>> _collision_shapes;
+        std::unordered_map<TypeId, sp<CollisionShape>> _collision_shapes;
 
         op<btDefaultCollisionConfiguration> _collision_configuration;
         op<btCollisionDispatcher> _collision_dispatcher;

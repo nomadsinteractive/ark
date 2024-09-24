@@ -4,7 +4,7 @@
 
 namespace ark {
 
-Ref::Ref(IdType id, void* instance, sp<Boolean> discarded)
+Ref::Ref(RefId id, void* instance, sp<Boolean> discarded)
     : _id(id), _instance(instance), _discarded(std::move(discarded), false)
 {
 }
@@ -19,7 +19,7 @@ Ref::operator bool() const
     return !isDiscarded();
 }
 
-IdType Ref::id() const
+RefId Ref::id() const
 {
     return _id;
 }

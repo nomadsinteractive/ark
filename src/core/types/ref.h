@@ -19,7 +19,7 @@ public:
     }
 
 //  [[script::bindings::operator(index)]]
-    IdType id() const;
+    RefId id() const;
 
     bool isDiscarded() const;
 //  [[script::bindings::property]]
@@ -31,10 +31,10 @@ public:
     void discard();
 
 private:
-    Ref(IdType id, void* instance, sp<Boolean> discarded = nullptr);
+    Ref(RefId id, void* instance, sp<Boolean> discarded = nullptr);
 
 private:
-    IdType _id;
+    RefId _id;
     void* _instance;
     SafeVar<Boolean> _discarded;
 

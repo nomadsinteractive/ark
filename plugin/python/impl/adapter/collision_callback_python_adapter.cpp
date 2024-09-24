@@ -60,12 +60,6 @@ void CollisionCallbackPythonAdapter::onEndContact(const RigidBody& rigidBody)
     }
 }
 
-void CollisionCallbackPythonAdapter::traverse(const Holder::Visitor& visitor)
-{
-    HolderUtil::visit(_on_begin_contact.ref(), visitor);
-    HolderUtil::visit(_on_end_contact.ref(), visitor);
-}
-
 PyObject* CollisionCallbackPythonAdapter::toPyObject(const sp<RigidBody>& rigidBody) const
 {
     const Class* objClass = rigidBody.getClass();

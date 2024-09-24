@@ -1,22 +1,19 @@
-#ifndef ARK_CORE_IMPL_VARIABLE_INTEGRAL_H_
-#define ARK_CORE_IMPL_VARIABLE_INTEGRAL_H_
+#pragma once
 
 #include "core/forwarding.h"
-#include "core/inf/holder.h"
 #include "core/inf/variable.h"
 #include "core/types/implements.h"
 #include "core/types/shared_ptr.h"
-#include "core/util/holder_util.h"
 
 namespace ark {
 
-template<typename T> class Integral : public Variable<T>, public Holder, Implements<Integral<T>, Variable<T>, Holder> {
+template<typename T> class Integral final : public Variable<T>, Implements<Integral<T>, Variable<T>> {
 public:
     Integral(sp<Variable<T>> v, sp<Numeric> t)
         : _v(std::move(v)), _t(std::move(t)), _s0(0), _v0(_v->val()), _t0(_t->val()) {
     }
 
-    virtual T val() override {
+    T val() override {
         T v = _v->val();
         float t = _t->val();
         _s0 += ((v + _v0) / 2) * (t - _t0);
@@ -25,13 +22,8 @@ public:
         return _s0;
     }
 
-    virtual bool update(uint64_t timestamp) override {
+    bool update(uint64_t timestamp) override {
         return _t->update(timestamp);
-    }
-
-    virtual void traverse(const Visitor& visitor) override {
-        HolderUtil::visit(_v, visitor);
-        HolderUtil::visit(_t, visitor);
     }
 
 private:
@@ -43,13 +35,13 @@ private:
     float _t0;
 };
 
-template<typename T> class IntegralS2 : public Variable<T>, public Holder, Implements<IntegralS2<T>, Variable<T>, Holder> {
+template<typename T> class IntegralS2 final : public Variable<T>, Implements<IntegralS2<T>, Variable<T>> {
 public:
     IntegralS2(sp<Variable<T>> a, sp<Numeric> t, const T& s0, const T& s1)
         : _a(std::move(a)), _t(std::move(t)), _s0(s0), _s1(s1), _a1(0), _t0(_t->val()), _t1(_t0) {
     }
 
-    virtual T val() override {
+    T val() override {
         float t = _t->val();
         T s2 = _s1 * 2 - _s0 + (t - _t1) * (_t1 - _t0) * _a1;
         _a1 = _a->val();
@@ -60,13 +52,8 @@ public:
         return s2;
     }
 
-    virtual bool update(uint64_t timestamp) override {
+    bool update(uint64_t timestamp) override {
         return _t->update(timestamp);
-    }
-
-    virtual void traverse(const Visitor& visitor) override {
-        HolderUtil::visit(_a, visitor);
-        HolderUtil::visit(_t, visitor);
     }
 
 private:
@@ -81,5 +68,3 @@ private:
 };
 
 }
-
-#endif

@@ -54,11 +54,4 @@ void RendererMakerPython::recycle(const Box& renderer)
     }
 }
 
-void RendererMakerPython::traverse(const Holder::Visitor& visitor)
-{
-    visitor(_maker.ref());
-    if(_recycler)
-        visitor(_recycler.ref());
-}
-
 }

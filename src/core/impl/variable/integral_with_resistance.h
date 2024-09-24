@@ -7,7 +7,7 @@
 
 namespace ark {
 
-template<typename T> class IntegralWithResistance : public Variable<T> {
+template<typename T> class [[deprecated]] IntegralWithResistance : public Variable<T> {
 public:
     IntegralWithResistance(const T& v0, sp<Variable<T>> a, sp<Numeric> cd, sp<Numeric> t)
         : _v(v0), _a(std::move(a)), _cd(std::move(cd)), _t(std::move(t)), _last_t(_t->val()) {

@@ -19,7 +19,7 @@ namespace ark::plugin::bullet {
 
 namespace {
 
-class GImpactCollisionShape : public CollisionShape {
+class GImpactCollisionShape final : public CollisionShape {
 public:
     GImpactCollisionShape(btGImpactMeshShape* shape, btTriangleIndexVertexArray* tiva, btScalar mass)
         : CollisionShape(shape, mass), _tiva(tiva) {
@@ -41,10 +41,10 @@ void GImpactRigidBodyImporter::import(ColliderBullet& collider, const document& 
     btCollisionDispatcher * dispatcher = static_cast<btCollisionDispatcher*>(collider.btDynamicWorld()->getDispatcher());
     btGImpactCollisionAlgorithm::registerAlgorithm(dispatcher);
 
-    std::unordered_map<int32_t, sp<CollisionShape>>& shapes = collider.collisionShapes();
+    std::unordered_map<TypeId, sp<CollisionShape>>& shapes = collider.collisionShapes();
     for(const document& i : manifest->children("model"))
     {
-        int32_t type = Documents::ensureAttribute<int32_t>(i, constants::TYPE);
+        const int32_t type = Documents::ensureAttribute<int32_t>(i, constants::TYPE);
         Model model = _model_loader->loadModel(type);
         shapes[type] = makeCollisionShape(model, Documents::getAttribute<float>(i, "mass", 1.0f));
     }

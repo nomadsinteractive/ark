@@ -7,7 +7,7 @@
 #include <glm/glm.hpp>
 
 #include "core/inf/variable.h"
-#include "core/impl/variable/interpolate.h"
+#include "core/impl/variable/lerp.h"
 #include "core/impl/variable/variable_op1.h"
 #include "core/impl/variable/variable_op2.h"
 #include "core/util/operators.h"
@@ -270,22 +270,22 @@ float Math::lerp(float a, float b, float t0, float t1, float t)
 
 sp<Numeric> Math::lerp(sp<Numeric> a, sp<Numeric> b, sp<Numeric> t)
 {
-    return sp<Interpolate<float, float>>::make(std::move(a), std::move(b), std::move(t));
+    return sp<Lerp<float, float>>::make(std::move(a), std::move(b), std::move(t));
 }
 
 sp<Vec2> Math::lerp(sp<Vec2> a, sp<Vec2> b, sp<Numeric> t)
 {
-    return sp<Interpolate<V2, float>>::make(std::move(a), std::move(b), std::move(t));
+    return sp<Lerp<V2, float>>::make(std::move(a), std::move(b), std::move(t));
 }
 
 sp<Vec3> Math::lerp(sp<Vec3> a, sp<Vec3> b, sp<Numeric> t)
 {
-    return sp<Interpolate<V3, float>>::make(std::move(a), std::move(b), std::move(t));
+    return sp<Lerp<V3, float>>::make(std::move(a), std::move(b), std::move(t));
 }
 
 sp<Vec4> Math::lerp(sp<Vec4> a, sp<Vec4> b, sp<Numeric> t)
 {
-    return sp<Interpolate<V4, float>>::make(std::move(a), std::move(b), std::move(t));
+    return sp<Lerp<V4, float>>::make(std::move(a), std::move(b), std::move(t));
 }
 
 V3 Math::quadratic(float a, float b, float c)

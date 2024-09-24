@@ -35,32 +35,32 @@ sp<RigidBody> ColliderBullet::createBody(Collider::BodyType type, sp<Shape> shap
 {
     btTransform transform;
     const V3 pos = position->val();
-    const V4 quat = rotate ? rotate->val() : V4(0, 0, 0, 1.0f);
+    const V4 quat = rotate ? rotate->val() : constants::QUATERNION_ZERO;
     transform.setIdentity();
     transform.setOrigin(btVector3(pos.x(), pos.y(), pos.z()));
     transform.setRotation(btQuaternion(quat.x(), quat.y(), quat.z(), quat.w()));
     DCHECK(!discarded, "Unimplemented");
 
     sp<CollisionShape> cs;
-    const auto iter = _stub->_collision_shapes.find(shape->id());
+    const auto iter = _stub->_collision_shapes.find(shape->type());
     if(iter == _stub->_collision_shapes.end())
     {
         btCollisionShape* btShape;
         const V3 size = shape->size().val();
-        switch(shape->id())
+        switch(shape->type())
         {
-        case Shape::SHAPE_ID_BOX:
+        case Shape::TYPE_BOX:
             btShape = new btBoxShape(btVector3(size.x() / 2, size.y() / 2, size.z() / 2));
             break;
-        case Shape::SHAPE_ID_BALL:
+        case Shape::TYPE_BALL:
             btShape = new btSphereShape(size.x() / 2);
             break;
-        case Shape::SHAPE_ID_CAPSULE:
-            DCHECK_WARN(size.y() > size.x(), "When constructing a capsule shape, its height(%.2f) needs be greater than its width(%.2f)", size.y() > size.x());
+        case Shape::TYPE_CAPSULE:
+            CHECK_WARN(size.y() > size.x(), "When constructing a capsule shape, its height(%.2f) needs be greater than its width(%.2f)", size.y() > size.x());
             btShape = new btCapsuleShapeZ(size.x() / 2, size.y() - size.x());
             break;
         default:
-            DFATAL("Undefined RigidBody(%d) in this world", shape->id());
+            DFATAL("Undefined RigidBody(%d) in this world", shape->type());
             break;
         }
         cs = sp<CollisionShape>::make(btShape, 1.0f);
@@ -134,12 +134,12 @@ btDiscreteDynamicsWorld* ColliderBullet::btDynamicWorld() const
     return _stub->_dynamics_world.get();
 }
 
-const std::unordered_map<int32_t, sp<CollisionShape>>& ColliderBullet::collisionShapes() const
+const std::unordered_map<TypeId, sp<CollisionShape>>& ColliderBullet::collisionShapes() const
 {
     return _stub->_collision_shapes;
 }
 
-std::unordered_map<int32_t, sp<CollisionShape>>& ColliderBullet::collisionShapes()
+std::unordered_map<TypeId, sp<CollisionShape>>& ColliderBullet::collisionShapes()
 {
     return _stub->_collision_shapes;
 }
@@ -381,7 +381,7 @@ sp<Collider> ColliderBullet::BUILDER_IMPL2::build(const Scope& args)
 }
 
 ColliderBullet::KinematicObject::KinematicObject(sp<Vec3> position, sp<Vec4> quaternion, sp<BtRigidBodyRef> rigidBody)
-    : _position(std::move(position)), _quaternion(std::move(quaternion), V4(0, 0, 0, 1.0f)), _rigid_body(std::move(rigidBody))
+    : _position(std::move(position)), _quaternion(std::move(quaternion), constants::QUATERNION_ZERO), _rigid_body(std::move(rigidBody))
 {
 }
 

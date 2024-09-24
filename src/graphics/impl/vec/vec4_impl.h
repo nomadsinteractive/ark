@@ -62,7 +62,6 @@ private:
     sp<NumericWrapper> _y;
     sp<NumericWrapper> _z;
     sp<NumericWrapper> _w;
-
 };
 
 }

@@ -35,10 +35,10 @@ BvhRigidBodyImporter::BvhRigidBodyImporter(sp<ModelLoader> modelLoader)
 
 void BvhRigidBodyImporter::import(ColliderBullet& collider, const document& manifest)
 {
-    std::unordered_map<int32_t, sp<CollisionShape>>& shapes = collider.collisionShapes();
+    std::unordered_map<TypeId, sp<CollisionShape>>& shapes = collider.collisionShapes();
     for(const document& i : manifest->children("model"))
     {
-        int32_t type = Documents::ensureAttribute<int32_t>(i, constants::TYPE);
+        const int32_t type = Documents::ensureAttribute<int32_t>(i, constants::TYPE);
         Model model = _model_loader->loadModel(type);
         shapes[type] = makeCollisionShape(model);
     }

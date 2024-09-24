@@ -1,27 +1,24 @@
-#ifndef ARK_CORE_IMPL_VARIABLE_INTERPOLATE_H_
-#define ARK_CORE_IMPL_VARIABLE_INTERPOLATE_H_
+#pragma once
 
 #include "core/forwarding.h"
-#include "core/inf/holder.h"
 #include "core/inf/variable.h"
 #include "core/types/implements.h"
 #include "core/types/shared_ptr.h"
-#include "core/util/holder_util.h"
 #include "core/util/updatable_util.h"
 
 namespace ark {
 
-template<typename T, typename U> class Interpolate : public Variable<T>, public Holder, Implements<Interpolate<T, U>, Variable<T>, Holder> {
+template<typename T, typename U> class Lerp final : public Variable<T>, Implements<Lerp<T, U>, Variable<T>> {
 public:
-    Interpolate(sp<Variable<T>> a, sp<Variable<T>> b, sp<Variable<U>> v)
+    Lerp(sp<Variable<T>> a, sp<Variable<T>> b, sp<Variable<U>> v)
         : _a(std::move(a)), _b(std::move(b)), _v(std::move(v)), _a_freezed(_a->val()), _delta_freezed(_b->val() - _a_freezed), _val(_a_freezed + _delta_freezed * _v->val()) {
     }
 
-    virtual T val() override {
+    T val() override {
         return _val;
     }
 
-    virtual bool update(uint64_t timestamp) override {
+    bool update(uint64_t timestamp) override {
         bool dirty = UpdatableUtil::update(timestamp, _a, _b);
         if(dirty) {
             _a_freezed = _a->val();
@@ -32,12 +29,6 @@ public:
             return true;
         }
         return false;
-    }
-
-    virtual void traverse(const Visitor& visitor) override {
-        HolderUtil::visit(_a, visitor);
-        HolderUtil::visit(_b, visitor);
-        HolderUtil::visit(_v, visitor);
     }
 
 private:
@@ -51,5 +42,3 @@ private:
 };
 
 }
-
-#endif

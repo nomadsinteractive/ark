@@ -11,29 +11,31 @@ namespace ark {
 class ARK_API Shape final {
 public:
 //  [[script::bindings::enumeration]]
-    enum ShapeId {
-        SHAPE_ID_NONE = 0,
-        SHAPE_ID_AABB = -1,
-        SHAPE_ID_BALL = -2,
-        SHAPE_ID_BOX = -3,
-        SHAPE_ID_CAPSULE = -4
+    enum Type {
+        TYPE_NONE = 0,
+        TYPE_AABB = string_hash("aabb"),
+        TYPE_BALL = string_hash("ball"),
+        TYPE_BOX = string_hash("box"),
+        TYPE_CAPSULE = string_hash("capsule")
     };
 
 public:
 //  [[script::bindings::auto]]
-    Shape(int32_t id = Shape::SHAPE_ID_NONE, sp<Vec3> size = nullptr);
+    Shape(TypeId type = Shape::TYPE_NONE, sp<Vec3> size = nullptr);
 
 //  [[script::bindings::property]]
-    int32_t id() const;
+    TypeId type() const;
 //  [[script::bindings::property]]
-    void setId(int32_t id);
+    void setType(TypeId type);
+//  [[script::bindings::property]]
+    void setType(const String& type);
 //  [[script::bindings::property]]
     const SafeVar<Vec3>& size() const;
 //  [[script::bindings::property]]
     void setSize(sp<Vec3> size);
 
 private:
-    int32_t _id;
+    TypeId _type;
     SafeVar<Vec3> _size;
 };
 

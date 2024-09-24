@@ -27,7 +27,7 @@ BroadPhraseTilemap::BroadPhraseTilemap(sp<Tilemap> tilemap, NarrowPhrase& narrow
     : _tilemap(std::move(tilemap))
 {
     const Tileset& tileset = _tilemap->tileset();
-    _body_def_tile = narrowPhrase.makeBodyDef(Shape::SHAPE_ID_AABB,  sp<Vec3>::make<Vec3::Const>(tileset.tileSize()->val())).impl();
+    _body_def_tile = narrowPhrase.makeBodyDef(Shape::TYPE_AABB,  sp<Vec3>::make<Vec3::Const>(tileset.tileSize()->val())).impl();
 }
 
 void BroadPhraseTilemap::create(IdType /*id*/, const V3& /*position*/, const V3& /*aabb*/)
@@ -65,7 +65,7 @@ BroadPhrase::Result BroadPhraseTilemap::search(const V3& position, const V3& siz
                         if(tile)
                         {
                             int32_t shapeId = tile->shapeId();
-                            if(shapeId != Shape::SHAPE_ID_NONE)
+                            if(shapeId != Shape::TYPE_NONE)
                             {
                                 int32_t candidateId = toCandidateId(layerId, k, j);
                                 if(candidateIdSet.find(candidateId) != candidateIdSet.end())
@@ -151,7 +151,7 @@ void BroadPhraseTilemap::addCandidate(const TilemapLayer& tilemapLayer, std::set
             if(tile)
             {
                 int32_t shapeId = tile->shapeId();
-                if(shapeId != Shape::SHAPE_ID_NONE)
+                if(shapeId != Shape::TYPE_NONE)
                     candidates.push_back(makeCandidate(candidateId, tile->id(), shapeId, tl + V2(col * tileSize.x(), row * tileSize.y()), tilemapLayer.collisionFilter()));
             }
         }
@@ -160,7 +160,7 @@ void BroadPhraseTilemap::addCandidate(const TilemapLayer& tilemapLayer, std::set
 
 BroadPhrase::Candidate BroadPhraseTilemap::makeCandidate(int32_t candidateId, uint32_t metaId, int32_t shapeId, const V2& position, sp<CollisionFilter> collisionFilter) const
 {
-    Box bodyDef = shapeId == Shape::SHAPE_ID_AABB ? _body_def_tile : Box();
+    Box bodyDef = shapeId == Shape::TYPE_AABB ? _body_def_tile : Box();
     return Candidate(candidateId, position, constants::QUATERNION_ZERO, metaId, shapeId, std::move(collisionFilter), std::move(bodyDef));
 }
 

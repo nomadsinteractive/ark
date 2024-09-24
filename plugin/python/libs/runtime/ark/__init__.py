@@ -2318,18 +2318,22 @@ class Platform:
 
 class Shape:
 
-    SHAPE_ID_NONE = 0
-    SHAPE_ID_AABB = -1
-    SHAPE_ID_BALL = -2
-    SHAPE_ID_BOX = -3
-    SHAPE_ID_CAPSULE = -4
+    TYPE_NONE = 0
+    TYPE_AABB = -1
+    TYPE_BALL = -2
+    TYPE_BOX = -3
+    TYPE_CAPSULE = -4
 
-    def __init__(self, _id: int, size: Optional[Vec3] = None):
+    def __init__(self, type: int, size: Optional[Vec3] = None):
         pass
 
     @property
-    def id(self) -> int:
+    def type(self) -> int:
         return 0
+
+    @type.setter
+    def type(self, type: int | str):
+        pass
 
     @property
     def size(self) -> Optional[Vec3]:

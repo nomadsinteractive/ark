@@ -4,7 +4,7 @@ namespace ark {
 
 sp<Ref> RefManager::makeRef(void* instance, sp<Boolean> discarded)
 {
-    IdType refId;
+    RefId refId;
     if(_recycled_ids.pop(refId))
     {
         DCHECK(!_ref_slots.at(refId)._allocated, "Ref(%d) has been already allocated while making a new Ref", refId);
@@ -14,13 +14,13 @@ sp<Ref> RefManager::makeRef(void* instance, sp<Boolean> discarded)
     }
     else
     {
-        refId = static_cast<IdType>(_ref_slots.size());
+        refId = static_cast<RefId>(_ref_slots.size());
         _ref_slots.push_back({new Ref{refId, instance, std::move(discarded)}, true});
     }
     return {std::shared_ptr<Ref>(_ref_slots[refId]._ref.get(), [this](void* ref) { recycle(ref); }), nullptr};
 }
 
-Ref& RefManager::toRef(IdType id)
+Ref& RefManager::toRef(RefId id)
 {
     CHECK(id < _ref_slots.size() && _ref_slots.at(id)._allocated, "Invaild Ref(%d)", id);
     return _ref_slots.at(id)._ref;

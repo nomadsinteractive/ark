@@ -30,9 +30,9 @@ ColliderBox2D::ColliderBox2D(const b2Vec2& gravity, const V2& pixelPerMeter)
     : _stub(sp<Stub>::make(gravity, pixelPerMeter))
 {
     const BodyCreateInfo box(sp<Box>::make(), 1.0f, 0.2f);
-    _stub->_body_manifests[ark::Shape::SHAPE_ID_AABB] = box;
-    _stub->_body_manifests[ark::Shape::SHAPE_ID_BALL] = BodyCreateInfo(sp<Ball>::make(), 1.0f, 0.2f);
-    _stub->_body_manifests[ark::Shape::SHAPE_ID_BOX] = box;
+    _stub->_body_manifests[ark::Shape::TYPE_AABB] = box;
+    _stub->_body_manifests[ark::Shape::TYPE_BALL] = BodyCreateInfo(sp<Ball>::make(), 1.0f, 0.2f);
+    _stub->_body_manifests[ark::Shape::TYPE_BOX] = box;
     _stub->_world.SetContactListener(&_stub->_contact_listener);
     _stub->_world.SetDestructionListener(&_stub->_destruction_listener);
 }
@@ -44,7 +44,7 @@ void ColliderBox2D::run()
 
 sp<RigidBody> ColliderBox2D::createBody(Collider::BodyType type, sp<ark::Shape> shape, sp<Vec3> position, sp<Rotation> rotation, sp<Boolean> discarded)
 {
-    const auto iter = _stub->_body_manifests.find(shape->id());
+    const auto iter = _stub->_body_manifests.find(shape->type());
     DCHECK(iter != _stub->_body_manifests.end(), "RigidBody shape-id: %d not found", shape);
     const BodyCreateInfo& manifest = iter->second;
     const sp<RigidBodyBox2D> body = sp<RigidBodyBox2D>::make(*this, type, position, shape->size().val(), rotation ? rotation->theta() : nullptr, manifest);
@@ -209,7 +209,7 @@ void ColliderBox2D::ContactListenerImpl::BeginContact(b2Contact* contact)
         contact->GetWorldManifold(&worldManifold);
         const V3 normal = V3(worldManifold.normal.x, worldManifold.normal.y, 0);
         const b2Vec2& contactPoint = worldManifold.points[0];
-        const IdType id1 = s1->ref()->id(), id2 = s2->ref()->id();
+        const RefId id1 = s1->ref()->id(), id2 = s2->ref()->id();
         if(s1->_stub->_contacts.find(id2) == s1->_stub->_contacts.end())
         {
             s1->_stub->_contacts.insert(id2);
@@ -231,7 +231,7 @@ void ColliderBox2D::ContactListenerImpl::EndContact(b2Contact* contact)
     {
         const sp<RigidBodyBox2D::Stub>& body1 = s1->_stub;
         const sp<RigidBodyBox2D::Stub>& body2 = s2->_stub;
-        const IdType id1 = s1->ref()->id(), id2 = s2->ref()->id();
+        const RefId id1 = s1->ref()->id(), id2 = s2->ref()->id();
         if(const auto it1 = body1->_contacts.find(id2); it1 != body1->_contacts.end())
         {
             body1->_contacts.erase(it1);

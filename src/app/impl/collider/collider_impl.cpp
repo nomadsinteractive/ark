@@ -291,13 +291,13 @@ const RigidBodyDef& ColliderImpl::RigidBodyImpl::bodyDef() const
 
 const RigidBodyDef& ColliderImpl::RigidBodyImpl::updateBodyDef(NarrowPhrase& narrowPhrase, const SafeVar<Vec3>& size)
 {
-    _body_def = narrowPhrase.makeBodyDef(_shape->id(), size);
+    _body_def = narrowPhrase.makeBodyDef(_shape->type(), size);
     return _body_def;
 }
 
 BroadPhrase::Candidate ColliderImpl::RigidBodyImpl::toBroadPhraseCandidate() const
 {
-    return BroadPhrase::Candidate(ref()->id(), position().val(), quaternion().val(), metaId(), _shape->id(), collisionFilter(), bodyDef().impl());
+    return {ref()->id(), position().val(), quaternion().val(), metaId(), _shape->type(), collisionFilter(), bodyDef().impl()};
 }
 
 ColliderImpl::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

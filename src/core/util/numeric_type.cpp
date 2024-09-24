@@ -10,7 +10,7 @@
 #include "core/impl/variable/fence.h"
 #include "core/impl/variable/integral.h"
 #include "core/impl/variable/integral_with_resistance.h"
-#include "core/impl/variable/interpolate.h"
+#include "core/impl/variable/lerp.h"
 #include "core/impl/variable/periodic.h"
 #include "core/impl/variable/second_order_dynamics.h"
 #include "core/impl/variable/variable_dyed.h"
@@ -288,7 +288,7 @@ sp<Numeric> NumericType::dye(sp<Numeric> self, sp<Boolean> condition, String mes
 
 sp<Numeric> NumericType::lerp(const sp<Numeric>& self, const sp<Numeric>& b, const sp<Numeric>& t)
 {
-    return sp<Interpolate<float, float>>::make(self, b, t);
+    return sp<Lerp<float, float>>::make(self, b, t);
 }
 
 sp<Numeric> NumericType::sod(sp<Numeric> self, float d0, float k, float z, float r, sp<Numeric> t)
