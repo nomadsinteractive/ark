@@ -68,7 +68,7 @@ std::vector<sp<Material>> ModelImporterAssimp::loadMaterials(const aiScene* scen
             aiColor4D ac;
             material = sp<Material>::make(i, std::move(mName));
             if(aiGetMaterialColor(am, AI_MATKEY_COLOR_DIFFUSE, &ac) == aiReturn_SUCCESS)
-                material->baseColor()->setColor(sp<Vec4::Const>::make(V4(ac.r, ac.g, ac.b, ac.a)));
+                material->baseColor()->setColor(sp<Vec4>::make<Vec4::Const>(V4(ac.r, ac.g, ac.b, ac.a)));
         }
     }
 

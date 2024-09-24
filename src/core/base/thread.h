@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_BASE_THREAD_H_
-#define ARK_CORE_BASE_THREAD_H_
+#pragma once
 
 #include <condition_variable>
 #include <mutex>
@@ -91,5 +90,3 @@ private:
 };
 
 }
-
-#endif

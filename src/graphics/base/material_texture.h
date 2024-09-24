@@ -16,6 +16,7 @@ public:
         TYPE_ROUGHNESS,
         TYPE_METALLIC,
         TYPE_SPECULAR,
+        TYPE_EMISSION,
         TYPE_LENGTH
     };
 

@@ -2,9 +2,7 @@
 
 #include "core/base/thread.h"
 
-namespace ark {
-namespace plugin {
-namespace python {
+namespace ark::plugin::python {
 
 namespace {
 
@@ -34,6 +32,3 @@ void checkThreadFlag()
 }
 
 }
-}
-}
-

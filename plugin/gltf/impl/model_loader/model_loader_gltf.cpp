@@ -122,9 +122,12 @@ std::vector<sp<Material>> loadMaterials(tinygltf::Model const& gltfModel, Materi
                                static_cast<float>(vertexColorData.at(2)), static_cast<float>(vertexColorData.at(3)));
                 material->baseColor()->setColor(sp<Vec4>::make<Vec4::Const>(vertexColor));
             }
+            material->roughness()->setColor(sp<Vec4>::make<Vec4::Const>(gltfMaterial.pbrMetallicRoughness.roughnessFactor, 0, 0, 0));
+            material->metallic()->setColor(sp<Vec4>::make<Vec4::Const>(gltfMaterial.pbrMetallicRoughness.metallicFactor, 0, 0, 0));
 
+            const std::vector<double>& emission = gltfMaterial.emissiveFactor;
+            material->emission()->setColor(sp<Vec4>::make<Vec4::Const>(static_cast<float>(emission.at(0)), static_cast<float>(emission.at(1)), static_cast<float>(emission.at(2)), 0));
             // TODO: Normals
-            // TODO: MetallicRoughness
         }
     }
 
@@ -289,7 +292,7 @@ Model ModelImporterGltf::import(const Manifest& manifest, MaterialBundle& materi
     tinygltf::TinyGLTF loader;
     tinygltf::Model gltfModel;
     std::string errString, warnString;
-    sp<Readable> readable = Ark::instance().openAsset(manifest.src());
+    const sp<Readable> readable = Ark::instance().openAsset(manifest.src());
 
     std::vector<uint8_t> buf(readable->remaining());
     readable->read(buf.data(), static_cast<uint32_t>(buf.size()));
@@ -322,7 +325,7 @@ Model ModelImporterGltf::import(const Manifest& manifest, MaterialBundle& materi
     const tinygltf::Scene& scene = gltfModel.scenes.at(0);
     sp<Node> rootNode = sp<Node>::make(scene.name, M4::identity());
 
-    for(int32_t i : scene.nodes)
+    for(const int32_t i : scene.nodes)
         rootNode->childNodes().push_back(loadNodeHierarchy(gltfModel, gltfModel.nodes.at(i), meshes));
 
     float aabbMinX(std::numeric_limits<float>::max()), aabbMinY(std::numeric_limits<float>::max()), aabbMinZ(std::numeric_limits<float>::max());

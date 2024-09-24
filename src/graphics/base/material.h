@@ -30,6 +30,8 @@ public:
     const sp<MaterialTexture>& metallic() const;
 //  [[script::bindings::property]]
     const sp<MaterialTexture>& specular() const;
+//  [[script::bindings::property]]
+    const sp<MaterialTexture>& emission() const;
 
 //  [[script::bindings::auto]]
     const sp<MaterialTexture>& getTexture(MaterialTexture::Type type) const;
@@ -39,10 +41,7 @@ public:
     public:
         BUILDER(BeanFactory& beanFactory, const document& manifest);
 
-        virtual sp<Material> build(const Scope& args) override;
-
-    private:
-        sp<Builder<Bitmap>> makeBitmapBuilder(BeanFactory& beanFactory, const document& manifest);
+        sp<Material> build(const Scope& args) override;
 
     private:
         SafePtr<Builder<Bitmap>> _base_color;

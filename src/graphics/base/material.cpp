@@ -8,6 +8,24 @@
 
 namespace ark {
 
+namespace {
+
+sp<Builder<Bitmap>> makeBitmapBuilder(BeanFactory& beanFactory, const document& manifest)
+{
+    if(manifest)
+    {
+        if(const String src = Documents::getAttribute(manifest, constants::SRC))
+            return beanFactory.ensureBuilder<Bitmap>(src);
+
+        const String value = Documents::getAttribute(manifest, constants::VALUE);
+        CHECK(value, "You must define a texture by either src or value attribute");
+        DFATAL("Unimplemented");
+    }
+    return nullptr;
+}
+
+}
+
 Material::Material(int32_t id, String name, bitmap baseColor, bitmap normal, bitmap roughness, bitmap metallic, bitmap specular)
     : _id(id), _name(std::move(name))
 {
@@ -16,6 +34,7 @@ Material::Material(int32_t id, String name, bitmap baseColor, bitmap normal, bit
     _textures[MaterialTexture::TYPE_ROUGHNESS] = sp<MaterialTexture>::make(nullptr, std::move(roughness));
     _textures[MaterialTexture::TYPE_METALLIC] = sp<MaterialTexture>::make(nullptr, std::move(metallic));
     _textures[MaterialTexture::TYPE_SPECULAR] = sp<MaterialTexture>::make(nullptr, std::move(specular));
+    _textures[MaterialTexture::TYPE_EMISSION] = sp<MaterialTexture>::make();
 }
 
 int32_t Material::id() const
@@ -53,6 +72,11 @@ const sp<MaterialTexture>& Material::specular() const
     return _textures[MaterialTexture::TYPE_SPECULAR];
 }
 
+const sp<MaterialTexture>& Material::emission() const
+{
+    return _textures[MaterialTexture::TYPE_EMISSION];
+}
+
 const sp<MaterialTexture>& Material::getTexture(MaterialTexture::Type type) const
 {
     ASSERT(type >= 0 && type < MaterialTexture::TYPE_LENGTH);
@@ -72,21 +96,6 @@ Material::BUILDER::BUILDER(BeanFactory& beanFactory, const document& manifest)
 sp<Material> Material::BUILDER::build(const Scope& args)
 {
     return sp<Material>::make(0, "", _base_color->build(args), _normal->build(args), _roughness->build(args), _metallic->build(args), _specular->build(args));
-}
-
-sp<Builder<Bitmap>> Material::BUILDER::makeBitmapBuilder(BeanFactory& beanFactory, const document& manifest)
-{
-    if(manifest)
-    {
-        const String src = Documents::getAttribute(manifest, constants::SRC);
-        if(src)
-            return beanFactory.ensureBuilder<Bitmap>(src);
-
-        const String value = Documents::getAttribute(manifest, constants::VALUE);
-        DCHECK(value, "You must define a texture by either src or value attribute");
-        DFATAL("Unimplemented");
-    }
-    return nullptr;
 }
 
 }
