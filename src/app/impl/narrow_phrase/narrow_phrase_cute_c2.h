@@ -18,7 +18,7 @@ class NarrowPhraseCuteC2 : public NarrowPhrase {
 public:
     NarrowPhraseCuteC2(const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-    RigidBodyDef makeBodyDef(int32_t shapeId, const SafeVar<Vec3>& size) override;
+    RigidBodyDef makeBodyDef(TypeId shapeId, const SafeVar<Vec3>& size) override;
 
     Ray toRay(const V2& from, const V2& to) override;
 
@@ -77,13 +77,13 @@ private:
 
     const CollisionFilter& getCollisionFilter(const CollisionFilter& oneFilter, const sp<CollisionFilter>& specifiedFilter);
 
-    sp<BodyDefCuteC2> findBodyDef(int32_t shapeId) const;
+    sp<BodyDefCuteC2> findBodyDef(TypeId shapeId) const;
     sp<BodyDefCuteC2> ensureBodyDef(const BroadPhrase::Candidate& candidate) const;
 
     std::vector<ShapeCuteC2> toCuteC2Shapes(const ShapeCuteC2& shape) const;
 
 private:
-    std::unordered_map<int32_t, sp<BodyDefCuteC2>> _body_defs;
+    std::unordered_map<TypeId, sp<BodyDefCuteC2>> _body_defs;
 
 };
 

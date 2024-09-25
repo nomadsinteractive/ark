@@ -122,11 +122,11 @@ std::vector<sp<Material>> loadMaterials(tinygltf::Model const& gltfModel, Materi
                                static_cast<float>(vertexColorData.at(2)), static_cast<float>(vertexColorData.at(3)));
                 material->baseColor()->setColor(sp<Vec4>::make<Vec4::Const>(vertexColor));
             }
-            material->roughness()->setColor(sp<Vec4>::make<Vec4::Const>(gltfMaterial.pbrMetallicRoughness.roughnessFactor, 0, 0, 0));
-            material->metallic()->setColor(sp<Vec4>::make<Vec4::Const>(gltfMaterial.pbrMetallicRoughness.metallicFactor, 0, 0, 0));
+            material->roughness()->setColor(sp<Vec4>::make<Vec4::Const>(V4(static_cast<float>(gltfMaterial.pbrMetallicRoughness.roughnessFactor), 0, 0, 0)));
+            material->metallic()->setColor(sp<Vec4>::make<Vec4::Const>(V4(static_cast<float>(gltfMaterial.pbrMetallicRoughness.metallicFactor), 0, 0, 0)));
 
             const std::vector<double>& emission = gltfMaterial.emissiveFactor;
-            material->emission()->setColor(sp<Vec4>::make<Vec4::Const>(static_cast<float>(emission.at(0)), static_cast<float>(emission.at(1)), static_cast<float>(emission.at(2)), 0));
+            material->emission()->setColor(sp<Vec4>::make<Vec4::Const>(V4(static_cast<float>(emission.at(0)), static_cast<float>(emission.at(1)), static_cast<float>(emission.at(2)), 0)));
             // TODO: Normals
         }
     }

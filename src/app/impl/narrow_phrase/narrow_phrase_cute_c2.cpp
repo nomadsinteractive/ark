@@ -48,7 +48,7 @@ sp<NarrowPhraseCuteC2::BodyDefCuteC2> NarrowPhraseCuteC2::makeBodyCapsule(const 
     return sp<BodyDefCuteC2>::make(size, V2(0.5f), toCuteC2Shapes(makeCapsuleShapeImpl(p1, p2, radius)));
 }
 
-RigidBodyDef NarrowPhraseCuteC2::makeBodyDef(int32_t shapeId, const SafeVar<Vec3>& size)
+RigidBodyDef NarrowPhraseCuteC2::makeBodyDef(TypeId shapeId, const SafeVar<Vec3>& size)
 {
     V3 sizeVal;
     sp<BodyDefCuteC2> bodyDef = findBodyDef(shapeId);
@@ -162,7 +162,7 @@ const CollisionFilter& NarrowPhraseCuteC2::getCollisionFilter(const CollisionFil
     return specifiedFilter ? *specifiedFilter : oneFilter;
 }
 
-sp<NarrowPhraseCuteC2::BodyDefCuteC2> NarrowPhraseCuteC2::findBodyDef(int32_t shapeId) const
+sp<NarrowPhraseCuteC2::BodyDefCuteC2> NarrowPhraseCuteC2::findBodyDef(TypeId shapeId) const
 {
     const auto iter = _body_defs.find(shapeId);
     return iter != _body_defs.end() ? iter->second : nullptr;
