@@ -13,10 +13,10 @@ namespace ark {
 template<typename T> class VariableWrapper final : public Variable<T>, public Wrapper<Variable<T>>, Implements<VariableWrapper<T>, Variable<T>, Wrapper<Variable<T>>> {
 public:
     VariableWrapper(const sp<Variable<T>>& delegate) noexcept
-        : Wrapper<Variable<T>>(Null::toSafePtr(delegate)), _variable_impl(nullptr) {
+        : Wrapper<Variable<T>>(Null::toSafePtr(delegate)) {
     }
     VariableWrapper(T value) noexcept
-        : Wrapper<Variable<T>>(sp<typename Variable<T>::Impl>::make(value)), _variable_impl(static_cast<typename Variable<T>::Impl*>(this->_wrapped.get())) {
+        : Wrapper<Variable<T>>(sp<typename Variable<T>::Const>::make(value)) {
     }
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(VariableWrapper);
 
@@ -29,18 +29,11 @@ public:
     }
 
     void set(T value) {
-        if(_variable_impl)
-            _variable_impl->set(std::move(value));
-        else {
-            deferedUnref();
-            _variable_impl = new typename Variable<T>::Impl(std::move(value));
-            this->_wrapped = sp<Variable<T>>::adopt(_variable_impl);
-            _timestamp.markDirty();
-        }
+        this->_wrapped = sp<Variable<T>>::make<Variable<T>::Const>(value);
+        _timestamp.markDirty();
     }
 
     void set(const sp<Variable<T>>& delegate) {
-        deferedUnref();
         DCHECK(delegate.get() != this, "Recursive delegate being set");
         this->_wrapped = Null::toSafePtr(delegate);
         _timestamp.markDirty();
@@ -52,15 +45,12 @@ public:
         return val;
     }
 
-private:
     void deferedUnref() {
-        _variable_impl = nullptr;
         if(this->_wrapped)
             Ark::instance().deferUnref(std::move(this->_wrapped));
     }
 
 private:
-    typename Variable<T>::Impl* _variable_impl;
     Timestamp _timestamp;
 };
 

@@ -63,25 +63,26 @@ namespace {
 Ark* _instance = nullptr;
 std::list<Ark*> _instance_stack;
 
-M4 changeProjectionHandSide(const M4& projection, bool flipx = true)
+M4 changeProjectionHandSide(const M4& projection, bool flipx, bool flipy)
 {
     M4 flip;
     if(flipx)
         flip[0] = -1;
-    flip[5] = -1;
+    if(flipy)
+        flip[5] = -1;
     return MatrixUtil::mul(flip, projection);
 }
 
 struct CameraDelegateCHS final : Camera::Delegate {
 
-    CameraDelegateCHS(sp<Delegate> delegate)
-        : _delegate(std::move(delegate))
+    CameraDelegateCHS(sp<Delegate> delegate, bool flipx, bool flipy)
+        : _delegate(std::move(delegate)), _flipx(flipx), _flipy(flipy)
     {
     }
 
     M4 frustum(float left, float right, float bottom, float top, float clipNear, float clipFar) override
     {
-        return changeProjectionHandSide(_delegate->frustum(left, right, bottom, top, clipNear, clipFar));
+        return changeProjectionHandSide(_delegate->frustum(left, right, bottom, top, clipNear, clipFar), _flipx, _flipy);
     }
 
     M4 lookAt(const V3& position, const V3& target, const V3& up) override
@@ -91,15 +92,18 @@ struct CameraDelegateCHS final : Camera::Delegate {
 
     M4 ortho(float left, float right, float bottom, float top, float clipNear, float clipFar) override
     {
-        return changeProjectionHandSide(_delegate->ortho(left, right, bottom, top, clipNear, clipFar), false);
+        const M4 m = _delegate->ortho(left, right, bottom, top, clipNear, clipFar);
+        return _flipy ? changeProjectionHandSide(m, false, _flipy) : m;
     }
 
     M4 perspective(float fov, float aspect, float clipNear, float clipFar) override
     {
-        return changeProjectionHandSide(_delegate->perspective(fov, aspect, clipNear, clipFar));
+        return changeProjectionHandSide(_delegate->perspective(fov, aspect, clipNear, clipFar), _flipx, _flipy);
     }
 
     sp<Delegate> _delegate;
+    bool _flipx;
+    bool _flipy;
 };
 
 sp<RenderEngine> doCreateRenderEngine(const ApplicationManifest::Renderer& renderer, const sp<ApplicationBundle>& applicationBundle)
@@ -390,7 +394,7 @@ const sp<ApplicationProfiler>& Ark::applicationProfiler() const
     return _application_profiler;
 }
 
-Camera Ark::createCamera(RendererCoordinateSystem coordinateSystem) const
+Camera Ark::createCamera(RendererCoordinateSystem coordinateSystem, bool flipx) const
 {
     if(coordinateSystem == COORDINATE_SYSTEM_DEFAULT)
         coordinateSystem = _manifest->renderer()._coordinate_system;
@@ -398,7 +402,10 @@ Camera Ark::createCamera(RendererCoordinateSystem coordinateSystem) const
     RendererFactory& rendererFactory = _application_context->renderController()->renderEngine()->rendererFactory();
     const RendererCoordinateSystem cs = coordinateSystem == COORDINATE_SYSTEM_DEFAULT ? rendererFactory.features()._default_coordinate_system : coordinateSystem;
     sp<Camera::Delegate> cameraDelegate = rendererFactory.createCamera();
-    return {cs, cs == rendererFactory.features()._default_coordinate_system ? std::move(cameraDelegate) : sp<Camera::Delegate>::make<CameraDelegateCHS>(std::move(cameraDelegate))};
+    const bool flipy = cs != rendererFactory.features()._default_coordinate_system;
+    if(flipx || flipy)
+        return {cs, sp<Camera::Delegate>::make<CameraDelegateCHS>(std::move(cameraDelegate), flipx, flipy)};
+    return {cs, std::move(cameraDelegate)};
 }
 
 op<ApplicationProfiler::Tracer> Ark::makeProfilerTracer(const char* func, const char* filename, int32_t lineno, const char* name, ApplicationProfiler::Category category) const

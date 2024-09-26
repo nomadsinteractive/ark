@@ -14,7 +14,6 @@ public:
 
 private:
     mutable uint64_t _last_modified;
-
 };
 
 }

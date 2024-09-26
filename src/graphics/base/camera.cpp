@@ -107,7 +107,7 @@ Camera::Camera()
 }
 
 Camera::Camera(const Camera& other)
-    : Camera(other._coordinate_system, other._delegate, other._view->wrapped(), other._projection->wrapped())
+    : Camera(other._coordinate_system, other._delegate, other._view, other._projection)
 {
     _stub->_position.reset(sp<Vec3>::make<Vec3::Const>(other._stub->_position.val()));
     _stub->_target.reset(sp<Vec3>::make<Vec3::Const>(other._stub->_target.val()));
@@ -205,9 +205,9 @@ void Camera::assign(const Camera& other)
 {
     _coordinate_system = other._coordinate_system;
     _delegate = other._delegate;
+    _stub = other._stub;
     _view->set(other.view());
     _projection->set(other.projection());
-    _vp->set(other.vp());
 }
 
 bool Camera::isYUp() const

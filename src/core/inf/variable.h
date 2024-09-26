@@ -19,7 +19,7 @@ public:
     class ByUpdate;
 };
 
-template<typename T> class Variable<T>::Impl : public Variable<T>, Implements<typename Variable<T>::Impl, Variable<T>> {
+template<typename T> class Variable<T>::Impl final : public Variable<T>, Implements<typename Variable<T>::Impl, Variable<T>> {
 public:
     Impl(T value)
         : _value(std::move(value)) {
@@ -43,7 +43,7 @@ private:
     Timestamp _timestamp;
 };
 
-template<typename T> class Variable<T>::Const : public Variable<T>, Implements<typename Variable<T>::Const, Variable<T>> {
+template<typename T> class Variable<T>::Const final : public Variable<T>, Implements<typename Variable<T>::Const, Variable<T>> {
 public:
     Const(T value)
         : _value(std::move(value)) {

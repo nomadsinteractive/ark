@@ -4,7 +4,7 @@
 
 namespace ark {
 
-class ARK_API Null {
+class ARK_API [[deprecated]] Null {
 public:
     template<typename T> static sp<T> toSafePtr(const sp<T>& p) {
         return toSafePtr_sfinae(p, nullptr);
