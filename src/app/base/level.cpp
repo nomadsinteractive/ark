@@ -158,10 +158,13 @@ void Level::load(const String& src)
                     const V3 p = parseVector<V3>(position);
                     const Quaternion quaternion(sp<Vec4>::make<Vec4::Const>(parseVector<V4>(rotation)));
                     const M4 matrix = quaternion.toMatrix()->val();
+                    //When converting Blender coordinate system(RHS) from z-up to y-up, it becomes LHS coordinate system.
                     const V3 front = MatrixUtil::mul(matrix, V3(0, -1.0f, 0));
                     const V3 up = MatrixUtil::mul(matrix, V3(0, 0, 1.0f));
-                    camera->perspective(fovy, 16.0f / 9, clipNear, clipFar);
-                    camera->lookAt(p, p + front, up);
+                    Camera c = Ark::instance().createCamera(Ark::COORDINATE_SYSTEM_LHS);
+                    c.perspective(fovy, 16.0f / 9, clipNear, clipFar);
+                    c.lookAt(p, p + front, up);
+                    camera->assign(c);
                 }
             }
             else if(clazz == "LIGHT")
