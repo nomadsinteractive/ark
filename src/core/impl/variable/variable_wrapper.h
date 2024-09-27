@@ -29,7 +29,7 @@ public:
     }
 
     void set(T value) {
-        this->_wrapped = sp<Variable<T>>::make<Variable<T>::Const>(value);
+        this->_wrapped = sp<Variable<T>>::template make<typename Variable<T>::Const>(value);
         _timestamp.markDirty();
     }
 
