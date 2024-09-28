@@ -135,7 +135,6 @@ Emitter::Source::Source(const sp<Integer>& type, const sp<Vec3>& position, const
 Emitter::Stub::Stub(const sp<Clock>& clock, const sp<LayerContext>& layerContext, const sp<Emitter::Source>& source, const std::vector<document>& particleDescriptor, BeanFactory& beanFactory)
     : _clock(clock), _layer_context(layerContext), _source(source), _next_tick(0)
 {
-    DCHECK_WARN(_layer_context->layerType() == Layer::TYPE_TRANSIENT, "You're creating emitter on a non-transient Layer, which may cause efficiency problems");
     for(const document& i : particleDescriptor)
         _particles.push_back(Particale(_source, i, beanFactory));
 }

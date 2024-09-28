@@ -16,7 +16,7 @@
 
 namespace ark {
 
-class ARK_API LayerContext : public Updatable {
+class ARK_API LayerContext final : public Updatable {
 public:
     struct ElementState {
         Optional<element_index_t> _index;
@@ -86,8 +86,6 @@ private:
     SafeVar<Boolean> _discarded;
 
     sp<Varyings> _varyings;
-
-    Layer::Type _layer_type;
 
     bool _reload_requested;
 

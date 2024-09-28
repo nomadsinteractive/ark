@@ -18,7 +18,7 @@ namespace ark {
 
 LayerContext::LayerContext(sp<Shader> shader, sp<ModelLoader> modelLoader, sp<Vec3> position, sp<Boolean> visible, sp<Boolean> discarded, sp<Varyings> varyings)
     : _shader(std::move(shader)), _model_loader(std::move(modelLoader)), _position(std::move(position)), _visible(std::move(visible), true), _discarded(discarded ? std::move(discarded) : nullptr, false),
-      _varyings(std::move(varyings)), _layer_type(Layer::TYPE_DYNAMIC), _reload_requested(false)
+      _varyings(std::move(varyings)), _reload_requested(false)
 {
 }
 
@@ -66,11 +66,6 @@ const sp<ModelLoader>& LayerContext::modelLoader() const
 void LayerContext::setModelLoader(sp<ModelLoader> modelLoader)
 {
     _model_loader = std::move(modelLoader);
-}
-
-Layer::Type LayerContext::layerType() const
-{
-    return _layer_type;
 }
 
 void LayerContext::add(sp<Renderable> renderable, sp<Updatable> isDirty, sp<Boolean> discarded)

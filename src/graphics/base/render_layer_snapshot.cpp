@@ -48,8 +48,7 @@ void RenderLayerSnapshot::addLayerContext(RenderRequest& renderRequest, std::vec
     for(auto iter = layerContexts.begin(); iter != layerContexts.end(); )
     {
         const sp<LayerContext>& layerContext = *iter;
-        const SafeVar<Boolean>& discarded = layerContext->discarded();
-        if((!discarded && layerContext.unique()) || discarded.val())
+        if(const SafeVar<Boolean>& discarded = layerContext->discarded(); (!discarded && layerContext.unique()) || discarded.val())
         {
             addDiscardedLayerContext(layerContext);
             iter = layerContexts.erase(iter);

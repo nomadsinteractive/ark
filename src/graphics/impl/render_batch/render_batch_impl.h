@@ -5,7 +5,7 @@
 
 namespace ark {
 
-class RenderBatchImpl : public RenderBatch {
+class RenderBatchImpl final : public RenderBatch {
 public:
 
     std::vector<sp<LayerContext>>& snapshot(const RenderRequest& renderRequest) override;
