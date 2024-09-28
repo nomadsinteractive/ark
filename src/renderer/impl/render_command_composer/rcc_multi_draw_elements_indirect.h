@@ -29,7 +29,7 @@ private:
         NodeLayoutInstance(const Node& node, const M4& globalTransform);
         NodeLayoutInstance(const Node& node, const NodeLayoutInstance& parentLayout);
 
-        size_t _node_id;
+        HashId _node_id;
 
         sp<Mat4::Impl> _node_transform;
         sp<Mat4> _global_transform;
@@ -41,13 +41,13 @@ private:
     struct ModelInstance;
 
     struct NodeInstance {
-        NodeInstance(ModelInstance& modelInstance, size_t nodeId);
+        NodeInstance(ModelInstance& modelInstance, HashId nodeId);
 
         M4 globalTransform() const;
         size_t snapshotIndex() const;
 
         ModelInstance& _model_instance;
-        size_t _node_id;
+        HashId _node_id;
     };
 
     struct MeshInstance {
@@ -66,7 +66,7 @@ private:
 
         sp<Model> _model;
         size_t _snapshot_index;
-        std::map<size_t, NodeLayoutInstance> _node_layouts;
+        std::map<HashId, NodeLayoutInstance> _node_layouts;
     };
 
     struct IndirectCmds {

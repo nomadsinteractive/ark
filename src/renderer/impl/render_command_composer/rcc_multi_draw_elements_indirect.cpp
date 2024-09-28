@@ -170,16 +170,15 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
             if(reload || snapshot._state.has(Renderable::RENDERABLE_STATE_DIRTY))
                 if(snapshot._varyings._buffers.length() > 0)
                 {
-                    const ModelBundle::ModelLayout& modelInfo = _model_bundle->ensureModelLayout(snapshot._type);
-                    const Boundaries& metrics = modelInfo._model->content();
+                    const ModelBundle::ModelLayout& modelLayout = _model_bundle->ensureModelLayout(snapshot._type);
+                    const Boundaries& metrics = modelLayout._model->content();
                     VertexWriter writer = buf.makeDividedVertexWriter(renderRequest, 1, instanceId, 1);
                     writer.next();
                     if(hasModelMatrix)
                         writer.writeAttribute(MatrixUtil::translate(M4::identity(), snapshot._position) * MatrixUtil::scale(snapshot._transform.toMatrix(), toScale(snapshot._size, metrics)) * nodeInstance->globalTransform(), PipelineInput::ATTRIBUTE_NAME_MODEL_MATRIX);
                     if(hasMaterialId && mesh->material())
                         writer.writeAttribute(mesh->material()->id(), PipelineInput::ATTRIBUTE_NAME_MATERIAL_ID);
-                    ByteArray::Borrowed divided = snapshot._varyings.getDivided(1)._content;
-                    if(divided.length() > attributeStride)
+                    if(ByteArray::Borrowed divided = snapshot._varyings.getDivided(1)._content; divided.length() > attributeStride)
                         writer.write(divided.buf() + attributeStride, divided.length() - attributeStride, attributeStride);
                 }
             ++ instanceId;
@@ -237,7 +236,8 @@ RCCMultiDrawElementsIndirect::ModelInstance::ModelInstance(size_t snapshotIndex,
     for(const ModelBundle::NodeLayout& i : modelLayout._node_layouts)
     {
         NodeLayoutInstance nodeLayout(i._node, i._transform);
-        size_t nodeId = nodeLayout._node_id;
+        HashId nodeId = nodeLayout._node_id;
+        ASSERT(_node_layouts.find(nodeId) == _node_layouts.end());
         _node_layouts.insert(std::make_pair(nodeId, std::move(nodeLayout)));
     }
 }
@@ -264,7 +264,7 @@ void RCCMultiDrawElementsIndirect::ModelInstance::setNodeTransform(size_t nodeId
     iter->second._node_transform->set(transform);
 }
 
-RCCMultiDrawElementsIndirect::NodeInstance::NodeInstance(ModelInstance& modelInstance, size_t nodeId)
+RCCMultiDrawElementsIndirect::NodeInstance::NodeInstance(ModelInstance& modelInstance, HashId nodeId)
     : _model_instance(modelInstance), _node_id(nodeId)
 {
 }

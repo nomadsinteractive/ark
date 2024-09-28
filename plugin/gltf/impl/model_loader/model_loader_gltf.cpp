@@ -247,7 +247,7 @@ Mesh processPrimitive(const tinygltf::Model& gltfModel, const std::vector<sp<Mat
     ASSERT(primitive.material == -1 || primitive.material < materials.size());
     sp<Material> material = primitive.material >= 0 ? materials.at(primitive.material) : nullptr;
 
-    return Mesh(id, std::move(name), std::move(indices), std::move(vertices), toArray<Mesh::UV>(std::move(uvs)), toArray<V3>(std::move(normals)), nullptr, nullptr, std::move(material));
+    return {id, std::move(name), std::move(indices), std::move(vertices), toArray<Mesh::UV>(std::move(uvs)), toArray<V3>(std::move(normals)), nullptr, nullptr, std::move(material)};
 }
 
 M4 getNodeLocalTransformMatrix(const tinygltf::Node& node)
@@ -301,8 +301,8 @@ Model ModelImporterGltf::import(const Manifest& manifest, MaterialBundle& materi
     else
         loader.LoadBinaryFromMemory(&gltfModel, &errString, &warnString, buf.data(), buf.size());
 
-    CHECK(errString.size() == 0, "Loading \"%s\" failed with error: %s", manifest.src().c_str(), errString.c_str());
-    CHECK_WARN(warnString.size() == 0, "Warning: \"%s\" %s", manifest.src().c_str(), warnString.c_str());
+    CHECK(errString.empty(), "Loading \"%s\" failed with error: %s", manifest.src().c_str(), errString.c_str());
+    CHECK_WARN(warnString.empty(), "Warning: \"%s\" %s", manifest.src().c_str(), warnString.c_str());
 
     CHECK(gltfModel.scenes.size() == 1, "\"%s\" must have only one scene, but this file has %d", manifest.src().c_str(), gltfModel.scenes.size());
 
@@ -342,7 +342,7 @@ Model ModelImporterGltf::import(const Manifest& manifest, MaterialBundle& materi
             if(aabbMaxZ < j.z()) aabbMaxZ = j.z();
         }
 
-    return Model(std::move(materials), std::move(meshes), std::move(rootNode), sp<Boundaries>::make(V3(aabbMinX, aabbMinY, aabbMinZ), V3(aabbMaxX, aabbMaxY, aabbMaxZ)));
+    return {std::move(materials), std::move(meshes), std::move(rootNode), sp<Boundaries>::make(V3(aabbMinX, aabbMinY, aabbMinZ), V3(aabbMaxX, aabbMaxY, aabbMaxZ))};
 }
 
 sp<ModelLoader::Importer> ModelImporterGltf::BUILDER::build(const Scope& args)

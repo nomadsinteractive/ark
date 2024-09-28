@@ -47,8 +47,6 @@ private:
         ModelLayout& addModel(int32_t type, sp<Model> model);
         const ModelLayout& ensureModelLayout(int32_t type) const;
 
-        void loadNodeLayouts(const sp<Node>& node, const M4& parentTransform, std::vector<NodeLayout>& nodeLayouts) const;
-
         sp<MaterialBundle> _material_bundle;
         sp<Importer> _importer;
 

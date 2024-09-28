@@ -12,18 +12,8 @@ public:
 
     std::vector<sp<LayerContext>>& snapshot(const RenderRequest& renderRequest) override;
 
-//  [[plugin::resource-loader("post-process")]]
-    class BUILDER final : public Builder<RenderBatch> {
-    public:
-        BUILDER(BeanFactory& factory, const document& manifest);
-
-        sp<RenderBatch> build(const Scope& args) override;
-
-    };
-
 private:
     std::vector<sp<LayerContext>> _contexts;
-
     sp<LayerContext> _layer_context;
 };
 

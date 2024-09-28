@@ -8,7 +8,7 @@ namespace ark {
 
 class ModelLoaderUnitQuad final : public ModelLoader {
 public:
-    ModelLoaderUnitQuad(sp<Texture> texture);
+    ModelLoaderUnitQuad();
 
     sp<RenderCommandComposer> makeRenderCommandComposer(const Shader& shader) override;
     sp<Model> loadModel(int32_t type) override;
@@ -16,16 +16,13 @@ public:
 //  [[plugin::builder::by-value("unit-quad")]]
     class BUILDER final : public Builder<ModelLoader> {
     public:
-        BUILDER(BeanFactory& factory, const String& texture);
+        BUILDER() = default;
 
         sp<ModelLoader> build(const Scope& args) override;
 
-    private:
-        sp<Builder<Texture>> _texture;
     };
 
 private:
-    sp<Atlas> _atlas;
     sp<Model> _unit_model;
 };
 

@@ -6,7 +6,7 @@
 #include "graphics/base/layer_context.h"
 #include "graphics/base/render_object.h"
 #include "graphics/base/render_request.h"
-#include "graphics/impl/render_batch/render_batch_impl.h"
+#include "graphics/impl/render_batch/render_batch_post_process.h"
 
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/model.h"
@@ -20,6 +20,23 @@
 #include "renderer/inf/render_command_composer.h"
 
 namespace ark {
+
+class RenderLayer::RenderBatchImpl final : public RenderBatch {
+public:
+
+    std::vector<sp<LayerContext>>& snapshot(const RenderRequest& renderRequest) override
+    {
+        return _layer_contexts;
+    }
+
+    void addLayerContext(sp<LayerContext> layerContext)
+    {
+        _layer_contexts.push_back(std::move(layerContext));
+    }
+
+private:
+    std::vector<sp<LayerContext>> _layer_contexts;
+};
 
 RenderLayer::Stub::Stub(sp<RenderController> renderController, sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Boolean> visible, sp<Boolean> discarded, sp<Varyings> varyings, sp<Vec4> scissor)
     : _render_controller(std::move(renderController)), _model_loader(ModelLoaderCached::ensureCached(std::move(modelLoader))), _shader(std::move(shader)), _scissor(std::move(scissor)),
@@ -111,7 +128,7 @@ void RenderLayer::render(RenderRequest& renderRequest, const V3& position)
 RenderLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _resource_loader_context(resourceLoaderContext), _layers(factory.makeBuilderList<Layer>(manifest, constants::LAYER)), _model_loader(factory.ensureBuilder<ModelLoader>(manifest, constants::MODEL_LOADER)),
       _shader(factory.ensureBuilder<Shader>(manifest, constants::SHADER)), _varyings(factory.getConcreteClassBuilder<Varyings>(manifest, constants::VARYINGS)), _visible(factory.getBuilder<Boolean>(manifest, constants::VISIBLE)),
-      _discarded(factory.getBuilder<Boolean>(manifest, constants::DISCARDED)), _scissor(factory.getBuilder<Vec4>(manifest, "scissor"))
+      _discarded(factory.getBuilder<Boolean>(manifest, constants::DISCARDED)), _scissor(factory.getBuilder<Vec4>(manifest, "scissor")), _post_process(manifest->getChild("post-process") != nullptr)
 {
 }
 
@@ -124,6 +141,9 @@ sp<RenderLayer> RenderLayer::BUILDER::build(const Scope& args)
         const sp<Layer> layer = i->build(args);
         renderLayer->addLayerContext(layer->context());
     }
+    //TODO: just for now
+    if(_post_process)
+        renderLayer->addRenderBatch(sp<RenderBatch>::make<RenderBatchPostProcess>());
     return renderLayer;
 }
 

@@ -99,10 +99,10 @@ sp<Model> ModelBundle::Stub::importModel(const Manifest& manifest, const sp<Impo
 ModelBundle::ModelLayout& ModelBundle::Stub::addModel(int32_t type, sp<Model> model)
 {
     CHECK(_model_layouts.find(type) == _model_layouts.end(), "Model[%d] exists already", type);
-    ModelLayout& modelInfo = _model_layouts[type];
-    modelInfo._node_layouts = model->toFlatLayouts<NodeLayout>();
-    modelInfo._vertex_offset = _vertex_length;
-    modelInfo._index_offset = _index_length;
+    ModelLayout& modelLayout = _model_layouts[type];
+    modelLayout._node_layouts = model->toFlatLayouts<NodeLayout>();
+    modelLayout._vertex_offset = _vertex_length;
+    modelLayout._index_offset = _index_length;
     size_t meshIndexOffset = _index_length;
     size_t meshVertexOffset = _vertex_length;
     for(const sp<Mesh>& i : model->meshes())
@@ -110,13 +110,13 @@ ModelBundle::ModelLayout& ModelBundle::Stub::addModel(int32_t type, sp<Model> mo
         MeshLayout ml = {i, meshIndexOffset, meshVertexOffset};
         meshIndexOffset += i->indices().size();
         meshVertexOffset += i->vertexCount();
-        modelInfo._mesh_layouts.push_back(std::move(ml));
+        modelLayout._mesh_layouts.push_back(std::move(ml));
     }
     _vertex_length += model->vertexCount();
     _index_length += model->indexCount();
 
-    modelInfo._model = std::move(model);
-    return modelInfo;
+    modelLayout._model = std::move(model);
+    return modelLayout;
 }
 
 const ModelBundle::ModelLayout& ModelBundle::Stub::ensureModelLayout(int32_t type) const

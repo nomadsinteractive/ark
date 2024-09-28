@@ -8,7 +8,6 @@
 
 #include "graphics/forwarding.h"
 #include "graphics/base/layer.h"
-#include "graphics/impl/render_batch/render_batch_impl.h"
 #include "graphics/inf/renderable.h"
 #include "graphics/inf/renderer.h"
 
@@ -77,6 +76,7 @@ public:
         SafePtr<Builder<Boolean>> _visible;
         SafePtr<Builder<Boolean>> _discarded;
         SafePtr<Builder<Vec4>> _scissor;
+        bool _post_process;
     };
 
 //  [[plugin::resource-loader("render-layer")]]
@@ -96,6 +96,7 @@ private:
 private:
     sp<Stub> _stub;
 
+    class RenderBatchImpl;
     sp<RenderBatchImpl> _render_batch;
     std::vector<sp<RenderBatch>> _render_batches;
 

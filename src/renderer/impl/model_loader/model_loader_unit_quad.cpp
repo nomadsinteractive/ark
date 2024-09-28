@@ -5,8 +5,8 @@
 
 namespace ark {
 
-ModelLoaderUnitQuad::ModelLoaderUnitQuad(sp<Texture> texture)
-    : ModelLoader(Enum::RENDER_MODE_TRIANGLES, std::move(texture)), _unit_model(Global<Constants>()->MODEL_UNIT_QUAD)
+ModelLoaderUnitQuad::ModelLoaderUnitQuad()
+    : ModelLoader(Enum::RENDER_MODE_TRIANGLES, nullptr), _unit_model(Global<Constants>()->MODEL_UNIT_QUAD)
 {
 }
 
@@ -20,14 +20,9 @@ sp<Model> ModelLoaderUnitQuad::loadModel(int32_t type)
     return _unit_model;
 }
 
-ModelLoaderUnitQuad::BUILDER::BUILDER(BeanFactory& factory, const String& texture)
-    : _texture(factory.ensureBuilder<Texture>(texture))
-{
-}
-
 sp<ModelLoader> ModelLoaderUnitQuad::BUILDER::build(const Scope& args)
 {
-    return sp<ModelLoaderUnitQuad>::make(_texture->build(args));
+    return sp<ModelLoaderUnitQuad>::make();
 }
 
 }
