@@ -6,9 +6,9 @@
 
 #include "renderer/base/animation_input.h"
 
-namespace ark {
-namespace plugin {
-namespace assimp {
+#include "util/animate_util.h"
+
+namespace ark::plugin::assimp {
 
 AnimationAssimpNodes::AnimationAssimpNodes(float tps, const aiAnimation* animation, const aiNode* rootNode, const aiMatrix4x4& globalTransform, Table<String, AnimationNode>& nodes, const NodeLoaderCallback& callback)
     : Animation(static_cast<float>(animation->mDuration), tps), _nodes(sp<Table<String, uint32_t>>::make()), _animation_frames(sp<std::vector<AnimationFrame>>::make())
@@ -78,6 +78,4 @@ void AnimationAssimpNodes::loadNodeHierarchy(float tick, const aiNode* node, con
         loadNodeHierarchy(tick, node->mChildren[i], animation, globalTransformation, nodes, callback);
 }
 
-}
-}
 }

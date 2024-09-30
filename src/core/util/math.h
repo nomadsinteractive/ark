@@ -130,8 +130,8 @@ public:
         return std::make_pair(nearest, ldmin);
     }
 
-    template<typename T> static void hashCombine(std::size_t& seed, const T& v) {
-        std::hash<T> hasher;
+    template<typename T, typename U> static void hashCombine(T& seed, const U& v) {
+        std::hash<U> hasher;
         seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
     }
 

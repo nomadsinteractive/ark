@@ -1,7 +1,4 @@
-#ifndef ARK_PLUGIN_ASSIMP_IMPL_ANIMATE_MAKER_ANIMATION_ASSIMP_NODES_H_
-#define ARK_PLUGIN_ASSIMP_IMPL_ANIMATE_MAKER_ANIMATION_ASSIMP_NODES_H_
-
-#include <unordered_map>
+#pragma once
 
 #include <assimp/Importer.hpp>
 
@@ -20,11 +17,8 @@
 #include "renderer/inf/animation.h"
 
 #include "assimp/base/node_table.h"
-#include "assimp/util/animate_util.h"
 
-namespace ark {
-namespace plugin {
-namespace assimp {
+namespace ark::plugin::assimp {
 
 class AnimationAssimpNodes : public Animation {
 public:
@@ -32,8 +26,8 @@ public:
 
     AnimationAssimpNodes(float tps, const aiAnimation* animation, const aiNode* rootNode, const aiMatrix4x4& globalTransform, Table<String, AnimationNode>& nodes, const NodeLoaderCallback& callback);
 
-    virtual sp<AnimationInput> makeInput(sp<Numeric> tick) override;
-    virtual const std::vector<String>& nodeNames() override;
+    sp<AnimationInput> makeInput(sp<Numeric> tick) override;
+    const std::vector<String>& nodeNames() override;
 
 private:
     static void loadHierarchy(float tick, const aiNode* node, const aiAnimation* animation, const aiMatrix4x4& parentTransform, Table<String, AnimationNode>& nodes, const NodeLoaderCallback& callback, AnimationFrame& output);
@@ -47,7 +41,3 @@ private:
 };
 
 }
-}
-}
-
-#endif

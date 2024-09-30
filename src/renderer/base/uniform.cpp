@@ -84,7 +84,7 @@ uint32_t Uniform::length() const
 
 size_t Uniform::size() const
 {
-    size_t s = _component_size * _length;
+    const size_t s = _component_size * _length;
     DCHECK(!_uploader || _uploader->size() <= s, "Uniform buffer overflow, name: \"%s\", size: %d, input size: %d", _name.c_str(), s, _uploader->size());
     DCHECK_WARN(!_uploader || _uploader->size() == s, "Uniform buffer size mismatch, name: \"%s\", size: %d, input size: %d", _name.c_str(), s, _uploader->size());
     return s;

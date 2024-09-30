@@ -18,8 +18,8 @@
 
 #include "renderer/base/atlas.h"
 #include "renderer/base/material_bundle.h"
+#include "renderer/base/mesh.h"
 #include "renderer/base/render_controller.h"
-#include "renderer/base/render_engine.h"
 #include "renderer/base/shader_data_type.h"
 
 namespace ark::plugin::gltf {
@@ -270,18 +270,19 @@ M4 getNodeLocalTransformMatrix(const tinygltf::Node& node)
     return translateMatrix * rotateMatrix * scaleMatrix;
 }
 
-sp<Node> loadNodeHierarchy(const tinygltf::Model& gltfModel, const tinygltf::Node& node, const std::vector<sp<Mesh>>& meshes)
+sp<Node> loadNodeHierarchy(const tinygltf::Model& gltfModel, const tinygltf::Node& node, const std::vector<sp<Mesh>>& primitives, const std::vector<std::vector<uint32_t>>& primitivesInMesh)
 {
     sp<Node> n = sp<Node>::make(node.name, getNodeLocalTransformMatrix(node));
 
     if(node.mesh != -1)
     {
-        ASSERT(node.mesh < meshes.size());
-        n->meshes().push_back(meshes.at(node.mesh));
+        ASSERT(node.mesh < primitivesInMesh.size());
+        for(const uint32_t i : primitivesInMesh.at(node.mesh))
+            n->meshes().push_back(primitives.at(i));
     }
 
     for(const int32_t i : node.children)
-        n->childNodes().push_back(loadNodeHierarchy(gltfModel, gltfModel.nodes.at(i), meshes));
+        n->childNodes().push_back(loadNodeHierarchy(gltfModel, gltfModel.nodes.at(i), primitives, primitivesInMesh));
     return n;
 }
 
@@ -310,7 +311,7 @@ Model ModelImporterGltf::import(const Manifest& manifest, MaterialBundle& materi
 
     uint32_t meshId = 0, primitiveId = 0;
     std::vector<sp<Mesh>> meshes;
-    std::vector<std::vector<uint32_t>> primitives;
+    std::vector<std::vector<uint32_t>> primitivesInMesh(gltfModel.meshes.size());
 
     for(const tinygltf::Mesh& i : gltfModel.meshes) {
         uint32_t primitiveBase = 0;
@@ -320,13 +321,22 @@ Model ModelImporterGltf::import(const Manifest& manifest, MaterialBundle& materi
             primitiveIds.push_back(primitiveId);
             meshes.push_back(sp<Mesh>::make(processPrimitive(gltfModel, materials, j, M4(), primitiveId++, std::move(primitiveName))));
         }
+        primitivesInMesh[meshId++] = std::move(primitiveIds);
+    }
+
+    std::set<HashId> nameHashes;
+    for(const tinygltf::Node& i : gltfModel.nodes)
+    {
+        HashId nameHash = string_hash(i.name.c_str());
+        CHECK(nameHashes.find(nameHash) == nameHashes.end(), "Duplicated node \"%s\" found in \"%s\"", i.name.c_str(), manifest.src().c_str());
+        nameHashes.insert(nameHash);
     }
 
     const tinygltf::Scene& scene = gltfModel.scenes.at(0);
     sp<Node> rootNode = sp<Node>::make(scene.name, M4::identity());
 
     for(const int32_t i : scene.nodes)
-        rootNode->childNodes().push_back(loadNodeHierarchy(gltfModel, gltfModel.nodes.at(i), meshes));
+        rootNode->childNodes().push_back(loadNodeHierarchy(gltfModel, gltfModel.nodes.at(i), meshes, primitivesInMesh));
 
     float aabbMinX(std::numeric_limits<float>::max()), aabbMinY(std::numeric_limits<float>::max()), aabbMinZ(std::numeric_limits<float>::max());
     float aabbMaxX(std::numeric_limits<float>::min()), aabbMaxY(std::numeric_limits<float>::min()), aabbMaxZ(std::numeric_limits<float>::min());

@@ -201,8 +201,11 @@ void RCCMultiDrawElementsIndirect::reloadIndirectCommands(const RenderLayerSnaps
             sp<NodeInstance> nodeInstance = sp<NodeInstance>::make(modelInstance, j._node->name().hash());
             for(const sp<Mesh>& k : j._node->meshes())
             {
+                uint64_t cmdHash = 0;
+                Math::hashCombine(cmdHash, type);
+                Math::hashCombine(cmdHash, k->id());
                 const ModelBundle::MeshLayout& meshLayout = modelLayout._mesh_layouts.at(k->id());
-                IndirectCmds& modelIndirect = _indirect_cmds[static_cast<uint64_t>(type) << 32 | k->id()];
+                IndirectCmds& modelIndirect = _indirect_cmds[cmdHash];
                 if(modelIndirect._mesh_instances.empty())
                     modelIndirect._command = {static_cast<uint32_t>(meshLayout._mesh->indices().size()), 0, static_cast<uint32_t>(meshLayout._index_offset), static_cast<uint32_t>(meshLayout._vertex_offset), 0};
 
@@ -237,29 +240,29 @@ RCCMultiDrawElementsIndirect::ModelInstance::ModelInstance(size_t snapshotIndex,
     {
         NodeLayoutInstance nodeLayout(i._node, i._transform);
         HashId nodeId = nodeLayout._node_id;
-        ASSERT(_node_layouts.find(nodeId) == _node_layouts.end());
-        _node_layouts.insert(std::make_pair(nodeId, std::move(nodeLayout)));
+        ASSERT(_node_layout_instances.find(nodeId) == _node_layout_instances.end());
+        _node_layout_instances.insert(std::make_pair(nodeId, std::move(nodeLayout)));
     }
 }
 
 bool RCCMultiDrawElementsIndirect::ModelInstance::isDynamicLayout() const
 {
-    if(_node_layouts.empty())
+    if(_node_layout_instances.empty())
         return true;
 
-    return static_cast<bool>(_node_layouts.begin()->second._node_transform);
+    return static_cast<bool>(_node_layout_instances.begin()->second._node_transform);
 }
 
 void RCCMultiDrawElementsIndirect::ModelInstance::toDynamicLayout()
 {
     for(NodeLayoutInstance& i : _model->toFlatLayouts<NodeLayoutInstance>())
-        _node_layouts[i._node_id] = std::move(i);
+        _node_layout_instances[i._node_id] = std::move(i);
 }
 
 void RCCMultiDrawElementsIndirect::ModelInstance::setNodeTransform(size_t nodeId, const M4& transform)
 {
-    const auto iter = _node_layouts.find(nodeId);
-    DASSERT(iter != _node_layouts.end());
+    const auto iter = _node_layout_instances.find(nodeId);
+    DASSERT(iter != _node_layout_instances.end());
     DASSERT(iter->second._node_transform);
     iter->second._node_transform->set(transform);
 }
@@ -271,8 +274,8 @@ RCCMultiDrawElementsIndirect::NodeInstance::NodeInstance(ModelInstance& modelIns
 
 M4 RCCMultiDrawElementsIndirect::NodeInstance::globalTransform() const
 {
-    const auto iter = _model_instance._node_layouts.find(_node_id);
-    DASSERT(iter != _model_instance._node_layouts.end());
+    const auto iter = _model_instance._node_layout_instances.find(_node_id);
+    DASSERT(iter != _model_instance._node_layout_instances.end());
     return iter->second._global_transform->val();
 }
 
