@@ -37,10 +37,10 @@ public:
         AttributeOffsets();
         AttributeOffsets(const PipelineInput& input);
 
-        size_t stride() const;
+        uint32_t stride() const;
 
         int32_t _offsets[ATTRIBUTE_NAME_COUNT];
-        AttributeName _last_attribute;
+        uint32_t _stride;
     };
 
     class ARK_API StreamLayout {

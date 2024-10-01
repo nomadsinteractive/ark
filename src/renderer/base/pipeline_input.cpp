@@ -9,8 +9,26 @@
 
 namespace ark {
 
+namespace {
+
+uint32_t getAttributeEndOffset(const PipelineInput::AttributeOffsets& attrOffsets, PipelineInput::AttributeName attrName)
+{
+    switch(attrName)
+    {
+        case PipelineInput::ATTRIBUTE_NAME_MODEL_MATRIX:
+            return attrOffsets._offsets[attrName] + sizeof(M4);
+        case PipelineInput::ATTRIBUTE_NAME_NODE_ID:
+        case PipelineInput::ATTRIBUTE_NAME_MATERIAL_ID:
+            return attrOffsets._offsets[attrName] + sizeof(int32_t);
+        default:
+            return std::max(0, attrOffsets._offsets[attrName]);
+    }
+}
+
+}
+
 PipelineInput::AttributeOffsets::AttributeOffsets()
-    : _last_attribute(ATTRIBUTE_NAME_TEX_COORDINATE)
+    : _stride(0)
 {
     std::fill_n(_offsets, ATTRIBUTE_NAME_COUNT, -1);
 }
@@ -33,32 +51,13 @@ PipelineInput::AttributeOffsets::AttributeOffsets(const PipelineInput& input)
         _offsets[ATTRIBUTE_NAME_MATERIAL_ID] = stream1.getAttributeOffset("MaterialId");
     }
 
-    int32_t lastOffset = -1;
     for(int32_t i = ATTRIBUTE_NAME_TEX_COORDINATE; i < ATTRIBUTE_NAME_COUNT; ++i)
-    {
-        if(lastOffset < _offsets[i])
-        {
-            _last_attribute = static_cast<AttributeName>(i);
-            lastOffset = _offsets[i];
-        }
-    }
+        _stride = std::max(getAttributeEndOffset(*this, static_cast<PipelineInput::AttributeName>(i)), _stride);
 }
 
-size_t PipelineInput::AttributeOffsets::stride() const
+uint32_t PipelineInput::AttributeOffsets::stride() const
 {
-    if(_offsets[_last_attribute] < 0)
-        return 0;
-
-    switch(_last_attribute)
-    {
-        case ATTRIBUTE_NAME_MODEL_MATRIX:
-            return _offsets[ATTRIBUTE_NAME_MODEL_MATRIX] + sizeof(M4);
-        case ATTRIBUTE_NAME_NODE_ID:
-        case ATTRIBUTE_NAME_MATERIAL_ID:
-            return _offsets[_last_attribute] + sizeof(int32_t);
-        default:
-            return _offsets[_last_attribute];
-    }
+    return _stride;
 }
 
 PipelineInput::PipelineInput(const sp<Camera>& camera)

@@ -31,7 +31,7 @@ public:
 
     void upload(Writable& uploader) override {
         uint32_t offset = 0;
-        size_t stride = _pipeline_input->getStreamLayout(0).stride();
+        const size_t stride = _pipeline_input->getStreamLayout(0).stride();
         PipelineInput::AttributeOffsets attributes(_pipeline_input);
         for(const ModelBundle::ModelLayout& i : _model_bundle->modelLayouts().values())
         {
