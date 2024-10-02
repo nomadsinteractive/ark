@@ -108,7 +108,7 @@ VKFramebuffer::Stub::Stub(const sp<VKRenderer>& renderer, const sp<Recycler>& re
     if(_configure._clear_mask.has(RenderTarget::CLEAR_MASK_COLOR))
         for(uint32_t i = 0; i < _configure._color_attachments.size(); ++i)
             _clear_values.push_back(clearColor);
-    if(_configure._clear_mask.has(RenderTarget::CLEAR_MASK_DEPTH_STENCIL))
+    if(_configure._clear_mask.has(RenderTarget::CLEAR_MASK_DEPTH_STENCIL) && !_configure._depth_stencil_usage.has(RenderTarget::DEPTH_STENCIL_USAGE_FOR_INPUT))
         _clear_values.push_back(clearDepthStencil);
 
     _render_pass_begin_info.renderArea = _scissor;
@@ -161,17 +161,20 @@ VkRenderPass VKFramebuffer::Stub::acquire(const PipelineDescriptor& bindings)
         attachments.push_back(depthstencilView);
 
         VkAttachmentDescription depthAttachmentDescription = {};
+        const VkAttachmentLoadOp loadOp = _configure._depth_stencil_usage.has(RenderTarget::DEPTH_STENCIL_USAGE_FOR_INPUT) ? VK_ATTACHMENT_LOAD_OP_LOAD : VK_ATTACHMENT_LOAD_OP_CLEAR;
+        const VkAttachmentStoreOp storeOp = _configure._depth_stencil_usage.has(RenderTarget::DEPTH_STENCIL_USAGE_FOR_OUTPUT) ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
         depthAttachmentDescription.format = fbDepthFormat;
         depthAttachmentDescription.samples = VK_SAMPLE_COUNT_1_BIT;
-        depthAttachmentDescription.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-        depthAttachmentDescription.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        depthAttachmentDescription.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        depthAttachmentDescription.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        depthAttachmentDescription.loadOp = loadOp;
+        depthAttachmentDescription.storeOp = storeOp;
+        depthAttachmentDescription.stencilLoadOp = loadOp;
+        depthAttachmentDescription.stencilStoreOp = storeOp;
         depthAttachmentDescription.initialLayout = VKUtil::toImageLayout(_configure._depth_stencil_attachment->usage());
         depthAttachmentDescription.finalLayout = depthAttachmentDescription.initialLayout;
         attachmentDescriptions.push_back(depthAttachmentDescription);
     }
-    VkAttachmentReference depthReference = { static_cast<uint32_t>(attachmentReferences.size()), VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL };
+    VkAttachmentReference depthReference = { static_cast<uint32_t>(attachmentReferences.size()), _configure._depth_stencil_usage == RenderTarget::DEPTH_STENCIL_USAGE_FOR_INPUT ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL
+                                                                                                                                                                                                : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL };
 
     VkSubpassDescription subpassDescription = {};
     subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;

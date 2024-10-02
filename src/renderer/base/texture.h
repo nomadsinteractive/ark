@@ -68,11 +68,6 @@ public:
         CONSTANT_COUNT
     };
 
-    enum Flag {
-        FLAG_FOR_INPUT = 1,
-        FLAG_FOR_OUTPUT = 2
-    };
-
     struct Parameters {
         Parameters(Type type, const document& parameters = nullptr, Format format = FORMAT_AUTO, Feature features = FEATURE_DEFAULT);
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Parameters);

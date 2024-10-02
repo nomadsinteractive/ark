@@ -25,8 +25,8 @@ const sp<Resource>& RenderTarget::resource() const
 }
 
 RenderTarget::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _render_controller(resourceLoaderContext->renderController()), _renderer(factory.ensureBuilder<RendererPhrase>(manifest)),
-      _clear_mask(Documents::getAttribute<RenderTarget::ClearMask>(manifest, "clear-mask", CLEAR_MASK_ALL))
+    : _render_controller(resourceLoaderContext->renderController()), _renderer(factory.ensureBuilder<RendererPhrase>(manifest)), _clear_mask(Documents::getAttribute<ClearMask>(manifest, "clear-mask", CLEAR_MASK_ALL)),
+      _depth_stencil_usage(Documents::getAttribute<DepthStencilUsage>(manifest, "depth-stencil-usage", DEPTH_STENCIL_USAGE_FOR_OUTPUT))
 {
     for(const document& i : manifest->children(constants::TEXTURE))
         _attachments.emplace_back(factory.ensureBuilder<Texture>(i), i);
@@ -46,10 +46,9 @@ sp<RenderTarget> RenderTarget::BUILDER::build(const Scope& args)
         {
             CHECK(configure._depth_stencil_attachment == nullptr, "Only one depth-stencil attachment allowed");
             CHECK(usage.has(Texture::USAGE_DEPTH_STENCIL_ATTACHMENT), "Unknow Texture usage: %d", usage);
-            const Texture::Flag flags = Documents::getAttribute<Texture::Flag>(j, "flags", Texture::FLAG_FOR_OUTPUT);
-            CHECK_WARN(!(flags & Texture::FLAG_FOR_INPUT && usage.has(Texture::USAGE_DEPTH_STENCIL_ATTACHMENT) && _clear_mask.has(RenderTarget::CLEAR_MASK_DEPTH_STENCIL)),
+            CHECK_WARN(!(_depth_stencil_usage.has(DEPTH_STENCIL_USAGE_FOR_OUTPUT) && usage.has(Texture::USAGE_DEPTH_STENCIL_ATTACHMENT) && _clear_mask.has(RenderTarget::CLEAR_MASK_DEPTH_STENCIL)),
                        "Depth-stencil texture marked \"for input\" would be cleared before rendering pass");
-            configure._depth_stencil_flags = flags;
+            configure._depth_stencil_usage = _depth_stencil_usage;
             configure._depth_stencil_attachment = std::move(tex);
         }
     }
@@ -77,6 +76,17 @@ template<> ARK_API RenderTarget::ClearMask StringConvert::eval<RenderTarget::Cle
             {"all", RenderTarget::CLEAR_MASK_ALL}
         }};
     return RenderTarget::ClearMask::toBitSet(str, clearMasks);
+}
+
+template<> RenderTarget::DepthStencilUsage StringConvert::eval<RenderTarget::DepthStencilUsage>(const String& str)
+{
+    constexpr std::array<std::pair<const char*, RenderTarget::DepthStencilUsageBits>, 2> usages = {{
+        {"for_input", RenderTarget::DEPTH_STENCIL_USAGE_FOR_INPUT},
+        {"for_output", RenderTarget::DEPTH_STENCIL_USAGE_FOR_OUTPUT},
+    }};
+    if(str)
+        return RenderTarget::DepthStencilUsage::toBitSet(str, usages);
+    return {RenderTarget::DEPTH_STENCIL_USAGE_FOR_OUTPUT};
 }
 
 }

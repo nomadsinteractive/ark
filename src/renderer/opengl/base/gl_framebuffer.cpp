@@ -97,7 +97,7 @@ void GLFramebuffer::upload(GraphicsContext& graphicsContext)
         LOGD("glFramebufferTexture2D, attachment: %d, id: %d", v, k);
     }
 
-    // if(depthInputs.size() > 0)
+    if(_configure._depth_stencil_usage != RenderTarget::DEPTH_STENCIL_USAGE_FOR_INPUT)
     {
         const sp<GLTexture> gltex = depthTexture->delegate();
         sp<GLRenderbuffer> renderbuffer = gltex->renderbuffer();
@@ -108,9 +108,9 @@ void GLFramebuffer::upload(GraphicsContext& graphicsContext)
             renderbuffer->upload(graphicsContext);
         }
         glBindRenderbuffer(GL_RENDERBUFFER, static_cast<GLuint>(renderbuffer->id()));
-        glRenderbufferStorage(GL_RENDERBUFFER, depthInternalformat, static_cast<GLsizei>(depthTexture->width()), static_cast<GLsizei>(depthTexture->height()));
+        glRenderbufferStorage(GL_RENDERBUFFER, depthInternalformat, depthTexture->width(), depthTexture->height());
         for(const GLenum i : depthInputs)
-            glFramebufferRenderbuffer(_configure._depth_stencil_flags & Texture::FLAG_FOR_INPUT ? GL_READ_FRAMEBUFFER : GL_DRAW_FRAMEBUFFER, i, GL_RENDERBUFFER, static_cast<GLuint>(renderbuffer->id()));
+            glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, i, GL_RENDERBUFFER, static_cast<GLuint>(renderbuffer->id()));
     }
 
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)

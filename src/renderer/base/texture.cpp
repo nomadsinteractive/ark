@@ -213,17 +213,6 @@ template<> ARK_API Texture::CONSTANT StringConvert::eval<Texture::CONSTANT>(cons
     return Texture::CONSTANT_NEAREST;
 }
 
-template<> Texture::Flag StringConvert::eval<Texture::Flag>(const String& str)
-{
-    constexpr std::array<std::pair<const char*, Texture::Flag>, 2> flags = { {
-        {"for_input", Texture::FLAG_FOR_INPUT},
-        {"for_output", Texture::FLAG_FOR_OUTPUT},
-    }};
-    if(str)
-        return static_cast<Texture::Flag>(BitSet<Texture::Flag>::toBitSet(str, flags).bits());
-    return Texture::FLAG_FOR_OUTPUT;
-}
-
 Texture::Parameters::Parameters(Type type, const document& parameters, Format format, Texture::Feature features)
     : _type(type), _usage(parameters ? Documents::getAttribute<Texture::Usage>(parameters, "usage", Texture::USAGE_AUTO) : Texture::USAGE_AUTO),
       _format(parameters ? Documents::getAttribute<Texture::Format>(parameters, "format", format) : format),
