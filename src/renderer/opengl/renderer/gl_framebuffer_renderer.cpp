@@ -1,43 +1,34 @@
 #include "renderer/opengl/renderer/gl_framebuffer_renderer.h"
 
 #include "core/base/bean_factory.h"
-#include "core/util/documents.h"
 
 #include "graphics/base/render_request.h"
 #include "graphics/base/render_command_pipeline.h"
 
-#include "renderer/base/buffer.h"
 #include "renderer/base/render_target.h"
 #include "renderer/base/graphics_context.h"
-#include "renderer/base/recycler.h"
 #include "renderer/base/render_controller.h"
 #include "renderer/base/render_engine_context.h"
-#include "renderer/base/texture.h"
-#include "renderer/base/resource_loader_context.h"
-#include "renderer/inf/resource.h"
 
 #include "renderer/opengl/base/gl_framebuffer.h"
 
 #include "platform/gl/gl.h"
 
-namespace ark {
-namespace opengl {
+namespace ark::opengl {
 
 namespace {
 
-class PreDrawElementsToFBO : public RenderCommand {
-public:
+struct PreDrawElementsToFBO final : RenderCommand {
     PreDrawElementsToFBO(sp<GLFramebuffer> fbo, int32_t width, int32_t height, uint32_t drawBufferCount, int32_t clearMask)
         : _fbo(std::move(fbo)), _width(width), _height(height), _clear_mask(clearMask), _clear_color_value(0, 0, 0, 1), _clear_depth_value(1.0f),
           _clear_stencil_value(0), _draw_buffer_count(drawBufferCount) {
     }
 
-    virtual void draw(GraphicsContext& /*graphicsContext*/) override {
+    void draw(GraphicsContext& /*graphicsContext*/) override {
         glBindFramebuffer(GL_FRAMEBUFFER, static_cast<GLuint>(_fbo->id()));
         glViewport(0, 0, _width, _height);
         if(_clear_mask) {
-            uint32_t mds = _clear_mask & RenderTarget::CLEAR_MASK_DEPTH_STENCIL;
-            if(mds) {
+            if(const uint32_t mds = _clear_mask & RenderTarget::CLEAR_MASK_DEPTH_STENCIL) {
                 if(mds == RenderTarget::CLEAR_MASK_DEPTH_STENCIL)
                     glClearBufferfi(GL_DEPTH_STENCIL, 0, _clear_depth_value, _clear_stencil_value);
                 else if(mds == RenderTarget::CLEAR_MASK_DEPTH)
@@ -52,7 +43,6 @@ public:
         }
     }
 
-private:
     sp<GLFramebuffer> _fbo;
     GLsizei _width, _height;
     int32_t _clear_mask;
@@ -64,15 +54,13 @@ private:
     uint32_t _draw_buffer_count;
 };
 
-class PostDrawElementsToFBO : public RenderCommand {
-public:
-    virtual void draw(GraphicsContext& graphicsContext) override {
+struct PostDrawElementsToFBO final : RenderCommand {
+    void draw(GraphicsContext& graphicsContext) override {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-        const RenderEngineContext::Resolution& resolution = graphicsContext.renderContext()->displayResolution();
-        glViewport(0, 0, static_cast<GLsizei>(resolution.width), static_cast<GLsizei>(resolution.height));
+        const auto [width, height] = graphicsContext.renderContext()->displayResolution();
+        glViewport(0, 0, static_cast<GLsizei>(width), static_cast<GLsizei>(height));
     }
-
 };
 
 }
@@ -89,5 +77,4 @@ void GLFramebufferRenderer::render(RenderRequest& renderRequest, const V3& posit
     renderRequest.addRenderCommand(_post_draw);
 }
 
-}
 }

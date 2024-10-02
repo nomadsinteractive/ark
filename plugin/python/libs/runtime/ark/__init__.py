@@ -1602,7 +1602,7 @@ class Layer:
     def context(self) -> LayerContext:
         return LayerContext()
 
-    def add_render_object(self, render_object: RenderObject, disposed: Boolean = None):
+    def add_render_object(self, render_object: RenderObject, discarded: Boolean = None):
         pass
 
     def clear(self):

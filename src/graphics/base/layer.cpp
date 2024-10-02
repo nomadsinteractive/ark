@@ -53,9 +53,8 @@ void Layer::clear()
 }
 
 Layer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _type(Documents::getAttribute(manifest, constants::TYPE, Layer::TYPE_DYNAMIC)), _render_layer(factory.getBuilder<RenderLayer>(manifest, constants::RENDER_LAYER)),
-      _model_loader(factory.getBuilder<ModelLoader>(manifest, constants::MODEL_LOADER)), _visible(factory.getBuilder<Boolean>(manifest, constants::VISIBLE)),
-      _position(factory.getBuilder<Vec3>(manifest, constants::POSITION)), _render_objects(factory.makeBuilderList<RenderObject>(manifest, constants::RENDER_OBJECT))
+    : _render_layer(factory.getBuilder<RenderLayer>(manifest, constants::RENDER_LAYER)), _model_loader(factory.getBuilder<ModelLoader>(manifest, constants::MODEL_LOADER)),
+      _visible(factory.getBuilder<Boolean>(manifest, constants::VISIBLE)), _position(factory.getBuilder<Vec3>(manifest, constants::POSITION)), _render_objects(factory.makeBuilderList<RenderObject>(manifest, constants::RENDER_OBJECT))
 {
 }
 
@@ -70,16 +69,6 @@ sp<Layer> Layer::BUILDER::build(const Scope& args)
     for(const sp<Builder<RenderObject>>& i : _render_objects)
         layerContext.add(i->build(args));
     return layer;
-}
-
-template<> ARK_API Layer::Type StringConvert::eval<Layer::Type>(const String& str)
-{
-    if(str == "dynamic")
-        return Layer::TYPE_DYNAMIC;
-    if(str == "static")
-        return Layer::TYPE_STATIC;
-    DCHECK(str == "transient", "Unkown layer type: %s, known types are ['static', 'dynamic', 'transient']", str.c_str());
-    return Layer::TYPE_TRANSIENT;
 }
 
 }

@@ -23,7 +23,6 @@
 #include "renderer/opengl/renderer/gl_framebuffer_renderer.h"
 #include "renderer/opengl/render_view/render_view_opengl.h"
 #include "renderer/opengl/es30/snippet_factory/snippet_factory_gles30.h"
-#include "renderer/opengl/util/gl_util.h"
 
 #include "generated/opengl_plugin.h"
 
@@ -45,6 +44,14 @@ void setVersion(Ark::RendererVersion version, RenderEngineContext& glContext)
     definitions["frag.color"] = "f_FragColor";
     glContext.setSnippetFactory(sp<gles30::SnippetFactoryGLES30>::make());
     glContext.setVersion(version);
+}
+
+int32_t toClearMaskBits(const RenderTarget::CreateConfigure& configure)
+{
+    RenderTarget::ClearMask clearMask = configure._clear_mask;
+    if(configure._depth_stencil_usage.has(RenderTarget::DEPTH_STENCIL_USAGE_FOR_INPUT))
+        clearMask.set(RenderTarget::CLEAR_MASK_DEPTH_STENCIL, false);
+    return clearMask.bits();
 }
 
 }
@@ -100,9 +107,8 @@ sp<RenderTarget> RendererFactoryOpenGL::createRenderTarget(sp<Renderer> renderer
     int32_t width = configure._color_attachments.at(0)->width();
     int32_t height = configure._color_attachments.at(0)->height();
     uint32_t drawBufferCount = static_cast<uint32_t>(configure._color_attachments.size());
-    const int32_t clearMask = configure._clear_mask.bits();
     sp<GLFramebuffer> fbo = sp<GLFramebuffer>::make(_recycler, std::move(configure));
-    return sp<RenderTarget>::make(sp<GLFramebufferRenderer>::make(fbo, width, height, std::move(renderer), drawBufferCount, clearMask), std::move(fbo));
+    return sp<RenderTarget>::make(sp<GLFramebufferRenderer>::make(fbo, width, height, std::move(renderer), drawBufferCount, toClearMaskBits(configure)), std::move(fbo));
 }
 
 sp<PipelineFactory> RendererFactoryOpenGL::createPipelineFactory()
@@ -114,7 +120,7 @@ sp<Texture::Delegate> RendererFactoryOpenGL::createTexture(sp<Size> size, sp<Tex
 {
     if(parameters->_type == Texture::TYPE_2D)
         return sp<GLTexture2D>::make(_recycler, std::move(size), std::move(parameters));
-    else if(parameters->_type == Texture::TYPE_CUBEMAP)
+    if(parameters->_type == Texture::TYPE_CUBEMAP)
         return sp<GLCubemap>::make(_recycler, std::move(size), std::move(parameters));
     DFATAL("Unsupported texture type: %d", parameters->_type);
     return nullptr;

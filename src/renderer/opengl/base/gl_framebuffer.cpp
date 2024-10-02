@@ -13,6 +13,22 @@
 
 namespace ark::opengl {
 
+namespace {
+
+sp<GLRenderbuffer> ensureRenderBuffer(GraphicsContext& graphicsContext, GLTexture& texture, sp<Recycler> recycler)
+{
+    sp<GLRenderbuffer> renderbuffer = texture.renderbuffer();
+    if(!renderbuffer)
+    {
+        renderbuffer = sp<GLRenderbuffer>::make(recycler);
+        texture.setRenderbuffer(renderbuffer);
+        renderbuffer->upload(graphicsContext);
+    }
+    return renderbuffer;
+}
+
+}
+
 GLFramebuffer::GLFramebuffer(sp<Recycler> recycler, RenderTarget::CreateConfigure configure)
     : _recycler(std::move(recycler)), _configure(std::move(configure)), _id(0)
 {
@@ -97,20 +113,18 @@ void GLFramebuffer::upload(GraphicsContext& graphicsContext)
         LOGD("glFramebufferTexture2D, attachment: %d, id: %d", v, k);
     }
 
-    if(_configure._depth_stencil_usage != RenderTarget::DEPTH_STENCIL_USAGE_FOR_INPUT)
+    if(depthTexture)
     {
-        const sp<GLTexture> gltex = depthTexture->delegate();
-        sp<GLRenderbuffer> renderbuffer = gltex->renderbuffer();
-        if(!renderbuffer)
-        {
-            renderbuffer = sp<GLRenderbuffer>::make(_recycler);
-            gltex->setRenderbuffer(renderbuffer);
-            renderbuffer->upload(graphicsContext);
-        }
+        const sp<GLRenderbuffer> renderbuffer = ensureRenderBuffer(graphicsContext, *static_cast<sp<GLTexture>>(depthTexture->delegate()), _recycler);
         glBindRenderbuffer(GL_RENDERBUFFER, static_cast<GLuint>(renderbuffer->id()));
         glRenderbufferStorage(GL_RENDERBUFFER, depthInternalformat, depthTexture->width(), depthTexture->height());
         for(const GLenum i : depthInputs)
-            glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, i, GL_RENDERBUFFER, static_cast<GLuint>(renderbuffer->id()));
+        {
+            if(_configure._depth_stencil_usage.has(RenderTarget::DEPTH_STENCIL_USAGE_FOR_INPUT))
+                glFramebufferRenderbuffer(GL_READ_FRAMEBUFFER, i, GL_RENDERBUFFER, static_cast<GLuint>(renderbuffer->id()));
+            if(_configure._depth_stencil_usage.has(RenderTarget::DEPTH_STENCIL_USAGE_FOR_OUTPUT))
+                glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, i, GL_RENDERBUFFER, static_cast<GLuint>(renderbuffer->id()));
+        }
     }
 
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
