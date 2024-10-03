@@ -55,7 +55,6 @@ public:
         sp<Layer> build(const Scope& args) override;
 
     private:
-        Layer::Type _type;
         SafePtr<Builder<RenderLayer>> _render_layer;
         SafePtr<Builder<ModelLoader>> _model_loader;
         SafePtr<Builder<Boolean>> _visible;

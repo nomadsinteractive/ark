@@ -17,7 +17,7 @@ namespace ark {
 class ARK_API AnimationType {
 public:
 //  [[script::bindings::classmethod]]
-    static sp<AnimationInput> makeInput(const sp<Animation>& self, const sp<Numeric>& tick, const sp<Runnable>& onComplete = nullptr);
+    static sp<AnimationUploader> makeInput(const sp<Animation>& self, const sp<Numeric>& tick, const sp<Runnable>& onComplete = nullptr);
 
 //  [[script::bindings::property]]
     static float ticks(const sp<Animation>& self);

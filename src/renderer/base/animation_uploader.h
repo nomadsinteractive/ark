@@ -12,17 +12,17 @@ namespace ark {
 typedef std::vector<M4> AnimationFrame;
 
 //[[script::bindings::extends(Uploader)]]
-class ARK_API AnimationInput : public Uploader {
+class ARK_API AnimationUploader final : public Uploader {
 public:
-    AnimationInput(sp<Numeric> duration, uint32_t durationInTicks, const sp<Table<String, uint32_t>>& node, const sp<std::vector<AnimationFrame>>& animationFrames);
+    AnimationUploader(sp<Numeric> duration, uint32_t durationInTicks, const sp<Table<String, uint32_t>>& node, const sp<std::vector<AnimationFrame>>& animationFrames);
 
 //  [[script::bindings::auto]]
     sp<Mat4> getNodeMatrix(const String& name);
 //  [[script::bindings::auto]]
     std::vector<float> getTransformVariance(const V3& c, const std::vector<String>& nodes);
 
-    virtual bool update(uint64_t timestamp) override;
-    virtual void upload(Writable& buf) override;
+    bool update(uint64_t timestamp) override;
+    void upload(Writable& buf) override;
 
 private:
     struct Stub {

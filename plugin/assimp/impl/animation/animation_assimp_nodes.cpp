@@ -4,7 +4,7 @@
 
 #include "graphics/base/mat.h"
 
-#include "renderer/base/animation_input.h"
+#include "renderer/base/animation_uploader.h"
 
 #include "util/animate_util.h"
 
@@ -32,9 +32,9 @@ AnimationAssimpNodes::AnimationAssimpNodes(float tps, const aiAnimation* animati
          _nodes->push_back(iter.first, index++);
 }
 
-sp<AnimationInput> AnimationAssimpNodes::makeInput(sp<Numeric> tick)
+sp<AnimationUploader> AnimationAssimpNodes::makeInput(sp<Numeric> tick)
 {
-    return sp<AnimationInput>::make(std::move(tick), _duration_in_ticks, _nodes, _animation_frames);
+    return sp<AnimationUploader>::make(std::move(tick), _duration_in_ticks, _nodes, _animation_frames);
 }
 
 const std::vector<String>& AnimationAssimpNodes::nodeNames()

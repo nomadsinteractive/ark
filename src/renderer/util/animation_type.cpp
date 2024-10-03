@@ -8,7 +8,7 @@
 
 namespace ark {
 
-sp<AnimationInput> AnimationType::makeInput(const sp<Animation>& self, const sp<Numeric>& tick, const sp<Runnable>& onComplete)
+sp<AnimationUploader> AnimationType::makeInput(const sp<Animation>& self, const sp<Numeric>& tick, const sp<Runnable>& onComplete)
 {
     sp<Numeric> t = tick;
 

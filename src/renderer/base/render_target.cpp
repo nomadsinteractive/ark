@@ -46,8 +46,6 @@ sp<RenderTarget> RenderTarget::BUILDER::build(const Scope& args)
         {
             CHECK(configure._depth_stencil_attachment == nullptr, "Only one depth-stencil attachment allowed");
             CHECK(usage.has(Texture::USAGE_DEPTH_STENCIL_ATTACHMENT), "Unknow Texture usage: %d", usage);
-            CHECK_WARN(!(_depth_stencil_usage.has(DEPTH_STENCIL_USAGE_FOR_OUTPUT) && usage.has(Texture::USAGE_DEPTH_STENCIL_ATTACHMENT) && _clear_mask.has(RenderTarget::CLEAR_MASK_DEPTH_STENCIL)),
-                       "Depth-stencil texture marked \"for input\" would be cleared before rendering pass");
             configure._depth_stencil_usage = _depth_stencil_usage;
             configure._depth_stencil_attachment = std::move(tex);
         }

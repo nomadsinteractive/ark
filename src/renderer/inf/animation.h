@@ -19,7 +19,7 @@ public:
 
     virtual ~Animation() = default;
 
-    virtual sp<AnimationInput> makeInput(sp<Numeric> duration) = 0;
+    virtual sp<AnimationUploader> makeInput(sp<Numeric> duration) = 0;
     virtual const std::vector<String>& nodeNames() = 0;
 
     const float ticks() const {

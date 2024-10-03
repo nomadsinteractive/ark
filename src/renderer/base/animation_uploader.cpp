@@ -1,4 +1,4 @@
-#include "renderer/base/animation_input.h"
+#include "renderer/base/animation_uploader.h"
 
 #include "core/collection/table.h"
 #include "core/base/string.h"
@@ -8,17 +8,17 @@
 
 namespace ark {
 
-AnimationInput::AnimationInput(sp<Numeric> duration, uint32_t durationInTicks, const sp<Table<String, uint32_t>>& node, const sp<std::vector<AnimationFrame>>& animationFrames)
+AnimationUploader::AnimationUploader(sp<Numeric> duration, uint32_t durationInTicks, const sp<Table<String, uint32_t>>& node, const sp<std::vector<AnimationFrame>>& animationFrames)
     : Uploader(node->size() * sizeof(M4)), _stub(sp<Stub>::make(std::move(duration), durationInTicks, node, animationFrames))
 {
 }
 
-sp<Mat4> AnimationInput::getNodeMatrix(const String& name)
+sp<Mat4> AnimationUploader::getNodeMatrix(const String& name)
 {
     return sp<NodeMatrix>::make(_stub, name);
 }
 
-std::vector<float> AnimationInput::getTransformVariance(const V3& c, const std::vector<String>& nodes)
+std::vector<float> AnimationUploader::getTransformVariance(const V3& c, const std::vector<String>& nodes)
 {
     Table<String, uint32_t>& nodeTable = _stub->_nodes;
     const std::vector<AnimationFrame>& animationFrames = _stub->_animation_frames;
@@ -42,22 +42,22 @@ std::vector<float> AnimationInput::getTransformVariance(const V3& c, const std::
     return avgs;
 }
 
-bool AnimationInput::update(uint64_t timestamp)
+bool AnimationUploader::update(uint64_t timestamp)
 {
     return _stub->update(timestamp);
 }
 
-void AnimationInput::upload(Writable& buf)
+void AnimationUploader::upload(Writable& buf)
 {
     buf.write(_stub->getFrameInput(), _size, 0);
 }
 
-AnimationInput::Stub::Stub(sp<Numeric> tick, uint32_t durationInTicks, const sp<Table<String, uint32_t>>& nodes, const sp<std::vector<AnimationFrame>>& matrics)
+AnimationUploader::Stub::Stub(sp<Numeric> tick, uint32_t durationInTicks, const sp<Table<String, uint32_t>>& nodes, const sp<std::vector<AnimationFrame>>& matrics)
     : _duration_in_ticks(durationInTicks), _tick(std::move(tick)), _nodes(nodes), _animation_frames(matrics), _frame_index(0)
 {
 }
 
-bool AnimationInput::Stub::update(uint64_t timestamp)
+bool AnimationUploader::Stub::update(uint64_t timestamp)
 {
     if(_tick->update(timestamp))
     {
@@ -67,23 +67,23 @@ bool AnimationInput::Stub::update(uint64_t timestamp)
     return false;
 }
 
-const M4* AnimationInput::Stub::getFrameInput() const
+const M4* AnimationUploader::Stub::getFrameInput() const
 {
     DCHECK(_frame_index < _animation_frames->size(), "Animation has no frame[%d]", _frame_index);
     return _animation_frames->at(_frame_index).data();
 }
 
-AnimationInput::NodeMatrix::NodeMatrix(const sp<Stub>& stub, const String& name)
+AnimationUploader::NodeMatrix::NodeMatrix(const sp<Stub>& stub, const String& name)
     : _stub(stub), _node_index(_stub->_nodes->at(name))
 {
 }
 
-bool AnimationInput::NodeMatrix::update(uint64_t timestamp)
+bool AnimationUploader::NodeMatrix::update(uint64_t timestamp)
 {
     return _stub->update(timestamp);
 }
 
-M4 AnimationInput::NodeMatrix::val()
+M4 AnimationUploader::NodeMatrix::val()
 {
     return _stub->getFrameInput()[_node_index];
 }

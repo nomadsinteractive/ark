@@ -7,7 +7,7 @@
 namespace ark {
 
 class Animation;
-class AnimationInput;
+class AnimationUploader;
 class Atlas;
 class Attribute;
 class BitmapBundle;
