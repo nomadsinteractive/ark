@@ -26,7 +26,7 @@ sp<AnimationUploader> AnimationType::makeInput(const sp<Animation>& self, const 
 
 float AnimationType::ticks(const sp<Animation>& self)
 {
-    return self->ticks();
+    return self->duration();
 }
 
 float AnimationType::tps(const sp<Animation>& self)
@@ -36,7 +36,7 @@ float AnimationType::tps(const sp<Animation>& self)
 
 float AnimationType::duration(const sp<Animation>& self)
 {
-    return self->ticks() / self->tps();
+    return self->duration() / self->tps();
 }
 
 const std::vector<String>& AnimationType::nodeNames(const sp<Animation>& self)

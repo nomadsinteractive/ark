@@ -26,9 +26,6 @@ public:
 	Model loadModel();
 
 private:
-	void loadAnimation(const tinygltf::Animation& anim);
-
-private:
 	op<tinygltf::Model> _model;
 	std::vector<sp<Material>> _materials;
 

@@ -14,17 +14,17 @@ typedef std::vector<M4> AnimationFrame;
 //[[script::bindings::extends(Uploader)]]
 class ARK_API AnimationUploader final : public Uploader {
 public:
-    AnimationUploader(sp<Numeric> duration, uint32_t durationInTicks, const sp<Table<String, uint32_t>>& node, const sp<std::vector<AnimationFrame>>& animationFrames);
+    AnimationUploader(sp<Numeric> duration, uint32_t durationInTicks, const sp<Table<String, uint32_t>>& nodeIds, const sp<std::vector<AnimationFrame>>& animationFrames);
 
 //  [[script::bindings::auto]]
     sp<Mat4> getNodeMatrix(const String& name);
 //  [[script::bindings::auto]]
-    std::vector<float> getTransformVariance(const V3& c, const std::vector<String>& nodes);
+    std::vector<V3> getNodeDisplacements(const String& nodeName, const V3& origin) const;
 
     bool update(uint64_t timestamp) override;
     void upload(Writable& buf) override;
 
-private:
+public:
     struct Stub {
         Stub(sp<Numeric> tick, uint32_t durationInTicks, const sp<Table<String, uint32_t>>& nodes, const sp<std::vector<AnimationFrame>>& animationFrames);
 
@@ -41,19 +41,6 @@ private:
         sp<std::vector<AnimationFrame>> _animation_frames;
 
         uint32_t _frame_index;
-    };
-
-    class NodeMatrix : public Mat4 {
-    public:
-        NodeMatrix(const sp<Stub>& stub, const String& name);
-
-        virtual bool update(uint64_t timestamp) override;
-
-        virtual M4 val() override;
-
-    private:
-        sp<Stub> _stub;
-        uint32_t _node_index;
     };
 
 private:

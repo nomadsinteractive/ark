@@ -139,13 +139,18 @@ float V4::hypot() const
 
 V4 V4::normalize() const
 {
-    float length = std::max(hypot(), MIN_NORMALIZE_LENGTH);
+    const float length = std::max(hypot(), MIN_NORMALIZE_LENGTH);
     return V4(_x / length, _y / length, _z / length, _w / length);
 }
 
 V4 V4::floorDiv(const V4& other) const
 {
     return V4(Math::floorDiv(_x, other._x), Math::floorDiv(_y, other._y), Math::floorDiv(_z, other._z), Math::floorDiv(_w, other._w));
+}
+
+V3 V4::toNonHomogeneous() const
+{
+    return (_w < 0 ? -V3(_x, _y, _z) : V3(_x, _y, _z)) / std::max(MIN_NORMALIZE_LENGTH, std::abs(_w));
 }
 
 }

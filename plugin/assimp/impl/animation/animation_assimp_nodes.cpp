@@ -18,8 +18,8 @@ AnimationAssimpNodes::AnimationAssimpNodes(float tps, const aiAnimation* animati
 
     float tpsDefault = animation->mTicksPerSecond != 0 ? static_cast<float>(animation->mTicksPerSecond) : tps;
 
-    _duration_in_ticks = static_cast<uint32_t>(_ticks * _tps / tpsDefault);
-    float step = _ticks / static_cast<float>(_duration_in_ticks);
+    _duration_in_ticks = static_cast<uint32_t>(_duration * _tps / tpsDefault);
+    float step = _duration / static_cast<float>(_duration_in_ticks);
     for(uint32_t i = 0; i < _duration_in_ticks; ++i)
     {
         AnimationFrame frame;

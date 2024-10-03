@@ -16,7 +16,7 @@
 
 namespace ark {
 
-class Math {
+class ARK_API Math {
 public:
     template<typename T> static bool between(T a1, T a2, T val) {
         return a1 <= a2 ? (a1 <= val && val <= a2) : (a2 <= val && val <= a1);
@@ -135,106 +135,106 @@ public:
         seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
     }
 
-    static ARK_API uint32_t log2(uint32_t x);
+    static uint32_t log2(uint32_t x);
 
-    static ARK_API float abs(float x);
-    static ARK_API V2 abs(const V2& x);
-    static ARK_API V3 abs(const V3& x);
-    static ARK_API V4 abs(const V4& x);
+    static float abs(float x);
+    static V2 abs(const V2& x);
+    static V3 abs(const V3& x);
+    static V4 abs(const V4& x);
 
 //  [[script::bindings::auto]]
-    static ARK_API float sin(float x);
+    static float sin(float x);
 //  [[plugin::function("sin")]]
 //  [[script::bindings::auto]]
-    static ARK_API sp<Numeric> sin(const sp<Numeric>& x);
+    static sp<Numeric> sin(const sp<Numeric>& x);
 //  [[script::bindings::auto]]
-    static ARK_API float cos(float x);
+    static float cos(float x);
 //  [[plugin::function("cos")]]
 //  [[script::bindings::auto]]
-    static ARK_API sp<Numeric> cos(const sp<Numeric>& x);
+    static sp<Numeric> cos(const sp<Numeric>& x);
 
 //  [[plugin::function("min")]]
 //  [[script::bindings::auto]]
-    static ARK_API sp<Numeric> min(sp<Numeric> a1, sp<Numeric> a2);
+    static sp<Numeric> min(sp<Numeric> a1, sp<Numeric> a2);
 //  [[plugin::function("max")]]
 //  [[script::bindings::auto]]
-    static ARK_API sp<Numeric> max(sp<Numeric> a1, sp<Numeric> a2);
+    static sp<Numeric> max(sp<Numeric> a1, sp<Numeric> a2);
 
 //  [[script::bindings::auto]]
-    static ARK_API float acos(float x);
+    static float acos(float x);
 //  [[plugin::function("acos")]]
 //  [[script::bindings::auto]]
-    static ARK_API sp<Numeric> acos(const sp<Numeric>& x);
+    static sp<Numeric> acos(const sp<Numeric>& x);
 //  [[script::bindings::auto]]
-    static ARK_API float atan2(float y, float x);
+    static float atan2(float y, float x);
 //  [[script::bindings::auto]]
-    static ARK_API sp<Numeric> atan2(const sp<Numeric>& dy, const sp<Numeric>& dx);
+    static sp<Numeric> atan2(const sp<Numeric>& dy, const sp<Numeric>& dx);
 //  [[script::bindings::auto]]
-    static ARK_API float radians(float degree);
+    static float radians(float degree);
 
 //  [[script::bindings::auto]]
-    static ARK_API float tanh(float x);
+    static float tanh(float x);
 
-    static ARK_API int32_t floor(float x);
-    static ARK_API float round(float x);
-    static ARK_API V2 round(const V2& v);
-    static ARK_API V3 round(const V3& v);
-    static ARK_API V4 round(const V4& v);
-
-//  [[script::bindings::auto]]
-    static ARK_API float randf();
-//  [[script::bindings::auto]]
-    static ARK_API sp<Numeric> randv();
+    static int32_t floor(float x);
+    static float round(float x);
+    static V2 round(const V2& v);
+    static V3 round(const V3& v);
+    static V4 round(const V4& v);
 
 //  [[script::bindings::auto]]
-    static ARK_API uint32_t hypot(int32_t dx, int32_t dy);
+    static float randf();
 //  [[script::bindings::auto]]
-    static ARK_API float hypot(float dx, float dy);
+    static sp<Numeric> randv();
+
 //  [[script::bindings::auto]]
-    static ARK_API float sqrt(float number);
+    static uint32_t hypot(int32_t dx, int32_t dy);
+//  [[script::bindings::auto]]
+    static float hypot(float dx, float dy);
+//  [[script::bindings::auto]]
+    static float sqrt(float number);
 //  [[plugin::function("sqrt")]]
 //  [[script::bindings::auto]]
-    static ARK_API sp<Numeric> sqrt(sp<Numeric> number);
+    static sp<Numeric> sqrt(sp<Numeric> number);
 
 //  [[script::bindings::auto]]
-    static ARK_API float distance(const V2& lvalue, const V2& rvalue);
+    static float distance(const V2& lvalue, const V2& rvalue);
 //  [[script::bindings::auto]]
-    static ARK_API float distance(const V3& lvalue, const V3& rvalue);
+    static float distance(const V3& lvalue, const V3& rvalue);
 //  [[script::bindings::auto]]
-    static ARK_API float distance(const V4& lvalue, const V4& rvalue);
+    static float distance(const V4& lvalue, const V4& rvalue);
 
 //  [[script::bindings::auto]]
-    static ARK_API sp<Numeric> distance(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue);
+    static sp<Numeric> distance(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue);
 //  [[script::bindings::auto]]
-    static ARK_API sp<Numeric> distance(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue);
+    static sp<Numeric> distance(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue);
 //  [[script::bindings::auto]]
-    static ARK_API sp<Numeric> distance(const sp<Vec4>& lvalue, const sp<Vec4>& rvalue);
+    static sp<Numeric> distance(const sp<Vec4>& lvalue, const sp<Vec4>& rvalue);
 
 //  [[script::bindings::auto]]
-    static ARK_API sp<Numeric> dot(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue);
+    static sp<Numeric> dot(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue);
 //  [[script::bindings::auto]]
-    static ARK_API sp<Numeric> dot(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue);
+    static sp<Numeric> dot(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue);
 //  [[script::bindings::auto]]
-    static ARK_API sp<Numeric> dot(const sp<Vec4>& lvalue, const sp<Vec4>& rvalue);
+    static sp<Numeric> dot(const sp<Vec4>& lvalue, const sp<Vec4>& rvalue);
 
 //  [[script::bindings::auto]]
-    static ARK_API float lerp(float a, float b, float t);
-    static ARK_API float lerp(float a, float b, float t0, float t1, float t);
+    static float lerp(float a, float b, float t);
+    static float lerp(float a, float b, float t0, float t1, float t);
 //  [[script::bindings::auto]]
-    static ARK_API sp<Numeric> lerp(sp<Numeric> a, sp<Numeric> b, sp<Numeric> t);
+    static sp<Numeric> lerp(sp<Numeric> a, sp<Numeric> b, sp<Numeric> t);
 //  [[script::bindings::auto]]
-    static ARK_API sp<Vec2> lerp(sp<Vec2> a, sp<Vec2> b, sp<Numeric> t);
+    static sp<Vec2> lerp(sp<Vec2> a, sp<Vec2> b, sp<Numeric> t);
 //  [[script::bindings::auto]]
-    static ARK_API sp<Vec3> lerp(sp<Vec3> a, sp<Vec3> b, sp<Numeric> t);
+    static sp<Vec3> lerp(sp<Vec3> a, sp<Vec3> b, sp<Numeric> t);
 //  [[script::bindings::auto]]
-    static ARK_API sp<Vec4> lerp(sp<Vec4> a, sp<Vec4> b, sp<Numeric> t);
+    static sp<Vec4> lerp(sp<Vec4> a, sp<Vec4> b, sp<Numeric> t);
 
     [[deprecated]]
 //  [[script::bindings::auto]]
-    static ARK_API V3 quadratic(float a, float b, float c);
+    static V3 quadratic(float a, float b, float c);
     [[deprecated]]
 //  [[script::bindings::auto]]
-    static ARK_API V2 projectile(float dx, float dy, float v, float g, uint32_t sid);
+    static V2 projectile(float dx, float dy, float v, float g, uint32_t sid);
 
     static uint32_t hash32(uint32_t x);
     static uint32_t hash64(uint64_t key);
@@ -243,12 +243,14 @@ public:
     static V3 normalize(const V3& v2);
     static V4 normalize(const V4& v2);
 
+    static V4 slerp(const V4& x, const V4& y, float t);
+
     static void vibrate(float s0, float v0, float s1, float v1, float& o, float& a, float& t0, float& t1);
 
-    static ARK_API const float PI;
-    static ARK_API const float PIx2;
-    static ARK_API const float PI_2;
-    static ARK_API const float PI_4;
+    static const float PI;
+    static const float PIx2;
+    static const float PI_2;
+    static const float PI_4;
 };
 
 }

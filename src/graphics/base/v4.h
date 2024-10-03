@@ -40,6 +40,8 @@ public:
     V4 normalize() const;
     V4 floorDiv(const V4& other) const;
 
+    V3 toNonHomogeneous() const;
+
 private:
     float _w;
 

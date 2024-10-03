@@ -9,10 +9,13 @@
 
 #include "core/base/constants.h"
 #include "core/inf/readable.h"
+#include "core/util/math.h"
 #include "core/util/strings.h"
 
 #include "graphics/base/v4.h"
+#include "impl/animation/animation_gltf.h"
 
+#include "renderer/base/animation_uploader.h"
 #include "renderer/base/atlas.h"
 #include "renderer/base/material_bundle.h"
 #include "renderer/base/mesh.h"
@@ -27,8 +30,12 @@ namespace {
 struct AnimationChannel {
 	enum PathType { TRANSLATION, ROTATION, SCALE };
 	PathType path;
-	sp<Node> node;
+	uint32_t node_id;
 	uint32_t samplerIndex;
+
+	V3 _intermediate_translation{};
+	V3 _intermediate_scale{};
+	V4 _intermediate_quaternion{};
 };
 
 struct AnimationSampler {
@@ -39,6 +46,7 @@ struct AnimationSampler {
 };
 
 struct Animation {
+	String name;
 	std::vector<AnimationSampler> samplers;
 	std::vector<AnimationChannel> channels;
 	float start = std::numeric_limits<float>::max();
@@ -55,6 +63,11 @@ template<typename T> struct SBufferReadData {
 	ShaderDataType _shader_data_type;
 	size_t NumElements = 0;
 };
+
+template<typename T> T mix(const T& x, const T& y, float a)
+{
+	return x * (1.0 - a) + y * a;
+}
 
 template<typename T, typename TReadElementType> void readBufferData(SBufferReadData<T>& bufferReadData) {
 	if constexpr(!std::is_same_v<TReadElementType, void>)
@@ -313,6 +326,128 @@ tinygltf::Model loadGltfModel(const String& src)
 	return gltfModel;
 }
 
+Animation loadAnimation(const tinygltf::Model& model, const tinygltf::Animation& anim)
+{
+    Animation animation;
+
+	for (const auto& i : anim.samplers)
+	{
+		AnimationSampler sampler{};
+
+		if(i.interpolation == "LINEAR")
+			sampler.interpolation = AnimationSampler::InterpolationType::LINEAR;
+		else if(i.interpolation == "STEP")
+			sampler.interpolation = AnimationSampler::InterpolationType::STEP;
+		else if(i.interpolation == "CUBICSPLINE")
+			sampler.interpolation = AnimationSampler::InterpolationType::CUBICSPLINE;
+
+		// Read sampler input time values
+		{
+			const tinygltf::Accessor& accessor = model.accessors[i.input];
+			const tinygltf::BufferView& bufferView = model.bufferViews[accessor.bufferView];
+			const tinygltf::Buffer& buffer = model.buffers[bufferView.buffer];
+
+			assert(accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT);
+
+			float* buf = new float[accessor.count];
+			memcpy(buf, &buffer.data[accessor.byteOffset + bufferView.byteOffset], accessor.count * sizeof(float));
+			for (size_t index = 0; index < accessor.count; index++)
+				sampler.inputs.push_back(buf[index]);
+            delete[] buf;
+			for(const float input : sampler.inputs)
+			{
+				if(input < animation.start)
+					animation.start = input;
+				if(input > animation.end)
+					animation.end = input;
+			}
+		}
+
+		// Read sampler output T/R/S values
+		{
+			const tinygltf::Accessor& accessor = model.accessors[i.output];
+			const tinygltf::BufferView& bufferView = model.bufferViews[accessor.bufferView];
+			const tinygltf::Buffer& buffer = model.buffers[bufferView.buffer];
+
+			assert(accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT);
+
+			switch(accessor.type) {
+				case TINYGLTF_TYPE_VEC3: {
+					std::vector<V3> buf(accessor.count);
+					memcpy(buf.data(), &buffer.data[accessor.byteOffset + bufferView.byteOffset], accessor.count * sizeof(V3));
+					for (size_t index = 0; index < accessor.count; index++)
+						sampler.outputsVec4.push_back(V4(buf.at(index), 0.0f));
+	                break;
+				}
+				case TINYGLTF_TYPE_VEC4: {
+					std::vector<V4> buf(accessor.count);
+					memcpy(buf.data(), &buffer.data[accessor.byteOffset + bufferView.byteOffset], accessor.count * sizeof(V4));
+					for (size_t index = 0; index < accessor.count; index++)
+						sampler.outputsVec4.push_back(buf.at(index));
+	                break;
+				}
+				default:
+					FATAL("Unknown type %d", accessor.type);
+					break;
+			}
+		}
+
+		animation.samplers.push_back(sampler);
+	}
+
+	for (const tinygltf::AnimationChannel& source: anim.channels)
+		if(source.target_node >= 0)
+		{
+			AnimationChannel channel{};
+
+			if(source.target_path == "rotation") {
+				channel.path = AnimationChannel::PathType::ROTATION;
+			}
+			else if(source.target_path == "translation") {
+				channel.path = AnimationChannel::PathType::TRANSLATION;
+			}
+			else if(source.target_path == "scale") {
+				channel.path = AnimationChannel::PathType::SCALE;
+			}
+			CHECK(source.target_path != "weights", "Implemented");
+
+			channel.samplerIndex = source.sampler;
+			channel.node_id = source.target_node;
+			animation.channels.push_back(channel);
+		}
+
+	return animation;
+}
+
+void updateAnimation(Animation& animation, float time)
+{
+	for (auto& channel : animation.channels)
+	{
+		const AnimationSampler& sampler = animation.samplers[channel.samplerIndex];
+		if(sampler.inputs.size() > sampler.outputsVec4.size())
+			continue;
+
+		for (auto i = 0; i < sampler.inputs.size() - 1; i++)
+			if ((time >= sampler.inputs[i]) && (time <= sampler.inputs[i + 1]))
+				if(const float u = std::max(0.0f, time - sampler.inputs[i]) / (sampler.inputs[i + 1] - sampler.inputs[i]); u <= 1.0f) {
+					switch (channel.path) {
+						case AnimationChannel::PathType::TRANSLATION: {
+							channel._intermediate_translation = mix<V4>(sampler.outputsVec4[i], sampler.outputsVec4[i + 1], u).toNonHomogeneous();
+							break;
+						}
+						case AnimationChannel::PathType::SCALE: {
+							channel._intermediate_scale = mix<V4>(sampler.outputsVec4[i], sampler.outputsVec4[i + 1], u).toNonHomogeneous();
+							break;
+						}
+						case AnimationChannel::PathType::ROTATION: {
+							channel._intermediate_quaternion = Math::slerp(sampler.outputsVec4[i], sampler.outputsVec4[i + 1], u);
+							break;
+						}
+					}
+				}
+	}
+}	
+
 }
 
 GltfImporter::GltfImporter(const String& src, const MaterialBundle& materialBundle)
@@ -343,8 +478,60 @@ Model GltfImporter::loadModel()
 	for(const int32_t i : scene.nodes)
 		rootNode->childNodes().push_back(loadNode(i));
 
-	for(const tinygltf::Animation& i : _model->animations)
-		loadAnimation(i);
+	Table<String, sp<ark::Animation>> animations;
+	if(!_model->animations.empty())
+	{
+		const float tps = 24.0f;
+		std::vector<Animation> loadingAnimations;
+		float animationDuration = std::numeric_limits<float>::min();
+
+		for(const tinygltf::Animation& i : _model->animations)
+		{
+			Animation animation = loadAnimation(_model, i);
+			if(animationDuration < animation.end)
+				animationDuration = animation.end;
+			loadingAnimations.push_back(std::move(animation));
+		}
+
+		const uint32_t tickCount = animationDuration * tps;
+		const float tickInterval = 1.0f / tps;
+
+		for(Animation& animation : loadingAnimations)
+		{
+			std::map<uint32_t, uint32_t> channelNodeIds;
+			for(const AnimationChannel& channel : animation.channels)
+				channelNodeIds.emplace(channel.node_id, channelNodeIds.size());
+
+			std::vector<AnimationFrame> frames(tickCount);
+
+			for(uint32_t i = 0; i < tickCount; ++i)
+			{
+				AnimationFrame animationFrame(channelNodeIds.size());
+
+				const float time = i * tickInterval;
+				updateAnimation(animation, time);
+				for(const AnimationChannel& channel : animation.channels)
+				{
+					const uint32_t frameNodeId = channelNodeIds[channel.node_id];
+					const M4 matrix = MatrixUtil::translate(MatrixUtil::rotate(MatrixUtil::scale(M4::identity(), channel._intermediate_scale), channel._intermediate_quaternion), channel._intermediate_translation);
+					animationFrame[frameNodeId] = MatrixUtil::mul(matrix, animationFrame.at(frameNodeId));
+				}
+
+				frames[i] = std::move(animationFrame);
+			}
+
+			Table<String, uint32_t> nodeIds;
+			std::vector<String> nodeNames;
+			for(const auto [nodeId, frameNodeId] : channelNodeIds)
+			{
+				const sp<Node>& node = _nodes.at(nodeId);
+				nodeNames.push_back(node->name());
+				nodeIds.push_back(node->name(), frameNodeId);
+			}
+
+			animations.push_back(std::move(animation.name), sp<ark::Animation>::make<AnimationGltf>(tickCount, std::move(nodeNames), std::move(nodeIds), std::move(frames)));
+		}
+	}
 
 	float aabbMinX(std::numeric_limits<float>::max()), aabbMinY(std::numeric_limits<float>::max()), aabbMinZ(std::numeric_limits<float>::max());
 	float aabbMaxX(std::numeric_limits<float>::min()), aabbMaxY(std::numeric_limits<float>::min()), aabbMaxZ(std::numeric_limits<float>::min());
@@ -360,7 +547,7 @@ Model GltfImporter::loadModel()
 			if(aabbMaxZ < j.z()) aabbMaxZ = j.z();
 		}
 
-	return {std::move(_materials), std::move(_primitives), std::move(rootNode), sp<Boundaries>::make(V3(aabbMinX, aabbMinY, aabbMinZ), V3(aabbMaxX, aabbMaxY, aabbMaxZ))};
+	return {std::move(_materials), std::move(_primitives), std::move(rootNode), sp<Boundaries>::make(V3(aabbMinX, aabbMinY, aabbMinZ), V3(aabbMaxX, aabbMaxY, aabbMaxZ)), nullptr, std::move(animations)};
 }
 
 sp<Node> GltfImporter::loadNode(int32_t nodeId)
@@ -379,103 +566,6 @@ sp<Node> GltfImporter::loadNode(int32_t nodeId)
 	for(const int32_t i : node.children)
 		n->childNodes().push_back(loadNode(i));
 	return n;
-}
-
-void GltfImporter::loadAnimation(const tinygltf::Animation& anim)
-{
-    Animation animation;
-	for (const auto& i : anim.samplers) {
-		AnimationSampler sampler{};
-
-		if (i.interpolation == "LINEAR") {
-			sampler.interpolation = AnimationSampler::InterpolationType::LINEAR;
-		}
-		if (i.interpolation == "STEP") {
-			sampler.interpolation = AnimationSampler::InterpolationType::STEP;
-		}
-		if (i.interpolation == "CUBICSPLINE") {
-			sampler.interpolation = AnimationSampler::InterpolationType::CUBICSPLINE;
-		}
-
-		// Read sampler input time values
-		{
-			const tinygltf::Accessor& accessor = _model->accessors[i.input];
-			const tinygltf::BufferView& bufferView = _model->bufferViews[accessor.bufferView];
-			const tinygltf::Buffer& buffer = _model->buffers[bufferView.buffer];
-
-			assert(accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT);
-
-			float *buf = new float[accessor.count];
-			memcpy(buf, &buffer.data[accessor.byteOffset + bufferView.byteOffset], accessor.count * sizeof(float));
-			for (size_t index = 0; index < accessor.count; index++) {
-				sampler.inputs.push_back(buf[index]);
-			}
-            delete[] buf;
-			for (auto input : sampler.inputs) {
-				if (input < animation.start) {
-					animation.start = input;
-				};
-				if (input > animation.end) {
-					animation.end = input;
-				}
-			}
-		}
-
-		// Read sampler output T/R/S values
-		{
-			const tinygltf::Accessor& accessor = _model->accessors[i.output];
-			const tinygltf::BufferView& bufferView = _model->bufferViews[accessor.bufferView];
-			const tinygltf::Buffer& buffer = _model->buffers[bufferView.buffer];
-
-			assert(accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT);
-
-			switch (accessor.type) {
-				case TINYGLTF_TYPE_VEC3: {
-					std::vector<V3> buf(accessor.count);
-					memcpy(buf.data(), &buffer.data[accessor.byteOffset + bufferView.byteOffset], accessor.count * sizeof(V3));
-					for (size_t index = 0; index < accessor.count; index++)
-						sampler.outputsVec4.push_back(V4(buf.at(index), 0.0f));
-	                break;
-				}
-				case TINYGLTF_TYPE_VEC4: {
-					std::vector<V4> buf(accessor.count);
-					memcpy(buf.data(), &buffer.data[accessor.byteOffset + bufferView.byteOffset], accessor.count * sizeof(V4));
-					for (size_t index = 0; index < accessor.count; index++)
-						sampler.outputsVec4.push_back(buf.at(index));
-	                break;
-				}
-				default:
-					FATAL("Unknown type %d", accessor.type);
-					break;
-			}
-		}
-
-		animation.samplers.push_back(sampler);
-	}
-
-	for (const tinygltf::AnimationChannel& source: anim.channels)
-	{
-		AnimationChannel channel{};
-
-		if (source.target_path == "rotation") {
-			channel.path = AnimationChannel::PathType::ROTATION;
-		}
-		if (source.target_path == "translation") {
-			channel.path = AnimationChannel::PathType::TRANSLATION;
-		}
-		if (source.target_path == "scale") {
-			channel.path = AnimationChannel::PathType::SCALE;
-		}
-		CHECK(source.target_path != "weights", "Implemented");
-
-		channel.samplerIndex = source.sampler;
-		channel.node = _nodes.at(source.target_node);
-		if (!channel.node) {
-			continue;
-		}
-
-		animation.channels.push_back(channel);
-	}
 }
 
 }

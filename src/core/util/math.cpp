@@ -5,6 +5,8 @@
 #include <stdlib.h>
 
 #include <glm/glm.hpp>
+#include <glm/detail/type_quat.hpp>
+#include <glm/ext/quaternion_common.hpp>
 
 #include "core/inf/variable.h"
 #include "core/impl/variable/lerp.h"
@@ -346,6 +348,12 @@ V3 Math::normalize(const V3& v3)
 V4 Math::normalize(const V4& v4)
 {
     const glm::vec4 n = glm::normalize(glm::vec4(v4.x(), v4.y(), v4.z(), v4.w()));
+    return V4(n.x, n.y, n.z, n.w);
+}
+
+V4 Math::slerp(const V4& x, const V4& y, float t)
+{
+    const glm::quat n = glm::slerp(glm::quat(x.x(), x.y(), x.z(), x.w()), glm::quat(y.x(), y.y(), y.z(), y.w()), t);
     return V4(n.x, n.y, n.z, n.w);
 }
 

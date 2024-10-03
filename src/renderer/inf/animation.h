@@ -13,8 +13,8 @@ namespace ark {
 
 class ARK_API Animation {
 public:
-    Animation(float ticks, float tps)
-        : _ticks(ticks), _tps(tps) {
+    Animation(float duration, float tps)
+        : _duration(duration), _tps(tps) {
     }
 
     virtual ~Animation() = default;
@@ -22,16 +22,16 @@ public:
     virtual sp<AnimationUploader> makeInput(sp<Numeric> duration) = 0;
     virtual const std::vector<String>& nodeNames() = 0;
 
-    const float ticks() const {
-        return _ticks;
+    float duration() const {
+        return _duration;
     }
 
-    const float tps() const {
+    float tps() const {
         return _tps;
     }
 
 protected:
-    float _ticks;
+    float _duration;
     float _tps;
 };
 

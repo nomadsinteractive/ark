@@ -18,8 +18,8 @@ namespace ark {
 class ARK_API Model {
 public:
     Model() = default;
-    Model(sp<Uploader> indices, sp<Vertices> vertices, sp<Boundaries> content, sp<Boundaries> occupy = nullptr);
-    Model(std::vector<sp<Material>> materials, std::vector<sp<Mesh>> meshes, sp<Node> rootNode, sp<Boundaries> bounds = nullptr, sp<Boundaries> occupies = nullptr);
+    Model(sp<Uploader> indices, sp<Vertices> vertices, sp<Boundaries> content, sp<Boundaries> occupy = nullptr, Table<String, sp<Animation>> animations = {});
+    Model(std::vector<sp<Material>> materials, std::vector<sp<Mesh>> meshes, sp<Node> rootNode, sp<Boundaries> bounds = nullptr, sp<Boundaries> occupy = nullptr, Table<String, sp<Animation>> animations = {});
     DEFAULT_COPY_AND_ASSIGN(Model);
 
 //  [[script::bindings::property]]
@@ -92,11 +92,11 @@ private:
     sp<Node> _root_node;
     std::vector<sp<Material>> _materials;
     std::vector<sp<Mesh>> _meshes;
-    Table<String, sp<Animation>> _animations;
     std::vector<String> _node_names;
-
     sp<Boundaries> _content;
     sp<Boundaries> _occupy;
+
+    Table<String, sp<Animation>> _animations;
 };
 
 }

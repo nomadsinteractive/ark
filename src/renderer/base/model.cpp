@@ -110,14 +110,14 @@ struct NodeLayout {
 
 }
 
-Model::Model(sp<Uploader> indices, sp<Vertices> vertices, sp<Boundaries> content, sp<Boundaries> occupy)
-    : _indices(std::move(indices)), _vertices(std::move(vertices)), _content(std::move(content)), _occupy(occupy ? std::move(occupy) : sp<Boundaries>(_content))
+Model::Model(sp<Uploader> indices, sp<Vertices> vertices, sp<Boundaries> content, sp<Boundaries> occupy, Table<String, sp<Animation>> animations)
+    : _indices(std::move(indices)), _vertices(std::move(vertices)), _content(std::move(content)), _occupy(occupy ? std::move(occupy) : sp<Boundaries>(_content)), _animations(std::move(animations))
 {
 }
 
-Model::Model(std::vector<sp<Material>> materials, std::vector<sp<Mesh>> meshes, sp<Node> rootNode, sp<Boundaries> bounds, sp<Boundaries> occupies)
+Model::Model(std::vector<sp<Material>> materials, std::vector<sp<Mesh>> meshes, sp<Node> rootNode, sp<Boundaries> bounds, sp<Boundaries> occupies, Table<String, sp<Animation>> animations)
     : _indices(sp<InputMeshIndices>::make(meshes)), _vertices(sp<MeshVertices>::make(meshes)), _root_node(std::move(rootNode)), _materials(std::move(materials)), _meshes(std::move(meshes)),
-      _content(bounds ? std::move(bounds) : sp<Boundaries>::make(calcBoundingAABB())), _occupy(occupies ? std::move(occupies) : sp<Boundaries>(_content))
+      _content(bounds ? std::move(bounds) : sp<Boundaries>::make(calcBoundingAABB())), _occupy(occupies ? std::move(occupies) : sp<Boundaries>(_content)), _animations(std::move(animations))
 {
 }
 

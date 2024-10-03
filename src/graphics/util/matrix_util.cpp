@@ -39,7 +39,7 @@ M2 MatrixUtil::scale(const M2& lvalue, const V2& rvalue)
 
 M3 MatrixUtil::mul(const M3& lvalue, const M3& rvalue)
 {
-    return M3(lvalue.mat<glm::mat3>() * rvalue.mat<glm::mat3>());
+    return {lvalue.mat<glm::mat3>() * rvalue.mat<glm::mat3>()};
 }
 
 V3 MatrixUtil::mul(const M3& lvalue, const V3& rvalue)

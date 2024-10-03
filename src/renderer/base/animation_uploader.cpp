@@ -8,8 +8,32 @@
 
 namespace ark {
 
-AnimationUploader::AnimationUploader(sp<Numeric> duration, uint32_t durationInTicks, const sp<Table<String, uint32_t>>& node, const sp<std::vector<AnimationFrame>>& animationFrames)
-    : Uploader(node->size() * sizeof(M4)), _stub(sp<Stub>::make(std::move(duration), durationInTicks, node, animationFrames))
+namespace {
+
+struct NodeMatrix final : Mat4 {
+    NodeMatrix(const sp<AnimationUploader::Stub>& stub, const String& name)
+        : _stub(stub), _node_index(_stub->_nodes->at(name))
+    {
+    }
+
+    bool update(uint64_t timestamp) override
+    {
+        return _stub->update(timestamp);
+    }
+
+    M4 val() override
+    {
+        return _stub->getFrameInput()[_node_index];
+    }
+
+    sp<AnimationUploader::Stub> _stub;
+    uint32_t _node_index;
+};
+
+}
+
+AnimationUploader::AnimationUploader(sp<Numeric> duration, uint32_t durationInTicks, const sp<Table<String, uint32_t>>& nodeIds, const sp<std::vector<AnimationFrame>>& animationFrames)
+    : Uploader(nodeIds->size() * sizeof(M4)), _stub(sp<Stub>::make(std::move(duration), durationInTicks, nodeIds, animationFrames))
 {
 }
 
@@ -18,28 +42,18 @@ sp<Mat4> AnimationUploader::getNodeMatrix(const String& name)
     return sp<NodeMatrix>::make(_stub, name);
 }
 
-std::vector<float> AnimationUploader::getTransformVariance(const V3& c, const std::vector<String>& nodes)
+std::vector<V3> AnimationUploader::getNodeDisplacements(const String& nodeName, const V3& origin) const
 {
-    Table<String, uint32_t>& nodeTable = _stub->_nodes;
+    const Table<String, uint32_t>& nodeTable = _stub->_nodes;
     const std::vector<AnimationFrame>& animationFrames = _stub->_animation_frames;
-    std::vector<float> avgs(nodes.size()), lastFrame(nodes.size());
-    for(size_t i = 0; i < animationFrames.size(); ++i)
-    {
-        const AnimationFrame& f1 = animationFrames.at(i);
-        const V4 scala = V4(c, 1.0f);
+    const uint32_t nodeIndex = nodeTable.at(nodeName);
+    const V4 scala(origin, 1.0f);
+    std::vector<V3> displacements(animationFrames.size());
 
-        for(size_t j = 0; j < nodes.size(); ++j)
-        {
-            const String& name = nodes.at(j);
-            uint32_t nodeIndex = nodeTable.at(name);
-            const V4 d = f1[nodeIndex] * scala - scala;
-            float sl = d.dot(d);
-            if(i != 0)
-                avgs[j] = sl - lastFrame[j];
-            lastFrame[j] = sl;
-        }
-    }
-    return avgs;
+    for(size_t i = 0; i < animationFrames.size(); ++i)
+        displacements[i] = (animationFrames[i][nodeIndex] * scala).toNonHomogeneous();
+
+    return displacements;
 }
 
 bool AnimationUploader::update(uint64_t timestamp)
@@ -73,18 +87,4 @@ const M4* AnimationUploader::Stub::getFrameInput() const
     return _animation_frames->at(_frame_index).data();
 }
 
-AnimationUploader::NodeMatrix::NodeMatrix(const sp<Stub>& stub, const String& name)
-    : _stub(stub), _node_index(_stub->_nodes->at(name))
-{
-}
-
-bool AnimationUploader::NodeMatrix::update(uint64_t timestamp)
-{
-    return _stub->update(timestamp);
-}
-
-M4 AnimationUploader::NodeMatrix::val()
-{
-    return _stub->getFrameInput()[_node_index];
-}
 }
