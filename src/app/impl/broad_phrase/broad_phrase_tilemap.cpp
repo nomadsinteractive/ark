@@ -161,7 +161,7 @@ void BroadPhraseTilemap::addCandidate(const TilemapLayer& tilemapLayer, std::set
 BroadPhrase::Candidate BroadPhraseTilemap::makeCandidate(int32_t candidateId, uint32_t metaId, int32_t shapeId, const V2& position, sp<CollisionFilter> collisionFilter) const
 {
     Box bodyDef = shapeId == Shape::TYPE_AABB ? _body_def_tile : Box();
-    return Candidate(candidateId, position, constants::QUATERNION_ZERO, metaId, shapeId, std::move(collisionFilter), std::move(bodyDef));
+    return Candidate(candidateId, position, constants::QUATERNION_ONE, metaId, shapeId, std::move(collisionFilter), std::move(bodyDef));
 }
 
 BroadPhraseTilemap::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

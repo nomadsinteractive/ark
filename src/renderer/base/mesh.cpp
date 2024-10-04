@@ -29,6 +29,12 @@ Mesh::Mesh(uint32_t id, String name, std::vector<element_index_t> indices, std::
           (!_bone_infos || _vertices.size() == _bone_infos->length()), "Invalid mesh \"%s\", id: %d", _name.c_str(), id);
 }
 
+const Node& Mesh::parent() const
+{
+    ASSERT(_parent);
+    return *_parent;
+}
+
 uint32_t Mesh::id() const
 {
     return _id;
@@ -76,7 +82,6 @@ void Mesh::write(VertexWriter& buf) const
     const V3* normal = _normals ? _normals->buf() : nullptr;
     const Tangent* tangent = _tangents ? _tangents->buf() : nullptr;
     const BoneInfo* boneInfo = _bone_infos ? _bone_infos->buf() : nullptr;
-    const bool hasMaterialId = false; //buf.hasAttribute(PipelineInput::ATTRIBUTE_NAME_MATERIAL_ID);
     const size_t len = _vertices.size();
 
     for(size_t i = 0; i < len; ++i)
@@ -101,8 +106,6 @@ void Mesh::write(VertexWriter& buf) const
         }
         if(boneInfo)
             buf.writeBoneInfo(*(boneInfo++));
-        if(hasMaterialId)
-            buf.writeAttribute(_material->id(), PipelineInput::ATTRIBUTE_NAME_MATERIAL_ID);
     }
 }
 
@@ -133,3 +136,4 @@ void Mesh::BoneInfo::add(uint32_t id, float weight)
 }
 
 }
+

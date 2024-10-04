@@ -25,6 +25,12 @@ public:
         USAGE_NORMAL,
         USAGE_TANGENT,
         USAGE_BITANGENT,
+        USAGE_BONE_IDS,
+        USAGE_BONE_WEIGHTS,
+
+        USAGE_MODEL_MATRIX,
+        USAGE_NODE_ID,
+        USAGE_MATERIAL_ID,
         USAGE_COUNT
     };
 

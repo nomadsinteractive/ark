@@ -44,4 +44,9 @@ const std::vector<String>& AnimationType::nodeNames(const sp<Animation>& self)
     return self->nodeNames();
 }
 
+std::vector<std::pair<String, sp<Mat4>>> AnimationType::getNodeTransforms(const sp<Animation>& self, sp<Numeric> time)
+{
+    return self->getNodeTranforms(std::move(time));
+}
+
 }

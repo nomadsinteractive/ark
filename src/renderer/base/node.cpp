@@ -1,5 +1,6 @@
 #include "renderer/base/node.h"
 
+#include "mesh.h"
 #include "core/inf/variable.h"
 
 
@@ -29,9 +30,10 @@ const std::vector<sp<Mesh>>& Node::meshes() const
     return _meshes;
 }
 
-std::vector<sp<Mesh>>& Node::meshes()
+void Node::addMesh(sp<Mesh> mesh)
 {
-    return _meshes;
+    mesh->_parent = this;
+    _meshes.push_back(std::move(mesh));
 }
 
 const M4& Node::transform() const

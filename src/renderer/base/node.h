@@ -26,7 +26,7 @@ public:
 
 //  [[script::bindings::property]]
     const std::vector<sp<Mesh>>& meshes() const;
-    std::vector<sp<Mesh>>& meshes();
+    void addMesh(sp<Mesh> mesh);
 
 //  [[script::bindings::property]]
     const M4& transform() const;

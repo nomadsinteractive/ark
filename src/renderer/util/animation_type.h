@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_UTIL_ANIMATION_TYPE_H_
-#define ARK_RENDERER_UTIL_ANIMATION_TYPE_H_
+#pragma once
 
 #include <vector>
 
@@ -28,8 +27,8 @@ public:
 //  [[script::bindings::property]]
     static const std::vector<String>& nodeNames(const sp<Animation>& self);
 
+//  [[script::bindings::classmethod]]
+    static std::vector<std::pair<String, sp<Mat4>>> getNodeTransforms(const sp<Animation>& self, sp<Numeric> time);
 };
 
 }
-
-#endif

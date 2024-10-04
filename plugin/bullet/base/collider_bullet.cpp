@@ -35,7 +35,7 @@ sp<RigidBody> ColliderBullet::createBody(Collider::BodyType type, sp<Shape> shap
 {
     btTransform transform;
     const V3 pos = position->val();
-    const V4 quat = rotate ? rotate->val() : constants::QUATERNION_ZERO;
+    const V4 quat = rotate ? rotate->val() : constants::QUATERNION_ONE;
     transform.setIdentity();
     transform.setOrigin(btVector3(pos.x(), pos.y(), pos.z()));
     transform.setRotation(btQuaternion(quat.x(), quat.y(), quat.z(), quat.w()));
@@ -381,7 +381,7 @@ sp<Collider> ColliderBullet::BUILDER_IMPL2::build(const Scope& args)
 }
 
 ColliderBullet::KinematicObject::KinematicObject(sp<Vec3> position, sp<Vec4> quaternion, sp<BtRigidBodyRef> rigidBody)
-    : _position(std::move(position)), _quaternion(std::move(quaternion), constants::QUATERNION_ZERO), _rigid_body(std::move(rigidBody))
+    : _position(std::move(position)), _quaternion(std::move(quaternion), constants::QUATERNION_ONE), _rigid_body(std::move(rigidBody))
 {
 }
 

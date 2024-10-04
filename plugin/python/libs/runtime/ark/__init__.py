@@ -1245,6 +1245,9 @@ class Animation:
     def make_input(self, t: Numeric, on_complete: Optional[Callable] = None) -> AnimationInput:
         pass
 
+    def get_node_transforms(self, t: TYPE_NUMERIC) -> list[tuple[str, Mat4]]:
+        pass
+
 
 class MaterialTexture:
 

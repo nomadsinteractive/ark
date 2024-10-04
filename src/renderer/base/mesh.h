@@ -49,6 +49,8 @@ public:
     Mesh(uint32_t id, String name, std::vector<element_index_t> indices, std::vector<V3> vertices, sp<Array<UV>> uvs, sp<Array<V3>> normals, sp<Array<Tangent>> tangents, sp<Array<BoneInfo>> boneInfos, sp<Material> material);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Mesh);
 
+    const Node& parent() const;
+
 //  [[script::bindings::property]]
     uint32_t id() const;
 //  [[script::bindings::property]]
@@ -79,6 +81,9 @@ private:
     sp<Array<Tangent>> _tangents;
     sp<Array<BoneInfo>> _bone_infos;
     sp<Material> _material;
+
+    Node* _parent;
+    friend class Node;
 };
 
 }

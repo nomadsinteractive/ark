@@ -141,7 +141,6 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
         const RenderLayerSnapshot::Element& s = renderLayerItems.at(i);
         const Renderable::Snapshot& snapshot = s._snapshot;
         if(reload || s._snapshot._state.has(Renderable::RENDERABLE_STATE_DIRTY))
-        {
             if(!snapshot._varyings._sub_properties.empty())
             {
                 const auto iter = _model_instances.find(i);
@@ -154,14 +153,13 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
                     if(Varyings::Divided subProperty = k.getDivided(1); subProperty._content.length() > sizeof(M4))
                         iter->second.setNodeTransform(j, *reinterpret_cast<const M4*>(subProperty._content.buf()));
             }
-        }
     }
 
     size_t instanceId = 0;
     const PipelineInput::AttributeOffsets& attributeOffsets = buf.pipelineBindings()->pipelineDescriptor()->attributes();
     const size_t attributeStride = attributeOffsets.stride();
-    const bool hasModelMatrix = attributeOffsets._offsets[PipelineInput::ATTRIBUTE_NAME_MODEL_MATRIX] != -1;
-    const bool hasMaterialId = attributeOffsets._offsets[PipelineInput::ATTRIBUTE_NAME_MATERIAL_ID] != -1;
+    const bool hasModelMatrix = attributeOffsets._offsets[Attribute::USAGE_MODEL_MATRIX] != -1;
+    const bool hasMaterialId = attributeOffsets._offsets[Attribute::USAGE_MATERIAL_ID] != -1;
     for(const IndirectCmds& i : _indirect_cmds.values())
         for(const auto& [nodeInstance, mesh] : i._mesh_instances)
         {
@@ -175,9 +173,9 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
                     VertexWriter writer = buf.makeDividedVertexWriter(renderRequest, 1, instanceId, 1);
                     writer.next();
                     if(hasModelMatrix)
-                        writer.writeAttribute(MatrixUtil::translate(M4::identity(), snapshot._position) * MatrixUtil::scale(snapshot._transform.toMatrix(), toScale(snapshot._size, metrics)) * nodeInstance->globalTransform(), PipelineInput::ATTRIBUTE_NAME_MODEL_MATRIX);
+                        writer.writeAttribute(MatrixUtil::translate(M4::identity(), snapshot._position) * MatrixUtil::scale(snapshot._transform.toMatrix(), toScale(snapshot._size, metrics)) * nodeInstance->globalTransform(), Attribute::USAGE_MODEL_MATRIX);
                     if(hasMaterialId && mesh->material())
-                        writer.writeAttribute(mesh->material()->id(), PipelineInput::ATTRIBUTE_NAME_MATERIAL_ID);
+                        writer.writeAttribute(mesh->material()->id(), Attribute::USAGE_MATERIAL_ID);
                     if(ByteArray::Borrowed divided = snapshot._varyings.getDivided(1)._content; divided.length() > attributeStride)
                         writer.write(divided.buf() + attributeStride, divided.length() - attributeStride, attributeStride);
                 }

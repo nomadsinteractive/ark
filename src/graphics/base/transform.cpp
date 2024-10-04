@@ -75,13 +75,13 @@ private:
 };
 
 Transform::Transform(Type type, sp<Rotation> rotation, sp<Vec3> scale, sp<Vec3> translation)
-    : _type(type), _stub(sp<Stub>::make(Stub{{std::move(rotation), constants::QUATERNION_ZERO}, {std::move(scale), V3(1.0f)}, {std::move(translation)}}))
+    : _type(type), _stub(sp<Stub>::make(Stub{{std::move(rotation), constants::QUATERNION_ONE}, {std::move(scale), V3(1.0f)}, {std::move(translation)}}))
 {
     doUpdateDelegate();
 }
 
 Transform::Transform(sp<Transform::Delegate> delegate)
-    : _type(TYPE_DELEGATED), _stub(sp<Stub>::make(Stub{{nullptr, constants::QUATERNION_ZERO}, {nullptr, V3(1.0f)}, {}})), _delegate(std::move(delegate))
+    : _type(TYPE_DELEGATED), _stub(sp<Stub>::make(Stub{{nullptr, constants::QUATERNION_ONE}, {nullptr, V3(1.0f)}, {}})), _delegate(std::move(delegate))
 {
     doUpdateDelegate();
 }

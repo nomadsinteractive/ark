@@ -100,7 +100,6 @@ struct MatrixQuaternion final : Mat4 {
 
 }
 
-
 Quaternion::Quaternion(sp<Vec4> quaternion)
     : Wrapper(std::move(quaternion))
 {

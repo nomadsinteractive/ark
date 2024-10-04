@@ -19,8 +19,11 @@ public:
 
     virtual ~Animation() = default;
 
+    [[deprecated]]
     virtual sp<AnimationUploader> makeInput(sp<Numeric> duration) = 0;
+    [[deprecated]]
     virtual const std::vector<String>& nodeNames() = 0;
+    virtual std::vector<std::pair<String, sp<Mat4>>> getNodeTranforms(sp<Numeric> time) = 0;
 
     float duration() const {
         return _duration;

@@ -7,15 +7,15 @@ namespace ark::plugin::gltf {
 
 class AnimationGltf final : public Animation {
 public:
-    AnimationGltf(uint32_t durationInTicks, std::vector<String> nodeNames, Table<String, uint32_t> node, std::vector<AnimationFrame> animationFrames);
+    AnimationGltf(uint32_t durationInTicks, Table<String, uint32_t> node, std::vector<AnimationFrame> animationFrames);
 
     sp<AnimationUploader> makeInput(sp<Numeric> duration) override;
     const std::vector<String>& nodeNames() override;
 
+    std::vector<std::pair<String, sp<Mat4>>> getNodeTranforms(sp<Numeric> tick) override;
+
 private:
     uint32_t _duration_in_ticks;
-    std::vector<String> _node_names;
-
     sp<Table<String, uint32_t>> _nodes;
     sp<std::vector<AnimationFrame>> _animation_frames;
 };

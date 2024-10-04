@@ -42,6 +42,11 @@ const std::vector<String>& AnimationAssimpNodes::nodeNames()
     return _nodes->keys();
 }
 
+std::vector<std::pair<String, sp<Mat4>>> AnimationAssimpNodes::getNodeTranforms(sp<Numeric> duration)
+{
+    return {};
+}
+
 void AnimationAssimpNodes::loadHierarchy(float tick, const aiNode* node, const aiAnimation* animation, const aiMatrix4x4& transform, Table<String, AnimationNode>& nodes, const NodeLoaderCallback& callback, std::vector<M4>& output)
 {
     loadNodeHierarchy(tick, node, animation, aiMatrix4x4(), nodes, callback);

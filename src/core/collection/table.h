@@ -13,6 +13,9 @@ template<typename T, typename U, bool Ordered> class Table {
 public:
     static constexpr size_t npos = std::numeric_limits<size_t>::max();
 
+    typedef T key_type;
+    typedef U mapped_type;
+
     template<bool IS_CONSTANT> struct Iterator {
 
         template <typename V> using PType = std::conditional_t<IS_CONSTANT, const V&, V&>;

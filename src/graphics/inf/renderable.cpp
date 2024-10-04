@@ -35,7 +35,7 @@ Renderable::StateBits Renderable::State::stateBits() const
 void Renderable::Snapshot::applyVaryings(const Varyings::Snapshot& defaultVaryingsSnapshot)
 {
     if(!_varyings)
-        _varyings = defaultVaryingsSnapshot;
+        _varyings._buffers = defaultVaryingsSnapshot._buffers;
     else
         _varyings.apply(defaultVaryingsSnapshot ? &defaultVaryingsSnapshot : nullptr);
 }

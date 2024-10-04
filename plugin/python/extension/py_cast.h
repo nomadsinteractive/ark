@@ -121,9 +121,8 @@ private:
         if(PyBridge::isPyNone(object))
             return Optional<sp<T>>(sp<T>());
 
-        PyTypeObject* pyType = reinterpret_cast<PyTypeObject*>(PyBridge::PyObject_Type(object));
-        if(PythonInterpreter::instance().isPyArkTypeObject(pyType)) {
-            PyArkType::Instance* instance = reinterpret_cast<PyArkType::Instance*>(object);
+        if(PyTypeObject* pyType = reinterpret_cast<PyTypeObject*>(PyBridge::PyObject_Type(object)); PythonInterpreter::instance().isPyArkTypeObject(pyType)) {
+            const PyArkType::Instance* instance = reinterpret_cast<PyArkType::Instance*>(object);
             DASSERT(instance->box);
             sp<T> s = instance->box->as<T>();
             return s ? Optional<sp<T>>(std::move(s)) : Optional<sp<T>>();
@@ -147,7 +146,7 @@ private:
         return pyList;
     }
 
-    template<typename T> static PyObject* fromIterable_sfinae(const T& map, typename std::remove_reference<decltype(map.begin()->second)>::type*) {
+    template<typename T> static PyObject* fromIterable_sfinae(const T& map, std::enable_if_t<std::is_same_v<typename T::mapped_type, std::remove_reference_t<decltype(map.begin()->second)>>>*) {
         PyObject* pyDict = PyDict_New();
         for(const auto& i : map)
             PyBridge::PyDict_SetItem(pyDict, toPyObject(i.first), toPyObject(i.second));
@@ -241,6 +240,12 @@ private:
     }
     template<typename T> static PyObject* toPyObject_sfinae(const T& value, std::enable_if_t<std::is_floating_point_v<T>>*) {
         return PyBridge::PyFloat_FromDouble(value);
+    }
+    template<typename T> static PyObject* toPyObject_sfinae(const T& value, std::pair<decltype(value.first), decltype(value.second)>*) {
+        PyObject* pyPair = PyBridge::PyTuple_New(2);
+        PyBridge::PyTuple_SetItem(pyPair, 0, toPyObject(value.first));
+        PyBridge::PyTuple_SetItem(pyPair, 1, toPyObject(value.second));
+        return pyPair;
     }
     template<typename T> static PyObject* toPyObject_sfinae(const T& value, ...) {
         return toPyObject_impl<T>(value);

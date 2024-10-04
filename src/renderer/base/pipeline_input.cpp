@@ -11,17 +11,17 @@ namespace ark {
 
 namespace {
 
-uint32_t getAttributeEndOffset(const PipelineInput::AttributeOffsets& attrOffsets, PipelineInput::AttributeName attrName)
+uint32_t getAttributeEndOffset(const PipelineInput::AttributeOffsets& attrOffsets, Attribute::Usage usage)
 {
-    switch(attrName)
+    switch(usage)
     {
-        case PipelineInput::ATTRIBUTE_NAME_MODEL_MATRIX:
-            return attrOffsets._offsets[attrName] + sizeof(M4);
-        case PipelineInput::ATTRIBUTE_NAME_NODE_ID:
-        case PipelineInput::ATTRIBUTE_NAME_MATERIAL_ID:
-            return attrOffsets._offsets[attrName] + sizeof(int32_t);
+        case Attribute::USAGE_MODEL_MATRIX:
+            return attrOffsets._offsets[usage] + sizeof(M4);
+        case Attribute::USAGE_NODE_ID:
+        case Attribute::USAGE_MATERIAL_ID:
+            return attrOffsets._offsets[usage] + sizeof(int32_t);
         default:
-            return std::max(0, attrOffsets._offsets[attrName]);
+            return std::max(0, attrOffsets._offsets[usage]);
     }
 }
 
@@ -30,29 +30,30 @@ uint32_t getAttributeEndOffset(const PipelineInput::AttributeOffsets& attrOffset
 PipelineInput::AttributeOffsets::AttributeOffsets()
     : _stride(0)
 {
-    std::fill_n(_offsets, ATTRIBUTE_NAME_COUNT, -1);
+    std::fill_n(_offsets, Attribute::USAGE_COUNT, -1);
 }
 
 PipelineInput::AttributeOffsets::AttributeOffsets(const PipelineInput& input)
     : AttributeOffsets()
 {
     const StreamLayout& stream = input.streamLayouts().at(0);
-    _offsets[ATTRIBUTE_NAME_TEX_COORDINATE] = stream.getAttributeOffset(Attribute::USAGE_TEX_COORD);
-    _offsets[ATTRIBUTE_NAME_NORMAL] = stream.getAttributeOffset(Attribute::USAGE_NORMAL);
-    _offsets[ATTRIBUTE_NAME_TANGENT] = stream.getAttributeOffset(Attribute::USAGE_TANGENT);
-    _offsets[ATTRIBUTE_NAME_BITANGENT] = stream.getAttributeOffset(Attribute::USAGE_BITANGENT);
-    _offsets[ATTRIBUTE_NAME_BONE_IDS] = stream.getAttributeOffset("BoneIds");
-    _offsets[ATTRIBUTE_NAME_BONE_WEIGHTS] = stream.getAttributeOffset("BoneWeights");
+    _offsets[Attribute::USAGE_POSITION] = 0;
+    _offsets[Attribute::USAGE_TEX_COORD] = stream.getAttributeOffset(Attribute::USAGE_TEX_COORD);
+    _offsets[Attribute::USAGE_NORMAL] = stream.getAttributeOffset(Attribute::USAGE_NORMAL);
+    _offsets[Attribute::USAGE_TANGENT] = stream.getAttributeOffset(Attribute::USAGE_TANGENT);
+    _offsets[Attribute::USAGE_BITANGENT] = stream.getAttributeOffset(Attribute::USAGE_BITANGENT);
+    _offsets[Attribute::USAGE_BONE_IDS] = stream.getAttributeOffset("BoneIds");
+    _offsets[Attribute::USAGE_BONE_WEIGHTS] = stream.getAttributeOffset("BoneWeights");
     if(input.streamLayouts().size() > 1)
     {
         const StreamLayout& stream1 = input.streamLayouts().at(1);
-        _offsets[ATTRIBUTE_NAME_MODEL_MATRIX] = stream1.getAttributeOffset("Model");
-        _offsets[ATTRIBUTE_NAME_NODE_ID] = stream1.getAttributeOffset("NodeId");
-        _offsets[ATTRIBUTE_NAME_MATERIAL_ID] = stream1.getAttributeOffset("MaterialId");
+        _offsets[Attribute::USAGE_MODEL_MATRIX] = stream1.getAttributeOffset("Model");
+        _offsets[Attribute::USAGE_NODE_ID] = stream1.getAttributeOffset("NodeId");
+        _offsets[Attribute::USAGE_MATERIAL_ID] = stream1.getAttributeOffset("MaterialId");
     }
 
-    for(int32_t i = ATTRIBUTE_NAME_TEX_COORDINATE; i < ATTRIBUTE_NAME_COUNT; ++i)
-        _stride = std::max(getAttributeEndOffset(*this, static_cast<PipelineInput::AttributeName>(i)), _stride);
+    for(int32_t i = Attribute::USAGE_MODEL_MATRIX; i < Attribute::USAGE_COUNT; ++i)
+        _stride = std::max(getAttributeEndOffset(*this, static_cast<Attribute::Usage>(i)), _stride);
 }
 
 uint32_t PipelineInput::AttributeOffsets::stride() const

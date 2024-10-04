@@ -28,6 +28,7 @@ public:
 
     sp<AnimationUploader> makeInput(sp<Numeric> tick) override;
     const std::vector<String>& nodeNames() override;
+    std::vector<std::pair<String, sp<Mat4>>> getNodeTranforms(sp<Numeric> duration) override;
 
 private:
     static void loadHierarchy(float tick, const aiNode* node, const aiAnimation* animation, const aiMatrix4x4& parentTransform, Table<String, AnimationNode>& nodes, const NodeLoaderCallback& callback, AnimationFrame& output);

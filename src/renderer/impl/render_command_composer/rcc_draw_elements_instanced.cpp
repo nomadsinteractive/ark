@@ -42,7 +42,7 @@ sp<RenderCommand> RCCDrawElementsInstanced::compose(const RenderRequest& renderR
 
     const PipelineInput::AttributeOffsets& attributeOffsets = buf.pipelineBindings()->pipelineDescriptor()->attributes();
     const size_t attributeStride = attributeOffsets.stride();
-    const bool hasModelMatrix = attributeOffsets._offsets[PipelineInput::ATTRIBUTE_NAME_MODEL_MATRIX] != -1;
+    const bool hasModelMatrix = attributeOffsets._offsets[Attribute::USAGE_MODEL_MATRIX] != -1;
 
     VertexWriter writer = buf.makeDividedVertexWriter(renderRequest, snapshot._elements.size(), 0, 1);
     for(const RenderLayerSnapshot::Element& i : snapshot._elements)
@@ -50,7 +50,7 @@ sp<RenderCommand> RCCDrawElementsInstanced::compose(const RenderRequest& renderR
         const Renderable::Snapshot& snapshot = i._snapshot;
         writer.next();
         if(hasModelMatrix)
-            writer.writeAttribute(MatrixUtil::translate(M4::identity(), snapshot._position) * MatrixUtil::scale(snapshot._transform.toMatrix(), snapshot._size), PipelineInput::ATTRIBUTE_NAME_MODEL_MATRIX);
+            writer.writeAttribute(MatrixUtil::translate(M4::identity(), snapshot._position) * MatrixUtil::scale(snapshot._transform.toMatrix(), snapshot._size), Attribute::USAGE_MODEL_MATRIX);
         ByteArray::Borrowed divided = snapshot._varyings.getDivided(1)._content;
         if(divided.length() > attributeStride)
             writer.write(divided.buf() + attributeStride, divided.length() - attributeStride, attributeStride);

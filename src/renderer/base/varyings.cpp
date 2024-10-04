@@ -133,7 +133,7 @@ sp<Varyings> Varyings::subscribe(const String& name)
 static String findNearestAttribute(const PipelineInput& pipelineInput, const String& name)
 {
     String nearest;
-    size_t nd = std::numeric_limits<size_t>::max();
+    constexpr size_t nd = std::numeric_limits<size_t>::max();
     for(const auto& [i, j] : pipelineInput.streamLayouts())
     {
         const auto [value, distance] = Math::levensteinNearest(name, j.attributes().keys());
@@ -220,11 +220,8 @@ void Varyings::Snapshot::apply(const Snapshot* defaults)
     {
         Divided& div = _buffers.at(i);
         if(defaults)
-        {
-            Divided def = defaults->getDivided(div._divisor);
-            if(def)
+            if(const Divided def = defaults->getDivided(div._divisor))
                 div.apply(def._slot_snapshot);
-        }
         div.apply();
     }
 }
@@ -250,7 +247,7 @@ void Varyings::Snapshot::snapshotSubProperties(const std::map<String, sp<Varying
 }
 
 Varyings::Divided::Divided()
-    : _divisor(0), _content(), _slot_snapshot(nullptr)
+    : _divisor(0), _slot_snapshot(nullptr)
 {
 }
 
@@ -279,7 +276,7 @@ void Varyings::Divided::apply(const SlotSnapshot* slots)
 void Varyings::Divided::addSnapshot(Allocator& allocator, const Slot& slot)
 {
     DASSERT(slot._offset >= 0);
-    uint32_t size = static_cast<uint32_t>(slot._uploader->size());
+    const uint32_t size = static_cast<uint32_t>(slot._uploader->size());
     void* content = allocator.sbrk(size);
 
     WritableMemory writer(content);

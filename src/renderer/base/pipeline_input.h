@@ -19,27 +19,13 @@ namespace ark {
 
 class ARK_API PipelineInput {
 public:
-//TODO: Use Attribute::Usage instead
-    enum AttributeName {
-        ATTRIBUTE_NAME_TEX_COORDINATE,
-        ATTRIBUTE_NAME_NORMAL,
-        ATTRIBUTE_NAME_TANGENT,
-        ATTRIBUTE_NAME_BITANGENT,
-        ATTRIBUTE_NAME_BONE_IDS,
-        ATTRIBUTE_NAME_BONE_WEIGHTS,
-        ATTRIBUTE_NAME_MODEL_MATRIX,
-        ATTRIBUTE_NAME_NODE_ID,
-        ATTRIBUTE_NAME_MATERIAL_ID,
-        ATTRIBUTE_NAME_COUNT
-    };
-
     struct ARK_API AttributeOffsets {
         AttributeOffsets();
         AttributeOffsets(const PipelineInput& input);
 
         uint32_t stride() const;
 
-        int32_t _offsets[ATTRIBUTE_NAME_COUNT];
+        int32_t _offsets[Attribute::USAGE_COUNT];
         uint32_t _stride;
     };
 

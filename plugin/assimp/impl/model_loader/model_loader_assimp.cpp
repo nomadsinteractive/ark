@@ -285,7 +285,7 @@ sp<Node> ModelImporterAssimp::loadNodeHierarchy(const aiNode* node, const std::v
     for(uint32_t i = 0; i < node->mNumMeshes; ++i)
     {
         DASSERT(node->mMeshes[i] < meshes.size());
-        n->meshes().push_back(meshes[node->mMeshes[i]]);
+        n->addMesh(meshes[node->mMeshes[i]]);
     }
     for(uint32_t i = 0; i < node->mNumChildren; ++i)
         n->childNodes().push_back(loadNodeHierarchy(node->mChildren[i], meshes));

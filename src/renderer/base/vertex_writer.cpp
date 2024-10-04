@@ -30,13 +30,13 @@ void VertexWriter::writePosition(const V3& position)
 void VertexWriter::writeTexCoordinate(uint16_t u, uint16_t v)
 {
     const uint16_t uv[2] = {u, v};
-    writeAttribute(uv, PipelineInput::ATTRIBUTE_NAME_TEX_COORDINATE);
+    writeAttribute(uv, Attribute::USAGE_TEX_COORD);
 }
 
 void VertexWriter::writeBoneInfo(const Mesh::BoneInfo& boneInfo)
 {
-    writeAttribute(boneInfo._ids, PipelineInput::ATTRIBUTE_NAME_BONE_IDS);
-    writeAttribute(boneInfo._weights, PipelineInput::ATTRIBUTE_NAME_BONE_WEIGHTS);
+    writeAttribute(boneInfo._ids, Attribute::USAGE_BONE_IDS);
+    writeAttribute(boneInfo._weights, Attribute::USAGE_BONE_WEIGHTS);
 }
 
 void VertexWriter::write(const void* buf, uint32_t size, uint32_t offset)
@@ -54,17 +54,17 @@ void VertexWriter::setRenderable(const Renderable::Snapshot& renderObject)
 
 void VertexWriter::writeNormal(const V3& normal)
 {
-    writeAttribute(normal, PipelineInput::ATTRIBUTE_NAME_NORMAL);
+    writeAttribute(normal, Attribute::USAGE_NORMAL);
 }
 
 void VertexWriter::writeTangent(const V3& tangent)
 {
-    writeAttribute(tangent, PipelineInput::ATTRIBUTE_NAME_TANGENT);
+    writeAttribute(tangent, Attribute::USAGE_TANGENT);
 }
 
 void VertexWriter::writeBitangent(const V3& bitangent)
 {
-    writeAttribute(bitangent, PipelineInput::ATTRIBUTE_NAME_BITANGENT);
+    writeAttribute(bitangent, Attribute::USAGE_BITANGENT);
 }
 
 void VertexWriter::next()

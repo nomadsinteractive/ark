@@ -166,14 +166,14 @@ sp<Boolean> IntegerType::ne(const sp<Integer>& self, const sp<Integer>& other)
 
 size_t IntegerType::len(const sp<Integer>& self)
 {
-    sp<IntegerSubscribed> is = self.tryCast<IntegerSubscribed>();
+    const sp<IntegerSubscribed> is = self.tryCast<IntegerSubscribed>();
     ASSERT(is);
     return is->values().size();
 }
 
 sp<Integer> IntegerType::subscribe(const sp<Integer>& self, sp<Integer> index)
 {
-    sp<IntegerSubscribed> is = self.tryCast<IntegerSubscribed>();
+    const sp<IntegerSubscribed> is = self.tryCast<IntegerSubscribed>();
     ASSERT(is);
     return sp<IntegerSubscribed>::make(is->values(), std::move(index));
 }

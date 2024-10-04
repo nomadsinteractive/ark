@@ -42,15 +42,15 @@ const ModelBundle::ModelLayout& ModelBundle::ensureModelLayout(int32_t type) con
     return _stub->ensureModelLayout(type);
 }
 
+sp<Model> ModelBundle::getModel(const NamedType& namedType) const
+{
+    const auto iter = _stub->_model_layouts.find(namedType.type());
+    return iter != _stub->_model_layouts.end() ? iter->second._model : nullptr;
+}
+
 sp<Model> ModelBundle::loadModel(int32_t type)
 {
     return ensureModelLayout(type)._model;
-}
-
-sp<Model> ModelBundle::getModel(int32_t type) const
-{
-    const auto iter = _stub->_model_layouts.find(type);
-    return iter != _stub->_model_layouts.end() ? iter->second._model : nullptr;
 }
 
 void ModelBundle::importModel(const NamedType& namedType, const String& src, sp<Future> future)

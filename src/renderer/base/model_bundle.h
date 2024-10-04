@@ -96,7 +96,7 @@ public:
     const ModelLayout& ensureModelLayout(int32_t type) const;
 
 //[[script::bindings::auto]]
-    sp<Model> getModel(int32_t type) const;
+    sp<Model> getModel(const NamedType& namedType) const;
 
 //[[script::bindings::auto]]
     void importModel(const NamedType& namedType, const String& src, sp<Future> future = nullptr);

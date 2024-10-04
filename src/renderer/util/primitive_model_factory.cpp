@@ -59,7 +59,7 @@ public:
         : Vertices((cols + 1) * (rows + 1)), _cols(cols), _rows(rows), _tex_coords(std::move(texCoords)), _matrix(matrix ? Optional<M4>(matrix->val()) : Optional<M4>()) {
     }
 
-    virtual void write(VertexWriter& buf, const V3& /*size*/) override {
+    void write(VertexWriter& buf, const V3& /*size*/) override {
         float gridSize = 1.0f;
         float x = -float(_cols) * gridSize / 2;
         float z = x;
@@ -68,7 +68,7 @@ public:
         float ustep = texCoords.width() / _cols;
         float vstep = texCoords.height() / _rows;
         float v = texCoords.top();
-        CHECK(hasTexCoords || !buf.hasAttribute(PipelineInput::ATTRIBUTE_NAME_TEX_COORDINATE), "Plane doesn't have a tex coordinate configured, but the shader needs one");
+        CHECK(hasTexCoords || !buf.hasAttribute(Attribute::USAGE_TEX_COORD), "Plane doesn't have a tex coordinate configured, but the shader needs one");
         for(size_t i = 0; i < _rows + 1; ++i) {
             float x0 = x;
             float u = texCoords.left();
