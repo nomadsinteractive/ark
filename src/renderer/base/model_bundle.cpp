@@ -177,7 +177,7 @@ void ModelBundle::AddModuleRunnable::run()
 }
 
 ModelBundle::NodeLayout::NodeLayout(const sp<Node>& node, const NodeLayout& parentLayout)
-    : _node(node), _transform(parentLayout._node ? parentLayout._transform * _node->transform() : _node->transform())
+    : _node(node), _transform(parentLayout._node ? parentLayout._transform * _node->matrix() : _node->matrix())
 {
 }
 

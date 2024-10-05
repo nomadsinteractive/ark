@@ -137,7 +137,7 @@ M4 MatrixUtil::transpose(const M4& matrix)
 
 M4 MatrixUtil::inverse(const M4& matrix)
 {
-    return glm::inverse(glm::make_mat4(reinterpret_cast<const float*>(&matrix)));
+    return glm::inverse(glm::make_mat4(matrix.value()));
 }
 
 M4 MatrixUtil::ortho(float left, float right, float bottom, float top, float near, float far)

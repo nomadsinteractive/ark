@@ -15,6 +15,7 @@ namespace ark {
 class ARK_API Node {
 public:
     Node(String name, const M4& transform);
+    Node(String name, const V3& translation, const V4& rotation, const V3& scale);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Node);
 
 //  [[script::bindings::property]]
@@ -29,7 +30,14 @@ public:
     void addMesh(sp<Mesh> mesh);
 
 //  [[script::bindings::property]]
-    const M4& transform() const;
+    const M4& matrix() const;
+
+//  [[script::bindings::property]]
+    const V3& translation() const;
+//  [[script::bindings::property]]
+    const V4& rotation() const;
+//  [[script::bindings::property]]
+    const V3& scale() const;
 
 //  [[script::bindings::auto]]
     sp<Node> findChildNode(const String& name) const;
@@ -40,7 +48,11 @@ private:
     std::vector<sp<Node>> _child_nodes;
     std::vector<sp<Mesh>> _meshes;
 
-    M4 _transform;
+    V3 _translation;
+    V4 _rotation;
+    V3 _scale;
+
+    M4 _matrix;
 };
 
 }

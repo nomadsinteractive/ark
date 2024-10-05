@@ -7,7 +7,11 @@
 namespace ark {
 
 Node::Node(String name, const M4& transform)
-    : _name(std::move(name)), _transform(transform) {
+    : _name(std::move(name)), _matrix(transform) {
+}
+
+Node::Node(String name, const V3& translation, const V4& rotation, const V3& scale)
+    : _name(std::move(name)), _translation(translation), _rotation(rotation), _scale(scale), _matrix(MatrixUtil::scale(MatrixUtil::rotate(MatrixUtil::translate({}, translation), rotation), scale)) {
 }
 
 const String& Node::name() const
@@ -36,9 +40,24 @@ void Node::addMesh(sp<Mesh> mesh)
     _meshes.push_back(std::move(mesh));
 }
 
-const M4& Node::transform() const
+const M4& Node::matrix() const
 {
-    return _transform;
+    return _matrix;
+}
+
+const V3& Node::translation() const
+{
+    return _translation;
+}
+
+const V4& Node::rotation() const
+{
+    return _rotation;
+}
+
+const V3& Node::scale() const
+{
+    return _scale;
 }
 
 sp<Node> Node::findChildNode(const String& name) const

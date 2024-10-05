@@ -44,7 +44,7 @@ void WithText::onWire(const WiringContext& context)
         CHECK(model, "Text with transform node \"%s\" has no model defined", _transform_node.c_str());
         const sp<Node> node = model->findNode(_transform_node);
         CHECK(node, "Text with transform node \"%s\" model has no node defined", _transform_node.c_str());
-        matrix = matrix ? Mat4Type::matmul(std::move(matrix), node->transform()) : sp<Mat4>::make<Mat4::Const>(node->transform());
+        matrix = matrix ? Mat4Type::matmul(std::move(matrix), node->matrix()) : sp<Mat4>::make<Mat4::Const>(node->matrix());
     }
     if(matrix)
         _text->setTransform(std::move(matrix));

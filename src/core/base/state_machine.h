@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_BASE_STATE_MACHINE_H_
-#define ARK_CORE_BASE_STATE_MACHINE_H_
+#pragma once
 
 #include <vector>
 
@@ -43,5 +42,3 @@ private:
 };
 
 };
-
-#endif

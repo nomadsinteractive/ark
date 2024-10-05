@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_BASE_COMMAND_GROUP_H_
-#define ARK_CORE_BASE_COMMAND_GROUP_H_
+#pragma once
 
 #include <vector>
 
@@ -37,5 +36,3 @@ private:
 };
 
 }
-
-#endif

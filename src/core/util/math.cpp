@@ -353,8 +353,8 @@ V4 Math::normalize(const V4& v4)
 
 V4 Math::slerp(const V4& x, const V4& y, float t)
 {
-    const glm::quat n = glm::slerp(glm::quat(x.x(), x.y(), x.z(), x.w()), glm::quat(y.x(), y.y(), y.z(), y.w()), t);
-    return V4(n.x, n.y, n.z, n.w);
+    const glm::quat n = glm::slerp(glm::quat(x.w(), x.x(), x.y(), x.z()), glm::quat(y.w(), y.x(), y.y(), y.z()), t);
+    return {n.x, n.y, n.z, n.w};
 }
 
 /**

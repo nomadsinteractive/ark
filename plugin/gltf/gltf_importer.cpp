@@ -27,12 +27,23 @@ namespace ark::plugin::gltf {
 
 namespace {
 
+struct NodeTransform {
+	sp<Node> _node;
+	V3 _translation;
+	V4 _rotation;
+	V3 _scale;
+
+	M4 toMatrix() const
+	{
+		return MatrixUtil::inverse(_node->matrix()) * MatrixUtil::scale(MatrixUtil::rotate(MatrixUtil::translate({}, _translation), _rotation), _scale);;
+	}
+};
+
 struct AnimationChannel {
 	enum PathType { TRANSLATION, ROTATION, SCALE };
 	PathType path;
 	uint32_t node_id;
 	uint32_t samplerIndex;
-	M4 _intermediate_matrix;
 };
 
 struct AnimationSampler {
@@ -245,7 +256,7 @@ Mesh processPrimitive(const tinygltf::Model& gltfModel, const std::vector<sp<Mat
     return {id, std::move(name), std::move(indices), std::move(vertices), toArray<Mesh::UV>(std::move(uvs)), toArray<V3>(std::move(normals)), nullptr, nullptr, std::move(material)};
 }
 
-M4 getNodeLocalTransformMatrix(const tinygltf::Node& node)
+sp<Node> makeNode(const tinygltf::Node& node)
 {
 	V3 translation(0);
 	if(!node.translation.empty())
@@ -259,10 +270,7 @@ M4 getNodeLocalTransformMatrix(const tinygltf::Node& node)
 	if(!node.rotation.empty())
 		quaternion = V4(static_cast<float>(node.rotation.at(0)), static_cast<float>(node.rotation.at(1)), static_cast<float>(node.rotation.at(2)), static_cast<float>(node.rotation.at(3)));
 
-	const M4 translateMatrix = MatrixUtil::translate(M4::identity(), translation);
-	const M4 rotateMatrix = MatrixUtil::rotate(M4::identity(), quaternion);
-	const M4 scaleMatrix = MatrixUtil::scale(M4::identity(), scale);
-	return translateMatrix * rotateMatrix * scaleMatrix;
+	return sp<Node>::make(node.name, translation, quaternion, scale);
 }
 
 std::vector<sp<Material>> loadMaterials(tinygltf::Model const& gltfModel, const MaterialBundle& materialBundle)
@@ -373,7 +381,7 @@ Animation loadAnimation(const tinygltf::Model& model, const tinygltf::Animation&
 					std::vector<V3> buf(accessor.count);
 					memcpy(buf.data(), &buffer.data[accessor.byteOffset + bufferView.byteOffset], accessor.count * sizeof(V3));
 					for (size_t index = 0; index < accessor.count; index++)
-						sampler.outputsVec4.push_back(V4(buf.at(index), 1.0f));
+						sampler.outputsVec4.emplace_back(buf.at(index), 1.0f);
 	                break;
 				}
 				case TINYGLTF_TYPE_VEC4: {
@@ -392,64 +400,64 @@ Animation loadAnimation(const tinygltf::Model& model, const tinygltf::Animation&
 		animation.samplers.push_back(sampler);
 	}
 
-	for (const tinygltf::AnimationChannel& source: anim.channels)
-		if(source.target_node >= 0)
+	for (const tinygltf::AnimationChannel& i: anim.channels)
+		if(i.target_node >= 0)
 		{
 			AnimationChannel channel{};
 
-			if(source.target_path == "rotation") {
+			if(i.target_path == "rotation")
 				channel.path = AnimationChannel::PathType::ROTATION;
-			}
-			else if(source.target_path == "translation") {
+			else if(i.target_path == "translation")
 				channel.path = AnimationChannel::PathType::TRANSLATION;
-			}
-			else if(source.target_path == "scale") {
+			else if(i.target_path == "scale")
 				channel.path = AnimationChannel::PathType::SCALE;
-			}
-			CHECK(source.target_path != "weights", "Implemented");
+			CHECK(i.target_path != "weights", "Implemented");
 
-			channel.samplerIndex = source.sampler;
-			channel.node_id = source.target_node;
+			channel.samplerIndex = i.sampler;
+			channel.node_id = i.target_node;
 			animation.channels.push_back(channel);
 		}
 
 	return animation;
 }
 
-void updateAnimation(Animation& animation, float time)
+void updateAnimation(Animation& animation, std::vector<NodeTransform>& nodeTransforms, const std::map<uint32_t, uint32_t>& channelNodeIds, float time)
 {
-	V3 translation;
-	V3 scale(constants::SCALE_ONE);
-	V4 quaternion(constants::QUATERNION_ONE);
-
-	for (AnimationChannel& channel : animation.channels)
+	for(AnimationChannel& i : animation.channels)
 	{
-		const AnimationSampler& sampler = animation.samplers[channel.samplerIndex];
+		const AnimationSampler& sampler = animation.samplers[i.samplerIndex];
 		if(sampler.inputs.size() > sampler.outputsVec4.size())
 			continue;
 
-		for(auto i = 0; i < sampler.inputs.size() - 1; i++)
-			if((time >= sampler.inputs[i]) && (time <= sampler.inputs[i + 1]))
-				if(const float u = std::max(0.0f, time - sampler.inputs[i]) / (sampler.inputs[i + 1] - sampler.inputs[i]); u <= 1.0f) {
-					switch (channel.path) {
-						case AnimationChannel::PathType::TRANSLATION: {
-							translation = mix<V4>(sampler.outputsVec4[i], sampler.outputsVec4[i + 1], u).toNonHomogeneous();
+		NodeTransform& transform = nodeTransforms.at(channelNodeIds.at(i.node_id));
+
+		for(auto j = 0; j < sampler.inputs.size() - 1; ++j)
+			if(time >= sampler.inputs[j] && time <= sampler.inputs[j + 1])
+				if(const float u = std::max(0.0f, time - sampler.inputs[j]) / (sampler.inputs[j + 1] - sampler.inputs[j]); u <= 1.0f)
+				{
+					switch (i.path) {
+						case AnimationChannel::PathType::TRANSLATION:
+							transform._translation = mix<V4>(sampler.outputsVec4[j], sampler.outputsVec4[j + 1], u).toNonHomogeneous();
 							break;
-						}
-						case AnimationChannel::PathType::SCALE: {
-							scale = mix<V4>(sampler.outputsVec4[i], sampler.outputsVec4[i + 1], u).toNonHomogeneous();
+						case AnimationChannel::PathType::SCALE:
+							transform._scale = mix<V4>(sampler.outputsVec4[j], sampler.outputsVec4[j + 1], u).toNonHomogeneous();
 							break;
-						}
-						case AnimationChannel::PathType::ROTATION: {
-							quaternion = Math::slerp(sampler.outputsVec4[i], sampler.outputsVec4[i + 1], u);
+						case AnimationChannel::PathType::ROTATION:
+							transform._rotation = Math::slerp(sampler.outputsVec4[j], sampler.outputsVec4[j + 1], u);
 							break;
-						}
 					}
 				}
-
-		channel._intermediate_matrix =  MatrixUtil::translate(MatrixUtil::rotate(MatrixUtil::scale(M4::identity(), scale), quaternion), translation);
 	}
 }	
+
+void initNodeTransforms(const std::vector<sp<Node>>& nodes, std::vector<NodeTransform>& nodeTransforms, std::map<uint32_t, uint32_t> channelNodeIds)
+{
+	for(const auto [k, v] : channelNodeIds)
+	{
+		const sp<Node>& node = nodes.at(k);
+		nodeTransforms[v] = {node, node->translation(), node->rotation(), node->scale()};
+	}
+}
 
 }
 
@@ -475,7 +483,7 @@ void GltfImporter::loadPrimitives()
 
 Model GltfImporter::loadModel()
 {
-	const tinygltf::Scene& scene = _model->scenes.at(0);
+	const tinygltf::Scene& scene = _model->scenes.at(_model->defaultScene);
 	sp<Node> rootNode = sp<Node>::make(scene.name, M4::identity());
 
 	for(const int32_t i : scene.nodes)
@@ -501,24 +509,24 @@ Model GltfImporter::loadModel()
 			loadingAnimations.push_back(std::move(animation));
 		}
 
-		const uint32_t tickCount = animationDuration * tps;
+		const uint32_t tickCount = static_cast<uint32_t>(animationDuration * tps);
 		const float tickInterval = 1.0f / tps;
 
+		std::vector<NodeTransform> nodeTransforms(channelNodeIds.size());
 		for(Animation& animation : loadingAnimations)
 		{
 			std::vector<AnimationFrame> frames(tickCount);
+			initNodeTransforms(_nodes, nodeTransforms, channelNodeIds);
 
 			for(uint32_t i = 0; i < tickCount; ++i)
 			{
 				AnimationFrame animationFrame(channelNodeIds.size());
 
 				const float time = i * tickInterval;
-				updateAnimation(animation, time);
-				for(const AnimationChannel& channel : animation.channels)
-				{
-					const uint32_t frameNodeId = channelNodeIds[channel.node_id];
-					animationFrame[frameNodeId] = MatrixUtil::mul(channel._intermediate_matrix, animationFrame.at(frameNodeId));
-				}
+				updateAnimation(animation, nodeTransforms, channelNodeIds, time);
+
+				for(uint32_t j = 0; j < nodeTransforms.size(); ++j)
+					animationFrame[j] = nodeTransforms.at(j).toMatrix();
 
 				frames[i] = std::move(animationFrame);
 			}
@@ -554,7 +562,7 @@ Model GltfImporter::loadModel()
 sp<Node> GltfImporter::loadNode(int32_t nodeId)
 {
 	const tinygltf::Node& node = _model->nodes.at(nodeId);
-	sp<Node> n = sp<Node>::make(node.name, getNodeLocalTransformMatrix(node));
+	sp<Node> n = makeNode(node);
 	_nodes[nodeId] = n;
 
 	if(node.mesh != -1)

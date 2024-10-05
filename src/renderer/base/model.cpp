@@ -80,7 +80,7 @@ struct NodeLayout {
         : _node(nullptr), _transform(M4::identity()) {
     }
     NodeLayout(const Node& node, const NodeLayout& parentLayout)
-        : _node(&node), _transform(parentLayout._transform* node.transform()) {
+        : _node(&node), _transform(parentLayout._transform* node.matrix()) {
     }
 
     void calcTransformedBoudingAABB(const V3& a0, const V3& a1, V3& aabbMin, V3& aabbMax) const {
