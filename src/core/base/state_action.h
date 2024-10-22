@@ -6,7 +6,7 @@
 
 namespace ark {
 
-class ARK_API Command {
+class ARK_API StateAction {
 public:
     enum State {
         STATE_ACTIVATED,
@@ -30,7 +30,7 @@ public:
     };
 
 public:
-    Command(StateMachine& stateMachine, sp<Runnable> onActivate, sp<Runnable> onDeactivate, sp<CommandGroup> commandGroup);
+    StateAction(StateMachine& stateMachine, sp<Runnable> onActivate, sp<Runnable> onDeactivate, sp<StateActionGroup> commandGroup);
 
 //  [[script::bindings::auto]]
     void activate();
@@ -40,16 +40,16 @@ public:
 //  [[script::bindings::property]]
     uint32_t mask() const;
 
-    bool conflicts(const Command& other) const;
+    bool conflicts(const StateAction& other) const;
 
     State state() const;
     void setState(State state);
 
-    const sp<CommandGroup>& commandGroup() const;
+    const sp<StateActionGroup>& commandGroup() const;
 
 private:
     StateMachine& _state_machine;
-    sp<CommandGroup> _command_group;
+    sp<StateActionGroup> _command_group;
 
     sp<StateHolder> _state_holder;
 

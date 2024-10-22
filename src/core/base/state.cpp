@@ -1,7 +1,7 @@
 #include "core/base/state.h"
 
-#include "core/base/command.h"
-#include "core/base/command_group.h"
+#include "core/base/state_action.h"
+#include "core/base/state_action_group.h"
 #include "core/inf/runnable.h"
 #include "core/util/log.h"
 
@@ -29,24 +29,24 @@ void State::deactivate()
     _active = false;
 }
 
-void State::linkCommand(Command& command)
+void State::linkCommand(StateAction& command)
 {
     DCHECK(_linked_commands.find(&command) == _linked_commands.end(), "Command has been linked to this state already");
     _linked_commands.insert(std::make_pair(&command, nullptr));
 }
 
-void State::linkCommandGroup(CommandGroup& commandGroup)
+void State::linkCommandGroup(StateActionGroup& commandGroup)
 {
-    for(Command* i : commandGroup._commands)
+    for(StateAction* i : commandGroup._commands)
         linkCommand(*i);
 }
 
-int32_t State::resolveConflicts(const Command& command, Command::State state, Command::State toState) const
+int32_t State::resolveConflicts(const StateAction& command, StateAction::State state, StateAction::State toState) const
 {
     int32_t count = 0;
     for(const auto& i : _linked_commands)
     {
-        Command* cmd = i.first;
+        StateAction* cmd = i.first;
         if(cmd != &command)
         {
             if(cmd->conflicts(command) && cmd->state() == state)

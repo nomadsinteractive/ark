@@ -1,7 +1,7 @@
 #include "core/base/state_machine.h"
 
-#include "core/base/command.h"
-#include "core/base/command_group.h"
+#include "core/base/state_action.h"
+#include "core/base/state_action_group.h"
 #include "core/base/state.h"
 
 namespace ark {
@@ -11,9 +11,9 @@ StateMachine::StateMachine()
 {
 }
 
-sp<Command> StateMachine::addCommand(sp<Runnable> onActivate, sp<Runnable> onDeactivate, sp<CommandGroup> commandGroup)
+sp<StateAction> StateMachine::addCommand(sp<Runnable> onActivate, sp<Runnable> onDeactivate, sp<StateActionGroup> commandGroup)
 {
-    sp<Command> cmd = sp<Command>::make(*this, std::move(onActivate), std::move(onDeactivate), std::move(commandGroup));
+    sp<StateAction> cmd = sp<StateAction>::make(*this, std::move(onActivate), std::move(onDeactivate), std::move(commandGroup));
     _commands.push_back(cmd);
     return cmd;
 }
@@ -38,26 +38,26 @@ void StateMachine::transit(State& next)
     start(next);
 }
 
-void StateMachine::activateCommand(Command& command)
+void StateMachine::activateCommand(StateAction& command)
 {
-    CHECK(command.state() != Command::STATE_ACTIVATED, "Illegal state, Command has been executed already");
-    command.setState(Command::STATE_ACTIVATED);
+    CHECK(command.state() != StateAction::STATE_ACTIVATED, "Illegal state, Command has been executed already");
+    command.setState(StateAction::STATE_ACTIVATED);
     if(command.commandGroup())
-        command.commandGroup()->resolveConflicts(command, Command::STATE_ACTIVATED, Command::STATE_SUPPRESSED);
+        command.commandGroup()->resolveConflicts(command, StateAction::STATE_ACTIVATED, StateAction::STATE_SUPPRESSED);
     if(command.mask())
     {
         ASSERT(_active_state);
-        _active_state->resolveConflicts(command, Command::STATE_ACTIVATED, Command::STATE_SUPPRESSED);
+        _active_state->resolveConflicts(command, StateAction::STATE_ACTIVATED, StateAction::STATE_SUPPRESSED);
     }
 }
 
-void StateMachine::deactivateCommand(Command& command)
+void StateMachine::deactivateCommand(StateAction& command)
 {
-    CHECK(command.state() != Command::STATE_DEACTIVATED, "Illegal state, Command has been terminated already");
-    command.setState(Command::STATE_DEACTIVATED);
-    if(command.commandGroup() && command.commandGroup()->resolveConflicts(command, Command::STATE_SUPPRESSED, Command::STATE_ACTIVATED) == 0)
+    CHECK(command.state() != StateAction::STATE_DEACTIVATED, "Illegal state, Command has been terminated already");
+    command.setState(StateAction::STATE_DEACTIVATED);
+    if(command.commandGroup() && command.commandGroup()->resolveConflicts(command, StateAction::STATE_SUPPRESSED, StateAction::STATE_ACTIVATED) == 0)
         command.commandGroup()->deactivate();
-    if(_active_state->resolveConflicts(command, Command::STATE_SUPPRESSED, Command::STATE_ACTIVATED) == 0 && _active_state->_fallback)
+    if(_active_state->resolveConflicts(command, StateAction::STATE_SUPPRESSED, StateAction::STATE_ACTIVATED) == 0 && _active_state->_fallback)
         transit(*_active_state->_fallback);
 }
 

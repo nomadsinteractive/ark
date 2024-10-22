@@ -15,7 +15,7 @@ public:
     StateMachine();
 
 //  [[script::bindings::auto]]
-    sp<Command> addCommand(sp<Runnable> onActivate = nullptr, sp<Runnable> onDeactivate = nullptr, sp<CommandGroup> commandGroup = nullptr);
+    sp<StateAction> addCommand(sp<Runnable> onActivate = nullptr, sp<Runnable> onDeactivate = nullptr, sp<StateActionGroup> commandGroup = nullptr);
 
 //  [[script::bindings::auto]]
     sp<State> addState(const sp<Runnable>& onActivate = nullptr, const sp<State>& fallback = nullptr);
@@ -26,18 +26,18 @@ public:
 //  [[script::bindings::auto]]
     void transit(State& next);
 
-    void activateCommand(Command& command);
-    void deactivateCommand(Command& command);
+    void activateCommand(StateAction& command);
+    void deactivateCommand(StateAction& command);
 
     const std::vector<sp<State>>& states() const;
 
 private:
     std::vector<sp<State>> _states;
-    std::vector<sp<Command>> _commands;
+    std::vector<sp<StateAction>> _commands;
 
     State* _active_state;
 
-    friend class Command;
+    friend class StateAction;
     friend class State;
 };
 

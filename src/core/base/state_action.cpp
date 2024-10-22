@@ -1,66 +1,66 @@
-#include "core/base/command.h"
+#include "core/base/state_action.h"
 
-#include "core/base/command_group.h"
+#include "core/base/state_action_group.h"
 #include "core/base/state_machine.h"
 #include "core/inf/runnable.h"
 
 namespace ark {
 
-Command::Command(StateMachine& stateMachine, sp<Runnable> onActivate, sp<Runnable> onDeactivate, sp<CommandGroup> commandGroup)
+StateAction::StateAction(StateMachine& stateMachine, sp<Runnable> onActivate, sp<Runnable> onDeactivate, sp<StateActionGroup> commandGroup)
     : _state_machine(stateMachine), _command_group(std::move(commandGroup)), _state_holder(sp<StateHolder>::make(std::move(onActivate), std::move(onDeactivate)))
 {
     if(_command_group)
         _command_group->_commands.push_back(this);
 }
 
-void Command::activate()
+void StateAction::activate()
 {
     _state_machine.activateCommand(*this);
 }
 
-void Command::deactivate()
+void StateAction::deactivate()
 {
     _state_machine.deactivateCommand(*this);
 }
 
-uint32_t Command::mask() const
+uint32_t StateAction::mask() const
 {
     return _command_group ? _command_group->mask() : 0;
 }
 
-bool Command::conflicts(const Command& other) const
+bool StateAction::conflicts(const StateAction& other) const
 {
     return (mask() & other.mask()) != 0;
 }
 
-Command::State Command::state() const
+StateAction::State StateAction::state() const
 {
     return _state_holder->state();
 }
 
-void Command::setState(Command::State state)
+void StateAction::setState(StateAction::State state)
 {
     if(state == STATE_ACTIVATED && _command_group->stateHolder()->state() != state)
         _command_group->activate();
     _state_holder->setState(state);
 }
 
-const sp<CommandGroup>& Command::commandGroup() const
+const sp<StateActionGroup>& StateAction::commandGroup() const
 {
     return _command_group;
 }
 
-Command::StateHolder::StateHolder(sp<Runnable> onActivate, sp<Runnable> onDeactivate)
+StateAction::StateHolder::StateHolder(sp<Runnable> onActivate, sp<Runnable> onDeactivate)
     : _state(STATE_DEACTIVATED), _on_activate(std::move(onActivate)), _on_deactivate(std::move(onDeactivate))
 {
 }
 
-Command::State Command::StateHolder::state() const
+StateAction::State StateAction::StateHolder::state() const
 {
     return _state;
 }
 
-void Command::StateHolder::setState(Command::State state)
+void StateAction::StateHolder::setState(StateAction::State state)
 {
     if(_state != state)
     {
