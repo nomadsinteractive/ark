@@ -155,7 +155,7 @@ void ApplicationContext::initialize(const document& manifest)
 
 sp<ResourceLoader> ApplicationContext::createResourceLoader(const String& name, const Scope& args)
 {
-    Identifier id(Identifier::parse(name));
+    const Identifier id(Identifier::parse(name));
     if(id.isVal())
     {
         const document doc = _application_bundle->loadDocument(name);

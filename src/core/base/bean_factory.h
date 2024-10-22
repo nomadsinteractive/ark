@@ -491,13 +491,13 @@ private:
     sp<Builder<T>> _delegate;
 };
 
-template<typename T> class BuilderByArgument : public Builder<T> {
+template<typename T> class BuilderByArgument final : public Builder<T> {
 public:
     BuilderByArgument(WeakPtr<Scope> references, String name, sp<Builder<T>> fallback = nullptr)
         : _references(std::move(references)), _name(std::move(name)), _fallback(std::move(fallback)) {
     }
 
-    virtual sp<T> build(const Scope& args) override {
+    sp<T> build(const Scope& args) override {
         sp<T> value = args.build<T>(_name, args);
         if(!value) {
             const sp<Scope> references = _references.lock();
