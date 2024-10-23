@@ -15,12 +15,17 @@ public:
     StateMachine(sp<State> entry);
 
 //  [[script::bindings::auto]]
-    void addState(sp<State> state);
+    void reset(sp<State> state);
 
 private:
-    State* _active_state;
+    void doActionTransit(const StateAction& action);
+    void doActionActive(const StateAction& action);
+    void doActionDeactive(const StateAction& action);
 
-    std::vector<sp<State>> _states;
+    void doActive(sp<State> state);
+
+private:
+    std::vector<sp<State>> _active_states;
 
     friend class StateAction;
     friend class State;

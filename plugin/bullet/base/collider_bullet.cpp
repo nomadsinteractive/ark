@@ -371,13 +371,13 @@ sp<ColliderBullet> ColliderBullet::BUILDER_IMPL1::build(const Scope& args)
 }
 
 ColliderBullet::BUILDER_IMPL2::BUILDER_IMPL2(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _delegate(factory, manifest, resourceLoaderContext)
+    : _impl(factory, manifest, resourceLoaderContext)
 {
 }
 
 sp<Collider> ColliderBullet::BUILDER_IMPL2::build(const Scope& args)
 {
-    return _delegate.build(args);
+    return _impl.build(args);
 }
 
 ColliderBullet::KinematicObject::KinematicObject(sp<Vec3> position, sp<Vec4> quaternion, sp<BtRigidBodyRef> rigidBody)

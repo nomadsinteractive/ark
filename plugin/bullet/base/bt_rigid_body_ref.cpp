@@ -1,8 +1,6 @@
 #include "bullet/base/bt_rigid_body_ref.h"
 
-namespace ark {
-namespace plugin {
-namespace bullet {
+namespace ark::plugin::bullet {
 
 BtRigidBodyRef::BtRigidBodyRef(btCollisionObject* rigidBody)
     : _rigid_body(rigidBody)
@@ -26,6 +24,4 @@ void BtRigidBodyRef::reset()
     _rigid_body.reset();
 }
 
-}
-}
 }

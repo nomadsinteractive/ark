@@ -39,14 +39,14 @@ public:
     ColliderBullet(const V3& gravity, sp<ModelLoader> modelLoader);
 
 //  [[script::bindings::auto]]
-    virtual sp<RigidBody> createBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Rotation> rotate = nullptr, sp<Boolean> discarded = nullptr) override;
+    sp<RigidBody> createBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Rotation> rotate = nullptr, sp<Boolean> discarded = nullptr) override;
 //  [[script::bindings::auto]]
-    virtual std::vector<RayCastManifold> rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter = nullptr) override;
+    std::vector<RayCastManifold> rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter = nullptr) override;
 
 //  [[script::bindings::auto]]
     void rayCastClosest(const V3& from, const V3& to, const sp<CollisionCallback>& callback, int32_t filterGroup = 1, int32_t filterMask = -1);
 
-    virtual void run() override;
+    void run() override;
 
     btDiscreteDynamicsWorld* btDynamicWorld() const;
 
@@ -58,7 +58,7 @@ public:
     public:
         BUILDER_IMPL1(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<ColliderBullet> build(const Scope& args) override;
+        sp<ColliderBullet> build(const Scope& args) override;
 
     private:
         sp<Builder<Vec3>> _gravity;
@@ -73,10 +73,10 @@ public:
     public:
         BUILDER_IMPL2(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<Collider> build(const Scope& args) override;
+        sp<Collider> build(const Scope& args) override;
 
     private:
-        BUILDER_IMPL1 _delegate;
+        BUILDER_IMPL1 _impl;
     };
 
 private:

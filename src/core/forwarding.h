@@ -52,7 +52,7 @@ class Class;
 class ClassHierarychyManager;
 class Clock;
 class StateAction;
-class StateActionGroup;
+class StateActionStrand;
 class DOMDocument;
 class DOMAttribute;
 class DOMElement;

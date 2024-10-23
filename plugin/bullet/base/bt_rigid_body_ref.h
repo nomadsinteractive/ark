@@ -1,5 +1,4 @@
-#ifndef ARK_PLUGIN_BULLET_BASE_BT_RIGID_BODY_REF_H_
-#define ARK_PLUGIN_BULLET_BASE_BT_RIGID_BODY_REF_H_
+#pragma once
 
 #include "core/types/owned_ptr.h"
 
@@ -8,9 +7,7 @@
 #include "btBulletDynamicsCommon.h"
 
 
-namespace ark {
-namespace plugin {
-namespace bullet {
+namespace ark::plugin::bullet {
 
 class BtRigidBodyRef  {
 public:
@@ -26,7 +23,3 @@ private:
 };
 
 }
-}
-}
-
-#endif

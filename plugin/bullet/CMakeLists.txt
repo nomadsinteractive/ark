@@ -3,8 +3,6 @@ cmake_minimum_required(VERSION 3.15)
 
 include(${ARK_SRC_DIR}/tools/cmake/core.cmake)
 
-#find_package(Bullet CONFIG REQUIRED)
-#target_link_libraries(main PRIVATE LinearMath Bullet3Common BulletDynamics BulletSoftBody)
 ark_find_vcpkg_package(Bullet LIBRARIES LinearMath Bullet3Common BulletDynamics BulletSoftBody)
 
 ark_include_directories(${ARK_INCLUDE_DIRS})

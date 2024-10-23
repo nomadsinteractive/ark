@@ -12,6 +12,7 @@ PyInstanceRef::~PyInstanceRef()
     if(_deref)
         Py_XDECREF(_instance);
 }
+
 PyObject* PyInstanceRef::instance() const
 {
     return _instance;

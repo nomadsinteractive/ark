@@ -2515,7 +2515,18 @@ class Collider:
         pass
 
 
+class StateActionStrand:
+    def __init__(self):
+        pass
+
+
 class StateAction:
+
+    def __init__(self, state_machine: "StateMachine", start: "State", end: "State", action_strand: Optional[StateActionStrand] = None):
+        pass
+
+    def execute(self):
+        pass
 
     def activate(self):
         pass
@@ -2524,42 +2535,21 @@ class StateAction:
         pass
 
 
-class StateActionGroup:
-    def __init__(self, mask: int, on_activate: Optional[Callable] = None, on_deactivate: Optional[Callable] = None):
-        self._mask = 0
-
-    @property
-    def mask(self):
-        return self._mask
-
-
 class State:
+
+    def __init__(self, on_active: Optional[Callable] = None, on_deactive: Optional[Callable] = None):
+        pass
 
     @property
     def active(self) -> bool:
         return False
-
-    def link_command(self, command: Command):
-        pass
-
-    def link_command_group(self, command_group: CommandGroup):
-        pass
 
 
 class StateMachine:
     def __init__(self):
         pass
 
-    def add_command(self, on_activate: Optional[Callable] = None, on_deactivate: Optional[Callable] = None, command_group: CommandGroup = None) -> Command:
-        pass
-
-    def add_state(self, on_active: Optional[Callable] = None, fallback_state: Optional[State] = None) -> State:
-        pass
-
     def start(self, entry: State):
-        pass
-
-    def transit(self, next_state: State):
         pass
 
 

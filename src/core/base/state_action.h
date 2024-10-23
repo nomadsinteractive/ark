@@ -8,24 +8,27 @@ namespace ark {
 
 class ARK_API StateAction {
 public:
-    StateAction(State& start, State& end, sp<StateActionGroup> actionStrand = nullptr);
+//  [[script::bindings::auto]]
+    StateAction(StateMachine& stateMachine, const sp<State>& start, const sp<State>& end, const sp<StateActionStrand>& actionStrand = nullptr);
+
+//  [[script::bindings::property]]
+    const sp<State>& start() const;
+//  [[script::bindings::property]]
+    const sp<State>& end() const;
 
 //  [[script::bindings::auto]]
-    void execute();
+    void execute() const;
 //  [[script::bindings::auto]]
-    void activate();
+    void activate() const;
 //  [[script::bindings::auto]]
-    void deactivate();
-
-    bool conflicts(const StateAction& other) const;
-
-    const sp<StateActionGroup>& commandGroup() const;
+    void deactivate() const;
 
 private:
-    State& _start;
-    State& _end;
+    StateMachine& _state_machine;
 
-    sp<StateActionGroup> _action_strand;
+    sp<StateActionStrand> _strand;
+
+    friend class StateMachine;
 };
 
 }

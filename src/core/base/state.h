@@ -18,22 +18,17 @@ public:
 //  [[script::bindings::property]]
     bool active() const;
 
-//  [[script::bindings::auto]]
-    sp<StateAction> createAction(const sp<State>& nextState, sp<StateActionGroup> strand = nullptr);
-
 private:
     void doActivate();
     void doDeactivate();
 
 private:
-    bool _active;
-
     sp<Runnable> _on_active;
     sp<Runnable> _on_deactive;
-
-    std::vector<sp<StateAction>> _actions;
+    bool _active;
 
     friend class StateMachine;
+    friend class StateAction;
 };
 
 }
