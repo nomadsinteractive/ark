@@ -32,6 +32,13 @@ public:
         return ptr;
     }
 
+    T& operator *() const {
+        const std::shared_ptr<T> ptr = _weak_ptr.lock();
+        ASSERT(ptr);
+        return *ptr;
+    }
+
+
     bool expired() const {
         return _weak_ptr.expired();
     }

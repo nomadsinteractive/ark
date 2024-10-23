@@ -2515,7 +2515,7 @@ class Collider:
         pass
 
 
-class Command:
+class StateAction:
 
     def activate(self):
         pass
@@ -2524,7 +2524,7 @@ class Command:
         pass
 
 
-class CommandGroup:
+class StateActionGroup:
     def __init__(self, mask: int, on_activate: Optional[Callable] = None, on_deactivate: Optional[Callable] = None):
         self._mask = 0
 

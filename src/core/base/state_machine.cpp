@@ -6,64 +6,14 @@
 
 namespace ark {
 
-StateMachine::StateMachine()
-    : _active_state(nullptr)
+StateMachine::StateMachine(sp<State> entry)
+    : _active_state(entry.get()), _states{std::move(entry)}
 {
 }
 
-sp<StateAction> StateMachine::addCommand(sp<Runnable> onActivate, sp<Runnable> onDeactivate, sp<StateActionGroup> commandGroup)
+void StateMachine::addState(sp<State> state)
 {
-    sp<StateAction> cmd = sp<StateAction>::make(*this, std::move(onActivate), std::move(onDeactivate), std::move(commandGroup));
-    _commands.push_back(cmd);
-    return cmd;
-}
-
-sp<State> StateMachine::addState(const sp<Runnable>& onActivate, const sp<State>& fallback)
-{
-    sp<State> state = sp<State>::make(*this, onActivate, fallback.get());
-    _states.push_back(state);
-    return state;
-}
-
-void StateMachine::start(State& entry)
-{
-    _active_state = &entry;
-    _active_state->activate();
-}
-
-void StateMachine::transit(State& next)
-{
-    CHECK(_active_state, "Statemachine has not active state(call start first)");
-    _active_state->deactivate();
-    start(next);
-}
-
-void StateMachine::activateCommand(StateAction& command)
-{
-    CHECK(command.state() != StateAction::STATE_ACTIVATED, "Illegal state, Command has been executed already");
-    command.setState(StateAction::STATE_ACTIVATED);
-    if(command.commandGroup())
-        command.commandGroup()->resolveConflicts(command, StateAction::STATE_ACTIVATED, StateAction::STATE_SUPPRESSED);
-    if(command.mask())
-    {
-        ASSERT(_active_state);
-        _active_state->resolveConflicts(command, StateAction::STATE_ACTIVATED, StateAction::STATE_SUPPRESSED);
-    }
-}
-
-void StateMachine::deactivateCommand(StateAction& command)
-{
-    CHECK(command.state() != StateAction::STATE_DEACTIVATED, "Illegal state, Command has been terminated already");
-    command.setState(StateAction::STATE_DEACTIVATED);
-    if(command.commandGroup() && command.commandGroup()->resolveConflicts(command, StateAction::STATE_SUPPRESSED, StateAction::STATE_ACTIVATED) == 0)
-        command.commandGroup()->deactivate();
-    if(_active_state->resolveConflicts(command, StateAction::STATE_SUPPRESSED, StateAction::STATE_ACTIVATED) == 0 && _active_state->_fallback)
-        transit(*_active_state->_fallback);
-}
-
-const std::vector<sp<State>>& StateMachine::states() const
-{
-    return _states;
+    _states.push_back(std::move(state));
 }
 
 }

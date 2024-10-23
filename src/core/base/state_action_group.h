@@ -20,15 +20,9 @@ public:
     void activate();
     void deactivate();
 
-    int32_t resolveConflicts(const StateAction& command, StateAction::State state, StateAction::State toState) const;
-
-    const sp<StateAction::StateHolder>& stateHolder() const;
-
 private:
     uint32_t _mask;
     
-    sp<StateAction::StateHolder> _state_holder;
-
     std::vector<StateAction*> _commands;
 
     friend class StateAction;

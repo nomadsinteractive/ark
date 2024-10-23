@@ -12,30 +12,15 @@ namespace ark {
 class ARK_API StateMachine {
 public:
 //  [[script::bindings::auto]]
-    StateMachine();
+    StateMachine(sp<State> entry);
 
 //  [[script::bindings::auto]]
-    sp<StateAction> addCommand(sp<Runnable> onActivate = nullptr, sp<Runnable> onDeactivate = nullptr, sp<StateActionGroup> commandGroup = nullptr);
-
-//  [[script::bindings::auto]]
-    sp<State> addState(const sp<Runnable>& onActivate = nullptr, const sp<State>& fallback = nullptr);
-
-//  [[script::bindings::auto]]
-    void start(State& entry);
-
-//  [[script::bindings::auto]]
-    void transit(State& next);
-
-    void activateCommand(StateAction& command);
-    void deactivateCommand(StateAction& command);
-
-    const std::vector<sp<State>>& states() const;
+    void addState(sp<State> state);
 
 private:
-    std::vector<sp<State>> _states;
-    std::vector<sp<StateAction>> _commands;
-
     State* _active_state;
+
+    std::vector<sp<State>> _states;
 
     friend class StateAction;
     friend class State;

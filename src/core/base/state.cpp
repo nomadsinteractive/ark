@@ -7,8 +7,8 @@
 
 namespace ark {
 
-State::State(StateMachine& /*stateMachine*/, const sp<Runnable>& onActive, State* fallback)
-    : _on_active(onActive), _fallback(fallback), _active(false)
+State::State(sp<Runnable> onActive, sp<Runnable> onDeactivate)
+    : _active(false), _on_active(std::move(onActive)), _on_deactive(std::move(onDeactivate))
 {
 }
 
@@ -17,45 +17,25 @@ bool State::active() const
     return _active;
 }
 
-void State::activate()
+sp<StateAction> State::createAction(const sp<State>& nextState, sp<StateActionGroup> strand)
+{
+    sp<StateAction> action = sp<StateAction>::make(*this, *nextState, std::move(strand));
+    _actions.push_back(action);
+    return action;
+}
+
+void State::doActivate()
 {
     if(_on_active && !_active)
         _on_active->run();
     _active = true;
 }
 
-void State::deactivate()
+void State::doDeactivate()
 {
+    if(_on_deactive && _active)
+        _on_deactive->run();
     _active = false;
-}
-
-void State::linkCommand(StateAction& command)
-{
-    DCHECK(_linked_commands.find(&command) == _linked_commands.end(), "Command has been linked to this state already");
-    _linked_commands.insert(std::make_pair(&command, nullptr));
-}
-
-void State::linkCommandGroup(StateActionGroup& commandGroup)
-{
-    for(StateAction* i : commandGroup._commands)
-        linkCommand(*i);
-}
-
-int32_t State::resolveConflicts(const StateAction& command, StateAction::State state, StateAction::State toState) const
-{
-    int32_t count = 0;
-    for(const auto& i : _linked_commands)
-    {
-        StateAction* cmd = i.first;
-        if(cmd != &command)
-        {
-            if(cmd->conflicts(command) && cmd->state() == state)
-                cmd->setState(toState);
-            if(cmd->state() == toState)
-                ++count;
-        }
-    }
-    return count;
 }
 
 }
