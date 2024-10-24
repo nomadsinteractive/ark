@@ -15,7 +15,7 @@ namespace ark {
 class ARK_API Entity final : public Debris {
 public:
 //  [[script::bindings::constructor]]
-    Entity(Traits components = Traits());
+    Entity(Traits components = {});
     ~Entity() override;
 
     void traverse(const Visitor& visitor) override;
@@ -26,15 +26,6 @@ public:
 
     template<typename T> void addComponent(sp<T> cmp) {
         addComponent(Box(std::move(cmp)));
-    }
-
-//  [[script::bindings::loader]]
-    template<typename T> sp<T> loadComponent(const String& name, const Scope& args) {
-        const sp<ResourceLoader>& resourceLoader = _components.get<ResourceLoader>();
-        CHECK(resourceLoader, "An Entity doesn't have a ResourceLoader component can't load anything.");
-        sp<T> cmp = resourceLoader->load<T>(name, args);
-        addComponent<T>(cmp);
-        return cmp;
     }
 
 //  [[script::bindings::property]]

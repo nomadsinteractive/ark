@@ -15,7 +15,7 @@ namespace ark::plugin::python {
 
 namespace {
 
-class PythonCallableCharacterMaker : public GlyphMaker {
+class PythonCallableCharacterMaker final : public GlyphMaker {
 public:
     PythonCallableCharacterMaker(PyInstance callable)
         : _callable(std::move(callable)) {
@@ -26,8 +26,7 @@ public:
 
         PyInstance args(PyInstance::steal(PyTuple_New(1)));
         PyTuple_SetItem(args.pyObject(), 0, PyCast::toPyObject(text));
-        PyObject* ret = _callable.call(args.pyObject());
-        if(ret)
+        if(PyObject* ret = _callable.call(args.pyObject()))
         {
             const std::vector<sp<Glyph>> glyphs = ret == Py_None ? std::vector<sp<Glyph>>() : PyCast::ensureCppObject<std::vector<sp<Glyph>>>(ret);
             Py_DECREF(ret);
@@ -63,7 +62,7 @@ void PyCallableDuckType::to(sp<EventListener>& inst)
 
 void PyCallableDuckType::to(sp<GlyphMaker>& inst)
 {
-    inst = sp<PythonCallableCharacterMaker>::make(_instance);
+    inst = sp<GlyphMaker>::make<PythonCallableCharacterMaker>(_instance);
 }
 
 void PyCallableDuckType::to(sp<RendererMaker>& inst)

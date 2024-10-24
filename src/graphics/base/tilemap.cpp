@@ -14,7 +14,7 @@
 #include "graphics/base/tilemap_layer.h"
 #include "graphics/base/tileset.h"
 #include "graphics/base/v2.h"
-#include "graphics/impl/frame/scrollable.h"
+#include "graphics/inf/tile_maker.h"
 
 #include "app/base/collision_filter.h"
 #include "app/base/a_star.h"
@@ -330,20 +330,13 @@ const std::vector<sp<TilemapLayer>>& Tilemap::layers() const
 
 Tilemap::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _tileset(factory.ensureBuilder<Tileset>(manifest, "tileset")), _render_layer(factory.getBuilder<RenderLayer>(manifest, constants::RENDER_LAYER)),
-      _importer(factory.getBuilder<Importer<Tilemap>>(manifest, "importer")), _outputer(factory.getBuilder<Outputer<Tilemap>>(manifest, "outputer")),
-      _scrollable(factory.getBuilder<Scrollable>(manifest, "scrollable"))
+      _importer(factory.getBuilder<Importer<Tilemap>>(manifest, "importer")), _outputer(factory.getBuilder<Outputer<Tilemap>>(manifest, "outputer"))
 {
 }
 
 sp<Tilemap> Tilemap::BUILDER::build(const Scope& args)
 {
     sp<Tilemap> tilemap = sp<Tilemap>::make(_tileset->build(args), _render_layer->build(args), _importer->build(args), _outputer->build(args));
-    if(_scrollable)
-    {
-        sp<Scrollable> scrollable = _scrollable->build(args);
-        scrollable->setRendererMaker(sp<TilemapLayerMaker>::make(tilemap, scrollable->rendererMaker()));
-        tilemap->_stub->_scrollable = std::move(scrollable);
-    }
     return tilemap;
 }
 
@@ -353,13 +346,6 @@ std::vector<sp<LayerContext>>& Tilemap::Stub::snapshot(const RenderRequest& rend
     for(TilemapLayer& i : _layers)
         if(i._layer_context)
             _layer_contexts.push_back(i._layer_context);
-    if(_scrollable)
-        for(const Box& i : _scrollable->cull(renderRequest.timestamp()))
-        {
-            const sp<TilemapLayer> tilemapLayer = i.as<TilemapLayer>();
-            if(tilemapLayer && std::find(_layer_contexts.begin(), _layer_contexts.end(), tilemapLayer->_layer_context) == _layer_contexts.end())
-                _layer_contexts.push_back(tilemapLayer->_layer_context);
-        }
     return _layer_contexts;
 }
 

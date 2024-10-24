@@ -3,7 +3,6 @@
 #include "core/base/scope.h"
 #include "core/traits/expendable.h"
 #include "core/inf/debris.h"
-#include "core/inf/variable.h"
 #include "core/util/log.h"
 
 #include "python/extension/py_cast.h"
@@ -11,20 +10,22 @@
 
 namespace ark::plugin::python {
 
-static PyObject* __richcmp__(PyArkType::Instance* obj1, PyObject* obj2, int op)
+namespace {
+
+PyObject* __richcmp__(PyArkType::Instance* obj1, PyObject* obj2, int op)
 {
     if(PyIndex_Check(reinterpret_cast<PyObject*>(obj1)) && PyIndex_Check(obj2))
     {
         PyObject* idx1 = PyNumber_Index(reinterpret_cast<PyObject*>(obj1));
         PyObject* idx2 = PyNumber_Index(obj2);
-        long value1 = PyLong_AsLong(idx1);
-        long value2 = PyLong_AsLong(idx2);
+        const long value1 = PyLong_AsLong(idx1);
+        const long value2 = PyLong_AsLong(idx2);
         Py_XDECREF(idx1);
         Py_XDECREF(idx2);
         Py_RETURN_RICHCOMPARE(value1, value2, op);
     }
 
-    bool obj2IsNone = obj2 == Py_None;
+    const bool obj2IsNone = obj2 == Py_None;
     if(!(obj2IsNone || PythonInterpreter::instance().isPyArkTypeObject(Py_TYPE(obj2))))
     {
         LOGW("Comparing Ark-Type object \"%s\" with non-Ark-Type object \"%s\"", Py_TYPE(obj1)->tp_name, Py_TYPE(obj2)->tp_name);
@@ -37,28 +38,26 @@ static PyObject* __richcmp__(PyArkType::Instance* obj1, PyObject* obj2, int op)
     Py_RETURN_RICHCOMPARE(hash1, hash2, op);
 }
 
-static Py_hash_t __hash__(PyArkType::Instance* self)
+Py_hash_t __hash__(PyArkType::Instance* self)
 {
     return static_cast<Py_hash_t>(self->box->id());
 }
 
 struct BreakException {
-    BreakException(int32_t retcode)
-        : _retcode(retcode) {
-    }
-
     int32_t _retcode;
 };
 
-static int __traverse__(PyArkType::Instance* self, visitproc visitor, void* args)
+int __traverse__(PyArkType::Instance* self, visitproc visitor, void* args)
 {
-    if(const sp<Debris> holder = self->box->as<Debris>())
+    if(const sp<Debris> debris = self->box->as<Debris>())
         try {
-            holder->traverse([&visitor, args](const Box& packed) {
+            debris->traverse([&visitor, args](const Box& packed) {
                 if(const sp<PyInstanceRef> pi = packed.as<PyInstanceRef>())
-                    if(int32_t vret = visitor(pi->instance(), args))
-                        throw BreakException(vret);
+                {
+                    if(const int32_t vret = visitor(pi->instance(), args))
+                        throw BreakException{vret};
                     return true;
+                }
                 return false;
             });
         } catch(const BreakException& e) {
@@ -67,17 +66,20 @@ static int __traverse__(PyArkType::Instance* self, visitproc visitor, void* args
     return 0;
 }
 
-static int __clear__(PyArkType::Instance* self)
+int __clear__(PyArkType::Instance* self)
 {
-    if(const sp<Debris> holder = self->box->as<Debris>())
-        holder->traverse([](const Box& packed) {
-                if(const sp<PyInstanceRef> pi = packed.as<PyInstanceRef>()) {
+    if(const sp<Debris> debris = self->box->as<Debris>())
+        debris->traverse([](const Box& packed) {
+                if(const sp<PyInstanceRef> pi = packed.as<PyInstanceRef>())
+                {
                     pi->clear();
                     return true;
                 }
                 return false;
             });
     return 0;
+}
+
 }
 
 PyArkType::PyArkType(const String& name, const String& doc, PyTypeObject* base, unsigned long flags)

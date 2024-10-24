@@ -66,8 +66,6 @@ public:
         SafePtr<Builder<RenderLayer>> _render_layer;
         SafePtr<Builder<Importer<Tilemap>>> _importer;
         SafePtr<Builder<Outputer<Tilemap>>> _outputer;
-
-        sp<Builder<Scrollable>> _scrollable;
     };
 
 private:
