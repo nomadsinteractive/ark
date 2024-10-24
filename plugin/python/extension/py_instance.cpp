@@ -1,10 +1,9 @@
 #include "python/extension/py_instance.h"
 
 #include "core/types/shared_ptr.h"
-#include "core/util/log.h"
 
-#include "extension/python_interpreter.h"
-#include "extension/reference_manager.h"
+#include "python/extension/python_extension.h"
+#include "python/extension/reference_manager.h"
 
 namespace ark::plugin::python {
 
@@ -15,26 +14,25 @@ PyInstance::PyInstance(sp<PyInstanceRef> ref)
 
 PyInstance PyInstance::borrow(PyObject* object)
 {
-    return PyInstance(object ? sp<PyInstanceRef>::make(object, false) : nullptr);
+    return {object ? sp<PyInstanceRef>::make(object, false) : nullptr};
 }
 
 PyInstance PyInstance::steal(PyObject* object)
 {
-    Py_XINCREF(object);
-    return PyInstance(object ? sp<PyInstanceRef>::make(object, true) : nullptr);
+    return {object ? sp<PyInstanceRef>::make(object, true) : nullptr};
 }
 
 PyInstance PyInstance::own(PyObject* object)
 {
     Py_XINCREF(object);
-    return PyInstance(object ? sp<PyInstanceRef>::make(object, true) : nullptr);
+    return {object ? sp<PyInstanceRef>::make(object, true) : nullptr};
 }
 
 PyInstance PyInstance::track(PyObject* object)
 {
     Py_XINCREF(object);
     sp<PyInstanceRef> ref = sp<PyInstanceRef>::make(object, true);
-    PythonInterpreter::instance().referenceManager()->track(ref);
+    PythonExtension::instance().referenceManager()->track(ref);
     return ref;
 }
 
@@ -58,7 +56,7 @@ PyObject* PyInstance::type()
     return reinterpret_cast<PyObject*>(_ref->instance()->ob_type);
 }
 
-const char* PyInstance::name()
+const char* PyInstance::name() const
 {
     return Py_TYPE(_ref->instance())->tp_name;
 }
@@ -71,7 +69,7 @@ bool PyInstance::hasAttr(const char* name) const
 PyInstance PyInstance::getAttr(const char* name) const
 {
     const sp<PyInstanceRef> attr = sp<PyInstanceRef>::make(PyObject_GetAttrString(_ref->instance(), name), true);
-    PythonInterpreter::instance().referenceManager()->track(attr);
+    PythonExtension::instance().referenceManager()->track(attr);
     return attr;
 }
 

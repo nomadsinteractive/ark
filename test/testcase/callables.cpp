@@ -1,6 +1,5 @@
 #include "core/types/shared_ptr.h"
 
-#include "core/base/callable.h"
 #include "core/base/library.h"
 #include "core/util/string_convert.h"
 
@@ -22,8 +21,8 @@ public:
 
         Library library;
         library.addCallable<int(int)>("test", &test);
-        const sp<Callable<int(int)>> callable = library.getCallable<int(int)>("test");
-        TESTCASE_VALIDATE(callable->call(0) != 1);
+        const Optional<std::function<int(int)>> callable = library.getCallable<int(int)>("test");
+        TESTCASE_VALIDATE((callable.value())(0) != 1);
 
         return 0;
     }

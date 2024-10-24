@@ -2706,12 +2706,12 @@ class WithTransform:
         pass
 
 
-class Tag:
-    def __init__(self, info: Any):
+class WithTag:
+    def __init__(self, tag: Any):
         pass
 
     @property
-    def info(self) -> Any:
+    def tag(self) -> Any:
         return None
 
 

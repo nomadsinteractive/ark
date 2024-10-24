@@ -19,12 +19,12 @@
 #include "app/base/raycast_manifold.h"
 
 #include "python/api.h"
-#include "python/extension/python_interpreter.h"
+#include "python/extension/python_extension.h"
 #include "python/extension/py_instance_ref.h"
 
-#include "python/impl/adapter/collision_callback_python_adapter.h"
-#include "python/impl/adapter/python_callable_runnable.h"
-#include "python/impl/adapter/python_callable_event_listener.h"
+#include "python/impl/adapter/collision_callback_python.h"
+#include "python/impl/adapter/runnable_python.h"
+#include "python/impl/adapter/event_listener_python.h"
 
 #include "python/impl/duck/py_callable_duck_type.h"
 #include "python/impl/duck/py_list_duck_type.h"
@@ -115,26 +115,26 @@ String unicodeToUTF8String(PyObject* object, const char* encoding, const char* e
 Optional<sp<Runnable>> PyCast::toRunnable(PyObject* object)
 {
     if(PyCallable_Check(object))
-        return sp<Runnable>::make<PythonCallableRunnable>(PyInstance::own(object));
+        return sp<Runnable>::make<RunnablePython>(PyInstance::own(object));
 
     return toSharedPtrDefault<Runnable>(object);
 }
 
 sp<CollisionCallback> PyCast::toCollisionCallback(PyObject* object)
 {
-    return sp<CollisionCallbackPythonAdapter>::make(PyInstance::borrow(object));
+    return sp<CollisionCallbackPython>::make(PyInstance::borrow(object));
 }
 
 sp<EventListener> PyCast::toEventListener(PyObject* object)
 {
     if(PyCallable_Check(object))
-        return sp<PythonCallableEventListener>::make(PyInstance::track(object));
+        return sp<EventListenerPython>::make(PyInstance::track(object));
 
     if(PyObject_HasAttrString(object, "on_event"))
     {
         PyInstance onEvent = PyInstance::steal(PyObject_GetAttrString(object, "on_event"));
         CHECK(onEvent.isCallable(), "The on_event method of type \"%s\" should be Callable", Py_TYPE(object)->tp_name);
-        return sp<PythonCallableEventListener>::make(std::move(onEvent));
+        return sp<EventListenerPython>::make(std::move(onEvent));
     }
 
     return toSharedPtrDefault<EventListener>(object).value();
@@ -262,7 +262,7 @@ Scope PyCast::toScope(PyObject* kws)
     Scope scope;
     if(kws)
     {
-        const PythonInterpreter& pi = PythonInterpreter::instance();
+        const PythonExtension& pi = PythonExtension::instance();
         PyObject* keys = PyDict_Keys(kws);
         const Py_ssize_t size = PyList_Size(keys);
         for(Py_ssize_t i = 0; i < size; i ++)
@@ -295,7 +295,7 @@ Traits PyCast::toTraits(PyObject* args, size_t offset)
         for(size_t i = offset; i < size; ++i)
         {
             PyObject* v = PyTuple_GetItem(args, i);
-            DCHECK(PythonInterpreter::instance().isPyArkTypeObject(Py_TYPE(v)), "Trait \"%s\" must be an Ark Type", Py_TYPE(v)->tp_name);
+            DCHECK(PythonExtension::instance().isPyArkTypeObject(Py_TYPE(v)), "Trait \"%s\" must be an Ark Type", Py_TYPE(v)->tp_name);
             Box component(*reinterpret_cast<PyArkType::Instance*>(v)->box);
             const TypeId typeId = component.typeId();
             traits.put(typeId, std::move(component));
@@ -318,7 +318,7 @@ PyObject* PyCast::toPyObject_SharedPtr(const sp<String>& inst) {
 
 PyObject* PyCast::toPyObject(const Box& box)
 {
-    return PythonInterpreter::instance().toPyObject(box);
+    return PythonExtension::instance().toPyObject(box);
 }
 
 bool PyCast::isNoneOrNull(PyObject* pyObject)
@@ -353,7 +353,7 @@ template<> ARK_PLUGIN_PYTHON_API Optional<Json> PyCast::toCppObject_impl<Json>(P
 
 template<> ARK_PLUGIN_PYTHON_API Optional<Box> PyCast::toCppObject_impl<Box>(PyObject* object)
 {
-    if(PythonInterpreter::instance().isPyArkTypeObject(Py_TYPE(object)))
+    if(PythonExtension::instance().isPyArkTypeObject(Py_TYPE(object)))
         return *reinterpret_cast<PyArkType::Instance*>(object)->box;
     return object != Py_None ? Box(PyInstance::track(object).ref()) : Box();
 }
@@ -379,7 +379,7 @@ template<> ARK_PLUGIN_PYTHON_API Optional<float> PyCast::toCppObject_impl<float>
 
 template<> ARK_PLUGIN_PYTHON_API Optional<uint32_t> PyCast::toCppObject_impl<uint32_t>(PyObject* object)
 {
-    PythonInterpreter& pi = PythonInterpreter::instance();
+    PythonExtension& pi = PythonExtension::instance();
     if(pi.isPyArkTypeObject(object))
     {
         PyArkType* pyArkType = pi.getPyArkType(object);

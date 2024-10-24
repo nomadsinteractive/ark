@@ -206,7 +206,7 @@ def gen_body_source(filename, output_dir, output_file, namespaces, modulename, r
     lines.append('\n' + '''void __init_%s__(PyObject* module)
 {
     std::vector<PyArkType*> moduletypes;
-    ark::plugin::python::PythonInterpreter& pi = ark::plugin::python::PythonInterpreter::instance();
+    ark::plugin::python::PythonExtension& pi = ark::plugin::python::PythonExtension::instance();
     %s
     for(PyArkType* i : moduletypes)
         i->onReady();
@@ -415,7 +415,7 @@ class GenLoaderMethod(GenMethod):
         return self.gen_py_method_def_tp(genclass)
 
     def _gen_calling_statement(self, genclass, argnames):
-        return 'PythonInterpreter::instance().ensurePyArkType(reinterpret_cast<PyObject*>(self))->load(*self, "%s", %s);' % (self._name, argnames)
+        return 'PythonExtension::instance().ensurePyArkType(reinterpret_cast<PyObject*>(self))->load(*self, "%s", %s);' % (self._name, argnames)
 
     def need_unpack_statement(self):
         return False

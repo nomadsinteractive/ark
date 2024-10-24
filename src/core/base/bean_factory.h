@@ -218,8 +218,10 @@ public:
 public:
     BeanFactory(std::nullptr_t);
     BeanFactory();
+    explicit BeanFactory(sp<Stub> stub);
     BeanFactory(const BeanFactory& other) = default;
     BeanFactory(BeanFactory&& other) = default;
+
     ~BeanFactory();
 
     template<typename T> sp<Builder<T>> createBuilderByRef(const Identifier& id) {
@@ -453,15 +455,9 @@ public:
     }
 
 private:
-    BeanFactory(sp<Stub> stub)
-        : _stub(std::move(stub)) {
-    }
-
-private:
     sp<Stub> _stub;
 
-    friend class WeakRef;
-    friend class BeanFactoryWeakRef;
+    friend class Queries;
 };
 
 namespace  {
@@ -576,7 +572,7 @@ template<typename T> sp<T> BeanFactory::buildWithQueries(const String& name, con
 template<typename T> sp<T> Scope::build(const String& name, const Scope& args) const {
     const sp<T> obj = getObject(name).template as<T>();
     if(!obj && _queries)
-        return _queries->_bean_factory.ensure().buildWithQueries<T>(name, _queries, args);
+        return _queries->ensureBeanFactory().buildWithQueries<T>(name, _queries, args);
     return obj;
 }
 

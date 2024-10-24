@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_IMPL_VARIABLE_VARIABLE_TERNARY_H_
-#define ARK_CORE_IMPL_VARIABLE_VARIABLE_TERNARY_H_
+#pragma once
 
 #include <type_traits>
 
@@ -8,7 +7,7 @@
 
 namespace ark {
 
-template<typename T> class VariableTernary : public Variable<T> {
+template<typename T> class VariableTernary final : public Variable<T> {
 public:
     VariableTernary(sp<Boolean> condition, sp<Variable<T>> a, sp<Variable<T>> b)
         : _condition(std::move(condition)), _a(std::move(a)), _b(std::move(b)) {
@@ -30,5 +29,3 @@ private:
 };
 
 }
-
-#endif

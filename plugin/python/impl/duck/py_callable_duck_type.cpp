@@ -5,8 +5,8 @@
 #include "graphics/base/glyph.h"
 #include "graphics/inf/glyph_maker.h"
 
-#include "python/impl/adapter/python_callable_runnable.h"
-#include "python/impl/adapter/python_callable_event_listener.h"
+#include "python/impl/adapter/runnable_python.h"
+#include "python/impl/adapter/event_listener_python.h"
 #include "python/impl/adapter/renderer_maker_python.h"
 
 #include "python/extension/py_cast.h"
@@ -24,7 +24,7 @@ public:
     std::vector<sp<Glyph>> makeGlyphs(const std::wstring& text) override {
         DCHECK_THREAD_FLAG();
 
-        PyInstance args(PyInstance::steal(PyTuple_New(1)));
+        const PyInstance args(PyInstance::steal(PyTuple_New(1)));
         PyTuple_SetItem(args.pyObject(), 0, PyCast::toPyObject(text));
         if(PyObject* ret = _callable.call(args.pyObject()))
         {
@@ -32,9 +32,8 @@ public:
             Py_DECREF(ret);
             return glyphs;
         }
-        else
-            PythonInterpreter::instance().logErr();
 
+        PythonExtension::instance().logErr();
         return {};
     }
 
@@ -52,12 +51,12 @@ PyCallableDuckType::PyCallableDuckType(PyInstance inst)
 
 void PyCallableDuckType::to(sp<Runnable>& inst)
 {
-    inst = sp<PythonCallableRunnable>::make(_instance);
+    inst = sp<RunnablePython>::make(_instance);
 }
 
 void PyCallableDuckType::to(sp<EventListener>& inst)
 {
-    inst = sp<PythonCallableEventListener>::make(_instance);
+    inst = sp<EventListenerPython>::make(_instance);
 }
 
 void PyCallableDuckType::to(sp<GlyphMaker>& inst)

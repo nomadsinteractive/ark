@@ -11,19 +11,18 @@
 #include "core/impl/variable/variable_op2.h"
 #include "core/impl/variable/variable_ternary.h"
 #include "core/inf/array.h"
-#include "core/util/log.h"
 
 namespace ark {
 
 namespace {
 
-template<typename OP, typename T = Boolean> class OperationBuilder : public Builder<Boolean> {
+template<typename OP, typename T = Boolean> class OperationBuilder final : public Builder<Boolean> {
 public:
     OperationBuilder(const sp<Builder<T>>& a1, const sp<Builder<T>>& a2)
         : _a1(a1), _a2(a2) {
     }
 
-    virtual sp<Boolean> build(const Scope& args) override {
+    sp<Boolean> build(const Scope& args) override {
         return sp<OP>::make(_a1->build(args), _a2->build(args));
     }
 
@@ -32,7 +31,7 @@ private:
     sp<Builder<T>> _a2;
 };
 
-class NegativeBooleanBuilder : public Builder<Boolean> {
+class NegativeBooleanBuilder final : public Builder<Boolean> {
 public:
     NegativeBooleanBuilder(const sp<Builder<Boolean>>& a1)
         : _a1(a1) {

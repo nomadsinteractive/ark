@@ -15,12 +15,10 @@
 
 namespace ark::plugin::python {
 
-class PythonInterpreter;
-
-class ARK_PLUGIN_PYTHON_API PythonScript : public Interpreter, public Implements<PythonScript, Interpreter> {
+class ARK_PLUGIN_PYTHON_API PythonInterpreter final : public Interpreter, public Implements<PythonInterpreter, Interpreter> {
 public:
-    PythonScript(const String& name, const document& libraries);
-    ~PythonScript() override;
+    PythonInterpreter(const String& name, const document& libraries);
+    ~PythonInterpreter() override;
 
     void initialize() override;
 
@@ -32,7 +30,7 @@ public:
     const std::vector<String>& paths() const;
 
 //  [[plugin::builder("python")]]
-    class BUILDER : public Builder<Interpreter> {
+    class BUILDER final : public Builder<Interpreter> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 

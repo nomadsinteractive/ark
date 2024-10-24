@@ -6,13 +6,13 @@
 
 namespace ark {
 
-class ARK_API Tag final {
+class ARK_API WithTag final {
 public:
 //  [[script::bindings::auto]]
-    Tag(Box info);
+    WithTag(Box tag);
 
 //  [[script::bindings::property]]
-    const Box& info() const;
+    const Box& tag() const;
 
 private:
     Box _info;

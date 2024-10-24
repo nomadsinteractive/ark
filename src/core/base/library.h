@@ -1,11 +1,11 @@
 #pragma once
 
+#include <any>
 #include <functional>
-#include <unordered_map>
+#include <map>
 
-#include "core/base/callable.h"
 #include "core/forwarding.h"
-#include "core/types/shared_ptr.h"
+#include "core/types/optional.h"
 #include "core/util/strings.h"
 
 namespace ark {
@@ -30,23 +30,19 @@ public:
     Library() = default;
     DEFAULT_COPY_AND_ASSIGN(Library);
 
-    template<typename T> sp<Callable<T>> getCallable(const String& name) const {
+    template<typename T> Optional<std::function<T>> getCallable(const String& name) const {
         Function<T> func;
         const auto iter = _callables.find(func.name(name));
-        return iter != _callables.end() ? iter->second.template toPtr<Callable<T>>() : nullptr;
+        return iter != _callables.end() ? Optional<std::function<T>>(std::any_cast<std::function<T>>(iter->second)) : Optional<std::function<T>>();
     }
 
-    template<typename T> void addCallable(const String& name, std::function<T> func) {
-        addCallable(name, sp<Callable<T>>::make(std::move(func)));
-    }
-
-    template<typename T> void addCallable(const String& name, const sp<Callable<T>>& callable) {
+    template<typename T> void addCallable(const String& name, std::function<T> callable) {
         Function<T> func;
-        _callables.insert(std::make_pair(func.name(name), callable));
+        _callables.insert(std::make_pair(func.name(name), std::make_any<std::function<T>>(std::move(callable))));
     }
 
 private:
-    std::unordered_map<String, Box> _callables;
+    std::map<String, std::any> _callables;
 };
 
 }

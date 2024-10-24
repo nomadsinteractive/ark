@@ -1,4 +1,4 @@
-#include "python/impl/script/python_script.h"
+#include "python/impl/interpreter/python_interpreter.h"
 
 #include "core/base/plugin_manager.h"
 #include "core/base/scope.h"
@@ -10,7 +10,7 @@
 
 #include "graphics/forwarding.h"
 
-#include "python/extension/python_interpreter.h"
+#include "python/extension/python_extension.h"
 #include "python/extension/ark_py_importlib.h"
 #include "python/extension/py_cast.h"
 #include "python/extension/py_instance.h"
@@ -57,7 +57,7 @@ void addScopeToDict(PyObject* dict, const Scope& scope)
     {
         const String& name = iter.first;
         const Box& box = iter.second;
-        PyObject* pyInstance = PythonInterpreter::instance().toPyObject(box);
+        PyObject* pyInstance = PythonExtension::instance().toPyObject(box);
         PyDict_SetItemString(dict, name.c_str(), pyInstance);
     }
 }
@@ -67,7 +67,7 @@ PyObject* argumentsToTuple(const Interpreter::Arguments& args)
     PyObject* tuple = PyTuple_New(args.size());
     uint32_t i = 0;
     for(const Box& arg : args)
-        PyTuple_SetItem(tuple, i++, PythonInterpreter::instance().toPyObject(arg));
+        PyTuple_SetItem(tuple, i++, PythonExtension::instance().toPyObject(arg));
     return tuple;
 }
 
@@ -80,7 +80,7 @@ PyInstance getMainModuleAttr(const char* name)
 
 }
 
-PythonScript::PythonScript(const String& name, const document& libraries)
+PythonInterpreter::PythonInterpreter(const String& name, const document& libraries)
     : _name(Strings::fromUTF8(name))
 {
     PyImport_AppendInittab("ark", PyInit_ark);
@@ -128,13 +128,13 @@ PythonScript::PythonScript(const String& name, const document& libraries)
 #endif
 }
 
-PythonScript::~PythonScript()
+PythonInterpreter::~PythonInterpreter()
 {
     Py_XDECREF(_ark_module);
     Py_Finalize();
 }
 
-void PythonScript::initialize()
+void PythonInterpreter::initialize()
 {
     DSET_THREAD_FLAG();
 
@@ -147,7 +147,7 @@ void PythonScript::initialize()
         i.createScriptModule(*this);
 }
 
-void PythonScript::execute(const sp<Asset>& source, const Scope& vars)
+void PythonInterpreter::execute(const sp<Asset>& source, const Scope& vars)
 {
     DCHECK_THREAD_FLAG();
     PyObject* m = PyImport_AddModule("__main__");
@@ -159,10 +159,10 @@ void PythonScript::execute(const sp<Asset>& source, const Scope& vars)
     const PyInstance co = PyInstance::steal(Py_CompileStringExFlags(Strings::loadFromReadable(source->open()).c_str(), source->location().c_str(), Py_file_input, nullptr, -1));
     const PyInstance v = PyInstance::steal(PyEval_EvalCode(co.pyObject(), globals, globals));
     if(v.isNullptr() || v.pyObject() == nullptr)
-        PythonInterpreter::instance().logErr();
+        PythonExtension::instance().logErr();
 }
 
-Box PythonScript::call(const Box& func, const Interpreter::Arguments& args)
+Box PythonInterpreter::call(const Box& func, const Interpreter::Arguments& args)
 {
     DCHECK_THREAD_FLAG();
     const PyInstance pyfunc = PyInstance::steal(PyCast::toPyObject(func));
@@ -172,16 +172,16 @@ Box PythonScript::call(const Box& func, const Interpreter::Arguments& args)
     if(PyObject* ret = pyfunc.call(tuple.pyObject()))
     {
         if(PyErr_Occurred())
-            PythonInterpreter::instance().logErr();
+            PythonExtension::instance().logErr();
         Box r = std::move(PyCast::toCppObject<Box>(ret).value());
         Py_DECREF(ret);
         return r;
     }
-    PythonInterpreter::instance().logErr();
+    PythonExtension::instance().logErr();
     return Box();
 }
 
-Box PythonScript::attr(const Box& obj, const String& name)
+Box PythonInterpreter::attr(const Box& obj, const String& name)
 {
     DCHECK_THREAD_FLAG();
     if(!obj)
@@ -191,28 +191,28 @@ Box PythonScript::attr(const Box& obj, const String& name)
     ASSERT(!pyobj.isNullptr());
     const PyInstance pyattr = pyobj.getAttr(name.c_str());
     if(PyErr_Occurred())
-        PythonInterpreter::instance().logErr();
+        PythonExtension::instance().logErr();
     return pyattr.toBox();
 }
 
-PyObject* PythonScript::arkModule()
+PyObject* PythonInterpreter::arkModule()
 {
     return _ark_module;
 }
 
-const std::vector<String>& PythonScript::paths() const
+const std::vector<String>& PythonInterpreter::paths() const
 {
     return _paths;
 }
 
-PythonScript::BUILDER::BUILDER(BeanFactory& /*parent*/, const document& manifest)
+PythonInterpreter::BUILDER::BUILDER(BeanFactory& /*parent*/, const document& manifest)
     : _manifest(manifest)
 {
 }
 
-sp<Interpreter> PythonScript::BUILDER::build(const Scope& args)
+sp<Interpreter> PythonInterpreter::BUILDER::build(const Scope& args)
 {
-    return sp<Interpreter>::make<PythonScript>("ark-python", _manifest);
+    return sp<Interpreter>::make<PythonInterpreter>("ark-python", _manifest);
 }
 
 }

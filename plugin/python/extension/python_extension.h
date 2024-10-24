@@ -1,7 +1,6 @@
 #pragma once
 
 #include <map>
-#include <type_traits>
 
 #include <Python.h>
 
@@ -15,18 +14,18 @@
 
 #include "python/api.h"
 #include "python/forwarding.h"
-#include "python/impl/script/python_script.h"
+#include "python/impl/interpreter/python_interpreter.h"
 #include "python/extension/py_ark_type.h"
 #include "python/extension/py_bridge.h"
 
 namespace ark::plugin::python {
 
-class ARK_PLUGIN_PYTHON_API PythonInterpreter {
+class ARK_PLUGIN_PYTHON_API PythonExtension {
 public:
 
-    static PythonInterpreter& instance();
+    static PythonExtension& instance();
 
-    PythonInterpreter();
+    PythonExtension();
 
     template<typename T> int addPyArkType(PyArkType* pyArkType) {
         _type_by_id[Type<T>::id()] = pyArkType;
@@ -72,7 +71,7 @@ public:
     bool exceptErr(PyObject* type) const;
 
     template<typename T> void addModulePlugin(T& plugin, Interpreter& script, const char* name, const char* documentation, const PyMethodDef* methods) {
-        PythonScript* pythonScript = static_cast<PythonScript*>(&script);
+        PythonInterpreter* pythonScript = static_cast<PythonInterpreter*>(&script);
         ASSERT(pythonScript);
         static struct PyModuleDef cPluginModuleDef = {
             PyModuleDef_HEAD_INIT,

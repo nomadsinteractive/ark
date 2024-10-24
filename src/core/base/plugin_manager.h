@@ -15,13 +15,11 @@ public:
 
     typedef Plugin* (*PluginInitializer)(Ark&);
 
-    template<typename T> sp<Callable<T>> getCallable(const String& name) const {
-        for(const sp<Plugin>& i : _plugins) {
-            sp<Callable<T>> callable = i->library().getCallable<T>(name);
-            if(callable)
+    template<typename T> Optional<std::function<T>> getCallable(const String& name) const {
+        for(const sp<Plugin>& i : _plugins)
+            if(Optional<std::function<T>> callable = i->library().getCallable<T>(name))
                 return callable;
-        }
-        return nullptr;
+        return {};
     }
 
     sp<BeanFactory> createBeanFactory(const sp<Dictionary<document>>& documentById) const;
@@ -34,7 +32,6 @@ public:
 
 private:
     std::vector<sp<Plugin>> _plugins;
-
 };
 
 }

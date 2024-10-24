@@ -32,7 +32,7 @@ public:
     explicit operator bool() const;
 
     PyObject* type();
-    const char* name();
+    const char* name() const;
 
     bool hasAttr(const char* name) const;
     PyInstance getAttr(const char* name) const;

@@ -1,4 +1,4 @@
-#include "python/impl/adapter/python_callable_event_listener.h"
+#include "python/impl/adapter/event_listener_python.h"
 
 #include "app/base/event.h"
 
@@ -8,12 +8,12 @@
 
 namespace ark::plugin::python {
 
-PythonCallableEventListener::PythonCallableEventListener(PyInstance callable)
+EventListenerPython::EventListenerPython(PyInstance callable)
     : _callable(std::move(callable)), _args(PyInstance::steal(PyTuple_New(1)))
 {
 }
 
-bool PythonCallableEventListener::onEvent(const Event& event)
+bool EventListenerPython::onEvent(const Event& event)
 {
     DCHECK_THREAD_FLAG();
 
@@ -27,12 +27,12 @@ bool PythonCallableEventListener::onEvent(const Event& event)
         Py_DECREF(ret);
     }
     else
-        PythonInterpreter::instance().logErr();
+        PythonExtension::instance().logErr();
 
     return consumed;
 }
 
-void PythonCallableEventListener::traverse(const Debris::Visitor& visitor)
+void EventListenerPython::traverse(const Debris::Visitor& visitor)
 {
     visitor(_callable.ref());
 }

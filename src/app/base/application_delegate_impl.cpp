@@ -80,8 +80,7 @@ ApplicationDelegateImpl::ScriptTag::ScriptTag(sp<Interpreter> interpreter, const
       _function_name(Documents::getAttribute(manifest, "function")),
       _interpreter(std::move(interpreter)), _vars(std::move(vars))
 {
-    const String src = Documents::getAttribute(manifest, constants::SRC);
-    if(src)
+    if(const String src = Documents::getAttribute(manifest, constants::SRC))
     {
         _source = Ark::instance().getAsset(src);
         CHECK(_source, "Cannot open script \"%s\"", src.c_str());

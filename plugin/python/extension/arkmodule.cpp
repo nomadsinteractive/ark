@@ -12,7 +12,7 @@
 #include "app/forwarding.h"
 #include "app/base/application_context.h"
 
-#include "python/impl/script/python_script.h"
+#include "python/impl/interpreter/python_interpreter.h"
 #include "python/extension/py_instance.h"
 #include "python/extension/py_cast.h"
 #include "python/extension/py_ark_type.h"
@@ -176,7 +176,7 @@ PyObject* ark_is_NDC_Y_Up(PyObject* /*self*/, PyObject* /*args*/)
 
 PyObject* ark_getRefManager(PyObject* /*self*/, PyObject* /*args*/)
 {
-    return PyCast::toPyObject(PythonInterpreter::instance().referenceManager());
+    return PyCast::toPyObject(PythonExtension::instance().referenceManager());
 }
 
 PyObject* ark_trace_(PyObject* /*self*/, PyObject* /*args*/)
@@ -208,7 +208,7 @@ PyObject* initarkmodule()
 
 PyMODINIT_FUNC PyInit_ark(void)
 {
-    const std::vector<String>& paths = static_cast<ark::plugin::python::PythonScript*>(Ark::instance().applicationContext()->interpreter().get())->paths();
+    const std::vector<String>& paths = static_cast<ark::plugin::python::PythonInterpreter*>(Ark::instance().applicationContext()->interpreter().get())->paths();
     PyObject* module = ark::plugin::python::initarkmodule();
     PyObject* path = PyList_New(static_cast<Py_ssize_t>(paths.size()));
     Py_ssize_t i = 0;

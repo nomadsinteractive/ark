@@ -1,8 +1,8 @@
 #pragma once
 
-#include "core/base/bean_factory_weak_ref.h"
 #include "core/base/string.h"
 #include "core/collection/table.h"
+#include "core/types/shared_ptr.h"
 
 namespace ark {
 
@@ -10,8 +10,12 @@ class ARK_API Queries {
 public:
     Queries(const BeanFactory& factory, Table<String, String> queries);
 
+    BeanFactory ensureBeanFactory() const;
+
 private:
-    BeanFactoryWeakRef _bean_factory;
+    struct BeanFactoryWeakRef;
+
+    sp<BeanFactoryWeakRef> _bean_factory;
     Table<String, String> _queries;
 
     friend class BeanFactory;

@@ -16,6 +16,7 @@ public:
     virtual void initialize() = 0;
 
     virtual void execute(const sp<Asset>& source, const Scope& vars) = 0;
+
     virtual Box call(const Box& func, const Arguments& args) = 0;
     virtual Box attr(const Box& obj, const String& name) = 0;
 

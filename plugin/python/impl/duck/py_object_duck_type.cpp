@@ -3,7 +3,7 @@
 #include "graphics/base/color.h"
 
 #include "python/extension/py_cast.h"
-#include "python/impl/adapter/collision_callback_python_adapter.h"
+#include "python/impl/adapter/collision_callback_python.h"
 #include "python/impl/adapter/renderer_maker_python.h"
 
 namespace ark::plugin::python {

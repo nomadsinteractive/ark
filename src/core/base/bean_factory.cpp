@@ -10,6 +10,11 @@ BeanFactory::BeanFactory()
     : _stub(sp<Stub>::make()) {
 }
 
+BeanFactory::BeanFactory(sp<Stub> stub)
+    : _stub(std::move(stub))
+{
+}
+
 BeanFactory::~BeanFactory()
 {
 }

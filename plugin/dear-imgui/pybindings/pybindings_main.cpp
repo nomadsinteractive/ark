@@ -3,7 +3,7 @@
 #include "core/base/api.h"
 #include "core/types/shared_ptr.h"
 
-#include "python/extension/python_interpreter.h"
+#include "python/extension/python_extension.h"
 #include "generated/py_dear-imgui_bindings.h"
 
 using namespace ark;
@@ -23,7 +23,7 @@ public:
     }
 
     void createScriptModule(Interpreter& script) override {
-        PythonInterpreter::instance().addModulePlugin<DearImguiPybindingsPlugin>(*this, script, "dear_imgui", "ark.dear_imgui module", ARK_DEAR_IMGUI_METHODS);
+        PythonExtension::instance().addModulePlugin<DearImguiPybindingsPlugin>(*this, script, "dear_imgui", "ark.dear_imgui module", ARK_DEAR_IMGUI_METHODS);
     }
 
     void initialize(PyObject* dearimguimodule) {

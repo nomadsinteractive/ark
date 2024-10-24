@@ -10,7 +10,6 @@ namespace ark {
 template<typename T> class Array;
 template<typename T> class Builder;
 template<typename T> class ByIndex;
-template<typename T> class Callable;
 template<typename T> class Dictionary;
 template<typename T> class Duck;
 template<typename T> class Expectation;

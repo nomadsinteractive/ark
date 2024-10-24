@@ -38,7 +38,6 @@ public:
         return *ptr;
     }
 
-
     bool expired() const {
         return _weak_ptr.expired();
     }

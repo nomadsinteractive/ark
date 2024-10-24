@@ -21,7 +21,7 @@
 
 #include "python/api.h"
 #include "python/extension/py_instance.h"
-#include "python/extension/python_interpreter.h"
+#include "python/extension/python_extension.h"
 #include "python/extension/py_bridge.h"
 
 namespace ark::plugin::python {
@@ -61,7 +61,7 @@ public:
     template<typename T> static PyObject* toPyObject_SharedPtr_sfinae(const sp<T>& object, std::nullptr_t ) {
         if(!object)
             return PyBridge::incRefNone();
-        return PythonInterpreter::instance().pyNewObject<T>(object);
+        return PythonExtension::instance().pyNewObject<T>(object);
     }
 
     template<typename T> static Optional<T> toCppObject_impl(PyObject* object);
@@ -121,7 +121,7 @@ private:
         if(PyBridge::isPyNone(object))
             return Optional<sp<T>>(sp<T>());
 
-        if(PyTypeObject* pyType = reinterpret_cast<PyTypeObject*>(PyBridge::PyObject_Type(object)); PythonInterpreter::instance().isPyArkTypeObject(pyType)) {
+        if(PyTypeObject* pyType = reinterpret_cast<PyTypeObject*>(PyBridge::PyObject_Type(object)); PythonExtension::instance().isPyArkTypeObject(pyType)) {
             const PyArkType::Instance* instance = reinterpret_cast<PyArkType::Instance*>(object);
             DASSERT(instance->box);
             sp<T> s = instance->box->as<T>();
@@ -199,7 +199,7 @@ private:
             PyInstance tuple = PyInstance::steal(makeArgumentTuple<Args...>(args...));
             PyInstance result = PyInstance::steal(pyObj.call(tuple.pyObject()));
             if(result.isNullptr())
-                PythonInterpreter::instance().logErr();
+                PythonExtension::instance().logErr();
             if constexpr(std::is_same_v<R, void>)
                 return;
             else
@@ -222,7 +222,7 @@ private:
         return fromIterable_sfinae<T>(iterable, nullptr);
     }
     template<typename T> static PyObject* toPyObject_sfinae(const T& value, std::enable_if_t<std::is_enum_v<T>>*) {
-        return PythonInterpreter::instance().getPyArkType<Enum>()->create(Box(value));
+        return PythonExtension::instance().getPyArkType<Enum>()->create(Box(value));
     }
     template<typename T> static PyObject* toPyObject_sfinae(const T& value, std::enable_if_t<std::is_integral_v<T> && !std::is_same_v<T, bool>>*) {
         if constexpr(sizeof(T) <= sizeof(int32_t)) {

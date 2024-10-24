@@ -2,7 +2,6 @@
 
 #include "core/forwarding.h"
 #include "core/base/bean_factory.h"
-#include "core/base/callable.h"
 #include "core/base/plugin_manager.h"
 #include "core/inf/variable.h"
 #include "core/types/global.h"
@@ -14,47 +13,47 @@ namespace ark {
 
 class Expression {
 private:
-    template<typename T> class CallerBuilderV0 : public Builder<T> {
+    template<typename T> class CallerBuilderV0 final : public Builder<T> {
     public:
-        CallerBuilderV0(const sp<Callable<sp<T>()>>& callable)
-            : _callable(callable) {
+        CallerBuilderV0(std::function<sp<T>()> callable)
+            : _callable(std::move(callable)) {
         }
 
-        virtual sp<T> build(const Scope& /*args*/) override {
-            return _callable->call();
+        sp<T> build(const Scope& /*args*/) override {
+            return _callable();
         }
 
     private:
-        sp<Callable<sp<T>()>> _callable;
+        std::function<sp<T>()> _callable;
     };
 
-    template<typename T> class CallerBuilderV1 : public Builder<T> {
+    template<typename T> class CallerBuilderV1 final : public Builder<T> {
     public:
-        CallerBuilderV1(const sp<Callable<sp<T>(const sp<T>&)>>& callable, const sp<Builder<T>>& a1)
-            : _callable(callable), _a1(a1) {
+        CallerBuilderV1(std::function<sp<T>(const sp<T>&)> callable, const sp<Builder<T>>& a1)
+            : _callable(std::move(callable)), _a1(a1) {
         }
 
-        virtual sp<T> build(const Scope& args) override {
-            return _callable->call(_a1->build(args));
+        sp<T> build(const Scope& args) override {
+            return _callable(_a1->build(args));
         }
 
     private:
-        sp<Callable<sp<T>(const sp<T>&)>> _callable;
+        std::function<sp<T>(const sp<T>&)> _callable;
         sp<Builder<T>> _a1;
     };
 
-    template<typename T> class CallerBuilderV2 : public Builder<T> {
+    template<typename T> class CallerBuilderV2 final : public Builder<T> {
     public:
-        CallerBuilderV2(const sp<Callable<sp<T>(const sp<T>&, const sp<T>&)>>& callable, const sp<Builder<T>>& a1, const sp<Builder<T>>& a2)
-            : _callable(callable), _a1(a1), _a2(a2) {
+        CallerBuilderV2(std::function<sp<T>(const sp<T>&, const sp<T>&)> callable, const sp<Builder<T>>& a1, const sp<Builder<T>>& a2)
+            : _callable(std::move(callable)), _a1(a1), _a2(a2) {
         }
 
-        virtual sp<T> build(const Scope& args) override {
-            return _callable->call(_a1->build(args), _a2->build(args));
+        sp<T> build(const Scope& args) override {
+            return _callable(_a1->build(args), _a2->build(args));
         }
 
     private:
-        sp<Callable<sp<T>(const sp<T>&, const sp<T>&)>> _callable;
+        std::function<sp<T>(const sp<T>&, const sp<T>&)> _callable;
         sp<Builder<T>> _a1;
         sp<Builder<T>> _a2;
     };
@@ -131,19 +130,19 @@ public:
                 const std::vector<String> paramList = params.split(',');
                 typedef sp<N> ParamType;
                 if(paramList.size() == 0) {
-                    const sp<Callable<ParamType()>> callable = pluginManager->getCallable<ParamType()>(func);
+                    Optional<std::function<ParamType()>> callable = pluginManager->getCallable<ParamType()>(func);
                     DCHECK(callable, "Undefined function \"%s\"", func.c_str());
-                    return sp<CallerBuilderV0<N>>::make(callable);
+                    return sp<CallerBuilderV0<N>>::make(std::move(callable.value()));
                 }
-                else if(paramList.size() == 1) {
-                    const sp<Callable<ParamType(const ParamType&)>> callable = pluginManager->getCallable<ParamType(const ParamType&)>(func);
+                if(paramList.size() == 1) {
+                    Optional<std::function<ParamType(const ParamType&)>> callable = pluginManager->getCallable<ParamType(const ParamType&)>(func);
                     DCHECK(callable, "Undefined function \"%s\"", func.c_str());
-                    return sp<CallerBuilderV1<N>>::make(callable, compile(factory, params));
+                    return sp<CallerBuilderV1<N>>::make(std::move(callable.value()), compile(factory, params));
                 }
-                else if(paramList.size() == 2) {
-                    const sp<Callable<ParamType(const ParamType&, const ParamType&)>> callable = pluginManager->getCallable<ParamType(const ParamType&, const ParamType&)>(func);
+                if(paramList.size() == 2) {
+                    Optional<std::function<ParamType(const ParamType&, const ParamType&)>> callable = pluginManager->getCallable<ParamType(const ParamType&, const ParamType&)>(func);
                     DCHECK(callable, "Undefined function \"%s\"", func.c_str());
-                    return sp<CallerBuilderV2<N>>::make(callable, compile(factory, paramList[0]), compile(factory, paramList[1]));
+                    return sp<CallerBuilderV2<N>>::make(std::move(callable.value()), compile(factory, paramList[0]), compile(factory, paramList[1]));
                 }
                 DFATAL("Unsupported parameter number: %d", paramList.size());
                 return nullptr;
