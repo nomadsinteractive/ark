@@ -6,7 +6,7 @@
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
 #include "core/collection/traits.h"
-#include "core/inf/holder.h"
+#include "core/inf/debris.h"
 #include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
 

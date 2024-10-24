@@ -41,7 +41,7 @@ AUTOBIND_OPERATOR_PATTERN = re.compile(r'\[\[script::bindings::operator\(([^)]+)
 AUTOBIND_CLASS_PATTERN = re.compile(r'\[\[script::bindings::(class|name)\(([^)]+)\)]]')
 AUTOBIND_EXTENDS_PATTERN = re.compile(r'\[\[script::bindings::extends\((\w+)\)]]')
 AUTOBIND_TYPEDEF_PATTERN = re.compile(r'\[\[script::bindings::auto]]\s+typedef\s+\w[\w<>\s]+\s+(\w+);')
-AUTOBIND_ANNOTATION_PATTERN = re.compile(r'\[\[script::bindings::(auto|container|holder)]]%s\s+class\s+([^{\r\n]+)\s*{' % ANNOTATION_PATTERN)
+AUTOBIND_ANNOTATION_PATTERN = re.compile(r'\[\[script::bindings::(auto|container|debris)]]%s\s+class\s+([^{\r\n]+)\s*{' % ANNOTATION_PATTERN)
 
 BUILDABLE_PATTERN = re.compile(r'\[\[plugin::(?:builder|resource-loader)[^]]*]]\s+class\s+\w+\s*(?:final)?\s*:\s*public\s+Builder<([^{]+)>\s*{')
 
@@ -732,7 +732,7 @@ def main(params, paths):
     def autoannotation(filename, content, m, x):
         names = [i for i in x[1].split(':', 2)[0].split() if i not in ('ARK_API', 'final')]
         if len(names) >= 1:
-            binding_classes[names[-1]] = GenClass(filename, names[-1], x[0].strip() in ('container', 'holder'))
+            binding_classes[names[-1]] = GenClass(filename, names[-1], x[0].strip() == 'debris')
 
     def autotypedef(filename, content, m, x):
         binding_classes[x] = GenClass(filename, x, False)

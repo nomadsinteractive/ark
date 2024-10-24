@@ -24,7 +24,7 @@ Entity::~Entity()
 void Entity::traverse(const Visitor& visitor)
 {
     for(const auto& [k, v] : _components.traits())
-        if(const sp<Holder>& holder = v.as<Holder>())
+        if(const sp<Debris>& holder = v.as<Debris>())
             holder->traverse(visitor);
 }
 

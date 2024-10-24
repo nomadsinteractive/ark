@@ -2,7 +2,7 @@
 
 #include "core/base/scope.h"
 #include "core/traits/expendable.h"
-#include "core/inf/holder.h"
+#include "core/inf/debris.h"
 #include "core/inf/variable.h"
 #include "core/util/log.h"
 
@@ -52,7 +52,7 @@ struct BreakException {
 
 static int __traverse__(PyArkType::Instance* self, visitproc visitor, void* args)
 {
-    if(const sp<Holder> holder = self->box->as<Holder>())
+    if(const sp<Debris> holder = self->box->as<Debris>())
         try {
             holder->traverse([&visitor, args](const Box& packed) {
                 if(const sp<PyInstanceRef> pi = packed.as<PyInstanceRef>())
@@ -69,7 +69,7 @@ static int __traverse__(PyArkType::Instance* self, visitproc visitor, void* args
 
 static int __clear__(PyArkType::Instance* self)
 {
-    if(const sp<Holder> holder = self->box->as<Holder>())
+    if(const sp<Debris> holder = self->box->as<Debris>())
         holder->traverse([](const Box& packed) {
                 if(const sp<PyInstanceRef> pi = packed.as<PyInstanceRef>()) {
                     pi->clear();

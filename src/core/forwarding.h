@@ -64,7 +64,7 @@ class ExecutorThreadPool;
 class Uploader;
 class Function;
 class Future;
-class Holder;
+class Debris;
 class Interpreter;
 class Json;
 class Notifier;

@@ -1,7 +1,7 @@
 #ifndef ARK_PLUGIN_PYTHON_IMPL_EVENT_LISTENER_PYTHON_CALLABLE_EVENT_LISTENER_H_
 #define ARK_PLUGIN_PYTHON_IMPL_EVENT_LISTENER_PYTHON_CALLABLE_EVENT_LISTENER_H_
 
-#include "core/inf/holder.h"
+#include "core/inf/debris.h"
 #include "core/types/shared_ptr.h"
 
 #include "app/inf/event_listener.h"
@@ -12,7 +12,7 @@ namespace ark {
 namespace plugin {
 namespace python {
 
-class PythonCallableEventListener : public EventListener, public Holder, Implements<PythonCallableEventListener, EventListener, Holder> {
+class PythonCallableEventListener : public EventListener, public Debris, Implements<PythonCallableEventListener, EventListener, Debris> {
 public:
     PythonCallableEventListener(PyInstance callable);
 

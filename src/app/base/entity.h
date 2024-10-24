@@ -11,8 +11,8 @@
 
 namespace ark {
 
-//[[script::bindings::holder]]
-class ARK_API Entity final : public Holder {
+//[[script::bindings::debris]]
+class ARK_API Entity final : public Debris {
 public:
 //  [[script::bindings::constructor]]
     Entity(Traits components = Traits());

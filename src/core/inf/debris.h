@@ -7,9 +7,9 @@
 
 namespace ark {
 
-class ARK_API Holder {
+class ARK_API Debris {
 public:
-    virtual ~Holder() = default;
+    virtual ~Debris() = default;
 
     typedef std::function<bool(const Box&)> Visitor;
 

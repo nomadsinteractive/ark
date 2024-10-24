@@ -1,14 +1,14 @@
 #pragma once
 
 #include "core/base/api.h"
-#include "core/inf/holder.h"
+#include "core/inf/debris.h"
 #include "core/inf/wirable.h"
 
 #include "app/inf/collision_callback.h"
 
 namespace ark {
 
-class ARK_API WithCollisionCallback : public Wirable, public CollisionCallback, public Holder {
+class ARK_API WithCollisionCallback final : public Wirable, public CollisionCallback, public Debris {
 public:
 //  [[script::bindings::auto]]
     WithCollisionCallback(sp<CollisionCallback> collisionCallback);

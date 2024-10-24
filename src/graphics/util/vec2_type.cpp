@@ -3,7 +3,7 @@
 #include <algorithm>
 
 #include "core/base/observer.h"
-#include "core/inf/holder.h"
+#include "core/inf/debris.h"
 #include "core/impl/variable/variable_op1.h"
 #include "core/impl/variable/variable_op2.h"
 #include "core/util/holder_util.h"
