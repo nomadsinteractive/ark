@@ -15,6 +15,7 @@
 
 namespace ark {
 
+//TODO: Rename to Rigidbody
 class ARK_API RigidBody : public Wirable {
 public:
     RigidBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> quaternion, Box impl, sp<Ref> ref);

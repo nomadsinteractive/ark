@@ -1,6 +1,6 @@
 #include "app/base/level.h"
 
-#include <unordered_map>
+#include <map>
 
 #include "core/ark.h"
 
@@ -26,9 +26,9 @@ namespace ark {
 namespace {
 
 struct Library {
+    String _name;
     int32_t _type;
-    sp<Collider> _rigid_body_collider;
-    V3 _dimensions;
+    sp<Vec3> _dimensions;
 };
 
 template<typename T> T parseVector(const String& value) {
@@ -71,36 +71,36 @@ sp<RenderObject> makeRenderObject(const document& manifest, int32_t type, bool v
     return sp<RenderObject>::make(type, sp<Vec3>::make<Vec3::Const>(parseVector<V3>(position)), nullptr, std::move(transform), nullptr, visible ? globalConstants->BOOLEAN_TRUE : globalConstants->BOOLEAN_FALSE);
 }
 
-sp<RigidBody> makeRigidBody(const Library& library, const sp<RenderObject>& renderObject, int32_t shapeId)
+sp<RigidBody> makeRigidBody(const Library& library, const sp<Collider>& collider, const sp<RenderObject>& renderObject, Collider::BodyType bodyType, const std::map<String, String>& shapeIdAliases)
 {
-    if(!library._rigid_body_collider)
+    if(!collider)
         return nullptr;
 
-    const V3& dimension = library._dimensions;
-    return library._rigid_body_collider->createBody(Collider::BODY_TYPE_STATIC, sp<Shape>::make(shapeId, sp<Vec3>::make<Vec3::Const>(V3(dimension.x(), dimension.y(), dimension.z()))), renderObject->position(),
-                                                renderObject->transform()->rotation());
+    const auto iter = shapeIdAliases.find(library._name);
+    TypeId shapeId = iter != shapeIdAliases.end() ? iter->second.hash() : library._type;
+    return collider->createBody(bodyType, sp<Shape>::make(shapeId, library._dimensions), renderObject->position(), renderObject->transform()->rotation());
 }
 
 }
 
-Level::Level(std::map<String, sp<Layer>> renderObjectLayers, std::map<String, sp<Collider>> rigidBodyLayers, std::map<String, sp<Camera>> cameras, std::map<String, sp<Vec3>> lights)
-    : _render_object_layers(std::move(renderObjectLayers)), _rigid_body_layers(std::move(rigidBodyLayers)), _cameras(std::move(cameras)), _lights(std::move(lights))
+Level::Level(std::map<String, sp<Layer>> renderObjectLayers, std::map<String, sp<Camera>> cameras, std::map<String, sp<Vec3>> lights)
+    : _render_object_layers(std::move(renderObjectLayers)), _cameras(std::move(cameras)), _lights(std::move(lights))
 {
 }
 
-void Level::load(const String& src)
+void Level::load(const String& src, const sp<Collider>& collider, const std::map<String, String>& shapeIdAliases)
 {
     const document manifest = Ark::instance().applicationContext()->applicationBundle()->loadDocument(src);
     CHECK(manifest, "Cannot load manifest \"%s\"", src.c_str());
 
-    std::unordered_map<int32_t, Library> libraryMapping;
+    std::map<int32_t, Library> libraryMapping;
     for(const document& i : manifest->children("library"))
     {
         const String& name = Documents::ensureAttribute(i, constants::NAME);
         const String& dimensions = Documents::ensureAttribute(i, "dimensions");
         const int32_t id = Documents::ensureAttribute<int32_t>(i, constants::ID);
         CHECK_WARN(libraryMapping.find(id) == libraryMapping.end(), "Overwriting instance library mapping(%d)", id);
-        libraryMapping.emplace(id, Library{static_cast<int32_t>(name.hash()), getCollider(name), parseVector<V3>(dimensions)});
+        libraryMapping.emplace(id, Library{name, static_cast<int32_t>(name.hash()), sp<Vec3>::make<Vec3::Const>(parseVector<V3>(dimensions))});
     }
 
     for(const document& i : manifest->children(constants::LAYER))
@@ -123,8 +123,9 @@ void Level::load(const String& src)
                 CHECK(layer, "Trying to load model instance into undefined Layer(%s)", layerName.c_str());
                 layer->addRenderObject(renderObject);
 
-                if(sp<RigidBody> rigidBody = makeRigidBody(library, renderObject, library._type))
+                if(const Collider::BodyType bodyType = Documents::getAttribute<Collider::BodyType>(j, "rigidbody_type", Collider::BODY_TYPE_NONE); bodyType != Collider::BODY_TYPE_NONE)
                 {
+                    sp<RigidBody> rigidBody = makeRigidBody(library, collider, renderObject, bodyType, shapeIdAliases);
                     if(name)
                         _rigid_objects[name] = std::move(rigidBody);
                     else
@@ -189,12 +190,6 @@ sp<Layer> Level::getLayer(const String& name) const
     return iter != _render_object_layers.end() ? iter->second : nullptr;
 }
 
-sp<Collider> Level::getCollider(const String& name) const
-{
-    const auto iter = _rigid_body_layers.find(name);
-    return iter != _rigid_body_layers.end() ? iter->second : nullptr;
-}
-
 sp<Camera> Level::getCamera(const String& name) const
 {
     const auto iter = _cameras.find(name);
@@ -220,8 +215,7 @@ sp<RigidBody> Level::getRigidBody(const String& name) const
 }
 
 Level::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _render_object_layers(loadNamedTypes<Layer>(factory, manifest, constants::RENDER_OBJECT, constants::LAYER)),
-      _rigid_object_layers(loadNamedTypes<Collider>(factory, manifest, "rigid-body", "collider"))
+    : _render_object_layers(loadNamedTypes<Layer>(factory, manifest, constants::RENDER_OBJECT, constants::LAYER))
 {
     for(const document& i : manifest->children("camera"))
         _cameras.emplace_back(Documents::ensureAttribute(i, constants::NAME), factory.ensureBuilder<Camera>(i, constants::REF));
@@ -240,9 +234,8 @@ sp<Level> Level::BUILDER::build(const Scope& args)
         lights[i.first] = i.second->build(args);
 
     std::map<String, sp<Layer>> instanceLibraries = loadNamedTypeInstances<Layer>(_render_object_layers, args);
-    std::map<String, sp<Collider>> rigidBodies = loadNamedTypeInstances<Collider>(_rigid_object_layers, args);
 
-    return sp<Level>::make(std::move(instanceLibraries), std::move(rigidBodies), std::move(cameras), std::move(lights));
+    return sp<Level>::make(std::move(instanceLibraries), std::move(cameras), std::move(lights));
 }
 
 }

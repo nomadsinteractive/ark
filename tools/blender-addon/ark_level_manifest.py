@@ -1,7 +1,7 @@
-from typing import Union
+from typing import Optional, Union
 
-from bpy.props import StringProperty, EnumProperty
-from bpy.types import Operator
+from bpy.props import BoolProperty, CollectionProperty, EnumProperty, IntProperty, StringProperty
+from bpy.types import Operator, UIList
 from mathutils import Quaternion, Vector
 
 import bpy
@@ -10,7 +10,7 @@ from bpy_extras.io_utils import ExportHelper
 bl_info = {
     "name": "Ark Level Manifest",
     "author": "Nomads Interactive",
-    "version": (1, 0, 1),
+    "version": (1, 0, 2),
     "blender": (2, 81, 6),
     "location": "File > Export > Ark Level Manifest",
     "category": "Import-Export",
@@ -64,12 +64,12 @@ class XmlWriter:
 
 
 class ArkScene:
-    def __init__(self, layer_collection, named_layers):
+    def __init__(self, layer_collection, layer_properties: dict[str, "ArkLayerProperty"]):
         self._collections = bpy.data.collections
         instance_collections = set(filter(None, (i.instance_collection for i in bpy.data.objects)))
         self._libraries = [ArkInstanceCollection(i, j) for i, j in enumerate(instance_collections)]
         collections_not_excluded = [i.collection for i in layer_collection.children if not i.exclude]
-        self._layers = [ArkLayer(self, i, i in named_layers) for i in collections_not_excluded if not i.library]
+        self._layers = [ArkLayer(self, i, layer_properties[i.name]) for i in collections_not_excluded if not i.library]
 
     def find_library(self, collection):
         for i in self._libraries:
@@ -119,9 +119,11 @@ class ArkInstanceCollection:
 
 
 class ArkLayer:
-    def __init__(self, scene: ArkScene, collection, export_names):
+    def __init__(self, scene: ArkScene, collection, layer_property):
+        export_names = layer_property.export_names
+        rigidbody_type = 'static' if layer_property.rigidbody_static else (layer_property.rigidbody_dynamic and 'dynamic' or None)
         self._name = collection.name
-        self._objects = [ArkObject(scene, i, export_names) for i in collection.objects]
+        self._objects = [ArkObject(scene, i, export_names, rigidbody_type) for i in collection.objects]
 
     def to_json(self, indent):
         lines = [i.to_json(indent) for i in self._objects]
@@ -138,9 +140,10 @@ class ArkLayer:
 
 
 class ArkObject:
-    def __init__(self, scene: ArkScene, obj, export_name: bool):
+    def __init__(self, scene: ArkScene, obj, export_name: bool, rigidbody_type: Optional[str] = None):
         self._object = obj
         self._export_name = export_name
+        self._rigidbody_type = rigidbody_type
         self._class = obj.type if obj.type != 'EMPTY' else None
         self._position = obj.location
         self._scale = obj.scale
@@ -168,6 +171,9 @@ class ArkObject:
 
         if self._class or self._export_name:
             writer.write_property('name', self._object.name)
+        if self._rigidbody_type:
+            writer.write_property('rigidbody_type', self._rigidbody_type)
+
         if self._class:
             writer.write_property('class', self._class)
             if self._object.type == 'CAMERA':
@@ -196,10 +202,8 @@ def generate_level_manifest(self, filepath, opt_name):
 
     root_layer_collection = get_root_layer_collection()
     if root_layer_collection:
-        collections_not_excluded = [i.collection for i in root_layer_collection.children if not i.exclude]
-        named_layers = set(i for i in collections_not_excluded if i.name in self.properties.named_layers)
-        scene = ArkScene(root_layer_collection, named_layers)
-
+        layer_properties = {i.name: i for i in self.properties.layer_properties}
+        scene = ArkScene(root_layer_collection, layer_properties)
         content = scene.to_xml(0) if opt_name == 'OPT_XML' else scene.to_json(0)
         with open(filepath, 'wt', encoding='utf-8') as fp:
             fp.write(content)
@@ -211,25 +215,56 @@ def on_file_selector_data_format_update(self, context):
     ArkLevelManifestExporter.filename_ext = '.' + self.data_format.split('_')[-1].lower()
 
 
-def make_layer_item_callback():
+class ArkLayerProperty(bpy.types.PropertyGroup):
+    name: StringProperty()
+    export_names: BoolProperty(name="Export Names")
+    rigidbody_static: BoolProperty(name="Static Rigidbody Layer")
+    rigidbody_dynamic: BoolProperty(name="Dynamic Rigidbody Layer")
 
-    # https://docs.blender.org/api/blender_python_api_master/bpy.props.html#bpy.props.EnumProperty
-    # Warning: There is a known bug with using a callback, Python must keep a reference to the strings returned or Blender will misbehave or even crash.
 
-    item_names = []
+bpy.utils.register_class(ArkLayerProperty)
 
-    def get_items(self, context):
-        root_layer_collection = get_root_layer_collection()
-        collections_not_excluded = [i.collection for i in root_layer_collection.children if not i.exclude]
-        names = [i.name for i in collections_not_excluded]
 
-        if len(item_names) != len(names) or any(i != j for i, j in zip(names, item_names)):
-            item_names.clear()
-            item_names.extend(names)
+def load_layer_property_items(layer_properties):
+    root_layer_collection = get_root_layer_collection()
+    collections_not_excluded = [i.collection for i in root_layer_collection.children if not i.exclude]
+    exporting_layer_names = [i.name for i in collections_not_excluded]
+    layer_properties.clear()
+    # if exporting_layer_names and len(layer_properties) == 0:
+    for i in exporting_layer_names:
+        prop = layer_properties.add()
+        prop.name = i
+        prop.export_names = False
+        prop.rigidbody_static = False
+        prop.rigidbody_dynamic = False
 
-        return tuple((i, i, '') for i in item_names)
 
-    return get_items
+class TOOL_UL_List(UIList):
+    bl_idname = "TOOL_UL_List"
+    layout_type = "DEFAULT" # could be "COMPACT" or "GRID"
+
+    def draw_item(self, context,
+                    layout, # Layout to draw the item
+                    data, # Data from which to take Collection property
+                    item, # Item of the collection property
+                    icon, # Icon of the item in the collection
+                    active_data, # Data from which to take property for the active element
+                    active_propname, # Identifier of property in active_data, for the active element
+                    index, # Index of the item in the collection - default 0
+                    flt_flag # The filter-flag result for this item - default 0
+            ):
+
+        # Make sure your code supports all 3 layout types
+        if self.layout_type in {'DEFAULT', 'COMPACT'}:
+            layout.label(text=item.name)
+
+        elif self.layout_type in {'GRID'}:
+            layout.alignment = 'CENTER'
+            layout.label(text="")
+
+        layout.prop(item, "export_names")
+        layout.prop(item, "rigidbody_static")
+        layout.prop(item, "rigidbody_dynamic")
 
 
 class ArkLevelManifestExporter(Operator, ExportHelper):
@@ -250,19 +285,27 @@ class ArkLevelManifestExporter(Operator, ExportHelper):
         update=on_file_selector_data_format_update
     )
 
-    named_layers: EnumProperty(
-        name="Named Layers",
-        options={'ENUM_FLAG'},
-        items=make_layer_item_callback(),
-        description="Select the layers which will also export their children"
+    layer_properties: CollectionProperty(
+        type=ArkLayerProperty,
+        name="Layer Properties"
     )
+    layer_properties_i: IntProperty()
+
+    def invoke(self, context, _event):
+        load_layer_property_items(self.layer_properties)
+        return super().invoke(context, _event)
 
     def draw(self, context):
         layout = self.layout
         layout.use_property_split = True
 
         layout.column().prop(self, "data_format")
-        layout.column().prop(self, "named_layers")
+
+        row = layout.row()
+        row.template_list("TOOL_UL_List", "custom_id_blah",
+                           self, "layer_properties",
+                           self, "layer_properties_i")
+
 
     def execute(self, context):
         return generate_level_manifest(self, self.filepath, self.data_format)
@@ -274,6 +317,7 @@ def menu_func_export_button(self, context):
 
 classes = (
     ArkLevelManifestExporter,
+    TOOL_UL_List,
 )
 
 
@@ -289,6 +333,8 @@ def unregister():
 
     for i in classes:
         bpy.utils.unregister_class(i)
+
+    bpy.utils.unregister_class(ArkLayerProperty)
 
 
 if __name__ == "__main__":

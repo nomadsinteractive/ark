@@ -28,15 +28,13 @@ public:
     typedef NamedLayerBuilder<Collider> RigidBodyLayer;
 
 public:
-//  [[script::bindings::constructor]]
-    Level(std::map<String, sp<Layer>> renderObjectLayers, std::map<String, sp<Collider>> rigidBodyLayers = {}, std::map<String, sp<Camera>> cameras = {}, std::map<String, sp<Vec3>> lights = {});
+//  [[script::bindings::auto]]
+    Level(std::map<String, sp<Layer>> renderObjectLayers, std::map<String, sp<Camera>> cameras = {}, std::map<String, sp<Vec3>> lights = {});
 
 //  [[script::bindings::auto]]
-    void load(const String& src);
+    void load(const String& src, const sp<Collider>& collider = nullptr, const std::map<String, String>& shapeIdAliases = {});
 //  [[script::bindings::auto]]
     sp<Layer> getLayer(const String& name) const;
-//  [[script::bindings::auto]]
-    sp<Collider> getCollider(const String& name) const;
 //  [[script::bindings::auto]]
     sp<Camera> getCamera(const String& name) const;
 //  [[script::bindings::auto]]
@@ -47,7 +45,7 @@ public:
     sp<RigidBody> getRigidBody(const String& name) const;
 
 //  [[plugin::builder]]
-    class BUILDER : public Builder<Level> {
+    class BUILDER final : public Builder<Level> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
@@ -55,14 +53,12 @@ public:
 
     private:
         std::vector<RenderObjectLayer> _render_object_layers;
-        std::vector<RigidBodyLayer> _rigid_object_layers;
         std::vector<std::pair<String, sp<Builder<Camera>>>> _cameras;
         std::vector<std::pair<String, sp<Builder<Vec3>>>> _lights;
     };
 
 private:
     std::map<String, sp<Layer>> _render_object_layers;
-    std::map<String, sp<Collider>> _rigid_body_layers;
 
     std::map<String, sp<Camera>> _cameras;
     std::map<String, sp<Vec3>> _lights;

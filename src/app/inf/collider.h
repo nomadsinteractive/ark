@@ -14,6 +14,7 @@ class ARK_API Collider {
 public:
 //  [[script::bindings::enumeration]]
     enum BodyType {
+        BODY_TYPE_NONE = 0,
         BODY_TYPE_KINEMATIC = 1,
         BODY_TYPE_DYNAMIC = 2,
         BODY_TYPE_STATIC = 4,
