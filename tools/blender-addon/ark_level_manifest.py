@@ -138,9 +138,9 @@ class ArkLayer:
 
 
 class ArkObject:
-    def __init__(self, scene: ArkScene, obj, export_names: bool):
+    def __init__(self, scene: ArkScene, obj, export_name: bool):
         self._object = obj
-        self._export_names = export_names
+        self._export_name = export_name
         self._class = obj.type if obj.type != 'EMPTY' else None
         self._position = obj.location
         self._scale = obj.scale
@@ -166,7 +166,7 @@ class ArkObject:
     def write(self, writer):
         writer.begin_element('object')
 
-        if self._class or self._export_names:
+        if self._class or self._export_name:
             writer.write_property('name', self._object.name)
         if self._class:
             writer.write_property('class', self._class)
@@ -197,8 +197,8 @@ def generate_level_manifest(self, filepath, opt_name):
     root_layer_collection = get_root_layer_collection()
     if root_layer_collection:
         collections_not_excluded = [i.collection for i in root_layer_collection.children if not i.exclude]
-        name_layers = set(i for i in collections_not_excluded if i.name in self.properties.named_layers)
-        scene = ArkScene(root_layer_collection, name_layers)
+        named_layers = set(i for i in collections_not_excluded if i.name in self.properties.named_layers)
+        scene = ArkScene(root_layer_collection, named_layers)
 
         content = scene.to_xml(0) if opt_name == 'OPT_XML' else scene.to_json(0)
         with open(filepath, 'wt', encoding='utf-8') as fp:

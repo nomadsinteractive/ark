@@ -8,19 +8,16 @@
 
 namespace ark {
 
-class WithDebris final : Wirable, Debris {
+class WithDebris final : public Wirable, public Debris {
 public:
-
-    void track(sp<Debris> debris);
-
-    static sp<WithDebris> ensureComponent(const WiringContext& context);
-
-private:
 
     TypeId onPoll(WiringContext& context) override;
     void onWire(const WiringContext& context) override;
 
     void traverse(const Visitor& visitor) override;
+
+    void track(sp<Debris> debris);
+    static sp<WithDebris> ensureComponent(const WiringContext& context);
 
 private:
     std::vector<WeakPtr<Debris>> _debris;

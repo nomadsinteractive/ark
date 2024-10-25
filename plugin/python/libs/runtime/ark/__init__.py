@@ -100,6 +100,12 @@ class Readable:
     pass
 
 
+class Runnable:
+
+    def run(self):
+        pass
+
+
 class Writable:
     pass
 
@@ -292,6 +298,14 @@ class _Var:
         return 0.0
 
     def __neg__(self):
+        pass
+
+
+class Behavior:
+    def __init__(self, delegate: Any):
+        pass
+
+    def __getattr__(self, name: str) -> Runnable:
         pass
 
 
@@ -2537,7 +2551,7 @@ class StateAction:
 
 class State:
 
-    def __init__(self, on_active: Optional[Callable] = None, on_deactive: Optional[Callable] = None):
+    def __init__(self, on_active: Optional[Runnable] = None, on_deactive: Optional[Runnable] = None):
         pass
 
     @property
@@ -2546,10 +2560,10 @@ class State:
 
 
 class StateMachine:
-    def __init__(self):
+    def __init__(self, entry: State):
         pass
 
-    def start(self, entry: State):
+    def reset(self, state: State):
         pass
 
 

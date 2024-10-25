@@ -23,12 +23,6 @@ public:
     sp<Runnable> getMethod(const String& name);
 
 private:
-    template<typename T> void track(const sp<T>& object) {
-        if(sp<Debris> debris = object.tryCast<Debris>())
-            _with_debris.track(std::move(debris));
-    }
-
-private:
     sp<Interpreter> _interpreter;
     Box _delegate;
 
