@@ -5,10 +5,6 @@
 
 namespace ark {
 
-StateActionStrand::StateActionStrand()
-{
-}
-
 StateActionStrand::StateActionStrand(sp<State> start, sp<State> end)
     : _start(std::move(start)), _end(std::move(end))
 {

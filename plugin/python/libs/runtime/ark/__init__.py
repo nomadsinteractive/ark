@@ -2530,13 +2530,49 @@ class Collider:
 
 
 class StateActionStrand:
-    def __init__(self):
+    def __init__(self, start: "State", end: "State"):
         pass
 
 
 class StateAction:
 
-    def __init__(self, state_machine: "StateMachine", start: "State", end: "State", action_strand: Optional[StateActionStrand] = None):
+    def __init__(self, state_machine: "StateMachine", strand: StateActionStrand, on_execute: Optional[Runnable] = None, on_activate: Optional[Runnable] = None, on_deactive: Optional[Runnable] = None):
+        pass
+
+    @property
+    def strand(self) -> StateActionStrand:
+        pass
+
+    @property
+    def start(self) -> "State":
+        pass
+
+    @property
+    def end(self) -> "State":
+        pass
+
+    @property
+    def on_execute(self) -> Optional[Runnable]:
+        pass
+
+    @on_execute.setter
+    def on_execute(self, on_execute: Optional[Runnable]):
+        pass
+
+    @property
+    def on_activate(self) -> Optional[Runnable]:
+        pass
+
+    @on_activate.setter
+    def on_activate(self, on_activate: Optional[Runnable]):
+        pass
+
+    @property
+    def on_deactivate(self) -> Optional[Runnable]:
+        pass
+
+    @on_deactivate.setter
+    def on_deactivate(self, on_deactivate: Optional[Runnable]):
         pass
 
     def execute(self):

@@ -12,7 +12,6 @@ namespace ark {
 class ARK_API StateActionStrand {
 public:
 //  [[script::bindings::auto]]
-    StateActionStrand();
     StateActionStrand(sp<State> start, sp<State> end);
 
     sp<State> _start;

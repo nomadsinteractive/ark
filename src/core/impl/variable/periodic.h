@@ -9,7 +9,7 @@
 
 namespace ark {
 
-template<typename T> class Periodic : public Variable<T>::ByUpdate, public Wrapper<Variable<T>>, public Implements<Periodic<T>, Variable<T>, Wrapper<Variable<T>>> {
+template<typename T> class [[deprecated]] Periodic : public Variable<T>::ByUpdate, public Wrapper<Variable<T>>, public Implements<Periodic<T>, Variable<T>, Wrapper<Variable<T>>> {
 public:
     Periodic(sp<Variable<T>> delegate, sp<Numeric> interval, sp<Numeric> duration)
         : Variable<T>::ByUpdate(delegate->val()), Wrapper<Variable<T>>(std::move(delegate)), _interval(std::move(interval)), _duration(std::move(duration)),

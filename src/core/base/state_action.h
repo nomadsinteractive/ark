@@ -9,12 +9,27 @@ namespace ark {
 class ARK_API StateAction {
 public:
 //  [[script::bindings::auto]]
-    StateAction(StateMachine& stateMachine, const sp<State>& start, const sp<State>& end, const sp<StateActionStrand>& actionStrand = nullptr);
+    StateAction(StateMachine& stateMachine, sp<StateActionStrand> strand, sp<Runnable> onExecute = nullptr, sp<Runnable> onActivate = nullptr, sp<Runnable> onDeactivate = nullptr);
 
+//  [[script::bindings::property]]
+    const sp<StateActionStrand>& strand() const;
 //  [[script::bindings::property]]
     const sp<State>& start() const;
 //  [[script::bindings::property]]
     const sp<State>& end() const;
+
+//  [[script::bindings::property]]
+    const sp<Runnable>& onExecute() const;
+//  [[script::bindings::property]]
+    void setOnExecute(sp<Runnable> onExecute);
+//  [[script::bindings::property]]
+    const sp<Runnable>& onActivate() const;
+//  [[script::bindings::property]]
+    void setOnActivate(sp<Runnable> onActivate);
+//  [[script::bindings::property]]
+    const sp<Runnable>& onDeactivate() const;
+//  [[script::bindings::property]]
+    void setOnDeactivate(sp<Runnable> onDeactivate);
 
 //  [[script::bindings::auto]]
     void execute() const;
@@ -27,6 +42,10 @@ private:
     StateMachine& _state_machine;
 
     sp<StateActionStrand> _strand;
+
+    sp<Runnable> _on_execute;
+    sp<Runnable> _on_activate;
+    sp<Runnable> _on_deactivate;
 
     friend class StateMachine;
 };

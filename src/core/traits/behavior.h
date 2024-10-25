@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/forwarding.h"
+#include "core/base/api.h"
 #include "core/inf/debris.h"
 #include "core/inf/wirable.h"
 #include "core/traits/with_debris.h"
@@ -9,7 +10,7 @@
 
 namespace ark {
 
-class Behavior final : public Wirable, public Debris {
+class ARK_API Behavior final : public Wirable, public Debris {
 public:
 //  [[script::bindings::auto]]
     Behavior(Box delegate);

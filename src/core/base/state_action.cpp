@@ -5,30 +5,15 @@
 
 namespace ark {
 
-namespace {
-
-sp<StateActionStrand> ensureStateActionStrand(const sp<State>& start, const sp<State>& end, const sp<StateActionStrand>& actionStrand)
-{
-    if(actionStrand)
-    {
-        CHECK((actionStrand->_start == nullptr || actionStrand->_start == start) && (actionStrand->_end == nullptr || actionStrand->_end == end), "All actions in Strand must have the same start and end states.");
-        if(actionStrand->_start == nullptr)
-            actionStrand->_start = start;
-        if(actionStrand->_end == nullptr)
-            actionStrand->_end = end;
-
-        return actionStrand;
-    }
-
-    return sp<StateActionStrand>::make(start, end);
-}
-
-}
-
-StateAction::StateAction(StateMachine& stateMachine, const sp<State>& start, const sp<State>& end, const sp<StateActionStrand>& actionStrand)
-    : _state_machine(stateMachine), _strand(ensureStateActionStrand(start, end, actionStrand))
+StateAction::StateAction(StateMachine& stateMachine, sp<StateActionStrand> strand, sp<Runnable> onExecute, sp<Runnable> onActivate, sp<Runnable> onDeactivate)
+    : _state_machine(stateMachine), _strand(std::move(strand)), _on_execute(std::move(onExecute)), _on_activate(std::move(onActivate)), _on_deactivate(std::move(onDeactivate))
 {
     _strand->_actions.push_back(this);
+}
+
+const sp<StateActionStrand>& StateAction::strand() const
+{
+    return _strand;
 }
 
 const sp<State>& StateAction::start() const
@@ -41,9 +26,39 @@ const sp<State>& StateAction::end() const
     return _strand->_end;
 }
 
+const sp<Runnable>& StateAction::onExecute() const
+{
+    return _on_execute;
+}
+
+void StateAction::setOnExecute(sp<Runnable> onExecute)
+{
+    _on_execute = std::move(onExecute);
+}
+
+const sp<Runnable>& StateAction::onActivate() const
+{
+    return _on_activate;
+}
+
+void StateAction::setOnActivate(sp<Runnable> onActivate)
+{
+    _on_activate = std::move(onActivate);
+}
+
+const sp<Runnable>& StateAction::onDeactivate() const
+{
+    return _on_deactivate;
+}
+
+void StateAction::setOnDeactivate(sp<Runnable> onDeactivate)
+{
+    _on_deactivate = std::move(onDeactivate);
+}
+
 void StateAction::execute() const
 {
-    _state_machine.doActionTransit(*this);
+    _state_machine.doActionExecute(*this);
 }
 
 void StateAction::activate() const
