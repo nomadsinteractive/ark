@@ -13,7 +13,7 @@
 #include "renderer/forwarding.h"
 
 #include "app/forwarding.h"
-#include "app/base/rigid_body.h"
+#include "app/base/rigidbody.h"
 #include "app/impl/collider/axis_segments.h"
 #include "app/inf/collider.h"
 #include "app/inf/broad_phrase.h"
@@ -25,7 +25,7 @@ class ColliderImpl : public Collider {
 public:
     ColliderImpl(std::vector<std::pair<sp<BroadPhrase>, sp<CollisionFilter>>> broadPhrase, sp<NarrowPhrase> narrowPhrase, RenderController& renderController);
 
-    sp<RigidBody> createBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Rotation> rotate, sp<Boolean> discarded) override;
+    sp<Rigidbody> createBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Rotation> rotate, sp<Boolean> discarded) override;
     std::vector<RayCastManifold> rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter) override;
 
 //  [[plugin::resource-loader]]
@@ -56,7 +56,7 @@ public:
         std::vector<sp<Ref>> toRigidBodyRefs(const std::unordered_set<BroadPhrase::IdType>& candidateSet, uint32_t filter) const;
         std::vector<BroadPhrase::Candidate> toBroadPhraseCandidates(const std::unordered_set<BroadPhrase::IdType>& candidateSet, uint32_t filter) const;
 
-        void resolveCandidates(const RigidBody& self, const BroadPhrase::Candidate& candidateSelf, const std::vector<BroadPhrase::Candidate>& candidates, const RigidBody& callback, std::set<BroadPhrase::IdType>& c);
+        void resolveCandidates(const Rigidbody& self, const BroadPhrase::Candidate& candidateSelf, const std::vector<BroadPhrase::Candidate>& candidates, const Rigidbody& callback, std::set<BroadPhrase::IdType>& c);
 
         const sp<NarrowPhrase>& narrowPhrase() const;
 
@@ -82,7 +82,7 @@ public:
         friend class RigidBodyImpl;
     };
 
-    class RigidBodyImpl : public RigidBody, Implements<RigidBodyImpl, RigidBody, Wirable> {
+    class RigidBodyImpl : public Rigidbody, Implements<RigidBodyImpl, Rigidbody, Wirable> {
     public:
         RigidBodyImpl(const ColliderImpl::Stub& stub, Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<Boolean> discarded);
 

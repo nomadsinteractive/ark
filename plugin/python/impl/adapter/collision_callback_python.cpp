@@ -1,7 +1,7 @@
 #include "python/impl/adapter/collision_callback_python.h"
 
 #include "app/base/collision_manifold.h"
-#include "app/base/rigid_body.h"
+#include "app/base/rigidbody.h"
 
 #include "python/api.h"
 #include "python/extension/py_cast.h"
@@ -10,7 +10,7 @@ namespace ark::plugin::python {
 
 namespace {
 
-PyObject* toPyObject(const sp<RigidBody>& rigidBody)
+PyObject* toPyObject(const sp<Rigidbody>& rigidBody)
 {
     if(const Class* objClass = rigidBody.getClass(); PythonExtension::instance().isPyObject(objClass->id()))
         return PythonExtension::instance().toPyObject(objClass->cast(Box(rigidBody), objClass->id()));
@@ -25,7 +25,7 @@ CollisionCallbackPython::CollisionCallbackPython(const PyInstance& delegate)
 {
 }
 
-void CollisionCallbackPython::onBeginContact(const RigidBody& rigidBody, const CollisionManifold& manifold)
+void CollisionCallbackPython::onBeginContact(const Rigidbody& rigidBody, const CollisionManifold& manifold)
 {
     DCHECK_THREAD_FLAG();
     if(_on_begin_contact)
@@ -48,7 +48,7 @@ void CollisionCallbackPython::onBeginContact(const RigidBody& rigidBody, const C
     }
 }
 
-void CollisionCallbackPython::onEndContact(const RigidBody& rigidBody)
+void CollisionCallbackPython::onEndContact(const Rigidbody& rigidBody)
 {
     DCHECK_THREAD_FLAG();
     if(_on_end_contact)

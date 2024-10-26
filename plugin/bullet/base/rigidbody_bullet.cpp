@@ -1,18 +1,18 @@
-#include "bullet/rigid_body/rigid_body_bullet.h"
+#include "bullet/base/rigidbody_bullet.h"
 
 #include "app/traits/shape.h"
 
 #include "bullet/base/collision_shape.h"
-#include "bullet/base/bt_rigid_body_ref.h"
+#include "bullet/base/bt_rigidbody_ref.h"
 
 namespace ark::plugin::bullet {
 
-RigidBodyBullet::Stub::Stub(ColliderBullet world, sp<CollisionShape> collisionShape, sp<BtRigidBodyRef> rigidBody)
+RigidbodyBullet::Stub::Stub(ColliderBullet world, sp<CollisionShape> collisionShape, sp<BtRigidbodyRef> rigidBody)
     : _world(std::move(world)), _collision_shape(std::move(collisionShape)), _rigid_body(std::move(rigidBody))
 {
 }
 
-RigidBodyBullet::Stub::~Stub()
+RigidbodyBullet::Stub::~Stub()
 {
     btCollisionObject* collisionObject = _rigid_body->collisionObject();
     _world.btDynamicWorld()->removeCollisionObject(collisionObject);
@@ -20,52 +20,52 @@ RigidBodyBullet::Stub::~Stub()
     _rigid_body->reset();
 }
 
-RigidBodyBullet::RigidBodyBullet(int32_t id, Collider::BodyType type, ColliderBullet world, sp<CollisionShape> collisionShape, sp<Vec3> position, sp<Transform> transform, sp<BtRigidBodyRef> rigidBody)
-    : RigidBody(type, nullptr, std::move(position), transform->rotation(), sp<Stub>::make(std::move(world), std::move(collisionShape), std::move(rigidBody)), nullptr),
+RigidbodyBullet::RigidbodyBullet(int32_t id, Collider::BodyType type, ColliderBullet world, sp<CollisionShape> collisionShape, sp<Vec3> position, sp<Transform> transform, sp<BtRigidbodyRef> rigidBody)
+    : Rigidbody(type, nullptr, std::move(position), transform->rotation(), sp<Stub>::make(std::move(world), std::move(collisionShape), std::move(rigidBody)), nullptr),
       _stub(_impl.toPtr<Stub>())
 {
     _stub->_rigid_body->collisionObject()->setUserPointer(this);
 }
 
-void RigidBodyBullet::applyCentralForce(const V3& force)
+void RigidbodyBullet::applyCentralForce(const V3& force)
 {
     _stub->_rigid_body->rigidBody()->applyCentralForce(btVector3(force.x(), force.y(), force.z()));
 }
 
-V3 RigidBodyBullet::linearVelocity() const
+V3 RigidbodyBullet::linearVelocity() const
 {
     const btVector3& velocity = _stub->_rigid_body->rigidBody()->getLinearVelocity();
     return V3(velocity.x(), velocity.y(), velocity.z());
 }
 
-void RigidBodyBullet::setLinearVelocity(const V3& velocity)
+void RigidbodyBullet::setLinearVelocity(const V3& velocity)
 {
     _stub->_rigid_body->rigidBody()->setActivationState(DISABLE_DEACTIVATION);
     _stub->_rigid_body->rigidBody()->setLinearVelocity(btVector3(velocity.x(), velocity.y(), velocity.z()));
 }
 
-float RigidBodyBullet::friction() const
+float RigidbodyBullet::friction() const
 {
     return _stub->_rigid_body->collisionObject()->getFriction();
 }
 
-void RigidBodyBullet::setFriction(float friction)
+void RigidbodyBullet::setFriction(float friction)
 {
     _stub->_rigid_body->collisionObject()->setFriction(friction);
 }
 
-V3 RigidBodyBullet::angularFactor() const
+V3 RigidbodyBullet::angularFactor() const
 {
     const btVector3& factor = _stub->_rigid_body->rigidBody()->getAngularFactor();
     return V3(factor.x(), factor.y(), factor.z());
 }
 
-void RigidBodyBullet::setAngularFactor(const V3& factor)
+void RigidbodyBullet::setAngularFactor(const V3& factor)
 {
     _stub->_rigid_body->rigidBody()->setAngularFactor(btVector3(factor.x(), factor.y(), factor.z()));
 }
 
-const sp<BtRigidBodyRef>& RigidBodyBullet::rigidBody() const
+const sp<BtRigidbodyRef>& RigidbodyBullet::rigidBody() const
 {
     return _stub->_rigid_body;
 }

@@ -26,7 +26,7 @@
 namespace ark::plugin::bullet {
 
 //[[script::bindings::name("World")]]
-class ARK_PLUGIN_BULLET_API ColliderBullet : public Runnable, public Collider, Implements<ColliderBullet, Runnable, Collider> {
+class ARK_PLUGIN_BULLET_API ColliderBullet final : public Runnable, public Collider, Implements<ColliderBullet, Runnable, Collider> {
 public:
     class RigidBodyImporter {
     public:
@@ -39,7 +39,7 @@ public:
     ColliderBullet(const V3& gravity, sp<ModelLoader> modelLoader);
 
 //  [[script::bindings::auto]]
-    sp<RigidBody> createBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Rotation> rotate = nullptr, sp<Boolean> discarded = nullptr) override;
+    sp<Rigidbody> createBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Rotation> rotation = nullptr, sp<Boolean> discarded = nullptr) override;
 //  [[script::bindings::auto]]
     std::vector<RayCastManifold> rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter = nullptr) override;
 
@@ -61,7 +61,7 @@ public:
         sp<ColliderBullet> build(const Scope& args) override;
 
     private:
-        sp<Builder<Vec3>> _gravity;
+        V3 _gravity;
         SafePtr<Builder<ModelLoader>> _model_loader;
         std::vector<std::pair<sp<Builder<RigidBodyImporter>>, document>> _importers;
 
@@ -81,11 +81,11 @@ public:
 
 private:
     struct KinematicObject {
-        KinematicObject(sp<Vec3> position, sp<Vec4> quaternion, sp<BtRigidBodyRef> rigidBody);
+        KinematicObject(sp<Vec3> position, sp<Vec4> quaternion, sp<BtRigidbodyRef> rigidBody);
 
         SafeVar<Vec3> _position;
         SafeVar<Vec4> _quaternion;
-        sp<BtRigidBodyRef> _rigid_body;
+        sp<BtRigidbodyRef> _rigid_body;
 
         class ListFilter {
         public:
@@ -121,52 +121,23 @@ private:
     };
 
     struct ContactInfo {
-        std::set<sp<BtRigidBodyRef>> _last_tick;
-        std::set<sp<BtRigidBodyRef>> _current_tick;
+        std::set<sp<BtRigidbodyRef>> _last_tick;
+        std::set<sp<BtRigidbodyRef>> _current_tick;
     };
 
-    class DynamicPosition : public Vec3 {
-    public:
-        DynamicPosition(const sp<btMotionState>& motionState, bool isStaticBody);
-
-        virtual bool update(uint64_t timestamp) override;
-
-        virtual V3 val() override;
-
-    private:
-        V3 getWorldPosition() const;
-
-    private:
-        sp<btMotionState> _motion_state;
-        bool _is_static_body;
-    };
-
-    class DynamicTransform final : public Transform::Delegate {
-    public:
-        DynamicTransform(const sp<btMotionState>& motionState);
-
-        bool update(const Transform::Stub& transform, uint64_t timestamp) override;
-        void snapshot(const Transform::Stub& transform, Transform::Snapshot& snapshot) const override;
-        V3 transform(const Transform::Snapshot& snapshot, const V3& position) const override;
-        M4 toMatrix(const Transform::Snapshot& snapshot) const override;
-
-    private:
-        sp<btMotionState> _motion_state;
-    };
-
-    static sp<BtRigidBodyRef> makeRigidBody(btDynamicsWorld* world, btCollisionShape* shape, btMotionState* motionState, Collider::BodyType bodyType, btScalar mass);
-    static sp<BtRigidBodyRef> makeGhostObject(btDynamicsWorld* world, btCollisionShape* shape, Collider::BodyType bodyType);
+    static sp<BtRigidbodyRef> makeRigidBody(btDynamicsWorld* world, btCollisionShape* shape, btMotionState* motionState, Collider::BodyType bodyType, btScalar mass);
+    static sp<BtRigidbodyRef> makeGhostObject(btDynamicsWorld* world, btCollisionShape* shape, Collider::BodyType bodyType);
 
     static void myInternalPreTickCallback(btDynamicsWorld *dynamicsWorld, btScalar timeStep);
     static void myInternalTickCallback(btDynamicsWorld *dynamicsWorld, btScalar timeStep);
 
-    static const RigidBodyBullet& getRigidBodyFromCollisionObject(const btCollisionObject* collisionObject);
+    static const RigidbodyBullet& getRigidBodyFromCollisionObject(const btCollisionObject* collisionObject);
 
-    void addTickContactInfo(const sp<BtRigidBodyRef>& rigidBody, const sp<CollisionCallback>& callback, const sp<BtRigidBodyRef>& contact, const V3& cp, const V3& normal);
+    void addTickContactInfo(const sp<BtRigidbodyRef>& rigidBody, const sp<CollisionCallback>& callback, const sp<BtRigidbodyRef>& contact, const V3& cp, const V3& normal);
 
 private:
     sp<Stub> _stub;
-    std::map<sp<BtRigidBodyRef>, ContactInfo> _contact_infos;
+    std::map<sp<BtRigidbodyRef>, ContactInfo> _contact_infos;
 };
 
 }

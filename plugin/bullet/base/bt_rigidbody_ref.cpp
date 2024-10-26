@@ -1,25 +1,25 @@
-#include "bullet/base/bt_rigid_body_ref.h"
+#include "bullet/base/bt_rigidbody_ref.h"
 
 namespace ark::plugin::bullet {
 
-BtRigidBodyRef::BtRigidBodyRef(btCollisionObject* rigidBody)
+BtRigidbodyRef::BtRigidbodyRef(btCollisionObject* rigidBody)
     : _rigid_body(rigidBody)
 {
 }
 
-btRigidBody* BtRigidBodyRef::rigidBody() const
+btRigidBody* BtRigidbodyRef::rigidBody() const
 {
     btRigidBody* body = btRigidBody::upcast(_rigid_body.get());
     DCHECK(body, "CollisionObject(%d) is not a btRigidBody instance", _rigid_body->getInternalType());
     return body;
 }
 
-btCollisionObject* BtRigidBodyRef::collisionObject() const
+btCollisionObject* BtRigidbodyRef::collisionObject() const
 {
     return _rigid_body.get();
 }
 
-void BtRigidBodyRef::reset()
+void BtRigidbodyRef::reset()
 {
     _rigid_body.reset();
 }

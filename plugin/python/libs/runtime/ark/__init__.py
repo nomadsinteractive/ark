@@ -1454,16 +1454,16 @@ class ModelBundle:
 
 
 class Level:
-    def __init__(self, render_object_layers: dict[str, 'Layer'], rigid_body_layers: dict[str, 'Collider'] = None, cameras: dict[str, Camera] = None, lights: dict[str, Vec3] = None):
+    def __init__(self, render_object_layers: dict[str, 'Layer'], cameras: dict[str, Camera] = None, lights: dict[str, Vec3] = None):
         pass
 
-    def load(self, src: str):
+    def load(self, src: str, collider: Optional['Collider'] = None, shape_id_aliases: dict[str, str] = None):
         pass
 
     def get_render_object(self, name: str) -> 'RenderObject':
         pass
 
-    def get_rigid_body(self, name: str) -> 'RigidBody':
+    def get_rigid_body(self, name: str) -> 'Rigidbody':
         pass
 
 
@@ -2357,7 +2357,7 @@ class Shape:
         return None
 
 
-class RigidBody:
+class Rigidbody:
 
     def __init__(self):
         self._disposed = Boolean(False)
@@ -2492,7 +2492,7 @@ class RayCastManifold:
         return 0, 0, 0
 
     @property
-    def rigid_body(self) -> Optional[RigidBody]:
+    def rigid_body(self) -> Optional[Rigidbody]:
         return None
 
 
@@ -2522,7 +2522,7 @@ class Collider:
     BODY_FLAG_MANUAL_POSITION = 8
     BODY_FLAG_MANUAL_ROTATION = 16
 
-    def create_body(self, type_: int | Integer, shape: Optional[Shape], position, rotate=None, disposed: Optional[Boolean] = None) -> RigidBody:
+    def create_body(self, type_: int | Integer, shape: Optional[Shape], position, rotate=None, disposed: Optional[Boolean] = None) -> Rigidbody:
         pass
 
     def ray_cast(self, ray_from, ray_to, collision_filter: Optional[CollisionFilter] = None) -> List[RayCastManifold]:

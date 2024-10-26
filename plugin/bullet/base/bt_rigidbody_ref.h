@@ -9,9 +9,9 @@
 
 namespace ark::plugin::bullet {
 
-class BtRigidBodyRef  {
+class BtRigidbodyRef  {
 public:
-    BtRigidBodyRef(btCollisionObject* rigidBody);
+    BtRigidbodyRef(btCollisionObject* rigidBody);
 
     btRigidBody* rigidBody() const;
     btCollisionObject* collisionObject() const;

@@ -18,7 +18,7 @@ namespace box2d {
 class ARK_PLUGIN_BOX2D_API PrismaticJoint : public Joint {
 public:
 //  [[script::bindings::auto]]
-    PrismaticJoint(const sp<ColliderBox2D>& world, const RigidBodyBox2D& b1, const RigidBodyBox2D& b2, const V2& anchorA, const V2& anchorB, float referenceAngle, bool collideConnected = false);
+    PrismaticJoint(const sp<ColliderBox2D>& world, const RigidbodyBox2D& b1, const RigidbodyBox2D& b2, const V2& anchorA, const V2& anchorB, float referenceAngle, bool collideConnected = false);
 
 /*
 //  [[script::bindings::auto]]
@@ -28,7 +28,7 @@ public:
 */
 
 private:
-    static b2Joint* makeJoint(b2World& b2World, const RigidBodyBox2D& b1, const RigidBodyBox2D& b2, const V2& anchorA, const V2& anchorB, float referenceAngle, bool collideConnected);
+    static b2Joint* makeJoint(b2World& b2World, const RigidbodyBox2D& b1, const RigidbodyBox2D& b2, const V2& anchorA, const V2& anchorB, float referenceAngle, bool collideConnected);
 
 };
 

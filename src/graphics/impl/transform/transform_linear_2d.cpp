@@ -23,7 +23,7 @@ V3 TransformLinear2D::transform(const Transform::Snapshot& snapshot, const V3& p
 {
     const Snapshot& data = snapshot.getData<Snapshot>();
     const V3 pos = MatrixUtil::mul(data.matrix, V3(position.x(), position.y(), 1.0f));
-    return V3(pos.x() / pos.z(), pos.y() / pos.z(), position.z());
+    return {pos.x() / pos.z(), pos.y() / pos.z(), position.z()};
 }
 
 M4 TransformLinear2D::toMatrix(const Transform::Snapshot& snapshot) const

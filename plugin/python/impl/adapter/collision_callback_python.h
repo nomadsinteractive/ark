@@ -11,8 +11,8 @@ class CollisionCallbackPython final : public CollisionCallback, public Debris, p
 public:
     CollisionCallbackPython(const PyInstance& delegate);
 
-    void onBeginContact(const RigidBody& rigidBody, const CollisionManifold& manifold) override;
-    void onEndContact(const RigidBody& rigidBody) override;
+    void onBeginContact(const Rigidbody& rigidBody, const CollisionManifold& manifold) override;
+    void onEndContact(const Rigidbody& rigidBody) override;
 
     void traverse(const Visitor& visitor) override;
 

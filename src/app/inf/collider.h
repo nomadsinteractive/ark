@@ -22,15 +22,13 @@ public:
 
         BODY_TYPE_SENSOR = 8,
         BODY_TYPE_ALL = 15,
-
-        BODY_FLAG_MANUAL_ROTATION = 16
     };
 
 public:
     virtual ~Collider() = default;
 
 //  [[script::bindings::auto]]
-    virtual sp<RigidBody> createBody(Collider::BodyType type, sp<Shape> shape = nullptr, sp<Vec3> position = nullptr, sp<Rotation> rotate = nullptr, sp<Boolean> discarded = nullptr) = 0;
+    virtual sp<Rigidbody> createBody(Collider::BodyType type, sp<Shape> shape = nullptr, sp<Vec3> position = nullptr, sp<Rotation> rotate = nullptr, sp<Boolean> discarded = nullptr) = 0;
 //  [[script::bindings::auto]]
     virtual std::vector<RayCastManifold> rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter = nullptr) = 0;
 

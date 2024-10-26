@@ -7,10 +7,10 @@ namespace bullet {
 
 class Body;
 class BodyCreateInfo;
-class BtRigidBodyRef;
+class BtRigidbodyRef;
 class CollisionShape;
 class ColliderBullet;
-class RigidBodyBullet;
+class RigidbodyBullet;
 
 }
 }

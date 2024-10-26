@@ -1,7 +1,6 @@
 #include "core/util/string_convert.h"
 
 #include <string>
-#include <stdlib.h>
 
 #include "core/ark.h"
 #include "core/base/api.h"
@@ -13,8 +12,22 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/traits/layout_param.h"
+#include "graphics/base/v4.h"
 
 namespace ark {
+
+namespace {
+
+template<typename T> T parseVector(const String& value) {
+    T vector(0);
+    const std::vector<String> splitted = Strings::unwrap(value, '(', ')').split(',');
+    CHECK(splitted.size() <= sizeof(T) / sizeof(float), "Vector \"%s\" has more components than its target value(Vec%d)", value.c_str(), sizeof(T) / sizeof(float));
+    for(size_t i = 0; i < splitted.size(); ++i)
+        vector[i] = Strings::eval<float>(splitted.at(i));
+    return vector;
+}
+
+}
 
 template<> ARK_API String StringConvert::eval<String>(const String& repr)
 {
@@ -123,6 +136,21 @@ template<> ARK_API bool StringConvert::eval<bool>(const String& str)
 template<> ARK_API String StringConvert::repr<bool>(const bool& val)
 {
     return val ? "true" : "false";
+}
+
+template<> ARK_API V2 StringConvert::eval<V2>(const String& repr)
+{
+    return parseVector<V2>(repr);
+}
+
+template<> ARK_API V3 StringConvert::eval<V3>(const String& repr)
+{
+    return parseVector<V3>(repr);
+}
+
+template<> ARK_API V4 StringConvert::eval<V4>(const String& repr)
+{
+    return parseVector<V4>(repr);
 }
 
 template<> ARK_API String StringConvert::repr<V2>(const V2& val)

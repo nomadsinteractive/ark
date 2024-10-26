@@ -18,7 +18,7 @@
 #include "app/inf/collision_callback.h"
 #include "app/traits/shape.h"
 
-#include "box2d/impl/rigid_body_box2d.h"
+#include "box2d/impl/rigidbody_box2d.h"
 #include "box2d/impl/joint.h"
 #include "box2d/impl/shapes/ball.h"
 #include "box2d/impl/shapes/box.h"
@@ -42,12 +42,12 @@ void ColliderBox2D::run()
     _stub->run();
 }
 
-sp<RigidBody> ColliderBox2D::createBody(Collider::BodyType type, sp<ark::Shape> shape, sp<Vec3> position, sp<Rotation> rotation, sp<Boolean> discarded)
+sp<Rigidbody> ColliderBox2D::createBody(Collider::BodyType type, sp<ark::Shape> shape, sp<Vec3> position, sp<Rotation> rotation, sp<Boolean> discarded)
 {
     const auto iter = _stub->_body_manifests.find(shape->type());
     CHECK(iter != _stub->_body_manifests.end(), "RigidBody shape-id: %d not found", shape->type());
     const BodyCreateInfo& manifest = iter->second;
-    const sp<RigidBodyBox2D> body = sp<RigidBodyBox2D>::make(*this, type, position, shape->size().val(), rotation ? rotation->theta() : nullptr, manifest);
+    const sp<RigidbodyBox2D> body = sp<RigidbodyBox2D>::make(*this, type, position, shape->size().val(), rotation ? rotation->theta() : nullptr, manifest);
     if(rotation)
         body->setAngle(rotation->theta().val());
     CHECK(!discarded, "Unimplemented");
@@ -201,8 +201,8 @@ void ColliderBox2D::Stub::run()
 
 void ColliderBox2D::ContactListenerImpl::BeginContact(b2Contact* contact)
 {
-    RigidBodyBox2D* s1 = reinterpret_cast<RigidBodyBox2D*>(contact->GetFixtureA()->GetBody()->GetUserData().pointer);
-    RigidBodyBox2D* s2 = reinterpret_cast<RigidBodyBox2D*>(contact->GetFixtureB()->GetBody()->GetUserData().pointer);
+    RigidbodyBox2D* s1 = reinterpret_cast<RigidbodyBox2D*>(contact->GetFixtureA()->GetBody()->GetUserData().pointer);
+    RigidbodyBox2D* s2 = reinterpret_cast<RigidbodyBox2D*>(contact->GetFixtureB()->GetBody()->GetUserData().pointer);
     if(s1 && s2)
     {
         b2WorldManifold worldManifold;
@@ -225,12 +225,12 @@ void ColliderBox2D::ContactListenerImpl::BeginContact(b2Contact* contact)
 
 void ColliderBox2D::ContactListenerImpl::EndContact(b2Contact* contact)
 {
-    RigidBodyBox2D* s1 = reinterpret_cast<RigidBodyBox2D*>(contact->GetFixtureA()->GetBody()->GetUserData().pointer);
-    RigidBodyBox2D* s2 = reinterpret_cast<RigidBodyBox2D*>(contact->GetFixtureB()->GetBody()->GetUserData().pointer);
+    RigidbodyBox2D* s1 = reinterpret_cast<RigidbodyBox2D*>(contact->GetFixtureA()->GetBody()->GetUserData().pointer);
+    RigidbodyBox2D* s2 = reinterpret_cast<RigidbodyBox2D*>(contact->GetFixtureB()->GetBody()->GetUserData().pointer);
     if(s1 && s2)
     {
-        const sp<RigidBodyBox2D::Stub>& body1 = s1->_stub;
-        const sp<RigidBodyBox2D::Stub>& body2 = s2->_stub;
+        const sp<RigidbodyBox2D::Stub>& body1 = s1->_stub;
+        const sp<RigidbodyBox2D::Stub>& body2 = s2->_stub;
         const RefId id1 = s1->ref()->id(), id2 = s2->ref()->id();
         if(const auto it1 = body1->_contacts.find(id2); it1 != body1->_contacts.end())
         {

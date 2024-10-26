@@ -37,13 +37,13 @@ public:
         {
             std::map<TypeId, PyArkType::LoaderFunction>& loader = pyResourceLoaderType->ensureLoader("load");
             loader[Type<ColliderBullet>::id()] = [](PyArkType::Instance& inst, const String& id, const Scope& args)->Box { return inst.unpack<ResourceLoader>()->load<ColliderBullet>(id, args); };
-            loader[Type<RigidBodyBullet>::id()] = [](PyArkType::Instance& inst, const String& id, const Scope& args)->Box { return inst.unpack<ResourceLoader>()->load<RigidBodyBullet>(id, args); };
+            loader[Type<RigidbodyBullet>::id()] = [](PyArkType::Instance& inst, const String& id, const Scope& args)->Box { return inst.unpack<ResourceLoader>()->load<RigidbodyBullet>(id, args); };
         }
         PyArkType* pyArenaType = PythonExtension::instance().getPyArkType<Arena>();
         {
             std::map<TypeId, PyArkType::LoaderFunction>& loader = pyArenaType->ensureLoader("load");
             loader[Type<ColliderBullet>::id()] = [](PyArkType::Instance& inst, const String& id, const Scope& args)->Box { return inst.unpack<Arena>()->load<ColliderBullet>(id, args); };
-            loader[Type<RigidBodyBullet>::id()] = [](PyArkType::Instance& inst, const String& id, const Scope& args)->Box { return inst.unpack<Arena>()->load<RigidBodyBullet>(id, args); };
+            loader[Type<RigidbodyBullet>::id()] = [](PyArkType::Instance& inst, const String& id, const Scope& args)->Box { return inst.unpack<Arena>()->load<RigidbodyBullet>(id, args); };
         }
     }
 

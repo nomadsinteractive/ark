@@ -71,42 +71,42 @@ bool V2::operator <(const V2& other) const
 
 V2 V2::operator -() const
 {
-    return V2(-_x, -_y);
+    return {-_x, -_y};
 }
 
 V2 operator +(const V2& lvalue, const V2& rvalue)
 {
-    return V2(lvalue._x + rvalue._x, lvalue._y + rvalue._y);
+    return {lvalue._x + rvalue._x, lvalue._y + rvalue._y};
 }
 
 V2 operator -(const V2& lvalue, const V2& rvalue)
 {
-    return V2(lvalue._x - rvalue._x, lvalue._y - rvalue._y);
+    return {lvalue._x - rvalue._x, lvalue._y - rvalue._y};
 }
 
 V2 operator *(const V2& lvalue, const V2& rvalue)
 {
-    return V2(lvalue._x * rvalue._x, lvalue._y * rvalue._y);
+    return {lvalue._x * rvalue._x, lvalue._y * rvalue._y};
 }
 
 V2 operator *(const V2& lvalue, float rvalue)
 {
-    return V2(lvalue._x * rvalue, lvalue._y * rvalue);
+    return {lvalue._x * rvalue, lvalue._y * rvalue};
 }
 
 V2 operator *(float lvalue, const V2& rvalue)
 {
-    return V2(rvalue._x * lvalue, rvalue._y * lvalue);
+    return {rvalue._x * lvalue, rvalue._y * lvalue};
 }
 
 V2 operator /(const V2& lvalue, const V2& rvalue)
 {
-    return V2(lvalue._x / rvalue._x, lvalue._y / rvalue._y);
+    return {lvalue._x / rvalue._x, lvalue._y / rvalue._y};
 }
 
 V2 operator /(const V2& lvalue, float rvalue)
 {
-    return V2(lvalue._x / rvalue, lvalue._y / rvalue);
+    return {lvalue._x / rvalue, lvalue._y / rvalue};
 }
 
 float V2::x() const
@@ -131,23 +131,23 @@ float V2::hypot() const
 
 V3 V2::extend(float z) const
 {
-    return V3(_x, _y, z);
+    return {_x, _y, z};
 }
 
 V4 V2::extend(const V2& zw) const
 {
-    return V4(_x, _y, zw.x(), zw.y());
+    return {_x, _y, zw.x(), zw.y()};
 }
 
 V2 V2::floorDiv(const V2& other) const
 {
-    return V2(Math::floorDiv(_x, other._x), Math::floorDiv(_y, other._y));
+    return {Math::floorDiv(_x, other._x), Math::floorDiv(_y, other._y)};
 }
 
 V2 V2::normalize() const
 {
     float length = std::max(hypot(), MIN_NORMALIZE_LENGTH);
-    return V2(_x / length, _y / length);
+    return {_x / length, _y / length};
 }
 
 const float* V2::value() const
@@ -168,7 +168,7 @@ const float& V2::operator[](size_t idx) const
 Range<float> V2::subscribe(const Slice& slice, size_t length)
 {
     const Slice adjusted = slice.adjustIndices(length);
-    return Range<float>(&_x + adjusted.begin(), &_x + adjusted.end(), slice.step());
+    return {&_x + adjusted.begin(), &_x + adjusted.end(), slice.step()};
 }
 
 float& V2::operator[](size_t idx)
@@ -185,13 +185,6 @@ void V2::initialize(const std::initializer_list<float>& values, size_t len)
     int32_t idx = 0;
     for(float i : values)
         (*this)[idx++] = i;
-}
-
-template<> ARK_API V2 StringConvert::eval<V2>(const String& str)
-{
-    std::vector<String> sst = str.split(',');
-    DCHECK(sst.size() == 2, "Illegal size: %s", str.c_str());
-    return V2(Strings::eval<float>(sst.at(0)), Strings::eval<float>(sst.at(1)));
 }
 
 }

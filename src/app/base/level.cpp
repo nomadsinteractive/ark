@@ -15,7 +15,7 @@
 
 #include "app/base/application_context.h"
 #include "app/base/application_bundle.h"
-#include "app/base/rigid_body.h"
+#include "app/base/rigidbody.h"
 #include "app/inf/collider.h"
 #include "app/traits/shape.h"
 #include "renderer/base/render_engine.h"
@@ -30,15 +30,6 @@ struct Library {
     int32_t _type;
     sp<Vec3> _dimensions;
 };
-
-template<typename T> T parseVector(const String& value) {
-    T vector(0);
-    const std::vector<String> splitted = Strings::unwrap(value, '(', ')').split(',');
-    CHECK(splitted.size() <= sizeof(T) / sizeof(float), "Vector \"%s\" has more components than its target value(Vec%d)", value.c_str(), sizeof(T) / sizeof(float));
-    for(size_t i = 0; i < splitted.size(); ++i)
-        vector[i] = Strings::eval<float>(splitted.at(i));
-    return vector;
-}
 
 template<typename T> std::vector<Level::NamedLayerBuilder<T>> loadNamedTypes(BeanFactory& factory, const document& manifest, const String& name, const String& builderName) {
     std::vector<Level::NamedLayerBuilder<T>> namedTypes;
@@ -56,8 +47,8 @@ template<typename T> std::map<String, sp<T>> loadNamedTypeInstances(const std::v
 
 sp<Transform> makeTransform(const String& rotation, const String& scale)
 {
-    const V3 s = scale ? parseVector<V3>(scale) : V3(1.0f);
-    const V4 quat = parseVector<V4>(rotation);
+    const V3 s = scale ? Strings::eval<V3>(scale) : V3(1.0f);
+    const V4 quat = Strings::eval<V4>(rotation);
     return sp<Transform>::make(Transform::TYPE_LINEAR_3D, sp<Rotation>::make(quat), sp<Vec3>::make<Vec3::Const>(s));
 }
 
@@ -68,17 +59,23 @@ sp<RenderObject> makeRenderObject(const document& manifest, int32_t type, bool v
     const String& scale = Documents::ensureAttribute(manifest, "scale");
     const String& rotation = Documents::ensureAttribute(manifest, constants::ROTATION);
     sp<Transform> transform = makeTransform(rotation, scale);
-    return sp<RenderObject>::make(type, sp<Vec3>::make<Vec3::Const>(parseVector<V3>(position)), nullptr, std::move(transform), nullptr, visible ? globalConstants->BOOLEAN_TRUE : globalConstants->BOOLEAN_FALSE);
+    return sp<RenderObject>::make(type, sp<Vec3>::make<Vec3::Const>(Strings::eval<V3>(position)), nullptr, std::move(transform), nullptr, visible ? globalConstants->BOOLEAN_TRUE : globalConstants->BOOLEAN_FALSE);
 }
 
-sp<RigidBody> makeRigidBody(const Library& library, const sp<Collider>& collider, const sp<RenderObject>& renderObject, Collider::BodyType bodyType, const std::map<String, String>& shapeIdAliases)
+sp<Rigidbody> makeRigidBody(const Library& library, const sp<Collider>& collider, const sp<RenderObject>& renderObject, Collider::BodyType bodyType, const std::map<String, String>& shapeIdAliases)
 {
     if(!collider)
         return nullptr;
 
     const auto iter = shapeIdAliases.find(library._name);
     TypeId shapeId = iter != shapeIdAliases.end() ? iter->second.hash() : library._type;
-    return collider->createBody(bodyType, sp<Shape>::make(shapeId, library._dimensions), renderObject->position(), renderObject->transform()->rotation());
+    if(bodyType != Collider::BODY_TYPE_DYNAMIC)
+        return collider->createBody(bodyType, sp<Shape>::make(shapeId, library._dimensions), renderObject->position(), renderObject->transform()->rotation());
+
+    const sp<Rigidbody> rigidbody = collider->createBody(bodyType, sp<Shape>::make(shapeId, library._dimensions), Vec3Type::freeze(renderObject->position()), sp<Rotation>::make(renderObject->transform()->rotation()->val()));
+    renderObject->setPosition(rigidbody->position().wrapped());
+    renderObject->transform()->setRotation(sp<Rotation>::make(rigidbody->quaternion().wrapped()));
+    return rigidbody;
 }
 
 }
@@ -100,7 +97,7 @@ void Level::load(const String& src, const sp<Collider>& collider, const std::map
         const String& dimensions = Documents::ensureAttribute(i, "dimensions");
         const int32_t id = Documents::ensureAttribute<int32_t>(i, constants::ID);
         CHECK_WARN(libraryMapping.find(id) == libraryMapping.end(), "Overwriting instance library mapping(%d)", id);
-        libraryMapping.emplace(id, Library{name, static_cast<int32_t>(name.hash()), sp<Vec3>::make<Vec3::Const>(parseVector<V3>(dimensions))});
+        libraryMapping.emplace(id, Library{name, static_cast<int32_t>(name.hash()), sp<Vec3>::make<Vec3::Const>(Strings::eval<V3>(dimensions))});
     }
 
     for(const document& i : manifest->children(constants::LAYER))
@@ -125,7 +122,7 @@ void Level::load(const String& src, const sp<Collider>& collider, const std::map
 
                 if(const Collider::BodyType bodyType = Documents::getAttribute<Collider::BodyType>(j, "rigidbody_type", Collider::BODY_TYPE_NONE); bodyType != Collider::BODY_TYPE_NONE)
                 {
-                    sp<RigidBody> rigidBody = makeRigidBody(library, collider, renderObject, bodyType, shapeIdAliases);
+                    sp<Rigidbody> rigidBody = makeRigidBody(library, collider, renderObject, bodyType, shapeIdAliases);
                     if(name)
                         _rigid_objects[name] = std::move(rigidBody);
                     else
@@ -157,8 +154,8 @@ void Level::load(const String& src, const sp<Collider>& collider, const std::map
                     const float fovy = Documents::ensureAttribute<float>(j, "fov_y");
                     const float clipNear = Documents::ensureAttribute<float>(j, "clip-near");
                     const float clipFar = Documents::ensureAttribute<float>(j, "clip-far");
-                    const V3 p = parseVector<V3>(position);
-                    const Quaternion quaternion(sp<Vec4>::make<Vec4::Const>(parseVector<V4>(rotation)));
+                    const V3 p = Strings::eval<V3>(position);
+                    const Quaternion quaternion(sp<Vec4>::make<Vec4::Const>(Strings::eval<V4>(rotation)));
                     const M4 matrix = quaternion.toMatrix()->val();
                     //After converting Blender coordinate system(RHS) from z-up to y-up, it becomes LHS coordinate system.
                     const V3 front = MatrixUtil::mul(matrix, V3(0, camera->isYUp() ? 1.0f : -1.0f, 0));
@@ -176,7 +173,7 @@ void Level::load(const String& src, const sp<Collider>& collider, const std::map
                 DCHECK_WARN(light, "Undefined light(%s) in \"%s\"", name.c_str(), src.c_str());
                 if(light)
                 {
-                    const V3 position = parseVector<V3>(Documents::ensureAttribute(j, constants::POSITION));
+                    const V3 position = Strings::eval<V3>(Documents::ensureAttribute(j, constants::POSITION));
                     Vec3Type::set(light, position);
                 }
             }
@@ -208,7 +205,7 @@ sp<RenderObject> Level::getRenderObject(const String& name) const
     return iter != _render_objects.end() ? iter->second : nullptr;
 }
 
-sp<RigidBody> Level::getRigidBody(const String& name) const
+sp<Rigidbody> Level::getRigidBody(const String& name) const
 {
     const auto iter = _rigid_objects.find(name);
     return iter != _rigid_objects.end() ? iter->second : nullptr;

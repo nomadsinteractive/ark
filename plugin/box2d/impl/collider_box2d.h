@@ -36,7 +36,7 @@ public:
     void run() override;
 
 //  [[script::bindings::auto]]
-    sp<RigidBody> createBody(Collider::BodyType type, sp<ark::Shape> shape, sp<Vec3> position, sp<Rotation> rotate = nullptr, sp<Boolean> discarded = nullptr) override;
+    sp<Rigidbody> createBody(Collider::BodyType type, sp<ark::Shape> shape, sp<Vec3> position, sp<Rotation> rotate = nullptr, sp<Boolean> discarded = nullptr) override;
 //  [[script::bindings::auto]]
     std::vector<RayCastManifold> rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter) override;
 
@@ -136,7 +136,7 @@ private:
     sp<Stub> _stub;
 
     friend class BUILDER_IMPL1;
-    friend class RigidBodyBox2D;
+    friend class RigidbodyBox2D;
 };
 
 }

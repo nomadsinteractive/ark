@@ -15,8 +15,8 @@ public:
     TypeId onPoll(WiringContext& context) override;
     void onWire(const WiringContext& context) override;
 
-    void onBeginContact(const RigidBody& rigidBody, const CollisionManifold& manifold) override;
-    void onEndContact(const RigidBody& rigidBody) override;
+    void onBeginContact(const Rigidbody& rigidBody, const CollisionManifold& manifold) override;
+    void onEndContact(const Rigidbody& rigidBody) override;
 
 //  [[plugin::builder("with_collision_callback")]]
     class BUILDER final : public Builder<Wirable> {

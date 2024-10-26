@@ -42,7 +42,7 @@ public:
 //  [[script::bindings::auto]]
     sp<RenderObject> getRenderObject(const String& name) const;
 //  [[script::bindings::auto]]
-    sp<RigidBody> getRigidBody(const String& name) const;
+    sp<Rigidbody> getRigidBody(const String& name) const;
 
 //  [[plugin::builder]]
     class BUILDER final : public Builder<Level> {
@@ -64,8 +64,8 @@ private:
     std::map<String, sp<Vec3>> _lights;
     std::map<String, sp<RenderObject>> _render_objects;
 
-    std::map<String, sp<RigidBody>> _rigid_objects;
-    std::vector<sp<RigidBody>> _unnamed_rigid_objects;
+    std::map<String, sp<Rigidbody>> _rigid_objects;
+    std::vector<sp<Rigidbody>> _unnamed_rigid_objects;
 };
 
 }

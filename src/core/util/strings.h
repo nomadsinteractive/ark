@@ -102,7 +102,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const String& value);
 
-        virtual sp<String> build(const Scope& args) override;
+        sp<String> build(const Scope& args) override;
 
     private:
         sp<Builder<String>> _delegate;

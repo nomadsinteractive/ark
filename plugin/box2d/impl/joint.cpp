@@ -4,7 +4,7 @@
 
 #include "app/base/application_context.h"
 
-#include "box2d/impl/rigid_body_box2d.h"
+#include "box2d/impl/rigidbody_box2d.h"
 #include "box2d/impl/collider_box2d.h"
 
 namespace ark {

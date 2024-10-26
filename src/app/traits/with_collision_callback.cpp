@@ -21,12 +21,12 @@ void WithCollisionCallback::onWire(const WiringContext& context)
         WithDebris::ensureComponent(context)->track(std::move(debris));
 }
 
-void WithCollisionCallback::onBeginContact(const RigidBody& rigidBody, const CollisionManifold& manifold)
+void WithCollisionCallback::onBeginContact(const Rigidbody& rigidBody, const CollisionManifold& manifold)
 {
     return _collision_callback->onBeginContact(rigidBody, manifold);
 }
 
-void WithCollisionCallback::onEndContact(const RigidBody& rigidBody)
+void WithCollisionCallback::onEndContact(const Rigidbody& rigidBody)
 {
     _collision_callback->onEndContact(rigidBody);
 }

@@ -5,7 +5,7 @@ namespace ark {
 namespace plugin {
 namespace box2d {
 
-class RigidBodyBox2D;
+class RigidbodyBox2D;
 class BodyCreateInfo;
 class Joint;
 class Shape;

@@ -21,6 +21,7 @@ public:
     static V2 mul(const M3& lvalue, const V2& rvalue);
 
     static M3 rotate(const M3& lvalue, float radian);
+    static M3 rotate(const M3& lvalue, float s, float c);
     static M3 scale(const M3& lvalue, const V2& rvalue);
     static M3 translate(const M3& lvalue, const V2& rvalue);
 

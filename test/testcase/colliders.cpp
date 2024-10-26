@@ -17,7 +17,7 @@
 
 #include "app/base/application_context.h"
 #include "core/base/resource_loader.h"
-#include "app/base/rigid_body.h"
+#include "app/base/rigidbody.h"
 #include "app/inf/collider.h"
 #include "app/inf/collision_callback.h"
 #include "app/inf/broad_phrase.h"
@@ -36,14 +36,14 @@ public:
         : _render_object(renderObject), _contact_began(false), _contact_ended(false) {
     }
 
-    virtual void onBeginContact(const RigidBody& rigidBody, const CollisionManifold& manifold) override {
+    virtual void onBeginContact(const Rigidbody& rigidBody, const CollisionManifold& manifold) override {
         const V3 p1 = _render_object->position()->val();
         const V3 p2 = rigidBody.position().val();
         printf("onBeginContact: (%.2f, %.2f, %.2f) - (%.2f, %.2f, %.2f) rotation: %.2f\n", p1.x(), p1.y(), p1.z(), p2.x(), p2.y(), p2.z(), _render_object->transform()->rotation()->theta().val());
         _contact_began = true;
     }
 
-    virtual void onEndContact(const RigidBody& rigidBody) override {
+    virtual void onEndContact(const Rigidbody& rigidBody) override {
         const V3 p1 = _render_object->position()->val();
         const V3 p2 = rigidBody.position().val();
         printf("onEndContact: (%.2f, %.2f, %.2f) - (%.2f, %.2f, %.2f) rotation: %.2f\n", p1.x(), p1.y(), p1.z(), p2.x(), p2.y(), p2.z(), _render_object->transform()->rotation()->theta().val());
@@ -82,11 +82,11 @@ public:
         const auto r = bp2->search(V3(220, 0, 0), V3(16, 32, 0));
 
         const sp<RenderObject> c001 = resourceLoader->load<RenderObject>("c001", args);
-        const sp<RigidBody> rigidBody001 = collider->createBody(Collider::BODY_TYPE_DYNAMIC, sp<Shape>::make(Shape::TYPE_AABB, static_cast<sp<Vec3>>(c001->size())), c001->position());
+        const sp<Rigidbody> rigidBody001 = collider->createBody(Collider::BODY_TYPE_DYNAMIC, sp<Shape>::make(Shape::TYPE_AABB, static_cast<sp<Vec3>>(c001->size())), c001->position());
         const sp<RenderObject> c002 = resourceLoader->load<RenderObject>("c002", args);
-        const sp<RigidBody> rigidBody002 = collider->createBody(Collider::BODY_TYPE_STATIC, sp<Shape>::make(Shape::TYPE_AABB, static_cast<sp<Vec3>>(c002->size())), c002->position());
+        const sp<Rigidbody> rigidBody002 = collider->createBody(Collider::BODY_TYPE_STATIC, sp<Shape>::make(Shape::TYPE_AABB, static_cast<sp<Vec3>>(c002->size())), c002->position());
         const sp<RenderObject> c003 = resourceLoader->load<RenderObject>("c003", args);
-        const sp<RigidBody> rigidBody003 = collider->createBody(Collider::BODY_TYPE_DYNAMIC, sp<Shape>::make(1, static_cast<sp<Vec3>>(c003->size())), c003->position(), c003->transform()->rotation());
+        const sp<Rigidbody> rigidBody003 = collider->createBody(Collider::BODY_TYPE_DYNAMIC, sp<Shape>::make(1, static_cast<sp<Vec3>>(c003->size())), c003->position(), c003->transform()->rotation());
         const sp<CollisionCallbackImpl> collisionCallbackImpl001 = sp<CollisionCallbackImpl>::make(c001);
         const sp<CollisionCallbackImpl> collisionCallbackImpl003 = sp<CollisionCallbackImpl>::make(c003);
         rigidBody001->setCollisionCallback(collisionCallbackImpl001);

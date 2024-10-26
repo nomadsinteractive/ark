@@ -15,12 +15,11 @@
 
 namespace ark {
 
-//TODO: Rename to Rigidbody
-class ARK_API RigidBody : public Wirable {
+class ARK_API Rigidbody : public Wirable {
 public:
-    RigidBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> quaternion, Box impl, sp<Ref> ref);
-    ~RigidBody() override;
-    DISALLOW_COPY_AND_ASSIGN(RigidBody);
+    Rigidbody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> quaternion, Box impl, sp<Ref> ref);
+    ~Rigidbody() override;
+    DISALLOW_COPY_AND_ASSIGN(Rigidbody);
 
 //  [[script::bindings::auto]]
     virtual void discard();
@@ -57,13 +56,13 @@ public:
 //  [[script::bindings::property]]
     void setCollisionFilter(sp<CollisionFilter> collisionFilter);
 
-    void onBeginContact(const RigidBody& rigidBody, const CollisionManifold& manifold) const;
-    void onEndContact(const RigidBody& rigidBody) const;
+    void onBeginContact(const Rigidbody& rigidBody, const CollisionManifold& manifold) const;
+    void onEndContact(const Rigidbody& rigidBody) const;
 
-    void onBeginContact(const RigidBody& self, const RigidBody& rigidBody, const CollisionManifold& manifold) const;
-    void onEndContact(const RigidBody& self, const RigidBody& rigidBody) const;
+    void onBeginContact(const Rigidbody& self, const Rigidbody& rigidBody, const CollisionManifold& manifold) const;
+    void onEndContact(const Rigidbody& self, const Rigidbody& rigidBody) const;
 
-    sp<RigidBody> makeShadow() const;
+    sp<Rigidbody> makeShadow() const;
 
 protected:
     sp<Ref> _ref;

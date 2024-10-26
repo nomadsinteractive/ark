@@ -33,7 +33,7 @@ class Model;
 class RayCastManifold;
 class RendererWithState;
 class ResourceLoader;
-class RigidBody;
+class Rigidbody;
 class RigidBodyDef;
 class Shape;
 class Surface;

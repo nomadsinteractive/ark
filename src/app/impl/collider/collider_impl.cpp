@@ -17,7 +17,7 @@
 #include "app/base/collision_filter.h"
 #include "app/base/collision_manifold.h"
 #include "app/base/raycast_manifold.h"
-#include "app/base/rigid_body.h"
+#include "app/base/rigidbody.h"
 #include "app/inf/broad_phrase.h"
 #include "app/inf/narrow_phrase.h"
 #include "app/traits/shape.h"
@@ -36,7 +36,7 @@ ColliderImpl::ColliderImpl(std::vector<std::pair<sp<BroadPhrase>, sp<CollisionFi
     renderController.addPreComposeUpdatable(_stub, sp<BooleanByWeakRef<Stub>>::make(_stub, 1));
 }
 
-sp<RigidBody> ColliderImpl::createBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Rotation> rotate, sp<Boolean> disposed)
+sp<Rigidbody> ColliderImpl::createBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Rotation> rotate, sp<Boolean> disposed)
 {
     CHECK(type == Collider::BODY_TYPE_KINEMATIC || type == Collider::BODY_TYPE_DYNAMIC || type == Collider::BODY_TYPE_STATIC || type == Collider::BODY_TYPE_SENSOR, "Unknown BodyType: %d", type);
     return _stub->createRigidBody(type, std::move(shape), std::move(position), std::move(rotate), std::move(disposed));
@@ -156,7 +156,7 @@ std::vector<sp<Ref>> ColliderImpl::Stub::toRigidBodyRefs(const std::unordered_se
     std::vector<sp<Ref>> rigidBodies;
     for(BroadPhrase::IdType i : candidateSet)
         if(const auto iter = _rigid_bodies.find(i); iter != _rigid_bodies.end())
-            if(const sp<Ref>& ref = iter->second; !ref->isDiscarded() && ref->instance<RigidBody>().type() & filter)
+            if(const sp<Ref>& ref = iter->second; !ref->isDiscarded() && ref->instance<Rigidbody>().type() & filter)
                 rigidBodies.push_back(ref);
     return rigidBodies;
 }
@@ -196,7 +196,7 @@ std::vector<RayCastManifold> ColliderImpl::Stub::rayCast(const V2& from, const V
     return manifolds;
 }
 
-void ColliderImpl::Stub::resolveCandidates(const RigidBody& self, const BroadPhrase::Candidate& candidateSelf, const std::vector<BroadPhrase::Candidate>& candidates, const RigidBody& callback, std::set<BroadPhrase::IdType>& c)
+void ColliderImpl::Stub::resolveCandidates(const Rigidbody& self, const BroadPhrase::Candidate& candidateSelf, const std::vector<BroadPhrase::Candidate>& candidates, const Rigidbody& callback, std::set<BroadPhrase::IdType>& c)
 {
     std::set<BroadPhrase::IdType> contacts = std::move(c);
     std::set<BroadPhrase::IdType> contactsOut;
@@ -209,7 +209,7 @@ void ColliderImpl::Stub::resolveCandidates(const RigidBody& self, const BroadPhr
             if(const auto iter = contacts.find(i._id); iter == contacts.end())
             {
                 if(const Ref& ref = refManager.toRef(i._id))
-                    callback.onBeginContact(self, ref.instance<RigidBody>(), manifold);
+                    callback.onBeginContact(self, ref.instance<Rigidbody>(), manifold);
             }
             else
                 contacts.erase(iter);
@@ -220,7 +220,7 @@ void ColliderImpl::Stub::resolveCandidates(const RigidBody& self, const BroadPhr
     {
         if(contactsOut.find(i) == contactsOut.end())
             if(const Ref& ref = refManager.toRef(i))
-                callback.onEndContact(self, ref.instance<RigidBody>());
+                callback.onEndContact(self, ref.instance<Rigidbody>());
     }
     c = std::move(contactsOut);
 }
@@ -231,7 +231,7 @@ const sp<NarrowPhrase>& ColliderImpl::Stub::narrowPhrase() const
 }
 
 ColliderImpl::RigidBodyImpl::RigidBodyImpl(const ColliderImpl::Stub& stub, Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<Boolean> discarded)
-    : RigidBody(type, std::move(shape), std::move(position), std::move(rotation), Box(), Global<RefManager>()->makeRef(this, std::move(discarded))), _collider_stub(stub), _position_updated(true), _size_updated(false)
+    : Rigidbody(type, std::move(shape), std::move(position), std::move(rotation), Box(), Global<RefManager>()->makeRef(this, std::move(discarded))), _collider_stub(stub), _position_updated(true), _size_updated(false)
 {
 }
 

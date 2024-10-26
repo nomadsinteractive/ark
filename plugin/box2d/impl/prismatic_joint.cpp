@@ -1,6 +1,6 @@
 #include "box2d/impl/prismatic_joint.h"
 
-#include "box2d/impl/rigid_body_box2d.h"
+#include "box2d/impl/rigidbody_box2d.h"
 #include "box2d/impl/joint.h"
 #include "box2d/impl/collider_box2d.h"
 
@@ -8,12 +8,12 @@ namespace ark {
 namespace plugin {
 namespace box2d {
 
-PrismaticJoint::PrismaticJoint(const sp<ColliderBox2D>& world, const RigidBodyBox2D& b1, const RigidBodyBox2D& b2, const V2& anchorA, const V2& anchorB, float referenceAngle, bool collideConnected)
+PrismaticJoint::PrismaticJoint(const sp<ColliderBox2D>& world, const RigidbodyBox2D& b1, const RigidbodyBox2D& b2, const V2& anchorA, const V2& anchorB, float referenceAngle, bool collideConnected)
     : Joint(world, makeJoint(world->world(), b1, b2, anchorA, anchorB, referenceAngle, collideConnected))
 {
 }
 
-b2Joint*PrismaticJoint::makeJoint(b2World& b2World, const RigidBodyBox2D& b1, const RigidBodyBox2D& b2, const V2& anchorA, const V2& anchorB, float referenceAngle, bool collideConnected)
+b2Joint*PrismaticJoint::makeJoint(b2World& b2World, const RigidbodyBox2D& b1, const RigidbodyBox2D& b2, const V2& anchorA, const V2& anchorB, float referenceAngle, bool collideConnected)
 {
     b2PrismaticJointDef jointDef;
     jointDef.bodyA = b1.body();
