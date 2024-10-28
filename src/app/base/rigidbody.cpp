@@ -51,6 +51,11 @@ void Rigidbody::onWire(const WiringContext& context)
         _ref->setDiscarded(std::move(expendable));
 }
 
+RefId Rigidbody::id() const
+{
+    return _ref->id();
+}
+
 const sp<Ref>& Rigidbody::ref() const
 {
     return _ref;

@@ -630,4 +630,9 @@ template<> ARK_PLUGIN_PYTHON_API PyObject* PyCast::toPyObject_impl<Span>(const S
     return PyBytes_FromStringAndSize(strview.data(), static_cast<size_t>(strview.size()));
 }
 
+template<> ARK_PLUGIN_PYTHON_API PyObject* PyCast::toPyObject_impl<NamedType>(const NamedType& obj)
+{
+    return toPyObject<sp<NamedType>>(sp<NamedType>::make(obj));
+}
+
 }

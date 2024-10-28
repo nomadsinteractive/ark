@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/forwarding.h"
+#include "core/base/named_type.h"
 #include "core/types/safe_var.h"
 
 #include "graphics/forwarding.h"
@@ -21,21 +22,15 @@ public:
 
 public:
 //  [[script::bindings::auto]]
-    Shape(TypeId type = Shape::TYPE_NONE, sp<Vec3> size = nullptr);
+    Shape(const NamedType& type = {Shape::TYPE_NONE}, sp<Vec3> size = nullptr);
 
 //  [[script::bindings::property]]
-    TypeId type() const;
-//  [[script::bindings::property]]
-    void setType(TypeId type);
-//  [[script::bindings::property]]
-    void setType(const String& type);
+    const NamedType& type() const;
 //  [[script::bindings::property]]
     const SafeVar<Vec3>& size() const;
-//  [[script::bindings::property]]
-    void setSize(sp<Vec3> size);
 
 private:
-    TypeId _type;
+    NamedType _type;
     SafeVar<Vec3> _size;
 };
 

@@ -50,7 +50,7 @@ public:
 public:
 
 //  [[script::bindings::operator(index)]]
-    static int32_t toInteger(const Box& self);
+    static uint32_t __index__(const Box& self);
 //[[script::bindings::operator(&)]]
     static int32_t __and__(const Box& lvalue, const Box& rvalue);
 //[[script::bindings::operator(|)]]

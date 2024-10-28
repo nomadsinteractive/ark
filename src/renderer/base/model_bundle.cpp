@@ -44,7 +44,7 @@ const ModelBundle::ModelLayout& ModelBundle::ensureModelLayout(int32_t type) con
 
 sp<Model> ModelBundle::getModel(const NamedType& namedType) const
 {
-    const auto iter = _stub->_model_layouts.find(namedType.type());
+    const auto iter = _stub->_model_layouts.find(namedType.id());
     return iter != _stub->_model_layouts.end() ? iter->second._model : nullptr;
 }
 
@@ -55,13 +55,13 @@ sp<Model> ModelBundle::loadModel(int32_t type)
 
 void ModelBundle::importModel(const NamedType& namedType, const String& src, sp<Future> future)
 {
-    importModel(namedType.type(), Manifest(src), std::move(future));
+    importModel(namedType.id(), Manifest(src), std::move(future));
 }
 
 void ModelBundle::importModel(const NamedType& namedType, const Manifest& manifest, sp<Future> future)
 {
     const ApplicationContext& applicationContext = Ark::instance().applicationContext();
-    sp<Runnable> task = sp<Runnable>::make<ImportModuleRunnable>(namedType.type(), manifest, _stub, nullptr, applicationContext.executorMain(), std::move(future));
+    sp<Runnable> task = sp<Runnable>::make<ImportModuleRunnable>(namedType.id(), manifest, _stub, nullptr, applicationContext.executorMain(), std::move(future));
     applicationContext.executorThreadPool()->execute(std::move(task));
 }
 

@@ -51,6 +51,7 @@ PyCallableDuckType::PyCallableDuckType(PyInstance inst)
 
 void PyCallableDuckType::to(sp<Runnable>& inst)
 {
+    WARN("Converting python function to Runnable directly is deprecated. Use Behavior class as an alternative.");
     inst = sp<RunnablePython>::make(_instance);
 }
 

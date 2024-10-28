@@ -15,7 +15,7 @@
 namespace ark {
 
 RenderObject::RenderObject(const NamedType& type, sp<Vec3> position, sp<Size> size, sp<Transform> transform, sp<Varyings> varyings, sp<Boolean> visible, sp<Boolean> discarded)
-    : RenderObject(sp<IntegerWrapper>::make(type.type()), std::move(position), std::move(size), std::move(transform), std::move(varyings), std::move(visible), std::move(discarded))
+    : RenderObject(sp<IntegerWrapper>::make(type.id()), std::move(position), std::move(size), std::move(transform), std::move(varyings), std::move(visible), std::move(discarded))
 {
 }
 

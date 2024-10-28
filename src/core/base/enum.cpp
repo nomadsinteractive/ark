@@ -28,7 +28,7 @@ template<> void EnumMap<Enum::DrawProcedure>::initialize(std::map<String, Enum::
     enums["draw_instanced"] = Enum::DRAW_PROCEDURE_DRAW_INSTANCED;
 }
 
-int32_t Enum::toInteger(const Box& self)
+uint32_t Enum::__index__(const Box& self)
 {
     return self.toInteger();
 }

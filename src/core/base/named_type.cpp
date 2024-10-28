@@ -21,15 +21,15 @@ struct HashNames {
 }
 
 NamedType::NamedType(String name)
-    : _name(std::move(name)), _type(_name.hash())
+    : _id(name.hash()), _name(std::move(name))
 {
 #ifdef ARK_FLAG_DEBUG
-    Global<HashNames>()->_hash_names[_type] = _name;
+    Global<HashNames>()->_hash_names[_id] = _name;
 #endif
 }
 
-NamedType::NamedType(int32_t type)
-    : _type(type)
+NamedType::NamedType(TypeId typeId)
+    : _id(typeId)
 {
 }
 
@@ -38,9 +38,9 @@ bool NamedType::update(uint64_t timestamp)
     return _timestamp.update(timestamp);
 }
 
-int NamedType::val()
+int32_t NamedType::val()
 {
-    return _type;
+    return _id;
 }
 
 const String& NamedType::name() const
@@ -48,9 +48,9 @@ const String& NamedType::name() const
     return _name;
 }
 
-int32_t NamedType::type() const
+TypeId NamedType::id() const
 {
-    return _type;
+    return _id;
 }
 
 String NamedType::reverse(int32_t type)

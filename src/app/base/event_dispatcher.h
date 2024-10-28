@@ -1,5 +1,4 @@
-#ifndef ARK_APP_BASE_EVENT_DISPATCHER_H_
-#define ARK_APP_BASE_EVENT_DISPATCHER_H_
+#pragma once
 
 #include <map>
 #include <stack>
@@ -12,13 +11,13 @@
 
 namespace ark {
 
-class ARK_API EventDispatcher : public EventListener {
+class ARK_API EventDispatcher final : public EventListener {
 public:
 //  [[script::bindings::auto]]
     EventDispatcher();
 
 //  [[script::bindings::auto]]
-    void onKeyEvent(Event::Code code, sp<Runnable> onPress, sp<Runnable> onRelease, sp<Runnable> onRepeat);
+    void onKeyEvent(Event::Code code, sp<Runnable> onPress = nullptr, sp<Runnable> onRelease = nullptr, sp<Runnable> onRepeat = nullptr);
 //  [[script::bindings::auto]]
     void unKeyEvent(Event::Code code);
 
@@ -30,7 +29,7 @@ public:
     float motionClickRange() const;
 
 //  [[script::bindings::auto]]
-    virtual bool onEvent(const Event& event) override;
+    bool onEvent(const Event& event) override;
 
 private:
     class KeyEventListener {
@@ -38,7 +37,7 @@ private:
         KeyEventListener(sp<Runnable> onPress, sp<Runnable> onRelease, sp<Runnable> onRepeat);
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(KeyEventListener);
 
-        void onEvent(const EventDispatcher& dispatcher, const Event& event);
+        void onEvent(const EventDispatcher& dispatcher, const Event& event) const;
 
     private:
         sp<Runnable> _on_press;
@@ -75,5 +74,3 @@ private:
 };
 
 }
-
-#endif

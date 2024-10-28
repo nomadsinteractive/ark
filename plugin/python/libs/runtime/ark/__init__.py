@@ -26,6 +26,7 @@ TYPE_VEC3 = Union[tuple[TYPE_NUMERIC, TYPE_NUMERIC, TYPE_NUMERIC], TYPE_VEC2, 'V
 TYPE_RECTI = tuple[int, int, int, int]
 TYPE_FLOAT4 = tuple[float, float, float, float]
 TYPE_M4 = tuple[TYPE_FLOAT4, TYPE_FLOAT4, TYPE_FLOAT4, TYPE_FLOAT4]
+TYPE_ID = Union[int, str]
 
 
 def logd(*args):
@@ -1348,42 +1349,30 @@ class Node:
         pass
 
 
-class Metrics:
+class Boundaries:
 
     @property
-    def width(self) -> float:
-        return 0
-
-    @property
-    def height(self) -> float:
-        return 0
-
-    @property
-    def depth(self) -> float:
-        return 0
-
-    @property
-    def aabb_min(self) -> tuple[float, float, float]:
+    def aabb_min(self) -> Vec3:
         return 0, 0, 0
 
     @property
-    def aabb_max(self) -> tuple[float, float, float]:
+    def aabb_max(self) -> Vec3:
         return 0, 0, 0
 
     @property
-    def size(self) -> tuple[float, float, float]:
+    def size(self) -> Vec3:
         return 0, 0, 0
 
 
 class Model:
 
     @property
-    def bounds(self) -> Metrics:
-        return Metrics()
+    def content(self) -> Boundaries:
+        return Boundaries()
 
     @property
-    def occupies(self) -> Metrics:
-        return Metrics()
+    def occupy(self) -> Boundaries:
+        return Boundaries()
 
     @property
     def materials(self) -> list[Material]:
@@ -1446,10 +1435,10 @@ class ModelBundle:
     def vertex_length(self) -> int:
         return 0
 
-    def get_model(self, t: int) -> Model:
+    def get_model(self, t: TYPE_ID) -> Model:
         pass
 
-    def import_model(self, t: int, manifest: str | Manifest, future: Optional[Future] = None):
+    def import_model(self, t: TYPE_ID, manifest: str | Manifest, future: Optional[Future] = None):
         pass
 
 
@@ -2197,7 +2186,7 @@ class EventDispatcher(EventListener):
     def on_event(self, event):
         pass
 
-    def on_key_event(self, code, on_press, on_release, on_repeat):
+    def on_key_event(self, code, on_press: Optional[Runnable] = None, on_release: Optional[Runnable] = None, on_repeat: Optional[Runnable] = None):
         pass
 
     def on_motion_event(self, on_down, on_up, on_click, on_move):
@@ -2341,7 +2330,7 @@ class Shape:
     TYPE_BOX = -3
     TYPE_CAPSULE = -4
 
-    def __init__(self, type: int, size: Optional[Vec3] = None):
+    def __init__(self, type: TYPE_ID, size: Optional[Vec3] = None):
         pass
 
     @property
@@ -2397,7 +2386,7 @@ class Rigidbody:
         return Size(0, 0)
 
     @property
-    def transform(self) -> Transform:
+    def quaternion(self) -> Vec4:
         pass
 
     @property
@@ -2507,20 +2496,13 @@ class Collider:
     BODY_SHAPE_BOX = -3
     BODY_SHAPE_CAPSULE = -4
 
-    SHAPE_TYPE_NONE = "ark_shape_type_none"
-    SHAPE_TYPE_AABB = "ark_shape_type_aabb"
-    SHAPE_TYPE_BALL = "ark_shape_type_ball"
-    SHAPE_TYPE_BOX = "ark_shape_type_box"
-    SHAPE_TYPE_CAPSULE = "ark_shape_type_capsule"
-
-    BODY_TYPE_KINEMATIC = 0
-    BODY_TYPE_DYNAMIC = 1
-    BODY_TYPE_STATIC = 2
-
-    BODY_TYPE_SENSOR = 4
-
-    BODY_FLAG_MANUAL_POSITION = 8
-    BODY_FLAG_MANUAL_ROTATION = 16
+    BODY_TYPE_NONE = 0
+    BODY_TYPE_KINEMATIC = 1
+    BODY_TYPE_DYNAMIC = 2
+    BODY_TYPE_STATIC = 4
+    BODY_TYPE_RIGID = 7
+    BODY_TYPE_SENSOR = 8
+    BODY_TYPE_ALL = 15
 
     def create_body(self, type_: int | Integer, shape: Optional[Shape], position, rotate=None, disposed: Optional[Boolean] = None) -> Rigidbody:
         pass

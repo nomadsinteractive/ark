@@ -28,6 +28,8 @@ public:
     void onWire(const WiringContext& context) override;
 
 //  [[script::bindings::property]]
+    RefId id() const;
+//  [[script::bindings::property]]
     const sp<Ref>& ref() const;
 //  [[script::bindings::property]]
     Collider::BodyType type() const;

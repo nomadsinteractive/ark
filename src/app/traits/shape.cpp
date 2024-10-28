@@ -5,34 +5,19 @@
 
 namespace ark {
 
-Shape::Shape(TypeId type, sp<Vec3> size)
+Shape::Shape(const NamedType& type, sp<Vec3> size)
     : _type(type), _size(std::move(size))
 {
 }
 
-TypeId Shape::type() const
+const NamedType& Shape::type() const
 {
     return _type;
-}
-
-void Shape::setType(TypeId type)
-{
-    _type = type;
-}
-
-void Shape::setType(const String& type)
-{
-    _type = type.hash();
 }
 
 const SafeVar<Vec3>& Shape::size() const
 {
     return _size;
-}
-
-void Shape::setSize(sp<Vec3> size)
-{
-    _size = sp<Vec3>::make<VariableDirty<V3>>(std::move(size), _size);
 }
 
 }

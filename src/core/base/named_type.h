@@ -13,20 +13,22 @@ public:
 //  [[script::bindings::auto]]
     NamedType(String name);
 //  [[script::bindings::auto]]
-    NamedType(int32_t type);
+    NamedType(TypeId typeId);
 
     bool update(uint64_t timestamp) override;
-    int val() override;
+    int32_t val() override;
 
+//  [[script::bindings::property]]
+    TypeId id() const;
+//  [[script::bindings::property]]
     const String& name() const;
-    int32_t type() const;
 
 //  [[script::bindings::auto]]
     static String reverse(int32_t type);
 
 private:
+    TypeId _id;
     String _name;
-    int32_t _type;
     Timestamp _timestamp;
 };
 

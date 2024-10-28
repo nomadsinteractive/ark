@@ -17,8 +17,7 @@ void EventDispatcher::onKeyEvent(Event::Code code, sp<Runnable> onPress, sp<Runn
 
 void EventDispatcher::unKeyEvent(Event::Code code)
 {
-    auto iter = _key_events.find(code);
-    if(iter != _key_events.end())
+    if(const auto iter = _key_events.find(code); iter != _key_events.end())
         if(!iter->second.empty())
             iter->second.pop();
 }
@@ -41,11 +40,9 @@ float EventDispatcher::motionClickRange() const
 
 bool EventDispatcher::onEvent(const Event& event)
 {
-    Event::Action action = event.action();
-    if(action == Event::ACTION_KEY_DOWN || action == Event::ACTION_KEY_UP || action == Event::ACTION_KEY_REPEAT)
+    if(const Event::Action action = event.action(); action == Event::ACTION_KEY_DOWN || action == Event::ACTION_KEY_UP || action == Event::ACTION_KEY_REPEAT)
     {
-        const auto iter = _key_events.find(event.code());
-        if(iter != _key_events.end() && !iter->second.empty())
+        if(const auto iter = _key_events.find(event.code()); iter != _key_events.end() && !iter->second.empty())
         {
             iter->second.top().onEvent(*this, event);
             return true;
@@ -64,10 +61,9 @@ EventDispatcher::KeyEventListener::KeyEventListener(sp<Runnable> onPress, sp<Run
 {
 }
 
-void EventDispatcher::KeyEventListener::onEvent(const EventDispatcher& dispatcher, const Event& event)
+void EventDispatcher::KeyEventListener::onEvent(const EventDispatcher& dispatcher, const Event& event) const
 {
-    Event::Action action = event.action();
-    if(action == Event::ACTION_KEY_DOWN)
+    if(const Event::Action action = event.action(); action == Event::ACTION_KEY_DOWN)
     {
         if(_on_press)
             _on_press->run();

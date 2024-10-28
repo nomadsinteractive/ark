@@ -109,12 +109,11 @@ sp<Rigidbody> ColliderBullet::createBody(Collider::BodyType type, sp<Shape> shap
     DCHECK(!discarded, "Unimplemented");
 
     sp<CollisionShape> cs;
-    const auto iter = _stub->_collision_shapes.find(shape->type());
-    if(iter == _stub->_collision_shapes.end())
+    if(const auto iter = _stub->_collision_shapes.find(shape->type().id()); iter == _stub->_collision_shapes.end())
     {
         btCollisionShape* btShape;
         const V3 size = shape->size().val();
-        switch(shape->type())
+        switch(shape->type().id())
         {
         case Shape::TYPE_BOX:
             btShape = new btBoxShape(btVector3(size.x() / 2, size.y() / 2, size.z() / 2));
@@ -123,8 +122,8 @@ sp<Rigidbody> ColliderBullet::createBody(Collider::BodyType type, sp<Shape> shap
             btShape = new btSphereShape(size.x() / 2);
             break;
         case Shape::TYPE_CAPSULE:
-            CHECK_WARN(size.y() > size.x(), "When constructing a capsule shape, its height(%.2f) needs be greater than its width(%.2f)", size.y() > size.x());
-            btShape = new btCapsuleShapeZ(size.x() / 2, size.y() - size.x());
+            CHECK_WARN(size.y() > size.x(), "When constructing a capsule shape, its height(%.2f) needs be greater than its width(%.2f)", size.y(), size.x());
+            btShape = new btCapsuleShape(size.x() / 2, size.y() - size.x());
             break;
         default:
             DFATAL("Undefined RigidBody(%d) in this world", shape->type());
@@ -150,7 +149,7 @@ sp<Rigidbody> ColliderBullet::createBody(Collider::BodyType type, sp<Shape> shap
                                      sp<Transform>::make(sp<DynamicTransform>::make(motionState)), std::move(rigidBody));
 }
 
-void ColliderBullet::rayCastClosest(const V3& from, const V3& to, const sp<CollisionCallback>& callback, int32_t filterGroup, int32_t filterMask)
+void ColliderBullet::rayCastClosest(const V3& from, const V3& to, const sp<CollisionCallback>& callback, int32_t filterGroup, int32_t filterMask) const
 {
     btVector3 btFrom(from.x(), from.y(), from.z());
     btVector3 btTo(to.x(), to.y(), to.z());
