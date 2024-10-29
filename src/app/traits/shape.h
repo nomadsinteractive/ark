@@ -30,6 +30,15 @@ public:
 //  [[script::bindings::property]]
     const SafeVar<Vec3>& size() const;
 
+    template<typename T> sp<T> asImplementation() const {
+        if(!_implementation)
+            return nullptr;
+
+        sp<T> implementation = _implementation.as<T>();
+        ASSERT(implementation);
+        return implementation;
+    }
+
 private:
     NamedType _type;
     SafeVar<Vec3> _size;

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "core/types/owned_ptr.h"
-#include "core/types/shared_ptr.h"
 
 #include "bullet/base/collider_bullet.h"
 

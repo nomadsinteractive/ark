@@ -42,6 +42,11 @@ sp<Rigidbody> ColliderImpl::createBody(Collider::BodyType type, sp<Shape> shape,
     return _stub->createRigidBody(type, std::move(shape), std::move(position), std::move(rotate), std::move(disposed));
 }
 
+sp<Shape> ColliderImpl::createShape(const NamedType& type, sp<Vec3> size)
+{
+    return sp<Shape>::make(type, std::move(size));
+}
+
 std::vector<RayCastManifold> ColliderImpl::rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter)
 {
     return _stub->rayCast(V2(from.x(), from.y()), V2(to.x(), to.y()), collisionFilter);

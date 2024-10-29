@@ -29,6 +29,7 @@ struct Library {
     String _name;
     int32_t _type;
     sp<Vec3> _dimensions;
+    sp<Shape> _shape;
 };
 
 template<typename T> std::vector<Level::NamedLayerBuilder<T>> loadNamedTypes(BeanFactory& factory, const document& manifest, const String& name, const String& builderName) {
@@ -62,17 +63,21 @@ sp<RenderObject> makeRenderObject(const document& manifest, int32_t type, bool v
     return sp<RenderObject>::make(type, sp<Vec3>::make<Vec3::Const>(Strings::eval<V3>(position)), nullptr, std::move(transform), nullptr, visible ? globalConstants->BOOLEAN_TRUE : globalConstants->BOOLEAN_FALSE);
 }
 
-sp<Rigidbody> makeRigidBody(const Library& library, const sp<Collider>& collider, const sp<RenderObject>& renderObject, Collider::BodyType bodyType, const std::map<String, String>& shapeIdAliases)
+sp<Rigidbody> makeRigidBody(Library& library, const sp<Collider>& collider, const sp<RenderObject>& renderObject, Collider::BodyType bodyType, const std::map<String, String>& shapeIdAliases)
 {
     if(!collider)
         return nullptr;
 
     const auto iter = shapeIdAliases.find(library._name);
-    TypeId shapeId = iter != shapeIdAliases.end() ? iter->second.hash() : library._type;
-    if(bodyType != Collider::BODY_TYPE_DYNAMIC)
-        return collider->createBody(bodyType, sp<Shape>::make(shapeId, library._dimensions), renderObject->position(), renderObject->transform()->rotation());
+    const TypeId shapeId = iter != shapeIdAliases.end() ? iter->second.hash() : library._type;
 
-    const sp<Rigidbody> rigidbody = collider->createBody(bodyType, sp<Shape>::make(shapeId, library._dimensions), Vec3Type::freeze(renderObject->position()), sp<Rotation>::make(renderObject->transform()->rotation()->val()));
+    if(!library._shape)
+        library._shape = collider->createShape(shapeId, sp<Vec3>::make<Vec3::Const>(library._dimensions));
+
+    if(bodyType != Collider::BODY_TYPE_DYNAMIC)
+        return collider->createBody(bodyType, library._shape, renderObject->position(), renderObject->transform()->rotation());
+
+    const sp<Rigidbody> rigidbody = collider->createBody(bodyType, library._shape, Vec3Type::freeze(renderObject->position()), sp<Rotation>::make(renderObject->transform()->rotation()->val()));
     renderObject->setPosition(rigidbody->position().wrapped());
     renderObject->transform()->setRotation(sp<Rotation>::make(rigidbody->quaternion().wrapped()));
     return rigidbody;
@@ -113,7 +118,7 @@ void Level::load(const String& src, const sp<Collider>& collider, const std::map
             {
                 const auto iter = libraryMapping.find(instanceOf);
                 ASSERT(iter != libraryMapping.end());
-                const Library& library = iter->second;
+                Library& library = iter->second;
                 String name = Documents::getAttribute(j, constants::NAME);
                 sp<RenderObject> renderObject = makeRenderObject(j, library._type, visible);
 

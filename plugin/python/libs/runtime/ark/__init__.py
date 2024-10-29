@@ -2491,11 +2491,6 @@ class NarrowPhrase:
 
 class Collider:
 
-    BODY_SHAPE_AABB = -1
-    BODY_SHAPE_BALL = -2
-    BODY_SHAPE_BOX = -3
-    BODY_SHAPE_CAPSULE = -4
-
     BODY_TYPE_NONE = 0
     BODY_TYPE_KINEMATIC = 1
     BODY_TYPE_DYNAMIC = 2
@@ -2505,6 +2500,9 @@ class Collider:
     BODY_TYPE_ALL = 15
 
     def create_body(self, type_: int | Integer, shape: Optional[Shape], position, rotate=None, disposed: Optional[Boolean] = None) -> Rigidbody:
+        pass
+
+    def create_shape(self, shape_type: TYPE_ID, size: Optional[TYPE_VEC3] = None) -> Shape:
         pass
 
     def ray_cast(self, ray_from, ray_to, collision_filter: Optional[CollisionFilter] = None) -> List[RayCastManifold]:

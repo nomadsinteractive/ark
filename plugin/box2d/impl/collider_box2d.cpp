@@ -65,6 +65,11 @@ sp<Rigidbody> ColliderBox2D::createBody(Collider::BodyType type, sp<ark::Shape> 
     return body;
 }
 
+sp<ark::Shape> ColliderBox2D::createShape(const NamedType& type, sp<Vec3> size)
+{
+    return sp<ark::Shape>::make(type, std::move(size));
+}
+
 std::vector<RayCastManifold> ColliderBox2D::rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& /*collisionFilter*/)
 {
     DFATAL("Unimplemented");

@@ -38,6 +38,8 @@ public:
 //  [[script::bindings::auto]]
     sp<Rigidbody> createBody(Collider::BodyType type, sp<ark::Shape> shape, sp<Vec3> position, sp<Rotation> rotate = nullptr, sp<Boolean> discarded = nullptr) override;
 //  [[script::bindings::auto]]
+    sp<ark::Shape> createShape(const NamedType& type, sp<Vec3> size) override;
+//  [[script::bindings::auto]]
     std::vector<RayCastManifold> rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter) override;
 
     b2World& world() const;

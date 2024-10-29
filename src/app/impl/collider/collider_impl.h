@@ -21,14 +21,15 @@
 
 namespace ark {
 
-class ColliderImpl : public Collider {
+class ColliderImpl final : public Collider {
 public:
     ColliderImpl(std::vector<std::pair<sp<BroadPhrase>, sp<CollisionFilter>>> broadPhrase, sp<NarrowPhrase> narrowPhrase, RenderController& renderController);
 
     sp<Rigidbody> createBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Rotation> rotate, sp<Boolean> discarded) override;
+    sp<Shape> createShape(const NamedType& type, sp<Vec3> size) override;
     std::vector<RayCastManifold> rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter) override;
 
-//  [[plugin::resource-loader]]
+    //  [[plugin::resource-loader]]
     class BUILDER : public Builder<Collider> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
