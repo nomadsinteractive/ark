@@ -88,7 +88,7 @@ Transform::Transform(sp<Transform::Delegate> delegate)
 
 Transform::Snapshot Transform::snapshot() const
 {
-    return Snapshot(*this);
+    return {*this};
 }
 
 bool Transform::update(uint64_t timestamp)

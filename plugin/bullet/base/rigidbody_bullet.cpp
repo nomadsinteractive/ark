@@ -35,7 +35,7 @@ void RigidbodyBullet::applyCentralForce(const V3& force)
 V3 RigidbodyBullet::linearVelocity() const
 {
     const btVector3& velocity = _stub->_rigid_body->rigidBody()->getLinearVelocity();
-    return V3(velocity.x(), velocity.y(), velocity.z());
+    return {velocity.x(), velocity.y(), velocity.z()};
 }
 
 void RigidbodyBullet::setLinearVelocity(const V3& velocity)

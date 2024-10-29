@@ -2330,7 +2330,7 @@ class Shape:
     TYPE_BOX = -3
     TYPE_CAPSULE = -4
 
-    def __init__(self, type: TYPE_ID, size: Optional[Vec3] = None):
+    def __init__(self, type: TYPE_ID, size: Optional[TYPE_VEC3] = None):
         pass
 
     @property

@@ -59,7 +59,7 @@ private:
 class DynamicTransform final : public Transform::Delegate {
 public:
     DynamicTransform(const sp<btMotionState>& motionState)
-    : _motion_state(motionState) {
+        : _motion_state(motionState) {
     }
 
     bool update(const Transform::Stub& transform, uint64_t timestamp) override
@@ -126,7 +126,7 @@ sp<Rigidbody> ColliderBullet::createBody(Collider::BodyType type, sp<Shape> shap
             btShape = new btCapsuleShape(size.x() / 2, size.y() - size.x());
             break;
         default:
-            DFATAL("Undefined RigidBody(%d) in this world", shape->type());
+            FATAL("Undefined shape type %d(%s) in this world", shape->type().id(), shape->type().name().c_str());
             break;
         }
         cs = sp<CollisionShape>::make(btShape, 1.0f);
