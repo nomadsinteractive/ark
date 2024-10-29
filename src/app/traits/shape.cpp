@@ -1,12 +1,16 @@
 #include "app/traits/shape.h"
 
-#include "core/base/string.h"
 #include "core/impl/variable/variable_dirty.h"
 
 namespace ark {
 
 Shape::Shape(const NamedType& type, sp<Vec3> size)
     : _type(type), _size(std::move(size))
+{
+}
+
+Shape::Shape(const NamedType& type, sp<Vec3> size, Box implementation)
+    : _type(type), _size(std::move(size)), _implementation(std::move(implementation))
 {
 }
 

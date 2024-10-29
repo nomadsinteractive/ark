@@ -48,7 +48,7 @@ sp<NarrowPhraseCuteC2::BodyDefCuteC2> NarrowPhraseCuteC2::makeBodyCapsule(const 
     return sp<BodyDefCuteC2>::make(size, V2(0.5f), toCuteC2Shapes(makeCapsuleShapeImpl(p1, p2, radius)));
 }
 
-RigidBodyDef NarrowPhraseCuteC2::makeBodyDef(TypeId shapeId, const SafeVar<Vec3>& size)
+RigidbodyDef NarrowPhraseCuteC2::makeBodyDef(TypeId shapeId, const SafeVar<Vec3>& size)
 {
     V3 sizeVal;
     sp<BodyDefCuteC2> bodyDef = findBodyDef(shapeId);
@@ -96,7 +96,7 @@ RigidBodyDef NarrowPhraseCuteC2::makeBodyDef(TypeId shapeId, const SafeVar<Vec3>
                 break;
         }
     }
-    return RigidBodyDef(sizeVal, V3(bodyDef->pivot(), 0), bodyDef);
+    return RigidbodyDef(sizeVal, V3(bodyDef->pivot(), 0), bodyDef);
 }
 
 NarrowPhrase::Ray NarrowPhraseCuteC2::toRay(const V2& from, const V2& to)

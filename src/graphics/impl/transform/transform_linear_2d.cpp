@@ -15,8 +15,11 @@ bool TransformLinear2D::update(const Transform::Stub& transform, uint64_t timest
 void TransformLinear2D::snapshot(const Transform::Stub& transform, Transform::Snapshot& snapshot) const
 {
     Snapshot& data = snapshot.makeData<Snapshot>();
-    const SafeVar<Numeric>& theta = transform._rotation.wrapped()->theta();
-    data.matrix = MatrixUtil::translate(MatrixUtil::rotate(MatrixUtil::scale(M3::identity(), V2(transform._scale.val())), theta.val()), V2(transform._translation.val()));
+    const V4 quaternion = transform._rotation.val();
+    CHECK(quaternion.x() == 0 && quaternion.y() == 0, "2D rotation should be always in the XY plane");
+    const float s = 2 * quaternion.z() * quaternion.w();
+    const float c = 2 * quaternion.w() * quaternion.w() - 1.0f;
+    data.matrix = MatrixUtil::translate(MatrixUtil::rotate(MatrixUtil::scale(M3::identity(), V2(transform._scale.val())), s, c), V2(transform._translation.val()));
 }
 
 V3 TransformLinear2D::transform(const Transform::Snapshot& snapshot, const V3& position) const

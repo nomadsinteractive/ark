@@ -1,4 +1,4 @@
-#include "plugin/bullet/importer/gimpact_rigid_body_importer.h"
+#include "plugin/bullet/importer/gimpact_rigidbody_importer.h"
 
 #include "core/base/bean_factory.h"
 #include "core/dom/dom_document.h"
@@ -29,14 +29,37 @@ private:
     op<btTriangleIndexVertexArray> _tiva;
 };
 
+sp<CollisionShape> makeCollisionShape(const Model& model, btScalar mass)
+{
+    constexpr PHY_ScalarType indexType = sizeof(element_index_t) == 4 ? PHY_INTEGER : PHY_SHORT;
+    btTriangleIndexVertexArray* tiva = new btTriangleIndexVertexArray();
+    DCHECK(model.meshes().size() > 0, "This model has no meshes data");
+    for(const Mesh& i : model.meshes())
+    {
+        btIndexedMesh indexedMesh;
+        indexedMesh.m_numTriangles = static_cast<int32_t>(i.indices().size() / 3);
+        indexedMesh.m_triangleIndexBase = reinterpret_cast<const unsigned char*>(i.indices().data());
+        indexedMesh.m_triangleIndexStride = 3 * sizeof(element_index_t);
+        indexedMesh.m_numVertices = static_cast<int32_t>(i.vertexCount());
+        indexedMesh.m_vertexBase = reinterpret_cast<const unsigned char*>(i.vertices().data());
+        indexedMesh.m_vertexStride = sizeof(V3);
+        tiva->addIndexedMesh(indexedMesh, indexType);
+    }
+
+    btGImpactMeshShape* gImpactShape = new btGImpactMeshShape(tiva);
+    gImpactShape->postUpdate();
+    gImpactShape->updateBound();
+    return sp<CollisionShape>::make<GImpactCollisionShape>(gImpactShape, tiva, mass);
 }
 
-GImpactRigidBodyImporter::GImpactRigidBodyImporter(sp<ModelLoader> modelLoader)
+}
+
+GImpactRigidbodyImporter::GImpactRigidbodyImporter(sp<ModelLoader> modelLoader)
     : _model_loader(std::move(modelLoader))
 {
 }
 
-void GImpactRigidBodyImporter::import(ColliderBullet& collider, const document& manifest)
+void GImpactRigidbodyImporter::import(ColliderBullet& collider, const document& manifest)
 {
     btCollisionDispatcher * dispatcher = static_cast<btCollisionDispatcher*>(collider.btDynamicWorld()->getDispatcher());
     btGImpactCollisionAlgorithm::registerAlgorithm(dispatcher);
@@ -50,36 +73,14 @@ void GImpactRigidBodyImporter::import(ColliderBullet& collider, const document& 
     }
 }
 
-sp<CollisionShape> GImpactRigidBodyImporter::makeCollisionShape(const Model& model, btScalar mass)
-{
-    btTriangleIndexVertexArray* tiva = new btTriangleIndexVertexArray();
-    DCHECK(model.meshes().size() > 0, "This model has no meshes data");
-    for(const Mesh& i : model.meshes())
-    {
-        btIndexedMesh indexedMesh;
-        indexedMesh.m_numTriangles = static_cast<int32_t>(i.indices().size() / 3);
-        indexedMesh.m_triangleIndexBase = reinterpret_cast<const unsigned char*>(i.indices().data());
-        indexedMesh.m_triangleIndexStride = 3 * sizeof(element_index_t);
-        indexedMesh.m_numVertices = static_cast<int32_t>(i.vertexCount());
-        indexedMesh.m_vertexBase = reinterpret_cast<const unsigned char*>(i.vertices().data());
-        indexedMesh.m_vertexStride = sizeof(V3);
-        tiva->addIndexedMesh(indexedMesh, sizeof(element_index_t) == 4 ? PHY_INTEGER : PHY_SHORT);
-    }
-
-    btGImpactMeshShape* gImpactShape = new btGImpactMeshShape(tiva);
-    gImpactShape->postUpdate();
-    gImpactShape->updateBound();
-    return sp<GImpactCollisionShape>::make(gImpactShape, tiva, mass);
-}
-
-GImpactRigidBodyImporter::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+GImpactRigidbodyImporter::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _model_loader(factory.ensureBuilder<ModelLoader>(manifest, "model-loader"))
 {
 }
 
-sp<ColliderBullet::RigidBodyImporter> GImpactRigidBodyImporter::BUILDER::build(const Scope& args)
+sp<ColliderBullet::RigidbodyImporter> GImpactRigidbodyImporter::BUILDER::build(const Scope& args)
 {
-    return sp<GImpactRigidBodyImporter>::make(_model_loader->build(args));
+    return sp<GImpactRigidbodyImporter>::make(_model_loader->build(args));
 }
 
 }

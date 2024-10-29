@@ -34,7 +34,7 @@ class RayCastManifold;
 class RendererWithState;
 class ResourceLoader;
 class Rigidbody;
-class RigidBodyDef;
+class RigidbodyDef;
 class Shape;
 class Surface;
 class SurfaceUpdater;

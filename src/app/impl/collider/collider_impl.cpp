@@ -140,7 +140,7 @@ sp<ColliderImpl::RigidBodyImpl> ColliderImpl::Stub::createRigidBody(Collider::Bo
 {
     const V3 size = shape->size().val();
     sp<RigidBodyImpl> rigidBody = sp<RigidBodyImpl>::make(*this, type, std::move(shape), std::move(position), std::move(rotate), std::move(discarded));
-    const RigidBodyDef& rigidBodyDef = rigidBody->updateBodyDef(_narrow_phrase, sp<Vec3>::make<Vec3::Const>(size));
+    const RigidbodyDef& rigidBodyDef = rigidBody->updateBodyDef(_narrow_phrase, sp<Vec3>::make<Vec3::Const>(size));
     _rigid_bodies[rigidBody->ref()->id()] = rigidBody->ref();
 
     const V3 posVal = rigidBody->position().val();
@@ -284,12 +284,12 @@ void ColliderImpl::RigidBodyImpl::doDispose(ColliderImpl::Stub& stub)
     stub.requestRigidBodyRemoval(ref()->id());
 }
 
-const RigidBodyDef& ColliderImpl::RigidBodyImpl::bodyDef() const
+const RigidbodyDef& ColliderImpl::RigidBodyImpl::bodyDef() const
 {
     return _body_def;
 }
 
-const RigidBodyDef& ColliderImpl::RigidBodyImpl::updateBodyDef(NarrowPhrase& narrowPhrase, const SafeVar<Vec3>& size)
+const RigidbodyDef& ColliderImpl::RigidBodyImpl::updateBodyDef(NarrowPhrase& narrowPhrase, const SafeVar<Vec3>& size)
 {
     _body_def = narrowPhrase.makeBodyDef(_shape->type().id(), size);
     return _body_def;

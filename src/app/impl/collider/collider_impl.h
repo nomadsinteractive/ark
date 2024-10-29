@@ -92,8 +92,8 @@ public:
 
         void doDispose(ColliderImpl::Stub& stub);
 
-        const RigidBodyDef& bodyDef() const;
-        const RigidBodyDef& updateBodyDef(NarrowPhrase& narrowPhrase, const SafeVar<Vec3>& size);
+        const RigidbodyDef& bodyDef() const;
+        const RigidbodyDef& updateBodyDef(NarrowPhrase& narrowPhrase, const SafeVar<Vec3>& size);
 
         BroadPhrase::Candidate toBroadPhraseCandidate() const;
 
@@ -102,7 +102,7 @@ public:
         std::set<BroadPhrase::IdType> _dynamic_contacts;
         std::set<BroadPhrase::IdType> _static_contacts;
 
-        RigidBodyDef _body_def;
+        RigidbodyDef _body_def;
 
         bool _position_updated;
         bool _size_updated;

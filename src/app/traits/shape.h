@@ -23,6 +23,7 @@ public:
 public:
 //  [[script::bindings::auto]]
     Shape(const NamedType& type = {Shape::TYPE_NONE}, sp<Vec3> size = nullptr);
+    Shape(const NamedType& type, sp<Vec3> size, Box implementation);
 
 //  [[script::bindings::property]]
     const NamedType& type() const;
@@ -32,6 +33,8 @@ public:
 private:
     NamedType _type;
     SafeVar<Vec3> _size;
+
+    Box _implementation;
 };
 
 }

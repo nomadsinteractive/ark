@@ -12,6 +12,7 @@
 
 namespace ark {
 
+//[[script::bindings::extends(ModelLoader)]]
 class ARK_API ModelBundle final : public ModelLoader {
 public:
     struct MeshLayout {

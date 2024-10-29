@@ -28,9 +28,9 @@ namespace ark::plugin::bullet {
 //[[script::bindings::name("World")]]
 class ARK_PLUGIN_BULLET_API ColliderBullet final : public Runnable, public Collider, Implements<ColliderBullet, Runnable, Collider> {
 public:
-    class RigidBodyImporter {
+    class RigidbodyImporter {
     public:
-        virtual ~RigidBodyImporter() = default;
+        virtual ~RigidbodyImporter() = default;
 
         virtual void import(ColliderBullet& collider, const document& manifest) = 0;
     };
@@ -63,7 +63,7 @@ public:
     private:
         V3 _gravity;
         SafePtr<Builder<ModelLoader>> _model_loader;
-        std::vector<std::pair<sp<Builder<RigidBodyImporter>>, document>> _importers;
+        std::vector<std::pair<sp<Builder<RigidbodyImporter>>, document>> _importers;
 
         sp<ResourceLoaderContext> _resource_loader_context;
     };

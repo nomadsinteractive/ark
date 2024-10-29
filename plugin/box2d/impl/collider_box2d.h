@@ -77,9 +77,9 @@ public:
 
         std::vector<std::pair<sp<Builder<RigidBodyImporter>>, String>> _importers;
 
-        sp<Builder<Vec2>> _ppm;
-        sp<Builder<Vec2>> _gravity;
-        SafePtr<Builder<Boolean>> _disposed;
+        V2 _ppm;
+        V2 _gravity;
+        SafePtr<Builder<Boolean>> _discarded;
     };
 
 //  [[plugin::resource-loader("b2World")]]

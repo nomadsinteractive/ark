@@ -56,33 +56,23 @@ private:
     bool _is_static_body;
 };
 
-class DynamicTransform final : public Transform::Delegate {
+class DynamicRotation final : public Vec4 {
 public:
-    DynamicTransform(const sp<btMotionState>& motionState)
+    DynamicRotation(const sp<btMotionState>& motionState)
         : _motion_state(motionState) {
     }
 
-    bool update(const Transform::Stub& transform, uint64_t timestamp) override
+    bool update(uint64_t timestamp) override
     {
         return true;
     }
 
-    void snapshot(const Transform::Stub& /*transform*/, Transform::Snapshot& snapshot) const override
+    V4 val() override
     {
         btTransform transform;
         _motion_state->getWorldTransform(transform);
-        transform.setOrigin(btVector3(0, 0, 0));
-        transform.getOpenGLMatrix(snapshot.makeData<M4>().value());
-    }
-
-    V3 transform(const Transform::Snapshot& snapshot, const V3& position) const override
-    {
-        return position;
-    }
-
-    M4 toMatrix(const Transform::Snapshot& snapshot) const override
-    {
-        return snapshot.getData<M4>();
+        const btQuaternion quaternion = transform.getRotation();
+        return {quaternion.x(), quaternion.y(), quaternion.z(), quaternion.w()};
     }
 
 private:
@@ -138,15 +128,14 @@ sp<Rigidbody> ColliderBullet::createBody(Collider::BodyType type, sp<Shape> shap
     {
         sp<BtRigidbodyRef> rigidbody = makeGhostObject(btDynamicWorld(), cs->btShape(), type);
         _stub->_kinematic_objects.emplace_back(KinematicObject(position, rotation, rigidbody));
-        return sp<RigidbodyBullet>::make(++ _stub->_body_id_base, type, *this, std::move(cs), position,
-                                         sp<Transform>::make(Transform::TYPE_LINEAR_3D, rotation), std::move(rigidbody));
+        return sp<Rigidbody>::make<RigidbodyBullet>(++ _stub->_body_id_base, type, *this, std::move(cs), position, std::move(rotation), std::move(rigidbody));
     }
 
     const float mass = type == BODY_TYPE_DYNAMIC ? cs->mass() : 0;
     sp<btMotionState> motionState = sp<btDefaultMotionState>::make(transform);
     sp<BtRigidbodyRef> rigidBody = makeRigidBody(btDynamicWorld(), cs->btShape(), motionState.get(), type, mass);
-    return sp<RigidbodyBullet>::make(++ _stub->_body_id_base, type, *this, std::move(cs), sp<DynamicPosition>::make(motionState, type == BODY_TYPE_STATIC),
-                                     sp<Transform>::make(sp<DynamicTransform>::make(motionState)), std::move(rigidBody));
+    sp<Vec3> btPosition = sp<Vec3>::make<DynamicPosition>(motionState, type == BODY_TYPE_STATIC);
+    return sp<Rigidbody>::make<RigidbodyBullet>(++ _stub->_body_id_base, type, *this, std::move(cs), std::move(btPosition), sp<Vec4>::make<DynamicRotation>(std::move(motionState)), std::move(rigidBody));
 }
 
 void ColliderBullet::rayCastClosest(const V3& from, const V3& to, const sp<CollisionCallback>& callback, int32_t filterGroup, int32_t filterMask) const
@@ -212,7 +201,7 @@ std::unordered_map<TypeId, sp<CollisionShape>>& ColliderBullet::collisionShapes(
 
 void ColliderBullet::myInternalPreTickCallback(btDynamicsWorld* dynamicsWorld, btScalar /*timeStep*/)
 {
-    ColliderBullet* self = static_cast<ColliderBullet*>(dynamicsWorld->getWorldUserInfo());
+    const ColliderBullet* self = static_cast<ColliderBullet*>(dynamicsWorld->getWorldUserInfo());
     const uint64_t tick = Ark::instance().applicationContext()->renderController()->tick();
     for(const KinematicObject& i : self->_stub->_kinematic_objects)
     {
@@ -371,7 +360,7 @@ ColliderBullet::BUILDER_IMPL1::BUILDER_IMPL1(BeanFactory& factory, const documen
       _resource_loader_context(resourceLoaderContext)
 {
     for(const auto& i : manifest->children("import"))
-        _importers.emplace_back(factory.ensureBuilder<RigidBodyImporter>(i), i);
+        _importers.emplace_back(factory.ensureBuilder<RigidbodyImporter>(i), i);
 }
 
 sp<ColliderBullet> ColliderBullet::BUILDER_IMPL1::build(const Scope& args)

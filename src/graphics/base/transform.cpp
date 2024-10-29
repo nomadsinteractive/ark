@@ -74,13 +74,13 @@ private:
     M4 _value;
 };
 
-Transform::Transform(Type type, sp<Rotation> rotation, sp<Vec3> scale, sp<Vec3> translation)
+Transform::Transform(Type type, sp<Vec4> rotation, sp<Vec3> scale, sp<Vec3> translation)
     : _type(type), _stub(sp<Stub>::make(Stub{{std::move(rotation), constants::QUATERNION_ONE}, {std::move(scale), V3(1.0f)}, {std::move(translation)}}))
 {
     doUpdateDelegate();
 }
 
-Transform::Transform(sp<Transform::Delegate> delegate)
+Transform::Transform(sp<Delegate> delegate)
     : _type(TYPE_DELEGATED), _stub(sp<Stub>::make(Stub{{nullptr, constants::QUATERNION_ONE}, {nullptr, V3(1.0f)}, {}})), _delegate(std::move(delegate))
 {
     doUpdateDelegate();
@@ -101,12 +101,12 @@ M4 Transform::val()
     return _wrapped->val();
 }
 
-const sp<Rotation>& Transform::rotation()
+const sp<Vec4>& Transform::rotation()
 {
     return tryUpdateDelegate(_stub->_rotation);
 }
 
-void Transform::setRotation(sp<Rotation> rotation)
+void Transform::setRotation(sp<Vec4> rotation)
 {
     _stub->_rotation.reset(std::move(rotation));
     doUpdateDelegate();

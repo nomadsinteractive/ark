@@ -17,7 +17,7 @@ namespace ark {
 class ARK_API Transform final : public Wrapper<Mat4>, public Mat4 {
 public:
     struct Stub {
-        SafeVar<Rotation> _rotation;
+        SafeVar<Vec4> _rotation;
         SafeVar<Vec3> _scale;
         SafeVar<Vec3> _translation;
     };
@@ -43,7 +43,7 @@ public:
     };
 
 //  [[script::bindings::auto]]
-    Transform(Transform::Type type = Transform::TYPE_LINEAR_3D, sp<Rotation> rotation = nullptr, sp<Vec3> scale = nullptr, sp<Vec3> translation = nullptr);
+    Transform(Transform::Type type = Transform::TYPE_LINEAR_3D, sp<Vec4> rotation = nullptr, sp<Vec3> scale = nullptr, sp<Vec3> translation = nullptr);
     Transform(sp<Delegate> delegate);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Transform);
 
@@ -80,9 +80,9 @@ public:
     M4 val() override;
 
 //  [[script::bindings::property]]
-    const sp<Rotation>& rotation();
+    const sp<Vec4>& rotation();
 //  [[script::bindings::property]]
-    void setRotation(sp<Rotation> rotation);
+    void setRotation(sp<Vec4> rotation);
 
 //  [[script::bindings::property]]
     const sp<Vec3>& scale();

@@ -18,7 +18,7 @@ class NarrowPhraseCuteC2 : public NarrowPhrase {
 public:
     NarrowPhraseCuteC2(const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-    RigidBodyDef makeBodyDef(TypeId shapeId, const SafeVar<Vec3>& size) override;
+    RigidbodyDef makeBodyDef(TypeId shapeId, const SafeVar<Vec3>& size) override;
 
     Ray toRay(const V2& from, const V2& to) override;
 

@@ -11,9 +11,7 @@
 
 #include "plugin/bullet/base/collision_shape.h"
 
-namespace ark {
-namespace plugin {
-namespace bullet {
+namespace ark::plugin::bullet {
 
 ConvexHullRigidBodyImporter::ConvexHullRigidBodyImporter(sp<ModelLoader> modelLoader)
     : _model_loader(std::move(modelLoader))
@@ -50,11 +48,9 @@ ConvexHullRigidBodyImporter::BUILDER::BUILDER(BeanFactory& factory, const docume
 {
 }
 
-sp<ColliderBullet::RigidBodyImporter> ConvexHullRigidBodyImporter::BUILDER::build(const Scope& args)
+sp<ColliderBullet::RigidbodyImporter> ConvexHullRigidBodyImporter::BUILDER::build(const Scope& args)
 {
     return sp<ConvexHullRigidBodyImporter>::make(_model_loader->build(args));
 }
 
-}
-}
 }

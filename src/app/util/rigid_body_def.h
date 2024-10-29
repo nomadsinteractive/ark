@@ -9,18 +9,15 @@
 
 namespace ark {
 
-class ARK_API RigidBodyDef {
+class ARK_API [[deprecated]] RigidbodyDef {
 public:
-    RigidBodyDef() = default;
-    RigidBodyDef(const V3& size, const V3& pivot, Box impl);
-    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(RigidBodyDef);
+    RigidbodyDef() = default;
+    RigidbodyDef(const V3& size, const V3& pivot, Box impl);
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(RigidbodyDef);
 
-//  [[script::bindings::property]]
     const V3& size() const;
-//  [[script::bindings::property]]
     const V3& pivot() const;
 
-//  [[script::bindings::property]]
     float occupyRadius() const;
 
     const Box& impl() const;

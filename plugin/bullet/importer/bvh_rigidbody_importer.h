@@ -4,18 +4,18 @@
 
 namespace ark::plugin::bullet {
 
-class BvhRigidBodyImporter : public ColliderBullet::RigidBodyImporter {
+class BvhRigidbodyImporter : public ColliderBullet::RigidbodyImporter {
 public:
-    BvhRigidBodyImporter(sp<ModelLoader> modelLoader);
+    BvhRigidbodyImporter(sp<ModelLoader> modelLoader);
 
     virtual void import(ColliderBullet& collider, const document& manifest) override;
 
 //  [[plugin::builder("Bvh")]]
-    class BUILDER : public Builder<ColliderBullet::RigidBodyImporter> {
+    class BUILDER : public Builder<ColliderBullet::RigidbodyImporter> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<ColliderBullet::RigidBodyImporter> build(const Scope& args) override;
+        virtual sp<ColliderBullet::RigidbodyImporter> build(const Scope& args) override;
 
     private:
         SafePtr<Builder<ModelLoader>> _model_loader;

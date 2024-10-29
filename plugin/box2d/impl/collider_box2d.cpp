@@ -143,8 +143,8 @@ void ColliderBox2D::setBodyManifest(int32_t id, const BodyCreateInfo& bodyManife
 }
 
 ColliderBox2D::BUILDER_IMPL1::BUILDER_IMPL1(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _factory(factory), _manifest(manifest), _resource_loader_context(resourceLoaderContext), _ppm(factory.ensureBuilder<Vec2>(manifest, "pixel-per-meter")),
-      _gravity(factory.ensureBuilder<Vec2>(manifest, "gravity")), _disposed(factory.getBuilder<Boolean>(manifest, constants::DISCARDED))
+    : _factory(factory), _manifest(manifest), _resource_loader_context(resourceLoaderContext), _ppm(Documents::ensureAttribute<V2>(manifest, "pixel-per-meter")),
+      _gravity(Documents::getAttribute<V2>(manifest, "gravity", {0, -9.8f})), _discarded(factory.getBuilder<Boolean>(manifest, constants::DISCARDED))
 {
     for(const document& i : _manifest->children("import"))
         _importers.push_back({_factory.ensureBuilder<RigidBodyImporter>(i), Documents::ensureAttribute(i, constants::SRC)});
@@ -152,13 +152,11 @@ ColliderBox2D::BUILDER_IMPL1::BUILDER_IMPL1(BeanFactory& factory, const document
 
 sp<ColliderBox2D> ColliderBox2D::BUILDER_IMPL1::build(const Scope& args)
 {
-    const V2 g = _gravity->build(args)->val();
-    b2Vec2 gravity(g.x(), g.y());
-    const sp<ColliderBox2D> world = sp<ColliderBox2D>::make(gravity, _ppm->build(args)->val());
+    b2Vec2 gravity(_gravity.x(), _gravity.y());
+    const sp<ColliderBox2D> world = sp<ColliderBox2D>::make(gravity, _ppm);
     for(const document& i : _manifest->children("rigid-body"))
     {
-        int32_t type = Documents::ensureAttribute<int32_t>(i, constants::TYPE);
-
+        const int32_t type = Documents::ensureAttribute<int32_t>(i, constants::TYPE);
         BodyCreateInfo bodyCreateInfo(_factory.ensure<Shape>(i, "shape", args), Documents::getAttribute<float>(i, "density", 1.0f),
                                       Documents::getAttribute<float>(i, "friction", 0.2f), Documents::getAttribute<bool>(i, "is-sensor", false));
         bodyCreateInfo.category = Documents::getAttribute<uint16_t>(i, "category", 0);
@@ -167,15 +165,15 @@ sp<ColliderBox2D> ColliderBox2D::BUILDER_IMPL1::build(const Scope& args)
         world->_stub->_body_manifests[type] = bodyCreateInfo;
     }
 
-    Ark& ark = Ark::instance();
-    for(const auto& i : _importers)
+    const Ark& ark = Ark::instance();
+    for(const auto& [k, v] : _importers)
     {
-        const sp<RigidBodyImporter> importer = i.first->build(args);
-        importer->import(world, ark.openAsset(i.second));
+        const sp<RigidBodyImporter> importer = k->build(args);
+        importer->import(*world, ark.openAsset(v));
     }
 
-    const sp<Boolean> expired = _disposed->build(args);
-    _resource_loader_context->renderController()->addPreComposeRunnable(world->_stub, expired ? expired : BooleanType::__or__(_resource_loader_context->disposed(), sp<Boolean>::make<BooleanByWeakRef<ColliderBox2D::Stub>>(world->_stub, 1)));
+    const sp<Boolean> discarded = _discarded->build(args);
+    _resource_loader_context->renderController()->addPreComposeRunnable(world->_stub, discarded ? discarded : BooleanType::__or__(_resource_loader_context->disposed(), sp<Boolean>::make<BooleanByWeakRef<ColliderBox2D::Stub>>(world->_stub, 1)));
     return world;
 }
 

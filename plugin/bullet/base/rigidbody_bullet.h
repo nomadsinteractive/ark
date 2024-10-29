@@ -19,7 +19,7 @@ namespace ark::plugin::bullet {
 //[[script::bindings::name("Rigidbody")]]
 class ARK_PLUGIN_BULLET_API RigidbodyBullet final : public Rigidbody, Implements<RigidbodyBullet, Rigidbody>  {
 public:
-    RigidbodyBullet(int32_t id, Collider::BodyType type, ColliderBullet world, sp<CollisionShape> collisionShape, sp<Vec3> position, sp<Transform> transform, sp<BtRigidbodyRef> rigidBody);
+    RigidbodyBullet(int32_t id, Collider::BodyType type, ColliderBullet world, sp<CollisionShape> collisionShape, sp<Vec3> position, sp<Vec4> quaternion, sp<BtRigidbodyRef> rigidBody);
 
 //  [[script::bindings::auto]]
     void applyCentralForce(const V3& force);

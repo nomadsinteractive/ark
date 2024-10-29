@@ -20,8 +20,8 @@ RigidbodyBullet::Stub::~Stub()
     _rigid_body->reset();
 }
 
-RigidbodyBullet::RigidbodyBullet(int32_t id, Collider::BodyType type, ColliderBullet world, sp<CollisionShape> collisionShape, sp<Vec3> position, sp<Transform> transform, sp<BtRigidbodyRef> rigidBody)
-    : Rigidbody(type, nullptr, std::move(position), transform->rotation(), sp<Stub>::make(std::move(world), std::move(collisionShape), std::move(rigidBody)), nullptr),
+RigidbodyBullet::RigidbodyBullet(int32_t id, Collider::BodyType type, ColliderBullet world, sp<CollisionShape> collisionShape, sp<Vec3> position, sp<Vec4> quaternion, sp<BtRigidbodyRef> rigidBody)
+    : Rigidbody(type, nullptr, std::move(position), std::move(quaternion), sp<Stub>::make(std::move(world), std::move(collisionShape), std::move(rigidBody)), nullptr),
       _stub(_impl.toPtr<Stub>())
 {
     _stub->_rigid_body->collisionObject()->setUserPointer(this);

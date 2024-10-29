@@ -4,25 +4,22 @@
 
 namespace ark::plugin::bullet {
 
-class GImpactRigidBodyImporter : public ColliderBullet::RigidBodyImporter {
+class GImpactRigidbodyImporter : public ColliderBullet::RigidbodyImporter {
 public:
-    GImpactRigidBodyImporter(sp<ModelLoader> modelLoader);
+    GImpactRigidbodyImporter(sp<ModelLoader> modelLoader);
 
     void import(ColliderBullet& collider, const document& manifest) override;
 
 //  [[plugin::builder("GImpact")]]
-    class BUILDER : public Builder<ColliderBullet::RigidBodyImporter> {
+    class BUILDER : public Builder<ColliderBullet::RigidbodyImporter> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<ColliderBullet::RigidBodyImporter> build(const Scope& args) override;
+        virtual sp<ColliderBullet::RigidbodyImporter> build(const Scope& args) override;
 
     private:
         SafePtr<Builder<ModelLoader>> _model_loader;
     };
-
-private:
-    sp<CollisionShape> makeCollisionShape(const Model& model, btScalar mass);
 
 private:
     sp<ModelLoader> _model_loader;

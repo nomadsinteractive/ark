@@ -1,4 +1,4 @@
-#include "plugin/bullet/importer/bvh_rigid_body_importer.h"
+#include "plugin/bullet/importer/bvh_rigidbody_importer.h"
 
 #include "core/base/bean_factory.h"
 #include "core/dom/dom_document.h"
@@ -28,12 +28,12 @@ private:
 
 }
 
-BvhRigidBodyImporter::BvhRigidBodyImporter(sp<ModelLoader> modelLoader)
+BvhRigidbodyImporter::BvhRigidbodyImporter(sp<ModelLoader> modelLoader)
     : _model_loader(std::move(modelLoader))
 {
 }
 
-void BvhRigidBodyImporter::import(ColliderBullet& collider, const document& manifest)
+void BvhRigidbodyImporter::import(ColliderBullet& collider, const document& manifest)
 {
     std::unordered_map<TypeId, sp<CollisionShape>>& shapes = collider.collisionShapes();
     for(const document& i : manifest->children("model"))
@@ -44,7 +44,7 @@ void BvhRigidBodyImporter::import(ColliderBullet& collider, const document& mani
     }
 }
 
-sp<CollisionShape> BvhRigidBodyImporter::makeCollisionShape(const Model& model)
+sp<CollisionShape> BvhRigidbodyImporter::makeCollisionShape(const Model& model)
 {
     btTriangleIndexVertexArray* tiva = new btTriangleIndexVertexArray();
     CHECK(!model.meshes().empty(), "This model has no meshes data");
@@ -64,14 +64,14 @@ sp<CollisionShape> BvhRigidBodyImporter::makeCollisionShape(const Model& model)
     return sp<BvhCollisionShape>::make(bvhShape, tiva);
 }
 
-BvhRigidBodyImporter::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+BvhRigidbodyImporter::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _model_loader(factory.ensureBuilder<ModelLoader>(manifest, "model-loader"))
 {
 }
 
-sp<ColliderBullet::RigidBodyImporter> BvhRigidBodyImporter::BUILDER::build(const Scope& args)
+sp<ColliderBullet::RigidbodyImporter> BvhRigidbodyImporter::BUILDER::build(const Scope& args)
 {
-    return sp<RigidBodyImporter>::make<BvhRigidBodyImporter>(_model_loader->build(args));
+    return sp<RigidbodyImporter>::make<BvhRigidbodyImporter>(_model_loader->build(args));
 }
 
 }
