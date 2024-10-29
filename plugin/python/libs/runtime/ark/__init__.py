@@ -23,6 +23,7 @@ TYPE_NUMERIC = Union[TYPE_INT_OR_FLOAT, 'Numeric']
 TYPE_RECT = tuple[TYPE_INT_OR_FLOAT, TYPE_INT_OR_FLOAT, TYPE_INT_OR_FLOAT, TYPE_INT_OR_FLOAT]
 TYPE_VEC2 = Union[tuple[TYPE_NUMERIC, TYPE_NUMERIC], 'Vec2']
 TYPE_VEC3 = Union[tuple[TYPE_NUMERIC, TYPE_NUMERIC, TYPE_NUMERIC], TYPE_VEC2, 'Vec3']
+TYPE_VEC4 = Union[tuple[TYPE_NUMERIC, TYPE_NUMERIC, TYPE_NUMERIC, TYPE_NUMERIC],'Vec4']
 TYPE_RECTI = tuple[int, int, int, int]
 TYPE_FLOAT4 = tuple[float, float, float, float]
 TYPE_M4 = tuple[TYPE_FLOAT4, TYPE_FLOAT4, TYPE_FLOAT4, TYPE_FLOAT4]
@@ -1825,38 +1826,41 @@ class Rotation(Vec4):
 
 
 class Transform(Mat4):
-    TYPE_LINEAR_2D = 0
-    TYPE_LINEAR_3D = 1
+    TYPE_NONE = 0
+    TYPE_LINEAR_2D = 1
+    TYPE_LINEAR_3D = 2
 
-    def __init__(self, t: int = TYPE_LINEAR_3D, rotation: Optional[Rotation] = None, scale: TYPE_VEC3 | None = None, translation: Vec3 | Vec2 | None = None):
-        self._type = t
-        self._rotation = rotation
-        self._scale = scale
-        self._translation = translation
+    def __init__(self, rotation: Optional[TYPE_VEC4] = None, scale: Optional[TYPE_VEC3] = None, translation: Optional[TYPE_VEC3] = None, t: int = TYPE_NONE):
+        pass
 
     @property
-    def rotation(self) -> Rotation:
-        return self._rotation
+    def rotation(self) -> Vec4:
+        pass
 
     @rotation.setter
-    def rotation(self, v: Rotation):
-        self._rotation = v
+    def rotation(self, rotation: Vec4):
+        pass
 
     @property
     def scale(self) -> Vec3:
-        return self._scale
+        pass
 
     @scale.setter
     def scale(self, v):
-        self._scale = v
+        pass
 
     @property
     def translation(self) -> Vec3:
-        return self._translation
+        pass
 
     @translation.setter
     def translation(self, v):
-        self._translation = v
+        pass
+
+
+class Transform3D(Transform):
+    def __init__(self, rotation: Optional[TYPE_VEC4] = None, scale: Optional[TYPE_VEC3] = None, translation: Optional[TYPE_VEC3] = None):
+        pass
 
 
 class Random:

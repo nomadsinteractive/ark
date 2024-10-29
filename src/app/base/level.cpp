@@ -50,7 +50,7 @@ sp<Transform> makeTransform(const String& rotation, const String& scale)
 {
     const V3 s = scale ? Strings::eval<V3>(scale) : V3(1.0f);
     const V4 quat = Strings::eval<V4>(rotation);
-    return sp<Transform>::make(Transform::TYPE_LINEAR_3D, sp<Rotation>::make(quat), sp<Vec3>::make<Vec3::Const>(s));
+    return sp<Transform>::make(sp<Rotation>::make(quat), sp<Vec3>::make<Vec3::Const>(s), nullptr, Transform::TYPE_LINEAR_3D);
 }
 
 sp<RenderObject> makeRenderObject(const document& manifest, int32_t type, bool visible)

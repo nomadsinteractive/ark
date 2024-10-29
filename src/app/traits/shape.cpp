@@ -5,7 +5,7 @@
 namespace ark {
 
 Shape::Shape(const NamedType& type, sp<Vec3> size)
-    : _type(type), _size(std::move(size))
+    : Shape(type, std::move(size), {})
 {
 }
 

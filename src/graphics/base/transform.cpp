@@ -6,10 +6,8 @@
 #include "core/inf/variable.h"
 #include "core/types/global.h"
 #include "core/types/null.h"
-#include "core/util/string_convert.h"
 
 #include "graphics/base/v3.h"
-#include "graphics/impl/transform/transform_none.h"
 #include "graphics/impl/transform/transform_linear_2d.h"
 #include "graphics/impl/transform/transform_simple_2d.h"
 #include "graphics/impl/transform/transform_linear_3d.h"
@@ -18,6 +16,29 @@
 namespace ark {
 
 namespace {
+
+class TransformNone final : public Transform::Delegate {
+public:
+
+    bool TransformNone::update(const Transform::Stub& transform, uint64_t timestamp) override
+    {
+        return false;
+    }
+
+    void TransformNone::snapshot(const Transform::Stub& /*transform*/, Transform::Snapshot& snapshot) const override
+    {
+    }
+
+    V3 TransformNone::transform(const Transform::Snapshot& snapshot, const V3& position) const override
+    {
+        return position;
+    }
+
+    M4 TransformNone::toMatrix(const Transform::Snapshot& /*snapshot*/) const override
+    {
+        return M4::identity();
+    }
+};
 
 class TransformDelegateMat4 final : public Transform::Delegate {
 public:
@@ -74,7 +95,7 @@ private:
     M4 _value;
 };
 
-Transform::Transform(Type type, sp<Vec4> rotation, sp<Vec3> scale, sp<Vec3> translation)
+Transform::Transform(sp<Vec4> rotation, sp<Vec3> scale, sp<Vec3> translation, Type type)
     : _type(type), _stub(sp<Stub>::make(Stub{{std::move(rotation), constants::QUATERNION_ONE}, {std::move(scale), V3(1.0f)}, {std::move(translation)}}))
 {
     doUpdateDelegate();
@@ -93,12 +114,12 @@ Transform::Snapshot Transform::snapshot() const
 
 bool Transform::update(uint64_t timestamp)
 {
-    return _wrapped->update(timestamp);
+    return _matrix.update(timestamp);
 }
 
 M4 Transform::val()
 {
-    return _wrapped->val();
+    return _matrix.val();
 }
 
 const sp<Vec4>& Transform::rotation()
@@ -143,16 +164,19 @@ void Transform::reset(sp<Mat4> transform)
 
 void Transform::doUpdateDelegate()
 {
-    if(_type != TYPE_DELEGATED)
-        _delegate = makeDelegate();
-    _wrapped = sp<Mat4>::make<VariableDirty<M4>>(sp<Mat4>::make<TransformToMat4>(*this), *this);
+    if(_type != TYPE_NONE)
+    {
+        if(_type != TYPE_DELEGATED)
+            _delegate = makeDelegate();
+        _matrix.reset(sp<Mat4>::make<VariableDirty<M4>>(sp<Mat4>::make<TransformToMat4>(*this), _matrix));
+    }
 }
 
 sp<Transform::Delegate> Transform::makeDelegate() const
 {
     CHECK(_type != TYPE_DELEGATED, "Delegated Transform may not be updated");
 
-    if(!_stub->_rotation && !_stub->_scale && !_stub->_translation)
+    if(_type == TYPE_NONE || (!_stub->_rotation && !_stub->_scale && !_stub->_translation))
         return Global<TransformNone>().cast<Delegate>();
 
     return _stub->_rotation ? makeTransformLinear() : makeTransformSimple();
@@ -160,12 +184,12 @@ sp<Transform::Delegate> Transform::makeDelegate() const
 
 sp<Transform::Delegate> Transform::makeTransformLinear() const
 {
-    return _type == TYPE_LINEAR_2D ? Global<TransformLinear2D>().cast<Transform::Delegate>() : Global<TransformLinear3D>().cast<Transform::Delegate>();
+    return _type == TYPE_LINEAR_2D ? Global<TransformLinear2D>().cast<Delegate>() : Global<TransformLinear3D>().cast<Delegate>();
 }
 
 sp<Transform::Delegate> Transform::makeTransformSimple() const
 {
-    return _type == TYPE_LINEAR_2D ? Global<TransformSimple2D>().cast<Transform::Delegate>() : Global<TransformSimple3D>().cast<Transform::Delegate>();
+    return _type == TYPE_LINEAR_2D ? Global<TransformSimple2D>().cast<Delegate>() : Global<TransformSimple3D>().cast<Delegate>();
 }
 
 Transform::Snapshot::Snapshot(const Transform& transform)
@@ -186,15 +210,7 @@ V3 Transform::Snapshot::transform(const V3& p) const
 
 template<> ARK_API sp<Transform> Null::safePtr()
 {
-    return sp<Transform>::make();
-}
-
-template<> ARK_API Transform::Type StringConvert::eval<Transform::Type>(const String& str)
-{
-    if(str == "2d")
-        return Transform::TYPE_LINEAR_2D;
-    DCHECK(str == "3d", "Unknow transform type: %s", str.c_str());
-    return Transform::TYPE_LINEAR_3D;
+    return sp<Transform>::make(nullptr, nullptr, nullptr, Transform::TYPE_LINEAR_3D);
 }
 
 }

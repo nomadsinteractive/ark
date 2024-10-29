@@ -14,7 +14,7 @@
 namespace ark {
 
 //[[script::bindings::extends(Mat4)]]
-class ARK_API Transform final : public Wrapper<Mat4>, public Mat4 {
+class ARK_API Transform : public Mat4 {
 public:
     struct Stub {
         SafeVar<Vec4> _rotation;
@@ -37,13 +37,14 @@ public:
 
 //  [[script::bindings::enumeration]]
     enum Type {
+        TYPE_NONE,
         TYPE_LINEAR_2D,
         TYPE_LINEAR_3D,
         TYPE_DELEGATED
     };
 
 //  [[script::bindings::auto]]
-    Transform(Transform::Type type = Transform::TYPE_LINEAR_3D, sp<Vec4> rotation = nullptr, sp<Vec3> scale = nullptr, sp<Vec3> translation = nullptr);
+    Transform(sp<Vec4> rotation = nullptr, sp<Vec3> scale = nullptr, sp<Vec3> translation = nullptr, Transform::Type type = Transform::TYPE_NONE);
     Transform(sp<Delegate> delegate);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Transform);
 
@@ -118,12 +119,12 @@ private:
     sp<Stub> _stub;
     sp<Delegate> _delegate;
 
+    SafeVar<Mat4> _matrix;
+
     friend class TransformSimple2D;
     friend class TransformSimple3D;
     friend class TransformLinear2D;
     friend class TransformLinear3D;
-    friend class TransformTRS;
-    friend class TransformNone;
 
     class TransformToMat4;
 };
