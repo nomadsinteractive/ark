@@ -83,7 +83,7 @@ private:
 
 sp<CollisionShape> makeConvexHullCollisionShape(const Model& model, btScalar mass)
 {
-    btConvexHullShape* convexHullShape = new btConvexHullShape();
+    const sp<btConvexHullShape> convexHullShape = sp<btConvexHullShape>::make();
 
     CHECK(!model.meshes().empty(), "ConvexHullRigidBodyImporter only works with Mesh based models");
     for(const Mesh& i : model.meshes())
@@ -118,7 +118,7 @@ sp<Rigidbody> ColliderBullet::createBody(Collider::BodyType type, sp<Shape> shap
     if(!cs)
         if(const auto iter = _stub->_collision_shapes.find(shape->type().id()); iter == _stub->_collision_shapes.end())
         {
-            btCollisionShape* btShape;
+            btCollisionShape* btShape = nullptr;
             const V3 size = shape->size().val();
             switch(shape->type().id())
             {
@@ -136,21 +136,21 @@ sp<Rigidbody> ColliderBullet::createBody(Collider::BodyType type, sp<Shape> shap
                 FATAL("Undefined shape type %d(%s) in this world", shape->type().id(), shape->type().name().c_str());
                 break;
             }
-            cs = sp<CollisionShape>::make(btShape, 1.0f);
+            cs = sp<CollisionShape>::make(sp<btCollisionShape>::adopt(btShape), 1.0f);
         }
         else
             cs = iter->second;
 
     if(type == BODY_TYPE_SENSOR)
     {
-        sp<BtRigidbodyRef> rigidbody = makeGhostObject(btDynamicWorld(), cs->btShape(), type);
+        sp<BtRigidbodyRef> rigidbody = makeGhostObject(btDynamicWorld(), cs->btShape().get(), type);
         _stub->_kinematic_objects.emplace_back(KinematicObject(position, rotation, rigidbody));
         return sp<Rigidbody>::make<RigidbodyBullet>(++ _stub->_body_id_base, type, *this, std::move(cs), std::move(position), std::move(rotation), std::move(rigidbody));
     }
 
     const float mass = type == BODY_TYPE_DYNAMIC ? cs->mass() : 0;
     sp<btMotionState> motionState = sp<btDefaultMotionState>::make(btTrans);
-    sp<BtRigidbodyRef> rigidBody = makeRigidBody(btDynamicWorld(), cs->btShape(), motionState.get(), type, mass);
+    sp<BtRigidbodyRef> rigidBody = makeRigidBody(btDynamicWorld(), cs->btShape().get(), motionState.get(), type, mass);
     sp<Vec3> btPosition = sp<Vec3>::make<DynamicPosition>(motionState, type == BODY_TYPE_STATIC);
     return sp<Rigidbody>::make<RigidbodyBullet>(++ _stub->_body_id_base, type, *this, std::move(cs), std::move(btPosition), sp<Vec4>::make<DynamicRotation>(std::move(motionState)), std::move(rigidBody));
 }

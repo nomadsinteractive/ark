@@ -39,14 +39,14 @@ public:
     virtual void onBeginContact(const Rigidbody& rigidBody, const CollisionManifold& manifold) override {
         const V3 p1 = _render_object->position()->val();
         const V3 p2 = rigidBody.position().val();
-        printf("onBeginContact: (%.2f, %.2f, %.2f) - (%.2f, %.2f, %.2f) rotation: %s\n", p1.x(), p1.y(), p1.z(), p2.x(), p2.y(), p2.z(), Strings::toString(_render_object->transform()->rotation()->val()).c_str());
+        printf("onBeginContact: (%.2f, %.2f, %.2f) - (%.2f, %.2f, %.2f) rotation: %s\n", p1.x(), p1.y(), p1.z(), p2.x(), p2.y(), p2.z(), Strings::toString(_render_object->transform()->rotation().val()).c_str());
         _contact_began = true;
     }
 
     virtual void onEndContact(const Rigidbody& rigidBody) override {
         const V3 p1 = _render_object->position()->val();
         const V3 p2 = rigidBody.position().val();
-        printf("onEndContact: (%.2f, %.2f, %.2f) - (%.2f, %.2f, %.2f) rotation: %s\n", p1.x(), p1.y(), p1.z(), p2.x(), p2.y(), p2.z(), Strings::toString(_render_object->transform()->rotation()->val()).c_str());
+        printf("onEndContact: (%.2f, %.2f, %.2f) - (%.2f, %.2f, %.2f) rotation: %s\n", p1.x(), p1.y(), p1.z(), p2.x(), p2.y(), p2.z(), Strings::toString(_render_object->transform()->rotation().val()).c_str());
         if(_contact_began)
             _contact_ended = true;
     }
@@ -86,7 +86,7 @@ public:
         const sp<RenderObject> c002 = resourceLoader->load<RenderObject>("c002", args);
         const sp<Rigidbody> rigidBody002 = collider->createBody(Collider::BODY_TYPE_STATIC, sp<Shape>::make(Shape::TYPE_AABB, static_cast<sp<Vec3>>(c002->size())), c002->position());
         const sp<RenderObject> c003 = resourceLoader->load<RenderObject>("c003", args);
-        const sp<Rigidbody> rigidBody003 = collider->createBody(Collider::BODY_TYPE_DYNAMIC, sp<Shape>::make(1, static_cast<sp<Vec3>>(c003->size())), c003->position(), c003->transform()->rotation());
+        const sp<Rigidbody> rigidBody003 = collider->createBody(Collider::BODY_TYPE_DYNAMIC, sp<Shape>::make(1, static_cast<sp<Vec3>>(c003->size())), c003->position(), c003->transform()->rotation().wrapped());
         const sp<CollisionCallbackImpl> collisionCallbackImpl001 = sp<CollisionCallbackImpl>::make(c001);
         const sp<CollisionCallbackImpl> collisionCallbackImpl003 = sp<CollisionCallbackImpl>::make(c003);
         rigidBody001->setCollisionCallback(collisionCallbackImpl001);

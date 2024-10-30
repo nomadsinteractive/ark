@@ -228,7 +228,7 @@ public:
     }
 
     static sp<VarType> freeze(const sp<VarType>& self) {
-        return sp<typename VarType::Const>::make(self->val());
+        return self ? sp<typename VarType::Const>::make(self->val()) : nullptr;
     }
 
     static sp<VarType> wrap(sp<VarType> self) {

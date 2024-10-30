@@ -21,8 +21,8 @@ namespace {
 
 class GImpactCollisionShape final : public CollisionShape {
 public:
-    GImpactCollisionShape(btGImpactMeshShape* shape, btTriangleIndexVertexArray* tiva, btScalar mass)
-        : CollisionShape(shape, mass), _tiva(tiva) {
+    GImpactCollisionShape(sp<btCollisionShape> shape, btTriangleIndexVertexArray* tiva, btScalar mass)
+        : CollisionShape(std::move(shape), mass), _tiva(tiva) {
     }
 
 private:
@@ -46,7 +46,7 @@ sp<CollisionShape> makeCollisionShape(const Model& model, btScalar mass)
         tiva->addIndexedMesh(indexedMesh, indexType);
     }
 
-    btGImpactMeshShape* gImpactShape = new btGImpactMeshShape(tiva);
+    const sp<btGImpactMeshShape> gImpactShape = sp<btGImpactMeshShape>::make(tiva);
     gImpactShape->postUpdate();
     gImpactShape->updateBound();
     return sp<CollisionShape>::make<GImpactCollisionShape>(gImpactShape, tiva, mass);

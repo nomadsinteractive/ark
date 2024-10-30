@@ -20,21 +20,21 @@ namespace {
 class TransformNone final : public Transform::Delegate {
 public:
 
-    bool TransformNone::update(const Transform::Stub& transform, uint64_t timestamp) override
+    bool update(const Transform::Stub& transform, uint64_t timestamp) override
     {
         return false;
     }
 
-    void TransformNone::snapshot(const Transform::Stub& /*transform*/, Transform::Snapshot& snapshot) const override
+    void snapshot(const Transform::Stub& /*transform*/, Transform::Snapshot& snapshot) const override
     {
     }
 
-    V3 TransformNone::transform(const Transform::Snapshot& snapshot, const V3& position) const override
+    V3 transform(const Transform::Snapshot& snapshot, const V3& position) const override
     {
         return position;
     }
 
-    M4 TransformNone::toMatrix(const Transform::Snapshot& /*snapshot*/) const override
+    M4 toMatrix(const Transform::Snapshot& /*snapshot*/) const override
     {
         return M4::identity();
     }
@@ -122,9 +122,9 @@ M4 Transform::val()
     return _matrix.val();
 }
 
-const sp<Vec4>& Transform::rotation() const
+const SafeVar<Vec4>& Transform::rotation() const
 {
-    return const_cast<Transform&>(*this).tryUpdateDelegate(_stub->_rotation);
+    return _stub->_rotation;
 }
 
 void Transform::setRotation(sp<Vec4> rotation)
@@ -133,9 +133,9 @@ void Transform::setRotation(sp<Vec4> rotation)
     doUpdateDelegate();
 }
 
-const sp<Vec3>& Transform::scale() const
+const SafeVar<Vec3>& Transform::scale() const
 {
-    return const_cast<Transform&>(*this).tryUpdateDelegate(_stub->_scale);
+    return _stub->_scale;
 }
 
 void Transform::setScale(sp<Vec3> scale)
@@ -144,9 +144,9 @@ void Transform::setScale(sp<Vec3> scale)
     doUpdateDelegate();
 }
 
-const sp<Vec3>& Transform::translation() const
+const SafeVar<Vec3>& Transform::translation() const
 {
-    return const_cast<Transform&>(*this).tryUpdateDelegate(_stub->_translation);
+    return _stub->_translation;
 }
 
 void Transform::setTranslation(sp<Vec3> translation)
@@ -160,11 +160,6 @@ void Transform::reset(sp<Mat4> transform)
     _type = TYPE_DELEGATED;
     _delegate = sp<Delegate>::make<TransformDelegateMat4>(std::move(transform));
     doUpdateDelegate();
-}
-
-const sp<Transform::Stub>& Transform::stub() const
-{
-    return _stub;
 }
 
 void Transform::doUpdateDelegate()

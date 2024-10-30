@@ -80,38 +80,26 @@ public:
     M4 val() override;
 
 //  [[script::bindings::property]]
-    const sp<Vec4>& rotation() const;
+    const SafeVar<Vec4>& rotation() const;
 //  [[script::bindings::property]]
     void setRotation(sp<Vec4> rotation);
 
 //  [[script::bindings::property]]
-    const sp<Vec3>& scale() const;
+    const SafeVar<Vec3>& scale() const;
 //  [[script::bindings::property]]
     void setScale(sp<Vec3> scale);
 
 //  [[script::bindings::property]]
-    const sp<Vec3>& translation() const;
+    const SafeVar<Vec3>& translation() const;
 //  [[script::bindings::property]]
     void setTranslation(sp<Vec3> translation);
 
     void reset(sp<Mat4> transform);
 
-    const sp<Stub>& stub() const;
-
 private:
     sp<Delegate> makeDelegate() const;
     sp<Delegate> makeTransformLinear() const;
     sp<Delegate> makeTransformSimple() const;
-
-    template<typename T> const sp<T>& tryUpdateDelegate(SafeVar<T>& safevar) {
-        if(safevar)
-            return static_cast<const sp<T>&>(safevar);
-
-        const sp<T>& var = safevar.ensure();
-        if(_type != TYPE_DELEGATED)
-            doUpdateDelegate();
-        return var;
-    }
 
     void doUpdateDelegate();
 

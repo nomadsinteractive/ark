@@ -2,14 +2,14 @@
 
 namespace ark::plugin::bullet {
 
-CollisionShape::CollisionShape(btCollisionShape* shape, btScalar mass)
-    : _shape(shape), _mass(mass)
+CollisionShape::CollisionShape(sp<btCollisionShape> shape, btScalar mass)
+    : _shape(std::move(shape)), _mass(mass)
 {
 }
 
-btCollisionShape* CollisionShape::btShape() const
+const sp<btCollisionShape>& CollisionShape::btShape() const
 {
-    return _shape.get();
+    return _shape;
 }
 
 btScalar CollisionShape::mass() const

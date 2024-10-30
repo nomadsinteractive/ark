@@ -18,8 +18,8 @@ namespace {
 
 class BvhCollisionShape : public CollisionShape {
 public:
-    BvhCollisionShape(btBvhTriangleMeshShape* shape, btTriangleIndexVertexArray* tiva)
-        : CollisionShape(shape, 0), _tiva(tiva) {
+    BvhCollisionShape(sp<btCollisionShape> shape, btTriangleIndexVertexArray* tiva)
+        : CollisionShape(std::move(shape), 0), _tiva(tiva) {
     }
 
 private:
@@ -60,7 +60,7 @@ sp<CollisionShape> BvhRigidbodyImporter::makeCollisionShape(const Model& model)
         tiva->addIndexedMesh(indexedMesh, sizeof(element_index_t) == 4 ? PHY_INTEGER : PHY_SHORT);
     }
 
-    btBvhTriangleMeshShape* bvhShape = new btBvhTriangleMeshShape(tiva, true);
+    const sp<btBvhTriangleMeshShape> bvhShape = sp<btBvhTriangleMeshShape>::make(tiva, true);
     return sp<BvhCollisionShape>::make(bvhShape, tiva);
 }
 

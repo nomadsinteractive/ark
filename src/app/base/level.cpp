@@ -76,9 +76,9 @@ sp<Rigidbody> makeRigidBody(Library& library, const sp<Collider>& collider, cons
         library._shape = collider->createShape(shapeId, sp<Vec3>::make<Vec3::Const>(library._dimensions));
 
     if(bodyType != Collider::BODY_TYPE_DYNAMIC)
-        return collider->createBody(bodyType, library._shape, renderObject->position(), renderObject->transform()->rotation());
+        return collider->createBody(bodyType, library._shape, renderObject->position(), renderObject->transform()->rotation().wrapped());
 
-    const sp<Rigidbody> rigidbody = collider->createBody(bodyType, library._shape, Vec3Type::freeze(renderObject->position()), Vec4Type::freeze(renderObject->transform()->rotation()));
+    sp<Rigidbody> rigidbody = collider->createBody(bodyType, library._shape, Vec3Type::freeze(renderObject->position()), Vec4Type::freeze(renderObject->transform()->rotation().wrapped()));
     renderObject->setPosition(rigidbody->position().wrapped());
     renderObject->transform()->setRotation(rigidbody->quaternion().wrapped());
     return rigidbody;

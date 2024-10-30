@@ -31,7 +31,7 @@ void ConvexHullRigidBodyImporter::import(ColliderBullet& collider, const documen
 
 sp<CollisionShape> ConvexHullRigidBodyImporter::makeCollisionShape(const Model& model, btScalar mass)
 {
-    btConvexHullShape* convexHullShape = new btConvexHullShape();
+    const sp<btConvexHullShape> convexHullShape = sp<btConvexHullShape>::make();
 
     CHECK(!model.meshes().empty(), "ConvexHullRigidBodyImporter only works with Mesh based models");
     for(const Mesh& i : model.meshes())
