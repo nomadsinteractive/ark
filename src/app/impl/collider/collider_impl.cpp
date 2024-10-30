@@ -25,9 +25,13 @@
 
 namespace ark {
 
-static bool collisionFilterTest(const sp<CollisionFilter>& cf1, const sp<CollisionFilter>& cf2)
+namespace {
+
+bool collisionFilterTest(const sp<CollisionFilter>& cf1, const sp<CollisionFilter>& cf2)
 {
     return cf1 && cf2 ? cf1->collisionTest(*cf2) : true;
+}
+
 }
 
 ColliderImpl::ColliderImpl(std::vector<std::pair<sp<BroadPhrase>, sp<CollisionFilter>>> broadPhrases, sp<NarrowPhrase> narrowPhrase, RenderController& renderController)
@@ -166,15 +170,14 @@ std::vector<sp<Ref>> ColliderImpl::Stub::toRigidBodyRefs(const std::unordered_se
     return rigidBodies;
 }
 
-std::vector<BroadPhrase::Candidate> ColliderImpl::Stub::toBroadPhraseCandidates(const std::unordered_set<BroadPhrase::IdType>& candidateSet, uint32_t filter) const
+std::vector<BroadPhrase::Candidate> ColliderImpl::Stub::toBroadPhraseCandidates(const std::unordered_set<BroadPhrase::IdType>& candidateSet) const
 {
     std::vector<BroadPhrase::Candidate> candidates;
     RefManager& refManager = Global<RefManager>();
     for(BroadPhrase::IdType i : candidateSet)
     {
         const RigidBodyImpl& rigidBody = refManager.toRef(i).instance<RigidBodyImpl>();
-        if(rigidBody.type() & filter)
-            candidates.emplace_back(rigidBody.toBroadPhraseCandidate());
+        candidates.emplace_back(rigidBody.toBroadPhraseCandidate());
     }
     return candidates;
 }
@@ -279,7 +282,7 @@ void ColliderImpl::RigidBodyImpl::collisionTest(ColliderImpl::Stub& collider, co
     {
         DPROFILER_TRACE("NarrowPhrase");
         const BroadPhrase::Candidate candidateSelf = toBroadPhraseCandidate();
-        collider.resolveCandidates(*this, candidateSelf, collider.toBroadPhraseCandidates(dynamicCandidates, Collider::BODY_TYPE_ALL), *this, _dynamic_contacts);
+        collider.resolveCandidates(*this, candidateSelf, collider.toBroadPhraseCandidates(dynamicCandidates), *this, _dynamic_contacts);
         collider.resolveCandidates(*this, candidateSelf, result._static_candidates, *this, _static_contacts);
     }
 }

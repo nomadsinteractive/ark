@@ -34,8 +34,6 @@ public:
 //  [[script::bindings::property]]
     Collider::BodyType type() const;
 //  [[script::bindings::property]]
-    Collider::BodyType rigidType() const;
-//  [[script::bindings::property]]
     uint32_t metaId() const;
 
 //  [[script::bindings::property]]

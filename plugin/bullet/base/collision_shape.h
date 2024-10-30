@@ -16,7 +16,7 @@ public:
     btScalar mass() const;
     void setMass(btScalar mass);
 
-private:
+protected:
     sp<btCollisionShape> _shape;
     btScalar _mass;
 };

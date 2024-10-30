@@ -227,9 +227,6 @@ class _Var:
     def wrap(self):
         pass
 
-    def periodic(self, interval: Optional['Numeric'] = None, duration: Optional['Numeric'] = None):
-        pass
-
     def clamp(self, a, b):
         pass
 
@@ -300,6 +297,23 @@ class _Var:
         return 0.0
 
     def __neg__(self):
+        pass
+
+
+class Boolean(_Var):
+    def __init__(self, value):
+        _Var.__init__(self, value)
+
+    def toggle(self):
+        pass
+
+    def negative(self) -> 'Boolean':
+        pass
+
+    def __or__(self, other) -> 'Boolean':
+        pass
+
+    def __and__(self, other) -> 'Boolean':
         pass
 
 
@@ -432,6 +446,27 @@ class Future:
     @property
     def is_done(self) -> bool:
         return False
+
+
+class Ref:
+
+    def __index__(self):
+        pass
+
+    @property
+    def id(self) -> int:
+        pass
+
+    @property
+    def discarded(self) -> Optional[Boolean]:
+        pass
+
+    @discarded.setter
+    def discarded(self, discarded: Boolean):
+        pass
+
+    def discard(self):
+        pass
 
 
 class Buffer:
@@ -887,23 +922,6 @@ class String:
 
     @staticmethod
     def format(msg: str, **kwargs) -> 'String':
-        pass
-
-
-class Boolean(_Var):
-    def __init__(self, value):
-        _Var.__init__(self, value)
-
-    def toggle(self):
-        pass
-
-    def negative(self) -> 'Boolean':
-        pass
-
-    def __or__(self, other) -> 'Boolean':
-        pass
-
-    def __and__(self, other) -> 'Boolean':
         pass
 
 
@@ -2353,7 +2371,7 @@ class Shape:
 class Rigidbody:
 
     def __init__(self):
-        self._disposed = Boolean(False)
+        pass
 
     def dispose(self):
         pass
@@ -2364,6 +2382,10 @@ class Rigidbody:
     @property
     def id(self) -> int:
         return 0
+
+    @property
+    def ref(self) -> Ref:
+        pass
 
     @property
     def type(self) -> int:
@@ -2402,8 +2424,8 @@ class Rigidbody:
         return 0
 
     @property
-    def disposed(self) -> Boolean:
-        return self._disposed
+    def discarded(self) -> Optional[Boolean]:
+        pass
 
     @property
     def collision_callback(self):

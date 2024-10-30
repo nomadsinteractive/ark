@@ -16,13 +16,11 @@ public:
 //  [[script::bindings::enumeration]]
     enum BodyType {
         BODY_TYPE_NONE = 0,
-        BODY_TYPE_KINEMATIC = 1,
-        BODY_TYPE_DYNAMIC = 2,
-        BODY_TYPE_STATIC = 4,
-        BODY_TYPE_RIGID = 7,
-
-        BODY_TYPE_SENSOR = 8,
-        BODY_TYPE_ALL = 15,
+        BODY_TYPE_KINEMATIC,
+        BODY_TYPE_DYNAMIC,
+        BODY_TYPE_STATIC,
+        BODY_TYPE_RIGID,
+        BODY_TYPE_SENSOR
     };
 
 public:

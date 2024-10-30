@@ -49,16 +49,19 @@ template<typename T> std::map<String, sp<T>> loadNamedTypeInstances(const std::v
 
 sp<Transform> makeTransform(const String& rotation, const String& scale)
 {
-    const V3 s = scale ? Strings::eval<V3>(scale) : V3(1.0f);
+    sp<Vec3> s;
     const V4 quat = Strings::eval<V4>(rotation);
-    return sp<Transform>::make(sp<Vec4>::make<Vec4::Const>(quat), sp<Vec3>::make<Vec3::Const>(s), nullptr, Transform::TYPE_LINEAR_3D);
+    if(scale)
+        if(const V3 sv = Strings::eval<V3>(scale); sv != V3(1.0f))
+            s = sp<Vec3>::make<Vec3::Const>(sv);
+    return sp<Transform>::make(sp<Vec4>::make<Vec4::Const>(quat), std::move(s), nullptr, Transform::TYPE_LINEAR_3D);
 }
 
 sp<RenderObject> makeRenderObject(const document& manifest, int32_t type, bool visible)
 {
     const Global<Constants> globalConstants;
     const V3 position = Documents::ensureAttribute<V3>(manifest, constants::POSITION);
-    const String& scale = Documents::ensureAttribute(manifest, "scale");
+    const String& scale = Documents::getAttribute(manifest, "scale");
     const String& rotation = Documents::ensureAttribute(manifest, constants::ROTATION);
     sp<Transform> transform = makeTransform(rotation, scale);
     return sp<RenderObject>::make(type, sp<Vec3>::make<Vec3::Const>(position), nullptr, std::move(transform), nullptr, visible ? globalConstants->BOOLEAN_TRUE : globalConstants->BOOLEAN_FALSE);

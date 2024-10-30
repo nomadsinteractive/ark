@@ -1,5 +1,4 @@
-#ifndef ARK_APP_BASE_RESOURCE_BUNDLE_H_
-#define ARK_APP_BASE_RESOURCE_BUNDLE_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/base/json.h"
@@ -52,5 +51,3 @@ private:
 };
 
 }
-
-#endif

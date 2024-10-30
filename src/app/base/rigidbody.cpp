@@ -66,11 +66,6 @@ Collider::BodyType Rigidbody::type() const
     return _type;
 }
 
-Collider::BodyType Rigidbody::rigidType() const
-{
-    return static_cast<Collider::BodyType>(_type & Collider::BODY_TYPE_RIGID);
-}
-
 const sp<Shape>& Rigidbody::shape() const
 {
     return _shape;
@@ -129,6 +124,8 @@ template<> ARK_API Collider::BodyType StringConvert::eval<Collider::BodyType>(co
         return Collider::BODY_TYPE_KINEMATIC;
     if(str == "dynamic")
         return Collider::BODY_TYPE_DYNAMIC;
+    if(str == "sensor")
+        return Collider::BODY_TYPE_SENSOR;
     FATAL("Unknow body type \"%s\"", str.c_str());
     return Collider::BODY_TYPE_STATIC;
 }
@@ -148,14 +145,14 @@ void Rigidbody::onEndContact(const Rigidbody& rigidBody) const
 void Rigidbody::onBeginContact(const Rigidbody& self, const Rigidbody& rigidBody, const CollisionManifold& manifold) const
 {
     onBeginContact(rigidBody, manifold);
-    if(rigidBody.rigidType() == Collider::BODY_TYPE_STATIC)
+    if(rigidBody.type() == Collider::BODY_TYPE_STATIC)
         rigidBody.onBeginContact(self, CollisionManifold(manifold.contactPoint(), -manifold.normal()));
 }
 
 void Rigidbody::onEndContact(const Rigidbody& self, const Rigidbody& rigidBody) const
 {
     onEndContact(rigidBody);
-    if(rigidBody.rigidType() == Collider::BODY_TYPE_STATIC)
+    if(rigidBody.type() == Collider::BODY_TYPE_STATIC)
         rigidBody.onEndContact(self);
 }
 
