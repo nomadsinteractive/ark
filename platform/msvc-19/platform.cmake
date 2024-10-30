@@ -13,3 +13,5 @@ if(ARK_ENABLE_ADDRESS_SANITIZER)
     ark_compile_options(-fsanitize=address)
     ark_link_libraries(clang_rt.asan-i386)
 endif()
+
+ark_compile_options(/bigobj)

@@ -3,8 +3,6 @@
 #include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/base/clock.h"
-#include "core/base/range.h"
-#include "core/base/slice.h"
 #include "core/impl/variable/variable_dyed.h"
 #include "core/impl/variable/integral.h"
 #include "core/impl/variable/integral_with_resistance.h"
@@ -20,7 +18,6 @@
 #include "core/util/operators.h"
 
 #include "graphics/forwarding.h"
-#include "graphics/base/v4.h"
 #include "graphics/base/size.h"
 #include "graphics/impl/vec/vec_subscribed.h"
 

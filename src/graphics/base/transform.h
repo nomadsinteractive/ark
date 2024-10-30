@@ -8,7 +8,6 @@
 
 #include "graphics/forwarding.h"
 #include "graphics/base/mat.h"
-#include "graphics/traits/rotation.h"
 #include "graphics/base/v3.h"
 
 namespace ark {
@@ -81,21 +80,23 @@ public:
     M4 val() override;
 
 //  [[script::bindings::property]]
-    const sp<Vec4>& rotation();
+    const sp<Vec4>& rotation() const;
 //  [[script::bindings::property]]
     void setRotation(sp<Vec4> rotation);
 
 //  [[script::bindings::property]]
-    const sp<Vec3>& scale();
+    const sp<Vec3>& scale() const;
 //  [[script::bindings::property]]
     void setScale(sp<Vec3> scale);
 
 //  [[script::bindings::property]]
-    const sp<Vec3>& translation();
+    const sp<Vec3>& translation() const;
 //  [[script::bindings::property]]
     void setTranslation(sp<Vec3> translation);
 
     void reset(sp<Mat4> transform);
+
+    const sp<Stub>& stub() const;
 
 private:
     sp<Delegate> makeDelegate() const;

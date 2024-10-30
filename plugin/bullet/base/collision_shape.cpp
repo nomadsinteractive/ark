@@ -1,8 +1,6 @@
 #include "bullet/base/collision_shape.h"
 
-namespace ark {
-namespace plugin {
-namespace bullet {
+namespace ark::plugin::bullet {
 
 CollisionShape::CollisionShape(btCollisionShape* shape, btScalar mass)
     : _shape(shape), _mass(mass)
@@ -24,6 +22,4 @@ void CollisionShape::setMass(btScalar mass)
     _mass = mass;
 }
 
-}
-}
 }

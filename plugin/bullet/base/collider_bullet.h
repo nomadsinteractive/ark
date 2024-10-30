@@ -39,7 +39,7 @@ public:
     ColliderBullet(const V3& gravity, sp<ModelLoader> modelLoader);
 
 //  [[script::bindings::auto]]
-    sp<Rigidbody> createBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Rotation> rotation = nullptr, sp<Boolean> discarded = nullptr) override;\
+    sp<Rigidbody> createBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position = nullptr, sp<Vec4> rotation = nullptr, sp<Boolean> discarded = nullptr) override;
 //  [[script::bindings::auto]]
     sp<Shape> createShape(const NamedType& type, sp<Vec3> size) override;
 //  [[script::bindings::auto]]

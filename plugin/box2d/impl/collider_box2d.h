@@ -36,7 +36,7 @@ public:
     void run() override;
 
 //  [[script::bindings::auto]]
-    sp<Rigidbody> createBody(Collider::BodyType type, sp<ark::Shape> shape, sp<Vec3> position, sp<Rotation> rotate = nullptr, sp<Boolean> discarded = nullptr) override;
+    sp<Rigidbody> createBody(Collider::BodyType type, sp<ark::Shape> shape, sp<Vec3> position = nullptr, sp<Vec4> rotation = nullptr, sp<Boolean> discarded = nullptr) override;
 //  [[script::bindings::auto]]
     sp<ark::Shape> createShape(const NamedType& type, sp<Vec3> size) override;
 //  [[script::bindings::auto]]

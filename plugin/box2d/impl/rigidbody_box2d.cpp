@@ -1,18 +1,13 @@
 #include "box2d/impl/rigidbody_box2d.h"
 
 #include "core/ark.h"
-#include "core/base/bean_factory.h"
 #include "core/base/future.h"
 #include "core/inf/variable.h"
-#include "core/types/weak_ptr.h"
 #include "core/util/bean_utils.h"
-#include "core/util/numeric_type.h"
-#include "core/util/log.h"
 
 #include "graphics/base/rect.h"
 #include "graphics/base/render_object.h"
-#include "graphics/base/quaternion.h"
-#include "graphics/base/transform.h"
+#include "graphics/traits/rotation.h"
 #include "graphics/base/v3.h"
 
 #include "app/base/application_context.h"

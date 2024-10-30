@@ -122,9 +122,9 @@ M4 Transform::val()
     return _matrix.val();
 }
 
-const sp<Vec4>& Transform::rotation()
+const sp<Vec4>& Transform::rotation() const
 {
-    return tryUpdateDelegate(_stub->_rotation);
+    return const_cast<Transform&>(*this).tryUpdateDelegate(_stub->_rotation);
 }
 
 void Transform::setRotation(sp<Vec4> rotation)
@@ -133,9 +133,9 @@ void Transform::setRotation(sp<Vec4> rotation)
     doUpdateDelegate();
 }
 
-const sp<Vec3>& Transform::scale()
+const sp<Vec3>& Transform::scale() const
 {
-    return tryUpdateDelegate(_stub->_scale);
+    return const_cast<Transform&>(*this).tryUpdateDelegate(_stub->_scale);
 }
 
 void Transform::setScale(sp<Vec3> scale)
@@ -144,9 +144,9 @@ void Transform::setScale(sp<Vec3> scale)
     doUpdateDelegate();
 }
 
-const sp<Vec3>& Transform::translation()
+const sp<Vec3>& Transform::translation() const
 {
-    return tryUpdateDelegate(_stub->_translation);
+    return const_cast<Transform&>(*this).tryUpdateDelegate(_stub->_translation);
 }
 
 void Transform::setTranslation(sp<Vec3> translation)
@@ -160,6 +160,11 @@ void Transform::reset(sp<Mat4> transform)
     _type = TYPE_DELEGATED;
     _delegate = sp<Delegate>::make<TransformDelegateMat4>(std::move(transform));
     doUpdateDelegate();
+}
+
+const sp<Transform::Stub>& Transform::stub() const
+{
+    return _stub;
 }
 
 void Transform::doUpdateDelegate()

@@ -14,6 +14,7 @@
 #include "graphics/base/size.h"
 #include "graphics/util/vec2_type.h"
 #include "graphics/util/vec3_type.h"
+#include "graphics/util/vec4_type.h"
 
 #include "app/base/event.h"
 #include "app/base/raycast_manifold.h"
@@ -28,7 +29,6 @@
 
 #include "python/impl/duck/py_callable_duck_type.h"
 #include "python/impl/duck/py_list_duck_type.h"
-#include "python/impl/duck/py_numeric_duck_type.h"
 #include "python/impl/duck/py_object_duck_type.h"
 #include "python/impl/duck/py_vec_duck_type.h"
 
@@ -164,50 +164,40 @@ String PyCast::toString(PyObject* object, const char* encoding, const char* erro
     return "";
 }
 
-sp<Vec2> PyCast::toVec2(PyObject* object, bool alert)
+sp<Vec2> PyCast::toVec2(PyObject* object)
 {
-    if(PyTuple_Check(object) && PyObject_Length(object) == 2)
+    if(PyTuple_CheckExact(object) && PyObject_Length(object) == 2)
     {
         PyObject* x, *y;
         if(PyArg_ParseTuple(object, "OO", &x, &y))
             return Vec2Type::create(toNumeric(x).value(), toNumeric(y).value());
         PyErr_Clear();
     }
-    sp<Vec2> vec2 = toSharedPtrOrNull<Vec2>(object);
-
-    if(!vec2)
-    {
-        const sp<Size> size = toSharedPtrOrNull<Size>(object);
-        if(size)
-            vec2 = Vec2Type::create(size->width(), size->height());
-    }
-
-    CHECK(vec2 || !alert, "Cannot cast <%s> to <Vec2>", Py_TYPE(object)->tp_name);
-    return vec2;
+    return toSharedPtrOrNull<Vec2>(object);
 }
 
-sp<Vec3> PyCast::toVec3(PyObject* object, bool alert)
+sp<Vec3> PyCast::toVec3(PyObject* object)
 {
-    if(isNoneOrNull(object))
-        return nullptr;
-
-    if(PyTuple_Check(object) && (PyObject_Length(object) == 2 || PyObject_Length(object) == 3))
+    if(PyTuple_CheckExact(object) && (PyObject_Length(object) == 2 || PyObject_Length(object) == 3))
     {
         PyObject* x, *y, *z = nullptr;
         if(PyArg_ParseTuple(object, "OO|O", &x, &y, &z))
             return Vec3Type::create(toNumeric(x).value(), toNumeric(y).value(), toNumeric(z).value());
         PyErr_Clear();
     }
+    return toSharedPtrOrNull<Vec3>(object);
+}
 
-    if(sp<Vec3> vec3 = toSharedPtrOrNull<Vec3>(object))
-        return vec3;
-
-    sp<Vec2> vec2 = toSharedPtrOrNull<Vec2>(object);
-    if(!vec2 && !alert)
-        return nullptr;
-
-    CHECK(vec2, "Cannot cast \"%s\" to Vec3, possible candidates: tuple, Vec3, Vec2", Py_TYPE(object)->tp_name);
-    return Vec2Type::extend(std::move(vec2), sp<Numeric>::make<Numeric::Const>(0.0f));
+sp<Vec4> PyCast::toVec4(PyObject* object)
+{
+    if(PyTuple_CheckExact(object) && PyObject_Length(object) == 4)
+    {
+        PyObject* x, *y, *z, *w = nullptr;
+        if(PyArg_ParseTuple(object, "OOOO", &x, &y, &z, &w))
+            return Vec4Type::create(toNumeric(x).value(), toNumeric(y).value(), toNumeric(z).value(), toNumeric(w).value());
+        PyErr_Clear();
+    }
+    return toSharedPtrOrNull<Vec4>(object);
 }
 
 Optional<sp<Mat4>> PyCast::toMat4(PyObject* object)
@@ -430,9 +420,8 @@ template<> ARK_PLUGIN_PYTHON_API Optional<V2> PyCast::toCppObject_impl<V2>(PyObj
             return V2(x, y);
         PyErr_Clear();
     }
-    const sp<Vec2> vec2 = toVec2(object, true);
-    if(vec2)
-        return vec2->val();
+    if(const Optional<sp<Vec2>> vec2 = toSharedPtr<Vec2>(object))
+        return vec2.value()->val();
     FATAL("V2 object should be either Vec2 or length-2 tuple (eg. (1.0, 1.0))");
     return V2();
 }
@@ -446,8 +435,7 @@ template<> ARK_PLUGIN_PYTHON_API Optional<V3> PyCast::toCppObject_impl<V3>(PyObj
             return V3(x, y, z);
         PyErr_Clear();
     }
-    Optional<sp<Vec3>> vec3 = toSharedPtr<Vec3>(object);
-    if(vec3)
+    if(const Optional<sp<Vec3>> vec3 = toSharedPtr<Vec3>(object))
         return vec3.value()->val();
     return Optional<V3>();
 }
@@ -461,8 +449,8 @@ template<> ARK_PLUGIN_PYTHON_API Optional<V4> PyCast::toCppObject_impl<V4>(PyObj
             return V4(x, y, z, w);
         PyErr_Clear();
     }
-    Optional<sp<Vec4>> vec4 = toSharedPtr<Vec4>(object);
-    if(vec4)
+
+    if(Optional<sp<Vec4>> vec4 = toSharedPtr<Vec4>(object))
         return vec4.value()->val();
     return Optional<V4>();
 }

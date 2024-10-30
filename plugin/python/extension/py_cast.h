@@ -322,8 +322,10 @@ private:
         return map;
     }
 
-    static sp<Vec2> toVec2(PyObject* object, bool alert);
-    static sp<Vec3> toVec3(PyObject* object, bool alert);
+    static sp<Vec2> toVec2(PyObject* object);
+    static sp<Vec3> toVec3(PyObject* object);
+    static sp<Vec4> toVec4(PyObject* object);
+
     static Optional<sp<Mat4>> toMat4(PyObject* object);
 
     static Optional<sp<Integer>> toInteger(PyObject* object);
@@ -336,7 +338,7 @@ template<> inline Optional<sp<String>> PyCast::toSharedPtrImpl<String>(PyObject*
 {
     if(Optional<String> opt = toStringExact(object))
         return sp<String>::make(std::move(opt.value()));
-    return Optional<sp<String>>();
+    return {};
 }
 
 template<> inline Optional<sp<StringVar>> PyCast::toSharedPtrImpl<StringVar>(PyObject* object)
@@ -376,14 +378,20 @@ template<> inline Optional<sp<EventListener>> PyCast::toSharedPtrImpl<EventListe
 
 template<> inline Optional<sp<Vec2>> PyCast::toSharedPtrImpl<Vec2>(PyObject* object)
 {
-    sp<Vec2> vec2 = toVec2(object, false);
+    sp<Vec2> vec2 = toVec2(object);
     return vec2 ? Optional<sp<Vec2>>(std::move(vec2)) : Optional<sp<Vec2>>();
 }
 
 template<> inline Optional<sp<Vec3>> PyCast::toSharedPtrImpl<Vec3>(PyObject* object)
 {
-    sp<Vec3> vec3 = toVec3(object, false);
+    sp<Vec3> vec3 = toVec3(object);
     return vec3 ? Optional<sp<Vec3>>(std::move(vec3)) : Optional<sp<Vec3>>();
+}
+
+template<> inline Optional<sp<Vec4>> PyCast::toSharedPtrImpl<Vec4>(PyObject* object)
+{
+    sp<Vec4> vec4 = toVec4(object);
+    return vec4 ? Optional<sp<Vec4>>(std::move(vec4)) : Optional<sp<Vec4>>();
 }
 
 template<> inline Optional<sp<Mat4>> PyCast::toSharedPtrImpl<Mat4>(PyObject* object)

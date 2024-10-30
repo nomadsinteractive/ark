@@ -10,6 +10,7 @@
 #include "graphics/base/rect.h"
 #include "graphics/base/v2.h"
 #include "graphics/traits/bounds.h"
+#include "graphics/traits/rotation.h"
 
 #include "renderer/base/resource_loader_context.h"
 
@@ -42,14 +43,15 @@ void ColliderBox2D::run()
     _stub->run();
 }
 
-sp<Rigidbody> ColliderBox2D::createBody(Collider::BodyType type, sp<ark::Shape> shape, sp<Vec3> position, sp<Rotation> rotation, sp<Boolean> discarded)
+sp<Rigidbody> ColliderBox2D::createBody(Collider::BodyType type, sp<ark::Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<Boolean> discarded)
 {
     const auto iter = _stub->_body_manifests.find(shape->type().id());
     CHECK(iter != _stub->_body_manifests.end(), "RigidBody shape-id: %d not found", shape->type().id());
     const BodyCreateInfo& manifest = iter->second;
-    const sp<RigidbodyBox2D> body = sp<RigidbodyBox2D>::make(*this, type, position, shape->size().val(), rotation ? rotation->theta() : nullptr, manifest);
-    if(rotation)
-        body->setAngle(rotation->theta().val());
+    const sp<Rotation> rot = rotation.tryCast<Rotation>();
+    const sp<RigidbodyBox2D> body = sp<RigidbodyBox2D>::make(*this, type, position, shape->size().val(), rot ? rot->theta() : nullptr, manifest);
+    if(rot)
+        body->setAngle(rot->theta().val());
     CHECK(!discarded, "Unimplemented");
 
     if(manifest.category || manifest.mask || manifest.group)

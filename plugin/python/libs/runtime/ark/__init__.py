@@ -1830,7 +1830,7 @@ class Transform(Mat4):
     TYPE_LINEAR_2D = 1
     TYPE_LINEAR_3D = 2
 
-    def __init__(self, rotation: Optional[TYPE_VEC4] = None, scale: Optional[TYPE_VEC3] = None, translation: Optional[TYPE_VEC3] = None, t: int = TYPE_NONE):
+    def __init__(self, rotation: Optional[TYPE_VEC4] = None, scale: Optional[TYPE_VEC3] = None, translation: Optional[TYPE_VEC3] = None, type: int = TYPE_NONE):
         pass
 
     @property

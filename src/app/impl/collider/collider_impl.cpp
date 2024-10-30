@@ -36,10 +36,10 @@ ColliderImpl::ColliderImpl(std::vector<std::pair<sp<BroadPhrase>, sp<CollisionFi
     renderController.addPreComposeUpdatable(_stub, sp<BooleanByWeakRef<Stub>>::make(_stub, 1));
 }
 
-sp<Rigidbody> ColliderImpl::createBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Rotation> rotate, sp<Boolean> disposed)
+sp<Rigidbody> ColliderImpl::createBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<Boolean> discarded)
 {
     CHECK(type == Collider::BODY_TYPE_KINEMATIC || type == Collider::BODY_TYPE_DYNAMIC || type == Collider::BODY_TYPE_STATIC || type == Collider::BODY_TYPE_SENSOR, "Unknown BodyType: %d", type);
-    return _stub->createRigidBody(type, std::move(shape), std::move(position), std::move(rotate), std::move(disposed));
+    return _stub->createRigidBody(type, std::move(shape), std::move(position), std::move(rotation), std::move(discarded));
 }
 
 sp<Shape> ColliderImpl::createShape(const NamedType& type, sp<Vec3> size)
@@ -141,7 +141,7 @@ void ColliderImpl::Stub::requestRigidBodyRemoval(int32_t rigidBodyId)
     _phrase_dispose.insert(rigidBodyId);
 }
 
-sp<ColliderImpl::RigidBodyImpl> ColliderImpl::Stub::createRigidBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Rotation> rotate, sp<Boolean> discarded)
+sp<ColliderImpl::RigidBodyImpl> ColliderImpl::Stub::createRigidBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotate, sp<Boolean> discarded)
 {
     const V3 size = shape->size().val();
     sp<RigidBodyImpl> rigidBody = sp<RigidBodyImpl>::make(*this, type, std::move(shape), std::move(position), std::move(rotate), std::move(discarded));

@@ -12,6 +12,7 @@
 #include "graphics/base/render_object.h"
 #include "graphics/base/transform.h"
 #include "graphics/util/vec3_type.h"
+#include "graphics/util/vec4_type.h"
 
 #include "app/base/application_context.h"
 #include "app/base/application_bundle.h"
@@ -50,17 +51,17 @@ sp<Transform> makeTransform(const String& rotation, const String& scale)
 {
     const V3 s = scale ? Strings::eval<V3>(scale) : V3(1.0f);
     const V4 quat = Strings::eval<V4>(rotation);
-    return sp<Transform>::make(sp<Rotation>::make(quat), sp<Vec3>::make<Vec3::Const>(s), nullptr, Transform::TYPE_LINEAR_3D);
+    return sp<Transform>::make(sp<Vec4>::make<Vec4::Const>(quat), sp<Vec3>::make<Vec3::Const>(s), nullptr, Transform::TYPE_LINEAR_3D);
 }
 
 sp<RenderObject> makeRenderObject(const document& manifest, int32_t type, bool visible)
 {
     const Global<Constants> globalConstants;
-    const String& position = Documents::ensureAttribute(manifest, constants::POSITION);
+    const V3 position = Documents::ensureAttribute<V3>(manifest, constants::POSITION);
     const String& scale = Documents::ensureAttribute(manifest, "scale");
     const String& rotation = Documents::ensureAttribute(manifest, constants::ROTATION);
     sp<Transform> transform = makeTransform(rotation, scale);
-    return sp<RenderObject>::make(type, sp<Vec3>::make<Vec3::Const>(Strings::eval<V3>(position)), nullptr, std::move(transform), nullptr, visible ? globalConstants->BOOLEAN_TRUE : globalConstants->BOOLEAN_FALSE);
+    return sp<RenderObject>::make(type, sp<Vec3>::make<Vec3::Const>(position), nullptr, std::move(transform), nullptr, visible ? globalConstants->BOOLEAN_TRUE : globalConstants->BOOLEAN_FALSE);
 }
 
 sp<Rigidbody> makeRigidBody(Library& library, const sp<Collider>& collider, const sp<RenderObject>& renderObject, Collider::BodyType bodyType, const std::map<String, String>& shapeIdAliases)
@@ -77,9 +78,9 @@ sp<Rigidbody> makeRigidBody(Library& library, const sp<Collider>& collider, cons
     if(bodyType != Collider::BODY_TYPE_DYNAMIC)
         return collider->createBody(bodyType, library._shape, renderObject->position(), renderObject->transform()->rotation());
 
-    const sp<Rigidbody> rigidbody = collider->createBody(bodyType, library._shape, Vec3Type::freeze(renderObject->position()), sp<Rotation>::make(renderObject->transform()->rotation()->val()));
+    const sp<Rigidbody> rigidbody = collider->createBody(bodyType, library._shape, Vec3Type::freeze(renderObject->position()), Vec4Type::freeze(renderObject->transform()->rotation()));
     renderObject->setPosition(rigidbody->position().wrapped());
-    renderObject->transform()->setRotation(sp<Rotation>::make(rigidbody->quaternion().wrapped()));
+    renderObject->transform()->setRotation(rigidbody->quaternion().wrapped());
     return rigidbody;
 }
 

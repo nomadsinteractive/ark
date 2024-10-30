@@ -29,7 +29,7 @@ public:
     virtual ~Collider() = default;
 
 //  [[script::bindings::auto]]
-    virtual sp<Rigidbody> createBody(Collider::BodyType type, sp<Shape> shape = nullptr, sp<Vec3> position = nullptr, sp<Rotation> rotate = nullptr, sp<Boolean> discarded = nullptr) = 0;
+    virtual sp<Rigidbody> createBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position = nullptr, sp<Vec4> rotation = nullptr, sp<Boolean> discarded = nullptr) = 0;
 //  [[script::bindings::auto]]
     virtual sp<Shape> createShape(const NamedType& type, sp<Vec3> size = nullptr) = 0;
 //  [[script::bindings::auto]]
