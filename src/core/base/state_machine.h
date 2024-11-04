@@ -19,8 +19,8 @@ public:
 
 private:
     void doActionExecute(const StateAction& action);
-    void doActionActive(const StateAction& action);
-    void doActionDeactive(const StateAction& action);
+    void doActionActivate(const StateAction& action);
+    void doActionDeactivate(const StateAction& action);
 
     void doActive(sp<State> state);
 

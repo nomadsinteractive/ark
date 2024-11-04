@@ -31,21 +31,36 @@ public:
 //  [[script::bindings::property]]
     void setOnDeactivate(sp<Runnable> onDeactivate);
 
-//  [[script::bindings::auto]]
-    void execute() const;
-//  [[script::bindings::auto]]
-    void activate() const;
-//  [[script::bindings::auto]]
-    void deactivate() const;
+//  [[script::bindings::property]]
+    const sp<Runnable>& execute();
+//  [[script::bindings::property]]
+    const sp<Runnable>& activate();
+//  [[script::bindings::property]]
+    const sp<Runnable>& deactivate();
 
 private:
-    StateMachine& _state_machine;
+    struct Stub {
+        StateMachine& _state_machine;
 
-    sp<StateActionStrand> _strand;
+        sp<StateActionStrand> _strand;
 
-    sp<Runnable> _on_execute;
-    sp<Runnable> _on_activate;
-    sp<Runnable> _on_deactivate;
+        sp<Runnable> _on_execute;
+        sp<Runnable> _on_activate;
+        sp<Runnable> _on_deactivate;
+    };
+
+    StateAction(sp<Stub> stub);
+
+    struct StateActionExecute;
+    struct StateActionActivate;
+    struct StateActionDeactivate;
+
+private:
+    sp<Stub> _stub;
+
+    sp<Runnable> _execute;
+    sp<Runnable> _activate;
+    sp<Runnable> _deactivate;
 
     friend class StateMachine;
 };
