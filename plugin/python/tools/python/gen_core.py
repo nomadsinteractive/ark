@@ -112,11 +112,11 @@ ARK_PY_ARGUMENT_CHECKERS = {
     'int32_t': GenConverter('PyBridge::isPyLongExact({0})'),
     'uint32_t': GenConverter('PyBridge::isPyLongExact({0})'),
     'float': GenConverter('(PyBridge::isPyLongExact({0}) || PyBridge::isPyFloatExact({0}))'),
-    'std::vector<float>': GenConverter('(PyBridge::isPyListExact({0}) || PyBridge::isPyTupleExact({0}))'),
-    'std::vector<int32_t>': GenConverter('(PyBridge::isPyListExact({0}) || PyBridge::isPyTupleExact({0}))'),
-    'V2': GenConverter('(PyBridge::isPyTupleExact({0}) && PyBridge::PyObject_Size({0}) == 2)'),
-    'V3': GenConverter('(PyBridge::isPyTupleExact({0}) && PyBridge::PyObject_Size({0}) == 3)'),
-    'V4': GenConverter('(PyBridge::isPyTupleExact({0}) && PyBridge::PyObject_Size({0}) == 4)'),
+    'std::vector<float>': GenConverter('(PyBridge::isPySequence({0})'),
+    'std::vector<int32_t>': GenConverter('(PyBridge::isPySequence({0})'),
+    'V2': GenConverter('(PyBridge::isPySequence({0}) && PyBridge::PyObject_Size({0}) == 2)'),
+    'V3': GenConverter('(PyBridge::isPySequence({0}) && PyBridge::PyObject_Size({0}) == 3)'),
+    'V4': GenConverter('(PyBridge::isPySequence({0}) && PyBridge::PyObject_Size({0}) == 4)'),
     'std::wstring': GenConverter('PyBridge::isPyUnicodeExact({0})')
 }
 

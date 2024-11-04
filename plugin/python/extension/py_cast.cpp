@@ -423,7 +423,7 @@ template<> ARK_PLUGIN_PYTHON_API Optional<V2> PyCast::toCppObject_impl<V2>(PyObj
     if(const Optional<sp<Vec2>> vec2 = toSharedPtr<Vec2>(object))
         return vec2.value()->val();
     FATAL("V2 object should be either Vec2 or length-2 tuple (eg. (1.0, 1.0))");
-    return V2();
+    return {};
 }
 
 template<> ARK_PLUGIN_PYTHON_API Optional<V3> PyCast::toCppObject_impl<V3>(PyObject* object)
@@ -437,7 +437,7 @@ template<> ARK_PLUGIN_PYTHON_API Optional<V3> PyCast::toCppObject_impl<V3>(PyObj
     }
     if(const Optional<sp<Vec3>> vec3 = toSharedPtr<Vec3>(object))
         return vec3.value()->val();
-    return Optional<V3>();
+    return {};
 }
 
 template<> ARK_PLUGIN_PYTHON_API Optional<V4> PyCast::toCppObject_impl<V4>(PyObject* object)
@@ -452,7 +452,7 @@ template<> ARK_PLUGIN_PYTHON_API Optional<V4> PyCast::toCppObject_impl<V4>(PyObj
 
     if(Optional<sp<Vec4>> vec4 = toSharedPtr<Vec4>(object))
         return vec4.value()->val();
-    return Optional<V4>();
+    return {};
 }
 
 template<> ARK_PLUGIN_PYTHON_API Optional<M4> PyCast::toCppObject_impl<M4>(PyObject* object)

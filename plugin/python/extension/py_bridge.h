@@ -7,9 +7,7 @@
 #include "python/forwarding.h"
 #include "python/api.h"
 
-namespace ark {
-namespace plugin {
-namespace python {
+namespace ark::plugin::python {
 
 class ARK_PLUGIN_PYTHON_API PyBridge {
 public:
@@ -60,16 +58,13 @@ public:
     static bool isPyNone(PyObject* obj);
     static bool isPyList(PyObject* obj);
     static bool isPyBool(PyObject* obj);
-    static bool isPyTuple(PyObject* obj);
+    static bool isPySequence(PyObject* obj);
 
     static bool isPyDictExact(PyObject* obj);
     static bool isPyListExact(PyObject* obj);
     static bool isPyLongExact(PyObject* obj);
     static bool isPyFloatExact(PyObject* obj);
-    static bool isPyTupleExact(PyObject* obj);
     static bool isPyUnicodeExact(PyObject* obj);
 };
 
-}
-}
 }

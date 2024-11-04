@@ -257,7 +257,7 @@ class GenMethod(object):
         bodylines = []
         args = [(i, j) for i, j in enumerate(not_overloaded_args) if j]
         args_set = {i for i, j in args}
-        argdeclare = [j.gen_declare('obj%d' % i, 'arg%d' % i, exact_cast, optional_check) for i, j in args]
+        argdeclare = [j.gen_declare(f'obj{i}', f'arg{i}', exact_cast, optional_check) for i, j in args]
         self_type_checks = []
         if self._self_argument:
             if not self._self_argument.type_compare(f'sp<{genclass.binding_classname}>', f'{genclass.binding_classname}&', 'Box'):
@@ -265,11 +265,11 @@ class GenMethod(object):
         self._gen_convert_args_code(bodylines, argdeclare, optional_check)
 
         if check_args and args:
-            bodylines.append("if(%s) %s;" % (' || '.join(['!obj%d' % i for i, j in args]), self.err_return_value))
+            bodylines.append("if(%s) %s;" % (' || '.join([f'!obj{i}' for i, j in args]), self.err_return_value))
 
         r = acg.strip_key_words(self._return_type, ['virtual', 'const', '&'])
         argtypes = [' '.join(i.gen_declare('t', 't').split('=')[0].strip().split()[:-1]) for i in self._arguments]
-        argvalues = ', '.join(gen_method_call_arg('obj%d.value()' % i if optional_check and i in args_set else 'obj%d' % i, j.str(), argtypes[i]) for i, j in enumerate(self._arguments))
+        argvalues = ', '.join(gen_method_call_arg(f'obj{i}.value()' if optional_check and i in args_set else f'obj{i}', j.str(), argtypes[i]) for i, j in enumerate(self._arguments))
         callstatement = self._gen_calling_statement(genclass, argvalues)
         py_return = self.gen_py_return()
         pyret = ['return 0;'] if py_return == 'int' else self.gen_return_statement(r, py_return)
@@ -277,7 +277,9 @@ class GenMethod(object):
             callstatement = '%s ret = %s' % (acg.strip_key_words(self._return_type, ['virtual']), callstatement)
         calling_lines = [callstatement] + pyret
         type_checks = [(i, j.gen_type_check('t')) for i, j in enumerate(gen_type_check_args) if j]
-        nullptr_check = ['(obj%d || %d >= argc)' % (i, i) for i, j in type_checks if not j]
+        nullptr_check = [f'(obj{i} || {i} >= argc)' for i, j in type_checks if not j]
+        if optional_check:
+            nullptr_check.extend(f'obj{i}' for i in args_set)
         if self_type_checks or nullptr_check:
             if nullptr_check:
                 lines.insert(0, 'const Py_ssize_t argc = %s;' % self.gen_py_argc())
@@ -522,7 +524,10 @@ class GenSequenceMethod(GenSubscribableMethod):
         if not self._is_len_func and not self._is_set_func:
             index_check = [
                 'if(!ret)',
-                '    PyBridge::setStopIterationErrString("");'
+                '{',
+                '    PyBridge::setStopIterationErrString("");',
+                '    return nullptr;',
+                '}'
             ]
             return index_check + return_statement
         return return_statement

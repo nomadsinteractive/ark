@@ -44,9 +44,9 @@ public:
     static sp<Vec3> absolute(const sp<Vec3>& self);
 
 //  [[script::bindings::classmethod]]
-    static void set(const sp<VariableWrapper<V3>>& self, const V3& val);
-//  [[script::bindings::classmethod]]
     static void set(const sp<VariableWrapper<V3>>& self, sp<Vec3> val);
+//  [[script::bindings::classmethod]]
+    static void set(const sp<VariableWrapper<V3>>& self, const V3& val);
 //  [[script::bindings::classmethod]]
     static void set(const sp<Vec3>& self, const V3& val);
 
@@ -75,6 +75,11 @@ public:
     static void setZ(const sp<Vec3>& self, float z);
 //  [[script::bindings::property]]
     static void setZ(const sp<Vec3>& self, sp<Numeric> z);
+
+//  [[script::bindings::seq(len)]]
+    static size_t len(const sp<Vec3>& self);
+//  [[script::bindings::seq(get)]]
+    static Optional<float> getItem(const sp<Vec3>& self, ptrdiff_t idx);
 
 //  [[script::bindings::classmethod]]
     static sp<Size> toSize(const sp<Vec3>& self);

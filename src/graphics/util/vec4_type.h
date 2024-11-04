@@ -57,9 +57,9 @@ public:
     static sp<Numeric> hypot(sp<Vec4> self);
 
 //  [[script::bindings::classmethod]]
-    static void set(const sp<VariableWrapper<V4>>& self, const V4& val);
-//  [[script::bindings::classmethod]]
     static void set(const sp<VariableWrapper<V4>>& self, sp<Vec4> val);
+//  [[script::bindings::classmethod]]
+    static void set(const sp<VariableWrapper<V4>>& self, const V4& val);
 //  [[script::bindings::classmethod]]
     static void set(const sp<Vec4>& self, const V4& val);
 
@@ -84,6 +84,11 @@ public:
     static void setZ(const sp<Vec4>& self, float z);
 //  [[script::bindings::property]]
     static void setZ(const sp<Vec4>& self, sp<Numeric> z);
+
+//  [[script::bindings::seq(len)]]
+    static size_t len(const sp<Vec4>& self);
+//  [[script::bindings::seq(get)]]
+    static Optional<float> getItem(const sp<Vec4>& self, ptrdiff_t index);
 **/
 //  [[script::bindings::property]]
     static sp<Numeric> w(const sp<Vec4>& self);

@@ -190,9 +190,9 @@ bool PyBridge::isPyBool(PyObject* obj)
     return PyBool_Check(obj);
 }
 
-bool PyBridge::isPyTuple(PyObject* obj)
+bool PyBridge::isPySequence(PyObject* obj)
 {
-    return PyTuple_Check(obj);
+    return PySequence_Check(obj);
 }
 
 bool PyBridge::isPyDictExact(PyObject* obj)
@@ -213,11 +213,6 @@ bool PyBridge::isPyLongExact(PyObject* obj)
 bool PyBridge::isPyFloatExact(PyObject* obj)
 {
     return PyFloat_CheckExact(obj);
-}
-
-bool PyBridge::isPyTupleExact(PyObject* obj)
-{
-    return PyTuple_CheckExact(obj);
 }
 
 bool PyBridge::isPyUnicodeExact(PyObject* obj)
