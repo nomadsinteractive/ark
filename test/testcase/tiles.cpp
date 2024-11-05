@@ -44,7 +44,7 @@ class RendererMakerImpl : public RendererMaker {
 public:
     virtual std::vector<Box> make(float x, float y) override {
         printf("makeTile(%.2f, %.2f)\n", x, y);
-        return {sp<TileRendererImpl>::make(x, y)};
+        return {Box(sp<TileRendererImpl>::make(x, y))};
     }
 
     virtual void recycle(const Box& /*renderer*/) override {
@@ -60,8 +60,8 @@ public:
         const sp<RendererMaker> rendererMaker = sp<RendererMakerImpl>::make();
         const sp<Scope> args = sp<Scope>::make();
         const sp<Numeric::Impl> scroller = sp<Numeric::Impl>::make(0.0f);
-        args->put("scroller", scroller);
-        args->put("tile_maker", rendererMaker);
+        args->put("scroller", Box(scroller));
+        args->put("tile_maker", Box(rendererMaker));
         const sp<Renderer> scrollable = beanFactory->build<Renderer>("@scrollable-001", args);
         int32_t errorCode, errorBase = 1;
         errorCode = checkScrollable(scrollable, NAN, 0.0f, 50.0f, NAN, errorBase);

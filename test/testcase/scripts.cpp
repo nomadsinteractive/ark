@@ -43,7 +43,7 @@ public:
             return -1;
         }
         const sp<Scope> vars = sp<Scope>::make();
-        vars->put("_resource_loader", resourceLoader);
+        vars->put("_resource_loader", Box(resourceLoader));
         script->execute(Ark::instance().getAsset("hello.py"), vars);
         return 0;
     }

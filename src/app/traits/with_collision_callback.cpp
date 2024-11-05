@@ -6,8 +6,8 @@
 namespace ark {
 
 WithCollisionCallback::WithCollisionCallback(sp<CollisionCallback> collisionCallback)
-    : _collision_callback(std::move(collisionCallback))
 {
+    setCollisionCallback(std::move(collisionCallback));
 }
 
 TypeId WithCollisionCallback::onPoll(WiringContext& /*context*/)
@@ -18,13 +18,23 @@ TypeId WithCollisionCallback::onPoll(WiringContext& /*context*/)
 void WithCollisionCallback::onWire(const WiringContext& context)
 {
     _with_debris.onWire(context);
-    if(const sp<Debris> debris = _collision_callback.tryCast<Debris>())
-        _with_debris.track(debris);
 }
 
 void WithCollisionCallback::traverse(const Visitor& visitor)
 {
     _with_debris.traverse(visitor);
+}
+
+const sp<CollisionCallback>& WithCollisionCallback::collisionCallback() const
+{
+    return _collision_callback;
+}
+
+void WithCollisionCallback::setCollisionCallback(sp<CollisionCallback> collisionCallback)
+{
+    if(const sp<Debris> debris = collisionCallback.tryCast<Debris>())
+        _with_debris.track(debris);
+    _collision_callback = std::move(collisionCallback);
 }
 
 void WithCollisionCallback::onBeginContact(const Rigidbody& rigidBody, const CollisionManifold& manifold)

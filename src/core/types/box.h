@@ -21,10 +21,10 @@ public:
     constexpr Box(std::nullptr_t) noexcept
         : _type_id(0), _class(nullptr) {
     }
-    template<typename T> Box(sp<T> sharedPtr) noexcept
+    template<typename T> explicit Box(sp<T> sharedPtr) noexcept
         : _type_id(Type<T>::id()), _class(sharedPtr.getClass()), _stub(sharedPtr ? _make_ptr_stub(new SharedPtr<T>(std::move(sharedPtr))) : nullptr) {
     }
-    template<typename T> Box(T enumValue) noexcept
+    template<typename T> explicit Box(T enumValue) noexcept
         : _type_id(Type<T>::id()), _class(Class::getClass<T>()), _stub(_make_enum_stub<T>(enumValue)) {
     }
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Box);

@@ -18,6 +18,11 @@ public:
     void onWire(const WiringContext& context) override;
     void traverse(const Visitor& visitor) override;
 
+//  [[script::bindings::property]]
+    const sp<CollisionCallback>& collisionCallback() const;
+//  [[script::bindings::property]]
+    void setCollisionCallback(sp<CollisionCallback> collisionCallback);
+
     void onBeginContact(const Rigidbody& rigidBody, const CollisionManifold& manifold) override;
     void onEndContact(const Rigidbody& rigidBody) override;
 

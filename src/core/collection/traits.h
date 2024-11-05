@@ -27,7 +27,7 @@ public:
     }
 
     template<typename T> Box& put(sp<T> trait) {
-        return put(Type<T>::id(), trait);
+        return put(Type<T>::id(), Box(std::move(trait)));
     }
 
     Box& put(TypeId typeId, Box trait) {

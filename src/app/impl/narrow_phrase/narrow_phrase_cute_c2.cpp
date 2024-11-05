@@ -96,7 +96,7 @@ RigidbodyDef NarrowPhraseCuteC2::makeBodyDef(TypeId shapeId, const SafeVar<Vec3>
                 break;
         }
     }
-    return RigidbodyDef(sizeVal, V3(bodyDef->pivot(), 0), bodyDef);
+    return RigidbodyDef(sizeVal, V3(bodyDef->pivot(), 0), Box(bodyDef));
 }
 
 NarrowPhrase::Ray NarrowPhraseCuteC2::toRay(const V2& from, const V2& to)

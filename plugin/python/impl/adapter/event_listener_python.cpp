@@ -34,7 +34,7 @@ bool EventListenerPython::onEvent(const Event& event)
 
 void EventListenerPython::traverse(const Debris::Visitor& visitor)
 {
-    visitor(_callable.ref());
+    _callable.traverse(visitor);
 }
 
 }

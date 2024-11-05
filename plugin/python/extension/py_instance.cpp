@@ -41,9 +41,15 @@ const sp<PyInstanceRef>& PyInstance::ref() const
     return _ref;
 }
 
+void PyInstance::traverse(const Debris::Visitor& visitor) const
+{
+    if(*this)
+        visitor(Box(_ref));
+}
+
 Box PyInstance::toBox() const
 {
-    return {_ref};
+    return Box(_ref);
 }
 
 PyInstance::operator bool() const

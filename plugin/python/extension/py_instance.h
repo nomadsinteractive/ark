@@ -4,7 +4,7 @@
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
-#include "core/types/implements.h"
+#include "core/inf/debris.h"
 #include "core/types/shared_ptr.h"
 
 #include "python/forwarding.h"
@@ -25,6 +25,7 @@ public:
     static PyInstance track(PyObject* object);
 
     const sp<PyInstanceRef>& ref() const;
+    void traverse(const Debris::Visitor& visitor) const;
 
     Box toBox() const;
 

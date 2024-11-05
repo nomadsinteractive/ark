@@ -475,7 +475,7 @@ public:
         if(!inst) {
             inst = _delegate->build(args);
             CHECK(inst, "Cannot build \"%s\"", _name.c_str());
-            reference->put(_name, inst);
+            reference->put(_name, Box(inst));
             _delegate = nullptr;
         }
         return inst;

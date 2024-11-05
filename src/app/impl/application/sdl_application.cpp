@@ -204,7 +204,7 @@ public:
                                                         32, static_cast<int32_t>(bitmap->rowBytes()), rmask, gmask, bmask, amask);
         SDL_Cursor* cursor = SDL_CreateColorCursor(surface, hotX, hotY);
         SDL_FreeSurface(surface);
-        return sp<SDLCursor>::make(cursor);
+        return Box(sp<SDLCursor>::make(cursor));
     }
 
     Box createSystemCursor(SystemCursorName name) override {
@@ -247,7 +247,7 @@ public:
                 cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_HAND);
             break;
         }
-        return cursor ? sp<SDLCursor>::make(cursor) : nullptr;
+        return cursor ? Box(sp<SDLCursor>::make(cursor)) : nullptr;
     }
 
     void showCursor(const Box& cursor) override {

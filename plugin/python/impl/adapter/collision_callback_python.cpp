@@ -71,10 +71,8 @@ void CollisionCallbackPython::onEndContact(const Rigidbody& rigidBody)
 
 void CollisionCallbackPython::traverse(const Visitor& visitor)
 {
-    if(_on_begin_contact)
-        visitor(_on_begin_contact.ref());
-    if(_on_end_contact)
-        visitor(_on_end_contact.ref());
+    _on_begin_contact.traverse(visitor);
+    _on_end_contact.traverse(visitor);
 }
 
 }

@@ -261,17 +261,17 @@ Scope PyCast::toScope(PyObject* kws)
             PyObject* item = PyDict_GetItem(kws, key);
             const String sKey = toString(key);
             if(PyTuple_CheckExact(item) || pi.isInstance<Vec2>(item) || pi.isInstance<Vec3>(item) || pi.isInstance<Vec4>(item))
-                scope.put(sKey, sp<PyVecDuckType>::make(PyInstance::track(item)));
+                scope.put(sKey, Box(sp<PyVecDuckType>::make(PyInstance::track(item))));
             if(PyList_CheckExact(item))
-                scope.put(sKey, sp<PyListDuckType>::make(PyInstance::track(item)));
+                scope.put(sKey, Box(sp<PyListDuckType>::make(PyInstance::track(item))));
             else if(pi.isPyArkTypeObject(Py_TYPE(item)))
                 scope.put(sKey, *reinterpret_cast<PyArkType::Instance*>(item)->box);
             else if(PyBool_Check(item))
-                scope.put(sKey, sp<Boolean>::make<Boolean::Const>(PyObject_IsTrue(item) != 0));
+                scope.put(sKey, Box(sp<Boolean>::make<Boolean::Const>(PyObject_IsTrue(item) != 0)));
             else if(PyCallable_Check(item))
-                scope.put(sKey, sp<PyCallableDuckType>::make(PyInstance::track(item)));
+                scope.put(sKey, Box(sp<PyCallableDuckType>::make(PyInstance::track(item))));
             else
-                scope.put(sKey, sp<PyObjectDuckType>::make(PyInstance::track(item)));
+                scope.put(sKey, Box(sp<PyObjectDuckType>::make(PyInstance::track(item))));
         }
         Py_DECREF(keys);
     }

@@ -28,24 +28,24 @@ template<typename... INTERFACES> std::set<TypeId> _make_types() {
 
 template<typename T, typename U = void, typename... INTERFACES> Box _dynamic_down_cast(const sp<T>& ptr, TypeId id) {
     if(Type<U>::id() == id) {
-        const sp<U> casted = ptr.template cast<U>();
-        return casted;
+        sp<U> casted = ptr.template cast<U>();
+        return Box(std::move(casted));
     }
     if(const Class* clazz = Class::getClass(Type<U>::id()); clazz && clazz->isInstance(id))
-        return clazz->cast(ptr.template cast<U>(), id);
+        return clazz->cast(Box(ptr.template cast<U>()), id);
     if(sizeof...(INTERFACES) != 0)
        return _dynamic_down_cast<T, INTERFACES...>(ptr, id);
-    return Box();
+    return {};
 }
 
 template<typename T, typename U = void, typename... INTERFACES> Box _dynamic_up_cast(const Box& box) {
     if(Type<U>::id() == box.typeId()) {
         const sp<U>& unpacked = box.toPtr<U>();
-        return unpacked.template cast<T>();
+        return Box(unpacked.template cast<T>());
     }
     if(sizeof...(INTERFACES) != 0)
        return _dynamic_up_cast<T, INTERFACES...>(box);
-    return Box();
+    return {};
 }
 
 template<typename T, typename... INTERFACES> class ClassImpl final : public IClass {

@@ -30,7 +30,7 @@ void RunnablePython::run()
 
 void RunnablePython::traverse(const Visitor& visitor)
 {
-    visitor(_callable.ref());
+    visitor(Box(_callable.ref()));
 }
 
 }

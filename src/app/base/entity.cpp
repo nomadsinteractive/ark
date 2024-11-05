@@ -91,7 +91,7 @@ sp<Entity> Entity::BUILDER::build(const Scope& args)
     }
     for(const sp<Builder<Wirable>>& i : _components)
     {
-        Box trait = i->build(args);
+        Box trait(i->build(args));
         traits.put(trait.getClass()->id(), std::move(trait));
     }
     return sp<Entity>::make(std::move(traits));

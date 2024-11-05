@@ -67,7 +67,7 @@ public:
         sp<Numeric> g6 = beanFactory.build<Numeric>("@g6", args);
         TESTCASE_VALIDATE(g6 && g6->val() == 5.0f);
 
-        args.put("t", sp<Numeric::Const>::make(12.0f));
+        args.put("t", Box(sp<Numeric::Const>::make(12.0f)));
         sp<Numeric> g7 = beanFactory.build<Numeric>("g7", args);
         TESTCASE_VALIDATE(g7 && g7->val() == 12.0f);
 

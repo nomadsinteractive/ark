@@ -125,7 +125,7 @@ public:
 private:
     template<typename T> void setProperty(const String& name, sp<Variable<T>> var) {
         String cname = Strings::capitalizeFirst(name);
-        _properties[cname] = var;
+        _properties[cname] = Box(var);
         setSlotInput(std::move(cname), sp<Uploader>::make<UploaderOfVariable<T>>(std::move(var)));
         _timestamp.markDirty();
     }

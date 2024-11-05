@@ -999,6 +999,14 @@ class NamedType:
     def __init__(self, value):
         pass
 
+    @property
+    def id(self) -> int:
+        pass
+
+    @property
+    def name(self) -> str:
+        pass
+
     @staticmethod
     def reverse(hashid: int) -> str:
         pass
@@ -2392,6 +2400,10 @@ class Rigidbody:
         return 0
 
     @property
+    def shape(self) -> Shape:
+        pass
+
+    @property
     def meta_id(self) -> int:
         return 0
 
@@ -2412,7 +2424,7 @@ class Rigidbody:
         return Size(0, 0)
 
     @property
-    def quaternion(self) -> Vec4:
+    def quaternion(self) -> Optional[Vec4]:
         pass
 
     @property
@@ -2772,6 +2784,10 @@ class WithTag:
     @property
     def tag(self) -> Any:
         return None
+
+    @tag.setter
+    def tag(self, tag: Any):
+        pass
 
 
 class CollisionCallback:

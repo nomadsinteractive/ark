@@ -31,11 +31,6 @@ WithDebris::WithDebris()
     : _tracker(sp<Tracker>::make()) {
 }
 
-void WithDebris::track(const sp<Debris>& debris) const
-{
-    _tracker->track(debris);
-}
-
 TypeId WithDebris::onPoll(WiringContext& context)
 {
     return constants::TYPE_ID_NONE;
@@ -53,6 +48,17 @@ void WithDebris::onWire(const WiringContext& context)
 void WithDebris::traverse(const Visitor& visitor)
 {
     _tracker->traverse(visitor);
+}
+
+void WithDebris::track(const Box& obj) const
+{
+    if(const sp<Debris> debris = obj.as<Debris>())
+        _tracker->track(debris);
+}
+
+void WithDebris::track(const sp<Debris>& debris) const
+{
+    _tracker->track(debris);
 }
 
 sp<WithDebris::Tracker> WithDebris::ensureTracker(const WiringContext& context)

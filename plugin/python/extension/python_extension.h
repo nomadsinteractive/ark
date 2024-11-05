@@ -46,12 +46,13 @@ public:
     template<typename T> PyObject* pyNewObject(const sp<T>& object) {
         const Class* objClass = object.getClass();
         const TypeId typeId = objClass->id();
-        return _type_by_id.find(typeId) != _type_by_id.end() ? toPyObject(objClass->cast(object, typeId)) : getPyArkType<T>()->create(object);
+        const Box box(object);
+        return _type_by_id.find(typeId) != _type_by_id.end() ? toPyObject(objClass->cast(box, typeId)) : getPyArkType<T>()->create(box);
     }
 
     template<typename T, typename P> T* pyModuleAddType(PyObject* module, const char* moduleName, const char* typeName, PyTypeObject* base, long flags) {
         static T pyType(Strings::sprintf("%s.%s", moduleName, typeName), Strings::sprintf("%s.%s Type", moduleName, typeName), base, flags);
-        int ret = addPyArkType<P>(&pyType);
+        const int ret = addPyArkType<P>(&pyType);
         DCHECK(!ret, "PyArkType init failed");
         if(!ret)
             PyBridge::PyModule_AddObject(module, typeName, pyType.getPyObject());

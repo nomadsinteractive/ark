@@ -15,6 +15,7 @@ public:
 
     void traverse(const Visitor& visitor) override;
 
+    void track(const Box& obj) const;
     void track(const sp<Debris>& debris) const;
 
 private:

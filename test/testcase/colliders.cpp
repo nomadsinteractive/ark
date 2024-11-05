@@ -72,7 +72,7 @@ public:
         const sp<Numeric> duration = clock->duration();
 
         Scope args;
-        args.put("t", duration);
+        args.put("t", Box(duration));
         const sp<Collider> collider = resourceLoader->load<Collider>("collider-01", args);
         const sp<BroadPhrase> bp1 = resourceLoader->load<BroadPhrase>("tracker-01", args);
         const sp<BroadPhrase> bp2 = resourceLoader->load<BroadPhrase>("tracker-02", args);

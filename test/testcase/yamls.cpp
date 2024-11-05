@@ -19,11 +19,11 @@ public:
     virtual int launch() {
         const sp<BeanFactory> beanFactory = getBeanFactory();
         const sp<Scope> scope = sp<Scope>::make();
-        scope->put("locale", sp<String>::make("zh"));
+        scope->put("locale", Box(sp<String>::make("zh")));
         const sp<StringBundle> zhStringBundle = beanFactory->build<StringBundle>("@string-bundle-001", scope);
         if(*zhStringBundle->getString("l001/_locale") != "ZH")
             return 1;
-        scope->put("locale", sp<String>::make("en"));
+        scope->put("locale", Box(sp<String>::make("en")));
         const sp<StringBundle> enStringBundle = beanFactory->build<StringBundle>("@string-bundle-001", scope);
         if(*enStringBundle->getString("l001/_locale") != "EN")
             return 2;

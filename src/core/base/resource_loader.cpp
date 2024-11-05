@@ -99,13 +99,13 @@ Box ResourceLoader::PackageRefs::get(const String& name)
 {
     const auto iter = _packages.find(name);
     if(iter != _packages.end())
-        return iter->second;
+        return Box(iter->second);
 
     sp<BeanFactory> package = _bean_factory.getPackage(name);
     DCHECK(package, "ResourceLoader has no package named \"%s\"", name.c_str());
     const sp<ResourceLoader> resourceLoader = sp<ResourceLoader>::make(std::move(package));
     _packages.insert(std::make_pair(name, resourceLoader));
-    return resourceLoader;
+    return Box(resourceLoader);
 }
 
 }

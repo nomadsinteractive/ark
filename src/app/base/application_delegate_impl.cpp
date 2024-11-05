@@ -35,7 +35,7 @@ void ApplicationDelegateImpl::onCreate(Application& application, const sp<Surfac
 
     const sp<Scope> vars = sp<Scope>::make();
     const sp<ApplicationFacade> applicationFacade = sp<ApplicationFacade>::make(application, surface, _manifest);
-    vars->put("_application", applicationFacade);
+    vars->put("_application", Box(applicationFacade));
 
     applicationFacade->setBackgroundColor(Documents::getAttribute<Color>(appManifest, "background-color", Color(0, 0, 0)));
 

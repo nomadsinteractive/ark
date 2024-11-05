@@ -2,6 +2,7 @@
 
 #include "app/inf/collision_callback.h"
 #include "core/inf/debris.h"
+#include "core/types/implements.h"
 
 #include "python/extension/py_instance.h"
 

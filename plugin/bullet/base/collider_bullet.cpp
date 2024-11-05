@@ -145,14 +145,14 @@ sp<Rigidbody> ColliderBullet::createBody(Collider::BodyType type, sp<Shape> shap
     {
         sp<BtRigidbodyRef> rigidbody = makeGhostObject(btDynamicWorld(), cs->btShape().get(), type);
         _stub->_kinematic_objects.emplace_back(KinematicObject(position, rotation, rigidbody));
-        return sp<Rigidbody>::make<RigidbodyBullet>(++ _stub->_body_id_base, type, *this, std::move(cs), std::move(position), std::move(rotation), std::move(rigidbody));
+        return sp<Rigidbody>::make<RigidbodyBullet>(++ _stub->_body_id_base, type, std::move(shape), *this, std::move(cs), std::move(position), std::move(rotation), std::move(rigidbody));
     }
 
     const float mass = type == BODY_TYPE_DYNAMIC ? cs->mass() : 0;
     sp<btMotionState> motionState = sp<btDefaultMotionState>::make(btTrans);
     sp<BtRigidbodyRef> rigidBody = makeRigidBody(btDynamicWorld(), cs->btShape().get(), motionState.get(), type, mass);
     sp<Vec3> btPosition = sp<Vec3>::make<DynamicPosition>(motionState, type == BODY_TYPE_STATIC);
-    return sp<Rigidbody>::make<RigidbodyBullet>(++ _stub->_body_id_base, type, *this, std::move(cs), std::move(btPosition), sp<Vec4>::make<DynamicRotation>(std::move(motionState)), std::move(rigidBody));
+    return sp<Rigidbody>::make<RigidbodyBullet>(++ _stub->_body_id_base, type, std::move(shape), *this, std::move(cs), std::move(btPosition), sp<Vec4>::make<DynamicRotation>(std::move(motionState)), std::move(rigidBody));
 }
 
 sp<Shape> ColliderBullet::createShape(const NamedType& type, sp<Vec3> size)
@@ -166,7 +166,7 @@ sp<Shape> ColliderBullet::createShape(const NamedType& type, sp<Vec3> size)
     sp<Vec3> contentSize = size ? std::move(size) : model->content()->size();
     const V3 contentSizeValue = contentSize->val();
     sp<CollisionShape> collisionShape = makeConvexHullCollisionShape(model, contentSizeValue.x() * contentSizeValue.y() * contentSizeValue.z());
-    return sp<Shape>::make(type, std::move(contentSize), std::move(collisionShape));
+    return sp<Shape>::make(type, std::move(contentSize), Box(std::move(collisionShape)));
 }
 
 void ColliderBullet::rayCastClosest(const V3& from, const V3& to, const sp<CollisionCallback>& callback, int32_t filterGroup, int32_t filterMask) const

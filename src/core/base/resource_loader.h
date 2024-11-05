@@ -20,11 +20,11 @@ private:
             : _bean_factory(beanFactory) {
         }
 
-        virtual Box get(const String& refid) override {
+        Box get(const String& refid) override {
             SafePtr<Builder<T>> builder = getBuilder(Identifier::parseRef(refid));
-            const sp<T> ptr = builder->build({});
+            sp<T> ptr = builder->build({});
             DCHECK(ptr, "ResourceLoader has no object referred as \"%s\"", refid.c_str());
-            return ptr;
+            return Box(std::move(ptr));
         }
 
         SafePtr<Builder<T>> getBuilder(const Identifier& id) {
