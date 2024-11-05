@@ -10,6 +10,7 @@
 
 namespace ark {
 
+//[[script::bindings::debris]]
 class ARK_API Behavior final : public Wirable, public Debris {
 public:
 //  [[script::bindings::auto]]

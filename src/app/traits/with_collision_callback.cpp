@@ -17,8 +17,14 @@ TypeId WithCollisionCallback::onPoll(WiringContext& /*context*/)
 
 void WithCollisionCallback::onWire(const WiringContext& context)
 {
-    if(sp<Debris> debris = _collision_callback.tryCast<Debris>())
-        WithDebris::ensureComponent(context)->track(std::move(debris));
+    _with_debris.onWire(context);
+    if(const sp<Debris> debris = _collision_callback.tryCast<Debris>())
+        _with_debris.track(debris);
+}
+
+void WithCollisionCallback::traverse(const Visitor& visitor)
+{
+    _with_debris.traverse(visitor);
 }
 
 void WithCollisionCallback::onBeginContact(const Rigidbody& rigidBody, const CollisionManifold& manifold)

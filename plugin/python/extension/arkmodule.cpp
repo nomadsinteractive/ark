@@ -15,7 +15,6 @@
 #include "python/impl/interpreter/python_interpreter.h"
 #include "python/extension/py_instance.h"
 #include "python/extension/py_cast.h"
-#include "python/extension/py_ark_type.h"
 
 #include "platform/platform.h"
 

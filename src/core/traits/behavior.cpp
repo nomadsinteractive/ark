@@ -45,10 +45,12 @@ TypeId Behavior::onPoll(WiringContext& context)
 
 void Behavior::onWire(const WiringContext& context)
 {
+    _with_debris.onWire(context);
 }
 
 void Behavior::traverse(const Visitor& visitor)
 {
+    visitor(_delegate);
     _with_debris.traverse(visitor);
 }
 

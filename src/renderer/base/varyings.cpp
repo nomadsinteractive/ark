@@ -1,12 +1,10 @@
 #include "renderer/base/varyings.h"
 
-#include "core/ark.h"
 #include "core/base/allocator.h"
 #include "core/base/bean_factory.h"
 #include "core/inf/uploader.h"
 #include "core/inf/variable.h"
 #include "core/impl/writable/writable_memory.h"
-#include "core/util/holder_util.h"
 #include "core/util/math.h"
 
 #include "graphics/base/rect.h"
@@ -14,7 +12,6 @@
 
 #include "renderer/base/shader.h"
 #include "renderer/base/pipeline_input.h"
-#include "renderer/base/varyings.h"
 
 namespace ark {
 

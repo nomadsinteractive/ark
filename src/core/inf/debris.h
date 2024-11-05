@@ -11,7 +11,7 @@ class ARK_API Debris {
 public:
     virtual ~Debris() = default;
 
-    typedef std::function<bool(const Box&)> Visitor;
+    typedef std::function<void(const Box&)> Visitor;
 
     virtual void traverse(const Visitor& visitor) = 0;
 };

@@ -8,14 +8,14 @@ namespace ark {
 template<typename T> class WeakPtr {
 public:
     constexpr WeakPtr() noexcept = default;
-    WeakPtr(SharedPtr<T> sharedPtr) noexcept
-        : _weak_ptr(std::move(sharedPtr._ptr)), _weak_class(sharedPtr.getClass()) {
+    WeakPtr(const SharedPtr<T>& sharedPtr) noexcept
+        : _weak_ptr(sharedPtr._ptr), _weak_class(sharedPtr.getClass()) {
     }
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(WeakPtr);
 
-    void reset(SharedPtr<T> sharedPtr) {
+    void reset(const SharedPtr<T>& sharedPtr) {
         _weak_class = sharedPtr.getClass();
-        _weak_ptr = std::move(sharedPtr._ptr);
+        _weak_ptr = {sharedPtr._ptr};
     }
 
     SharedPtr<T> lock() const {
@@ -28,7 +28,7 @@ public:
 
     SharedPtr<T> ensure() const {
         SharedPtr<T> ptr = lock();
-        DASSERT(ptr);
+        ASSERT(ptr);
         return ptr;
     }
 

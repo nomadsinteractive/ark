@@ -1,6 +1,8 @@
 #pragma once
 
 #include "core/base/api.h"
+#include "core/inf/debris.h"
+#include "core/inf/wirable.h"
 
 #include "core/types/box.h"
 

@@ -1,12 +1,9 @@
 #include "graphics/util/vec2_type.h"
 
-#include <algorithm>
-
 #include "core/base/observer.h"
 #include "core/inf/debris.h"
 #include "core/impl/variable/variable_op1.h"
 #include "core/impl/variable/variable_op2.h"
-#include "core/util/holder_util.h"
 #include "core/util/operators.h"
 #include "core/util/updatable_util.h"
 

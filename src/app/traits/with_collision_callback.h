@@ -1,19 +1,22 @@
 #pragma once
 
 #include "core/base/api.h"
+#include "core/traits/with_debris.h"
 #include "core/inf/wirable.h"
 
 #include "app/inf/collision_callback.h"
 
 namespace ark {
 
-class ARK_API WithCollisionCallback final : public Wirable, public CollisionCallback {
+//[[script::bindings::debris]]
+class ARK_API WithCollisionCallback final : public Wirable, public Debris, public CollisionCallback {
 public:
 //  [[script::bindings::auto]]
     WithCollisionCallback(sp<CollisionCallback> collisionCallback);
 
     TypeId onPoll(WiringContext& context) override;
     void onWire(const WiringContext& context) override;
+    void traverse(const Visitor& visitor) override;
 
     void onBeginContact(const Rigidbody& rigidBody, const CollisionManifold& manifold) override;
     void onEndContact(const Rigidbody& rigidBody) override;
@@ -31,6 +34,8 @@ public:
 
 private:
     sp<CollisionCallback> _collision_callback;
+
+    WithDebris _with_debris;
 };
 
 }

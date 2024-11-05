@@ -2,7 +2,7 @@
 
 #include "core/base/with_timestamp.h"
 #include "core/inf/runnable.h"
-#include "core/util/holder_util.h"
+#include "core/inf/variable.h"
 
 namespace ark {
 

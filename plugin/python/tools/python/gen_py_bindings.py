@@ -173,7 +173,7 @@ def gen_module_type_declarations(modulename, results):
         if not i.base_classname or i.base_classname in class_declared or i.base_classname not in class_names:
             base_type = 'pi.getPyArkType<%s>()->getPyTypeObject()' % i.base_classname if i.base_classname else 'nullptr'
             declarations.append(line_pattern % (i.py_class_name, i.binding_classname, modulename, i.name, base_type,
-                                                '|Py_TPFLAGS_HAVE_GC' if i.is_container else ''))
+                                                '|Py_TPFLAGS_HAVE_GC' if i.has_debris else ''))
             class_declared.add(i.binding_classname)
         else:
             assert len(genclasses) != 0
@@ -489,15 +489,15 @@ class GenRichCompareMethod(GenMethod):
 
 
 class GenClass(object):
-    def __init__(self, filename, class_name, is_container=False):
-        self._py_src_name = 'py_ark_' + acg.camel_case_to_snake_case(class_name) + '_type'
-        self._py_class_name = 'PyArk%sType' % class_name
+    def __init__(self, filename: str, class_name: str, has_debris: bool = False):
+        self._py_src_name = f'py_ark_{acg.camel_case_to_snake_case(class_name)}_type'
+        self._py_class_name = f'PyArk{class_name}Type'
         self._filename = filename
         self._name = class_name
         self._classname = class_name
         self._binding_classname = class_name
         self._base_classname = None
-        self._is_container = is_container
+        self._has_debris = has_debris
         self._methods = {}
         self._enum_constants = {}
 
@@ -553,8 +553,8 @@ class GenClass(object):
         return self._filename
 
     @property
-    def is_container(self):
-        return self._is_container
+    def has_debris(self):
+        return self._has_debris
 
     def add_method(self, method):
         try:
