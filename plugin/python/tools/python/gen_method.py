@@ -217,8 +217,8 @@ class GenMethod(object):
     def need_unpack_statement(self):
         return not (self._self_argument and self._self_argument.type_compare('Box'))
 
-    def gen_py_type_constructor_codes(self, lines, genclass):
-        pass
+    def is_constructor(self):
+        return False
 
     def gen_self_statement(self, genclass):
         if self._self_argument:
@@ -230,8 +230,8 @@ class GenMethod(object):
 
     def gen_declaration(self):
         return [
-            'static %s %s(%s);' % (self.gen_py_return(), self._name, self.gen_py_arguments()),
-            'constexpr static auto %s_r = ark::plugin::python::PyCast::RuntimeFuncWrapper<decltype(&%s), %s>;' % (self._name, self._name, self._name)
+            f'static {self.gen_py_return()} {self._name}({self.gen_py_arguments()});',
+            f'constexpr static auto {self._name}_r = ark::plugin::python::PyCast::RuntimeFuncWrapper<decltype(&{self._name}), {self._name}>;'
         ]
 
     @staticmethod

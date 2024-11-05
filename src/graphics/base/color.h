@@ -42,6 +42,7 @@ public:
     sp<Vec3> toVec3() const;
 
 //  [[script::bindings::operator(index)]]
+//  [[script::bindings::property]]
     uint32_t value() const;
 
 //  [[script::bindings::auto]]

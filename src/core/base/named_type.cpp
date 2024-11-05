@@ -11,8 +11,7 @@ struct HashNames {
 
     String findName(HashId hash) const
     {
-        const auto iter = _hash_names.find(hash);
-        if(iter != _hash_names.end())
+        if(const auto iter = _hash_names.find(hash); iter != _hash_names.end())
             return iter->second;
         return "<Unknow>";
     }
@@ -28,7 +27,7 @@ NamedType::NamedType(String name)
 #endif
 }
 
-NamedType::NamedType(TypeId typeId)
+NamedType::NamedType(HashId typeId)
     : _id(typeId)
 {
 }
@@ -48,12 +47,12 @@ const String& NamedType::name() const
     return _name;
 }
 
-TypeId NamedType::id() const
+HashId NamedType::id() const
 {
     return _id;
 }
 
-String NamedType::reverse(int32_t type)
+String NamedType::reverse(HashId type)
 {
     return Global<HashNames>()->findName(type);
 }

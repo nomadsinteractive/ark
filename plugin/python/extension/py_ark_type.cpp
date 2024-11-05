@@ -56,9 +56,7 @@ int __traverse__(PyArkType::Instance* self, visitproc visitor, void* args)
                 {
                     if(const int32_t vret = visitor(pi->instance(), args))
                         throw BreakException{vret};
-                    // return true;
                 }
-                // return false;
             });
         } catch(const BreakException& e) {
             return e._retcode;

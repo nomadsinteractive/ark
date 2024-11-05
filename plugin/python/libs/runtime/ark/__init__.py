@@ -2364,12 +2364,8 @@ class Shape:
         pass
 
     @property
-    def type(self) -> int:
+    def type(self) -> NamedType:
         return 0
-
-    @type.setter
-    def type(self, type: int | str):
-        pass
 
     @property
     def size(self) -> Optional[Vec3]:

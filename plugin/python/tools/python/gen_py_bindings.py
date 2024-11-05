@@ -25,7 +25,7 @@ RICH_COMPARE_OPS = {
     '>=': 'Py_GE'
 }
 
-ANNOTATION_PATTERN = r'(?:\s*(?://)?\s*\[\[[^]]+]])*'
+ANNOTATION_PATTERN = r'(?:\s*(?://)?\s*\[\[[^]]+]]\s+)*'
 METHOD_PATTERN = r'([^(\r\n]+)\(([^\r\n]*)\)[^;\r\n]*;'
 DECLARATION_PATTERN = r'(static\s+)?(const\s+)?([\w\s]+);'
 
@@ -37,11 +37,11 @@ AUTOBIND_LOADER_PATTERN = re.compile(r'\[\[script::bindings::loader]]\s+template
 AUTOBIND_METHOD_PATTERN = re.compile(r'\[\[script::bindings::(auto|classmethod|constructor)]]\s+%s' % METHOD_PATTERN)
 AUTOBIND_AS_MAPPING_PATTERN = re.compile(r'\[\[script::bindings::map\(([^)]+)\)]]\s+%s' % METHOD_PATTERN)
 AUTOBIND_AS_SEQUENCE_PATTERN = re.compile(r'\[\[script::bindings::seq\(([^)]+)\)]]\s+%s' % METHOD_PATTERN)
-AUTOBIND_OPERATOR_PATTERN = re.compile(r'\[\[script::bindings::operator\(([^)]+)\)]]\s+%s' % METHOD_PATTERN)
+AUTOBIND_OPERATOR_PATTERN = re.compile(r'\[\[script::bindings::operator\(([^)]+)\)]]\s+%s%s' % (ANNOTATION_PATTERN, METHOD_PATTERN))
 AUTOBIND_CLASS_PATTERN = re.compile(r'\[\[script::bindings::(class|name)\(([^)]+)\)]]')
 AUTOBIND_EXTENDS_PATTERN = re.compile(r'\[\[script::bindings::extends\((\w+)\)]]')
 AUTOBIND_TYPEDEF_PATTERN = re.compile(r'\[\[script::bindings::auto]]\s+typedef\s+\w[\w<>\s]+\s+(\w+);')
-AUTOBIND_ANNOTATION_PATTERN = re.compile(r'\[\[script::bindings::(auto|container|debris)]]%s\s+class\s+([^{\r\n]+)\s*{' % ANNOTATION_PATTERN)
+AUTOBIND_ANNOTATION_PATTERN = re.compile(r'\[\[script::bindings::(auto|debris)]]%sclass\s+([^{\r\n]+)\s*{' % ANNOTATION_PATTERN)
 
 BUILDABLE_PATTERN = re.compile(r'\[\[plugin::(?:builder|resource-loader)[^]]*]]\s+class\s+\w+\s*(?:final)?\s*:\s*public\s+Builder<([^{]+)>\s*{')
 
@@ -333,8 +333,8 @@ class GenConstructorMethod(GenMethod):
     def need_unpack_statement(self):
         return False
 
-    def gen_py_type_constructor_codes(self, lines, genclass):
-        lines.append('pyTypeObject->tp_init = reinterpret_cast<initproc>(%s::__init___r);' % genclass.py_class_name)
+    def is_constructor(self):
+        return True
 
 
 class GenPropertyMethod(GenMethod):
@@ -498,7 +498,8 @@ class GenClass(object):
         self._binding_classname = class_name
         self._base_classname = None
         self._has_debris = has_debris
-        self._methods = {}
+        self._method_dict = {}
+        self._methods = []
         self._enum_constants = {}
 
     @property
@@ -542,7 +543,7 @@ class GenClass(object):
 
     @property
     def methods(self):
-        return self._methods.values()
+        return self._method_dict.values()
 
     @property
     def enum_constants(self):
@@ -558,19 +559,22 @@ class GenClass(object):
 
     def add_method(self, method):
         try:
-            m = self._methods[method.name]
+            m = self._method_dict[method.name]
             can_overload = hasattr(m, 'add_overloaded_method') or type(m) is type(method)
-            assert can_overload, f'Trying to overload two different methods "{type(m).__name__}" and "{type(method).__name__}"'
-            method = m.overload(m, method)
+            # assert can_overload, f'Trying to overload two different methods "{type(m).__name__}" and "{type(method).__name__}"'
+            if can_overload:
+                self._methods.remove(m)
+                method = m.overload(m, method)
         except KeyError:
             pass
-        self._methods[method.name] = method
+        self._methods.append(method)
+        self._method_dict[method.name] = method
 
     def add_enum_constant(self, name, value):
         self._enum_constants[name] = value
 
     def has_methods(self):
-        return len(self._methods) > 0
+        return len(self._method_dict) > 0
 
     def property_methods(self):
         return self.find_methods_by_type(GenPropertyMethod)
@@ -597,11 +601,11 @@ class GenClass(object):
         return self.find_methods_by_type(GenSequenceMethod)
 
     def find_methods_by_type(self, method_type):
-        return [i for i in self.methods if isinstance(i, method_type)]
+        return [i for i in self._methods if isinstance(i, method_type)]
 
     def gen_py_type_constructor_codes(self, lines):
-        for i in self.methods:
-            i.gen_py_type_constructor_codes(lines, self)
+        if any(i.is_constructor() for i in self.methods):
+            lines.append(f'pyTypeObject->tp_init = reinterpret_cast<initproc>({self.py_class_name}::__init___r);')
 
     def gen_property_defs(self):
         property_defs = []

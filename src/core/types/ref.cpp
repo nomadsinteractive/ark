@@ -19,11 +19,6 @@ Ref::operator bool() const
     return !isDiscarded();
 }
 
-RefId Ref::toIndex() const
-{
-    return _id;
-}
-
 RefId Ref::id() const
 {
     return _id;

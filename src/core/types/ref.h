@@ -19,7 +19,6 @@ public:
     }
 
 //  [[script::bindings::operator(index)]]
-    RefId toIndex() const;
 //  [[script::bindings::property]]
     RefId id() const;
 
