@@ -27,7 +27,7 @@ TYPE_VEC4 = Union[tuple[TYPE_NUMERIC, TYPE_NUMERIC, TYPE_NUMERIC, TYPE_NUMERIC],
 TYPE_RECTI = tuple[int, int, int, int]
 TYPE_FLOAT4 = tuple[float, float, float, float]
 TYPE_M4 = tuple[TYPE_FLOAT4, TYPE_FLOAT4, TYPE_FLOAT4, TYPE_FLOAT4]
-TYPE_ID = Union[int, str]
+TYPE_NAMED_HASH_ID = Union[int, str]
 
 
 def logd(*args):
@@ -995,12 +995,12 @@ class Integer(_Var):
         pass
 
 
-class NamedType:
+class NamedHash:
     def __init__(self, value):
         pass
 
     @property
-    def id(self) -> int:
+    def hash(self) -> int:
         pass
 
     @property
@@ -1008,7 +1008,7 @@ class NamedType:
         pass
 
     @staticmethod
-    def reverse(hashid: int) -> str:
+    def reverse(hash: int) -> str:
         pass
 
 
@@ -1462,10 +1462,10 @@ class ModelBundle:
     def vertex_length(self) -> int:
         return 0
 
-    def get_model(self, t: TYPE_ID) -> Model:
+    def get_model(self, t: TYPE_NAMED_HASH_ID) -> Model:
         pass
 
-    def import_model(self, t: TYPE_ID, manifest: str | Manifest, future: Optional[Future] = None):
+    def import_model(self, t: TYPE_NAMED_HASH_ID, manifest: str | Manifest, future: Optional[Future] = None):
         pass
 
 
@@ -2360,12 +2360,12 @@ class Shape:
     TYPE_BOX = -3
     TYPE_CAPSULE = -4
 
-    def __init__(self, type: TYPE_ID, size: Optional[TYPE_VEC3] = None):
+    def __init__(self, id: TYPE_NAMED_HASH_ID, size: Optional[TYPE_VEC3] = None):
         pass
 
     @property
-    def type(self) -> NamedType:
-        return 0
+    def type(self) -> NamedHash:
+        pass
 
     @property
     def size(self) -> Optional[Vec3]:
@@ -2536,7 +2536,7 @@ class Collider:
     def create_body(self, type_: int | Integer, shape: Optional[Shape], position, rotate=None, disposed: Optional[Boolean] = None) -> Rigidbody:
         pass
 
-    def create_shape(self, shape_type: TYPE_ID, size: Optional[TYPE_VEC3] = None) -> Shape:
+    def create_shape(self, shape_id: TYPE_NAMED_HASH_ID, size: Optional[TYPE_VEC3] = None) -> Shape:
         pass
 
     def ray_cast(self, ray_from, ray_to, collision_filter: Optional[CollisionFilter] = None) -> List[RayCastManifold]:

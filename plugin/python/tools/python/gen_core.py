@@ -11,7 +11,7 @@ _paths = None
 
 INDENT = '    '
 
-TYPE_DEFINED_OBJ = ('V2', 'V3', 'V4', 'M3', 'M4', 'NamedType', 'Rect', 'RectI', 'RectF', 'Slice')
+TYPE_DEFINED_OBJ = ('V2', 'V3', 'V4', 'M3', 'M4', 'NamedHash', 'Rect', 'RectI', 'RectF', 'Slice')
 TYPE_DEFINED_SP = ('document', 'element', 'attribute', 'bitmap')
 
 
@@ -169,7 +169,7 @@ ARK_PY_ARGUMENTS = (
     (r'(int32_t|int16_t|int8_t)', GenArgumentMeta('int32_t', 'int32_t', 'i')),
     (r'float', GenArgumentMeta('float', 'float', 'f')),
     (r'bool', GenArgumentMeta('int32_t', 'bool', 'p', True)),
-    (r'TypeId', GenArgumentMeta('PyObject*', 'TypeId', 'O')),
+    (r'HashId|TypeId', GenArgumentMeta('PyObject*', 'uint32_t', 'O')),
     (r'([^:]+::.+)', GenArgumentMeta('PyObject*', '${0}', 'O')),
 )
 

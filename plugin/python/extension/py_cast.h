@@ -6,7 +6,7 @@
 #include <Python.h>
 
 #include "core/base/bean_factory.h"
-#include "core/base/named_type.h"
+#include "core/base/named_hash.h"
 #include "core/forwarding.h"
 #include "core/inf/array.h"
 #include "core/types/box.h"

@@ -46,7 +46,7 @@ sp<Rigidbody> ColliderImpl::createBody(Collider::BodyType type, sp<Shape> shape,
     return _stub->createRigidBody(type, std::move(shape), std::move(position), std::move(rotation), std::move(discarded));
 }
 
-sp<Shape> ColliderImpl::createShape(const NamedType& type, sp<Vec3> size)
+sp<Shape> ColliderImpl::createShape(const NamedHash& type, sp<Vec3> size)
 {
     return sp<Shape>::make(type, std::move(size));
 }
@@ -299,13 +299,13 @@ const RigidbodyDef& ColliderImpl::RigidBodyImpl::bodyDef() const
 
 const RigidbodyDef& ColliderImpl::RigidBodyImpl::updateBodyDef(NarrowPhrase& narrowPhrase, const SafeVar<Vec3>& size)
 {
-    _body_def = narrowPhrase.makeBodyDef(_shape->type().id(), size);
+    _body_def = narrowPhrase.makeBodyDef(_shape->type().hash(), size);
     return _body_def;
 }
 
 BroadPhrase::Candidate ColliderImpl::RigidBodyImpl::toBroadPhraseCandidate() const
 {
-    return {ref()->id(), position().val(), quaternion().val(), metaId(), _shape->type().id(), collisionFilter(), bodyDef().impl()};
+    return {ref()->id(), position().val(), quaternion().val(), metaId(), _shape->type().hash(), collisionFilter(), bodyDef().impl()};
 }
 
 ColliderImpl::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

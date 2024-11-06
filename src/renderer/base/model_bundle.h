@@ -97,12 +97,12 @@ public:
     const ModelLayout& ensureModelLayout(int32_t type) const;
 
 //[[script::bindings::auto]]
-    sp<Model> getModel(const NamedType& namedType) const;
+    sp<Model> getModel(const NamedHash& type) const;
 
 //[[script::bindings::auto]]
-    void importModel(const NamedType& namedType, const String& src, sp<Future> future = nullptr);
+    void importModel(const NamedHash& type, const String& src, sp<Future> future = nullptr);
 //[[script::bindings::auto]]
-    void importModel(const NamedType& namedType, const Manifest& manifest, sp<Future> future = nullptr);
+    void importModel(const NamedHash& type, const Manifest& manifest, sp<Future> future = nullptr);
 
 //[[script::bindings::property]]
     size_t vertexLength() const;

@@ -4,17 +4,17 @@
 
 namespace ark {
 
-Shape::Shape(const NamedType& type, sp<Vec3> size)
+Shape::Shape(const NamedHash& type, sp<Vec3> size)
     : Shape(type, std::move(size), {})
 {
 }
 
-Shape::Shape(const NamedType& type, sp<Vec3> size, Box implementation)
+Shape::Shape(const NamedHash& type, sp<Vec3> size, Box implementation)
     : _type(type), _size(std::move(size)), _implementation(std::move(implementation))
 {
 }
 
-const NamedType& Shape::type() const
+const NamedHash& Shape::type() const
 {
     return _type;
 }

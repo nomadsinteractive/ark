@@ -1,6 +1,6 @@
 #include "render_batch_post_process.h"
 
-#include "core/base/named_type.h"
+#include "core/base/named_hash.h"
 
 #include "graphics/base/layer_context.h"
 #include "graphics/base/render_object.h"
@@ -19,7 +19,7 @@ RenderBatchPostProcess::RenderBatchPostProcess()
     const RenderEngine& renderEngine = Ark::instance().applicationContext()->renderEngine();
     sp<Vec3> position = Vec3Type::create(renderEngine.viewport().width() / 2, renderEngine.viewport().height() / 2, 0);
     sp<Size> size = sp<Size>::make(renderEngine.viewport().width(), renderEngine.viewport().height());
-    _layer_context->add(sp<Renderable>::make<RenderObject>(NamedType(1), std::move(position), std::move(size)), nullptr, Global<Constants>()->BOOLEAN_FALSE);
+    _layer_context->add(sp<Renderable>::make<RenderObject>(NamedHash(1), std::move(position), std::move(size)), nullptr, Global<Constants>()->BOOLEAN_FALSE);
     _contexts.push_back(_layer_context);
 }
 

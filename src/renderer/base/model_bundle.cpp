@@ -3,7 +3,7 @@
 #include "core/ark.h"
 #include "core/base/bean_factory.h"
 #include "core/base/future.h"
-#include "core/base/named_type.h"
+#include "core/base/named_hash.h"
 #include "core/inf/executor.h"
 #include "core/impl/executor/executor_thread_pool.h"
 
@@ -42,9 +42,9 @@ const ModelBundle::ModelLayout& ModelBundle::ensureModelLayout(int32_t type) con
     return _stub->ensureModelLayout(type);
 }
 
-sp<Model> ModelBundle::getModel(const NamedType& namedType) const
+sp<Model> ModelBundle::getModel(const NamedHash& type) const
 {
-    const auto iter = _stub->_model_layouts.find(namedType.id());
+    const auto iter = _stub->_model_layouts.find(type.hash());
     return iter != _stub->_model_layouts.end() ? iter->second._model : nullptr;
 }
 
@@ -53,15 +53,15 @@ sp<Model> ModelBundle::loadModel(int32_t type)
     return ensureModelLayout(type)._model;
 }
 
-void ModelBundle::importModel(const NamedType& namedType, const String& src, sp<Future> future)
+void ModelBundle::importModel(const NamedHash& type, const String& src, sp<Future> future)
 {
-    importModel(namedType.id(), Manifest(src), std::move(future));
+    importModel(type.hash(), Manifest(src), std::move(future));
 }
 
-void ModelBundle::importModel(const NamedType& namedType, const Manifest& manifest, sp<Future> future)
+void ModelBundle::importModel(const NamedHash& type, const Manifest& manifest, sp<Future> future)
 {
     const ApplicationContext& applicationContext = Ark::instance().applicationContext();
-    sp<Runnable> task = sp<Runnable>::make<ImportModuleRunnable>(namedType.id(), manifest, _stub, nullptr, applicationContext.executorMain(), std::move(future));
+    sp<Runnable> task = sp<Runnable>::make<ImportModuleRunnable>(type.hash(), manifest, _stub, nullptr, applicationContext.executorMain(), std::move(future));
     applicationContext.executorThreadPool()->execute(std::move(task));
 }
 

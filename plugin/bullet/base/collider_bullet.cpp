@@ -116,11 +116,11 @@ sp<Rigidbody> ColliderBullet::createBody(Collider::BodyType type, sp<Shape> shap
 
     sp<CollisionShape> cs = shape->asImplementation<CollisionShape>();
     if(!cs)
-        if(const auto iter = _stub->_collision_shapes.find(shape->type().id()); iter == _stub->_collision_shapes.end())
+        if(const auto iter = _stub->_collision_shapes.find(shape->type().hash()); iter == _stub->_collision_shapes.end())
         {
             btCollisionShape* btShape = nullptr;
             const V3 size = shape->size().val();
-            switch(shape->type().id())
+            switch(shape->type().hash())
             {
             case Shape::TYPE_BOX:
                 btShape = new btBoxShape(btVector3(size.x() / 2, size.y() / 2, size.z() / 2));
@@ -133,7 +133,7 @@ sp<Rigidbody> ColliderBullet::createBody(Collider::BodyType type, sp<Shape> shap
                 btShape = new btCapsuleShape(size.x() / 2, size.y() - size.x());
                 break;
             default:
-                FATAL("Undefined shape type %d(%s) in this world", shape->type().id(), shape->type().name().c_str());
+                FATAL("Undefined shape type %d(%s) in this world", shape->type().hash(), shape->type().name().c_str());
                 break;
             }
             cs = sp<CollisionShape>::make(sp<btCollisionShape>::adopt(btShape), 1.0f);
@@ -155,14 +155,14 @@ sp<Rigidbody> ColliderBullet::createBody(Collider::BodyType type, sp<Shape> shap
     return sp<Rigidbody>::make<RigidbodyBullet>(++ _stub->_body_id_base, type, std::move(shape), *this, std::move(cs), std::move(btPosition), sp<Vec4>::make<DynamicRotation>(std::move(motionState)), std::move(rigidBody));
 }
 
-sp<Shape> ColliderBullet::createShape(const NamedType& type, sp<Vec3> size)
+sp<Shape> ColliderBullet::createShape(const NamedHash& type, sp<Vec3> size)
 {
-    const TypeId shapeId = type.id();
-    if(shapeId == Shape::TYPE_AABB || shapeId == Shape::TYPE_BOX || shapeId == Shape::TYPE_BALL || shapeId == Shape::TYPE_CAPSULE)
+    const HashId shapeType = type.hash();
+    if(shapeType == Shape::TYPE_AABB || shapeType == Shape::TYPE_BOX || shapeType == Shape::TYPE_BALL || shapeType == Shape::TYPE_CAPSULE)
         return sp<Shape>::make(type, std::move(size));
 
-    const sp<Model> model = _stub->_model_loader->loadModel(shapeId);
-    CHECK(model, "Failed to load model[%d(\"%s\")]", type.id(), type.name().c_str());
+    const sp<Model> model = _stub->_model_loader->loadModel(shapeType);
+    CHECK(model, "Failed to load model[%ud(\"%s\")]", type.hash(), type.name().c_str());
     sp<Vec3> contentSize = size ? std::move(size) : model->content()->size();
     const V3 contentSizeValue = contentSize->val();
     sp<CollisionShape> collisionShape = makeConvexHullCollisionShape(model, contentSizeValue.x() * contentSizeValue.y() * contentSizeValue.z());

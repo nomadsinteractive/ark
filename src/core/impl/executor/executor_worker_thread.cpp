@@ -37,9 +37,7 @@ void ExecutorWorkerThread::Worker::run()
         _thread.wait(std::chrono::milliseconds(1));
 
         sp<Runnable> task;
-        bool hasTask = _pending_tasks.pop(task);
-
-        if(hasTask)
+        if(_pending_tasks.pop(task))
         {
             do
             {

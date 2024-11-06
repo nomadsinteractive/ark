@@ -1,6 +1,6 @@
 #include "graphics/impl/storage/tileset_importer_tsx.h"
 
-#include "core/base/named_type.h"
+#include "core/base/named_hash.h"
 #include "core/util/documents.h"
 #include "core/util/strings.h"
 

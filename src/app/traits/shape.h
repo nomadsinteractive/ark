@@ -1,7 +1,7 @@
 #pragma once
 
 #include "core/forwarding.h"
-#include "core/base/named_type.h"
+#include "core/base/named_hash.h"
 #include "core/types/safe_var.h"
 
 #include "graphics/forwarding.h"
@@ -22,11 +22,11 @@ public:
 
 public:
 //  [[script::bindings::auto]]
-    Shape(const NamedType& type = {Shape::TYPE_NONE}, sp<Vec3> size = nullptr);
-    Shape(const NamedType& type, sp<Vec3> size, Box implementation);
+    Shape(const NamedHash& type = {Shape::TYPE_NONE}, sp<Vec3> size = nullptr);
+    Shape(const NamedHash& type, sp<Vec3> size, Box implementation);
 
 //  [[script::bindings::property]]
-    const NamedType& type() const;
+    const NamedHash& type() const;
 //  [[script::bindings::property]]
     const SafeVar<Vec3>& size() const;
 
@@ -40,7 +40,7 @@ public:
     }
 
 private:
-    NamedType _type;
+    NamedHash _type;
     SafeVar<Vec3> _size;
 
     Box _implementation;

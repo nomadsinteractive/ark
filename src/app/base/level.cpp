@@ -4,7 +4,7 @@
 
 #include "core/ark.h"
 
-#include "core/base/named_type.h"
+#include "core/base/named_hash.h"
 
 #include "graphics/base/camera.h"
 #include "graphics/base/layer.h"

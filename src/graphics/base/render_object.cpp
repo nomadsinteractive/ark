@@ -1,7 +1,7 @@
 #include "graphics/base/render_object.h"
 
 #include "core/base/bean_factory.h"
-#include "core/base/named_type.h"
+#include "core/base/named_hash.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/inf/variable.h"
 #include "core/util/numeric_type.h"
@@ -14,8 +14,8 @@
 
 namespace ark {
 
-RenderObject::RenderObject(const NamedType& type, sp<Vec3> position, sp<Size> size, sp<Transform> transform, sp<Varyings> varyings, sp<Boolean> visible, sp<Boolean> discarded)
-    : RenderObject(sp<IntegerWrapper>::make(type.id()), std::move(position), std::move(size), std::move(transform), std::move(varyings), std::move(visible), std::move(discarded))
+RenderObject::RenderObject(const NamedHash& type, sp<Vec3> position, sp<Size> size, sp<Transform> transform, sp<Varyings> varyings, sp<Boolean> visible, sp<Boolean> discarded)
+    : RenderObject(sp<IntegerWrapper>::make(type.hash()), std::move(position), std::move(size), std::move(transform), std::move(varyings), std::move(visible), std::move(discarded))
 {
 }
 

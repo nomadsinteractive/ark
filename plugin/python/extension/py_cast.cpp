@@ -2,7 +2,7 @@
 
 #include "core/base/json.h"
 #include "core/base/observer.h"
-#include "core/base/named_type.h"
+#include "core/base/named_hash.h"
 #include "core/base/scope.h"
 #include "core/base/slice.h"
 #include "core/inf/variable.h"
@@ -11,7 +11,6 @@
 
 #include "graphics/base/color.h"
 #include "graphics/base/mat.h"
-#include "graphics/base/size.h"
 #include "graphics/util/vec2_type.h"
 #include "graphics/util/vec3_type.h"
 #include "graphics/util/vec4_type.h"
@@ -326,12 +325,12 @@ template<> ARK_PLUGIN_PYTHON_API Optional<std::wstring> PyCast::toCppObject_impl
     return toWString(object);
 }
 
-template<> ARK_PLUGIN_PYTHON_API Optional<NamedType> PyCast::toCppObject_impl<NamedType>(PyObject* object)
+template<> ARK_PLUGIN_PYTHON_API Optional<NamedHash> PyCast::toCppObject_impl<NamedHash>(PyObject* object)
 {
     if(Optional<String> strOpt = toStringExact(object))
-        return NamedType(std::move(strOpt.value()));
+        return NamedHash(std::move(strOpt.value()));
     if(Optional<int32_t> intOpt = toCppInteger<int32_t>(object))
-        return NamedType(intOpt.value());
+        return NamedHash(intOpt.value());
     return {};
 }
 
@@ -618,9 +617,9 @@ template<> ARK_PLUGIN_PYTHON_API PyObject* PyCast::toPyObject_impl<Span>(const S
     return PyBytes_FromStringAndSize(strview.data(), static_cast<size_t>(strview.size()));
 }
 
-template<> ARK_PLUGIN_PYTHON_API PyObject* PyCast::toPyObject_impl<NamedType>(const NamedType& obj)
+template<> ARK_PLUGIN_PYTHON_API PyObject* PyCast::toPyObject_impl<NamedHash>(const NamedHash& obj)
 {
-    return toPyObject<sp<NamedType>>(sp<NamedType>::make(obj));
+    return toPyObject<sp<NamedHash>>(sp<NamedHash>::make(obj));
 }
 
 }
