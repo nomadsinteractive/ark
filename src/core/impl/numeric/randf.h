@@ -1,20 +1,19 @@
-#ifndef ARK_CORE_IMPL_NUMERIC_RANDF_H_
-#define ARK_CORE_IMPL_NUMERIC_RANDF_H_
+#pragma once
 
 #include "core/forwarding.h"
 #include "core/inf/variable.h"
-#include "core/types/safe_ptr.h"
+#include "core/types/safe_var.h"
 #include "core/types/shared_ptr.h"
 
 namespace ark {
 
-class Randf : public Numeric {
+class Randf final : public Numeric {
 public:
-    Randf(const sp<Numeric>& b);
-    Randf(const sp<Numeric>& a, const sp<Numeric>& b);
+    Randf(sp<Numeric> b);
+    Randf(sp<Numeric> a, sp<Numeric> b);
 
-    virtual float val() override;
-    virtual bool update(uint64_t timestamp) override;
+    float val() override;
+    bool update(uint64_t timestamp) override;
 
 //  [[plugin::function("randf")]]
     static sp<Numeric> randf(const sp<Numeric>& b);
@@ -26,10 +25,8 @@ public:
     static sp<Numeric> randfv(const sp<Numeric>& a, const sp<Numeric>& b);
 
 private:
-    SafePtr<Numeric> _a;
+    SafeVar<Numeric> _a;
     sp<Numeric> _b;
 };
 
 }
-
-#endif

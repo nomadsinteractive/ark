@@ -37,11 +37,6 @@ sp<Renderer> RendererType::wrap(const sp<Renderer>& self)
     return sp<RendererWrapper>::make(self);
 }
 
-SafePtr<Size> RendererType::size(const sp<Renderer>& self)
-{
-    return SafePtr<Size>();
-}
-
 sp<Renderer> RendererType::reset(const sp<Renderer>& self, sp<Renderer> wrapped)
 {
     const sp<Wrapper<Renderer>> rd = self.tryCast<Wrapper<Renderer>>();

@@ -57,17 +57,18 @@ sp<Transform> makeTransform(const String& rotation, const String& scale)
     return sp<Transform>::make(sp<Vec4>::make<Vec4::Const>(quat), std::move(s), nullptr, Transform::TYPE_LINEAR_3D);
 }
 
-sp<RenderObject> makeRenderObject(const document& manifest, int32_t type, bool visible)
+std::pair<sp<RenderObject>, sp<Transform>> makeRenderObject(const document& manifest, HashId type, bool visible)
 {
     const Global<Constants> globalConstants;
     const V3 position = Documents::ensureAttribute<V3>(manifest, constants::POSITION);
     const String& scale = Documents::getAttribute(manifest, "scale");
     const String& rotation = Documents::ensureAttribute(manifest, constants::ROTATION);
     sp<Transform> transform = makeTransform(rotation, scale);
-    return sp<RenderObject>::make(type, sp<Vec3>::make<Vec3::Const>(position), nullptr, std::move(transform), nullptr, visible ? globalConstants->BOOLEAN_TRUE : globalConstants->BOOLEAN_FALSE);
+    sp<RenderObject> renderObject = sp<RenderObject>::make(type, sp<Vec3>::make<Vec3::Const>(position), nullptr, transform, nullptr, visible ? globalConstants->BOOLEAN_TRUE : globalConstants->BOOLEAN_FALSE);
+    return {std::move(renderObject), std::move(transform)};
 }
 
-sp<Rigidbody> makeRigidBody(Library& library, const sp<Collider>& collider, const sp<RenderObject>& renderObject, Collider::BodyType bodyType, const std::map<String, String>& shapeIdAliases)
+sp<Rigidbody> makeRigidBody(Library& library, const sp<Collider>& collider, RenderObject& renderObject, Transform& transform, Collider::BodyType bodyType, const std::map<String, String>& shapeIdAliases)
 {
     if(!collider)
         return nullptr;
@@ -79,11 +80,11 @@ sp<Rigidbody> makeRigidBody(Library& library, const sp<Collider>& collider, cons
         library._shape = collider->createShape(shapeId, sp<Vec3>::make<Vec3::Const>(library._dimensions));
 
     if(bodyType != Collider::BODY_TYPE_DYNAMIC)
-        return collider->createBody(bodyType, library._shape, renderObject->position(), renderObject->transform()->rotation().wrapped());
+        return collider->createBody(bodyType, library._shape, renderObject.position(), transform.rotation().wrapped());
 
-    sp<Rigidbody> rigidbody = collider->createBody(bodyType, library._shape, Vec3Type::freeze(renderObject->position()), Vec4Type::freeze(renderObject->transform()->rotation().wrapped()));
-    renderObject->setPosition(rigidbody->position().wrapped());
-    renderObject->transform()->setRotation(rigidbody->quaternion().wrapped());
+    sp<Rigidbody> rigidbody = collider->createBody(bodyType, library._shape, Vec3Type::freeze(renderObject.position()), Vec4Type::freeze(transform.rotation().wrapped()));
+    renderObject.setPosition(rigidbody->position().wrapped());
+    transform.setRotation(rigidbody->quaternion().wrapped());
     return rigidbody;
 }
 
@@ -124,14 +125,14 @@ void Level::load(const String& src, const sp<Collider>& collider, const std::map
                 ASSERT(iter != libraryMapping.end());
                 Library& library = iter->second;
                 String name = Documents::getAttribute(j, constants::NAME);
-                sp<RenderObject> renderObject = makeRenderObject(j, library._type, visible);
+                auto [renderObject, transform] = makeRenderObject(j, library._type, visible);
 
                 CHECK(layer, "Trying to load model instance into undefined Layer(%s)", layerName.c_str());
                 layer->addRenderObject(renderObject);
 
                 if(const Collider::BodyType bodyType = Documents::getAttribute<Collider::BodyType>(j, "rigidbody_type", Collider::BODY_TYPE_NONE); bodyType != Collider::BODY_TYPE_NONE)
                 {
-                    sp<Rigidbody> rigidBody = makeRigidBody(library, collider, renderObject, bodyType, shapeIdAliases);
+                    sp<Rigidbody> rigidBody = makeRigidBody(library, collider, renderObject, transform, bodyType, shapeIdAliases);
                     if(name)
                         _rigid_objects[name] = std::move(rigidBody);
                     else
@@ -144,8 +145,7 @@ void Level::load(const String& src, const sp<Collider>& collider, const std::map
             else if(clazz == "MESH")
             {
                 const String& name = Documents::ensureAttribute(j, constants::NAME);
-                const int32_t type = name.hash();
-                sp<RenderObject> renderObject = makeRenderObject(j, type, visible);
+                auto [renderObject, _] = makeRenderObject(j, name.hash(), visible);
                 CHECK(layer, "Trying to load model instance into undefined Layer(%s)", layerName.c_str());
                 layer->addRenderObject(renderObject);
                 if(name)

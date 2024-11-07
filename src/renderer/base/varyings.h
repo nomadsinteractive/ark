@@ -75,7 +75,7 @@ public:
 
 public:
 //[[script::bindings::auto]]
-    Varyings();
+    Varyings() = default;
     Varyings(const PipelineInput& pipelineInput);
 
     bool update(uint64_t timestamp);

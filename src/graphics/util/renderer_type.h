@@ -31,8 +31,6 @@ public:
 //[[script::bindings::classmethod]]
     static sp<Renderer> wrap(const sp<Renderer>& self);
 
-//[[script::bindings::property]]
-    static SafePtr<Size> size(const sp<Renderer>& self);
 //[[script::bindings::classmethod]]
     static sp<Renderer> reset(const sp<Renderer>& self, sp<Renderer> wrapped);
 

@@ -41,7 +41,6 @@ public:
         template<typename T> bool typeCheck() const {
             return box && box->typeId() == Type<T>::id();
         }
-
     };
 
 public:

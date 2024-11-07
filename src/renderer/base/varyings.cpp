@@ -17,11 +17,10 @@ namespace ark {
 
 namespace {
 
-template<typename T> class UploaderSlotDefault : public Uploader {
+template<typename T> class UploaderSlotDefault final : public Uploader {
 public:
     UploaderSlotDefault(size_t length)
-        : Uploader(length * sizeof(T)), _data(length)
-    {
+        : Uploader(length * sizeof(T)), _data(length) {
     }
 
     bool update(uint64_t timestamp) override
@@ -38,10 +37,6 @@ private:
     std::vector<T> _data;
 };
 
-}
-
-Varyings::Varyings()
-{
 }
 
 Varyings::Varyings(const PipelineInput& pipelineInput)

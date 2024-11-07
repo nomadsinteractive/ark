@@ -5,24 +5,24 @@
 
 namespace ark {
 
-Randf::Randf(const sp<Numeric>& b)
-    : _b(b)
+Randf::Randf(sp<Numeric> b)
+    : _b(std::move(b))
 {
 }
 
-Randf::Randf(const sp<Numeric>& a, const sp<Numeric>& b)
-    : _a(a), _b(b)
+Randf::Randf(sp<Numeric> a, sp<Numeric> b)
+    : _a(std::move(a)), _b(std::move(b))
 {
 }
 
 float Randf::val()
 {
-    float a = _a->val();
-    float b = _b->val();
+    const float a = _a.val();
+    const float b = _b->val();
     return Math::randf() * (b - a) + a;
 }
 
-bool Randf::update(uint64_t /*timestamp*/)
+bool Randf::update(uint64_t timestamp)
 {
     return true;
 }
@@ -30,23 +30,23 @@ bool Randf::update(uint64_t /*timestamp*/)
 sp<Numeric> Randf::randf(const sp<Numeric>& b)
 {
     Randf rand(b);
-    return sp<Numeric::Const>::make(rand.val());
+    return sp<Const>::make(rand.val());
 }
 
 sp<Numeric> Randf::randf(const sp<Numeric>& a, const sp<Numeric>& b)
 {
     Randf rand(a, b);
-    return sp<Numeric::Const>::make(rand.val());
+    return sp<Const>::make(rand.val());
 }
 
 sp<Numeric> Randf::randfv(const sp<Numeric>& b)
 {
-    return sp<Randf>::make(b);
+    return sp<Numeric>::make<Randf>(b);
 }
 
 sp<Numeric> Randf::randfv(const sp<Numeric>& a, const sp<Numeric>& b)
 {
-    return sp<Randf>::make(a, b);
+    return sp<Numeric>::make<Randf>(a, b);
 }
 
 }

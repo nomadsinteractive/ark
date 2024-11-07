@@ -3,7 +3,6 @@
 #include "core/base/api.h"
 #include "core/base/timestamp.h"
 #include "core/inf/builder.h"
-#include "core/inf/wirable.h"
 #include "core/types/box.h"
 #include "core/types/shared_ptr.h"
 #include "core/types/safe_ptr.h"

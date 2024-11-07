@@ -82,7 +82,6 @@ private:
 
 private:
     sp<RenderLayer> _render_layer;
-    SafePtr<Size> _size;
     sp<Tileset> _tileset;
     sp<Storage> _storage;
 
