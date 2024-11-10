@@ -56,14 +56,7 @@ void StateMachine::doActionDeactivate(const StateAction& action)
         if(action._stub->_on_deactivate)
             action._stub->_on_deactivate->run();
 
-        if(const StateAction* nextAction = action._stub->_strand->doActionDeactive(action))
-        {
-            if(action._stub->_on_activate)
-                action._stub->_on_activate->run();
-
-            nextAction->end()->doActivate();
-        }
-        else
+        if(action._stub->_strand->doActionDeactive(action))
         {
             action.end()->doDeactivate();
             _active_states.erase(iter);

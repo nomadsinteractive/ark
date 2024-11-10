@@ -14,15 +14,14 @@ public:
 //  [[script::bindings::auto]]
     StateActionStrand(sp<State> start, sp<State> end);
 
+private:
+    void doActionActive(const StateAction& action);
+    bool doActionDeactive(const StateAction& action);
+
     sp<State> _start;
     sp<State> _end;
 
-private:
-    void doActionActive(const StateAction& action);
-    const StateAction* doActionDeactive(const StateAction& action);
-
-    std::vector<const StateAction*> _actions;
-    std::vector<const StateAction*> _activated_action_stack;
+    std::vector<sp<StateAction::Stub>> _activated_actions;
 
     friend class StateMachine;
     friend class StateAction;

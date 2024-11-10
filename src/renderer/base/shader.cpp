@@ -1,7 +1,6 @@
 #include "renderer/base/shader.h"
 
 #include "core/base/string_table.h"
-#include "core/types/safe_ptr.h"
 #include "core/types/global.h"
 #include "core/util/string_convert.h"
 #include "core/util/documents.h"

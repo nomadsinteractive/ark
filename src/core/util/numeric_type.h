@@ -14,11 +14,11 @@ namespace ark {
 class ARK_API NumericType final {
 public:
 //  [[script::bindings::constructor]]
-    static sp<NumericWrapper> create(float value);
-//  [[script::bindings::constructor]]
     static sp<NumericWrapper> create(sp<Numeric> value);
 //  [[script::bindings::constructor]]
     static sp<NumericWrapper> create(sp<Integer> value);
+//  [[script::bindings::constructor]]
+    static sp<NumericWrapper> create(float value);
 
 //  [[script::bindings::operator(+)]]
     static sp<Numeric> add(const sp<Numeric>& lvalue, const sp<Numeric>& rvalue);

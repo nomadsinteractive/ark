@@ -3,7 +3,6 @@
 #include "core/collection/traits.h"
 #include "core/traits/expendable.h"
 #include "core/traits/visibility.h"
-#include "core/types/safe_ptr.h"
 #include "graphics/impl/renderer/renderer_group.h"
 
 #include "graphics/inf/renderer.h"

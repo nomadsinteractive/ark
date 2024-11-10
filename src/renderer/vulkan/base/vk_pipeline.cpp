@@ -99,6 +99,8 @@ sp<VKPipeline::BakedRenderer> makeBakedRenderer(const PipelineDescriptor& bindin
             return sp<VKDrawElementsInstanced>::make();
         case Enum::DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT:
             return sp<VKMultiDrawElementsIndirect>::make();
+        default:
+            break;
     }
     DFATAL("Not render procedure creator for %d", bindings.drawProcedure());
     return nullptr;

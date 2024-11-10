@@ -48,7 +48,6 @@ struct StateAction::StateActionDeactivate final : Runnable {
 StateAction::StateAction(StateMachine& stateMachine, sp<StateActionStrand> strand, sp<Runnable> onExecute, sp<Runnable> onActivate, sp<Runnable> onDeactivate)
     : _stub(sp<Stub>::make(Stub{stateMachine, std::move(strand), std::move(onExecute), std::move(onActivate), std::move(onDeactivate)}))
 {
-    _stub->_strand->_actions.push_back(this);
 }
 
 StateAction::StateAction(sp<Stub> stub)

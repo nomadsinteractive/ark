@@ -25,13 +25,13 @@ public:
         REPEAT_NOTIFY = 16
     };
 
-//[[script::bindings::constructor]]
-    static sp<IntegerWrapper> create(int32_t value);
-//[[script::bindings::constructor]]
+//  [[script::bindings::constructor]]
     static sp<IntegerWrapper> create(sp<Integer> value);
-//[[script::bindings::constructor]]
+//  [[script::bindings::constructor]]
     static sp<IntegerWrapper> create(sp<Numeric> value);
-//[[script::bindings::constructor]]
+//  [[script::bindings::constructor]]
+    static sp<IntegerWrapper> create(int32_t value);
+//  [[script::bindings::constructor]]
     static sp<Integer> create(std::vector<sp<Integer>> values);
 
 //[[script::bindings::operator(+)]]

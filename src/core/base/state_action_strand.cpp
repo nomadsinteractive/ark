@@ -12,14 +12,21 @@ StateActionStrand::StateActionStrand(sp<State> start, sp<State> end)
 
 void StateActionStrand::doActionActive(const StateAction& action)
 {
-    _activated_action_stack.push_back(&action);
+    _activated_actions.push_back(action._stub);
 }
 
-const StateAction* StateActionStrand::doActionDeactive(const StateAction& action)
+bool StateActionStrand::doActionDeactive(const StateAction& action)
 {
-    if(const auto iter = std::find(_activated_action_stack.begin(), _activated_action_stack.end(), &action); iter != _activated_action_stack.end())
-        _activated_action_stack.erase(iter);
-    return _activated_action_stack.empty() ? nullptr : _activated_action_stack.back();
+    if(const auto iter = std::find(_activated_actions.begin(), _activated_actions.end(), action._stub); iter != _activated_actions.end())
+        _activated_actions.erase(iter);
+
+    if(_activated_actions.empty())
+        return true;
+
+    const sp<StateAction::Stub>& nextActionStub = _activated_actions.front();
+    if(nextActionStub->_on_activate)
+        nextActionStub->_on_activate->run();
+    return false;
 }
 
 }

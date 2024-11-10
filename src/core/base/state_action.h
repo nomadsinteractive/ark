@@ -63,6 +63,7 @@ private:
     sp<Runnable> _deactivate;
 
     friend class StateMachine;
+    friend class StateActionStrand;
 };
 
 }

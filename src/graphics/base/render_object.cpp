@@ -14,12 +14,12 @@
 
 namespace ark {
 
-RenderObject::RenderObject(const NamedHash& type, sp<Vec3> position, sp<Size> size, sp<Transform> transform, sp<Varyings> varyings, sp<Boolean> visible, sp<Boolean> discarded)
+RenderObject::RenderObject(const NamedHash& type, sp<Vec3> position, sp<Vec3> size, sp<Transform> transform, sp<Varyings> varyings, sp<Boolean> visible, sp<Boolean> discarded)
     : RenderObject(sp<IntegerWrapper>::make(type.hash()), std::move(position), std::move(size), std::move(transform), std::move(varyings), std::move(visible), std::move(discarded))
 {
 }
 
-RenderObject::RenderObject(sp<Integer> type, sp<Vec3> position, sp<Size> size, sp<Transform> transform, sp<Varyings> varyings, sp<Boolean> visible, sp<Boolean> discarded)
+RenderObject::RenderObject(sp<Integer> type, sp<Vec3> position, sp<Vec3> size, sp<Transform> transform, sp<Varyings> varyings, sp<Boolean> visible, sp<Boolean> discarded)
     : _type(sp<IntegerWrapper>::make(std::move(type))), _position(std::move(position)), _size(std::move(size)), _transform(transform ? std::move(transform) : sp<Transform>::make<TransformImpl>(TransformType::TYPE_LINEAR_3D)),
       _varyings(std::move(varyings)), _visible(std::move(visible), true), _discarded(std::move(discarded), false)
 {

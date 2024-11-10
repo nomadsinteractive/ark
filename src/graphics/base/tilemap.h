@@ -4,7 +4,6 @@
 
 #include "core/base/api.h"
 #include "core/inf/builder.h"
-#include "core/types/safe_ptr.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"

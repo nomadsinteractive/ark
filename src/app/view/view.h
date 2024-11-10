@@ -6,7 +6,6 @@
 #include "core/inf/builder.h"
 #include "core/inf/updatable.h"
 #include "core/inf/wirable.h"
-#include "core/types/safe_ptr.h"
 #include "core/types/safe_var.h"
 
 #include "graphics/forwarding.h"
