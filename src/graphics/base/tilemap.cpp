@@ -336,7 +336,7 @@ Tilemap::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 
 sp<Tilemap> Tilemap::BUILDER::build(const Scope& args)
 {
-    sp<Tilemap> tilemap = sp<Tilemap>::make(_tileset->build(args), _render_layer->build(args), _importer->build(args), _outputer->build(args));
+    sp<Tilemap> tilemap = sp<Tilemap>::make(_tileset->build(args), _render_layer.build(args), _importer.build(args), _outputer.build(args));
     return tilemap;
 }
 

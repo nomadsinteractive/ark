@@ -2,10 +2,12 @@
 
 #include "core/inf/builder.h"
 #include "core/inf/variable.h"
+#include "core/types/safe_var.h"
 #include "core/types/shared_ptr.h"
 
-#include "graphics/inf/renderer.h"
 #include "graphics/forwarding.h"
+#include "graphics/inf/renderer.h"
+#include "graphics/base/v3.h"
 
 #include "renderer/forwarding.h"
 #include "renderer/base/buffer.h"
@@ -15,11 +17,11 @@ namespace ark {
 class ShaderFrame : public Renderer {
 public:
     [[deprecated]]
-    ShaderFrame(const sp<Size>& size, const sp<Shader>& shader, RenderController& renderController);
+    ShaderFrame(sp<Vec3> size, const sp<Shader>& shader, RenderController& renderController);
 
     virtual void render(RenderRequest& renderRequest, const V3& position) override;
 
-    const sp<Size>& size();
+    const SafeVar<Vec3>& size();
 
 //  [[plugin::resource-loader("shader-frame")]]
     class BUILDER : public Builder<Renderer> {
@@ -39,7 +41,7 @@ private:
     ByteArray::Borrowed getVertexBuffer(RenderRequest& renderRequest, const V3& position) const;
 
 private:
-    SafePtr<Size> _size;
+    SafeVar<Vec3> _size;
     sp<Shader> _shader;
 
     sp<PipelineBindings> _pipeline_bindings;

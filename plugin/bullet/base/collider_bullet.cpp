@@ -396,7 +396,7 @@ ColliderBullet::BUILDER_IMPL1::BUILDER_IMPL1(BeanFactory& factory, const documen
 
 sp<ColliderBullet> ColliderBullet::BUILDER_IMPL1::build(const Scope& args)
 {
-    const sp<ColliderBullet> collider = sp<ColliderBullet>::make(_gravity, _model_loader->build(args));
+    const sp<ColliderBullet> collider = sp<ColliderBullet>::make(_gravity, _model_loader.build(args));
     for(const auto& i : _importers)
         i.first->build(args)->import(collider, i.second);
     _resource_loader_context->renderController()->addPreComposeRunnable(collider, BooleanType::__or__(_resource_loader_context->disposed(), sp<Boolean>::make<BooleanByWeakRef<ColliderBullet>>(collider, 1)));

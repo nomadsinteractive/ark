@@ -143,7 +143,7 @@ sp<Size> Size::BUILDER::build(const Scope& args)
 {
     if(_size)
         return _size->build(args);
-    return sp<Size>::make(_width->build(args), _height->build(args), _depth->build(args));
+    return sp<Size>::make(_width.build(args), _height.build(args), _depth.build(args));
 }
 
 }

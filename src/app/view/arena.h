@@ -80,7 +80,7 @@ public:
     private:
         BeanFactory _factory;
         document _manifest;
-        SafePtr<Builder<ResourceLoader>> _resource_loader;
+        SafeBuilder<ResourceLoader> _resource_loader;
         builder<View> _root_view;
     };
 

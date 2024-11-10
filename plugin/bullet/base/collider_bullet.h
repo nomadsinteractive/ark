@@ -10,9 +10,9 @@
 #include "core/inf/variable.h"
 #include "core/types/implements.h"
 #include "core/types/owned_ptr.h"
-#include "core/types/safe_ptr.h"
+#include "core/types/safe_builder.h"
 
-#include "graphics/base/transform.h"
+#include "graphics/inf/transform.h"
 
 #include "renderer/forwarding.h"
 
@@ -64,7 +64,7 @@ public:
 
     private:
         V3 _gravity;
-        SafePtr<Builder<ModelLoader>> _model_loader;
+        SafeBuilder<ModelLoader> _model_loader;
         std::vector<std::pair<sp<Builder<RigidbodyImporter>>, document>> _importers;
 
         sp<ResourceLoaderContext> _resource_loader_context;

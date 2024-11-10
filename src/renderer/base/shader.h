@@ -65,7 +65,7 @@ public:
 
         std::vector<StageManifest> _stages;
         SnippetManifest _snippets;
-        SafePtr<Builder<Camera>> _camera;
+        SafeBuilder<Camera> _camera;
         PipelineDescriptor::Parameters::BUILDER _parameters;
     };
 

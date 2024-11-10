@@ -3,7 +3,8 @@
 #include "core/base/api.h"
 
 #include "graphics/forwarding.h"
-#include "graphics/base/transform.h"
+#include "graphics/inf/transform.h"
+#include "graphics/base/v3.h"
 
 #include "renderer/base/varyings.h"
 
@@ -47,8 +48,9 @@ public:
         sp<Model> _model = nullptr;
         V3 _position{0};
         V3 _size{1.0f};
-        Transform::Snapshot _transform;
-        Varyings::Snapshot _varyings;
+        sp<Transform> _transform = nullptr;
+        Transform::Snapshot _transform_snapshot;
+        Varyings::Snapshot _varyings_snapshot;
     };
 
     virtual StateBits updateState(const RenderRequest& renderRequest) = 0;

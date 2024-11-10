@@ -63,10 +63,10 @@ public:
         BeanFactory _factory;
         document _manifest;
 
-        SafePtr<Builder<Boolean>> _discarded;
-        SafePtr<Builder<Boolean>> _visible;
-        SafePtr<Builder<RenderObject>> _background;
-        sp<Builder<LayoutParam>> _layout_param;
+        SafeBuilder<Boolean> _discarded;
+        SafeBuilder<Boolean> _visible;
+        SafeBuilder<RenderObject> _background;
+        SafeBuilder<LayoutParam> _layout_param;
     };
 
 //  [[plugin::builder("view")]]

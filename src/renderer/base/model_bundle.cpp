@@ -134,7 +134,7 @@ ModelBundle::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 
 sp<ModelBundle> ModelBundle::BUILDER::build(const Scope& args)
 {
-    sp<ModelBundle> modelBundle = sp<ModelBundle>::make(_material_bundle->build(args), _importer->build(args));
+    sp<ModelBundle> modelBundle = sp<ModelBundle>::make(_material_bundle.build(args), _importer->build(args));
     modelBundle->import(_bean_factory, _manifest, args);
     return modelBundle;
 }

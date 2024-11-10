@@ -5,7 +5,7 @@
 #include "core/inf/builder.h"
 #include "core/inf/debris.h"
 #include "core/types/shared_ptr.h"
-#include "core/types/safe_ptr.h"
+#include "core/types/safe_builder.h"
 #include "core/types/safe_var.h"
 
 #include "graphics/forwarding.h"
@@ -55,10 +55,10 @@ public:
         sp<Layer> build(const Scope& args) override;
 
     private:
-        SafePtr<Builder<RenderLayer>> _render_layer;
-        SafePtr<Builder<ModelLoader>> _model_loader;
-        SafePtr<Builder<Boolean>> _visible;
-        SafePtr<Builder<Vec3>> _position;
+        SafeBuilder<RenderLayer> _render_layer;
+        SafeBuilder<ModelLoader> _model_loader;
+        SafeBuilder<Boolean> _visible;
+        SafeBuilder<Vec3> _position;
         std::vector<sp<Builder<RenderObject>>> _render_objects;
     };
 

@@ -175,7 +175,7 @@ Buffer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const s
 sp<Buffer> Buffer::BUILDER::build(const Scope& args)
 {
     const sp<RenderController>& renderController = _resource_loader_context->renderController();
-    return sp<Buffer>::make(renderController->makeBuffer(Buffer::TYPE_STORAGE, _usage, _input->build(args)));
+    return sp<Buffer>::make(renderController->makeBuffer(Buffer::TYPE_STORAGE, _usage, _input.build(args)));
 }
 
 template<> ARK_API Buffer::Usage StringConvert::eval<Buffer::Usage>(const String& str)

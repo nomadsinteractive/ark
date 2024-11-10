@@ -121,7 +121,7 @@ Shader::BUILDER_IMPL::BUILDER_IMPL(BeanFactory& factory, const document& manifes
 
 sp<Shader> Shader::BUILDER_IMPL::build(const Scope& args)
 {
-    sp<PipelineBuildingContext> buildingContext = makePipelineBuildingContext(_camera->build(args), args);
+    sp<PipelineBuildingContext> buildingContext = makePipelineBuildingContext(_camera.build(args), args);
     buildingContext->loadManifest(_manifest, _factory, args);
 
     sp<PipelineLayout> pipelineLayout = sp<PipelineLayout>::make(std::move(buildingContext));

@@ -5,7 +5,7 @@
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
 #include "core/inf/builder.h"
-#include "core/types/safe_ptr.h"
+#include "core/types/safe_builder.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -67,12 +67,12 @@ public:
 
     private:
         sp<Builder<RenderLayer>> _render_layer;
-        SafePtr<Builder<StringVar>> _text;
-        SafePtr<Builder<LayoutParam>> _layout_param;
-        SafePtr<Builder<GlyphMaker>> _glyph_maker;
-        SafePtr<Builder<Mat4>> _transform;
-        SafePtr<Builder<Numeric>> _text_scale;
-        SafePtr<Builder<Numeric>> _letter_spacing;
+        SafeBuilder<StringVar> _text;
+        SafeBuilder<LayoutParam> _layout_param;
+        SafeBuilder<GlyphMaker> _glyph_maker;
+        SafeBuilder<Mat4> _transform;
+        SafeBuilder<Numeric> _text_scale;
+        SafeBuilder<Numeric> _letter_spacing;
         float _line_height;
         float _line_indent;
     };

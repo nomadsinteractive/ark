@@ -141,7 +141,7 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
         const RenderLayerSnapshot::Element& s = renderLayerItems.at(i);
         const Renderable::Snapshot& snapshot = s._snapshot;
         if(reload || s._snapshot._state.has(Renderable::RENDERABLE_STATE_DIRTY))
-            if(!snapshot._varyings._sub_properties.empty())
+            if(!snapshot._varyings_snapshot._sub_properties.empty())
             {
                 const auto iter = _model_instances.find(i);
                 DASSERT(iter != _model_instances.end());
@@ -149,7 +149,7 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
                 if(!iter->second.isDynamicLayout())
                     iter->second.toDynamicLayout();
 
-                for(const auto& [j, k] : snapshot._varyings._sub_properties)
+                for(const auto& [j, k] : snapshot._varyings_snapshot._sub_properties)
                     if(Varyings::Divided subProperty = k.getDivided(1); subProperty._content.length() > sizeof(M4))
                         iter->second.setNodeTransform(j, *reinterpret_cast<const M4*>(subProperty._content.buf()));
             }
@@ -166,17 +166,20 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
             const RenderLayerSnapshot::Element& s = renderLayerItems.at(nodeInstance->snapshotIndex());
             const Renderable::Snapshot& snapshot = s._snapshot;
             if(reload || snapshot._state.has(Renderable::RENDERABLE_STATE_DIRTY))
-                if(snapshot._varyings._buffers.length() > 0)
+                if(snapshot._varyings_snapshot._buffers.length() > 0)
                 {
                     const ModelBundle::ModelLayout& modelLayout = _model_bundle->ensureModelLayout(snapshot._type);
                     const Boundaries& metrics = modelLayout._model->content();
                     VertexWriter writer = buf.makeDividedVertexWriter(renderRequest, 1, instanceId, 1);
                     writer.next();
                     if(hasModelMatrix)
-                        writer.writeAttribute(MatrixUtil::translate(M4::identity(), snapshot._position) * MatrixUtil::scale(snapshot._transform.toMatrix(), toScale(snapshot._size, metrics)) * nodeInstance->globalTransform(), Attribute::USAGE_MODEL_MATRIX);
+                    {
+                        const M4 modelMatrix = MatrixUtil::translate({}, snapshot._position) * MatrixUtil::scale(snapshot._transform->toMatrix(snapshot._transform_snapshot), toScale(snapshot._size, metrics)) * nodeInstance->globalTransform();
+                        writer.writeAttribute(modelMatrix, Attribute::USAGE_MODEL_MATRIX);
+                    }
                     if(hasMaterialId && mesh->material())
                         writer.writeAttribute(mesh->material()->id(), Attribute::USAGE_MATERIAL_ID);
-                    if(ByteArray::Borrowed divided = snapshot._varyings.getDivided(1)._content; divided.length() > attributeStride)
+                    if(ByteArray::Borrowed divided = snapshot._varyings_snapshot.getDivided(1)._content; divided.length() > attributeStride)
                         writer.write(divided.buf() + attributeStride, divided.length() - attributeStride, attributeStride);
                 }
             ++ instanceId;

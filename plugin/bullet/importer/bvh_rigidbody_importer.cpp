@@ -71,7 +71,7 @@ BvhRigidbodyImporter::BUILDER::BUILDER(BeanFactory& factory, const document& man
 
 sp<ColliderBullet::RigidbodyImporter> BvhRigidbodyImporter::BUILDER::build(const Scope& args)
 {
-    return sp<RigidbodyImporter>::make<BvhRigidbodyImporter>(_model_loader->build(args));
+    return sp<RigidbodyImporter>::make<BvhRigidbodyImporter>(_model_loader.build(args));
 }
 
 }

@@ -9,7 +9,7 @@
 
 #include "graphics/base/rect.h"
 #include "graphics/base/quaternion.h"
-#include "graphics/base/transform.h"
+#include "graphics/inf/transform.h"
 #include "graphics/base/v2.h"
 
 #include "app/base/collision_manifold.h"

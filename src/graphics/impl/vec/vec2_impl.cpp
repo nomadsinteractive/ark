@@ -89,7 +89,7 @@ Vec2Impl::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 
 sp<Vec2> Vec2Impl::BUILDER::build(const Scope& args)
 {
-    return sp<Vec2Impl>::make(_x->build(args), _y->build(args));
+    return sp<Vec2Impl>::make(_x->build(args), _y.build(args));
 }
 
 }

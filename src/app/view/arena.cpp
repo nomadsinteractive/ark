@@ -129,7 +129,7 @@ Arena::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 
 sp<Arena> Arena::BUILDER::build(const Scope& args)
 {
-    sp<ResourceLoader> r1 = _resource_loader->build(args);
+    sp<ResourceLoader> r1 = _resource_loader.build(args);
     sp<ResourceLoader> resourceLoader = r1 ? std::move(r1) : sp<ResourceLoader>::make(_factory);
     BeanFactory& factory = resourceLoader->beanFactory();
     sp<Arena> arena = sp<Arena>::make(_root_view->build(args), factory.ensure<RendererPhrase>(_manifest, args) ,std::move(resourceLoader));

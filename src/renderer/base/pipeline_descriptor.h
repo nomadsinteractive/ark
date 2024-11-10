@@ -148,7 +148,7 @@ public:
         private:
             sp<RenderController> _render_controller;
 
-            SafePtr<Builder<Vec4>> _pipeline_bindings_scissor;
+            SafeBuilder<Vec4> _pipeline_bindings_scissor;
             PipelineTraitTable _traits;
             [[deprecated]]
             uint32_t _pipeline_bindings_flags;

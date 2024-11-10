@@ -270,12 +270,12 @@ sp<Texture> Texture::BUILDER::build(const Scope& args)
     const sp<Texture::Parameters> parameters = sp<Texture::Parameters>::make(type, _manifest);
     parameters->loadParameters(_manifest, _factory, args);
 
-    if(const sp<String> src = _src->build(args))
+    if(const sp<String> src = _src.build(args))
        return _resource_loader_context->textureBundle()->createTexture(*src, parameters);
 
     const sp<Size> size = _factory.ensureConcreteClassBuilder<Size>(_manifest, constants::SIZE)->build(args);
     CHECK(size->widthAsFloat() != 0 && size->heightAsFloat() != 0, "Cannot build texture from \"%s\"", Documents::toString(_manifest).c_str());
-    sp<Uploader> uploader = _uploader->build(args);
+    sp<Uploader> uploader = _uploader.build(args);
     return _resource_loader_context->renderController()->createTexture(size, parameters, uploader ? std::move(uploader) : sp<Uploader>::make<UploaderClear>(size, parameters->_format), _upload_strategy);
 }
 

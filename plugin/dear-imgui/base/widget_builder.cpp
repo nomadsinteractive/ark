@@ -13,6 +13,7 @@
 #include "graphics/impl/vec/vec2_impl.h"
 #include "graphics/impl/vec/vec3_impl.h"
 #include "graphics/impl/vec/vec4_impl.h"
+#include "graphics/util/transform_type.h"
 #include "graphics/util/vec3_type.h"
 
 #include "dear-imgui/base/renderer_context.h"
@@ -648,7 +649,7 @@ void WidgetBuilder::endTabItem()
 void WidgetBuilder::guizmoTransformEdit(const sp<Transform>& transform, sp<Camera> camera)
 {
     sp<Mat4::Impl> matrix = sp<Mat4::Impl>::make(transform->val());
-    transform->reset(matrix);
+    TransformType::reset(transform, matrix);
     addWidget(sp<Widget>::make<GuizmoTransformEdit>(std::move(matrix), std::move(camera)));
 }
 

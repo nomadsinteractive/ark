@@ -23,7 +23,7 @@ public:
     void downloadBuffer(GraphicsContext& graphicsContext, size_t offset, size_t size, void* ptr) override;
     ResourceRecycleFunc recycle() override;
 
-    void reload(GraphicsContext& graphicsContext, const ByteArray::Borrowed& buf);
+    void reload(GraphicsContext& graphicsContext, const ByteArray::Borrowed& buf) const;
 
     const VkBuffer& vkBuffer() const;
 

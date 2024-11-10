@@ -338,12 +338,12 @@ LayoutParam::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 sp<LayoutParam> LayoutParam::BUILDER::build(const Scope& args)
 {
     const sp<Size> size = _size ? _size->build(args) : nullptr;
-    sp<Vec4> margins = _margins->build(args);
-    sp<Vec4> paddings = _paddings->build(args);
-    sp<Vec3> position = _position->build(args);
+    sp<Vec4> margins = _margins.build(args);
+    sp<Vec4> paddings = _paddings.build(args);
+    sp<Vec3> position = _position.build(args);
     Length width = size ? Length(LENGTH_TYPE_PIXEL, size->width()) : _width ? _width->build(args) : Length();
     Length height = size ? Length(LENGTH_TYPE_PIXEL, size->height()) : _height ? _height->build(args) : Length();
-    return sp<LayoutParam>::make(std::move(width), std::move(height), _layout->build(args), _flex_direction, _flex_wrap, _justify_content, _align_items, _align_self, _align_content, _display, _flex_grow,
+    return sp<LayoutParam>::make(std::move(width), std::move(height), _layout.build(args), _flex_direction, _flex_wrap, _justify_content, _align_items, _align_self, _align_content, _display, _flex_grow,
                                  LayoutParam::Length(), std::move(margins), std::move(paddings), std::move(position));
 }
 

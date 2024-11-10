@@ -4,8 +4,8 @@
 #include "core/base/named_hash.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/inf/variable.h"
-#include "core/util/numeric_type.h"
 #include "core/util/updatable_util.h"
+#include "graphics/impl/transform/transform_impl.h"
 
 #include "graphics/util/vec3_type.h"
 
@@ -20,7 +20,8 @@ RenderObject::RenderObject(const NamedHash& type, sp<Vec3> position, sp<Size> si
 }
 
 RenderObject::RenderObject(sp<Integer> type, sp<Vec3> position, sp<Size> size, sp<Transform> transform, sp<Varyings> varyings, sp<Boolean> visible, sp<Boolean> discarded)
-    : _type(sp<IntegerWrapper>::make(std::move(type))), _position(std::move(position)), _size(std::move(size)), _transform(std::move(transform)), _varyings(std::move(varyings)), _visible(std::move(visible), true), _discarded(std::move(discarded), false)
+    : _type(sp<IntegerWrapper>::make(std::move(type))), _position(std::move(position)), _size(std::move(size)), _transform(transform ? std::move(transform) : sp<Transform>::make<TransformImpl>(TransformType::TYPE_LINEAR_3D)),
+      _varyings(std::move(varyings)), _visible(std::move(visible), true), _discarded(std::move(discarded), false)
 {
 }
 
@@ -44,7 +45,7 @@ const SafeVar<Vec3>& RenderObject::size()
     return _size;
 }
 
-const SafePtr<Transform>& RenderObject::transform() const
+const sp<Transform>& RenderObject::transform() const
 {
     return _transform;
 }
@@ -239,7 +240,7 @@ Renderable::Snapshot RenderObject::snapshot(const LayerContextSnapshot& snapshot
     const int32_t typeId = _type->val();
     sp<Model> model = snapshotContext._render_layer.context()->modelLoader()->loadModel(typeId);
     if(state & RENDERABLE_STATE_DIRTY)
-        return {state, typeId, std::move(model), _position.val(), _size.val(), _transform->snapshot(), _varyings ? _varyings->snapshot(snapshotContext.pipelineInput(), renderRequest.allocator()) : Varyings::Snapshot()};
+        return {state, typeId, std::move(model), _position.val(), _size.val(), _transform, _transform->snapshot(), _varyings ? _varyings->snapshot(snapshotContext.pipelineInput(), renderRequest.allocator()) : Varyings::Snapshot()};
     return {state, typeId, std::move(model)};
 }
 
@@ -252,7 +253,7 @@ RenderObject::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 
 sp<RenderObject> RenderObject::BUILDER::build(const Scope& args)
 {
-    return sp<RenderObject>::make(_type->build(args), _position->build(args), _size->build(args), _transform->build(args), _varyings->build(args), nullptr, _discarded->build(args));
+    return sp<RenderObject>::make(_type.build(args), _position.build(args), _size.build(args), _transform.build(args), _varyings.build(args), nullptr, _discarded.build(args));
 }
 
 RenderObject::BUILDER_RENDERABLE::BUILDER_RENDERABLE(BeanFactory& factory, const document& manifest)

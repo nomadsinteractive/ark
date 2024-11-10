@@ -87,7 +87,7 @@ sp<Vec4> Vec4Impl::BUILDER::build(const Scope& args)
 {
     if(_value)
         return _value->build(args);
-    return sp<Vec4Impl>::make(_x->build(args), _y->build(args), _z->build(args), _w->build(args));
+    return sp<Vec4Impl>::make(_x.build(args), _y.build(args), _z.build(args), _w.build(args));
 }
 
 Vec4Impl::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& str)

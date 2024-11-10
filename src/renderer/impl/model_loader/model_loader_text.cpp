@@ -52,7 +52,7 @@ ModelLoaderText::BUILDER::BUILDER(BeanFactory& factory, const document& manifest
 
 sp<ModelLoader> ModelLoaderText::BUILDER::build(const Scope& args)
 {
-    const sp<String> textSize = _text_size->build(args);
+    const sp<String> textSize = _text_size.build(args);
     return sp<ModelLoaderText>::make(_resource_loader_context->renderController(), _alphabet->build(args), _atlas->build(args), textSize ? Font::TextSize(*textSize) : Font::TextSize());
 }
 

@@ -54,7 +54,7 @@ uint8_t* Allocator::_sbrk(size_t size)
 
 ByteArray::Borrowed Allocator::sbrkSpan(size_t size, size_t alignment)
 {
-    return ByteArray::Borrowed(sbrk(size, alignment), size);
+    return {sbrk(size, alignment), size};
 }
 
 Allocator::Block::Block(size_t blockSize)

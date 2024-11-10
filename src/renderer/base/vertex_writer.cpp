@@ -12,7 +12,7 @@ VertexWriter::VertexWriter(const PipelineInput::AttributeOffsets& attributes, bo
 }
 
 VertexWriter::VertexWriter(const PipelineInput::AttributeOffsets& attributes, bool doTransform, sp<VertexWriter::Writer> writer)
-    : _attribute_offsets(attributes), _writer(std::move(writer)), _do_transform(doTransform), _visible(true), _transform(nullptr)
+    : _attribute_offsets(attributes), _writer(std::move(writer)), _do_transform(doTransform), _visible(true), _transform_snapshot(nullptr)
 {
 }
 
@@ -23,8 +23,8 @@ bool VertexWriter::hasAttribute(int32_t name) const
 
 void VertexWriter::writePosition(const V3& position)
 {
-    DASSERT(!_do_transform || _transform);
-    _writer->writeObject<V3>(_visible ? (_do_transform ? (_transform->transform(position) + _translate) : position) : V3());
+    DASSERT(!_do_transform || _transform_snapshot);
+    _writer->writeObject<V3>(_visible ? (_do_transform ? (_transform->transform(*_transform_snapshot, {position, 1.0f}).toNonHomogeneous() + _translate) : position) : V3());
 }
 
 void VertexWriter::writeTexCoordinate(uint16_t u, uint16_t v)
@@ -46,9 +46,10 @@ void VertexWriter::write(const void* buf, uint32_t size, uint32_t offset)
 
 void VertexWriter::setRenderable(const Renderable::Snapshot& renderObject)
 {
-    _transform = &renderObject._transform;
+    _transform = renderObject._transform.get();
+    _transform_snapshot = &renderObject._transform_snapshot;
     _translate = renderObject._position;
-    _varying_contents = renderObject._varyings.getDivided(0)._content;
+    _varying_contents = renderObject._varyings_snapshot.getDivided(0)._content;
     _visible = renderObject._state.has(Renderable::RENDERABLE_STATE_VISIBLE);
 }
 

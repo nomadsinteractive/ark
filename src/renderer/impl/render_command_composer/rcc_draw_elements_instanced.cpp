@@ -50,8 +50,8 @@ sp<RenderCommand> RCCDrawElementsInstanced::compose(const RenderRequest& renderR
         const Renderable::Snapshot& snapshot = i._snapshot;
         writer.next();
         if(hasModelMatrix)
-            writer.writeAttribute(MatrixUtil::translate(M4::identity(), snapshot._position) * MatrixUtil::scale(snapshot._transform.toMatrix(), snapshot._size), Attribute::USAGE_MODEL_MATRIX);
-        ByteArray::Borrowed divided = snapshot._varyings.getDivided(1)._content;
+            writer.writeAttribute(MatrixUtil::translate({}, snapshot._position) * MatrixUtil::scale(snapshot._transform->toMatrix(snapshot._transform_snapshot), snapshot._size), Attribute::USAGE_MODEL_MATRIX);
+        ByteArray::Borrowed divided = snapshot._varyings_snapshot.getDivided(1)._content;
         if(divided.length() > attributeStride)
             writer.write(divided.buf() + attributeStride, divided.length() - attributeStride, attributeStride);
     }

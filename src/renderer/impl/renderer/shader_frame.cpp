@@ -15,8 +15,8 @@
 
 namespace ark {
 
-ShaderFrame::ShaderFrame(const sp<Size>& size, const sp<Shader>& shader, RenderController& renderController)
-    : _size(size), _shader(shader), _pipeline_bindings(shader->makeBindings(Buffer(), Enum::RENDER_MODE_TRIANGLES, Enum::DRAW_PROCEDURE_DRAW_ELEMENTS)),
+ShaderFrame::ShaderFrame(sp<Vec3> size, const sp<Shader>& shader, RenderController& renderController)
+    : _size(std::move(size)), _shader(shader), _pipeline_bindings(shader->makeBindings(Buffer(), Enum::RENDER_MODE_TRIANGLES, Enum::DRAW_PROCEDURE_DRAW_ELEMENTS)),
       _vertex_buffer(renderController.makeVertexBuffer()), _ib_snapshot(renderController.getSharedPrimitiveIndexBuffer(Global<Constants>()->MODEL_UNIT_QUAD, false)->snapshot(renderController, 1))
 {
 }
@@ -28,17 +28,18 @@ void ShaderFrame::render(RenderRequest& renderRequest, const V3& position)
     renderRequest.addRenderCommand(drawingContext.toRenderCommand(renderRequest));
 }
 
-const sp<Size>& ShaderFrame::size()
+const SafeVar<Vec3>& ShaderFrame::size()
 {
     return _size;
 }
 
 ByteArray::Borrowed ShaderFrame::getVertexBuffer(RenderRequest& renderRequest, const V3& position) const
 {
+    const V3 size = _size.val();
     float x = position.x(), y = position.y(), z = position.z();
-    float top = y + _size->heightAsFloat(), bottom = y;
+    float top = y + size.y(), bottom = y;
     uint16_t uvtop = 0xffff, uvbottom = 0;
-    Array<float>::Fixed<16> buffer({x, bottom, z, 0, x, top, z, 0, x + _size->widthAsFloat(), bottom, z, 0, x + _size->widthAsFloat(), top, z, 0});
+    Array<float>::Fixed<16> buffer({x, bottom, z, 0, x, top, z, 0, x + size.x(), bottom, z, 0, x + size.x(), top, z, 0});
     uint16_t* ip = reinterpret_cast<uint16_t*>(buffer.buf());
     ip[6] = 0;
     ip[7] = uvbottom;
@@ -63,7 +64,7 @@ sp<Renderer> ShaderFrame::BUILDER::build(const Scope& args)
 {
     const sp<Size> size = _size->build(args);
     const sp<Shader> shader = _shader->build(args);
-    return sp<ShaderFrame>::make(size, shader, _resource_loader_context->renderController());
+    return sp<Renderer>::make<ShaderFrame>(size, shader, _resource_loader_context->renderController());
 }
 
 }

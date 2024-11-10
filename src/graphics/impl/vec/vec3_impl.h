@@ -3,9 +3,8 @@
 #include "core/base/api.h"
 #include "core/base/string.h"
 #include "core/inf/builder.h"
-#include "core/inf/debris.h"
 #include "core/inf/variable.h"
-#include "core/types/safe_ptr.h"
+#include "core/types/safe_builder.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -39,7 +38,7 @@ public:
         virtual sp<Vec3> build(const Scope& args) override;
 
     private:
-        SafePtr<Builder<Numeric>> _x, _y, _z;
+        SafeBuilder<Numeric> _x, _y, _z;
     };
 
 //  [[plugin::builder::by-value]]

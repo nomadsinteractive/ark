@@ -5,7 +5,7 @@
 #include "core/base/wrapper.h"
 #include "core/inf/builder.h"
 #include "core/inf/variable.h"
-#include "core/types/safe_ptr.h"
+#include "core/types/safe_builder.h"
 #include "core/types/safe_var.h"
 #include "core/types/shared_ptr.h"
 
@@ -55,8 +55,8 @@ public:
         sp<Rotation> build(const Scope& args) override;
 
     private:
-        SafePtr<Builder<Numeric>> _theta;
-        SafePtr<Builder<Vec3>> _axis;
+        SafeBuilder<Numeric> _theta;
+        SafeBuilder<Vec3> _axis;
     };
 
 //  [[plugin::builder::by-value]]
@@ -67,7 +67,7 @@ public:
         sp<Rotation> build(const Scope& args) override;
 
     private:
-        SafePtr<Builder<Numeric>> _theta;
+        SafeBuilder<Numeric> _theta;
     };
 
 private:

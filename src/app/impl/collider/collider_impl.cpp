@@ -9,7 +9,7 @@
 #include "core/util/log.h"
 
 #include "graphics/base/size.h"
-#include "graphics/base/transform.h"
+#include "graphics/inf/transform.h"
 #include "graphics/base/v2.h"
 
 #include "renderer/base/resource_loader_context.h"
@@ -321,7 +321,7 @@ sp<Collider> ColliderImpl::BUILDER::build(const Scope& args)
 {
     std::vector<std::pair<sp<BroadPhrase>, sp<CollisionFilter>>> broadPhrases;
     for(const auto& [i, j] : _broad_phrases)
-        broadPhrases.emplace_back(i->build(args), j->build(args));
+        broadPhrases.emplace_back(i->build(args), j.build(args));
     return sp<ColliderImpl>::make(std::move(broadPhrases), _narrow_phrase->build(args), _render_controller);
 }
 

@@ -97,7 +97,7 @@ Rotation::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 
 sp<Rotation> Rotation::BUILDER::build(const Scope& args)
 {
-    return sp<Rotation>::make(_theta->build(args), _axis->build(args));
+    return sp<Rotation>::make(_theta.build(args), _axis.build(args));
 }
 
 Rotation::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& str)
@@ -107,7 +107,7 @@ Rotation::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& str)
 
 sp<Rotation> Rotation::DICTIONARY::build(const Scope& args)
 {
-    return sp<Rotation>::make(_theta->build(args));
+    return sp<Rotation>::make(_theta.build(args));
 }
 
 }

@@ -138,7 +138,7 @@ PipelineDescriptor::Parameters::BUILDER::BUILDER(BeanFactory& factory, const doc
 
 PipelineDescriptor::Parameters PipelineDescriptor::Parameters::BUILDER::build(const Scope& args) const
 {
-    const sp<Vec4> scissor = _pipeline_bindings_scissor->build(args);
+    const sp<Vec4> scissor = _pipeline_bindings_scissor.build(args);
     return {scissor ? Optional<Rect>(_render_controller->renderEngine()->toRendererRect(Rect(scissor->val()))) : Optional<Rect>(), _traits, _pipeline_bindings_flags};
 }
 

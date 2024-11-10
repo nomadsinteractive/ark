@@ -5,7 +5,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
-#include "graphics/base/transform.h"
+#include "graphics/inf/transform.h"
 
 #include "app/base/rigidbody.h"
 

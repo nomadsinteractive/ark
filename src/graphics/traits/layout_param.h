@@ -4,7 +4,7 @@
 #include "core/base/timestamp.h"
 #include "core/inf/builder.h"
 #include "core/inf/updatable.h"
-#include "core/types/safe_ptr.h"
+#include "core/types/safe_builder.h"
 #include "core/types/safe_var.h"
 
 #include "graphics/forwarding.h"
@@ -186,7 +186,7 @@ public:
     private:
         sp<Builder<Length>> _width;
         sp<Builder<Length>> _height;
-        SafePtr<Builder<Layout>> _layout;
+        SafeBuilder<Layout> _layout;
         FlexDirection _flex_direction;
         FlexWrap _flex_wrap;
         JustifyContent _justify_content;
@@ -198,9 +198,9 @@ public:
         Display _display;
         float _flex_grow;
 
-        SafePtr<Builder<Vec4>> _margins;
-        SafePtr<Builder<Vec4>> _paddings;
-        SafePtr<Builder<Vec3>> _position;
+        SafeBuilder<Vec4> _margins;
+        SafeBuilder<Vec4> _paddings;
+        SafeBuilder<Vec3> _position;
     };
 
 private:

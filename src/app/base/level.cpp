@@ -10,17 +10,18 @@
 #include "graphics/base/layer.h"
 #include "graphics/base/quaternion.h"
 #include "graphics/base/render_object.h"
-#include "graphics/base/transform.h"
+#include "graphics/base/transform_3d.h"
+#include "graphics/inf/transform.h"
 #include "graphics/util/vec3_type.h"
 #include "graphics/util/vec4_type.h"
+
+#include "renderer/base/render_engine.h"
 
 #include "app/base/application_context.h"
 #include "app/base/application_bundle.h"
 #include "app/base/rigidbody.h"
 #include "app/inf/collider.h"
 #include "app/traits/shape.h"
-#include "renderer/base/render_engine.h"
-
 
 namespace ark {
 
@@ -47,28 +48,28 @@ template<typename T> std::map<String, sp<T>> loadNamedTypeInstances(const std::v
     return instances;
 }
 
-sp<Transform> makeTransform(const String& rotation, const String& scale)
+sp<Transform3D> makeTransform(const String& rotation, const String& scale)
 {
     sp<Vec3> s;
     const V4 quat = Strings::eval<V4>(rotation);
     if(scale)
         if(const V3 sv = Strings::eval<V3>(scale); sv != V3(1.0f))
             s = sp<Vec3>::make<Vec3::Const>(sv);
-    return sp<Transform>::make(sp<Vec4>::make<Vec4::Const>(quat), std::move(s), nullptr, Transform::TYPE_LINEAR_3D);
+    return sp<Transform3D>::make(sp<Vec4>::make<Vec4::Const>(quat), std::move(s));
 }
 
-std::pair<sp<RenderObject>, sp<Transform>> makeRenderObject(const document& manifest, HashId type, bool visible)
+std::pair<sp<RenderObject>, sp<Transform3D>> makeRenderObject(const document& manifest, HashId type, bool visible)
 {
     const Global<Constants> globalConstants;
     const V3 position = Documents::ensureAttribute<V3>(manifest, constants::POSITION);
     const String& scale = Documents::getAttribute(manifest, "scale");
     const String& rotation = Documents::ensureAttribute(manifest, constants::ROTATION);
-    sp<Transform> transform = makeTransform(rotation, scale);
+    sp<Transform3D> transform = makeTransform(rotation, scale);
     sp<RenderObject> renderObject = sp<RenderObject>::make(type, sp<Vec3>::make<Vec3::Const>(position), nullptr, transform, nullptr, visible ? globalConstants->BOOLEAN_TRUE : globalConstants->BOOLEAN_FALSE);
     return {std::move(renderObject), std::move(transform)};
 }
 
-sp<Rigidbody> makeRigidBody(Library& library, const sp<Collider>& collider, RenderObject& renderObject, Transform& transform, Collider::BodyType bodyType, const std::map<String, String>& shapeIdAliases)
+sp<Rigidbody> makeRigidBody(Library& library, const sp<Collider>& collider, RenderObject& renderObject, Transform3D& transform, Collider::BodyType bodyType, const std::map<String, String>& shapeIdAliases)
 {
     if(!collider)
         return nullptr;

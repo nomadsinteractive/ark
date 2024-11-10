@@ -63,9 +63,9 @@ public:
 
     private:
         sp<Builder<Size>> _size;
-        SafePtr<Builder<Numeric>> _width;
-        SafePtr<Builder<Numeric>> _height;
-        SafePtr<Builder<Numeric>> _depth;
+        SafeBuilder<Numeric> _width;
+        SafeBuilder<Numeric> _height;
+        SafeBuilder<Numeric> _depth;
     };
 
 //  [[plugin::builder::by-value]]

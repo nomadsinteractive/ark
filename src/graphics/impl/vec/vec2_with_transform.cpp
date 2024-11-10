@@ -2,7 +2,7 @@
 
 #include "core/util/updatable_util.h"
 
-#include "graphics/base/transform.h"
+#include "graphics/inf/transform.h"
 #include "graphics/base/v2.h"
 
 namespace ark {
@@ -14,7 +14,8 @@ Vec2WithTransform::Vec2WithTransform(const sp<Vec2>& delegate, const sp<Transfor
 
 V2 Vec2WithTransform::val()
 {
-    return _transform->snapshot().transform(V3(_delegate->val(), 0));
+    const V3 transformed = _transform->transform(_transform->snapshot(), {_delegate->val(), 0, 1.0f}).toNonHomogeneous();
+    return {transformed.x(), transformed.y()};
 }
 
 bool Vec2WithTransform::update(uint64_t timestamp)

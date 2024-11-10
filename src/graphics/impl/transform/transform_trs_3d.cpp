@@ -1,0 +1,38 @@
+#include "graphics/impl/transform/transform_trs_3d.h"
+
+#include "core/util/updatable_util.h"
+
+#include "graphics/base/mat.h"
+#include "graphics/base/quaternion.h"
+#include "graphics/base/v4.h"
+#include "graphics/util/matrix_util.h"
+
+namespace ark {
+
+TransformTRS3D::TransformTRS3D(const TransformImpl& transform)
+    : _stub(transform._stub)
+{
+}
+
+bool TransformTRS3D::update(uint64_t timestamp)
+{
+    return UpdatableUtil::update(timestamp, _stub->_translation, _stub->_rotation, _stub->_scale);
+}
+
+Transform::Snapshot TransformTRS3D::snapshot()
+{
+    const V4 quat = _stub->_rotation.val();
+    return {MatrixUtil::translate(MatrixUtil::rotate(MatrixUtil::scale({}, _stub->_scale.val()), quat), _stub->_translation.val())};
+}
+
+V4 TransformTRS3D::transform(const Snapshot& snapshot, const V4& xyzw)
+{
+    return MatrixUtil::mul(snapshot.data<M4>(), xyzw);
+}
+
+M4 TransformTRS3D::toMatrix(const Snapshot& snapshot)
+{
+    return snapshot.data<M4>();
+}
+
+}

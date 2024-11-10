@@ -617,8 +617,8 @@ Text::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 
 sp<Text> Text::BUILDER::build(const Scope& args)
 {
-    float letterSpacing = _letter_spacing ? _letter_spacing->build(args)->val() : 0.0f;
-    return sp<Text>::make(_render_layer->build(args), _text->build(args), _layout_param->build(args), _glyph_maker->build(args), _text_scale->build(args), _transform->build(args), letterSpacing, _line_height, _line_indent);
+    float letterSpacing = _letter_spacing ? _letter_spacing.build(args)->val() : 0.0f;
+    return sp<Text>::make(_render_layer->build(args), _text.build(args), _layout_param.build(args), _glyph_maker.build(args), _text_scale.build(args), _transform.build(args), letterSpacing, _line_height, _line_indent);
 }
 
 }

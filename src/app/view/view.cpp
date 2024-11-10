@@ -352,7 +352,7 @@ View::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 
 sp<View> View::BUILDER::build(const Scope& args)
 {
-    sp<View> view = sp<View>::make(_layout_param->build(args), _background->build(args), _visible->build(args), _discarded->build(args));
+    sp<View> view = sp<View>::make(_layout_param.build(args), _background.build(args), _visible.build(args), _discarded.build(args));
     for(const document& i : _manifest->children(constants::VIEW))
         view->addView(_factory.ensure<View>(i, args));
     return view;

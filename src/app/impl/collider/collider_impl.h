@@ -8,6 +8,7 @@
 #include "core/inf/updatable.h"
 #include "core/inf/variable.h"
 #include "core/types/implements.h"
+#include "core/types/safe_builder.h"
 #include "core/types/shared_ptr.h"
 
 #include "renderer/forwarding.h"
@@ -37,7 +38,7 @@ public:
         virtual sp<Collider> build(const Scope& args) override;
 
     private:
-        std::vector<std::pair<sp<Builder<BroadPhrase>>, SafePtr<Builder<CollisionFilter>>>> _broad_phrases;
+        std::vector<std::pair<sp<Builder<BroadPhrase>>, SafeBuilder<CollisionFilter>>> _broad_phrases;
         sp<Builder<NarrowPhrase>> _narrow_phrase;
         sp<RenderController> _render_controller;
     };

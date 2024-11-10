@@ -100,7 +100,7 @@ ResourceRecycleFunc VKBuffer::recycle()
     };
 }
 
-void VKBuffer::reload(GraphicsContext& /*graphicsContext*/, const ByteArray::Borrowed& buf)
+void VKBuffer::reload(GraphicsContext& /*graphicsContext*/, const ByteArray::Borrowed& buf) const
 {
     DCHECK(buf.length() <= size(), "Buffer memory overflow, buffer size: %d, source size: %d", size(), buf.length());
     DCHECK(!isDeviceLocal(), "Can't reload a Vulkan Buffer with VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT set");

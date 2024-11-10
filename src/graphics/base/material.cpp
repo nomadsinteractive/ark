@@ -95,7 +95,7 @@ Material::BUILDER::BUILDER(BeanFactory& beanFactory, const document& manifest)
 
 sp<Material> Material::BUILDER::build(const Scope& args)
 {
-    return sp<Material>::make(0, "", _base_color->build(args), _normal->build(args), _roughness->build(args), _metallic->build(args), _specular->build(args));
+    return sp<Material>::make(0, "", _base_color.build(args), _normal.build(args), _roughness.build(args), _metallic.build(args), _specular.build(args));
 }
 
 }

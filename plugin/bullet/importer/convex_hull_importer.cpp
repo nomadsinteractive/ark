@@ -50,7 +50,7 @@ ConvexHullRigidBodyImporter::BUILDER::BUILDER(BeanFactory& factory, const docume
 
 sp<ColliderBullet::RigidbodyImporter> ConvexHullRigidBodyImporter::BUILDER::build(const Scope& args)
 {
-    return sp<ConvexHullRigidBodyImporter>::make(_model_loader->build(args));
+    return sp<ConvexHullRigidBodyImporter>::make(_model_loader.build(args));
 }
 
 }

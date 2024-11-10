@@ -4,7 +4,7 @@
 #include "core/inf/builder.h"
 #include "core/inf/debris.h"
 #include "core/inf/variable.h"
-#include "core/types/safe_ptr.h"
+#include "core/types/safe_builder.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -40,7 +40,7 @@ public:
         sp<Vec4> build(const Scope& args) override;
 
     private:
-        SafePtr<Builder<Numeric>> _x, _y, _z, _w;
+        SafeBuilder<Numeric> _x, _y, _z, _w;
         sp<Builder<Vec4>> _value;
     };
 

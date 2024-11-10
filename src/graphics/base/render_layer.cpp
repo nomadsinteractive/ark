@@ -134,8 +134,8 @@ RenderLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, co
 
 sp<RenderLayer> RenderLayer::BUILDER::build(const Scope& args)
 {
-    const sp<RenderLayer> renderLayer = sp<RenderLayer>::make(_resource_loader_context->renderController(), _model_loader->build(args), _shader->build(args), _visible->build(args),
-                                                              _discarded->build(args), _varyings->build(args), _scissor->build(args));
+    const sp<RenderLayer> renderLayer = sp<RenderLayer>::make(_resource_loader_context->renderController(), _model_loader->build(args), _shader->build(args), _visible.build(args),
+                                                              _discarded.build(args), _varyings->build(args), _scissor.build(args));
     for(const sp<Builder<Layer>>& i : _layers)
     {
         const sp<Layer> layer = i->build(args);

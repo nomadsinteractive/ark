@@ -122,7 +122,7 @@ public:
         BeanFactory _bean_factory;
         document _manifest;
 
-        SafePtr<Builder<MaterialBundle>> _material_bundle;
+        SafeBuilder<MaterialBundle> _material_bundle;
         sp<Builder<Importer>> _importer;
     };
 

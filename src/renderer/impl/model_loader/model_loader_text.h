@@ -33,7 +33,7 @@ public:
         sp<ResourceLoaderContext> _resource_loader_context;
         sp<Builder<Alphabet>> _alphabet;
         sp<Builder<Atlas>> _atlas;
-        SafePtr<Builder<String>> _text_size;
+        SafeBuilder<String> _text_size;
     };
 
 private:

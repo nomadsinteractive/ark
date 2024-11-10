@@ -15,11 +15,12 @@
 #include "core/types/weak_ptr.h"
 #include "core/util/math.h"
 
-#include "graphics/base/transform.h"
+#include "graphics/inf/transform.h"
 #include "graphics/base/quaternion.h"
 
 #include "app/base/application_context.h"
 #include "core/base/resource_loader.h"
+#include "graphics/util/transform_type.h"
 
 #include "platform/platform.h"
 
@@ -87,11 +88,11 @@ public:
         TESTCASE_VALIDATE(v3 && v3->val().x() == 0 && v3->val().y() == 110);
 
         const sp<Transform> t1 = beanFactory.build<Transform>("t1", args);
-        if(!t1 || t1->translation().val().x() != 20.0f || t1->translation().val().y() != 30.0f)
+        if(!t1 || TransformType::translation(t1)->val().x() != 20.0f || TransformType::translation(t1)->val().y() != 30.0f)
             return 17;
 
         sp<Transform> t3 = beanFactory.build<Transform>("@t3", args);
-        TESTCASE_VALIDATE(t3 && t3->scale().val().x() == 2.0f && t3->scale().val().y() == 2.0f);
+        TESTCASE_VALIDATE(t3 && TransformType::scale(t3)->val().x() == 2.0f && TransformType::scale(t3)->val().y() == 2.0f);
 
         const sp<Expendable> e004 = beanFactory.build<Expendable>("@e004", args);
         const sp<Expendable> e004Copy = beanFactory.build<Expendable>("@e004", args);

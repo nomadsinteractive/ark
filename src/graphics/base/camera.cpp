@@ -97,7 +97,7 @@ private:
     M4 _matrix;
 };
 
-const char sclipNearclipFarPlaneWarning[] = "ClipNear: %.2f, ClipFar: %.2f. Far plane should be further than near plane, and distance to the near plane should be greater than zero.";
+constexpr char sclipNearclipFarPlaneWarning[] = "ClipNear: %.2f, ClipFar: %.2f. Far plane should be further than near plane, and distance to the near plane should be greater than zero.";
 
 }
 
@@ -318,12 +318,12 @@ M4 Camera::DelegateRH_NO::lookAt(const V3& position, const V3& target, const V3&
 
 M4 Camera::DelegateRH_NO::ortho(float left, float right, float bottom, float top, float clipNear, float clipFar)
 {
-    return M4(glm::orthoRH_NO(left, right, bottom, top, clipNear, clipFar));
+    return {glm::orthoRH_NO(left, right, bottom, top, clipNear, clipFar)};
 }
 
 M4 Camera::DelegateRH_NO::perspective(float fov, float aspect, float clipNear, float clipFar)
 {
-    return M4(glm::perspectiveRH_NO(fov, aspect, clipNear, clipFar));
+    return {glm::perspectiveRH_NO(fov, aspect, clipNear, clipFar)};
 }
 
 }

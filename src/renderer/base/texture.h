@@ -5,7 +5,7 @@
 #include "core/base/bean_factory.h"
 #include "core/base/bit_set.h"
 #include "core/inf/builder.h"
-#include "core/types/safe_ptr.h"
+#include "core/types/safe_builder.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -186,8 +186,8 @@ public:
 
         BeanFactory _factory;
         document _manifest;
-        SafePtr<Builder<String>> _src;
-        SafePtr<Builder<Texture::Uploader>> _uploader;
+        SafeBuilder<String> _src;
+        SafeBuilder<Uploader> _uploader;
         uint32_t _upload_strategy;
     };
 

@@ -63,9 +63,9 @@ public:
 
     private:
         sp<Builder<Tileset>> _tileset;
-        SafePtr<Builder<RenderLayer>> _render_layer;
-        SafePtr<Builder<Importer<Tilemap>>> _importer;
-        SafePtr<Builder<Outputer<Tilemap>>> _outputer;
+        SafeBuilder<RenderLayer> _render_layer;
+        SafeBuilder<Importer<Tilemap>> _importer;
+        SafeBuilder<Outputer<Tilemap>> _outputer;
     };
 
 private:

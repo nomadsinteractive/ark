@@ -80,7 +80,7 @@ GImpactRigidbodyImporter::BUILDER::BUILDER(BeanFactory& factory, const document&
 
 sp<ColliderBullet::RigidbodyImporter> GImpactRigidbodyImporter::BUILDER::build(const Scope& args)
 {
-    return sp<GImpactRigidbodyImporter>::make(_model_loader->build(args));
+    return sp<GImpactRigidbodyImporter>::make(_model_loader.build(args));
 }
 
 }

@@ -7,7 +7,7 @@
 #include "core/base/bean_factory.h"
 #include "core/collection/traits.h"
 #include "core/inf/debris.h"
-#include "core/types/safe_ptr.h"
+#include "core/types/safe_builder.h"
 #include "core/types/shared_ptr.h"
 
 namespace ark {
@@ -21,13 +21,13 @@ private:
         }
 
         Box get(const String& refid) override {
-            SafePtr<Builder<T>> builder = getBuilder(Identifier::parseRef(refid));
-            sp<T> ptr = builder->build({});
+            const SafeBuilder<T> builder = getBuilder(Identifier::parseRef(refid));
+            sp<T> ptr = builder.build({});
             DCHECK(ptr, "ResourceLoader has no object referred as \"%s\"", refid.c_str());
             return Box(std::move(ptr));
         }
 
-        SafePtr<Builder<T>> getBuilder(const Identifier& id) {
+        SafeBuilder<T> getBuilder(const Identifier& id) {
             DCHECK(id.isRef(), "Id \"%s\" must be a reference", (id.isArg() ? id.arg().c_str() : id.val().c_str()));
 
             if(id.package())
@@ -36,14 +36,14 @@ private:
             const auto iter = _builders.find(id.ref());
             if(iter != _builders.end())
                 return iter->second;
-            SafePtr<Builder<T>>& builder = _builders[id.ref()];
+            SafeBuilder<T>& builder = _builders[id.ref()];
             builder = _bean_factory.createBuilderByRef<T>(id);
             return builder;
         }
 
     private:
         BeanFactory _bean_factory;
-        std::unordered_map<String, SafePtr<Builder<T>>> _builders;
+        std::unordered_map<String, SafeBuilder<T>> _builders;
 
     };
 
@@ -69,7 +69,7 @@ public:
         if(name.at(0) == '#')
             return _bean_factory.getBuilder<T>(name.substr(1))->build(args);
         const Identifier id = name.at(0) == Identifier::ID_TYPE_REFERENCE ? Identifier::parse(name) : Identifier::parseRef(name);
-        return _builder_refs.ensure<BuilderRefs<T>>(_bean_factory)->getBuilder(id)->build(args);
+        return _builder_refs.ensure<BuilderRefs<T>>(_bean_factory)->getBuilder(id).build(args);
     }
 
 //  [[script::bindings::property]]

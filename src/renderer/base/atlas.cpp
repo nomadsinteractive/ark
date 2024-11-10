@@ -250,7 +250,7 @@ Atlas::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 
 sp<Atlas> Atlas::BUILDER::build(const Scope& args)
 {
-    sp<Texture> texture = _texture->build(args);
+    sp<Texture> texture = _texture.build(args);
     DASSERT(texture);
     const sp<Atlas> atlas = sp<Atlas>::make(std::move(texture));
 

@@ -5,7 +5,7 @@
 #include "core/base/bean_factory.h"
 #include "core/collection/traits.h"
 #include "core/inf/builder.h"
-#include "core/types/safe_ptr.h"
+#include "core/types/safe_builder.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -114,7 +114,7 @@ public:
         virtual sp<Atlas> build(const Scope& args) override;
 
     private:
-        SafePtr<Builder<Texture>> _texture;
+        SafeBuilder<Texture> _texture;
         std::vector<sp<Builder<AtlasImporter>>> _importers;
     };
 

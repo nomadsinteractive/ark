@@ -5,7 +5,6 @@
 #include "core/inf/builder.h"
 #include "core/types/box.h"
 #include "core/types/shared_ptr.h"
-#include "core/types/safe_ptr.h"
 #include "core/types/safe_var.h"
 
 #include "graphics/forwarding.h"
@@ -17,9 +16,9 @@ namespace ark {
 class ARK_API RenderObject final : public Renderable {
 public:
 //  [[script::bindings::auto]]
-    RenderObject(const NamedHash& type, sp<Vec3> position = nullptr, sp<Size> size = nullptr, sp<Transform> transform = nullptr, sp<Varyings> varyings = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> discarded = nullptr);
-//  [[script::bindings::auto]]
     RenderObject(sp<Integer> type, sp<Vec3> position = nullptr, sp<Size> size = nullptr, sp<Transform> transform = nullptr, sp<Varyings> varyings = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> discarded = nullptr);
+//  [[script::bindings::auto]]
+    RenderObject(const NamedHash& type, sp<Vec3> position = nullptr, sp<Size> size = nullptr, sp<Transform> transform = nullptr, sp<Varyings> varyings = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> discarded = nullptr);
 
 //  [[script::bindings::property]]
     sp<Integer> type() const;
@@ -67,7 +66,7 @@ public:
 //  [[script::bindings::property]]
     void setSize(sp<Vec3> size);
 //  [[script::bindings::property]]
-    const SafePtr<Transform>& transform() const;
+    const sp<Transform>& transform() const;
 //  [[script::bindings::property]]
     void setTransform(sp<Transform> transform);
 //  [[script::bindings::property]]
@@ -114,12 +113,12 @@ public:
         sp<RenderObject> build(const Scope& args) override;
 
     private:
-        SafePtr<Builder<Integer>> _type;
-        SafePtr<Builder<Vec3>> _position;
-        SafePtr<Builder<Size>> _size;
-        SafePtr<Builder<Transform>> _transform;
-        SafePtr<Builder<Varyings>> _varyings;
-        SafePtr<Builder<Boolean>> _discarded;
+        SafeBuilder<Integer> _type;
+        SafeBuilder<Vec3> _position;
+        SafeBuilder<Size> _size;
+        SafeBuilder<Transform> _transform;
+        SafeBuilder<Varyings> _varyings;
+        SafeBuilder<Boolean> _discarded;
     };
 
 //  [[plugin::builder("render_object")]]
@@ -138,7 +137,7 @@ private:
 
     SafeVar<Vec3> _position;
     SafeVar<Vec3> _size;
-    SafePtr<Transform> _transform;
+    sp<Transform> _transform;
     sp<Varyings> _varyings;
 
     SafeVar<Boolean> _visible;

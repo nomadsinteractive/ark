@@ -3,9 +3,8 @@
 #include "core/base/api.h"
 #include "core/forwarding.h"
 #include "core/inf/builder.h"
-#include "core/inf/debris.h"
 #include "core/inf/variable.h"
-#include "core/types/safe_ptr.h"
+#include "core/types/safe_builder.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/base/v2.h"
@@ -40,7 +39,7 @@ public:
 
     private:
         sp<Builder<Numeric>> _x;
-        SafePtr<Builder<Numeric>> _y;
+        SafeBuilder<Numeric> _y;
     };
 
 //  [[plugin::builder::by-value]]

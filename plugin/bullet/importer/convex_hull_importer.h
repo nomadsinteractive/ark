@@ -18,7 +18,7 @@ public:
         virtual sp<ColliderBullet::RigidbodyImporter> build(const Scope& args) override;
 
     private:
-        SafePtr<Builder<ModelLoader>> _model_loader;
+        SafeBuilder<ModelLoader> _model_loader;
     };
 
 private:

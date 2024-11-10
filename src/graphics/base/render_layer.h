@@ -73,9 +73,9 @@ public:
         sp<Builder<ModelLoader>> _model_loader;
         sp<Builder<Shader>> _shader;
         sp<Builder<Varyings>> _varyings;
-        SafePtr<Builder<Boolean>> _visible;
-        SafePtr<Builder<Boolean>> _discarded;
-        SafePtr<Builder<Vec4>> _scissor;
+        SafeBuilder<Boolean> _visible;
+        SafeBuilder<Boolean> _discarded;
+        SafeBuilder<Vec4> _scissor;
         bool _post_process;
     };
 

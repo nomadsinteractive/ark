@@ -3,7 +3,7 @@
 #include "core/base/api.h"
 #include "core/inf/writable.h"
 
-#include "graphics/base/transform.h"
+#include "graphics/inf/transform.h"
 #include "graphics/inf/renderable.h"
 
 #include "renderer/base/mesh.h"
@@ -75,7 +75,8 @@ private:
 
     bool _do_transform;
     bool _visible;
-    const Transform::Snapshot* _transform;
+    Transform* _transform;
+    const Transform::Snapshot* _transform_snapshot;
     V3 _translate;
 
     ByteArray::Borrowed _varying_contents;

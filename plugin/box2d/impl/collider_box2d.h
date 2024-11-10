@@ -9,7 +9,7 @@
 #include "core/inf/builder.h"
 #include "core/inf/runnable.h"
 #include "core/types/implements.h"
-#include "core/types/safe_ptr.h"
+#include "core/types/safe_builder.h"
 #include "core/types/shared_ptr.h"
 
 #include "renderer/forwarding.h"
@@ -81,7 +81,7 @@ public:
 
         V2 _ppm;
         V2 _gravity;
-        SafePtr<Builder<Boolean>> _discarded;
+        SafeBuilder<Boolean> _discarded;
     };
 
 //  [[plugin::resource-loader("b2World")]]

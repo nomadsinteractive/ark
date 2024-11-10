@@ -1,5 +1,7 @@
 #pragma once
 
+#include "core/base/wrapper.h"
+
 #include "graphics/inf/renderable.h"
 
 namespace ark {

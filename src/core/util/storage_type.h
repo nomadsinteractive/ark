@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_UTIL_STORAGE_TYPE_H_
-#define ARK_CORE_UTIL_STORAGE_TYPE_H_
+#pragma once
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
@@ -10,7 +9,6 @@ namespace ark {
 //[[script::bindings::class("Storage")]]
 class ARK_API StorageType {
 public:
-
 //[[script::bindings::classmethod]]
     static void load(const sp<Storage>& self, const sp<Readable>& src);
 //[[script::bindings::classmethod]]
@@ -24,5 +22,3 @@ public:
 };
 
 }
-
-#endif
