@@ -1,7 +1,6 @@
 #include "graphics/util/vec2_type.h"
 
 #include "core/base/observer.h"
-#include "core/inf/debris.h"
 #include "core/impl/variable/variable_op1.h"
 #include "core/impl/variable/variable_op2.h"
 #include "core/util/operators.h"
@@ -21,9 +20,8 @@ public:
     }
 
     V2 val() override {
-        V2 v = _delegate->val();
-        float distance = getPlaneDistance(v);
-        if(!Math::signEquals(_distance, distance)) {
+        const V2 v = _delegate->val();
+        if(const float distance = getPlaneDistance(v); !Math::signEquals(_distance, distance)) {
             _observer->notify();
             _distance = distance;
         }
@@ -47,11 +45,11 @@ private:
     float _distance;
 };
 
-}
-
-static float _atan2(const V2& val)
+float _atan2(const V2& val)
 {
     return Math::atan2(val.y(), val.x());
+}
+
 }
 
 sp<Vec2> Vec2Type::create(sp<Numeric> x, sp<Numeric> y)
@@ -87,11 +85,6 @@ sp<Vec2> Vec2Type::fence(sp<Vec2> self, sp<Vec3> plane, sp<Observer> observer)
 sp<Numeric> Vec2Type::atan2(sp<Vec2> self)
 {
     return sp<VariableOP1<float, V2>>::make(_atan2, std::move(self));
-}
-
-template<> ARK_API sp<Vec2> Null::safePtr()
-{
-    return sp<Vec2Impl>::make();
 }
 
 }

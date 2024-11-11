@@ -1,7 +1,5 @@
 #include "core/base/plugin.h"
 
-#include "core/types/null.h"
-
 namespace ark {
 
 Plugin::Plugin(const String& name, PluginType type)

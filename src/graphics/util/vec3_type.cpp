@@ -9,10 +9,10 @@ namespace ark {
 
 namespace {
 
-class Vec3Cross : public Vec3 {
+class Vec3Cross final : public Vec3 {
 public:
-    Vec3Cross(const sp<Vec3>& a, const sp<Vec3>& b)
-        : _a(a), _b(b) {
+    Vec3Cross(sp<Vec3> a, sp<Vec3> b)
+        : _a(std::move(a)), _b(std::move(b)) {
     }
 
     V3 val() override {
@@ -72,11 +72,6 @@ sp<Vec3> Vec3Type::cross(sp<Vec3> self, sp<Vec3> other)
 sp<Vec3> Vec3Type::cross(sp<Vec3> self, const V3& other)
 {
     return sp<Vec3Cross>::make(std::move(self), sp<Vec3::Const>::make(other));
-}
-
-template<> ARK_API sp<Vec3> Null::safePtr()
-{
-    return sp<Vec3Impl>::make();
 }
 
 }

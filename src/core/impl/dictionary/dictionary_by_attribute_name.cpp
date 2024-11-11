@@ -1,6 +1,5 @@
 #include "core/impl/dictionary/dictionary_by_attribute_name.h"
 
-#include "core/types/null.h"
 #include "core/util/documents.h"
 #include "core/util/strings.h"
 

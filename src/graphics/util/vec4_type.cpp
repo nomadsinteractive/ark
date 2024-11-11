@@ -38,9 +38,4 @@ sp<Vec4> Vec4Type::xyzw(sp<Vec4> self)
     return self;
 }
 
-template<> ARK_API sp<Vec4> Null::safePtr()
-{
-    return sp<Vec4Impl>::make();
-}
-
 }

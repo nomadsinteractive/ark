@@ -7,15 +7,8 @@
 #include "core/types/shared_ptr.h"
 #include "core/util/uploader_type.h"
 
-#include "graphics/base/rect.h"
-#include "graphics/base/v3.h"
-
 #include "renderer/base/model.h"
 #include "renderer/base/pipeline_building_context.h"
-#include "renderer/impl/vertices/vertices_nine_patch_quads.h"
-#include "renderer/impl/vertices/vertices_nine_patch_triangle_strips.h"
-#include "renderer/impl/vertices/vertices_point.h"
-#include "renderer/impl/vertices/vertices_quad.h"
 
 
 namespace ark {

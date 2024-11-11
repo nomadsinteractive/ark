@@ -52,9 +52,4 @@ sp<Expendable> Expendable::DICTIONARY::build(const Scope& args)
     return _delegate ? sp<Expendable>::make(_delegate->build(args)) : sp<Expendable>::make(_discarded);
 }
 
-template<> ARK_API sp<Expendable> Null::safePtr()
-{
-    return sp<Expendable>::make(false);
-}
-
 }

@@ -1,7 +1,6 @@
 #include "core/base/identifier.h"
 
 #include "core/util/strings.h"
-#include "core/types/null.h"
 
 namespace ark {
 

@@ -57,7 +57,7 @@ void RigidbodyBullet::setFriction(float friction)
 V3 RigidbodyBullet::angularFactor() const
 {
     const btVector3& factor = _stub->_rigidbody->rigidBody()->getAngularFactor();
-    return V3(factor.x(), factor.y(), factor.z());
+    return {factor.x(), factor.y(), factor.z()};
 }
 
 void RigidbodyBullet::setAngularFactor(const V3& factor)

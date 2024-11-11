@@ -116,11 +116,6 @@ const sp<Vec3Impl>& Size::impl() const
     return _impl;
 }
 
-template<> ARK_API sp<Size> Null::safePtr()
-{
-    return sp<Size>::make();
-}
-
 Size::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)
 {
     BeanUtils::split(factory, value, _width, _height, _depth);

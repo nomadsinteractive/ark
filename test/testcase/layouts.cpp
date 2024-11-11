@@ -1,6 +1,5 @@
 #include "core/ark.h"
 #include "core/base/bean_factory.h"
-#include "core/types/null.h"
 
 #include "graphics/base/rect.h"
 #include "graphics/base/size.h"

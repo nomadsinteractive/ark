@@ -4,7 +4,6 @@
 
 #include "core/base/api.h"
 #include "core/dom/dom_document.h"
-#include "core/types/null.h"
 #include "core/types/optional.h"
 #include "core/types/shared_ptr.h"
 #include "core/util/strings.h"

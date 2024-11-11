@@ -3,13 +3,9 @@
 #include "core/base/json.h"
 #include "core/base/observer.h"
 #include "core/base/scope.h"
-#include "core/inf/variable.h"
 #include "core/types/box.h"
 #include "core/types/global.h"
-#include "core/types/null.h"
 #include "core/util/log.h"
-
-#include "app/base/event.h"
 
 #include "python/api.h"
 #include "python/extension/python_extension.h"

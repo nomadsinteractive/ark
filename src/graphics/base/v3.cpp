@@ -1,9 +1,6 @@
 #include "graphics/base/v3.h"
 
 #include "core/ark.h"
-#include "core/inf/variable.h"
-#include "core/types/null.h"
-#include "core/types/shared_ptr.h"
 #include "core/util/math.h"
 
 namespace ark {

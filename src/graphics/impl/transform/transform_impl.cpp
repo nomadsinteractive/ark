@@ -5,7 +5,6 @@
 #include "core/impl/variable/variable_dirty.h"
 #include "core/inf/variable.h"
 #include "core/types/global.h"
-#include "core/types/null.h"
 #include "core/util/updatable_util.h"
 
 #include "graphics/base/v3.h"
@@ -184,11 +183,6 @@ sp<Transform> TransformImpl::makeTransformTRS() const
 sp<Transform> TransformImpl::makeTransformTS() const
 {
     return _type == TransformType::TYPE_LINEAR_2D ? sp<Transform>::make<TransformTS2D>(*this) : sp<Transform>::make<TransformTS3D>(*this);
-}
-
-template<> ARK_API sp<Transform> Null::safePtr()
-{
-    return sp<Transform>::make<TransformImpl>(TransformType::TYPE_LINEAR_3D);
 }
 
 }

@@ -163,10 +163,10 @@ sp<Shape> ColliderBullet::createShape(const NamedHash& type, sp<Vec3> size)
 
     const sp<Model> model = _stub->_model_loader->loadModel(shapeType);
     CHECK(model, "Failed to load model[%ud(\"%s\")]", type.hash(), type.name().c_str());
-    sp<Vec3> contentSize = size ? std::move(size) : model->content()->size();
+    sp<Vec3> contentSize = size ? std::move(size) : sp<Vec3>(model->content()->size());
     const V3 contentSizeValue = contentSize->val();
     sp<CollisionShape> collisionShape = makeConvexHullCollisionShape(model, contentSizeValue.x() * contentSizeValue.y() * contentSizeValue.z());
-    return sp<Shape>::make(type, std::move(contentSize), Box(std::move(collisionShape)));
+    return sp<Shape>::make(type, std::move(contentSize), nullptr, Box(std::move(collisionShape)));
 }
 
 void ColliderBullet::rayCastClosest(const V3& from, const V3& to, const sp<CollisionCallback>& callback, int32_t filterGroup, int32_t filterMask) const

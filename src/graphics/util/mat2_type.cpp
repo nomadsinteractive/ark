@@ -65,9 +65,4 @@ sp<Mat2> Mat2Type::freeze(const sp<Mat2>& self)
     return sp<Mat2::Const>::make(self->val());
 }
 
-template<> ARK_API sp<Mat2> Null::safePtr()
-{
-    return sp<Mat2Impl>::make();
-}
-
 }

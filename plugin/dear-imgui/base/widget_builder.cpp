@@ -349,25 +349,24 @@ public:
         const bool useSnap = ImGui::IsKeyDown(ImGuiKey_LeftCtrl);
         ImGui::Text(useSnap ? "Snapping" : "(Hold Ctrl to snap)");
         V2 snap;
-        switch (mCurrentGizmoOperation)
+        switch(mCurrentGizmoOperation)
         {
         case ImGuizmo::TRANSLATE:
-            // snap = config.mSnapTranslation;
             ImGui::InputFloat3("Snap", snap.value());
             break;
         case ImGuizmo::ROTATE:
-            // snap = config.mSnapRotation;
             ImGui::InputFloat("Angle Snap", snap.value());
             break;
         case ImGuizmo::SCALE:
-            // snap = config.mSnapScale;
             ImGui::InputFloat("Scale Snap", snap.value());
+            break;
+        default:
             break;
         }
         M4 cameraView = _camera->view()->val();
         M4 cameraProjection = _camera->projection()->val();
 
-        ImGuiIO& io = ImGui::GetIO();
+        const ImGuiIO& io = ImGui::GetIO();
         ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
         ImGuizmo::Manipulate(cameraView.value(), cameraProjection.value(), mCurrentGizmoOperation, mCurrentGizmoMode, matrix.value(), nullptr, useSnap ? snap.value() : nullptr);
         _matrix->set(matrix);

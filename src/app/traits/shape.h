@@ -22,13 +22,15 @@ public:
 
 public:
 //  [[script::bindings::auto]]
-    Shape(const NamedHash& type = {Shape::TYPE_NONE}, sp<Vec3> size = nullptr);
-    Shape(const NamedHash& type, sp<Vec3> size, Box implementation);
+    Shape(const NamedHash& type = {Shape::TYPE_NONE}, sp<Vec3> size = nullptr, sp<Vec3> orgin = nullptr);
+    Shape(const NamedHash& type, sp<Vec3> size, sp<Vec3> orgin, Box implementation);
 
 //  [[script::bindings::property]]
     const NamedHash& type() const;
 //  [[script::bindings::property]]
     const SafeVar<Vec3>& size() const;
+//  [[script::bindings::property]]
+    const SafeVar<Vec3>& orgin() const;
 
     template<typename T> sp<T> asImplementation() const {
         if(!_implementation)
@@ -42,6 +44,7 @@ public:
 private:
     NamedHash _type;
     SafeVar<Vec3> _size;
+    SafeVar<Vec3> _orgin;
 
     Box _implementation;
 };

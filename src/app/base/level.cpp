@@ -11,7 +11,6 @@
 #include "graphics/base/quaternion.h"
 #include "graphics/base/render_object.h"
 #include "graphics/base/transform_3d.h"
-#include "graphics/inf/transform.h"
 #include "graphics/util/vec3_type.h"
 #include "graphics/util/vec4_type.h"
 
@@ -69,16 +68,14 @@ std::pair<sp<RenderObject>, sp<Transform3D>> makeRenderObject(const document& ma
     return {std::move(renderObject), std::move(transform)};
 }
 
-sp<Rigidbody> makeRigidBody(Library& library, const sp<Collider>& collider, RenderObject& renderObject, Transform3D& transform, Collider::BodyType bodyType, const std::map<String, String>& shapeIdAliases)
+sp<Rigidbody> makeRigidBody(Library& library, const sp<Collider>& collider, RenderObject& renderObject, Transform3D& transform, Collider::BodyType bodyType, const std::map<String, sp<Shape>>& shapes)
 {
     if(!collider)
         return nullptr;
 
-    const auto iter = shapeIdAliases.find(library._name);
-    const TypeId shapeId = iter != shapeIdAliases.end() ? iter->second.hash() : library._type;
-
     if(!library._shape)
-        library._shape = collider->createShape(shapeId, sp<Vec3>::make<Vec3::Const>(library._dimensions));
+        if(const auto iter = shapes.find(library._name); iter != shapes.end())
+            library._shape = iter->second;
 
     if(bodyType != Collider::BODY_TYPE_DYNAMIC)
         return collider->createBody(bodyType, library._shape, renderObject.position(), transform.rotation().wrapped());
@@ -96,7 +93,7 @@ Level::Level(std::map<String, sp<Layer>> renderObjectLayers, std::map<String, sp
 {
 }
 
-void Level::load(const String& src, const sp<Collider>& collider, const std::map<String, String>& shapeIdAliases)
+void Level::load(const String& src, const sp<Collider>& collider, const std::map<String, sp<Shape>>& shapes)
 {
     const document manifest = Ark::instance().applicationContext()->applicationBundle()->loadDocument(src);
     CHECK(manifest, "Cannot load manifest \"%s\"", src.c_str());
@@ -133,7 +130,7 @@ void Level::load(const String& src, const sp<Collider>& collider, const std::map
 
                 if(const Collider::BodyType bodyType = Documents::getAttribute<Collider::BodyType>(j, "rigidbody_type", Collider::BODY_TYPE_NONE); bodyType != Collider::BODY_TYPE_NONE)
                 {
-                    sp<Rigidbody> rigidBody = makeRigidBody(library, collider, renderObject, transform, bodyType, shapeIdAliases);
+                    sp<Rigidbody> rigidBody = makeRigidBody(library, collider, renderObject, transform, bodyType, shapes);
                     if(name)
                         _rigid_objects[name] = std::move(rigidBody);
                     else

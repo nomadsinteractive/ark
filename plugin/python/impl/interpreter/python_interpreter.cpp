@@ -4,7 +4,6 @@
 #include "core/base/scope.h"
 #include "core/base/thread.h"
 #include "core/inf/asset.h"
-#include "core/types/null.h"
 #include "core/types/global.h"
 #include "core/util/log.h"
 

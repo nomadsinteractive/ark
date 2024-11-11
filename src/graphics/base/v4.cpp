@@ -1,13 +1,7 @@
 #include "graphics/base/v4.h"
 
 #include "core/ark.h"
-#include "core/inf/array.h"
-#include "core/types/null.h"
-#include "core/util/string_convert.h"
-#include "core/util/strings.h"
 #include "core/util/math.h"
-
-#include "graphics/base/color.h"
 
 namespace ark {
 

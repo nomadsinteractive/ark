@@ -64,9 +64,4 @@ sp<Mat3> Mat3Type::ensureImpl(const sp<Mat3>& self)
     return impl;
 }
 
-template<> ARK_API sp<Mat3> Null::safePtr()
-{
-    return sp<Mat3Impl>::make();
-}
-
 }

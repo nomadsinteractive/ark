@@ -15,7 +15,6 @@
 #include "core/inf/readable.h"
 #include "core/inf/variable.h"
 #include "core/types/global.h"
-#include "core/types/null.h"
 #include "core/types/shared_ptr.h"
 #include "core/util/documents.h"
 #include "core/base/identifier.h"

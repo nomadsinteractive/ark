@@ -12,7 +12,7 @@ public:
         : _transform(std::move(transform)), _matrix(matrix), _origin(origin) {
     }
 
-    bool update(uint64_t timestamp)
+    bool update(uint64_t timestamp) override
     {
         return _transform->update(timestamp);
     }
@@ -22,7 +22,7 @@ public:
         return _transform->snapshot();
     }
 
-    V4 transform(const Transform::Snapshot& snapshot, const V4& xyzw) override
+    V4 transform(const Snapshot& snapshot, const V4& xyzw) override
     {
         return {MatrixUtil::transform(_matrix, _transform->transform(snapshot, xyzw),_origin), 1.0f};
     }

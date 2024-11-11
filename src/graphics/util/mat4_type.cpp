@@ -135,11 +135,6 @@ sp<Mat4Impl> Mat4Type::ensureImpl(const sp<Mat4>& self)
     return impl;
 }
 
-template<> sp<Mat4> Null::safePtr()
-{
-    return sp<Mat4Impl>::make();
-}
-
 template<> String StringConvert::repr<M4>(const M4& val)
 {
     const float* buf = val.value();

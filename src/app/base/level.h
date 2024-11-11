@@ -32,7 +32,7 @@ public:
     Level(std::map<String, sp<Layer>> renderObjectLayers, std::map<String, sp<Camera>> cameras = {}, std::map<String, sp<Vec3>> lights = {});
 
 //  [[script::bindings::auto]]
-    void load(const String& src, const sp<Collider>& collider = nullptr, const std::map<String, String>& shapeIdAliases = {});
+    void load(const String& src, const sp<Collider>& collider = nullptr, const std::map<String, sp<Shape>>& shapes = {});
 //  [[script::bindings::auto]]
     sp<Layer> getLayer(const String& name) const;
 //  [[script::bindings::auto]]

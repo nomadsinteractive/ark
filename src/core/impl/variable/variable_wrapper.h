@@ -6,17 +6,16 @@
 #include "core/base/timestamp.h"
 #include "core/inf/variable.h"
 #include "core/types/implements.h"
-#include "core/types/null.h"
 
 namespace ark {
 
 template<typename T> class VariableWrapper final : public Variable<T>, public Wrapper<Variable<T>>, Implements<VariableWrapper<T>, Variable<T>, Wrapper<Variable<T>>> {
 public:
-    VariableWrapper(const sp<Variable<T>>& delegate) noexcept
-        : Wrapper<Variable<T>>(Null::toSafePtr(delegate)) {
+    VariableWrapper(sp<Variable<T>> delegate) noexcept
+        : Wrapper<Variable<T>>(std::move(delegate)) {
     }
     VariableWrapper(T value) noexcept
-        : Wrapper<Variable<T>>(sp<typename Variable<T>::Const>::make(value)) {
+        : Wrapper<Variable<T>>(sp<Variable<T>>::template make<typename Variable<T>::Const>(value)) {
     }
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(VariableWrapper);
 
@@ -33,9 +32,9 @@ public:
         _timestamp.markDirty();
     }
 
-    void set(const sp<Variable<T>>& delegate) {
+    void set(sp<Variable<T>> delegate) {
         DCHECK(delegate.get() != this, "Recursive delegate being set");
-        this->_wrapped = Null::toSafePtr(delegate);
+        this->_wrapped = std::move(delegate);
         _timestamp.markDirty();
     }
 
