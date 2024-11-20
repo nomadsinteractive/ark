@@ -95,7 +95,79 @@ sp<CollisionShape> makeConvexHullCollisionShape(const Model& model, btScalar mas
     return sp<CollisionShape>::make(convexHullShape, mass);
 }
 
+struct KinematicObject {
+    KinematicObject(sp<Vec3> position, sp<Vec4> quaternion, sp<BtRigidbodyRef> rigidBody)
+        : _position(std::move(position)), _quaternion(std::move(quaternion), constants::QUATERNION_ONE), _rigid_body(std::move(rigidBody)) {
+    }
+
+    SafeVar<Vec3> _position;
+    SafeVar<Vec4> _quaternion;
+    sp<BtRigidbodyRef> _rigid_body;
+
+    class ListFilter {
+    public:
+        ListFilter() = default;
+
+        FilterAction operator() (const KinematicObject& item) const
+        {
+            return item._rigid_body.unique() ? FILTER_ACTION_REMOVE : FILTER_ACTION_NONE;
+        }
+
+    };
+};
+
 }
+
+struct ColliderBullet::Stub final : Runnable {
+    Stub(const V3& gravity, sp<ModelLoader> modelLoader)
+        : _model_loader(std::move(modelLoader)), _collision_configuration(new btDefaultCollisionConfiguration()), _collision_dispatcher(new btCollisionDispatcher(_collision_configuration)),
+          _broadphase(new btDbvtBroadphase()), _solver(new btSequentialImpulseConstraintSolver()), _dynamics_world(new btDiscreteDynamicsWorld(_collision_dispatcher, _broadphase, _solver, _collision_configuration)),
+          _body_id_base(0), _time_step(1 / 60.0f) {
+        _dynamics_world->setGravity(btVector3(gravity.x(), gravity.y(), gravity.z()));
+    }
+
+    ~Stub() override
+    {
+        dispose();
+    }
+
+    void run() override
+    {
+        _dynamics_world->stepSimulation(_time_step);
+    }
+
+    void dispose()
+    {
+        for(int32_t i = _dynamics_world->getNumConstraints() - 1; i >= 0; i--)
+            _dynamics_world->removeConstraint(_dynamics_world->getConstraint(i));
+
+        for(int32_t i = _dynamics_world->getNumCollisionObjects() - 1; i >= 0; i--)
+        {
+            btCollisionObject* obj = _dynamics_world->getCollisionObjectArray()[i];
+            btRigidBody* body = btRigidBody::upcast(obj);
+            if (body && body->getMotionState())
+                delete body->getMotionState();
+            _dynamics_world->removeCollisionObject(obj);
+            delete obj;
+        }
+    }
+
+    sp<ModelLoader> _model_loader;
+    std::unordered_map<TypeId, sp<CollisionShape>> _collision_shapes;
+
+    op<btDefaultCollisionConfiguration> _collision_configuration;
+    op<btCollisionDispatcher> _collision_dispatcher;
+
+    op<btBroadphaseInterface> _broadphase;
+    op<btConstraintSolver> _solver;
+    op<btDiscreteDynamicsWorld> _dynamics_world;
+
+    List<KinematicObject, KinematicObject::ListFilter> _kinematic_objects;
+
+    uint32_t _body_id_base;
+
+    float _time_step;
+};
 
 ColliderBullet::ColliderBullet(const V3& gravity, sp<ModelLoader> modelLoader)
     : _stub(sp<Stub>::make(gravity, std::move(modelLoader)))
@@ -155,18 +227,18 @@ sp<Rigidbody> ColliderBullet::createBody(Collider::BodyType type, sp<Shape> shap
     return sp<Rigidbody>::make<RigidbodyBullet>(++ _stub->_body_id_base, type, std::move(shape), *this, std::move(cs), std::move(btPosition), sp<Vec4>::make<DynamicRotation>(std::move(motionState)), std::move(rigidBody));
 }
 
-sp<Shape> ColliderBullet::createShape(const NamedHash& type, sp<Vec3> size)
+sp<Shape> ColliderBullet::createShape(const NamedHash& type, sp<Vec3> size, sp<Vec3> origin)
 {
     const HashId shapeType = type.hash();
     if(shapeType == Shape::TYPE_AABB || shapeType == Shape::TYPE_BOX || shapeType == Shape::TYPE_BALL || shapeType == Shape::TYPE_CAPSULE)
-        return sp<Shape>::make(type, std::move(size));
+        return sp<Shape>::make(type, std::move(size), std::move(origin));
 
     const sp<Model> model = _stub->_model_loader->loadModel(shapeType);
     CHECK(model, "Failed to load model[%ud(\"%s\")]", type.hash(), type.name().c_str());
     sp<Vec3> contentSize = size ? std::move(size) : sp<Vec3>(model->content()->size());
     const V3 contentSizeValue = contentSize->val();
     sp<CollisionShape> collisionShape = makeConvexHullCollisionShape(model, contentSizeValue.x() * contentSizeValue.y() * contentSizeValue.z());
-    return sp<Shape>::make(type, std::move(contentSize), nullptr, Box(std::move(collisionShape)));
+    return sp<Shape>::make(type, std::move(contentSize), std::move(origin), Box(std::move(collisionShape)));
 }
 
 void ColliderBullet::rayCastClosest(const V3& from, const V3& to, const sp<CollisionCallback>& callback, int32_t filterGroup, int32_t filterMask) const
@@ -208,11 +280,6 @@ std::vector<RayCastManifold> ColliderBullet::rayCast(const V3& from, const V3& t
         }
     }
     return manifolds;
-}
-
-void ColliderBullet::run()
-{
-    _stub->step();
 }
 
 btDiscreteDynamicsWorld* ColliderBullet::btDynamicWorld() const
@@ -320,40 +387,6 @@ void ColliderBullet::addTickContactInfo(const sp<BtRigidbodyRef>& rigidBody, con
         callback->onBeginContact(getRigidBodyFromCollisionObject(contact->collisionObject()), CollisionManifold(cp, normal));
 }
 
-ColliderBullet::Stub::Stub(const V3& gravity, sp<ModelLoader> modelLoader)
-    : _model_loader(std::move(modelLoader)), _collision_configuration(new btDefaultCollisionConfiguration()), _collision_dispatcher(new btCollisionDispatcher(_collision_configuration)),
-      _broadphase(new btDbvtBroadphase()), _solver(new btSequentialImpulseConstraintSolver()), _dynamics_world(new btDiscreteDynamicsWorld(_collision_dispatcher, _broadphase, _solver, _collision_configuration)),
-      _body_id_base(0), _time_step(1 / 60.0f)
-{
-    _dynamics_world->setGravity(btVector3(gravity.x(), gravity.y(), gravity.z()));
-}
-
-ColliderBullet::Stub::~Stub()
-{
-    dispose();
-}
-
-void ColliderBullet::Stub::step()
-{
-    _dynamics_world->stepSimulation(_time_step);
-}
-
-void ColliderBullet::Stub::dispose()
-{
-    for(int32_t i = _dynamics_world->getNumConstraints() - 1; i >= 0; i--)
-        _dynamics_world->removeConstraint(_dynamics_world->getConstraint(i));
-
-    for(int32_t i = _dynamics_world->getNumCollisionObjects() - 1; i >= 0; i--)
-    {
-        btCollisionObject* obj = _dynamics_world->getCollisionObjectArray()[i];
-        btRigidBody* body = btRigidBody::upcast(obj);
-        if (body && body->getMotionState())
-            delete body->getMotionState();
-        _dynamics_world->removeCollisionObject(obj);
-        delete obj;
-    }
-}
-
 sp<BtRigidbodyRef> ColliderBullet::makeRigidBody(btDynamicsWorld* world, btCollisionShape* shape, btMotionState* motionState, Collider::BodyType bodyType, btScalar mass)
 {
     DASSERT(bodyType == Collider::BODY_TYPE_STATIC || bodyType == Collider::BODY_TYPE_DYNAMIC || bodyType == Collider::BODY_TYPE_KINEMATIC);
@@ -387,7 +420,7 @@ sp<BtRigidbodyRef> ColliderBullet::makeGhostObject(btDynamicsWorld* world, btCol
 }
 
 ColliderBullet::BUILDER_IMPL1::BUILDER_IMPL1(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _gravity(Documents::getAttribute<V3>(manifest, "gravity", {0, -9.8, 0})), _model_loader(factory.getBuilder<ModelLoader>(manifest, "model-loader")),
+    : _gravity(Documents::getAttribute<V3>(manifest, "gravity", {0, -9.8f, 0})), _model_loader(factory.getBuilder<ModelLoader>(manifest, "model-loader")),
       _resource_loader_context(resourceLoaderContext)
 {
     for(const auto& i : manifest->children("import"))
@@ -397,9 +430,9 @@ ColliderBullet::BUILDER_IMPL1::BUILDER_IMPL1(BeanFactory& factory, const documen
 sp<ColliderBullet> ColliderBullet::BUILDER_IMPL1::build(const Scope& args)
 {
     const sp<ColliderBullet> collider = sp<ColliderBullet>::make(_gravity, _model_loader.build(args));
-    for(const auto& i : _importers)
-        i.first->build(args)->import(collider, i.second);
-    _resource_loader_context->renderController()->addPreComposeRunnable(collider, BooleanType::__or__(_resource_loader_context->disposed(), sp<Boolean>::make<BooleanByWeakRef<ColliderBullet>>(collider, 1)));
+    for(const auto& [k, v] : _importers)
+        k->build(args)->import(collider, v);
+    _resource_loader_context->renderController()->addPreComposeRunnable(collider->_stub, BooleanType::__or__(_resource_loader_context->disposed(), sp<Boolean>::make<BooleanByWeakRef<ColliderBullet>>(collider, 0)));
     return collider;
 }
 
@@ -411,16 +444,6 @@ ColliderBullet::BUILDER_IMPL2::BUILDER_IMPL2(BeanFactory& factory, const documen
 sp<Collider> ColliderBullet::BUILDER_IMPL2::build(const Scope& args)
 {
     return _impl.build(args);
-}
-
-ColliderBullet::KinematicObject::KinematicObject(sp<Vec3> position, sp<Vec4> quaternion, sp<BtRigidbodyRef> rigidBody)
-    : _position(std::move(position)), _quaternion(std::move(quaternion), constants::QUATERNION_ONE), _rigid_body(std::move(rigidBody))
-{
-}
-
-FilterAction ColliderBullet::KinematicObject::ListFilter::operator() (const KinematicObject& item) const
-{
-    return item._rigid_body.unique() ? FILTER_ACTION_REMOVE : FILTER_ACTION_NONE;
 }
 
 }

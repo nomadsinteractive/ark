@@ -38,7 +38,7 @@ public:
 //  [[script::bindings::auto]]
     sp<Rigidbody> createBody(Collider::BodyType type, sp<ark::Shape> shape, sp<Vec3> position = nullptr, sp<Vec4> rotation = nullptr, sp<Boolean> discarded = nullptr) override;
 //  [[script::bindings::auto]]
-    sp<ark::Shape> createShape(const NamedHash& type, sp<Vec3> size) override;
+    sp<ark::Shape> createShape(const NamedHash& type, sp<Vec3> size, sp<Vec3> origin) override;
 //  [[script::bindings::auto]]
     std::vector<RayCastManifold> rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter) override;
 

@@ -8,7 +8,7 @@ namespace ark {
 
 template<typename T> class BooleanByWeakRef final : public Boolean {
 public:
-    BooleanByWeakRef(sp<T> ptr, long useCount)
+    BooleanByWeakRef(sp<T> ptr, int32_t useCount)
         : _weak_ref(std::move(ptr)), _use_count(useCount) {
     }
 
@@ -22,7 +22,7 @@ public:
 
 private:
     WeakPtr<T> _weak_ref;
-    long _use_count;
+    int32_t _use_count;
 };
 
 }

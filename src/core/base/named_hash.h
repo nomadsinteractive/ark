@@ -19,7 +19,7 @@ public:
     const String& name() const;
 
 //  [[script::bindings::auto]]
-    static String reverse(HashId hash);
+    static const String& reverse(HashId hash);
 
 private:
     HashId _hash;

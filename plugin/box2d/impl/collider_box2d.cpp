@@ -67,9 +67,9 @@ sp<Rigidbody> ColliderBox2D::createBody(Collider::BodyType type, sp<ark::Shape> 
     return body;
 }
 
-sp<ark::Shape> ColliderBox2D::createShape(const NamedHash& type, sp<Vec3> size)
+sp<ark::Shape> ColliderBox2D::createShape(const NamedHash& type, sp<Vec3> size, sp<Vec3> origin)
 {
-    return sp<ark::Shape>::make(type, std::move(size));
+    return sp<ark::Shape>::make(type, std::move(size), std::move(origin));
 }
 
 std::vector<RayCastManifold> ColliderBox2D::rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& /*collisionFilter*/)

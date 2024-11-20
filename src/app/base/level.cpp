@@ -74,9 +74,12 @@ sp<Rigidbody> makeRigidBody(Library& library, const sp<Collider>& collider, Rend
         return nullptr;
 
     if(!library._shape)
+    {
         if(const auto iter = shapes.find(library._name); iter != shapes.end())
             library._shape = iter->second;
-
+        else
+            library._shape = collider->createShape(library._name, library._dimensions);
+    }
     if(bodyType != Collider::BODY_TYPE_DYNAMIC)
         return collider->createBody(bodyType, library._shape, renderObject.position(), transform.rotation().wrapped());
 

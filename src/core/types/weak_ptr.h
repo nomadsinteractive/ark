@@ -46,7 +46,7 @@ public:
         return _weak_ptr.use_count() == 1;
     }
 
-    long useCount() const {
+    int32_t useCount() const {
         return _weak_ptr.use_count();
     }
 

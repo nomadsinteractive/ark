@@ -2360,7 +2360,7 @@ class Shape:
     TYPE_BOX = -3
     TYPE_CAPSULE = -4
 
-    def __init__(self, id: TYPE_NAMED_HASH_ID, size: Optional[TYPE_VEC3] = None):
+    def __init__(self, id: TYPE_NAMED_HASH_ID, size: Optional[TYPE_VEC3] = None, origin: Optional[TYPE_VEC3] = None):
         pass
 
     @property
@@ -2369,6 +2369,10 @@ class Shape:
 
     @property
     def size(self) -> Optional[Vec3]:
+        return None
+
+    @property
+    def origin(self) -> Optional[Vec3]:
         return None
 
 

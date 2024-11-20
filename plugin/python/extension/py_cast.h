@@ -69,7 +69,7 @@ public:
 
     template<typename T> static Optional<sp<T>> toSharedPtr(PyObject* object) {
         if(PyBridge::isPyNone(object))
-            return sp<T>();
+            return {sp<T>()};
         return toSharedPtrImpl<T>(object);
     }
 

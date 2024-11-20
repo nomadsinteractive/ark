@@ -9,11 +9,13 @@ namespace {
 struct HashNames {
     std::unordered_map<HashId, String> _hash_names;
 
-    String findName(HashId id) const
+    const String& findName(HashId id) const
     {
         if(const auto iter = _hash_names.find(id); iter != _hash_names.end())
             return iter->second;
-        return "<Unknow>";
+
+        static String _name_unknown = "<Unknow>";
+        return _name_unknown;
     }
 };
 
@@ -34,7 +36,7 @@ NamedHash::NamedHash(HashId hash)
 
 const String& NamedHash::name() const
 {
-    return _name;
+    return _name ? _name : reverse(_hash);
 }
 
 HashId NamedHash::hash() const
@@ -42,7 +44,7 @@ HashId NamedHash::hash() const
     return _hash;
 }
 
-String NamedHash::reverse(HashId hash)
+const String& NamedHash::reverse(HashId hash)
 {
     return Global<HashNames>()->findName(hash);
 }

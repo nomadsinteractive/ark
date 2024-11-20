@@ -4,15 +4,11 @@
 #include <vector>
 
 #include "core/forwarding.h"
-#include "core/collection/list.h"
 #include "core/inf/builder.h"
 #include "core/inf/runnable.h"
 #include "core/inf/variable.h"
 #include "core/types/implements.h"
-#include "core/types/owned_ptr.h"
 #include "core/types/safe_builder.h"
-
-#include "graphics/inf/transform.h"
 
 #include "renderer/forwarding.h"
 
@@ -26,7 +22,7 @@
 namespace ark::plugin::bullet {
 
 //[[script::bindings::name("World")]]
-class ARK_PLUGIN_BULLET_API ColliderBullet final : public Runnable, public Collider, Implements<ColliderBullet, Runnable, Collider> {
+class ARK_PLUGIN_BULLET_API ColliderBullet final : public Collider, Implements<ColliderBullet, Collider> {
 public:
     class RigidbodyImporter {
     public:
@@ -41,14 +37,14 @@ public:
 //  [[script::bindings::auto]]
     sp<Rigidbody> createBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position = nullptr, sp<Vec4> rotation = nullptr, sp<Boolean> discarded = nullptr) override;
 //  [[script::bindings::auto]]
-    sp<Shape> createShape(const NamedHash& type, sp<Vec3> size) override;
+    sp<Shape> createShape(const NamedHash& type, sp<Vec3> size, sp<Vec3> origin) override;
 //  [[script::bindings::auto]]
     std::vector<RayCastManifold> rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter = nullptr) override;
 
 //  [[script::bindings::auto]]
     void rayCastClosest(const V3& from, const V3& to, const sp<CollisionCallback>& callback, int32_t filterGroup = 1, int32_t filterMask = -1) const;
 
-    void run() override;
+    void run() ;
 
     btDiscreteDynamicsWorld* btDynamicWorld() const;
 
@@ -82,45 +78,7 @@ public:
     };
 
 private:
-    struct KinematicObject {
-        KinematicObject(sp<Vec3> position, sp<Vec4> quaternion, sp<BtRigidbodyRef> rigidBody);
-
-        SafeVar<Vec3> _position;
-        SafeVar<Vec4> _quaternion;
-        sp<BtRigidbodyRef> _rigid_body;
-
-        class ListFilter {
-        public:
-            ListFilter() = default;
-
-            FilterAction operator() (const KinematicObject& item) const;
-
-        };
-    };
-
-    struct Stub {
-        Stub(const V3& gravity, sp<ModelLoader> modelLoader);
-        ~Stub();
-
-        void step();
-        void dispose();
-
-        sp<ModelLoader> _model_loader;
-        std::unordered_map<TypeId, sp<CollisionShape>> _collision_shapes;
-
-        op<btDefaultCollisionConfiguration> _collision_configuration;
-        op<btCollisionDispatcher> _collision_dispatcher;
-
-        op<btBroadphaseInterface> _broadphase;
-        op<btConstraintSolver> _solver;
-        op<btDiscreteDynamicsWorld> _dynamics_world;
-
-        List<KinematicObject, KinematicObject::ListFilter> _kinematic_objects;
-
-        uint32_t _body_id_base;
-
-        float _time_step;
-    };
+    struct Stub;
 
     struct ContactInfo {
         std::set<sp<BtRigidbodyRef>> _last_tick;
