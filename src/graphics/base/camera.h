@@ -64,9 +64,9 @@ public:
     Camera(Ark::RendererCoordinateSystem cs, sp<Delegate> delegate, sp<Mat4> view = nullptr, sp<Mat4> projection = nullptr);
 
 //  [[script::bindings::auto]]
-    void ortho(const V2& leftTop, const V2& rightBottom, const V2& clip);
-//  [[script::bindings::auto]]
     void ortho(sp<Vec2> leftTop, sp<Vec2> rightBottom, sp<Vec2> clip);
+//  [[script::bindings::auto]]
+    void ortho(const V2& leftTop, const V2& rightBottom, const V2& clip);
     void ortho(float left, float right, float bottom, float top, float clipNear, float clipFar);
 
 //  [[script::bindings::auto]]
@@ -75,9 +75,9 @@ public:
     void perspective(float fov, float aspect, float clipNear, float clipFar);
 
 //  [[script::bindings::auto]]
-    void lookAt(const V3& position, const V3& target, const V3& up);
-//  [[script::bindings::auto]]
     void lookAt(sp<Vec3> position, sp<Vec3> target, sp<Vec3> up);
+//  [[script::bindings::auto]]
+    void lookAt(const V3& position, const V3& target, const V3& up);
 
 //  [[script::bindings::auto]]
     V3 toWorldPosition(float screenX, float screenY, float z) const;

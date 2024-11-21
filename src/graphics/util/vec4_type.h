@@ -17,9 +17,10 @@ namespace ark {
 class ARK_API Vec4Type final : public VecType<V4, Vec4Impl> {
 public:
 //  [[script::bindings::constructor]]
-    static sp<Vec4> create(float x, float y, float z, float w);
-//  [[script::bindings::constructor]]
     static sp<Vec4> create(sp<Numeric> x, sp<Numeric> y, sp<Numeric> z, sp<Numeric> w);
+//  [[script::bindings::constructor]]
+    static sp<Vec4> create(float x, float y, float z, float w);
+
 /**
 //  [[script::bindings::operator(+)]]
     static sp<Vec4> add(sp<Vec4> lvalue, sp<Vec4> rvalue);

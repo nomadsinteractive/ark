@@ -23,6 +23,7 @@
 #include "bullet/base/bt_rigidbody_ref.h"
 #include "bullet/base/collision_shape.h"
 #include "bullet/base/rigidbody_bullet.h"
+#include "graphics/util/vec3_type.h"
 
 namespace ark::plugin::bullet {
 
@@ -30,18 +31,18 @@ namespace {
 
 class DynamicPosition final : public Vec3 {
 public:
-    DynamicPosition(const sp<btMotionState>& motionState, bool isStaticBody)
-        : _motion_state(motionState), _is_static_body(isStaticBody) {
+    DynamicPosition(const sp<btMotionState>& motionState, const V3& origin)
+        : _motion_state(motionState), _origin(origin) {
     }
 
     bool update(uint64_t timestamp) override
     {
-        return !_is_static_body;
+        return true;
     }
 
     V3 val() override
     {
-        return getWorldPosition();
+        return getWorldPosition() - _origin;
     }
 
 private:
@@ -55,7 +56,7 @@ private:
 
 private:
     sp<btMotionState> _motion_state;
-    bool _is_static_body;
+    V3 _origin;
 };
 
 class DynamicRotation final : public Vec4 {
@@ -100,7 +101,7 @@ struct KinematicObject {
         : _position(std::move(position)), _quaternion(std::move(quaternion), constants::QUATERNION_ONE), _rigid_body(std::move(rigidBody)) {
     }
 
-    SafeVar<Vec3> _position;
+    sp<Vec3> _position;
     SafeVar<Vec4> _quaternion;
     sp<BtRigidbodyRef> _rigid_body;
 
@@ -178,12 +179,6 @@ ColliderBullet::ColliderBullet(const V3& gravity, sp<ModelLoader> modelLoader)
 
 sp<Rigidbody> ColliderBullet::createBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<Boolean> discarded)
 {
-    btTransform btTrans;
-    const V3 pos = position->val();
-    const V4 quat = rotation ? rotation->val() : constants::QUATERNION_ONE;
-    btTrans.setIdentity();
-    btTrans.setOrigin(btVector3(pos.x(), pos.y(), pos.z()));
-    btTrans.setRotation(btQuaternion(quat.x(), quat.y(), quat.z(), quat.w()));
     DCHECK(!discarded, "Unimplemented");
 
     sp<CollisionShape> cs = shape->asImplementation<CollisionShape>();
@@ -215,16 +210,26 @@ sp<Rigidbody> ColliderBullet::createBody(Collider::BodyType type, sp<Shape> shap
 
     if(type == BODY_TYPE_SENSOR)
     {
+        sp<Vec3> originPosition = shape->origin() ? Vec3Type::add(position, shape->origin().val()) : position;
         sp<BtRigidbodyRef> rigidbody = makeGhostObject(btDynamicWorld(), cs->btShape().get(), type);
-        _stub->_kinematic_objects.emplace_back(KinematicObject(position, rotation, rigidbody));
+        _stub->_kinematic_objects.emplace_back(KinematicObject(std::move(originPosition), rotation, rigidbody));
         return sp<Rigidbody>::make<RigidbodyBullet>(++ _stub->_body_id_base, type, std::move(shape), *this, std::move(cs), std::move(position), std::move(rotation), std::move(rigidbody));
     }
+
+    btTransform btTrans;
+    const V3 origin = shape->origin().val();
+    const V3 pos = position->val() + origin;
+    const V4 quat = rotation ? rotation->val() : constants::QUATERNION_ONE;
+    btTrans.setIdentity();
+    btTrans.setOrigin(btVector3(pos.x(), pos.y(), pos.z()));
+    btTrans.setRotation(btQuaternion(quat.x(), quat.y(), quat.z(), quat.w()));
 
     const float mass = type == BODY_TYPE_DYNAMIC ? cs->mass() : 0;
     sp<btMotionState> motionState = sp<btDefaultMotionState>::make(btTrans);
     sp<BtRigidbodyRef> rigidBody = makeRigidBody(btDynamicWorld(), cs->btShape().get(), motionState.get(), type, mass);
-    sp<Vec3> btPosition = sp<Vec3>::make<DynamicPosition>(motionState, type == BODY_TYPE_STATIC);
-    return sp<Rigidbody>::make<RigidbodyBullet>(++ _stub->_body_id_base, type, std::move(shape), *this, std::move(cs), std::move(btPosition), sp<Vec4>::make<DynamicRotation>(std::move(motionState)), std::move(rigidBody));
+    sp<Vec3> btPosition = type == BODY_TYPE_STATIC ? sp<Vec3>::make<Vec3::Const>(pos - origin) : sp<Vec3>::make<DynamicPosition>(motionState, origin);
+    sp<Vec4> btRotation = type == BODY_TYPE_STATIC ? sp<Vec4>::make<Vec4::Const>(quat) : sp<Vec4>::make<DynamicRotation>(std::move(motionState));
+    return sp<Rigidbody>::make<RigidbodyBullet>(++ _stub->_body_id_base, type, std::move(shape), *this, std::move(cs), std::move(btPosition), std::move(btRotation), std::move(rigidBody));
 }
 
 sp<Shape> ColliderBullet::createShape(const NamedHash& type, sp<Vec3> size, sp<Vec3> origin)
@@ -303,9 +308,9 @@ void ColliderBullet::myInternalPreTickCallback(btDynamicsWorld* dynamicsWorld, b
     const uint64_t tick = Ark::instance().applicationContext()->renderController()->tick();
     for(const KinematicObject& i : self->_stub->_kinematic_objects)
     {
-        i._position.update(tick);
+        i._position->update(tick);
         i._quaternion.update(tick);
-        V3 pos = i._position.val();
+        V3 pos = i._position->val();
         const V4 quaternion = i._quaternion.val();
         btTransform transform;
         transform.setRotation(btQuaternion(quaternion.x(), quaternion.y(), quaternion.z(), quaternion.w()));

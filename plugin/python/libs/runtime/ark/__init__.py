@@ -2549,7 +2549,7 @@ class Collider:
     def create_body(self, type_: int | Integer, shape: Optional[Shape], position, rotate=None, disposed: Optional[Boolean] = None) -> Rigidbody:
         pass
 
-    def create_shape(self, shape_id: TYPE_NAMED_HASH_ID, size: Optional[TYPE_VEC3] = None) -> Shape:
+    def create_shape(self, shape_id: TYPE_NAMED_HASH_ID, size: Optional[TYPE_VEC3] = None, origin: Optional[TYPE_VEC3] = None) -> Shape:
         pass
 
     def ray_cast(self, ray_from, ray_to, collision_filter: Optional[CollisionFilter] = None) -> List[RayCastManifold]:

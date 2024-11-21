@@ -85,7 +85,7 @@ private:
         }
 
         template<typename T> sp<T> unpack() const {
-            return shared_ptr ? *reinterpret_cast<const sp<T>*>(shared_ptr) : nullptr;
+            return shared_ptr ? *static_cast<const sp<T>*>(shared_ptr) : nullptr;
         }
 
         const void* shared_ptr;

@@ -8,7 +8,7 @@ from os import path
 from typing import Optional
 
 from gen_core import get_param_and_paths, import_acg, INDENT, GenArgumentMeta, GenArgument, create_overloaded_method_type, get_params
-from gen_method import GenMethod, GenGetPropMethod, GenSetPropMethod, GenMappingMethod, gen_operator_defs, gen_as_mapping_defs, GenOperatorMethod, \
+from gen_method import GenMethod, GenGetPropMethod, GenSetPropMethod, GenMappingMethod, gen_as_number_operator_defs, gen_as_mapping_defs, GenOperatorMethod, \
     GenSequenceMethod, gen_as_sequence_defs
 
 LOADER_TEMPLATE = '''template<typename T> static Box PyArk${classname}_${methodname}Function(PyArkType::Instance& inst, const String& id, const Scope& args) {
@@ -255,11 +255,16 @@ def gen_class_body_source(genclass, includes, lines, buildables):
         as_mapping_defs = gen_as_mapping_defs(genclass)
         gen_constructor_definition_source(genclass.py_class_name, 'as_mapping', as_mapping_defs, lines, tp_method_lines)
 
-        operator_defs = gen_operator_defs(genclass)
+        operator_defs = gen_as_number_operator_defs(genclass)
         gen_constructor_definition_source(genclass.py_class_name, 'as_number', operator_defs, lines, tp_method_lines)
 
         rich_compare_defs = genclass.gen_rich_compare_defs()
         gen_constructor_definition_source(genclass.py_class_name, 'richcompare', rich_compare_defs, lines, tp_method_lines, 'richcmpfunc')
+
+        tp_call_operator_methods = [i for i in genclass.operator_methods() if i.operator == 'call']
+        if tp_call_operator_methods:
+            tp_call_operator_defs = ['/* tp_call */']
+            gen_constructor_definition_source(genclass.py_class_name, 'call', tp_call_operator_defs, lines, tp_method_lines, 'ternaryfunc')
 
         property_defs = genclass.gen_property_defs()
         if property_defs:
@@ -267,7 +272,7 @@ def gen_class_body_source(genclass, includes, lines, buildables):
             methoddeclare = ',\n    '.join(propertydeclare % tuple(i) for i in property_defs)
             lines.append('\nstatic PyGetSetDef %s_getseters[] = {\n    %s,\n    {%s}\n};'
                          % (genclass.py_class_name, methoddeclare, ', '.join(['nullptr'] * 5)))
-            tp_method_lines.append('pyTypeObject->tp_getset = %s_getseters;' % genclass.py_class_name)
+            tp_method_lines.append(f'pyTypeObject->tp_getset = {genclass.py_class_name}_getseters;')
 
         for i in genclass.loader_methods():
             lines.append(acg.format(LOADER_TEMPLATE, classname=genclass.classname, methodname=i.name))

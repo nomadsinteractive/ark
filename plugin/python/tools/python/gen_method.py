@@ -584,8 +584,9 @@ def gen_template_defs(py_class_name: str, methods, code_templates: list[str], op
     return code_lines
 
 
-def gen_operator_defs(genclass):
-    return gen_template_defs(genclass.py_class_name, genclass.operator_methods(), TP_AS_NUMBER_TEMPLATE, TP_AS_NUMBER_TEMPLATE_OPERATOR)
+def gen_as_number_operator_defs(genclass):
+    as_number_operator_methods = [i for i in genclass.operator_methods() if i.operator in TP_AS_NUMBER_TEMPLATE_OPERATOR]
+    return gen_template_defs(genclass.py_class_name, as_number_operator_methods, TP_AS_NUMBER_TEMPLATE, TP_AS_NUMBER_TEMPLATE_OPERATOR)
 
 
 def gen_as_mapping_defs(genclass):
