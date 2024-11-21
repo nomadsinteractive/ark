@@ -1011,6 +1011,9 @@ class NamedHash:
     def reverse(hash: int) -> str:
         pass
 
+    def __index__(self) -> int:
+        pass
+
 
 class Expendable(Boolean):
     def __init__(self, disposed=False):
@@ -1105,6 +1108,12 @@ class Vec2(_Var):
         pass
 
     def __iter__(self):
+        pass
+
+    def __len__(self):
+        return 2
+
+    def __getitem__(self, i):
         pass
 
     def __str__(self):

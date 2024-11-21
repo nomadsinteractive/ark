@@ -106,7 +106,7 @@ private:
     };
 
     template<typename T> static void _shared_ptr_destructor(const void* inst) {
-        delete reinterpret_cast<const SharedPtr<T>*>(inst);
+        delete static_cast<const SharedPtr<T>*>(inst);
     }
 
     template<typename T> void _type_check() const {
