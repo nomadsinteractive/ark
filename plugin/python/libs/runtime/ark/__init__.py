@@ -104,7 +104,7 @@ class Readable:
 
 class Runnable:
 
-    def run(self):
+    def __call__(self):
         pass
 
 

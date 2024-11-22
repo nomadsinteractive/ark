@@ -261,11 +261,6 @@ def gen_class_body_source(genclass, includes, lines, buildables):
         rich_compare_defs = genclass.gen_rich_compare_defs()
         gen_constructor_definition_source(genclass.py_class_name, 'richcompare', rich_compare_defs, lines, tp_method_lines, 'richcmpfunc')
 
-        tp_call_operator_methods = [i for i in genclass.operator_methods() if i.operator == 'call']
-        if tp_call_operator_methods:
-            tp_call_operator_defs = ['/* tp_call */']
-            gen_constructor_definition_source(genclass.py_class_name, 'call', tp_call_operator_defs, lines, tp_method_lines, 'ternaryfunc')
-
         property_defs = genclass.gen_property_defs()
         if property_defs:
             propertydeclare = '{"%s", %s, %s, "%s", nullptr}'
@@ -283,6 +278,7 @@ def gen_class_body_source(genclass, includes, lines, buildables):
                     tp_method_lines.append(INDENT + i.gen_loader_statement(genclass.classname, j, i.name))
             tp_method_lines.append('}')
 
+    genclass.gen_tp_call_code(tp_method_lines)
     genclass.gen_py_type_constructor_codes(tp_method_lines)
 
     tp_method_lines.extend(f'_enum_constants["{k}"] = Box({v});' for k, v in genclass.enum_constants.items())
@@ -607,6 +603,13 @@ class GenClass(object):
 
     def find_methods_by_type(self, method_type):
         return [i for i in self._methods if isinstance(i, method_type)]
+
+    def gen_tp_call_code(self, lines):
+        tp_call_operator_methods = [i for i in self.operator_methods() if i.operator == 'call']
+        if tp_call_operator_methods:
+            assert len(tp_call_operator_methods) == 1, "Only one tp_call method allowed"
+            tp_call_method = tp_call_operator_methods[0]
+            lines.append(f'pyTypeObject->tp_call = reinterpret_cast<ternaryfunc>({self.py_class_name}::{tp_call_method.name}_r);')
 
     def gen_py_type_constructor_codes(self, lines):
         if any(i.is_constructor() for i in self.methods):

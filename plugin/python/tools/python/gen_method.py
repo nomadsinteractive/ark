@@ -398,6 +398,9 @@ class GenOperatorMethod(GenMethod):
         return self._operator not in ('&&', '||')
 
     def gen_py_arguments(self):
+        if self._operator == 'call':
+            assert not self._is_static
+            return 'Instance* self, PyObject*, PyObject*'
         arglen = len(self._arguments)
         args = ['PyObject* arg%d' % i for i in range(arglen)]
         if self._is_static:
