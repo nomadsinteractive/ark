@@ -7,8 +7,8 @@
 
 namespace ark {
 
-State::State(sp<Runnable> onActive, sp<Runnable> onDeactivate)
-    : _on_active(std::move(onActive)), _on_deactive(std::move(onDeactivate)), _active(false)
+State::State(sp<Runnable> onActivate, sp<Runnable> onDeactivate)
+    : _on_activate(std::move(onActivate)), _on_deactivate(std::move(onDeactivate)), _active(false)
 {
 }
 
@@ -19,16 +19,16 @@ bool State::active() const
 
 void State::doActivate()
 {
-    if(_on_active)
-        _on_active->run();
+    if(_on_activate)
+        _on_activate->run();
     _active = true;
 }
 
 void State::doDeactivate()
 {
     CHECK_WARN(_active, "State is not active");
-    if(_on_deactive && _active)
-        _on_deactive->run();
+    if(_on_deactivate && _active)
+        _on_deactivate->run();
     _active = false;
 }
 

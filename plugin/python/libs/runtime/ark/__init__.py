@@ -2617,7 +2617,7 @@ class StateAction:
 
 class State:
 
-    def __init__(self, on_active: Optional[Runnable] = None, on_deactive: Optional[Runnable] = None):
+    def __init__(self, on_activate: Optional[Runnable] = None, on_deactivate: Optional[Runnable] = None):
         pass
 
     @property
