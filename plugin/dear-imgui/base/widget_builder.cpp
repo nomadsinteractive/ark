@@ -158,11 +158,11 @@ public:
             _renderer_context->relTextureRefCount(_texture.get());
     }
 
-    virtual void render() override {
+    void render() override {
         const V2 size = _size->val();
         const V4 color = _color->val();
         const V4 borderColor = _border_color->val();
-        ImGui::Image(_texture ? _texture.get() : nullptr, *reinterpret_cast<const ImVec2*>(&size), _uv0, _uv1, *reinterpret_cast<const ImVec4*>(&color), *reinterpret_cast<const ImVec4*>(&borderColor));
+        ImGui::Image(reinterpret_cast<ImTextureID>(_texture ? _texture.get() : nullptr), *reinterpret_cast<const ImVec2*>(&size), _uv0, _uv1, *reinterpret_cast<const ImVec4*>(&color), *reinterpret_cast<const ImVec4*>(&borderColor));
     }
 
 private:

@@ -4,13 +4,9 @@
 
 namespace ark {
 
-StringBuffer::StringBuffer()
-{
-}
-
 String StringBuffer::str() const
 {
-    return _ss.str();
+    return {_ss.str()};
 }
 
 void StringBuffer::clear()

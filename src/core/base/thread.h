@@ -23,7 +23,7 @@ public:
         THREAD_STATE_TERMINATED
     };
 
-    typedef std::thread::id Id;
+    typedef std::size_t Id;
 
     Thread(const sp<Runnable>& entry = nullptr);
     Thread(const sp<Stub>& stub);

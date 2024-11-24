@@ -1278,7 +1278,7 @@ class AnimationInput(Uploader):
 
 class Animation:
     @property
-    def ticks(self) -> float:
+    def ticks(self) -> int:
         return 0
 
     @property
@@ -1288,13 +1288,6 @@ class Animation:
     @property
     def duration(self) -> float:
         return 0
-
-    @property
-    def node_names(self) -> List[str]:
-        return []
-
-    def make_input(self, t: Numeric, on_complete: Optional[Callable] = None) -> AnimationInput:
-        pass
 
     def get_node_transforms(self, t: TYPE_NUMERIC) -> list[tuple[str, Mat4]]:
         pass
@@ -2760,11 +2753,6 @@ class Entity:
         return 0
 
     def discard(self):
-        pass
-
-
-class WithRenderable:
-    def __init__(self, renderable: 'Renderable', layer: RenderLayer | Layer):
         pass
 
 

@@ -8,7 +8,7 @@ namespace ark {
 
 class ARK_API StringBuffer {
 public:
-    StringBuffer();
+    StringBuffer() = default;
 
     String str() const;
     void clear();

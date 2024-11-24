@@ -273,13 +273,14 @@ void String::search(const std::regex& pattern, const std::function<bool(const st
     std::smatch match;
     while(std::regex_search(str, match, pattern))
     {
-        if(!traveller2(match.prefix().str()))
+        if(match.prefix().length() > 0 && !traveller2(match.prefix().str()))
             break;
         if(!traveller1(match))
             break;
         str = match.suffix().str();
     }
-    traveller2(str);
+    if(!str.empty())
+        traveller2(str);
 }
 
 bool String::startsWith(const String& other) const

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <assimp/Importer.hpp>
-
 #include <assimp/anim.h>
 #include <assimp/scene.h>
 
@@ -11,7 +9,6 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
-#include "graphics/base/mat.h"
 
 #include "renderer/base/animation_uploader.h"
 #include "renderer/inf/animation.h"
@@ -26,8 +23,6 @@ public:
 
     AnimationAssimpNodes(float tps, const aiAnimation* animation, const aiNode* rootNode, const aiMatrix4x4& globalTransform, Table<String, AnimationNode>& nodes, const NodeLoaderCallback& callback);
 
-    sp<AnimationUploader> makeInput(sp<Numeric> tick) override;
-    const std::vector<String>& nodeNames() override;
     std::vector<std::pair<String, sp<Mat4>>> getNodeTranforms(sp<Numeric> duration) override;
 
 private:

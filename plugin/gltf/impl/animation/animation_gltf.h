@@ -9,9 +9,6 @@ class AnimationGltf final : public Animation {
 public:
     AnimationGltf(uint32_t durationInTicks, Table<String, uint32_t> node, std::vector<AnimationFrame> animationFrames);
 
-    sp<AnimationUploader> makeInput(sp<Numeric> duration) override;
-    const std::vector<String>& nodeNames() override;
-
     std::vector<std::pair<String, sp<Mat4>>> getNodeTranforms(sp<Numeric> tick) override;
 
 private:

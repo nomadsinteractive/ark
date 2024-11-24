@@ -6,7 +6,7 @@
 
 #include "core/base/string_buffer.h"
 #include "core/base/string_table.h"
-#include "core/types/global.h"
+#include "core/base/thread.h"
 #include "core/util/strings.h"
 
 #include "renderer/base/pipeline_building_context.h"
@@ -108,9 +108,9 @@ void ShaderPreprocessor::parseMainBlock(const String& source, PipelineBuildingCo
         String body;
         const size_t prefixStart = parseFunctionBody(remaining, body);
         sp<String> fragment = sp<String>::make();
-        _main.push_back(sp<String>::make(prefix));
+        _main.push_back(sp<String>::make(prefix + "\n"));
         _main.push_back(fragment);
-        _main.push_back(sp<String>::make(remaining.substr(prefixStart)));
+        _main.push_back(sp<String>::make("\n" + remaining.substr(prefixStart)));
         _main_block = sp<Function>::make("main", m[2].str(), m[1].str(), body.strip(), std::move(fragment));
         return false;
     });
@@ -372,7 +372,7 @@ String ShaderPreprocessor::genDeclarations(const String& mainFunc) const
         sb << "#version " << _version << '\n';
 
     sb << '\n';
-    if(_predefined_macros.size())
+    if(!_predefined_macros.empty())
     {
         for(const String& i : _predefined_macros)
             sb << i << '\n';
@@ -573,14 +573,14 @@ Table<String, ShaderPreprocessor::Declaration>& ShaderPreprocessor::DeclarationL
 }
 
 ShaderPreprocessor::Source::Source(String code)
-    : _fragments{sp<String>::make(std::move(code))}
+    : _lines{sp<String>::make(std::move(code))}
 {
 }
 
 String ShaderPreprocessor::Source::str(char endl) const
 {
     StringBuffer sb;
-    for(const auto& i : _fragments)
+    for(const auto& i : _lines)
         if(i && !i->empty())
         {
             sb << *i;
@@ -590,19 +590,19 @@ String ShaderPreprocessor::Source::str(char endl) const
     return sb.str();
 }
 
-void ShaderPreprocessor::Source::push_front(const sp<String>& fragment)
+void ShaderPreprocessor::Source::push_front(sp<String> fragment)
 {
-    _fragments.push_front(fragment);
+    _lines.push_front(std::move(fragment));
 }
 
-void ShaderPreprocessor::Source::push_back(const sp<String>& fragment)
+void ShaderPreprocessor::Source::push_back(sp<String> fragment)
 {
-    _fragments.push_back(fragment);
+    _lines.push_back(std::move(fragment));
 }
 
 bool ShaderPreprocessor::Source::search(const std::regex& pattern, const std::function<bool (const std::smatch&)>& traveller) const
 {
-    for(const sp<String>& i : _fragments)
+    for(const sp<String>& i : _lines)
         if(!i->search(pattern, traveller))
             return false;
     return true;
@@ -610,7 +610,7 @@ bool ShaderPreprocessor::Source::search(const std::regex& pattern, const std::fu
 
 bool ShaderPreprocessor::Source::contains(const String& str) const
 {
-    for(const sp<String>& i : _fragments)
+    for(const sp<String>& i : _lines)
         if(i->find(str) != String::npos)
             return true;
     return false;
@@ -618,34 +618,36 @@ bool ShaderPreprocessor::Source::contains(const String& str) const
 
 void ShaderPreprocessor::Source::replace(const String& str, const String& replacment)
 {
-    for(const sp<String>& i : _fragments)
+    for(const sp<String>& i : _lines)
         *i = i->replace(str, replacment);
 }
 
 void ShaderPreprocessor::Source::replace(const std::regex& regexp, const std::function<sp<String>(const std::smatch&)>& replacer)
 {
-    for(auto iter = _fragments.begin(); iter != _fragments.end(); ++iter)
+    for(auto iter = _lines.begin(); iter != _lines.end(); ++iter)
     {
+        bool matched = false;
         const sp<String>& fragment = *iter;
         std::vector<sp<String>> inserting;
-        fragment->search(regexp, [&inserting, replacer](const std::smatch& match) {
+        fragment->search(regexp, [&matched, &inserting, replacer](const std::smatch& match) {
             if(sp<String> replacement = replacer(match))
                 inserting.push_back(std::move(replacement));
+            matched = true;
             return true;
         }, [&inserting](const String& unmatch) {
             inserting.push_back(sp<String>::make(unmatch));
             return true;
         });
 
-        if(inserting.size() > 1)
+        if(matched || inserting.size() > 1)
         {
             for(const auto& i : inserting)
             {
-                iter = _fragments.insert(iter, i);
+                iter = _lines.insert(iter, i);
                 ++iter;
             }
-            iter = _fragments.erase(iter);
-            if(iter == _fragments.end())
+            iter = _lines.erase(iter);
+            if(iter == _lines.end())
                 break;
         }
     }
@@ -653,7 +655,7 @@ void ShaderPreprocessor::Source::replace(const std::regex& regexp, const std::fu
 
 void ShaderPreprocessor::Source::insertBefore(const String& statement, const String& str)
 {
-    for(const sp<String>& i : _fragments)
+    for(const sp<String>& i : _lines)
     {
         String& code = *i;
         String::size_type pos = code.find(statement);

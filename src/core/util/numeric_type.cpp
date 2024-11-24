@@ -116,11 +116,6 @@ sp<Numeric> NumericType::mod(const sp<Numeric>& lvalue, const sp<Numeric>& rvalu
     return sp<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::Mod<float>>>::make(lvalue, rvalue);
 }
 
-sp<Numeric> NumericType::mod(const sp<Numeric>& lvalue, float rvalue)
-{
-    return sp<VariableOP2<sp<Numeric>, float, Operators::Mod<float>>>::make(lvalue, rvalue);
-}
-
 sp<Numeric> NumericType::mod(float lvalue, const sp<Numeric>& rvalue)
 {
     return sp<VariableOP2<float, sp<Numeric>, Operators::Mod<float>>>::make(lvalue, rvalue);

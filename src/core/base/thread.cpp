@@ -95,7 +95,7 @@ bool Thread::isTerminated() const
 
 Thread::Id Thread::currentThreadId()
 {
-    return std::this_thread::get_id();
+    return std::hash<std::thread::id>{}(std::this_thread::get_id());
 }
 
 Thread::Stub::Stub(const sp<Runnable>& entry)

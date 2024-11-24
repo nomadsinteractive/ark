@@ -32,16 +32,6 @@ AnimationAssimpNodes::AnimationAssimpNodes(float tps, const aiAnimation* animati
          _nodes->push_back(iter.first, index++);
 }
 
-sp<AnimationUploader> AnimationAssimpNodes::makeInput(sp<Numeric> tick)
-{
-    return sp<AnimationUploader>::make(std::move(tick), _duration_in_ticks, _nodes, _animation_frames);
-}
-
-const std::vector<String>& AnimationAssimpNodes::nodeNames()
-{
-    return _nodes->keys();
-}
-
 std::vector<std::pair<String, sp<Mat4>>> AnimationAssimpNodes::getNodeTranforms(sp<Numeric> duration)
 {
     return {};

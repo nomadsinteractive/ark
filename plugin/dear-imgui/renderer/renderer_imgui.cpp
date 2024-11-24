@@ -244,7 +244,7 @@ void RendererImgui::MyImGuiRenderFunction(const RenderRequest& renderRequest, Im
                 // By default the indices ImDrawIdx are 16-bits, you can change them to 32-bits in imconfig.h if your engine doesn't support 16-bits indices.
                 const ImVec2& pos = draw_data->DisplayPos;
 
-                const sp<DrawCommandPool>& drawCommandPool = _renderer_context->obtainDrawCommandPool(pcmd->TextureId);
+                const sp<DrawCommandPool>& drawCommandPool = _renderer_context->obtainDrawCommandPool(reinterpret_cast<void*>(pcmd->TextureId));
                 sp<DrawCommandRecycler> recycler = drawCommandPool->obtainDrawCommandRecycler();
                 const sp<DrawCommand>& drawCommand = recycler->drawCommand();
                 Buffer::Snapshot vertexBuffer = drawCommand->_vertex_buffer.snapshot(vb);

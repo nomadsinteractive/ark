@@ -15,17 +15,12 @@ namespace ark {
 //[[script::bindings::class("Animation")]]
 class ARK_API AnimationType {
 public:
-//  [[script::bindings::classmethod]]
-    static sp<AnimationUploader> makeInput(const sp<Animation>& self, const sp<Numeric>& tick, const sp<Runnable>& onComplete = nullptr);
-
 //  [[script::bindings::property]]
-    static float ticks(const sp<Animation>& self);
+    static uint32_t ticks(const sp<Animation>& self);
 //  [[script::bindings::property]]
     static float tps(const sp<Animation>& self);
 //  [[script::bindings::property]]
     static float duration(const sp<Animation>& self);
-//  [[script::bindings::property]]
-    static const std::vector<String>& nodeNames(const sp<Animation>& self);
 
 //  [[script::bindings::classmethod]]
     static std::vector<std::pair<String, sp<Mat4>>> getNodeTransforms(const sp<Animation>& self, sp<Numeric> time);

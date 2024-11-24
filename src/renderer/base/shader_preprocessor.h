@@ -71,8 +71,8 @@ private:
 
         String str(char endl = 0) const;
 
-        void push_front(const sp<String>& fragment);
-        void push_back(const sp<String>& fragment);
+        void push_front(sp<String> fragment);
+        void push_back(sp<String> fragment);
 
         bool search(const std::regex& pattern, const std::function<bool(const std::smatch& match)>& traveller) const;
         bool contains(const String& str) const;
@@ -83,7 +83,7 @@ private:
         void insertBefore(const String& statement, const String& str);
 
     private:
-        std::list<sp<String>> _fragments;
+        std::list<sp<String>> _lines;
     };
 
     struct Parameter {
