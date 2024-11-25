@@ -92,13 +92,13 @@ BroadPhrase::Result ColliderImpl::Stub::broadPhraseRayCast(const V3& from, const
     return result;
 }
 
-void ColliderImpl::Stub::updateBroadPhraseCandidate(BroadPhrase::IdType id, const V3& position, const V3& aabb) const
+void ColliderImpl::Stub::updateBroadPhraseCandidate(BroadPhrase::CandidateIdType id, const V3& position, const V3& aabb) const
 {
     for(const auto& [i, j] : _broad_phrases)
         i->update(id, position, aabb);
 }
 
-void ColliderImpl::Stub::removeBroadPhraseCandidate(BroadPhrase::IdType id)
+void ColliderImpl::Stub::removeBroadPhraseCandidate(BroadPhrase::CandidateIdType id)
 {
     for(const auto& [i, j] : _broad_phrases)
         i->remove(id);
@@ -160,21 +160,21 @@ sp<ColliderImpl::RigidBodyImpl> ColliderImpl::Stub::createRigidBody(Collider::Bo
     return rigidBody;
 }
 
-std::vector<sp<Ref>> ColliderImpl::Stub::toRigidBodyRefs(const std::unordered_set<BroadPhrase::IdType>& candidateSet, uint32_t filter) const
+std::vector<sp<Ref>> ColliderImpl::Stub::toRigidBodyRefs(const std::unordered_set<BroadPhrase::CandidateIdType>& candidateSet, uint32_t filter) const
 {
     std::vector<sp<Ref>> rigidBodies;
-    for(BroadPhrase::IdType i : candidateSet)
+    for(BroadPhrase::CandidateIdType i : candidateSet)
         if(const auto iter = _rigid_bodies.find(i); iter != _rigid_bodies.end())
             if(const sp<Ref>& ref = iter->second; !ref->isDiscarded() && ref->instance<Rigidbody>().type() & filter)
                 rigidBodies.push_back(ref);
     return rigidBodies;
 }
 
-std::vector<BroadPhrase::Candidate> ColliderImpl::Stub::toBroadPhraseCandidates(const std::unordered_set<BroadPhrase::IdType>& candidateSet) const
+std::vector<BroadPhrase::Candidate> ColliderImpl::Stub::toBroadPhraseCandidates(const std::unordered_set<BroadPhrase::CandidateIdType>& candidateSet) const
 {
     std::vector<BroadPhrase::Candidate> candidates;
     RefManager& refManager = Global<RefManager>();
-    for(BroadPhrase::IdType i : candidateSet)
+    for(BroadPhrase::CandidateIdType i : candidateSet)
     {
         const RigidBodyImpl& rigidBody = refManager.toRef(i).instance<RigidBodyImpl>();
         candidates.emplace_back(rigidBody.toBroadPhraseCandidate());
@@ -204,10 +204,10 @@ std::vector<RayCastManifold> ColliderImpl::Stub::rayCast(const V2& from, const V
     return manifolds;
 }
 
-void ColliderImpl::Stub::resolveCandidates(const Rigidbody& self, const BroadPhrase::Candidate& candidateSelf, const std::vector<BroadPhrase::Candidate>& candidates, const Rigidbody& callback, std::set<BroadPhrase::IdType>& c)
+void ColliderImpl::Stub::resolveCandidates(const Rigidbody& self, const BroadPhrase::Candidate& candidateSelf, const std::vector<BroadPhrase::Candidate>& candidates, const Rigidbody& callback, std::set<BroadPhrase::CandidateIdType>& c)
 {
-    std::set<BroadPhrase::IdType> contacts = std::move(c);
-    std::set<BroadPhrase::IdType> contactsOut;
+    std::set<BroadPhrase::CandidateIdType> contacts = std::move(c);
+    std::set<BroadPhrase::CandidateIdType> contactsOut;
     RefManager& refManager = Global<RefManager>();
     for(const BroadPhrase::Candidate& i : candidates)
     {
@@ -224,7 +224,7 @@ void ColliderImpl::Stub::resolveCandidates(const Rigidbody& self, const BroadPhr
             contactsOut.insert(i._id);
         }
     }
-    for(const BroadPhrase::IdType i : contacts)
+    for(const BroadPhrase::CandidateIdType i : contacts)
     {
         if(contactsOut.find(i) == contactsOut.end())
             if(const Ref& ref = refManager.toRef(i))
@@ -262,20 +262,20 @@ bool ColliderImpl::RigidBodyImpl::update(uint64_t timestamp)
     return true;
 }
 
-void ColliderImpl::RigidBodyImpl::collisionTest(ColliderImpl::Stub& collider, const V3& position, const V3& size, const std::set<BroadPhrase::IdType>& removingIds)
+void ColliderImpl::RigidBodyImpl::collisionTest(ColliderImpl::Stub& collider, const V3& position, const V3& size, const std::set<BroadPhrase::CandidateIdType>& removingIds)
 {
     if(_ref->isDiscarded())
         return doDispose(collider);
 
     BroadPhrase::Result result;
-    std::unordered_set<BroadPhrase::IdType> dynamicCandidates;
+    std::unordered_set<BroadPhrase::CandidateIdType> dynamicCandidates;
 
     {
         DPROFILER_TRACE("BroadPhrase");
         result = collider.broadPhraseSearch(position, size, collisionFilter());
         dynamicCandidates = std::move(result._dynamic_candidates);
         dynamicCandidates.erase(ref()->id());
-        for(const BroadPhrase::IdType i : removingIds)
+        for(const BroadPhrase::CandidateIdType i : removingIds)
             dynamicCandidates.erase(i);
     }
 
@@ -305,7 +305,7 @@ const RigidbodyDef& ColliderImpl::RigidBodyImpl::updateBodyDef(NarrowPhrase& nar
 
 BroadPhrase::Candidate ColliderImpl::RigidBodyImpl::toBroadPhraseCandidate() const
 {
-    return {ref()->id(), position().val(), quaternion().val(), metaId(), _shape->type().hash(), collisionFilter(), bodyDef().impl()};
+    return {ref()->id(), position().val(), quaternion().val(), _shape->type().hash(), collisionFilter(), bodyDef().impl()};
 }
 
 ColliderImpl::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

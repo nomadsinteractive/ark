@@ -15,9 +15,9 @@ class BroadPhraseTilemap : public BroadPhrase {
 public:
     BroadPhraseTilemap(sp<Tilemap> tilemap, NarrowPhrase& narrowPhrase);
 
-    void create(IdType id, const V3& position, const V3& aabb) override;
-    void update(IdType id, const V3& position, const V3& aabb) override;
-    void remove(IdType id) override;
+    void create(CandidateIdType id, const V3& position, const V3& aabb) override;
+    void update(CandidateIdType id, const V3& position, const V3& aabb) override;
+    void remove(CandidateIdType id) override;
 
     Result search(const V3& position, const V3& size) override;
     Result rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter) override;
@@ -35,10 +35,10 @@ public:
     };
 
 private:
-    IdType toCandidateId(int32_t layerId, int32_t row, int32_t col) const;
+    CandidateIdType toCandidateId(int32_t layerId, int32_t row, int32_t col) const;
 
     void addCandidate(const TilemapLayer& tilemapLayer, std::set<int32_t>& candidateIdSet, std::vector<BroadPhrase::Candidate>& candidates, int32_t row, int32_t col, int32_t layerId, const V2& tl, const V2& tileSize);
-    Candidate makeCandidate(int32_t candidateId, uint32_t metaId, int32_t shapeId, const V2& position, sp<CollisionFilter> collisionFilter) const;
+    Candidate makeCandidate(CandidateIdType candidateId, TypeId shapeId, const V2& position, sp<CollisionFilter> collisionFilter) const;
 
 private:
     sp<Tilemap> _tilemap;

@@ -16,7 +16,7 @@
 namespace ark {
 
 Rigidbody::Rigidbody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> quaternion, Box impl, sp<Ref> ref)
-    : _ref(ref ? std::move(ref) : Global<RefManager>()->makeRef(this)), _type(type), _meta_id(0), _shape(std::move(shape)), _position(std::move(position)), _quaternion(std::move(quaternion)), _impl(std::move(impl))
+    : _ref(ref ? std::move(ref) : Global<RefManager>()->makeRef(this)), _type(type), _shape(std::move(shape)), _position(std::move(position)), _quaternion(std::move(quaternion)), _impl(std::move(impl))
 {
 }
 
@@ -69,11 +69,6 @@ Collider::BodyType Rigidbody::type() const
 const sp<Shape>& Rigidbody::shape() const
 {
     return _shape;
-}
-
-uint32_t Rigidbody::metaId() const
-{
-    return _meta_id;
 }
 
 const SafeVar<Vec3>& Rigidbody::position() const

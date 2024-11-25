@@ -11,9 +11,9 @@ namespace ark {
 class BroadPhraseAll : public BroadPhrase {
 public:
 
-    void create(IdType id, const V3& position, const V3& aabb) override;
-    void update(IdType id, const V3& position, const V3& aabb) override;
-    void remove(IdType id) override;
+    void create(CandidateIdType id, const V3& position, const V3& aabb) override;
+    void update(CandidateIdType id, const V3& position, const V3& aabb) override;
+    void remove(CandidateIdType id) override;
 
     Result search(const V3& position, const V3& size) override;
     Result rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter) override;
@@ -28,7 +28,7 @@ public:
     };
 
 private:
-    std::unordered_set<IdType> _candidates;
+    std::unordered_set<CandidateIdType> _candidates;
 };
 
 }

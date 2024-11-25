@@ -492,29 +492,24 @@ Model GltfImporter::loadModel()
 	Table<String, sp<ark::Animation>> animations;
 	if(!_model->animations.empty())
 	{
-		const float tps = 24.0f;
 		std::vector<Animation> loadingAnimations;
-		float animationDuration = std::numeric_limits<float>::min();
 		std::map<uint32_t, uint32_t> channelNodeIds;
 
 		for(const tinygltf::Animation& i : _model->animations)
 		{
 			Animation animation = loadAnimation(_model, i, loadingAnimations.size());
-			if(animationDuration < animation.end)
-				animationDuration = animation.end;
-
 			for(const AnimationChannel& channel : animation.channels)
 				channelNodeIds.emplace(channel.node_id, channelNodeIds.size());
-
 			loadingAnimations.push_back(std::move(animation));
 		}
 
-		const uint32_t tickCount = static_cast<uint32_t>(animationDuration * tps);
+		const float tps = 24.0f;
 		const float tickInterval = 1.0f / tps;
 
 		std::vector<NodeTransform> nodeTransforms(channelNodeIds.size());
 		for(Animation& animation : loadingAnimations)
 		{
+			const uint32_t tickCount = static_cast<uint32_t>(animation.end * tps);
 			std::vector<AnimationFrame> frames(tickCount);
 			initNodeTransforms(_nodes, nodeTransforms, channelNodeIds);
 

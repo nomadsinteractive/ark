@@ -30,15 +30,15 @@ BroadPhraseTilemap::BroadPhraseTilemap(sp<Tilemap> tilemap, NarrowPhrase& narrow
     _body_def_tile = narrowPhrase.makeBodyDef(Shape::TYPE_AABB,  sp<Vec3>::make<Vec3::Const>(tileset.tileSize()->val())).impl();
 }
 
-void BroadPhraseTilemap::create(IdType /*id*/, const V3& /*position*/, const V3& /*aabb*/)
+void BroadPhraseTilemap::create(CandidateIdType /*id*/, const V3& /*position*/, const V3& /*aabb*/)
 {
 }
 
-void BroadPhraseTilemap::update(IdType /*id*/, const V3& /*position*/, const V3& /*aabb*/)
+void BroadPhraseTilemap::update(CandidateIdType /*id*/, const V3& /*position*/, const V3& /*aabb*/)
 {
 }
 
-void BroadPhraseTilemap::remove(IdType /*id*/)
+void BroadPhraseTilemap::remove(CandidateIdType /*id*/)
 {
 }
 
@@ -74,7 +74,7 @@ BroadPhrase::Result BroadPhraseTilemap::search(const V3& position, const V3& siz
                                     continue;
                                 }
                                 candidateIdSet.insert(candidateId);
-                                candidates.push_back(makeCandidate(candidateId, tile->id(), shapeId, V2(px, selectionPoint.y() + (k - selectionRange.top()) * tileSize.y() + tileSize.y() / 2), i.collisionFilter()));
+                                candidates.push_back(makeCandidate(candidateId, tile->id(), V2(px, selectionPoint.y() + (k - selectionRange.top()) * tileSize.y() + tileSize.y() / 2), i.collisionFilter()));
                             }
                         }
                     }
@@ -134,7 +134,7 @@ BroadPhrase::Result BroadPhraseTilemap::rayCast(const V3& from, const V3& to, co
     return BroadPhrase::Result({}, std::move(candidates));
 }
 
-BroadPhrase::IdType BroadPhraseTilemap::toCandidateId(int32_t layerId, int32_t row, int32_t col) const
+BroadPhrase::CandidateIdType BroadPhraseTilemap::toCandidateId(int32_t layerId, int32_t row, int32_t col) const
 {
     return layerId << 16 | ((row << 8) & 0xff00) | (col & 0xff);
 }
@@ -149,19 +149,16 @@ void BroadPhraseTilemap::addCandidate(const TilemapLayer& tilemapLayer, std::set
             const sp<Tile>& tile = tilemapLayer.getTile(static_cast<uint32_t>(col), static_cast<uint32_t>(row));
             candidateIdSet.insert(candidateId);
             if(tile)
-            {
-                int32_t shapeId = tile->shapeId();
-                if(shapeId != Shape::TYPE_NONE)
-                    candidates.push_back(makeCandidate(candidateId, tile->id(), shapeId, tl + V2(col * tileSize.x(), row * tileSize.y()), tilemapLayer.collisionFilter()));
-            }
+                if(const int32_t shapeId = tile->shapeId(); shapeId != Shape::TYPE_NONE)
+                    candidates.push_back(makeCandidate(candidateId, tile->id(), tl + V2(col * tileSize.x(), row * tileSize.y()), tilemapLayer.collisionFilter()));
         }
     }
 }
 
-BroadPhrase::Candidate BroadPhraseTilemap::makeCandidate(int32_t candidateId, uint32_t metaId, int32_t shapeId, const V2& position, sp<CollisionFilter> collisionFilter) const
+BroadPhrase::Candidate BroadPhraseTilemap::makeCandidate(CandidateIdType candidateId, TypeId shapeId, const V2& position, sp<CollisionFilter> collisionFilter) const
 {
     Box bodyDef = shapeId == Shape::TYPE_AABB ? _body_def_tile : Box();
-    return Candidate(candidateId, position, constants::QUATERNION_ONE, metaId, shapeId, std::move(collisionFilter), std::move(bodyDef));
+    return {candidateId, position, constants::QUATERNION_ONE, shapeId, std::move(collisionFilter), std::move(bodyDef)};
 }
 
 BroadPhraseTilemap::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

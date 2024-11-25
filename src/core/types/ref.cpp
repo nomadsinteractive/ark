@@ -1,6 +1,7 @@
 #include "core/types/ref.h"
 
 #include "core/base/ref_manager.h"
+#include "core/util/log.h"
 
 namespace ark {
 

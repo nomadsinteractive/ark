@@ -33,8 +33,6 @@ public:
     const sp<Ref>& ref() const;
 //  [[script::bindings::property]]
     Collider::BodyType type() const;
-//  [[script::bindings::property]]
-    uint32_t metaId() const;
 
 //  [[script::bindings::property]]
     const sp<Shape>& shape() const;
@@ -68,7 +66,6 @@ protected:
     sp<Ref> _ref;
 
     Collider::BodyType _type;
-    uint32_t _meta_id;
     sp<Shape> _shape;
     SafeVar<Vec3> _position;
     SafeVar<Vec4> _quaternion;

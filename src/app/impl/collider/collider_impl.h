@@ -55,15 +55,15 @@ public:
 
         sp<RigidBodyImpl> createRigidBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<Boolean> discarded);
 
-        std::vector<sp<Ref>> toRigidBodyRefs(const std::unordered_set<BroadPhrase::IdType>& candidateSet, uint32_t filter) const;
-        std::vector<BroadPhrase::Candidate> toBroadPhraseCandidates(const std::unordered_set<BroadPhrase::IdType>& candidateSet) const;
+        std::vector<sp<Ref>> toRigidBodyRefs(const std::unordered_set<BroadPhrase::CandidateIdType>& candidateSet, uint32_t filter) const;
+        std::vector<BroadPhrase::Candidate> toBroadPhraseCandidates(const std::unordered_set<BroadPhrase::CandidateIdType>& candidateSet) const;
 
-        void resolveCandidates(const Rigidbody& self, const BroadPhrase::Candidate& candidateSelf, const std::vector<BroadPhrase::Candidate>& candidates, const Rigidbody& callback, std::set<BroadPhrase::IdType>& c);
+        void resolveCandidates(const Rigidbody& self, const BroadPhrase::Candidate& candidateSelf, const std::vector<BroadPhrase::Candidate>& candidates, const Rigidbody& callback, std::set<BroadPhrase::CandidateIdType>& c);
 
         const sp<NarrowPhrase>& narrowPhrase() const;
 
-        void updateBroadPhraseCandidate(BroadPhrase::IdType id, const V3& position, const V3& aabb) const;
-        void removeBroadPhraseCandidate(BroadPhrase::IdType id);
+        void updateBroadPhraseCandidate(BroadPhrase::CandidateIdType id, const V3& position, const V3& aabb) const;
+        void removeBroadPhraseCandidate(BroadPhrase::CandidateIdType id);
 
         bool update(uint64_t timestamp) override;
 
@@ -78,8 +78,8 @@ public:
         std::unordered_map<uintptr_t, sp<Ref>> _rigid_bodies;
         std::vector<sp<Ref>> _rigid_body_refs;
 
-        std::set<BroadPhrase::IdType> _phrase_dispose;
-        std::set<BroadPhrase::IdType> _phrase_remove;
+        std::set<BroadPhrase::CandidateIdType> _phrase_dispose;
+        std::set<BroadPhrase::CandidateIdType> _phrase_remove;
 
         friend class RigidBodyImpl;
     };
@@ -90,7 +90,7 @@ public:
 
         bool update(uint64_t timestamp);
 
-        void collisionTest(ColliderImpl::Stub& collider, const V3& position, const V3& size, const std::set<BroadPhrase::IdType>& removingIds);
+        void collisionTest(ColliderImpl::Stub& collider, const V3& position, const V3& size, const std::set<BroadPhrase::CandidateIdType>& removingIds);
 
         void doDispose(ColliderImpl::Stub& stub);
 
@@ -101,8 +101,8 @@ public:
 
     private:
         const ColliderImpl::Stub& _collider_stub;
-        std::set<BroadPhrase::IdType> _dynamic_contacts;
-        std::set<BroadPhrase::IdType> _static_contacts;
+        std::set<BroadPhrase::CandidateIdType> _dynamic_contacts;
+        std::set<BroadPhrase::CandidateIdType> _static_contacts;
 
         RigidbodyDef _body_def;
 

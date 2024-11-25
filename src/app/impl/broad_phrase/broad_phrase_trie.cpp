@@ -13,17 +13,17 @@ BroadPhraseTrie::BroadPhraseTrie(int32_t dimension)
 {
 }
 
-void BroadPhraseTrie::create(IdType id, const V3& position, const V3& aabb)
+void BroadPhraseTrie::create(CandidateIdType id, const V3& position, const V3& aabb)
 {
     _stub->create(id, position, aabb);
 }
 
-void BroadPhraseTrie::update(IdType id, const V3& position, const V3& aabb)
+void BroadPhraseTrie::update(CandidateIdType id, const V3& position, const V3& aabb)
 {
     _stub->update(id, position, aabb);
 }
 
-void BroadPhraseTrie::remove(IdType id)
+void BroadPhraseTrie::remove(CandidateIdType id)
 {
     _stub->remove(id);
 }
@@ -49,13 +49,13 @@ BroadPhraseTrie::Stub::~Stub()
     delete[] _axes;
 }
 
-void BroadPhraseTrie::Stub::remove(IdType id)
+void BroadPhraseTrie::Stub::remove(CandidateIdType id)
 {
     for(int32_t i = 0; i < _dimension; i++)
         _axes[i].remove(id);
 }
 
-void BroadPhraseTrie::Stub::create(IdType id, const V3& position, const V3& size)
+void BroadPhraseTrie::Stub::create(CandidateIdType id, const V3& position, const V3& size)
 {
     for(int32_t i = 0; i < _dimension; i++)
     {
@@ -65,7 +65,7 @@ void BroadPhraseTrie::Stub::create(IdType id, const V3& position, const V3& size
     }
 }
 
-void BroadPhraseTrie::Stub::update(IdType id, const V3& position, const V3& size)
+void BroadPhraseTrie::Stub::update(CandidateIdType id, const V3& position, const V3& size)
 {
     for(int32_t i = 0; i < _dimension; i++)
     {
@@ -75,14 +75,14 @@ void BroadPhraseTrie::Stub::update(IdType id, const V3& position, const V3& size
     }
 }
 
-std::unordered_set<BroadPhrase::IdType> BroadPhraseTrie::Stub::search(const V3& position, const V3& size) const
+std::unordered_set<BroadPhrase::CandidateIdType> BroadPhraseTrie::Stub::search(const V3& position, const V3& size) const
 {
-    std::unordered_set<IdType> candidates = _axes[0].search(position[0] - size[0] / 2.0f, position[0] + size[0] / 2.0f);
+    std::unordered_set<CandidateIdType> candidates = _axes[0].search(position[0] - size[0] / 2.0f, position[0] + size[0] / 2.0f);
     for(int32_t i = 1; i < _dimension && !candidates.empty(); i++)
     {
-        const std::unordered_set<IdType> s1 = std::move(candidates);
-        const std::unordered_set<IdType> s2 = _axes[i].search(position[i] - size[i] / 2.0f, position[i] + size[i] / 2.0f);
-        for(const IdType j : s1)
+        const std::unordered_set<CandidateIdType> s1 = std::move(candidates);
+        const std::unordered_set<CandidateIdType> s2 = _axes[i].search(position[i] - size[i] / 2.0f, position[i] + size[i] / 2.0f);
+        for(const CandidateIdType j : s1)
             if(s2.find(j) != s2.end())
                 candidates.insert(j);
     }
@@ -107,12 +107,12 @@ BroadPhraseTrie::Axis::Range::Range(Boundary* lower, Boundary* upper)
     : _lower(lower), _upper(upper) {
 }
 
-void BroadPhraseTrie::Axis::create(IdType id, float low, float high)
+void BroadPhraseTrie::Axis::create(CandidateIdType id, float low, float high)
 {
     _ranges[id] = Range(boundaryCreate(_lower_bounds, id, static_cast<int32_t>(std::floor(low))), boundaryCreate(_upper_bounds, id, static_cast<int32_t>(std::ceil(high))));
 }
 
-void BroadPhraseTrie::Axis::update(IdType id, float low, float high)
+void BroadPhraseTrie::Axis::update(CandidateIdType id, float low, float high)
 {
     Range& range = ensureRange(id);
     int32_t keyLower = static_cast<int32_t>(std::floor(low));
@@ -121,7 +121,7 @@ void BroadPhraseTrie::Axis::update(IdType id, float low, float high)
     range._upper = boundaryUpdate(_upper_bounds, range._upper, keyUpper, id);
 }
 
-void BroadPhraseTrie::Axis::remove(IdType id)
+void BroadPhraseTrie::Axis::remove(CandidateIdType id)
 {
     Range& range = ensureRange(id);
     boundaryRemove(_lower_bounds, range._lower, id);
@@ -129,10 +129,10 @@ void BroadPhraseTrie::Axis::remove(IdType id)
     _ranges.erase(_ranges.find(id));
 }
 
-std::unordered_set<BroadPhrase::IdType> BroadPhraseTrie::Axis::search(float low, float high) const
+std::unordered_set<BroadPhrase::CandidateIdType> BroadPhraseTrie::Axis::search(float low, float high) const
 {
-    std::set<IdType> c1;
-    std::unordered_set<IdType> c3;
+    std::set<CandidateIdType> c1;
+    std::unordered_set<CandidateIdType> c3;
     const auto keyLower = static_cast<int32_t>(std::floor(low));
     const auto keyUpper = static_cast<int32_t>(std::ceil(high));
 
@@ -140,14 +140,14 @@ std::unordered_set<BroadPhrase::IdType> BroadPhraseTrie::Axis::search(float low,
         c1.insert(iter->second.items.begin(), iter->second.items.end());
 
     for(auto iter = _upper_bounds.lower_bound(keyLower); iter != _upper_bounds.end(); ++iter)
-        for(const IdType i : iter->second.items)
+        for(const CandidateIdType i : iter->second.items)
             if(c1.find(i) != c1.end())
                 c3.insert(c3.begin(), i);
 
     return c3;
 }
 
-BroadPhraseTrie::Axis::Boundary* BroadPhraseTrie::Axis::boundaryCreate(std::map<int32_t, Boundary>& boundaries, IdType id, int32_t key)
+BroadPhraseTrie::Axis::Boundary* BroadPhraseTrie::Axis::boundaryCreate(std::map<int32_t, Boundary>& boundaries, CandidateIdType id, int32_t key)
 {
     Boundary& boundary = boundaries[key];
     if(boundary.items.empty())
@@ -156,7 +156,7 @@ BroadPhraseTrie::Axis::Boundary* BroadPhraseTrie::Axis::boundaryCreate(std::map<
     return &boundary;
 }
 
-BroadPhraseTrie::Axis::Boundary* BroadPhraseTrie::Axis::boundaryUpdate(std::map<int32_t, Boundary>& boundaries, Boundary* boundary, int32_t key, IdType id)
+BroadPhraseTrie::Axis::Boundary* BroadPhraseTrie::Axis::boundaryUpdate(std::map<int32_t, Boundary>& boundaries, Boundary* boundary, int32_t key, CandidateIdType id)
 {
     if(key != boundary->key)
     {
@@ -166,7 +166,7 @@ BroadPhraseTrie::Axis::Boundary* BroadPhraseTrie::Axis::boundaryUpdate(std::map<
     return boundary;
 }
 
-void BroadPhraseTrie::Axis::boundaryRemove(std::map<int32_t, Boundary>& boundaries, Boundary* boundary, IdType id)
+void BroadPhraseTrie::Axis::boundaryRemove(std::map<int32_t, Boundary>& boundaries, Boundary* boundary, CandidateIdType id)
 {
     boundary->items.erase(boundary->items.find(id));
     if(boundary->items.empty())
