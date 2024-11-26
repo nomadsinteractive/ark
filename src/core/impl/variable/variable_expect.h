@@ -14,14 +14,15 @@ public:
     }
 
     T val() override {
+        const T value = _value;
         if(_expectation->val())
             notify();
-        return _value;
+        return value;
     }
 
     bool update(uint64_t timestamp) override {
-        bool dirty;
-        if(dirty = this->_wrapped->update(timestamp))
+        const bool dirty = this->_wrapped->update(timestamp);
+        if(dirty)
             _value = this->_wrapped->val();
         _expectation->update(timestamp);
         return dirty;
