@@ -12,21 +12,21 @@ namespace {
 
 struct AnimationSession {
 
-    AnimationSession(sp<Numeric> tick, uint32_t durationInTicks, sp<std::vector<AnimationFrame>> animationFrames)
-        : _tick(std::move(tick)), _duration_in_ticks(durationInTicks), _animation_frames(std::move(animationFrames)), _frame_index(static_cast<uint32_t>(fmod(_tick->val(), _duration_in_ticks))) {
+    AnimationSession(sp<Integer> tick, uint32_t durationInTicks, sp<std::vector<AnimationFrame>> animationFrames)
+        : _tick(std::move(tick)), _duration_in_ticks(durationInTicks), _animation_frames(std::move(animationFrames)), _frame_index(static_cast<uint32_t>(_tick->val()) % _duration_in_ticks) {
     }
 
     bool update(uint64_t timestamp)
     {
         if(_tick->update(timestamp))
         {
-            _frame_index = static_cast<uint32_t>(fmod(_tick->val(), _duration_in_ticks));
+            _frame_index = static_cast<uint32_t>(_tick->val()) % _duration_in_ticks;
             return true;
         }
         return false;
     }
 
-    sp<Numeric> _tick;
+    sp<Integer> _tick;
     uint32_t _duration_in_ticks;
     sp<std::vector<AnimationFrame>> _animation_frames;
 
@@ -59,11 +59,11 @@ AnimationGltf::AnimationGltf(uint32_t durationInTicks, Table<String, uint32_t> n
 {
 }
 
-std::vector<std::pair<String, sp<Mat4>>> AnimationGltf::getNodeTranforms(sp<Numeric> tick)
+std::vector<std::pair<String, sp<Mat4>>> AnimationGltf::getNodeTranforms(sp<Integer> tick)
 {
     std::vector<std::pair<String, sp<Mat4>>> nodeTransforms;
 
-    sp<AnimationSession> session = sp<AnimationSession>::make(tick, _duration_in_ticks, _animation_frames);
+    sp<AnimationSession> session = sp<AnimationSession>::make(std::move(tick), _duration_in_ticks, _animation_frames);
     for(const auto& [name, nodeIdx] : *_nodes)
         nodeTransforms.emplace_back(name, sp<NodeMatrix>::make(session, nodeIdx));
 

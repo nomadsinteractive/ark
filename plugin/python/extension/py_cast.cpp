@@ -217,12 +217,12 @@ Optional<sp<StringVar>> PyCast::toStringVar(PyObject* object)
 Optional<sp<Numeric>> PyCast::toNumeric(PyObject* object)
 {
     if(isNoneOrNull(object))
-        return sp<Numeric>();
+        return {sp<Numeric>()};
 
     if(PyLong_Check(object))
-        return sp<Numeric>::make<Numeric::Const>(static_cast<float>(PyLong_AsLong(object)));
+        return {sp<Numeric>::make<Numeric::Const>(static_cast<float>(PyLong_AsLong(object)))};
     if(PyFloat_Check(object))
-        return sp<Numeric>::make<Numeric::Const>(static_cast<float>(PyFloat_AsDouble(object)));
+        return {sp<Numeric>::make<Numeric::Const>(static_cast<float>(PyFloat_AsDouble(object)))};
 
     return toSharedPtrDefault<Numeric>(object);
 }

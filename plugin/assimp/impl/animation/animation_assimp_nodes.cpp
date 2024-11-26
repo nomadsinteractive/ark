@@ -32,7 +32,7 @@ AnimationAssimpNodes::AnimationAssimpNodes(float tps, const aiAnimation* animati
          _nodes->push_back(iter.first, index++);
 }
 
-std::vector<std::pair<String, sp<Mat4>>> AnimationAssimpNodes::getNodeTranforms(sp<Numeric> duration)
+std::vector<std::pair<String, sp<Mat4>>> AnimationAssimpNodes::getNodeTranforms(sp<Integer> tick)
 {
     return {};
 }

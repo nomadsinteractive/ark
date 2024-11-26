@@ -9,7 +9,7 @@
 
 namespace ark {
 
-template<typename T> class Fence final : public Variable<T>::ByUpdate, public WithObserver {
+template<typename T> class Fence final : public Variable<T>::ByUpdate, public WithObserver, Implements<Fence<T>, Variable<T>, WithObserver> {
 public:
     Fence(sp<Variable<T>> delegate, sp<Variable<T>> expectation, sp<Observer> observer)
         : Variable<T>::ByUpdate(delegate->val()), WithObserver(std::move(observer)), _delegate(std::move(delegate)), _expectation(std::move(expectation)), _is_greater(this->val() > expectation->val()) {
@@ -20,10 +20,8 @@ public:
             return false;
 
         value = _delegate->val();
-        T boundary = _expectation->val();
-        bool isGreater = value > boundary;
-        if(isGreater != _is_greater)
-        {
+        const T boundary = _expectation->val();
+        if(const bool isGreater = value > boundary; isGreater != _is_greater) {
             _is_greater = isGreater;
             notify();
         }

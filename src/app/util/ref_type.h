@@ -3,6 +3,8 @@
 #include "core/forwarding.h"
 #include "core/base/api.h"
 
+#include "app/forwarding.h"
+
 namespace ark {
 
 //[[script::bindings::class("Ref")]]
@@ -18,8 +20,13 @@ public:
 //  [[script::bindings::property]]
     static void setDiscarded(const sp<Ref>& self, sp<Boolean> discarded);
 
-//  [[script::bindings::auto]]
+//  [[script::bindings::classmethod]]
     static void discard(const sp<Ref>& self);
+
+//  [[script::bindings::classmethod]]
+    static sp<Entity> toEntity(const sp<Ref>& self);
+//  [[script::bindings::classmethod]]
+    static sp<Rigidbody> toRigidbody(const sp<Ref>& self);
 };
 
 }

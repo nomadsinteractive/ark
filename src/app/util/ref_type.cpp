@@ -1,5 +1,6 @@
 #include "app/util/ref_type.h"
 
+#include "core/types/class.h"
 #include "core/types/ref.h"
 
 namespace ark {
@@ -27,6 +28,18 @@ void RefType::setDiscarded(const sp<Ref>& self, sp<Boolean> discarded)
 void RefType::discard(const sp<Ref>& self)
 {
     self->discard();
+}
+
+sp<Entity> RefType::toEntity(const sp<Ref>& self)
+{
+    Entity& entity = self->instance<Entity>();
+    return {std::shared_ptr<Entity>(&entity, [](void* ref) {}), Class::getClass<Entity>()};
+}
+
+sp<Rigidbody> RefType::toRigidbody(const sp<Ref>& self)
+{
+    Rigidbody& rigidbody = self->instance<Rigidbody>();
+    return {std::shared_ptr<Rigidbody>(&rigidbody, [](void* ref) {}), Class::getClass<Rigidbody>()};
 }
 
 }

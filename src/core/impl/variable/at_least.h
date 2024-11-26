@@ -8,7 +8,7 @@
 
 namespace ark {
 
-template<typename T> class AtLeast final : public Variable<T>, public Wrapper<Variable<T>>, public WithObserver, Implements<AtLeast<T>, Variable<T>, Wrapper<Variable<T>>> {
+template<typename T> class AtLeast final : public Variable<T>, public Wrapper<Variable<T>>, public WithObserver, Implements<AtLeast<T>, Variable<T>, Wrapper<Variable<T>>, WithObserver> {
 public:
     AtLeast(sp<Variable<T>> delegate, sp<Variable<T>> boundary, sp<Observer> observer)
          : Wrapper<Variable<T>>(std::move(delegate)), WithObserver(std::move(observer)), _boundary(std::move(boundary)) {

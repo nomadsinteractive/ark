@@ -23,7 +23,9 @@ public:
     static float duration(const sp<Animation>& self);
 
 //  [[script::bindings::classmethod]]
-    static std::vector<std::pair<String, sp<Mat4>>> getNodeTransforms(const sp<Animation>& self, sp<Numeric> time);
+    static std::vector<std::pair<String, sp<Mat4>>> getNodeTransforms(const sp<Animation>& self, sp<Integer> tick);
+//  [[script::bindings::classmethod]]
+    static std::vector<std::pair<String, sp<Mat4>>> getNodeTransforms(const sp<Animation>& self, sp<Numeric> tick);
 };
 
 }

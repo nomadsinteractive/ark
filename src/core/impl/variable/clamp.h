@@ -7,10 +7,10 @@
 
 namespace ark {
 
-template<typename T> class Clamp final : public Variable<T>::ByUpdate, public WithObserver {
+template<typename T> class Clamp final : public Variable<T>::ByUpdate, public WithObserver, Implements<Clamp<T>, Variable<T>, WithObserver> {
 public:
-    Clamp(const sp<Variable<T>>& delegate, const sp<Variable<T>>& min, const sp<Variable<T>>& max, sp<Observer> observer)
-        : Variable<T>::ByUpdate(delegate->val()), WithObserver(std::move(observer)), _delegate(delegate), _min(min), _max(max) {
+    Clamp(sp<Variable<T>> delegate, sp<Variable<T>> min, sp<Variable<T>> max, sp<Observer> observer)
+        : Variable<T>::ByUpdate(delegate->val()), WithObserver(std::move(observer)), _delegate(std::move(delegate)), _min(std::move(min)), _max(std::move(max)) {
         doClamp(this->_value);
     }
 

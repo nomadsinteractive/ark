@@ -200,6 +200,12 @@ void NumericType::setDelegate(const sp<Numeric>& self, const sp<Numeric>& delega
     nw->set(delegate);
 }
 
+sp<Observer> NumericType::observer(const sp<Numeric>& self)
+{
+    const sp<WithObserver> wo = self.tryCast<WithObserver>();
+    return wo ? wo->observer() : nullptr;
+}
+
 void NumericType::set(const sp<Numeric::Impl>& self, float value)
 {
     self->set(value);
@@ -239,36 +245,26 @@ sp<Numeric> NumericType::synchronize(const sp<Numeric>& self, const sp<Boolean>&
     return Ark::instance().applicationContext()->synchronize(self, disposed);
 }
 
-sp<ExpectationF> NumericType::atLeast(const sp<Numeric>& self, const sp<Numeric>& a1)
+sp<Numeric> NumericType::atLeast(sp<Numeric> self, sp<Numeric> a1, sp<Observer> observer)
 {
-    const sp<AtLeast<float>> delegate = sp<AtLeast<float>>::make(self, a1, nullptr);
-    return sp<ExpectationF>::make(delegate, delegate.cast<WithObserver>());
+    return sp<Numeric>::make<AtLeast<float>>(std::move(self), std::move(a1), std::move(observer));
 }
 
-sp<ExpectationF> NumericType::atMost(const sp<Numeric>& self, const sp<Numeric>& a1)
+sp<Numeric> NumericType::atMost(sp<Numeric> self, sp<Numeric> a1, sp<Observer> observer)
 {
-    const sp<AtMost<float>> delegate = sp<AtMost<float>>::make(self, a1, nullptr);
-    return sp<ExpectationF>::make(delegate, delegate.cast<WithObserver>());
+    return sp<Numeric>::make<AtMost<float>>(std::move(self), std::move(a1), std::move(observer));
 }
 
-sp<ExpectationF> NumericType::boundary(const sp<Numeric>& self, const sp<Numeric>& a1)
+sp<Numeric> NumericType::clamp(sp<Numeric> self, sp<Numeric> min, sp<Numeric> max, sp<Observer> observer)
+{
+    ASSERT(self && min && max);
+    return sp<Numeric>::make<Clamp<float>>(std::move(self), std::move(min), std::move(max), std::move(observer));
+}
+
+sp<Numeric> NumericType::fence(sp<Numeric> self, sp<Numeric> a1, sp<Observer> observer)
 {
     DASSERT(self && a1);
-    return self->val() < a1->val() ? atMost(self, a1) : atLeast(self, a1);
-}
-
-sp<ExpectationF> NumericType::clamp(const sp<Numeric>& self, const sp<Numeric>& min, const sp<Numeric>& max)
-{
-    DASSERT(self && min && max);
-    const sp<Clamp<float>> delegate = sp<Clamp<float>>::make(self, min, max, nullptr);
-    return sp<ExpectationF>::make(delegate, delegate.cast<WithObserver>());
-}
-
-sp<ExpectationF> NumericType::fence(const sp<Numeric>& self, const sp<Numeric>& a1)
-{
-    DASSERT(self && a1);
-    const sp<Fence<float>> delegate = sp<Fence<float>>::make(self, a1, nullptr);
-    return sp<ExpectationF>::make(delegate, delegate.cast<WithObserver>());
+    return sp<Numeric>::make<Fence<float>>(std::move(self), std::move(a1), std::move(observer));
 }
 
 sp<Numeric> NumericType::ifElse(sp<Numeric> self, sp<Boolean> condition, sp<Numeric> negative)

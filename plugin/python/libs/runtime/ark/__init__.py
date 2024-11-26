@@ -468,6 +468,12 @@ class Ref:
     def discard(self):
         pass
 
+    def to_entity(self) -> "Entity":
+        pass
+
+    def to_rigidbody(self) -> "Rigidbody":
+        pass
+
 
 class Buffer:
     TYPE_VERTEX = 0
@@ -1289,7 +1295,7 @@ class Animation:
     def duration(self) -> float:
         return 0
 
-    def get_node_transforms(self, t: TYPE_NUMERIC) -> list[tuple[str, Mat4]]:
+    def get_node_transforms(self, t: TYPE_INTEGER) -> list[tuple[str, Mat4]]:
         pass
 
 

@@ -30,7 +30,6 @@ public:
 private:
     SafeVar<Boolean> _condition;
     String _message;
-
 };
 
 }

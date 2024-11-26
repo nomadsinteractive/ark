@@ -11,6 +11,7 @@
 #include "core/impl/variable/fence.h"
 #include "core/impl/variable/periodic.h"
 #include "core/impl/variable/variable_dyed.h"
+#include "core/impl/variable/variable_expect.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/impl/variable/variable_op1.h"
 #include "core/impl/variable/variable_op2.h"
@@ -204,6 +205,12 @@ void IntegerType::setDelegate(const sp<Integer>& self, const sp<Integer>& delega
     iw->set(delegate);
 }
 
+sp<Observer> IntegerType::observer(const sp<Integer>& self)
+{
+    const sp<WithObserver> wo = self.tryCast<WithObserver>();
+    return wo ? wo->observer() : nullptr;
+}
+
 void IntegerType::set(const sp<Integer::Impl>& self, int32_t value)
 {
     self->set(value);
@@ -252,10 +259,9 @@ int32_t IntegerType::toRepeat(const String& repeat)
     return static_cast<IntegerType::Repeat>(action | flags);
 }
 
-sp<ExpectationI> IntegerType::repeat(std::vector<int32_t> array, IntegerType::Repeat repeat)
+sp<Integer> IntegerType::repeat(std::vector<int32_t> array, IntegerType::Repeat repeat, sp<Observer> observer)
 {
-    const sp<IntegerByArray> delegate = sp<IntegerByArray>::make(sp<IntArray::Vector>::make(std::move(array)), repeat, nullptr);
-    return sp<ExpectationI>::make(delegate, delegate.cast<WithObserver>());
+    return sp<Integer>::make<IntegerByArray>(sp<IntArray>::make<IntArray::Vector>(std::move(array)), repeat, std::move(observer));
 }
 
 sp<Integer> IntegerType::animate(const sp<Integer>& self, const sp<Numeric>& interval, const sp<Numeric>& duration)
@@ -263,30 +269,31 @@ sp<Integer> IntegerType::animate(const sp<Integer>& self, const sp<Numeric>& int
     return sp<Periodic<int32_t>>::make(self, interval ? interval : sp<Numeric>::make<Numeric::Const>(1.0f / 24), duration ? duration : Ark::instance().appClock()->duration());
 }
 
-sp<ExpectationI> IntegerType::atLeast(sp<Integer> self, sp<Integer> a1)
+sp<Integer> IntegerType::expect(sp<Integer> self, sp<Boolean> expectation, sp<Observer> observer)
 {
-    const sp<AtLeast<int32_t>> delegate = sp<AtLeast<int32_t>>::make(std::move(self), std::move(a1), nullptr);
-    return sp<ExpectationI>::make(std::move(delegate), delegate.cast<WithObserver>());
+    return sp<Integer>::make<VariableExpect<int32_t>>(std::move(self), std::move(expectation), std::move(observer));
 }
 
-sp<ExpectationI> IntegerType::atMost(sp<Integer> self, sp<Integer> a1)
+sp<Integer> IntegerType::atLeast(sp<Integer> self, sp<Integer> a1, sp<Observer> observer)
 {
-    const sp<AtMost<int32_t>> delegate = sp<AtMost<int32_t>>::make(std::move(self), std::move(a1), nullptr);
-    return sp<ExpectationI>::make(delegate, delegate.cast<WithObserver>());
+    return sp<Integer>::make<AtLeast<int32_t>>(std::move(self), std::move(a1), std::move(observer));
 }
 
-sp<ExpectationI> IntegerType::clamp(const sp<Integer>& self, const sp<Integer>& min, const sp<Integer>& max)
+sp<Integer> IntegerType::atMost(sp<Integer> self, sp<Integer> a1, sp<Observer> observer)
 {
-    DASSERT(self && min && max);
-    const sp<Clamp<int32_t>> delegate = sp<Clamp<int32_t>>::make(self, min, max, nullptr);
-    return sp<ExpectationI>::make(delegate, delegate.cast<WithObserver>());
+    return sp<Integer>::make<AtMost<int32_t>>(std::move(self), std::move(a1), std::move(observer));
 }
 
-sp<ExpectationI> IntegerType::fence(const sp<Integer>& self, const sp<Integer>& a1)
+sp<Integer> IntegerType::clamp(sp<Integer> self, sp<Integer> min, sp<Integer> max, sp<Observer> observer)
 {
-    DASSERT(self && a1);
-    const sp<Fence<int32_t>> delegate = sp<Fence<int32_t>>::make(self, a1, nullptr);
-    return sp<ExpectationI>::make(delegate, delegate.cast<WithObserver>());
+    ASSERT(self && min && max);
+    return sp<Integer>::make<Clamp<int32_t>>(self, min, max, std::move(observer));
+}
+
+sp<Integer> IntegerType::fence(sp<Integer> self, sp<Integer> a1, sp<Observer> observer)
+{
+    ASSERT(self && a1);
+    return sp<Integer>::make<Fence<int32_t>>(std::move(self), std::move(a1), std::move(observer));
 }
 
 sp<Integer> IntegerType::ifElse(const sp<Integer>& self, const sp<Boolean>& condition, const sp<Integer>& negative)

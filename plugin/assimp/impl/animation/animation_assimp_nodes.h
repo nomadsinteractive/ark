@@ -23,7 +23,7 @@ public:
 
     AnimationAssimpNodes(float tps, const aiAnimation* animation, const aiNode* rootNode, const aiMatrix4x4& globalTransform, Table<String, AnimationNode>& nodes, const NodeLoaderCallback& callback);
 
-    std::vector<std::pair<String, sp<Mat4>>> getNodeTranforms(sp<Numeric> duration) override;
+    std::vector<std::pair<String, sp<Mat4>>> getNodeTranforms(sp<Integer> tick) override;
 
 private:
     static void loadHierarchy(float tick, const aiNode* node, const aiAnimation* animation, const aiMatrix4x4& parentTransform, Table<String, AnimationNode>& nodes, const NodeLoaderCallback& callback, AnimationFrame& output);

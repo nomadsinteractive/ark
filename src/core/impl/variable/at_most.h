@@ -8,7 +8,7 @@
 
 namespace ark {
 
-template<typename T> class AtMost final : public Variable<T>, public Wrapper<Variable<T>>, public WithObserver, Implements<AtMost<T>, Variable<T>, Wrapper<Variable<T>>> {
+template<typename T> class AtMost final : public Variable<T>, public Wrapper<Variable<T>>, public WithObserver, Implements<AtMost<T>, Variable<T>, Wrapper<Variable<T>>, WithObserver> {
 public:
     AtMost(sp<Variable<T>> delegate, sp<Variable<T>> boundary, sp<Observer> observer)
          : Wrapper<Variable<T>>(std::move(delegate)), WithObserver(std::move(observer)), _boundary(std::move(boundary)) {

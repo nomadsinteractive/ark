@@ -2,7 +2,6 @@
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
-#include "core/base/expectation_f.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/inf/builder.h"
 #include "core/inf/variable.h"
@@ -85,6 +84,9 @@ public:
 //  [[script::bindings::property]]
     static void setDelegate(const sp<Numeric>& self, const sp<Numeric>& delegate);
 
+//  [[script::bindings::property]]
+    static sp<Observer> observer(const sp<Numeric>& self);
+
 //  [[script::bindings::classmethod]]
     static void set(const sp<Numeric::Impl>& self, float value);
 //  [[script::bindings::classmethod]]
@@ -102,15 +104,13 @@ public:
     static sp<Numeric> synchronize(const sp<Numeric>& self, const sp<Boolean>& disposed = nullptr);
 
 //  [[script::bindings::classmethod]]
-    static sp<ExpectationF> atLeast(const sp<Numeric>& self, const sp<Numeric>& a1);
+    static sp<Numeric> atLeast(sp<Numeric> self, sp<Numeric> a1, sp<Observer> observer = nullptr);
 //  [[script::bindings::classmethod]]
-    static sp<ExpectationF> atMost(const sp<Numeric>& self, const sp<Numeric>& a1);
+    static sp<Numeric> atMost(sp<Numeric> self, sp<Numeric> a1, sp<Observer> observer = nullptr);
 //  [[script::bindings::classmethod]]
-    static sp<ExpectationF> boundary(const sp<Numeric>& self, const sp<Numeric>& a1);
+    static sp<Numeric> clamp(sp<Numeric> self, sp<Numeric> min, sp<Numeric> max, sp<Observer> observer = nullptr);
 //  [[script::bindings::classmethod]]
-    static sp<ExpectationF> clamp(const sp<Numeric>& self, const sp<Numeric>& min, const sp<Numeric>& max);
-//  [[script::bindings::classmethod]]
-    static sp<ExpectationF> fence(const sp<Numeric>& self, const sp<Numeric>& a1);
+    static sp<Numeric> fence(sp<Numeric> self, sp<Numeric> a1, sp<Observer> observer = nullptr);
 //  [[script::bindings::classmethod]]
     static sp<Numeric> ifElse(sp<Numeric> self, sp<Boolean> condition, sp<Numeric> negative);
 //  [[script::bindings::classmethod]]
@@ -146,7 +146,7 @@ public:
     public:
         DICTIONARY(BeanFactory& factory, const String& expr);
 
-        virtual sp<Numeric> build(const Scope& args) override;
+        sp<Numeric> build(const Scope& args) override;
 
     private:
         sp<Builder<Numeric>> _value;
@@ -157,7 +157,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Numeric> build(const Scope& args) override;
+        sp<Numeric> build(const Scope& args) override;
 
     private:
         sp<Builder<Numeric>> _value;

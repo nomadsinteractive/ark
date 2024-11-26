@@ -16,7 +16,7 @@ public:
     }
     virtual ~Animation() = default;
 
-    virtual std::vector<std::pair<String, sp<Mat4>>> getNodeTranforms(sp<Numeric> time) = 0;
+    virtual std::vector<std::pair<String, sp<Mat4>>> getNodeTranforms(sp<Integer> tick) = 0;
 
     float duration() const {
         return _duration;

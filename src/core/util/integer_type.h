@@ -4,7 +4,6 @@
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
-#include "core/base/expectation_i.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/inf/builder.h"
 #include "core/inf/variable.h"
@@ -84,10 +83,13 @@ public:
 //[[script::bindings::property]]
     static void setDelegate(const sp<Integer>& self, const sp<Integer>& delegate);
 
+//  [[script::bindings::property]]
+    static sp<Observer> observer(const sp<Integer>& self);
+
 //[[script::bindings::auto]]
     static int32_t toRepeat(const String& repeat);
 //[[script::bindings::auto]]
-    static sp<ExpectationI> repeat(std::vector<int32_t> array, IntegerType::Repeat repeat = IntegerType::REPEAT_NONE);
+    static sp<Integer> repeat(std::vector<int32_t> array, IntegerType::Repeat repeat = IntegerType::REPEAT_NONE, sp<Observer> observer = nullptr);
 
 //[[script::bindings::classmethod]]
     static void set(const sp<Integer::Impl>& self, int32_t value);
@@ -105,14 +107,17 @@ public:
     static sp<Integer> animate(const sp<Integer>& self, const sp<Numeric>& interval = nullptr, const sp<Numeric>& duration = nullptr);
 
 //  [[script::bindings::classmethod]]
-    static sp<ExpectationI> atLeast(sp<Integer> self, sp<Integer> a1);
-//  [[script::bindings::classmethod]]
-    static sp<ExpectationI> atMost(sp<Integer> self, sp<Integer> a1);
+    static sp<Integer> expect(sp<Integer> self, sp<Boolean> expectation, sp<Observer> observer = nullptr);
 
 //  [[script::bindings::classmethod]]
-    static sp<ExpectationI> clamp(const sp<Integer>& self, const sp<Integer>& min, const sp<Integer>& max);
+    static sp<Integer> atLeast(sp<Integer> self, sp<Integer> a1, sp<Observer> observer = nullptr);
 //  [[script::bindings::classmethod]]
-    static sp<ExpectationI> fence(const sp<Integer>& self, const sp<Integer>& a1);
+    static sp<Integer> atMost(sp<Integer> self, sp<Integer> a1, sp<Observer> observer = nullptr);
+
+//  [[script::bindings::classmethod]]
+    static sp<Integer> clamp(sp<Integer> self, sp<Integer> min, sp<Integer> max, sp<Observer> observer = nullptr);
+//  [[script::bindings::classmethod]]
+    static sp<Integer> fence(sp<Integer> self, sp<Integer> a1, sp<Observer> observer = nullptr);
 
 //  [[script::bindings::classmethod]]
     static sp<Integer> ifElse(const sp<Integer>& self, const sp<Boolean>& condition, const sp<Integer>& negative);

@@ -15,15 +15,15 @@
 
 namespace ark {
 
-Rigidbody::Rigidbody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> quaternion, Box impl, sp<Ref> ref)
-    : _ref(ref ? std::move(ref) : Global<RefManager>()->makeRef(this)), _type(type), _shape(std::move(shape)), _position(std::move(position)), _quaternion(std::move(quaternion)), _impl(std::move(impl))
+Rigidbody::Rigidbody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> quaternion, Box impl, sp<Ref> ref, bool isShadow)
+    : _ref(ref ? std::move(ref) : Global<RefManager>()->makeRef(this)), _type(type), _shape(std::move(shape)), _position(std::move(position)), _quaternion(std::move(quaternion)), _impl(std::move(impl)), _is_shadow(isShadow)
 {
 }
 
-
 Rigidbody::~Rigidbody()
 {
-    _ref->discard();
+    if(!_is_shadow)
+        _ref->discard();
 }
 
 void Rigidbody::discard()
@@ -108,7 +108,7 @@ void Rigidbody::setCollisionFilter(sp<CollisionFilter> collisionFilter)
 
 sp<Rigidbody> Rigidbody::makeShadow() const
 {
-    return sp<Rigidbody>::make(_type, _shape, _position.wrapped(), _quaternion.wrapped(), _impl, sp<Ref>::make(*_ref));
+    return sp<Rigidbody>::make(_type, _shape, _position.wrapped(), _quaternion.wrapped(), _impl, _ref, true);
 }
 
 template<> ARK_API Collider::BodyType StringConvert::eval<Collider::BodyType>(const String& str)
