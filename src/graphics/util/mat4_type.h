@@ -15,7 +15,7 @@ namespace ark {
 class ARK_API Mat4Type final {
 public:
 //  [[script::bindings::constructor]]
-    static sp<Mat4> create(const M4& m = M4::identity());
+    static sp<Mat4> create(const M4& m = {});
 //  [[script::bindings::constructor]]
     static sp<Mat4> create(sp<Mat3> other);
 //  [[script::bindings::constructor]]

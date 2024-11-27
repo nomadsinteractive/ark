@@ -35,7 +35,7 @@ struct NodeTransform {
 
 	M4 toMatrix() const
 	{
-		return MatrixUtil::inverse(_node->matrix()) * MatrixUtil::scale(MatrixUtil::rotate(MatrixUtil::translate({}, _translation), _rotation), _scale);;
+		return MatrixUtil::inverse(_node->localMatrix()) * MatrixUtil::scale(MatrixUtil::rotate(MatrixUtil::translate({}, _translation), _rotation), _scale);;
 	}
 };
 
@@ -256,7 +256,7 @@ Mesh processPrimitive(const tinygltf::Model& gltfModel, const std::vector<sp<Mat
     return {id, std::move(name), std::move(indices), std::move(vertices), toArray<Mesh::UV>(std::move(uvs)), toArray<V3>(std::move(normals)), nullptr, nullptr, std::move(material)};
 }
 
-sp<Node> makeNode(const tinygltf::Node& node)
+sp<Node> makeNode(WeakPtr<Node> parentNode, const tinygltf::Node& node)
 {
 	V3 translation(0);
 	if(!node.translation.empty())
@@ -270,7 +270,7 @@ sp<Node> makeNode(const tinygltf::Node& node)
 	if(!node.rotation.empty())
 		quaternion = V4(static_cast<float>(node.rotation.at(0)), static_cast<float>(node.rotation.at(1)), static_cast<float>(node.rotation.at(2)), static_cast<float>(node.rotation.at(3)));
 
-	return sp<Node>::make(node.name, translation, quaternion, scale);
+	return sp<Node>::make(std::move(parentNode), node.name, translation, quaternion, scale);
 }
 
 std::vector<sp<Material>> loadMaterials(tinygltf::Model const& gltfModel, const MaterialBundle& materialBundle)
@@ -484,10 +484,10 @@ void GltfImporter::loadPrimitives()
 Model GltfImporter::loadModel()
 {
 	const tinygltf::Scene& scene = _model->scenes.at(_model->defaultScene);
-	sp<Node> rootNode = sp<Node>::make(scene.name, M4::identity());
+	sp<Node> rootNode = sp<Node>::make(WeakPtr<Node>(), scene.name, M4::identity());
 
 	for(const int32_t i : scene.nodes)
-		rootNode->childNodes().push_back(loadNode(i));
+		rootNode->childNodes().push_back(loadNode(rootNode, i));
 
 	Table<String, sp<ark::Animation>> animations;
 	if(!_model->animations.empty())
@@ -554,10 +554,10 @@ Model GltfImporter::loadModel()
 	return {std::move(_materials), std::move(_primitives), std::move(rootNode), sp<Boundaries>::make(V3(aabbMinX, aabbMinY, aabbMinZ), V3(aabbMaxX, aabbMaxY, aabbMaxZ)), nullptr, std::move(animations)};
 }
 
-sp<Node> GltfImporter::loadNode(int32_t nodeId)
+sp<Node> GltfImporter::loadNode(WeakPtr<Node> parentNode, int32_t nodeId)
 {
 	const tinygltf::Node& node = _model->nodes.at(nodeId);
-	sp<Node> n = makeNode(node);
+	sp<Node> n = makeNode(std::move(parentNode), node);
 	_nodes[nodeId] = n;
 
 	if(node.mesh != -1)
@@ -568,7 +568,7 @@ sp<Node> GltfImporter::loadNode(int32_t nodeId)
 	}
 
 	for(const int32_t i : node.children)
-		n->childNodes().push_back(loadNode(i));
+		n->childNodes().push_back(loadNode(n, i));
 	return n;
 }
 

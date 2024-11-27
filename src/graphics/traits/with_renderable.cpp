@@ -36,9 +36,9 @@ void WithRenderable::onWire(const WiringContext& context)
         const sp<Node> node = model && transformNode ? model->findNode(transformNode) : nullptr;
         CHECK(!transformNode || node, "Transform node \"%s\" doesn't exist", transformNode.c_str());
         if(withTransform)
-            r = sp<Renderable>::make<RenderableWithTransform>(std::move(r), node ? Mat4Type::matmul(withTransform->transform(), node->matrix()) : withTransform->transform());
+            r = sp<Renderable>::make<RenderableWithTransform>(std::move(r), node ? Mat4Type::matmul(withTransform->transform(), node->localMatrix()) : withTransform->transform());
         else if(node)
-            r = sp<Renderable>::make<RenderableWithTransform>(std::move(r), sp<Mat4>::make<Mat4::Const>(node->matrix()));
+            r = sp<Renderable>::make<RenderableWithTransform>(std::move(r), sp<Mat4>::make<Mat4::Const>(node->localMatrix()));
         if(renderObject)
             //TODO: There are some name conventions that we should test the attribute name "id"
             if(const sp<WithId>& withId = context.getComponent<WithId>(); withId && layerContext->shader() && layerContext->shader()->input()->getAttribute("Id"))

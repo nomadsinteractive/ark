@@ -1,5 +1,4 @@
-#ifndef ARK_PLUGIN_ASSIMP_IMPL_MODEL_LOADER_MODEL_LOADER_ASSIMP_H_
-#define ARK_PLUGIN_ASSIMP_IMPL_MODEL_LOADER_MODEL_LOADER_ASSIMP_H_
+#pragma once
 
 #include <assimp/postprocess.h>
 #include <assimp/version.h>
@@ -23,14 +22,12 @@
 #include "assimp/forwarding.h"
 #include "assimp/impl/animation/animation_assimp_nodes.h"
 
-namespace ark {
-namespace plugin {
-namespace assimp {
+namespace ark::plugin::assimp {
 
-class ModelImporterAssimp : public ModelLoader::Importer {
+class ModelImporterAssimp final : public ModelLoader::Importer {
 public:
 
-    virtual Model import(const Manifest& manifest, MaterialBundle& materialBundle) override;
+    Model import(const Manifest& manifest, MaterialBundle& materialBundle) override;
 
 //  [[plugin::builder::by-value("assimp")]]
     class BUILDER : public Builder<ModelLoader::Importer> {
@@ -53,7 +50,7 @@ private:
     bitmap loadBitmap(const sp<BitmapLoaderBundle>& imageResource, const aiTexture* tex) const;
     std::vector<element_index_t> loadIndices(const aiMesh* mesh, element_index_t indexOffset) const;
 
-    sp<Node> loadNodeHierarchy(const aiNode* node, const std::vector<sp<Mesh>>& meshes) const;
+    sp<Node> loadNodeHierarchy(WeakPtr<Node> parentNode, const aiNode* node, const std::vector<sp<Mesh>>& meshes) const;
 
     void loadNodeHierarchy(const aiNode* node, NodeTable& nodes, std::unordered_map<uint32_t, uint32_t>& nodeIds) const;
     void loadSceneTexture(const ResourceLoaderContext& resourceLoaderContext, const aiTexture* tex);
@@ -70,6 +67,3 @@ private:
 };
 
 }
-}
-}
-#endif

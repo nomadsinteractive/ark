@@ -80,7 +80,7 @@ struct NodeLayout {
         : _node(nullptr), _transform(M4::identity()) {
     }
     NodeLayout(const Node& node, const NodeLayout& parentLayout)
-        : _node(&node), _transform(parentLayout._transform* node.matrix()) {
+        : _node(&node), _transform(parentLayout._transform* node.localMatrix()) {
     }
 
     void calcTransformedBoudingAABB(const V3& a0, const V3& a1, V3& aabbMin, V3& aabbMax) const {
@@ -191,16 +191,6 @@ const Table<String, sp<Animation>>& Model::animations() const
 void Model::setAnimations(Table<String, sp<Animation>> animates)
 {
     _animations = std::move(animates);
-}
-
-const std::vector<String>& Model::nodeNames() const
-{
-    return _node_names;
-}
-
-void Model::setNodeNames(std::vector<String> nodes)
-{
-    _node_names = std::move(nodes);
 }
 
 const sp<Animation>& Model::getAnimation(const String& name) const

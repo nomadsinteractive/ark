@@ -209,15 +209,15 @@ Model ModelImporterAssimp::loadModel(const aiScene* scene, MaterialBundle& mater
         vertexBase += static_cast<element_index_t>(meshes.back()->vertexCount());
     }
 
-    sp<Node> rootNode = loadNodeHierarchy(scene->mRootNode, meshes);
+    sp<Node> rootNode = loadNodeHierarchy({}, scene->mRootNode, meshes);
 
     std::vector<document> animateManifests = manifest.descriptor() ? manifest.descriptor()->children("animate") : std::vector<document>();
     const bool hasAnimation = scene->HasAnimations() || animateManifests.size() > 0;
-    aiMatrix4x4 globalAnimationTransform;
 
     Model model(std::move(materials), std::move(meshes), std::move(rootNode));
     if(hasAnimation)
     {
+        aiMatrix4x4 globalAnimationTransform;
         bool noBones = bones.nodes().size() == 0;
         Table<String, sp<Animation>> animates;
         AnimationAssimpNodes::NodeLoaderCallback callback = noBones ? callbackNodeAnimation : callbackBoneAnimation;
@@ -239,7 +239,6 @@ Model ModelImporterAssimp::loadModel(const aiScene* scene, MaterialBundle& mater
         }
 
         model.setAnimations(std::move(animates));
-        model.setNodeNames(animationNodes.nodes().keys());
     }
 
     return model;
@@ -279,16 +278,16 @@ sp<ModelLoader::Importer> ModelImporterAssimp::BUILDER::build(const Scope& /*arg
     return sp<ModelImporterAssimp>::make();
 }
 
-sp<Node> ModelImporterAssimp::loadNodeHierarchy(const aiNode* node, const std::vector<sp<Mesh>>& meshes) const
+sp<Node> ModelImporterAssimp::loadNodeHierarchy(WeakPtr<Node> parentNode, const aiNode* node, const std::vector<sp<Mesh>>& meshes) const
 {
-    sp<Node> n = sp<Node>::make(node->mName.C_Str(), M4(node->mTransformation).transpose());
+    sp<Node> n = sp<Node>::make(std::move(parentNode), node->mName.C_Str(), M4(node->mTransformation).transpose());
     for(uint32_t i = 0; i < node->mNumMeshes; ++i)
     {
         DASSERT(node->mMeshes[i] < meshes.size());
         n->addMesh(meshes[node->mMeshes[i]]);
     }
     for(uint32_t i = 0; i < node->mNumChildren; ++i)
-        n->childNodes().push_back(loadNodeHierarchy(node->mChildren[i], meshes));
+        n->childNodes().push_back(loadNodeHierarchy(n, node->mChildren[i], meshes));
     return n;
 }
 

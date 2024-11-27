@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "core/base/string.h"
+#include "core/types/weak_ptr.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -14,12 +15,15 @@ namespace ark {
 
 class ARK_API Node {
 public:
-    Node(String name, const M4& transform);
-    Node(String name, const V3& translation, const V4& rotation, const V3& scale);
+    Node(WeakPtr<Node> parentNode, String name, const M4& transform);
+    Node(WeakPtr<Node> parentNode, String name, const V3& translation, const V4& rotation, const V3& scale);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Node);
 
 //  [[script::bindings::property]]
     const String& name() const;
+
+//  [[script::bindings::property]]
+    sp<Node> parentNode() const;
 
 //  [[script::bindings::property]]
     const std::vector<sp<Node>>& childNodes() const;
@@ -30,7 +34,7 @@ public:
     void addMesh(sp<Mesh> mesh);
 
 //  [[script::bindings::property]]
-    const M4& matrix() const;
+    const M4& localMatrix() const;
 
 //  [[script::bindings::property]]
     const V3& translation() const;
@@ -43,6 +47,7 @@ public:
     sp<Node> findChildNode(const String& name) const;
 
 private:
+    WeakPtr<Node> _parent_node;
     String _name;
 
     std::vector<sp<Node>> _child_nodes;
@@ -52,7 +57,7 @@ private:
     V4 _rotation;
     V3 _scale;
 
-    M4 _matrix;
+    M4 _local_matrix;
 };
 
 }

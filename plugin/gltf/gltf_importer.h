@@ -20,7 +20,7 @@ class GltfImporter {
 public:
 	GltfImporter(const String& src, const MaterialBundle& materialBundle);
 
-	sp<Node> loadNode(int32_t nodeId);
+	sp<Node> loadNode(WeakPtr<Node> parentNode, int32_t nodeId);
 	void loadPrimitives();
 
 	Model loadModel();

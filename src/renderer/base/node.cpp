@@ -1,22 +1,26 @@
 #include "renderer/base/node.h"
 
 #include "mesh.h"
-#include "core/inf/variable.h"
 
 
 namespace ark {
 
-Node::Node(String name, const M4& transform)
-    : _name(std::move(name)), _matrix(transform) {
+Node::Node(WeakPtr<Node> parentNode, String name, const M4& transform)
+    : _parent_node(std::move(parentNode)), _name(std::move(name)), _local_matrix(transform) {
 }
 
-Node::Node(String name, const V3& translation, const V4& rotation, const V3& scale)
-    : _name(std::move(name)), _translation(translation), _rotation(rotation), _scale(scale), _matrix(MatrixUtil::scale(MatrixUtil::rotate(MatrixUtil::translate({}, translation), rotation), scale)) {
+Node::Node(WeakPtr<Node> parentNode, String name, const V3& translation, const V4& rotation, const V3& scale)
+    : _parent_node(std::move(parentNode)), _name(std::move(name)), _translation(translation), _rotation(rotation), _scale(scale), _local_matrix(MatrixUtil::scale(MatrixUtil::rotate(MatrixUtil::translate({}, translation), rotation), scale)) {
 }
 
 const String& Node::name() const
 {
     return _name;
+}
+
+sp<Node> Node::parentNode() const
+{
+    return _parent_node.lock();
 }
 
 const std::vector<sp<Node>>& Node::childNodes() const
@@ -40,9 +44,9 @@ void Node::addMesh(sp<Mesh> mesh)
     _meshes.push_back(std::move(mesh));
 }
 
-const M4& Node::matrix() const
+const M4& Node::localMatrix() const
 {
-    return _matrix;
+    return _local_matrix;
 }
 
 const V3& Node::translation() const

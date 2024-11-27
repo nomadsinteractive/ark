@@ -25,6 +25,8 @@ TYPE_VEC2 = Union[tuple[TYPE_NUMERIC, TYPE_NUMERIC], 'Vec2']
 TYPE_VEC3 = Union[tuple[TYPE_NUMERIC, TYPE_NUMERIC, TYPE_NUMERIC], TYPE_VEC2, 'Vec3']
 TYPE_VEC4 = Union[tuple[TYPE_NUMERIC, TYPE_NUMERIC, TYPE_NUMERIC, TYPE_NUMERIC],'Vec4']
 TYPE_RECTI = tuple[int, int, int, int]
+TYPE_FLOAT2 = tuple[float, float]
+TYPE_FLOAT3 = tuple[float, float, float]
 TYPE_FLOAT4 = tuple[float, float, float, float]
 TYPE_M4 = tuple[TYPE_FLOAT4, TYPE_FLOAT4, TYPE_FLOAT4, TYPE_FLOAT4]
 TYPE_NAMED_HASH_ID = Union[int, str]
@@ -1369,6 +1371,10 @@ class Node:
         return ''
 
     @property
+    def parent_node(self) -> Optional["Node"]:
+        pass
+
+    @property
     def child_nodes(self) -> list['Node']:
         return []
 
@@ -1377,8 +1383,20 @@ class Node:
         return []
 
     @property
-    def transform(self) -> TYPE_M4:
+    def local_matrix(self) -> TYPE_M4:
         return ((0,) * 4, ) * 4
+
+    @property
+    def translation(self) -> TYPE_FLOAT3:
+        pass
+
+    @property
+    def rotation(self) -> TYPE_FLOAT4:
+        pass
+
+    @property
+    def scale(self) -> TYPE_FLOAT3:
+        pass
 
     def find_child_node(self, name: str) -> Optional['Node']:
         pass
@@ -1428,10 +1446,6 @@ class Model:
     @property
     def animations(self) -> dict[str, Animation]:
         return {}
-
-    @property
-    def node_names(self) -> list[str]:
-        return []
 
     @property
     def root_node(self) -> Optional[Node]:

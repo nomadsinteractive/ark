@@ -13,24 +13,23 @@ namespace {
 struct AnimationSession {
 
     AnimationSession(sp<Integer> tick, uint32_t durationInTicks, sp<std::vector<AnimationFrame>> animationFrames)
-        : _tick(std::move(tick)), _duration_in_ticks(durationInTicks), _animation_frames(std::move(animationFrames)), _frame_index(static_cast<uint32_t>(_tick->val()) % _duration_in_ticks) {
+        : _tick(std::move(tick)), _duration_in_ticks(durationInTicks), _animation_frames(std::move(animationFrames)) {
     }
 
-    bool update(uint64_t timestamp)
+    bool update(uint64_t timestamp) const
     {
-        if(_tick->update(timestamp))
-        {
-            _frame_index = static_cast<uint32_t>(_tick->val()) % _duration_in_ticks;
-            return true;
-        }
-        return false;
+        return _tick->update(timestamp);
     }
 
+    const AnimationFrame& currentFrame() const
+    {
+        return _animation_frames->at(static_cast<uint32_t>(_tick->val()) % _duration_in_ticks);
+    }
+
+private:
     sp<Integer> _tick;
     uint32_t _duration_in_ticks;
     sp<std::vector<AnimationFrame>> _animation_frames;
-
-    uint32_t _frame_index;
 };
 
 struct NodeMatrix final : Mat4 {
@@ -45,7 +44,7 @@ struct NodeMatrix final : Mat4 {
 
     M4 val() override
     {
-        return _session->_animation_frames->at(_session->_frame_index).at(_node_index);
+        return _session->currentFrame().at(_node_index);
     }
 
     sp<AnimationSession> _session;

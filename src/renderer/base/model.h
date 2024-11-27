@@ -53,10 +53,6 @@ public:
     const Table<String, sp<Animation>>& animations() const;
     void setAnimations(Table<String, sp<Animation>> animations);
 
-//  [[script::bindings::property]]
-    const std::vector<String>& nodeNames() const;
-    void setNodeNames(std::vector<String> nodes);
-
 //  [[script::bindings::auto]]
     const sp<Animation>& getAnimation(const String& name) const;
 
