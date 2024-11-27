@@ -1,12 +1,10 @@
-#include "gltf/impl/animation/animation_gltf.h"
+#include "renderer/base/animation.h"
 
-#include "core/base/string.h"
-#include "core/collection/table.h"
-#include "core/types/shared_ptr.h"
+#include "core/util/integer_type.h"
 
 #include "graphics/base/mat.h"
 
-namespace ark::plugin::gltf {
+namespace ark {
 
 namespace {
 
@@ -53,12 +51,27 @@ struct NodeMatrix final : Mat4 {
 
 }
 
-AnimationGltf::AnimationGltf(uint32_t durationInTicks, Table<String, uint32_t> nodes, std::vector<AnimationFrame> animationFrames)
-    : Animation(durationInTicks / 24.0f, 24.0f), _duration_in_ticks(durationInTicks), _nodes(sp<Table<String, uint32_t>>::make(std::move(nodes))), _animation_frames(sp<std::vector<AnimationFrame>>::make(std::move(animationFrames)))
+Animation::Animation(uint32_t durationInTicks, Table<String, uint32_t> nodes, std::vector<AnimationFrame> animationFrames)
+    : _duration(durationInTicks / 24.0f), _tps(24.0f), _duration_in_ticks(durationInTicks), _nodes(sp<Table<String, uint32_t>>::make(std::move(nodes))), _animation_frames(sp<std::vector<AnimationFrame>>::make(std::move(animationFrames)))
 {
 }
 
-std::vector<std::pair<String, sp<Mat4>>> AnimationGltf::getNodeTranforms(sp<Integer> tick)
+float Animation::duration() const
+{
+    return _duration;
+}
+
+float Animation::tps() const
+{
+    return _tps;
+}
+
+uint32_t Animation::ticks() const
+{
+    return static_cast<uint32_t>(_duration * _tps);
+}
+
+std::vector<std::pair<String, sp<Mat4>>> Animation::getNodeTransforms(sp<Integer> tick) const
 {
     std::vector<std::pair<String, sp<Mat4>>> nodeTransforms;
 
@@ -67,6 +80,11 @@ std::vector<std::pair<String, sp<Mat4>>> AnimationGltf::getNodeTranforms(sp<Inte
         nodeTransforms.emplace_back(name, sp<NodeMatrix>::make(session, nodeIdx));
 
     return nodeTransforms;
+}
+
+std::vector<std::pair<String, sp<Mat4>>> Animation::getNodeTransforms(sp<Numeric> tick) const
+{
+    return getNodeTransforms(IntegerType::create(std::move(tick)));
 }
 
 }

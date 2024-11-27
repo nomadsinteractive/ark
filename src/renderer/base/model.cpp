@@ -5,7 +5,6 @@
 
 #include "renderer/base/mesh.h"
 #include "renderer/base/vertex_writer.h"
-#include "renderer/inf/animation.h"
 #include "renderer/inf/vertices.h"
 
 

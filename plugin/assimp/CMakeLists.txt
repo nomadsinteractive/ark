@@ -14,7 +14,6 @@ list(APPEND LOCAL_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR})
 
 aux_source_directory(. LOCAL_SRC_LIST)
 aux_source_directory(base LOCAL_SRC_LIST)
-aux_source_directory(impl/animation LOCAL_SRC_LIST)
 aux_source_directory(impl/io LOCAL_SRC_LIST)
 aux_source_directory(impl/model_loader LOCAL_SRC_LIST)
 aux_source_directory(util LOCAL_SRC_LIST)

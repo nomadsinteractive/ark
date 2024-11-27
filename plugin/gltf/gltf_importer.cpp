@@ -13,9 +13,8 @@
 #include "core/util/strings.h"
 
 #include "graphics/base/v4.h"
-#include "impl/animation/animation_gltf.h"
 
-#include "renderer/base/animation_uploader.h"
+#include "renderer/base/animation.h"
 #include "renderer/base/atlas.h"
 #include "renderer/base/material_bundle.h"
 #include "renderer/base/mesh.h"
@@ -533,7 +532,7 @@ Model GltfImporter::loadModel()
 				nodeIds.push_back(node->name(), frameNodeId);
 			}
 
-			animations.push_back(std::move(animation.name), sp<ark::Animation>::make<AnimationGltf>(tickCount, std::move(nodeIds), std::move(frames)));
+			animations.push_back(std::move(animation.name), sp<ark::Animation>::make(tickCount, std::move(nodeIds), std::move(frames)));
 		}
 	}
 

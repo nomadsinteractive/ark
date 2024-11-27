@@ -11,32 +11,90 @@
 #include "graphics/base/bitmap.h"
 #include "graphics/base/material.h"
 #include "graphics/base/size.h"
-#include "graphics/util/matrix_util.h"
 
-#include "renderer/base/atlas.h"
+#include "renderer/base/animation.h"
 #include "renderer/base/drawing_buffer.h"
 #include "renderer/base/material_bundle.h"
 #include "renderer/base/model.h"
-#include "renderer/base/model_bundle.h"
 #include "renderer/base/node.h"
 #include "renderer/base/pipeline_descriptor.h"
-#include "renderer/base/pipeline_descriptor.h"
-#include "renderer/base/pipeline_input.h"
 #include "renderer/base/render_engine.h"
-#include "renderer/base/render_engine_context.h"
 #include "renderer/base/resource_loader_context.h"
-#include "renderer/base/pipeline_bindings.h"
-#include "renderer/base/shader.h"
-#include "renderer/base/uniform.h"
 #include "renderer/impl/render_command_composer/rcc_multi_draw_elements_indirect.h"
-#include "renderer/inf/render_command_composer.h"
 
 #include "assimp/base/node_table.h"
-#include "assimp/impl/animation/animation_assimp_nodes.h"
 #include "assimp/impl/io/ark_io_system.h"
+#include "assimp/util/animate_util.h"
 
 
 namespace ark::plugin::assimp {
+
+namespace {
+
+void loadNodeHierarchy(float tick, const aiNode* node, const aiAnimation* animation, const aiMatrix4x4& parentTransform, Table<String, AnimationNode>& nodes, const ModelImporterAssimp::NodeLoaderCallback& callback)
+{
+    const String nodeName(node->mName.data);
+    const aiNodeAnim* pNodeAnim = AnimateUtil::findNodeAnim(animation, nodeName);
+
+    aiMatrix4x4 nodeTransformation(node->mTransformation);
+
+    if(pNodeAnim)
+    {
+        aiMatrix4x4 matScale = AnimateUtil::interpolateScale(tick, pNodeAnim);
+        aiMatrix4x4 matRotation = AnimateUtil::interpolateRotation(tick, pNodeAnim);
+        aiMatrix4x4 matTranslation = AnimateUtil::interpolateTranslation(tick, pNodeAnim);
+
+        nodeTransformation = matTranslation * matRotation * matScale;
+    }
+
+    const aiMatrix4x4 globalTransformation = parentTransform * nodeTransformation;
+
+    auto iter = nodes.find(nodeName);
+    if (iter != nodes.end())
+        iter->second._intermediate = callback(iter->second, globalTransformation);
+
+    for (uint32_t i = 0; i < node->mNumChildren; i++)
+        loadNodeHierarchy(tick, node->mChildren[i], animation, globalTransformation, nodes, callback);
+}
+
+void loadHierarchy(float tick, const aiNode* node, const aiAnimation* animation, const aiMatrix4x4& transform, Table<String, AnimationNode>& nodes, const ModelImporterAssimp::NodeLoaderCallback& callback, std::vector<M4>& output)
+{
+    loadNodeHierarchy(tick, node, animation, aiMatrix4x4(), nodes, callback);
+    for(AnimationNode& i : nodes.values())
+    {
+        const aiMatrix4x4 finalMatrix = transform * i._intermediate;
+        output.push_back(M4(finalMatrix).transpose());
+    }
+}
+
+sp<Animation> makeAnimation(float tps, const aiAnimation* animation, const aiNode* rootNode, const aiMatrix4x4& globalTransform, Table<String, AnimationNode>& nodes, const ModelImporterAssimp::NodeLoaderCallback& callback)
+{
+    const float duration = static_cast<float>(animation->mDuration);
+    const float tpsDefault = animation->mTicksPerSecond != 0 ? static_cast<float>(animation->mTicksPerSecond) : tps;
+    const uint32_t durationInTicks = static_cast<uint32_t>(duration * tps / tpsDefault);
+
+    Table<String, uint32_t> nodeIds;
+    std::vector<AnimationFrame> animationFrames;
+
+    aiMatrix4x4 globalInversedTransform = rootNode->mTransformation * globalTransform;
+    globalInversedTransform.Inverse();
+
+    const float step = duration / static_cast<float>(durationInTicks);
+    for(uint32_t i = 0; i < durationInTicks; ++i)
+    {
+        AnimationFrame frame;
+        loadHierarchy(static_cast<float>(i) * step, rootNode, animation, globalInversedTransform, nodes, callback, frame);
+        animationFrames.push_back(std::move(frame));
+    }
+
+    uint32_t index = 0;
+    for(const auto& iter : nodes)
+        nodeIds.push_back(iter.first, index++);
+
+    return sp<Animation>::make(durationInTicks, std::move(nodeIds), std::move(animationFrames));
+}
+
+}
 
 bitmap ModelImporterAssimp::loadBitmap(const sp<BitmapLoaderBundle>& imageResource, const aiTexture* tex) const
 {
@@ -103,23 +161,23 @@ void ModelImporterAssimp::loadNodeHierarchy(const aiNode* node, NodeTable& nodes
         loadNodeHierarchy(node->mChildren[i], nodes, nodeIds);
 }
 
-void ModelImporterAssimp::loadAnimates(float tps, Table<String, sp<Animation>>& animates, const aiScene* scene, const aiMatrix4x4& globalTransformation, Table<String, AnimationNode>& nodes, const AnimationAssimpNodes::NodeLoaderCallback& callback) const
+void ModelImporterAssimp::loadAnimates(float tps, Table<String, sp<Animation>>& animates, const aiScene* scene, const aiMatrix4x4& globalTransformation, Table<String, AnimationNode>& nodes, const NodeLoaderCallback& callback) const
 {
     for(uint32_t i = 0; i < scene->mNumAnimations; ++i)
     {
         const aiAnimation* animation = scene->mAnimations[i];
-        animates.push_back(animation->mName.C_Str(), sp<AnimationAssimpNodes>::make(tps, animation, scene->mRootNode, globalTransformation, nodes, callback));
+        animates.push_back(animation->mName.C_Str(), makeAnimation(tps, animation, scene->mRootNode, globalTransformation, nodes, callback));
     }
 }
 
-void ModelImporterAssimp::loadAnimates(float tps, Table<String, sp<Animation>>& animates, const aiScene* scene, const aiMatrix4x4& globalTransformation, Table<String, AnimationNode>& nodes, const AnimationAssimpNodes::NodeLoaderCallback& callback, String name, String alias) const
+void ModelImporterAssimp::loadAnimates(float tps, Table<String, sp<Animation>>& animates, const aiScene* scene, const aiMatrix4x4& globalTransformation, Table<String, AnimationNode>& nodes, const NodeLoaderCallback& callback, String name, String alias) const
 {
     for(uint32_t i = 0; i < scene->mNumAnimations; ++i)
     {
         const aiAnimation* animate = scene->mAnimations[i];
         if(name == animate->mName.C_Str())
         {
-            sp<Animation> animation = sp<AnimationAssimpNodes>::make(tps, animate, scene->mRootNode, globalTransformation, nodes, callback);
+            sp<Animation> animation = makeAnimation(tps, animate, scene->mRootNode, globalTransformation, nodes, callback);
             if(alias)
             {
                 if(animates.has(name))
@@ -220,7 +278,7 @@ Model ModelImporterAssimp::loadModel(const aiScene* scene, MaterialBundle& mater
         aiMatrix4x4 globalAnimationTransform;
         bool noBones = bones.nodes().size() == 0;
         Table<String, sp<Animation>> animates;
-        AnimationAssimpNodes::NodeLoaderCallback callback = noBones ? callbackNodeAnimation : callbackBoneAnimation;
+        NodeLoaderCallback callback = noBones ? callbackNodeAnimation : callbackBoneAnimation;
         NodeTable animationNodes = noBones ? loadNodes(scene->mRootNode, model) : std::move(bones);
         float defaultTps = manifest.getAttribute<float>("tps", 24.0f);
         loadAnimates(defaultTps, animates, scene, globalAnimationTransform, animationNodes.nodes(), callback);

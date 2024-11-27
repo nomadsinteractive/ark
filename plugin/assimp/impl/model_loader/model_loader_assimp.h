@@ -14,18 +14,17 @@
 #include "graphics/base/render_layer.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/base/buffer.h"
 #include "renderer/base/mesh.h"
 #include "renderer/base/model_bundle.h"
 #include "renderer/inf/model_loader.h"
 
 #include "assimp/forwarding.h"
-#include "assimp/impl/animation/animation_assimp_nodes.h"
 
 namespace ark::plugin::assimp {
 
 class ModelImporterAssimp final : public ModelLoader::Importer {
 public:
+    typedef std::function<aiMatrix4x4(const AnimationNode& node, const aiMatrix4x4& globalTransformation)> NodeLoaderCallback;
 
     Model import(const Manifest& manifest, MaterialBundle& materialBundle) override;
 
@@ -34,8 +33,7 @@ public:
     public:
         BUILDER() = default;
 
-        virtual sp<ModelLoader::Importer> build(const Scope& args) override;
-
+        sp<ModelLoader::Importer> build(const Scope& args) override;
     };
 
 private:
@@ -44,8 +42,8 @@ private:
     Mesh loadMesh(const aiScene* scene, const aiMesh* mesh, MaterialBundle& materialBundle, uint32_t meshId, element_index_t vertexBase, NodeTable& boneMapping, const std::vector<sp<Material> >& materials) const;
     NodeTable loadNodes(const aiNode* node, Model& model) const;
     void loadBones(const aiMesh* mesh, NodeTable& boneMapping, Array<Mesh::BoneInfo>& bones) const;
-    void loadAnimates(float tps, Table<String, sp<Animation>>& animates, const aiScene* scene, const aiMatrix4x4& globalTransformation, Table<String, AnimationNode>& nodes, const AnimationAssimpNodes::NodeLoaderCallback& callback) const;
-    void loadAnimates(float tps, Table<String, sp<Animation>>& animates, const aiScene* scene, const aiMatrix4x4& globalTransformation, Table<String, AnimationNode>& nodes, const AnimationAssimpNodes::NodeLoaderCallback& callback, String name, String alias) const;
+    void loadAnimates(float tps, Table<String, sp<Animation>>& animates, const aiScene* scene, const aiMatrix4x4& globalTransformation, Table<String, AnimationNode>& nodes, const NodeLoaderCallback& callback) const;
+    void loadAnimates(float tps, Table<String, sp<Animation>>& animates, const aiScene* scene, const aiMatrix4x4& globalTransformation, Table<String, AnimationNode>& nodes, const NodeLoaderCallback& callback, String name, String alias) const;
 
     bitmap loadBitmap(const sp<BitmapLoaderBundle>& imageResource, const aiTexture* tex) const;
     std::vector<element_index_t> loadIndices(const aiMesh* mesh, element_index_t indexOffset) const;

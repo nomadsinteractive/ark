@@ -23,16 +23,18 @@ uint32_t ShaderDataType::size() const
 uint32_t ShaderDataType::sizeOfComponent() const
 {
 	switch (_component_type) {
-	case TYPE_NONE:
-		return 0;
-	case TYPE_BYTE:
-    case TYPE_UBYTE:
-		return 1;
-	case TYPE_FLOAT:
-	case TYPE_INTEGER:
-		return 4;
-	case TYPE_USHORT:
-		return 2;
+		case TYPE_NONE:
+			return 0;
+		case TYPE_BYTE:
+	    case TYPE_UBYTE:
+			return 1;
+		case TYPE_FLOAT:
+		case TYPE_INTEGER:
+			return 4;
+		case TYPE_USHORT:
+			return 2;
+		default:
+			break;
 	}
 	FATAL("Unknow component type: %d", _component_type);
 	return 0;

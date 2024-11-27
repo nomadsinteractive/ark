@@ -61,12 +61,12 @@ private:
 
 }
 
-sp<IntegerWrapper> IntegerType::create(sp<Integer> value)
+sp<Integer> IntegerType::create(sp<Integer> value)
 {
     return sp<IntegerWrapper>::make(std::move(value));
 }
 
-sp<IntegerWrapper> IntegerType::create(sp<Numeric> value)
+sp<Integer> IntegerType::create(sp<Numeric> value)
 {
     sp<Integer> casted = sp<VariableOP1<int32_t, float>>::make(Operators::Cast<float, int32_t>(), std::move(value));
     return sp<IntegerWrapper>::make(std::move(casted));
@@ -77,7 +77,7 @@ sp<Integer> IntegerType::create(std::vector<sp<Integer>> values)
     return sp<IntegerSubscribed>::make(std::move(values), sp<Integer::Const>::make(0));
 }
 
-sp<IntegerWrapper> IntegerType::create(int32_t value)
+sp<Integer> IntegerType::create(int32_t value)
 {
     return sp<IntegerWrapper>::make(value);
 }
