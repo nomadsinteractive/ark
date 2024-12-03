@@ -9,7 +9,7 @@ Use it for:
 3. Unit test(maybe)
 
 """
-from typing import Callable, List, Type, TypeVar, Union, Optional, Dict, Tuple, Any
+from typing import Callable, List, Type, TypeVar, Union, Optional, Dict, Tuple, Any, Self
 
 _BUILDABLE_TYPES = TypeVar('_BUILDABLE_TYPES', 'Arena', 'AudioPlayer', 'Boolean', 'Characters', 'Collider', 'Integer', 'ModelLoader', 'Numeric', 'NarrowPhrase',
                            'Layer', 'Vec2', 'Vec3', 'Vec4', 'Renderer', 'RenderLayer', 'RenderObject', 'Rotation', 'Size', 'StringBundle', 'Tilemap',
@@ -933,24 +933,24 @@ class String:
         pass
 
 
-class Numeric(_Var):
+class _Scalar(_Var):
+
+    def at_least(self, least) -> Self:
+        pass
+
+    def at_most(self, most) -> Self:
+        pass
+
+    def fence(self, fence) -> Self:
+        pass
+
+
+class Numeric(_Scalar):
     def __init__(self, val):
         _Var.__init__(self, val)
 
-    def approach(self, expectation) -> 'ExpectationF':
-        return ExpectationF(self)
-
-    def at_least(self, least) -> 'ExpectationF':
-        return ExpectationF(self)
-
-    def at_most(self, most) -> 'ExpectationF':
-        return ExpectationF(self)
-
-    def boundary(self, boundary) -> 'ExpectationF':
-        return ExpectationF(self)
-
-    def fence(self, fence) -> 'ExpectationF':
-        return ExpectationF(self)
+    def approach(self, expectation) -> Self:
+        pass
 
     def integral(self, t: Optional['Numeric'] = None) -> 'Numeric':
         pass
@@ -975,7 +975,7 @@ class Numeric(_Var):
         pass
 
 
-class Integer(_Var):
+class Integer(_Scalar):
     REPEAT_NONE = 0
     REPEAT_REVERSE = 1
     REPEAT_LOOP = 4
@@ -986,7 +986,7 @@ class Integer(_Var):
         super().__init__(value)
 
     @staticmethod
-    def repeat(array: List[int], repeat: int) -> 'ExpectationI':
+    def repeat(array: List[int], repeat: int) -> Integer:
         pass
 
     @staticmethod
@@ -1297,7 +1297,10 @@ class Animation:
     def duration(self) -> float:
         return 0
 
-    def get_node_transforms(self, t: TYPE_INTEGER) -> list[tuple[str, Mat4]]:
+    def get_local_transforms(self, t: TYPE_INTEGER | TYPE_NUMERIC) -> list[tuple[str, Mat4]]:
+        pass
+
+    def get_global_transform(self, node: "Node", t: TYPE_INTEGER | TYPE_NUMERIC) -> Mat4:
         pass
 
 
@@ -1607,27 +1610,6 @@ class RenderObject:
 
     def hide(self):
         pass
-
-
-class _Expectation:
-    def create_observer(self, callback: Callable, oneshot=True) -> Observer:
-        pass
-
-    def add_observer(self, callback: Callable, oneshot=True) -> Observer:
-        pass
-
-    def clear(self):
-        pass
-
-
-class ExpectationF(Numeric, _Expectation):
-    def __init__(self, val):
-        super().__init__(val)
-
-
-class ExpectationI(Integer, _Expectation):
-    def __init__(self, val):
-        super().__init__(val)
 
 
 class LayerContext:

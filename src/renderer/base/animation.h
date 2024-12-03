@@ -9,6 +9,8 @@
 
 #include "graphics/forwarding.h"
 
+#include "renderer/forwarding.h"
+
 namespace ark {
 
 typedef std::vector<M4> AnimationFrame;
@@ -25,15 +27,18 @@ public:
     uint32_t ticks() const;
 
 //  [[script::bindings::auto]]
-    std::vector<std::pair<String, sp<Mat4>>> getNodeTransforms(sp<Integer> tick) const;
+    std::vector<std::pair<String, sp<Mat4>>> getLocalTransforms(sp<Integer> tick) const;
 //  [[script::bindings::auto]]
-    std::vector<std::pair<String, sp<Mat4>>> getNodeTransforms(sp<Numeric> tick) const;
+    std::vector<std::pair<String, sp<Mat4>>> getLocalTransforms(sp<Numeric> tick) const;
+
+//  [[script::bindings::auto]]
+    sp<Mat4> getGlobalTransform(const Node& node, sp<Integer> tick) const;
 
 private:
-    float _duration;
     float _tps;
-
+    float _duration;
     uint32_t _duration_in_ticks;
+
     sp<Table<String, uint32_t>> _nodes;
     sp<std::vector<AnimationFrame>> _animation_frames;
 };
