@@ -196,7 +196,7 @@ private:
             : _func(std::move(func)), _arg(std::move(arg)), _observer(std::move(observer)) {
         }
 
-        virtual void render() override {
+        void render() override {
             if(_func(_arg()))
                 _observer->notify();
         }

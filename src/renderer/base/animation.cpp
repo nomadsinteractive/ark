@@ -117,9 +117,15 @@ sp<Mat4> Animation::getGlobalTransform(const Node& node, sp<Integer> tick) const
     ASSERT(pNode);
     do
     {
-        const auto iter = _nodes->find(pNode->name());
-        int32_t nodeIndex = iter == _nodes->end() ? -1 : static_cast<int32_t>(iter->second);
-        transformPath.emplace_back(nodeIndex, pNode->localMatrix());
+        if(const auto iter = _nodes->find(pNode->name()); iter == _nodes->end())
+        {
+            if(transformPath.empty() || transformPath.back().first != -1)
+                transformPath.emplace_back(-1, pNode->localMatrix());
+            else
+                transformPath.back().second = pNode->localMatrix() * transformPath.back().second;
+        }
+        else
+            transformPath.emplace_back(static_cast<int32_t>(iter->second), pNode->localMatrix());
         pNode = pNode->parentNode().get();
     } while(pNode);
 

@@ -33,11 +33,6 @@ private:
 
 }
 
-Observer::Observer(bool oneshot)
-    : _oneshot(oneshot)
-{
-}
-
 void Observer::notify()
 {
     std::vector<Callback> callbacks = std::move(_callbacks);
@@ -50,16 +45,16 @@ void Observer::notify()
     }
 }
 
-void Observer::addCallback(sp<Runnable> callback, uint32_t triggerAfter)
+void Observer::addCallback(sp<Runnable> callback, bool oneshot, uint32_t triggerAfter)
 {
     ASSERT(callback);
-    _callbacks.push_back({std::move(callback), _oneshot, false, triggerAfter});
+    _callbacks.push_back({std::move(callback), oneshot, false, triggerAfter});
 }
 
-sp<Boolean> Observer::addBooleanSignal(bool value)
+sp<Boolean> Observer::addBooleanSignal(bool value, bool oneshot)
 {
     sp<Signal> signal = sp<Signal>::make(value, !value);
-    _callbacks.push_back({signal, _oneshot, true, 1});
+    _callbacks.push_back({signal, oneshot, true, 1});
     return signal;
 }
 

@@ -243,7 +243,7 @@ public:
     }
 
     void render() override {
-        bool renderResult = ImGui::InputTextWithHint(_label.c_str(), _hint ? _hint->val()->c_str() : nullptr, &_text_buf[0], _text_buf.size(), _flags);
+        const bool renderResult = ImGui::InputTextWithHint(_label.c_str(), _hint ? _hint->val()->c_str() : nullptr, &_text_buf[0], _text_buf.size(), _flags);
         if(renderResult) {
             StringType::set(_value, sp<String>::make(_text_buf.data()));
             if(_observer) {

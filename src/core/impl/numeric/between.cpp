@@ -24,8 +24,8 @@ bool Between::update(uint64_t timestamp)
         return false;
 
     _value = _delegate->val();
-    float min = _min->val();
-    float max = _max->val();
+    const float min = _min->val();
+    const float max = _max->val();
     bool crossed = false;
     if(_at_border)
     {

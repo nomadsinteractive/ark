@@ -6,17 +6,17 @@
 
 namespace ark {
 
-template<typename T> class VariableObserver : public Variable<T> {
+template<typename T> class VariableObserver final : public Variable<T> {
 public:
     VariableObserver(sp<Variable<T>> delegate, sp<Observer> observer)
         : _delegate(std::move(delegate)), _observer(std::move(observer)), _val(_delegate->val()) {
     }
 
-    virtual T val() override {
+    T val() override {
         return _delegate->val();
     }
 
-    virtual bool update(uint64_t timestamp) override {
+    bool update(uint64_t timestamp) override {
         if(_delegate->update(timestamp)) {
             T val = _delegate->val();
             if(val != _val) {

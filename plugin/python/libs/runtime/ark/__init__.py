@@ -784,13 +784,13 @@ class ApplicationManifest:
 
 
 class Observer:
-    def __init__(self, oneshot: bool = True):
+    def __init__(self):
         pass
 
     def update(self):
         pass
 
-    def add_callback(self, callback: Callable, trigger_after: int = 1):
+    def add_callback(self, callback: Callable, oneshot: bool = False, trigger_after: int = 1):
         pass
 
 
