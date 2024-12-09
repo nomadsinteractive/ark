@@ -27,18 +27,18 @@ class IntegerSubscribed final : public Integer, Implements<IntegerSubscribed, In
 public:
     IntegerSubscribed(std::vector<sp<Integer>> values, sp<Integer> index)
         : _values(std::move(values)), _index(std::move(index)) {
-        CHECK(_values.size() > 0, "IntegerVector should have at least one component");
+        CHECK(!_values.empty(), "IntegerVector should have at least one component");
         updateSubscription();
     }
 
-    virtual bool update(uint64_t timestamp) override {
-        bool indexDirty = _index->update(timestamp);
+    bool update(uint64_t timestamp) override {
+        const bool indexDirty = _index->update(timestamp);
         if(indexDirty)
             updateSubscription();
         return _subscribed->update(timestamp) || indexDirty;
     }
 
-    virtual int32_t val() override {
+    int32_t val() override {
         return _subscribed->val();
     }
 
@@ -48,7 +48,7 @@ public:
 
 private:
     void updateSubscription() {
-        int32_t index = _index->val();
+        const int32_t index = _index->val();
         CHECK(index < _values.size(), "Subscription index out of bounds: index: %d, array_length: %d", index, _values.size());
         _subscribed = _values.at(index % _values.size());
     }
@@ -287,7 +287,7 @@ sp<Integer> IntegerType::atMost(sp<Integer> self, sp<Integer> a1, sp<Observer> o
 sp<Integer> IntegerType::clamp(sp<Integer> self, sp<Integer> min, sp<Integer> max, sp<Observer> observer)
 {
     ASSERT(self && min && max);
-    return sp<Integer>::make<Clamp<int32_t>>(self, min, max, std::move(observer));
+    return sp<Integer>::make<Clamp<int32_t>>(std::move(self), std::move(min), std::move(max), std::move(observer));
 }
 
 sp<Integer> IntegerType::fence(sp<Integer> self, sp<Integer> a1, sp<Observer> observer)

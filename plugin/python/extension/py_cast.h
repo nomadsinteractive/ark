@@ -105,6 +105,10 @@ public:
             catch(const std::exception& e) {
                 PyBridge::setRuntimeErrString(e.what());
             }
+            if constexpr(std::is_pointer_v<R>)
+                return nullptr;
+            if constexpr(std::is_signed_v<R>)
+                return static_cast<R>(-1);
             return static_cast<R>(0);
         }
     };

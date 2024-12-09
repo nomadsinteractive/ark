@@ -51,7 +51,7 @@ struct LocalMatrix final : Mat4 {
 };
 
 struct GlobalMatrix final : Mat4 {
-    GlobalMatrix(sp<AnimationSession> session, std::vector<std::pair<uint32_t, M4>> transformPath)
+    GlobalMatrix(sp<AnimationSession> session, std::vector<std::pair<int32_t, M4>> transformPath)
         : _session(std::move(session)), _transform_path(std::move(transformPath)) {
     }
 
@@ -64,12 +64,12 @@ struct GlobalMatrix final : Mat4 {
     {
         M4 transform;
         for(const auto& [k, v] : _transform_path)
-            transform = v * _session->currentFrame().at(k) * transform;
+            transform = (k >= 0 ? v * _session->currentFrame().at(k) : v) * transform;
         return transform;
     }
 
     sp<AnimationSession> _session;
-    std::vector<std::pair<uint32_t, M4>> _transform_path;
+    std::vector<std::pair<int32_t, M4>> _transform_path;
 };
 
 }
@@ -112,13 +112,15 @@ std::vector<std::pair<String, sp<Mat4>>> Animation::getLocalTransforms(sp<Numeri
 
 sp<Mat4> Animation::getGlobalTransform(const Node& node, sp<Integer> tick) const
 {
-    std::vector<std::pair<uint32_t, M4>> transformPath;
+    std::vector<std::pair<int32_t, M4>> transformPath;
     const Node* pNode = &node;
+    ASSERT(pNode);
     do
     {
-        uint32_t nodeId = (*_nodes)[pNode->name()];
-        transformPath.emplace_back(nodeId, pNode->localMatrix());
-        pNode = node.parentNode().get();
+        const auto iter = _nodes->find(pNode->name());
+        int32_t nodeIndex = iter == _nodes->end() ? -1 : static_cast<int32_t>(iter->second);
+        transformPath.emplace_back(nodeIndex, pNode->localMatrix());
+        pNode = pNode->parentNode().get();
     } while(pNode);
 
     sp<AnimationSession> session = sp<AnimationSession>::make(std::move(tick), _duration_in_ticks, _animation_frames);
