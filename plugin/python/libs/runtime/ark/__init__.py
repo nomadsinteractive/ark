@@ -16,7 +16,7 @@ _BUILDABLE_TYPES = TypeVar('_BUILDABLE_TYPES', 'Arena', 'AudioPlayer', 'Boolean'
                            'TilemapImporter', 'Tileset', 'TilesetImporter', 'Transform', 'Varyings', 'View')
 
 
-TYPE_INTEGER = Union[int, 'Integer']
+TYPE_INTEGER = Union[int, "Integer"]
 TYPE_ENUM = Union[int, 'Enum']
 TYPE_INT_OR_FLOAT = Union[int, float]
 TYPE_NUMERIC = Union[TYPE_INT_OR_FLOAT, 'Numeric']
@@ -982,24 +982,27 @@ class Integer(_Scalar):
     REPEAT_LAST = 8
     REPEAT_NOTIFY = 16
 
-    def __init__(self, value: Union[int, 'Integer', Numeric, list['Integer']]):
+    def __init__(self, value: Union[int, "Integer", Numeric, list["Integer"]]):
         super().__init__(value)
 
     @staticmethod
-    def repeat(array: List[int], repeat: int) -> Integer:
+    def repeat(array: list[int], repeat: int) -> "Integer":
         pass
 
     @staticmethod
     def to_repeat(repeat: str) -> int:
         pass
 
-    def animate(self, interval: Union[Numeric, float] = None, duration: Union[Numeric, float] = None) -> 'Integer':
+    def animate(self, interval: Union[Numeric, float] = None, duration: Union[Numeric, float] = None) -> "Integer":
         pass
 
     def __len__(self):
         pass
 
-    def __getitem__(self, index: 'Integer') -> 'Integer':
+    def __getitem__(self, index: TYPE_INTEGER) -> "Integer":
+        pass
+
+    def __floordiv__(self, other: TYPE_INTEGER) -> "Integer":
         pass
 
 

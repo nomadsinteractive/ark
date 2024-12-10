@@ -415,7 +415,7 @@ bool WidgetBuilder::begin(String name, sp<Boolean> isOpen)
 {
     CHECK(isOpen == nullptr || isOpen.isInstance<BooleanWrapper>(), "isOpen parameter must be either BooleanWrapper instance or nullptr");
     sp<WidgetGroup> window = isOpen ? sp<WidgetGroup>::make<Window>(std::move(name), std::move(isOpen)) : sp<WidgetGroup>::make<WindowNoClose>(std::move(name));
-    addWidgetGroupAndPush(window);
+    addWidgetGroupAndPush(std::move(window));
     return true;
 }
 
@@ -431,14 +431,14 @@ void WidgetBuilder::bulletText(const String& content)
 
 sp<Observer> WidgetBuilder::button(const String& label, const V2& size)
 {
-    sp<Observer> observer = sp<Observer>::make(false);
+    sp<Observer> observer = sp<Observer>::make();
     addCallback<String>([size](const char* s) { return ImGui::Button(s, ImVec2(size.x(), size.y())); }, label, observer);
     return observer;
 }
 
 sp<Observer> WidgetBuilder::smallButton(const String& label)
 {
-    sp<Observer> observer = sp<Observer>::make(false);
+    sp<Observer> observer = sp<Observer>::make();
     addCallback<String>(ImGui::SmallButton, label, observer);
     return observer;
 }
@@ -489,7 +489,7 @@ void WidgetBuilder::text(const String& content)
 
 sp<Observer> WidgetBuilder::inputText(String label, sp<StringVar::Impl> value, size_t maxLength, int32_t flags)
 {
-    sp<Observer> observer = sp<Observer>::make(false);
+    sp<Observer> observer = sp<Observer>::make();
     addWidget(sp<WidgetInputText<StringVar::Impl>>::make(std::move(label), std::move(value), maxLength, nullptr, observer, flags));
     return observer;
 }

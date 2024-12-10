@@ -26,17 +26,21 @@ public:
 //  [[script::bindings::operator(+)]]
     static sp<Numeric> add(float lvalue, const sp<Numeric>& rvalue);
 //  [[script::bindings::operator(-)]]
-    static sp<Numeric> sub(const sp<Numeric>& lvalue, const sp<Numeric>& rvalue);
+    static sp<Numeric> sub(sp<Numeric> lvalue, sp<Numeric> rvalue);
 //  [[script::bindings::operator(-)]]
-    static sp<Numeric> sub(const sp<Numeric>& lvalue, float rvalue);
+    static sp<Numeric> sub(sp<Numeric> lvalue, float rvalue);
 //  [[script::bindings::operator(-)]]
-    static sp<Numeric> sub(float lvalue, const sp<Numeric>& rvalue);
+    static sp<Numeric> sub(float lvalue, sp<Numeric> rvalue);
 //  [[script::bindings::operator(*)]]
     static sp<Numeric> mul(sp<Numeric> lvalue, sp<Numeric> rvalue);
 //  [[script::bindings::operator(*)]]
     static sp<Numeric> mul(sp<Numeric> lvalue, float rvalue);
 //  [[script::bindings::operator(*)]]
-    static sp<Numeric> mul(float lvalue, sp<Numeric> rvalue);
+    static sp<Vec2> mul(sp<Numeric> lvalue, sp<Vec2> rvalue);
+//  [[script::bindings::operator(*)]]
+    static sp<Vec3> mul(sp<Numeric> lvalue, sp<Vec3> rvalue);
+//  [[script::bindings::operator(*)]]
+    static sp<Vec4> mul(sp<Numeric> lvalue, sp<Vec4> rvalue);
 //  [[script::bindings::operator(/)]]
     static sp<Numeric> truediv(const sp<Numeric>& lvalue, const sp<Numeric>& rvalue);
 //  [[script::bindings::operator(/)]]

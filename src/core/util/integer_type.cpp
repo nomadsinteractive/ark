@@ -102,6 +102,21 @@ sp<Numeric> IntegerType::mul(sp<Integer> self, sp<Numeric> rvalue)
     return sp<VariableOP2<sp<Integer>, sp<Numeric>, Operators::Mul<int32_t, float>>>::make(std::move(self), std::move(rvalue));
 }
 
+sp<Vec2> IntegerType::mul(sp<Integer> lhs, sp<Vec2> rhs)
+{
+    return sp<Vec2>::make<VariableOP2<sp<Vec2>, sp<Integer>, Operators::Mul<V2, float>>>(std::move(rhs), std::move(lhs));
+}
+
+sp<Vec3> IntegerType::mul(sp<Integer> lhs, sp<Vec3> rhs)
+{
+    return sp<Vec3>::make<VariableOP2<sp<Vec3>, sp<Integer>, Operators::Mul<V3, float>>>(std::move(rhs), std::move(lhs));
+}
+
+sp<Vec4> IntegerType::mul(sp<Integer> lhs, sp<Vec4> rhs)
+{
+    return sp<Vec4>::make<VariableOP2<sp<Vec4>, sp<Integer>, Operators::Mul<V4, float>>>(std::move(rhs), std::move(lhs));
+}
+
 sp<Integer> IntegerType::mod(const sp<Integer>& self, const sp<Integer>& rvalue)
 {
     return sp<VariableOP2<sp<Integer>, sp<Integer>, Operators::Mod<int32_t>>>::make(self, rvalue);

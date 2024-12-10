@@ -99,42 +99,6 @@ private:
     uint64_t _initial_ticket;
 };
 
-class NumericLinearBuilder : public ark::Builder<ark::Numeric> {
-public:
-    NumericLinearBuilder(ark::BeanFactory& /*factory*/, const ark::document& manifest)
-        : _s(ark::Documents::getAttribute(manifest, "s", 0.0f)), _v(ark::Documents::getAttribute(manifest, "v", 0.0f)) {
-
-    }
-
-    virtual ark::sp<ark::Numeric> build(const ark::Scope& /*args*/) override {
-        const ark::sp<Duration> t = ark::sp<Duration>::make(ark::Platform::getSteadyClock());
-        return ark::NumericType::add(ark::NumericType::mul(_v, t), _s);
-    }
-
-private:
-    float _s;
-    float _v;
-};
-
-class NumericAccelerateBuilder : public ark::Builder<ark::Numeric> {
-public:
-    NumericAccelerateBuilder(ark::BeanFactory& /*factory*/, const ark::document& manifest)
-        : _s(ark::Documents::getAttribute(manifest, "s", 0.0f)), _v(ark::Documents::getAttribute(manifest, "v", 0.0f)), _a(ark::Documents::getAttribute(manifest, "a", 0.0f)) {
-
-    }
-
-    virtual ark::sp<ark::Numeric> build(const ark::Scope& /*args*/) override {
-        const ark::sp<Duration> t = ark::sp<Duration>::make(ark::Platform::getSteadyClock());
-        const ark::sp<ark::Numeric> tsquare = ark::NumericType::mul(t, t);
-        return ark::NumericType::add(_s, ark::NumericType::mul(0.5f, ark::NumericType::mul(_v, tsquare)));
-    }
-
-private:
-    float _s;
-    float _v;
-    float _a;
-};
-
 class TestcasePlugin : public ark::Plugin {
 public:
     TestcasePlugin()
@@ -143,8 +107,6 @@ public:
 
     virtual ark::BeanFactory::Factory createBeanFactory(const ark::BeanFactory& beanFactory, const ark::sp<ark::Dictionary<ark::document>>& documentById) override {
         ark::BeanFactory::Factory refBeanFactory(beanFactory.references(), documentById);
-        refBeanFactory.addBuilderFactory<ark::Numeric>("linear", [](ark::BeanFactory& factory, const ark::document& manifest)->ark::sp<ark::Builder<ark::Numeric>> { return ark::sp<ark::Builder<ark::Numeric>>::adopt(new NumericLinearBuilder(factory, manifest)); });
-        refBeanFactory.addBuilderFactory<ark::Numeric>("accelerate", [](ark::BeanFactory& factory, const ark::document& manifest)->ark::sp<ark::Builder<ark::Numeric>> { return ark::sp<ark::Builder<ark::Numeric>>::adopt(new NumericAccelerateBuilder(factory, manifest)); });
         return refBeanFactory;
     }
 };

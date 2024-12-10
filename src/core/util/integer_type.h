@@ -33,14 +33,20 @@ public:
 //  [[script::bindings::constructor]]
     static sp<Integer> create(std::vector<sp<Integer>> values);
 
-//[[script::bindings::operator(+)]]
+//  [[script::bindings::operator(+)]]
     static sp<Integer> add(sp<Integer> self, sp<Integer> rvalue);
-//[[script::bindings::operator(-)]]
+//  [[script::bindings::operator(-)]]
     static sp<Integer> sub(sp<Integer> self, sp<Integer> rvalue);
-//[[script::bindings::operator(*)]]
+//  [[script::bindings::operator(*)]]
     static sp<Integer> mul(sp<Integer> self, sp<Integer> rvalue);
-//[[script::bindings::operator(*)]]
+//  [[script::bindings::operator(*)]]
     static sp<Numeric> mul(sp<Integer> self, sp<Numeric> rvalue);
+//  [[script::bindings::operator(*)]]
+    static sp<Vec2> mul(sp<Integer> lhs, sp<Vec2> rhs);
+//  [[script::bindings::operator(*)]]
+    static sp<Vec3> mul(sp<Integer> lhs, sp<Vec3> rhs);
+//  [[script::bindings::operator(*)]]
+    static sp<Vec4> mul(sp<Integer> lhs, sp<Vec4> rhs);
 //[[script::bindings::operator(%)]]
     static sp<Integer> mod(const sp<Integer>& self, const sp<Integer>& rvalue);
 //[[script::bindings::operator(/)]]
