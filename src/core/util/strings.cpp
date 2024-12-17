@@ -152,13 +152,6 @@ void Strings::cut(const String& str, String& left, String& right, char sep, bool
     }
 }
 
-void Strings::rcut(const String& str, String& left, String& right, char sep)
-{
-    auto pos = str.rfind(sep);
-    left = pos != String::npos ? str.substr(0, pos) : "";
-    right = pos != String::npos ? str.substr(pos + 1) : str;
-}
-
 void Strings::parentheses(const String& expr, String& lvalue, String& remaining)
 {
     size_t pos = parentheses(expr, 0);

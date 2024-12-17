@@ -21,8 +21,6 @@ public:
     static String unwrap(const String& str, char open, char close);
 [[deprecated]]
     static void cut(const String& str, String& left, String& right, char sep, bool clearValues = true);
-[[deprecated]]
-    static void rcut(const String& str, String& left, String& right, char sep);
 
     static void parentheses(const String& expr, String& lvalue, String& remaining);
     static size_t parentheses(const String& expr, size_t start, char open = '(', char close = ')');

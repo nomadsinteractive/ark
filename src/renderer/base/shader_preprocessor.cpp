@@ -344,9 +344,8 @@ uint32_t ShaderPreprocessor::getUniformSize(Uniform::Type type, const String& de
     uint32_t size = 0;
     for(const String& i : source.split(';'))
     {
-        String vtype, vname;
-        Strings::cut(i.strip(), vtype, vname, ' ');
-        Uniform::Type t = Uniform::toType(vtype);
+        auto [vtype, vname] = i.strip().cut(' ');
+        const Uniform::Type t = Uniform::toType(vtype);
         size += getUniformSize(t, vtype.strip());
     }
     return size;

@@ -19,15 +19,11 @@ void TilesetImporterTsx::import(Tileset& tileset, const sp<Readable>& src)
         String type = Documents::getAttribute(i, "class");
         int32_t shapeId = Documents::getAttribute<int32_t>(i, "shape_id", -1);
         const document image = i->getChild("image");
-        DASSERT(image);
-//        uint32_t width = Documents::getAttribute<uint32_t>(image, "width", 0);
-//        uint32_t height = Documents::getAttribute<uint32_t>(image, "height", 0);
+        ASSERT(image);
         const String source = Documents::ensureAttribute(image, "source");
-        String path, name;
-        Strings::rcut(source, path, name, '/');
-        String stem, ext;
-        Strings::rcut(name, stem, ext, '.');
-        tileset.addTile(sp<Tile>::make(id, std::move(type), shapeId, sp<RenderObject>::make(Strings::eval<int32_t>(stem), nullptr, tileset.tileSize())));
+        auto [path, name] = source.rcut('/');
+        auto [stem, ext] = name.rcut('.');
+        tileset.addTile(sp<Tile>::make(id, std::move(type), shapeId, sp<RenderObject>::make(Strings::eval<int32_t>(stem.value()), nullptr, tileset.tileSize())));
     }
 }
 

@@ -146,9 +146,8 @@ void Identifier::parseQueries(const String& queries)
 {
     for(const String& i : queries.split('&'))
     {
-        String name, value;
-        Strings::cut(i, name, value, '=');
-        _queries.push_back(name.strip(), value.strip());
+        auto [name, value] = i.cut('=');
+        _queries.push_back(name.strip(), value.value().strip());
     }
 }
 

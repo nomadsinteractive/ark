@@ -28,13 +28,12 @@ std::vector<String> StringBundleImpl::getStringArray(const String& resid)
 
 sp<StringBundle> StringBundleImpl::split(const String& resid, String& remains)
 {
-    String dirname, filename;
-    Strings::cut(resid, dirname, filename, '/');
+    auto [dirname, filename] = resid.cut('/');
 
-    const auto iter = _directories.find(dirname);
-    if(iter != _directories.end())
+    ASSERT(filename);
+    if(const auto iter = _directories.find(dirname); iter != _directories.end())
     {
-        remains = filename;
+        remains = std::move(filename.value());
         return iter->second;
     }
 
