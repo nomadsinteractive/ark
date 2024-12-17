@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/types/shared_ptr.h"
@@ -16,17 +14,15 @@ public:
 //  [[script::bindings::property]]
     bool active() const;
 
-private:
-    void doActivate();
-    void doDeactivate();
+//  [[script::bindings::auto]]
+    void activate();
+//  [[script::bindings::auto]]
+    void deactivate();
 
 private:
     sp<Runnable> _on_activate;
     sp<Runnable> _on_deactivate;
     bool _active;
-
-    friend class StateMachine;
-    friend class StateAction;
 };
 
 }

@@ -121,10 +121,6 @@ public:
     static sp<Vec4> modFloor(sp<Vec4> self, sp<Numeric> mod);
 //  [[script::bindings::classmethod]]
     static sp<Vec4> modFloor(sp<Vec4> self, sp<Vec4> mod);
-//  [[script::bindings::classmethod]]
-    static sp<Vec4> modCeil(sp<Vec4> self, sp<Numeric> mod);
-//  [[script::bindings::classmethod]]
-    static sp<Vec4> modCeil(sp<Vec4> self, sp<Vec4> mod);
 
 //  [[script::bindings::classmethod]]
     static sp<Vec4> floor(sp<Vec4> self);

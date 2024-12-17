@@ -46,11 +46,11 @@ public:
 //  [[script::bindings::operator(*)]]
     static sp<Vec4> mul(sp<Integer> lhs, sp<Vec4> rhs);
 //[[script::bindings::operator(%)]]
-    static sp<Integer> mod(const sp<Integer>& self, const sp<Integer>& rvalue);
+    static sp<Integer> mod(sp<Integer> lhs, sp<Integer> rhs);
 //[[script::bindings::operator(/)]]
-    static sp<Numeric> truediv(const sp<Integer>& self, const sp<Integer>& rvalue);
+    static sp<Numeric> truediv(sp<Integer> lhs, sp<Integer> rhs);
 //[[script::bindings::operator(//)]]
-    static sp<Integer> floordiv(const sp<Integer>& self, const sp<Integer>& rvalue);
+    static sp<Integer> floordiv(sp<Integer> lhs, sp<Integer> rhs);
 //[[script::bindings::operator(neg)]]
     static sp<Integer> negative(sp<Integer> self);
 //[[script::bindings::operator(int)]]

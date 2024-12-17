@@ -96,39 +96,24 @@ sp<Vec4> NumericType::mul(sp<Numeric> lvalue, sp<Vec4> rvalue)
     return sp<Vec4>::make<VariableOP2<sp<Vec4>, sp<Numeric>, Operators::Mul<V4, float>>>(std::move(rvalue), std::move(lvalue));
 }
 
-sp<Numeric> NumericType::truediv(const sp<Numeric>& lvalue, const sp<Numeric>& rvalue)
+sp<Numeric> NumericType::truediv(sp<Numeric> lhs, sp<Numeric> rhs)
 {
-    return sp<Numeric>::make<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::Div<float>>>(lvalue, rvalue);
+    return sp<Numeric>::make<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::Div<float>>>(std::move(lhs), std::move(rhs));
 }
 
-sp<Numeric> NumericType::truediv(const sp<Numeric>& lvalue, float rvalue)
+sp<Numeric> NumericType::floordiv(sp<Numeric> lhs, sp<Numeric> rhs)
 {
-    return sp<Numeric>::make<VariableOP2<sp<Numeric>, float, Operators::Div<float>>>(lvalue, rvalue);
+    return sp<Numeric>::make<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::FloorDiv<float>>>(std::move(lhs), std::move(rhs));
 }
 
-sp<Numeric> NumericType::truediv(float lvalue, const sp<Numeric>& rvalue)
+sp<Numeric> NumericType::floordiv(sp<Numeric> lhs, sp<Integer> rhs)
 {
-    return sp<Numeric>::make<VariableOP2<float, sp<Numeric>, Operators::Div<float>>>(lvalue, rvalue);
+    return sp<Numeric>::make<VariableOP2<sp<Numeric>, sp<Integer>, Operators::FloorDiv<float, int32_t>>>(std::move(lhs), std::move(rhs));
 }
 
-sp<Numeric> NumericType::floordiv(const sp<Numeric>& lvalue, const sp<Numeric>& rvalue)
+sp<Numeric> NumericType::mod(sp<Numeric> lhs, sp<Numeric> rhs)
 {
-    return sp<Numeric>::make<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::NumericFloorDiv<float>>>(lvalue, rvalue);
-}
-
-sp<Numeric> NumericType::floordiv(const sp<Numeric>& lvalue, const sp<Integer>& rvalue)
-{
-    return sp<Numeric>::make<VariableOP2<sp<Numeric>, sp<Integer>, Operators::NumericFloorDiv<float, int32_t>>>(lvalue, rvalue);
-}
-
-sp<Numeric> NumericType::mod(const sp<Numeric>& lvalue, const sp<Numeric>& rvalue)
-{
-    return sp<Numeric>::make<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::Mod<float>>>(lvalue, rvalue);
-}
-
-sp<Numeric> NumericType::mod(float lvalue, const sp<Numeric>& rvalue)
-{
-    return sp<Numeric>::make<VariableOP2<float, sp<Numeric>, Operators::Mod<float>>>(lvalue, rvalue);
+    return sp<Numeric>::make<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::Mod<float>>>(std::move(lhs), std::move(rhs));
 }
 
 sp<Numeric> NumericType::negative(const sp<Numeric>& self)
@@ -312,11 +297,6 @@ sp<Numeric> NumericType::integralWithResistance(const sp<Numeric>& self, float v
 sp<Numeric> NumericType::modFloor(const sp<Numeric>& self, const sp<Numeric>& mod)
 {
     return sp<Numeric>::make<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::ModFloor<float>>>(self, mod);
-}
-
-sp<Numeric> NumericType::modCeil(const sp<Numeric>& self, const sp<Numeric>& mod)
-{
-    return sp<Numeric>::make<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::ModCeil<float>>>(self, mod);
 }
 
 sp<Numeric> NumericType::floor(sp<Numeric> self)

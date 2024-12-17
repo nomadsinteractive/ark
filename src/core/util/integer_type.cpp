@@ -112,19 +112,19 @@ sp<Vec4> IntegerType::mul(sp<Integer> lhs, sp<Vec4> rhs)
     return sp<Vec4>::make<VariableOP2<sp<Vec4>, sp<Integer>, Operators::Mul<V4, float>>>(std::move(rhs), std::move(lhs));
 }
 
-sp<Integer> IntegerType::mod(const sp<Integer>& self, const sp<Integer>& rvalue)
+sp<Integer> IntegerType::mod(sp<Integer> lhs, sp<Integer> rhs)
 {
-    return sp<Integer>::make<VariableOP2<sp<Integer>, sp<Integer>, Operators::Mod<int32_t>>>(self, rvalue);
+    return sp<Integer>::make<VariableOP2<sp<Integer>, sp<Integer>, Operators::Mod<int32_t>>>(std::move(lhs), std::move(rhs));
 }
 
-sp<Numeric> IntegerType::truediv(const sp<Integer>& self, const sp<Integer>& rvalue)
+sp<Numeric> IntegerType::truediv(sp<Integer> lhs, sp<Integer> rhs)
 {
-    return sp<Numeric>::make<VariableOP2<sp<Integer>, sp<Integer>, Operators::Div<float, int32_t>>>(self, rvalue);
+    return sp<Numeric>::make<VariableOP2<sp<Integer>, sp<Integer>, Operators::Div<float, int32_t>>>(std::move(lhs), std::move(rhs));
 }
 
-sp<Integer> IntegerType::floordiv(const sp<Integer>& self, const sp<Integer>& rvalue)
+sp<Integer> IntegerType::floordiv(sp<Integer> lhs, sp<Integer> rhs)
 {
-    return sp<Integer>::make<VariableOP2<sp<Integer>, sp<Integer>, Operators::Div<int32_t>>>(self, rvalue);
+    return sp<Integer>::make<VariableOP2<sp<Integer>, sp<Integer>, Operators::FloorDiv<int32_t>>>(std::move(lhs), std::move(rhs));
 }
 
 sp<Integer> IntegerType::negative(sp<Integer> self)

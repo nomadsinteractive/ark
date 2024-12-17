@@ -17,7 +17,7 @@ void StateMachine::reset(sp<State> state)
 {
     for(const sp<State>& i : _active_states)
         if(i != state)
-            i->doDeactivate();
+            i->deactivate();
 
     _active_states.clear();
     doActive(std::move(state));
@@ -30,7 +30,7 @@ void StateMachine::doActionExecute(const StateAction& action)
         if(action._stub->_on_execute)
             action._stub->_on_execute->run();
 
-        action.start()->doDeactivate();
+        action.start()->deactivate();
         _active_states.erase(iter);
 
         doActive(action.end());
@@ -58,7 +58,7 @@ void StateMachine::doActionDeactivate(const StateAction& action)
 
         if(action._stub->_strand->doActionDeactive(action))
         {
-            action.end()->doDeactivate();
+            action.end()->deactivate();
             _active_states.erase(iter);
             doActive(action.start());
         }
@@ -67,7 +67,7 @@ void StateMachine::doActionDeactivate(const StateAction& action)
 
 void StateMachine::doActive(sp<State> state)
 {
-    state->doActivate();
+    state->activate();
     _active_states.push_back(std::move(state));
 }
 

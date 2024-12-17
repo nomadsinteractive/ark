@@ -259,14 +259,6 @@ public:
         return sp<VariableOP2<sp<VarType>, sp<VarType>, Operators::ModFloor<T>>>::make(std::move(self), std::move(mod));
     }
 
-    static sp<VarType> modCeil(sp<VarType> self, sp<Numeric> mod) {
-        return sp<VariableOP2<sp<VarType>, sp<VarType>, Operators::ModCeil<T>>>::make(std::move(self), sp<IMPL>::make(std::move(mod)));
-    }
-
-    static sp<VarType> modCeil(sp<VarType> self, sp<VarType> mod) {
-        return sp<VariableOP2<sp<VarType>, sp<VarType>, Operators::ModCeil<T>>>::make(self, std::move(mod));
-    }
-
     static sp<VarType> ifElse(sp<VarType> self, sp<Boolean> condition, sp<VarType> otherwise) {
         return sp<VariableTernary<T>>::make(std::move(condition), std::move(self), std::move(otherwise));
     }

@@ -42,19 +42,13 @@ public:
 //  [[script::bindings::operator(*)]]
     static sp<Vec4> mul(sp<Numeric> lvalue, sp<Vec4> rvalue);
 //  [[script::bindings::operator(/)]]
-    static sp<Numeric> truediv(const sp<Numeric>& lvalue, const sp<Numeric>& rvalue);
-//  [[script::bindings::operator(/)]]
-    static sp<Numeric> truediv(const sp<Numeric>& lvalue, float rvalue);
-//  [[script::bindings::operator(/)]]
-    static sp<Numeric> truediv(float lvalue, const sp<Numeric>& rvalue);
+    static sp<Numeric> truediv(sp<Numeric> lhs, sp<Numeric> rhs);
 //  [[script::bindings::operator(//)]]
-    static sp<Numeric> floordiv(const sp<Numeric>& lvalue, const sp<Numeric>& rvalue);
+    static sp<Numeric> floordiv(sp<Numeric> lhs, sp<Numeric> rhs);
 //  [[script::bindings::operator(//)]]
-    static sp<Numeric> floordiv(const sp<Numeric>& lvalue, const sp<Integer>& rvalue);
+    static sp<Numeric> floordiv(sp<Numeric> lhs, sp<Integer> rhs);
 //  [[script::bindings::operator(%)]]
-    static sp<Numeric> mod(const sp<Numeric>& lvalue, const sp<Numeric>& rvalue);
-//  [[script::bindings::operator(%)]]
-    static sp<Numeric> mod(float lvalue, const sp<Numeric>& rvalue);
+    static sp<Numeric> mod(sp<Numeric> lhs, sp<Numeric> rhs);
 //  [[script::bindings::operator(neg)]]
     static sp<Numeric> negative(const sp<Numeric>& self);
 //  [[script::bindings::operator(abs)]]
@@ -124,8 +118,6 @@ public:
 
 //  [[script::bindings::classmethod]]
     static sp<Numeric> modFloor(const sp<Numeric>& self, const sp<Numeric>& mod);
-//  [[script::bindings::classmethod]]
-    static sp<Numeric> modCeil(const sp<Numeric>& self, const sp<Numeric>& mod);
 //  [[script::bindings::classmethod]]
     static sp<Numeric> floor(sp<Numeric> self);
 //  [[script::bindings::classmethod]]

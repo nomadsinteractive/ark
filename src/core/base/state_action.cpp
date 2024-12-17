@@ -13,7 +13,8 @@ struct StateAction::StateActionExecute final : Runnable {
 
     void run() override
     {
-        _stub->_state_machine.doActionExecute({_stub});
+        if(_stub->_strand->_start->active())
+            _stub->_state_machine.doActionExecute({_stub});
     }
 
     sp<Stub> _stub;
@@ -26,7 +27,8 @@ struct StateAction::StateActionActivate final : Runnable {
 
     void run() override
     {
-        _stub->_state_machine.doActionActivate({_stub});
+        if(_stub->_strand->_start->active())
+            _stub->_state_machine.doActionActivate({_stub});
     }
 
     sp<Stub> _stub;

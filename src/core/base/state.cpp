@@ -17,14 +17,14 @@ bool State::active() const
     return _active;
 }
 
-void State::doActivate()
+void State::activate()
 {
     if(_on_activate)
         _on_activate->run();
     _active = true;
 }
 
-void State::doDeactivate()
+void State::deactivate()
 {
     CHECK_WARN(_active, "State is not active");
     if(_on_deactivate && _active)

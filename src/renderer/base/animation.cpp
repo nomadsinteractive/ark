@@ -2,6 +2,7 @@
 
 #include "node.h"
 #include "core/util/integer_type.h"
+#include "core/util/math.h"
 
 #include "graphics/base/mat.h"
 
@@ -22,7 +23,8 @@ struct AnimationSession {
 
     const AnimationFrame& currentFrame() const
     {
-        return _animation_frames->at(static_cast<uint32_t>(_tick->val()) % _duration_in_ticks);
+        const int32_t frame = Math::floorMod<int32_t>(_tick->val(), _duration_in_ticks);
+        return _animation_frames->at(frame);
     }
 
 private:

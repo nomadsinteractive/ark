@@ -94,23 +94,22 @@ std::unordered_set<BroadPhrase::CandidateIdType> BroadPhraseGrid::Stub::search(c
 
 void BroadPhraseGrid::Axis::create(CandidateIdType id, float position, float low, float high)
 {
-    int32_t mp = Math::modFloor(static_cast<int32_t>(position), _stride);
+    const int32_t mp = Math::modFloor(static_cast<int32_t>(position), _stride);
     int32_t remainder;
-    int32_t begin = Math::divmod(static_cast<int32_t>(low), _stride, remainder);
-    int32_t end = Math::divmod(static_cast<int32_t>(high), _stride, remainder) + 1;
+    const int32_t begin = Math::divmod(static_cast<int32_t>(low), _stride, remainder);
+    const int32_t end = Math::divmod(static_cast<int32_t>(high), _stride, remainder) + 1;
     const Range cur(mp, begin, end);
     updateRange(id, cur, Range());
 }
 
 void BroadPhraseGrid::Axis::update(CandidateIdType id, float position, float low, float high)
 {
-    int32_t mp = Math::modFloor(static_cast<int32_t>(position), _stride);
-    const auto iter = _trackee_ranges.find(id);
-    if(iter != _trackee_ranges.end() && iter->second._position != mp)
+    const int32_t mp = Math::modFloor(static_cast<int32_t>(position), _stride);
+    if(const auto iter = _trackee_ranges.find(id); iter != _trackee_ranges.end() && iter->second._position != mp)
     {
         int32_t remainder;
-        int32_t begin = Math::divmod(static_cast<int32_t>(low), _stride, remainder);
-        int32_t end = Math::divmod(static_cast<int32_t>(high), _stride, remainder) + 1;
+        const int32_t begin = Math::divmod(static_cast<int32_t>(low), _stride, remainder);
+        const int32_t end = Math::divmod(static_cast<int32_t>(high), _stride, remainder) + 1;
         const Range cur(mp, begin, end);
         const Range prev = iter->second;
         updateRange(id, cur, prev);
@@ -134,8 +133,8 @@ std::unordered_set<BroadPhrase::CandidateIdType> BroadPhraseGrid::Axis::search(f
 {
     std::unordered_set<CandidateIdType> candidates;
     int32_t remainder;
-    int32_t begin = Math::divmod(static_cast<int32_t>(low), _stride, remainder);
-    int32_t end = Math::divmod(static_cast<int32_t>(high), _stride, remainder) + 1;
+    const int32_t begin = Math::divmod(static_cast<int32_t>(low), _stride, remainder);
+    const int32_t end = Math::divmod(static_cast<int32_t>(high), _stride, remainder) + 1;
     for(int32_t i = begin; i < end; i++)
     {
         const auto range = _trackee_range_ids.equal_range(i);
