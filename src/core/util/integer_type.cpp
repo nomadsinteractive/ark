@@ -63,43 +63,43 @@ private:
 
 sp<Integer> IntegerType::create(sp<Integer> value)
 {
-    return sp<IntegerWrapper>::make(std::move(value));
+    return sp<Integer>::make<IntegerWrapper>(std::move(value));
 }
 
 sp<Integer> IntegerType::create(sp<Numeric> value)
 {
     sp<Integer> casted = sp<VariableOP1<int32_t, float>>::make(Operators::Cast<float, int32_t>(), std::move(value));
-    return sp<IntegerWrapper>::make(std::move(casted));
+    return sp<Integer>::make<IntegerWrapper>(std::move(casted));
 }
 
 sp<Integer> IntegerType::create(std::vector<sp<Integer>> values)
 {
-    return sp<IntegerSubscribed>::make(std::move(values), sp<Integer::Const>::make(0));
+    return sp<Integer>::make<IntegerSubscribed>(std::move(values), sp<Integer::Const>::make(0));
 }
 
 sp<Integer> IntegerType::create(int32_t value)
 {
-    return sp<IntegerWrapper>::make(value);
+    return sp<Integer>::make<IntegerWrapper>(value);
 }
 
 sp<Integer> IntegerType::add(sp<Integer> self, sp<Integer> rvalue)
 {
-    return sp<VariableOP2<sp<Integer>, sp<Integer>, Operators::Add<int32_t>>>::make(std::move(self), std::move(rvalue));
+    return sp<Integer>::make<VariableOP2<sp<Integer>, sp<Integer>, Operators::Add<int32_t>>>(std::move(self), std::move(rvalue));
 }
 
 sp<Integer> IntegerType::sub(sp<Integer> self, sp<Integer> rvalue)
 {
-    return sp<VariableOP2<sp<Integer>, sp<Integer>, Operators::Sub<int32_t>>>::make(std::move(self), std::move(rvalue));
+    return sp<Integer>::make<VariableOP2<sp<Integer>, sp<Integer>, Operators::Sub<int32_t>>>(std::move(self), std::move(rvalue));
 }
 
 sp<Integer> IntegerType::mul(sp<Integer> self, sp<Integer> rvalue)
 {
-    return sp<VariableOP2<sp<Integer>, sp<Integer>, Operators::Mul<int32_t>>>::make(std::move(self), std::move(rvalue));
+    return sp<Integer>::make<VariableOP2<sp<Integer>, sp<Integer>, Operators::Mul<int32_t>>>(std::move(self), std::move(rvalue));
 }
 
 sp<Numeric> IntegerType::mul(sp<Integer> self, sp<Numeric> rvalue)
 {
-    return sp<VariableOP2<sp<Integer>, sp<Numeric>, Operators::Mul<int32_t, float>>>::make(std::move(self), std::move(rvalue));
+    return sp<Numeric>::make<VariableOP2<sp<Integer>, sp<Numeric>, Operators::Mul<int32_t, float>>>(std::move(self), std::move(rvalue));
 }
 
 sp<Vec2> IntegerType::mul(sp<Integer> lhs, sp<Vec2> rhs)
@@ -119,22 +119,22 @@ sp<Vec4> IntegerType::mul(sp<Integer> lhs, sp<Vec4> rhs)
 
 sp<Integer> IntegerType::mod(const sp<Integer>& self, const sp<Integer>& rvalue)
 {
-    return sp<VariableOP2<sp<Integer>, sp<Integer>, Operators::Mod<int32_t>>>::make(self, rvalue);
+    return sp<Integer>::make<VariableOP2<sp<Integer>, sp<Integer>, Operators::Mod<int32_t>>>(self, rvalue);
 }
 
 sp<Numeric> IntegerType::truediv(const sp<Integer>& self, const sp<Integer>& rvalue)
 {
-    return sp<VariableOP2<sp<Integer>, sp<Integer>, Operators::Div<float, int32_t>>>::make(self, rvalue);
+    return sp<Numeric>::make<VariableOP2<sp<Integer>, sp<Integer>, Operators::Div<float, int32_t>>>(self, rvalue);
 }
 
 sp<Integer> IntegerType::floordiv(const sp<Integer>& self, const sp<Integer>& rvalue)
 {
-    return sp<VariableOP2<sp<Integer>, sp<Integer>, Operators::Div<int32_t>>>::make(self, rvalue);
+    return sp<Integer>::make<VariableOP2<sp<Integer>, sp<Integer>, Operators::Div<int32_t>>>(self, rvalue);
 }
 
 sp<Integer> IntegerType::negative(sp<Integer> self)
 {
-    return sp<VariableOP1<int32_t>>::make(Operators::Neg<int32_t>(), std::move(self));
+    return sp<Integer>::make<VariableOP1<int32_t>>(Operators::Neg<int32_t>(), std::move(self));
 }
 
 int32_t IntegerType::toInt32(const sp<Integer>& self)
@@ -149,32 +149,32 @@ float IntegerType::toFloat(const sp<Integer>& self)
 
 sp<Boolean> IntegerType::gt(const sp<Integer>& self, const sp<Integer>& other)
 {
-    return sp<VariableOP2<sp<Integer>, sp<Integer>, Operators::GT<int32_t>>>::make(self, other);
+    return sp<Boolean>::make<VariableOP2<sp<Integer>, sp<Integer>, Operators::GT<int32_t>>>(self, other);
 }
 
 sp<Boolean> IntegerType::ge(const sp<Integer>& self, const sp<Integer>& other)
 {
-    return sp<VariableOP2<sp<Integer>, sp<Integer>, Operators::GE<int32_t>>>::make(self, other);
+    return sp<Boolean>::make<VariableOP2<sp<Integer>, sp<Integer>, Operators::GE<int32_t>>>(self, other);
 }
 
 sp<Boolean> IntegerType::lt(const sp<Integer>& self, const sp<Integer>& other)
 {
-    return sp<VariableOP2<sp<Integer>, sp<Integer>, Operators::LT<int32_t>>>::make(self, other);
+    return sp<Boolean>::make<VariableOP2<sp<Integer>, sp<Integer>, Operators::LT<int32_t>>>(self, other);
 }
 
 sp<Boolean> IntegerType::le(const sp<Integer>& self, const sp<Integer>& other)
 {
-    return sp<VariableOP2<sp<Integer>, sp<Integer>, Operators::LE<int32_t>>>::make(self, other);
+    return sp<Boolean>::make<VariableOP2<sp<Integer>, sp<Integer>, Operators::LE<int32_t>>>(self, other);
 }
 
 sp<Boolean> IntegerType::eq(const sp<Integer>& self, const sp<Integer>& other)
 {
-    return sp<VariableOP2<sp<Integer>, sp<Integer>, Operators::EQ<int32_t>>>::make(self, other);
+    return sp<Boolean>::make<VariableOP2<sp<Integer>, sp<Integer>, Operators::EQ<int32_t>>>(self, other);
 }
 
 sp<Boolean> IntegerType::ne(const sp<Integer>& self, const sp<Integer>& other)
 {
-    return sp<VariableOP2<sp<Integer>, sp<Integer>, Operators::NE<int32_t>>>::make(self, other);
+    return sp<Boolean>::make<VariableOP2<sp<Integer>, sp<Integer>, Operators::NE<int32_t>>>(self, other);
 }
 
 size_t IntegerType::len(const sp<Integer>& self)
@@ -188,7 +188,7 @@ sp<Integer> IntegerType::subscribe(const sp<Integer>& self, sp<Integer> index)
 {
     const sp<IntegerSubscribed> is = self.tryCast<IntegerSubscribed>();
     ASSERT(is);
-    return sp<IntegerSubscribed>::make(is->values(), std::move(index));
+    return sp<Integer>::make<IntegerSubscribed>(is->values(), std::move(index));
 }
 
 int32_t IntegerType::val(const sp<Integer>& self)
@@ -243,12 +243,12 @@ void IntegerType::set(const sp<IntegerWrapper>& self, const sp<Integer>& delegat
 
 sp<Integer> IntegerType::wrap(const sp<Integer>& self)
 {
-    return sp<IntegerWrapper>::make(self);
+    return sp<Integer>::make<IntegerWrapper>(self);
 }
 
 sp<Integer> IntegerType::freeze(const sp<Integer>& self)
 {
-    return sp<Integer::Const>::make(self->val());
+    return sp<Integer>::make<Integer::Const>(self->val());
 }
 
 int32_t IntegerType::toRepeat(const String& repeat)
@@ -271,7 +271,7 @@ int32_t IntegerType::toRepeat(const String& repeat)
             flags |= IntegerType::REPEAT_NOTIFY;
         }
     }
-    return static_cast<IntegerType::Repeat>(action | flags);
+    return static_cast<Repeat>(action | flags);
 }
 
 sp<Integer> IntegerType::repeat(std::vector<int32_t> array, IntegerType::Repeat repeat, sp<Observer> observer)
@@ -281,7 +281,7 @@ sp<Integer> IntegerType::repeat(std::vector<int32_t> array, IntegerType::Repeat 
 
 sp<Integer> IntegerType::animate(const sp<Integer>& self, const sp<Numeric>& interval, const sp<Numeric>& duration)
 {
-    return sp<Periodic<int32_t>>::make(self, interval ? interval : sp<Numeric>::make<Numeric::Const>(1.0f / 24), duration ? duration : Ark::instance().appClock()->duration());
+    return sp<Integer>::make<Periodic<int32_t>>(self, interval ? interval : sp<Numeric>::make<Numeric::Const>(1.0f / 24), duration ? duration : Ark::instance().appClock()->duration());
 }
 
 sp<Integer> IntegerType::expect(sp<Integer> self, sp<Boolean> expectation, sp<Observer> observer)
@@ -313,12 +313,12 @@ sp<Integer> IntegerType::fence(sp<Integer> self, sp<Integer> a1, sp<Observer> ob
 
 sp<Integer> IntegerType::ifElse(const sp<Integer>& self, const sp<Boolean>& condition, const sp<Integer>& negative)
 {
-    return sp<VariableTernary<int32_t>>::make(condition, self, negative);
+    return sp<Integer>::make<VariableTernary<int32_t>>(condition, self, negative);
 }
 
 sp<Integer> IntegerType::dye(sp<Integer> self, sp<Boolean> condition, String message)
 {
-    return sp<VariableDyed<int32_t>>::make(std::move(self), std::move(condition), std::move(message));
+    return sp<Integer>::make<VariableDyed<int32_t>>(std::move(self), std::move(condition), std::move(message));
 }
 
 IntegerType::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)
