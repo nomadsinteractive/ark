@@ -30,8 +30,6 @@ public:
     static sp<Integer> create(sp<Numeric> value);
 //  [[script::bindings::constructor]]
     static sp<Integer> create(int32_t value);
-//  [[script::bindings::constructor]]
-    static sp<Integer> create(std::vector<sp<Integer>> values);
 
 //  [[script::bindings::operator(+)]]
     static sp<Integer> add(sp<Integer> self, sp<Integer> rvalue);
@@ -72,11 +70,6 @@ public:
     static sp<Boolean> eq(const sp<Integer>& self, const sp<Integer>& other);
 //[[script::bindings::operator(!=)]]
     static sp<Boolean> ne(const sp<Integer>& self, const sp<Integer>& other);
-
-//[[script::bindings::map(len)]]
-    static size_t len(const sp<Integer>& self);
-//[[script::bindings::map(get)]]
-    static sp<Integer> subscribe(const sp<Integer>& self, sp<Integer> index);
 
 //[[script::bindings::property]]
     static int32_t val(const sp<Integer>& self);

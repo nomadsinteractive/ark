@@ -72,11 +72,6 @@ sp<Integer> IntegerType::create(sp<Numeric> value)
     return sp<Integer>::make<IntegerWrapper>(std::move(casted));
 }
 
-sp<Integer> IntegerType::create(std::vector<sp<Integer>> values)
-{
-    return sp<Integer>::make<IntegerSubscribed>(std::move(values), sp<Integer::Const>::make(0));
-}
-
 sp<Integer> IntegerType::create(int32_t value)
 {
     return sp<Integer>::make<IntegerWrapper>(value);
@@ -175,20 +170,6 @@ sp<Boolean> IntegerType::eq(const sp<Integer>& self, const sp<Integer>& other)
 sp<Boolean> IntegerType::ne(const sp<Integer>& self, const sp<Integer>& other)
 {
     return sp<Boolean>::make<VariableOP2<sp<Integer>, sp<Integer>, Operators::NE<int32_t>>>(self, other);
-}
-
-size_t IntegerType::len(const sp<Integer>& self)
-{
-    const sp<IntegerSubscribed> is = self.tryCast<IntegerSubscribed>();
-    ASSERT(is);
-    return is->values().size();
-}
-
-sp<Integer> IntegerType::subscribe(const sp<Integer>& self, sp<Integer> index)
-{
-    const sp<IntegerSubscribed> is = self.tryCast<IntegerSubscribed>();
-    ASSERT(is);
-    return sp<Integer>::make<IntegerSubscribed>(is->values(), std::move(index));
 }
 
 int32_t IntegerType::val(const sp<Integer>& self)
