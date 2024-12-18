@@ -56,8 +56,6 @@ public:
     static sp<Vec2> integral(sp<Vec2> self, sp<Numeric> t = nullptr);
 //  [[script::bindings::classmethod]]
     static sp<Vec2> integralS2(sp<Vec2> self, const V2& s0, const Optional<V2>& s1 = Optional<V2>(), sp<Numeric> t = nullptr);
-//  [[script::bindings::classmethod]]
-    static sp<Vec2> integralWithResistance(sp<Vec2> self, const V2& v0, sp<Numeric> cd, sp<Numeric> t = nullptr);
 
 //  [[script::bindings::classmethod]]
     static sp<Numeric> distanceTo(sp<Vec2> self, sp<Vec2> other);

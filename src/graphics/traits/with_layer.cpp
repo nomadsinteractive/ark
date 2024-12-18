@@ -33,11 +33,6 @@ void WithLayer::onWire(const WiringContext& context)
         _layer_context->add(std::move(renderable), context.getComponent<Updatable>(), context.getComponent<Expendable>());
 }
 
-const sp<LayerContext>& WithLayer::layerContext() const
-{
-    return _layer_context;
-}
-
 const sp<ModelLoader>& WithLayer::modelLoader() const
 {
     return _layer_context->modelLoader();

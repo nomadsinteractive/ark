@@ -1,7 +1,6 @@
 #pragma once
 
 #include "core/base/api.h"
-#include "core/base/timestamp.h"
 #include "core/types/shared_ptr.h"
 #include "core/types/safe_var.h"
 
@@ -30,6 +29,8 @@ public:
 
 // [[script::bindings::property]]
     float zorder() const;
+// [[script::bindings::property]]
+    void setZorder(float zorder);
 
 // [[script::bindings::property]]
     const sp<Tileset>& tileset() const;
@@ -79,34 +80,8 @@ public:
 private:
     void setTile(uint32_t col, uint32_t row, const sp<Tile>& tile, const sp<RenderObject>& renderObject);
 
-    class Stub;
-
-    class RenderableTile : public Renderable {
-    public:
-        RenderableTile(const sp<Stub>& stub, sp<Tile> tile, sp<RenderObject> renderable, const V3& position);
-
-        virtual StateBits updateState(const RenderRequest& renderRequest) override;
-        virtual Snapshot snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, StateBits state) override;
-
-        void dispose();
-
-        sp<Stub> _stub;
-        sp<Tile> _tile;
-        sp<RenderObject> _renderable;
-        V3 _position;
-    };
-
-    class Stub {
-    public:
-        Stub(size_t colCount, size_t rowCount, sp<Tileset> tileset, SafeVar<Vec3> position, float zorder);
-        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Stub);
-
-        size_t _col_count;
-        size_t _row_count;
-        sp<Tileset> _tileset;
-        SafeVar<Vec3> _position;
-        float _zorder;
-    };
+    struct Stub;
+    struct RenderableTile;
 
 private:
     String _name;

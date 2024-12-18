@@ -15,10 +15,10 @@
 
 namespace ark {
 
-class ARK_API Arena final : public EventListener, public Renderer, public Renderer::Group {
+class ARK_API Activity final : public EventListener, public Renderer, public Renderer::Group {
 public:
-    Arena(sp<View> view, sp<RendererPhrase> renderGroup, sp<ResourceLoader> resourceLoader);
-    ~Arena() override;
+    Activity(sp<View> view, sp<RendererPhrase> renderGroup, sp<ResourceLoader> resourceLoader);
+    ~Activity() override;
 
 //  [[script::bindings::auto]]
     void addRenderer(sp<Renderer> renderer, const Traits& traits) override;
@@ -70,11 +70,11 @@ public:
     void addView(sp<View> view, sp<Boolean> discarded = nullptr);
 
 //  [[plugin::builder]]
-    class BUILDER final : public Builder<Arena> {
+    class BUILDER final : public Builder<Activity> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        sp<Arena> build(const Scope& args) override;
+        sp<Activity> build(const Scope& args) override;
 
     private:
         BeanFactory _factory;

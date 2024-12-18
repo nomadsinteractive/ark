@@ -43,9 +43,9 @@ public:
     const sp<ResourceLoader>& resourceLoader() const;
 
 //  [[script::bindings::property]]
-    const sp<Arena>& arena() const;
+    const sp<Activity>& activity() const;
 //  [[script::bindings::property]]
-    void setArena(sp<Arena> arena);
+    void setActivity(sp<Activity> activity);
 
 //  [[script::bindings::auto]]
     sp<ResourceLoader> createResourceLoader(const String& name, const Scope& args);
@@ -110,8 +110,8 @@ private:
 
     sp<ApplicationManifest> _manifest;
 
-    sp<Arena> _arena;
-    sp<Expendable> _arena_discarded;
+    sp<Activity> _activity;
+    sp<Expendable> _activity_discarded;
 };
 
 }

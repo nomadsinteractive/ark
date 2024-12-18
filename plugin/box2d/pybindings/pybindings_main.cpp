@@ -5,7 +5,7 @@
 #include "core/types/shared_ptr.h"
 #include "core/util/string_convert.h"
 
-#include "app/view/arena.h"
+#include "app/view/activity.h"
 
 #include "python/impl/interpreter/python_interpreter.h"
 #include "python/extension/python_extension.h"
@@ -39,10 +39,10 @@ public:
             loader[Type<RigidbodyBox2D>::id()] = [](PyArkType::Instance& inst, const String& id, const Scope& args)->Box { return Box(inst.unpack<ResourceLoader>()->load<RigidbodyBox2D>(id, args)); };
         }
         {
-            PyArkType* pyArenaType = PythonExtension::instance().getPyArkType<Arena>();
+            PyArkType* pyArenaType = PythonExtension::instance().getPyArkType<Activity>();
             std::map<TypeId, PyArkType::LoaderFunction>& loader = pyArenaType->ensureLoader("load");
-            loader[Type<ColliderBox2D>::id()] = [](PyArkType::Instance& inst, const String& id, const Scope& args)->Box { return Box(inst.unpack<Arena>()->load<ColliderBox2D>(id, args)); };
-            loader[Type<RigidbodyBox2D>::id()] = [](PyArkType::Instance& inst, const String& id, const Scope& args)->Box { return Box(inst.unpack<Arena>()->load<RigidbodyBox2D>(id, args)); };
+            loader[Type<ColliderBox2D>::id()] = [](PyArkType::Instance& inst, const String& id, const Scope& args)->Box { return Box(inst.unpack<Activity>()->load<ColliderBox2D>(id, args)); };
+            loader[Type<RigidbodyBox2D>::id()] = [](PyArkType::Instance& inst, const String& id, const Scope& args)->Box { return Box(inst.unpack<Activity>()->load<RigidbodyBox2D>(id, args)); };
         }
     }
 

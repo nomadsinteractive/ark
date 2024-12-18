@@ -24,13 +24,10 @@ public:
     void onWire(const WiringContext& context) override;
 
 //  [[script::bindings::property]]
-    const sp<LayerContext>& layerContext() const;
-
-//  [[script::bindings::property]]
     const sp<ModelLoader>& modelLoader() const;
 
 //  [[plugin::builder("with_layer")]]
-    class BUILDER : public Builder<Wirable> {
+    class BUILDER final : public Builder<Wirable> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 

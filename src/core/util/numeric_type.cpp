@@ -9,7 +9,6 @@
 #include "core/impl/variable/clamp.h"
 #include "core/impl/variable/fence.h"
 #include "core/impl/variable/integral.h"
-#include "core/impl/variable/integral_with_resistance.h"
 #include "core/impl/variable/lerp.h"
 #include "core/impl/variable/periodic.h"
 #include "core/impl/variable/second_order_dynamics.h"
@@ -287,11 +286,6 @@ sp<Numeric> NumericType::sod(sp<Numeric> self, float d0, float k, float z, float
 sp<Numeric> NumericType::periodic(const sp<Numeric>& self, const sp<Numeric>& interval, const sp<Numeric>& duration)
 {
     return sp<Numeric>::make<Periodic<float>>(self, interval ? interval : sp<Numeric>::make<Numeric::Const>(1.0f / 24), duration ? duration : Ark::instance().appClock()->duration());
-}
-
-sp<Numeric> NumericType::integralWithResistance(const sp<Numeric>& self, float v0, const sp<Numeric>& cd, const sp<Numeric>& t)
-{
-    return sp<Numeric>::make<IntegralWithResistance<float>>(v0, self, cd, t ? t : Ark::instance().appClock()->duration());
 }
 
 sp<Numeric> NumericType::modFloor(const sp<Numeric>& self, const sp<Numeric>& mod)

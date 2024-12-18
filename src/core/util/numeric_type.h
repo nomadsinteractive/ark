@@ -113,8 +113,6 @@ public:
     static sp<Numeric> ifElse(sp<Numeric> self, sp<Boolean> condition, sp<Numeric> negative);
 //  [[script::bindings::classmethod]]
     static sp<Numeric> integral(const sp<Numeric>& self, const sp<Numeric>& t = nullptr);
-//  [[script::bindings::classmethod]]
-    static sp<Numeric> integralWithResistance(const sp<Numeric>& self, float v0, const sp<Numeric>& cd, const sp<Numeric>& t = nullptr);
 
 //  [[script::bindings::classmethod]]
     static sp<Numeric> modFloor(const sp<Numeric>& self, const sp<Numeric>& mod);

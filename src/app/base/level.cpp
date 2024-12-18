@@ -27,10 +27,48 @@ namespace ark {
 namespace {
 
 struct Library {
-    String _name;
-    int32_t _type;
-    sp<Vec3> _dimensions;
+    NamedHash _id;
+    sp<Vec3> _size;
     sp<Shape> _shape;
+};
+
+enum ObjectClass {
+    OBJECT_CLASS_INSTANCE,
+    OBJECT_CLASS_MESH,
+    OBJECT_CLASS_CAMERA,
+    OBJECT_CLASS_LIGHT
+};
+
+struct Object {
+    document _manifest;
+
+    String _name;
+    ObjectClass _class;
+
+    bool _visible;
+
+    V3 _position;
+    Optional<V3> _scale;
+    Optional<V4> _rotation;
+
+    Collider::BodyType _body_type;
+    int32_t _instance_of;
+
+    Object(document manifest)
+        : _manifest(std::move(manifest)), _name(Documents::getAttribute(_manifest, constants::NAME)), _class(OBJECT_CLASS_INSTANCE), _visible(Documents::getAttribute<bool>(_manifest, constants::VISIBLE, true)),
+          _position(Documents::getAttribute<V3>(_manifest, constants::POSITION, V3())), _scale(Documents::getAttributeOptional<V3>(_manifest, constants::SCALE)),
+          _rotation(Documents::getAttributeOptional<V4>(_manifest, constants::ROTATION)), _body_type(Documents::getAttribute<Collider::BodyType>(_manifest, "rigidbody_type", Collider::BODY_TYPE_NONE)),
+          _instance_of(Documents::getAttribute<int32_t>(_manifest, "instance-of", -1))
+    {
+        const String clazz = Documents::getAttribute(_manifest, constants::CLASS);
+        if(clazz == "MESH")
+            _class = OBJECT_CLASS_MESH;
+        else if(clazz == "CAMERA")
+            _class = OBJECT_CLASS_CAMERA;
+        else if(clazz == "LIGHT")
+            _class = OBJECT_CLASS_LIGHT;
+    }
+
 };
 
 template<typename T> std::vector<Level::NamedLayerBuilder<T>> loadNamedTypes(BeanFactory& factory, const document& manifest, const String& name, const String& builderName) {
@@ -47,24 +85,21 @@ template<typename T> std::map<String, sp<T>> loadNamedTypeInstances(const std::v
     return instances;
 }
 
-sp<Transform3D> makeTransform(const String& rotation, const String& scale)
+sp<Transform3D> makeTransform(const Optional<V4>& rotation, const Optional<V3>& scale)
 {
     sp<Vec3> s;
-    const V4 quat = Strings::eval<V4>(rotation);
+    const V4 quat = rotation ? rotation.value() : constants::QUATERNION_ONE;
     if(scale)
-        if(const V3 sv = Strings::eval<V3>(scale); sv != V3(1.0f))
+        if(const V3 sv = scale.value(); sv != constants::SCALE_ONE)
             s = sp<Vec3>::make<Vec3::Const>(sv);
     return sp<Transform3D>::make(sp<Vec4>::make<Vec4::Const>(quat), std::move(s));
 }
 
-std::pair<sp<RenderObject>, sp<Transform3D>> makeRenderObject(const document& manifest, HashId type, bool visible)
+std::pair<sp<RenderObject>, sp<Transform3D>> makeRenderObject(const Object& obj, HashId type)
 {
     const Global<Constants> globalConstants;
-    const V3 position = Documents::ensureAttribute<V3>(manifest, constants::POSITION);
-    const String& scale = Documents::getAttribute(manifest, "scale");
-    const String& rotation = Documents::ensureAttribute(manifest, constants::ROTATION);
-    sp<Transform3D> transform = makeTransform(rotation, scale);
-    sp<RenderObject> renderObject = sp<RenderObject>::make(type, sp<Vec3>::make<Vec3::Const>(position), nullptr, transform, nullptr, visible ? globalConstants->BOOLEAN_TRUE : globalConstants->BOOLEAN_FALSE);
+    sp<Transform3D> transform = makeTransform(obj._rotation, obj._scale);
+    sp<RenderObject> renderObject = sp<RenderObject>::make(type, sp<Vec3>::make<Vec3::Const>(obj._position), nullptr, transform, nullptr, obj._visible ? globalConstants->BOOLEAN_TRUE : globalConstants->BOOLEAN_FALSE);
     return {std::move(renderObject), std::move(transform)};
 }
 
@@ -75,10 +110,10 @@ sp<Rigidbody> makeRigidBody(Library& library, const sp<Collider>& collider, Rend
 
     if(!library._shape)
     {
-        if(const auto iter = shapes.find(library._name); iter != shapes.end())
+        if(const auto iter = shapes.find(library._id.name()); iter != shapes.end())
             library._shape = iter->second;
         else
-            library._shape = collider->createShape(library._name, library._dimensions);
+            library._shape = collider->createShape(library._id, library._size);
     }
     if(bodyType != Collider::BODY_TYPE_DYNAMIC)
         return collider->createBody(bodyType, library._shape, renderObject.position(), transform.rotation().wrapped());
@@ -91,8 +126,8 @@ sp<Rigidbody> makeRigidBody(Library& library, const sp<Collider>& collider, Rend
 
 }
 
-Level::Level(std::map<String, sp<Layer>> renderObjectLayers, std::map<String, sp<Camera>> cameras, std::map<String, sp<Vec3>> lights)
-    : _render_object_layers(std::move(renderObjectLayers)), _cameras(std::move(cameras)), _lights(std::move(lights))
+Level::Level(std::map<String, sp<Layer>> layers, std::map<String, sp<Camera>> cameras, std::map<String, sp<Vec3>> lights)
+    : _layers(std::move(layers)), _cameras(std::move(cameras)), _lights(std::move(lights))
 {
 }
 
@@ -108,7 +143,7 @@ void Level::load(const String& src, const sp<Collider>& collider, const std::map
         const String& dimensions = Documents::ensureAttribute(i, "dimensions");
         const int32_t id = Documents::ensureAttribute<int32_t>(i, constants::ID);
         CHECK_WARN(libraryMapping.find(id) == libraryMapping.end(), "Overwriting instance library mapping(%d)", id);
-        libraryMapping.emplace(id, Library{name, static_cast<int32_t>(name.hash()), sp<Vec3>::make<Vec3::Const>(Strings::eval<V3>(dimensions))});
+        libraryMapping.emplace(id, Library{name, sp<Vec3>::make<Vec3::Const>(Strings::eval<V3>(dimensions))});
     }
 
     for(const document& i : manifest->children(constants::LAYER))
@@ -117,75 +152,63 @@ void Level::load(const String& src, const sp<Collider>& collider, const std::map
         const sp<Layer> layer = getLayer(layerName);
         for(const document& j : i->children("object"))
         {
-            const int32_t instanceOf = Documents::getAttribute<int32_t>(j, "instance-of", -1);
-            const String clazz = Documents::getAttribute(j, constants::CLASS);
-            const bool visible = Documents::getAttribute<bool>(j, constants::VISIBLE, true);
-            if(instanceOf != -1)
+            const Object obj(j);
+            if(obj._instance_of != -1)
             {
-                const auto iter = libraryMapping.find(instanceOf);
+                const auto iter = libraryMapping.find(obj._instance_of);
                 ASSERT(iter != libraryMapping.end());
                 Library& library = iter->second;
-                String name = Documents::getAttribute(j, constants::NAME);
-                auto [renderObject, transform] = makeRenderObject(j, library._type, visible);
+                auto [renderObject, transform] = makeRenderObject(obj, library._id.hash());
 
                 CHECK(layer, "Trying to load model instance into undefined Layer(%s)", layerName.c_str());
                 layer->addRenderObject(renderObject);
 
-                if(const Collider::BodyType bodyType = Documents::getAttribute<Collider::BodyType>(j, "rigidbody_type", Collider::BODY_TYPE_NONE); bodyType != Collider::BODY_TYPE_NONE)
+                if(obj._body_type != Collider::BODY_TYPE_NONE)
                 {
-                    sp<Rigidbody> rigidBody = makeRigidBody(library, collider, renderObject, transform, bodyType, shapes);
-                    if(name)
-                        _rigid_objects[name] = std::move(rigidBody);
+                    sp<Rigidbody> rigidBody = makeRigidBody(library, collider, renderObject, transform, obj._body_type, shapes);
+                    if(obj._name)
+                        _rigid_objects[obj._name] = std::move(rigidBody);
                     else
                         _unnamed_rigid_objects.push_back(std::move(rigidBody));
                 }
 
-                if(name)
-                    _render_objects[name] = std::move(renderObject);
+                if(obj._name)
+                    _render_objects[obj._name] = std::move(renderObject);
             }
-            else if(clazz == "MESH")
+            else if(obj._class == OBJECT_CLASS_MESH)
             {
-                const String& name = Documents::ensureAttribute(j, constants::NAME);
-                auto [renderObject, _] = makeRenderObject(j, name.hash(), visible);
+                auto [renderObject, _] = makeRenderObject(obj, obj._name.hash());
                 CHECK(layer, "Trying to load model instance into undefined Layer(%s)", layerName.c_str());
                 layer->addRenderObject(renderObject);
-                if(name)
-                    _render_objects[name] = std::move(renderObject);
+                if(obj._name)
+                    _render_objects[obj._name] = std::move(renderObject);
             }
-            else if(clazz == "CAMERA")
+            else if(obj._class == OBJECT_CLASS_CAMERA)
             {
-                const String& name = Documents::ensureAttribute(j, constants::NAME);
-                const sp<Camera> camera = getCamera(name);
-                DCHECK_WARN(camera, "Undefined camera(%s) in \"%s\"", name.c_str(), src.c_str());
+                const sp<Camera> camera = getCamera(obj._name);
+                DCHECK_WARN(camera, "Undefined camera(%s) in \"%s\"", obj._name.c_str(), src.c_str());
                 if(camera)
                 {
-                    const String& position = Documents::ensureAttribute(j, constants::POSITION);
-                    const String& rotation = Documents::ensureAttribute(j, constants::ROTATION);
-                    const float fovy = Documents::ensureAttribute<float>(j, "fov_y");
-                    const float clipNear = Documents::ensureAttribute<float>(j, "clip-near");
-                    const float clipFar = Documents::ensureAttribute<float>(j, "clip-far");
-                    const V3 p = Strings::eval<V3>(position);
-                    const Quaternion quaternion(sp<Vec4>::make<Vec4::Const>(Strings::eval<V4>(rotation)));
+                    const float fovy = Documents::ensureAttribute<float>(obj._manifest, "fov_y");
+                    const float clipNear = Documents::ensureAttribute<float>(obj._manifest, "clip-near");
+                    const float clipFar = Documents::ensureAttribute<float>(obj._manifest, "clip-far");
+                    const Quaternion quaternion(sp<Vec4>::make<Vec4::Const>(obj._rotation ? obj._rotation.value() : constants::QUATERNION_ONE));
                     const M4 matrix = quaternion.toMatrix()->val();
                     //After converting Blender coordinate system(RHS) from z-up to y-up, it becomes LHS coordinate system.
                     const V3 front = MatrixUtil::mul(matrix, V3(0, camera->isYUp() ? 1.0f : -1.0f, 0));
                     const V3 up = MatrixUtil::mul(matrix, V3(0, 0, 1.0f));
                     Camera c = Ark::instance().createCamera(Ark::COORDINATE_SYSTEM_LHS, Ark::instance().applicationContext()->renderEngine()->coordinateSystem() == Ark::COORDINATE_SYSTEM_LHS);
                     c.perspective(fovy, 16.0f / 9, clipNear, clipFar);
-                    c.lookAt(p, p + front, up);
+                    c.lookAt(obj._position, obj._position + front, up);
                     camera->assign(c);
                 }
             }
-            else if(clazz == "LIGHT")
+            else if(obj._class == OBJECT_CLASS_LIGHT)
             {
-                const String& name = Documents::ensureAttribute(j, constants::NAME);
-                const sp<Vec3> light = getLight(name);
-                DCHECK_WARN(light, "Undefined light(%s) in \"%s\"", name.c_str(), src.c_str());
+                const sp<Vec3> light = getLight(obj._name);
+                DCHECK_WARN(light, "Undefined light(%s) in \"%s\"", obj._name.c_str(), src.c_str());
                 if(light)
-                {
-                    const V3 position = Strings::eval<V3>(Documents::ensureAttribute(j, constants::POSITION));
-                    Vec3Type::set(light, position);
-                }
+                    Vec3Type::set(light, obj._position);
             }
         }
     }
@@ -193,8 +216,8 @@ void Level::load(const String& src, const sp<Collider>& collider, const std::map
 
 sp<Layer> Level::getLayer(const String& name) const
 {
-    const auto iter = _render_object_layers.find(name);
-    return iter != _render_object_layers.end() ? iter->second : nullptr;
+    const auto iter = _layers.find(name);
+    return iter != _layers.end() ? iter->second : nullptr;
 }
 
 sp<Camera> Level::getCamera(const String& name) const
@@ -219,30 +242,6 @@ sp<Rigidbody> Level::getRigidBody(const String& name) const
 {
     const auto iter = _rigid_objects.find(name);
     return iter != _rigid_objects.end() ? iter->second : nullptr;
-}
-
-Level::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _render_object_layers(loadNamedTypes<Layer>(factory, manifest, constants::RENDER_OBJECT, constants::LAYER))
-{
-    for(const document& i : manifest->children("camera"))
-        _cameras.emplace_back(Documents::ensureAttribute(i, constants::NAME), factory.ensureBuilder<Camera>(i, constants::REF));
-    for(const document& i : manifest->children("light"))
-        _lights.emplace_back(Documents::ensureAttribute(i, constants::NAME), factory.ensureBuilder<Vec3>(i, constants::REF));
-}
-
-sp<Level> Level::BUILDER::build(const Scope& args)
-{
-    std::map<String, sp<Camera>> cameras;
-    for(const auto& i : _cameras)
-        cameras[i.first] = i.second->build(args);
-
-    std::map<String, sp<Vec3>> lights;
-    for(const auto& i : _lights)
-        lights[i.first] = i.second->build(args);
-
-    std::map<String, sp<Layer>> instanceLibraries = loadNamedTypeInstances<Layer>(_render_object_layers, args);
-
-    return sp<Level>::make(std::move(instanceLibraries), std::move(cameras), std::move(lights));
 }
 
 }

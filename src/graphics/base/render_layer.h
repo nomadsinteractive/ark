@@ -47,6 +47,8 @@ public:
     RenderLayerSnapshot snapshot(RenderRequest& renderRequest);
 
 //  [[script::bindings::property]]
+    const sp<ModelLoader>& modelLoader() const;
+//  [[script::bindings::property]]
     const sp<LayerContext>& context() const;
 
 //  [[script::bindings::auto]]

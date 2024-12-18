@@ -5,7 +5,6 @@
 #include "core/base/clock.h"
 #include "core/impl/variable/variable_dyed.h"
 #include "core/impl/variable/integral.h"
-#include "core/impl/variable/integral_with_resistance.h"
 #include "core/impl/variable/lerp.h"
 #include "core/impl/variable/second_order_dynamics.h"
 #include "core/impl/variable/variable_op1.h"
@@ -121,10 +120,6 @@ public:
     static sp<VarType> integralS2(sp<VarType> self, const T& s0, const Optional<T>& s1, sp<Numeric> t) {
         sp<Numeric> duration = t ? std::move(t) : Ark::instance().appClock()->duration();
         return sp<IntegralS2<T>>::make(std::move(self), std::move(duration), s0, s1 ? s1.value() : s0);
-    }
-
-    static sp<VarType> integralWithResistance(sp<VarType> self, const T& v0, sp<Numeric> cd, sp<Numeric> t) {
-        return sp<IntegralWithResistance<T>>::make(v0, std::move(self), cd, t ? std::move(t) : Ark::instance().appClock()->duration());
     }
 
     static sp<Numeric> distanceTo(sp<VarType> self, sp<VarType> other) {

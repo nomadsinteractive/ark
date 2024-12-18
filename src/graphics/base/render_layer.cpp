@@ -89,6 +89,11 @@ RenderLayerSnapshot RenderLayer::snapshot(RenderRequest& renderRequest)
     return renderLayerSnapshot;
 }
 
+const sp<ModelLoader>& RenderLayer::modelLoader() const
+{
+    return _stub->_model_loader;
+}
+
 sp<LayerContext> RenderLayer::makeLayerContext(sp<ModelLoader> modelLoader, sp<Vec3> position, sp<Boolean> visible, sp<Boolean> discarded) const
 {
     return sp<LayerContext>::make(_stub->_shader, modelLoader ? sp<ModelLoader>::make<ModelLoaderCached>(std::move(modelLoader)) : _stub->_model_loader, std::move(position), std::move(visible), std::move(discarded), _stub->_layer_context->varyings());

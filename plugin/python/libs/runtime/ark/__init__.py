@@ -566,7 +566,7 @@ class RenderController:
 class ApplicationFacade:
 
     def __init__(self):
-        self._arena = None
+        self._activity = None
 
     @property
     def clock(self) -> 'Clock':
@@ -613,12 +613,12 @@ class ApplicationFacade:
         return ResourceLoader()
 
     @property
-    def arena(self) -> 'Arena':
-        return self._arena
+    def activity(self) -> "Activity":
+        return self._activity
 
-    @arena.setter
-    def arena(self, arena: 'Arena'):
-        self._arena = arena
+    @activity.setter
+    def activity(self, activity: "Activity"):
+        self._activity = activity
 
     @property
     def argv(self) -> List[str]:
@@ -955,9 +955,6 @@ class Numeric(_Scalar):
     def integral(self, t: Optional['Numeric'] = None) -> 'Numeric':
         pass
 
-    def integral_with_resistance(self, v0: float, cd: Union[float, 'Numeric'], t: Optional['Numeric'] = None) -> 'Numeric':
-        pass
-
     def if_else(self, condition: Union[bool, Boolean], negative: Union[float, 'Numeric']) -> 'Numeric':
         pass
 
@@ -1080,9 +1077,6 @@ class Vec2(_Var):
         return self._x, self._y
 
     def integral(self, t: Optional[Numeric] = None) -> 'Vec2':
-        pass
-
-    def integral_with_resistance(self, v0: tuple[float, float], cd: Union[float, 'Numeric'], t: Optional['Numeric'] = None) -> 'Vec2':
         pass
 
     def wrap(self) -> 'Vec2':
@@ -1498,10 +1492,10 @@ class ModelBundle:
 
 
 class Level:
-    def __init__(self, render_object_layers: dict[str, 'Layer'], cameras: dict[str, Camera] = None, lights: dict[str, Vec3] = None):
+    def __init__(self, layers: dict[str, 'Layer'], cameras: dict[str, Camera] = None, lights: dict[str, Vec3] = None):
         pass
 
-    def load(self, src: str, collider: Optional['Collider'] = None, shape_id_aliases: dict[str, str] = None):
+    def load(self, src: str, collider: Optional['Collider'] = None, shapes: dict[str, "Shape"] = None):
         pass
 
     def get_render_object(self, name: str) -> 'RenderObject':
@@ -1649,7 +1643,7 @@ class Layer:
         pass
 
 
-class Arena:
+class Activity:
 
     def load(self, clz: Type[_BUILDABLE_TYPES], name, **kwargs) -> _BUILDABLE_TYPES:
         return clz()

@@ -8,7 +8,7 @@ class ApplicationController;
 class ApplicationDelegate;
 class ApplicationProfiler;
 class ApplicationBundle;
-class Arena;
+class Activity;
 class AudioPlayer;
 class BroadPhrase;
 class Button;

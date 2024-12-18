@@ -7,7 +7,7 @@
 #include "renderer/base/resource_loader_context.h"
 
 #include "app/base/application_context.h"
-#include "app/view/arena.h"
+#include "app/view/activity.h"
 
 namespace ark {
 

@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_BASE_TILESET_H_
-#define ARK_GRAPHICS_BASE_TILESET_H_
+#pragma once
 
 #include <unordered_map>
 
@@ -37,16 +36,16 @@ public:
     void load(const String& src);
 
 //  [[plugin::builder]]
-    class BUILDER : public Builder<Tileset> {
+    class BUILDER final : public Builder<Tileset> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Tileset> build(const Scope& args) override;
+        sp<Tileset> build(const Scope& args) override;
 
     private:
         float _tile_width;
         float _tile_height;
-        sp<Builder<TilesetImporter>> _importer;
+        builder<TilesetImporter> _importer;
     };
 
 private:
@@ -57,5 +56,3 @@ private:
 };
 
 }
-
-#endif

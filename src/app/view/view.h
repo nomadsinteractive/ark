@@ -103,7 +103,7 @@ protected:
     sp<Updatable> _updatable_view;
     sp<Updatable> _updatable_layout;
 
-    friend class Arena;
+    friend class Activity;
     friend class ViewHierarchy;
 };
 

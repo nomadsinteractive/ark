@@ -29,7 +29,7 @@ public:
 
 public:
 //  [[script::bindings::auto]]
-    Level(std::map<String, sp<Layer>> renderObjectLayers, std::map<String, sp<Camera>> cameras = {}, std::map<String, sp<Vec3>> lights = {});
+    Level(std::map<String, sp<Layer>> layers, std::map<String, sp<Camera>> cameras = {}, std::map<String, sp<Vec3>> lights = {});
 
 //  [[script::bindings::auto]]
     void load(const String& src, const sp<Collider>& collider = nullptr, const std::map<String, sp<Shape>>& shapes = {});
@@ -44,21 +44,8 @@ public:
 //  [[script::bindings::auto]]
     sp<Rigidbody> getRigidBody(const String& name) const;
 
-//  [[plugin::builder]]
-    class BUILDER final : public Builder<Level> {
-    public:
-        BUILDER(BeanFactory& factory, const document& manifest);
-
-        sp<Level> build(const Scope& args) override;
-
-    private:
-        std::vector<RenderObjectLayer> _render_object_layers;
-        std::vector<std::pair<String, sp<Builder<Camera>>>> _cameras;
-        std::vector<std::pair<String, sp<Builder<Vec3>>>> _lights;
-    };
-
 private:
-    std::map<String, sp<Layer>> _render_object_layers;
+    std::map<String, sp<Layer>> _layers;
 
     std::map<String, sp<Camera>> _cameras;
     std::map<String, sp<Vec3>> _lights;

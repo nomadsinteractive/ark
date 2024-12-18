@@ -13,7 +13,7 @@
 #include "app/base/application_manifest.h"
 #include "app/base/surface.h"
 #include "app/impl/event_listener/event_listener_by_script.h"
-#include "app/view/arena.h"
+#include "app/view/activity.h"
 
 namespace ark {
 
@@ -39,8 +39,8 @@ void ApplicationDelegateImpl::onCreate(Application& application, const sp<Surfac
 
     applicationFacade->setBackgroundColor(Documents::getAttribute<Color>(appManifest, "background-color", Color(0, 0, 0)));
 
-    if(sp<Arena> arena = appResourceLoader->beanFactory().build<Arena>(appManifest, "arena", {}))
-        applicationFacade->setArena(std::move(arena));
+    if(sp<Activity> activity = appResourceLoader->beanFactory().build<Activity>(appManifest, "activity", {}))
+        applicationFacade->setActivity(std::move(activity));
 
     bool defaultEventListenerSet = false;
     for(const document& i : appManifest->children("script"))

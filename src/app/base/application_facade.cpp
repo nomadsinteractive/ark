@@ -16,7 +16,7 @@
 #include "app/base/application_context.h"
 #include "app/base/surface.h"
 #include "app/inf/application_controller.h"
-#include "app/view/arena.h"
+#include "app/view/activity.h"
 
 namespace ark {
 
@@ -151,31 +151,31 @@ const sp<ResourceLoader>& ApplicationFacade::resourceLoader() const
     return _context->resourceLoader();
 }
 
-const sp<Arena>& ApplicationFacade::arena() const
+const sp<Activity>& ApplicationFacade::activity() const
 {
-    return _arena;
+    return _activity;
 }
 
-void ApplicationFacade::setArena(sp<Arena> arena)
+void ApplicationFacade::setActivity(sp<Activity> activity)
 {
-    if(_arena == arena)
+    if(_activity == activity)
     {
-        WARN("Replacing current Arena with the same one");
+        WARN("Replacing current Activity with the same one");
         return;
     }
 
-    if(_arena)
+    if(_activity)
     {
-        _arena_discarded->discard();
-        _context->deferUnref(std::move(_arena));
+        _activity_discarded->discard();
+        _context->deferUnref(std::move(_activity));
     }
 
-    ASSERT(arena);
-    _arena = std::move(arena);
-    _arena_discarded = sp<Expendable>::make();
+    ASSERT(activity);
+    _activity = std::move(activity);
+    _activity_discarded = sp<Expendable>::make();
 
-    _surface_controller->addRenderer(_arena, _arena_discarded);
-    _context->addEventListener(_arena, _arena_discarded);
+    _surface_controller->addRenderer(_activity, _activity_discarded);
+    _context->addEventListener(_activity, _activity_discarded);
 }
 
 sp<ResourceLoader> ApplicationFacade::createResourceLoader(const String& name, const Scope& args)

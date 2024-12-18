@@ -57,6 +57,7 @@ const char* const NAME = "name";
 const char* const INPUT = "input";
 const char* const INTERVAL = "interval";
 const char* const POSITION = "position";
+const char* const SCALE = "scale";
 const char* const SNIPPET = "snippet";
 const char* const SRC = "src";
 const char* const RECT = "rect";

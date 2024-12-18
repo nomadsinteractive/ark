@@ -222,7 +222,7 @@ void Tilemap::addLayer(sp<TilemapLayer> layer, float zorder)
 {
     if(_render_layer)
         layer->setLayerContext(_render_layer->makeLayerContext(nullptr, layer->position().wrapped(), layer->visible().wrapped(), nullptr));
-    layer->_stub->_zorder = zorder;
+    layer->setZorder(zorder);
     _stub->_layers.insert(std::upper_bound(_stub->_layers.begin(), _stub->_layers.end(), layer, _tilemapLayerCompareGreater), std::move(layer));
 }
 

@@ -562,7 +562,7 @@ void Text::Content::setRichText(std::wstring richText, const sp<ResourceLoader>&
 void Text::Content::createContent()
 {
     _glyphs = makeGlyphs(_glyph_maker, _text_unicode);
-    _layout_chars = toLayoutCharacters(_glyphs, _render_layer->context()->modelLoader());
+    _layout_chars = toLayoutCharacters(_glyphs, _render_layer->modelLoader());
     createLayerContent(doLayoutWithoutBoundary());
 }
 
