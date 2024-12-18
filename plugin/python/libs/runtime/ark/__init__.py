@@ -2561,7 +2561,7 @@ class StateActionStrand:
 
 class StateAction:
 
-    def __init__(self, state_machine: "StateMachine", strand: StateActionStrand, on_execute: Optional[Runnable] = None, on_activate: Optional[Runnable] = None, on_deactivate: Optional[Runnable] = None):
+    def __init__(self, state_machine: "StateMachine", strand: StateActionStrand, on_activate: Optional[Runnable] = None, on_deactivate: Optional[Runnable] = None):
         pass
 
     @property
@@ -2574,14 +2574,6 @@ class StateAction:
 
     @property
     def end(self) -> "State":
-        pass
-
-    @property
-    def on_execute(self) -> Optional[Runnable]:
-        pass
-
-    @on_execute.setter
-    def on_execute(self, on_execute: Optional[Runnable]):
         pass
 
     @property
@@ -2598,10 +2590,6 @@ class StateAction:
 
     @on_deactivate.setter
     def on_deactivate(self, on_deactivate: Optional[Runnable]):
-        pass
-
-    @property
-    def execute(self) -> Runnable:
         pass
 
     @property

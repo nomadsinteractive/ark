@@ -18,7 +18,6 @@ public:
     void reset(sp<State> state);
 
 private:
-    void doActionExecute(const StateAction& action);
     void doActionActivate(const StateAction& action);
     void doActionDeactivate(const StateAction& action);
 

@@ -23,20 +23,6 @@ void StateMachine::reset(sp<State> state)
     doActive(std::move(state));
 }
 
-void StateMachine::doActionExecute(const StateAction& action)
-{
-    if(const auto iter = std::find(_active_states.begin(), _active_states.end(), action.start()); iter != _active_states.end())
-    {
-        if(action._stub->_on_execute)
-            action._stub->_on_execute->run();
-
-        action.start()->deactivate();
-        _active_states.erase(iter);
-
-        doActive(action.end());
-    }
-}
-
 void StateMachine::doActionActivate(const StateAction& action)
 {
     if(const auto iter = std::find(_active_states.begin(), _active_states.end(), action.start()); iter != _active_states.end())
