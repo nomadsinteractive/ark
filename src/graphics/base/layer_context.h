@@ -27,12 +27,9 @@ public:
 
     bool update(uint64_t timestamp) override;
 
-//  [[script::bindings::property]]
     const sp<Shader>& shader() const;
 
-//  [[script::bindings::property]]
     const SafeVar<Vec3>& position() const;
-//  [[script::bindings::property]]
     void setPosition(sp<Vec3> position);
 
     SafeVar<Boolean>& visible();
@@ -40,42 +37,23 @@ public:
 
     const SafeVar<Boolean>& discarded() const;
 
-//  [[script::bindings::property]]
     const sp<ModelLoader>& modelLoader() const;
     void setModelLoader(sp<ModelLoader> modelLoader);
 
-    Layer::Type layerType() const;
-
-//  [[script::bindings::auto]]
-    void add(sp<Renderable> renderable, sp<Updatable> isDirty = nullptr, sp<Boolean> discarded = nullptr);
-//  [[script::bindings::auto]]
+    void add(sp<Renderable> renderable, sp<Updatable> updatable = nullptr, sp<Boolean> discarded = nullptr);
     void clear();
     void dispose();
-//  [[script::bindings::property]]
     const sp<Varyings>& varyings() const;
-//  [[script::bindings::property]]
     void setVaryings(sp<Varyings> varyings);
 
     void markDirty();
 
     bool processNewCreated();
 
-    LayerContextSnapshot snapshot(RenderLayer renderLayer, RenderRequest& renderRequest, const PipelineInput& pipelineInput);
+    LayerContextSnapshot snapshot(RenderLayer renderLayer, const RenderRequest& renderRequest, const PipelineInput& pipelineInput);
 
     bool ensureState(void* stateKey);
     ElementState& addElementState(void* key);
-
-    class BUILDER final : public Builder<LayerContext> {
-    public:
-        BUILDER(BeanFactory& factory, const document& manifest, Layer::Type layerType = Layer::TYPE_DYNAMIC);
-
-        sp<LayerContext> build(const Scope& args) override;
-
-    private:
-        sp<Builder<Layer>> _layer;
-        sp<Builder<RenderLayer>> _render_layer;
-        Layer::Type _layer_type;
-    };
 
 private:
     sp<Shader> _shader;

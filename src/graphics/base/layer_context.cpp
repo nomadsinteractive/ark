@@ -5,19 +5,17 @@
 #include "core/util/log.h"
 #include "core/util/updatable_util.h"
 
-#include "graphics/base/layer.h"
 #include "graphics/base/render_object.h"
 #include "graphics/base/layer_context_snapshot.h"
 #include "graphics/util/renderable_type.h"
 
-#include "renderer/base/model.h"
 #include "renderer/base/pipeline_input.h"
 #include "renderer/base/shader.h"
 
 namespace ark {
 
 LayerContext::LayerContext(sp<Shader> shader, sp<ModelLoader> modelLoader, sp<Vec3> position, sp<Boolean> visible, sp<Boolean> discarded, sp<Varyings> varyings)
-    : _shader(std::move(shader)), _model_loader(std::move(modelLoader)), _position(std::move(position)), _visible(std::move(visible), true), _discarded(discarded ? std::move(discarded) : nullptr, false),
+    : _shader(std::move(shader)), _model_loader(std::move(modelLoader)), _position(std::move(position)), _visible(std::move(visible), true), _discarded(std::move(discarded), false),
       _varyings(std::move(varyings)), _reload_requested(false)
 {
 }
@@ -68,9 +66,9 @@ void LayerContext::setModelLoader(sp<ModelLoader> modelLoader)
     _model_loader = std::move(modelLoader);
 }
 
-void LayerContext::add(sp<Renderable> renderable, sp<Updatable> isDirty, sp<Boolean> discarded)
+void LayerContext::add(sp<Renderable> renderable, sp<Updatable> updatable, sp<Boolean> discarded)
 {
-    _renderable_created.push_back(RenderableType::create(std::move(renderable), std::move(isDirty), std::move(discarded)));
+    _renderable_created.push_back(RenderableType::create(std::move(renderable), std::move(updatable), std::move(discarded)));
 }
 
 void LayerContext::clear()
@@ -114,7 +112,7 @@ bool LayerContext::processNewCreated()
     return true;
 }
 
-LayerContextSnapshot LayerContext::snapshot(RenderLayer renderLayer, RenderRequest& renderRequest, const PipelineInput& pipelineInput)
+LayerContextSnapshot LayerContext::snapshot(RenderLayer renderLayer, const RenderRequest& renderRequest, const PipelineInput& pipelineInput)
 {
     const bool dirty = UpdatableUtil::update(renderRequest.timestamp(), _position, _visible, _discarded, _varyings);
     if(!_varyings)
@@ -126,23 +124,6 @@ LayerContext::ElementState& LayerContext::addElementState(void* key)
 {
     DASSERT(_element_states.find(key) == _element_states.end());
     return _element_states.insert(std::make_pair(key, ElementState{})).first->second;
-}
-
-LayerContext::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, Layer::Type layerType)
-    : _layer(factory.getBuilder<Layer>(manifest, constants::LAYER)),
-      _render_layer(_layer ? nullptr : factory.getBuilder<RenderLayer>(manifest, constants::RENDER_LAYER)), _layer_type(layerType)
-{
-    CHECK(_layer || _render_layer, "LayerContext must be associated with one Layer or RenderLayer");
-}
-
-sp<LayerContext> LayerContext::BUILDER::build(const Scope& args)
-{
-    if(_layer)
-        return _layer->build(args)->context();
-    const sp<RenderLayer> renderLayer = _render_layer->build(args);
-    if(_layer_type != Layer::TYPE_UNSPECIFIED)
-        return renderLayer->addLayerContext();
-    return renderLayer->context();
 }
 
 }

@@ -15,18 +15,16 @@
 
 namespace ark {
 
-RenderLayerSnapshot::RenderLayerSnapshot(RenderRequest& renderRequest, const sp<RenderLayer::Stub>& stub)
-    : _stub(stub), _index_count(0), _buffer_object(_stub->_shader->input()->takeBufferSnapshot(renderRequest, false))
+RenderLayerSnapshot::RenderLayerSnapshot(const RenderRequest& renderRequest, const sp<RenderLayer::Stub>& stub)
+    : _stub(stub), _index_count(0), _buffer_object(_stub->_shader->input()->takeBufferSnapshot(renderRequest, false)), _vertices_dirty(false)
 {
-    _vertices_dirty = doAddLayerContext(renderRequest, _stub->_layer_context);
-
     if(_stub->_scissor && _stub->_scissor->update(renderRequest.timestamp()))
         _scissor = Rect(_stub->_scissor->val());
 }
 
-sp<RenderCommand> RenderLayerSnapshot::compose(const RenderRequest& renderRequest)
+sp<RenderCommand> RenderLayerSnapshot::compose(const RenderRequest& renderRequest) const
 {
-    if(!_elements.empty() && _stub->_layer_context->visible().val())
+    if(!_elements.empty() && _stub->_visible.val())
         return _stub->_render_command_composer->compose(renderRequest, *this);
 
     DrawingContext drawingContext(_stub->_pipeline_bindings, _buffer_object, nullptr);
@@ -43,7 +41,7 @@ const sp<PipelineInput>& RenderLayerSnapshot::pipelineInput() const
     return _stub->_shader->input();
 }
 
-void RenderLayerSnapshot::addLayerContext(RenderRequest& renderRequest, std::vector<sp<LayerContext>>& layerContexts)
+void RenderLayerSnapshot::addLayerContext(const RenderRequest& renderRequest, std::vector<sp<LayerContext>>& layerContexts)
 {
     for(auto iter = layerContexts.begin(); iter != layerContexts.end(); )
     {
@@ -100,7 +98,7 @@ sp<RenderCommand> RenderLayerSnapshot::toRenderCommand(const RenderRequest& rend
     return drawingContext.toRenderCommand(renderRequest);
 }
 
-bool RenderLayerSnapshot::doAddLayerContext(RenderRequest& renderRequest, LayerContext& layerContext)
+bool RenderLayerSnapshot::doAddLayerContext(const RenderRequest& renderRequest, LayerContext& layerContext)
 {
     const PipelineInput& pipelineInput = _stub->_shader->input();
 

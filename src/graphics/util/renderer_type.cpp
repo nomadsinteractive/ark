@@ -8,6 +8,7 @@
 #include "graphics/inf/renderer.h"
 #include "graphics/impl/renderer/renderer_style_position.h"
 #include "graphics/impl/renderer/renderer_wrapper.h"
+#include "graphics/impl/renderer/render_group.h"
 
 namespace ark {
 
@@ -18,7 +19,7 @@ sp<Renderer> RendererType::create(const sp<Renderer>& delegate)
 
 sp<Renderer> RendererType::create(const std::vector<sp<Renderer>>& renderers)
 {
-    const sp<RendererGroup> rendererGroup = sp<RendererGroup>::make();
+    const sp<RendererPhrase> rendererGroup = sp<RendererPhrase>::make();
     for(const sp<Renderer>& i : renderers)
         rendererGroup->addRenderer(i, {});
     return wrap(rendererGroup);
@@ -33,7 +34,7 @@ void RendererType::addRenderer(const sp<Renderer>& self, const sp<Renderer>& ren
 
 sp<Renderer> RendererType::wrap(const sp<Renderer>& self)
 {
-    return sp<RendererWrapper>::make(self);
+    return sp<Renderer>::make<RendererWrapper>(self);
 }
 
 sp<Renderer> RendererType::reset(const sp<Renderer>& self, sp<Renderer> wrapped)

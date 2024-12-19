@@ -7,18 +7,8 @@
 
 namespace ark {
 
-WithLayer::WithLayer(const sp<Layer>& layer)
-    : _layer_context(layer->context())
-{
-}
-
-WithLayer::WithLayer(const sp<RenderLayer>& renderLayer)
-    : _layer_context(renderLayer->context())
-{
-}
-
-WithLayer::WithLayer(sp<LayerContext> layerContext)
-    : _layer_context(std::move(layerContext))
+WithLayer::WithLayer(sp<Layer> layer)
+    : _layer(std::move(layer))
 {
 }
 
@@ -30,22 +20,22 @@ TypeId WithLayer::onPoll(WiringContext& context)
 void WithLayer::onWire(const WiringContext& context)
 {
     if(sp<Renderable> renderable = context.getComponent<Renderable>())
-        _layer_context->add(std::move(renderable), context.getComponent<Updatable>(), context.getComponent<Expendable>());
+        _layer->add(std::move(renderable), context.getComponent<Updatable>(), context.getComponent<Expendable>());
 }
 
-const sp<ModelLoader>& WithLayer::modelLoader() const
+const sp<Layer>& WithLayer::layer() const
 {
-    return _layer_context->modelLoader();
+    return _layer;
 }
 
 WithLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _layer_context(sp<LayerContext::BUILDER>::make(factory, manifest, Layer::TYPE_UNSPECIFIED))
+    : _layer(factory.ensureBuilder<Layer>(manifest, constants::LAYER))
 {
 }
 
 sp<Wirable> WithLayer::BUILDER::build(const Scope& args)
 {
-    return sp<Wirable>::make<WithLayer>(_layer_context->build(args));
+    return sp<Wirable>::make<WithLayer>(_layer->build(args));
 }
 
 }

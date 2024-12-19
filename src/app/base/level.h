@@ -19,15 +19,6 @@ namespace ark {
 
 class ARK_API Level {
 public:
-    template<typename T> struct NamedLayerBuilder {
-        String _name;
-        sp<Builder<T>> _builder;
-    };
-
-    typedef NamedLayerBuilder<Layer> RenderObjectLayer;
-    typedef NamedLayerBuilder<Collider> RigidBodyLayer;
-
-public:
 //  [[script::bindings::auto]]
     Level(std::map<String, sp<Layer>> layers, std::map<String, sp<Camera>> cameras = {}, std::map<String, sp<Vec3>> lights = {});
 

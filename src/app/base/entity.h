@@ -29,7 +29,7 @@ public:
     }
 
 //  [[script::bindings::property]]
-    const sp<Ref>& id() const;
+    const sp<Ref>& ref() const;
 
 //  [[script::bindings::auto]]
     void discard();
@@ -61,8 +61,6 @@ private:
 private:
     sp<Ref> _ref;
     Traits _components;
-
-    friend class EntityId;
 };
 
 }

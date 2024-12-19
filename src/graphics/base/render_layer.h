@@ -25,18 +25,15 @@ private:
         sp<RenderController> _render_controller;
         sp<ModelLoader> _model_loader;
         sp<Shader> _shader;
+        SafeVar<Boolean> _visible;
+        SafeVar<Boolean> _discarded;
+        sp<Varyings> _varyings;
         sp<Vec4> _scissor;
 
         sp<RenderCommandComposer> _render_command_composer;
         sp<PipelineBindings> _pipeline_bindings;
 
         uint32_t _stride;
-
-    private:
-        sp<LayerContext> _layer_context;
-
-        friend class RenderLayer;
-        friend class RenderLayerSnapshot;
     };
 
 public:
@@ -48,8 +45,6 @@ public:
 
 //  [[script::bindings::property]]
     const sp<ModelLoader>& modelLoader() const;
-//  [[script::bindings::property]]
-    const sp<LayerContext>& context() const;
 
 //  [[script::bindings::auto]]
     sp<Layer> makeLayer(sp<ModelLoader> modelLoader = nullptr, sp<Vec3> position = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> discarded = nullptr) const;

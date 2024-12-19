@@ -4,7 +4,6 @@
 
 #include "graphics/base/camera.h"
 #include "graphics/base/layer_context.h"
-#include "graphics/base/render_object.h"
 #include "graphics/base/render_request.h"
 #include "graphics/impl/render_batch/render_batch_post_process.h"
 
@@ -39,9 +38,9 @@ private:
 };
 
 RenderLayer::Stub::Stub(sp<RenderController> renderController, sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Boolean> visible, sp<Boolean> discarded, sp<Varyings> varyings, sp<Vec4> scissor)
-    : _render_controller(std::move(renderController)), _model_loader(ModelLoaderCached::ensureCached(std::move(modelLoader))), _shader(std::move(shader)), _scissor(std::move(scissor)),
-      _render_command_composer(_model_loader->makeRenderCommandComposer(_shader)), _pipeline_bindings(_render_command_composer->makeShaderBindings(_shader, _render_controller, _model_loader->renderMode())),
-      _stride(_shader->input()->getStreamLayout(0).stride()), _layer_context(sp<LayerContext>::make(_shader, _model_loader, nullptr, std::move(visible), std::move(discarded), std::move(varyings)))
+    : _render_controller(std::move(renderController)), _model_loader(ModelLoaderCached::ensureCached(std::move(modelLoader))), _shader(std::move(shader)), _visible(std::move(visible), true),
+      _discarded(std::move(discarded), false), _varyings(std::move(varyings)), _scissor(std::move(scissor)), _render_command_composer(_model_loader->makeRenderCommandComposer(_shader)),
+      _pipeline_bindings(_render_command_composer->makeShaderBindings(_shader, _render_controller, _model_loader->renderMode())), _stride(_shader->input()->getStreamLayout(0).stride())
 {
     _model_loader->bind(_pipeline_bindings);
     CHECK(!_scissor || _pipeline_bindings->pipelineDescriptor()->hasFlag(PipelineDescriptor::FLAG_DYNAMIC_SCISSOR, PipelineDescriptor::FLAG_DYNAMIC_SCISSOR_BITMASK), "RenderLayer has a scissor while its Shader has no FLAG_DYNAMIC_SCISSOR set");
@@ -55,11 +54,6 @@ RenderLayer::RenderLayer(sp<RenderController> renderController, sp<ModelLoader> 
 RenderLayer::RenderLayer(sp<RenderLayer::Stub> stub)
     : _stub(std::move(stub)), _render_batch(sp<RenderBatchImpl>::make()), _render_batches{_render_batch}
 {
-}
-
-const sp<LayerContext>& RenderLayer::context() const
-{
-    return _stub->_layer_context;
 }
 
 RenderLayerSnapshot RenderLayer::snapshot(RenderRequest& renderRequest)
@@ -96,7 +90,7 @@ const sp<ModelLoader>& RenderLayer::modelLoader() const
 
 sp<LayerContext> RenderLayer::makeLayerContext(sp<ModelLoader> modelLoader, sp<Vec3> position, sp<Boolean> visible, sp<Boolean> discarded) const
 {
-    return sp<LayerContext>::make(_stub->_shader, modelLoader ? sp<ModelLoader>::make<ModelLoaderCached>(std::move(modelLoader)) : _stub->_model_loader, std::move(position), std::move(visible), std::move(discarded), _stub->_layer_context->varyings());
+    return sp<LayerContext>::make(_stub->_shader, modelLoader ? sp<ModelLoader>::make<ModelLoaderCached>(std::move(modelLoader)) : _stub->_model_loader, std::move(position), std::move(visible), std::move(discarded), _stub->_varyings);
 }
 
 sp<LayerContext> RenderLayer::addLayerContext(sp<ModelLoader> modelLoader, sp<Vec3> position, sp<Boolean> visible, sp<Boolean> discarded) const
@@ -111,7 +105,7 @@ void RenderLayer::addLayerContext(sp<LayerContext> layerContext)
     if(!layerContext->modelLoader())
         layerContext->setModelLoader(_stub->_model_loader);
     if(!layerContext->varyings())
-        layerContext->setVaryings(_stub->_layer_context->varyings());
+        layerContext->setVaryings(_stub->_varyings);
     _render_batch->addLayerContext(std::move(layerContext));
 }
 

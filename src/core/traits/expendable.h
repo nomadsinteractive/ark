@@ -23,9 +23,9 @@ public:
     void discard();
 
 //  [[script::bindings::auto]]
-    void set(bool disposed);
+    void set(bool discarded);
 //  [[script::bindings::auto]]
-    void set(sp<Boolean> disposed);
+    void set(sp<Boolean> discarded);
 
 //  [[plugin::builder::by-value]]
     class DICTIONARY : public Builder<Expendable> {
@@ -41,7 +41,6 @@ public:
 
 private:
     sp<BooleanWrapper> _discarded;
-
 };
 
 }

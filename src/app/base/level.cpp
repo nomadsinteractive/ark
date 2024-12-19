@@ -71,20 +71,6 @@ struct Object {
 
 };
 
-template<typename T> std::vector<Level::NamedLayerBuilder<T>> loadNamedTypes(BeanFactory& factory, const document& manifest, const String& name, const String& builderName) {
-    std::vector<Level::NamedLayerBuilder<T>> namedTypes;
-    for(const document& i : manifest->children(name))
-        namedTypes.push_back({Documents::ensureAttribute(i, constants::NAME), factory.ensureBuilder<T>(i, builderName)});
-    return namedTypes;
-}
-
-template<typename T> std::map<String, sp<T>> loadNamedTypeInstances(const std::vector<Level::NamedLayerBuilder<T>>& namedTypes, const Scope& args) {
-    std::map<String, sp<T>> instances;
-    for(const Level::NamedLayerBuilder<T>& i : namedTypes)
-        instances[i._name] = i._builder->build(args);
-    return instances;
-}
-
 sp<Transform3D> makeTransform(const Optional<V4>& rotation, const Optional<V3>& scale)
 {
     sp<Vec3> s;

@@ -30,7 +30,7 @@ void WithRenderable::onWire(const WiringContext& context)
     const sp<Boolean> visible = context.getComponent<Visibility>();
     const sp<Model> model = context.getComponent<Model>();
     const sp<WithTransform> withTransform = context.getComponent<WithTransform>();
-    for(const auto& [renderable, renderObject, layerContext, transformNode] : _manifests)
+    for(const auto& [layer, renderable, renderObject, transformNode] : _manifests)
     {
         sp<Renderable> r = renderObject ? renderObject.cast<Renderable>() : renderable;
         const sp<Node> node = model && transformNode ? model->findNode(transformNode) : nullptr;
@@ -41,14 +41,14 @@ void WithRenderable::onWire(const WiringContext& context)
             r = sp<Renderable>::make<RenderableWithTransform>(std::move(r), sp<Mat4>::make<Mat4::Const>(node->localMatrix()));
         if(renderObject)
             //TODO: There are some name conventions that we should test the attribute name "id"
-            if(const sp<WithId>& withId = context.getComponent<WithId>(); withId && layerContext->shader() && layerContext->shader()->input()->getAttribute("Id"))
+            if(const sp<WithId>& withId = context.getComponent<WithId>(); withId && layer->shader() && layer->shader()->input()->getAttribute("Id"))
                 renderObject->varyings()->setProperty(constants::ID, sp<Integer>::make<Integer::Const>(withId->id()));
-        layerContext->add(std::move(r), visible, discarded);
+        layer->add(std::move(r), nullptr, discarded);
     }
 }
 
 WithRenderable::ManifestFactory::ManifestFactory(BeanFactory& factory, const document& manifest)
-    : _layer_context(sp<LayerContext::BUILDER>::make(factory, manifest)), _transform_node(Documents::getAttribute(manifest, "transform-node"))
+    : _layer(factory.ensureBuilder<Layer>(manifest, constants::LAYER)), _transform_node(Documents::getAttribute(manifest, "transform-node"))
 {
     if(manifest->name() == constants::RENDER_OBJECT)
         _render_object = factory.ensureBuilder<RenderObject>(manifest);
@@ -68,8 +68,8 @@ sp<Wirable> WithRenderable::BUILDER::build(const Scope& args)
 {
     std::vector<Manifest> manifests;
     manifests.reserve(_manifests.size());
-    for(const auto& [renderable, renderObject, layerContext, transformNode] : _manifests)
-        manifests.push_back({renderable ? renderable->build(args) : nullptr, renderObject ? renderObject->build(args) : nullptr, layerContext->build(args), transformNode});
+    for(const auto& [layer, renderable, renderObject, transformNode] : _manifests)
+        manifests.push_back({layer->build(args), renderable ? renderable->build(args) : nullptr, renderObject ? renderObject->build(args) : nullptr, transformNode});
     return sp<Wirable>::make<WithRenderable>(std::move(manifests));
 }
 

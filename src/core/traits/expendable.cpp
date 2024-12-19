@@ -30,14 +30,14 @@ void Expendable::discard()
     _discarded->set(true);
 }
 
-void Expendable::set(bool disposed)
+void Expendable::set(bool discarded)
 {
-    _discarded->set(disposed);
+    _discarded->set(discarded);
 }
 
-void Expendable::set(sp<Boolean> disposed)
+void Expendable::set(sp<Boolean> discarded)
 {
-    _discarded->set(std::move(disposed));
+    _discarded->set(std::move(discarded));
 }
 
 Expendable::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)

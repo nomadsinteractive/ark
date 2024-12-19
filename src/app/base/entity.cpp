@@ -36,7 +36,7 @@ void Entity::doWire()
     WirableType::wireAll(_components);
 }
 
-const sp<Ref>& Entity::id() const
+const sp<Ref>& Entity::ref() const
 {
     return _ref;
 }

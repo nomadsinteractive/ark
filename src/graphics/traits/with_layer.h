@@ -14,17 +14,13 @@ namespace ark {
 class ARK_API WithLayer final : public Wirable {
 public:
 //  [[script::bindings::auto]]
-    WithLayer(const sp<Layer>& layer);
-//  [[script::bindings::auto]]
-    WithLayer(const sp<RenderLayer>& renderLayer);
-//  [[script::bindings::auto]]
-    WithLayer(sp<LayerContext> layerContext);
+    WithLayer(sp<Layer> layer);
 
     TypeId onPoll(WiringContext& context) override;
     void onWire(const WiringContext& context) override;
 
 //  [[script::bindings::property]]
-    const sp<ModelLoader>& modelLoader() const;
+    const sp<Layer>& layer() const;
 
 //  [[plugin::builder("with_layer")]]
     class BUILDER final : public Builder<Wirable> {
@@ -34,11 +30,11 @@ public:
         sp<Wirable> build(const Scope& args) override;
 
     private:
-        sp<Builder<LayerContext>> _layer_context;
+        builder<Layer> _layer;
     };
 
 private:
-    sp<LayerContext> _layer_context;
+    sp<Layer> _layer;
 };
 
 }

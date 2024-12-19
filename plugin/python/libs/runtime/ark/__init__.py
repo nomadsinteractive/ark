@@ -1498,10 +1498,13 @@ class Level:
     def load(self, src: str, collider: Optional['Collider'] = None, shapes: dict[str, "Shape"] = None):
         pass
 
-    def get_render_object(self, name: str) -> 'RenderObject':
+    def get_layer(self, name: str) -> "Layer":
         pass
 
-    def get_rigid_body(self, name: str) -> 'Rigidbody':
+    def get_render_object(self, name: str) -> "RenderObject":
+        pass
+
+    def get_rigid_body(self, name: str) -> "Rigidbody":
         pass
 
 
@@ -2736,8 +2739,8 @@ class Entity:
         pass
 
     @property
-    def id(self) -> int:
-        return 0
+    def ref(self) -> Ref:
+        pass
 
     def discard(self):
         pass

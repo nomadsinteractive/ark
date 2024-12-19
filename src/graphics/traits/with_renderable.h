@@ -11,9 +11,9 @@ namespace ark {
 class WithRenderable final : public Wirable {
 private:
     struct Manifest {
+        sp<Layer> _layer;
         sp<Renderable> _renderable;
         sp<RenderObject> _render_object;
-        sp<LayerContext> _layer_context;
         String _transform_node;
     };
 
@@ -26,9 +26,9 @@ public:
     struct ManifestFactory {
         ManifestFactory(BeanFactory& factory, const document& manifest);
 
-        sp<Builder<Renderable>> _renderable;
-        sp<Builder<RenderObject>> _render_object;
-        sp<Builder<LayerContext>> _layer_context;
+        builder<Layer> _layer;
+        builder<Renderable> _renderable;
+        builder<RenderObject> _render_object;
 
         String _transform_node;
     };

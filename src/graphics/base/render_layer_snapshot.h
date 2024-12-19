@@ -53,12 +53,12 @@ public:
 public:
     RenderLayerSnapshot(RenderLayerSnapshot&& other) = default;
 
-    sp<RenderCommand> compose(const RenderRequest& renderRequest);
+    sp<RenderCommand> compose(const RenderRequest& renderRequest) const;
 
     bool needsReload() const;
     const sp<PipelineInput>& pipelineInput() const;
 
-    void addLayerContext(RenderRequest& renderRequest, std::vector<sp<LayerContext>>& layerContexts);
+    void addLayerContext(const RenderRequest& renderRequest, std::vector<sp<LayerContext>>& layerContexts);
     void snapshot(const RenderRequest& renderRequest);
 
     sp<RenderCommand> toRenderCommand(const RenderRequest& renderRequest, Buffer::Snapshot vertices, Buffer::Snapshot indices, uint32_t drawCount, DrawingParams params) const;
@@ -79,9 +79,9 @@ private:
     std::list<LayerContextSnapshot> _layer_context_snapshots;
 
 private:
-    RenderLayerSnapshot(RenderRequest& renderRequest, const sp<RenderLayer::Stub>& stub);
+    RenderLayerSnapshot(const RenderRequest& renderRequest, const sp<RenderLayer::Stub>& stub);
 
-    bool doAddLayerContext(RenderRequest& renderRequest, LayerContext& layerContext);
+    bool doAddLayerContext(const RenderRequest& renderRequest, LayerContext& layerContext);
     bool addDiscardedState(LayerContext& lc, void* stateKey);
     void addDiscardedLayerContext(LayerContext& lc);
     void addDiscardedLayerContexts(const std::vector<sp<LayerContext>>& layerContexts);
