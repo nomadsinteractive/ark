@@ -7,8 +7,6 @@
 #include "core/types/global.h"
 #include "core/util/log.h"
 
-#include "graphics/forwarding.h"
-
 #include "python/extension/python_extension.h"
 #include "python/extension/ark_py_importlib.h"
 #include "python/extension/py_cast.h"
@@ -52,10 +50,8 @@ bool hasInjected()
 
 void addScopeToDict(PyObject* dict, const Scope& scope)
 {
-    for(const auto& iter : scope.variables())
+    for(const auto& [name, box] : scope.variables())
     {
-        const String& name = iter.first;
-        const Box& box = iter.second;
         PyObject* pyInstance = PythonExtension::instance().toPyObject(box);
         PyDict_SetItemString(dict, name.c_str(), pyInstance);
     }
@@ -118,7 +114,7 @@ PythonInterpreter::PythonInterpreter(const String& name, const document& librari
     }
     if(!Py_HasFileSystemDefaultEncoding)
     {
-        char* encodings = reinterpret_cast<char*>(PyMem_RawMalloc(8));
+        char* encodings = static_cast<char*>(PyMem_RawMalloc(8));
         strncpy(encodings, "utf-8", 8);
         Py_FileSystemDefaultEncoding = encodings;
     }

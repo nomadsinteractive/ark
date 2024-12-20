@@ -66,8 +66,7 @@ static PyMethodDef ARK_METHODS[] = {
 
 PyObject* ark_log(Log::LogLevel level, PyObject* args)
 {
-    size_t size = PyTuple_Size(args);
-    if(size)
+    if(const size_t size = PyTuple_Size(args))
     {
         PyInstance pyContent = PyInstance::borrow(PyTuple_GetItem(args, 0));
         if(pyContent.isNone())
@@ -215,6 +214,27 @@ PyMODINIT_FUNC PyInit_ark(void)
         PyList_SetItem(path, i++, PyUnicode_FromString(str.c_str()));
     PyObject_SetAttrString(module, "path", path);
     Py_DECREF(path);
+
+    //TODO: We should have it done better
+    const std::pair<const char*, const char*> type_hints[] = {
+        {"TYPE_INTEGER", "Union[int, 'Integer']"},
+        {"TYPE_ENUM", "Union[int, 'Enum']"},
+        {"TYPE_INT_OR_FLOAT", "Union[int, float]"},
+        {"TYPE_NUMERIC", "Union[TYPE_INT_OR_FLOAT, 'Numeric']"},
+        {"TYPE_RECT", "tuple[TYPE_INT_OR_FLOAT, TYPE_INT_OR_FLOAT, TYPE_INT_OR_FLOAT, TYPE_INT_OR_FLOAT]"},
+        {"TYPE_VEC2", "Union[tuple[TYPE_NUMERIC, TYPE_NUMERIC], 'Vec2']"},
+        {"TYPE_VEC3", "Union[tuple[TYPE_NUMERIC, TYPE_NUMERIC, TYPE_NUMERIC], TYPE_VEC2, 'Vec3']"},
+        {"TYPE_VEC4", "Union[tuple[TYPE_NUMERIC, TYPE_NUMERIC, TYPE_NUMERIC, TYPE_NUMERIC], 'Vec4']"},
+        {"TYPE_RECTI", "tuple[int, int, int, int]"},
+        {"TYPE_FLOAT2", "tuple[float, float]"},
+        {"TYPE_FLOAT3", "tuple[float, float, float]"},
+        {"TYPE_FLOAT4", "tuple[float, float, float, float]"},
+        {"TYPE_M4", "tuple[TYPE_FLOAT4, TYPE_FLOAT4, TYPE_FLOAT4, TYPE_FLOAT4]"},
+        {"TYPE_NAMED_HASH_ID", "Union[int, str]"}
+    };
+    for(auto [k, v] : type_hints)
+        PyModule_AddStringConstant(module, k, v);
+
     return module;
 }
 
