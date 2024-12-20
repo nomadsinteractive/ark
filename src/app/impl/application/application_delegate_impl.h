@@ -14,7 +14,7 @@
 
 namespace ark {
 
-class ARK_API ApplicationDelegateImpl : public ApplicationDelegate {
+class ARK_API ApplicationDelegateImpl final : public ApplicationDelegate {
 public:
     ApplicationDelegateImpl(const sp<ApplicationManifest>& manifest);
 
@@ -49,7 +49,6 @@ private:
 
 private:
     std::vector<ScriptTag> _interpreter;
-
 };
 
 }

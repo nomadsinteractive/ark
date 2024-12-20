@@ -28,16 +28,6 @@ public:
 
     sp<Entity> makeEntity(Traits components = Traits()) const;
 
-//  [[script::bindings::loader]]
-    template<typename T> sp<T> load(const String& name, const Scope& args) {
-        DCHECK(_resource_loader, "Trying to load objects on a discarded Arena");
-        const sp<T> bean = _resource_loader->load<T>(name, args);
-        DCHECK(bean, "Cannot build object \"%s\"", name.c_str());
-        return bean;
-    }
-
-//  [[script::bindings::auto]]
-    sp<Renderer> loadRenderer(const String& name, const Scope& args);
 //  [[script::bindings::auto]]
     Box getReference(const String& id) const;
 
@@ -85,7 +75,7 @@ public:
 
 private:
     sp<View> _view;
-    sp<RendererPhrase> _render_group;
+    sp<RendererPhrase> _render_phrases;
     sp<ResourceLoader> _resource_loader;
     op<EventListenerList> _event_listeners;
 };

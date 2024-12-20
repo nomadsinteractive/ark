@@ -85,7 +85,7 @@ sp<BitmapLoaderBundle> ApplicationBundle::createImageLoaderBundle(bool justDecod
 #ifdef ARK_USE_STB_IMAGE
     const sp<BitmapLoaderBundle> imageBundle = sp<BitmapLoaderBundle>::make(_asset_bundle, sp<STBBitmapLoader>::make(justDecodeBounds));
 #else
-    const sp<BitmapBundle> imageBundle = sp<BitmapBundle>::make(_asset_bundle, nullptr);
+    const sp<BitmapLoaderBundle> imageBundle = sp<BitmapLoaderBundle>::make(_asset_bundle, nullptr);
 #endif
 #ifdef ARK_USE_LIBPNG
     imageBundle->addLoader("png", sp<PNGBitmapLoader>::make(justDecodeBounds));

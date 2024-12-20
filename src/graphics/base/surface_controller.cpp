@@ -6,7 +6,6 @@
 
 #include "graphics/base/render_request.h"
 #include "graphics/base/v3.h"
-#include "graphics/impl/renderer/renderer_group.h"
 
 namespace ark {
 

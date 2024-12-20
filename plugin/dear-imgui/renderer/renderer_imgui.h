@@ -1,7 +1,7 @@
 #pragma once
 
-#include "core/inf/builder.h"
 #include "core/concurrent/lf_stack.h"
+#include "core/inf/builder.h"
 #include "core/types/implements.h"
 #include "core/types/shared_ptr.h"
 
@@ -30,13 +30,12 @@ public:
 
     const sp<RendererContext>& rendererContext() const;
 
-public:
 //  [[plugin::resource-loader("imgui")]]
-    class BUILDER : public Builder<Renderer> {
+    class BUILDER final : public Builder<Renderer> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<Renderer> build(const Scope& args) override;
+        sp<Renderer> build(const Scope& args) override;
 
     private:
         document _manifest;
@@ -61,7 +60,7 @@ public:
         const sp<DrawCommand>& drawCommand() const;
 
     private:
-        sp<LFStack<sp<RendererImgui::DrawCommand>>> _recycler;
+        sp<LFStack<sp<DrawCommand>>> _recycler;
         sp<DrawCommand> _draw_command;
     };
 
@@ -74,12 +73,12 @@ private:
     sp<Shader> _shader;
     sp<RenderController> _render_controller;
     sp<RenderEngine> _render_engine;
-    sp<RendererGroup> _renderer_group;
-
     sp<Texture> _texture;
 
     sp<PipelineFactory> _pipeline_factory;
     sp<RendererContext> _renderer_context;
+
+    std::vector<sp<Renderer>> _renderers;
 };
 
 }

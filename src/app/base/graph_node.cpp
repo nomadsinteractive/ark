@@ -2,7 +2,7 @@
 
 #include "app/base/graph.h"
 #include "app/base/graph_route.h"
-#include "app/base/a_star.h"
+#include "app/util/a_star.h"
 
 namespace ark {
 

@@ -1,9 +1,8 @@
 #include "graphics/util/renderer_type.h"
 
 #include "core/collection/traits.h"
-#include "core/traits/expendable.h"
+#include "core/traits/discarded.h"
 #include "core/traits/visibility.h"
-#include "graphics/impl/renderer/renderer_group.h"
 
 #include "graphics/inf/renderer.h"
 #include "graphics/impl/renderer/renderer_style_position.h"

@@ -8,7 +8,6 @@
 
 #include "graphics/base/bitmap.h"
 #include "graphics/base/rect.h"
-#include "graphics/base/size.h"
 
 #include "renderer/base/bitmap_bundle.h"
 #include "renderer/base/graphics_context.h"
@@ -62,23 +61,28 @@ private:
 
 constexpr uint32_t UV_NORMALIZE_RANGE = std::numeric_limits<uint16_t>::max();
 
+Rect toUVRect(const Atlas::Item& item)
+{
+    return Rect(item._ux / static_cast<float>(UV_NORMALIZE_RANGE), item._uy / static_cast<float>(UV_NORMALIZE_RANGE), item._vx / static_cast<float>(UV_NORMALIZE_RANGE), item._vy / static_cast<float>(UV_NORMALIZE_RANGE));
 }
 
-Atlas::Atlas(sp<Texture> texture, bool allowDefaultItem)
-    : _texture(std::move(texture)), _allow_default_item(allowDefaultItem)
+}
+
+Atlas::Atlas(sp<Texture> texture)
+    : _texture(std::move(texture))
 {
 }
 
 void Atlas::loadItem(const document& manifest)
 {
-    DCHECK(manifest->name() == "item", "No rule to import item \"%s\"", Documents::toString(manifest).c_str());
-    int32_t type = Documents::getAttribute<int32_t>(manifest, constants::TYPE, 0);
-    float px = Documents::getAttribute<float>(manifest, "pivot-x", 0);
-    float py = Documents::getAttribute<float>(manifest, "pivot-x", 0);
+    CHECK(manifest->name() == "item", "No rule to import item \"%s\"", Documents::toString(manifest).c_str());
+    const int32_t type = Documents::getAttribute<int32_t>(manifest, constants::TYPE, 0);
+    const float px = Documents::getAttribute<float>(manifest, "pivot-x", 0);
+    const float py = Documents::getAttribute<float>(manifest, "pivot-x", 0);
     if(has(type))
     {
         const Item& item = at(type);
-        _items[type] = Item(item.ux(), item.uy(), item.vx(), item.vy(), Rect(-px, -py, 1.0f - px, 1.0f - py), item.size(), V2(px, py));
+        _items[type] = {item._ux, item._uy, item._vx, item._vy, Rect(-px, -py, 1.0f - px, 1.0f - py), item._size, V2(px, py)};
     }
     else
     {
@@ -93,12 +97,12 @@ const sp<Texture>& Atlas::texture() const
     return _texture;
 }
 
-const std::unordered_map<int32_t, Atlas::Item>& Atlas::items() const
+const std::unordered_map<HashId, Atlas::Item>& Atlas::items() const
 {
     return _items;
 }
 
-std::unordered_map<int32_t, Atlas::Item>& Atlas::items()
+std::unordered_map<HashId, Atlas::Item>& Atlas::items()
 {
     return _items;
 }
@@ -113,24 +117,24 @@ uint32_t Atlas::height() const
     return static_cast<uint32_t>(_texture->height());
 }
 
-bool Atlas::has(int32_t c) const
+bool Atlas::has(const NamedHash& resid) const
 {
-    return _items.find(c) != _items.end();
+    return _items.find(resid.hash()) != _items.end();
 }
 
-const V2& Atlas::getOriginalSize(int32_t c) const
+const V2& Atlas::getOriginalSize(const NamedHash& resid) const
 {
-    return at(c).size();
+    return at(resid)._size;
 }
 
-const V2& Atlas::getPivot(int32_t c) const
+const V2& Atlas::getPivot(const NamedHash& resid) const
 {
-    return at(c).pivot();
+    return at(resid)._pivot;
 }
 
-Rect Atlas::getItemUV(int32_t c) const
+Rect Atlas::getItemUV(const NamedHash& resid) const
 {
-    return at(c).uv();
+    return toUVRect(at(resid));
 }
 
 sp<BitmapBundle> Atlas::makeBitmapBundle() const
@@ -156,10 +160,12 @@ void Atlas::add(int32_t id, uint32_t ux, uint32_t uy, uint32_t vx, uint32_t vy, 
     _items[id] = makeItem(ux, uy, vx, vy, bounds, size, pivot);
 }
 
-const Atlas::Item& Atlas::at(int32_t id) const
+const Atlas::Item& Atlas::at(const NamedHash& resid) const
 {
-    CHECK((_allow_default_item || id == 0) || has(id), "Item(%d) does not exist", id);
-    return _allow_default_item || id == 0 ? (has(id) ? _items.at(id) : _default_item) : _items.at(id);
+    const HashId idhash = resid.hash();
+    const auto iter = _items.find(resid.hash());
+    CHECK(iter != _items.end(), "Item[%u](%s) does not exist", idhash, resid.name().c_str());
+    return iter->second;
 }
 
 Rect Atlas::getItemBounds(int32_t id) const
@@ -167,7 +173,7 @@ Rect Atlas::getItemBounds(int32_t id) const
     const Item& item = at(id);
     const float nw = _texture->width() / static_cast<float>(UV_NORMALIZE_RANGE);
     const float nh = _texture->height() / static_cast<float>(UV_NORMALIZE_RANGE);
-    return Rect(item.ux() * nw, item.vy() * nh, item.vx() * nw, item.uy() * nh);
+    return Rect(item._ux * nw, item._vy * nh, item._vx * nw, item._uy * nh);
 }
 
 uint16_t Atlas::unnormalize(float v)
@@ -182,11 +188,11 @@ uint16_t Atlas::unnormalize(uint32_t x, uint32_t s)
 
 Atlas::Item Atlas::makeItem(uint32_t ux, uint32_t uy, uint32_t vx, uint32_t vy, const Rect& bounds, const V2& size, const V2& pivot) const
 {
-    uint16_t l = unnormalize(ux, static_cast<uint32_t>(_texture->width()));
-    uint16_t t = unnormalize(uy, static_cast<uint32_t>(_texture->height()));
-    uint16_t r = unnormalize(vx, static_cast<uint32_t>(_texture->width()));
-    uint16_t b = unnormalize(vy, static_cast<uint32_t>(_texture->height()));
-    return Item(l, b, r, t, Rect(bounds.left() - pivot.x(), bounds.top() - pivot.y(), bounds.right() - pivot.x(), bounds.bottom() - pivot.y()), size, pivot);
+    const uint16_t l = unnormalize(ux, static_cast<uint32_t>(_texture->width()));
+    const uint16_t t = unnormalize(uy, static_cast<uint32_t>(_texture->height()));
+    const uint16_t r = unnormalize(vx, static_cast<uint32_t>(_texture->width()));
+    const uint16_t b = unnormalize(vy, static_cast<uint32_t>(_texture->height()));
+    return {l, b, r, t, Rect(bounds.left() - pivot.x(), bounds.top() - pivot.y(), bounds.right() - pivot.x(), bounds.bottom() - pivot.y()), size, pivot};
 }
 
 void Atlas::AttachmentNinePatch::import(Atlas& atlas, const document& manifest)
@@ -258,56 +264,6 @@ sp<Atlas> Atlas::BUILDER::build(const Scope& args)
         i->build(args)->import(atlas, nullptr);
 
     return atlas;
-}
-
-Atlas::Item::Item()
-    : _ux(0), _uy(0), _vx(0), _vy(0)
-{
-}
-
-Atlas::Item::Item(uint16_t ux, uint16_t uy, uint16_t vx, uint16_t vy, const Rect& bounds, const V2& size, const V2& pivot)
-    : _ux(ux), _uy(uy), _vx(vx), _vy(vy), _bounds(bounds), _size(size), _pivot(pivot)
-{
-}
-
-const Rect& Atlas::Item::bounds() const
-{
-    return _bounds;
-}
-
-const V2& Atlas::Item::size() const
-{
-    return _size;
-}
-
-const V2& Atlas::Item::pivot() const
-{
-    return _pivot;
-}
-
-Rect Atlas::Item::uv() const
-{
-    return Rect(_ux / static_cast<float>(UV_NORMALIZE_RANGE), _uy / static_cast<float>(UV_NORMALIZE_RANGE), _vx / static_cast<float>(UV_NORMALIZE_RANGE), _vy / static_cast<float>(UV_NORMALIZE_RANGE));
-}
-
-uint16_t Atlas::Item::ux() const
-{
-    return _ux;
-}
-
-uint16_t Atlas::Item::uy() const
-{
-    return _uy;
-}
-
-uint16_t Atlas::Item::vx() const
-{
-    return _vx;
-}
-
-uint16_t Atlas::Item::vy() const
-{
-    return _vy;
 }
 
 }

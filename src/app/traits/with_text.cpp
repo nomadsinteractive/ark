@@ -48,7 +48,7 @@ void WithText::onWire(const WiringContext& context)
     }
     if(matrix)
         _text->setTransform(std::move(matrix));
-    _text->show(context.getComponent<Expendable>());
+    _text->show(context.getComponent<Discarded>());
 }
 
 WithText::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

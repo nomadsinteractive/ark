@@ -9,12 +9,12 @@
 namespace ark {
 
 //[[script::bindings::extends(Boolean)]]
-class ARK_API Expendable final : public Boolean {
+class ARK_API Discarded final : public Boolean {
 public:
 //  [[script::bindings::auto]]
-    Expendable(bool discarded = false);
+    Discarded(bool discarded = false);
 //  [[script::bindings::auto]]
-    Expendable(sp<Boolean> discarded);
+    Discarded(sp<Boolean> discarded);
 
     bool val() override;
     bool update(uint64_t timestamp) override;
@@ -28,11 +28,11 @@ public:
     void set(sp<Boolean> discarded);
 
 //  [[plugin::builder::by-value]]
-    class DICTIONARY : public Builder<Expendable> {
+    class DICTIONARY final : public Builder<Discarded> {
     public:
         DICTIONARY(BeanFactory& factory, const String& value);
 
-        sp<Expendable> build(const Scope& args) override;
+        sp<Discarded> build(const Scope& args) override;
 
     private:
         bool _discarded;

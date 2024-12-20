@@ -1,7 +1,6 @@
 #include "app/base/application.h"
 
 #include "core/base/string_table.h"
-#include "core/inf/dictionary.h"
 #include "core/inf/string_bundle.h"
 #include "core/inf/runnable.h"
 #include "core/impl/runnable/runnable_by_function.h"
@@ -21,8 +20,6 @@
 #include "app/base/event.h"
 #include "app/base/surface.h"
 #include "app/base/surface_updater.h"
-
-#include "platform/platform.h"
 
 namespace ark {
 

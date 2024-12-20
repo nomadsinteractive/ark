@@ -55,7 +55,7 @@ class StateActionStrand;
 class DOMDocument;
 class DOMAttribute;
 class DOMElement;
-class Expendable;
+class Discarded;
 class Duration;
 class Enum;
 class Executor;

@@ -17,7 +17,7 @@
 #include "graphics/inf/tile_maker.h"
 
 #include "app/base/collision_filter.h"
-#include "app/base/a_star.h"
+#include "app/util/a_star.h"
 
 namespace ark {
 

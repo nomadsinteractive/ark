@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_BASE_BITMAP_BUNDLE_H_
-#define ARK_RENDERER_BASE_BITMAP_BUNDLE_H_
+#pragma once
 
 #include <unordered_map>
 
@@ -18,14 +17,11 @@ public:
     BitmapBundle(const Atlas& atlas, sp<Bitmap> atlasBitmap);
 
 //  [[script::bindings::auto]]
-    sp<Bitmap> getBitmap(int32_t resid);
+    sp<Bitmap> getBitmap(const NamedHash& resid) const;
 
 private:
     const Atlas& _atlas;
     sp<Bitmap> _atlas_bitmap;
-    std::unordered_map<int32_t, sp<Bitmap>> _bitmaps;
 };
 
 }
-
-#endif

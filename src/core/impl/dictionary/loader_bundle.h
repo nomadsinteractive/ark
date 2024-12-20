@@ -11,7 +11,7 @@
 
 namespace ark {
 
-template<typename T> class LoaderBundle : public Dictionary<T> {
+template<typename T> class LoaderBundle final : public Dictionary<T> {
 private:
     typedef Loader<T> LoaderType;
 

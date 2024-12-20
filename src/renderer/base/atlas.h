@@ -3,6 +3,7 @@
 #include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
+#include "core/base/named_hash.h"
 #include "core/collection/traits.h"
 #include "core/inf/builder.h"
 #include "core/types/safe_builder.h"
@@ -18,26 +19,9 @@ namespace ark {
 
 class ARK_API Atlas {
 public:
-    Atlas(sp<Texture> texture, bool allowDefaultItem = false);
+    Atlas(sp<Texture> texture);
 
-    class ARK_API Item {
-    public:
-        Item();
-        Item(uint16_t ux, uint16_t uy, uint16_t vx, uint16_t vy, const Rect& bounds, const V2& size, const V2& pivot);
-        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Item);
-
-        const Rect& bounds() const;
-        const V2& size() const;
-        const V2& pivot() const;
-
-        Rect uv() const;
-
-        uint16_t ux() const;
-        uint16_t uy() const;
-        uint16_t vx() const;
-        uint16_t vy() const;
-
-    private:
+    struct Item {
         uint16_t _ux, _uy;
         uint16_t _vx, _vy;
         Rect _bounds;
@@ -56,13 +40,13 @@ public:
     uint32_t height() const;
 
 //  [[script::bindings::auto]]
-    bool has(int32_t c) const;
+    bool has(const NamedHash& resid) const;
 //  [[script::bindings::auto]]
-    const V2& getOriginalSize(int32_t c) const;
+    const V2& getOriginalSize(const NamedHash& resid) const;
 //  [[script::bindings::auto]]
-    const V2& getPivot(int32_t c) const;
+    const V2& getPivot(const NamedHash& resid) const;
 //  [[script::bindings::auto]]
-    Rect getItemUV(int32_t c) const;
+    Rect getItemUV(const NamedHash& resid) const;
 
 //  [[script::bindings::auto]]
     sp<BitmapBundle> makeBitmapBundle() const;
@@ -72,13 +56,13 @@ public:
 
     Traits& attachments();
 
-    const std::unordered_map<int32_t, Item>& items() const;
-    std::unordered_map<int32_t, Item>& items();
+    const std::unordered_map<HashId, Item>& items() const;
+    std::unordered_map<HashId, Item>& items();
 
     void add(int32_t id, uint32_t ux, uint32_t uy, uint32_t vx, uint32_t vy, const Rect& bounds, const V2& size, const V2& pivot);
     Item makeItem(uint32_t ux, uint32_t uy, uint32_t vx, uint32_t vy, const Rect& bounds, const V2& size, const V2& pivot) const;
 
-    const Item& at(int32_t id) const;
+    const Item& at(const NamedHash& resid) const;
     Rect getItemBounds(int32_t id) const;
 
     void clear();
@@ -111,7 +95,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Atlas> build(const Scope& args) override;
+        sp<Atlas> build(const Scope& args) override;
 
     private:
         SafeBuilder<Texture> _texture;
@@ -120,11 +104,7 @@ public:
 
 private:
     sp<Texture> _texture;
-
-    bool _allow_default_item;
-    Item _default_item;
-
-    std::unordered_map<int32_t, Item> _items;
+    std::unordered_map<HashId, Item> _items;
 
     Traits _attachments;
 

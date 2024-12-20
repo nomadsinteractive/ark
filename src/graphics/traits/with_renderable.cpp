@@ -26,7 +26,7 @@ TypeId WithRenderable::onPoll(WiringContext& context)
 
 void WithRenderable::onWire(const WiringContext& context)
 {
-    const sp<Boolean> discarded = context.getComponent<Expendable>();
+    const sp<Boolean> discarded = context.getComponent<Discarded>();
     const sp<Boolean> visible = context.getComponent<Visibility>();
     const sp<Model> model = context.getComponent<Model>();
     const sp<WithTransform> withTransform = context.getComponent<WithTransform>();

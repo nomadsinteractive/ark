@@ -1,7 +1,7 @@
 #include "python/extension/py_ark_type.h"
 
 #include "core/base/scope.h"
-#include "core/traits/expendable.h"
+#include "core/traits/discarded.h"
 #include "core/inf/debris.h"
 #include "core/util/log.h"
 

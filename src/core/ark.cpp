@@ -47,7 +47,7 @@ limitations under the License.
 
 #include "app/base/application_bundle.h"
 #include "app/base/application_context.h"
-#include "app/base/application_delegate_impl.h"
+#include "app/impl/application/application_delegate_impl.h"
 #include "app/base/application_manifest.h"
 #include "app/impl/application/sdl_application.h"
 

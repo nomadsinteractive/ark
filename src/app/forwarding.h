@@ -28,7 +28,6 @@ class GraphRoute;
 class ViewHierarchy;
 class Level;
 class NarrowPhrase;
-class MessageLoopThread;
 class Model;
 class RayCastManifold;
 class RendererWithState;

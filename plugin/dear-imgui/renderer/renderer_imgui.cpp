@@ -14,7 +14,6 @@
 #include "graphics/base/camera.h"
 #include "graphics/base/render_request.h"
 #include "graphics/inf/render_command.h"
-#include "graphics/impl/renderer/renderer_group.h"
 
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/resource_loader_context.h"
@@ -112,7 +111,7 @@ ImGuiKey toImGuiKey(Event::Code code) {
 }
 
 RendererImgui::RendererImgui(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Shader>& shader, const sp<Texture>& texture)
-    : _shader(shader), _render_controller(resourceLoaderContext->renderController()), _render_engine(_render_controller->renderEngine()), _renderer_group(sp<RendererGroup>::make()), _texture(texture),
+    : _shader(shader), _render_controller(resourceLoaderContext->renderController()), _render_engine(_render_controller->renderEngine()), _texture(texture),
       _pipeline_factory(shader->pipelineFactory()), _renderer_context(sp<RendererContext>::make(shader, resourceLoaderContext->renderController()))
 {
     _renderer_context->addDefaultTexture(texture);
@@ -127,7 +126,8 @@ void RendererImgui::render(RenderRequest& renderRequest, const V3& position)
 
     ImGui::NewFrame();
     ImGuizmo::BeginFrame();
-    _renderer_group->render(renderRequest, position);
+    for(const sp<Renderer>& i : _renderers)
+        i->render(renderRequest, position);
     ImGui::EndFrame();
     ImGui::Render();
     MyImGuiRenderFunction(renderRequest, ImGui::GetDrawData());
@@ -135,7 +135,7 @@ void RendererImgui::render(RenderRequest& renderRequest, const V3& position)
 
 void RendererImgui::addRenderer(sp<Renderer> renderer, const Traits& traits)
 {
-    _renderer_group->addRenderer(std::move(renderer), traits);
+    _renderers.push_back(std::move(renderer));
 }
 
 bool RendererImgui::onEvent(const Event& event)

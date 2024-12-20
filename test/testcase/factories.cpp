@@ -11,7 +11,7 @@
 #include "core/inf/dictionary.h"
 #include "core/inf/variable.h"
 #include "core/impl/dictionary/dictionary_by_attribute_name.h"
-#include "core/traits/expendable.h"
+#include "core/traits/discarded.h"
 #include "core/types/weak_ptr.h"
 #include "core/util/math.h"
 
@@ -32,14 +32,14 @@ class FactoriesCase : public TestCase {
 public:
     virtual int launch() {
         Ark& ark = Ark::instance();
-        WeakPtr<Expendable> we1;
+        WeakPtr<Discarded> we1;
 
         Scope args;
         const sp<ResourceLoader> resourceLoader = ark.applicationContext()->createResourceLoader("application.xml", args);
         BeanFactory& beanFactory = resourceLoader->beanFactory();
         ark.applicationContext()->sysClock()->setTicker(Platform::getSteadyClock());
 
-        const sp<Expendable> e1 = beanFactory.build<Expendable>("@e1", args);
+        const sp<Discarded> e1 = beanFactory.build<Discarded>("@e1", args);
 
         TESTCASE_VALIDATE(e1 && !e1->val());
 
@@ -94,8 +94,8 @@ public:
         sp<Transform> t3 = beanFactory.build<Transform>("@t3", args);
         TESTCASE_VALIDATE(t3 && TransformType::scale(t3)->val().x() == 2.0f && TransformType::scale(t3)->val().y() == 2.0f);
 
-        const sp<Expendable> e004 = beanFactory.build<Expendable>("@e004", args);
-        const sp<Expendable> e004Copy = beanFactory.build<Expendable>("@e004", args);
+        const sp<Discarded> e004 = beanFactory.build<Discarded>("@e004", args);
+        const sp<Discarded> e004Copy = beanFactory.build<Discarded>("@e004", args);
         TESTCASE_VALIDATE(e004 == e004Copy);
 
         const sp<Numeric> g8 = beanFactory.build<Numeric>("@g8", args);
@@ -136,7 +136,7 @@ public:
                           && g18->val() == 2 && g18->val() == 1
                           && g18->val() == 2 && g18->val() == 3);
 
-        const sp<Expendable> disposed = we1.lock();
+        const sp<Discarded> disposed = we1.lock();
         TESTCASE_VALIDATE(!disposed);
 
         return 0;

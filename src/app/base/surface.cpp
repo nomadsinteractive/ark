@@ -1,13 +1,9 @@
 #include "app/base/surface.h"
 
-#include "core/inf/runnable.h"
 #include "core/impl/executor/executor_thread_pool.h"
-#include "core/impl/runnable/runnable_by_function.h"
 
 #include "graphics/base/render_command_pipeline.h"
-#include "graphics/impl/renderer/renderer_group.h"
 #include "graphics/inf/render_view.h"
-#include "graphics/base/render_layer.h"
 
 #include "renderer/base/render_controller.h"
 

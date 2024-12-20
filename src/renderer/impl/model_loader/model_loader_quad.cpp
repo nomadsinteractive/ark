@@ -23,8 +23,8 @@ sp<RenderCommandComposer> ModelLoaderQuad::makeRenderCommandComposer(const Shade
 sp<Model> ModelLoaderQuad::loadModel(int32_t type)
 {
     const Atlas::Item& texCoord = _atlas->at(type);
-    const V2& size = texCoord.size();
-    return sp<Model>::make(_unit_model->indices(), sp<VerticesQuad>::make(texCoord), sp<Boundaries>::make(V3(0), V3(size, 0), V3(texCoord.pivot(), 0)));
+    const V2& size = texCoord._size;
+    return sp<Model>::make(_unit_model->indices(), sp<VerticesQuad>::make(texCoord), sp<Boundaries>::make(V3(0), V3(size, 0), V3(texCoord._pivot, 0)));
 }
 
 ModelLoaderQuad::BUILDER::BUILDER(BeanFactory& factory, const String& atlas)

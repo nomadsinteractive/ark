@@ -47,8 +47,8 @@ void Rigidbody::onWire(const WiringContext& context)
     if(auto collisionCallback = context.getComponent<CollisionCallback>())
         _collision_callback = std::move(collisionCallback);
 
-    if(sp<Boolean> expendable = context.getComponent<Expendable>())
-        _ref->setDiscarded(std::move(expendable));
+    if(sp<Boolean> discarded = context.getComponent<Discarded>())
+        _ref->setDiscarded(std::move(discarded));
 }
 
 RefId Rigidbody::id() const

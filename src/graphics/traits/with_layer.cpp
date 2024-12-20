@@ -20,7 +20,7 @@ TypeId WithLayer::onPoll(WiringContext& context)
 void WithLayer::onWire(const WiringContext& context)
 {
     if(sp<Renderable> renderable = context.getComponent<Renderable>())
-        _layer->add(std::move(renderable), context.getComponent<Updatable>(), context.getComponent<Expendable>());
+        _layer->add(std::move(renderable), context.getComponent<Updatable>(), context.getComponent<Discarded>());
 }
 
 const sp<Layer>& WithLayer::layer() const

@@ -24,7 +24,6 @@
 #include "app/base/application_bundle.h"
 #include "app/base/application_manifest.h"
 #include "app/base/event.h"
-#include "app/base/message_loop_thread.h"
 #include "app/impl/event_listener/event_listener_list.h"
 
 #include "platform/platform.h"

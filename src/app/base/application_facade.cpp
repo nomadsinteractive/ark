@@ -1,7 +1,7 @@
 #include "app/base/application_facade.h"
 
 #include "core/base/future.h"
-#include "core/traits/expendable.h"
+#include "core/traits/discarded.h"
 #include "core/util/updatable_util.h"
 
 #include "graphics/base/camera.h"
@@ -16,7 +16,7 @@
 #include "app/base/application_context.h"
 #include "app/base/surface.h"
 #include "app/inf/application_controller.h"
-#include "app/view/activity.h"
+#include "app/base/activity.h"
 
 namespace ark {
 
@@ -172,7 +172,7 @@ void ApplicationFacade::setActivity(sp<Activity> activity)
 
     ASSERT(activity);
     _activity = std::move(activity);
-    _activity_discarded = sp<Expendable>::make();
+    _activity_discarded = sp<Discarded>::make();
 
     _surface_controller->addRenderer(_activity, _activity_discarded);
     _context->addEventListener(_activity, _activity_discarded);

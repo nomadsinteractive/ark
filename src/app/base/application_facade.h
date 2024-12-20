@@ -111,7 +111,7 @@ private:
     sp<ApplicationManifest> _manifest;
 
     sp<Activity> _activity;
-    sp<Expendable> _activity_discarded;
+    sp<Discarded> _activity_discarded;
 };
 
 }

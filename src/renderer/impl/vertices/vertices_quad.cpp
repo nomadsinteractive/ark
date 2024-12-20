@@ -10,7 +10,7 @@ VerticesQuad::VerticesQuad()
 }
 
 VerticesQuad::VerticesQuad(const Atlas::Item& quad)
-    : Vertices(4), _bounds(quad.bounds()), _ux(quad.ux()), _uy(quad.uy()), _vx(quad.vx()), _vy(quad.vy())
+    : Vertices(4), _bounds(quad._bounds), _ux(quad._ux), _uy(quad._uy), _vx(quad._vx), _vy(quad._vy)
 {
 }
 

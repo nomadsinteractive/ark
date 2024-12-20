@@ -3,9 +3,8 @@
 #include "core/base/api.h"
 #include "core/base/plugin_manager.h"
 #include "core/types/shared_ptr.h"
-#include "core/util/string_convert.h"
 
-#include "app/view/activity.h"
+#include "app/base/activity.h"
 
 #include "python/impl/interpreter/python_interpreter.h"
 #include "python/extension/python_extension.h"
@@ -24,7 +23,7 @@ PyMethodDef ARK_BOX2D_METHODS[] = {
     {NULL, NULL, 0, NULL}
 };
 
-class Box2dPybindingsPlugin : public Plugin {
+class Box2dPybindingsPlugin final : public Plugin {
 public:
     Box2dPybindingsPlugin()
         : Plugin("box2d-pybindings", Plugin::PLUGIN_TYPE_CORE) {
@@ -37,12 +36,6 @@ public:
             std::map<TypeId, PyArkType::LoaderFunction>& loader = pyResourceLoaderType->ensureLoader("load");
             loader[Type<ColliderBox2D>::id()] = [](PyArkType::Instance& inst, const String& id, const Scope& args)->Box { return Box(inst.unpack<ResourceLoader>()->load<ColliderBox2D>(id, args)); };
             loader[Type<RigidbodyBox2D>::id()] = [](PyArkType::Instance& inst, const String& id, const Scope& args)->Box { return Box(inst.unpack<ResourceLoader>()->load<RigidbodyBox2D>(id, args)); };
-        }
-        {
-            PyArkType* pyArenaType = PythonExtension::instance().getPyArkType<Activity>();
-            std::map<TypeId, PyArkType::LoaderFunction>& loader = pyArenaType->ensureLoader("load");
-            loader[Type<ColliderBox2D>::id()] = [](PyArkType::Instance& inst, const String& id, const Scope& args)->Box { return Box(inst.unpack<Activity>()->load<ColliderBox2D>(id, args)); };
-            loader[Type<RigidbodyBox2D>::id()] = [](PyArkType::Instance& inst, const String& id, const Scope& args)->Box { return Box(inst.unpack<Activity>()->load<RigidbodyBox2D>(id, args)); };
         }
     }
 

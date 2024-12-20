@@ -1,4 +1,4 @@
-#include "app/base/application_delegate_impl.h"
+#include "app/impl/application/application_delegate_impl.h"
 
 #include "core/ark.h"
 #include "core/base/scope.h"
@@ -13,7 +13,7 @@
 #include "app/base/application_manifest.h"
 #include "app/base/surface.h"
 #include "app/impl/event_listener/event_listener_by_script.h"
-#include "app/view/activity.h"
+#include "app/base/activity.h"
 
 namespace ark {
 

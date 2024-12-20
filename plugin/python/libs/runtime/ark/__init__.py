@@ -100,6 +100,26 @@ class Enum:
         return 0
 
 
+class NamedHash:
+    def __init__(self, value):
+        pass
+
+    @property
+    def hash(self) -> int:
+        return 0
+
+    @property
+    def name(self) -> str:
+        return ''
+
+    @staticmethod
+    def reverse(hash: int) -> str:
+        pass
+
+    def __index__(self) -> int:
+        pass
+
+
 class Readable:
     pass
 
@@ -714,16 +734,16 @@ class Atlas:
     def texture(self) -> Texture:
         pass
 
-    def has(self, c: int) -> bool:
+    def has(self, resid:  NamedHash) -> bool:
         pass
 
-    def get_item_uv(self, c: int) -> TYPE_RECT:
+    def get_item_uv(self, resid:  NamedHash) -> TYPE_RECT:
         pass
 
-    def get_original_size(self, c:  int) -> tuple[float, float]:
+    def get_original_size(self, resid:  NamedHash) -> tuple[float, float]:
         pass
 
-    def get_pivot(self, c:  int) -> tuple[float, float]:
+    def get_pivot(self, resid:  NamedHash) -> tuple[float, float]:
         pass
 
     def add_importer(self, importer: AtlasImporter, readable: Optional[Readable] = None):
@@ -1003,27 +1023,7 @@ class Integer(_Scalar):
         pass
 
 
-class NamedHash:
-    def __init__(self, value):
-        pass
-
-    @property
-    def hash(self) -> int:
-        pass
-
-    @property
-    def name(self) -> str:
-        pass
-
-    @staticmethod
-    def reverse(hash: int) -> str:
-        pass
-
-    def __index__(self) -> int:
-        pass
-
-
-class Expendable(Boolean):
+class Discarded(Boolean):
     def __init__(self, disposed=False):
         pass
 
@@ -1648,9 +1648,6 @@ class Layer:
 
 class Activity:
 
-    def load(self, clz: Type[_BUILDABLE_TYPES], name, **kwargs) -> _BUILDABLE_TYPES:
-        return clz()
-
     @property
     def layers(self):
         return None
@@ -1684,9 +1681,6 @@ class Activity:
         pass
 
     def add_render_layer(self, render_layer: Renderer):
-        pass
-
-    def load_renderer(self, name: str, **kwargs):
         pass
 
     def add_event_listener(self, event_listener: Union[Callable[['Event'], bool], 'EventListener'], priority: int = 0):

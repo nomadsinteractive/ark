@@ -2,16 +2,58 @@
 
 #include "core/ark.h"
 
-#include "core/base/future.h"
 #include "core/inf/runnable.h"
 #include "core/inf/variable.h"
 #include "core/impl/executor/executor_this_thread.h"
 #include "core/impl/runnable/runnable_by_function.h"
 #include "core/impl/runnable/runnable_composite.h"
-#include "core/traits/expendable.h"
-#include "core/util/log.h"
 
 namespace ark {
+
+class MessageLoop::Task final : public Runnable {
+public:
+    Task(sp<Runnable> target, sp<Boolean> canceled, uint64_t nextFireTick, uint32_t interval)
+        : _target(std::move(target)), _canceled(std::move(canceled)), _next_fire_tick(nextFireTick), _interval(interval)
+    {
+    }
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Task);
+
+    void run() override
+    {
+        if(_canceled)
+        {
+            if(!_canceled->val())
+                _target->run();
+        }
+        else
+            _target->run();
+    }
+
+    bool isCancelled() const
+    {
+        return _canceled ? _canceled->val() : false;
+    }
+
+    uint64_t nextFireTick() const
+    {
+        return _next_fire_tick;
+    }
+    uint32_t interval() const
+    {
+        return _interval;
+    }
+
+    void setNextFireTick(uint64_t tick)
+    {
+        _next_fire_tick = tick;
+    }
+
+private:
+    sp<Runnable> _target;
+    sp<Boolean> _canceled;
+    uint64_t _next_fire_tick;
+    uint32_t _interval;
+};
 
 MessageLoop::MessageLoop(sp<Variable<uint64_t>> clock)
     : MessageLoop(std::move(clock), sp<ExecutorThisThread>::make())
@@ -43,7 +85,7 @@ void MessageLoop::schedule(sp<Runnable> runnable, float interval, sp<Boolean> ca
 uint64_t MessageLoop::pollOnce()
 {
     DPROFILER_TRACE("MessageLoop");
-    uint64_t now = _clock->val();
+    const uint64_t now = _clock->val();
 
     uint64_t nextFireTick = now + 10000;
     for(sp<Task>& task : _scheduled.clear())
@@ -51,9 +93,7 @@ uint64_t MessageLoop::pollOnce()
 
     std::vector<sp<Runnable>> scheduled;
     while(_tasks.size() > 0)
-    {
-        Task& front = _tasks.front();
-        if(front.nextFireTick() <= now)
+        if(Task& front = _tasks.front(); front.nextFireTick() <= now)
         {
             sp<Task> nextTask = _tasks.front();
             _tasks.pop_front();
@@ -72,7 +112,6 @@ uint64_t MessageLoop::pollOnce()
             nextFireTick = front.nextFireTick();
             break;
         }
-    }
     runScheduledTask(std::move(scheduled));
     return nextFireTick;
 }
@@ -91,7 +130,7 @@ void MessageLoop::requestNextTask(sp<Task> task)
     _tasks.push_back(std::move(task));
 }
 
-void MessageLoop::runScheduledTask(std::vector<sp<Runnable>> scheduled)
+void MessageLoop::runScheduledTask(std::vector<sp<Runnable>> scheduled) const
 {
     if(!scheduled.empty())
     {
@@ -100,42 +139,6 @@ void MessageLoop::runScheduledTask(std::vector<sp<Runnable>> scheduled)
         else
             _executor->execute(sp<RunnableComposite>::make(std::move(scheduled)));
     }
-}
-
-MessageLoop::Task::Task(sp<Runnable> target, sp<Boolean> canceled, uint64_t nextFireTick, uint32_t interval)
-    : _target(std::move(target)), _canceled(std::move(canceled)), _next_fire_tick(nextFireTick), _interval(interval)
-{
-}
-
-void MessageLoop::Task::run()
-{
-    if(_canceled)
-    {
-        if(!_canceled->val())
-            _target->run();
-    }
-    else
-        _target->run();
-}
-
-bool MessageLoop::Task::isCancelled() const
-{
-    return _canceled ? _canceled->val() : false;
-}
-
-uint64_t MessageLoop::Task::nextFireTick() const
-{
-    return _next_fire_tick;
-}
-
-uint32_t MessageLoop::Task::interval() const
-{
-    return _interval;
-}
-
-void MessageLoop::Task::setNextFireTick(uint64_t tick)
-{
-    _next_fire_tick = tick;
 }
 
 }
