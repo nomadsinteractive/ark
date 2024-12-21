@@ -29,6 +29,9 @@ public:
     sp<Entity> makeEntity(Traits components = Traits()) const;
 
 //  [[script::bindings::auto]]
+    sp<Arena> makeArena(const Scope& kwargs) const;
+
+//  [[script::bindings::auto]]
     Box getReference(const String& id) const;
 
 //  [[script::bindings::property]]

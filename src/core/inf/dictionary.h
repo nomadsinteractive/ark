@@ -1,7 +1,5 @@
-#ifndef ARK_CORE_INF_DIRECTORY_H_
-#define ARK_CORE_INF_DIRECTORY_H_
+#pragma once
 
-#include "core/base/api.h"
 #include "core/forwarding.h"
 
 namespace ark {
@@ -11,9 +9,6 @@ public:
     virtual ~Dictionary() = default;
 
     virtual T get(const String& name) = 0;
-
 };
 
 }
-
-#endif

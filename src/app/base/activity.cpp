@@ -8,6 +8,7 @@
 #include "graphics/base/render_layer.h"
 
 #include "app/base/application_context.h"
+#include "app/base/arena.h"
 #include "app/base/entity.h"
 #include "app/impl/event_listener/event_listener_list.h"
 #include "app/view/view.h"
@@ -46,6 +47,11 @@ sp<Entity> Activity::makeEntity(Traits components) const
 {
     components.put(_resource_loader);
     return sp<Entity>::make(std::move(components));
+}
+
+sp<Arena> Activity::makeArena(const Scope& kwargs) const
+{
+    return sp<Arena>::make(_render_phrases, _resource_loader, sp<Scope>::make(kwargs));
 }
 
 Box Activity::getReference(const String& id) const

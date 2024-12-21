@@ -2,13 +2,14 @@
 
 namespace ark {
 
+class Activity;
 class Application;
 class ApplicationContext;
 class ApplicationController;
 class ApplicationDelegate;
 class ApplicationProfiler;
 class ApplicationBundle;
-class Activity;
+class Arena;
 class AudioPlayer;
 class BroadPhrase;
 class Button;
@@ -31,7 +32,6 @@ class NarrowPhrase;
 class Model;
 class RayCastManifold;
 class RendererWithState;
-class ResourceLoader;
 class Rigidbody;
 class RigidbodyDef;
 class Shape;

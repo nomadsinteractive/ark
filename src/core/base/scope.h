@@ -19,7 +19,7 @@ class BoxBundle {
 
 */
 
-class ARK_API Scope : public BoxBundle {
+class ARK_API Scope final : public BoxBundle {
 public:
     Scope() = default;
     Scope(std::map<String, Box> variables, sp<Queries> queries = nullptr);
@@ -27,7 +27,7 @@ public:
 
     template<typename T> sp<T> build(const String& name, const Scope& args) const;
 
-    virtual Box get(const String& name) override;
+    Box get(const String& name) override;
 
     void put(const String& name, Box value);
 

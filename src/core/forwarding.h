@@ -88,6 +88,7 @@ class StringTable;
 class Thread;
 class Traits;
 class Ref;
+class ResourceLoader;
 class Updatable;
 class UpdatableWrapper;
 class UploaderWrapper;
