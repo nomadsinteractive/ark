@@ -103,7 +103,6 @@ public:
 
     void initialize(const PipelineBuildingContext& buildingContext);
 
-    Camera& camera();
     const Camera& camera() const;
     const std::vector<sp<UBO>>& ubos() const;
 

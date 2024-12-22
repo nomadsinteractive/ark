@@ -33,7 +33,7 @@ public:
     void fix();
 
 //  [[plugin::builder]]
-    class BUILDER : public Builder<Vec4> {
+    class BUILDER final : public Builder<Vec4> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
@@ -45,7 +45,7 @@ public:
     };
 
 //  [[plugin::builder::by-value]]
-    class DICTIONARY : public Builder<Vec4> {
+    class DICTIONARY final : public Builder<Vec4> {
     public:
         DICTIONARY(BeanFactory& parent, const String& str);
 

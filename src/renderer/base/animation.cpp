@@ -93,7 +93,7 @@ float Animation::tps() const
 
 uint32_t Animation::ticks() const
 {
-    return static_cast<uint32_t>(_duration * _tps);
+    return _duration_in_ticks;
 }
 
 std::vector<std::pair<String, sp<Mat4>>> Animation::getLocalTransforms(sp<Integer> tick) const

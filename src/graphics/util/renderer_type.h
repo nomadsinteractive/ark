@@ -12,11 +12,11 @@ namespace ark {
 class ARK_API RendererType final {
 public:
 //  [[script::bindings::enumeration]]
-    enum Phrase {
-        PHRASE_DEFAULT,
+    enum Priority {
+        PRIORITY_UI = -10,
+        PRIORITY_DEFAULT = 0,
         PHRASE_WIDGET,
-        PHRASE_RENDER_LAYER,
-        PHRASE_COUNT
+        PHRASE_RENDER_LAYER
     };
 
 public:

@@ -283,10 +283,9 @@ public:
 
     [[nodiscard]]
     Optional<PtrType> allocate(SizeType size, SizeType alignment = kAlignment) {
-        DCHECK(alignment != 0 && ((alignment % kAlignment) == 0 || (kAlignment % alignment) == 0), "Illegal alignment %d", alignment);
+        CHECK(alignment != 0 && ((alignment % kAlignment) == 0 || (kAlignment % alignment) == 0), "Illegal alignment %d", alignment);
         for(Strategy& i : _strategies) {
-            const Optional<Fragment> fragmentOpt = i.allocate(*this, size, alignment);
-            if(fragmentOpt) {
+            if(const Optional<Fragment> fragmentOpt = i.allocate(*this, size, alignment)) {
                 const Fragment& fragment = fragmentOpt.value();
                 _allocated += fragment._size;
                 return _memory.begin() + fragment._offset;

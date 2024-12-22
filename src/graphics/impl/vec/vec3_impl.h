@@ -31,7 +31,7 @@ public:
     void fix();
 
 //  [[plugin::builder("vec3")]]
-    class BUILDER : public Builder<Vec3> {
+    class BUILDER final : public Builder<Vec3> {
     public:
         BUILDER(BeanFactory& parent, const document& doc);
 
@@ -42,11 +42,11 @@ public:
     };
 
 //  [[plugin::builder::by-value]]
-    class DICTIONARY : public Builder<Vec3> {
+    class DICTIONARY final : public Builder<Vec3> {
     public:
         DICTIONARY(BeanFactory& parent, const String& str);
 
-        virtual sp<Vec3> build(const Scope& args) override;
+        sp<Vec3> build(const Scope& args) override;
 
     private:
         sp<Builder<Numeric>> _x, _y, _z;

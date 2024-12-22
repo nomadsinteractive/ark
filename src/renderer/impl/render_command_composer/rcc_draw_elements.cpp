@@ -26,7 +26,7 @@ sp<PipelineBindings> RCCDrawElements::makeShaderBindings(Shader& shader, RenderC
 sp<RenderCommand> RCCDrawElements::compose(const RenderRequest& renderRequest, const RenderLayerSnapshot& snapshot)
 {
     const size_t verticesCount = _model->vertexCount();
-    const Buffer& vertices = snapshot._stub->_pipeline_bindings->vertices();
+    const Buffer& vertexBuf = snapshot._stub->_pipeline_bindings->vertices();
 
     DrawingBuffer buf(snapshot._stub->_pipeline_bindings, snapshot._stub->_stride);
     if(snapshot.needsReload())
@@ -49,9 +49,10 @@ sp<RenderCommand> RCCDrawElements::compose(const RenderRequest& renderRequest, c
         }
     }
 
+    Buffer::Snapshot vertices = buf.vertices().toSnapshot(vertexBuf);
     Buffer::Snapshot indices = _primitive_index_buffer->snapshot(snapshot._stub->_render_controller, snapshot._elements.size());
     const uint32_t drawCount = static_cast<uint32_t>(indices.length<element_index_t>());
-    return snapshot.toRenderCommand(renderRequest, buf.vertices().toSnapshot(vertices), std::move(indices), drawCount, DrawingParams::DrawElements{0});
+    return snapshot.toRenderCommand(renderRequest, std::move(vertices), std::move(indices), drawCount, DrawingParams::DrawElements{0});
 }
 
 }

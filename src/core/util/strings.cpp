@@ -4,7 +4,6 @@
 #include <cstdarg>
 #include <cctype>
 #include <cstdio>
-#include <memory>
 #include <string>
 #include <regex>
 
@@ -520,7 +519,7 @@ bool Strings::isNumeric(const String& value)
 {
     const char* str = value.c_str();
     while(*str)
-        if(char c = *(str++); c < '+' || c > '9' || c == '/')
+        if(const char c = *(str++); c < '+' || c > '9' || c == '/')
             return false;
     return true;
 }

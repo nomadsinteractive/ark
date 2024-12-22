@@ -6,12 +6,10 @@
 #include "core/base/api.h"
 #include "core/base/clock.h"
 #include "core/base/string_buffer.h"
-#include "core/inf/variable.h"
 #include "core/inf/array.h"
 #include "core/util/strings.h"
 #include "core/types/shared_ptr.h"
 
-#include "graphics/traits/layout_param.h"
 #include "graphics/base/v4.h"
 
 namespace ark {

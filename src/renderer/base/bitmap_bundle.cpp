@@ -1,5 +1,7 @@
 #include "renderer/base/bitmap_bundle.h"
 
+#include "core/base/named_hash.h"
+
 #include "graphics/base/bitmap.h"
 
 #include "renderer/base/atlas.h"

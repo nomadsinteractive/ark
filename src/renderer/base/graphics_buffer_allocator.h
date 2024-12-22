@@ -21,7 +21,7 @@ public:
         uint32_t _size;
     };
 
-    typedef Heap<Memory, uint32_t, 16> HeapType;
+    typedef Heap<Memory, uint32_t, 4> HeapType;
 
     class Page {
     public:

@@ -68,11 +68,11 @@ public:
     };
 
 //  [[plugin::builder::by-value]]
-    class DICTIONARY : public Builder<Size> {
+    class DICTIONARY final : public Builder<Size> {
     public:
         DICTIONARY(BeanFactory& factory, const String& value);
 
-        virtual sp<Size> build(const Scope& args) override;
+        sp<Size> build(const Scope& args) override;
 
     private:
         sp<Builder<Numeric>> _width;

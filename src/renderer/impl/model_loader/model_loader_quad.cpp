@@ -1,5 +1,7 @@
 #include "renderer/impl/model_loader/model_loader_quad.h"
 
+#include "core/base/named_hash.h"
+
 #include "renderer/base/atlas.h"
 #include "renderer/base/model.h"
 #include "renderer/base/pipeline_descriptor.h"

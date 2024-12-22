@@ -240,80 +240,80 @@ sp<Mat4> Camera::vp() const
     return _vp;
 }
 
-sp<Camera> Camera::createDefaultCamera()
+Camera Camera::createDefaultCamera()
 {
     const Camera& defaultCamera = Global<Camera>();
-    return sp<Camera>::make(defaultCamera);
+    return defaultCamera;
 }
 
 M4 Camera::DelegateLH_ZO::frustum(float left, float right, float bottom, float top, float clipNear, float clipFar)
 {
-    return M4(glm::frustumLH_ZO(left, right, bottom, top, clipNear, clipFar));
+    return {glm::frustumLH_ZO(left, right, bottom, top, clipNear, clipFar)};
 }
 
 M4 Camera::DelegateLH_ZO::lookAt(const V3& position, const V3& target, const V3& up)
 {
-    return M4(glm::lookAtLH(glm::vec3(position.x(), position.y(), position.z()), glm::vec3(target.x(), target.y(), target.z()), glm::vec3(up.x(), up.y(), up.z())));
+    return {glm::lookAtLH(glm::vec3(position.x(), position.y(), position.z()), glm::vec3(target.x(), target.y(), target.z()), glm::vec3(up.x(), up.y(), up.z()))};
 }
 
 M4 Camera::DelegateLH_ZO::ortho(float left, float right, float bottom, float top, float clipNear, float clipFar)
 {
-    return M4(glm::orthoLH_ZO(left, right, bottom, top, clipNear, clipFar));
+    return {glm::orthoLH_ZO(left, right, bottom, top, clipNear, clipFar)};
 }
 
 M4 Camera::DelegateLH_ZO::perspective(float fov, float aspect, float clipNear, float clipFar)
 {
-    return M4(glm::perspectiveLH_ZO(fov, aspect, clipNear, clipFar));
+    return {glm::perspectiveLH_ZO(fov, aspect, clipNear, clipFar)};
 }
 
 M4 Camera::DelegateRH_ZO::frustum(float left, float right, float bottom, float top, float clipNear, float clipFar)
 {
-    return M4(glm::frustumRH_ZO(left, right, bottom, top, clipNear, clipFar));
+    return {glm::frustumRH_ZO(left, right, bottom, top, clipNear, clipFar)};
 }
 
 M4 Camera::DelegateRH_ZO::lookAt(const V3& position, const V3& target, const V3& up)
 {
-    return M4(glm::lookAtRH(glm::vec3(position.x(), position.y(), position.z()), glm::vec3(target.x(), target.y(), target.z()), glm::vec3(up.x(), up.y(), up.z())));
+    return {lookAtRH(glm::vec3(position.x(), position.y(), position.z()), glm::vec3(target.x(), target.y(), target.z()), glm::vec3(up.x(), up.y(), up.z()))};
 }
 
 M4 Camera::DelegateRH_ZO::ortho(float left, float right, float bottom, float top, float clipNear, float clipFar)
 {
-    return M4(glm::orthoRH_ZO(left, right, bottom, top, clipNear, clipFar));
+    return {glm::orthoRH_ZO(left, right, bottom, top, clipNear, clipFar)};
 }
 
 M4 Camera::DelegateRH_ZO::perspective(float fov, float aspect, float clipNear, float clipFar)
 {
-    return M4(glm::perspectiveRH_ZO(fov, aspect, clipNear, clipFar));
+    return {glm::perspectiveRH_ZO(fov, aspect, clipNear, clipFar)};
 }
 
 M4 Camera::DelegateLH_NO::frustum(float left, float right, float bottom, float top, float clipNear, float clipFar)
 {
-    return M4(glm::frustumLH_NO(left, right, bottom, top, clipNear, clipFar));
+    return {glm::frustumLH_NO(left, right, bottom, top, clipNear, clipFar)};
 }
 
 M4 Camera::DelegateLH_NO::lookAt(const V3& position, const V3& target, const V3& up)
 {
-    return M4(glm::lookAtLH(glm::vec3(position.x(), position.y(), position.z()), glm::vec3(target.x(), target.y(), target.z()), glm::vec3(up.x(), up.y(), up.z())));
+    return {glm::lookAtLH(glm::vec3(position.x(), position.y(), position.z()), glm::vec3(target.x(), target.y(), target.z()), glm::vec3(up.x(), up.y(), up.z()))};
 }
 
 M4 Camera::DelegateLH_NO::ortho(float left, float right, float bottom, float top, float clipNear, float clipFar)
 {
-    return M4(glm::orthoLH_NO(left, right, bottom, top, clipNear, clipFar));
+    return {glm::orthoLH_NO(left, right, bottom, top, clipNear, clipFar)};
 }
 
 M4 Camera::DelegateLH_NO::perspective(float fov, float aspect, float clipNear, float clipFar)
 {
-    return M4(glm::perspectiveLH_NO(fov, aspect, clipNear, clipFar));
+    return {glm::perspectiveLH_NO(fov, aspect, clipNear, clipFar)};
 }
 
 M4 Camera::DelegateRH_NO::frustum(float left, float right, float bottom, float top, float clipNear, float clipFar)
 {
-    return M4(glm::frustumRH_NO(left, right, bottom, top, clipNear, clipFar));
+    return {glm::frustumRH_NO(left, right, bottom, top, clipNear, clipFar)};
 }
 
 M4 Camera::DelegateRH_NO::lookAt(const V3& position, const V3& target, const V3& up)
 {
-    return M4(glm::lookAtRH(glm::vec3(position.x(), position.y(), position.z()), glm::vec3(target.x(), target.y(), target.z()), glm::vec3(up.x(), up.y(), up.z())));
+    return {glm::lookAtRH(glm::vec3(position.x(), position.y(), position.z()), glm::vec3(target.x(), target.y(), target.z()), glm::vec3(up.x(), up.y(), up.z()))};
 }
 
 M4 Camera::DelegateRH_NO::ortho(float left, float right, float bottom, float top, float clipNear, float clipFar)

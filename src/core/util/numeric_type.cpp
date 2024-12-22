@@ -17,8 +17,6 @@
 #include "core/impl/variable/variable_op2.h"
 #include "core/impl/variable/variable_ternary.h"
 #include "core/util/operators.h"
-#include "core/util/strings.h"
-#include "core/util/updatable_util.h"
 
 #include "app/base/application_context.h"
 

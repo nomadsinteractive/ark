@@ -3,6 +3,8 @@
 #include "core/collection/traits.h"
 #include "core/traits/discarded.h"
 #include "core/traits/visibility.h"
+#include "core/util/strings.h"
+#include "core/util/string_convert.h"
 
 #include "graphics/inf/renderer.h"
 #include "graphics/impl/renderer/renderer_style_position.h"
@@ -46,6 +48,13 @@ sp<Renderer> RendererType::reset(const sp<Renderer>& self, sp<Renderer> wrapped)
 sp<Renderer> RendererType::translate(const sp<Renderer>& self, const sp<Vec3>& position)
 {
     return sp<RendererStylePosition>::make(self, position);
+}
+
+template<> ARK_API RendererType::Priority StringConvert::eval<RendererType::Priority>(const String& expr)
+{
+    if(Strings::isNumeric(expr))
+        return static_cast<RendererType::Priority>(Strings::eval<int32_t>(expr));
+    return RendererType::PRIORITY_DEFAULT;
 }
 
 }

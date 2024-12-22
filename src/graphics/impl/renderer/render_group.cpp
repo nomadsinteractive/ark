@@ -8,20 +8,20 @@ namespace ark {
 
 struct RendererPhrase::BUILDER::Phrase {
 
-    Phrase(BeanFactory& beanFactory, const document& manifest, RendererType::Phrase phrase)
-        : _renderer(beanFactory.ensureBuilder<Renderer>(manifest)), _phrase(phrase)
+    Phrase(BeanFactory& beanFactory, const document& manifest)
+        : _renderer(beanFactory.ensureBuilder<Renderer>(manifest)), _priority(Documents::getAttribute<RendererType::Priority>(manifest, "priority", RendererType::PRIORITY_DEFAULT))
     {
     }
 
     sp<Builder<Renderer>> _renderer;
-    RendererType::Phrase _phrase;
+    RendererType::Priority _priority;
 };
 
 void RendererPhrase::render(RenderRequest& renderRequest, const V3& position)
 {
-    for(DVList<sp<Renderer>>& i : _phrases)
-        for(const sp<Renderer>& j : i.update(renderRequest.timestamp()))
-            j->render(renderRequest, position);
+    for(auto& [k, v] : _phrases)
+        for(const sp<Renderer>& i : v.update(renderRequest.timestamp()))
+            i->render(renderRequest, position);
 }
 
 void RendererPhrase::addRenderer(sp<Renderer> renderer, const Traits& traits)
@@ -29,31 +29,25 @@ void RendererPhrase::addRenderer(sp<Renderer> renderer, const Traits& traits)
     ASSERT(renderer);
     const sp<Discarded>& droplet = traits.get<Discarded>();
     const sp<Visibility>& visibility = traits.get<Visibility>();
-    const RendererType::Phrase phrase = traits.getEnum<RendererType::Phrase>(RendererType::PHRASE_DEFAULT);
+    const RendererType::Priority phrase = traits.getEnum<RendererType::Priority>(RendererType::PRIORITY_DEFAULT);
     _phrases[phrase].emplace_back(std::move(renderer), droplet, visibility);
 }
 
-void RendererPhrase::add(RendererType::Phrase phrase, sp<Renderer> renderer, sp<Boolean> discarded, sp<Boolean> visible)
+void RendererPhrase::add(RendererType::Priority phrase, sp<Renderer> renderer, sp<Boolean> discarded, sp<Boolean> visible)
 {
     _phrases[phrase].emplace_back(std::move(renderer), std::move(discarded), std::move(visible));
 }
 
 RendererPhrase::BUILDER::BUILDER(BeanFactory& beanFactory, const document& manifest)
-    : _phrases{
-        beanFactory.makeBuilderListObject<Phrase>(manifest, constants::RENDERER, RendererType::PHRASE_DEFAULT),
-        beanFactory.makeBuilderListObject<Phrase>(manifest, constants::RENDER_TARGET, RendererType::PHRASE_DEFAULT),
-        beanFactory.makeBuilderListObject<Phrase>(manifest, "widget", RendererType::PHRASE_WIDGET),
-        beanFactory.makeBuilderListObject<Phrase>(manifest, constants::RENDER_LAYER, RendererType::PHRASE_RENDER_LAYER)
-    }
+    : _phrases(beanFactory.makeBuilderListObject<Phrase>(manifest, constants::RENDERER))
 {
 }
 
 sp<RendererPhrase> RendererPhrase::BUILDER::build(const Scope& args)
 {
     sp<RendererPhrase> renderGroup = sp<RendererPhrase>::make();
-    for(const std::vector<Phrase>& i : _phrases)
-        for(const Phrase& j : i)
-            renderGroup->add(j._phrase, j._renderer->build(args));
+    for(const Phrase& i : _phrases)
+        renderGroup->add(i._priority, i._renderer->build(args));
     return renderGroup;
 }
 

@@ -19,11 +19,8 @@ public:
 
 // [[script::bindings::auto]]
     void addRenderer(sp<Renderer> renderer, sp<Boolean> discarded = nullptr, sp<Boolean> visible = nullptr);
-// [[script::bindings::auto]]
-    void addControlLayer(sp<Renderer> controller, sp<Boolean> discarded = nullptr, sp<Boolean> visible = nullptr);
 
     void requestUpdate(uint64_t timestamp);
-
     void onRenderFrame(const Color& backgroundColor, RenderView& renderView);
 
 private:

@@ -42,8 +42,8 @@ PipelineInput::AttributeOffsets::AttributeOffsets(const PipelineInput& input)
     _offsets[Attribute::USAGE_NORMAL] = stream.getAttributeOffset(Attribute::USAGE_NORMAL);
     _offsets[Attribute::USAGE_TANGENT] = stream.getAttributeOffset(Attribute::USAGE_TANGENT);
     _offsets[Attribute::USAGE_BITANGENT] = stream.getAttributeOffset(Attribute::USAGE_BITANGENT);
-    _offsets[Attribute::USAGE_BONE_IDS] = stream.getAttributeOffset("BoneIds");
-    _offsets[Attribute::USAGE_BONE_WEIGHTS] = stream.getAttributeOffset("BoneWeights");
+    _offsets[Attribute::USAGE_BONE_IDS] = stream.getAttributeOffset(Attribute::USAGE_BONE_IDS);
+    _offsets[Attribute::USAGE_BONE_WEIGHTS] = stream.getAttributeOffset(Attribute::USAGE_BONE_WEIGHTS);
     if(input.streamLayouts().size() > 1)
     {
         const StreamLayout& stream1 = input.streamLayouts().at(1);
@@ -62,22 +62,17 @@ uint32_t PipelineInput::AttributeOffsets::stride() const
 }
 
 PipelineInput::PipelineInput(const sp<Camera>& camera)
-    : _camera(*(camera ? camera : Camera::createDefaultCamera())), _stream_layouts{{0, StreamLayout()}}
+    : _camera(camera ? *camera : Camera::createDefaultCamera()), _stream_layouts{{0, StreamLayout()}}
 {
 }
 
 void PipelineInput::initialize(const PipelineBuildingContext& buildingContext)
 {
-    for(auto& [k, v] : buildingContext._ubos)
+    for(const auto& [k, v] : buildingContext._ubos)
     {
         v->initialize();
-        _ubos.push_back(std::move(v));
+        _ubos.push_back(v);
     }
-}
-
-Camera& PipelineInput::camera()
-{
-    return _camera;
 }
 
 const Camera& PipelineInput::camera() const
@@ -152,7 +147,7 @@ Optional<const Attribute&> PipelineInput::getAttribute(const String& name) const
     for(const auto& i : _stream_layouts)
         if(const Optional<const Attribute&> opt = i.second.getAttribute(name))
             return opt;
-    return Optional<const Attribute&>();
+    return {};
 }
 
 sp<Uniform> PipelineInput::getUniform(const String& name) const

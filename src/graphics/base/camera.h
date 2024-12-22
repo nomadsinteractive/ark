@@ -107,7 +107,7 @@ public:
     void assign(const Camera& other);
     bool isYUp() const;
 
-    static sp<Camera> createDefaultCamera();
+    static Camera createDefaultCamera();
 
     struct Stub;
 

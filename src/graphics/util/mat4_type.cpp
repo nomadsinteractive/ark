@@ -3,10 +3,10 @@
 #include "core/ark.h"
 #include "core/impl/variable/variable_dyed.h"
 #include "core/impl/variable/variable_op1.h"
-#include "core/impl/variable/variable_wrapper.h"
 #include "core/impl/variable/variable_op2.h"
 #include "core/util/operators.h"
-#include "core/util/updatable_util.h"
+#include "core/util/strings.h"
+#include "core/util/string_convert.h"
 
 #include "graphics/base/mat.h"
 #include "graphics/impl/mat/mat4_impl.h"
@@ -135,9 +135,9 @@ sp<Mat4Impl> Mat4Type::ensureImpl(const sp<Mat4>& self)
     return impl;
 }
 
-template<> String StringConvert::repr<M4>(const M4& val)
+template<> String StringConvert::repr<M4>(const M4& obj)
 {
-    const float* buf = val.value();
+    const float* buf = obj.value();
     StringBuffer sb;
     sb << "(";
     for(size_t i = 0; i < 4; ++i)

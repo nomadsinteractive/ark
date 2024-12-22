@@ -2,7 +2,6 @@
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
-#include "core/impl/variable/variable_wrapper.h"
 #include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
 

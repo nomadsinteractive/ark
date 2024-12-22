@@ -1,6 +1,7 @@
 #include "renderer/impl/model_loader/model_loader_sphere.h"
 
 #include "core/base/manifest.h"
+#include "core/base/named_hash.h"
 #include "core/util/documents.h"
 #include "core/util/math.h"
 #include "core/util/uploader_type.h"

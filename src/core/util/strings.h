@@ -64,11 +64,6 @@ public:
         return StringConvert::repr<T>(value);
     }
 
-    template<typename T> static T toEnum(const String& str) {
-        Global<EnumMap<T>> enums;
-        return enums->ensureEnum(str);
-    }
-
     template<typename T> static T eval(const String& str) {
         return StringConvert::eval<T>(str);
     }

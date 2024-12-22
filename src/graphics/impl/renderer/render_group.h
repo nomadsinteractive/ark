@@ -1,5 +1,6 @@
 #pragma once
 
+#include <map>
 #include <vector>
 
 #include "core/base/api.h"
@@ -17,7 +18,7 @@ public:
     void render(RenderRequest& renderRequest, const V3& position) override;
     void addRenderer(sp<Renderer> renderer, const Traits& traits) override;
 
-    void add(RendererType::Phrase phrase, sp<Renderer> renderer, sp<Boolean> discarded = nullptr, sp<Boolean> visible = nullptr);
+    void add(RendererType::Priority phrase, sp<Renderer> renderer, sp<Boolean> discarded = nullptr, sp<Boolean> visible = nullptr);
 
 //  [[plugin::builder]]
     class BUILDER final : public Builder<RendererPhrase> {
@@ -28,7 +29,7 @@ public:
 
     private:
         struct Phrase;
-        std::vector<Phrase> _phrases[RendererType::PHRASE_COUNT + 1];
+        std::vector<Phrase> _phrases;
     };
 
 //  [[plugin::builder("render-group")]]
@@ -43,7 +44,7 @@ public:
     };
 
 private:
-    DVList<sp<Renderer>> _phrases[RendererType::PHRASE_COUNT];
+    std::map<RendererType::Priority, DVList<sp<Renderer>>> _phrases;
 };
 
 }

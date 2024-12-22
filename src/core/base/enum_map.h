@@ -9,7 +9,7 @@
 
 namespace ark {
 
-template<typename T> class EnumMap {
+template<typename T> class [[deprecated]] EnumMap {
 public:
     EnumMap() {
         initialize(_values);

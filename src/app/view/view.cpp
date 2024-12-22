@@ -266,7 +266,7 @@ View::~View()
 
 TypeId View::onPoll(WiringContext& context)
 {
-    sp<Vec3> size = Vec3Type::create(sp<LayoutSize<0>>::make(_stub), sp<LayoutSize<1>>::make(_stub), nullptr);
+    sp<Vec3> size = Vec3Type::create(sp<LayoutSize<0>>::make(_stub), sp<LayoutSize<1>>::make(_stub), Global<Constants>()->NUMERIC_ZERO);
     context.addComponentBuilder(make_lazy_builder<Shape>(Shape::TYPE_AABB, sp<Vec3>(size)));
     context.addComponentBuilder(make_lazy_builder<Boundaries>(std::move(size)));
     context.addComponentBuilder(make_lazy_builder<Vec3, LayoutPosition>(_stub, _updatable_layout, true, true));

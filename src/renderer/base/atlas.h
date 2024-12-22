@@ -3,7 +3,6 @@
 #include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
-#include "core/base/named_hash.h"
 #include "core/collection/traits.h"
 #include "core/inf/builder.h"
 #include "core/types/safe_builder.h"
@@ -64,8 +63,6 @@ public:
 
     const Item& at(const NamedHash& resid) const;
     Rect getItemBounds(int32_t id) const;
-
-    void clear();
 
     static uint16_t unnormalize(float v);
     static uint16_t unnormalize(uint32_t x, uint32_t s);

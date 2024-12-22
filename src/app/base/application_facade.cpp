@@ -138,7 +138,7 @@ const sp<SurfaceController>& ApplicationFacade::surfaceController() const
 
 sp<Camera> ApplicationFacade::camera() const
 {
-    return Camera::createDefaultCamera();
+    return Global<Camera>();
 }
 
 const sp<ApplicationManifest>& ApplicationFacade::manifest() const
@@ -196,11 +196,6 @@ const std::vector<String>& ApplicationFacade::argv() const
 void ApplicationFacade::addPreRenderTask(sp<Runnable> task, sp<Boolean> cancelled)
 {
     _context->addPreRenderTask(std::move(task), std::move(cancelled));
-}
-
-void ApplicationFacade::addControlLayer(const sp<Renderer>& controlLayer)
-{
-    _surface_controller->addControlLayer(controlLayer);
 }
 
 void ApplicationFacade::addEventListener(sp<EventListener> eventListener, sp<Boolean> disposed)

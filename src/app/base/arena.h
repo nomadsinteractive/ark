@@ -20,6 +20,8 @@ public:
 private:
     struct Stub;
 
+    struct RenderLayerBundle;
+
 private:
     sp<Stub> _stub;
 

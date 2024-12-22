@@ -1,6 +1,7 @@
 #include "renderer/base/atlas.h"
 
 #include "core/base/bean_factory.h"
+#include "core/base/named_hash.h"
 #include "core/dom/dom_document.h"
 #include "core/inf/storage.h"
 #include "core/util/math.h"

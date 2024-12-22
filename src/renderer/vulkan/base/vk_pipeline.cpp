@@ -425,7 +425,7 @@ void VKPipeline::setupGraphicsPipeline(GraphicsContext& graphicsContext, const V
         state.colorBlendOp = VK_BLEND_OP_ADD;
         blendAttachmentStates.push_back(state);
     }
-    CHECK_WARN(blendAttachmentStates.size() > 0, "Graphics pipeline has no color attachment");
+    CHECK_WARN(!blendAttachmentStates.empty(), "Graphics pipeline has no color attachment");
     VkPipelineColorBlendStateCreateInfo colorBlendState =
             vks::initializers::pipelineColorBlendStateCreateInfo(
                 static_cast<uint32_t>(blendAttachmentStates.size()),

@@ -25,7 +25,7 @@ Size::Size(float width, float height, float depth)
 }
 
 Size::Size(sp<Numeric> width, sp<Numeric> height, sp<Numeric> depth)
-    : _impl(sp<Vec3Impl>::make(std::move(width), std::move(height), std::move(depth)))
+    : _impl(sp<Vec3Impl>::make(std::move(width), std::move(height), depth ? std::move(depth) : Global<Constants>()->NUMERIC_ZERO))
 {
 }
 

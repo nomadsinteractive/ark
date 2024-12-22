@@ -97,7 +97,7 @@ size_t Buffer::size() const
 
 Buffer::Snapshot Buffer::snapshot(size_t size) const
 {
-    return Snapshot(_delegate, size, nullptr);
+    return {_delegate, size, nullptr};
 }
 
 Buffer::operator bool() const
@@ -112,7 +112,7 @@ Buffer::Snapshot Buffer::snapshot(const ByteArray::Borrowed& strip) const
 
 Buffer::Snapshot Buffer::snapshot(sp<Uploader> input, size_t size) const
 {
-    return Snapshot(_delegate, size, std::move(input));
+    return {_delegate, size, std::move(input)};
 }
 
 uint64_t Buffer::id() const
@@ -145,7 +145,7 @@ Buffer::Factory::Factory(size_t stride)
 
 Buffer::Snapshot Buffer::Factory::toSnapshot(const Buffer& buffer)
 {
-    if(_strips.size() == 0)
+    if(_strips.empty())
         return buffer.snapshot();
 
     return buffer.snapshot(sp<InputBufferSnapshot>::make(_size, std::move(_strips)));

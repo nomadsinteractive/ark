@@ -31,11 +31,11 @@ public:
     void fix();
 
 //  [[plugin::builder("vec2")]]
-    class BUILDER : public Builder<Vec2> {
+    class BUILDER final : public Builder<Vec2> {
     public:
         BUILDER(BeanFactory& factory, const document& doc);
 
-        virtual sp<Vec2> build(const Scope& args) override;
+        sp<Vec2> build(const Scope& args) override;
 
     private:
         sp<Builder<Numeric>> _x;
@@ -43,11 +43,11 @@ public:
     };
 
 //  [[plugin::builder::by-value]]
-    class DICTIONARY : public Builder<Vec2> {
+    class DICTIONARY final : public Builder<Vec2> {
     public:
         DICTIONARY(BeanFactory& factory, const String& str);
 
-        virtual sp<Vec2> build(const Scope& args) override;
+        sp<Vec2> build(const Scope& args) override;
 
     private:
         sp<Builder<Numeric>> _x;

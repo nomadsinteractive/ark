@@ -6,11 +6,10 @@
 #include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
 #include "core/types/safe_var.h"
-#include "core/util/strings.h"
 
 namespace ark {
 
-template<typename T> class VariableDyed : public Wrapper<Variable<T>>, public Variable<T> {
+template<typename T> class VariableDyed final : public Wrapper<Variable<T>>, public Variable<T> {
 public:
     VariableDyed(sp<Variable<T>> delegate, sp<Boolean> condition, String message)
         :  Wrapper<Variable<T>>(std::move(delegate)), _condition(std::move(condition), true), _message(std::move(message)) {
@@ -22,9 +21,8 @@ public:
     }
 
     T val() override {
-        T v = this->_wrapped->val();
-        TRACE(_condition.val(), Strings::sprintf("%s: %s", _message.c_str(), Strings::toString(v).c_str()).c_str());
-        return v;
+        TRACE(_condition.val(), _message.c_str());
+        return this->_wrapped->val();
     }
 
 private:

@@ -13,6 +13,7 @@ template<typename T> class VariableWrapper final : public Variable<T>, public Wr
 public:
     VariableWrapper(sp<Variable<T>> delegate) noexcept
         : Wrapper<Variable<T>>(std::move(delegate)) {
+        ASSERT(this->_wrapped);
     }
     VariableWrapper(T value) noexcept
         : Wrapper<Variable<T>>(sp<Variable<T>>::template make<typename Variable<T>::Const>(value)) {

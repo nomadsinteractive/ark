@@ -14,7 +14,6 @@ class ARK_API GraphicsContext {
 public:
     GraphicsContext() = default;
     GraphicsContext(sp<RenderEngineContext> renderContext, sp<RenderController> renderController);
-    ~GraphicsContext();
 
     static GraphicsContext& mocked();
 

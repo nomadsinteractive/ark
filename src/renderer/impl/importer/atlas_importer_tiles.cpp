@@ -1,6 +1,7 @@
 #include "renderer/impl/importer/atlas_importer_tiles.h"
 
 #include "core/base/bean_factory.h"
+#include "core/base/named_hash.h"
 #include "core/inf/variable.h"
 #include "core/util/math.h"
 #include "core/util/documents.h"
