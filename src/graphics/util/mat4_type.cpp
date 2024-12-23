@@ -15,11 +15,9 @@ namespace ark {
 
 namespace {
 
-class MatrixOperators {
-public:
+struct MatrixOperators {
 
-    class ToM4 {
-    public:
+    struct ToM4 {
         M4 operator()(const M3& m3) const {
             M4 m4 = M4::identity();
             *reinterpret_cast<V3*>(&m4[0]) = *reinterpret_cast<const V3*>(&m3[0]);
@@ -29,17 +27,21 @@ public:
         }
     };
 
-    class Translate {
-    public:
-        M4 operator()(const M4& v1, const V3& v2) const {
-            return MatrixUtil::translate(v1, v2);
+    struct Rotate {
+        M4 operator()(const M4& v1, const V4& v2) const {
+            return MatrixUtil::rotate(v1, v2);
         }
     };
 
-    class Rotate {
-    public:
-        M4 operator()(const M4& v1, const V4& v2) const {
-            return MatrixUtil::rotate(v1, v2);
+    struct Scale {
+        M4 operator()(const M4& v1, const V3& v2) const {
+            return MatrixUtil::scale(v1, v2);
+        }
+    };
+
+    struct Translate {
+        M4 operator()(const M4& v1, const V3& v2) const {
+            return MatrixUtil::translate(v1, v2);
         }
     };
 
@@ -58,64 +60,74 @@ M4 Mat4Type::val(const sp<Mat4>& self)
     return self->val();
 }
 
-sp<Mat4> Mat4Type::create(const M4& m)
+sp<Mat4> Mat4Type::create(const M4& other)
 {
-    return sp<Mat4>::make<Mat4Impl>(m);
+    return sp<Mat4>::make<Mat4Impl>(other);
 }
 
 sp<Mat4> Mat4Type::create(sp<Mat3> other)
 {
-    return sp<VariableOP1<M4, M3>>::make(MatrixOperators::ToM4(), std::move(other));
+    return sp<Mat4>::make<VariableOP1<M4, M3>>(MatrixOperators::ToM4(), std::move(other));
 }
 
 sp<Mat4> Mat4Type::create(sp<Mat4> other)
 {
-    return sp<Mat4Impl>::make(std::move(other));
+    return sp<Mat4>::make<Mat4Impl>(std::move(other));
 }
 
 sp<Mat4> Mat4Type::create(const V4& t, const V4& b, const V4& n, const V4& w)
 {
-    return sp<Mat4Impl>::make(t, b, n, w);
+    return sp<Mat4>::make<Mat4Impl>(t, b, n, w);
 }
 
 sp<Mat4> Mat4Type::matmul(sp<Mat4> lvalue, sp<Mat4> rvalue)
 {
-    return sp<VariableOP2<sp<Mat4>, sp<Mat4>, Operators::Mul<M4, M4>>>::make(std::move(lvalue), std::move(rvalue));
+    return sp<Mat4>::make<VariableOP2<sp<Mat4>, sp<Mat4>, Operators::Mul<M4>>>(std::move(lvalue), std::move(rvalue));
 }
 
 sp<Mat4> Mat4Type::matmul(sp<Mat4> lvalue, const M4& rvalue)
 {
-    return sp<VariableOP2<sp<Mat4>, M4, Operators::Mul<M4, M4>>>::make(std::move(lvalue), rvalue);
+    return sp<Mat4>::make<VariableOP2<sp<Mat4>, M4, Operators::Mul<M4>>>(std::move(lvalue), rvalue);
 }
 
 sp<Mat4> Mat4Type::matmul(const M4& lvalue, sp<Mat4> rvalue)
 {
-    return sp<VariableOP2<M4, sp<Mat4>, Operators::Mul<M4, M4>>>::make(std::move(lvalue), rvalue);
+    return sp<Mat4>::make<VariableOP2<M4, sp<Mat4>, Operators::Mul<M4>>>(std::move(lvalue), rvalue);
 }
 
 sp<Vec4> Mat4Type::matmul(sp<Mat4> lvalue, sp<Vec4> rvalue)
 {
-    return sp<VariableOP2<sp<Mat4>, sp<Vec4>, Operators::Mul<M4, V4>>>::make(std::move(lvalue), std::move(rvalue));
+    return sp<Vec4>::make<VariableOP2<sp<Mat4>, sp<Vec4>, Operators::Mul<M4, V4>>>(std::move(lvalue), std::move(rvalue));
 }
 
 sp<Vec4> Mat4Type::matmul(sp<Mat4> lvalue, const V4& rvalue)
 {
-    return sp<VariableOP2<sp<Mat4>, V4, Operators::Mul<M4, V4>>>::make(std::move(lvalue), rvalue);
+    return sp<Vec4>::make<VariableOP2<sp<Mat4>, V4, Operators::Mul<M4, V4>>>(std::move(lvalue), rvalue);
 }
 
 sp<Vec3> Mat4Type::matmul(sp<Mat4> lvalue, sp<Vec3> rvalue)
 {
-    return sp<VariableOP2<sp<Mat4>, sp<Vec3>, Operators::Mul<M4, V3>>>::make(std::move(lvalue), std::move(rvalue));
+    return sp<Vec3>::make<VariableOP2<sp<Mat4>, sp<Vec3>, Operators::Mul<M4, V3>>>(std::move(lvalue), std::move(rvalue));
 }
 
 sp<Vec3> Mat4Type::matmul(sp<Mat4> lvalue, const V3& rvalue)
 {
-    return sp<VariableOP2<sp<Mat4>, V3, Operators::Mul<M4, V3>>>::make(std::move(lvalue), rvalue);
+    return sp<Vec3>::make<VariableOP2<sp<Mat4>, V3, Operators::Mul<M4, V3>>>(std::move(lvalue), rvalue);
 }
 
-sp<Mat4> Mat4Type::identity()
+sp<Mat4> Mat4Type::rotate(sp<Mat4> self, sp<Vec4> quaternion)
 {
-    return sp<Mat4Impl>::make();
+    return sp<Mat4>::make<VariableOP2<sp<Mat4>, sp<Vec4>, MatrixOperators::Rotate>>(std::move(self), std::move(quaternion));
+}
+
+sp<Mat4> Mat4Type::scale(sp<Mat4> self, sp<Vec3> scale)
+{
+    return sp<Mat4>::make<VariableOP2<sp<Mat4>, sp<Vec3>, MatrixOperators::Scale>>(std::move(self), std::move(scale));
+}
+
+sp<Mat4> Mat4Type::translate(sp<Mat4> self, sp<Vec3> translation)
+{
+    return sp<Mat4>::make<VariableOP2<sp<Mat4>, sp<Vec3>, MatrixOperators::Translate>>(std::move(self), std::move(translation));
 }
 
 sp<Mat4> Mat4Type::freeze(const sp<Mat4>& self)
@@ -125,7 +137,7 @@ sp<Mat4> Mat4Type::freeze(const sp<Mat4>& self)
 
 sp<Mat4> Mat4Type::dye(sp<Mat4> self, sp<Boolean> condition, String message)
 {
-    return sp<VariableDyed<M4>>::make(std::move(self), std::move(condition), std::move(message));
+    return sp<Mat4>::make<VariableDyed<M4>>(std::move(self), std::move(condition), std::move(message));
 }
 
 sp<Mat4Impl> Mat4Type::ensureImpl(const sp<Mat4>& self)

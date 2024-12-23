@@ -316,9 +316,9 @@ def create_overloaded_method_type(base_type, **kwargs):
             method._arguments = self._replace_arguments(method.arguments, self._arguments)
             self._overloaded_methods.append(method)
 
-        @staticmethod
-        def _replace_arguments(args1, args2):
+        def _replace_arguments(self, args1: list[GenArgument], args2: list[GenArgument]):
             assert len(args1) == len(args2)
-            return [GenArgument(i.index, i.accept_type, i.default_value, GenArgumentMeta('PyObject*', i.meta.cast_signature, 'O', False, i.has_defvalue or j.has_defvalue), i.str()) for i, j in zip(args1, args2)]
+            assert all(i.argname == j.argname for i, j in zip(args1, args2)), f"Overloaded methods({self.name}) should have the same argument names"
+            return [GenArgument(i.index, i.accept_type, i.default_value, GenArgumentMeta('PyObject*', i.meta.cast_signature, 'O', False, i.has_defvalue or j.has_defvalue), i.str(), i.argname) for i, j in zip(args1, args2)]
 
     return GenOverloadedMethod

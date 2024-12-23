@@ -11,7 +11,7 @@ public:
     struct Stub;
 
 //  [[script::bindings::auto]]
-    Json(const sp<Json>& other = nullptr);
+    Json(const sp<Json>& value = nullptr);
 //  [[script::bindings::auto]]
     Json(const String& value);
 //  [[script::bindings::auto]]

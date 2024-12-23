@@ -15,15 +15,15 @@ public:
     enum Priority {
         PRIORITY_UI = -10,
         PRIORITY_DEFAULT = 0,
-        PHRASE_WIDGET,
-        PHRASE_RENDER_LAYER
+        PRIORITY_UI_BLEND = 10,
+        PRIORITY_UI_TEXT = 20
     };
 
 public:
 //[[script::bindings::constructor]]
-    static sp<Renderer> create(const sp<Renderer>& delegate = nullptr);
+    static sp<Renderer> create(const sp<Renderer>& other = nullptr);
 //[[script::bindings::constructor]]
-    static sp<Renderer> create(const std::vector<sp<Renderer>>& renderers);
+    static sp<Renderer> create(const std::vector<sp<Renderer>>& other);
 
 //[[script::bindings::classmethod]]
     static void addRenderer(const sp<Renderer>& self, const sp<Renderer>& renderer, const Traits& traits);

@@ -178,22 +178,22 @@ sp<Tile> TilemapLayer::getTileByPosition(float x, float y) const
     return getTile(static_cast<uint32_t>(x / _stub->_tileset->tileWidth()), static_cast<uint32_t>(y / _stub->_tileset->tileHeight()));
 }
 
-void TilemapLayer::setTile(uint32_t col, uint32_t row, const sp<RenderObject>& renderObject)
+void TilemapLayer::setTile(uint32_t col, uint32_t row, const sp<RenderObject>& tile)
 {
-    setTile(col, row, nullptr, renderObject);
+    setTile(col, row, nullptr, tile);
 }
 
-void TilemapLayer::setTile(uint32_t col, uint32_t row, int32_t tileId)
+void TilemapLayer::setTile(uint32_t col, uint32_t row, int32_t tile)
 {
-    if(tileId >= 0)
+    if(tile >= 0)
     {
-        const sp<Tile>& tile = _stub->_tileset->getTile(tileId);
-        CHECK(tile, "TileId %d does not exist", tileId);
-        setTile(col, row, tile);
+        const sp<Tile>& t = _stub->_tileset->getTile(tile);
+        CHECK(t, "TileId %d does not exist", tile);
+        setTile(col, row, t);
     }
     else
     {
-        CHECK(tileId == -1, "Illegal negative tileId: %d", tileId);
+        CHECK(tile == -1, "Illegal negative tileId: %d", tile);
         setTile(col, row, nullptr, nullptr);
     }
 }

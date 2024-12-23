@@ -29,7 +29,7 @@ public:
 //  [[script::bindings::classmethod]]
     static void set(const sp<StringVarWrapper>& self, sp<String> value);
 //  [[script::bindings::classmethod]]
-    static void set(const sp<StringVarWrapper>& self, sp<StringVar> delegate);
+    static void set(const sp<StringVarWrapper>& self, sp<StringVar> value);
 
 //  [[script::bindings::classmethod]]
     static sp<StringVar> ifElse(sp<StringVar> self, sp<Boolean> condition, sp<StringVar> negative);
@@ -44,22 +44,22 @@ public:
     static sp<StringVar> format(String format, const Scope& kwargs);
 
 //  [[plugin::builder::by-value]]
-    class DICTIONARY : public Builder<StringVar> {
+    class DICTIONARY final : public Builder<StringVar> {
     public:
         DICTIONARY(BeanFactory&, const String& expr);
 
-        virtual sp<StringVar> build(const Scope& args) override;
+        sp<StringVar> build(const Scope& args) override;
 
     private:
         sp<Builder<String>> _value;
     };
 
 //  [[plugin::builder]]
-    class BUILDER : public Builder<StringVar> {
+    class BUILDER final : public Builder<StringVar> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<StringVar> build(const Scope& args) override;
+        sp<StringVar> build(const Scope& args) override;
 
     private:
         String getValue(const document& manifest) const;

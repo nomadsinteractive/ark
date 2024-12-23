@@ -28,15 +28,15 @@ public:
 //[[script::bindings::property]]
     static sp<Boolean> wrapped(const sp<Boolean>& self);
 
-//[[script::bindings::classmethod]]
+//  [[script::bindings::classmethod]]
     static sp<Boolean> negative(sp<Boolean> self);
 
-//[[script::bindings::classmethod]]
+//  [[script::bindings::classmethod]]
+    static void set(const sp<BooleanWrapper>& self, sp<Boolean> value);
+//  [[script::bindings::classmethod]]
     static void set(const sp<Boolean::Impl>& self, bool value);
-//[[script::bindings::classmethod]]
+//  [[script::bindings::classmethod]]
     static void set(const sp<BooleanWrapper>& self, bool value);
-//[[script::bindings::classmethod]]
-    static void set(const sp<BooleanWrapper>& self, const sp<Boolean>& delegate);
 
 //[[script::bindings::classmethod]]
     static void toggle(const sp<Boolean::Impl>& self);

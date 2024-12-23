@@ -34,11 +34,11 @@ public:
 //  [[script::bindings::map(get)]]
     static Optional<int32_t> subscribe(const sp<IntArray>& self, ptrdiff_t index);
 //  [[script::bindings::map(get)]]
-    static sp<IntArray> subscribe(const sp<IntArray>& self, const Slice& slice);
+    static sp<IntArray> subscribe(const sp<IntArray>& self, const Slice& index);
 //  [[script::bindings::map(set)]]
     static int32_t subscribeAssign(const sp<IntArray>& self, ptrdiff_t index, int32_t value);
 //  [[script::bindings::map(set)]]
-    static int32_t subscribeAssign(const sp<IntArray>& self, const Slice& slice, const std::vector<int32_t>& values);
+    static int32_t subscribeAssign(const sp<IntArray>& self, const Slice& index, const std::vector<int32_t>& value);
 
 //  [[script::bindings::classmethod]]
     static Span toBytes(const sp<IntArray>& self);

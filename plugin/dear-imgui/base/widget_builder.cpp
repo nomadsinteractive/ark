@@ -514,9 +514,9 @@ void WidgetBuilder::inputFloat2(const String& label, const sp<Vec2>& value, cons
     addWidget(sp<InputWithType<V2, Vec2Impl>>::make([format, flags](const char* l, V2* v) { return ImGui::InputFloat2(l, reinterpret_cast<float*>(v), format.c_str(), flags); }, label, value));
 }
 
-void WidgetBuilder::inputFloat3(const String& label, const sp<Size>& size, const String& format, int32_t flags)
+void WidgetBuilder::inputFloat3(const String& label, const sp<Size>& value, const String& format, int32_t flags)
 {
-    inputFloat3(label, size->impl().cast<Vec3>(), format, flags);
+    inputFloat3(label, value->impl().cast<Vec3>(), format, flags);
 }
 
 void WidgetBuilder::inputFloat3(const String& label, const sp<Vec3>& value, const String& format, int32_t flags)
@@ -539,9 +539,9 @@ void WidgetBuilder::sliderFloat2(const String& label, const sp<Vec2>& value, flo
     addWidget(sp<InputWithType<V2, Vec2Impl>>::make([v_min, v_max, format, power](const char* l, V2* v) { return ImGui::SliderFloat2(l, reinterpret_cast<float*>(v), v_min, v_max, format.c_str(), power); }, label, value));
 }
 
-void WidgetBuilder::sliderFloat3(const String& label, const sp<Size>& size, float v_min, float v_max, const String& format, float power)
+void WidgetBuilder::sliderFloat3(const String& label, const sp<Size>& value, float v_min, float v_max, const String& format, float power)
 {
-    sliderFloat3(label, size->impl().cast<Vec3>(), v_min, v_max, format, power);
+    sliderFloat3(label, value->impl().cast<Vec3>(), v_min, v_max, format, power);
 }
 
 void WidgetBuilder::sliderFloat3(const String& label, const sp<Vec3>& value, float v_min, float v_max, const String& format, float power)
@@ -574,9 +574,9 @@ void WidgetBuilder::colorPicker3(const String& label, const sp<Vec3>& value)
     addWidget(sp<InputWithType<V3, Vec3Impl>>::make([](const char* l, V3* v) { return ImGui::ColorPicker3(l, reinterpret_cast<float*>(v)); }, label, value));
 }
 
-void WidgetBuilder::colorPicker4(const String& label, const sp<Color>& color)
+void WidgetBuilder::colorPicker4(const String& label, const sp<Color>& value)
 {
-    addWidget(sp<InputWithType<V4, Vec4Impl>>::make([](const char* l, V4* v) { return ImGui::ColorPicker4(l, reinterpret_cast<float*>(v)); }, label, color->wrapped()));
+    addWidget(sp<InputWithType<V4, Vec4Impl>>::make([](const char* l, V4* v) { return ImGui::ColorPicker4(l, reinterpret_cast<float*>(v)); }, label, value->wrapped()));
 }
 
 void WidgetBuilder::colorPicker4(const String& label, const sp<Vec4>& value)

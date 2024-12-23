@@ -30,11 +30,11 @@ struct Json::Stub {
     nlohmann::json _json;
 };
 
-Json::Json(const sp<Json>& other)
+Json::Json(const sp<Json>& value)
     : _stub(sp<Stub>::make())
 {
-    if(other)
-        _stub->_json = other->_stub->_json;
+    if(value)
+        _stub->_json = value->_stub->_json;
 }
 
 Json::Json(const String& value)

@@ -100,7 +100,7 @@ public:
     sp<Model> getModel(const NamedHash& type) const;
 
 //[[script::bindings::auto]]
-    void importModel(const NamedHash& type, const String& src, sp<Future> future = nullptr);
+    void importModel(const NamedHash& type, const String& manifest, sp<Future> future = nullptr);
 //[[script::bindings::auto]]
     void importModel(const NamedHash& type, const Manifest& manifest, sp<Future> future = nullptr);
 

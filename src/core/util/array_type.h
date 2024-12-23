@@ -15,17 +15,17 @@ namespace ark {
 template<typename T> class ArrayType {
 private:
 
-    class ArraySliced : public Array<T> {
+    class ArraySliced final : public Array<T> {
     public:
         ArraySliced(sp<Array<T>> array, size_t offset, size_t length)
             : _array(std::move(array)), _slice_offset(offset), _slice_length(length) {
         }
 
-        virtual size_t length() override {
+        size_t length() override {
             return _slice_length;
         }
 
-        virtual T* buf() override {
+        T* buf() override {
             return _array->buf() + _slice_offset;
         }
 
@@ -36,17 +36,17 @@ private:
 
     };
 
-    class ArrayWrapper : public Wrapper<Array<T>>, public Array<T>, Implements<ArrayWrapper, Array<T>> {
+    class ArrayWrapper final : public Wrapper<Array<T>>, public Array<T>, Implements<ArrayWrapper, Array<T>> {
     public:
         ArrayWrapper(sp<Array<T>> delegate)
             : Wrapper<Array<T>>(std::move(delegate)) {
         }
 
-        virtual size_t length() override {
+        size_t length() override {
             return this->_wrapped->length();
         }
 
-        virtual T* buf() override {
+        T* buf() override {
             return this->_wrapped->buf();
         }
 

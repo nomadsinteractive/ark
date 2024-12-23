@@ -17,6 +17,7 @@ _BUILDABLE_TYPES = TypeVar('_BUILDABLE_TYPES', 'Arena', 'AudioPlayer', 'Boolean'
 
 
 TYPE_INTEGER = Union[int, "Integer"]
+TYPE_BOOLEAN = Union[bool, 'Boolean']
 TYPE_ENUM = Union[int, 'Enum']
 TYPE_INT_OR_FLOAT = Union[int, float]
 TYPE_NUMERIC = Union[TYPE_INT_OR_FLOAT, 'Numeric']
@@ -1882,6 +1883,11 @@ class Transform(Mat4):
         pass
 
 
+class Transform2D(Transform):
+    def __init__(self, rotation: Optional[TYPE_NUMERIC] = None, scale: Optional[TYPE_VEC2] = None, translation: Optional[TYPE_VEC2] = None):
+        pass
+
+
 class Transform3D(Transform):
     def __init__(self, rotation: Optional[TYPE_VEC4] = None, scale: Optional[TYPE_VEC3] = None, translation: Optional[TYPE_VEC3] = None):
         pass
@@ -2222,7 +2228,7 @@ class EventDispatcher(EventListener):
 
 
 class Glyph:
-    def __init__(self, _type: Union[Integer, int], position: Optional[Vec3] = None, transform: Optional[Transform] = None, varyings: Optional['Varyings'] = None, visible: Optional['Visibility'] = None, disposed: Optional[Disposed] = None):
+    def __init__(self, _type: Union[Integer, int], position: Optional[Vec3] = None, transform: Optional[Transform] = None, varyings: Optional['Varyings'] = None, visible: Optional['Visibility'] = None, discarded: Optional[Discarded] = None):
         pass
 
     @property
@@ -2239,8 +2245,8 @@ class Glyph:
 
 
 class Text:
-    def __init__(self, render_layer: RenderLayer, text: String | str | None = None, glyph_maker: Any = None, text_scale: float = 1.0, letter_spacing: float = 0,
-                 line_height: float = 0, line_indent: float = 0):
+    def __init__(self, render_layer: RenderLayer, text: String | str | None = None, position: Optional[Vec3] = None, layout_param: Optional["LayoutParam"] = None, glyph_maker: Any = None, text_scale: float = 1.0, transform: Optional[Mat4] = None,
+                 letter_spacing: float = 0, line_height: float = 0, line_indent: float = 0):
         pass
 
     @property
@@ -2275,7 +2281,7 @@ class Text:
     def transform(self, transform: Optional[Mat4]):
         pass
 
-    def show(self, discarded: Optional[Boolean] = None):
+    def show(self, discarded: Optional[TYPE_BOOLEAN] = None):
         pass
 
     def set_rich_text(self, text: str, **kwargs):

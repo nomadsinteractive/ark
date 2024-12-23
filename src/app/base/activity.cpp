@@ -101,7 +101,7 @@ void Activity::pushEventListener(sp<EventListener> eventListener, sp<Boolean> di
 
 void Activity::addRenderLayer(sp<Renderer> renderLayer, sp<Boolean> discarded)
 {
-    _render_phrases->add(RendererType::PHRASE_RENDER_LAYER, std::move(renderLayer), std::move(discarded));
+    _render_phrases->add(RendererType::PRIORITY_UI_TEXT, std::move(renderLayer), std::move(discarded));
 }
 
 void Activity::setView(sp<View> view)

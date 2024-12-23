@@ -123,9 +123,9 @@ float Math::atan2(float y, float x)
     return std::atan2(y, x);
 }
 
-sp<Numeric> Math::atan2(const sp<Numeric>& dy, const sp<Numeric>& dx)
+sp<Numeric> Math::atan2(sp<Numeric> y, sp<Numeric> x)
 {
-    return sp<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::Atan2>>::make(dy, dx);
+    return sp<Numeric>::make<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::Atan2>>(std::move(y), std::move(x));
 }
 
 float Math::radians(float degree)

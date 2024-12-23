@@ -177,10 +177,10 @@ sp<Vec2> PyCast::toVec2(PyObject* object)
 
 sp<Vec3> PyCast::toVec3(PyObject* object)
 {
-    if(PyTuple_CheckExact(object) && (PyObject_Length(object) == 2 || PyObject_Length(object) == 3))
+    if(PyTuple_CheckExact(object) && PyObject_Length(object) == 3)
     {
-        PyObject* x, *y, *z = nullptr;
-        if(PyArg_ParseTuple(object, "OO|O", &x, &y, &z))
+        PyObject* x, *y, *z;
+        if(PyArg_ParseTuple(object, "OOO", &x, &y, &z))
             return Vec3Type::create(toNumeric(x).value(), toNumeric(y).value(), toNumeric(z).value());
         PyErr_Clear();
     }

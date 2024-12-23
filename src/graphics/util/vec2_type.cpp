@@ -7,7 +7,6 @@
 #include "core/util/updatable_util.h"
 
 #include "graphics/impl/vec/vec2_impl.h"
-#include "graphics/impl/vec/vec2_with_transform.h"
 
 namespace ark {
 
@@ -62,19 +61,14 @@ sp<Vec2> Vec2Type::create(float x, float y)
     return sp<Vec2Impl>::make(x, y);
 }
 
-sp<Vec2> Vec2Type::transform(const sp<Vec2>& self, const sp<Transform>& transform)
-{
-    return sp<Vec2WithTransform>::make(self, transform);
-}
-
 sp<Vec3> Vec2Type::extend(sp<Vec2> self, sp<Numeric> z)
 {
     return sp<VariableOP2<sp<Vec2>, sp<Numeric>, Operators::Extend<V2, float>>>::make(std::move(self), std::move(z));
 }
 
-sp<Vec4> Vec2Type::extend(sp<Vec2> self, sp<Vec2> zw)
+sp<Vec4> Vec2Type::extend(sp<Vec2> self, sp<Vec2> z)
 {
-    return sp<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::Extend<V2, V2>>>::make(std::move(self), std::move(zw));
+    return sp<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::Extend<V2, V2>>>::make(std::move(self), std::move(z));
 }
 
 sp<Vec2> Vec2Type::fence(sp<Vec2> self, sp<Vec3> plane, sp<Observer> observer)

@@ -153,6 +153,11 @@ sp<Boolean> BooleanType::wrapped(const sp<Boolean>& self)
     return ib ? ib->wrapped() : nullptr;
 }
 
+void BooleanType::set(const sp<BooleanWrapper>& self, sp<Boolean> value)
+{
+    self->set(std::move(value));
+}
+
 void BooleanType::set(const sp<Boolean::Impl>& self, bool value)
 {
     self->set(value);
@@ -161,11 +166,6 @@ void BooleanType::set(const sp<Boolean::Impl>& self, bool value)
 void BooleanType::set(const sp<BooleanWrapper>& self, bool value)
 {
     self->set(value);
-}
-
-void BooleanType::set(const sp<BooleanWrapper>& self, const sp<Boolean>& delegate)
-{
-    self->set(delegate);
 }
 
 void BooleanType::toggle(const sp<Boolean::Impl>& self)

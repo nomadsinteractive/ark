@@ -77,24 +77,24 @@ sp<Integer> IntegerType::create(int32_t value)
     return sp<Integer>::make<IntegerWrapper>(value);
 }
 
-sp<Integer> IntegerType::add(sp<Integer> self, sp<Integer> rvalue)
+sp<Integer> IntegerType::add(sp<Integer> lhs, sp<Integer> rhs)
 {
-    return sp<Integer>::make<VariableOP2<sp<Integer>, sp<Integer>, Operators::Add<int32_t>>>(std::move(self), std::move(rvalue));
+    return sp<Integer>::make<VariableOP2<sp<Integer>, sp<Integer>, Operators::Add<int32_t>>>(std::move(lhs), std::move(rhs));
 }
 
-sp<Integer> IntegerType::sub(sp<Integer> self, sp<Integer> rvalue)
+sp<Integer> IntegerType::sub(sp<Integer> lhs, sp<Integer> rhs)
 {
-    return sp<Integer>::make<VariableOP2<sp<Integer>, sp<Integer>, Operators::Sub<int32_t>>>(std::move(self), std::move(rvalue));
+    return sp<Integer>::make<VariableOP2<sp<Integer>, sp<Integer>, Operators::Sub<int32_t>>>(std::move(lhs), std::move(rhs));
 }
 
-sp<Integer> IntegerType::mul(sp<Integer> self, sp<Integer> rvalue)
+sp<Integer> IntegerType::mul(sp<Integer> lhs, sp<Integer> rhs)
 {
-    return sp<Integer>::make<VariableOP2<sp<Integer>, sp<Integer>, Operators::Mul<int32_t>>>(std::move(self), std::move(rvalue));
+    return sp<Integer>::make<VariableOP2<sp<Integer>, sp<Integer>, Operators::Mul<int32_t>>>(std::move(lhs), std::move(rhs));
 }
 
-sp<Numeric> IntegerType::mul(sp<Integer> self, sp<Numeric> rvalue)
+sp<Numeric> IntegerType::mul(sp<Integer> lhs, sp<Numeric> rhs)
 {
-    return sp<Numeric>::make<VariableOP2<sp<Integer>, sp<Numeric>, Operators::Mul<int32_t, float>>>(std::move(self), std::move(rvalue));
+    return sp<Numeric>::make<VariableOP2<sp<Integer>, sp<Numeric>, Operators::Mul<int32_t, float>>>(std::move(lhs), std::move(rhs));
 }
 
 sp<Vec2> IntegerType::mul(sp<Integer> lhs, sp<Vec2> rhs)
@@ -175,16 +175,6 @@ sp<Boolean> IntegerType::ne(const sp<Integer>& self, const sp<Integer>& other)
 int32_t IntegerType::val(const sp<Integer>& self)
 {
     return self->val();
-}
-
-void IntegerType::setVal(const sp<Integer::Impl>& self, int32_t value)
-{
-    self->set(value);
-}
-
-void IntegerType::setVal(const sp<IntegerWrapper>& self, int32_t value)
-{
-    self->set(value);
 }
 
 sp<Integer> IntegerType::delegate(const sp<Integer>& self)

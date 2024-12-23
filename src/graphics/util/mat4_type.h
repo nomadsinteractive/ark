@@ -15,11 +15,11 @@ namespace ark {
 class ARK_API Mat4Type final {
 public:
 //  [[script::bindings::constructor]]
-    static sp<Mat4> create(const M4& m = {});
-//  [[script::bindings::constructor]]
-    static sp<Mat4> create(sp<Mat3> other);
+    static sp<Mat4> create(const M4& other = M4());
 //  [[script::bindings::constructor]]
     static sp<Mat4> create(sp<Mat4> other);
+//  [[script::bindings::constructor]]
+    static sp<Mat4> create(sp<Mat3> other);
     static sp<Mat4> create(const V4& t, const V4& b, const V4& n, const V4& w);
     static sp<Mat4> create(sp<Vec4> t, sp<Vec4> b, sp<Vec4> n, sp<Vec4> w);
 
@@ -41,8 +41,12 @@ public:
 //  [[script::bindings::operator(@)]]
     static sp<Vec3> matmul(sp<Mat4> lvalue, const V3& rvalue);
 
-//  [[script::bindings::auto]]
-    static sp<Mat4> identity();
+//  [[script::bindings::classmethod]]
+    static sp<Mat4> rotate(sp<Mat4> self, sp<Vec4> quaternion);
+//  [[script::bindings::classmethod]]
+    static sp<Mat4> scale(sp<Mat4> self, sp<Vec3> scale);
+//  [[script::bindings::classmethod]]
+    static sp<Mat4> translate(sp<Mat4> self, sp<Vec3> translation);
 
 //  [[script::bindings::classmethod]]
     static sp<Mat4> freeze(const sp<Mat4>& self);

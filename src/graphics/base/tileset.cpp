@@ -49,10 +49,10 @@ sp<Tile> Tileset::getTile(int32_t id) const
     return iter != _tiles.end() ? iter->second : nullptr;
 }
 
-void Tileset::load(const sp<Readable>& readable)
+void Tileset::load(const sp<Readable>& src)
 {
     DASSERT(_importer);
-    _importer->import(*this, readable);
+    _importer->import(*this, src);
 }
 
 void Tileset::load(const String& src)

@@ -180,7 +180,7 @@ public:
 //  [[script::bindings::auto]]
     static float atan2(float y, float x);
 //  [[script::bindings::auto]]
-    static sp<Numeric> atan2(const sp<Numeric>& dy, const sp<Numeric>& dx);
+    static sp<Numeric> atan2(sp<Numeric> y, sp<Numeric> x);
 //  [[script::bindings::auto]]
     static float radians(float degree);
 

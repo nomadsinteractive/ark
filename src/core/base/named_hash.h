@@ -8,9 +8,9 @@ namespace ark {
 class ARK_API NamedHash final {
 public:
 //  [[script::bindings::auto]]
-    NamedHash(String name);
+    NamedHash(String value);
 //  [[script::bindings::auto]]
-    NamedHash(HashId hash);
+    NamedHash(HashId value);
 
 //  [[script::bindings::operator(index)]]
 //  [[script::bindings::property]]

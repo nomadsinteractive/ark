@@ -21,16 +21,16 @@ struct HashNames {
 
 }
 
-NamedHash::NamedHash(String name)
-    : _hash(name.hash()), _name(std::move(name))
+NamedHash::NamedHash(String value)
+    : _hash(value.hash()), _name(std::move(value))
 {
 #ifdef ARK_FLAG_DEBUG
     Global<HashNames>()->_hash_names[_hash] = _name;
 #endif
 }
 
-NamedHash::NamedHash(HashId hash)
-    : _hash(hash)
+NamedHash::NamedHash(HashId value)
+    : _hash(value)
 {
 }
 

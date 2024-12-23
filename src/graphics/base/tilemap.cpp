@@ -201,9 +201,9 @@ const sp<Storage>& Tilemap::storage() const
     return _storage;
 }
 
-void Tilemap::load(const sp<Readable>& readable)
+void Tilemap::load(const sp<Readable>& src)
 {
-    _storage->import(readable);
+    _storage->import(src);
 }
 
 void Tilemap::load(const String& src)

@@ -131,14 +131,10 @@ public:
 //  [[script::bindings::property]]
     static sp<Vec2> wrapped(const sp<Vec2>& self);
 **/
-
-[[deprecated]]
-//  [[script::bindings::classmethod]]
-    static sp<Vec2> transform(const sp<Vec2>& self, const sp<Transform>& transform);
 //  [[script::bindings::classmethod]]
     static sp<Vec3> extend(sp<Vec2> self, sp<Numeric> z);
 //  [[script::bindings::classmethod]]
-    static sp<Vec4> extend(sp<Vec2> self, sp<Vec2> zw);
+    static sp<Vec4> extend(sp<Vec2> self, sp<Vec2> z);
 //  [[script::bindings::classmethod]]
     static sp<Vec2> fence(sp<Vec2> self, sp<Vec3> plane, sp<Observer> observer);
 //  [[script::bindings::classmethod]]

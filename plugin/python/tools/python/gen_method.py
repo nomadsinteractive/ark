@@ -181,7 +181,7 @@ class GenMethod(object):
             fromcall = 'toPyObject'
         return ['return PyCast::%s(ret);' % fromcall]
 
-    def _gen_parse_tuple_code(self, lines, declares, args):
+    def _gen_parse_tuple_code(self, lines: list[str], declares: list[str], args: list[GenArgument]):
         lines.append(f'\n{INDENT}'.join(declares))
         parse_format = ''.join(i.parse_signature for i in args)
         if parse_format.count('|') > 1:
@@ -192,7 +192,6 @@ class GenMethod(object):
             parse_format = ts[0] + '|' + ''.join(ts[1:])
 
         parse_arg_refnames = ', '.join(f'&arg{i}' for i, j in enumerate(args) if j.parse_signature)
-        # TODO: to all possible methods(only overloaded methods don't support keyword arguments for now, and they should be)
         if self._has_keyword_names() and not self._has_scope_or_traits_argument:
             lines.append(self._make_argname_declares())
             parsestatement = f'''if(!PyBridge::PyArg_ParseTupleAndKeywords(args, kws, "{parse_format}", const_cast<char**>(argnames), {parse_arg_refnames}))

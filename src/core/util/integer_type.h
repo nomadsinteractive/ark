@@ -32,13 +32,13 @@ public:
     static sp<Integer> create(int32_t value);
 
 //  [[script::bindings::operator(+)]]
-    static sp<Integer> add(sp<Integer> self, sp<Integer> rvalue);
+    static sp<Integer> add(sp<Integer> lhs, sp<Integer> rhs);
 //  [[script::bindings::operator(-)]]
-    static sp<Integer> sub(sp<Integer> self, sp<Integer> rvalue);
+    static sp<Integer> sub(sp<Integer> lhs, sp<Integer> rhs);
 //  [[script::bindings::operator(*)]]
-    static sp<Integer> mul(sp<Integer> self, sp<Integer> rvalue);
+    static sp<Integer> mul(sp<Integer> lhs, sp<Integer> rhs);
 //  [[script::bindings::operator(*)]]
-    static sp<Numeric> mul(sp<Integer> self, sp<Numeric> rvalue);
+    static sp<Numeric> mul(sp<Integer> lhs, sp<Numeric> rhs);
 //  [[script::bindings::operator(*)]]
     static sp<Vec2> mul(sp<Integer> lhs, sp<Vec2> rhs);
 //  [[script::bindings::operator(*)]]
@@ -74,10 +74,6 @@ public:
 //[[script::bindings::property]]
     static int32_t val(const sp<Integer>& self);
 //[[script::bindings::property]]
-    static void setVal(const sp<Integer::Impl>& self, int32_t value);
-//[[script::bindings::property]]
-    static void setVal(const sp<IntegerWrapper>& self, int32_t value);
-//[[script::bindings::property]]
     static sp<Integer> delegate(const sp<Integer>& self);
 //[[script::bindings::property]]
     static void setDelegate(const sp<Integer>& self, const sp<Integer>& delegate);
@@ -95,7 +91,7 @@ public:
 //[[script::bindings::classmethod]]
     static void set(const sp<IntegerWrapper>& self, int32_t value);
 //[[script::bindings::classmethod]]
-    static void set(const sp<IntegerWrapper>& self, const sp<Integer>& delegate);
+    static void set(const sp<IntegerWrapper>& self, const sp<Integer>& value);
 
 //[[script::bindings::classmethod]]
     static sp<Integer> wrap(const sp<Integer>& self);

@@ -38,7 +38,7 @@ public:
     const std::vector<sp<TilemapLayer>>& layers() const;
 
 //  [[script::bindings::auto]]
-    void load(const sp<Readable>& readable);
+    void load(const sp<Readable>& src);
 //  [[script::bindings::auto]]
     void load(const String& src);
 
@@ -58,7 +58,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Tilemap> build(const Scope& args) override;
+        sp<Tilemap> build(const Scope& args) override;
 
     private:
         sp<Builder<Tileset>> _tileset;

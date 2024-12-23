@@ -146,9 +146,9 @@ void StringType::set(const sp<StringVarWrapper>& self, sp<String> value)
     self->set(std::move(value));
 }
 
-void StringType::set(const sp<StringVarWrapper>& self, sp<StringVar> delegate)
+void StringType::set(const sp<StringVarWrapper>& self, sp<StringVar> value)
 {
-    self->set(std::move(delegate));
+    self->set(std::move(value));
 }
 
 sp<StringVar> StringType::ifElse(sp<StringVar> self, sp<Boolean> condition, sp<StringVar> negative)

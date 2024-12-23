@@ -53,9 +53,9 @@ sp<Model> ModelBundle::loadModel(int32_t type)
     return ensureModelLayout(type)._model;
 }
 
-void ModelBundle::importModel(const NamedHash& type, const String& src, sp<Future> future)
+void ModelBundle::importModel(const NamedHash& type, const String& manifest, sp<Future> future)
 {
-    importModel(type.hash(), Manifest(src), std::move(future));
+    importModel(type.hash(), Manifest(manifest), std::move(future));
 }
 
 void ModelBundle::importModel(const NamedHash& type, const Manifest& manifest, sp<Future> future)

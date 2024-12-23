@@ -58,9 +58,9 @@ public:
 // [[script::bindings::auto]]
     sp<Tile> getTileByPosition(float x, float y) const;
 // [[script::bindings::auto]]
-    void setTile(uint32_t col, uint32_t row, const sp<RenderObject>& renderObject);
+    void setTile(uint32_t col, uint32_t row, const sp<RenderObject>& tile);
 // [[script::bindings::auto]]
-    void setTile(uint32_t col, uint32_t row, int32_t tileId);
+    void setTile(uint32_t col, uint32_t row, int32_t tile);
 // [[script::bindings::auto]]
     void setTile(uint32_t col, uint32_t row, const sp<Tile>& tile);
 // [[script::bindings::auto]]

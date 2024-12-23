@@ -177,7 +177,7 @@ public:
     bool isHeightMatchParent() const;
 
 //  [[plugin::builder]]
-    class BUILDER : public Builder<LayoutParam> {
+    class BUILDER final : public Builder<LayoutParam> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 

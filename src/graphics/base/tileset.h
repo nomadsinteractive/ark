@@ -31,7 +31,7 @@ public:
     sp<Tile> getTile(int32_t id) const;
 
 //  [[script::bindings::auto]]
-    void load(const sp<Readable>& readable);
+    void load(const sp<Readable>& src);
 //  [[script::bindings::auto]]
     void load(const String& src);
 

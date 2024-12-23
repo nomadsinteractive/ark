@@ -13,15 +13,15 @@
 
 namespace ark {
 
-sp<Renderer> RendererType::create(const sp<Renderer>& delegate)
+sp<Renderer> RendererType::create(const sp<Renderer>& other)
 {
-    return wrap(delegate);
+    return wrap(other);
 }
 
-sp<Renderer> RendererType::create(const std::vector<sp<Renderer>>& renderers)
+sp<Renderer> RendererType::create(const std::vector<sp<Renderer>>& other)
 {
     const sp<RendererPhrase> rendererGroup = sp<RendererPhrase>::make();
-    for(const sp<Renderer>& i : renderers)
+    for(const sp<Renderer>& i : other)
         rendererGroup->addRenderer(i, {});
     return wrap(rendererGroup);
 }
