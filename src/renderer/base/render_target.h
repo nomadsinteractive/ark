@@ -55,7 +55,7 @@ public:
 
     private:
         sp<RenderController> _render_controller;
-        sp<Builder<RendererPhrase>> _renderer;
+        sp<Builder<RenderGroup>> _renderer;
         std::vector<std::pair<sp<Builder<Texture>>, document>> _attachments;
         ClearMask _clear_mask;
         DepthStencilUsage _depth_stencil_usage;

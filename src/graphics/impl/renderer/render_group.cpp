@@ -6,7 +6,7 @@
 
 namespace ark {
 
-struct RendererPhrase::BUILDER::Phrase {
+struct RenderGroup::BUILDER::Phrase {
 
     Phrase(BeanFactory& beanFactory, const document& manifest)
         : _renderer(beanFactory.ensureBuilder<Renderer>(manifest)), _priority(Documents::getAttribute<RendererType::Priority>(manifest, "priority", RendererType::PRIORITY_DEFAULT))
@@ -17,14 +17,14 @@ struct RendererPhrase::BUILDER::Phrase {
     RendererType::Priority _priority;
 };
 
-void RendererPhrase::render(RenderRequest& renderRequest, const V3& position)
+void RenderGroup::render(RenderRequest& renderRequest, const V3& position)
 {
     for(auto& [k, v] : _phrases)
         for(const sp<Renderer>& i : v.update(renderRequest.timestamp()))
             i->render(renderRequest, position);
 }
 
-void RendererPhrase::addRenderer(sp<Renderer> renderer, const Traits& traits)
+void RenderGroup::addRenderer(sp<Renderer> renderer, const Traits& traits)
 {
     ASSERT(renderer);
     const sp<Discarded>& droplet = traits.get<Discarded>();
@@ -33,30 +33,30 @@ void RendererPhrase::addRenderer(sp<Renderer> renderer, const Traits& traits)
     _phrases[phrase].emplace_back(std::move(renderer), droplet, visibility);
 }
 
-void RendererPhrase::add(RendererType::Priority phrase, sp<Renderer> renderer, sp<Boolean> discarded, sp<Boolean> visible)
+void RenderGroup::add(RendererType::Priority phrase, sp<Renderer> renderer, sp<Boolean> discarded, sp<Boolean> visible)
 {
     _phrases[phrase].emplace_back(std::move(renderer), std::move(discarded), std::move(visible));
 }
 
-RendererPhrase::BUILDER::BUILDER(BeanFactory& beanFactory, const document& manifest)
+RenderGroup::BUILDER::BUILDER(BeanFactory& beanFactory, const document& manifest)
     : _phrases(beanFactory.makeBuilderListObject<Phrase>(manifest, constants::RENDERER))
 {
 }
 
-sp<RendererPhrase> RendererPhrase::BUILDER::build(const Scope& args)
+sp<RenderGroup> RenderGroup::BUILDER::build(const Scope& args)
 {
-    sp<RendererPhrase> renderGroup = sp<RendererPhrase>::make();
+    sp<RenderGroup> renderGroup = sp<RenderGroup>::make();
     for(const Phrase& i : _phrases)
         renderGroup->add(i._priority, i._renderer->build(args));
     return renderGroup;
 }
 
-RendererPhrase::BUILDER_RENDERER::BUILDER_RENDERER(BeanFactory& beanFactory, const document& manifest)
+RenderGroup::BUILDER_RENDERER::BUILDER_RENDERER(BeanFactory& beanFactory, const document& manifest)
     : _impl(beanFactory, manifest)
 {
 }
 
-sp<Renderer> RendererPhrase::BUILDER_RENDERER::build(const Scope& args)
+sp<Renderer> RenderGroup::BUILDER_RENDERER::build(const Scope& args)
 {
     return _impl.build(args);
 }

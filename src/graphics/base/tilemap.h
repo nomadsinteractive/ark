@@ -8,7 +8,6 @@
 
 #include "graphics/forwarding.h"
 #include "graphics/base/render_layer.h"
-#include "graphics/inf/renderer.h"
 #include "graphics/inf/render_batch.h"
 
 #include "app/forwarding.h"
@@ -69,13 +68,12 @@ public:
 
 private:
 
-    class Stub : public RenderBatch {
+    class Stub final : public RenderBatch {
     public:
 
-        virtual std::vector<sp<LayerContext>>& snapshot(const RenderRequest& renderRequest) override;
+        std::vector<sp<LayerContext>>& snapshot(const RenderRequest& renderRequest) override;
 
         std::vector<sp<TilemapLayer>> _layers;
-        sp<Scrollable> _scrollable;
         std::vector<sp<LayerContext>> _layer_contexts;
     };
 

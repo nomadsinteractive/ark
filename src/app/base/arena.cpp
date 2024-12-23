@@ -9,7 +9,7 @@
 namespace ark {
 
 struct Arena::Stub {
-    sp<RendererPhrase> _render_phrases;
+    sp<RenderGroup> _render_phrases;
     sp<ResourceLoader> _resource_loader;
     sp<Scope> _scope;
 
@@ -34,7 +34,7 @@ struct Arena::RenderLayerBundle final : BoxBundle {
     sp<Stub> _stub;
 };
 
-Arena::Arena(sp<RendererPhrase> renderPhrases, sp<ResourceLoader> resourceLoader, sp<Scope> args)
+Arena::Arena(sp<RenderGroup> renderPhrases, sp<ResourceLoader> resourceLoader, sp<Scope> args)
     : _stub(sp<Stub>::make(Stub{std::move(renderPhrases), std::move(resourceLoader), std::move(args)}))
 {
 }

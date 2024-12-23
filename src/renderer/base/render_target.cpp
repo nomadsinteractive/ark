@@ -25,7 +25,7 @@ const sp<Resource>& RenderTarget::resource() const
 }
 
 RenderTarget::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _render_controller(resourceLoaderContext->renderController()), _renderer(factory.ensureBuilder<RendererPhrase>(manifest)), _clear_mask(Documents::getAttribute<ClearMask>(manifest, "clear-mask", CLEAR_MASK_ALL)),
+    : _render_controller(resourceLoaderContext->renderController()), _renderer(factory.ensureBuilder<RenderGroup>(manifest)), _clear_mask(Documents::getAttribute<ClearMask>(manifest, "clear-mask", CLEAR_MASK_ALL)),
       _depth_stencil_usage(Documents::getAttribute<DepthStencilUsage>(manifest, "depth-stencil-usage", DEPTH_STENCIL_USAGE_FOR_OUTPUT))
 {
     for(const document& i : manifest->children(constants::TEXTURE))

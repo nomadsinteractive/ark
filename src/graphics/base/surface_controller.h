@@ -26,7 +26,7 @@ public:
 private:
     sp<Allocator::Pool> _allocator_pool;
     sp<OCSQueue<RenderRequest>> _render_requests;
-    RendererPhrase _renderer_phrase;
+    RenderGroup _renderer_phrase;
 };
 
 }

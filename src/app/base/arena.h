@@ -10,7 +10,7 @@ namespace ark {
 
 class ARK_API Arena {
 public:
-    Arena(sp<RendererPhrase> renderPhrases, sp<ResourceLoader> resourceLoader, sp<Scope> args);
+    Arena(sp<RenderGroup> renderPhrases, sp<ResourceLoader> resourceLoader, sp<Scope> args);
 
 //  [[script::bindings::auto]]
     const sp<BoxBundle>& layers() const;

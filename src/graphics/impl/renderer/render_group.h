@@ -12,7 +12,7 @@
 
 namespace ark {
 
-class ARK_API RendererPhrase final : public Renderer, public Renderer::Group {
+class ARK_API RenderGroup final : public Renderer, public Renderer::Group {
 public:
 
     void render(RenderRequest& renderRequest, const V3& position) override;
@@ -21,11 +21,11 @@ public:
     void add(RendererType::Priority phrase, sp<Renderer> renderer, sp<Boolean> discarded = nullptr, sp<Boolean> visible = nullptr);
 
 //  [[plugin::builder]]
-    class BUILDER final : public Builder<RendererPhrase> {
+    class BUILDER final : public Builder<RenderGroup> {
     public:
         BUILDER(BeanFactory& beanFactory, const document& manifest);
 
-        sp<RendererPhrase> build(const Scope& args) override;
+        sp<RenderGroup> build(const Scope& args) override;
 
     private:
         struct Phrase;

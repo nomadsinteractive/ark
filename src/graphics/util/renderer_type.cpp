@@ -20,7 +20,7 @@ sp<Renderer> RendererType::create(const sp<Renderer>& other)
 
 sp<Renderer> RendererType::create(const std::vector<sp<Renderer>>& other)
 {
-    const sp<RendererPhrase> rendererGroup = sp<RendererPhrase>::make();
+    const sp<RenderGroup> rendererGroup = sp<RenderGroup>::make();
     for(const sp<Renderer>& i : other)
         rendererGroup->addRenderer(i, {});
     return wrap(rendererGroup);
@@ -54,6 +54,12 @@ template<> ARK_API RendererType::Priority StringConvert::eval<RendererType::Prio
 {
     if(Strings::isNumeric(expr))
         return static_cast<RendererType::Priority>(Strings::eval<int32_t>(expr));
+    if(expr.startsWith("ui_text"))
+        return RendererType::PRIORITY_UI_TEXT;
+    if(expr.startsWith("ui_blend"))
+        return RendererType::PRIORITY_UI_BLEND;
+    if(expr.startsWith("ui"))
+        return RendererType::PRIORITY_UI;
     return RendererType::PRIORITY_DEFAULT;
 }
 

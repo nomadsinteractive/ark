@@ -2245,7 +2245,7 @@ class Glyph:
 
 
 class Text:
-    def __init__(self, render_layer: RenderLayer, text: String | str | None = None, position: Optional[Vec3] = None, layout_param: Optional["LayoutParam"] = None, glyph_maker: Any = None, text_scale: float = 1.0, transform: Optional[Mat4] = None,
+    def __init__(self, render_layer: RenderLayer, text: String | str | None = None, position: Optional[TYPE_VEC3] = None, layout_param: Optional["LayoutParam"] = None, glyph_maker: Any = None, transform: Optional[Mat4] = None,
                  letter_spacing: float = 0, line_height: float = 0, line_indent: float = 0):
         pass
 

@@ -17,7 +17,7 @@ namespace ark {
 
 class ARK_API Activity final : public EventListener, public Renderer, public Renderer::Group {
 public:
-    Activity(sp<View> view, sp<RendererPhrase> renderGroup, sp<ResourceLoader> resourceLoader);
+    Activity(sp<View> view, sp<RenderGroup> renderGroup, sp<ResourceLoader> resourceLoader);
     ~Activity() override;
 
 //  [[script::bindings::auto]]
@@ -78,7 +78,7 @@ public:
 
 private:
     sp<View> _view;
-    sp<RendererPhrase> _render_phrases;
+    sp<RenderGroup> _render_phrases;
     sp<ResourceLoader> _resource_loader;
     op<EventListenerList> _event_listeners;
 };

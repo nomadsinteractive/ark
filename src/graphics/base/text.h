@@ -17,7 +17,7 @@ namespace ark {
 class ARK_API Text {
 public:
 //  [[script::bindings::auto]]
-    Text(sp<RenderLayer> renderLayer, sp<StringVar> text = nullptr, sp<Vec3> position = nullptr, sp<LayoutParam> layoutParam = nullptr, sp<GlyphMaker> glyphMaker = nullptr, sp<Numeric> textScale = nullptr, sp<Mat4> transform = nullptr, float letterSpacing = 0.0f, float lineHeight = 0.0f, float lineIndent = 0.0f);
+    Text(sp<RenderLayer> renderLayer, sp<StringVar> text = nullptr, sp<Vec3> position = nullptr, sp<LayoutParam> layoutParam = nullptr, sp<GlyphMaker> glyphMaker = nullptr, sp<Mat4> transform = nullptr, float letterSpacing = 0.0f, float lineHeight = 0.0f, float lineIndent = 0.0f);
 
 //  [[script::bindings::property]]
     const std::vector<sp<RenderObject>>& contents() const;
@@ -28,7 +28,7 @@ public:
     void setLayoutParam(sp<LayoutParam> layoutParam);
 
 //  [[script::bindings::property]]
-    const sp<Vec3>& position() const;
+    const SafeVar<Vec3>& position() const;
 //  [[script::bindings::property]]
     void setPosition(sp<Vec3> position);
 
@@ -72,7 +72,6 @@ public:
         SafeBuilder<LayoutParam> _layout_param;
         SafeBuilder<GlyphMaker> _glyph_maker;
         SafeBuilder<Mat4> _transform;
-        SafeBuilder<Numeric> _text_scale;
         SafeBuilder<Numeric> _letter_spacing;
         float _line_height;
         float _line_indent;

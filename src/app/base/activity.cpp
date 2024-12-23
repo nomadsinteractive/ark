@@ -16,7 +16,7 @@
 
 namespace ark {
 
-Activity::Activity(sp<View> view, sp<RendererPhrase> renderGroup, sp<ResourceLoader> resourceLoader)
+Activity::Activity(sp<View> view, sp<RenderGroup> renderGroup, sp<ResourceLoader> resourceLoader)
     : _view(std::move(view)), _render_phrases(std::move(renderGroup)), _resource_loader(std::move(resourceLoader)), _event_listeners(new EventListenerList())
 {
     _view->markAsTopView();
@@ -130,7 +130,7 @@ sp<Activity> Activity::BUILDER::build(const Scope& args)
     sp<ResourceLoader> r1 = _resource_loader.build(args);
     sp<ResourceLoader> resourceLoader = r1 ? std::move(r1) : sp<ResourceLoader>::make(_factory);
     BeanFactory& factory = resourceLoader->beanFactory();
-    sp<Activity> activity = sp<Activity>::make(_root_view->build(args), factory.ensure<RendererPhrase>(_manifest, args) ,std::move(resourceLoader));
+    sp<Activity> activity = sp<Activity>::make(_root_view->build(args), factory.ensure<RenderGroup>(_manifest, args) ,std::move(resourceLoader));
 
     for(const document& i : _manifest->children())
     {
