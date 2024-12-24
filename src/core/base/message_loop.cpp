@@ -7,31 +7,27 @@
 #include "core/impl/executor/executor_this_thread.h"
 #include "core/impl/runnable/runnable_by_function.h"
 #include "core/impl/runnable/runnable_composite.h"
+#include "core/types/safe_var.h"
 
 namespace ark {
 
 class MessageLoop::Task final : public Runnable {
 public:
     Task(sp<Runnable> target, sp<Boolean> canceled, uint64_t nextFireTick, uint32_t interval)
-        : _target(std::move(target)), _canceled(std::move(canceled)), _next_fire_tick(nextFireTick), _interval(interval)
+        : _runnable(std::move(target)), _canceled(std::move(canceled), false), _next_fire_tick(nextFireTick), _interval(interval)
     {
     }
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Task);
 
     void run() override
     {
-        if(_canceled)
-        {
-            if(!_canceled->val())
-                _target->run();
-        }
-        else
-            _target->run();
+        if(!_canceled.val())
+            _runnable->run();
     }
 
     bool isCancelled() const
     {
-        return _canceled ? _canceled->val() : false;
+        return _canceled.val();
     }
 
     uint64_t nextFireTick() const
@@ -49,8 +45,8 @@ public:
     }
 
 private:
-    sp<Runnable> _target;
-    sp<Boolean> _canceled;
+    sp<Runnable> _runnable;
+    SafeVar<Boolean> _canceled;
     uint64_t _next_fire_tick;
     uint32_t _interval;
 };
@@ -92,7 +88,7 @@ uint64_t MessageLoop::pollOnce()
         requestNextTask(std::move(task));
 
     std::vector<sp<Runnable>> scheduled;
-    while(_tasks.size() > 0)
+    while(!_tasks.empty())
         if(Task& front = _tasks.front(); front.nextFireTick() <= now)
         {
             sp<Task> nextTask = _tasks.front();
@@ -104,7 +100,7 @@ uint64_t MessageLoop::pollOnce()
                     nextTask->setNextFireTick(now + nextTask->interval());
                     requestNextTask(nextTask);
                 }
-                scheduled.push_back(std::move(nextTask));
+                scheduled.emplace_back(nextTask);
             }
         }
         else
@@ -112,7 +108,8 @@ uint64_t MessageLoop::pollOnce()
             nextFireTick = front.nextFireTick();
             break;
         }
-    runScheduledTask(std::move(scheduled));
+    if(!scheduled.empty())
+        runScheduledTask(std::move(scheduled));
     return nextFireTick;
 }
 

@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_IMPL_RUNNABLE_RUNNABLE_COMPOSITE_H_
-#define ARK_CORE_IMPL_RUNNABLE_RUNNABLE_COMPOSITE_H_
+#pragma once
 
 #include <vector>
 
@@ -8,16 +7,14 @@
 
 namespace ark {
 
-class RunnableComposite : public Runnable {
+class RunnableComposite final : public Runnable {
 public:
     RunnableComposite(std::vector<sp<Runnable>> composites);
 
-    virtual void run() override;
+    void run() override;
 
 private:
     std::vector<sp<Runnable>> _composites;
 };
 
 }
-
-#endif

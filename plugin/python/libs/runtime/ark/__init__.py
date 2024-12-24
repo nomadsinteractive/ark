@@ -30,7 +30,7 @@ TYPE_FLOAT2 = tuple[float, float]
 TYPE_FLOAT3 = tuple[float, float, float]
 TYPE_FLOAT4 = tuple[float, float, float, float]
 TYPE_M4 = tuple[TYPE_FLOAT4, TYPE_FLOAT4, TYPE_FLOAT4, TYPE_FLOAT4]
-TYPE_NAMED_HASH_ID = Union[int, str]
+TYPE_NAMED_HASH = Union[int, str]
 
 
 def logd(*args):
@@ -1485,10 +1485,10 @@ class ModelBundle:
     def vertex_length(self) -> int:
         return 0
 
-    def get_model(self, t: TYPE_NAMED_HASH_ID) -> Model:
+    def get_model(self, t: TYPE_NAMED_HASH) -> Model:
         pass
 
-    def import_model(self, t: TYPE_NAMED_HASH_ID, manifest: str | Manifest, future: Optional[Future] = None):
+    def import_model(self, t: TYPE_NAMED_HASH, manifest: str | Manifest, future: Optional[Future] = None):
         pass
 
 
@@ -1510,8 +1510,8 @@ class Level:
 
 
 class RenderObject:
-    def __init__(self, t, pos=None, size=None, transform=None, varyings: Optional['Varyings'] = None, visible: Optional['Visibility'] = None, discarded: Optional[Boolean] = None):
-        self._position = pos
+    def __init__(self, type: TYPE_NAMED_HASH, position: Optional[TYPE_VEC3] = None, size: Optional[TYPE_VEC3] = None, transform=None, varyings: Optional['Varyings'] = None, visible: Optional['Visibility'] = None, discarded: Optional[Boolean] = None):
+        self._position = position
         self._size = size
         self._transform = transform
         self._discarded = discarded
@@ -2364,7 +2364,7 @@ class Shape:
     TYPE_BOX = -3
     TYPE_CAPSULE = -4
 
-    def __init__(self, id: TYPE_NAMED_HASH_ID, size: Optional[TYPE_VEC3] = None, origin: Optional[TYPE_VEC3] = None):
+    def __init__(self, id: TYPE_NAMED_HASH, size: Optional[TYPE_VEC3] = None, origin: Optional[TYPE_VEC3] = None):
         pass
 
     @property
@@ -2544,7 +2544,7 @@ class Collider:
     def create_body(self, type_: int | Integer, shape: Optional[Shape], position, rotate=None, disposed: Optional[Boolean] = None) -> Rigidbody:
         pass
 
-    def create_shape(self, shape_id: TYPE_NAMED_HASH_ID, size: Optional[TYPE_VEC3] = None, origin: Optional[TYPE_VEC3] = None) -> Shape:
+    def create_shape(self, shape_id: TYPE_NAMED_HASH, size: Optional[TYPE_VEC3] = None, origin: Optional[TYPE_VEC3] = None) -> Shape:
         pass
 
     def ray_cast(self, ray_from, ray_to, collision_filter: Optional[CollisionFilter] = None) -> List[RayCastManifold]:
