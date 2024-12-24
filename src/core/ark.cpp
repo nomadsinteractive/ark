@@ -63,13 +63,15 @@ namespace {
 Ark* _instance = nullptr;
 std::list<Ark*> _instance_stack;
 
-M4 changeProjectionHandSide(const M4& projection, bool flipx, bool flipy)
+M4 changeProjectionHandSide(const M4& projection, bool flipx, bool flipy, bool flipz)
 {
     M4 flip;
     if(flipx)
-        flip[0] = -1;
+        flip[0] = -1.0f;
     if(flipy)
-        flip[5] = -1;
+        flip[5] = -1.0f;
+    if(flipz)
+        flip[10] = -1.0f;
     return MatrixUtil::mul(flip, projection);
 }
 
@@ -82,7 +84,7 @@ struct CameraDelegateCHS final : Camera::Delegate {
 
     M4 frustum(float left, float right, float bottom, float top, float clipNear, float clipFar) override
     {
-        return changeProjectionHandSide(_delegate->frustum(left, right, bottom, top, clipNear, clipFar), _flipx, _flipy);
+        return changeProjectionHandSide(_delegate->frustum(left, right, bottom, top, clipNear, clipFar), _flipx, _flipy, false);
     }
 
     M4 lookAt(const V3& position, const V3& target, const V3& up) override
@@ -93,12 +95,12 @@ struct CameraDelegateCHS final : Camera::Delegate {
     M4 ortho(float left, float right, float bottom, float top, float clipNear, float clipFar) override
     {
         const M4 m = _delegate->ortho(left, right, bottom, top, clipNear, clipFar);
-        return _flipy ? changeProjectionHandSide(m, false, _flipy) : m;
+        return changeProjectionHandSide(m, false, _flipy, bottom < top && !_flipy);
     }
 
     M4 perspective(float fov, float aspect, float clipNear, float clipFar) override
     {
-        return changeProjectionHandSide(_delegate->perspective(fov, aspect, clipNear, clipFar), _flipx, _flipy);
+        return changeProjectionHandSide(_delegate->perspective(fov, aspect, clipNear, clipFar), _flipx, _flipy, false);
     }
 
     sp<Delegate> _delegate;

@@ -5,13 +5,11 @@
 
 #include "graphics/inf/render_command.h"
 #include "graphics/base/color.h"
-#include "graphics/base/viewport.h"
 
 #include "renderer/base/graphics_context.h"
 #include "renderer/opengl/util/gl_debug.h"
 
 #include "platform/gl/gl.h"
-#include "platform/platform.h"
 #include "renderer/base/render_controller.h"
 #include "renderer/base/render_engine.h"
 
@@ -19,7 +17,7 @@ namespace ark {
 
 namespace {
 
-void _glDebugCallbackProc(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam)
+void glDebugCallbackProc(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam)
 {
     LOGD(message);
 }
@@ -76,7 +74,7 @@ void RenderViewOpenGL::initialize(uint32_t width, uint32_t height)
 {
     LOGD("Width: %d, Height: %d", width, height);
 #if !defined(__APPLE__)
-    glDebugMessageCallback(_glDebugCallbackProc, nullptr);
+    glDebugMessageCallback(glDebugCallbackProc, nullptr);
 #endif
     glViewport(0, 0, static_cast<GLsizei>(width), static_cast<GLsizei>(height));
 
