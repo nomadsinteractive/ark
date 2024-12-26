@@ -80,7 +80,7 @@ public:
     void lookAt(const V3& position, const V3& target, const V3& up);
 
 //  [[script::bindings::auto]]
-    V3 toWorldPosition(float screenX, float screenY, float z) const;
+    sp<Vec3> toWorldPosition(sp<Vec3> screenPosition) const;
 //  [[script::bindings::auto]]
     V3 toViewportPosition(const V3& worldPosition) const;
 //  [[script::bindings::auto]]

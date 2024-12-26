@@ -6,7 +6,6 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
-#include "graphics/base/v4.h"
 #include "graphics/base/mat.h"
 
 namespace ark {
@@ -47,6 +46,9 @@ public:
     static sp<Mat4> scale(sp<Mat4> self, sp<Vec3> scale);
 //  [[script::bindings::classmethod]]
     static sp<Mat4> translate(sp<Mat4> self, sp<Vec3> translation);
+
+//  [[script::bindings::classmethod]]
+    static sp<Mat4> inverse(sp<Mat4> self);
 
 //  [[script::bindings::classmethod]]
     static sp<Mat4> freeze(const sp<Mat4>& self);

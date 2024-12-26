@@ -1,6 +1,7 @@
 #include "graphics/util/mat4_type.h"
 
 #include "core/ark.h"
+#include "core/impl/variable/variable_cached.h"
 #include "core/impl/variable/variable_dyed.h"
 #include "core/impl/variable/variable_op1.h"
 #include "core/impl/variable/variable_op2.h"
@@ -24,6 +25,12 @@ struct MatrixOperators {
             *reinterpret_cast<V3*>(&m4[4]) = *reinterpret_cast<const V3*>(&m3[3]);
             *reinterpret_cast<V3*>(&m4[8]) = *reinterpret_cast<const V3*>(&m3[6]);
             return m4;
+        }
+    };
+
+    struct Inverse {
+        M4 operator()(const M4& matrix) const {
+            return MatrixUtil::inverse(matrix);
         }
     };
 
@@ -128,6 +135,11 @@ sp<Mat4> Mat4Type::scale(sp<Mat4> self, sp<Vec3> scale)
 sp<Mat4> Mat4Type::translate(sp<Mat4> self, sp<Vec3> translation)
 {
     return sp<Mat4>::make<VariableOP2<sp<Mat4>, sp<Vec3>, MatrixOperators::Translate>>(std::move(self), std::move(translation));
+}
+
+sp<Mat4> Mat4Type::inverse(sp<Mat4> self)
+{
+    return sp<Mat4>::make<VariableCached<M4>>(sp<Mat4>::make<VariableOP1<M4>>(MatrixOperators::Inverse(), std::move(self)));
 }
 
 sp<Mat4> Mat4Type::freeze(const sp<Mat4>& self)

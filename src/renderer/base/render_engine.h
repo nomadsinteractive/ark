@@ -76,9 +76,10 @@ public:
     bool isYUp() const;
     bool isViewportFlipped() const;
 
+    V2 toNDC(float viewportX, float viewportY) const;
     V2 toViewportPosition(const V2& position) const;
+
     Rect toRendererRect(const Rect& scissor, Ark::RendererCoordinateSystem cs = Ark::COORDINATE_SYSTEM_DEFAULT) const;
-    V3 toWorldPosition(const M4& vpMatrix, float screenX, float screenY, float z) const;
 
     void onSurfaceCreated();
 

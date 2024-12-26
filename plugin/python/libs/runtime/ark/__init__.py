@@ -928,7 +928,7 @@ class Camera:
     def look_at(self, position: TYPE_VEC3, target: TYPE_VEC3, up: TYPE_VEC3):
         pass
 
-    def to_world_position(self, screen_x: float, screen_y: float, z: float) -> tuple:
+    def to_world_position(self, screen_x: float, screen_y: float, z: float) -> TYPE_FLOAT3:
         pass
 
     def to_viewport_position(self, position: TYPE_VEC3) -> 'Vec3':

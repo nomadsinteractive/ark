@@ -97,6 +97,31 @@ private:
     M4 _matrix;
 };
 
+class WorldPosition final : public Vec3 {
+public:
+    WorldPosition(sp<RenderEngine> renderEngine, sp<Mat4> viewProjectionInverse, sp<Vec3> screenPosition)
+        : _render_engine(std::move(renderEngine)), _view_projecttion_inverse(std::move(viewProjectionInverse)), _screen_position(std::move(screenPosition))
+    {
+    }
+
+    bool update(uint64_t timestamp) override
+    {
+        return UpdatableUtil::update(timestamp, _view_projecttion_inverse, _screen_position);
+    }
+
+    V3 val() override
+    {
+        const V3 pos = _screen_position->val();
+        const V2 ndc = _render_engine->toNDC(pos.x(), pos.y());
+        return MatrixUtil::mul(_view_projecttion_inverse->val(), V3(ndc, pos.z()));
+    }
+
+private:
+    sp<RenderEngine> _render_engine;
+    sp<Mat4> _view_projecttion_inverse;
+    sp<Vec3> _screen_position;
+};
+
 constexpr char sclipNearclipFarPlaneWarning[] = "ClipNear: %.2f, ClipFar: %.2f. Far plane should be further than near plane, and distance to the near plane should be greater than zero.";
 
 }
@@ -161,17 +186,18 @@ void Camera::lookAt(const V3& position, const V3& target, const V3& up)
     _view->set(_delegate->lookAt(position, target, up));
 }
 
+sp<Vec3> Camera::toWorldPosition(sp<Vec3> screenPosition) const
+{
+    sp<Mat4> vpInverse = Mat4Type::inverse(_vp);
+    return sp<Vec3>::make<WorldPosition>(Ark::instance().applicationContext()->renderEngine(), std::move(vpInverse), std::move(screenPosition));
+}
+
 void Camera::lookAt(sp<Vec3> position, sp<Vec3> target, sp<Vec3> up)
 {
     _stub->_position.reset(std::move(position));
     _stub->_target.reset(std::move(target));
     _stub->_up.reset(std::move(up));
     _view->set(sp<Mat4>::make<FrustumMatrixVariable>(_delegate, _stub));
-}
-
-V3 Camera::toWorldPosition(float screenX, float screenY, float z) const
-{
-    return Ark::instance().applicationContext()->renderEngine()->toWorldPosition(_vp->val(), screenX, screenY, z);
 }
 
 V3 Camera::toViewportPosition(const V3& worldPosition) const

@@ -78,15 +78,12 @@ Rect RenderEngine::toRendererRect(const Rect& scissor, Ark::RendererCoordinateSy
     return s;
 }
 
-V3 RenderEngine::toWorldPosition(const M4& vpMatrix, float screenX, float screenY, float z) const
+V2 RenderEngine::toNDC(float viewportX, float viewportY) const
 {
     const Viewport& viewport = _render_context->viewport();
-
-    const float ndcx = (screenX * 2 - viewport.width()) / viewport.width();
-    const float ndcy = (screenY * 2 - viewport.height()) / viewport.height();
-    const M4 vpInverse = MatrixUtil::inverse(vpMatrix);
-    const V4 pos = MatrixUtil::mul(vpInverse, V4(ndcx, isViewportFlipped() ? -ndcy : ndcy, z, 1.0f));
-    return {pos.x() / pos.w(), pos.y() / pos.w(), pos.z() / pos.w()};
+    const float ndcx = (viewportX * 2 - viewport.width()) / viewport.width();
+    const float ndcy = (viewportY * 2 - viewport.height()) / viewport.height();
+    return {ndcx, isViewportFlipped() ? -ndcy : ndcy};
 }
 
 void RenderEngine::onSurfaceCreated()

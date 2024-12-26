@@ -70,11 +70,11 @@ public:
         : _value(std::move(value)) {
     }
 
-    virtual T val() override {
+    T val() override {
         return _value;
     }
 
-    virtual bool update(uint64_t timestamp) override {
+    bool update(uint64_t timestamp) override {
         return doUpdate(timestamp, _value);
     }
 
