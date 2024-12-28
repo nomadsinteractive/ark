@@ -48,7 +48,7 @@ private:
     sp<RenderController> _render_controller;
     sp<TextureBundle> _texture_bundle;
 
-    sp<Boolean::Impl> _disposed;
+    sp<Boolean::Impl> _discarded;
 
 };
 

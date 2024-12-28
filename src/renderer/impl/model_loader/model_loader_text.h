@@ -37,12 +37,6 @@ public:
     };
 
 private:
-    bool resize(uint32_t textureWidth, uint32_t textureHeight);
-
-    void ensureCharacter(int32_t c);
-
-    void reloadTexture();
-    bool prepareOne(int32_t c);
 
     struct AtlasAttachment;
 
@@ -57,7 +51,7 @@ private:
     struct GlyphBundle {
         GlyphBundle(AtlasAttachment& atlasAttachment, sp<Alphabet> alphabet, const Font::TextSize& textSize);
 
-        GlyphModel& ensureGlyphModel(uint64_t timestamp, int32_t c, bool reload);
+        const GlyphModel& ensureGlyphModel(uint64_t timestamp, int32_t c, bool reload);
 
         bool prepareOne(uint64_t timestamp, int32_t c, int32_t ckey);
 

@@ -4,6 +4,7 @@
 #include "core/base/string.h"
 #include "core/base/bean_factory.h"
 #include "core/base/bit_set.h"
+#include "core/base/timestamp.h"
 #include "core/inf/builder.h"
 #include "core/types/safe_builder.h"
 #include "core/types/shared_ptr.h"
@@ -120,23 +121,22 @@ public:
         Type _type;
     };
 
-    class UploaderBitmap : public Uploader {
+    class UploaderBitmap final : public Uploader {
     public:
         UploaderBitmap(sp<Bitmap> bitmap);
 
-        virtual void initialize(GraphicsContext& graphicsContext, Delegate& delegate) override;
+        void initialize(GraphicsContext& graphicsContext, Delegate& delegate) override;
 
     private:
         bitmap _bitmap;
     };
 
     Texture(sp<Delegate> delegate, sp<Size> size, sp<Uploader> uploader, sp<Parameters> parameters);
-    ~Texture() override;
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Texture);
 
-    virtual uint64_t id() override;
-    virtual void upload(GraphicsContext& graphicsContext) override;
-    virtual ResourceRecycleFunc recycle() override;
+    uint64_t id() override;
+    void upload(GraphicsContext& graphicsContext) override;
+    ResourceRecycleFunc recycle() override;
 
     Type type() const;
     Usage usage() const;
@@ -160,22 +160,10 @@ public:
 
     const sp<Uploader>& uploader() const;
 
-public:
-
-//  [[plugin::resource-loader::by-value]]
-    class DICTIONARY : public Builder<Texture> {
-    public:
-        DICTIONARY(BeanFactory& factory, const String& value, const sp<ResourceLoaderContext>& resourceLoaderContext);
-
-        virtual sp<Texture> build(const Scope& args) override;
-
-    private:
-        sp<ResourceLoaderContext> _resource_loader_context;
-        String _src;
-    };
+    bool update(int64_t timestamp) const;
 
 //  [[plugin::resource-loader]]
-    class BUILDER : public Builder<Texture> {
+    class BUILDER final : public Builder<Texture> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
@@ -196,6 +184,8 @@ private:
     sp<Size> _size;
     sp<Uploader> _uploader;
     sp<Parameters> _parameters;
+
+    Timestamp _timestamp;
 };
 
 }

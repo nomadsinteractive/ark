@@ -1,8 +1,6 @@
 #include "renderer/vulkan/base/vk_texture.h"
 
 #include "core/base/string.h"
-#include "core/inf/dictionary.h"
-#include "core/inf/variable.h"
 
 #include "graphics/base/bitmap.h"
 
@@ -27,11 +25,11 @@ void copyBitmap(uint8_t* buf, const Bitmap& bitmap, const bytearray& imagedata, 
         memcpy(buf, imagedata->buf(), imageDataSize);
     else
     {
-        uint32_t steps = bitmap.width() * bitmap.height();
-        uint32_t pixelBytes = bitmap.rowBytes() / bitmap.width();
-        size_t newPixelBytes = imageDataSize / steps;
-        size_t padding = newPixelBytes - pixelBytes;
-        uint8_t* it1 = imagedata->buf();
+        const uint32_t steps = bitmap.width() * bitmap.height();
+        const uint32_t pixelBytes = bitmap.rowBytes() / bitmap.width();
+        const size_t newPixelBytes = imageDataSize / steps;
+        const size_t padding = newPixelBytes - pixelBytes;
+        const uint8_t* it1 = imagedata->buf();
         uint8_t* it2 = buf;
         for(uint32_t i = 0; i < steps; ++i)
         {
@@ -60,7 +58,7 @@ VkImageUsageFlags toTextureUsage(Texture::Usage usage)
 }
 
 VKTexture::VKTexture(sp<Recycler> recycler, sp<VKRenderer> renderer, uint32_t width, uint32_t height, sp<Texture::Parameters> parameters)
-    : Texture::Delegate(parameters->_type), _recycler(std::move(recycler)), _renderer(std::move(renderer)), _width(width), _height(height), _parameters(std::move(parameters)),
+    : Delegate(parameters->_type), _recycler(std::move(recycler)), _renderer(std::move(renderer)), _width(width), _height(height), _parameters(std::move(parameters)),
       _num_faces(_parameters->_type == Texture::TYPE_2D ? 1 : 6), _image(VK_NULL_HANDLE), _memory(VK_NULL_HANDLE), _descriptor{}
 {
 }

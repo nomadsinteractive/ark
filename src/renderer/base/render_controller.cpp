@@ -242,8 +242,8 @@ void RenderController::upload(sp<Resource> resource, UploadStrategy strategy, sp
     if(strategy.has(US_ON_CHANGE))
     {
         CHECK(updatable, "An updatable must be specified using \"on_change\" upload strategy");
-        sp<Boolean> disposed = future ? future->canceled() : sp<Boolean>::make<BooleanByWeakRef<Resource>>(resource, 1);
-        addPreComposeUpdatable(std::move(updatable), std::move(disposed));
+        sp<Boolean> discarded = future ? future->canceled() : sp<Boolean>::make<BooleanByWeakRef<Resource>>(resource, 1);
+        addPreComposeUpdatable(std::move(updatable), std::move(discarded));
     }
     if(strategy != US_ON_CHANGE)
         _uploading_resources.push(UploadingRenderResource(RenderResource(std::move(resource), std::move(future)), strategy, priority));

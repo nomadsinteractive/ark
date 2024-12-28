@@ -36,12 +36,12 @@ private:
 void Observer::notify()
 {
     std::vector<Callback> callbacks = std::move(_callbacks);
-    for(const auto& [func, oneshot, owned, triggerAfter] : callbacks)
+    for(auto& [func, oneshot, owned, triggerAfter] : callbacks)
     {
         if(triggerAfter < 2)
             func->run();
         if(triggerAfter > 1 || !(oneshot || (owned && func.unique())))
-            _callbacks.push_back({func, oneshot, owned, triggerAfter ? triggerAfter - 1 : 0});
+            _callbacks.push_back({std::move(func), oneshot, owned, triggerAfter ? triggerAfter - 1 : 0});
     }
 }
 

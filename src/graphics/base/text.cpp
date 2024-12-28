@@ -330,8 +330,9 @@ float doCreateRichContent(GlyphContents& cm, GlyphMaker& gm, const document& ric
 
 struct Text::Content {
     Content(sp<RenderLayer> renderLayer, sp<StringVar> text, sp<Vec3> position, sp<LayoutParam> layoutParam, sp<GlyphMaker> glyphMaker, sp<Mat4> transform, float letterSpacing, float lineHeight, float lineIndent)
-        : _render_layer(std::move(renderLayer)), _text(text ? std::move(text) : StringType::create()), _position(std::move(position)), _layout_param(std::move(layoutParam)), _glyph_maker(glyphMaker ? std::move(glyphMaker) : sp<GlyphMaker>::make<GlyphMakerSpan>()),
-          _transform(std::move(transform)), _letter_spacing(letterSpacing), _layout_direction(Ark::instance().applicationContext()->renderEngine()->toLayoutDirection(1.0f)), _line_height(lineHeight), _line_indent(lineIndent), _size(sp<Size>::make(0.0f, 0.0f))
+        : _render_layer(std::move(renderLayer)), _text(text ? std::move(text) : StringType::create()), _position(sp<VariableWrapper<V3>>::make(position ? std::move(position) : sp<Vec3>::make<Vec3::Const>(V3(0)))), _layout_param(std::move(layoutParam)),
+          _glyph_maker(glyphMaker ? std::move(glyphMaker) : sp<GlyphMaker>::make<GlyphMakerSpan>()), _transform(std::move(transform)), _letter_spacing(letterSpacing), _layout_direction(Ark::instance().applicationContext()->renderEngine()->toLayoutDirection(1.0f)),
+          _line_height(lineHeight), _line_indent(lineIndent), _size(sp<Size>::make(0.0f, 0.0f))
     {
         if(_text->val() && !_text->val()->empty())
             setText(Strings::fromUTF8(*_text->val()));
@@ -420,7 +421,7 @@ struct Text::Content {
         if(_layer_context)
             _layer_context->clear();
         else
-            _layer_context = _render_layer->makeLayerContext(nullptr, _position.wrapped(), nullptr, nullptr);
+            _layer_context = _render_layer->makeLayerContext(nullptr, _position, nullptr, nullptr);
 
         Layout::Hierarchy hierarchy = makeHierarchy();
         DASSERT(_render_objects.size() == hierarchy._child_nodes.size());
@@ -462,7 +463,7 @@ struct Text::Content {
 
     sp<RenderLayer> _render_layer;
     sp<StringVar> _text;
-    SafeVar<Vec3> _position;
+    sp<VariableWrapper<V3>> _position;
     sp<LayoutParam> _layout_param;
     sp<GlyphMaker> _glyph_maker;
     sp<Mat4> _transform;
@@ -525,14 +526,14 @@ void Text::setLayoutParam(sp<LayoutParam> layoutParam)
     _content->_timestamp.markDirty();
 }
 
-const SafeVar<Vec3>& Text::position() const
+sp<Vec3> Text::position() const
 {
     return _content->_position;
 }
 
 void Text::setPosition(sp<Vec3> position)
 {
-    _content->_position.reset(std::move(position));
+    _content->_position->set(std::move(position));
 }
 
 const sp<Mat4>& Text::transform() const

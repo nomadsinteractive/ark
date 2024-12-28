@@ -128,10 +128,10 @@ public:
 
     sp<RenderCommandComposer> makeDrawElementsIncremental(sp<Model> model) const;
 
-    template<typename T> sp<Variable<T>> synchronize(sp<Variable<T>> delegate, sp<Boolean> disposed) {
+    template<typename T> sp<Variable<T>> synchronize(sp<Variable<T>> delegate, sp<Boolean> discarded) {
         const sp<UpdatableSynchronized<T>> s = sp<UpdatableSynchronized<T>>::make(std::move(delegate));
         const sp<Variable<T>>& var = s->synchronized();
-        _on_pre_compose_updatable.emplace_back(s, disposed ? std::move(disposed) : sp<Boolean>::make<BooleanByWeakRef<Variable<T>>>(var, 1));
+        _on_pre_compose_updatable.emplace_back(s, discarded ? std::move(discarded) : sp<Boolean>::make<BooleanByWeakRef<Variable<T>>>(var, 1));
         return var;
     }
 

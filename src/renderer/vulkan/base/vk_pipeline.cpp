@@ -209,9 +209,8 @@ ResourceRecycleFunc VKPipeline::recycle()
 
 void VKPipeline::bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
-    for(const sp<Boolean>& i : _texture_observers)
-        if(i->val())
-            _rebind_needed = true;
+    const PipelineDescriptor& pipelineDescriptor = drawingContext._bindings->pipelineDescriptor();
+    _rebind_needed = shouldRebind(graphicsContext.tick(), pipelineDescriptor) || _rebind_needed;
 
     if(_rebind_needed)
         setupDescriptorSet(graphicsContext, drawingContext._bindings->pipelineDescriptor());
@@ -271,7 +270,7 @@ void VKPipeline::setupDescriptorSetLayout(const PipelineDescriptor& pipelineDesc
     for(const sp<PipelineInput::UBO>& i : pipelineInput.ubos())
     {
         binding = std::max(binding, i->binding());
-        if(shouldBeBinded(i->_stages))
+        if(shouldStageNeedBinded(i->_stages))
         {
             const VkShaderStageFlags stages = i->_stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, Enum::SHADER_STAGE_BIT_COUNT);
             setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, stages, i->binding()));
@@ -280,7 +279,7 @@ void VKPipeline::setupDescriptorSetLayout(const PipelineDescriptor& pipelineDesc
     for(const PipelineInput::SSBO& i : pipelineInput.ssbos())
     {
         binding = std::max(binding, i._binding);
-        if(shouldBeBinded(i._stages))
+        if(shouldStageNeedBinded(i._stages))
         {
             const VkShaderStageFlags stages = i._stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, Enum::SHADER_STAGE_BIT_COUNT);
             setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, stages, i._binding));
@@ -289,11 +288,11 @@ void VKPipeline::setupDescriptorSetLayout(const PipelineDescriptor& pipelineDesc
 
     const uint32_t bindingBase = binding + 1;
     for(const auto& [_binding, _stages] : pipelineDescriptor.layout()->samplers())
-        if(shouldBeBinded(_stages))
+        if(shouldStageNeedBinded(_stages))
             setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, Enum::SHADER_STAGE_BIT_COUNT), bindingBase + _binding));
 
     for(const auto& [_binding, _stages] : pipelineDescriptor.layout()->images())
-        if(shouldBeBinded(_stages))
+        if(shouldStageNeedBinded(_stages))
             setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, _stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, Enum::SHADER_STAGE_BIT_COUNT), bindingBase + _binding));
 
     const VkDescriptorSetLayoutCreateInfo descriptorLayout = vks::initializers::descriptorSetLayoutCreateInfo(setLayoutBindings.data(), static_cast<uint32_t>(setLayoutBindings.size()));
@@ -318,7 +317,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
     for(const sp<PipelineInput::UBO>& i : pipelineDescriptor.input()->ubos())
     {
         binding = std::max(binding, i->binding());
-        if(shouldBeBinded(i->_stages))
+        if(shouldStageNeedBinded(i->_stages))
         {
             sp<VKBuffer> ubo = sp<VKBuffer>::make(_renderer, _recycler, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
             ubo->uploadBuffer(graphicsContext, sp<UploaderArray<uint8_t>>::make(std::vector<uint8_t>(i->size(), 0)));
@@ -334,7 +333,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
     for(const PipelineInput::SSBO& i : pipelineDescriptor.input()->ssbos())
     {
         binding = std::max(binding, i._binding);
-        if(shouldBeBinded(i._stages))
+        if(shouldStageNeedBinded(i._stages))
         {
             const sp<VKBuffer> sbo = i._buffer.delegate();
             writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
@@ -347,7 +346,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
     const uint32_t bindingBase = binding + 1;
     _texture_observers.clear();
     for(const auto& [i, bindingSet] : pipelineDescriptor.samplers())
-        if(shouldBeBinded(bindingSet._stages))
+        if(shouldStageNeedBinded(bindingSet._stages))
         {
             CHECK_WARN(i, "Pipeline has unbound sampler");
             if(i)
@@ -363,7 +362,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
             }
         }
     for(const auto& [i, bindingSet] : pipelineDescriptor.images())
-        if(shouldBeBinded(bindingSet._stages))
+        if(shouldStageNeedBinded(bindingSet._stages))
         {
             CHECK_WARN(i, "Pipeline has unbound image");
             if(i)
@@ -416,14 +415,14 @@ void VKPipeline::setupGraphicsPipeline(GraphicsContext& graphicsContext, const V
     for(uint32_t i = 0; i < colorAttachmentCount; ++i)
     {
         //TODO: MRT only albedo needs blending for now, what about the others?
-        VkPipelineColorBlendAttachmentState state = vks::initializers::pipelineColorBlendAttachmentState(0xf, i == 0);
-        state.srcAlphaBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
-        state.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-        state.alphaBlendOp = VK_BLEND_OP_SUBTRACT;
-        state.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
-        state.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-        state.colorBlendOp = VK_BLEND_OP_ADD;
-        blendAttachmentStates.push_back(state);
+        VkPipelineColorBlendAttachmentState cbaState = vks::initializers::pipelineColorBlendAttachmentState(0xf, i == 0);
+        cbaState.srcAlphaBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+        cbaState.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+        cbaState.alphaBlendOp = VK_BLEND_OP_SUBTRACT;
+        cbaState.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+        cbaState.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+        cbaState.colorBlendOp = VK_BLEND_OP_ADD;
+        blendAttachmentStates.push_back(cbaState);
     }
     CHECK_WARN(!blendAttachmentStates.empty(), "Graphics pipeline has no color attachment");
     VkPipelineColorBlendStateCreateInfo colorBlendState =
@@ -573,9 +572,24 @@ VkPipelineRasterizationStateCreateInfo VKPipeline::makeRasterizationState() cons
     return vks::initializers::pipelineRasterizationStateCreateInfo(VK_POLYGON_MODE_FILL, VK_CULL_MODE_BACK_BIT, VK_FRONT_FACE_COUNTER_CLOCKWISE, 0);
 }
 
-bool VKPipeline::shouldBeBinded(const ShaderStageSet& stages) const
+bool VKPipeline::shouldStageNeedBinded(const ShaderStageSet& stages) const
 {
     return !_is_compute_pipeline || stages.has(Enum::SHADER_STAGE_BIT_COMPUTE);
+}
+
+bool VKPipeline::shouldRebind(int64_t tick, const PipelineDescriptor& pipelineDescriptor) const
+{
+    bool rebindNeeded = false;
+    for(const auto& [i, bindingSet] : pipelineDescriptor.samplers())
+        if(i->update(tick))
+            rebindNeeded = true;
+    for(const auto& [i, bindingSet] : pipelineDescriptor.images())
+        if(i->update(tick))
+            rebindNeeded = true;
+    for(const sp<Boolean>& i : _texture_observers)
+        if(i->val())
+            rebindNeeded = true;
+    return rebindNeeded;
 }
 
 }

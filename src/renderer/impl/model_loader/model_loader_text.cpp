@@ -16,7 +16,6 @@
 #include "renderer/base/model.h"
 #include "renderer/base/render_controller.h"
 #include "renderer/base/resource_loader_context.h"
-#include "renderer/base/render_engine.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/texture.h"
 #include "renderer/impl/render_command_composer/rcc_draw_elements_incremental.h"
@@ -107,7 +106,7 @@ void ModelLoaderText::GlyphBundle::reload(uint64_t timestamp)
         ensureGlyphModel(timestamp, i, false);
 }
 
-ModelLoaderText::GlyphModel& ModelLoaderText::GlyphBundle::ensureGlyphModel(uint64_t timestamp, int32_t c, bool oneshot)
+const ModelLoaderText::GlyphModel& ModelLoaderText::GlyphBundle::ensureGlyphModel(uint64_t timestamp, int32_t c, bool oneshot)
 {
     const auto iter = _glyphs.find(c);
     if(iter == _glyphs.end())
@@ -126,7 +125,7 @@ ModelLoaderText::GlyphModel& ModelLoaderText::GlyphBundle::ensureGlyphModel(uint
         if(oneshot)
             _atlas_attachment.reloadTexture();
     }
-    ModelLoaderText::GlyphModel& gm = iter == _glyphs.end() ? _glyphs[c] : iter->second;
+    GlyphModel& gm = iter == _glyphs.end() ? _glyphs[c] : iter->second;
     gm._timestamp = timestamp;
     return gm;
 }
@@ -153,7 +152,7 @@ void ModelLoaderText::AtlasAttachment::initialize(uint32_t textureWidth, uint32_
 
 bool ModelLoaderText::AtlasAttachment::resize(uint32_t textureWidth, uint32_t textureHeight)
 {
-    uint64_t timestamp = Ark::instance().appClock()->tick();
+    const uint64_t timestamp = Ark::instance().appClock()->tick();
 
     initialize(textureWidth, textureHeight);
 
@@ -171,7 +170,7 @@ void ModelLoaderText::AtlasAttachment::reloadTexture()
 
     _texture_reload_future = sp<Future>::make();
     sp<Size> size = sp<Size>::make(static_cast<float>(_glyph_bitmap->width()), static_cast<float>(_glyph_bitmap->height()));
-    const sp<Texture> texture = _render_controller->createTexture(size, _atlas.texture()->parameters(), sp<Texture::UploaderBitmap>::make(_glyph_bitmap), RenderController::US_RELOAD, _texture_reload_future);
+    const sp<Texture> texture = _render_controller->createTexture(size, _atlas.texture()->parameters(), sp<Texture::Uploader>::make<Texture::UploaderBitmap>(_glyph_bitmap), RenderController::US_RELOAD, _texture_reload_future);
     _atlas.texture()->setDelegate(texture->delegate(), std::move(size));
 }
 

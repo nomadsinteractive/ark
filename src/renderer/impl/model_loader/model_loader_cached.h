@@ -8,7 +8,7 @@
 
 namespace ark {
 
-class ModelLoaderCached : public ModelLoader {
+class ModelLoaderCached final : public ModelLoader {
 public:
     ModelLoaderCached(sp<ModelLoader> delegate);
 

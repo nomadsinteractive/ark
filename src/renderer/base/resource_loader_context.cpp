@@ -12,14 +12,14 @@ namespace ark {
 ResourceLoaderContext::ResourceLoaderContext(sp<Dictionary<document>> documents, sp<BitmapLoaderBundle> bitmapBundle, sp<BitmapLoaderBundle> bitmapBoundsBundle,
                                              sp<ExecutorThreadPool> executor, sp<RenderController> renderController)
     : _documents(std::move(documents)), _bitmap_bundle(std::move(bitmapBundle)), _bitmap_bounds_bundle(std::move(bitmapBoundsBundle)), _executor_thread_pool(std::move(executor)),
-      _render_controller(std::move(renderController)), _texture_bundle(sp<TextureBundle>::make(_render_controller)), _disposed(sp<Boolean::Impl>::make(false))
+      _render_controller(std::move(renderController)), _texture_bundle(sp<TextureBundle>::make(_render_controller)), _discarded(sp<Boolean::Impl>::make(false))
 {
 }
 
 ResourceLoaderContext::~ResourceLoaderContext()
 {
     LOGD("");
-    _disposed->set(true);
+    _discarded->set(true);
 }
 
 const sp<Dictionary<document>>& ResourceLoaderContext::documents() const
@@ -54,7 +54,7 @@ const sp<TextureBundle>& ResourceLoaderContext::textureBundle() const
 
 sp<Boolean> ResourceLoaderContext::disposed() const
 {
-    return _disposed;
+    return _discarded;
 }
 
 }

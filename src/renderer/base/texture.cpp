@@ -1,6 +1,5 @@
 #include "renderer/base/texture.h"
 
-#include "core/base/enum_map.h"
 #include "core/inf/array.h"
 #include "core/inf/variable.h"
 #include "core/impl/dictionary/dictionary_by_attribute_name.h"
@@ -11,10 +10,8 @@
 #include "graphics/base/bitmap.h"
 #include "graphics/base/size.h"
 
-#include "renderer/base/recycler.h"
 #include "renderer/base/render_controller.h"
 #include "renderer/base/texture_bundle.h"
-#include "renderer/base/graphics_context.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/util/render_util.h"
 
@@ -45,10 +42,6 @@ private:
 
 Texture::Texture(sp<Delegate> delegate, sp<Size> size, sp<Texture::Uploader> uploader, sp<Parameters> parameters)
     : _delegate(std::move(delegate)), _size(std::move(size)), _uploader(std::move(uploader)), _parameters(std::move(parameters))
-{
-}
-
-Texture::~Texture()
 {
 }
 
@@ -105,6 +98,7 @@ const sp<Texture::Parameters>& Texture::parameters() const
 void Texture::setParameters(sp<Parameters> parameters)
 {
     _parameters = std::move(parameters);
+    _timestamp.markDirty();
 }
 
 const sp<Texture::Delegate>& Texture::delegate() const
@@ -112,20 +106,27 @@ const sp<Texture::Delegate>& Texture::delegate() const
     return _delegate;
 }
 
-void Texture::setDelegate(sp<Texture::Delegate> delegate)
+void Texture::setDelegate(sp<Delegate> delegate)
 {
     _delegate = std::move(delegate);
+    _timestamp.markDirty();
 }
 
 void Texture::setDelegate(sp<Delegate> delegate, sp<Size> size)
 {
     _delegate = std::move(delegate);
     _size = std::move(size);
+    _timestamp.markDirty();
 }
 
 const sp<Texture::Uploader>& Texture::uploader() const
 {
     return _uploader;
+}
+
+bool Texture::update(int64_t timestamp) const
+{
+    return _timestamp.update(timestamp);
 }
 
 template<> ARK_API Texture::Type StringConvert::eval<Texture::Type>(const String& str)
@@ -246,16 +247,6 @@ Texture::Delegate::Delegate(Texture::Type type)
 Texture::Type Texture::Delegate::type() const
 {
     return _type;
-}
-
-Texture::DICTIONARY::DICTIONARY(BeanFactory& /*factory*/, const String& value, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _resource_loader_context(resourceLoaderContext), _src(value)
-{
-}
-
-sp<Texture> Texture::DICTIONARY::build(const Scope& /*args*/)
-{
-    return _resource_loader_context->textureBundle()->getTexture(_src);
 }
 
 Texture::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

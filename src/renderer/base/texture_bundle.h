@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_BASE_TEXTURE_BUNDLE_H_
-#define ARK_RENDERER_BASE_TEXTURE_BUNDLE_H_
+#pragma once
 
 #include <map>
 
@@ -9,15 +8,12 @@
 
 #include "renderer/base/texture.h"
 
-#include "renderer/base/texture.h"
-
 namespace ark {
 
 class TextureBundle {
 public:
     TextureBundle(const sp<RenderController>& renderController);
 
-    const sp<Texture>& getTexture(const String& src);
     const sp<Texture>& createTexture(const String& src, const sp<Texture::Parameters>& parameters);
 
 private:
@@ -33,5 +29,3 @@ private:
 };
 
 }
-
-#endif

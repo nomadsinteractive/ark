@@ -28,7 +28,7 @@ public:
     void setLayoutParam(sp<LayoutParam> layoutParam);
 
 //  [[script::bindings::property]]
-    const SafeVar<Vec3>& position() const;
+    sp<Vec3> position() const;
 //  [[script::bindings::property]]
     void setPosition(sp<Vec3> position);
 

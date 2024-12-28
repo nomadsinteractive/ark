@@ -36,16 +36,6 @@ TextureBundle::TextureBundle(const sp<RenderController>& renderController)
 {
 }
 
-const sp<Texture>& TextureBundle::getTexture(const String& src)
-{
-    sp<Texture>& texture = _textures[src];
-    if(texture)
-        return texture;
-
-    texture = doCreateTexture(src, sp<Texture::Parameters>::make(Texture::TYPE_2D));
-    return texture;
-}
-
 const sp<Texture>& TextureBundle::createTexture(const String& src, const sp<Texture::Parameters>& parameters)
 {
     sp<Texture>& texture = _textures[src];
