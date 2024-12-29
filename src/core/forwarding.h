@@ -45,6 +45,7 @@ class Asset;
 class AssetBundle;
 class BeanFactory;
 class BeanFactoryWeakRef;
+class Behavior;
 class Box;
 class Class;
 class ClassHierarychyManager;
@@ -132,7 +133,7 @@ typedef sp<FloatArray> floatarray;
 typedef std::chrono::time_point<std::chrono::steady_clock> TimePoint;
 //TODO: change to std::span when c++20 or above arrives
 typedef std::string_view Span;
-typedef String StringView;
+typedef std::string_view StringView;
 
 typedef Loader<document> DocumentLoader;
 typedef LoaderBundle<document> DocumentLoaderBundle;

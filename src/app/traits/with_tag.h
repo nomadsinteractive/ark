@@ -26,7 +26,6 @@ public:
 
 private:
     Box _tag;
-
     WithDebris _with_debris;
 };
 

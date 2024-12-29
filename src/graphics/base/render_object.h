@@ -29,9 +29,9 @@ public:
     float height();
 
 //  [[script::bindings::property]]
-    void setType(int32_t type);
+    void setType(const NamedHash& type);
 //  [[script::bindings::property]]
-    void setType(const sp<Integer>& type);
+    void setType(sp<Integer> type);
 
 //  [[script::bindings::property]]
     float x() const;
@@ -127,6 +127,18 @@ public:
         BUILDER_RENDERABLE(BeanFactory& factory, const document& manifest);
 
         sp<Renderable> build(const Scope& args) override;
+
+    private:
+        BUILDER _builder_impl;
+    };
+
+
+//  [[plugin::builder("with-render-object")]]
+    class BUILDER_WIRABLE final : public Builder<Wirable> {
+    public:
+        BUILDER_WIRABLE(BeanFactory& factory, const document& manifest);
+
+        sp<Wirable> build(const Scope& args) override;
 
     private:
         BUILDER _builder_impl;

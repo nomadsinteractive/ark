@@ -31,7 +31,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<NarrowPhrase> build(const Scope& args) override;
+        sp<NarrowPhrase> build(const Scope& args) override;
 
     private:
         document _manifest;
@@ -60,27 +60,15 @@ private:
 
     };
 
-    static ShapeCuteC2 makeAABBShapeImpl(const Rect& bounds);
-    static ShapeCuteC2 makeBallShapeImpl(const V2& position, float radius);
-    static ShapeCuteC2 makeBoxShapeImpl(const Rect& bounds);
-    static ShapeCuteC2 makeCapsuleShapeImpl(const V2& p1, const V2& p2, float radius);
-    static ShapeCuteC2 makePolygonShapeImpl(const std::vector<V2>& vertices);
+    static sp<BodyDefCuteC2> makeBodyAABB(const Rect& aabb);
+    static sp<BodyDefCuteC2> makeBodyBall(const V2& position, float radius);
+    static sp<BodyDefCuteC2> makeBodyBox(const Rect& bounds);
+    static sp<BodyDefCuteC2> makeBodyCapsule(const V2& p1, const V2& p2, float radius);
 
-private:
-    sp<BodyDefCuteC2> makeBodyAABB(const Rect& aabb);
-    sp<BodyDefCuteC2> makeBodyBall(const V2& position, float radius);
-    sp<BodyDefCuteC2> makeBodyBox(const Rect& bounds);
-    sp<BodyDefCuteC2> makeBodyCapsule(const V2& p1, const V2& p2, float radius);
-
-    void toRay(const V2& from, const V2& to, c2Ray& ray) const;
     void loadShapes(const document& manifest, float ppu);
-
-    const CollisionFilter& getCollisionFilter(const CollisionFilter& oneFilter, const sp<CollisionFilter>& specifiedFilter);
 
     sp<BodyDefCuteC2> findBodyDef(TypeId shapeId) const;
     sp<BodyDefCuteC2> ensureBodyDef(const BroadPhrase::Candidate& candidate) const;
-
-    std::vector<ShapeCuteC2> toCuteC2Shapes(const ShapeCuteC2& shape) const;
 
 private:
     std::unordered_map<TypeId, sp<BodyDefCuteC2>> _body_defs;

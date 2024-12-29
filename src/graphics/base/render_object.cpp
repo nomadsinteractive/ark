@@ -4,6 +4,7 @@
 #include "core/base/named_hash.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/inf/variable.h"
+#include "core/inf/wirable.h"
 #include "core/util/updatable_util.h"
 #include "graphics/impl/transform/transform_impl.h"
 
@@ -13,6 +14,39 @@
 #include "renderer/base/varyings.h"
 
 namespace ark {
+
+namespace {
+
+class WirableRenderObject final : public Wirable {
+public:
+    WirableRenderObject(sp<RenderObject> renderObject)
+        : _render_object(std::move(renderObject))
+    {
+    }
+
+    TypeId onPoll(WiringContext& context) override
+    {
+        context.addComponent(_render_object);
+        return constants::TYPE_ID_NONE;
+    }
+
+    void onWire(const WiringContext& context) override
+    {
+        if(auto size = context.getComponent<Size>())
+            _render_object->setSize(std::move(size));
+
+        if(auto transform = context.getComponent<Transform>())
+            _render_object->setTransform(std::move(transform));
+
+        if(auto discarded = context.getComponent<Discarded>())
+            _render_object->setDiscarded(std::move(discarded));
+    }
+
+private:
+    sp<RenderObject> _render_object;
+};
+
+}
 
 RenderObject::RenderObject(const NamedHash& type, sp<Vec3> position, sp<Vec3> size, sp<Transform> transform, sp<Varyings> varyings, sp<Boolean> visible, sp<Boolean> discarded)
     : RenderObject(sp<IntegerWrapper>::make(type.hash()), std::move(position), std::move(size), std::move(transform), std::move(varyings), std::move(visible), std::move(discarded))
@@ -57,16 +91,16 @@ const sp<Varyings>& RenderObject::varyings()
     return _varyings;
 }
 
-void RenderObject::setType(int32_t type)
+void RenderObject::setType(const NamedHash& type)
 {
-    _type->set(type);
+    _type->set(type.hash());
     _discarded.reset(nullptr);
     _timestamp.markDirty();
 }
 
-void RenderObject::setType(const sp<Integer>& type)
+void RenderObject::setType(sp<Integer> type)
 {
-    _type->set(type);
+    _type->set(std::move(type));
     _timestamp.markDirty();
 }
 
@@ -264,6 +298,16 @@ RenderObject::BUILDER_RENDERABLE::BUILDER_RENDERABLE(BeanFactory& factory, const
 sp<Renderable> RenderObject::BUILDER_RENDERABLE::build(const Scope& args)
 {
     return _builder_impl.build(args);
+}
+
+RenderObject::BUILDER_WIRABLE::BUILDER_WIRABLE(BeanFactory& factory, const document& manifest)
+    : _builder_impl(factory, manifest)
+{
+}
+
+sp<Wirable> RenderObject::BUILDER_WIRABLE::build(const Scope& args)
+{
+    return sp<Wirable>::make<WirableRenderObject>(_builder_impl.build(args));
 }
 
 }

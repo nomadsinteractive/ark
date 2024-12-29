@@ -184,12 +184,17 @@ String String::toLower() const
 {
     std::string s = _str;
     std::transform(s.begin(), s.end(), s.begin(), ::tolower);
-    return String(s);
+    return {s};
 }
 
 StringView String::toStringView() const
 {
-    return StringView(_str);
+    return {_str.c_str(), _str.size()};
+}
+
+String::operator StringView() const
+{
+    return toStringView();
 }
 
 std::pair<String, Optional<String>> String::cut(char sep) const

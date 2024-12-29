@@ -9,7 +9,6 @@
 #include "core/util/log.h"
 
 #include "graphics/base/size.h"
-#include "graphics/inf/transform.h"
 #include "graphics/base/v2.h"
 
 #include "renderer/base/resource_loader_context.h"
@@ -174,7 +173,7 @@ std::vector<BroadPhrase::Candidate> ColliderImpl::Stub::toBroadPhraseCandidates(
 {
     std::vector<BroadPhrase::Candidate> candidates;
     RefManager& refManager = Global<RefManager>();
-    for(BroadPhrase::CandidateIdType i : candidateSet)
+    for(const BroadPhrase::CandidateIdType i : candidateSet)
     {
         const RigidBodyImpl& rigidBody = refManager.toRef(i).instance<RigidBodyImpl>();
         candidates.emplace_back(rigidBody.toBroadPhraseCandidate());

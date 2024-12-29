@@ -47,6 +47,7 @@ public:
     String toLower() const;
 
     StringView toStringView() const;
+    operator StringView() const;
 
     std::pair<String, Optional<String>> cut(char sep) const;
     std::pair<Optional<String>, String> rcut(char sep) const;

@@ -57,7 +57,7 @@ public:
     {
         return nullptr;
     }
-    Box attr(const Box& obj, const String& name) override
+    Box attr(const Box& obj, StringView name) override
     {
         return nullptr;
     }

@@ -22,7 +22,7 @@ public:
 //  [[script::bindings::property]]
     const sp<Layer>& layer() const;
 
-//  [[plugin::builder("with_layer")]]
+//  [[plugin::builder("with-layer")]]
     class BUILDER final : public Builder<Wirable> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);

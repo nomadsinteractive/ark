@@ -8,7 +8,7 @@
 
 namespace ark::plugin::python {
 
-class CollisionCallbackPython final : public CollisionCallback, public Debris, public Implements<CollisionCallbackPython, CollisionCallback, Debris> {
+class [[deprecated]] CollisionCallbackPython final : public CollisionCallback, public Debris, public Implements<CollisionCallbackPython, CollisionCallback, Debris> {
 public:
     CollisionCallbackPython(const PyInstance& delegate);
 

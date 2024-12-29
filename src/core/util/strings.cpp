@@ -315,9 +315,9 @@ bool utf8ToWStr(const char* utf8Str, size_t maxCount, std::wstring& wideStr)
     return utf8ToUtf16(const_cast<wchar_t*>(wideStr.c_str()), destLen, utf8Str, maxCount);
 }
 
-bool utf8ToWStr(const String& utf8Str, std::wstring& wideStr)
+bool utf8ToWStr(StringView utf8Str, std::wstring& wideStr)
 {
-    return utf8ToWStr(utf8Str.c_str(), utf8Str.length(), wideStr);
+    return utf8ToWStr(utf8Str.data(), utf8Str.length(), wideStr);
 }
 
 //! See the documentation for utf8ToUtf16()
@@ -413,7 +413,7 @@ String Strings::toUTF8(const std::wstring& text)
     return utf8;
 }
 
-std::wstring Strings::fromUTF8(const String& text)
+std::wstring Strings::fromUTF8(StringView text)
 {
     std::wstring wide;
     utf8ToWStr(text, wide);

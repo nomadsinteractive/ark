@@ -14,7 +14,7 @@ public:
     TypeId onPoll(WiringContext& context) override;
     void onWire(const WiringContext& context) override;
 
-//  [[plugin::builder("with_text")]]
+//  [[plugin::builder("with-text")]]
     class BUILDER final : public Builder<Wirable> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);

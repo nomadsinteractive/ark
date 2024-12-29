@@ -2448,7 +2448,7 @@ class Rigidbody:
         return None
 
     @collision_callback.setter
-    def collision_callback(self, collision_callback):
+    def collision_callback(self, collision_callback: "CollisionCallback"):
         pass
 
     @property
@@ -2778,7 +2778,7 @@ class WithTag:
 
 
 class CollisionCallback:
-    def __init__(self, callback_obj):
+    def __init__(self, behavior: Behavior, on_begin_contact: str = 'on_begin_contact', on_end_contact: str = 'on_end_contact'):
         pass
 
 

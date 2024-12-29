@@ -8,15 +8,18 @@
 #include "core/types/ref.h"
 #include "core/util/string_convert.h"
 
+#include "graphics/base/boundaries.h"
+
 #include "app/base/application_context.h"
 #include "app/base/collision_manifold.h"
 #include "app/inf/collision_callback.h"
 #include "app/traits/shape.h"
+#include "app/traits/with_tag.h"
 
 namespace ark {
 
 Rigidbody::Rigidbody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> quaternion, Box impl, sp<Ref> ref, bool isShadow)
-    : _ref(ref ? std::move(ref) : Global<RefManager>()->makeRef(this)), _type(type), _shape(std::move(shape)), _position(std::move(position)), _quaternion(std::move(quaternion)), _impl(std::move(impl)), _is_shadow(isShadow)
+    : _ref(ref ? std::move(ref) : Global<RefManager>()->makeRef(this)), _type(type), _shape(std::move(shape)), _position(std::move(position)), _quaternion(std::move(quaternion), constants::QUATERNION_ONE), _impl(std::move(impl)), _is_shadow(isShadow)
 {
 }
 
@@ -49,6 +52,9 @@ void Rigidbody::onWire(const WiringContext& context)
 
     if(sp<Boolean> discarded = context.getComponent<Discarded>())
         _ref->setDiscarded(std::move(discarded));
+
+    if(sp<WithTag> withTag = context.getComponent<WithTag>())
+        _with_tag = std::move(withTag);
 }
 
 RefId Rigidbody::id() const
@@ -104,6 +110,19 @@ const sp<CollisionFilter>& Rigidbody::collisionFilter() const
 void Rigidbody::setCollisionFilter(sp<CollisionFilter> collisionFilter)
 {
     _collision_filter = std::move(collisionFilter);
+}
+
+Box Rigidbody::tag() const
+{
+    return _with_tag ? nullptr : _with_tag->tag();
+}
+
+void Rigidbody::setTag(Box tag)
+{
+    if(_with_tag)
+        _with_tag->setTag(std::move(tag));
+    else
+        _with_tag = sp<WithTag>::make(std::move(tag));
 }
 
 sp<Rigidbody> Rigidbody::makeShadow() const

@@ -3,6 +3,7 @@
 #include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/inf/debris.h"
+#include "core/inf/interpreter.h"
 #include "core/inf/wirable.h"
 #include "core/traits/with_debris.h"
 #include "core/types/box.h"
@@ -21,7 +22,22 @@ public:
     void traverse(const Visitor& visitor) override;
 
 //  [[script::bindings::getprop]]
-    sp<Runnable> getMethod(const String& name);
+    sp<Runnable> getRunnable(StringView name);
+
+    class Method final : public Debris {
+    public:
+        Method(sp<Interpreter> interpreter, Box function);
+
+        void call(const Interpreter::Arguments& args) const;
+
+        void traverse(const Visitor& visitor) override;
+
+    private:
+        sp<Interpreter> _interpreter;
+        Box _function;
+    };
+
+    sp<Method> getMethod(StringView name);
 
 private:
     sp<Interpreter> _interpreter;

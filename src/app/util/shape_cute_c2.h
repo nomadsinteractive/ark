@@ -21,9 +21,6 @@ public:
 
     ShapeCuteC2 transform(const V2& position, const V4& quaternion) const;
 
-    uint32_t width;
-    uint32_t height;
-
     C2_TYPE t;
     union {
         c2AABB aabb;

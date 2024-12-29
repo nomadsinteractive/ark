@@ -173,7 +173,7 @@ template<> ARK_API String StringConvert::repr<sp<String>>(const sp<String>& val)
 
 template<> ARK_API std::wstring StringConvert::eval<std::wstring>(const String& str)
 {
-    return Strings::fromUTF8(str);
+    return Strings::fromUTF8(str.toStringView());
 }
 
 template<> ARK_API String StringConvert::repr<std::wstring>(const std::wstring& str)

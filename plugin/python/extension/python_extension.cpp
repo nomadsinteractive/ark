@@ -7,14 +7,11 @@
 #include "core/types/global.h"
 #include "core/util/log.h"
 
-#include "python/api.h"
-#include "python/extension/python_extension.h"
 #include "python/extension/py_instance_ref.h"
 #include "python/extension/reference_manager.h"
 
 #include "python/impl/adapter/collision_callback_python.h"
 #include "python/impl/adapter/runnable_python.h"
-#include "python/impl/adapter/event_listener_python.h"
 
 namespace ark::plugin::python {
 

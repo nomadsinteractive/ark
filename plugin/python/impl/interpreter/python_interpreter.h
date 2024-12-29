@@ -17,14 +17,14 @@ namespace ark::plugin::python {
 
 class ARK_PLUGIN_PYTHON_API PythonInterpreter final : public Interpreter, public Implements<PythonInterpreter, Interpreter> {
 public:
-    PythonInterpreter(const String& name, const document& libraries);
+    PythonInterpreter(StringView name, const document& libraries);
     ~PythonInterpreter() override;
 
     void initialize() override;
 
     void execute(const sp<Asset>& source, const Scope& vars) override;
     Box call(const Box& func, const Arguments& args) override;
-    Box attr(const Box& obj, const String& name) override;
+    Box attr(const Box& obj, StringView name) override;
 
     PyObject* arkModule();
     const std::vector<String>& paths() const;

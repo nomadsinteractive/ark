@@ -8,8 +8,6 @@
 #include "core/util/log.h"
 
 #include "graphics/base/rect.h"
-#include "graphics/base/quaternion.h"
-#include "graphics/inf/transform.h"
 #include "graphics/base/v2.h"
 
 #include "app/base/collision_manifold.h"
@@ -17,23 +15,27 @@
 
 namespace ark {
 
-static void translate(float x, float y, const V2& translate, float& ox, float& oy)
+namespace {
+
+void translate(float x, float y, const V2& translate, float& ox, float& oy)
 {
     ox = x + translate.x();
     oy = y + translate.y();
 }
 
+}
+
 ShapeCuteC2::ShapeCuteC2()
-    : width(0), height(0), t(C2_TYPE_NONE)
+    : t(C2_TYPE_NONE)
 {
     memset(&s, 0, sizeof(s));
     memset(&x, 0, sizeof(x));
 }
 
-ShapeCuteC2::ShapeCuteC2(const ShapeCuteC2& other, const V2& translate, const V4& quaternion)
+ShapeCuteC2::ShapeCuteC2(const ShapeCuteC2& other, const V2& translate, const V4& rotation)
     : t(other.t), s(other.s), _collision_filter(other._collision_filter)
 {
-    doTransform(translate, quaternion);
+    doTransform(translate, rotation);
 }
 
 bool ShapeCuteC2::collideManifold(const ShapeCuteC2& other, CollisionManifold& collisionManifold) const
@@ -113,10 +115,10 @@ void ShapeCuteC2::doTransform(const V2& position, const V4& quaternion)
         translate(s.capsule.b.x, s.capsule.b.y, position, s.capsule.b.x, s.capsule.b.y);
         break;
     case C2_TYPE_POLY:
-        DCHECK(quaternion.y() == 0 && quaternion.z() == 0, "Only 2D quaternion supported(cos(t), 0, 0, sin(t))");
+        CHECK(quaternion.y() == 0 && quaternion.z() == 0, "Only 2D quaternion supported(sin(t), 0, 0, cos(t))");
         x.p.x = position.x();
         x.p.y = position.y();
-        x.r.c = quaternion.w() * quaternion.w() - 1.0f;
+        x.r.c = quaternion.x() * quaternion.x() - 1.0f;
         x.r.s = 2.0f * quaternion.x() * quaternion.w();
         break;
     case C2_TYPE_NONE:

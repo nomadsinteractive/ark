@@ -30,7 +30,7 @@ public:
     static std::map<String, String> parseProperties(const String& str, char delim = ';', char equal = ':');
 
     static String toUTF8(const std::wstring& text);
-    static std::wstring fromUTF8(const String& text);
+    static std::wstring fromUTF8(StringView text);
 
     static bool splitFunction(const String& expr, String& func, String& args);
 

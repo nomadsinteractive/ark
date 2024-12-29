@@ -75,7 +75,7 @@ PyInstance getMainModuleAttr(const char* name)
 
 }
 
-PythonInterpreter::PythonInterpreter(const String& name, const document& libraries)
+PythonInterpreter::PythonInterpreter(StringView name, const document& libraries)
     : _name(Strings::fromUTF8(name))
 {
     PyImport_AppendInittab("ark", PyInit_ark);
@@ -176,15 +176,15 @@ Box PythonInterpreter::call(const Box& func, const Interpreter::Arguments& args)
     return Box();
 }
 
-Box PythonInterpreter::attr(const Box& obj, const String& name)
+Box PythonInterpreter::attr(const Box& obj, StringView name)
 {
     DCHECK_THREAD_FLAG();
     if(!obj)
-        return getMainModuleAttr(name.c_str()).toBox();
+        return getMainModuleAttr(name.data()).toBox();
 
     const PyInstance pyobj = PyInstance::steal(PyCast::toPyObject(obj));
     ASSERT(!pyobj.isNullptr());
-    const PyInstance pyattr = pyobj.getAttr(name.c_str());
+    const PyInstance pyattr = pyobj.getAttr(name.data());
     if(PyErr_Occurred())
         PythonExtension::instance().logErr();
     return pyattr.toBox();

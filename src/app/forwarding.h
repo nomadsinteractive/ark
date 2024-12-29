@@ -38,5 +38,6 @@ class Shape;
 class Surface;
 class SurfaceUpdater;
 class View;
+class WithTag;
 
 }

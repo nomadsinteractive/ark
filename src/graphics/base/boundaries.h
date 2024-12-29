@@ -19,6 +19,8 @@ public:
 
 //  [[script::bindings::property]]
     const sp<Vec3>& size() const;
+//  [[script::bindings::property]]
+    const sp<Vec3>& center() const;
 
 //  [[script::bindings::property]]
     const sp<Vec3>& aabbMin() const;
@@ -36,8 +38,9 @@ public:
     bool update(uint64_t timestamp) const;
 
 private:
-    sp<Vec3> _aabb_max;
     sp<Vec3> _aabb_min;
+    sp<Vec3> _aabb_max;
+    sp<Vec3> _center;
     sp<Vec3> _size;
 };
 

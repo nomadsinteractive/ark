@@ -121,6 +121,9 @@ Optional<sp<Runnable>> PyCast::toRunnable(PyObject* object)
 
 sp<CollisionCallback> PyCast::toCollisionCallback(PyObject* object)
 {
+    if(Optional<sp<CollisionCallback>> callbackOpt = toSharedPtrDefault<CollisionCallback>(object))
+        return callbackOpt.value();
+    WARN("Converting Python object to CollisonBack implicitly is deprecated, call CollisionCallback(...) instead");
     return sp<CollisionCallbackPython>::make(PyInstance::borrow(object));
 }
 

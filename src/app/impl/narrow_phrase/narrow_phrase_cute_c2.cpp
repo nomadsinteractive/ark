@@ -14,6 +14,91 @@
 
 namespace ark {
 
+namespace {
+
+const CollisionFilter& getCollisionFilter(const CollisionFilter& oneFilter, const sp<CollisionFilter>& specifiedFilter)
+{
+    return specifiedFilter ? *specifiedFilter : oneFilter;
+}
+
+std::vector<ShapeCuteC2> toCuteC2Shapes(const ShapeCuteC2& shape)
+{
+    return {shape};
+}
+
+void toRayC2(const V2& from, const V2& to, c2Ray& ray)
+{
+    const V2 delta = to - from;
+    ray.p = { from.x(), from.y() };
+    if(delta.hypot() > 0.01f)
+    {
+        const V2 nd = delta.normalize();
+        ray.d = { nd.x(), nd.y() };
+        ray.t = delta.hypot();
+    }
+    else
+    {
+        ray.d = { 0, 1.0f };
+        ray.t = 0.01f;
+    }
+}
+
+ShapeCuteC2 makeAABBShapeImpl(const Rect& bounds)
+{
+    ShapeCuteC2 shape;
+    shape.t = C2_TYPE_AABB;
+    shape.s.aabb.min.x = bounds.left();
+    shape.s.aabb.min.y = bounds.top();
+    shape.s.aabb.max.x = bounds.right();
+    shape.s.aabb.max.y = bounds.bottom();
+    return shape;
+}
+
+ShapeCuteC2 makePolygonShapeImpl(const std::vector<V2>& vertices)
+{
+    CHECK(vertices.size() < C2_MAX_POLYGON_VERTS, "Max polygon vertices exceeded, vertices.size: %d, max size: %d", vertices.size(), C2_MAX_POLYGON_VERTS);
+
+    ShapeCuteC2 shape;
+    c2Poly& poly = shape.s.poly;
+    shape.t = C2_TYPE_POLY;
+
+    for(size_t i = 0; i < vertices.size(); ++i)
+        poly.verts[i] = { vertices.at(i).x(), vertices.at(i).y() };
+    poly.count = static_cast<int32_t>(vertices.size());
+
+    c2MakePoly(&poly);
+    return shape;
+}
+
+ShapeCuteC2 makeBallShapeImpl(const V2& position, float radius)
+{
+    ShapeCuteC2 shape;
+    shape.t = C2_TYPE_CIRCLE;
+    shape.s.circle.p.x = position.x();
+    shape.s.circle.p.y = position.y();
+    shape.s.circle.r = radius;
+    return shape;
+}
+
+ShapeCuteC2 makeBoxShapeImpl(const Rect& bounds)
+{
+    return makePolygonShapeImpl({V2(bounds.left(), bounds.top()), V2(bounds.left(), bounds.bottom()), V2(bounds.right(), bounds.bottom()), V2(bounds.right(), bounds.top())});
+}
+
+ShapeCuteC2 makeCapsuleShapeImpl(const V2& p1, const V2& p2, float radius)
+{
+    ShapeCuteC2 shape;
+    shape.t = C2_TYPE_CAPSULE;
+    shape.s.capsule.a.x = p1.x();
+    shape.s.capsule.a.y = p1.y();
+    shape.s.capsule.b.x = p2.x();
+    shape.s.capsule.b.y = p2.y();
+    shape.s.capsule.r = radius;
+    return shape;
+}
+
+}
+
 NarrowPhraseCuteC2::NarrowPhraseCuteC2(const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
 {
     float ppu = Documents::getAttribute<float>(manifest, "ppu", 1.0f);
@@ -102,7 +187,7 @@ RigidbodyDef NarrowPhraseCuteC2::makeBodyDef(TypeId shapeId, const SafeVar<Vec3>
 NarrowPhrase::Ray NarrowPhraseCuteC2::toRay(const V2& from, const V2& to)
 {
     Ray ray;
-    toRay(from, to, *ray.data<c2Ray>());
+    toRayC2(from, to, *ray.data<c2Ray>());
     return ray;
 }
 
@@ -131,35 +216,13 @@ bool NarrowPhraseCuteC2::rayCastManifold(const Ray& ray, const BroadPhrase::Cand
     return false;
 }
 
-void NarrowPhraseCuteC2::toRay(const V2& from, const V2& to, c2Ray& ray) const
-{
-    const V2 delta = to - from;
-    ray.p = { from.x(), from.y() };
-    if(delta.hypot() > 0.01f)
-    {
-        const V2 nd = delta.normalize();
-        ray.d = { nd.x(), nd.y() };
-        ray.t = delta.hypot();
-    }
-    else
-    {
-        ray.d = { 0, 1.0f };
-        ray.t = 0.01f;
-    }
-}
-
 void NarrowPhraseCuteC2::loadShapes(const document& manifest, float ppu)
 {
     for(const document& i : manifest->children("body"))
     {
-        int32_t shapeId = Documents::ensureAttribute<int32_t>(i, "name");
+        const int32_t shapeId = Documents::ensureAttribute<int32_t>(i, "name");
         _body_defs[shapeId] = sp<BodyDefCuteC2>::make(i, ppu);
     }
-}
-
-const CollisionFilter& NarrowPhraseCuteC2::getCollisionFilter(const CollisionFilter& oneFilter, const sp<CollisionFilter>& specifiedFilter)
-{
-    return specifiedFilter ? *specifiedFilter : oneFilter;
 }
 
 sp<NarrowPhraseCuteC2::BodyDefCuteC2> NarrowPhraseCuteC2::findBodyDef(TypeId shapeId) const
@@ -175,65 +238,6 @@ sp<NarrowPhraseCuteC2::BodyDefCuteC2> NarrowPhraseCuteC2::ensureBodyDef(const Br
     sp<BodyDefCuteC2> bodyDef = findBodyDef(candidate._shape_id);
     CHECK(bodyDef, "Shape %d not found", candidate._shape_id);
     return bodyDef;
-}
-
-std::vector<ShapeCuteC2> NarrowPhraseCuteC2::toCuteC2Shapes(const ShapeCuteC2& shape) const
-{
-    return std::vector<ShapeCuteC2>{ shape };
-}
-
-ShapeCuteC2 NarrowPhraseCuteC2::makeAABBShapeImpl(const Rect& bounds)
-{
-    ShapeCuteC2 shape;
-    shape.t = C2_TYPE_AABB;
-    shape.s.aabb.min.x = bounds.left();
-    shape.s.aabb.min.y = bounds.top();
-    shape.s.aabb.max.x = bounds.right();
-    shape.s.aabb.max.y = bounds.bottom();
-    return shape;
-}
-
-ShapeCuteC2 NarrowPhraseCuteC2::makeBallShapeImpl(const V2& position, float radius)
-{
-    ShapeCuteC2 shape;
-    shape.t = C2_TYPE_CIRCLE;
-    shape.s.circle.p.x = position.x();
-    shape.s.circle.p.y = position.y();
-    shape.s.circle.r = radius;
-    return shape;
-}
-
-ShapeCuteC2 NarrowPhraseCuteC2::makeBoxShapeImpl(const Rect& bounds)
-{
-    return makePolygonShapeImpl({V2(bounds.left(), bounds.top()), V2(bounds.left(), bounds.bottom()), V2(bounds.right(), bounds.bottom()), V2(bounds.right(), bounds.top())});
-}
-
-ShapeCuteC2 NarrowPhraseCuteC2::makeCapsuleShapeImpl(const V2& p1, const V2& p2, float radius)
-{
-    ShapeCuteC2 shape;
-    shape.t = C2_TYPE_CAPSULE;
-    shape.s.capsule.a.x = p1.x();
-    shape.s.capsule.a.y = p1.y();
-    shape.s.capsule.b.x = p2.x();
-    shape.s.capsule.b.y = p2.y();
-    shape.s.capsule.r = radius;
-    return shape;
-}
-
-ShapeCuteC2 NarrowPhraseCuteC2::makePolygonShapeImpl(const std::vector<V2>& vertices)
-{
-    CHECK(vertices.size() < C2_MAX_POLYGON_VERTS, "Max polygon vertices exceeded, vertices.size: %d, max size: %d", vertices.size(), C2_MAX_POLYGON_VERTS);
-
-    ShapeCuteC2 shape;
-    c2Poly& poly = shape.s.poly;
-    shape.t = C2_TYPE_POLY;
-
-    for(size_t i = 0; i < vertices.size(); ++i)
-        poly.verts[i] = { vertices.at(i).x(), vertices.at(i).y() };
-    poly.count = static_cast<int32_t>(vertices.size());
-
-    c2MakePoly(&poly);
-    return shape;
 }
 
 NarrowPhraseCuteC2::BodyDefCuteC2::BodyDefCuteC2(const V2& size, const V2& pivot, std::vector<ShapeCuteC2> shapes)
@@ -252,7 +256,7 @@ NarrowPhraseCuteC2::BodyDefCuteC2::BodyDefCuteC2(const document& manifest, float
         const float bx = Documents::ensureAttribute<float>(manifest, "bx");
         const float by = Documents::ensureAttribute<float>(manifest, "by");
         const float r = Documents::ensureAttribute<float>(manifest, "r");
-        _shapes.push_back(NarrowPhraseCuteC2::makeCapsuleShapeImpl(V2(ax, ay) / ppu, V2(bx, by) / ppu, r / ppu));
+        _shapes.push_back(makeCapsuleShapeImpl(V2(ax, ay) / ppu, V2(bx, by) / ppu, r / ppu));
     }
     else if(shapeType == "polygon")
     {

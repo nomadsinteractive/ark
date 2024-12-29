@@ -54,13 +54,37 @@ void Behavior::traverse(const Visitor& visitor)
     _with_debris.traverse(visitor);
 }
 
-sp<Runnable> Behavior::getMethod(const String& name)
+sp<Runnable> Behavior::getRunnable(StringView name)
 {
     Box function = _interpreter->attr(_delegate, name);
-    CHECK(function, "Object has no attribute \"%s\"", name.c_str());
+    CHECK(function, "Object has no attribute \"%s\"", name.data());
     sp<RunnableImpl> runnable = sp<RunnableImpl>::make(_interpreter, function);
     _with_debris.track(runnable);
     return runnable;
+}
+
+Behavior::Method::Method(sp<Interpreter> interpreter, Box function)
+    : _interpreter(std::move(interpreter)), _function(std::move(function))
+{
+}
+
+void Behavior::Method::call(const Interpreter::Arguments& args) const
+{
+    _interpreter->call(_function, args);
+}
+
+void Behavior::Method::traverse(const Visitor& visitor)
+{
+    visitor(_function);
+}
+
+sp<Behavior::Method> Behavior::getMethod(StringView name)
+{
+    Box function = _interpreter->attr(_delegate, name);
+    CHECK(function, "Object has no attribute \"%s\"", name.data());
+    sp<Method> method = sp<Method>::make(_interpreter, function);
+    _with_debris.track(method);
+    return method;
 }
 
 }

@@ -8,7 +8,6 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
-#include "graphics/base/v4.h"
 
 #include "app/forwarding.h"
 #include "app/inf/collider.h"
@@ -54,6 +53,11 @@ public:
 //  [[script::bindings::property]]
     void setCollisionFilter(sp<CollisionFilter> collisionFilter);
 
+//  [[script::bindings::property]]
+    Box tag() const;
+//  [[script::bindings::property]]
+    void setTag(Box tag);
+
     void onBeginContact(const Rigidbody& rigidBody, const CollisionManifold& manifold) const;
     void onEndContact(const Rigidbody& rigidBody) const;
 
@@ -75,6 +79,7 @@ protected:
 
     sp<CollisionCallback> _collision_callback;
     sp<CollisionFilter> _collision_filter;
+    sp<WithTag> _with_tag;
 };
 
 }

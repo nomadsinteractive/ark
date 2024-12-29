@@ -30,10 +30,8 @@ public:
 
 //  [[script::bindings::property]]
     const sp<Ref>& ref() const;
-
 //  [[script::bindings::auto]]
     void discard();
-
 //  [[script::bindings::auto]]
     bool hasComponent(TypeId typeId) const;
 //  [[script::bindings::auto]]

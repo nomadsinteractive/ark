@@ -23,18 +23,13 @@ TypeId WithText::onPoll(WiringContext& context)
 
 void WithText::onWire(const WiringContext& context)
 {
-    sp<Vec3> position = context.getComponent<Vec3>();
     if(sp<Boundaries> boundaries = context.getComponent<Boundaries>())
-    {
-        if(position)
-            position = Vec3Type::add(position, boundaries->aabbMin());
         _text->setBoundaries(std::move(boundaries));
-    }
-    if(position)
-        _text->setPosition(std::move(position));
+
     if(!_text->layoutParam())
         if(const sp<View> view = context.getComponent<View>())
             _text->setLayoutParam(view->layoutParam());
+
     sp<Mat4> matrix;
     if(const sp<WithTransform> transform = context.getComponent<WithTransform>())
         matrix = transform->transform();

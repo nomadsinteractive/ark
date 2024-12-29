@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/types/shared_ptr.h"
 
@@ -11,9 +12,7 @@ namespace ark {
 class ARK_API CollisionCallbackType final {
 public:
 //  [[script::bindings::constructor]]
-    static sp<CollisionCallback> create(sp<CollisionCallback> value);
-//  [[script::bindings::constructor]]
-    static sp<CollisionCallback> create(String value);
+    static sp<CollisionCallback> create(Behavior& behavior, StringView onBeginContact = "on_begin_contact", StringView onEndContact = "on_end_contact");
 
 };
 
