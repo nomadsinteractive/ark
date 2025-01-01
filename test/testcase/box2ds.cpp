@@ -9,6 +9,7 @@
 #include "core/types/shared_ptr.h"
 #include "core/types/global.h"
 #include "core/util/strings.h"
+#include "core/util/trace.h"
 
 #include "graphics/base/v3.h"
 

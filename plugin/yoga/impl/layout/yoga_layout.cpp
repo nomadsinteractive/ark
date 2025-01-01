@@ -212,7 +212,6 @@ void updateLayoutResult(const Layout::Hierarchy& hierarchy)
                               YGNodeLayoutGetPadding(ygNode, YGEdgeBottom), YGNodeLayoutGetPadding(ygNode, YGEdgeLeft)));
     layoutNode.setOffsetPosition(V2(YGNodeLayoutGetLeft(ygNode), YGNodeLayoutGetTop(ygNode)));
     layoutNode.setSize(V2(YGNodeLayoutGetWidth(ygNode), YGNodeLayoutGetHeight(ygNode)));
-
     for(const Layout::Hierarchy& i : hierarchy._child_nodes)
         updateLayoutResult(i);
 }
@@ -229,7 +228,7 @@ void doUpdate(const Layout::Hierarchy& hierarchy, uint64_t timestamp)
         doUpdate(i, timestamp);
 }
 
-class UpdatableYogaLayout : public Updatable {
+class UpdatableYogaLayout final : public Updatable {
 public:
     UpdatableYogaLayout(Layout::Hierarchy hierarchy)
         : _hierarchy(std::move(hierarchy)), _yg_node(doInflate(Global<YogaConfig>(), _hierarchy, nullptr)) {
@@ -257,10 +256,6 @@ private:
 sp<Updatable> YogaLayout::inflate(Hierarchy hierarchy)
 {
     return sp<Updatable>::make<UpdatableYogaLayout>(std::move(hierarchy));
-}
-
-YogaLayout::BUILDER::BUILDER(BeanFactory& factory)
-{
 }
 
 sp<Layout> YogaLayout::BUILDER::build(const Scope& args)

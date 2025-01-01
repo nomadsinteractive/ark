@@ -9,7 +9,7 @@
 #include "core/types/shared_ptr.h"
 #include "core/util/log.h"
 
-#include "graphics/base/size.h"
+#include "graphics/traits/size.h"
 
 #include "renderer/base/render_engine.h"
 #include "renderer/base/render_engine_context.h"

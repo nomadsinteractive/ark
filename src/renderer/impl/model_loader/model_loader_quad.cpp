@@ -1,6 +1,7 @@
 #include "renderer/impl/model_loader/model_loader_quad.h"
 
 #include "core/base/named_hash.h"
+#include "core/types/global.h"
 
 #include "renderer/base/atlas.h"
 #include "renderer/base/model.h"
@@ -8,7 +9,6 @@
 #include "renderer/base/render_controller.h"
 #include "renderer/impl/render_command_composer/rcc_draw_elements_incremental.h"
 #include "renderer/impl/vertices/vertices_quad.h"
-#include "renderer/util/render_util.h"
 
 namespace ark {
 
@@ -26,7 +26,8 @@ sp<Model> ModelLoaderQuad::loadModel(int32_t type)
 {
     const Atlas::Item& texCoord = _atlas->at(type);
     const V2& size = texCoord._size;
-    return sp<Model>::make(_unit_model->indices(), sp<VerticesQuad>::make(texCoord), sp<Boundaries>::make(V3(0), V3(size, 0), V3(texCoord._pivot, 0)));
+    const V2 aabbMin = -texCoord._pivot;
+    return sp<Model>::make(_unit_model->indices(), sp<VerticesQuad>::make(texCoord), sp<Boundaries>::make(V3(aabbMin, 0), V3(aabbMin + size, 0)));
 }
 
 ModelLoaderQuad::BUILDER::BUILDER(BeanFactory& factory, const String& atlas)

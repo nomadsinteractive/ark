@@ -16,7 +16,7 @@
 #include "core/util/math.h"
 
 #include "graphics/inf/transform.h"
-#include "graphics/base/quaternion.h"
+#include "graphics/traits/quaternion.h"
 
 #include "app/base/application_context.h"
 #include "core/base/resource_loader.h"

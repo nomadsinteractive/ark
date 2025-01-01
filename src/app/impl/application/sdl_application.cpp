@@ -19,7 +19,7 @@
 #include "core/util/math.h"
 
 #include "graphics/base/bitmap.h"
-#include "graphics/base/size.h"
+#include "graphics/traits/size.h"
 #include "graphics/base/surface_controller.h"
 #include "graphics/inf/render_view.h"
 

@@ -5,7 +5,7 @@
 #include "core/util/uploader_type.h"
 #include "core/util/log.h"
 
-#include "graphics/base/size.h"
+#include "graphics/traits/size.h"
 
 #include "renderer/base/pipeline_building_context.h"
 #include "renderer/base/pipeline_descriptor.h"

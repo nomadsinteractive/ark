@@ -10,6 +10,7 @@ public:
 
     bool update(uint64_t timestamp) const;
 
+    void markClean();
     void markDirty();
 
 private:

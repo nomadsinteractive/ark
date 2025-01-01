@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_IMPL_INPUT_INPUT_V4F_H_
-#define ARK_GRAPHICS_IMPL_INPUT_INPUT_V4F_H_
+#pragma once
 
 #include "core/inf/builder.h"
 #include "core/types/shared_ptr.h"
@@ -8,9 +7,9 @@
 
 namespace ark {
 
-class InputV4f {
+class InputV2f {
 public:
-//  [[plugin::builder::by-value("v4f")]]
+//  [[plugin::builder::by-value("v2f")]]
     class BUILDER : public Builder<Uploader> {
     public:
         BUILDER(BeanFactory& factory, const String& value);
@@ -18,10 +17,8 @@ public:
         virtual sp<Uploader> build(const Scope& args) override;
 
     private:
-        sp<Builder<Vec4>> _vec4;
+        sp<Builder<Vec2>> _vec2;
     };
 };
 
 }
-
-#endif

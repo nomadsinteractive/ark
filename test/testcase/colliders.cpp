@@ -12,7 +12,7 @@
 
 #include "graphics/base/rect.h"
 #include "graphics/base/render_object.h"
-#include "graphics/base/quaternion.h"
+#include "graphics/traits/quaternion.h"
 #include "graphics/base/v2.h"
 
 #include "app/base/application_context.h"

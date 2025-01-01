@@ -1,6 +1,5 @@
-#include "graphics/impl/input/input_v2f.h"
+#include "graphics/impl/uploader/input_v2f.h"
 
-#include "core/base/bean_factory.h"
 #include "core/base/bean_factory.h"
 #include "core/impl/uploader/uploader_of_variable.h"
 
@@ -15,7 +14,7 @@ InputV2f::BUILDER::BUILDER(BeanFactory& factory, const String& value)
 
 sp<Uploader> InputV2f::BUILDER::build(const Scope& args)
 {
-    return sp<UploaderOfVariable<V2>>::make(_vec2->build(args));
+    return sp<Uploader>::make<UploaderOfVariable<V2>>(_vec2->build(args));
 }
 
 }

@@ -24,6 +24,7 @@ class Material;
 class MaterialTexture;
 class Model;
 class NamedHash;
+class Position;
 class RenderLayer;
 class RenderLayerSnapshot;
 class LayerContext;

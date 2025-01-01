@@ -17,12 +17,13 @@ class ARK_API ViewHierarchy {
 public:
     ViewHierarchy(sp<Layout> layout);
 
-    bool isIsolatedLayout() const;
+    bool isLayoutTopView() const;
 
     bool updateDescendantLayout(uint64_t timestamp);
-    bool updateLayout(const sp<Layout::Node>& layoutNode, uint64_t timestamp, bool isDirty);
+    bool updateLayout(const sp<Layout::Node>& layoutNode, uint64_t timestamp, bool layoutParamDirty);
 
     const std::vector<sp<View>>& updateChildren();
+    void markHierarchyDirty();
 
     void addView(sp<View> view);
 
@@ -37,6 +38,8 @@ private:
 
     std::vector<sp<View>> _children;
     std::vector<sp<View>> _incremental;
+
+    Timestamp _timestamp;
 };
 
 }

@@ -1,4 +1,4 @@
-#include "resource_loader.h"
+#include "core/base/resource_loader.h"
 
 #include "core/util/documents.h"
 #include "core/util/log.h"
@@ -7,7 +7,7 @@
 #include "renderer/base/resource_loader_context.h"
 
 #include "app/base/application_context.h"
-#include "app/base/activity.h"
+#include "app/base/application_manifest.h"
 
 namespace ark {
 

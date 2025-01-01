@@ -7,6 +7,7 @@
 #include "core/inf/wirable.h"
 #include "core/util/updatable_util.h"
 #include "graphics/impl/transform/transform_impl.h"
+#include "graphics/traits/position.h"
 
 #include "graphics/util/vec3_type.h"
 
@@ -32,6 +33,11 @@ public:
 
     void onWire(const WiringContext& context) override
     {
+        if(sp<Vec3> position = context.getComponent<Position>())
+            _render_object->setPosition(std::move(position));
+        else if(const auto boundaries = context.getComponent<Boundaries>())
+            _render_object->setPosition(boundaries->center());
+
         if(auto size = context.getComponent<Size>())
             _render_object->setSize(std::move(size));
 

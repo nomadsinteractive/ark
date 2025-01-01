@@ -8,7 +8,7 @@
 #include "core/util/log.h"
 
 #include "graphics/base/camera.h"
-#include "graphics/base/size.h"
+#include "graphics/traits/size.h"
 #include "graphics/base/viewport.h"
 #include "graphics/inf/render_view.h"
 

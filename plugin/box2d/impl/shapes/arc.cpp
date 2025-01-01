@@ -4,7 +4,7 @@
 #include "core/inf/variable.h"
 #include "core/util/math.h"
 
-#include "graphics/base/size.h"
+#include "graphics/traits/size.h"
 
 #include "box2d/impl/body_create_info.h"
 

@@ -48,8 +48,8 @@ Boundaries::Boundaries()
 {
 }
 
-Boundaries::Boundaries(sp<Vec3> size)
-    : Boundaries(Vec3Type::mul(size, V3(-0.5f)), Vec3Type::mul(size, 0.5f), std::move(size))
+Boundaries::Boundaries(sp<Vec3> position, sp<Vec3> extent)
+    : _aabb_min(Vec3Type::sub(position, extent)), _aabb_max(Vec3Type::add(position, extent)), _center(std::move(position)), _size(Vec3Type::mul(std::move(extent), 2.0f))
 {
 }
 
@@ -58,18 +58,9 @@ Boundaries::Boundaries(const V3& aabbMin, const V3& aabbMax)
 {
 }
 
-Boundaries::Boundaries(const V3& position, const V3& size, const V3& origin)
-    : Boundaries(position - origin, position - origin + size)
-{
-}
-
-Boundaries::Boundaries(sp<Vec3> aabbMin, sp<Vec3> aabbMax)
-    : _aabb_min(std::move(aabbMin)), _aabb_max(std::move(aabbMax)), _center(Vec3Type::mul(Vec3Type::add(_aabb_min, _aabb_max), 0.5f)), _size(Vec3Type::sub(_aabb_max, _aabb_min))
-{
-}
-
 Boundaries::Boundaries(sp<Vec3> aabbMin, sp<Vec3> aabbMax, sp<Vec3> size)
-    : _aabb_min(std::move(aabbMin)), _aabb_max(std::move(aabbMax)), _center(Vec3Type::mul(Vec3Type::add(_aabb_min, _aabb_max), 0.5f)), _size(std::move(size))
+    : _aabb_min(std::move(aabbMin)), _aabb_max(std::move(aabbMax)), _center(Vec3Type::mul(Vec3Type::add(_aabb_min, _aabb_max), 0.5f)),
+      _size(size ? std::move(size) : Vec3Type::sub(_aabb_max, _aabb_min))
 {
 }
 

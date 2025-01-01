@@ -8,7 +8,7 @@
 #include "core/types/safe_var.h"
 
 #include "graphics/forwarding.h"
-#include "graphics/base/size.h"
+#include "graphics/traits/size.h"
 #include "graphics/inf/renderable.h"
 
 namespace ark {

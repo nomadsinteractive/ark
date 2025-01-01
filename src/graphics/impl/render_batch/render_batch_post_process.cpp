@@ -1,6 +1,7 @@
 #include "render_batch_post_process.h"
 
 #include "core/base/named_hash.h"
+#include "core/types/global.h"
 
 #include "graphics/base/layer_context.h"
 #include "graphics/base/render_object.h"

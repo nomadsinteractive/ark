@@ -10,7 +10,7 @@
 
 #include "graphics/base/bitmap.h"
 #include "graphics/base/material.h"
-#include "graphics/base/size.h"
+#include "graphics/traits/size.h"
 
 #include "renderer/base/animation.h"
 #include "renderer/base/drawing_buffer.h"

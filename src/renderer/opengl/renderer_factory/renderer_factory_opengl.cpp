@@ -6,7 +6,7 @@
 
 #include "graphics/base/bitmap.h"
 #include "graphics/base/camera.h"
-#include "graphics/base/size.h"
+#include "graphics/traits/size.h"
 #include "graphics/base/viewport.h"
 
 #include "renderer/base/render_target.h"

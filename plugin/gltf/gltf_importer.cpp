@@ -7,6 +7,7 @@
 #define JSON_NOEXCEPTION
 #include <tiny_gltf.h>
 
+#include "core/ark.h"
 #include "core/base/constants.h"
 #include "core/inf/readable.h"
 #include "core/util/math.h"

@@ -8,7 +8,7 @@
 #include "core/types/ref.h"
 #include "core/util/log.h"
 
-#include "graphics/base/size.h"
+#include "graphics/traits/size.h"
 #include "graphics/base/v2.h"
 
 #include "renderer/base/resource_loader_context.h"

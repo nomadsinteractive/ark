@@ -8,7 +8,7 @@
 #include "platform/platform.h"
 
 #include "graphics/base/bitmap.h"
-#include "graphics/base/size.h"
+#include "graphics/traits/size.h"
 
 #include "renderer/base/render_target.h"
 #include "renderer/base/graphics_context.h"

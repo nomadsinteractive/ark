@@ -7,8 +7,8 @@
 #include "core/inf/variable.h"
 #include "core/util/boolean_type.h"
 
-#include "graphics/base/quaternion.h"
-#include "graphics/base/size.h"
+#include "graphics/traits/quaternion.h"
+#include "graphics/traits/size.h"
 #include "graphics/base/v3.h"
 
 #include "renderer/base/mesh.h"

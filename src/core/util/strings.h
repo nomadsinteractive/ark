@@ -3,7 +3,6 @@
 #include <map>
 
 #include "core/base/api.h"
-#include "core/base/enum_map.h"
 #include "core/base/string.h"
 #include "core/base/string_buffer.h"
 #include "core/inf/builder.h"

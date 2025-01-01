@@ -5,7 +5,7 @@
 #include "core/util/bean_utils.h"
 #include "core/util/boolean_type.h"
 
-#include "graphics/base/quaternion.h"
+#include "graphics/traits/quaternion.h"
 #include "graphics/base/rect.h"
 #include "graphics/base/v2.h"
 #include "graphics/traits/rotation.h"

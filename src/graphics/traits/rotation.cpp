@@ -5,7 +5,7 @@
 #include "core/impl/variable/variable_dirty.h"
 
 #include "graphics/base/v3.h"
-#include "graphics/base/quaternion.h"
+#include "graphics/traits/quaternion.h"
 #include "graphics/util/vec4_type.h"
 
 namespace ark {

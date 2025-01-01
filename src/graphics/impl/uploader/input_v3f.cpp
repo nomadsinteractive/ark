@@ -1,4 +1,4 @@
-#include "graphics/impl/input/input_v3f.h"
+#include "graphics/impl/uploader/input_v3f.h"
 
 #include "core/inf/variable.h"
 #include "core/base/bean_factory.h"
@@ -15,7 +15,7 @@ FlatableV3f::BUILDER::BUILDER(BeanFactory& factory, const String& value)
 
 sp<Uploader> FlatableV3f::BUILDER::build(const Scope& args)
 {
-    return sp<UploaderOfVariable<V3>>::make(_vec3->build(args));
+    return sp<Uploader>::make<UploaderOfVariable<V3>>(_vec3->build(args));
 }
 
 }

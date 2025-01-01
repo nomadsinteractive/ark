@@ -3,7 +3,7 @@
 #include "core/util/log.h"
 
 #include "graphics/base/bitmap.h"
-#include "graphics/base/size.h"
+#include "graphics/traits/size.h"
 
 #include "renderer/base/texture.h"
 

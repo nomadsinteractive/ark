@@ -4,7 +4,7 @@
 #include "core/util/math.h"
 
 #include "graphics/base/rect.h"
-#include "graphics/base/size.h"
+#include "graphics/traits/size.h"
 
 #include "renderer/base/resource_loader_context.h"
 

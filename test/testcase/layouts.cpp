@@ -2,7 +2,7 @@
 #include "core/base/bean_factory.h"
 
 #include "graphics/base/rect.h"
-#include "graphics/base/size.h"
+#include "graphics/traits/size.h"
 #include "graphics/inf/layout.h"
 #include "graphics/traits/layout_param.h"
 

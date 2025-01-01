@@ -17,7 +17,7 @@
 #include "graphics/base/render_layer.h"
 #include "graphics/base/render_object.h"
 #include "graphics/base/render_request.h"
-#include "graphics/base/size.h"
+#include "graphics/traits/size.h"
 #include "graphics/base/v3.h"
 #include "graphics/impl/glyph_maker/glyph_maker_span.h"
 #include "graphics/impl/renderable/renderable_with_transform.h"

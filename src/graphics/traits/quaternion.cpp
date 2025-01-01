@@ -1,4 +1,4 @@
-#include "graphics/base/quaternion.h"
+#include "graphics/traits/quaternion.h"
 
 #include <glm/gtx/quaternion.hpp>
 

@@ -1,5 +1,7 @@
 #include "renderer/impl/model_loader/model_loader_nine_patch_triangle_strips.h"
 
+#include "core/types/global.h"
+
 #include "renderer/base/atlas.h"
 #include "renderer/base/model.h"
 #include "renderer/base/pipeline_descriptor.h"

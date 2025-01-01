@@ -1,6 +1,6 @@
-#ifndef ARK_PLATFORMS_PLATFORM_H_
-#define ARK_PLATFORMS_PLATFORM_H_
+#pragma once
 
+#include "core/ark.h"
 #include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/util/log.h"
@@ -44,5 +44,3 @@ public:
 };
 
 }
-
-#endif

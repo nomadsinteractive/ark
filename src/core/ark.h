@@ -8,6 +8,7 @@
 #include "core/base/string.h"
 #include "core/collection/traits.h"
 #include "core/types/shared_ptr.h"
+#include "core/util/log.h"
 
 #include "renderer/forwarding.h"
 

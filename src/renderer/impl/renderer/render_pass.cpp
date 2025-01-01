@@ -1,5 +1,6 @@
 #include "renderer/impl/renderer/render_pass.h"
 
+#include "core/base/enum_map.h"
 #include "graphics/base/render_request.h"
 
 #include "renderer/base/drawing_context.h"

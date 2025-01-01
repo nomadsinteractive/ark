@@ -4,6 +4,7 @@
 #include "core/base/api.h"
 #include "core/types/shared_ptr.h"
 
+#include "graphics/forwarding.h"
 #include "graphics/base/v3.h"
 
 namespace ark {
@@ -11,11 +12,9 @@ namespace ark {
 class ARK_API Boundaries {
 public:
     Boundaries();
-    Boundaries(sp<Vec3> size);
-    Boundaries(sp<Vec3> aabbMin, sp<Vec3> aabbMax);
+    Boundaries(sp<Vec3> position, sp<Vec3> extent);
     Boundaries(sp<Vec3> aabbMin, sp<Vec3> aabbMax, sp<Vec3> size);
     Boundaries(const V3& aabbMin, const V3& aabbMax);
-    Boundaries(const V3& position, const V3& size, const V3& origin);
 
 //  [[script::bindings::property]]
     const sp<Vec3>& size() const;

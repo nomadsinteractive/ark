@@ -2,7 +2,7 @@
 
 #include <Box2D/Box2D.h>
 
-#include "graphics/base/size.h"
+#include "graphics/traits/size.h"
 
 #include "box2d/forwarding.h"
 

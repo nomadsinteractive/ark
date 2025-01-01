@@ -8,7 +8,7 @@
 
 namespace ark::plugin::yoga {
 
-class YogaLayout : public Layout {
+class YogaLayout final : public Layout {
 public:
 
     sp<Updatable> inflate(Hierarchy hierarchy) override;
@@ -16,7 +16,7 @@ public:
 //  [[plugin::builder::by-value("yoga")]]
     class BUILDER : public Builder<Layout> {
     public:
-        BUILDER(BeanFactory& factory);
+        BUILDER() = default;
 
         sp<Layout> build(const Scope& args) override;
     };

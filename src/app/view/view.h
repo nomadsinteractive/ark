@@ -69,7 +69,7 @@ public:
         std::vector<builder<View>> _children;
     };
 
-//  [[plugin::builder("view")]]
+//  [[plugin::builder("with-view")]]
     class BUILDER_WIRABLE final : public Builder<Wirable> {
     public:
         BUILDER_WIRABLE(BeanFactory& factory, const document& manifest);
@@ -77,7 +77,8 @@ public:
         sp<Wirable> build(const Scope& args) override;
 
     private:
-        BUILDER _builder_impl;
+        builder<View> _view;
+        SafeBuilder<StringVar> _name;
     };
 
 //  [[plugin::builder("text")]]
@@ -102,7 +103,6 @@ protected:
     sp<RenderObject> _background;
     sp<Boolean> _is_discarded;
     sp<Updatable> _updatable_view;
-    sp<Updatable> _updatable_layout;
 
     friend class Activity;
     friend class ViewHierarchy;

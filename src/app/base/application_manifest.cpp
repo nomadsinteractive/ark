@@ -5,7 +5,7 @@
 #include "core/util/string_convert.h"
 #include "core/util/documents.h"
 
-#include "graphics/base/size.h"
+#include "graphics/traits/size.h"
 
 #include "platform/platform.h"
 

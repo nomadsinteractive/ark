@@ -3,10 +3,10 @@
 #include "core/ark.h"
 #include "core/base/clock.h"
 #include "core/base/future.h"
-#include "core/util/log.h"
+#include "core/types/global.h"
 
 #include "graphics/base/bitmap.h"
-#include "graphics/base/size.h"
+#include "graphics/traits/size.h"
 #include "graphics/inf/alphabet.h"
 
 #include "renderer/base/atlas.h"
@@ -79,8 +79,8 @@ bool ModelLoaderText::GlyphBundle::prepareOne(uint64_t timestamp, int32_t c, int
         const V2 charSize(static_cast<float>(bitmap_width), static_cast<float>(bitmap_height));
         Atlas::Item item = _atlas_attachment._atlas.makeItem(cx, cy, cx + bitmap_width, cy + bitmap_height, bounds, charSize, V2(0));
         const V3 xyz(static_cast<float>(bitmap_x), static_cast<float>(bitmap_y), 0);
-        sp<Boundaries> content = sp<Boundaries>::make(xyz, V3(charSize, 0), xyz);
-        sp<Boundaries> occupies = sp<Boundaries>::make(V3(0), V3(static_cast<float>(width), static_cast<float>(height), 0), xyz);
+        sp<Boundaries> content = sp<Boundaries>::make(V3(0), V3(charSize, 0));
+        sp<Boundaries> occupies = sp<Boundaries>::make(-xyz, V3(static_cast<float>(width), static_cast<float>(height), 0) - xyz);
         _glyphs[ckey] = GlyphModel(sp<Model>::make(_unit_glyph_model->indices(), sp<VerticesQuad>::make(item), std::move(content), std::move(occupies)), timestamp);
     }
     else

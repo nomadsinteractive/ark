@@ -5,7 +5,7 @@
 #include "core/inf/array.h"
 
 #include "graphics/base/bitmap.h"
-#include "graphics/base/size.h"
+#include "graphics/traits/size.h"
 
 #include "cmft/util/cmft_util.h"
 

@@ -1,9 +1,10 @@
 #include "renderer/impl/renderer/skybox.h"
 
 #include "core/util/uploader_type.h"
+#include "core/types/global.h"
 
 #include "graphics/base/render_request.h"
-#include "graphics/base/size.h"
+#include "graphics/traits/size.h"
 
 #include "renderer/base/buffer.h"
 #include "renderer/base/drawing_context.h"

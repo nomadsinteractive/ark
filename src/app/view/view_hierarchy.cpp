@@ -13,7 +13,7 @@ ViewHierarchy::ViewHierarchy(sp<Layout> layout)
 {
 }
 
-bool ViewHierarchy::isIsolatedLayout() const
+bool ViewHierarchy::isLayoutTopView() const
 {
     return static_cast<bool>(_layout);
 }
@@ -35,14 +35,18 @@ bool ViewHierarchy::updateHierarchy()
 
     for(auto iter = _children.begin(); iter != _children.end(); )
     {
-        const sp<View>& i = *iter;
-        if(i->discarded().val())
+        if(const sp<View>& i = *iter; i->discarded().val())
         {
             iter = _children.erase(iter);
             hierarchyChanged = true;
         }
         else
+        {
+            if(i->hierarchy())
+                i->hierarchy()->updateHierarchy();
+
             ++iter;
+        }
     }
     return hierarchyChanged;
 }
@@ -58,25 +62,27 @@ Layout::Hierarchy ViewHierarchy::toLayoutHierarchy(sp<Layout::Node> layoutNode) 
     return hierarchy;
 }
 
-bool ViewHierarchy::updateLayout(const sp<Layout::Node>& layoutNode, uint64_t timestamp, bool isDirty)
+bool ViewHierarchy::updateLayout(const sp<Layout::Node>& layoutNode, uint64_t timestamp, bool layoutParamDirty)
 {
-    if(const bool hierarchyChanged = updateHierarchy(); hierarchyChanged || isDirty)
+    const bool hierarchyDirty = _timestamp.update(timestamp);
+    if(const bool hierarchyChanged = updateHierarchy() || hierarchyDirty; hierarchyChanged || layoutParamDirty)
     {
         if(_layout)
         {
             if(hierarchyChanged)
             {
                 _updatable_layout = _layout->inflate(toLayoutHierarchy(layoutNode));
+                _timestamp.markClean();
                 timestamp = 0;
             }
 
             if(_updatable_layout)
                 _updatable_layout->update(timestamp);
         }
-        isDirty = true;
+        layoutParamDirty = true;
     }
 
-    return updateDescendantLayout(timestamp) || isDirty;
+    return updateDescendantLayout(timestamp) || layoutParamDirty;
 }
 
 const std::vector<sp<View>>& ViewHierarchy::updateChildren()
@@ -85,6 +91,11 @@ const std::vector<sp<View>>& ViewHierarchy::updateChildren()
         _children.push_back(std::move(i));
     _incremental.clear();
     return _children;
+}
+
+void ViewHierarchy::markHierarchyDirty()
+{
+    _timestamp.markDirty();
 }
 
 void ViewHierarchy::addView(sp<View> view)

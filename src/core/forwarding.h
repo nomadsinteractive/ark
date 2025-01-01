@@ -3,6 +3,7 @@
 #include <chrono>
 
 #include <stdint.h>
+#include <vector>
 #include <unordered_map>
 
 namespace ark {
@@ -32,6 +33,7 @@ template<typename T> class VariableWrapper;
 template<typename T> class WeakPtr;
 template<typename T> class Wrapper;
 
+template <typename T> using Vector = std::vector<T>;
 
 template <typename T> using builder = SharedPtr<Builder<T>>;
 template <typename T> using sp = SharedPtr<T>;
@@ -40,6 +42,7 @@ template <typename T> using array = sp<Array<T>>;
 
 class Ark;
 class Allocator;
+class ApplicationContext;
 class ApplicationManifest;
 class Asset;
 class AssetBundle;

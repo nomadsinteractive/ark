@@ -9,7 +9,7 @@
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/util/string_type.h"
 
-#include "graphics/base/size.h"
+#include "graphics/traits/size.h"
 #include "graphics/impl/vec/vec2_impl.h"
 #include "graphics/impl/vec/vec3_impl.h"
 #include "graphics/impl/vec/vec4_impl.h"

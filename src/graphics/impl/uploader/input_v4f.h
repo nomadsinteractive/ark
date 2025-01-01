@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_IMPL_INPUT_INPUT_VEC3_H_
-#define ARK_GRAPHICS_IMPL_INPUT_INPUT_VEC3_H_
+#pragma once
 
 #include "core/inf/builder.h"
 #include "core/types/shared_ptr.h"
@@ -8,9 +7,9 @@
 
 namespace ark {
 
-class FlatableV3f {
+class InputV4f {
 public:
-//  [[plugin::builder::by-value("v3f")]]
+//  [[plugin::builder::by-value("v4f")]]
     class BUILDER : public Builder<Uploader> {
     public:
         BUILDER(BeanFactory& factory, const String& value);
@@ -18,10 +17,8 @@ public:
         virtual sp<Uploader> build(const Scope& args) override;
 
     private:
-        sp<Builder<Vec3>> _vec3;
+        sp<Builder<Vec4>> _vec4;
     };
 };
 
 }
-
-#endif

@@ -1025,7 +1025,7 @@ class Integer(_Scalar):
 
 
 class Discarded(Boolean):
-    def __init__(self, disposed=False):
+    def __init__(self, discarded=False):
         pass
 
     def dispose(self):
@@ -2671,14 +2671,13 @@ class View:
         return Boolean(False)
 
     @property
-    def position(self) -> Vec3:
-        return Vec3(0, 0, 0)
-
-    @property
     def layout_param(self) -> LayoutParam:
         return LayoutParam()
 
     def add_view(self, view: 'View'):
+        pass
+
+    def find_view(self, name: str) -> Optional[View]:
         pass
 
 
@@ -2740,6 +2739,9 @@ class Entity:
 
     @property
     def ref(self) -> Ref:
+        pass
+
+    def get_component(self, ctype: type):
         pass
 
     def discard(self):

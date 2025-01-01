@@ -3,7 +3,7 @@
 #include "core/base/bean_factory.h"
 #include "core/impl/boolean/boolean_by_weak_ref.h"
 #include "core/impl/updatable/updatable_once_per_frame.h"
-#include "core/util/boolean_type.h"
+#include "core/types/global.h"
 #include "core/util/math.h"
 #include "core/util/updatable_util.h"
 
@@ -22,6 +22,7 @@
 #include "app/traits/with_text.h"
 #include "app/view/view_hierarchy.h"
 #include "core/util/wirable_type.h"
+#include "graphics/traits/position.h"
 
 namespace ark {
 
@@ -66,7 +67,7 @@ struct View::Stub final : Updatable {
         V3 offset = parentStub ? parentStub->getTopViewOffsetPosition(false) + layoutOffset : layoutOffset;
         if(includePaddings)
             offset += V3(layoutNode.paddings().w(), layoutNode.paddings().x(), 0);
-        return layoutNode._layout_param->position().val() + offset;
+        return layoutNode._layout_param->offset().val() + offset;
     }
 
     sp<Layout::Node> getTopViewLayoutNode() const
@@ -110,6 +111,20 @@ V2 toPivotPosition(const sp<Boundaries>& occupies, const V2& size)
     return occupies->toPivotPosition(size);
 }
 
+sp<View::Stub> findLayoutTopView(sp<View::Stub> stub)
+{
+    while(stub)
+    {
+        if(stub->_top_view)
+            break;
+        if(stub->_hierarchy && stub->_hierarchy->isLayoutTopView())
+            break;
+
+        stub = stub->_parent_stub.lock();
+    }
+    return stub;
+}
+
 template<size_t IDX> class LayoutSize final : public Numeric {
 public:
     LayoutSize(sp<View::Stub> stub)
@@ -131,8 +146,8 @@ private:
 
 class LayoutPosition final : public Vec3 {
 public:
-    LayoutPosition(sp<View::Stub> stub, sp<Updatable> updatable, bool isBackground, bool isCenter)
-        : _stub(std::move(stub)), _updatable(std::move(updatable)), _is_background(isBackground), _is_center(isCenter)
+    LayoutPosition(sp<View::Stub> stub, sp<Updatable> updatable)
+        : _stub(std::move(stub)), _updatable(std::move(updatable))
     {
     }
 
@@ -145,19 +160,15 @@ public:
     {
         const Layout::Node& layoutNode = _stub->_layout_node;
         const V2& size = layoutNode.size();
-        const V4& paddings = layoutNode.paddings();
         const V3 offsetPosition = _stub->getTopViewOffsetPosition(false);
-        const float yOffset = Ark::instance().applicationContext()->renderEngine()->isLHS() ? size.y() : 0;
-        const float x = offsetPosition.x() + (_is_background ? 0 : paddings.w()) + (_is_center ? size.x() / 2 : 0);
-        const float y = (offsetPosition.y() + (_is_background ? 0 : paddings.x())) + (_is_center ? size.y() / 2 : yOffset);
+        const float x = offsetPosition.x() + size.x() / 2;
+        const float y = offsetPosition.y() + size.y() / 2;
         return {toViewportPosition(V2(x, y)), offsetPosition.z()};
     }
 
 private:
     sp<View::Stub> _stub;
     sp<Updatable> _updatable;
-    bool _is_background;
-    bool _is_center;
 };
 
 class RenderableView final : public Renderable {
@@ -226,25 +237,16 @@ private:
     sp<View::Stub> _stub;
 };
 
-class UpdatableIsolatedLayout : public Updatable {
+class UpdatableLayoutTopView final : public Updatable {
 public:
-    UpdatableIsolatedLayout(sp<View::Stub> stub)
+    UpdatableLayoutTopView(sp<View::Stub> stub)
         : _stub(std::move(stub))
     {
     }
 
     bool update(uint64_t timestamp) override
     {
-        sp<View::Stub> stub = _stub;
-        while(stub)
-        {
-            if(stub->_top_view)
-                break;
-            if(stub->_hierarchy && stub->_hierarchy->isIsolatedLayout())
-                break;
-
-            stub = stub->_parent_stub.lock();
-        }
+        const sp<View::Stub> stub = findLayoutTopView(_stub);
         return stub ? stub->update(timestamp) : false;
     }
 
@@ -252,11 +254,35 @@ private:
     sp<View::Stub> _stub;
 };
 
+class WirableView final : public Wirable {
+public:
+    WirableView(sp<View> view, String name)
+        : _view(std::move(view)), _name(std::move(name))
+    {
+    }
+
+    TypeId onPoll(WiringContext& context) override
+    {
+        context.addComponent(_view);
+        const sp<View>& wiringView = _name ? _view->findView(_name) : _view;
+        wiringView->onPoll(context);
+        return constants::TYPE_ID_NONE;
+    }
+
+    void onWire(const WiringContext& context) override
+    {
+    }
+
+private:
+    sp<View> _view;
+    String _name;
+};
+
 }
 
 View::View(sp<LayoutParam> layoutParam, String name, sp<RenderObject> background, sp<Boolean> visible, sp<Boolean> discarded)
     : _stub(sp<Stub>::make(std::move(layoutParam), std::move(name), std::move(visible), std::move(discarded))), _background(std::move(background)), _is_discarded(sp<Boolean>::make<IsDiscarded>(_stub)),
-      _updatable_view(sp<UpdatableOncePerFrame>::make(_stub)), _updatable_layout(sp<UpdatableOncePerFrame>::make(sp<UpdatableIsolatedLayout>::make(_stub)))
+      _updatable_view(sp<UpdatableOncePerFrame>::make(_stub))
 {
 }
 
@@ -268,11 +294,13 @@ View::~View()
 TypeId View::onPoll(WiringContext& context)
 {
     sp<Vec3> size = Vec3Type::create(sp<LayoutSize<0>>::make(_stub), sp<LayoutSize<1>>::make(_stub), Global<Constants>()->NUMERIC_ZERO);
-    context.addComponentBuilder(make_lazy_builder<Shape>(Shape::TYPE_AABB, sp<Vec3>(size)));
-    context.addComponentBuilder(make_lazy_builder<Boundaries>(std::move(size)));
-    context.addComponentBuilder(make_lazy_builder<Vec3, LayoutPosition>(_stub, _updatable_layout, true, true));
+    sp<Updatable> updatable = sp<Updatable>::make<UpdatableOncePerFrame>(sp<Updatable>::make<UpdatableLayoutTopView>(_stub));
     if(_background)
-        context.addComponentBuilder(to_lazy_builder<Renderable>(RenderableType::create, sp<Renderable>::make<RenderableView>(_stub, _background, true), _updatable_layout, _is_discarded));
+        context.setComponentBuilder(to_lazy_builder<Renderable>(RenderableType::create, sp<Renderable>::make<RenderableView>(_stub, _background, true), updatable, _is_discarded));
+    sp<Vec3> position = sp<Vec3>::make<LayoutPosition>(_stub, std::move(updatable));
+    context.setComponentBuilder(make_lazy_builder<Shape>(Shape::TYPE_AABB, size));
+    context.setComponentBuilder(make_lazy_builder<Boundaries>(position, Vec3Type::mul(std::move(size), 0.5f)));
+    context.setComponentBuilder(make_lazy_builder<Position>(std::move(position)));
     return Type<View>::id();
 }
 
@@ -327,17 +355,22 @@ void View::addView(sp<View> view, sp<Boolean> discarded)
 
     view->setParent(*this);
     _stub->ensureViewHierarchy().addView(std::move(view));
+
+    if(const sp<Stub> layoutTopView = findLayoutTopView(_stub))
+        if(layoutTopView->_hierarchy)
+            layoutTopView->_hierarchy->markHierarchyDirty();
 }
 
 sp<View> View::findView(StringView name) const
 {
-    for(const sp<View>& i : _stub->_hierarchy->updateChildren())
-    {
-        if(i->_stub->_name == name)
-            return i;
-        if(sp<View> found = i->findView(name))
-            return found;
-    }
+    if(_stub->_hierarchy)
+        for(const sp<View>& i : _stub->_hierarchy->updateChildren())
+        {
+            if(i->_stub->_name == name)
+                return i;
+            if(sp<View> found = i->findView(name))
+                return found;
+        }
     return nullptr;
 }
 
@@ -372,13 +405,14 @@ sp<View> View::BUILDER::build(const Scope& args)
 }
 
 View::BUILDER_WIRABLE::BUILDER_WIRABLE(BeanFactory& factory, const document& manifest)
-    : _builder_impl(factory, manifest)
+    : _view(factory.ensureBuilder<View>(manifest, constants::VIEW)), _name(factory.getBuilder<StringVar>(manifest, constants::NAME))
 {
 }
 
 sp<Wirable> View::BUILDER_WIRABLE::build(const Scope& args)
 {
-    return _builder_impl.build(args);
+    const sp<StringVar> name = _name.build(args);
+    return sp<Wirable>::make<WirableView>(_view->build(args), name ? *name->val() : "");
 }
 
 View::BUILDER_VIEW::BUILDER_VIEW(BeanFactory& factory, const document& manifest)

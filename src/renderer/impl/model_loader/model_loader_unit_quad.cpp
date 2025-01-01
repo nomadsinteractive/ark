@@ -1,5 +1,7 @@
 #include "renderer/impl/model_loader/model_loader_unit_quad.h"
 
+#include "core/types/global.h"
+
 #include "renderer/base/model.h"
 #include "renderer/impl/render_command_composer/rcc_draw_elements.h"
 

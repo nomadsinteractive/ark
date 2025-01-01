@@ -23,13 +23,13 @@ V3 toV3(const V4& v4) {
     return V3(v4.x() / w, v4.y() / w, v4.z() / w);
 }
 
-class VerticesTriangle : public Vertices {
+class VerticesTriangle final : public Vertices {
 public:
     VerticesTriangle(Optional<Rect> texCoords)
         : Vertices(3), _tex_coords(std::move(texCoords)) {
     }
 
-    virtual void write(VertexWriter& buf, const V3& /*size*/) override {
+    void write(VertexWriter& buf, const V3& /*size*/) override {
         const bool hasTexCoords = static_cast<bool>(_tex_coords);
         const Rect texCoords = hasTexCoords ? _tex_coords.value() : Rect();
         buf.next();
@@ -154,12 +154,12 @@ PrimitiveModelFactory::PrimitiveModelFactory(sp<Mat4> transform)
 
 sp<Model> PrimitiveModelFactory::makeTriangle(Optional<Rect> texCoords)
 {
-    return sp<Model>::make(UploaderType::makeElementIndexInput(std::vector<element_index_t>{0, 1, 2}), sp<VerticesTriangle>::make(std::move(texCoords)), sp<Boundaries>::make(V3(0), V3(1., 1., 0), V3(0)));
+    return sp<Model>::make(UploaderType::makeElementIndexInput(std::vector<element_index_t>{0, 1, 2}), sp<VerticesTriangle>::make(std::move(texCoords)), sp<Boundaries>::make(V3(-0.5, -0.5, 0), V3(0.5, 0.5, 0)));
 }
 
 sp<Model> PrimitiveModelFactory::makePlane(uint32_t cols, uint32_t rows, Optional<Rect> texCoords)
 {
-    return sp<Model>::make(sp<UploaderPlane>::make(cols, rows), sp<VerticesPlane>::make(cols, rows, std::move(texCoords), _transform), sp<Boundaries>::make(V3(0), V3(cols, rows, 0), V3(0)));
+    return sp<Model>::make(sp<UploaderPlane>::make(cols, rows), sp<VerticesPlane>::make(cols, rows, std::move(texCoords), _transform), sp<Boundaries>::make(V3(cols * -0.5f, rows * -0.5f, 0), V3(cols * 0.5f, rows * 0.5f, 0)));
 }
 
 }

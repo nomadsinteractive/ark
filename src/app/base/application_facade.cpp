@@ -2,10 +2,11 @@
 
 #include "core/base/future.h"
 #include "core/traits/discarded.h"
+#include "core/types/global.h"
 #include "core/util/updatable_util.h"
 
 #include "graphics/base/camera.h"
-#include "graphics/base/size.h"
+#include "graphics/traits/size.h"
 #include "graphics/base/surface_controller.h"
 #include "graphics/impl/vec/vec2_impl.h"
 

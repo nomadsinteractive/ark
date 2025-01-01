@@ -9,7 +9,7 @@
 #include "core/util/log.h"
 
 #include "graphics/base/viewport.h"
-#include "graphics/base/size.h"
+#include "graphics/traits/size.h"
 
 #include "app/base/application_delegate_impl.h"
 

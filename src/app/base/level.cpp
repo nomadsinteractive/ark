@@ -3,12 +3,12 @@
 #include <map>
 
 #include "core/ark.h"
-
 #include "core/base/named_hash.h"
+#include "core/types/global.h"
 
 #include "graphics/base/camera.h"
 #include "graphics/base/layer.h"
-#include "graphics/base/quaternion.h"
+#include "graphics/traits/quaternion.h"
 #include "graphics/base/render_object.h"
 #include "graphics/base/transform_3d.h"
 #include "graphics/util/vec3_type.h"

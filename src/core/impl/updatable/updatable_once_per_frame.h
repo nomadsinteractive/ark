@@ -5,11 +5,11 @@
 
 namespace ark {
 
-class UpdatableOncePerFrame : public Updatable {
+class UpdatableOncePerFrame final : public Updatable {
 public:
     UpdatableOncePerFrame(sp<Updatable> delegate);
 
-    virtual bool update(uint64_t timestamp) override;
+    bool update(uint64_t timestamp) override;
 
 private:
     sp<Updatable> _delegate;

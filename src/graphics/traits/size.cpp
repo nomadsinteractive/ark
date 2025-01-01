@@ -1,9 +1,10 @@
-#include "graphics/base/size.h"
+#include "graphics/traits/size.h"
 
 #include "core/ark.h"
 #include "core/base/constants.h"
+#include "core/base/bean_factory.h"
 #include "core/impl/variable/variable_wrapper.h"
-#include "core/util/bean_utils.h"
+#include "core/types/global.h"
 
 #include "graphics/base/v2.h"
 
@@ -114,16 +115,6 @@ sp<Size> Size::freeze()
 const sp<Vec3Impl>& Size::impl() const
 {
     return _impl;
-}
-
-Size::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)
-{
-    BeanUtils::split(factory, value, _width, _height, _depth);
-}
-
-sp<Size> Size::DICTIONARY::build(const Scope& args)
-{
-    return sp<Size>::make(_width->build(args), _height->build(args), _depth->build(args));
 }
 
 Size::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
