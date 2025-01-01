@@ -26,8 +26,8 @@
 namespace ark {
 
 struct View::Stub final : Updatable {
-    Stub(sp<LayoutParam> layoutParam, sp<Boolean> visible, sp<Boolean> discarded)
-        : _hierarchy(layoutParam->layout() ? sp<ViewHierarchy>::make(layoutParam->layout()) : nullptr), _layout_node(sp<Layout::Node>::make(std::move(layoutParam))), _visible(std::move(visible), true), _discarded(std::move(discarded), false), _top_view(false)
+    Stub(sp<LayoutParam> layoutParam, String name, sp<Boolean> visible, sp<Boolean> discarded)
+        : _name(std::move(name)), _hierarchy(layoutParam->layout() ? sp<ViewHierarchy>::make(layoutParam->layout()) : nullptr), _layout_node(sp<Layout::Node>::make(std::move(layoutParam))), _visible(std::move(visible), true), _discarded(std::move(discarded), false), _top_view(false)
     {
     }
 
@@ -84,6 +84,7 @@ struct View::Stub final : Updatable {
         return _hierarchy;
     }
 
+    String _name;
     sp<ViewHierarchy> _hierarchy;
     sp<Layout::Node> _layout_node;
 
@@ -128,7 +129,7 @@ private:
     sp<View::Stub> _stub;
 };
 
-class LayoutPosition : public Vec3 {
+class LayoutPosition final : public Vec3 {
 public:
     LayoutPosition(sp<View::Stub> stub, sp<Updatable> updatable, bool isBackground, bool isCenter)
         : _stub(std::move(stub)), _updatable(std::move(updatable)), _is_background(isBackground), _is_center(isCenter)
@@ -146,9 +147,9 @@ public:
         const V2& size = layoutNode.size();
         const V4& paddings = layoutNode.paddings();
         const V3 offsetPosition = _stub->getTopViewOffsetPosition(false);
-        float yOffset = Ark::instance().applicationContext()->renderEngine()->isLHS() ? size.y() : 0;
-        float x = offsetPosition.x() + (_is_background ? 0 : paddings.w()) + (_is_center ? size.x() / 2 : 0);
-        float y = (offsetPosition.y() + (_is_background ? 0 : paddings.x())) + (_is_center ? size.y() / 2 : yOffset);
+        const float yOffset = Ark::instance().applicationContext()->renderEngine()->isLHS() ? size.y() : 0;
+        const float x = offsetPosition.x() + (_is_background ? 0 : paddings.w()) + (_is_center ? size.x() / 2 : 0);
+        const float y = (offsetPosition.y() + (_is_background ? 0 : paddings.x())) + (_is_center ? size.y() / 2 : yOffset);
         return {toViewportPosition(V2(x, y)), offsetPosition.z()};
     }
 
@@ -253,8 +254,8 @@ private:
 
 }
 
-View::View(sp<LayoutParam> layoutParam, sp<RenderObject> background, sp<Boolean> visible, sp<Boolean> discarded)
-    : _stub(sp<Stub>::make(std::move(layoutParam), std::move(visible), std::move(discarded))), _background(std::move(background)), _is_discarded(sp<Boolean>::make<IsDiscarded>(_stub)),
+View::View(sp<LayoutParam> layoutParam, String name, sp<RenderObject> background, sp<Boolean> visible, sp<Boolean> discarded)
+    : _stub(sp<Stub>::make(std::move(layoutParam), std::move(name), std::move(visible), std::move(discarded))), _background(std::move(background)), _is_discarded(sp<Boolean>::make<IsDiscarded>(_stub)),
       _updatable_view(sp<UpdatableOncePerFrame>::make(_stub)), _updatable_layout(sp<UpdatableOncePerFrame>::make(sp<UpdatableIsolatedLayout>::make(_stub)))
 {
 }
@@ -328,6 +329,18 @@ void View::addView(sp<View> view, sp<Boolean> discarded)
     _stub->ensureViewHierarchy().addView(std::move(view));
 }
 
+sp<View> View::findView(StringView name) const
+{
+    for(const sp<View>& i : _stub->_hierarchy->updateChildren())
+    {
+        if(i->_stub->_name == name)
+            return i;
+        if(sp<View> found = i->findView(name))
+            return found;
+    }
+    return nullptr;
+}
+
 const sp<ViewHierarchy>& View::hierarchy() const
 {
     return _stub->_hierarchy;
@@ -345,16 +358,16 @@ void View::markAsTopView()
 }
 
 View::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _factory(factory), _manifest(manifest), _discarded(factory.getBuilder<Boolean>(manifest, constants::DISCARDED)), _visible(factory.getBuilder<Boolean>(manifest, constants::VISIBLE)),
-      _background(factory.getBuilder<RenderObject>(manifest, constants::BACKGROUND)), _layout_param(factory.ensureConcreteClassBuilder<LayoutParam>(manifest, "layout-param"))
+    : _name(Documents::getAttribute(manifest, constants::NAME)), _discarded(factory.getBuilder<Boolean>(manifest, constants::DISCARDED)), _visible(factory.getBuilder<Boolean>(manifest, constants::VISIBLE)),
+      _background(factory.getBuilder<RenderObject>(manifest, constants::BACKGROUND)), _layout_param(factory.ensureConcreteClassBuilder<LayoutParam>(manifest, constants::LAYOUT_PARAM)), _children(factory.makeBuilderList<View>(manifest, constants::VIEW))
 {
 }
 
 sp<View> View::BUILDER::build(const Scope& args)
 {
-    sp<View> view = sp<View>::make(_layout_param.build(args), _background.build(args), _visible.build(args), _discarded.build(args));
-    for(const document& i : _manifest->children(constants::VIEW))
-        view->addView(_factory.ensure<View>(i, args));
+    sp<View> view = sp<View>::make(_layout_param.build(args), _name, _background.build(args), _visible.build(args), _discarded.build(args));
+    for(const builder<View>& i : _children)
+        view->addView(i->build(args));
     return view;
 }
 

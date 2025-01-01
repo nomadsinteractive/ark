@@ -45,6 +45,11 @@ private:
 
 }
 
+sp<CollisionCallback> CollisionCallbackType::create(Behavior& behavior)
+{
+    return create(behavior, "on_begin_contact", "on_end_contact");
+}
+
 sp<CollisionCallback> CollisionCallbackType::create(Behavior& behavior, StringView onBeginContact, StringView onEndContact)
 {
     sp<Behavior::Method> onBeginContactMethod = behavior.getMethod(onBeginContact);

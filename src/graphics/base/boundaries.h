@@ -35,6 +35,11 @@ public:
 //  [[script::bindings::auto]]
     V3 toPivotPosition(const V3& size) const;
 
+//  [[script::bindings::auto]]
+    sp<Boolean> ptin(sp<Vec3> point) const;
+//  [[script::bindings::auto]]
+    bool ptin(const V3& point) const;
+
     bool update(uint64_t timestamp) const;
 
 private:

@@ -19,7 +19,7 @@ namespace ark {
 
 class ARK_API View final : public Wirable {
 public:
-    View(sp<LayoutParam> layoutParam, sp<RenderObject> background = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> discarded = nullptr);
+    View(sp<LayoutParam> layoutParam, String name, sp<RenderObject> background = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> discarded = nullptr);
     ~View() override;
 
     TypeId onPoll(WiringContext& context) override;
@@ -46,6 +46,8 @@ public:
 
 //  [[script::bindings::auto]]
     void addView(sp<View> view, sp<Boolean> discarded = nullptr);
+//  [[script::bindings::auto]]
+    sp<View> findView(StringView name) const;
 
     const sp<ViewHierarchy>& hierarchy() const;
 
@@ -59,13 +61,12 @@ public:
         sp<View> build(const Scope& args) override;
 
     private:
-        BeanFactory _factory;
-        document _manifest;
-
+        String _name;
         SafeBuilder<Boolean> _discarded;
         SafeBuilder<Boolean> _visible;
         SafeBuilder<RenderObject> _background;
         SafeBuilder<LayoutParam> _layout_param;
+        std::vector<builder<View>> _children;
     };
 
 //  [[plugin::builder("view")]]

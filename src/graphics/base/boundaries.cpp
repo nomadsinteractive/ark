@@ -2,10 +2,46 @@
 
 #include "core/inf/variable.h"
 #include "core/util/math.h"
+#include "core/util/updatable_util.h"
 
 #include "graphics/util/vec3_type.h"
 
 namespace ark {
+
+namespace {
+
+bool ptinAABB(const V3 point, const V3 aabbMin, const V3 aabbMax)
+{
+    for(int32_t i = 0; i < 3; i++)
+        if(!Math::between(aabbMin[i], aabbMax[i], point[i]))
+            return false;
+    return true;
+}
+
+class InBoundaries final : public Boolean {
+public:
+    InBoundaries(sp<Vec3> point, sp<Vec3> aabbMin, sp<Vec3> aabbMax)
+        : _point(std::move(point)), _aabb_min(std::move(aabbMin)), _aabb_max(std::move(aabbMax))
+    {
+    }
+
+    bool update(uint64_t timestamp) override
+    {
+        return UpdatableUtil::update(timestamp, _point, _aabb_min, _aabb_max);
+    }
+
+    bool val() override
+    {
+        return ptinAABB(_point->val(), _aabb_min->val(), _aabb_max->val());
+    }
+
+private:
+    sp<Vec3> _point;
+    sp<Vec3> _aabb_min;
+    sp<Vec3> _aabb_max;
+};
+
+}
 
 Boundaries::Boundaries()
     : Boundaries(V3(-0.5f), V3(0.5f))
@@ -75,6 +111,16 @@ V3 Boundaries::toPivotPosition(const V3& size) const
     const V3& occupyAABBMin = _aabb_min->val();
     const V3& occupyAABBMax = _aabb_max->val();
     return {Math::lerp(0, size.x(), occupyAABBMin.x(), occupyAABBMax.x(), 0), Math::lerp(0, size.y(), occupyAABBMin.y(), occupyAABBMax.y(), 0), Math::lerp(0, size.z(), occupyAABBMin.z(), occupyAABBMax.z(), 0)};
+}
+
+bool Boundaries::ptin(const V3& point) const
+{
+    return ptinAABB(point, _aabb_min->val(), _aabb_max->val());;
+}
+
+sp<Boolean> Boundaries::ptin(sp<Vec3> point) const
+{
+    return sp<Boolean>::make<InBoundaries>(std::move(point), _aabb_min, _aabb_max);
 }
 
 bool Boundaries::update(uint64_t timestamp) const

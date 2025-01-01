@@ -11,14 +11,18 @@ PyListDuckType::PyListDuckType(PyInstance instance)
 
 void PyListDuckType::to(sp<std::vector<Box>>& inst)
 {
-    std::vector<Box> boxes;
-    const Py_ssize_t list_len = PyList_Size(_instance.pyObject());
+    const Py_ssize_t objSize = PyObject_Size(_instance.pyObject());
     const PythonExtension& pi = PythonExtension::instance();
-    for(Py_ssize_t i = 0; i < list_len; ++i)
+
+    std::vector<Box> boxes;
+    for(Py_ssize_t i = 0; i < objSize; ++i)
     {
-        PyObject* item = PyList_GET_ITEM(_instance.pyObject(), i);
-        if(pi.isPyArkTypeObject(Py_TYPE(item)))
-            boxes.push_back(*reinterpret_cast<PyArkType::Instance*>(item)->box);
+        PyObject* key = PyLong_FromSsize_t(i);
+        PyObject* item = PyObject_GetItem(_instance.pyObject(), key);
+        ASSERT(pi.isPyArkTypeObject(Py_TYPE(item)));
+        boxes.push_back(*reinterpret_cast<PyArkType::Instance*>(item)->box);
+        Py_XDECREF(key);
+        Py_XDECREF(key);
     }
     inst = sp<std::vector<Box>>::make(std::move(boxes));
 }

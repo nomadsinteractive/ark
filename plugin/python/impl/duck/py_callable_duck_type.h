@@ -13,7 +13,7 @@
 
 namespace ark::plugin::python {
 
-class PyCallableDuckType final : public Duck<Runnable>, public Duck<EventListener>, public Duck<GlyphMaker>, public Duck<RendererMaker>,
+class [[deprecated]] PyCallableDuckType final : public Duck<Runnable>, public Duck<EventListener>, public Duck<GlyphMaker>, public Duck<RendererMaker>,
         public Implements<PyCallableDuckType, Duck<Runnable>, Duck<EventListener>, Duck<GlyphMaker>, Duck<RendererMaker>> {
 public:
     PyCallableDuckType(PyInstance inst);

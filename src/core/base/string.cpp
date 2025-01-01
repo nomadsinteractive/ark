@@ -6,7 +6,6 @@
 
 #include "core/base/string_buffer.h"
 #include "core/inf/array.h"
-#include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
 
 namespace ark {
@@ -288,14 +287,14 @@ void String::search(const std::regex& pattern, const std::function<bool(const st
         traveller2(str);
 }
 
-bool String::startsWith(const String& other) const
+bool String::startsWith(StringView other) const
 {
-    return strncmp(_str.c_str(), other.c_str(), other.length()) == 0;
+    return strncmp(_str.c_str(), other.data(), other.length()) == 0;
 }
 
-bool String::endsWith(const String& other) const
+bool String::endsWith(StringView other) const
 {
-    return _str.length() >= other._str.length() && _str.compare(_str.length() - other._str.length(), other._str.length(), other._str) == 0;
+    return _str.length() >= other.length() && strncmp(_str.c_str() + _str.length() - other.length(), other.data(), other.length()) == 0;
 }
 
 String::operator bool() const
@@ -303,14 +302,14 @@ String::operator bool() const
     return !_str.empty();
 }
 
-bool String::operator ==(const String& other) const
+bool String::operator ==(StringView other) const
 {
-    return _str == other._str;
+    return _str == other;
 }
 
-bool String::operator !=(const String& other) const
+bool String::operator !=(StringView other) const
 {
-    return _str != other._str;
+    return _str != other;
 }
 
 bool String::operator <(const String& other) const

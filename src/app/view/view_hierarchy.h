@@ -22,7 +22,7 @@ public:
     bool updateDescendantLayout(uint64_t timestamp);
     bool updateLayout(const sp<Layout::Node>& layoutNode, uint64_t timestamp, bool isDirty);
 
-    const std::vector<sp<View>>& updateSlots();
+    const std::vector<sp<View>>& updateChildren();
 
     void addView(sp<View> view);
 
@@ -31,13 +31,11 @@ private:
 
     Layout::Hierarchy toLayoutHierarchy(sp<Layout::Node> layoutNode) const;
 
-    std::vector<sp<View>> getLayoutItems() const;
-
 private:
     sp<Layout> _layout;
     sp<Updatable> _updatable_layout;
 
-    std::vector<sp<View>> _slots;
+    std::vector<sp<View>> _children;
     std::vector<sp<View>> _incremental;
 };
 

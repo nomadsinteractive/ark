@@ -31,7 +31,10 @@ void PyObjectDuckType::to(sp<RendererMaker>& inst)
 
 void PyObjectDuckType::to(sp<Integer>& inst)
 {
-    inst = PyCast::ensureCppObject<sp<Integer>>(_instance.pyObject());
+    if(Optional<sp<Integer>> opt = PyCast::toCppObject<sp<Integer>>(_instance.pyObject()))
+        inst = std::move(opt.value());
+    else
+        inst = sp<Integer>::make<Integer::Const>(PyCast::ensureCppObject<String>(_instance.pyObject()).hash());
 }
 
 void PyObjectDuckType::to(sp<Numeric>& inst)

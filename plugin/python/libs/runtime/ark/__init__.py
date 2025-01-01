@@ -102,7 +102,7 @@ class Enum:
 
 
 class NamedHash:
-    def __init__(self, value):
+    def __init__(self, value: TYPE_NAMED_HASH):
         pass
 
     @property

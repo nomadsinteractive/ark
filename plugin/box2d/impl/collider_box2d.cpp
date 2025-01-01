@@ -4,12 +4,10 @@
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/util/bean_utils.h"
 #include "core/util/boolean_type.h"
-#include "core/util/log.h"
 
 #include "graphics/base/quaternion.h"
 #include "graphics/base/rect.h"
 #include "graphics/base/v2.h"
-#include "graphics/traits/bounds.h"
 #include "graphics/traits/rotation.h"
 
 #include "renderer/base/resource_loader_context.h"

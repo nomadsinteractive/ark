@@ -63,10 +63,11 @@ public:
 
     explicit operator bool() const;
 
-    bool startsWith(const String& other) const;
-    bool endsWith(const String& other) const;
-    bool operator ==(const String& other) const;
-    bool operator !=(const String& other) const;
+    bool startsWith(StringView other) const;
+    bool endsWith(StringView other) const;
+
+    bool operator ==(StringView other) const;
+    bool operator !=(StringView other) const;
     bool operator <(const String& other) const;
     bool operator >(const String& other) const;
 

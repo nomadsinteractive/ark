@@ -14,7 +14,7 @@ namespace ark {
 namespace plugin {
 namespace python {
 
-class PyVecDuckType : public Duck<Vec2>, public Duck<Vec3>, public Duck<Size>, public Duck<Vec4>, public Duck<Rotation>, public Implements<PyVecDuckType, Duck<Vec2>, Duck<Vec3>, Duck<Size>, Duck<Vec4>, Duck<Rotation>> {
+class [[deprecated]] PyVecDuckType : public Duck<Vec2>, public Duck<Vec3>, public Duck<Size>, public Duck<Vec4>, public Duck<Rotation>, public Implements<PyVecDuckType, Duck<Vec2>, Duck<Vec3>, Duck<Size>, Duck<Vec4>, Duck<Rotation>> {
 public:
     PyVecDuckType(PyInstance inst);
 
