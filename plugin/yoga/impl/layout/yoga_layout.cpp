@@ -8,7 +8,7 @@
 #include "core/base/bean_factory.h"
 
 #include "graphics/base/v2.h"
-#include "graphics/traits/layout_param.h"
+#include "graphics/components/layout_param.h"
 
 #include "app/view/view.h"
 #include "app/view/view_hierarchy.h"

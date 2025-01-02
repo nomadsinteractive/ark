@@ -3,7 +3,7 @@
 #include "core/base/api.h"
 #include "core/inf/debris.h"
 #include "core/inf/wirable.h"
-#include "core/traits/with_debris.h"
+#include "core/components/with_debris.h"
 
 #include "core/types/box.h"
 
@@ -15,7 +15,6 @@ public:
 //  [[script::bindings::auto]]
     WithTag(Box tag);
 
-    TypeId onPoll(WiringContext& context) override;
     void onWire(const WiringContext& context) override;
     void traverse(const Visitor& visitor) override;
 

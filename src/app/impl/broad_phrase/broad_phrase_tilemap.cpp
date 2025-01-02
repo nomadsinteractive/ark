@@ -7,7 +7,7 @@
 #include "core/util/math.h"
 
 #include "graphics/base/rect.h"
-#include "graphics/base/render_object.h"
+#include "graphics/components/render_object.h"
 #include "graphics/base/tilemap.h"
 #include "graphics/base/tilemap_layer.h"
 #include "graphics/base/tileset.h"
@@ -18,7 +18,7 @@
 #include "app/base/collision_filter.h"
 #include "app/inf/collider.h"
 #include "app/inf/narrow_phrase.h"
-#include "app/traits/shape.h"
+#include "app/components/shape.h"
 #include "app/util/rigid_body_def.h"
 
 namespace ark {

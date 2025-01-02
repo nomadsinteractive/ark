@@ -1,12 +1,12 @@
 #include "app/base/application_facade.h"
 
 #include "core/base/future.h"
-#include "core/traits/discarded.h"
+#include "core/components/discarded.h"
 #include "core/types/global.h"
 #include "core/util/updatable_util.h"
 
 #include "graphics/base/camera.h"
-#include "graphics/traits/size.h"
+#include "graphics/components/size.h"
 #include "graphics/base/surface_controller.h"
 #include "graphics/impl/vec/vec2_impl.h"
 

@@ -5,7 +5,7 @@
 #include "core/util/log.h"
 
 #include "graphics/base/camera.h"
-#include "graphics/traits/size.h"
+#include "graphics/components/size.h"
 #include "graphics/base/viewport.h"
 
 #include "renderer/base/render_target.h"

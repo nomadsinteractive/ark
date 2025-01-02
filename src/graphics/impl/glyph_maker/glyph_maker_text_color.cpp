@@ -3,7 +3,7 @@
 #include "core/base/bean_factory.h"
 #include "core/inf/variable.h"
 
-#include "graphics/base/render_object.h"
+#include "graphics/components/render_object.h"
 #include "graphics/base/glyph.h"
 
 namespace ark {

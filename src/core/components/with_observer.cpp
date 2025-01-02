@@ -1,4 +1,4 @@
-#include "core/traits/with_observer.h"
+#include "core/components/with_observer.h"
 
 #include "core/base/observer.h"
 

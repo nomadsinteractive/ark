@@ -2,7 +2,7 @@
 
 #include "core/base/wrapper.h"
 #include "core/inf/variable.h"
-#include "core/traits/with_observer.h"
+#include "core/components/with_observer.h"
 #include "core/types/shared_ptr.h"
 #include "core/util/updatable_util.h"
 

@@ -70,7 +70,7 @@ public:
 
 private:
     sp<T> _lazy_instance;
-    std::tuple<Args...> _args;
+    std::tuple<std::remove_reference_t<Args>...> _args;
     MakeSharedPtrType _maker_func;
 };
 

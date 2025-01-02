@@ -20,7 +20,6 @@ private:
 public:
     WithRenderable(std::vector<Manifest> manifests);
 
-    TypeId onPoll(WiringContext& context) override;
     void onWire(const WiringContext& context) override;
 
     struct ManifestFactory {

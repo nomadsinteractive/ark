@@ -5,7 +5,7 @@
 #include "graphics/base/layer_context.h"
 #include "graphics/base/render_command_pipeline.h"
 #include "graphics/base/render_layer.h"
-#include "graphics/base/render_object.h"
+#include "graphics/components/render_object.h"
 
 #include "renderer/impl/model_loader/model_loader_cached.h"
 

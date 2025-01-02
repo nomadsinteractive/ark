@@ -1,7 +1,7 @@
-#include "app/traits/with_text.h"
+#include "app/components/with_text.h"
 
 #include "graphics/base/boundaries.h"
-#include "graphics/traits/with_transform.h"
+#include "graphics/components/with_transform.h"
 #include "graphics/util/mat4_type.h"
 #include "graphics/util/vec3_type.h"
 
@@ -11,8 +11,8 @@
 
 namespace ark {
 
-WithText::WithText(sp<Text> text, String nodeName)
-    : _text(std::move(text)), _node_name(std::move(nodeName))
+WithText::WithText(sp<Text> text, String nodeName, String viewName)
+    : _text(std::move(text)), _node_name(std::move(nodeName)), _view_name(std::move(viewName))
 {
 }
 
@@ -24,37 +24,32 @@ TypeId WithText::onPoll(WiringContext& context)
 
 void WithText::onWire(const WiringContext& context)
 {
-    if(sp<Boundaries> boundaries = context.getComponent<Boundaries>())
-        _text->setBoundaries(std::move(boundaries));
+    _text->onWire(context);
 
-    if(!_text->layoutParam())
-        if(const sp<View> view = context.getComponent<View>())
-            _text->setLayoutParam(view->layoutParam());
+    if(_view_name)
+        _text->setBoundaries(context.ensureComponent<View>()->findView(_view_name)->makeBoundaries());
 
-    sp<Mat4> matrix;
-    if(const sp<WithTransform> transform = context.getComponent<WithTransform>())
-        matrix = transform->transform();
     if(_node_name)
     {
         const sp<Model> model = context.getComponent<Model>();
         CHECK(model, "Text with transform node \"%s\" has no model defined", _node_name.c_str());
         const sp<Node> node = model->findNode(_node_name);
         CHECK(node, "Text with transform node \"%s\" model has no node defined", _node_name.c_str());
+        sp<Mat4> matrix = _text->transform();
         matrix = matrix ? Mat4Type::matmul(std::move(matrix), node->localMatrix()) : sp<Mat4>::make<Mat4::Const>(node->localMatrix());
+        if(matrix)
+            _text->setTransform(std::move(matrix));
     }
-    if(matrix)
-        _text->setTransform(std::move(matrix));
-    _text->show(context.getComponent<Discarded>());
 }
 
 WithText::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _text(factory.ensureBuilder<Text>(manifest, constants::TEXT)), _node_name(Documents::getAttribute(manifest, "node-name"))
+    : _text(factory.ensureBuilder<Text>(manifest, constants::TEXT)), _node_name(Documents::getAttribute(manifest, "node-name")), _view_name(Documents::getAttribute(manifest, "view-name"))
 {
 }
 
 sp<Wirable> WithText::BUILDER::build(const Scope& args)
 {
-    return sp<Wirable>::make<WithText>(_text->build(args), _node_name);
+    return sp<Wirable>::make<WithText>(_text->build(args), _node_name, _view_name);
 }
 
 }

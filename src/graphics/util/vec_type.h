@@ -17,7 +17,7 @@
 #include "core/util/operators.h"
 
 #include "graphics/forwarding.h"
-#include "graphics/traits/size.h"
+#include "graphics/components/size.h"
 #include "graphics/impl/vec/vec_subscribed.h"
 
 #include "app/base/application_context.h"

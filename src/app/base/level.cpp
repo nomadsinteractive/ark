@@ -8,8 +8,8 @@
 
 #include "graphics/base/camera.h"
 #include "graphics/base/layer.h"
-#include "graphics/traits/quaternion.h"
-#include "graphics/base/render_object.h"
+#include "graphics/components/quaternion.h"
+#include "graphics/components/render_object.h"
 #include "graphics/base/transform_3d.h"
 #include "graphics/util/vec3_type.h"
 #include "graphics/util/vec4_type.h"
@@ -20,7 +20,7 @@
 #include "app/base/application_bundle.h"
 #include "app/base/rigidbody.h"
 #include "app/inf/collider.h"
-#include "app/traits/shape.h"
+#include "app/components/shape.h"
 
 namespace ark {
 

@@ -2,14 +2,14 @@
 
 #include "core/inf/wirable.h"
 
-#include "graphics/base/text.h"
+#include "graphics/components/text.h"
 
 namespace ark {
 
 class ARK_API WithText final : public Wirable {
 public:
 //  [[script::bindings::auto]]
-    WithText(sp<Text> text, String nodeName = "");
+    WithText(sp<Text> text, String nodeName = "", String viewName = "");
 
     TypeId onPoll(WiringContext& context) override;
     void onWire(const WiringContext& context) override;
@@ -24,11 +24,13 @@ public:
     private:
         sp<Builder<Text>> _text;
         String _node_name;
+        String _view_name;
     };
 
 private:
     sp<Text> _text;
     String _node_name;
+    String _view_name;
 };
 
 }

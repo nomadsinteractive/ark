@@ -8,7 +8,7 @@
 #include "core/types/ref.h"
 #include "core/util/log.h"
 
-#include "graphics/traits/size.h"
+#include "graphics/components/size.h"
 #include "graphics/base/v2.h"
 
 #include "renderer/base/resource_loader_context.h"
@@ -19,7 +19,7 @@
 #include "app/base/rigidbody.h"
 #include "app/inf/broad_phrase.h"
 #include "app/inf/narrow_phrase.h"
-#include "app/traits/shape.h"
+#include "app/components/shape.h"
 #include "app/util/rigid_body_def.h"
 
 namespace ark {

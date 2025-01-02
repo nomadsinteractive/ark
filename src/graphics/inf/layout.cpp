@@ -2,7 +2,7 @@
 
 #include "core/util/updatable_util.h"
 
-#include "graphics/traits/layout_param.h"
+#include "graphics/components/layout_param.h"
 
 namespace ark {
 

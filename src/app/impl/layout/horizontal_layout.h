@@ -1,6 +1,6 @@
 #pragma once
 
-#include "graphics/traits/layout_param.h"
+#include "graphics/components/layout_param.h"
 
 #include "graphics/inf/layout.h"
 

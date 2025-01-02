@@ -1,6 +1,6 @@
 #include "bullet/base/rigidbody_bullet.h"
 
-#include "app/traits/shape.h"
+#include "app/components/shape.h"
 
 #include "bullet/base/collision_shape.h"
 #include "bullet/base/bt_rigidbody_ref.h"

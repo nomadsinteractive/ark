@@ -4,7 +4,7 @@
 #include "core/util/documents.h"
 #include "core/util/strings.h"
 
-#include "graphics/base/render_object.h"
+#include "graphics/components/render_object.h"
 #include "graphics/base/tile.h"
 #include "graphics/base/tileset.h"
 

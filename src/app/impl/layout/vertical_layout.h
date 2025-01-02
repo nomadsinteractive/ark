@@ -3,7 +3,7 @@
 #include "core/inf/builder.h"
 
 #include "graphics/forwarding.h"
-#include "graphics/traits/layout_param.h"
+#include "graphics/components/layout_param.h"
 
 #include "graphics/inf/layout.h"
 

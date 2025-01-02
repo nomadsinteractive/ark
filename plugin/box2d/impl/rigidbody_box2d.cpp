@@ -6,12 +6,12 @@
 #include "core/util/bean_utils.h"
 
 #include "graphics/base/rect.h"
-#include "graphics/base/render_object.h"
-#include "graphics/traits/rotation.h"
+#include "graphics/components/render_object.h"
+#include "graphics/components/rotation.h"
 #include "graphics/base/v3.h"
 
 #include "app/base/application_context.h"
-#include "app/traits/shape.h"
+#include "app/components/shape.h"
 
 #include "box2d/impl/collider_box2d.h"
 

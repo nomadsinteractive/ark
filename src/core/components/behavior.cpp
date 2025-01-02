@@ -1,4 +1,4 @@
-#include "core/traits/behavior.h"
+#include "core/components/behavior.h"
 
 #include "core/ark.h"
 
@@ -36,11 +36,6 @@ private:
 Behavior::Behavior(Box delegate)
     : _interpreter(Ark::instance().applicationContext()->interpreter()), _delegate(std::move(delegate))
 {
-}
-
-TypeId Behavior::onPoll(WiringContext& context)
-{
-    return constants::TYPE_ID_NONE;
 }
 
 void Behavior::onWire(const WiringContext& context)

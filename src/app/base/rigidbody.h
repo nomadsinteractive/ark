@@ -23,7 +23,6 @@ public:
 //  [[script::bindings::auto]]
     virtual void discard();
 
-    TypeId onPoll(WiringContext& context) override;
     void onWire(const WiringContext& context) override;
 
 //  [[script::bindings::property]]

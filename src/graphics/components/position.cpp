@@ -1,4 +1,4 @@
-#include "graphics/traits/position.h"
+#include "graphics/components/position.h"
 
 #include "core/impl/variable/variable_dirty.h"
 #include "graphics/base/v3.h"

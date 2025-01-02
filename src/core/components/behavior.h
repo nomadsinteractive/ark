@@ -5,7 +5,7 @@
 #include "core/inf/debris.h"
 #include "core/inf/interpreter.h"
 #include "core/inf/wirable.h"
-#include "core/traits/with_debris.h"
+#include "core/components/with_debris.h"
 #include "core/types/box.h"
 #include "core/types/shared_ptr.h"
 
@@ -17,7 +17,6 @@ public:
 //  [[script::bindings::auto]]
     Behavior(Box delegate);
 
-    TypeId onPoll(WiringContext& context) override;
     void onWire(const WiringContext& context) override;
     void traverse(const Visitor& visitor) override;
 

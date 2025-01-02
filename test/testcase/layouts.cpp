@@ -2,9 +2,9 @@
 #include "core/base/bean_factory.h"
 
 #include "graphics/base/rect.h"
-#include "graphics/traits/size.h"
+#include "graphics/components/size.h"
 #include "graphics/inf/layout.h"
-#include "graphics/traits/layout_param.h"
+#include "graphics/components/layout_param.h"
 
 #include "test/base/test_case.h"
 

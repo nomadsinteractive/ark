@@ -1,4 +1,4 @@
-#include "graphics/base/render_object.h"
+#include "graphics/components/render_object.h"
 
 #include "core/base/bean_factory.h"
 #include "core/base/named_hash.h"
@@ -7,7 +7,7 @@
 #include "core/inf/wirable.h"
 #include "core/util/updatable_util.h"
 #include "graphics/impl/transform/transform_impl.h"
-#include "graphics/traits/position.h"
+#include "graphics/components/position.h"
 
 #include "graphics/util/vec3_type.h"
 
@@ -36,7 +36,7 @@ public:
     void onWire(const WiringContext& context) override
     {
         if(_view_name)
-            _render_object->setPosition(context.ensureComponent<View>()->layoutPosition());
+            _render_object->setPosition(context.ensureComponent<View>()->findView(_view_name)->layoutPosition());
         else if(sp<Vec3> position = context.getComponent<Position>())
             _render_object->setPosition(std::move(position));
         else if(const auto boundaries = context.getComponent<Boundaries>())

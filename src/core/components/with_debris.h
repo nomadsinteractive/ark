@@ -10,7 +10,6 @@ public:
     WithDebris();
     DISALLOW_COPY_AND_ASSIGN(WithDebris);
 
-    TypeId onPoll(WiringContext& context) override;
     void onWire(const WiringContext& context) override;
 
     void traverse(const Visitor& visitor) override;

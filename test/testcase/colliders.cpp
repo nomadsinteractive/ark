@@ -11,8 +11,8 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/base/rect.h"
-#include "graphics/base/render_object.h"
-#include "graphics/traits/quaternion.h"
+#include "graphics/components/render_object.h"
+#include "graphics/components/quaternion.h"
 #include "graphics/base/v2.h"
 
 #include "app/base/application_context.h"
@@ -21,7 +21,7 @@
 #include "app/inf/collider.h"
 #include "app/inf/collision_callback.h"
 #include "app/inf/broad_phrase.h"
-#include "app/traits/shape.h"
+#include "app/components/shape.h"
 #include "core/types/ref.h"
 #include "graphics/util/transform_type.h"
 

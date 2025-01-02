@@ -10,7 +10,7 @@
 #include "graphics/base/layer_context.h"
 #include "graphics/base/render_layer.h"
 
-#include "graphics/base/text.h"
+#include "graphics/components/text.h"
 
 #include "app/base/application_context.h"
 

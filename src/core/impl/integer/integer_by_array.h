@@ -3,7 +3,7 @@
 #include "core/forwarding.h"
 #include "core/base/wrapper.h"
 #include "core/inf/variable.h"
-#include "core/traits/with_observer.h"
+#include "core/components/with_observer.h"
 #include "core/util/integer_type.h"
 
 namespace ark {

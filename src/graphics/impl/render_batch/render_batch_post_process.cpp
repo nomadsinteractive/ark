@@ -4,7 +4,7 @@
 #include "core/types/global.h"
 
 #include "graphics/base/layer_context.h"
-#include "graphics/base/render_object.h"
+#include "graphics/components/render_object.h"
 #include "graphics/util/vec3_type.h"
 
 #include "renderer/impl/model_loader/model_loader_unit_quad.h"

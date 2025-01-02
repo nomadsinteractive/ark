@@ -1,8 +1,8 @@
 #include "graphics/util/renderer_type.h"
 
 #include "core/collection/traits.h"
-#include "core/traits/discarded.h"
-#include "core/traits/visibility.h"
+#include "core/components/discarded.h"
+#include "core/components/visibility.h"
 #include "core/util/strings.h"
 #include "core/util/string_convert.h"
 

@@ -3,7 +3,7 @@
 #include "core/base/bean_factory.h"
 #include "core/inf/variable.h"
 
-#include "graphics/traits/size.h"
+#include "graphics/components/size.h"
 #include "graphics/base/v2.h"
 
 #include "box2d/impl/body_create_info.h"

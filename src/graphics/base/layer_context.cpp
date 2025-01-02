@@ -5,7 +5,7 @@
 #include "core/util/log.h"
 #include "core/util/updatable_util.h"
 
-#include "graphics/base/render_object.h"
+#include "graphics/components/render_object.h"
 #include "graphics/base/layer_context_snapshot.h"
 #include "graphics/util/renderable_type.h"
 

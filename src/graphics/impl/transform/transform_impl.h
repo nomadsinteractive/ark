@@ -16,7 +16,8 @@ namespace ark {
 class ARK_API TransformImpl : public Wrapper<Transform>, public Transform, Implements<TransformImpl, Transform, Mat4> {
 public:
     TransformImpl(TransformType::Type type = TransformType::TYPE_NONE, sp<Vec4> rotation = nullptr, sp<Vec3> scale = nullptr, sp<Vec3> translation = nullptr);
-    TransformImpl(sp<Transform> delegate);
+    explicit TransformImpl(sp<Transform> delegate);
+    explicit TransformImpl(sp<Mat4> delegate);
 
     bool update(uint64_t timestamp) override;
     M4 val() override;

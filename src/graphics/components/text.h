@@ -5,6 +5,7 @@
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
 #include "core/inf/builder.h"
+#include "core/inf/wirable.h"
 #include "core/types/safe_builder.h"
 #include "core/types/shared_ptr.h"
 
@@ -14,10 +15,12 @@
 
 namespace ark {
 
-class ARK_API Text {
+class ARK_API Text : public Wirable {
 public:
 //  [[script::bindings::auto]]
     Text(sp<RenderLayer> renderLayer, sp<StringVar> text = nullptr, sp<Vec3> position = nullptr, sp<LayoutParam> layoutParam = nullptr, sp<GlyphMaker> glyphMaker = nullptr, sp<Mat4> transform = nullptr, float letterSpacing = 0.0f, float lineHeight = 0.0f, float lineIndent = 0.0f);
+
+    void onWire(const WiringContext& context) override;
 
 //  [[script::bindings::property]]
     const std::vector<sp<RenderObject>>& contents() const;

@@ -1,7 +1,7 @@
 #include "graphics/base/glyph.h"
 
-#include "graphics/base/render_object.h"
-#include "graphics/traits/size.h"
+#include "graphics/components/render_object.h"
+#include "graphics/components/size.h"
 #include "graphics/util/vec3_type.h"
 
 namespace ark {

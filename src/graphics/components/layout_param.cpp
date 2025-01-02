@@ -1,4 +1,4 @@
-#include "graphics/traits/layout_param.h"
+#include "graphics/components/layout_param.h"
 
 #include "core/base/constants.h"
 #include "core/inf/variable.h"
@@ -7,7 +7,7 @@
 #include "core/util/strings.h"
 #include "core/util/updatable_util.h"
 
-#include "graphics/traits/size.h"
+#include "graphics/components/size.h"
 
 namespace ark {
 

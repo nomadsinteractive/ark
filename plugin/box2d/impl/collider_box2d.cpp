@@ -5,17 +5,17 @@
 #include "core/util/bean_utils.h"
 #include "core/util/boolean_type.h"
 
-#include "graphics/traits/quaternion.h"
+#include "graphics/components/quaternion.h"
 #include "graphics/base/rect.h"
 #include "graphics/base/v2.h"
-#include "graphics/traits/rotation.h"
+#include "graphics/components/rotation.h"
 
 #include "renderer/base/resource_loader_context.h"
 
 #include "app/base/collision_manifold.h"
 #include "app/base/raycast_manifold.h"
 #include "app/inf/collision_callback.h"
-#include "app/traits/shape.h"
+#include "app/components/shape.h"
 
 #include "box2d/impl/rigidbody_box2d.h"
 #include "box2d/impl/joint.h"

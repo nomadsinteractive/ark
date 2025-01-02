@@ -11,12 +11,12 @@
 #include "core/inf/dictionary.h"
 #include "core/inf/variable.h"
 #include "core/impl/dictionary/dictionary_by_attribute_name.h"
-#include "core/traits/discarded.h"
+#include "core/components/discarded.h"
 #include "core/types/weak_ptr.h"
 #include "core/util/math.h"
 
 #include "graphics/inf/transform.h"
-#include "graphics/traits/quaternion.h"
+#include "graphics/components/quaternion.h"
 
 #include "app/base/application_context.h"
 #include "core/base/resource_loader.h"

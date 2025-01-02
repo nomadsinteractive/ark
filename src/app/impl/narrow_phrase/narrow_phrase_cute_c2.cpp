@@ -4,12 +4,12 @@
 #include "core/util/math.h"
 
 #include "graphics/base/rect.h"
-#include "graphics/traits/size.h"
+#include "graphics/components/size.h"
 
 #include "renderer/base/resource_loader_context.h"
 
 #include "app/inf/collider.h"
-#include "app/traits/shape.h"
+#include "app/components/shape.h"
 #include "app/util/rigid_body_def.h"
 
 namespace ark {

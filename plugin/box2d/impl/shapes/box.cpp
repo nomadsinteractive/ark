@@ -2,7 +2,7 @@
 
 #include "core/base/bean_factory.h"
 
-#include "graphics/traits/size.h"
+#include "graphics/components/size.h"
 
 #include "box2d/impl/body_create_info.h"
 

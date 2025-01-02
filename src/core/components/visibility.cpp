@@ -1,4 +1,4 @@
-#include "core/traits/visibility.h"
+#include "core/components/visibility.h"
 
 #include "core/base/bean_factory.h"
 #include "core/impl/variable/variable_wrapper.h"

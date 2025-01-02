@@ -4,7 +4,7 @@
 
 #include "core/base/constants.h"
 #include "core/base/ref_manager.h"
-#include "core/traits/with_id.h"
+#include "core/components/with_id.h"
 #include "core/types/global.h"
 #include "core/util/wirable_type.h"
 

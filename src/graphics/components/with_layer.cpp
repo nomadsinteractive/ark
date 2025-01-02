@@ -1,5 +1,6 @@
 #include "with_layer.h"
 
+#include "core/base/bean_factory.h"
 #include "core/base/constants.h"
 
 #include "graphics/base/layer.h"
@@ -14,6 +15,7 @@ WithLayer::WithLayer(sp<Layer> layer)
 
 TypeId WithLayer::onPoll(WiringContext& context)
 {
+    context.setComponent(_layer);
     return constants::TYPE_ID_NONE;
 }
 

@@ -1,7 +1,7 @@
 #include "renderer/base/texture_bundle.h"
 
 #include "graphics/base/bitmap.h"
-#include "graphics/traits/size.h"
+#include "graphics/components/size.h"
 
 #include "renderer/base/render_controller.h"
 #include "renderer/base/render_engine.h"

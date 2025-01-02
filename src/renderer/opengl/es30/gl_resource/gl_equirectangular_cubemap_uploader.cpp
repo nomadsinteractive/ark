@@ -1,6 +1,6 @@
 #include "renderer/opengl/es30/gl_resource/gl_equirectangular_cubemap_uploader.h"
 
-#include "graphics/traits/size.h"
+#include "graphics/components/size.h"
 
 #include "renderer/base/shader.h"
 #include "renderer/base/pipeline_bindings.h"

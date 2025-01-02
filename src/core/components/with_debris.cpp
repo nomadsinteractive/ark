@@ -1,4 +1,4 @@
-#include "core/traits/with_debris.h"
+#include "core/components/with_debris.h"
 
 #include <vector>
 
@@ -29,11 +29,6 @@ struct WithDebris::Tracker {
 
 WithDebris::WithDebris()
     : _tracker(sp<Tracker>::make()) {
-}
-
-TypeId WithDebris::onPoll(WiringContext& context)
-{
-    return constants::TYPE_ID_NONE;
 }
 
 void WithDebris::onWire(const WiringContext& context)

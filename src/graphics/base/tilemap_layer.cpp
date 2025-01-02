@@ -9,8 +9,8 @@
 #include "core/util/math.h"
 
 #include "graphics/base/layer_context.h"
-#include "graphics/base/render_object.h"
-#include "graphics/traits/size.h"
+#include "graphics/components/render_object.h"
+#include "graphics/components/size.h"
 #include "graphics/base/tile.h"
 #include "graphics/base/tilemap.h"
 #include "graphics/base/tileset.h"

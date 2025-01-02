@@ -1,11 +1,11 @@
-#include "graphics/traits/rotation.h"
+#include "graphics/components/rotation.h"
 
 #include "core/base/bean_factory.h"
 #include "core/base/constants.h"
 #include "core/impl/variable/variable_dirty.h"
 
 #include "graphics/base/v3.h"
-#include "graphics/traits/quaternion.h"
+#include "graphics/components/quaternion.h"
 #include "graphics/util/vec4_type.h"
 
 namespace ark {

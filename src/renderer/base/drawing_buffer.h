@@ -8,7 +8,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
-#include "graphics/base/render_object.h"
+#include "graphics/components/render_object.h"
 #include "graphics/inf/transform.h"
 #include "graphics/base/v3.h"
 

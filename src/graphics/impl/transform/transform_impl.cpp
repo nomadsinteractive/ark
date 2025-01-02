@@ -86,6 +86,11 @@ TransformImpl::TransformImpl(sp<Transform> delegate)
     doUpdateDelegate();
 }
 
+TransformImpl::TransformImpl(sp<Mat4> delegate)
+    : TransformImpl(sp<Transform>::make<TransformDelegateMat4>(std::move(delegate)))
+{
+}
+
 Transform::Snapshot TransformImpl::snapshot()
 {
     return _wrapped->snapshot();

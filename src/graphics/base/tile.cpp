@@ -1,6 +1,6 @@
 #include "graphics/base/tile.h"
 
-#include "graphics/base/render_object.h"
+#include "graphics/components/render_object.h"
 
 namespace ark {
 

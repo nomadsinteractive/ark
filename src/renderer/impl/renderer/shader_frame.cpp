@@ -3,7 +3,7 @@
 #include "core/types/global.h"
 
 #include "graphics/base/render_request.h"
-#include "graphics/traits/size.h"
+#include "graphics/components/size.h"
 
 #include "renderer/base/buffer.h"
 #include "renderer/base/drawing_context.h"

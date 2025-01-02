@@ -1,4 +1,4 @@
-#include "graphics/base/text.h"
+#include "graphics/components/text.h"
 
 #include <cwctype>
 
@@ -15,15 +15,15 @@
 #include "graphics/base/layer_context.h"
 #include "graphics/base/glyph.h"
 #include "graphics/base/render_layer.h"
-#include "graphics/base/render_object.h"
+#include "graphics/components/render_object.h"
 #include "graphics/base/render_request.h"
-#include "graphics/traits/size.h"
+#include "graphics/components/size.h"
 #include "graphics/base/v3.h"
 #include "graphics/impl/glyph_maker/glyph_maker_span.h"
 #include "graphics/impl/renderable/renderable_with_transform.h"
 #include "graphics/inf/glyph_maker.h"
 #include "graphics/inf/layout.h"
-#include "graphics/traits/layout_param.h"
+#include "graphics/components/layout_param.h"
 #include "graphics/util/vec3_type.h"
 
 #include "renderer/base/atlas.h"
@@ -508,6 +508,21 @@ private:
 Text::Text(sp<RenderLayer> renderLayer, sp<StringVar> text, sp<Vec3> position, sp<LayoutParam> layoutParam, sp<GlyphMaker> glyphMaker, sp<Mat4> transform, float letterSpacing, float lineHeight, float lineIndent)
     : _content(sp<Content>::make(std::move(renderLayer), std::move(text), std::move(position), std::move(layoutParam), std::move(glyphMaker), std::move(transform), letterSpacing, lineHeight, lineIndent))
 {
+}
+
+void Text::onWire(const WiringContext& context)
+{
+    if(sp<Boundaries> boundaries = context.getComponent<Boundaries>())
+        setBoundaries(std::move(boundaries));
+
+    if(!layoutParam())
+        if(const sp<View> view = context.getComponent<View>())
+            setLayoutParam(view->layoutParam());
+
+    if(const sp<Mat4> transform = context.getComponent<Transform>())
+        setTransform(std::move(transform));
+
+    show(context.getComponent<Discarded>());
 }
 
 const std::vector<sp<RenderObject>>& Text::contents() const

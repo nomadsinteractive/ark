@@ -6,7 +6,7 @@
 #include "core/types/global.h"
 
 #include "graphics/base/bitmap.h"
-#include "graphics/traits/size.h"
+#include "graphics/components/size.h"
 
 
 namespace ark {

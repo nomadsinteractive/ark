@@ -7,7 +7,7 @@
 
 #include "graphics/base/rect.h"
 #include "graphics/base/color.h"
-#include "graphics/traits/layout_param.h"
+#include "graphics/components/layout_param.h"
 
 #include "app/view/view.h"
 

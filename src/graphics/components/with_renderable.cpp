@@ -1,12 +1,12 @@
-#include "graphics/traits/with_renderable.h"
+#include "graphics/components/with_renderable.h"
 
-#include "core/traits/with_id.h"
+#include "core/components/with_id.h"
 #include "core/util/documents.h"
 
 #include "graphics/base/layer_context.h"
-#include "graphics/base/render_object.h"
+#include "graphics/components/render_object.h"
 #include "graphics/impl/renderable/renderable_with_transform.h"
-#include "graphics/traits/with_transform.h"
+#include "graphics/components/with_transform.h"
 #include "graphics/util/mat4_type.h"
 
 #include "renderer/base/model.h"
@@ -19,24 +19,19 @@ WithRenderable::WithRenderable(std::vector<Manifest> manifests)
 {
 }
 
-TypeId WithRenderable::onPoll(WiringContext& context)
-{
-    return constants::TYPE_ID_NONE;
-}
-
 void WithRenderable::onWire(const WiringContext& context)
 {
     const sp<Boolean> discarded = context.getComponent<Discarded>();
     const sp<Boolean> visible = context.getComponent<Visibility>();
     const sp<Model> model = context.getComponent<Model>();
-    const sp<WithTransform> withTransform = context.getComponent<WithTransform>();
+    const sp<Transform> transform = context.getComponent<Transform>();
     for(const auto& [layer, renderable, renderObject, transformNode] : _manifests)
     {
         sp<Renderable> r = renderObject ? renderObject.cast<Renderable>() : renderable;
         const sp<Node> node = model && transformNode ? model->findNode(transformNode) : nullptr;
         CHECK(!transformNode || node, "Transform node \"%s\" doesn't exist", transformNode.c_str());
-        if(withTransform)
-            r = sp<Renderable>::make<RenderableWithTransform>(std::move(r), node ? Mat4Type::matmul(withTransform->transform(), node->localMatrix()) : withTransform->transform());
+        if(transform)
+            r = sp<Renderable>::make<RenderableWithTransform>(std::move(r), node ? Mat4Type::matmul(transform, node->localMatrix()) : transform);
         else if(node)
             r = sp<Renderable>::make<RenderableWithTransform>(std::move(r), sp<Mat4>::make<Mat4::Const>(node->localMatrix()));
         if(renderObject)

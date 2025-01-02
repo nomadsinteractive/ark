@@ -3,7 +3,7 @@
 #include "graphics/base/render_request.h"
 
 #include "graphics/inf/layout.h"
-#include "graphics/traits/layout_param.h"
+#include "graphics/components/layout_param.h"
 #include "app/view/view.h"
 
 namespace ark {

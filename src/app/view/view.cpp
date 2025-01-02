@@ -8,8 +8,8 @@
 #include "core/util/updatable_util.h"
 
 #include "graphics/base/layer.h"
-#include "graphics/base/render_object.h"
-#include "graphics/traits/layout_param.h"
+#include "graphics/components/render_object.h"
+#include "graphics/components/layout_param.h"
 #include "graphics/util/vec3_type.h"
 #include "graphics/util/renderable_type.h"
 
@@ -18,11 +18,11 @@
 
 #include "app/base/application_context.h"
 #include "app/base/entity.h"
-#include "app/traits/shape.h"
-#include "app/traits/with_text.h"
+#include "app/components/shape.h"
+#include "app/components/with_text.h"
 #include "app/view/view_hierarchy.h"
 #include "core/util/wirable_type.h"
-#include "graphics/traits/position.h"
+#include "graphics/components/position.h"
 
 namespace ark {
 
@@ -264,7 +264,7 @@ public:
     TypeId onPoll(WiringContext& context) override
     {
         _view->onPoll(context);
-        context.putComponent(_view);
+        context.setComponent(_view);
         return constants::TYPE_ID_NONE;
     }
 
@@ -291,13 +291,9 @@ View::~View()
 
 TypeId View::onPoll(WiringContext& context)
 {
-    sp<Vec3> position = layoutPosition();
-    sp<Vec3> size = layoutSize();
-    if(_background)
-        context.setComponentBuilder(to_lazy_builder<Renderable>(RenderableType::create, sp<Renderable>::make<RenderableView>(_stub, _background, true), _updatable_layout, _is_discarded));
-    context.setComponentBuilder(make_lazy_builder<Shape>(Shape::TYPE_AABB, size));
-    context.setComponentBuilder(make_lazy_builder<Boundaries>(position, Vec3Type::mul(std::move(size), 0.5f)));
-    context.setComponentBuilder(make_lazy_builder<Position>(std::move(position)));
+    context.setComponent(makeBoundaries());
+    context.setComponent(sp<Position>::make(layoutPosition()));
+    context.setComponent(sp<Shape>::make(Shape::TYPE_AABB, layoutSize()));
     return Type<View>::id();
 }
 
@@ -385,6 +381,11 @@ sp<View> View::findView(StringView name) const
                 return found;
         }
     return nullptr;
+}
+
+sp<Boundaries> View::makeBoundaries()
+{
+    return sp<Boundaries>::make(layoutPosition(), Vec3Type::mul(layoutSize(), 0.5f));
 }
 
 const sp<ViewHierarchy>& View::hierarchy() const

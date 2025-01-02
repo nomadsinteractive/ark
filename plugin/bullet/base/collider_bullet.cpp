@@ -7,8 +7,8 @@
 #include "core/inf/variable.h"
 #include "core/util/boolean_type.h"
 
-#include "graphics/traits/quaternion.h"
-#include "graphics/traits/size.h"
+#include "graphics/components/quaternion.h"
+#include "graphics/components/size.h"
 #include "graphics/base/v3.h"
 
 #include "renderer/base/mesh.h"
@@ -18,7 +18,7 @@
 #include "app/base/application_context.h"
 #include "app/base/collision_manifold.h"
 #include "app/inf/collision_callback.h"
-#include "app/traits//shape.h"
+#include "app/components//shape.h"
 
 #include "bullet/base/bt_rigidbody_ref.h"
 #include "bullet/base/collision_shape.h"

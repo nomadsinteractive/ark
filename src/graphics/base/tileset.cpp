@@ -6,7 +6,7 @@
 #include "core/inf/storage.h"
 #include "core/util/documents.h"
 
-#include "graphics/base/render_object.h"
+#include "graphics/components/render_object.h"
 #include "graphics/base/tile.h"
 
 namespace ark {

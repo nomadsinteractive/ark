@@ -1,4 +1,4 @@
-#include "core/traits/discarded.h"
+#include "core/components/discarded.h"
 
 #include "core/base/bean_factory.h"
 #include "core/impl/variable/variable_wrapper.h"

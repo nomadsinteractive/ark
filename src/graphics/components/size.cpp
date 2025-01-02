@@ -1,4 +1,4 @@
-#include "graphics/traits/size.h"
+#include "graphics/components/size.h"
 
 #include "core/ark.h"
 #include "core/base/constants.h"

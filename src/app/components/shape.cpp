@@ -1,4 +1,4 @@
-#include "app/traits/shape.h"
+#include "app/components/shape.h"
 
 #include "core/impl/variable/variable_dirty.h"
 

@@ -2,7 +2,7 @@
 
 #include "app/base/application_context.h"
 #include "core/inf/interpreter.h"
-#include "core/traits/behavior.h"
+#include "core/components/behavior.h"
 
 #include "app/base/collision_manifold.h"
 #include "app/base/rigidbody.h"

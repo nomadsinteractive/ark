@@ -6,7 +6,7 @@
 
 #include "graphics/forwarding.h"
 #include "graphics/inf/layout.h"
-#include "graphics/traits/layout_param.h"
+#include "graphics/components/layout_param.h"
 
 namespace ark {
 

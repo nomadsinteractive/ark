@@ -9,7 +9,7 @@
 #include "core/types/safe_var.h"
 
 #include "graphics/forwarding.h"
-#include "graphics/base/text.h"
+#include "graphics/components/text.h"
 #include "graphics/inf/layout.h"
 #include "graphics/inf/renderable.h"
 
@@ -53,6 +53,8 @@ public:
     void addView(sp<View> view, sp<Boolean> discarded = nullptr);
 //  [[script::bindings::auto]]
     sp<View> findView(StringView name) const;
+
+    sp<Boundaries> makeBoundaries();
 
     const sp<ViewHierarchy>& hierarchy() const;
 

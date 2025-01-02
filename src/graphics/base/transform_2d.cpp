@@ -2,7 +2,7 @@
 
 #include "core/types/global.h"
 
-#include "graphics/traits/quaternion.h"
+#include "graphics/components/quaternion.h"
 #include "graphics/util/vec2_type.h"
 
 namespace ark {

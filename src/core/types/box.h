@@ -110,7 +110,7 @@ private:
     }
 
     template<typename T> void _type_check() const {
-        DCHECK(_type_id == Type<T>::id(), "Wrong type being unpacked");
+        CHECK(_type_id == Type<T>::id(), "Wrong type being unpacked");
     }
 
     typedef std::variant<PtrStub, EnumStub> _StubVariant;

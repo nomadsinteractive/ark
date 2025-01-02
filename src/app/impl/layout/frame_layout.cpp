@@ -1,6 +1,6 @@
 #include "app/impl/layout/frame_layout.h"
 
-#include "graphics/traits/layout_param.h"
+#include "graphics/components/layout_param.h"
 
 #include "app/util/layout_util.h"
 

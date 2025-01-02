@@ -13,8 +13,8 @@
 #include "app/base/application_context.h"
 #include "app/base/collision_manifold.h"
 #include "app/inf/collision_callback.h"
-#include "app/traits/shape.h"
-#include "app/traits/with_tag.h"
+#include "app/components/shape.h"
+#include "app/components/with_tag.h"
 
 namespace ark {
 
@@ -32,11 +32,6 @@ Rigidbody::~Rigidbody()
 void Rigidbody::discard()
 {
     _ref->discard();
-}
-
-TypeId Rigidbody::onPoll(WiringContext& context)
-{
-    return constants::TYPE_ID_NONE;
 }
 
 void Rigidbody::onWire(const WiringContext& context)
