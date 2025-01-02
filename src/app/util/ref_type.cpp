@@ -33,13 +33,13 @@ void RefType::discard(const sp<Ref>& self)
 sp<Entity> RefType::toEntity(const sp<Ref>& self)
 {
     Entity& entity = self->instance<Entity>();
-    return {std::shared_ptr<Entity>(&entity, [](void* ref) {}), Class::getClass<Entity>()};
+    return {std::shared_ptr<Entity>(&entity, [](void* ref) {}), Class::ensureClass<Entity>()};
 }
 
 sp<Rigidbody> RefType::toRigidbody(const sp<Ref>& self)
 {
     Rigidbody& rigidbody = self->instance<Rigidbody>();
-    return {std::shared_ptr<Rigidbody>(&rigidbody, [](void* ref) {}), Class::getClass<Rigidbody>()};
+    return {std::shared_ptr<Rigidbody>(&rigidbody, [](void* ref) {}), Class::ensureClass<Rigidbody>()};
 }
 
 }

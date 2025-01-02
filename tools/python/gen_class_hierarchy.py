@@ -59,8 +59,6 @@ def generate_bootstrap_func(func_name, classinfos):
     %s
 
     %s
-
-    classManager.updateHierarchy();
 }
 ''' % (func_name, INDENT.join(interfaces), INDENT.join([i.add_class() for i in classinfos]))
 

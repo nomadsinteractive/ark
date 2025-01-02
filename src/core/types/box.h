@@ -25,7 +25,7 @@ public:
         : _type_id(Type<T>::id()), _class(sharedPtr.getClass()), _stub(sharedPtr ? _make_ptr_stub(new SharedPtr<T>(std::move(sharedPtr))) : nullptr) {
     }
     template<typename T> explicit Box(T enumValue) noexcept
-        : _type_id(Type<T>::id()), _class(Class::getClass<T>()), _stub(_make_enum_stub<T>(enumValue)) {
+        : _type_id(Type<T>::id()), _class(Class::ensureClass<T>()), _stub(_make_enum_stub<T>(enumValue)) {
     }
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Box);
 

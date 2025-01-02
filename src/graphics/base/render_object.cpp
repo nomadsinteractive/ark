@@ -14,14 +14,16 @@
 #include "renderer/base/model.h"
 #include "renderer/base/varyings.h"
 
+#include "app/view/view.h"
+
 namespace ark {
 
 namespace {
 
 class WirableRenderObject final : public Wirable {
 public:
-    WirableRenderObject(sp<RenderObject> renderObject)
-        : _render_object(std::move(renderObject))
+    WirableRenderObject(sp<RenderObject> renderObject, String viewName)
+        : _render_object(std::move(renderObject)), _view_name(std::move(viewName))
     {
     }
 
@@ -33,7 +35,9 @@ public:
 
     void onWire(const WiringContext& context) override
     {
-        if(sp<Vec3> position = context.getComponent<Position>())
+        if(_view_name)
+            _render_object->setPosition(context.ensureComponent<View>()->layoutPosition());
+        else if(sp<Vec3> position = context.getComponent<Position>())
             _render_object->setPosition(std::move(position));
         else if(const auto boundaries = context.getComponent<Boundaries>())
             _render_object->setPosition(boundaries->center());
@@ -50,6 +54,7 @@ public:
 
 private:
     sp<RenderObject> _render_object;
+    String _view_name;
 };
 
 }
@@ -307,13 +312,13 @@ sp<Renderable> RenderObject::BUILDER_RENDERABLE::build(const Scope& args)
 }
 
 RenderObject::BUILDER_WIRABLE::BUILDER_WIRABLE(BeanFactory& factory, const document& manifest)
-    : _builder_impl(factory, manifest)
+    : _builder_impl(factory, manifest), _view_name(Documents::getAttribute(manifest, "view-name"))
 {
 }
 
 sp<Wirable> RenderObject::BUILDER_WIRABLE::build(const Scope& args)
 {
-    return sp<Wirable>::make<WirableRenderObject>(_builder_impl.build(args));
+    return sp<Wirable>::make<WirableRenderObject>(_builder_impl.build(args), _view_name);
 }
 
 }

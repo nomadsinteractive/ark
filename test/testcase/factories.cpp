@@ -75,7 +75,7 @@ public:
         const sp<Vec2> vertex = beanFactory.build<Vec2>("@vertex", args);
         TESTCASE_VALIDATE(vertex && vertex->val().x() == 100.0f && vertex->val().y() == 110.0f);
 
-        Class* clazz = Class::getClass<Vec2>();
+        Class* clazz = Class::ensureClass<Vec2>();
         TESTCASE_VALIDATE(clazz);
 
         const sp<Vec2> v1 = beanFactory.build<Vec2>("@v1", args);

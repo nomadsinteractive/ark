@@ -23,20 +23,16 @@ Class* ClassManager::addClass(TypeId id, const char* name, std::unique_ptr<IClas
     return classPtr.get();
 }
 
-Class* ClassManager::obtain(TypeId id)
+Class* ClassManager::ensureClass(TypeId id)
 {
     const std::scoped_lock<std::mutex> guard(_mutex);
 
     if(const auto iter = _classes.find(id); iter != _classes.end())
         return iter->second.get();
 
-    Class* clazz = new Class(id);
+    const auto clazz = new Class(id);
     _classes[id] = std::unique_ptr<Class>(clazz);
     return clazz;
-}
-
-void ClassManager::updateHierarchy()
-{
 }
 
 ClassManager& ClassManager::instance()

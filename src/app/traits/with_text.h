@@ -9,7 +9,7 @@ namespace ark {
 class ARK_API WithText final : public Wirable {
 public:
 //  [[script::bindings::auto]]
-    WithText(sp<Text> text, String transformNode = "");
+    WithText(sp<Text> text, String nodeName = "");
 
     TypeId onPoll(WiringContext& context) override;
     void onWire(const WiringContext& context) override;
@@ -23,12 +23,12 @@ public:
 
     private:
         sp<Builder<Text>> _text;
-        String _transform_node;
+        String _node_name;
     };
 
 private:
     sp<Text> _text;
-    String _transform_node;
+    String _node_name;
 };
 
 }

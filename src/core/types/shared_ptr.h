@@ -32,7 +32,7 @@ public:
     }
 
     template<typename U = T, typename... Args> static SharedPtr<T> make(Args&&... args) {
-        return SharedPtr<T>(new U(std::forward<Args>(args)...), std::is_same_v<T, U> ? nullptr : Class::getClass<U>());
+        return SharedPtr(new U(std::forward<Args>(args)...), std::is_same_v<T, U> ? nullptr : Class::ensureClass<U>());
     }
 
     bool operator == (const SharedPtr<T>& sp) const {
@@ -72,7 +72,7 @@ public:
 
     const Class* getClass() const {
         if(!_class)
-            _class = Class::getClass<T>();
+            _class = Class::ensureClass<T>();
         return _class;
     }
 
@@ -86,7 +86,7 @@ public:
 
     template<typename U> SharedPtr<U> tryCast() const {
         if(_ptr) {
-            Box self(Type<T>::id(), getClass(), this, _ptr.get(), [](const void*) {});
+            const Box self(Type<T>::id(), getClass(), this, _ptr.get(), [](const void*) {});
             return self.as<U>();
         }
         return nullptr;

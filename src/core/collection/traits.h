@@ -4,6 +4,7 @@
 #include "core/collection/table.h"
 #include "core/types/box.h"
 #include "core/types/optional.h"
+#include "core/types/shared_ptr.h"
 #include "core/types/type.h"
 
 namespace ark {
@@ -29,9 +30,27 @@ public:
     template<typename T> Box& put(sp<T> trait) {
         return put(Type<T>::id(), Box(std::move(trait)));
     }
+    template<typename T> Box& add(sp<T> trait) {
+        return add(Type<T>::id(), Box(std::move(trait)));
+    }
 
     Box& put(TypeId typeId, Box trait) {
         Box& slot = _traits[typeId];
+        slot = std::move(trait);
+        return slot;
+    }
+
+    Box& add(TypeId typeId, Box trait) {
+        Box& slot = _traits[typeId];
+        if(slot) {
+            Box& listBox = _traits[toVectorTypeId(typeId)];
+            sp<Vector<Box>> list = listBox.toPtr<Vector<Box>>();
+            if(!list) {
+                list = sp<Vector<Box>>::make();
+                listBox = Box(list);
+            }
+            list->push_back(trait);
+        }
         slot = std::move(trait);
         return slot;
     }

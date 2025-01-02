@@ -8,7 +8,7 @@ namespace ark {
 
 namespace {
 
-class DefaultClassImpl : public IClass {
+class DefaultClassImpl final : public IClass {
 public:
     Box cast(const Box& box, TypeId id) override {
         if(box.typeId() == id)
@@ -69,14 +69,14 @@ Box Class::cast(const Box& box, TypeId id) const
     return _delegate->cast(box, id);
 }
 
-void Class::setImplementation(std::set<TypeId>&& implementation)
+void Class::setImplementation(std::set<TypeId> implementation)
 {
-    _implements = implementation;
+    _implements = std::move(implementation);
 }
 
-Class* Class::getClass(TypeId id)
+Class* Class::ensureClass(TypeId id)
 {
-    return ClassManager::instance().obtain(id);
+    return ClassManager::instance().ensureClass(id);
 }
 
 Class* Class::addClass(TypeId id, const char* name, std::unique_ptr<IClass> impl)

@@ -1,8 +1,10 @@
 #pragma once
 
-#include <chrono>
-
 #include <stdint.h>
+
+#include <chrono>
+#include <map>
+#include <set>
 #include <vector>
 #include <unordered_map>
 
@@ -34,6 +36,10 @@ template<typename T> class WeakPtr;
 template<typename T> class Wrapper;
 
 template <typename T> using Vector = std::vector<T>;
+template <typename T> using Set = std::set<T>;
+
+template <typename T, typename U> using HashMap = std::unordered_map<T, U>;
+template <typename T, typename U> using Map = std::map<T, U>;
 
 template <typename T> using builder = SharedPtr<Builder<T>>;
 template <typename T> using sp = SharedPtr<T>;

@@ -506,7 +506,7 @@ private:
 };
 
 Text::Text(sp<RenderLayer> renderLayer, sp<StringVar> text, sp<Vec3> position, sp<LayoutParam> layoutParam, sp<GlyphMaker> glyphMaker, sp<Mat4> transform, float letterSpacing, float lineHeight, float lineIndent)
-    : _render_layer(std::move(renderLayer)), _content(sp<Content>::make(_render_layer, std::move(text), std::move(position), std::move(layoutParam), std::move(glyphMaker), std::move(transform), letterSpacing, lineHeight, lineIndent))
+    : _content(sp<Content>::make(std::move(renderLayer), std::move(text), std::move(position), std::move(layoutParam), std::move(glyphMaker), std::move(transform), letterSpacing, lineHeight, lineIndent))
 {
 }
 
@@ -578,7 +578,7 @@ void Text::show(sp<Boolean> discarded)
     hide();
 
     _render_batch = sp<RenderBatch>::make<RenderBatchContent>(_content, discarded ? std::move(discarded) : sp<Boolean>::make<BooleanByWeakRef<Content>>(_content, 0));
-    _render_layer->addRenderBatch(_render_batch);
+    _content->_render_layer->addRenderBatch(_render_batch);
 }
 
 void Text::hide()

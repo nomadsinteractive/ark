@@ -11,13 +11,14 @@
 
 namespace ark {
 
-WithText::WithText(sp<Text> text, String transformNode)
-    : _text(std::move(text)), _transform_node(std::move(transformNode))
+WithText::WithText(sp<Text> text, String nodeName)
+    : _text(std::move(text)), _node_name(std::move(nodeName))
 {
 }
 
 TypeId WithText::onPoll(WiringContext& context)
 {
+    context.addComponent(_text);
     return constants::TYPE_ID_NONE;
 }
 
@@ -33,12 +34,12 @@ void WithText::onWire(const WiringContext& context)
     sp<Mat4> matrix;
     if(const sp<WithTransform> transform = context.getComponent<WithTransform>())
         matrix = transform->transform();
-    if(_transform_node)
+    if(_node_name)
     {
         const sp<Model> model = context.getComponent<Model>();
-        CHECK(model, "Text with transform node \"%s\" has no model defined", _transform_node.c_str());
-        const sp<Node> node = model->findNode(_transform_node);
-        CHECK(node, "Text with transform node \"%s\" model has no node defined", _transform_node.c_str());
+        CHECK(model, "Text with transform node \"%s\" has no model defined", _node_name.c_str());
+        const sp<Node> node = model->findNode(_node_name);
+        CHECK(node, "Text with transform node \"%s\" model has no node defined", _node_name.c_str());
         matrix = matrix ? Mat4Type::matmul(std::move(matrix), node->localMatrix()) : sp<Mat4>::make<Mat4::Const>(node->localMatrix());
     }
     if(matrix)
@@ -47,13 +48,13 @@ void WithText::onWire(const WiringContext& context)
 }
 
 WithText::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _text(factory.ensureBuilder<Text>(manifest, constants::TEXT)), _transform_node(Documents::getAttribute(manifest, "transform-node"))
+    : _text(factory.ensureBuilder<Text>(manifest, constants::TEXT)), _node_name(Documents::getAttribute(manifest, "node-name"))
 {
 }
 
 sp<Wirable> WithText::BUILDER::build(const Scope& args)
 {
-    return sp<Wirable>::make<WithText>(_text->build(args), _transform_node);
+    return sp<Wirable>::make<WithText>(_text->build(args), _node_name);
 }
 
 }

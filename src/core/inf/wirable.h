@@ -1,7 +1,5 @@
 #pragma once
 
-#include <map>
-
 #include "core/forwarding.h"
 #include "core/base/bean_factory.h"
 #include "core/base/scope.h"
@@ -23,21 +21,22 @@ public:
             if(sp<T> component = _components.get<T>())
                 return component;
             if(const auto iter = _component_builders.find(Type<T>::id()); iter != _component_builders.end())
-                return iter->second.template toPtr<Builder<T>>()->build(Scope());
+                return iter->second.template toPtr<Builder<T>>()->build({});
             return nullptr;
         }
 
-        template<typename T> void addComponent(sp<T> component) {
-            if(sp<T> existing = getComponent<T>()) {
-                sp<Vector<T>> vector = _components.get<Vector<T>>();
-                if(!vector) {
-                    vector = sp<Vector<T>>::make();
-                    vector->push_back(std::move(existing));
-                    _components.put(vector);
-                }
-                vector->push_back(component);
-            }
+        template<typename T> sp<T> ensureComponent() const {
+            sp<T> component = _components.get<T>();
+            CHECK(component, "Component \"%s\" does not exist", Class::ensureClass<T>()->name());
+            return component;
+        }
+
+        template<typename T> void putComponent(sp<T> component) {
+            CHECK_WARN(!_components.has<T>(), "Overriding component: \"%s\"", Class::ensureClass<T>()->name());
             _components.put(std::move(component));
+        }
+        template<typename T> void addComponent(sp<T> component) {
+            _components.add(std::move(component));
         }
 
         template<typename T> void setComponentBuilder(sp<Builder<T>> componentBuilder) {
@@ -46,7 +45,7 @@ public:
 
     private:
         Traits& _components;
-        std::map<TypeId, Box> _component_builders;
+        Map<TypeId, Box> _component_builders;
     };
 
     virtual ~Wirable() = default;

@@ -26,14 +26,14 @@ public:
 
         template<typename T> sp<T> unpack() const {
             DCHECK(box, "PyObject \"%s\" has not been initialized", ob_base.ob_type->tp_name);
-            CHECK(typeCheck<T>(), "PyObject \"%s\" cannot being casted to %s", ob_base.ob_type->tp_name, Class::getClass<T>()->name());
+            CHECK(typeCheck<T>(), "PyObject \"%s\" cannot being casted to %s", ob_base.ob_type->tp_name, Class::ensureClass<T>()->name());
             return box->toPtr<T>();
         }
 
         template<typename T> sp<T> as() const {
             DCHECK(box, "PyObject \"%s\" has not been initialized", ob_base.ob_type->tp_name);
             const sp<T> inst = box->as<T>();
-            CHECK(inst, "PyObject \"%s\" cannot being casted to %s", ob_base.ob_type->tp_name, Class::getClass<T>()->name());
+            CHECK(inst, "PyObject \"%s\" cannot being casted to %s", ob_base.ob_type->tp_name, Class::ensureClass<T>()->name());
             return inst;
         }
 

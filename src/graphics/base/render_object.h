@@ -142,6 +142,7 @@ public:
 
     private:
         BUILDER _builder_impl;
+        String _view_name;
     };
 
 private:

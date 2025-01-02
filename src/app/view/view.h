@@ -44,6 +44,11 @@ public:
 //  [[script::bindings::property]]
     void setLayoutParam(sp<LayoutParam> layoutParam);
 
+//  [[script::bindings::property]]
+    const sp<Vec3>& layoutPosition();
+//  [[script::bindings::property]]
+    const sp<Size>& layoutSize();
+
 //  [[script::bindings::auto]]
     void addView(sp<View> view, sp<Boolean> discarded = nullptr);
 //  [[script::bindings::auto]]
@@ -78,7 +83,6 @@ public:
 
     private:
         builder<View> _view;
-        SafeBuilder<StringVar> _name;
     };
 
 //  [[plugin::builder("text")]]
@@ -103,6 +107,10 @@ protected:
     sp<RenderObject> _background;
     sp<Boolean> _is_discarded;
     sp<Updatable> _updatable_view;
+    sp<Updatable> _updatable_layout;
+
+    sp<Vec3> _layout_position;
+    sp<Size> _layout_size;
 
     friend class Activity;
     friend class ViewHierarchy;

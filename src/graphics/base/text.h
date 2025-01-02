@@ -80,7 +80,6 @@ public:
     struct Content;
 
 private:
-    sp<RenderLayer> _render_layer;
     sp<Content> _content;
     sp<RenderBatch> _render_batch;
 };

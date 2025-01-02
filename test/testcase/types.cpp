@@ -103,7 +103,7 @@ public:
         TESTCASE_VALIDATE(d.isInstance<Node>() && d.tryCast<Node>()->h == 8);
         TESTCASE_VALIDATE(d.isInstance<E>() && d.tryCast<E>()->i == 9);
 
-        Class* nodeClass = Class::getClass<Node>();
+        Class* nodeClass = Class::ensureClass<Node>();
         TESTCASE_VALIDATE(nodeClass);
 
         TESTCASE_VALIDATE(nodeClass->isInstance(Type<B>::id()));
@@ -124,7 +124,7 @@ public:
 
         sp<D> b = nb.as<D>();
 
-        const Class* renderLayerClass = Class::getClass<RenderLayer>();
+        const Class* renderLayerClass = Class::ensureClass<RenderLayer>();
         TESTCASE_VALIDATE(renderLayerClass->isInstance(Type<Renderer>::id()));
         TESTCASE_VALIDATE(String(renderLayerClass->name()) == "RenderLayer");
 

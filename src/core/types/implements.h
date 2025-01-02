@@ -12,7 +12,7 @@ namespace _internal {
 
 template<typename T, typename... INTERFACES> void _add_types(std::set<TypeId>& interfaces) {
     interfaces.insert(Type<T>::id());
-    if(const Class* clazz = Class::getClass(Type<T>::id())) {
+    if(const Class* clazz = Class::ensureClass<T>()) {
         interfaces.insert(clazz->id());
         interfaces.insert(clazz->implements().begin(), clazz->implements().end());
     }
@@ -31,7 +31,7 @@ template<typename T, typename U = void, typename... INTERFACES> Box _dynamic_dow
         sp<U> casted = ptr.template cast<U>();
         return Box(std::move(casted));
     }
-    if(const Class* clazz = Class::getClass(Type<U>::id()); clazz && clazz->isInstance(id))
+    if(const Class* clazz = Class::ensureClass<U>(); clazz && clazz->isInstance(id))
         return clazz->cast(Box(ptr.template cast<U>()), id);
     if(sizeof...(INTERFACES) != 0)
        return _dynamic_down_cast<T, INTERFACES...>(ptr, id);
@@ -70,7 +70,7 @@ private:
 };
 
 template<typename T, typename... INTERFACES> Class* _make_class() {
-    Class* clazz = Class::addClass(Type<T>::id(), "<Unknown>", std::make_unique<ClassImpl<T, INTERFACES...>>());
+    Class* clazz = Class::addClass<T>("<Unknown>", std::make_unique<ClassImpl<T, INTERFACES...>>());
     clazz->setImplementation(_make_types<T, INTERFACES...>());
     return clazz;
 }

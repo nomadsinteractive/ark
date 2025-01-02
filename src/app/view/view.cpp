@@ -256,16 +256,15 @@ private:
 
 class WirableView final : public Wirable {
 public:
-    WirableView(sp<View> view, String name)
-        : _view(std::move(view)), _name(std::move(name))
+    WirableView(sp<View> view)
+        : _view(std::move(view))
     {
     }
 
     TypeId onPoll(WiringContext& context) override
     {
-        context.addComponent(_view);
-        const sp<View>& wiringView = _name ? _view->findView(_name) : _view;
-        wiringView->onPoll(context);
+        _view->onPoll(context);
+        context.putComponent(_view);
         return constants::TYPE_ID_NONE;
     }
 
@@ -275,7 +274,6 @@ public:
 
 private:
     sp<View> _view;
-    String _name;
 };
 
 }
@@ -293,11 +291,10 @@ View::~View()
 
 TypeId View::onPoll(WiringContext& context)
 {
-    sp<Vec3> size = Vec3Type::create(sp<LayoutSize<0>>::make(_stub), sp<LayoutSize<1>>::make(_stub), Global<Constants>()->NUMERIC_ZERO);
-    sp<Updatable> updatable = sp<Updatable>::make<UpdatableOncePerFrame>(sp<Updatable>::make<UpdatableLayoutTopView>(_stub));
+    sp<Vec3> position = layoutPosition();
+    sp<Vec3> size = layoutSize();
     if(_background)
-        context.setComponentBuilder(to_lazy_builder<Renderable>(RenderableType::create, sp<Renderable>::make<RenderableView>(_stub, _background, true), updatable, _is_discarded));
-    sp<Vec3> position = sp<Vec3>::make<LayoutPosition>(_stub, std::move(updatable));
+        context.setComponentBuilder(to_lazy_builder<Renderable>(RenderableType::create, sp<Renderable>::make<RenderableView>(_stub, _background, true), _updatable_layout, _is_discarded));
     context.setComponentBuilder(make_lazy_builder<Shape>(Shape::TYPE_AABB, size));
     context.setComponentBuilder(make_lazy_builder<Boundaries>(position, Vec3Type::mul(std::move(size), 0.5f)));
     context.setComponentBuilder(make_lazy_builder<Position>(std::move(position)));
@@ -346,6 +343,22 @@ const sp<LayoutParam>& View::layoutParam() const
 void View::setLayoutParam(sp<LayoutParam> layoutParam)
 {
     _stub->_layout_node->_layout_param = std::move(layoutParam);
+}
+
+const sp<Vec3>& View::layoutPosition()
+{
+    if(!_updatable_layout)
+        _updatable_layout = sp<Updatable>::make<UpdatableOncePerFrame>(sp<Updatable>::make<UpdatableLayoutTopView>(_stub));
+    if(!_layout_position)
+        _layout_position = sp<LayoutPosition>::make(_stub, _updatable_layout);
+    return _layout_position;
+}
+
+const sp<Size>& View::layoutSize()
+{
+    if(!_layout_size)
+        _layout_size = Vec3Type::create(sp<LayoutSize<0>>::make(_stub), sp<LayoutSize<1>>::make(_stub), Global<Constants>()->NUMERIC_ZERO);
+    return _layout_size;
 }
 
 void View::addView(sp<View> view, sp<Boolean> discarded)
@@ -405,14 +418,13 @@ sp<View> View::BUILDER::build(const Scope& args)
 }
 
 View::BUILDER_WIRABLE::BUILDER_WIRABLE(BeanFactory& factory, const document& manifest)
-    : _view(factory.ensureBuilder<View>(manifest, constants::VIEW)), _name(factory.getBuilder<StringVar>(manifest, constants::NAME))
+    : _view(factory.ensureBuilder<View>(manifest, constants::VIEW))
 {
 }
 
 sp<Wirable> View::BUILDER_WIRABLE::build(const Scope& args)
 {
-    const sp<StringVar> name = _name.build(args);
-    return sp<Wirable>::make<WirableView>(_view->build(args), name ? *name->val() : "");
+    return sp<Wirable>::make<WirableView>(_view->build(args));
 }
 
 View::BUILDER_VIEW::BUILDER_VIEW(BeanFactory& factory, const document& manifest)
