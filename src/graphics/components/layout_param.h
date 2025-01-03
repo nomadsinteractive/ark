@@ -15,13 +15,6 @@ namespace ark {
 class ARK_API LayoutParam final : public Updatable {
 public:
 //  [[script::bindings::enumeration]]
-    enum Display {
-        DISPLAY_BLOCK,
-        DISPLAY_FLOAT,
-        DISPLAY_ABSOLUTE
-    };
-
-//  [[script::bindings::enumeration]]
     enum JustifyContent {
         JUSTIFY_CONTENT_FLEX_START,
         JUSTIFY_CONTENT_FLEX_END,
@@ -82,8 +75,7 @@ public:
     LayoutParam(Length width, Length height, sp<Layout> layout = nullptr, LayoutParam::FlexDirection flexDirection = LayoutParam::FLEX_DIRECTION_ROW, LayoutParam::FlexWrap flexWrap = LayoutParam::FLEX_WRAP_NOWRAP,
                 LayoutParam::JustifyContent justifyContent = LayoutParam::JUSTIFY_CONTENT_FLEX_START, LayoutParam::Align alignItems = LayoutParam::ALIGN_STRETCH,
                 LayoutParam::Align alignSelf = LayoutParam::ALIGN_AUTO, LayoutParam::Align alignContent = LayoutParam::ALIGN_STRETCH,
-                LayoutParam::Display display = LayoutParam::DISPLAY_BLOCK, float flexGrow = 0, Length flexBasis = {}, sp<Vec4> margins = nullptr, sp<Vec4> paddings = nullptr,
-                sp<Vec3> offset = nullptr);
+                float flexGrow = 0, Length flexBasis = {}, sp<Vec4> margins = nullptr, sp<Vec4> paddings = nullptr, sp<Vec3> offset = nullptr);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(LayoutParam);
 
     bool update(uint64_t timestamp) override;
@@ -109,11 +101,6 @@ public:
 
     const sp<Boolean>& stopPropagation() const;
     void setStopPropagation(sp<Boolean> stopPropagation);
-
-//  [[script::bindings::property]]
-    LayoutParam::Display display() const;
-//  [[script::bindings::property]]
-    void setDisplay(LayoutParam::Display display);
 
 //  [[script::bindings::property]]
     LayoutParam::LengthType flexBasisType() const;
@@ -197,7 +184,6 @@ public:
         Align _align_self;
         Align _align_content;
         sp<Builder<Size>> _size;
-        Display _display;
         float _flex_grow;
 
         SafeBuilder<Vec4> _margins;
@@ -219,8 +205,6 @@ private:
     Align _align_content;
 
     sp<Boolean> _stop_propagation;
-
-    Display _display;
 
     Length _flex_basis;
     float _flex_grow;

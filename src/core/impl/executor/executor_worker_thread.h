@@ -9,7 +9,7 @@
 
 namespace ark {
 
-class ExecutorWorkerThread : public Executor {
+class ExecutorWorkerThread final : public Executor {
 public:
     class Strategy {
     public:
@@ -27,17 +27,18 @@ public:
 
 public:
     ExecutorWorkerThread(sp<Strategy> strategy, String name);
+    ~ExecutorWorkerThread() override;
 
     void execute(sp<Runnable> task) override;
 
     const sp<Strategy>& strategy() const;
 
 private:
-    class Worker : public Runnable {
+    class Worker final : public Runnable {
     public:
         Worker(Thread thread, sp<Strategy> strategy);
 
-        virtual void run() override;
+        void run() override;
 
         Thread _thread;
         sp<Strategy> _strategy;

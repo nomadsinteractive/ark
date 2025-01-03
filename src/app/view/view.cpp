@@ -8,10 +8,8 @@
 #include "core/util/updatable_util.h"
 
 #include "graphics/base/layer.h"
-#include "graphics/components/render_object.h"
 #include "graphics/components/layout_param.h"
 #include "graphics/util/vec3_type.h"
-#include "graphics/util/renderable_type.h"
 
 #include "renderer/base/model.h"
 #include "renderer/base/render_engine.h"
@@ -21,20 +19,19 @@
 #include "app/components/shape.h"
 #include "app/components/with_text.h"
 #include "app/view/view_hierarchy.h"
-#include "core/util/wirable_type.h"
 #include "graphics/components/position.h"
 
 namespace ark {
 
 struct View::Stub final : Updatable {
-    Stub(sp<LayoutParam> layoutParam, String name, sp<Boolean> visible, sp<Boolean> discarded)
-        : _name(std::move(name)), _hierarchy(layoutParam->layout() ? sp<ViewHierarchy>::make(layoutParam->layout()) : nullptr), _layout_node(sp<Layout::Node>::make(std::move(layoutParam))), _visible(std::move(visible), true), _discarded(std::move(discarded), false), _top_view(false)
+    Stub(sp<LayoutParam> layoutParam, String name, sp<Boolean> discarded)
+        : _name(std::move(name)), _hierarchy(layoutParam->layout() ? sp<ViewHierarchy>::make(layoutParam->layout()) : nullptr), _layout_node(sp<Layout::Node>::make(std::move(layoutParam))), _discarded(std::move(discarded), false), _top_view(false)
     {
     }
 
     bool update(uint64_t timestamp) override
     {
-        bool dirty = UpdatableUtil::update(timestamp, _layout_node->_layout_param, _discarded, _visible);
+        bool dirty = UpdatableUtil::update(timestamp, _layout_node->_layout_param, _discarded);
         if(_hierarchy)
             dirty = _hierarchy->updateLayout(_layout_node, timestamp, dirty);
         return dirty;
@@ -45,12 +42,6 @@ struct View::Stub final : Updatable {
         _discarded.reset(sp<Boolean>::make<Boolean::Const>(true));
         _layout_node->_layout_param = nullptr;
         _layout_node = nullptr;
-    }
-
-    bool isVisible() const
-    {
-        const sp<Stub> parentStub = _parent_stub.lock();
-        return _visible.val() && (_top_view || (parentStub ? parentStub->isVisible() : false));
     }
 
     bool isDiscarded() const
@@ -89,7 +80,6 @@ struct View::Stub final : Updatable {
     sp<ViewHierarchy> _hierarchy;
     sp<Layout::Node> _layout_node;
 
-    SafeVar<Boolean> _visible;
     SafeVar<Boolean> _discarded;
 
     WeakPtr<Stub> _parent_stub;
@@ -171,45 +161,6 @@ private:
     sp<Updatable> _updatable;
 };
 
-class RenderableView final : public Renderable {
-public:
-    RenderableView(sp<View::Stub> viewStub, sp<Renderable> renderable, bool isBackground)
-        : _view_stub(std::move(viewStub)), _renderable(std::move(renderable)), _is_background(isBackground)
-    {
-    }
-
-    StateBits updateState(const RenderRequest& renderRequest) override
-    {
-        Renderable::State state = _renderable->updateState(renderRequest);
-        if(state.has(Renderable::RENDERABLE_STATE_VISIBLE))
-            state.set(Renderable::RENDERABLE_STATE_VISIBLE, _view_stub->isVisible());
-        return state.stateBits();
-    }
-
-    Snapshot snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, StateBits state) override
-    {
-        if(const sp<Layout::Node> topViewLayoutNode = _view_stub->getTopViewLayoutNode())
-        {
-            const Layout::Node& layoutNode = _view_stub->_layout_node;
-            const V4& paddings = layoutNode.paddings();
-            const V2& layoutSize = layoutNode.size();
-            const V2 size = _is_background ? layoutSize : layoutSize - V2(paddings.y() + paddings.w(), paddings.x() + paddings.z());
-            const V3 topViewOffset = _view_stub->getTopViewOffsetPosition(false);
-            const V3 offset = _is_background ? topViewOffset : topViewOffset + V3(paddings.w(), paddings.x(), 0);
-            Snapshot snapshot = _renderable->snapshot(snapshotContext, renderRequest, state);
-            snapshot._position += V3(toViewportPosition(toPivotPosition(snapshot._model->occupy(), size) + V2(offset.x(), offset.y())), offset.z());
-            snapshot._size = V3(size, 0);
-            return snapshot;
-        }
-        return {RENDERABLE_STATE_NONE};
-    }
-
-    private:
-        sp<View::Stub> _view_stub;
-        sp<Renderable> _renderable;
-        bool _is_background;
-};
-
 class IsDiscarded final : public Boolean {
 public:
     IsDiscarded(sp<View::Stub> stub)
@@ -228,6 +179,7 @@ public:
         }
         return dirty;
     }
+
     bool val() override
     {
         return _stub->isDiscarded();
@@ -278,8 +230,8 @@ private:
 
 }
 
-View::View(sp<LayoutParam> layoutParam, String name, sp<RenderObject> background, sp<Boolean> visible, sp<Boolean> discarded)
-    : _stub(sp<Stub>::make(std::move(layoutParam), std::move(name), std::move(visible), std::move(discarded))), _background(std::move(background)), _is_discarded(sp<Boolean>::make<IsDiscarded>(_stub)),
+View::View(sp<LayoutParam> layoutParam, String name, sp<Boolean> discarded)
+    : _stub(sp<Stub>::make(std::move(layoutParam), std::move(name), std::move(discarded))), _is_discarded(sp<Boolean>::make<IsDiscarded>(_stub)),
       _updatable_view(sp<UpdatableOncePerFrame>::make(_stub))
 {
 }
@@ -309,16 +261,6 @@ bool View::updateLayout(uint64_t timestamp) const
 const sp<Layout::Node>& View::layoutNode() const
 {
     return _stub->_layout_node;
-}
-
-const SafeVar<Boolean>& View::visible() const
-{
-    return _stub->_visible;
-}
-
-void View::setVisbile(sp<Boolean> visible)
-{
-    _stub->_visible.reset(std::move(visible));
 }
 
 const SafeVar<Boolean>& View::discarded() const
@@ -405,14 +347,14 @@ void View::markAsTopView()
 }
 
 View::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _name(Documents::getAttribute(manifest, constants::NAME)), _discarded(factory.getBuilder<Boolean>(manifest, constants::DISCARDED)), _visible(factory.getBuilder<Boolean>(manifest, constants::VISIBLE)),
-      _background(factory.getBuilder<RenderObject>(manifest, constants::BACKGROUND)), _layout_param(factory.ensureConcreteClassBuilder<LayoutParam>(manifest, constants::LAYOUT_PARAM)), _children(factory.makeBuilderList<View>(manifest, constants::VIEW))
+    : _name(Documents::getAttribute(manifest, constants::NAME)), _discarded(factory.getBuilder<Boolean>(manifest, constants::DISCARDED)),
+      _layout_param(factory.ensureConcreteClassBuilder<LayoutParam>(manifest, constants::LAYOUT_PARAM)), _children(factory.makeBuilderList<View>(manifest, constants::VIEW))
 {
 }
 
 sp<View> View::BUILDER::build(const Scope& args)
 {
-    sp<View> view = sp<View>::make(_layout_param.build(args), _name, _background.build(args), _visible.build(args), _discarded.build(args));
+    sp<View> view = sp<View>::make(_layout_param.build(args), _name, _discarded.build(args));
     for(const builder<View>& i : _children)
         view->addView(i->build(args));
     return view;
@@ -426,21 +368,6 @@ View::BUILDER_WIRABLE::BUILDER_WIRABLE(BeanFactory& factory, const document& man
 sp<Wirable> View::BUILDER_WIRABLE::build(const Scope& args)
 {
     return sp<Wirable>::make<WirableView>(_view->build(args));
-}
-
-View::BUILDER_VIEW::BUILDER_VIEW(BeanFactory& factory, const document& manifest)
-    : _builder_impl(factory, manifest), _builder_text(factory, manifest)
-{
-}
-
-sp<View> View::BUILDER_VIEW::build(const Scope& args)
-{
-    const sp<View> view = _builder_impl.build(args);
-    const sp<Text> text = _builder_text.build(args);
-    Traits traits(view, sp<Wirable>::make<WithText>(text));
-    WirableType::wireAll(traits);
-    text->show(sp<Boolean>::make<BooleanByWeakRef<View>>(view, 0));
-    return view;
 }
 
 }

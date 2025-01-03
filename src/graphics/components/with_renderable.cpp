@@ -24,7 +24,7 @@ void WithRenderable::onWire(const WiringContext& context)
     const sp<Boolean> discarded = context.getComponent<Discarded>();
     const sp<Boolean> visible = context.getComponent<Visibility>();
     const sp<Model> model = context.getComponent<Model>();
-    const sp<Transform> transform = context.getComponent<Transform>();
+    const sp<Mat4> transform = context.getComponent<Transform>();
     for(const auto& [layer, renderable, renderObject, transformNode] : _manifests)
     {
         sp<Renderable> r = renderObject ? renderObject.cast<Renderable>() : renderable;

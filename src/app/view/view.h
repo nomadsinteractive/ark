@@ -19,7 +19,7 @@ namespace ark {
 
 class ARK_API View final : public Wirable {
 public:
-    View(sp<LayoutParam> layoutParam, String name, sp<RenderObject> background = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> discarded = nullptr);
+    View(sp<LayoutParam> layoutParam, String name, sp<Boolean> discarded = nullptr);
     ~View() override;
 
     TypeId onPoll(WiringContext& context) override;
@@ -28,11 +28,6 @@ public:
     bool updateLayout(uint64_t timestamp) const;
 
     const sp<Layout::Node>& layoutNode() const;
-
-//  [[script::bindings::property]]
-    const SafeVar<Boolean>& visible() const;
-//  [[script::bindings::property]]
-    void setVisbile(sp<Boolean> visible);
 
 //  [[script::bindings::property]]
     const SafeVar<Boolean>& discarded() const;
@@ -70,8 +65,6 @@ public:
     private:
         String _name;
         SafeBuilder<Boolean> _discarded;
-        SafeBuilder<Boolean> _visible;
-        SafeBuilder<RenderObject> _background;
         SafeBuilder<LayoutParam> _layout_param;
         std::vector<builder<View>> _children;
     };
@@ -87,18 +80,6 @@ public:
         builder<View> _view;
     };
 
-//  [[plugin::builder("text")]]
-    class BUILDER_VIEW final : public Builder<View> {
-    public:
-        BUILDER_VIEW(BeanFactory& factory, const document& manifest);
-
-        sp<View> build(const Scope& args) override;
-
-    private:
-        BUILDER _builder_impl;
-        Text::BUILDER _builder_text;
-    };
-
     struct Stub;
 
 private:
@@ -106,7 +87,6 @@ private:
 
 protected:
     sp<Stub> _stub;
-    sp<RenderObject> _background;
     sp<Boolean> _is_discarded;
     sp<Updatable> _updatable_view;
     sp<Updatable> _updatable_layout;

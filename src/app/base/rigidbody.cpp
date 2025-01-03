@@ -9,6 +9,7 @@
 #include "core/util/string_convert.h"
 
 #include "graphics/base/boundaries.h"
+#include "graphics/components/position.h"
 
 #include "app/base/application_context.h"
 #include "app/base/collision_manifold.h"
@@ -18,8 +19,8 @@
 
 namespace ark {
 
-Rigidbody::Rigidbody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> quaternion, Box impl, sp<Ref> ref, bool isShadow)
-    : _ref(ref ? std::move(ref) : Global<RefManager>()->makeRef(this)), _type(type), _shape(std::move(shape)), _position(std::move(position)), _quaternion(std::move(quaternion), constants::QUATERNION_ONE), _impl(std::move(impl)), _is_shadow(isShadow)
+Rigidbody::Rigidbody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, Box impl, sp<Ref> ref, bool isShadow)
+    : _ref(ref ? std::move(ref) : Global<RefManager>()->makeRef(this)), _type(type), _shape(std::move(shape)), _position(std::move(position)), _rotation(std::move(rotation), constants::QUATERNION_ONE), _impl(std::move(impl)), _is_shadow(isShadow)
 {
 }
 
@@ -36,7 +37,7 @@ void Rigidbody::discard()
 
 void Rigidbody::onWire(const WiringContext& context)
 {
-    if(auto position = context.getComponent<Vec3>())
+    if(sp<Vec3> position = context.getComponent<Position>())
         _position.reset(std::move(position));
 
     if(auto shape = context.getComponent<Shape>())
@@ -77,9 +78,9 @@ const SafeVar<Vec3>& Rigidbody::position() const
     return _position;
 }
 
-const SafeVar<Vec4>& Rigidbody::quaternion() const
+const SafeVar<Vec4>& Rigidbody::rotation() const
 {
-    return _quaternion;
+    return _rotation;
 }
 
 const SafeVar<Boolean>& Rigidbody::discarded() const
@@ -122,7 +123,20 @@ void Rigidbody::setTag(Box tag)
 
 sp<Rigidbody> Rigidbody::makeShadow() const
 {
-    return sp<Rigidbody>::make(_type, _shape, _position.wrapped(), _quaternion.wrapped(), _impl, _ref, true);
+    return sp<Rigidbody>::make(_type, _shape, _position.wrapped(), _rotation.wrapped(), _impl, _ref, true);
+}
+
+Rigidbody::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+    : _collider(factory.ensureBuilder<Collider>(manifest, "collider")), _body_type(Documents::getAttribute<Collider::BodyType>(manifest, "body-type", Collider::BODY_TYPE_KINEMATIC)), _shape(factory.getBuilder<Shape>(manifest, "shape")),
+      _position(factory.getBuilder<Vec3>(manifest, constants::POSITION)), _rotation(factory.getBuilder<Vec4>(manifest, constants::ROTATION)), _discarded(factory.getBuilder<Boolean>(manifest, constants::DISCARDED))
+{
+}
+
+sp<Rigidbody> Rigidbody::BUILDER::build(const Scope& args)
+{
+    const sp<Collider> collider = _collider->build(args);
+    sp<Shape> shape = _shape.build(args);
+    return collider->createBody(_body_type, shape ? std::move(shape) : sp<Shape>::make(), _position.build(args), _rotation.build(args), _discarded.build(args));
 }
 
 template<> ARK_API Collider::BodyType StringConvert::eval<Collider::BodyType>(const String& str)

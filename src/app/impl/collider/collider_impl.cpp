@@ -304,7 +304,7 @@ const RigidbodyDef& ColliderImpl::RigidBodyImpl::updateBodyDef(NarrowPhrase& nar
 
 BroadPhrase::Candidate ColliderImpl::RigidBodyImpl::toBroadPhraseCandidate() const
 {
-    return {ref()->id(), position().val(), quaternion().val(), _shape->type().hash(), collisionFilter(), bodyDef().impl()};
+    return {ref()->id(), position().val(), rotation().val(), _shape->type().hash(), collisionFilter(), bodyDef().impl()};
 }
 
 ColliderImpl::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)

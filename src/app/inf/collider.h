@@ -19,7 +19,7 @@ public:
         BODY_TYPE_KINEMATIC,
         BODY_TYPE_DYNAMIC,
         BODY_TYPE_STATIC,
-        BODY_TYPE_RIGID,
+        BODY_TYPE_RIGID = 3,
         BODY_TYPE_SENSOR
     };
 

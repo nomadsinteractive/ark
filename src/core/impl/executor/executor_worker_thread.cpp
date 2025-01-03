@@ -11,6 +11,12 @@ ExecutorWorkerThread::ExecutorWorkerThread(sp<ExecutorWorkerThread::Strategy> st
     _thread.start();
 }
 
+ExecutorWorkerThread::~ExecutorWorkerThread()
+{
+    _thread.terminate();
+    _thread.notify();
+}
+
 void ExecutorWorkerThread::execute(sp<Runnable> task)
 {
     _worker->_pending_tasks.push(std::move(task));

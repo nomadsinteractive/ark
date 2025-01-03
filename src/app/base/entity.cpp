@@ -1,5 +1,6 @@
 #include "entity.h"
 
+#include "app/components/with_tag.h"
 #include "core/inf/wirable.h"
 
 #include "core/base/constants.h"
@@ -68,6 +69,13 @@ bool Entity::hasComponent(TypeId typeId) const
 Optional<Box> Entity::getComponent(TypeId typeId) const
 {
     return _components.get(typeId);
+}
+
+Box Entity::tag() const
+{
+    if(const sp<WithTag> withTag = _components.get<WithTag>())
+        return withTag->tag();
+    return {};
 }
 
 const Traits& Entity::components() const

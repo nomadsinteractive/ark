@@ -106,7 +106,7 @@ sp<Rigidbody> makeRigidBody(Library& library, const sp<Collider>& collider, Rend
 
     sp<Rigidbody> rigidbody = collider->createBody(bodyType, library._shape, Vec3Type::freeze(renderObject.position()), Vec4Type::freeze(transform.rotation().wrapped()));
     renderObject.setPosition(rigidbody->position().wrapped());
-    transform.setRotation(rigidbody->quaternion().wrapped());
+    transform.setRotation(rigidbody->rotation().wrapped());
     return rigidbody;
 }
 

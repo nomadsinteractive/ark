@@ -22,8 +22,7 @@ bool ViewHierarchy::updateDescendantLayout(uint64_t timestamp)
 {
     bool isDirty = false;
     for(const sp<View>& i: updateChildren())
-        if(i->visible().val())
-            isDirty = i->updateLayout(timestamp) || isDirty;
+        isDirty = i->updateLayout(timestamp) || isDirty;
     return isDirty;
 }
 

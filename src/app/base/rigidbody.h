@@ -11,12 +11,13 @@
 
 #include "app/forwarding.h"
 #include "app/inf/collider.h"
+#include "core/types/safe_builder.h"
 
 namespace ark {
 
 class ARK_API Rigidbody : public Wirable {
 public:
-    Rigidbody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> quaternion, Box impl, sp<Ref> ref, bool isShadow = false);
+    Rigidbody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, Box impl, sp<Ref> ref, bool isShadow = false);
     ~Rigidbody() override;
     DISALLOW_COPY_AND_ASSIGN(Rigidbody);
 
@@ -37,7 +38,7 @@ public:
 //  [[script::bindings::property]]
     const SafeVar<Vec3>& position() const;
 //  [[script::bindings::property]]
-    const SafeVar<Vec4>& quaternion() const;
+    const SafeVar<Vec4>& rotation() const;
 
 //  [[script::bindings::property]]
     const SafeVar<Boolean>& discarded() const;
@@ -65,13 +66,29 @@ public:
 
     sp<Rigidbody> makeShadow() const;
 
+//  [[plugin::builder]]
+    class BUILDER final : public Builder<Rigidbody> {
+    public:
+        BUILDER(BeanFactory& factory, const document& manifest);
+
+        sp<Rigidbody> build(const Scope& args) override;
+
+    private:
+        builder<Collider> _collider;
+        Collider::BodyType _body_type;
+        SafeBuilder<Shape> _shape;
+        SafeBuilder<Vec3> _position;
+        SafeBuilder<Vec4> _rotation;
+        SafeBuilder<Boolean> _discarded;
+    };
+
 protected:
     sp<Ref> _ref;
 
     Collider::BodyType _type;
     sp<Shape> _shape;
     SafeVar<Vec3> _position;
-    SafeVar<Vec4> _quaternion;
+    SafeVar<Vec4> _rotation;
 
     Box _impl;
     bool _is_shadow;

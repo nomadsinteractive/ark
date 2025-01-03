@@ -574,6 +574,7 @@ const sp<Boundaries>& Text::boundaries() const
 
 void Text::setBoundaries(sp<Boundaries> boundaries)
 {
+    setPosition(boundaries->aabbMin());
     _content->_boundaries = std::move(boundaries);
     _content->_timestamp.markDirty();
 }

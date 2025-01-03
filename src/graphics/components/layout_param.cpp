@@ -56,19 +56,10 @@ sp<Builder<LayoutParam::Length>> getLengthBuilder(BeanFactory& factory, const do
 
 }
 
-template<> ARK_API LayoutParam::Display StringConvert::eval<LayoutParam::Display>(const String& str)
-{
-    if(str == "float")
-        return LayoutParam::DISPLAY_FLOAT;
-    if(str == "absolute")
-        return LayoutParam::DISPLAY_ABSOLUTE;
-    return LayoutParam::DISPLAY_BLOCK;
-}
-
 LayoutParam::LayoutParam(Length width, Length height, sp<Layout> layout, FlexDirection flexDirection, FlexWrap flexWrap, JustifyContent justifyContent, Align alignItems, Align alignSelf,
-                         Align alignContent, Display display, float flexGrow, Length flexBasis, sp<Vec4> margins, sp<Vec4> paddings, sp<Vec3> offset)
+                         Align alignContent, float flexGrow, Length flexBasis, sp<Vec4> margins, sp<Vec4> paddings, sp<Vec3> offset)
     : _width(std::move(width)), _height(std::move(height)), _layout(std::move(layout)), _flex_direction(flexDirection), _flex_wrap(flexWrap), _justify_content(justifyContent), _align_items(alignItems), _align_self(alignSelf), _align_content(alignContent),
-      _display(display), _flex_basis(std::move(flexBasis)), _flex_grow(flexGrow), _margins(std::move(margins)), _paddings(std::move(paddings)), _offset(std::move(offset))
+      _flex_basis(std::move(flexBasis)), _flex_grow(flexGrow), _margins(std::move(margins)), _paddings(std::move(paddings)), _offset(std::move(offset))
 {
 }
 
@@ -149,16 +140,6 @@ const sp<Boolean>& LayoutParam::stopPropagation() const
 void LayoutParam::setStopPropagation(sp<Boolean> stopPropagation)
 {
     _stop_propagation = std::move(stopPropagation);
-}
-
-LayoutParam::Display LayoutParam::display() const
-{
-    return _display;
-}
-
-void LayoutParam::setDisplay(Display display)
-{
-    _display = display;
 }
 
 LayoutParam::LengthType LayoutParam::flexBasisType() const
@@ -329,9 +310,8 @@ LayoutParam::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
       _flex_direction(Documents::getAttribute<FlexDirection>(manifest, "flex-direction", FLEX_DIRECTION_ROW)), _flex_wrap(Documents::getAttribute<FlexWrap>(manifest, "flex-wrap", FLEX_WRAP_NOWRAP)),
       _justify_content(Documents::getAttribute<JustifyContent>(manifest, "justify-content", JUSTIFY_CONTENT_FLEX_START)), _align_items(Documents::getAttribute<Align>(manifest, "align-items", ALIGN_STRETCH)),
       _align_self(Documents::getAttribute<Align>(manifest, "align-self", ALIGN_AUTO)), _align_content(Documents::getAttribute<Align>(manifest, "align-content", ALIGN_FLEX_START)),
-      _size(factory.getBuilder<Size>(manifest, constants::SIZE)), _display(Documents::getAttribute<Display>(manifest, "display", LayoutParam::DISPLAY_BLOCK)),
-      _flex_grow(Documents::getAttribute<float>(manifest, "flex-grow", 0.0)), _margins(factory.getBuilder<Vec4>(manifest, "margins")), _paddings(factory.getBuilder<Vec4>(manifest, "paddings")),
-      _offset(factory.getBuilder<Vec3>(manifest, "offset"))
+      _size(factory.getBuilder<Size>(manifest, constants::SIZE)), _flex_grow(Documents::getAttribute<float>(manifest, "flex-grow", 0.0)), _margins(factory.getBuilder<Vec4>(manifest, "margins")),
+      _paddings(factory.getBuilder<Vec4>(manifest, "paddings")), _offset(factory.getBuilder<Vec3>(manifest, "offset"))
 {
 }
 
@@ -343,7 +323,7 @@ sp<LayoutParam> LayoutParam::BUILDER::build(const Scope& args)
     sp<Vec3> offset = _offset.build(args);
     Length width = size ? Length(LENGTH_TYPE_PIXEL, size->width()) : _width ? _width->build(args) : Length();
     Length height = size ? Length(LENGTH_TYPE_PIXEL, size->height()) : _height ? _height->build(args) : Length();
-    return sp<LayoutParam>::make(std::move(width), std::move(height), _layout.build(args), _flex_direction, _flex_wrap, _justify_content, _align_items, _align_self, _align_content, _display, _flex_grow,
+    return sp<LayoutParam>::make(std::move(width), std::move(height), _layout.build(args), _flex_direction, _flex_wrap, _justify_content, _align_items, _align_self, _align_content, _flex_grow,
                                  Length(), std::move(margins), std::move(paddings), std::move(offset));
 }
 
