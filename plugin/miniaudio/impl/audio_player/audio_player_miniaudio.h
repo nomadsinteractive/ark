@@ -9,39 +9,30 @@
 #include "app/inf/audio_player.h"
 
 
-namespace ark {
-namespace plugin {
-namespace miniaudio {
+namespace ark::plugin::miniaudio {
 
-class AudioPlayerMiniAudio : public AudioPlayer {
+class AudioPlayerMiniAudio final : public AudioPlayer {
 public:
-    AudioPlayerMiniAudio(const sp<ResourceLoaderContext>& resourceLoaderContext);
-    ~AudioPlayerMiniAudio() override;
+    AudioPlayerMiniAudio();
 
-    virtual sp<Future> play(const sp<Readable>& source, AudioFormat format, PlayOption options) override;
-    virtual bool isAudioFormatSupported(AudioFormat format) override;
+    sp<Future> play(const sp<Readable>& source, AudioFormat format, PlayOption options) override;
+    bool isAudioFormatSupported(AudioFormat format) override;
 
-//  [[plugin::resource-loader("miniaudio")]]
-    class BUILDER : public Builder<AudioPlayer> {
+//  [[plugin::builder("miniaudio")]]
+    class BUILDER final : public Builder<AudioPlayer> {
     public:
-        BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
+        BUILDER() = default;
 
-        virtual sp<AudioPlayer> build(const Scope& args) override;
-
-    private:
-        sp<ResourceLoaderContext> _resource_loader_context;
+        sp<AudioPlayer> build(const Scope& args) override;
 
     };
 
-//  [[plugin::resource-loader]]
-    class BUILDER_DEFAULT : public Builder<AudioPlayer> {
+//  [[plugin::builder]]
+    class BUILDER_DEFAULT final : public Builder<AudioPlayer> {
     public:
-        BUILDER_DEFAULT(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
+        BUILDER_DEFAULT() = default;
 
-        virtual sp<AudioPlayer> build(const Scope& args) override;
-
-    private:
-        BUILDER _delegate;
+        sp<AudioPlayer> build(const Scope& args) override;
 
     };
 
@@ -54,6 +45,4 @@ private:
     WeakPtr<MADevice> _device;
 };
 
-}
-}
 }

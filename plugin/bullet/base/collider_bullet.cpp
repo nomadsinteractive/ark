@@ -437,7 +437,7 @@ sp<ColliderBullet> ColliderBullet::BUILDER_IMPL1::build(const Scope& args)
     const sp<ColliderBullet> collider = sp<ColliderBullet>::make(_gravity, _model_loader.build(args));
     for(const auto& [k, v] : _importers)
         k->build(args)->import(collider, v);
-    _resource_loader_context->renderController()->addPreComposeRunnable(collider->_stub, BooleanType::__or__(_resource_loader_context->disposed(), sp<Boolean>::make<BooleanByWeakRef<ColliderBullet>>(collider, 0)));
+    _resource_loader_context->renderController()->addPreComposeRunnable(collider->_stub, BooleanType::__or__(_resource_loader_context->discarded(), sp<Boolean>::make<BooleanByWeakRef<ColliderBullet>>(collider, 0)));
     return collider;
 }
 

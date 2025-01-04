@@ -9,6 +9,7 @@
 
 #include "graphics/base/layer.h"
 #include "graphics/components/layout_param.h"
+#include "graphics/components/position.h"
 #include "graphics/util/vec3_type.h"
 
 #include "renderer/base/model.h"
@@ -17,9 +18,7 @@
 #include "app/base/application_context.h"
 #include "app/base/entity.h"
 #include "app/components/shape.h"
-#include "app/components/with_text.h"
 #include "app/view/view_hierarchy.h"
-#include "graphics/components/position.h"
 
 namespace ark {
 
@@ -90,7 +89,7 @@ namespace {
 
 V2 toViewportPosition(const V2& position)
 {
-    return Ark::instance().applicationContext()->toViewportPosition(position);
+    return Ark::instance().applicationContext()->renderEngine()->toLHSPosition(position);
 }
 
 V2 toPivotPosition(const sp<Boundaries>& occupies, const V2& size)
@@ -153,6 +152,7 @@ public:
         const V3 offsetPosition = _stub->getTopViewOffsetPosition(false);
         const float x = offsetPosition.x() + size.x() / 2;
         const float y = offsetPosition.y() + size.y() / 2;
+        // return {x, y, offsetPosition.z()};
         return {toViewportPosition(V2(x, y)), offsetPosition.z()};
     }
 

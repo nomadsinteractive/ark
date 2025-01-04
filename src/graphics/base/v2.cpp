@@ -145,7 +145,7 @@ V2 V2::floorDiv(const V2& other) const
 
 V2 V2::normalize() const
 {
-    float length = std::max(hypot(), MIN_NORMALIZE_LENGTH);
+    const float length = std::max(hypot(), MIN_NORMALIZE_LENGTH);
     return {_x / length, _y / length};
 }
 
@@ -182,7 +182,7 @@ void V2::initialize(const std::initializer_list<float>& values, size_t len)
     memset(this, 0, sizeof(float) * len);
 
     int32_t idx = 0;
-    for(float i : values)
+    for(const float i : values)
         (*this)[idx++] = i;
 }
 

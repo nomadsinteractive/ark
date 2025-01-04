@@ -236,11 +236,6 @@ void Camera::assign(const Camera& other)
     _projection->set(other.projection());
 }
 
-bool Camera::isYUp() const
-{
-    return _coordinate_system == Ark::COORDINATE_SYSTEM_RHS;
-}
-
 sp<Mat4> Camera::view() const
 {
     return _view;

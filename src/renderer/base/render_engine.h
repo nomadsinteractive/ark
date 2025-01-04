@@ -77,7 +77,7 @@ public:
     bool isViewportFlipped() const;
 
     V2 toNDC(float viewportX, float viewportY) const;
-    V2 toViewportPosition(const V2& position) const;
+    V2 toLHSPosition(const V2& position) const;
 
     Rect toRendererRect(const Rect& scissor, Ark::RendererCoordinateSystem cs = Ark::COORDINATE_SYSTEM_DEFAULT) const;
 

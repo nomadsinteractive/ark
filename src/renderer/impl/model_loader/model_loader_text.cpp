@@ -32,8 +32,6 @@ ModelLoaderText::ModelLoaderText(sp<RenderController> renderController, sp<Alpha
 
 sp<RenderCommandComposer> ModelLoaderText::makeRenderCommandComposer(const Shader& shader)
 {
-    const Camera& camera = shader.input()->camera();
-    _glyph_bundle->_is_y_up = camera.isYUp();
     return Ark::instance().renderController()->makeDrawElementsIncremental(Global<Constants>()->MODEL_UNIT_QUAD);
 }
 
@@ -74,8 +72,8 @@ bool ModelLoaderText::GlyphBundle::prepareOne(uint64_t timestamp, int32_t c, int
         const uint32_t cy = packedBounds.y + 1;
         _alphabet->draw(c, _atlas_attachment._glyph_bitmap, cx, cy);
 
-        const float bottom = _is_y_up ? static_cast<float>(height - bitmap_height - bitmap_y) / bitmap_height : static_cast<float>(bitmap_y) / bitmap_height;
-        const Rect bounds = _is_y_up ? Rect(0, bottom, 1.0f, bottom + 1.0f) : Rect(0, bottom + 1.0f, 1.0f, bottom);
+        const float bottom = static_cast<float>(height - bitmap_height - bitmap_y) / bitmap_height;
+        const Rect bounds(0, bottom, 1.0f, bottom + 1.0f);
         const V2 charSize(static_cast<float>(bitmap_width), static_cast<float>(bitmap_height));
         Atlas::Item item = _atlas_attachment._atlas.makeItem(cx, cy, cx + bitmap_width, cy + bitmap_height, bounds, charSize, V2(0));
         const V3 xyz(static_cast<float>(bitmap_x), static_cast<float>(bitmap_y), 0);

@@ -11,8 +11,8 @@ namespace ark {
 
 ResourceLoaderContext::ResourceLoaderContext(sp<Dictionary<document>> documents, sp<BitmapLoaderBundle> bitmapBundle, sp<BitmapLoaderBundle> bitmapBoundsBundle,
                                              sp<ExecutorThreadPool> executor, sp<RenderController> renderController)
-    : _documents(std::move(documents)), _bitmap_bundle(std::move(bitmapBundle)), _bitmap_bounds_bundle(std::move(bitmapBoundsBundle)), _executor_thread_pool(std::move(executor)),
-      _render_controller(std::move(renderController)), _texture_bundle(sp<TextureBundle>::make(_render_controller)), _discarded(sp<Boolean::Impl>::make(false))
+    : _documents(std::move(documents)), _bitmap_bundle(std::move(bitmapBundle)), _bitmap_bounds_bundle(std::move(bitmapBoundsBundle)),
+      _render_controller(std::move(renderController)), _texture_bundle(sp<TextureBundle>::make(_render_controller)), _discarded(sp<Discarded>::make())
 {
 }
 
@@ -37,11 +37,6 @@ const sp<BitmapLoaderBundle>& ResourceLoaderContext::bitmapBoundsBundle() const
     return _bitmap_bounds_bundle;
 }
 
-const sp<ExecutorThreadPool>& ResourceLoaderContext::executorThreadPool() const
-{
-    return _executor_thread_pool;
-}
-
 const sp<RenderController>& ResourceLoaderContext::renderController() const
 {
     return _render_controller;
@@ -52,7 +47,7 @@ const sp<TextureBundle>& ResourceLoaderContext::textureBundle() const
     return _texture_bundle;
 }
 
-sp<Boolean> ResourceLoaderContext::disposed() const
+sp<Boolean> ResourceLoaderContext::discarded() const
 {
     return _discarded;
 }

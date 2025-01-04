@@ -77,9 +77,10 @@ M4 changeProjectionHandSide(const M4& projection, bool flipx, bool flipy, bool f
 
 struct CameraDelegateCHS final : Camera::Delegate {
 
-    CameraDelegateCHS(sp<Delegate> delegate, bool flipx, bool flipy)
-        : _delegate(std::move(delegate)), _flipx(flipx), _flipy(flipy)
+    CameraDelegateCHS(Ark::RendererCoordinateSystem rcs, sp<Delegate> delegate, bool flipx, bool flipy)
+        : _rcs(rcs), _delegate(std::move(delegate)), _flipx(flipx), _flipy(flipy)
     {
+        ASSERT(_rcs == Ark::COORDINATE_SYSTEM_LHS || _rcs == Ark::COORDINATE_SYSTEM_RHS);
     }
 
     M4 frustum(float left, float right, float bottom, float top, float clipNear, float clipFar) override
@@ -94,8 +95,10 @@ struct CameraDelegateCHS final : Camera::Delegate {
 
     M4 ortho(float left, float right, float bottom, float top, float clipNear, float clipFar) override
     {
+        const bool needFlipY = (_rcs == Ark::COORDINATE_SYSTEM_LHS ? bottom < top : bottom > top) != _flipy;
+        const bool needFlipZ = (_rcs == Ark::COORDINATE_SYSTEM_LHS ? clipNear < clipFar : clipNear > clipFar) != needFlipY;
         const M4 m = _delegate->ortho(left, right, bottom, top, clipNear, clipFar);
-        return changeProjectionHandSide(m, false, _flipy, bottom < top && !_flipy);
+        return changeProjectionHandSide(m, false, needFlipY, needFlipZ);
     }
 
     M4 perspective(float fov, float aspect, float clipNear, float clipFar) override
@@ -103,6 +106,7 @@ struct CameraDelegateCHS final : Camera::Delegate {
         return changeProjectionHandSide(_delegate->perspective(fov, aspect, clipNear, clipFar), _flipx, _flipy, false);
     }
 
+    Ark::RendererCoordinateSystem _rcs;
     sp<Delegate> _delegate;
     bool _flipx;
     bool _flipy;
@@ -406,7 +410,7 @@ Camera Ark::createCamera(RendererCoordinateSystem coordinateSystem, bool flipx) 
     sp<Camera::Delegate> cameraDelegate = rendererFactory.createCamera();
     const bool flipy = cs != rendererFactory.features()._default_coordinate_system;
     if(flipx || flipy)
-        return {cs, sp<Camera::Delegate>::make<CameraDelegateCHS>(std::move(cameraDelegate), flipx, flipy)};
+        return {cs, sp<Camera::Delegate>::make<CameraDelegateCHS>(cs, std::move(cameraDelegate), flipx, flipy)};
     return {cs, std::move(cameraDelegate)};
 }
 

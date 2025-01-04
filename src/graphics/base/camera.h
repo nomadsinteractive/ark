@@ -105,7 +105,6 @@ public:
     sp<Mat4> vp() const;
 
     void assign(const Camera& other);
-    bool isYUp() const;
 
     static Camera createDefaultCamera();
 

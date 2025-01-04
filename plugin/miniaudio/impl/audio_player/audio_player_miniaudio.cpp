@@ -6,6 +6,7 @@
 #include <thread>
 #include <miniaudio.h>
 
+#include "app/base/application_context.h"
 #include "core/base/future.h"
 #include "core/inf/executor.h"
 #include "core/inf/readable.h"
@@ -18,15 +19,11 @@
 #include "app/util/audio_mixer.h"
 
 
-namespace ark {
-namespace plugin {
-namespace miniaudio {
-
+namespace ark::plugin::miniaudio {
 
 static ma_result _decoder_read_proc(ma_decoder* pDecoder, void* pBufferOut, size_t bytesToRead, size_t* pBytesRead);
 static ma_result _decoder_seek_proc(ma_decoder* pDecoder, ma_int64 byteOffset, ma_seek_origin origin);
 static void _data_callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 frameCount);
-
 
 class AudioPlayerMiniAudio::MADevice : public Runnable {
 public:
@@ -86,17 +83,13 @@ ma_result _decoder_read_proc(ma_decoder* pDecoder, void* pBufferOut, size_t byte
 
 ma_result _decoder_seek_proc(ma_decoder* pDecoder, ma_int64 byteOffset, ma_seek_origin origin)
 {
-    AudioMixer* readable = reinterpret_cast<AudioMixer*>(pDecoder->pUserData);
+    AudioMixer* readable = static_cast<AudioMixer*>(pDecoder->pUserData);
     DCHECK(origin == ma_seek_origin_start || origin == ma_seek_origin_current, "ma_seek_origin should be either ma_seek_origin_start or ma_seek_origin_current");
     return readable->seek(byteOffset, origin == ma_seek_origin_start ? SEEK_SET : SEEK_CUR) == 0 ? MA_SUCCESS : MA_ERROR;
 }
 
-AudioPlayerMiniAudio::AudioPlayerMiniAudio(const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _executor(resourceLoaderContext->executorThreadPool())
-{
-}
-
-AudioPlayerMiniAudio::~AudioPlayerMiniAudio()
+AudioPlayerMiniAudio::AudioPlayerMiniAudio()
+    : _executor(Ark::instance().applicationContext()->executorThreadPool())
 {
 }
 
@@ -123,29 +116,17 @@ sp<Future> AudioPlayerMiniAudio::play(const sp<Readable>& source, AudioFormat fo
 
 bool AudioPlayerMiniAudio::isAudioFormatSupported(AudioPlayer::AudioFormat format)
 {
-    return format == AudioPlayer::AUDIO_FORMAT_PCM;
-}
-
-AudioPlayerMiniAudio::BUILDER::BUILDER(BeanFactory& /*factory*/, const document& /*manifest*/, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _resource_loader_context(resourceLoaderContext)
-{
+    return format == AUDIO_FORMAT_PCM;
 }
 
 sp<AudioPlayer> AudioPlayerMiniAudio::BUILDER::build(const Scope& /*args*/)
 {
-    return sp<AudioPlayerMiniAudio>::make(_resource_loader_context);
-}
-
-AudioPlayerMiniAudio::BUILDER_DEFAULT::BUILDER_DEFAULT(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _delegate(factory, manifest, resourceLoaderContext)
-{
+    return sp<AudioPlayerMiniAudio>::make();
 }
 
 sp<AudioPlayer> AudioPlayerMiniAudio::BUILDER_DEFAULT::build(const Scope& args)
 {
-    return _delegate.build(args);
+    return sp<AudioPlayerMiniAudio>::make();
 }
 
-}
-}
 }

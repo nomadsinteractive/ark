@@ -47,8 +47,6 @@ public:
 
     bool onEvent(const Event& event);
 
-    V2 toViewportPosition(const V2& position) const;
-
     void addPreRenderTask(sp<Runnable> task, sp<Boolean> cancelled);
 
     void addEventListener(sp<EventListener> eventListener, sp<Boolean> disposed = nullptr);

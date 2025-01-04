@@ -88,12 +88,12 @@ void RendererFactoryOpenGL::onSurfaceCreated(RenderEngine& renderEngine)
 
 sp<RenderView> RendererFactoryOpenGL::createRenderView(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController)
 {
-    return sp<RenderView>::adopt(new RenderViewOpenGL(renderContext, renderController));
+    return sp<RenderView>::make<RenderViewOpenGL>(renderContext, renderController);
 }
 
 sp<Buffer::Delegate> RendererFactoryOpenGL::createBuffer(Buffer::Type type, Buffer::Usage usage)
 {
-    return sp<GLBuffer>::make(type, usage, _recycler);
+    return sp<Buffer::Delegate>::make<GLBuffer>(type, usage, _recycler);
 }
 
 sp<Camera::Delegate> RendererFactoryOpenGL::createCamera()

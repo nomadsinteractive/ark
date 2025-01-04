@@ -218,7 +218,7 @@ void updateLayoutResult(const Layout::Hierarchy& hierarchy)
 
 void doUpdate(const Layout::Hierarchy& hierarchy, uint64_t timestamp)
 {
-    Layout::Node& layoutNode = hierarchy._node;
+    const Layout::Node& layoutNode = hierarchy._node;
     YGNodeRef ygNode = static_cast<YGNodeRef>(layoutNode._tag);
 
     if(layoutNode._layout_param)

@@ -36,7 +36,11 @@ public:
     void onWire(const WiringContext& context) override
     {
         if(_view_name)
-            _render_object->setPosition(context.ensureComponent<View>()->findView(_view_name)->layoutPosition());
+        {
+            const sp<View> view = context.ensureComponent<View>()->findView(_view_name);
+            _render_object->setPosition(view->layoutPosition());
+            _render_object->setSize(view->layoutSize());
+        }
         else if(sp<Vec3> position = context.getComponent<Position>())
             _render_object->setPosition(std::move(position));
         else if(const auto boundaries = context.getComponent<Boundaries>())

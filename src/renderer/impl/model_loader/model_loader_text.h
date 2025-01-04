@@ -63,7 +63,6 @@ private:
         sp<Model> _unit_glyph_model;
         Font::TextSize _text_size;
         std::unordered_map<int32_t, GlyphModel> _glyphs;
-        bool _is_y_up = true;
     };
 
     struct AtlasAttachment {

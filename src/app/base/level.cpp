@@ -1,7 +1,5 @@
 #include "app/base/level.h"
 
-#include <map>
-
 #include "core/ark.h"
 #include "core/base/named_hash.h"
 #include "core/types/global.h"
@@ -89,7 +87,7 @@ std::pair<sp<RenderObject>, sp<Transform3D>> makeRenderObject(const Object& obj,
     return {std::move(renderObject), std::move(transform)};
 }
 
-sp<Rigidbody> makeRigidBody(Library& library, const sp<Collider>& collider, RenderObject& renderObject, Transform3D& transform, Collider::BodyType bodyType, const std::map<String, sp<Shape>>& shapes)
+sp<Rigidbody> makeRigidBody(Library& library, const sp<Collider>& collider, RenderObject& renderObject, Transform3D& transform, Collider::BodyType bodyType, const Map<String, sp<Shape>>& shapes)
 {
     if(!collider)
         return nullptr;
@@ -112,17 +110,17 @@ sp<Rigidbody> makeRigidBody(Library& library, const sp<Collider>& collider, Rend
 
 }
 
-Level::Level(std::map<String, sp<Layer>> layers, std::map<String, sp<Camera>> cameras, std::map<String, sp<Vec3>> lights)
+Level::Level(Map<String, sp<Layer>> layers, Map<String, sp<Camera>> cameras, Map<String, sp<Vec3>> lights)
     : _layers(std::move(layers)), _cameras(std::move(cameras)), _lights(std::move(lights))
 {
 }
 
-void Level::load(const String& src, const sp<Collider>& collider, const std::map<String, sp<Shape>>& shapes)
+void Level::load(const String& src, const sp<Collider>& collider, const Map<String, sp<Shape>>& shapes)
 {
     const document manifest = Ark::instance().applicationContext()->applicationBundle()->loadDocument(src);
     CHECK(manifest, "Cannot load manifest \"%s\"", src.c_str());
 
-    std::map<int32_t, Library> libraryMapping;
+    Map<int32_t, Library> libraryMapping;
     for(const document& i : manifest->children("library"))
     {
         const String& name = Documents::ensureAttribute(i, constants::NAME);
@@ -181,7 +179,7 @@ void Level::load(const String& src, const sp<Collider>& collider, const std::map
                     const Quaternion quaternion(sp<Vec4>::make<Vec4::Const>(obj._rotation ? obj._rotation.value() : constants::QUATERNION_ONE));
                     const M4 matrix = quaternion.toMatrix()->val();
                     //After converting Blender coordinate system(RHS) from z-up to y-up, it becomes LHS coordinate system.
-                    const V3 front = MatrixUtil::mul(matrix, V3(0, camera->isYUp() ? 1.0f : -1.0f, 0));
+                    const V3 front = MatrixUtil::mul(matrix, V3(0, 1.0f, 0));
                     const V3 up = MatrixUtil::mul(matrix, V3(0, 0, 1.0f));
                     Camera c = Ark::instance().createCamera(Ark::COORDINATE_SYSTEM_LHS, Ark::instance().applicationContext()->renderEngine()->coordinateSystem() == Ark::COORDINATE_SYSTEM_LHS);
                     c.perspective(fovy, 16.0f / 9, clipNear, clipFar);

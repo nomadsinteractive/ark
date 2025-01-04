@@ -3,8 +3,6 @@
 #include "core/types/global.h"
 
 #include "graphics/base/camera.h"
-#include "graphics/base/mat.h"
-#include "graphics/util/matrix_util.h"
 
 #include "renderer/base/render_engine_context.h"
 #include "renderer/inf/renderer_factory.h"
@@ -62,9 +60,9 @@ bool RenderEngine::isViewportFlipped() const
     return _coordinate_system != _renderer_factory->features()._default_coordinate_system;
 }
 
-V2 RenderEngine::toViewportPosition(const V2& position) const
+V2 RenderEngine::toLHSPosition(const V2& position) const
 {
-    if(isViewportFlipped())
+    if(_coordinate_system == Ark::COORDINATE_SYSTEM_RHS)
         return {position.x(), _render_context->viewport().height() - position.y()};
     return position;
 }
@@ -94,7 +92,11 @@ void RenderEngine::onSurfaceCreated()
 sp<RenderView> RenderEngine::createRenderView(const sp<RenderController>& renderController, const Viewport& viewport) const
 {
     const Global<Camera> mainCamera;
-    mainCamera->ortho(viewport.left(), viewport.right(), viewport.top(), viewport.bottom(), viewport.clipNear(), viewport.clipFar());
+    // We're ignoring the clipping plane arguments in ortho projections and using the standard NDC configuration
+    if(isLHS())
+        mainCamera->ortho(viewport.left(), viewport.right(), viewport.bottom(), viewport.top(), 1.0f, -1.0f);
+    else
+        mainCamera->ortho(viewport.left(), viewport.right(), viewport.top(), viewport.bottom(), 1.0f, -1.0f);
 
     _render_context->setViewport(viewport);
     return _renderer_factory->createRenderView(_render_context, renderController);

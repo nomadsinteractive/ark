@@ -178,7 +178,7 @@ sp<ColliderBox2D> ColliderBox2D::BUILDER_IMPL1::build(const Scope& args)
     }
 
     const sp<Boolean> discarded = _discarded.build(args);
-    _resource_loader_context->renderController()->addPreComposeRunnable(world->_stub, discarded ? discarded : BooleanType::__or__(_resource_loader_context->disposed(), sp<Boolean>::make<BooleanByWeakRef<ColliderBox2D::Stub>>(world->_stub, 1)));
+    _resource_loader_context->renderController()->addPreComposeRunnable(world->_stub, discarded ? discarded : BooleanType::__or__(_resource_loader_context->discarded(), sp<Boolean>::make<BooleanByWeakRef<ColliderBox2D::Stub>>(world->_stub, 1)));
     return world;
 }
 
