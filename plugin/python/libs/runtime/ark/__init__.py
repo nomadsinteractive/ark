@@ -820,6 +820,13 @@ class Shader:
 
 
 class Renderer:
+
+    PRIORITY_UI = -10,
+    PRIORITY_DEFAULT = 0,
+    PRIORITY_UI_BLEND = 10,
+    PRIORITY_UI_TEXT = 20
+    PRIORITY_CONTROL = 100
+
     def __init__(self, delegate: Optional['Renderer'] | list['Renderer'] = None):
         self._delegate = delegate
 
@@ -2474,13 +2481,7 @@ class Rigidbody:
 
 class SurfaceController:
 
-    def add_renderer(self, renderer: Renderer, discarded: Optional[Boolean] = None, visible: Optional[Boolean] = None):
-        pass
-
-    def add_control_layer(self, renderer: Renderer, discarded: Optional[Boolean] = None, visible: Optional[Boolean] = None):
-        pass
-
-    def add_layer(self, renderer: Renderer, discarded: Optional[Boolean] = None, visible: Optional[Boolean] = None):
+    def add_renderer(self, renderer: Renderer, discarded: Optional[Boolean] = None, visible: Optional[Boolean] = None, priority: int = Renderer.PRIORITY_DEFAULT):
         pass
 
 

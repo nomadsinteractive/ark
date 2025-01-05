@@ -1,8 +1,6 @@
-#ifndef ARK_RENDERER_INF_SNIPPET_FACTORY_H_
-#define ARK_RENDERER_INF_SNIPPET_FACTORY_H_
+#pragma once
 
-#include "core/ark.h"
-#include "core/types/shared_ptr.h"
+#include "core/base/api.h"
 
 #include "renderer/forwarding.h"
 
@@ -16,5 +14,3 @@ public:
 };
 
 }
-
-#endif

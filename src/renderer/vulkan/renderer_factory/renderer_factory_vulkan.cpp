@@ -98,9 +98,9 @@ sp<Buffer::Delegate> RendererFactoryVulkan::createBuffer(Buffer::Type type, Buff
     return sp<VKBuffer>::make(_renderer, _recycler, usagesFlags[type], flags);
 }
 
-sp<Camera::Delegate> RendererFactoryVulkan::createCamera()
+sp<Camera::Delegate> RendererFactoryVulkan::createCamera(Ark::RendererCoordinateSystem rcs)
 {
-    return sp<Camera::Delegate>::make<Camera::DelegateLH_ZO>();
+    return rcs == Ark::COORDINATE_SYSTEM_RHS ? sp<Camera::Delegate>::make<Camera::DelegateRH_ZO>() : sp<Camera::Delegate>::make<Camera::DelegateLH_ZO>();
 }
 
 sp<RenderTarget> RendererFactoryVulkan::createRenderTarget(sp<Renderer> renderer, RenderTarget::CreateConfigure configure)

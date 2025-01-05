@@ -9,8 +9,6 @@
 #include "graphics/forwarding.h"
 #include "graphics/impl/renderer/render_group.h"
 
-#include "app/forwarding.h"
-
 namespace ark {
 
 class ARK_API SurfaceController {
@@ -18,7 +16,7 @@ public:
     SurfaceController();
 
 // [[script::bindings::auto]]
-    void addRenderer(sp<Renderer> renderer, sp<Boolean> discarded = nullptr, sp<Boolean> visible = nullptr);
+    void addRenderer(sp<Renderer> renderer, sp<Boolean> discarded = nullptr, sp<Boolean> visible = nullptr, RendererType::Priority priority = RendererType::PRIORITY_DEFAULT);
 
     void requestUpdate(uint64_t timestamp);
     void onRenderFrame(const Color& backgroundColor, RenderView& renderView);

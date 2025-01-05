@@ -18,7 +18,7 @@ public:
     void render(RenderRequest& renderRequest, const V3& position) override;
     void addRenderer(sp<Renderer> renderer, const Traits& traits) override;
 
-    void add(RendererType::Priority phrase, sp<Renderer> renderer, sp<Boolean> discarded = nullptr, sp<Boolean> visible = nullptr);
+    void add(RendererType::Priority priority, sp<Renderer> renderer, sp<Boolean> discarded = nullptr, sp<Boolean> visible = nullptr);
 
 //  [[plugin::builder]]
     class BUILDER final : public Builder<RenderGroup> {

@@ -209,9 +209,9 @@ sp<Buffer::Delegate> RendererFactoryBgfx::createBuffer(Buffer::Type type, Buffer
     return nullptr;
 }
 
-sp<Camera::Delegate> RendererFactoryBgfx::createCamera()
+sp<Camera::Delegate> RendererFactoryBgfx::createCamera(Ark::RendererCoordinateSystem rcs)
 {
-    return sp<Camera::Delegate>::make<Camera::DelegateRH_NO>();
+    return rcs == Ark::COORDINATE_SYSTEM_LHS ? sp<Camera::Delegate>::make<Camera::DelegateLH_NO>() :  sp<Camera::Delegate>::make<Camera::DelegateRH_NO>();
 }
 
 sp<RenderTarget> RendererFactoryBgfx::createRenderTarget(sp<Renderer> renderer, RenderTarget::CreateConfigure configure)

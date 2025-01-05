@@ -271,7 +271,7 @@ sp<RendererImgui::DrawCommandRecycler> RendererImgui::obtainDrawCommandRecycler(
 }
 
 RendererImgui::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _manifest(manifest), _resource_loader_context(resourceLoaderContext), _camera(sp<Camera>::make(Ark::instance().createCamera())),
+    : _manifest(manifest), _resource_loader_context(resourceLoaderContext), _camera(sp<Camera>::make(Ark::instance().createCamera(Ark::COORDINATE_SYSTEM_LHS, false, true))),
       _shader(Shader::fromDocument(factory, manifest, resourceLoaderContext, "shaders/imgui.vert", "shaders/imgui.frag"))
 {
 }

@@ -16,7 +16,8 @@ public:
         PRIORITY_UI = -10,
         PRIORITY_DEFAULT = 0,
         PRIORITY_UI_BLEND = 10,
-        PRIORITY_UI_TEXT = 20
+        PRIORITY_UI_TEXT = 20,
+        PRIORITY_CONTROL = 100
     };
 
 public:

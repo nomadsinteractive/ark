@@ -384,7 +384,7 @@ class MarkStudio:
             self._discarded.set(True)
         self._discarded = Boolean(False)
 
-        self._application_facade.surface_controller.add_control_layer(self._imgui, self._discarded)
+        self._application_facade.surface_controller.add_renderer(self._imgui, self._discarded, priority=Renderer.PRIORITY_CONTROL)
         self._application_facade.push_event_listener(self._imgui, self._discarded)
 
     def close(self):

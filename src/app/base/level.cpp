@@ -181,7 +181,7 @@ void Level::load(const String& src, const sp<Collider>& collider, const Map<Stri
                     //After converting Blender coordinate system(RHS) from z-up to y-up, it becomes LHS coordinate system.
                     const V3 front = MatrixUtil::mul(matrix, V3(0, 1.0f, 0));
                     const V3 up = MatrixUtil::mul(matrix, V3(0, 0, 1.0f));
-                    Camera c = Ark::instance().createCamera(Ark::COORDINATE_SYSTEM_LHS, Ark::instance().applicationContext()->renderEngine()->coordinateSystem() == Ark::COORDINATE_SYSTEM_LHS);
+                    Camera c = Ark::instance().createCamera(Ark::COORDINATE_SYSTEM_LHS, true, Ark::instance().applicationContext()->renderEngine()->coordinateSystem() == Ark::COORDINATE_SYSTEM_RHS);
                     c.perspective(fovy, 16.0f / 9, clipNear, clipFar);
                     c.lookAt(obj._position, obj._position + front, up);
                     camera->assign(c);
