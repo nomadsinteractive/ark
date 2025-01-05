@@ -5,7 +5,7 @@
 #include "core/types/global.h"
 
 #include "graphics/base/camera.h"
-#include "graphics/base/layer.h"
+#include "graphics/components/layer.h"
 #include "graphics/components/quaternion.h"
 #include "graphics/components/render_object.h"
 #include "graphics/base/transform_3d.h"

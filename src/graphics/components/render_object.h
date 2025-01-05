@@ -3,6 +3,7 @@
 #include "core/base/api.h"
 #include "core/base/timestamp.h"
 #include "core/inf/builder.h"
+#include "core/inf/wirable.h"
 #include "core/types/box.h"
 #include "core/types/shared_ptr.h"
 #include "core/types/safe_var.h"
@@ -13,7 +14,7 @@
 
 namespace ark {
 
-class ARK_API RenderObject final : public Renderable {
+class ARK_API RenderObject final : public Renderable, public Wirable {
 public:
 //  [[script::bindings::auto]]
     RenderObject(sp<Integer> type, sp<Vec3> position = nullptr, sp<Vec3> size = nullptr, sp<Transform> transform = nullptr, sp<Varyings> varyings = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> discarded = nullptr);
@@ -75,9 +76,9 @@ public:
     void setVaryings(sp<Varyings> varyings);
 
 //  [[script::bindings::property]]
-    const Box& tag() const;
+    Box tag() const;
 //  [[script::bindings::property]]
-    void setTag(const Box& tag);
+    void setTag(Box tag);
 
 //  [[script::bindings::property]]
     const sp<Boolean>& discarded();
@@ -104,6 +105,8 @@ public:
 
     StateBits updateState(const RenderRequest& renderRequest) override;
     Renderable::Snapshot snapshot(const LayerContextSnapshot& snapshotContext, const RenderRequest& renderRequest, StateBits state) override;
+
+    void onWire(const WiringContext& context, const Box& self) override;
 
 //  [[plugin::builder]]
     class BUILDER final : public Builder<RenderObject> {
@@ -132,7 +135,6 @@ public:
         BUILDER _builder_impl;
     };
 
-
 //  [[plugin::builder("with-render-object")]]
     class BUILDER_WIRABLE final : public Builder<Wirable> {
     public:
@@ -141,8 +143,7 @@ public:
         sp<Wirable> build(const Scope& args) override;
 
     private:
-        BUILDER _builder_impl;
-        String _view_name;
+        builder<RenderObject> _render_object;
     };
 
 private:
@@ -156,7 +157,7 @@ private:
     SafeVar<Boolean> _visible;
     SafeVar<Boolean> _discarded;
 
-    Box _tag;
+    sp<WithTag> _with_tag;
 
     Timestamp _timestamp;
 };

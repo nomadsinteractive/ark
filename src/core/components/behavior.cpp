@@ -38,9 +38,9 @@ Behavior::Behavior(Box delegate)
 {
 }
 
-void Behavior::onWire(const WiringContext& context)
+void Behavior::onWire(const WiringContext& context, const Box& self)
 {
-    _with_debris.onWire(context);
+    _with_debris.onWire(context, self);
 }
 
 void Behavior::traverse(const Visitor& visitor)

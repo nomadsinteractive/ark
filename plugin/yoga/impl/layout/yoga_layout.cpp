@@ -130,20 +130,20 @@ template<typename T, typename U> Optional<T> updateVar(uint64_t timestamp, U& va
 {
     if(!timestamp || var.update(timestamp))
         return var.val();
-    return Optional<T>();
+    return {};
 }
 
-void applyLayoutParam(const LayoutParam& layoutParam, YGNodeRef node, uint64_t timestamp)
+void updateLayoutParam(const LayoutParam& layoutParam, YGNodeRef node, uint64_t timestamp)
 {
     if(const Optional<float> width = updateVar<float>(timestamp, layoutParam.width()._value))
     {
-        if(layoutParam.widthType() == LayoutParam::LENGTH_TYPE_AUTO)
+        if(layoutParam.width()._type == LayoutParam::LENGTH_TYPE_AUTO)
             YGNodeStyleSetWidthAuto(node);
-        else if(layoutParam.widthType() == LayoutParam::LENGTH_TYPE_PIXEL)
+        else if(layoutParam.width()._type == LayoutParam::LENGTH_TYPE_PIXEL)
             YGNodeStyleSetWidth(node, width.value());
         else
         {
-            ASSERT(layoutParam.widthType() == LayoutParam::LENGTH_TYPE_PERCENTAGE);
+            ASSERT(layoutParam.width()._type == LayoutParam::LENGTH_TYPE_PERCENTAGE);
             YGNodeStyleSetWidthPercent(node, width.value());
         }
     }
@@ -211,7 +211,7 @@ void updateLayoutResult(const Layout::Hierarchy& hierarchy)
     layoutNode.setPaddings(V4(YGNodeLayoutGetPadding(ygNode, YGEdgeTop), YGNodeLayoutGetPadding(ygNode, YGEdgeRight),
                               YGNodeLayoutGetPadding(ygNode, YGEdgeBottom), YGNodeLayoutGetPadding(ygNode, YGEdgeLeft)));
     layoutNode.setOffsetPosition(V2(YGNodeLayoutGetLeft(ygNode), YGNodeLayoutGetTop(ygNode)));
-    layoutNode.setSize(V2(YGNodeLayoutGetWidth(ygNode), YGNodeLayoutGetHeight(ygNode)));
+    layoutNode.setSize({YGNodeLayoutGetWidth(ygNode), YGNodeLayoutGetHeight(ygNode)});
     for(const Layout::Hierarchy& i : hierarchy._child_nodes)
         updateLayoutResult(i);
 }
@@ -222,7 +222,7 @@ void doUpdate(const Layout::Hierarchy& hierarchy, uint64_t timestamp)
     YGNodeRef ygNode = static_cast<YGNodeRef>(layoutNode._tag);
 
     if(layoutNode._layout_param)
-        applyLayoutParam(layoutNode._layout_param, ygNode, timestamp);
+        updateLayoutParam(layoutNode._layout_param, ygNode, timestamp);
 
     for(const Layout::Hierarchy& i : hierarchy._child_nodes)
         doUpdate(i, timestamp);
@@ -239,7 +239,7 @@ public:
 
     bool update(uint64_t timestamp) override {
         const LayoutParam& layoutParam = _hierarchy._node->_layout_param;
-        ASSERT(layoutParam.widthType() != LayoutParam::LENGTH_TYPE_PERCENTAGE && layoutParam.height()._type != LayoutParam::LENGTH_TYPE_PERCENTAGE);
+        ASSERT(layoutParam.width()._type != LayoutParam::LENGTH_TYPE_PERCENTAGE && layoutParam.height()._type != LayoutParam::LENGTH_TYPE_PERCENTAGE);
         doUpdate(_hierarchy, timestamp);
         YGNodeCalculateLayout(_yg_node, layoutParam.contentWidth(), layoutParam.contentHeight(), YGDirectionLTR);
         updateLayoutResult(_hierarchy);

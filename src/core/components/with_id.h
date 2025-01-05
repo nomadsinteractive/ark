@@ -9,7 +9,7 @@ public:
 //  [[script::bindings::auto]]
     WithId();
 
-    void onWire(const WiringContext& context) override;
+    void onWire(const WiringContext& context, const Box& self) override;
 
 //  [[script::bindings::auto]]
     RefId id() const;

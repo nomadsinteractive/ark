@@ -1,4 +1,4 @@
-#include "app/components/with_tag.h"
+#include "core/components/with_tag.h"
 
 namespace ark {
 
@@ -18,9 +18,9 @@ void WithTag::setTag(Box tag)
     _tag = std::move(tag);
 }
 
-void WithTag::onWire(const WiringContext& context)
+void WithTag::onWire(const WiringContext& context, const Box& self)
 {
-    _with_debris.onWire(context);
+    _with_debris.onWire(context, self);
 }
 
 void WithTag::traverse(const Visitor& visitor)

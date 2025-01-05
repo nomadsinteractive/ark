@@ -7,7 +7,7 @@
 #include "core/types/weak_ptr.h"
 
 #include "graphics/forwarding.h"
-#include "graphics/base/layer.h"
+#include "graphics/components/layer.h"
 #include "graphics/inf/renderable.h"
 #include "graphics/inf/renderer.h"
 

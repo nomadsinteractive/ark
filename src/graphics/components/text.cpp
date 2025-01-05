@@ -15,15 +15,17 @@
 #include "graphics/base/layer_context.h"
 #include "graphics/base/glyph.h"
 #include "graphics/base/render_layer.h"
-#include "graphics/components/render_object.h"
 #include "graphics/base/render_request.h"
+#include "graphics/components/layout_param.h"
+#include "graphics/components/position.h"
+#include "graphics/components/render_object.h"
 #include "graphics/components/size.h"
 #include "graphics/base/v3.h"
 #include "graphics/impl/glyph_maker/glyph_maker_span.h"
 #include "graphics/impl/renderable/renderable_with_transform.h"
 #include "graphics/inf/glyph_maker.h"
 #include "graphics/inf/layout.h"
-#include "graphics/components/layout_param.h"
+#include "graphics/util/mat4_type.h"
 #include "graphics/util/vec3_type.h"
 
 #include "renderer/base/atlas.h"
@@ -444,7 +446,7 @@ struct Text::Content {
             if(_layout_param->layout())
                 return _layout_param->layout();
 
-            if(!(_layout_param->isWidthWrapContent() || _layout_param->flexWrap() == LayoutParam::FLEX_WRAP_NOWRAP))
+            if(!(_layout_param->isWrapContent() || _layout_param->flexWrap() == LayoutParam::FLEX_WRAP_NOWRAP))
                 return sp<Layout>::make<LayoutParagraph>(_layout_param, _letter_spacing, _line_height);
         }
         return sp<Layout>::make<LayoutLabel>(_letter_spacing);
@@ -510,17 +512,32 @@ Text::Text(sp<RenderLayer> renderLayer, sp<StringVar> text, sp<Vec3> position, s
 {
 }
 
-void Text::onWire(const WiringContext& context)
+void Text::onWire(const WiringContext& context, const Box& self)
 {
-    if(sp<Boundaries> boundaries = context.getComponent<Boundaries>())
+    if(const sp<View> view = context.getComponent<View>())
+    {
+        LayoutParam& layoutParam = view->layoutParam();
+        setBoundaries(view->makeBoundaries());
+        if(layoutParam.width()._type == LayoutParam::LENGTH_TYPE_AUTO)
+            layoutParam.setWidth({LayoutParam::LENGTH_TYPE_PIXEL, size()->width()});
+        if(layoutParam.height()._type == LayoutParam::LENGTH_TYPE_AUTO)
+            layoutParam.setHeight({LayoutParam::LENGTH_TYPE_PIXEL, size()->height()});
+    }
+    else if(sp<Boundaries> boundaries = context.getComponent<Boundaries>())
         setBoundaries(std::move(boundaries));
+    else if(sp<Vec3> position = context.getComponent<Position>())
+        setPosition(std::move(position));
 
-    if(!layoutParam())
-        if(const sp<View> view = context.getComponent<View>())
-            setLayoutParam(view->layoutParam());
-
-    if(const sp<Mat4> transform = context.getComponent<Transform>())
+    if(sp<Mat4> transform = context.getComponent<Transform>())
         setTransform(std::move(transform));
+
+    if(const sp<Node> node = context.getComponent<Node>())
+    {
+        sp<Mat4> matrix = transform();
+        matrix = matrix ? Mat4Type::matmul(std::move(matrix), node->localMatrix()) : sp<Mat4>::make<Mat4::Const>(node->localMatrix());
+        if(matrix)
+            setTransform(std::move(matrix));
+    }
 
     show(context.getComponent<Discarded>());
 }
@@ -620,6 +637,16 @@ sp<Text> Text::BUILDER::build(const Scope& args)
 {
     float letterSpacing = _letter_spacing ? _letter_spacing.build(args)->val() : 0.0f;
     return sp<Text>::make(_render_layer->build(args), _text.build(args), _position.build(args), _layout_param.build(args), _glyph_maker.build(args), _transform.build(args), letterSpacing, _line_height, _line_indent);
+}
+
+Text::BUILDER_WIRABLE::BUILDER_WIRABLE(BeanFactory& factory, const document& manifest)
+    : _text(factory.ensureBuilder<Text>(manifest))
+{
+}
+
+sp<Wirable> Text::BUILDER_WIRABLE::build(const Scope& args)
+{
+    return _text->build(args);
 }
 
 }

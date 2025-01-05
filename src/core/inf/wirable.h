@@ -2,9 +2,8 @@
 
 #include "core/forwarding.h"
 #include "core/base/constants.h"
-#include "core/base/scope.h"
+#include "core/base/string.h"
 #include "core/collection/traits.h"
-#include "core/inf/builder.h"
 
 namespace ark {
 
@@ -12,22 +11,24 @@ class Wirable {
 public:
     class WiringContext {
     public:
-        WiringContext(Traits& components)
-            : _components(components) {
+        WiringContext(Traits& components, bool uploadOnClose = true)
+            : _components(components), _upload_on_close(uploadOnClose) {
         }
         ~WiringContext() {
-            for(Box& i : _intermedia_list)
-                _components.add(i.typeId(), std::move(i));
+            if(_upload_on_close) {
+                for(Box& i : _intermedia_list)
+                    _components.add(i.typeId(), std::move(i));
 
-            for(auto& [k, v] : _intermedia_map)
-                _components.put(k, std::move(v));
+                for(auto& [k, v] : _intermedia_map)
+                    _components.put(k, std::move(v));
+            }
         }
 
         template<typename T> sp<T> getComponent() const {
-            if(sp<T> component = _components.get<T>())
-                return component;
             if(const auto iter = _intermedia_map.find(Type<T>::id()); iter != _intermedia_map.end())
                 return iter->second.template toPtr<T>();
+            if(sp<T> component = _components.get<T>())
+                return component;
             return nullptr;
         }
 
@@ -38,7 +39,7 @@ public:
         }
 
         template<typename T> void setComponent(sp<T> component) {
-            CHECK_WARN(!(_components.has<T>() || _intermedia_map.find(Type<T>::id()) != _intermedia_map.end()), "Overriding component: \"%s\"", Class::ensureClass<T>()->name());
+            CHECK_WARN(!(_upload_on_close && (_components.has<T>() || _intermedia_map.find(Type<T>::id()) != _intermedia_map.end())), "Overriding component: \"%s\"", Class::ensureClass<T>()->name());
             setIntermediaComponent(std::move(component));
         }
 
@@ -49,14 +50,31 @@ public:
 
     private:
         template<typename T> void setIntermediaComponent(sp<T> component) {
-            if(!_components.has<T>())
+            if(!(_upload_on_close && _components.has<T>()))
                 _intermedia_map.insert_or_assign(Type<T>::id(), Box(std::move(component)));
         }
 
     private:
         Traits& _components;
+        bool _upload_on_close;
         Vector<Box> _intermedia_list;
         Map<TypeId, Box> _intermedia_map;
+    };
+
+    class Niche {
+    public:
+        Niche(String name)
+            : _name(std::move(name)) {
+        }
+        virtual ~Niche() = default;
+
+        virtual void onPoll(WiringContext& context, StringView value) = 0;
+
+        [[nodiscard]]
+        const String& name() const { return _name; }
+
+    protected:
+        String _name;
     };
 
     virtual ~Wirable() = default;
@@ -65,7 +83,7 @@ public:
         return constants::TYPE_ID_NONE;
     }
 
-    virtual void onWire(const WiringContext& context) = 0;
+    virtual void onWire(const WiringContext& context, const Box& self) = 0;
 
 };
 

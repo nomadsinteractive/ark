@@ -2,6 +2,7 @@
 
 #include "core/inf/builder.h"
 #include "core/inf/debris.h"
+#include "core/inf/wirable.h"
 #include "core/types/shared_ptr.h"
 #include "core/types/safe_builder.h"
 #include "core/types/safe_var.h"

@@ -8,7 +8,7 @@ WithId::WithId()
 {
 }
 
-void WithId::onWire(const WiringContext& context)
+void WithId::onWire(const WiringContext& context, const Box& self)
 {
 }
 

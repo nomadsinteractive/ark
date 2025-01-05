@@ -10,7 +10,7 @@
 namespace ark {
 
 //[[script::bindings::extends(Vec3)]]
-class ARK_API Position final : public Wrapper<Vec3>, public Vec3, public Wirable {
+class ARK_API Position final : public Wrapper<Vec3>, public Vec3 {
 public:
 //  [[script::bindings::auto]]
     Position(sp<Vec3> position);
@@ -21,8 +21,6 @@ public:
     bool update(uint64_t timestamp) override;
     V3 val() override;
 
-    TypeId onPoll(WiringContext& context) override;
-    void onWire(const WiringContext& context) override;
 };
 
 }

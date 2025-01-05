@@ -1,5 +1,7 @@
 #include "graphics/components/render_object.h"
 
+#include <core/components/with_tag.h>
+
 #include "core/base/bean_factory.h"
 #include "core/base/named_hash.h"
 #include "core/impl/variable/variable_wrapper.h"
@@ -17,51 +19,6 @@
 #include "app/view/view.h"
 
 namespace ark {
-
-namespace {
-
-class WirableRenderObject final : public Wirable {
-public:
-    WirableRenderObject(sp<RenderObject> renderObject, String viewName)
-        : _render_object(std::move(renderObject)), _view_name(std::move(viewName))
-    {
-    }
-
-    TypeId onPoll(WiringContext& context) override
-    {
-        context.addComponent(_render_object);
-        return constants::TYPE_ID_NONE;
-    }
-
-    void onWire(const WiringContext& context) override
-    {
-        if(_view_name)
-        {
-            const sp<View> view = context.ensureComponent<View>()->findView(_view_name);
-            _render_object->setPosition(view->layoutPosition());
-            _render_object->setSize(view->layoutSize());
-        }
-        else if(sp<Vec3> position = context.getComponent<Position>())
-            _render_object->setPosition(std::move(position));
-        else if(const auto boundaries = context.getComponent<Boundaries>())
-            _render_object->setPosition(boundaries->center());
-
-        if(auto size = context.getComponent<Size>())
-            _render_object->setSize(std::move(size));
-
-        if(auto transform = context.getComponent<Transform>())
-            _render_object->setTransform(std::move(transform));
-
-        if(auto discarded = context.getComponent<Discarded>())
-            _render_object->setDiscarded(std::move(discarded));
-    }
-
-private:
-    sp<RenderObject> _render_object;
-    String _view_name;
-};
-
-}
 
 RenderObject::RenderObject(const NamedHash& type, sp<Vec3> position, sp<Vec3> size, sp<Transform> transform, sp<Varyings> varyings, sp<Boolean> visible, sp<Boolean> discarded)
     : RenderObject(sp<IntegerWrapper>::make(type.hash()), std::move(position), std::move(size), std::move(transform), std::move(varyings), std::move(visible), std::move(discarded))
@@ -210,14 +167,17 @@ void RenderObject::setVaryings(sp<Varyings> varyings)
     _timestamp.markDirty();
 }
 
-const Box& RenderObject::tag() const
+Box RenderObject::tag() const
 {
-    return _tag;
+    return _with_tag ? _with_tag->tag() : nullptr;
 }
 
-void RenderObject::setTag(const Box& tag)
+void RenderObject::setTag(Box tag)
 {
-    _tag = tag;
+    if(!_with_tag)
+        _with_tag = sp<WithTag>::make(std::move(tag));
+    else
+        _with_tag->setTag(std::move(tag));
 }
 
 const sp<Boolean>& RenderObject::discarded()
@@ -293,6 +253,36 @@ Renderable::Snapshot RenderObject::snapshot(const LayerContextSnapshot& snapshot
     return {state, typeId, std::move(model)};
 }
 
+void RenderObject::onWire(const WiringContext& context, const Box& self)
+{
+    const sp<View> view = context.getComponent<View>();
+
+    if(sp<Vec3> size = context.getComponent<Size>(); size && !view)
+        setSize(std::move(size));
+
+    if(view)
+    {
+        setPosition(view->layoutPosition());
+        setSize(view->layoutSize());
+    }
+    else if(const auto boundaries = context.getComponent<Boundaries>())
+        setPosition(boundaries->center());
+    else if(sp<Vec3> position = context.getComponent<Position>())
+        setPosition(std::move(position));
+
+    if(auto transform = context.getComponent<Transform>())
+        setTransform(std::move(transform));
+
+    if(sp<Boolean> discarded = context.getComponent<Discarded>())
+        setDiscarded(std::move(discarded));
+
+    if(auto withTag = context.getComponent<WithTag>())
+        _with_tag = std::move(withTag);
+
+    if(const auto layer = context.getComponent<Layer>())
+        layer->addRenderObject(self.as<RenderObject>());
+}
+
 RenderObject::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _type(factory.getBuilder<Integer>(manifest, constants::TYPE)), _position(factory.getBuilder<Vec3>(manifest, constants::POSITION)), _size(factory.getBuilder<Size>(manifest, constants::SIZE)),
       _transform(factory.getBuilder<Transform>(manifest, constants::TRANSFORM)), _varyings(factory.getConcreteClassBuilder<Varyings>(manifest, constants::VARYINGS)),
@@ -316,13 +306,13 @@ sp<Renderable> RenderObject::BUILDER_RENDERABLE::build(const Scope& args)
 }
 
 RenderObject::BUILDER_WIRABLE::BUILDER_WIRABLE(BeanFactory& factory, const document& manifest)
-    : _builder_impl(factory, manifest), _view_name(Documents::getAttribute(manifest, "view-name"))
+    : _render_object(factory.ensureBuilder<RenderObject>(manifest))
 {
 }
 
 sp<Wirable> RenderObject::BUILDER_WIRABLE::build(const Scope& args)
 {
-    return sp<Wirable>::make<WirableRenderObject>(_builder_impl.build(args), _view_name);
+    return _render_object->build(args);
 }
 
 }

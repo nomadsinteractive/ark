@@ -49,7 +49,9 @@ public:
     StringView toStringView() const;
     operator StringView() const;
 
+    [[nodiscard]]
     std::pair<String, Optional<String>> cut(char sep) const;
+    [[nodiscard]]
     std::pair<Optional<String>, String> rcut(char sep) const;
 
     void insert(size_type pos, const String& str);

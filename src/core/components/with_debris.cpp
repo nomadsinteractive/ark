@@ -31,7 +31,7 @@ WithDebris::WithDebris()
     : _tracker(sp<Tracker>::make()) {
 }
 
-void WithDebris::onWire(const WiringContext& context)
+void WithDebris::onWire(const WiringContext& context, const Box& self)
 {
     std::vector<WeakPtr<Debris>> debris = std::move(_tracker->_debris);
     _tracker = ensureTracker(context);

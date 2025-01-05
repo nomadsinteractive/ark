@@ -2776,10 +2776,5 @@ class CollisionCallback:
         pass
 
 
-class WithText:
-    def __init__(self, text: Text, transform_node: Optional[str] = None):
-        pass
-
-
 def __trace__():
     pass

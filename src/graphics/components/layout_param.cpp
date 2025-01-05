@@ -18,11 +18,6 @@ bool isLengthMatchParent(const LayoutParam::Length& length)
     return length._type == LayoutParam::LENGTH_TYPE_PERCENTAGE && length._value.val() == 100.0f;
 }
 
-bool isLengthWrapContent(const LayoutParam::Length& length)
-{
-    return length._type == LayoutParam::LENGTH_TYPE_AUTO;
-}
-
 class BuilderLengthVar final : public Builder<LayoutParam::Length> {
 public:
     BuilderLengthVar(LayoutParam::LengthType varType, sp<Builder<Numeric>> var)
@@ -65,7 +60,8 @@ LayoutParam::LayoutParam(Length width, Length height, sp<Layout> layout, FlexDir
 
 bool LayoutParam::update(uint64_t timestamp)
 {
-    return _timestamp.update(timestamp) || UpdatableUtil::update(timestamp, _width, _height, _margins, _paddings, _flex_basis);
+    const bool dirty = _timestamp.update(timestamp);
+    return UpdatableUtil::update(timestamp, _width, _height, _margins, _paddings, _flex_basis) || dirty;
 }
 
 const sp<Layout>& LayoutParam::layout() const
@@ -183,19 +179,9 @@ const LayoutParam::Length& LayoutParam::width() const
     return _width;
 }
 
-void LayoutParam::setWidth(sp<Numeric> width)
+void LayoutParam::setWidth(Length width)
 {
-    _width._value.reset(width);
-}
-
-LayoutParam::LengthType LayoutParam::widthType() const
-{
-    return _width._type;
-}
-
-void LayoutParam::setWidthType(LengthType widthType)
-{
-    _width._type = widthType;
+    _width = std::move(width);
     _timestamp.markDirty();
 }
 
@@ -204,14 +190,9 @@ const LayoutParam::Length& LayoutParam::height() const
     return _height;
 }
 
-void LayoutParam::setHeight(sp<Numeric> height)
+void LayoutParam::setHeight(Length height)
 {
-    _height._value.reset(std::move(height));
-}
-
-void LayoutParam::setHeightType(LengthType heightType)
-{
-    _height._type = heightType;
+    _height = std::move(height);
     _timestamp.markDirty();
 }
 
@@ -277,17 +258,7 @@ void LayoutParam::setOffset(sp<Vec3> offset)
 
 bool LayoutParam::isWrapContent() const
 {
-    return isWidthWrapContent() || isHeightWrapContent();
-}
-
-bool LayoutParam::isWidthWrapContent() const
-{
-    return isLengthWrapContent(_width);
-}
-
-bool LayoutParam::isHeightWrapContent() const
-{
-    return isLengthWrapContent(_height);
+    return _flex_wrap == FLEX_WRAP_WRAP || _flex_wrap == FLEX_WRAP_WRAP_REVERSE;
 }
 
 bool LayoutParam::isMatchParent() const

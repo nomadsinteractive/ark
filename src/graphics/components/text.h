@@ -15,12 +15,12 @@
 
 namespace ark {
 
-class ARK_API Text : public Wirable {
+class ARK_API Text final : public Wirable {
 public:
 //  [[script::bindings::auto]]
     Text(sp<RenderLayer> renderLayer, sp<StringVar> text = nullptr, sp<Vec3> position = nullptr, sp<LayoutParam> layoutParam = nullptr, sp<GlyphMaker> glyphMaker = nullptr, sp<Mat4> transform = nullptr, float letterSpacing = 0.0f, float lineHeight = 0.0f, float lineIndent = 0.0f);
 
-    void onWire(const WiringContext& context) override;
+    void onWire(const WiringContext& context, const Box& self) override;
 
 //  [[script::bindings::property]]
     const std::vector<sp<RenderObject>>& contents() const;
@@ -78,6 +78,17 @@ public:
         SafeBuilder<Numeric> _letter_spacing;
         float _line_height;
         float _line_indent;
+    };
+
+//  [[plugin::builder("with-text")]]
+    class BUILDER_WIRABLE final : public Builder<Wirable> {
+    public:
+        BUILDER_WIRABLE(BeanFactory& factory, const document& manifest);
+
+        sp<Wirable> build(const Scope& args) override;
+
+    private:
+        builder<Text> _text;
     };
 
     struct Content;

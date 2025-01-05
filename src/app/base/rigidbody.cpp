@@ -15,7 +15,7 @@
 #include "app/base/collision_manifold.h"
 #include "app/inf/collision_callback.h"
 #include "app/components/shape.h"
-#include "app/components/with_tag.h"
+#include "core/components/with_tag.h"
 
 namespace ark {
 
@@ -35,7 +35,7 @@ void Rigidbody::discard()
     _ref->discard();
 }
 
-void Rigidbody::onWire(const WiringContext& context)
+void Rigidbody::onWire(const WiringContext& context, const Box& self)
 {
     if(sp<Vec3> position = context.getComponent<Position>())
         _position.reset(std::move(position));

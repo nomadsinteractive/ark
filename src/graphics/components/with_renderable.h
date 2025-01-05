@@ -1,7 +1,7 @@
 #pragma once
 
-#include <vector>
-
+#include "core/base/string.h"
+#include "core/inf/builder.h"
 #include "core/inf/wirable.h"
 
 #include "graphics/forwarding.h"
@@ -18,9 +18,9 @@ private:
     };
 
 public:
-    WithRenderable(std::vector<Manifest> manifests);
+    WithRenderable(Vector<Manifest> manifests);
 
-    void onWire(const WiringContext& context) override;
+    void onWire(const WiringContext& context, const Box& self) override;
 
     struct ManifestFactory {
         ManifestFactory(BeanFactory& factory, const document& manifest);
@@ -40,11 +40,11 @@ public:
         sp<Wirable> build(const Scope& args) override;
 
     private:
-        std::vector<ManifestFactory> _manifests;
+        Vector<ManifestFactory> _manifests;
     };
 
 private:
-    std::vector<Manifest> _manifests;
+    Vector<Manifest> _manifests;
 };
 
 }

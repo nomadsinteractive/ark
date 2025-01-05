@@ -296,7 +296,7 @@ public:
             return nullptr;
 
         const Identifier f = Identifier::parse(id, idType);
-        if(std::is_same<T, String>::value)
+        if constexpr (std::is_same_v<T, String>)
             return f.isArg() ? getBuilderByArg<T>(f) : findBuilderByValue<T>(id);
         if(f.isRef())
             return createBuilderByRef<T>(f);
@@ -336,7 +336,7 @@ public:
     }
     template<typename T, typename... Args> std::vector<T> makeBuilderListObject(const document& doc, const String& nodeName, Args&&... args) {
         std::vector<T> list;
-        for(const document& i : doc->children(nodeName))
+        for(const document& i : nodeName ? doc->children(nodeName) : doc->children())
             list.emplace_back(*this, i, std::forward<Args>(args)...);
         return list;
     }

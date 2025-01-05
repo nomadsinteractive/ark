@@ -10,10 +10,10 @@ WithTransform::WithTransform(sp<Transform> transform)
 TypeId WithTransform::onPoll(WiringContext& context)
 {
     context.setComponent(_transform);
-    return constants::TYPE_ID_NONE;
+    return Type<Transform>::id();
 }
 
-void WithTransform::onWire(const WiringContext& context)
+void WithTransform::onWire(const WiringContext& context, const Box& self)
 {
 }
 

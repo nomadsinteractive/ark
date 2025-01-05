@@ -118,16 +118,10 @@ public:
     bool hasFlexGrow() const;
 
     const Length& width() const;
-    void setWidth(sp<Numeric> width);
-
-    LayoutParam::LengthType widthType() const;
-    void setWidthType(LayoutParam::LengthType widthType);
+    void setWidth(Length width);
 
     const Length& height() const;
-    void setHeight(sp<Numeric> height);
-
-//  [[script::bindings::property]]
-    void setHeightType(LayoutParam::LengthType heightType);
+    void setHeight(Length height);
 
 //  [[script::bindings::property]]
     LayoutParam::FlexDirection flexDirection() const;
@@ -158,8 +152,6 @@ public:
     void setOffset(sp<Vec3> offset);
 
     bool isWrapContent() const;
-    bool isWidthWrapContent() const;
-    bool isHeightWrapContent() const;
 
     bool isMatchParent() const;
     bool isWidthMatchParent() const;

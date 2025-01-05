@@ -54,6 +54,10 @@ public:
         return _stub ? _ensure_enum_stub()->_value : 0;
     }
 
+    Box cast(TypeId typeId) const {
+        return _class->cast(*this, typeId);
+    }
+
     template<typename T> sp<T> as() const {
         if(!_stub)
             return nullptr;
@@ -62,7 +66,7 @@ public:
         const PtrStub& ptrStub = std::get<PtrStub>(*_stub);
         sp<T> inst = typeId == _type_id ? ptrStub.unpack<T>() : _class->cast(*this, typeId).toPtr<T>();
         if(!inst) {
-            if(const sp<Duck<T>> duck = _class->cast(*this, Type<Duck<T>>::id()).template toPtr<Duck<T>>())
+            if(const sp<Duck<T>> duck = cast(Type<Duck<T>>::id()).template toPtr<Duck<T>>())
                 duck->to(inst);
         }
         return inst;

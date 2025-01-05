@@ -122,9 +122,19 @@ Identifier Identifier::withouPackage() const
 
 bool Identifier::parseAndValidate(const String& s, String& package, String& value, String& queries, bool strictMode)
 {
-    String packageAndName = s;
-    Strings::cut(s, packageAndName, queries, '?', false);
-    Strings::cut(packageAndName, package, value, ':');
+    auto [packageAndName, queriesOpt] = s.cut('?');
+    if(auto [packageCut, valueOpt] = packageAndName.cut(':'); valueOpt)
+    {
+        package = std::move(packageCut);
+        value = std::move(valueOpt.value());
+    }
+    else
+    {
+        package = "";
+        value = std::move(packageCut);
+    }
+    if(queriesOpt)
+        queries = std::move(queriesOpt.value());
     if(strictMode)
         return Strings::isVariableName(package) && Strings::isVariableName(value);
     return Strings::isVariableName(package);

@@ -19,7 +19,7 @@ WithRenderable::WithRenderable(std::vector<Manifest> manifests)
 {
 }
 
-void WithRenderable::onWire(const WiringContext& context)
+void WithRenderable::onWire(const WiringContext& context, const Box& self)
 {
     const sp<Boolean> discarded = context.getComponent<Discarded>();
     const sp<Boolean> visible = context.getComponent<Visibility>();

@@ -22,7 +22,7 @@ bool ViewHierarchy::updateDescendantLayout(uint64_t timestamp)
 {
     bool isDirty = false;
     for(const sp<View>& i: updateChildren())
-        isDirty = i->updateLayout(timestamp) || isDirty;
+        isDirty = i->update(timestamp) || isDirty;
     return isDirty;
 }
 
@@ -61,27 +61,23 @@ Layout::Hierarchy ViewHierarchy::toLayoutHierarchy(sp<Layout::Node> layoutNode) 
     return hierarchy;
 }
 
-bool ViewHierarchy::updateLayout(const sp<Layout::Node>& layoutNode, uint64_t timestamp, bool layoutParamDirty)
+bool ViewHierarchy::updateLayout(const sp<Layout::Node>& layoutNode, uint64_t timestamp)
 {
-    const bool hierarchyDirty = _timestamp.update(timestamp);
-    if(const bool hierarchyChanged = updateHierarchy() || hierarchyDirty; hierarchyChanged || layoutParamDirty)
+    bool hierarchyDirty = _timestamp.update(timestamp);
+    if(const bool hierarchyChanged = updateHierarchy(); hierarchyChanged || hierarchyDirty)
     {
-        if(_layout)
+        if(_layout && hierarchyChanged)
         {
-            if(hierarchyChanged)
-            {
-                _updatable_layout = _layout->inflate(toLayoutHierarchy(layoutNode));
-                _timestamp.markClean();
-                timestamp = 0;
-            }
-
-            if(_updatable_layout)
-                _updatable_layout->update(timestamp);
+            _updatable_layout = _layout->inflate(toLayoutHierarchy(layoutNode));
+            _timestamp.markClean();
+            timestamp = 0;
         }
-        layoutParamDirty = true;
+        hierarchyDirty = true;
     }
+    if(_updatable_layout)
+        return _updatable_layout->update(timestamp) || hierarchyDirty;
 
-    return updateDescendantLayout(timestamp) || layoutParamDirty;
+    return updateDescendantLayout(timestamp) || hierarchyDirty;
 }
 
 const std::vector<sp<View>>& ViewHierarchy::updateChildren()

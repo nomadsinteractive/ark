@@ -4,7 +4,7 @@
 #include "core/base/bean_factory.h"
 #include "core/util/log.h"
 
-#include "graphics/base/layer.h"
+#include "graphics/components/layer.h"
 #include "graphics/base/render_layer.h"
 
 #include "app/base/application_context.h"

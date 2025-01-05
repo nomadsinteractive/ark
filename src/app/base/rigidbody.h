@@ -24,7 +24,7 @@ public:
 //  [[script::bindings::auto]]
     virtual void discard();
 
-    void onWire(const WiringContext& context) override;
+    void onWire(const WiringContext& context, const Box& self) override;
 
 //  [[script::bindings::property]]
     RefId id() const;

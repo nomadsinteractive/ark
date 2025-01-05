@@ -15,7 +15,7 @@ public:
 //  [[script::bindings::auto]]
     WithTag(Box tag);
 
-    void onWire(const WiringContext& context) override;
+    void onWire(const WiringContext& context, const Box& self) override;
     void traverse(const Visitor& visitor) override;
 
 //  [[script::bindings::property]]

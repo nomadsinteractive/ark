@@ -103,6 +103,7 @@ class UpdatableWrapper;
 class UploaderWrapper;
 class Visibility;
 class Wirable;
+class WithTag;
 class Writable;
 
 typedef Dictionary<Box> BoxBundle;

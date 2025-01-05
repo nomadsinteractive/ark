@@ -10,7 +10,7 @@ public:
     WithTransform(sp<Transform> transform);
 
     TypeId onPoll(WiringContext& context) override;
-    void onWire(const WiringContext& context) override;
+    void onWire(const WiringContext& context, const Box& self) override;
 
 private:
     sp<Transform> _transform;

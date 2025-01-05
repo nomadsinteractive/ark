@@ -7,7 +7,7 @@
 #include "core/util/math.h"
 #include "core/util/updatable_util.h"
 
-#include "graphics/base/layer.h"
+#include "graphics/components/layer.h"
 #include "graphics/components/layout_param.h"
 #include "graphics/components/position.h"
 #include "graphics/util/vec3_type.h"
@@ -30,10 +30,9 @@ struct View::Stub final : Updatable {
 
     bool update(uint64_t timestamp) override
     {
-        bool dirty = UpdatableUtil::update(timestamp, _layout_node->_layout_param, _discarded);
         if(_hierarchy)
-            dirty = _hierarchy->updateLayout(_layout_node, timestamp, dirty);
-        return dirty;
+            return _hierarchy->updateLayout(_layout_node, timestamp);
+        return UpdatableUtil::update(timestamp, _layout_node->_layout_param, _discarded);
     }
 
     void dispose()
@@ -92,14 +91,6 @@ V2 toViewportPosition(const V2& position)
     return Ark::instance().applicationContext()->renderEngine()->toLHSPosition(position);
 }
 
-V2 toPivotPosition(const sp<Boundaries>& occupies, const V2& size)
-{
-    if(!occupies)
-        return Ark::instance().applicationContext()->renderEngine()->isLHS() ? V2(0, 0) : V2(0, size.y());
-
-    return occupies->toPivotPosition(size);
-}
-
 sp<View::Stub> findLayoutTopView(sp<View::Stub> stub)
 {
     while(stub)
@@ -152,7 +143,6 @@ public:
         const V3 offsetPosition = _stub->getTopViewOffsetPosition(false);
         const float x = offsetPosition.x() + size.x() / 2;
         const float y = offsetPosition.y() + size.y() / 2;
-        // return {x, y, offsetPosition.z()};
         return {toViewportPosition(V2(x, y)), offsetPosition.z()};
     }
 
@@ -206,32 +196,10 @@ private:
     sp<View::Stub> _stub;
 };
 
-class WirableView final : public Wirable {
-public:
-    WirableView(sp<View> view)
-        : _view(std::move(view))
-    {
-    }
-
-    TypeId onPoll(WiringContext& context) override
-    {
-        _view->onPoll(context);
-        context.setComponent(_view);
-        return constants::TYPE_ID_NONE;
-    }
-
-    void onWire(const WiringContext& context) override
-    {
-    }
-
-private:
-    sp<View> _view;
-};
-
 }
 
 View::View(sp<LayoutParam> layoutParam, String name, sp<Boolean> discarded)
-    : _stub(sp<Stub>::make(std::move(layoutParam), std::move(name), std::move(discarded))), _is_discarded(sp<Boolean>::make<IsDiscarded>(_stub)),
+    : Niche("view-name"), _stub(sp<Stub>::make(std::move(layoutParam), std::move(name), std::move(discarded))), _is_discarded(sp<Boolean>::make<IsDiscarded>(_stub)),
       _updatable_view(sp<UpdatableOncePerFrame>::make(_stub))
 {
 }
@@ -245,15 +213,23 @@ TypeId View::onPoll(WiringContext& context)
 {
     context.setComponent(makeBoundaries());
     context.setComponent(sp<Position>::make(layoutPosition()));
+    context.setComponent(layoutSize());
     context.setComponent(sp<Shape>::make(Shape::TYPE_AABB, layoutSize()));
-    return Type<View>::id();
+    return constants::TYPE_ID_NONE;
 }
 
-void View::onWire(const WiringContext& context)
+void View::onWire(const WiringContext& context, const Box& self)
 {
 }
 
-bool View::updateLayout(uint64_t timestamp) const
+void View::onPoll(WiringContext& context, StringView value)
+{
+    const sp<View> view = findView(value);
+    view->onPoll(context);
+    context.setComponent(view);
+}
+
+bool View::update(uint64_t timestamp) const
 {
     return _updatable_view->update(timestamp);
 }
@@ -361,13 +337,13 @@ sp<View> View::BUILDER::build(const Scope& args)
 }
 
 View::BUILDER_WIRABLE::BUILDER_WIRABLE(BeanFactory& factory, const document& manifest)
-    : _view(factory.ensureBuilder<View>(manifest, constants::VIEW))
+    : _view(factory.ensureBuilder<View>(manifest))
 {
 }
 
 sp<Wirable> View::BUILDER_WIRABLE::build(const Scope& args)
 {
-    return sp<Wirable>::make<WirableView>(_view->build(args));
+    return _view->build(args);
 }
 
 }

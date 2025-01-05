@@ -17,15 +17,17 @@
 
 namespace ark {
 
-class ARK_API View final : public Wirable {
+class ARK_API View final : public Wirable, public Wirable::Niche {
 public:
     View(sp<LayoutParam> layoutParam, String name, sp<Boolean> discarded = nullptr);
     ~View() override;
 
     TypeId onPoll(WiringContext& context) override;
-    void onWire(const WiringContext& context) override;
+    void onWire(const WiringContext& context, const Box& self) override;
 
-    bool updateLayout(uint64_t timestamp) const;
+    void onPoll(WiringContext& context, StringView value) override;
+
+    bool update(uint64_t timestamp) const;
 
     const sp<Layout::Node>& layoutNode() const;
 

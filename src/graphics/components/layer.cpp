@@ -1,4 +1,4 @@
-#include "graphics/base/layer.h"
+#include "graphics/components/layer.h"
 
 #include "core/base/bean_factory.h"
 

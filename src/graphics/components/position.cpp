@@ -25,13 +25,4 @@ V3 Position::val()
     return _wrapped->val();
 }
 
-TypeId Position::onPoll(WiringContext& context)
-{
-    return Type<Position>::id();
-}
-
-void Position::onWire(const WiringContext& context)
-{
-}
-
 }

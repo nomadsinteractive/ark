@@ -17,7 +17,7 @@ public:
 //  [[script::bindings::auto]]
     Behavior(Box delegate);
 
-    void onWire(const WiringContext& context) override;
+    void onWire(const WiringContext& context, const Box& self) override;
     void traverse(const Visitor& visitor) override;
 
 //  [[script::bindings::getprop]]

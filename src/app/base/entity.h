@@ -14,8 +14,14 @@ namespace ark {
 //[[script::bindings::debris]]
 class ARK_API Entity final : public Debris {
 public:
+    struct Component {
+        Box _trait;
+        document _manifest;
+    };
+
 //  [[script::bindings::constructor]]
     Entity(Traits components = {});
+    Entity(Vector<Component> components);
     ~Entity() override;
 
     void traverse(const Visitor& visitor) override;
@@ -52,12 +58,12 @@ public:
         sp<Entity> build(const Scope& args) override;
 
     private:
-        sp<Builder<std::vector<Box>>> _boxes;
-        std::vector<sp<Builder<Wirable>>> _components;
-    };
+        struct ComponentBuilder;
 
-private:
-    void doWire();
+    private:
+        sp<Builder<std::vector<Box>>> _boxes;
+        std::vector<ComponentBuilder> _components;
+    };
 
 private:
     sp<Ref> _ref;

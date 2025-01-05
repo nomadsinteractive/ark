@@ -10,7 +10,7 @@ public:
     WithDebris();
     DISALLOW_COPY_AND_ASSIGN(WithDebris);
 
-    void onWire(const WiringContext& context) override;
+    void onWire(const WiringContext& context, const Box& self) override;
 
     void traverse(const Visitor& visitor) override;
 

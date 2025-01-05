@@ -136,21 +136,6 @@ String Strings::unwrap(const String& str, char open, char close)
     return str;
 }
 
-void Strings::cut(const String& str, String& left, String& right, char sep, bool clearValues)
-{
-    auto pos = str.find(sep);
-    if(pos != String::npos)
-    {
-        left = str.substr(0, pos);
-        right = str.substr(pos + 1);
-    }
-    else if(clearValues)
-    {
-        left = "";
-        right = str;
-    }
-}
-
 void Strings::parentheses(const String& expr, String& lvalue, String& remaining)
 {
     size_t pos = parentheses(expr, 0);
