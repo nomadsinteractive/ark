@@ -1,8 +1,5 @@
 #pragma once
 
-#include <unordered_map>
-#include <vector>
-
 #include <Box2D/Box2D.h>
 
 #include "core/base/bean_factory.h"
@@ -24,6 +21,7 @@
 
 namespace ark::plugin::box2d {
 
+//[[script::bindings::extends(Collider)]]
 //[[script::bindings::name("World")]]
 class ARK_PLUGIN_BOX2D_API ColliderBox2D final : public Runnable, public Collider, Implements<ColliderBox2D, Runnable, Collider> {
 public:
@@ -35,17 +33,14 @@ public:
 
     void run() override;
 
-//  [[script::bindings::auto]]
-    sp<Rigidbody> createBody(Collider::BodyType type, sp<ark::Shape> shape, sp<Vec3> position = nullptr, sp<Vec4> rotation = nullptr, sp<Boolean> discarded = nullptr) override;
-//  [[script::bindings::auto]]
+    Rigidbody::Impl createBody(Rigidbody::BodyType type, sp<ark::Shape> shape, sp<Vec3> position = nullptr, sp<Vec4> rotation = nullptr, sp<Boolean> discarded = nullptr) override;
     sp<ark::Shape> createShape(const NamedHash& type, sp<Vec3> size, sp<Vec3> origin) override;
-//  [[script::bindings::auto]]
     std::vector<RayCastManifold> rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter) override;
 
     b2World& world() const;
 
     b2Body* createBody(const b2BodyDef& bodyDef) const;
-    b2Body* createBody(Collider::BodyType type, const V3& position, const V3& size, const BodyCreateInfo& createInfo) const;
+    b2Body* createBody(Rigidbody::BodyType type, const V3& position, const V3& size, const BodyCreateInfo& createInfo) const;
 
 //  [[script::bindings::auto]]
     float toPixelX(float meterX) const;
@@ -70,7 +65,7 @@ public:
         virtual sp<ColliderBox2D> build(const Scope& args) override;
 
     private:
-        void createBody(Collider::BodyType type, const sp<ColliderBox2D>& world, const document& manifest, const Scope& args);
+        void createBody(Rigidbody::BodyType type, const sp<ColliderBox2D>& world, const document& manifest, const Scope& args);
 
     private:
         BeanFactory _factory;

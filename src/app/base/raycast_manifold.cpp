@@ -2,8 +2,8 @@
 
 namespace ark {
 
-RayCastManifold::RayCastManifold(float distance, const V3& normal, sp<Ref> rigidBody)
-    : _distance(distance), _normal(normal), _rigid_body(std::move(rigidBody))
+RayCastManifold::RayCastManifold(float distance, const V3& normal, sp<Rigidbody> rigidbody)
+    : _distance(distance), _normal(normal), _rigidbody(std::move(rigidbody))
 {
 }
 
@@ -17,9 +17,14 @@ const V3& RayCastManifold::normal() const
     return _normal;
 }
 
-const sp<Ref>& RayCastManifold::rigidBody() const
+const sp<Rigidbody>& RayCastManifold::rigidbody() const
 {
-    return _rigid_body;
+    return _rigidbody;
+}
+
+void RayCastManifold::setRigidBody(sp<Rigidbody> rigidbody)
+{
+    _rigidbody = std::move(rigidbody);
 }
 
 }

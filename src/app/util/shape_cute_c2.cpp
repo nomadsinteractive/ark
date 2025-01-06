@@ -51,13 +51,12 @@ bool ShapeCuteC2::collideManifold(const ShapeCuteC2& other, CollisionManifold& c
     return false;
 }
 
-bool ShapeCuteC2::rayCastManifold(const c2Ray& ray, RayCastManifold& rayCastManifold) const
+Optional<RayCastManifold> ShapeCuteC2::rayCastManifold(const c2Ray& ray) const
 {
     c2Raycast raycast;
-    bool r = c2CastRay(ray, &s, &x, t, &raycast);
-    if(r)
-        rayCastManifold = RayCastManifold(raycast.t, V3(raycast.n.x, raycast.n.y, 0), rayCastManifold.rigidBody());
-    return r;
+    if(c2CastRay(ray, &s, &x, t, &raycast))
+        return {RayCastManifold(raycast.t, V3(raycast.n.x, raycast.n.y, 0))};
+    return {};
 }
 
 ShapeCuteC2 ShapeCuteC2::transform(const V2& position, const V4& quaternion) const

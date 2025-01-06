@@ -17,11 +17,12 @@
 
 #include "app/base/application_context.h"
 #include "core/base/resource_loader.h"
-#include "app/base/rigidbody.h"
+#include "app/components/rigidbody.h"
 #include "app/inf/collider.h"
 #include "app/inf/collision_callback.h"
 #include "app/inf/broad_phrase.h"
 #include "app/components/shape.h"
+#include "app/util/collider_type.h"
 #include "core/types/ref.h"
 #include "graphics/util/transform_type.h"
 
@@ -83,21 +84,21 @@ public:
         const auto r = bp2->search(V3(220, 0, 0), V3(16, 32, 0));
 
         const sp<RenderObject> c001 = resourceLoader->load<RenderObject>("c001", args);
-        const sp<Rigidbody> rigidBody001 = collider->createBody(Collider::BODY_TYPE_DYNAMIC, sp<Shape>::make(Shape::TYPE_AABB, static_cast<sp<Vec3>>(c001->size())), c001->position());
+        const sp<Rigidbody> rigidBody001 = ColliderType::createBody(collider, Rigidbody::BODY_TYPE_DYNAMIC, sp<Shape>::make(Shape::TYPE_AABB, static_cast<sp<Vec3>>(c001->size())), c001->position());
         const sp<RenderObject> c002 = resourceLoader->load<RenderObject>("c002", args);
-        const sp<Rigidbody> rigidBody002 = collider->createBody(Collider::BODY_TYPE_STATIC, sp<Shape>::make(Shape::TYPE_AABB, static_cast<sp<Vec3>>(c002->size())), c002->position());
+        const sp<Rigidbody> rigidBody002 = ColliderType::createBody(collider, Rigidbody::BODY_TYPE_STATIC, sp<Shape>::make(Shape::TYPE_AABB, static_cast<sp<Vec3>>(c002->size())), c002->position());
         const sp<RenderObject> c003 = resourceLoader->load<RenderObject>("c003", args);
-        // const sp<Rigidbody> rigidBody003 = collider->createBody(Collider::BODY_TYPE_DYNAMIC, sp<Shape>::make(1, static_cast<sp<Vec3>>(c003->size())), c003->position(), TransformType::rotation(c003->transform()).wrapped());
+        // const sp<Rigidbody> rigidBody003 = collider->createBody(Rigidbody::BODY_TYPE_DYNAMIC, sp<Shape>::make(1, static_cast<sp<Vec3>>(c003->size())), c003->position(), TransformType::rotation(c003->transform()).wrapped());
         const sp<CollisionCallbackImpl> collisionCallbackImpl001 = sp<CollisionCallbackImpl>::make(c001);
         const sp<CollisionCallbackImpl> collisionCallbackImpl003 = sp<CollisionCallbackImpl>::make(c003);
         rigidBody001->setCollisionCallback(collisionCallbackImpl001);
         // rigidBody003->setCollisionCallback(collisionCallbackImpl003);
         const auto s1 = bp1->search(V3(120, 380, 0), V3(60, 60, 0))._dynamic_candidates;
-        TESTCASE_VALIDATE(s1.find(rigidBody001->ref()->id()) != s1.end());
+        TESTCASE_VALIDATE(s1.find(rigidBody001->id()) != s1.end());
         const auto s2 = bp1->search(V3(40, 380, 0), V3(60, 60, 0))._dynamic_candidates;
-        TESTCASE_VALIDATE(s2.find(rigidBody001->ref()->id()) == s2.end());
+        TESTCASE_VALIDATE(s2.find(rigidBody001->id()) == s2.end());
         const auto s3 = bp1->search(V3(120, 450, 0), V3(60, 60, 0))._dynamic_candidates;
-        TESTCASE_VALIDATE(s3.find(rigidBody001->ref()->id()) == s3.end());
+        TESTCASE_VALIDATE(s3.find(rigidBody001->id()) == s3.end());
 
         while(duration->val() < 3.0f) {
             applicationContext->updateRenderState();

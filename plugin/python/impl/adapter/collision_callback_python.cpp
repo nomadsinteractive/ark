@@ -1,7 +1,7 @@
 #include "python/impl/adapter/collision_callback_python.h"
 
 #include "app/base/collision_manifold.h"
-#include "app/base/rigidbody.h"
+#include "app/components/rigidbody.h"
 
 #include "python/api.h"
 #include "python/extension/py_cast.h"

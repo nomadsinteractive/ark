@@ -17,7 +17,7 @@ public:
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(ShapeCuteC2);
 
     bool collideManifold(const ShapeCuteC2& other, CollisionManifold& collisionManifold) const;
-    bool rayCastManifold(const c2Ray& ray, RayCastManifold& rayCastManifold) const;
+    Optional<RayCastManifold> rayCastManifold(const c2Ray& ray) const;
 
     ShapeCuteC2 transform(const V2& position, const V4& quaternion) const;
 

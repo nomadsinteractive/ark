@@ -1,0 +1,134 @@
+#pragma once
+
+#include "core/base/api.h"
+#include "core/inf/builder.h"
+#include "core/inf/wirable.h"
+#include "core/types/box.h"
+#include "core/types/safe_var.h"
+#include "core/types/shared_ptr.h"
+
+#include "graphics/forwarding.h"
+
+#include "app/forwarding.h"
+#include "core/types/safe_builder.h"
+
+namespace ark {
+
+class ARK_API Rigidbody : public Wirable {
+public:
+//  [[script::bindings::enumeration]]
+    enum BodyType {
+        BODY_TYPE_NONE = 0,
+        BODY_TYPE_KINEMATIC,
+        BODY_TYPE_DYNAMIC,
+        BODY_TYPE_STATIC,
+        BODY_TYPE_RIGID = 3,
+        BODY_TYPE_SENSOR
+    };
+
+    struct Stub {
+        Stub(sp<Ref> ref, BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation);
+
+        void onBeginContact(const Rigidbody& rigidBody, const CollisionManifold& manifold) const;
+        void onEndContact(const Rigidbody& rigidBody) const;
+
+        void onBeginContact(const Rigidbody& self, const Rigidbody& rigidBody, const CollisionManifold& manifold) const;
+        void onEndContact(const Rigidbody& self, const Rigidbody& rigidBody) const;
+
+        sp<Ref> _ref;
+        BodyType _type;
+        sp<Shape> _shape;
+        SafeVar<Vec3> _position;
+        SafeVar<Vec4> _rotation;
+        sp<CollisionCallback> _collision_callback;
+        sp<CollisionFilter> _collision_filter;
+        sp<WithTag> _with_tag;
+    };
+
+    struct Impl {
+        sp<Stub> _stub;
+        Box _instance;
+    };
+
+public:
+    Rigidbody(BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<Boolean> discarded, Box impl, bool isShadow = false);
+    Rigidbody(Impl impl, bool isShadow);
+    ~Rigidbody() override;
+
+    void onWire(const WiringContext& context, const Box& self) override;
+
+//  [[script::bindings::property]]
+    RefId id() const;
+//  [[script::bindings::property]]
+    Rigidbody::BodyType type() const;
+
+//  [[script::bindings::property]]
+    const sp<Shape>& shape() const;
+//  [[script::bindings::property]]
+    const SafeVar<Vec3>& position() const;
+//  [[script::bindings::property]]
+    const SafeVar<Vec4>& rotation() const;
+
+//  [[script::bindings::auto]]
+    void discard();
+//  [[script::bindings::property]]
+    const SafeVar<Boolean>& discarded() const;
+
+//  [[script::bindings::property]]
+    const sp<CollisionCallback>& collisionCallback() const;
+//  [[script::bindings::property]]
+    void setCollisionCallback(sp<CollisionCallback> collisionCallback);
+
+//  [[script::bindings::property]]
+    const sp<CollisionFilter>& collisionFilter() const;
+//  [[script::bindings::property]]
+    void setCollisionFilter(sp<CollisionFilter> collisionFilter);
+
+//  [[script::bindings::property]]
+    Box tag() const;
+//  [[script::bindings::property]]
+    void setTag(Box tag);
+
+//  [[script::bindings::property]]
+    const Box& impl() const;
+
+    void onBeginContact(const Rigidbody& rigidbody, const CollisionManifold& manifold) const;
+    void onEndContact(const Rigidbody& rigidbody) const;
+    void onBeginContact(const Rigidbody& self, const Rigidbody& rigidbody, const CollisionManifold& manifold) const;
+    void onEndContact(const Rigidbody& self, const Rigidbody& rigidbody) const;
+
+    sp<Rigidbody> makeShadow() const;
+
+//  [[plugin::builder]]
+    class BUILDER final : public Builder<Rigidbody> {
+    public:
+        BUILDER(BeanFactory& factory, const document& manifest);
+
+        sp<Rigidbody> build(const Scope& args) override;
+
+    private:
+        builder<Collider> _collider;
+        BodyType _body_type;
+        SafeBuilder<Shape> _shape;
+        SafeBuilder<Vec3> _position;
+        SafeBuilder<Vec4> _rotation;
+        SafeBuilder<Boolean> _discarded;
+    };
+
+//  [[plugin::builder("with-rigidbody")]]
+    class BUILDER_WIRABLE final : public Builder<Wirable> {
+    public:
+        BUILDER_WIRABLE(BeanFactory& factory, const document& manifest);
+
+        sp<Wirable> build(const Scope& args) override;
+
+    private:
+        builder<Rigidbody> _rigidbody;
+    };
+
+protected:
+    Impl _impl;
+    bool _is_shadow;
+};
+
+}

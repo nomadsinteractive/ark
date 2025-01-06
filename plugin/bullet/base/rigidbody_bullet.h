@@ -5,9 +5,8 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
-#include "graphics/inf/transform.h"
 
-#include "app/base/rigidbody.h"
+#include "app/components/rigidbody.h"
 
 #include "bullet/api.h"
 #include "bullet/base/collider_bullet.h"
@@ -15,11 +14,9 @@
 
 namespace ark::plugin::bullet {
 
-//[[script::bindings::extends(Rigidbody)]]
-//[[script::bindings::name("Rigidbody")]]
-class ARK_PLUGIN_BULLET_API RigidbodyBullet final : public Rigidbody, Implements<RigidbodyBullet, Rigidbody>  {
+class ARK_PLUGIN_BULLET_API RigidbodyBullet final  {
 public:
-    RigidbodyBullet(int32_t id, Collider::BodyType type, sp<Shape> shape, ColliderBullet world, sp<CollisionShape> collisionShape, sp<Vec3> position, sp<Vec4> quaternion, sp<BtRigidbodyRef> rigidBody);
+    RigidbodyBullet(ColliderBullet world, sp<BtRigidbodyRef> rigidBody, Rigidbody::BodyType type, sp<Shape> shape, sp<CollisionShape> collisionShape, sp<Vec3> position, sp<Vec4> rotation, sp<Boolean> discarded);
 
 //  [[script::bindings::auto]]
     void applyCentralForce(const V3& force);
@@ -39,7 +36,12 @@ public:
 //  [[script::bindings::property]]
     void setAngularFactor(const V3& factor);
 
-    const sp<BtRigidbodyRef>& rigidBody() const;
+    const sp<Ref>& ref() const;
+    const sp<Rigidbody::Stub>& stub() const;
+
+    Rigidbody makeShadow() const;
+    const sp<CollisionCallback>& collisionCallback() const;
+    const sp<BtRigidbodyRef>& btRigidbodyRef() const;
 
 private:
     struct Stub {
@@ -53,7 +55,8 @@ private:
     };
 
 private:
-    sp<Stub> _stub;
+    sp<Rigidbody::Stub> _rigidbody_stub;
+    sp<Stub> _bt_rigidbody_stub;
 };
 
 }

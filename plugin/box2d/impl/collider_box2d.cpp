@@ -41,7 +41,7 @@ void ColliderBox2D::run()
     _stub->run();
 }
 
-sp<Rigidbody> ColliderBox2D::createBody(Collider::BodyType type, sp<ark::Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<Boolean> discarded)
+Rigidbody::Impl ColliderBox2D::createBody(Rigidbody::BodyType type, sp<ark::Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<Boolean> discarded)
 {
     const auto iter = _stub->_body_manifests.find(shape->type().hash());
     CHECK(iter != _stub->_body_manifests.end(), "RigidBody shape-type: %ud not found", shape->type().hash());
@@ -62,7 +62,7 @@ sp<Rigidbody> ColliderBox2D::createBody(Collider::BodyType type, sp<ark::Shape> 
             fixture->SetFilterData(filter);
     }
 
-    return body;
+    return {body->rigidbodyStub(), ark::Box(body)};
 }
 
 sp<ark::Shape> ColliderBox2D::createShape(const NamedHash& type, sp<Vec3> size, sp<Vec3> origin)
@@ -86,18 +86,18 @@ b2Body* ColliderBox2D::createBody(const b2BodyDef& bodyDef) const
     return _stub->_world.CreateBody(&bodyDef);
 }
 
-b2Body* ColliderBox2D::createBody(Collider::BodyType type, const V3& position, const V3& size, const BodyCreateInfo& createInfo) const
+b2Body* ColliderBox2D::createBody(Rigidbody::BodyType type, const V3& position, const V3& size, const BodyCreateInfo& createInfo) const
 {
     b2BodyDef bodyDef;
-    switch(type & Collider::BODY_TYPE_RIGID)
+    switch(type & Rigidbody::BODY_TYPE_RIGID)
     {
-    case Collider::BODY_TYPE_DYNAMIC:
+    case Rigidbody::BODY_TYPE_DYNAMIC:
         bodyDef.type = b2_dynamicBody;
         break;
-    case Collider::BODY_TYPE_KINEMATIC:
+    case Rigidbody::BODY_TYPE_KINEMATIC:
         bodyDef.type = b2_kinematicBody;
         break;
-    case Collider::BODY_TYPE_STATIC:
+    case Rigidbody::BODY_TYPE_STATIC:
         bodyDef.type = b2_staticBody;
         break;
     default:
@@ -212,16 +212,16 @@ void ColliderBox2D::ContactListenerImpl::BeginContact(b2Contact* contact)
         contact->GetWorldManifold(&worldManifold);
         const V3 normal = V3(worldManifold.normal.x, worldManifold.normal.y, 0);
         const b2Vec2& contactPoint = worldManifold.points[0];
-        const RefId id1 = s1->ref()->id(), id2 = s2->ref()->id();
+        const RefId id1 = s1->rigidbodyStub()->_ref->id(), id2 = s2->rigidbodyStub()->_ref->id();
         if(s1->_stub->_contacts.find(id2) == s1->_stub->_contacts.end())
         {
             s1->_stub->_contacts.insert(id2);
-            s1->onBeginContact(*s2, CollisionManifold(V3(contactPoint.x, contactPoint.y, 0), normal));
+            s1->_rigidbody_stub->onBeginContact(s2->makeShadow(), CollisionManifold(V3(contactPoint.x, contactPoint.y, 0), normal));
         }
         if(s2->_stub->_contacts.find(id1) == s2->_stub->_contacts.end())
         {
             s2->_stub->_contacts.insert(id1);
-            s2->onBeginContact(*s1, CollisionManifold(V3(contactPoint.x, contactPoint.y, 0), -normal));
+            s2->_rigidbody_stub->onBeginContact(s1->makeShadow(), CollisionManifold(V3(contactPoint.x, contactPoint.y, 0), -normal));
         }
     }
 }
@@ -234,16 +234,16 @@ void ColliderBox2D::ContactListenerImpl::EndContact(b2Contact* contact)
     {
         const sp<RigidbodyBox2D::Stub>& body1 = s1->_stub;
         const sp<RigidbodyBox2D::Stub>& body2 = s2->_stub;
-        const RefId id1 = s1->ref()->id(), id2 = s2->ref()->id();
+        const RefId id1 = s1->rigidbodyStub()->_ref->id(), id2 = s2->rigidbodyStub()->_ref->id();
         if(const auto it1 = body1->_contacts.find(id2); it1 != body1->_contacts.end())
         {
             body1->_contacts.erase(it1);
-            s1->onEndContact(*s2);
+            s1->_rigidbody_stub->onEndContact(s2->makeShadow());
         }
         if(const auto it2 = body2->_contacts.find(id1); it2 != body2->_contacts.end())
         {
             body2->_contacts.erase(it2);
-            s2->onEndContact(*s1);
+            s2->_rigidbody_stub->onEndContact(s1->makeShadow());
         }
     }
 }

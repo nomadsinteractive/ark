@@ -23,7 +23,7 @@ public:
     Ray toRay(const V2& from, const V2& to) override;
 
     bool collisionManifold(const BroadPhrase::Candidate& candidateOne, const BroadPhrase::Candidate& candidateOther, CollisionManifold& collisionManifold) override;
-    bool rayCastManifold(const Ray& ray, const BroadPhrase::Candidate& candidate, RayCastManifold& rayCastManifold) override;
+    Optional<RayCastManifold> rayCastManifold(const Ray& ray, const BroadPhrase::Candidate& candidate) override;
 
 public:
 //  [[plugin::resource-loader("cute-c2")]]

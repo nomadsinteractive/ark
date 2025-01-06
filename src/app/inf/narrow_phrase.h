@@ -36,7 +36,7 @@ public:
     virtual Ray toRay(const V2& from, const V2& to) = 0;
 
     virtual bool collisionManifold(const BroadPhrase::Candidate& candidateOne, const BroadPhrase::Candidate& candidateOther, CollisionManifold& collisionManifold) = 0;
-    virtual bool rayCastManifold(const Ray& ray, const BroadPhrase::Candidate& candidate, RayCastManifold& rayCastManifold) = 0;
+    virtual Optional<RayCastManifold> rayCastManifold(const Ray& ray, const BroadPhrase::Candidate& candidate) = 0;
 };
 
 }

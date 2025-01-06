@@ -25,8 +25,6 @@ public:
 
 //  [[script::bindings::classmethod]]
     static sp<Entity> toEntity(const sp<Ref>& self);
-//  [[script::bindings::classmethod]]
-    static sp<Rigidbody> toRigidbody(const sp<Ref>& self);
 };
 
 }

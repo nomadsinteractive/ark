@@ -10,6 +10,7 @@
 
 #include "app/inf/collider.h"
 #include "app/components/shape.h"
+#include "app/base/raycast_manifold.h"
 #include "app/util/rigid_body_def.h"
 
 namespace ark {
@@ -205,15 +206,15 @@ bool NarrowPhraseCuteC2::collisionManifold(const BroadPhrase::Candidate& candida
     return false;
 }
 
-bool NarrowPhraseCuteC2::rayCastManifold(const Ray& ray, const BroadPhrase::Candidate& candidate, RayCastManifold& rayCastManifold)
+Optional<RayCastManifold> NarrowPhraseCuteC2::rayCastManifold(const Ray& ray, const BroadPhrase::Candidate& candidate)
 {
     for(const ShapeCuteC2& i : ensureBodyDef(candidate)->shapes())
     {
         const ShapeCuteC2 transformed = i.transform(candidate._position, candidate._quaternion);
-        if(transformed.rayCastManifold(*ray.data<c2Ray>(), rayCastManifold))
-            return true;
+        if(Optional<RayCastManifold> rayCastManifold = transformed.rayCastManifold(*ray.data<c2Ray>()))
+            return rayCastManifold;
     }
-    return false;
+    return {};
 }
 
 void NarrowPhraseCuteC2::loadShapes(const document& manifest, float ppu)

@@ -8,7 +8,7 @@
 
 #include "graphics/forwarding.h"
 
-#include "app/base/rigidbody.h"
+#include "app/components/rigidbody.h"
 #include "app/inf/collider.h"
 
 #include "box2d/api.h"
@@ -18,9 +18,8 @@
 
 namespace ark::plugin::box2d {
 
-//[[script::bindings::extends(Rigidbody)]]
 //[[script::bindings::name("Rigidbody")]]
-class ARK_PLUGIN_BOX2D_API RigidbodyBox2D final : public Rigidbody, Implements<RigidbodyBox2D, Rigidbody> {
+class ARK_PLUGIN_BOX2D_API RigidbodyBox2D {
 public:
     struct Stub {
         Stub(const ColliderBox2D& world, b2Body* body);
@@ -37,12 +36,11 @@ public:
 
 public:
 //  [[script::bindings::auto]]
-    RigidbodyBox2D(const ColliderBox2D& world, Collider::BodyType type, const sp<Vec3>& position, const V3& size, const SafeVar<Numeric>& rotate, const sp<Shape>& shape, float density, float friction);
-    RigidbodyBox2D(const ColliderBox2D& world, Collider::BodyType type, const sp<Vec3>& position, const V3& size, const SafeVar<Numeric>& rotate, const BodyCreateInfo& createInfo);
-    RigidbodyBox2D(const sp<Stub>& stub, Collider::BodyType type, const sp<Vec3>& position, const V3& size, const SafeVar<Numeric>& rotate);
+    RigidbodyBox2D(const ColliderBox2D& world, Rigidbody::BodyType type, const sp<Vec3>& position, const V3& size, const SafeVar<Numeric>& rotate, const sp<Shape>& shape, float density, float friction);
+    RigidbodyBox2D(const ColliderBox2D& world, Rigidbody::BodyType type, const sp<Vec3>& position, const V3& size, const SafeVar<Numeric>& rotate, const BodyCreateInfo& createInfo);
+    RigidbodyBox2D(const sp<Stub>& stub, Rigidbody::BodyType type, const sp<Vec3>& position, const V3& size, const SafeVar<Numeric>& rotate, sp<Boolean> discarded = nullptr);
 
-    void discard() override;
-
+    const sp<Rigidbody::Stub>& rigidbodyStub() const;
     b2Body* body() const;
 
 //  [[script::bindings::property]]
@@ -101,7 +99,10 @@ public:
 //  [[script::bindings::auto]]
     sp<Future> applyRotate(const sp<Numeric>& rotate);
 
+    Rigidbody makeShadow() const;
+
 private:
+    sp<Rigidbody::Stub> _rigidbody_stub;
     sp<Stub> _stub;
 
     friend class ColliderBox2D;

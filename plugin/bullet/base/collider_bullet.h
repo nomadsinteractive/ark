@@ -1,8 +1,5 @@
 #pragma once
 
-#include <map>
-#include <vector>
-
 #include "core/forwarding.h"
 #include "core/inf/builder.h"
 #include "core/inf/runnable.h"
@@ -21,6 +18,7 @@
 
 namespace ark::plugin::bullet {
 
+//[[script::bindings::extends(Collider)]]
 //[[script::bindings::name("World")]]
 class ARK_PLUGIN_BULLET_API ColliderBullet final : public Collider, Implements<ColliderBullet, Collider> {
 public:
@@ -34,17 +32,12 @@ public:
 public:
     ColliderBullet(const V3& gravity, sp<ModelLoader> modelLoader);
 
-//  [[script::bindings::auto]]
-    sp<Rigidbody> createBody(Collider::BodyType type, sp<Shape> shape, sp<Vec3> position = nullptr, sp<Vec4> rotation = nullptr, sp<Boolean> discarded = nullptr) override;
-//  [[script::bindings::auto]]
+    Rigidbody::Impl createBody(Rigidbody::BodyType type, sp<Shape> shape, sp<Vec3> position = nullptr, sp<Vec4> rotation = nullptr, sp<Boolean> discarded = nullptr) override;
     sp<Shape> createShape(const NamedHash& type, sp<Vec3> size, sp<Vec3> origin) override;
-//  [[script::bindings::auto]]
     std::vector<RayCastManifold> rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter = nullptr) override;
 
 //  [[script::bindings::auto]]
     void rayCastClosest(const V3& from, const V3& to, const sp<CollisionCallback>& callback, int32_t filterGroup = 1, int32_t filterMask = -1) const;
-
-    void run() ;
 
     btDiscreteDynamicsWorld* btDynamicWorld() const;
 
@@ -85,8 +78,8 @@ private:
         std::set<sp<BtRigidbodyRef>> _current_tick;
     };
 
-    static sp<BtRigidbodyRef> makeRigidBody(btDynamicsWorld* world, btCollisionShape* shape, btMotionState* motionState, Collider::BodyType bodyType, btScalar mass);
-    static sp<BtRigidbodyRef> makeGhostObject(btDynamicsWorld* world, btCollisionShape* shape, Collider::BodyType bodyType);
+    static sp<BtRigidbodyRef> makeRigidBody(btDynamicsWorld* world, btCollisionShape* shape, btMotionState* motionState, Rigidbody::BodyType bodyType, btScalar mass);
+    static sp<BtRigidbodyRef> makeGhostObject(btDynamicsWorld* world, btCollisionShape* shape, Rigidbody::BodyType bodyType);
 
     static void myInternalPreTickCallback(btDynamicsWorld *dynamicsWorld, btScalar timeStep);
     static void myInternalTickCallback(btDynamicsWorld *dynamicsWorld, btScalar timeStep);

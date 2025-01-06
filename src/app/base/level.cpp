@@ -16,9 +16,10 @@
 
 #include "app/base/application_context.h"
 #include "app/base/application_bundle.h"
-#include "app/base/rigidbody.h"
+#include "app/components/rigidbody.h"
 #include "app/inf/collider.h"
 #include "app/components/shape.h"
+#include "app/util/collider_type.h"
 
 namespace ark {
 
@@ -49,13 +50,13 @@ struct Object {
     Optional<V3> _scale;
     Optional<V4> _rotation;
 
-    Collider::BodyType _body_type;
+    Rigidbody::BodyType _body_type;
     int32_t _instance_of;
 
     Object(document manifest)
         : _manifest(std::move(manifest)), _name(Documents::getAttribute(_manifest, constants::NAME)), _class(OBJECT_CLASS_INSTANCE), _visible(Documents::getAttribute<bool>(_manifest, constants::VISIBLE, true)),
           _position(Documents::getAttribute<V3>(_manifest, constants::POSITION, V3())), _scale(Documents::getAttributeOptional<V3>(_manifest, constants::SCALE)),
-          _rotation(Documents::getAttributeOptional<V4>(_manifest, constants::ROTATION)), _body_type(Documents::getAttribute<Collider::BodyType>(_manifest, "rigidbody_type", Collider::BODY_TYPE_NONE)),
+          _rotation(Documents::getAttributeOptional<V4>(_manifest, constants::ROTATION)), _body_type(Documents::getAttribute<Rigidbody::BodyType>(_manifest, "rigidbody_type", Rigidbody::BODY_TYPE_NONE)),
           _instance_of(Documents::getAttribute<int32_t>(_manifest, "instance-of", -1))
     {
         const String clazz = Documents::getAttribute(_manifest, constants::CLASS);
@@ -87,7 +88,7 @@ std::pair<sp<RenderObject>, sp<Transform3D>> makeRenderObject(const Object& obj,
     return {std::move(renderObject), std::move(transform)};
 }
 
-sp<Rigidbody> makeRigidBody(Library& library, const sp<Collider>& collider, RenderObject& renderObject, Transform3D& transform, Collider::BodyType bodyType, const Map<String, sp<Shape>>& shapes)
+sp<Rigidbody> makeRigidBody(Library& library, const sp<Collider>& collider, RenderObject& renderObject, Transform3D& transform, Rigidbody::BodyType bodyType, const Map<String, sp<Shape>>& shapes)
 {
     if(!collider)
         return nullptr;
@@ -99,10 +100,10 @@ sp<Rigidbody> makeRigidBody(Library& library, const sp<Collider>& collider, Rend
         else
             library._shape = collider->createShape(library._id, library._size);
     }
-    if(bodyType != Collider::BODY_TYPE_DYNAMIC)
-        return collider->createBody(bodyType, library._shape, renderObject.position(), transform.rotation().wrapped());
+    if(bodyType != Rigidbody::BODY_TYPE_DYNAMIC)
+        return ColliderType::createBody(collider, bodyType, library._shape, renderObject.position(), transform.rotation().wrapped());
 
-    sp<Rigidbody> rigidbody = collider->createBody(bodyType, library._shape, Vec3Type::freeze(renderObject.position()), Vec4Type::freeze(transform.rotation().wrapped()));
+    sp<Rigidbody> rigidbody = ColliderType::createBody(collider, bodyType, library._shape, Vec3Type::freeze(renderObject.position()), Vec4Type::freeze(transform.rotation().wrapped()));
     renderObject.setPosition(rigidbody->position().wrapped());
     transform.setRotation(rigidbody->rotation().wrapped());
     return rigidbody;
@@ -147,7 +148,7 @@ void Level::load(const String& src, const sp<Collider>& collider, const Map<Stri
                 CHECK(layer, "Trying to load model instance into undefined Layer(%s)", layerName.c_str());
                 layer->addRenderObject(renderObject);
 
-                if(obj._body_type != Collider::BODY_TYPE_NONE)
+                if(obj._body_type != Rigidbody::BODY_TYPE_NONE)
                 {
                     sp<Rigidbody> rigidBody = makeRigidBody(library, collider, renderObject, transform, obj._body_type, shapes);
                     if(obj._name)

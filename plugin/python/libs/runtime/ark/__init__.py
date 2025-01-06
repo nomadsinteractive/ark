@@ -2388,9 +2388,13 @@ class Shape:
 
 
 class Rigidbody:
-
-    def __init__(self):
-        pass
+    BODY_TYPE_NONE = 0
+    BODY_TYPE_KINEMATIC = 1
+    BODY_TYPE_DYNAMIC = 2
+    BODY_TYPE_STATIC = 4
+    BODY_TYPE_RIGID = 7
+    BODY_TYPE_SENSOR = 8
+    BODY_TYPE_ALL = 15
 
     def dispose(self):
         pass
@@ -2403,20 +2407,12 @@ class Rigidbody:
         return 0
 
     @property
-    def ref(self) -> Ref:
-        pass
-
-    @property
     def type(self) -> int:
         return 0
 
     @property
     def shape(self) -> Shape:
         pass
-
-    @property
-    def meta_id(self) -> int:
-        return 0
 
     @property
     def xy(self) -> tuple:
@@ -2533,15 +2529,6 @@ class NarrowPhrase:
 
 
 class Collider:
-
-    BODY_TYPE_NONE = 0
-    BODY_TYPE_KINEMATIC = 1
-    BODY_TYPE_DYNAMIC = 2
-    BODY_TYPE_STATIC = 4
-    BODY_TYPE_RIGID = 7
-    BODY_TYPE_SENSOR = 8
-    BODY_TYPE_ALL = 15
-
     def create_body(self, type_: int | Integer, shape: Optional[Shape], position, rotate=None, disposed: Optional[Boolean] = None) -> Rigidbody:
         pass
 

@@ -1,9 +1,7 @@
 #pragma once
 
-#include <map>
 #include <iterator>
 #include <unordered_set>
-#include <vector>
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
@@ -46,7 +44,7 @@ public:
         }
 
         std::unordered_set<CandidateIdType> _dynamic_candidates;
-        std::vector<Candidate> _static_candidates;
+        Vector<Candidate> _static_candidates;
     };
 
 public:

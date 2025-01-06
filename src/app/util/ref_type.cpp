@@ -36,10 +36,4 @@ sp<Entity> RefType::toEntity(const sp<Ref>& self)
     return {std::shared_ptr<Entity>(&entity, [](void* ref) {}), Class::ensureClass<Entity>()};
 }
 
-sp<Rigidbody> RefType::toRigidbody(const sp<Ref>& self)
-{
-    Rigidbody& rigidbody = self->instance<Rigidbody>();
-    return {std::shared_ptr<Rigidbody>(&rigidbody, [](void* ref) {}), Class::ensureClass<Rigidbody>()};
-}
-
 }

@@ -5,7 +5,7 @@
 #include "core/components/behavior.h"
 
 #include "app/base/collision_manifold.h"
-#include "app/base/rigidbody.h"
+#include "app/components/rigidbody.h"
 #include "app/inf/collision_callback.h"
 
 namespace ark {

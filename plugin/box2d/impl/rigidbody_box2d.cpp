@@ -2,8 +2,9 @@
 
 #include "core/ark.h"
 #include "core/base/future.h"
+#include "core/base/ref_manager.h"
 #include "core/inf/variable.h"
-#include "core/util/bean_utils.h"
+#include "core/types/global.h"
 
 #include "graphics/base/rect.h"
 #include "graphics/components/render_object.h"
@@ -164,32 +165,31 @@ private:
 
 }
 
-RigidbodyBox2D::RigidbodyBox2D(const ColliderBox2D& world, Collider::BodyType type, const sp<Vec3>& position, const V3& size, const SafeVar<Numeric>& rotate, const sp<Shape>& shape, float density, float friction)
-    : RigidbodyBox2D(world, type, position, size, rotate, BodyCreateInfo(shape, density, friction, type & Collider::BODY_TYPE_SENSOR))
+RigidbodyBox2D::RigidbodyBox2D(const ColliderBox2D& world, Rigidbody::BodyType type, const sp<Vec3>& position, const V3& size, const SafeVar<Numeric>& rotate, const sp<Shape>& shape, float density, float friction)
+    : RigidbodyBox2D(world, type, position, size, rotate, BodyCreateInfo(shape, density, friction, type & Rigidbody::BODY_TYPE_SENSOR))
 {
 }
 
-RigidbodyBox2D::RigidbodyBox2D(const ColliderBox2D& world, Collider::BodyType type, const sp<Vec3>& position, const V3& size, const SafeVar<Numeric>& rotate, const BodyCreateInfo& createInfo)
+RigidbodyBox2D::RigidbodyBox2D(const ColliderBox2D& world, Rigidbody::BodyType type, const sp<Vec3>& position, const V3& size, const SafeVar<Numeric>& rotate, const BodyCreateInfo& createInfo)
     : RigidbodyBox2D(sp<Stub>::make(world, world.createBody(type, position->val(), size, createInfo)), type, position, size, rotate)
 {
 }
 
 //TODO: Manual rotation
-RigidbodyBox2D::RigidbodyBox2D(const sp<Stub>& stub, Collider::BodyType type, const sp<Vec3>& position, const V3& size, const SafeVar<Numeric>& rotation)
-    : Rigidbody(type, sp<ark::Shape>::make(0, sp<Vec3>::make<Vec3::Const>(size)), sp<_RigidBodyPosition>::make(stub, position),
-                sp<Rotation>::make(sp<Numeric>::make<_RigidBodyRotation>(stub)), Box(), nullptr), _stub(stub)
+RigidbodyBox2D::RigidbodyBox2D(const sp<Stub>& stub, Rigidbody::BodyType type, const sp<Vec3>& position, const V3& size, const SafeVar<Numeric>& rotation, sp<Boolean> discarded)
+    : _rigidbody_stub(sp<Rigidbody::Stub>::make(Global<RefManager>()->makeRef(this, std::move(discarded)), type, sp<ark::Shape>::make(0, sp<Vec3>::make<Vec3::Const>(size)), sp<_RigidBodyPosition>::make(stub, position), sp<Rotation>::make(sp<Numeric>::make<_RigidBodyRotation>(stub)))),
+      _stub(stub)
 {
     _stub->_body->GetUserData().pointer = reinterpret_cast<uintptr_t>(this);
 }
 
-void RigidbodyBox2D::discard()
+const sp<Rigidbody::Stub>& RigidbodyBox2D::rigidbodyStub() const
 {
-    _stub->dispose();
+    return _rigidbody_stub;
 }
 
 b2Body* RigidbodyBox2D::body() const
 {
-
     return _stub->body();
 }
 
@@ -315,6 +315,11 @@ sp<Future> RigidbodyBox2D::applyRotate(const sp<Numeric>& rotate)
     const sp<Runnable> task = sp<ManualApplyRotate>::make(_stub, rotate, future);
     Ark::instance().applicationContext()->addPreRenderTask(task, future->canceled());
     return future;
+}
+
+Rigidbody RigidbodyBox2D::makeShadow() const
+{
+    return {{_rigidbody_stub, nullptr}, true};
 }
 
 RigidbodyBox2D::Stub::Stub(const ColliderBox2D& world, b2Body* body)
