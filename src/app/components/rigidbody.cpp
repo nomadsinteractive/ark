@@ -75,11 +75,17 @@ void Rigidbody::discard()
 
 void Rigidbody::onWire(const WiringContext& context, const Box& self)
 {
+    if(auto shape = context.getComponent<Shape>())
+    {
+        const sp<Collider> collider = _impl._instance.as<Collider>();
+        ASSERT(shape->type().hash() != Shape::TYPE_NONE);
+        ASSERT(collider);
+        ASSERT(_is_shadow);
+        _impl = collider->createBody(_impl._stub->_type, std::move(shape), _impl._stub->_position.wrapped(), _impl._stub->_rotation.wrapped(), _impl._stub->_ref->discarded().wrapped());
+        _is_shadow = false;
+    }
     if(sp<Vec3> position = context.getComponent<Position>())
         _impl._stub->_position.reset(std::move(position));
-
-    if(auto shape = context.getComponent<Shape>())
-        _impl._stub->_shape = std::move(shape);
 
     if(auto collisionCallback = context.getComponent<CollisionCallback>())
         _impl._stub->_collision_callback = std::move(collisionCallback);
@@ -173,9 +179,7 @@ Rigidbody::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 sp<Rigidbody> Rigidbody::BUILDER::build(const Scope& args)
 {
     const sp<Collider> collider = _collider->build(args);
-    if(sp<Shape> shape = _shape.build(args))
-        return ColliderType::createBody(collider, _body_type, std::move(shape), _position.build(args), _rotation.build(args), _discarded.build(args));
-    return sp<Rigidbody>::make(_body_type, nullptr, _position.build(args), _rotation.build(args), _discarded.build(args), Box(collider));
+    return ColliderType::createBody(collider, _body_type, _shape.build(args), _position.build(args), _rotation.build(args), _discarded.build(args));
 }
 
 template<> ARK_API Rigidbody::BodyType StringConvert::eval<Rigidbody::BodyType>(const String& str)

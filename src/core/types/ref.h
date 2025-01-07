@@ -7,6 +7,7 @@ namespace ark {
 
 class ARK_API Ref {
 public:
+    Ref(RefId id, void* instance, sp<Boolean> discarded = nullptr);
     ~Ref();
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Ref);
 
@@ -24,9 +25,6 @@ public:
     void setDiscarded(sp<Boolean> discarded);
 
     void discard();
-
-private:
-    Ref(RefId id, void* instance, sp<Boolean> discarded = nullptr);
 
 private:
     RefId _id;
