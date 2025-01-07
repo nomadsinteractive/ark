@@ -13,7 +13,6 @@
 #include "graphics/components/position.h"
 
 #include "app/base/application_context.h"
-#include "app/base/collision_manifold.h"
 #include "app/components/shape.h"
 #include "app/inf/collider.h"
 #include "app/inf/collision_callback.h"
@@ -36,20 +35,6 @@ void Rigidbody::Stub::onEndContact(const Rigidbody& rigidBody) const
 {
     if(_collision_callback && rigidBody.type() != Rigidbody::BODY_TYPE_SENSOR)
         _collision_callback->onEndContact(rigidBody);
-}
-
-void Rigidbody::Stub::onBeginContact(const Rigidbody& self, const Rigidbody& rigidBody, const CollisionManifold& manifold) const
-{
-    onBeginContact(rigidBody, manifold);
-    if(rigidBody.type() == BODY_TYPE_STATIC)
-        rigidBody.onBeginContact(self, CollisionManifold(manifold.contactPoint(), -manifold.normal()));
-}
-
-void Rigidbody::Stub::onEndContact(const Rigidbody& self, const Rigidbody& rigidBody) const
-{
-    onEndContact(rigidBody);
-    if(rigidBody.type() == BODY_TYPE_STATIC)
-        rigidBody.onEndContact(self);
 }
 
 Rigidbody::Rigidbody(BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<Boolean> discarded, Box impl, bool isShadow)
@@ -75,23 +60,29 @@ void Rigidbody::discard()
 
 void Rigidbody::onWire(const WiringContext& context, const Box& self)
 {
+    if(sp<Vec3> position = context.getComponent<Position>())
+        _impl._stub->_position.reset(std::move(position));
+
+    if(sp<Boolean> discarded = context.getComponent<Discarded>())
+        _impl._stub->_ref->setDiscarded(std::move(discarded));
+
     if(auto shape = context.getComponent<Shape>())
     {
         const sp<Collider> collider = _impl._instance.as<Collider>();
         ASSERT(shape->type().hash() != Shape::TYPE_NONE);
         ASSERT(collider);
         ASSERT(_is_shadow);
-        _impl = collider->createBody(_impl._stub->_type, std::move(shape), _impl._stub->_position.wrapped(), _impl._stub->_rotation.wrapped(), _impl._stub->_ref->discarded().wrapped());
+        Impl impl = std::move(_impl);
+        _impl = collider->createBody(impl._stub->_type, std::move(shape), impl._stub->_position.wrapped(), impl._stub->_rotation.wrapped(), impl._stub->_ref->discarded().wrapped());
+        _impl._stub->_collision_callback = std::move(impl._stub->_collision_callback);
+        _impl._stub->_collision_filter = std::move(impl._stub->_collision_filter);
+        _impl._stub->_with_tag = std::move(impl._stub->_with_tag);
         _is_shadow = false;
     }
-    if(sp<Vec3> position = context.getComponent<Position>())
-        _impl._stub->_position.reset(std::move(position));
 
-    if(auto collisionCallback = context.getComponent<CollisionCallback>())
-        _impl._stub->_collision_callback = std::move(collisionCallback);
-
-    if(sp<Boolean> discarded = context.getComponent<Discarded>())
-        _impl._stub->_ref->setDiscarded(std::move(discarded));
+    if(!_impl._stub->_collision_callback)
+        if(auto collisionCallback = context.getComponent<CollisionCallback>())
+            _impl._stub->_collision_callback = std::move(collisionCallback);
 
     if(sp<WithTag> withTag = context.getComponent<WithTag>())
         _impl._stub->_with_tag = std::move(withTag);
@@ -149,7 +140,7 @@ void Rigidbody::setCollisionFilter(sp<CollisionFilter> collisionFilter)
 
 Box Rigidbody::tag() const
 {
-    return _impl._stub->_with_tag ? nullptr : _impl._stub->_with_tag->tag();
+    return _impl._stub->_with_tag ? _impl._stub->_with_tag->tag() : nullptr;
 }
 
 void Rigidbody::setTag(Box tag)
@@ -172,14 +163,20 @@ sp<Rigidbody> Rigidbody::makeShadow() const
 
 Rigidbody::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _collider(factory.ensureBuilder<Collider>(manifest, "collider")), _body_type(Documents::getAttribute<BodyType>(manifest, "body-type", BODY_TYPE_KINEMATIC)), _shape(factory.getBuilder<Shape>(manifest, "shape")),
-      _position(factory.getBuilder<Vec3>(manifest, constants::POSITION)), _rotation(factory.getBuilder<Vec4>(manifest, constants::ROTATION)), _discarded(factory.getBuilder<Boolean>(manifest, constants::DISCARDED))
+      _position(factory.getBuilder<Vec3>(manifest, constants::POSITION)), _rotation(factory.getBuilder<Vec4>(manifest, constants::ROTATION)), _discarded(factory.getBuilder<Boolean>(manifest, constants::DISCARDED)),
+      _collision_callback(factory.getBuilder<CollisionCallback>(manifest, constants::COLLISION_CALLBACK)), _collision_filter(factory.getBuilder<CollisionFilter>(manifest, "collision-filter"))
 {
 }
 
 sp<Rigidbody> Rigidbody::BUILDER::build(const Scope& args)
 {
     const sp<Collider> collider = _collider->build(args);
-    return ColliderType::createBody(collider, _body_type, _shape.build(args), _position.build(args), _rotation.build(args), _discarded.build(args));
+    sp<Rigidbody> rigidbody = ColliderType::createBody(collider, _body_type, _shape.build(args), _position.build(args), _rotation.build(args), _discarded.build(args));
+    if(sp<CollisionCallback> collisionCallback = _collision_callback.build(args))
+        rigidbody->setCollisionCallback(std::move(collisionCallback));
+    if(sp<CollisionFilter> collisionFilter = _collision_filter.build(args))
+        rigidbody->setCollisionFilter(std::move(collisionFilter));
+    return rigidbody;
 }
 
 template<> ARK_API Rigidbody::BodyType StringConvert::eval<Rigidbody::BodyType>(const String& str)
@@ -204,16 +201,6 @@ void Rigidbody::onBeginContact(const Rigidbody& rigidbody, const CollisionManifo
 void Rigidbody::onEndContact(const Rigidbody& rigidbody) const
 {
     _impl._stub->onEndContact(rigidbody);
-}
-
-void Rigidbody::onBeginContact(const Rigidbody& self, const Rigidbody& rigidbody, const CollisionManifold& manifold) const
-{
-    _impl._stub->onBeginContact(self, rigidbody, manifold);
-}
-
-void Rigidbody::onEndContact(const Rigidbody& self, const Rigidbody& rigidbody) const
-{
-    _impl._stub->onEndContact(self, rigidbody);
 }
 
 Rigidbody::BUILDER_WIRABLE::BUILDER_WIRABLE(BeanFactory& factory, const document& manifest)

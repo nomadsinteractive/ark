@@ -42,7 +42,7 @@ public:
     };
 
 public:
-    class RigidBodyImpl;
+    class RigidbodyImpl;
 
     struct Stub : public Updatable {
         Stub(std::vector<std::pair<sp<BroadPhrase>, sp<CollisionFilter>>> broadPhrases, sp<NarrowPhrase> narrowPhrase);
@@ -51,12 +51,12 @@ public:
 
         void requestRigidBodyRemoval(int32_t rigidBodyId);
 
-        sp<RigidBodyImpl> createRigidBody(Rigidbody::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<Boolean> discarded);
+        sp<RigidbodyImpl> createRigidBody(Rigidbody::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<Boolean> discarded);
 
         std::vector<sp<Ref>> toRigidBodyRefs(const std::unordered_set<BroadPhrase::CandidateIdType>& candidateSet, uint32_t filter) const;
         std::vector<BroadPhrase::Candidate> toBroadPhraseCandidates(const std::unordered_set<BroadPhrase::CandidateIdType>& candidateSet) const;
 
-        void resolveCandidates(const Rigidbody& self, const BroadPhrase::Candidate& candidateSelf, const std::vector<BroadPhrase::Candidate>& candidates, const Rigidbody& callback, std::set<BroadPhrase::CandidateIdType>& c);
+        void resolveCandidates(const Rigidbody& self, const BroadPhrase::Candidate& candidateSelf, const std::vector<BroadPhrase::Candidate>& candidates, std::set<BroadPhrase::CandidateIdType>& c);
 
         const sp<NarrowPhrase>& narrowPhrase() const;
 
@@ -73,13 +73,13 @@ public:
         std::vector<std::pair<sp<BroadPhrase>, sp<CollisionFilter>>> _broad_phrases;
         sp<NarrowPhrase> _narrow_phrase;
 
-        std::unordered_map<uintptr_t, sp<Ref>> _rigid_bodies;
-        std::vector<sp<Ref>> _rigid_body_refs;
+        std::unordered_map<BroadPhrase::CandidateIdType, sp<Ref>> _rigid_bodies;
+        Set<const Ref*> _dirty_rigid_body_refs;
 
         std::set<BroadPhrase::CandidateIdType> _phrase_dispose;
         std::set<BroadPhrase::CandidateIdType> _phrase_remove;
 
-        friend class RigidBodyImpl;
+        friend class RigidbodyImpl;
     };
 
 private:

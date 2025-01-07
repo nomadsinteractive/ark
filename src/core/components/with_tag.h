@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/base/api.h"
+#include "core/inf/builder.h"
 #include "core/inf/debris.h"
 #include "core/inf/wirable.h"
 #include "core/components/with_debris.h"
@@ -22,6 +23,17 @@ public:
     const Box& tag() const;
 //  [[script::bindings::property]]
     void setTag(Box tag);
+
+//  [[plugin::builder("with-tag")]]
+    class BUILDER final : public Builder<Wirable> {
+    public:
+        BUILDER(BeanFactory& factory, const document& manifest);
+
+        sp<Wirable> build(const Scope& args) override;
+
+    private:
+        builder<Box> _tag;
+    };
 
 private:
     Box _tag;

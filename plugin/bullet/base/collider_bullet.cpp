@@ -325,8 +325,8 @@ void ColliderBullet::myInternalPreTickCallback(btDynamicsWorld* dynamicsWorld, b
 
 void ColliderBullet::myInternalTickCallback(btDynamicsWorld* dynamicsWorld, btScalar /*timeStep*/)
 {
-    int32_t numManifolds = dynamicsWorld->getDispatcher()->getNumManifolds();
-    ColliderBullet* self = reinterpret_cast<ColliderBullet*>(dynamicsWorld->getWorldUserInfo());
+    const int32_t numManifolds = dynamicsWorld->getDispatcher()->getNumManifolds();
+    ColliderBullet* self = static_cast<ColliderBullet*>(dynamicsWorld->getWorldUserInfo());
     for(int32_t i = 0; i < numManifolds; ++i)
     {
         btPersistentManifold* contactManifold = dynamicsWorld->getDispatcher()->getManifoldByIndexInternal(i);
@@ -358,7 +358,7 @@ void ColliderBullet::myInternalTickCallback(btDynamicsWorld* dynamicsWorld, btSc
         }
     }
 
-    for(auto iter = self->_contact_infos.begin(); iter != self->_contact_infos.end(); ++iter)
+    for(auto iter = self->_contact_infos.begin(); iter != self->_contact_infos.end(); )
     {
         const sp<BtRigidbodyRef>& rigidBody = iter->first;
         ContactInfo& contactInfo = iter->second;
@@ -378,8 +378,9 @@ void ColliderBullet::myInternalTickCallback(btDynamicsWorld* dynamicsWorld, btSc
             contactInfo._last_tick = std::move(contactInfo._current_tick);
         }
         if(contactInfo._last_tick.empty())
-            if((iter = self->_contact_infos.erase(iter)) == self->_contact_infos.end())
-                break;
+            iter = self->_contact_infos.erase(iter);
+        else
+            ++iter;
     }
 }
 

@@ -32,9 +32,6 @@ public:
         void onBeginContact(const Rigidbody& rigidBody, const CollisionManifold& manifold) const;
         void onEndContact(const Rigidbody& rigidBody) const;
 
-        void onBeginContact(const Rigidbody& self, const Rigidbody& rigidBody, const CollisionManifold& manifold) const;
-        void onEndContact(const Rigidbody& self, const Rigidbody& rigidBody) const;
-
         sp<Ref> _ref;
         BodyType _type;
         sp<Shape> _shape;
@@ -94,8 +91,6 @@ public:
 
     void onBeginContact(const Rigidbody& rigidbody, const CollisionManifold& manifold) const;
     void onEndContact(const Rigidbody& rigidbody) const;
-    void onBeginContact(const Rigidbody& self, const Rigidbody& rigidbody, const CollisionManifold& manifold) const;
-    void onEndContact(const Rigidbody& self, const Rigidbody& rigidbody) const;
 
     sp<Rigidbody> makeShadow() const;
 
@@ -113,6 +108,8 @@ public:
         SafeBuilder<Vec3> _position;
         SafeBuilder<Vec4> _rotation;
         SafeBuilder<Boolean> _discarded;
+        SafeBuilder<CollisionCallback> _collision_callback;
+        SafeBuilder<CollisionFilter> _collision_filter;
     };
 
 //  [[plugin::builder("with-rigidbody")]]

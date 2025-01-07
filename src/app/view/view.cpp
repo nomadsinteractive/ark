@@ -16,7 +16,6 @@
 #include "renderer/base/render_engine.h"
 
 #include "app/base/application_context.h"
-#include "app/base/entity.h"
 #include "app/components/shape.h"
 #include "app/view/view_hierarchy.h"
 
@@ -143,7 +142,7 @@ public:
         const V3 offsetPosition = _stub->getTopViewOffsetPosition(false);
         const float x = offsetPosition.x() + size.x() / 2;
         const float y = offsetPosition.y() + size.y() / 2;
-        return {toViewportPosition(V2(x, y)), offsetPosition.z()};
+        return {toViewportPosition({x, y}), offsetPosition.z()};
     }
 
 private:

@@ -494,6 +494,9 @@ public:
     }
 
     sp<T> build(const Scope& args) override {
+        if constexpr(std::is_same_v<T, Box>)
+            return sp<Box>::make(args.getObject(_name));
+
         sp<T> value = args.build<T>(_name, args);
         if(!value) {
             const sp<Scope> references = _references.lock();
