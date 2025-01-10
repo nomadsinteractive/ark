@@ -104,6 +104,8 @@ public:
 //  [[script::bindings::property]]
     sp<Mat4> vp() const;
 
+    bool isRHS() const;
+
     void assign(const Camera& other);
 
     static Camera createDefaultCamera();

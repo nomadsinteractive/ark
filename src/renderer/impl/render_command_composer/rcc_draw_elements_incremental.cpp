@@ -14,11 +14,6 @@
 
 namespace ark {
 
-RCCDrawElementsIncremental::RCCDrawElementsIncremental(sp<Model> model)
-    : _model(std::move(model))
-{
-}
-
 sp<PipelineBindings> RCCDrawElementsIncremental::makeShaderBindings(Shader& shader, RenderController& renderController, Enum::RenderMode renderMode)
 {
     _strips = renderController.gba().makeStrips(shader.input()->getStreamLayout(0).stride());

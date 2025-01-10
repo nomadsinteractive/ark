@@ -8,7 +8,7 @@
 namespace ark {
 
 ModelLoaderUnitQuad::ModelLoaderUnitQuad()
-    : ModelLoader(Enum::RENDER_MODE_TRIANGLES, nullptr), _unit_model(Global<Constants>()->MODEL_UNIT_QUAD)
+    : ModelLoader(Enum::RENDER_MODE_TRIANGLES, nullptr), _unit_model(Global<Constants>()->MODEL_UNIT_QUAD_RHS)
 {
 }
 

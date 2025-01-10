@@ -349,7 +349,7 @@ sp<RenderTarget> RenderController::makeRenderTarget(sp<Renderer> renderer, Rende
 
 sp<RenderCommandComposer> RenderController::makeDrawElementsIncremental(sp<Model> model) const
 {
-    return _render_engine->rendererFactory()->features()._can_draw_element_incremental ? sp<RenderCommandComposer>::make<RCCDrawElementsIncremental>(std::move(model))
+    return _render_engine->rendererFactory()->features()._can_draw_element_incremental ? sp<RenderCommandComposer>::make<RCCDrawElementsIncremental>()
                                                                                        : sp<RenderCommandComposer>::make<RCCDrawElements>(std::move(model));
 }
 

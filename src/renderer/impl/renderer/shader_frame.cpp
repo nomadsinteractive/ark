@@ -17,7 +17,7 @@ namespace ark {
 
 ShaderFrame::ShaderFrame(sp<Vec3> size, const sp<Shader>& shader, RenderController& renderController)
     : _size(std::move(size)), _shader(shader), _pipeline_bindings(shader->makeBindings(Buffer(), Enum::RENDER_MODE_TRIANGLES, Enum::DRAW_PROCEDURE_DRAW_ELEMENTS)),
-      _vertex_buffer(renderController.makeVertexBuffer()), _ib_snapshot(renderController.getSharedPrimitiveIndexBuffer(Global<Constants>()->MODEL_UNIT_QUAD, false)->snapshot(renderController, 1))
+      _vertex_buffer(renderController.makeVertexBuffer()), _ib_snapshot(renderController.getSharedPrimitiveIndexBuffer(Global<Constants>()->MODEL_UNIT_QUAD_RHS, false)->snapshot(renderController, 1))
 {
 }
 

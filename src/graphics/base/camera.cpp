@@ -148,7 +148,7 @@ Camera::Camera(Ark::RendererCoordinateSystem cs, sp<Delegate> delegate, sp<Mat4>
     : _coordinate_system(cs), _delegate(std::move(delegate)), _view(sp<Mat4>::make<Mat4Wrapper>(view ? std::move(view) : Mat4Type::create())), _projection(sp<Mat4>::make<Mat4Wrapper>(projection ? std::move(projection) : Mat4Type::create())),
       _vp(sp<Mat4>::make<Mat4Wrapper>(Mat4Type::matmul(_projection.cast<Mat4>(), _view.cast<Mat4>()))), _stub(sp<Stub>::make())
 {
-    ASSERT(_coordinate_system != Ark::COORDINATE_SYSTEM_DEFAULT);
+    CHECK(_coordinate_system == Ark::COORDINATE_SYSTEM_LHS || _coordinate_system == Ark::COORDINATE_SYSTEM_RHS, "Camera's coordinate system should be either LHS or RHS");
 }
 
 void Camera::ortho(const V2& leftTop, const V2& rightBottom, const V2& clip)
@@ -259,6 +259,11 @@ void Camera::setProjection(sp<Mat4> projection)
 sp<Mat4> Camera::vp() const
 {
     return _vp;
+}
+
+bool Camera::isRHS() const
+{
+    return _coordinate_system == Ark::COORDINATE_SYSTEM_RHS;
 }
 
 Camera Camera::createDefaultCamera()

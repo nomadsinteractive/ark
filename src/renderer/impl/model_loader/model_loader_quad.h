@@ -27,6 +27,7 @@ public:
 private:
     sp<Atlas> _atlas;
     sp<Model> _unit_model;
+    bool _is_rhs;
 };
 
 }

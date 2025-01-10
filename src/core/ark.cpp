@@ -412,9 +412,9 @@ Camera Ark::createCamera() const
 Camera Ark::createCamera(RendererCoordinateSystem cs, bool flipx, bool flipy) const
 {
     RendererFactory& rendererFactory = _application_context->renderController()->renderEngine()->rendererFactory();
-    sp<Camera::Delegate> cameraDelegate = rendererFactory.createCamera();
-    if(flipx || flipy)
-        return {cs, sp<Camera::Delegate>::make<CameraDelegateCHS>(cs, std::move(cameraDelegate), flipx, flipy)};
+    sp<Camera::Delegate> cameraDelegate = rendererFactory.createCamera(cs);
+    // if(flipx || flipy)
+    //     return {cs, sp<Camera::Delegate>::make<CameraDelegateCHS>(cs, std::move(cameraDelegate), flipx, flipy)};
     return {cs, std::move(cameraDelegate)};
 }
 

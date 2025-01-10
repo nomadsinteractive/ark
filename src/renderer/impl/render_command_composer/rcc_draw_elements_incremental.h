@@ -9,13 +9,12 @@ namespace ark {
 
 class RCCDrawElementsIncremental final : public RenderCommandComposer {
 public:
-    RCCDrawElementsIncremental(sp<Model> model);
+    RCCDrawElementsIncremental() = default;
 
     sp<PipelineBindings> makeShaderBindings(Shader& shader, RenderController& renderController, Enum::RenderMode renderMode) override;
     sp<RenderCommand> compose(const RenderRequest& renderRequest, const RenderLayerSnapshot& snapshot) override;
 
 private:
-    sp<Model> _model;
     Buffer _indices;
     sp<GraphicsBufferAllocator::Strips> _strips;
 };

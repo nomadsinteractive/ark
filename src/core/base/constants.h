@@ -18,7 +18,8 @@ struct Constants {
 
     sp<Boundaries> BOUNDARIES_UNIT;
 
-    sp<Model> MODEL_UNIT_QUAD;
+    sp<Model> MODEL_UNIT_QUAD_RHS;
+    sp<Model> MODEL_UNIT_QUAD_LHS;
     sp<Model> MODEL_UNIT_NINE_PATCH_TRIANGLE_STRIPS;
     sp<Model> MODEL_UNIT_NINE_PATCH_QUADS;
 

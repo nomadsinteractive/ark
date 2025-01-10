@@ -93,10 +93,7 @@ sp<RenderView> RenderEngine::createRenderView(const sp<RenderController>& render
 {
     const Global<Camera> mainCamera;
     // We're ignoring the clipping plane arguments in ortho projections and using the standard NDC configuration
-    if(isLHS())
-        mainCamera->ortho(viewport.left(), viewport.right(), viewport.bottom(), viewport.top(), 1.0f, -1.0f);
-    else
-        mainCamera->ortho(viewport.left(), viewport.right(), viewport.top(), viewport.bottom(), 1.0f, -1.0f);
+    mainCamera->ortho(viewport.left(), viewport.right(), viewport.bottom(), viewport.top(), 1.0f, -1.0f);
 
     _render_context->setViewport(viewport);
     return _renderer_factory->createRenderView(_render_context, renderController);

@@ -7,11 +7,10 @@
 
 namespace ark {
 
-class VerticesQuad final : public Vertices {
+class VerticesQuadRHS final : public Vertices {
 public:
-    VerticesQuad();
-    VerticesQuad(const Atlas::Item& quad);
-    VerticesQuad(const Rect& bounds, uint16_t ux, uint16_t uy, uint16_t vx, uint16_t vy);
+    VerticesQuadRHS(const Atlas::Item& quad);
+    VerticesQuadRHS(const Rect& bounds, uint16_t ux, uint16_t uy, uint16_t vx, uint16_t vy);
 
     void write(VertexWriter& buf, const V3& size) override;
 
