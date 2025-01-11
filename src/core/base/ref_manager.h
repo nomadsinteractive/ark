@@ -1,14 +1,13 @@
 #pragma once
 
-#include <vector>
-
+#include "core/base/api.h"
 #include "core/types/owned_ptr.h"
 #include "core/types/ref.h"
 #include "core/concurrent/lf_stack.h"
 
 namespace ark {
 
-class RefManager {
+class ARK_API RefManager {
 public:
 
     sp<Ref> makeRef(void* instance, sp<Boolean> discarded = nullptr);
@@ -23,7 +22,7 @@ private:
     };
 
 private:
-    std::vector<RefSlot> _ref_slots;
+    Vector<RefSlot> _ref_slots;
     LFStack<uint32_t> _recycled_ids;
 };
 

@@ -8,7 +8,6 @@
 #include "core/base/string.h"
 #include "core/collection/traits.h"
 #include "core/types/shared_ptr.h"
-#include "core/util/log.h"
 
 #include "renderer/forwarding.h"
 
@@ -88,8 +87,8 @@ public:
     const sp<ApplicationContext>& applicationContext() const;
     const sp<ApplicationProfiler>& applicationProfiler() const;
 
-    Camera createCamera() const;
-    Camera createCamera(RendererCoordinateSystem cs, bool flipx, bool flipy) const;
+    Camera createCamera(RendererCoordinateSystem cs = COORDINATE_SYSTEM_DEFAULT) const;
+    Camera createCamera(RendererCoordinateSystem cs, bool flipy) const;
 
     op<ApplicationProfiler::Tracer> makeProfilerTracer(const char* func, const char* filename, int32_t lineno, const char* name, ApplicationProfiler::Category category = ApplicationProfiler::CATEGORY_DEFAULT) const;
     op<ApplicationProfiler::Logger> makeProfilerLogger(const char* func, const char* filename, int32_t lineno, const char* name) const;

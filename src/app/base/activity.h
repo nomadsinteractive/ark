@@ -29,7 +29,7 @@ public:
     sp<Entity> makeEntity(Traits components = Traits()) const;
 
 //  [[script::bindings::auto]]
-    sp<Arena> makeArena(const Scope& kwargs) const;
+    sp<Arena> makeArena() const;
 
 //  [[script::bindings::auto]]
     Box getReference(const String& id) const;

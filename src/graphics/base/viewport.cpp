@@ -1,5 +1,7 @@
 #include "graphics/base/viewport.h"
 
+#include "core/util/math.h"
+
 namespace ark {
 
 Viewport::Viewport(float left, float top, float right, float bottom, float clipNear, float clipFar)
@@ -24,13 +26,12 @@ float Viewport::clipFar() const
 
 float Viewport::toViewportX(float screenX, float surfaceWidth) const
 {
-    return left() + (right() - left()) * screenX / surfaceWidth;
+    return Math::lerp(left(), right(), screenX / surfaceWidth);
 }
 
 float Viewport::toViewportY(float screenY, float surfaceHeight) const
 {
-    const float bt = bottom() - top();
-    return bt > 0.0f ? bt - bt * screenY / surfaceHeight : - bt * screenY / surfaceHeight;
+    return Math::lerp(top(), bottom(), screenY / surfaceHeight);
 }
 
 }

@@ -41,6 +41,7 @@ private:
     sp<Atlas> _atlas;
     sp<Atlas::AttachmentNinePatch> _nine_patch_attachment;
     sp<Model> _unit_model;
+    bool _is_lhs;
 };
 
 }

@@ -14,8 +14,10 @@
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/texture.h"
 #include "renderer/base/resource_loader_context.h"
-#include "renderer/impl/vertices/vertices_nine_patch_quads.h"
-#include "renderer/impl/vertices/vertices_nine_patch_triangle_strips.h"
+#include "renderer/impl/vertices/vertices_nine_patch_quads_lhs.h"
+#include "renderer/impl/vertices/vertices_nine_patch_quads_rhs.h"
+#include "renderer/impl/vertices/vertices_nine_patch_triangle_strips_lhs.h"
+#include "renderer/impl/vertices/vertices_nine_patch_triangle_strips_rhs.h"
 
 namespace ark {
 
@@ -174,7 +176,7 @@ Rect Atlas::getItemBounds(int32_t id) const
     const Item& item = at(id);
     const float nw = _texture->width() / static_cast<float>(UV_NORMALIZE_RANGE);
     const float nh = _texture->height() / static_cast<float>(UV_NORMALIZE_RANGE);
-    return Rect(item._ux * nw, item._vy * nh, item._vx * nw, item._uy * nh);
+    return {item._ux * nw, item._vy * nh, item._vx * nw, item._uy * nh};
 }
 
 uint16_t Atlas::unnormalize(float v)
@@ -220,7 +222,7 @@ void Atlas::AttachmentNinePatch::import(Atlas& atlas, const document& manifest)
 
 void Atlas::AttachmentNinePatch::add(int32_t type, uint32_t textureWidth, uint32_t textureHeight, const Rect& paddings, const Atlas& atlas)
 {
-    Rect bounds = atlas.getItemBounds(type);
+    const Rect bounds = atlas.getItemBounds(type);
     const Rect ninePatches(paddings.left(), paddings.top(), bounds.width() - paddings.right(), bounds.height() - paddings.bottom());
     addNinePatch(type, textureWidth, textureHeight, ninePatches, bounds);
 }
@@ -232,22 +234,26 @@ void Atlas::AttachmentNinePatch::addNinePatch(int32_t type, uint32_t textureWidt
 
 void Atlas::AttachmentNinePatch::addNinePatch(int32_t type, uint32_t textureWidth, uint32_t textureHeight, const Rect& ninePatch, const Rect& bounds)
 {
-    _vertices_triangle_strips[type] = sp<VerticesNinePatchTriangleStrips>::make(bounds, ninePatch, textureWidth, textureHeight);
-    _vertices_quads[type] = sp<VerticesNinePatchQuads>::make(bounds, ninePatch, textureWidth, textureHeight);
+    _nine_patch_vertices[type] = {
+        sp<Vertices>::make<VerticesNinePatchTriangleStripsRHS>(bounds, ninePatch, textureWidth, textureHeight),
+        sp<Vertices>::make<VerticesNinePatchQuadsRHS>(bounds, ninePatch, textureWidth, textureHeight),
+        sp<Vertices>::make<VerticesNinePatchTriangleStripsLHS>(bounds, ninePatch, textureWidth, textureHeight),
+        sp<Vertices>::make<VerticesNinePatchQuadsLHS>(bounds, ninePatch, textureWidth, textureHeight)
+    };
 }
 
-const sp<Vertices>& Atlas::AttachmentNinePatch::ensureVerticesTriangleStrips(int32_t type) const
+const sp<Vertices>& Atlas::AttachmentNinePatch::ensureVerticesTriangleStrips(int32_t type, bool isLHS) const
 {
-    const auto iter = _vertices_triangle_strips.find(type);
-    CHECK(iter != _vertices_triangle_strips.end(), "Cannot find type: %d", type);
-    return iter->second;
+    const auto iter = _nine_patch_vertices.find(type);
+    CHECK(iter != _nine_patch_vertices.end(), "Cannot find type: %d", type);
+    return isLHS ? iter->second._triangle_strips_lhs : iter->second._triangle_strips_rhs;
 }
 
-const sp<Vertices>& Atlas::AttachmentNinePatch::ensureVerticesQuads(int32_t type) const
+const sp<Vertices>& Atlas::AttachmentNinePatch::ensureVerticesQuads(int32_t type, bool isLHS) const
 {
-    const auto iter = _vertices_quads.find(type);
-    CHECK(iter != _vertices_quads.end(), "Cannot find type: %d", type);
-    return iter->second;
+    const auto iter = _nine_patch_vertices.find(type);
+    CHECK(iter != _nine_patch_vertices.end(), "Cannot find type: %d", type);
+    return isLHS ? iter->second._quads_lhs : iter->second._quads_rhs;
 }
 
 Atlas::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

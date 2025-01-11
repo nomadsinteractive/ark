@@ -21,6 +21,8 @@
 #include "renderer/base/mesh.h"
 #include "renderer/base/model.h"
 #include "renderer/base/node.h"
+#include "renderer/base/render_controller.h"
+#include "renderer/base/render_engine.h"
 #include "renderer/base/shader_data_type.h"
 
 namespace ark::plugin::gltf {
@@ -249,6 +251,10 @@ Mesh processPrimitive(const tinygltf::Model& gltfModel, const std::vector<sp<Mat
 
     SBufferReadData bufferReadData = getAttributeData<element_index_t, element_index_t>(gltfModel, primitive.indices);
     std::vector<element_index_t> indices = std::move(bufferReadData.DstData);
+
+	if(Ark::instance().renderController()->renderEngine()->isBackendLHS())
+		for(size_t i = 0; i < indices.size(); i += 3)
+			std::swap(indices[i + 1], indices[i + 2]);
 
     ASSERT(primitive.material == -1 || primitive.material < materials.size());
     sp<Material> material = primitive.material >= 0 ? materials.at(primitive.material) : nullptr;
@@ -499,7 +505,7 @@ Model GltfImporter::loadModel()
 		{
 			Animation animation = loadAnimation(_model, i, loadingAnimations.size());
 			for(const AnimationChannel& channel : animation.channels)
-				channelNodeIds.emplace(channel.node_id, channelNodeIds.size());
+				channelNodeIds.emplace(channel.node_id, static_cast<uint32_t>(channelNodeIds.size()));
 			loadingAnimations.push_back(std::move(animation));
 		}
 

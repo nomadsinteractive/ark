@@ -95,7 +95,7 @@ private:
     class ExecutorWorkerStrategy;
 
 private:
-    std::vector<String> _argv;
+    Vector<String> _argv;
     sp<Ticker> _ticker;
     sp<Vec2Impl> _cursor_position;
     sp<Vec2Impl> _cursor_frag_coord;

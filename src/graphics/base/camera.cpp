@@ -261,9 +261,9 @@ sp<Mat4> Camera::vp() const
     return _vp;
 }
 
-bool Camera::isRHS() const
+bool Camera::isLHS() const
 {
-    return _coordinate_system == Ark::COORDINATE_SYSTEM_RHS;
+    return _coordinate_system == Ark::COORDINATE_SYSTEM_LHS;
 }
 
 Camera Camera::createDefaultCamera()

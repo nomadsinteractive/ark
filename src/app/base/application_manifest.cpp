@@ -168,6 +168,8 @@ ApplicationManifest::Renderer::Renderer(const document& manifest)
 
 Viewport ApplicationManifest::Renderer::toViewport() const
 {
+    if(_coordinate_system == Ark::COORDINATE_SYSTEM_RHS)
+        return {0, _resolution.y(), _resolution.x(), 0, -1.0f, 1.0f};
     return {0, 0, _resolution.x(), _resolution.y(), -1.0f, 1.0f};
 }
 

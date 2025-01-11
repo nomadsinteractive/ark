@@ -49,9 +49,9 @@ sp<Entity> Activity::makeEntity(Traits components) const
     return sp<Entity>::make(std::move(components));
 }
 
-sp<Arena> Activity::makeArena(const Scope& kwargs) const
+sp<Arena> Activity::makeArena() const
 {
-    return sp<Arena>::make(_render_phrases, _resource_loader, sp<Scope>::make(kwargs));
+    return sp<Arena>::make(_render_phrases, _resource_loader);
 }
 
 Box Activity::getReference(const String& id) const

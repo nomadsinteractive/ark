@@ -148,8 +148,11 @@ bool RendererImgui::onEvent(const Event& event)
     case Event::ACTION_DOWN:
         io.AddMouseButtonEvent(MouseIndex[event.button() - Event::BUTTON_MOUSE_LEFT], event.action() == Event::ACTION_DOWN);
     case Event::ACTION_MOVE:
-        io.AddMousePosEvent(event.x(), io.DisplaySize.y - event.y());
-        break;
+        {
+            const float eventy = Ark::instance().renderController()->renderEngine()->isLHS() ? event.y() : io.DisplaySize.y - event.y();
+            io.AddMousePosEvent(event.x(), eventy);
+            break;
+        }
     case Event::ACTION_WHEEL:
         io.AddMouseWheelEvent(0, event.x());
         break;
@@ -157,8 +160,7 @@ bool RendererImgui::onEvent(const Event& event)
     case Event::ACTION_KEY_UP:
         {
             const bool isKeyDown = event.action() == Event::ACTION_KEY_DOWN;
-            const Event::Code code = event.code();
-            switch(code)
+            switch(const Event::Code code = event.code())
             {
                 case Event::CODE_KEYBOARD_LSHIFT:
                 case Event::CODE_KEYBOARD_RSHIFT:
@@ -271,7 +273,7 @@ sp<RendererImgui::DrawCommandRecycler> RendererImgui::obtainDrawCommandRecycler(
 }
 
 RendererImgui::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _manifest(manifest), _resource_loader_context(resourceLoaderContext), _camera(sp<Camera>::make(Ark::instance().createCamera(Ark::COORDINATE_SYSTEM_LHS, false, true))),
+    : _manifest(manifest), _resource_loader_context(resourceLoaderContext), _camera(sp<Camera>::make(Ark::instance().createCamera(Ark::COORDINATE_SYSTEM_LHS, Ark::instance().renderController()->renderEngine()->isBackendLHS()))),
       _shader(Shader::fromDocument(factory, manifest, resourceLoaderContext, "shaders/imgui.vert", "shaders/imgui.frag"))
 {
 }

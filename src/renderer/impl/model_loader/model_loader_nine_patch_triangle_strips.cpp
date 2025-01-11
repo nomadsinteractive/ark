@@ -5,7 +5,6 @@
 #include "renderer/base/atlas.h"
 #include "renderer/base/model.h"
 #include "renderer/base/pipeline_descriptor.h"
-#include "renderer/base/pipeline_bindings.h"
 #include "renderer/impl/render_command_composer/rcc_draw_elements.h"
 #include "renderer/util/render_util.h"
 
@@ -17,14 +16,15 @@ ModelLoaderNinePatchTriangleStrips::ModelLoaderNinePatchTriangleStrips(sp<Atlas>
 {
 }
 
-sp<RenderCommandComposer> ModelLoaderNinePatchTriangleStrips::makeRenderCommandComposer(const Shader& /*shader*/)
+sp<RenderCommandComposer> ModelLoaderNinePatchTriangleStrips::makeRenderCommandComposer(const Shader& shader)
 {
+    _is_lhs = shader.input()->camera().isLHS();
     return sp<RCCDrawElements>::make(_unit_model);
 }
 
 sp<Model> ModelLoaderNinePatchTriangleStrips::loadModel(int32_t type)
 {
-    return sp<Model>::make(_unit_model->indices(), _nine_patch_attachment->ensureVerticesTriangleStrips(type), _unit_model->content(), _unit_model->occupy());
+    return sp<Model>::make(_unit_model->indices(), _nine_patch_attachment->ensureVerticesTriangleStrips(type, _is_lhs), _unit_model->content(), _unit_model->occupy());
 }
 
 ModelLoaderNinePatchTriangleStrips::BUILDER::BUILDER(BeanFactory& factory, const String& atlas)

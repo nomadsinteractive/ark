@@ -16,8 +16,8 @@ class ARK_API SDLApplication final : public Application {
 public:
     SDLApplication(sp<ApplicationDelegate> applicationDelegate, sp<ApplicationContext> applicationContext, uint32_t width, uint32_t height, const ApplicationManifest& manifest);
 
-    virtual int run() override;
-    virtual const sp<ApplicationController>& controller() override;
+    int run() override;
+    const sp<ApplicationController>& controller() override;
 
     void onSurfaceChanged();
 
