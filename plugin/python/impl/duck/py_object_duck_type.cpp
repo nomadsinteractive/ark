@@ -18,17 +18,6 @@ void PyObjectDuckType::to(sp<String>& inst)
     inst = sp<String>::make(PyCast::toString(_instance.pyObject()));
 }
 
-void PyObjectDuckType::to(sp<CollisionCallback>& inst)
-{
-    inst = PyCast::ensureCppObject<sp<CollisionCallback>>(_instance.pyObject());
-}
-
-void PyObjectDuckType::to(sp<RendererMaker>& inst)
-{
-    PyInstance recycler = _instance.hasAttr("recycle") ? _instance.getAttr("recycle") : PyInstance();
-    inst = sp<RendererMakerPython>::make(_instance.getAttr("make"), std::move(recycler));
-}
-
 void PyObjectDuckType::to(sp<Integer>& inst)
 {
     if(Optional<sp<Integer>> opt = PyCast::toCppObject<sp<Integer>>(_instance.pyObject()))
@@ -40,6 +29,11 @@ void PyObjectDuckType::to(sp<Integer>& inst)
 void PyObjectDuckType::to(sp<Numeric>& inst)
 {
     inst = PyCast::ensureCppObject<sp<Numeric>>(_instance.pyObject());
+}
+
+void PyObjectDuckType::to(sp<Box>& inst)
+{
+    inst = sp<Box>::make(PyCast::ensureCppObject<Box>(_instance.pyObject()));
 }
 
 }

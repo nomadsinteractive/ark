@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_BASE_VIEWPORT_H_
-#define ARK_GRAPHICS_BASE_VIEWPORT_H_
+#pragma once
 
 #include "graphics/base/rect.h"
 
@@ -23,5 +22,3 @@ private:
 };
 
 }
-
-#endif

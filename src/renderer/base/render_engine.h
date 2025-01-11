@@ -73,6 +73,7 @@ public:
 
     float toLayoutDirection(float direction) const;
     bool isLHS() const;
+    bool isBackendLHS() const;
     bool isYUp() const;
     bool isViewportFlipped() const;
 

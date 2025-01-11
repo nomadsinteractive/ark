@@ -4,6 +4,7 @@
 #include "core/base/clock.h"
 #include "core/base/future.h"
 #include "core/types/global.h"
+#include "core/util/log.h"
 
 #include "graphics/base/bitmap.h"
 #include "graphics/components/size.h"
@@ -19,6 +20,7 @@
 #include "renderer/base/shader.h"
 #include "renderer/base/texture.h"
 #include "renderer/impl/render_command_composer/rcc_draw_elements_incremental.h"
+#include "renderer/impl/vertices/vertices_quad_lhs.h"
 #include "renderer/impl/vertices/vertices_quad_rhs.h"
 
 
@@ -32,6 +34,7 @@ ModelLoaderText::ModelLoaderText(sp<RenderController> renderController, sp<Alpha
 
 sp<RenderCommandComposer> ModelLoaderText::makeRenderCommandComposer(const Shader& shader)
 {
+    _glyph_bundle->_is_lhs = shader.input()->camera().isLHS();
     return Ark::instance().renderController()->makeDrawElementsIncremental(Global<Constants>()->MODEL_UNIT_QUAD_RHS);
 }
 
@@ -54,7 +57,7 @@ sp<ModelLoader> ModelLoaderText::BUILDER::build(const Scope& args)
 }
 
 ModelLoaderText::GlyphBundle::GlyphBundle(AtlasAttachment& atlasAttachment, sp<Alphabet> alphabet, const Font::TextSize& textSize)
-    : _atlas_attachment(atlasAttachment), _alphabet(std::move(alphabet)), _unit_glyph_model(Global<Constants>()->MODEL_UNIT_QUAD_RHS), _text_size(textSize)
+    : _atlas_attachment(atlasAttachment), _alphabet(std::move(alphabet)), _unit_glyph_model(Global<Constants>()->MODEL_UNIT_QUAD_RHS), _text_size(textSize), _is_lhs(false)
 {
 }
 
@@ -72,14 +75,14 @@ bool ModelLoaderText::GlyphBundle::prepareOne(uint64_t timestamp, int32_t c, int
         const uint32_t cy = packedBounds.y + 1;
         _alphabet->draw(c, _atlas_attachment._glyph_bitmap, cx, cy);
 
-        const float bottom = static_cast<float>(height - bitmap_height - bitmap_y) / bitmap_height;
+        const float bottom = static_cast<float>(_is_lhs ? bitmap_y : height - bitmap_height - bitmap_y) / bitmap_height;
         const Rect bounds(0, bottom, 1.0f, bottom + 1.0f);
         const V2 charSize(static_cast<float>(bitmap_width), static_cast<float>(bitmap_height));
         Atlas::Item item = _atlas_attachment._atlas.makeItem(cx, cy, cx + bitmap_width, cy + bitmap_height, bounds, charSize, V2(0));
         const V3 xyz(static_cast<float>(bitmap_x), static_cast<float>(bitmap_y), 0);
         sp<Boundaries> content = sp<Boundaries>::make(V3(0), V3(charSize, 0));
         sp<Boundaries> occupies = sp<Boundaries>::make(-xyz, V3(static_cast<float>(width), static_cast<float>(height), 0) - xyz);
-        _glyphs[ckey] = GlyphModel(sp<Model>::make(_unit_glyph_model->indices(), sp<VerticesQuadRHS>::make(item), std::move(content), std::move(occupies)), timestamp);
+        _glyphs[ckey] = GlyphModel(sp<Model>::make(_unit_glyph_model->indices(), _is_lhs ? sp<Vertices>::make<VerticesQuadLHS>(item) : sp<Vertices>::make<VerticesQuadRHS>(item), std::move(content), std::move(occupies)), timestamp);
     }
     else
     {

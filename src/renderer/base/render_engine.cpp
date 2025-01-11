@@ -50,6 +50,11 @@ bool RenderEngine::isLHS() const
     return _coordinate_system == Ark::COORDINATE_SYSTEM_LHS;
 }
 
+bool RenderEngine::isBackendLHS() const
+{
+    return _renderer_factory->features()._default_coordinate_system == Ark::COORDINATE_SYSTEM_LHS;
+}
+
 bool RenderEngine::isYUp() const
 {
     return coordinateSystem() == Ark::COORDINATE_SYSTEM_RHS;
@@ -92,8 +97,14 @@ void RenderEngine::onSurfaceCreated()
 sp<RenderView> RenderEngine::createRenderView(const sp<RenderController>& renderController, const Viewport& viewport) const
 {
     const Global<Camera> mainCamera;
-    // We're ignoring the clipping plane arguments in ortho projections and using the standard NDC configuration
-    mainCamera->ortho(viewport.left(), viewport.right(), viewport.bottom(), viewport.top(), 1.0f, -1.0f);
+    float clipNear = viewport.clipNear();
+    float clipFar = viewport.clipFar();
+    if(isLHS())
+        std::swap(clipNear, clipFar);
+    if(isBackendLHS())
+        mainCamera->ortho(viewport.left(), viewport.right(), viewport.top(), viewport.bottom(), clipNear, clipFar);
+    else
+        mainCamera->ortho(viewport.left(), viewport.right(), viewport.bottom(), viewport.top(), clipNear, clipFar);
 
     _render_context->setViewport(viewport);
     return _renderer_factory->createRenderView(_render_context, renderController);

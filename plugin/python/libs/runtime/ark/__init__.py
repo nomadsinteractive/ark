@@ -825,7 +825,8 @@ class Renderer:
     PRIORITY_DEFAULT = 0,
     PRIORITY_UI_BLEND = 10,
     PRIORITY_UI_TEXT = 20
-    PRIORITY_CONTROL = 100
+    PRIORITY_RENDER_LAYER = 30
+    PRIORITY_CONTROL = 50
 
     def __init__(self, delegate: Optional['Renderer'] | list['Renderer'] = None):
         self._delegate = delegate
@@ -935,7 +936,7 @@ class Camera:
     def look_at(self, position: TYPE_VEC3, target: TYPE_VEC3, up: TYPE_VEC3):
         pass
 
-    def to_world_position(self, screen_x: float, screen_y: float, z: float) -> TYPE_FLOAT3:
+    def to_world_position(self, screen_position: TYPE_VEC3) -> TYPE_VEC3:
         pass
 
     def to_viewport_position(self, position: TYPE_VEC3) -> 'Vec3':
@@ -1032,14 +1033,14 @@ class Integer(_Scalar):
 
 
 class Discarded(Boolean):
-    def __init__(self, discarded=False):
-        pass
+    def __init__(self, discarded: TYPE_BOOLEAN = False):
+        Boolean.__init__(self, discarded)
 
-    def dispose(self):
+    def discard(self):
         pass
 
     def observe(self, observer: Observer) -> Boolean:
-        return Boolean(False)
+        pass
 
     def __bool__(self):
         return False
@@ -2305,7 +2306,7 @@ class StringBundle:
 
 
 class Color(Vec4):
-    def __init__(self, r, g, b, a):
+    def __init__(self, r: float, g: float, b: float, a: float = 1.0):
         super().__init__(r, g, b, a)
 
     @property

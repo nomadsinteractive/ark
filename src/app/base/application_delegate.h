@@ -12,7 +12,7 @@ namespace ark {
 
 class ARK_API ApplicationDelegate : public EventListener {
 public:
-    ApplicationDelegate(const sp<ApplicationManifest>& manifest);
+    ApplicationDelegate(sp<ApplicationManifest> manifest);
     ~ApplicationDelegate() override = default;
 
     virtual const char* name();

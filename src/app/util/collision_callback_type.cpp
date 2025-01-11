@@ -12,7 +12,7 @@ namespace ark {
 
 namespace {
 
-class CollisionCallbackImpl : public CollisionCallback {
+class CollisionCallbackImpl final : public CollisionCallback {
 public:
     CollisionCallbackImpl(sp<Behavior::Method> onBeginContact, sp<Behavior::Method> onEndContact)
         : _on_begin_contact(std::move(onBeginContact)), _on_end_contact(std::move(onEndContact))

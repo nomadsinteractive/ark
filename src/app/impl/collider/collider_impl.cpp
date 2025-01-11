@@ -203,7 +203,7 @@ bool ColliderImpl::Stub::update(uint64_t timestamp)
     _phrase_remove = std::move(_phrase_dispose);
 
     for(const auto& [id, ref] : _rigid_bodies)
-        if(ref)
+        if(ref && !ref->isDiscarded())
         {
             RigidbodyImpl& body = ref->instance<RigidbodyImpl>();
             const bool dirty = body.update(timestamp);

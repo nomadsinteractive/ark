@@ -1,20 +1,20 @@
-#include "renderer/impl/vertices/vertices_nine_patch_triangle_strips.h"
+#include "renderer/impl/vertices/vertices_nine_patch_triangle_strips_rhs.h"
 
 #include "renderer/base/vertex_writer.h"
 
 namespace ark {
 
-VerticesNinePatchTriangleStrips::VerticesNinePatchTriangleStrips()
+VerticesNinePatchTriangleStripsRHS::VerticesNinePatchTriangleStripsRHS()
     : VerticesNinePatch(16)
 {
 }
 
-VerticesNinePatchTriangleStrips::VerticesNinePatchTriangleStrips(const Rect& bounds, const Rect& patches, uint32_t textureWidth, uint32_t textureHeight)
+VerticesNinePatchTriangleStripsRHS::VerticesNinePatchTriangleStripsRHS(const Rect& bounds, const Rect& patches, uint32_t textureWidth, uint32_t textureHeight)
     : VerticesNinePatch(16, bounds, patches, textureWidth, textureHeight)
 {
 }
 
-void VerticesNinePatchTriangleStrips::write(VertexWriter& buf, const V3& size)
+void VerticesNinePatchTriangleStripsRHS::write(VertexWriter& buf, const V3& size)
 {
     const Rect content(0, 0, std::max(_paddings.left() + _paddings.right(), size.x()), std::max(_paddings.top() + _paddings.bottom(), size.y()));
     const Rect paintRect = content.translate(-size.x() / 2, -size.y() / 2);

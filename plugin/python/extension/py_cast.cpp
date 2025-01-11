@@ -29,7 +29,6 @@
 #include "python/impl/duck/py_callable_duck_type.h"
 #include "python/impl/duck/py_list_duck_type.h"
 #include "python/impl/duck/py_object_duck_type.h"
-#include "python/impl/duck/py_vec_duck_type.h"
 
 namespace ark::plugin::python {
 

@@ -78,10 +78,6 @@ Application::Application(sp<ApplicationDelegate> applicationDelegate, sp<Applica
 {
 }
 
-Application::~Application()
-{
-}
-
 const char* Application::name() const
 {
     return _application_delegate->name();

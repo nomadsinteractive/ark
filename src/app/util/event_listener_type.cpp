@@ -8,9 +8,14 @@
 
 namespace ark {
 
-sp<EventListener> EventListenerType::create(sp<EventListener> eventListener)
+sp<EventListener> EventListenerType::create(sp<EventListener> delegate, StringView onEventName)
 {
-    return sp<EventListenerWrapper>::make(std::move(eventListener));
+    return sp<EventListener>::make<EventListenerWrapper>(std::move(delegate));
+}
+
+sp<EventListener> EventListenerType::create(const sp<Behavior>& delegate, StringView onEventName)
+{
+    return nullptr;
 }
 
 bool EventListenerType::onEvent(const sp<EventListener>& self, const Event& event)
@@ -42,7 +47,7 @@ sp<EventListenerWrapper> EventListenerType::ensureWrapper(const sp<EventListener
 
 sp<EventListenerList> EventListenerType::ensureEventListenerList(const sp<EventListener>& self)
 {
-    sp<EventListenerWrapper> wrapper = ensureWrapper(self);
+    const sp<EventListenerWrapper> wrapper = ensureWrapper(self);
     sp<EventListener> wrapped = wrapper->wrapped();
     sp<EventListenerList> ell = wrapped ? wrapped.tryCast<EventListenerList>() : nullptr;
     if(!ell)

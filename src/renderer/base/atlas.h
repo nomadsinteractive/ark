@@ -69,8 +69,8 @@ public:
 
     class AttachmentNinePatch {
     public:
-        const sp<Vertices>& ensureVerticesTriangleStrips(int32_t type) const;
-        const sp<Vertices>& ensureVerticesQuads(int32_t type) const;
+        const sp<Vertices>& ensureVerticesTriangleStrips(int32_t type, bool isLHS) const;
+        const sp<Vertices>& ensureVerticesQuads(int32_t type, bool isLHS) const;
 
         void import(Atlas& atlas, const document& manifest);
 
@@ -79,12 +79,17 @@ public:
 
     private:
         void addNinePatch(int32_t type, uint32_t textureWidth, uint32_t textureHeight, const Rect& ninePatch, const Rect& bounds);
-
         sp<Vertices> makeNinePatchVertices(uint32_t textureWidth, uint32_t textureHeight, const Rect& paddings, const Rect& bounds) const;
 
+        struct NinePatchVertices {
+            sp<Vertices> _triangle_strips_rhs;
+            sp<Vertices> _quads_rhs;
+            sp<Vertices> _triangle_strips_lhs;
+            sp<Vertices> _quads_lhs;
+        };
+
     private:
-        std::unordered_map<int32_t, sp<Vertices>> _vertices_triangle_strips;
-        std::unordered_map<int32_t, sp<Vertices>> _vertices_quads;
+        Map<int32_t, NinePatchVertices> _nine_patch_vertices;
     };
 
 //  [[plugin::builder]]

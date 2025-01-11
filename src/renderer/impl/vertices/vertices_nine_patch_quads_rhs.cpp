@@ -1,20 +1,20 @@
-#include "renderer/impl/vertices/vertices_nine_patch_quads.h"
+#include "renderer/impl/vertices/vertices_nine_patch_quads_rhs.h"
 
 #include "renderer/base/vertex_writer.h"
 
 namespace ark {
 
-VerticesNinePatchQuads::VerticesNinePatchQuads()
+VerticesNinePatchQuadsRHS::VerticesNinePatchQuadsRHS()
     : VerticesNinePatch(36)
 {
 }
 
-VerticesNinePatchQuads::VerticesNinePatchQuads(const Rect& bounds, const Rect& patches, uint32_t textureWidth, uint32_t textureHeight)
+VerticesNinePatchQuadsRHS::VerticesNinePatchQuadsRHS(const Rect& bounds, const Rect& patches, uint32_t textureWidth, uint32_t textureHeight)
     : VerticesNinePatch(36, bounds, patches, textureWidth, textureHeight)
 {
 }
 
-void VerticesNinePatchQuads::write(VertexWriter& buf, const V3& size)
+void VerticesNinePatchQuadsRHS::write(VertexWriter& buf, const V3& size)
 {
     const Rect content(0, 0, std::max(_paddings.left() + _paddings.right(), size.x()), std::max(_paddings.top() + _paddings.bottom(), size.y()));
     const Rect paintRect = content.translate(-size.x() / 2, -size.y() / 2);

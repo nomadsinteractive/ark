@@ -1,6 +1,7 @@
 #include "graphics/impl/renderer/render_group.h"
 
 #include "core/base/bean_factory.h"
+#include "core/impl/boolean/boolean_by_weak_ref.h"
 #include "graphics/components/layer.h"
 #include "graphics/base/render_layer.h"
 
@@ -27,10 +28,10 @@ void RenderGroup::render(RenderRequest& renderRequest, const V3& position)
 void RenderGroup::addRenderer(sp<Renderer> renderer, const Traits& traits)
 {
     ASSERT(renderer);
-    const sp<Discarded>& droplet = traits.get<Discarded>();
+    const sp<Discarded>& discarded = traits.get<Discarded>();
     const sp<Visibility>& visibility = traits.get<Visibility>();
     const RendererType::Priority phrase = traits.getEnum<RendererType::Priority>(RendererType::PRIORITY_DEFAULT);
-    _phrases[phrase].emplace_back(std::move(renderer), droplet, visibility);
+    _phrases[phrase].emplace_back(std::move(renderer), discarded, visibility);
 }
 
 void RenderGroup::add(RendererType::Priority priority, sp<Renderer> renderer, sp<Boolean> discarded, sp<Boolean> visible)

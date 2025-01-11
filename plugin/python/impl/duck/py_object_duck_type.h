@@ -13,16 +13,14 @@
 
 namespace ark::plugin::python {
 
-class PyObjectDuckType : public Duck<String>, public Duck<CollisionCallback>, public Duck<RendererMaker>, public Duck<Integer>, public Duck<Numeric>,
-        public Implements<PyObjectDuckType, Duck<String>, Duck<CollisionCallback>, Duck<RendererMaker>, Duck<Integer>, Duck<Numeric>> {
+class PyObjectDuckType final : public Duck<String>, public Duck<Integer>, public Duck<Numeric>, public Duck<Box>, Implements<PyObjectDuckType, Duck<String>, Duck<Integer>, Duck<Numeric>, Duck<Box>> {
 public:
     PyObjectDuckType(PyInstance inst);
 
-    virtual void to(sp<String>& inst) override;
-    virtual void to(sp<CollisionCallback>& inst) override;
-    virtual void to(sp<RendererMaker>& inst) override;
-    virtual void to(sp<Integer>& inst) override;
-    virtual void to(sp<Numeric>& inst) override;
+    void to(sp<String>& inst) override;
+    void to(sp<Integer>& inst) override;
+    void to(sp<Numeric>& inst) override;
+    void to(sp<Box>& inst) override;
 
 private:
     PyInstance _instance;

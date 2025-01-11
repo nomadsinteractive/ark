@@ -21,7 +21,7 @@ ModelLoaderQuad::ModelLoaderQuad(sp<Atlas> atlas)
 
 sp<RenderCommandComposer> ModelLoaderQuad::makeRenderCommandComposer(const Shader& shader)
 {
-    _is_rhs = shader.input()->camera().isRHS();
+    _is_lhs = shader.input()->camera().isLHS();
     return Ark::instance().renderController()->makeDrawElementsIncremental(_unit_model);
 }
 
@@ -30,7 +30,7 @@ sp<Model> ModelLoaderQuad::loadModel(int32_t type)
     const Atlas::Item& texCoord = _atlas->at(type);
     const V2& size = texCoord._size;
     const V2 aabbMin = -texCoord._pivot;
-    return sp<Model>::make(_unit_model->indices(), _is_rhs ? sp<Vertices>::make<VerticesQuadRHS>(texCoord) : sp<Vertices>::make<VerticesQuadLHS>(texCoord), sp<Boundaries>::make(V3(aabbMin, 0), V3(aabbMin + size, 0)));
+    return sp<Model>::make(_unit_model->indices(), _is_lhs ? sp<Vertices>::make<VerticesQuadLHS>(texCoord) : sp<Vertices>::make<VerticesQuadRHS>(texCoord), sp<Boundaries>::make(V3(aabbMin, 0), V3(aabbMin + size, 0)));
 }
 
 ModelLoaderQuad::BUILDER::BUILDER(BeanFactory& factory, const String& atlas)

@@ -8,12 +8,10 @@
 #include "app/base/surface.h"
 #include "core/inf/interpreter.h"
 
-#include "platform/platform.h"
-
 namespace ark {
 
-ApplicationDelegate::ApplicationDelegate(const sp<ApplicationManifest>& manifest)
-    : _manifest(manifest)
+ApplicationDelegate::ApplicationDelegate(sp<ApplicationManifest> manifest)
+    : _manifest(std::move(manifest))
 {
 }
 

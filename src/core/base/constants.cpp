@@ -7,8 +7,8 @@
 
 #include "renderer/base/model.h"
 #include "renderer/base/render_engine.h"
-#include "renderer/impl/vertices/vertices_nine_patch_quads.h"
-#include "renderer/impl/vertices/vertices_nine_patch_triangle_strips.h"
+#include "renderer/impl/vertices/vertices_nine_patch_quads_rhs.h"
+#include "renderer/impl/vertices/vertices_nine_patch_triangle_strips_rhs.h"
 #include "renderer/impl/vertices/vertices_point.h"
 #include "renderer/impl/vertices/vertices_quad_lhs.h"
 #include "renderer/impl/vertices/vertices_quad_rhs.h"
@@ -28,12 +28,12 @@ sp<Model> makeUnitQuadModel(const sp<Boundaries>& content, bool isRHS)
 
 sp<Model> makeUnitNinePatchTriangleStripsModel(const sp<Boundaries>& content, bool isRHS)
 {
-    return sp<Model>::make(UploaderType::makeElementIndexInput(std::initializer_list<element_index_t>({0, 4, 1, 5, 2, 6, 3, 7, 7, 4, 4, 8, 5, 9, 6, 10, 7, 11, 11, 8, 8, 12, 9, 13, 10, 14, 11, 15})), sp<VerticesNinePatchTriangleStrips>::make(), content);
+    return sp<Model>::make(UploaderType::makeElementIndexInput(std::initializer_list<element_index_t>({0, 4, 1, 5, 2, 6, 3, 7, 7, 4, 4, 8, 5, 9, 6, 10, 7, 11, 11, 8, 8, 12, 9, 13, 10, 14, 11, 15})), sp<VerticesNinePatchTriangleStripsRHS>::make(), content);
 }
 
 sp<Model> makeUnitNinePatchQuadsModel(const sp<Boundaries>& content)
 {
-    return sp<Model>::make(UploaderType::makeElementIndexInput(std::initializer_list<element_index_t>({0, 2, 1, 2, 3, 1, 4, 6, 5, 6, 7, 5, 8, 10, 9, 10, 11, 9, 12, 14, 13, 14, 15, 13, 16, 18, 17, 18, 19, 17, 20, 22, 21, 22, 23, 21, 24, 26, 25, 26, 27, 25, 28, 30, 29, 30, 31, 29, 32, 34, 33, 34, 35, 33})), sp<VerticesNinePatchQuads>::make(), content);
+    return sp<Model>::make(UploaderType::makeElementIndexInput(std::initializer_list<element_index_t>({0, 2, 1, 2, 3, 1, 4, 6, 5, 6, 7, 5, 8, 10, 9, 10, 11, 9, 12, 14, 13, 14, 15, 13, 16, 18, 17, 18, 19, 17, 20, 22, 21, 22, 23, 21, 24, 26, 25, 26, 27, 25, 28, 30, 29, 30, 31, 29, 32, 34, 33, 34, 35, 33})), sp<VerticesNinePatchQuadsRHS>::make(), content);
 }
 
 }

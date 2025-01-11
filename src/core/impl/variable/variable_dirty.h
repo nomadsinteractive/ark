@@ -11,6 +11,7 @@ template<typename T> class VariableDirty final : public Variable<T> {
 public:
     VariableDirty(sp<Variable<T>> delegate, Wrapper<Variable<T>>& wrapper)
         : _delegate(std::move(delegate)), _wrapper(wrapper) {
+        ASSERT(_delegate);
         _timestamp.markDirty();
     }
 

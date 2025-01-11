@@ -4,12 +4,11 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/base/atlas.h"
-#include "renderer/base/model.h"
 #include "renderer/inf/model_loader.h"
 
 namespace ark {
 
-class ModelLoaderNinePatchTriangleStrips : public ModelLoader {
+class ModelLoaderNinePatchTriangleStrips final : public ModelLoader {
 public:
     ModelLoaderNinePatchTriangleStrips(sp<Atlas> atlas);
 
@@ -21,7 +20,7 @@ public:
     public:
         BUILDER(BeanFactory& factory, const String& atlas);
 
-        virtual sp<ModelLoader> build(const Scope& args) override;
+        sp<ModelLoader> build(const Scope& args) override;
 
     private:
         sp<Builder<Atlas>> _atlas;
@@ -31,6 +30,7 @@ private:
     sp<Atlas> _atlas;
     sp<Atlas::AttachmentNinePatch> _nine_patch_attachment;
     sp<Model> _unit_model;
+    bool _is_lhs;
 };
 
 }

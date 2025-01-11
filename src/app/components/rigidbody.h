@@ -14,7 +14,7 @@
 
 namespace ark {
 
-class ARK_API Rigidbody : public Wirable {
+class ARK_API Rigidbody final : public Wirable {
 public:
 //  [[script::bindings::enumeration]]
     enum BodyType {
@@ -26,7 +26,7 @@ public:
         BODY_TYPE_SENSOR
     };
 
-    struct Stub {
+    struct ARK_API Stub {
         Stub(sp<Ref> ref, BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation);
 
         void onBeginContact(const Rigidbody& rigidBody, const CollisionManifold& manifold) const;

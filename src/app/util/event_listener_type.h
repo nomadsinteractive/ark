@@ -1,9 +1,7 @@
-#ifndef ARK_APP_UTIL_EVENT_LISTENER_TYPE_H_
-#define ARK_APP_UTIL_EVENT_LISTENER_TYPE_H_
+#pragma once
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
-#include "core/inf/builder.h"
 #include "core/types/shared_ptr.h"
 
 #include "app/forwarding.h"
@@ -14,7 +12,9 @@ namespace ark {
 class ARK_API EventListenerType {
 public:
 //  [[script::bindings::constructor]]
-    static sp<EventListener> create(sp<EventListener> eventListener = nullptr);
+    static sp<EventListener> create(sp<EventListener> delegate = nullptr, StringView onEventName = "");
+//  [[script::bindings::constructor]]
+    static sp<EventListener> create(const sp<Behavior>& delegate, StringView onEventName);
 
 //  [[script::bindings::classmethod]]
     static bool onEvent(const sp<EventListener>& self, const Event& event);
@@ -34,5 +34,3 @@ private:
 };
 
 }
-
-#endif

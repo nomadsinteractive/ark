@@ -400,21 +400,22 @@ const sp<ApplicationProfiler>& Ark::applicationProfiler() const
     return _application_profiler;
 }
 
-Camera Ark::createCamera() const
+Camera Ark::createCamera(RendererCoordinateSystem cs) const
 {
-    RendererCoordinateSystem coordinateSystem = _manifest->renderer()._coordinate_system;
-    RendererFactory& rendererFactory = _application_context->renderController()->renderEngine()->rendererFactory();
-    const RendererCoordinateSystem cs = coordinateSystem == COORDINATE_SYSTEM_DEFAULT ? rendererFactory.features()._default_coordinate_system : coordinateSystem;
-    const bool flipy = cs != rendererFactory.features()._default_coordinate_system;
-    return createCamera(cs, true, flipy);
+    const RendererFactory& rendererFactory = _application_context->renderController()->renderEngine()->rendererFactory();
+    if(cs == COORDINATE_SYSTEM_DEFAULT)
+        cs = _manifest->renderer()._coordinate_system;
+    if(cs == COORDINATE_SYSTEM_DEFAULT)
+        cs = rendererFactory.features()._default_coordinate_system;
+    return createCamera(cs, false);
 }
 
-Camera Ark::createCamera(RendererCoordinateSystem cs, bool flipx, bool flipy) const
+Camera Ark::createCamera(RendererCoordinateSystem cs, bool flipy) const
 {
     RendererFactory& rendererFactory = _application_context->renderController()->renderEngine()->rendererFactory();
     sp<Camera::Delegate> cameraDelegate = rendererFactory.createCamera(cs);
-    // if(flipx || flipy)
-    //     return {cs, sp<Camera::Delegate>::make<CameraDelegateCHS>(cs, std::move(cameraDelegate), flipx, flipy)};
+    if(flipy)
+        return {cs, sp<Camera::Delegate>::make<CameraDelegateCHS>(cs, std::move(cameraDelegate), flipy, flipy)};
     return {cs, std::move(cameraDelegate)};
 }
 

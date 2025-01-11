@@ -17,14 +17,15 @@ ModelLoaderNinePatchQuads::ModelLoaderNinePatchQuads(sp<Atlas> atlas)
 {
 }
 
-sp<RenderCommandComposer> ModelLoaderNinePatchQuads::makeRenderCommandComposer(const Shader& /*shader*/)
+sp<RenderCommandComposer> ModelLoaderNinePatchQuads::makeRenderCommandComposer(const Shader& shader)
 {
+    _is_lhs = shader.input()->camera().isLHS();
     return Ark::instance().renderController()->makeDrawElementsIncremental(_unit_model);
 }
 
 sp<Model> ModelLoaderNinePatchQuads::loadModel(int32_t type)
 {
-    return sp<Model>::make(_unit_model->indices(), _nine_patch_attachment->ensureVerticesQuads(type), _unit_model->content(), _unit_model->occupy());
+    return sp<Model>::make(_unit_model->indices(), _nine_patch_attachment->ensureVerticesQuads(type, _is_lhs), _unit_model->content(), _unit_model->occupy());
 }
 
 ModelLoaderNinePatchQuads::BUILDER::BUILDER(BeanFactory& factory, const String& atlas)

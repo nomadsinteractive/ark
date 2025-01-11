@@ -89,8 +89,7 @@ EventDispatcher::MotionEventListener::MotionEventListener(const sp<EventListener
 
 bool EventDispatcher::MotionEventListener::onEvent(const EventDispatcher& dispatcher, const Event& event)
 {
-    Event::Action action = event.action();
-    if(action == Event::ACTION_DOWN)
+    if(const Event::Action action = event.action(); action == Event::ACTION_DOWN)
     {
         _pressed_x = event.x();
         _pressed_y = event.y();

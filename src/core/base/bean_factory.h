@@ -494,9 +494,6 @@ public:
     }
 
     sp<T> build(const Scope& args) override {
-        if constexpr(std::is_same_v<T, Box>)
-            return sp<Box>::make(args.getObject(_name));
-
         sp<T> value = args.build<T>(_name, args);
         if(!value) {
             const sp<Scope> references = _references.lock();
@@ -513,13 +510,13 @@ private:
     sp<Builder<T>> _fallback;
 };
 
-template<typename T> class BuilderWithQueries : public Builder<T> {
+template<typename T> class BuilderWithQueries final : public Builder<T> {
 public:
     BuilderWithQueries(sp<Builder<T>> delegate, const BeanFactory& factory, const Identifier& id)
         : _delegate(std::move(delegate)), _queries(sp<Queries>::make(factory, id.queries())) {
     }
 
-    virtual sp<T> build(const Scope& args) override {
+    sp<T> build(const Scope& args) override {
         Scope argsAndQueries(args.variables(), _queries);
         return _delegate->build(argsAndQueries);
     }
