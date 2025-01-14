@@ -27,7 +27,7 @@ public:
     public:
         Method(sp<Interpreter> interpreter, Box function);
 
-        void call(const Interpreter::Arguments& args) const;
+        Box call(const Interpreter::Arguments& args) const;
 
         void traverse(const Visitor& visitor) override;
 

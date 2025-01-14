@@ -2208,7 +2208,7 @@ class Function:
 
 
 class EventListener:
-    def __init__(self, listener: Any = None):
+    def __init__(self, delegate: "EventListener" | Behavior | None, on_event_name: str = 'on_event'):
         pass
 
     def on_event(self, event: Event):
@@ -2217,7 +2217,10 @@ class EventListener:
     def reset(self, listener: Any = None):
         pass
 
-    def add_event_listener(self, listener: Any, disposed: Optional[Boolean] = None, push_front: bool = False):
+    def add_event_listener(self, listener: Any, disposed: Optional[Boolean] = None):
+        pass
+
+    def push_event_listener(self, listener: Any, disposed: Optional[Boolean] = None):
         pass
 
 
@@ -2761,6 +2764,14 @@ class WithTag:
 
 class CollisionCallback:
     def __init__(self, behavior: Behavior, on_begin_contact: str = 'on_begin_contact', on_end_contact: str = 'on_end_contact'):
+        pass
+
+
+class Position(Vec3):
+    def __init__(self, position: TYPE_VEC3):
+        Vec3.__init__(self, 0, 0, 0)
+
+    def reset(self, position: TYPE_VEC3):
         pass
 
 

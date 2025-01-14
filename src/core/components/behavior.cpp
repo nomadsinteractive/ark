@@ -63,9 +63,9 @@ Behavior::Method::Method(sp<Interpreter> interpreter, Box function)
 {
 }
 
-void Behavior::Method::call(const Interpreter::Arguments& args) const
+Box Behavior::Method::call(const Interpreter::Arguments& args) const
 {
-    _interpreter->call(_function, args);
+    return _interpreter->call(_function, args);
 }
 
 void Behavior::Method::traverse(const Visitor& visitor)

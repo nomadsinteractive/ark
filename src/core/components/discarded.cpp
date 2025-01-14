@@ -11,7 +11,7 @@ Discarded::Discarded(bool discarded)
 }
 
 Discarded::Discarded(sp<Boolean> discarded)
-    : _discarded(sp<BooleanWrapper>::make(discarded))
+    : _discarded(sp<BooleanWrapper>::make(std::move(discarded)))
 {
 }
 

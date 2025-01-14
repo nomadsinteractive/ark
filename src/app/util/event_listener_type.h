@@ -14,7 +14,7 @@ public:
 //  [[script::bindings::constructor]]
     static sp<EventListener> create(sp<EventListener> delegate = nullptr, StringView onEventName = "");
 //  [[script::bindings::constructor]]
-    static sp<EventListener> create(const sp<Behavior>& delegate, StringView onEventName);
+    static sp<EventListener> create(Behavior& delegate, StringView onEventName = "on_event");
 
 //  [[script::bindings::classmethod]]
     static bool onEvent(const sp<EventListener>& self, const Event& event);
@@ -23,9 +23,9 @@ public:
     static void reset(const sp<EventListener>& self, sp<EventListener> eventListener);
 
 //  [[script::bindings::classmethod]]
-    static void addEventListener(const sp<EventListener>& self, sp<EventListener> eventListener, sp<Boolean> disposed = nullptr);
+    static void addEventListener(const sp<EventListener>& self, sp<EventListener> eventListener, sp<Boolean> discarded = nullptr);
 //  [[script::bindings::classmethod]]
-    static void pushEventListener(const sp<EventListener>& self, sp<EventListener> eventListener, sp<Boolean> disposed = nullptr);
+    static void pushEventListener(const sp<EventListener>& self, sp<EventListener> eventListener, sp<Boolean> discarded = nullptr);
 
 private:
     static sp<EventListenerWrapper> ensureWrapper(const sp<EventListener>& self);
