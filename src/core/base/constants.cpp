@@ -18,15 +18,15 @@ namespace ark {
 
 namespace {
 
-sp<Model> makeUnitQuadModel(const sp<Boundaries>& content, bool isRHS)
+sp<Model> makeUnitQuadModel(const sp<Boundaries>& content, bool isLHS)
 {
     const Rect bounds(-0.5f, -0.5f, 0.5f, 0.5f);
-    sp<Vertices> vertices = isRHS ? sp<Vertices>::make<VerticesQuadRHS>(bounds, 0, 0, std::numeric_limits<uint16_t>::max(), std::numeric_limits<uint16_t>::max())
-                                    : sp<Vertices>::make<VerticesQuadLHS>(bounds, 0, 0, std::numeric_limits<uint16_t>::max(), std::numeric_limits<uint16_t>::max());
+    sp<Vertices> vertices = isLHS ? sp<Vertices>::make<VerticesQuadLHS>(bounds, 0, 0, std::numeric_limits<uint16_t>::max(), std::numeric_limits<uint16_t>::max())
+                                    : sp<Vertices>::make<VerticesQuadRHS>(bounds, 0, 0, std::numeric_limits<uint16_t>::max(), std::numeric_limits<uint16_t>::max());
     return sp<Model>::make(UploaderType::makeElementIndexInput(std::initializer_list<element_index_t>({0, 2, 1, 2, 3, 1})), std::move(vertices), content);
 }
 
-sp<Model> makeUnitNinePatchTriangleStripsModel(const sp<Boundaries>& content, bool isRHS)
+sp<Model> makeUnitNinePatchTriangleStripsModel(const sp<Boundaries>& content)
 {
     return sp<Model>::make(UploaderType::makeElementIndexInput(std::initializer_list<element_index_t>({0, 4, 1, 5, 2, 6, 3, 7, 7, 4, 4, 8, 5, 9, 6, 10, 7, 11, 11, 8, 8, 12, 9, 13, 10, 14, 11, 15})), sp<VerticesNinePatchTriangleStripsRHS>::make(), content);
 }
@@ -40,8 +40,8 @@ sp<Model> makeUnitNinePatchQuadsModel(const sp<Boundaries>& content)
 
 Constants::Constants()
     : DOCUMENT_NONE(document::make("")), BOOLEAN_TRUE(sp<Boolean>::make<Boolean::Const>(true)), BOOLEAN_FALSE(sp<Boolean>::make<Boolean::Const>(false)), BOUNDARIES_UNIT(sp<Boundaries>::make(V3(-0.5f), V3(0.5f))),
-      MODEL_UNIT_QUAD_RHS(makeUnitQuadModel(BOUNDARIES_UNIT, true)), MODEL_UNIT_QUAD_LHS(makeUnitQuadModel(BOUNDARIES_UNIT, false)),
-      MODEL_UNIT_NINE_PATCH_TRIANGLE_STRIPS(makeUnitNinePatchTriangleStripsModel(BOUNDARIES_UNIT, true)),
+      MODEL_UNIT_QUAD_RHS(makeUnitQuadModel(BOUNDARIES_UNIT, false)), MODEL_UNIT_QUAD_LHS(makeUnitQuadModel(BOUNDARIES_UNIT, true)),
+      MODEL_UNIT_NINE_PATCH_TRIANGLE_STRIPS(makeUnitNinePatchTriangleStripsModel(BOUNDARIES_UNIT)),
       MODEL_UNIT_NINE_PATCH_QUADS(makeUnitNinePatchQuadsModel(BOUNDARIES_UNIT)),
       NUMERIC_ZERO(sp<Numeric>::make<Numeric::Const>(0)), NUMERIC_ONE(sp<Numeric>::make<Numeric::Const>(1.0f))
 {

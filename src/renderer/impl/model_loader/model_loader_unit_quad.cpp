@@ -16,7 +16,7 @@ ModelLoaderUnitQuad::ModelLoaderUnitQuad()
 sp<RenderCommandComposer> ModelLoaderUnitQuad::makeRenderCommandComposer(const Shader& shader)
 {
     _unit_model = shader.input()->camera().isLHS() ? Global<Constants>()->MODEL_UNIT_QUAD_LHS : Global<Constants>()->MODEL_UNIT_QUAD_RHS;
-    return sp<RCCDrawElements>::make(_unit_model);
+    return sp<RenderCommandComposer>::make<RCCDrawElements>(_unit_model);
 }
 
 sp<Model> ModelLoaderUnitQuad::loadModel(int32_t type)
@@ -26,7 +26,7 @@ sp<Model> ModelLoaderUnitQuad::loadModel(int32_t type)
 
 sp<ModelLoader> ModelLoaderUnitQuad::BUILDER::build(const Scope& args)
 {
-    return sp<ModelLoaderUnitQuad>::make();
+    return sp<ModelLoader>::make<ModelLoaderUnitQuad>();
 }
 
 }
