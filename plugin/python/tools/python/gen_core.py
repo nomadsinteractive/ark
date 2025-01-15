@@ -13,6 +13,11 @@ INDENT = '    '
 
 TYPE_DEFINED_OBJ = ('V2', 'V3', 'V4', 'M3', 'M4', 'NamedHash', 'Rect', 'RectI', 'RectF', 'Slice')
 TYPE_DEFINED_SP = ('document', 'element', 'attribute', 'bitmap')
+TYPE_COLLECTION_TEMPLATE_PREFIX = ['std::vector<', 'std::map<', 'Map<', 'HashMap<', 'Vector<', 'Set<']
+
+
+def is_collection_template_type(typename: str):
+    return any(typename.startswith(i) for i in TYPE_COLLECTION_TEMPLATE_PREFIX)
 
 
 def get_param_and_paths() -> tuple[dict[str, str], list[str]]:
@@ -91,7 +96,7 @@ def gen_method_call_arg(name: str, targettype: str, argtype: str):
         return f'*{name}'
     if targettype != argtype:
         return gen_cast_call(targettype, name)
-    if any(targettype.startswith(i) for i in ('std::vector', 'std::map', 'sp<', 'Box', 'Traits')):
+    if any(targettype.startswith(i) for i in (TYPE_COLLECTION_TEMPLATE_PREFIX + ['sp<', 'Box', 'Traits'])):
         return f'std::move({name})'
     return name
     # if ctype in ARK_PY_ARGUMENT_CHECKERS:
@@ -170,7 +175,7 @@ ARK_PY_ARGUMENTS = (
     (r'float', GenArgumentMeta('float', 'float', 'f')),
     (r'bool', GenArgumentMeta('int32_t', 'bool', 'p', True)),
     (r'HashId|TypeId', GenArgumentMeta('PyObject*', 'uint32_t', 'O')),
-    (r'([^:]+::.+)', GenArgumentMeta('PyObject*', '${0}', 'O')),
+    (rf'((?:{"|".join(TYPE_COLLECTION_TEMPLATE_PREFIX)}|[^:]+::).+)', GenArgumentMeta('PyObject*', '${0}', 'O')),
 )
 
 
@@ -248,7 +253,7 @@ class GenArgument:
         if m in TYPE_DEFINED_SP:
             return self._gen_var_declare(m, objname, to_cpp_object, m, argname, False, optional_check)
         typename = acg.remove_crv(typename)
-        if m != self._accept_type and not typename.startswith('std::'):
+        if m != self._accept_type and not is_collection_template_type(typename):
             return self._gen_var_declare('sp<%s>' % m, objname, '%sSharedPtr' % optional_cast_prefix, m, argname, extract_cast, optional_check)
         functype = acg.get_template_type(typename, 'Optional') if is_optional_type else typename
         return self._gen_var_declare(typename, objname, to_cpp_object, functype, argname, False, optional_check)

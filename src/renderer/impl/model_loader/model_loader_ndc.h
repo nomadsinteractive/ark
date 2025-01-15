@@ -6,20 +6,19 @@
 
 namespace ark {
 
-class ModelLoaderUnitQuad final : public ModelLoader {
+class ModelLoaderNDC final : public ModelLoader {
 public:
-    ModelLoaderUnitQuad();
+    ModelLoaderNDC();
 
     sp<RenderCommandComposer> makeRenderCommandComposer(const Shader& shader) override;
     sp<Model> loadModel(int32_t type) override;
 
-//  [[plugin::builder::by-value("unit-quad")]]
+//  [[plugin::builder::by-value("ndc")]]
     class BUILDER final : public Builder<ModelLoader> {
     public:
         BUILDER() = default;
 
         sp<ModelLoader> build(const Scope& args) override;
-
     };
 
 private:

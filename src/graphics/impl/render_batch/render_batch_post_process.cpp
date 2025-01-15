@@ -7,7 +7,7 @@
 #include "graphics/components/render_object.h"
 #include "graphics/util/vec3_type.h"
 
-#include "renderer/impl/model_loader/model_loader_unit_quad.h"
+#include "renderer/impl/model_loader/model_loader_ndc.h"
 #include "renderer/base/render_engine.h"
 
 #include "app/base/application_context.h"
@@ -15,7 +15,7 @@
 namespace ark {
 
 RenderBatchPostProcess::RenderBatchPostProcess()
-    : RenderBatch(Global<Constants>()->BOOLEAN_FALSE), _layer_context(sp<LayerContext>::make(nullptr, sp<ModelLoader>::make<ModelLoaderUnitQuad>(), nullptr, nullptr, Global<Constants>()->BOOLEAN_FALSE))
+    : RenderBatch(Global<Constants>()->BOOLEAN_FALSE), _layer_context(sp<LayerContext>::make(nullptr, sp<ModelLoader>::make<ModelLoaderNDC>(), nullptr, nullptr, Global<Constants>()->BOOLEAN_FALSE))
 {
     const RenderEngine& renderEngine = Ark::instance().applicationContext()->renderEngine();
     sp<Vec3> position = Vec3Type::create(renderEngine.viewport().width() / 2, renderEngine.viewport().height() / 2, 0);

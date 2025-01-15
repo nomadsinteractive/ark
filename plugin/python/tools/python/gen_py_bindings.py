@@ -272,7 +272,7 @@ def gen_class_body_source(genclass, includes, lines, buildables):
         for i in genclass.loader_methods():
             lines.append(acg.format(LOADER_TEMPLATE, classname=genclass.classname, methodname=i.name))
             tp_method_lines.append('{')
-            tp_method_lines.append(INDENT + 'std::map<TypeId, LoaderFunction>& loader = ensureLoader("%s");' % i.name)
+            tp_method_lines.append(INDENT + 'Map<TypeId, LoaderFunction>& loader = ensureLoader("%s");' % i.name)
             for j in buildables:
                 if j.find('::') == -1:
                     tp_method_lines.append(INDENT + i.gen_loader_statement(genclass.classname, j, i.name))

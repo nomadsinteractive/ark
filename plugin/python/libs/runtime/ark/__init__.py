@@ -1500,20 +1500,86 @@ class ModelBundle:
         pass
 
 
+class LevelObject:
+
+    TYPE_INSTANCE = 0
+    TYPE_MESH = 1
+    TYPE_CAMERA = 2
+    TYPE_LIGHT = 3
+
+    @property
+    def manifest(self) -> DOMDocument:
+        pass
+
+    @property
+    def name(self) -> str:
+        pass
+
+    @property
+    def type(self) -> int:
+        pass
+
+    @property
+    def visible(self) -> bool:
+        pass
+
+    @property
+    def position(self) -> TYPE_FLOAT3:
+        pass
+
+    @property
+    def scale(self) -> Optional[TYPE_FLOAT3]:
+        pass
+
+    @property
+    def rotation(self) -> Optional[TYPE_FLOAT4]:
+        pass
+
+    @property
+    def instance_of(self) -> int:
+        pass
+
+    @property
+    def entity(self) -> "Entity":
+        pass
+
+    @property
+    def render_object(self) -> "RenderObject":
+        pass
+
+
+class LevelLayer:
+
+    @property
+    def name(self) -> str:
+        pass
+
+    @property
+    def objects(self) -> list[LevelObject]:
+        pass
+
+    def get_object(self, name: str) -> Optional[LevelObject]:
+        pass
+
+    def create_render_objects(self, layer: "Layer"):
+        pass
+
+    def create_rigidbodies(self, collider: "Collider", body_type: int, shapes: dict[str, "Shape"] = None, collision_filter: Optional["CollisionFilter"] = None):
+        pass
+
+
 class Level:
-    def __init__(self, layers: dict[str, 'Layer'], cameras: dict[str, Camera] = None, lights: dict[str, Vec3] = None):
+    def __init__(self, src: str, cameras: dict[str, Camera] = None, lights: dict[str, Vec3] = None):
+        pass
+
+    @property
+    def layers(self) -> list[LevelLayer]:
         pass
 
     def load(self, src: str, collider: Optional['Collider'] = None, shapes: dict[str, "Shape"] = None):
         pass
 
-    def get_layer(self, name: str) -> "Layer":
-        pass
-
-    def get_render_object(self, name: str) -> "RenderObject":
-        pass
-
-    def get_rigid_body(self, name: str) -> "Rigidbody":
+    def get_layer(self, name: str) -> LevelLayer:
         pass
 
 
@@ -2400,12 +2466,6 @@ class Rigidbody:
     BODY_TYPE_SENSOR = 8
     BODY_TYPE_ALL = 15
 
-    def dispose(self):
-        pass
-
-    def bind(self, render_object: RenderObject):
-        pass
-
     @property
     def id(self) -> int:
         return 0
@@ -2431,11 +2491,7 @@ class Rigidbody:
         return Vec3(0, 0, 0)
 
     @property
-    def size(self) -> Size:
-        return Size(0, 0)
-
-    @property
-    def quaternion(self) -> Optional[Vec4]:
+    def rotation(self) -> Optional[Vec4]:
         pass
 
     @property
@@ -2476,6 +2532,9 @@ class Rigidbody:
 
     @tag.setter
     def tag(self, tag):
+        pass
+
+    def discard(self):
         pass
 
 
