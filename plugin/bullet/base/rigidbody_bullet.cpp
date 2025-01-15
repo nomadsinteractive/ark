@@ -23,8 +23,8 @@ RigidbodyBullet::Stub::~Stub()
     _rigidbody->reset();
 }
 
-RigidbodyBullet::RigidbodyBullet(ColliderBullet world, sp<BtRigidbodyRef> rigidBody, Rigidbody::BodyType type, sp<Shape> shape, sp<CollisionShape> collisionShape, sp<Vec3> position, sp<Vec4> rotation, sp<Boolean> discarded)
-    : _rigidbody_stub(sp<Rigidbody::Stub>::make(Global<RefManager>()->makeRef(this, std::move(discarded)), type, std::move(shape), std::move(position), std::move(rotation))), _bt_rigidbody_stub(sp<Stub>::make(std::move(world), std::move(collisionShape), std::move(rigidBody)))
+RigidbodyBullet::RigidbodyBullet(ColliderBullet world, sp<BtRigidbodyRef> rigidBody, Rigidbody::BodyType type, sp<Shape> shape, sp<CollisionShape> collisionShape, sp<Vec3> position, sp<Vec4> rotation, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded)
+    : _rigidbody_stub(sp<Rigidbody::Stub>::make(Global<RefManager>()->makeRef(this, std::move(discarded)), type, std::move(shape), std::move(position), std::move(rotation), std::move(collisionFilter))), _bt_rigidbody_stub(sp<Stub>::make(std::move(world), std::move(collisionShape), std::move(rigidBody)))
 {
     _bt_rigidbody_stub->_rigidbody->collisionObject()->setUserPointer(this);
 }

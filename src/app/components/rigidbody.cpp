@@ -20,8 +20,8 @@
 
 namespace ark {
 
-Rigidbody::Stub::Stub(sp<Ref> ref, BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation)
-    : _ref(std::move(ref)), _type(type), _shape(std::move(shape)), _position(std::move(position)), _rotation(std::move(rotation))
+Rigidbody::Stub::Stub(sp<Ref> ref, BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<CollisionFilter> collisionFilter)
+    : _ref(std::move(ref)), _type(type), _shape(std::move(shape)), _position(std::move(position)), _rotation(std::move(rotation)), _collision_filter(std::move(collisionFilter))
 {
 }
 
@@ -73,7 +73,7 @@ void Rigidbody::onWire(const WiringContext& context, const Box& self)
         ASSERT(collider);
         ASSERT(_is_shadow);
         Impl impl = std::move(_impl);
-        _impl = collider->createBody(impl._stub->_type, std::move(shape), impl._stub->_position.wrapped(), impl._stub->_rotation.wrapped(), impl._stub->_ref->discarded().wrapped());
+        _impl = collider->createBody(impl._stub->_type, std::move(shape), impl._stub->_position.wrapped(), impl._stub->_rotation.wrapped(), std::move(impl._stub->_collision_filter), impl._stub->_ref->discarded().wrapped());
         _impl._stub->_collision_callback = std::move(impl._stub->_collision_callback);
         _impl._stub->_collision_filter = std::move(impl._stub->_collision_filter);
         _impl._stub->_with_tag = std::move(impl._stub->_with_tag);
@@ -171,11 +171,9 @@ Rigidbody::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 sp<Rigidbody> Rigidbody::BUILDER::build(const Scope& args)
 {
     const sp<Collider> collider = _collider->build(args);
-    sp<Rigidbody> rigidbody = ColliderType::createBody(collider, _body_type, _shape.build(args), _position.build(args), _rotation.build(args), _discarded.build(args));
+    sp<Rigidbody> rigidbody = ColliderType::createBody(collider, _body_type, _shape.build(args), _position.build(args), _rotation.build(args), _collision_filter.build(args), _discarded.build(args));
     if(sp<CollisionCallback> collisionCallback = _collision_callback.build(args))
         rigidbody->setCollisionCallback(std::move(collisionCallback));
-    if(sp<CollisionFilter> collisionFilter = _collision_filter.build(args))
-        rigidbody->setCollisionFilter(std::move(collisionFilter));
     return rigidbody;
 }
 

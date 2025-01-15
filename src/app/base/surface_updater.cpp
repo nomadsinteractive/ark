@@ -20,8 +20,8 @@ void SurfaceUpdater::run()
 {
     DPROFILER_TRACE("SurfaceUpdate");
     DTHREAD_CHECK(THREAD_ID_CORE);
-    uint64_t timestamp = _render_controller->updateTick();
-    uint64_t interval = std::min<uint64_t>(timestamp - _pre_frame_timestamp, 1000000 / 24);
+    const uint64_t timestamp = _render_controller->updateTick();
+    const uint64_t interval = std::min<uint64_t>(timestamp - _pre_frame_timestamp, 1000000 / 24);
     _app_clock_interval->set(interval / 1000000.0f);
     _app_clock_ticker->set(_app_clock_ticker->val() + interval);
     _render_controller->onPreCompose(timestamp);

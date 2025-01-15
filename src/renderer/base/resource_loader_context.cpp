@@ -9,8 +9,7 @@
 
 namespace ark {
 
-ResourceLoaderContext::ResourceLoaderContext(sp<Dictionary<document>> documents, sp<BitmapLoaderBundle> bitmapBundle, sp<BitmapLoaderBundle> bitmapBoundsBundle,
-                                             sp<ExecutorThreadPool> executor, sp<RenderController> renderController)
+ResourceLoaderContext::ResourceLoaderContext(sp<Dictionary<document>> documents, sp<BitmapLoaderBundle> bitmapBundle, sp<BitmapLoaderBundle> bitmapBoundsBundle, sp<RenderController> renderController)
     : _documents(std::move(documents)), _bitmap_bundle(std::move(bitmapBundle)), _bitmap_bounds_bundle(std::move(bitmapBoundsBundle)),
       _render_controller(std::move(renderController)), _texture_bundle(sp<TextureBundle>::make(_render_controller)), _discarded(sp<Discarded>::make())
 {

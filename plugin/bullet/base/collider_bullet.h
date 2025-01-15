@@ -32,7 +32,7 @@ public:
 public:
     ColliderBullet(const V3& gravity, sp<ModelLoader> modelLoader);
 
-    Rigidbody::Impl createBody(Rigidbody::BodyType type, sp<Shape> shape, sp<Vec3> position = nullptr, sp<Vec4> rotation = nullptr, sp<Boolean> discarded = nullptr) override;
+    Rigidbody::Impl createBody(Rigidbody::BodyType type, sp<Shape> shape, sp<Vec3> position = nullptr, sp<Vec4> rotation = nullptr, sp<CollisionFilter> collisionFilter = nullptr, sp<Boolean> discarded = nullptr) override;
     sp<Shape> createShape(const NamedHash& type, sp<Vec3> size, sp<Vec3> origin) override;
     std::vector<RayCastManifold> rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter = nullptr) override;
 
@@ -78,13 +78,8 @@ private:
         std::set<sp<BtRigidbodyRef>> _current_tick;
     };
 
-    static sp<BtRigidbodyRef> makeRigidBody(btDynamicsWorld* world, btCollisionShape* shape, btMotionState* motionState, Rigidbody::BodyType bodyType, btScalar mass);
-    static sp<BtRigidbodyRef> makeGhostObject(btDynamicsWorld* world, btCollisionShape* shape, Rigidbody::BodyType bodyType);
-
     static void myInternalPreTickCallback(btDynamicsWorld *dynamicsWorld, btScalar timeStep);
     static void myInternalTickCallback(btDynamicsWorld *dynamicsWorld, btScalar timeStep);
-
-    static const RigidbodyBullet& getRigidBodyFromCollisionObject(const btCollisionObject* collisionObject);
 
     void addTickContactInfo(const sp<BtRigidbodyRef>& rigidBody, const sp<CollisionCallback>& callback, const sp<BtRigidbodyRef>& contact, const V3& cp, const V3& normal);
 

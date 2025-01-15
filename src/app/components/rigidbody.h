@@ -27,7 +27,7 @@ public:
     };
 
     struct ARK_API Stub {
-        Stub(sp<Ref> ref, BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation);
+        Stub(sp<Ref> ref, BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<CollisionFilter> collisionFilter = nullptr);
 
         void onBeginContact(const Rigidbody& rigidBody, const CollisionManifold& manifold) const;
         void onEndContact(const Rigidbody& rigidBody) const;
@@ -37,8 +37,8 @@ public:
         sp<Shape> _shape;
         SafeVar<Vec3> _position;
         SafeVar<Vec4> _rotation;
-        sp<CollisionCallback> _collision_callback;
         sp<CollisionFilter> _collision_filter;
+        sp<CollisionCallback> _collision_callback;
         sp<WithTag> _with_tag;
     };
 

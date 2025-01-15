@@ -2533,7 +2533,7 @@ class NarrowPhrase:
 
 
 class Collider:
-    def create_body(self, type_: int | Integer, shape: Optional[Shape], position, rotate=None, disposed: Optional[Boolean] = None) -> Rigidbody:
+    def create_body(self, type_: int | Integer, shape: Optional[Shape], position, rotate=None, collision_filter: Optional[CollisionFilter] = None, discarded: Optional[Boolean] = None) -> Rigidbody:
         pass
 
     def create_shape(self, shape_id: TYPE_NAMED_HASH, size: Optional[TYPE_VEC3] = None, origin: Optional[TYPE_VEC3] = None) -> Shape:
