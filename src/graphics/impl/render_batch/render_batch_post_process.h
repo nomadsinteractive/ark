@@ -1,7 +1,5 @@
 #pragma once
 
-#include "core/inf/builder.h"
-
 #include "graphics/inf/render_batch.h"
 
 namespace ark {

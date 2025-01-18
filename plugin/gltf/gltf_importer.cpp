@@ -471,6 +471,10 @@ GltfImporter::GltfImporter(const String& src, const MaterialBundle& materialBund
 {
 }
 
+GltfImporter::~GltfImporter()
+{
+}
+
 void GltfImporter::loadPrimitives()
 {
 	uint32_t meshId = 0, primitiveId = 0;

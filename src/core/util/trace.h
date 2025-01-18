@@ -5,6 +5,7 @@
 
 #include "core/base/api.h"
 #include "core/util/strings.h"
+#include "core/util/log.h"
 
 namespace ark {
 

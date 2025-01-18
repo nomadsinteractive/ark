@@ -9,7 +9,7 @@
 
 namespace tinygltf {
 
-class Animation;
+struct Animation;
 class Model;
 
 }
@@ -19,6 +19,7 @@ namespace ark::plugin::gltf {
 class GltfImporter {
 public:
 	GltfImporter(const String& src, const MaterialBundle& materialBundle);
+	~GltfImporter();
 
 	sp<Node> loadNode(WeakPtr<Node> parentNode, int32_t nodeId);
 	void loadPrimitives();
