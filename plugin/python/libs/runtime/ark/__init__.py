@@ -1508,10 +1508,6 @@ class LevelObject:
     TYPE_LIGHT = 3
 
     @property
-    def manifest(self) -> DOMDocument:
-        pass
-
-    @property
     def name(self) -> str:
         pass
 
@@ -1569,17 +1565,21 @@ class LevelLayer:
 
 
 class Level:
-    def __init__(self, src: str, cameras: dict[str, Camera] = None, lights: dict[str, Vec3] = None):
+    def __init__(self, src: str):
         pass
 
     @property
     def layers(self) -> list[LevelLayer]:
         pass
 
-    def load(self, src: str, collider: Optional['Collider'] = None, shapes: dict[str, "Shape"] = None):
+    @property
+    def cameras(self) -> dict[str, "Camera"]:
         pass
 
     def get_layer(self, name: str) -> LevelLayer:
+        pass
+
+    def get_camera(self, name: str) -> Optional[Camera]:
         pass
 
 
@@ -2461,10 +2461,10 @@ class Rigidbody:
     BODY_TYPE_NONE = 0
     BODY_TYPE_KINEMATIC = 1
     BODY_TYPE_DYNAMIC = 2
-    BODY_TYPE_STATIC = 4
-    BODY_TYPE_RIGID = 7
-    BODY_TYPE_SENSOR = 8
-    BODY_TYPE_ALL = 15
+    BODY_TYPE_STATIC = 3
+    BODY_TYPE_RIGID = 3
+    BODY_TYPE_SENSOR = 1 << 2
+    BODY_TYPE_GHOST = 2 << 2
 
     @property
     def id(self) -> int:

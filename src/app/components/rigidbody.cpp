@@ -27,13 +27,13 @@ Rigidbody::Stub::Stub(sp<Ref> ref, BodyType type, sp<Shape> shape, sp<Vec3> posi
 
 void Rigidbody::Stub::onBeginContact(const Rigidbody& rigidBody, const CollisionManifold& manifold) const
 {
-    if(_collision_callback && rigidBody.type() != Rigidbody::BODY_TYPE_SENSOR)
+    if(_collision_callback && rigidBody.type() != BODY_TYPE_SENSOR)
         _collision_callback->onBeginContact(rigidBody, manifold);
 }
 
 void Rigidbody::Stub::onEndContact(const Rigidbody& rigidBody) const
 {
-    if(_collision_callback && rigidBody.type() != Rigidbody::BODY_TYPE_SENSOR)
+    if(_collision_callback && rigidBody.type() != BODY_TYPE_SENSOR)
         _collision_callback->onEndContact(rigidBody);
 }
 
@@ -187,6 +187,8 @@ template<> ARK_API Rigidbody::BodyType StringConvert::eval<Rigidbody::BodyType>(
         return Rigidbody::BODY_TYPE_DYNAMIC;
     if(str == "sensor")
         return Rigidbody::BODY_TYPE_SENSOR;
+    if(str == "ghost")
+        return Rigidbody::BODY_TYPE_GHOST;
     FATAL("Unknow body type \"%s\"", str.c_str());
     return Rigidbody::BODY_TYPE_STATIC;
 }

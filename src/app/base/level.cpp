@@ -18,8 +18,8 @@
 
 namespace ark {
 
-Level::Level(const String& src, Map<String, sp<Camera>> cameras, Map<String, sp<Vec3>> lights)
-    : _libraries(sp<Map<int32_t, sp<LevelLibrary>>>::make()), _cameras(std::move(cameras)), _lights(std::move(lights))
+Level::Level(const String& src)
+    : _libraries(sp<Map<int32_t, sp<LevelLibrary>>>::make())
 {
     load(src);
 }
@@ -47,29 +47,23 @@ void Level::load(const String& src)
             LevelObject obj(j);
             if(obj._type == LevelObject::TYPE_CAMERA)
             {
-                const sp<Camera> camera = getCamera(obj._name);
-                DCHECK_WARN(camera, "Undefined camera(%s) in \"%s\"", obj._name.c_str(), src.c_str());
-                if(camera)
-                {
-                    const float fovy = Documents::ensureAttribute<float>(obj._manifest, "fov_y");
-                    const float clipNear = Documents::ensureAttribute<float>(obj._manifest, "clip-near");
-                    const float clipFar = Documents::ensureAttribute<float>(obj._manifest, "clip-far");
-                    const Quaternion quaternion(sp<Vec4>::make<Vec4::Const>(obj._rotation ? obj._rotation.value() : constants::QUATERNION_ONE));
-                    const M4 matrix = quaternion.toMatrix()->val();
-                    const V3 front = MatrixUtil::mul(matrix, V3(0, 1.0f, 0));
-                    const V3 up = MatrixUtil::mul(matrix, V3(0, 0, 1.0f));
-                    Camera c = Ark::instance().createCamera(Ark::COORDINATE_SYSTEM_RHS, true, !Ark::instance().renderController()->renderEngine()->isBackendLHS());
-                    c.perspective(fovy, 16.0f / 9, clipNear, clipFar);
-                    c.lookAt(obj._position, obj._position + front, up);
-                    camera->assign(c);
-                }
+                DCHECK_WARN(!getCamera(obj._name), "Overwriting camera(%s) in \"%s\"", obj._name.c_str(), src.c_str());
+                const float fovy = Documents::ensureAttribute<float>(j, "fov_y");
+                const float clipNear = Documents::ensureAttribute<float>(j, "clip-near");
+                const float clipFar = Documents::ensureAttribute<float>(j, "clip-far");
+                const Quaternion quaternion(sp<Vec4>::make<Vec4::Const>(obj._rotation ? obj._rotation.value() : constants::QUATERNION_ONE));
+                const M4 matrix = quaternion.toMatrix()->val();
+                const V3 front = MatrixUtil::mul(matrix, V3(0, 1.0f, 0));
+                const V3 up = MatrixUtil::mul(matrix, V3(0, 0, 1.0f));
+                Camera c = Ark::instance().createCamera(Ark::COORDINATE_SYSTEM_RHS, true, !Ark::instance().renderController()->renderEngine()->isBackendLHS());
+                c.perspective(fovy, 16.0f / 9, clipNear, clipFar);
+                c.lookAt(obj._position, obj._position + front, up);
+                _cameras[obj._name] = sp<Camera>::make(std::move(c));
             }
             else if(obj._type == LevelObject::TYPE_LIGHT)
             {
-                const sp<Vec3> light = getLight(obj._name);
-                DCHECK_WARN(light, "Undefined light(%s) in \"%s\"", obj._name.c_str(), src.c_str());
-                if(light)
-                    Vec3Type::set(light, obj._position);
+                DCHECK_WARN(!getLight(obj._name), "Overwriting light(%s) in \"%s\"", obj._name.c_str(), src.c_str());
+                _lights[obj._name] = sp<Vec3>::make<Vec3::Const>(obj._position);
             }
             layerObjects.push_back(sp<LevelObject>::make(obj));
         }
@@ -87,10 +81,20 @@ sp<LevelLayer> Level::getLayer(StringView name) const
     return iter != _layers_by_name.end() ? iter->second : nullptr;
 }
 
+const Map<String, sp<Camera>>& Level::cameras() const
+{
+    return _cameras;
+}
+
 sp<Camera> Level::getCamera(const String& name) const
 {
     const auto iter = _cameras.find(name);
     return iter != _cameras.end() ? iter->second : nullptr;
+}
+
+const Map<String, sp<Vec3>>& Level::lights() const
+{
+    return _lights;
 }
 
 sp<Vec3> Level::getLight(const String& name) const

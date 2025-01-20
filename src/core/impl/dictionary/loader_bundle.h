@@ -1,7 +1,5 @@
 #pragma once
 
-#include <map>
-
 #include "core/base/string.h"
 #include "core/inf/asset.h"
 #include "core/inf/asset_bundle.h"
@@ -20,7 +18,7 @@ public:
         : _asset_bundle(std::move(assetBundle)), _default_loader(std::move(defaultLoader)) {
     }
 
-    virtual T get(const String& name) override {
+    T get(const String& name) override {
         const auto [fname, fext] = name.rcut('.');
         const sp<Asset> asset = _asset_bundle->getAsset(name);
         CHECK(asset, "Asset %s not found", name.c_str());
@@ -43,9 +41,7 @@ public:
 private:
     sp<AssetBundle> _asset_bundle;
     sp<LoaderType> _default_loader;
-
-    std::map<String, sp<LoaderType>> _loaders;
-
+    Map<String, sp<LoaderType>> _loaders;
 };
 
 }

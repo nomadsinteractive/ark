@@ -13,16 +13,14 @@ public:
 //  [[script::bindings::enumeration]]
     enum Type {
         TYPE_INSTANCE,
-        TYPE_MESH,
+        TYPE_ELEMENT,
         TYPE_CAMERA,
         TYPE_LIGHT
     };
 
-    LevelObject(document manifest);
+    LevelObject(const document& manifest);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(LevelObject);
 
-//  [[script::bindings::property]]
-    const document& manifest() const;
 //  [[script::bindings::property]]
     const String& name() const;
 //  [[script::bindings::property]]
@@ -47,15 +45,12 @@ public:
     const sp<RenderObject>& renderObject() const;
 
 private:
-    document _manifest;
-
     String _name;
     Type _type;
     bool _visible;
     V3 _position;
     Optional<V3> _scale;
     Optional<V4> _rotation;
-    Rigidbody::BodyType _body_type;
     int32_t _instance_of;
 
     sp<Entity> _entity;

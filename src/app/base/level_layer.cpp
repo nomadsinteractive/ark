@@ -97,15 +97,13 @@ void LevelLayer::createRenderObjects(Layer& layer) const
             const sp<LevelLibrary>& library = iter->second;
             auto [renderObject, transform] = makeRenderObject(obj, library->_name.hash());
             layer.addRenderObject(renderObject);
-            // if(obj._name)
-                obj._render_object = std::move(renderObject);
+            obj._render_object = std::move(renderObject);
         }
-        else if(obj._type == LevelObject::TYPE_MESH)
+        else if(obj._type == LevelObject::TYPE_ELEMENT)
         {
             auto [renderObject, _] = makeRenderObject(obj, obj._name.hash());
             layer.addRenderObject(renderObject);
-            // if(obj._name)
-                obj._render_object = std::move(renderObject);
+            obj._render_object = std::move(renderObject);
         }
 }
 

@@ -15,16 +15,22 @@ namespace ark {
 class ARK_API Level {
 public:
 //  [[script::bindings::auto]]
-    Level(const String& src, Map<String, sp<Camera>> cameras = {}, Map<String, sp<Vec3>> lights = {});
+    Level(const String& src);
 
     void load(const String& src);
+
 //  [[script::bindings::property]]
     const Vector<sp<LevelLayer>>& layers();
 //  [[script::bindings::auto]]
     sp<LevelLayer> getLayer(StringView name) const;
 
+//  [[script::bindings::property]]
+    const Map<String, sp<Camera>>& cameras() const;
 //  [[script::bindings::auto]]
     sp<Camera> getCamera(const String& name) const;
+
+//  [[script::bindings::property]]
+    const Map<String, sp<Vec3>>& lights() const;
 //  [[script::bindings::auto]]
     sp<Vec3> getLight(const String& name) const;
 

@@ -163,8 +163,8 @@ struct BtRigibodyObject {
     };
 };
 
-struct KinematicObject : BtRigibodyObject {
-    KinematicObject(sp<Vec3> position, sp<Vec4> quaternion, sp<BtRigidbodyRef> btRigidbodyRef)
+struct GhostObject : BtRigibodyObject {
+    GhostObject(sp<Vec3> position, sp<Vec4> quaternion, sp<BtRigidbodyRef> btRigidbodyRef)
         : BtRigibodyObject(std::move(btRigidbodyRef)), _position(std::move(position)), _quaternion(std::move(quaternion), constants::QUATERNION_ONE) {
     }
 
@@ -220,7 +220,7 @@ struct ColliderBullet::Stub final : Runnable {
     op<btConstraintSolver> _solver;
     op<btDiscreteDynamicsWorld> _dynamics_world;
 
-    List<KinematicObject, KinematicObject::ListFilter> _kinematic_objects;
+    List<GhostObject, GhostObject::ListFilter> _ghost_objects;
 
     sp<Numeric> _app_clock_interval;
 };
@@ -264,11 +264,11 @@ Rigidbody::Impl ColliderBullet::createBody(Rigidbody::BodyType type, sp<Shape> s
             cs = iter->second;
     }
 
-    if(type == Rigidbody::BODY_TYPE_SENSOR)
+    if(type == Rigidbody::BODY_TYPE_SENSOR || type == Rigidbody::BODY_TYPE_GHOST)
     {
         sp<Vec3> originPosition = shape->origin() ? Vec3Type::add(position, shape->origin().val()) : position;
         sp<BtRigidbodyRef> btRigidbodyDef = makeGhostObject(btDynamicWorld(), cs->btShape().get(), type, collisionFilter);
-        _stub->_kinematic_objects.emplace_back(KinematicObject(std::move(originPosition), rotation, btRigidbodyDef));
+        _stub->_ghost_objects.emplace_back(GhostObject(std::move(originPosition), rotation, btRigidbodyDef));
         sp<RigidbodyBullet> impl = sp<RigidbodyBullet>::make(*this, std::move(btRigidbodyDef), type, std::move(shape), std::move(cs), std::move(position), std::move(rotation), std::move(collisionFilter), std::move(discarded));
         sp<Rigidbody::Stub> stub = impl->stub();
         return Rigidbody::Impl{std::move(stub), Box(std::move(impl))};
@@ -366,7 +366,7 @@ void ColliderBullet::myInternalPreTickCallback(btDynamicsWorld* dynamicsWorld, b
 {
     const ColliderBullet* self = static_cast<ColliderBullet*>(dynamicsWorld->getWorldUserInfo());
     const uint64_t tick = Ark::instance().applicationContext()->renderController()->tick();
-    for(const KinematicObject& i : self->_stub->_kinematic_objects)
+    for(const GhostObject& i : self->_stub->_ghost_objects)
     {
         i._position->update(tick);
         i._quaternion.update(tick);
@@ -405,9 +405,9 @@ void ColliderBullet::myInternalTickCallback(btDynamicsWorld* dynamicsWorld, btSc
                 const V3 cp(ptA.x(), ptA.y(), ptA.z());
                 const V3 normal(normalOnB.x(), normalOnB.y(), normalOnB.z());
 
-                if(ccObjA)
+                if(ccObjA && objB.stub()->_type != Rigidbody::BODY_TYPE_SENSOR)
                     self->addTickContactInfo(refA, ccObjA, refB, cp, normal);
-                if(ccObjB)
+                if(ccObjB && objA.stub()->_type != Rigidbody::BODY_TYPE_SENSOR)
                     self->addTickContactInfo(refB, ccObjB, refA, cp, -normal);
             }
         }

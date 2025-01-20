@@ -1,7 +1,5 @@
 #pragma once
 
-#include <unordered_map>
-
 #include "core/base/api.h"
 #include "core/inf/builder.h"
 #include "core/types/shared_ptr.h"
@@ -52,7 +50,7 @@ private:
     sp<Size> _tile_size;
     sp<TilesetImporter> _importer;
 
-    std::unordered_map<int32_t, sp<Tile>> _tiles;
+    HashMap<int32_t, sp<Tile>> _tiles;
 };
 
 }

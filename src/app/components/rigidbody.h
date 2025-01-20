@@ -23,7 +23,8 @@ public:
         BODY_TYPE_DYNAMIC,
         BODY_TYPE_STATIC,
         BODY_TYPE_RIGID = 3,
-        BODY_TYPE_SENSOR
+        BODY_TYPE_SENSOR = 1 << 2,
+        BODY_TYPE_GHOST = 2 << 2
     };
 
     struct ARK_API Stub {
