@@ -29,6 +29,13 @@ RigidbodyBullet::RigidbodyBullet(ColliderBullet world, sp<BtRigidbodyRef> rigidB
     _bt_rigidbody_stub->_rigidbody->collisionObject()->setUserPointer(this);
 }
 
+void RigidbodyBullet::discard()
+{
+    _rigidbody_stub->_ref->discard();
+    _bt_rigidbody_stub->_world.btDynamicWorld()->removeCollisionObject(_bt_rigidbody_stub->_rigidbody->collisionObject());
+    _bt_rigidbody_stub = nullptr;
+}
+
 const sp<Ref>& RigidbodyBullet::ref() const
 {
     return _rigidbody_stub->_ref;

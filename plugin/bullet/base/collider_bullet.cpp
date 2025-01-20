@@ -24,6 +24,7 @@
 #include "bullet/base/bt_rigidbody_ref.h"
 #include "bullet/base/collision_shape.h"
 #include "bullet/base/rigidbody_bullet.h"
+#include "core/types/ref.h"
 
 namespace ark::plugin::bullet {
 
@@ -84,9 +85,9 @@ private:
 
 sp<CollisionShape> makeConvexHullCollisionShape(const Model& model, btScalar mass)
 {
-    const sp<btConvexHullShape> convexHullShape = sp<btConvexHullShape>::make();
-
     CHECK(!model.meshes().empty(), "ConvexHullRigidBodyImporter only works with Mesh based models");
+
+    const sp<btConvexHullShape> convexHullShape = sp<btConvexHullShape>::make();
     for(const Mesh& i : model.meshes())
         for(const V3& j : i.vertices())
             convexHullShape->addPoint(btVector3(j.x(), j.y(), j.z()), false);
@@ -95,26 +96,6 @@ sp<CollisionShape> makeConvexHullCollisionShape(const Model& model, btScalar mas
     convexHullShape->optimizeConvexHull();
     return sp<CollisionShape>::make(convexHullShape, mass);
 }
-
-struct KinematicObject {
-    KinematicObject(sp<Vec3> position, sp<Vec4> quaternion, sp<BtRigidbodyRef> btRigidbodyRef)
-        : _position(std::move(position)), _quaternion(std::move(quaternion), constants::QUATERNION_ONE), _bt_rigidbody_ref(std::move(btRigidbodyRef)) {
-    }
-
-    sp<Vec3> _position;
-    SafeVar<Vec4> _quaternion;
-    sp<BtRigidbodyRef> _bt_rigidbody_ref;
-
-    class ListFilter {
-    public:
-        ListFilter() = default;
-
-        FilterAction operator() (const KinematicObject& item) const
-        {
-            return item._bt_rigidbody_ref.unique() ? FILTER_ACTION_REMOVE : FILTER_ACTION_NONE;
-        }
-    };
-};
 
 sp<BtRigidbodyRef> makeRigidBody(btDynamicsWorld* world, btCollisionShape* shape, btMotionState* motionState, Rigidbody::BodyType bodyType, btScalar mass, const sp<CollisionFilter>& collisionFilter)
 {
@@ -153,10 +134,44 @@ sp<BtRigidbodyRef> makeGhostObject(btDynamicsWorld* world, btCollisionShape* sha
     return sp<BtRigidbodyRef>::make(ghostObject);
 }
 
-const RigidbodyBullet& getRigidBodyFromCollisionObject(const btCollisionObject* collisionObject)
+RigidbodyBullet& getRigidBodyFromCollisionObject(const btCollisionObject* collisionObject)
 {
     return *static_cast<RigidbodyBullet*>(collisionObject->getUserPointer());
 }
+
+struct BtRigibodyObject {
+    BtRigibodyObject(sp<BtRigidbodyRef> btRigidbodyRef)
+        : _bt_rigidbody_ref(std::move(btRigidbodyRef))
+    {
+    }
+
+    sp<BtRigidbodyRef> _bt_rigidbody_ref;
+
+    class ListFilter {
+    public:
+        ListFilter() = default;
+
+        FilterAction operator() (const BtRigibodyObject& item) const
+        {
+            if(RigidbodyBullet& rigidbody = getRigidBodyFromCollisionObject(item._bt_rigidbody_ref->collisionObject()); rigidbody.stub()->_ref->isDiscarded())
+            {
+                rigidbody.discard();
+                return FILTER_ACTION_REMOVE;
+            }
+            return item._bt_rigidbody_ref.unique() ? FILTER_ACTION_REMOVE : FILTER_ACTION_NONE;
+        }
+    };
+};
+
+struct KinematicObject : BtRigibodyObject {
+    KinematicObject(sp<Vec3> position, sp<Vec4> quaternion, sp<BtRigidbodyRef> btRigidbodyRef)
+        : BtRigibodyObject(std::move(btRigidbodyRef)), _position(std::move(position)), _quaternion(std::move(quaternion), constants::QUATERNION_ONE) {
+    }
+
+    sp<Vec3> _position;
+    SafeVar<Vec4> _quaternion;
+
+};
 
 }
 
@@ -171,7 +186,7 @@ struct ColliderBullet::Stub final : Runnable {
 
     ~Stub() override
     {
-        dispose();
+        discard();
     }
 
     void run() override
@@ -179,14 +194,15 @@ struct ColliderBullet::Stub final : Runnable {
         _dynamics_world->stepSimulation(_app_clock_interval->val());
     }
 
-    void dispose()
+    void discard() const
     {
         for(int32_t i = _dynamics_world->getNumConstraints() - 1; i >= 0; i--)
             _dynamics_world->removeConstraint(_dynamics_world->getConstraint(i));
 
+        btCollisionObjectArray& coArray = _dynamics_world->getCollisionObjectArray();
         for(int32_t i = _dynamics_world->getNumCollisionObjects() - 1; i >= 0; i--)
         {
-            btCollisionObject* obj = _dynamics_world->getCollisionObjectArray()[i];
+            btCollisionObject* obj = coArray[i];
             if(btRigidBody* body = btRigidBody::upcast(obj); body && body->getMotionState())
                 delete body->getMotionState();
             _dynamics_world->removeCollisionObject(obj);
@@ -218,8 +234,6 @@ ColliderBullet::ColliderBullet(const V3& gravity, sp<ModelLoader> modelLoader)
 
 Rigidbody::Impl ColliderBullet::createBody(Rigidbody::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded)
 {
-    DCHECK(!discarded, "Unimplemented");
-
     sp<CollisionShape> cs = shape->asImplementation<CollisionShape>();
     if(!cs)
     {
@@ -359,6 +373,7 @@ void ColliderBullet::myInternalPreTickCallback(btDynamicsWorld* dynamicsWorld, b
         V3 pos = i._position->val();
         const V4 quaternion = i._quaternion.val();
         btTransform transform;
+        transform.setIdentity();
         transform.setRotation(btQuaternion(quaternion.x(), quaternion.y(), quaternion.z(), quaternion.w()));
         transform.setOrigin(btVector3(pos.x(), pos.y(), pos.z()));
         i._bt_rigidbody_ref->collisionObject()->setWorldTransform(transform);
@@ -367,13 +382,12 @@ void ColliderBullet::myInternalPreTickCallback(btDynamicsWorld* dynamicsWorld, b
 
 void ColliderBullet::myInternalTickCallback(btDynamicsWorld* dynamicsWorld, btScalar /*timeStep*/)
 {
-    const int32_t numManifolds = dynamicsWorld->getDispatcher()->getNumManifolds();
+    btDispatcher* dispatcher = dynamicsWorld->getDispatcher();
+    const int32_t numManifolds = dispatcher->getNumManifolds();
     ColliderBullet* self = static_cast<ColliderBullet*>(dynamicsWorld->getWorldUserInfo());
     for(int32_t i = 0; i < numManifolds; ++i)
     {
-        btPersistentManifold* contactManifold = dynamicsWorld->getDispatcher()->getManifoldByIndexInternal(i);
-
-        if(contactManifold->getNumContacts() > 0)
+        if(const btPersistentManifold* contactManifold = dispatcher->getManifoldByIndexInternal(i); contactManifold->getNumContacts() > 0)
         {
             const RigidbodyBullet& objA = getRigidBodyFromCollisionObject(contactManifold->getBody0());
             const sp<CollisionCallback>& ccObjA = objA.collisionCallback();
@@ -385,7 +399,7 @@ void ColliderBullet::myInternalTickCallback(btDynamicsWorld* dynamicsWorld, btSc
 
             if(ccObjA || ccObjB)
             {
-                btManifoldPoint& pt = contactManifold->getContactPoint(0);
+                const btManifoldPoint& pt = contactManifold->getContactPoint(0);
                 const btVector3& ptA = pt.getPositionWorldOnA();
                 const btVector3& normalOnB = pt.m_normalWorldOnB;
                 const V3 cp(ptA.x(), ptA.y(), ptA.z());
@@ -393,7 +407,6 @@ void ColliderBullet::myInternalTickCallback(btDynamicsWorld* dynamicsWorld, btSc
 
                 if(ccObjA)
                     self->addTickContactInfo(refA, ccObjA, refB, cp, normal);
-
                 if(ccObjB)
                     self->addTickContactInfo(refB, ccObjB, refA, cp, -normal);
             }
@@ -408,7 +421,7 @@ void ColliderBullet::myInternalTickCallback(btDynamicsWorld* dynamicsWorld, btSc
             contactInfo._last_tick.clear();
         else
         {
-            const RigidbodyBullet& obj = getRigidBodyFromCollisionObject(iter->first->collisionObject());
+            const RigidbodyBullet& obj = getRigidBodyFromCollisionObject(rigidBody->collisionObject());
             for(const sp<BtRigidbodyRef>& i : contactInfo._last_tick)
                 if(i->collisionObject())
                 {
@@ -435,7 +448,7 @@ void ColliderBullet::addTickContactInfo(const sp<BtRigidbodyRef>& rigidBody, con
 }
 
 ColliderBullet::BUILDER_IMPL1::BUILDER_IMPL1(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _gravity(Documents::getAttribute<V3>(manifest, "gravity", {0, -9.8f, 0})), _model_loader(factory.getBuilder<ModelLoader>(manifest, "model-loader")),
+    : _gravity(Documents::getAttribute<V3>(manifest, "gravity", {0, -9.8f, 0})), _model_loader(factory.getBuilder<ModelLoader>(manifest, constants::MODEL_LOADER)),
       _resource_loader_context(resourceLoaderContext)
 {
     for(const auto& i : manifest->children("import"))

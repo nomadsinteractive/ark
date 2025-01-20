@@ -1607,11 +1607,11 @@ class RenderObject:
         pass
 
     @property
-    def disposed(self) -> Boolean:
+    def discarded(self) -> Boolean:
         return self._discarded
 
-    @disposed.setter
-    def disposed(self, disposed: Boolean):
+    @discarded.setter
+    def discarded(self, discarded: Boolean):
         pass
 
     @property
@@ -1677,7 +1677,7 @@ class RenderObject:
     def absorb(self, o):
         pass
 
-    def dispose(self):
+    def discard(self):
         pass
 
     def show(self):

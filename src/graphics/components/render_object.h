@@ -93,7 +93,7 @@ public:
     void setVisible(sp<Boolean> visible);
 
 //  [[script::bindings::auto]]
-    void dispose();
+    void discard();
 
 //  [[script::bindings::auto]]
     void show();

@@ -208,7 +208,7 @@ void RenderObject::setVisible(sp<Boolean> visible)
     _timestamp.markDirty();
 }
 
-void RenderObject::dispose()
+void RenderObject::discard()
 {
     setDiscarded(sp<Boolean::Const>::make(true));
 }

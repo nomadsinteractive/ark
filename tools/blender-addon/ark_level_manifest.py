@@ -1,8 +1,9 @@
+from math import radians
 from typing import Optional, Union
 
 from bpy.props import BoolProperty, CollectionProperty, EnumProperty, IntProperty, StringProperty
 from bpy.types import Operator, UIList
-from mathutils import Quaternion, Vector
+from mathutils import Euler, Quaternion, Vector
 
 import bpy
 from bpy_extras.io_utils import ExportHelper
@@ -20,6 +21,10 @@ bl_info = {
 
 
 _INDENT_BLOCK = '\t'
+Z_UP_TO_Y_UP_ROTATION = Euler((radians(-90), 0, 0))
+
+def truncate(v: float):
+    return round(v * 100000) / 100000
 
 
 def to_json_field_value(name, value, indent):
@@ -31,11 +36,20 @@ def to_xml_attr_value(name, value):
 
 
 def to_y_up_position(position):
-    x, y, z = position
+    v = Vector(position)
+    v.rotate(Z_UP_TO_Y_UP_ROTATION)
+    return tuple(truncate(i) for i in v)
+
+
+def to_y_up_scale(scale):
+    x, y, z = scale
     return x, z, y
 
 
 def to_y_up_quaternion(quaternion):
+    # q = Quaternion(quaternion)
+    # q.rotate(Z_UP_TO_Y_UP_ROTATION)
+    # return tuple(truncate(i) for i in q)
     w, x, y, z = quaternion
     return x, z, y, w
 
@@ -112,7 +126,7 @@ class ArkInstanceCollection:
         if obj:
             bb = obj.bound_box
             d = Vector(tuple(max(bb[i][j] for i in range(8)) - min(bb[i][j] for i in range(8)) for j in range(3)))
-            dimensions = ', '.join(str(abs(i)) for i in to_y_up_position(obj.matrix_world @ d))
+            dimensions = ', '.join(str(abs(i)) for i in to_y_up_scale(obj.matrix_world @ d))
         else:
             dimensions = '0, 0, 0'
         return '%s<library id="%d" name="%s" dimensions="(%s)"/>' % (_INDENT_BLOCK * indent, self._id, self._name, dimensions)
@@ -121,9 +135,8 @@ class ArkInstanceCollection:
 class ArkLayer:
     def __init__(self, scene: ArkScene, collection, layer_property):
         export_names = layer_property.export_names
-        rigidbody_type = 'static' if layer_property.rigidbody_static else (layer_property.rigidbody_dynamic and 'dynamic' or None)
         self._name = collection.name
-        self._objects = [ArkObject(scene, i, export_names, rigidbody_type) for i in collection.objects]
+        self._objects = [ArkObject(scene, i, export_names) for i in collection.objects]
 
     def to_json(self, indent):
         lines = [i.to_json(indent) for i in self._objects]
@@ -183,7 +196,7 @@ class ArkObject:
                 writer.write_property('clip-far', self._object.data.clip_end)
 
         writer.write_property('position', to_y_up_position(self._position))
-        writer.write_property('scale', to_y_up_position(self._scale))
+        writer.write_property('scale', to_y_up_scale(self._scale))
         writer.write_property('rotation', to_y_up_quaternion(self._rotation))
         writer.write_property('visible', self._object.visible_get() and 'true' or 'false')
         if self._instance_of:
@@ -263,8 +276,6 @@ class TOOL_UL_List(UIList):
             layout.label(text="")
 
         layout.prop(item, "export_names")
-        layout.prop(item, "rigidbody_static")
-        layout.prop(item, "rigidbody_dynamic")
 
 
 class ArkLevelManifestExporter(Operator, ExportHelper):

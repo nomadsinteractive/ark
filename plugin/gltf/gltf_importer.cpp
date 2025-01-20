@@ -252,9 +252,6 @@ Mesh processPrimitive(const tinygltf::Model& gltfModel, const std::vector<sp<Mat
     SBufferReadData bufferReadData = getAttributeData<element_index_t, element_index_t>(gltfModel, primitive.indices);
     std::vector<element_index_t> indices = std::move(bufferReadData.DstData);
 
-	for(size_t i = 0; i < indices.size(); i += 3)
-		std::swap(indices[i + 1], indices[i + 2]);
-
     ASSERT(primitive.material == -1 || primitive.material < materials.size());
     sp<Material> material = primitive.material >= 0 ? materials.at(primitive.material) : nullptr;
 

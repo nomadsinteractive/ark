@@ -56,10 +56,9 @@ void Level::load(const String& src)
                     const float clipFar = Documents::ensureAttribute<float>(obj._manifest, "clip-far");
                     const Quaternion quaternion(sp<Vec4>::make<Vec4::Const>(obj._rotation ? obj._rotation.value() : constants::QUATERNION_ONE));
                     const M4 matrix = quaternion.toMatrix()->val();
-                    //After converting Blender coordinate system(RHS) from z-up to y-up, it becomes LHS coordinate system.
-                    const V3 front = MatrixUtil::mul(matrix, V3(0, -1.0f, 0));
+                    const V3 front = MatrixUtil::mul(matrix, V3(0, 1.0f, 0));
                     const V3 up = MatrixUtil::mul(matrix, V3(0, 0, 1.0f));
-                    Camera c = Ark::instance().createCamera(Ark::COORDINATE_SYSTEM_LHS, true, !Ark::instance().renderController()->renderEngine()->isBackendLHS());
+                    Camera c = Ark::instance().createCamera(Ark::COORDINATE_SYSTEM_RHS, true, !Ark::instance().renderController()->renderEngine()->isBackendLHS());
                     c.perspective(fovy, 16.0f / 9, clipNear, clipFar);
                     c.lookAt(obj._position, obj._position + front, up);
                     camera->assign(c);
