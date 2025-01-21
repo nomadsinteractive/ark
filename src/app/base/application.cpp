@@ -78,11 +78,6 @@ Application::Application(sp<ApplicationDelegate> applicationDelegate, sp<Applica
 {
 }
 
-const char* Application::name() const
-{
-    return _application_delegate->name();
-}
-
 const sp<ApplicationContext>& Application::context() const
 {
     return _application_context;
@@ -128,7 +123,7 @@ void Application::onCreate()
     stringTable->addStringBundle("asset", sp<AssetStringBundle>::make());
     sp<RenderView> renderView = _application_context->renderEngine()->createRenderView(_application_context->renderController(), _viewport);
     _surface = sp<Surface>::make(std::move(renderView), _application_context);
-    _surface_updater_created = sp<OnSurfaceUpdatePostCreated>::make(_surface->updater(), _application_context, _application_delegate);
+    _surface_updater_created = sp<Runnable>::make<OnSurfaceUpdatePostCreated>(_surface->updater(), _application_context, _application_delegate);
     _application_context->runAtCoreThread([this] () {
         onCreateTask();
     });

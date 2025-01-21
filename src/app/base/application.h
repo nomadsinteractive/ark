@@ -31,7 +31,6 @@ public:
 
     V2 toViewportPosition(const V2& xy) const;
 
-    const char* name() const;
     const sp<ApplicationContext>& context() const;
     const sp<Size>& surfaceSize() const;
 

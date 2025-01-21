@@ -70,7 +70,7 @@ public:
     int32_t argc() const;
     const char** argv() const;
 
-    sp<Application> makeApplication(sp<ApplicationManifest> manifest, uint32_t width, uint32_t height);
+    sp<Application> makeApplication(sp<ApplicationManifest> manifest);
 
     const sp<ApplicationManifest>& manifest() const;
 

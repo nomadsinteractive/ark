@@ -233,7 +233,7 @@ const sp<ExecutorThreadPool>& ApplicationContext::executorThreadPool() const
     return _executor_thread_pool;
 }
 
-const std::vector<String>& ApplicationContext::argv() const
+const Vector<String>& ApplicationContext::argv() const
 {
     return _argv;
 }
@@ -327,21 +327,21 @@ void ApplicationContext::addStringBundle(const String& name, const sp<StringBund
 
 sp<String> ApplicationContext::getString(const String& resid, bool alert)
 {
-    DASSERT(resid);
+    ASSERT(resid);
     const Identifier id = resid.at(0) == '@' ? Identifier::parse(resid, Identifier::ID_TYPE_AUTO, false) : Identifier::parseRef(resid, false);
     return _string_table->getString(id.package(), id.ref(), alert);
 }
 
-std::vector<String> ApplicationContext::getStringArray(const String& resid)
+Vector<String> ApplicationContext::getStringArray(const String& resid)
 {
-    DASSERT(resid);
+    ASSERT(resid);
     const Identifier id = resid.at(0) == '@' ? Identifier::parse(resid, Identifier::ID_TYPE_AUTO, false) : Identifier::parseRef(resid, false);
     return _string_table->getStringArray(id.package(), id.ref(), true);
 }
 
 sp<Runnable> ApplicationContext::defer(const sp<Runnable>& task) const
 {
-    return sp<DeferedRunnable>::make(_message_loop_core, task);
+    return sp<Runnable>::make<DeferedRunnable>(_message_loop_core, task);
 }
 
 const Color& ApplicationContext::backgroundColor() const

@@ -14,25 +14,19 @@
 
 #include "core/base/clock.h"
 #include "core/base/message_loop.h"
-#include "core/inf/runnable.h"
-#include "core/types/implements.h"
 #include "core/util/math.h"
 
 #include "graphics/base/bitmap.h"
 #include "graphics/components/size.h"
 #include "graphics/base/surface_controller.h"
-#include "graphics/inf/render_view.h"
 
 #include "renderer/base/render_engine.h"
 #include "renderer/base/render_engine_context.h"
 
 #include "app/base/application_context.h"
 #include "app/base/application_manifest.h"
-#include "app/base/surface.h"
-#include "app/base/surface_updater.h"
 #include "app/inf/application_controller.h"
 
-#include "platform/platform.h"
 #include "renderer/inf/renderer_factory.h"
 
 #ifdef ARK_PLATFORM_DARWIN
@@ -298,11 +292,20 @@ V2 toFragCoordXY(const V2& xy, Ark::RendererCoordinateSystem rcs, float surfaceH
     return xy;
 }
 
+int32_t toWindowPosition(int32_t pos)
+{
+    if(pos == ApplicationManifest::WINDOW_POSITION_UNDEFINED)
+        return SDL_WINDOWPOS_UNDEFINED;
+    if(pos == ApplicationManifest::WINDOW_POSITION_CENTERED)
+        return SDL_WINDOWPOS_CENTERED;
+    return pos;
+}
+
 }
 
 SDLApplication::SDLApplication(sp<ApplicationDelegate> applicationDelegate, sp<ApplicationContext> applicationContext, uint32_t width, uint32_t height, const ApplicationManifest& manifest)
     : Application(std::move(applicationDelegate), applicationContext, width, height, manifest.renderer().toViewport()), _main_window(nullptr), _cond(SDL_CreateCond()), _lock(SDL_CreateMutex()),
-      _controller(sp<SDLApplicationController>::make(std::move(applicationContext))), _window_flag(manifest.application()._window_flag), _vsync(manifest.renderer()._vsync)
+      _controller(sp<SDLApplicationController>::make(std::move(applicationContext))), _vsync(manifest.renderer()._vsync)
 {
     initialize();
 }
@@ -381,9 +384,11 @@ void SDLApplication::initialize()
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
-    SDL_ShowCursor((_window_flag & ApplicationManifest::WINDOW_FLAG_SHOW_CURSOR) ? SDL_ENABLE : SDL_DISABLE);
+    const ApplicationManifest::Window& window = Ark::instance().manifest()->window();
 
-    _main_window = SDL_CreateWindow(name(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, static_cast<int32_t>(_surface_size->widthAsFloat()), static_cast<int32_t>(_surface_size->heightAsFloat()), toSDLWindowFlag(_application_context, _window_flag));
+    SDL_ShowCursor((window._flag & ApplicationManifest::WINDOW_FLAG_SHOW_CURSOR) ? SDL_ENABLE : SDL_DISABLE);
+
+    _main_window = SDL_CreateWindow(window._title.c_str(), toWindowPosition(window._position_x), toWindowPosition(window._position_y), static_cast<int32_t>(_surface_size->widthAsFloat()), static_cast<int32_t>(_surface_size->heightAsFloat()), toSDLWindowFlag(_application_context, window._flag));
     if(!_main_window)
     {
         /* Die if creation failed */
@@ -409,7 +414,7 @@ void SDLApplication::initialize()
 
 uint32_t SDLApplication::toSDLWindowFlag(const sp<ApplicationContext>& applicationContext, uint32_t appWindowFlag)
 {
-    Ark::RendererVersion version = applicationContext->renderEngine()->version();
+    const Ark::RendererVersion version = applicationContext->renderEngine()->version();
 
     uint32_t windowFlag = SDL_WINDOW_SHOWN;
     if(appWindowFlag & ApplicationManifest::WINDOW_FLAG_FULL_SCREEN)

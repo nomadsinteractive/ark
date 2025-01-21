@@ -1,7 +1,5 @@
 #pragma once
 
-#include <map>
-
 #include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/base/message_loop.h"
@@ -38,7 +36,7 @@ public:
     const sp<Executor>& executorMain() const;
     const sp<ExecutorThreadPool>& executorThreadPool() const;
 
-    const std::vector<String>& argv() const;
+    const Vector<String>& argv() const;
 
     const sp<Clock>& sysClock() const;
     const sp<Clock>& appClock() const;

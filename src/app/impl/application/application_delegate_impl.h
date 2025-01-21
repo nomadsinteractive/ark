@@ -16,10 +16,9 @@ namespace ark {
 
 class ARK_API ApplicationDelegateImpl final : public ApplicationDelegate {
 public:
-    ApplicationDelegateImpl(const sp<ApplicationManifest>& manifest);
+    ApplicationDelegateImpl() = default;
 
     void onCreate(Application& application, const sp<Surface>& surface) override;
-
     void onPause() override;
     void onResume() override;
 

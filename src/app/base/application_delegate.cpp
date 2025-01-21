@@ -10,16 +10,6 @@
 
 namespace ark {
 
-ApplicationDelegate::ApplicationDelegate(sp<ApplicationManifest> manifest)
-    : _manifest(std::move(manifest))
-{
-}
-
-const char* ApplicationDelegate::name()
-{
-    return _manifest->name().c_str();
-}
-
 void ApplicationDelegate::onCreate(Application& application, const sp<Surface>& surface)
 {
     _application_context = application.context();

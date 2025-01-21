@@ -1,12 +1,9 @@
 #pragma once
 
-#include <vector>
-
 #include "core/ark.h"
 #include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/base/string.h"
-#include "core/collection/table.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -30,12 +27,24 @@ public:
         WINDOW_FLAG_FULL_SCREEN_WINDOWED = 16
     };
 
+    enum WindowPosition {
+        WINDOW_POSITION_UNDEFINED = -2,
+        WINDOW_POSITION_CENTERED = -1
+    };
+
     struct Application {
         String _dir;
         String _filename;
         String _title;
         MessageLoopType _message_loop;
-        WindowFlag _window_flag;
+    };
+
+    struct Window {
+        String _title;
+        WindowFlag _flag;
+        int32_t _position_x;
+        int32_t _position_y;
+        float _scale;
     };
 
     struct Asset {
@@ -78,12 +87,13 @@ public:
     const String& name() const;
 
     const Application& application() const;
+    const Window& window() const;
 
     const String& appDir() const;
     const String& assetDir() const;
 
-    const std::vector<Asset>& assets() const;
-    const std::vector<String>& plugins() const;
+    const Vector<Asset>& assets() const;
+    const Vector<String>& plugins() const;
 
 // [[script::bindings::property]]
     const V2& rendererResolution() const;
@@ -104,6 +114,7 @@ private:
     std::vector<String> _plugins;
 
     Application _application;
+    Window _window;
     Heap _heap;
     Renderer _renderer;
 

@@ -83,8 +83,8 @@ struct FragCoordStretch final : Vec2 {
 
 }
 
-ApplicationFacade::ApplicationFacade(Application& app, const Surface& surface, sp<ApplicationManifest> manifest)
-    : _context(app.context()), _controller(app.controller()), _surface_controller(surface.controller()), _surface_size(app.surfaceSize()), _manifest(std::move(manifest))
+ApplicationFacade::ApplicationFacade(Application& app, const Surface& surface)
+    : _context(app.context()), _controller(app.controller()), _surface_controller(surface.controller()), _surface_size(app.surfaceSize())
 {
 }
 
@@ -144,7 +144,7 @@ sp<Camera> ApplicationFacade::camera() const
 
 const sp<ApplicationManifest>& ApplicationFacade::manifest() const
 {
-    return _manifest;
+    return Ark::instance().manifest();
 }
 
 const sp<ResourceLoader>& ApplicationFacade::resourceLoader() const

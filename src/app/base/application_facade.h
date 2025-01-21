@@ -15,7 +15,7 @@ namespace ark {
 
 class ARK_API ApplicationFacade {
 public:
-    ApplicationFacade(Application& app, const Surface& surface, sp<ApplicationManifest> manifest);
+    ApplicationFacade(Application& app, const Surface& surface);
 
 //  [[script::bindings::property]]
     const sp<Clock>& clock() const;
@@ -105,8 +105,6 @@ private:
     sp<ApplicationController> _controller;
     sp<SurfaceController> _surface_controller;
     sp<Size> _surface_size;
-
-    sp<ApplicationManifest> _manifest;
 
     sp<Activity> _activity;
     sp<Discarded> _activity_discarded;

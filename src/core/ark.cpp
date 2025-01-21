@@ -33,6 +33,7 @@ limitations under the License.
 #include "core/impl/dictionary/dictionary_impl.h"
 #include "core/inf/asset.h"
 #include "core/types/global.h"
+#include "core/types/optional.h"
 #include "core/util/asset_bundle_type.h"
 
 #include "renderer/base/render_engine.h"
@@ -202,11 +203,11 @@ public:
         sp<AssetBundle> asset;
 
         for(const Mounted& i : _mounts)
-            if(const sp<AssetBundle> ia = i.getBundle(url))
-                asset = asset ? sp<AssetBundle>::adopt(new AssetBundleWithFallback(asset, ia)) : ia;
+            if(sp<AssetBundle> ia = i.getBundle(url))
+                asset = asset ? sp<AssetBundle>::make<AssetBundleWithFallback>(std::move(asset), std::move(ia)) : std::move(ia);
 
-        if(const sp<AssetBundle> fallback = _builtin_asset_bundle->getBundle(path))
-            return asset ? sp<AssetBundle>::adopt(new AssetBundleWithFallback(asset, fallback)) : fallback;
+        if(sp<AssetBundle> fallback = _builtin_asset_bundle->getBundle(path))
+            return asset ? sp<AssetBundle>::make<AssetBundleWithFallback>(std::move(asset), std::move(fallback)) : std::move(fallback);
         CHECK(asset, "AssetBundle \"%s\" doesn't exists", path.c_str());
         return asset;
     }
@@ -226,41 +227,40 @@ private:
             : _root(manifest._protocol, manifest._root), _asset_bundle(std::move(asset)) {
         }
 
-        sp<Asset> getAsset(const URL& url) const {
-            String relpath;
-            if(getRelativePath(url, relpath))
-                return _asset_bundle->getAsset(relpath);
+        sp<Asset> getAsset(const URL& url) const
+        {
+            if(const Optional<String> relPath = getRelativePath(url))
+                return _asset_bundle->getAsset(relPath.value());
+
             return nullptr;
         }
 
-        sp<AssetBundle> getBundle(const URL& url) const {
-            String relpath;
-            if(getRelativePath(url, relpath)) {
-                if(relpath.empty())
+        sp<AssetBundle> getBundle(const URL& url) const
+        {
+            if(const Optional<String> relPath = getRelativePath(url))
+            {
+                if(relPath->empty())
                     return _asset_bundle;
-                const sp<AssetBundle> asset = _asset_bundle->getBundle(relpath);
-                if(asset)
+
+                if(sp<AssetBundle> asset = _asset_bundle->getBundle(relPath.value()))
                     return asset;
 
-                const String filename = relpath.rstrip('/');
-                const sp<Asset> fp = _asset_bundle->getAsset(filename);
-                if(fp)
-                    return sp<AssetBundleZipFile>::make(fp->open(), Platform::getRealPath(filename));
+                const String filename = relPath->rstrip('/');
+                if(const sp<Asset> fp = _asset_bundle->getAsset(filename))
+                    return sp<AssetBundle>::make<AssetBundleZipFile>(fp->open(), Platform::getRealPath(filename));
             }
             return nullptr;
         }
 
     private:
-        bool getRelativePath(const URL& url, String& relpath) const {
-            if(url.protocol() == _root.protocol() || _root.path().empty()) {
-                relpath = url.path();
-                return true;
-            }
-            if(url.protocol().empty() && url.path().startsWith(_root.path())) {
-                relpath = url.path().substr(_root.path().length());
-                return true;
-            }
-            return false;
+        Optional<String> getRelativePath(const URL& url) const {
+            if(url.protocol() == _root.protocol() || _root.path().empty())
+                return {url.path()};
+
+            if(url.protocol().empty() && url.path().startsWith(_root.path()))
+                return {url.path().substr(_root.path().length())};
+
+            return {};
         }
 
     private:
@@ -311,7 +311,7 @@ void Ark::initialize(sp<ApplicationManifest> manifest)
     loadPlugins(_manifest);
 
     sp<BeanFactory> factory = createBeanFactory(sp<DictionaryImpl<document>>::make());
-    _asset_bundle = sp<ArkAssetBundle>::make(AssetBundleType::createBuiltInAssetBundle(_manifest->assetDir(), _manifest->appDir()), factory, _manifest->assets());
+    _asset_bundle = sp<ArkAssetBundle>::make(AssetBundleType::createBuiltInAssetBundle(_manifest->assetDir(), _manifest->application()._dir), factory, _manifest->assets());
     sp<ApplicationBundle> applicationBundle = sp<ApplicationBundle>::make(_asset_bundle->getAssetBundle("/"));
     sp<RenderEngine> renderEngine = createRenderEngine(factory, _manifest->renderer(), applicationBundle);
     _application_context = createApplicationContext(_manifest, std::move(applicationBundle), std::move(renderEngine));
@@ -341,10 +341,12 @@ const char** Ark::argv() const
     return _argv;
 }
 
-sp<Application> Ark::makeApplication(sp<ApplicationManifest> manifest, uint32_t width, uint32_t height)
+sp<Application> Ark::makeApplication(sp<ApplicationManifest> manifest)
 {
+    const float scale = manifest->window()._scale;
+    const V2& resolution = manifest->rendererResolution();
     initialize(std::move(manifest));
-    return sp<SDLApplication>::make<SDLApplication>(sp<ApplicationDelegateImpl>::make(_manifest), _application_context, width, height, _manifest);
+    return sp<Application>::make<SDLApplication>(sp<ApplicationDelegate>::make<ApplicationDelegateImpl>(), _application_context, static_cast<uint32_t>(resolution.x() * scale), static_cast<uint32_t>(resolution.y() * scale), _manifest);
 }
 
 const sp<ApplicationManifest>& Ark::manifest() const

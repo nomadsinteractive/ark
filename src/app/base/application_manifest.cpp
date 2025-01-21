@@ -64,7 +64,7 @@ void ApplicationManifest::load(const String& src)
     for(const document& i : _content->children("asset"))
         _assets.emplace_back(i);
 
-    _plugins = Documents::getSystemSpecificList<std::vector<String>>(_content->children("plugin"), constants::NAME);
+    _plugins = Documents::getSystemSpecificList<Vector<String>>(_content->children("plugin"), constants::NAME);
 
     if(const document& renderer = _content->getChild("renderer"))
         _renderer = Renderer(renderer);
@@ -75,7 +75,12 @@ void ApplicationManifest::load(const String& src)
     _interpreter = _content->getChild("interpreter");
 
     _application._title = Documents::getAttributeValue(_content, "application/title");
-    _application._window_flag = Documents::getAttributeValue<WindowFlag>(_content, "application/window-flag", WINDOW_FLAG_SHOW_CURSOR);
+
+    _window._title = Documents::getAttributeValue(_content, "window/title", _application._title);
+    _window._flag = Documents::getAttributeValue<WindowFlag>(_content, "window/window-flag", WINDOW_FLAG_SHOW_CURSOR);
+    _window._position_x = Documents::getAttributeValue<int32_t>(_content, "window/x", WINDOW_POSITION_CENTERED);
+    _window._position_y = Documents::getAttributeValue<int32_t>(_content, "window/y", WINDOW_POSITION_CENTERED);
+    _window._scale = Documents::getAttributeValue<float>(_content, "window/scale", 1.0f);
 
     const String messageLoopType = Documents::getAttributeValue(_content, "application/message-loop", "core");
     if(messageLoopType == "core")
@@ -100,9 +105,9 @@ const ApplicationManifest::Application& ApplicationManifest::application() const
     return _application;
 }
 
-const String& ApplicationManifest::appDir() const
+const ApplicationManifest::Window& ApplicationManifest::window() const
 {
-    return _application._dir;
+    return _window;
 }
 
 const String& ApplicationManifest::assetDir() const
@@ -110,12 +115,12 @@ const String& ApplicationManifest::assetDir() const
     return _asset_dir;
 }
 
-const std::vector<ApplicationManifest::Asset>& ApplicationManifest::assets() const
+const Vector<ApplicationManifest::Asset>& ApplicationManifest::assets() const
 {
     return _assets;
 }
 
-const std::vector<String>& ApplicationManifest::plugins() const
+const Vector<String>& ApplicationManifest::plugins() const
 {
     return _plugins;
 }
@@ -157,8 +162,8 @@ ApplicationManifest::Renderer::Renderer()
 }
 
 ApplicationManifest::Renderer::Renderer(const document& manifest)
-    : _class(Documents::getAttribute(manifest, "class")), _target(Documents::getAttribute(manifest, "target", Ark::RENDERER_TARGET_AUTO)), _version(Documents::getAttribute(manifest, "version", Ark::RENDERER_VERSION_AUTO)),
-    _coordinate_system(Documents::getAttribute(manifest, "coordinate-system", Ark::COORDINATE_SYSTEM_DEFAULT)), _vsync(Documents::getAttribute(manifest, "vsync", false))
+    : _class(Documents::getAttribute(manifest, constants::CLASS)), _target(Documents::getAttribute(manifest, "target", Ark::RENDERER_TARGET_AUTO)), _version(Documents::getAttribute(manifest, "version", Ark::RENDERER_VERSION_AUTO)),
+      _coordinate_system(Documents::getAttribute(manifest, "coordinate-system", Ark::COORDINATE_SYSTEM_DEFAULT)), _vsync(Documents::getAttribute(manifest, "vsync", false))
 {
     if(const document& resolution = manifest->getChild("resolution"))
         _resolution = {Documents::ensureAttribute<float>(resolution, constants::WIDTH), Documents::ensureAttribute<float>(resolution, constants::HEIGHT)};

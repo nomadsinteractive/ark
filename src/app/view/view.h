@@ -11,7 +11,6 @@
 #include "graphics/forwarding.h"
 #include "graphics/components/text.h"
 #include "graphics/inf/layout.h"
-#include "graphics/inf/renderable.h"
 
 #include "app/forwarding.h"
 

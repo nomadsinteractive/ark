@@ -12,10 +12,6 @@ namespace ark {
 
 class ARK_API ApplicationDelegate : public EventListener {
 public:
-    ApplicationDelegate(sp<ApplicationManifest> manifest);
-    ~ApplicationDelegate() override = default;
-
-    virtual const char* name();
 
     virtual void onCreate(Application& application, const sp<Surface>& surface);
     virtual void onPause();
@@ -29,8 +25,6 @@ public:
     bool onEvent(const Event& event) override;
 
 protected:
-    sp<ApplicationManifest> _manifest;
-
     sp<ApplicationContext> _application_context;
     sp<RenderView> _render_view;
     sp<Surface> _surface;

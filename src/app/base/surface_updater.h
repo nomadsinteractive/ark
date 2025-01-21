@@ -13,11 +13,11 @@
 
 namespace ark {
 
-class SurfaceUpdater : public Runnable {
+class SurfaceUpdater final : public Runnable {
 public:
     SurfaceUpdater(sp<SurfaceController> surfaceController, const ApplicationContext& applicationContext);
 
-    virtual void run() override;
+    void run() override;
 
 private:
     sp<SurfaceController> _surface_controller;

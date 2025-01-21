@@ -1,7 +1,6 @@
 import inspect
 from typing import Callable, Any, Optional
 
-import ark
 from ark import Renderer, Vec2, Boolean, Vec3, Numeric, Vec4, String, Color, Integer, ApplicationFacade
 from ark import dear_imgui
 from marks import pydevd_start, pydevd_stop
@@ -47,7 +46,7 @@ class InputField:
 
 
 class ConsoleCommand:
-    def __init__(self, name: str, delegate):
+    def __init__(self, name: str, delegate: Any):
         self._name = name
         self._packages = tuple(name.split('.'))
         self._delegate = delegate
@@ -57,7 +56,7 @@ class ConsoleCommand:
         return self._name
 
     @property
-    def delegate(self):
+    def delegate(self) -> Any:
         return self._delegate
 
     def get_executor(self, name_and_methods: list[str]):
@@ -176,7 +175,7 @@ class MainWindow(BaseWindow):
         self._quick_bar_items = quick_bar_items or []
         self._build_quick_bar()
 
-    def on_show(self, builder: dear_imgui.WidgetBuilder):
+    def on_show(self, builder: dear_imgui.WidgetBuilder, **kwargs):
         builder.text('Debugger')
         builder.small_button('Start').add_callback(self.pydevd_start)
         builder.same_line()
@@ -318,7 +317,7 @@ class ResourceWindow(BaseWindow):
     def textures(self):
         return self._textures
 
-    def on_show(self, builder: dear_imgui.WidgetBuilder, **kwargs):
+    def on_show(self, builder: dear_imgui.WidgetBuilder):
         for i in self._textures:
             builder.image(i)
 
