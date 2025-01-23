@@ -11,10 +11,12 @@ namespace ark {
 class ARK_API Glyph {
 public:
 //  [[script::bindings::auto]]
-    Glyph(sp<Integer> type, sp<Vec3> position = nullptr, sp<Transform> transform = nullptr, sp<Varyings> varyings = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> discarded = nullptr);
+    Glyph(sp<Integer> type, sp<Font> font = nullptr, sp<Vec3> position = nullptr, sp<Transform> transform = nullptr, sp<Varyings> varyings = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> discarded = nullptr);
 
 //  [[script::bindings::property]]
     const sp<Integer>& type() const;
+//  [[script::bindings::property]]
+    const sp<Font>& font() const;
 //  [[script::bindings::property]]
     const sp<Vec3>& position() const;
 //  [[script::bindings::property]]
@@ -22,7 +24,7 @@ public:
 //  [[script::bindings::property]]
     const sp<Varyings>& varyings() const;
 //  [[script::bindings::property]]
-    void setVaryings(const sp<Varyings>& varyings);
+    void setVaryings(sp<Varyings> varyings);
 //  [[script::bindings::property]]
     const sp<Boolean>& discarded() const;
 //  [[script::bindings::property]]
@@ -40,6 +42,7 @@ public:
 
 private:
     sp<Integer> _type;
+    sp<Font> _font;
     sp<Vec3> _position;
     sp<Transform> _transform;
     sp<Varyings> _varyings;
@@ -49,6 +52,8 @@ private:
     wchar_t _character;
     V2 _occupy_size;
     V2 _content_size;
+
+    friend class GlyphMaker;
 };
 
 }

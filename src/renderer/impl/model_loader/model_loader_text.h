@@ -1,8 +1,5 @@
 #pragma once
 
-#include <vector>
-#include <unordered_map>
-
 #include "core/inf/builder.h"
 #include "core/types/shared_ptr.h"
 
@@ -17,28 +14,27 @@ namespace ark {
 
 class ModelLoaderText final : public ModelLoader {
 public:
-    ModelLoaderText(sp<RenderController> renderController, sp<Alphabet> alphabet, sp<Atlas> atlas, const Font::TextSize& textSize);
+    ModelLoaderText(sp<Alphabet> alphabet, sp<Atlas> atlas, const Font& font);
 
     sp<RenderCommandComposer> makeRenderCommandComposer(const Shader& shader) override;
     sp<Model> loadModel(int32_t type) override;
 
-//  [[plugin::resource-loader("text")]]
-    class BUILDER : public Builder<ModelLoader> {
+//  [[plugin::builder("text")]]
+    class BUILDER final : public Builder<ModelLoader> {
     public:
-        BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
+        BUILDER(BeanFactory& factory, const document& manifest);
 
         sp<ModelLoader> build(const Scope& args) override;
 
     private:
-        sp<ResourceLoaderContext> _resource_loader_context;
-        sp<Builder<Alphabet>> _alphabet;
-        sp<Builder<Atlas>> _atlas;
-        SafeBuilder<String> _text_size;
+        builder<Alphabet> _alphabet;
+        builder<Atlas> _atlas;
+        builder<Font> _font;
     };
 
 private:
 
-    struct AtlasAttachment;
+    struct AtlasGlyphAttachment;
 
     struct GlyphModel {
         GlyphModel();
@@ -49,7 +45,7 @@ private:
     };
 
     struct GlyphBundle {
-        GlyphBundle(AtlasAttachment& atlasAttachment, sp<Alphabet> alphabet, const Font::TextSize& textSize);
+        GlyphBundle(AtlasGlyphAttachment& atlasAttachment, sp<Alphabet> alphabet, const Font& font);
 
         const GlyphModel& ensureGlyphModel(uint64_t timestamp, int32_t c, bool reload);
 
@@ -57,23 +53,23 @@ private:
 
         void reload(uint64_t timestamp);
 
-        AtlasAttachment& _atlas_attachment;
+        AtlasGlyphAttachment& _atlas_attachment;
 
         sp<Alphabet> _alphabet;
+        Font _font;
         sp<Model> _unit_glyph_model;
-        Font::TextSize _text_size;
-        std::unordered_map<int32_t, GlyphModel> _glyphs;
+
+        HashMap<int32_t, GlyphModel> _glyphs;
 
         bool _is_lhs;
     };
 
-    struct AtlasAttachment {
-        AtlasAttachment(Atlas& atlas, sp<RenderController> renderController);
+    struct AtlasGlyphAttachment {
+        AtlasGlyphAttachment(Atlas& atlas);
 
-        sp<GlyphBundle> makeGlyphBundle(sp<Alphabet> alphabet, const Font::TextSize& textSize);
+        const sp<GlyphBundle>& ensureGlyphBundle(sp<Alphabet> alphabet, const Font& font);
 
         Atlas& _atlas;
-        sp<RenderController> _render_controller;
 
         void initialize(uint32_t textureWidth, uint32_t textureHeight);
         bool resize(uint32_t textureWidth, uint32_t textureHeight);
@@ -82,15 +78,16 @@ private:
         bitmap _glyph_bitmap;
 
         MaxRectsBinPack _bin_pack;
-        std::vector<sp<GlyphBundle>> _glyph_bundles;
+        Map<Font, sp<GlyphBundle>> _glyph_bundles;
 
         sp<Future> _texture_reload_future;
     };
 
 private:
+    sp<Alphabet> _alphabet;
     sp<Atlas> _atlas;
-    sp<AtlasAttachment> _atlas_attachment;
-    sp<GlyphBundle> _glyph_bundle;
+    sp<AtlasGlyphAttachment> _glyph_attachment;
+    sp<GlyphBundle> _default_glyph_bundle;
 };
 
 }

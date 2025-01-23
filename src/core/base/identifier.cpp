@@ -6,10 +6,9 @@ namespace ark {
 
 namespace {
 
-bool parseAndValidate(const String& s, String& package, String& value, String& queries, bool strictMode)
+bool parseAndValidate(const String& s, String& package, String& value, bool strictMode)
 {
-    auto [packageAndName, queriesOpt] = s.cut('?');
-    if(auto [packageCut, valueOpt] = packageAndName.cut(':'); valueOpt)
+    if(auto [packageCut, valueOpt] = s.cut(':'); valueOpt)
     {
         package = std::move(packageCut);
         value = std::move(valueOpt.value());
@@ -19,8 +18,6 @@ bool parseAndValidate(const String& s, String& package, String& value, String& q
         package = "";
         value = std::move(packageCut);
     }
-    if(queriesOpt)
-        queries = std::move(queriesOpt.value());
     if(strictMode)
         return Strings::isVariableName(package) && Strings::isVariableName(value);
     return Strings::isVariableName(package);
@@ -28,14 +25,24 @@ bool parseAndValidate(const String& s, String& package, String& value, String& q
 
 bool parseTypeAndValue(const String& s, String& type, String& value)
 {
-    const String::size_type pos = s.find('(');
-    if(pos > 0 && pos != String::npos && s.back() == ')')
+    if(const String::size_type pos = s.find('('); pos > 0 && pos != String::npos && s.back() == ')')
     {
         value = s.substr(0, pos);
         type = s.substr(pos + 1, s.length() - 1);
         return true;
     }
     return false;
+}
+
+Optional<Identifier> tryParse(Identifier::Type tokenType, const String& s, bool strict)
+{
+    String package;
+    String value;
+
+    if(parseAndValidate(s, package, value, strict))
+        return {Identifier(tokenType, std::move(package), std::move(value))};
+
+    return {};
 }
 
 }
@@ -49,35 +56,37 @@ Identifier Identifier::parse(const String& s, Identifier::Type idType, bool stri
 {
     CHECK(s, "Illegal identifier: empty string");
 
-    Identifier::Type headTypeToken = static_cast<Type>(s.at(0));
-    Identifier::Type idTypeToken = idType == ID_TYPE_AUTO ? headTypeToken : idType;
+    const Type headTypeToken = static_cast<Type>(s.at(0));
+    const Type idTypeToken = idType == ID_TYPE_AUTO ? headTypeToken : idType;
 
-    String package, value, valueType, queries;
-    if(idTypeToken == ID_TYPE_REFERENCE && parseAndValidate(headTypeToken == ID_TYPE_REFERENCE ? s.substr(1) : s, package, value, queries, strictMode))
-        return Identifier(ID_TYPE_REFERENCE, package, value, "");
+    if(idTypeToken == ID_TYPE_REFERENCE)
+        if(Optional<Identifier> idOpt = tryParse(ID_TYPE_REFERENCE, headTypeToken == ID_TYPE_REFERENCE ? s.substr(1) : s, strictMode))
+            return std::move(idOpt.value());
 
-    if(idTypeToken == ID_TYPE_ARGUMENT && parseAndValidate(headTypeToken == ID_TYPE_ARGUMENT ? s.substr(1) : s, package, value, queries, strictMode))
-        return Identifier(ID_TYPE_ARGUMENT, package, value, "");
+    if(idTypeToken == ID_TYPE_ARGUMENT)
+        if(Optional<Identifier> idOpt = tryParse(ID_TYPE_ARGUMENT, headTypeToken == ID_TYPE_ARGUMENT ? s.substr(1) : s, strictMode))
+            return std::move(idOpt.value());
 
     if(idTypeToken == ID_TYPE_EXPRESSION)
     {
         CHECK(s.back() == '}', "Illegal identifier, expression not in braces: %s", s.c_str());
-        return Identifier(ID_TYPE_EXPRESSION, package, s.substr(1, s.length() - 1).strip(), "");
+        return Identifier(ID_TYPE_EXPRESSION, {}, s.substr(1, s.length() - 1).strip());
     }
 
+    String package, value, valueType;
     if(idTypeToken == ID_TYPE_VALUE_AND_TYPE || parseTypeAndValue(headTypeToken == ID_TYPE_VALUE_AND_TYPE ? s.substr(1) : s, value, valueType))
         return Identifier(ID_TYPE_VALUE_AND_TYPE, package, value, valueType);
 
-    return parseAndValidate(s, package, value, queries, false) ? Identifier(idType == ID_TYPE_AUTO ? ID_TYPE_VALUE : idType, package, value, "") : Identifier(ID_TYPE_VALUE, "", s, "");
+    return parseAndValidate(s, package, value, false) ? Identifier(idType == ID_TYPE_AUTO ? ID_TYPE_VALUE : idType, package, value) : Identifier(ID_TYPE_VALUE, "", s);
 }
 
 Identifier Identifier::parseRef(const String& s, bool strictMode)
 {
-    DCHECK(s, "Illegal identifier: empty string");
-    String package, ref, queries;
-    bool idValid = parseAndValidate(s, package, ref, queries, strictMode);
-    DCHECK_WARN(idValid, "Unvaild refid \"%s\"", s.c_str());
-    return idValid ? Identifier(ID_TYPE_REFERENCE, package, ref, "") : Identifier(ID_TYPE_REFERENCE, "", s, "");
+    CHECK(s, "Illegal identifier: empty string");
+    String package, ref;
+    const bool idValid = parseAndValidate(s, package, ref, strictMode);
+    CHECK_WARN(idValid, "Unvaild refid \"%s\"", s.c_str());
+    return idValid ? Identifier(ID_TYPE_REFERENCE, package, ref) : Identifier(ID_TYPE_REFERENCE, "", s);
 }
 
 Identifier::Type Identifier::type() const
@@ -108,11 +117,6 @@ const String& Identifier::val() const
 const String& Identifier::valType() const
 {
     return _type == ID_TYPE_VALUE_AND_TYPE ? _value_type : String::null();
-}
-
-const Table<String, String>& Identifier::queries() const
-{
-    return _queries;
 }
 
 String Identifier::toString() const

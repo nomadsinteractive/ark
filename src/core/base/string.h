@@ -3,7 +3,6 @@
 #include <functional>
 #include <string>
 #include <regex>
-#include <vector>
 
 #include "core/base/api.h"
 #include "core/types/optional.h"
@@ -56,7 +55,7 @@ public:
 
     void insert(size_type pos, const String& str);
 
-    std::vector<String> split(char delim, bool allowEmpty = false) const;
+    Vector<String> split(char delim, bool allowEmpty = false) const;
     void split(char delim, bool allowEmpty, const std::function<bool(const String&)>& traveller) const;
 
     array<String> match(const std::regex& pattern) const;

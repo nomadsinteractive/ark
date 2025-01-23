@@ -58,9 +58,9 @@ const WithTimestamp<V2>& Layout::Node::offsetPosition() const
     return _offset_position;
 }
 
-void Layout::Node::setOffsetPosition(const V2& offsetPosition)
+void Layout::Node::setOffsetPosition(const V2& offsetPosition, bool markDirty)
 {
-    _offset_position.reset(offsetPosition);
+    _offset_position.reset(offsetPosition, markDirty);
 }
 
 const WithTimestamp<V2>& Layout::Node::size() const
@@ -68,9 +68,9 @@ const WithTimestamp<V2>& Layout::Node::size() const
     return _size;
 }
 
-void Layout::Node::setSize(const V2& size)
+void Layout::Node::setSize(const V2& size, bool markDirty)
 {
-    _size.reset(size);
+    _size.reset(size, markDirty);
 }
 
 bool Layout::Node::update(uint32_t timestamp)

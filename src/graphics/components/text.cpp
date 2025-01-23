@@ -36,6 +36,7 @@
 
 #include "app/base/application_context.h"
 #include "app/view/view.h"
+#include "graphics/base/font.h"
 
 namespace ark {
 
@@ -53,7 +54,7 @@ struct Character {
     bool _is_line_break;
 };
 
-bool isCJK(int32_t c)
+bool isCJK(const int32_t c)
 {
     return c == 0x3005 || Math::between<int32_t>(0x3400, 0x4DBF, c) || Math::between<int32_t>(0x4E00, 0x9FFF, c) ||
            Math::between<int32_t>(0xF900, 0xFAFF, c) || Math::between<int32_t>(0x20000, 0x2A6DF, c) || Math::between<int32_t>(0x2A700, 0x2B73F, c) ||
@@ -78,7 +79,7 @@ V2 getCharacterOffset(const Model& model)
 
 std::vector<Character> toLayoutCharacters(const GlyphContents& glyphs, ModelLoader& modelLoader)
 {
-    std::unordered_map<wchar_t, std::tuple<sp<Model>, V2, bool, bool>> mmap;
+    HashMap<wchar_t, std::tuple<sp<Model>, V2, bool, bool>> mmap;
     float integral = 0;
     std::vector<Character> layoutChars;
     layoutChars.reserve(glyphs.size());
@@ -96,7 +97,7 @@ std::vector<Character> toLayoutCharacters(const GlyphContents& glyphs, ModelLoad
         else
         {
             const int32_t type = c;
-            sp<Model> model = modelLoader.loadModel(type);
+            sp<Model> model = modelLoader.loadModel(i->font() ? i->font()->combine(type) : type);
             const V2 offset = getCharacterOffset(model);
             const Boundaries& m = model->occupy();
             bool iscjk = isCJK(c);
@@ -333,7 +334,7 @@ float doCreateRichContent(GlyphContents& cm, GlyphMaker& gm, const document& ric
 struct Text::Content {
     Content(sp<RenderLayer> renderLayer, sp<StringVar> text, sp<Vec3> position, sp<LayoutParam> layoutParam, sp<GlyphMaker> glyphMaker, sp<Mat4> transform, float letterSpacing, float lineHeight, float lineIndent)
         : _render_layer(std::move(renderLayer)), _text(text ? std::move(text) : StringType::create()), _position(sp<VariableWrapper<V3>>::make(position ? std::move(position) : sp<Vec3>::make<Vec3::Const>(V3(0)))), _layout_param(std::move(layoutParam)),
-          _glyph_maker(glyphMaker ? std::move(glyphMaker) : sp<GlyphMaker>::make<GlyphMakerSpan>()), _transform(std::move(transform)), _letter_spacing(letterSpacing), _layout_direction(Ark::instance().applicationContext()->renderEngine()->toLayoutDirection(1.0f)),
+          _glyph_maker(std::move(glyphMaker)), _transform(std::move(transform)), _letter_spacing(letterSpacing), _layout_direction(Ark::instance().applicationContext()->renderEngine()->toLayoutDirection(1.0f)),
           _line_height(lineHeight), _line_indent(lineIndent), _size(sp<Size>::make(0.0f, 0.0f))
     {
         if(_text->val() && !_text->val()->empty())
@@ -508,7 +509,7 @@ private:
 };
 
 Text::Text(sp<RenderLayer> renderLayer, sp<StringVar> text, sp<Vec3> position, sp<LayoutParam> layoutParam, sp<GlyphMaker> glyphMaker, sp<Mat4> transform, float letterSpacing, float lineHeight, float lineIndent)
-    : _content(sp<Content>::make(std::move(renderLayer), std::move(text), std::move(position), std::move(layoutParam), std::move(glyphMaker), std::move(transform), letterSpacing, lineHeight, lineIndent))
+    : _content(sp<Content>::make(std::move(renderLayer), std::move(text), std::move(position), std::move(layoutParam), glyphMaker ? std::move(glyphMaker) : sp<GlyphMaker>::make<GlyphMakerSpan>(std::move(nullptr)), std::move(transform), letterSpacing, lineHeight, lineIndent))
 {
 }
 
@@ -542,7 +543,7 @@ void Text::onWire(const WiringContext& context, const Box& self)
     show(context.getComponent<Discarded>());
 }
 
-const std::vector<sp<RenderObject>>& Text::contents() const
+const Vector<sp<RenderObject>>& Text::contents() const
 {
     return _content->_render_objects;
 }
@@ -627,16 +628,17 @@ void Text::setRichText(std::wstring richText, const sp<ResourceLoader>& resource
 }
 
 Text::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _render_layer(factory.ensureBuilder<RenderLayer>(manifest, constants::RENDER_LAYER)), _text(factory.getBuilder<StringVar>(manifest, constants::TEXT)), _position(factory.getBuilder<Vec3>(manifest, constants::POSITION)), _layout_param(factory.getBuilder<LayoutParam>(manifest, constants::LAYOUT_PARAM)),
-      _glyph_maker(factory.getBuilder<GlyphMaker>(manifest, "glyph-maker")), _transform(factory.getBuilder<Mat4>(manifest, constants::TRANSFORM)), _letter_spacing(factory.getBuilder<Numeric>(manifest, "letter-spacing")),
+    : _render_layer(factory.ensureBuilder<RenderLayer>(manifest, constants::RENDER_LAYER)), _text(factory.getBuilder<StringVar>(manifest, constants::TEXT)), _font(factory.getBuilder<Font>(manifest, constants::FONT)), _position(factory.getBuilder<Vec3>(manifest, constants::POSITION)),
+      _layout_param(factory.getBuilder<LayoutParam>(manifest, constants::LAYOUT_PARAM)), _glyph_maker(factory.getBuilder<GlyphMaker>(manifest, "glyph-maker")), _transform(factory.getBuilder<Mat4>(manifest, constants::TRANSFORM)), _letter_spacing(factory.getBuilder<Numeric>(manifest, "letter-spacing")),
       _line_height(Documents::getAttribute<float>(manifest, "line-height", 0.0f)), _line_indent(Documents::getAttribute<float>(manifest, "line-indent", 0.0f))
 {
 }
 
 sp<Text> Text::BUILDER::build(const Scope& args)
 {
+    sp<GlyphMaker> glyphMaker = _glyph_maker.build(args);
     float letterSpacing = _letter_spacing ? _letter_spacing.build(args)->val() : 0.0f;
-    return sp<Text>::make(_render_layer->build(args), _text.build(args), _position.build(args), _layout_param.build(args), _glyph_maker.build(args), _transform.build(args), letterSpacing, _line_height, _line_indent);
+    return sp<Text>::make(_render_layer->build(args), _text.build(args), _position.build(args), _layout_param.build(args), glyphMaker ? std::move(glyphMaker) : sp<GlyphMaker>::make<GlyphMakerSpan>(_font.build(args)), _transform.build(args), letterSpacing, _line_height, _line_indent);
 }
 
 Text::BUILDER_WIRABLE::BUILDER_WIRABLE(BeanFactory& factory, const document& manifest)

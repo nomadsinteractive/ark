@@ -44,17 +44,8 @@ private:
             return nullptr;
         }
 
-        sp<Builder<T>> decorate(BeanFactory& factory, const sp<Builder<T>>& builder, const String& style, const String& value) const {
-            auto iter = _decorators.find(style);
-            return iter != _decorators.end() ? iter->second(factory, builder, value) : nullptr;
-        }
-
         void addBuilderFactory(const String& id, std::function<sp<Builder<T>>(BeanFactory&, const document&)> builderFactory) {
             _builders[id] = std::move(builderFactory);
-        }
-
-        void addBuilderDecorator(const String& style, std::function<sp<Builder<T>>(BeanFactory&, const sp<Builder<T>>&, const String&)> builderDecorator) {
-            _decorators[style] = std::move(builderDecorator);
         }
 
         void setDefaultBuilderFactory(std::function<sp<Builder<T>>(BeanFactory&, const document&)> builderFactory) {
@@ -77,53 +68,34 @@ private:
         }
 
         sp<Builder<T>> createBuilder(BeanFactory& factory, const String& className, const document& doc, bool wrapBuilder) const {
-            const String id = Documents::getAttribute(doc, constants::ID);
-            const String wrappedId = wrapBuilder ? id : "";
-            const String ref = Documents::getAttribute(doc, constants::REF);
-            const String style = Documents::getAttribute(doc, constants::STYLE);
+            const String& id = Documents::getAttribute(doc, constants::ID);
+            const String& wrappedId = wrapBuilder ? id : "";
+            const String& ref = Documents::getAttribute(doc, constants::REF);
             if(className.empty() && ref) {
                 const Identifier f = Identifier::parse(ref);
                 if(f.isRef()) {
                     if(f.package().empty() && (f.ref() == id || ref == id))
-                        return createBuilderInternal(factory, className, style, ref, doc);
-                    const sp<Builder<T>> builder = factory.createBuilderByRef<T>(f);
-                    return makeWrappedBuilder(makeDecoratedBuilder(factory, builder, style), wrappedId);
+                        return createBuilderInternal(factory, className, ref, doc);
+
+                    return makeWrappedBuilder(factory.createBuilderByRef<T>(f), wrappedId);
                 }
                 if(f.isArg())
-                    return makeDecoratedBuilder(factory, factory.getBuilderByArg<T>(f), style);
+                    return factory.getBuilderByArg<T>(f);
             }
-            return createBuilderInternal(factory, className.empty() ? doc->name() : className, style, wrappedId, doc);
+            return createBuilderInternal(factory, className.empty() ? doc->name() : className, wrappedId, doc);
         }
 
     private:
-        sp<Builder<T>> createBuilderInternal(BeanFactory& factory, const String& className, const String& style, const String& id, const document& doc) const {
+        sp<Builder<T>> createBuilderInternal(BeanFactory& factory, const String& className, const String& id, const document& doc) const {
             const auto iter = _builders.find(className);
             if(iter == _builders.end())
-                return _default_builder_factory ? makeWrappedBuilder(makeDecoratedBuilder(factory, _default_builder_factory(factory, doc), style), id) : nullptr;
-            const sp<Builder<T>> builder = iter->second(factory, doc);
+                return _default_builder_factory ? makeWrappedBuilder(_default_builder_factory(factory, doc), id) : nullptr;
+            sp<Builder<T>> builder = iter->second(factory, doc);
             CHECK(builder, "Builder \"%s\" create failed", className.c_str());
-            return makeWrappedBuilder(makeDecoratedBuilder(factory, builder, style), id);
+            return makeWrappedBuilder(std::move(builder), id);
         }
 
         sp<Builder<T>> makeWrappedBuilder(sp<Builder<T>> builder, const String& id) const;
-
-        sp<Builder<T>> makeDecoratedBuilder(BeanFactory& factory, const sp<Builder<T>>& builder, const String& styles) const {
-            if(styles && builder) {
-                sp<Builder<T>> f = builder;
-                for(const String& style : styles.split(';')) {
-                    if(style.at(0) == '@') {
-                        const document node = _document_by_id->get(style.substr(1));
-                        CHECK(node, "Style \"%s\" not found", style.substr(1).c_str());
-                        f = factory.decorate<T>(f, node);
-                    } else {
-                        const auto [key, value] = style.cut(':');
-                        f = factory.decorate<T>(f, key, value ? value.value() : "");
-                    }
-                }
-                return f;
-            }
-            return builder;
-        }
 
     private:
         WeakPtr<Scope> _references;
@@ -134,7 +106,6 @@ private:
 
         std::unordered_map<String, std::function<sp<Builder<T>>(BeanFactory&, const String&)>> _values;
         std::unordered_map<String, std::function<sp<Builder<T>>(BeanFactory&, const document&)>> _builders;
-        std::unordered_map<String, std::function<sp<Builder<T>>(BeanFactory&, const sp<Builder<T>>&, const String&)>> _decorators;
     };
 
 public:
@@ -165,11 +136,6 @@ public:
             return worker ? worker->createValueBuilder(factory, type, value) : nullptr;
         }
 
-        template<typename T> sp<Builder<T>> decorate(BeanFactory& factory, const sp<Builder<T>>& builder, const String& style, const String& value) const {
-            const sp<Worker<T>>& worker = _workers.get<Worker<T>>();
-            return worker ? worker->decorate(factory, builder, style, value) : nullptr;
-        }
-
         template<typename T> void addDictionaryFactory(const String& name, std::function<sp<Builder<T>>(BeanFactory&, const String&)> dictionaryFactory) {
             ensureWorker<T>()->addDictionaryFactory(name, dictionaryFactory);
         }
@@ -184,10 +150,6 @@ public:
 
         template<typename T> void addBuilderFactory(std::function<sp<Builder<T>>(BeanFactory&, const document&)>&& builderFactory) {
             ensureWorker<T>()->setDefaultBuilderFactory(std::move(builderFactory));
-        }
-
-        template<typename T> void addBuilderDecorator(const String& style, std::function<sp<Builder<T>>(BeanFactory&, const sp<Builder<T>>&, const String&)> builderDecorator) {
-            ensureWorker<T>()->addBuilderDecorator(style, builderDecorator);
         }
 
     private:
@@ -269,22 +231,6 @@ public:
     template<typename T> sp<T> ensure(const document& doc, const String& attr, const Scope& args) {
         const sp<T> obj = build<T>(doc, attr, args);
         CHECK(obj, "Counld not build \"%s\" from \"%s\"", attr.c_str(), Documents::toString(doc).c_str());
-        return obj;
-    }
-
-    template<typename T, typename U> sp<T> buildDecorated(const document& doc, const Scope& args) {
-        const sp<Builder<U>> builder = findBuilderByDocument<U>(doc, true);
-        if(!builder)
-            return nullptr;
-
-        if(const String style = Documents::getAttribute(doc, constants::STYLE))
-            return decorate<T>(sp<typename Builder<T>::template Wrapper<Builder<U>>>::make(builder), style)->build(args);
-        return builder->build(args);
-    }
-
-    template<typename T, typename U> sp<T> ensureDecorated(const document& doc, const Scope& args) {
-        const sp<T> obj = buildDecorated<T, U>(doc, args);
-        CHECK(obj, "Counld not build \"%s\"", Documents::toString(doc).c_str());
         return obj;
     }
 
@@ -387,18 +333,6 @@ public:
         return builder;
     }
 
-    template<typename T> sp<Builder<T>> decorate(const sp<Builder<T>>& builder, const String& properties) {
-        const document style = Documents::fromProperties(properties);
-        return decorate<T>(builder, style);
-    }
-
-    template<typename T> sp<Builder<T>> decorate(const sp<Builder<T>>& builder, const document& style) {
-        sp<Builder<T>> f = builder;
-        for(const attribute& attr : style->attributes())
-            f = decorate<T>(f, attr->name(), attr->value());
-        return f;
-    }
-
     void add(const Factory& factory, bool front = false);
     void addPackage(const String& name, const BeanFactory& package);
 
@@ -436,13 +370,6 @@ public:
             if(sp<Builder<T>> builder = i.createValueBuilder<T>(*this, type, value))
                 return builder;
         return nullptr;
-    }
-
-    template<typename T> sp<Builder<T>> decorate(const sp<Builder<T>>& builder, const String& style, const String& value) {
-        for(const Factory& i : _stub->_factories)
-            if(sp<Builder<T>> f = i.decorate<T>(*this, builder, style, value))
-                return f;
-        return builder;
     }
 
     template<typename T> sp<T> buildSafe(const sp<Builder<T>>& builder, const Scope& args) {
@@ -504,11 +431,9 @@ private:
 };
 
 template<typename T> sp<Builder<T>> BeanFactory::Worker<T>::makeWrappedBuilder(sp<Builder<T>> builder, const String& id) const {
-    if(id.empty())
+    if(id.empty() || id.at(0) != '@')
         return builder;
-    if(id.at(0) == '@')
-        return sp<BuilderBySoftRef<T>>::make(id.substr(1), _references, std::move(builder));
-    return builder;
+    return sp<Builder<T>>::make<BuilderBySoftRef<T>>(id.substr(1), _references, std::move(builder));
 }
 
 template<typename T> sp<Builder<T>> BeanFactory::getBuilderByArg(String argname) {

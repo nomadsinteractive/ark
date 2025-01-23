@@ -1,20 +1,12 @@
-#ifndef ARK_GRAPHICS_BASE_FONT_H_
-#define ARK_GRAPHICS_BASE_FONT_H_
+#pragma once
 
-#include "core/base/api.h"
+#include "core/base/string.h"
+#include "core/inf/builder.h"
 
 namespace ark {
 
 class Font {
 public:
-    enum Family {
-        FONT_FAMILY_DEFAULT,
-        FONT_FAMILY_ARIAL,
-        FONT_FAMILY_MONOSPACE,
-        FONT_FAMILY_SANS_SERIF,
-        FONT_FAMILY_SERIF
-    };
-
     enum Style {
         FONT_STYLE_REGULAR = 0,
         FONT_STYLE_BOLD = 1,
@@ -32,27 +24,53 @@ public:
         TextSize(const String& size);
         TextSize(uint32_t value, SizeUnit unit);
 
-        bool operator < (const TextSize& other) const;
-
         uint32_t _value;
         SizeUnit _unit;
     };
 
-    Font(const TextSize& size, Family family = FONT_FAMILY_DEFAULT, Style style = FONT_STYLE_REGULAR);
+    Font(TextSize size = {}, Style style = FONT_STYLE_REGULAR);
+    Font(uint32_t size, SizeUnit sizeUnit, Style style = FONT_STYLE_REGULAR);
 
-    const TextSize& size() const;
-    Family family() const;
+    explicit operator bool() const;
+
+    TextSize size() const;
+
+    uint32_t sizeValue() const;
+    SizeUnit sizeUnit() const;
+
     Style style() const;
+
+    uint32_t combine(uint32_t unicode) const;
 
     bool operator < (const Font& other) const;
 
+    static std::pair<Font, uint32_t> partition(uint32_t combined);
+
+//  [[plugin::builder]]
+    class BUILDER final : public Builder<Font> {
+    public:
+        BUILDER(BeanFactory& factory, const document& manifest);
+
+        sp<Font> build(const Scope& args) override;
+
+    private:
+        builder<String> _text_size;
+    };
+
+//  [[plugin::builder::by-value]]
+    class DICTIONARY final : public Builder<Font> {
+    public:
+        DICTIONARY(BeanFactory& beanFactory, const String& expr);
+
+        sp<Font> build(const Scope& args) override;
+
+    private:
+        builder<String> _text_size;
+    };
+
 private:
     TextSize _size;
-    Family _family;
     Style _style;
-
 };
 
 }
-
-#endif

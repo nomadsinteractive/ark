@@ -5,7 +5,7 @@
 namespace ark {
 
 ModelLoaderCached::ModelLoaderCached(sp<ModelLoader> delegate)
-    : ModelLoader(delegate->renderMode(), delegate->texture()), _delegate(std::move(delegate))
+    : ModelLoader(delegate->renderMode(), delegate->texture(), delegate->trait()), _delegate(std::move(delegate))
 {
 }
 
@@ -26,7 +26,7 @@ sp<Model> ModelLoaderCached::loadModel(int32_t type)
 
 sp<ModelLoader> ModelLoaderCached::ensureCached(sp<ModelLoader> delegate)
 {
-    return delegate ? sp<ModelLoader>::make<ModelLoaderCached>(std::move(delegate)) : delegate;
+    return !delegate || delegate->trait() & MODEL_TRAIT_DISALLOW_CACHE ? delegate : sp<ModelLoader>::make<ModelLoaderCached>(std::move(delegate));
 }
 
 }

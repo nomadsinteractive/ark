@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_IMPL_GLYPH_MAKER_GLYPH_MAKER_SPAN_H_
-#define ARK_GRAPHICS_IMPL_GLYPH_MAKER_GLYPH_MAKER_SPAN_H_
+#pragma once
 
 #include "core/inf/builder.h"
 
@@ -7,21 +6,14 @@
 
 namespace ark {
 
-class GlyphMakerSpan : public GlyphMaker {
+class GlyphMakerSpan final : public GlyphMaker {
 public:
+    GlyphMakerSpan(sp<Font> font);
 
-    virtual std::vector<sp<Glyph>> makeGlyphs(const std::wstring& text) override;
+    std::vector<sp<Glyph>> makeGlyphs(const std::wstring& text) override;
 
-//[[plugin::builder]]
-    class BUILDER : public Builder<GlyphMaker> {
-    public:
-        BUILDER() = default;
-
-        virtual sp<GlyphMaker> build(const Scope& args) override;
-    };
-
+private:
+    sp<Font> _font;
 };
 
 }
-
-#endif

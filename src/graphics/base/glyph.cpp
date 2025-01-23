@@ -6,14 +6,19 @@
 
 namespace ark {
 
-Glyph::Glyph(sp<Integer> type, sp<Vec3> position, sp<Transform> transform, sp<Varyings> varyings, sp<Boolean> visible, sp<Boolean> discarded)
-    : _type(type), _position(std::move(position)), _transform(std::move(transform)), _varyings(std::move(varyings)), _visible(std::move(visible)), _discarded(std::move(discarded)), _character(0)
+Glyph::Glyph(sp<Integer> type, sp<Font> font, sp<Vec3> position, sp<Transform> transform, sp<Varyings> varyings, sp<Boolean> visible, sp<Boolean> discarded)
+    : _type(std::move(type)), _font(std::move(font)), _position(std::move(position)), _transform(std::move(transform)), _varyings(std::move(varyings)), _visible(std::move(visible)), _discarded(std::move(discarded)), _character(0)
 {
 }
 
 const sp<Integer>& Glyph::type() const
 {
     return _type;
+}
+
+const sp<Font>& Glyph::font() const
+{
+    return _font;
 }
 
 const sp<Vec3>& Glyph::position() const
@@ -31,9 +36,9 @@ const sp<Varyings>& Glyph::varyings() const
     return _varyings;
 }
 
-void Glyph::setVaryings(const sp<Varyings>& varyings)
+void Glyph::setVaryings(sp<Varyings> varyings)
 {
-    _varyings = varyings;
+    _varyings = std::move(varyings);
 }
 
 const sp<Boolean>& Glyph::discarded() const

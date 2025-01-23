@@ -5,8 +5,8 @@
 
 namespace ark {
 
-ModelLoader::ModelLoader(Enum::RenderMode renderMode, sp<Texture> texture)
-    : _render_mode(renderMode), _texture(std::move(texture)) {
+ModelLoader::ModelLoader(Enum::RenderMode renderMode, sp<Texture> texture, ModelTrait trait)
+    : _render_mode(renderMode), _texture(std::move(texture)), _trait(trait) {
 }
 
 Enum::RenderMode ModelLoader::renderMode() const
@@ -23,6 +23,11 @@ void ModelLoader::bind(const PipelineBindings& pipelineBindings) const
 const sp<Texture>& ModelLoader::texture() const
 {
     return _texture;
+}
+
+ModelLoader::ModelTrait ModelLoader::trait() const
+{
+    return _trait;
 }
 
 }

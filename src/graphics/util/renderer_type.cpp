@@ -2,12 +2,10 @@
 
 #include "core/collection/traits.h"
 #include "core/components/discarded.h"
-#include "core/components/visibility.h"
 #include "core/util/strings.h"
 #include "core/util/string_convert.h"
 
 #include "graphics/inf/renderer.h"
-#include "graphics/impl/renderer/renderer_style_position.h"
 #include "graphics/impl/renderer/renderer_wrapper.h"
 #include "graphics/impl/renderer/render_group.h"
 
@@ -43,11 +41,6 @@ sp<Renderer> RendererType::reset(const sp<Renderer>& self, sp<Renderer> wrapped)
     const sp<Wrapper<Renderer>> rd = self.tryCast<Wrapper<Renderer>>();
     CHECK(rd, "Renderer is not an instance of Wrapper<Renderer>");
     return rd->reset(std::move(wrapped));
-}
-
-sp<Renderer> RendererType::translate(const sp<Renderer>& self, const sp<Vec3>& position)
-{
-    return sp<RendererStylePosition>::make(self, position);
 }
 
 template<> ARK_API RendererType::Priority StringConvert::eval<RendererType::Priority>(const String& expr)

@@ -2,7 +2,6 @@
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
-#include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
 #include "graphics/inf/layout.h"
@@ -19,6 +18,8 @@ public:
 
     static float calcItemOffsetX(LayoutParam::Align align, const Layout::Node& rootNode, Layout::Node& item);
     static float calcItemOffsetY(LayoutParam::Align align, const Layout::Node& rootNode, Layout::Node& item);
+
+    static V2 calcItemSize(const LayoutParam& layoutParam, const Layout::Node& parent);
 
 private:
     static Rect flow(LayoutParam::FlexDirection flexDirection, const V2& size, Rect& available);

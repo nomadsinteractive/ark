@@ -3,7 +3,6 @@
 #include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
 
-#include "graphics/base/v4.h"
 #include "graphics/forwarding.h"
 
 namespace ark {
@@ -48,7 +47,7 @@ const char* const DELEGATE = "delegate";
 const char* const DISCARDED = "discarded";
 const char* const ENTITY = "ENTITY";
 const char* const EVENT_LISTENER = "event-listener";
-const char* const VARYINGS = "varyings";
+const char* const FONT = "font";
 const char* const FOREGROUND = "foreground";
 const char* const GRAVITY = "gravity";
 const char* const LAYOUT = "layout";
@@ -74,7 +73,6 @@ const char* const RENDER_TARGET = "render-target";
 const char* const ROTATION = "rotation";
 const char* const SHADER = "shader";
 const char* const SIZE = "size";
-const char* const STYLE = "style";
 const char* const TEXT = "text";
 const char* const TEXTURE = "texture";
 const char* const TIMEOUT = "timeout";
@@ -82,6 +80,7 @@ const char* const TRANSFORM = "transform";
 const char* const TRANSLATION = "translation";
 const char* const TYPE = "type";
 const char* const VALUE = "value";
+const char* const VARYINGS = "varyings";
 const char* const VIEW = "view";
 const char* const VISIBLE = "visible";
 

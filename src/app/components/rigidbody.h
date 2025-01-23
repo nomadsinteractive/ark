@@ -8,6 +8,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
+#include "graphics/base/v4.h"
 
 #include "app/forwarding.h"
 #include "core/types/safe_builder.h"

@@ -23,7 +23,7 @@ public:
     void onWire(const WiringContext& context, const Box& self) override;
 
 //  [[script::bindings::property]]
-    const std::vector<sp<RenderObject>>& contents() const;
+    const Vector<sp<RenderObject>>& contents() const;
 
 //  [[script::bindings::property]]
     const sp<LayoutParam>& layoutParam() const;
@@ -71,6 +71,7 @@ public:
     private:
         sp<Builder<RenderLayer>> _render_layer;
         SafeBuilder<StringVar> _text;
+        SafeBuilder<Font> _font;
         SafeBuilder<Vec3> _position;
         SafeBuilder<LayoutParam> _layout_param;
         SafeBuilder<GlyphMaker> _glyph_maker;

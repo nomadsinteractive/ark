@@ -1,6 +1,5 @@
 #pragma once
 
-#include <vector>
 #include <string>
 
 #include "graphics/forwarding.h"
@@ -11,7 +10,7 @@ class GlyphMaker {
 public:
     virtual ~GlyphMaker() = default;
 
-    virtual std::vector<sp<Glyph>> makeGlyphs(const std::wstring& text) = 0;
+    virtual Vector<sp<Glyph>> makeGlyphs(const std::wstring& text) = 0;
 
 };
 

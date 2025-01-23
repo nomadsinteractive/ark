@@ -90,10 +90,10 @@ public:
         });
     }
 
-    virtual sp<String> build(const Scope& args) override {
+    sp<String> build(const Scope& args) override {
         StringBuffer sb;
         for(const sp<Builder<String>>& i : _builders) {
-            sp<String> v = i->build(args);
+            const sp<String> v = i->build(args);
             sb << v->c_str();
         }
         return sp<String>::make(sb.str());

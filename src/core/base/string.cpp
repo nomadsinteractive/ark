@@ -217,9 +217,9 @@ void String::insert(size_type pos, const String& str)
     _str.insert(pos, str._str);
 }
 
-std::vector<String> String::split(char delim, bool allowEmpty) const
+Vector<String> String::split(char delim, bool allowEmpty) const
 {
-    std::vector<String> elems;
+    Vector<String> elems;
     std::stringstream ss(_str);
     std::string item;
     while(std::getline(ss, item, delim))
