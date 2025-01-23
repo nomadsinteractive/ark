@@ -141,13 +141,15 @@ sp<Entity> Entity::BUILDER::build(const Scope& args)
     {
         const sp<std::vector<Box>> boxes = _boxes->build(args);
         for(Box& i : *boxes)
-            components.push_back({std::move(i)});
+            if(i)
+                components.push_back({std::move(i)});
     }
     for(const ComponentBuilder& i : _components)
-    {
-        const Box trait(i._wirable->build(args));
-        components.push_back({trait.cast(trait.getClass()->id()), i._manifest});
-    }
+        if(sp<Wirable> wirable = i._wirable->build(args))
+        {
+            const Box trait(std::move(wirable));
+            components.push_back({trait.cast(trait.getClass()->id()), i._manifest});
+        }
     return sp<Entity>::make(std::move(components));
 }
 

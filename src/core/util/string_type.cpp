@@ -172,10 +172,10 @@ sp<StringVar> StringType::format(String format, const Scope& kwargs)
             return true;
         }
 
-        const std::string format = matched[2].str();
-        const Box value = kwargs.getObject(name);
+        const std::string m2 = matched[2].str();
+        const Optional<Box> value = kwargs.getObject(name);
         CHECK(value, "Unable to get keyword name \"%s\"", name.c_str());
-        sp<StringVar> formatted = toStringVar<int32_t, float, sp<String>>(value, format.c_str());
+        sp<StringVar> formatted = toStringVar<int32_t, float, sp<String>>(value.value(), m2.c_str());
         CHECK(formatted, "Unable to format key \"%s\"", name.c_str());
         strList.push_back(std::move(formatted));
         return true;

@@ -22,8 +22,9 @@
 namespace ark {
 
 struct View::Stub final : Updatable {
-    Stub(sp<LayoutParam> layoutParam, String name, sp<Boolean> discarded)
-        : _name(std::move(name)), _hierarchy(layoutParam->layout() ? sp<ViewHierarchy>::make(layoutParam->layout()) : nullptr), _layout_node(sp<Layout::Node>::make(std::move(layoutParam))), _discarded(std::move(discarded), false), _top_view(false)
+    Stub(sp<LayoutParam> layoutParam, String name, sp<Vec3> position, sp<Boolean> discarded)
+        : _name(std::move(name)), _hierarchy(layoutParam->layout() ? sp<ViewHierarchy>::make(layoutParam->layout()) : nullptr), _layout_node(sp<Layout::Node>::make(std::move(layoutParam))), _position(std::move(position)),
+          _discarded(std::move(discarded), false), _top_view(false)
     {
     }
 
@@ -52,10 +53,20 @@ struct View::Stub final : Updatable {
         const Layout::Node& layoutNode = _layout_node;
         const V3 layoutOffset(layoutNode.offsetPosition(), 0);
         const sp<Stub> parentStub = _parent_stub.lock();
-        V3 offset = parentStub ? parentStub->getTopViewOffsetPosition(false) + layoutOffset : layoutOffset;
+        V3 offset = (parentStub ? parentStub->getTopViewOffsetPosition(false) : getViewPosition()) + layoutOffset;
         if(includePaddings)
             offset += V3(layoutNode.paddings().w(), layoutNode.paddings().x(), 0);
         return layoutNode._layout_param->offset().val() + offset;
+    }
+
+    V3 getViewPosition() const
+    {
+        if(!_position)
+            return V3();
+
+        const V3 position = _position->val();
+        const V2 layoutSize = _layout_node->size().value();
+        return {position.x() - layoutSize.x() / 2, position.y() - layoutSize.y() / 2, position.z()};
     }
 
     sp<Layout::Node> getTopViewLayoutNode() const
@@ -77,6 +88,7 @@ struct View::Stub final : Updatable {
     sp<ViewHierarchy> _hierarchy;
     sp<Layout::Node> _layout_node;
 
+    sp<Vec3> _position;
     SafeVar<Boolean> _discarded;
 
     WeakPtr<Stub> _parent_stub;
@@ -150,34 +162,6 @@ private:
     sp<Updatable> _updatable;
 };
 
-class IsDiscarded final : public Boolean {
-public:
-    IsDiscarded(sp<View::Stub> stub)
-        : _stub(std::move(stub))
-    {
-    }
-
-    bool update(uint64_t timestamp) override
-    {
-        bool dirty = false;
-        sp<View::Stub> stub = _stub;
-        while(stub)
-        {
-            dirty = stub->_discarded.update(timestamp) || dirty;
-            stub = stub->_parent_stub.lock();
-        }
-        return dirty;
-    }
-
-    bool val() override
-    {
-        return _stub->isDiscarded();
-    }
-
-private:
-    sp<View::Stub> _stub;
-};
-
 class UpdatableLayoutTopView final : public Updatable {
 public:
     UpdatableLayoutTopView(sp<View::Stub> stub)
@@ -197,9 +181,8 @@ private:
 
 }
 
-View::View(sp<LayoutParam> layoutParam, String name, sp<Boolean> discarded)
-    : Niche("view-name"), _stub(sp<Stub>::make(std::move(layoutParam), std::move(name), std::move(discarded))), _is_discarded(sp<Boolean>::make<IsDiscarded>(_stub)),
-      _updatable_view(sp<UpdatableOncePerFrame>::make(_stub))
+View::View(sp<LayoutParam> layoutParam, String name, sp<Vec3> position, sp<Boolean> discarded)
+    : Niche("view-name"), _stub(sp<Stub>::make(std::move(layoutParam), std::move(name), std::move(position), std::move(discarded))), _updatable_view(sp<Updatable>::make<UpdatableOncePerFrame>(_stub))
 {
 }
 
@@ -322,14 +305,14 @@ void View::markAsTopView()
 }
 
 View::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _name(Documents::getAttribute(manifest, constants::NAME)), _discarded(factory.getBuilder<Boolean>(manifest, constants::DISCARDED)),
+    : _name(Documents::getAttribute(manifest, constants::NAME)), _position(factory.getBuilder<Vec3>(manifest, constants::POSITION)), _discarded(factory.getBuilder<Boolean>(manifest, constants::DISCARDED)),
       _layout_param(factory.ensureConcreteClassBuilder<LayoutParam>(manifest, constants::LAYOUT_PARAM)), _children(factory.makeBuilderList<View>(manifest, constants::VIEW))
 {
 }
 
 sp<View> View::BUILDER::build(const Scope& args)
 {
-    sp<View> view = sp<View>::make(_layout_param.build(args), _name, _discarded.build(args));
+    sp<View> view = sp<View>::make(_layout_param.build(args), _name, _position.build(args), _discarded.build(args));
     for(const builder<View>& i : _children)
         view->addView(i->build(args));
     return view;

@@ -82,7 +82,6 @@ class Mutex;
 class Observer;
 class Plugin;
 class PluginManager;
-class Queries;
 class Readable;
 class Runnable;
 class Scope;

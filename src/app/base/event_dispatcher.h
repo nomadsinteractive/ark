@@ -1,6 +1,5 @@
 #pragma once
 
-#include <map>
 #include <stack>
 
 #include "core/base/api.h"
@@ -22,7 +21,7 @@ public:
     void unKeyEvent(Event::Code code);
 
 //  [[script::bindings::auto]]
-    void onMotionEvent(sp<EventListener> onDown, sp<EventListener> onUp, sp<EventListener> onClick, sp<EventListener> onMove);
+    void onMotionEvent(sp<EventListener> onPress = nullptr, sp<EventListener> onRelease = nullptr, sp<EventListener> onClick = nullptr, sp<EventListener> onMove = nullptr);
 //  [[script::bindings::auto]]
     void unMotionEvent();
 
@@ -57,8 +56,8 @@ private:
         bool onEvent(const EventDispatcher& dispatcher, const Event& event);
 
     private:
-        sp<EventListener> _on_down;
-        sp<EventListener> _on_up;
+        sp<EventListener> _on_press;
+        sp<EventListener> _on_release;
         sp<EventListener> _on_click;
         sp<EventListener> _on_move;
 
@@ -69,7 +68,7 @@ private:
 private:
     float _motion_click_range;
 
-    std::map<Event::Code, std::stack<KeyEventListener>> _key_events;
+    Map<Event::Code, std::stack<KeyEventListener>> _key_events;
     std::stack<MotionEventListener> _motion_events;
 };
 

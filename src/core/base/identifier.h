@@ -15,8 +15,7 @@ public:
         ID_TYPE_VALUE_AND_TYPE = 2,
         ID_TYPE_REFERENCE = '@',
         ID_TYPE_ARGUMENT = '$',
-        ID_TYPE_EXPRESSION = '{',
-        ID_TYPE_QUERY = '?'
+        ID_TYPE_EXPRESSION = '{'
     };
 
     Identifier(const Identifier& other) = default;
@@ -44,12 +43,7 @@ public:
     Identifier withouPackage() const;
 
 private:
-    Identifier(Type type, String package, String val, String valueType, const String& queries);
-
-    static bool parseAndValidate(const String& s, String& package, String& val, String& queries, bool strictMode);
-    static bool parseTypeAndValue(const String& s, String& type, String& value);
-
-    void parseQueries(const String& queries);
+    Identifier(Type type, String package, String val, String valueType);
 
 private:
     Type _type;

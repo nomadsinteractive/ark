@@ -19,9 +19,14 @@ void PyListDuckType::to(sp<std::vector<Box>>& inst)
     {
         PyObject* key = PyLong_FromSsize_t(i);
         PyObject* item = PyObject_GetItem(_instance.pyObject(), key);
-        ASSERT(pi.isPyArkTypeObject(Py_TYPE(item)));
-        boxes.push_back(*reinterpret_cast<PyArkType::Instance*>(item)->box);
-        Py_XDECREF(key);
+        if(Py_IsNone(item))
+            boxes.push_back({});
+        else
+        {
+            ASSERT(pi.isPyArkTypeObject(Py_TYPE(item)));
+            boxes.push_back(*reinterpret_cast<PyArkType::Instance*>(item)->box);
+        }
+        Py_XDECREF(item);
         Py_XDECREF(key);
     }
     inst = sp<std::vector<Box>>::make(std::move(boxes));

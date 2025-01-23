@@ -31,17 +31,6 @@ Rect LayoutUtil::flow(LayoutParam::FlexDirection flexDirection, const V2& size, 
     return available;
 }
 
-V2 LayoutUtil::inflate(const std::vector<sp<LayoutParam>>& slots)
-{
-    float width = 0, height = 0;
-    for(const LayoutParam& i : slots)
-    {
-        width = std::max(width, i.occupyWidth());
-        height = std::max(height, i.occupyHeight());
-    }
-    return V2(width, height);
-}
-
 std::pair<float, float> LayoutUtil::calcFlowDirection(LayoutParam::JustifyContent justifyContent, float totalSpace, float childrenSpace, size_t childCount)
 {
     switch(justifyContent) {
@@ -65,6 +54,27 @@ std::pair<float, float> LayoutUtil::calcFlowDirection(LayoutParam::JustifyConten
     return {0.0f, 0.0f};
 }
 
+LayoutParam::Align LayoutUtil::toAlign(LayoutParam::JustifyContent justifyContent)
+{
+    switch(justifyContent)
+    {
+        case LayoutParam::JUSTIFY_CONTENT_FLEX_START:
+            return LayoutParam::ALIGN_FLEX_START;
+        case LayoutParam::JUSTIFY_CONTENT_FLEX_END:
+            return LayoutParam::ALIGN_FLEX_END;
+        case LayoutParam::JUSTIFY_CONTENT_CENTER:
+            return LayoutParam::ALIGN_CENTER;
+        case LayoutParam::JUSTIFY_CONTENT_SPACE_BETWEEN:
+            return LayoutParam::ALIGN_SPACE_BETWEEN;
+        case LayoutParam::JUSTIFY_CONTENT_SPACE_AROUND:
+            return LayoutParam::ALIGN_SPACE_AROUND;
+        case LayoutParam::JUSTIFY_CONTENT_SPACE_EVENLY:
+            return LayoutParam::ALIGN_STRETCH;
+    }
+    WARN("Unknown justify content: %d", justifyContent);
+    return LayoutParam::ALIGN_FLEX_START;
+}
+
 float LayoutUtil::calcItemOffsetX(LayoutParam::Align align, const Layout::Node& rootNode, Layout::Node& item)
 {
     float offset = 0;
@@ -76,7 +86,7 @@ float LayoutUtil::calcItemOffsetX(LayoutParam::Align align, const Layout::Node& 
             offset = rootNode.contentWidth() - item.occupyWidth();
             break;
         case LayoutParam::ALIGN_STRETCH:
-            item.setSize(V2(rootNode.size()->x(), item.size()->y()));
+            item.setSize({rootNode.size()->x(), item.size()->y()});
         case LayoutParam::ALIGN_AUTO:
         case LayoutParam::ALIGN_FLEX_START:
         case LayoutParam::ALIGN_BASELINE:
@@ -99,7 +109,7 @@ float LayoutUtil::calcItemOffsetY(LayoutParam::Align align, const Layout::Node& 
             offset = rootNode.contentHeight() - item.occupyHeight();
             break;
         case LayoutParam::ALIGN_STRETCH:
-            item.setSize(V2(rootNode.size()->x(), item.size()->y()));
+            item.setSize({rootNode.size()->x(), item.size()->y()});
         case LayoutParam::ALIGN_AUTO:
         case LayoutParam::ALIGN_FLEX_START:
         case LayoutParam::ALIGN_BASELINE:

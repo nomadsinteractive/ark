@@ -64,8 +64,9 @@ public:
         : _name(name) {
     }
 
-    virtual sp<String> build(const Scope& args) override {
-        const sp<String> value = args.build<String>(_name, args);
+    sp<String> build(const Scope& args) override {
+        Optional<Box> optValue = args.getObject(_name);
+        sp<String> value = optValue ? optValue->as<String>() : nullptr;
         CHECK(value, "Cannot get argument \"%s\"", _name.c_str());
         return value;
     }

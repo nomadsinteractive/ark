@@ -2,13 +2,10 @@
 
 #include <list>
 #include <type_traits>
-#include <unordered_map>
-#include <vector>
 
 #include "core/base/api.h"
 #include "core/base/constants.h"
 #include "core/base/identifier.h"
-#include "core/base/queries.h"
 #include "core/base/scope.h"
 
 #include "core/collection/traits.h"
@@ -359,8 +356,6 @@ public:
     template<typename T> sp<Builder<T>> getBuilderByArg(const Identifier& id);
     template<typename T> sp<Builder<T>> getBuilderByRef(const Identifier& id, BeanFactory& factory);
 
-    template<typename T> sp<T> buildWithQueries(const String& name, const Queries& queries, const Scope& args);
-
     template<typename T> sp<Builder<T>> ensureBuilder(const String& id, Identifier::Type idType = Identifier::ID_TYPE_AUTO) {
         DCHECK(id, "Empty value being built");
         const sp<Builder<T>> builder = getBuilder<T>(id, idType);
@@ -456,11 +451,7 @@ public:
 
 private:
     sp<Stub> _stub;
-
-    friend class Queries;
 };
-
-namespace  {
 
 template<typename T> class BuilderBySoftRef final : public Builder<T> {
 public:
@@ -471,7 +462,7 @@ public:
     sp<T> build(const Scope& args) override {
         const sp<Scope> reference = _references.lock();
         CHECK(reference, "BeanFactory has been disposed");
-        sp<T> inst = reference->build<T>(_name, args);
+        sp<T> inst = reference->get(_name).as<T>();
         if(!inst) {
             inst = _delegate->build(args);
             CHECK(inst, "Cannot build \"%s\"", _name.c_str());
@@ -494,14 +485,16 @@ public:
     }
 
     sp<T> build(const Scope& args) override {
-        sp<T> value = args.build<T>(_name, args);
-        if(!value) {
-            const sp<Scope> references = _references.lock();
-            CHECK(references, "BeanFactory has been disposed");
-            value = references->build<T>(_name, args);
-        }
-        CHECK(value || _fallback, "Cannot get argument \"%s\"", _name.c_str());
-        return value ? value : _fallback->build(args);
+        if(const Optional<Box> optVar = args.getObject(_name))
+            if(sp<T> value = optVar->as<T>(); value || !optVar.value())
+                return value;
+
+        if(const Optional<Box> optVar = _references.ensure()->getObject(_name))
+            if(sp<T> value = optVar->as<T>(); value || !optVar.value())
+                return value;
+
+        CHECK(_fallback, "Cannot get argument \"%s\"", _name.c_str());
+        return _fallback->build(args);
     }
 
 private:
@@ -509,24 +502,6 @@ private:
     String _name;
     sp<Builder<T>> _fallback;
 };
-
-template<typename T> class BuilderWithQueries final : public Builder<T> {
-public:
-    BuilderWithQueries(sp<Builder<T>> delegate, const BeanFactory& factory, const Identifier& id)
-        : _delegate(std::move(delegate)), _queries(sp<Queries>::make(factory, id.queries())) {
-    }
-
-    sp<T> build(const Scope& args) override {
-        Scope argsAndQueries(args.variables(), _queries);
-        return _delegate->build(argsAndQueries);
-    }
-
-private:
-    sp<Builder<T>> _delegate;
-    sp<Queries> _queries;
-};
-
-}
 
 template<typename T> sp<Builder<T>> BeanFactory::Worker<T>::makeWrappedBuilder(sp<Builder<T>> builder, const String& id) const {
     if(id.empty())
@@ -546,34 +521,15 @@ template<typename T> sp<Builder<T>> BeanFactory::getBuilderByArg(const Identifie
 }
 
 template<typename T> sp<Builder<T>> BeanFactory::getBuilderByRef(const Identifier& id, BeanFactory& factory) {
-    String refid = id.ref();
-    sp<T> inst = _stub->_references->get(refid).template as<T>();
-    if(inst)
+    const String refid = id.ref();
+    if(sp<T> inst = _stub->_references->get(refid).template as<T>())
        return sp<typename Builder<T>::Prebuilt>::make(std::move(inst));
 
-    for(const Factory& i : _stub->_factories) {
-        const sp<Builder<T>> builder = i.findBuilder<T>(refid, *this);
-        if(builder) {
-            if(id.queries().size())
-                return sp<BuilderWithQueries<T>>::make(builder, factory, id);
+    for(const Factory& i : _stub->_factories)
+        if(const sp<Builder<T>> builder = i.findBuilder<T>(refid, *this))
             return builder;
-        }
-    }
-    return nullptr;
-}
 
-template<typename T> sp<T> BeanFactory::buildWithQueries(const String& name, const Queries& queries, const Scope& args) {
-    const auto iter = queries._queries.find(name);
-    if(iter != queries._queries.end())
-        return build<T>(iter->second, args);
     return nullptr;
-}
-
-template<typename T> sp<T> Scope::build(const String& name, const Scope& args) const {
-    const sp<T> obj = getObject(name).template as<T>();
-    if(!obj && _queries)
-        return _queries->ensureBeanFactory().buildWithQueries<T>(name, _queries, args);
-    return obj;
 }
 
 }

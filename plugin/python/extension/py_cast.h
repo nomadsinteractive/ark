@@ -312,8 +312,8 @@ private:
             return Optional<T>();
 
         T map;
-        PyInstance keys(PyInstance::steal(PyBridge::PyDict_Keys(obj)));
-        Py_ssize_t keySize = PyBridge::PyList_Size(keys.pyObject());
+        const PyInstance keys(PyInstance::steal(PyBridge::PyDict_Keys(obj)));
+        const Py_ssize_t keySize = PyBridge::PyList_Size(keys.pyObject());
         for(Py_ssize_t i = 0; i < keySize; ++i) {
             PyObject* key = PyBridge::PyList_GetItem(keys.pyObject(), i);
             PyObject* item = PyBridge::PyDict_GetItem(obj, key);
@@ -363,21 +363,6 @@ template<> inline Optional<sp<Integer>> PyCast::toSharedPtrImpl<Integer>(PyObjec
 template<> inline Optional<sp<Boolean>> PyCast::toSharedPtrImpl<Boolean>(PyObject* object)
 {
     return toBoolean(object);
-}
-
-template<> inline Optional<sp<Runnable>> PyCast::toSharedPtrImpl<Runnable>(PyObject* object)
-{
-    return toRunnable(object);
-}
-
-template<> inline Optional<sp<CollisionCallback>> PyCast::toSharedPtrImpl<CollisionCallback>(PyObject* object)
-{
-    return toCollisionCallback(object);
-}
-
-template<> inline Optional<sp<EventListener>> PyCast::toSharedPtrImpl<EventListener>(PyObject* object)
-{
-    return toEventListener(object);
 }
 
 template<> inline Optional<sp<Vec2>> PyCast::toSharedPtrImpl<Vec2>(PyObject* object)

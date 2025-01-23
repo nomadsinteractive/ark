@@ -2,14 +2,15 @@
 
 namespace ark {
 
-Scope::Scope(std::map<String, Box> variables, sp<Queries> queries)
-    : _variables(std::move(variables)), _queries(std::move(queries))
+Scope::Scope(std::map<String, Box> variables)
+    : _variables(std::move(variables))
 {
 }
 
 Box Scope::get(const String& name)
 {
-    return getObject(name);
+    Optional<Box> optVar = getObject(name);
+    return optVar ? optVar.value() : Box();
 }
 
 void Scope::put(const String& name, Box value)
@@ -22,10 +23,10 @@ const std::map<String, Box>& Scope::variables() const
     return _variables;
 }
 
-Box Scope::getObject(const String& name) const
+Optional<Box> Scope::getObject(const String& name) const
 {
     const auto iter = _variables.find(name);
-    return iter != _variables.end() ? iter->second : Box();
+    return iter != _variables.end() ? Optional<Box>{iter->second} : Optional<Box>{};
 }
 
 }

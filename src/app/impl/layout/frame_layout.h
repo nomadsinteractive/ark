@@ -8,21 +8,18 @@
 
 namespace ark {
 
-class FrameLayout : public Layout {
+class FrameLayout final : public Layout {
 public:
 
     sp<Updatable> inflate(Hierarchy hierarchy) override;
 
 //  [[plugin::builder::by-value("frame")]]
-    class BUILDER : public Builder<Layout> {
+    class BUILDER final : public Builder<Layout> {
     public:
         BUILDER() = default;
 
         sp<Layout> build(const Scope& args) override;
     };
-
-private:
-    sp<Node> _root_node;
 };
 
 }

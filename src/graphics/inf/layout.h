@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include "core/base/api.h"
 #include "core/base/with_timestamp.h"
 #include "core/inf/updatable.h"
@@ -50,7 +48,7 @@ public:
 
     struct Hierarchy {
         sp<Node> _node;
-        std::vector<Hierarchy> _child_nodes;
+        Vector<Hierarchy> _child_nodes;
     };
 
 public:

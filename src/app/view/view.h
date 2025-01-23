@@ -18,7 +18,7 @@ namespace ark {
 
 class ARK_API View final : public Wirable, public Wirable::Niche {
 public:
-    View(sp<LayoutParam> layoutParam, String name, sp<Boolean> discarded = nullptr);
+    View(sp<LayoutParam> layoutParam, String name, sp<Vec3> position = nullptr, sp<Boolean> discarded = nullptr);
     ~View() override;
 
     TypeId onPoll(WiringContext& context) override;
@@ -65,6 +65,7 @@ public:
 
     private:
         String _name;
+        SafeBuilder<Vec3> _position;
         SafeBuilder<Boolean> _discarded;
         SafeBuilder<LayoutParam> _layout_param;
         std::vector<builder<View>> _children;
@@ -88,7 +89,6 @@ private:
 
 protected:
     sp<Stub> _stub;
-    sp<Boolean> _is_discarded;
     sp<Updatable> _updatable_view;
     sp<Updatable> _updatable_layout;
 

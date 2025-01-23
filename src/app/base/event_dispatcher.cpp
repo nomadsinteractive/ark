@@ -22,9 +22,9 @@ void EventDispatcher::unKeyEvent(Event::Code code)
             iter->second.pop();
 }
 
-void EventDispatcher::onMotionEvent(sp<EventListener> onDown, sp<EventListener> onUp, sp<EventListener> onClick, sp<EventListener> onMove)
+void EventDispatcher::onMotionEvent(sp<EventListener> onPress, sp<EventListener> onRelease, sp<EventListener> onClick, sp<EventListener> onMove)
 {
-    _motion_events.emplace(std::move(onDown), std::move(onUp), std::move(onClick), std::move(onMove));
+    _motion_events.emplace(std::move(onPress), std::move(onRelease), std::move(onClick), std::move(onMove));
 }
 
 void EventDispatcher::unMotionEvent()
@@ -83,7 +83,7 @@ void EventDispatcher::KeyEventListener::onEvent(const EventDispatcher& dispatche
 }
 
 EventDispatcher::MotionEventListener::MotionEventListener(const sp<EventListener>& onPress, const sp<EventListener>& onRelease, const sp<EventListener>& onClick, const sp<EventListener>& onMove)
-    : _on_down(onPress), _on_up(onRelease), _on_click(onClick), _on_move(onMove), _pressed_x(0), _pressed_y(0)
+    : _on_press(onPress), _on_release(onRelease), _on_click(onClick), _on_move(onMove), _pressed_x(0), _pressed_y(0)
 {
 }
 
@@ -93,8 +93,8 @@ bool EventDispatcher::MotionEventListener::onEvent(const EventDispatcher& dispat
     {
         _pressed_x = event.x();
         _pressed_y = event.y();
-        if(_on_down)
-            return _on_down->onEvent(event);
+        if(_on_press)
+            return _on_press->onEvent(event);
     }
     else if(action == Event::ACTION_UP)
     {
@@ -103,8 +103,8 @@ bool EventDispatcher::MotionEventListener::onEvent(const EventDispatcher& dispat
             if(_on_click->onEvent(event))
                 return true;
         }
-        if(_on_up)
-            _on_up->onEvent(event);
+        if(_on_release)
+            _on_release->onEvent(event);
     }
     else if(action == Event::ACTION_MOVE)
     {

@@ -13,9 +13,10 @@ namespace ark {
 class ARK_API LayoutUtil {
 public:
 
-    static V2 inflate(const std::vector<sp<LayoutParam>>& slots);
-
     static std::pair<float, float> calcFlowDirection(LayoutParam::JustifyContent justifyContent, float totalSpace, float childrenSpace, size_t childCount);
+
+    static LayoutParam::Align toAlign(LayoutParam::JustifyContent justifyContent);
+
     static float calcItemOffsetX(LayoutParam::Align align, const Layout::Node& rootNode, Layout::Node& item);
     static float calcItemOffsetY(LayoutParam::Align align, const Layout::Node& rootNode, Layout::Node& item);
 

@@ -9,7 +9,7 @@
 
 namespace ark::plugin::python {
 
-class EventListenerPython : public EventListener, public Debris, Implements<EventListenerPython, EventListener, Debris> {
+class [[deprecated]] EventListenerPython : public EventListener, public Debris, Implements<EventListenerPython, EventListener, Debris> {
 public:
     EventListenerPython(PyInstance callable);
 

@@ -261,8 +261,6 @@ Scope PyCast::toScope(PyObject* kws)
             PyObject* key = PyList_GetItem(keys, i);
             PyObject* item = PyDict_GetItem(kws, key);
             const String sKey = toString(key);
-            // if(PyTuple_CheckExact(item) || pi.isInstance<Vec2>(item) || pi.isInstance<Vec3>(item) || pi.isInstance<Vec4>(item))
-            //     scope.put(sKey, Box(sp<PyVecDuckType>::make(PyInstance::track(item))));
             if(PyList_CheckExact(item) || PyTuple_CheckExact(item))
                 scope.put(sKey, Box(sp<PyListDuckType>::make(PyInstance::track(item))));
             else if(pi.isPyArkTypeObject(Py_TYPE(item)))
@@ -271,6 +269,8 @@ Scope PyCast::toScope(PyObject* kws)
                 scope.put(sKey, Box(sp<Boolean>::make<Boolean::Const>(PyObject_IsTrue(item) != 0)));
             else if(PyCallable_Check(item))
                 scope.put(sKey, Box(sp<PyCallableDuckType>::make(PyInstance::track(item))));
+            else if(Py_IsNone(item))
+                scope.put(sKey, {});
             else
                 scope.put(sKey, Box(sp<PyObjectDuckType>::make(PyInstance::track(item))));
         }
