@@ -462,7 +462,7 @@ public:
     sp<T> build(const Scope& args) override {
         const sp<Scope> reference = _references.lock();
         CHECK(reference, "BeanFactory has been disposed");
-        sp<T> inst = reference->get(_name).as<T>();
+        sp<T> inst = reference->get(_name).template as<T>();
         if(!inst) {
             inst = _delegate->build(args);
             CHECK(inst, "Cannot build \"%s\"", _name.c_str());

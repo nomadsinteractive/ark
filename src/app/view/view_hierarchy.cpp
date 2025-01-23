@@ -66,7 +66,7 @@ bool ViewHierarchy::updateLayout(const sp<Layout::Node>& layoutNode, uint64_t ti
     bool hierarchyDirty = _timestamp.update(timestamp);
     if(const bool hierarchyChanged = updateHierarchy(); hierarchyChanged || hierarchyDirty)
     {
-        if(_layout && hierarchyChanged)
+        if(_layout && (hierarchyChanged || !_updatable_layout))
         {
             _updatable_layout = _layout->inflate(toLayoutHierarchy(layoutNode));
             _timestamp.markClean();

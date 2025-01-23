@@ -32,7 +32,7 @@ struct View::Stub final : Updatable {
     {
         if(_hierarchy)
             return _hierarchy->updateLayout(_layout_node, timestamp);
-        return UpdatableUtil::update(timestamp, _layout_node->_layout_param, _discarded);
+        return UpdatableUtil::update(timestamp, _layout_node->_layout_param, _position, _discarded);
     }
 
     void dispose()
@@ -202,6 +202,8 @@ TypeId View::onPoll(WiringContext& context)
 
 void View::onWire(const WiringContext& context, const Box& self)
 {
+    if(sp<Boolean> discarded = context.getComponent<Discarded>())
+        setDiscarded(std::move(discarded));
 }
 
 void View::onPoll(WiringContext& context, StringView value)
