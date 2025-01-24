@@ -365,6 +365,11 @@ template<> inline Optional<sp<Boolean>> PyCast::toSharedPtrImpl<Boolean>(PyObjec
     return toBoolean(object);
 }
 
+template<> inline Optional<sp<Runnable>> PyCast::toSharedPtrImpl<Runnable>(PyObject* object)
+{
+    return toRunnable(object);
+}
+
 template<> inline Optional<sp<Vec2>> PyCast::toSharedPtrImpl<Vec2>(PyObject* object)
 {
     sp<Vec2> vec2 = toVec2(object);

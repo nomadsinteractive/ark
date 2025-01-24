@@ -118,29 +118,6 @@ Optional<sp<Runnable>> PyCast::toRunnable(PyObject* object)
     return toSharedPtrDefault<Runnable>(object);
 }
 
-sp<CollisionCallback> PyCast::toCollisionCallback(PyObject* object)
-{
-    if(Optional<sp<CollisionCallback>> callbackOpt = toSharedPtrDefault<CollisionCallback>(object))
-        return callbackOpt.value();
-    WARN("Converting Python object to CollisonBack implicitly is deprecated, call CollisionCallback(...) instead");
-    return sp<CollisionCallbackPython>::make(PyInstance::borrow(object));
-}
-
-sp<EventListener> PyCast::toEventListener(PyObject* object)
-{
-    if(PyCallable_Check(object))
-        return sp<EventListenerPython>::make(PyInstance::track(object));
-
-    if(PyObject_HasAttrString(object, "on_event"))
-    {
-        PyInstance onEvent = PyInstance::steal(PyObject_GetAttrString(object, "on_event"));
-        CHECK(onEvent.isCallable(), "The on_event method of type \"%s\" should be Callable", Py_TYPE(object)->tp_name);
-        return sp<EventListenerPython>::make(std::move(onEvent));
-    }
-
-    return toSharedPtrDefault<EventListener>(object).value();
-}
-
 Optional<String> PyCast::toStringExact(PyObject* object, const char* encoding, const char* error)
 {
     if(PyUnicode_Check(object))
@@ -162,7 +139,7 @@ String PyCast::toString(PyObject* object, const char* encoding, const char* erro
         Py_DECREF(str);
         return r;
     }
-    return "";
+    return {};
 }
 
 sp<Vec2> PyCast::toVec2(PyObject* object)

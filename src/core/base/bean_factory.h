@@ -433,7 +433,7 @@ private:
 template<typename T> sp<Builder<T>> BeanFactory::Worker<T>::makeWrappedBuilder(sp<Builder<T>> builder, const String& id) const {
     if(id.empty() || id.at(0) != '@')
         return builder;
-    return sp<Builder<T>>::make<BuilderBySoftRef<T>>(id.substr(1), _references, std::move(builder));
+    return sp<Builder<T>>::template make<BuilderBySoftRef<T>>(id.substr(1), _references, std::move(builder));
 }
 
 template<typename T> sp<Builder<T>> BeanFactory::getBuilderByArg(String argname) {
