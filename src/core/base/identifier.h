@@ -15,7 +15,7 @@ public:
         ID_TYPE_ARGUMENT = '$',
         ID_TYPE_EXPRESSION = '{'
     };
-    Identifier(Type type, String package, String val, String valueType = {});
+    Identifier(Type type, String package, String val, String valueType = {}, bool isOptional = false);
 
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Identifier);
 
@@ -35,6 +35,7 @@ public:
     bool isRef() const;
     bool isArg() const;
     bool isVal() const;
+    bool isOptional() const;
 
     Identifier withouPackage() const;
 
@@ -43,6 +44,7 @@ private:
     String _package;
     String _value;
     String _value_type;
+    bool _is_optional;
 };
 
 }

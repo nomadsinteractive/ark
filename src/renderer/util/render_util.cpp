@@ -249,19 +249,19 @@ bytearray RenderUtil::makeUnitCubeVertices(bool flipWindingOrder)
 
 Attribute RenderUtil::makePredefinedAttribute(const String& name, const String& type, Attribute::Usage layoutType)
 {
-    if(type == "vec3" || type == "v3f")
+    if(type == "vec3")
         return {layoutType, name, Attribute::TYPE_FLOAT, type, 3, false};
-    if(type == "vec2" || type == "v2f")
+    if(type == "vec2")
         return {layoutType, name, Attribute::TYPE_FLOAT, type, 2, false};
     if(type == "float")
         return {layoutType, name, Attribute::TYPE_FLOAT, type, 1, false};
     if(type == "int" || type == "uint")
         return {layoutType, name, Attribute::TYPE_INTEGER, type, 1, false};
-    if(type == "vec4" || type == "v4f")
+    if(type == "vec4")
         return {layoutType, name, Attribute::TYPE_FLOAT, type, 4, false};
-    if(type == "vec4b" || type == "v4b")
+    if(type == "vec4b")
         return {layoutType, name, Attribute::TYPE_UBYTE, type, 4, true};
-    if(type == "vec3b" || type == "v3fb")
+    if(type == "vec3b")
         return {layoutType, name, Attribute::TYPE_UBYTE, type, 3, true};
     if(type == "uint8")
         return {layoutType, name, Attribute::TYPE_UBYTE, type, 1, false};

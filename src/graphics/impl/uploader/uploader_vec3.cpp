@@ -1,4 +1,4 @@
-#include "graphics/impl/uploader/input_v3f.h"
+#include "graphics/impl/uploader/uploader_vec3.h"
 
 #include "core/inf/variable.h"
 #include "core/base/bean_factory.h"
@@ -8,12 +8,12 @@
 
 namespace ark {
 
-FlatableV3f::BUILDER::BUILDER(BeanFactory& factory, const String& value)
+UploaderVec3::BUILDER::BUILDER(BeanFactory& factory, const String& value)
     : _vec3(factory.ensureBuilder<Vec3>(value))
 {
 }
 
-sp<Uploader> FlatableV3f::BUILDER::build(const Scope& args)
+sp<Uploader> UploaderVec3::BUILDER::build(const Scope& args)
 {
     return sp<Uploader>::make<UploaderOfVariable<V3>>(_vec3->build(args));
 }

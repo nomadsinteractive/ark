@@ -3,8 +3,8 @@
 #include "core/inf/array.h"
 #include "core/impl/uploader/uploader_impl.h"
 #include "core/impl/uploader/uploader_array.h"
-#include "core/impl/uploader/input_repeat.h"
-#include "core/impl/uploader/input_variable_array.h"
+#include "core/impl/uploader/uploader_repeat.h"
+#include "core/impl/uploader/uploader_variable_array.h"
 #include "core/impl/uploader/uploader_of_variable.h"
 #include "core/impl/writable/writable_memory.h"
 #include "core/impl/writable/writable_with_offset.h"
@@ -150,7 +150,7 @@ sp<Uploader> UploaderType::create(std::map<size_t, sp<Uploader>> value, size_t s
 
 sp<Uploader> UploaderType::create(std::vector<sp<Mat4>> value, size_t size)
 {
-    return reserve(sp<InputVariableArray<M4>>::make(std::move(value)), size);
+    return reserve(sp<UploaderVariableArray<M4>>::make(std::move(value)), size);
 }
 
 sp<Uploader> UploaderType::create(const std::vector<sp<Uploader>>& value, size_t size)
@@ -245,7 +245,7 @@ sp<Uploader> UploaderType::remap(sp<Uploader> self, size_t size, size_t offset)
 
 sp<Uploader> UploaderType::repeat(sp<Uploader> self, size_t length, size_t stride)
 {
-    return sp<InputRepeat>::make(std::move(self), length, stride);
+    return sp<UploaderRepeat>::make(std::move(self), length, stride);
 }
 
 void UploaderType::addInput(const sp<Uploader>& self, size_t offset, sp<Uploader> input)

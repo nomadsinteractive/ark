@@ -39,16 +39,34 @@ Optional<Identifier> tryParse(Identifier::Type tokenType, const String& s, bool 
     String package;
     String value;
 
-    if(parseAndValidate(s, package, value, strict))
-        return {Identifier(tokenType, std::move(package), std::move(value))};
+    if(auto [packageCut, valueOpt] = s.cut(':'); valueOpt)
+    {
+        package = std::move(packageCut);
+        value = std::move(valueOpt.value());
+    }
+    else
+    {
+        package = "";
+        value = std::move(packageCut);
+    }
+
+    bool isOptional = false;
+    if(!value.empty() && value.startsWith("?"))
+    {
+        value = value.substr(1);
+        isOptional = true;
+    }
+
+    if(const bool isPkgVarName = Strings::isVariableName(package); strict ? isPkgVarName && Strings::isVariableName(value) : isPkgVarName)
+        return {Identifier(tokenType, std::move(package), std::move(value), {}, isOptional)};
 
     return {};
 }
 
 }
 
-Identifier::Identifier(Type type, String package, String value, String valueType)
-    : _type(type), _package(std::move(package)), _value(std::move(value)), _value_type(std::move(valueType))
+Identifier::Identifier(Type type, String package, String value, String valueType, bool isOptional)
+    : _type(type), _package(std::move(package)), _value(std::move(value)), _value_type(std::move(valueType)), _is_optional(isOptional)
 {
 }
 
@@ -77,7 +95,10 @@ Identifier Identifier::parse(const String& s, Identifier::Type idType, bool stri
     if(idTypeToken == ID_TYPE_VALUE_AND_TYPE || parseTypeAndValue(headTypeToken == ID_TYPE_VALUE_AND_TYPE ? s.substr(1) : s, value, valueType))
         return Identifier(ID_TYPE_VALUE_AND_TYPE, package, value, valueType);
 
-    return parseAndValidate(s, package, value, false) ? Identifier(idType == ID_TYPE_AUTO ? ID_TYPE_VALUE : idType, package, value) : Identifier(ID_TYPE_VALUE, "", s);
+    if(Optional<Identifier> idOpt = tryParse(idType == ID_TYPE_AUTO ? ID_TYPE_VALUE : idType, s, false))
+        return std::move(idOpt.value());
+
+    return Identifier(ID_TYPE_VALUE, "", s);
 }
 
 Identifier Identifier::parseRef(const String& s, bool strictMode)
@@ -149,6 +170,11 @@ bool Identifier::isArg() const
 bool Identifier::isVal() const
 {
     return _type == ID_TYPE_VALUE;
+}
+
+bool Identifier::isOptional() const
+{
+    return _is_optional;
 }
 
 Identifier Identifier::withouPackage() const

@@ -1,16 +1,15 @@
 #include "graphics/components/render_object.h"
 
-#include <core/components/with_tag.h>
-
 #include "core/base/bean_factory.h"
 #include "core/base/named_hash.h"
+#include "core/components/with_tag.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/inf/variable.h"
 #include "core/inf/wirable.h"
 #include "core/util/updatable_util.h"
+
 #include "graphics/impl/transform/transform_impl.h"
 #include "graphics/components/position.h"
-
 #include "graphics/util/vec3_type.h"
 
 #include "renderer/base/model.h"

@@ -104,8 +104,8 @@ private:
         std::function<sp<Builder<T>>(BeanFactory&, const document&)> _default_builder_factory;
         std::function<sp<Builder<T>>(BeanFactory&, const String&)> _default_dictionary_factory;
 
-        std::unordered_map<String, std::function<sp<Builder<T>>(BeanFactory&, const String&)>> _values;
-        std::unordered_map<String, std::function<sp<Builder<T>>(BeanFactory&, const document&)>> _builders;
+        Map<String, std::function<sp<Builder<T>>(BeanFactory&, const String&)>> _values;
+        Map<String, std::function<sp<Builder<T>>(BeanFactory&, const document&)>> _builders;
     };
 
 public:
@@ -171,24 +171,23 @@ public:
 
         sp<Scope> _references;
         std::list<Factory> _factories;
-        std::map<String, sp<BeanFactory>> _packages;
+        Map<String, sp<BeanFactory>> _packages;
     };
 
 public:
-    BeanFactory(std::nullptr_t);
     BeanFactory();
+    BeanFactory(std::nullptr_t);
     explicit BeanFactory(sp<Stub> stub);
-    BeanFactory(const BeanFactory& other) = default;
-    BeanFactory(BeanFactory&& other) = default;
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(BeanFactory);
 
-    ~BeanFactory();
+    ~BeanFactory() = default;
 
     template<typename T> sp<Builder<T>> createBuilderByRef(const Identifier& id) {
         sp<Builder<T>> builder;
         if(id.package()) {
             sp<BeanFactory> factory = getPackage(id.package());
             CHECK(factory, "Id: \"%s\"'s package \"%s\" not found", id.toString().c_str(), id.package().c_str());
-            builder = factory ? factory->getBuilderByRef<T>(id.withouPackage(), *this) : nullptr;
+            builder = factory ? factory->getBuilderByRef<T>(id.withouPackage()) : nullptr;
             CHECK_WARN(builder, "Cannot build \"%s\" from package \"%s\"", id.toString().c_str(), id.package().c_str());
         }
         else
@@ -294,13 +293,20 @@ public:
         return ensureBuilder<T>(attrValue);
     }
 
-    template<typename T> sp<Builder<T>> getBuilderByRef(const Identifier& id) {
-        return getBuilderByRef<T>(id, *this);
-    }
-
     template<typename T> sp<Builder<T>> getBuilderByArg(String argname);
     template<typename T> sp<Builder<T>> getBuilderByArg(const Identifier& id);
-    template<typename T> sp<Builder<T>> getBuilderByRef(const Identifier& id, BeanFactory& factory);
+
+    template<typename T> sp<Builder<T>> getBuilderByRef(const Identifier& id) {
+        const String& refid = id.ref();
+        if(sp<T> inst = _stub->_references->get(refid).template as<T>())
+            return sp<typename Builder<T>::Prebuilt>::make(std::move(inst));
+
+        for(const Factory& i : _stub->_factories)
+            if(const sp<Builder<T>> builder = i.findBuilder<T>(refid, *this))
+                return builder;
+
+        return nullptr;
+    }
 
     template<typename T> sp<Builder<T>> ensureBuilder(const String& id, Identifier::Type idType = Identifier::ID_TYPE_AUTO) {
         DCHECK(id, "Empty value being built");
@@ -421,7 +427,7 @@ public:
                 return value;
 
         CHECK(_fallback, "Cannot get argument \"%s\"", _name.c_str());
-        return _fallback->build(args);
+        return _fallback ? _fallback->build(args) : nullptr;
     }
 
 private:
@@ -442,19 +448,7 @@ template<typename T> sp<Builder<T>> BeanFactory::getBuilderByArg(String argname)
 
 template<typename T> sp<Builder<T>> BeanFactory::getBuilderByArg(const Identifier& id) {
     CHECK(id.isArg(), "Cannot build \"%s\" because it's not an argument", id.toString().c_str());
-    return sp<BuilderByArgument<T>>::make(_stub->_references, id.arg(), findBuilderByValue<T>(id.toString()));
-}
-
-template<typename T> sp<Builder<T>> BeanFactory::getBuilderByRef(const Identifier& id, BeanFactory& factory) {
-    const String refid = id.ref();
-    if(sp<T> inst = _stub->_references->get(refid).template as<T>())
-       return sp<typename Builder<T>::Prebuilt>::make(std::move(inst));
-
-    for(const Factory& i : _stub->_factories)
-        if(const sp<Builder<T>> builder = i.findBuilder<T>(refid, *this))
-            return builder;
-
-    return nullptr;
+    return sp<BuilderByArgument<T>>::make(_stub->_references, id.arg(), id.isOptional() ? sp<Builder<T>>::template make<Builder<T>::Null>() : findBuilderByValue<T>(id.toString()));
 }
 
 }

@@ -28,10 +28,9 @@ public:
         return _timestamp.update(timestamp);
     }
 
-    void reset(T other, bool markDirty = true) {
+    void reset(T other) {
         _value = std::move(other);
-        if(markDirty)
-            _timestamp.markDirty();
+        _timestamp.markDirty();
     }
 
 private:

@@ -7,17 +7,17 @@
 
 namespace ark {
 
-class InputV4f {
+class UploaderVec2 {
 public:
-//  [[plugin::builder::by-value("v4f")]]
-    class BUILDER : public Builder<Uploader> {
+//  [[plugin::builder::by-value("vec2")]]
+    class BUILDER final : public Builder<Uploader> {
     public:
         BUILDER(BeanFactory& factory, const String& value);
 
-        virtual sp<Uploader> build(const Scope& args) override;
+        sp<Uploader> build(const Scope& args) override;
 
     private:
-        sp<Builder<Vec4>> _vec4;
+        sp<Builder<Vec2>> _vec2;
     };
 };
 

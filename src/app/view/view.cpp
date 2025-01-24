@@ -31,7 +31,10 @@ struct View::Stub final : Updatable {
     bool update(uint64_t timestamp) override
     {
         if(_hierarchy)
-            return _hierarchy->updateLayout(_layout_node, timestamp);
+        {
+            const bool positionDirty = _position ? _position->update(timestamp) : false;
+            return _hierarchy->updateLayout(_layout_node, timestamp) || positionDirty;
+        }
         return UpdatableUtil::update(timestamp, _layout_node->_layout_param, _position, _discarded);
     }
 
@@ -123,10 +126,13 @@ public:
     }
 
     bool update(uint64_t timestamp) override {
-        return _stub->_layout_node->size().update(timestamp);
+        return _stub->_layout_node ? _stub->_layout_node->size().update(timestamp) : false;
     }
 
     float val() override {
+        if(!_stub->_layout_node)
+            return 0;
+
         const V2& size = _stub->_layout_node->size();
         return size[IDX];
     }
@@ -149,6 +155,9 @@ public:
 
     V3 val() override
     {
+        if(!_stub->_layout_node)
+            return V3();
+
         const Layout::Node& layoutNode = _stub->_layout_node;
         const V2& size = layoutNode.size();
         const V3 offsetPosition = _stub->getTopViewOffsetPosition(false);

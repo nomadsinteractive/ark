@@ -1,5 +1,6 @@
 #include "python/impl/duck/py_list_duck_type.h"
 
+#include "python/extension/py_cast.h"
 #include "python/extension/python_extension.h"
 
 namespace ark::plugin::python {
@@ -7,6 +8,21 @@ namespace ark::plugin::python {
 PyListDuckType::PyListDuckType(PyInstance instance)
     : _instance(std::move(instance))
 {
+}
+
+void PyListDuckType::to(sp<Vec2>& inst)
+{
+    inst = PyCast::ensureSharedPtr<Vec2>(_instance.pyObject());
+}
+
+void PyListDuckType::to(sp<Vec3>& inst)
+{
+    inst = PyCast::ensureSharedPtr<Vec3>(_instance.pyObject());
+}
+
+void PyListDuckType::to(sp<Vec4>& inst)
+{
+    inst = PyCast::ensureSharedPtr<Vec4>(_instance.pyObject());
 }
 
 void PyListDuckType::to(sp<std::vector<Box>>& inst)

@@ -339,7 +339,7 @@ class MarkStudio:
     def __init__(self, application_facade: ApplicationFacade, imgui: Renderer, resolution: Vec2, quick_bar_items: Optional[list[QuickBarItem]] = None):
         self._application_facade = application_facade
         self._imgui = imgui
-        self._discarded = None
+        self._discarded = Boolean(False)
         self._renderer_quickbar = None
         self._renderer_properties = None
         self._layer_editor_visibility = Boolean(False)
@@ -348,6 +348,10 @@ class MarkStudio:
         self._properties_window = PropertiesWindow(self._imgui, True)
         self._resource_window = ResourceWindow(self._imgui, True)
         self._resolution = resolution
+
+    @property
+    def discarded(self) -> Boolean:
+        return self._discarded
 
     @property
     def main_window(self) -> MainWindow:
@@ -379,8 +383,7 @@ class MarkStudio:
         else:
             self._console_window.hide()
 
-        if self._discarded is not None:
-            self._discarded.set(True)
+        self._discarded.set(True)
         self._discarded = Boolean(False)
 
         self._application_facade.surface_controller.add_renderer(self._imgui, self._discarded, priority=Renderer.PRIORITY_CONTROL)

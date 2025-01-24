@@ -1,4 +1,4 @@
-#include "graphics/impl/uploader/input_v4f.h"
+#include "graphics/impl/uploader/uploader_vec4.h"
 
 #include "core/inf/variable.h"
 #include "core/base/bean_factory.h"
@@ -8,12 +8,12 @@
 
 namespace ark {
 
-InputV4f::BUILDER::BUILDER(BeanFactory& factory, const String& value)
+UploaderVec4::BUILDER::BUILDER(BeanFactory& factory, const String& value)
     : _vec4(factory.ensureBuilder<Vec4>(value))
 {
 }
 
-sp<Uploader> InputV4f::BUILDER::build(const Scope& args)
+sp<Uploader> UploaderVec4::BUILDER::build(const Scope& args)
 {
     return sp<Uploader>::make<UploaderOfVariable<V4>>(_vec4->build(args));
 }

@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_IMPL_INPUT_INPUT_NUMERIC_H_
-#define ARK_CORE_IMPL_INPUT_INPUT_NUMERIC_H_
+#pragma once
 
 #include "core/inf/builder.h"
 
@@ -7,14 +6,14 @@
 
 namespace ark {
 
-class InputNumeric {
+class UploaderNumeric {
 public:
 //  [[plugin::builder::by-value("float")]]
-    class BUILDER : public Builder<Uploader> {
+    class BUILDER final : public Builder<Uploader> {
     public:
         BUILDER(BeanFactory& factory, const String& value);
 
-        virtual sp<Uploader> build(const Scope& args) override;
+        sp<Uploader> build(const Scope& args) override;
 
     private:
         sp<Builder<Numeric>> _numeric;
@@ -22,5 +21,3 @@ public:
 };
 
 }
-
-#endif

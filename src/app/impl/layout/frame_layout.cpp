@@ -15,16 +15,16 @@ public:
     }
 
     bool update(uint64_t timestamp) override {
-        bool dirty = false;
-        const Layout::Node& parentNode = _hierarchy._node;
+        Layout::Node& rootNode = _hierarchy._node;
+        bool dirty = rootNode.update(timestamp);
         for(const Layout::Hierarchy& i : _hierarchy._child_nodes)
-            if(i._node->update(timestamp))
+            if(i._node->_layout_param->update(timestamp))
             {
-                i._node->setSize(LayoutUtil::calcItemSize(i._node->_layout_param, parentNode), false);
+                i._node->setSize(LayoutUtil::calcItemSize(i._node->_layout_param, rootNode));
 
-                float offsetX = LayoutUtil::calcItemOffsetX(LayoutUtil::toAlign(i._node->_layout_param->justifyContent()), parentNode, i._node);
-                float offsetY = LayoutUtil::calcItemOffsetY(i._node->_layout_param->alignSelf(), parentNode, i._node);
-                i._node->setOffsetPosition({offsetX, offsetY}, false);
+                float offsetX = LayoutUtil::calcItemOffsetX(LayoutUtil::toAlign(i._node->_layout_param->justifyContent()), rootNode, i._node);
+                float offsetY = LayoutUtil::calcItemOffsetY(i._node->_layout_param->alignSelf(), rootNode, i._node);
+                i._node->setOffsetPosition({offsetX, offsetY});
                 dirty = true;
             }
         return dirty;

@@ -29,10 +29,10 @@ public:
         void setMargins(const V4& margins);
 
         const WithTimestamp<V2>& offsetPosition() const;
-        void setOffsetPosition(const V2& offsetPosition, bool markDirty = true);
+        void setOffsetPosition(const V2& offsetPosition);
 
         const WithTimestamp<V2>& size() const;
-        void setSize(const V2& size, bool markDirty = true);
+        void setSize(const V2& size);
 
         bool update(uint32_t timestamp);
 

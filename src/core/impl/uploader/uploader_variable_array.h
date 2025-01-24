@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include "core/inf/uploader.h"
 #include "core/inf/variable.h"
 #include "core/inf/writable.h"
@@ -11,9 +9,9 @@
 
 namespace ark {
 
-template<typename T, size_t ALIGN = sizeof(T)> class InputVariableArray final : public Uploader, Implements<InputVariableArray<T, ALIGN>, Uploader> {
+template<typename T, size_t ALIGN = sizeof(T)> class UploaderVariableArray final : public Uploader, Implements<UploaderVariableArray<T, ALIGN>, Uploader> {
 public:
-    InputVariableArray(std::vector<sp<Variable<T>>> vector)
+    UploaderVariableArray(Vector<sp<Variable<T>>> vector)
         : Uploader(vector.size() * ALIGN), _vector(std::move(vector)) {
     }
 
@@ -30,7 +28,7 @@ public:
     }
 
 private:
-    std::vector<sp<Variable<T>>> _vector;
+    Vector<sp<Variable<T>>> _vector;
 };
 
 }

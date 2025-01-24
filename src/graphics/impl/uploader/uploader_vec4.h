@@ -7,17 +7,17 @@
 
 namespace ark {
 
-class FlatableV3f {
+class UploaderVec4 {
 public:
-//  [[plugin::builder::by-value("v3f")]]
-    class BUILDER : public Builder<Uploader> {
+//  [[plugin::builder::by-value("vec4")]]
+    class BUILDER final : public Builder<Uploader> {
     public:
         BUILDER(BeanFactory& factory, const String& value);
 
-        virtual sp<Uploader> build(const Scope& args) override;
+        sp<Uploader> build(const Scope& args) override;
 
     private:
-        sp<Builder<Vec3>> _vec3;
+        sp<Builder<Vec4>> _vec4;
     };
 };
 

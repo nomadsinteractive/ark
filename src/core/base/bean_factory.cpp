@@ -15,10 +15,6 @@ BeanFactory::BeanFactory(sp<Stub> stub)
 {
 }
 
-BeanFactory::~BeanFactory()
-{
-}
-
 void BeanFactory::add(const BeanFactory::Factory& factory, bool front)
 {
     if(front)
