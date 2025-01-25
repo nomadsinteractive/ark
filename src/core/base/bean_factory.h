@@ -448,7 +448,7 @@ template<typename T> sp<Builder<T>> BeanFactory::getBuilderByArg(String argname)
 
 template<typename T> sp<Builder<T>> BeanFactory::getBuilderByArg(const Identifier& id) {
     CHECK(id.isArg(), "Cannot build \"%s\" because it's not an argument", id.toString().c_str());
-    return sp<BuilderByArgument<T>>::make(_stub->_references, id.arg(), id.isOptional() ? sp<Builder<T>>::template make<Builder<T>::Null>() : findBuilderByValue<T>(id.toString()));
+    return sp<BuilderByArgument<T>>::make(_stub->_references, id.arg(), id.isOptional() ? sp<Builder<T>>::template make<typename Builder<T>::Null>() : findBuilderByValue<T>(id.toString()));
 }
 
 }
