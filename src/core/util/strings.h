@@ -1,7 +1,5 @@
 #pragma once
 
-#include <map>
-
 #include "core/base/api.h"
 #include "core/base/string.h"
 #include "core/base/string_buffer.h"
@@ -24,7 +22,7 @@ public:
 
     static bool parseArrayAndIndex(const String& expr, String& name, int32_t& index);
 
-    static std::map<String, String> parseProperties(const String& str, char delim = ';', char equal = ':');
+    static Map<String, String> parseProperties(const String& str, char delim = ';', char equal = ':');
 
     static String toUTF8(const std::wstring& text);
     static std::wstring fromUTF8(StringView text);

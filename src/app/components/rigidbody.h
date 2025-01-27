@@ -11,6 +11,7 @@
 #include "graphics/base/v4.h"
 
 #include "app/forwarding.h"
+#include "core/impl/builder/enum_builder.h"
 #include "core/types/safe_builder.h"
 
 namespace ark {
@@ -105,7 +106,7 @@ public:
 
     private:
         builder<Collider> _collider;
-        BodyType _body_type;
+        EnumBuilder<BodyType> _body_type;
         SafeBuilder<Shape> _shape;
         SafeBuilder<Vec3> _position;
         SafeBuilder<Vec4> _rotation;

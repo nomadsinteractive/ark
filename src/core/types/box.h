@@ -50,6 +50,10 @@ public:
         return static_cast<T>(toInteger());
     }
 
+    bool isEnum() const {
+        return std::get_if<EnumStub>(_stub.get()) != nullptr;
+    }
+
     int32_t toInteger() const {
         return _stub ? _ensure_enum_stub()->_value : 0;
     }

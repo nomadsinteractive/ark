@@ -293,8 +293,14 @@ public:
         return ensureBuilder<T>(attrValue);
     }
 
-    template<typename T> sp<Builder<T>> getBuilderByArg(String argname);
-    template<typename T> sp<Builder<T>> getBuilderByArg(const Identifier& id);
+    template<typename T> sp<Builder<T>> getBuilderByArg(String argname) {
+        return sp<BuilderByArgument<T>>::make(_stub->_references, std::move(argname));
+    }
+
+    template<typename T> sp<Builder<T>> getBuilderByArg(const Identifier& id) {
+        CHECK(id.isArg(), "Cannot build \"%s\" because it's not an argument", id.toString().c_str());
+        return sp<BuilderByArgument<T>>::make(_stub->_references, id.arg(), id.isOptional() ? sp<Builder<T>>::template make<typename Builder<T>::Null>() : findBuilderByValue<T>(id.toString()));
+    }
 
     template<typename T> sp<Builder<T>> getBuilderByRef(const Identifier& id) {
         const String& refid = id.ref();
@@ -383,6 +389,32 @@ public:
     }
 
 private:
+    template<typename T> class BuilderByArgument final : public Builder<T> {
+    public:
+        BuilderByArgument(WeakPtr<Scope> references, String name, sp<Builder<T>> fallback = nullptr)
+            : _references(std::move(references)), _name(std::move(name)), _fallback(std::move(fallback)) {
+        }
+
+        sp<T> build(const Scope& args) override {
+            if(const Optional<Box> optVar = args.getObject(_name))
+                if(sp<T> value = optVar->as<T>(); value || !optVar.value())
+                    return value;
+
+            if(const Optional<Box> optVar = _references.ensure()->getObject(_name))
+                if(sp<T> value = optVar->as<T>(); value || !optVar.value())
+                    return value;
+
+            CHECK(_fallback, "Cannot get argument \"%s\"", _name.c_str());
+            return _fallback ? _fallback->build(args) : nullptr;
+        }
+
+    private:
+        WeakPtr<Scope> _references;
+        String _name;
+        sp<Builder<T>> _fallback;
+    };
+
+private:
     sp<Stub> _stub;
 };
 
@@ -411,44 +443,10 @@ private:
     sp<Builder<T>> _delegate;
 };
 
-template<typename T> class BuilderByArgument final : public Builder<T> {
-public:
-    BuilderByArgument(WeakPtr<Scope> references, String name, sp<Builder<T>> fallback = nullptr)
-        : _references(std::move(references)), _name(std::move(name)), _fallback(std::move(fallback)) {
-    }
-
-    sp<T> build(const Scope& args) override {
-        if(const Optional<Box> optVar = args.getObject(_name))
-            if(sp<T> value = optVar->as<T>(); value || !optVar.value())
-                return value;
-
-        if(const Optional<Box> optVar = _references.ensure()->getObject(_name))
-            if(sp<T> value = optVar->as<T>(); value || !optVar.value())
-                return value;
-
-        CHECK(_fallback, "Cannot get argument \"%s\"", _name.c_str());
-        return _fallback ? _fallback->build(args) : nullptr;
-    }
-
-private:
-    WeakPtr<Scope> _references;
-    String _name;
-    sp<Builder<T>> _fallback;
-};
-
 template<typename T> sp<Builder<T>> BeanFactory::Worker<T>::makeWrappedBuilder(sp<Builder<T>> builder, const String& id) const {
     if(id.empty() || id.at(0) != '@')
         return builder;
     return sp<Builder<T>>::template make<BuilderBySoftRef<T>>(id.substr(1), _references, std::move(builder));
-}
-
-template<typename T> sp<Builder<T>> BeanFactory::getBuilderByArg(String argname) {
-    return sp<BuilderByArgument<T>>::make(_stub->_references, std::move(argname));
-}
-
-template<typename T> sp<Builder<T>> BeanFactory::getBuilderByArg(const Identifier& id) {
-    CHECK(id.isArg(), "Cannot build \"%s\" because it's not an argument", id.toString().c_str());
-    return sp<BuilderByArgument<T>>::make(_stub->_references, id.arg(), id.isOptional() ? sp<Builder<T>>::template make<typename Builder<T>::Null>() : findBuilderByValue<T>(id.toString()));
 }
 
 }

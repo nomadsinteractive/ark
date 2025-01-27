@@ -11,8 +11,7 @@
 namespace ark {
 
 template<typename T> class Array;
-template<typename T> class Builder;
-template<typename T> class ByIndex;
+template<typename T> class IBuilder;
 template<typename T> class Dictionary;
 template<typename T> class Duck;
 template<typename T> class Expectation;
@@ -41,10 +40,12 @@ template <typename T> using Set = std::set<T>;
 template <typename T, typename U> using HashMap = std::unordered_map<T, U>;
 template <typename T, typename U> using Map = std::map<T, U>;
 
-template <typename T> using builder = SharedPtr<Builder<T>>;
 template <typename T> using sp = SharedPtr<T>;
 template <typename T> using op = OwnedPtr<T>;
 template <typename T> using array = sp<Array<T>>;
+
+template <typename T> using Builder = IBuilder<SharedPtr<T>>;
+template <typename T> using builder = SharedPtr<Builder<T>>;
 
 class Ark;
 class Allocator;

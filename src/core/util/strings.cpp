@@ -20,11 +20,11 @@
 
 namespace ark {
 
-static std::vector<sp<Builder<String>>> regexp_split(const std::string& s, const std::regex& pattern, const std::function<sp<Builder<String>>(const std::smatch&)>& replacer)
+static Vector<sp<Builder<String>>> regexp_split(const std::string& s, const std::regex& pattern, const std::function<sp<Builder<String>>(const std::smatch&)>& replacer)
 {
     std::smatch match;
     std::string str = s;
-    std::vector<sp<Builder<String>>> items;
+    Vector<sp<Builder<String>>> items;
 
     while(std::regex_search(str, match, pattern))
     {
@@ -41,7 +41,7 @@ static std::vector<sp<Builder<String>>> regexp_split(const std::string& s, const
 
 namespace {
 
-class StringBuilderImpl1 : public Builder<String> {
+class StringBuilderImpl1 final : public Builder<String> {
 public:
     StringBuilderImpl1(const String& package, const String& resid)
         : _package(package), _resid(resid) {
@@ -58,7 +58,7 @@ private:
 
 };
 
-class StringBuilderImpl2 : public Builder<String> {
+class StringBuilderImpl2 final : public Builder<String> {
 public:
     StringBuilderImpl2(const String& name)
         : _name(name) {
@@ -75,7 +75,7 @@ private:
     String _name;
 };
 
-class StringBuilderImpl3 : public Builder<String> {
+class StringBuilderImpl3 final : public Builder<String> {
 public:
     StringBuilderImpl3(const String& value)
         : _value(sp<String>::make(value)) {
@@ -102,7 +102,7 @@ public:
 private:
     sp<String> _value;
 
-    std::vector<sp<Builder<String>>> _builders;
+    Vector<sp<Builder<String>>> _builders;
 };
 
 }
@@ -176,10 +176,10 @@ bool Strings::parseArrayAndIndex(const String& expr, String& name, int32_t& inde
     return true;
 }
 
-std::map<String, String> Strings::parseProperties(const String& str, char delim, char equal)
+Map<String, String> Strings::parseProperties(const String& str, char delim, char equal)
 {
-    std::map<String, String> properties;
-    std::vector<String> elems = str.split(delim);
+    Map<String, String> properties;
+    Vector<String> elems = str.split(delim);
     for(const String& i : elems)
     {
         const auto [key, value] = i.cut(equal);
@@ -377,7 +377,7 @@ bool wStrToUtf8(const wchar_t* wideStr, size_t maxCount, String& utf8Str)
     if(!utf16ToUtf8(nullptr, destLen, wideStr, maxCount))
         return false;
 
-    std::vector<char> buf(destLen + 1);
+    Vector<char> buf(destLen + 1);
     buf.back() = 0;
 //    utf8Str = String(destLen, 0);
 //    DCHECK(utf8Str.length() == destLen, "Cannot allocate %d bytes, out of memory?", destLen);

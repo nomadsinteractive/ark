@@ -162,7 +162,7 @@ sp<Rigidbody> Rigidbody::makeShadow() const
 }
 
 Rigidbody::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _collider(factory.ensureBuilder<Collider>(manifest, "collider")), _body_type(Documents::getAttribute<BodyType>(manifest, "body-type", BODY_TYPE_KINEMATIC)), _shape(factory.getBuilder<Shape>(manifest, "shape")),
+    : _collider(factory.ensureBuilder<Collider>(manifest, "collider")), _body_type(manifest, "body-type", BODY_TYPE_KINEMATIC), _shape(factory.getBuilder<Shape>(manifest, "shape")),
       _position(factory.getBuilder<Vec3>(manifest, constants::POSITION)), _rotation(factory.getBuilder<Vec4>(manifest, constants::ROTATION)), _discarded(factory.getBuilder<Boolean>(manifest, constants::DISCARDED)),
       _collision_callback(factory.getBuilder<CollisionCallback>(manifest, constants::COLLISION_CALLBACK)), _collision_filter(factory.getBuilder<CollisionFilter>(manifest, "collision-filter"))
 {
@@ -171,7 +171,7 @@ Rigidbody::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 sp<Rigidbody> Rigidbody::BUILDER::build(const Scope& args)
 {
     const sp<Collider> collider = _collider->build(args);
-    sp<Rigidbody> rigidbody = ColliderType::createBody(collider, _body_type, _shape.build(args), _position.build(args), _rotation.build(args), _collision_filter.build(args), _discarded.build(args));
+    sp<Rigidbody> rigidbody = ColliderType::createBody(collider, _body_type.build(args), _shape.build(args), _position.build(args), _rotation.build(args), _collision_filter.build(args), _discarded.build(args));
     if(sp<CollisionCallback> collisionCallback = _collision_callback.build(args))
         rigidbody->setCollisionCallback(std::move(collisionCallback));
     return rigidbody;
