@@ -54,9 +54,6 @@ private:
     sp<VKDescriptorPool> makeDescriptorPool() const;
     void bindUBOShapshots(GraphicsContext& graphicsContext, const std::vector<RenderLayerSnapshot::UBOSnapshot>& uboSnapshots) const;
 
-    VkPipelineDepthStencilStateCreateInfo makeDepthStencilState() const;
-    VkPipelineRasterizationStateCreateInfo makeRasterizationState() const;
-
     bool shouldStageNeedBinded(const ShaderStageSet& stages) const;
     bool shouldRebind(int64_t tick, const PipelineDescriptor& pipelineDescriptor) const;
 

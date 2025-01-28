@@ -113,6 +113,8 @@ Uniform::Type Uniform::toType(const String& declaredType)
         return typeOpt.value();
     if(const Optional<Type> typeOpt = vecToUniformType(declaredType, "ivec", TYPE_I1))
         return typeOpt.value();
+    if(const Optional<Type> typeOpt = vecToUniformType(declaredType, "uvec", TYPE_I1))
+        return typeOpt.value();
     if(declaredType.startsWith("v") && (declaredType.size() == 3 || declaredType.size() == 4))
     {
         const int32_t vs = declaredType.at(1) - '1';

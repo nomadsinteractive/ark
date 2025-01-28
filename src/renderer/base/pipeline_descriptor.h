@@ -111,6 +111,7 @@ public:
     };
 
     struct TraitBlend {
+        bool _enabled;
         BlendFactor _src_rgb_factor;
         BlendFactor _dst_rgb_factor;
         BlendFactor _src_alpha_factor;

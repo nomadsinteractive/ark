@@ -267,7 +267,7 @@ Attribute RenderUtil::makePredefinedAttribute(const String& name, const String& 
         return {layoutType, name, Attribute::TYPE_UBYTE, type, 1, false};
     if(type == "mat4")
         return {layoutType, name, Attribute::TYPE_FLOAT, type, 16, false};
-    if(type == "ivec4")
+    if(type == "ivec4" || type == "uvec4")
         return {layoutType, name, Attribute::TYPE_INTEGER, type, 4, false};
     DFATAL("Unknown attribute type \"%s\"", type.c_str());
     return {};

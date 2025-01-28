@@ -735,19 +735,22 @@ class Atlas:
     def texture(self) -> Texture:
         pass
 
-    def has(self, resid:  NamedHash) -> bool:
+    def has(self, resid:  TYPE_NAMED_HASH) -> bool:
         pass
 
-    def get_item_uv(self, resid:  NamedHash) -> TYPE_RECT:
+    def get_item_uv(self, resid:  TYPE_NAMED_HASH) -> TYPE_RECT:
         pass
 
-    def get_original_size(self, resid:  NamedHash) -> tuple[float, float]:
+    def get_original_size(self, resid:  TYPE_NAMED_HASH) -> tuple[float, float]:
         pass
 
-    def get_pivot(self, resid:  NamedHash) -> tuple[float, float]:
+    def get_pivot(self, resid:  TYPE_NAMED_HASH) -> tuple[float, float]:
         pass
 
     def add_importer(self, importer: AtlasImporter, readable: Optional[Readable] = None):
+        pass
+
+    def make_bitmap_bundle(self):
         pass
 
 

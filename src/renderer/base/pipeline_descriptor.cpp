@@ -183,6 +183,7 @@ PipelineDescriptor::PipelineTraitMeta::PipelineTraitMeta(const document& manifes
         _configure._cull_face_test._front_face = Documents::getAttribute<FrontFace>(manifest, "front-face", PipelineDescriptor::FRONT_FACE_DEFAULT);
         break;
     case TRAIT_TYPE_BLEND:
+        _configure._blend._enabled = Documents::getAttribute<bool>(manifest, "enabled", true);
         _configure._blend._src_rgb_factor = Documents::getAttribute<BlendFactor>(manifest, "src-rgb", BLEND_FACTOR_DEFAULT);
         _configure._blend._dst_rgb_factor = Documents::getAttribute<BlendFactor>(manifest, "dst-rgb", BLEND_FACTOR_DEFAULT);
         _configure._blend._src_alpha_factor = Documents::getAttribute<BlendFactor>(manifest, "src-alpha", BLEND_FACTOR_DEFAULT);
