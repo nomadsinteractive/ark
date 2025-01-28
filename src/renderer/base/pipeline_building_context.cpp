@@ -385,12 +385,12 @@ void PipelineBuildingContext::loadPredefinedUniform(BeanFactory& factory, const 
         const String& type = Documents::ensureAttribute(i, constants::TYPE);
         const String& value = Documents::ensureAttribute(i, constants::VALUE);
         const builder<Uploader> builder = factory.findBuilderByTypeValue<Uploader>(type, value);
-        sp<Uploader> input = builder ? builder->build(args) : factory.ensure<Uploader>(value, args);
-        const uint32_t size = static_cast<uint32_t>(input->size());
+        sp<Uploader> uploader = builder ? builder->build(args) : factory.ensure<Uploader>(value, args);
+        const uint32_t size = static_cast<uint32_t>(uploader->size());
         const Uniform::Type uType = Uniform::toType(type);
         const uint32_t componentSize = uType != Uniform::TYPE_STRUCT ? Uniform::getComponentSize(uType) : size;
         CHECK(componentSize, "Unknow type \"%s\"", type.c_str());
-        addUniform(name, uType, size / componentSize, uType == Uniform::TYPE_F3 ? sp<Uploader>::make<AlignedInput>(std::move(input), 16) : std::move(input));
+        addUniform(sp<Uniform>::make(std::move(name), uType, componentSize, size / componentSize, uType == Uniform::TYPE_F3 ? sp<Uploader>::make<AlignedInput>(std::move(uploader), 16) : std::move(uploader)));
     }
 }
 

@@ -1,6 +1,7 @@
 #include "core/base/identifier.h"
 
 #include "core/util/strings.h"
+#include "core/util/string_convert.h"
 
 namespace ark {
 
@@ -110,6 +111,11 @@ Identifier Identifier::parseRef(const String& s, bool strictMode)
     return idValid ? Identifier(ID_TYPE_REFERENCE, package, ref) : Identifier(ID_TYPE_REFERENCE, "", s);
 }
 
+Identifier::operator bool() const
+{
+    return !_value.empty();
+}
+
 Identifier::Type Identifier::type() const
 {
     return _type;
@@ -182,6 +188,16 @@ Identifier Identifier::withouPackage() const
     Identifier wp = *this;
     wp._package = "";
     return wp;
+}
+
+template<> Identifier StringConvert::eval<Identifier>(const String& val)
+{
+    return Identifier::parse(val);
+}
+
+template<> String StringConvert::repr<Identifier>(const Identifier& val)
+{
+    return val.toString();
 }
 
 }

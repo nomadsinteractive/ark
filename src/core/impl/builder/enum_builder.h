@@ -11,7 +11,7 @@ namespace ark {
 template<typename T> class EnumBuilder final : public IBuilder<T> {
 public:
     EnumBuilder(const document& manifest, const String& name, T defaultValue)
-        : EnumBuilder(Identifier::parse(Documents::getAttribute(manifest, name)), defaultValue)
+        : EnumBuilder(Documents::getAttribute<Identifier>(manifest, name, {}), defaultValue)
     {
     }
     EnumBuilder(Identifier id, T defaultValue)
@@ -22,7 +22,7 @@ public:
     }
 
     T build(const Scope& args) override {
-        if(_id.isVal())
+        if(!_id || _id.isVal())
             return _value;
         CHECK(_id.isArg(), "Only value and argument Enum Builders are supported");
         if(const Optional<Box> optVar = args.getObject(_id.arg()))

@@ -1,11 +1,7 @@
 #pragma once
 
-#include <map>
-
 #include "core/forwarding.h"
 #include "core/base/api.h"
-#include "core/base/timestamp.h"
-#include "core/inf/builder.h"
 #include "core/inf/uploader.h"
 #include "core/types/implements.h"
 #include "core/types/shared_ptr.h"
@@ -32,24 +28,24 @@ public:
 //  [[script::bindings::constructor]]
     static sp<Uploader> create(sp<Vec4> value, size_t size = 0);
 //  [[script::bindings::constructor]]
-    static sp<Uploader> create(std::map<size_t, sp<Uploader>> value, size_t size = 0);
+    static sp<Uploader> create(Map<size_t, sp<Uploader>> value, size_t size = 0);
 //  [[script::bindings::constructor]]
-    static sp<Uploader> create(std::vector<sp<Mat4>> value, size_t size = 0);
+    static sp<Uploader> create(Vector<sp<Mat4>> value, size_t size = 0);
 //  [[script::bindings::constructor]]
-    static sp<Uploader> create(const std::vector<sp<Uploader>>& value, size_t size = 0);
+    static sp<Uploader> create(Vector<sp<Uploader>> value, size_t size = 0);
 //  [[script::bindings::constructor]]
-    static sp<Uploader> create(std::vector<V3> value, size_t size = 0);
+    static sp<Uploader> create(Vector<V3> value, size_t size = 0);
 //  [[script::bindings::constructor]]
-    static sp<Uploader> create(std::vector<V4> value, size_t size = 0);
+    static sp<Uploader> create(Vector<V4> value, size_t size = 0);
 //  [[script::bindings::constructor]]
-    static sp<Uploader> create(std::vector<uint32_t> value, size_t size = 0);
+    static sp<Uploader> create(Vector<uint32_t> value, size_t size = 0);
 //  [[script::bindings::constructor]]
     static sp<Uploader> create(const std::set<uint32_t>& value, size_t size = 0);
 
 //  [[script::bindings::classmethod]]
-    static std::vector<uint8_t> toBytes(Uploader& self);
-    static std::map<size_t, std::vector<uint8_t>> record(Uploader& self);
-    static std::map<size_t, size_t> recordRanges(Uploader& self);
+    static Vector<uint8_t> toBytes(Uploader& self);
+    static Map<size_t, Vector<uint8_t>> record(Uploader& self);
+    static Map<size_t, size_t> recordRanges(Uploader& self);
 
 //  [[script::bindings::property]]
     static size_t size(const sp<Uploader>& self);
@@ -74,7 +70,7 @@ public:
     static sp<Uploader> wrap(sp<Uploader> self);
 
 //  [[script::bindings::auto]]
-    static sp<Uploader> makeElementIndexInput(std::vector<element_index_t> value);
+    static sp<Uploader> makeElementIndexInput(Vector<element_index_t> value);
 
 private:
     static sp<UploaderWrapper> ensureWrapper(const sp<Uploader>& self);

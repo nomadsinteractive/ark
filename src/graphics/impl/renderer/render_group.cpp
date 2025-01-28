@@ -1,20 +1,19 @@
 #include "graphics/impl/renderer/render_group.h"
 
 #include "core/base/bean_factory.h"
-#include "core/impl/boolean/boolean_by_weak_ref.h"
 #include "graphics/components/layer.h"
 #include "graphics/base/render_layer.h"
 
 namespace ark {
 
-struct RenderGroup::BUILDER::Phrase {
+template<typename T, RendererType::Priority P> struct RenderGroup::BUILDER::Phrase {
 
     Phrase(BeanFactory& beanFactory, const document& manifest)
-        : _renderer(beanFactory.ensureBuilder<Renderer>(manifest)), _priority(Documents::getAttribute<RendererType::Priority>(manifest, "priority", RendererType::PRIORITY_DEFAULT))
+        : _renderer(beanFactory.ensureBuilder<T>(manifest)), _priority(Documents::getAttribute<RendererType::Priority>(manifest, "priority", P))
     {
     }
 
-    sp<Builder<Renderer>> _renderer;
+    sp<Builder<T>> _renderer;
     RendererType::Priority _priority;
 };
 
@@ -40,14 +39,16 @@ void RenderGroup::add(RendererType::Priority priority, sp<Renderer> renderer, sp
 }
 
 RenderGroup::BUILDER::BUILDER(BeanFactory& beanFactory, const document& manifest)
-    : _phrases(beanFactory.makeBuilderListObject<Phrase>(manifest, constants::RENDERER))
+    : _renderers(beanFactory.makeBuilderListObject<Phrase<Renderer, RendererType::PRIORITY_DEFAULT>>(manifest, constants::RENDERER)), _render_layers(beanFactory.makeBuilderListObject<Phrase<RenderLayer, RendererType::PRIORITY_RENDER_LAYER>>(manifest, constants::RENDER_LAYER))
 {
 }
 
 sp<RenderGroup> RenderGroup::BUILDER::build(const Scope& args)
 {
     sp<RenderGroup> renderGroup = sp<RenderGroup>::make();
-    for(const Phrase& i : _phrases)
+    for(const auto& i : _renderers)
+        renderGroup->add(i._priority, i._renderer->build(args));
+    for(const auto& i : _render_layers)
         renderGroup->add(i._priority, i._renderer->build(args));
     return renderGroup;
 }

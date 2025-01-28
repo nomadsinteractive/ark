@@ -389,8 +389,8 @@ public:
         glGetIntegerv(GL_BLEND_SRC_ALPHA, &_src_alpha_factor_default);
         glGetIntegerv(GL_BLEND_DST_RGB, &_dest_rgb_factor_default);
         glGetIntegerv(GL_BLEND_DST_ALPHA, &_dest_alpha_factor_default);
-        glBlendFuncSeparate(_src_rgb_factor != std::numeric_limits<GLenum>::max() ? _src_rgb_factor : _src_rgb_factor_default, _dest_rgb_factor != std::numeric_limits<GLenum>::max() ? _dest_rgb_factor : _dest_rgb_factor_default,
-                            _src_alpha_factor != std::numeric_limits<GLenum>::max() ? _src_alpha_factor : _src_alpha_factor_default, _dest_alpha_factor != std::numeric_limits<GLenum>::max() ? _dest_alpha_factor : _dest_alpha_factor_default);
+        glBlendFuncSeparate(_src_rgb_factor ? _src_rgb_factor.value() : _src_rgb_factor_default, _dest_rgb_factor ? _dest_rgb_factor.value() : _dest_rgb_factor_default,
+                            _src_alpha_factor ? _src_alpha_factor.value() : _src_alpha_factor_default, _dest_alpha_factor ? _dest_alpha_factor.value() : _dest_alpha_factor_default);
     }
 
     void postDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override {
@@ -398,10 +398,10 @@ public:
     }
 
 private:
-    GLenum _src_rgb_factor;
-    GLenum _dest_rgb_factor;
-    GLenum _src_alpha_factor;
-    GLenum _dest_alpha_factor;
+    Optional<GLenum> _src_rgb_factor;
+    Optional<GLenum> _dest_rgb_factor;
+    Optional<GLenum> _src_alpha_factor;
+    Optional<GLenum> _dest_alpha_factor;
 
     GLenum _src_rgb_factor_default;
     GLenum _dest_rgb_factor_default;
@@ -702,27 +702,27 @@ GLPipeline::GLPipeline(const sp<Recycler>& recycler, uint32_t version, std::map<
     for(const auto& [k, v] : bindings.parameters()._traits)
     {
         if(k == PipelineDescriptor::TRAIT_TYPE_CULL_FACE_TEST)
-            _draw_decorators.push_back(sp<GLCullFaceTest>::make(v._configure._cull_face_test));
+            _draw_decorators.push_back(sp<Snippet::DrawEvents>::make<GLCullFaceTest>(v._configure._cull_face_test));
         else if(k == PipelineDescriptor::TRAIT_TYPE_DEPTH_TEST)
-            _draw_decorators.push_back(sp<GLDepthTest>::make(v._configure._depth_test));
+            _draw_decorators.push_back(sp<Snippet::DrawEvents>::make<GLDepthTest>(v._configure._depth_test));
         else if(k == PipelineDescriptor::TRAIT_TYPE_STENCIL_TEST)
         {
             std::vector<sp<Snippet::DrawEvents>> delegate;
             const PipelineDescriptor::TraitStencilTest& test = v._configure._stencil_test;
             if(test._front._type == PipelineDescriptor::FRONT_FACE_TYPE_DEFAULT && test._front._type == test._back._type)
-                delegate.push_back(sp<GLStencilTestSeparate>::make(test._front));
+                delegate.push_back(sp<Snippet::DrawEvents>::make<GLStencilTestSeparate>(test._front));
             else
             {
                 if(test._front._type == PipelineDescriptor::FRONT_FACE_TYPE_FRONT)
-                    delegate.push_back(sp<GLStencilTestSeparate>::make(test._front));
+                    delegate.push_back(sp<Snippet::DrawEvents>::make<GLStencilTestSeparate>(test._front));
                 if(test._back._type == PipelineDescriptor::FRONT_FACE_TYPE_BACK)
-                    delegate.push_back(sp<GLStencilTestSeparate>::make(test._back));
+                    delegate.push_back(sp<Snippet::DrawEvents>::make<GLStencilTestSeparate>(test._back));
             }
             DASSERT(delegate.size() > 0);
-            _draw_decorators.push_back(sp<GLStencilTest>::make(std::move(delegate)));
+            _draw_decorators.push_back(sp<Snippet::DrawEvents>::make<GLStencilTest>(std::move(delegate)));
         }
         else if(k == PipelineDescriptor::TRAIT_TYPE_BLEND)
-            _draw_decorators.push_back(sp<GLTraitBlend>::make(v._configure._blend));
+            _draw_decorators.push_back(sp<Snippet::DrawEvents>::make<GLTraitBlend>(v._configure._blend));
     }
 }
 

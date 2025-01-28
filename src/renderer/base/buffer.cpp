@@ -167,15 +167,14 @@ void Buffer::Delegate::setSize(size_t size)
     _size = size;
 }
 
-Buffer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _resource_loader_context(resourceLoaderContext), _input(factory.getBuilder<Uploader>(manifest, "input")), _usage(Documents::getAttribute<Usage>(manifest, "usage", USAGE_BIT_DYNAMIC))
+Buffer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+    : _uploader(factory.getBuilder<Uploader>(manifest, "uploader")), _usage(Documents::getAttribute<Usage>(manifest, "usage", USAGE_BIT_DYNAMIC))
 {
 }
 
 sp<Buffer> Buffer::BUILDER::build(const Scope& args)
 {
-    const sp<RenderController>& renderController = _resource_loader_context->renderController();
-    return sp<Buffer>::make(renderController->makeBuffer(Buffer::TYPE_STORAGE, _usage, _input.build(args)));
+    return sp<Buffer>::make(Ark::instance().renderController()->makeBuffer(Buffer::TYPE_STORAGE, _usage, _uploader.build(args)));
 }
 
 template<> ARK_API Buffer::Usage StringConvert::eval<Buffer::Usage>(const String& str)

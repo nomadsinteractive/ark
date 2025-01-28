@@ -1,8 +1,5 @@
 #pragma once
 
-#include <map>
-#include <vector>
-
 #include "core/base/api.h"
 #include "core/collection/list.h"
 #include "core/inf/builder.h"
@@ -28,8 +25,9 @@ public:
         sp<RenderGroup> build(const Scope& args) override;
 
     private:
-        struct Phrase;
-        std::vector<Phrase> _phrases;
+        template<typename T, RendererType::Priority P> struct Phrase;
+        Vector<Phrase<Renderer, RendererType::PRIORITY_DEFAULT>> _renderers;
+        Vector<Phrase<RenderLayer, RendererType::PRIORITY_RENDER_LAYER>> _render_layers;
     };
 
 //  [[plugin::builder("render-group")]]
@@ -44,7 +42,7 @@ public:
     };
 
 private:
-    std::map<RendererType::Priority, DVList<sp<Renderer>>> _phrases;
+    Map<RendererType::Priority, DVList<sp<Renderer>>> _phrases;
 };
 
 }

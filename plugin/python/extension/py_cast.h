@@ -280,13 +280,12 @@ private:
         return Optional<T>();
     }
     template<typename T, typename U> static Optional<T> toCppCollectionObject_sfinae(PyObject* obj, ...) {
-        Py_ssize_t len = !PyBridge::isPyDictExact(obj) ? PyBridge::PyObject_Size(obj) : -1;
-        if(len == -1)
-            return Optional<T>();
+        if(const Py_ssize_t len = !PyBridge::isPyDictExact(obj) ? PyBridge::PyObject_Size(obj) : -1; len == -1)
+            return {};
         T col;
         if(copyToCppObject<U>(obj, std::inserter(col, col.begin())))
             return col;
-        return Optional<T>();
+        return {};
     }
     template<typename T, typename OutIt> static bool copyToCppObject(PyObject* obj, OutIt outIter) {
         PyObject* iter = PyBridge::PyObject_GetIter(obj);
@@ -401,10 +400,10 @@ template<> inline Optional<sp<ByteArray>> PyCast::toSharedPtrImpl<ByteArray>(PyO
     if(PyObject_CheckBuffer(object)) {
         Py_buffer buf;
         PyObject_GetBuffer(object, &buf, PyBUF_C_CONTIGUOUS);
-        sp<ByteArray> arr = sp<ByteArray::Allocated>::make(buf.len);
-        memcpy(arr->buf(), buf.buf, buf.len);
+        sp<ByteArray> array = sp<ByteArray>::make<ByteArray::Allocated>(buf.len);
+        memcpy(array->buf(), buf.buf, buf.len);
         PyBuffer_Release(&buf);
-        return arr;
+        return array;
     }
     return toSharedPtrDefault<ByteArray>(object);
 }

@@ -15,6 +15,7 @@ public:
         ID_TYPE_ARGUMENT = '$',
         ID_TYPE_EXPRESSION = '{'
     };
+    Identifier() = default;
     Identifier(Type type, String package, String val, String valueType = {}, bool isOptional = false);
 
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Identifier);
@@ -22,6 +23,7 @@ public:
     static Identifier parse(const String& s, Type idType = ID_TYPE_AUTO, bool strictMode = true);
     static Identifier parseRef(const String& s, bool strictMode = true);
 
+    explicit operator bool() const;
     Type type() const;
 
     const String& package() const;

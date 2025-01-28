@@ -43,8 +43,8 @@ public:
         TYPE_COUNT
     };
 
-    Uniform(String name, String declaredType, Type type, size_t size, uint32_t length, sp<Uploader> uploader);
-    Uniform(String name, String type, uint32_t length, sp<Uploader> uploader);
+    Uniform(String name, String declaredType, Type type, uint32_t componentSize, uint32_t length, sp<Uploader> uploader);
+    Uniform(String name, Type type, uint32_t componentSize, uint32_t length, sp<Uploader> uploader);
     Uniform(String name, Type type, uint32_t length, sp<Uploader> uploader);
     DEFAULT_COPY_AND_ASSIGN(Uniform);
 
@@ -69,7 +69,7 @@ private:
     String _name;
     String _declared_type;
     Type _type;
-    size_t _component_size;
+    uint32_t _component_size;
     uint32_t _length;
     sp<Uploader> _uploader;
 };

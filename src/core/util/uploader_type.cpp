@@ -26,11 +26,11 @@ private:
     };
 
 public:
-    UploaderList(const std::vector<sp<Uploader>>& uploaders)
+    UploaderList(Vector<sp<Uploader>> uploaders)
         : Uploader(0) {
-        for(const sp<Uploader>& i : uploaders) {
-            size_t size = i->size();
-            _uploaders.push_back(Node{_size, i, true});
+        for(sp<Uploader>& i : uploaders) {
+            const size_t size = i->size();
+            _uploaders.push_back({_size, std::move(i), true});
             _size += size;
         }
     }
@@ -55,7 +55,7 @@ public:
     }
 
 private:
-    std::vector<Node> _uploaders;
+    Vector<Node> _uploaders;
 };
 
 struct WritableSnapshot final : Writable {
@@ -65,19 +65,19 @@ struct WritableSnapshot final : Writable {
         if(iter != _records.begin() && !_records.empty())
             if(const auto previter = std::prev(iter); previter->first + previter->second.size() == offset)
             {
-                std::vector<uint8_t>& prev = previter->second;
+                Vector<uint8_t>& prev = previter->second;
                 size_t prevsize = prev.size();
                 prev.resize(prevsize + size);
                 memcpy(prev.data() + prevsize, buffer, size);
                 return size;
             }
-        std::vector<uint8_t> data(size);
+        Vector<uint8_t> data(size);
         memcpy(data.data(), buffer, size);
         _records.insert(iter, {offset, std::move(data)});
         return size;
     }
 
-    std::map<size_t, std::vector<uint8_t>> _records;
+    std::map<size_t, Vector<uint8_t>> _records;
 };
 
 struct WritableRangeSnapshot final : Writable {
@@ -107,86 +107,85 @@ sp<UploaderImpl> ensureImpl(const sp<Uploader>& self)
 
 }
 
-
 sp<Uploader> UploaderType::create(sp<ByteArray> value, size_t size)
 {
-    return reserve(sp<UploaderArray<uint8_t>>::make(std::move(value)), size);
+    return reserve(sp<Uploader>::make<UploaderArray<uint8_t>>(std::move(value)), size);
 }
 
 sp<Uploader> UploaderType::create(sp<IntArray> value, size_t size)
 {
-    return reserve(sp<UploaderArray<int32_t>>::make(std::move(value)), size);
+    return reserve(sp<Uploader>::make<UploaderArray<int32_t>>(std::move(value)), size);
 }
 
 sp<Uploader> UploaderType::create(sp<Integer> value, size_t size)
 {
-    return reserve(sp<UploaderOfVariable<int32_t>>::make(std::move(value)), size);
+    return reserve(sp<Uploader>::make<UploaderOfVariable<int32_t>>(std::move(value)), size);
 }
 
 sp<Uploader> UploaderType::create(sp<Numeric> value, size_t size)
 {
-    return reserve(sp<UploaderOfVariable<float>>::make(std::move(value)), size);
+    return reserve(sp<Uploader>::make<UploaderOfVariable<float>>(std::move(value)), size);
 }
 
 sp<Uploader> UploaderType::create(sp<Vec2> value, size_t size)
 {
-    return reserve(sp<UploaderOfVariable<V2>>::make(std::move(value)), size);
+    return reserve(sp<Uploader>::make<UploaderOfVariable<V2>>(std::move(value)), size);
 }
 
 sp<Uploader> UploaderType::create(sp<Vec3> value, size_t size)
 {
-    return reserve(sp<UploaderOfVariable<V3>>::make(std::move(value)), size);
+    return reserve(sp<Uploader>::make<UploaderOfVariable<V3>>(std::move(value)), size);
 }
 
 sp<Uploader> UploaderType::create(sp<Vec4> value, size_t size)
 {
-    return reserve(sp<UploaderOfVariable<V4>>::make(std::move(value)), size);
+    return reserve(sp<Uploader>::make<UploaderOfVariable<V4>>(std::move(value)), size);
 }
 
 sp<Uploader> UploaderType::create(std::map<size_t, sp<Uploader>> value, size_t size)
 {
-    return sp<UploaderImpl>::make(std::move(value), size);
+    return sp<Uploader>::make<UploaderImpl>(std::move(value), size);
 }
 
-sp<Uploader> UploaderType::create(std::vector<sp<Mat4>> value, size_t size)
+sp<Uploader> UploaderType::create(Vector<sp<Mat4>> value, size_t size)
 {
-    return reserve(sp<UploaderVariableArray<M4>>::make(std::move(value)), size);
+    return reserve(sp<Uploader>::make<UploaderVariableArray<M4>>(std::move(value)), size);
 }
 
-sp<Uploader> UploaderType::create(const std::vector<sp<Uploader>>& value, size_t size)
+sp<Uploader> UploaderType::create(Vector<sp<Uploader>> value, size_t size)
 {
-    return reserve(sp<UploaderList>::make(value), size);
+    return reserve(sp<Uploader>::make<UploaderList>(std::move(value)), size);
 }
 
-sp<Uploader> UploaderType::create(std::vector<V3> value, size_t size)
+sp<Uploader> UploaderType::create(Vector<V3> value, size_t size)
 {
-    return reserve(sp<UploaderArray<V3>>::make(std::move(value)), size);
+    return reserve(sp<Uploader>::make<UploaderArray<V3>>(std::move(value)), size);
 }
 
-sp<Uploader> UploaderType::create(std::vector<V4> value, size_t size)
+sp<Uploader> UploaderType::create(Vector<V4> value, size_t size)
 {
-    return reserve(sp<UploaderArray<V4>>::make(std::move(value)), size);
+    return reserve(sp<Uploader>::make<UploaderArray<V4>>(std::move(value)), size);
 }
 
-sp<Uploader> UploaderType::create(std::vector<uint32_t> value, size_t size)
+sp<Uploader> UploaderType::create(Vector<uint32_t> value, size_t size)
 {
-    return reserve(sp<UploaderArray<uint32_t>>::make(std::move(value)), size);
+    return reserve(sp<Uploader>::make<UploaderArray<uint32_t>>(std::move(value)), size);
 }
 
 sp<Uploader> UploaderType::create(const std::set<uint32_t>& value, size_t size)
 {
-    return reserve(sp<UploaderArray<uint32_t>>::make(std::vector<uint32_t>(value.begin(), value.end())), size);
+    return reserve(sp<Uploader>::make<UploaderArray<uint32_t>>(Vector<uint32_t>(value.begin(), value.end())), size);
 }
 
-std::vector<uint8_t> UploaderType::toBytes(Uploader& self)
+Vector<uint8_t> UploaderType::toBytes(Uploader& self)
 {
-    std::vector<uint8_t> bytes(self.size());
+    Vector<uint8_t> bytes(self.size());
     WritableMemory writable(bytes.data());
     self.upload(writable);
     return bytes;
 }
 
-std::map<size_t, std::vector<uint8_t>> UploaderType::record(Uploader& self)
+std::map<size_t, Vector<uint8_t>> UploaderType::record(Uploader& self)
 {
     WritableSnapshot writable;
     self.upload(writable);
@@ -202,12 +201,12 @@ std::map<size_t, size_t> UploaderType::recordRanges(Uploader& self)
 
 sp<Uploader> UploaderType::wrap(sp<Uploader> self)
 {
-    return sp<UploaderWrapper>::make(std::move(self));
+    return sp<Uploader>::make<UploaderWrapper>(std::move(self));
 }
 
-sp<Uploader> UploaderType::makeElementIndexInput(std::vector<element_index_t> value)
+sp<Uploader> UploaderType::makeElementIndexInput(Vector<element_index_t> value)
 {
-    return sp<UploaderArray<element_index_t>>::make(std::move(value));
+    return sp<Uploader>::make<UploaderArray<element_index_t>>(std::move(value));
 }
 
 void UploaderType::reset(const sp<Uploader>& self, sp<Uploader> delegate)
@@ -245,7 +244,7 @@ sp<Uploader> UploaderType::remap(sp<Uploader> self, size_t size, size_t offset)
 
 sp<Uploader> UploaderType::repeat(sp<Uploader> self, size_t length, size_t stride)
 {
-    return sp<UploaderRepeat>::make(std::move(self), length, stride);
+    return sp<Uploader>::make<UploaderRepeat>(std::move(self), length, stride);
 }
 
 void UploaderType::addInput(const sp<Uploader>& self, size_t offset, sp<Uploader> input)
@@ -266,7 +265,7 @@ void UploaderType::markDirty(const sp<Uploader>& self)
 sp<UploaderWrapper> UploaderType::ensureWrapper(const sp<Uploader>& self)
 {
     const sp<UploaderWrapper> wrapper = self.tryCast<UploaderWrapper>();
-    CHECK(wrapper, "This Input object is not a InputWrapper instance");
+    CHECK(wrapper, "This Uploader object is not a UploaderWrapper instance");
     return wrapper;
 }
 

@@ -23,7 +23,7 @@ TYPE_INT_OR_FLOAT = Union[int, float]
 TYPE_NUMERIC = Union[TYPE_INT_OR_FLOAT, 'Numeric']
 TYPE_RECT = tuple[TYPE_INT_OR_FLOAT, TYPE_INT_OR_FLOAT, TYPE_INT_OR_FLOAT, TYPE_INT_OR_FLOAT]
 TYPE_VEC2 = Union[tuple[TYPE_NUMERIC, TYPE_NUMERIC], 'Vec2']
-TYPE_VEC3 = Union[tuple[TYPE_NUMERIC, TYPE_NUMERIC, TYPE_NUMERIC], TYPE_VEC2, 'Vec3']
+TYPE_VEC3 = Union[tuple[TYPE_NUMERIC, TYPE_NUMERIC, TYPE_NUMERIC], 'Vec3']
 TYPE_VEC4 = Union[tuple[TYPE_NUMERIC, TYPE_NUMERIC, TYPE_NUMERIC, TYPE_NUMERIC],'Vec4']
 TYPE_RECTI = tuple[int, int, int, int]
 TYPE_FLOAT2 = tuple[float, float]
@@ -1348,6 +1348,10 @@ class Material:
 
     @property
     def specular(self) -> Optional[MaterialTexture]:
+        return None
+
+    @property
+    def emission(self) -> Optional[MaterialTexture]:
         return None
 
 

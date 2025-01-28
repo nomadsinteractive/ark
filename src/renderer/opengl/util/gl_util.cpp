@@ -66,11 +66,11 @@ GLenum GLUtil::toStencilFunc(PipelineDescriptor::StencilFunc func)
     return glFuncs[func];
 }
 
-GLenum GLUtil::toBlendFactor(PipelineDescriptor::BlendFactor blendFactor)
+Optional<GLenum> GLUtil::toBlendFactor(PipelineDescriptor::BlendFactor blendFactor)
 {
     switch(blendFactor) {
     case PipelineDescriptor::BLEND_FACTOR_DEFAULT:
-        return std::numeric_limits<GLenum>::max();
+        return {};
     case PipelineDescriptor::BLEND_FACTOR_ZERO:
         return GL_ZERO;
     case PipelineDescriptor::BLEND_FACTOR_ONE:
@@ -99,7 +99,7 @@ GLenum GLUtil::toBlendFactor(PipelineDescriptor::BlendFactor blendFactor)
         break;
     }
     FATAL("Unknow BlendFacor: %d", blendFactor);
-    return GL_ZERO;
+    return {};
 }
 
 GLenum GLUtil::toFrontFaceType(PipelineDescriptor::FrontFaceType face)

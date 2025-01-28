@@ -120,16 +120,15 @@ public:
 
     const sp<Delegate>& delegate() const;
 
-//  [[plugin::resource-loader]]
-    class BUILDER : public Builder<Buffer> {
+//  [[plugin::builder]]
+    class BUILDER final : public Builder<Buffer> {
     public:
-        BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
+        BUILDER(BeanFactory& factory, const document& manifest);
 
         sp<Buffer> build(const Scope& args) override;
 
     private:
-        sp<ResourceLoaderContext> _resource_loader_context;
-        SafeBuilder<Uploader> _input;
+        SafeBuilder<Uploader> _uploader;
         Usage _usage;
     };
 

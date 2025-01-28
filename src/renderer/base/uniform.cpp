@@ -43,6 +43,8 @@ String toDeclaredType(Uniform::Type type)
             return "uimage2D";
         case Uniform::TYPE_IIMAGE2D:
             return "iimage2D";
+        case Uniform::TYPE_STRUCT:
+            return "struct";
         default:
             break;
     }
@@ -52,13 +54,13 @@ String toDeclaredType(Uniform::Type type)
 
 }
 
-Uniform::Uniform(String name, String declaredType, Uniform::Type type, size_t size, uint32_t length, sp<Uploader> uploader)
-    : _name(std::move(name)), _declared_type(std::move(declaredType)), _type(type), _component_size(size), _length(length), _uploader(std::move(uploader))
+Uniform::Uniform(String name, String declaredType, Uniform::Type type, uint32_t componentSize, uint32_t length, sp<Uploader> uploader)
+    : _name(std::move(name)), _declared_type(std::move(declaredType)), _type(type), _component_size(componentSize), _length(length), _uploader(std::move(uploader))
 {
 }
 
-Uniform::Uniform(String name, String type, uint32_t length, sp<Uploader> uploader)
-    : Uniform(std::move(name), std::move(type), toType(type), getComponentSize(toType(type)), length, std::move(uploader))
+Uniform::Uniform(String name, Type type, uint32_t componentSize, uint32_t length, sp<Uploader> uploader)
+    : _name(std::move(name)), _declared_type(toDeclaredType(type)), _type(type), _component_size(componentSize), _length(length), _uploader(std::move(uploader))
 {
 }
 
@@ -94,7 +96,7 @@ static Optional<Uniform::Type> vecToUniformType(const String& declaredType, cons
 {
     if(declaredType.startsWith(vecPrefix) && declaredType.length() == vecPrefix.length() + 1)
     {
-        int32_t vs = declaredType.at(vecPrefix.length()) - '1';
+        const int32_t vs = declaredType.at(vecPrefix.length()) - '1';
         CHECK(vs >= 0 && vs < 4, "Unknow type %s", declaredType.c_str());
         return static_cast<Uniform::Type>(baseType + vs);
     }
@@ -107,16 +109,14 @@ Uniform::Type Uniform::toType(const String& declaredType)
         return TYPE_I1;
     if(declaredType == "float")
         return TYPE_F1;
-    Optional<Uniform::Type> typeOpt = vecToUniformType(declaredType, "vec", TYPE_F1);
-    if(typeOpt)
+    if(const Optional<Type> typeOpt = vecToUniformType(declaredType, "vec", TYPE_F1))
         return typeOpt.value();
-    typeOpt = vecToUniformType(declaredType, "ivec", TYPE_I1);
-    if(typeOpt)
+    if(const Optional<Type> typeOpt = vecToUniformType(declaredType, "ivec", TYPE_I1))
         return typeOpt.value();
     if(declaredType.startsWith("v") && (declaredType.size() == 3 || declaredType.size() == 4))
     {
-        int32_t vs = declaredType.at(1) - '1';
-        char ts = declaredType.at(2);
+        const int32_t vs = declaredType.at(1) - '1';
+        const char ts = declaredType.at(2);
         CHECK(vs >= 0 && vs < 4 && (ts == 'i' || ts == 'f'), "Unknow type %s", declaredType.c_str());
         if(declaredType.endsWith("v"))
             return ts == 'f' ? static_cast<Type>(TYPE_F1V + vs) : static_cast<Type>(TYPE_I1V + vs);
@@ -136,9 +136,9 @@ Uniform::Type Uniform::toType(const String& declaredType)
         return TYPE_UIMAGE2D;
     if(declaredType == "iimage2D")
         return TYPE_IIMAGE2D;
-    CHECK(declaredType == "image2D", "Unknow type \"%s\"", declaredType.c_str());
     if(declaredType == "image2D")
         return TYPE_IMAGE2D;
+    CHECK(declaredType == "struct", "Unknow type \"%s\"", declaredType.c_str());
     return TYPE_STRUCT;
 }
 
