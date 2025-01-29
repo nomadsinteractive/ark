@@ -9,11 +9,11 @@
 
 namespace ark {
 
-class EventListenerByScript : public EventListener {
+class EventListenerByScript final : public EventListener {
 public:
     EventListenerByScript(const sp<Interpreter>& script, const String& eventName);
 
-    virtual bool onEvent(const Event& event) override;
+    bool onEvent(const Event& event) override;
 
 private:
     sp<Interpreter> _script;

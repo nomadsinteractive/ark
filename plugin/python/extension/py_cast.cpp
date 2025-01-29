@@ -22,11 +22,8 @@
 #include "python/extension/python_extension.h"
 #include "python/extension/py_instance_ref.h"
 
-#include "python/impl/adapter/collision_callback_python.h"
 #include "python/impl/adapter/runnable_python.h"
-#include "python/impl/adapter/event_listener_python.h"
 
-#include "python/impl/duck/py_callable_duck_type.h"
 #include "python/impl/duck/py_list_duck_type.h"
 #include "python/impl/duck/py_object_duck_type.h"
 
@@ -244,8 +241,6 @@ Scope PyCast::toScope(PyObject* kws)
                 scope.put(sKey, *reinterpret_cast<PyArkType::Instance*>(item)->box);
             else if(PyBool_Check(item))
                 scope.put(sKey, Box(sp<Boolean>::make<Boolean::Const>(PyObject_IsTrue(item) != 0)));
-            else if(PyCallable_Check(item))
-                scope.put(sKey, Box(sp<PyCallableDuckType>::make(PyInstance::track(item))));
             else if(Py_IsNone(item))
                 scope.put(sKey, {});
             else

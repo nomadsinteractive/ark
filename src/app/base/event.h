@@ -119,6 +119,7 @@ public:
 
 //  [[script::bindings::enumeration]]
     enum Button {
+        BUTTON_NONE,
         BUTTON_MOUSE_LEFT,
         BUTTON_MOUSE_MIDDLE,
         BUTTON_MOUSE_RIGHT,
@@ -140,7 +141,7 @@ public:
     };
 
     struct TextInputInfo {
-        TextInputInfo(const String& text);
+        TextInputInfo(StringView text);
 
         char _text[CONSTANT_TEXT_INPUT_TEXT_SIZE];
     };

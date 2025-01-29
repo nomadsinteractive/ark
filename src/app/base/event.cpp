@@ -50,12 +50,16 @@ uint64_t Event::timestamp() const
 
 Event::Code Event::code() const
 {
-    return _info._keyboard._code;
+    if(_action == ACTION_KEY_DOWN || _action == ACTION_KEY_UP || _action == ACTION_KEY_REPEAT)
+        return _info._keyboard._code;
+    return CODE_NONE;
 }
 
 Event::Button Event::button() const
 {
-    return _info._button._which;
+    if(_action == ACTION_DOWN || _action == ACTION_UP)
+        return _info._button._which;
+    return BUTTON_NONE;
 }
 
 wchar_t Event::character() const
@@ -68,9 +72,9 @@ const char* Event::textInput() const
     return _info._text_input._text;
 }
 
-Event::TextInputInfo::TextInputInfo(const String& text)
+Event::TextInputInfo::TextInputInfo(const StringView text)
 {
-    std::strncpy(_text, text.c_str(), sizeof(_text));
+    std::strncpy(_text, text.data(), sizeof(_text));
 }
 
 Event::KeyboardInfo::KeyboardInfo(Code code, wchar_t character)

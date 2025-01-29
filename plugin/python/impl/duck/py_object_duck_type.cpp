@@ -1,7 +1,5 @@
 #include "python/impl/duck/py_object_duck_type.h"
 
-#include "graphics/base/color.h"
-
 #include "python/extension/py_cast.h"
 
 namespace ark::plugin::python {
