@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include "core/base/api.h"
 #include "core/base/bit_set.h"
 #include "core/forwarding.h"

@@ -122,7 +122,7 @@ ModelBundle::ModelLayout& ModelBundle::Stub::addModel(int32_t type, sp<Model> mo
 const ModelBundle::ModelLayout& ModelBundle::Stub::ensureModelLayout(int32_t type) const
 {
     const auto iter = _model_layouts.find(type);
-    CHECK(iter != _model_layouts.end(), "Model not found, type: %d", type);
+    CHECK(iter != _model_layouts.end(), "Model not found, type: %d(%s)", type, NamedHash::reverse(type).c_str());
     return iter->second;
 }
 

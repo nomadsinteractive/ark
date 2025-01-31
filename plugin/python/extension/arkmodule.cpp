@@ -218,6 +218,7 @@ PyMODINIT_FUNC PyInit_ark(void)
     //TODO: We should have it done better
     const std::pair<const char*, const char*> type_hints[] = {
         {"TYPE_INTEGER", "ark.Integer"},
+        {"TYPE_BOOLEAN", "ark.Boolean"},
         {"TYPE_ENUM", "Union[int, 'Enum']"},
         {"TYPE_INT_OR_FLOAT", "Union[int, float]"},
         {"TYPE_NUMERIC", "ark.Numeric"},
