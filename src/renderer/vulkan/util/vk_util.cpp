@@ -35,7 +35,7 @@ VkPipelineShaderStageCreateInfo VKUtil::loadShader(VkDevice device, const String
 
 VkPipelineShaderStageCreateInfo VKUtil::createShader(VkDevice device, const String& source, Enum::ShaderStageBit stage)
 {
-    const std::vector<uint32_t> spirv = RenderUtil::compileSPIR(source, stage, Ark::RENDERER_TARGET_VULKAN);
+    const std::vector<uint32_t> spirv = RenderUtil::compileSPIR(source, stage, Ark::RENDERER_BACKEND_VULKAN);
     VkShaderModuleCreateInfo moduleCreateInfo = {VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
     moduleCreateInfo.codeSize = spirv.size() * sizeof(uint32_t);
     moduleCreateInfo.pCode = spirv.data();
@@ -62,17 +62,20 @@ void VKUtil::createImage(const VKDevice& device, const VkImageCreateInfo& imageC
     checkResult(vkBindImageMemory(logicalDevice, *image, *memory, 0));
 }
 
-VkImageLayout VKUtil::toImageLayout(Texture::Usage usage)
+VkImageLayout VKUtil::toImageLayout(const Texture::Usage usage)
 {
+    if(usage.has(Texture::USAGE_ATTACHMENT))
+        return toAttachmentImageLayout(usage);
+
     if(usage.has(Texture::USAGE_SAMPLER) || usage.has(Texture::USAGE_STORAGE))
         return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
-    return toAttachmentImageLayout(usage);
+    return VK_IMAGE_LAYOUT_GENERAL;
 }
 
 VkImageLayout VKUtil::toAttachmentImageLayout(Texture::Usage usage)
 {
-    switch(usage.bits() & Texture::USAGE_ATTACHMENT)
+    switch(usage.bits() & Texture::USAGE_DEPTH_STENCIL_ATTACHMENT)
     {
         case Texture::USAGE_DEPTH_ATTACHMENT:
             return VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
@@ -83,7 +86,9 @@ VkImageLayout VKUtil::toAttachmentImageLayout(Texture::Usage usage)
         default:
             break;
     }
-    return VK_IMAGE_LAYOUT_GENERAL;
+    if(usage.has(Texture::USAGE_SAMPLER) || usage.has(Texture::USAGE_STORAGE))
+        return VK_IMAGE_LAYOUT_GENERAL;
+    return VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 }
 
 VkFormat VKUtil::toAttributeFormat(Attribute::Type type, uint32_t length)
@@ -153,7 +158,7 @@ static VkFormat toVkChannelFormat(const VkFormat* channelFormat, uint32_t compon
 
 VkFormat VKUtil::toTextureFormat(uint32_t componentSize, uint8_t channels, Texture::Format format)
 {
-    static const VkFormat vkFormats[] = {
+    constexpr VkFormat vkFormats[] = {
         VK_FORMAT_R8_UNORM, VK_FORMAT_R8_SNORM, VK_FORMAT_R16_UNORM, VK_FORMAT_R16_SNORM, VK_FORMAT_R16_SFLOAT, VK_FORMAT_R32_SFLOAT, VK_FORMAT_R32_UINT, VK_FORMAT_R32_SINT,
         VK_FORMAT_R8G8_UNORM, VK_FORMAT_R8G8_SNORM, VK_FORMAT_R16G16_UNORM, VK_FORMAT_R16G16_SNORM, VK_FORMAT_R16G16_SFLOAT, VK_FORMAT_R32G32_SFLOAT, VK_FORMAT_R32G32_UINT, VK_FORMAT_R32G32_SINT,
         VK_FORMAT_R8G8B8_UNORM, VK_FORMAT_R8G8B8_SNORM, VK_FORMAT_R16G16B16_UNORM, VK_FORMAT_R16G16B16_SNORM, VK_FORMAT_R16G16B16_SFLOAT, VK_FORMAT_R32G32B32_SFLOAT, VK_FORMAT_R32G32B32_UINT, VK_FORMAT_R32G32B32_SINT,

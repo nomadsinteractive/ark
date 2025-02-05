@@ -5,35 +5,37 @@
 
 #include "renderer/vulkan/base/vk_framebuffer.h"
 
-#include "platform/vulkan/vulkan.h"
-
-namespace ark {
-namespace vulkan {
+namespace ark::vulkan {
 
 namespace {
 
 class PreDrawElementsToFBO : public RenderCommand {
 public:
     PreDrawElementsToFBO(const sp<VKFramebuffer>& fbo)
-        : _fbo(fbo) {
+        : _fbo(fbo)
+    {
     }
 
-    virtual void draw(GraphicsContext& graphicsContext) override {
-        _fbo->beginCommandBuffer(graphicsContext);
+    void draw(GraphicsContext& graphicsContext) override
+    {
+        _fbo->beginRenderPass(graphicsContext);
     }
 
 private:
     sp<VKFramebuffer> _fbo;
 };
 
-class PostDrawElementsToFBO : public RenderCommand {
+class PostDrawElementsToFBO final : public RenderCommand {
 public:
     PostDrawElementsToFBO(const sp<VKFramebuffer>& fbo)
-        : _fbo(fbo) {
+        : _fbo(fbo)
+    {
     }
 
-    virtual void draw(GraphicsContext& graphicsContext) override {
-        _fbo->endCommandBuffer(graphicsContext);
+    void draw(GraphicsContext& graphicsContext) override
+    {
+        const VkCommandBuffer commandBuffer = _fbo->endRenderPass(graphicsContext);
+        vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr, 0, nullptr, 0, nullptr);
     }
 
 private:
@@ -54,5 +56,4 @@ void VKFramebufferRenderer::render(RenderRequest& renderRequest, const V3& posit
     renderRequest.addRenderCommand(_post_draw);
 }
 
-}
 }

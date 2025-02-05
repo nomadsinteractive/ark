@@ -28,11 +28,11 @@ public:
 
 private:
 	op<tinygltf::Model> _model;
-	std::vector<sp<Material>> _materials;
+	Vector<sp<Material>> _materials;
 
-	std::vector<sp<Node>> _nodes;
-	std::vector<sp<Mesh>> _primitives;
-	std::vector<std::vector<uint32_t>> _primitives_in_mesh;
+	Vector<sp<Node>> _nodes;
+	Vector<sp<Mesh>> _primitives;
+	Vector<Vector<uint32_t>> _primitives_in_mesh;
 
 	Table<String, sp<Animation>> _animations;
 };

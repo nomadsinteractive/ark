@@ -11,6 +11,7 @@
 
 #include "graphics/base/boundaries.h"
 #include "graphics/components/position.h"
+#include "graphics/components/rotation.h"
 
 #include "app/base/application_context.h"
 #include "app/components/shape.h"
@@ -62,6 +63,9 @@ void Rigidbody::onWire(const WiringContext& context, const Box& self)
 {
     if(sp<Vec3> position = context.getComponent<Position>())
         _impl._stub->_position.reset(std::move(position));
+
+    if(sp<Vec4> rotation = context.getComponent<Rotation>())
+        _impl._stub->_rotation.reset(std::move(rotation));
 
     if(sp<Boolean> discarded = context.getComponent<Discarded>())
         _impl._stub->_ref->setDiscarded(std::move(discarded));

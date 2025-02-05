@@ -67,7 +67,7 @@ public:
 
         String _class;
 
-        Ark::RendererTarget _target;
+        Ark::RendererBackend _target;
         Ark::RendererVersion _version;
         Ark::RendererCoordinateSystem _coordinate_system;
 

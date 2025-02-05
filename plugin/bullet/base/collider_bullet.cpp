@@ -153,7 +153,10 @@ struct BtRigibodyObject {
 
         FilterAction operator() (const BtRigibodyObject& item) const
         {
-            if(RigidbodyBullet& rigidbody = getRigidBodyFromCollisionObject(item._bt_rigidbody_ref->collisionObject()); rigidbody.stub()->_ref->isDiscarded())
+            const btCollisionObject* collisionObject = item._bt_rigidbody_ref->collisionObject();
+            if(!collisionObject)
+                return FILTER_ACTION_REMOVE;
+            if(RigidbodyBullet& rigidbody = getRigidBodyFromCollisionObject(collisionObject); rigidbody.stub()->_ref->isDiscarded())
             {
                 rigidbody.discard();
                 return FILTER_ACTION_REMOVE;

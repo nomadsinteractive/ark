@@ -51,14 +51,14 @@ struct AnimationChannel {
 struct AnimationSampler {
 	enum InterpolationType { LINEAR, STEP, CUBICSPLINE };
 	InterpolationType interpolation;
-	std::vector<float> inputs;
-	std::vector<V4> outputsVec4;
+	Vector<float> inputs;
+	Vector<V4> outputsVec4;
 };
 
 struct Animation {
 	String name;
-	std::vector<AnimationSampler> samplers;
-	std::vector<AnimationChannel> channels;
+	Vector<AnimationSampler> samplers;
+	Vector<AnimationChannel> channels;
 	float start = std::numeric_limits<float>::max();
 	float end = std::numeric_limits<float>::min();
 };
@@ -67,7 +67,7 @@ template<typename T> struct SBufferReadData {
 	const uint8_t* SrcData = nullptr;
 	size_t SrcStride = 0;
 
-	std::vector<T> DstData;
+	Vector<T> DstData;
 	size_t DstStride = 0;
 
 	ShaderDataType _shader_data_type;
@@ -219,14 +219,14 @@ template<typename T, typename ComponentType = void> SBufferReadData<T> getAttrib
     return bufferReadParams;
 }
 
-template<typename T> sp<Array<T>> toArray(std::vector<T> vector) {
+template<typename T> sp<Array<T>> toArray(Vector<T> vector) {
     return vector.size() ? sp<typename Array<T>::Vector>::make(std::move(vector)) : nullptr;
 }
 
-Mesh processPrimitive(const tinygltf::Model& gltfModel, const std::vector<sp<Material>>& materials, const tinygltf::Primitive& primitive, uint32_t id, String name) {
-    std::vector<V3> vertices;
-    std::vector<V3> normals;
-    std::vector<Mesh::UV> uvs;
+Mesh processPrimitive(const tinygltf::Model& gltfModel, const Vector<sp<Material>>& materials, const tinygltf::Primitive& primitive, uint32_t id, String name) {
+    Vector<V3> vertices;
+    Vector<V3> normals;
+    Vector<Mesh::UV> uvs;
 
     for(const auto& [attributeKey, attributeValue] : primitive.attributes)
     {
@@ -250,7 +250,7 @@ Mesh processPrimitive(const tinygltf::Model& gltfModel, const std::vector<sp<Mat
     }
 
     SBufferReadData bufferReadData = getAttributeData<element_index_t, element_index_t>(gltfModel, primitive.indices);
-    std::vector<element_index_t> indices = std::move(bufferReadData.DstData);
+    Vector<element_index_t> indices = std::move(bufferReadData.DstData);
 
     ASSERT(primitive.material == -1 || primitive.material < materials.size());
     sp<Material> material = primitive.material >= 0 ? materials.at(primitive.material) : nullptr;
@@ -275,9 +275,9 @@ sp<Node> makeNode(WeakPtr<Node> parentNode, const tinygltf::Node& node)
 	return sp<Node>::make(std::move(parentNode), node.name, translation, quaternion, scale);
 }
 
-std::vector<sp<Material>> loadMaterials(tinygltf::Model const& gltfModel, const MaterialBundle& materialBundle)
+Vector<sp<Material>> loadMaterials(tinygltf::Model const& gltfModel, const MaterialBundle& materialBundle)
 {
-	std::vector<sp<Material>> materials(gltfModel.materials.size());
+	Vector<sp<Material>> materials(gltfModel.materials.size());
 
 	for(size_t i = 0; i < gltfModel.materials.size(); ++i) {
 		const tinygltf::Material& gltfMaterial = gltfModel.materials.at(i);
@@ -286,7 +286,7 @@ std::vector<sp<Material>> loadMaterials(tinygltf::Model const& gltfModel, const 
 		if(!(material = materialBundle.getMaterial(mName))) {
 			material = sp<Material>::make(i, std::move(mName));
 			if(gltfMaterial.pbrMetallicRoughness.baseColorTexture.index == -1) {
-				const std::vector<double>& vertexColorData = gltfMaterial.pbrMetallicRoughness.baseColorFactor;
+				const Vector<double>& vertexColorData = gltfMaterial.pbrMetallicRoughness.baseColorFactor;
 				V4 vertexColor(static_cast<float>(vertexColorData.at(0)), static_cast<float>(vertexColorData.at(1)),
 							   static_cast<float>(vertexColorData.at(2)), static_cast<float>(vertexColorData.at(3)));
 				material->baseColor()->setColor(sp<Vec4>::make<Vec4::Const>(vertexColor));
@@ -294,7 +294,7 @@ std::vector<sp<Material>> loadMaterials(tinygltf::Model const& gltfModel, const 
 			material->roughness()->setColor(sp<Vec4>::make<Vec4::Const>(V4(static_cast<float>(gltfMaterial.pbrMetallicRoughness.roughnessFactor), 0, 0, 0)));
 			material->metallic()->setColor(sp<Vec4>::make<Vec4::Const>(V4(static_cast<float>(gltfMaterial.pbrMetallicRoughness.metallicFactor), 0, 0, 0)));
 
-			const std::vector<double>& emission = gltfMaterial.emissiveFactor;
+			const Vector<double>& emission = gltfMaterial.emissiveFactor;
 			material->emission()->setColor(sp<Vec4>::make<Vec4::Const>(V4(static_cast<float>(emission.at(0)), static_cast<float>(emission.at(1)), static_cast<float>(emission.at(2)), 0)));
 			// TODO: Normals
 		}
@@ -310,7 +310,7 @@ tinygltf::Model loadGltfModel(const String& src)
 	std::string errString, warnString;
 	const sp<Readable> readable = Ark::instance().openAsset(src);
 
-	std::vector<uint8_t> buf(readable->remaining());
+	Vector<uint8_t> buf(readable->remaining());
 	readable->read(buf.data(), static_cast<uint32_t>(buf.size()));
 	if(src.endsWith(".gltf"))
 		loader.LoadASCIIFromString(&gltfModel, &errString, &warnString, reinterpret_cast<const char*>(buf.data()), buf.size(), "");
@@ -380,14 +380,14 @@ Animation loadAnimation(const tinygltf::Model& model, const tinygltf::Animation&
 
 			switch(accessor.type) {
 				case TINYGLTF_TYPE_VEC3: {
-					std::vector<V3> buf(accessor.count);
+					Vector<V3> buf(accessor.count);
 					memcpy(buf.data(), &buffer.data[accessor.byteOffset + bufferView.byteOffset], accessor.count * sizeof(V3));
 					for (size_t index = 0; index < accessor.count; index++)
 						sampler.outputsVec4.emplace_back(buf.at(index), 1.0f);
 	                break;
 				}
 				case TINYGLTF_TYPE_VEC4: {
-					std::vector<V4> buf(accessor.count);
+					Vector<V4> buf(accessor.count);
 					memcpy(buf.data(), &buffer.data[accessor.byteOffset + bufferView.byteOffset], accessor.count * sizeof(V4));
 					for (size_t index = 0; index < accessor.count; index++)
 						sampler.outputsVec4.push_back(buf.at(index));
@@ -423,7 +423,7 @@ Animation loadAnimation(const tinygltf::Model& model, const tinygltf::Animation&
 	return animation;
 }
 
-void updateAnimation(Animation& animation, std::vector<NodeTransform>& nodeTransforms, const std::map<uint32_t, uint32_t>& channelNodeIds, float time)
+void updateAnimation(Animation& animation, Vector<NodeTransform>& nodeTransforms, const std::map<uint32_t, uint32_t>& channelNodeIds, float time)
 {
 	for(AnimationChannel& i : animation.channels)
 	{
@@ -452,7 +452,7 @@ void updateAnimation(Animation& animation, std::vector<NodeTransform>& nodeTrans
 	}
 }	
 
-void initNodeTransforms(const std::vector<sp<Node>>& nodes, std::vector<NodeTransform>& nodeTransforms, std::map<uint32_t, uint32_t> channelNodeIds)
+void initNodeTransforms(const Vector<sp<Node>>& nodes, Vector<NodeTransform>& nodeTransforms, std::map<uint32_t, uint32_t> channelNodeIds)
 {
 	for(const auto [k, v] : channelNodeIds)
 	{
@@ -477,7 +477,7 @@ void GltfImporter::loadPrimitives()
 	uint32_t meshId = 0, primitiveId = 0;
 	for(const tinygltf::Mesh& i : _model->meshes) {
 		uint32_t primitiveBase = 0;
-		std::vector<uint32_t> primitiveIds;
+		Vector<uint32_t> primitiveIds;
 		for(const tinygltf::Primitive& j : i.primitives) {
 			String primitiveName = i.primitives.size() == 1 ? String(i.name) : Strings::sprintf("%s-%d", i.name.c_str(), primitiveBase++);
 			primitiveIds.push_back(primitiveId);
@@ -498,7 +498,7 @@ Model GltfImporter::loadModel()
 	Table<String, sp<ark::Animation>> animations;
 	if(!_model->animations.empty())
 	{
-		std::vector<Animation> loadingAnimations;
+		Vector<Animation> loadingAnimations;
 		std::map<uint32_t, uint32_t> channelNodeIds;
 
 		for(const tinygltf::Animation& i : _model->animations)
@@ -512,11 +512,11 @@ Model GltfImporter::loadModel()
 		const float tps = 24.0f;
 		const float tickInterval = 1.0f / tps;
 
-		std::vector<NodeTransform> nodeTransforms(channelNodeIds.size());
+		Vector<NodeTransform> nodeTransforms(channelNodeIds.size());
 		for(Animation& animation : loadingAnimations)
 		{
 			const uint32_t tickCount = static_cast<uint32_t>(animation.end * tps);
-			std::vector<AnimationFrame> frames(tickCount);
+			Vector<AnimationFrame> frames(tickCount);
 			initNodeTransforms(_nodes, nodeTransforms, channelNodeIds);
 
 			for(uint32_t i = 0; i < tickCount; ++i)

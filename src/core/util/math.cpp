@@ -170,37 +170,17 @@ float Math::randf()
 
 sp<Numeric> Math::randv()
 {
-    return sp<RandNumeric>::make();
-}
-
-uint32_t Math::hypot(int32_t dx, int32_t dy)
-{
-    int32_t min, max, approx;
-
-    if(dx < 0) dx = -dx;
-    if(dy < 0) dy = -dy;
-
-    if(dx < dy)
-    {
-        min = dx;
-        max = dy;
-    }
-    else
-    {
-        min = dy;
-        max = dx;
-    }
-
-    approx = (max * 1007) + (min * 441);
-    if(max < (min << 4))
-        approx -= (max * 40);
-
-    return ((approx + 512) >> 10);
+    return sp<Numeric>::make<RandNumeric>();
 }
 
 float Math::hypot(float dx, float dy)
 {
     return sqrt(dx * dx + dy * dy);
+}
+
+float Math::hypot2(float dx, float dy)
+{
+    return dx * dx + dy * dy;
 }
 
 float Math::sqrt(float x)

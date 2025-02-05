@@ -47,10 +47,10 @@ public:
     public:
         State(sp<RenderPassPhrase> renderPassPhrase, VkCommandBuffer commandBuffer, bool beginCommandBuffer);
 
-        const sp<RenderPassPhrase>& renderPassPhrase() const;
+        VkCommandBuffer ensureCommandBuffer();
 
+        const sp<RenderPassPhrase>& renderPassPhrase() const;
         VkRenderPass acquireRenderPass(const PipelineDescriptor& bindings) const;
-        VkCommandBuffer startRecording();
 
     private:
         sp<RenderPassPhrase> _render_pass_phrase;
@@ -62,10 +62,10 @@ public:
         friend class VKGraphicsContext;
     };
 
-    State& getCurrentState();
+    State& currentState();
 
     void pushState(sp<RenderPassPhrase> starter);
-    void popState();
+    VkCommandBuffer popState();
 
     void submit(VkQueue queue);
 

@@ -35,11 +35,19 @@ public:
     sp<Vec3> getLight(const String& name) const;
 
 private:
-    sp<Map<int32_t, sp<LevelLibrary>>> _libraries;
+    struct Stub {
+        Map<int32_t, sp<LevelLibrary>> _libraries;
+        Map<String, sp<Camera>> _cameras;
+        Map<String, sp<Vec3>> _lights;
+    };
+
+private:
+    sp<Stub> _stub;
     Vector<sp<LevelLayer>> _layers;
     Map<StringView, sp<LevelLayer>> _layers_by_name;
-    Map<String, sp<Camera>> _cameras;
-    Map<String, sp<Vec3>> _lights;
+
+    friend class LevelLayer;
+    friend class LevelObject;
 };
 
 }

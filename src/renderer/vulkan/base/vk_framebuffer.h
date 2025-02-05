@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -27,8 +25,8 @@ public:
     void upload(GraphicsContext& graphicsContext) override;
     ResourceRecycleFunc recycle() override;
 
-    void beginCommandBuffer(GraphicsContext& graphicsContext);
-    void endCommandBuffer(GraphicsContext& graphicsContext);
+    void beginRenderPass(GraphicsContext& graphicsContext) const;
+    VkCommandBuffer endRenderPass(GraphicsContext& graphicsContext) const;
 
 private:
     class Stub final : public VKGraphicsContext::RenderPassPhrase {

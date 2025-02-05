@@ -4,6 +4,9 @@
 #include "core/base/string.h"
 #include "core/types/shared_ptr.h"
 
+#include "graphics/base/v4.h"
+
+#include "app/base/level.h"
 #include "app/components/rigidbody.h"
 
 namespace ark {
@@ -18,7 +21,7 @@ public:
         TYPE_LIGHT
     };
 
-    LevelObject(const document& manifest);
+    LevelObject(const sp<Level::Stub>& level, const document& manifest);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(LevelObject);
 
 //  [[script::bindings::property]]
@@ -36,6 +39,11 @@ public:
 //  [[script::bindings::property]]
     int32_t instanceOf() const;
 
+//  [[script::bindings::auto]]
+    sp<RenderObject> createRenderObject() const;
+//  [[script::bindings::auto]]
+    sp<Rigidbody> createRigidbody(const sp<Collider>& collider, Rigidbody::BodyType bodyType, const Map<String, sp<Shape>>& shapes, const sp<CollisionFilter>& collisionFilter) const;
+
 //  [[script::bindings::property]]
     const sp<Entity>& entity() const;
 //  [[script::bindings::property]]
@@ -45,6 +53,7 @@ public:
     const sp<RenderObject>& renderObject() const;
 
 private:
+    sp<Level::Stub> _level;
     String _name;
     Type _type;
     bool _visible;

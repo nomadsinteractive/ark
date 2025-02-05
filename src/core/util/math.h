@@ -199,9 +199,9 @@ public:
     static sp<Numeric> randv();
 
 //  [[script::bindings::auto]]
-    static uint32_t hypot(int32_t dx, int32_t dy);
-//  [[script::bindings::auto]]
     static float hypot(float dx, float dy);
+//  [[script::bindings::auto]]
+    static float hypot2(float dx, float dy);
 //  [[script::bindings::auto]]
     static float sqrt(float number);
 //  [[plugin::function("sqrt")]]

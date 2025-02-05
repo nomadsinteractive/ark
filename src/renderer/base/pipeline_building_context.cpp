@@ -419,6 +419,7 @@ void PipelineBuildingContext::loadPredefinedImage(BeanFactory& factory, const Sc
         if(!name)
             name = Strings::sprintf("u_Image%d", binding);
         CHECK(!_images.has(name), "Image \"%s\" redefined", name.c_str());
+        CHECK(texture->usage().has(Texture::USAGE_STORAGE), "Texture \"%s\" declared as a storage image here but its usage has no \"storage\" bits", name.c_str());
         _images.push_back(std::move(name), std::move(texture));
         binding++;
     }

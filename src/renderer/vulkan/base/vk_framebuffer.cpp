@@ -20,7 +20,7 @@ namespace ark::vulkan {
 
 namespace {
 
-RenderEngineContext::Resolution getFramebufferResolution(const std::vector<sp<Texture>>& colorAttachments)
+RenderEngineContext::Resolution getFramebufferResolution(const Vector<sp<Texture>>& colorAttachments)
 {
     DASSERT(colorAttachments.size() > 0);
     const sp<Texture>& texture = colorAttachments.at(0);
@@ -78,14 +78,14 @@ ResourceRecycleFunc VKFramebuffer::recycle()
     };
 }
 
-void VKFramebuffer::beginCommandBuffer(GraphicsContext& graphicsContext)
+void VKFramebuffer::beginRenderPass(GraphicsContext& graphicsContext) const
 {
     graphicsContext.attachments().ensure<VKGraphicsContext>()->pushState(_stub);
 }
 
-void VKFramebuffer::endCommandBuffer(GraphicsContext& graphicsContext)
+VkCommandBuffer VKFramebuffer::endRenderPass(GraphicsContext& graphicsContext) const
 {
-    graphicsContext.attachments().ensure<VKGraphicsContext>()->popState();
+    return graphicsContext.attachments().ensure<VKGraphicsContext>()->popState();
 }
 
 VkRect2D VKFramebuffer::Stub::getFramebufferScissor() const

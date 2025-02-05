@@ -1,7 +1,5 @@
 #include "app/base/level_layer.h"
 
-#include <bx/typetraits.h>
-
 #include "core/base/named_hash.h"
 #include "core/types/global.h"
 
@@ -63,8 +61,8 @@ sp<Rigidbody> makeRigidBody(LevelLibrary& library, const sp<Collider>& collider,
 
 }
 
-LevelLayer::LevelLayer(sp<Map<int32_t, sp<LevelLibrary>>> libraries, String name, Vector<sp<LevelObject>> objects)
-    : _libraries(std::move(libraries)), _name(std::move(name)), _objects(std::move(objects))
+LevelLayer::LevelLayer(const sp<Level::Stub>& level, String name, Vector<sp<LevelObject>> objects)
+    : _level(level), _name(std::move(name)), _objects(std::move(objects))
 {
     for(const sp<LevelObject>& i : _objects)
         if(i->name())
@@ -92,8 +90,8 @@ void LevelLayer::createRenderObjects(Layer& layer) const
     for(const sp<LevelObject>& i : _objects)
         if(LevelObject& obj = *i; obj._instance_of != -1)
         {
-            const auto iter = _libraries->find(obj._instance_of);
-            ASSERT(iter != _libraries->end());
+            const auto iter = _level->_libraries.find(obj._instance_of);
+            ASSERT(iter != _level->_libraries.end());
             const sp<LevelLibrary>& library = iter->second;
             auto [renderObject, transform] = makeRenderObject(obj, library->_name.hash());
             layer.addRenderObject(renderObject);
@@ -112,8 +110,8 @@ void LevelLayer::createRigidbodies(const sp<Collider>& collider, Rigidbody::Body
     for(const sp<LevelObject>& i : _objects)
         if(LevelObject& obj = *i; obj._instance_of != -1)
         {
-            const auto iter = _libraries->find(obj._instance_of);
-            ASSERT(iter != _libraries->end());
+            const auto iter = _level->_libraries.find(obj._instance_of);
+            ASSERT(iter != _level->_libraries.end());
             const sp<LevelLibrary>& library = iter->second;
             obj._rigidbody = makeRigidBody(library, collider, obj, bodyType, shapes, collisionFilter);
         }

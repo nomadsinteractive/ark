@@ -91,8 +91,8 @@ void VKTexture::upload(GraphicsContext& graphicsContext, const sp<Texture::Uploa
             uploadBitmap(graphicsContext, Bitmap(_width, _height, _width * 4, 4, false), imagedata);
         else
         {
-            uint8_t channels = format & Texture::FORMAT_RGBA;
-            uint32_t componentSize = RenderUtil::getComponentSize(format);
+            const uint8_t channels = format & Texture::FORMAT_RGBA;
+            const uint32_t componentSize = RenderUtil::getComponentSize(format);
             uploadBitmap(graphicsContext, Bitmap(_width, _height, _width * channels * componentSize, channels, false), imagedata);
         }
     }
@@ -137,7 +137,7 @@ void VKTexture::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap& 
         VkBool32 validDepthFormat = vks::tools::getSupportedDepthFormat(_renderer->vkPhysicalDevice(), &fbDepthFormat);
         DASSERT(validDepthFormat);
 
-        VkImageCreateInfo image = vks::initializers::imageCreateInfo();
+        VkImageCreateInfo image = {VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO};
         image.format = fbDepthFormat;
         image.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
         image.imageType = VK_IMAGE_TYPE_2D;
@@ -148,7 +148,7 @@ void VKTexture::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap& 
         image.tiling = VK_IMAGE_TILING_OPTIMAL;
         VKUtil::createImage(_renderer->device(), image, &_image, &_memory);
 
-        VkImageViewCreateInfo depthStencilView = vks::initializers::imageViewCreateInfo();
+        VkImageViewCreateInfo depthStencilView = {VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO};
         depthStencilView.viewType = VK_IMAGE_VIEW_TYPE_2D;
         depthStencilView.format = fbDepthFormat;
         depthStencilView.flags = 0;

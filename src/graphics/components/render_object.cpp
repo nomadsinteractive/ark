@@ -10,6 +10,7 @@
 
 #include "graphics/impl/transform/transform_impl.h"
 #include "graphics/components/position.h"
+#include "graphics/components/rotation.h"
 #include "graphics/util/vec3_type.h"
 
 #include "renderer/base/model.h"
@@ -271,6 +272,13 @@ void RenderObject::onWire(const WiringContext& context, const Box& self)
 
     if(auto transform = context.getComponent<Transform>())
         setTransform(std::move(transform));
+    else
+    {
+        sp<Vec4> rotation = context.getComponent<Rotation>();
+        //TODO: Scale and translation
+        if(rotation)
+            setTransform(TransformType::create(std::move(rotation), nullptr, nullptr, TransformType::TYPE_LINEAR_3D));
+    }
 
     if(sp<Boolean> discarded = context.getComponent<Discarded>())
         setDiscarded(std::move(discarded));

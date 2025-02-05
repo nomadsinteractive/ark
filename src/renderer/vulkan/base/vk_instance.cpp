@@ -36,27 +36,27 @@ VkBool32 vkDebugUtilsMessengerCallbackEXT(
     return VK_FALSE;
 }
 
-std::vector<std::string> get_supported_extensions() {
+Vector<std::string> get_supported_extensions() {
     uint32_t count = 0;
     VKUtil::checkResult(vkEnumerateInstanceExtensionProperties(nullptr, &count, nullptr));
 
-    std::vector<VkExtensionProperties> extensionProperties(count);
+    Vector<VkExtensionProperties> extensionProperties(count);
 
     // Get the extensions
     VKUtil::checkResult(vkEnumerateInstanceExtensionProperties(nullptr, &count, extensionProperties.data()));
 
-    std::vector<std::string> extensions;
+    Vector<std::string> extensions;
     for(const auto& extension : extensionProperties)
         extensions.push_back(extension.extensionName);
 
     return extensions;
 }
 
-std::vector<VkLayerProperties> getInstanceLayerProperties() {
+Vector<VkLayerProperties> getInstanceLayerProperties() {
     uint32_t layerCount;
     vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
 
-    std::vector<VkLayerProperties> availableLayers(layerCount);
+    Vector<VkLayerProperties> availableLayers(layerCount);
     vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
 
     return availableLayers;
@@ -126,8 +126,8 @@ void VKInstance::initialize(const RenderEngine& renderEngine)
     instanceCreateInfo.pApplicationInfo = &appInfo;
 
 #if ARK_VK_DEBUG_LAYER_ENABLED
-    std::vector<const char*> validationLayerNames;
-    const std::vector<VkLayerProperties> layerProperties = getInstanceLayerProperties();
+    Vector<const char*> validationLayerNames;
+    const Vector<VkLayerProperties> layerProperties = getInstanceLayerProperties();
     for(const auto& i : layerProperties)
         if(strcmp(i.layerName, "VK_LAYER_KHRONOS_validation") == 0)
         {
@@ -164,7 +164,7 @@ VkInstance VKInstance::vkInstance() const
     return _instance;
 }
 
-const std::vector<VkPhysicalDevice>& VKInstance::physicalDevices() const
+const Vector<VkPhysicalDevice>& VKInstance::physicalDevices() const
 {
     return _physical_devices;
 }

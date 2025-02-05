@@ -111,12 +111,12 @@ sp<RenderTarget> RendererFactoryVulkan::createRenderTarget(sp<Renderer> renderer
 
 sp<RenderView> RendererFactoryVulkan::createRenderView(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController)
 {
-    return sp<RenderViewVulkan>::make(_renderer, renderContext, renderController);
+    return sp<RenderView>::make<RenderViewVulkan>(_renderer, renderContext, renderController);
 }
 
 sp<PipelineFactory> RendererFactoryVulkan::createPipelineFactory()
 {
-    return sp<PipelineFactoryVulkan>::make(_recycler, _renderer);
+    return sp<PipelineFactory>::make<PipelineFactoryVulkan>(_recycler, _renderer);
 }
 
 sp<Texture::Delegate> RendererFactoryVulkan::createTexture(sp<Size> size, sp<Texture::Parameters> parameters)

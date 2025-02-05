@@ -2035,6 +2035,10 @@ class Math:
         return 0
 
     @staticmethod
+    def hypot2(x, y):
+        return 0
+
+    @staticmethod
     def dot(x, y) -> Numeric:
         pass
 

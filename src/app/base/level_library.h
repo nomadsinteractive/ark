@@ -34,6 +34,7 @@ private:
 
     friend class Level;
     friend class LevelLayer;
+    friend class LevelObject;
 };
 
 }

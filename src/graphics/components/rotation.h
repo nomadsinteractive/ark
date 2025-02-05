@@ -3,7 +3,6 @@
 #include "core/base/api.h"
 #include "core/base/constants.h"
 #include "core/base/wrapper.h"
-#include "core/inf/builder.h"
 #include "core/inf/variable.h"
 #include "core/types/safe_builder.h"
 #include "core/types/safe_var.h"

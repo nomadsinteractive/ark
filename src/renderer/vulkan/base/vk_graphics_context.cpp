@@ -119,7 +119,7 @@ VkCommandBuffer VKGraphicsContext::RenderPassPhrase::vkCommandBuffer() const
     return _command_buffer;
 }
 
-VKGraphicsContext::State& VKGraphicsContext::getCurrentState()
+VKGraphicsContext::State& VKGraphicsContext::currentState()
 {
     ASSERT(!_state_stack.empty());
     return _state_stack.top();
@@ -133,7 +133,7 @@ void VKGraphicsContext::pushState(sp<RenderPassPhrase> starter)
     _state_stack.push(State(std::move(starter), commandBuffer, beginCommandBuffer));
 }
 
-void VKGraphicsContext::popState()
+VkCommandBuffer VKGraphicsContext::popState()
 {
     DASSERT(!_state_stack.empty());
     const State state = _state_stack.top();
@@ -148,6 +148,8 @@ void VKGraphicsContext::popState()
         VKUtil::checkResult(vkEndCommandBuffer(commandBuffer));
         _submit_queue.submitCommandBuffer(commandBuffer);
     }
+
+    return commandBuffer;
 }
 
 void VKGraphicsContext::submit(VkQueue queue)
@@ -180,7 +182,7 @@ VkRenderPass VKGraphicsContext::State::acquireRenderPass(const PipelineDescripto
     return _render_pass_phrase->acquire(bindings);
 }
 
-VkCommandBuffer VKGraphicsContext::State::startRecording()
+VkCommandBuffer VKGraphicsContext::State::ensureCommandBuffer()
 {
     if(_render_pass == VK_NULL_HANDLE)
     {

@@ -19,7 +19,7 @@
 namespace ark {
 
 Level::Level(const String& src)
-    : _libraries(sp<Map<int32_t, sp<LevelLibrary>>>::make())
+    : _stub(sp<Stub>::make())
 {
     load(src);
 }
@@ -34,8 +34,8 @@ void Level::load(const String& src)
         const String& name = Documents::ensureAttribute(i, constants::NAME);
         const String& dimensions = Documents::ensureAttribute(i, "dimensions");
         const int32_t id = Documents::ensureAttribute<int32_t>(i, constants::ID);
-        CHECK_WARN(_libraries->find(id) == _libraries->end(), "Overwriting instance library mapping(%d)", id);
-        _libraries->emplace(id, sp<LevelLibrary>::make(id, name, sp<Vec3>::make<Vec3::Const>(Strings::eval<V3>(dimensions))));
+        CHECK_WARN(_stub->_libraries.find(id) == _stub->_libraries.end(), "Overwriting instance library mapping(%d)", id);
+        _stub->_libraries.emplace(id, sp<LevelLibrary>::make(id, name, sp<Vec3>::make<Vec3::Const>(Strings::eval<V3>(dimensions))));
     }
 
     for(const document& i : manifest->children(constants::LAYER))
@@ -44,7 +44,7 @@ void Level::load(const String& src)
         Vector<sp<LevelObject>> layerObjects;
         for(const document& j : i->children("object"))
         {
-            LevelObject obj(j);
+            LevelObject obj(_stub, j);
             if(obj._type == LevelObject::TYPE_CAMERA)
             {
                 DCHECK_WARN(!getCamera(obj._name), "Overwriting camera(%s) in \"%s\"", obj._name.c_str(), src.c_str());
@@ -58,16 +58,16 @@ void Level::load(const String& src)
                 Camera c = Ark::instance().createCamera(Ark::COORDINATE_SYSTEM_RHS, true, !Ark::instance().renderController()->renderEngine()->isBackendLHS());
                 c.perspective(fovy, 16.0f / 9, clipNear, clipFar);
                 c.lookAt(obj._position, obj._position + front, up);
-                _cameras[obj._name] = sp<Camera>::make(std::move(c));
+                _stub->_cameras[obj._name] = sp<Camera>::make(std::move(c));
             }
             else if(obj._type == LevelObject::TYPE_LIGHT)
             {
                 DCHECK_WARN(!getLight(obj._name), "Overwriting light(%s) in \"%s\"", obj._name.c_str(), src.c_str());
-                _lights[obj._name] = sp<Vec3>::make<Vec3::Const>(obj._position);
+                _stub->_lights[obj._name] = sp<Vec3>::make<Vec3::Const>(obj._position);
             }
             layerObjects.push_back(sp<LevelObject>::make(obj));
         }
-        _layers.push_back(sp<LevelLayer>::make(_libraries, std::move(layerName), std::move(layerObjects)));
+        _layers.push_back(sp<LevelLayer>::make(_stub, std::move(layerName), std::move(layerObjects)));
     }
 
     for(const sp<LevelLayer>& i : _layers)
@@ -75,7 +75,7 @@ void Level::load(const String& src)
             _layers_by_name.emplace(i->name(), i);
 }
 
-sp<LevelLayer> Level::getLayer(StringView name) const
+sp<LevelLayer> Level::getLayer(const StringView name) const
 {
     const auto iter = _layers_by_name.find(name);
     return iter != _layers_by_name.end() ? iter->second : nullptr;
@@ -83,24 +83,24 @@ sp<LevelLayer> Level::getLayer(StringView name) const
 
 const Map<String, sp<Camera>>& Level::cameras() const
 {
-    return _cameras;
+    return _stub->_cameras;
 }
 
 sp<Camera> Level::getCamera(const String& name) const
 {
-    const auto iter = _cameras.find(name);
-    return iter != _cameras.end() ? iter->second : nullptr;
+    const auto iter = _stub->_cameras.find(name);
+    return iter != _stub->_cameras.end() ? iter->second : nullptr;
 }
 
 const Map<String, sp<Vec3>>& Level::lights() const
 {
-    return _lights;
+    return _stub->_lights;
 }
 
 sp<Vec3> Level::getLight(const String& name) const
 {
-    const auto iter = _lights.find(name);
-    return iter != _lights.end() ? iter->second : nullptr;
+    const auto iter = _stub->_lights.find(name);
+    return iter != _stub->_lights.end() ? iter->second : nullptr;
 }
 
 const Vector<sp<LevelLayer>>& Level::layers()

@@ -184,7 +184,7 @@ struct alignas(1) BgfxShaderAttributeChunk {
 ::bgfx::ShaderHandle createShader(const PipelineInput& pipelineInput, const String& source, Enum::ShaderStageBit stage)
 {
     const char bgfxChunkMagic[4] = {toBgfxShaderTypeMagic(stage), 'S', 'H', 11};
-    const std::vector<uint32_t> binaries = RenderUtil::compileSPIR(source, stage, Ark::RENDERER_TARGET_VULKAN);
+    const std::vector<uint32_t> binaries = RenderUtil::compileSPIR(source, stage, Ark::RENDERER_BACKEND_VULKAN);
     const void* bytecode = binaries.data();
     const uint32_t bytecodeSize = binaries.size() * sizeof(uint32_t);
     // const void* bytecode = source.c_str();

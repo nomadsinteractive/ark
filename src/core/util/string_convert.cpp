@@ -64,15 +64,15 @@ template<> ARK_API float StringConvert::eval<float>(const String& repr)
     return static_cast<float>(atof(repr.c_str()));
 }
 
-template<> Ark::RendererTarget StringConvert::eval<Ark::RendererTarget>(const String& repr)
+template<> Ark::RendererBackend StringConvert::eval<Ark::RendererBackend>(const String& repr)
 {
     const String target = repr.toLower();
     if(target == "opengl" || target == "gles")
-        return Ark::RENDERER_TARGET_OPENGL;
+        return Ark::RENDERER_BACKEND_OPENGL;
     if(target == "vulkan")
-        return Ark::RENDERER_TARGET_VULKAN;
-    CHECK(repr == "auto", "Unknow RendererTarget: \"%s, supported values are [\"opengl\", \"vulkan\", \"auto\"]", repr.c_str());
-    return Ark::RENDERER_TARGET_AUTO;
+        return Ark::RENDERER_BACKEND_VULKAN;
+    CHECK(repr == "auto", "Unknow RendererBackend: \"%s, supported values are [\"opengl\", \"vulkan\", \"auto\"]", repr.c_str());
+    return Ark::RENDERER_BACKEND_AUTO;
 }
 
 template<> Ark::RendererVersion StringConvert::eval<Ark::RendererVersion>(const String& repr)

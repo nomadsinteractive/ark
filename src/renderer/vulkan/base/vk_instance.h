@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include "renderer/forwarding.h"
 
 #include "platform/vulkan/vulkan.h"
@@ -17,15 +15,15 @@ public:
 
     VkInstance vkInstance() const;
 
-    const std::vector<VkPhysicalDevice>& physicalDevices() const;
+    const Vector<VkPhysicalDevice>& physicalDevices() const;
 
 private:
     void setupDebugMessageCallback();
 
 private:
-    std::vector<const char*> _extensions;
+    Vector<const char*> _extensions;
 
-    std::vector<VkPhysicalDevice> _physical_devices;
+    Vector<VkPhysicalDevice> _physical_devices;
 
     VkDebugUtilsMessengerEXT _callback1;
     VkDebugUtilsMessengerEXT _callback2;

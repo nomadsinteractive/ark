@@ -1,9 +1,5 @@
 #pragma once
 
-#include <vector>
-
-#include "core/types/shared_ptr.h"
-
 #include "renderer/vulkan/forward.h"
 
 #include "platform/vulkan/vulkan.h"
@@ -18,7 +14,7 @@ public:
     VkQueue vkQueue() const;
 
     VkCommandBuffer createCommandBuffer(VkCommandBufferLevel level, bool begin) const;
-    std::vector<VkCommandBuffer> makeCommandBuffers(uint32_t count) const;
+    Vector<VkCommandBuffer> makeCommandBuffers(uint32_t count) const;
 
     void flushCommandBuffer(VkCommandBuffer commandBuffer, bool free) const;
 
@@ -29,7 +25,6 @@ private:
 
     VkQueue _queue;
     VkCommandPool _command_pool;
-
 };
 
 }
