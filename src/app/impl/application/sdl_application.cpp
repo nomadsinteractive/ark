@@ -156,6 +156,11 @@ Event::Code sdlScanCodeToEventCode(SDL_Scancode sc)
     return Event::CODE_NONE;
 }
 
+void doSetMouseCapture(bool enabled) {
+    const int32_t r = SDL_CaptureMouse(enabled ? SDL_TRUE : SDL_FALSE);
+    CHECK_WARN(r == 0, "Error calling SDL_CaptureMouse, enabled: %d, return: %d, error: %s", enabled, r, SDL_GetError());
+}
+
 class SDLCursor {
 public:
     SDLCursor(SDL_Cursor* cursor)
@@ -167,7 +172,7 @@ public:
             SDL_FreeCursor(_cursor);
     }
 
-    SDL_Cursor* cursor() {
+    SDL_Cursor* cursor() const {
         return _cursor;
     }
 
@@ -262,8 +267,8 @@ public:
 
     void setMouseCapture(bool enabled) override {
 #ifdef _WIN32
-        _application_context->messageLoopRenderer()->post([this, enabled] () {
-            this->doSetMouseCapture(enabled);
+        _application_context->messageLoopRenderer()->post([enabled] () {
+            doSetMouseCapture(enabled);
         }, 0);
 #else
         doSetMouseCapture(enabled);
@@ -275,14 +280,7 @@ public:
     }
 
 private:
-    void doSetMouseCapture(bool enabled) {
-        int32_t r = SDL_CaptureMouse(enabled ? SDL_TRUE : SDL_FALSE);
-        CHECK_WARN(r == 0, "Error calling SDL_CaptureMouse, enabled: %d, return: %d, error: %s", enabled, r, SDL_GetError());
-    }
-
-private:
     sp<ApplicationContext> _application_context;
-
 };
 
 V2 toFragCoordXY(const V2& xy, Ark::RendererCoordinateSystem rcs, float surfaceHeight)

@@ -11,7 +11,8 @@ int main(int argc, const char* argv[])
 {
     try {
         Ark ark(argc, argv);
-        return ark.runTests(sp<ApplicationManifest>::make("manifest.xml"));
+        ark.initialize(sp<ApplicationManifest>::make("manifest.xml"));
+        return ark.runTests();
     }
     catch(const std::exception& ex)
     {

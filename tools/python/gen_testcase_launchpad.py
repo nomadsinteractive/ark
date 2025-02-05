@@ -115,9 +115,7 @@ public:
 
 namespace ark {
 
-int32_t Ark::runTests(sp<ApplicationManifest> manifest) {
-    initialize(std::move(manifest));
-
+int32_t Ark::runTests() {
     const Global<PluginManager> pluginManager;
     pluginManager->addPlugin(sp<TestcasePlugin>::make());
     %s

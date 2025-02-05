@@ -341,11 +341,10 @@ const char** Ark::argv() const
     return _argv;
 }
 
-sp<Application> Ark::makeApplication(sp<ApplicationManifest> manifest)
+sp<Application> Ark::makeApplication() const
 {
-    const float scale = manifest->window()._scale;
-    const V2& resolution = manifest->rendererResolution();
-    initialize(std::move(manifest));
+    const float scale = _manifest->window()._scale;
+    const V2& resolution = _manifest->rendererResolution();
     return sp<Application>::make<SDLApplication>(sp<ApplicationDelegate>::make<ApplicationDelegateImpl>(), _application_context, static_cast<uint32_t>(resolution.x() * scale), static_cast<uint32_t>(resolution.y() * scale), _manifest);
 }
 

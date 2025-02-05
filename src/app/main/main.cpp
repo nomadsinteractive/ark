@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include "core/ark.h"
 #include "core/types/shared_ptr.h"
 
@@ -12,8 +10,8 @@ int main(int argc, const char* argv[])
 {
     try {
         Ark ark(argc, argv);
-        sp<ApplicationManifest> manifest = sp<ApplicationManifest>::make("manifest.xml");
-        const sp<Application> app = ark.makeApplication(std::move(manifest));
+        ark.initialize(sp<ApplicationManifest>::make("manifest.xml"));
+        const sp<Application> app = ark.makeApplication();
         return app->run();
     }
     catch(const std::exception& ex)

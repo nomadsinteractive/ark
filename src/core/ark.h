@@ -70,7 +70,8 @@ public:
     int32_t argc() const;
     const char** argv() const;
 
-    sp<Application> makeApplication(sp<ApplicationManifest> manifest);
+    void initialize(sp<ApplicationManifest> manifest);
+    sp<Application> makeApplication() const;
 
     const sp<ApplicationManifest>& manifest() const;
 
@@ -96,12 +97,10 @@ public:
 
     void deferUnref(Box box) const;
 
-    int32_t runTests(sp<ApplicationManifest> manifest);
+    int32_t runTests();
 
 private:
     void push();
-
-    void initialize(sp<ApplicationManifest> manifest);
 
     sp<ApplicationContext> createApplicationContext(const ApplicationManifest& manifest, sp<ApplicationBundle> resource, sp<RenderEngine> renderEngine);
 
