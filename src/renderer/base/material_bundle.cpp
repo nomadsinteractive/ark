@@ -12,21 +12,24 @@
 
 namespace ark {
 
-static std::map<String, sp<Material>> _to_material_map(const std::vector<sp<Material>>& materials)
+namespace {
+
+Table<String, sp<Material>> _to_material_map(const Vector<sp<Material>>& materials)
 {
-    std::map<String, sp<Material>> materialMap;
+    Table<String, sp<Material>> materialMap;
     for(const sp<Material>& i : materials)
         materialMap[i->name()] = i;
     return materialMap;
 }
 
+}
 
-MaterialBundle::MaterialBundle(const std::vector<sp<Material>>& materials)
+MaterialBundle::MaterialBundle(const Vector<sp<Material>>& materials)
     : MaterialBundle(_to_material_map(materials), std::array<sp<Texture>, MaterialTexture::TYPE_LENGTH>())
 {
 }
 
-MaterialBundle::MaterialBundle(std::map<String, sp<Material>> materials, std::array<sp<Texture>, MaterialTexture::TYPE_LENGTH> textures)
+MaterialBundle::MaterialBundle(Table<String, sp<Material>> materials, std::array<sp<Texture>, MaterialTexture::TYPE_LENGTH> textures)
     : _materials(std::move(materials)), _width(0), _height(0)
 {
     for(size_t i = 0; i < MaterialTexture::TYPE_LENGTH; ++i)
@@ -41,7 +44,7 @@ MaterialBundle::MaterialBundle(std::map<String, sp<Material>> materials, std::ar
         }
 
     MaxRectsBinPack binPack(_width, _height, false);
-    std::vector<std::map<bitmap, RectI>> bitmapBounds(MaterialTexture::TYPE_LENGTH);
+    Vector<std::map<bitmap, RectI>> bitmapBounds(MaterialTexture::TYPE_LENGTH);
 
     for(const auto& i : _materials)
     {
@@ -74,6 +77,11 @@ MaterialBundle::MaterialBundle(std::map<String, sp<Material>> materials, std::ar
             i->updateTexture();
 }
 
+const Vector<sp<Material>>& MaterialBundle::materials() const
+{
+    return _materials.values();
+}
+
 sp<Material> MaterialBundle::getMaterial(const String& name) const
 {
     const auto iter = _materials.find(name);
@@ -82,19 +90,26 @@ sp<Material> MaterialBundle::getMaterial(const String& name) const
 
 void MaterialBundle::addMaterial(String name, sp<Material> material)
 {
-    _materials[std::move(name)] = std::move(material);
+    _materials.push_back(std::move(name), std::move(material));
+}
+
+sp<Material> MaterialBundle::addMaterial(String name)
+{
+    sp<Material> material = sp<Material>::make(_materials.size(), name);
+    _materials.push_back(std::move(name), material);
+    return material;
 }
 
 Rect MaterialBundle::getMaterialUV(const String& name) const
 {
     const auto iter = _material_bounds.find(name);
     if(iter == _material_bounds.end())
-        return Rect(0, 1.0f, 1.0f, 0);
+        return {0, 1.0f, 1.0f, 0};
 
     const RectI& bounds = iter->second;
-    float fwidth = static_cast<float>(_width);
-    float fheight = static_cast<float>(_height);
-    return Rect(bounds.left() / fwidth, bounds.bottom() / fheight, bounds.right() / fwidth, bounds.top() / fheight);
+    const float fwidth = static_cast<float>(_width);
+    const float fheight = static_cast<float>(_height);
+    return {bounds.left() / fwidth, bounds.bottom() / fheight, bounds.right() / fwidth, bounds.top() / fheight};
 }
 
 MaterialBundle::BUILDER::BUILDER(BeanFactory& beanFactory, const document& manifest)
@@ -104,7 +119,7 @@ MaterialBundle::BUILDER::BUILDER(BeanFactory& beanFactory, const document& manif
 
 sp<MaterialBundle> MaterialBundle::BUILDER::build(const Scope& args)
 {
-    std::map<String, sp<Material>> materials;
+    Table<String, sp<Material>> materials;
     DASSERT(_names.size() == _materials.size());
     for(size_t i = 0; i < _names.size(); ++i)
         materials[_names.at(i)] = _materials.at(i)->build(args);

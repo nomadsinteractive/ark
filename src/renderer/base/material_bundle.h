@@ -1,12 +1,10 @@
-#ifndef ARK_RENDERER_BASE_MATERIAL_BUNDLE_H_
-#define ARK_RENDERER_BASE_MATERIAL_BUNDLE_H_
+#pragma once
 
 #include <array>
-#include <map>
-#include <vector>
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
+#include "core/collection/table.h"
 #include "core/inf/builder.h"
 #include "core/types/shared_ptr.h"
 
@@ -23,34 +21,39 @@ namespace ark {
 class ARK_API MaterialBundle {
 public:
 //  [[script::bindings::auto]]
-    MaterialBundle(const std::vector<sp<Material>>& materials = std::vector<sp<Material>>{});
-    MaterialBundle(std::map<String, sp<Material>> materials, std::array<sp<Texture>, MaterialTexture::TYPE_LENGTH> textures);
+    MaterialBundle(const Vector<sp<Material>>& materials = {});
+    MaterialBundle(Table<String, sp<Material>> materials, std::array<sp<Texture>, MaterialTexture::TYPE_LENGTH> textures);
+
+//  [[script::bindings::property]]
+    const Vector<sp<Material>>& materials() const;
 
 //  [[script::bindings::auto]]
     sp<Material> getMaterial(const String& name) const;
 //  [[script::bindings::auto]]
     void addMaterial(String name, sp<Material> material);
 
+    sp<Material> addMaterial(String name);
+
     Rect getMaterialUV(const String& name) const;
 
 //  [[plugin::builder]]
-    class BUILDER : public Builder<MaterialBundle> {
+    class BUILDER final : public Builder<MaterialBundle> {
     public:
         BUILDER(BeanFactory& beanFactory, const document& manifest);
 
-        virtual sp<MaterialBundle> build(const Scope& args) override;
+        sp<MaterialBundle> build(const Scope& args) override;
 
     private:
-        std::vector<String> _names;
-        std::vector<sp<Builder<Material>>> _materials;
+        Vector<String> _names;
+        Vector<sp<Builder<Material>>> _materials;
 
-        std::vector<MaterialTexture::Type> _types;
-        std::vector<sp<Builder<Texture>>> _textures;
+        Vector<MaterialTexture::Type> _types;
+        Vector<sp<Builder<Texture>>> _textures;
     };
 
 private:
-    std::map<String, sp<Material>> _materials;
-    std::map<String, RectI> _material_bounds;
+    Table<String, sp<Material>> _materials;
+    Map<String, RectI> _material_bounds;
     int32_t _width;
     int32_t _height;
 
@@ -60,5 +63,3 @@ private:
 };
 
 }
-
-#endif

@@ -1,9 +1,6 @@
 #pragma once
 
-#include <map>
 #include <memory>
-#include <unordered_map>
-#include <vector>
 
 #include "core/base/api.h"
 
@@ -19,7 +16,7 @@ public:
     template<bool IS_CONSTANT> struct Iterator {
 
         template <typename V> using PType = std::conditional_t<IS_CONSTANT, const V&, V&>;
-        template <typename V> using VType = std::conditional_t<IS_CONSTANT, const std::vector<V>&, std::vector<V>&>;
+        template <typename V> using VType = std::conditional_t<IS_CONSTANT, const Vector<V>&, Vector<V>&>;
 
         typedef std::pair<PType<T>, PType<U>> PairType;
 
@@ -82,7 +79,7 @@ public:
 
     typedef Iterator<false> iterator;
     typedef Iterator<true>  const_iterator;
-    typedef std::conditional_t<Ordered, std::map<T, size_t>, std::unordered_map<T, size_t>> IndexType;
+    typedef std::conditional_t<Ordered, Map<T, size_t>, HashMap<T, size_t>> IndexType;
 
 public:
     Table() = default;
@@ -99,15 +96,15 @@ public:
         return _indices.find(key) != _indices.end();
     }
 
-    const std::vector<T>& keys() const {
+    const Vector<T>& keys() const {
         return _keys;
     }
 
-    const std::vector<U>& values() const {
+    const Vector<U>& values() const {
         return _values;
     }
 
-    std::vector<U>& values() {
+    Vector<U>& values() {
         return _values;
     }
 
@@ -163,16 +160,16 @@ public:
         _values.clear();
     }
 
-    template<typename V> std::vector<V> flat() const {
-        std::vector<V> flatted;
+    template<typename V> Vector<V> flat() const {
+        Vector<V> flatted;
         for(const auto& [k, v] : *this)
             flatted.emplace_back(k, v);
         return flatted;
     }
 
 private:
-    std::vector<T> _keys;
-    std::vector<U> _values;
+    Vector<T> _keys;
+    Vector<U> _values;
     IndexType _indices;
 };
 

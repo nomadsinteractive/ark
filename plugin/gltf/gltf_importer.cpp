@@ -275,16 +275,16 @@ sp<Node> makeNode(WeakPtr<Node> parentNode, const tinygltf::Node& node)
 	return sp<Node>::make(std::move(parentNode), node.name, translation, quaternion, scale);
 }
 
-Vector<sp<Material>> loadMaterials(tinygltf::Model const& gltfModel, const MaterialBundle& materialBundle)
+Vector<sp<Material>> loadMaterials(const tinygltf::Model& gltfModel, MaterialBundle& materialBundle)
 {
 	Vector<sp<Material>> materials(gltfModel.materials.size());
 
 	for(size_t i = 0; i < gltfModel.materials.size(); ++i) {
 		const tinygltf::Material& gltfMaterial = gltfModel.materials.at(i);
 		String mName = gltfMaterial.name;
-		sp<Material>& material = materials[i];
-		if(!(material = materialBundle.getMaterial(mName))) {
-			material = sp<Material>::make(i, std::move(mName));
+		if(sp<Material>& material = materials[i]; !(material = materialBundle.getMaterial(mName)))
+		{
+			material = materialBundle.addMaterial(std::move(mName));
 			if(gltfMaterial.pbrMetallicRoughness.baseColorTexture.index == -1) {
 				const Vector<double>& vertexColorData = gltfMaterial.pbrMetallicRoughness.baseColorFactor;
 				V4 vertexColor(static_cast<float>(vertexColorData.at(0)), static_cast<float>(vertexColorData.at(1)),
@@ -296,7 +296,6 @@ Vector<sp<Material>> loadMaterials(tinygltf::Model const& gltfModel, const Mater
 
 			const Vector<double>& emission = gltfMaterial.emissiveFactor;
 			material->emission()->setColor(sp<Vec4>::make<Vec4::Const>(V4(static_cast<float>(emission.at(0)), static_cast<float>(emission.at(1)), static_cast<float>(emission.at(2)), 0)));
-			// TODO: Normals
 		}
 	}
 
@@ -463,7 +462,7 @@ void initNodeTransforms(const Vector<sp<Node>>& nodes, Vector<NodeTransform>& no
 
 }
 
-GltfImporter::GltfImporter(const String& src, const MaterialBundle& materialBundle)
+GltfImporter::GltfImporter(const String& src, MaterialBundle& materialBundle)
 	: _model(new tinygltf::Model(loadGltfModel(src))), _materials(loadMaterials(_model, materialBundle)), _nodes(_model->nodes.size()), _primitives_in_mesh(_model->meshes.size())
 {
 }
