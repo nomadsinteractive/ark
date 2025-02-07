@@ -1547,11 +1547,15 @@ class LevelObject:
         pass
 
     @property
-    def entity(self) -> "Entity":
+    def shape(self) -> Optional["Shape"]:
         pass
 
     @property
     def render_object(self) -> "RenderObject":
+        pass
+
+    @property
+    def rigidbody(self) -> "Rigidbody":
         pass
 
 

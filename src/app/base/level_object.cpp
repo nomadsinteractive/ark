@@ -109,49 +109,48 @@ int32_t LevelObject::instanceOf() const
     return _instance_of;
 }
 
-sp<RenderObject> LevelObject::createRenderObject() const
+sp<Shape> LevelObject::shape() const
+{
+    return _instance_of != -1 ? library()->shape() : nullptr;
+}
+
+sp<RenderObject> LevelObject::createRenderObject()
 {
     if(_instance_of != -1)
     {
-        const auto iter = _level->_libraries.find(_instance_of);
-        ASSERT(iter != _level->_libraries.end());
-        const sp<LevelLibrary>& library = iter->second;
-        auto [renderObject, transform] = makeRenderObject(*this, library->_name.hash());
-        return renderObject;
+        auto [renderObject, transform] = makeRenderObject(*this, library()->_name.hash());
+        _render_object = std::move(renderObject);
     }
-    if(_type == LevelObject::TYPE_ELEMENT)
+    else if(_type == TYPE_ELEMENT)
     {
         auto [renderObject, _] = makeRenderObject(*this, _name.hash());
-        return renderObject;
+        _render_object = std::move(renderObject);
     }
-    return nullptr;
+    return _render_object;
 }
 
-sp<Rigidbody> LevelObject::createRigidbody(const sp<Collider>& collider, Rigidbody::BodyType bodyType, const Map<String, sp<Shape>>& shapes, const sp<CollisionFilter>& collisionFilter) const
+sp<Rigidbody> LevelObject::createRigidbody(const sp<Collider>& collider, Rigidbody::BodyType bodyType, const Map<String, sp<Shape>>& shapes, const sp<CollisionFilter>& collisionFilter)
 {
     if(_instance_of != -1)
-    {
-        const auto iter = _level->_libraries.find(_instance_of);
-        ASSERT(iter != _level->_libraries.end());
-        const sp<LevelLibrary>& library = iter->second;
-        return makeRigidBody(library, collider, *this, bodyType, shapes, collisionFilter);
-    }
-    return nullptr;
+        _rigidbody = makeRigidBody(library(), collider, *this, bodyType, shapes, collisionFilter);
+    return _rigidbody;
 }
 
-const sp<Entity>& LevelObject::entity() const
+const sp<LevelLibrary>& LevelObject::library() const
 {
-    return _entity;
-}
-
-void LevelObject::setEntity(sp<Entity> entity)
-{
-    _entity = std::move(entity);
+    const auto iter = _level->_libraries.find(_instance_of);
+    ASSERT(iter != _level->_libraries.end());
+    return iter->second;
 }
 
 const sp<RenderObject>& LevelObject::renderObject() const
 {
     return _render_object;
+}
+
+const sp<Rigidbody>& LevelObject::rigidbody() const
+{
+    return _rigidbody;
 }
 
 }
