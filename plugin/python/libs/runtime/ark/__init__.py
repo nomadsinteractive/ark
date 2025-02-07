@@ -1486,6 +1486,10 @@ class MaterialBundle:
     def __init__(self, materials: list[Material] = None):
         pass
 
+    @property
+    def materials(self) -> list[Material]:
+        pass
+
     def add_material(self, name: str, material: Material):
         pass
 
