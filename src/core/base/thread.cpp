@@ -73,6 +73,12 @@ void Thread::join() const
     _stub->join();
 }
 
+void Thread::tryJoin() const
+{
+    if(_stub->_thread.joinable())
+        _stub->join();
+}
+
 void Thread::detach() const
 {
     _stub->detach();

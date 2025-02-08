@@ -45,7 +45,7 @@ public:
 
         DCHECK(removed, "Unable to remove Worker: %p", this);
         DCHECK(_stub->_worker_count > 0, "Worker count mismatch");
-        _stub->_worker_count --;
+         -- _stub->_worker_count;
     }
 
     uint64_t onBusy() override
@@ -105,6 +105,20 @@ sp<ExecutorWorkerThread> ExecutorThreadPool::obtainWorkerThread()
     }
 
     return createWorkerThread();
+}
+
+void ExecutorThreadPool::releaseAll(bool wait)
+{
+    Vector<sp<ExecutorWorkerThread>> waitThreads;
+    for(const sp<ExecutorWorkerThread>& i : _stub->_worker_threads)
+    {
+        i->terminate();
+        if(wait)
+            waitThreads.push_back(i);
+    }
+
+    for(const sp<ExecutorWorkerThread>& i : waitThreads)
+        i->tryJoin();
 }
 
 sp<ExecutorWorkerThread> ExecutorThreadPool::createWorkerThread()

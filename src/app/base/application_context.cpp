@@ -152,6 +152,13 @@ void ApplicationContext::initialize(const document& manifest)
         _interpreter = sp<Interpreter>::make<NoneInterpreter>();
 }
 
+void ApplicationContext::finalize()
+{
+    _executor_main.cast<ExecutorWorkerThread>()->terminate();
+    _executor_thread_pool->releaseAll(true);
+    _executor_main.cast<ExecutorWorkerThread>()->tryJoin();
+}
+
 sp<ResourceLoader> ApplicationContext::createResourceLoader(const String& name, const Scope& args)
 {
     const Identifier id(Identifier::parse(name));

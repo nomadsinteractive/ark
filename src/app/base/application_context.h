@@ -85,6 +85,7 @@ public:
 
 private:
     void initialize(const document& manifest);
+    void finalize();
 
     sp<ResourceLoader> createResourceLoaderImpl(const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
     document createResourceLoaderManifest(const document& manifest) const;

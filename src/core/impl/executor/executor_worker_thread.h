@@ -30,6 +30,8 @@ public:
     ~ExecutorWorkerThread() override;
 
     void execute(sp<Runnable> task) override;
+    void terminate() const;
+    void tryJoin() const;
 
     const sp<Strategy>& strategy() const;
 

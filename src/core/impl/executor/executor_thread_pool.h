@@ -17,6 +17,8 @@ public:
 
     sp<ExecutorWorkerThread> obtainWorkerThread();
 
+    void releaseAll(bool wait);
+
 private:
     class WorkerThreadStrategy;
 

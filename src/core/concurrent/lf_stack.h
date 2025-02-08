@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_CONCURRENT_LF_STACK_H_
-#define ARK_CORE_CONCURRENT_LF_STACK_H_
+#pragma once
 
 #include "core/concurrent/internal.h"
 #include "core/forwarding.h"
@@ -57,8 +56,7 @@ public:
 
 //[[ark::threadsafe]]
     bool pop(T& data) {
-        Node* head = _delegate.pop();
-        if(head) {
+        if(Node* head = _delegate.pop()) {
             data = head->data();
             _recycler->put(head);
             return true;
@@ -82,8 +80,7 @@ public:
 
 private:
     Node* obtain(T data) {
-        Node* pooled = _recycler->obtain();
-        if(pooled)
+        if(Node* pooled = _recycler->obtain())
             return new(pooled) Node(std::move(data), nullptr);
         return Node::alloc(std::move(data));
     }
@@ -100,5 +97,3 @@ private:
 };
 
 }
-
-#endif

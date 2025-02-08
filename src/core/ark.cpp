@@ -281,13 +281,14 @@ Ark::Ark(int32_t argc, const char** argv)
 
 Ark::~Ark()
 {
-    for(auto iter = _instance_stack.begin(); iter != _instance_stack.end(); ++iter)
+    _application_context->finalize();
+
+    for(auto iter = _instance_stack.begin(); iter != _instance_stack.end(); )
         if(*iter == this)
-        {
             iter = _instance_stack.erase(iter);
-            if(iter == _instance_stack.end())
-                break;
-        }
+        else
+            ++iter;
+
     if(_instance == this)
         _instance = _instance_stack.size() > 0 ? _instance_stack.front() : nullptr;
 }

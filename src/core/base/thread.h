@@ -34,6 +34,7 @@ public:
     void terminate() const;
 
     void join() const;
+    void tryJoin() const;
     void detach() const;
 
     bool isRunning() const;

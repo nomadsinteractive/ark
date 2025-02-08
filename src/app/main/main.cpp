@@ -8,8 +8,8 @@ using namespace ark;
 
 int main(int argc, const char* argv[])
 {
+    Ark ark(argc, argv);
     try {
-        Ark ark(argc, argv);
         ark.initialize(sp<ApplicationManifest>::make("manifest.xml"));
         const sp<Application> app = ark.makeApplication();
         return app->run();

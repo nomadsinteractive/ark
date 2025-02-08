@@ -13,14 +13,27 @@ ExecutorWorkerThread::ExecutorWorkerThread(sp<ExecutorWorkerThread::Strategy> st
 
 ExecutorWorkerThread::~ExecutorWorkerThread()
 {
-    _thread.terminate();
-    _thread.notify();
+    terminate();
 }
 
 void ExecutorWorkerThread::execute(sp<Runnable> task)
 {
     _worker->_pending_tasks.push(std::move(task));
     _thread.notify();
+}
+
+void ExecutorWorkerThread::terminate() const
+{
+    if(_thread.isTerminated())
+    {
+        _thread.terminate();
+        _thread.notify();
+    }
+}
+
+void ExecutorWorkerThread::tryJoin() const
+{
+    _thread.tryJoin();
 }
 
 const sp<ExecutorWorkerThread::Strategy>& ExecutorWorkerThread::strategy() const
