@@ -24,7 +24,7 @@ void ExecutorWorkerThread::execute(sp<Runnable> task)
 
 void ExecutorWorkerThread::terminate() const
 {
-    if(_thread.isTerminated())
+    if(!_thread.isTerminated())
     {
         _thread.terminate();
         _thread.notify();

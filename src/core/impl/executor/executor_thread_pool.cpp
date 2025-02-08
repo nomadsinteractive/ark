@@ -112,9 +112,9 @@ void ExecutorThreadPool::releaseAll(bool wait)
     Vector<sp<ExecutorWorkerThread>> waitThreads;
     for(const sp<ExecutorWorkerThread>& i : _stub->_worker_threads)
     {
-        i->terminate();
         if(wait)
             waitThreads.push_back(i);
+        i->terminate();
     }
 
     for(const sp<ExecutorWorkerThread>& i : waitThreads)

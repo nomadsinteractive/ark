@@ -1118,6 +1118,9 @@ class Vec2(_Var):
     def to_size(self) -> 'Size':
         pass
 
+    def lerp(self, other, t: TYPE_NUMERIC) -> Self:
+        pass
+
     def sod(self, d0, k: float, z: float, r: float, t: Optional['Numeric'] = None):
         pass
 
