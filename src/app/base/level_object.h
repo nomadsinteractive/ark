@@ -52,7 +52,6 @@ public:
     sp<Rigidbody> createRigidbody(const sp<Collider>& collider, Rigidbody::BodyType bodyType, const Map<String, sp<Shape>>& shapes, const sp<CollisionFilter>& collisionFilter);
 
 private:
-
     const sp<LevelLibrary>& library() const;
 
 private:
@@ -65,7 +64,6 @@ private:
     Optional<V4> _rotation;
     int32_t _instance_of;
 
-    sp<Entity> _entity;
     sp<RenderObject> _render_object;
     sp<Rigidbody> _rigidbody;
 
