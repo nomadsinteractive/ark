@@ -210,7 +210,7 @@ VkPipelineRasterizationStateCreateInfo makeRasterizationState(const PipelineDesc
 
 VkPipelineColorBlendAttachmentState makeColorBlendAttachmentState(const PipelineDescriptor::PipelineTraitTable& traits)
 {
-    VkPipelineColorBlendAttachmentState cbaState = vks::initializers::pipelineColorBlendAttachmentState(0xf, false);
+    VkPipelineColorBlendAttachmentState cbaState = vks::initializers::pipelineColorBlendAttachmentState(0xf, true);
     cbaState.srcAlphaBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
     cbaState.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
     cbaState.alphaBlendOp = VK_BLEND_OP_SUBTRACT;

@@ -53,6 +53,7 @@ public:
         _idled_cycle = 0;
         return 0;
     }
+
     uint64_t onIdle(Thread& thread) override
     {
         _idled_cycle ++;
