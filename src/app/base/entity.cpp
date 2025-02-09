@@ -1,5 +1,6 @@
 #include "entity.h"
 
+#include "core/components/discarded.h"
 #include "core/components/with_tag.h"
 #include "core/inf/wirable.h"
 
@@ -10,17 +11,41 @@
 
 namespace ark {
 
+namespace {
+
+class RefDiscarded final : public Boolean {
+public:
+    RefDiscarded(sp<Ref> ref)
+        : _ref(std::move(ref))
+    {
+    }
+
+    bool update(uint64_t timestamp) override
+    {
+        return _ref->discarded().update(timestamp);
+    }
+
+    bool val() override
+    {
+        return _ref->isDiscarded();
+    }
+
+private:
+    sp<Ref> _ref;
+};
+
+}
+
 Entity::Entity(Traits components)
     : _ref(Global<RefManager>()->makeRef(this)), _components(std::move(components))
 {
-    if(const sp<WithId>& withId = _components.get<WithId>())
-        withId->_id = _ref->id();
-
     Wirable::WiringContext context(_components);
     for(const auto& [k, v] : _components.traits())
         if(const sp<Wirable> wirable = v.as<Wirable>())
             if(const TypeId typeId = wirable->onPoll(context); typeId != constants::TYPE_ID_NONE)
                 _components.add(typeId, v);
+
+    preWire();
     for(const auto& [k, v] : _components.traits())
         if(const sp<Wirable> wirable = v.as<Wirable>())
             wirable->onWire(context, v);
@@ -43,9 +68,7 @@ Entity::Entity(Vector<Component> components)
         }
     }
 
-    if(const sp<WithId>& withId = _components.get<WithId>())
-        withId->_id = _ref->id();
-
+    preWire();
     for(const auto& [k, v] : components)
         if(const sp<Wirable> wirable = k.as<Wirable>())
         {
@@ -151,6 +174,15 @@ sp<Entity> Entity::BUILDER::build(const Scope& args)
             components.push_back({trait.cast(trait.getClass()->id()), i._manifest});
         }
     return sp<Entity>::make(std::move(components));
+}
+
+void Entity::preWire()
+{
+    if(const sp<WithId>& withId = _components.get<WithId>())
+        withId->_id = _ref->id();
+
+    if(!_components.get<Discarded>())
+        _components.put(sp<Discarded>::make(sp<Boolean>::make<RefDiscarded>(_ref)));
 }
 
 }

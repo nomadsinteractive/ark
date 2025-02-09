@@ -66,6 +66,9 @@ public:
     };
 
 private:
+    void preWire();
+
+private:
     sp<Ref> _ref;
     Traits _components;
 };
