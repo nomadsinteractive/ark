@@ -77,11 +77,6 @@ Event::TextInputInfo::TextInputInfo(const StringView text)
     std::strncpy(_text, text.data(), sizeof(_text));
 }
 
-Event::KeyboardInfo::KeyboardInfo(Code code, wchar_t character)
-    : _code(code), _character(character)
-{
-}
-
 Event::EventInfo::EventInfo(const TextInputInfo& textInput)
     : _text_input(textInput)
 {

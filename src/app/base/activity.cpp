@@ -71,18 +71,6 @@ sp<BoxBundle> Activity::refs() const
     return _resource_loader->refs();
 }
 
-sp<BoxBundle> Activity::layers() const
-{
-    CHECK(_resource_loader, "Trying to get ResourceLoader on a discarded Activity");
-    return _resource_loader->layers();
-}
-
-sp<BoxBundle> Activity::renderLayers() const
-{
-    CHECK(_resource_loader, "Trying to get ResourceLoader on a discarded Activity");
-    return _resource_loader->renderLayers();
-}
-
 sp<BoxBundle> Activity::packages() const
 {
     CHECK(_resource_loader, "Trying to get ResourceLoader on a discarded Activity");

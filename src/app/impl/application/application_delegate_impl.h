@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include "core/base/api.h"
 #include "core/base/scope.h"
 #include "core/base/string.h"
@@ -47,7 +45,7 @@ private:
     };
 
 private:
-    std::vector<ScriptTag> _interpreter;
+    Vector<ScriptTag> _interpreter;
 };
 
 }

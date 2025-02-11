@@ -16,7 +16,6 @@ public:
     virtual ~Application() = default;
 
     virtual int run() = 0;
-
     virtual const sp<ApplicationController>& controller() = 0;
 
     virtual void onCreate();

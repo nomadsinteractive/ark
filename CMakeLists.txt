@@ -196,9 +196,8 @@ ark_add_plugin_directory(bullet plugin/bullet)
 ark_add_plugin_directory(optick plugin/optick)
 ark_add_plugin_directory(tracy plugin/tracy)
 ark_add_plugin_directory(yoga plugin/yoga)
-
 if(NOT (ANDROID OR IOS))
-    ark_find_vcpkg_package(SDL2 LIBRARIES $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>)
+    ark_add_plugin_directory(sdl2 plugin/sdl2)
 endif()
 
 ark_setup_tools(ark_gen_string_table)

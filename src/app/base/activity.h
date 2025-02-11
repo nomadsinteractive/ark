@@ -39,11 +39,6 @@ public:
 
 //  [[script::bindings::property]]
     sp<BoxBundle> refs() const;
-    [[deprecated]]
-//  [[script::bindings::property]]
-    sp<BoxBundle> layers() const;
-//  [[script::bindings::property]]
-    sp<BoxBundle> renderLayers() const;
 //  [[script::bindings::property]]
     sp<BoxBundle> packages() const;
 

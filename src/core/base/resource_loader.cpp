@@ -26,16 +26,6 @@ sp<BoxBundle> ResourceLoader::refs() const
     return _bean_factory.references();
 }
 
-sp<BoxBundle> ResourceLoader::layers()
-{
-    return _builder_refs.ensure<BuilderRefs<Layer>>(_bean_factory);
-}
-
-sp<BoxBundle> ResourceLoader::renderLayers()
-{
-    return _builder_refs.ensure<BuilderRefs<RenderLayer>>(_bean_factory);
-}
-
 sp<BoxBundle> ResourceLoader::packages() const
 {
     return _packages;

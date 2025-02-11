@@ -61,7 +61,7 @@ public:
         uint32_t _device_unit_size;
     };
 
-    struct Renderer {
+    struct ARK_API Renderer {
         Renderer();
         Renderer(const document& manifest);
 

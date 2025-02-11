@@ -134,13 +134,11 @@ public:
     };
 
     struct KeyboardInfo {
-        KeyboardInfo(Code code, wchar_t character);
-
         Code _code;
         wchar_t _character;
     };
 
-    struct TextInputInfo {
+    struct ARK_API TextInputInfo {
         TextInputInfo(StringView text);
 
         char _text[CONSTANT_TEXT_INPUT_TEXT_SIZE];
@@ -159,7 +157,7 @@ public:
         uint32_t _states;
     };
 
-    union EventInfo {
+    union ARK_API EventInfo {
         EventInfo(const TextInputInfo& textInput);
         EventInfo(const KeyboardInfo& keyboard);
         EventInfo(const ButtonInfo& button);

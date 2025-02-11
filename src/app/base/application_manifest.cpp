@@ -17,9 +17,9 @@ uint32_t toSize(const String& sizestr)
 {
     const String s = sizestr.toLower();
     const std::pair<String, uint32_t> suffixs[] = {{"k", 10}, {"kb", 10}, {"m", 20}, {"mb", 20}, {"g", 30}, {"gb", 30}};
-    for(const std::pair<String, uint32_t>& i : suffixs)
-        if(s.endsWith(i.first))
-            return Strings::eval<uint32_t>(s.substr(0, s.length() - i.first.length())) << i.second;
+    for(const auto& [k, v] : suffixs)
+        if(s.endsWith(k))
+            return Strings::eval<uint32_t>(s.substr(0, s.length() - k.length())) << v;
     return Strings::eval<uint32_t>(s);
 }
 

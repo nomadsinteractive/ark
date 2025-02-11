@@ -2,9 +2,9 @@
 
 #include "core/base/api.h"
 #include "core/forwarding.h"
+#include "core/inf/builder.h"
 
 #include "app/base/application.h"
-#include "app/base/event.h"
 
 struct SDL_cond;
 struct SDL_mutex;
@@ -12,7 +12,7 @@ struct SDL_Window;
 
 namespace ark {
 
-class ARK_API SDLApplication final : public Application {
+class SDLApplication final : public Application {
 public:
     SDLApplication(sp<ApplicationDelegate> applicationDelegate, sp<ApplicationContext> applicationContext, uint32_t width, uint32_t height, const ApplicationManifest& manifest);
 
@@ -20,6 +20,14 @@ public:
     const sp<ApplicationController>& controller() override;
 
     void onSurfaceChanged();
+
+//  [[plugin::builder]]
+    class BUILDER final : public Builder<Application> {
+    public:
+        BUILDER() = default;
+
+        sp<Application> build(const Scope& args) override;
+    };
 
 private:
     void initialize();

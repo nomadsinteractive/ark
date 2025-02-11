@@ -1,4 +1,4 @@
-#include "app/impl/application/sdl_application.h"
+#include "sdl_application.h"
 
 #include <SDL.h>
 
@@ -12,6 +12,7 @@
 
 #include <SDL_syswm.h>
 
+#include "../../../../src/app/impl/application/application_delegate_impl.h"
 #include "core/base/clock.h"
 #include "core/base/message_loop.h"
 #include "core/util/math.h"
@@ -25,6 +26,7 @@
 
 #include "app/base/application_context.h"
 #include "app/base/application_manifest.h"
+#include "app/base/event.h"
 #include "app/inf/application_controller.h"
 
 #include "renderer/inf/renderer_factory.h"
@@ -366,6 +368,15 @@ void SDLApplication::onSurfaceChanged()
     Application::onSurfaceChanged(static_cast<uint32_t>(w), static_cast<uint32_t>(h));
 }
 
+sp<Application> SDLApplication::BUILDER::build(const Scope& args)
+{
+    const Ark& ark = Ark::instance();
+    const sp<ApplicationManifest>& manifest = ark.manifest();
+    const float scale = manifest->window()._scale;
+    const V2& resolution = manifest->rendererResolution();
+    return sp<Application>::make<SDLApplication>(sp<ApplicationDelegate>::make<ApplicationDelegateImpl>(), ark.applicationContext(), static_cast<uint32_t>(resolution.x() * scale), static_cast<uint32_t>(resolution.y() * scale), manifest);
+}
+
 void SDLApplication::initialize()
 {
     /* Initialize SDL's Video subsystem */
@@ -471,7 +482,7 @@ void SDLApplication::pollEvents(uint64_t timestamp)
         case SDL_KEYDOWN:
         case SDL_KEYUP:
             {
-                const Event::KeyboardInfo keyboardInfo(sdlScanCodeToEventCode(event.key.keysym.scancode), static_cast<wchar_t>(event.key.keysym.sym));
+                const Event::KeyboardInfo keyboardInfo{sdlScanCodeToEventCode(event.key.keysym.scancode), static_cast<wchar_t>(event.key.keysym.sym)};
                 const Event e(event.key.repeat ? Event::ACTION_KEY_REPEAT : (event.type == SDL_KEYDOWN ? Event::ACTION_KEY_DOWN : Event::ACTION_KEY_UP), timestamp, keyboardInfo);
                 onEvent(e);
                 break;

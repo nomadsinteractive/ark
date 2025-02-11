@@ -50,7 +50,7 @@ limitations under the License.
 #include "app/base/application_context.h"
 #include "app/impl/application/application_delegate_impl.h"
 #include "app/base/application_manifest.h"
-#include "app/impl/application/sdl_application.h"
+#include "plugin/sdl2/impl/application/sdl_application.h"
 
 #include "platform/platform.h"
 
@@ -311,7 +311,7 @@ void Ark::initialize(sp<ApplicationManifest> manifest)
 
     loadPlugins(_manifest);
 
-    sp<BeanFactory> factory = createBeanFactory(sp<DictionaryImpl<document>>::make());
+    sp<BeanFactory> factory = createBeanFactory(sp<Dictionary<document>>::make<DictionaryImpl<document>>());
     _asset_bundle = sp<ArkAssetBundle>::make(AssetBundleType::createBuiltInAssetBundle(_manifest->assetDir(), _manifest->application()._dir), factory, _manifest->assets());
     sp<ApplicationBundle> applicationBundle = sp<ApplicationBundle>::make(_asset_bundle->getAssetBundle("/"));
     sp<RenderEngine> renderEngine = createRenderEngine(factory, _manifest->renderer(), applicationBundle);
@@ -344,9 +344,7 @@ const char** Ark::argv() const
 
 sp<Application> Ark::makeApplication() const
 {
-    const float scale = _manifest->window()._scale;
-    const V2& resolution = _manifest->rendererResolution();
-    return sp<Application>::make<SDLApplication>(sp<ApplicationDelegate>::make<ApplicationDelegateImpl>(), _application_context, static_cast<uint32_t>(resolution.x() * scale), static_cast<uint32_t>(resolution.y() * scale), _manifest);
+    return _application_context->resourceLoader()->beanFactory().build<Application>(Global<Constants>()->DOCUMENT_NONE, {});
 }
 
 const sp<ApplicationManifest>& Ark::manifest() const

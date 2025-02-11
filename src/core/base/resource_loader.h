@@ -1,7 +1,5 @@
 #pragma once
 
-#include <unordered_map>
-
 #include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
@@ -43,7 +41,7 @@ private:
 
     private:
         BeanFactory _bean_factory;
-        std::unordered_map<String, SafeBuilder<T>> _builders;
+        HashMap<String, SafeBuilder<T>> _builders;
 
     };
 
@@ -55,8 +53,7 @@ private:
 
     private:
         BeanFactory _bean_factory;
-        std::unordered_map<String, sp<ResourceLoader>> _packages;
-
+        HashMap<String, sp<ResourceLoader>> _packages;
     };
 
 public:
@@ -74,10 +71,6 @@ public:
 
 //  [[script::bindings::property]]
     sp<BoxBundle> refs() const;
-//  [[script::bindings::property]]
-    sp<BoxBundle> layers();
-//  [[script::bindings::property]]
-    sp<BoxBundle> renderLayers();
 //  [[script::bindings::property]]
     sp<BoxBundle> packages() const;
 
