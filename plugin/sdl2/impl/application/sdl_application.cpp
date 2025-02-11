@@ -12,9 +12,7 @@
 
 #include <SDL_syswm.h>
 
-#include "../../../../src/app/impl/application/application_delegate_impl.h"
 #include "core/base/clock.h"
-#include "core/base/message_loop.h"
 #include "core/util/math.h"
 
 #include "graphics/base/bitmap.h"
@@ -27,6 +25,7 @@
 #include "app/base/application_context.h"
 #include "app/base/application_manifest.h"
 #include "app/base/event.h"
+#include "app/impl/application/application_delegate_impl.h"
 #include "app/inf/application_controller.h"
 
 #include "renderer/inf/renderer_factory.h"

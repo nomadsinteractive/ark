@@ -11,13 +11,11 @@
 
 #include "platform/platform.h"
 
-namespace ark {
-namespace platform {
-namespace darwin {
+namespace ark::platform::darwin {
 
 namespace {
 
-class BundleAsset : public Asset {
+class BundleAsset final : public Asset {
 public:
     BundleAsset(String location, CFURLRef url)
         : _location(std::move(location)), _url(url) {
@@ -26,9 +24,9 @@ public:
         CFRelease(_url);
     }
 
-    virtual sp<Readable> open() override {
+    sp<Readable> open() override {
         CFReadStreamRef stream = CFReadStreamCreateWithFile(nullptr, _url);
-        std::vector<uint8_t> bytes;
+        Vector<uint8_t> bytes;
         if(stream)
         {
             CFReadStreamOpen(stream);
@@ -70,7 +68,7 @@ sp<Asset> AssetBundleDarwin::getAsset(const String& name)
     CFURLRef url = CFBundleCopyResourceURL(bundle, cfName, nullptr, cfDirectory);
     CFRelease(cfDirectory);
     CFRelease(cfName);
-    return url ? sp<BundleAsset>::make(Platform::pathJoin(_directory, name), url) : nullptr;
+    return url ? sp<Asset>::make<BundleAsset>(Platform::pathJoin(_directory, name), url) : nullptr;
 }
 
 sp<AssetBundle> AssetBundleDarwin::getBundle(const String& path)
@@ -78,23 +76,9 @@ sp<AssetBundle> AssetBundleDarwin::getBundle(const String& path)
     return sp<AssetBundleDarwin>::make(Platform::pathJoin(_directory, path));
 }
 
-bool AssetBundleDarwin::exists(const String& location)
-{
-    CFBundleRef bundle = CFBundleGetMainBundle();
-    CFStringRef cfDirectory = CFStringCreateWithCString(nullptr, location.c_str(), kCFStringEncodingUTF8);
-    CFURLRef url = CFBundleCopyResourceURL(bundle, nullptr, nullptr, cfDirectory);
-    CFRelease(cfDirectory);
-    bool r = static_cast<bool>(url);
-    if(url)
-        CFRelease(url);
-    return r;
-}
-
-std::vector<sp<Asset>> AssetBundleDarwin::listAssets(const String &regex)
+Vector<sp<Asset>> AssetBundleDarwin::listAssets(const String& regex)
 {
     return {};
 }
 
-}
-}
 }

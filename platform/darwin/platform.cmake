@@ -32,5 +32,6 @@ if(IOS)
 endif()
 
 list(APPEND ARK_COMPILE_DEFINITIONS -DARK_PLATFORM_DARWIN)
+ark_link_options(-framework CoreFoundation)
 
 aux_source_directory(platform/darwin/impl LOCAL_SRC_LIST)

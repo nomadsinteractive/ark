@@ -5,6 +5,9 @@
 #include <mach-o/dyld.h>
 #include <unistd.h>
 
+#include <CoreFoundation/CFBundle.h>
+#include <CoreFoundation/CFStream.h>
+
 #ifndef ARK_PLATFORM_IOS
 #include <libproc.h>
 #endif
@@ -25,6 +28,22 @@
 
 namespace ark {
 
+namespace {
+
+bool exists(const String& location)
+{
+    CFBundleRef bundle = CFBundleGetMainBundle();
+    CFStringRef cfDirectory = CFStringCreateWithCString(nullptr, location.c_str(), kCFStringEncodingUTF8);
+    CFURLRef url = CFBundleCopyResourceURL(bundle, nullptr, nullptr, cfDirectory);
+    CFRelease(cfDirectory);
+    bool r = static_cast<bool>(url);
+    if(url)
+        CFRelease(url);
+    return r;
+}
+
+}
+
 using namespace platform::darwin;
 
 void Platform::log(Log::LogLevel /*logLevel*/, const char* tag, const char* content)
@@ -35,7 +54,7 @@ void Platform::log(Log::LogLevel /*logLevel*/, const char* tag, const char* cont
 
 sp<AssetBundle> Platform::getAssetBundle(const String& path, const String& appPath)
 {
-    sp<AssetBundle> bundle = AssetBundleDarwin::exists(path) ? sp<AssetBundle>::make<AssetBundleDarwin>(path) : nullptr;
+    sp<AssetBundle> bundle = exists(path) ? sp<AssetBundle>::make<AssetBundleDarwin>(path) : nullptr;
     if(isDirectory(path))
     {
         const sp<AssetBundle> pathBundle = sp<AssetBundleDirectory>::make(path);
@@ -44,7 +63,7 @@ sp<AssetBundle> Platform::getAssetBundle(const String& path, const String& appPa
     if(isDirectory(appPath))
     {
         const sp<AssetBundle> appPathBundle = sp<AssetBundleDirectory>::make(path);
-        bundle = bundle ? sp<AssetBundleWithFallback>::make(bundle, appPathBundle).cast<AssetBundle>() : appPathBundle;
+        bundle = bundle ? sp<AssetBundle>::make<AssetBundleWithFallback>(bundle, appPathBundle) : appPathBundle;
     }
     return bundle;
 }

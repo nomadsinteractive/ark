@@ -59,6 +59,7 @@ function(ark_add_shared_library name)
     add_library(${name} SHARED ${LOCAL_SRC_LIST})
     ark_apply_target_properties(${name})
     target_link_libraries(${name} LINK_PRIVATE ${LOCAL_LIBS})
+    target_link_options(${name} PRIVATE ${LOCAL_LINK_OPTIONS})
 endfunction()
 
 function(ark_add_executable name)
@@ -66,6 +67,7 @@ function(ark_add_executable name)
     add_executable(${name} ${LOCAL_SRC_LIST})
     ark_apply_target_properties(${name})
     target_link_libraries(${name} LINK_PRIVATE ${LOCAL_LIBS})
+    target_link_options(${name} PRIVATE ${LOCAL_LINK_OPTIONS})
 endfunction()
 
 macro(ark_add_plugin_library name)
@@ -192,6 +194,10 @@ endmacro()
 
 macro(ark_link_libraries)
     list(APPEND LOCAL_LIBS ${ARGN})
+endmacro()
+
+macro(ark_link_options)
+    list(APPEND LOCAL_LINK_OPTIONS ${ARGN})
 endmacro()
 
 macro(ark_compile_definitions)
