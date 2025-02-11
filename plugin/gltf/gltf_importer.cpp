@@ -538,7 +538,8 @@ Model GltfImporter::loadModel()
 				nodeIds.push_back(node->name(), frameNodeId);
 			}
 
-			animations.push_back(std::move(animation.name), sp<ark::Animation>::make(tickCount, std::move(nodeIds), std::move(frames)));
+			auto anim = sp<ark::Animation>::make(animation.name, tickCount, std::move(nodeIds), std::move(frames));
+			animations.push_back(std::move(animation.name), std::move(anim));
 		}
 	}
 

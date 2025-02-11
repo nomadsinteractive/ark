@@ -22,7 +22,7 @@ public:
 
         Iterator(VType<T> keys, VType<U> values, size_t iterator)
             : _keys(keys), _values(values), _iterator(iterator), _data(iterator != npos ? new PairType(_keys.at(_iterator), _values.at(_iterator)) : nullptr) {
-            DCHECK(keys.size() == values.size(), "Zipped iterator must be equal length");
+            DCHECK(keys.size() == values.size(), "Zipped iterator must be equal length: %zu vs %zu", keys.size(), values.size());
         }
         Iterator(Iterator&& other)
             : _keys(other._keys), _values(other._values), _iterator(other._iterator), _data(std::move(other._data)) {

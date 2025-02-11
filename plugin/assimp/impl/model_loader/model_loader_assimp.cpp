@@ -67,7 +67,7 @@ void loadHierarchy(float tick, const aiNode* node, const aiAnimation* animation,
     }
 }
 
-sp<Animation> makeAnimation(float tps, const aiAnimation* animation, const aiNode* rootNode, const aiMatrix4x4& globalTransform, Table<String, AnimationNode>& nodes, const ModelImporterAssimp::NodeLoaderCallback& callback)
+sp<Animation> makeAnimation(String name, float tps, const aiAnimation* animation, const aiNode* rootNode, const aiMatrix4x4& globalTransform, Table<String, AnimationNode>& nodes, const ModelImporterAssimp::NodeLoaderCallback& callback)
 {
     const float duration = static_cast<float>(animation->mDuration);
     const float tpsDefault = animation->mTicksPerSecond != 0 ? static_cast<float>(animation->mTicksPerSecond) : tps;
@@ -91,7 +91,7 @@ sp<Animation> makeAnimation(float tps, const aiAnimation* animation, const aiNod
     for(const auto& iter : nodes)
         nodeIds.push_back(iter.first, index++);
 
-    return sp<Animation>::make(durationInTicks, std::move(nodeIds), std::move(animationFrames));
+    return sp<Animation>::make(std::move(name), durationInTicks, std::move(nodeIds), std::move(animationFrames));
 }
 
 }
@@ -166,7 +166,7 @@ void ModelImporterAssimp::loadAnimates(float tps, Table<String, sp<Animation>>& 
     for(uint32_t i = 0; i < scene->mNumAnimations; ++i)
     {
         const aiAnimation* animation = scene->mAnimations[i];
-        animates.push_back(animation->mName.C_Str(), makeAnimation(tps, animation, scene->mRootNode, globalTransformation, nodes, callback));
+        animates.push_back(animation->mName.C_Str(), makeAnimation(animation->mName.C_Str(), tps, animation, scene->mRootNode, globalTransformation, nodes, callback));
     }
 }
 
@@ -177,7 +177,7 @@ void ModelImporterAssimp::loadAnimates(float tps, Table<String, sp<Animation>>& 
         const aiAnimation* animate = scene->mAnimations[i];
         if(name == animate->mName.C_Str())
         {
-            sp<Animation> animation = makeAnimation(tps, animate, scene->mRootNode, globalTransformation, nodes, callback);
+            sp<Animation> animation = makeAnimation(name, tps, animate, scene->mRootNode, globalTransformation, nodes, callback);
             if(alias)
             {
                 if(animates.has(name))

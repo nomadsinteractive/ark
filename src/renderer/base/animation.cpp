@@ -12,7 +12,7 @@ namespace {
 
 struct AnimationSession {
 
-    AnimationSession(sp<Integer> tick, uint32_t durationInTicks, sp<std::vector<AnimationFrame>> animationFrames)
+    AnimationSession(sp<Integer> tick, uint32_t durationInTicks, sp<Vector<AnimationFrame>> animationFrames)
         : _tick(std::move(tick)), _duration_in_ticks(durationInTicks), _animation_frames(std::move(animationFrames)) {
     }
 
@@ -30,7 +30,7 @@ struct AnimationSession {
 private:
     sp<Integer> _tick;
     uint32_t _duration_in_ticks;
-    sp<std::vector<AnimationFrame>> _animation_frames;
+    sp<Vector<AnimationFrame>> _animation_frames;
 };
 
 struct LocalMatrix final : Mat4 {
@@ -53,7 +53,7 @@ struct LocalMatrix final : Mat4 {
 };
 
 struct GlobalMatrix final : Mat4 {
-    GlobalMatrix(sp<AnimationSession> session, std::vector<std::pair<int32_t, M4>> transformPath)
+    GlobalMatrix(sp<AnimationSession> session, Vector<std::pair<int32_t, M4>> transformPath)
         : _session(std::move(session)), _transform_path(std::move(transformPath)) {
     }
 
@@ -71,14 +71,19 @@ struct GlobalMatrix final : Mat4 {
     }
 
     sp<AnimationSession> _session;
-    std::vector<std::pair<int32_t, M4>> _transform_path;
+    Vector<std::pair<int32_t, M4>> _transform_path;
 };
 
 }
 
-Animation::Animation(uint32_t durationInTicks, Table<String, uint32_t> nodes, std::vector<AnimationFrame> animationFrames)
-    : _tps(24.0f), _duration(static_cast<float>(durationInTicks) / _tps), _duration_in_ticks(durationInTicks), _nodes(sp<Table<String, uint32_t>>::make(std::move(nodes))), _animation_frames(sp<std::vector<AnimationFrame>>::make(std::move(animationFrames)))
+Animation::Animation(String name, uint32_t durationInTicks, Table<String, uint32_t> nodes, Vector<AnimationFrame> animationFrames)
+    : _name(std::move(name)), _tps(24.0f), _duration(static_cast<float>(durationInTicks) / _tps), _duration_in_ticks(durationInTicks), _nodes(sp<Table<String, uint32_t>>::make(std::move(nodes))), _animation_frames(sp<Vector<AnimationFrame>>::make(std::move(animationFrames)))
 {
+}
+
+const String& Animation::name() const
+{
+    return _name;
 }
 
 float Animation::duration() const
@@ -96,9 +101,9 @@ uint32_t Animation::ticks() const
     return _duration_in_ticks;
 }
 
-std::vector<std::pair<String, sp<Mat4>>> Animation::getLocalTransforms(sp<Integer> tick) const
+Vector<std::pair<String, sp<Mat4>>> Animation::getLocalTransforms(sp<Integer> tick) const
 {
-    std::vector<std::pair<String, sp<Mat4>>> nodeTransforms;
+    Vector<std::pair<String, sp<Mat4>>> nodeTransforms;
 
     sp<AnimationSession> session = sp<AnimationSession>::make(std::move(tick), _duration_in_ticks, _animation_frames);
     for(const auto& [name, nodeIdx] : *_nodes)
@@ -107,14 +112,14 @@ std::vector<std::pair<String, sp<Mat4>>> Animation::getLocalTransforms(sp<Intege
     return nodeTransforms;
 }
 
-std::vector<std::pair<String, sp<Mat4>>> Animation::getLocalTransforms(sp<Numeric> tick) const
+Vector<std::pair<String, sp<Mat4>>> Animation::getLocalTransforms(sp<Numeric> tick) const
 {
     return getLocalTransforms(IntegerType::create(std::move(tick)));
 }
 
 sp<Mat4> Animation::getGlobalTransform(const Node& node, sp<Integer> tick) const
 {
-    std::vector<std::pair<int32_t, M4>> transformPath;
+    Vector<std::pair<int32_t, M4>> transformPath;
     const Node* pNode = &node;
     ASSERT(pNode);
     do
