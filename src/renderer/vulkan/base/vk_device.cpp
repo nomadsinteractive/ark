@@ -9,20 +9,27 @@
 
 namespace ark::vulkan {
 
-VKDevice::VKDevice(const sp<VKInstance>& instance, VkPhysicalDevice physicalDevice)
-    : _instance(instance), _vulkan_device(new vks::VulkanDevice(physicalDevice))
+VKDevice::VKDevice(const sp<VKInstance>& instance, const VkPhysicalDevice physicalDevice, const Ark::RendererVersion version)
+    : _instance(instance), _vulkan_device(new vks::VulkanDevice(physicalDevice)), _features_vk12{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES}, _features{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2, version >= Ark::RENDERER_VERSION_VULKAN_12 ? &_features_vk12 : nullptr},
+      _enabled_features_vk12{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES}, _enabled_features{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2, version >= Ark::RENDERER_VERSION_VULKAN_12 ? &_enabled_features_vk12 : nullptr}
 {
-    _vulkan_device->enabledFeatures = {};
-    if(_vulkan_device->features.samplerAnisotropy)
-        _vulkan_device->enabledFeatures.samplerAnisotropy = VK_TRUE;
-    if(_vulkan_device->features.multiDrawIndirect)
-        _vulkan_device->enabledFeatures.multiDrawIndirect = VK_TRUE;
-    if(_vulkan_device->features.fragmentStoresAndAtomics)
-        _vulkan_device->enabledFeatures.fragmentStoresAndAtomics = VK_TRUE;
-    if(_vulkan_device->features.independentBlend)
-        _vulkan_device->enabledFeatures.independentBlend = VK_TRUE;
+    vkGetPhysicalDeviceFeatures2(physicalDevice, &_features);
+    if(_features.features.samplerAnisotropy)
+        _enabled_features.features.samplerAnisotropy = VK_TRUE;
+    if(_features.features.multiDrawIndirect)
+        _enabled_features.features.multiDrawIndirect = VK_TRUE;
+    if(_features.features.fragmentStoresAndAtomics)
+        _enabled_features.features.fragmentStoresAndAtomics = VK_TRUE;
+    if(_features.features.independentBlend)
+        _enabled_features.features.independentBlend = VK_TRUE;
 
-    VKUtil::checkResult(_vulkan_device->createLogicalDevice(_vulkan_device->enabledFeatures, _enabled_extensions));
+    if(version >= Ark::RENDERER_VERSION_VULKAN_12)
+    {
+        if(_features_vk12.separateDepthStencilLayouts)
+            _enabled_features_vk12.separateDepthStencilLayouts = VK_TRUE;
+    }
+
+    VKUtil::checkResult(_vulkan_device->createLogicalDevice(_enabled_features.features, _enabled_extensions, version >= Ark::RENDERER_VERSION_VULKAN_12 ? &_enabled_features : nullptr));
 
     initDeviceQueue(_vulkan_device->queueFamilyIndices.graphics);
     initDeviceQueue(_vulkan_device->queueFamilyIndices.compute);
@@ -65,7 +72,7 @@ const VkPhysicalDeviceProperties& VKDevice::properties() const
 
 const VkPhysicalDeviceFeatures& VKDevice::features() const
 {
-    return _vulkan_device->features;
+    return _features.features;
 }
 
 const VkPhysicalDeviceMemoryProperties& VKDevice::memoryProperties() const

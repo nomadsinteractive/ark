@@ -1,8 +1,6 @@
 #pragma once
 
-#include <map>
-#include <vector>
-
+#include "core/ark.h"
 #include "core/types/owned_ptr.h"
 #include "core/types/shared_ptr.h"
 
@@ -15,7 +13,7 @@ namespace ark::vulkan {
 
 class VKDevice {
 public:
-    VKDevice(const sp<VKInstance>& instance, VkPhysicalDevice vkPhysicalDevice);
+    VKDevice(const sp<VKInstance>& instance, VkPhysicalDevice physicalDevice, Ark::RendererVersion version);
     ~VKDevice();
 
     VkInstance vkInstance() const;
@@ -46,14 +44,17 @@ private:
 
 private:
     sp<VKInstance> _instance;
-
-    std::vector<const char*> _enabled_extensions;
-
+    Vector<const char*> _enabled_extensions;
     op<vks::VulkanDevice> _vulkan_device;
-
-    std::map<uint32_t, VkQueue> _queue_families;
+    Map<uint32_t, VkQueue> _queue_families;
     VkFormat _depth_format;
     VkPipelineCache _pipeline_cache;
+
+    VkPhysicalDeviceVulkan12Features _features_vk12;
+    VkPhysicalDeviceFeatures2 _features;
+
+    VkPhysicalDeviceVulkan12Features _enabled_features_vk12;
+    VkPhysicalDeviceFeatures2 _enabled_features;
 };
 
 }

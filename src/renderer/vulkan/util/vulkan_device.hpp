@@ -29,10 +29,6 @@ namespace vks
 		VkDevice logicalDevice;
 		/** @brief Properties of the physical device including limits that the application can check against */
 		VkPhysicalDeviceProperties properties;
-		/** @brief Features of the physical device that an application can use to check if a feature is supported */
-		VkPhysicalDeviceFeatures features;
-		/** @brief Features that have been enabled for use on the physical device */
-		VkPhysicalDeviceFeatures enabledFeatures;
 		/** @brief Memory types and heaps of the physical device */
 		VkPhysicalDeviceMemoryProperties memoryProperties;
 		/** @brief Queue family properties of the physical device */
@@ -70,8 +66,6 @@ namespace vks
 			// Store Properties features, limits and properties of the physical device for later use
 			// Device properties also contain limits and sparse properties
 			vkGetPhysicalDeviceProperties(physicalDevice, &properties);
-			// Features should be checked by the examples before using them
-			vkGetPhysicalDeviceFeatures(physicalDevice, &features);
 			// Memory properties are used regularly for creating all kinds of buffers
 			vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memoryProperties);
 			// Queue family properties, used for setting up requested queues upon device creation
@@ -215,7 +209,7 @@ namespace vks
 		*
 		* @return VkResult of the device creation call
 		*/
-		VkResult createLogicalDevice(VkPhysicalDeviceFeatures enabledFeatures, std::vector<const char*> enabledExtensions, bool useSwapChain = true, VkQueueFlags requestedQueueTypes = VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_COMPUTE_BIT)
+		VkResult createLogicalDevice(const VkPhysicalDeviceFeatures& enabledFeatures, std::vector<const char*> enabledExtensions, const void* pNext = nullptr, bool useSwapChain = true, VkQueueFlags requestedQueueTypes = VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_COMPUTE_BIT)
 		{			
 			// Desired queues need to be requested upon logical device creation
 			// Due to differing queue family configurations of Vulkan implementations this can be a bit tricky, especially if the application
@@ -287,15 +281,15 @@ namespace vks
 			}
 
 			// Create the logical device representation
-			std::vector<const char*> deviceExtensions(enabledExtensions);
+			std::vector<const char*> deviceExtensions(std::move(enabledExtensions));
 			if (useSwapChain)
 			{
 				// If the device will be used for presenting to a display via a swapchain we need to request the swapchain extension
 				deviceExtensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
 			}
 
-			VkDeviceCreateInfo deviceCreateInfo = {};
-			deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+			VkDeviceCreateInfo deviceCreateInfo = {VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO};
+			deviceCreateInfo.pNext = pNext;
 			deviceCreateInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());;
 			deviceCreateInfo.pQueueCreateInfos = queueCreateInfos.data();
 			deviceCreateInfo.pEnabledFeatures = &enabledFeatures;
@@ -320,8 +314,6 @@ namespace vks
 				// Create a default command pool for graphics command buffers
 				commandPool = createCommandPool(queueFamilyIndices.graphics);
 			}
-
-			this->enabledFeatures = enabledFeatures;
 
 			return result;
 		}
