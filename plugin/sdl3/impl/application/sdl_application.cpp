@@ -118,14 +118,15 @@ Event::Code sdlScanCodeToEventCode(SDL_Scancode sc)
     return Event::CODE_NONE;
 }
 
-void doSetMouseCapture(bool enabled) {
+void doSetMouseCapture(bool enabled)
+{
     const int32_t r = SDL_CaptureMouse(enabled);
     CHECK_WARN(r == 0, "Error calling SDL_CaptureMouse, enabled: %d, return: %d, error: %s", enabled, r, SDL_GetError());
 }
 
-SDL_Surface* SDL_CreateRGBSurfaceFrom(void *pixels, int width, int height, int depth, int pitch, Uint32 Rmask, Uint32 Gmask, Uint32 Bmask, Uint32 Amask)
+SDL_Surface* SDL_CreateRGBSurfaceFrom(void* pixels, int32_t width, int32_t height, int32_t depth, int32_t pitch, uint32_t rmask, uint32_t gmask, uint32_t bmask, uint32_t amask)
 {
-    return SDL_CreateSurfaceFrom(width, height, SDL_GetPixelFormatForMasks(depth, Rmask, Gmask, Bmask, Amask), pixels, pitch);
+    return SDL_CreateSurfaceFrom(width, height, SDL_GetPixelFormatForMasks(depth, rmask, gmask, bmask, amask), pixels, pitch);
 }
 
 class SDLCursor {
@@ -217,7 +218,7 @@ public:
     }
 
     void showCursor(const Box& cursor) override {
-        if(SDL_CursorVisible())
+        if(!SDL_CursorVisible())
             SDL_ShowCursor();
 
         if(cursor) {
@@ -278,7 +279,7 @@ SDLApplication::SDLApplication(sp<ApplicationDelegate> applicationDelegate, sp<A
 int SDLApplication::run()
 {
     /* Create our opengl context and attach it to our window */
-    SDL_GLContext maincontext = _use_open_gl ? SDL_GL_CreateContext(_main_window) : nullptr;
+    const SDL_GLContext maincontext = _use_open_gl ? SDL_GL_CreateContext(_main_window) : nullptr;
 
     /* This makes our buffer swap syncronized with the monitor's vertical refresh */
     if(_use_open_gl)
@@ -397,7 +398,7 @@ void SDLApplication::initialize()
     info.windows.hdc = static_cast<HDC>(SDL_GetPointerProperty(SDL_GetWindowProperties(_main_window), SDL_PROP_WINDOW_WIN32_HDC_POINTER, nullptr));
     info.windows.window = static_cast<HWND>(SDL_GetPointerProperty(SDL_GetWindowProperties(_main_window), SDL_PROP_WINDOW_WIN32_HWND_POINTER, nullptr));
 #elif defined (ARK_PLATFORM_DARWIN)
-    info.darwin.window = SDL_GetPointerProperty(SDL_GetWindowProperties(_main_window), SDL_PROP_WINDOW_COCOA_WINDOW_POINTER, nullptr);
+    info.darwin.window = static_cast<NSWindow*>(SDL_GetPointerProperty(SDL_GetWindowProperties(_main_window), SDL_PROP_WINDOW_COCOA_WINDOW_POINTER, nullptr));
     info.darwin.view = Cocoa_Metal_CreateView(nullptr, _main_window);
 #endif
 }
@@ -411,8 +412,8 @@ void SDLApplication::pollEvents(uint64_t timestamp)
         switch(event.type)
         {
         case SDL_EVENT_QUIT:
-                gQuit = true;
-                break;
+            gQuit = true;
+            break;
         case SDL_EVENT_MOUSE_BUTTON_DOWN:
         case SDL_EVENT_MOUSE_BUTTON_UP:
             {
