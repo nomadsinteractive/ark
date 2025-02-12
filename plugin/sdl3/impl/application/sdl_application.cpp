@@ -1,16 +1,14 @@
 #include "sdl_application.h"
 
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
 
 #ifdef ARK_USE_OPEN_GL
-#include <SDL2/SDL_opengl.h>
+#include <SDL3/SDL_opengl.h>
 #endif
 
 #ifdef ARK_USE_VULKAN
-#include <SDL2/SDL_vulkan.h>
+#include <SDL3/SDL_vulkan.h>
 #endif
-
-#include <SDL2/SDL_syswm.h>
 
 #include "core/base/clock.h"
 #include "core/util/math.h"
@@ -38,42 +36,6 @@ extern "C" void* Cocoa_Metal_CreateView(SDL_VideoDevice* _this, SDL_Window* wind
 namespace ark {
 
 namespace {
-
-void* sdlNativeWindowHandle(SDL_Window* _window)
-{
-    SDL_SysWMinfo wmi;
-    SDL_VERSION(&wmi.version);
-    if (!SDL_GetWindowWMInfo(_window, &wmi))
-        return nullptr;
-
-#	if BX_PLATFORM_LINUX
-#		if ENTRY_CONFIG_USE_WAYLAND
-    if (wmi.subsystem == SDL_SYSWM_WAYLAND)
-    {
-        wl_egl_window *win_impl = (wl_egl_window*)SDL_GetWindowData(_window, "wl_egl_window");
-        if(!win_impl)
-        {
-            int width, height;
-            SDL_GetWindowSize(_window, &width, &height);
-            struct wl_surface* surface = wmi.info.wl.surface;
-            if(!surface)
-                return nullptr;
-            win_impl = wl_egl_window_create(surface, width, height);
-            SDL_SetWindowData(_window, "wl_egl_window", win_impl);
-        }
-        return (void*)(uintptr_t)win_impl;
-    }
-    else
-#		endif // ENTRY_CONFIG_USE_WAYLAND
-        return (void*)wmi.info.x11.window;
-#	elif BX_PLATFORM_OSX || BX_PLATFORM_IOS || BX_PLATFORM_VISIONOS
-    return wmi.info.cocoa.window;
-#	elif BX_PLATFORM_WINDOWS
-    return wmi.info.win.window;
-#   elif BX_PLATFORM_ANDROID
-    return wmi.info.android.window;
-#	endif // BX_PLATFORM_
-}
 
 bool gQuit = false;
 
@@ -157,8 +119,13 @@ Event::Code sdlScanCodeToEventCode(SDL_Scancode sc)
 }
 
 void doSetMouseCapture(bool enabled) {
-    const int32_t r = SDL_CaptureMouse(enabled ? SDL_TRUE : SDL_FALSE);
+    const int32_t r = SDL_CaptureMouse(enabled);
     CHECK_WARN(r == 0, "Error calling SDL_CaptureMouse, enabled: %d, return: %d, error: %s", enabled, r, SDL_GetError());
+}
+
+SDL_Surface* SDL_CreateRGBSurfaceFrom(void *pixels, int width, int height, int depth, int pitch, Uint32 Rmask, Uint32 Gmask, Uint32 Bmask, Uint32 Amask)
+{
+    return SDL_CreateSurfaceFrom(width, height, SDL_GetPixelFormatForMasks(depth, Rmask, Gmask, Bmask, Amask), pixels, pitch);
 }
 
 class SDLCursor {
@@ -169,7 +136,7 @@ public:
 
     ~SDLCursor() {
         if(_cursor)
-            SDL_FreeCursor(_cursor);
+            SDL_DestroyCursor(_cursor);
     }
 
     SDL_Cursor* cursor() const {
@@ -202,7 +169,7 @@ public:
         SDL_Surface* surface = SDL_CreateRGBSurfaceFrom(bitmap->at(0, 0), static_cast<int32_t>(bitmap->width()), static_cast<int32_t>(bitmap->height()),
                                                         32, static_cast<int32_t>(bitmap->rowBytes()), rmask, gmask, bmask, amask);
         SDL_Cursor* cursor = SDL_CreateColorCursor(surface, hotX, hotY);
-        SDL_FreeSurface(surface);
+        SDL_DestroySurface(surface);
         return Box(sp<SDLCursor>::make(cursor));
     }
 
@@ -210,10 +177,10 @@ public:
         SDL_Cursor* cursor = nullptr;
         switch(name) {
             case SYSTEM_CURSOR_DEFAULT:
-                cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_ARROW);
+                cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_DEFAULT);
             break;
             case SYSTEM_CURSOR_TEXT:
-                cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_IBEAM);
+                cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_TEXT);
             break;
             case SYSTEM_CURSOR_WAIT:
                 cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_WAIT);
@@ -222,36 +189,36 @@ public:
                 cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_CROSSHAIR);
             break;
             case SYSTEM_CURSOR_PROGRESS:
-                cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_WAITARROW);
+                cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_PROGRESS);
             break;
             case SYSTEM_CURSOR_SIZENWSE:
-                cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENWSE);
+                cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_NWSE_RESIZE);
             break;
             case SYSTEM_CURSOR_SIZENESW:
-                cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENESW);
+                cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_NESW_RESIZE);
             break;
             case SYSTEM_CURSOR_SIZEWE:
-                cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZEWE);
+                cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_EW_RESIZE);
             break;
             case SYSTEM_CURSOR_SIZENS:
-                cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENS);
+                cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_NS_RESIZE);
             break;
             case SYSTEM_CURSOR_SIZEALL:
-                cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZEALL);
+                cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_MOVE);
             break;
             case SYSTEM_CURSOR_NO:
-                cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_NO);
+                cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_NOT_ALLOWED);
             break;
             case SYSTEM_CURSOR_HAND:
-                cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_HAND);
+                cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_POINTER);
             break;
         }
         return cursor ? Box(sp<SDLCursor>::make(cursor)) : nullptr;
     }
 
     void showCursor(const Box& cursor) override {
-        if(SDL_ShowCursor(SDL_QUERY) == SDL_DISABLE)
-            SDL_ShowCursor(SDL_ENABLE);
+        if(SDL_CursorVisible())
+            SDL_ShowCursor();
 
         if(cursor) {
             const sp<SDLCursor> s = cursor.as<SDLCursor>();
@@ -262,7 +229,7 @@ public:
     }
 
     void hideCursor() override {
-        SDL_ShowCursor(SDL_DISABLE);
+        SDL_HideCursor();
     }
 
     void setMouseCapture(bool enabled) override {
@@ -302,7 +269,7 @@ int32_t toWindowPosition(int32_t pos)
 }
 
 SDLApplication::SDLApplication(sp<ApplicationDelegate> applicationDelegate, sp<ApplicationContext> applicationContext, uint32_t width, uint32_t height, const ApplicationManifest& manifest)
-    : Application(std::move(applicationDelegate), applicationContext, width, height, manifest.renderer().toViewport()), _main_window(nullptr), _cond(SDL_CreateCond()), _lock(SDL_CreateMutex()),
+    : Application(std::move(applicationDelegate), applicationContext, width, height, manifest.renderer().toViewport()), _main_window(nullptr), _cond(SDL_CreateCondition()), _lock(SDL_CreateMutex()),
       _controller(sp<SDLApplicationController>::make(std::move(applicationContext))), _vsync(manifest.renderer()._vsync)
 {
     initialize();
@@ -342,11 +309,11 @@ int SDLApplication::run()
 
     /* Delete our opengl context, destroy our window, and shutdown SDL */
     if(_use_open_gl)
-        SDL_GL_DeleteContext(maincontext);
+        SDL_GL_DestroyContext(maincontext);
 
     SDL_DestroyWindow(_main_window);
 
-    SDL_DestroyCond(_cond);
+    SDL_DestroyCondition(_cond);
     SDL_DestroyMutex(_lock);
 
     SDL_Quit();
@@ -378,7 +345,7 @@ sp<Application> SDLApplication::BUILDER::build(const Scope& args)
 void SDLApplication::initialize()
 {
     /* Initialize SDL's Video subsystem */
-    if (SDL_Init(SDL_INIT_VIDEO) < 0)
+    if(!SDL_Init(SDL_INIT_VIDEO))
     {
         FATAL("Unable to initialize SDL");
     }
@@ -393,9 +360,30 @@ void SDLApplication::initialize()
 
     const ApplicationManifest::Window& window = Ark::instance().manifest()->window();
 
-    SDL_ShowCursor((window._flag & ApplicationManifest::WINDOW_FLAG_SHOW_CURSOR) ? SDL_ENABLE : SDL_DISABLE);
+    if(window._flag & ApplicationManifest::WINDOW_FLAG_SHOW_CURSOR)
+        SDL_ShowCursor();
+    else
+        SDL_HideCursor();
 
-    _main_window = SDL_CreateWindow(window._title.c_str(), toWindowPosition(window._position_x), toWindowPosition(window._position_y), static_cast<int32_t>(_surface_size->widthAsFloat()), static_cast<int32_t>(_surface_size->heightAsFloat()), toSDLWindowFlag(_application_context, window._flag));
+    _use_open_gl = _application_context->renderEngine()->version() < Ark::RENDERER_VERSION_VULKAN_11;
+
+    const SDL_PropertiesID props = SDL_CreateProperties();
+    SDL_SetStringProperty(props, SDL_PROP_WINDOW_CREATE_TITLE_STRING, window._title.c_str());
+    SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_X_NUMBER, toWindowPosition(window._position_x));
+    SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_Y_NUMBER, toWindowPosition(window._position_y));
+    SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, static_cast<int32_t>(_surface_size->widthAsFloat()));
+    SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, static_cast<int32_t>(_surface_size->heightAsFloat()));
+
+    SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_FULLSCREEN_BOOLEAN, window._flag & ApplicationManifest::WINDOW_FLAG_FULL_SCREEN);
+    SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_BORDERLESS_BOOLEAN, window._flag & ApplicationManifest::WINDOW_FLAG_FULL_SCREEN_WINDOWED);
+    SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_MAXIMIZED_BOOLEAN, window._flag & ApplicationManifest::WINDOW_FLAG_MAXINIZED);
+    SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_RESIZABLE_BOOLEAN, window._flag & ApplicationManifest::WINDOW_FLAG_RESIZABLE);
+
+    SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_OPENGL_BOOLEAN, _use_open_gl);
+
+    _main_window = SDL_CreateWindowWithProperties(props);
+    SDL_DestroyProperties(props);
+
     if(!_main_window)
     {
         /* Die if creation failed */
@@ -403,39 +391,15 @@ void SDLApplication::initialize()
         FATAL(SDL_GetError());
     }
 
-    SDL_SysWMinfo wmInfo;
-    SDL_VERSION(&wmInfo.version)
-    const auto result = SDL_GetWindowWMInfo(_main_window, &wmInfo);
-    ASSERT(result);
-
     RenderEngine::PlatformInfo& info = _application_context->renderEngine()->info();
 #if defined(ARK_PLATFORM_WINDOWS)
-    info.windows.hinstance = wmInfo.info.win.hinstance;
-    info.windows.hdc = wmInfo.info.win.hdc;
-    info.windows.window = wmInfo.info.win.window;
+    info.windows.hinstance = static_cast<HINSTANCE>(SDL_GetPointerProperty(SDL_GetWindowProperties(_main_window), SDL_PROP_WINDOW_WIN32_INSTANCE_POINTER, nullptr));
+    info.windows.hdc = static_cast<HDC>(SDL_GetPointerProperty(SDL_GetWindowProperties(_main_window), SDL_PROP_WINDOW_WIN32_HDC_POINTER, nullptr));
+    info.windows.window = static_cast<HWND>(SDL_GetPointerProperty(SDL_GetWindowProperties(_main_window), SDL_PROP_WINDOW_WIN32_HWND_POINTER, nullptr));
 #elif defined (ARK_PLATFORM_DARWIN)
-    info.darwin.window = wmInfo.info.cocoa.window;
+    info.darwin.window = SDL_GetPointerProperty(SDL_GetWindowProperties(_main_window), SDL_PROP_WINDOW_COCOA_WINDOW_POINTER, nullptr);
     info.darwin.view = Cocoa_Metal_CreateView(nullptr, _main_window);
 #endif
-}
-
-uint32_t SDLApplication::toSDLWindowFlag(const sp<ApplicationContext>& applicationContext, uint32_t appWindowFlag)
-{
-    const Ark::RendererVersion version = applicationContext->renderEngine()->version();
-
-    uint32_t windowFlag = SDL_WINDOW_SHOWN;
-    if(appWindowFlag & ApplicationManifest::WINDOW_FLAG_FULL_SCREEN)
-        windowFlag |= SDL_WINDOW_FULLSCREEN;
-    if(appWindowFlag & ApplicationManifest::WINDOW_FLAG_FULL_SCREEN_WINDOWED)
-        windowFlag |= SDL_WINDOW_FULLSCREEN_DESKTOP;
-    if(appWindowFlag & ApplicationManifest::WINDOW_FLAG_MAXINIZED)
-        windowFlag |= SDL_WINDOW_MAXIMIZED;
-    if(appWindowFlag & ApplicationManifest::WINDOW_FLAG_RESIZABLE)
-        windowFlag |= SDL_WINDOW_RESIZABLE;
-
-    _use_open_gl = version < Ark::RENDERER_VERSION_VULKAN_11;
-    windowFlag |= (_use_open_gl ? SDL_WINDOW_OPENGL : 0);
-    return windowFlag;
 }
 
 void SDLApplication::pollEvents(uint64_t timestamp)
@@ -446,20 +410,20 @@ void SDLApplication::pollEvents(uint64_t timestamp)
     {
         switch(event.type)
         {
-        case SDL_QUIT:
+        case SDL_EVENT_QUIT:
                 gQuit = true;
                 break;
-        case SDL_MOUSEBUTTONDOWN:
-        case SDL_MOUSEBUTTONUP:
+        case SDL_EVENT_MOUSE_BUTTON_DOWN:
+        case SDL_EVENT_MOUSE_BUTTON_UP:
             {
                 const V2 rawPosition(static_cast<float>(event.button.x), static_cast<float>(event.button.y));
                 const Event::Button which = static_cast<Event::Button>(Event::BUTTON_MOUSE_LEFT + event.button.button - SDL_BUTTON_LEFT);
                 Event::ButtonInfo bi{toViewportPosition(rawPosition), toFragCoordXY(rawPosition, rcs, _surface_size->heightAsFloat()), which};
-                Event e(event.type == SDL_MOUSEBUTTONDOWN ? Event::ACTION_DOWN : Event::ACTION_UP, timestamp, bi);
+                Event e(event.type == SDL_EVENT_MOUSE_BUTTON_DOWN ? Event::ACTION_DOWN : Event::ACTION_UP, timestamp, bi);
                 onEvent(e);
                 break;
             }
-        case SDL_MOUSEMOTION:
+        case SDL_EVENT_MOUSE_MOTION:
             {
                 const V2 rawPosition(static_cast<float>(event.motion.x), static_cast<float>(event.motion.y));
                 const Event::Button which = static_cast<Event::Button>(Event::BUTTON_MOUSE_LEFT + event.button.button - SDL_BUTTON_LEFT);
@@ -468,7 +432,7 @@ void SDLApplication::pollEvents(uint64_t timestamp)
                 onEvent(e);
                 break;
             }
-        case SDL_MOUSEWHEEL:
+        case SDL_EVENT_MOUSE_WHEEL:
             {
                 const V2 rawPosition(static_cast<float>(event.motion.x), static_cast<float>(event.motion.y));
                 const Event::Button which = static_cast<Event::Button>(Event::BUTTON_MOUSE_LEFT + event.button.button - SDL_BUTTON_LEFT);
@@ -477,34 +441,29 @@ void SDLApplication::pollEvents(uint64_t timestamp)
                 onEvent(e);
                 break;
             }
-        case SDL_KEYDOWN:
-        case SDL_KEYUP:
+        case SDL_EVENT_KEY_DOWN:
+        case SDL_EVENT_KEY_UP:
             {
-                const Event::KeyboardInfo keyboardInfo{sdlScanCodeToEventCode(event.key.keysym.scancode), static_cast<wchar_t>(event.key.keysym.sym)};
-                const Event e(event.key.repeat ? Event::ACTION_KEY_REPEAT : (event.type == SDL_KEYDOWN ? Event::ACTION_KEY_DOWN : Event::ACTION_KEY_UP), timestamp, keyboardInfo);
+                const Event::KeyboardInfo keyboardInfo{sdlScanCodeToEventCode(event.key.scancode), static_cast<wchar_t>(event.key.key)};
+                const Event e(event.key.repeat ? Event::ACTION_KEY_REPEAT : (event.type == SDL_EVENT_KEY_DOWN ? Event::ACTION_KEY_DOWN : Event::ACTION_KEY_UP), timestamp, keyboardInfo);
                 onEvent(e);
                 break;
             }
-        case SDL_TEXTINPUT:
+        case SDL_EVENT_TEXT_INPUT:
             {
                 const Event e(Event::ACTION_TEXT_INPUT, timestamp, Event::TextInputInfo(event.text.text));
                 onEvent(e);
                 break;
             }
-        case SDL_WINDOWEVENT:
-            {
-                switch (event.window.event)  {
-                case SDL_WINDOWEVENT_HIDDEN:
-                case SDL_WINDOWEVENT_MINIMIZED:
-                    onPause();
-                    break;
-                case SDL_WINDOWEVENT_SHOWN:
-                case SDL_WINDOWEVENT_RESTORED:
-                    onResume();
-                    onSurfaceChanged();
-                }
-                break;
-            }
+        case SDL_EVENT_WINDOW_HIDDEN:
+        case SDL_EVENT_WINDOW_MINIMIZED:
+            onPause();
+            break;
+        case SDL_EVENT_WINDOW_SHOWN:
+        case SDL_EVENT_WINDOW_RESTORED:
+            onResume();
+            onSurfaceChanged();
+            break;
         }
     }
 }

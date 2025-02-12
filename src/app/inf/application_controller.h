@@ -12,11 +12,11 @@ class ARK_API ApplicationController {
 public:
 //  [[script::bindings::enumeration]]
     enum SystemCursorName {
-        SYSTEM_CURSOR_ARROW,
-        SYSTEM_CURSOR_IBEAM,
+        SYSTEM_CURSOR_DEFAULT,
+        SYSTEM_CURSOR_TEXT,
         SYSTEM_CURSOR_WAIT,
         SYSTEM_CURSOR_CROSSHAIR,
-        SYSTEM_CURSOR_WAITARROW,
+        SYSTEM_CURSOR_PROGRESS,
         SYSTEM_CURSOR_SIZENWSE,
         SYSTEM_CURSOR_SIZENESW,
         SYSTEM_CURSOR_SIZEWE,

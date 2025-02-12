@@ -28,6 +28,7 @@
     "nlohmann-json",
     "python3",
     "sdl2",
+    "sdl3",
     "spdlog",
     "stb",
     "tinygltf",

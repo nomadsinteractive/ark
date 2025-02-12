@@ -198,6 +198,7 @@ ark_add_plugin_directory(tracy plugin/tracy)
 ark_add_plugin_directory(yoga plugin/yoga)
 if(NOT (ANDROID OR IOS))
     ark_add_plugin_directory(sdl2 plugin/sdl2)
+    ark_add_plugin_directory(sdl3 plugin/sdl3)
 endif()
 
 ark_setup_tools(ark_gen_string_table)
