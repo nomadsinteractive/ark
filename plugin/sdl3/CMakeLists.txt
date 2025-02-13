@@ -9,7 +9,12 @@ ark_include_directories(${CMAKE_CURRENT_SOURCE_DIR}/..)
 ark_include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 aux_source_directory(. LOCAL_SRC_LIST)
+aux_source_directory(base LOCAL_SRC_LIST)
 aux_source_directory(impl/application LOCAL_SRC_LIST)
+aux_source_directory(impl/buffer LOCAL_SRC_LIST)
+aux_source_directory(impl/pipeline_factory LOCAL_SRC_LIST)
+aux_source_directory(impl/renderer_factory LOCAL_SRC_LIST)
+aux_source_directory(impl/texture LOCAL_SRC_LIST)
 
 ark_find_vcpkg_package(SDL3 LIBRARIES SDL3::SDL3)
 

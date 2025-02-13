@@ -314,12 +314,12 @@ uint32_t RenderUtil::getComponentSize(Texture::Format format)
     return 4;
 }
 
-std::vector<uint32_t> RenderUtil::compileSPIR(const String& source, Enum::ShaderStageBit stage, Ark::RendererBackend renderTarget)
+std::vector<uint32_t> RenderUtil::compileSPIR(const StringView source, Enum::ShaderStageBit stage, Ark::RendererBackend renderTarget)
 {
     const Global<GLSLLangInitializer> initializer;
     EShLanguage esStage = initializer->toShLanguage(stage);
     glslang::TShader shader(esStage);
-    const char* sources[] = {source.c_str()};
+    const char* sources[] = {source.data()};
     shader.setStrings(sources, 1);
 
     typedef std::map<uint32_t, uint32_t> TPerSetBaseBinding;
@@ -366,12 +366,12 @@ std::vector<uint32_t> RenderUtil::compileSPIR(const String& source, Enum::Shader
 #endif
 
     if(!shader.parse(&initializer->builtInResource(), 100, false, EShMsgDefault))
-        FATAL("Compile error:\n%s\n\n%s", source.c_str(), shader.getInfoLog());
+        FATAL("Compile error:\n%s\n\n%s", source.data(), shader.getInfoLog());
     {
         glslang::TProgram program;
         program.addShader(&shader);
         if(!program.link(EShMsgDefault))
-            FATAL("Link error: %s\n\n%s", source.c_str(), shader.getInfoLog());
+            FATAL("Link error: %s\n\n%s", source.data(), shader.getInfoLog());
 
         if(const glslang::TIntermediate* intermedia = program.getIntermediate(esStage)) {
             std::vector<uint32_t> spirv;

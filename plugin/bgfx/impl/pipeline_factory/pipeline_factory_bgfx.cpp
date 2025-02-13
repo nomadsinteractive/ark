@@ -294,7 +294,7 @@ struct DrawPipelineBgfx final : ResourceBase<::bgfx::ProgramHandle, Pipeline> {
         DASSERT(drawingContext._vertices);
         DASSERT(drawingContext._indices);
 
-        const BgfxContext& ctx = graphicsContext.attachments().ensure<BgfxContext>();
+        const BgfxContext& ctx = graphicsContext.traits().ensure<BgfxContext>();
 
         for(const auto& [uniform, texture, stage] : _sampler_slots)
             ::bgfx::setTexture(stage, uniform, texture->handle());
@@ -410,7 +410,7 @@ public:
 
     void compute(GraphicsContext& graphicsContext, const ComputeContext& computeContext) override
     {
-        const BgfxContext& ctx = graphicsContext.attachments().ensure<BgfxContext>();
+        const BgfxContext& ctx = graphicsContext.traits().ensure<BgfxContext>();
         ::bgfx::dispatch(ctx._view_id, _handle);
     }
 

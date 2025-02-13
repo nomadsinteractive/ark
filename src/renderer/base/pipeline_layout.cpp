@@ -72,12 +72,12 @@ std::map<Enum::ShaderStageBit, ShaderPreprocessor::Stage> PipelineLayout::getPre
     return shaders;
 }
 
-const std::vector<PipelineInput::BindingSet>& PipelineLayout::samplers() const
+const Vector<PipelineInput::BindingSet>& PipelineLayout::samplers() const
 {
     return _samplers;
 }
 
-const std::vector<PipelineInput::BindingSet>& PipelineLayout::images() const
+const Vector<PipelineInput::BindingSet>& PipelineLayout::images() const
 {
     return _images;
 }
@@ -92,7 +92,7 @@ void PipelineLayout::initialize(const Shader& shader)
     if(const op<ShaderPreprocessor>& computeStage = _building_context->computingStage(); computeStage && !_building_context->renderStages().empty())
     {
         std::array<uint32_t, 3> numWorkGroupsArray = {1, 1, 1};
-        const std::vector<String> numWorkGroups = Documents::getAttribute(computeStage->_manifest, "num-work-groups", "64").split(',');
+        const Vector<String> numWorkGroups = Documents::getAttribute(computeStage->_manifest, "num-work-groups", "64").split(',');
         for(size_t i = 0; i < std::min(numWorkGroups.size(), numWorkGroupsArray.size()); ++i)
             numWorkGroupsArray[i] = Strings::eval<uint32_t>(numWorkGroups.at(i));
         addSnippet(sp<Snippet>::make<SnippetDrawCompute>(shader.input(), numWorkGroupsArray, true));
@@ -107,12 +107,12 @@ void PipelineLayout::initialize(const Shader& shader)
     _input->initialize(_building_context);
 }
 
-std::vector<std::pair<sp<Texture>, PipelineInput::BindingSet>> PipelineLayout::makeBindingSamplers() const
+Vector<std::pair<sp<Texture>, PipelineInput::BindingSet>> PipelineLayout::makeBindingSamplers() const
 {
     const PipelineInput& pipelineInput = _input;
     CHECK_WARN(pipelineInput.samplerCount() >= _predefined_samplers.size(), "Predefined samplers(%d) is more than samplers(%d) in PipelineLayout", _predefined_samplers.size(), _input->samplerCount());
 
-    std::vector<std::pair<sp<Texture>, PipelineInput::BindingSet>> samplers;
+    Vector<std::pair<sp<Texture>, PipelineInput::BindingSet>> samplers;
     for(size_t i = 0; i < _samplers.size(); ++i)
     {
         const String& name = pipelineInput.samplerNames().at(i);
@@ -123,11 +123,11 @@ std::vector<std::pair<sp<Texture>, PipelineInput::BindingSet>> PipelineLayout::m
     return samplers;
 }
 
-std::vector<std::pair<sp<Texture>, PipelineInput::BindingSet>> PipelineLayout::makeBindingImages() const
+Vector<std::pair<sp<Texture>, PipelineInput::BindingSet>> PipelineLayout::makeBindingImages() const
 {
     DASSERT(_predefined_images.size() == _images.size());
 
-    std::vector<std::pair<sp<Texture>, PipelineInput::BindingSet>> bindingImages;
+    Vector<std::pair<sp<Texture>, PipelineInput::BindingSet>> bindingImages;
     for(size_t i = 0; i < _images.size(); ++i)
         bindingImages.emplace_back(_predefined_images.values().at(i), _images.at(i));
     return bindingImages;

@@ -2,11 +2,11 @@
 
 #include "core/inf/variable.h"
 #include "core/impl/writable/writable_memory.h"
+#include "core/util/uploader_type.h"
 
 #include "renderer/base/mesh.h"
 #include "renderer/base/vertex_writer.h"
 #include "renderer/inf/vertices.h"
-
 
 namespace ark {
 
@@ -132,9 +132,8 @@ const sp<Vertices>& Model::vertices() const
 
 element_index_t Model::writeIndices(element_index_t* buf, element_index_t baseIndex) const
 {
-    WritableMemory memory(buf);
-    _indices->upload(memory);
-    element_index_t length = static_cast<element_index_t>(_indices->size() / sizeof(element_index_t));
+    UploaderType::writeTo(_indices, buf);
+    const element_index_t length = static_cast<element_index_t>(_indices->size() / sizeof(element_index_t));
     if(baseIndex != 0)
         for(size_t i = 0; i < length; ++i)
             buf[i] += baseIndex;

@@ -6,6 +6,7 @@
 #include "core/inf/variable.h"
 #include "core/impl/writable/writable_memory.h"
 #include "core/util/math.h"
+#include "core/util/uploader_type.h"
 
 #include "graphics/base/rect.h"
 #include "graphics/base/v4.h"
@@ -271,8 +272,7 @@ void Varyings::Divided::addSnapshot(Allocator& allocator, const Slot& slot)
     const uint32_t size = static_cast<uint32_t>(slot._uploader->size());
     void* content = allocator.sbrk(size);
 
-    WritableMemory writer(content);
-    slot._uploader->upload(writer);
+    UploaderType::writeTo(slot._uploader, content);
     memcpy(_content.buf() + slot._offset, content, size);
     addSlotSnapshot(new(allocator.sbrk(sizeof(SlotSnapshot))) SlotSnapshot(content, slot._offset, size));
 }

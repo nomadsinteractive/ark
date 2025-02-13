@@ -27,26 +27,26 @@ public:
     void preCompile(GraphicsContext& graphicsContext);
 
     std::map<Enum::ShaderStageBit, ShaderPreprocessor::Stage> getPreprocessedStages(const RenderEngineContext& renderEngineContext) const;
-    const std::vector<PipelineInput::BindingSet>& samplers() const;
-    const std::vector<PipelineInput::BindingSet>& images() const;
+    const Vector<PipelineInput::BindingSet>& samplers() const;
+    const Vector<PipelineInput::BindingSet>& images() const;
 
     size_t colorAttachmentCount() const;
 
-    std::vector<std::pair<sp<Texture>, PipelineInput::BindingSet>> makeBindingSamplers() const;
-    std::vector<std::pair<sp<Texture>, PipelineInput::BindingSet>> makeBindingImages() const;
+    Vector<std::pair<sp<Texture>, PipelineInput::BindingSet>> makeBindingSamplers() const;
+    Vector<std::pair<sp<Texture>, PipelineInput::BindingSet>> makeBindingImages() const;
 
 private:
     sp<PipelineBuildingContext> _building_context;
     sp<PipelineInput> _input;
     sp<Snippet> _snippet;
 
-    std::vector<ShaderPreprocessor::Stage> _preprocessed_stages;
+    Vector<ShaderPreprocessor::Stage> _preprocessed_stages;
 
     Table<String, sp<Texture>> _predefined_samplers;
     Table<String, sp<Texture>> _predefined_images;
 
-    std::vector<PipelineInput::BindingSet> _samplers;
-    std::vector<PipelineInput::BindingSet> _images;
+    Vector<PipelineInput::BindingSet> _samplers;
+    Vector<PipelineInput::BindingSet> _images;
 
     size_t _color_attachment_count;
 

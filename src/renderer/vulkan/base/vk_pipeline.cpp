@@ -511,7 +511,7 @@ void VKPipeline::setupGraphicsPipeline(GraphicsContext& graphicsContext, const V
     for(const auto& [k, v] : _stages)
         shaderStages.push_back(VKUtil::createShader(device->vkLogicalDevice(), v, k));
 
-    const sp<VKGraphicsContext>& vkGraphicsContext = graphicsContext.attachments().ensure<VKGraphicsContext>();
+    const sp<VKGraphicsContext>& vkGraphicsContext = graphicsContext.traits().ensure<VKGraphicsContext>();
     VKGraphicsContext::State& state = vkGraphicsContext->currentState();
     VkGraphicsPipelineCreateInfo pipelineCreateInfo = vks::initializers::pipelineCreateInfo(_layout, state.acquireRenderPass(_pipeline_descriptor), 0);
 
@@ -567,7 +567,7 @@ void VKPipeline::setupComputePipeline(GraphicsContext& /*graphicsContext*/)
 
 void VKPipeline::buildDrawCommandBuffer(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) const
 {
-    const sp<VKGraphicsContext>& vkGraphicsContext = graphicsContext.attachments().ensure<VKGraphicsContext>();
+    const sp<VKGraphicsContext>& vkGraphicsContext = graphicsContext.traits().ensure<VKGraphicsContext>();
     VKGraphicsContext::State& state = vkGraphicsContext->currentState();
     const VkCommandBuffer commandBuffer = state.ensureCommandBuffer();
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
@@ -591,7 +591,7 @@ void VKPipeline::buildDrawCommandBuffer(GraphicsContext& graphicsContext, const 
 
 void VKPipeline::buildComputeCommandBuffer(GraphicsContext& graphicsContext, const ComputeContext& computeContext)
 {
-    const sp<VKComputeContext>& vkContext = graphicsContext.attachments().ensure<VKComputeContext>();
+    const sp<VKComputeContext>& vkContext = graphicsContext.traits().ensure<VKComputeContext>();
     const VkCommandBuffer commandBuffer = vkContext->buildCommandBuffer(graphicsContext);
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, _pipeline);
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, _layout, 0, 1, &_descriptor_set, 0, nullptr);

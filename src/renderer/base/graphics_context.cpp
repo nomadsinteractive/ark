@@ -1,5 +1,6 @@
 #include "renderer/base/graphics_context.h"
 
+#include "render_engine_context.h"
 #include "core/inf/variable.h"
 #include "core/types/global.h"
 #include "core/util/strings.h"
@@ -42,14 +43,14 @@ const sp<Recycler>& GraphicsContext::recycler() const
     return _render_controller->recycler();
 }
 
-Traits& GraphicsContext::attachments()
+Traits& GraphicsContext::traits()
 {
-    return _attachments;
+    return _render_context->traits();
 }
 
-const Traits& GraphicsContext::attachments() const
+const Traits& GraphicsContext::traits() const
 {
-    return _attachments;
+    return _render_context->traits();
 }
 
 const sp<RenderEngineContext>& GraphicsContext::renderContext() const

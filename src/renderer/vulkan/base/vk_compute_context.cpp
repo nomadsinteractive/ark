@@ -41,7 +41,7 @@ void VKComputeContext::end()
 VkCommandBuffer VKComputeContext::buildCommandBuffer(GraphicsContext& graphicsContext)
 {
     if(_semaphore_render_complete == VK_NULL_HANDLE)
-        _semaphore_render_complete = graphicsContext.attachments().ensure<VKGraphicsContext>()->submitQueue().createSignalSemaphore();
+        _semaphore_render_complete = graphicsContext.traits().ensure<VKGraphicsContext>()->submitQueue().createSignalSemaphore();
     if(_command_buffer == VK_NULL_HANDLE)
         begin();
     return _command_buffer;

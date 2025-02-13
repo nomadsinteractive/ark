@@ -99,7 +99,6 @@ public:
 
         virtual void initialize(GraphicsContext& graphicsContext, Delegate& delegate) = 0;
         virtual void update(GraphicsContext& graphicsContext, Delegate& delegate);
-
     };
 
     class ARK_API Delegate {

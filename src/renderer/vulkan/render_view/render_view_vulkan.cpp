@@ -32,10 +32,10 @@ void RenderViewVulkan::onSurfaceChanged(uint32_t width, uint32_t height)
     _renderer->renderTarget()->onSurfaceChanged(width, height);
 
     _vk_graphics_context = sp<VKGraphicsContext>::make(_graphics_context, _renderer);
-    _graphics_context->attachments().put<VKGraphicsContext>(_vk_graphics_context);
+    _graphics_context->traits().put<VKGraphicsContext>(_vk_graphics_context);
 
     _vk_compute_context = sp<VKComputeContext>::make(_graphics_context, _renderer);
-    _graphics_context->attachments().put<VKComputeContext>(_vk_compute_context);
+    _graphics_context->traits().put<VKComputeContext>(_vk_compute_context);
 
     _graphics_context->onSurfaceReady();
 }

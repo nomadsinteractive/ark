@@ -2,7 +2,7 @@
 
 #include "core/base/allocator.h"
 #include "core/base/string.h"
-#include "core/impl/writable/writable_memory.h"
+#include "core/util/uploader_type.h"
 
 #include "renderer/base/pipeline_building_context.h"
 #include "renderer/base/render_controller.h"
@@ -80,29 +80,29 @@ const Camera& PipelineInput::camera() const
     return _camera;
 }
 
-const std::vector<sp<PipelineInput::UBO>>& PipelineInput::ubos() const
+const Vector<sp<PipelineInput::UBO>>& PipelineInput::ubos() const
 {
     return _ubos;
 }
 
-std::vector<PipelineInput::SSBO>& PipelineInput::ssbos()
+Vector<PipelineInput::SSBO>& PipelineInput::ssbos()
 {
     return _ssbos;
 }
 
-const std::vector<PipelineInput::SSBO>& PipelineInput::ssbos() const
+const Vector<PipelineInput::SSBO>& PipelineInput::ssbos() const
 {
     return _ssbos;
 }
 
 sp<RenderLayerSnapshot::BufferObject> PipelineInput::takeBufferSnapshot(const RenderRequest& renderRequest, bool isComputeStage) const
 {
-    std::vector<RenderLayerSnapshot::UBOSnapshot> uboSnapshot;
+    Vector<RenderLayerSnapshot::UBOSnapshot> uboSnapshot;
     for(const sp<UBO>& i : _ubos)
         if(isComputeStage ? i->_stages.has(Enum::SHADER_STAGE_BIT_COMPUTE) : i->_stages != Enum::SHADER_STAGE_BIT_COMPUTE)
             uboSnapshot.push_back(i->snapshot(renderRequest));
 
-    std::vector<std::pair<uint32_t, Buffer::Snapshot>> ssboSnapshot;
+    Vector<std::pair<uint32_t, Buffer::Snapshot>> ssboSnapshot;
     for(const SSBO& i : _ssbos)
         if(isComputeStage ? i._stages.has(Enum::SHADER_STAGE_BIT_COMPUTE) : i._stages != Enum::SHADER_STAGE_BIT_COMPUTE)
             ssboSnapshot.emplace_back(i._binding, i._buffer.snapshot());
@@ -125,7 +125,7 @@ size_t PipelineInput::samplerCount() const
     return _sampler_names.size();
 }
 
-const std::vector<String>& PipelineInput::samplerNames() const
+const Vector<String>& PipelineInput::samplerNames() const
 {
     return _sampler_names;
 }
@@ -222,7 +222,7 @@ void PipelineInput::UBO::doSnapshot(uint64_t timestamp, bool force) const
 {
     uint8_t* buf = _buffer->buf();
     uint8_t* dirtyFlags = _dirty_flags->buf();
-    const std::vector<sp<Uniform>>& uniforms = _uniforms.values();
+    const Vector<sp<Uniform>>& uniforms = _uniforms.values();
     for(size_t i = 0; i < uniforms.size(); ++i)
     {
         const Uniform& uniform = uniforms.at(i);
@@ -230,10 +230,7 @@ void PipelineInput::UBO::doSnapshot(uint64_t timestamp, bool force) const
         bool dirty = input && input->update(timestamp);
         dirtyFlags[i] = static_cast<uint8_t>(force || dirty);
         if(dirtyFlags[i] && input)
-        {
-            WritableMemory writable(buf);
-            input->upload(writable);
-        }
+            UploaderType::writeTo(input, buf);
         buf += uniform.size();
     }
 }
@@ -265,7 +262,7 @@ const Table<String, sp<Uniform>>& PipelineInput::UBO::uniforms() const
     return _uniforms;
 }
 
-const std::vector<std::pair<uintptr_t, size_t>>& PipelineInput::UBO::slots() const
+const Vector<std::pair<uintptr_t, size_t>>& PipelineInput::UBO::slots() const
 {
     return _slots;
 }

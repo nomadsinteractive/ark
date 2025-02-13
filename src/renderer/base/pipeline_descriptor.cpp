@@ -42,8 +42,8 @@ struct PipelineDescriptor::Stub {
     //TODO: move it to stream
     PipelineInput::AttributeOffsets _attributes;
 
-    std::vector<std::pair<sp<Texture>, PipelineInput::BindingSet>> _samplers;
-    std::vector<std::pair<sp<Texture>, PipelineInput::BindingSet>> _images;
+    Vector<std::pair<sp<Texture>, PipelineInput::BindingSet>> _samplers;
+    Vector<std::pair<sp<Texture>, PipelineInput::BindingSet>> _images;
 };
 
 PipelineDescriptor::PipelineDescriptor(Enum::RenderMode mode, Enum::DrawProcedure renderProcedure, Parameters parameters, sp<PipelineLayout> pipelineLayout)
@@ -86,12 +86,12 @@ const PipelineInput::AttributeOffsets& PipelineDescriptor::attributes() const
     return _stub->_attributes;
 }
 
-const std::vector<std::pair<sp<Texture>, PipelineInput::BindingSet>>& PipelineDescriptor::samplers() const
+const Vector<std::pair<sp<Texture>, PipelineInput::BindingSet>>& PipelineDescriptor::samplers() const
 {
     return _stub->_samplers;
 }
 
-const std::vector<std::pair<sp<Texture>, PipelineInput::BindingSet>>& PipelineDescriptor::images() const
+const Vector<std::pair<sp<Texture>, PipelineInput::BindingSet>>& PipelineDescriptor::images() const
 {
     return _stub->_images;
 }
@@ -163,7 +163,7 @@ PipelineDescriptor::PipelineTraitMeta::PipelineTraitMeta(const document& manifes
         break;
     case TRAIT_TYPE_STENCIL_TEST: {
         TraitStencilTest& stencilTest = _configure._stencil_test;
-        const std::vector<document>& faces = manifest->children("face");
+        const Vector<document>& faces = manifest->children("face");
         if(faces.empty())
             stencilTest._front = stencilTest._back = loadStencilTestSeparate(manifest, true);
         else

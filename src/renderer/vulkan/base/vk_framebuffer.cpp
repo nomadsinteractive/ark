@@ -80,12 +80,12 @@ ResourceRecycleFunc VKFramebuffer::recycle()
 
 void VKFramebuffer::beginRenderPass(GraphicsContext& graphicsContext) const
 {
-    graphicsContext.attachments().ensure<VKGraphicsContext>()->pushState(_stub);
+    graphicsContext.traits().ensure<VKGraphicsContext>()->pushState(_stub);
 }
 
 VkCommandBuffer VKFramebuffer::endRenderPass(GraphicsContext& graphicsContext) const
 {
-    return graphicsContext.attachments().ensure<VKGraphicsContext>()->popState();
+    return graphicsContext.traits().ensure<VKGraphicsContext>()->popState();
 }
 
 VkRect2D VKFramebuffer::Stub::getFramebufferScissor() const

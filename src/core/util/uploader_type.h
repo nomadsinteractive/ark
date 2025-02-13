@@ -46,6 +46,7 @@ public:
     static Vector<uint8_t> toBytes(Uploader& self);
     static Map<size_t, Vector<uint8_t>> record(Uploader& self);
     static Map<size_t, size_t> recordRanges(Uploader& self);
+    static void writeTo(Uploader& self, void* ptr);
 
 //  [[script::bindings::property]]
     static size_t size(const sp<Uploader>& self);

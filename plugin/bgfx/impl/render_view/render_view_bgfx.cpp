@@ -26,7 +26,7 @@ void RenderViewBgfx::onSurfaceChanged(uint32_t width, uint32_t height)
     _bgfx_context = sp<BgfxContext>::make();
 
     _graphics_context.reset(new GraphicsContext(_graphics_context->renderContext(), _graphics_context->renderController()));
-    _graphics_context->attachments().put(_bgfx_context);
+    _graphics_context->traits().put(_bgfx_context);
 
     uint32_t flags = BGFX_RESET_NONE;
     const sp<RenderEngineContext>& renderContext = _graphics_context->renderContext();

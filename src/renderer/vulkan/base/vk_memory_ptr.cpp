@@ -1,7 +1,7 @@
 #include "renderer/vulkan/base/vk_memory_ptr.h"
 
 #include "core/inf/uploader.h"
-#include "core/impl/writable/writable_memory.h"
+#include "core/util/uploader_type.h"
 
 #include "renderer/vulkan/base/vk_memory.h"
 
@@ -99,10 +99,7 @@ void VKMemoryPtr::Stub::unmap() const
 void VKMemoryPtr::Stub::upload(Uploader& uploader) const
 {
     CHECK(uploader.size() <= _size, "Uploader size: %d, memory size: %d", uploader.size(), _size);
-
-    WritableMemory writer(map());
-    uploader.upload(writer);
-
+    UploaderType::writeTo(uploader, map());
     unmap();
 }
 

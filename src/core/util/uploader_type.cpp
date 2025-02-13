@@ -77,7 +77,7 @@ struct WritableSnapshot final : Writable {
         return size;
     }
 
-    std::map<size_t, Vector<uint8_t>> _records;
+    Map<size_t, Vector<uint8_t>> _records;
 };
 
 struct WritableRangeSnapshot final : Writable {
@@ -95,7 +95,7 @@ struct WritableRangeSnapshot final : Writable {
         return size;
     }
 
-    std::map<size_t, size_t> _records;
+    Map<size_t, size_t> _records;
 };
 
 sp<UploaderImpl> ensureImpl(const sp<Uploader>& self)
@@ -142,7 +142,7 @@ sp<Uploader> UploaderType::create(sp<Vec4> value, size_t size)
     return reserve(sp<Uploader>::make<UploaderOfVariable<V4>>(std::move(value)), size);
 }
 
-sp<Uploader> UploaderType::create(std::map<size_t, sp<Uploader>> value, size_t size)
+sp<Uploader> UploaderType::create(Map<size_t, sp<Uploader>> value, size_t size)
 {
     return sp<Uploader>::make<UploaderImpl>(std::move(value), size);
 }
@@ -180,23 +180,28 @@ sp<Uploader> UploaderType::create(const std::set<uint32_t>& value, size_t size)
 Vector<uint8_t> UploaderType::toBytes(Uploader& self)
 {
     Vector<uint8_t> bytes(self.size());
-    WritableMemory writable(bytes.data());
-    self.upload(writable);
+    writeTo(self, bytes.data());
     return bytes;
 }
 
-std::map<size_t, Vector<uint8_t>> UploaderType::record(Uploader& self)
+Map<size_t, Vector<uint8_t>> UploaderType::record(Uploader& self)
 {
     WritableSnapshot writable;
     self.upload(writable);
     return writable._records;
 }
 
-std::map<size_t, size_t> UploaderType::recordRanges(Uploader& self)
+Map<size_t, size_t> UploaderType::recordRanges(Uploader& self)
 {
     WritableRangeSnapshot writable;
     self.upload(writable);
     return writable._records;
+}
+
+void UploaderType::writeTo(Uploader& self, void* ptr)
+{
+    WritableMemory memory(ptr);
+    self.upload(memory);
 }
 
 sp<Uploader> UploaderType::wrap(sp<Uploader> self)

@@ -1,6 +1,4 @@
-#include "sdl_application.h"
-
-#include <SDL3/SDL.h>
+#include "sdl3/impl/application/application_sdl3.h"
 
 #ifdef ARK_USE_OPEN_GL
 #include <SDL3/SDL_opengl.h>
@@ -27,13 +25,15 @@
 
 #include "renderer/inf/renderer_factory.h"
 
+#include "sdl3/base/context_sdl3_gpu.h"
+
 #ifdef ARK_PLATFORM_DARWIN
 struct SDL_VideoDevice;
 
 extern "C" void* Cocoa_Metal_CreateView(SDL_VideoDevice* _this, SDL_Window* window);
 #endif
 
-namespace ark {
+namespace ark::plugin::sdl3 {
 
 namespace {
 
@@ -269,14 +269,14 @@ int32_t toWindowPosition(int32_t pos)
 
 }
 
-SDLApplication::SDLApplication(sp<ApplicationDelegate> applicationDelegate, sp<ApplicationContext> applicationContext, uint32_t width, uint32_t height, const ApplicationManifest& manifest)
+ApplicationSDL3::ApplicationSDL3(sp<ApplicationDelegate> applicationDelegate, sp<ApplicationContext> applicationContext, uint32_t width, uint32_t height, const ApplicationManifest& manifest)
     : Application(std::move(applicationDelegate), applicationContext, width, height, manifest.renderer().toViewport()), _main_window(nullptr), _cond(SDL_CreateCondition()), _lock(SDL_CreateMutex()),
       _controller(sp<SDLApplicationController>::make(std::move(applicationContext))), _vsync(manifest.renderer()._vsync)
 {
     initialize();
 }
 
-int SDLApplication::run()
+int ApplicationSDL3::run()
 {
     /* Create our opengl context and attach it to our window */
     const SDL_GLContext maincontext = _use_open_gl ? SDL_GL_CreateContext(_main_window) : nullptr;
@@ -322,28 +322,28 @@ int SDLApplication::run()
     return 0;
 }
 
-const sp<ApplicationController>& SDLApplication::controller()
+const sp<ApplicationController>& ApplicationSDL3::controller()
 {
     return _controller;
 }
 
-void SDLApplication::onSurfaceChanged()
+void ApplicationSDL3::onSurfaceChanged()
 {
     int32_t w, h;
     SDL_GetWindowSize(_main_window, &w, &h);
     Application::onSurfaceChanged(static_cast<uint32_t>(w), static_cast<uint32_t>(h));
 }
 
-sp<Application> SDLApplication::BUILDER::build(const Scope& args)
+sp<Application> ApplicationSDL3::BUILDER::build(const Scope& args)
 {
     const Ark& ark = Ark::instance();
     const sp<ApplicationManifest>& manifest = ark.manifest();
     const float scale = manifest->window()._scale;
     const V2& resolution = manifest->rendererResolution();
-    return sp<Application>::make<SDLApplication>(sp<ApplicationDelegate>::make<ApplicationDelegateImpl>(), ark.applicationContext(), static_cast<uint32_t>(resolution.x() * scale), static_cast<uint32_t>(resolution.y() * scale), manifest);
+    return sp<Application>::make<ApplicationSDL3>(sp<ApplicationDelegate>::make<ApplicationDelegateImpl>(), ark.applicationContext(), static_cast<uint32_t>(resolution.x() * scale), static_cast<uint32_t>(resolution.y() * scale), manifest);
 }
 
-void SDLApplication::initialize()
+void ApplicationSDL3::initialize()
 {
     /* Initialize SDL's Video subsystem */
     if(!SDL_Init(SDL_INIT_VIDEO))
@@ -366,7 +366,8 @@ void SDLApplication::initialize()
     else
         SDL_HideCursor();
 
-    _use_open_gl = _application_context->renderEngine()->version() < Ark::RENDERER_VERSION_VULKAN_11;
+    RenderEngine& renderEngine = _application_context->renderEngine();
+    _use_open_gl = renderEngine.version() < Ark::RENDERER_VERSION_VULKAN_11;
 
     const SDL_PropertiesID props = SDL_CreateProperties();
     SDL_SetStringProperty(props, SDL_PROP_WINDOW_CREATE_TITLE_STRING, window._title.c_str());
@@ -392,7 +393,10 @@ void SDLApplication::initialize()
         FATAL(SDL_GetError());
     }
 
-    RenderEngine::PlatformInfo& info = _application_context->renderEngine()->info();
+    ContextSDL3_GPU& sdl3GPUContext = renderEngine.context()->traits().ensure<ContextSDL3_GPU>();
+    sdl3GPUContext._main_window = _main_window;
+
+    RenderEngine::PlatformInfo& info = renderEngine.info();
 #if defined(ARK_PLATFORM_WINDOWS)
     info.windows.hinstance = static_cast<HINSTANCE>(SDL_GetPointerProperty(SDL_GetWindowProperties(_main_window), SDL_PROP_WINDOW_WIN32_INSTANCE_POINTER, nullptr));
     info.windows.hdc = static_cast<HDC>(SDL_GetPointerProperty(SDL_GetWindowProperties(_main_window), SDL_PROP_WINDOW_WIN32_HDC_POINTER, nullptr));
@@ -403,7 +407,7 @@ void SDLApplication::initialize()
 #endif
 }
 
-void SDLApplication::pollEvents(uint64_t timestamp)
+void ApplicationSDL3::pollEvents(uint64_t timestamp)
 {
     const Ark::RendererCoordinateSystem rcs = _application_context->renderController()->renderEngine()->rendererFactory()->features()._default_coordinate_system;
     SDL_Event event;

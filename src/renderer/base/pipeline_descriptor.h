@@ -170,8 +170,8 @@ public:
 
     const PipelineInput::AttributeOffsets& attributes() const;
 
-    const std::vector<std::pair<sp<Texture>, PipelineInput::BindingSet>>& samplers() const;
-    const std::vector<std::pair<sp<Texture>, PipelineInput::BindingSet>>& images() const;
+    const Vector<std::pair<sp<Texture>, PipelineInput::BindingSet>>& samplers() const;
+    const Vector<std::pair<sp<Texture>, PipelineInput::BindingSet>>& images() const;
 
     void bindSampler(sp<Texture> texture, uint32_t name = 0);
 

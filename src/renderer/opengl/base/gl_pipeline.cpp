@@ -684,7 +684,7 @@ sp<Stage> makeShader(GraphicsContext& graphicsContext, uint32_t version, GLenum 
 {
     typedef std::unordered_map<GLenum, std::map<String, WeakPtr<Stage>>> ShaderPool;
 
-    const sp<ShaderPool>& shaders = graphicsContext.attachments().ensure<ShaderPool>();
+    const sp<ShaderPool>& shaders = graphicsContext.traits().ensure<ShaderPool>();
     if(const auto iter = (*shaders)[type].find(source); iter != (*shaders)[type].end())
         if(const sp<Stage> shader = iter->second.lock())
             return shader;

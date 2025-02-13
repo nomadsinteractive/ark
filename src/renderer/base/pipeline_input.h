@@ -63,7 +63,7 @@ public:
         const Table<String, sp<Uniform>>& uniforms() const;
         void addUniform(const sp<Uniform>& uniform);
 
-        const std::vector<std::pair<uintptr_t, size_t>>& slots() const;
+        const Vector<std::pair<uintptr_t, size_t>>& slots() const;
 
         void initialize();
         void doSnapshot(uint64_t timestamp, bool force) const;
@@ -71,7 +71,7 @@ public:
         uint32_t _binding;
         Table<String, sp<Uniform>> _uniforms;
 
-        std::vector<std::pair<uintptr_t, size_t>> _slots;
+        Vector<std::pair<uintptr_t, size_t>> _slots;
         ShaderStageSet _stages;
 
         bytearray _dirty_flags;
@@ -104,18 +104,18 @@ public:
     void initialize(const PipelineBuildingContext& buildingContext);
 
     const Camera& camera() const;
-    const std::vector<sp<UBO>>& ubos() const;
+    const Vector<sp<UBO>>& ubos() const;
 
-    std::vector<SSBO>& ssbos();
-    const std::vector<SSBO>& ssbos() const;
+    Vector<SSBO>& ssbos();
+    const Vector<SSBO>& ssbos() const;
 
     sp<RenderLayerSnapshot::BufferObject> takeBufferSnapshot(const RenderRequest& renderRequest, bool isComputeStage) const;
 
-    const std::map<uint32_t, StreamLayout>& streamLayouts() const;
-    std::map<uint32_t, StreamLayout>& streamLayouts();
+    const Map<uint32_t, StreamLayout>& streamLayouts() const;
+    Map<uint32_t, StreamLayout>& streamLayouts();
 
     size_t samplerCount() const;
-    const std::vector<String>& samplerNames() const;
+    const Vector<String>& samplerNames() const;
 
     void addAttribute(String name, Attribute attribute);
 
@@ -128,11 +128,11 @@ public:
 private:
     Camera _camera;
 
-    std::vector<sp<UBO>> _ubos;
-    std::vector<SSBO> _ssbos;
+    Vector<sp<UBO>> _ubos;
+    Vector<SSBO> _ssbos;
 
-    std::map<uint32_t, StreamLayout> _stream_layouts;
-    std::vector<String> _sampler_names;
+    Map<uint32_t, StreamLayout> _stream_layouts;
+    Vector<String> _sampler_names;
 
     friend class PipelineBuildingContext;
     friend class PipelineLayout;

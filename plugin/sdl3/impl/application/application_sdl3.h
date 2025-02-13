@@ -1,20 +1,18 @@
 #pragma once
 
+#include <SDL3/SDL.h>
+
 #include "core/base/api.h"
 #include "core/forwarding.h"
 #include "core/inf/builder.h"
 
 #include "app/base/application.h"
 
-struct SDL_Condition;
-struct SDL_Mutex;
-struct SDL_Window;
+namespace ark::plugin::sdl3 {
 
-namespace ark {
-
-class SDLApplication final : public Application {
+class ApplicationSDL3 final : public Application {
 public:
-    SDLApplication(sp<ApplicationDelegate> applicationDelegate, sp<ApplicationContext> applicationContext, uint32_t width, uint32_t height, const ApplicationManifest& manifest);
+    ApplicationSDL3(sp<ApplicationDelegate> applicationDelegate, sp<ApplicationContext> applicationContext, uint32_t width, uint32_t height, const ApplicationManifest& manifest);
 
     int run() override;
     const sp<ApplicationController>& controller() override;

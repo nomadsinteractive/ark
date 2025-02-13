@@ -1,6 +1,5 @@
 #include "renderer/vulkan/base/vk_buffer.h"
 
-#include "core/impl/writable/writable_memory.h"
 #include "core/util/uploader_type.h"
 
 #include "renderer/base/recycler.h"
@@ -36,8 +35,7 @@ void VKBuffer::uploadBuffer(GraphicsContext& graphicsContext, Uploader& input)
     ensureSize(graphicsContext, input.size());
     if(isHostVisible())
     {
-        WritableMemory writable(_memory->map());
-        input.upload(writable);
+        UploaderType::writeTo(input, _memory->map());
         if(!isHostCoherent())
             VKUtil::checkResult(flush());
         _memory->unmap();
