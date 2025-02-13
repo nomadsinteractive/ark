@@ -5,6 +5,7 @@
 #include "core/inf/builder.h"
 
 #include "app/base/application.h"
+#include "app/base/application_manifest.h"
 
 struct SDL_cond;
 struct SDL_mutex;
@@ -33,7 +34,7 @@ private:
     void initialize();
 
     void pollEvents(uint64_t timestamp);
-    uint32_t toSDLWindowFlag(const sp<ApplicationContext>& applicationContext, uint32_t appWindowFlag);
+    uint32_t toSDLWindowFlag(const sp<ApplicationContext>& applicationContext, ApplicationManifest::WindowFlags appWindowFlag);
 
 private:
     SDL_Window* _main_window;

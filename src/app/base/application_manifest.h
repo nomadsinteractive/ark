@@ -3,6 +3,7 @@
 #include "core/ark.h"
 #include "core/forwarding.h"
 #include "core/base/api.h"
+#include "core/base/bit_set.h"
 #include "core/base/string.h"
 #include "core/types/shared_ptr.h"
 
@@ -18,7 +19,7 @@ public:
         MESSAGE_LOOP_TYPE_RENDER
     };
 
-    enum WindowFlag {
+    enum WindowFlagBits {
         WINDOW_FLAG_NONE = 0,
         WINDOW_FLAG_SHOW_CURSOR = 1,
         WINDOW_FLAG_RESIZABLE = 2,
@@ -26,6 +27,7 @@ public:
         WINDOW_FLAG_FULL_SCREEN = 8,
         WINDOW_FLAG_FULL_SCREEN_WINDOWED = 16
     };
+    typedef BitSet<WindowFlagBits> WindowFlags;
 
     enum WindowPosition {
         WINDOW_POSITION_UNDEFINED = -2,
@@ -41,7 +43,7 @@ public:
 
     struct Window {
         String _title;
-        WindowFlag _flag;
+        WindowFlags _flags;
         int32_t _position_x;
         int32_t _position_y;
         float _scale;

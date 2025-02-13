@@ -23,23 +23,6 @@ uint32_t toSize(const String& sizestr)
     return Strings::eval<uint32_t>(s);
 }
 
-ApplicationManifest::WindowFlag toOneWindowFlag(const String& val)
-{
-    const String s = val.toLower();
-    if(s == "show_cursor")
-        return ApplicationManifest::WINDOW_FLAG_SHOW_CURSOR;
-    if(s == "resizable")
-        return ApplicationManifest::WINDOW_FLAG_RESIZABLE;
-    if(s == "maxinized")
-        return ApplicationManifest::WINDOW_FLAG_MAXINIZED;
-    if(s == "full_screen")
-        return ApplicationManifest::WINDOW_FLAG_FULL_SCREEN;
-    if(s == "full_screen_windowed")
-        return ApplicationManifest::WINDOW_FLAG_FULL_SCREEN_WINDOWED;
-    DFATAL("Unknow window flag: %s", val.c_str());
-    return ApplicationManifest::WINDOW_FLAG_NONE;
-}
-
 }
 
 ApplicationManifest::ApplicationManifest(const String& src)
@@ -77,7 +60,7 @@ void ApplicationManifest::load(const String& src)
     _application._title = Documents::getAttributeValue(_content, "application/title");
 
     _window._title = Documents::getAttributeValue(_content, "window/title", _application._title);
-    _window._flag = Documents::getAttributeValue<WindowFlag>(_content, "window/window-flag", WINDOW_FLAG_SHOW_CURSOR);
+    _window._flags = Documents::getAttributeValue<WindowFlags>(_content, "window/flags", WINDOW_FLAG_SHOW_CURSOR);
     _window._position_x = Documents::getAttributeValue<int32_t>(_content, "window/x", WINDOW_POSITION_CENTERED);
     _window._position_y = Documents::getAttributeValue<int32_t>(_content, "window/y", WINDOW_POSITION_CENTERED);
     _window._scale = Documents::getAttributeValue<float>(_content, "window/scale", 1.0f);
@@ -178,12 +161,18 @@ Viewport ApplicationManifest::Renderer::toViewport() const
     return {0, 0, _resolution.x(), _resolution.y(), -1.0f, 1.0f};
 }
 
-template<> ARK_API ApplicationManifest::WindowFlag StringConvert::eval<ApplicationManifest::WindowFlag>(const String& val)
+template<> ARK_API ApplicationManifest::WindowFlags StringConvert::eval<ApplicationManifest::WindowFlags>(const String& val)
 {
-    uint32_t v = ApplicationManifest::WINDOW_FLAG_NONE;
-    for(const String& i : val.split('|'))
-        v |= toOneWindowFlag(i);
-    return static_cast<ApplicationManifest::WindowFlag>(v);
+    constexpr std::array<std::pair<const char*, ApplicationManifest::WindowFlagBits>, 6> windowFlags = {{
+        {"none", ApplicationManifest::WINDOW_FLAG_NONE},
+        {"show_cursor", ApplicationManifest::WINDOW_FLAG_SHOW_CURSOR},
+        {"resizable", ApplicationManifest::WINDOW_FLAG_RESIZABLE},
+        {"maxinized", ApplicationManifest::WINDOW_FLAG_MAXINIZED},
+        {"full_screen", ApplicationManifest::WINDOW_FLAG_FULL_SCREEN},
+        {"borderless", ApplicationManifest::WINDOW_FLAG_FULL_SCREEN_WINDOWED},
+    }};
+
+    return ApplicationManifest::WindowFlags::toBitSet(val, windowFlags);
 }
 
 ApplicationManifest::Asset::Asset(const document& manifest)
