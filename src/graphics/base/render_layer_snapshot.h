@@ -56,7 +56,7 @@ public:
     sp<RenderCommand> compose(const RenderRequest& renderRequest) const;
 
     bool needsReload() const;
-    const sp<PipelineInput>& pipelineInput() const;
+    const sp<ShaderLayout>& pipelineInput() const;
 
     void addLayerContext(const RenderRequest& renderRequest, std::vector<sp<LayerContext>>& layerContexts);
     void snapshot(const RenderRequest& renderRequest);

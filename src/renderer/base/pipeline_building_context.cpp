@@ -19,11 +19,11 @@ namespace {
 
 class UniqueNameSet {
 public:
-    UniqueNameSet(std::vector<String>& names)
+    UniqueNameSet(Vector<String>& names)
         : _names(names) {
     }
 
-    void addBindings(const std::vector<String>& names) {
+    void addBindings(const Vector<String>& names) {
         for(const String& i : names)
             if(_name_set.find(i) == _name_set.end()) {
                 _name_set.insert(i);
@@ -32,7 +32,7 @@ public:
     }
 
 private:
-    std::vector<String>& _names;
+    Vector<String>& _names;
     std::set<String> _name_set;
 };
 
@@ -111,7 +111,7 @@ Attribute makePredefinedAttribute(const String& name, const String& type)
 }
 
 PipelineBuildingContext::PipelineBuildingContext(const sp<RenderController>& renderController, const sp<Camera>& camera)
-    : _render_controller(renderController), _input(sp<PipelineInput>::make(camera))
+    : _render_controller(renderController), _input(sp<ShaderLayout>::make(camera))
 {
 }
 
@@ -169,7 +169,7 @@ void PipelineBuildingContext::initializeAttributes()
         if(!attributes.has(k))
             attributes.push_back(k, v.declareType());
 
-    std::vector<String> generated;
+    Vector<String> generated;
     for(const auto& [k, v] : attributes)
         if(!firstStage._declaration_ins.has(k)
            && !firstStage._declaration_outs.has(k)
@@ -209,20 +209,20 @@ void PipelineBuildingContext::initializeAttributes()
 
 void PipelineBuildingContext::initializeSSBO() const
 {
-    Table<String, PipelineInput::SSBO> sobs;
+    Table<String, ShaderLayout::SSBO> sobs;
     for(const ShaderPreprocessor* preprocessor : _stages)
         for(const auto& [name, bindings] : preprocessor->_ssbos)
         {
             if(!sobs.has(name))
             {
                 CHECK(_ssbos.has(name), "SSBO \"%s\" does not exist", name.c_str());
-                sobs[name] = PipelineInput::SSBO(_ssbos.at(name), static_cast<uint32_t>(bindings));
+                sobs[name] = ShaderLayout::SSBO(_ssbos.at(name), static_cast<uint32_t>(bindings));
             }
             sobs[name]._stages.set(preprocessor->_shader_stage);
         }
 
-    for(const auto& i : sobs)
-        _input->ssbos().push_back(i.second);
+    for(auto& i : sobs.values())
+        _input->ssbos().push_back(std::move(i));
 }
 
 void PipelineBuildingContext::tryBindCamera(const ShaderPreprocessor& shaderPreprocessor)
@@ -262,28 +262,28 @@ void PipelineBuildingContext::initializeUniforms()
     }
 
     for(const ShaderPreprocessor* stage : _stages)
-        if(const std::vector<String>& uniformNames = stage->_declaration_uniforms.vars().keys(); !uniformNames.empty())
+        if(const Vector<String>& uniformNames = stage->_declaration_uniforms.vars().keys(); !uniformNames.empty())
         {
             const std::set<String> uniformNameSet(uniformNames.begin(), uniformNames.end());
             HashId hash = 0;
             for(const String& i : uniformNameSet)
                 hash += hash * 101 + i.hash();
 
-            sp<PipelineInput::UBO>& ubo = _ubos[hash];
+            sp<ShaderLayout::UBO>& ubo = _ubos[hash];
             if(ubo == nullptr)
-                ubo = sp<PipelineInput::UBO>::make(binding++);
+                ubo = sp<ShaderLayout::UBO>::make(binding++);
             ubo->_stages.set(stage->_shader_stage);
             for(const String& i : uniformNames)
                 ubo->addUniform(_uniforms.at(i));
         }
 }
 
-const std::vector<ShaderPreprocessor*>& PipelineBuildingContext::stages() const
+const Vector<ShaderPreprocessor*>& PipelineBuildingContext::stages() const
 {
     return _stages;
 }
 
-const std::map<Enum::ShaderStageBit, op<ShaderPreprocessor>>& PipelineBuildingContext::renderStages() const
+const Map<Enum::ShaderStageBit, op<ShaderPreprocessor>>& PipelineBuildingContext::renderStages() const
 {
     return _rendering_stages;
 }
@@ -355,9 +355,9 @@ const op<ShaderPreprocessor>& PipelineBuildingContext::addStage(sp<String> sourc
     return stage;
 }
 
-std::map<String, String> PipelineBuildingContext::toDefinitions() const
+Map<String, String> PipelineBuildingContext::toDefinitions() const
 {
-    std::map<String, String> definitions;
+    Map<String, String> definitions;
     for(const auto& [i, j] : _definitions)
         definitions.insert(std::make_pair(i, j->val()));
     return definitions;
@@ -464,8 +464,8 @@ void PipelineBuildingContext::initializeStages(PipelineLayout& pipelineLayout)
         tryBindCamera(*vertex);
 
     uint32_t binding = 0;
-    Table<String, PipelineInput::BindingSet> samplers;
-    Table<String, PipelineInput::BindingSet> images;
+    Table<String, ShaderLayout::BindingSet> samplers;
+    Table<String, ShaderLayout::BindingSet> images;
     {
         UniqueNameSet samplerNames(_input->_sampler_names);
         if(const ShaderPreprocessor* vertex = tryGetRenderStage(Enum::SHADER_STAGE_BIT_VERTEX))

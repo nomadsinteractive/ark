@@ -5,7 +5,7 @@
 namespace ark::plugin::sdl3 {
 
 TextureSDL3_GPU::TextureSDL3_GPU(const uint32_t width, const uint32_t height, sp<Texture::Parameters> parameters)
-    : Delegate(parameters->_type), _width(width), _height(height), _parameters(std::move(parameters))
+    : Delegate(parameters->_type), _width(width), _height(height), _parameters(std::move(parameters)), _texture(nullptr), _sampler(nullptr)
 {
 }
 

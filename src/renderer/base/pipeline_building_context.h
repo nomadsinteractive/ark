@@ -1,9 +1,5 @@
 #pragma once
 
-#include <map>
-#include <set>
-#include <vector>
-
 #include "core/base/api.h"
 #include "core/base/string.h"
 #include "core/collection/table.h"
@@ -45,21 +41,21 @@ public:
     };
 
     sp<RenderController> _render_controller;
-    sp<PipelineInput> _input;
+    sp<ShaderLayout> _input;
 
-    std::map<String, Attribute> _attributes;
-    std::map<String, sp<StringVar>> _definitions;
-    std::vector<LayoutBinding> _layout_bindings;
+    Map<String, Attribute> _attributes;
+    Map<String, sp<StringVar>> _definitions;
+    Vector<LayoutBinding> _layout_bindings;
     Table<String, sp<Uniform>> _uniforms;
     Table<String, sp<Texture>> _samplers;
     Table<String, sp<Texture>> _images;
     Table<String, Buffer> _ssbos;
-    std::map<HashId, sp<PipelineInput::UBO>> _ubos;
+    Map<HashId, sp<ShaderLayout::UBO>> _ubos;
 
-    std::set<String> _input_vars;
+    Set<String> _input_vars;
 
-    const std::vector<ShaderPreprocessor*>& stages() const;
-    const std::map<Enum::ShaderStageBit, op<ShaderPreprocessor>>& renderStages() const;
+    const Vector<ShaderPreprocessor*>& stages() const;
+    const Map<Enum::ShaderStageBit, op<ShaderPreprocessor>>& renderStages() const;
     const op<ShaderPreprocessor>& computingStage() const;
 
     void addAttribute(String name, String type, uint32_t divisor);
@@ -73,7 +69,7 @@ public:
     const op<ShaderPreprocessor>& getRenderStage(Enum::ShaderStageBit shaderStage) const;
     const op<ShaderPreprocessor>& addStage(sp<String> source, document manifest, Enum::ShaderStageBit shaderStage, Enum::ShaderStageBit preShaderStage);
 
-    std::map<String, String> toDefinitions() const;
+    Map<String, String> toDefinitions() const;
 
     void tryBindCamera(const ShaderPreprocessor& shaderPreprocessor);
 
@@ -93,9 +89,9 @@ private:
     void loadLayoutBindings(BeanFactory& factory, const Scope& args, const document& manifest);
     void loadDefinitions(BeanFactory& factory, const Scope& args, const document& manifest);
 
-    std::map<Enum::ShaderStageBit, op<ShaderPreprocessor>> _rendering_stages;
+    Map<Enum::ShaderStageBit, op<ShaderPreprocessor>> _rendering_stages;
     op<ShaderPreprocessor> _computing_stage;
-    std::vector<ShaderPreprocessor*> _stages;
+    Vector<ShaderPreprocessor*> _stages;
 
     friend class PipelineLayout;
 };

@@ -70,10 +70,26 @@ private:
     sp<ApplicationDelegate> _application_delegate;
 };
 
+sp<Size> getSurfaceSize(const ApplicationManifest& applicationManifest)
+{
+    const float scale = applicationManifest.window()._scale;
+    const V2& resolution = applicationManifest.rendererResolution();
+    return sp<Size>::make(resolution.x() * scale, resolution.y() * scale);
 }
 
-Application::Application(sp<ApplicationDelegate> applicationDelegate, sp<ApplicationContext> applicationContext, uint32_t surfaceWidth, uint32_t surfaceHeight, const Viewport& viewport)
-    : _application_delegate(std::move(applicationDelegate)), _application_context(std::move(applicationContext)), _viewport(viewport), _surface_size(sp<Size>::make(static_cast<float>(surfaceWidth), static_cast<float>(surfaceHeight))),
+Viewport getViewport(const ApplicationManifest& applicationManifest, const Ark::RendererCoordinateSystem coordinateSystem)
+{
+    const V2& resolution = applicationManifest.rendererResolution();
+    if(coordinateSystem == Ark::COORDINATE_SYSTEM_RHS)
+        return {0, resolution.y(), resolution.x(), 0, -1.0f, 1.0f};
+    DASSERT(coordinateSystem == Ark::COORDINATE_SYSTEM_LHS);
+    return {0, 0, resolution.x(), resolution.y(), -1.0f, 1.0f};
+}
+
+}
+
+Application::Application(sp<ApplicationDelegate> applicationDelegate, sp<ApplicationContext> applicationContext, const ApplicationManifest& applicationManifest)
+    : _application_delegate(std::move(applicationDelegate)), _application_context(std::move(applicationContext)), _viewport(getViewport(applicationManifest, _application_context->renderEngine()->coordinateSystem())), _surface_size(getSurfaceSize(applicationManifest)),
       _surface_updater_pre_created(sp<OnSurfaceUpdatePreCreated>::make(_application_context)), _surface_updater(_surface_updater_pre_created.get())
 {
 }

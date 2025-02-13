@@ -301,8 +301,8 @@ int32_t toWindowPosition(int32_t pos)
 
 }
 
-SDLApplication::SDLApplication(sp<ApplicationDelegate> applicationDelegate, sp<ApplicationContext> applicationContext, uint32_t width, uint32_t height, const ApplicationManifest& manifest)
-    : Application(std::move(applicationDelegate), applicationContext, width, height, manifest.renderer().toViewport()), _main_window(nullptr), _cond(SDL_CreateCond()), _lock(SDL_CreateMutex()),
+SDLApplication::SDLApplication(sp<ApplicationDelegate> applicationDelegate, sp<ApplicationContext> applicationContext, const ApplicationManifest& manifest)
+    : Application(std::move(applicationDelegate), applicationContext, manifest), _main_window(nullptr), _cond(SDL_CreateCond()), _lock(SDL_CreateMutex()),
       _controller(sp<SDLApplicationController>::make(std::move(applicationContext))), _vsync(manifest.renderer()._vsync)
 {
     initialize();
@@ -370,9 +370,7 @@ sp<Application> SDLApplication::BUILDER::build(const Scope& args)
 {
     const Ark& ark = Ark::instance();
     const sp<ApplicationManifest>& manifest = ark.manifest();
-    const float scale = manifest->window()._scale;
-    const V2& resolution = manifest->rendererResolution();
-    return sp<Application>::make<SDLApplication>(sp<ApplicationDelegate>::make<ApplicationDelegateImpl>(), ark.applicationContext(), static_cast<uint32_t>(resolution.x() * scale), static_cast<uint32_t>(resolution.y() * scale), manifest);
+    return sp<Application>::make<SDLApplication>(sp<ApplicationDelegate>::make<ApplicationDelegateImpl>(), ark.applicationContext(), manifest);
 }
 
 void SDLApplication::initialize()

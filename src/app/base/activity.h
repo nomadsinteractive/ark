@@ -57,6 +57,9 @@ public:
 //  [[script::bindings::auto]]
     void addView(sp<View> view, sp<Boolean> discarded = nullptr);
 
+//  [[script::bindings::auto]]
+    void addEntity(sp<Entity> entity);
+
 //  [[plugin::builder]]
     class BUILDER final : public Builder<Activity> {
     public:
@@ -69,6 +72,8 @@ public:
         document _manifest;
         SafeBuilder<ResourceLoader> _resource_loader;
         builder<View> _root_view;
+        builder<RenderGroup> _render_group;
+        Vector<builder<Entity>> _entities;
     };
 
 private:
@@ -76,6 +81,7 @@ private:
     sp<RenderGroup> _render_group;
     sp<ResourceLoader> _resource_loader;
     op<EventListenerList> _event_listeners;
+    Vector<sp<Entity>> _entities;
 };
 
 }

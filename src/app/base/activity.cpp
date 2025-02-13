@@ -109,9 +109,14 @@ void Activity::addView(sp<View> view, sp<Boolean> discarded)
     _view->addView(std::move(view), std::move(discarded));
 }
 
+void Activity::addEntity(sp<Entity> entity)
+{
+    _entities.push_back(std::move(entity));
+}
+
 Activity::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _factory(factory), _manifest(manifest), _resource_loader(factory.getBuilder<ResourceLoader>(manifest, "resource-loader")),
-      _root_view(factory.ensureBuilder<View>(manifest, "root-view"))
+      _root_view(factory.ensureBuilder<View>(manifest, "root-view")), _render_group(factory.ensureBuilder<RenderGroup>(manifest)), _entities(factory.makeBuilderList<Entity>(manifest, constants::ENTITY))
 {
 }
 
@@ -120,7 +125,7 @@ sp<Activity> Activity::BUILDER::build(const Scope& args)
     sp<ResourceLoader> r1 = _resource_loader.build(args);
     sp<ResourceLoader> resourceLoader = r1 ? std::move(r1) : sp<ResourceLoader>::make(_factory);
     BeanFactory& factory = resourceLoader->beanFactory();
-    sp<Activity> activity = sp<Activity>::make(_root_view->build(args), factory.ensure<RenderGroup>(_manifest, args) ,std::move(resourceLoader));
+    sp<Activity> activity = sp<Activity>::make(_root_view->build(args), _render_group->build(args), std::move(resourceLoader));
 
     for(const document& i : _manifest->children())
     {
@@ -129,6 +134,10 @@ sp<Activity> Activity::BUILDER::build(const Scope& args)
         else if(name == constants::VIEW)
             activity->addView(factory.ensure<View>(i, args));
     }
+
+    for(const builder<Entity>& i : _entities)
+        activity->addEntity(i->build(args));
+
     return activity;
 }
 

@@ -12,7 +12,7 @@
 #include "graphics/base/v4.h"
 
 #include "renderer/base/shader.h"
-#include "renderer/base/pipeline_input.h"
+#include "renderer/base/shader_layout.h"
 
 namespace ark {
 
@@ -40,7 +40,7 @@ private:
 
 }
 
-Varyings::Varyings(const PipelineInput& pipelineInput)
+Varyings::Varyings(const ShaderLayout& pipelineInput)
 {
     for(const auto& [k, v] : pipelineInput.streamLayouts())
     {
@@ -123,7 +123,7 @@ sp<Varyings> Varyings::subscribe(const String& name)
     return subProp;
 }
 
-static String findNearestAttribute(const PipelineInput& pipelineInput, const String& name)
+static String findNearestAttribute(const ShaderLayout& pipelineInput, const String& name)
 {
     String nearest;
     constexpr size_t nd = std::numeric_limits<size_t>::max();
@@ -136,7 +136,7 @@ static String findNearestAttribute(const PipelineInput& pipelineInput, const Str
     return nearest;
 }
 
-Varyings::Snapshot Varyings::snapshot(const PipelineInput& pipelineInput, Allocator& allocator)
+Varyings::Snapshot Varyings::snapshot(const ShaderLayout& pipelineInput, Allocator& allocator)
 {
     if(!_slots.size())
     {
@@ -233,7 +233,7 @@ Varyings::Divided Varyings::Snapshot::getDivided(uint32_t divisor) const
     return Varyings::Divided();
 }
 
-void Varyings::Snapshot::snapshotSubProperties(const std::map<String, sp<Varyings>>& subProperties, const PipelineInput& pipelineInput, Allocator& allocator)
+void Varyings::Snapshot::snapshotSubProperties(const std::map<String, sp<Varyings>>& subProperties, const ShaderLayout& pipelineInput, Allocator& allocator)
 {
     for(const auto& [i, j] : subProperties)
         _sub_properties[i.hash()] = j->snapshot(pipelineInput, allocator);

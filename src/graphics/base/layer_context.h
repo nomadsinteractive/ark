@@ -48,7 +48,7 @@ public:
 
     bool processNewCreated();
 
-    LayerContextSnapshot snapshot(RenderLayer renderLayer, const RenderRequest& renderRequest, const PipelineInput& pipelineInput);
+    LayerContextSnapshot snapshot(RenderLayer renderLayer, const RenderRequest& renderRequest, const ShaderLayout& pipelineInput);
 
     bool ensureState(void* stateKey);
     ElementState& addElementState(void* key);

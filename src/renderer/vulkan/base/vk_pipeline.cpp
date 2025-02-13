@@ -8,7 +8,7 @@
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/pipeline_layout.h"
-#include "renderer/base/pipeline_input.h"
+#include "renderer/base/shader_layout.h"
 #include "renderer/base/render_engine_context.h"
 #include "renderer/base/recycler.h"
 #include "renderer/base/pipeline_bindings.h"
@@ -336,7 +336,7 @@ void VKPipeline::compute(GraphicsContext& graphicsContext, const ComputeContext&
     buildComputeCommandBuffer(graphicsContext, computeContext);
 }
 
-void VKPipeline::setupVertexDescriptions(const PipelineInput& input, VKPipeline::VertexLayout& vertexLayout)
+void VKPipeline::setupVertexDescriptions(const ShaderLayout& input, VKPipeline::VertexLayout& vertexLayout)
 {
     uint32_t location = 0;
     for(const auto& [divsor, stream] : input.streamLayouts())
@@ -368,10 +368,10 @@ void VKPipeline::setupDescriptorSetLayout(const PipelineDescriptor& pipelineDesc
 {
     const sp<VKDevice>& device = _renderer->device();
 
-    const PipelineInput& pipelineInput = pipelineDescriptor.input();
+    const ShaderLayout& pipelineInput = pipelineDescriptor.input();
     std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings;
     uint32_t binding = 0;
-    for(const sp<PipelineInput::UBO>& i : pipelineInput.ubos())
+    for(const sp<ShaderLayout::UBO>& i : pipelineInput.ubos())
     {
         binding = std::max(binding, i->binding());
         if(shouldStageNeedBinded(i->_stages))
@@ -380,7 +380,7 @@ void VKPipeline::setupDescriptorSetLayout(const PipelineDescriptor& pipelineDesc
             setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, stages, i->binding()));
         }
     }
-    for(const PipelineInput::SSBO& i : pipelineInput.ssbos())
+    for(const ShaderLayout::SSBO& i : pipelineInput.ssbos())
     {
         binding = std::max(binding, i._binding);
         if(shouldStageNeedBinded(i._stages))
@@ -418,7 +418,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
     uint32_t binding = 0;
 
     _ubos.clear();
-    for(const sp<PipelineInput::UBO>& i : pipelineDescriptor.input()->ubos())
+    for(const sp<ShaderLayout::UBO>& i : pipelineDescriptor.input()->ubos())
     {
         binding = std::max(binding, i->binding());
         if(shouldStageNeedBinded(i->_stages))
@@ -434,7 +434,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
         }
     }
 
-    for(const PipelineInput::SSBO& i : pipelineDescriptor.input()->ssbos())
+    for(const ShaderLayout::SSBO& i : pipelineDescriptor.input()->ssbos())
     {
         binding = std::max(binding, i._binding);
         if(shouldStageNeedBinded(i._stages))

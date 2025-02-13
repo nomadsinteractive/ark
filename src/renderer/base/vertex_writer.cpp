@@ -6,12 +6,12 @@
 
 namespace ark {
 
-VertexWriter::VertexWriter(const PipelineInput::AttributeOffsets& attributes, bool doTransform, uint8_t* ptr, size_t size, size_t stride)
+VertexWriter::VertexWriter(const ShaderLayout::AttributeOffsets& attributes, bool doTransform, uint8_t* ptr, size_t size, size_t stride)
     : VertexWriter(attributes, doTransform, sp<WriterMemory>::make(ptr, size, stride))
 {
 }
 
-VertexWriter::VertexWriter(const PipelineInput::AttributeOffsets& attributes, bool doTransform, sp<VertexWriter::Writer> writer)
+VertexWriter::VertexWriter(const ShaderLayout::AttributeOffsets& attributes, bool doTransform, sp<VertexWriter::Writer> writer)
     : _attribute_offsets(attributes), _writer(std::move(writer)), _do_transform(doTransform), _visible(true), _transform_snapshot(nullptr)
 {
 }

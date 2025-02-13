@@ -41,7 +41,7 @@ private:
         std::vector<VkVertexInputAttributeDescription> attributeDescriptions;
     };
 
-    void setupVertexDescriptions(const PipelineInput& input, VertexLayout& vertexLayout);
+    void setupVertexDescriptions(const ShaderLayout& input, VertexLayout& vertexLayout);
     void setupDescriptorSetLayout(const PipelineDescriptor& pipelineDescriptor);
     void setupDescriptorSet(GraphicsContext& graphicsContext, const PipelineDescriptor& pipelineDescriptor);
 

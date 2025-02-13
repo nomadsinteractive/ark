@@ -12,7 +12,7 @@ namespace ark::plugin::sdl3 {
 
 class ApplicationSDL3 final : public Application {
 public:
-    ApplicationSDL3(sp<ApplicationDelegate> applicationDelegate, sp<ApplicationContext> applicationContext, uint32_t width, uint32_t height, const ApplicationManifest& manifest);
+    ApplicationSDL3(sp<ApplicationDelegate> applicationDelegate, sp<ApplicationContext> applicationContext, const ApplicationManifest& manifest);
 
     int run() override;
     const sp<ApplicationController>& controller() override;

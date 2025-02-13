@@ -11,7 +11,7 @@
 #include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/pipeline_descriptor.h"
 #include "renderer/base/pipeline_layout.h"
-#include "renderer/base/pipeline_input.h"
+#include "renderer/base/shader_layout.h"
 #include "renderer/inf/pipeline.h"
 #include "renderer/util/render_util.h"
 
@@ -23,18 +23,7 @@ namespace ark::plugin::sdl3 {
 
 namespace {
 
-String translatePredefinedName(const String& name)
-{
-    if(name == "u_VP")
-        return "u_viewProj";
-    if(name == "u_View")
-        return "u_view";
-    if(name == "u_Projection")
-        return "u_proj";
-    return name;
-}
-
-SDL_GPUShader* createGraphicsShader(SDL_GPUDevice* device, const PipelineInput& pipelineInput, const StringView source, Enum::ShaderStageBit stageBit)
+SDL_GPUShader* createGraphicsShader(SDL_GPUDevice* device, const ShaderLayout& pipelineInput, const StringView source, Enum::ShaderStageBit stageBit)
 {
 	const SDL_GPUShaderStage stage = stageBit == Enum::SHADER_STAGE_BIT_VERTEX ? SDL_GPU_SHADERSTAGE_VERTEX : SDL_GPU_SHADERSTAGE_FRAGMENT;
 	const SDL_GPUShaderFormat backendFormats = SDL_GetGPUShaderFormats(device);
@@ -68,12 +57,12 @@ SDL_GPUShader* createGraphicsShader(SDL_GPUDevice* device, const PipelineInput& 
     const Uint32 samplerCount = stageBit == Enum::SHADER_STAGE_BIT_FRAGMENT ? pipelineInput.samplerCount() : 0;
 
     Uint32 uniformBufferCount = 0;
-    for(const PipelineInput::UBO& i : pipelineInput.ubos())
+    for(const ShaderLayout::UBO& i : pipelineInput.ubos())
         if(i._stages.has(stageBit))
             ++ uniformBufferCount;
 
     Uint32 storageBufferCount = 0;
-    for(const PipelineInput::SSBO& i : pipelineInput.ssbos())
+    for(const ShaderLayout::SSBO& i : pipelineInput.ssbos())
         if(i._stages.has(stageBit))
             ++ storageBufferCount;
 
@@ -169,8 +158,8 @@ SDL_GPUPrimitiveType toPrimitiveType(const Enum::RenderMode drawMode)
 
 class DrawPipelineSDL3_GPU final : public Pipeline {
 public:
-    DrawPipelineSDL3_GPU(Enum::DrawProcedure drawProcedure, Enum::RenderMode drawMode, const sp<PipelineInput>& pipelineInput, String vertexShader, String fragmentShader)
-        : _draw_procedure(drawProcedure), _draw_mode(drawMode), _pipeline_input(pipelineInput), _vertex_shader(std::move(vertexShader)), _fragment_shader(std::move(fragmentShader)) {
+    DrawPipelineSDL3_GPU(Enum::DrawProcedure drawProcedure, Enum::RenderMode drawMode, const sp<ShaderLayout>& pipelineInput, String vertexShader, String fragmentShader)
+        : _draw_procedure(drawProcedure), _draw_mode(drawMode), _pipeline_input(pipelineInput), _vertex_shader(std::move(vertexShader)), _fragment_shader(std::move(fragmentShader)), _pipeline(nullptr) {
     }
 
     uint64_t id() override
@@ -181,6 +170,8 @@ public:
     ResourceRecycleFunc recycle() override
     {
         SDL_GPUGraphicsPipeline* pipeline = _pipeline;
+        _pipeline = nullptr;
+
         return [pipeline] (GraphicsContext& graphicsContext) {
             SDL_GPUDevice* gpuDevice = ensureGPUDevice(graphicsContext);
             SDL_ReleaseGPUGraphicsPipeline(gpuDevice, pipeline);
@@ -259,13 +250,7 @@ public:
         const PipelineBindings& pipelineBindings = drawingContext._bindings;
         const GraphicsContextSDL3_GPU& sdl3GC = graphicsContext.traits().ensure<GraphicsContextSDL3_GPU>();
 
-        SDL_GPUColorTargetInfo colorTargetInfo = {};
-        colorTargetInfo.texture = sdl3GC._render_target;
-        colorTargetInfo.clear_color = { 0.0f, 0.0f, 0.0f, 1.0f };
-        colorTargetInfo.load_op = SDL_GPU_LOADOP_CLEAR;
-        colorTargetInfo.store_op = SDL_GPU_STOREOP_STORE;
-
-        SDL_GPURenderPass* renderPass = SDL_BeginGPURenderPass(sdl3GC._command_buffer, &colorTargetInfo, 1, nullptr);
+        SDL_GPURenderPass* renderPass = SDL_BeginGPURenderPass(sdl3GC._command_buffer, &sdl3GC._color_target_info, 1, nullptr);
 
         SDL_BindGPUGraphicsPipeline(renderPass, _pipeline);
 
@@ -314,7 +299,7 @@ public:
 private:
     Enum::DrawProcedure _draw_procedure;
     Enum::RenderMode _draw_mode;
-    sp<PipelineInput> _pipeline_input;
+    sp<ShaderLayout> _pipeline_input;
     String _vertex_shader;
     String _fragment_shader;
 

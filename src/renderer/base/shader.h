@@ -40,7 +40,7 @@ public:
     const sp<RenderController>& renderController() const;
 
     void setCamera(const Camera& camera);
-    const sp<PipelineInput>& input() const;
+    const sp<ShaderLayout>& input() const;
     const sp<PipelineLayout>& layout() const;
 
     const PipelineDescriptor::Parameters& descriptorParams() const;
@@ -86,7 +86,7 @@ private:
     sp<PipelineFactory> _pipeline_factory;
     sp<RenderController> _render_controller;
     sp<PipelineLayout> _pipeline_layout;
-    sp<PipelineInput> _pipeline_input;
+    sp<ShaderLayout> _pipeline_input;
 
     PipelineDescriptor::Parameters _descriptor_params;
 };

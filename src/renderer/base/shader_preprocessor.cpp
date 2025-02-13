@@ -268,7 +268,7 @@ sp<Uniform> ShaderPreprocessor::makeUniformInput(String name, Uniform::Type type
     return sp<Uniform>::make(std::move(name), type, 1, nullptr);
 }
 
-void ShaderPreprocessor::insertUBOStruct(const PipelineInput::UBO& ubo)
+void ShaderPreprocessor::insertUBOStruct(const ShaderLayout::UBO& ubo)
 {
     StringBuffer sb;
     sb << "layout (binding = " << ubo.binding() << ") uniform UBO" << ubo.binding() << " {\n";
@@ -280,7 +280,7 @@ void ShaderPreprocessor::insertUBOStruct(const PipelineInput::UBO& ubo)
     _uniform_declaration_codes.push_back(sp<String>::make(sb.str()));
 }
 
-bool ShaderPreprocessor::hasUBO(const PipelineInput::UBO& ubo) const
+bool ShaderPreprocessor::hasUBO(const ShaderLayout::UBO& ubo) const
 {
     for(const auto& i : ubo.uniforms().values())
         if(_main.contains(i->name()))
@@ -288,12 +288,12 @@ bool ShaderPreprocessor::hasUBO(const PipelineInput::UBO& ubo) const
     return false;
 }
 
-void ShaderPreprocessor::declareUBOStruct(const PipelineInput& piplineInput)
+void ShaderPreprocessor::declareUBOStruct(const ShaderLayout& piplineInput)
 {
     for(const ShaderPreprocessor::Declaration& i : _declaration_uniforms.vars().values())
         i.setSource("");
 
-    for(const sp<PipelineInput::UBO>& i : piplineInput.ubos())
+    for(const sp<ShaderLayout::UBO>& i : piplineInput.ubos())
         if(hasUBO(i))
             insertUBOStruct(i);
 }

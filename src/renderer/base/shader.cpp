@@ -68,7 +68,7 @@ const sp<PipelineFactory>& Shader::pipelineFactory() const
     return _pipeline_factory;
 }
 
-const sp<PipelineInput>& Shader::input() const
+const sp<ShaderLayout>& Shader::input() const
 {
     return _pipeline_input;
 }

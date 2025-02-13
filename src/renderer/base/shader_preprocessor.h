@@ -7,7 +7,7 @@
 #include "core/collection/table.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/base/pipeline_input.h"
+#include "renderer/base/shader_layout.h"
 #include "renderer/base/render_engine.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/uniform.h"
@@ -159,9 +159,9 @@ public:
 
     sp<Uniform> makeUniformInput(String name, Uniform::Type type) const;
 
-    void insertUBOStruct(const PipelineInput::UBO& ubo);
-    bool hasUBO(const PipelineInput::UBO& ubo) const;
-    void declareUBOStruct(const PipelineInput& piplineInput);
+    void insertUBOStruct(const ShaderLayout::UBO& ubo);
+    bool hasUBO(const ShaderLayout::UBO& ubo) const;
+    void declareUBOStruct(const ShaderLayout& piplineInput);
 
     String outputName() const;
 

@@ -4,7 +4,7 @@
 #include "core/util/string_convert.h"
 
 #include "renderer/base/graphics_context.h"
-#include "renderer/base/pipeline_input.h"
+#include "renderer/base/shader_layout.h"
 #include "renderer/base/pipeline_layout.h"
 
 namespace ark {
@@ -38,12 +38,12 @@ struct PipelineDescriptor::Stub {
     Parameters _parameters;
 
     sp<PipelineLayout> _layout;
-    sp<PipelineInput> _input;
+    sp<ShaderLayout> _input;
     //TODO: move it to stream
-    PipelineInput::AttributeOffsets _attributes;
+    ShaderLayout::AttributeOffsets _attributes;
 
-    Vector<std::pair<sp<Texture>, PipelineInput::BindingSet>> _samplers;
-    Vector<std::pair<sp<Texture>, PipelineInput::BindingSet>> _images;
+    Vector<std::pair<sp<Texture>, ShaderLayout::BindingSet>> _samplers;
+    Vector<std::pair<sp<Texture>, ShaderLayout::BindingSet>> _images;
 };
 
 PipelineDescriptor::PipelineDescriptor(Enum::RenderMode mode, Enum::DrawProcedure renderProcedure, Parameters parameters, sp<PipelineLayout> pipelineLayout)
@@ -76,22 +76,22 @@ const sp<PipelineLayout>& PipelineDescriptor::layout() const
     return _stub->_layout;
 }
 
-const sp<PipelineInput>& PipelineDescriptor::input() const
+const sp<ShaderLayout>& PipelineDescriptor::input() const
 {
     return _stub->_input;
 }
 
-const PipelineInput::AttributeOffsets& PipelineDescriptor::attributes() const
+const ShaderLayout::AttributeOffsets& PipelineDescriptor::attributes() const
 {
     return _stub->_attributes;
 }
 
-const Vector<std::pair<sp<Texture>, PipelineInput::BindingSet>>& PipelineDescriptor::samplers() const
+const Vector<std::pair<sp<Texture>, ShaderLayout::BindingSet>>& PipelineDescriptor::samplers() const
 {
     return _stub->_samplers;
 }
 
-const Vector<std::pair<sp<Texture>, PipelineInput::BindingSet>>& PipelineDescriptor::images() const
+const Vector<std::pair<sp<Texture>, ShaderLayout::BindingSet>>& PipelineDescriptor::images() const
 {
     return _stub->_images;
 }

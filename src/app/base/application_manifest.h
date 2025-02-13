@@ -63,7 +63,7 @@ public:
         uint32_t _device_unit_size;
     };
 
-    struct ARK_API Renderer {
+    struct Renderer {
         Renderer();
         Renderer(const document& manifest);
 
@@ -75,8 +75,6 @@ public:
 
         bool _vsync;
         V2 _resolution;
-
-        Viewport toViewport() const;
     };
 
 public:

@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest>
 	<asset src="../assets"/>
-    <renderer version="auto">
+    <renderer class="sdl3-gpu" version="auto">
         <resolution width="960" height="540"/>
     </renderer>
 	<resource-loader src="app.xml"/>
     <application title="s01 - Hello World">
-		<arena>
-			<root-view layout="frame">
-				<renderer ref="@pre:fps-counter" style="position:0, 470"/>
-			</root-view>
+		<activity>
             <render-layer ref="@pre:rl001"/>
             <render-layer ref="@pre:rl002"/>
-			<view class="text" text="Hello World" render-layer="@pre:rl002"/>
-		</arena>
+			<root-view layout="frame"/>
+			<entity>
+				<with-text text="Hello World" render-layer="@pre:rl002"/>
+			</entity>
+		</activity>
 	</application>
+	<plugin name="ark-sdl3" for="windows|darwin"/>
 </manifest>

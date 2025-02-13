@@ -70,13 +70,13 @@ public:
         explicit operator bool() const;
 
         Varyings::Divided getDivided(uint32_t divisor) const;
-        void snapshotSubProperties(const std::map<String, sp<Varyings>>& subProperties, const PipelineInput& pipelineInput, Allocator& allocator);
+        void snapshotSubProperties(const std::map<String, sp<Varyings>>& subProperties, const ShaderLayout& pipelineInput, Allocator& allocator);
     };
 
 public:
 //[[script::bindings::auto]]
     Varyings() = default;
-    Varyings(const PipelineInput& pipelineInput);
+    Varyings(const ShaderLayout& pipelineInput);
 
     bool update(uint64_t timestamp);
 
@@ -99,7 +99,7 @@ public:
 //[[script::bindings::map(get)]]
     sp<Varyings> subscribe(const String& name);
 
-    Snapshot snapshot(const PipelineInput& pipelineInput, Allocator& allocator);
+    Snapshot snapshot(const ShaderLayout& pipelineInput, Allocator& allocator);
 
 //  [[plugin::builder]]
     class BUILDER : public Builder<Varyings> {

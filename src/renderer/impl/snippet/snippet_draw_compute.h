@@ -10,12 +10,12 @@ namespace ark {
 
 class SnippetDrawCompute final : public Snippet {
 public:
-    SnippetDrawCompute(sp<PipelineInput> pipelineInput, std::array<uint32_t, 3> numWorkGroups, bool atPostDraw);
+    SnippetDrawCompute(sp<ShaderLayout> pipelineInput, std::array<uint32_t, 3> numWorkGroups, bool atPostDraw);
 
     sp<DrawEvents> makeDrawEvents(const RenderRequest& renderRequest) override;
 
 private:
-    sp<PipelineInput> _pipeline_input;
+    sp<ShaderLayout> _pipeline_input;
     std::array<uint32_t, 3> _num_work_groups;
     bool _at_post_draw;
 };

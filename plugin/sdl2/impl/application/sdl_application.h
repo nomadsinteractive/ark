@@ -15,7 +15,7 @@ namespace ark {
 
 class SDLApplication final : public Application {
 public:
-    SDLApplication(sp<ApplicationDelegate> applicationDelegate, sp<ApplicationContext> applicationContext, uint32_t width, uint32_t height, const ApplicationManifest& manifest);
+    SDLApplication(sp<ApplicationDelegate> applicationDelegate, sp<ApplicationContext> applicationContext, const ApplicationManifest& manifest);
 
     int run() override;
     const sp<ApplicationController>& controller() override;

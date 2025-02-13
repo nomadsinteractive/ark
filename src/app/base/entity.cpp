@@ -153,7 +153,7 @@ struct Entity::BUILDER::ComponentBuilder {
 };
 
 Entity::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _boxes(factory.getBuilder<std::vector<Box>>(manifest, "components")), _components(factory.makeBuilderListObject<ComponentBuilder>(manifest, ""))
+    : _boxes(factory.getBuilder<Vector<Box>>(manifest, "components")), _components(factory.makeBuilderListObject<ComponentBuilder>(manifest, ""))
 {
 }
 
@@ -162,7 +162,7 @@ sp<Entity> Entity::BUILDER::build(const Scope& args)
     Vector<Component> components;
     if(_boxes)
     {
-        const sp<std::vector<Box>> boxes = _boxes->build(args);
+        const sp<Vector<Box>> boxes = _boxes->build(args);
         for(Box& i : *boxes)
             if(i)
                 components.push_back({std::move(i)});

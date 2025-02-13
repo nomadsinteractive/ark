@@ -12,12 +12,12 @@ namespace ark {
 
 namespace {
 
-String preprocess(const RenderEngineContext& renderEngineContext, const std::map<String, String>& definitions, const String& source)
+String preprocess(const RenderEngineContext& renderEngineContext, const Map<String, String>& definitions, const String& source)
 {
     DCHECK(renderEngineContext.version() > 0, "Unintialized RenderEngineContext");
 
     static std::regex var_pattern(R"(\$\{([\w.]+)\})");
-    const std::map<String, String>& engineDefinitions = renderEngineContext.definitions();
+    const Map<String, String>& engineDefinitions = renderEngineContext.definitions();
 
     return source.replace(var_pattern, [&engineDefinitions, &definitions] (Array<String>& matches)->String {
         const String& varName = matches.at(1);
@@ -57,14 +57,14 @@ void PipelineLayout::preCompile(GraphicsContext& graphicsContext)
     }
 }
 
-const sp<PipelineInput>& PipelineLayout::input() const
+const sp<ShaderLayout>& PipelineLayout::input() const
 {
     return _input;
 }
 
-std::map<Enum::ShaderStageBit, ShaderPreprocessor::Stage> PipelineLayout::getPreprocessedStages(const RenderEngineContext& renderEngineContext) const
+Map<Enum::ShaderStageBit, ShaderPreprocessor::Stage> PipelineLayout::getPreprocessedStages(const RenderEngineContext& renderEngineContext) const
 {
-    std::map<Enum::ShaderStageBit, ShaderPreprocessor::Stage> shaders;
+    Map<Enum::ShaderStageBit, ShaderPreprocessor::Stage> shaders;
 
     for(const auto& [manifest, stage, source] : _preprocessed_stages)
         shaders[stage] = {manifest, stage, preprocess(renderEngineContext, _definitions, source)};
@@ -72,12 +72,12 @@ std::map<Enum::ShaderStageBit, ShaderPreprocessor::Stage> PipelineLayout::getPre
     return shaders;
 }
 
-const Vector<PipelineInput::BindingSet>& PipelineLayout::samplers() const
+const Vector<ShaderLayout::BindingSet>& PipelineLayout::samplers() const
 {
     return _samplers;
 }
 
-const Vector<PipelineInput::BindingSet>& PipelineLayout::images() const
+const Vector<ShaderLayout::BindingSet>& PipelineLayout::images() const
 {
     return _images;
 }
@@ -107,12 +107,12 @@ void PipelineLayout::initialize(const Shader& shader)
     _input->initialize(_building_context);
 }
 
-Vector<std::pair<sp<Texture>, PipelineInput::BindingSet>> PipelineLayout::makeBindingSamplers() const
+Vector<std::pair<sp<Texture>, ShaderLayout::BindingSet>> PipelineLayout::makeBindingSamplers() const
 {
-    const PipelineInput& pipelineInput = _input;
+    const ShaderLayout& pipelineInput = _input;
     CHECK_WARN(pipelineInput.samplerCount() >= _predefined_samplers.size(), "Predefined samplers(%d) is more than samplers(%d) in PipelineLayout", _predefined_samplers.size(), _input->samplerCount());
 
-    Vector<std::pair<sp<Texture>, PipelineInput::BindingSet>> samplers;
+    Vector<std::pair<sp<Texture>, ShaderLayout::BindingSet>> samplers;
     for(size_t i = 0; i < _samplers.size(); ++i)
     {
         const String& name = pipelineInput.samplerNames().at(i);
@@ -123,11 +123,11 @@ Vector<std::pair<sp<Texture>, PipelineInput::BindingSet>> PipelineLayout::makeBi
     return samplers;
 }
 
-Vector<std::pair<sp<Texture>, PipelineInput::BindingSet>> PipelineLayout::makeBindingImages() const
+Vector<std::pair<sp<Texture>, ShaderLayout::BindingSet>> PipelineLayout::makeBindingImages() const
 {
     DASSERT(_predefined_images.size() == _images.size());
 
-    Vector<std::pair<sp<Texture>, PipelineInput::BindingSet>> bindingImages;
+    Vector<std::pair<sp<Texture>, ShaderLayout::BindingSet>> bindingImages;
     for(size_t i = 0; i < _images.size(); ++i)
         bindingImages.emplace_back(_predefined_images.values().at(i), _images.at(i));
     return bindingImages;

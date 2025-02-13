@@ -68,7 +68,7 @@ public:
         SafeBuilder<Vec3> _position;
         SafeBuilder<Boolean> _discarded;
         SafeBuilder<LayoutParam> _layout_param;
-        std::vector<builder<View>> _children;
+        Vector<builder<View>> _children;
     };
 
 //  [[plugin::builder("with-view")]]

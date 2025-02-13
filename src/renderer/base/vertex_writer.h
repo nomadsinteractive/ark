@@ -7,7 +7,7 @@
 #include "graphics/inf/renderable.h"
 
 #include "renderer/base/mesh.h"
-#include "renderer/base/pipeline_input.h"
+#include "renderer/base/shader_layout.h"
 
 namespace ark {
 
@@ -21,8 +21,8 @@ public:
     };
 
 public:
-    VertexWriter(const PipelineInput::AttributeOffsets& attributes, bool doTransform, sp<Writer> writer);
-    VertexWriter(const PipelineInput::AttributeOffsets& attributes, bool doTransform, uint8_t* ptr, size_t size, size_t stride);
+    VertexWriter(const ShaderLayout::AttributeOffsets& attributes, bool doTransform, sp<Writer> writer);
+    VertexWriter(const ShaderLayout::AttributeOffsets& attributes, bool doTransform, uint8_t* ptr, size_t size, size_t stride);
 
     template<typename T> void write(const T& value, uint32_t offset = 0) {
         _writer->write(&value, sizeof(T), offset);
@@ -70,7 +70,7 @@ private:
     void writeArray(ByteArray& array);
 
 private:
-    PipelineInput::AttributeOffsets _attribute_offsets;
+    ShaderLayout::AttributeOffsets _attribute_offsets;
     sp<Writer> _writer;
 
     bool _do_transform;

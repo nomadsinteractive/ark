@@ -12,8 +12,8 @@ struct Arena::Stub {
     sp<RenderGroup> _render_group;
     sp<ResourceLoader> _resource_loader;
 
-    std::map<String, sp<Layer>> _layers;
-    std::map<String, sp<RenderLayer>> _render_layers;
+    Map<String, sp<Layer>> _layers;
+    Map<String, sp<RenderLayer>> _render_layers;
 };
 
 struct Arena::RenderLayerBundle final : BoxBundle {

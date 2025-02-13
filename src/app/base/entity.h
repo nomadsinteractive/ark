@@ -61,8 +61,8 @@ public:
         struct ComponentBuilder;
 
     private:
-        sp<Builder<std::vector<Box>>> _boxes;
-        std::vector<ComponentBuilder> _components;
+        sp<Builder<Vector<Box>>> _boxes;
+        Vector<ComponentBuilder> _components;
     };
 
 private:

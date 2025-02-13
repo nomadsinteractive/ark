@@ -8,7 +8,7 @@
 #include "core/collection/table.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/base/pipeline_input.h"
+#include "renderer/base/shader_layout.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/base/shader_preprocessor.h"
 
@@ -22,22 +22,22 @@ public:
     const sp<Snippet>& snippet() const;
     void initialize(const Shader& shader);
 
-    const sp<PipelineInput>& input() const;
+    const sp<ShaderLayout>& input() const;
 
     void preCompile(GraphicsContext& graphicsContext);
 
-    std::map<Enum::ShaderStageBit, ShaderPreprocessor::Stage> getPreprocessedStages(const RenderEngineContext& renderEngineContext) const;
-    const Vector<PipelineInput::BindingSet>& samplers() const;
-    const Vector<PipelineInput::BindingSet>& images() const;
+    Map<Enum::ShaderStageBit, ShaderPreprocessor::Stage> getPreprocessedStages(const RenderEngineContext& renderEngineContext) const;
+    const Vector<ShaderLayout::BindingSet>& samplers() const;
+    const Vector<ShaderLayout::BindingSet>& images() const;
 
     size_t colorAttachmentCount() const;
 
-    Vector<std::pair<sp<Texture>, PipelineInput::BindingSet>> makeBindingSamplers() const;
-    Vector<std::pair<sp<Texture>, PipelineInput::BindingSet>> makeBindingImages() const;
+    Vector<std::pair<sp<Texture>, ShaderLayout::BindingSet>> makeBindingSamplers() const;
+    Vector<std::pair<sp<Texture>, ShaderLayout::BindingSet>> makeBindingImages() const;
 
 private:
     sp<PipelineBuildingContext> _building_context;
-    sp<PipelineInput> _input;
+    sp<ShaderLayout> _input;
     sp<Snippet> _snippet;
 
     Vector<ShaderPreprocessor::Stage> _preprocessed_stages;
@@ -45,12 +45,12 @@ private:
     Table<String, sp<Texture>> _predefined_samplers;
     Table<String, sp<Texture>> _predefined_images;
 
-    Vector<PipelineInput::BindingSet> _samplers;
-    Vector<PipelineInput::BindingSet> _images;
+    Vector<ShaderLayout::BindingSet> _samplers;
+    Vector<ShaderLayout::BindingSet> _images;
 
     size_t _color_attachment_count;
 
-    std::map<String, String> _definitions;
+    Map<String, String> _definitions;
 
     friend class PipelineBuildingContext;
     friend class Shader;

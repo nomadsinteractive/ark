@@ -17,7 +17,7 @@ namespace ark {
 
 class ARK_API PipelineBindings {
 public:
-    PipelineBindings(Buffer vertices, sp<PipelineFactory> pipelineFactory, sp<PipelineDescriptor> pipelineDescriptor, std::map<uint32_t, Buffer> streams);
+    PipelineBindings(Buffer vertices, sp<PipelineFactory> pipelineFactory, sp<PipelineDescriptor> pipelineDescriptor, Map<uint32_t, Buffer> streams);
 
     const Buffer& vertices() const;
     Buffer& vertices();
@@ -29,15 +29,15 @@ public:
     void addSnippet(sp<Snippet> snippet);
 
     const sp<PipelineLayout>& pipelineLayout() const;
-    const sp<PipelineInput>& pipelineInput() const;
+    const sp<ShaderLayout>& pipelineInput() const;
 
-    const sp<std::map<uint32_t, Buffer>>& streams() const;
+    const sp<Map<uint32_t, Buffer>>& streams() const;
     const sp<Traits>& attachments() const;
 
     const sp<Pipeline>& ensureRenderPipeline(GraphicsContext& graphicsContext);
     const sp<Pipeline>& ensureComputePipeline(GraphicsContext& graphicsContext);
 
-    std::map<uint32_t, Buffer::Factory> makeDividedBufferFactories() const;
+    Map<uint32_t, Buffer::Factory> makeDividedBufferFactories() const;
 
 private:
     void doEnsurePipeline(GraphicsContext& graphicsContext);
@@ -48,7 +48,7 @@ private:
     sp<PipelineDescriptor> _pipeline_descriptor;
     sp<Snippet> _snippet;
 
-    sp<std::map<uint32_t, Buffer>> _streams;
+    sp<Map<uint32_t, Buffer>> _streams;
 
     sp<Pipeline> _render_pipeline;
     sp<Pipeline> _compute_pipeline;

@@ -12,7 +12,7 @@
 
 namespace ark {
 
-class AlphabetTrueType : public Alphabet {
+class AlphabetTrueType final : public Alphabet {
 public:
     AlphabetTrueType(const String& src);
     ~AlphabetTrueType() override;

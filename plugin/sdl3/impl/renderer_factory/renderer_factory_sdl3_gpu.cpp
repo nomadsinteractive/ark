@@ -36,7 +36,7 @@ public:
 
         RenderUtil::setLayoutDescriptor(RenderUtil::setupLayoutLocation(context, firstStage._declaration_ins), sLocation, 0);
 
-        const PipelineInput& pipelineInput = pipelineLayout.input();
+        const ShaderLayout& pipelineInput = pipelineLayout.input();
         if(ShaderPreprocessor* vertex = context.tryGetRenderStage(Enum::SHADER_STAGE_BIT_VERTEX))
         {
             RenderUtil::setLayoutDescriptor(vertex->_declaration_images, "binding", static_cast<uint32_t>(pipelineInput.ubos().size() + pipelineInput.ssbos().size() + pipelineInput.samplerCount()));
@@ -45,19 +45,9 @@ public:
         if(ShaderPreprocessor* fragment = context.tryGetRenderStage(Enum::SHADER_STAGE_BIT_FRAGMENT))
         {
             fragment->linkNextStage("FragColor");
-            const uint32_t bindingOffset = std::max<uint32_t>(2, pipelineInput.ubos().size() + pipelineInput.ssbos().size());
+            const uint32_t bindingOffset = static_cast<uint32_t>(pipelineInput.ubos().size() + pipelineInput.ssbos().size());
+            RenderUtil::setLayoutDescriptor(fragment->_declaration_samplers, "binding", bindingOffset);
             RenderUtil::setLayoutDescriptor(fragment->_declaration_images, "binding", bindingOffset + static_cast<uint32_t>(fragment->_declaration_samplers.vars().size()));
-
-            uint32_t binding = 0;
-            constexpr uint32_t samplerOffset = 16;
-            const Vector<String>& samplerNames = fragment->_declaration_samplers.vars().keys();
-            fragment->_declaration_samplers.clear();
-            for(const String& k : samplerNames)
-            {
-                fragment->_declaration_samplers.declare("sampler", "", k + "S", Strings::sprintf("binding = %d", bindingOffset + samplerOffset + binding));
-                fragment->_declaration_samplers.declare("texture2D", "", k + "T", Strings::sprintf("binding = %d", bindingOffset + binding++));
-                fragment->_predefined_macros.emplace_back(Strings::sprintf("#define %s sampler2D(%sT, %sS)", k.c_str(), k.c_str(), k.c_str()));
-            }
         }
 
         if(const ShaderPreprocessor* compute = context.computingStage().get())
@@ -159,7 +149,7 @@ sp<RenderEngineContext> RendererFactorySDL3_GPU::createRenderEngineContext(const
 class BufferSDL3 final : public Buffer::Delegate {
 public:
     BufferSDL3(const SDL_GPUBufferUsageFlags usageFlags)
-        : _usage_flags(usageFlags) {
+        : _usage_flags(usageFlags), _buffer(nullptr), _buffer_size(0) {
     }
 
     uint64_t id() override
@@ -175,6 +165,7 @@ public:
     {
         SDL_GPUBuffer* buffer = _buffer;
         _buffer = nullptr;
+        _buffer_size = 0;
 
         return [buffer] (GraphicsContext& graphicsContext) {
             SDL_ReleaseGPUBuffer(ensureGPUDevice(graphicsContext), buffer);
@@ -186,6 +177,17 @@ public:
         SDL_GPUDevice* gpuDevice = ensureGPUDevice(graphicsContext);
 
         const Uint32 inputSize = input.size();
+
+        if(!_buffer || inputSize > _buffer_size)
+        {
+            if(_buffer)
+                SDL_ReleaseGPUBuffer(gpuDevice, _buffer);
+
+            const SDL_GPUBufferCreateInfo bufferCreateInfo = {_usage_flags, inputSize};
+            _buffer = SDL_CreateGPUBuffer(gpuDevice, &bufferCreateInfo);
+            _buffer_size = inputSize;
+        }
+
         const SDL_GPUTransferBufferCreateInfo transferBufferCreateInfo{SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD, inputSize};
         SDL_GPUTransferBuffer* uploadTransferBuffer = SDL_CreateGPUTransferBuffer(gpuDevice, &transferBufferCreateInfo);
 
@@ -231,6 +233,7 @@ public:
 private:
     SDL_GPUBufferUsageFlags _usage_flags;
     SDL_GPUBuffer* _buffer;
+    uint32_t _buffer_size;
 };
 
 sp<Buffer::Delegate> RendererFactorySDL3_GPU::createBuffer(Buffer::Type type, Buffer::Usage usage)
@@ -285,44 +288,38 @@ public:
 
     void onRenderFrame(const Color& backgroundColor, RenderCommand& renderCommand) override
     {
-        ContextSDL3_GPU& context = _graphics_context->traits().ensure<ContextSDL3_GPU>();
+        const ContextSDL3_GPU& context = _graphics_context->traits().ensure<ContextSDL3_GPU>();
+        GraphicsContextSDL3_GPU& graphicsContext = _graphics_context->traits().ensure<GraphicsContextSDL3_GPU>();
 
-        SDL_GPUCommandBuffer* cmdbuf = SDL_AcquireGPUCommandBuffer(context._gpu_gevice);
-        if(!cmdbuf)
+        graphicsContext._command_buffer = SDL_AcquireGPUCommandBuffer(context._gpu_gevice);
+        if(!graphicsContext._command_buffer)
         {
             SDL_Log("AcquireGPUCommandBuffer failed: %s", SDL_GetError());
             return;
         }
 
-        if(!SDL_WaitAndAcquireGPUSwapchainTexture(cmdbuf, context._main_window, &context._swapchain_texture, nullptr, nullptr))
+        graphicsContext._color_target_info = {
+            nullptr,
+            0,
+            0,
+            { 0.0f, 0.0f, 0.0f, 1.0f },
+            SDL_GPU_LOADOP_CLEAR,
+            SDL_GPU_STOREOP_STORE
+        };
+
+        if(!SDL_WaitAndAcquireGPUSwapchainTexture(graphicsContext._command_buffer, context._main_window, &graphicsContext._color_target_info.texture, nullptr, nullptr))
         {
             SDL_Log("WaitAndAcquireGPUSwapchainTexture failed: %s", SDL_GetError());
             return;
         }
 
-        if(context._swapchain_texture)
+        if(graphicsContext._color_target_info.texture)
         {
-            SDL_GPUColorTargetInfo colorTargetInfo = { 0 };
-            colorTargetInfo.texture = context._swapchain_texture;
-            colorTargetInfo.clear_color = { 0.0f, 0.0f, 0.0f, 1.0f };
-            colorTargetInfo.load_op = SDL_GPU_LOADOP_CLEAR;
-            colorTargetInfo.store_op = SDL_GPU_STOREOP_STORE;
-
-            SDL_GPURenderPass* renderPass = SDL_BeginGPURenderPass(cmdbuf, &colorTargetInfo, 1, nullptr);
-
-            // SDL_BindGPUGraphicsPipeline(renderPass, Pipeline);
-            // SDL_BindGPUVertexBuffers(renderPass, 0, &(SDL_GPUBufferBinding){ .buffer = VertexBuffer, .offset = 0 }, 1);
-            // SDL_BindGPUIndexBuffer(renderPass, &(SDL_GPUBufferBinding){ .buffer = IndexBuffer, .offset = 0 }, SDL_GPU_INDEXELEMENTSIZE_16BIT);
-            // SDL_BindGPUFragmentSamplers(renderPass, 0, &(SDL_GPUTextureSamplerBinding){ .texture = Texture, .sampler = Samplers[CurrentSamplerIndex] }, 1);
-            // SDL_DrawGPUIndexedPrimitives(renderPass, 6, 1, 0, 0, 0);
-
-            SDL_EndGPURenderPass(renderPass);
-
             _graphics_context->onDrawFrame();
             renderCommand.draw(_graphics_context);
         }
 
-        SDL_SubmitGPUCommandBuffer(cmdbuf);
+        SDL_SubmitGPUCommandBuffer(graphicsContext._command_buffer);
     }
 
 private:

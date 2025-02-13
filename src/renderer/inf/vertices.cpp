@@ -9,7 +9,7 @@ namespace {
 
 class UploaderVertices : public Uploader {
 public:
-    UploaderVertices(sp<PipelineInput> pipelineInput, sp<Vertices> vertices, const V3& bounds)
+    UploaderVertices(sp<ShaderLayout> pipelineInput, sp<Vertices> vertices, const V3& bounds)
         : Uploader(pipelineInput->getStreamLayout(0).stride() * vertices->length()), _pipeline_input(std::move(pipelineInput)), _vertices(std::move(vertices)), _bounds(bounds) {
     }
 
@@ -20,7 +20,7 @@ public:
 public:
     virtual void upload(Writable& writable) override {
         size_t stride = _pipeline_input->getStreamLayout(0).stride();
-        PipelineInput::AttributeOffsets attributes(_pipeline_input);
+        ShaderLayout::AttributeOffsets attributes(_pipeline_input);
         uint32_t size = static_cast<uint32_t>(_vertices->length() * stride);
         std::vector<uint8_t> buf(size);
         VertexWriter stream(attributes, false, buf.data(), size, stride);
@@ -29,7 +29,7 @@ public:
     }
 
 private:
-    sp<PipelineInput> _pipeline_input;
+    sp<ShaderLayout> _pipeline_input;
     sp<Vertices> _vertices;
     V3 _bounds;
 };

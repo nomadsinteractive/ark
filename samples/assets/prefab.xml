@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<alphabet id="@a001" class="true-type" src="fonts/PassionOne-Regular.ttf" text-size="96" style="fallback: @a002"/>
-	<alphabet id="@a002" class="system" text-size="96"/>
+	<alphabet id="@a01" class="true-type" src="fonts/PassionOne-Regular.ttf"/>
 	<atlas id="@blocks" src="blocks.png">
 		<import class="tiles" tile-width="32" tile-height="32" bounds="0, 0, 512, 512" pivot-x="0.5" pivot-y="0.5"/>
 		<import class="nine-patch">
@@ -17,10 +16,12 @@
 		<stage type="vertex" src="@shaders:default.vert"/>
 		<stage type="fragment" src="@shaders:texture.frag"/>
 	</shader>
+	<model-loader id="ml_text" class="text" alphabet="@a01" atlas="@atlas_01">
+		<font size="96px"/>
+	</model-loader>
 	<render-layer id="@rl001" model-loader="quad(@alphabets)" shader="@s_default"/>
-	<render-layer id="@rl002" atlas="@atlas_01">
+	<render-layer id="@rl002" atlas="@atlas_01" model-loader="@ml_text">
 		<shader snippet="swizzle(1.0, 1.0, 1.0, r)"/>
-		<model-loader class="text" alphabet="@a001" atlas="@atlas_01"/>
 	</render-layer>
 	<render-layer id="@rl003" model-loader="quad(@blocks)"/>
 	<renderer id="fps-counter" class="fps-counter" render-layer="@rl001" message="%.2f / 60"/>

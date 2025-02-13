@@ -1,4 +1,4 @@
-#include "renderer/base/pipeline_input.h"
+#include "renderer/base/shader_layout.h"
 
 #include "core/base/allocator.h"
 #include "core/base/string.h"
@@ -11,7 +11,7 @@ namespace ark {
 
 namespace {
 
-uint32_t getAttributeEndOffset(const PipelineInput::AttributeOffsets& attrOffsets, Attribute::Usage usage)
+uint32_t getAttributeEndOffset(const ShaderLayout::AttributeOffsets& attrOffsets, Attribute::Usage usage)
 {
     switch(usage)
     {
@@ -27,13 +27,13 @@ uint32_t getAttributeEndOffset(const PipelineInput::AttributeOffsets& attrOffset
 
 }
 
-PipelineInput::AttributeOffsets::AttributeOffsets()
+ShaderLayout::AttributeOffsets::AttributeOffsets()
     : _stride(0)
 {
     std::fill_n(_offsets, Attribute::USAGE_COUNT, -1);
 }
 
-PipelineInput::AttributeOffsets::AttributeOffsets(const PipelineInput& input)
+ShaderLayout::AttributeOffsets::AttributeOffsets(const ShaderLayout& input)
     : AttributeOffsets()
 {
     const StreamLayout& stream = input.streamLayouts().at(0);
@@ -56,17 +56,17 @@ PipelineInput::AttributeOffsets::AttributeOffsets(const PipelineInput& input)
         _stride = std::max(getAttributeEndOffset(*this, static_cast<Attribute::Usage>(i)), _stride);
 }
 
-uint32_t PipelineInput::AttributeOffsets::stride() const
+uint32_t ShaderLayout::AttributeOffsets::stride() const
 {
     return _stride;
 }
 
-PipelineInput::PipelineInput(const sp<Camera>& camera)
+ShaderLayout::ShaderLayout(const sp<Camera>& camera)
     : _camera(camera ? *camera : Camera::createDefaultCamera()), _stream_layouts{{0, StreamLayout()}}
 {
 }
 
-void PipelineInput::initialize(const PipelineBuildingContext& buildingContext)
+void ShaderLayout::initialize(const PipelineBuildingContext& buildingContext)
 {
     for(const auto& [k, v] : buildingContext._ubos)
     {
@@ -75,27 +75,27 @@ void PipelineInput::initialize(const PipelineBuildingContext& buildingContext)
     }
 }
 
-const Camera& PipelineInput::camera() const
+const Camera& ShaderLayout::camera() const
 {
     return _camera;
 }
 
-const Vector<sp<PipelineInput::UBO>>& PipelineInput::ubos() const
+const Vector<sp<ShaderLayout::UBO>>& ShaderLayout::ubos() const
 {
     return _ubos;
 }
 
-Vector<PipelineInput::SSBO>& PipelineInput::ssbos()
+Vector<ShaderLayout::SSBO>& ShaderLayout::ssbos()
 {
     return _ssbos;
 }
 
-const Vector<PipelineInput::SSBO>& PipelineInput::ssbos() const
+const Vector<ShaderLayout::SSBO>& ShaderLayout::ssbos() const
 {
     return _ssbos;
 }
 
-sp<RenderLayerSnapshot::BufferObject> PipelineInput::takeBufferSnapshot(const RenderRequest& renderRequest, bool isComputeStage) const
+sp<RenderLayerSnapshot::BufferObject> ShaderLayout::takeBufferSnapshot(const RenderRequest& renderRequest, bool isComputeStage) const
 {
     Vector<RenderLayerSnapshot::UBOSnapshot> uboSnapshot;
     for(const sp<UBO>& i : _ubos)
@@ -110,39 +110,39 @@ sp<RenderLayerSnapshot::BufferObject> PipelineInput::takeBufferSnapshot(const Re
     return sp<RenderLayerSnapshot::BufferObject>::make(RenderLayerSnapshot::BufferObject{std::move(uboSnapshot), std::move(ssboSnapshot)});
 }
 
-const std::map<uint32_t, PipelineInput::StreamLayout>& PipelineInput::streamLayouts() const
+const std::map<uint32_t, ShaderLayout::StreamLayout>& ShaderLayout::streamLayouts() const
 {
     return _stream_layouts;
 }
 
-std::map<uint32_t, PipelineInput::StreamLayout>& PipelineInput::streamLayouts()
+std::map<uint32_t, ShaderLayout::StreamLayout>& ShaderLayout::streamLayouts()
 {
     return _stream_layouts;
 }
 
-size_t PipelineInput::samplerCount() const
+size_t ShaderLayout::samplerCount() const
 {
     return _sampler_names.size();
 }
 
-const Vector<String>& PipelineInput::samplerNames() const
+const Vector<String>& ShaderLayout::samplerNames() const
 {
     return _sampler_names;
 }
 
-void PipelineInput::addAttribute(String name, Attribute attribute)
+void ShaderLayout::addAttribute(String name, Attribute attribute)
 {
     _stream_layouts[attribute.divisor()].addAttribute(std::move(name), std::move(attribute));
 }
 
-const PipelineInput::StreamLayout& PipelineInput::getStreamLayout(uint32_t divisor) const
+const ShaderLayout::StreamLayout& ShaderLayout::getStreamLayout(uint32_t divisor) const
 {
     const auto iter = _stream_layouts.find(divisor);
     DCHECK(iter != _stream_layouts.end(), "PipelineInput has no stream(%d)", divisor);
     return iter->second;
 }
 
-Optional<const Attribute&> PipelineInput::getAttribute(const String& name) const
+Optional<const Attribute&> ShaderLayout::getAttribute(const String& name) const
 {
     for(const auto& i : _stream_layouts)
         if(const Optional<const Attribute&> opt = i.second.getAttribute(name))
@@ -150,7 +150,7 @@ Optional<const Attribute&> PipelineInput::getAttribute(const String& name) const
     return {};
 }
 
-sp<Uniform> PipelineInput::getUniform(const String& name) const
+sp<Uniform> ShaderLayout::getUniform(const String& name) const
 {
     for(const sp<UBO>& i : _ubos)
         if(const auto iter = i->uniforms().find(name); iter != i->uniforms().end())
@@ -158,22 +158,22 @@ sp<Uniform> PipelineInput::getUniform(const String& name) const
     return nullptr;
 }
 
-PipelineInput::StreamLayout::StreamLayout()
+ShaderLayout::StreamLayout::StreamLayout()
     : _stride(0)
 {
 }
 
-uint32_t PipelineInput::StreamLayout::stride() const
+uint32_t ShaderLayout::StreamLayout::stride() const
 {
     return _stride;
 }
 
-const Table<String, Attribute>& PipelineInput::StreamLayout::attributes() const
+const Table<String, Attribute>& ShaderLayout::StreamLayout::attributes() const
 {
     return _attributes;
 }
 
-void PipelineInput::StreamLayout::addAttribute(String name, Attribute attribute)
+void ShaderLayout::StreamLayout::addAttribute(String name, Attribute attribute)
 {
     DCHECK(!_attributes.has(name), "Attribute \"%s\" has been added already", name.c_str());
     attribute.setOffset(_stride);
@@ -181,7 +181,7 @@ void PipelineInput::StreamLayout::addAttribute(String name, Attribute attribute)
     _attributes.push_back(std::move(name), std::move(attribute));
 }
 
-Optional<const Attribute&> PipelineInput::StreamLayout::getAttribute(Attribute::Usage layoutType) const
+Optional<const Attribute&> ShaderLayout::StreamLayout::getAttribute(Attribute::Usage layoutType) const
 {
     DASSERT(layoutType != Attribute::USAGE_CUSTOM);
     for(const Attribute& i : _attributes.values())
@@ -190,35 +190,35 @@ Optional<const Attribute&> PipelineInput::StreamLayout::getAttribute(Attribute::
     return {};
 }
 
-Optional<const Attribute&> PipelineInput::StreamLayout::getAttribute(const String& name) const
+Optional<const Attribute&> ShaderLayout::StreamLayout::getAttribute(const String& name) const
 {
     return _attributes.has(name) ? Optional<const Attribute&>(_attributes.at(name)) : Optional<const Attribute&>();
 }
 
-int32_t PipelineInput::StreamLayout::getAttributeOffset(Attribute::Usage layoutType) const
+int32_t ShaderLayout::StreamLayout::getAttributeOffset(Attribute::Usage layoutType) const
 {
     const Optional<const Attribute&> attr = getAttribute(layoutType);
     return attr ? static_cast<int32_t>(attr->offset()) : -1;
 }
 
-int32_t PipelineInput::StreamLayout::getAttributeOffset(const String& name) const
+int32_t ShaderLayout::StreamLayout::getAttributeOffset(const String& name) const
 {
     return _attributes.has(name) ? static_cast<int32_t>(_attributes.at(name).offset()) : -1;
 }
 
-void PipelineInput::StreamLayout::align(uint32_t alignment)
+void ShaderLayout::StreamLayout::align(uint32_t alignment)
 {
     uint32_t mod = _stride % alignment;
     if(mod != 0)
         _stride += (alignment - mod);
 }
 
-PipelineInput::UBO::UBO(uint32_t binding)
+ShaderLayout::UBO::UBO(uint32_t binding)
     : _binding(binding)
 {
 }
 
-void PipelineInput::UBO::doSnapshot(uint64_t timestamp, bool force) const
+void ShaderLayout::UBO::doSnapshot(uint64_t timestamp, bool force) const
 {
     uint8_t* buf = _buffer->buf();
     uint8_t* dirtyFlags = _dirty_flags->buf();
@@ -235,7 +235,7 @@ void PipelineInput::UBO::doSnapshot(uint64_t timestamp, bool force) const
     }
 }
 
-RenderLayerSnapshot::UBOSnapshot PipelineInput::UBO::snapshot(const RenderRequest& renderRequest) const
+RenderLayerSnapshot::UBOSnapshot ShaderLayout::UBO::snapshot(const RenderRequest& renderRequest) const
 {
     doSnapshot(renderRequest.timestamp(), false);
     RenderLayerSnapshot::UBOSnapshot ubo {
@@ -247,27 +247,27 @@ RenderLayerSnapshot::UBOSnapshot PipelineInput::UBO::snapshot(const RenderReques
     return ubo;
 }
 
-uint32_t PipelineInput::UBO::binding() const
+uint32_t ShaderLayout::UBO::binding() const
 {
     return _binding;
 }
 
-size_t PipelineInput::UBO::size() const
+size_t ShaderLayout::UBO::size() const
 {
     return _buffer->length();
 }
 
-const Table<String, sp<Uniform>>& PipelineInput::UBO::uniforms() const
+const Table<String, sp<Uniform>>& ShaderLayout::UBO::uniforms() const
 {
     return _uniforms;
 }
 
-const Vector<std::pair<uintptr_t, size_t>>& PipelineInput::UBO::slots() const
+const Vector<std::pair<uintptr_t, size_t>>& ShaderLayout::UBO::slots() const
 {
     return _slots;
 }
 
-void PipelineInput::UBO::initialize()
+void ShaderLayout::UBO::initialize()
 {
     size_t offset = 0;
     for(const auto& i : _uniforms.values())
@@ -285,17 +285,17 @@ void PipelineInput::UBO::initialize()
     doSnapshot(0, true);
 }
 
-void PipelineInput::UBO::addUniform(const sp<Uniform>& uniform)
+void ShaderLayout::UBO::addUniform(const sp<Uniform>& uniform)
 {
     _uniforms.push_back(uniform->name(), uniform);
 }
 
-PipelineInput::SSBO::SSBO(Buffer buffer, uint32_t binding)
+ShaderLayout::SSBO::SSBO(Buffer buffer, uint32_t binding)
     : _buffer(std::move(buffer)), _binding(binding)
 {
 }
 
-uint32_t PipelineInput::BindingSet::addStage(Enum::ShaderStageBit stage, uint32_t binding)
+uint32_t ShaderLayout::BindingSet::addStage(Enum::ShaderStageBit stage, uint32_t binding)
 {
     _stages.set(stage);
     if(_binding != std::numeric_limits<uint32_t>::max())

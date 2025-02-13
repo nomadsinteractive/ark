@@ -36,7 +36,7 @@ bool RenderLayerSnapshot::needsReload() const
     return _vertices_dirty || _stub->_pipeline_bindings->vertices().size() == 0;
 }
 
-const sp<PipelineInput>& RenderLayerSnapshot::pipelineInput() const
+const sp<ShaderLayout>& RenderLayerSnapshot::pipelineInput() const
 {
     return _stub->_shader->input();
 }
@@ -100,7 +100,7 @@ sp<RenderCommand> RenderLayerSnapshot::toRenderCommand(const RenderRequest& rend
 
 bool RenderLayerSnapshot::doAddLayerContext(const RenderRequest& renderRequest, LayerContext& layerContext)
 {
-    const PipelineInput& pipelineInput = _stub->_shader->input();
+    const ShaderLayout& pipelineInput = _stub->_shader->input();
 
     _layer_context_snapshots.push_back(layerContext.snapshot(RenderLayer(_stub), renderRequest, pipelineInput));
     const LayerContextSnapshot& layerSnapshot = _layer_context_snapshots.back();

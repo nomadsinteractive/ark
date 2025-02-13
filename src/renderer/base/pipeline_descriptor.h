@@ -9,7 +9,7 @@
 
 #include "graphics/forwarding.h"
 
-#include "renderer/base/pipeline_input.h"
+#include "renderer/base/shader_layout.h"
 #include "renderer/inf/model_loader.h"
 
 namespace ark {
@@ -166,12 +166,12 @@ public:
     const Parameters& parameters() const;
     const Optional<Rect>& scissor() const;
     const sp<PipelineLayout>& layout() const;
-    const sp<PipelineInput>& input() const;
+    const sp<ShaderLayout>& input() const;
 
-    const PipelineInput::AttributeOffsets& attributes() const;
+    const ShaderLayout::AttributeOffsets& attributes() const;
 
-    const Vector<std::pair<sp<Texture>, PipelineInput::BindingSet>>& samplers() const;
-    const Vector<std::pair<sp<Texture>, PipelineInput::BindingSet>>& images() const;
+    const Vector<std::pair<sp<Texture>, ShaderLayout::BindingSet>>& samplers() const;
+    const Vector<std::pair<sp<Texture>, ShaderLayout::BindingSet>>& images() const;
 
     void bindSampler(sp<Texture> texture, uint32_t name = 0);
 

@@ -139,8 +139,7 @@ const document& ApplicationManifest::interpreter() const
 }
 
 ApplicationManifest::Renderer::Renderer()
-    : _backend(Ark::RENDERER_BACKEND_AUTO), _version(Ark::RENDERER_VERSION_AUTO), _coordinate_system(Ark::COORDINATE_SYSTEM_DEFAULT), _vsync(false),
-    _resolution(1920, 1080)
+    : _backend(Ark::RENDERER_BACKEND_AUTO), _version(Ark::RENDERER_VERSION_AUTO), _coordinate_system(Ark::COORDINATE_SYSTEM_DEFAULT), _vsync(false), _resolution(1920, 1080)
 {
 }
 
@@ -152,13 +151,6 @@ ApplicationManifest::Renderer::Renderer(const document& manifest)
         _resolution = {Documents::ensureAttribute<float>(resolution, constants::WIDTH), Documents::ensureAttribute<float>(resolution, constants::HEIGHT)};
     else
         _resolution = {1920, 1080};
-}
-
-Viewport ApplicationManifest::Renderer::toViewport() const
-{
-    if(_coordinate_system == Ark::COORDINATE_SYSTEM_RHS)
-        return {0, _resolution.y(), _resolution.x(), 0, -1.0f, 1.0f};
-    return {0, 0, _resolution.x(), _resolution.y(), -1.0f, 1.0f};
 }
 
 template<> ARK_API ApplicationManifest::WindowFlags StringConvert::eval<ApplicationManifest::WindowFlags>(const String& val)

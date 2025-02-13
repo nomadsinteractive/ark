@@ -1,8 +1,5 @@
 #pragma once
 
-#include <map>
-#include <vector>
-
 #include "core/base/api.h"
 #include "core/collection/table.h"
 #include "core/types/optional.h"
@@ -17,11 +14,11 @@
 
 namespace ark {
 
-class ARK_API PipelineInput {
+class ARK_API ShaderLayout {
 public:
     struct ARK_API AttributeOffsets {
         AttributeOffsets();
-        AttributeOffsets(const PipelineInput& input);
+        AttributeOffsets(const ShaderLayout& input);
 
         uint32_t stride() const;
 
@@ -78,7 +75,7 @@ public:
         bytearray _buffer;
 
         friend class PipelineBuildingContext;
-        friend class PipelineInput;
+        friend class ShaderLayout;
     };
 
     struct SSBO {
@@ -99,7 +96,7 @@ public:
         uint32_t addStage(Enum::ShaderStageBit stage, uint32_t binding);
     };
 public:
-    PipelineInput(const sp<Camera>& camera);
+    ShaderLayout(const sp<Camera>& camera);
 
     void initialize(const PipelineBuildingContext& buildingContext);
 
@@ -126,6 +123,7 @@ public:
     sp<Uniform> getUniform(const String& name) const;
 
 private:
+    //TODO: move it to Shader
     Camera _camera;
 
     Vector<sp<UBO>> _ubos;
