@@ -30,6 +30,7 @@
     "sdl2",
     "sdl3",
     "spdlog",
+    "spirv-cross",
     "stb",
     "tinygltf",
     "tinyxml2",

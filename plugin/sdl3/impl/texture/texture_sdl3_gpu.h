@@ -14,17 +14,13 @@ public:
     uint64_t id() override;
 
     void upload(GraphicsContext& graphicsContext, const sp<Texture::Uploader>& uploader) override;
-
     ResourceRecycleFunc recycle() override;
-
     void clear(GraphicsContext& graphicsContext) override;
-
     bool download(GraphicsContext& graphicsContext, Bitmap& bitmap) override;
-
     void uploadBitmap(GraphicsContext& graphicsContext, const Bitmap& bitmap, const std::vector<sp<ByteArray>>& imagedata) override;
 
     SDL_GPUTexture* texture() const;
-    SDL_GPUSampler* sampler() const;
+    SDL_GPUSampler* ensureSampler(SDL_GPUDevice *gpuDevice);
 
 private:
     SDL_GPUTexture* createTexture(GraphicsContext& graphicsContext) const;

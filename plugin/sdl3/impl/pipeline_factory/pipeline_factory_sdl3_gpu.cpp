@@ -1,11 +1,12 @@
 #include "sdl3/impl/pipeline_factory/pipeline_factory_sdl3_gpu.h"
 
 #include <SDL3/SDL.h>
+#include <SDL3_shadercross/SDL_shadercross.h>
 
-#include "core/impl/writable/writable_memory.h"
+#include "core/types/global.h"
 #include "core/util/uploader_type.h"
-#include "renderer/base/compute_context.h"
 
+#include "renderer/base/compute_context.h"
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/pipeline_bindings.h"
@@ -16,40 +17,42 @@
 #include "renderer/util/render_util.h"
 
 #include "sdl3/base/context_sdl3_gpu.h"
-#include "sdl3/impl/buffer/buffer_sdl3_gpu.h"
 #include "sdl3/impl/texture/texture_sdl3_gpu.h"
 
 namespace ark::plugin::sdl3 {
 
 namespace {
 
+class SDL_ShaderCrossContext {
+public:
+    SDL_ShaderCrossContext()
+    {
+        SDL_ShaderCross_Init();
+        _shader_format = SDL_ShaderCross_GetSPIRVShaderFormats();
+    }
+    ~SDL_ShaderCrossContext()
+    {
+        SDL_ShaderCross_Quit();
+    }
+
+    SDL_GPUShaderFormat _shader_format;
+};
+
 SDL_GPUShader* createGraphicsShader(SDL_GPUDevice* device, const ShaderLayout& pipelineInput, const StringView source, Enum::ShaderStageBit stageBit)
 {
-	const SDL_GPUShaderStage stage = stageBit == Enum::SHADER_STAGE_BIT_VERTEX ? SDL_GPU_SHADERSTAGE_VERTEX : SDL_GPU_SHADERSTAGE_FRAGMENT;
-	const SDL_GPUShaderFormat backendFormats = SDL_GetGPUShaderFormats(device);
-	SDL_GPUShaderFormat format = SDL_GPU_SHADERFORMAT_INVALID;
-	const char* entrypoint;
-
-	if (backendFormats & SDL_GPU_SHADERFORMAT_SPIRV)
-	{
-		format = SDL_GPU_SHADERFORMAT_SPIRV;
-		entrypoint = "main";
-	}
+	const SDL_GPUShaderFormat backendFormats = Global<SDL_ShaderCrossContext>()->_shader_format;
+	const char* entrypoint = nullptr;
+    if (backendFormats & SDL_GPU_SHADERFORMAT_SPIRV)
+        entrypoint = "main";
     else if (backendFormats & SDL_GPU_SHADERFORMAT_MSL)
-    {
-		format = SDL_GPU_SHADERFORMAT_MSL;
-		entrypoint = "main0";
-	}
+        entrypoint = "main0";
     else if (backendFormats & SDL_GPU_SHADERFORMAT_DXIL)
-    {
-		format = SDL_GPU_SHADERFORMAT_DXIL;
-		entrypoint = "main";
-	}
+        entrypoint = "main";
     else
     {
-		SDL_Log("%s", "Unrecognized backend shader format!");
-		return nullptr;
-	}
+        SDL_Log("%s", "Unrecognized backend shader format!");
+        return nullptr;
+    }
 
     const Vector<uint32_t> binaries = RenderUtil::compileSPIR(source, stageBit, Ark::RENDERER_BACKEND_VULKAN);
     const void* bytecode = binaries.data();
@@ -68,19 +71,23 @@ SDL_GPUShader* createGraphicsShader(SDL_GPUDevice* device, const ShaderLayout& p
 
     Uint32 storageTextureCount = 0;
 
-	const SDL_GPUShaderCreateInfo shaderInfo = {
-		binaries.size(),
-		static_cast<const Uint8*>(bytecode),
-		entrypoint,
-		format,
-		stage,
-		samplerCount,
-		storageTextureCount,
-		storageBufferCount,
-		uniformBufferCount
-	};
+    const SDL_ShaderCross_SPIRV_Info spirvInfo = {
+        static_cast<const Uint8*>(bytecode),
+        binaries.size() * sizeof(uint32_t),
+        entrypoint,
+        stageBit == Enum::SHADER_STAGE_BIT_VERTEX ? SDL_SHADERCROSS_SHADERSTAGE_VERTEX : SDL_SHADERCROSS_SHADERSTAGE_FRAGMENT,
+        false,
+        nullptr
+    };
 
-	SDL_GPUShader* shader = SDL_CreateGPUShader(device, &shaderInfo);
+    SDL_ShaderCross_GraphicsShaderMetadata shaderMetadata = {
+        samplerCount,
+        storageTextureCount,
+        storageBufferCount,
+        uniformBufferCount
+    };
+
+    SDL_GPUShader* shader = SDL_ShaderCross_CompileGraphicsShaderFromSPIRV(device, &spirvInfo, &shaderMetadata);
 	if(!shader)
 	{
 		SDL_Log("Failed to create shader!");
@@ -254,10 +261,10 @@ public:
 
         SDL_BindGPUGraphicsPipeline(renderPass, _pipeline);
 
-        const SDL_GPUBufferBinding vertexBufferBinding = {drawingContext._vertices.delegate().cast<Buffer_SDL3_GPU>()->buffer(), 0};
+        const SDL_GPUBufferBinding vertexBufferBinding = {reinterpret_cast<SDL_GPUBuffer*>(drawingContext._vertices.id()), 0};
         SDL_BindGPUVertexBuffers(renderPass, 0, &vertexBufferBinding, 1);
 
-        const SDL_GPUBufferBinding indexBufferBinding = {drawingContext._indices.delegate().cast<Buffer_SDL3_GPU>()->buffer(), 0};
+        const SDL_GPUBufferBinding indexBufferBinding = {reinterpret_cast<SDL_GPUBuffer*>(drawingContext._indices.id()), 0};
         SDL_BindGPUIndexBuffer(renderPass, &indexBufferBinding, SDL_GPU_INDEXELEMENTSIZE_16BIT);
 
         SDL_GPUTextureSamplerBinding textureSamplerBinding[8];
@@ -265,12 +272,11 @@ public:
         ASSERT(pipelineBindings.pipelineDescriptor()->samplers().size() < 8);
         for(const auto& [k, v] : pipelineBindings.pipelineDescriptor()->samplers())
         {
-            const TextureSDL3_GPU& texture = k->delegate().cast<TextureSDL3_GPU>();
-            textureSamplerBinding[samplerCount] = {
+            TextureSDL3_GPU& texture = k->delegate().cast<TextureSDL3_GPU>();
+            textureSamplerBinding[samplerCount ++] = {
                 texture.texture(),
-                texture.sampler()
+                texture.ensureSampler(ensureGPUDevice(graphicsContext))
             };
-            ++ samplerCount;
         }
         SDL_BindGPUFragmentSamplers(renderPass, 0, textureSamplerBinding, samplerCount);
 
@@ -281,7 +287,7 @@ public:
                 break;
             case Enum::DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT: {
                 const DrawingParams::DrawMultiElementsIndirect& param = drawingContext._parameters.drawMultiElementsIndirect();
-                SDL_DrawGPUIndexedPrimitivesIndirect(renderPass, param._indirect_cmds.delegate().cast<Buffer_SDL3_GPU>()->buffer(), 0, param._indirect_cmd_count);
+                SDL_DrawGPUIndexedPrimitivesIndirect(renderPass, reinterpret_cast<SDL_GPUBuffer*>(param._indirect_cmds.id()), 0, param._indirect_cmd_count);
                 break;
             }
             default:

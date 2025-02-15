@@ -314,7 +314,7 @@ uint32_t RenderUtil::getComponentSize(Texture::Format format)
     return 4;
 }
 
-std::vector<uint32_t> RenderUtil::compileSPIR(const StringView source, Enum::ShaderStageBit stage, Ark::RendererBackend renderTarget)
+Vector<uint32_t> RenderUtil::compileSPIR(const StringView source, Enum::ShaderStageBit stage, Ark::RendererBackend renderTarget)
 {
     const Global<GLSLLangInitializer> initializer;
     EShLanguage esStage = initializer->toShLanguage(stage);
@@ -322,11 +322,11 @@ std::vector<uint32_t> RenderUtil::compileSPIR(const StringView source, Enum::Sha
     const char* sources[] = {source.data()};
     shader.setStrings(sources, 1);
 
-    typedef std::map<uint32_t, uint32_t> TPerSetBaseBinding;
+    typedef Map<uint32_t, uint32_t> TPerSetBaseBinding;
     std::array<std::array<uint32_t, EShLangCount>, glslang::EResCount> baseBinding;
     std::array<std::array<TPerSetBaseBinding, EShLangCount>, glslang::EResCount> baseBindingForSet;
-    std::array<std::vector<std::string>, EShLangCount> baseResourceSetBinding;
-    std::vector<std::pair<std::string, int32_t>> uniformLocationOverrides;
+    std::array<Vector<std::string>, EShLangCount> baseResourceSetBinding;
+    Vector<std::pair<std::string, int32_t>> uniformLocationOverrides;
 
     int32_t uniformBase = 0;
 
@@ -374,7 +374,7 @@ std::vector<uint32_t> RenderUtil::compileSPIR(const StringView source, Enum::Sha
             FATAL("Link error: %s\n\n%s", source.data(), shader.getInfoLog());
 
         if(const glslang::TIntermediate* intermedia = program.getIntermediate(esStage)) {
-            std::vector<uint32_t> spirv;
+            Vector<uint32_t> spirv;
             spv::SpvBuildLogger logger;
             glslang::SpvOptions spvOptions;
             spvOptions.disableOptimizer = false;
@@ -388,10 +388,10 @@ std::vector<uint32_t> RenderUtil::compileSPIR(const StringView source, Enum::Sha
     return {};
 }
 
-std::vector<ShaderPreprocessor::Declaration> RenderUtil::setupLayoutLocation(const PipelineBuildingContext& context, const ShaderPreprocessor::DeclarationList& declarations)
+Vector<ShaderPreprocessor::Declaration> RenderUtil::setupLayoutLocation(const PipelineBuildingContext& context, const ShaderPreprocessor::DeclarationList& declarations)
 {
-    std::vector<ShaderPreprocessor::Declaration> locations;
-    std::map<uint32_t, std::vector<const ShaderPreprocessor::Declaration*>> divisors;
+    Vector<ShaderPreprocessor::Declaration> locations;
+    Map<uint32_t, Vector<const ShaderPreprocessor::Declaration*>> divisors;
 
     for(const ShaderPreprocessor::Declaration& i : declarations.vars().values()) {
         const auto iter = context._attributes.find(i.name());
@@ -409,7 +409,7 @@ std::vector<ShaderPreprocessor::Declaration> RenderUtil::setupLayoutLocation(con
     return locations;
 }
 
-uint32_t RenderUtil::setLayoutDescriptor(const std::vector<ShaderPreprocessor::Declaration>& declarations, const String& qualifierName, uint32_t start)
+uint32_t RenderUtil::setLayoutDescriptor(const Vector<ShaderPreprocessor::Declaration>& declarations, const String& qualifierName, uint32_t start)
 {
     uint32_t counter = start;
     for(const ShaderPreprocessor::Declaration& i : declarations)

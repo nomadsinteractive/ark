@@ -150,19 +150,12 @@ public:
 
 };
 
-}
-
-static bool _tilemapLayerCompareLess(const TilemapLayer& a, const TilemapLayer& b)
-{
-    return a.zorder() < b.zorder();
-}
-
-static bool _tilemapLayerCompareGreater(const TilemapLayer& a, const TilemapLayer& b)
+bool _tilemapLayerCompareGreater(const TilemapLayer& a, const TilemapLayer& b)
 {
     return a.zorder() > b.zorder();
 }
 
-static sp<CollisionFilter> toCollisionFilter(sp<Json> jCollisionFilter)
+sp<CollisionFilter> toCollisionFilter(const sp<Json>& jCollisionFilter)
 {
     if(!jCollisionFilter)
         return nullptr;
@@ -171,6 +164,8 @@ static sp<CollisionFilter> toCollisionFilter(sp<Json> jCollisionFilter)
     uint32_t maskBits = static_cast<uint32_t>(jCollisionFilter->getInt("mask", -1));
     uint32_t groupIndex = static_cast<uint32_t>(jCollisionFilter->getInt("group_index", 0));
     return sp<CollisionFilter>::make(categoryBits, maskBits, groupIndex);
+}
+
 }
 
 Tilemap::Tilemap(sp<Tileset> tileset, sp<RenderLayer> renderLayer, sp<Importer<Tilemap>> importer, sp<Outputer<Tilemap>> outputer)

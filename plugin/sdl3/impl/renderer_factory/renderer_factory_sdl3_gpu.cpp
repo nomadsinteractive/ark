@@ -21,6 +21,7 @@
 #include "app/base/application_context.h"
 
 #include "sdl3/base/context_sdl3_gpu.h"
+#include "sdl3/impl/buffer/buffer_sdl3_gpu.h"
 #include "sdl3/impl/pipeline_factory/pipeline_factory_sdl3_gpu.h"
 #include "sdl3/impl/texture/texture_sdl3_gpu.h"
 
@@ -28,7 +29,7 @@ namespace ark::plugin::sdl3 {
 
 namespace {
 
-class SnippetSDL3 final : public Snippet {
+class SnippetSDL3_GPU final : public Snippet {
 public:
     void preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout) override {
         const String sLocation = "location";
@@ -87,7 +88,7 @@ class SnippetFactorySDL3 final : public SnippetFactory {
 public:
     sp<Snippet> createCoreSnippet() override
     {
-        return sp<Snippet>::make<SnippetSDL3>();
+        return sp<Snippet>::make<SnippetSDL3_GPU>();
     }
 };
 
@@ -146,108 +147,18 @@ sp<RenderEngineContext> RendererFactorySDL3_GPU::createRenderEngineContext(const
     return renderContext;
 }
 
-class BufferSDL3 final : public Buffer::Delegate {
-public:
-    BufferSDL3(const SDL_GPUBufferUsageFlags usageFlags)
-        : _usage_flags(usageFlags), _buffer(nullptr), _buffer_size(0) {
-    }
-
-    uint64_t id() override
-    {
-        return reinterpret_cast<uint64_t>(_buffer);
-    }
-
-    void upload(GraphicsContext& graphicsContext) override
-    {
-    }
-
-    ResourceRecycleFunc recycle() override
-    {
-        SDL_GPUBuffer* buffer = _buffer;
-        _buffer = nullptr;
-        _buffer_size = 0;
-
-        return [buffer] (GraphicsContext& graphicsContext) {
-            SDL_ReleaseGPUBuffer(ensureGPUDevice(graphicsContext), buffer);
-        };
-    }
-
-    void uploadBuffer(GraphicsContext& graphicsContext, Uploader& input) override
-    {
-        SDL_GPUDevice* gpuDevice = ensureGPUDevice(graphicsContext);
-
-        const Uint32 inputSize = input.size();
-
-        if(!_buffer || inputSize > _buffer_size)
-        {
-            if(_buffer)
-                SDL_ReleaseGPUBuffer(gpuDevice, _buffer);
-
-            const SDL_GPUBufferCreateInfo bufferCreateInfo = {_usage_flags, inputSize};
-            _buffer = SDL_CreateGPUBuffer(gpuDevice, &bufferCreateInfo);
-            _buffer_size = inputSize;
-        }
-
-        const SDL_GPUTransferBufferCreateInfo transferBufferCreateInfo{SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD, inputSize};
-        SDL_GPUTransferBuffer* uploadTransferBuffer = SDL_CreateGPUTransferBuffer(gpuDevice, &transferBufferCreateInfo);
-
-        void* transferData = SDL_MapGPUTransferBuffer(gpuDevice, uploadTransferBuffer, false);
-        UploaderType::writeTo(input, transferData);
-        SDL_UnmapGPUTransferBuffer(gpuDevice, uploadTransferBuffer);
-
-        SDL_GPUCommandBuffer* uploadCmdBuf = SDL_AcquireGPUCommandBuffer(gpuDevice);
-        SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(uploadCmdBuf);
-
-        const SDL_GPUTransferBufferLocation transferBufferLocation{uploadTransferBuffer, 0};
-        const SDL_GPUBufferRegion bufferRegion{_buffer, 0, inputSize};
-        SDL_UploadToGPUBuffer(copyPass, &transferBufferLocation, &bufferRegion, false);
-
-        SDL_EndGPUCopyPass(copyPass);
-        SDL_SubmitGPUCommandBuffer(uploadCmdBuf);
-        SDL_ReleaseGPUTransferBuffer(gpuDevice, uploadTransferBuffer);
-    }
-
-    void downloadBuffer(GraphicsContext& graphicsContext, size_t offset, size_t size, void* ptr) override
-    {
-        SDL_GPUDevice* gpuDevice = ensureGPUDevice(graphicsContext);
-
-        const SDL_GPUTransferBufferCreateInfo transferBufferCreateInfo{SDL_GPU_TRANSFERBUFFERUSAGE_DOWNLOAD, static_cast<Uint32>(size)};
-        SDL_GPUTransferBuffer* downloadTransferBuffer = SDL_CreateGPUTransferBuffer(gpuDevice, &transferBufferCreateInfo);
-
-        SDL_GPUCommandBuffer* uploadCmdBuf = SDL_AcquireGPUCommandBuffer(gpuDevice);
-        SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(uploadCmdBuf);
-
-        const SDL_GPUBufferRegion bufferRegion{_buffer, static_cast<Uint32>(offset), static_cast<Uint32>(size)};
-        const SDL_GPUTransferBufferLocation transferBufferLocation{downloadTransferBuffer, 0};
-        SDL_DownloadFromGPUBuffer(copyPass, &bufferRegion, &transferBufferLocation);
-        SDL_EndGPUCopyPass(copyPass);
-        SDL_SubmitGPUCommandBuffer(uploadCmdBuf);
-
-        const Uint8* downloadedData = static_cast<const Uint8*>(SDL_MapGPUTransferBuffer(gpuDevice, downloadTransferBuffer, false));
-        memcpy(ptr, downloadedData, size);
-        SDL_UnmapGPUTransferBuffer(gpuDevice, downloadTransferBuffer);
-
-        SDL_ReleaseGPUTransferBuffer(gpuDevice, downloadTransferBuffer);
-    }
-
-private:
-    SDL_GPUBufferUsageFlags _usage_flags;
-    SDL_GPUBuffer* _buffer;
-    uint32_t _buffer_size;
-};
-
 sp<Buffer::Delegate> RendererFactorySDL3_GPU::createBuffer(Buffer::Type type, Buffer::Usage usage)
 {
     switch(type)
     {
         case Buffer::TYPE_VERTEX:
-            return usage.has(Buffer::USAGE_BIT_DYNAMIC) ? sp<Buffer::Delegate>::make<BufferSDL3>(SDL_GPU_BUFFERUSAGE_VERTEX) : sp<Buffer::Delegate>::make<BufferSDL3>(SDL_GPU_BUFFERUSAGE_VERTEX);
+            return usage.has(Buffer::USAGE_BIT_DYNAMIC) ? sp<Buffer::Delegate>::make<BufferSDL3_GPU>(SDL_GPU_BUFFERUSAGE_VERTEX) : sp<Buffer::Delegate>::make<BufferSDL3_GPU>(SDL_GPU_BUFFERUSAGE_VERTEX);
         case Buffer::TYPE_INDEX:
-            return usage.has(Buffer::USAGE_BIT_DYNAMIC) ? sp<Buffer::Delegate>::make<BufferSDL3>(SDL_GPU_BUFFERUSAGE_INDEX) : sp<Buffer::Delegate>::make<BufferSDL3>(SDL_GPU_BUFFERUSAGE_INDEX);
+            return usage.has(Buffer::USAGE_BIT_DYNAMIC) ? sp<Buffer::Delegate>::make<BufferSDL3_GPU>(SDL_GPU_BUFFERUSAGE_INDEX) : sp<Buffer::Delegate>::make<BufferSDL3_GPU>(SDL_GPU_BUFFERUSAGE_INDEX);
         case Buffer::TYPE_DRAW_INDIRECT:
-            return sp<Buffer::Delegate>::make<BufferSDL3>(SDL_GPU_BUFFERUSAGE_INDIRECT);
+            return sp<Buffer::Delegate>::make<BufferSDL3_GPU>(SDL_GPU_BUFFERUSAGE_INDIRECT);
         case Buffer::TYPE_STORAGE:
-            return sp<Buffer::Delegate>::make<BufferSDL3>(SDL_GPU_BUFFERUSAGE_GRAPHICS_STORAGE_READ | SDL_GPU_BUFFERUSAGE_COMPUTE_STORAGE_READ | SDL_GPU_BUFFERUSAGE_COMPUTE_STORAGE_WRITE);
+            return sp<Buffer::Delegate>::make<BufferSDL3_GPU>(SDL_GPU_BUFFERUSAGE_GRAPHICS_STORAGE_READ | SDL_GPU_BUFFERUSAGE_COMPUTE_STORAGE_READ | SDL_GPU_BUFFERUSAGE_COMPUTE_STORAGE_WRITE);
         default:
             FATAL("Unknow buffer type: %d", type);
             break;
@@ -270,9 +181,9 @@ sp<PipelineFactory> RendererFactorySDL3_GPU::createPipelineFactory()
     return sp<PipelineFactory>::make<PipelineFactorySDL3_GPU>();
 }
 
-class RenderViewSDL3 final : public RenderView {
+class RenderViewSDL3_GPU final : public RenderView {
 public:
-    RenderViewSDL3(sp<RenderEngineContext> renderContext, sp<RenderController> renderController)
+    RenderViewSDL3_GPU(sp<RenderEngineContext> renderContext, sp<RenderController> renderController)
         : _graphics_context(new GraphicsContext(std::move(renderContext), std::move(renderController)))
     {
     }
@@ -328,7 +239,7 @@ private:
 
 sp<RenderView> RendererFactorySDL3_GPU::createRenderView(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController)
 {
-    return sp<RenderView>::make<RenderViewSDL3>(renderContext, renderController);
+    return sp<RenderView>::make<RenderViewSDL3_GPU>(renderContext, renderController);
 }
 
 sp<Texture::Delegate> RendererFactorySDL3_GPU::createTexture(sp<Size> size, sp<Texture::Parameters> parameters)

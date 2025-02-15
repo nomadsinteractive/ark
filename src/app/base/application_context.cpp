@@ -161,8 +161,7 @@ void ApplicationContext::finalize()
 
 sp<ResourceLoader> ApplicationContext::createResourceLoader(const String& name, const Scope& args)
 {
-    const Identifier id(Identifier::parse(name));
-    if(id.isVal())
+    if(const Identifier id(Identifier::parse(name)); id.isVal())
     {
         const document doc = _application_bundle->loadDocument(name);
         DCHECK(doc, "Resource \"%s\" not found", name.c_str());

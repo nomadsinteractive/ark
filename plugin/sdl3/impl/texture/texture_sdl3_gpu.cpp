@@ -1,5 +1,6 @@
 #include "sdl3/impl/texture/texture_sdl3_gpu.h"
 
+#include "core/inf/array.h"
 #include "graphics/base/bitmap.h"
 
 namespace ark::plugin::sdl3 {
@@ -35,7 +36,8 @@ ResourceRecycleFunc TextureSDL3_GPU::recycle()
 
     return [texture, sampler] (GraphicsContext& graphicsContext) {
         SDL_GPUDevice* gpuDevice = ensureGPUDevice(graphicsContext);
-        SDL_ReleaseGPUTexture(gpuDevice, texture);
+        if(texture)
+            SDL_ReleaseGPUTexture(gpuDevice, texture);
         if(sampler)
             SDL_ReleaseGPUSampler(gpuDevice, sampler);
     };
@@ -50,7 +52,7 @@ bool TextureSDL3_GPU::download(GraphicsContext& graphicsContext, Bitmap& bitmap)
     return false;
 }
 
-void TextureSDL3_GPU::uploadBitmap(GraphicsContext& graphicsContext, const Bitmap& bitmap, const std::vector<sp<ByteArray>>& imagedata)
+void TextureSDL3_GPU::uploadBitmap(GraphicsContext& graphicsContext, const Bitmap& bitmap, const Vector<sp<ByteArray>>& imagedata)
 {
     if(!_texture)
         _texture = createTexture(graphicsContext);
@@ -59,8 +61,14 @@ void TextureSDL3_GPU::uploadBitmap(GraphicsContext& graphicsContext, const Bitma
     SDL_GPUCommandBuffer* uploadCmdBuf = SDL_AcquireGPUCommandBuffer(gpuDevice);
     SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(uploadCmdBuf);
 
-    const SDL_GPUTransferBufferCreateInfo transferBufferCreateInfo{SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD, bitmap.rowBytes() * bitmap.height()};
+    const Uint32 bitmapSize = bitmap.rowBytes() * bitmap.height();
+    const SDL_GPUTransferBufferCreateInfo transferBufferCreateInfo{SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD, bitmapSize};
     SDL_GPUTransferBuffer* textureTransferBuffer = SDL_CreateGPUTransferBuffer(gpuDevice, &transferBufferCreateInfo);
+    
+    void* transferData = SDL_MapGPUTransferBuffer(gpuDevice, textureTransferBuffer, false);
+    DASSERT(imagedata.at(0)->size() <= bitmapSize);
+    memcpy(transferData, imagedata.at(0)->buf(), bitmapSize);
+    SDL_UnmapGPUTransferBuffer(gpuDevice, textureTransferBuffer);
 
     const SDL_GPUTextureTransferInfo textureTransferInfo{textureTransferBuffer, 0, bitmap.rowBytes(), 0};
     const SDL_GPUTextureRegion textureRegion{_texture, 0, 0, 0, 0, 0, bitmap.width(), bitmap.height(), 1};
@@ -68,15 +76,7 @@ void TextureSDL3_GPU::uploadBitmap(GraphicsContext& graphicsContext, const Bitma
 
     SDL_EndGPUCopyPass(copyPass);
     SDL_SubmitGPUCommandBuffer(uploadCmdBuf);
-
-    if(_parameters->_usage.has(Texture::USAGE_SAMPLER))
-    {
-        const SDL_GPUSamplerCreateInfo samplerCreateInfo = {
-            SDL_GPU_FILTER_NEAREST,
-            SDL_GPU_FILTER_NEAREST
-        };
-        _sampler = SDL_CreateGPUSampler(gpuDevice, &samplerCreateInfo);
-    }
+    SDL_ReleaseGPUTransferBuffer(gpuDevice, textureTransferBuffer);
 }
 
 SDL_GPUTexture* TextureSDL3_GPU::texture() const
@@ -84,8 +84,16 @@ SDL_GPUTexture* TextureSDL3_GPU::texture() const
     return _texture;
 }
 
-SDL_GPUSampler* TextureSDL3_GPU::sampler() const
+SDL_GPUSampler* TextureSDL3_GPU::ensureSampler(SDL_GPUDevice *gpuDevice)
 {
+    if(!_sampler)
+    {
+        const SDL_GPUSamplerCreateInfo samplerCreateInfo = {
+            SDL_GPU_FILTER_NEAREST,
+            SDL_GPU_FILTER_NEAREST
+        };
+        _sampler = SDL_CreateGPUSampler(gpuDevice, &samplerCreateInfo);
+    }
     return _sampler;
 }
 

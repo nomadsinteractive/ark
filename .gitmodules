@@ -13,3 +13,6 @@
 [submodule "plugin/optick/3rdparty/optick"]
 	path = plugin/optick/3rdparty/optick
 	url = https://github.com/bombomby/optick.git
+[submodule "plugin/sdl3/3rdparty/SDL_shadercross"]
+	path = plugin/sdl3/3rdparty/SDL_shadercross
+	url = https://github.com/libsdl-org/SDL_shadercross.git

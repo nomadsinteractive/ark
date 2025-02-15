@@ -282,6 +282,8 @@ Ark::Ark(int32_t argc, const char** argv)
 Ark::~Ark()
 {
     _application_context->finalize();
+    _application_context = nullptr;
+    _interfaces = {};
 
     for(auto iter = _instance_stack.begin(); iter != _instance_stack.end(); )
         if(*iter == this)

@@ -281,7 +281,7 @@ class GenMethod(object):
             nullptr_check.extend(f'obj{i}' for i in args_set)
         if self_type_checks or nullptr_check:
             if nullptr_check:
-                lines.insert(0, 'const Py_ssize_t argc = %s;' % self.gen_py_argc())
+                lines.insert(0, '[[maybe_unused]] const Py_ssize_t argc = %s;' % self.gen_py_argc())
             nullptr_check = self_type_checks + nullptr_check
             calling_lines = ['if(%s)' % ' && '.join(nullptr_check), '{'] + [INDENT + i for i in calling_lines] + ['}']
         lines.extend(bodylines + self._gen_calling_body(genclass, calling_lines))

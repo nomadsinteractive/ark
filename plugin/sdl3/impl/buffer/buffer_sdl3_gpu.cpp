@@ -6,35 +6,46 @@
 
 namespace ark::plugin::sdl3 {
 
-Buffer_SDL3_GPU::Buffer_SDL3_GPU(const SDL_GPUBufferUsageFlags usageFlags)
-    : _usage_flags(usageFlags)
+BufferSDL3_GPU::BufferSDL3_GPU(const SDL_GPUBufferUsageFlags usageFlags)
+    : _usage_flags(usageFlags), _buffer(nullptr), _buffer_size(0)
 {
 }
 
-uint64_t Buffer_SDL3_GPU::id()
+uint64_t BufferSDL3_GPU::id()
 {
     return reinterpret_cast<uint64_t>(_buffer);
 }
 
-void Buffer_SDL3_GPU::upload(GraphicsContext& graphicsContext)
+void BufferSDL3_GPU::upload(GraphicsContext& graphicsContext)
 {
 }
 
-ResourceRecycleFunc Buffer_SDL3_GPU::recycle()
+ResourceRecycleFunc BufferSDL3_GPU::recycle()
 {
     SDL_GPUBuffer* buffer = _buffer;
     _buffer = nullptr;
+    _buffer_size = 0;
 
     return [buffer] (GraphicsContext& graphicsContext) {
         SDL_ReleaseGPUBuffer(ensureGPUDevice(graphicsContext), buffer);
     };
 }
 
-void Buffer_SDL3_GPU::uploadBuffer(GraphicsContext& graphicsContext, Uploader& input)
+void BufferSDL3_GPU::uploadBuffer(GraphicsContext& graphicsContext, Uploader& input)
 {
     SDL_GPUDevice* gpuDevice = ensureGPUDevice(graphicsContext);
 
     const Uint32 inputSize = input.size();
+    if(!_buffer || inputSize > _buffer_size)
+    {
+        if(_buffer)
+            SDL_ReleaseGPUBuffer(gpuDevice, _buffer);
+
+        const SDL_GPUBufferCreateInfo bufferCreateInfo = {_usage_flags, inputSize};
+        _buffer = SDL_CreateGPUBuffer(gpuDevice, &bufferCreateInfo);
+        _buffer_size = inputSize;
+    }
+
     const SDL_GPUTransferBufferCreateInfo transferBufferCreateInfo{SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD, inputSize};
     SDL_GPUTransferBuffer* uploadTransferBuffer = SDL_CreateGPUTransferBuffer(gpuDevice, &transferBufferCreateInfo);
 
@@ -54,7 +65,7 @@ void Buffer_SDL3_GPU::uploadBuffer(GraphicsContext& graphicsContext, Uploader& i
     SDL_ReleaseGPUTransferBuffer(gpuDevice, uploadTransferBuffer);
 }
 
-void Buffer_SDL3_GPU::downloadBuffer(GraphicsContext& graphicsContext, size_t offset, size_t size, void* ptr)
+void BufferSDL3_GPU::downloadBuffer(GraphicsContext& graphicsContext, size_t offset, size_t size, void* ptr)
 {
     SDL_GPUDevice* gpuDevice = ensureGPUDevice(graphicsContext);
 
@@ -75,11 +86,6 @@ void Buffer_SDL3_GPU::downloadBuffer(GraphicsContext& graphicsContext, size_t of
     SDL_UnmapGPUTransferBuffer(gpuDevice, downloadTransferBuffer);
 
     SDL_ReleaseGPUTransferBuffer(gpuDevice, downloadTransferBuffer);
-}
-
-SDL_GPUBuffer* Buffer_SDL3_GPU::buffer() const
-{
-    return _buffer;
 }
 
 }

@@ -271,7 +271,7 @@ sp<Uniform> ShaderPreprocessor::makeUniformInput(String name, Uniform::Type type
 void ShaderPreprocessor::insertUBOStruct(const ShaderLayout::UBO& ubo)
 {
     StringBuffer sb;
-    sb << "layout (binding = " << ubo.binding() << ") uniform UBO" << ubo.binding() << " {\n";
+    sb << "layout (set = " << ubo.binding() + 1 << ", binding = " << ubo.binding() << ") uniform UBO" << ubo.binding() << " {\n";
     for(const auto& i : ubo.uniforms().values()) {
         _main.replace(i->name(), Strings::sprintf("ubo%d.%s", ubo.binding(), i->name().c_str()));
         sb << i->declaration("") << '\n';
