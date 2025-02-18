@@ -48,9 +48,9 @@ void setVersion(Ark::RendererVersion version, RenderEngineContext& glContext)
 
 int32_t toClearMaskBits(const RenderTarget::CreateConfigure& configure)
 {
-    RenderTarget::ClearMask clearMask = configure._clear_mask;
+    RenderTarget::ClearBitSet clearMask = configure._clear_bits;
     if(configure._depth_stencil_usage.has(RenderTarget::DEPTH_STENCIL_USAGE_FOR_INPUT))
-        clearMask.set(RenderTarget::CLEAR_MASK_DEPTH_STENCIL, false);
+        clearMask.set(RenderTarget::CLEAR_BIT_DEPTH_STENCIL, false);
     return clearMask.bits();
 }
 

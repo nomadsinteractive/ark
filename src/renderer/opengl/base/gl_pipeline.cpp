@@ -86,11 +86,11 @@ struct GLPipeline::Stub {
         glUseProgram(_id);
 
         const PipelineBindings& pipelineBindings = pipelineContext._bindings;
-        bindUBOSnapshots(pipelineContext._buffer_object->_ubos, pipelineBindings.pipelineInput());
+        bindUBOSnapshots(pipelineContext._buffer_object->_ubos, pipelineBindings.shaderLayout());
 
         uint32_t binding = 0;
-        const std::vector<String>& samplerNames = pipelineBindings.pipelineInput()->samplerNames();
-        const std::vector<std::pair<sp<Texture>, ShaderLayout::BindingSet>>& samplers = pipelineBindings.pipelineDescriptor()->samplers();
+        const Vector<String>& samplerNames = pipelineBindings.shaderLayout()->samplers().keys();
+        const Vector<std::pair<sp<Texture>, ShaderLayout::DescriptorSet>>& samplers = pipelineBindings.pipelineDescriptor()->samplers();
         DASSERT(samplerNames.size() == samplers.size());
         for(size_t i = 0; i < samplerNames.size(); ++i)
         {
@@ -102,7 +102,7 @@ struct GLPipeline::Stub {
             ++ binding;
         }
 
-        const std::vector<std::pair<sp<Texture>, ShaderLayout::BindingSet>>& images = pipelineBindings.pipelineDescriptor()->images();
+        const Vector<std::pair<sp<Texture>, ShaderLayout::DescriptorSet>>& images = pipelineBindings.pipelineDescriptor()->images();
         for(size_t i = 0; i < images.size(); ++i)
             if(const sp<Texture>& image = images.at(i).first)
                 bindImage(image, static_cast<uint32_t>(i));
@@ -110,7 +110,7 @@ struct GLPipeline::Stub {
 
     void bindUBO(const RenderLayerSnapshot::UBOSnapshot& uboSnapshot, const sp<ShaderLayout::UBO>& ubo)
     {
-        const std::vector<sp<Uniform>>& uniforms = ubo->uniforms().values();
+        const Vector<sp<Uniform>>& uniforms = ubo->uniforms().values();
         for(size_t i = 0; i < uniforms.size(); ++i)
         {
             if(uboSnapshot._dirty_flags.buf()[i] || _rebind_needed)
@@ -217,7 +217,7 @@ struct GLPipeline::Stub {
         return glGetAttribLocation(_id, name.c_str());
     }
 
-    void bindUBOSnapshots(const std::vector<RenderLayerSnapshot::UBOSnapshot>& uboSnapshots, const ShaderLayout& pipelineInput)
+    void bindUBOSnapshots(const Vector<RenderLayerSnapshot::UBOSnapshot>& uboSnapshots, const ShaderLayout& pipelineInput)
     {
         size_t binding = 0;
         for(const sp<ShaderLayout::UBO>& ubo : pipelineInput.ubos())
@@ -335,7 +335,7 @@ private:
 
 class GLStencilTest final : public Snippet::DrawEvents {
 public:
-    GLStencilTest(std::vector<sp<Snippet::DrawEvents>> delegate)
+    GLStencilTest(Vector<sp<Snippet::DrawEvents>> delegate)
         : _delegate(std::move(delegate)) {
     }
 
@@ -351,7 +351,7 @@ public:
     }
 
 private:
-    std::vector<sp<Snippet::DrawEvents>> _delegate;
+    Vector<sp<Snippet::DrawEvents>> _delegate;
 };
 
 class GLStencilTestSeparate final : public Snippet::DrawEvents {
@@ -570,7 +570,7 @@ private:
     Optional<Rect> _scissor;
     sp<PipelineDrawCommand> _renderer;
 
-    std::vector<GLBufferBaseBinder> _ssbo_binders;
+    Vector<GLBufferBaseBinder> _ssbo_binders;
 };
 
 class PipelineOperationCompute final : public PipelineOperation {
@@ -601,7 +601,7 @@ public:
 
 private:
     sp<GLPipeline::Stub> _stub;
-    std::vector<GLBufferBaseBinder> _ssbo_binders;
+    Vector<GLBufferBaseBinder> _ssbo_binders;
 };
 
 class Stage {
@@ -641,7 +641,7 @@ private:
             glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
 
             size_t len = static_cast<size_t>(length);
-            std::vector<GLchar> logs(len + 1);
+            Vector<GLchar> logs(len + 1);
             glGetShaderInfoLog(id, length, &length, logs.data());
             logs.back() = 0;
             StringBuffer sb;
@@ -674,7 +674,7 @@ String getInformationLog(GLuint id)
     glGetProgramiv(id, GL_INFO_LOG_LENGTH, &length);
 
     const size_t len = static_cast<size_t>(length);
-    std::vector<GLchar> infos(len + 1);
+    Vector<GLchar> infos(len + 1);
     glGetProgramInfoLog(id, length, &length, infos.data());
     infos.back() = 0;
     return infos.data();
@@ -707,7 +707,7 @@ GLPipeline::GLPipeline(const sp<Recycler>& recycler, uint32_t version, std::map<
             _draw_decorators.push_back(sp<Snippet::DrawEvents>::make<GLDepthTest>(v._configure._depth_test));
         else if(k == PipelineDescriptor::TRAIT_TYPE_STENCIL_TEST)
         {
-            std::vector<sp<Snippet::DrawEvents>> delegate;
+            Vector<sp<Snippet::DrawEvents>> delegate;
             const PipelineDescriptor::TraitStencilTest& test = v._configure._stencil_test;
             if(test._front._type == PipelineDescriptor::FRONT_FACE_TYPE_DEFAULT && test._front._type == test._back._type)
                 delegate.push_back(sp<Snippet::DrawEvents>::make<GLStencilTestSeparate>(test._front));

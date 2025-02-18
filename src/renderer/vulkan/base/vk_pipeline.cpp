@@ -287,7 +287,7 @@ void VKPipeline::upload(GraphicsContext& graphicsContext)
     else
     {
         VertexLayout vertexLayout;
-        setupVertexDescriptions(_pipeline_descriptor.input(), vertexLayout);
+        setupVertexDescriptions(_pipeline_descriptor.shaderLayout(), vertexLayout);
         setupGraphicsPipeline(graphicsContext, vertexLayout);
     }
 }
@@ -368,10 +368,10 @@ void VKPipeline::setupDescriptorSetLayout(const PipelineDescriptor& pipelineDesc
 {
     const sp<VKDevice>& device = _renderer->device();
 
-    const ShaderLayout& pipelineInput = pipelineDescriptor.input();
+    const ShaderLayout& shaderLayout = pipelineDescriptor.shaderLayout();
     std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings;
     uint32_t binding = 0;
-    for(const sp<ShaderLayout::UBO>& i : pipelineInput.ubos())
+    for(const sp<ShaderLayout::UBO>& i : shaderLayout.ubos())
     {
         binding = std::max(binding, i->binding());
         if(shouldStageNeedBinded(i->_stages))
@@ -380,7 +380,7 @@ void VKPipeline::setupDescriptorSetLayout(const PipelineDescriptor& pipelineDesc
             setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, stages, i->binding()));
         }
     }
-    for(const ShaderLayout::SSBO& i : pipelineInput.ssbos())
+    for(const ShaderLayout::SSBO& i : shaderLayout.ssbos())
     {
         binding = std::max(binding, i._binding);
         if(shouldStageNeedBinded(i._stages))
@@ -391,11 +391,11 @@ void VKPipeline::setupDescriptorSetLayout(const PipelineDescriptor& pipelineDesc
     }
 
     const uint32_t bindingBase = binding + 1;
-    for(const auto& [_binding, _stages] : pipelineDescriptor.layout()->samplers())
+    for(const auto& [_stages, _binding] : pipelineDescriptor.shaderLayout()->samplers().values())
         if(shouldStageNeedBinded(_stages))
             setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, Enum::SHADER_STAGE_BIT_COUNT), bindingBase + _binding));
 
-    for(const auto& [_binding, _stages] : pipelineDescriptor.layout()->images())
+    for(const auto& [_stages, _binding] : pipelineDescriptor.shaderLayout()->images().values())
         if(shouldStageNeedBinded(_stages))
             setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, _stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, Enum::SHADER_STAGE_BIT_COUNT), bindingBase + _binding));
 
@@ -418,7 +418,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
     uint32_t binding = 0;
 
     _ubos.clear();
-    for(const sp<ShaderLayout::UBO>& i : pipelineDescriptor.input()->ubos())
+    for(const sp<ShaderLayout::UBO>& i : pipelineDescriptor.shaderLayout()->ubos())
     {
         binding = std::max(binding, i->binding());
         if(shouldStageNeedBinded(i->_stages))
@@ -434,7 +434,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
         }
     }
 
-    for(const ShaderLayout::SSBO& i : pipelineDescriptor.input()->ssbos())
+    for(const ShaderLayout::SSBO& i : pipelineDescriptor.shaderLayout()->ssbos())
     {
         binding = std::max(binding, i._binding);
         if(shouldStageNeedBinded(i._stages))
@@ -601,10 +601,10 @@ void VKPipeline::buildComputeCommandBuffer(GraphicsContext& graphicsContext, con
 sp<VKDescriptorPool> VKPipeline::makeDescriptorPool() const
 {
     std::map<VkDescriptorType, uint32_t> poolSizes;
-    if(!_pipeline_descriptor.input()->ubos().empty())
-        poolSizes[VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER] = static_cast<uint32_t>(_pipeline_descriptor.input()->ubos().size());
-    if(!_pipeline_descriptor.input()->ssbos().empty())
-        poolSizes[VK_DESCRIPTOR_TYPE_STORAGE_BUFFER] = static_cast<uint32_t>(_pipeline_descriptor.input()->ssbos().size());
+    if(!_pipeline_descriptor.shaderLayout()->ubos().empty())
+        poolSizes[VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER] = static_cast<uint32_t>(_pipeline_descriptor.shaderLayout()->ubos().size());
+    if(!_pipeline_descriptor.shaderLayout()->ssbos().empty())
+        poolSizes[VK_DESCRIPTOR_TYPE_STORAGE_BUFFER] = static_cast<uint32_t>(_pipeline_descriptor.shaderLayout()->ssbos().size());
     if(!(_pipeline_descriptor.samplers().empty() && _pipeline_descriptor.images().empty()))
         poolSizes[VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER] = static_cast<uint32_t>(_pipeline_descriptor.samplers().size() + _pipeline_descriptor.images().size());
     if(!_pipeline_descriptor.images().empty())

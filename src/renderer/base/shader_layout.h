@@ -89,12 +89,13 @@ public:
         ShaderStageSet _stages;
     };
 
-    struct BindingSet {
-        uint32_t _binding = std::numeric_limits<uint32_t>::max();
+    struct DescriptorSet {
         ShaderStageSet _stages;
+        uint32_t _binding = std::numeric_limits<uint32_t>::max();
 
         uint32_t addStage(Enum::ShaderStageBit stage, uint32_t binding);
     };
+
 public:
     ShaderLayout(const sp<Camera>& camera);
 
@@ -111,8 +112,8 @@ public:
     const Map<uint32_t, StreamLayout>& streamLayouts() const;
     Map<uint32_t, StreamLayout>& streamLayouts();
 
-    size_t samplerCount() const;
-    const Vector<String>& samplerNames() const;
+    const Table<String, DescriptorSet>& samplers() const;
+    const Table<String, DescriptorSet>& images() const;
 
     void addAttribute(String name, Attribute attribute);
 
@@ -130,7 +131,9 @@ private:
     Vector<SSBO> _ssbos;
 
     Map<uint32_t, StreamLayout> _stream_layouts;
-    Vector<String> _sampler_names;
+
+    Table<String, DescriptorSet> _samplers;
+    Table<String, DescriptorSet> _images;
 
     friend class PipelineBuildingContext;
     friend class PipelineLayout;

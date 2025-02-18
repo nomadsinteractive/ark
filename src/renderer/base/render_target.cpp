@@ -25,7 +25,7 @@ const sp<Resource>& RenderTarget::resource() const
 }
 
 RenderTarget::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _render_controller(resourceLoaderContext->renderController()), _renderer(factory.ensureBuilder<RenderGroup>(manifest)), _clear_mask(Documents::getAttribute<ClearMask>(manifest, "clear-mask", CLEAR_MASK_ALL)),
+    : _render_controller(resourceLoaderContext->renderController()), _renderer(factory.ensureBuilder<RenderGroup>(manifest)), _clear_mask(Documents::getAttribute<ClearBitSet>(manifest, "clear-mask", CLEAR_BIT_ALL)),
       _depth_stencil_usage(Documents::getAttribute<DepthStencilUsage>(manifest, "depth-stencil-usage", DEPTH_STENCIL_USAGE_FOR_OUTPUT))
 {
     for(const document& i : manifest->children(constants::TEXTURE))
@@ -50,7 +50,7 @@ sp<RenderTarget> RenderTarget::BUILDER::build(const Scope& args)
             configure._depth_stencil_attachment = std::move(tex);
         }
     }
-    configure._clear_mask = _clear_mask;
+    configure._clear_bits = _clear_mask;
     return _render_controller->makeRenderTarget(_renderer->build(args), std::move(configure));
 }
 
@@ -64,16 +64,16 @@ sp<Renderer> RenderTarget::RENDERER_BUILDER::build(const Scope& args)
     return _impl.build(args);
 }
 
-template<> ARK_API RenderTarget::ClearMask StringConvert::eval<RenderTarget::ClearMask>(const String& str)
+template<> ARK_API RenderTarget::ClearBitSet StringConvert::eval<RenderTarget::ClearBitSet>(const String& str)
 {
-    constexpr std::array<std::pair<const char*, RenderTarget::ClearMaskBits>, 5> clearMasks = {{
-            {"none", RenderTarget::CLEAR_MASK_NONE},
-            {"color", RenderTarget::CLEAR_MASK_COLOR},
-            {"depth", RenderTarget::CLEAR_MASK_DEPTH},
-            {"stencil", RenderTarget::CLEAR_MASK_COLOR},
-            {"all", RenderTarget::CLEAR_MASK_ALL}
+    constexpr std::array<std::pair<const char*, RenderTarget::ClearBits>, 5> clearMasks = {{
+            {"none", RenderTarget::CLEAR_BIT_NONE},
+            {"color", RenderTarget::CLEAR_BIT_COLOR},
+            {"depth", RenderTarget::CLEAR_BIT_DEPTH},
+            {"stencil", RenderTarget::CLEAR_BIT_COLOR},
+            {"all", RenderTarget::CLEAR_BIT_ALL}
         }};
-    return RenderTarget::ClearMask::toBitSet(str, clearMasks);
+    return RenderTarget::ClearBitSet::toBitSet(str, clearMasks);
 }
 
 template<> RenderTarget::DepthStencilUsage StringConvert::eval<RenderTarget::DepthStencilUsage>(const String& str)

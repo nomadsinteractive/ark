@@ -68,16 +68,16 @@ public:
 
         RenderUtil::setLayoutDescriptor(RenderUtil::setupLayoutLocation(context, firstStage._declaration_ins), sLocation, 0);
 
-        const ShaderLayout& pipelineInput = pipelineLayout.input();
+        const ShaderLayout& shaderLayout = pipelineLayout.shaderLayout();
         if(ShaderPreprocessor* vertex = context.tryGetRenderStage(Enum::SHADER_STAGE_BIT_VERTEX))
         {
-            RenderUtil::setLayoutDescriptor(vertex->_declaration_images, "binding", static_cast<uint32_t>(pipelineInput.ubos().size() + pipelineInput.ssbos().size() + pipelineInput.samplerCount()));
+            RenderUtil::setLayoutDescriptor(vertex->_declaration_images, "binding", static_cast<uint32_t>(shaderLayout.ubos().size() + shaderLayout.ssbos().size() + shaderLayout.samplers().size()));
             vertex->_predefined_macros.emplace_back("#define gl_InstanceID gl_InstanceIndex");
         }
         if(ShaderPreprocessor* fragment = context.tryGetRenderStage(Enum::SHADER_STAGE_BIT_FRAGMENT))
         {
             fragment->linkNextStage("FragColor");
-            const uint32_t bindingOffset = std::max<uint32_t>(2, pipelineInput.ubos().size() + pipelineInput.ssbos().size());
+            const uint32_t bindingOffset = std::max<uint32_t>(2, shaderLayout.ubos().size() + shaderLayout.ssbos().size());
             RenderUtil::setLayoutDescriptor(fragment->_declaration_images, "binding", bindingOffset + static_cast<uint32_t>(fragment->_declaration_samplers.vars().size()));
 
             uint32_t binding = 0;
@@ -94,7 +94,7 @@ public:
 
         if(const ShaderPreprocessor* compute = context.computingStage().get())
         {
-            const uint32_t bindingOffset = static_cast<uint32_t>(pipelineInput.ubos().size() + pipelineInput.ssbos().size());
+            const uint32_t bindingOffset = static_cast<uint32_t>(shaderLayout.ubos().size() + shaderLayout.ssbos().size());
             RenderUtil::setLayoutDescriptor(compute->_declaration_images, "binding", bindingOffset);
         }
 
@@ -113,7 +113,7 @@ public:
         {
             ShaderPreprocessor& preprocessor = v;
             preprocessor._version = 450;
-            preprocessor.declareUBOStruct(pipelineInput);
+            preprocessor.declareUBOStruct(shaderLayout);
             preprocessor._predefined_macros.push_back("#extension GL_ARB_separate_shader_objects : enable");
             preprocessor._predefined_macros.push_back("#extension GL_ARB_shading_language_420pack : enable");
         }

@@ -41,7 +41,7 @@ public:
     };
 
     sp<RenderController> _render_controller;
-    sp<ShaderLayout> _input;
+    sp<ShaderLayout> _shader_layout;
 
     Map<String, Attribute> _attributes;
     Map<String, sp<StringVar>> _definitions;

@@ -14,9 +14,11 @@ public:
     constexpr BitSet()
         : _bits(0) {
     }
-    constexpr BitSet(uint32_t bits)
+    constexpr BitSet(const convertable_type bits)
         : _bits(bits) {
     }
+    DEFAULT_COPY_AND_ASSIGN(BitSet);
+
     explicit operator bool() const {
         return static_cast<bool>(_bits);
     }
@@ -24,11 +26,26 @@ public:
     bool operator ==(T other) const {
         return _bits == toConvertableType(other);
     }
+    bool operator ==(const BitSet other) const {
+        return _bits == other.bits();
+    }
     bool operator !=(T other) const {
         return _bits != toConvertableType(other);
     }
+    bool operator !=(const BitSet other) const {
+        return _bits != other.bits();
+    }
     BitSet operator |(T other) const {
         return BitSet(_bits | other);
+    }
+    BitSet operator |(const BitSet other) const {
+        return BitSet(_bits | other.bits());
+    }
+    BitSet operator &(T other) const {
+        return BitSet(_bits & other);
+    }
+    BitSet operator &(const BitSet other) const {
+        return BitSet(_bits & other.bits());
     }
 
     convertable_type bits() const {
@@ -52,6 +69,13 @@ public:
             if(const T bits = static_cast<T>(SHIFT ? i : 1 << i); has(bits))
                 flags = static_cast<U>(flags | converter(bits));
         return flags;
+    }
+
+    template<typename... Args> static constexpr BitSet toBitSet(Args&&... bits) {
+        if constexpr(sizeof...(bits) == 0)
+            return {};
+
+        return {toConvertableType(std::forward<Args>(bits)...)};
     }
 
     template<size_t N> static BitSet toBitSet(const String& value, const std::array<std::pair<const char*, T>, N>& bitNames) {
@@ -78,7 +102,13 @@ public:
     }
 
 private:
-    static convertable_type toConvertableType(T value) {
+    template<typename... Args> constexpr static convertable_type toConvertableType(convertable_type value, Args&&... vars) {
+        if constexpr(sizeof...(vars) > 0) {
+            if constexpr(SHIFT)
+                return 1 << value | toConvertableType(std::forward<Args>(vars)...);
+            return value | toConvertableType(std::forward<Args>(vars)...);
+        }
+
         if constexpr(SHIFT)
             return 1 << value;
         return value;

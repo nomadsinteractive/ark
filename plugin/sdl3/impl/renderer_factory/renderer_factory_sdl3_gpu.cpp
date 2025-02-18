@@ -37,33 +37,32 @@ public:
 
         RenderUtil::setLayoutDescriptor(RenderUtil::setupLayoutLocation(context, firstStage._declaration_ins), sLocation, 0);
 
-        const ShaderLayout& pipelineInput = pipelineLayout.input();
+        const ShaderLayout& shaderLayout = pipelineLayout.shaderLayout();
         if(ShaderPreprocessor* vertex = context.tryGetRenderStage(Enum::SHADER_STAGE_BIT_VERTEX))
         {
-            RenderUtil::setLayoutDescriptor(vertex->_declaration_images, "binding", static_cast<uint32_t>(pipelineInput.ubos().size() + pipelineInput.ssbos().size() + pipelineInput.samplerCount()));
+            RenderUtil::setLayoutDescriptor(vertex->_declaration_images, "binding", static_cast<uint32_t>(shaderLayout.ubos().size() + shaderLayout.ssbos().size() + shaderLayout.samplers().size()));
             vertex->_predefined_macros.emplace_back("#define gl_InstanceID gl_InstanceIndex");
         }
         if(ShaderPreprocessor* fragment = context.tryGetRenderStage(Enum::SHADER_STAGE_BIT_FRAGMENT))
         {
             fragment->linkNextStage("FragColor");
-            const uint32_t bindingOffset = std::max<uint32_t>(2, pipelineInput.ubos().size() + pipelineInput.ssbos().size());
-            RenderUtil::setLayoutDescriptor(fragment->_declaration_images, "binding", bindingOffset + static_cast<uint32_t>(fragment->_declaration_samplers.vars().size()));
+            RenderUtil::setLayoutDescriptor(fragment->_declaration_images, "binding", static_cast<uint32_t>(fragment->_declaration_samplers.vars().size()));
 
             uint32_t binding = 0;
-            constexpr uint32_t samplerOffset = 16;
-            const std::vector<String> samplerNames = fragment->_declaration_samplers.vars().keys();
+            const Vector<String> samplerNames = fragment->_declaration_samplers.vars().keys();
             fragment->_declaration_samplers.clear();
             for(const String& k : samplerNames)
             {
-                fragment->_declaration_samplers.declare("sampler", "", k + "S", Strings::sprintf("binding = %d", bindingOffset + samplerOffset + binding));
-                fragment->_declaration_samplers.declare("texture2D", "", k + "T", Strings::sprintf("binding = %d", bindingOffset + binding++));
-                fragment->_predefined_macros.emplace_back(Strings::sprintf("#define %s sampler2D(%sT, %sS)", k.c_str(), k.c_str(), k.c_str()));
+                constexpr uint32_t samplerSet = 2;
+                fragment->_declaration_samplers.declare("sampler", "", k + "_S", Strings::sprintf("set = %d, binding = %d", samplerSet, binding));
+                fragment->_declaration_samplers.declare("texture2D", "", k + "_T", Strings::sprintf("set = %d, binding = %d", samplerSet, binding++));
+                fragment->_predefined_macros.emplace_back(Strings::sprintf("#define %s sampler2D(%s_T, %s_S)", k.c_str(), k.c_str(), k.c_str()));
             }
         }
 
         if(const ShaderPreprocessor* compute = context.computingStage().get())
         {
-            const uint32_t bindingOffset = static_cast<uint32_t>(pipelineInput.ubos().size() + pipelineInput.ssbos().size());
+            const uint32_t bindingOffset = static_cast<uint32_t>(shaderLayout.ubos().size() + shaderLayout.ssbos().size());
             RenderUtil::setLayoutDescriptor(compute->_declaration_images, "binding", bindingOffset);
         }
 
@@ -82,7 +81,7 @@ public:
         {
             ShaderPreprocessor& preprocessor = v;
             preprocessor._version = 450;
-            preprocessor.declareUBOStruct(pipelineInput);
+            preprocessor.declareUBOStruct(shaderLayout, 1);
             preprocessor._predefined_macros.push_back("#extension GL_ARB_separate_shader_objects : enable");
             preprocessor._predefined_macros.push_back("#extension GL_ARB_shading_language_420pack : enable");
         }
@@ -91,7 +90,6 @@ public:
     sp<DrawEvents> makeDrawEvents() override {
         return sp<Snippet::DrawEvents>::make();
     }
-
 };
 
 class SnippetFactorySDL3 final : public SnippetFactory {
@@ -181,9 +179,82 @@ sp<Camera::Delegate> RendererFactorySDL3_GPU::createCamera(const Ark::RendererCo
     return rcs == Ark::COORDINATE_SYSTEM_LHS ? sp<Camera::Delegate>::make<Camera::DelegateLH_NO>() :  sp<Camera::Delegate>::make<Camera::DelegateRH_NO>();
 }
 
+Optional<SDL_GPUDepthStencilTargetInfo> toDepthStencilTargetInfo(const RenderTarget::CreateConfigure& configure)
+{
+    if(!configure._depth_stencil_attachment)
+        return {};
+
+    const SDL_GPUDepthStencilTargetInfo depthStencilTargetInfo = {
+        reinterpret_cast<SDL_GPUTexture*>(configure._depth_stencil_attachment->id()),
+        1.0f,
+        configure._clear_bits.has(RenderTarget::CLEAR_BIT_DEPTH) ? SDL_GPU_LOADOP_CLEAR : SDL_GPU_LOADOP_LOAD,
+        configure._depth_stencil_usage.has(RenderTarget::DEPTH_STENCIL_USAGE_FOR_OUTPUT) ? SDL_GPU_STOREOP_STORE : SDL_GPU_STOREOP_DONT_CARE,
+        configure._clear_bits.has(RenderTarget::CLEAR_BIT_STENCIL) ? SDL_GPU_LOADOP_CLEAR : SDL_GPU_LOADOP_DONT_CARE,
+        SDL_GPU_STOREOP_DONT_CARE,
+    };
+    return {depthStencilTargetInfo};
+}
+
+class RenderCommandOffscreenPredraw final : public RenderCommand {
+public:
+    RenderCommandOffscreenPredraw(RenderTarget::CreateConfigure configure)
+        : _configure(std::move(configure)), _depth_stencil_target(toDepthStencilTargetInfo(_configure))
+    {
+        for(const sp<Texture>& i : _configure._color_attachments)
+            _render_targets.push_back({
+                reinterpret_cast<SDL_GPUTexture*>(i->id()),
+                0,
+                0,
+                {0, 0, 0, 0},
+                SDL_GPU_LOADOP_CLEAR,
+                SDL_GPU_STOREOP_STORE
+            });
+    }
+
+    void draw(GraphicsContext& graphicsContext) override
+    {
+        GraphicsContextSDL3_GPU& gc = ensureGraphicsContext(graphicsContext);
+        gc.pushRenderTargets(&_configure, _render_targets, _depth_stencil_target);
+    }
+
+private:
+    RenderTarget::CreateConfigure _configure;
+    Vector<SDL_GPUColorTargetInfo> _render_targets;
+    Optional<SDL_GPUDepthStencilTargetInfo> _depth_stencil_target;
+};
+
+class RenderCommandOffscreenPostdraw final : public RenderCommand {
+public:
+    void draw(GraphicsContext& graphicsContext) override
+    {
+        GraphicsContextSDL3_GPU& gc = ensureGraphicsContext(graphicsContext);
+        gc.popRenderTargets();
+    }
+};
+
+class OffscreenRendererSDL3_GPU final : public Renderer {
+public:
+    OffscreenRendererSDL3_GPU(sp<Renderer> renderer, RenderTarget::CreateConfigure configure)
+        : _delegate(std::move(renderer)), _pre_draw(sp<RenderCommand>::make<RenderCommandOffscreenPredraw>(std::move(configure))), _post_draw(sp<RenderCommand>::make<RenderCommandOffscreenPostdraw>())
+    {
+    }
+
+    void render(RenderRequest& renderRequest, const V3& position) override
+    {
+        renderRequest.addRenderCommand(_pre_draw);
+        _delegate->render(renderRequest, position);
+        renderRequest.addRenderCommand(_post_draw);
+    }
+
+private:
+    sp<Renderer> _delegate;
+    sp<RenderCommand> _pre_draw;
+    sp<RenderCommand> _post_draw;
+};
+
 sp<RenderTarget> RendererFactorySDL3_GPU::createRenderTarget(sp<Renderer> renderer, RenderTarget::CreateConfigure configure)
 {
-    return nullptr;
+    return sp<RenderTarget>::make(sp<Renderer>::make<OffscreenRendererSDL3_GPU>(std::move(renderer), std::move(configure)), nullptr);
 }
 
 sp<PipelineFactory> RendererFactorySDL3_GPU::createPipelineFactory()
@@ -209,38 +280,40 @@ public:
 
     void onRenderFrame(const Color& backgroundColor, RenderCommand& renderCommand) override
     {
-        const ContextSDL3_GPU& context = _graphics_context->traits().ensure<ContextSDL3_GPU>();
-        GraphicsContextSDL3_GPU& graphicsContext = _graphics_context->traits().ensure<GraphicsContextSDL3_GPU>();
+        const ContextSDL3_GPU& context = ensureContext(_graphics_context);
+        GraphicsContextSDL3_GPU& graphicsContext = ensureGraphicsContext(_graphics_context);
 
-        graphicsContext._command_buffer = SDL_AcquireGPUCommandBuffer(context._gpu_gevice);
-        if(!graphicsContext._command_buffer)
+        SDL_GPUCommandBuffer* cmdbuf = SDL_AcquireGPUCommandBuffer(context._gpu_gevice);
+        if(!cmdbuf)
         {
             SDL_Log("AcquireGPUCommandBuffer failed: %s", SDL_GetError());
             return;
         }
 
-        graphicsContext._color_target_info = {
-            nullptr,
-            0,
-            0,
-            { 0.0f, 0.0f, 0.0f, 1.0f },
-            SDL_GPU_LOADOP_CLEAR,
-            SDL_GPU_STOREOP_STORE
-        };
-
-        if(!SDL_WaitAndAcquireGPUSwapchainTexture(graphicsContext._command_buffer, context._main_window, &graphicsContext._color_target_info.texture, nullptr, nullptr))
+        graphicsContext._command_buffer = cmdbuf;
+        SDL_GPUTexture* swapchainTexture = nullptr;
+        if(SDL_WaitAndAcquireGPUSwapchainTexture(cmdbuf, context._main_window, &swapchainTexture, nullptr, nullptr))
         {
-            SDL_Log("WaitAndAcquireGPUSwapchainTexture failed: %s", SDL_GetError());
-            return;
-        }
-
-        if(graphicsContext._color_target_info.texture)
-        {
+            DASSERT(swapchainTexture);
+            const V4 clearColor = backgroundColor.rgba();
+            const Vector<SDL_GPUColorTargetInfo> colorTargets = {{
+                swapchainTexture,
+                0,
+                0,
+                { clearColor.x(), clearColor.y(), clearColor.z(), clearColor.w() },
+                SDL_GPU_LOADOP_CLEAR,
+                SDL_GPU_STOREOP_STORE
+            }};
+            constexpr Optional<SDL_GPUDepthStencilTargetInfo> depthStencilTarget = {};
+            graphicsContext.pushRenderTargets(nullptr, colorTargets, depthStencilTarget);
             _graphics_context->onDrawFrame();
             renderCommand.draw(_graphics_context);
+            graphicsContext.popRenderTargets();
         }
+        else
+            SDL_Log("WaitAndAcquireGPUSwapchainTexture failed: %s", SDL_GetError());
 
-        SDL_SubmitGPUCommandBuffer(graphicsContext._command_buffer);
+        SDL_SubmitGPUCommandBuffer(cmdbuf);
     }
 
 private:

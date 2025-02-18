@@ -55,7 +55,7 @@ public:
         const sp<PipelineLayout> pipelineLayout = sp<PipelineLayout>::make(buildingContext);
         pipelineLayout->addSnippet(snippet);
         pipelineLayout->initialize(Shader(pipelineFactory, Ark::instance().renderController(), pipelineLayout, {}));
-        const sp<ShaderLayout>& pipelineInput = pipelineLayout->input();
+        const sp<ShaderLayout>& pipelineInput = pipelineLayout->shaderLayout();
 
         TESTCASE_VALIDATE(pipelineInput->streamLayouts()[0].stride() != 0);
         TESTCASE_VALIDATE(pipelineInput->getAttribute("Position")->length());

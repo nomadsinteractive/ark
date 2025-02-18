@@ -29,7 +29,7 @@ public:
     void addSnippet(sp<Snippet> snippet);
 
     const sp<PipelineLayout>& pipelineLayout() const;
-    const sp<ShaderLayout>& pipelineInput() const;
+    const sp<ShaderLayout>& shaderLayout() const;
 
     const sp<Map<uint32_t, Buffer>>& streams() const;
     const sp<Traits>& attachments() const;

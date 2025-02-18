@@ -26,7 +26,7 @@ SDL_GPUTextureFormat toChannelFormat(const SDL_GPUTextureFormat* channelFormat, 
     return format & Texture::FORMAT_SIGNED ? channelFormat[7] : channelFormat[6];
 }
 
-SDL_GPUTextureFormat toSDL_GPUTextureFormat(const Bitmap& bitmap, const Texture::Format format)
+SDL_GPUTextureFormat toTextureFormat(const Bitmap& bitmap, const Texture::Format format)
 {
     constexpr SDL_GPUTextureFormat sdlFormats[] = {
         SDL_GPU_TEXTUREFORMAT_R8_UNORM, SDL_GPU_TEXTUREFORMAT_R8_SNORM, SDL_GPU_TEXTUREFORMAT_R16_UNORM, SDL_GPU_TEXTUREFORMAT_R16_SNORM, SDL_GPU_TEXTUREFORMAT_R16_FLOAT, SDL_GPU_TEXTUREFORMAT_R32_FLOAT, SDL_GPU_TEXTUREFORMAT_R32_UINT, SDL_GPU_TEXTUREFORMAT_R32_INT,
@@ -57,10 +57,18 @@ SDL_GPUTextureUsageFlags toTextureUsageFlags(const Texture::Usage usage)
     return flags;
 }
 
+SDL_GPUTexture* createTexture(GraphicsContext& graphicsContext, const Texture::Parameters& parameters, const SDL_GPUTextureFormat textureFormat, uint32_t width, uint32_t height)
+{
+    SDL_GPUDevice* gpuDevice = ensureGPUDevice(graphicsContext);
+    const SDL_GPUTextureCreateInfo textureCreateInfo{parameters._type == Texture::TYPE_2D ? SDL_GPU_TEXTURETYPE_2D : SDL_GPU_TEXTURETYPE_CUBE, textureFormat, toTextureUsageFlags(parameters._usage), width, height, 1, 1};
+    return SDL_CreateGPUTexture(gpuDevice, &textureCreateInfo);
+}
+
+
 }
 
 TextureSDL3_GPU::TextureSDL3_GPU(const uint32_t width, const uint32_t height, sp<Texture::Parameters> parameters)
-    : Delegate(parameters->_type), _width(width), _height(height), _parameters(std::move(parameters)), _texture(nullptr), _sampler(nullptr)
+    : Delegate(parameters->_type), _width(width), _height(height), _parameters(std::move(parameters)), _texture_format(SDL_GPU_TEXTUREFORMAT_INVALID), _texture(nullptr), _sampler(nullptr)
 {
 }
 
@@ -109,7 +117,10 @@ bool TextureSDL3_GPU::download(GraphicsContext& graphicsContext, Bitmap& bitmap)
 void TextureSDL3_GPU::uploadBitmap(GraphicsContext& graphicsContext, const Bitmap& bitmap, const Vector<sp<ByteArray>>& imagedata)
 {
     if(!_texture)
-        _texture = createTexture(graphicsContext, bitmap);
+    {
+        _texture_format = toTextureFormat(bitmap, _parameters->_format);
+        _texture = createTexture(graphicsContext, _parameters, _texture_format, _width, _height);
+    }
 
     SDL_GPUDevice* gpuDevice = ensureGPUDevice(graphicsContext);
     SDL_GPUCommandBuffer* uploadCmdBuf = SDL_AcquireGPUCommandBuffer(gpuDevice);
@@ -138,6 +149,11 @@ SDL_GPUTexture* TextureSDL3_GPU::texture() const
     return _texture;
 }
 
+SDL_GPUTextureFormat TextureSDL3_GPU::textureFormat() const
+{
+    return _texture_format;
+}
+
 SDL_GPUSampler* TextureSDL3_GPU::ensureSampler(SDL_GPUDevice *gpuDevice)
 {
     if(!_sampler)
@@ -149,14 +165,6 @@ SDL_GPUSampler* TextureSDL3_GPU::ensureSampler(SDL_GPUDevice *gpuDevice)
         _sampler = SDL_CreateGPUSampler(gpuDevice, &samplerCreateInfo);
     }
     return _sampler;
-}
-
-SDL_GPUTexture* TextureSDL3_GPU::createTexture(GraphicsContext& graphicsContext, const Bitmap& bitmap) const
-{
-    SDL_GPUDevice* gpuDevice = ensureGPUDevice(graphicsContext);
-    const Texture::Parameters& parameters = *_parameters;
-    const SDL_GPUTextureCreateInfo textureCreateInfo{parameters._type == Texture::TYPE_2D ? SDL_GPU_TEXTURETYPE_2D : SDL_GPU_TEXTURETYPE_CUBE, toSDL_GPUTextureFormat(bitmap, parameters._format), toTextureUsageFlags(parameters._usage), _width, _height, 1, 1};
-    return SDL_CreateGPUTexture(gpuDevice, &textureCreateInfo);
 }
 
 }

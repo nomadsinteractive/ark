@@ -3,7 +3,6 @@
 #include <SDL3/SDL.h>
 #include <SDL3_shadercross/SDL_shadercross.h>
 
-#include "core/types/global.h"
 #include "core/util/uploader_type.h"
 
 #include "renderer/base/compute_context.h"
@@ -23,7 +22,7 @@ namespace ark::plugin::sdl3 {
 
 namespace {
 
-SDL_GPUShader* createGraphicsShader(SDL_GPUDevice* device, const ShaderLayout& pipelineInput, const StringView source, Enum::ShaderStageBit stageBit)
+SDL_GPUShader* createGraphicsShader(SDL_GPUDevice* device, const ShaderLayout& shaderLayout, const StringView source, const Enum::ShaderStageBit stageBit)
 {
 	const SDL_GPUShaderFormat backendFormats = SDL_ShaderCross_GetSPIRVShaderFormats();
 	const char* entrypoint = nullptr;
@@ -42,19 +41,25 @@ SDL_GPUShader* createGraphicsShader(SDL_GPUDevice* device, const ShaderLayout& p
     const Vector<uint32_t> binaries = RenderUtil::compileSPIR(source, stageBit, Ark::RENDERER_BACKEND_VULKAN);
     const void* bytecode = binaries.data();
 
-    const Uint32 samplerCount = stageBit == Enum::SHADER_STAGE_BIT_FRAGMENT ? pipelineInput.samplerCount() : 0;
+    Uint32 samplerCount = 0;
+    for(const ShaderLayout::DescriptorSet& i : shaderLayout.samplers().values())
+        if(i._stages.has(stageBit))
+            ++ samplerCount;
+
+    Uint32 storageTextureCount = 0;
+    for(const ShaderLayout::DescriptorSet& i : shaderLayout.images().values())
+        if(i._stages.has(stageBit))
+            ++ storageTextureCount;
 
     Uint32 uniformBufferCount = 0;
-    for(const ShaderLayout::UBO& i : pipelineInput.ubos())
+    for(const ShaderLayout::UBO& i : shaderLayout.ubos())
         if(i._stages.has(stageBit))
             ++ uniformBufferCount;
 
     Uint32 storageBufferCount = 0;
-    for(const ShaderLayout::SSBO& i : pipelineInput.ssbos())
+    for(const ShaderLayout::SSBO& i : shaderLayout.ssbos())
         if(i._stages.has(stageBit))
             ++ storageBufferCount;
-
-    Uint32 storageTextureCount = 0;
 
     const SDL_ShaderCross_SPIRV_Info spirvInfo = {
         static_cast<const Uint8*>(bytecode),
@@ -86,20 +91,61 @@ SDL_GPUShader* createGraphicsShader(SDL_GPUDevice* device, const ShaderLayout& p
 	return shader;
 }
 
-SDL_GPUColorTargetBlendState toColorTargetBlendState()
+
+SDL_GPUBlendFactor toBlendFactor(PipelineDescriptor::BlendFactor blendFactor, const SDL_GPUBlendFactor defaultBlendFactor)
 {
-    SDL_GPUColorTargetBlendState colorTargetBlendState = {
-        SDL_GPU_BLENDFACTOR_SRC_ALPHA,
-        SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA,
+    switch(blendFactor) {
+        case PipelineDescriptor::BLEND_FACTOR_ZERO:
+            return SDL_GPU_BLENDFACTOR_ZERO;
+        case PipelineDescriptor::BLEND_FACTOR_ONE:
+            return SDL_GPU_BLENDFACTOR_ONE;
+        case PipelineDescriptor::BLEND_FACTOR_SRC_COLOR:
+            return SDL_GPU_BLENDFACTOR_SRC_COLOR;
+        case PipelineDescriptor::BLEND_FACTOR_ONE_MINUS_SRC_COLOR:
+            return SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_COLOR;
+        case PipelineDescriptor::BLEND_FACTOR_DST_COLOR:
+            return SDL_GPU_BLENDFACTOR_DST_COLOR;
+        case PipelineDescriptor::BLEND_FACTOR_ONE_MINUS_DST_COLOR:
+            return SDL_GPU_BLENDFACTOR_ONE_MINUS_DST_COLOR;
+        case PipelineDescriptor::BLEND_FACTOR_SRC_ALPHA:
+            return SDL_GPU_BLENDFACTOR_SRC_ALPHA;
+        case PipelineDescriptor::BLEND_FACTOR_ONE_MINUS_SRC_ALPHA:
+            return SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA;
+        case PipelineDescriptor::BLEND_FACTOR_DST_ALPHA:
+            return SDL_GPU_BLENDFACTOR_DST_ALPHA;
+        case PipelineDescriptor::BLEND_FACTOR_ONE_MINUS_DST_ALPHA:
+            return SDL_GPU_BLENDFACTOR_ONE_MINUS_DST_ALPHA;
+        case PipelineDescriptor::BLEND_FACTOR_CONST_COLOR:
+            return SDL_GPU_BLENDFACTOR_CONSTANT_COLOR;
+        case PipelineDescriptor::BLEND_FACTOR_CONST_ALPHA:
+            return SDL_GPU_BLENDFACTOR_CONSTANT_COLOR;
+        case PipelineDescriptor::BLEND_FACTOR_DEFAULT:
+            return defaultBlendFactor;
+        default:
+            break;
+    }
+    FATAL("Unknow BlendFacor: %d", blendFactor);
+    return SDL_GPU_BLENDFACTOR_INVALID;
+}
+
+SDL_GPUBlendOp toBlendOp()
+{
+
+}
+
+SDL_GPUColorTargetBlendState toColorTargetBlendState(const PipelineDescriptor::TraitBlend& blend)
+{
+    return {
+        toBlendFactor(blend._src_rgb_factor, SDL_GPU_BLENDFACTOR_SRC_ALPHA),
+        toBlendFactor(blend._dst_rgb_factor, SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA),
         SDL_GPU_BLENDOP_ADD,
-        SDL_GPU_BLENDFACTOR_SRC_ALPHA,
-        SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA,
+        toBlendFactor(blend._src_alpha_factor, SDL_GPU_BLENDFACTOR_SRC_ALPHA),
+        toBlendFactor(blend._dst_alpha_factor, SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA),
         SDL_GPU_BLENDOP_SUBTRACT,
         0xf,
-        true,
+        blend._enabled,
         false
     };
-    return colorTargetBlendState;
 }
 
 SDL_GPUVertexElementFormat toVertexElementFormat(const Attribute& attribute)
@@ -163,10 +209,32 @@ SDL_GPUPrimitiveType toPrimitiveType(const Enum::RenderMode drawMode)
     return SDL_GPU_PRIMITIVETYPE_TRIANGLELIST;
 }
 
+void bindUBOSnapshots(SDL_GPUCommandBuffer* cmdbuf, const Vector<RenderLayerSnapshot::UBOSnapshot>& uboSnapshots, const ShaderLayout& shaderLayout, const ShaderStageSet stages)
+{
+    size_t binding = 0;
+    for(const sp<ShaderLayout::UBO>& ubo : shaderLayout.ubos())
+    {
+        const ShaderStageSet uboStages = ubo->_stages;
+        if(uboStages & stages)
+        {
+            DCHECK(binding < uboSnapshots.size(), "UBO Snapshot and UBO Layout mismatch: %d vs %d", uboSnapshots.size(), shaderLayout.ubos().size());
+            const RenderLayerSnapshot::UBOSnapshot& uboSnapshot = uboSnapshots.at(binding++);
+            const void* data = uboSnapshot._buffer.buf();
+            const uint32_t size = uboSnapshot._buffer.length();
+            if(uboStages.has(Enum::SHADER_STAGE_BIT_VERTEX))
+                SDL_PushGPUVertexUniformData(cmdbuf, ubo->binding(), data, size);
+            if(uboStages.has(Enum::SHADER_STAGE_BIT_FRAGMENT))
+                SDL_PushGPUFragmentUniformData(cmdbuf, ubo->binding(), data, size);
+            if(uboStages.has(Enum::SHADER_STAGE_BIT_COMPUTE))
+                SDL_PushGPUComputeUniformData(cmdbuf, ubo->binding(), data, size);
+        }
+    }
+}
+
 class DrawPipelineSDL3_GPU final : public Pipeline {
 public:
-    DrawPipelineSDL3_GPU(Enum::DrawProcedure drawProcedure, Enum::RenderMode drawMode, const sp<ShaderLayout>& pipelineInput, String vertexShader, String fragmentShader)
-        : _draw_procedure(drawProcedure), _draw_mode(drawMode), _pipeline_input(pipelineInput), _vertex_shader(std::move(vertexShader)), _fragment_shader(std::move(fragmentShader)), _pipeline(nullptr) {
+    DrawPipelineSDL3_GPU(const Enum::DrawProcedure drawProcedure, const PipelineDescriptor& pipelineDescriptor, String vertexShader, String fragmentShader)
+        : _draw_procedure(drawProcedure), _draw_mode(pipelineDescriptor.mode()), _pipeline_descriptor(pipelineDescriptor), _vertex_shader(std::move(vertexShader)), _fragment_shader(std::move(fragmentShader)), _pipeline(nullptr) {
     }
 
     uint64_t id() override
@@ -192,8 +260,9 @@ public:
             const ContextSDL3_GPU& context = ensureContext(graphicsContext);
             SDL_GPUDevice* gpuDevice = context._gpu_gevice;
 
-            SDL_GPUShader* vertexShader = createGraphicsShader(gpuDevice, _pipeline_input, _vertex_shader, Enum::SHADER_STAGE_BIT_VERTEX);
-            SDL_GPUShader* fragmentShader = createGraphicsShader(gpuDevice, _pipeline_input, _fragment_shader, Enum::SHADER_STAGE_BIT_FRAGMENT);
+            const ShaderLayout& shaderLayout = _pipeline_descriptor.shaderLayout();
+            SDL_GPUShader* vertexShader = createGraphicsShader(gpuDevice, shaderLayout, _vertex_shader, Enum::SHADER_STAGE_BIT_VERTEX);
+            SDL_GPUShader* fragmentShader = createGraphicsShader(gpuDevice, shaderLayout, _fragment_shader, Enum::SHADER_STAGE_BIT_FRAGMENT);
 
             SDL_GPUVertexBufferDescription vertexBufferDescription[8];
             Uint32 numVertexBuffers = 0;
@@ -201,7 +270,7 @@ public:
             SDL_GPUVertexAttribute vertexAttribute[32];
             Uint32 numVertexAttributes = 0;
 
-            for(const auto& [k, v] : _pipeline_input->streamLayouts())
+            for(const auto& [k, v] : shaderLayout.streamLayouts())
             {
                 vertexBufferDescription[numVertexBuffers] = {
                     numVertexBuffers,
@@ -224,10 +293,46 @@ public:
                 }
             }
 
-            const SDL_GPUColorTargetDescription colorTargetDescription = {
-                SDL_GetGPUSwapchainTextureFormat(gpuDevice, context._main_window),
-                toColorTargetBlendState()
+            constexpr SDL_GPUColorTargetBlendState defaultBlendState = {
+                SDL_GPU_BLENDFACTOR_SRC_ALPHA,
+                SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA,
+                SDL_GPU_BLENDOP_ADD,
+                SDL_GPU_BLENDFACTOR_SRC_ALPHA,
+                SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA,
+                SDL_GPU_BLENDOP_SUBTRACT,
+                0xf,
+                true,
+                false
             };
+            const auto& traits = _pipeline_descriptor.parameters()._traits;
+            const SDL_GPUColorTargetBlendState blendState = traits.has(PipelineDescriptor::TRAIT_TYPE_BLEND) ? toColorTargetBlendState(traits.at(PipelineDescriptor::TRAIT_TYPE_BLEND)._configure._blend) : defaultBlendState;
+
+            Uint32 numColorTargets = 0;
+            SDL_GPUColorTargetDescription colorTargetDescriptions[8];
+
+            bool hasDepthStencilTarget = false;
+            SDL_GPUTextureFormat depthStencilFormat = SDL_GPU_TEXTUREFORMAT_INVALID;
+            const GraphicsContextSDL3_GPU& gc = ensureGraphicsContext(graphicsContext);
+            if(const RenderTargetContext& renderTarget = gc.renderTarget(); renderTarget._create_config)
+            {
+                const RenderTarget::CreateConfigure& rtCreateConfig = *renderTarget._create_config;
+                for(const sp<Texture>& i : rtCreateConfig._color_attachments)
+                {
+                    colorTargetDescriptions[numColorTargets] = {
+                        i->delegate().cast<TextureSDL3_GPU>()->textureFormat(),
+                        numColorTargets == 0 ? blendState : SDL_GPUColorTargetBlendState{}
+                    };
+                    ++ numColorTargets;
+                }
+            }
+            else
+            {
+                colorTargetDescriptions[0] = {
+                    SDL_GetGPUSwapchainTextureFormat(gpuDevice, context._main_window),
+                    blendState
+                };
+                numColorTargets = 1;
+            }
             const SDL_GPUGraphicsPipelineCreateInfo pipelineCreateInfo = {
                 vertexShader,
                 fragmentShader,
@@ -247,10 +352,10 @@ public:
                     SDL_GPU_COMPAREOP_LESS_OR_EQUAL
                 }
                 , {
-                    &colorTargetDescription,
-                    1,
-                    SDL_GPU_TEXTUREFORMAT_D24_UNORM,
-                    true
+                    colorTargetDescriptions,
+                    numColorTargets,
+                    depthStencilFormat,
+                    hasDepthStencilTarget
                 }
             };
             _pipeline = SDL_CreateGPUGraphicsPipeline(gpuDevice, &pipelineCreateInfo);
@@ -271,11 +376,16 @@ public:
         DASSERT(drawingContext._indices);
 
         const PipelineBindings& pipelineBindings = drawingContext._bindings;
-        const GraphicsContextSDL3_GPU& sdl3GC = graphicsContext.traits().ensure<GraphicsContextSDL3_GPU>();
+        const GraphicsContextSDL3_GPU& sdl3GC = ensureGraphicsContext(graphicsContext);
 
-        SDL_GPURenderPass* renderPass = SDL_BeginGPURenderPass(sdl3GC._command_buffer, &sdl3GC._color_target_info, 1, nullptr);
+        const RenderTargetContext& renderTargets = sdl3GC.renderTarget();
+        const Optional<SDL_GPUDepthStencilTargetInfo>& depthStencilTarget = renderTargets._depth_stencil_target;
+        SDL_GPURenderPass* renderPass = SDL_BeginGPURenderPass(sdl3GC._command_buffer, renderTargets._color_targets.data(), renderTargets._color_targets.size(), depthStencilTarget ? depthStencilTarget.get() : nullptr);
 
         SDL_BindGPUGraphicsPipeline(renderPass, _pipeline);
+
+        constexpr ShaderStageSet currentStageSets = ShaderStageSet::toBitSet(Enum::SHADER_STAGE_BIT_VERTEX, Enum::SHADER_STAGE_BIT_FRAGMENT);
+        bindUBOSnapshots(sdl3GC._command_buffer, drawingContext._buffer_object->_ubos, drawingContext._bindings->shaderLayout(), currentStageSets);
 
         const SDL_GPUBufferBinding vertexBufferBinding = {reinterpret_cast<SDL_GPUBuffer*>(drawingContext._vertices.id()), 0};
         SDL_BindGPUVertexBuffers(renderPass, 0, &vertexBufferBinding, 1);
@@ -299,7 +409,7 @@ public:
         switch(_draw_procedure)
         {
             case Enum::DRAW_PROCEDURE_DRAW_ELEMENTS:
-                SDL_DrawGPUIndexedPrimitives(renderPass, drawingContext._draw_count, 0, 0, 0, 0);
+                SDL_DrawGPUIndexedPrimitives(renderPass, drawingContext._draw_count, 1, 0, 0, 0);
                 break;
             case Enum::DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT: {
                 const DrawingParams::DrawMultiElementsIndirect& param = drawingContext._parameters.drawMultiElementsIndirect();
@@ -321,7 +431,7 @@ public:
 private:
     Enum::DrawProcedure _draw_procedure;
     Enum::RenderMode _draw_mode;
-    sp<ShaderLayout> _pipeline_input;
+    PipelineDescriptor _pipeline_descriptor;
     String _vertex_shader;
     String _fragment_shader;
 
@@ -434,7 +544,7 @@ sp<Pipeline> PipelineFactorySDL3_GPU::buildPipeline(GraphicsContext& graphicsCon
         const Enum::DrawProcedure drawProcedure = pipelineDescriptor.drawProcedure();
         const auto fIter = stages.find(Enum::SHADER_STAGE_BIT_FRAGMENT);
         CHECK(fIter != stages.end(), "Pipeline has no fragment shader(only vertex shader available)");
-        return sp<Pipeline>::make<DrawPipelineSDL3_GPU>(drawProcedure, pipelineDescriptor.mode(), pipelineDescriptor.input(), std::move(vIter->second), std::move(fIter->second));
+        return sp<Pipeline>::make<DrawPipelineSDL3_GPU>(drawProcedure, pipelineDescriptor, std::move(vIter->second), std::move(fIter->second));
     }
     const auto cIter = stages.find(Enum::SHADER_STAGE_BIT_COMPUTE);
     CHECK(cIter != stages.end(), "Pipeline has no compute shader");

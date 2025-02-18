@@ -1,8 +1,5 @@
 #pragma once
 
-#include <map>
-#include <vector>
-
 #include "core/base/api.h"
 #include "core/base/string.h"
 #include "core/collection/table.h"
@@ -22,31 +19,26 @@ public:
     const sp<Snippet>& snippet() const;
     void initialize(const Shader& shader);
 
-    const sp<ShaderLayout>& input() const;
+    const sp<ShaderLayout>& shaderLayout() const;
 
     void preCompile(GraphicsContext& graphicsContext);
 
     Map<Enum::ShaderStageBit, ShaderPreprocessor::Stage> getPreprocessedStages(const RenderEngineContext& renderEngineContext) const;
-    const Vector<ShaderLayout::BindingSet>& samplers() const;
-    const Vector<ShaderLayout::BindingSet>& images() const;
 
     size_t colorAttachmentCount() const;
 
-    Vector<std::pair<sp<Texture>, ShaderLayout::BindingSet>> makeBindingSamplers() const;
-    Vector<std::pair<sp<Texture>, ShaderLayout::BindingSet>> makeBindingImages() const;
+    Vector<std::pair<sp<Texture>, ShaderLayout::DescriptorSet>> makeBindingSamplers() const;
+    Vector<std::pair<sp<Texture>, ShaderLayout::DescriptorSet>> makeBindingImages() const;
 
 private:
     sp<PipelineBuildingContext> _building_context;
-    sp<ShaderLayout> _input;
+    sp<ShaderLayout> _shader_layout;
     sp<Snippet> _snippet;
 
     Vector<ShaderPreprocessor::Stage> _preprocessed_stages;
 
     Table<String, sp<Texture>> _predefined_samplers;
     Table<String, sp<Texture>> _predefined_images;
-
-    Vector<ShaderLayout::BindingSet> _samplers;
-    Vector<ShaderLayout::BindingSet> _images;
 
     size_t _color_attachment_count;
 

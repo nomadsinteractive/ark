@@ -28,8 +28,8 @@ public:
     };
 
     struct BufferObject {
-        std::vector<UBOSnapshot> _ubos;
-        std::vector<std::pair<uint32_t, Buffer::Snapshot>> _ssbos;
+        Vector<UBOSnapshot> _ubos;
+        Vector<std::pair<uint32_t, Buffer::Snapshot>> _ssbos;
     };
 
     enum SnapshotFlag {
@@ -58,7 +58,7 @@ public:
     bool needsReload() const;
     const sp<ShaderLayout>& pipelineInput() const;
 
-    void addLayerContext(const RenderRequest& renderRequest, std::vector<sp<LayerContext>>& layerContexts);
+    void addLayerContext(const RenderRequest& renderRequest, Vector<sp<LayerContext>>& layerContexts);
     void snapshot(const RenderRequest& renderRequest);
 
     sp<RenderCommand> toRenderCommand(const RenderRequest& renderRequest, Buffer::Snapshot vertices, Buffer::Snapshot indices, uint32_t drawCount, DrawingParams params) const;
@@ -84,7 +84,7 @@ private:
     bool doAddLayerContext(const RenderRequest& renderRequest, LayerContext& layerContext);
     bool addDiscardedState(LayerContext& lc, void* stateKey);
     void addDiscardedLayerContext(LayerContext& lc);
-    void addDiscardedLayerContexts(const std::vector<sp<LayerContext>>& layerContexts);
+    void addDiscardedLayerContexts(const Vector<sp<LayerContext>>& layerContexts);
 
     friend class RenderLayer;
 };

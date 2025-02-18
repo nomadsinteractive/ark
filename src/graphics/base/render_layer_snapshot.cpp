@@ -41,7 +41,7 @@ const sp<ShaderLayout>& RenderLayerSnapshot::pipelineInput() const
     return _stub->_shader->input();
 }
 
-void RenderLayerSnapshot::addLayerContext(const RenderRequest& renderRequest, std::vector<sp<LayerContext>>& layerContexts)
+void RenderLayerSnapshot::addLayerContext(const RenderRequest& renderRequest, Vector<sp<LayerContext>>& layerContexts)
 {
     for(auto iter = layerContexts.begin(); iter != layerContexts.end(); )
     {
@@ -81,7 +81,7 @@ void RenderLayerSnapshot::addDiscardedLayerContext(LayerContext& lc)
     lc._element_states.clear();
 }
 
-void RenderLayerSnapshot::addDiscardedLayerContexts(const std::vector<sp<LayerContext>>& layerContexts)
+void RenderLayerSnapshot::addDiscardedLayerContexts(const Vector<sp<LayerContext>>& layerContexts)
 {
     for(const sp<LayerContext>& lc : layerContexts)
         addDiscardedLayerContext(lc);

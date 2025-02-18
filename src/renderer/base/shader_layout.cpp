@@ -110,24 +110,24 @@ sp<RenderLayerSnapshot::BufferObject> ShaderLayout::takeBufferSnapshot(const Ren
     return sp<RenderLayerSnapshot::BufferObject>::make(RenderLayerSnapshot::BufferObject{std::move(uboSnapshot), std::move(ssboSnapshot)});
 }
 
-const std::map<uint32_t, ShaderLayout::StreamLayout>& ShaderLayout::streamLayouts() const
+const Map<uint32_t, ShaderLayout::StreamLayout>& ShaderLayout::streamLayouts() const
 {
     return _stream_layouts;
 }
 
-std::map<uint32_t, ShaderLayout::StreamLayout>& ShaderLayout::streamLayouts()
+Map<uint32_t, ShaderLayout::StreamLayout>& ShaderLayout::streamLayouts()
 {
     return _stream_layouts;
 }
 
-size_t ShaderLayout::samplerCount() const
+const Table<String, ShaderLayout::DescriptorSet>& ShaderLayout::samplers() const
 {
-    return _sampler_names.size();
+    return _samplers;
 }
 
-const Vector<String>& ShaderLayout::samplerNames() const
+const Table<String, ShaderLayout::DescriptorSet>& ShaderLayout::images() const
 {
-    return _sampler_names;
+    return _images;
 }
 
 void ShaderLayout::addAttribute(String name, Attribute attribute)
@@ -295,7 +295,7 @@ ShaderLayout::SSBO::SSBO(Buffer buffer, uint32_t binding)
 {
 }
 
-uint32_t ShaderLayout::BindingSet::addStage(Enum::ShaderStageBit stage, uint32_t binding)
+uint32_t ShaderLayout::DescriptorSet::addStage(Enum::ShaderStageBit stage, uint32_t binding)
 {
     _stages.set(stage);
     if(_binding != std::numeric_limits<uint32_t>::max())

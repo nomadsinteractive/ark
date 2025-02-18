@@ -1,7 +1,6 @@
 #pragma once
 
-#include <vector>
-
+#include "core/base/api.h"
 #include "core/base/bit_set.h"
 #include "core/inf/builder.h"
 #include "core/types/shared_ptr.h"
@@ -15,17 +14,17 @@
 
 namespace ark {
 
-class RenderTarget final : public Renderer {
+class ARK_API RenderTarget final : public Renderer {
 public:
-    enum ClearMaskBits {
-        CLEAR_MASK_NONE = 0,
-        CLEAR_MASK_COLOR = 1,
-        CLEAR_MASK_DEPTH = 2,
-        CLEAR_MASK_STENCIL = 4,
-        CLEAR_MASK_DEPTH_STENCIL = 6,
-        CLEAR_MASK_ALL = 7
+    enum ClearBits {
+        CLEAR_BIT_NONE = 0,
+        CLEAR_BIT_COLOR = 1,
+        CLEAR_BIT_DEPTH = 2,
+        CLEAR_BIT_STENCIL = 4,
+        CLEAR_BIT_DEPTH_STENCIL = 6,
+        CLEAR_BIT_ALL = 7
     };
-    typedef BitSet<ClearMaskBits> ClearMask;
+    typedef BitSet<ClearBits> ClearBitSet;
 
     enum DepthStencilUsageBits {
         DEPTH_STENCIL_USAGE_FOR_INPUT = 1,
@@ -34,9 +33,9 @@ public:
     typedef BitSet<DepthStencilUsageBits> DepthStencilUsage;
 
     struct CreateConfigure {
-        std::vector<sp<Texture>> _color_attachments;
+        Vector<sp<Texture>> _color_attachments;
         sp<Texture> _depth_stencil_attachment;
-        ClearMask _clear_mask;
+        ClearBitSet _clear_bits;
         DepthStencilUsage _depth_stencil_usage;
     };
 
@@ -56,8 +55,8 @@ public:
     private:
         sp<RenderController> _render_controller;
         sp<Builder<RenderGroup>> _renderer;
-        std::vector<std::pair<sp<Builder<Texture>>, document>> _attachments;
-        ClearMask _clear_mask;
+        Vector<std::pair<sp<Builder<Texture>>, document>> _attachments;
+        ClearBitSet _clear_mask;
         DepthStencilUsage _depth_stencil_usage;
     };
 

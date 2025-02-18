@@ -105,10 +105,10 @@ VKFramebuffer::Stub::Stub(const sp<VKRenderer>& renderer, const sp<Recycler>& re
     clearColor.color = { { 0.0f, 0.0f, 0.0f, 0.0f } };
     clearDepthStencil.depthStencil = { 1.0f, 0 };
 
-    if(_configure._clear_mask.has(RenderTarget::CLEAR_MASK_COLOR))
+    if(_configure._clear_bits.has(RenderTarget::CLEAR_BIT_COLOR))
         for(uint32_t i = 0; i < _configure._color_attachments.size(); ++i)
             _clear_values.push_back(clearColor);
-    if(_configure._clear_mask.has(RenderTarget::CLEAR_MASK_DEPTH_STENCIL) && !_configure._depth_stencil_usage.has(RenderTarget::DEPTH_STENCIL_USAGE_FOR_INPUT))
+    if(_configure._clear_bits.has(RenderTarget::CLEAR_BIT_DEPTH_STENCIL) && !_configure._depth_stencil_usage.has(RenderTarget::DEPTH_STENCIL_USAGE_FOR_INPUT))
         _clear_values.push_back(clearDepthStencil);
 
     _render_pass_begin_info.renderArea = _scissor;

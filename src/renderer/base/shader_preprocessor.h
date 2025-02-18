@@ -159,9 +159,8 @@ public:
 
     sp<Uniform> makeUniformInput(String name, Uniform::Type type) const;
 
-    void insertUBOStruct(const ShaderLayout::UBO& ubo);
     bool hasUBO(const ShaderLayout::UBO& ubo) const;
-    void declareUBOStruct(const ShaderLayout& piplineInput);
+    void declareUBOStruct(const ShaderLayout& shaderLayout, int32_t spaceSet = -1);
 
     String outputName() const;
 
@@ -175,6 +174,8 @@ private:
 
     sp<String> addUniform(const String& type, const String& name, uint32_t length, String declaration);
     uint32_t getUniformSize(Uniform::Type type, const String& declaredType) const;
+
+    void insertUBOStruct(const ShaderLayout::UBO& ubo, int32_t spaceSet);
 
     void linkParameters(const std::vector<Parameter>& parameters, const ShaderPreprocessor& preStage, std::set<String>& passThroughVars);
 

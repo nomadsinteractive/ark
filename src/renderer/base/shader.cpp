@@ -42,7 +42,7 @@ Shader::StageManifest::StageManifest(BeanFactory& factory, const document& manif
 }
 
 Shader::Shader(sp<PipelineFactory> pipelineFactory, sp<RenderController> renderController, sp<PipelineLayout> pipelineLayout, PipelineDescriptor::Parameters bindingParams)
-    : _pipeline_factory(std::move(pipelineFactory)), _render_controller(std::move(renderController)), _pipeline_layout(std::move(pipelineLayout)), _pipeline_input(_pipeline_layout->input()), _descriptor_params(std::move(bindingParams))
+    : _pipeline_factory(std::move(pipelineFactory)), _render_controller(std::move(renderController)), _pipeline_layout(std::move(pipelineLayout)), _pipeline_input(_pipeline_layout->shaderLayout()), _descriptor_params(std::move(bindingParams))
 {
     _pipeline_layout->initialize(*this);
 }

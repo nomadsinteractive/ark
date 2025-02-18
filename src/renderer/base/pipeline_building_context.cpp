@@ -17,28 +17,9 @@ namespace ark {
 
 namespace {
 
-class UniqueNameSet {
+class AlignedUploader final : public Uploader {
 public:
-    UniqueNameSet(Vector<String>& names)
-        : _names(names) {
-    }
-
-    void addBindings(const Vector<String>& names) {
-        for(const String& i : names)
-            if(_name_set.find(i) == _name_set.end()) {
-                _name_set.insert(i);
-                _names.push_back(i);
-            }
-    }
-
-private:
-    Vector<String>& _names;
-    std::set<String> _name_set;
-};
-
-class AlignedInput final : public Uploader {
-public:
-    AlignedInput(sp<Uploader> delegate, size_t alignedSize)
+    AlignedUploader(sp<Uploader> delegate, size_t alignedSize)
         : Uploader(alignedSize), _delegate(std::move(delegate)), _aligned_size(alignedSize) {
         CHECK(_delegate->size() <= _aligned_size, "Alignment is lesser than delegate's size(%d)", _delegate->size());
     }
@@ -111,7 +92,7 @@ Attribute makePredefinedAttribute(const String& name, const String& type)
 }
 
 PipelineBuildingContext::PipelineBuildingContext(const sp<RenderController>& renderController, const sp<Camera>& camera)
-    : _render_controller(renderController), _input(sp<ShaderLayout>::make(camera))
+    : _render_controller(renderController), _shader_layout(sp<ShaderLayout>::make(camera))
 {
 }
 
@@ -180,7 +161,7 @@ void PipelineBuildingContext::initializeAttributes()
         }
 
     const uint32_t alignment = _render_controller->renderEngine()->rendererFactory()->features()._attribute_alignment;
-    for(auto &[k, v] : _input->streamLayouts())
+    for(auto &[k, v] : _shader_layout->streamLayouts())
         v.align(k == 0 ? 4 : alignment);
 
     //TODO: link all outputs to next stage's inputs
@@ -222,12 +203,12 @@ void PipelineBuildingContext::initializeSSBO() const
         }
 
     for(auto& i : sobs.values())
-        _input->ssbos().push_back(std::move(i));
+        _shader_layout->ssbos().push_back(std::move(i));
 }
 
 void PipelineBuildingContext::tryBindCamera(const ShaderPreprocessor& shaderPreprocessor)
 {
-    const Camera& camera = _input->camera();
+    const Camera& camera = _shader_layout->camera();
     tryBindUniformMatrix(shaderPreprocessor, "u_VP", camera.vp());
     tryBindUniformMatrix(shaderPreprocessor, "u_View", camera.view());
     tryBindUniformMatrix(shaderPreprocessor, "u_Projection", camera.projection());
@@ -297,7 +278,7 @@ void PipelineBuildingContext::addAttribute(String name, String type, uint32_t di
 {
     //TODO: add attribute to specified stage
     const Attribute& attr = addPredefinedAttribute(name, type, divisor, Enum::SHADER_STAGE_BIT_VERTEX);
-    _input->addAttribute(std::move(name), attr);
+    _shader_layout->addAttribute(std::move(name), attr);
 }
 
 void PipelineBuildingContext::addUniform(String name, Uniform::Type type, uint32_t length, sp<Uploader> input)
@@ -390,7 +371,7 @@ void PipelineBuildingContext::loadPredefinedUniform(BeanFactory& factory, const 
         const Uniform::Type uType = Uniform::toType(type);
         const uint32_t componentSize = uType != Uniform::TYPE_STRUCT ? Uniform::getComponentSize(uType) : size;
         CHECK(componentSize, "Unknow type \"%s\"", type.c_str());
-        addUniform(sp<Uniform>::make(std::move(name), uType, componentSize, size / componentSize, uType == Uniform::TYPE_F3 ? sp<Uploader>::make<AlignedInput>(std::move(uploader), 16) : std::move(uploader)));
+        addUniform(sp<Uniform>::make(std::move(name), uType, componentSize, size / componentSize, uType == Uniform::TYPE_F3 ? sp<Uploader>::make<AlignedUploader>(std::move(uploader), 16) : std::move(uploader)));
     }
 }
 
@@ -464,10 +445,9 @@ void PipelineBuildingContext::initializeStages(PipelineLayout& pipelineLayout)
         tryBindCamera(*vertex);
 
     uint32_t binding = 0;
-    Table<String, ShaderLayout::BindingSet> samplers;
-    Table<String, ShaderLayout::BindingSet> images;
+    Table<String, ShaderLayout::DescriptorSet>& samplers = _shader_layout->_samplers;
+    Table<String, ShaderLayout::DescriptorSet>& images = _shader_layout->_images;
     {
-        UniqueNameSet samplerNames(_input->_sampler_names);
         if(const ShaderPreprocessor* vertex = tryGetRenderStage(Enum::SHADER_STAGE_BIT_VERTEX))
         {
             for(const String& i : vertex->_declaration_images.vars().keys())
@@ -475,7 +455,6 @@ void PipelineBuildingContext::initializeStages(PipelineLayout& pipelineLayout)
         }
         if(const ShaderPreprocessor* fragment = tryGetRenderStage(Enum::SHADER_STAGE_BIT_FRAGMENT))
         {
-            samplerNames.addBindings(fragment->_declaration_samplers.vars().keys());
             for(const String& i : fragment->_declaration_samplers.vars().keys())
                 binding = samplers[i].addStage(Enum::SHADER_STAGE_BIT_FRAGMENT, binding);
             for(const String& i : fragment->_declaration_images.vars().keys())
@@ -486,12 +465,11 @@ void PipelineBuildingContext::initializeStages(PipelineLayout& pipelineLayout)
     if(const ShaderPreprocessor* compute = _computing_stage.get())
     {
         tryBindCamera(*compute);
-        _input->_sampler_names = compute->_declaration_samplers.vars().keys();
+        for(const String& i : compute->_declaration_samplers.vars().keys())
+            binding = samplers[i].addStage(Enum::SHADER_STAGE_BIT_COMPUTE, binding);
         for(const String& i : compute->_declaration_images.vars().keys())
             binding = images[i].addStage(Enum::SHADER_STAGE_BIT_COMPUTE, binding);
     }
-    pipelineLayout._samplers = std::move(samplers.values());
-    pipelineLayout._images = std::move(images.values());
 }
 
 void PipelineBuildingContext::loadDefinitions(BeanFactory& factory, const Scope& args, const document& manifest)

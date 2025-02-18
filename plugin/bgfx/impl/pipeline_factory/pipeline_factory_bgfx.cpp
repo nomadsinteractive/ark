@@ -181,7 +181,7 @@ struct alignas(1) BgfxShaderAttributeChunk {
 
 #pragma pack(pop)
 
-::bgfx::ShaderHandle createShader(const ShaderLayout& pipelineInput, const String& source, Enum::ShaderStageBit stage)
+::bgfx::ShaderHandle createShader(const ShaderLayout& shaderLayout, const String& source, Enum::ShaderStageBit stage)
 {
     const char bgfxChunkMagic[4] = {toBgfxShaderTypeMagic(stage), 'S', 'H', 11};
     const std::vector<uint32_t> binaries = RenderUtil::compileSPIR(source, stage, Ark::RENDERER_BACKEND_VULKAN);
@@ -195,7 +195,7 @@ struct alignas(1) BgfxShaderAttributeChunk {
     uint32_t uboSize = 0;
     uint32_t ssboSize = 0;
     uint32_t dynamicDataSize = 0;
-    for(const ShaderLayout::UBO& i : pipelineInput.ubos())
+    for(const ShaderLayout::UBO& i : shaderLayout.ubos())
         if(i._stages.has(stage))
             for(const auto& [name, uniform] : i.uniforms())
             {
@@ -213,7 +213,7 @@ struct alignas(1) BgfxShaderAttributeChunk {
 
     uint32_t binding = 2;
     if(stage == Enum::SHADER_STAGE_BIT_FRAGMENT)
-        for(const String& i : pipelineInput.samplerNames())
+        for(const String& i : shaderLayout.samplers().keys())
         {
             dynamicDataSize += (i.size() + 1);
 
@@ -226,13 +226,13 @@ struct alignas(1) BgfxShaderAttributeChunk {
             uniformChunks.emplace_back(i, uniformChunk);
         }
 
-    for(const ShaderLayout::SSBO& i : pipelineInput.ssbos())
+    for(const ShaderLayout::SSBO& i : shaderLayout.ssbos())
         ssboSize += i._buffer.size();
 
     uint32_t customId = 0;
     std::vector<BgfxShaderAttributeChunk> attributeChunks;
     if(stage == Enum::SHADER_STAGE_BIT_VERTEX)
-        for(const auto& [name, attribute] : pipelineInput.getStreamLayout(0).attributes())
+        for(const auto& [name, attribute] : shaderLayout.getStreamLayout(0).attributes())
             attributeChunks.push_back({toBgfxAttribId(attribute.usage(), customId)});
 
     shaderHeader.count = uniformChunks.size();
@@ -276,12 +276,12 @@ struct DrawPipelineBgfx final : ResourceBase<::bgfx::ProgramHandle, Pipeline> {
 
     void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override
     {
-        if(_sampler_slots.empty() && !drawingContext._bindings->pipelineInput()->samplerNames().empty())
+        if(const Vector<String>& samplerNames = drawingContext._bindings->shaderLayout()->samplers().keys(); _sampler_slots.empty() && !samplerNames.empty())
         {
             uint8_t textureUint = 0;
-            for(size_t i = 0; i < drawingContext._bindings->pipelineInput()->samplerNames().size(); ++i)
+            for(size_t i = 0; i < samplerNames.size(); ++i)
             {
-                const String& name = drawingContext._bindings->pipelineInput()->samplerNames().at(i);
+                const String& name = samplerNames.at(i);
                 const auto& [texture, bindingSet] = drawingContext._bindings->pipelineDescriptor()->samplers().at(i);
                 const sp<TextureBgfx> textureBgfx = texture->delegate().cast<TextureBgfx>();
                 _sampler_slots.push_back({::bgfx::createUniform(name.c_str(), ::bgfx::UniformType::Sampler), std::move(textureBgfx), textureUint++});
@@ -300,7 +300,7 @@ struct DrawPipelineBgfx final : ResourceBase<::bgfx::ProgramHandle, Pipeline> {
             ::bgfx::setTexture(stage, uniform, texture->handle());
 
         {
-            const Camera& camera = drawingContext._bindings->pipelineInput()->camera();
+            const Camera& camera = drawingContext._bindings->shaderLayout()->camera();
             const M4 view = camera.view()->val();
             const M4 proj = camera.projection()->val();
             ::bgfx::setViewTransform(ctx._view_id, &view, &proj);
@@ -336,7 +336,7 @@ struct DrawPipelineBgfx final : ResourceBase<::bgfx::ProgramHandle, Pipeline> {
                 ::bgfx::InstanceDataBuffer idb;
                 for(const auto& [divisor, buffer] : param._divided_buffer_snapshots)
                 {
-                    const ShaderLayout::StreamLayout& sl = drawingContext._bindings->pipelineInput()->getStreamLayout(divisor);
+                    const ShaderLayout::StreamLayout& sl = drawingContext._bindings->shaderLayout()->getStreamLayout(divisor);
                     const uint32_t availInstanceCount = ::bgfx::getAvailInstanceDataBuffer(instanceCount, sl.stride());
                     ::bgfx::allocInstanceDataBuffer(&idb, availInstanceCount, sl.stride());
                     if(buffer._uploader)
@@ -427,7 +427,7 @@ sp<Pipeline> PipelineFactoryBgfx::buildPipeline(GraphicsContext& graphicsContext
         const Enum::DrawProcedure drawProcedure = pipelineDescriptor.drawProcedure();
         const auto fIter = stages.find(Enum::SHADER_STAGE_BIT_FRAGMENT);
         CHECK(fIter != stages.end(), "Pipeline has no fragment shader(only vertex shader available)");
-        return sp<Pipeline>::make<DrawPipelineBgfx>(drawProcedure, pipelineDescriptor.mode(), pipelineDescriptor.input(), std::move(vIter->second), std::move(fIter->second));
+        return sp<Pipeline>::make<DrawPipelineBgfx>(drawProcedure, pipelineDescriptor.mode(), pipelineDescriptor.shaderLayout(), std::move(vIter->second), std::move(fIter->second));
     }
     const auto cIter = stages.find(Enum::SHADER_STAGE_BIT_COMPUTE);
     CHECK(cIter != stages.end(), "Pipeline has no compute shader");

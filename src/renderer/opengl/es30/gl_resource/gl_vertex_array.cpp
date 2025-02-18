@@ -25,7 +25,7 @@ void GLVertexArray::upload(GraphicsContext& graphicsContext)
     glBindVertexArray(_id);
     _vertex->upload(graphicsContext);
     glBindBuffer(GL_ARRAY_BUFFER, static_cast<GLuint>(_vertex->id()));
-    _pipeline->bindBuffer(graphicsContext, _pipeline_descriptor->input(), _streams);
+    _pipeline->bindBuffer(graphicsContext, _pipeline_descriptor->shaderLayout(), _streams);
     glBindVertexArray(0);
     LOGD("id = %d", _id);
 }

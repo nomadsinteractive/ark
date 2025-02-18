@@ -166,12 +166,12 @@ public:
     const Parameters& parameters() const;
     const Optional<Rect>& scissor() const;
     const sp<PipelineLayout>& layout() const;
-    const sp<ShaderLayout>& input() const;
+    const sp<ShaderLayout>& shaderLayout() const;
 
     const ShaderLayout::AttributeOffsets& attributes() const;
 
-    const Vector<std::pair<sp<Texture>, ShaderLayout::BindingSet>>& samplers() const;
-    const Vector<std::pair<sp<Texture>, ShaderLayout::BindingSet>>& images() const;
+    const Vector<std::pair<sp<Texture>, ShaderLayout::DescriptorSet>>& samplers() const;
+    const Vector<std::pair<sp<Texture>, ShaderLayout::DescriptorSet>>& images() const;
 
     void bindSampler(sp<Texture> texture, uint32_t name = 0);
 

@@ -72,7 +72,7 @@ void BufferBase::setupVertexBufferLayout(::bgfx::VertexLayout& vertexLayout, con
 {
     vertexLayout.begin();
     uint32_t customAttrIdx = 0;
-    for(const auto& [k, v] : pipelineDescriptor.input()->getStreamLayout(0).attributes())
+    for(const auto& [k, v] : pipelineDescriptor.shaderLayout()->getStreamLayout(0).attributes())
     {
         const ::bgfx::Attrib::Enum attribEnum = toAttribEnum(v.usage(), v.usage() == Attribute::USAGE_CUSTOM ? customAttrIdx++ : customAttrIdx);
         vertexLayout.add(attribEnum, v.length(), toAttribType(v.type()), v.normalized());

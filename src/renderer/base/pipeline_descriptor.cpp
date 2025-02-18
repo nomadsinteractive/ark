@@ -38,12 +38,12 @@ struct PipelineDescriptor::Stub {
     Parameters _parameters;
 
     sp<PipelineLayout> _layout;
-    sp<ShaderLayout> _input;
+    sp<ShaderLayout> _shader_layout;
     //TODO: move it to stream
     ShaderLayout::AttributeOffsets _attributes;
 
-    Vector<std::pair<sp<Texture>, ShaderLayout::BindingSet>> _samplers;
-    Vector<std::pair<sp<Texture>, ShaderLayout::BindingSet>> _images;
+    Vector<std::pair<sp<Texture>, ShaderLayout::DescriptorSet>> _samplers;
+    Vector<std::pair<sp<Texture>, ShaderLayout::DescriptorSet>> _images;
 };
 
 PipelineDescriptor::PipelineDescriptor(Enum::RenderMode mode, Enum::DrawProcedure renderProcedure, Parameters parameters, sp<PipelineLayout> pipelineLayout)
@@ -76,9 +76,9 @@ const sp<PipelineLayout>& PipelineDescriptor::layout() const
     return _stub->_layout;
 }
 
-const sp<ShaderLayout>& PipelineDescriptor::input() const
+const sp<ShaderLayout>& PipelineDescriptor::shaderLayout() const
 {
-    return _stub->_input;
+    return _stub->_shader_layout;
 }
 
 const ShaderLayout::AttributeOffsets& PipelineDescriptor::attributes() const
@@ -86,12 +86,12 @@ const ShaderLayout::AttributeOffsets& PipelineDescriptor::attributes() const
     return _stub->_attributes;
 }
 
-const Vector<std::pair<sp<Texture>, ShaderLayout::BindingSet>>& PipelineDescriptor::samplers() const
+const Vector<std::pair<sp<Texture>, ShaderLayout::DescriptorSet>>& PipelineDescriptor::samplers() const
 {
     return _stub->_samplers;
 }
 
-const Vector<std::pair<sp<Texture>, ShaderLayout::BindingSet>>& PipelineDescriptor::images() const
+const Vector<std::pair<sp<Texture>, ShaderLayout::DescriptorSet>>& PipelineDescriptor::images() const
 {
     return _stub->_images;
 }
@@ -105,7 +105,7 @@ void PipelineDescriptor::bindSampler(sp<Texture> texture, uint32_t name)
 
 bool PipelineDescriptor::hasDivisors() const
 {
-    return _stub->_input->streamLayouts().size() > 1;
+    return _stub->_shader_layout->streamLayouts().size() > 1;
 }
 
 PipelineDescriptor::Flag PipelineDescriptor::getFlag(PipelineDescriptor::Flag bitmask) const
@@ -124,7 +124,7 @@ void PipelineDescriptor::setFlag(PipelineDescriptor::Flag flag, PipelineDescript
 }
 
 PipelineDescriptor::Stub::Stub(Enum::RenderMode mode, Enum::DrawProcedure renderProcedure, Parameters parameters, sp<PipelineLayout> pipelineLayout)
-    : _mode(mode), _render_procedure(renderProcedure), _parameters(std::move(parameters)), _layout(std::move(pipelineLayout)), _input(_layout->input()), _attributes(_input),
+    : _mode(mode), _render_procedure(renderProcedure), _parameters(std::move(parameters)), _layout(std::move(pipelineLayout)), _shader_layout(_layout->shaderLayout()), _attributes(_shader_layout),
       _samplers(_layout->makeBindingSamplers()), _images(_layout->makeBindingImages())
 {
 }

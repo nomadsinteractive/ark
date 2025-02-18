@@ -9,7 +9,7 @@ namespace ark::plugin::sdl3 {
 
 class TextureSDL3_GPU final : public Texture::Delegate {
 public:
-    TextureSDL3_GPU(const uint32_t width, const uint32_t height, sp<Texture::Parameters> parameters);
+    TextureSDL3_GPU(uint32_t width, uint32_t height, sp<Texture::Parameters> parameters);
 
     uint64_t id() override;
 
@@ -20,15 +20,15 @@ public:
     void uploadBitmap(GraphicsContext& graphicsContext, const Bitmap& bitmap, const std::vector<sp<ByteArray>>& imagedata) override;
 
     SDL_GPUTexture* texture() const;
-    SDL_GPUSampler* ensureSampler(SDL_GPUDevice *gpuDevice);
+    SDL_GPUTextureFormat textureFormat() const;
 
-private:
-    SDL_GPUTexture* createTexture(GraphicsContext& graphicsContext, const Bitmap& bitmap) const;
+    SDL_GPUSampler* ensureSampler(SDL_GPUDevice *gpuDevice);
 
 private:
     uint32_t _width;
     uint32_t _height;
     sp<Texture::Parameters> _parameters;
+    SDL_GPUTextureFormat _texture_format;
 
     SDL_GPUTexture* _texture;
     SDL_GPUSampler* _sampler;

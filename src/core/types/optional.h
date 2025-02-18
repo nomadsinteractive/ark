@@ -10,54 +10,49 @@ template<typename T> class Optional {
 public:
     constexpr Optional() noexcept = default;
     Optional(T value) noexcept
-        : _optional(Stub(std::move(value))) {
+        : _stub{{std::move(value)}} {
     }
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Optional);
 
     typedef std::remove_reference_t<T> OPT_TYPE;
 
     explicit operator bool() const {
-        return static_cast<bool>(_optional);
+        return static_cast<bool>(_stub);
     }
 
     OPT_TYPE& value() {
-        return *_ptr();
+        return *get();
     }
 
     const OPT_TYPE& value() const {
-        return *_ptr();
+        return *get();
     }
 
     OPT_TYPE* operator ->() {
-        return _ptr();
+        return get();
     }
 
     const OPT_TYPE* operator ->() const {
-        return _ptr();
+        return get();
+    }
+
+    const OPT_TYPE* get() const {
+        CHECK(_stub, "Bad optional access");
+        return &_stub.value()._value;
+    }
+
+    OPT_TYPE* get() {
+        CHECK(_stub, "Bad optional access");
+        return &_stub.value()._value;
     }
 
 private:
     struct Stub {
-        Stub(T value)
-            : _value(std::move(value)) {
-        }
-        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Stub);
-
         T _value;
     };
 
-    const OPT_TYPE* _ptr() const {
-        CHECK(_optional, "Bad optional access");
-        return &_optional.value()._value;
-    }
-
-    OPT_TYPE* _ptr() {
-        CHECK(_optional, "Bad optional access");
-        return &_optional.value()._value;
-    }
-
 private:
-    std::optional<Stub> _optional;
+    std::optional<Stub> _stub;
 };
 
 }

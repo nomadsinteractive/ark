@@ -261,7 +261,7 @@ void RenderController::uploadBuffer(Buffer& buffer, sp<Uploader> uploader, Rende
     if(strategy == US_ON_CHANGE)
         upload(nullptr, strategy, std::move(updatable), std::move(future), priority);
     else
-        upload(sp<ResourceUploadBufferSnapshot>::make(buffer.delegate(), uploaderInstance), strategy, std::move(updatable), std::move(future), priority);
+        upload(sp<Resource>::make<ResourceUploadBufferSnapshot>(buffer.delegate(), uploaderInstance), strategy, std::move(updatable), std::move(future), priority);
 }
 
 const sp<Recycler>& RenderController::recycler() const
@@ -342,8 +342,9 @@ sp<RenderController::PrimitiveIndexBuffer> RenderController::getSharedPrimitiveI
 
 sp<RenderTarget> RenderController::makeRenderTarget(sp<Renderer> renderer, RenderTarget::CreateConfigure configure)
 {
-    const sp<RenderTarget> renderTarget = renderEngine()->rendererFactory()->createRenderTarget(std::move(renderer), std::move(configure));
-    upload(renderTarget->resource(), US_ONCE_AND_ON_SURFACE_READY, nullptr, nullptr, UPLOAD_PRIORITY_LOW);
+    sp<RenderTarget> renderTarget = renderEngine()->rendererFactory()->createRenderTarget(std::move(renderer), std::move(configure));
+    if(renderTarget->resource())
+        upload(renderTarget->resource(), US_ONCE_AND_ON_SURFACE_READY, nullptr, nullptr, UPLOAD_PRIORITY_LOW);
     return renderTarget;
 }
 
