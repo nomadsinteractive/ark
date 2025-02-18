@@ -46,9 +46,19 @@ public:
         if(ShaderPreprocessor* fragment = context.tryGetRenderStage(Enum::SHADER_STAGE_BIT_FRAGMENT))
         {
             fragment->linkNextStage("FragColor");
-            const uint32_t bindingOffset = static_cast<uint32_t>(pipelineInput.ubos().size() + pipelineInput.ssbos().size());
-            RenderUtil::setLayoutDescriptor(fragment->_declaration_samplers, "binding", bindingOffset);
+            const uint32_t bindingOffset = std::max<uint32_t>(2, pipelineInput.ubos().size() + pipelineInput.ssbos().size());
             RenderUtil::setLayoutDescriptor(fragment->_declaration_images, "binding", bindingOffset + static_cast<uint32_t>(fragment->_declaration_samplers.vars().size()));
+
+            uint32_t binding = 0;
+            constexpr uint32_t samplerOffset = 16;
+            const std::vector<String> samplerNames = fragment->_declaration_samplers.vars().keys();
+            fragment->_declaration_samplers.clear();
+            for(const String& k : samplerNames)
+            {
+                fragment->_declaration_samplers.declare("sampler", "", k + "S", Strings::sprintf("binding = %d", bindingOffset + samplerOffset + binding));
+                fragment->_declaration_samplers.declare("texture2D", "", k + "T", Strings::sprintf("binding = %d", bindingOffset + binding++));
+                fragment->_predefined_macros.emplace_back(Strings::sprintf("#define %s sampler2D(%sT, %sS)", k.c_str(), k.c_str(), k.c_str()));
+            }
         }
 
         if(const ShaderPreprocessor* compute = context.computingStage().get())
@@ -121,13 +131,13 @@ void RendererFactorySDL3_GPU::onSurfaceCreated(RenderEngine& renderEngine)
 {
     _gpu_device = SDL_CreateGPUDevice(
             SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXIL | SDL_GPU_SHADERFORMAT_MSL,
+#if ARK_FLAG_DEBUG
+            true,
+#else
             false,
+#endif
             nullptr);
-    if(!_gpu_device)
-    {
-        SDL_Log("GPUCreateDevice failed");
-        return;
-    }
+    CHECK(_gpu_device, "GPUCreateDevice failed");
 
     ContextSDL3_GPU& sdl3GPUContext = renderEngine.context()->traits().ensure<ContextSDL3_GPU>();
     ASSERT(sdl3GPUContext._main_window);

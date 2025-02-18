@@ -23,7 +23,7 @@ public:
     SDL_GPUSampler* ensureSampler(SDL_GPUDevice *gpuDevice);
 
 private:
-    SDL_GPUTexture* createTexture(GraphicsContext& graphicsContext) const;
+    SDL_GPUTexture* createTexture(GraphicsContext& graphicsContext, const Bitmap& bitmap) const;
 
 private:
     uint32_t _width;

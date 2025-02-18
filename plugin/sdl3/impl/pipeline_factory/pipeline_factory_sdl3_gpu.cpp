@@ -23,24 +23,9 @@ namespace ark::plugin::sdl3 {
 
 namespace {
 
-class SDL_ShaderCrossContext {
-public:
-    SDL_ShaderCrossContext()
-    {
-        SDL_ShaderCross_Init();
-        _shader_format = SDL_ShaderCross_GetSPIRVShaderFormats();
-    }
-    ~SDL_ShaderCrossContext()
-    {
-        SDL_ShaderCross_Quit();
-    }
-
-    SDL_GPUShaderFormat _shader_format;
-};
-
 SDL_GPUShader* createGraphicsShader(SDL_GPUDevice* device, const ShaderLayout& pipelineInput, const StringView source, Enum::ShaderStageBit stageBit)
 {
-	const SDL_GPUShaderFormat backendFormats = Global<SDL_ShaderCrossContext>()->_shader_format;
+	const SDL_GPUShaderFormat backendFormats = SDL_ShaderCross_GetSPIRVShaderFormats();
 	const char* entrypoint = nullptr;
     if (backendFormats & SDL_GPU_SHADERFORMAT_SPIRV)
         entrypoint = "main";
@@ -76,7 +61,11 @@ SDL_GPUShader* createGraphicsShader(SDL_GPUDevice* device, const ShaderLayout& p
         binaries.size() * sizeof(uint32_t),
         entrypoint,
         stageBit == Enum::SHADER_STAGE_BIT_VERTEX ? SDL_SHADERCROSS_SHADERSTAGE_VERTEX : SDL_SHADERCROSS_SHADERSTAGE_FRAGMENT,
+#ifdef ARK_FLAG_DEBUG
+        true,
+#else
         false,
+#endif
         nullptr
     };
 
@@ -97,50 +86,61 @@ SDL_GPUShader* createGraphicsShader(SDL_GPUDevice* device, const ShaderLayout& p
 	return shader;
 }
 
-SDL_GPUVertexElementFormat toVertexElementFormat(const Attribute& i)
+SDL_GPUColorTargetBlendState toColorTargetBlendState()
 {
-    switch(i.type())
-    {
-        case Attribute::TYPE_BYTE:
-            if(i.length() == 2)
-                return SDL_GPU_VERTEXELEMENTFORMAT_BYTE2;
-            if(i.length() == 4)
-                return SDL_GPU_VERTEXELEMENTFORMAT_BYTE4;
-            break;
-        case Attribute::TYPE_FLOAT: {
-            constexpr SDL_GPUVertexElementFormat floatFormat[4] = {SDL_GPU_VERTEXELEMENTFORMAT_FLOAT, SDL_GPU_VERTEXELEMENTFORMAT_FLOAT2, SDL_GPU_VERTEXELEMENTFORMAT_FLOAT3, SDL_GPU_VERTEXELEMENTFORMAT_FLOAT4};
-            if(i.length() > 0 && i.length() < 5)
-                return floatFormat[i.length()];
-            break;
+    SDL_GPUColorTargetBlendState colorTargetBlendState = {
+        SDL_GPU_BLENDFACTOR_SRC_ALPHA,
+        SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA,
+        SDL_GPU_BLENDOP_ADD,
+        SDL_GPU_BLENDFACTOR_SRC_ALPHA,
+        SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA,
+        SDL_GPU_BLENDOP_SUBTRACT,
+        0xf,
+        true,
+        false
+    };
+    return colorTargetBlendState;
+}
+
+SDL_GPUVertexElementFormat toVertexElementFormat(const Attribute& attribute)
+{
+    const uint32_t length = attribute.length();
+    if(length > 0 && length < 5)
+        switch(attribute.type())
+        {
+            case Attribute::TYPE_FLOAT:
+            {
+                constexpr SDL_GPUVertexElementFormat formats[4] = {SDL_GPU_VERTEXELEMENTFORMAT_FLOAT, SDL_GPU_VERTEXELEMENTFORMAT_FLOAT2, SDL_GPU_VERTEXELEMENTFORMAT_FLOAT3, SDL_GPU_VERTEXELEMENTFORMAT_FLOAT4};
+                return formats[length - 1];
+            }
+            case Attribute::TYPE_BYTE:
+                case Attribute::TYPE_UBYTE:
+                if(length == 2)
+                    return attribute.normalized()?  SDL_GPU_VERTEXELEMENTFORMAT_BYTE2_NORM : SDL_GPU_VERTEXELEMENTFORMAT_BYTE2;
+                if(length == 4)
+                    return attribute.normalized()?  SDL_GPU_VERTEXELEMENTFORMAT_BYTE4_NORM : SDL_GPU_VERTEXELEMENTFORMAT_BYTE4;
+                break;
+            case Attribute::TYPE_INTEGER:
+            {
+                constexpr SDL_GPUVertexElementFormat formats[4] = {SDL_GPU_VERTEXELEMENTFORMAT_INT, SDL_GPU_VERTEXELEMENTFORMAT_INT2, SDL_GPU_VERTEXELEMENTFORMAT_INT3, SDL_GPU_VERTEXELEMENTFORMAT_INT4};
+                return formats[length - 1];
+            }
+            case Attribute::TYPE_SHORT:
+                if(length == 2)
+                    return attribute.normalized() ? SDL_GPU_VERTEXELEMENTFORMAT_SHORT2_NORM : SDL_GPU_VERTEXELEMENTFORMAT_SHORT2;
+                if(length == 4)
+                    return attribute.normalized() ? SDL_GPU_VERTEXELEMENTFORMAT_SHORT4_NORM : SDL_GPU_VERTEXELEMENTFORMAT_SHORT4;
+                break;
+            case Attribute::TYPE_USHORT:
+                if(length == 2)
+                    return attribute.normalized() ? SDL_GPU_VERTEXELEMENTFORMAT_USHORT2_NORM : SDL_GPU_VERTEXELEMENTFORMAT_USHORT2;
+                if(length == 4)
+                    return attribute.normalized() ? SDL_GPU_VERTEXELEMENTFORMAT_USHORT4_NORM : SDL_GPU_VERTEXELEMENTFORMAT_USHORT4;
+                break;
+            default:
+                break;
         }
-        case Attribute::TYPE_INTEGER: {
-            constexpr SDL_GPUVertexElementFormat intFormat[4] = {SDL_GPU_VERTEXELEMENTFORMAT_INT, SDL_GPU_VERTEXELEMENTFORMAT_INT2, SDL_GPU_VERTEXELEMENTFORMAT_INT3, SDL_GPU_VERTEXELEMENTFORMAT_INT4};
-            if(i.length() > 0 && i.length() < 5)
-                return intFormat[i.length()];
-            break;
-        }
-        case Attribute::TYPE_SHORT:
-            if(i.length() == 2)
-                return SDL_GPU_VERTEXELEMENTFORMAT_SHORT2;
-            if(i.length() == 4)
-                return SDL_GPU_VERTEXELEMENTFORMAT_SHORT4;
-            break;
-        case Attribute::TYPE_UBYTE:
-            if(i.length() == 2)
-                return SDL_GPU_VERTEXELEMENTFORMAT_UBYTE2;
-            if(i.length() == 4)
-                return SDL_GPU_VERTEXELEMENTFORMAT_UBYTE4;
-            break;
-        case Attribute::TYPE_USHORT:
-            if(i.length() == 2)
-                return SDL_GPU_VERTEXELEMENTFORMAT_USHORT2;
-            if(i.length() == 4)
-                return SDL_GPU_VERTEXELEMENTFORMAT_USHORT4;
-            break;
-        default:
-            break;
-    }
-    FATAL("Unsupported attribute type: %d length = %d", i.type(), i.length());
+    FATAL("Unsupported attribute type: %d length = %d", attribute.type(), length);
     return SDL_GPU_VERTEXELEMENTFORMAT_INVALID;
 }
 
@@ -189,7 +189,9 @@ public:
     {
         if(!_pipeline)
         {
-            SDL_GPUDevice* gpuDevice = ensureGPUDevice(graphicsContext);
+            const ContextSDL3_GPU& context = ensureContext(graphicsContext);
+            SDL_GPUDevice* gpuDevice = context._gpu_gevice;
+
             SDL_GPUShader* vertexShader = createGraphicsShader(gpuDevice, _pipeline_input, _vertex_shader, Enum::SHADER_STAGE_BIT_VERTEX);
             SDL_GPUShader* fragmentShader = createGraphicsShader(gpuDevice, _pipeline_input, _fragment_shader, Enum::SHADER_STAGE_BIT_FRAGMENT);
 
@@ -222,6 +224,10 @@ public:
                 }
             }
 
+            const SDL_GPUColorTargetDescription colorTargetDescription = {
+                SDL_GetGPUSwapchainTextureFormat(gpuDevice, context._main_window),
+                toColorTargetBlendState()
+            };
             const SDL_GPUGraphicsPipelineCreateInfo pipelineCreateInfo = {
                 vertexShader,
                 fragmentShader,
@@ -240,8 +246,18 @@ public:
                 }, {
                     SDL_GPU_COMPAREOP_LESS_OR_EQUAL
                 }
+                , {
+                    &colorTargetDescription,
+                    1,
+                    SDL_GPU_TEXTUREFORMAT_D24_UNORM,
+                    true
+                }
             };
             _pipeline = SDL_CreateGPUGraphicsPipeline(gpuDevice, &pipelineCreateInfo);
+            CHECK(_pipeline, "%s", SDL_GetError());
+
+            SDL_ReleaseGPUShader(gpuDevice, vertexShader);
+            SDL_ReleaseGPUShader(gpuDevice, fragmentShader);
         }
     }
 

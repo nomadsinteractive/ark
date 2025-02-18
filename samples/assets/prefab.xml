@@ -11,7 +11,7 @@
 		<import class="characters" characters="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890/.(),- "
 				font-width="32" font-height="64"/>
 	</atlas>
-	<atlas id="@atlas_01" width="512" height="512"/>
+	<atlas id="@atlas_01" width="512" height="512" format="r"/>
 	<shader id="@s_default">
 		<stage type="vertex" src="@shaders:default.vert"/>
 		<stage type="fragment" src="@shaders:texture.frag"/>

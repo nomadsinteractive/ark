@@ -5,6 +5,60 @@
 
 namespace ark::plugin::sdl3 {
 
+namespace {
+
+SDL_GPUTextureFormat toChannelFormat(const SDL_GPUTextureFormat* channelFormat, const uint32_t depths, const Texture::Format format)
+{
+    if(depths == 1)
+    {
+        CHECK(!(format & Texture::FORMAT_FLOAT), "Component size one doesn't support float format");
+        return channelFormat[0];
+    }
+    if(depths == 2)
+    {
+        if(format & Texture::FORMAT_FLOAT)
+            return channelFormat[4];
+        return format & Texture::FORMAT_SIGNED ? channelFormat[3] : channelFormat[2];
+    }
+    DCHECK(depths == 4, "Unsupported color-depth: %d", depths * 8);
+    if(format & Texture::FORMAT_FLOAT)
+        return channelFormat[5];
+    return format & Texture::FORMAT_SIGNED ? channelFormat[7] : channelFormat[6];
+}
+
+SDL_GPUTextureFormat toSDL_GPUTextureFormat(const Bitmap& bitmap, const Texture::Format format)
+{
+    constexpr SDL_GPUTextureFormat sdlFormats[] = {
+        SDL_GPU_TEXTUREFORMAT_R8_UNORM, SDL_GPU_TEXTUREFORMAT_R8_SNORM, SDL_GPU_TEXTUREFORMAT_R16_UNORM, SDL_GPU_TEXTUREFORMAT_R16_SNORM, SDL_GPU_TEXTUREFORMAT_R16_FLOAT, SDL_GPU_TEXTUREFORMAT_R32_FLOAT, SDL_GPU_TEXTUREFORMAT_R32_UINT, SDL_GPU_TEXTUREFORMAT_R32_INT,
+        SDL_GPU_TEXTUREFORMAT_R8G8_UNORM, SDL_GPU_TEXTUREFORMAT_R8G8_SNORM, SDL_GPU_TEXTUREFORMAT_R16G16_UNORM, SDL_GPU_TEXTUREFORMAT_R16G16_SNORM, SDL_GPU_TEXTUREFORMAT_R16G16_FLOAT, SDL_GPU_TEXTUREFORMAT_R32G32_FLOAT, SDL_GPU_TEXTUREFORMAT_R32G32_UINT, SDL_GPU_TEXTUREFORMAT_R32G32_INT,
+        SDL_GPU_TEXTUREFORMAT_R8G8_UNORM, SDL_GPU_TEXTUREFORMAT_R8G8_SNORM, SDL_GPU_TEXTUREFORMAT_R16G16_UNORM, SDL_GPU_TEXTUREFORMAT_R16G16_SNORM, SDL_GPU_TEXTUREFORMAT_R16G16_FLOAT, SDL_GPU_TEXTUREFORMAT_R32G32_FLOAT, SDL_GPU_TEXTUREFORMAT_R32G32_UINT, SDL_GPU_TEXTUREFORMAT_R32G32_INT,
+        SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM, SDL_GPU_TEXTUREFORMAT_R8G8B8A8_SNORM, SDL_GPU_TEXTUREFORMAT_R16G16B16A16_UNORM, SDL_GPU_TEXTUREFORMAT_R16G16B16A16_SNORM, SDL_GPU_TEXTUREFORMAT_R16G16B16A16_FLOAT, SDL_GPU_TEXTUREFORMAT_R32G32B32A32_FLOAT, SDL_GPU_TEXTUREFORMAT_R32G32B32A32_UINT, SDL_GPU_TEXTUREFORMAT_R32G32B32A32_INT
+    };
+    CHECK(bitmap.channels() != 3, "3 channels textures are not supported");
+    CHECK(!(format & Texture::FORMAT_SIGNED && format & Texture::FORMAT_FLOAT), "FORMAT_SIGNED format can not combined with FORMAT_FLOAT");
+    const uint32_t channel8 = (bitmap.channels() - 1) * 8;
+    return toChannelFormat(sdlFormats + channel8, bitmap.depth(), format);
+}
+
+SDL_GPUTextureUsageFlags toTextureUsageFlags(const Texture::Usage usage)
+{
+    if(usage == Texture::USAGE_AUTO)
+        return SDL_GPU_TEXTUREUSAGE_SAMPLER;
+
+    SDL_GPUTextureUsageFlags flags = 0;
+    if(usage.has(Texture::USAGE_DEPTH_STENCIL_ATTACHMENT))
+        flags |= SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET;
+    if(usage.has(Texture::USAGE_COLOR_ATTACHMENT))
+        flags |= SDL_GPU_TEXTUREUSAGE_COLOR_TARGET;
+    if(usage.has(Texture::USAGE_SAMPLER))
+        flags |= SDL_GPU_TEXTUREUSAGE_SAMPLER;
+    if(usage.has(Texture::USAGE_STORAGE))
+        flags |= SDL_GPU_TEXTUREUSAGE_GRAPHICS_STORAGE_READ | SDL_GPU_TEXTUREUSAGE_COMPUTE_STORAGE_READ | SDL_GPU_TEXTUREUSAGE_COMPUTE_STORAGE_WRITE;
+    return flags;
+}
+
+}
+
 TextureSDL3_GPU::TextureSDL3_GPU(const uint32_t width, const uint32_t height, sp<Texture::Parameters> parameters)
     : Delegate(parameters->_type), _width(width), _height(height), _parameters(std::move(parameters)), _texture(nullptr), _sampler(nullptr)
 {
@@ -55,7 +109,7 @@ bool TextureSDL3_GPU::download(GraphicsContext& graphicsContext, Bitmap& bitmap)
 void TextureSDL3_GPU::uploadBitmap(GraphicsContext& graphicsContext, const Bitmap& bitmap, const Vector<sp<ByteArray>>& imagedata)
 {
     if(!_texture)
-        _texture = createTexture(graphicsContext);
+        _texture = createTexture(graphicsContext, bitmap);
 
     SDL_GPUDevice* gpuDevice = ensureGPUDevice(graphicsContext);
     SDL_GPUCommandBuffer* uploadCmdBuf = SDL_AcquireGPUCommandBuffer(gpuDevice);
@@ -70,7 +124,7 @@ void TextureSDL3_GPU::uploadBitmap(GraphicsContext& graphicsContext, const Bitma
     memcpy(transferData, imagedata.at(0)->buf(), bitmapSize);
     SDL_UnmapGPUTransferBuffer(gpuDevice, textureTransferBuffer);
 
-    const SDL_GPUTextureTransferInfo textureTransferInfo{textureTransferBuffer, 0, bitmap.rowBytes(), 0};
+    const SDL_GPUTextureTransferInfo textureTransferInfo{textureTransferBuffer, 0, bitmap.width(), bitmap.height()};
     const SDL_GPUTextureRegion textureRegion{_texture, 0, 0, 0, 0, 0, bitmap.width(), bitmap.height(), 1};
     SDL_UploadToGPUTexture(copyPass, &textureTransferInfo, &textureRegion, false);
 
@@ -97,11 +151,11 @@ SDL_GPUSampler* TextureSDL3_GPU::ensureSampler(SDL_GPUDevice *gpuDevice)
     return _sampler;
 }
 
-SDL_GPUTexture* TextureSDL3_GPU::createTexture(GraphicsContext& graphicsContext) const
+SDL_GPUTexture* TextureSDL3_GPU::createTexture(GraphicsContext& graphicsContext, const Bitmap& bitmap) const
 {
     SDL_GPUDevice* gpuDevice = ensureGPUDevice(graphicsContext);
     const Texture::Parameters& parameters = *_parameters;
-    const SDL_GPUTextureCreateInfo textureCreateInfo{parameters._type == Texture::TYPE_2D ? SDL_GPU_TEXTURETYPE_2D : SDL_GPU_TEXTURETYPE_CUBE, SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM, SDL_GPU_TEXTUREUSAGE_SAMPLER, _width, _height, 1, 1};
+    const SDL_GPUTextureCreateInfo textureCreateInfo{parameters._type == Texture::TYPE_2D ? SDL_GPU_TEXTURETYPE_2D : SDL_GPU_TEXTURETYPE_CUBE, toSDL_GPUTextureFormat(bitmap, parameters._format), toTextureUsageFlags(parameters._usage), _width, _height, 1, 1};
     return SDL_CreateGPUTexture(gpuDevice, &textureCreateInfo);
 }
 

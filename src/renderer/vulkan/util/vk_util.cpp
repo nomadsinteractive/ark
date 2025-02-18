@@ -131,32 +131,26 @@ VkFormat VKUtil::toAttributeFormat(Attribute::Type type, uint32_t length)
     return VK_FORMAT_R32G32B32A32_SFLOAT;
 }
 
-static VkFormat toVkChannelFormat(const VkFormat* channelFormat, uint32_t componentSize, Texture::Format format)
+static VkFormat toVkChannelFormat(const VkFormat* channelFormat, const uint32_t depths, const Texture::Format format)
 {
-/*
- *    VK_FORMAT_R8G8_UNORM, VK_FORMAT_R8G8_SNORM,
-      VK_FORMAT_R16G16_UNORM, VK_FORMAT_R16G16_SNORM,
-      VK_FORMAT_R16G16_SFLOAT, VK_FORMAT_R32G32_SFLOAT,
-      VK_FORMAT_R32G32_UINT, VK_FORMAT_R32G32_SINT
-*/
-    if(componentSize == 1)
+    if(depths == 1)
     {
         CHECK(!(format & Texture::FORMAT_FLOAT), "Component size one doesn't support float format");
         return channelFormat[0];
     }
-    if(componentSize == 2)
+    if(depths == 2)
     {
         if(format & Texture::FORMAT_FLOAT)
             return channelFormat[4];
         return format & Texture::FORMAT_SIGNED ? channelFormat[3] : channelFormat[2];
     }
-    DCHECK(componentSize == 4, "Unsupported color-depth: %d", componentSize * 8);
+    DCHECK(depths == 4, "Unsupported color-depth: %d", depths * 8);
     if(format & Texture::FORMAT_FLOAT)
         return channelFormat[5];
     return format & Texture::FORMAT_SIGNED ? channelFormat[7] : channelFormat[6];
 }
 
-VkFormat VKUtil::toTextureFormat(uint32_t componentSize, uint8_t channels, Texture::Format format)
+VkFormat VKUtil::toTextureFormat(const uint32_t depths, const uint8_t channels, const Texture::Format format)
 {
     constexpr VkFormat vkFormats[] = {
         VK_FORMAT_R8_UNORM, VK_FORMAT_R8_SNORM, VK_FORMAT_R16_UNORM, VK_FORMAT_R16_SNORM, VK_FORMAT_R16_SFLOAT, VK_FORMAT_R32_SFLOAT, VK_FORMAT_R32_UINT, VK_FORMAT_R32_SINT,
@@ -165,14 +159,14 @@ VkFormat VKUtil::toTextureFormat(uint32_t componentSize, uint8_t channels, Textu
         VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_R8G8B8A8_SNORM, VK_FORMAT_R16G16B16A16_UNORM, VK_FORMAT_R16G16B16A16_SNORM, VK_FORMAT_R16G16B16A16_SFLOAT, VK_FORMAT_R32G32B32A32_SFLOAT, VK_FORMAT_R32G32B32A32_UINT, VK_FORMAT_R32G32B32A32_SINT
     };
     CHECK(!(format & Texture::FORMAT_SIGNED && format & Texture::FORMAT_FLOAT), "FORMAT_SIGNED format can not combined with FORMAT_FLOAT");
-    uint32_t channel8 = (channels - 1) * 8;
+    const uint32_t channel8 = (channels - 1) * 8;
     CHECK_WARN(channels != 3, "RGB texture format may not be supported by all the graphics drivers");
-    return toVkChannelFormat(vkFormats + channel8, componentSize, format);
+    return toVkChannelFormat(vkFormats + channel8, depths, format);
 }
 
 VkFormat VKUtil::toTextureFormat(const Bitmap& bitmap, Texture::Format format)
 {
-    return toTextureFormat(bitmap.rowBytes() / bitmap.width() / bitmap.channels(), bitmap.channels(), format);
+    return toTextureFormat(bitmap.depth(), bitmap.channels(), format);
 }
 
 VkFormat VKUtil::toTextureFormat(Texture::Format format)
