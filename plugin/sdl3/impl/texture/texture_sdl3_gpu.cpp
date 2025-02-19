@@ -60,6 +60,11 @@ SDL_GPUTextureUsageFlags toTextureUsageFlags(const Texture::Usage usage)
     return flags;
 }
 
+SDL_GPUFilter toFilter(const Texture::Filter filter)
+{
+    return filter == Texture::FILTER_NEAREST ? SDL_GPU_FILTER_NEAREST : SDL_GPU_FILTER_LINEAR;
+}
+
 SDL_GPUTexture* createTexture(GraphicsContext& graphicsContext, const Texture::Parameters& parameters, const SDL_GPUTextureFormat textureFormat, uint32_t width, uint32_t height)
 {
     SDL_GPUDevice* gpuDevice = ensureGPUDevice(graphicsContext);
@@ -156,13 +161,14 @@ SDL_GPUTextureFormat TextureSDL3_GPU::textureFormat() const
     return _texture_format;
 }
 
-SDL_GPUSampler* TextureSDL3_GPU::ensureSampler(SDL_GPUDevice *gpuDevice)
+SDL_GPUSampler* TextureSDL3_GPU::ensureSampler(SDL_GPUDevice* gpuDevice)
 {
     if(!_sampler)
     {
+        const Texture::Parameters& parameters = _parameters;
         const SDL_GPUSamplerCreateInfo samplerCreateInfo = {
-            SDL_GPU_FILTER_NEAREST,
-            SDL_GPU_FILTER_NEAREST
+            toFilter(parameters._min_filter),
+            toFilter(parameters._mag_filter)
         };
         _sampler = SDL_CreateGPUSampler(gpuDevice, &samplerCreateInfo);
     }

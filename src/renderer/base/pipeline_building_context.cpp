@@ -245,7 +245,7 @@ void PipelineBuildingContext::initializeUniforms()
     for(const ShaderPreprocessor* stage : _stages)
         if(const Vector<String>& uniformNames = stage->_declaration_uniforms.vars().keys(); !uniformNames.empty())
         {
-            const std::set<String> uniformNameSet(uniformNames.begin(), uniformNames.end());
+            const Set<String> uniformNameSet(uniformNames.begin(), uniformNames.end());
             HashId hash = 0;
             for(const String& i : uniformNameSet)
                 hash += hash * 101 + i.hash();

@@ -69,7 +69,7 @@ public:
 
         String _class;
 
-        Ark::RendererBackend _backend;
+        Ark::RenderingBackendBit _backend;
         Ark::RendererVersion _version;
         Ark::RendererCoordinateSystem _coordinate_system;
 

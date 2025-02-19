@@ -345,7 +345,7 @@ public:
         return builder;
     }
 
-    void add(const Factory& factory, bool front = false);
+    void add(Factory factory, bool front = false);
     void addPackage(const String& name, const BeanFactory& package);
 
     void extend(const BeanFactory& other);

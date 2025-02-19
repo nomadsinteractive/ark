@@ -139,12 +139,12 @@ const document& ApplicationManifest::interpreter() const
 }
 
 ApplicationManifest::Renderer::Renderer()
-    : _backend(Ark::RENDERER_BACKEND_AUTO), _version(Ark::RENDERER_VERSION_AUTO), _coordinate_system(Ark::COORDINATE_SYSTEM_DEFAULT), _vsync(false), _resolution(1920, 1080)
+    : _backend(Ark::RENDERING_BACKEND_ALL), _version(Ark::RENDERER_VERSION_AUTO), _coordinate_system(Ark::COORDINATE_SYSTEM_DEFAULT), _vsync(false), _resolution(1920, 1080)
 {
 }
 
 ApplicationManifest::Renderer::Renderer(const document& manifest)
-    : _class(Documents::getAttribute(manifest, constants::CLASS)), _backend(Documents::getAttribute(manifest, "target", Ark::RENDERER_BACKEND_AUTO)), _version(Documents::getAttribute(manifest, "version", Ark::RENDERER_VERSION_AUTO)),
+    : _class(Documents::getAttribute(manifest, constants::CLASS)), _backend(Documents::getAttribute(manifest, "backend", Ark::RENDERING_BACKEND_ALL)), _version(Documents::getAttribute(manifest, "version", Ark::RENDERER_VERSION_AUTO)),
       _coordinate_system(Documents::getAttribute(manifest, "coordinate-system", Ark::COORDINATE_SYSTEM_DEFAULT)), _vsync(Documents::getAttribute(manifest, "vsync", false))
 {
     if(const document& resolution = manifest->getChild("resolution"))
@@ -155,7 +155,7 @@ ApplicationManifest::Renderer::Renderer(const document& manifest)
 
 template<> ARK_API ApplicationManifest::WindowFlags StringConvert::eval<ApplicationManifest::WindowFlags>(const String& val)
 {
-    constexpr std::array<std::pair<const char*, ApplicationManifest::WindowFlagBits>, 6> windowFlags = {{
+    constexpr ApplicationManifest::WindowFlags::LookupTable<6> windowFlags = {{
         {"none", ApplicationManifest::WINDOW_FLAG_NONE},
         {"show_cursor", ApplicationManifest::WINDOW_FLAG_SHOW_CURSOR},
         {"resizable", ApplicationManifest::WINDOW_FLAG_RESIZABLE},
@@ -163,7 +163,6 @@ template<> ARK_API ApplicationManifest::WindowFlags StringConvert::eval<Applicat
         {"full_screen", ApplicationManifest::WINDOW_FLAG_FULL_SCREEN},
         {"borderless", ApplicationManifest::WINDOW_FLAG_FULL_SCREEN_WINDOWED},
     }};
-
     return ApplicationManifest::WindowFlags::toBitSet(val, windowFlags);
 }
 

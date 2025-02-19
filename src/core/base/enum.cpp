@@ -1,7 +1,7 @@
 #include "core/base/enum.h"
 
 #include "core/base/string.h"
-#include "core/base/enum_map.h"
+#include "core/types/box.h"
 #include "core/util/string_convert.h"
 
 namespace ark {
@@ -20,12 +20,15 @@ template<> Enum::RenderMode StringConvert::eval<Enum::RenderMode>(const String& 
     return Enum::RENDER_MODE_NONE;
 }
 
-template<> void EnumMap<Enum::DrawProcedure>::initialize(std::map<String, Enum::DrawProcedure>& enums)
+template<> Enum::DrawProcedure StringConvert::eval<Enum::DrawProcedure>(const String& str)
 {
-    enums["auto"] = Enum::DRAW_PROCEDURE_AUTO;
-    enums["draw_arrays"] = Enum::DRAW_PROCEDURE_DRAW_ARRAYS;
-    enums["draw_elements"] = Enum::DRAW_PROCEDURE_DRAW_ELEMENTS;
-    enums["draw_instanced"] = Enum::DRAW_PROCEDURE_DRAW_INSTANCED;
+    constexpr Enum::LookupTable<StringView, Enum::DrawProcedure, 4> table = {{
+        {"auto", Enum::DRAW_PROCEDURE_AUTO},
+        {"draw_arrays", Enum::DRAW_PROCEDURE_DRAW_ARRAYS},
+        {"draw_elements", Enum::DRAW_PROCEDURE_DRAW_ELEMENTS},
+        {"draw_instanced", Enum::DRAW_PROCEDURE_DRAW_INSTANCED}
+    }};
+    return Enum::lookup<Enum::DrawProcedure, 4>(table, str);
 }
 
 uint32_t Enum::__index__(const Box& self)

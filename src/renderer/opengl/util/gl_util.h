@@ -8,9 +8,7 @@
 #include "renderer/forwarding.h"
 #include "renderer/base/buffer.h"
 #include "renderer/base/pipeline_descriptor.h"
-#include "renderer/base/shader_layout.h"
 #include "renderer/base/texture.h"
-#include "renderer/inf/model_loader.h"
 
 #include "platform/gl/gl.h"
 

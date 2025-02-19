@@ -77,11 +77,21 @@ public:
             prestage = iter->second.get();
         }
 
-        for(const auto& [_, v] : context.renderStages())
+        {
+            Map<uint32_t, uint32_t> spaces;
+            for(const sp<ShaderLayout::UBO>& i : shaderLayout.ubos())
+            {
+                uint32_t& binding = spaces[i->_stages.bits()];
+                i->_binding = binding;
+                ++ binding;
+            }
+        }
+
+        for(const auto& [k, v] : context.renderStages())
         {
             ShaderPreprocessor& preprocessor = v;
             preprocessor._version = 450;
-            preprocessor.declareUBOStruct(shaderLayout, 1);
+            preprocessor.declareUBOStruct(shaderLayout, k == Enum::SHADER_STAGE_BIT_VERTEX ? 1 : 3);
             preprocessor._predefined_macros.push_back("#extension GL_ARB_separate_shader_objects : enable");
             preprocessor._predefined_macros.push_back("#extension GL_ARB_shading_language_420pack : enable");
         }
@@ -103,80 +113,8 @@ public:
 void setVersion(Ark::RendererVersion version, RenderEngineContext& vkContext)
 {
     LOGD("Choose Renderer Version = %d", version);
-    Map<String, String>& definitions = vkContext.definitions();
-
-    definitions["vert.in"] = "in";
-    definitions["vert.out"] = "out";
-    definitions["frag.in"] = "in";
-    definitions["frag.out"] = "out";
-    definitions["frag.color"] = "f_FragColor";
-    definitions["camera.uVP"] = "u_viewProj";
-    definitions["camera.uView"] = "u_view";
-    definitions["camera.uProjection"] = "u_proj";
-    vkContext.setSnippetFactory(sp<SnippetFactorySDL3>::make());
-
+    vkContext.setSnippetFactory(sp<SnippetFactory>::make<SnippetFactorySDL3>());
     vkContext.setVersion(version);
-}
-
-}
-
-RendererFactorySDL3_GPU::RendererFactorySDL3_GPU()
-    : RendererFactory({Ark::COORDINATE_SYSTEM_RHS, false, 16}), _gpu_device(nullptr)
-{
-}
-
-void RendererFactorySDL3_GPU::onSurfaceCreated(RenderEngine& renderEngine)
-{
-    _gpu_device = SDL_CreateGPUDevice(
-            SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXIL | SDL_GPU_SHADERFORMAT_MSL,
-#if ARK_FLAG_DEBUG
-            true,
-#else
-            false,
-#endif
-            nullptr);
-    CHECK(_gpu_device, "GPUCreateDevice failed");
-
-    ContextSDL3_GPU& sdl3GPUContext = renderEngine.context()->traits().ensure<ContextSDL3_GPU>();
-    ASSERT(sdl3GPUContext._main_window);
-
-    if(!SDL_ClaimWindowForGPUDevice(_gpu_device, sdl3GPUContext._main_window))
-    {
-        SDL_Log("GPUClaimWindow failed");
-        return;
-    }
-    sdl3GPUContext._gpu_gevice = _gpu_device;
-}
-
-sp<RenderEngineContext> RendererFactorySDL3_GPU::createRenderEngineContext(const ApplicationManifest::Renderer& renderer)
-{
-    const sp<RenderEngineContext> renderContext = sp<RenderEngineContext>::make(renderer, Viewport(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f));
-    setVersion(renderer._version == Ark::RENDERER_VERSION_AUTO ? Ark::RENDERER_VERSION_VULKAN_13 : renderer._version, renderContext);
-    return renderContext;
-}
-
-sp<Buffer::Delegate> RendererFactorySDL3_GPU::createBuffer(Buffer::Type type, Buffer::Usage usage)
-{
-    switch(type)
-    {
-        case Buffer::TYPE_VERTEX:
-            return usage.has(Buffer::USAGE_BIT_DYNAMIC) ? sp<Buffer::Delegate>::make<BufferSDL3_GPU>(SDL_GPU_BUFFERUSAGE_VERTEX) : sp<Buffer::Delegate>::make<BufferSDL3_GPU>(SDL_GPU_BUFFERUSAGE_VERTEX);
-        case Buffer::TYPE_INDEX:
-            return usage.has(Buffer::USAGE_BIT_DYNAMIC) ? sp<Buffer::Delegate>::make<BufferSDL3_GPU>(SDL_GPU_BUFFERUSAGE_INDEX) : sp<Buffer::Delegate>::make<BufferSDL3_GPU>(SDL_GPU_BUFFERUSAGE_INDEX);
-        case Buffer::TYPE_DRAW_INDIRECT:
-            return sp<Buffer::Delegate>::make<BufferSDL3_GPU>(SDL_GPU_BUFFERUSAGE_INDIRECT);
-        case Buffer::TYPE_STORAGE:
-            return sp<Buffer::Delegate>::make<BufferSDL3_GPU>(SDL_GPU_BUFFERUSAGE_GRAPHICS_STORAGE_READ | SDL_GPU_BUFFERUSAGE_COMPUTE_STORAGE_READ | SDL_GPU_BUFFERUSAGE_COMPUTE_STORAGE_WRITE);
-        default:
-            FATAL("Unknow buffer type: %d", type);
-            break;
-    }
-    return nullptr;
-}
-
-sp<Camera::Delegate> RendererFactorySDL3_GPU::createCamera(const Ark::RendererCoordinateSystem rcs)
-{
-    return rcs == Ark::COORDINATE_SYSTEM_LHS ? sp<Camera::Delegate>::make<Camera::DelegateLH_NO>() :  sp<Camera::Delegate>::make<Camera::DelegateRH_NO>();
 }
 
 Optional<SDL_GPUDepthStencilTargetInfo> toDepthStencilTargetInfo(const RenderTarget::CreateConfigure& configure)
@@ -252,16 +190,6 @@ private:
     sp<RenderCommand> _post_draw;
 };
 
-sp<RenderTarget> RendererFactorySDL3_GPU::createRenderTarget(sp<Renderer> renderer, RenderTarget::CreateConfigure configure)
-{
-    return sp<RenderTarget>::make(sp<Renderer>::make<OffscreenRendererSDL3_GPU>(std::move(renderer), std::move(configure)), nullptr);
-}
-
-sp<PipelineFactory> RendererFactorySDL3_GPU::createPipelineFactory()
-{
-    return sp<PipelineFactory>::make<PipelineFactorySDL3_GPU>();
-}
-
 class RenderViewSDL3_GPU final : public RenderView {
 public:
     RenderViewSDL3_GPU(sp<RenderEngineContext> renderContext, sp<RenderController> renderController)
@@ -319,6 +247,74 @@ public:
 private:
     op<GraphicsContext> _graphics_context;
 };
+
+}
+
+RendererFactorySDL3_GPU::RendererFactorySDL3_GPU()
+    : RendererFactory({Ark::RenderingBackendSet::toBitSet(Ark::RENDERING_BACKEND_VULKAN_BIT, Ark::RENDERING_BACKEND_DIRECT_X_BIT, Ark::RENDERING_BACKEND_METAL_BIT), Ark::COORDINATE_SYSTEM_RHS, false, 16}), _gpu_device(nullptr)
+{
+}
+
+void RendererFactorySDL3_GPU::onSurfaceCreated(RenderEngine& renderEngine)
+{
+    _gpu_device = SDL_CreateGPUDevice(
+            SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXIL | SDL_GPU_SHADERFORMAT_MSL,
+#if ARK_FLAG_DEBUG
+            true,
+#else
+            false,
+#endif
+            nullptr);
+    CHECK(_gpu_device, "GPUCreateDevice failed");
+
+    ContextSDL3_GPU& sdl3GPUContext = renderEngine.context()->traits().ensure<ContextSDL3_GPU>();
+    ASSERT(sdl3GPUContext._main_window);
+    sdl3GPUContext._gpu_gevice = _gpu_device;
+
+    const bool success = SDL_ClaimWindowForGPUDevice(_gpu_device, sdl3GPUContext._main_window);
+    CHECK(success, "SDL_ClaimWindowForGPUDevice failed: %s", SDL_GetError());
+}
+
+sp<RenderEngineContext> RendererFactorySDL3_GPU::createRenderEngineContext(const ApplicationManifest::Renderer& renderer)
+{
+    const sp<RenderEngineContext> renderContext = sp<RenderEngineContext>::make(renderer, Viewport(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f));
+    setVersion(renderer._version == Ark::RENDERER_VERSION_AUTO ? Ark::RENDERER_VERSION_VULKAN_13 : renderer._version, renderContext);
+    return renderContext;
+}
+
+sp<Buffer::Delegate> RendererFactorySDL3_GPU::createBuffer(Buffer::Type type, Buffer::Usage usage)
+{
+    switch(type)
+    {
+        case Buffer::TYPE_VERTEX:
+            return usage.has(Buffer::USAGE_BIT_DYNAMIC) ? sp<Buffer::Delegate>::make<BufferSDL3_GPU>(SDL_GPU_BUFFERUSAGE_VERTEX) : sp<Buffer::Delegate>::make<BufferSDL3_GPU>(SDL_GPU_BUFFERUSAGE_VERTEX);
+        case Buffer::TYPE_INDEX:
+            return usage.has(Buffer::USAGE_BIT_DYNAMIC) ? sp<Buffer::Delegate>::make<BufferSDL3_GPU>(SDL_GPU_BUFFERUSAGE_INDEX) : sp<Buffer::Delegate>::make<BufferSDL3_GPU>(SDL_GPU_BUFFERUSAGE_INDEX);
+        case Buffer::TYPE_DRAW_INDIRECT:
+            return sp<Buffer::Delegate>::make<BufferSDL3_GPU>(SDL_GPU_BUFFERUSAGE_INDIRECT);
+        case Buffer::TYPE_STORAGE:
+            return sp<Buffer::Delegate>::make<BufferSDL3_GPU>(SDL_GPU_BUFFERUSAGE_GRAPHICS_STORAGE_READ | SDL_GPU_BUFFERUSAGE_COMPUTE_STORAGE_READ | SDL_GPU_BUFFERUSAGE_COMPUTE_STORAGE_WRITE);
+        default:
+            FATAL("Unknow buffer type: %d", type);
+            break;
+    }
+    return nullptr;
+}
+
+sp<Camera::Delegate> RendererFactorySDL3_GPU::createCamera(const Ark::RendererCoordinateSystem rcs)
+{
+    return rcs == Ark::COORDINATE_SYSTEM_LHS ? sp<Camera::Delegate>::make<Camera::DelegateLH_NO>() :  sp<Camera::Delegate>::make<Camera::DelegateRH_NO>();
+}
+
+sp<RenderTarget> RendererFactorySDL3_GPU::createRenderTarget(sp<Renderer> renderer, RenderTarget::CreateConfigure configure)
+{
+    return sp<RenderTarget>::make(sp<Renderer>::make<OffscreenRendererSDL3_GPU>(std::move(renderer), std::move(configure)), nullptr);
+}
+
+sp<PipelineFactory> RendererFactorySDL3_GPU::createPipelineFactory()
+{
+    return sp<PipelineFactory>::make<PipelineFactorySDL3_GPU>();
+}
 
 sp<RenderView> RendererFactorySDL3_GPU::createRenderView(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController)
 {

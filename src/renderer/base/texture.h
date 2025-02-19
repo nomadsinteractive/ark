@@ -57,16 +57,16 @@ public:
         TYPE_COUNT
     };
 
-    enum CONSTANT {
-        CONSTANT_NEAREST,
-        CONSTANT_LINEAR,
-        CONSTANT_LINEAR_MIPMAP,
-        CONSTANT_CLAMP_TO_EDGE,
-        CONSTANT_CLAMP_TO_BORDER,
-        CONSTANT_MIRRORED_REPEAT,
-        CONSTANT_REPEAT,
-        CONSTANT_MIRROR_CLAMP_TO_EDGE,
-        CONSTANT_COUNT
+    enum Filter {
+        FILTER_NEAREST,
+        FILTER_LINEAR,
+        FILTER_LINEAR_MIPMAP,
+        FILTER_CLAMP_TO_EDGE,
+        FILTER_CLAMP_TO_BORDER,
+        FILTER_MIRRORED_REPEAT,
+        FILTER_REPEAT,
+        FILTER_MIRROR_CLAMP_TO_EDGE,
+        FILTER_COUNT
     };
 
     struct Parameters {
@@ -80,15 +80,15 @@ public:
         Format _format;
         Feature _features;
 
-        CONSTANT _min_filter;
-        CONSTANT _mag_filter;
+        Filter _min_filter;
+        Filter _mag_filter;
 
-        CONSTANT _wrap_s;
-        CONSTANT _wrap_t;
-        CONSTANT _wrap_r;
+        Filter _wrap_s;
+        Filter _wrap_t;
+        Filter _wrap_r;
 
     private:
-        CONSTANT getEnumValue(Dictionary<document>& dict, const String& name, BeanFactory& factory, const Scope& args, Texture::CONSTANT defValue);
+        Filter getEnumValue(Dictionary<document>& dict, const String& name, BeanFactory& factory, const Scope& args, Texture::Filter defValue);
     };
 
     class Delegate;

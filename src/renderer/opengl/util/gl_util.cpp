@@ -1,8 +1,5 @@
 #include "renderer/opengl/util/gl_util.h"
 
-#include <unordered_map>
-
-#include "core/base/enum_map.h"
 #include "core/types/global.h"
 #include "core/util/uploader_type.h"
 #include "core/util/math.h"
@@ -16,7 +13,6 @@
 #include "renderer/base/render_controller.h"
 #include "renderer/base/render_engine_context.h"
 #include "renderer/base/shader.h"
-#include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/texture.h"
 #include "renderer/util/render_util.h"
 
@@ -27,41 +23,41 @@
 
 namespace ark {
 
-GLenum GLUtil::toEnum(Enum::RenderMode renderMode)
+GLenum GLUtil::toEnum(const Enum::RenderMode renderMode)
 {
-    static const GLenum models[Enum::RENDER_MODE_COUNT] = {GL_LINES, GL_POINTS, GL_TRIANGLES, GL_TRIANGLE_STRIP};
+    constexpr GLenum models[Enum::RENDER_MODE_COUNT] = {GL_LINES, GL_POINTS, GL_TRIANGLES, GL_TRIANGLE_STRIP};
     DCHECK(renderMode >= 0 && renderMode < Enum::RENDER_MODE_COUNT, "Unknown Mode: %d", renderMode);
     return models[renderMode];
 }
 
-GLenum GLUtil::toBufferType(Buffer::Type type)
+GLenum GLUtil::toBufferType(const Buffer::Type type)
 {
-    static const GLenum types[Buffer::TYPE_COUNT] = {GL_ARRAY_BUFFER, GL_ELEMENT_ARRAY_BUFFER, GL_DRAW_INDIRECT_BUFFER, GL_SHADER_STORAGE_BUFFER};
+    constexpr GLenum types[Buffer::TYPE_COUNT] = {GL_ARRAY_BUFFER, GL_ELEMENT_ARRAY_BUFFER, GL_DRAW_INDIRECT_BUFFER, GL_SHADER_STORAGE_BUFFER};
     DCHECK(type >= 0 && type < Buffer::TYPE_COUNT, "Unknown buffer type: %d", type);
     return types[type];
 }
 
-GLenum GLUtil::toShaderType(Enum::ShaderStageBit stage)
+GLenum GLUtil::toShaderType(const Enum::ShaderStageBit stage)
 {
 #ifndef ANDROID
-    static const GLenum types[Enum::SHADER_STAGE_BIT_COUNT] = {GL_VERTEX_SHADER, GL_TESS_CONTROL_SHADER, GL_TESS_EVALUATION_SHADER, GL_GEOMETRY_SHADER, GL_FRAGMENT_SHADER, GL_COMPUTE_SHADER};
+    constexpr GLenum types[Enum::SHADER_STAGE_BIT_COUNT] = {GL_VERTEX_SHADER, GL_TESS_CONTROL_SHADER, GL_TESS_EVALUATION_SHADER, GL_GEOMETRY_SHADER, GL_FRAGMENT_SHADER, GL_COMPUTE_SHADER};
 #else
-    static const GLenum types[Enum::SHADER_STAGE_COUNT] = {GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, GL_COMPUTE_SHADER};
+    constexpr GLenum types[Enum::SHADER_STAGE_COUNT] = {GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, GL_COMPUTE_SHADER};
 #endif
     DASSERT(stage >= 0 && stage < Enum::SHADER_STAGE_BIT_COUNT);
     return types[stage];
 }
 
-GLenum GLUtil::toCompareFunc(PipelineDescriptor::CompareFunc func)
+GLenum GLUtil::toCompareFunc(const PipelineDescriptor::CompareFunc func)
 {
-    const GLenum glFuncs[PipelineDescriptor::COMPARE_FUNC_LENGTH] = {GL_ZERO, GL_ALWAYS, GL_NEVER, GL_EQUAL, GL_NOTEQUAL, GL_LESS, GL_GREATER, GL_LEQUAL, GL_GEQUAL};
+    constexpr GLenum glFuncs[PipelineDescriptor::COMPARE_FUNC_LENGTH] = {GL_ZERO, GL_ALWAYS, GL_NEVER, GL_EQUAL, GL_NOTEQUAL, GL_LESS, GL_GREATER, GL_LEQUAL, GL_GEQUAL};
     DCHECK(func < PipelineDescriptor::COMPARE_FUNC_LENGTH, "Unknow compare func: %d", func);
     return glFuncs[func];
 }
 
 GLenum GLUtil::toStencilFunc(PipelineDescriptor::StencilFunc func)
 {
-    const GLenum glFuncs[PipelineDescriptor::STENCIL_FUNC_LENGTH] = {GL_KEEP, GL_ZERO, GL_REPLACE, GL_INCR, GL_INCR_WRAP, GL_DECR, GL_DECR_WRAP, GL_INVERT};
+    constexpr GLenum glFuncs[PipelineDescriptor::STENCIL_FUNC_LENGTH] = {GL_KEEP, GL_ZERO, GL_REPLACE, GL_INCR, GL_INCR_WRAP, GL_DECR, GL_DECR_WRAP, GL_INVERT};
     DCHECK(func < PipelineDescriptor::STENCIL_FUNC_LENGTH, "Unknow stencil func: %d", func);
     return glFuncs[func];
 }
@@ -104,19 +100,56 @@ Optional<GLenum> GLUtil::toBlendFactor(PipelineDescriptor::BlendFactor blendFact
 
 GLenum GLUtil::toFrontFaceType(PipelineDescriptor::FrontFaceType face)
 {
-    const GLenum glFaceTypes[PipelineDescriptor::FRONT_FACE_TYPE_LENGTH] = {GL_FRONT_AND_BACK, GL_FRONT, GL_BACK};
+    constexpr GLenum glFaceTypes[PipelineDescriptor::FRONT_FACE_TYPE_LENGTH] = {GL_FRONT_AND_BACK, GL_FRONT, GL_BACK};
     DCHECK(face < PipelineDescriptor::FRONT_FACE_TYPE_LENGTH, "Unknow front face type: %d", face);
     return glFaceTypes[face];
 }
 
+constexpr Enum::LookupTable<StringView, GLenum, 34> glEnumTable = {{
+    {"nearest", GL_NEAREST},
+    {"linear", GL_LINEAR},
+    {"texture_mag_filter", GL_TEXTURE_MAG_FILTER},
+    {"texture_min_filter", GL_TEXTURE_MIN_FILTER},
+    {"texture_wrap_s", GL_TEXTURE_WRAP_S},
+    {"texture_wrap_t", GL_TEXTURE_WRAP_T},
+    {"texture_wrap_r", GL_TEXTURE_WRAP_R},
+    {"clamp_to_edge", GL_CLAMP_TO_EDGE},
+    {"clamp_to_border", GL_CLAMP_TO_BORDER},
+    {"mirrored_repeat", GL_MIRRORED_REPEAT},
+    {"repeat", GL_REPEAT},
+    {"mirror_clamp_to_edge", GL_MIRROR_CLAMP_TO_EDGE},
+    {"rgba", GL_RGBA},
+    {"rgb", GL_RGB},
+    {"alpha", GL_ALPHA},
+    {"rg", GL_RG},
+    {"always", GL_ALWAYS},
+    {"never", GL_NEVER},
+    {"equal", GL_EQUAL},
+    {"not_equal", GL_NOTEQUAL},
+    {"less", GL_LESS},
+    {"greater", GL_GREATER},
+    {"less_equal", GL_LEQUAL},
+    {"greater_equal", GL_GEQUAL},
+    {"keep", GL_KEEP},
+    {"zero", GL_ZERO},
+    {"replace", GL_REPLACE},
+    {"incr", GL_INCR},
+    {"decr", GL_DECR},
+    {"cw", GL_CW},
+    {"ccw", GL_CCW},
+    {"front", GL_FRONT},
+    {"back", GL_BACK},
+    {"front_and_back", GL_FRONT_AND_BACK}
+}};
+
 GLenum GLUtil::getEnum(const String& name)
 {
-    return EnumMap<GLenum>::instance().ensureEnum(name);
+    return Enum::lookup<GLenum, 34>(glEnumTable, name);
 }
 
 GLenum GLUtil::getEnum(const String& name, GLenum defValue)
 {
-    return EnumMap<GLenum>::instance().toEnumOrDefault(name, defValue);
+    return Enum::lookup<StringView, GLenum, 34>(glEnumTable, name, defValue);
 }
 
 GLenum GLUtil::getEnum(const document& manifest, const String& name)
@@ -264,7 +297,7 @@ void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, Render
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, width, height);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
 
-    for (uint32_t i = 0; i < 6; ++i)
+    for(uint32_t i = 0; i < 6; ++i)
         ::glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA8, width, height, 0, GL_RGB, GL_FLOAT, nullptr);
 
     const M4 captureProjection = MatrixUtil::perspective(Math::radians(90.0f), 1.0f, 0.1f, 10.0f);
@@ -325,49 +358,6 @@ void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, Render
 void GLUtil::glTexImage2D(uint32_t index, int32_t n, void* data)
 {
     ::glTexImage2D(static_cast<GLenum>(GL_TEXTURE_CUBE_MAP_POSITIVE_X + index), 0, static_cast<GLint>(GL_RGBA8), n, n, 0, GL_RGBA, GL_FLOAT, data);
-}
-
-template<> ARK_API void EnumMap<GLenum>::initialize(std::map<String, GLenum>& enums)
-{
-    enums["nearest"] = GL_NEAREST;
-    enums["linear"] = GL_LINEAR;
-    enums["texture_mag_filter"] = GL_TEXTURE_MAG_FILTER;
-    enums["texture_min_filter"] = GL_TEXTURE_MIN_FILTER;
-    enums["texture_wrap_s"] = GL_TEXTURE_WRAP_S;
-    enums["texture_wrap_t"] = GL_TEXTURE_WRAP_T;
-    enums["texture_wrap_r"] = GL_TEXTURE_WRAP_R;
-    enums["clamp_to_edge"] = GL_CLAMP_TO_EDGE;
-    enums["clamp_to_border"] = GL_CLAMP_TO_BORDER;
-    enums["mirrored_repeat"] = GL_MIRRORED_REPEAT;
-    enums["repeat"] = GL_REPEAT;
-    enums["mirror_clamp_to_edge"] = GL_MIRROR_CLAMP_TO_EDGE;
-
-    enums["rgba"] = GL_RGBA;
-    enums["rgb"] = GL_RGB;
-    enums["alpha"] = GL_ALPHA;
-    enums["rg"] = GL_RG;
-
-    enums["always"] = GL_ALWAYS;
-    enums["never"] = GL_NEVER;
-    enums["equal"] = GL_EQUAL;
-    enums["not_equal"] = GL_NOTEQUAL;
-    enums["less"] = GL_LESS;
-    enums["greater"] = GL_GREATER;
-    enums["less_equal"] = GL_LEQUAL;
-    enums["greater_equal"] = GL_GEQUAL;
-
-    enums["keep"] = GL_KEEP;
-    enums["zero"] = GL_ZERO;
-    enums["replace"] = GL_REPLACE;
-    enums["incr"] = GL_INCR;
-    enums["decr"] = GL_DECR;
-
-    enums["cw"] = GL_CW;
-    enums["ccw"] = GL_CCW;
-
-    enums["front"] = GL_FRONT;
-    enums["back"] = GL_BACK;
-    enums["front_and_back"] = GL_FRONT_AND_BACK;
 }
 
 GLBufferBinder::GLBufferBinder(GLenum target, GLuint buffer)

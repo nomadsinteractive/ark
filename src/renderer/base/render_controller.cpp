@@ -1,11 +1,9 @@
 #include "renderer/base/render_controller.h"
 
 #include "core/base/future.h"
-#include "core/base/enum_map.h"
 #include "core/inf/runnable.h"
 #include "core/inf/writable.h"
 #include "core/impl/uploader/uploader_snapshot.h"
-#include "platform/platform.h"
 
 #include "graphics/base/bitmap.h"
 #include "graphics/components/size.h"
@@ -15,11 +13,12 @@
 #include "renderer/base/model.h"
 #include "renderer/base/recycler.h"
 #include "renderer/base/render_engine.h"
-#include "renderer/base/render_engine_context.h"
 #include "renderer/impl/render_command_composer/rcc_draw_elements.h"
 #include "renderer/impl/render_command_composer/rcc_draw_elements_incremental.h"
 #include "renderer/inf/renderer_factory.h"
 #include "renderer/util/render_util.h"
+
+#include "platform/platform.h"
 
 namespace ark {
 
@@ -482,7 +481,7 @@ void RenderController::RenderResourceList::foreach(GraphicsContext& graphicsCont
 
 template<> ARK_API RenderController::UploadStrategy StringConvert::eval<RenderController::UploadStrategy>(const String& str)
 {
-    constexpr std::array<std::pair<const char*, RenderController::UploadStrategyBit>, 5> uploadStrategies = {{
+    constexpr RenderController::UploadStrategy::LookupTable<5> uploadStrategies = {{
         {"reload", RenderController::US_RELOAD},
         {"once", RenderController::US_ONCE},
         {"on_surface_ready", RenderController::US_ON_SURFACE_READY},

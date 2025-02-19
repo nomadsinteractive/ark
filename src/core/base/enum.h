@@ -1,6 +1,10 @@
 #pragma once
 
+#include <array>
+
 #include "core/base/api.h"
+#include "core/base/string.h"
+#include "core/base/string_buffer.h"
 
 namespace ark {
 
@@ -47,7 +51,27 @@ public:
         SHADER_STAGE_BIT_COUNT
     };
 
-public:
+    template<typename K, typename V, size_t N> using LookupTable = std::array<std::pair<K, V>, N>;
+    template<typename K, typename V, size_t N> constexpr static V lookup(const LookupTable<K, V, N>& table, const K key, const V defaultValue) {
+        for(const auto [k, v] : table)
+            if(key == k)
+                return v;
+        return defaultValue;
+    }
+    template<typename T, size_t N> constexpr static T lookup(const LookupTable<StringView, T, N>& table, const StringView key) {
+        for(const auto [k, v] : table)
+            if(key == k)
+                return v;
+
+        StringBuffer sb;
+        for(size_t j = 0; j < N; ++j) {
+            sb << table.at(j).first << '(' << static_cast<uint32_t>(table.at(j).second) << ')';
+            if(j == N - 1)
+                sb << ", ";
+        }
+        FATAL("Unknow value %s, possible values are [%s]", key.data(), sb.str().c_str());
+        return static_cast<T>(0);
+    }
 
 //  [[script::bindings::operator(index)]]
     static uint32_t __index__(const Box& self);

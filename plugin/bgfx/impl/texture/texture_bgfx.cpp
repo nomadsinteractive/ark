@@ -95,11 +95,11 @@ namespace {
 uint32_t toBgfxTextureFlags(const Texture::Parameters& params)
 {
     uint32_t flags = 0;
-    flags |= params._min_filter == Texture::CONSTANT_NEAREST ? BGFX_SAMPLER_MIN_POINT : BGFX_SAMPLER_MIN_ANISOTROPIC;
-    flags |= params._mag_filter == Texture::CONSTANT_NEAREST ? BGFX_SAMPLER_MAG_POINT : BGFX_SAMPLER_MAG_ANISOTROPIC;
-    flags |= params._wrap_r == Texture::CONSTANT_REPEAT ? BGFX_SAMPLER_U_BORDER : BGFX_SAMPLER_U_CLAMP;
-    flags |= params._wrap_s == Texture::CONSTANT_REPEAT ? BGFX_SAMPLER_V_BORDER : BGFX_SAMPLER_V_CLAMP;
-    flags |= params._wrap_t == Texture::CONSTANT_REPEAT ? BGFX_SAMPLER_W_BORDER : BGFX_SAMPLER_W_CLAMP;
+    flags |= params._min_filter == Texture::FILTER_NEAREST ? BGFX_SAMPLER_MIN_POINT : BGFX_SAMPLER_MIN_ANISOTROPIC;
+    flags |= params._mag_filter == Texture::FILTER_NEAREST ? BGFX_SAMPLER_MAG_POINT : BGFX_SAMPLER_MAG_ANISOTROPIC;
+    flags |= params._wrap_r == Texture::FILTER_REPEAT ? BGFX_SAMPLER_U_BORDER : BGFX_SAMPLER_U_CLAMP;
+    flags |= params._wrap_s == Texture::FILTER_REPEAT ? BGFX_SAMPLER_V_BORDER : BGFX_SAMPLER_V_CLAMP;
+    flags |= params._wrap_t == Texture::FILTER_REPEAT ? BGFX_SAMPLER_W_BORDER : BGFX_SAMPLER_W_CLAMP;
     return flags ? flags : UINT32_MAX;
 }
 

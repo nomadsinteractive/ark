@@ -1,7 +1,5 @@
 #include "core/base/plugin_manager.h"
 
-#include <map>
-
 #include "core/ark.h"
 #include "core/base/bean_factory.h"
 #include "core/base/plugin.h"

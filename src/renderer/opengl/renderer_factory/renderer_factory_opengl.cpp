@@ -36,13 +36,7 @@ namespace {
 void setVersion(Ark::RendererVersion version, RenderEngineContext& glContext)
 {
     LOGD("Choose GLVersion = %d", version);
-    std::map<String, String>& definitions = glContext.definitions();
-    definitions["vert.in"] = "in";
-    definitions["vert.out"] = "out";
-    definitions["frag.in"] = "in";
-    definitions["frag.out"] = "out";
-    definitions["frag.color"] = "f_FragColor";
-    glContext.setSnippetFactory(sp<gles30::SnippetFactoryGLES30>::make());
+    glContext.setSnippetFactory(sp<SnippetFactory>::make<gles30::SnippetFactoryGLES30>());
     glContext.setVersion(version);
 }
 
@@ -57,7 +51,7 @@ int32_t toClearMaskBits(const RenderTarget::CreateConfigure& configure)
 }
 
 RendererFactoryOpenGL::RendererFactoryOpenGL(sp<Recycler> recycler)
-    : RendererFactory({Ark::COORDINATE_SYSTEM_RHS, true, sizeof(float)}), _recycler(std::move(recycler))
+    : RendererFactory({{Ark::RENDERING_BACKEND_OPENGL_BIT}, Ark::COORDINATE_SYSTEM_RHS, true, sizeof(float)}), _recycler(std::move(recycler))
 {
     const Global<PluginManager> pluginManager;
     pluginManager->addPlugin(sp<opengl::OpenglPlugin>::make());

@@ -5,6 +5,7 @@
 #include "core/ark.h"
 #include "core/base/api.h"
 #include "core/base/clock.h"
+#include "core/base/enum.h"
 #include "core/base/string_buffer.h"
 #include "core/inf/array.h"
 #include "core/util/strings.h"
@@ -64,15 +65,15 @@ template<> ARK_API float StringConvert::eval<float>(const String& repr)
     return static_cast<float>(atof(repr.c_str()));
 }
 
-template<> Ark::RendererBackend StringConvert::eval<Ark::RendererBackend>(const String& repr)
+template<> Ark::RenderingBackendBit StringConvert::eval<Ark::RenderingBackendBit>(const String& repr)
 {
-    const String target = repr.toLower();
-    if(target == "opengl" || target == "gles")
-        return Ark::RENDERER_BACKEND_OPENGL;
-    if(target == "vulkan")
-        return Ark::RENDERER_BACKEND_VULKAN;
-    CHECK(repr == "auto", "Unknow RendererBackend: \"%s, supported values are [\"opengl\", \"vulkan\", \"auto\"]", repr.c_str());
-    return Ark::RENDERER_BACKEND_AUTO;
+    constexpr Enum::LookupTable<StringView, Ark::RenderingBackendBit, 4> table ={{
+        {"opengl", Ark::RENDERING_BACKEND_OPENGL_BIT},
+        {"vulkan", Ark::RENDERING_BACKEND_VULKAN_BIT},
+        {"direct_x", Ark::RENDERING_BACKEND_DIRECT_X_BIT},
+        {"metal", Ark::RENDERING_BACKEND_METAL_BIT},
+    }};
+    return Enum::lookup<Ark::RenderingBackendBit, 4>(table, repr.toLower());
 }
 
 template<> Ark::RendererVersion StringConvert::eval<Ark::RendererVersion>(const String& repr)

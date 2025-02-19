@@ -2,7 +2,6 @@
 
 #include <any>
 #include <functional>
-#include <map>
 
 #include "core/forwarding.h"
 #include "core/types/optional.h"
@@ -42,7 +41,7 @@ public:
     }
 
 private:
-    std::map<String, std::any> _callables;
+    Map<String, std::any> _callables;
 };
 
 }

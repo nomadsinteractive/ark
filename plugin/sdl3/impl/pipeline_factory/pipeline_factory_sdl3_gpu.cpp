@@ -38,7 +38,7 @@ SDL_GPUShader* createGraphicsShader(SDL_GPUDevice* device, const ShaderLayout& s
         return nullptr;
     }
 
-    const Vector<uint32_t> binaries = RenderUtil::compileSPIR(source, stageBit, Ark::RENDERER_BACKEND_VULKAN);
+    const Vector<uint32_t> binaries = RenderUtil::compileSPIR(source, stageBit, Ark::RENDERING_BACKEND_VULKAN_BIT);
     const void* bytecode = binaries.data();
 
     Uint32 samplerCount = 0;
@@ -91,8 +91,7 @@ SDL_GPUShader* createGraphicsShader(SDL_GPUDevice* device, const ShaderLayout& s
 	return shader;
 }
 
-
-SDL_GPUBlendFactor toBlendFactor(PipelineDescriptor::BlendFactor blendFactor, const SDL_GPUBlendFactor defaultBlendFactor)
+SDL_GPUBlendFactor toBlendFactor(const PipelineDescriptor::BlendFactor blendFactor, const SDL_GPUBlendFactor defaultBlendFactor)
 {
     switch(blendFactor) {
         case PipelineDescriptor::BLEND_FACTOR_ZERO:
@@ -208,9 +207,7 @@ void bindUBOSnapshots(SDL_GPUCommandBuffer* cmdbuf, const Vector<RenderLayerSnap
 {
     size_t binding = 0;
     for(const sp<ShaderLayout::UBO>& ubo : shaderLayout.ubos())
-    {
-        const ShaderStageSet uboStages = ubo->_stages;
-        if(uboStages & stages)
+        if(const ShaderStageSet uboStages = ubo->_stages; uboStages & stages)
         {
             DCHECK(binding < uboSnapshots.size(), "UBO Snapshot and UBO Layout mismatch: %d vs %d", uboSnapshots.size(), shaderLayout.ubos().size());
             const RenderLayerSnapshot::UBOSnapshot& uboSnapshot = uboSnapshots.at(binding++);
@@ -223,7 +220,6 @@ void bindUBOSnapshots(SDL_GPUCommandBuffer* cmdbuf, const Vector<RenderLayerSnap
             if(uboStages.has(Enum::SHADER_STAGE_BIT_COMPUTE))
                 SDL_PushGPUComputeUniformData(cmdbuf, ubo->binding(), data, size);
         }
-    }
 }
 
 class DrawPipelineSDL3_GPU final : public Pipeline {
@@ -394,6 +390,9 @@ public:
         for(const auto& [k, v] : pipelineBindings.pipelineDescriptor()->samplers())
         {
             TextureSDL3_GPU& texture = k->delegate().cast<TextureSDL3_GPU>();
+            if(!texture.texture())
+                return SDL_EndGPURenderPass(renderPass);
+
             textureSamplerBinding[samplerCount ++] = {
                 texture.texture(),
                 texture.ensureSampler(ensureGPUDevice(graphicsContext))
@@ -435,8 +434,8 @@ private:
 
 class ComputePipelineSDL3_GPU final : public Pipeline {
 public:
-    ComputePipelineSDL3_GPU(String computeShader)
-        : _compute_shader(std::move(computeShader)) {
+    ComputePipelineSDL3_GPU(const PipelineDescriptor& pipelineDescriptor, String computeShader)
+        : _pipeline_descriptor(pipelineDescriptor), _compute_shader(std::move(computeShader)) {
     }
 
     uint64_t id() override
@@ -460,38 +459,67 @@ public:
             SDL_GPUDevice* gpuDevice = ensureGPUDevice(graphicsContext);
 
             const SDL_GPUShaderFormat backendFormats = SDL_GetGPUShaderFormats(gpuDevice);
-            SDL_GPUShaderFormat format = SDL_GPU_SHADERFORMAT_INVALID;
             const char *entrypoint;
-
-            if (backendFormats & SDL_GPU_SHADERFORMAT_SPIRV) {
-                format = SDL_GPU_SHADERFORMAT_SPIRV;
+            if (backendFormats & SDL_GPU_SHADERFORMAT_SPIRV)
                 entrypoint = "main";
-            } else if (backendFormats & SDL_GPU_SHADERFORMAT_MSL) {
-                format = SDL_GPU_SHADERFORMAT_MSL;
+            else if (backendFormats & SDL_GPU_SHADERFORMAT_MSL)
                 entrypoint = "main0";
-            } else if (backendFormats & SDL_GPU_SHADERFORMAT_DXIL) {
-                format = SDL_GPU_SHADERFORMAT_DXIL;
+            else if (backendFormats & SDL_GPU_SHADERFORMAT_DXIL)
                 entrypoint = "main";
-            } else {
+            else
+            {
                 SDL_Log("%s", "Unrecognized backend shader format!");
                 return;
             }
 
-            const Vector<uint32_t> binaries = RenderUtil::compileSPIR(_compute_shader, Enum::SHADER_STAGE_BIT_COMPUTE, Ark::RENDERER_BACKEND_VULKAN);
+            const Vector<uint32_t> binaries = RenderUtil::compileSPIR(_compute_shader, Enum::SHADER_STAGE_BIT_COMPUTE, Ark::RENDERING_BACKEND_VULKAN_BIT);
             const void* bytecode = binaries.data();
 
-            const SDL_GPUComputePipelineCreateInfo computePipelineCreateInfo = {
-                binaries.size(),
+            const SDL_ShaderCross_SPIRV_Info spirvInfo = {
                 static_cast<const Uint8*>(bytecode),
+                binaries.size() * sizeof(uint32_t),
                 entrypoint,
-                format
+                SDL_SHADERCROSS_SHADERSTAGE_COMPUTE,
+        #ifdef ARK_FLAG_DEBUG
+                true,
+        #else
+                false,
+        #endif
+                nullptr
             };
 
-            _pipeline = SDL_CreateGPUComputePipeline(gpuDevice, &computePipelineCreateInfo);
-            if(!_pipeline)
-            {
-                SDL_Log("Failed to create compute pipeline!");
-            }
+            const ShaderLayout& shaderLayout = _pipeline_descriptor.shaderLayout();
+            Uint32 samplerCount = 0;
+            for(const ShaderLayout::DescriptorSet& i : shaderLayout.samplers().values())
+                if(i._stages.has(Enum::SHADER_STAGE_BIT_COMPUTE))
+                    ++ samplerCount;
+
+            Uint32 storageTextureCount = 0;
+            for(const ShaderLayout::DescriptorSet& i : shaderLayout.images().values())
+                if(i._stages.has(Enum::SHADER_STAGE_BIT_COMPUTE))
+                    ++ storageTextureCount;
+
+            Uint32 uniformBufferCount = 0;
+            for(const ShaderLayout::UBO& i : shaderLayout.ubos())
+                if(i._stages.has(Enum::SHADER_STAGE_BIT_COMPUTE))
+                    ++ uniformBufferCount;
+
+            Uint32 storageBufferCount = 0;
+            for(const ShaderLayout::SSBO& i : shaderLayout.ssbos())
+                if(i._stages.has(Enum::SHADER_STAGE_BIT_COMPUTE))
+                    ++ storageBufferCount;
+
+            SDL_ShaderCross_ComputePipelineMetadata shaderMetadata = {
+                samplerCount,
+                storageTextureCount,
+                storageBufferCount,
+                0,
+                0,
+                uniformBufferCount
+            };
+
+            _pipeline = SDL_ShaderCross_CompileComputePipelineFromSPIRV(gpuDevice, &spirvInfo, &shaderMetadata);
+            CHECK(_pipeline, "%s", SDL_GetError());
         }
     }
 
@@ -506,25 +534,19 @@ public:
 
     void compute(GraphicsContext& graphicsContext, const ComputeContext& computeContext) override
     {
+        const GraphicsContextSDL3_GPU& sdl3GC = ensureGraphicsContext(graphicsContext);
+
         SDL_GPUStorageTextureReadWriteBinding storageTextureBindings[8];
         SDL_GPUStorageBufferReadWriteBinding storageBufferBindings[8];
 
-        const GraphicsContextSDL3_GPU& sdl3GC = graphicsContext.traits().ensure<GraphicsContextSDL3_GPU>();
-
-        SDL_GPUComputePass* computePass = SDL_BeginGPUComputePass(
-            sdl3GC._command_buffer,
-            storageTextureBindings,
-            1,
-            storageBufferBindings,
-            0
-        );
-
+        SDL_GPUComputePass* computePass = SDL_BeginGPUComputePass(sdl3GC._command_buffer, storageTextureBindings, 1, storageBufferBindings, 0);
         SDL_BindGPUComputePipeline(computePass, _pipeline);
         SDL_DispatchGPUCompute(computePass, computeContext._num_work_groups[0], computeContext._num_work_groups[1], computeContext._num_work_groups[2]);
         SDL_EndGPUComputePass(computePass);
     }
 
 private:
+    PipelineDescriptor _pipeline_descriptor;
     String _compute_shader;
 
     SDL_GPUComputePipeline* _pipeline;
@@ -543,7 +565,7 @@ sp<Pipeline> PipelineFactorySDL3_GPU::buildPipeline(GraphicsContext& graphicsCon
     }
     const auto cIter = stages.find(Enum::SHADER_STAGE_BIT_COMPUTE);
     CHECK(cIter != stages.end(), "Pipeline has no compute shader");
-    return sp<Pipeline>::make<ComputePipelineSDL3_GPU>(std::move(cIter->second));
+    return sp<Pipeline>::make<ComputePipelineSDL3_GPU>(pipelineDescriptor, std::move(cIter->second));
 }
 
 }

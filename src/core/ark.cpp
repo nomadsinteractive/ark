@@ -22,8 +22,9 @@ limitations under the License.
  *
  */
 
-#include "core/ark.h"
+#include <list>
 
+#include "core/ark.h"
 
 #include "core/base/plugin_manager.h"
 #include "core/base/url.h"

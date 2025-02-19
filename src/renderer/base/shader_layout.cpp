@@ -213,7 +213,7 @@ void ShaderLayout::StreamLayout::align(uint32_t alignment)
         _stride += (alignment - mod);
 }
 
-ShaderLayout::UBO::UBO(uint32_t binding)
+ShaderLayout::UBO::UBO(const uint32_t binding)
     : _binding(binding)
 {
 }

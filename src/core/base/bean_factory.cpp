@@ -15,12 +15,12 @@ BeanFactory::BeanFactory(sp<Stub> stub)
 {
 }
 
-void BeanFactory::add(const BeanFactory::Factory& factory, bool front)
+void BeanFactory::add(BeanFactory::Factory factory, bool front)
 {
     if(front)
-        _stub->_factories.push_front(factory);
+        _stub->_factories.push_front(std::move(factory));
     else
-        _stub->_factories.push_back(factory);
+        _stub->_factories.push_back(std::move(factory));
 }
 
 void BeanFactory::addPackage(const String& name, const BeanFactory& package)

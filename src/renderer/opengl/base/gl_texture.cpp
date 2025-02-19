@@ -32,7 +32,7 @@ void GLTexture::upload(GraphicsContext& graphicsContext, const sp<Texture::Uploa
     const bool uninitialized = _id == 0;
     if(uninitialized)
     {
-        constexpr GLenum glParameters[Texture::CONSTANT_COUNT] = {GL_NEAREST, GL_LINEAR, GL_LINEAR_MIPMAP_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_BORDER, GL_MIRRORED_REPEAT, GL_REPEAT, GL_MIRROR_CLAMP_TO_EDGE};
+        constexpr GLenum glParameters[Texture::FILTER_COUNT] = {GL_NEAREST, GL_LINEAR, GL_LINEAR_MIPMAP_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_BORDER, GL_MIRRORED_REPEAT, GL_REPEAT, GL_MIRROR_CLAMP_TO_EDGE};
 
         glGenTextures(1, &_id);
         LOGD("Generating GLTexture[%d]", _id);

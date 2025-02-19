@@ -136,17 +136,12 @@ public:
 void setVersion(Ark::RendererVersion version, RenderEngineContext& vkContext)
 {
     LOGD("Choose Bgfx Version = %d", version);
-    std::map<String, String>& definitions = vkContext.definitions();
+    Map<String, String>& definitions = vkContext.definitions();
 
-    definitions["vert.in"] = "in";
-    definitions["vert.out"] = "out";
-    definitions["frag.in"] = "in";
-    definitions["frag.out"] = "out";
-    definitions["frag.color"] = "f_FragColor";
     definitions["camera.uVP"] = "u_viewProj";
     definitions["camera.uView"] = "u_view";
     definitions["camera.uProjection"] = "u_proj";
-    vkContext.setSnippetFactory(sp<SnippetFactoryBgfx>::make());
+    vkContext.setSnippetFactory(sp<SnippetFactory>::make<SnippetFactoryBgfx>());
 
     vkContext.setVersion(version);
 }
@@ -154,7 +149,7 @@ void setVersion(Ark::RendererVersion version, RenderEngineContext& vkContext)
 }
 
 RendererFactoryBgfx::RendererFactoryBgfx()
-    : RendererFactory({Ark::COORDINATE_SYSTEM_RHS, false, 16})
+    : RendererFactory({{{Ark::RENDERING_BACKEND_ALL}}, Ark::COORDINATE_SYSTEM_RHS, false, 16})
 {
 }
 

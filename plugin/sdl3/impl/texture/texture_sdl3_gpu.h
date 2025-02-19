@@ -3,6 +3,7 @@
 #include <SDL3/SDL.h>
 
 #include "renderer/base/texture.h"
+
 #include "sdl3/base/context_sdl3_gpu.h"
 
 namespace ark::plugin::sdl3 {

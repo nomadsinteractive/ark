@@ -39,11 +39,11 @@ constexpr char STAGE_ATTR_PREFIX[Enum::SHADER_STAGE_BIT_COUNT + 1][4] = {"a_", "
 char _STAGE_ATTR_PREFIX[Enum::SHADER_STAGE_COUNT + 1][4] = {"a_", "v_", "f_", "c_"};
 #endif
 
-const char* ANNOTATION_VERT_IN = "${vert.in}";
-const char* ANNOTATION_VERT_OUT = "${vert.out}";
-const char* ANNOTATION_FRAG_IN = "${frag.in}";
-const char* ANNOTATION_FRAG_OUT = "${frag.out}";
-const char* ANNOTATION_FRAG_COLOR = "${frag.color}";
+const char* ANNOTATION_VERT_IN = "in";
+const char* ANNOTATION_VERT_OUT = "out";
+const char* ANNOTATION_FRAG_IN = "in";
+const char* ANNOTATION_FRAG_OUT = "out";
+const char* ANNOTATION_FRAG_COLOR = "f_FragColor";
 
 }
 

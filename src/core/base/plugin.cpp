@@ -13,17 +13,17 @@ void Plugin::initialize()
 
 BeanFactory::Factory Plugin::createBeanFactory(const BeanFactory& /*beanFactory*/, const sp<Dictionary<document>>& /*documentById*/)
 {
-    return BeanFactory::Factory();
+    return {};
 }
 
 BeanFactory::Factory Plugin::createResourceLoader(const BeanFactory& /*beanFactory*/, const sp<Dictionary<document>>& /*documentById*/, const sp<ResourceLoaderContext>& /*resourceLoaderContext*/)
 {
-    return BeanFactory::Factory();
+    return {};
 }
 
 Library Plugin::createLibrary()
 {
-    return Library();
+    return {};
 }
 
 void Plugin::createScriptModule(Interpreter& /*script*/)
@@ -32,16 +32,14 @@ void Plugin::createScriptModule(Interpreter& /*script*/)
 
 void Plugin::loadBeanFactory(BeanFactory& beanFactory, const sp<Dictionary<document>>& documentById)
 {
-    BeanFactory::Factory refBeanFactory = createBeanFactory(beanFactory, documentById);
-    if(refBeanFactory)
-        beanFactory.add(refBeanFactory, _type == Plugin::PLUGIN_TYPE_CORE);
+    if(BeanFactory::Factory refBeanFactory = createBeanFactory(beanFactory, documentById))
+        beanFactory.add(std::move(refBeanFactory), _type == Plugin::PLUGIN_TYPE_CORE);
 }
 
 void Plugin::loadResourceLoader(BeanFactory& beanFactory, const sp<Dictionary<document>>& documentById, const sp<ResourceLoaderContext>& resourceLoaderContext)
 {
-    const BeanFactory::Factory resourceLoaderBeanFactory = createResourceLoader(beanFactory, documentById, resourceLoaderContext);
-    if(resourceLoaderBeanFactory)
-        beanFactory.add(resourceLoaderBeanFactory, _type == Plugin::PLUGIN_TYPE_CORE);
+    if(BeanFactory::Factory resourceLoaderBeanFactory = createResourceLoader(beanFactory, documentById, resourceLoaderContext))
+        beanFactory.add(std::move(resourceLoaderBeanFactory), _type == Plugin::PLUGIN_TYPE_CORE);
 }
 
 const String& Plugin::name() const

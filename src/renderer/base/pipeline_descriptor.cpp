@@ -1,6 +1,5 @@
 #include "renderer/base/pipeline_descriptor.h"
 
-#include "core/base/enum_map.h"
 #include "core/util/string_convert.h"
 
 #include "renderer/base/graphics_context.h"
@@ -267,26 +266,24 @@ template<> ARK_API PipelineDescriptor::FrontFaceType StringConvert::eval<Pipelin
     return PipelineDescriptor::FRONT_FACE_TYPE_BACK;
 }
 
-template<> ARK_API void EnumMap<PipelineDescriptor::BlendFactor>::initialize(std::map<String, PipelineDescriptor::BlendFactor>& enums)
-{
-    enums["default"] = PipelineDescriptor::BLEND_FACTOR_DEFAULT;
-    enums["zero"] = PipelineDescriptor::BLEND_FACTOR_ZERO;
-    enums["one"] = PipelineDescriptor::BLEND_FACTOR_ONE;
-    enums["src_color"] = PipelineDescriptor::BLEND_FACTOR_SRC_COLOR;
-    enums["one_minus_src_color"] = PipelineDescriptor::BLEND_FACTOR_ONE_MINUS_SRC_COLOR;
-    enums["dst_color"] = PipelineDescriptor::BLEND_FACTOR_DST_COLOR;
-    enums["one_minus_dst_color"] = PipelineDescriptor::BLEND_FACTOR_ONE_MINUS_DST_COLOR;
-    enums["src_alpha"] = PipelineDescriptor::BLEND_FACTOR_SRC_ALPHA;
-    enums["one_minus_src_alpha"] = PipelineDescriptor::BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-    enums["dst_alpha"] = PipelineDescriptor::BLEND_FACTOR_DST_ALPHA;
-    enums["one_minus_dst_alpha"] = PipelineDescriptor::BLEND_FACTOR_ONE_MINUS_DST_ALPHA;
-    enums["const_color"] = PipelineDescriptor::BLEND_FACTOR_CONST_COLOR;
-    enums["const_alpha"] = PipelineDescriptor::BLEND_FACTOR_CONST_ALPHA;
-}
-
 template<> ARK_API PipelineDescriptor::BlendFactor StringConvert::eval<PipelineDescriptor::BlendFactor>(const String& str)
 {
-    return EnumMap<PipelineDescriptor::BlendFactor>::instance().ensureEnum(str);
+    constexpr Enum::LookupTable<StringView, PipelineDescriptor::BlendFactor, 13> table = {{
+        {"default", PipelineDescriptor::BLEND_FACTOR_DEFAULT},
+        {"zero", PipelineDescriptor::BLEND_FACTOR_ZERO},
+        {"one", PipelineDescriptor::BLEND_FACTOR_ONE},
+        {"src_color", PipelineDescriptor::BLEND_FACTOR_SRC_COLOR},
+        {"one_minus_src_color", PipelineDescriptor::BLEND_FACTOR_ONE_MINUS_SRC_COLOR},
+        {"dst_color", PipelineDescriptor::BLEND_FACTOR_DST_COLOR},
+        {"one_minus_dst_color", PipelineDescriptor::BLEND_FACTOR_ONE_MINUS_DST_COLOR},
+        {"src_alpha", PipelineDescriptor::BLEND_FACTOR_SRC_ALPHA},
+        {"one_minus_src_alpha", PipelineDescriptor::BLEND_FACTOR_ONE_MINUS_SRC_ALPHA},
+        {"dst_alpha", PipelineDescriptor::BLEND_FACTOR_DST_ALPHA},
+        {"one_minus_dst_alpha", PipelineDescriptor::BLEND_FACTOR_ONE_MINUS_DST_ALPHA},
+        {"const_color", PipelineDescriptor::BLEND_FACTOR_CONST_COLOR},
+        {"const_alpha", PipelineDescriptor::BLEND_FACTOR_CONST_ALPHA}
+    }};
+    return Enum::lookup<PipelineDescriptor::BlendFactor, 13>(table, str);
 }
 
 }

@@ -13,7 +13,7 @@ public:
     String str() const;
     void clear();
 
-    StringBuffer& operator <<(const String& str);
+    StringBuffer& operator <<(StringView str);
     StringBuffer& operator <<(const char* str);
     StringBuffer& operator <<(uint32_t val);
     StringBuffer& operator <<(int32_t val);

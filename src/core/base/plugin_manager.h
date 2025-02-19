@@ -1,7 +1,6 @@
 #pragma once
 
 #include <functional>
-#include <vector>
 
 #include "core/base/api.h"
 #include "core/base/plugin.h"
@@ -27,11 +26,11 @@ public:
     void each(const std::function<bool(const sp<Plugin>&)>& visitor) const;
     void load(const String& name);
 
-    const std::vector<sp<Plugin>>& plugins() const;
+    const Vector<sp<Plugin>>& plugins() const;
     void addPlugin(sp<Plugin> plugin);
 
 private:
-    std::vector<sp<Plugin>> _plugins;
+    Vector<sp<Plugin>> _plugins;
 };
 
 }

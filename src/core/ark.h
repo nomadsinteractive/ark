@@ -1,9 +1,8 @@
 #pragma once
 
-#include <list>
-
 #include "core/forwarding.h"
 #include "core/base/api.h"
+#include "core/base/bit_set.h"
 #include "core/base/class_manager.h"
 #include "core/base/string.h"
 #include "core/collection/traits.h"
@@ -18,11 +17,14 @@ namespace ark {
 
 class ARK_API Ark {
 public:
-    enum RendererBackend {
-        RENDERER_BACKEND_AUTO,
-        RENDERER_BACKEND_OPENGL,
-        RENDERER_BACKEND_VULKAN
-   };
+    enum RenderingBackendBit {
+        RENDERING_BACKEND_OPENGL_BIT = 1 << 0,
+        RENDERING_BACKEND_VULKAN_BIT = 1 << 1,
+        RENDERING_BACKEND_DIRECT_X_BIT = 1 << 2,
+        RENDERING_BACKEND_METAL_BIT = 1 << 3,
+        RENDERING_BACKEND_ALL = RENDERING_BACKEND_OPENGL_BIT | RENDERING_BACKEND_VULKAN_BIT | RENDERING_BACKEND_DIRECT_X_BIT | RENDERING_BACKEND_METAL_BIT
+    };
+    typedef BitSet<RenderingBackendBit> RenderingBackendSet;
 
     enum RendererVersion {
         RENDERER_VERSION_AUTO = 0,

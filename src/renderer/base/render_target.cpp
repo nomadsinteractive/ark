@@ -66,19 +66,19 @@ sp<Renderer> RenderTarget::RENDERER_BUILDER::build(const Scope& args)
 
 template<> ARK_API RenderTarget::ClearBitSet StringConvert::eval<RenderTarget::ClearBitSet>(const String& str)
 {
-    constexpr std::array<std::pair<const char*, RenderTarget::ClearBits>, 5> clearMasks = {{
+    constexpr RenderTarget::ClearBitSet::LookupTable<5> clearBits = {{
             {"none", RenderTarget::CLEAR_BIT_NONE},
             {"color", RenderTarget::CLEAR_BIT_COLOR},
             {"depth", RenderTarget::CLEAR_BIT_DEPTH},
             {"stencil", RenderTarget::CLEAR_BIT_COLOR},
             {"all", RenderTarget::CLEAR_BIT_ALL}
         }};
-    return RenderTarget::ClearBitSet::toBitSet(str, clearMasks);
+    return RenderTarget::ClearBitSet::toBitSet(str, clearBits);
 }
 
 template<> RenderTarget::DepthStencilUsage StringConvert::eval<RenderTarget::DepthStencilUsage>(const String& str)
 {
-    constexpr std::array<std::pair<const char*, RenderTarget::DepthStencilUsageBits>, 2> usages = {{
+    constexpr RenderTarget::DepthStencilUsage::LookupTable<2> usages = {{
         {"for_input", RenderTarget::DEPTH_STENCIL_USAGE_FOR_INPUT},
         {"for_output", RenderTarget::DEPTH_STENCIL_USAGE_FOR_OUTPUT},
     }};

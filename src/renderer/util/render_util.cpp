@@ -314,7 +314,7 @@ uint32_t RenderUtil::getComponentSize(Texture::Format format)
     return 4;
 }
 
-Vector<uint32_t> RenderUtil::compileSPIR(const StringView source, Enum::ShaderStageBit stage, Ark::RendererBackend renderTarget)
+Vector<uint32_t> RenderUtil::compileSPIR(const StringView source, Enum::ShaderStageBit stage, Ark::RenderingBackendBit renderTarget)
 {
     const Global<GLSLLangInitializer> initializer;
     EShLanguage esStage = initializer->toShLanguage(stage);
@@ -349,12 +349,11 @@ Vector<uint32_t> RenderUtil::compileSPIR(const StringView source, Enum::ShaderSt
 //TODO: Use the specified version
     switch(renderTarget)
     {
-        case Ark::RENDERER_BACKEND_AUTO:
-        case Ark::RENDERER_BACKEND_OPENGL:
+        case Ark::RENDERING_BACKEND_OPENGL_BIT:
             shader.setEnvInput(glslang::EShSourceGlsl, esStage, glslang::EShClientOpenGL, 450);
             shader.setEnvClient(glslang::EShClientOpenGL, glslang::EShTargetOpenGL_450);
             break;
-        case Ark::RENDERER_BACKEND_VULKAN:
+        case Ark::RENDERING_BACKEND_VULKAN_BIT:
             shader.setEnvInput(glslang::EShSourceGlsl, esStage, glslang::EShClientVulkan, 100);
             shader.setEnvClient(glslang::EShClientVulkan, glslang::EShTargetVulkan_1_2);
             break;

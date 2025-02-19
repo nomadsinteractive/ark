@@ -1,8 +1,6 @@
 #pragma once
 
-#include <array>
-
-#include "string_buffer.h"
+#include "core/base/enum.h"
 #include "core/base/string.h"
 
 namespace ark {
@@ -52,7 +50,7 @@ public:
         return _bits;
     }
 
-    void set(T bits, bool enabled = true) {
+    void set(T bits, const bool enabled = true) {
         if(enabled)
             _bits |= toConvertableType(bits);
         else
@@ -63,7 +61,7 @@ public:
         return _bits & toConvertableType(bits);
     }
 
-    template<typename U> U toFlags(const std::function<U(T)>& converter, size_t count) const {
+    template<typename U> U toFlags(const std::function<U(T)>& converter, const size_t count) const {
         U flags = static_cast<U>(0);
         for(size_t i = 0; i < count; ++i)
             if(const T bits = static_cast<T>(SHIFT ? i : 1 << i); has(bits))
@@ -78,26 +76,11 @@ public:
         return {toConvertableType(std::forward<Args>(bits)...)};
     }
 
-    template<size_t N> static BitSet toBitSet(const String& value, const std::array<std::pair<const char*, T>, N>& bitNames) {
+    template<size_t N> using LookupTable = Enum::LookupTable<StringView, T, N>;
+    template<size_t N> static BitSet toBitSet(const String& value, const LookupTable<N>& bitNames) {
         convertable_type bitsets = 0;
-        for(const String& i : value.split('|')) {
-            convertable_type bitvalue = std::numeric_limits<convertable_type>::max();
-            for(const auto [k, v] : bitNames)
-                if(i.strip() == k) {
-                    bitvalue = toConvertableType(v);
-                    break;
-                }
-            if(bitvalue == std::numeric_limits<convertable_type>::max()) {
-                StringBuffer sb;
-                for(size_t j = 0; j < N; ++j) {
-                    sb << bitNames.at(j).first << '(' << bitNames.at(j).second << ')';
-                    if(j == N - 1)
-                        sb << ", ";
-                }
-                FATAL("Unknow value %s, possible values are [%s]", i.c_str(), sb.str().c_str());
-            }
-            bitsets |= bitvalue;
-        }
+        for(const String& i : value.split('|'))
+            bitsets |= Enum::lookup<T, N>(bitNames, i.strip());
         return {bitsets};
     }
 

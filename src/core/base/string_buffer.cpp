@@ -11,12 +11,12 @@ String StringBuffer::str() const
 
 void StringBuffer::clear()
 {
-    _ss = std::ostringstream();
+    _ss = {};
 }
 
-StringBuffer& StringBuffer::operator <<(const String& str)
+StringBuffer& StringBuffer::operator<<(const StringView str)
 {
-    _ss << str._str;
+    _ss << str;
     return *this;
 }
 
@@ -26,19 +26,19 @@ StringBuffer& StringBuffer::operator <<(const char* str)
     return *this;
 }
 
-StringBuffer& StringBuffer::operator <<(uint32_t val)
+StringBuffer& StringBuffer::operator <<(const uint32_t val)
 {
     _ss << val;
     return *this;
 }
 
-StringBuffer& StringBuffer::operator <<(int32_t val)
+StringBuffer& StringBuffer::operator <<(const int32_t val)
 {
     _ss << val;
     return *this;
 }
 
-StringBuffer& StringBuffer::operator <<(char c)
+StringBuffer& StringBuffer::operator <<(const char c)
 {
     _ss << c;
     return *this;

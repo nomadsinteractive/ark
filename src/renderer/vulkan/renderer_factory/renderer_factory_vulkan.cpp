@@ -40,22 +40,14 @@ namespace {
 void setVersion(Ark::RendererVersion version, RenderEngineContext& vkContext)
 {
     LOGD("Choose Vulkan Version = %d", version);
-    std::map<String, String>& definitions = vkContext.definitions();
-
-    definitions["vert.in"] = "in";
-    definitions["vert.out"] = "out";
-    definitions["frag.in"] = "in";
-    definitions["frag.out"] = "out";
-    definitions["frag.color"] = "f_FragColor";
-    vkContext.setSnippetFactory(sp<SnippetFactoryVulkan>::make());
-
+    vkContext.setSnippetFactory(sp<SnippetFactory>::make<SnippetFactoryVulkan>());
     vkContext.setVersion(version);
 }
 
 }
 
 RendererFactoryVulkan::RendererFactoryVulkan(sp<Recycler> recycler)
-    : RendererFactory({Ark::COORDINATE_SYSTEM_LHS, true, sizeof(float)}), _recycler(std::move(recycler)), _renderer(sp<VKRenderer>::make())
+    : RendererFactory({{Ark::RENDERING_BACKEND_VULKAN_BIT}, Ark::COORDINATE_SYSTEM_LHS, true, sizeof(float)}), _recycler(std::move(recycler)), _renderer(sp<VKRenderer>::make())
 {
     const Global<PluginManager> pm;
     pm->addPlugin(sp<VulkanPlugin>::make());

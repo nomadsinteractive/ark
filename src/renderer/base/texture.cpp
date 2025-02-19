@@ -1,7 +1,6 @@
 #include "renderer/base/texture.h"
 
 #include "core/inf/array.h"
-#include "core/inf/variable.h"
 #include "core/impl/dictionary/dictionary_by_attribute_name.h"
 #include "core/util/string_convert.h"
 #include "core/util/documents.h"
@@ -139,7 +138,7 @@ template<> ARK_API Texture::Type StringConvert::eval<Texture::Type>(const String
 
 template<> ARK_API Texture::Format StringConvert::eval<Texture::Format>(const String& str)
 {
-    constexpr std::array<std::pair<const char*, Texture::Format>, 11> formats = { {
+    constexpr BitSet<Texture::Format>::LookupTable<11> formats = {{
             {"r", Texture::FORMAT_R},
             {"rg", Texture::FORMAT_RG},
             {"rgb", Texture::FORMAT_RGB},
@@ -159,7 +158,7 @@ template<> ARK_API Texture::Format StringConvert::eval<Texture::Format>(const St
 
 template<> ARK_API Texture::Usage StringConvert::eval<Texture::Usage>(const String& str)
 {
-    constexpr std::array<std::pair<const char*, Texture::UsageBits>, 6> usages = { {
+    constexpr Texture::Usage::LookupTable<6> usages = {{
         {"general", Texture::USAGE_AUTO},
         {"depth", Texture::USAGE_DEPTH_ATTACHMENT},
         {"stencil", Texture::USAGE_DEPTH_STENCIL_ATTACHMENT},
@@ -189,37 +188,37 @@ template<> ARK_API Texture::Feature StringConvert::eval<Texture::Feature>(const 
     return Texture::FEATURE_DEFAULT;
 }
 
-template<> ARK_API Texture::CONSTANT StringConvert::eval<Texture::CONSTANT>(const String& str)
+template<> ARK_API Texture::Filter StringConvert::eval<Texture::Filter>(const String& str)
 {
     if(str)
     {
         if(str == "nearest")
-            return Texture::CONSTANT_NEAREST;
+            return Texture::FILTER_NEAREST;
         if(str == "linear")
-            return Texture::CONSTANT_LINEAR;
+            return Texture::FILTER_LINEAR;
         if(str == "linear_mipmap")
-            return Texture::CONSTANT_LINEAR_MIPMAP;
+            return Texture::FILTER_LINEAR_MIPMAP;
         if(str == "clamp_to_edge")
-            return Texture::CONSTANT_CLAMP_TO_EDGE;
+            return Texture::FILTER_CLAMP_TO_EDGE;
         if(str == "clamp_to_border")
-            return Texture::CONSTANT_CLAMP_TO_BORDER;
+            return Texture::FILTER_CLAMP_TO_BORDER;
         if(str == "mirrored_repeat")
-            return Texture::CONSTANT_MIRRORED_REPEAT;
+            return Texture::FILTER_MIRRORED_REPEAT;
         if(str == "repeat")
-            return Texture::CONSTANT_REPEAT;
+            return Texture::FILTER_REPEAT;
         if(str == "mirror_clamp_to_edge")
-            return Texture::CONSTANT_MIRROR_CLAMP_TO_EDGE;
+            return Texture::FILTER_MIRROR_CLAMP_TO_EDGE;
     }
     DFATAL("Unknow TextureParameter: %s", str.c_str());
-    return Texture::CONSTANT_NEAREST;
+    return Texture::FILTER_NEAREST;
 }
 
 Texture::Parameters::Parameters(Type type, const document& parameters, Format format, Texture::Feature features)
     : _type(type), _usage(parameters ? Documents::getAttribute<Texture::Usage>(parameters, "usage", Texture::USAGE_AUTO) : Texture::USAGE_AUTO),
       _format(parameters ? Documents::getAttribute<Texture::Format>(parameters, "format", format) : format),
       _features(parameters ? Documents::getAttribute<Texture::Feature>(parameters, "feature", features) : features),
-      _min_filter((features & Texture::FEATURE_MIPMAPS) ? CONSTANT_LINEAR_MIPMAP : CONSTANT_LINEAR), _mag_filter(CONSTANT_LINEAR),
-      _wrap_s(CONSTANT_REPEAT), _wrap_t(CONSTANT_REPEAT), _wrap_r(CONSTANT_REPEAT)
+      _min_filter((features & Texture::FEATURE_MIPMAPS) ? FILTER_LINEAR_MIPMAP : FILTER_LINEAR), _mag_filter(FILTER_LINEAR),
+      _wrap_s(FILTER_REPEAT), _wrap_t(FILTER_REPEAT), _wrap_r(FILTER_REPEAT)
 {
 }
 
@@ -233,10 +232,10 @@ void Texture::Parameters::loadParameters(const document& parameters, BeanFactory
     _wrap_r = getEnumValue(byName, "wrap_r", factory, args, _wrap_r);
 }
 
-Texture::CONSTANT Texture::Parameters::getEnumValue(Dictionary<document>& dict, const String& name, BeanFactory& factory, const Scope& args, Texture::CONSTANT defValue)
+Texture::Filter Texture::Parameters::getEnumValue(Dictionary<document>& dict, const String& name, BeanFactory& factory, const Scope& args, Texture::Filter defValue)
 {
     const document doc = dict.get(name);
-    return doc ? Strings::eval<Texture::CONSTANT>(factory.ensure<String>(doc, constants::VALUE, args)) : defValue;
+    return doc ? Strings::eval<Texture::Filter>(factory.ensure<String>(doc, constants::VALUE, args)) : defValue;
 }
 
 Texture::Delegate::Delegate(Texture::Type type)
