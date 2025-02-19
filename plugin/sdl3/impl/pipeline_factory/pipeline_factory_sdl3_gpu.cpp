@@ -128,11 +128,6 @@ SDL_GPUBlendFactor toBlendFactor(PipelineDescriptor::BlendFactor blendFactor, co
     return SDL_GPU_BLENDFACTOR_INVALID;
 }
 
-SDL_GPUBlendOp toBlendOp()
-{
-
-}
-
 SDL_GPUColorTargetBlendState toColorTargetBlendState(const PipelineDescriptor::TraitBlend& blend)
 {
     return {
@@ -391,7 +386,7 @@ public:
         SDL_BindGPUVertexBuffers(renderPass, 0, &vertexBufferBinding, 1);
 
         const SDL_GPUBufferBinding indexBufferBinding = {reinterpret_cast<SDL_GPUBuffer*>(drawingContext._indices.id()), 0};
-        SDL_BindGPUIndexBuffer(renderPass, &indexBufferBinding, SDL_GPU_INDEXELEMENTSIZE_16BIT);
+        SDL_BindGPUIndexBuffer(renderPass, &indexBufferBinding, sizeof(element_index_t) == 2 ? SDL_GPU_INDEXELEMENTSIZE_16BIT : SDL_GPU_INDEXELEMENTSIZE_32BIT);
 
         SDL_GPUTextureSamplerBinding textureSamplerBinding[8];
         Uint32 samplerCount = 0;

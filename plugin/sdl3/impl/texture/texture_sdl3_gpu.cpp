@@ -26,8 +26,11 @@ SDL_GPUTextureFormat toChannelFormat(const SDL_GPUTextureFormat* channelFormat, 
     return format & Texture::FORMAT_SIGNED ? channelFormat[7] : channelFormat[6];
 }
 
-SDL_GPUTextureFormat toTextureFormat(const Bitmap& bitmap, const Texture::Format format)
+SDL_GPUTextureFormat toTextureFormat(const Bitmap& bitmap, const Texture::Format format, const Texture::Usage usage)
 {
+    if(usage.has(Texture::USAGE_DEPTH_ATTACHMENT))
+        return SDL_GPU_TEXTUREFORMAT_D32_FLOAT;
+
     constexpr SDL_GPUTextureFormat sdlFormats[] = {
         SDL_GPU_TEXTUREFORMAT_R8_UNORM, SDL_GPU_TEXTUREFORMAT_R8_SNORM, SDL_GPU_TEXTUREFORMAT_R16_UNORM, SDL_GPU_TEXTUREFORMAT_R16_SNORM, SDL_GPU_TEXTUREFORMAT_R16_FLOAT, SDL_GPU_TEXTUREFORMAT_R32_FLOAT, SDL_GPU_TEXTUREFORMAT_R32_UINT, SDL_GPU_TEXTUREFORMAT_R32_INT,
         SDL_GPU_TEXTUREFORMAT_R8G8_UNORM, SDL_GPU_TEXTUREFORMAT_R8G8_SNORM, SDL_GPU_TEXTUREFORMAT_R16G16_UNORM, SDL_GPU_TEXTUREFORMAT_R16G16_SNORM, SDL_GPU_TEXTUREFORMAT_R16G16_FLOAT, SDL_GPU_TEXTUREFORMAT_R32G32_FLOAT, SDL_GPU_TEXTUREFORMAT_R32G32_UINT, SDL_GPU_TEXTUREFORMAT_R32G32_INT,
@@ -63,7 +66,6 @@ SDL_GPUTexture* createTexture(GraphicsContext& graphicsContext, const Texture::P
     const SDL_GPUTextureCreateInfo textureCreateInfo{parameters._type == Texture::TYPE_2D ? SDL_GPU_TEXTURETYPE_2D : SDL_GPU_TEXTURETYPE_CUBE, textureFormat, toTextureUsageFlags(parameters._usage), width, height, 1, 1};
     return SDL_CreateGPUTexture(gpuDevice, &textureCreateInfo);
 }
-
 
 }
 
@@ -118,7 +120,7 @@ void TextureSDL3_GPU::uploadBitmap(GraphicsContext& graphicsContext, const Bitma
 {
     if(!_texture)
     {
-        _texture_format = toTextureFormat(bitmap, _parameters->_format);
+        _texture_format = toTextureFormat(bitmap, _parameters->_format, _parameters->_usage);
         _texture = createTexture(graphicsContext, _parameters, _texture_format, _width, _height);
     }
 

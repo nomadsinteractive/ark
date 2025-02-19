@@ -6,7 +6,7 @@ namespace ark::plugin::bgfx {
 
 template<typename T> class Handle;
 
-class BgfxContext;
+struct BgfxContext;
 
 typedef Handle<::bgfx::VertexBufferHandle> StaticVertexBuffer;
 typedef Handle<::bgfx::DynamicVertexBufferHandle> DynamicVertexBuffer;
