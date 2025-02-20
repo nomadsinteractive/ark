@@ -52,7 +52,7 @@
 
 #define WARN(...)   ark::__message__(ark::__warning__, __ARK_FUNCTION__, nullptr, __VA_ARGS__)
 #define FATAL(...)  ark::__message__(ark::__fatal__, __ARK_FUNCTION__, nullptr, __VA_ARGS__)
-#define THREAD_CHECK(threadId) __thread_check__<threadId>(__ARK_FUNCTION__)
+#define THREAD_CHECK(threadId) __thread_check__(__ARK_FUNCTION__, threadId)
 #define CHECK(cond, ...) if(!(cond)) ark::__message__(ark::__fatal__, __ARK_FUNCTION__, #cond, __VA_ARGS__)
 #define CHECK_WARN(cond, ...) if(!(cond)) ark::__message__(ark::__warning__, __ARK_FUNCTION__, #cond, __VA_ARGS__)
 #define TRACE(cond, ...) if(cond) ark::__message__(ark::__trace__, __ARK_FUNCTION__, #cond, __VA_ARGS__)
@@ -99,9 +99,11 @@ void ARK_API __message__(fnTraceCallback callback, const char* func, const char*
 #ifndef ARK_FLAG_DEBUG
 [[noreturn]]
 #endif
+
 void ARK_API __fatal__(const char* func, const char* condition, const char* message);
 void ARK_API __warning__(const char* func, const char* condition, const char* message);
 void ARK_API __trace__(const char* func, const char* condition, const char* message);
+void ARK_API __thread_check__(const char* func, THREAD_ID threadId);
 
 namespace _internal {
 
@@ -116,11 +118,6 @@ template<THREAD_ID ID> struct ThreadFlag {
 
 template<THREAD_ID ID> void __thread_init__() {
     _internal::ThreadFlag<ID>::id() = ID;
-}
-
-template<THREAD_ID ID> void __thread_check__(const char* func) {
-    if(_internal::ThreadFlag<ID>::id() != ID)
-        __message__(__fatal__, func, "", "ThreadId check failed: %d, should be %d", _internal::ThreadFlag<ID>::id(), ID);
 }
 
 template<typename T, size_t N> constexpr size_t array_size(const T (&)[N]) {

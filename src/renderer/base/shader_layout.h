@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/base/api.h"
+#include "core/base/bit_set_types.h"
 #include "core/collection/table.h"
 #include "core/types/optional.h"
 #include "core/types/shared_ptr.h"
@@ -10,7 +11,6 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/base/attribute.h"
-#include "renderer/base/shader_stage.h"
 
 namespace ark {
 

@@ -15,8 +15,6 @@ class ARK_API ApplicationBundle {
 public:
     ApplicationBundle(sp<AssetBundle> assetBundle);
 
-    const sp<Recycler>& recycler() const;
-
     const sp<DocumentLoaderBundle>& documents() const;
 
     const sp<BitmapLoaderBundle>& bitmapBundle() const;
@@ -46,8 +44,6 @@ private:
 
     sp<BitmapLoaderBundle> _bitmap_bundle;
     sp<BitmapLoaderBundle> _bitmap_bounds_loader;
-
-    sp<Recycler> _recycler;
 };
 
 }

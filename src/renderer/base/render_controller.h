@@ -47,15 +47,15 @@ public:
         UPLOAD_PRIORITY_COUNT
     };
 
-    class PrimitiveIndexBuffer {
+    class ARK_API PrimitiveIndexBuffer {
     public:
-        PrimitiveIndexBuffer(std::vector<element_index_t> modelIndices, size_t modelVertexCount, bool degenerate, size_t primitiveCount);
+        PrimitiveIndexBuffer(Vector<element_index_t> modelIndices, size_t modelVertexCount, bool degenerate, size_t primitiveCount);
 
         size_t upload(RenderController& renderController);
         Buffer::Snapshot snapshot(RenderController& renderController, size_t primitiveCountRequired);
 
     private:
-        std::vector<element_index_t> _model_indices;
+        Vector<element_index_t> _model_indices;
         size_t _model_vertex_count;
         size_t _primitive_count;
 
@@ -89,7 +89,7 @@ private:
     };
 
 public:
-    RenderController(const sp<RenderEngine>& renderEngine, const sp<Recycler>& recycler, const sp<Dictionary<bitmap>>& bitmapLoader, const sp<Dictionary<bitmap>>& bitmapBoundsLoader);
+    RenderController(const sp<RenderEngine>& renderEngine, const sp<Dictionary<bitmap>>& bitmapLoader, const sp<Dictionary<bitmap>>& bitmapBoundsLoader);
 
     void reset();
 
@@ -185,7 +185,7 @@ private:
         void foreach(GraphicsContext& graphicsContext, bool recycle, bool upload);
 
     private:
-        std::vector<RenderResource> _resources[UPLOAD_PRIORITY_COUNT];
+        Vector<RenderResource> _resources[UPLOAD_PRIORITY_COUNT];
     };
 
 private:
@@ -206,10 +206,10 @@ private:
     DList<sp<Updatable>> _on_pre_compose_updatable;
     DList<sp<Runnable>> _on_pre_compose_runnable;
 
-    std::vector<UpdatableSynchronized<bool>> _on_pre_render_sync;
+    Vector<UpdatableSynchronized<bool>> _on_pre_render_sync;
     DList<sp<Runnable>> _on_pre_render_runnable;
 
-    std::vector<Box> _defered_instances;
+    Vector<Box> _defered_instances;
     std::map<uint32_t, sp<PrimitiveIndexBuffer>> _shared_primitive_index_buffer;
 
     GraphicsBufferAllocator _gba;

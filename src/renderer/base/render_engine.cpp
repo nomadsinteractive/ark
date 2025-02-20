@@ -15,7 +15,7 @@ RenderEngine::RenderEngine(const ApplicationManifest::Renderer& renderer, sp<Ren
 {
 }
 
-Ark::RendererVersion RenderEngine::version() const
+Enum::RendererVersion RenderEngine::version() const
 {
     return _render_context->version();
 }

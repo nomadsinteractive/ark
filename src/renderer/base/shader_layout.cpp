@@ -11,7 +11,7 @@ namespace ark {
 
 namespace {
 
-uint32_t getAttributeEndOffset(const ShaderLayout::AttributeOffsets& attrOffsets, Attribute::Usage usage)
+uint32_t getAttributeEndOffset(const ShaderLayout::AttributeOffsets& attrOffsets, const Attribute::Usage usage)
 {
     switch(usage)
     {

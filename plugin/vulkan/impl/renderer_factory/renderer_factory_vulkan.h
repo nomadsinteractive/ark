@@ -1,0 +1,45 @@
+#pragma once
+
+#include "core/ark.h"
+#include "core/inf/builder.h"
+#include "core/types/shared_ptr.h"
+
+#include "renderer/forwarding.h"
+#include "renderer/inf/renderer_factory.h"
+
+#include "vulkan/forwarding.h"
+
+namespace ark::plugin::vulkan {
+
+class RendererFactoryVulkan final : public RendererFactory {
+public:
+    RendererFactoryVulkan();
+    ~RendererFactoryVulkan() override = default;
+
+    sp<RenderEngineContext> createRenderEngineContext(const ApplicationManifest::Renderer& renderer) override;
+    void onSurfaceCreated(RenderEngine& renderEngine) override;
+
+    sp<Buffer::Delegate> createBuffer(Buffer::Type type, Buffer::Usage usage) override;
+    sp<Camera::Delegate> createCamera(Ark::RendererCoordinateSystem rcs) override;
+    sp<RenderTarget> createRenderTarget(sp<Renderer> renderer, RenderTarget::CreateConfigure configure) override;
+    sp<RenderView> createRenderView(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController) override;
+    sp<PipelineFactory> createPipelineFactory() override;
+    sp<Texture::Delegate> createTexture(sp<Size> size, sp<Texture::Parameters> parameters) override;
+
+//  [[plugin::builder::by-value("vulkan")]]
+    class BUILDER final : public Builder<RendererFactory> {
+    public:
+        BUILDER() = default;
+
+        sp<RendererFactory> build(const Scope& args) override;
+    };
+
+private:
+    sp<VKRenderer> _renderer;
+
+    friend class VKUtil;
+    friend class PipelineFactoryVulkan;
+
+};
+
+}

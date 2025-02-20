@@ -28,8 +28,7 @@ private:
         }
 
         sp<Builder<T>> createValueBuilder(BeanFactory& factory, const String& type, const String& value) const {
-            auto iter = _values.find(type);
-            if(iter != _values.end())
+            if(const auto iter = _values.find(type); iter != _values.end())
                 return iter->second(factory, value);
             return nullptr;
         }
@@ -66,7 +65,7 @@ private:
                     if(f.package().empty() && (f.ref() == id || ref == id))
                         return createBuilderInternal(factory, className, ref, doc);
 
-                    return makeWrappedBuilder(factory.createBuilderByRef<T>(f), wrappedId, factory.references());
+                    return makeWrappedBuilder<T>(factory.createBuilderByRef<T>(f), wrappedId, factory.references());
                 }
                 if(f.isArg())
                     return factory.getBuilderByArg<T>(f);
@@ -78,13 +77,11 @@ private:
         sp<Builder<T>> createBuilderInternal(BeanFactory& factory, const String& className, const String& id, const document& doc) const {
             const auto iter = _builders.find(className);
             if(iter == _builders.end())
-                return _default_builder_factory ? makeWrappedBuilder(_default_builder_factory(factory, doc), id, factory.references()) : nullptr;
+                return _default_builder_factory ? makeWrappedBuilder<T>(_default_builder_factory(factory, doc), id, factory.references()) : nullptr;
             sp<Builder<T>> builder = iter->second(factory, doc);
             CHECK(builder, "Builder \"%s\" create failed", className.c_str());
-            return makeWrappedBuilder(std::move(builder), id, factory.references());
+            return makeWrappedBuilder<T>(std::move(builder), id, factory.references());
         }
-
-        sp<Builder<T>> makeWrappedBuilder(sp<Builder<T>> builder, const String& id, const sp<Scope>& references) const;
 
     private:
         std::function<sp<Builder<T>>(BeanFactory&, const document&)> _default_builder_factory;
@@ -92,12 +89,16 @@ private:
 
         Map<String, std::function<sp<Builder<T>>(BeanFactory&, const String&)>> _values;
         Map<String, std::function<sp<Builder<T>>(BeanFactory&, const document&)>> _builders;
+
+        friend class Factory;
+        friend class BeanFactory;
     };
 
 public:
     class ARK_API Factory {
     public:
         Factory() = default;
+        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Factory);
 
         explicit operator bool() const;
 
@@ -137,7 +138,10 @@ public:
             ensureWorker<T>()->setDefaultBuilderFactory(std::move(builderFactory));
         }
 
-    private:
+        template<typename T> sp<Worker<T>> getWorker() const {
+            return _workers.get<Worker<T>>();
+        }
+
         template<typename T> sp<Worker<T>> ensureWorker() {
             if(!_workers.has<Worker<T>>())
                 _workers.put<Worker<T>>(sp<Worker<T>>::make());
@@ -250,6 +254,15 @@ public:
         return ensureBuilder<T>(attrValue);
     }
 
+    template<typename T> Vector<std::pair<String, builder<T>>> makeValueBuilderList() {
+        Vector<std::pair<String, builder<T>>> list;
+        for(const Factory& i : _stub->_factories)
+            if(const sp<Worker<T>> worker = i.getWorker<T>())
+                for(const auto& [k, v] : worker->_values)
+                    list.emplace_back(k, v(*this, k));
+        return list;
+    }
+
     template<typename T> Vector<builder<T>> makeBuilderList(const document& doc, const String& nodeName) {
         Vector<builder<T>> list;
         if(const String attrValue = Documents::getAttribute(doc, nodeName))
@@ -259,13 +272,14 @@ public:
             list.push_back(ensureBuilder<T>(i));
         return list;
     }
+
     template<typename T, typename... Args> Vector<T> makeBuilderListObject(const document& doc, const String& nodeName, Args&&... args) {
         Vector<T> list;
         for(const document& i : nodeName ? doc->children(nodeName) : doc->children())
             list.emplace_back(*this, i, std::forward<Args>(args)...);
         return list;
     }
-//TODO: deprecate this one, which brings chaos
+
     template<typename T> sp<Builder<T>> getConcreteClassBuilder(const document& doc, const String& attr) {
         static_assert(!std::is_abstract_v<T>, "Not a concrete class");
         const String attrValue = Documents::getAttribute(doc, attr);
@@ -300,31 +314,31 @@ public:
 
     template<typename T> sp<Builder<T>> ensureBuilder(const String& id, Identifier::Type idType = Identifier::ID_TYPE_AUTO) {
         DCHECK(id, "Empty value being built");
-        const sp<Builder<T>> builder = getBuilder<T>(id, idType);
+        sp<Builder<T>> builder = getBuilder<T>(id, idType);
         CHECK(builder, "Cannot find builder \"%s\"", id.c_str());
         return builder;
     }
 
     template<typename T> sp<Builder<T>> ensureBuilder(const document& doc) {
-        const sp<Builder<T>> builder = findBuilderByDocument<T>(doc, true);
+        sp<Builder<T>> builder = findBuilderByDocument<T>(doc, true);
         CHECK(builder, "Cannot not build from \"%s\"", Documents::toString(doc).c_str());
         return builder;
     }
 
     template<typename T> sp<Builder<T>> ensureBuilder(const document& doc, const String& attr) {
-        const sp<Builder<T>> builder = getBuilder<T>(doc, attr);
+        sp<Builder<T>> builder = getBuilder<T>(doc, attr);
         CHECK(builder, "Cannot not build \"%s\" from \"%s\"", attr.c_str(), Documents::toString(doc).c_str());
         return builder;
     }
 
     template<typename T> sp<Builder<T>> ensureConcreteClassBuilder(const document& doc, const String& attr) {
-        const sp<Builder<T>> builder = getConcreteClassBuilder<T>(doc, attr);
+        sp<Builder<T>> builder = getConcreteClassBuilder<T>(doc, attr);
         CHECK(builder, "Cannot not build \"%s\" from \"%s\"", attr.c_str(), Documents::toString(doc).c_str());
         return builder;
     }
 
     template<typename T> sp<Builder<T>> ensureBuilderByTypeValue(const String& type, const String& value) {
-        const sp<Builder<T>> builder = findBuilderByTypeValue<T>(type, value);
+        sp<Builder<T>> builder = findBuilderByTypeValue<T>(type, value);
         CHECK(builder, "Cannot not build Type(%s) with value \"%s\"", type.c_str(), value.c_str());
         return builder;
     }
@@ -336,11 +350,6 @@ public:
     sp<BeanFactory> getPackage(const String& name) const;
 
     const sp<Scope>& references() const;
-
-    template<typename T> sp<Builder<T>> getNullBuilder() const {
-        static const sp<Builder<T>> nb = sp<typename Builder<T>::Null>::make();
-        return nb;
-    }
 
     template<typename T> sp<Builder<T>> findBuilderByDocument(const document& doc, bool wrapBuilder) {
         const String className = Documents::getAttribute(doc, constants::CLASS);
@@ -368,11 +377,17 @@ public:
         return nullptr;
     }
 
-    template<typename T> sp<T> buildSafe(const sp<Builder<T>>& builder, const Scope& args) {
+private:
+    template<typename T> static sp<T> buildSafe(const sp<Builder<T>>& builder, const Scope& args) {
         return builder ? builder->build(args) : nullptr;
     }
 
-private:
+    template<typename T> static sp<Builder<T>> makeWrappedBuilder(sp<Builder<T>> builder, const String& id, const sp<Scope>& references) {
+        if(id.empty() || id.at(0) != '@')
+            return builder;
+        return sp<Builder<T>>::template make<BuilderBySoftRef<T>>(id.substr(1), std::move(references), std::move(builder));
+    }
+
     template<typename T> class BuilderByArgument final : public Builder<T> {
     public:
         BuilderByArgument(WeakPtr<Scope> references, String name, sp<Builder<T>> fallback = nullptr)
@@ -398,39 +413,33 @@ private:
         sp<Builder<T>> _fallback;
     };
 
+    template<typename T> class BuilderBySoftRef final : public Builder<T> {
+    public:
+        BuilderBySoftRef(String name, WeakPtr<Scope> references, sp<Builder<T>> delegate)
+            : _name(std::move(name)), _references(std::move(references)), _delegate(std::move(delegate)) {
+        }
+
+        sp<T> build(const Scope& args) override {
+            const sp<Scope> reference = _references.lock();
+            CHECK(reference, "BeanFactory has been disposed");
+            sp<T> inst = reference->get(_name).template as<T>();
+            if(!inst) {
+                inst = _delegate->build(args);
+                CHECK(inst, "Cannot build \"%s\"", _name.c_str());
+                reference->put(_name, Box(inst));
+                _delegate = nullptr;
+            }
+            return inst;
+        }
+
+    private:
+        String _name;
+        WeakPtr<Scope> _references;
+        sp<Builder<T>> _delegate;
+    };
+
 private:
     sp<Stub> _stub;
 };
-
-template<typename T> class BuilderBySoftRef final : public Builder<T> {
-public:
-    BuilderBySoftRef(String name, WeakPtr<Scope> references, sp<Builder<T>> delegate)
-        : _name(std::move(name)), _references(std::move(references)), _delegate(std::move(delegate)) {
-    }
-
-    sp<T> build(const Scope& args) override {
-        const sp<Scope> reference = _references.lock();
-        CHECK(reference, "BeanFactory has been disposed");
-        sp<T> inst = reference->get(_name).template as<T>();
-        if(!inst) {
-            inst = _delegate->build(args);
-            CHECK(inst, "Cannot build \"%s\"", _name.c_str());
-            reference->put(_name, Box(inst));
-            _delegate = nullptr;
-        }
-        return inst;
-    }
-
-private:
-    String _name;
-    WeakPtr<Scope> _references;
-    sp<Builder<T>> _delegate;
-};
-
-template<typename T> sp<Builder<T>> BeanFactory::Worker<T>::makeWrappedBuilder(sp<Builder<T>> builder, const String& id, const sp<Scope>& references) const {
-    if(id.empty() || id.at(0) != '@')
-        return builder;
-    return sp<Builder<T>>::template make<BuilderBySoftRef<T>>(id.substr(1), std::move(references), std::move(builder));
-}
 
 }

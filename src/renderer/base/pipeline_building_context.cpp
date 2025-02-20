@@ -54,6 +54,11 @@ Attribute::Usage toAttributeLayoutType(const String& name, const String& type)
         CHECK(type == "int" || type == "vec3" || type == "vec4"|| type == "vec3b" || type == "vec4b", "Unacceptable Color type: '%s', must be in [int, vec3, vec4, vec3b, vec4b]", type.c_str());
         return Attribute::USAGE_COLOR;
     }
+    if(name == "model")
+    {
+        CHECK(type == "mat4", "Unacceptable Model type: '%s', must be in [mat4]", type.c_str());
+        return Attribute::USAGE_MODEL_MATRIX;
+    }
     if(name == "normal")
     {
         CHECK(type == "vec3", "Unacceptable Normal type: '%s', must be in [vec3]", type.c_str());

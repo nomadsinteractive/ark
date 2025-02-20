@@ -2,6 +2,7 @@
 
 #include "core/ark.h"
 #include "core/base/api.h"
+#include "core/base/bit_set_types.h"
 
 #include "graphics/forwarding.h"
 #include "graphics/base/camera.h"
@@ -18,7 +19,7 @@ namespace ark {
 class ARK_API RendererFactory {
 public:
     struct Features {
-        Ark::RenderingBackendSet _supported_backends;
+        RenderingBackendSet _supported_backends;
         Ark::RendererCoordinateSystem _default_coordinate_system;
         bool _can_draw_element_incremental;
         uint32_t _attribute_alignment;

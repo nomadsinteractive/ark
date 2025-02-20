@@ -12,39 +12,12 @@
 
 #include "app/forwarding.h"
 #include "app/inf/application_profiler.h"
+#include "base/constants.h"
 
 namespace ark {
 
 class ARK_API Ark {
 public:
-    enum RenderingBackendBit {
-        RENDERING_BACKEND_OPENGL_BIT = 1 << 0,
-        RENDERING_BACKEND_VULKAN_BIT = 1 << 1,
-        RENDERING_BACKEND_DIRECT_X_BIT = 1 << 2,
-        RENDERING_BACKEND_METAL_BIT = 1 << 3,
-        RENDERING_BACKEND_ALL = RENDERING_BACKEND_OPENGL_BIT | RENDERING_BACKEND_VULKAN_BIT | RENDERING_BACKEND_DIRECT_X_BIT | RENDERING_BACKEND_METAL_BIT
-    };
-    typedef BitSet<RenderingBackendBit> RenderingBackendSet;
-
-    enum RendererVersion {
-        RENDERER_VERSION_AUTO = 0,
-        RENDERER_VERSION_OPENGL_30 = 30,
-        RENDERER_VERSION_OPENGL_31 = 31,
-        RENDERER_VERSION_OPENGL_32 = 32,
-        RENDERER_VERSION_OPENGL_33 = 33,
-        RENDERER_VERSION_OPENGL_40 = 40,
-        RENDERER_VERSION_OPENGL_41 = 41,
-        RENDERER_VERSION_OPENGL_42 = 42,
-        RENDERER_VERSION_OPENGL_43 = 43,
-        RENDERER_VERSION_OPENGL_44 = 44,
-        RENDERER_VERSION_OPENGL_45 = 45,
-        RENDERER_VERSION_OPENGL_46 = 46,
-        RENDERER_VERSION_VULKAN = 100,
-        RENDERER_VERSION_VULKAN_11 = 111,
-        RENDERER_VERSION_VULKAN_12 = 112,
-        RENDERER_VERSION_VULKAN_13 = 113
-    };
-
     enum RendererCoordinateSystem {
         COORDINATE_SYSTEM_DEFAULT = 0,
         COORDINATE_SYSTEM_LHS = -1,
@@ -89,6 +62,8 @@ public:
     const sp<RenderController>& renderController() const;
     const sp<ApplicationContext>& applicationContext() const;
     const sp<ApplicationProfiler>& applicationProfiler() const;
+
+    const Constants& constants();
 
     Camera createCamera(RendererCoordinateSystem cs = COORDINATE_SYSTEM_DEFAULT) const;
     Camera createCamera(RendererCoordinateSystem cs, bool flip) const;

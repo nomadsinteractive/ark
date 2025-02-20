@@ -14,7 +14,6 @@
 #include "renderer/base/render_engine_context.h"
 #include "renderer/inf/snippet_factory.h"
 #include "renderer/inf/snippet.h"
-#include "renderer/impl/snippet_factory/snippet_factory_vulkan.h"
 #include "renderer/util/render_util.h"
 
 #include "app/base/application_context.h"
@@ -133,7 +132,7 @@ public:
     }
 };
 
-void setVersion(Ark::RendererVersion version, RenderEngineContext& vkContext)
+void setVersion(Enum::RendererVersion version, RenderEngineContext& vkContext)
 {
     LOGD("Choose Bgfx Version = %d", version);
     Map<String, String>& definitions = vkContext.definitions();
@@ -149,14 +148,14 @@ void setVersion(Ark::RendererVersion version, RenderEngineContext& vkContext)
 }
 
 RendererFactoryBgfx::RendererFactoryBgfx()
-    : RendererFactory({{Ark::RENDERING_BACKEND_ALL}, Ark::COORDINATE_SYSTEM_RHS, false, 16})
+    : RendererFactory({{Enum::RENDERING_BACKEND_ALL}, Ark::COORDINATE_SYSTEM_RHS, false, 16})
 {
 }
 
 void RendererFactoryBgfx::onSurfaceCreated(RenderEngine& renderEngine)
 {
     ::bgfx::Init init;
-    init.type = renderEngine.version() >= Ark::RENDERER_VERSION_VULKAN ? ::bgfx::RendererType::Vulkan : ::bgfx::RendererType::OpenGL;
+    init.type = renderEngine.version() >= Enum::RENDERER_VERSION_VULKAN ? ::bgfx::RendererType::Vulkan : ::bgfx::RendererType::OpenGL;
     init.vendorId = BGFX_PCI_ID_NONE;
 
     const RenderEngine::PlatformInfo& info = Ark::instance().applicationContext()->renderEngine()->info();
@@ -181,7 +180,7 @@ void RendererFactoryBgfx::onSurfaceCreated(RenderEngine& renderEngine)
 sp<RenderEngineContext> RendererFactoryBgfx::createRenderEngineContext(const ApplicationManifest::Renderer& renderer)
 {
     const sp<RenderEngineContext> renderContext = sp<RenderEngineContext>::make(renderer, Viewport(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f));
-    setVersion(renderer._version == Ark::RENDERER_VERSION_AUTO ? Ark::RENDERER_VERSION_VULKAN_13 : renderer._version, renderContext);
+    setVersion(renderer._version == Enum::RENDERER_VERSION_AUTO ? Enum::RENDERER_VERSION_VULKAN_13 : renderer._version, renderContext);
     return renderContext;
 }
 

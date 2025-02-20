@@ -19,22 +19,9 @@ endif()
 
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>${LOCAL_MSVC_RUNTIME_CONF_SUFFIX}")
 
-if(ARK_USE_OPEN_GL)
-    ark_find_vcpkg_package(glbinding LIBRARIES glbinding::glbinding glbinding::glbinding-aux)
-    ark_link_libraries(glbinding::glbinding)
-endif()
-
-if(ARK_USE_VULKAN)
-    ark_find_vulkan()
-endif()
-
 aux_source_directory(platform/windows/impl LOCAL_SRC_LIST)
 aux_source_directory(platform/windows/impl/runtime LOCAL_RUNTIME_LIBRARY_SRC_LIST)
 
 set_source_files_properties(${ARK_GENERATED_FILE_DIRECTORY}/framework_plugin.cpp PROPERTIES COMPILE_FLAGS /bigobj)
-
-if(ARK_USE_VULKAN)
-    ark_compile_definitions(-DVK_USE_PLATFORM_WIN32_KHR)
-endif()
 
 list(APPEND ARK_COMPILE_DEFINITIONS -DARK_PLATFORM_WINDOWS)

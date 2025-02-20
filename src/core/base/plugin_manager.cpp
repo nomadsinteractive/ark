@@ -20,13 +20,6 @@ sp<BeanFactory> PluginManager::createBeanFactory(const sp<Dictionary<document>>&
     return beanFactory;
 }
 
-void PluginManager::each(const std::function<bool(const sp<Plugin>&)>& visitor) const
-{
-    for(const sp<Plugin>& plugin : _plugins)
-        if(!visitor(plugin))
-            break;
-}
-
 void PluginManager::load(const String& name)
 {
 #ifdef ARK_BUILD_STATIC_PLUGINS
@@ -55,6 +48,7 @@ const Vector<sp<Plugin>>& PluginManager::plugins() const
 
 void PluginManager::addPlugin(sp<Plugin> plugin)
 {
+    plugin->initialize();
     _plugins.push_back(std::move(plugin));
 }
 

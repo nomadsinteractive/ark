@@ -75,9 +75,9 @@ String Platform::getRealPath(const String& path)
     return realpath;
 }
 
-std::vector<Ark::RendererVersion> Platform::getRendererVersionPreferences()
+Vector<Enum::RendererVersion> Platform::getRendererVersionPreferences()
 {
-    return {Ark::RENDERER_VERSION_OPENGL_46, Ark::RENDERER_VERSION_VULKAN_12};
+    return {Enum::RENDERER_VERSION_OPENGL_46, Enum::RENDERER_VERSION_VULKAN_12};
 }
 
 sp<Alphabet> Platform::getSystemAlphabet(const Font& font, const String& lang)
@@ -104,9 +104,6 @@ sp<Alphabet> Platform::getSystemAlphabet(const Font& font, const String& lang)
 
 void Platform::glInitialize()
 {
-#ifdef ARK_USE_OPEN_GL
-    glbinding::Binding::initialize(nullptr);
-#endif
 }
 
 void Platform::vkInitialize()

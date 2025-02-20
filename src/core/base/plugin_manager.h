@@ -1,7 +1,5 @@
 #pragma once
 
-#include <functional>
-
 #include "core/base/api.h"
 #include "core/base/plugin.h"
 #include "core/forwarding.h"
@@ -16,7 +14,6 @@ public:
 
     sp<BeanFactory> createBeanFactory(const sp<Dictionary<document>>& documentById) const;
 
-    void each(const std::function<bool(const sp<Plugin>&)>& visitor) const;
     void load(const String& name);
 
     const Vector<sp<Plugin>>& plugins() const;

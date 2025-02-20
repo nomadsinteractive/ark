@@ -186,8 +186,8 @@ Buffer::Snapshot RenderController::PrimitiveIndexBuffer::snapshot(RenderControll
     return _buffer.snapshot(size);
 }
 
-RenderController::RenderController(const sp<RenderEngine>& renderEngine, const sp<Recycler>& recycler, const sp<Dictionary<bitmap>>& bitmapLoader, const sp<Dictionary<bitmap>>& bitmapBoundsLoader)
-    : _render_engine(renderEngine), _recycler(recycler), _bitmap_loader(bitmapLoader), _bitmap_bounds_loader(bitmapBoundsLoader), _clock(Platform::getSteadyClock()), _gba(*this)
+RenderController::RenderController(const sp<RenderEngine>& renderEngine, const sp<Dictionary<bitmap>>& bitmapLoader, const sp<Dictionary<bitmap>>& bitmapBoundsLoader)
+    : _render_engine(renderEngine), _recycler(sp<Recycler>::make()), _bitmap_loader(bitmapLoader), _bitmap_bounds_loader(bitmapBoundsLoader), _clock(Platform::getSteadyClock()), _gba(*this)
 {
 }
 

@@ -198,6 +198,30 @@ uint32_t getNextLayoutLocation(const ShaderPreprocessor::Declaration& declar, ui
     return location;
 }
 
+glslang::EShTargetLanguageVersion toTargetLanguageVersion(const uint32_t targetLanguageVersion, const glslang::EShTargetLanguageVersion defaultVersion)
+{
+    switch(targetLanguageVersion)
+    {
+        case 10:
+            return glslang::EShTargetSpv_1_0;
+        case 11:
+            return glslang::EShTargetSpv_1_1;
+        case 12:
+            return glslang::EShTargetSpv_1_2;
+        case 13:
+            return glslang::EShTargetSpv_1_3;
+        case 14:
+            return glslang::EShTargetSpv_1_4;
+        case 15:
+            return glslang::EShTargetSpv_1_5;
+        case 16:
+            return glslang::EShTargetSpv_1_6;
+        default:
+        break;
+    }
+    return defaultVersion;
+}
+
 }
 
 bytearray RenderUtil::makeUnitCubeVertices(bool flipWindingOrder)
@@ -314,7 +338,7 @@ uint32_t RenderUtil::getComponentSize(Texture::Format format)
     return 4;
 }
 
-Vector<uint32_t> RenderUtil::compileSPIR(const StringView source, Enum::ShaderStageBit stage, Ark::RenderingBackendBit renderTarget)
+Vector<uint32_t> RenderUtil::compileSPIR(const StringView source, Enum::ShaderStageBit stage, Enum::RenderingBackendBit renderTarget, const uint32_t targetLanguageVersion)
 {
     const Global<GLSLLangInitializer> initializer;
     EShLanguage esStage = initializer->toShLanguage(stage);
@@ -349,19 +373,19 @@ Vector<uint32_t> RenderUtil::compileSPIR(const StringView source, Enum::ShaderSt
 //TODO: Use the specified version
     switch(renderTarget)
     {
-        case Ark::RENDERING_BACKEND_OPENGL_BIT:
+        case Enum::RENDERING_BACKEND_BIT_OPENGL:
             shader.setEnvInput(glslang::EShSourceGlsl, esStage, glslang::EShClientOpenGL, 450);
             shader.setEnvClient(glslang::EShClientOpenGL, glslang::EShTargetOpenGL_450);
             break;
-        case Ark::RENDERING_BACKEND_VULKAN_BIT:
+        case Enum::RENDERING_BACKEND_BIT_VULKAN:
             shader.setEnvInput(glslang::EShSourceGlsl, esStage, glslang::EShClientVulkan, 100);
             shader.setEnvClient(glslang::EShClientVulkan, glslang::EShTargetVulkan_1_2);
             break;
     }
 #ifdef ARK_PLATFORM_DARWIN
-    shader.setEnvTarget(glslang::EShTargetSpv, glslang::EShTargetSpv_1_5);
+    shader.setEnvTarget(glslang::EShTargetSpv, toTargetLanguageVersion(targetLanguageVersion, glslang::EShTargetSpv_1_6));
 #else
-    shader.setEnvTarget(glslang::EShTargetSpv, glslang::EShTargetSpv_1_5);
+    shader.setEnvTarget(glslang::EShTargetSpv, toTargetLanguageVersion(targetLanguageVersion, glslang::EShTargetSpv_1_6));
 #endif
 
     if(!shader.parse(&initializer->builtInResource(), 100, false, EShMsgDefault))

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <map>
-
 #include "core/base/api.h"
 #include "core/base/string.h"
 #include "core/collection/table.h"
@@ -9,7 +7,6 @@
 #include "renderer/forwarding.h"
 #include "renderer/base/shader_layout.h"
 #include "renderer/base/render_engine.h"
-#include "renderer/base/shader.h"
 #include "renderer/base/uniform.h"
 
 namespace ark {
@@ -124,7 +121,7 @@ private:
         String _params;
         String _return_type;
         String _body;
-        std::vector<Parameter> _args;
+        Vector<Parameter> _args;
         sp<String> _place_hoder;
 
     private:
@@ -146,7 +143,7 @@ public:
     const char* inVarPrefix() const;
     const char* outVarPrefix() const;
 
-    const std::vector<Parameter>& args() const;
+    const Vector<Parameter>& args() const;
 
     void inDeclare(const String& type, const String& name);
     void outDeclare(const String& type, const String& name);
@@ -177,7 +174,7 @@ private:
 
     void insertUBOStruct(const ShaderLayout::UBO& ubo, int32_t spaceSet);
 
-    void linkParameters(const std::vector<Parameter>& parameters, const ShaderPreprocessor& preStage, std::set<String>& passThroughVars);
+    void linkParameters(const Vector<Parameter>& parameters, const ShaderPreprocessor& preStage, std::set<String>& passThroughVars);
 
     static const char* getOutAttributePrefix(Enum::ShaderStageBit preStage);
 
@@ -209,11 +206,11 @@ public:
 
     int32_t _version;
 
-    std::vector<String> _predefined_macros;
-    std::vector<Parameter> _predefined_parameters;
-    std::vector<ResultModifer> _result_modifiers;
+    Vector<String> _predefined_macros;
+    Vector<Parameter> _predefined_parameters;
+    Vector<ResultModifer> _result_modifiers;
 
-    std::map<std::string, int32_t> _ssbos;
+    Map<std::string, int32_t> _ssbos;
 
     DeclarationList _declaration_ins;
     DeclarationList _declaration_outs;

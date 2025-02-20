@@ -38,7 +38,7 @@ SDL_GPUShader* createGraphicsShader(SDL_GPUDevice* device, const ShaderLayout& s
         return nullptr;
     }
 
-    const Vector<uint32_t> binaries = RenderUtil::compileSPIR(source, stageBit, Ark::RENDERING_BACKEND_VULKAN_BIT);
+    const Vector<uint32_t> binaries = RenderUtil::compileSPIR(source, stageBit, Enum::RENDERING_BACKEND_BIT_VULKAN, 10);
     const void* bytecode = binaries.data();
 
     Uint32 samplerCount = 0;
@@ -222,6 +222,25 @@ void bindUBOSnapshots(SDL_GPUCommandBuffer* cmdbuf, const Vector<RenderLayerSnap
         }
 }
 
+void setupVertexAttributes(const Attribute& attribute, SDL_GPUVertexAttribute* attribDesc, uint32_t& location, uint32_t& numVertexAttributes)
+{
+    if(attribute.length() == 16 && attribute.type() == Attribute::TYPE_FLOAT)
+        for(uint32_t i = 0; i < 4; ++i)
+            attribDesc[numVertexAttributes ++] = {
+                location ++,
+                attribute.divisor(),
+                SDL_GPU_VERTEXELEMENTFORMAT_FLOAT4,
+                attribute.offset() + i * 16,
+            };
+    else
+        attribDesc[numVertexAttributes ++] = {
+            location ++,
+            attribute.divisor(),
+            toVertexElementFormat(attribute),
+            attribute.offset()
+        };
+}
+
 class DrawPipelineSDL3_GPU final : public Pipeline {
 public:
     DrawPipelineSDL3_GPU(const Enum::DrawProcedure drawProcedure, const PipelineDescriptor& pipelineDescriptor, String vertexShader, String fragmentShader)
@@ -258,8 +277,9 @@ public:
             SDL_GPUVertexBufferDescription vertexBufferDescription[8];
             Uint32 numVertexBuffers = 0;
 
-            SDL_GPUVertexAttribute vertexAttribute[32];
+            SDL_GPUVertexAttribute vertexAttributes[32];
             Uint32 numVertexAttributes = 0;
+            Uint32 location = 0;
 
             for(const auto& [k, v] : shaderLayout.streamLayouts())
             {
@@ -271,17 +291,8 @@ public:
                 };
                 ++ numVertexBuffers;
 
-                Uint32 location = 0;
                 for(const Attribute& i : v.attributes().values())
-                {
-                    vertexAttribute[numVertexAttributes] = {
-                        location ++,
-                        i.divisor(),
-                        toVertexElementFormat(i),
-                        i.offset()
-                    };
-                    ++ numVertexAttributes;
-                }
+                    setupVertexAttributes(i, vertexAttributes, location, numVertexAttributes);
             }
 
             constexpr SDL_GPUColorTargetBlendState defaultBlendState = {
@@ -330,7 +341,7 @@ public:
                 {
                     vertexBufferDescription,
                     numVertexBuffers,
-                    vertexAttribute,
+                    vertexAttributes,
                     numVertexAttributes
                 },
                 toPrimitiveType(_draw_mode), {
@@ -472,7 +483,7 @@ public:
                 return;
             }
 
-            const Vector<uint32_t> binaries = RenderUtil::compileSPIR(_compute_shader, Enum::SHADER_STAGE_BIT_COMPUTE, Ark::RENDERING_BACKEND_VULKAN_BIT);
+            const Vector<uint32_t> binaries = RenderUtil::compileSPIR(_compute_shader, Enum::SHADER_STAGE_BIT_COMPUTE, Enum::RENDERING_BACKEND_BIT_VULKAN, 10);
             const void* bytecode = binaries.data();
 
             const SDL_ShaderCross_SPIRV_Info spirvInfo = {

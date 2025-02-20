@@ -14,22 +14,22 @@ const ApplicationManifest::Renderer& RenderEngineContext::renderer() const
     return _renderer;
 }
 
-Ark::RendererVersion RenderEngineContext::version() const
+Enum::RendererVersion RenderEngineContext::version() const
 {
     return _renderer._version;
 }
 
-void RenderEngineContext::setVersion(Ark::RendererVersion version)
+void RenderEngineContext::setVersion(const Enum::RendererVersion version)
 {
     _renderer._version = version;
 }
 
-const std::map<String, String>& RenderEngineContext::definitions() const
+const Map<String, String>& RenderEngineContext::definitions() const
 {
     return _definitions;
 }
 
-std::map<String, String>& RenderEngineContext::definitions()
+Map<String, String>& RenderEngineContext::definitions()
 {
     return _definitions;
 }
@@ -64,20 +64,20 @@ const V2& RenderEngineContext::displayUnit() const
 uint32_t RenderEngineContext::getGLSLVersion() const
 {
     switch(_renderer._version) {
-    case Ark::RENDERER_VERSION_OPENGL_30:
+    case Enum::RENDERER_VERSION_OPENGL_30:
         return 130;
-    case Ark::RENDERER_VERSION_OPENGL_31:
+    case Enum::RENDERER_VERSION_OPENGL_31:
         return 140;
-    case Ark::RENDERER_VERSION_OPENGL_32:
+    case Enum::RENDERER_VERSION_OPENGL_32:
         return 150;
-    case Ark::RENDERER_VERSION_OPENGL_33:
-    case Ark::RENDERER_VERSION_OPENGL_40:
-    case Ark::RENDERER_VERSION_OPENGL_41:
-    case Ark::RENDERER_VERSION_OPENGL_42:
-    case Ark::RENDERER_VERSION_OPENGL_43:
-    case Ark::RENDERER_VERSION_OPENGL_44:
-    case Ark::RENDERER_VERSION_OPENGL_45:
-    case Ark::RENDERER_VERSION_OPENGL_46:
+    case Enum::RENDERER_VERSION_OPENGL_33:
+    case Enum::RENDERER_VERSION_OPENGL_40:
+    case Enum::RENDERER_VERSION_OPENGL_41:
+    case Enum::RENDERER_VERSION_OPENGL_42:
+    case Enum::RENDERER_VERSION_OPENGL_43:
+    case Enum::RENDERER_VERSION_OPENGL_44:
+    case Enum::RENDERER_VERSION_OPENGL_45:
+    case Enum::RENDERER_VERSION_OPENGL_46:
         return static_cast<uint32_t>(_renderer._version) * 10;
     default:
         break;

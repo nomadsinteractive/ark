@@ -20,6 +20,7 @@ ContextSDL3_GPU::~ContextSDL3_GPU()
 
 void GraphicsContextSDL3_GPU::pushRenderTargets(const RenderTarget::CreateConfigure* createConfig, const Vector<SDL_GPUColorTargetInfo>& colorTargets, const Optional<SDL_GPUDepthStencilTargetInfo>& depthStencilTarget)
 {
+    ASSERT(!depthStencilTarget || depthStencilTarget->texture);
     _render_targets.push_back({createConfig, colorTargets, depthStencilTarget});
 }
 

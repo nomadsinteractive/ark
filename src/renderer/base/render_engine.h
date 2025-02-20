@@ -63,7 +63,7 @@ public:
 public:
     RenderEngine(const ApplicationManifest::Renderer& renderer, sp<RendererFactory> rendererFactory);
 
-    Ark::RendererVersion version() const;
+    Enum::RendererVersion version() const;
     Ark::RendererCoordinateSystem coordinateSystem() const;
 
     const sp<RendererFactory>& rendererFactory() const;

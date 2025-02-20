@@ -110,7 +110,7 @@ public:
     }
 };
 
-void setVersion(Ark::RendererVersion version, RenderEngineContext& vkContext)
+void setVersion(const Enum::RendererVersion version, RenderEngineContext& vkContext)
 {
     LOGD("Choose Renderer Version = %d", version);
     vkContext.setSnippetFactory(sp<SnippetFactory>::make<SnippetFactorySDL3>());
@@ -123,7 +123,7 @@ Optional<SDL_GPUDepthStencilTargetInfo> toDepthStencilTargetInfo(const RenderTar
         return {};
 
     const SDL_GPUDepthStencilTargetInfo depthStencilTargetInfo = {
-        reinterpret_cast<SDL_GPUTexture*>(configure._depth_stencil_attachment->id()),
+        nullptr,
         1.0f,
         configure._clear_bits.has(RenderTarget::CLEAR_BIT_DEPTH) ? SDL_GPU_LOADOP_CLEAR : SDL_GPU_LOADOP_LOAD,
         configure._depth_stencil_usage.has(RenderTarget::DEPTH_STENCIL_USAGE_FOR_OUTPUT) ? SDL_GPU_STOREOP_STORE : SDL_GPU_STOREOP_DONT_CARE,
@@ -140,7 +140,7 @@ public:
     {
         for(const sp<Texture>& i : _configure._color_attachments)
             _render_targets.push_back({
-                reinterpret_cast<SDL_GPUTexture*>(i->id()),
+                nullptr,
                 0,
                 0,
                 {0, 0, 0, 0},
@@ -151,6 +151,11 @@ public:
 
     void draw(GraphicsContext& graphicsContext) override
     {
+        for(size_t i = 0; i < _render_targets.size(); ++i)
+            _render_targets.at(i).texture = reinterpret_cast<SDL_GPUTexture*>(_configure._color_attachments.at(i)->id());
+        if(_configure._depth_stencil_attachment)
+            _depth_stencil_target->texture = reinterpret_cast<SDL_GPUTexture*>(_configure._depth_stencil_attachment->id());
+
         GraphicsContextSDL3_GPU& gc = ensureGraphicsContext(graphicsContext);
         gc.pushRenderTargets(&_configure, _render_targets, _depth_stencil_target);
     }
@@ -251,7 +256,7 @@ private:
 }
 
 RendererFactorySDL3_GPU::RendererFactorySDL3_GPU()
-    : RendererFactory({Ark::RenderingBackendSet::toBitSet(Ark::RENDERING_BACKEND_VULKAN_BIT, Ark::RENDERING_BACKEND_DIRECT_X_BIT, Ark::RENDERING_BACKEND_METAL_BIT), Ark::COORDINATE_SYSTEM_RHS, false, 16}), _gpu_device(nullptr)
+    : RendererFactory({RenderingBackendSet::toBitSet(Enum::RENDERING_BACKEND_BIT_DIRECT_X, Enum::RENDERING_BACKEND_BIT_METAL), Ark::COORDINATE_SYSTEM_RHS, false, 16}), _gpu_device(nullptr)
 {
 }
 
@@ -278,7 +283,7 @@ void RendererFactorySDL3_GPU::onSurfaceCreated(RenderEngine& renderEngine)
 sp<RenderEngineContext> RendererFactorySDL3_GPU::createRenderEngineContext(const ApplicationManifest::Renderer& renderer)
 {
     const sp<RenderEngineContext> renderContext = sp<RenderEngineContext>::make(renderer, Viewport(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f));
-    setVersion(renderer._version == Ark::RENDERER_VERSION_AUTO ? Ark::RENDERER_VERSION_VULKAN_13 : renderer._version, renderContext);
+    setVersion(renderer._version == Enum::RENDERER_VERSION_AUTO ? Enum::RENDERER_VERSION_VULKAN_13 : renderer._version, renderContext);
     return renderContext;
 }
 

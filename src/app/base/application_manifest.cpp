@@ -139,12 +139,12 @@ const document& ApplicationManifest::interpreter() const
 }
 
 ApplicationManifest::Renderer::Renderer()
-    : _backend(Ark::RENDERING_BACKEND_ALL), _version(Ark::RENDERER_VERSION_AUTO), _coordinate_system(Ark::COORDINATE_SYSTEM_DEFAULT), _vsync(false), _resolution(1920, 1080)
+    : _backend(Enum::RENDERING_BACKEND_AUTO), _version(Enum::RENDERER_VERSION_AUTO), _coordinate_system(Ark::COORDINATE_SYSTEM_DEFAULT), _vsync(false), _resolution(1920, 1080)
 {
 }
 
 ApplicationManifest::Renderer::Renderer(const document& manifest)
-    : _class(Documents::getAttribute(manifest, constants::CLASS)), _backend(Documents::getAttribute(manifest, "backend", Ark::RENDERING_BACKEND_ALL)), _version(Documents::getAttribute(manifest, "version", Ark::RENDERER_VERSION_AUTO)),
+    : _class(Documents::getAttribute(manifest, constants::CLASS)), _backend(Documents::getAttribute(manifest, "backend", Enum::RENDERING_BACKEND_AUTO)), _version(Documents::getAttribute(manifest, "version", Enum::RENDERER_VERSION_AUTO)),
       _coordinate_system(Documents::getAttribute(manifest, "coordinate-system", Ark::COORDINATE_SYSTEM_DEFAULT)), _vsync(Documents::getAttribute(manifest, "vsync", false))
 {
     if(const document& resolution = manifest->getChild("resolution"))

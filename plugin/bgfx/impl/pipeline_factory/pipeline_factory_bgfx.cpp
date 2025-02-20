@@ -184,14 +184,14 @@ struct alignas(1) BgfxShaderAttributeChunk {
 ::bgfx::ShaderHandle createShader(const ShaderLayout& shaderLayout, const String& source, Enum::ShaderStageBit stage)
 {
     const char bgfxChunkMagic[4] = {toBgfxShaderTypeMagic(stage), 'S', 'H', 11};
-    const std::vector<uint32_t> binaries = RenderUtil::compileSPIR(source, stage, Ark::RENDERING_BACKEND_VULKAN_BIT);
+    const Vector<uint32_t> binaries = RenderUtil::compileSPIR(source, stage, Enum::RENDERING_BACKEND_BIT_VULKAN);
     const void* bytecode = binaries.data();
     const uint32_t bytecodeSize = binaries.size() * sizeof(uint32_t);
     // const void* bytecode = source.c_str();
     // const uint32_t bytecodeSize = source.size();
     BgfxShaderHeader shaderHeader;
     shaderHeader.magic = *reinterpret_cast<const uint32_t*>(bgfxChunkMagic);
-    std::vector<std::pair<String, BgfxShaderUniformChunk>> uniformChunks;
+    Vector<std::pair<String, BgfxShaderUniformChunk>> uniformChunks;
     uint32_t uboSize = 0;
     uint32_t ssboSize = 0;
     uint32_t dynamicDataSize = 0;
@@ -230,7 +230,7 @@ struct alignas(1) BgfxShaderAttributeChunk {
         ssboSize += i._buffer.size();
 
     uint32_t customId = 0;
-    std::vector<BgfxShaderAttributeChunk> attributeChunks;
+    Vector<BgfxShaderAttributeChunk> attributeChunks;
     if(stage == Enum::SHADER_STAGE_BIT_VERTEX)
         for(const auto& [name, attribute] : shaderLayout.getStreamLayout(0).attributes())
             attributeChunks.push_back({toBgfxAttribId(attribute.usage(), customId)});
@@ -362,8 +362,8 @@ struct DrawPipelineBgfx final : ResourceBase<::bgfx::ProgramHandle, Pipeline> {
         }
     }
 //TODO: Move them to somewhere else
-    std::vector<uint8_t> indirectCommands;
-    std::vector<uint8_t> instanceDataBuffers;
+    Vector<uint8_t> indirectCommands;
+    Vector<uint8_t> instanceDataBuffers;
     void compute(GraphicsContext& graphicsContext, const ComputeContext& computeContext) override
     {
         DFATAL("Shouldn't be here");
@@ -381,7 +381,7 @@ struct DrawPipelineBgfx final : ResourceBase<::bgfx::ProgramHandle, Pipeline> {
     String _vertex_shader;
     String _fragment_shader;
 
-    std::vector<SamplerSlot> _sampler_slots;
+    Vector<SamplerSlot> _sampler_slots;
 };
 
 class ComputePipelineBgfx final : public ResourceBase<::bgfx::ProgramHandle, Pipeline> {

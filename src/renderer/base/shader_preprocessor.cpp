@@ -6,7 +6,6 @@
 
 #include "core/base/string_buffer.h"
 #include "core/base/string_table.h"
-#include "core/base/thread.h"
 #include "core/util/strings.h"
 
 #include "renderer/base/pipeline_building_context.h"
@@ -220,7 +219,7 @@ const char* ShaderPreprocessor::outVarPrefix() const
     return STAGE_ATTR_PREFIX[_shader_stage + 1];
 }
 
-const std::vector<ShaderPreprocessor::Parameter>& ShaderPreprocessor::args() const
+const Vector<ShaderPreprocessor::Parameter>& ShaderPreprocessor::args() const
 {
     return _main_block->_args;
 }
@@ -354,7 +353,7 @@ uint32_t ShaderPreprocessor::getUniformSize(Uniform::Type type, const String& de
     return size;
 }
 
-void ShaderPreprocessor::linkParameters(const std::vector<ShaderPreprocessor::Parameter>& parameters, const ShaderPreprocessor& preStage, std::set<String>& passThroughVars)
+void ShaderPreprocessor::linkParameters(const Vector<ShaderPreprocessor::Parameter>& parameters, const ShaderPreprocessor& preStage, std::set<String>& passThroughVars)
 {
     for(const auto& i : parameters)
         if(i._modifier & Parameter::PARAMETER_ANNOTATION_IN)
@@ -630,7 +629,7 @@ void ShaderPreprocessor::Source::replace(const std::regex& regexp, const std::fu
     {
         bool matched = false;
         const sp<String>& fragment = *iter;
-        std::vector<sp<String>> inserting;
+        Vector<sp<String>> inserting;
         fragment->search(regexp, [&matched, &inserting, replacer](const std::smatch& match) {
             if(sp<String> replacement = replacer(match))
                 inserting.push_back(std::move(replacement));

@@ -20,8 +20,8 @@ public:
     Plugin(const String& name, PluginType type);
     virtual ~Plugin() = default;
 
-    virtual BeanFactory::Factory createBeanFactory(const BeanFactory& beanFactory);
-    virtual BeanFactory::Factory createResourceLoader(const BeanFactory& beanFactory, const sp<ResourceLoaderContext>& resourceLoaderContext);
+    virtual BeanFactory::Factory createBeanFactory();
+    virtual BeanFactory::Factory createResourceLoader(const sp<ResourceLoaderContext>& resourceLoaderContext);
 
     virtual void createScriptModule(Interpreter& script);
 
@@ -31,8 +31,13 @@ public:
     const String& name() const;
 
 private:
+    void initialize();
+
+private:
     String _name;
     PluginType _type;
+
+    BeanFactory::Factory _factory;
 
     friend class PluginManager;
 };

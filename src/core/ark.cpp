@@ -38,14 +38,7 @@ limitations under the License.
 #include "core/util/asset_bundle_type.h"
 
 #include "renderer/base/render_engine.h"
-
-#ifdef ARK_USE_OPEN_GL
-#include "renderer/opengl/renderer_factory/renderer_factory_opengl.h"
-#endif
-
-#ifdef ARK_USE_VULKAN
-#include "renderer/vulkan/renderer_factory/renderer_factory_vulkan.h"
-#endif
+#include "renderer/inf/renderer_factory.h"
 
 #include "app/base/application_bundle.h"
 #include "app/base/application_context.h"
@@ -114,37 +107,47 @@ struct CameraDelegateCHS final : Camera::Delegate {
     bool _flipy;
 };
 
-sp<RenderEngine> doCreateRenderEngine(const ApplicationManifest::Renderer& renderer, const sp<ApplicationBundle>& applicationBundle)
+sp<RendererFactory> chooseRenderFactory(const Vector<sp<RendererFactory>>& rendererFactories, const Enum::RenderingBackendBit renderingBackend)
 {
-    switch(renderer._version) {
-        case Ark::RENDERER_VERSION_AUTO:
-        case Ark::RENDERER_VERSION_OPENGL_30:
-        case Ark::RENDERER_VERSION_OPENGL_31:
-        case Ark::RENDERER_VERSION_OPENGL_32:
-        case Ark::RENDERER_VERSION_OPENGL_33:
-        case Ark::RENDERER_VERSION_OPENGL_40:
-        case Ark::RENDERER_VERSION_OPENGL_41:
-        case Ark::RENDERER_VERSION_OPENGL_42:
-        case Ark::RENDERER_VERSION_OPENGL_43:
-        case Ark::RENDERER_VERSION_OPENGL_44:
-        case Ark::RENDERER_VERSION_OPENGL_45:
-        case Ark::RENDERER_VERSION_OPENGL_46:
-#ifdef ARK_USE_OPEN_GL
-            return sp<RenderEngine>::make(renderer, sp<opengl::RendererFactoryOpenGL>::make(applicationBundle->recycler()));
-#endif
-        case Ark::RENDERER_VERSION_VULKAN:
-        case Ark::RENDERER_VERSION_VULKAN_11:
-        case Ark::RENDERER_VERSION_VULKAN_12:
-        case Ark::RENDERER_VERSION_VULKAN_13:
-        {
-            ApplicationManifest::Renderer rendererInUse = renderer;
-            if(rendererInUse._version == Ark::RENDERER_VERSION_VULKAN)
-                rendererInUse._version = Ark::RENDERER_VERSION_VULKAN_13;
-#ifdef ARK_USE_VULKAN
-            return sp<RenderEngine>::make(rendererInUse, sp<vulkan::RendererFactoryVulkan>::make(applicationBundle->recycler()));
-#endif
-        }
-        break;
+    for(const sp<RendererFactory>& i : rendererFactories)
+        if(i->features()._supported_backends.has(renderingBackend))
+            return i;
+    FATAL("Unable to find a suitable RendererFactory for: %d", renderingBackend);
+    return nullptr;
+}
+
+sp<RenderEngine> doCreateRenderEngine(BeanFactory& beanFactory, const ApplicationManifest::Renderer& renderer)
+{
+    Vector<sp<RendererFactory>> rendererFactories;
+    for(const auto& [k, v] : beanFactory.makeValueBuilderList<RendererFactory>())
+        rendererFactories.emplace_back(v->build({}));
+
+    ApplicationManifest::Renderer rendererInUse = renderer;
+    if(rendererInUse._version == Enum::RENDERER_VERSION_OPENGL)
+        rendererInUse._version = Enum::RENDERER_VERSION_OPENGL_46;
+    else if(rendererInUse._version == Enum::RENDERER_VERSION_VULKAN)
+        rendererInUse._version = Enum::RENDERER_VERSION_VULKAN_13;
+
+    if(rendererInUse._backend != Enum::RENDERING_BACKEND_AUTO)
+        return sp<RenderEngine>::make(rendererInUse, chooseRenderFactory(rendererFactories, rendererInUse._backend));
+
+    switch(rendererInUse._version) {
+        case Enum::RENDERER_VERSION_OPENGL_30:
+        case Enum::RENDERER_VERSION_OPENGL_31:
+        case Enum::RENDERER_VERSION_OPENGL_32:
+        case Enum::RENDERER_VERSION_OPENGL_33:
+        case Enum::RENDERER_VERSION_OPENGL_40:
+        case Enum::RENDERER_VERSION_OPENGL_41:
+        case Enum::RENDERER_VERSION_OPENGL_42:
+        case Enum::RENDERER_VERSION_OPENGL_43:
+        case Enum::RENDERER_VERSION_OPENGL_44:
+        case Enum::RENDERER_VERSION_OPENGL_45:
+        case Enum::RENDERER_VERSION_OPENGL_46:
+            return sp<RenderEngine>::make(rendererInUse, chooseRenderFactory(rendererFactories, Enum::RENDERING_BACKEND_BIT_OPENGL));
+        case Enum::RENDERER_VERSION_VULKAN_11:
+        case Enum::RENDERER_VERSION_VULKAN_12:
+        case Enum::RENDERER_VERSION_VULKAN_13:
+            return sp<RenderEngine>::make(rendererInUse, chooseRenderFactory(rendererFactories, Enum::RENDERING_BACKEND_BIT_VULKAN));
     }
     FATAL("Unknown engine type: %d", renderer._version);
     return nullptr;
@@ -158,19 +161,19 @@ void loadPlugins(const ApplicationManifest& manifest)
         pluginManager->load(i);
 }
 
-sp<RenderEngine> createRenderEngine(BeanFactory& beanFactory, const ApplicationManifest::Renderer& renderer, const sp<ApplicationBundle>& applicationBundle)
+sp<RenderEngine> createRenderEngine(BeanFactory& beanFactory, const ApplicationManifest::Renderer& renderer)
 {
     if(renderer._class)
-        return sp<RenderEngine>::make(renderer, beanFactory.ensure<RendererFactory>(renderer._class, Scope()));
+        return sp<RenderEngine>::make(renderer, beanFactory.ensure<RendererFactory>(renderer._class, {}));
 
-    if(renderer._version != Ark::RENDERER_VERSION_AUTO)
-        return doCreateRenderEngine(renderer, applicationBundle);
+    if(renderer._version != Enum::RENDERER_VERSION_AUTO)
+        return doCreateRenderEngine(beanFactory, renderer);
 
     ApplicationManifest::Renderer rendererInUse = renderer;
-    for(const Ark::RendererVersion i : Platform::getRendererVersionPreferences())
+    for(const Enum::RendererVersion i : Platform::getRendererVersionPreferences())
     {
         rendererInUse._version = i;
-        if(sp<RenderEngine> renderEngine = doCreateRenderEngine(rendererInUse, applicationBundle))
+        if(sp<RenderEngine> renderEngine = doCreateRenderEngine(beanFactory, rendererInUse))
             return renderEngine;
     }
 
@@ -186,7 +189,7 @@ public:
         : _builtin_asset_bundle(builtInAssetBundle) {
         for(const ApplicationManifest::Asset& i : assets) {
             if(sp<AssetBundle> assetBundle = createAsset(factory, i))
-                _mounts.push_front(Mounted(i, assetBundle));
+                _mounts.push_front(Mounted(i, std::move(assetBundle)));
         }
     }
 
@@ -317,7 +320,7 @@ void Ark::initialize(sp<ApplicationManifest> manifest)
     sp<BeanFactory> factory = createBeanFactory(sp<Dictionary<document>>::make<DictionaryImpl<document>>());
     _asset_bundle = sp<ArkAssetBundle>::make(AssetBundleType::createBuiltInAssetBundle(_manifest->assetDir(), _manifest->application()._dir), factory, _manifest->assets());
     sp<ApplicationBundle> applicationBundle = sp<ApplicationBundle>::make(_asset_bundle->getAssetBundle("/"));
-    sp<RenderEngine> renderEngine = createRenderEngine(factory, _manifest->renderer(), applicationBundle);
+    sp<RenderEngine> renderEngine = createRenderEngine(factory, _manifest->renderer());
     _application_context = createApplicationContext(_manifest, std::move(applicationBundle), std::move(renderEngine));
 }
 
@@ -401,6 +404,11 @@ const sp<ApplicationContext>& Ark::applicationContext() const
 const sp<ApplicationProfiler>& Ark::applicationProfiler() const
 {
     return _application_profiler;
+}
+
+const Constants& Ark::constants()
+{
+    return ensure<Constants>();
 }
 
 Camera Ark::createCamera(RendererCoordinateSystem cs) const

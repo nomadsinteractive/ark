@@ -65,34 +65,35 @@ template<> ARK_API float StringConvert::eval<float>(const String& repr)
     return static_cast<float>(atof(repr.c_str()));
 }
 
-template<> Ark::RenderingBackendBit StringConvert::eval<Ark::RenderingBackendBit>(const String& repr)
+template<> Enum::RenderingBackendBit StringConvert::eval<Enum::RenderingBackendBit>(const String& repr)
 {
-    constexpr Enum::LookupTable<StringView, Ark::RenderingBackendBit, 4> table ={{
-        {"opengl", Ark::RENDERING_BACKEND_OPENGL_BIT},
-        {"vulkan", Ark::RENDERING_BACKEND_VULKAN_BIT},
-        {"direct_x", Ark::RENDERING_BACKEND_DIRECT_X_BIT},
-        {"metal", Ark::RENDERING_BACKEND_METAL_BIT},
+    constexpr Enum::LookupTable<StringView, Enum::RenderingBackendBit, 4> table ={{
+        {"opengl", Enum::RENDERING_BACKEND_BIT_OPENGL},
+        {"vulkan", Enum::RENDERING_BACKEND_BIT_VULKAN},
+        {"direct_x", Enum::RENDERING_BACKEND_BIT_DIRECT_X},
+        {"metal", Enum::RENDERING_BACKEND_BIT_METAL},
     }};
-    return Enum::lookup<Ark::RenderingBackendBit, 4>(table, repr.toLower());
+    return Enum::lookup<Enum::RenderingBackendBit, 4>(table, repr.toLower());
 }
 
-template<> Ark::RendererVersion StringConvert::eval<Ark::RendererVersion>(const String& repr)
+template<> Enum::RendererVersion StringConvert::eval<Enum::RendererVersion>(const String& repr)
 {
     const String version = repr.toLower();
-    if(version.startsWith("opengl_"))
-        return static_cast<Ark::RendererVersion>(atoi(version.c_str() + 7));
+    if(version == "opengl")
+        return Enum::RENDERER_VERSION_OPENGL;
     if(version == "vulkan")
-        return Ark::RENDERER_VERSION_VULKAN;
+        return Enum::RENDERER_VERSION_VULKAN;
+    if(version.startsWith("opengl_"))
+        return static_cast<Enum::RendererVersion>(atoi(version.c_str() + 7));
     if(version.startsWith("vulkan_"))
-        return static_cast<Ark::RendererVersion>(atoi(version.c_str() + 7) + Ark::RENDERER_VERSION_VULKAN);
-    CHECK(repr == "auto", "Unknow RendererVersion: \"%s, supported values are [\"opengl_21\", \"opengl_46\", \"vulkan_11\", ...]", repr.c_str());
-    return Ark::RENDERER_VERSION_AUTO;
+        return static_cast<Enum::RendererVersion>(atoi(version.c_str() + 7) + Enum::RENDERER_VERSION_VULKAN);
+    CHECK(repr == "auto", "Unknow RendererVersion: \"%s, supported values are [\"opengl_31\", \"opengl_46\", \"vulkan_11\", ...]", repr.c_str());
+    return Enum::RENDERER_VERSION_AUTO;
 }
 
 template<> Ark::RendererCoordinateSystem StringConvert::eval<Ark::RendererCoordinateSystem>(const String& str)
 {
-    const String cs = str.toLower();
-    if(cs == "lhs")
+    if(str.toLower() == "lhs")
         return Ark::COORDINATE_SYSTEM_LHS;
     DCHECK(str == "rhs", "Unknow RendererCoordinateSystem: \"%s, supported values are [\"lhs\", \"rhs\"]", str.c_str());
     return Ark::COORDINATE_SYSTEM_RHS;

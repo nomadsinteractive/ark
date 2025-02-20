@@ -18,8 +18,8 @@ aux_source_directory(impl/renderer_factory LOCAL_SRC_LIST)
 aux_source_directory(impl/texture LOCAL_SRC_LIST)
 
 ark_find_vcpkg_package(SDL3 LIBRARIES SDL3::SDL3)
-add_subdirectory(3rdparty/SDL_shadercross)
 
+add_subdirectory(3rdparty/SDL_shadercross)
 ark_link_libraries(SDL3_shadercross-static)
 
 ark_setup_tools(ark_gen_plugin_class)

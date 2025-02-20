@@ -28,8 +28,8 @@ public:
 
     const ApplicationManifest::Renderer& renderer() const;
 
-    Ark::RendererVersion version() const;
-    void setVersion(Ark::RendererVersion version);
+    Enum::RendererVersion version() const;
+    void setVersion(Enum::RendererVersion version);
 
     const Map<String, String>& definitions() const;
     Map<String, String>& definitions();

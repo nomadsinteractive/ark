@@ -14,13 +14,13 @@ BUILDER_PATTERN = re.compile(r'\[\[plugin::(builder|resource-loader)(?:\("([\w\-
 DICTIONARY_PATTERN = re.compile(r'\[\[plugin::(builder|resource-loader)::by-value(?:\("([\w\-_]+)"\))?\]\]\s+' + BUILDER_IMPLEMENTATION_PATTERN)
 
 INDENT = '\n    '
-REF_BUILDER_TEMPLATE = '''BeanFactory::Factory ${plugin_name}::createBeanFactory(const BeanFactory& beanFactory)
+REF_BUILDER_TEMPLATE = '''BeanFactory::Factory ${plugin_name}::createBeanFactory()
 {
     BeanFactory::Factory refBeanFactory;
     %s
     return refBeanFactory;
 }'''
-RES_BUILDER_TEMPLATE = '''BeanFactory::Factory ${plugin_name}::createResourceLoader(const BeanFactory& beanFactory, const sp<ResourceLoaderContext>& resourceLoaderContext)
+RES_BUILDER_TEMPLATE = '''BeanFactory::Factory ${plugin_name}::createResourceLoader(const sp<ResourceLoaderContext>& resourceLoaderContext)
 {
     BeanFactory::Factory resBeanFactory;
     %s
@@ -294,10 +294,10 @@ def main():
     ns = ark_namespace
 
     ref_builder = generate_method_def('ref_builder', result, REF_BUILDER_TEMPLATE, plugin_name=plugin_name)
-    ref_builder_declare = f'{ns}BeanFactory::Factory createBeanFactory(const {ns}BeanFactory& beanFactory) override;' if ref_builder else ''
+    ref_builder_declare = f'{ns}BeanFactory::Factory createBeanFactory() override;' if ref_builder else ''
 
     res_builder = generate_method_def('res_builder', result, RES_BUILDER_TEMPLATE, plugin_name=plugin_name)
-    res_builder_declare = f'{ns}BeanFactory::Factory createResourceLoader(const {ns}BeanFactory& beanFactory, const {ns}sp<{ns}ResourceLoaderContext>& resourceLoaderContext) override;' if res_builder else ''
+    res_builder_declare = f'{ns}BeanFactory::Factory createResourceLoader(const {ns}sp<{ns}ResourceLoaderContext>& resourceLoaderContext) override;' if res_builder else ''
 
     classdeclare = acg.format('''class ${plugin_name} final : public ${ns}Plugin {
 public:

@@ -105,7 +105,7 @@ public:
         : Plugin("test", ark::Plugin::PLUGIN_TYPE_CORE) {
     }
 
-    ark::BeanFactory::Factory createBeanFactory(const ark::BeanFactory& beanFactory) override {
+    ark::BeanFactory::Factory createBeanFactory() override {
         ark::BeanFactory::Factory refBeanFactory;
         return refBeanFactory;
     }

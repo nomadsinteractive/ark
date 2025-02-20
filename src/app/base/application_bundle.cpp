@@ -11,20 +11,14 @@
 #include "graphics/impl/bitmap_loader/png_bitmap_loader.h"
 #include "graphics/impl/bitmap_loader/stb_bitmap_loader.h"
 
-#include "renderer/base/recycler.h"
 #include "renderer/base/render_controller.h"
 
 namespace ark {
 
 ApplicationBundle::ApplicationBundle(sp<AssetBundle> assetBundle)
     : _asset_bundle(std::move(assetBundle)), _document_loader_bundle(createDocumentLoaderBundle()), _json_loader_bundle(createJsonLoaderBundle()), _string_loader_bundle(createStringLoaderBundle()),
-      _bitmap_bundle(createImageLoaderBundle(false)), _bitmap_bounds_loader(createImageLoaderBundle(true)), _recycler(sp<Recycler>::make())
+      _bitmap_bundle(createImageLoaderBundle(false)), _bitmap_bounds_loader(createImageLoaderBundle(true))
 {
-}
-
-const sp<Recycler>& ApplicationBundle::recycler() const
-{
-    return _recycler;
 }
 
 const sp<DocumentLoaderBundle>& ApplicationBundle::documents() const
