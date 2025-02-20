@@ -20,24 +20,17 @@ public:
     Plugin(const String& name, PluginType type);
     virtual ~Plugin() = default;
 
-    virtual BeanFactory::Factory createBeanFactory(const BeanFactory& beanFactory, const sp<Dictionary<document>>& documentById);
-    virtual BeanFactory::Factory createResourceLoader(const BeanFactory& beanFactory, const sp<Dictionary<document>>& documentById, const sp<ResourceLoaderContext>& resourceLoaderContext);
-    virtual Library createLibrary();
+    virtual BeanFactory::Factory createBeanFactory(const BeanFactory& beanFactory);
+    virtual BeanFactory::Factory createResourceLoader(const BeanFactory& beanFactory, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
     virtual void createScriptModule(Interpreter& script);
 
-    void loadBeanFactory(BeanFactory& beanFactory, const sp<Dictionary<document>>& documentById);
-    void loadResourceLoader(BeanFactory& beanFactory, const sp<Dictionary<document>>& documentById, const sp<ResourceLoaderContext>& resourceLoaderContext);
+    void loadBeanFactory(BeanFactory& beanFactory);
+    void loadResourceLoader(BeanFactory& beanFactory, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
     const String& name() const;
-    const Library& library() const;
 
 private:
-    void initialize();
-
-private:
-    Library _library;
-
     String _name;
     PluginType _type;
 

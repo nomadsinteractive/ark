@@ -14,9 +14,9 @@ namespace ark {
 
 sp<BeanFactory> PluginManager::createBeanFactory(const sp<Dictionary<document>>& documentById) const
 {
-    const sp<BeanFactory> beanFactory = sp<BeanFactory>::make();
+    sp<BeanFactory> beanFactory = sp<BeanFactory>::make(documentById);
     for(const sp<Plugin>& plugin : _plugins)
-        plugin->loadBeanFactory(beanFactory, documentById);
+        plugin->loadBeanFactory(beanFactory);
     return beanFactory;
 }
 
@@ -48,14 +48,13 @@ void PluginManager::load(const String& name)
     addPlugin(sp<Plugin>::adopt(plugin));
 }
 
-const std::vector<sp<Plugin>>& PluginManager::plugins() const
+const Vector<sp<Plugin>>& PluginManager::plugins() const
 {
     return _plugins;
 }
 
 void PluginManager::addPlugin(sp<Plugin> plugin)
 {
-    plugin->initialize();
     _plugins.push_back(std::move(plugin));
 }
 

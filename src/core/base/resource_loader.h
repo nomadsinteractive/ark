@@ -82,12 +82,11 @@ public:
 //  [[plugin::builder]]
     class BUILDER : public Builder<ResourceLoader> {
     public:
-        BUILDER(BeanFactory& factory, const document& doc, const sp<ApplicationContext>& applicationContext);
+        BUILDER(BeanFactory& factory, const document& manifest, const sp<ApplicationContext>& applicationContext);
 
-        virtual sp<ResourceLoader> build(const Scope& args) override;
+        sp<ResourceLoader> build(const Scope& args) override;
 
     private:
-        BeanFactory _factory;
         sp<ApplicationContext> _application_context;
         document _manifest;
         String _src;
@@ -98,7 +97,7 @@ public:
     public:
         DICTIONARY(BeanFactory& factory, const String& value, const sp<ApplicationContext>& applicationContext);
 
-        virtual sp<ResourceLoader> build(const Scope& args) override;
+        sp<ResourceLoader> build(const Scope& args) override;
 
     private:
         String _src;
@@ -110,7 +109,6 @@ private:
     Traits _builder_refs;
 
     sp<PackageRefs> _packages;
-
 };
 
 }

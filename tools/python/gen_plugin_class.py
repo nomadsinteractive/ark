@@ -12,26 +12,19 @@ ANNOTATION_PATTERN = r'(?:\s*(?://)?\s*\[\[[^]]+\]\])*'
 BUILDER_IMPLEMENTATION_PATTERN = r'class\s+([\w_]+)\s*(?:final)?\s*:\s*public\s+Builder<([^{]+)>\s+\{'
 BUILDER_PATTERN = re.compile(r'\[\[plugin::(builder|resource-loader)(?:\("([\w\-_]+)"\))?\]\]\s+' + BUILDER_IMPLEMENTATION_PATTERN)
 DICTIONARY_PATTERN = re.compile(r'\[\[plugin::(builder|resource-loader)::by-value(?:\("([\w\-_]+)"\))?\]\]\s+' + BUILDER_IMPLEMENTATION_PATTERN)
-FUNCTION_PATTERN = re.compile(r'\[\[plugin::function\("([\w\-_]+)"\)\]\]\s*%s\s*static\s+(?:ARK_API\s+)?([^(\r\n]+)\(([^)\r\n]*)\)[^;\r\n]*;' % ANNOTATION_PATTERN)
 
 INDENT = '\n    '
-REF_BUILDER_TEMPLATE = '''BeanFactory::Factory ${plugin_name}::createBeanFactory(const BeanFactory& beanFactory, const sp<Dictionary<document>>& documentById)
+REF_BUILDER_TEMPLATE = '''BeanFactory::Factory ${plugin_name}::createBeanFactory(const BeanFactory& beanFactory)
 {
-    BeanFactory::Factory refBeanFactory(beanFactory.references(), documentById);
+    BeanFactory::Factory refBeanFactory;
     %s
     return refBeanFactory;
 }'''
-RES_BUILDER_TEMPLATE = '''BeanFactory::Factory ${plugin_name}::createResourceLoader(const BeanFactory& beanFactory, const sp<Dictionary<document>>& documentById, const sp<ResourceLoaderContext>& resourceLoaderContext)
+RES_BUILDER_TEMPLATE = '''BeanFactory::Factory ${plugin_name}::createResourceLoader(const BeanFactory& beanFactory, const sp<ResourceLoaderContext>& resourceLoaderContext)
 {
-    BeanFactory::Factory resBeanFactory(beanFactory.references(), documentById);
+    BeanFactory::Factory resBeanFactory;
     %s
     return resBeanFactory;
-}'''
-FUNC_BUILDER_TEMPLATE = '''Library ${plugin_name}::createLibrary()
-{
-    Library library;
-    %s
-    return library;
 }'''
 
 _class_members = {}
@@ -230,8 +223,7 @@ def search_for_plugins(paths):
 
     acg.match_header_patterns(paths, True,
                               HeaderPattern(BUILDER_PATTERN, match_builder),
-                              HeaderPattern(DICTIONARY_PATTERN, match_dictionary),
-                              HeaderPattern(FUNCTION_PATTERN, match_function))
+                              HeaderPattern(DICTIONARY_PATTERN, match_dictionary))
     return result
 
 
@@ -302,13 +294,10 @@ def main():
     ns = ark_namespace
 
     ref_builder = generate_method_def('ref_builder', result, REF_BUILDER_TEMPLATE, plugin_name=plugin_name)
-    ref_builder_declare = f'{ns}BeanFactory::Factory createBeanFactory(const {ns}BeanFactory& beanFactory, const {ns}sp<{ns}Dictionary<{ns}document>>& documentById) override;' if ref_builder else ''
+    ref_builder_declare = f'{ns}BeanFactory::Factory createBeanFactory(const {ns}BeanFactory& beanFactory) override;' if ref_builder else ''
 
     res_builder = generate_method_def('res_builder', result, RES_BUILDER_TEMPLATE, plugin_name=plugin_name)
-    res_builder_declare = f'{ns}BeanFactory::Factory createResourceLoader(const {ns}BeanFactory& beanFactory, const {ns}sp<{ns}Dictionary<{ns}document>>& documentById, const {ns}sp<{ns}ResourceLoaderContext>& resourceLoaderContext) override;' if res_builder else ''
-
-    func_builder = generate_method_def('func', result, FUNC_BUILDER_TEMPLATE, plugin_name=plugin_name)
-    function_declare = f'{ns}Library createLibrary() override;' if func_builder else ''
+    res_builder_declare = f'{ns}BeanFactory::Factory createResourceLoader(const {ns}BeanFactory& beanFactory, const {ns}sp<{ns}ResourceLoaderContext>& resourceLoaderContext) override;' if res_builder else ''
 
     classdeclare = acg.format('''class ${plugin_name} final : public ${ns}Plugin {
 public:
@@ -316,10 +305,9 @@ public:
 
     ${ref_builder_declare}
     ${res_builder_declare}
-    ${functionDeclare}
 ${member_declare}
 };
-''', plugin_name=plugin_name, ns=ark_namespace, member_declare=get_member_declare(), plugin_arguments=get_plugin_arguments(), ref_builder_declare=ref_builder_declare, res_builder_declare=res_builder_declare, functionDeclare=function_declare)
+''', plugin_name=plugin_name, ns=ark_namespace, member_declare=get_member_declare(), plugin_arguments=get_plugin_arguments(), ref_builder_declare=ref_builder_declare, res_builder_declare=res_builder_declare)
     content = acg.format('''#pragma once
 
 #include "core/base/plugin.h"
@@ -340,7 +328,7 @@ ${classdeclare}
     classdefine = acg.format('''${plugin_name}::${plugin_name}(${plugin_arguments})
     : Plugin("${name}", Plugin::PLUGIN_TYPE_${type})${plugin_arguments_assigment} {
 }
-${ref_builder}${res_builder}${funcBuilder}${plugin_member_getter}''', name=config['name'], type=config['type'].upper(), plugin_name=plugin_name, plugin_arguments=get_plugin_arguments(), plugin_arguments_assigment=get_plugin_arguments_assigment(), ref_builder=ref_builder, res_builder=res_builder, funcBuilder=func_builder, plugin_member_getter=get_plugin_member_getter(plugin_name))
+${ref_builder}${res_builder}${plugin_member_getter}''', name=config['name'], type=config['type'].upper(), plugin_name=plugin_name, plugin_arguments=get_plugin_arguments(), plugin_arguments_assigment=get_plugin_arguments_assigment(), ref_builder=ref_builder, res_builder=res_builder, plugin_member_getter=get_plugin_member_getter(plugin_name))
     using_namespace = 'using namespace ark;' if 'ark' not in config['namespace'] else ''
     content = acg.format('''#include "${file_path}.h"
 

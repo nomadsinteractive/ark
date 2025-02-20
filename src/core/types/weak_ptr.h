@@ -13,6 +13,10 @@ public:
     }
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(WeakPtr);
 
+    explicit operator bool() const {
+        return _weak_class != nullptr;
+    }
+
     void reset(const SharedPtr<T>& sharedPtr) {
         _weak_class = sharedPtr.getClass();
         _weak_ptr = {sharedPtr._ptr};

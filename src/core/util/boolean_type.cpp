@@ -1,15 +1,12 @@
 #include "core/util/boolean_type.h"
 
-#include <regex>
 
 #include "core/base/bean_factory.h"
-#include "core/base/constants.h"
 #include "core/base/expression.h"
 #include "core/impl/variable/variable_dyed.h"
 #include "core/impl/variable/variable_observer.h"
 #include "core/impl/variable/variable_op1.h"
 #include "core/impl/variable/variable_op2.h"
-#include "core/impl/variable/variable_ternary.h"
 #include "core/inf/array.h"
 
 namespace ark {
@@ -103,37 +100,31 @@ Expression::Operator<bool> BooleanOperation::OPS[2] = {
 
 String BooleanOperation::NEGATIVE_OPS[2] = {"!", "not "};
 
-
-static bool _operator_not(bool val)
-{
-    return !val;
-}
-
 }
 
 sp<Boolean> BooleanType::create(const sp<Boolean>& value)
 {
-    return sp<BooleanWrapper>::make(value);
+    return sp<Boolean>::make<BooleanWrapper>(value);
 }
 
 sp<Boolean> BooleanType::create(bool value)
 {
-    return sp<BooleanWrapper>::make(value);
+    return sp<Boolean>::make<BooleanWrapper>(value);
 }
 
 sp<Boolean> BooleanType::__and__(sp<Boolean> self, sp<Boolean> rvalue)
 {
-    return sp<VariableOP2<sp<Boolean>, sp<Boolean>, Operators::And<bool>>>::make(std::move(self), std::move(rvalue));
+    return sp<Boolean>::make<VariableOP2<sp<Boolean>, sp<Boolean>, Operators::And<bool>>>(std::move(self), std::move(rvalue));
 }
 
 sp<Boolean> BooleanType::__or__(sp<Boolean> self, sp<Boolean> rvalue)
 {
-    return sp<VariableOP2<sp<Boolean>, sp<Boolean>, Operators::Or<bool>>>::make(std::move(self), std::move(rvalue));
+    return sp<Boolean>::make<VariableOP2<sp<Boolean>, sp<Boolean>, Operators::Or<bool>>>(std::move(self), std::move(rvalue));
 }
 
 sp<Boolean> BooleanType::negative(sp<Boolean> self)
 {
-    return sp<VariableOP1<bool>>::make(_operator_not, std::move(self));
+    return sp<Boolean>::make<VariableOP1<bool>>(Operators::Not<bool>(), std::move(self));
 }
 
 bool BooleanType::toBool(const sp<Boolean>& self)
@@ -180,7 +171,7 @@ void BooleanType::toggle(const sp<BooleanWrapper>& self)
 
 sp<Boolean> BooleanType::observe(const sp<Boolean>& self, const sp<Observer>& observer)
 {
-    return sp<VariableObserver<bool>>::make(self, observer);
+    return sp<Boolean>::make<VariableObserver<bool>>(self, observer);
 }
 
 sp<Boolean> BooleanType::dye(sp<Boolean> self, sp<Boolean> condition, String message)
@@ -189,7 +180,7 @@ sp<Boolean> BooleanType::dye(sp<Boolean> self, sp<Boolean> condition, String mes
     LOGW("Dyeing is a debugging technique, which should not be used in publish builds");
     return self;
 #endif
-    return sp<VariableDyed<bool>>::make(std::move(self), std::move(condition), std::move(message));
+    return sp<Boolean>::make<VariableDyed<bool>>(std::move(self), std::move(condition), std::move(message));
 }
 
 void BooleanType::fix(const sp<Boolean>& self)

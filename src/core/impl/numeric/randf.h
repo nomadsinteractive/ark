@@ -15,13 +15,9 @@ public:
     float val() override;
     bool update(uint64_t timestamp) override;
 
-//  [[plugin::function("randf")]]
     static sp<Numeric> randf(const sp<Numeric>& b);
-//  [[plugin::function("randf")]]
     static sp<Numeric> randf(const sp<Numeric>& a, const sp<Numeric>& b);
-//  [[plugin::function("randfv")]]
     static sp<Numeric> randfv(const sp<Numeric>& b);
-//  [[plugin::function("randfv")]]
     static sp<Numeric> randfv(const sp<Numeric>& a, const sp<Numeric>& b);
 
 private:

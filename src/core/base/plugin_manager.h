@@ -14,13 +14,6 @@ public:
 
     typedef Plugin* (*PluginInitializer)(Ark&);
 
-    template<typename T> Optional<std::function<T>> getCallable(const String& name) const {
-        for(const sp<Plugin>& i : _plugins)
-            if(Optional<std::function<T>> callable = i->library().getCallable<T>(name))
-                return callable;
-        return {};
-    }
-
     sp<BeanFactory> createBeanFactory(const sp<Dictionary<document>>& documentById) const;
 
     void each(const std::function<bool(const sp<Plugin>&)>& visitor) const;

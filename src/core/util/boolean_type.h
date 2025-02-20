@@ -53,22 +53,22 @@ public:
     static void fix(const sp<Boolean>& self);
 
 //  [[plugin::builder::by-value]]
-    class DICTIONARY : public Builder<Boolean> {
+    class DICTIONARY final : public Builder<Boolean> {
     public:
         DICTIONARY(BeanFactory&, const String& expr);
 
-        virtual sp<Boolean> build(const Scope& args) override;
+        sp<Boolean> build(const Scope& args) override;
 
     private:
         sp<Builder<Boolean>> _value;
     };
 
 //  [[plugin::builder]]
-    class BUILDER : public Builder<Boolean> {
+    class BUILDER final : public Builder<Boolean> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Boolean> build(const Scope& args) override;
+        sp<Boolean> build(const Scope& args) override;
 
     private:
         String getValue(const document& manifest) const;

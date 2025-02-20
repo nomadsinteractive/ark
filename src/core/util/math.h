@@ -156,25 +156,20 @@ public:
 
 //  [[script::bindings::auto]]
     static float sin(float x);
-//  [[plugin::function("sin")]]
 //  [[script::bindings::auto]]
     static sp<Numeric> sin(const sp<Numeric>& x);
 //  [[script::bindings::auto]]
     static float cos(float x);
-//  [[plugin::function("cos")]]
 //  [[script::bindings::auto]]
     static sp<Numeric> cos(const sp<Numeric>& x);
 
-//  [[plugin::function("min")]]
 //  [[script::bindings::auto]]
     static sp<Numeric> min(sp<Numeric> a1, sp<Numeric> a2);
-//  [[plugin::function("max")]]
 //  [[script::bindings::auto]]
     static sp<Numeric> max(sp<Numeric> a1, sp<Numeric> a2);
 
 //  [[script::bindings::auto]]
     static float acos(float x);
-//  [[plugin::function("acos")]]
 //  [[script::bindings::auto]]
     static sp<Numeric> acos(const sp<Numeric>& x);
 //  [[script::bindings::auto]]
@@ -204,7 +199,6 @@ public:
     static float hypot2(float dx, float dy);
 //  [[script::bindings::auto]]
     static float sqrt(float number);
-//  [[plugin::function("sqrt")]]
 //  [[script::bindings::auto]]
     static sp<Numeric> sqrt(sp<Numeric> number);
 

@@ -2,17 +2,8 @@
 
 namespace ark {
 
-BeanFactory::BeanFactory(std::nullptr_t)
-{
-}
-
-BeanFactory::BeanFactory()
-    : _stub(sp<Stub>::make()) {
-}
-
-BeanFactory::BeanFactory(sp<Stub> stub)
-    : _stub(std::move(stub))
-{
+BeanFactory::BeanFactory(sp<Dictionary<document>> documentRefs)
+    : _stub(sp<Stub>::make(std::move(documentRefs))) {
 }
 
 void BeanFactory::add(BeanFactory::Factory factory, bool front)
@@ -46,22 +37,18 @@ const sp<Scope>& BeanFactory::references() const
     return _stub->_references;
 }
 
-BeanFactory::Factory::Factory()
-{
-}
-
-BeanFactory::Factory::Factory(const WeakPtr<Scope>& references, const sp<Dictionary<document>>& documentById)
-    : _references(references), _document_by_id(documentById)
+BeanFactory::Factory::Factory(const WeakPtr<Scope>& references)
+    : _references(references)
 {
 }
 
 BeanFactory::Factory::operator bool() const
 {
-    return static_cast<bool>(_document_by_id);
+    return static_cast<bool>(_references);
 }
 
-BeanFactory::Stub::Stub()
-    : _references(sp<Scope>::make())
+BeanFactory::Stub::Stub(sp<Dictionary<document>> documentRefs)
+    : _references(sp<Scope>::make()), _document_refs(std::move(documentRefs))
 {
 }
 

@@ -62,8 +62,8 @@ class BeanFactoriesTestCase : public TestCase {
 public:
     virtual int launch() override {
         {
-            const sp<BeanFactory> beanFactory = sp<BeanFactory>::make();
-            BeanFactory::Factory factory(beanFactory->references(), sp<DictionaryImpl>::make());
+            const sp<BeanFactory> beanFactory = sp<BeanFactory>::make(sp<DictionaryImpl>::make());
+            BeanFactory::Factory factory(beanFactory->references());
             factory.addBuilderFactory<uint8_t>([](BeanFactory&, const document&) {return sp<BuilderImpl1>::make();});
             factory.addBuilderFactory<uint16_t>([](BeanFactory&, const document&) {return sp<BuilderImpl2>::make();});
             factory.addBuilderFactory<uint32_t>([](BeanFactory&, const document&) {return sp<BuilderImpl3>::make();});

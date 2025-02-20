@@ -59,9 +59,8 @@ BeanFactory& ResourceLoader::beanFactory()
     return _bean_factory;
 }
 
-ResourceLoader::BUILDER::BUILDER(BeanFactory& factory, const document& doc, const sp<ApplicationContext>& applicationContext)
-    : _factory(factory), _application_context(applicationContext), _manifest(doc),
-      _src(Documents::ensureAttribute(doc, constants::SRC))
+ResourceLoader::BUILDER::BUILDER(BeanFactory& /*factory*/, const document& manifest, const sp<ApplicationContext>& applicationContext)
+    : _application_context(applicationContext), _manifest(manifest), _src(Documents::ensureAttribute(manifest, constants::SRC))
 {
 }
 

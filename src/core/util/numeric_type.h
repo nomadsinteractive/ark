@@ -136,7 +136,7 @@ public:
     static sp<Numeric> dye(sp<Numeric> self, sp<Boolean> condition = nullptr, String message = "");
 
 //  [[plugin::builder::by-value]]
-    class DICTIONARY : public Builder<Numeric> {
+    class DICTIONARY final : public Builder<Numeric> {
     public:
         DICTIONARY(BeanFactory& factory, const String& expr);
 
@@ -147,7 +147,7 @@ public:
     };
 
 //  [[plugin::builder]]
-    class BUILDER : public Builder<Numeric> {
+    class BUILDER final : public Builder<Numeric> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 

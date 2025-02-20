@@ -105,8 +105,8 @@ public:
         : Plugin("test", ark::Plugin::PLUGIN_TYPE_CORE) {
     }
 
-    virtual ark::BeanFactory::Factory createBeanFactory(const ark::BeanFactory& beanFactory, const ark::sp<ark::Dictionary<ark::document>>& documentById) override {
-        ark::BeanFactory::Factory refBeanFactory(beanFactory.references(), documentById);
+    ark::BeanFactory::Factory createBeanFactory(const ark::BeanFactory& beanFactory) override {
+        ark::BeanFactory::Factory refBeanFactory;
         return refBeanFactory;
     }
 };

@@ -188,7 +188,7 @@ sp<ResourceLoader> ApplicationContext::createResourceLoaderImpl(const document& 
 
     const Global<PluginManager> pluginManager;
     pluginManager->each([&] (const sp<Plugin>& plugin)->bool {
-        plugin->loadResourceLoader(beanFactory, documentDictionary, context);
+        plugin->loadResourceLoader(beanFactory, context);
         return true;
     });
 

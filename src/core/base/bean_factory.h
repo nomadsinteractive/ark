@@ -7,7 +7,6 @@
 #include "core/base/constants.h"
 #include "core/base/identifier.h"
 #include "core/base/scope.h"
-
 #include "core/collection/traits.h"
 #include "core/dom/dom_document.h"
 #include "core/inf/builder.h"
@@ -21,16 +20,7 @@ class ARK_API BeanFactory {
 private:
     template<typename T> class Worker {
     public:
-        Worker(const WeakPtr<Scope>& references, const sp<Dictionary<document>>& documentById)
-            : _references(references), _document_by_id(documentById) {
-        }
-
-        sp<Builder<T>> findBuilder(const String& id, BeanFactory& factory) {
-            const document manifest = _document_by_id->get(id);
-            if(!manifest)
-                return nullptr;
-            return createBuilder(factory, manifest, true);
-        }
+        Worker() = default;
 
         sp<Builder<T>> createValueBuilder(BeanFactory& factory, const String& value) const {
             const sp<Builder<T>> builder = createValueBuilder(factory, value, value);
@@ -62,7 +52,7 @@ private:
             _default_dictionary_factory = std::move(defaultDictionaryFactory);
         }
 
-        sp<Builder<T>> createBuilder(BeanFactory& factory, const document& doc, bool wrapBuilder) const {
+        sp<Builder<T>> createBuilder(BeanFactory& factory, const document& doc, const bool wrapBuilder) const {
             const String className = Documents::getAttribute(doc, constants::CLASS);
             return createBuilder(factory, className, doc, wrapBuilder);
         }
@@ -70,14 +60,13 @@ private:
         sp<Builder<T>> createBuilder(BeanFactory& factory, const String& className, const document& doc, bool wrapBuilder) const {
             const String& id = Documents::getAttribute(doc, constants::ID);
             const String& wrappedId = wrapBuilder ? id : "";
-            const String& ref = Documents::getAttribute(doc, constants::REF);
-            if(className.empty() && ref) {
+            if(const String& ref = Documents::getAttribute(doc, constants::REF); className.empty() && ref) {
                 const Identifier f = Identifier::parse(ref);
                 if(f.isRef()) {
                     if(f.package().empty() && (f.ref() == id || ref == id))
                         return createBuilderInternal(factory, className, ref, doc);
 
-                    return makeWrappedBuilder(factory.createBuilderByRef<T>(f), wrappedId);
+                    return makeWrappedBuilder(factory.createBuilderByRef<T>(f), wrappedId, factory.references());
                 }
                 if(f.isArg())
                     return factory.getBuilderByArg<T>(f);
@@ -89,18 +78,15 @@ private:
         sp<Builder<T>> createBuilderInternal(BeanFactory& factory, const String& className, const String& id, const document& doc) const {
             const auto iter = _builders.find(className);
             if(iter == _builders.end())
-                return _default_builder_factory ? makeWrappedBuilder(_default_builder_factory(factory, doc), id) : nullptr;
+                return _default_builder_factory ? makeWrappedBuilder(_default_builder_factory(factory, doc), id, factory.references()) : nullptr;
             sp<Builder<T>> builder = iter->second(factory, doc);
             CHECK(builder, "Builder \"%s\" create failed", className.c_str());
-            return makeWrappedBuilder(std::move(builder), id);
+            return makeWrappedBuilder(std::move(builder), id, factory.references());
         }
 
-        sp<Builder<T>> makeWrappedBuilder(sp<Builder<T>> builder, const String& id) const;
+        sp<Builder<T>> makeWrappedBuilder(sp<Builder<T>> builder, const String& id, const sp<Scope>& references) const;
 
     private:
-        WeakPtr<Scope> _references;
-        sp<Dictionary<document>> _document_by_id;
-
         std::function<sp<Builder<T>>(BeanFactory&, const document&)> _default_builder_factory;
         std::function<sp<Builder<T>>(BeanFactory&, const String&)> _default_dictionary_factory;
 
@@ -111,14 +97,14 @@ private:
 public:
     class ARK_API Factory {
     public:
-        Factory();
-        Factory(const WeakPtr<Scope>& references, const sp<Dictionary<document>>& documentById);
+        Factory() = default;
+        Factory(const WeakPtr<Scope>& references);
 
         explicit operator bool() const;
 
-        template<typename T> sp<Builder<T>> findBuilder(const String& id, BeanFactory& factory) const {
+        template<typename T> sp<Builder<T>> createBuilder(const document& manifest, BeanFactory& factory) const {
             const sp<Worker<T>>& worker = _workers.get<Worker<T>>();
-            return worker ? worker->findBuilder(id, factory) : nullptr;
+            return worker ? worker->createBuilder(factory, manifest, true) : nullptr;
         }
 
         template<typename T> sp<Builder<T>> createBuilder(const String& className, const document& doc, BeanFactory& factory, bool wrapBuilder) const {
@@ -148,36 +134,35 @@ public:
             ensureWorker<T>()->addBuilderFactory(id, builderFactory);
         }
 
-        template<typename T> void addBuilderFactory(std::function<sp<Builder<T>>(BeanFactory&, const document&)>&& builderFactory) {
+        template<typename T> void addBuilderFactory(std::function<sp<Builder<T>>(BeanFactory&, const document&)> builderFactory) {
             ensureWorker<T>()->setDefaultBuilderFactory(std::move(builderFactory));
         }
 
     private:
         template<typename T> sp<Worker<T>> ensureWorker() {
             if(!_workers.has<Worker<T>>())
-                _workers.put<Worker<T>>(sp<Worker<T>>::make(_references, _document_by_id));
+                _workers.put<Worker<T>>(sp<Worker<T>>::make());
             return _workers.get<Worker<T>>();
         }
 
     private:
         WeakPtr<Scope> _references;
-        sp<Dictionary<document>> _document_by_id;
-
         Traits _workers;
     };
 
     struct Stub {
-        Stub();
+        Stub(sp<Dictionary<document>> documentRefs);
 
         sp<Scope> _references;
+        sp<Dictionary<document>> _document_refs;
+
         std::list<Factory> _factories;
         Map<String, sp<BeanFactory>> _packages;
     };
 
 public:
-    BeanFactory();
-    BeanFactory(std::nullptr_t);
-    explicit BeanFactory(sp<Stub> stub);
+    BeanFactory() = default;
+    BeanFactory(sp<Dictionary<document>> documentRefs);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(BeanFactory);
 
     ~BeanFactory() = default;
@@ -267,8 +252,8 @@ public:
         return ensureBuilder<T>(attrValue);
     }
 
-    template<typename T> std::vector<builder<T>> makeBuilderList(const document& doc, const String& nodeName) {
-        std::vector<builder<T>> list;
+    template<typename T> Vector<builder<T>> makeBuilderList(const document& doc, const String& nodeName) {
+        Vector<builder<T>> list;
         if(const String attrValue = Documents::getAttribute(doc, nodeName))
             list.push_back(ensureBuilder<T>(attrValue));
 
@@ -276,8 +261,8 @@ public:
             list.push_back(ensureBuilder<T>(i));
         return list;
     }
-    template<typename T, typename... Args> std::vector<T> makeBuilderListObject(const document& doc, const String& nodeName, Args&&... args) {
-        std::vector<T> list;
+    template<typename T, typename... Args> Vector<T> makeBuilderListObject(const document& doc, const String& nodeName, Args&&... args) {
+        Vector<T> list;
         for(const document& i : nodeName ? doc->children(nodeName) : doc->children())
             list.emplace_back(*this, i, std::forward<Args>(args)...);
         return list;
@@ -307,9 +292,10 @@ public:
         if(sp<T> inst = _stub->_references->get(refid).template as<T>())
             return sp<typename Builder<T>::Prebuilt>::make(std::move(inst));
 
-        for(const Factory& i : _stub->_factories)
-            if(const sp<Builder<T>> builder = i.findBuilder<T>(refid, *this))
-                return builder;
+        if(const document manifest = _stub->_document_refs->get(refid))
+            for(const Factory& i : _stub->_factories)
+                if(const sp<Builder<T>> builder = i.createBuilder<T>(manifest, *this))
+                    return builder;
 
         return nullptr;
     }
@@ -420,8 +406,8 @@ private:
 
 template<typename T> class BuilderBySoftRef final : public Builder<T> {
 public:
-    BuilderBySoftRef(String name, const WeakPtr<Scope>& references, sp<Builder<T>> delegate)
-        : _name(std::move(name)), _references(references), _delegate(std::move(delegate)) {
+    BuilderBySoftRef(String name, WeakPtr<Scope> references, sp<Builder<T>> delegate)
+        : _name(std::move(name)), _references(std::move(references)), _delegate(std::move(delegate)) {
     }
 
     sp<T> build(const Scope& args) override {
@@ -443,10 +429,10 @@ private:
     sp<Builder<T>> _delegate;
 };
 
-template<typename T> sp<Builder<T>> BeanFactory::Worker<T>::makeWrappedBuilder(sp<Builder<T>> builder, const String& id) const {
+template<typename T> sp<Builder<T>> BeanFactory::Worker<T>::makeWrappedBuilder(sp<Builder<T>> builder, const String& id, const sp<Scope>& references) const {
     if(id.empty() || id.at(0) != '@')
         return builder;
-    return sp<Builder<T>>::template make<BuilderBySoftRef<T>>(id.substr(1), _references, std::move(builder));
+    return sp<Builder<T>>::template make<BuilderBySoftRef<T>>(id.substr(1), std::move(references), std::move(builder));
 }
 
 }

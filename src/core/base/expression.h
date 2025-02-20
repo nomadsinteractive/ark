@@ -2,9 +2,7 @@
 
 #include "core/forwarding.h"
 #include "core/base/bean_factory.h"
-#include "core/base/plugin_manager.h"
 #include "core/inf/variable.h"
-#include "core/types/global.h"
 #include "core/types/shared_ptr.h"
 #include "core/util/operators.h"
 #include "core/util/strings.h"
@@ -12,52 +10,6 @@
 namespace ark {
 
 class Expression {
-private:
-    template<typename T> class CallerBuilderV0 final : public Builder<T> {
-    public:
-        CallerBuilderV0(std::function<sp<T>()> callable)
-            : _callable(std::move(callable)) {
-        }
-
-        sp<T> build(const Scope& /*args*/) override {
-            return _callable();
-        }
-
-    private:
-        std::function<sp<T>()> _callable;
-    };
-
-    template<typename T> class CallerBuilderV1 final : public Builder<T> {
-    public:
-        CallerBuilderV1(std::function<sp<T>(const sp<T>&)> callable, const sp<Builder<T>>& a1)
-            : _callable(std::move(callable)), _a1(a1) {
-        }
-
-        sp<T> build(const Scope& args) override {
-            return _callable(_a1->build(args));
-        }
-
-    private:
-        std::function<sp<T>(const sp<T>&)> _callable;
-        sp<Builder<T>> _a1;
-    };
-
-    template<typename T> class CallerBuilderV2 final : public Builder<T> {
-    public:
-        CallerBuilderV2(std::function<sp<T>(const sp<T>&, const sp<T>&)> callable, const sp<Builder<T>>& a1, const sp<Builder<T>>& a2)
-            : _callable(std::move(callable)), _a1(a1), _a2(a2) {
-        }
-
-        sp<T> build(const Scope& args) override {
-            return _callable(_a1->build(args), _a2->build(args));
-        }
-
-    private:
-        std::function<sp<T>(const sp<T>&, const sp<T>&)> _callable;
-        sp<Builder<T>> _a1;
-        sp<Builder<T>> _a2;
-    };
-
 public:
     template<typename T> struct Operator {
         typedef sp<Builder<Variable<T>>> V;
@@ -120,33 +72,9 @@ public:
             if(OP::isConstant(expr))
                 return sp<typename Builder<N>::Prebuilt>::make(sp<typename N::Impl>::make(Strings::eval<T>(expr)));
 
-            const V vBuilder = getVariableBuilder(factory, expr);
-            if(vBuilder)
+            if(V vBuilder = getVariableBuilder(factory, expr))
                 return vBuilder;
 
-            String func, params;
-            if(Strings::splitFunction(expr, func, params)) {
-                const Global<PluginManager> pluginManager;
-                const std::vector<String> paramList = params.split(',');
-                typedef sp<N> ParamType;
-                if(paramList.size() == 0) {
-                    Optional<std::function<ParamType()>> callable = pluginManager->getCallable<ParamType()>(func);
-                    DCHECK(callable, "Undefined function \"%s\"", func.c_str());
-                    return sp<CallerBuilderV0<N>>::make(std::move(callable.value()));
-                }
-                if(paramList.size() == 1) {
-                    Optional<std::function<ParamType(const ParamType&)>> callable = pluginManager->getCallable<ParamType(const ParamType&)>(func);
-                    DCHECK(callable, "Undefined function \"%s\"", func.c_str());
-                    return sp<CallerBuilderV1<N>>::make(std::move(callable.value()), compile(factory, params));
-                }
-                if(paramList.size() == 2) {
-                    Optional<std::function<ParamType(const ParamType&, const ParamType&)>> callable = pluginManager->getCallable<ParamType(const ParamType&, const ParamType&)>(func);
-                    DCHECK(callable, "Undefined function \"%s\"", func.c_str());
-                    return sp<CallerBuilderV2<N>>::make(std::move(callable.value()), compile(factory, paramList[0]), compile(factory, paramList[1]));
-                }
-                DFATAL("Unsupported parameter number: %d", paramList.size());
-                return nullptr;
-            }
             return compilePhrase ? compile(factory, expr) : V();
         }
 
@@ -173,15 +101,14 @@ public:
                 return compile(factory, lvalue);
             }
 
-            const V s = toPhrase(expr, factory);
-            if(s) {
+            if(V s = toPhrase(expr, factory)) {
                 remaining = "";
                 return s;
             }
 
-            size_t size = expr.length();
+            const size_t size = expr.length();
             for(size_t i = 1; i < size; i ++) {
-                char c = expr.at(i);
+                const char c = expr.at(i);
                 if(isspace(c))
                     continue;
                 if(c == '(')
@@ -202,7 +129,7 @@ public:
         }
 
         void opExpect(const String& expr, Operator<T>& op, String& rvalue) const {
-            size_t size = expr.length();
+            const size_t size = expr.length();
             for(size_t i = 0; i < size; i ++) {
                 if(isspace(expr.at(i)))
                     continue;
@@ -218,9 +145,7 @@ public:
             }
             FATAL("Illegal expression: \"%s\", unknow syntax", expr.c_str());
         }
-
     };
-
 };
 
 template<typename T> class NumericOperation {
@@ -252,7 +177,6 @@ public:
     }
 
     static Expression::Operator<T> OPS[4];
-
 };
 
 template<typename T> Expression::Operator<T> NumericOperation<T>::OPS[4] = {

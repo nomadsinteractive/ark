@@ -1,15 +1,13 @@
-#ifndef ARK_CORE_BASE_CLOCK_H_
-#define ARK_CORE_BASE_CLOCK_H_
+#pragma once
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
-#include "core/inf/builder.h"
 #include "core/inf/variable.h"
 #include "core/types/shared_ptr.h"
 
 namespace ark {
 
-class ARK_API Clock : public Variable<uint64_t> {
+class ARK_API Clock final : public Variable<uint64_t> {
 public:
     class ARK_API Interval {
     public:
@@ -42,8 +40,8 @@ public:
     Clock(sp<Variable<uint64_t>> ticker);
     Clock(const Clock& other) = default;
 
-    virtual uint64_t val() override;
-    virtual bool update(uint64_t timestamp) override;
+    uint64_t val() override;
+    bool update(uint64_t timestamp) override;
 
 //  [[script::bindings::property]]
     uint64_t tick() const;
@@ -73,5 +71,3 @@ private:
 };
 
 }
-
-#endif
