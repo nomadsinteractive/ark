@@ -123,15 +123,15 @@ public:
         }
 
         template<typename T> void addDictionaryFactory(const String& name, std::function<sp<Builder<T>>(BeanFactory&, const String&)> dictionaryFactory) {
-            ensureWorker<T>()->addDictionaryFactory(name, dictionaryFactory);
+            ensureWorker<T>()->addDictionaryFactory(name, std::move(dictionaryFactory));
         }
 
         template<typename T> void addDictionaryFactory(std::function<sp<Builder<T>>(BeanFactory&, const String&)> dictionaryFactory) {
-            ensureWorker<T>()->setDictionaryFactory(dictionaryFactory);
+            ensureWorker<T>()->setDictionaryFactory(std::move(dictionaryFactory));
         }
 
         template<typename T> void addBuilderFactory(const String& id, std::function<sp<Builder<T>>(BeanFactory&, const document&)> builderFactory) {
-            ensureWorker<T>()->addBuilderFactory(id, builderFactory);
+            ensureWorker<T>()->addBuilderFactory(id, std::move(builderFactory));
         }
 
         template<typename T> void addBuilderFactory(std::function<sp<Builder<T>>(BeanFactory&, const document&)> builderFactory) {
@@ -197,8 +197,8 @@ public:
     }
 
     template<typename T> sp<T> ensure(const String& value, const Scope& args) {
-        const sp<T> obj = build<T>(value, args);
-        CHECK(obj, "Counld not build \"%s\"", value.c_str());
+        sp<T> obj = build<T>(value, args);
+        CHECK(obj, "Could not build \"%s\"", value.c_str());
         return obj;
     }
 
@@ -207,14 +207,14 @@ public:
     }
 
     template<typename T> sp<T> ensure(const document& doc, const Scope& args) {
-        const sp<T> obj = build<T>(doc, args);
-        CHECK(obj, "Counld not build \"%s\"", Documents::toString(doc).c_str());
+        sp<T> obj = build<T>(doc, args);
+        CHECK(obj, "Could not build \"%s\"", Documents::toString(doc).c_str());
         return obj;
     }
 
     template<typename T> sp<T> ensure(const document& doc, const String& attr, const Scope& args) {
-        const sp<T> obj = build<T>(doc, attr, args);
-        CHECK(obj, "Counld not build \"%s\" from \"%s\"", attr.c_str(), Documents::toString(doc).c_str());
+        sp<T> obj = build<T>(doc, attr, args);
+        CHECK(obj, "Could not build \"%s\" from \"%s\"", attr.c_str(), Documents::toString(doc).c_str());
         return obj;
     }
 
