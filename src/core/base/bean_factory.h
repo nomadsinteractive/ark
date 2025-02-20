@@ -98,7 +98,6 @@ public:
     class ARK_API Factory {
     public:
         Factory() = default;
-        Factory(const WeakPtr<Scope>& references);
 
         explicit operator bool() const;
 
@@ -146,7 +145,6 @@ public:
         }
 
     private:
-        WeakPtr<Scope> _references;
         Traits _workers;
     };
 

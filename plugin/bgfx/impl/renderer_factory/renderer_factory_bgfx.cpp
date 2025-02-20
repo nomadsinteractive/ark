@@ -149,7 +149,7 @@ void setVersion(Ark::RendererVersion version, RenderEngineContext& vkContext)
 }
 
 RendererFactoryBgfx::RendererFactoryBgfx()
-    : RendererFactory({{{Ark::RENDERING_BACKEND_ALL}}, Ark::COORDINATE_SYSTEM_RHS, false, 16})
+    : RendererFactory({{Ark::RENDERING_BACKEND_ALL}, Ark::COORDINATE_SYSTEM_RHS, false, 16})
 {
 }
 

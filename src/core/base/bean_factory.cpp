@@ -37,14 +37,9 @@ const sp<Scope>& BeanFactory::references() const
     return _stub->_references;
 }
 
-BeanFactory::Factory::Factory(const WeakPtr<Scope>& references)
-    : _references(references)
-{
-}
-
 BeanFactory::Factory::operator bool() const
 {
-    return static_cast<bool>(_references);
+    return _workers.traits().size() > 0;
 }
 
 BeanFactory::Stub::Stub(sp<Dictionary<document>> documentRefs)

@@ -58,7 +58,7 @@ public:
                 return v;
         return defaultValue;
     }
-    template<typename T, size_t N> constexpr static T lookup(const LookupTable<StringView, T, N>& table, const StringView key) {
+    template<typename T, size_t N> static T lookup(const LookupTable<StringView, T, N>& table, const StringView key) {
         for(const auto [k, v] : table)
             if(key == k)
                 return v;
@@ -75,9 +75,9 @@ public:
 
 //  [[script::bindings::operator(index)]]
     static uint32_t __index__(const Box& self);
-//[[script::bindings::operator(&)]]
+//  [[script::bindings::operator(&)]]
     static int32_t __and__(const Box& lvalue, const Box& rvalue);
-//[[script::bindings::operator(|)]]
+//  [[script::bindings::operator(|)]]
     static int32_t __or__(const Box& lvalue, const Box& rvalue);
 };
 
