@@ -37,7 +37,7 @@ public:
     const sp<MaterialTexture>& getTexture(MaterialTexture::Type type) const;
 
 //  [[plugin::builder]]
-    class BUILDER : public Builder<Material> {
+    class BUILDER final : public Builder<Material> {
     public:
         BUILDER(BeanFactory& beanFactory, const document& manifest);
 

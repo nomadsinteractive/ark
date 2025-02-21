@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/types/shared_ptr.h"
@@ -30,7 +28,7 @@ private:
     };
 
 private:
-    std::vector<Callback> _callbacks;
+    Vector<Callback> _callbacks;
 };
 
 }

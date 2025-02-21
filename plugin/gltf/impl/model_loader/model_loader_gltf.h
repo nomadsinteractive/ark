@@ -26,8 +26,7 @@ public:
     };
 
 private:
-    std::vector<sp<Texture>> _textures;
-
+    Vector<sp<Texture>> _textures;
 };
 
 }

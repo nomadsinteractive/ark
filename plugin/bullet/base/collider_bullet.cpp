@@ -214,7 +214,7 @@ struct ColliderBullet::Stub final : Runnable {
     }
 
     sp<ModelLoader> _model_loader;
-    std::unordered_map<TypeId, sp<CollisionShape>> _collision_shapes;
+    HashMap<TypeId, sp<CollisionShape>> _collision_shapes;
 
     op<btDefaultCollisionConfiguration> _collision_configuration;
     op<btCollisionDispatcher> _collision_dispatcher;
@@ -355,12 +355,12 @@ btDiscreteDynamicsWorld* ColliderBullet::btDynamicWorld() const
     return _stub->_dynamics_world.get();
 }
 
-const std::unordered_map<TypeId, sp<CollisionShape>>& ColliderBullet::collisionShapes() const
+const HashMap<TypeId, sp<CollisionShape>>& ColliderBullet::collisionShapes() const
 {
     return _stub->_collision_shapes;
 }
 
-std::unordered_map<TypeId, sp<CollisionShape>>& ColliderBullet::collisionShapes()
+HashMap<TypeId, sp<CollisionShape>>& ColliderBullet::collisionShapes()
 {
     return _stub->_collision_shapes;
 }
@@ -393,25 +393,28 @@ void ColliderBullet::myInternalTickCallback(btDynamicsWorld* dynamicsWorld, btSc
         if(const btPersistentManifold* contactManifold = dispatcher->getManifoldByIndexInternal(i); contactManifold->getNumContacts() > 0)
         {
             const RigidbodyBullet& objA = getRigidBodyFromCollisionObject(contactManifold->getBody0());
-            const sp<CollisionCallback>& ccObjA = objA.collisionCallback();
             const RigidbodyBullet& objB = getRigidBodyFromCollisionObject(contactManifold->getBody1());
-            const sp<CollisionCallback>& ccObjB = objB.collisionCallback();
-
-            const sp<BtRigidbodyRef>& refA = objA.btRigidbodyRef();
-            const sp<BtRigidbodyRef>& refB = objB.btRigidbodyRef();
-
-            if(ccObjA || ccObjB)
+            if(!objA.ref()->isDiscarded() && !objB.ref()->isDiscarded())
             {
-                const btManifoldPoint& pt = contactManifold->getContactPoint(0);
-                const btVector3& ptA = pt.getPositionWorldOnA();
-                const btVector3& normalOnB = pt.m_normalWorldOnB;
-                const V3 cp(ptA.x(), ptA.y(), ptA.z());
-                const V3 normal(normalOnB.x(), normalOnB.y(), normalOnB.z());
+                const sp<CollisionCallback>& ccObjA = objA.collisionCallback();
+                const sp<CollisionCallback>& ccObjB = objB.collisionCallback();
 
-                if(ccObjA && objB.stub()->_type != Rigidbody::BODY_TYPE_SENSOR)
-                    self->addTickContactInfo(refA, ccObjA, refB, cp, normal);
-                if(ccObjB && objA.stub()->_type != Rigidbody::BODY_TYPE_SENSOR)
-                    self->addTickContactInfo(refB, ccObjB, refA, cp, -normal);
+                if(ccObjA || ccObjB)
+                {
+                    const btManifoldPoint& pt = contactManifold->getContactPoint(0);
+                    const btVector3& ptA = pt.getPositionWorldOnA();
+                    const btVector3& normalOnB = pt.m_normalWorldOnB;
+                    const V3 cp(ptA.x(), ptA.y(), ptA.z());
+                    const V3 normal(normalOnB.x(), normalOnB.y(), normalOnB.z());
+
+                    const sp<BtRigidbodyRef>& refA = objA.btRigidbodyRef();
+                    const sp<BtRigidbodyRef>& refB = objB.btRigidbodyRef();
+
+                    if(ccObjA && objB.stub()->_type != Rigidbody::BODY_TYPE_SENSOR)
+                        self->addTickContactInfo(refA, ccObjA, refB, cp, normal);
+                    if(ccObjB && objA.stub()->_type != Rigidbody::BODY_TYPE_SENSOR)
+                        self->addTickContactInfo(refB, ccObjB, refA, cp, -normal);
+                }
             }
         }
     }

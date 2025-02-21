@@ -105,6 +105,11 @@ void Entity::discard()
     _components.traits().clear();
 }
 
+sp<Discarded> Entity::discarded() const
+{
+    return _components.get<Discarded>();
+}
+
 void Entity::addComponent(Box component)
 {
     Wirable::WiringContext context(_components);

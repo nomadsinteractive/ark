@@ -50,7 +50,7 @@ sp<CollisionCallback> CollisionCallbackType::create(Behavior& behavior)
     return create(behavior, "on_begin_contact", "on_end_contact");
 }
 
-sp<CollisionCallback> CollisionCallbackType::create(Behavior& behavior, StringView onBeginContact, StringView onEndContact)
+sp<CollisionCallback> CollisionCallbackType::create(Behavior& behavior, const StringView onBeginContact, const StringView onEndContact)
 {
     sp<Behavior::Method> onBeginContactMethod = behavior.getMethod(onBeginContact);
     sp<Behavior::Method> onEndContactMethod = behavior.getMethod(onEndContact);

@@ -118,10 +118,10 @@ Event::Code sdlScanCodeToEventCode(SDL_Scancode sc)
     return Event::CODE_NONE;
 }
 
-void doSetMouseCapture(bool enabled)
+void doSetMouseCapture(const bool enabled)
 {
-    const int32_t r = SDL_CaptureMouse(enabled);
-    CHECK_WARN(r == 0, "Error calling SDL_CaptureMouse, enabled: %d, return: %d, error: %s", enabled, r, SDL_GetError());
+    const bool success = SDL_CaptureMouse(enabled);
+    CHECK_WARN(success, "Error calling SDL_CaptureMouse, enabled: %d, return: %d, error: %s", enabled, success, SDL_GetError());
 }
 
 SDL_Surface* SDL_CreateRGBSurfaceFrom(void* pixels, int32_t width, int32_t height, int32_t depth, int32_t pitch, uint32_t rmask, uint32_t gmask, uint32_t bmask, uint32_t amask)

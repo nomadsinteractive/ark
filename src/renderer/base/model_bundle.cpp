@@ -155,13 +155,13 @@ sp<ModelLoader> ModelBundle::MODEL_LOADER_BUILDER::build(const Scope& args)
 }
 
 ModelBundle::ImportModuleRunnable::ImportModuleRunnable(int32_t type, Manifest manifest, const sp<Stub>& stub, sp<Importer> importer, sp<Executor> executor, sp<Future> future)
-    : _type(type), _manifest(std::move(manifest)), _stub(stub), _importer(std::move(importer)), _executor(std::move(executor)), _future(future)
+    : _type(type), _manifest(std::move(manifest)), _stub(stub), _importer(std::move(importer)), _executor(std::move(executor)), _future(std::move(future))
 {
 }
 
 void ModelBundle::ImportModuleRunnable::run()
 {
-    _executor->execute(sp<AddModuleRunnable>::make(_type, std::move(_stub), _stub->importModel(_manifest, _importer), std::move(_future)));
+    _executor->execute(sp<Runnable>::make<AddModuleRunnable>(_type, std::move(_stub), _stub->importModel(_manifest, _importer), std::move(_future)));
 }
 
 ModelBundle::AddModuleRunnable::AddModuleRunnable(int32_t type, sp<Stub> stub, sp<Model> model, sp<Future> future)

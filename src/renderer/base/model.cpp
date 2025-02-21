@@ -12,7 +12,7 @@ namespace ark {
 
 namespace {
 
-size_t calcIndicesSize(const std::vector<sp<Mesh>>& meshes)
+size_t calcIndicesSize(const Vector<sp<Mesh>>& meshes)
 {
     size_t size = 0;
     for(const Mesh& i : meshes)
@@ -20,7 +20,7 @@ size_t calcIndicesSize(const std::vector<sp<Mesh>>& meshes)
     return size;
 }
 
-size_t calcVertexCount(const std::vector<sp<Mesh>>& meshes)
+size_t calcVertexCount(const Vector<sp<Mesh>>& meshes)
 {
     size_t vertexCount = 0;
     for(const Mesh& i : meshes)
@@ -30,7 +30,7 @@ size_t calcVertexCount(const std::vector<sp<Mesh>>& meshes)
 
 class InputMeshIndices final : public Uploader {
 public:
-    InputMeshIndices(std::vector<sp<Mesh>> meshes)
+    InputMeshIndices(Vector<sp<Mesh>> meshes)
         : Uploader(calcIndicesSize(meshes)), _meshes(std::move(meshes))
     {
     }
@@ -40,7 +40,7 @@ public:
         uint32_t offset = 0;
         for(const Mesh& i : _meshes)
         {
-            const std::vector<element_index_t>& indices = i.indices();
+            const Vector<element_index_t>& indices = i.indices();
             uint32_t size = static_cast<uint32_t>(indices.size() * sizeof(element_index_t));
             uploader.write(indices.data(), size, offset);
             offset += size;
@@ -53,12 +53,12 @@ public:
     }
 
 private:
-    std::vector<sp<Mesh>> _meshes;
+    Vector<sp<Mesh>> _meshes;
 };
 
 class MeshVertices final : public Vertices {
 public:
-    MeshVertices(std::vector<sp<Mesh>> meshes)
+    MeshVertices(Vector<sp<Mesh>> meshes)
         : Vertices(calcVertexCount(meshes)), _meshes(std::move(meshes))
     {
     }
@@ -70,7 +70,7 @@ public:
     }
 
 private:
-    std::vector<sp<Mesh>> _meshes;
+    Vector<sp<Mesh>> _meshes;
     V3 _size;
 };
 
@@ -114,7 +114,7 @@ Model::Model(sp<Uploader> indices, sp<Vertices> vertices, sp<Boundaries> content
 {
 }
 
-Model::Model(std::vector<sp<Material>> materials, std::vector<sp<Mesh>> meshes, sp<Node> rootNode, sp<Boundaries> bounds, sp<Boundaries> occupies, Table<String, sp<Animation>> animations)
+Model::Model(Vector<sp<Material>> materials, Vector<sp<Mesh>> meshes, sp<Node> rootNode, sp<Boundaries> bounds, sp<Boundaries> occupies, Table<String, sp<Animation>> animations)
     : _indices(sp<InputMeshIndices>::make(meshes)), _vertices(sp<MeshVertices>::make(meshes)), _root_node(std::move(rootNode)), _materials(std::move(materials)), _meshes(std::move(meshes)),
       _content(bounds ? std::move(bounds) : sp<Boundaries>::make(calcBoundingAABB())), _occupy(occupies ? std::move(occupies) : sp<Boundaries>(_content)), _animations(std::move(animations))
 {
@@ -140,12 +140,12 @@ element_index_t Model::writeIndices(element_index_t* buf, element_index_t baseIn
     return length;
 }
 
-const std::vector<sp<Material>>& Model::materials() const
+const Vector<sp<Material>>& Model::materials() const
 {
     return _materials;
 }
 
-const std::vector<sp<Mesh>>& Model::meshes() const
+const Vector<sp<Mesh>>& Model::meshes() const
 {
     return _meshes;
 }
@@ -230,7 +230,7 @@ Boundaries Model::calcBoundingAABB() const
 
     V3 aabbMin(std::numeric_limits<float>::max()), aabbMax(std::numeric_limits<float>::min());
 
-    std::vector<NodeLayout> nodeLayouts;
+    Vector<NodeLayout> nodeLayouts;
     loadFlatLayouts(_root_node, NodeLayout(), nodeLayouts);
 
     for(const NodeLayout& i : nodeLayouts)

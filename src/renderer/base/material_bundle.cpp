@@ -44,7 +44,7 @@ MaterialBundle::MaterialBundle(Table<String, sp<Material>> materials, std::array
         }
 
     MaxRectsBinPack binPack(_width, _height, false);
-    Vector<std::map<bitmap, RectI>> bitmapBounds(MaterialTexture::TYPE_LENGTH);
+    Vector<Map<bitmap, RectI>> bitmapBounds(MaterialTexture::TYPE_LENGTH);
 
     for(const auto& i : _materials)
     {
@@ -54,9 +54,7 @@ MaterialBundle::MaterialBundle(Table<String, sp<Material>> materials, std::array
             {
                 const sp<MaterialTexture>& texture = material->getTexture(static_cast<MaterialTexture::Type>(j));
                 if(bitmap bitmap = texture->bitmap())
-                {
-                    const auto biter = bitmapBounds[j].find(bitmap);
-                    if(biter == bitmapBounds[j].end())
+                    if(const auto biter = bitmapBounds[j].find(bitmap); biter == bitmapBounds[j].end())
                     {
                         if(const auto iter = _material_bounds.find(i.first); iter == _material_bounds.end())
                             bitmapBounds[j][bitmap] = _material_bounds[i.first] = _texture_packers[j]->addBitmap(binPack, bitmap, texture->bitmapWrapper());
@@ -68,7 +66,6 @@ MaterialBundle::MaterialBundle(Table<String, sp<Material>> materials, std::array
                     }
                     else
                         _material_bounds[i.first] = biter->second;
-                }
             }
     }
 

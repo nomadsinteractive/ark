@@ -19,7 +19,7 @@ class ARK_API Model {
 public:
     Model() = default;
     Model(sp<Uploader> indices, sp<Vertices> vertices, sp<Boundaries> content, sp<Boundaries> occupy = nullptr, Table<String, sp<Animation>> animations = {});
-    Model(std::vector<sp<Material>> materials, std::vector<sp<Mesh>> meshes, sp<Node> rootNode, sp<Boundaries> bounds = nullptr, sp<Boundaries> occupy = nullptr, Table<String, sp<Animation>> animations = {});
+    Model(Vector<sp<Material>> materials, Vector<sp<Mesh>> meshes, sp<Node> rootNode, sp<Boundaries> bounds = nullptr, sp<Boundaries> occupy = nullptr, Table<String, sp<Animation>> animations = {});
     DEFAULT_COPY_AND_ASSIGN(Model);
 
 //  [[script::bindings::property]]
@@ -30,9 +30,9 @@ public:
     element_index_t writeIndices(element_index_t* buf, element_index_t baseIndex = 0) const;
 
 //  [[script::bindings::property]]
-    const std::vector<sp<Material>>& materials() const;
+    const Vector<sp<Material>>& materials() const;
 //  [[script::bindings::property]]
-    const std::vector<sp<Mesh>>& meshes() const;
+    const Vector<sp<Mesh>>& meshes() const;
 //  [[script::bindings::property]]
     const sp<Node>& rootNode() const;
 
@@ -63,14 +63,14 @@ public:
     void dispose();
     bool isDiscarded() const;
 
-    template<typename T> std::vector<T> toFlatLayouts() const {
-        std::vector<T> nodeLayouts;
+    template<typename T> Vector<T> toFlatLayouts() const {
+        Vector<T> nodeLayouts;
         loadFlatLayouts(_root_node, T(), nodeLayouts);
         return nodeLayouts;
     }
 
 private:
-    template<typename T> static void loadFlatLayouts(const sp<Node>& node, const T& parentLayout, std::vector<T>& nodeLayouts) {
+    template<typename T> static void loadFlatLayouts(const sp<Node>& node, const T& parentLayout, Vector<T>& nodeLayouts) {
         T layout(node, parentLayout);
 
         if(!node->name().empty())
@@ -86,9 +86,9 @@ private:
     sp<Uploader> _indices;
     sp<Vertices> _vertices;
     sp<Node> _root_node;
-    std::vector<sp<Material>> _materials;
-    std::vector<sp<Mesh>> _meshes;
-    std::vector<String> _node_names;
+    Vector<sp<Material>> _materials;
+    Vector<sp<Mesh>> _meshes;
+    Vector<String> _node_names;
     sp<Boundaries> _content;
     sp<Boundaries> _occupy;
 

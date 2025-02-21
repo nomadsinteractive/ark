@@ -21,15 +21,18 @@ sp<Model> makeUnitQuadModel(const sp<Boundaries>& content, const bool isLHS)
 {
     const Rect bounds(-0.5f, -0.5f, 0.5f, 0.5f);
     sp<Vertices> vertices = isLHS ? sp<Vertices>::make<VerticesQuadLHS>(bounds, 0, 0, std::numeric_limits<uint16_t>::max(), std::numeric_limits<uint16_t>::max())
-                                    : sp<Vertices>::make<VerticesQuadRHS>(bounds, 0, 0, std::numeric_limits<uint16_t>::max(), std::numeric_limits<uint16_t>::max());
+                                  : sp<Vertices>::make<VerticesQuadRHS>(bounds, 0, 0, std::numeric_limits<uint16_t>::max(), std::numeric_limits<uint16_t>::max());
     return sp<Model>::make(UploaderType::makeElementIndexInput(std::initializer_list<element_index_t>({0, 2, 1, 2, 3, 1})), std::move(vertices), content);
 }
 
 sp<Model> makeNDCModel(const sp<Boundaries>& content)
 {
     const Rect bounds(-0.5f, -0.5f, 0.5f, 0.5f);
-    sp<Vertices> vertices = Ark::instance().renderController()->renderEngine()->isBackendLHS() ? sp<Vertices>::make<VerticesQuadLHS>(bounds, 0, std::numeric_limits<uint16_t>::max(), std::numeric_limits<uint16_t>::max(), 0)
-                                                                                               : sp<Vertices>::make<VerticesQuadRHS>(bounds, 0, 0, std::numeric_limits<uint16_t>::max(), std::numeric_limits<uint16_t>::max());
+    uint16_t uy = 0, vy = std::numeric_limits<uint16_t>::max();
+    if(Ark::instance().renderController()->renderEngine()->isBackendLHS())
+        std::swap(uy, vy);
+    sp<Vertices> vertices = Ark::instance().renderController()->renderEngine()->isLHS() ? sp<Vertices>::make<VerticesQuadLHS>(bounds, 0, uy, std::numeric_limits<uint16_t>::max(), vy)
+                                                                                        : sp<Vertices>::make<VerticesQuadRHS>(bounds, 0, uy, std::numeric_limits<uint16_t>::max(), vy);
     return sp<Model>::make(UploaderType::makeElementIndexInput(std::initializer_list<element_index_t>({0, 2, 1, 2, 3, 1})), std::move(vertices), content);
 }
 

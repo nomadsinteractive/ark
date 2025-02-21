@@ -39,6 +39,8 @@ public:
 //  [[script::bindings::auto]]
     void discard();
 //  [[script::bindings::auto]]
+    sp<Discarded> discarded() const;
+//  [[script::bindings::auto]]
     bool hasComponent(TypeId typeId) const;
 //  [[script::bindings::auto]]
     void addComponent(Box component);

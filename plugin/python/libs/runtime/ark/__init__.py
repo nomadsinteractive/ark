@@ -2815,6 +2815,10 @@ class Entity:
     def ref(self) -> Ref:
         pass
 
+    @property
+    def discarded(self) -> Discarded:
+        pass
+
     def get_component(self, ctype: type):
         pass
 

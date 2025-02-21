@@ -35,7 +35,7 @@ private:
 
 void Observer::notify()
 {
-    std::vector<Callback> callbacks = std::move(_callbacks);
+    Vector<Callback> callbacks = std::move(_callbacks);
     for(auto& [func, oneshot, owned, triggerAfter] : callbacks)
     {
         if(triggerAfter < 2)

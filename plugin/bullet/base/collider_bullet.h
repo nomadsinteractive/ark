@@ -34,15 +34,15 @@ public:
 
     Rigidbody::Impl createBody(Rigidbody::BodyType type, sp<Shape> shape, sp<Vec3> position = nullptr, sp<Vec4> rotation = nullptr, sp<CollisionFilter> collisionFilter = nullptr, sp<Boolean> discarded = nullptr) override;
     sp<Shape> createShape(const NamedHash& type, sp<Vec3> size, sp<Vec3> origin) override;
-    std::vector<RayCastManifold> rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter = nullptr) override;
+    Vector<RayCastManifold> rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter = nullptr) override;
 
 //  [[script::bindings::auto]]
     void rayCastClosest(const V3& from, const V3& to, const sp<CollisionCallback>& callback, int32_t filterGroup = 1, int32_t filterMask = -1) const;
 
     btDiscreteDynamicsWorld* btDynamicWorld() const;
 
-    const std::unordered_map<TypeId, sp<CollisionShape>>& collisionShapes() const;
-    std::unordered_map<TypeId, sp<CollisionShape>>& collisionShapes();
+    const HashMap<TypeId, sp<CollisionShape>>& collisionShapes() const;
+    HashMap<TypeId, sp<CollisionShape>>& collisionShapes();
 
 //  [[plugin::resource-loader]]
     class BUILDER_IMPL1 : public Builder<ColliderBullet> {
@@ -54,7 +54,7 @@ public:
     private:
         V3 _gravity;
         SafeBuilder<ModelLoader> _model_loader;
-        std::vector<std::pair<sp<Builder<RigidbodyImporter>>, document>> _importers;
+        Vector<std::pair<sp<Builder<RigidbodyImporter>>, document>> _importers;
 
         sp<ResourceLoaderContext> _resource_loader_context;
     };

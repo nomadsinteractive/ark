@@ -81,12 +81,12 @@ Rect RenderEngine::toRendererRect(const Rect& scissor, Ark::RendererCoordinateSy
     return s;
 }
 
-V2 RenderEngine::toNDC(float viewportX, float viewportY) const
+V2 RenderEngine::toNDC(const float viewportX, const float viewportY) const
 {
     const Viewport& viewport = _render_context->viewport();
-    const float ndcx = (viewportX * 2 - viewport.width()) / viewport.width();
-    const float ndcy = (viewportY * 2 - viewport.height()) / viewport.height();
-    return {ndcx, isViewportFlipped() ? -ndcy : ndcy};
+    const float ndcx = viewportX * 2.0f / viewport.width() - 1.0f;
+    const float ndcy = viewportY * 2.0f / viewport.height() - 1.0f;
+    return {ndcx, ndcy};
 }
 
 void RenderEngine::onSurfaceCreated()
@@ -97,12 +97,10 @@ void RenderEngine::onSurfaceCreated()
 sp<RenderView> RenderEngine::createRenderView(const sp<RenderController>& renderController, const Viewport& viewport) const
 {
     const Global<Camera> mainCamera;
-    float clipNear = viewport.clipNear();
-    float clipFar = viewport.clipFar();
+    const float clipNear = viewport.clipNear();
+    const float clipFar = viewport.clipFar();
     if(isLHS())
-        std::swap(clipNear, clipFar);
-    if(isBackendLHS())
-        mainCamera->ortho(viewport.left(), viewport.right(), viewport.top(), viewport.bottom(), clipNear, clipFar);
+        mainCamera->ortho(viewport.left(), viewport.right(), viewport.top(), viewport.bottom(), clipFar, clipNear);
     else
         mainCamera->ortho(viewport.left(), viewport.right(), viewport.bottom(), viewport.top(), clipNear, clipFar);
 

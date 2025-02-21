@@ -6,10 +6,6 @@
 
 namespace ark::plugin::gltf {
 
-namespace {
-
-}
-
 Model ModelImporterGltf::import(const Manifest& manifest, MaterialBundle& materialBundle)
 {
     GltfImporter importer(manifest.src(), materialBundle);
