@@ -20,7 +20,7 @@ public:
 
         typedef std::pair<PType<T>, PType<U>> PairType;
 
-        Iterator(VType<T> keys, VType<U> values, size_t iterator)
+        Iterator(VType<T> keys, VType<U> values, const size_t iterator)
             : _keys(keys), _values(values), _iterator(iterator), _data(iterator != npos ? new PairType(_keys.at(_iterator), _values.at(_iterator)) : nullptr) {
             DCHECK(keys.size() == values.size(), "Zipped iterator must be equal length: %zu vs %zu", keys.size(), values.size());
         }

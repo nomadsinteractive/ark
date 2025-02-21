@@ -12,6 +12,8 @@ public:
 //  [[script::bindings::auto]]
     NamedHash(HashId value);
 
+    explicit operator bool() const;
+
 //  [[script::bindings::operator(index)]]
 //  [[script::bindings::property]]
     HashId hash() const;

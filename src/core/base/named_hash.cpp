@@ -29,9 +29,14 @@ NamedHash::NamedHash(String value)
 #endif
 }
 
-NamedHash::NamedHash(HashId value)
+NamedHash::NamedHash(const HashId value)
     : _hash(value)
 {
+}
+
+NamedHash::operator bool() const
+{
+    return static_cast<bool>(_hash);
 }
 
 const String& NamedHash::name() const

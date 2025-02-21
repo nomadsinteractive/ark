@@ -18,7 +18,7 @@ namespace ark::plugin::gltf {
 
 class GltfImporter {
 public:
-	GltfImporter(const String& src, MaterialBundle& materialBundle);
+	GltfImporter(const String& src, const MaterialBundle& materialBundle);
 	~GltfImporter();
 
 	sp<Node> loadNode(WeakPtr<Node> parentNode, int32_t nodeId);

@@ -219,7 +219,8 @@ bool Application::onEvent(const Event& event)
 
 V2 Application::toViewportPosition(const V2& xy) const
 {
-    return V2(_viewport.toViewportX(xy.x(), _surface_size->widthAsFloat()), _viewport.toViewportY(xy.y(), _surface_size->heightAsFloat()));
+    const bool flip = Ark::instance().renderController()->renderEngine()->isViewportFlipped();
+    return {_viewport.toViewportX(xy.x(), _surface_size->widthAsFloat()), _viewport.toViewportY(xy.y(), _surface_size->heightAsFloat(), flip)};
 }
 
 }

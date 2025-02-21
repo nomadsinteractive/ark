@@ -24,14 +24,14 @@ float Viewport::clipFar() const
     return _clip_far;
 }
 
-float Viewport::toViewportX(float screenX, float surfaceWidth) const
+float Viewport::toViewportX(const float screenX, const float surfaceWidth) const
 {
     return Math::lerp(left(), right(), screenX / surfaceWidth);
 }
 
-float Viewport::toViewportY(float screenY, float surfaceHeight) const
+float Viewport::toViewportY(const float screenY, const float surfaceHeight, const bool flip) const
 {
-    return Math::lerp(top(), bottom(), screenY / surfaceHeight);
+    return flip ? Math::lerp(bottom(), top(), screenY / surfaceHeight) : Math::lerp(top(), bottom(), screenY / surfaceHeight);
 }
 
 }

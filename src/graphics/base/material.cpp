@@ -26,7 +26,7 @@ sp<Builder<Bitmap>> makeBitmapBuilder(BeanFactory& beanFactory, const document& 
 
 }
 
-Material::Material(int32_t id, String name, bitmap baseColor, bitmap normal, bitmap roughness, bitmap metallic, bitmap specular)
+Material::Material(const uint32_t id, String name, bitmap baseColor, bitmap normal, bitmap roughness, bitmap metallic, bitmap specular)
     : _id(id), _name(std::move(name))
 {
     _textures[MaterialTexture::TYPE_BASE_COLOR] = sp<MaterialTexture>::make(nullptr, std::move(baseColor));
@@ -37,9 +37,14 @@ Material::Material(int32_t id, String name, bitmap baseColor, bitmap normal, bit
     _textures[MaterialTexture::TYPE_EMISSION] = sp<MaterialTexture>::make();
 }
 
-int32_t Material::id() const
+uint32_t Material::id() const
 {
     return _id;
+}
+
+void Material::setId(const uint32_t id)
+{
+    _id = id;
 }
 
 const String& Material::name() const

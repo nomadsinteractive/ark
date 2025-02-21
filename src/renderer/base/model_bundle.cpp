@@ -14,11 +14,12 @@
 #include "renderer/impl/render_command_composer/rcc_multi_draw_elements_indirect.h"
 
 #include "app/base/application_context.h"
+#include "graphics/base/material.h"
 
 namespace ark {
 
-ModelBundle::ModelBundle(sp<MaterialBundle> materialBundle, sp<Importer> importer)
-    : ModelLoader(Enum::RENDER_MODE_TRIANGLES, nullptr), _stub(sp<Stub>::make(std::move(materialBundle), std::move(importer)))
+ModelBundle::ModelBundle(sp<Importer> importer, sp<MaterialBundle> materialBundle)
+    : ModelLoader(Enum::RENDER_MODE_TRIANGLES, nullptr), _stub(sp<Stub>::make(std::move(importer), std::move(materialBundle)))
 {
 }
 
@@ -34,12 +35,17 @@ void ModelBundle::import(BeanFactory& factory, const document& manifest, const S
 
 sp<RenderCommandComposer> ModelBundle::makeRenderCommandComposer(const Shader& /*shader*/)
 {
-    return sp<RCCMultiDrawElementsIndirect>::make(sp<ModelBundle>::make(_stub));
+    return sp<RenderCommandComposer>::make<RCCMultiDrawElementsIndirect>(sp<ModelBundle>::make(_stub));
 }
 
 const ModelBundle::ModelLayout& ModelBundle::ensureModelLayout(int32_t type) const
 {
     return _stub->ensureModelLayout(type);
+}
+
+const sp<MaterialBundle>& ModelBundle::materialBundle() const
+{
+    return _stub->_material_bundle;
 }
 
 sp<Model> ModelBundle::getModel(const NamedHash& type) const
@@ -65,6 +71,20 @@ void ModelBundle::importModel(const NamedHash& type, const Manifest& manifest, s
     applicationContext.executorThreadPool()->execute(std::move(task));
 }
 
+void ModelBundle::importMaterials(const NamedHash& type, const String& manifest)
+{
+    importMaterials(type, Manifest(manifest));
+}
+
+void ModelBundle::importMaterials(const NamedHash& type, const Manifest& manifest)
+{
+    sp<Model> model = _stub->importModel(manifest, nullptr);
+    for(const sp<Material>& i : model->materials())
+        _stub->_material_bundle->addMaterial(i->name(), i);
+    if(type)
+        _stub->addModel(type.hash(), std::move(model));
+}
+
 const Table<int32_t, ModelBundle::ModelLayout>& ModelBundle::modelLayouts() const
 {
     return _stub->_model_layouts;
@@ -84,7 +104,7 @@ void ModelBundle::Stub::import(BeanFactory& factory, const document& manifest, c
 {
     for(const document& i : manifest->children("model"))
     {
-        int32_t type = Documents::ensureAttribute<int32_t>(i, constants::TYPE);
+        const int32_t type = Documents::ensureAttribute<int32_t>(i, constants::TYPE);
         const String importer = Documents::getAttribute(i, "importer");
         const Manifest manifest(Documents::getAttribute(i, constants::SRC, ""), i);
         addModel(type, importModel(manifest, importer ? factory.build<Importer>(importer, args) : nullptr));
@@ -96,7 +116,7 @@ sp<Model> ModelBundle::Stub::importModel(const Manifest& manifest, const sp<Impo
     return sp<Model>::make((importer ? importer : _importer)->import(manifest, _material_bundle));
 }
 
-ModelBundle::ModelLayout& ModelBundle::Stub::addModel(int32_t type, sp<Model> model)
+ModelBundle::ModelLayout& ModelBundle::Stub::addModel(const int32_t type, sp<Model> model)
 {
     CHECK(_model_layouts.find(type) == _model_layouts.end(), "Model[%d] exists already", type);
     ModelLayout& modelLayout = _model_layouts[type];
@@ -134,13 +154,13 @@ ModelBundle::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 
 sp<ModelBundle> ModelBundle::BUILDER::build(const Scope& args)
 {
-    sp<ModelBundle> modelBundle = sp<ModelBundle>::make(_material_bundle.build(args), _importer->build(args));
+    sp<ModelBundle> modelBundle = sp<ModelBundle>::make(_importer->build(args), _material_bundle.build(args));
     modelBundle->import(_bean_factory, _manifest, args);
     return modelBundle;
 }
 
-ModelBundle::Stub::Stub(sp<MaterialBundle> materialBundle, sp<ModelLoader::Importer> importer)
-    : _material_bundle(materialBundle ? std::move(materialBundle) : sp<MaterialBundle>::make()), _importer(std::move(importer)), _vertex_length(0), _index_length(0)
+ModelBundle::Stub::Stub(sp<ModelLoader::Importer> importer, sp<MaterialBundle> materialBundle)
+    : _importer(std::move(importer)), _material_bundle(materialBundle ? std::move(materialBundle) : sp<MaterialBundle>::make()), _vertex_length(0), _index_length(0)
 {
 }
 

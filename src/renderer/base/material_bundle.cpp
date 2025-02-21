@@ -87,7 +87,16 @@ sp<Material> MaterialBundle::getMaterial(const String& name) const
 
 void MaterialBundle::addMaterial(String name, sp<Material> material)
 {
-    _materials.push_back(std::move(name), std::move(material));
+    if(const auto iter = _materials.find(name); iter == _materials.end())
+    {
+        material->setId(_materials.size());
+        _materials.push_back(std::move(name), std::move(material));
+    }
+    else
+    {
+        material->setId(iter->second->id());
+        iter->second = std::move(material);
+    }
 }
 
 sp<Material> MaterialBundle::addMaterial(String name)

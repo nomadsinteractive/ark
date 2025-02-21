@@ -13,7 +13,7 @@ public:
     float clipFar() const;
 
     float toViewportX(float screenX, float surfaceWidth) const;
-    float toViewportY(float screenY, float surfaceHeight) const;
+    float toViewportY(float screenY, float surfaceHeight, bool flip = false) const;
 
 private:
     float _clip_near;

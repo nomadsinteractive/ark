@@ -13,10 +13,12 @@ namespace ark {
 
 class ARK_API Material {
 public:
-    Material(int32_t id, String name, bitmap baseColor = nullptr, bitmap normal = nullptr, bitmap roughness = nullptr, bitmap metallic = nullptr, bitmap specular = nullptr);
+    Material(uint32_t id, String name, bitmap baseColor = nullptr, bitmap normal = nullptr, bitmap roughness = nullptr, bitmap metallic = nullptr, bitmap specular = nullptr);
 
 //  [[script::bindings::property]]
-    int32_t id() const;
+    uint32_t id() const;
+//  [[script::bindings::property]]
+    void setId(uint32_t id);
 //  [[script::bindings::property]]
     const String& name() const;
 
@@ -52,7 +54,7 @@ public:
     };
 
 private:
-    int32_t _id;
+    uint32_t _id;
     String _name;
     sp<MaterialTexture> _textures[MaterialTexture::TYPE_LENGTH];
 };

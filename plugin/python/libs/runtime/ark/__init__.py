@@ -1500,6 +1500,10 @@ class MaterialBundle:
 class ModelBundle:
 
     @property
+    def material_bundle(self) -> MaterialBundle:
+        pass
+
+    @property
     def index_length(self) -> int:
         return 0
 
@@ -1508,6 +1512,9 @@ class ModelBundle:
         return 0
 
     def get_model(self, t: TYPE_NAMED_HASH) -> Model:
+        pass
+
+    def import_materials(self, t: TYPE_NAMED_HASH, manifest: str | Manifest):
         pass
 
     def import_model(self, t: TYPE_NAMED_HASH, manifest: str | Manifest, future: Optional[Future] = None):

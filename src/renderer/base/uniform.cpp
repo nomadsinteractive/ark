@@ -105,10 +105,10 @@ static Optional<Uniform::Type> vecToUniformType(const String& declaredType, cons
 
 Uniform::Type Uniform::toType(const String& declaredType)
 {
-    if(declaredType == "int")
-        return TYPE_I1;
     if(declaredType == "float")
         return TYPE_F1;
+    if(declaredType == "int" || declaredType == "uint")
+        return TYPE_I1;
     if(const Optional<Type> typeOpt = vecToUniformType(declaredType, "vec", TYPE_F1))
         return typeOpt.value();
     if(const Optional<Type> typeOpt = vecToUniformType(declaredType, "ivec", TYPE_I1))

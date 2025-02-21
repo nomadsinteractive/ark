@@ -86,7 +86,7 @@ V2 RenderEngine::toNDC(const float viewportX, const float viewportY) const
     const Viewport& viewport = _render_context->viewport();
     const float ndcx = viewportX * 2.0f / viewport.width() - 1.0f;
     const float ndcy = viewportY * 2.0f / viewport.height() - 1.0f;
-    return {ndcx, ndcy};
+    return {ndcx, isViewportFlipped() ? -ndcy : ndcy};
 }
 
 void RenderEngine::onSurfaceCreated()
