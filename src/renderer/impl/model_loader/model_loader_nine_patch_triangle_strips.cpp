@@ -5,6 +5,7 @@
 #include "renderer/base/atlas.h"
 #include "renderer/base/model.h"
 #include "renderer/base/pipeline_descriptor.h"
+#include "renderer/base/shader.h"
 #include "renderer/impl/render_command_composer/rcc_draw_elements.h"
 #include "renderer/util/render_util.h"
 

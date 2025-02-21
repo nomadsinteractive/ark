@@ -6,6 +6,7 @@
 #include "renderer/base/model.h"
 #include "renderer/base/pipeline_descriptor.h"
 #include "renderer/base/render_controller.h"
+#include "renderer/base/shader.h"
 #include "renderer/impl/render_command_composer/rcc_draw_elements_incremental.h"
 #include "renderer/util/render_util.h"
 

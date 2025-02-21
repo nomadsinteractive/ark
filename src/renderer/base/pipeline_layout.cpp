@@ -3,6 +3,7 @@
 #include "renderer/base/pipeline_building_context.h"
 #include "renderer/base/render_engine_context.h"
 #include "renderer/base/shader_preprocessor.h"
+#include "renderer/base/shader.h"
 #include "renderer/base/snippet_delegate.h"
 #include "renderer/impl/snippet/snippet_draw_compute.h"
 #include "renderer/impl/snippet/snippet_linked_chain.h"

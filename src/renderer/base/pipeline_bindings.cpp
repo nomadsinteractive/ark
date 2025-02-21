@@ -6,6 +6,7 @@
 #include "renderer/base/render_controller.h"
 #include "renderer/impl/snippet/snippet_linked_chain.h"
 #include "renderer/inf/pipeline.h"
+#include "renderer/inf/pipeline_factory.h"
 
 namespace ark {
 
