@@ -387,10 +387,11 @@ void ColliderBullet::myInternalTickCallback(btDynamicsWorld* dynamicsWorld, btSc
 {
     btDispatcher* dispatcher = dynamicsWorld->getDispatcher();
     const int32_t numManifolds = dispatcher->getNumManifolds();
+    btPersistentManifold** manifolds = dispatcher->getInternalManifoldPointer();
     ColliderBullet* self = static_cast<ColliderBullet*>(dynamicsWorld->getWorldUserInfo());
     for(int32_t i = 0; i < numManifolds; ++i)
     {
-        if(const btPersistentManifold* contactManifold = dispatcher->getManifoldByIndexInternal(i); contactManifold->getNumContacts() > 0)
+        if(const btPersistentManifold* contactManifold = manifolds[i]; contactManifold->getNumContacts() > 0)
         {
             const RigidbodyBullet& objA = getRigidBodyFromCollisionObject(contactManifold->getBody0());
             const RigidbodyBullet& objB = getRigidBodyFromCollisionObject(contactManifold->getBody1());
