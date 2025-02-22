@@ -74,8 +74,8 @@ private:
     struct Stub;
 
     struct ContactInfo {
-        std::set<sp<BtRigidbodyRef>> _last_tick;
-        std::set<sp<BtRigidbodyRef>> _current_tick;
+        Set<sp<BtRigidbodyRef>> _last_tick;
+        Set<sp<BtRigidbodyRef>> _current_tick;
     };
 
     static void myInternalPreTickCallback(btDynamicsWorld *dynamicsWorld, btScalar timeStep);
@@ -85,7 +85,7 @@ private:
 
 private:
     sp<Stub> _stub;
-    std::map<sp<BtRigidbodyRef>, ContactInfo> _contact_infos;
+    Map<sp<BtRigidbodyRef>, ContactInfo> _contact_infos;
 };
 
 }

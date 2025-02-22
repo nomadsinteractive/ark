@@ -4,7 +4,6 @@
 #include "core/base/manifest.h"
 #include "core/collection/table.h"
 #include "core/inf/builder.h"
-#include "core/inf/runnable.h"
 #include "core/types/shared_ptr.h"
 
 #include "renderer/base/model.h"
@@ -34,56 +33,10 @@ public:
         size_t _vertex_offset;
         size_t _index_offset;
 
-        std::vector<MeshLayout> _mesh_layouts;
-        std::vector<NodeLayout> _node_layouts;
+        Vector<MeshLayout> _mesh_layouts;
+        Vector<NodeLayout> _node_layouts;
     };
-
-private:
-    struct Stub {
-        Stub(sp<Importer> importer, sp<MaterialBundle> materialBundle);
-
-        void import(BeanFactory& factory, const document& manifest, const Scope& args);
-
-        sp<Model> importModel(const Manifest& manifest, const sp<Importer>& importer);
-        ModelLayout& addModel(int32_t type, sp<Model> model);
-        const ModelLayout& ensureModelLayout(int32_t type) const;
-
-        sp<Importer> _importer;
-        sp<MaterialBundle> _material_bundle;
-
-        Table<int32_t, ModelLayout> _model_layouts;
-        size_t _vertex_length;
-        size_t _index_length;
-    };
-
-    class AddModuleRunnable : public Runnable {
-    public:
-        AddModuleRunnable(int32_t type, sp<Stub> stub, sp<Model> model, sp<Future> future);
-
-        void run() override;
-
-    private:
-        int32_t _type;
-        sp<Stub> _stub;
-        sp<Model> _model;
-        sp<Future> _future;
-
-    };
-
-    class ImportModuleRunnable : public Runnable {
-    public:
-        ImportModuleRunnable(int32_t type, Manifest manifest, const sp<Stub>& stub, sp<Importer> importer, sp<Executor> executor, sp<Future> future);
-
-        void run() override;
-
-    private:
-        int32_t _type;
-        Manifest _manifest;
-        sp<Stub> _stub;
-        sp<Importer> _importer;
-        sp<Executor> _executor;
-        sp<Future> _future;
-    };
+    struct Stub;
 
 public:
     ModelBundle(sp<Importer> importer, sp<MaterialBundle> materialBundle = nullptr);
@@ -139,7 +92,7 @@ public:
     public:
         MODEL_LOADER_BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<ModelLoader> build(const Scope& args) override;
+        sp<ModelLoader> build(const Scope& args) override;
 
     private:
         BUILDER _impl;
@@ -147,7 +100,6 @@ public:
 
 private:
     sp<Stub> _stub;
-
 };
 
 }
