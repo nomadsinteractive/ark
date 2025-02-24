@@ -8,7 +8,7 @@ namespace ark {
 
 class UploaderInt32 {
 public:
-//  [[plugin::builder::by-value("int32")]]
+//  [[plugin::builder::by-value("int")]]
     class BUILDER final : public Builder<Uploader> {
     public:
         BUILDER(BeanFactory& factory, const String& value);

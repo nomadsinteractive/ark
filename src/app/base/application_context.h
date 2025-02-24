@@ -79,8 +79,8 @@ public:
         _render_controller->deferUnref(Box(std::move(inst)));
     }
 
-    template<typename T> sp<Variable<T>> synchronize(const sp<Variable<T>>& delegate, const sp<Boolean>& disposed = nullptr) const {
-        return _render_controller->synchronize<T>(delegate, disposed);
+    template<typename T> sp<Variable<T>> synchronize(sp<Variable<T>> delegate, sp<Boolean> discarded = nullptr) const {
+        return _render_controller->synchronize<T>(std::move(delegate), std::move(discarded));
     }
 
 private:

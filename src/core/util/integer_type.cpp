@@ -25,7 +25,7 @@ namespace {
 
 class IntegerSubscribed final : public Integer, Implements<IntegerSubscribed, Integer> {
 public:
-    IntegerSubscribed(std::vector<sp<Integer>> values, sp<Integer> index)
+    IntegerSubscribed(Vector<sp<Integer>> values, sp<Integer> index)
         : _values(std::move(values)), _index(std::move(index)) {
         CHECK(!_values.empty(), "IntegerVector should have at least one component");
         updateSubscription();
@@ -42,7 +42,7 @@ public:
         return _subscribed->val();
     }
 
-    const std::vector<sp<Integer>>& values() const {
+    const Vector<sp<Integer>>& values() const {
         return _values;
     }
 
@@ -54,7 +54,7 @@ private:
     }
 
 private:
-    std::vector<sp<Integer>> _values;
+    Vector<sp<Integer>> _values;
     sp<Integer> _index;
     sp<Integer> _subscribed;
 };
@@ -245,7 +245,7 @@ int32_t IntegerType::toRepeat(const String& repeat)
     return static_cast<Repeat>(action | flags);
 }
 
-sp<Integer> IntegerType::repeat(std::vector<int32_t> array, IntegerType::Repeat repeat, sp<Observer> observer)
+sp<Integer> IntegerType::repeat(Vector<int32_t> array, IntegerType::Repeat repeat, sp<Observer> observer)
 {
     return sp<Integer>::make<IntegerByArray>(sp<IntArray>::make<IntArray::Vector>(std::move(array)), repeat, std::move(observer));
 }

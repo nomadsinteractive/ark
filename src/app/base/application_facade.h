@@ -53,7 +53,7 @@ public:
     sp<MessageLoop> makeMessageLoop(const sp<Clock>& clock);
 
 //  [[script::bindings::property]]
-    const std::vector<String>& argv() const;
+    const Vector<String>& argv() const;
 
 //  [[script::bindings::auto]]
     void addPreRenderTask(sp<Runnable> task, sp<Boolean> cancelled);
@@ -70,7 +70,7 @@ public:
 //  [[script::bindings::auto]]
     void post(sp<Runnable> task, float delays, sp<Boolean> canceled = nullptr);
 //  [[script::bindings::auto]]
-    void post(sp<Runnable> task, const std::vector<float>& delays, const sp<Boolean>& canceled = nullptr);
+    void post(sp<Runnable> task, const Vector<float>& delays, const sp<Boolean>& canceled = nullptr);
 //  [[script::bindings::auto]]
     void schedule(sp<Runnable> task, float interval, sp<Boolean> canceled = nullptr);
 
@@ -82,18 +82,10 @@ public:
 //  [[script::bindings::auto]]
     sp<String> getString(const String& resid, const sp<String>& defValue = nullptr);
 //  [[script::bindings::auto]]
-    std::vector<String> getStringArray(const String& resid);
+    Vector<String> getStringArray(const String& resid);
 
 //  [[script::bindings::auto]]
     sp<Runnable> defer(const sp<Runnable>& task) const;
-//  [[script::bindings::auto]]
-    sp<Numeric> synchronize(const sp<Numeric>& value) const;
-//  [[script::bindings::auto]]
-    sp<Vec2> synchronize(const sp<Vec2>& value) const;
-//  [[script::bindings::auto]]
-    sp<Vec3> synchronize(const sp<Vec3>& value) const;
-//  [[script::bindings::auto]]
-    sp<Vec4> synchronize(const sp<Vec4>& value) const;
 
 //  [[script::bindings::property]]
     const Color& backgroundColor() const;

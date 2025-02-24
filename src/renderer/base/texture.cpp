@@ -37,6 +37,27 @@ private:
     Bitmap _bitmap;
 };
 
+uint32_t toBitFormat(const StringView str, const uint32_t bitsOffset)
+{
+    DASSERT(str.length() >= bitsOffset);
+    if(str.length() == bitsOffset)
+        return Texture::FORMAT_32_BIT;
+
+    switch(const int32_t bits = std::strtol(str.data() + bitsOffset, nullptr, 10); bits)
+    {
+        case 8:
+            return Texture::FORMAT_8_BIT;
+        case 16:
+            return Texture::FORMAT_16_BIT;
+        case 32:
+            return Texture::FORMAT_32_BIT;
+        default:
+            FATAL("Unknow texture component type: %s", str.data());
+        break;
+    }
+    return 0;
+}
+
 }
 
 Texture::Texture(sp<Delegate> delegate, sp<Size> size, sp<Texture::Uploader> uploader, sp<Parameters> parameters)
@@ -138,7 +159,7 @@ template<> ARK_API Texture::Type StringConvert::eval<Texture::Type>(const String
 
 template<> ARK_API Texture::Format StringConvert::eval<Texture::Format>(const String& str)
 {
-    constexpr BitSet<Texture::Format>::LookupTable<11> formats = {{
+    constexpr BitSet<Texture::Format>::LookupTable<10> formats = {{
             {"r", Texture::FORMAT_R},
             {"rg", Texture::FORMAT_RG},
             {"rgb", Texture::FORMAT_RGB},
@@ -146,13 +167,27 @@ template<> ARK_API Texture::Format StringConvert::eval<Texture::Format>(const St
             {"signed", Texture::FORMAT_SIGNED},
             {"normalized", Texture::FORMAT_NORMALIZED},
             {"integer", Texture::FORMAT_INTEGER},
-            {"float", Texture::FORMAT_FLOAT},
             {"8bit", Texture::FORMAT_8_BIT},
             {"16bit", Texture::FORMAT_16_BIT},
             {"32bit", Texture::FORMAT_32_BIT}
         }};
     if(str)
-        return static_cast<Texture::Format>(BitSet<Texture::Format>::toBitSet(str, formats).bits());
+    {
+        uint32_t format = 0;
+        for(const String& i : str.split('|'))
+            if(const Texture::Format f = Enum::lookup<StringView, Texture::Format, 10>(formats, i, Texture::FORMAT_AUTO); f == Texture::FORMAT_AUTO)
+            {
+                if(i.startsWith("int"))
+                    format |= Texture::FORMAT_INTEGER | Texture::FORMAT_SIGNED | toBitFormat(i, 3);
+                else if(i.startsWith("uint"))
+                    format |= Texture::FORMAT_INTEGER | toBitFormat(i, 4);
+                else if(i.startsWith("float"))
+                    format |= Texture::FORMAT_FLOAT | toBitFormat(i, 5);
+            }
+            else
+                format |= static_cast<uint32_t>(f);
+        return static_cast<Texture::Format>(format);
+    }
     return Texture::FORMAT_AUTO;
 }
 

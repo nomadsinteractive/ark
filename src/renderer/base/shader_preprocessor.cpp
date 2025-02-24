@@ -17,7 +17,7 @@
 #define STD_TYPE_PATTERN        "int|uint8|float|[bi]?vec[234]|mat3|mat4"
 #define ATTRIBUTE_PATTERN       "\\s+(" STD_TYPE_PATTERN ")\\s+" "(?:a_|v_)(\\w+)" ARRAY_PATTERN ";"
 #define UNIFORM_PATTERN         "(\\w+)\\s+" "(\\w+)" ARRAY_PATTERN ";"
-#define LAYOUT_PATTERN          R"--(layout\((?:std140|binding\s*=\s*(\d+)|r\d+[uif]*|location=\d+|[\s,])+\)\s+)--"
+#define LAYOUT_PATTERN          R"--(layout\((?:std140|binding\s*=\s*(\d+)|[rgba]+\d+[uif]*|location=\d+|[\s,])+\)\s+)--"
 #define ACCESSIBILITY_PATTERN   "(?:(?:read|write)only\\s+)?"
 
 #define INDENT_STR "    "

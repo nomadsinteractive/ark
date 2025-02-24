@@ -28,7 +28,7 @@ struct UpdatableExpecting final : Updatable {
         : _condition(std::move(condition)), _future(std::move(future)) {
     }
 
-    bool update(uint64_t timestamp) override {
+    bool update(const uint64_t timestamp) override {
         const bool dirty = _condition->update(timestamp);
         if(_condition->val())
             _future->done();
@@ -40,11 +40,11 @@ struct UpdatableExpecting final : Updatable {
 };
 
 struct FragCoordRevert final : Vec2 {
-    FragCoordRevert(sp<Vec2> xy, float height)
+    FragCoordRevert(sp<Vec2> xy, const float height)
         : _xy(std::move(xy)), _height(height) {
     }
 
-    bool update(uint64_t timestamp) override
+    bool update(const uint64_t timestamp) override
     {
         return UpdatableUtil::update(timestamp, _xy);
     }
@@ -189,7 +189,7 @@ sp<MessageLoop> ApplicationFacade::makeMessageLoop(const sp<Clock>& clock)
     return _context->makeMessageLoop(clock);
 }
 
-const std::vector<String>& ApplicationFacade::argv() const
+const Vector<String>& ApplicationFacade::argv() const
 {
     return _context->argv();
 }
@@ -224,7 +224,7 @@ void ApplicationFacade::post(sp<Runnable> task, float delay, sp<Boolean> cancele
     _context->messageLoopApp()->post(std::move(task), delay, std::move(canceled));
 }
 
-void ApplicationFacade::post(sp<Runnable> task, const std::vector<float>& delays, const sp<Boolean>& canceled)
+void ApplicationFacade::post(sp<Runnable> task, const Vector<float>& delays, const sp<Boolean>& canceled)
 {
     for(float i : delays)
         post(task, i, canceled);
@@ -253,7 +253,7 @@ sp<String> ApplicationFacade::getString(const String& resid,  const sp<String>& 
     return val ? val : defValue;
 }
 
-std::vector<String> ApplicationFacade::getStringArray(const String& resid)
+Vector<String> ApplicationFacade::getStringArray(const String& resid)
 {
     return _context->getStringArray(resid);
 }
@@ -261,26 +261,6 @@ std::vector<String> ApplicationFacade::getStringArray(const String& resid)
 sp<Runnable> ApplicationFacade::defer(const sp<Runnable>& task) const
 {
     return _context->defer(task);
-}
-
-sp<Numeric> ApplicationFacade::synchronize(const sp<Numeric>& value) const
-{
-    return _context->synchronize(value);
-}
-
-sp<Vec2> ApplicationFacade::synchronize(const sp<Vec2>& value) const
-{
-    return _context->synchronize(value);
-}
-
-sp<Vec3> ApplicationFacade::synchronize(const sp<Vec3>& value) const
-{
-    return _context->synchronize(value);
-}
-
-sp<Vec4> ApplicationFacade::synchronize(const sp<Vec4>& value) const
-{
-    return _context->synchronize(value);
 }
 
 const Color& ApplicationFacade::backgroundColor() const

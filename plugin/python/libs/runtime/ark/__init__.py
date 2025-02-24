@@ -9,6 +9,7 @@ Use it for:
 3. Unit test(maybe)
 
 """
+from turtle import Shape
 from typing import Callable, List, Type, TypeVar, Union, Optional, Dict, Tuple, Any, Self
 
 _BUILDABLE_TYPES = TypeVar('_BUILDABLE_TYPES', 'Arena', 'AudioPlayer', 'Boolean', 'Characters', 'Collider', 'Integer', 'ModelLoader', 'Numeric', 'NarrowPhrase',
@@ -1088,20 +1089,20 @@ class Vec2(_Var):
     def transform(self, transform):
         return self._x, self._y
 
-    def integral(self, t: Optional[Numeric] = None) -> 'Vec2':
+    def integral(self, t: Optional[Numeric] = None) -> Self:
         pass
 
-    def wrap(self) -> 'Vec2':
-        return Vec2(self._x, self._y)
+    def wrap(self) -> Self:
+        return self
 
-    def synchronize(self, disposed: Optional[Boolean] = None) -> 'Vec2':
-        return Vec2(self._x, self._y)
+    def synchronize(self, discarded: Optional[Boolean] = None) -> Self:
+        return self
 
-    def attract(self, s0: Union[tuple, 'Vec2'], duration: float, t: Optional[Numeric] = None) -> 'Vec2':
-        pass
+    def attract(self, s0: Union[tuple, 'Vec2'], duration: float, t: Optional[Numeric] = None) -> Self:
+        return self
 
-    def fence(self, plane: Union['Vec3', tuple], observer: Union[Observer, Callable[[], None]]) -> 'Vec2':
-        return Vec2(self._x, self._y)
+    def fence(self, plane: Union['Vec3', tuple], observer: Union[Observer, Callable[[], None]]) -> Self:
+        return self
 
     def atan2(self) -> Numeric:
         pass
@@ -1566,6 +1567,12 @@ class LevelObject:
 
     @property
     def rigidbody(self) -> "Rigidbody":
+        pass
+
+    def create_render_object(self) -> "RenderObject":
+        pass
+
+    def create_rigidbody(self, collider: "Collider", body_type: int, shapes: dict[str, Shape], collision_filter: "CollisionFilter") -> "Rigidbody":
         pass
 
 

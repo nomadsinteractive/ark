@@ -104,7 +104,7 @@ public:
     {
     }
 
-    bool update(uint64_t timestamp) override
+    bool update(const uint64_t timestamp) override
     {
         return UpdatableUtil::update(timestamp, _view_projecttion_inverse, _screen_position);
     }

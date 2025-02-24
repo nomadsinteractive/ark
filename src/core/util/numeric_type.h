@@ -99,7 +99,7 @@ public:
 //  [[script::bindings::classmethod]]
     static sp<Numeric> wrap(sp<Numeric> self);
 //  [[script::bindings::classmethod]]
-    static sp<Numeric> synchronize(const sp<Numeric>& self, const sp<Boolean>& disposed = nullptr);
+    static sp<Numeric> synchronize(sp<Numeric> self, sp<Boolean> discarded = nullptr);
 
 //  [[script::bindings::classmethod]]
     static sp<Numeric> atLeast(sp<Numeric> self, sp<Numeric> a1, sp<Observer> observer = nullptr);

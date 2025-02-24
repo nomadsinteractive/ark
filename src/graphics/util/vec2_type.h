@@ -101,7 +101,7 @@ public:
 //  [[script::bindings::classmethod]]
     static sp<Vec2> wrap(sp<Vec2> self);
 //  [[script::bindings::classmethod]]
-    static sp<Vec2> synchronize(sp<Vec2> self, sp<Boolean> disposed = nullptr);
+    static sp<Vec2> synchronize(sp<Vec2> self, sp<Boolean> discarded = nullptr);
 
 //  [[script::bindings::classmethod]]
     static sp<Vec2> modFloor(sp<Vec2> self, sp<Numeric> mod);

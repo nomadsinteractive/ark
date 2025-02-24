@@ -17,6 +17,8 @@
 #include "renderer/base/varyings.h"
 
 #include "app/view/view.h"
+#include "core/components/with_id.h"
+#include "renderer/base/shader.h"
 
 namespace ark {
 
@@ -163,7 +165,7 @@ void RenderObject::setTransform(sp<Transform> transform)
 
 void RenderObject::setVaryings(sp<Varyings> varyings)
 {
-    _varyings = varyings;
+    _varyings = std::move(varyings);
     _timestamp.markDirty();
 }
 
@@ -287,7 +289,12 @@ void RenderObject::onWire(const WiringContext& context, const Box& self)
         _with_tag = std::move(withTag);
 
     if(const auto layer = context.getComponent<Layer>())
+    {
         layer->addRenderObject(self.as<RenderObject>());
+
+        if(const sp<WithId>& withId = context.getComponent<WithId>(); withId && layer->shader() && layer->shader()->input()->getAttribute("Id"))
+            varyings()->setProperty(constants::ID, sp<Integer>::make<Integer::Const>(withId->id()));
+    }
 }
 
 RenderObject::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

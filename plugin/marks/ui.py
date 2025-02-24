@@ -7,10 +7,9 @@ from marks import pydevd_start, pydevd_stop
 
 
 class QuickBarItem:
-    def __init__(self, text: str, on_click: Callable[[], None], close_main_window: bool = True):
+    def __init__(self, text: str, on_click: Callable[[], None]):
         self._text = text
         self._on_click = on_click
-        self._close_main_window = close_main_window
 
     @property
     def text(self) -> str:
@@ -19,10 +18,6 @@ class QuickBarItem:
     @property
     def on_click(self) -> Callable[[], None]:
         return self._on_click
-
-    @property
-    def close_main_window(self):
-        return self._close_main_window
 
 
 class InputField:
@@ -214,13 +209,11 @@ class MainWindow(BaseWindow):
 
     def _make_quickbar_onclick(self, quick_bar_item: QuickBarItem):
 
-        if quick_bar_item.close_main_window:
-            def onclick():
-                self._mark_studio.close()
-                quick_bar_item.on_click()
-            return onclick
+        def onclick():
+            self._mark_studio.close()
+            quick_bar_item.on_click()
 
-        return quick_bar_item.on_click
+        return onclick
 
 
 class ConsoleWindow(BaseWindow):
@@ -287,11 +280,13 @@ class ConsoleWindow(BaseWindow):
 
         def _callback():
             result = cmd() if callable(cmd) else cmd
-            if result is not None:
-                builder = dear_imgui.WidgetBuilder(self._imgui)
-                builder.separator()
-                builder.add_widget(self._make_tab_panel_widget(ConsoleCommand('', result), tab_panel))
-                sub_tab_panel.reset(builder.make_widget())
+            if result is None:
+                return close_main_window()
+
+            builder = dear_imgui.WidgetBuilder(self._imgui)
+            builder.separator()
+            builder.add_widget(self._make_tab_panel_widget(ConsoleCommand('', result), tab_panel))
+            sub_tab_panel.reset(builder.make_widget())
 
         return _callback
 
@@ -399,3 +394,22 @@ class MarkStudio:
     def make_default_command_items(self):
         return [ConsoleCommand('marks', MarkStudio.CommandDelegate(self, self._properties_window.is_open)),
                 ConsoleCommand('tool_box', MainWindow.ConsoleCommand(self._main_window))]
+
+
+_mark_studio: Optional[MarkStudio] = None
+
+
+def get_mark_studio() -> Optional[MarkStudio]:
+    return _mark_studio
+
+
+def close_main_window():
+    if _mark_studio and not _mark_studio.discarded:
+        return _mark_studio.close()
+
+
+def show_main_window(application_facade: ApplicationFacade, imgui: Renderer, resolution: Vec2, quick_bar_items: Optional[list[QuickBarItem]] = None, console_cmds: Optional[list[ConsoleCommand]] = None):
+    global _mark_studio
+    if not _mark_studio:
+        _mark_studio = MarkStudio(application_facade, imgui, resolution, quick_bar_items)
+        _mark_studio.show(console_cmds)

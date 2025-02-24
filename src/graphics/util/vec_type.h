@@ -230,8 +230,8 @@ public:
         return sp<VariableWrapper<T>>::make(std::move(self));
     }
 
-    static sp<VarType> synchronize(sp<VarType> self, sp<Boolean> disposed) {
-        return Ark::instance().applicationContext()->synchronize(std::move(self), std::move(disposed));
+    static sp<VarType> synchronize(sp<VarType> self, sp<Boolean> discarded) {
+        return Ark::instance().applicationContext()->synchronize(std::move(self), std::move(discarded));
     }
 
     static sp<VarType> floor(sp<VarType> self) {

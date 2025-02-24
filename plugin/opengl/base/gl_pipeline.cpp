@@ -102,10 +102,14 @@ struct GLPipeline::Stub {
             ++ binding;
         }
 
+        const Vector<String>& imageNames = pipelineBindings.shaderLayout()->images().keys();
         const Vector<std::pair<sp<Texture>, ShaderLayout::DescriptorSet>>& images = pipelineBindings.pipelineDescriptor()->images();
         for(size_t i = 0; i < images.size(); ++i)
             if(const sp<Texture>& image = images.at(i).first)
-                bindImage(image, static_cast<uint32_t>(i));
+            {
+                const String& name = imageNames.at(i);
+                bindImage(image, name, static_cast<uint32_t>(i));
+            }
     }
 
     void bindUBO(const RenderLayerSnapshot::UBOSnapshot& uboSnapshot, const sp<ShaderLayout::UBO>& ubo)
@@ -166,16 +170,15 @@ struct GLPipeline::Stub {
         }
     }
 
-    void bindImage(const Texture& texture, uint32_t name)
+    void bindImage(const Texture& texture, const String& name, const uint32_t binding)
     {
-        const char uniformName[16] = {'u', '_', 'I', 'm', 'a', 'g', 'e', static_cast<char>('0' + name)};
-        const GLUniform& uImage = getUniform(uniformName);
+        const GLUniform& uImage = getUniform(name);
         const Texture::Format textureFormat = texture.parameters()->_format;
         const uint32_t channelSize = RenderUtil::getChannelSize(textureFormat);
         const uint32_t componentSize = RenderUtil::getComponentSize(textureFormat);
         const GLenum format = GLUtil::getTextureInternalFormat(Texture::USAGE_AUTO, texture.parameters()->_format, channelSize, componentSize);
-        uImage.setUniform1i(static_cast<GLint>(name));
-        glBindImageTexture(name, static_cast<GLuint>(texture.delegate()->id()), 0, GL_FALSE, 0, GL_READ_WRITE, format);
+        uImage.setUniform1i(static_cast<GLint>(binding));
+        glBindImageTexture(binding, static_cast<GLuint>(texture.delegate()->id()), 0, GL_FALSE, 0, GL_READ_WRITE, format);
     }
 
     void activeTexture(const Texture& texture, const String& name, uint32_t binding)
@@ -190,8 +193,7 @@ struct GLPipeline::Stub {
 
     const GLUniform& getUniform(const String& name)
     {
-        const auto iter = _uniforms.find(name);
-        if(iter != _uniforms.end())
+        if(const auto iter = _uniforms.find(name); iter != _uniforms.end())
             return iter->second;
         _uniforms[name] = getUniformLocation(name);
         return _uniforms[name];

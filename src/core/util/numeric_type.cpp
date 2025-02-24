@@ -232,9 +232,9 @@ sp<Numeric> NumericType::wrap(sp<Numeric> self)
     return sp<Numeric>::make<NumericWrapper>(std::move(self));
 }
 
-sp<Numeric> NumericType::synchronize(const sp<Numeric>& self, const sp<Boolean>& disposed)
+sp<Numeric> NumericType::synchronize(sp<Numeric> self, sp<Boolean> discarded)
 {
-    return Ark::instance().applicationContext()->synchronize(self, disposed);
+    return Ark::instance().applicationContext()->synchronize(std::move(self), std::move(discarded));
 }
 
 sp<Numeric> NumericType::atLeast(sp<Numeric> self, sp<Numeric> a1, sp<Observer> observer)

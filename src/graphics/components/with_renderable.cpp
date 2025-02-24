@@ -6,7 +6,6 @@
 #include "graphics/base/layer_context.h"
 #include "graphics/components/render_object.h"
 #include "graphics/impl/renderable/renderable_with_transform.h"
-#include "graphics/components/with_transform.h"
 #include "graphics/util/mat4_type.h"
 
 #include "renderer/base/model.h"
@@ -27,18 +26,19 @@ void WithRenderable::onWire(const WiringContext& context, const Box& self)
     const sp<Mat4> transform = context.getComponent<Transform>();
     for(const auto& [layer, renderable, renderObject, transformNode] : _manifests)
     {
-        sp<Renderable> r = renderObject ? renderObject.cast<Renderable>() : renderable;
-        const sp<Node> node = model && transformNode ? model->findNode(transformNode) : nullptr;
-        CHECK(!transformNode || node, "Transform node \"%s\" doesn't exist", transformNode.c_str());
-        if(transform)
-            r = sp<Renderable>::make<RenderableWithTransform>(std::move(r), node ? Mat4Type::matmul(transform, node->localMatrix()) : transform);
-        else if(node)
-            r = sp<Renderable>::make<RenderableWithTransform>(std::move(r), sp<Mat4>::make<Mat4::Const>(node->localMatrix()));
         if(renderObject)
-            //TODO: There are some name conventions that we should test the attribute name "id"
-            if(const sp<WithId>& withId = context.getComponent<WithId>(); withId && layer->shader() && layer->shader()->input()->getAttribute("Id"))
-                renderObject->varyings()->setProperty(constants::ID, sp<Integer>::make<Integer::Const>(withId->id()));
-        layer->add(std::move(r), nullptr, discarded);
+            renderObject->onWire(context, self);
+        else
+        {
+            sp<Renderable> r = renderObject ? renderObject.cast<Renderable>() : renderable;
+            const sp<Node> node = model && transformNode ? model->findNode(transformNode) : nullptr;
+            CHECK(!transformNode || node, "Transform node \"%s\" doesn't exist", transformNode.c_str());
+            if(transform)
+                r = sp<Renderable>::make<RenderableWithTransform>(std::move(r), node ? Mat4Type::matmul(transform, node->localMatrix()) : transform);
+            else if(node)
+                r = sp<Renderable>::make<RenderableWithTransform>(std::move(r), sp<Mat4>::make<Mat4::Const>(node->localMatrix()));
+            layer->add(std::move(r), nullptr, discarded);
+        }
     }
 }
 
