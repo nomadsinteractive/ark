@@ -509,6 +509,9 @@ class Buffer:
     USAGE_BIT_DYNAMIC = 1
     USAGE_BIT_HOST_VISIBLE = 2
 
+    def __init__(self, type: int, usage_bits: int, uploader: "Uploader"):
+        pass
+
     @property
     def size(self) -> int:
         return 0
@@ -1589,7 +1592,7 @@ class LevelLayer:
     def get_object(self, name: str) -> Optional[LevelObject]:
         pass
 
-    def create_render_objects(self, layer: "Layer"):
+    def create_render_objects(self, layer: Optional["Layer"] = None):
         pass
 
     def create_rigidbodies(self, collider: "Collider", body_type: int, shapes: dict[str, "Shape"] = None, collision_filter: Optional["CollisionFilter"] = None):
@@ -1730,17 +1733,13 @@ class RenderLayer(Renderer):
         return LayerContext()
 
     def make_layer(self, model_loader: Optional[ModelLoader] = None, position: Optional[Vec3] = None, visible: Optional[Boolean] = None,
-                   disposable: Optional[Boolean] = None) -> 'Layer':
+                   discarded: Optional[Boolean] = None) -> "Layer":
         pass
 
 
 class Layer:
-    TYPE_UNSPECIFIED = 0
-    TYPE_DYNAMIC = 1
-    TYPE_STATIC = 2
-
-    def __init__(self, layer_context: Optional[LayerContext] = None):
-        super().__init__()
+    def __init__(self):
+        pass
 
     @property
     def context(self) -> LayerContext:

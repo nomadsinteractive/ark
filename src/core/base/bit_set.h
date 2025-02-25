@@ -69,13 +69,6 @@ public:
         return flags;
     }
 
-    template<typename... Args> static constexpr BitSet toBitSet(Args&&... bits) {
-        if constexpr(sizeof...(bits) == 0)
-            return {};
-
-        return {toConvertableType(std::forward<Args>(bits)...)};
-    }
-
     template<size_t N> using LookupTable = Enum::LookupTable<StringView, T, N>;
     template<size_t N> static BitSet toBitSet(const String& value, const LookupTable<N>& bitNames) {
         convertable_type bitsets = 0;
@@ -85,13 +78,7 @@ public:
     }
 
 private:
-    template<typename... Args> constexpr static convertable_type toConvertableType(convertable_type value, Args&&... vars) {
-        if constexpr(sizeof...(vars) > 0) {
-            if constexpr(SHIFT)
-                return 1 << value | toConvertableType(std::forward<Args>(vars)...);
-            return value | toConvertableType(std::forward<Args>(vars)...);
-        }
-
+    constexpr static convertable_type toConvertableType(const convertable_type value) {
         if constexpr(SHIFT)
             return 1 << value;
         return value;

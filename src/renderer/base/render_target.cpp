@@ -26,7 +26,7 @@ const sp<Resource>& RenderTarget::resource() const
 
 RenderTarget::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _render_controller(resourceLoaderContext->renderController()), _renderer(factory.ensureBuilder<RenderGroup>(manifest)), _clear_mask(Documents::getAttribute<ClearBitSet>(manifest, "clear-mask", CLEAR_BIT_ALL)),
-      _depth_stencil_usage(Documents::getAttribute<DepthStencilUsage>(manifest, "depth-stencil-usage", DEPTH_STENCIL_USAGE_FOR_OUTPUT))
+      _depth_stencil_op(Documents::getAttribute<DepthStencilOp>(manifest, "depth-stencil-op", {DEPTH_STENCIL_OP_BIT_CLEAR | DEPTH_STENCIL_OP_BIT_STORE}))
 {
     for(const document& i : manifest->children(constants::TEXTURE))
         _attachments.emplace_back(factory.ensureBuilder<Texture>(i), i);
@@ -46,7 +46,7 @@ sp<RenderTarget> RenderTarget::BUILDER::build(const Scope& args)
         {
             CHECK(configure._depth_stencil_attachment == nullptr, "Only one depth-stencil attachment allowed");
             CHECK(usage.has(Texture::USAGE_DEPTH_STENCIL_ATTACHMENT), "Unknow Texture usage: %d", usage);
-            configure._depth_stencil_usage = _depth_stencil_usage;
+            configure._depth_stencil_op = _depth_stencil_op;
             configure._depth_stencil_attachment = std::move(tex);
         }
     }
@@ -76,15 +76,17 @@ template<> ARK_API RenderTarget::ClearBitSet StringConvert::eval<RenderTarget::C
     return RenderTarget::ClearBitSet::toBitSet(str, clearBits);
 }
 
-template<> RenderTarget::DepthStencilUsage StringConvert::eval<RenderTarget::DepthStencilUsage>(const String& str)
+template<> RenderTarget::DepthStencilOp StringConvert::eval<RenderTarget::DepthStencilOp>(const String& str)
 {
-    constexpr RenderTarget::DepthStencilUsage::LookupTable<2> usages = {{
-        {"for_input", RenderTarget::DEPTH_STENCIL_USAGE_FOR_INPUT},
-        {"for_output", RenderTarget::DEPTH_STENCIL_USAGE_FOR_OUTPUT},
+    constexpr RenderTarget::DepthStencilOp::LookupTable<4> opBits = {{
+        {"load", RenderTarget::DEPTH_STENCIL_OP_BIT_LOAD},
+        {"clear", RenderTarget::DEPTH_STENCIL_OP_BIT_CLEAR},
+        {"dont_care", RenderTarget::DEPTH_STENCIL_OP_BIT_DONT_CARE},
+        {"store", RenderTarget::DEPTH_STENCIL_OP_BIT_STORE},
     }};
     if(str)
-        return RenderTarget::DepthStencilUsage::toBitSet(str, usages);
-    return {RenderTarget::DEPTH_STENCIL_USAGE_FOR_OUTPUT};
+        return RenderTarget::DepthStencilOp::toBitSet(str, opBits);
+    return {RenderTarget::DEPTH_STENCIL_OP_BIT_LOAD | RenderTarget::DEPTH_STENCIL_OP_BIT_STORE};
 }
 
 }

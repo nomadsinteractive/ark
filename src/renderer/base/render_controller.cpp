@@ -302,7 +302,7 @@ Buffer RenderController::makeBuffer(Buffer::Type type, Buffer::Usage usage, sp<U
     return buffer;
 }
 
-Buffer RenderController::makeBuffer(Buffer::Type type, Buffer::Usage usage, sp<Uploader> uploader)
+Buffer RenderController::makeBuffer(const Buffer::Type type, const Buffer::Usage usage, sp<Uploader> uploader)
 {
     UploadStrategy us = uploader ? US_ONCE_AND_ON_SURFACE_READY : US_ON_SURFACE_READY;
     if(usage.has(Buffer::USAGE_BIT_DYNAMIC) && uploader)

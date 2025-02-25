@@ -49,37 +49,44 @@ public:
 //  [[script::bindings::auto]]
     sp<Layer> makeLayer(sp<ModelLoader> modelLoader = nullptr, sp<Vec3> position = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> discarded = nullptr) const;
 
-    void dispose();
-
     sp<LayerContext> makeLayerContext(sp<ModelLoader> modelLoader, sp<Vec3> position, sp<Boolean> visible, sp<Boolean> discarded) const;
     sp<LayerContext> addLayerContext(sp<ModelLoader> modelLoader = nullptr, sp<Vec3> position = nullptr, sp<Boolean> visible = nullptr, sp<Boolean> discarded = nullptr) const;
     void addLayerContext(sp<LayerContext> layerContext);
 
     void addRenderBatch(sp<RenderBatch> renderBatch);
 
-//  [[plugin::resource-loader]]
-    class BUILDER : public Builder<RenderLayer> {
+//  [[plugin::builder]]
+    class BUILDER final : public Builder<RenderLayer> {
     public:
-        BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
+        BUILDER(BeanFactory& factory, const document& manifest);
+        BUILDER(BeanFactory& factory, const document& manifest, sp<Builder<ModelLoader>> modelLoader);
 
         sp<RenderLayer> build(const Scope& args) override;
 
     private:
-        sp<ResourceLoaderContext> _resource_loader_context;
-        std::vector<sp<Builder<Layer>>> _layers;
         sp<Builder<ModelLoader>> _model_loader;
         sp<Builder<Shader>> _shader;
         sp<Builder<Varyings>> _varyings;
         SafeBuilder<Boolean> _visible;
         SafeBuilder<Boolean> _discarded;
         SafeBuilder<Vec4> _scissor;
-        bool _post_process;
     };
 
-//  [[plugin::resource-loader("render-layer")]]
-    class RENDERER_BUILDER : public Builder<Renderer> {
+//  [[plugin::builder("render-layer")]]
+    class RENDERER_BUILDER final : public Builder<Renderer> {
     public:
-        RENDERER_BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
+        RENDERER_BUILDER(BeanFactory& factory, const document& manifest);
+
+        sp<Renderer> build(const Scope& args) override;
+
+    private:
+        BUILDER _impl;
+    };
+
+//  [[plugin::builder("post-process")]]
+    class RENDERER_POST_PROCESS final : public Builder<Renderer> {
+    public:
+        RENDERER_POST_PROCESS(BeanFactory& factory, const document& manifest);
 
         sp<Renderer> build(const Scope& args) override;
 
@@ -95,7 +102,7 @@ private:
 
     class RenderBatchImpl;
     sp<RenderBatchImpl> _render_batch;
-    std::vector<sp<RenderBatch>> _render_batches;
+    Vector<sp<RenderBatch>> _render_batches;
 
     friend class Layer;
     friend class RenderLayerSnapshot;

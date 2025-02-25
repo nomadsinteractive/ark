@@ -126,7 +126,7 @@ Optional<SDL_GPUDepthStencilTargetInfo> toDepthStencilTargetInfo(const RenderTar
         nullptr,
         1.0f,
         configure._clear_bits.has(RenderTarget::CLEAR_BIT_DEPTH) ? SDL_GPU_LOADOP_CLEAR : SDL_GPU_LOADOP_LOAD,
-        configure._depth_stencil_usage.has(RenderTarget::DEPTH_STENCIL_USAGE_FOR_OUTPUT) ? SDL_GPU_STOREOP_STORE : SDL_GPU_STOREOP_DONT_CARE,
+        configure._depth_stencil_op.has(RenderTarget::DEPTH_STENCIL_OP_BIT_STORE) ? SDL_GPU_STOREOP_STORE : SDL_GPU_STOREOP_DONT_CARE,
         configure._clear_bits.has(RenderTarget::CLEAR_BIT_STENCIL) ? SDL_GPU_LOADOP_CLEAR : SDL_GPU_LOADOP_DONT_CARE,
         SDL_GPU_STOREOP_DONT_CARE,
     };
@@ -256,7 +256,7 @@ private:
 }
 
 RendererFactorySDL3_GPU::RendererFactorySDL3_GPU()
-    : RendererFactory({RenderingBackendSet::toBitSet(Enum::RENDERING_BACKEND_BIT_DIRECT_X, Enum::RENDERING_BACKEND_BIT_METAL), Ark::COORDINATE_SYSTEM_RHS, false, 16}), _gpu_device(nullptr)
+    : RendererFactory({{Enum::RENDERING_BACKEND_BIT_DIRECT_X | Enum::RENDERING_BACKEND_BIT_METAL}, Ark::COORDINATE_SYSTEM_RHS, false, 16}), _gpu_device(nullptr)
 {
 }
 

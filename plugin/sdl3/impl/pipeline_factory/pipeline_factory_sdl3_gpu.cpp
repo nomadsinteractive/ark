@@ -386,7 +386,7 @@ public:
 
         SDL_BindGPUGraphicsPipeline(renderPass, _pipeline);
 
-        constexpr ShaderStageSet currentStageSets = ShaderStageSet::toBitSet(Enum::SHADER_STAGE_BIT_VERTEX, Enum::SHADER_STAGE_BIT_FRAGMENT);
+        constexpr ShaderStageSet currentStageSets = {Enum::SHADER_STAGE_BIT_VERTEX | Enum::SHADER_STAGE_BIT_FRAGMENT};
         bindUBOSnapshots(sdl3GC._command_buffer, drawingContext._buffer_object->_ubos, drawingContext._bindings->shaderLayout(), currentStageSets);
 
         const SDL_GPUBufferBinding vertexBufferBinding = {reinterpret_cast<SDL_GPUBuffer*>(drawingContext._vertices.id()), 0};

@@ -36,11 +36,11 @@ sp<LevelObject> LevelLayer::getObject(StringView name) const
     return iter != _objects_by_name.end() ? iter->second : nullptr;
 }
 
-void LevelLayer::createRenderObjects(Layer& layer) const
+void LevelLayer::createRenderObjects(const sp<Layer>& layer) const
 {
     for(const sp<LevelObject>& i : _objects)
-        if(const sp<RenderObject>& ro = i->createRenderObject())
-            layer.addRenderObject(ro);
+        if(const sp<RenderObject>& ro = i->createRenderObject(); ro && layer)
+            layer->addRenderObject(ro);
 }
 
 void LevelLayer::createRigidbodies(const sp<Collider>& collider, Rigidbody::BodyType bodyType, const Map<String, sp<Shape>>& shapes, const sp<CollisionFilter>& collisionFilter) const

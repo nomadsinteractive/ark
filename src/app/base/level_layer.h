@@ -24,7 +24,7 @@ public:
     sp<LevelObject> getObject(StringView name) const;
 
 //  [[script::bindings::auto]]
-    void createRenderObjects(Layer& layer) const;
+    void createRenderObjects(const sp<Layer>& layer = nullptr) const;
 //  [[script::bindings::auto]]
     void createRigidbodies(const sp<Collider>& collider, Rigidbody::BodyType bodyType, const Map<String, sp<Shape>>& shapes, const sp<CollisionFilter>& collisionFilter = nullptr) const;
 

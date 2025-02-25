@@ -31,7 +31,6 @@ public:
         USAGE_BIT_DYNAMIC = 1,
         USAGE_BIT_HOST_VISIBLE = 2
     };
-
     typedef BitSet<UsageBit> Usage;
 
     class ARK_API Delegate : public Resource {
@@ -91,10 +90,12 @@ public:
         size_t _stride;
         size_t _size;
 
-        std::vector<Strip> _strips;
+        Vector<Strip> _strips;
     };
 
 public:
+//  [[script::bindings::auto]]
+    Buffer(Buffer::Type type, Buffer::UsageBit usageBits, sp<Uploader> uploader);
     Buffer(sp<Delegate> delegate) noexcept;
     Buffer() noexcept = default;
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Buffer);
@@ -131,7 +132,6 @@ public:
     };
 
 private:
-    sp<RenderController> _render_controller;
     sp<Delegate> _delegate;
 };
 

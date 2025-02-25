@@ -8,10 +8,10 @@ class RenderBatchPostProcess final : public RenderBatch {
 public:
     RenderBatchPostProcess();
 
-    std::vector<sp<LayerContext>>& snapshot(const RenderRequest& renderRequest) override;
+    Vector<sp<LayerContext>>& snapshot(const RenderRequest& renderRequest) override;
 
 private:
-    std::vector<sp<LayerContext>> _contexts;
+    Vector<sp<LayerContext>> _contexts;
     sp<LayerContext> _layer_context;
 };
 

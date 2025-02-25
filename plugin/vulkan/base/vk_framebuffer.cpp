@@ -108,7 +108,7 @@ VKFramebuffer::Stub::Stub(const sp<VKRenderer>& renderer, const sp<Recycler>& re
     if(_configure._clear_bits.has(RenderTarget::CLEAR_BIT_COLOR))
         for(uint32_t i = 0; i < _configure._color_attachments.size(); ++i)
             _clear_values.push_back(clearColor);
-    if(_configure._clear_bits.has(RenderTarget::CLEAR_BIT_DEPTH_STENCIL) && !_configure._depth_stencil_usage.has(RenderTarget::DEPTH_STENCIL_USAGE_FOR_INPUT))
+    if(_configure._clear_bits.has(RenderTarget::CLEAR_BIT_DEPTH_STENCIL) && !_configure._depth_stencil_op.has(RenderTarget::DEPTH_STENCIL_OP_BIT_LOAD))
         _clear_values.push_back(clearDepthStencil);
 
     _render_pass_begin_info.renderArea = _scissor;
@@ -161,8 +161,9 @@ VkRenderPass VKFramebuffer::Stub::acquire(const PipelineDescriptor& bindings)
         attachments.push_back(depthstencilView);
 
         VkAttachmentDescription depthAttachmentDescription = {};
-        const VkAttachmentLoadOp loadOp = _configure._depth_stencil_usage.has(RenderTarget::DEPTH_STENCIL_USAGE_FOR_INPUT) ? VK_ATTACHMENT_LOAD_OP_LOAD : VK_ATTACHMENT_LOAD_OP_CLEAR;
-        const VkAttachmentStoreOp storeOp = _configure._depth_stencil_usage.has(RenderTarget::DEPTH_STENCIL_USAGE_FOR_OUTPUT) ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        const VkAttachmentLoadOp loadOp = !_configure._depth_stencil_op || _configure._depth_stencil_op == RenderTarget::DEPTH_STENCIL_OP_BIT_DONT_CARE ? VK_ATTACHMENT_LOAD_OP_DONT_CARE
+                                          : _configure._depth_stencil_op.has(RenderTarget::DEPTH_STENCIL_OP_BIT_CLEAR) ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
+        const VkAttachmentStoreOp storeOp = _configure._depth_stencil_op.has(RenderTarget::DEPTH_STENCIL_OP_BIT_STORE) ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
         depthAttachmentDescription.format = fbDepthFormat;
         depthAttachmentDescription.samples = VK_SAMPLE_COUNT_1_BIT;
         depthAttachmentDescription.loadOp = loadOp;
@@ -173,7 +174,7 @@ VkRenderPass VKFramebuffer::Stub::acquire(const PipelineDescriptor& bindings)
         depthAttachmentDescription.finalLayout = depthAttachmentDescription.initialLayout;
         attachmentDescriptions.push_back(depthAttachmentDescription);
     }
-    VkAttachmentReference depthReference = { static_cast<uint32_t>(attachmentReferences.size()), _configure._depth_stencil_usage == RenderTarget::DEPTH_STENCIL_USAGE_FOR_INPUT ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL
+    VkAttachmentReference depthReference = { static_cast<uint32_t>(attachmentReferences.size()), _configure._depth_stencil_op == RenderTarget::DEPTH_STENCIL_OP_BIT_LOAD ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL
                                                                                                                                                                                                 : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL };
 
     VkSubpassDescription subpassDescription = {};

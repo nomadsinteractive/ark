@@ -16,7 +16,7 @@ public:
     const sp<Boolean>& discarded() const;
     void setDiscarded(sp<Boolean> discarded);
 
-    virtual std::vector<sp<LayerContext>>& snapshot(const RenderRequest& renderRequest) = 0;
+    virtual Vector<sp<LayerContext>>& snapshot(const RenderRequest& renderRequest) = 0;
 
 protected:
     sp<Boolean> _discarded;

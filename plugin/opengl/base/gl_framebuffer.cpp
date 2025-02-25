@@ -120,9 +120,9 @@ void GLFramebuffer::upload(GraphicsContext& graphicsContext)
         glRenderbufferStorage(GL_RENDERBUFFER, depthInternalformat, depthTexture->width(), depthTexture->height());
         for(const GLenum i : depthInputs)
         {
-            if(_configure._depth_stencil_usage.has(RenderTarget::DEPTH_STENCIL_USAGE_FOR_INPUT))
+            if(_configure._depth_stencil_op != RenderTarget::DEPTH_STENCIL_OP_BIT_DONT_CARE && _configure._depth_stencil_op.has(RenderTarget::DEPTH_STENCIL_OP_BIT_LOAD))
                 glFramebufferRenderbuffer(GL_READ_FRAMEBUFFER, i, GL_RENDERBUFFER, static_cast<GLuint>(renderbuffer->id()));
-            if(_configure._depth_stencil_usage.has(RenderTarget::DEPTH_STENCIL_USAGE_FOR_OUTPUT))
+            if(_configure._depth_stencil_op.has(RenderTarget::DEPTH_STENCIL_OP_BIT_STORE))
                 glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, i, GL_RENDERBUFFER, static_cast<GLuint>(renderbuffer->id()));
         }
     }

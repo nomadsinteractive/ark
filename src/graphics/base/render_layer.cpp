@@ -15,6 +15,7 @@
 #include "renderer/base/shader.h"
 #include "renderer/base/pipeline_bindings.h"
 #include "renderer/impl/model_loader/model_loader_cached.h"
+#include "renderer/impl/model_loader/model_loader_ndc.h"
 #include "renderer/inf/model_loader.h"
 #include "renderer/inf/render_command_composer.h"
 
@@ -23,7 +24,7 @@ namespace ark {
 class RenderLayer::RenderBatchImpl final : public RenderBatch {
 public:
 
-    std::vector<sp<LayerContext>>& snapshot(const RenderRequest& renderRequest) override
+    Vector<sp<LayerContext>>& snapshot(const RenderRequest& renderRequest) override
     {
         return _layer_contexts;
     }
@@ -34,7 +35,7 @@ public:
     }
 
 private:
-    std::vector<sp<LayerContext>> _layer_contexts;
+    Vector<sp<LayerContext>> _layer_contexts;
 };
 
 RenderLayer::Stub::Stub(sp<RenderController> renderController, sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Boolean> visible, sp<Boolean> discarded, sp<Varyings> varyings, sp<Vec4> scissor)
@@ -64,7 +65,7 @@ RenderLayerSnapshot RenderLayer::snapshot(RenderRequest& renderRequest)
     for(auto iter = _render_batches.begin(); iter != _render_batches.end();)
     {
         const sp<RenderBatch>& i = *iter;
-        std::vector<sp<LayerContext>>& layerContexts = i->snapshot(renderRequest);
+        Vector<sp<LayerContext>>& layerContexts = i->snapshot(renderRequest);
         if(i->discarded() ? i->discarded()->val() : i.unique())
         {
             renderLayerSnapshot.addDiscardedLayerContexts(layerContexts);
@@ -124,36 +125,43 @@ void RenderLayer::render(RenderRequest& renderRequest, const V3& position)
     renderRequest.addRenderCommand(snapshot(renderRequest).compose(renderRequest));
 }
 
-RenderLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _resource_loader_context(resourceLoaderContext), _layers(factory.makeBuilderList<Layer>(manifest, constants::LAYER)), _model_loader(factory.ensureBuilder<ModelLoader>(manifest, constants::MODEL_LOADER)),
-      _shader(factory.ensureBuilder<Shader>(manifest, constants::SHADER)), _varyings(factory.getConcreteClassBuilder<Varyings>(manifest, constants::VARYINGS)), _visible(factory.getBuilder<Boolean>(manifest, constants::VISIBLE)),
-      _discarded(factory.getBuilder<Boolean>(manifest, constants::DISCARDED)), _scissor(factory.getBuilder<Vec4>(manifest, "scissor")), _post_process(manifest->getChild("post-process") != nullptr)
+RenderLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+    : BUILDER(factory, manifest, nullptr)
+{
+}
+
+RenderLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, sp<Builder<ModelLoader>> modelLoader)
+    : _model_loader(modelLoader ? std::move(modelLoader) : factory.ensureBuilder<ModelLoader>(manifest, constants::MODEL_LOADER)), _shader(factory.ensureBuilder<Shader>(manifest, constants::SHADER)),
+      _varyings(factory.getConcreteClassBuilder<Varyings>(manifest, constants::VARYINGS)), _visible(factory.getBuilder<Boolean>(manifest, constants::VISIBLE)), _discarded(factory.getBuilder<Boolean>(manifest, constants::DISCARDED)),
+      _scissor(factory.getBuilder<Vec4>(manifest, "scissor"))
 {
 }
 
 sp<RenderLayer> RenderLayer::BUILDER::build(const Scope& args)
 {
-    const sp<RenderLayer> renderLayer = sp<RenderLayer>::make(_resource_loader_context->renderController(), _model_loader->build(args), _shader->build(args), _visible.build(args),
-                                                              _discarded.build(args), _varyings->build(args), _scissor.build(args));
-    for(const sp<Builder<Layer>>& i : _layers)
-    {
-        const sp<Layer> layer = i->build(args);
-        renderLayer->addLayerContext(layer->context());
-    }
-    //TODO: just for now
-    if(_post_process)
-        renderLayer->addRenderBatch(sp<RenderBatch>::make<RenderBatchPostProcess>());
-    return renderLayer;
+    return sp<RenderLayer>::make(Ark::instance().renderController(), _model_loader->build(args), _shader->build(args), _visible.build(args), _discarded.build(args), _varyings->build(args), _scissor.build(args));
 }
 
-RenderLayer::RENDERER_BUILDER::RENDERER_BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _impl(factory, manifest, resourceLoaderContext)
+RenderLayer::RENDERER_BUILDER::RENDERER_BUILDER(BeanFactory& factory, const document& manifest)
+    : _impl(factory, manifest)
 {
 }
 
 sp<Renderer> RenderLayer::RENDERER_BUILDER::build(const Scope& args)
 {
     return _impl.build(args);
+}
+
+RenderLayer::RENDERER_POST_PROCESS::RENDERER_POST_PROCESS(BeanFactory& factory, const document& manifest)
+    : _impl(factory, manifest, sp<Builder<ModelLoader>>::make<Builder<ModelLoader>::Prebuilt>(sp<ModelLoader>::make<ModelLoaderNDC>()))
+{
+}
+
+sp<Renderer> RenderLayer::RENDERER_POST_PROCESS::build(const Scope& args)
+{
+    sp<RenderLayer> renderLayer = _impl.build(args);
+    renderLayer->addRenderBatch(sp<RenderBatch>::make<RenderBatchPostProcess>());
+    return renderLayer;
 }
 
 }

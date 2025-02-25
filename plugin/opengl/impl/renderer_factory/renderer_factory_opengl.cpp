@@ -43,8 +43,10 @@ void setVersion(Enum::RendererVersion version, RenderEngineContext& glContext)
 int32_t toClearMaskBits(const RenderTarget::CreateConfigure& configure)
 {
     RenderTarget::ClearBitSet clearMask = configure._clear_bits;
-    if(configure._depth_stencil_usage.has(RenderTarget::DEPTH_STENCIL_USAGE_FOR_INPUT))
+    if(configure._depth_stencil_op.has(RenderTarget::DEPTH_STENCIL_OP_BIT_LOAD))
         clearMask.set(RenderTarget::CLEAR_BIT_DEPTH_STENCIL, false);
+    else
+        clearMask.set(RenderTarget::CLEAR_BIT_DEPTH_STENCIL, configure._depth_stencil_op.has(RenderTarget::DEPTH_STENCIL_OP_BIT_CLEAR));
     return clearMask.bits();
 }
 

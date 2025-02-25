@@ -14,7 +14,7 @@ namespace {
 
 class InputBufferSnapshot final : public Uploader {
 public:
-    InputBufferSnapshot(size_t size, std::vector<Buffer::Strip> strips)
+    InputBufferSnapshot(const size_t size, Vector<Buffer::Strip> strips)
         : Uploader(size), _blocks(std::move(strips)) {
     }
 
@@ -28,7 +28,7 @@ public:
     }
 
 private:
-    std::vector<std::pair<size_t, ByteArray::Borrowed>> _blocks;
+    Vector<std::pair<size_t, ByteArray::Borrowed>> _blocks;
 };
 
 class RunnableBufferSynchronizer final : public Runnable {
@@ -85,6 +85,11 @@ const sp<Buffer::Delegate>& Buffer::Snapshot::delegate() const
     return _delegate;
 }
 
+Buffer::Buffer(const Type type, const UsageBit usageBits, sp<Uploader> uploader)
+    : _delegate(Ark::instance().renderController()->makeBuffer(type, Usage(usageBits), std::move(uploader))._delegate)
+{
+}
+
 Buffer::Buffer(sp<Buffer::Delegate> delegate) noexcept
     : _delegate(std::move(delegate))
 {
@@ -107,7 +112,7 @@ Buffer::operator bool() const
 
 Buffer::Snapshot Buffer::snapshot(const ByteArray::Borrowed& strip) const
 {
-    return Snapshot(_delegate, strip.length(), sp<InputBufferSnapshot>::make(strip.length(), std::vector<Buffer::Strip>{{0, strip}}));
+    return Snapshot(_delegate, strip.length(), sp<InputBufferSnapshot>::make(strip.length(), Vector<Buffer::Strip>{{0, strip}}));
 }
 
 Buffer::Snapshot Buffer::snapshot(sp<Uploader> input, size_t size) const

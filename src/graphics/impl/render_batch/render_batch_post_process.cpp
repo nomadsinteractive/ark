@@ -24,7 +24,7 @@ RenderBatchPostProcess::RenderBatchPostProcess()
     _contexts.push_back(_layer_context);
 }
 
-std::vector<sp<LayerContext>>& RenderBatchPostProcess::snapshot(const RenderRequest& renderRequest)
+Vector<sp<LayerContext>>& RenderBatchPostProcess::snapshot(const RenderRequest& renderRequest)
 {
     return _contexts;
 }

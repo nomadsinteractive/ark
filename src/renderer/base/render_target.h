@@ -26,17 +26,19 @@ public:
     };
     typedef BitSet<ClearBits> ClearBitSet;
 
-    enum DepthStencilUsageBits {
-        DEPTH_STENCIL_USAGE_FOR_INPUT = 1,
-        DEPTH_STENCIL_USAGE_FOR_OUTPUT = 2
+    enum DepthStencilOpBits {
+        DEPTH_STENCIL_OP_BIT_LOAD = 1,
+        DEPTH_STENCIL_OP_BIT_CLEAR = 2,
+        DEPTH_STENCIL_OP_BIT_DONT_CARE = 3,
+        DEPTH_STENCIL_OP_BIT_STORE = 4
     };
-    typedef BitSet<DepthStencilUsageBits> DepthStencilUsage;
+    typedef BitSet<DepthStencilOpBits> DepthStencilOp;
 
     struct CreateConfigure {
         Vector<sp<Texture>> _color_attachments;
         sp<Texture> _depth_stencil_attachment;
         ClearBitSet _clear_bits;
-        DepthStencilUsage _depth_stencil_usage;
+        DepthStencilOp _depth_stencil_op;
     };
 
     RenderTarget(sp<Renderer> renderer, sp<Resource> resource);
@@ -57,7 +59,7 @@ public:
         sp<Builder<RenderGroup>> _renderer;
         Vector<std::pair<sp<Builder<Texture>>, document>> _attachments;
         ClearBitSet _clear_mask;
-        DepthStencilUsage _depth_stencil_usage;
+        DepthStencilOp _depth_stencil_op;
     };
 
 //  [[plugin::resource-loader("render-target")]]
