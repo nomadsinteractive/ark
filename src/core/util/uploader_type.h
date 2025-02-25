@@ -3,7 +3,6 @@
 #include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/inf/uploader.h"
-#include "core/types/implements.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -39,8 +38,6 @@ public:
     static sp<Uploader> create(Vector<V4> value, size_t size = 0);
 //  [[script::bindings::constructor]]
     static sp<Uploader> create(Vector<uint32_t> value, size_t size = 0);
-//  [[script::bindings::constructor]]
-    static sp<Uploader> create(const std::set<uint32_t>& value, size_t size = 0);
 
 //  [[script::bindings::classmethod]]
     static Vector<uint8_t> toBytes(Uploader& self);
@@ -59,9 +56,9 @@ public:
     static sp<Uploader> repeat(sp<Uploader> self, size_t length, size_t stride = 0);
 
 //  [[script::bindings::classmethod]]
-    static void addInput(const sp<Uploader>& self, size_t offset, sp<Uploader> input);
+    static void put(const sp<Uploader>& self, size_t offset, sp<Uploader> input);
 //  [[script::bindings::classmethod]]
-    static void removeInput(const sp<Uploader>& self, size_t offset);
+    static void remove(const sp<Uploader>& self, size_t offset);
 //  [[script::bindings::classmethod]]
     static void markDirty(const sp<Uploader>& self);
 

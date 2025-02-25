@@ -208,7 +208,7 @@ sp<Camera::Delegate> RendererFactoryBgfx::createCamera(Ark::RendererCoordinateSy
     return rcs == Ark::COORDINATE_SYSTEM_LHS ? sp<Camera::Delegate>::make<Camera::DelegateLH_NO>() :  sp<Camera::Delegate>::make<Camera::DelegateRH_NO>();
 }
 
-sp<RenderTarget> RendererFactoryBgfx::createRenderTarget(sp<Renderer> renderer, RenderTarget::CreateConfigure configure)
+sp<RenderTarget> RendererFactoryBgfx::createRenderTarget(sp<Renderer> renderer, RenderTarget::Configure configure)
 {
     std::vector<::bgfx::TextureHandle> textureHandles;
     ::bgfx::createFrameBuffer(textureHandles.size(), textureHandles.data(), false);

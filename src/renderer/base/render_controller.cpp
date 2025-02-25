@@ -339,7 +339,7 @@ sp<RenderController::PrimitiveIndexBuffer> RenderController::getSharedPrimitiveI
     return pib;
 }
 
-sp<RenderTarget> RenderController::makeRenderTarget(sp<Renderer> renderer, RenderTarget::CreateConfigure configure)
+sp<RenderTarget> RenderController::makeRenderTarget(sp<Renderer> renderer, RenderTarget::Configure configure)
 {
     sp<RenderTarget> renderTarget = renderEngine()->rendererFactory()->createRenderTarget(std::move(renderer), std::move(configure));
     if(renderTarget->resource())

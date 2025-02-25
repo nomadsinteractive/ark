@@ -29,7 +29,7 @@ sp<GLRenderbuffer> ensureRenderBuffer(GraphicsContext& graphicsContext, GLTextur
 
 }
 
-GLFramebuffer::GLFramebuffer(sp<Recycler> recycler, RenderTarget::CreateConfigure configure)
+GLFramebuffer::GLFramebuffer(sp<Recycler> recycler, RenderTarget::Configure configure)
     : _recycler(std::move(recycler)), _configure(std::move(configure)), _id(0)
 {
 }
@@ -56,11 +56,11 @@ void GLFramebuffer::upload(GraphicsContext& graphicsContext)
     Table<uint64_t, GLenum> attachments;
 
     sp<Texture> depthTexture;
-    std::vector<GLenum> depthInputs;
+    Vector<GLenum> depthInputs;
     GLenum depthInternalformat;
 
     uint32_t idx = 0;
-    std::vector<GLenum> drawBuffers;
+    Vector<GLenum> drawBuffers;
 
     for(const sp<Texture>& i : _configure._color_attachments)
     {
@@ -107,11 +107,12 @@ void GLFramebuffer::upload(GraphicsContext& graphicsContext)
 
     glBindFramebuffer(GL_FRAMEBUFFER, _id);
     glDrawBuffers(static_cast<uint32_t>(drawBuffers.size()), drawBuffers.data());
-    for(const auto& [k, v] : attachments)
-    {
-        glFramebufferTexture2D(GL_FRAMEBUFFER, v, GL_TEXTURE_2D, static_cast<GLuint>(k), 0);
-        LOGD("glFramebufferTexture2D, attachment: %d, id: %d", v, k);
-    }
+    if(_configure._color_attachment_op.has(RenderTarget::ATTACHMENT_OP_BIT_STORE))
+        for(const auto& [k, v] : attachments)
+        {
+            glFramebufferTexture2D(GL_FRAMEBUFFER, v, GL_TEXTURE_2D, static_cast<GLuint>(k), 0);
+            LOGD("glFramebufferTexture2D, attachment: %d, id: %d", v, k);
+        }
 
     if(depthTexture)
     {
@@ -120,9 +121,9 @@ void GLFramebuffer::upload(GraphicsContext& graphicsContext)
         glRenderbufferStorage(GL_RENDERBUFFER, depthInternalformat, depthTexture->width(), depthTexture->height());
         for(const GLenum i : depthInputs)
         {
-            if(_configure._depth_stencil_op != RenderTarget::DEPTH_STENCIL_OP_BIT_DONT_CARE && _configure._depth_stencil_op.has(RenderTarget::DEPTH_STENCIL_OP_BIT_LOAD))
+            if(_configure._depth_stencil_op != RenderTarget::ATTACHMENT_OP_BIT_DONT_CARE && _configure._depth_stencil_op.has(RenderTarget::ATTACHMENT_OP_BIT_LOAD))
                 glFramebufferRenderbuffer(GL_READ_FRAMEBUFFER, i, GL_RENDERBUFFER, static_cast<GLuint>(renderbuffer->id()));
-            if(_configure._depth_stencil_op.has(RenderTarget::DEPTH_STENCIL_OP_BIT_STORE))
+            if(_configure._depth_stencil_op.has(RenderTarget::ATTACHMENT_OP_BIT_STORE))
                 glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, i, GL_RENDERBUFFER, static_cast<GLuint>(renderbuffer->id()));
         }
     }
@@ -140,6 +141,11 @@ ResourceRecycleFunc GLFramebuffer::recycle()
         LOGD("Deleting GLFramebuffer[%d]", id);
         glDeleteFramebuffers(1, &id);
     };
+}
+
+const RenderTarget::Configure& GLFramebuffer::configure() const
+{
+    return _configure;
 }
 
 }

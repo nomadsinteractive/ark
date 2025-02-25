@@ -26,7 +26,8 @@ const sp<Resource>& RenderTarget::resource() const
 
 RenderTarget::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _render_controller(resourceLoaderContext->renderController()), _renderer(factory.ensureBuilder<RenderGroup>(manifest)), _clear_mask(Documents::getAttribute<ClearBitSet>(manifest, "clear-mask", CLEAR_BIT_ALL)),
-      _depth_stencil_op(Documents::getAttribute<DepthStencilOp>(manifest, "depth-stencil-op", {DEPTH_STENCIL_OP_BIT_CLEAR | DEPTH_STENCIL_OP_BIT_STORE}))
+      _color_attachment_op(Documents::getAttribute<AttachmentOp>(manifest, "color-attachment-op", {ATTACHMENT_OP_BIT_CLEAR | ATTACHMENT_OP_BIT_STORE})),
+      _depth_stencil_op(Documents::getAttribute<AttachmentOp>(manifest, "depth-stencil-op", {ATTACHMENT_OP_BIT_CLEAR | ATTACHMENT_OP_BIT_STORE}))
 {
     for(const document& i : manifest->children(constants::TEXTURE))
         _attachments.emplace_back(factory.ensureBuilder<Texture>(i), i);
@@ -36,7 +37,7 @@ RenderTarget::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, c
 
 sp<RenderTarget> RenderTarget::BUILDER::build(const Scope& args)
 {
-    CreateConfigure configure;
+    Configure configure = {_color_attachment_op, _depth_stencil_op, _clear_mask};
     for(const auto& [i, j] : _attachments)
     {
         sp<Texture> tex = i->build(args);
@@ -46,11 +47,9 @@ sp<RenderTarget> RenderTarget::BUILDER::build(const Scope& args)
         {
             CHECK(configure._depth_stencil_attachment == nullptr, "Only one depth-stencil attachment allowed");
             CHECK(usage.has(Texture::USAGE_DEPTH_STENCIL_ATTACHMENT), "Unknow Texture usage: %d", usage);
-            configure._depth_stencil_op = _depth_stencil_op;
             configure._depth_stencil_attachment = std::move(tex);
         }
     }
-    configure._clear_bits = _clear_mask;
     return _render_controller->makeRenderTarget(_renderer->build(args), std::move(configure));
 }
 
@@ -76,17 +75,17 @@ template<> ARK_API RenderTarget::ClearBitSet StringConvert::eval<RenderTarget::C
     return RenderTarget::ClearBitSet::toBitSet(str, clearBits);
 }
 
-template<> RenderTarget::DepthStencilOp StringConvert::eval<RenderTarget::DepthStencilOp>(const String& str)
+template<> RenderTarget::AttachmentOp StringConvert::eval<RenderTarget::AttachmentOp>(const String& str)
 {
-    constexpr RenderTarget::DepthStencilOp::LookupTable<4> opBits = {{
-        {"load", RenderTarget::DEPTH_STENCIL_OP_BIT_LOAD},
-        {"clear", RenderTarget::DEPTH_STENCIL_OP_BIT_CLEAR},
-        {"dont_care", RenderTarget::DEPTH_STENCIL_OP_BIT_DONT_CARE},
-        {"store", RenderTarget::DEPTH_STENCIL_OP_BIT_STORE},
+    constexpr RenderTarget::AttachmentOp::LookupTable<4> opBits = {{
+        {"load", RenderTarget::ATTACHMENT_OP_BIT_LOAD},
+        {"clear", RenderTarget::ATTACHMENT_OP_BIT_CLEAR},
+        {"dont_care", RenderTarget::ATTACHMENT_OP_BIT_DONT_CARE},
+        {"store", RenderTarget::ATTACHMENT_OP_BIT_STORE},
     }};
     if(str)
-        return RenderTarget::DepthStencilOp::toBitSet(str, opBits);
-    return {RenderTarget::DEPTH_STENCIL_OP_BIT_LOAD | RenderTarget::DEPTH_STENCIL_OP_BIT_STORE};
+        return RenderTarget::AttachmentOp::toBitSet(str, opBits);
+    return {RenderTarget::ATTACHMENT_OP_BIT_LOAD | RenderTarget::ATTACHMENT_OP_BIT_STORE};
 }
 
 }

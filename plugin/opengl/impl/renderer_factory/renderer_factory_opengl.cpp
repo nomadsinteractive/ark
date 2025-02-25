@@ -40,13 +40,13 @@ void setVersion(Enum::RendererVersion version, RenderEngineContext& glContext)
     glContext.setVersion(version);
 }
 
-int32_t toClearMaskBits(const RenderTarget::CreateConfigure& configure)
+int32_t toClearMaskBits(const RenderTarget::Configure& configure)
 {
     RenderTarget::ClearBitSet clearMask = configure._clear_bits;
-    if(configure._depth_stencil_op.has(RenderTarget::DEPTH_STENCIL_OP_BIT_LOAD))
+    if(configure._depth_stencil_op.has(RenderTarget::ATTACHMENT_OP_BIT_LOAD))
         clearMask.set(RenderTarget::CLEAR_BIT_DEPTH_STENCIL, false);
     else
-        clearMask.set(RenderTarget::CLEAR_BIT_DEPTH_STENCIL, configure._depth_stencil_op.has(RenderTarget::DEPTH_STENCIL_OP_BIT_CLEAR));
+        clearMask.set(RenderTarget::CLEAR_BIT_DEPTH_STENCIL, configure._depth_stencil_op.has(RenderTarget::ATTACHMENT_OP_BIT_CLEAR));
     return clearMask.bits();
 }
 
@@ -94,7 +94,7 @@ sp<Camera::Delegate> RendererFactoryOpenGL::createCamera(Ark::RendererCoordinate
     return rcs == Ark::COORDINATE_SYSTEM_LHS ?  sp<Camera::Delegate>::make<Camera::DelegateLH_NO>() : sp<Camera::Delegate>::make<Camera::DelegateRH_NO>();
 }
 
-sp<RenderTarget> RendererFactoryOpenGL::createRenderTarget(sp<Renderer> renderer, RenderTarget::CreateConfigure configure)
+sp<RenderTarget> RendererFactoryOpenGL::createRenderTarget(sp<Renderer> renderer, RenderTarget::Configure configure)
 {
     CHECK(!configure._color_attachments.empty(), "Framebuffer object should have at least one color attachment");
     int32_t width = configure._color_attachments.at(0)->width();

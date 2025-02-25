@@ -20,7 +20,7 @@ public:
     void preDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override
     {
         _compute_context._bindings = context._bindings;
-        context._bindings->ensureComputePipeline(graphicsContext)->compute(graphicsContext, _compute_context);
+        context._bindings->ensurePipeline(graphicsContext)->compute(graphicsContext, _compute_context);
     }
 
     void postDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override {}
@@ -41,7 +41,7 @@ public:
     void postDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override
     {
         _compute_context._bindings = context._bindings;
-        context._bindings->ensureComputePipeline(graphicsContext)->compute(graphicsContext, _compute_context);
+        context._bindings->ensurePipeline(graphicsContext)->compute(graphicsContext, _compute_context);
     }
 
 private:
@@ -50,8 +50,8 @@ private:
 
 }
 
-SnippetDrawCompute::SnippetDrawCompute(sp<ShaderLayout> pipelineInput, std::array<uint32_t, 3> numWorkGroups, bool atPostDraw)
-    : _pipeline_input(std::move(pipelineInput)), _num_work_groups(numWorkGroups), _at_post_draw(atPostDraw)
+SnippetDrawCompute::SnippetDrawCompute(sp<ShaderLayout> shaderLayout, const std::array<uint32_t, 3> numWorkGroups, const bool atPostDraw)
+    : _pipeline_input(std::move(shaderLayout)), _num_work_groups(numWorkGroups), _at_post_draw(atPostDraw)
 {
 }
 

@@ -29,7 +29,7 @@ RenderEngineContext::Resolution getFramebufferResolution(const Vector<sp<Texture
 
 }
 
-VKFramebuffer::VKFramebuffer(const sp<VKRenderer>& renderer, const sp<Recycler>& recycler, RenderTarget::CreateConfigure configure)
+VKFramebuffer::VKFramebuffer(const sp<VKRenderer>& renderer, const sp<Recycler>& recycler, RenderTarget::Configure configure)
     : _stub(sp<Stub>::make(renderer, recycler, std::move(configure)))
 {
 }
@@ -95,7 +95,7 @@ VkRect2D VKFramebuffer::Stub::getFramebufferScissor() const
     return vks::initializers::rect2D(texture->width(), texture->height(), 0, 0);
 }
 
-VKFramebuffer::Stub::Stub(const sp<VKRenderer>& renderer, const sp<Recycler>& recycler, RenderTarget::CreateConfigure configure)
+VKFramebuffer::Stub::Stub(const sp<VKRenderer>& renderer, const sp<Recycler>& recycler, RenderTarget::Configure configure)
     : RenderPassPhrase(getFramebufferResolution(configure._color_attachments), configure._color_attachments.size()), _renderer(renderer), _recycler(recycler), _configure(std::move(configure)), _depthstencil_image(VK_NULL_HANDLE),
       _depthstencil_memory(VK_NULL_HANDLE), _depthstencil_view(VK_NULL_HANDLE), _render_pass_begin_info(vks::initializers::renderPassBeginInfo()), _scissor(vks::initializers::rect2D(_resolution.width, _resolution.height, 0, 0)),
       _viewport(vks::initializers::viewport(static_cast<float>(_resolution.width), static_cast<float>(_resolution.height), 0, 1.0f))
@@ -105,10 +105,10 @@ VKFramebuffer::Stub::Stub(const sp<VKRenderer>& renderer, const sp<Recycler>& re
     clearColor.color = { { 0.0f, 0.0f, 0.0f, 0.0f } };
     clearDepthStencil.depthStencil = { 1.0f, 0 };
 
-    if(_configure._clear_bits.has(RenderTarget::CLEAR_BIT_COLOR))
+    if(_configure._color_attachment_op.has(RenderTarget::ATTACHMENT_OP_BIT_CLEAR))
         for(uint32_t i = 0; i < _configure._color_attachments.size(); ++i)
             _clear_values.push_back(clearColor);
-    if(_configure._clear_bits.has(RenderTarget::CLEAR_BIT_DEPTH_STENCIL) && !_configure._depth_stencil_op.has(RenderTarget::DEPTH_STENCIL_OP_BIT_LOAD))
+    if(_configure._depth_stencil_op.has(RenderTarget::ATTACHMENT_OP_BIT_CLEAR))
         _clear_values.push_back(clearDepthStencil);
 
     _render_pass_begin_info.renderArea = _scissor;
@@ -124,24 +124,27 @@ void VKFramebuffer::Stub::initialize()
 VkRenderPass VKFramebuffer::Stub::acquire(const PipelineDescriptor& bindings)
 {
     VkDevice device = _renderer->vkLogicalDevice();
-    uint32_t width = _scissor.extent.width;
-    uint32_t height = _scissor.extent.height;
+    const uint32_t width = _scissor.extent.width;
+    const uint32_t height = _scissor.extent.height;
 
     VkFormat fbDepthFormat;
-    VkBool32 validDepthFormat = vks::tools::getSupportedDepthFormat(_renderer->vkPhysicalDevice(), &fbDepthFormat);
+    const VkBool32 validDepthFormat = vks::tools::getSupportedDepthFormat(_renderer->vkPhysicalDevice(), &fbDepthFormat);
     DASSERT(validDepthFormat);
 
-    std::vector<VkAttachmentDescription> attachmentDescriptions;
-    std::vector<VkAttachmentReference> attachmentReferences;
-    std::vector<VkImageView> attachments;
+    Vector<VkAttachmentDescription> attachmentDescriptions;
+    Vector<VkAttachmentReference> attachmentReferences;
+    Vector<VkImageView> attachments;
 
+    const VkAttachmentLoadOp colorAttachmentLoadOp = !_configure._color_attachment_op || _configure._color_attachment_op == RenderTarget::ATTACHMENT_OP_BIT_DONT_CARE ? VK_ATTACHMENT_LOAD_OP_DONT_CARE
+                                                     : _configure._color_attachment_op.has(RenderTarget::ATTACHMENT_OP_BIT_CLEAR) ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
+    const VkAttachmentStoreOp colorAttachmentStoreOp = _configure._color_attachment_op.has(RenderTarget::ATTACHMENT_OP_BIT_STORE) ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
     for(const Texture& i : _configure._color_attachments)
     {
         VkAttachmentDescription colorAttachmentDescription = {};
         colorAttachmentDescription.format = VKUtil::toTextureFormat(i.parameters()->_format);
         colorAttachmentDescription.samples = VK_SAMPLE_COUNT_1_BIT;
-        colorAttachmentDescription.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-        colorAttachmentDescription.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+        colorAttachmentDescription.loadOp = colorAttachmentLoadOp;
+        colorAttachmentDescription.storeOp = colorAttachmentStoreOp;
         colorAttachmentDescription.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         colorAttachmentDescription.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
         colorAttachmentDescription.initialLayout = VKUtil::toImageLayout(i.usage());
@@ -161,9 +164,9 @@ VkRenderPass VKFramebuffer::Stub::acquire(const PipelineDescriptor& bindings)
         attachments.push_back(depthstencilView);
 
         VkAttachmentDescription depthAttachmentDescription = {};
-        const VkAttachmentLoadOp loadOp = !_configure._depth_stencil_op || _configure._depth_stencil_op == RenderTarget::DEPTH_STENCIL_OP_BIT_DONT_CARE ? VK_ATTACHMENT_LOAD_OP_DONT_CARE
-                                          : _configure._depth_stencil_op.has(RenderTarget::DEPTH_STENCIL_OP_BIT_CLEAR) ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
-        const VkAttachmentStoreOp storeOp = _configure._depth_stencil_op.has(RenderTarget::DEPTH_STENCIL_OP_BIT_STORE) ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        const VkAttachmentLoadOp loadOp = !_configure._depth_stencil_op || _configure._depth_stencil_op == RenderTarget::ATTACHMENT_OP_BIT_DONT_CARE ? VK_ATTACHMENT_LOAD_OP_DONT_CARE
+                                          : _configure._depth_stencil_op.has(RenderTarget::ATTACHMENT_OP_BIT_CLEAR) ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
+        const VkAttachmentStoreOp storeOp = _configure._depth_stencil_op.has(RenderTarget::ATTACHMENT_OP_BIT_STORE) ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
         depthAttachmentDescription.format = fbDepthFormat;
         depthAttachmentDescription.samples = VK_SAMPLE_COUNT_1_BIT;
         depthAttachmentDescription.loadOp = loadOp;
@@ -174,7 +177,7 @@ VkRenderPass VKFramebuffer::Stub::acquire(const PipelineDescriptor& bindings)
         depthAttachmentDescription.finalLayout = depthAttachmentDescription.initialLayout;
         attachmentDescriptions.push_back(depthAttachmentDescription);
     }
-    VkAttachmentReference depthReference = { static_cast<uint32_t>(attachmentReferences.size()), _configure._depth_stencil_op == RenderTarget::DEPTH_STENCIL_OP_BIT_LOAD ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL
+    VkAttachmentReference depthReference = { static_cast<uint32_t>(attachmentReferences.size()), _configure._depth_stencil_op == RenderTarget::ATTACHMENT_OP_BIT_LOAD ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL
                                                                                                                                                                                                 : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL };
 
     VkSubpassDescription subpassDescription = {};

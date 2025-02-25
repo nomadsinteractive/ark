@@ -77,7 +77,7 @@ private:
 }
 
 struct GLPipeline::Stub {
-    Stub(bool isComputePipeline)
+    Stub(const bool isComputePipeline)
         : _is_compute_pipeline(isComputePipeline), _id(0), _rebind_needed(true) {
     }
 
@@ -219,13 +219,13 @@ struct GLPipeline::Stub {
         return glGetAttribLocation(_id, name.c_str());
     }
 
-    void bindUBOSnapshots(const Vector<RenderLayerSnapshot::UBOSnapshot>& uboSnapshots, const ShaderLayout& pipelineInput)
+    void bindUBOSnapshots(const Vector<RenderLayerSnapshot::UBOSnapshot>& uboSnapshots, const ShaderLayout& shaderLayout)
     {
         size_t binding = 0;
-        for(const sp<ShaderLayout::UBO>& ubo : pipelineInput.ubos())
+        for(const sp<ShaderLayout::UBO>& ubo : shaderLayout.ubos())
             if(shouldBeBinded(ubo->_stages))
             {
-                DCHECK(binding < uboSnapshots.size(), "UBO Snapshot and UBO Layout mismatch: %d vs %d", uboSnapshots.size(), pipelineInput.ubos().size());
+                DCHECK(binding < uboSnapshots.size(), "UBO Snapshot and UBO Layout mismatch: %d vs %d", uboSnapshots.size(), shaderLayout.ubos().size());
                 const RenderLayerSnapshot::UBOSnapshot& uboSnapshot = uboSnapshots.at(binding++);
                 bindUBO(uboSnapshot, ubo);
             }
@@ -234,14 +234,14 @@ struct GLPipeline::Stub {
 
     bool shouldBeBinded(const ShaderStageSet& stages) const
     {
-        return !_is_compute_pipeline || stages.has(Enum::SHADER_STAGE_BIT_COMPUTE);
+        return _is_compute_pipeline ? stages.has(Enum::SHADER_STAGE_BIT_COMPUTE) : !stages.has(Enum::SHADER_STAGE_BIT_COMPUTE);
     }
 
     bool _is_compute_pipeline;
     GLuint _id;
 
-    std::map<String, GLAttribute> _attributes;
-    std::map<String, GLUniform> _uniforms;
+    Map<String, GLAttribute> _attributes;
+    Map<String, GLUniform> _uniforms;
 
     bool _rebind_needed;
 };
@@ -532,7 +532,7 @@ public:
 
     void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override
     {
-        const volatile GLScissor scissor(drawingContext._scissor ? drawingContext._scissor : _scissor);
+        const GLScissor scissor(drawingContext._scissor ? drawingContext._scissor : _scissor);
 
         for(const auto& [i, j] : drawingContext._buffer_object->_ssbos)
             _ssbo_binders.emplace_back(GL_SHADER_STORAGE_BUFFER, static_cast<GLuint>(i), static_cast<GLuint>(j.id()));
@@ -550,7 +550,7 @@ public:
 private:
     static sp<PipelineDrawCommand> makeBakedRenderer(const PipelineDescriptor& bindings)
     {
-        GLenum mode = GLUtil::toEnum(bindings.mode());
+        const GLenum mode = GLUtil::toEnum(bindings.mode());
         switch(bindings.drawProcedure())
         {
             case Enum::DRAW_PROCEDURE_DRAW_ARRAYS:
@@ -660,7 +660,7 @@ private:
     uint32_t _id;
 };
 
-bool isComputePipeline(const std::map<Enum::ShaderStageBit, String>& stages)
+bool isComputePipeline(const Map<Enum::ShaderStageBit, String>& stages)
 {
     if(const auto iter = stages.find(Enum::SHADER_STAGE_BIT_COMPUTE); iter != stages.end())
     {
@@ -684,7 +684,7 @@ String getInformationLog(GLuint id)
 
 sp<Stage> makeShader(GraphicsContext& graphicsContext, uint32_t version, GLenum type, const String& source)
 {
-    typedef std::unordered_map<GLenum, std::map<String, WeakPtr<Stage>>> ShaderPool;
+    typedef std::unordered_map<GLenum, Map<String, WeakPtr<Stage>>> ShaderPool;
 
     const sp<ShaderPool>& shaders = graphicsContext.traits().ensure<ShaderPool>();
     if(const auto iter = (*shaders)[type].find(source); iter != (*shaders)[type].end())
@@ -698,7 +698,7 @@ sp<Stage> makeShader(GraphicsContext& graphicsContext, uint32_t version, GLenum 
 
 }
 
-GLPipeline::GLPipeline(const sp<Recycler>& recycler, uint32_t version, std::map<Enum::ShaderStageBit, String> stages, const PipelineDescriptor& bindings)
+GLPipeline::GLPipeline(const sp<Recycler>& recycler, uint32_t version, Map<Enum::ShaderStageBit, String> stages, const PipelineDescriptor& bindings)
     : _stub(sp<Stub>::make(isComputePipeline(stages))), _recycler(recycler), _version(version), _stages(std::move(stages)), _pipeline_operation(makePipelineOperation(bindings))
 {
     for(const auto& [k, v] : bindings.parameters()._traits)
@@ -745,7 +745,7 @@ void GLPipeline::upload(GraphicsContext& graphicsContext)
     _stub->_rebind_needed = true;
     _stub->_id = id;
 
-    std::map<Enum::ShaderStageBit, sp<Stage>> compiledStages;
+    Map<Enum::ShaderStageBit, sp<Stage>> compiledStages;
     for(const auto& [k, v] : _stages)
     {
         sp<Stage>& shader = compiledStages[k];
@@ -796,7 +796,7 @@ void GLPipeline::compute(GraphicsContext& graphicsContext, const ComputeContext&
     _pipeline_operation->compute(graphicsContext, computeContext);
 }
 
-void GLPipeline::bindBuffer(GraphicsContext& graphicsContext, const ShaderLayout& input, const std::map<uint32_t, Buffer>& divisors)
+void GLPipeline::bindBuffer(GraphicsContext& graphicsContext, const ShaderLayout& input, const Map<uint32_t, Buffer>& divisors)
 {
     DCHECK(id(), "GLProgram unprepared");
     bindBuffer(graphicsContext, input, 0);

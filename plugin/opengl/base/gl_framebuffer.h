@@ -10,7 +10,7 @@ namespace ark::plugin::opengl {
 
 class GLFramebuffer final : public Resource {
 public:
-    GLFramebuffer(sp<Recycler> recycler, RenderTarget::CreateConfigure configure);
+    GLFramebuffer(sp<Recycler> recycler, RenderTarget::Configure configure);
     ~GLFramebuffer() override;
 
     uint64_t id() override;
@@ -18,9 +18,11 @@ public:
     void upload(GraphicsContext& graphicsContext) override;
     ResourceRecycleFunc recycle() override;
 
+    const RenderTarget::Configure& configure() const;
+
 private:
     sp<Recycler> _recycler;
-    RenderTarget::CreateConfigure _configure;
+    RenderTarget::Configure _configure;
 
     uint32_t _id;
 };

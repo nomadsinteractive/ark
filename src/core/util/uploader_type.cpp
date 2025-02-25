@@ -172,11 +172,6 @@ sp<Uploader> UploaderType::create(Vector<uint32_t> value, size_t size)
     return reserve(sp<Uploader>::make<UploaderArray<uint32_t>>(std::move(value)), size);
 }
 
-sp<Uploader> UploaderType::create(const std::set<uint32_t>& value, size_t size)
-{
-    return reserve(sp<Uploader>::make<UploaderArray<uint32_t>>(Vector<uint32_t>(value.begin(), value.end())), size);
-}
-
 Vector<uint8_t> UploaderType::toBytes(Uploader& self)
 {
     Vector<uint8_t> bytes(self.size());
@@ -188,14 +183,14 @@ Map<size_t, Vector<uint8_t>> UploaderType::record(Uploader& self)
 {
     WritableSnapshot writable;
     self.upload(writable);
-    return writable._records;
+    return std::move(writable._records);
 }
 
 Map<size_t, size_t> UploaderType::recordRanges(Uploader& self)
 {
     WritableRangeSnapshot writable;
     self.upload(writable);
-    return writable._records;
+    return std::move(writable._records);
 }
 
 void UploaderType::writeTo(Uploader& self, void* ptr)
@@ -252,12 +247,12 @@ sp<Uploader> UploaderType::repeat(sp<Uploader> self, size_t length, size_t strid
     return sp<Uploader>::make<UploaderRepeat>(std::move(self), length, stride);
 }
 
-void UploaderType::addInput(const sp<Uploader>& self, size_t offset, sp<Uploader> input)
+void UploaderType::put(const sp<Uploader>& self, size_t offset, sp<Uploader> input)
 {
     ensureImpl(self)->addInput(offset, std::move(input));
 }
 
-void UploaderType::removeInput(const sp<Uploader>& self, size_t offset)
+void UploaderType::remove(const sp<Uploader>& self, size_t offset)
 {
     ensureImpl(self)->removeInput(offset);
 }

@@ -18,7 +18,7 @@ ContextSDL3_GPU::~ContextSDL3_GPU()
     SDL_ShaderCross_Quit();
 }
 
-void GraphicsContextSDL3_GPU::pushRenderTargets(const RenderTarget::CreateConfigure* createConfig, const Vector<SDL_GPUColorTargetInfo>& colorTargets, const Optional<SDL_GPUDepthStencilTargetInfo>& depthStencilTarget)
+void GraphicsContextSDL3_GPU::pushRenderTargets(const RenderTarget::Configure* createConfig, const Vector<SDL_GPUColorTargetInfo>& colorTargets, const Optional<SDL_GPUDepthStencilTargetInfo>& depthStencilTarget)
 {
     ASSERT(!depthStencilTarget || depthStencilTarget->texture);
     _render_targets.push_back({createConfig, colorTargets, depthStencilTarget});

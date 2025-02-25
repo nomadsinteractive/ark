@@ -176,13 +176,13 @@ class _Array:
     def to_bytes(self) -> bytes:
         pass
 
-    def to_byte_array(self) -> 'ByteArray':
+    def to_byte_array(self) -> "ByteArray":
         pass
 
     def __len__(self) -> int:
         return 0
 
-    def __getitem__(self, item):
+    def __getitem__(self, item) -> Self:
         pass
 
     def __setitem__(self, item, value):
@@ -203,19 +203,19 @@ class ByteArray(_Array):
     def __init__(self, size: int, fill: int = 0):
         pass
 
-    def to_integer(self) -> 'Integer':
+    def to_integer(self) -> "Integer":
         pass
 
-    def to_numeric(self) -> 'Numeric':
+    def to_numeric(self) -> "Numeric":
         pass
 
-    def to_vec2(self) -> 'Vec2':
+    def to_vec2(self) -> "Vec2":
         pass
 
-    def to_vec3(self) -> 'Vec3':
+    def to_vec3(self) -> "Vec3":
         pass
 
-    def to_vec4(self) -> 'Vec4':
+    def to_vec4(self) -> "Vec4":
         pass
 
 
@@ -594,11 +594,11 @@ class ApplicationFacade:
         self._activity = None
 
     @property
-    def clock(self) -> 'Clock':
+    def clock(self) -> "Clock":
         return Clock()
 
     @property
-    def clock_interval(self) -> 'Numeric':
+    def clock_interval(self) -> "Numeric":
         return Numeric(0)
 
     @property
@@ -820,10 +820,6 @@ class Observer:
 
     def add_callback(self, callback: Callable, oneshot: bool = False, trigger_after: int = 1):
         pass
-
-
-class Shader:
-    pass
 
 
 class Renderer:
@@ -1265,16 +1261,19 @@ class Uploader:
     def size(self):
         return 0
 
-    def reserve(self, size: int) -> 'Uploader':
+    def reserve(self, size: int) -> Self:
         pass
 
-    def remap(self, size: int, offset: int = 0) -> 'Uploader':
+    def remap(self, size: int, offset: int = 0) -> Self:
         pass
 
-    def add_input(self, offset: int, input_: 'Uploader'):
+    def repeat(self, length: int, stride: int = 0) -> Self:
         pass
 
-    def remove_input(self, offset: int):
+    def put(self, offset: int, input_: 'Uploader'):
+        pass
+
+    def remove(self, offset: int):
         pass
 
     def wrap(self) -> 'Uploader':
@@ -1284,10 +1283,6 @@ class Uploader:
         pass
 
     def mark_dirty(self):
-        pass
-
-    @staticmethod
-    def blank(size: int, fill: int = 0) -> 'Uploader':
         pass
 
 

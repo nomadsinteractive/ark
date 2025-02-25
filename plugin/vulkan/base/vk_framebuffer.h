@@ -17,7 +17,7 @@ namespace ark::plugin::vulkan {
 
 class VKFramebuffer final : public Resource {
 public:
-    VKFramebuffer(const sp<VKRenderer>& renderer, const sp<Recycler>& recycler, RenderTarget::CreateConfigure configure);
+    VKFramebuffer(const sp<VKRenderer>& renderer, const sp<Recycler>& recycler, RenderTarget::Configure configure);
     ~VKFramebuffer() override;
 
     uint64_t id() override;
@@ -31,7 +31,7 @@ public:
 private:
     class Stub final : public VKGraphicsContext::RenderPassPhrase {
     public:
-        Stub(const sp<VKRenderer>& renderer, const sp<Recycler>& recycler, RenderTarget::CreateConfigure configure);
+        Stub(const sp<VKRenderer>& renderer, const sp<Recycler>& recycler, RenderTarget::Configure configure);
 
         void initialize();
 
@@ -44,7 +44,7 @@ private:
     private:
         sp<VKRenderer> _renderer;
         sp<Recycler> _recycler;
-        RenderTarget::CreateConfigure _configure;
+        RenderTarget::Configure _configure;
 
         VkImage _depthstencil_image;
         VkDeviceMemory _depthstencil_memory;

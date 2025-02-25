@@ -45,7 +45,7 @@ public:
 
     const PipelineDescriptor::Parameters& descriptorParams() const;
 
-    sp<PipelineBindings> makeBindings(Buffer vertices, Enum::RenderMode mode, Enum::DrawProcedure renderProcedure, const std::map<uint32_t, sp<Uploader>>& uploaders = {}) const;
+    sp<PipelineBindings> makeBindings(Buffer vertices, Enum::RenderMode mode, Enum::DrawProcedure renderProcedure, const Map<uint32_t, sp<Uploader>>& uploaders = {}) const;
 
     class BUILDER_IMPL final : public Builder<Shader> {
     public:
@@ -80,7 +80,7 @@ public:
     };
 
 private:
-    std::map<uint32_t, Buffer> makeDivivedBuffers(const std::map<uint32_t, sp<Uploader>>& uploaders) const;
+    Map<uint32_t, Buffer> makeDivivedBuffers(const Map<uint32_t, sp<Uploader>>& uploaders) const;
 
 private:
     sp<PipelineFactory> _pipeline_factory;

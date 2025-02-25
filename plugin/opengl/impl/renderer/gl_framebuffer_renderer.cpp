@@ -27,6 +27,7 @@ struct PreDrawElementsToFBO final : RenderCommand {
     void draw(GraphicsContext& /*graphicsContext*/) override {
         glBindFramebuffer(GL_FRAMEBUFFER, static_cast<GLuint>(_fbo->id()));
         glViewport(0, 0, _width, _height);
+        const RenderTarget::Configure& configure = _fbo->configure();
         if(_clear_mask) {
             if(const uint32_t mds = _clear_mask & RenderTarget::CLEAR_BIT_DEPTH_STENCIL) {
                 if(mds == RenderTarget::CLEAR_BIT_DEPTH_STENCIL)
@@ -36,11 +37,11 @@ struct PreDrawElementsToFBO final : RenderCommand {
                 else
                     glClearBufferiv(GL_STENCIL, 0, &_clear_stencil_value);
             }
-
-            if(_clear_mask & RenderTarget::CLEAR_BIT_COLOR)
-                for(size_t i = 0; i < _draw_buffer_count; ++i)
-                    glClearBufferfv(GL_COLOR, static_cast<GLint>(i), reinterpret_cast<GLfloat *>(&_clear_color_value));
         }
+
+        if(configure._color_attachment_op.has(RenderTarget::ATTACHMENT_OP_BIT_CLEAR))
+            for(size_t i = 0; i < _draw_buffer_count; ++i)
+                glClearBufferfv(GL_COLOR, static_cast<GLint>(i), reinterpret_cast<GLfloat *>(&_clear_color_value));
     }
 
     sp<GLFramebuffer> _fbo;

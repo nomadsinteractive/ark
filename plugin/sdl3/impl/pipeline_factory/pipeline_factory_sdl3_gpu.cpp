@@ -317,7 +317,7 @@ public:
             const GraphicsContextSDL3_GPU& gc = ensureGraphicsContext(graphicsContext);
             if(const RenderTargetContext& renderTarget = gc.renderTarget(); renderTarget._create_config)
             {
-                const RenderTarget::CreateConfigure& rtCreateConfig = *renderTarget._create_config;
+                const RenderTarget::Configure& rtCreateConfig = *renderTarget._create_config;
                 for(const sp<Texture>& i : rtCreateConfig._color_attachments)
                 {
                     colorTargetDescriptions[numColorTargets] = {

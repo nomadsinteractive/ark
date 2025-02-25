@@ -1,8 +1,5 @@
 #pragma once
 
-#include <map>
-#include <vector>
-
 #include "core/base/api.h"
 #include "core/forwarding.h"
 #include "core/types/shared_ptr.h"
@@ -34,8 +31,7 @@ public:
     const sp<Map<uint32_t, Buffer>>& streams() const;
     const sp<Traits>& attachments() const;
 
-    const sp<Pipeline>& ensureRenderPipeline(GraphicsContext& graphicsContext);
-    const sp<Pipeline>& ensureComputePipeline(GraphicsContext& graphicsContext);
+    const sp<Pipeline>& ensurePipeline(GraphicsContext& graphicsContext);
 
     Map<uint32_t, Buffer::Factory> makeDividedBufferFactories() const;
 
@@ -50,8 +46,7 @@ private:
 
     sp<Map<uint32_t, Buffer>> _streams;
 
-    sp<Pipeline> _render_pipeline;
-    sp<Pipeline> _compute_pipeline;
+    sp<Pipeline> _pipeline;
 
     sp<Traits> _attachments;
 };

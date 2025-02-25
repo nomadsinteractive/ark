@@ -117,7 +117,7 @@ void setVersion(const Enum::RendererVersion version, RenderEngineContext& vkCont
     vkContext.setVersion(version);
 }
 
-Optional<SDL_GPUDepthStencilTargetInfo> toDepthStencilTargetInfo(const RenderTarget::CreateConfigure& configure)
+Optional<SDL_GPUDepthStencilTargetInfo> toDepthStencilTargetInfo(const RenderTarget::Configure& configure)
 {
     if(!configure._depth_stencil_attachment)
         return {};
@@ -125,8 +125,9 @@ Optional<SDL_GPUDepthStencilTargetInfo> toDepthStencilTargetInfo(const RenderTar
     const SDL_GPUDepthStencilTargetInfo depthStencilTargetInfo = {
         nullptr,
         1.0f,
-        configure._clear_bits.has(RenderTarget::CLEAR_BIT_DEPTH) ? SDL_GPU_LOADOP_CLEAR : SDL_GPU_LOADOP_LOAD,
-        configure._depth_stencil_op.has(RenderTarget::DEPTH_STENCIL_OP_BIT_STORE) ? SDL_GPU_STOREOP_STORE : SDL_GPU_STOREOP_DONT_CARE,
+        !configure._depth_stencil_op || configure._depth_stencil_op == RenderTarget::ATTACHMENT_OP_BIT_DONT_CARE ? SDL_GPU_LOADOP_DONT_CARE
+                                                : configure._depth_stencil_op.has(RenderTarget::ATTACHMENT_OP_BIT_CLEAR) ? SDL_GPU_LOADOP_CLEAR : SDL_GPU_LOADOP_LOAD,
+        configure._depth_stencil_op.has(RenderTarget::ATTACHMENT_OP_BIT_STORE) ? SDL_GPU_STOREOP_STORE : SDL_GPU_STOREOP_DONT_CARE,
         configure._clear_bits.has(RenderTarget::CLEAR_BIT_STENCIL) ? SDL_GPU_LOADOP_CLEAR : SDL_GPU_LOADOP_DONT_CARE,
         SDL_GPU_STOREOP_DONT_CARE,
     };
@@ -135,17 +136,20 @@ Optional<SDL_GPUDepthStencilTargetInfo> toDepthStencilTargetInfo(const RenderTar
 
 class RenderCommandOffscreenPredraw final : public RenderCommand {
 public:
-    RenderCommandOffscreenPredraw(RenderTarget::CreateConfigure configure)
+    RenderCommandOffscreenPredraw(RenderTarget::Configure configure)
         : _configure(std::move(configure)), _depth_stencil_target(toDepthStencilTargetInfo(_configure))
     {
+        const SDL_GPULoadOp loadOp = configure._color_attachment_op == RenderTarget::ATTACHMENT_OP_BIT_DONT_CARE ? SDL_GPU_LOADOP_DONT_CARE
+                                                : configure._color_attachment_op.has(RenderTarget::ATTACHMENT_OP_BIT_CLEAR) ? SDL_GPU_LOADOP_CLEAR : SDL_GPU_LOADOP_LOAD;
+        const SDL_GPUStoreOp storeOp = configure._color_attachment_op.has(RenderTarget::ATTACHMENT_OP_BIT_STORE) ? SDL_GPU_STOREOP_STORE : SDL_GPU_STOREOP_DONT_CARE;
         for(const sp<Texture>& i : _configure._color_attachments)
             _render_targets.push_back({
                 nullptr,
                 0,
                 0,
                 {0, 0, 0, 0},
-                SDL_GPU_LOADOP_CLEAR,
-                SDL_GPU_STOREOP_STORE
+                loadOp,
+                storeOp
             });
     }
 
@@ -161,7 +165,7 @@ public:
     }
 
 private:
-    RenderTarget::CreateConfigure _configure;
+    RenderTarget::Configure _configure;
     Vector<SDL_GPUColorTargetInfo> _render_targets;
     Optional<SDL_GPUDepthStencilTargetInfo> _depth_stencil_target;
 };
@@ -177,7 +181,7 @@ public:
 
 class OffscreenRendererSDL3_GPU final : public Renderer {
 public:
-    OffscreenRendererSDL3_GPU(sp<Renderer> renderer, RenderTarget::CreateConfigure configure)
+    OffscreenRendererSDL3_GPU(sp<Renderer> renderer, RenderTarget::Configure configure)
         : _delegate(std::move(renderer)), _pre_draw(sp<RenderCommand>::make<RenderCommandOffscreenPredraw>(std::move(configure))), _post_draw(sp<RenderCommand>::make<RenderCommandOffscreenPostdraw>())
     {
     }
@@ -311,7 +315,7 @@ sp<Camera::Delegate> RendererFactorySDL3_GPU::createCamera(const Ark::RendererCo
     return rcs == Ark::COORDINATE_SYSTEM_LHS ? sp<Camera::Delegate>::make<Camera::DelegateLH_NO>() :  sp<Camera::Delegate>::make<Camera::DelegateRH_NO>();
 }
 
-sp<RenderTarget> RendererFactorySDL3_GPU::createRenderTarget(sp<Renderer> renderer, RenderTarget::CreateConfigure configure)
+sp<RenderTarget> RendererFactorySDL3_GPU::createRenderTarget(sp<Renderer> renderer, RenderTarget::Configure configure)
 {
     return sp<RenderTarget>::make(sp<Renderer>::make<OffscreenRendererSDL3_GPU>(std::move(renderer), std::move(configure)), nullptr);
 }
