@@ -19,7 +19,7 @@ sp<Vec4> Vec4Type::create(sp<Numeric> x, sp<Numeric> y, sp<Numeric> z, sp<Numeri
 
 sp<Numeric> Vec4Type::w(const sp<Vec4>& self)
 {
-    const sp<Vec4Impl> impl = self.tryCast<Vec4Impl>();
+    const sp<Vec4Impl> impl = self.asInstance<Vec4Impl>();
     return impl ? static_cast<sp<Numeric>>(impl->w()) : sp<Numeric>::make<VariableOP1<float, V4>>(Operators::Subscript<V4, float>(3), self);
 }
 

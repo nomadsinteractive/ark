@@ -283,7 +283,7 @@ struct DrawPipelineBgfx final : ResourceBase<::bgfx::ProgramHandle, Pipeline> {
             {
                 const String& name = samplerNames.at(i);
                 const auto& [texture, bindingSet] = drawingContext._bindings->pipelineDescriptor()->samplers().at(i);
-                const sp<TextureBgfx> textureBgfx = texture->delegate().cast<TextureBgfx>();
+                sp<TextureBgfx> textureBgfx = texture->delegate().cast<TextureBgfx>();
                 _sampler_slots.push_back({::bgfx::createUniform(name.c_str(), ::bgfx::UniformType::Sampler), std::move(textureBgfx), textureUint++});
             }
         }

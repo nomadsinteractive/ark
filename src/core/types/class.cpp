@@ -10,10 +10,10 @@ namespace {
 
 class DefaultClassImpl final : public IClass {
 public:
-    Box cast(const Box& box, TypeId id) override {
+    Box cast(const Box& box, const TypeId id) override {
         if(box.typeId() == id)
             return box;
-        return Box();
+        return {};
     }
 };
 
@@ -24,12 +24,12 @@ Class::Class()
 {
 }
 
-Class::Class(TypeId id)
+Class::Class(const TypeId id)
     : _id(id), _name("<Unknown>"), _delegate(new DefaultClassImpl())
 {
 }
 
-Class::Class(TypeId id, const char* name, std::unique_ptr<IClass> delegate)
+Class::Class(const TypeId id, const char* name, std::unique_ptr<IClass> delegate)
     : _id(id), _name(name), _implements{id}, _delegate(std::move(delegate))
 {
 }
@@ -44,7 +44,7 @@ const char* Class::name() const
     return _name;
 }
 
-const std::set<TypeId>& Class::implements() const
+const Set<TypeId>& Class::implements() const
 {
     return _implements;
 }
@@ -69,12 +69,12 @@ Box Class::cast(const Box& box, TypeId id) const
     return _delegate->cast(box, id);
 }
 
-void Class::setImplementation(std::set<TypeId> implementation)
+void Class::setImplementation(Set<TypeId> implementation)
 {
     _implements = std::move(implementation);
 }
 
-Class* Class::ensureClass(TypeId id)
+Class* Class::ensureClass(const TypeId id)
 {
     return ClassManager::instance().ensureClass(id);
 }

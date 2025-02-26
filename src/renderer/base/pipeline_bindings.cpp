@@ -54,7 +54,6 @@ public:
         _pipeline_compute->compute(graphicsContext, computeContext);
     }
 
-private:
     sp<Pipeline> _pipeline_draw;
     sp<Pipeline> _pipeline_compute;
 };
@@ -133,6 +132,14 @@ const sp<Pipeline>& PipelineBindings::ensurePipeline(GraphicsContext& graphicsCo
     return _pipeline;
 }
 
+const sp<Pipeline>& PipelineBindings::ensureRenderPipeline(GraphicsContext& graphicsContext)
+{
+    const sp<Pipeline>& pipeline = ensurePipeline(graphicsContext);
+    if(pipeline.isInstance<PipelineComposite>())
+        return pipeline.cast<PipelineComposite>()->_pipeline_draw;
+    return pipeline;
+}
+
 Map<uint32_t, Buffer::Factory> PipelineBindings::makeDividedBufferFactories() const
 {
     Map<uint32_t, Buffer::Factory> builders;
@@ -150,6 +157,8 @@ void PipelineBindings::doEnsurePipeline(GraphicsContext& graphicsContext)
     _pipeline_descriptor->layout()->preCompile(graphicsContext);
 
     Map<Enum::ShaderStageBit, ShaderPreprocessor::Stage> stages = _pipeline_descriptor->layout()->getPreprocessedStages(graphicsContext.renderContext());
+    ASSERT(!stages.empty());
+
     Map<Enum::ShaderStageBit, String> sources;
     for(auto& [k, v] : stages)
         sources.emplace(k, std::move(v._source));

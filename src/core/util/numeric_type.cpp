@@ -180,21 +180,20 @@ float NumericType::val(const sp<Numeric>& self)
 
 sp<Numeric> NumericType::delegate(const sp<Numeric>& self)
 {
-    const sp<NumericWrapper>& nw = self.tryCast<NumericWrapper>();
+    const sp<NumericWrapper>& nw = self.asInstance<NumericWrapper>();
     DCHECK_WARN(nw, "Non-NumericWrapper instance has no delegate attribute. This should be an error unless you're inspecting it.");
     return nw ? nw->wrapped() : nullptr;
 }
 
 void NumericType::setDelegate(const sp<Numeric>& self, const sp<Numeric>& delegate)
 {
-    const sp<NumericWrapper> nw = self.tryCast<NumericWrapper>();
-    CHECK(nw, "Must be an NumericWrapper instance to set its delegate attribute");
+    const sp<NumericWrapper> nw = self.ensureInstance<NumericWrapper>("Must be an NumericWrapper instance to set its delegate attribute");
     nw->set(delegate);
 }
 
 sp<Observer> NumericType::observer(const sp<Numeric>& self)
 {
-    const sp<WithObserver> wo = self.tryCast<WithObserver>();
+    const sp<WithObserver> wo = self.asInstance<WithObserver>();
     return wo ? wo->observer() : nullptr;
 }
 
@@ -215,7 +214,7 @@ void NumericType::set(const sp<NumericWrapper>& self, sp<Numeric> value)
 
 float NumericType::fix(const sp<Numeric>& self)
 {
-    const sp<NumericWrapper> iw = self.tryCast<NumericWrapper>();
+    const sp<NumericWrapper> iw = self.asInstance<NumericWrapper>();
     DCHECK_WARN(iw, "Calling fix on non-NumericWrapper has no effect.");
     if(iw)
         return iw->fix();

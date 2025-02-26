@@ -84,12 +84,18 @@ public:
         return std::is_same_v<T, U> || getClass()->isInstance(Type<U>::id());
     }
 
-    template<typename U> SharedPtr<U> tryCast() const {
+    template<typename U> SharedPtr<U> asInstance() const {
         if(_ptr) {
             const Box self(Type<T>::id(), getClass(), this, _ptr.get(), [](const void*) {});
             return self.as<U>();
         }
         return nullptr;
+    }
+
+    template<typename U> SharedPtr<U> ensureInstance(const StringView assertMessage = "") const {
+        SharedPtr<U> ptr = asInstance<U>();
+        CHECK(ptr, assertMessage.data());
+        return ptr;
     }
 
     bool unique() const {

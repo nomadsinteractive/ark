@@ -193,8 +193,7 @@ private:
 template<typename T> class Input final : public Widget {
 public:
     Input(std::function<bool(const char*, T*)> func, String label, const sp<Variable<T>>& value)
-        : _func(std::move(func)), _label(std::move(label)), _value(value.template tryCast<VariableWrapper<T>>()) {
-        DCHECK(_value, "Value should be a Wrapper class");
+        : _func(std::move(func)), _label(std::move(label)), _value(value.template ensureInstance<VariableWrapper<T>>("Value should be a Wrapper class")) {
     }
 
     void render() override {
@@ -219,12 +218,10 @@ public:
         T v = _value->val();
         if(_func(_label.c_str(), &v))
         {
-            sp<VariableWrapper<T>> wrapper = _value.template tryCast<VariableWrapper<T>>();
-            if(wrapper)
+            if(sp<VariableWrapper<T>> wrapper = _value.template asInstance<VariableWrapper<T>>())
                 return wrapper->set(v);
 
-            sp<U> impl = _value.template tryCast<U>();
-            CHECK(impl, "Mutablable variable required.");
+            sp<U> impl = _value.template ensureInstance<U>("Mutablable variable required.");
             impl->set(v);
         }
     }
@@ -406,7 +403,7 @@ private:
 }
 
 WidgetBuilder::WidgetBuilder(const sp<Renderer>& imguiRenderer)
-    : _renderer_context(imguiRenderer.tryCast<RendererImgui>()->rendererContext()), _stub(sp<Stub>::make())
+    : _renderer_context(imguiRenderer.ensureInstance<RendererImgui>()->rendererContext()), _stub(sp<Stub>::make())
 {
     push(sp<WidgetGroup>::make());
 }
@@ -636,7 +633,7 @@ sp<Boolean> WidgetBuilder::beginTabItem(String label, const sp<Boolean>& pOpen, 
 {
     DCHECK_WARN(!pOpen || pOpen.isInstance<BooleanWrapper>(), "p_open should be a BooleanWrapper instance");
     sp<BooleanWrapper> activated = sp<BooleanWrapper>::make(false);
-    addWidgetGroupAndPush(sp<WidgetGroup>::make<TabItem>(std::move(label), flags, activated, pOpen.tryCast<BooleanWrapper>()));
+    addWidgetGroupAndPush(sp<WidgetGroup>::make<TabItem>(std::move(label), flags, activated, pOpen.asInstance<BooleanWrapper>()));
     return activated;
 }
 
@@ -654,8 +651,7 @@ void WidgetBuilder::guizmoTransformEdit(const sp<Transform>& transform, sp<Camer
 
 void WidgetBuilder::guizmoViewEdit(const sp<Mat4>& view, sp<Numeric> length, sp<Vec2> position, sp<Vec2> size, sp<Color> backgroundColor)
 {
-    const sp<Mat4Wrapper>& viewWrapper = view.tryCast<Mat4Wrapper>();
-    CHECK(viewWrapper, "Cannot edit non-wrapped view matrix");
+    const sp<Mat4Wrapper>& viewWrapper = view.ensureInstance<Mat4Wrapper>("Cannot edit non-wrapped view matrix");
     sp<Mat4::Impl> viewImpl = sp<Mat4::Impl>::make(viewWrapper->val());
     viewWrapper->reset(viewImpl);
     addWidget(sp<Widget>::make<GuizmoViewEdit>(std::move(viewImpl), std::move(length), std::move(position), std::move(size), std::move(backgroundColor)));

@@ -38,7 +38,7 @@ public:
 
         _context.upload(graphicsContext);
 
-        const sp<Pipeline> pipeline = _context._bindings->ensurePipeline(graphicsContext);
+        const sp<Pipeline>& pipeline = _context._bindings->ensurePipeline(graphicsContext);
         _snippet_draw->preDraw(graphicsContext, _context);
         pipeline->bind(graphicsContext, _context);
         pipeline->draw(graphicsContext, _context);

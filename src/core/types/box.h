@@ -58,7 +58,7 @@ public:
         return _stub ? _ensure_enum_stub()->_value : 0;
     }
 
-    Box cast(TypeId typeId) const {
+    Box cast(const TypeId typeId) const {
         return _class->cast(*this, typeId);
     }
 

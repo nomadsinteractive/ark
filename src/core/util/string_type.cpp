@@ -131,7 +131,7 @@ String StringType::val(const sp<StringVar>& self)
 
 sp<StringVar> StringType::wrapped(const sp<StringVar>& self)
 {
-    const sp<StringVarWrapper>& ib = self.tryCast<StringVarWrapper>();
+    const sp<StringVarWrapper>& ib = self.asInstance<StringVarWrapper>();
     DCHECK_WARN(ib, "Non-TextWrapper instance has no wrapped attribute. This should be an error unless you're inspecting it.");
     return ib ? ib->wrapped() : nullptr;
 }

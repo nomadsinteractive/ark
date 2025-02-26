@@ -31,7 +31,7 @@ public:
     void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
     void compute(GraphicsContext& graphicsContext, const ComputeContext& computeContext) override;
 
-    void bindBuffer(GraphicsContext& graphicsContext, const ShaderLayout& input, const std::map<uint32_t, Buffer>& divisors);
+    void bindBuffer(GraphicsContext& graphicsContext, const ShaderLayout& shaderLayout, const std::map<uint32_t, Buffer>& divisors);
 
     void activeTexture(const Texture& texture, const String& name, uint32_t binding);
 
@@ -60,7 +60,7 @@ public:
     struct Stub;
 
 private:
-    void bindBuffer(GraphicsContext&, const ShaderLayout& input, uint32_t divisor) const;
+    void bindBuffer(GraphicsContext&, const ShaderLayout& shaderLayout, uint32_t divisor) const;
     sp<PipelineOperation> makePipelineOperation(const PipelineDescriptor& bindings) const;
 
 private:

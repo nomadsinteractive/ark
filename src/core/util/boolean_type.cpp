@@ -139,7 +139,7 @@ bool BooleanType::val(const sp<Boolean>& self)
 
 sp<Boolean> BooleanType::wrapped(const sp<Boolean>& self)
 {
-    const sp<BooleanWrapper>& ib = self.tryCast<BooleanWrapper>();
+    const sp<BooleanWrapper>& ib = self.asInstance<BooleanWrapper>();
     DCHECK_WARN(ib, "Non-BooleanWrapper instance has no wrapped attribute. This should be an error unless you're inspecting it.");
     return ib ? ib->wrapped() : nullptr;
 }
@@ -185,7 +185,7 @@ sp<Boolean> BooleanType::dye(sp<Boolean> self, sp<Boolean> condition, String mes
 
 void BooleanType::fix(const sp<Boolean>& self)
 {
-    const sp<BooleanWrapper>& ib = self.tryCast<BooleanWrapper>();
+    const sp<BooleanWrapper>& ib = self.asInstance<BooleanWrapper>();
     DCHECK_WARN(ib, "Calling fix on non-BooleanWrapper has no effect.");
     if(ib)
         ib->fix();

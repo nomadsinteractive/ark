@@ -62,16 +62,14 @@ void EventListenerType::pushEventListener(const sp<EventListener>& self, sp<Even
 
 sp<EventListenerWrapper> EventListenerType::ensureWrapper(const sp<EventListener>& self)
 {
-    sp<EventListenerWrapper> wrapper = self.tryCast<EventListenerWrapper>();
-    CHECK(wrapper, "This EventListener object is not a EventListenerWrapper instance");
-    return wrapper;
+    return self.ensureInstance<EventListenerWrapper>("This EventListener object is not a EventListenerWrapper instance");
 }
 
 sp<EventListenerList> EventListenerType::ensureEventListenerList(const sp<EventListener>& self)
 {
     const sp<EventListenerWrapper> wrapper = ensureWrapper(self);
     sp<EventListener> wrapped = wrapper->wrapped();
-    sp<EventListenerList> ell = wrapped ? wrapped.tryCast<EventListenerList>() : nullptr;
+    sp<EventListenerList> ell = wrapped ? wrapped.asInstance<EventListenerList>() : nullptr;
     if(!ell)
     {
         ell = sp<EventListenerList>::make();

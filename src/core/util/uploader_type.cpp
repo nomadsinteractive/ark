@@ -100,9 +100,7 @@ struct WritableRangeSnapshot final : Writable {
 
 sp<UploaderImpl> ensureImpl(const sp<Uploader>& self)
 {
-    const sp<UploaderImpl> impl = self.tryCast<UploaderImpl>();
-    CHECK(impl, "This object is not a InputImpl instance. Use \"reserve\" method to create an InputImpl instance.");
-    return impl;
+    return self.ensureInstance<UploaderImpl>("This object is not a InputImpl instance. Use \"reserve\" method to create an InputImpl instance.");
 }
 
 }
@@ -211,7 +209,7 @@ sp<Uploader> UploaderType::makeElementIndexInput(Vector<element_index_t> value)
 
 void UploaderType::reset(const sp<Uploader>& self, sp<Uploader> delegate)
 {
-    if(const sp<UploaderImpl> impl = self.tryCast<UploaderImpl>())
+    if(const sp<UploaderImpl> impl = self.asInstance<UploaderImpl>())
         impl->reset(std::move(delegate));
     else
         ensureWrapper(self)->setDelegate(std::move(delegate));
@@ -264,9 +262,7 @@ void UploaderType::markDirty(const sp<Uploader>& self)
 
 sp<UploaderWrapper> UploaderType::ensureWrapper(const sp<Uploader>& self)
 {
-    const sp<UploaderWrapper> wrapper = self.tryCast<UploaderWrapper>();
-    CHECK(wrapper, "This Uploader object is not a UploaderWrapper instance");
-    return wrapper;
+    return self.ensureInstance<UploaderWrapper>("This Uploader object is not a UploaderWrapper instance");
 }
 
 }

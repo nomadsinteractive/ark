@@ -26,8 +26,7 @@ sp<Renderer> RendererType::create(const std::vector<sp<Renderer>>& other)
 
 void RendererType::addRenderer(const sp<Renderer>& self, const sp<Renderer>& renderer, const Traits& traits)
 {
-    DCHECK(self.isInstance<Renderer::Group>(), "Cannot call addRenderer on a none-group renderer");
-    const sp<Renderer::Group> rendererGroup = self.tryCast<Renderer::Group>();
+    const sp<Renderer::Group> rendererGroup = self.ensureInstance<Renderer::Group>("Cannot call addRenderer on a none-group renderer");
     rendererGroup->addRenderer(renderer, traits);
 }
 
@@ -38,8 +37,7 @@ sp<Renderer> RendererType::wrap(const sp<Renderer>& self)
 
 sp<Renderer> RendererType::reset(const sp<Renderer>& self, sp<Renderer> wrapped)
 {
-    const sp<Wrapper<Renderer>> rd = self.tryCast<Wrapper<Renderer>>();
-    CHECK(rd, "Renderer is not an instance of Wrapper<Renderer>");
+    const sp<Wrapper<Renderer>> rd = self.ensureInstance<Wrapper<Renderer>>("Renderer is not an instance of Wrapper<Renderer>");
     return rd->reset(std::move(wrapped));
 }
 

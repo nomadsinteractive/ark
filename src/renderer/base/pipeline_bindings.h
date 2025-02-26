@@ -32,6 +32,7 @@ public:
     const sp<Traits>& attachments() const;
 
     const sp<Pipeline>& ensurePipeline(GraphicsContext& graphicsContext);
+    const sp<Pipeline>& ensureRenderPipeline(GraphicsContext& graphicsContext);
 
     Map<uint32_t, Buffer::Factory> makeDividedBufferFactories() const;
 

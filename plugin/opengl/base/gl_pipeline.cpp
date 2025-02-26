@@ -796,17 +796,17 @@ void GLPipeline::compute(GraphicsContext& graphicsContext, const ComputeContext&
     _pipeline_operation->compute(graphicsContext, computeContext);
 }
 
-void GLPipeline::bindBuffer(GraphicsContext& graphicsContext, const ShaderLayout& input, const Map<uint32_t, Buffer>& divisors)
+void GLPipeline::bindBuffer(GraphicsContext& graphicsContext, const ShaderLayout& shaderLayout, const Map<uint32_t, Buffer>& divisors)
 {
     DCHECK(id(), "GLProgram unprepared");
-    bindBuffer(graphicsContext, input, 0);
+    bindBuffer(graphicsContext, shaderLayout, 0);
     for(const auto& [i, j] : divisors)
     {
         if(!j.id())
             j.upload(graphicsContext);
 
         const volatile GLBufferBinder binder(GL_ARRAY_BUFFER, static_cast<GLuint>(j.id()));
-        bindBuffer(graphicsContext, input, i);
+        bindBuffer(graphicsContext, shaderLayout, i);
     }
 }
 
@@ -820,9 +820,9 @@ const GLPipeline::GLUniform& GLPipeline::getUniform(const String& name) const
     return _stub->getUniform(name);
 }
 
-void GLPipeline::bindBuffer(GraphicsContext& /*graphicsContext*/, const ShaderLayout& input, uint32_t divisor) const
+void GLPipeline::bindBuffer(GraphicsContext& /*graphicsContext*/, const ShaderLayout& shaderLayout, const uint32_t divisor) const
 {
-    const ShaderLayout::StreamLayout& stream = input.getStreamLayout(divisor);
+    const ShaderLayout::StreamLayout& stream = shaderLayout.getStreamLayout(divisor);
     for(const auto& i : stream.attributes().values())
     {
         const GLAttribute& glAttribute = _stub->getAttribute(i.name());
