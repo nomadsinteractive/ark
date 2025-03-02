@@ -235,7 +235,7 @@ VkPipelineColorBlendAttachmentState makeColorBlendAttachmentState(const Pipeline
 
 }
 
-VKPipeline::VKPipeline(const PipelineDescriptor& bindings, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, std::map<Enum::ShaderStageBit, String> stages)
+VKPipeline::VKPipeline(const PipelineDescriptor& bindings, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, Map<Enum::ShaderStageBit, String> stages)
     : _pipeline_descriptor(bindings), _recycler(recycler), _renderer(renderer), _baked_renderer(makeBakedRenderer(bindings)), _layout(VK_NULL_HANDLE), _descriptor_set_layout(VK_NULL_HANDLE),
       _descriptor_set(VK_NULL_HANDLE), _pipeline(VK_NULL_HANDLE), _stages(std::move(stages)), _rebind_needed(true), _is_compute_pipeline(false)
 {
@@ -369,7 +369,7 @@ void VKPipeline::setupDescriptorSetLayout(const PipelineDescriptor& pipelineDesc
     const sp<VKDevice>& device = _renderer->device();
 
     const ShaderLayout& shaderLayout = pipelineDescriptor.shaderLayout();
-    std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings;
+    Vector<VkDescriptorSetLayoutBinding> setLayoutBindings;
     uint32_t binding = 0;
     for(const sp<ShaderLayout::UBO>& i : shaderLayout.ubos())
     {
@@ -414,7 +414,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
     VKUtil::checkResult(vkResetDescriptorPool(device->vkLogicalDevice(), _descriptor_pool->vkDescriptorPool(), 0));
     VKUtil::checkResult(vkAllocateDescriptorSets(device->vkLogicalDevice(), &allocInfo, &_descriptor_set));
 
-    std::vector<VkWriteDescriptorSet> writeDescriptorSets;
+    Vector<VkWriteDescriptorSet> writeDescriptorSets;
     uint32_t binding = 0;
 
     _ubos.clear();
@@ -424,7 +424,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
         if(shouldStageNeedBinded(i->_stages))
         {
             sp<VKBuffer> ubo = sp<VKBuffer>::make(_renderer, _recycler, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-            ubo->uploadBuffer(graphicsContext, sp<UploaderArray<uint8_t>>::make(std::vector<uint8_t>(i->size(), 0)));
+            ubo->uploadBuffer(graphicsContext, sp<UploaderArray<uint8_t>>::make(Vector<uint8_t>(i->size(), 0)));
             writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
                                               _descriptor_set,
                                               VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
@@ -501,13 +501,13 @@ void VKPipeline::setupGraphicsPipeline(GraphicsContext& graphicsContext, const V
     const VkPipelineColorBlendAttachmentState colorBlendAttachmentState = makeColorBlendAttachmentState(traits);
     const VkPipelineMultisampleStateCreateInfo multisampleState = vks::initializers::pipelineMultisampleStateCreateInfo(VK_SAMPLE_COUNT_1_BIT, 0);
 
-    std::vector<VkDynamicState> dynamicStateEnables = { VK_DYNAMIC_STATE_VIEWPORT };
+    Vector<VkDynamicState> dynamicStateEnables = { VK_DYNAMIC_STATE_VIEWPORT };
 
     if(_pipeline_descriptor.hasFlag(PipelineDescriptor::FLAG_DYNAMIC_SCISSOR, PipelineDescriptor::FLAG_DYNAMIC_SCISSOR_BITMASK))
         dynamicStateEnables.push_back(VK_DYNAMIC_STATE_SCISSOR);
     const VkPipelineDynamicStateCreateInfo dynamicState = vks::initializers::pipelineDynamicStateCreateInfo(dynamicStateEnables.data(), static_cast<uint32_t>(dynamicStateEnables.size()), 0);
 
-    std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
+    Vector<VkPipelineShaderStageCreateInfo> shaderStages;
     for(const auto& [k, v] : _stages)
         shaderStages.push_back(VKUtil::createShader(device->vkLogicalDevice(), v, k));
 
@@ -515,7 +515,7 @@ void VKPipeline::setupGraphicsPipeline(GraphicsContext& graphicsContext, const V
     VKGraphicsContext::State& state = vkGraphicsContext->currentState();
     VkGraphicsPipelineCreateInfo pipelineCreateInfo = vks::initializers::pipelineCreateInfo(_layout, state.acquireRenderPass(_pipeline_descriptor), 0);
 
-    std::vector<VkPipelineColorBlendAttachmentState> blendAttachmentStates;
+    Vector<VkPipelineColorBlendAttachmentState> blendAttachmentStates;
     uint32_t colorAttachmentCount = std::max<uint32_t>(_pipeline_descriptor.layout()->colorAttachmentCount(), state.renderPassPhrase()->colorAttachmentCount());
     for(uint32_t i = 0; i < colorAttachmentCount; ++i)
     {
@@ -600,7 +600,7 @@ void VKPipeline::buildComputeCommandBuffer(GraphicsContext& graphicsContext, con
 
 sp<VKDescriptorPool> VKPipeline::makeDescriptorPool() const
 {
-    std::map<VkDescriptorType, uint32_t> poolSizes;
+    Map<VkDescriptorType, uint32_t> poolSizes;
     if(!_pipeline_descriptor.shaderLayout()->ubos().empty())
         poolSizes[VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER] = static_cast<uint32_t>(_pipeline_descriptor.shaderLayout()->ubos().size());
     if(!_pipeline_descriptor.shaderLayout()->ssbos().empty())
@@ -612,7 +612,7 @@ sp<VKDescriptorPool> VKPipeline::makeDescriptorPool() const
     return sp<VKDescriptorPool>::make(_recycler, _renderer->device(), std::move(poolSizes));
 }
 
-void VKPipeline::bindUBOShapshots(GraphicsContext& graphicsContext, const std::vector<RenderLayerSnapshot::UBOSnapshot>& uboSnapshots) const
+void VKPipeline::bindUBOShapshots(GraphicsContext& graphicsContext, const Vector<RenderLayerSnapshot::UBOSnapshot>& uboSnapshots) const
 {
     DCHECK(uboSnapshots.size() == _ubos.size(), "UBO Snapshot and UBO Layout mismatch: %d vs %d", uboSnapshots.size(), _ubos.size());
 

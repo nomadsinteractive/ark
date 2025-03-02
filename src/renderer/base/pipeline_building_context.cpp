@@ -87,7 +87,7 @@ Attribute makePredefinedAttribute(const String& name, const String& type)
     if(layoutType == Attribute::USAGE_POSITION)
     {
         if(type == "int")
-            return {Attribute::USAGE_POSITION, "a_Position", Attribute::TYPE_INTEGER, type, 1, false};
+            return {Attribute::USAGE_POSITION, "a_Position", Attribute::TYPE_INT, type, 1, false};
         CHECK(type == "vec2" || type == "vec3" || type == "vec4", "Unacceptable Position type: '%s', must be in [int, vec2, vec3, vec4]", type.c_str());
         return {Attribute::USAGE_POSITION, "a_Position", Attribute::TYPE_FLOAT, type, std::min<uint32_t>(3, static_cast<uint32_t>(type.at(3) - '0')), false};
     }

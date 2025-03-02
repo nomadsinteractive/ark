@@ -35,23 +35,36 @@ public:
     }
 
 private:
-    std::vector<T> _data;
+    Vector<T> _data;
 };
+
+String findNearestAttribute(const ShaderLayout& shaderLayout, const String& name)
+{
+    String nearest;
+    constexpr size_t nd = std::numeric_limits<size_t>::max();
+    for(const auto& [i, j] : shaderLayout.streamLayouts())
+    {
+        const auto [value, distance] = Math::levensteinNearest(name, j.attributes().keys());
+        if(distance < nd)
+            nearest = std::move(value);
+    }
+    return nearest;
+}
 
 }
 
-Varyings::Varyings(const ShaderLayout& pipelineInput)
+Varyings::Varyings(const ShaderLayout& shaderLayout)
 {
-    for(const auto& [k, v] : pipelineInput.streamLayouts())
+    for(const auto& [k, v] : shaderLayout.streamLayouts())
     {
         for(const auto& [attrname, attr] : v.attributes())
             if(!(k == 0 && (attr.offset() == 0 || attr.offset() == 12)))  // slots with offset 0 and 12 in divisor 0 will always be the "a_Position" & "a_UV" attribute, which don't need to be recorded here.
-                _slots.insert({attrname, Slot(sp<UploaderSlotDefault<uint8_t>>::make(attr.size()), k, attr.offset())});
+                _slots.insert({attrname, Slot{sp<Uploader>::make<UploaderSlotDefault<uint8_t>>(attr.size()), k, static_cast<int32_t>(attr.offset())}});
         _slot_strides[k] = v.stride();
     }
 }
 
-bool Varyings::update(uint64_t timestamp)
+bool Varyings::update(const uint64_t timestamp)
 {
     bool dirty = _timestamp.update(timestamp);
     for(const auto& [i, j] : _sub_properties)
@@ -74,14 +87,14 @@ void Varyings::setSlotInput(const String& name, sp<Uploader> input)
 {
     if(const auto iter = _slots.find(name); iter == _slots.end())
     {
-        _slots.emplace(name, std::move(input));
+        _slots.emplace(name, Slot{std::move(input)});
         _slot_strides.clear();
     }
     else
     {
         const Slot& preslot = iter->second;
         CHECK(preslot._uploader->size() == input->size(), "Replacing existing varying \"%s\"(%d) with a different size value(%d)", name.c_str(), preslot._uploader->size(), input->size());
-        iter->second = Slot(std::move(input), preslot._divisor, preslot._offset);
+        iter->second = {std::move(input), preslot._divisor, preslot._offset};
     }
 }
 
@@ -121,19 +134,6 @@ sp<Varyings> Varyings::subscribe(const String& name)
     if(!subProp)
         subProp = sp<Varyings>::make();
     return subProp;
-}
-
-static String findNearestAttribute(const ShaderLayout& pipelineInput, const String& name)
-{
-    String nearest;
-    constexpr size_t nd = std::numeric_limits<size_t>::max();
-    for(const auto& [i, j] : pipelineInput.streamLayouts())
-    {
-        const auto [value, distance] = Math::levensteinNearest(name, j.attributes().keys());
-        if(distance < nd)
-            nearest = std::move(value);
-    }
-    return nearest;
 }
 
 Varyings::Snapshot Varyings::snapshot(const ShaderLayout& pipelineInput, Allocator& allocator)
@@ -191,18 +191,13 @@ sp<Varyings> Varyings::BUILDER::build(const Scope& args)
     return varyings;
 }
 
-Varyings::Slot::Slot(sp<Uploader> uploader, uint32_t divisor, int32_t offset)
-    : _uploader(std::move(uploader)), _divisor(divisor), _offset(offset)
-{
-}
-
 Varyings::BUILDER::InputBuilder::InputBuilder(BeanFactory& factory, const document& manifest)
     : _name(Documents::ensureAttribute(manifest, constants::NAME)), _input(factory.ensureBuilderByTypeValue<Uploader>(Documents::ensureAttribute(manifest, constants::TYPE),
                                                                                                                                Documents::ensureAttribute(manifest, constants::VALUE)))
 {
 }
 
-Varyings::Snapshot::Snapshot(Array<Varyings::Divided>::Borrowed buffers)
+Varyings::Snapshot::Snapshot(const Array<Divided>::Borrowed& buffers)
     : _buffers(buffers)
 {
 }
@@ -233,7 +228,7 @@ Varyings::Divided Varyings::Snapshot::getDivided(uint32_t divisor) const
     return Varyings::Divided();
 }
 
-void Varyings::Snapshot::snapshotSubProperties(const std::map<String, sp<Varyings>>& subProperties, const ShaderLayout& pipelineInput, Allocator& allocator)
+void Varyings::Snapshot::snapshotSubProperties(const Map<String, sp<Varyings>>& subProperties, const ShaderLayout& pipelineInput, Allocator& allocator)
 {
     for(const auto& [i, j] : subProperties)
         _sub_properties[i.hash()] = j->snapshot(pipelineInput, allocator);

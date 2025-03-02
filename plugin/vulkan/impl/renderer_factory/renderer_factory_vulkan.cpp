@@ -37,7 +37,7 @@ namespace ark::plugin::vulkan {
 
 namespace {
 
-void setVersion(Enum::RendererVersion version, RenderEngineContext& vkContext)
+void setVersion(const Enum::RendererVersion version, RenderEngineContext& vkContext)
 {
     LOGD("Choose Vulkan Version = %d", version);
     vkContext.setSnippetFactory(sp<SnippetFactory>::make<SnippetFactoryVulkan>());
@@ -75,7 +75,7 @@ void RendererFactoryVulkan::onSurfaceCreated(RenderEngine& renderEngine)
     _renderer->_render_target = sp<VKSwapChain>::make(renderEngine, _renderer->_device);
 }
 
-sp<Buffer::Delegate> RendererFactoryVulkan::createBuffer(Buffer::Type type, Buffer::Usage usage)
+sp<Buffer::Delegate> RendererFactoryVulkan::createBuffer(const Buffer::Type type, const Buffer::Usage usage)
 {
     constexpr VkBufferUsageFlags usagesFlags[Buffer::TYPE_COUNT] = {VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT};
     VkMemoryPropertyFlags flags = 0;
@@ -88,7 +88,7 @@ sp<Buffer::Delegate> RendererFactoryVulkan::createBuffer(Buffer::Type type, Buff
     return sp<VKBuffer>::make(_renderer, Ark::instance().renderController()->recycler(), usagesFlags[type], flags);
 }
 
-sp<Camera::Delegate> RendererFactoryVulkan::createCamera(Ark::RendererCoordinateSystem rcs)
+sp<Camera::Delegate> RendererFactoryVulkan::createCamera(const Ark::RendererCoordinateSystem rcs)
 {
     return rcs == Ark::COORDINATE_SYSTEM_RHS ? sp<Camera::Delegate>::make<Camera::DelegateRH_ZO>() : sp<Camera::Delegate>::make<Camera::DelegateLH_ZO>();
 }

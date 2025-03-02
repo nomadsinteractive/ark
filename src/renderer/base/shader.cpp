@@ -42,7 +42,7 @@ Shader::StageManifest::StageManifest(BeanFactory& factory, const document& manif
 }
 
 Shader::Shader(sp<PipelineFactory> pipelineFactory, sp<RenderController> renderController, sp<PipelineLayout> pipelineLayout, PipelineDescriptor::Parameters bindingParams)
-    : _pipeline_factory(std::move(pipelineFactory)), _render_controller(std::move(renderController)), _pipeline_layout(std::move(pipelineLayout)), _pipeline_input(_pipeline_layout->shaderLayout()), _descriptor_params(std::move(bindingParams))
+    : _pipeline_factory(std::move(pipelineFactory)), _render_controller(std::move(renderController)), _pipeline_layout(std::move(pipelineLayout)), _layout(_pipeline_layout->shaderLayout()), _descriptor_params(std::move(bindingParams))
 {
     _pipeline_layout->initialize(*this);
 }
@@ -58,9 +58,9 @@ sp<Builder<Shader>> Shader::fromDocument(BeanFactory& factory, const document& m
     return builder<Shader>::make<BUILDER_IMPL>(factory, manifest, resourceLoaderContext, defaultCamera ? builder<Camera>::make<Builder<Camera>::Prebuilt>(defaultCamera) : nullptr, std::move(stageManifests));
 }
 
-sp<RenderLayerSnapshot::BufferObject> Shader::takeBufferSnapshot(const RenderRequest& renderRequest, bool isComputeStage) const
+sp<RenderLayerSnapshot::BufferObject> Shader::takeBufferSnapshot(const RenderRequest& renderRequest, const bool isComputeStage) const
 {
-    return _pipeline_input->takeBufferSnapshot(renderRequest, isComputeStage);
+    return _layout->takeBufferSnapshot(renderRequest, isComputeStage);
 }
 
 const sp<PipelineFactory>& Shader::pipelineFactory() const
@@ -68,9 +68,9 @@ const sp<PipelineFactory>& Shader::pipelineFactory() const
     return _pipeline_factory;
 }
 
-const sp<ShaderLayout>& Shader::input() const
+const sp<ShaderLayout>& Shader::layout() const
 {
-    return _pipeline_input;
+    return _layout;
 }
 
 const sp<RenderController>& Shader::renderController() const
@@ -80,10 +80,10 @@ const sp<RenderController>& Shader::renderController() const
 
 void Shader::setCamera(const Camera& camera)
 {
-    _pipeline_input->_camera.assign(camera);
+    _layout->_camera.assign(camera);
 }
 
-const sp<PipelineLayout>& Shader::layout() const
+const sp<PipelineLayout>& Shader::pipelineLayout() const
 {
     return _pipeline_layout;
 }
@@ -101,7 +101,7 @@ sp<PipelineBindings> Shader::makeBindings(Buffer vertices, Enum::RenderMode mode
 std::map<uint32_t, Buffer> Shader::makeDivivedBuffers(const std::map<uint32_t, sp<Uploader>>& uploaders) const
 {
     std::map<uint32_t, Buffer> dividedBuffers;
-    for(const auto& [divisor, _] : _pipeline_input->streamLayouts())
+    for(const auto& [divisor, _] : _layout->streamLayouts())
         if(divisor != 0)
         {
             CHECK(dividedBuffers.find(divisor) == dividedBuffers.end(), "Duplicated stream divisor: %d", divisor);

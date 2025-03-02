@@ -284,9 +284,13 @@ void ShaderPreprocessor::insertUBOStruct(const ShaderLayout::UBO& ubo, const int
 
 bool ShaderPreprocessor::hasUBO(const ShaderLayout::UBO& ubo) const
 {
-    for(const auto& i : ubo.uniforms().values())
-        if(_main.contains(i->name()))
-            return true;
+    if(ubo._stages.has(_shader_stage))
+    {
+        for(const auto& i : ubo.uniforms().values())
+            if(!_main.contains(i->name()))
+                return false;
+        return true;
+    }
     return false;
 }
 

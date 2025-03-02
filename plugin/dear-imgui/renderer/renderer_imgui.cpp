@@ -221,7 +221,7 @@ void RendererImgui::MyImGuiRenderFunction(const RenderRequest& renderRequest, Im
         memcpy(ib.buf(), cmd_list->IdxBuffer.Data, ib.length());
 
         uint32_t offset = 0;
-        const sp<RenderLayerSnapshot::BufferObject> bo = _shader->input()->takeBufferSnapshot(renderRequest, false);
+        const sp<RenderLayerSnapshot::BufferObject> bo = _shader->layout()->takeBufferSnapshot(renderRequest, false);
         for (int j = 0; j < cmd_list->CmdBuffer.Size; j++)
         {
             const ImDrawCmd* pcmd = &cmd_list->CmdBuffer[j];

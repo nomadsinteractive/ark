@@ -21,18 +21,18 @@
 
 namespace ark::plugin::vulkan {
 
-void VKUtil::checkResult(VkResult result)
+void VKUtil::checkResult(const VkResult result)
 {
     CHECK(result == VK_SUCCESS, "Vulkan error: %s", vks::tools::errorString(result).c_str());
 }
 
-VkPipelineShaderStageCreateInfo VKUtil::loadShader(VkDevice device, const String& resid, Enum::ShaderStageBit stage)
+VkPipelineShaderStageCreateInfo VKUtil::loadShader(const VkDevice device, const String& resid, Enum::ShaderStageBit stage)
 {
     const String content = Strings::loadFromReadable(Ark::instance().openAsset(resid));
     return createShader(device, content, stage);
 }
 
-VkPipelineShaderStageCreateInfo VKUtil::createShader(VkDevice device, const String& source, Enum::ShaderStageBit stage)
+VkPipelineShaderStageCreateInfo VKUtil::createShader(const VkDevice device, const String& source, Enum::ShaderStageBit stage)
 {
     const std::vector<uint32_t> spirv = RenderUtil::compileSPIR(source, stage, Enum::RENDERING_BACKEND_BIT_VULKAN);
     VkShaderModuleCreateInfo moduleCreateInfo = {VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
@@ -107,9 +107,14 @@ VkFormat VKUtil::toAttributeFormat(Attribute::Type type, uint32_t length)
                 constexpr VkFormat formats[4] = {VK_FORMAT_R8_UNORM, VK_FORMAT_R8G8_UNORM, VK_FORMAT_R8G8B8_UNORM, VK_FORMAT_R8G8B8A8_UNORM};
                 return formats[length - 1];
             }
-            case Attribute::TYPE_INTEGER:
+            case Attribute::TYPE_INT:
             {
                 constexpr VkFormat formats[4] = {VK_FORMAT_R32_SINT, VK_FORMAT_R32G32_SINT, VK_FORMAT_R32G32B32_SINT, VK_FORMAT_R32G32B32A32_SINT};
+                return formats[length - 1];
+            }
+            case Attribute::TYPE_UINT:
+            {
+                constexpr VkFormat formats[4] = {VK_FORMAT_R32_UINT, VK_FORMAT_R32G32_UINT, VK_FORMAT_R32G32B32_UINT, VK_FORMAT_R32G32B32A32_UINT};
                 return formats[length - 1];
             }
             case Attribute::TYPE_SHORT:

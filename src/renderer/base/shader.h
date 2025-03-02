@@ -40,8 +40,8 @@ public:
     const sp<RenderController>& renderController() const;
 
     void setCamera(const Camera& camera);
-    const sp<ShaderLayout>& input() const;
-    const sp<PipelineLayout>& layout() const;
+    const sp<ShaderLayout>& layout() const;
+    const sp<PipelineLayout>& pipelineLayout() const;
 
     const PipelineDescriptor::Parameters& descriptorParams() const;
 
@@ -69,7 +69,7 @@ public:
     };
 
 //  [[plugin::resource-loader]]
-    class BUILDER : public Builder<Shader> {
+    class BUILDER final : public Builder<Shader> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
@@ -86,7 +86,7 @@ private:
     sp<PipelineFactory> _pipeline_factory;
     sp<RenderController> _render_controller;
     sp<PipelineLayout> _pipeline_layout;
-    sp<ShaderLayout> _pipeline_input;
+    sp<ShaderLayout> _layout;
 
     PipelineDescriptor::Parameters _descriptor_params;
 };

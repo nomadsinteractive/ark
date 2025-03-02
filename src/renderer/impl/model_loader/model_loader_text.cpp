@@ -33,7 +33,7 @@ ModelLoaderText::ModelLoaderText(sp<Alphabet> alphabet, sp<Atlas> atlas, const F
 
 sp<RenderCommandComposer> ModelLoaderText::makeRenderCommandComposer(const Shader& shader)
 {
-    _default_glyph_bundle->_is_lhs = shader.input()->camera().isLHS();
+    _default_glyph_bundle->_is_lhs = shader.layout()->camera().isLHS();
     return Ark::instance().renderController()->makeDrawElementsIncremental(Global<Constants>()->MODEL_UNIT_QUAD_RHS);
 }
 

@@ -20,7 +20,7 @@ ModelLoaderNinePatchQuads::ModelLoaderNinePatchQuads(sp<Atlas> atlas)
 
 sp<RenderCommandComposer> ModelLoaderNinePatchQuads::makeRenderCommandComposer(const Shader& shader)
 {
-    _is_lhs = shader.input()->camera().isLHS();
+    _is_lhs = shader.layout()->camera().isLHS();
     return Ark::instance().renderController()->makeDrawElementsIncremental(_unit_model);
 }
 

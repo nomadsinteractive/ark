@@ -95,16 +95,16 @@ const Vector<ShaderLayout::SSBO>& ShaderLayout::ssbos() const
     return _ssbos;
 }
 
-sp<RenderLayerSnapshot::BufferObject> ShaderLayout::takeBufferSnapshot(const RenderRequest& renderRequest, bool isComputeStage) const
+sp<RenderLayerSnapshot::BufferObject> ShaderLayout::takeBufferSnapshot(const RenderRequest& renderRequest, const bool isComputeStage) const
 {
     Vector<RenderLayerSnapshot::UBOSnapshot> uboSnapshot;
     for(const sp<UBO>& i : _ubos)
-        if(isComputeStage ? i->_stages.has(Enum::SHADER_STAGE_BIT_COMPUTE) : i->_stages != Enum::SHADER_STAGE_BIT_COMPUTE)
+        if(isComputeStage ? i->_stages.has(Enum::SHADER_STAGE_BIT_COMPUTE) : (i->_stages.has(Enum::SHADER_STAGE_BIT_VERTEX) || i->_stages.has(Enum::SHADER_STAGE_BIT_FRAGMENT)))
             uboSnapshot.push_back(i->snapshot(renderRequest));
 
     Vector<std::pair<uint32_t, Buffer::Snapshot>> ssboSnapshot;
     for(const SSBO& i : _ssbos)
-        if(isComputeStage ? i._stages.has(Enum::SHADER_STAGE_BIT_COMPUTE) : i._stages != Enum::SHADER_STAGE_BIT_COMPUTE)
+        if(isComputeStage ? i._stages.has(Enum::SHADER_STAGE_BIT_COMPUTE) : (i._stages.has(Enum::SHADER_STAGE_BIT_VERTEX) || i._stages.has(Enum::SHADER_STAGE_BIT_FRAGMENT)))
             ssboSnapshot.emplace_back(i._binding, i._buffer.snapshot());
 
     return sp<RenderLayerSnapshot::BufferObject>::make(RenderLayerSnapshot::BufferObject{std::move(uboSnapshot), std::move(ssboSnapshot)});

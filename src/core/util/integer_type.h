@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/impl/variable/variable_wrapper.h"
@@ -97,9 +95,6 @@ public:
     static sp<Integer> wrap(const sp<Integer>& self);
 //  [[script::bindings::classmethod]]
     static sp<Integer> freeze(const sp<Integer>& self);
-
-//[[script::bindings::classmethod]]
-    static sp<Integer> animate(const sp<Integer>& self, const sp<Numeric>& interval = nullptr, const sp<Numeric>& duration = nullptr);
 
 //  [[script::bindings::classmethod]]
     static sp<Integer> expect(sp<Integer> self, sp<Boolean> expectation, sp<Observer> observer = nullptr);

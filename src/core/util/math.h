@@ -238,9 +238,6 @@ public:
     [[deprecated]]
 //  [[script::bindings::auto]]
     static V3 quadratic(float a, float b, float c);
-    [[deprecated]]
-//  [[script::bindings::auto]]
-    static V2 projectile(float dx, float dy, float v, float g, uint32_t sid);
 
     static uint32_t hash32(uint32_t x);
     static uint32_t hash64(uint64_t key);

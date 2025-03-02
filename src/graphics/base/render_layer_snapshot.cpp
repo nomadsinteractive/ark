@@ -16,7 +16,7 @@
 namespace ark {
 
 RenderLayerSnapshot::RenderLayerSnapshot(const RenderRequest& renderRequest, const sp<RenderLayer::Stub>& stub)
-    : _stub(stub), _index_count(0), _buffer_object(_stub->_shader->input()->takeBufferSnapshot(renderRequest, false)), _vertices_dirty(false)
+    : _stub(stub), _index_count(0), _buffer_object(_stub->_shader->layout()->takeBufferSnapshot(renderRequest, false)), _vertices_dirty(false)
 {
     if(_stub->_scissor && _stub->_scissor->update(renderRequest.timestamp()))
         _scissor = Rect(_stub->_scissor->val());
@@ -38,7 +38,7 @@ bool RenderLayerSnapshot::needsReload() const
 
 const sp<ShaderLayout>& RenderLayerSnapshot::pipelineInput() const
 {
-    return _stub->_shader->input();
+    return _stub->_shader->layout();
 }
 
 void RenderLayerSnapshot::addLayerContext(const RenderRequest& renderRequest, Vector<sp<LayerContext>>& layerContexts)
@@ -100,9 +100,9 @@ sp<RenderCommand> RenderLayerSnapshot::toRenderCommand(const RenderRequest& rend
 
 bool RenderLayerSnapshot::doAddLayerContext(const RenderRequest& renderRequest, LayerContext& layerContext)
 {
-    const ShaderLayout& pipelineInput = _stub->_shader->input();
+    const ShaderLayout& shaderLayout = _stub->_shader->layout();
 
-    _layer_context_snapshots.push_back(layerContext.snapshot(RenderLayer(_stub), renderRequest, pipelineInput));
+    _layer_context_snapshots.push_back(layerContext.snapshot(RenderLayer(_stub), renderRequest, shaderLayout));
     const LayerContextSnapshot& layerSnapshot = _layer_context_snapshots.back();
 
     const bool reload = needsReload();

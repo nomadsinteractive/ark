@@ -160,7 +160,7 @@ SDL_GPUVertexElementFormat toVertexElementFormat(const Attribute& attribute)
                 if(length == 4)
                     return attribute.normalized()?  SDL_GPU_VERTEXELEMENTFORMAT_BYTE4_NORM : SDL_GPU_VERTEXELEMENTFORMAT_BYTE4;
                 break;
-            case Attribute::TYPE_INTEGER:
+            case Attribute::TYPE_INT:
             {
                 constexpr SDL_GPUVertexElementFormat formats[4] = {SDL_GPU_VERTEXELEMENTFORMAT_INT, SDL_GPU_VERTEXELEMENTFORMAT_INT2, SDL_GPU_VERTEXELEMENTFORMAT_INT3, SDL_GPU_VERTEXELEMENTFORMAT_INT4};
                 return formats[length - 1];

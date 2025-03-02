@@ -279,8 +279,10 @@ Attribute RenderUtil::makePredefinedAttribute(const String& name, const String& 
         return {layoutType, name, Attribute::TYPE_FLOAT, type, 2, false};
     if(type == "float")
         return {layoutType, name, Attribute::TYPE_FLOAT, type, 1, false};
-    if(type == "int" || type == "uint")
-        return {layoutType, name, Attribute::TYPE_INTEGER, type, 1, false};
+    if(type == "int")
+        return {layoutType, name, Attribute::TYPE_INT, type, 1, false};
+    if(type == "uint")
+        return {layoutType, name, Attribute::TYPE_UINT, type, 1, false};
     if(type == "vec4")
         return {layoutType, name, Attribute::TYPE_FLOAT, type, 4, false};
     if(type == "vec4b")
@@ -291,13 +293,15 @@ Attribute RenderUtil::makePredefinedAttribute(const String& name, const String& 
         return {layoutType, name, Attribute::TYPE_UBYTE, type, 1, false};
     if(type == "mat4")
         return {layoutType, name, Attribute::TYPE_FLOAT, type, 16, false};
-    if(type == "ivec4" || type == "uvec4")
-        return {layoutType, name, Attribute::TYPE_INTEGER, type, 4, false};
+    if(type == "ivec4")
+        return {layoutType, name, Attribute::TYPE_INT, type, 4, false};
+    if(type == "uvec4")
+        return {layoutType, name, Attribute::TYPE_UINT, type, 4, false};
     DFATAL("Unknown attribute type \"%s\"", type.c_str());
     return {};
 }
 
-uint32_t RenderUtil::hash(const element_index_t* buf, size_t len)
+uint32_t RenderUtil::hash(const element_index_t* buf, const size_t len)
 {
     uint32_t h = 0;
     for(size_t i = 0; i < len; ++i)
@@ -383,9 +387,9 @@ Vector<uint32_t> RenderUtil::compileSPIR(const StringView source, Enum::ShaderSt
             break;
     }
 #ifdef ARK_PLATFORM_DARWIN
-    shader.setEnvTarget(glslang::EShTargetSpv, toTargetLanguageVersion(targetLanguageVersion, glslang::EShTargetSpv_1_6));
+    shader.setEnvTarget(glslang::EShTargetSpv, toTargetLanguageVersion(targetLanguageVersion, glslang::EShTargetSpv_1_5));
 #else
-    shader.setEnvTarget(glslang::EShTargetSpv, toTargetLanguageVersion(targetLanguageVersion, glslang::EShTargetSpv_1_6));
+    shader.setEnvTarget(glslang::EShTargetSpv, toTargetLanguageVersion(targetLanguageVersion, glslang::EShTargetSpv_1_5));
 #endif
 
     if(!shader.parse(&initializer->builtInResource(), 100, false, EShMsgDefault))

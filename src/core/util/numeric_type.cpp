@@ -10,7 +10,6 @@
 #include "core/impl/variable/fence.h"
 #include "core/impl/variable/integral.h"
 #include "core/impl/variable/lerp.h"
-#include "core/impl/variable/periodic.h"
 #include "core/impl/variable/second_order_dynamics.h"
 #include "core/impl/variable/variable_dyed.h"
 #include "core/impl/variable/variable_op1.h"
@@ -278,11 +277,6 @@ sp<Numeric> NumericType::sod(sp<Numeric> self, float d0, float k, float z, float
     if(!t)
         t = Ark::instance().appClock()->duration();
     return sp<Numeric>::make<SecondOrderDynamics<float>>(std::move(self), d0, std::move(t), k, z, r);
-}
-
-sp<Numeric> NumericType::periodic(const sp<Numeric>& self, const sp<Numeric>& interval, const sp<Numeric>& duration)
-{
-    return sp<Numeric>::make<Periodic<float>>(self, interval ? interval : sp<Numeric>::make<Numeric::Const>(1.0f / 24), duration ? duration : Ark::instance().appClock()->duration());
 }
 
 sp<Numeric> NumericType::modFloor(const sp<Numeric>& self, const sp<Numeric>& mod)

@@ -37,7 +37,7 @@ namespace {
             return ::bgfx::AttribType::Uint8;
         case Attribute::TYPE_FLOAT:
             return ::bgfx::AttribType::Float;
-        case Attribute::TYPE_INTEGER:
+        case Attribute::TYPE_INT:
             return ::bgfx::AttribType::Float;
         case Attribute::TYPE_SHORT:
             return ::bgfx::AttribType::Int16;

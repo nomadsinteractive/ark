@@ -292,7 +292,7 @@ void RenderObject::onWire(const WiringContext& context, const Box& self)
     {
         layer->addRenderObject(self.as<RenderObject>());
 
-        if(const sp<WithId>& withId = context.getComponent<WithId>(); withId && layer->shader() && layer->shader()->input()->getAttribute("Id"))
+        if(const sp<WithId>& withId = context.getComponent<WithId>(); withId && layer->shader() && layer->shader()->layout()->getAttribute("Id"))
             varyings()->setProperty(constants::ID, sp<Integer>::make<Integer::Const>(withId->id()));
     }
 }

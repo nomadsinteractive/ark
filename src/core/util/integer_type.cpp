@@ -9,7 +9,6 @@
 #include "core/impl/variable/at_most.h"
 #include "core/impl/variable/clamp.h"
 #include "core/impl/variable/fence.h"
-#include "core/impl/variable/periodic.h"
 #include "core/impl/variable/variable_dyed.h"
 #include "core/impl/variable/variable_expect.h"
 #include "core/impl/variable/variable_wrapper.h"
@@ -247,11 +246,6 @@ int32_t IntegerType::toRepeat(const String& repeat)
 sp<Integer> IntegerType::repeat(Vector<int32_t> array, IntegerType::Repeat repeat, sp<Observer> observer)
 {
     return sp<Integer>::make<IntegerByArray>(sp<IntArray>::make<IntArray::Vector>(std::move(array)), repeat, std::move(observer));
-}
-
-sp<Integer> IntegerType::animate(const sp<Integer>& self, const sp<Numeric>& interval, const sp<Numeric>& duration)
-{
-    return sp<Integer>::make<Periodic<int32_t>>(self, interval ? interval : sp<Numeric>::make<Numeric::Const>(1.0f / 24), duration ? duration : Ark::instance().appClock()->duration());
 }
 
 sp<Integer> IntegerType::expect(sp<Integer> self, sp<Boolean> expectation, sp<Observer> observer)

@@ -10,7 +10,8 @@ public:
     enum Type {
         TYPE_BYTE,
         TYPE_FLOAT,
-        TYPE_INTEGER,
+        TYPE_INT,
+        TYPE_UINT,
         TYPE_SHORT,
         TYPE_UBYTE,
         TYPE_USHORT,

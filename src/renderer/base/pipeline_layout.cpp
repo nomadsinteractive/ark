@@ -86,7 +86,7 @@ void PipelineLayout::initialize(const Shader& shader)
         const Vector<String> numWorkGroups = Documents::getAttribute(computeStage->_manifest, "num-work-groups", "64").split(',');
         for(size_t i = 0; i < std::min(numWorkGroups.size(), numWorkGroupsArray.size()); ++i)
             numWorkGroupsArray[i] = Strings::eval<uint32_t>(numWorkGroups.at(i));
-        addSnippet(sp<Snippet>::make<SnippetDrawCompute>(shader.input(), numWorkGroupsArray, true));
+        addSnippet(sp<Snippet>::make<SnippetDrawCompute>(shader.layout(), numWorkGroupsArray, true));
     }
     _snippet = sp<Snippet>::make<SnippetDelegate>(_snippet);
     _snippet->preInitialize(_building_context);

@@ -57,7 +57,7 @@ public:
             _bits &= ~toConvertableType(bits);
     }
 
-    bool has(T bits) const {
+    bool has(const convertable_type bits) const {
         return _bits & toConvertableType(bits);
     }
 

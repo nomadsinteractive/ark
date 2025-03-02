@@ -59,7 +59,7 @@ uint32_t Attribute::length() const
 
 uint32_t Attribute::componentSize() const
 {
-    if(_type == TYPE_FLOAT || _type == TYPE_INTEGER)
+    if(_type == TYPE_FLOAT || _type == TYPE_INT || _type == TYPE_UINT)
         return sizeof(float);
     if(_type == TYPE_BYTE || _type == TYPE_UBYTE)
         return 1;

@@ -9,8 +9,8 @@ namespace {
 
 class UploaderVertices : public Uploader {
 public:
-    UploaderVertices(sp<ShaderLayout> pipelineInput, sp<Vertices> vertices, const V3& bounds)
-        : Uploader(pipelineInput->getStreamLayout(0).stride() * vertices->length()), _pipeline_input(std::move(pipelineInput)), _vertices(std::move(vertices)), _bounds(bounds) {
+    UploaderVertices(sp<ShaderLayout> shaderLayout, sp<Vertices> vertices, const V3& bounds)
+        : Uploader(shaderLayout->getStreamLayout(0).stride() * vertices->length()), _shader_layout(std::move(shaderLayout)), _vertices(std::move(vertices)), _bounds(bounds) {
     }
 
     virtual bool update(uint64_t /*timestamp*/) override {
@@ -19,8 +19,8 @@ public:
 
 public:
     virtual void upload(Writable& writable) override {
-        size_t stride = _pipeline_input->getStreamLayout(0).stride();
-        ShaderLayout::AttributeOffsets attributes(_pipeline_input);
+        size_t stride = _shader_layout->getStreamLayout(0).stride();
+        ShaderLayout::AttributeOffsets attributes(_shader_layout);
         uint32_t size = static_cast<uint32_t>(_vertices->length() * stride);
         std::vector<uint8_t> buf(size);
         VertexWriter stream(attributes, false, buf.data(), size, stride);
@@ -29,7 +29,7 @@ public:
     }
 
 private:
-    sp<ShaderLayout> _pipeline_input;
+    sp<ShaderLayout> _shader_layout;
     sp<Vertices> _vertices;
     V3 _bounds;
 };
@@ -49,7 +49,7 @@ size_t Vertices::length() const
 
 sp<Uploader> Vertices::toUploader(sp<Vertices> self, Shader& shader, const V3& bounds)
 {
-    return sp<UploaderVertices>::make(shader.input(), std::move(self), bounds);
+    return sp<UploaderVertices>::make(shader.layout(), std::move(self), bounds);
 }
 
 }

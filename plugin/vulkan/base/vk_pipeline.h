@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include "core/types/shared_ptr.h"
 
 #include "renderer/forwarding.h"
@@ -17,7 +15,7 @@ namespace ark::plugin::vulkan {
 
 class VKPipeline final : public Pipeline {
 public:
-    VKPipeline(const PipelineDescriptor& bindings, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, std::map<Enum::ShaderStageBit, String> stages);
+    VKPipeline(const PipelineDescriptor& bindings, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, Map<Enum::ShaderStageBit, String> stages);
     ~VKPipeline() override;
 
     VkPipeline vkPipeline() const;
@@ -37,8 +35,8 @@ public:
 private:
     struct VertexLayout {
         VkPipelineVertexInputStateCreateInfo inputState;
-        std::vector<VkVertexInputBindingDescription> bindingDescriptions;
-        std::vector<VkVertexInputAttributeDescription> attributeDescriptions;
+        Vector<VkVertexInputBindingDescription> bindingDescriptions;
+        Vector<VkVertexInputAttributeDescription> attributeDescriptions;
     };
 
     void setupVertexDescriptions(const ShaderLayout& input, VertexLayout& vertexLayout);
@@ -52,7 +50,7 @@ private:
     void buildComputeCommandBuffer(GraphicsContext& graphicsContext, const ComputeContext& drawingContext);
 
     sp<VKDescriptorPool> makeDescriptorPool() const;
-    void bindUBOShapshots(GraphicsContext& graphicsContext, const std::vector<RenderLayerSnapshot::UBOSnapshot>& uboSnapshots) const;
+    void bindUBOShapshots(GraphicsContext& graphicsContext, const Vector<RenderLayerSnapshot::UBOSnapshot>& uboSnapshots) const;
 
     bool shouldStageNeedBinded(const ShaderStageSet& stages) const;
     bool shouldRebind(int64_t tick, const PipelineDescriptor& pipelineDescriptor) const;
@@ -70,11 +68,10 @@ private:
     VkDescriptorSet _descriptor_set;
     VkPipeline _pipeline;
 
-    std::map<Enum::ShaderStageBit, String> _stages;
+    Map<Enum::ShaderStageBit, String> _stages;
 
-    std::vector<sp<VKBuffer>> _ubos;
-
-    std::vector<sp<Boolean>> _texture_observers;
+    Vector<sp<VKBuffer>> _ubos;
+    Vector<sp<Boolean>> _texture_observers;
 
     bool _rebind_needed;
     bool _is_compute_pipeline;

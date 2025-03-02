@@ -274,24 +274,9 @@ V3 Math::quadratic(float a, float b, float c)
 {
     float d = b * b - 4.0f * a * c;
     if(d < 0)
-        return V3(d, 0, 0);
-    float sqrtd = std::sqrt(d);
-    return V3(d, (-b + sqrtd) / 2.0f / a, (-b - sqrtd) / 2.0f / a);
-}
-
-V2 Math::projectile(float dx, float dy, float v, float g, uint32_t sid)
-{
-	float a = 1 + dy * dy / dx / dx;
-	float b = -dy * g - v * v;
-	float c = g * g * dx * dx * 0.25f;
-    const V3 solutions = quadratic(a, b, c);
-    DCHECK_WARN(sid == 0 || sid == 1, "Illegal solution id: %d, should be 0 or 1", sid);
-    float vx2 = sid == 0 ? solutions.y() : solutions.z();
-    if(solutions.x() < 0 || vx2 < 0)
-		return V2(0, 0);
-    float vx = std::sqrt(vx2);
-    float vy = std::sqrt(v * v - vx2);
-    return V2(dx > 0 ? vx : -vx, g < 0 ? vy : -vy);
+        return {d, 0, 0};
+    const float sqrtd = std::sqrt(d);
+    return {d, (-b + sqrtd) / 2.0f / a, (-b - sqrtd) / 2.0f / a};
 }
 
 uint32_t Math::hash32(uint32_t x)
