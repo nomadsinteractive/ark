@@ -87,6 +87,12 @@ struct VKMultiDrawElementsIndirect final : VKPipeline::BakedRenderer {
     }
 };
 
+struct VertexLayout {
+    VkPipelineVertexInputStateCreateInfo inputState;
+    Vector<VkVertexInputBindingDescription> bindingDescriptions;
+    Vector<VkVertexInputAttributeDescription> attributeDescriptions;
+};
+
 sp<VKPipeline::BakedRenderer> makeBakedRenderer(const PipelineDescriptor& bindings)
 {
     switch(bindings.drawProcedure())
@@ -233,6 +239,38 @@ VkPipelineColorBlendAttachmentState makeColorBlendAttachmentState(const Pipeline
     return cbaState;
 }
 
+VertexLayout setupVertexLayout(const ShaderLayout& shaderLayout)
+{
+    VertexLayout vertexLayout;
+
+    uint32_t location = 0;
+    for(const auto& [divsor, stream] : shaderLayout.streamLayouts())
+    {
+        vertexLayout.bindingDescriptions.push_back(vks::initializers::vertexInputBindingDescription(
+                                                   divsor,
+                                                   stream.stride(),
+                                                   divsor == 0 ? VK_VERTEX_INPUT_RATE_VERTEX : VK_VERTEX_INPUT_RATE_INSTANCE));
+
+        for(const Attribute& j : stream.attributes().values())
+        {
+            const uint32_t slen = std::min<uint32_t>(4, j.length());
+            for(uint32_t offset = 0; offset < j.length(); offset += slen)
+                vertexLayout.attributeDescriptions.push_back(vks::initializers::vertexInputAttributeDescription(
+                                                             divsor,
+                                                             location++,
+                                                             VKUtil::toAttributeFormat(j.type(), std::min<uint32_t>(4, j.length() - offset)),
+                                                             j.offset() + offset * j.componentSize()));
+        }
+    }
+    vertexLayout.inputState = {VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO};
+    vertexLayout.inputState.vertexBindingDescriptionCount = static_cast<uint32_t>(vertexLayout.bindingDescriptions.size());
+    vertexLayout.inputState.pVertexBindingDescriptions = vertexLayout.bindingDescriptions.data();
+    vertexLayout.inputState.vertexAttributeDescriptionCount = static_cast<uint32_t>(vertexLayout.attributeDescriptions.size());
+    vertexLayout.inputState.pVertexAttributeDescriptions = vertexLayout.attributeDescriptions.data();
+
+    return vertexLayout;
+}
+
 }
 
 VKPipeline::VKPipeline(const PipelineDescriptor& bindings, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, Map<Enum::ShaderStageBit, String> stages)
@@ -286,9 +324,7 @@ void VKPipeline::upload(GraphicsContext& graphicsContext)
         setupComputePipeline(graphicsContext);
     else
     {
-        VertexLayout vertexLayout;
-        setupVertexDescriptions(_pipeline_descriptor.shaderLayout(), vertexLayout);
-        setupGraphicsPipeline(graphicsContext, vertexLayout);
+        setupGraphicsPipeline(graphicsContext);
     }
 }
 
@@ -336,34 +372,6 @@ void VKPipeline::compute(GraphicsContext& graphicsContext, const ComputeContext&
     buildComputeCommandBuffer(graphicsContext, computeContext);
 }
 
-void VKPipeline::setupVertexDescriptions(const ShaderLayout& input, VKPipeline::VertexLayout& vertexLayout)
-{
-    uint32_t location = 0;
-    for(const auto& [divsor, stream] : input.streamLayouts())
-    {
-        vertexLayout.bindingDescriptions.push_back(vks::initializers::vertexInputBindingDescription(
-                                                   divsor,
-                                                   stream.stride(),
-                                                   divsor == 0 ? VK_VERTEX_INPUT_RATE_VERTEX : VK_VERTEX_INPUT_RATE_INSTANCE));
-
-        for(const Attribute& j : stream.attributes().values())
-        {
-            const uint32_t slen = std::min<uint32_t>(4, j.length());
-            for(uint32_t offset = 0; offset < j.length(); offset += slen)
-                vertexLayout.attributeDescriptions.push_back(vks::initializers::vertexInputAttributeDescription(
-                                                             divsor,
-                                                             location++,
-                                                             VKUtil::toAttributeFormat(j.type(), std::min<uint32_t>(4, j.length() - offset)),
-                                                             j.offset() + offset * j.componentSize()));
-        }
-    }
-    vertexLayout.inputState = vks::initializers::pipelineVertexInputStateCreateInfo();
-    vertexLayout.inputState.vertexBindingDescriptionCount = static_cast<uint32_t>(vertexLayout.bindingDescriptions.size());
-    vertexLayout.inputState.pVertexBindingDescriptions = vertexLayout.bindingDescriptions.data();
-    vertexLayout.inputState.vertexAttributeDescriptionCount = static_cast<uint32_t>(vertexLayout.attributeDescriptions.size());
-    vertexLayout.inputState.pVertexAttributeDescriptions = vertexLayout.attributeDescriptions.data();
-}
-
 void VKPipeline::setupDescriptorSetLayout(const PipelineDescriptor& pipelineDescriptor)
 {
     const sp<VKDevice>& device = _renderer->device();
@@ -374,7 +382,7 @@ void VKPipeline::setupDescriptorSetLayout(const PipelineDescriptor& pipelineDesc
     for(const sp<ShaderLayout::UBO>& i : shaderLayout.ubos())
     {
         binding = std::max(binding, i->binding());
-        if(shouldStageNeedBinded(i->_stages))
+        if(shouldStageNeedBinding(i->_stages))
         {
             const VkShaderStageFlags stages = i->_stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, Enum::SHADER_STAGE_BIT_COUNT);
             setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, stages, i->binding()));
@@ -383,7 +391,7 @@ void VKPipeline::setupDescriptorSetLayout(const PipelineDescriptor& pipelineDesc
     for(const ShaderLayout::SSBO& i : shaderLayout.ssbos())
     {
         binding = std::max(binding, i._binding);
-        if(shouldStageNeedBinded(i._stages))
+        if(shouldStageNeedBinding(i._stages))
         {
             const VkShaderStageFlags stages = i._stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, Enum::SHADER_STAGE_BIT_COUNT);
             setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, stages, i._binding));
@@ -392,11 +400,11 @@ void VKPipeline::setupDescriptorSetLayout(const PipelineDescriptor& pipelineDesc
 
     const uint32_t bindingBase = binding + 1;
     for(const auto& [_stages, _binding] : pipelineDescriptor.shaderLayout()->samplers().values())
-        if(shouldStageNeedBinded(_stages))
+        if(shouldStageNeedBinding(_stages))
             setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, Enum::SHADER_STAGE_BIT_COUNT), bindingBase + _binding));
 
     for(const auto& [_stages, _binding] : pipelineDescriptor.shaderLayout()->images().values())
-        if(shouldStageNeedBinded(_stages))
+        if(shouldStageNeedBinding(_stages))
             setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, _stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, Enum::SHADER_STAGE_BIT_COUNT), bindingBase + _binding));
 
     const VkDescriptorSetLayoutCreateInfo descriptorLayout = vks::initializers::descriptorSetLayoutCreateInfo(setLayoutBindings.data(), static_cast<uint32_t>(setLayoutBindings.size()));
@@ -421,7 +429,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
     for(const sp<ShaderLayout::UBO>& i : pipelineDescriptor.shaderLayout()->ubos())
     {
         binding = std::max(binding, i->binding());
-        if(shouldStageNeedBinded(i->_stages))
+        if(shouldStageNeedBinding(i->_stages))
         {
             sp<VKBuffer> ubo = sp<VKBuffer>::make(_renderer, _recycler, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
             ubo->uploadBuffer(graphicsContext, sp<UploaderArray<uint8_t>>::make(Vector<uint8_t>(i->size(), 0)));
@@ -437,7 +445,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
     for(const ShaderLayout::SSBO& i : pipelineDescriptor.shaderLayout()->ssbos())
     {
         binding = std::max(binding, i._binding);
-        if(shouldStageNeedBinded(i._stages))
+        if(shouldStageNeedBinding(i._stages))
         {
             const sp<VKBuffer> sbo = i._buffer.delegate();
             writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
@@ -450,7 +458,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
     const uint32_t bindingBase = binding + 1;
     _texture_observers.clear();
     for(const auto& [i, bindingSet] : pipelineDescriptor.samplers())
-        if(shouldStageNeedBinded(bindingSet._stages))
+        if(shouldStageNeedBinding(bindingSet._stages))
         {
             CHECK_WARN(i, "Pipeline has unbound sampler");
             if(i)
@@ -466,7 +474,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
             }
         }
     for(const auto& [i, bindingSet] : pipelineDescriptor.images())
-        if(shouldStageNeedBinded(bindingSet._stages))
+        if(shouldStageNeedBinding(bindingSet._stages))
         {
             CHECK_WARN(i, "Pipeline has unbound image");
             if(i)
@@ -485,7 +493,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
     vkUpdateDescriptorSets(device->vkLogicalDevice(), static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
 }
 
-void VKPipeline::setupGraphicsPipeline(GraphicsContext& graphicsContext, const VertexLayout& vertexLayout)
+void VKPipeline::setupGraphicsPipeline(GraphicsContext& graphicsContext)
 {
     const sp<VKDevice>& device = _renderer->device();
 
@@ -495,7 +503,7 @@ void VKPipeline::setupGraphicsPipeline(GraphicsContext& graphicsContext, const V
                 0,
                 VK_FALSE);
 
-    const PipelineDescriptor::PipelineTraitTable& traits =_pipeline_descriptor.parameters()._traits;
+    const PipelineDescriptor::PipelineTraitTable& traits = _pipeline_descriptor.parameters()._traits;
     const VkPipelineRasterizationStateCreateInfo rasterizationState = makeRasterizationState(traits);
     const VkPipelineDepthStencilStateCreateInfo depthStencilState = makeDepthStencilState(traits);
     const VkPipelineColorBlendAttachmentState colorBlendAttachmentState = makeColorBlendAttachmentState(traits);
@@ -538,6 +546,7 @@ void VKPipeline::setupGraphicsPipeline(GraphicsContext& graphicsContext, const V
     else
         vkScissors = VkRect2D({{0, 0}, {state.renderPassPhrase()->resolution().width, state.renderPassPhrase()->resolution().height}});
 
+    const VertexLayout vertexLayout = setupVertexLayout(_pipeline_descriptor.shaderLayout());
     pipelineCreateInfo.pVertexInputState = &vertexLayout.inputState;
     pipelineCreateInfo.pInputAssemblyState = &inputAssemblyState;
     pipelineCreateInfo.pRasterizationState = &rasterizationState;
@@ -627,12 +636,12 @@ void VKPipeline::bindUBOShapshots(GraphicsContext& graphicsContext, const Vector
     }
 }
 
-bool VKPipeline::shouldStageNeedBinded(const ShaderStageSet& stages) const
+bool VKPipeline::shouldStageNeedBinding(const ShaderStageSet stages) const
 {
-    return !_is_compute_pipeline || stages.has(Enum::SHADER_STAGE_BIT_COMPUTE);
+    return _is_compute_pipeline ? stages.has(Enum::SHADER_STAGE_BIT_COMPUTE) : (stages.has(Enum::SHADER_STAGE_BIT_VERTEX) || stages.has(Enum::SHADER_STAGE_BIT_FRAGMENT));
 }
 
-bool VKPipeline::shouldRebind(int64_t tick, const PipelineDescriptor& pipelineDescriptor) const
+bool VKPipeline::shouldRebind(const int64_t tick, const PipelineDescriptor& pipelineDescriptor) const
 {
     bool rebindNeeded = false;
     for(const auto& [i, bindingSet] : pipelineDescriptor.samplers())

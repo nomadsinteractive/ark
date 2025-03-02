@@ -33,17 +33,10 @@ public:
     class BakedRenderer;
 
 private:
-    struct VertexLayout {
-        VkPipelineVertexInputStateCreateInfo inputState;
-        Vector<VkVertexInputBindingDescription> bindingDescriptions;
-        Vector<VkVertexInputAttributeDescription> attributeDescriptions;
-    };
-
-    void setupVertexDescriptions(const ShaderLayout& input, VertexLayout& vertexLayout);
     void setupDescriptorSetLayout(const PipelineDescriptor& pipelineDescriptor);
     void setupDescriptorSet(GraphicsContext& graphicsContext, const PipelineDescriptor& pipelineDescriptor);
 
-    void setupGraphicsPipeline(GraphicsContext& graphicsContext, const VertexLayout& vertexLayout);
+    void setupGraphicsPipeline(GraphicsContext& graphicsContext);
     void setupComputePipeline(GraphicsContext& graphicsContext);
 
     void buildDrawCommandBuffer(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) const;
@@ -52,7 +45,7 @@ private:
     sp<VKDescriptorPool> makeDescriptorPool() const;
     void bindUBOShapshots(GraphicsContext& graphicsContext, const Vector<RenderLayerSnapshot::UBOSnapshot>& uboSnapshots) const;
 
-    bool shouldStageNeedBinded(const ShaderStageSet& stages) const;
+    bool shouldStageNeedBinding(ShaderStageSet stages) const;
     bool shouldRebind(int64_t tick, const PipelineDescriptor& pipelineDescriptor) const;
 
 private:

@@ -54,6 +54,7 @@ MaterialBundle::MaterialBundle(Table<String, sp<Material>> materials, std::array
             {
                 const sp<MaterialTexture>& texture = material->getTexture(static_cast<MaterialTexture::Type>(j));
                 if(bitmap bitmap = texture->bitmap())
+                {
                     if(const auto biter = bitmapBounds[j].find(bitmap); biter == bitmapBounds[j].end())
                     {
                         if(const auto iter = _material_bounds.find(i.first); iter == _material_bounds.end())
@@ -66,6 +67,7 @@ MaterialBundle::MaterialBundle(Table<String, sp<Material>> materials, std::array
                     }
                     else
                         _material_bounds[i.first] = biter->second;
+                }
             }
     }
 

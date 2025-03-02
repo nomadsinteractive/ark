@@ -34,7 +34,7 @@ public:
         return _bits != other.bits();
     }
     BitSet operator |(T other) const {
-        return BitSet(_bits | other);
+        return BitSet(_bits | toConvertableType(other));
     }
     BitSet operator |(const BitSet other) const {
         return BitSet(_bits | other.bits());
