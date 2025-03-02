@@ -164,7 +164,6 @@ public:
 private:
     void parseMainBlock(const String& source, PipelineBuildingContext& buildingContext);
     void parseDeclarations();
-    size_t parseFunctionBody(const String& s, String& body) const;
     String genDeclarations(const String& mainFunc) const;
 
     void addInclude(const String& filepath);
@@ -210,7 +209,7 @@ public:
     Vector<Parameter> _predefined_parameters;
     Vector<ResultModifer> _result_modifiers;
 
-    Map<std::string, int32_t> _ssbos;
+    Map<String, ShaderLayout::Binding> _ssbos;
 
     DeclarationList _declaration_ins;
     DeclarationList _declaration_outs;

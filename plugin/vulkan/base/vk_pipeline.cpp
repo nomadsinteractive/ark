@@ -98,13 +98,13 @@ sp<VKPipeline::BakedRenderer> makeBakedRenderer(const PipelineDescriptor& bindin
     switch(bindings.drawProcedure())
     {
         case Enum::DRAW_PROCEDURE_DRAW_ARRAYS:
-            return sp<VKDrawArrays>::make();
+            return sp<VKPipeline::BakedRenderer>::make<VKDrawArrays>();
         case Enum::DRAW_PROCEDURE_DRAW_ELEMENTS:
-            return sp<VKDrawElements>::make();
+            return sp<VKPipeline::BakedRenderer>::make<VKDrawElements>();
         case Enum::DRAW_PROCEDURE_DRAW_INSTANCED:
-            return sp<VKDrawElementsInstanced>::make();
+            return sp<VKPipeline::BakedRenderer>::make<VKDrawElementsInstanced>();
         case Enum::DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT:
-            return sp<VKMultiDrawElementsIndirect>::make();
+            return sp<VKPipeline::BakedRenderer>::make<VKMultiDrawElementsIndirect>();
         default:
             break;
     }
@@ -241,9 +241,8 @@ VkPipelineColorBlendAttachmentState makeColorBlendAttachmentState(const Pipeline
 
 VertexLayout setupVertexLayout(const ShaderLayout& shaderLayout)
 {
-    VertexLayout vertexLayout;
-
     uint32_t location = 0;
+    VertexLayout vertexLayout;
     for(const auto& [divsor, stream] : shaderLayout.streamLayouts())
     {
         vertexLayout.bindingDescriptions.push_back(vks::initializers::vertexInputBindingDescription(
@@ -274,8 +273,8 @@ VertexLayout setupVertexLayout(const ShaderLayout& shaderLayout)
 }
 
 VKPipeline::VKPipeline(const PipelineDescriptor& bindings, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, Map<Enum::ShaderStageBit, String> stages)
-    : _pipeline_descriptor(bindings), _recycler(recycler), _renderer(renderer), _baked_renderer(makeBakedRenderer(bindings)), _layout(VK_NULL_HANDLE), _descriptor_set_layout(VK_NULL_HANDLE),
-      _descriptor_set(VK_NULL_HANDLE), _pipeline(VK_NULL_HANDLE), _stages(std::move(stages)), _rebind_needed(true), _is_compute_pipeline(false)
+    : _pipeline_descriptor(bindings), _recycler(recycler), _renderer(renderer), _baked_renderer(makeBakedRenderer(bindings)), _layout(VK_NULL_HANDLE), _pipeline(VK_NULL_HANDLE), _stages(std::move(stages)),
+      _rebind_needed(true), _is_compute_pipeline(false)
 {
     for(const auto& i : _stages)
         if(i.first == Enum::SHADER_STAGE_BIT_COMPUTE)
@@ -301,11 +300,6 @@ VkPipelineLayout VKPipeline::vkPipelineLayout() const
     return _layout;
 }
 
-const VkDescriptorSet& VKPipeline::vkDescriptorSet() const
-{
-    return _descriptor_set;
-}
-
 uint64_t VKPipeline::id()
 {
     return (uint64_t)(_pipeline);
@@ -313,11 +307,7 @@ uint64_t VKPipeline::id()
 
 void VKPipeline::upload(GraphicsContext& graphicsContext)
 {
-    setupDescriptorSetLayout(_pipeline_descriptor);
-
-    _descriptor_pool = makeDescriptorPool();
-    _descriptor_pool->upload(graphicsContext);
-
+    setupDescriptorSetLayout(graphicsContext, _pipeline_descriptor);
     setupDescriptorSet(graphicsContext, _pipeline_descriptor);
 
     if(_is_compute_pipeline)
@@ -333,15 +323,14 @@ ResourceRecycleFunc VKPipeline::recycle()
     const sp<VKDevice> device = _renderer->device();
 
     VkPipelineLayout layout = _layout;
-    VkDescriptorSetLayout descriptorSetLayout = _descriptor_set_layout;
     VkPipeline pipeline = _pipeline;
     _pipeline = VK_NULL_HANDLE;
 
-    return [device, layout, descriptorSetLayout, pipeline](GraphicsContext&) {
+    return [device, layout, descriptorSetLayout = std::move(_descriptor_set_layouts), pipeline](GraphicsContext&) {
         if(layout)
             vkDestroyPipelineLayout(device->vkLogicalDevice(), layout, nullptr);
-        if(descriptorSetLayout)
-            vkDestroyDescriptorSetLayout(device->vkLogicalDevice(), descriptorSetLayout, nullptr);
+        for(const VkDescriptorSetLayout i : descriptorSetLayout)
+            vkDestroyDescriptorSetLayout(device->vkLogicalDevice(), i, nullptr);
         if(pipeline)
             vkDestroyPipeline(device->vkLogicalDevice(), pipeline, nullptr);
     };
@@ -372,69 +361,75 @@ void VKPipeline::compute(GraphicsContext& graphicsContext, const ComputeContext&
     buildComputeCommandBuffer(graphicsContext, computeContext);
 }
 
-void VKPipeline::setupDescriptorSetLayout(const PipelineDescriptor& pipelineDescriptor)
+void VKPipeline::addDescriptorSetLayout(const VkDevice device, const Vector<VkDescriptorSetLayoutBinding>& setLayoutBindings)
+{
+    const VkDescriptorSetLayoutCreateInfo descriptorLayout = vks::initializers::descriptorSetLayoutCreateInfo(setLayoutBindings.data(), static_cast<uint32_t>(setLayoutBindings.size()));
+    VkDescriptorSetLayout setLayout = VK_NULL_HANDLE;
+    VKUtil::checkResult(vkCreateDescriptorSetLayout(device, &descriptorLayout, nullptr, &setLayout));
+    _descriptor_set_layouts.push_back(setLayout);
+    _descriptor_sets.push_back(VK_NULL_HANDLE);
+}
+
+void VKPipeline::setupDescriptorSetLayout(GraphicsContext& graphicsContext, const PipelineDescriptor& pipelineDescriptor)
 {
     const sp<VKDevice>& device = _renderer->device();
 
     const ShaderLayout& shaderLayout = pipelineDescriptor.shaderLayout();
     Vector<VkDescriptorSetLayoutBinding> setLayoutBindings;
-    uint32_t binding = 0;
+    Vector<VkDescriptorSetLayoutBinding> setLayoutBindingsUBO;
     for(const sp<ShaderLayout::UBO>& i : shaderLayout.ubos())
-    {
-        binding = std::max(binding, i->binding());
         if(shouldStageNeedBinding(i->_stages))
         {
             const VkShaderStageFlags stages = i->_stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, Enum::SHADER_STAGE_BIT_COUNT);
-            setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, stages, i->binding()));
+            setLayoutBindingsUBO.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, stages, i->binding()));
         }
-    }
+
     for(const ShaderLayout::SSBO& i : shaderLayout.ssbos())
-    {
-        binding = std::max(binding, i._binding);
         if(shouldStageNeedBinding(i._stages))
         {
             const VkShaderStageFlags stages = i._stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, Enum::SHADER_STAGE_BIT_COUNT);
-            setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, stages, i._binding));
+            setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, stages, i._binding._location));
         }
-    }
 
-    const uint32_t bindingBase = binding + 1;
+    Vector<VkDescriptorSetLayoutBinding> setLayoutBindingsTexture;
     for(const auto& [_stages, _binding] : pipelineDescriptor.shaderLayout()->samplers().values())
         if(shouldStageNeedBinding(_stages))
-            setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, Enum::SHADER_STAGE_BIT_COUNT), bindingBase + _binding));
+            setLayoutBindingsTexture.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, Enum::SHADER_STAGE_BIT_COUNT), _binding._location));
 
     for(const auto& [_stages, _binding] : pipelineDescriptor.shaderLayout()->images().values())
         if(shouldStageNeedBinding(_stages))
-            setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, _stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, Enum::SHADER_STAGE_BIT_COUNT), bindingBase + _binding));
+            setLayoutBindingsTexture.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, _stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, Enum::SHADER_STAGE_BIT_COUNT), _binding._location));
 
-    const VkDescriptorSetLayoutCreateInfo descriptorLayout = vks::initializers::descriptorSetLayoutCreateInfo(setLayoutBindings.data(), static_cast<uint32_t>(setLayoutBindings.size()));
-    VKUtil::checkResult(vkCreateDescriptorSetLayout(device->vkLogicalDevice(), &descriptorLayout, nullptr, &_descriptor_set_layout));
+    addDescriptorSetLayout(device->vkLogicalDevice(), setLayoutBindings);
+    addDescriptorSetLayout(device->vkLogicalDevice(), setLayoutBindingsUBO);
+    addDescriptorSetLayout(device->vkLogicalDevice(), setLayoutBindingsTexture);
 
-    const VkPipelineLayoutCreateInfo pPipelineLayoutCreateInfo = vks::initializers::pipelineLayoutCreateInfo(&_descriptor_set_layout, 1);
+    const VkPipelineLayoutCreateInfo pPipelineLayoutCreateInfo = vks::initializers::pipelineLayoutCreateInfo(_descriptor_set_layouts.data(), _descriptor_set_layouts.size());
     VKUtil::checkResult(vkCreatePipelineLayout(device->vkLogicalDevice(), &pPipelineLayoutCreateInfo, nullptr, &_layout));
+
+    _descriptor_pool = makeDescriptorPool();
+    _descriptor_pool->upload(graphicsContext);
 }
 
 void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const PipelineDescriptor& pipelineDescriptor)
 {
     const sp<VKDevice>& device = _renderer->device();
 
-    const VkDescriptorSetAllocateInfo allocInfo = vks::initializers::descriptorSetAllocateInfo(_descriptor_pool->vkDescriptorPool(), &_descriptor_set_layout, 1);
+    const VkDescriptorSetAllocateInfo allocInfo = vks::initializers::descriptorSetAllocateInfo(_descriptor_pool->vkDescriptorPool(), _descriptor_set_layouts.data(), _descriptor_set_layouts.size());
     VKUtil::checkResult(vkResetDescriptorPool(device->vkLogicalDevice(), _descriptor_pool->vkDescriptorPool(), 0));
-    VKUtil::checkResult(vkAllocateDescriptorSets(device->vkLogicalDevice(), &allocInfo, &_descriptor_set));
+    VKUtil::checkResult(vkAllocateDescriptorSets(device->vkLogicalDevice(), &allocInfo, _descriptor_sets.data()));
 
     Vector<VkWriteDescriptorSet> writeDescriptorSets;
-    uint32_t binding = 0;
 
     _ubos.clear();
     for(const sp<ShaderLayout::UBO>& i : pipelineDescriptor.shaderLayout()->ubos())
     {
-        binding = std::max(binding, i->binding());
         if(shouldStageNeedBinding(i->_stages))
         {
             sp<VKBuffer> ubo = sp<VKBuffer>::make(_renderer, _recycler, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
             ubo->uploadBuffer(graphicsContext, sp<UploaderArray<uint8_t>>::make(Vector<uint8_t>(i->size(), 0)));
             writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
-                                              _descriptor_set,
+                                              _descriptor_sets.at(1),
                                               VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
                                               i->binding(),
                                               &ubo->vkDescriptor()));
@@ -442,20 +437,21 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
         }
     }
 
+    uint32_t binding = 0;
     for(const ShaderLayout::SSBO& i : pipelineDescriptor.shaderLayout()->ssbos())
     {
-        binding = std::max(binding, i._binding);
+        binding = std::max<uint32_t>(binding, i._binding._location);
         if(shouldStageNeedBinding(i._stages))
         {
             const sp<VKBuffer> sbo = i._buffer.delegate();
             writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
-                                              _descriptor_set,
+                                              _descriptor_sets.at(0),
                                               VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-                                              i._binding,
+                                              i._binding._location,
                                               &sbo->vkDescriptor()));
         }
     }
-    const uint32_t bindingBase = binding + 1;
+
     _texture_observers.clear();
     for(const auto& [i, bindingSet] : pipelineDescriptor.samplers())
         if(shouldStageNeedBinding(bindingSet._stages))
@@ -467,9 +463,9 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
                 _texture_observers.push_back(texture->observer().addBooleanSignal());
                 if(texture->vkDescriptor().imageView && texture->vkDescriptor().imageLayout)
                     writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
-                                                  _descriptor_set,
+                                                  _descriptor_sets.at(2),
                                                   VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                                                  bindingBase + bindingSet._binding,
+                                                  bindingSet._binding._location,
                                                   &texture->vkDescriptor()));
             }
         }
@@ -483,9 +479,9 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
                 _texture_observers.push_back(texture->observer().addBooleanSignal());
                 if(texture->vkDescriptor().imageView && texture->vkDescriptor().imageLayout)
                     writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(
-                                                  _descriptor_set,
+                                                  _descriptor_sets.at(2),
                                                   VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
-                                                  bindingBase + bindingSet._binding,
+                                                  bindingSet._binding._location,
                                                   &texture->vkDescriptor()));
             }
         }
@@ -580,7 +576,7 @@ void VKPipeline::buildDrawCommandBuffer(GraphicsContext& graphicsContext, const 
     VKGraphicsContext::State& state = vkGraphicsContext->currentState();
     const VkCommandBuffer commandBuffer = state.ensureCommandBuffer();
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
-    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _layout, 0, 1, &_descriptor_set, 0, nullptr);
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _layout, 0, _descriptor_sets.size(), _descriptor_sets.data(), 0, nullptr);
 
     VkDeviceSize offsets = 0;
     VkBuffer vkVertexBuffer = (VkBuffer)(drawingContext._vertices.id());
@@ -603,7 +599,7 @@ void VKPipeline::buildComputeCommandBuffer(GraphicsContext& graphicsContext, con
     const sp<VKComputeContext>& vkContext = graphicsContext.traits().ensure<VKComputeContext>();
     const VkCommandBuffer commandBuffer = vkContext->buildCommandBuffer(graphicsContext);
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, _pipeline);
-    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, _layout, 0, 1, &_descriptor_set, 0, nullptr);
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, _layout, 0, _descriptor_sets.size(), _descriptor_sets.data(), 0, nullptr);
     vkCmdDispatch(commandBuffer, computeContext._num_work_groups.at(0), computeContext._num_work_groups.at(1), computeContext._num_work_groups.at(2));
 }
 
@@ -618,7 +614,7 @@ sp<VKDescriptorPool> VKPipeline::makeDescriptorPool() const
         poolSizes[VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER] = static_cast<uint32_t>(_pipeline_descriptor.samplers().size() + _pipeline_descriptor.images().size());
     if(!_pipeline_descriptor.images().empty())
         poolSizes[VK_DESCRIPTOR_TYPE_STORAGE_IMAGE] = static_cast<uint32_t>(_pipeline_descriptor.images().size());
-    return sp<VKDescriptorPool>::make(_recycler, _renderer->device(), std::move(poolSizes));
+    return sp<VKDescriptorPool>::make(_recycler, _renderer->device(), std::move(poolSizes), _descriptor_set_layouts.size());
 }
 
 void VKPipeline::bindUBOShapshots(GraphicsContext& graphicsContext, const Vector<RenderLayerSnapshot::UBOSnapshot>& uboSnapshots) const

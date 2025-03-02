@@ -202,7 +202,7 @@ void PipelineBuildingContext::initializeSSBO() const
             if(!sobs.has(name))
             {
                 CHECK(_ssbos.has(name), "SSBO \"%s\" does not exist", name.c_str());
-                sobs[name] = ShaderLayout::SSBO(_ssbos.at(name), static_cast<uint32_t>(bindings));
+                sobs[name] = ShaderLayout::SSBO(_ssbos.at(name), bindings);
             }
             sobs[name]._stages.set(preprocessor->_shader_stage);
         }
@@ -238,15 +238,10 @@ void PipelineBuildingContext::initialize(PipelineLayout& pipelineLayout)
 
 void PipelineBuildingContext::initializeUniforms()
 {
-    int32_t binding = 0;
     for(ShaderPreprocessor* i : _stages)
-    {
-        for(const auto& j : i->_ssbos)
-            binding = std::max(binding, j.second + 1);
-
         i->setupUniforms(_uniforms);
-    }
 
+    int32_t binding = 0;
     for(const ShaderPreprocessor* stage : _stages)
         if(const Vector<String>& uniformNames = stage->_declaration_uniforms.vars().keys(); !uniformNames.empty())
         {

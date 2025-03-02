@@ -28,10 +28,12 @@ public:
 
 //  [[script::bindings::enumeration]]
     enum UsageBit {
-        USAGE_BIT_DYNAMIC = 1,
-        USAGE_BIT_HOST_VISIBLE = 2
+        USAGE_BIT_NONE,
+        USAGE_BIT_DYNAMIC,
+        USAGE_BIT_TRANSFER_SRC,
+        USAGE_BIT_HOST_VISIBLE
     };
-    typedef BitSet<UsageBit> Usage;
+    typedef BitSet<UsageBit, true> Usage;
 
     class ARK_API Delegate : public Resource {
     public:

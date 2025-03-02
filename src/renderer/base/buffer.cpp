@@ -184,7 +184,7 @@ sp<Buffer> Buffer::BUILDER::build(const Scope& args)
 
 template<> ARK_API Buffer::Usage StringConvert::eval<Buffer::Usage>(const String& str)
 {
-    constexpr Buffer::Usage::LookupTable<2> bits = {{{"dynamic", Buffer::USAGE_BIT_DYNAMIC}, {"host_visible", Buffer::USAGE_BIT_HOST_VISIBLE}}};
+    constexpr Buffer::Usage::LookupTable<3> bits = {{{"dynamic", Buffer::USAGE_BIT_DYNAMIC}, {"transfer_src", Buffer::USAGE_BIT_TRANSFER_SRC}, {"host_visible", Buffer::USAGE_BIT_HOST_VISIBLE}}};
     return Buffer::Usage::toBitSet(str, bits);
 }
 

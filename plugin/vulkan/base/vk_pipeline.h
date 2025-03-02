@@ -20,7 +20,6 @@ public:
 
     VkPipeline vkPipeline() const;
     VkPipelineLayout vkPipelineLayout() const;
-    const VkDescriptorSet& vkDescriptorSet() const;
 
     uint64_t id() override;
     void upload(GraphicsContext& graphicsContext) override;
@@ -33,7 +32,9 @@ public:
     class BakedRenderer;
 
 private:
-    void setupDescriptorSetLayout(const PipelineDescriptor& pipelineDescriptor);
+    void addDescriptorSetLayout(VkDevice device, const Vector<VkDescriptorSetLayoutBinding>& setLayoutBindings);
+
+    void setupDescriptorSetLayout(GraphicsContext& graphicsContext, const PipelineDescriptor& pipelineDescriptor);
     void setupDescriptorSet(GraphicsContext& graphicsContext, const PipelineDescriptor& pipelineDescriptor);
 
     void setupGraphicsPipeline(GraphicsContext& graphicsContext);
@@ -57,8 +58,8 @@ private:
     sp<BakedRenderer> _baked_renderer;
 
     VkPipelineLayout _layout;
-    VkDescriptorSetLayout _descriptor_set_layout;
-    VkDescriptorSet _descriptor_set;
+    Vector<VkDescriptorSetLayout> _descriptor_set_layouts;
+    Vector<VkDescriptorSet> _descriptor_sets;
     VkPipeline _pipeline;
 
     Map<Enum::ShaderStageBit, String> _stages;

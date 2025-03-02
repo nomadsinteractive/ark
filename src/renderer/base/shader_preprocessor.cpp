@@ -10,14 +10,13 @@
 
 #include "renderer/base/pipeline_building_context.h"
 #include "renderer/base/pipeline_layout.h"
-#include "renderer/base/render_engine_context.h"
 #include "renderer/util/render_util.h"
 
 #define ARRAY_PATTERN           "(?:\\[\\s*(\\d+)\\s*\\])?"
 #define STD_TYPE_PATTERN        "int|uint8|float|[bi]?vec[234]|mat3|mat4"
 #define ATTRIBUTE_PATTERN       "\\s+(" STD_TYPE_PATTERN ")\\s+" "(?:a_|v_)(\\w+)" ARRAY_PATTERN ";"
 #define UNIFORM_PATTERN         "(\\w+)\\s+" "(\\w+)" ARRAY_PATTERN ";"
-#define LAYOUT_PATTERN          R"--(layout\((?:std140|binding\s*=\s*(\d+)|[rgba]+\d+[uif]*|location=\d+|[\s,])+\)\s+)--"
+#define LAYOUT_PATTERN          R"--(layout\((?:std140|binding\s*=\s*(\d+)|set\s*=\s*(\d+)|[rgba]+\d+[uif]*|location=\d+|[\s,])+\)\s+)--"
 #define ACCESSIBILITY_PATTERN   "(?:(?:read|write)only\\s+)?"
 
 #define INDENT_STR "    "
@@ -43,6 +42,15 @@ const char* ANNOTATION_VERT_OUT = "out";
 const char* ANNOTATION_FRAG_IN = "in";
 const char* ANNOTATION_FRAG_OUT = "out";
 const char* ANNOTATION_FRAG_COLOR = "f_FragColor";
+
+size_t parseFunctionBody(const String& s, String& body)
+{
+    const String::size_type pos = s.find('{');
+    DCHECK(pos != String::npos, "Cannot parse function body: %s", s.c_str());
+    const size_t end = Strings::parentheses(s, pos, '{', '}');
+    body = s.substr(pos + 1, end - 1).strip();
+    return end + 1;
+}
 
 }
 
@@ -137,14 +145,16 @@ void ShaderPreprocessor::parseDeclarations()
     _main.replace(REGEX_STRUCT_PATTERN, structPatternReplacer);
 
     const auto uniformPatternReplacer = [this](const std::smatch& m) {
-        const uint32_t length = m[4].str().empty() ? 1 : Strings::eval<uint32_t>(m[4].str());
-        return this->addUniform(m[2].str(), m[3].str(), length, m.str());
+        const uint32_t length = m[5].matched ? Strings::eval<uint32_t>(m[5].str()) : 1;
+        return this->addUniform(m[3].str(), m[4].str(), length, m.str());
     };
     _include_declaration_codes.replace(REGEX_UNIFORM_PATTERN, uniformPatternReplacer);
     _main.replace(REGEX_UNIFORM_PATTERN, uniformPatternReplacer);
 
     auto ssboPattern = [this](const std::smatch& m) {
-        _ssbos[m[2].str()] = Strings::eval<int32_t>(m[1].str());
+        const int32_t binding = m[1].matched ? Strings::eval<int32_t>(m[1].str()) : -1;
+        const int32_t set = m[2].matched ? Strings::eval<int32_t>(m[2].str()) : -1;
+        _ssbos[m[3].str()] = {binding, set};
         return true;
     };
     _include_declaration_codes.search(REGEX_SSBO_PATTERN, ssboPattern);
@@ -183,16 +193,13 @@ ShaderPreprocessor::Stage ShaderPreprocessor::preprocess() const
 
 void ShaderPreprocessor::setupUniforms(Table<String, sp<Uniform>>& uniforms)
 {
-    for(const auto& i : _declaration_uniforms.vars())
-    {
-        if(const String& name = i.first; !uniforms.has(name))
+    for(const auto& [name, declare] : _declaration_uniforms.vars())
+        if(!uniforms.has(name))
         {
-            const Declaration& declare = i.second;
             Uniform::Type type = Uniform::toType(declare.type());
             uniforms.push_back(name, sp<Uniform>::make(name, declare.type(), type, type == Uniform::TYPE_STRUCT ? getUniformSize(type, declare.type())
                                                                                                                 : Uniform::getComponentSize(type), declare.length(), nullptr));
         }
-    }
 
     for(const sp<Uniform>& i : uniforms.values())
     {
@@ -314,16 +321,7 @@ String ShaderPreprocessor::outputName() const
     return sOutputNames[_shader_stage];
 }
 
-size_t ShaderPreprocessor::parseFunctionBody(const String& s, String& body) const
-{
-    String::size_type pos = s.find('{');
-    DCHECK(pos != String::npos, "Cannot parse function body: %s", s.c_str());
-    size_t end = Strings::parentheses(s, pos, '{', '}');
-    body = s.substr(pos + 1, end - 1).strip();
-    return end + 1;
-}
-
-sp<String> ShaderPreprocessor::addUniform(const String& type, const String& name, uint32_t length, String declaration)
+sp<String> ShaderPreprocessor::addUniform(const String& type, const String& name, const uint32_t length, String declaration)
 {
     sp<String> declarationVar = sp<String>::make(std::move(declaration));
     Declaration uniform(name, type, length, declarationVar);
@@ -539,7 +537,7 @@ ShaderPreprocessor::DeclarationList::DeclarationList(Source& source, const Strin
 {
 }
 
-void ShaderPreprocessor::DeclarationList::declare(const String& type, const char* prefix, const String& name, const String& layout, const char* qualifier, bool isFlat)
+void ShaderPreprocessor::DeclarationList::declare(const String& type, const char* prefix, const String& name, const String& layout, const char* qualifier, const bool isFlat)
 {
     if(!_vars.has(name))
     {
@@ -582,7 +580,7 @@ ShaderPreprocessor::Source::Source(String code)
 {
 }
 
-String ShaderPreprocessor::Source::str(char endl) const
+String ShaderPreprocessor::Source::str(const char endl) const
 {
     StringBuffer sb;
     for(const auto& i : _lines)

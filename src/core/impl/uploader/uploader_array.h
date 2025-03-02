@@ -6,26 +6,25 @@
 
 namespace ark {
 
-template<typename T> class UploaderArray : public Uploader {
+template<typename T> class UploaderArray final : public Uploader {
 public:
     UploaderArray(sp<Array<T>> vector)
         : Uploader(vector->size()), _vector(std::move(vector)) {
     }
-    UploaderArray(std::vector<T> vector)
+    UploaderArray(Vector<T> vector)
         : UploaderArray(sp<typename Array<T>::Vector>::make(std::move(vector))) {
     }
 
-    virtual void upload(Writable& buf) override {
+    void upload(Writable& buf) override {
         buf.write(_vector->buf(), _vector->size(), 0);
     }
 
-    virtual bool update(uint64_t /*timestamp*/) override {
+    bool update(uint64_t /*timestamp*/) override {
         return false;
     }
 
 private:
     sp<Array<T>> _vector;
-
 };
 
 }

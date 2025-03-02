@@ -105,7 +105,7 @@ sp<RenderLayerSnapshot::BufferObject> ShaderLayout::takeBufferSnapshot(const Ren
     Vector<std::pair<uint32_t, Buffer::Snapshot>> ssboSnapshot;
     for(const SSBO& i : _ssbos)
         if(isComputeStage ? i._stages.has(Enum::SHADER_STAGE_BIT_COMPUTE) : (i._stages.has(Enum::SHADER_STAGE_BIT_VERTEX) || i._stages.has(Enum::SHADER_STAGE_BIT_FRAGMENT)))
-            ssboSnapshot.emplace_back(i._binding, i._buffer.snapshot());
+            ssboSnapshot.emplace_back(i._binding._location, i._buffer.snapshot());
 
     return sp<RenderLayerSnapshot::BufferObject>::make(RenderLayerSnapshot::BufferObject{std::move(uboSnapshot), std::move(ssboSnapshot)});
 }
@@ -290,7 +290,7 @@ void ShaderLayout::UBO::addUniform(const sp<Uniform>& uniform)
     _uniforms.push_back(uniform->name(), uniform);
 }
 
-ShaderLayout::SSBO::SSBO(Buffer buffer, uint32_t binding)
+ShaderLayout::SSBO::SSBO(Buffer buffer, const Binding binding)
     : _buffer(std::move(buffer)), _binding(binding)
 {
 }
@@ -298,9 +298,9 @@ ShaderLayout::SSBO::SSBO(Buffer buffer, uint32_t binding)
 uint32_t ShaderLayout::DescriptorSet::addStage(Enum::ShaderStageBit stage, uint32_t binding)
 {
     _stages.set(stage);
-    if(_binding != std::numeric_limits<uint32_t>::max())
+    if(_binding._location != -1)
         return binding;
-    _binding = binding;
+    _binding = {static_cast<int32_t>(binding)};
     return binding + 1;
 }
 

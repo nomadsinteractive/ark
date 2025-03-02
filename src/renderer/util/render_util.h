@@ -29,8 +29,8 @@ public:
     static Vector<uint32_t> compileSPIR(StringView source, Enum::ShaderStageBit stage, Enum::RenderingBackendBit renderTarget, uint32_t targetLanguageVersion = 0);
 
     static Vector<ShaderPreprocessor::Declaration> setupLayoutLocation(const PipelineBuildingContext& context, const ShaderPreprocessor::DeclarationList& declarations);
-    static uint32_t setLayoutDescriptor(const Vector<ShaderPreprocessor::Declaration>& declarations, const String& qualifierName, uint32_t start);
-    static uint32_t setLayoutDescriptor(const ShaderPreprocessor::DeclarationList& declarations, const String& descriptor, uint32_t start);
+    static uint32_t setLayoutDescriptor(const Vector<ShaderPreprocessor::Declaration>& declarations, const String& qualifierName, uint32_t start, int32_t set = -1);
+    static uint32_t setLayoutDescriptor(const ShaderPreprocessor::DeclarationList& declarations, const String& descriptor, uint32_t start, int32_t set = -1);
     static uint32_t setLayoutDescriptor(const ShaderPreprocessor::DeclarationList& ins, const ShaderPreprocessor::DeclarationList& outs, const String& qualifierName, uint32_t start);
 };
 

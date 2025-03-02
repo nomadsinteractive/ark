@@ -164,10 +164,13 @@ private:
     TBuiltInResource _built_in_resource;
 };
 
-void setLayoutQualifierBinding(const ShaderPreprocessor::Declaration& declaration, const String& qualifierName, uint32_t binding)
+void setLayoutQualifierBinding(const ShaderPreprocessor::Declaration& declaration, const String& qualifierName, const uint32_t binding, const int32_t set = -1)
 {
     StringBuffer sb;
-    sb << "layout (" << qualifierName << " = " << binding << ") " << declaration.source();
+    sb << "layout (";
+    if(set >= 0)
+        sb << "set = " << set << ", ";
+    sb << qualifierName << " = " << binding << ") " << declaration.source();
     declaration.setSource(sb.str());
 }
 
@@ -436,29 +439,29 @@ Vector<ShaderPreprocessor::Declaration> RenderUtil::setupLayoutLocation(const Pi
     return locations;
 }
 
-uint32_t RenderUtil::setLayoutDescriptor(const Vector<ShaderPreprocessor::Declaration>& declarations, const String& qualifierName, uint32_t start)
+uint32_t RenderUtil::setLayoutDescriptor(const Vector<ShaderPreprocessor::Declaration>& declarations, const String& qualifierName, const uint32_t start, const int32_t set)
 {
     uint32_t counter = start;
     for(const ShaderPreprocessor::Declaration& i : declarations)
-        setLayoutQualifierBinding(i, qualifierName, getNextLayoutLocation(i, counter));
+        setLayoutQualifierBinding(i, qualifierName, getNextLayoutLocation(i, counter), set);
     return counter;
 }
 
-uint32_t RenderUtil::setLayoutDescriptor(const ShaderPreprocessor::DeclarationList& declarations, const String& descriptor, uint32_t start)
+uint32_t RenderUtil::setLayoutDescriptor(const ShaderPreprocessor::DeclarationList& declarations, const String& descriptor, const uint32_t start, const int32_t set)
 {
-    return setLayoutDescriptor(declarations.vars().values(), descriptor, start);
+    return setLayoutDescriptor(declarations.vars().values(), descriptor, start, set);
 }
 
-uint32_t RenderUtil::setLayoutDescriptor(const ShaderPreprocessor::DeclarationList& ins, const ShaderPreprocessor::DeclarationList& outs, const String& qualifierName, uint32_t start)
+uint32_t RenderUtil::setLayoutDescriptor(const ShaderPreprocessor::DeclarationList& ins, const ShaderPreprocessor::DeclarationList& outs, const String& qualifierName, const uint32_t start)
 {
     uint32_t counter = start;
     DCHECK_WARN(ins.vars().size() == outs.vars().size(), "Output/Input mismatch, output and input have different numbers of items: [%s] vs [%s]",
                 Strings::join(ins.vars().keys().data(), 0, ins.vars().keys().size()).c_str(), Strings::join(outs.vars().keys().data(), 0, outs.vars().keys().size()).c_str());
     for(const ShaderPreprocessor::Declaration& i : ins.vars().values()) {
-        uint32_t binding = getNextLayoutLocation(i, counter);
+        const uint32_t binding = getNextLayoutLocation(i, counter);
         setLayoutQualifierBinding(i, qualifierName, binding);
         const String outName = Strings::capitalizeFirst(i.name().startsWith("v_") ? i.name().substr(2) : i.name());
-        bool hasOutName = outs.vars().has(outName);
+        const bool hasOutName = outs.vars().has(outName);
         DCHECK_WARN(hasOutName, "Output/Input mismatch, \"%s\" exists in input but not found in next stage of shader", outName.c_str());
         if(hasOutName)
             setLayoutQualifierBinding(outs.vars().at(outName), qualifierName, binding);

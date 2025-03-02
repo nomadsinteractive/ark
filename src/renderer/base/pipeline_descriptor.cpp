@@ -170,7 +170,7 @@ PipelineDescriptor::PipelineTraitMeta::PipelineTraitMeta(const document& manifes
             stencilTest._front._type = stencilTest._back._type = FRONT_FACE_TYPE_DEFAULT;
             for(const auto& i : faces)
             {
-                PipelineDescriptor::TraitStencilTestSeparate face = loadStencilTestSeparate(i, false);
+                const TraitStencilTestSeparate face = loadStencilTestSeparate(i, false);
                 DCHECK(face._type != FRONT_FACE_TYPE_DEFAULT, "Default face type is not allowed in separated stencil configs");
                 (face._type == FRONT_FACE_TYPE_FRONT ? stencilTest._front : stencilTest._back) = face;
             }

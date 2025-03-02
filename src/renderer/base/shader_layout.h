@@ -49,6 +49,11 @@ public:
         uint32_t _stride;
     };
 
+    struct Binding {
+        int32_t _location = -1;
+        int32_t _set = -1;
+    };
+
     struct ARK_API UBO {
         UBO(uint32_t binding);
 
@@ -80,18 +85,18 @@ public:
 
     struct SSBO {
         SSBO() = default;
-        SSBO(Buffer buffer, uint32_t binding);
+        SSBO(Buffer buffer, Binding binding);
         DEFAULT_COPY_AND_ASSIGN(SSBO);
 
         Buffer _buffer;
-        uint32_t _binding;
+        Binding _binding;
 
         ShaderStageSet _stages;
     };
 
     struct DescriptorSet {
         ShaderStageSet _stages;
-        uint32_t _binding = std::numeric_limits<uint32_t>::max();
+        Binding _binding;
 
         uint32_t addStage(Enum::ShaderStageBit stage, uint32_t binding);
     };
