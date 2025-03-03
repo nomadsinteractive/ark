@@ -26,7 +26,7 @@ public:
         : RenderPassPhrase(resolution, 1, commandBuffer), _renderer(renderer), _framebuffer(framebuffer), _clear_color_value(toVkClearColorValue(backgroundColor.rgba())) {
     }
 
-    VkRenderPass acquire(const PipelineDescriptor& /*bindings*/) override {
+    VkRenderPass acquire() override {
         const VKSwapChain& renderTarget = _renderer->renderTarget();
         return renderTarget.vkRenderPassBeginInfo().renderPass;
     }
@@ -74,7 +74,7 @@ VKGraphicsContext::~VKGraphicsContext()
     vkDestroySemaphore(_renderer->vkLogicalDevice(), _semaphore_present_complete, nullptr);
 }
 
-void VKGraphicsContext::begin(uint32_t imageId, const Color& backgroundColor)
+void VKGraphicsContext::begin(const uint32_t imageId, const Color& backgroundColor)
 {
     const VKSwapChain& renderTarget = _renderer->renderTarget();
     const std::vector<VkCommandBuffer>& commandBuffers = _command_buffers->vkCommandBuffers();
@@ -99,7 +99,7 @@ VKSubmitQueue& VKGraphicsContext::submitQueue()
     return _submit_queue;
 }
 
-VKGraphicsContext::RenderPassPhrase::RenderPassPhrase(const RenderEngineContext::Resolution& resolution, uint32_t colorAttachmentCount, VkCommandBuffer commandBuffer)
+VKGraphicsContext::RenderPassPhrase::RenderPassPhrase(const RenderEngineContext::Resolution& resolution, const uint32_t colorAttachmentCount, VkCommandBuffer commandBuffer)
     : _resolution(resolution), _color_attachment_count(colorAttachmentCount), _command_buffer(commandBuffer)
 {
 }
@@ -167,7 +167,7 @@ VkSemaphore VKGraphicsContext::semaphorePresentComplete() const
     return _semaphore_present_complete;
 }
 
-VKGraphicsContext::State::State(sp<RenderPassPhrase> renderPassPhrase, VkCommandBuffer commandBuffer, bool beginCommandBuffer)
+VKGraphicsContext::State::State(sp<RenderPassPhrase> renderPassPhrase, const VkCommandBuffer commandBuffer, const bool beginCommandBuffer)
     : _render_pass_phrase(std::move(renderPassPhrase)), _command_buffer(commandBuffer), _begin_command_buffer(beginCommandBuffer), _render_pass(VK_NULL_HANDLE)
 {
 }
@@ -177,18 +177,18 @@ const sp<VKGraphicsContext::RenderPassPhrase>& VKGraphicsContext::State::renderP
     return _render_pass_phrase;
 }
 
-VkRenderPass VKGraphicsContext::State::acquireRenderPass(const PipelineDescriptor& bindings) const
+VkRenderPass VKGraphicsContext::State::acquireRenderPass() const
 {
-    return _render_pass_phrase->acquire(bindings);
+    return _render_pass_phrase->acquire();
 }
 
-VkCommandBuffer VKGraphicsContext::State::ensureCommandBuffer()
+VkCommandBuffer VKGraphicsContext::State::ensureRenderPass()
 {
     if(_render_pass == VK_NULL_HANDLE)
     {
         if(_begin_command_buffer)
         {
-            constexpr VkCommandBufferBeginInfo cmdBufInfo{ VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
+            constexpr VkCommandBufferBeginInfo cmdBufInfo = {VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
             VKUtil::checkResult(vkBeginCommandBuffer(_command_buffer, &cmdBufInfo));
         }
         _render_pass = _render_pass_phrase->begin(_command_buffer);

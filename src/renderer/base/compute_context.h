@@ -1,13 +1,11 @@
 #pragma once
 
 #include <array>
-#include <vector>
 
 #include "core/base/api.h"
 #include "core/types/shared_ptr.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/base/buffer.h"
 #include "renderer/base/pipeline_context.h"
 
 namespace ark {

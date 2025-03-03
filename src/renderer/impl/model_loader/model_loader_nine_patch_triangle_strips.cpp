@@ -19,7 +19,7 @@ ModelLoaderNinePatchTriangleStrips::ModelLoaderNinePatchTriangleStrips(sp<Atlas>
 
 sp<RenderCommandComposer> ModelLoaderNinePatchTriangleStrips::makeRenderCommandComposer(const Shader& shader)
 {
-    _is_lhs = shader.layout()->camera().isLHS();
+    _is_lhs = shader.camera().isLHS();
     return sp<RCCDrawElements>::make(_unit_model);
 }
 

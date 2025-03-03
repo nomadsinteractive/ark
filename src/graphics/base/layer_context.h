@@ -40,7 +40,8 @@ public:
 
     void add(sp<Renderable> renderable, sp<Updatable> updatable = nullptr, sp<Boolean> discarded = nullptr);
     void clear();
-    void dispose();
+    void discard();
+
     const sp<Varyings>& varyings() const;
     void setVaryings(sp<Varyings> varyings);
 
@@ -66,9 +67,9 @@ private:
     bool _reload_requested;
 
     std::deque<std::pair<sp<Renderable>, Renderable::State>> _renderables;
-    std::vector<sp<Renderable>> _renderable_created;
+    Vector<sp<Renderable>> _renderable_created;
 
-    std::unordered_map<void*, ElementState> _element_states;
+    HashMap<void*, ElementState> _element_states;
 
     Timestamp _timestamp;
 

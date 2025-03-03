@@ -36,11 +36,6 @@ bool RenderLayerSnapshot::needsReload() const
     return _vertices_dirty || _stub->_pipeline_bindings->vertices().size() == 0;
 }
 
-const sp<ShaderLayout>& RenderLayerSnapshot::pipelineInput() const
-{
-    return _stub->_shader->layout();
-}
-
 void RenderLayerSnapshot::addLayerContext(const RenderRequest& renderRequest, Vector<sp<LayerContext>>& layerContexts)
 {
     for(auto iter = layerContexts.begin(); iter != layerContexts.end(); )

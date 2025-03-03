@@ -272,8 +272,8 @@ VertexLayout setupVertexLayout(const ShaderLayout& shaderLayout)
 
 }
 
-VKPipeline::VKPipeline(const PipelineDescriptor& bindings, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, Map<Enum::ShaderStageBit, String> stages)
-    : _pipeline_descriptor(bindings), _recycler(recycler), _renderer(renderer), _baked_renderer(makeBakedRenderer(bindings)), _layout(VK_NULL_HANDLE), _pipeline(VK_NULL_HANDLE), _stages(std::move(stages)),
+VKPipeline::VKPipeline(const PipelineDescriptor& pipelineDescriptor, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, Map<Enum::ShaderStageBit, String> stages)
+    : _pipeline_descriptor(pipelineDescriptor), _recycler(recycler), _renderer(renderer), _baked_renderer(makeBakedRenderer(pipelineDescriptor)), _layout(VK_NULL_HANDLE), _pipeline(VK_NULL_HANDLE), _stages(std::move(stages)),
       _rebind_needed(true), _is_compute_pipeline(false)
 {
     for(const auto& i : _stages)
@@ -517,10 +517,10 @@ void VKPipeline::setupGraphicsPipeline(GraphicsContext& graphicsContext)
 
     const sp<VKGraphicsContext>& vkGraphicsContext = graphicsContext.traits().ensure<VKGraphicsContext>();
     VKGraphicsContext::State& state = vkGraphicsContext->currentState();
-    VkGraphicsPipelineCreateInfo pipelineCreateInfo = vks::initializers::pipelineCreateInfo(_layout, state.acquireRenderPass(_pipeline_descriptor), 0);
+    VkGraphicsPipelineCreateInfo pipelineCreateInfo = vks::initializers::pipelineCreateInfo(_layout, state.acquireRenderPass(), 0);
 
     Vector<VkPipelineColorBlendAttachmentState> blendAttachmentStates;
-    uint32_t colorAttachmentCount = std::max<uint32_t>(_pipeline_descriptor.layout()->colorAttachmentCount(), state.renderPassPhrase()->colorAttachmentCount());
+    const uint32_t colorAttachmentCount = std::max<uint32_t>(_pipeline_descriptor.layout()->colorAttachmentCount(), state.renderPassPhrase()->colorAttachmentCount());
     for(uint32_t i = 0; i < colorAttachmentCount; ++i)
     {
         //TODO: MRT only albedo needs blending for now, what about the others?
@@ -574,7 +574,7 @@ void VKPipeline::buildDrawCommandBuffer(GraphicsContext& graphicsContext, const 
 {
     const sp<VKGraphicsContext>& vkGraphicsContext = graphicsContext.traits().ensure<VKGraphicsContext>();
     VKGraphicsContext::State& state = vkGraphicsContext->currentState();
-    const VkCommandBuffer commandBuffer = state.ensureCommandBuffer();
+    const VkCommandBuffer commandBuffer = state.ensureRenderPass();
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _layout, 0, _descriptor_sets.size(), _descriptor_sets.data(), 0, nullptr);
 
@@ -598,6 +598,8 @@ void VKPipeline::buildComputeCommandBuffer(GraphicsContext& graphicsContext, con
 {
     const sp<VKComputeContext>& vkContext = graphicsContext.traits().ensure<VKComputeContext>();
     const VkCommandBuffer commandBuffer = vkContext->buildCommandBuffer(graphicsContext);
+
+    // vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 0, nullptr, 0, nullptr, 0, nullptr);
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, _pipeline);
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, _layout, 0, _descriptor_sets.size(), _descriptor_sets.data(), 0, nullptr);
     vkCmdDispatch(commandBuffer, computeContext._num_work_groups.at(0), computeContext._num_work_groups.at(1), computeContext._num_work_groups.at(2));

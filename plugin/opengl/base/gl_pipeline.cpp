@@ -54,7 +54,7 @@ GLuint compileShader(const uint32_t version, const GLenum type, const String& so
         GLint length;
         glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
 
-        size_t len = static_cast<size_t>(length);
+        const size_t len = static_cast<size_t>(length);
         Vector<GLchar> logs(len + 1);
         glGetShaderInfoLog(id, length, &length, logs.data());
         logs.back() = 0;

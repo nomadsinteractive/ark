@@ -2,7 +2,6 @@
 
 #include <deque>
 #include <list>
-#include <vector>
 
 #include "core/base/api.h"
 #include "core/inf/array.h"
@@ -56,7 +55,6 @@ public:
     sp<RenderCommand> compose(const RenderRequest& renderRequest) const;
 
     bool needsReload() const;
-    const sp<ShaderLayout>& pipelineInput() const;
 
     void addLayerContext(const RenderRequest& renderRequest, Vector<sp<LayerContext>>& layerContexts);
     void snapshot(const RenderRequest& renderRequest);

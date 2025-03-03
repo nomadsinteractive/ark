@@ -20,7 +20,7 @@ LayerContext::LayerContext(sp<Shader> shader, sp<ModelLoader> modelLoader, sp<Ve
 {
 }
 
-bool LayerContext::update(uint64_t timestamp)
+bool LayerContext::update(const uint64_t timestamp)
 {
     return _timestamp.update(timestamp);
 }
@@ -78,7 +78,7 @@ void LayerContext::clear()
     _renderable_created.clear();
 }
 
-void LayerContext::dispose()
+void LayerContext::discard()
 {
     _discarded.reset(Global<Constants>()->BOOLEAN_TRUE);
 }
@@ -117,7 +117,7 @@ LayerContextSnapshot LayerContext::snapshot(RenderLayer renderLayer, const Rende
     const bool dirty = UpdatableUtil::update(renderRequest.timestamp(), _position, _visible, _discarded, _varyings);
     if(!_varyings)
         _varyings = sp<Varyings>::make(pipelineInput);
-    return LayerContextSnapshot{dirty, _position.val(), _visible.val(), _discarded.val(), _varyings->snapshot(pipelineInput, renderRequest.allocator()), std::move(renderLayer)};
+    return {dirty, _position.val(), _visible.val(), _discarded.val(), _varyings->snapshot(pipelineInput, renderRequest.allocator()), std::move(renderLayer)};
 }
 
 LayerContext::ElementState& LayerContext::addElementState(void* key)

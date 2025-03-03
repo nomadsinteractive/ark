@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"

@@ -102,13 +102,11 @@ public:
     };
 
 public:
-    ShaderLayout(const sp<Camera>& camera);
+    ShaderLayout();
 
     void initialize(const PipelineBuildingContext& buildingContext);
 
-    const Camera& camera() const;
     const Vector<sp<UBO>>& ubos() const;
-
     Vector<SSBO>& ssbos();
     const Vector<SSBO>& ssbos() const;
 
@@ -129,9 +127,6 @@ public:
     sp<Uniform> getUniform(const String& name) const;
 
 private:
-    //TODO: move it to Shader
-    Camera _camera;
-
     Vector<sp<UBO>> _ubos;
     Vector<SSBO> _ssbos;
 

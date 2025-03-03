@@ -7,7 +7,7 @@
 
 namespace ark {
 
-ComputeContext::ComputeContext(sp<PipelineBindings> pipelineBindings, sp<RenderLayerSnapshot::BufferObject> bufferObject, std::array<uint32_t, 3> numWorkGroups)
+ComputeContext::ComputeContext(sp<PipelineBindings> pipelineBindings, sp<RenderLayerSnapshot::BufferObject> bufferObject, const std::array<uint32_t, 3> numWorkGroups)
     : PipelineContext{std::move(pipelineBindings), std::move(bufferObject)}, _num_work_groups(numWorkGroups)
 {
 }

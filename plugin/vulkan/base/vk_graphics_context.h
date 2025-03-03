@@ -34,7 +34,7 @@ public:
         uint32_t colorAttachmentCount() const;
         VkCommandBuffer vkCommandBuffer() const;
 
-        virtual VkRenderPass acquire(const PipelineDescriptor& bindings) = 0;
+        virtual VkRenderPass acquire() = 0;
         virtual VkRenderPass begin(VkCommandBuffer commandBuffer) = 0;
 
     protected:
@@ -47,10 +47,10 @@ public:
     public:
         State(sp<RenderPassPhrase> renderPassPhrase, VkCommandBuffer commandBuffer, bool beginCommandBuffer);
 
-        VkCommandBuffer ensureCommandBuffer();
+        VkRenderPass acquireRenderPass() const;
+        VkCommandBuffer ensureRenderPass();
 
         const sp<RenderPassPhrase>& renderPassPhrase() const;
-        VkRenderPass acquireRenderPass(const PipelineDescriptor& bindings) const;
 
     private:
         sp<RenderPassPhrase> _render_pass_phrase;

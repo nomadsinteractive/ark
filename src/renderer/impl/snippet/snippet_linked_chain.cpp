@@ -64,7 +64,7 @@ sp<Snippet::DrawEvents> SnippetLinkedChain::makeDrawEvents()
 sp<Snippet::DrawEvents> SnippetLinkedChain::makeDrawEvents(sp<Snippet::DrawEvents> de1, sp<Snippet::DrawEvents> de2) const
 {
     if(de1 && de2)
-        return sp<DrawEventsLinkedChain>::make(std::move(de1), std::move(de2));
+        return sp<Snippet::DrawEvents>::make<DrawEventsLinkedChain>(std::move(de1), std::move(de2));
     return de1 ? de1 : de2;
 }
 

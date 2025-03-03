@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include "core/base/api.h"
 #include "core/types/shared_ptr.h"
 #include "core/types/optional.h"

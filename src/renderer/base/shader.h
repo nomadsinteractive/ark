@@ -25,10 +25,10 @@ public:
         document _manifest;
     };
 
-    typedef std::vector<sp<Builder<Snippet>>> SnippetManifest;
+    typedef Vector<sp<Builder<Snippet>>> SnippetManifest;
 
 public:
-    Shader(sp<PipelineFactory> pipelineFactory, sp<RenderController> renderController, sp<PipelineLayout> layout, PipelineDescriptor::Parameters bindingParams);
+    Shader(sp<Camera> camera, sp<PipelineFactory> pipelineFactory, sp<RenderController> renderController, sp<PipelineLayout> layout, PipelineDescriptor::Parameters bindingParams);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Shader);
 
     static sp<Builder<Shader>> fromDocument(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext, const String& defVertex = "shaders/default.vert", const String& defFragment = "shaders/texture.frag", const sp<Camera>& defaultCamera = nullptr);
@@ -36,6 +36,7 @@ public:
     [[deprecated]]
     sp<RenderLayerSnapshot::BufferObject> takeBufferSnapshot(const RenderRequest& renderRequest, bool isComputeStage) const;
 
+    const Camera& camera() const;
     const sp<PipelineFactory>& pipelineFactory() const;
     const sp<RenderController>& renderController() const;
 
@@ -50,19 +51,19 @@ public:
     class BUILDER_IMPL final : public Builder<Shader> {
     public:
         BUILDER_IMPL(BeanFactory& factory, const document& manifest, const ResourceLoaderContext& resourceLoaderContext, sp<Builder<Camera>> camera = nullptr,
-                     Optional<std::vector<StageManifest>> stages = {}, Optional<SnippetManifest> snippets = {});
+                     Optional<Vector<StageManifest>> stages = {}, Optional<SnippetManifest> snippets = {});
 
         sp<Shader> build(const Scope& args) override;
 
     private:
-        sp<PipelineBuildingContext> makePipelineBuildingContext(const sp<Camera>& camera, const Scope& args) const;
+        sp<PipelineBuildingContext> makePipelineBuildingContext(const Scope& args) const;
 
     private:
         BeanFactory _factory;
         document _manifest;
         sp<RenderController> _render_controller;
 
-        std::vector<StageManifest> _stages;
+        Vector<StageManifest> _stages;
         SnippetManifest _snippets;
         SafeBuilder<Camera> _camera;
         PipelineDescriptor::Parameters::BUILDER _parameters;
@@ -83,6 +84,8 @@ private:
     Map<uint32_t, Buffer> makeDivivedBuffers(const Map<uint32_t, sp<Uploader>>& uploaders) const;
 
 private:
+    Camera _camera;
+
     sp<PipelineFactory> _pipeline_factory;
     sp<RenderController> _render_controller;
     sp<PipelineLayout> _pipeline_layout;

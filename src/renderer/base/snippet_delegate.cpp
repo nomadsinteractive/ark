@@ -1,7 +1,6 @@
 #include "renderer/base/snippet_delegate.h"
 
 #include "renderer/base/buffer.h"
-#include "renderer/base/drawing_context.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/pipeline_building_context.h"
 #include "renderer/base/render_engine_context.h"
@@ -70,7 +69,7 @@ public:
 
     sp<DrawEvents> makeDrawEvents() override
     {
-        return sp<CoreDrawEvents>::make(_wrapper, _snippet);
+        return sp<DrawEvents>::make<CoreDrawEvents>(_wrapper, _snippet);
     }
 
 private:

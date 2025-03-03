@@ -61,8 +61,8 @@ uint32_t ShaderLayout::AttributeOffsets::stride() const
     return _stride;
 }
 
-ShaderLayout::ShaderLayout(const sp<Camera>& camera)
-    : _camera(camera ? *camera : Camera::createDefaultCamera()), _stream_layouts{{0, StreamLayout()}}
+ShaderLayout::ShaderLayout()
+    : _stream_layouts{{0, StreamLayout()}}
 {
 }
 
@@ -73,11 +73,6 @@ void ShaderLayout::initialize(const PipelineBuildingContext& buildingContext)
         v->initialize();
         _ubos.push_back(v);
     }
-}
-
-const Camera& ShaderLayout::camera() const
-{
-    return _camera;
 }
 
 const Vector<sp<ShaderLayout::UBO>>& ShaderLayout::ubos() const
@@ -238,7 +233,7 @@ void ShaderLayout::UBO::doSnapshot(uint64_t timestamp, bool force) const
 RenderLayerSnapshot::UBOSnapshot ShaderLayout::UBO::snapshot(const RenderRequest& renderRequest) const
 {
     doSnapshot(renderRequest.timestamp(), false);
-    RenderLayerSnapshot::UBOSnapshot ubo {
+    RenderLayerSnapshot::UBOSnapshot ubo = {
         renderRequest.allocator().sbrkSpan(_dirty_flags->size()),
         renderRequest.allocator().sbrkSpan(_buffer->size())
     };

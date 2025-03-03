@@ -21,7 +21,7 @@ namespace ark {
 
 namespace {
 
-Optional<const Shader::StageManifest&> findStageManifest(Enum::ShaderStageBit type, const std::vector<Shader::StageManifest>& stages)
+Optional<const Shader::StageManifest&> findStageManifest(const Enum::ShaderStageBit type, const Vector<Shader::StageManifest>& stages)
 {
     for(const Shader::StageManifest& i : stages)
         if(type == i._type)
@@ -41,8 +41,8 @@ Shader::StageManifest::StageManifest(BeanFactory& factory, const document& manif
 {
 }
 
-Shader::Shader(sp<PipelineFactory> pipelineFactory, sp<RenderController> renderController, sp<PipelineLayout> pipelineLayout, PipelineDescriptor::Parameters bindingParams)
-    : _pipeline_factory(std::move(pipelineFactory)), _render_controller(std::move(renderController)), _pipeline_layout(std::move(pipelineLayout)), _layout(_pipeline_layout->shaderLayout()), _descriptor_params(std::move(bindingParams))
+Shader::Shader(sp<Camera> camera, sp<PipelineFactory> pipelineFactory, sp<RenderController> renderController, sp<PipelineLayout> pipelineLayout, PipelineDescriptor::Parameters bindingParams)
+    : _camera(camera ? *camera : Camera::createDefaultCamera()), _pipeline_factory(std::move(pipelineFactory)), _render_controller(std::move(renderController)), _pipeline_layout(std::move(pipelineLayout)), _layout(_pipeline_layout->shaderLayout()), _descriptor_params(std::move(bindingParams))
 {
     _pipeline_layout->initialize(*this);
 }
@@ -52,7 +52,7 @@ sp<Builder<Shader>> Shader::fromDocument(BeanFactory& factory, const document& m
     if(builder<Shader> shader = factory.getBuilder<Shader>(manifest, constants::SHADER))
         return shader;
     const Global<StringTable> stringTable;
-    std::vector<StageManifest> stageManifests;
+    Vector<StageManifest> stageManifests;
     stageManifests.emplace_back(Enum::SHADER_STAGE_BIT_VERTEX, builder<String>::make<Builder<String>::Prebuilt>(stringTable->getString(defVertex, true)));
     stageManifests.emplace_back(Enum::SHADER_STAGE_BIT_FRAGMENT, builder<String>::make<Builder<String>::Prebuilt>(stringTable->getString(defFragment, true)));
     return builder<Shader>::make<BUILDER_IMPL>(factory, manifest, resourceLoaderContext, defaultCamera ? builder<Camera>::make<Builder<Camera>::Prebuilt>(defaultCamera) : nullptr, std::move(stageManifests));
@@ -61,6 +61,11 @@ sp<Builder<Shader>> Shader::fromDocument(BeanFactory& factory, const document& m
 sp<RenderLayerSnapshot::BufferObject> Shader::takeBufferSnapshot(const RenderRequest& renderRequest, const bool isComputeStage) const
 {
     return _layout->takeBufferSnapshot(renderRequest, isComputeStage);
+}
+
+const Camera& Shader::camera() const
+{
+    return _camera;
 }
 
 const sp<PipelineFactory>& Shader::pipelineFactory() const
@@ -80,7 +85,7 @@ const sp<RenderController>& Shader::renderController() const
 
 void Shader::setCamera(const Camera& camera)
 {
-    _layout->_camera.assign(camera);
+    _camera.assign(camera);
 }
 
 const sp<PipelineLayout>& Shader::pipelineLayout() const
@@ -93,14 +98,14 @@ const PipelineDescriptor::Parameters& Shader::descriptorParams() const
     return _descriptor_params;
 }
 
-sp<PipelineBindings> Shader::makeBindings(Buffer vertices, Enum::RenderMode mode, Enum::DrawProcedure drawProcedure, const std::map<uint32_t, sp<Uploader>>& uploaders) const
+sp<PipelineBindings> Shader::makeBindings(Buffer vertices, Enum::RenderMode mode, Enum::DrawProcedure drawProcedure, const Map<uint32_t, sp<Uploader>>& uploaders) const
 {
     return sp<PipelineBindings>::make(std::move(vertices), _pipeline_factory, sp<PipelineDescriptor>::make(mode, drawProcedure, _descriptor_params, _pipeline_layout), makeDivivedBuffers(uploaders));
 }
 
-std::map<uint32_t, Buffer> Shader::makeDivivedBuffers(const std::map<uint32_t, sp<Uploader>>& uploaders) const
+Map<uint32_t, Buffer> Shader::makeDivivedBuffers(const Map<uint32_t, sp<Uploader>>& uploaders) const
 {
-    std::map<uint32_t, Buffer> dividedBuffers;
+    Map<uint32_t, Buffer> dividedBuffers;
     for(const auto& [divisor, _] : _layout->streamLayouts())
         if(divisor != 0)
         {
@@ -111,7 +116,7 @@ std::map<uint32_t, Buffer> Shader::makeDivivedBuffers(const std::map<uint32_t, s
     return dividedBuffers;
 }
 
-Shader::BUILDER_IMPL::BUILDER_IMPL(BeanFactory& factory, const document& manifest, const ResourceLoaderContext& resourceLoaderContext, sp<Builder<Camera>> camera, Optional<std::vector<StageManifest>> stages, Optional<SnippetManifest> snippets)
+Shader::BUILDER_IMPL::BUILDER_IMPL(BeanFactory& factory, const document& manifest, const ResourceLoaderContext& resourceLoaderContext, sp<Builder<Camera>> camera, Optional<Vector<StageManifest>> stages, Optional<SnippetManifest> snippets)
     : _factory(factory), _manifest(manifest), _render_controller(resourceLoaderContext.renderController()), _stages(stages ? std::move(stages.value()) : factory.makeBuilderListObject<StageManifest>(manifest, "stage")),
       _snippets(snippets ? std::move(snippets.value()) : factory.makeBuilderList<Snippet>(manifest, "snippet")), _camera(camera ? std::move(camera) : factory.getBuilder<Camera>(manifest, constants::CAMERA)),
       _parameters(factory, manifest, resourceLoaderContext)
@@ -120,19 +125,19 @@ Shader::BUILDER_IMPL::BUILDER_IMPL(BeanFactory& factory, const document& manifes
 
 sp<Shader> Shader::BUILDER_IMPL::build(const Scope& args)
 {
-    sp<PipelineBuildingContext> buildingContext = makePipelineBuildingContext(_camera.build(args), args);
+    sp<PipelineBuildingContext> buildingContext = makePipelineBuildingContext(args);
     buildingContext->loadManifest(_manifest, _factory, args);
 
     sp<PipelineLayout> pipelineLayout = sp<PipelineLayout>::make(std::move(buildingContext));
     for(const sp<Builder<Snippet>>& i : _snippets)
         pipelineLayout->addSnippet(i->build(args));
 
-    return sp<Shader>::make(_render_controller->createPipelineFactory(), _render_controller, std::move(pipelineLayout), _parameters.build(args));
+    return sp<Shader>::make(_camera.build(args), _render_controller->createPipelineFactory(), _render_controller, std::move(pipelineLayout), _parameters.build(args));
 }
 
-sp<PipelineBuildingContext> Shader::BUILDER_IMPL::makePipelineBuildingContext(const sp<Camera>& camera, const Scope& args) const
+sp<PipelineBuildingContext> Shader::BUILDER_IMPL::makePipelineBuildingContext(const Scope& args) const
 {
-    sp<PipelineBuildingContext> context = sp<PipelineBuildingContext>::make(_render_controller, camera);
+    sp<PipelineBuildingContext> context = sp<PipelineBuildingContext>::make(_render_controller);
     const Optional<const StageManifest&> vertexOpt = findStageManifest(Enum::SHADER_STAGE_BIT_VERTEX, _stages);
     const Optional<const StageManifest&> fragmentOpt = findStageManifest(Enum::SHADER_STAGE_BIT_FRAGMENT, _stages);
     const Optional<const StageManifest&> computeOpt = findStageManifest(Enum::SHADER_STAGE_BIT_COMPUTE, _stages);
@@ -146,7 +151,7 @@ sp<PipelineBuildingContext> Shader::BUILDER_IMPL::makePipelineBuildingContext(co
     else
         CHECK(computeOpt, "Shader must have at least one stage defined");
     if(computeOpt)
-        context->addStage(computeOpt->_source->build(args), computeOpt->_manifest, Enum::SHADER_STAGE_BIT_COMPUTE, Enum::SHADER_STAGE_BIT_NONE);
+        context->addStage(computeOpt->_source->build(args), computeOpt->_manifest, Enum::SHADER_STAGE_BIT_COMPUTE, fragmentOpt ? Enum::SHADER_STAGE_BIT_FRAGMENT : Enum::SHADER_STAGE_BIT_NONE);
     return context;
 }
 

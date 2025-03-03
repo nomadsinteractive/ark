@@ -91,7 +91,7 @@ private:
             PARAMETER_ANNOTATION_INOUT = 3
         };
         Parameter();
-        Parameter(String type, String name, Annotation modifier, uint32_t divisor);
+        Parameter(String type, String name, Annotation annotation, uint32_t divisor);
 
         DEFAULT_COPY_AND_ASSIGN(Parameter);
 
@@ -99,7 +99,7 @@ private:
 
         String _type;
         String _name;
-        Annotation _modifier;
+        Annotation _annotation;
         uint32_t _divisor;
     };
 
@@ -210,6 +210,8 @@ public:
     Vector<ResultModifer> _result_modifiers;
 
     Map<String, ShaderLayout::Binding> _ssbos;
+
+    Optional<std::array<uint32_t, 3>> _compute_local_sizes;
 
     DeclarationList _declaration_ins;
     DeclarationList _declaration_outs;

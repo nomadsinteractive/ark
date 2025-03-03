@@ -300,10 +300,10 @@ struct DrawPipelineBgfx final : ResourceBase<::bgfx::ProgramHandle, Pipeline> {
             ::bgfx::setTexture(stage, uniform, texture->handle());
 
         {
-            const Camera& camera = drawingContext._bindings->shaderLayout()->camera();
-            const M4 view = camera.view()->val();
-            const M4 proj = camera.projection()->val();
-            ::bgfx::setViewTransform(ctx._view_id, &view, &proj);
+            // const Camera& camera = drawingContext._bindings->shaderLayout()->camera();
+            // const M4 view = camera.view()->val();
+            // const M4 proj = camera.projection()->val();
+            // ::bgfx::setViewTransform(ctx._view_id, &view, &proj);
         }
 
         {

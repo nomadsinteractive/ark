@@ -25,11 +25,12 @@ namespace ark {
 
 namespace {
 
-std::regex REGEX_INCLUDE_PATTERN(R"(#include\s*[<"]([^>"]+)[>"])");
-std::regex REGEX_STRUCT_PATTERN(R"(struct\s+(\w+)\s*\{([^}]+)\}\s*;)");
-std::regex REGEX_IN_PATTERN("(?:attribute|varying|in)" ATTRIBUTE_PATTERN);
-std::regex REGEX_UNIFORM_PATTERN("(?:" LAYOUT_PATTERN ")?uniform\\s+" ACCESSIBILITY_PATTERN UNIFORM_PATTERN);
-std::regex REGEX_SSBO_PATTERN(LAYOUT_PATTERN ACCESSIBILITY_PATTERN "buffer\\s+(\\w+)");
+const std::regex REGEX_INCLUDE_PATTERN(R"(#include\s*[<"]([^>"]+)[>"])");
+const std::regex REGEX_STRUCT_PATTERN(R"(struct\s+(\w+)\s*\{([^}]+)\}\s*;)");
+const std::regex REGEX_IN_PATTERN("(?:attribute|varying|in)" ATTRIBUTE_PATTERN);
+const std::regex REGEX_UNIFORM_PATTERN("(?:" LAYOUT_PATTERN ")?uniform\\s+" ACCESSIBILITY_PATTERN UNIFORM_PATTERN);
+const std::regex REGEX_SSBO_PATTERN(LAYOUT_PATTERN ACCESSIBILITY_PATTERN "buffer\\s+(\\w+)");
+const std::regex REGEX_LOCAL_SIZE_PATTERN(R"--(layout\s*\(((?:local_size_[xyz]\s*=\s*\d+\s*,?\s*)+)\)\s+in\s*;)--");
 
 #ifndef ANDROID
 constexpr char STAGE_ATTR_PREFIX[Enum::SHADER_STAGE_BIT_COUNT + 1][4] = {"a_", "v_", "t_", "e_", "g_", "f_", "c_"};
@@ -54,7 +55,7 @@ size_t parseFunctionBody(const String& s, String& body)
 
 }
 
-ShaderPreprocessor::ShaderPreprocessor(sp<String> source, document manifest, Enum::ShaderStageBit shaderStage, Enum::ShaderStageBit preShaderStage)
+ShaderPreprocessor::ShaderPreprocessor(sp<String> source, document manifest, const Enum::ShaderStageBit shaderStage, const Enum::ShaderStageBit preShaderStage)
     : _source(std::move(source)), _manifest(std::move(manifest)), _shader_stage(shaderStage), _pre_shader_stage(preShaderStage), _version(0), _declaration_ins(_attribute_declaration_codes, shaderStage == Enum::SHADER_STAGE_BIT_VERTEX ? ANNOTATION_VERT_IN : ANNOTATION_FRAG_IN),
       _declaration_outs(_attribute_declaration_codes, shaderStage == Enum::SHADER_STAGE_BIT_VERTEX ? ANNOTATION_VERT_OUT : ANNOTATION_FRAG_OUT),
       _declaration_uniforms(_uniform_declaration_codes, "uniform"), _declaration_samplers(_uniform_declaration_codes, "uniform"), _declaration_images(_uniform_declaration_codes, "uniform"),
@@ -88,7 +89,7 @@ void ShaderPreprocessor::initializeAsFirst(PipelineBuildingContext& context)
 {
     initialize(context);
     for(const auto& i : _main_block->_args)
-        if(i._modifier & ShaderPreprocessor::Parameter::PARAMETER_ANNOTATION_IN)
+        if(i._annotation & Parameter::PARAMETER_ANNOTATION_IN)
             context.addInputAttribute(Strings::capitalizeFirst(i._name), i._type, i._divisor);
 }
 
@@ -159,6 +160,24 @@ void ShaderPreprocessor::parseDeclarations()
     };
     _include_declaration_codes.search(REGEX_SSBO_PATTERN, ssboPattern);
     _main.search(REGEX_SSBO_PATTERN, ssboPattern);
+
+    if(_shader_stage == Enum::SHADER_STAGE_BIT_COMPUTE)
+    {
+        const auto localSizeTraveller = [this] (const std::smatch& m)
+        {
+            _compute_local_sizes = {{1, 1, 1}};
+            std::array<uint32_t, 3>& localSizes = _compute_local_sizes.value();
+            for(const String& i : String(m[1].str()).split(','))
+                if(const auto [k, v] = i.cut('='); v)
+                {
+                    const uint32_t workGroup = k.strip().at(StringView("local_size_").size()) - 'x';
+                    const uint32_t size = Strings::eval<uint32_t>(v.value());
+                    localSizes[workGroup] = size;
+                }
+            return true;
+        };
+        _main.search(REGEX_LOCAL_SIZE_PATTERN, localSizeTraveller);
+    }
 
     if(!_main_block)
         return;
@@ -254,7 +273,7 @@ void ShaderPreprocessor::linkNextStage(const String& returnValueName)
     if(_main_block->hasReturnValue())
         _declaration_outs.declare(_main_block->_return_type, varPrefix, returnValueName, Strings::sprintf("location = %d", ++location));
     for(const Parameter& i : _main_block->_args)
-        if(i._modifier == Parameter::PARAMETER_ANNOTATION_OUT)
+        if(i._annotation == Parameter::PARAMETER_ANNOTATION_OUT)
             _declaration_outs.declare(i._type, varPrefix, Strings::capitalizeFirst(i._name), Strings::sprintf("location = %d", ++location), i.getQualifierStr());
 }
 
@@ -358,7 +377,7 @@ uint32_t ShaderPreprocessor::getUniformSize(Uniform::Type type, const String& de
 void ShaderPreprocessor::linkParameters(const Vector<ShaderPreprocessor::Parameter>& parameters, const ShaderPreprocessor& preStage, std::set<String>& passThroughVars)
 {
     for(const auto& i : parameters)
-        if(i._modifier & Parameter::PARAMETER_ANNOTATION_IN)
+        if(i._annotation & Parameter::PARAMETER_ANNOTATION_IN)
             if(!preStage._main_block->hasOutAttribute(i._name))
                 passThroughVars.insert(Strings::capitalizeFirst(i._name));
 }
@@ -415,13 +434,13 @@ void ShaderPreprocessor::Function::parse(PipelineBuildingContext& buildingContex
     {
         const String s = i.strip();
         Parameter param = parseParameter(s);
-        if(param._modifier & Parameter::PARAMETER_ANNOTATION_OUT)
+        if(param._annotation & Parameter::PARAMETER_ANNOTATION_OUT)
         {
             const Attribute attr = RenderUtil::makePredefinedAttribute(param._name, param._type);
             CHECK_WARN(attr.length() != 3 || stride % 16 == 0, "3-component out attribute \"%s\" ranged from %d to %d, some GPUs may not like this", attr.name().c_str(), stride, stride + attr.size());
             stride += attr.size();
         }
-        if(param._modifier & Parameter::PARAMETER_ANNOTATION_IN)
+        if(param._annotation & Parameter::PARAMETER_ANNOTATION_IN)
             buildingContext.addPredefinedAttribute(Strings::capitalizeFirst(param._name), param._type, param._divisor, Enum::SHADER_STAGE_BIT_VERTEX);
 
         _args.push_back(std::move(param));
@@ -490,7 +509,7 @@ void ShaderPreprocessor::Function::genDefinition()
     *_place_hoder = sb.str();
 }
 
-String ShaderPreprocessor::Function::genOutCall(Enum::ShaderStageBit preShaderStage, Enum::ShaderStageBit shaderStage) const
+String ShaderPreprocessor::Function::genOutCall(const Enum::ShaderStageBit preShaderStage, const Enum::ShaderStageBit shaderStage) const
 {
     StringBuffer sb;
     sb << "ark_main(";
@@ -499,7 +518,7 @@ String ShaderPreprocessor::Function::genOutCall(Enum::ShaderStageBit preShaderSt
     {
         if(iter != begin)
             sb << ", ";
-        if(iter->_modifier & Parameter::PARAMETER_ANNOTATION_OUT)
+        if(iter->_annotation & Parameter::PARAMETER_ANNOTATION_OUT)
             sb << getOutAttributePrefix(shaderStage);
         else
             sb << getOutAttributePrefix(preShaderStage);
@@ -513,7 +532,7 @@ String ShaderPreprocessor::Function::genOutCall(Enum::ShaderStageBit preShaderSt
 bool ShaderPreprocessor::Function::hasOutAttribute(const String& name) const
 {
     for(const auto& i : _args)
-        if(i._modifier & Parameter::PARAMETER_ANNOTATION_OUT && Strings::capitalizeFirst(i._name) == name)
+        if(i._annotation & Parameter::PARAMETER_ANNOTATION_OUT && Strings::capitalizeFirst(i._name) == name)
             return true;
     return false;
 }
@@ -527,7 +546,7 @@ size_t ShaderPreprocessor::Function::outArgumentCount() const
 {
     size_t count = 0;
     for(const auto& i : _args)
-        if(i._modifier & Parameter::PARAMETER_ANNOTATION_OUT)
+        if(i._annotation & Parameter::PARAMETER_ANNOTATION_OUT)
             count ++;
     return count;
 }
@@ -698,20 +717,20 @@ void ShaderPreprocessor::Declaration::setSource(String source) const
 }
 
 ShaderPreprocessor::Parameter::Parameter()
-    : _modifier(PARAMETER_ANNOTATION_DEFAULT), _divisor(0)
+    : _annotation(PARAMETER_ANNOTATION_DEFAULT), _divisor(0)
 {
 }
 
-ShaderPreprocessor::Parameter::Parameter(String type, String name, ShaderPreprocessor::Parameter::Annotation modifier, uint32_t divisor)
-    : _type(std::move(type)), _name(std::move(name)), _modifier(modifier), _divisor(divisor)
+ShaderPreprocessor::Parameter::Parameter(String type, String name, const Annotation annotation, const uint32_t divisor)
+    : _type(std::move(type)), _name(std::move(name)), _annotation(annotation), _divisor(divisor)
 {
 }
 
 const char* ShaderPreprocessor::Parameter::getQualifierStr() const
 {
     const char* qualifiers[] = {"in", "in", "out", "inout"};
-    DASSERT(_modifier >= PARAMETER_ANNOTATION_DEFAULT && _modifier <= PARAMETER_ANNOTATION_INOUT);
-    return qualifiers[_modifier];
+    DASSERT(_annotation >= PARAMETER_ANNOTATION_DEFAULT && _annotation <= PARAMETER_ANNOTATION_INOUT);
+    return qualifiers[_annotation];
 }
 
 }

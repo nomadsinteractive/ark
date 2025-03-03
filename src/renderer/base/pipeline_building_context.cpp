@@ -28,7 +28,7 @@ public:
         _delegate->upload(buf);
     }
 
-    bool update(uint64_t timestamp) override {
+    bool update(const uint64_t timestamp) override {
         return _delegate->update(timestamp);
     }
 
@@ -96,13 +96,13 @@ Attribute makePredefinedAttribute(const String& name, const String& type)
 
 }
 
-PipelineBuildingContext::PipelineBuildingContext(const sp<RenderController>& renderController, const sp<Camera>& camera)
-    : _render_controller(renderController), _shader_layout(sp<ShaderLayout>::make(camera))
+PipelineBuildingContext::PipelineBuildingContext(const sp<RenderController>& renderController)
+    : _render_controller(renderController), _shader_layout(sp<ShaderLayout>::make())
 {
 }
 
-PipelineBuildingContext::PipelineBuildingContext(const sp<RenderController>& renderController, const sp<Camera>& camera, sp<String> vertex, sp<String> fragment)
-    : PipelineBuildingContext(renderController, camera)
+PipelineBuildingContext::PipelineBuildingContext(const sp<RenderController>& renderController, sp<String> vertex, sp<String> fragment)
+    : PipelineBuildingContext(renderController)
 {
     addStage(std::move(vertex), nullptr, Enum::SHADER_STAGE_BIT_VERTEX, Enum::SHADER_STAGE_BIT_NONE);
     addStage(std::move(fragment), nullptr, Enum::SHADER_STAGE_BIT_FRAGMENT, Enum::SHADER_STAGE_BIT_VERTEX);
@@ -131,7 +131,7 @@ void PipelineBuildingContext::initializeAttributes()
 
     for(const auto& [i, j] : _rendering_stages)
         for(const ShaderPreprocessor::Parameter& k : j->args())
-            if(k._modifier & ShaderPreprocessor::Parameter::PARAMETER_ANNOTATION_IN)
+            if(k._annotation & ShaderPreprocessor::Parameter::PARAMETER_ANNOTATION_IN)
                 j->inDeclare(k._type, Strings::capitalizeFirst(k._name));
 
     std::set<String> passThroughVars;
@@ -187,9 +187,9 @@ void PipelineBuildingContext::initializeAttributes()
     }
 
     for(const auto& i : firstStage._main_block->_args)
-        if(i._modifier == ShaderPreprocessor::Parameter::PARAMETER_ANNOTATION_INOUT)
+        if(i._annotation == ShaderPreprocessor::Parameter::PARAMETER_ANNOTATION_INOUT)
             firstStage.passThroughDeclare(i._type, Strings::capitalizeFirst(i._name));
-        else if(i._modifier & ShaderPreprocessor::Parameter::PARAMETER_ANNOTATION_OUT)
+        else if(i._annotation & ShaderPreprocessor::Parameter::PARAMETER_ANNOTATION_OUT)
             firstStage.outDeclare(i._type, Strings::capitalizeFirst(i._name));
 }
 
@@ -211,9 +211,8 @@ void PipelineBuildingContext::initializeSSBO() const
         _shader_layout->ssbos().push_back(std::move(i));
 }
 
-void PipelineBuildingContext::tryBindCamera(const ShaderPreprocessor& shaderPreprocessor)
+void PipelineBuildingContext::tryBindCamera(const ShaderPreprocessor& shaderPreprocessor, const Camera& camera)
 {
-    const Camera& camera = _shader_layout->camera();
     tryBindUniformMatrix(shaderPreprocessor, "u_VP", camera.vp());
     tryBindUniformMatrix(shaderPreprocessor, "u_View", camera.view());
     tryBindUniformMatrix(shaderPreprocessor, "u_Projection", camera.projection());
@@ -228,9 +227,9 @@ void PipelineBuildingContext::tryBindUniformMatrix(const ShaderPreprocessor& sha
     }
 }
 
-void PipelineBuildingContext::initialize(PipelineLayout& pipelineLayout)
+void PipelineBuildingContext::initialize(const Camera& camera)
 {
-    initializeStages(pipelineLayout);
+    initializeStages(camera);
     initializeSSBO();
     initializeAttributes();
     initializeUniforms();
@@ -301,7 +300,7 @@ void PipelineBuildingContext::addInputAttribute(const String& name, const String
     }
 }
 
-Attribute& PipelineBuildingContext::addPredefinedAttribute(const String& name, const String& type, uint32_t divisor, Enum::ShaderStageBit stage)
+Attribute& PipelineBuildingContext::addPredefinedAttribute(const String& name, const String& type, const uint32_t divisor, Enum::ShaderStageBit stage)
 {
     if(_attributes.find(name) == _attributes.end())
     {
@@ -327,7 +326,7 @@ const op<ShaderPreprocessor>& PipelineBuildingContext::getRenderStage(Enum::Shad
     return iter->second;
 }
 
-const op<ShaderPreprocessor>& PipelineBuildingContext::addStage(sp<String> source, document manifest, Enum::ShaderStageBit shaderStage, Enum::ShaderStageBit preShaderStage)
+const op<ShaderPreprocessor>& PipelineBuildingContext::addStage(sp<String> source, document manifest, const Enum::ShaderStageBit shaderStage, const Enum::ShaderStageBit preShaderStage)
 {
     op<ShaderPreprocessor>& stage = shaderStage == Enum::SHADER_STAGE_BIT_COMPUTE ? _computing_stage : _rendering_stages[shaderStage];
     CHECK(!stage, "Stage '%d' has been initialized already", shaderStage);
@@ -433,7 +432,7 @@ void PipelineBuildingContext::loadLayoutBindings(BeanFactory& factory, const Sco
     }
 }
 
-void PipelineBuildingContext::initializeStages(PipelineLayout& pipelineLayout)
+void PipelineBuildingContext::initializeStages(const Camera& camera)
 {
     for(ShaderPreprocessor* preprocessor : _stages)
         if(preprocessor->_shader_stage == Enum::SHADER_STAGE_BIT_VERTEX)
@@ -442,7 +441,7 @@ void PipelineBuildingContext::initializeStages(PipelineLayout& pipelineLayout)
             preprocessor->initialize(*this);
 
     if(const ShaderPreprocessor* vertex = tryGetRenderStage(Enum::SHADER_STAGE_BIT_VERTEX))
-        tryBindCamera(*vertex);
+        tryBindCamera(*vertex, camera);
 
     uint32_t binding = 0;
     Table<String, ShaderLayout::DescriptorSet>& samplers = _shader_layout->_samplers;
@@ -464,7 +463,7 @@ void PipelineBuildingContext::initializeStages(PipelineLayout& pipelineLayout)
 
     if(const ShaderPreprocessor* compute = _computing_stage.get())
     {
-        tryBindCamera(*compute);
+        tryBindCamera(*compute, camera);
         for(const String& i : compute->_declaration_samplers.vars().keys())
             binding = samplers[i].addStage(Enum::SHADER_STAGE_BIT_COMPUTE, binding);
         for(const String& i : compute->_declaration_images.vars().keys())

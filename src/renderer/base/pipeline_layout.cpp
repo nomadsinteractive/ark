@@ -31,6 +31,23 @@ String preprocess(const RenderEngineContext& renderEngineContext, const Map<Stri
     });
 }
 
+class ComputeSnippetWrapper final : public Snippet, public Wrapper<Snippet> {
+public:
+    ComputeSnippetWrapper()
+        : Wrapper() {
+    }
+
+    sp<DrawEvents> makeDrawEvents(const RenderRequest& renderRequest) override
+    {
+        return _wrapped->makeDrawEvents(renderRequest);
+    }
+
+    sp<DrawEvents> makeDrawEvents() override
+    {
+        return _wrapped->makeDrawEvents();
+    }
+};
+
 }
 
 PipelineLayout::PipelineLayout(sp<PipelineBuildingContext> buildingContext)
@@ -80,22 +97,39 @@ size_t PipelineLayout::colorAttachmentCount() const
 
 void PipelineLayout::initialize(const Shader& shader)
 {
+    sp<ComputeSnippetWrapper> computeSnippetWrapper;
     if(const op<ShaderPreprocessor>& computeStage = _building_context->computingStage(); computeStage && !_building_context->renderStages().empty())
     {
-        std::array<uint32_t, 3> numWorkGroupsArray = {1, 1, 1};
-        const Vector<String> numWorkGroups = Documents::getAttribute(computeStage->_manifest, "num-work-groups", "64").split(',');
-        for(size_t i = 0; i < std::min(numWorkGroups.size(), numWorkGroupsArray.size()); ++i)
-            numWorkGroupsArray[i] = Strings::eval<uint32_t>(numWorkGroups.at(i));
-        addSnippet(sp<Snippet>::make<SnippetDrawCompute>(shader.layout(), numWorkGroupsArray, true));
+        computeSnippetWrapper = sp<ComputeSnippetWrapper>::make();
+        addSnippet(computeSnippetWrapper);
     }
+
     _snippet = sp<Snippet>::make<SnippetDelegate>(_snippet);
     _snippet->preInitialize(_building_context);
-    _building_context->initialize(*this);
+    _building_context->initialize(shader.camera());
 
     if(const ShaderPreprocessor* fragment = _building_context->tryGetRenderStage(Enum::SHADER_STAGE_BIT_FRAGMENT))
         _color_attachment_count = fragment->_main_block->outArgumentCount() + (fragment->_main_block->hasReturnValue() ? 1 : 0);
 
     _shader_layout->initialize(_building_context);
+
+    if(computeSnippetWrapper)
+    {
+        std::array<uint32_t, 3> numWorkGroupsArray = {1, 1, 1};
+        const op<ShaderPreprocessor>& computeStage = _building_context->computingStage();
+        if(const String numWorkGroupsAttr = Documents::getAttribute(computeStage->_manifest, "num-work-groups"))
+        {
+            const Vector<String> numWorkGroups = numWorkGroupsAttr.split(',');
+            for(size_t i = 0; i < std::min(numWorkGroups.size(), numWorkGroupsArray.size()); ++i)
+                numWorkGroupsArray[i] = Strings::eval<uint32_t>(numWorkGroups.at(i));
+        }
+        else
+        {
+            CHECK(computeStage->_compute_local_sizes, "Compute stage local size layout undefined");
+            numWorkGroupsArray = computeStage->_compute_local_sizes.value();
+        }
+        computeSnippetWrapper->reset(sp<Snippet>::make<SnippetDrawCompute>(shader.layout(), numWorkGroupsArray, computeStage->_pre_shader_stage != Enum::SHADER_STAGE_BIT_NONE));
+    }
 }
 
 Vector<std::pair<sp<Texture>, ShaderLayout::DescriptorSet>> PipelineLayout::makeBindingSamplers() const

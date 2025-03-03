@@ -15,14 +15,14 @@ namespace ark {
 
 class ARK_API PipelineBuildingContext {
 public:
-    PipelineBuildingContext(const sp<RenderController>& renderController, const sp<Camera>& camera);
-    PipelineBuildingContext(const sp<RenderController>& renderController, const sp<Camera>& camera, sp<String> vertex, sp<String> fragment);
+    PipelineBuildingContext(const sp<RenderController>& renderController);
+    PipelineBuildingContext(const sp<RenderController>& renderController, sp<String> vertex, sp<String> fragment);
 
     DISALLOW_COPY_AND_ASSIGN(PipelineBuildingContext);
 
     void loadManifest(const document& manifest, BeanFactory& factory, const Scope& args);
 
-    void initialize(PipelineLayout& pipelineLayout);
+    void initialize(const Camera& camera);
 
     enum LayoutBindingType {
         LAYOUT_BINDING_TYPE_AUTO,
@@ -71,11 +71,11 @@ public:
 
     Map<String, String> toDefinitions() const;
 
-    void tryBindCamera(const ShaderPreprocessor& shaderPreprocessor);
+    void tryBindCamera(const ShaderPreprocessor& shaderPreprocessor, const Camera& camera);
 
 private:
     void initializeAttributes();
-    void initializeStages(PipelineLayout& pipelineLayout);
+    void initializeStages(const Camera& camera);
     void initializeSSBO() const;
     void initializeUniforms();
 
