@@ -181,7 +181,7 @@ struct alignas(1) BgfxShaderAttributeChunk {
 
 #pragma pack(pop)
 
-::bgfx::ShaderHandle createShader(const ShaderLayout& shaderLayout, const String& source, Enum::ShaderStageBit stage)
+::bgfx::ShaderHandle createShader(const ShaderLayout& shaderLayout, const String& source, const Enum::ShaderStageBit stage)
 {
     const char bgfxChunkMagic[4] = {toBgfxShaderTypeMagic(stage), 'S', 'H', 11};
     const Vector<uint32_t> binaries = RenderUtil::compileSPIR(source, stage, Enum::RENDERING_BACKEND_BIT_VULKAN);

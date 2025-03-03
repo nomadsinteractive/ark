@@ -28,7 +28,6 @@ public:
 
 //  [[script::bindings::enumeration]]
     enum UsageBit {
-        USAGE_BIT_NONE,
         USAGE_BIT_DYNAMIC,
         USAGE_BIT_TRANSFER_SRC,
         USAGE_BIT_HOST_VISIBLE
@@ -43,6 +42,7 @@ public:
         virtual void downloadBuffer(GraphicsContext& graphicsContext, size_t offset, size_t size, void* ptr) = 0;
 
 //TODO: temporary interface for vertex buffer
+        [[deprecated]]
         virtual void setupLayout(const PipelineDescriptor& pipelineDescriptor)  {}
 
         size_t size() const;

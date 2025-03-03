@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include "core/ark.h"
 #include "core/forwarding.h"
 #include "core/base/api.h"
@@ -36,7 +34,6 @@ public:
         US_ON_CHANGE = 4,
         US_ON_EVERY_FRAME = 8
     };
-
     typedef BitSet<UploadStrategyBit> UploadStrategy;
 
 //  [[script::bindings::enumeration]]

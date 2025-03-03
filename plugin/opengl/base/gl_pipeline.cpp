@@ -26,27 +26,68 @@ namespace ark::plugin::opengl {
 
 namespace {
 
+void setVertexPointer(const Attribute& attribute, const GLuint location, const GLsizei stride, const uint32_t length, const uint32_t offset)
+{
+    constexpr GLenum glTypes[Attribute::TYPE_COUNT] = {GL_BYTE, GL_FLOAT, GL_INT, GL_UNSIGNED_INT, GL_SHORT, GL_UNSIGNED_BYTE, GL_UNSIGNED_SHORT};
+    glEnableVertexAttribArray(location);
+    if(attribute.type() == Attribute::TYPE_FLOAT || attribute.normalized())
+        glVertexAttribPointer(location, length, glTypes[attribute.type()], attribute.normalized() ? GL_TRUE : GL_FALSE, stride, reinterpret_cast<const void*>(static_cast<uintptr_t>(offset)));
+    else
+        glVertexAttribIPointer(location, length, glTypes[attribute.type()], stride, reinterpret_cast<const void*>(static_cast<uintptr_t>(offset)));
+
+    if(attribute.divisor())
+        glVertexAttribDivisor(location, attribute.divisor());
+}
+
+GLuint compileShader(const uint32_t version, const GLenum type, const String& source)
+{
+    const String versionSrc = source.startsWith("#version ") ? "" : Platform::glShaderVersionDeclaration(version);
+    const GLuint id = glCreateShader(type);
+    const GLchar* src[16] = {versionSrc.c_str()};
+    const uint32_t slen = Platform::glPreprocessShader(source, &src[1], 15);
+    glShaderSource(id, slen + 1, src, nullptr);
+    glCompileShader(id);
+    GLint compiled;
+    glGetShaderiv(id, GL_COMPILE_STATUS, &compiled);
+    if(!compiled)
+    {
+        GLint length;
+        glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
+
+        size_t len = static_cast<size_t>(length);
+        Vector<GLchar> logs(len + 1);
+        glGetShaderInfoLog(id, length, &length, logs.data());
+        logs.back() = 0;
+        StringBuffer sb;
+        for(uint32_t i = 0; i <= slen; i++)
+            sb << src[i] << '\n';
+        FATAL("%s\n\n%s", logs.data(), sb.str().c_str());
+        return 0;
+    }
+    return id;
+}
+
 class GLAttribute {
 public:
-    GLAttribute(GLint location = -1)
+    GLAttribute(const GLint location = -1)
         : _location(location) {
     }
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(GLAttribute);
 
-    void bind(const Attribute& attribute, GLsizei stride) const
+    void bind(const Attribute& attribute, const GLsizei stride) const
     {
         CHECK_WARN(_location >= 0, "Attribute \"%s\" location: %d", attribute.name().c_str(), _location);
         if(attribute.length() <= 4)
             setVertexPointer(attribute, _location, stride, attribute.length(), attribute.offset());
         else if(attribute.length() == 16)
         {
-            uint32_t offset = attribute.size() / 4;
+            const uint32_t offset = attribute.size() / 4;
             for(int32_t i = 0; i < 4; i++)
                 setVertexPointer(attribute, _location + i, stride, 4, attribute.offset() + offset * i);
         }
         else if(attribute.length() == 9)
         {
-            uint32_t offset = attribute.size() / 3;
+            const uint32_t offset = attribute.size() / 3;
             for(int32_t i = 0; i < 3; i++)
                 setVertexPointer(attribute, _location + i, stride, 3, attribute.offset() + offset * i);
         }
@@ -54,20 +95,6 @@ public:
         {
             FATAL("Unknow attribute \"%s %s\"", attribute.type(), attribute.name().c_str());
         }
-    }
-
-private:
-    static void setVertexPointer(const Attribute& attribute, GLuint location, GLsizei stride, uint32_t length, uint32_t offset)
-    {
-        constexpr  GLenum glTypes[Attribute::TYPE_COUNT] = {GL_BYTE, GL_FLOAT, GL_INT, GL_SHORT, GL_UNSIGNED_BYTE, GL_UNSIGNED_SHORT};
-        glEnableVertexAttribArray(location);
-        if(attribute.type() == Attribute::TYPE_FLOAT || attribute.normalized())
-            glVertexAttribPointer(location, length, glTypes[attribute.type()], attribute.normalized() ? GL_TRUE : GL_FALSE, stride, reinterpret_cast<const void*>(static_cast<uintptr_t>(offset)));
-        else
-            glVertexAttribIPointer(location, length, glTypes[attribute.type()], stride, reinterpret_cast<const void*>(static_cast<uintptr_t>(offset)));
-
-        if(attribute.divisor())
-            glVertexAttribDivisor(location, attribute.divisor());
     }
 
 private:
@@ -181,10 +208,10 @@ struct GLPipeline::Stub {
         glBindImageTexture(binding, static_cast<GLuint>(texture.delegate()->id()), 0, GL_FALSE, 0, GL_READ_WRITE, format);
     }
 
-    void activeTexture(const Texture& texture, const String& name, uint32_t binding)
+    void activeTexture(const Texture& texture, const String& name, const uint32_t binding)
     {
-        static GLenum glTargets[Texture::TYPE_COUNT] = {GL_TEXTURE_2D, GL_TEXTURE_CUBE_MAP};
-        glActiveTexture(static_cast<GLenum>(GL_TEXTURE0 + binding));
+        constexpr GLenum glTargets[Texture::TYPE_COUNT] = {GL_TEXTURE_2D, GL_TEXTURE_CUBE_MAP};
+        glActiveTexture(GL_TEXTURE0 + binding);
         glBindTexture(glTargets[texture.type()], static_cast<GLuint>(texture.delegate()->id()));
 
         const GLUniform& uTexture = getUniform(name);
@@ -413,7 +440,7 @@ private:
 
 class GLDrawArrays final : public PipelineDrawCommand {
 public:
-    GLDrawArrays(GLenum mode)
+    GLDrawArrays(const GLenum mode)
         : _mode(mode) {
     }
 
@@ -430,7 +457,7 @@ private:
 
 class GLDrawElements final : public PipelineDrawCommand {
 public:
-    GLDrawElements(GLenum mode)
+    GLDrawElements(const GLenum mode)
         : _mode(mode) {
     }
 
@@ -447,7 +474,7 @@ private:
 
 class GLDrawElementsInstanced final : public PipelineDrawCommand {
 public:
-    GLDrawElementsInstanced(GLenum mode)
+    GLDrawElementsInstanced(const GLenum mode)
         : _mode(mode) {
     }
 
@@ -463,14 +490,15 @@ public:
         }
         glDrawElementsInstanced(_mode, static_cast<GLsizei>(param._count), GLIndexType, nullptr, drawingContext._draw_count);
     }
+
 private:
     GLenum _mode;
 };
 
-struct GLMultiDrawElementsIndirect final : PipelineDrawCommand {
-    GLMultiDrawElementsIndirect(GLenum mode)
-        : _mode(mode)
-    {
+class GLMultiDrawElementsIndirect final : public PipelineDrawCommand {
+public:
+    GLMultiDrawElementsIndirect(const GLenum mode)
+        : _mode(mode) {
     }
 
     void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override
@@ -493,6 +521,7 @@ struct GLMultiDrawElementsIndirect final : PipelineDrawCommand {
 #endif
     }
 
+private:
     GLenum _mode;
 };
 
@@ -608,8 +637,8 @@ private:
 
 class Stage {
 public:
-    Stage(sp<Recycler> recycler, uint32_t version, GLenum type, const String& source)
-        : _recycler(std::move(recycler)), _id(compile(version, type, source)) {
+    Stage(sp<Recycler> recycler, const uint32_t version, const GLenum type, const String& source)
+        : _recycler(std::move(recycler)), _id(compileShader(version, type, source)) {
     }
     ~Stage()
     {
@@ -624,35 +653,6 @@ public:
     uint32_t id() const
     {
         return _id;
-    }
-
-private:
-    static GLuint compile(uint32_t version, GLenum type, const String& source)
-    {
-        const String versionSrc = source.startsWith("#version ") ? "" : Platform::glShaderVersionDeclaration(version);
-        const GLuint id = glCreateShader(type);
-        const GLchar* src[16] = {versionSrc.c_str()};
-        uint32_t slen = Platform::glPreprocessShader(source, &src[1], 15);
-        glShaderSource(id, slen + 1, src, nullptr);
-        glCompileShader(id);
-        GLint compiled;
-        glGetShaderiv(id, GL_COMPILE_STATUS, &compiled);
-        if(!compiled)
-        {
-            GLint length;
-            glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
-
-            size_t len = static_cast<size_t>(length);
-            Vector<GLchar> logs(len + 1);
-            glGetShaderInfoLog(id, length, &length, logs.data());
-            logs.back() = 0;
-            StringBuffer sb;
-            for(uint32_t i = 0; i <= slen; i++)
-                sb << src[i] << '\n';
-            FATAL("%s\n\n%s", logs.data(), sb.str().c_str());
-            return 0;
-        }
-        return id;
     }
 
 private:
@@ -684,7 +684,7 @@ String getInformationLog(GLuint id)
 
 sp<Stage> makeShader(GraphicsContext& graphicsContext, uint32_t version, GLenum type, const String& source)
 {
-    typedef std::unordered_map<GLenum, Map<String, WeakPtr<Stage>>> ShaderPool;
+    typedef HashMap<GLenum, Map<String, WeakPtr<Stage>>> ShaderPool;
 
     const sp<ShaderPool>& shaders = graphicsContext.traits().ensure<ShaderPool>();
     if(const auto iter = (*shaders)[type].find(source); iter != (*shaders)[type].end())
@@ -823,7 +823,7 @@ const GLPipeline::GLUniform& GLPipeline::getUniform(const String& name) const
 void GLPipeline::bindBuffer(GraphicsContext& /*graphicsContext*/, const ShaderLayout& shaderLayout, const uint32_t divisor) const
 {
     const ShaderLayout::StreamLayout& stream = shaderLayout.getStreamLayout(divisor);
-    for(const auto& i : stream.attributes().values())
+    for(const Attribute& i : stream.attributes().values())
     {
         const GLAttribute& glAttribute = _stub->getAttribute(i.name());
         glAttribute.bind(i, stream.stride());
@@ -835,7 +835,7 @@ sp<PipelineOperation> GLPipeline::makePipelineOperation(const PipelineDescriptor
     return _stub->_is_compute_pipeline ?  sp<PipelineOperation>::make<PipelineOperationCompute>(_stub) : sp<PipelineOperation>::make<PipelineOperationDraw>(_stub, bindings);
 }
 
-GLPipeline::GLUniform::GLUniform(GLint location)
+GLPipeline::GLUniform::GLUniform(const GLint location)
     : _location(location)
 {
 }

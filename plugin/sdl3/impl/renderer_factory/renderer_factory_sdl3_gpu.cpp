@@ -260,7 +260,7 @@ private:
 }
 
 RendererFactorySDL3_GPU::RendererFactorySDL3_GPU()
-    : RendererFactory({{Enum::RENDERING_BACKEND_BIT_DIRECT_X | Enum::RENDERING_BACKEND_BIT_METAL}, Ark::COORDINATE_SYSTEM_RHS, false, 16}), _gpu_device(nullptr)
+    : RendererFactory({{Enum::RENDERING_BACKEND_BIT_DIRECT_X, Enum::RENDERING_BACKEND_BIT_METAL}, Ark::COORDINATE_SYSTEM_RHS, false, 16}), _gpu_device(nullptr)
 {
 }
 

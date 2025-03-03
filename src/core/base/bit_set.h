@@ -12,34 +12,37 @@ public:
     constexpr BitSet()
         : _bits(0) {
     }
-    constexpr BitSet(const convertable_type bits)
+    constexpr explicit BitSet(const convertable_type bits)
         : _bits(bits) {
     }
-    DEFAULT_COPY_AND_ASSIGN(BitSet);
+    template<typename... Args> constexpr BitSet(Args... bits)
+        : _bits(toConvertableType(bits...)) {
+    }
+    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(BitSet);
 
     explicit operator bool() const {
         return static_cast<bool>(_bits);
     }
 
-    bool operator ==(T other) const {
+    bool operator ==(const T other) const {
         return _bits == toConvertableType(other);
     }
     bool operator ==(const BitSet other) const {
         return _bits == other.bits();
     }
-    bool operator !=(T other) const {
+    bool operator !=(const T other) const {
         return _bits != toConvertableType(other);
     }
     bool operator !=(const BitSet other) const {
         return _bits != other.bits();
     }
-    BitSet operator |(T other) const {
+    BitSet operator |(const T other) const {
         return BitSet(_bits | toConvertableType(other));
     }
     BitSet operator |(const BitSet other) const {
         return BitSet(_bits | other.bits());
     }
-    BitSet operator &(T other) const {
+    BitSet operator &(const T other) const {
         return BitSet(_bits & other);
     }
     BitSet operator &(const BitSet other) const {
@@ -50,14 +53,14 @@ public:
         return _bits;
     }
 
-    void set(T bits, const bool enabled = true) {
+    void set(const T bits, const bool enabled = true) {
         if(enabled)
             _bits |= toConvertableType(bits);
         else
             _bits &= ~toConvertableType(bits);
     }
 
-    bool has(const convertable_type bits) const {
+    bool has(const T bits) const {
         return _bits & toConvertableType(bits);
     }
 
@@ -74,11 +77,16 @@ public:
         convertable_type bitsets = 0;
         for(const String& i : value.split('|'))
             bitsets |= toConvertableType(Enum::lookup<T, N>(bitNames, i.strip()));
-        return {bitsets};
+        return BitSet(bitsets);
     }
 
 private:
-    constexpr static convertable_type toConvertableType(const convertable_type value) {
+    template<typename... Args> constexpr static convertable_type toConvertableType(const T value, Args... args) {
+        if constexpr(sizeof...(args) != 0) {
+            if constexpr(SHIFT)
+                return 1 << value | toConvertableType(args...);
+            return value | toConvertableType(args...);
+        }
         if constexpr(SHIFT)
             return 1 << value;
         return value;

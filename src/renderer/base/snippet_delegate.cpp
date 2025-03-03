@@ -45,7 +45,7 @@ private:
     SnippetDelegate& _wrapper;
     sp<Snippet> _snippet;
 
-    sp<Snippet::DrawEvents> _delegate;
+    sp<DrawEvents> _delegate;
 };
 
 class CoreSnippet final : public Snippet {

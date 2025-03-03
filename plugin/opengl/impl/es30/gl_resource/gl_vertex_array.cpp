@@ -1,7 +1,5 @@
 #include "opengl/impl/es30/gl_resource/gl_vertex_array.h"
 
-#include "core/util/log.h"
-
 #include "renderer/base/pipeline_descriptor.h"
 #include "renderer/base/pipeline_bindings.h"
 
@@ -27,7 +25,6 @@ void GLVertexArray::upload(GraphicsContext& graphicsContext)
     glBindBuffer(GL_ARRAY_BUFFER, static_cast<GLuint>(_vertex->id()));
     _pipeline->bindBuffer(graphicsContext, _pipeline_descriptor->shaderLayout(), _streams);
     glBindVertexArray(0);
-    LOGD("id = %d", _id);
 }
 
 ResourceRecycleFunc GLVertexArray::recycle()
@@ -35,7 +32,6 @@ ResourceRecycleFunc GLVertexArray::recycle()
     uint32_t id = _id;
     _id = 0;
     return [id](GraphicsContext&) {
-        LOGD("Deleting GLVertexArray[%d]", id);
         glDeleteVertexArrays(1, &id);
     };
 }

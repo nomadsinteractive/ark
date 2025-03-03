@@ -26,14 +26,13 @@
 
 #include "generated/opengl_plugin.h"
 
-#include "platform/platform.h"
 #include "platform/gl/gl.h"
 
 namespace ark::plugin::opengl {
 
 namespace {
 
-void setVersion(Enum::RendererVersion version, RenderEngineContext& glContext)
+void setVersion(const Enum::RendererVersion version, RenderEngineContext& glContext)
 {
     LOGD("Choose GLVersion = %d", version);
     glContext.setSnippetFactory(sp<SnippetFactory>::make<SnippetFactoryGLES30>());

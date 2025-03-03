@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest>
 	<asset src="../assets"/>
-    <renderer class="sdl3-gpu" version="auto">
+    <renderer version="auto">
         <resolution width="960" height="540"/>
     </renderer>
 	<resource-loader src="app.xml"/>
@@ -15,5 +15,7 @@
 			</entity>
 		</activity>
 	</application>
-	<plugin name="ark-sdl3" for="windows|darwin"/>
+	<plugin name="ark-opengl"/>
+	<plugin name="ark-sdl3"/>
+	<plugin name="ark-vulkan"/>
 </manifest>

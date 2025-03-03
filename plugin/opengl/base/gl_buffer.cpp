@@ -31,7 +31,7 @@ private:
 
 }
 
-GLBuffer::GLBuffer(Buffer::Type type, Buffer::Usage usage, sp<Recycler> recycler)
+GLBuffer::GLBuffer(const Buffer::Type type, const Buffer::Usage usage, sp<Recycler> recycler)
     : _type(GLUtil::toBufferType(type)), _usage(usage.has(Buffer::USAGE_BIT_DYNAMIC) ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW), _recycler(std::move(recycler)), _id(0)
 {
 }

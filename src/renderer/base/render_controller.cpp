@@ -293,7 +293,7 @@ sp<Texture> RenderController::createTexture2d(sp<Bitmap> bitmap, Texture::Format
     return createTexture(std::move(size), sp<Texture::Parameters>::make(Texture::TYPE_2D, nullptr, format), sp<Texture::UploaderBitmap>::make(std::move(bitmap)), us, std::move(future));
 }
 
-Buffer RenderController::makeBuffer(Buffer::Type type, Buffer::Usage usage, sp<Uploader> uploader, UploadStrategy us, sp<Future> future)
+Buffer RenderController::makeBuffer(const Buffer::Type type, const Buffer::Usage usage, sp<Uploader> uploader, const UploadStrategy us, sp<Future> future)
 {
     DTHREAD_CHECK(THREAD_ID_CORE);
     Buffer buffer(_render_engine->rendererFactory()->createBuffer(type, usage));
@@ -310,7 +310,7 @@ Buffer RenderController::makeBuffer(const Buffer::Type type, const Buffer::Usage
     return makeBuffer(type, usage, std::move(uploader), us);
 }
 
-Buffer RenderController::makeVertexBuffer(Buffer::Usage usage, sp<Uploader> uploader)
+Buffer RenderController::makeVertexBuffer(const Buffer::Usage usage, sp<Uploader> uploader)
 {
     return makeBuffer(Buffer::TYPE_VERTEX, usage, std::move(uploader));
 }

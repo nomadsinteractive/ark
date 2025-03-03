@@ -26,8 +26,8 @@ const sp<Resource>& RenderTarget::resource() const
 
 RenderTarget::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _render_controller(resourceLoaderContext->renderController()), _renderer(factory.ensureBuilder<RenderGroup>(manifest)), _clear_mask(Documents::getAttribute<ClearBitSet>(manifest, "clear-mask", CLEAR_BIT_ALL)),
-      _color_attachment_op(Documents::getAttribute<AttachmentOp>(manifest, "color-attachment-op", {ATTACHMENT_OP_BIT_CLEAR | ATTACHMENT_OP_BIT_STORE})),
-      _depth_stencil_op(Documents::getAttribute<AttachmentOp>(manifest, "depth-stencil-op", {ATTACHMENT_OP_BIT_CLEAR | ATTACHMENT_OP_BIT_STORE}))
+      _color_attachment_op(Documents::getAttribute<AttachmentOp>(manifest, "color-attachment-op", {ATTACHMENT_OP_BIT_CLEAR, ATTACHMENT_OP_BIT_STORE})),
+      _depth_stencil_op(Documents::getAttribute<AttachmentOp>(manifest, "depth-stencil-op", {ATTACHMENT_OP_BIT_CLEAR, ATTACHMENT_OP_BIT_STORE}))
 {
     for(const document& i : manifest->children(constants::TEXTURE))
         _attachments.emplace_back(factory.ensureBuilder<Texture>(i), i);
@@ -85,7 +85,7 @@ template<> RenderTarget::AttachmentOp StringConvert::eval<RenderTarget::Attachme
     }};
     if(str)
         return RenderTarget::AttachmentOp::toBitSet(str, opBits);
-    return {RenderTarget::ATTACHMENT_OP_BIT_LOAD | RenderTarget::ATTACHMENT_OP_BIT_STORE};
+    return {RenderTarget::ATTACHMENT_OP_BIT_LOAD, RenderTarget::ATTACHMENT_OP_BIT_STORE};
 }
 
 }
