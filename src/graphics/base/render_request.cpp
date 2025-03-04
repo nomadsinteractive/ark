@@ -36,7 +36,7 @@ void RenderRequest::addRenderCommand(sp<RenderCommand> renderCommand) const
     _stub->_render_command_pipe_line->add(std::move(renderCommand));
 }
 
-RenderRequest::Stub::Stub(uint64_t timestamp, sp<Allocator::Pool> allocatorPool)
+RenderRequest::Stub::Stub(const uint64_t timestamp, sp<Allocator::Pool> allocatorPool)
     : _timestamp(timestamp), _allocator(std::move(allocatorPool)), _render_command_pipe_line(sp<RenderCommandPipeline>::make())
 {
 }

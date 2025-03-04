@@ -229,7 +229,7 @@ VkRenderPass VKFramebuffer::Stub::acquire()
     return _render_pass_begin_info.renderPass;
 }
 
-VkRenderPass VKFramebuffer::Stub::begin(VkCommandBuffer commandBuffer)
+VkRenderPass VKFramebuffer::Stub::begin(const VkCommandBuffer commandBuffer)
 {
     vkCmdBeginRenderPass(commandBuffer, &_render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
     vkCmdSetViewport(commandBuffer, 0, 1, &_viewport);

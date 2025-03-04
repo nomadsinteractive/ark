@@ -1,5 +1,6 @@
 #include "vulkan/base/vk_framebuffer_renderer.h"
 
+#include "graphics/base/render_layer.h"
 #include "graphics/base/render_request.h"
 #include "graphics/inf/render_command.h"
 
@@ -44,15 +45,15 @@ private:
 
 }
 
-VKFramebufferRenderer::VKFramebufferRenderer(sp<Renderer> delegate, sp<VKFramebuffer> framebuffer)
-    : _delegate(std::move(delegate)), _fbo(std::move(framebuffer)), _pre_draw(sp<RenderCommand>::make<PreDrawElementsToFBO>(_fbo)), _post_draw(sp<RenderCommand>::make<PostDrawElementsToFBO>(_fbo))
+VKFramebufferRenderer::VKFramebufferRenderer(sp<RenderLayer> renderLayer, sp<VKFramebuffer> framebuffer)
+    : _render_layer(std::move(renderLayer)), _fbo(std::move(framebuffer)), _pre_draw(sp<RenderCommand>::make<PreDrawElementsToFBO>(_fbo)), _post_draw(sp<RenderCommand>::make<PostDrawElementsToFBO>(_fbo))
 {
 }
 
 void VKFramebufferRenderer::render(RenderRequest& renderRequest, const V3& position)
 {
     renderRequest.addRenderCommand(_pre_draw);
-    _delegate->render(renderRequest, position);
+    _render_layer->render(renderRequest, position);
     renderRequest.addRenderCommand(_post_draw);
 }
 

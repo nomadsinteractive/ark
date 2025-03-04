@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include "core/collection/list.h"
 #include "core/types/shared_ptr.h"
 #include "core/types/weak_ptr.h"

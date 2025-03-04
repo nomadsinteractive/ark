@@ -61,7 +61,7 @@ public:
 }
 
 PipelineBindings::PipelineBindings(Buffer vertices, sp<PipelineFactory> pipelineFactory, sp<PipelineDescriptor> pipelineDescriptor, Map<uint32_t, Buffer> streams)
-    : _vertices(std::move(vertices)), _pipeline_factory(std::move(pipelineFactory)), _pipeline_descriptor(std::move(pipelineDescriptor)), _snippet(_pipeline_descriptor->layout()->snippet()),
+    : _vertices(std::move(vertices)), _pipeline_factory(std::move(pipelineFactory)), _pipeline_descriptor(std::move(pipelineDescriptor)),
       _streams(sp<Map<uint32_t, Buffer>>::make(std::move(streams))), _attachments(sp<Traits>::make())
 {
     if(_vertices)
@@ -78,11 +78,6 @@ Buffer& PipelineBindings::vertices()
     return _vertices;
 }
 
-const sp<PipelineFactory>& PipelineBindings::pipelineFactory() const
-{
-    return _pipeline_factory;
-}
-
 const sp<PipelineDescriptor>& PipelineBindings::pipelineDescriptor() const
 {
     return _pipeline_descriptor;
@@ -90,18 +85,7 @@ const sp<PipelineDescriptor>& PipelineBindings::pipelineDescriptor() const
 
 const sp<Snippet>& PipelineBindings::snippet() const
 {
-    return _snippet;
-}
-
-void PipelineBindings::addSnippet(sp<Snippet> snippet)
-{
-    DCHECK(!_pipeline, "Draw snippet can only be added before pipeline creation");
-    _snippet = sp<SnippetLinkedChain>::make(std::move(_snippet), std::move(snippet));
-}
-
-const sp<PipelineLayout>& PipelineBindings::pipelineLayout() const
-{
-    return _pipeline_descriptor->layout();
+    return _pipeline_descriptor->layout()->snippet();
 }
 
 const sp<ShaderLayout>& PipelineBindings::shaderLayout() const

@@ -48,26 +48,25 @@ public:
 
     const sp<Resource>& resource() const;
 
-//  [[plugin::resource-loader]]
+//  [[plugin::builder]]
     class BUILDER final : public Builder<RenderTarget> {
     public:
-        BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
+        BUILDER(BeanFactory& factory, const document& manifest);
 
         sp<RenderTarget> build(const Scope& args) override;
 
     private:
-        sp<RenderController> _render_controller;
-        sp<Builder<RenderGroup>> _renderer;
+        builder<RenderLayer> _render_layer;
         Vector<std::pair<sp<Builder<Texture>>, document>> _attachments;
         ClearBitSet _clear_mask;
         AttachmentOp _color_attachment_op;
         AttachmentOp _depth_stencil_op;
     };
 
-//  [[plugin::resource-loader("render-target")]]
+//  [[plugin::builder("render-target")]]
     class RENDERER_BUILDER final : public Builder<Renderer> {
     public:
-        RENDERER_BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
+        RENDERER_BUILDER(BeanFactory& factory, const document& manifest);
 
         sp<Renderer> build(const Scope& args) override;
 

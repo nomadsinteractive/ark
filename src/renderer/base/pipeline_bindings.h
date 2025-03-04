@@ -19,13 +19,9 @@ public:
     const Buffer& vertices() const;
     Buffer& vertices();
 
-    const sp<PipelineFactory>& pipelineFactory() const;
     const sp<PipelineDescriptor>& pipelineDescriptor() const;
 
     const sp<Snippet>& snippet() const;
-    void addSnippet(sp<Snippet> snippet);
-
-    const sp<PipelineLayout>& pipelineLayout() const;
     const sp<ShaderLayout>& shaderLayout() const;
 
     const sp<Map<uint32_t, Buffer>>& streams() const;
@@ -43,7 +39,6 @@ private:
     Buffer _vertices;
     sp<PipelineFactory> _pipeline_factory;
     sp<PipelineDescriptor> _pipeline_descriptor;
-    sp<Snippet> _snippet;
 
     sp<Map<uint32_t, Buffer>> _streams;
 

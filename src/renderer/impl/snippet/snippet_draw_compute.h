@@ -15,7 +15,7 @@ public:
     sp<DrawEvents> makeDrawEvents(const RenderRequest& renderRequest) override;
 
 private:
-    sp<ShaderLayout> _pipeline_input;
+    sp<ShaderLayout> _shader_layout;
     std::array<uint32_t, 3> _num_work_groups;
     bool _at_post_draw;
 };

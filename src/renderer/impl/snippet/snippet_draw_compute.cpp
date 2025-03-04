@@ -51,13 +51,13 @@ private:
 }
 
 SnippetDrawCompute::SnippetDrawCompute(sp<ShaderLayout> shaderLayout, const std::array<uint32_t, 3> numWorkGroups, const bool atPostDraw)
-    : _pipeline_input(std::move(shaderLayout)), _num_work_groups(numWorkGroups), _at_post_draw(atPostDraw)
+    : _shader_layout(std::move(shaderLayout)), _num_work_groups(numWorkGroups), _at_post_draw(atPostDraw)
 {
 }
 
 sp<Snippet::DrawEvents> SnippetDrawCompute::makeDrawEvents(const RenderRequest& renderRequest)
 {
-    ComputeContext computeCtx(nullptr, _pipeline_input->takeBufferSnapshot(renderRequest, true), _num_work_groups);
+    ComputeContext computeCtx(nullptr, _shader_layout->takeBufferSnapshot(renderRequest, true), _num_work_groups);
     return _at_post_draw ? sp<DrawEvents>::make<DrawEventsPostDrawCompute>(std::move(computeCtx)) : sp<DrawEvents>::make<DrawEventsPreDrawCompute>(std::move(computeCtx));
 }
 

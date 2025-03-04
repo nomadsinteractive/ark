@@ -24,8 +24,8 @@ const sp<Resource>& RenderTarget::resource() const
     return _resource;
 }
 
-RenderTarget::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _render_controller(resourceLoaderContext->renderController()), _renderer(factory.ensureBuilder<RenderGroup>(manifest)), _clear_mask(Documents::getAttribute<ClearBitSet>(manifest, "clear-mask", CLEAR_BIT_ALL)),
+RenderTarget::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+    : _render_layer(factory.ensureBuilder<RenderLayer>(manifest, constants::RENDER_LAYER)), _clear_mask(Documents::getAttribute<ClearBitSet>(manifest, "clear-mask", CLEAR_BIT_ALL)),
       _color_attachment_op(Documents::getAttribute<AttachmentOp>(manifest, "color-attachment-op", {ATTACHMENT_OP_BIT_CLEAR, ATTACHMENT_OP_BIT_STORE})),
       _depth_stencil_op(Documents::getAttribute<AttachmentOp>(manifest, "depth-stencil-op", {ATTACHMENT_OP_BIT_CLEAR, ATTACHMENT_OP_BIT_STORE}))
 {
@@ -50,11 +50,11 @@ sp<RenderTarget> RenderTarget::BUILDER::build(const Scope& args)
             configure._depth_stencil_attachment = std::move(tex);
         }
     }
-    return _render_controller->makeRenderTarget(_renderer->build(args), std::move(configure));
+    return Ark::instance().renderController()->makeRenderTarget(_render_layer->build(args), std::move(configure));
 }
 
-RenderTarget::RENDERER_BUILDER::RENDERER_BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _impl(factory, manifest, resourceLoaderContext)
+RenderTarget::RENDERER_BUILDER::RENDERER_BUILDER(BeanFactory& factory, const document& manifest)
+    : _impl(factory, manifest)
 {
 }
 

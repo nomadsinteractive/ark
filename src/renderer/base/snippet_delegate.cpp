@@ -2,10 +2,8 @@
 
 #include "renderer/base/buffer.h"
 #include "renderer/base/graphics_context.h"
-#include "renderer/base/pipeline_building_context.h"
 #include "renderer/base/render_engine_context.h"
 #include "renderer/base/render_controller.h"
-#include "renderer/base/shader.h"
 #include "renderer/impl/snippet/snippet_linked_chain.h"
 #include "renderer/inf/snippet_factory.h"
 
@@ -49,8 +47,8 @@ private:
 
 class CoreSnippet final : public Snippet {
 public:
-    CoreSnippet(SnippetDelegate& wrapper, const sp<Snippet>& snippet)
-        : _wrapper(wrapper), _snippet(snippet)
+    CoreSnippet(SnippetDelegate& wrapper, sp<Snippet> snippet)
+        : _wrapper(wrapper), _snippet(std::move(snippet))
     {
     }
 
@@ -80,7 +78,7 @@ private:
 }
 
 SnippetDelegate::SnippetDelegate(sp<Snippet> snippet)
-    : Wrapper(sp<Snippet>::make<CoreSnippet>(*this, snippet))
+    : Wrapper(sp<Snippet>::make<CoreSnippet>(*this, std::move(snippet)))
 {
 }
 

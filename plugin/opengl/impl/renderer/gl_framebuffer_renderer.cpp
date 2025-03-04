@@ -1,7 +1,6 @@
 #include "opengl/impl/renderer/gl_framebuffer_renderer.h"
 
-#include "core/base/bean_factory.h"
-
+#include "graphics/base/render_layer.h"
 #include "graphics/base/render_request.h"
 #include "graphics/base/render_command_pipeline.h"
 
@@ -66,15 +65,15 @@ struct PostDrawElementsToFBO final : RenderCommand {
 
 }
 
-GLFramebufferRenderer::GLFramebufferRenderer(sp<GLFramebuffer> fbo, int32_t width, int32_t height, sp<Renderer> delegate, uint32_t drawBufferCount, int32_t clearMask)
-    : _delegate(std::move(delegate)), _pre_draw(sp<PreDrawElementsToFBO>::make(std::move(fbo), width, height, drawBufferCount, clearMask)), _post_draw(sp<PostDrawElementsToFBO>::make())
+GLFramebufferRenderer::GLFramebufferRenderer(sp<GLFramebuffer> fbo, int32_t width, int32_t height, sp<RenderLayer> renderLayer, uint32_t drawBufferCount, int32_t clearMask)
+    : _render_layer(std::move(renderLayer)), _pre_draw(sp<PreDrawElementsToFBO>::make(std::move(fbo), width, height, drawBufferCount, clearMask)), _post_draw(sp<PostDrawElementsToFBO>::make())
 {
 }
 
 void GLFramebufferRenderer::render(RenderRequest& renderRequest, const V3& position)
 {
     renderRequest.addRenderCommand(_pre_draw);
-    _delegate->render(renderRequest, position);
+    _render_layer->render(renderRequest, position);
     renderRequest.addRenderCommand(_post_draw);
 }
 

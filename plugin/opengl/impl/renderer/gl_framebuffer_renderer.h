@@ -13,12 +13,12 @@ namespace ark::plugin::opengl {
 
 class GLFramebufferRenderer final : public Renderer {
 public:
-    GLFramebufferRenderer(sp<GLFramebuffer> fbo, int32_t width, int32_t height, sp<Renderer> delegate, uint32_t drawBufferCount, int32_t clearMask);
+    GLFramebufferRenderer(sp<GLFramebuffer> fbo, int32_t width, int32_t height, sp<RenderLayer> renderLayer, uint32_t drawBufferCount, int32_t clearMask);
 
     void render(RenderRequest& renderRequest, const V3& position) override;
 
 private:
-    sp<Renderer> _delegate;
+    sp<RenderLayer> _render_layer;
     sp<RenderCommand> _pre_draw;
     sp<RenderCommand> _post_draw;
 
