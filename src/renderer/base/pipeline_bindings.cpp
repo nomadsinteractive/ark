@@ -44,11 +44,6 @@ public:
         _pipeline_draw->draw(graphicsContext, drawingContext);
     }
 
-    void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override
-    {
-        _pipeline_draw->bind(graphicsContext, drawingContext);
-    }
-
     void compute(GraphicsContext& graphicsContext, const ComputeContext& computeContext) override
     {
         _pipeline_compute->compute(graphicsContext, computeContext);

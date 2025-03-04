@@ -18,9 +18,9 @@ sp<Snippet> createCoreSnippet(const GraphicsContext& graphicsContext, sp<Snippet
     return next ? sp<Snippet>::make<SnippetLinkedChain>(std::move(coreSnippet), std::move(next)) : coreSnippet;
 }
 
-class CoreDrawEvents final : public Snippet::DrawEvents {
+class CoreDrawDecorator final : public Snippet::DrawDecorator {
 public:
-    CoreDrawEvents(SnippetDelegate& wrapper, const sp<Snippet>& snippet)
+    CoreDrawDecorator(SnippetDelegate& wrapper, const sp<Snippet>& snippet)
         : _wrapper(wrapper), _snippet(snippet)
     {
     }
@@ -29,7 +29,7 @@ public:
     {
         const sp<Snippet> delegate = _wrapper.wrapped();
         _wrapper.reset(createCoreSnippet(graphicsContext, _snippet));
-        _delegate = _wrapper.wrapped()->makeDrawEvents();
+        _delegate = _wrapper.wrapped()->makeDrawDecorator();
         _delegate->preDraw(graphicsContext, context);
     }
 
@@ -42,7 +42,7 @@ private:
     SnippetDelegate& _wrapper;
     sp<Snippet> _snippet;
 
-    sp<DrawEvents> _delegate;
+    sp<DrawDecorator> _delegate;
 };
 
 class CoreSnippet final : public Snippet {
@@ -65,9 +65,9 @@ public:
         _wrapper.preCompile(graphicsContext, context, pipelineLayout);
     }
 
-    sp<DrawEvents> makeDrawEvents() override
+    sp<DrawDecorator> makeDrawDecorator() override
     {
-        return sp<DrawEvents>::make<CoreDrawEvents>(_wrapper, _snippet);
+        return sp<DrawDecorator>::make<CoreDrawDecorator>(_wrapper, _snippet);
     }
 
 private:
@@ -92,14 +92,14 @@ void SnippetDelegate::preCompile(GraphicsContext& graphicsContext, PipelineBuild
     _wrapped->preCompile(graphicsContext, context, pipelineLayout);
 }
 
-sp<Snippet::DrawEvents> SnippetDelegate::makeDrawEvents(const RenderRequest& renderRequest)
+sp<Snippet::DrawDecorator> SnippetDelegate::makeDrawDecorator(const RenderRequest& renderRequest)
 {
-    return _wrapped->makeDrawEvents(renderRequest);
+    return _wrapped->makeDrawDecorator(renderRequest);
 }
 
-sp<Snippet::DrawEvents> SnippetDelegate::makeDrawEvents()
+sp<Snippet::DrawDecorator> SnippetDelegate::makeDrawDecorator()
 {
-    return _wrapped->makeDrawEvents();
+    return _wrapped->makeDrawDecorator();
 }
 
 }

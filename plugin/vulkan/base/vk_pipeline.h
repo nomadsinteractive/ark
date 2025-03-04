@@ -25,7 +25,7 @@ public:
     void upload(GraphicsContext& graphicsContext) override;
     ResourceRecycleFunc recycle() override;
 
-    void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
+    void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext);
     void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
     void compute(GraphicsContext& graphicsContext, const ComputeContext& computeContext) override;
 

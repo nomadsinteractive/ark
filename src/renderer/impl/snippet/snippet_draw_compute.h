@@ -12,7 +12,7 @@ class SnippetDrawCompute final : public Snippet {
 public:
     SnippetDrawCompute(sp<ShaderLayout> shaderLayout, std::array<uint32_t, 3> numWorkGroups, bool atPostDraw);
 
-    sp<DrawEvents> makeDrawEvents(const RenderRequest& renderRequest) override;
+    sp<DrawDecorator> makeDrawDecorator(const RenderRequest& renderRequest) override;
 
 private:
     sp<ShaderLayout> _shader_layout;

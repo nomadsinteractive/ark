@@ -351,6 +351,8 @@ void VKPipeline::bind(GraphicsContext& graphicsContext, const DrawingContext& dr
 void VKPipeline::draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
     DCHECK(!_is_compute_pipeline, "Not a drawing pipeline");
+
+    bind(graphicsContext, drawingContext);
     buildDrawCommandBuffer(graphicsContext, drawingContext);
 }
 

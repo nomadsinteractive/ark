@@ -368,10 +368,6 @@ public:
         }
     }
 
-    void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override
-    {
-    }
-
     void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override
     {
         DASSERT(drawingContext._vertices);
@@ -532,10 +528,6 @@ public:
             _pipeline = SDL_ShaderCross_CompileComputePipelineFromSPIRV(gpuDevice, &spirvInfo, &shaderMetadata);
             CHECK(_pipeline, "%s", SDL_GetError());
         }
-    }
-
-    void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override
-    {
     }
 
     void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override

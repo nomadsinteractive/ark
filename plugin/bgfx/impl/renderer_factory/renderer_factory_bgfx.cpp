@@ -118,8 +118,8 @@ public:
         }
     }
 
-    sp<DrawEvents> makeDrawEvents() override {
-        return sp<Snippet::DrawEvents>::make();
+    sp<DrawDecorator> makeDrawDecorator() override {
+        return sp<Snippet::DrawDecorator>::make();
     }
 
 };

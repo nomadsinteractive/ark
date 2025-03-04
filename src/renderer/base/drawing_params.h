@@ -1,6 +1,5 @@
 #pragma once
 
-#include <vector>
 #include <variant>
 
 #include "core/base/api.h"
@@ -19,7 +18,7 @@ public:
     struct DrawElementsInstanced {
         uint32_t _start;
         uint32_t _count;
-        std::vector<std::pair<uint32_t, Buffer::Snapshot>> _divided_buffer_snapshots;
+        Vector<std::pair<uint32_t, Buffer::Snapshot>> _divided_buffer_snapshots;
     };
 
     struct DrawElementsIndirectCommand {
@@ -31,7 +30,7 @@ public:
     };
 
     struct DrawMultiElementsIndirect {
-        std::vector<std::pair<uint32_t, Buffer::Snapshot>> _divided_buffer_snapshots;
+        Vector<std::pair<uint32_t, Buffer::Snapshot>> _divided_buffer_snapshots;
         Buffer::Snapshot _indirect_cmds;
         uint32_t _indirect_cmd_count;
     };

@@ -57,7 +57,7 @@ RenderLayer::RenderLayer(sp<RenderLayer::Stub> stub)
 {
 }
 
-RenderLayerSnapshot RenderLayer::snapshot(RenderRequest& renderRequest)
+RenderLayerSnapshot RenderLayer::snapshot(const RenderRequest& renderRequest)
 {
     DPROFILER_TRACE("Snapshot");
 

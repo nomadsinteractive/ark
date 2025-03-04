@@ -18,7 +18,7 @@ namespace ark::plugin::opengl {
 
 namespace {
 
-class DrawEventsGLES30 final : public Snippet::DrawEvents {
+class DrawEventsGLES30 final : public Snippet::DrawDecorator {
 public:
     void preDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override {
         const sp<GLVertexArray>& vertexArray = context._attachments->get<GLVertexArray>();
@@ -55,8 +55,8 @@ public:
             fragment->linkNextStage("FragColor");
     }
 
-    sp<DrawEvents> makeDrawEvents() override {
-        return sp<DrawEventsGLES30>::make();
+    sp<DrawDecorator> makeDrawDecorator() override {
+        return sp<DrawDecorator>::make<DrawEventsGLES30>();
     }
 };
 
@@ -64,7 +64,7 @@ public:
 
 sp<Snippet> SnippetFactoryGLES30::createCoreSnippet()
 {
-    return sp<SnippetGLES30>::make();
+    return sp<Snippet>::make<SnippetGLES30>();
 }
 
 }

@@ -19,9 +19,7 @@ public:
 
 private:
     sp<RenderLayer> _render_layer;
-    sp<VKFramebuffer> _fbo;
-    sp<RenderCommand> _pre_draw;
-    sp<RenderCommand> _post_draw;
+    sp<VKFramebuffer> _framebuffer;
 };
 
 }

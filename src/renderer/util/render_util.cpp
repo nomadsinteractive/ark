@@ -388,6 +388,9 @@ Vector<uint32_t> RenderUtil::compileSPIR(const StringView source, Enum::ShaderSt
             shader.setEnvInput(glslang::EShSourceGlsl, esStage, glslang::EShClientVulkan, 100);
             shader.setEnvClient(glslang::EShClientVulkan, glslang::EShTargetVulkan_1_2);
             break;
+        default:
+            FATAL("Unsupported");
+            break;
     }
 #ifdef ARK_PLATFORM_DARWIN
     shader.setEnvTarget(glslang::EShTargetSpv, toTargetLanguageVersion(targetLanguageVersion, glslang::EShTargetSpv_1_5));

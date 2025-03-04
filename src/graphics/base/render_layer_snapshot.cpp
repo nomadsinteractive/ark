@@ -27,8 +27,8 @@ sp<RenderCommand> RenderLayerSnapshot::compose(const RenderRequest& renderReques
     if(!_elements.empty() && _stub->_visible.val())
         return _stub->_render_command_composer->compose(renderRequest, *this);
 
-    DrawingContext drawingContext(_stub->_pipeline_bindings, _buffer_object, nullptr);
-    return drawingContext.toBindCommand();
+    DrawingContext drawingContext(_stub->_pipeline_bindings, _buffer_object);
+    return drawingContext.toBindCommand(renderRequest);
 }
 
 bool RenderLayerSnapshot::needsReload() const
@@ -84,7 +84,7 @@ void RenderLayerSnapshot::addDiscardedLayerContexts(const Vector<sp<LayerContext
 
 sp<RenderCommand> RenderLayerSnapshot::toRenderCommand(const RenderRequest& renderRequest, Buffer::Snapshot vertices, Buffer::Snapshot indices, uint32_t drawCount, DrawingParams params) const
 {
-    DrawingContext drawingContext(_stub->_pipeline_bindings, _buffer_object, _stub->_pipeline_bindings->attachments(), std::move(vertices), std::move(indices),
+    DrawingContext drawingContext(_stub->_pipeline_bindings, _buffer_object, std::move(vertices), std::move(indices),
                                   drawCount, std::move(params));
 
     if(_stub->_scissor)

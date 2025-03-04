@@ -12,9 +12,9 @@ class ARK_API Snippet {
 public:
     virtual ~Snippet() = default;
 
-    class ARK_API DrawEvents {
+    class ARK_API DrawDecorator {
     public:
-        virtual ~DrawEvents() = default;
+        virtual ~DrawDecorator() = default;
 
         virtual void preDraw(GraphicsContext& graphicsContext, const DrawingContext& context) {}
         virtual void postDraw(GraphicsContext& graphicsContext, const DrawingContext& context) {}
@@ -23,8 +23,8 @@ public:
     virtual void preInitialize(PipelineBuildingContext& context) {}
     virtual void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout) {}
 
-    virtual sp<DrawEvents> makeDrawEvents(const RenderRequest& /*renderRequest*/) { return makeDrawEvents(); }
-    virtual sp<DrawEvents> makeDrawEvents() { return nullptr; }
+    virtual sp<DrawDecorator> makeDrawDecorator(const RenderRequest& /*renderRequest*/) { return makeDrawDecorator(); }
+    virtual sp<DrawDecorator> makeDrawDecorator() { return nullptr; }
 };
 
 }

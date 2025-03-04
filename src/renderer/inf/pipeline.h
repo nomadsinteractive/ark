@@ -20,7 +20,6 @@ class ARK_API PipelineOperation : public PipelineDrawCommand {
 public:
     ~PipelineOperation() override = default;
 
-    virtual void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) = 0;
     virtual void compute(GraphicsContext& graphicsContext, const ComputeContext& computeContext) = 0;
 };
 

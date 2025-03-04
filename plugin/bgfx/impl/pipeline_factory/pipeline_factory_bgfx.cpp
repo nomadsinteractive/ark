@@ -274,7 +274,7 @@ struct DrawPipelineBgfx final : ResourceBase<::bgfx::ProgramHandle, Pipeline> {
         }
     }
 
-    void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override
+    void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
     {
         if(const Vector<String>& samplerNames = drawingContext._bindings->shaderLayout()->samplers().keys(); _sampler_slots.empty() && !samplerNames.empty())
         {
@@ -294,8 +294,9 @@ struct DrawPipelineBgfx final : ResourceBase<::bgfx::ProgramHandle, Pipeline> {
         DASSERT(drawingContext._vertices);
         DASSERT(drawingContext._indices);
 
-        const BgfxContext& ctx = graphicsContext.traits().ensure<BgfxContext>();
+        bind(graphicsContext, drawingContext);
 
+        const BgfxContext& ctx = graphicsContext.traits().ensure<BgfxContext>();
         for(const auto& [uniform, texture, stage] : _sampler_slots)
             ::bgfx::setTexture(stage, uniform, texture->handle());
 
@@ -397,10 +398,6 @@ public:
             const auto cHandle = ::bgfx::createShader(::bgfx::makeRef(_compute_shader.c_str(), _compute_shader.size()));
             _handle.reset(::bgfx::createProgram(cHandle, true));
         }
-    }
-
-    void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override
-    {
     }
 
     void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override

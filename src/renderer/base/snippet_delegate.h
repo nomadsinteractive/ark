@@ -16,8 +16,8 @@ public:
 
     void preInitialize(PipelineBuildingContext& context) override;
     void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout) override;
-    sp<DrawEvents> makeDrawEvents(const RenderRequest& renderRequest) override;
-    sp<DrawEvents> makeDrawEvents() override;
+    sp<DrawDecorator> makeDrawDecorator(const RenderRequest& renderRequest) override;
+    sp<DrawDecorator> makeDrawDecorator() override;
 
 };
 

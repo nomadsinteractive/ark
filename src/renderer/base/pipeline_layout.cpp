@@ -37,14 +37,14 @@ public:
         : Wrapper() {
     }
 
-    sp<DrawEvents> makeDrawEvents(const RenderRequest& renderRequest) override
+    sp<DrawDecorator> makeDrawDecorator(const RenderRequest& renderRequest) override
     {
-        return _wrapped->makeDrawEvents(renderRequest);
+        return _wrapped->makeDrawDecorator(renderRequest);
     }
 
-    sp<DrawEvents> makeDrawEvents() override
+    sp<DrawDecorator> makeDrawDecorator() override
     {
-        return _wrapped->makeDrawEvents();
+        return _wrapped->makeDrawDecorator();
     }
 };
 

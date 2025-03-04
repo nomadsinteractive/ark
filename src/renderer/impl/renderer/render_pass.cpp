@@ -39,7 +39,7 @@ void RenderPass::render(RenderRequest& renderRequest, const V3& /*position*/)
         }
         else
             drawParam = DrawingParams::DrawElements{0};
-        DrawingContext drawingContext(_pipeline_bindings, _shader->takeBufferSnapshot(renderRequest, false), _pipeline_bindings->attachments(), vertices.snapshot(),
+        DrawingContext drawingContext(_pipeline_bindings, _shader->takeBufferSnapshot(renderRequest, false), vertices.snapshot(),
                                       _index_buffer.snapshot(), drawCount, std::move(drawParam));
         renderRequest.addRenderCommand(drawingContext.toRenderCommand(renderRequest));
     }

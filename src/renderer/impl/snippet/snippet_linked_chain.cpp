@@ -8,9 +8,9 @@ namespace ark {
 
 namespace {
 
-class DrawEventsLinkedChain final : public Snippet::DrawEvents {
+class DrawEventsLinkedChain final : public Snippet::DrawDecorator {
 public:
-    DrawEventsLinkedChain(sp<Snippet::DrawEvents> delegate, sp<Snippet::DrawEvents> next)
+    DrawEventsLinkedChain(sp<Snippet::DrawDecorator> delegate, sp<Snippet::DrawDecorator> next)
         : _delegate(std::move(delegate)), _next(std::move(next)) {
         DASSERT(_delegate && _next);
     }
@@ -26,8 +26,8 @@ public:
     }
 
 private:
-    sp<DrawEvents> _delegate;
-    sp<DrawEvents> _next;
+    sp<DrawDecorator> _delegate;
+    sp<DrawDecorator> _next;
 };
 
 }
@@ -51,20 +51,20 @@ void SnippetLinkedChain::preCompile(GraphicsContext& graphicsContext, PipelineBu
     _next->preCompile(graphicsContext, context, pipelineLayout);
 }
 
-sp<Snippet::DrawEvents> SnippetLinkedChain::makeDrawEvents(const RenderRequest& renderRequest)
+sp<Snippet::DrawDecorator> SnippetLinkedChain::makeDrawDecorator(const RenderRequest& renderRequest)
 {
-    return makeDrawEvents(_delegate->makeDrawEvents(renderRequest), _next->makeDrawEvents(renderRequest));
+    return makeDrawEvents(_delegate->makeDrawDecorator(renderRequest), _next->makeDrawDecorator(renderRequest));
 }
 
-sp<Snippet::DrawEvents> SnippetLinkedChain::makeDrawEvents()
+sp<Snippet::DrawDecorator> SnippetLinkedChain::makeDrawDecorator()
 {
-    return makeDrawEvents(_delegate->makeDrawEvents(), _next->makeDrawEvents());
+    return makeDrawEvents(_delegate->makeDrawDecorator(), _next->makeDrawDecorator());
 }
 
-sp<Snippet::DrawEvents> SnippetLinkedChain::makeDrawEvents(sp<Snippet::DrawEvents> de1, sp<Snippet::DrawEvents> de2) const
+sp<Snippet::DrawDecorator> SnippetLinkedChain::makeDrawEvents(sp<Snippet::DrawDecorator> de1, sp<Snippet::DrawDecorator> de2) const
 {
     if(de1 && de2)
-        return sp<Snippet::DrawEvents>::make<DrawEventsLinkedChain>(std::move(de1), std::move(de2));
+        return sp<Snippet::DrawDecorator>::make<DrawEventsLinkedChain>(std::move(de1), std::move(de2));
     return de1 ? de1 : de2;
 }
 
@@ -75,7 +75,7 @@ SnippetLinkedChain::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& v
 
 sp<Snippet> SnippetLinkedChain::DICTIONARY::build(const Scope& args)
 {
-    const std::vector<String> l = Strings::unwrap(_value, '[', ']').split(',');
+    const Vector<String> l = Strings::unwrap(_value, '[', ']').split(',');
     DCHECK(l.size() > 0, "Empty list");
     if(l.size() == 1)
     {
@@ -85,9 +85,9 @@ sp<Snippet> SnippetLinkedChain::DICTIONARY::build(const Scope& args)
         return builder->build(args);
     }
 
-    sp<SnippetLinkedChain> chain = sp<SnippetLinkedChain>::make(_factory.ensure<Snippet>(l.at(0), args), _factory.ensure<Snippet>(l.at(1), args));
+    sp<Snippet> chain = sp<Snippet>::make<SnippetLinkedChain>(_factory.ensure<Snippet>(l.at(0), args), _factory.ensure<Snippet>(l.at(1), args));
     for(size_t i = 2; i < l.size(); i++)
-        chain = sp<SnippetLinkedChain>::make(chain, _factory.ensure<Snippet>(l.at(i), args));
+        chain = sp<Snippet>::make<SnippetLinkedChain>(std::move(chain), _factory.ensure<Snippet>(l.at(i), args));
     return chain;
 }
 

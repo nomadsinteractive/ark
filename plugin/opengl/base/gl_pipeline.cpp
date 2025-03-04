@@ -293,7 +293,7 @@ private:
     bool _enabled;
 };
 
-class GLCullFaceTest final : public Snippet::DrawEvents {
+class GLCullFaceTest final : public Snippet::DrawDecorator {
 public:
     GLCullFaceTest(const PipelineDescriptor::TraitCullFaceTest& trait)
         : _enabled(trait._enabled), _front_face(trait._front_face == PipelineDescriptor::FRONT_FACE_DEFAULT ? GL_ZERO : (trait._front_face == PipelineDescriptor::FRONT_FACE_CLOCK_WISE ? GL_CW : GL_CCW)), _pre_front_face(GL_ZERO) {
@@ -326,7 +326,7 @@ private:
     GLenum _pre_front_face;
 };
 
-class GLDepthTest final : public Snippet::DrawEvents {
+class GLDepthTest final : public Snippet::DrawDecorator {
 public:
     GLDepthTest(const PipelineDescriptor::TraitDepthTest& trait)
         : _func(GLUtil::toCompareFunc(trait._func)), _pre_func(GL_ZERO), _enabled(trait._enabled), _read_only(!trait._write_enabled) {
@@ -362,15 +362,15 @@ private:
     bool _read_only;
 };
 
-class GLStencilTest final : public Snippet::DrawEvents {
+class GLStencilTest final : public Snippet::DrawDecorator {
 public:
-    GLStencilTest(Vector<sp<Snippet::DrawEvents>> delegate)
+    GLStencilTest(Vector<sp<Snippet::DrawDecorator>> delegate)
         : _delegate(std::move(delegate)) {
     }
 
     void preDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override {
         glEnable(GL_STENCIL_TEST);
-        for(const sp<Snippet::DrawEvents>& i : _delegate)
+        for(const sp<Snippet::DrawDecorator>& i : _delegate)
             i->preDraw(graphicsContext, context);
     }
 
@@ -380,10 +380,10 @@ public:
     }
 
 private:
-    Vector<sp<Snippet::DrawEvents>> _delegate;
+    Vector<sp<Snippet::DrawDecorator>> _delegate;
 };
 
-class GLStencilTestSeparate final : public Snippet::DrawEvents {
+class GLStencilTestSeparate final : public Snippet::DrawDecorator {
 public:
     GLStencilTestSeparate(const PipelineDescriptor::TraitStencilTestSeparate& conf)
         : _face(GLUtil::toFrontFaceType(conf._type)), _mask(conf._mask), _func(GLUtil::toCompareFunc(conf._func)), _compare_mask(conf._compare_mask),
@@ -406,7 +406,7 @@ private:
     GLenum _op, _op_dfail, _op_dpass;
 };
 
-class GLTraitBlend final : public Snippet::DrawEvents {
+class GLTraitBlend final : public Snippet::DrawDecorator {
 public:
     GLTraitBlend(const PipelineDescriptor::TraitBlend& conf)
         : _src_rgb_factor(GLUtil::toBlendFactor(conf._src_rgb_factor)), _dest_rgb_factor(GLUtil::toBlendFactor(conf._dst_rgb_factor)),
@@ -554,13 +554,10 @@ public:
         : _stub(std::move(stub)), _scissor(bindings.scissor()), _renderer(makeBakedRenderer(bindings)) {
     }
 
-    void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override
-    {
-        _stub->bind(graphicsContext, drawingContext);
-    }
-
     void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override
     {
+        _stub->bind(graphicsContext, drawingContext);
+
         const GLScissor scissor(drawingContext._scissor ? drawingContext._scissor : _scissor);
 
         for(const auto& [i, j] : drawingContext._buffer_object->_ssbos)
@@ -608,10 +605,6 @@ class PipelineOperationCompute final : public PipelineOperation {
 public:
     PipelineOperationCompute(sp<GLPipeline::Stub> stub)
         : _stub(std::move(stub)) {
-    }
-
-    void bind(GraphicsContext& graphicsContext, const DrawingContext& computeContext) override
-    {
     }
 
     void draw(GraphicsContext& graphicsContext, const DrawingContext& computeContext) override
@@ -704,27 +697,27 @@ GLPipeline::GLPipeline(const sp<Recycler>& recycler, uint32_t version, Map<Enum:
     for(const auto& [k, v] : bindings.parameters()._traits)
     {
         if(k == PipelineDescriptor::TRAIT_TYPE_CULL_FACE_TEST)
-            _draw_decorators.push_back(sp<Snippet::DrawEvents>::make<GLCullFaceTest>(v._configure._cull_face_test));
+            _draw_decorators.push_back(sp<Snippet::DrawDecorator>::make<GLCullFaceTest>(v._configure._cull_face_test));
         else if(k == PipelineDescriptor::TRAIT_TYPE_DEPTH_TEST)
-            _draw_decorators.push_back(sp<Snippet::DrawEvents>::make<GLDepthTest>(v._configure._depth_test));
+            _draw_decorators.push_back(sp<Snippet::DrawDecorator>::make<GLDepthTest>(v._configure._depth_test));
         else if(k == PipelineDescriptor::TRAIT_TYPE_STENCIL_TEST)
         {
-            Vector<sp<Snippet::DrawEvents>> delegate;
+            Vector<sp<Snippet::DrawDecorator>> delegate;
             const PipelineDescriptor::TraitStencilTest& test = v._configure._stencil_test;
             if(test._front._type == PipelineDescriptor::FRONT_FACE_TYPE_DEFAULT && test._front._type == test._back._type)
-                delegate.push_back(sp<Snippet::DrawEvents>::make<GLStencilTestSeparate>(test._front));
+                delegate.push_back(sp<Snippet::DrawDecorator>::make<GLStencilTestSeparate>(test._front));
             else
             {
                 if(test._front._type == PipelineDescriptor::FRONT_FACE_TYPE_FRONT)
-                    delegate.push_back(sp<Snippet::DrawEvents>::make<GLStencilTestSeparate>(test._front));
+                    delegate.push_back(sp<Snippet::DrawDecorator>::make<GLStencilTestSeparate>(test._front));
                 if(test._back._type == PipelineDescriptor::FRONT_FACE_TYPE_BACK)
-                    delegate.push_back(sp<Snippet::DrawEvents>::make<GLStencilTestSeparate>(test._back));
+                    delegate.push_back(sp<Snippet::DrawDecorator>::make<GLStencilTestSeparate>(test._back));
             }
             DASSERT(delegate.size() > 0);
-            _draw_decorators.push_back(sp<Snippet::DrawEvents>::make<GLStencilTest>(std::move(delegate)));
+            _draw_decorators.push_back(sp<Snippet::DrawDecorator>::make<GLStencilTest>(std::move(delegate)));
         }
         else if(k == PipelineDescriptor::TRAIT_TYPE_BLEND)
-            _draw_decorators.push_back(sp<Snippet::DrawEvents>::make<GLTraitBlend>(v._configure._blend));
+            _draw_decorators.push_back(sp<Snippet::DrawDecorator>::make<GLTraitBlend>(v._configure._blend));
     }
 }
 
@@ -777,17 +770,12 @@ ResourceRecycleFunc GLPipeline::recycle()
     };
 }
 
-void GLPipeline::bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
-{
-    _pipeline_operation->bind(graphicsContext, drawingContext);
-}
-
 void GLPipeline::draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
-    for(const sp<Snippet::DrawEvents>& i : _draw_decorators)
+    for(const sp<Snippet::DrawDecorator>& i : _draw_decorators)
         i->preDraw(graphicsContext, drawingContext);
     _pipeline_operation->draw(graphicsContext, drawingContext);
-    for(const sp<Snippet::DrawEvents>& i : _draw_decorators)
+    for(const sp<Snippet::DrawDecorator>& i : _draw_decorators)
         i->postDraw(graphicsContext, drawingContext);
 }
 
@@ -830,9 +818,9 @@ void GLPipeline::bindBuffer(GraphicsContext& /*graphicsContext*/, const ShaderLa
     }
 }
 
-sp<PipelineOperation> GLPipeline::makePipelineOperation(const PipelineDescriptor& bindings) const
+sp<PipelineOperation> GLPipeline::makePipelineOperation(const PipelineDescriptor& pipelineDescriptor) const
 {
-    return _stub->_is_compute_pipeline ?  sp<PipelineOperation>::make<PipelineOperationCompute>(_stub) : sp<PipelineOperation>::make<PipelineOperationDraw>(_stub, bindings);
+    return _stub->_is_compute_pipeline ?  sp<PipelineOperation>::make<PipelineOperationCompute>(_stub) : sp<PipelineOperation>::make<PipelineOperationDraw>(_stub, pipelineDescriptor);
 }
 
 GLPipeline::GLUniform::GLUniform(const GLint location)
@@ -845,37 +833,37 @@ GLPipeline::GLUniform::operator bool() const
     return _location != -1;
 }
 
-void GLPipeline::GLUniform::setUniform1i(GLint x) const
+void GLPipeline::GLUniform::setUniform1i(const GLint x) const
 {
     glUniform1i(_location, x);
 }
 
-void GLPipeline::GLUniform::setUniform1f(GLfloat x) const
+void GLPipeline::GLUniform::setUniform1f(const GLfloat x) const
 {
     glUniform1f(_location, x);
 }
 
-void GLPipeline::GLUniform::setUniform2f(GLfloat x, GLfloat y) const
+void GLPipeline::GLUniform::setUniform2f(const GLfloat x, const GLfloat y) const
 {
     glUniform2f(_location, x, y);
 }
 
-void GLPipeline::GLUniform::setUniform3f(GLfloat x, GLfloat y, GLfloat z) const
+void GLPipeline::GLUniform::setUniform3f(const GLfloat x, const GLfloat y, const GLfloat z) const
 {
     glUniform3f(_location, x, y, z);
 }
 
-void GLPipeline::GLUniform::setUniform4f(GLfloat r, GLfloat g, GLfloat b, GLfloat a) const
+void GLPipeline::GLUniform::setUniform4f(const GLfloat r, const GLfloat g, const GLfloat b, const GLfloat a) const
 {
     glUniform4f(_location, r, g, b, a);
 }
 
-void GLPipeline::GLUniform::setUniform4fv(GLsizei count, const GLfloat* value) const
+void GLPipeline::GLUniform::setUniform4fv(const GLsizei count, const GLfloat* value) const
 {
     glUniform4fv(_location, count, value);
 }
 
-void GLPipeline::GLUniform::setUniformMatrix4fv(GLsizei count, GLboolean transpose, const GLfloat* value) const
+void GLPipeline::GLUniform::setUniformMatrix4fv(const GLsizei count, const GLboolean transpose, const GLfloat* value) const
 {
     glUniformMatrix4fv(_location, count, transpose, value);
 }

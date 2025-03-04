@@ -20,18 +20,18 @@ namespace ark::plugin::opengl {
 
 class GLPipeline final : public Pipeline {
 public:
-    GLPipeline(const sp<Recycler>& recycler, uint32_t version, std::map<Enum::ShaderStageBit, String> stages, const PipelineDescriptor& bindings);
+    GLPipeline(const sp<Recycler>& recycler, uint32_t version, Map<Enum::ShaderStageBit, String> stages, const PipelineDescriptor& bindings);
     ~GLPipeline() override;
 
     uint64_t id() override;
     void upload(GraphicsContext& graphicsContext) override;
     ResourceRecycleFunc recycle() override;
 
-    void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
+    void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext);
     void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
     void compute(GraphicsContext& graphicsContext, const ComputeContext& computeContext) override;
 
-    void bindBuffer(GraphicsContext& graphicsContext, const ShaderLayout& shaderLayout, const std::map<uint32_t, Buffer>& divisors);
+    void bindBuffer(GraphicsContext& graphicsContext, const ShaderLayout& shaderLayout, const Map<uint32_t, Buffer>& divisors);
 
     void activeTexture(const Texture& texture, const String& name, uint32_t binding);
 
@@ -61,7 +61,7 @@ public:
 
 private:
     void bindBuffer(GraphicsContext&, const ShaderLayout& shaderLayout, uint32_t divisor) const;
-    sp<PipelineOperation> makePipelineOperation(const PipelineDescriptor& bindings) const;
+    sp<PipelineOperation> makePipelineOperation(const PipelineDescriptor& pipelineDescriptor) const;
 
 private:
     sp<Stub> _stub;
@@ -69,10 +69,10 @@ private:
 
     uint32_t _version;
 
-    std::map<Enum::ShaderStageBit, String> _stages;
+    Map<Enum::ShaderStageBit, String> _stages;
 
     sp<PipelineOperation> _pipeline_operation;
-    std::vector<sp<Snippet::DrawEvents>> _draw_decorators;
+    Vector<sp<Snippet::DrawDecorator>> _draw_decorators;
 };
 
 }

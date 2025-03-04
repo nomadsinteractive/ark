@@ -10,7 +10,7 @@ namespace ark {
 
 namespace {
 
-class DrawEventsPreDrawCompute final : public Snippet::DrawEvents {
+class DrawEventsPreDrawCompute final : public Snippet::DrawDecorator {
 public:
     DrawEventsPreDrawCompute(ComputeContext computeContext)
         : _compute_context(std::move(computeContext))
@@ -29,7 +29,7 @@ private:
     ComputeContext _compute_context;
 };
 
-class DrawEventsPostDrawCompute final : public Snippet::DrawEvents {
+class DrawEventsPostDrawCompute final : public Snippet::DrawDecorator {
 public:
     DrawEventsPostDrawCompute(ComputeContext computeContext)
         : _compute_context(std::move(computeContext))
@@ -55,10 +55,10 @@ SnippetDrawCompute::SnippetDrawCompute(sp<ShaderLayout> shaderLayout, const std:
 {
 }
 
-sp<Snippet::DrawEvents> SnippetDrawCompute::makeDrawEvents(const RenderRequest& renderRequest)
+sp<Snippet::DrawDecorator> SnippetDrawCompute::makeDrawDecorator(const RenderRequest& renderRequest)
 {
     ComputeContext computeCtx(nullptr, _shader_layout->takeBufferSnapshot(renderRequest, true), _num_work_groups);
-    return _at_post_draw ? sp<DrawEvents>::make<DrawEventsPostDrawCompute>(std::move(computeCtx)) : sp<DrawEvents>::make<DrawEventsPreDrawCompute>(std::move(computeCtx));
+    return _at_post_draw ? sp<DrawDecorator>::make<DrawEventsPostDrawCompute>(std::move(computeCtx)) : sp<DrawDecorator>::make<DrawEventsPreDrawCompute>(std::move(computeCtx));
 }
 
 }

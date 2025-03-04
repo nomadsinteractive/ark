@@ -14,8 +14,8 @@ public:
 
     void preInitialize(PipelineBuildingContext& context) override;
     void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout) override;
-    sp<DrawEvents> makeDrawEvents(const RenderRequest& renderRequest) override;
-    sp<DrawEvents> makeDrawEvents() override;
+    sp<DrawDecorator> makeDrawDecorator(const RenderRequest& renderRequest) override;
+    sp<DrawDecorator> makeDrawDecorator() override;
 
 //  [[plugin::builder::by-value]]
     class DICTIONARY : public Builder<Snippet> {
@@ -46,7 +46,7 @@ public:
     };
 
 private:
-    sp<Snippet::DrawEvents> makeDrawEvents(sp<Snippet::DrawEvents> de1, sp<Snippet::DrawEvents> de2) const;
+    sp<Snippet::DrawDecorator> makeDrawEvents(sp<Snippet::DrawDecorator> de1, sp<Snippet::DrawDecorator> de2) const;
 
 private:
     sp<Snippet> _delegate;

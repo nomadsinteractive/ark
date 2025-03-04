@@ -23,7 +23,7 @@ ShaderFrame::ShaderFrame(sp<Vec3> size, const sp<Shader>& shader, RenderControll
 
 void ShaderFrame::render(RenderRequest& renderRequest, const V3& position)
 {
-    DrawingContext drawingContext(_pipeline_bindings, _shader->takeBufferSnapshot(renderRequest, false), _pipeline_bindings->attachments(),
+    DrawingContext drawingContext(_pipeline_bindings, _shader->takeBufferSnapshot(renderRequest, false),
                                   _vertex_buffer.snapshot(getVertexBuffer(renderRequest, position)), _ib_snapshot, 6, DrawingParams::DrawElements{0});
     renderRequest.addRenderCommand(drawingContext.toRenderCommand(renderRequest));
 }

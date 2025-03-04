@@ -29,7 +29,6 @@ public:
 
 public:
     Shader(sp<Camera> camera, sp<PipelineFactory> pipelineFactory, sp<RenderController> renderController, sp<PipelineLayout> layout, PipelineDescriptor::Parameters bindingParams);
-    DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Shader);
 
     static sp<Builder<Shader>> fromDocument(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext, const String& defVertex = "shaders/default.vert", const String& defFragment = "shaders/texture.frag", const sp<Camera>& defaultCamera = nullptr);
 
