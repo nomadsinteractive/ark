@@ -122,7 +122,12 @@ sp<Layer> RenderLayer::makeLayer(sp<ModelLoader> modelLoader, sp<Vec3> position,
 
 void RenderLayer::render(RenderRequest& renderRequest, const V3& position)
 {
-    renderRequest.addRenderCommand(snapshot(renderRequest).compose(renderRequest));
+    renderRequest.addRenderCommand(compose(renderRequest));
+}
+
+sp<RenderCommand> RenderLayer::compose(const RenderRequest& renderRequest)
+{
+    return snapshot(renderRequest).compose(renderRequest);
 }
 
 RenderLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

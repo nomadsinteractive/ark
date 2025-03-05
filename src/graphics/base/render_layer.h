@@ -39,7 +39,7 @@ public:
 
     void render(RenderRequest& renderRequest, const V3& position) override;
 
-    RenderLayerSnapshot snapshot(const RenderRequest& renderRequest);
+    sp<RenderCommand> compose(const RenderRequest& renderRequest);
 
 //  [[script::bindings::property]]
     const sp<ModelLoader>& modelLoader() const;
@@ -94,6 +94,8 @@ public:
 
 private:
     RenderLayer(sp<Stub> stub);
+
+    RenderLayerSnapshot snapshot(const RenderRequest& renderRequest);
 
 private:
     sp<Stub> _stub;

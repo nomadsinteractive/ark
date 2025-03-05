@@ -16,7 +16,7 @@ namespace ark {
 
 class ARK_API DrawingContext : public PipelineContext {
 public:
-    DrawingContext(sp<PipelineBindings> pipelineBindings, sp<RenderLayerSnapshot::BufferObject> bufferObject, Buffer::Snapshot vertices = {}, Buffer::Snapshot indices = {}, uint32_t drawCount = {},
+    DrawingContext(sp<PipelineBindings> pipelineBindings, sp<RenderLayerSnapshot::BufferObject> bufferObject, Buffer::Snapshot vertices = {}, Buffer::Snapshot indices = {}, uint32_t drawCount = 0,
                    DrawingParams parameters = {}, sp<Traits> attachments = nullptr);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(DrawingContext);
 

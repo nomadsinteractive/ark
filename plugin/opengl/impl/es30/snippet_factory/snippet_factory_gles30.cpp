@@ -21,6 +21,9 @@ namespace {
 class DrawEventsGLES30 final : public Snippet::DrawDecorator {
 public:
     void preDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override {
+        if(!context._vertices)
+            return;
+
         const sp<GLVertexArray>& vertexArray = context._attachments->get<GLVertexArray>();
         uint64_t vertexArrayId = vertexArray ? vertexArray->id() : 0;
         if(!vertexArrayId) {

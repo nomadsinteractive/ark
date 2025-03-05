@@ -40,7 +40,7 @@ VKFramebufferRenderer::VKFramebufferRenderer(sp<RenderLayer> renderLayer, sp<VKF
 
 void VKFramebufferRenderer::render(RenderRequest& renderRequest, const V3& position)
 {
-    sp<RenderCommand> renderCommand = _render_layer->snapshot(renderRequest).compose(renderRequest);
+    sp<RenderCommand> renderCommand = _render_layer->compose(renderRequest);
     renderRequest.addRenderCommand(sp<RenderCommand>::make<RenderCommandFBO>(_framebuffer, std::move(renderCommand)));
 }
 

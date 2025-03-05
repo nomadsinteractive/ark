@@ -49,7 +49,6 @@ public:
 
 private:
     std::variant<DrawElements, DrawElementsInstanced, DrawMultiElementsIndirect> _params;
-
 };
 
 }
