@@ -11,8 +11,8 @@ class RCCDrawElementsIncremental final : public RenderCommandComposer {
 public:
     RCCDrawElementsIncremental() = default;
 
-    sp<PipelineBindings> makeShaderBindings(Shader& shader, RenderController& renderController, Enum::RenderMode renderMode) override;
-    sp<RenderCommand> compose(const RenderRequest& renderRequest, const RenderLayerSnapshot& snapshot) override;
+    sp<PipelineBindings> makePipelineBindings(const Shader& shader, RenderController& renderController, Enum::RenderMode renderMode) override;
+    DrawingContext compose(const RenderRequest& renderRequest, const RenderLayerSnapshot& snapshot) override;
 
 private:
     Buffer _indices;

@@ -41,10 +41,6 @@ public:
         virtual void uploadBuffer(GraphicsContext& graphicsContext, Uploader& input) = 0;
         virtual void downloadBuffer(GraphicsContext& graphicsContext, size_t offset, size_t size, void* ptr) = 0;
 
-//TODO: temporary interface for vertex buffer
-        [[deprecated]]
-        virtual void setupLayout(const PipelineDescriptor& pipelineDescriptor)  {}
-
         size_t size() const;
         void setSize(size_t size);
 

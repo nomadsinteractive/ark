@@ -17,11 +17,11 @@ namespace ark {
 class ARK_API DrawingContext : public PipelineContext {
 public:
     DrawingContext(sp<PipelineBindings> pipelineBindings, sp<RenderLayerSnapshot::BufferObject> bufferObject, Buffer::Snapshot vertices = {}, Buffer::Snapshot indices = {}, uint32_t drawCount = 0,
-                   DrawingParams parameters = {}, sp<Traits> attachments = nullptr);
+                   DrawingParams parameters = {}, const sp<Traits>& attachments = nullptr);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(DrawingContext);
 
     sp<RenderCommand> toRenderCommand(const RenderRequest& renderRequest);
-    sp<RenderCommand> toBindCommand(const RenderRequest& renderRequest);
+    sp<RenderCommand> toNoopCommand(const RenderRequest& renderRequest);
 
     void upload(GraphicsContext& graphicsContext) const;
 

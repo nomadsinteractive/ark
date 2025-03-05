@@ -25,10 +25,10 @@ RenderLayerSnapshot::RenderLayerSnapshot(const RenderRequest& renderRequest, con
 sp<RenderCommand> RenderLayerSnapshot::compose(const RenderRequest& renderRequest) const
 {
     if(!_elements.empty() && _stub->_visible.val())
-        return _stub->_render_command_composer->compose(renderRequest, *this);
+        return _stub->_drawing_context_composer->compose(renderRequest, *this).toRenderCommand(renderRequest);
 
     DrawingContext drawingContext(_stub->_pipeline_bindings, _buffer_object);
-    return drawingContext.toBindCommand(renderRequest);
+    return drawingContext.toNoopCommand(renderRequest);
 }
 
 bool RenderLayerSnapshot::needsReload() const
@@ -82,15 +82,24 @@ void RenderLayerSnapshot::addDiscardedLayerContexts(const Vector<sp<LayerContext
         addDiscardedLayerContext(lc);
 }
 
-sp<RenderCommand> RenderLayerSnapshot::toRenderCommand(const RenderRequest& renderRequest, Buffer::Snapshot vertices, Buffer::Snapshot indices, uint32_t drawCount, DrawingParams params) const
+sp<RenderCommand> RenderLayerSnapshot::toRenderCommand(const RenderRequest& renderRequest, Buffer::Snapshot vertices, Buffer::Snapshot indices, const uint32_t drawCount, DrawingParams params) const
 {
     DrawingContext drawingContext(_stub->_pipeline_bindings, _buffer_object, std::move(vertices), std::move(indices),
                                   drawCount, std::move(params));
-
     if(_stub->_scissor)
         drawingContext._scissor = _stub->_render_controller->renderEngine()->toRendererRect(_scissor);
 
     return drawingContext.toRenderCommand(renderRequest);
+}
+
+DrawingContext RenderLayerSnapshot::toDrawingContext(Buffer::Snapshot vertices, Buffer::Snapshot indices, uint32_t drawCount, DrawingParams params) const
+{
+    DrawingContext drawingContext(_stub->_pipeline_bindings, _buffer_object, std::move(vertices), std::move(indices),
+                                  drawCount, std::move(params));
+    if(_stub->_scissor)
+        drawingContext._scissor = _stub->_render_controller->renderEngine()->toRendererRect(_scissor);
+
+    return drawingContext;
 }
 
 bool RenderLayerSnapshot::doAddLayerContext(const RenderRequest& renderRequest, LayerContext& layerContext)

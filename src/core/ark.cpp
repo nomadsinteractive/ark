@@ -148,6 +148,8 @@ sp<RenderEngine> doCreateRenderEngine(BeanFactory& beanFactory, const Applicatio
         case Enum::RENDERER_VERSION_VULKAN_12:
         case Enum::RENDERER_VERSION_VULKAN_13:
             return sp<RenderEngine>::make(rendererInUse, chooseRenderFactory(rendererFactories, Enum::RENDERING_BACKEND_BIT_VULKAN));
+        default:
+            break;
     }
     FATAL("Unknown engine type: %d", renderer._version);
     return nullptr;

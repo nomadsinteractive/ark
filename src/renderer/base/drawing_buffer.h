@@ -1,15 +1,10 @@
 #pragma once
 
-#include <vector>
-#include <map>
-
 #include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
-#include "graphics/components/render_object.h"
-#include "graphics/inf/transform.h"
 #include "graphics/base/v3.h"
 
 #include "renderer/forwarding.h"
@@ -43,7 +38,7 @@ private:
     sp<PipelineDescriptor> _pipeline_descriptor;
 
     Buffer::Factory _vertices;
-    std::map<uint32_t, Buffer::Factory> _divided_buffer_builders;
+    Map<uint32_t, Buffer::Factory> _divided_buffer_builders;
 
     bool _is_instanced;
 };

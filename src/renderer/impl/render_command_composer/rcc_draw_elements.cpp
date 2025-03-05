@@ -17,13 +17,13 @@ RCCDrawElements::RCCDrawElements(sp<Model> model)
 {
 }
 
-sp<PipelineBindings> RCCDrawElements::makeShaderBindings(Shader& shader, RenderController& renderController, Enum::RenderMode renderMode)
+sp<PipelineBindings> RCCDrawElements::makePipelineBindings(const Shader& shader, RenderController& renderController, Enum::RenderMode renderMode)
 {
     _primitive_index_buffer = renderController.getSharedPrimitiveIndexBuffer(_model, renderMode == Enum::RENDER_MODE_TRIANGLE_STRIP);
     return shader.makeBindings(renderController.makeVertexBuffer(), renderMode, Enum::DRAW_PROCEDURE_DRAW_ELEMENTS);
 }
 
-sp<RenderCommand> RCCDrawElements::compose(const RenderRequest& renderRequest, const RenderLayerSnapshot& snapshot)
+DrawingContext RCCDrawElements::compose(const RenderRequest& renderRequest, const RenderLayerSnapshot& snapshot)
 {
     const size_t verticesCount = _model->vertexCount();
     const Buffer& vertexBuf = snapshot._stub->_pipeline_bindings->vertices();
@@ -52,7 +52,7 @@ sp<RenderCommand> RCCDrawElements::compose(const RenderRequest& renderRequest, c
     Buffer::Snapshot vertices = buf.vertices().toSnapshot(vertexBuf);
     Buffer::Snapshot indices = _primitive_index_buffer->snapshot(snapshot._stub->_render_controller, snapshot._elements.size());
     const uint32_t drawCount = static_cast<uint32_t>(indices.length<element_index_t>());
-    return snapshot.toRenderCommand(renderRequest, std::move(vertices), std::move(indices), drawCount, DrawingParams::DrawElements{0});
+    return snapshot.toDrawingContext(std::move(vertices), std::move(indices), drawCount, DrawingParams::DrawElements{0});
 }
 
 }

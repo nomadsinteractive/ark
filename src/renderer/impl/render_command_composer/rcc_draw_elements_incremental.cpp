@@ -14,14 +14,14 @@
 
 namespace ark {
 
-sp<PipelineBindings> RCCDrawElementsIncremental::makeShaderBindings(Shader& shader, RenderController& renderController, Enum::RenderMode renderMode)
+sp<PipelineBindings> RCCDrawElementsIncremental::makePipelineBindings(const Shader& shader, RenderController& renderController, Enum::RenderMode renderMode)
 {
     _strips = renderController.gba().makeStrips(shader.layout()->getStreamLayout(0).stride());
     _indices = renderController.makeIndexBuffer();
     return shader.makeBindings(_strips->buffer(), renderMode, Enum::DRAW_PROCEDURE_DRAW_ELEMENTS);
 }
 
-sp<RenderCommand> RCCDrawElementsIncremental::compose(const RenderRequest& renderRequest, const RenderLayerSnapshot& snapshot)
+DrawingContext RCCDrawElementsIncremental::compose(const RenderRequest& renderRequest, const RenderLayerSnapshot& snapshot)
 {
     DrawingBuffer buf(snapshot._stub->_pipeline_bindings, snapshot._stub->_stride);
     bool hasNewCreatedSnapshot = false;
@@ -64,7 +64,7 @@ sp<RenderCommand> RCCDrawElementsIncremental::compose(const RenderRequest& rende
     }
 
     const Buffer& vertices = snapshot._stub->_pipeline_bindings->vertices();
-    return snapshot.toRenderCommand(renderRequest, buf.vertices().toSnapshot(vertices), _indices.snapshot(indexUploader), snapshot._index_count, DrawingParams::DrawElements{0});
+    return snapshot.toDrawingContext(buf.vertices().toSnapshot(vertices), _indices.snapshot(indexUploader), snapshot._index_count, DrawingParams::DrawElements{0});
 }
 
 }

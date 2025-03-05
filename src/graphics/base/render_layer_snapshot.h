@@ -59,6 +59,7 @@ public:
     void addLayerContext(const RenderRequest& renderRequest, Vector<sp<LayerContext>>& layerContexts);
     void snapshot(const RenderRequest& renderRequest);
 
+    DrawingContext toDrawingContext(Buffer::Snapshot vertices, Buffer::Snapshot indices, uint32_t drawCount, DrawingParams params) const;
     sp<RenderCommand> toRenderCommand(const RenderRequest& renderRequest, Buffer::Snapshot vertices, Buffer::Snapshot indices, uint32_t drawCount, DrawingParams params) const;
 
     sp<RenderLayer::Stub> _stub;

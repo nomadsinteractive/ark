@@ -11,8 +11,8 @@ class RCCDrawElements final : public RenderCommandComposer {
 public:
     RCCDrawElements(sp<Model> model);
 
-    sp<PipelineBindings> makeShaderBindings(Shader& shader, RenderController& renderController, Enum::RenderMode renderMode) override;
-    sp<RenderCommand> compose(const RenderRequest& renderRequest, const RenderLayerSnapshot& snapshot) override;
+    sp<PipelineBindings> makePipelineBindings(const Shader& shader, RenderController& renderController, Enum::RenderMode renderMode) override;
+    DrawingContext compose(const RenderRequest& renderRequest, const RenderLayerSnapshot& snapshot) override;
 
 private:
     sp<Model> _model;

@@ -20,8 +20,8 @@ class ARK_API RCCMultiDrawElementsIndirect final : public RenderCommandComposer 
 public:
     RCCMultiDrawElementsIndirect(sp<ModelBundle> multiModels);
 
-    sp<PipelineBindings> makeShaderBindings(Shader& shader, RenderController& renderController, Enum::RenderMode renderMode) override;
-    sp<RenderCommand> compose(const RenderRequest& renderRequest, const RenderLayerSnapshot& snapshot) override;
+    sp<PipelineBindings> makePipelineBindings(const Shader& shader, RenderController& renderController, Enum::RenderMode renderMode) override;
+    DrawingContext compose(const RenderRequest& renderRequest, const RenderLayerSnapshot& snapshot) override;
 
 private:
     struct NodeLayoutInstance {

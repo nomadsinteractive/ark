@@ -20,13 +20,13 @@ RCCDrawElementsInstanced::RCCDrawElementsInstanced(Model model)
 {
 }
 
-sp<PipelineBindings> RCCDrawElementsInstanced::makeShaderBindings(Shader& shader, RenderController& renderController, Enum::RenderMode renderMode)
+sp<PipelineBindings> RCCDrawElementsInstanced::makePipelineBindings(const Shader& shader, RenderController& renderController, Enum::RenderMode renderMode)
 {
     _indices = renderController.makeIndexBuffer({}, _model.indices());
     return shader.makeBindings(renderController.makeVertexBuffer(), renderMode, Enum::DRAW_PROCEDURE_DRAW_INSTANCED);
 }
 
-sp<RenderCommand> RCCDrawElementsInstanced::compose(const RenderRequest& renderRequest, const RenderLayerSnapshot& snapshot)
+DrawingContext RCCDrawElementsInstanced::compose(const RenderRequest& renderRequest, const RenderLayerSnapshot& snapshot)
 {
     const size_t verticesLength = _model.vertices()->length();
     const sp<ModelLoader>& modelLoader = snapshot._stub->_model_loader;
@@ -56,7 +56,7 @@ sp<RenderCommand> RCCDrawElementsInstanced::compose(const RenderRequest& renderR
             writer.write(divided.buf() + attributeStride, divided.length() - attributeStride, attributeStride);
     }
 
-    return snapshot.toRenderCommand(renderRequest, buf.vertices().toSnapshot(vertices), _indices.snapshot(), static_cast<uint32_t>(snapshot._elements.size()), DrawingParams::DrawElementsInstanced{0, static_cast<uint32_t>(_model.indexCount()), buf.toDividedBufferSnapshots()});
+    return snapshot.toDrawingContext(buf.vertices().toSnapshot(vertices), _indices.snapshot(), static_cast<uint32_t>(snapshot._elements.size()), DrawingParams::DrawElementsInstanced{0, static_cast<uint32_t>(_model.indexCount()), buf.toDividedBufferSnapshots()});
 }
 
 }

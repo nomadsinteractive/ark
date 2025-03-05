@@ -46,9 +46,6 @@ public:
     };
 
 private:
-    sp<Snippet::DrawDecorator> makeDrawEvents(sp<Snippet::DrawDecorator> de1, sp<Snippet::DrawDecorator> de2) const;
-
-private:
     sp<Snippet> _delegate;
     sp<Snippet> _next;
 };

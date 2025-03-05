@@ -8,9 +8,9 @@ namespace ark {
 
 namespace {
 
-class DrawEventsLinkedChain final : public Snippet::DrawDecorator {
+class DrawDecoratorComposite final : public Snippet::DrawDecorator {
 public:
-    DrawEventsLinkedChain(sp<Snippet::DrawDecorator> delegate, sp<Snippet::DrawDecorator> next)
+    DrawDecoratorComposite(sp<DrawDecorator> delegate, sp<DrawDecorator> next)
         : _delegate(std::move(delegate)), _next(std::move(next)) {
         DASSERT(_delegate && _next);
     }
@@ -21,14 +21,22 @@ public:
     }
 
     void postDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override {
-        _delegate->postDraw(graphicsContext, context);
         _next->postDraw(graphicsContext, context);
+        _delegate->postDraw(graphicsContext, context);
     }
 
 private:
     sp<DrawDecorator> _delegate;
     sp<DrawDecorator> _next;
 };
+
+
+sp<Snippet::DrawDecorator> makeDrawDecoratorComposite(sp<Snippet::DrawDecorator> de1, sp<Snippet::DrawDecorator> de2)
+{
+    if(de1 && de2)
+        return sp<Snippet::DrawDecorator>::make<DrawDecoratorComposite>(std::move(de1), std::move(de2));
+    return std::move(de1 ? de1 : de2);
+}
 
 }
 
@@ -53,19 +61,12 @@ void SnippetLinkedChain::preCompile(GraphicsContext& graphicsContext, PipelineBu
 
 sp<Snippet::DrawDecorator> SnippetLinkedChain::makeDrawDecorator(const RenderRequest& renderRequest)
 {
-    return makeDrawEvents(_delegate->makeDrawDecorator(renderRequest), _next->makeDrawDecorator(renderRequest));
+    return makeDrawDecoratorComposite(_delegate->makeDrawDecorator(renderRequest), _next->makeDrawDecorator(renderRequest));
 }
 
 sp<Snippet::DrawDecorator> SnippetLinkedChain::makeDrawDecorator()
 {
-    return makeDrawEvents(_delegate->makeDrawDecorator(), _next->makeDrawDecorator());
-}
-
-sp<Snippet::DrawDecorator> SnippetLinkedChain::makeDrawEvents(sp<Snippet::DrawDecorator> de1, sp<Snippet::DrawDecorator> de2) const
-{
-    if(de1 && de2)
-        return sp<Snippet::DrawDecorator>::make<DrawEventsLinkedChain>(std::move(de1), std::move(de2));
-    return de1 ? de1 : de2;
+    return makeDrawDecoratorComposite(_delegate->makeDrawDecorator(), _next->makeDrawDecorator());
 }
 
 SnippetLinkedChain::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)
@@ -99,26 +100,26 @@ SnippetLinkedChain::BUILDER::BUILDER(BeanFactory& factory, const document& manif
 sp<Snippet> SnippetLinkedChain::BUILDER::build(const Scope& args)
 {
     sp<Snippet> snippet;
-    sp<SnippetLinkedChain> chain;
+    sp<Snippet> next;
     for(const document& i : _manifest->children(constants::SNIPPET))
     {
-        if(!chain && snippet)
-            chain = sp<SnippetLinkedChain>::make(snippet, _build(i, args));
+        if(!next && snippet)
+            next = sp<Snippet>::make<SnippetLinkedChain>(std::move(snippet), _build(i, args));
         else
         {
             snippet = _build(i, args);
-            if(chain)
-                chain = sp<SnippetLinkedChain>::make(chain, snippet);
+            if(next)
+                next = sp<Snippet>::make<SnippetLinkedChain>(std::move(next), snippet);
         }
     }
-    DCHECK_WARN(chain, "Only one snippet in SnippetLinkedChain");
-    return chain ? chain.cast<Snippet>() : snippet;
+    DCHECK_WARN(next, "Only one snippet in SnippetLinkedChain");
+    return std::move(next ? next : snippet);
 }
 
 sp<Snippet> SnippetLinkedChain::BUILDER::_build(const document& manifest, const Scope& args)
 {
     const String type = Documents::getAttribute(manifest, constants::TYPE);
-    const String value = Documents::getAttribute(manifest, constants::VALUE);
+    const String& value = Documents::ensureAttribute(manifest, constants::VALUE);
     if(type)
         return _factory.ensureBuilderByTypeValue<Snippet>(type, value)->build(args);
     return _factory.ensure<Snippet>(manifest, args);

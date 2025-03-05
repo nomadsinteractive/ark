@@ -59,8 +59,6 @@ PipelineBindings::PipelineBindings(Buffer vertices, sp<PipelineFactory> pipeline
     : _vertices(std::move(vertices)), _pipeline_factory(std::move(pipelineFactory)), _pipeline_descriptor(std::move(pipelineDescriptor)),
       _streams(sp<Map<uint32_t, Buffer>>::make(std::move(streams))), _attachments(sp<Traits>::make())
 {
-    if(_vertices)
-        _vertices.delegate()->setupLayout(_pipeline_descriptor);
 }
 
 const Buffer& PipelineBindings::vertices() const

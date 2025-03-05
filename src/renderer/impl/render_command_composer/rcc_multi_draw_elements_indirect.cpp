@@ -96,14 +96,14 @@ RCCMultiDrawElementsIndirect::RCCMultiDrawElementsIndirect(sp<ModelBundle> multi
 {
 }
 
-sp<PipelineBindings> RCCMultiDrawElementsIndirect::makeShaderBindings(Shader& shader, RenderController& renderController, Enum::RenderMode renderMode)
+sp<PipelineBindings> RCCMultiDrawElementsIndirect::makePipelineBindings(const Shader& shader, RenderController& renderController, Enum::RenderMode renderMode)
 {
     _indices = renderController.makeIndexBuffer({}, sp<IndicesUploader>::make(_model_bundle));
     _draw_indirect = renderController.makeBuffer(Buffer::TYPE_DRAW_INDIRECT, Buffer::USAGE_BIT_DYNAMIC, nullptr);
     return shader.makeBindings(renderController.makeVertexBuffer({}, sp<VerticesUploader>::make(_model_bundle, shader.layout())), renderMode, Enum::DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT);
 }
 
-sp<RenderCommand> RCCMultiDrawElementsIndirect::compose(const RenderRequest& renderRequest, const RenderLayerSnapshot& snapshot)
+DrawingContext RCCMultiDrawElementsIndirect::compose(const RenderRequest& renderRequest, const RenderLayerSnapshot& snapshot)
 {
     DrawingBuffer buf(snapshot._stub->_pipeline_bindings, snapshot._stub->_stride);
     const Buffer& vertices = snapshot._stub->_pipeline_bindings->vertices();
@@ -115,7 +115,7 @@ sp<RenderCommand> RCCMultiDrawElementsIndirect::compose(const RenderRequest& ren
     writeModelMatices(renderRequest, buf, snapshot, reload);
 
     DrawingParams::DrawMultiElementsIndirect drawParams{buf.toDividedBufferSnapshots(), reload ? _draw_indirect.snapshot(makeIndirectBuffer(renderRequest)) : _draw_indirect.snapshot(), static_cast<uint32_t>(_indirect_cmds.size())};
-    return snapshot.toRenderCommand(renderRequest, vertices.snapshot(), _indices.snapshot(), 0, std::move(drawParams));
+    return snapshot.toDrawingContext(vertices.snapshot(), _indices.snapshot(), 0, std::move(drawParams));
 }
 
 ByteArray::Borrowed RCCMultiDrawElementsIndirect::makeIndirectBuffer(const RenderRequest& renderRequest) const
