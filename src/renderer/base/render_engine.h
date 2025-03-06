@@ -95,7 +95,6 @@ private:
 
     sp<RendererFactory> _renderer_factory;
     sp<RenderEngineContext> _render_context;
-
 };
 
 }

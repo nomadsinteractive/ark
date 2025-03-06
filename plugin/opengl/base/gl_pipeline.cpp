@@ -5,6 +5,7 @@
 #include "core/util/strings.h"
 
 #include "graphics/base/color.h"
+#include "opengl/impl/es30/gl_resource/gl_vertex_array.h"
 
 #include "renderer/base/compute_context.h"
 #include "renderer/base/recycler.h"
@@ -548,6 +549,39 @@ private:
     GLuint _buffer;
 };
 
+void ensureVertexArray(GraphicsContext& graphicsContext, const DrawingContext& context)
+{
+    const sp<GLVertexArray>& vertexArray = context._attachments->get<GLVertexArray>();
+    uint64_t vertexArrayId = vertexArray ? vertexArray->id() : 0;
+    if(!vertexArrayId) {
+        const sp<Pipeline>& renderPipeline = context._bindings->ensureRenderPipeline(graphicsContext);
+        sp<GLVertexArray> va = sp<GLVertexArray>::make(renderPipeline.cast<GLPipeline>(), context._vertices.delegate(), context._bindings);
+        va->upload(graphicsContext);
+        graphicsContext.renderController()->upload(va, RenderController::US_ON_SURFACE_READY);
+        vertexArrayId = va->id();
+        context._attachments->put(std::move(va));
+    }
+    glBindVertexArray(static_cast<GLuint>(vertexArrayId));
+}
+
+sp<PipelineDrawCommand> makeBakedRenderer(const PipelineDescriptor& bindings)
+{
+    const GLenum mode = GLUtil::toEnum(bindings.mode());
+    switch(bindings.drawProcedure())
+    {
+        case Enum::DRAW_PROCEDURE_DRAW_ARRAYS:
+            return sp<GLDrawArrays>::make(mode);
+        case Enum::DRAW_PROCEDURE_DRAW_ELEMENTS:
+            return sp<GLDrawElements>::make(mode);
+        case Enum::DRAW_PROCEDURE_DRAW_INSTANCED:
+            return sp<GLDrawElementsInstanced>::make(mode);
+        case Enum::DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT:
+            return sp<GLMultiDrawElementsIndirect>::make(mode);
+    }
+    DFATAL("Not render procedure creator for %d", bindings.drawProcedure());
+    return nullptr;
+}
+
 class PipelineOperationDraw final : public PipelineOperation {
 public:
     PipelineOperationDraw(sp<GLPipeline::Stub> stub, const PipelineDescriptor& bindings)
@@ -563,7 +597,12 @@ public:
         for(const auto& [i, j] : drawingContext._buffer_object->_ssbos)
             _ssbo_binders.emplace_back(GL_SHADER_STORAGE_BUFFER, static_cast<GLuint>(i), static_cast<GLuint>(j.id()));
 
+        ensureVertexArray(graphicsContext, drawingContext);
+        if(drawingContext._indices)
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLuint>(drawingContext._indices.id()));
+
         _renderer->draw(graphicsContext, drawingContext);
+        glBindVertexArray(0);
 
         _ssbo_binders.clear();
     }
@@ -571,25 +610,6 @@ public:
     void compute(GraphicsContext& graphicsContext, const ComputeContext& computeContext) override
     {
         DFATAL("This is a drawing pipeline, not compute");
-    }
-
-private:
-    static sp<PipelineDrawCommand> makeBakedRenderer(const PipelineDescriptor& bindings)
-    {
-        const GLenum mode = GLUtil::toEnum(bindings.mode());
-        switch(bindings.drawProcedure())
-        {
-            case Enum::DRAW_PROCEDURE_DRAW_ARRAYS:
-                return sp<GLDrawArrays>::make(mode);
-            case Enum::DRAW_PROCEDURE_DRAW_ELEMENTS:
-                return sp<GLDrawElements>::make(mode);
-            case Enum::DRAW_PROCEDURE_DRAW_INSTANCED:
-                return sp<GLDrawElementsInstanced>::make(mode);
-            case Enum::DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT:
-                return sp<GLMultiDrawElementsIndirect>::make(mode);
-        }
-        DFATAL("Not render procedure creator for %d", bindings.drawProcedure());
-        return nullptr;
     }
 
 private:

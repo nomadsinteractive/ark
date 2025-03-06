@@ -41,8 +41,8 @@ Shader::StageManifest::StageManifest(BeanFactory& factory, const document& manif
 {
 }
 
-Shader::Shader(sp<Camera> camera, sp<PipelineFactory> pipelineFactory, sp<RenderController> renderController, sp<PipelineLayout> pipelineLayout, PipelineDescriptor::Parameters bindingParams)
-    : _camera(camera ? *camera : Camera::createDefaultCamera()), _pipeline_factory(std::move(pipelineFactory)), _render_controller(std::move(renderController)), _pipeline_layout(std::move(pipelineLayout)), _layout(_pipeline_layout->shaderLayout()), _descriptor_params(std::move(bindingParams))
+Shader::Shader(sp<Camera> camera, sp<PipelineFactory> pipelineFactory, sp<RenderController> renderController, sp<PipelineLayout> pipelineLayout, PipelineDescriptor::Parameters parameters)
+    : _camera(camera ? *camera : Camera::createDefaultCamera()), _pipeline_factory(std::move(pipelineFactory)), _render_controller(std::move(renderController)), _pipeline_layout(std::move(pipelineLayout)), _layout(_pipeline_layout->shaderLayout()), _descriptor_params(std::move(parameters))
 {
     _pipeline_layout->initialize(*this);
 }

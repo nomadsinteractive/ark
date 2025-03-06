@@ -4,10 +4,10 @@
 #include "renderer/base/render_engine_context.h"
 #include "renderer/base/shader_preprocessor.h"
 #include "renderer/base/shader.h"
-#include "renderer/base/snippet_delegate.h"
 #include "renderer/impl/snippet/snippet_draw_compute.h"
 #include "renderer/impl/snippet/snippet_linked_chain.h"
 #include "renderer/inf/snippet.h"
+#include "renderer/inf/snippet_factory.h"
 
 namespace ark {
 
@@ -31,6 +31,15 @@ String preprocess(const RenderEngineContext& renderEngineContext, const Map<Stri
     });
 }
 
+sp<Snippet> createCoreSnippet(sp<Snippet> next)
+{
+    sp<Snippet> coreSnippet = Ark::instance().renderController()->renderEngine()->context()->snippetFactory()->createCoreSnippet();
+    DASSERT(coreSnippet);
+    if(next)
+        return sp<Snippet>::make<SnippetLinkedChain>(std::move(coreSnippet), std::move(next));
+    return coreSnippet;
+}
+
 class ComputeSnippetWrapper final : public Snippet, public Wrapper<Snippet> {
 public:
     ComputeSnippetWrapper()
@@ -40,11 +49,6 @@ public:
     sp<DrawDecorator> makeDrawDecorator(const RenderRequest& renderRequest) override
     {
         return _wrapped->makeDrawDecorator(renderRequest);
-    }
-
-    sp<DrawDecorator> makeDrawDecorator() override
-    {
-        return _wrapped->makeDrawDecorator();
     }
 };
 
@@ -104,7 +108,7 @@ void PipelineLayout::initialize(const Shader& shader)
         addSnippet(computeSnippetWrapper);
     }
 
-    _snippet = sp<Snippet>::make<SnippetDelegate>(_snippet);
+    _snippet = createCoreSnippet(std::move(_snippet));
     _snippet->preInitialize(_building_context);
     _building_context->initialize(shader.camera());
 

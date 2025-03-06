@@ -117,11 +117,6 @@ public:
             preprocessor._predefined_macros.push_back("#extension GL_ARB_shading_language_420pack : enable");
         }
     }
-
-    sp<DrawDecorator> makeDrawDecorator() override {
-        return sp<Snippet::DrawDecorator>::make();
-    }
-
 };
 
 class SnippetFactoryBgfx final : public SnippetFactory {

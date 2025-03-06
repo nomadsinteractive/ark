@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/base/api.h"
+#include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
 
@@ -23,8 +24,7 @@ public:
     virtual void preInitialize(PipelineBuildingContext& context) {}
     virtual void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout) {}
 
-    virtual sp<DrawDecorator> makeDrawDecorator(const RenderRequest& /*renderRequest*/) { return makeDrawDecorator(); }
-    virtual sp<DrawDecorator> makeDrawDecorator() { return nullptr; }
+    virtual sp<DrawDecorator> makeDrawDecorator(const RenderRequest& /*renderRequest*/) { return sp<DrawDecorator>::make(); }
 };
 
 }

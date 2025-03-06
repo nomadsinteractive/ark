@@ -65,10 +65,6 @@ public:
         }
     }
 
-    sp<DrawDecorator> makeDrawDecorator() override {
-        return sp<Snippet::DrawDecorator>::make();
-    }
-
 };
 
 }

@@ -1,9 +1,7 @@
 #include "renderer/base/graphics_context.h"
 
 #include "render_engine_context.h"
-#include "core/inf/variable.h"
 #include "core/types/global.h"
-#include "core/util/strings.h"
 
 #include "renderer/base/render_controller.h"
 

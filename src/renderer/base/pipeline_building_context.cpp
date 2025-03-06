@@ -7,7 +7,6 @@
 
 #include "renderer/base/pipeline_layout.h"
 #include "renderer/base/render_engine_context.h"
-#include "renderer/base/snippet_delegate.h"
 #include "renderer/impl/snippet/snippet_linked_chain.h"
 #include "renderer/inf/renderer_factory.h"
 #include "renderer/util/render_util.h"

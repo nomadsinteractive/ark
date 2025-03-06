@@ -15,10 +15,9 @@ public:
     void preInitialize(PipelineBuildingContext& context) override;
     void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout) override;
     sp<DrawDecorator> makeDrawDecorator(const RenderRequest& renderRequest) override;
-    sp<DrawDecorator> makeDrawDecorator() override;
 
 //  [[plugin::builder::by-value]]
-    class DICTIONARY : public Builder<Snippet> {
+    class DICTIONARY final : public Builder<Snippet> {
     public:
         DICTIONARY(BeanFactory& factory, const String& value);
 

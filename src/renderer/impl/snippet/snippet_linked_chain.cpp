@@ -64,11 +64,6 @@ sp<Snippet::DrawDecorator> SnippetLinkedChain::makeDrawDecorator(const RenderReq
     return makeDrawDecoratorComposite(_delegate->makeDrawDecorator(renderRequest), _next->makeDrawDecorator(renderRequest));
 }
 
-sp<Snippet::DrawDecorator> SnippetLinkedChain::makeDrawDecorator()
-{
-    return makeDrawDecoratorComposite(_delegate->makeDrawDecorator(), _next->makeDrawDecorator());
-}
-
 SnippetLinkedChain::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)
     : _factory(factory), _value(value)
 {
