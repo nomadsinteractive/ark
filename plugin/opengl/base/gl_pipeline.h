@@ -72,7 +72,7 @@ private:
     Map<Enum::ShaderStageBit, String> _stages;
 
     sp<PipelineOperation> _pipeline_operation;
-    Vector<sp<Snippet::DrawDecorator>> _draw_decorators;
+    Vector<sp<DrawDecorator>> _draw_decorators;
 };
 
 }

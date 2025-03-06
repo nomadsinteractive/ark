@@ -11,7 +11,7 @@
 #include "renderer/base/render_engine.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/pipeline_bindings.h"
-#include "renderer/inf/render_command_composer.h"
+#include "renderer/inf/drawing_context_composer.h"
 
 namespace ark {
 

@@ -44,7 +44,7 @@ public:
 
     void import(BeanFactory& factory, const document& manifest, const Scope& args);
 
-    sp<RenderCommandComposer> makeRenderCommandComposer(const Shader& shader) override;
+    sp<DrawingContextComposer> makeRenderCommandComposer(const Shader& shader) override;
     sp<Model> loadModel(int32_t type) override;
 
     const ModelLayout& ensureModelLayout(int32_t type) const;

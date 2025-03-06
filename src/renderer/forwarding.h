@@ -37,7 +37,7 @@ class Recycler;
 class Resource;
 class RenderEngineContext;
 class RenderController;
-class RenderCommandComposer;
+class DrawingContextComposer;
 class RenderEngine;
 class RendererFactory;
 class ResourceLoaderContext;

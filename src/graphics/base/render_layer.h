@@ -28,7 +28,7 @@ private:
         sp<Varyings> _varyings;
         sp<Vec4> _scissor;
 
-        sp<RenderCommandComposer> _drawing_context_composer;
+        sp<DrawingContextComposer> _drawing_context_composer;
         sp<PipelineBindings> _pipeline_bindings;
 
         uint32_t _stride;

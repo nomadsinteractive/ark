@@ -8,9 +8,9 @@
 
 namespace ark {
 
-class SnippetLinkedChain final : public Snippet {
+class SnippetComposite final : public Snippet {
 public:
-    SnippetLinkedChain(sp<Snippet> delegate, sp<Snippet> next);
+    SnippetComposite(sp<Snippet> delegate, sp<Snippet> next);
 
     void preInitialize(PipelineBuildingContext& context) override;
     void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout) override;
@@ -30,7 +30,7 @@ public:
     };
 
 //  [[plugin::builder]]
-    class BUILDER : public Builder<Snippet> {
+    class BUILDER final : public Builder<Snippet> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 

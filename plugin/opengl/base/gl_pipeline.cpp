@@ -294,7 +294,7 @@ private:
     bool _enabled;
 };
 
-class GLCullFaceTest final : public Snippet::DrawDecorator {
+class GLCullFaceTest final : public DrawDecorator {
 public:
     GLCullFaceTest(const PipelineDescriptor::TraitCullFaceTest& trait)
         : _enabled(trait._enabled), _front_face(trait._front_face == PipelineDescriptor::FRONT_FACE_DEFAULT ? GL_ZERO : (trait._front_face == PipelineDescriptor::FRONT_FACE_CLOCK_WISE ? GL_CW : GL_CCW)), _pre_front_face(GL_ZERO) {
@@ -327,7 +327,7 @@ private:
     GLenum _pre_front_face;
 };
 
-class GLDepthTest final : public Snippet::DrawDecorator {
+class GLDepthTest final : public DrawDecorator {
 public:
     GLDepthTest(const PipelineDescriptor::TraitDepthTest& trait)
         : _func(GLUtil::toCompareFunc(trait._func)), _pre_func(GL_ZERO), _enabled(trait._enabled), _read_only(!trait._write_enabled) {
@@ -363,15 +363,15 @@ private:
     bool _read_only;
 };
 
-class GLStencilTest final : public Snippet::DrawDecorator {
+class GLStencilTest final : public DrawDecorator {
 public:
-    GLStencilTest(Vector<sp<Snippet::DrawDecorator>> delegate)
+    GLStencilTest(Vector<sp<DrawDecorator>> delegate)
         : _delegate(std::move(delegate)) {
     }
 
     void preDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override {
         glEnable(GL_STENCIL_TEST);
-        for(const sp<Snippet::DrawDecorator>& i : _delegate)
+        for(const sp<DrawDecorator>& i : _delegate)
             i->preDraw(graphicsContext, context);
     }
 
@@ -381,10 +381,10 @@ public:
     }
 
 private:
-    Vector<sp<Snippet::DrawDecorator>> _delegate;
+    Vector<sp<DrawDecorator>> _delegate;
 };
 
-class GLStencilTestSeparate final : public Snippet::DrawDecorator {
+class GLStencilTestSeparate final : public DrawDecorator {
 public:
     GLStencilTestSeparate(const PipelineDescriptor::TraitStencilTestSeparate& conf)
         : _face(GLUtil::toFrontFaceType(conf._type)), _mask(conf._mask), _func(GLUtil::toCompareFunc(conf._func)), _compare_mask(conf._compare_mask),
@@ -407,7 +407,7 @@ private:
     GLenum _op, _op_dfail, _op_dpass;
 };
 
-class GLTraitBlend final : public Snippet::DrawDecorator {
+class GLTraitBlend final : public DrawDecorator {
 public:
     GLTraitBlend(const PipelineDescriptor::TraitBlend& conf)
         : _src_rgb_factor(GLUtil::toBlendFactor(conf._src_rgb_factor)), _dest_rgb_factor(GLUtil::toBlendFactor(conf._dst_rgb_factor)),
@@ -717,27 +717,27 @@ GLPipeline::GLPipeline(const sp<Recycler>& recycler, uint32_t version, Map<Enum:
     for(const auto& [k, v] : bindings.parameters()._traits)
     {
         if(k == PipelineDescriptor::TRAIT_TYPE_CULL_FACE_TEST)
-            _draw_decorators.push_back(sp<Snippet::DrawDecorator>::make<GLCullFaceTest>(v._configure._cull_face_test));
+            _draw_decorators.push_back(sp<DrawDecorator>::make<GLCullFaceTest>(v._configure._cull_face_test));
         else if(k == PipelineDescriptor::TRAIT_TYPE_DEPTH_TEST)
-            _draw_decorators.push_back(sp<Snippet::DrawDecorator>::make<GLDepthTest>(v._configure._depth_test));
+            _draw_decorators.push_back(sp<DrawDecorator>::make<GLDepthTest>(v._configure._depth_test));
         else if(k == PipelineDescriptor::TRAIT_TYPE_STENCIL_TEST)
         {
-            Vector<sp<Snippet::DrawDecorator>> delegate;
+            Vector<sp<DrawDecorator>> delegate;
             const PipelineDescriptor::TraitStencilTest& test = v._configure._stencil_test;
             if(test._front._type == PipelineDescriptor::FRONT_FACE_TYPE_DEFAULT && test._front._type == test._back._type)
-                delegate.push_back(sp<Snippet::DrawDecorator>::make<GLStencilTestSeparate>(test._front));
+                delegate.push_back(sp<DrawDecorator>::make<GLStencilTestSeparate>(test._front));
             else
             {
                 if(test._front._type == PipelineDescriptor::FRONT_FACE_TYPE_FRONT)
-                    delegate.push_back(sp<Snippet::DrawDecorator>::make<GLStencilTestSeparate>(test._front));
+                    delegate.push_back(sp<DrawDecorator>::make<GLStencilTestSeparate>(test._front));
                 if(test._back._type == PipelineDescriptor::FRONT_FACE_TYPE_BACK)
-                    delegate.push_back(sp<Snippet::DrawDecorator>::make<GLStencilTestSeparate>(test._back));
+                    delegate.push_back(sp<DrawDecorator>::make<GLStencilTestSeparate>(test._back));
             }
             DASSERT(delegate.size() > 0);
-            _draw_decorators.push_back(sp<Snippet::DrawDecorator>::make<GLStencilTest>(std::move(delegate)));
+            _draw_decorators.push_back(sp<DrawDecorator>::make<GLStencilTest>(std::move(delegate)));
         }
         else if(k == PipelineDescriptor::TRAIT_TYPE_BLEND)
-            _draw_decorators.push_back(sp<Snippet::DrawDecorator>::make<GLTraitBlend>(v._configure._blend));
+            _draw_decorators.push_back(sp<DrawDecorator>::make<GLTraitBlend>(v._configure._blend));
     }
 }
 
@@ -792,10 +792,10 @@ ResourceRecycleFunc GLPipeline::recycle()
 
 void GLPipeline::draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
 {
-    for(const sp<Snippet::DrawDecorator>& i : _draw_decorators)
+    for(const sp<DrawDecorator>& i : _draw_decorators)
         i->preDraw(graphicsContext, drawingContext);
     _pipeline_operation->draw(graphicsContext, drawingContext);
-    for(const sp<Snippet::DrawDecorator>& i : _draw_decorators)
+    for(const sp<DrawDecorator>& i : _draw_decorators)
         i->postDraw(graphicsContext, drawingContext);
 }
 

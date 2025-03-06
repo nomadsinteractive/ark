@@ -10,7 +10,7 @@ class ModelLoaderQuad final : public ModelLoader {
 public:
     ModelLoaderQuad(sp<Atlas> atlas);
 
-    sp<RenderCommandComposer> makeRenderCommandComposer(const Shader& shader) override;
+    sp<DrawingContextComposer> makeRenderCommandComposer(const Shader& shader) override;
     sp<Model> loadModel(int32_t type) override;
 
 //  [[plugin::builder::by-value("quad")]]

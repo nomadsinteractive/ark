@@ -4,7 +4,7 @@
 #include "renderer/base/pipeline_descriptor.h"
 #include "renderer/base/pipeline_layout.h"
 #include "renderer/base/render_controller.h"
-#include "renderer/impl/snippet/snippet_linked_chain.h"
+#include "renderer/impl/snippet/snippet_composite.h"
 #include "renderer/inf/pipeline.h"
 #include "renderer/inf/pipeline_factory.h"
 

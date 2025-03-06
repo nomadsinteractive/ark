@@ -10,7 +10,7 @@ class ModelLoaderNDC final : public ModelLoader {
 public:
     ModelLoaderNDC();
 
-    sp<RenderCommandComposer> makeRenderCommandComposer(const Shader& shader) override;
+    sp<DrawingContextComposer> makeRenderCommandComposer(const Shader& shader) override;
     sp<Model> loadModel(int32_t type) override;
 
 //  [[plugin::builder::by-value("ndc")]]

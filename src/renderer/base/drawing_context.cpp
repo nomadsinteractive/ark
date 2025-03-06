@@ -12,7 +12,7 @@ namespace {
 
 class RenderCommandNoop final : public RenderCommand {
 public:
-    RenderCommandNoop(DrawingContext context, sp<Snippet::DrawDecorator> drawDecorator)
+    RenderCommandNoop(DrawingContext context, sp<DrawDecorator> drawDecorator)
         : _context(std::move(context)), _draw_decorator(std::move(drawDecorator)) {
     }
 
@@ -24,12 +24,12 @@ public:
 
 private:
     DrawingContext _context;
-    sp<Snippet::DrawDecorator> _draw_decorator;
+    sp<DrawDecorator> _draw_decorator;
 };
 
 class RenderCommandDraw final : public RenderCommand {
 public:
-    RenderCommandDraw(DrawingContext context, sp<Snippet::DrawDecorator> drawDecorator)
+    RenderCommandDraw(DrawingContext context, sp<DrawDecorator> drawDecorator)
         : _context(std::move(context)), _draw_decorator(std::move(drawDecorator)) {
     }
 
@@ -46,7 +46,7 @@ public:
 
 private:
     DrawingContext _context;
-    sp<Snippet::DrawDecorator> _draw_decorator;
+    sp<DrawDecorator> _draw_decorator;
 };
 
 }
@@ -59,14 +59,14 @@ DrawingContext::DrawingContext(sp<PipelineBindings> pipelineBindings, sp<RenderL
 sp<RenderCommand> DrawingContext::toRenderCommand(const RenderRequest& renderRequest)
 {
     DCHECK(_bindings, "DrawingContext cannot be converted to RenderCommand more than once");
-    sp<Snippet::DrawDecorator> drawDecorator = _bindings->snippet()->makeDrawDecorator(renderRequest);
+    sp<DrawDecorator> drawDecorator = _bindings->snippet()->makeDrawDecorator(renderRequest);
     return sp<RenderCommand>::make<RenderCommandDraw>(std::move(*this), std::move(drawDecorator));
 }
 
 sp<RenderCommand> DrawingContext::toNoopCommand(const RenderRequest& renderRequest)
 {
     DCHECK(_bindings, "DrawingContext cannot be converted to RenderCommand more than once");
-    sp<Snippet::DrawDecorator> drawDecorator = _bindings->snippet()->makeDrawDecorator(renderRequest);
+    sp<DrawDecorator> drawDecorator = _bindings->snippet()->makeDrawDecorator(renderRequest);
     return sp<RenderCommand>::make<RenderCommandNoop>(std::move(*this), std::move(drawDecorator));
 }
 

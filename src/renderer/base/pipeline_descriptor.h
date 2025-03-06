@@ -179,7 +179,6 @@ public:
 
     Flag getFlag(Flag bitmask) const;
     bool hasFlag(Flag flag, Flag bitmask) const;
-    void setFlag(Flag flag, Flag bitmask) const;
 
 private:
     struct Stub;

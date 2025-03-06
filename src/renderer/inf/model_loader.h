@@ -33,7 +33,7 @@ public:
 //  [[script::bindings::auto]]
     virtual sp<Model> loadModel(int32_t type) = 0;
     [[nodiscard]]
-    virtual sp<RenderCommandComposer> makeRenderCommandComposer(const Shader& shader) = 0;
+    virtual sp<DrawingContextComposer> makeRenderCommandComposer(const Shader& shader) = 0;
 
     class ARK_API Importer {
     public:

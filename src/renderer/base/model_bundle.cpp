@@ -140,9 +140,9 @@ void ModelBundle::import(BeanFactory& factory, const document& manifest, const S
     _stub->import(factory, manifest, args);
 }
 
-sp<RenderCommandComposer> ModelBundle::makeRenderCommandComposer(const Shader& /*shader*/)
+sp<DrawingContextComposer> ModelBundle::makeRenderCommandComposer(const Shader& /*shader*/)
 {
-    return sp<RenderCommandComposer>::make<RCCMultiDrawElementsIndirect>(sp<ModelBundle>::make(_stub));
+    return sp<DrawingContextComposer>::make<RCCMultiDrawElementsIndirect>(sp<ModelBundle>::make(_stub));
 }
 
 const ModelBundle::ModelLayout& ModelBundle::ensureModelLayout(int32_t type) const

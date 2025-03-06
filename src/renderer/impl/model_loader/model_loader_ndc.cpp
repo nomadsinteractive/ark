@@ -13,10 +13,10 @@ ModelLoaderNDC::ModelLoaderNDC()
 {
 }
 
-sp<RenderCommandComposer> ModelLoaderNDC::makeRenderCommandComposer(const Shader& shader)
+sp<DrawingContextComposer> ModelLoaderNDC::makeRenderCommandComposer(const Shader& shader)
 {
     _unit_model = Global<Constants>()->MODEL_NDC;
-    return sp<RenderCommandComposer>::make<RCCDrawElements>(_unit_model);
+    return sp<DrawingContextComposer>::make<RCCDrawElements>(_unit_model);
 }
 
 sp<Model> ModelLoaderNDC::loadModel(int32_t type)

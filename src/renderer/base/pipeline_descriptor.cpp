@@ -117,11 +117,6 @@ bool PipelineDescriptor::hasFlag(PipelineDescriptor::Flag flag, PipelineDescript
     return flag == getFlag(bitmask);
 }
 
-void PipelineDescriptor::setFlag(PipelineDescriptor::Flag flag, PipelineDescriptor::Flag bitmask) const
-{
-    _stub->_parameters._flags = (_stub->_parameters._flags & ~static_cast<uint32_t>(bitmask)) | static_cast<uint32_t>(flag);
-}
-
 PipelineDescriptor::Stub::Stub(Enum::RenderMode mode, Enum::DrawProcedure renderProcedure, Parameters parameters, sp<PipelineLayout> pipelineLayout)
     : _mode(mode), _render_procedure(renderProcedure), _parameters(std::move(parameters)), _layout(std::move(pipelineLayout)), _shader_layout(_layout->shaderLayout()), _attributes(_shader_layout),
       _samplers(_layout->makeBindingSamplers()), _images(_layout->makeBindingImages())

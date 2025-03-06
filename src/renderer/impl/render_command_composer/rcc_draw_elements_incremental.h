@@ -3,11 +3,11 @@
 #include "renderer/forwarding.h"
 #include "renderer/base/buffer.h"
 #include "renderer/base/graphics_buffer_allocator.h"
-#include "renderer/inf/render_command_composer.h"
+#include "renderer/inf/drawing_context_composer.h"
 
 namespace ark {
 
-class RCCDrawElementsIncremental final : public RenderCommandComposer {
+class RCCDrawElementsIncremental final : public DrawingContextComposer {
 public:
     RCCDrawElementsIncremental() = default;
 

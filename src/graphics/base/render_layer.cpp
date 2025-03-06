@@ -17,7 +17,7 @@
 #include "renderer/impl/model_loader/model_loader_cached.h"
 #include "renderer/impl/model_loader/model_loader_ndc.h"
 #include "renderer/inf/model_loader.h"
-#include "renderer/inf/render_command_composer.h"
+#include "renderer/inf/drawing_context_composer.h"
 
 namespace ark {
 

@@ -3,11 +3,11 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/base/render_controller.h"
-#include "renderer/inf/render_command_composer.h"
+#include "renderer/inf/drawing_context_composer.h"
 
 namespace ark {
 
-class RCCDrawElements final : public RenderCommandComposer {
+class RCCDrawElements final : public DrawingContextComposer {
 public:
     RCCDrawElements(sp<Model> model);
 

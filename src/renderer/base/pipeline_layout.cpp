@@ -5,7 +5,7 @@
 #include "renderer/base/shader_preprocessor.h"
 #include "renderer/base/shader.h"
 #include "renderer/impl/snippet/snippet_draw_compute.h"
-#include "renderer/impl/snippet/snippet_linked_chain.h"
+#include "renderer/impl/snippet/snippet_composite.h"
 #include "renderer/inf/snippet.h"
 #include "renderer/inf/snippet_factory.h"
 
@@ -36,7 +36,7 @@ sp<Snippet> createCoreSnippet(sp<Snippet> next)
     sp<Snippet> coreSnippet = Ark::instance().renderController()->renderEngine()->context()->snippetFactory()->createCoreSnippet();
     DASSERT(coreSnippet);
     if(next)
-        return sp<Snippet>::make<SnippetLinkedChain>(std::move(coreSnippet), std::move(next));
+        return sp<Snippet>::make<SnippetComposite>(std::move(coreSnippet), std::move(next));
     return coreSnippet;
 }
 
@@ -63,7 +63,7 @@ PipelineLayout::PipelineLayout(sp<PipelineBuildingContext> buildingContext)
 void PipelineLayout::addSnippet(sp<Snippet> snippet)
 {
     DASSERT(snippet);
-    _snippet = _snippet ? sp<Snippet>::make<SnippetLinkedChain>(_snippet, std::move(snippet)) : std::move(snippet);
+    _snippet = _snippet ? sp<Snippet>::make<SnippetComposite>(_snippet, std::move(snippet)) : std::move(snippet);
 }
 
 void PipelineLayout::preCompile(GraphicsContext& graphicsContext)

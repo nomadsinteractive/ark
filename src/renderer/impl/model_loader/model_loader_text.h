@@ -16,7 +16,7 @@ class ModelLoaderText final : public ModelLoader {
 public:
     ModelLoaderText(sp<Alphabet> alphabet, sp<Atlas> atlas, const Font& font);
 
-    sp<RenderCommandComposer> makeRenderCommandComposer(const Shader& shader) override;
+    sp<DrawingContextComposer> makeRenderCommandComposer(const Shader& shader) override;
     sp<Model> loadModel(int32_t type) override;
 
 //  [[plugin::builder("text")]]

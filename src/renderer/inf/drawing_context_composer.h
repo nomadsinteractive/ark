@@ -6,9 +6,9 @@
 
 namespace ark {
 
-class ARK_API RenderCommandComposer {
+class ARK_API DrawingContextComposer {
 public:
-    virtual ~RenderCommandComposer() = default;
+    virtual ~DrawingContextComposer() = default;
 
     virtual sp<PipelineBindings> makePipelineBindings(const Shader& shader, RenderController& renderController, Enum::RenderMode renderMode) = 0;
     virtual DrawingContext compose(const RenderRequest& renderRequest, const RenderLayerSnapshot& snapshot) = 0;

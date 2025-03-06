@@ -11,12 +11,12 @@
 #include "renderer/base/model_bundle.h"
 #include "renderer/base/model.h"
 #include "renderer/base/shader_layout.h"
-#include "renderer/inf/render_command_composer.h"
+#include "renderer/inf/drawing_context_composer.h"
 
 
 namespace ark {
 
-class ARK_API RCCMultiDrawElementsIndirect final : public RenderCommandComposer {
+class ARK_API RCCMultiDrawElementsIndirect final : public DrawingContextComposer {
 public:
     RCCMultiDrawElementsIndirect(sp<ModelBundle> multiModels);
 

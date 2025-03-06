@@ -123,7 +123,7 @@ public:
 
     sp<RenderTarget> makeRenderTarget(sp<RenderLayer> renderLayer, RenderTarget::Configure configure);
 
-    sp<RenderCommandComposer> makeDrawElementsIncremental(sp<Model> model) const;
+    sp<DrawingContextComposer> makeDrawElementsIncremental(sp<Model> model) const;
 
     template<typename T> sp<Variable<T>> synchronize(sp<Variable<T>> delegate, sp<Boolean> discarded) {
         const sp<UpdatableSynchronized<T>> s = sp<UpdatableSynchronized<T>>::make(std::move(delegate));

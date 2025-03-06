@@ -9,7 +9,7 @@ ModelLoaderCached::ModelLoaderCached(sp<ModelLoader> delegate)
 {
 }
 
-sp<RenderCommandComposer> ModelLoaderCached::makeRenderCommandComposer(const Shader& shader)
+sp<DrawingContextComposer> ModelLoaderCached::makeRenderCommandComposer(const Shader& shader)
 {
     return _delegate->makeRenderCommandComposer(shader);
 }

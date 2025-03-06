@@ -347,10 +347,10 @@ sp<RenderTarget> RenderController::makeRenderTarget(sp<RenderLayer> renderLayer,
     return renderTarget;
 }
 
-sp<RenderCommandComposer> RenderController::makeDrawElementsIncremental(sp<Model> model) const
+sp<DrawingContextComposer> RenderController::makeDrawElementsIncremental(sp<Model> model) const
 {
-    return _render_engine->rendererFactory()->features()._can_draw_element_incremental ? sp<RenderCommandComposer>::make<RCCDrawElementsIncremental>()
-                                                                                       : sp<RenderCommandComposer>::make<RCCDrawElements>(std::move(model));
+    return _render_engine->rendererFactory()->features()._can_draw_element_incremental ? sp<DrawingContextComposer>::make<RCCDrawElementsIncremental>()
+                                                                                       : sp<DrawingContextComposer>::make<RCCDrawElements>(std::move(model));
 }
 
 void RenderController::addPreComposeUpdatable(sp<Updatable> updatable, sp<Boolean> canceled)
