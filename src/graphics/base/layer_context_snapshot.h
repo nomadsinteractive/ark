@@ -9,7 +9,7 @@ namespace ark {
 
 class LayerContextSnapshot {
 public:
-    const ShaderLayout& pipelineInput() const;
+    const PipelineLayout& pipelineInput() const;
 
     bool _dirty;
     V3 _position;

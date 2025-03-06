@@ -1,7 +1,7 @@
 #include "renderer/impl/snippet/snippet_swizzle.h"
 
 #include "renderer/base/pipeline_building_context.h"
-#include "renderer/base/shader_layout.h"
+#include "renderer/base/pipeline_layout.h"
 
 namespace ark {
 

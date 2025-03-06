@@ -81,7 +81,7 @@ const sp<Snippet>& PipelineBindings::snippet() const
     return _pipeline_descriptor->configuration()->snippet();
 }
 
-const sp<ShaderLayout>& PipelineBindings::shaderLayout() const
+const sp<PipelineLayout>& PipelineBindings::shaderLayout() const
 {
     return _pipeline_descriptor->shaderLayout();
 }
@@ -120,10 +120,10 @@ const sp<Pipeline>& PipelineBindings::ensureRenderPipeline(GraphicsContext& grap
 Map<uint32_t, Buffer::Factory> PipelineBindings::makeDividedBufferFactories() const
 {
     Map<uint32_t, Buffer::Factory> builders;
-    const sp<ShaderLayout>& shaderLayout = _pipeline_descriptor->shaderLayout();
+    const sp<PipelineLayout>& shaderLayout = _pipeline_descriptor->shaderLayout();
     for(const auto& i : *_streams)
     {
-        const ShaderLayout::StreamLayout& stream = shaderLayout->getStreamLayout(i.first);
+        const PipelineLayout::StreamLayout& stream = shaderLayout->getStreamLayout(i.first);
         builders.insert(std::make_pair(i.first, Buffer::Factory(stream.stride())));
     }
     return builders;

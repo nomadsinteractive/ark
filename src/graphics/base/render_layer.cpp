@@ -10,7 +10,7 @@
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/model.h"
 #include "renderer/base/pipeline_descriptor.h"
-#include "renderer/base/shader_layout.h"
+#include "renderer/base/pipeline_layout.h"
 #include "renderer/base/resource_loader_context.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/pipeline_bindings.h"

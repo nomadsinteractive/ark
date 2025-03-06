@@ -41,10 +41,10 @@ Shader::StageManifest::StageManifest(BeanFactory& factory, const document& manif
 {
 }
 
-Shader::Shader(sp<Camera> camera, sp<PipelineFactory> pipelineFactory, sp<RenderController> renderController, sp<PipelineConfiguration> pipelineLayout, PipelineDescriptor::Parameters parameters)
-    : _camera(camera ? *camera : Camera::createDefaultCamera()), _pipeline_factory(std::move(pipelineFactory)), _render_controller(std::move(renderController)), _pipeline_layout(std::move(pipelineLayout)), _layout(_pipeline_layout->shaderLayout()), _descriptor_params(std::move(parameters))
+Shader::Shader(sp<Camera> camera, sp<PipelineFactory> pipelineFactory, sp<RenderController> renderController, sp<PipelineConfiguration> pipelineConfiguration, PipelineDescriptor::Parameters parameters)
+    : _camera(camera ? *camera : Camera::createDefaultCamera()), _pipeline_factory(std::move(pipelineFactory)), _render_controller(std::move(renderController)), _pipeline_configuration(std::move(pipelineConfiguration)), _layout(_pipeline_configuration->pipelineLayout()), _descriptor_params(std::move(parameters))
 {
-    _pipeline_layout->initialize(*this);
+    _pipeline_configuration->initialize(*this);
 }
 
 sp<Builder<Shader>> Shader::fromDocument(BeanFactory& factory, const document& manifest, const String& defVertex, const String& defFragment, const sp<Camera>& defaultCamera)
@@ -73,7 +73,7 @@ const sp<PipelineFactory>& Shader::pipelineFactory() const
     return _pipeline_factory;
 }
 
-const sp<ShaderLayout>& Shader::layout() const
+const sp<PipelineLayout>& Shader::layout() const
 {
     return _layout;
 }
@@ -88,9 +88,9 @@ void Shader::setCamera(const Camera& camera)
     _camera.assign(camera);
 }
 
-const sp<PipelineConfiguration>& Shader::pipelineLayout() const
+const sp<PipelineConfiguration>& Shader::pipelineConfiguration() const
 {
-    return _pipeline_layout;
+    return _pipeline_configuration;
 }
 
 const PipelineDescriptor::Parameters& Shader::descriptorParams() const
@@ -100,7 +100,7 @@ const PipelineDescriptor::Parameters& Shader::descriptorParams() const
 
 sp<PipelineBindings> Shader::makeBindings(Buffer vertices, Enum::RenderMode mode, Enum::DrawProcedure drawProcedure, const Map<uint32_t, sp<Uploader>>& uploaders) const
 {
-    return sp<PipelineBindings>::make(std::move(vertices), _pipeline_factory, sp<PipelineDescriptor>::make(mode, drawProcedure, _descriptor_params, _pipeline_layout), makeDivivedBuffers(uploaders));
+    return sp<PipelineBindings>::make(std::move(vertices), _pipeline_factory, sp<PipelineDescriptor>::make(mode, drawProcedure, _descriptor_params, _pipeline_configuration), makeDivivedBuffers(uploaders));
 }
 
 Map<uint32_t, Buffer> Shader::makeDivivedBuffers(const Map<uint32_t, sp<Uploader>>& uploaders) const

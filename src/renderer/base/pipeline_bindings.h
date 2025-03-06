@@ -22,7 +22,7 @@ public:
     const sp<PipelineDescriptor>& pipelineDescriptor() const;
 
     const sp<Snippet>& snippet() const;
-    const sp<ShaderLayout>& shaderLayout() const;
+    const sp<PipelineLayout>& shaderLayout() const;
 
     const sp<Map<uint32_t, Buffer>>& streams() const;
     const sp<Traits>& attachments() const;

@@ -9,7 +9,7 @@
 
 #include "graphics/forwarding.h"
 
-#include "renderer/base/shader_layout.h"
+#include "renderer/base/pipeline_layout.h"
 #include "renderer/inf/model_loader.h"
 
 namespace ark {
@@ -151,12 +151,12 @@ public:
     const Parameters& parameters() const;
     const Optional<Rect>& scissor() const;
     const sp<PipelineConfiguration>& configuration() const;
-    const sp<ShaderLayout>& shaderLayout() const;
+    const sp<PipelineLayout>& shaderLayout() const;
 
-    const ShaderLayout::AttributeOffsets& attributes() const;
+    const PipelineLayout::AttributeOffsets& attributes() const;
 
-    const Vector<std::pair<sp<Texture>, ShaderLayout::DescriptorSet>>& samplers() const;
-    const Vector<std::pair<sp<Texture>, ShaderLayout::DescriptorSet>>& images() const;
+    const Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>>& samplers() const;
+    const Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>>& images() const;
 
     void bindSampler(sp<Texture> texture, uint32_t name = 0);
 
@@ -165,17 +165,17 @@ public:
 
 private:
     Enum::RenderMode _mode;
-    Enum::DrawProcedure _render_procedure;
+    Enum::DrawProcedure _draw_procedure;
 
     Parameters _parameters;
 
     sp<PipelineConfiguration> _configuration;
-    sp<ShaderLayout> _shader_layout;
+    sp<PipelineLayout> _layout;
     //TODO: move it to stream
-    ShaderLayout::AttributeOffsets _attributes;
+    PipelineLayout::AttributeOffsets _attributes;
 
-    Vector<std::pair<sp<Texture>, ShaderLayout::DescriptorSet>> _samplers;
-    Vector<std::pair<sp<Texture>, ShaderLayout::DescriptorSet>> _images;
+    Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>> _samplers;
+    Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>> _images;
 };
 
 }

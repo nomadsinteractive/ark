@@ -1,4 +1,4 @@
-#include "renderer/base/shader_layout.h"
+#include "renderer/base/pipeline_layout.h"
 
 #include "core/base/allocator.h"
 #include "core/base/string.h"
@@ -11,7 +11,7 @@ namespace ark {
 
 namespace {
 
-uint32_t getAttributeEndOffset(const ShaderLayout::AttributeOffsets& attrOffsets, const Attribute::Usage usage)
+uint32_t getAttributeEndOffset(const PipelineLayout::AttributeOffsets& attrOffsets, const Attribute::Usage usage)
 {
     switch(usage)
     {
@@ -27,13 +27,13 @@ uint32_t getAttributeEndOffset(const ShaderLayout::AttributeOffsets& attrOffsets
 
 }
 
-ShaderLayout::AttributeOffsets::AttributeOffsets()
+PipelineLayout::AttributeOffsets::AttributeOffsets()
     : _stride(0)
 {
     std::fill_n(_offsets, Attribute::USAGE_COUNT, -1);
 }
 
-ShaderLayout::AttributeOffsets::AttributeOffsets(const ShaderLayout& shaderLayout)
+PipelineLayout::AttributeOffsets::AttributeOffsets(const PipelineLayout& shaderLayout)
     : AttributeOffsets()
 {
     const StreamLayout& stream = shaderLayout.streamLayouts().at(0);
@@ -56,17 +56,17 @@ ShaderLayout::AttributeOffsets::AttributeOffsets(const ShaderLayout& shaderLayou
         _stride = std::max(getAttributeEndOffset(*this, static_cast<Attribute::Usage>(i)), _stride);
 }
 
-uint32_t ShaderLayout::AttributeOffsets::stride() const
+uint32_t PipelineLayout::AttributeOffsets::stride() const
 {
     return _stride;
 }
 
-ShaderLayout::ShaderLayout()
+PipelineLayout::PipelineLayout()
     : _stream_layouts{{0, StreamLayout()}}, _color_attachment_count(0)
 {
 }
 
-void ShaderLayout::initialize(const PipelineBuildingContext& buildingContext)
+void PipelineLayout::initialize(const PipelineBuildingContext& buildingContext)
 {
     if(const ShaderPreprocessor* fragment = buildingContext.tryGetRenderStage(Enum::SHADER_STAGE_BIT_FRAGMENT))
         _color_attachment_count = fragment->_main_block->outArgumentCount() + (fragment->_main_block->hasReturnValue() ? 1 : 0);
@@ -78,22 +78,17 @@ void ShaderLayout::initialize(const PipelineBuildingContext& buildingContext)
     }
 }
 
-const Vector<sp<ShaderLayout::UBO>>& ShaderLayout::ubos() const
+const Vector<sp<PipelineLayout::UBO>>& PipelineLayout::ubos() const
 {
     return _ubos;
 }
 
-Vector<ShaderLayout::SSBO>& ShaderLayout::ssbos()
+const Vector<PipelineLayout::SSBO>& PipelineLayout::ssbos() const
 {
     return _ssbos;
 }
 
-const Vector<ShaderLayout::SSBO>& ShaderLayout::ssbos() const
-{
-    return _ssbos;
-}
-
-sp<RenderLayerSnapshot::BufferObject> ShaderLayout::takeBufferSnapshot(const RenderRequest& renderRequest, const bool isComputeStage) const
+sp<RenderLayerSnapshot::BufferObject> PipelineLayout::takeBufferSnapshot(const RenderRequest& renderRequest, const bool isComputeStage) const
 {
     Vector<RenderLayerSnapshot::UBOSnapshot> uboSnapshot;
     for(const sp<UBO>& i : _ubos)
@@ -108,44 +103,44 @@ sp<RenderLayerSnapshot::BufferObject> ShaderLayout::takeBufferSnapshot(const Ren
     return sp<RenderLayerSnapshot::BufferObject>::make(RenderLayerSnapshot::BufferObject{std::move(uboSnapshot), std::move(ssboSnapshot)});
 }
 
-const Map<uint32_t, ShaderLayout::StreamLayout>& ShaderLayout::streamLayouts() const
+const Map<uint32_t, PipelineLayout::StreamLayout>& PipelineLayout::streamLayouts() const
 {
     return _stream_layouts;
 }
 
-Map<uint32_t, ShaderLayout::StreamLayout>& ShaderLayout::streamLayouts()
+Map<uint32_t, PipelineLayout::StreamLayout>& PipelineLayout::streamLayouts()
 {
     return _stream_layouts;
 }
 
-const Table<String, ShaderLayout::DescriptorSet>& ShaderLayout::samplers() const
+const Table<String, PipelineLayout::DescriptorSet>& PipelineLayout::samplers() const
 {
     return _samplers;
 }
 
-const Table<String, ShaderLayout::DescriptorSet>& ShaderLayout::images() const
+const Table<String, PipelineLayout::DescriptorSet>& PipelineLayout::images() const
 {
     return _images;
 }
 
-uint32_t ShaderLayout::colorAttachmentCount() const
+uint32_t PipelineLayout::colorAttachmentCount() const
 {
     return _color_attachment_count;
 }
 
-void ShaderLayout::addAttribute(String name, Attribute attribute)
+void PipelineLayout::addAttribute(String name, Attribute attribute)
 {
     _stream_layouts[attribute.divisor()].addAttribute(std::move(name), std::move(attribute));
 }
 
-const ShaderLayout::StreamLayout& ShaderLayout::getStreamLayout(uint32_t divisor) const
+const PipelineLayout::StreamLayout& PipelineLayout::getStreamLayout(const uint32_t divisor) const
 {
     const auto iter = _stream_layouts.find(divisor);
     DCHECK(iter != _stream_layouts.end(), "PipelineInput has no stream(%d)", divisor);
     return iter->second;
 }
 
-Optional<const Attribute&> ShaderLayout::getAttribute(const String& name) const
+Optional<const Attribute&> PipelineLayout::getAttribute(const String& name) const
 {
     for(const auto& i : _stream_layouts)
         if(const Optional<const Attribute&> opt = i.second.getAttribute(name))
@@ -153,7 +148,7 @@ Optional<const Attribute&> ShaderLayout::getAttribute(const String& name) const
     return {};
 }
 
-sp<Uniform> ShaderLayout::getUniform(const String& name) const
+sp<Uniform> PipelineLayout::getUniform(const String& name) const
 {
     for(const sp<UBO>& i : _ubos)
         if(const auto iter = i->uniforms().find(name); iter != i->uniforms().end())
@@ -161,22 +156,22 @@ sp<Uniform> ShaderLayout::getUniform(const String& name) const
     return nullptr;
 }
 
-ShaderLayout::StreamLayout::StreamLayout()
+PipelineLayout::StreamLayout::StreamLayout()
     : _stride(0)
 {
 }
 
-uint32_t ShaderLayout::StreamLayout::stride() const
+uint32_t PipelineLayout::StreamLayout::stride() const
 {
     return _stride;
 }
 
-const Table<String, Attribute>& ShaderLayout::StreamLayout::attributes() const
+const Table<String, Attribute>& PipelineLayout::StreamLayout::attributes() const
 {
     return _attributes;
 }
 
-void ShaderLayout::StreamLayout::addAttribute(String name, Attribute attribute)
+void PipelineLayout::StreamLayout::addAttribute(String name, Attribute attribute)
 {
     DCHECK(!_attributes.has(name), "Attribute \"%s\" has been added already", name.c_str());
     attribute.setOffset(_stride);
@@ -184,7 +179,7 @@ void ShaderLayout::StreamLayout::addAttribute(String name, Attribute attribute)
     _attributes.push_back(std::move(name), std::move(attribute));
 }
 
-Optional<const Attribute&> ShaderLayout::StreamLayout::getAttribute(Attribute::Usage layoutType) const
+Optional<const Attribute&> PipelineLayout::StreamLayout::getAttribute(Attribute::Usage layoutType) const
 {
     DASSERT(layoutType != Attribute::USAGE_CUSTOM);
     for(const Attribute& i : _attributes.values())
@@ -193,35 +188,35 @@ Optional<const Attribute&> ShaderLayout::StreamLayout::getAttribute(Attribute::U
     return {};
 }
 
-Optional<const Attribute&> ShaderLayout::StreamLayout::getAttribute(const String& name) const
+Optional<const Attribute&> PipelineLayout::StreamLayout::getAttribute(const String& name) const
 {
     return _attributes.has(name) ? Optional<const Attribute&>(_attributes.at(name)) : Optional<const Attribute&>();
 }
 
-int32_t ShaderLayout::StreamLayout::getAttributeOffset(Attribute::Usage layoutType) const
+int32_t PipelineLayout::StreamLayout::getAttributeOffset(Attribute::Usage layoutType) const
 {
     const Optional<const Attribute&> attr = getAttribute(layoutType);
     return attr ? static_cast<int32_t>(attr->offset()) : -1;
 }
 
-int32_t ShaderLayout::StreamLayout::getAttributeOffset(const String& name) const
+int32_t PipelineLayout::StreamLayout::getAttributeOffset(const String& name) const
 {
     return _attributes.has(name) ? static_cast<int32_t>(_attributes.at(name).offset()) : -1;
 }
 
-void ShaderLayout::StreamLayout::align(uint32_t alignment)
+void PipelineLayout::StreamLayout::align(uint32_t alignment)
 {
-    uint32_t mod = _stride % alignment;
+    const uint32_t mod = _stride % alignment;
     if(mod != 0)
         _stride += (alignment - mod);
 }
 
-ShaderLayout::UBO::UBO(const uint32_t binding)
+PipelineLayout::UBO::UBO(const uint32_t binding)
     : _binding(binding)
 {
 }
 
-void ShaderLayout::UBO::doSnapshot(uint64_t timestamp, bool force) const
+void PipelineLayout::UBO::doSnapshot(uint64_t timestamp, bool force) const
 {
     uint8_t* buf = _buffer->buf();
     uint8_t* dirtyFlags = _dirty_flags->buf();
@@ -238,7 +233,7 @@ void ShaderLayout::UBO::doSnapshot(uint64_t timestamp, bool force) const
     }
 }
 
-RenderLayerSnapshot::UBOSnapshot ShaderLayout::UBO::snapshot(const RenderRequest& renderRequest) const
+RenderLayerSnapshot::UBOSnapshot PipelineLayout::UBO::snapshot(const RenderRequest& renderRequest) const
 {
     doSnapshot(renderRequest.timestamp(), false);
     RenderLayerSnapshot::UBOSnapshot ubo = {
@@ -250,27 +245,27 @@ RenderLayerSnapshot::UBOSnapshot ShaderLayout::UBO::snapshot(const RenderRequest
     return ubo;
 }
 
-uint32_t ShaderLayout::UBO::binding() const
+uint32_t PipelineLayout::UBO::binding() const
 {
     return _binding;
 }
 
-size_t ShaderLayout::UBO::size() const
+size_t PipelineLayout::UBO::size() const
 {
     return _buffer->length();
 }
 
-const Table<String, sp<Uniform>>& ShaderLayout::UBO::uniforms() const
+const Table<String, sp<Uniform>>& PipelineLayout::UBO::uniforms() const
 {
     return _uniforms;
 }
 
-const Vector<std::pair<uintptr_t, size_t>>& ShaderLayout::UBO::slots() const
+const Vector<std::pair<uintptr_t, size_t>>& PipelineLayout::UBO::slots() const
 {
     return _slots;
 }
 
-void ShaderLayout::UBO::initialize()
+void PipelineLayout::UBO::initialize()
 {
     size_t offset = 0;
     for(const auto& i : _uniforms.values())
@@ -288,17 +283,17 @@ void ShaderLayout::UBO::initialize()
     doSnapshot(0, true);
 }
 
-void ShaderLayout::UBO::addUniform(const sp<Uniform>& uniform)
+void PipelineLayout::UBO::addUniform(const sp<Uniform>& uniform)
 {
     _uniforms.push_back(uniform->name(), uniform);
 }
 
-ShaderLayout::SSBO::SSBO(Buffer buffer, const Binding binding)
+PipelineLayout::SSBO::SSBO(Buffer buffer, const Binding binding)
     : _buffer(std::move(buffer)), _binding(binding)
 {
 }
 
-uint32_t ShaderLayout::DescriptorSet::addStage(Enum::ShaderStageBit stage, uint32_t binding)
+uint32_t PipelineLayout::DescriptorSet::addStage(Enum::ShaderStageBit stage, uint32_t binding)
 {
     _stages.set(stage);
     if(_binding._location != -1)

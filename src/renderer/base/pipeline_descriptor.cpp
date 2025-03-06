@@ -3,7 +3,7 @@
 #include "core/util/string_convert.h"
 
 #include "renderer/base/graphics_context.h"
-#include "renderer/base/shader_layout.h"
+#include "renderer/base/pipeline_layout.h"
 #include "renderer/base/pipeline_configuration.h"
 
 namespace ark {
@@ -71,8 +71,8 @@ PipelineDescriptor::TraitConfigure toPipelineTraitMeta(const document& manifest)
 
 }
 
-PipelineDescriptor::PipelineDescriptor(Enum::RenderMode mode, Enum::DrawProcedure drawProcedure, Parameters parameters, sp<PipelineConfiguration> configuration)
-    : _mode(mode), _render_procedure(drawProcedure), _parameters(std::move(parameters)), _configuration(std::move(configuration)), _shader_layout(_configuration->shaderLayout()), _attributes(_shader_layout),
+PipelineDescriptor::PipelineDescriptor(const Enum::RenderMode mode, const Enum::DrawProcedure drawProcedure, Parameters parameters, sp<PipelineConfiguration> configuration)
+    : _mode(mode), _draw_procedure(drawProcedure), _parameters(std::move(parameters)), _configuration(std::move(configuration)), _layout(_configuration->pipelineLayout()), _attributes(_layout),
       _samplers(_configuration->makeBindingSamplers()), _images(_configuration->makeBindingImages())
 {
 }
@@ -84,7 +84,7 @@ Enum::RenderMode PipelineDescriptor::mode() const
 
 Enum::DrawProcedure PipelineDescriptor::drawProcedure() const
 {
-    return _render_procedure;
+    return _draw_procedure;
 }
 
 const Optional<Rect>& PipelineDescriptor::scissor() const
@@ -102,22 +102,22 @@ const sp<PipelineConfiguration>& PipelineDescriptor::configuration() const
     return _configuration;
 }
 
-const sp<ShaderLayout>& PipelineDescriptor::shaderLayout() const
+const sp<PipelineLayout>& PipelineDescriptor::shaderLayout() const
 {
-    return _shader_layout;
+    return _layout;
 }
 
-const ShaderLayout::AttributeOffsets& PipelineDescriptor::attributes() const
+const PipelineLayout::AttributeOffsets& PipelineDescriptor::attributes() const
 {
     return _attributes;
 }
 
-const Vector<std::pair<sp<Texture>, ShaderLayout::DescriptorSet>>& PipelineDescriptor::samplers() const
+const Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>>& PipelineDescriptor::samplers() const
 {
     return _samplers;
 }
 
-const Vector<std::pair<sp<Texture>, ShaderLayout::DescriptorSet>>& PipelineDescriptor::images() const
+const Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>>& PipelineDescriptor::images() const
 {
     return _images;
 }
@@ -131,7 +131,7 @@ void PipelineDescriptor::bindSampler(sp<Texture> texture, const uint32_t name)
 
 bool PipelineDescriptor::hasDivisors() const
 {
-    return _shader_layout->streamLayouts().size() > 1;
+    return _layout->streamLayouts().size() > 1;
 }
 
 bool PipelineDescriptor::hasTrait(const TraitType traitType) const

@@ -118,7 +118,7 @@ struct GLPipeline::Stub {
 
         uint32_t binding = 0;
         const Vector<String>& samplerNames = pipelineBindings.shaderLayout()->samplers().keys();
-        const Vector<std::pair<sp<Texture>, ShaderLayout::DescriptorSet>>& samplers = pipelineBindings.pipelineDescriptor()->samplers();
+        const Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>>& samplers = pipelineBindings.pipelineDescriptor()->samplers();
         DASSERT(samplerNames.size() == samplers.size());
         for(size_t i = 0; i < samplerNames.size(); ++i)
         {
@@ -131,7 +131,7 @@ struct GLPipeline::Stub {
         }
 
         const Vector<String>& imageNames = pipelineBindings.shaderLayout()->images().keys();
-        const Vector<std::pair<sp<Texture>, ShaderLayout::DescriptorSet>>& images = pipelineBindings.pipelineDescriptor()->images();
+        const Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>>& images = pipelineBindings.pipelineDescriptor()->images();
         for(size_t i = 0; i < images.size(); ++i)
             if(const sp<Texture>& image = images.at(i).first)
             {
@@ -140,7 +140,7 @@ struct GLPipeline::Stub {
             }
     }
 
-    void bindUBO(const RenderLayerSnapshot::UBOSnapshot& uboSnapshot, const sp<ShaderLayout::UBO>& ubo)
+    void bindUBO(const RenderLayerSnapshot::UBOSnapshot& uboSnapshot, const sp<PipelineLayout::UBO>& ubo)
     {
         const Vector<sp<Uniform>>& uniforms = ubo->uniforms().values();
         for(size_t i = 0; i < uniforms.size(); ++i)
@@ -247,10 +247,10 @@ struct GLPipeline::Stub {
         return glGetAttribLocation(_id, name.c_str());
     }
 
-    void bindUBOSnapshots(const Vector<RenderLayerSnapshot::UBOSnapshot>& uboSnapshots, const ShaderLayout& shaderLayout)
+    void bindUBOSnapshots(const Vector<RenderLayerSnapshot::UBOSnapshot>& uboSnapshots, const PipelineLayout& shaderLayout)
     {
         size_t binding = 0;
-        for(const sp<ShaderLayout::UBO>& ubo : shaderLayout.ubos())
+        for(const sp<PipelineLayout::UBO>& ubo : shaderLayout.ubos())
             if(shouldBeBinded(ubo->_stages))
             {
                 DCHECK(binding < uboSnapshots.size(), "UBO Snapshot and UBO Layout mismatch: %d vs %d", uboSnapshots.size(), shaderLayout.ubos().size());
@@ -804,7 +804,7 @@ void GLPipeline::compute(GraphicsContext& graphicsContext, const ComputeContext&
     _pipeline_operation->compute(graphicsContext, computeContext);
 }
 
-void GLPipeline::bindBuffer(GraphicsContext& graphicsContext, const ShaderLayout& shaderLayout, const Map<uint32_t, Buffer>& divisors)
+void GLPipeline::bindBuffer(GraphicsContext& graphicsContext, const PipelineLayout& shaderLayout, const Map<uint32_t, Buffer>& divisors)
 {
     DCHECK(id(), "GLProgram unprepared");
     bindBuffer(graphicsContext, shaderLayout, 0);
@@ -828,9 +828,9 @@ const GLPipeline::GLUniform& GLPipeline::getUniform(const String& name) const
     return _stub->getUniform(name);
 }
 
-void GLPipeline::bindBuffer(GraphicsContext& /*graphicsContext*/, const ShaderLayout& shaderLayout, const uint32_t divisor) const
+void GLPipeline::bindBuffer(GraphicsContext& /*graphicsContext*/, const PipelineLayout& shaderLayout, const uint32_t divisor) const
 {
-    const ShaderLayout::StreamLayout& stream = shaderLayout.getStreamLayout(divisor);
+    const PipelineLayout::StreamLayout& stream = shaderLayout.getStreamLayout(divisor);
     for(const Attribute& i : stream.attributes().values())
     {
         const GLAttribute& glAttribute = _stub->getAttribute(i.name());

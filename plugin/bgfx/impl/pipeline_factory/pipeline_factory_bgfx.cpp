@@ -10,7 +10,7 @@
 #include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/pipeline_descriptor.h"
 #include "renderer/base/pipeline_configuration.h"
-#include "renderer/base/shader_layout.h"
+#include "renderer/base/pipeline_layout.h"
 #include "renderer/inf/pipeline.h"
 #include "renderer/util/render_util.h"
 
@@ -181,7 +181,7 @@ struct alignas(1) BgfxShaderAttributeChunk {
 
 #pragma pack(pop)
 
-::bgfx::ShaderHandle createShader(const ShaderLayout& shaderLayout, const String& source, const Enum::ShaderStageBit stage)
+::bgfx::ShaderHandle createShader(const PipelineLayout& shaderLayout, const String& source, const Enum::ShaderStageBit stage)
 {
     const char bgfxChunkMagic[4] = {toBgfxShaderTypeMagic(stage), 'S', 'H', 11};
     const Vector<uint32_t> binaries = RenderUtil::compileSPIR(source, stage, Enum::RENDERING_BACKEND_BIT_VULKAN);
@@ -195,7 +195,7 @@ struct alignas(1) BgfxShaderAttributeChunk {
     uint32_t uboSize = 0;
     uint32_t ssboSize = 0;
     uint32_t dynamicDataSize = 0;
-    for(const ShaderLayout::UBO& i : shaderLayout.ubos())
+    for(const PipelineLayout::UBO& i : shaderLayout.ubos())
         if(i._stages.has(stage))
             for(const auto& [name, uniform] : i.uniforms())
             {
@@ -226,7 +226,7 @@ struct alignas(1) BgfxShaderAttributeChunk {
             uniformChunks.emplace_back(i, uniformChunk);
         }
 
-    for(const ShaderLayout::SSBO& i : shaderLayout.ssbos())
+    for(const PipelineLayout::SSBO& i : shaderLayout.ssbos())
         ssboSize += i._buffer.size();
 
     uint32_t customId = 0;
@@ -260,7 +260,7 @@ struct alignas(1) BgfxShaderAttributeChunk {
 }
 
 struct DrawPipelineBgfx final : ResourceBase<::bgfx::ProgramHandle, Pipeline> {
-    DrawPipelineBgfx(Enum::DrawProcedure drawProcedure, Enum::RenderMode drawMode, const sp<ShaderLayout>& pipelineInput, String vertexShader, String fragmentShader)
+    DrawPipelineBgfx(Enum::DrawProcedure drawProcedure, Enum::RenderMode drawMode, const sp<PipelineLayout>& pipelineInput, String vertexShader, String fragmentShader)
         : _draw_procedure(drawProcedure), _draw_mode(drawMode), _pipeline_input(pipelineInput), _vertex_shader(std::move(vertexShader)), _fragment_shader(std::move(fragmentShader)) {
     }
 
@@ -337,7 +337,7 @@ struct DrawPipelineBgfx final : ResourceBase<::bgfx::ProgramHandle, Pipeline> {
                 ::bgfx::InstanceDataBuffer idb;
                 for(const auto& [divisor, buffer] : param._divided_buffer_snapshots)
                 {
-                    const ShaderLayout::StreamLayout& sl = drawingContext._bindings->shaderLayout()->getStreamLayout(divisor);
+                    const PipelineLayout::StreamLayout& sl = drawingContext._bindings->shaderLayout()->getStreamLayout(divisor);
                     const uint32_t availInstanceCount = ::bgfx::getAvailInstanceDataBuffer(instanceCount, sl.stride());
                     ::bgfx::allocInstanceDataBuffer(&idb, availInstanceCount, sl.stride());
                     if(buffer._uploader)
@@ -378,7 +378,7 @@ struct DrawPipelineBgfx final : ResourceBase<::bgfx::ProgramHandle, Pipeline> {
 
     Enum::DrawProcedure _draw_procedure;
     Enum::RenderMode _draw_mode;
-    sp<ShaderLayout> _pipeline_input;
+    sp<PipelineLayout> _pipeline_input;
     String _vertex_shader;
     String _fragment_shader;
 

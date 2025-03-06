@@ -28,7 +28,7 @@ public:
     typedef Vector<sp<Builder<Snippet>>> SnippetManifest;
 
 public:
-    Shader(sp<Camera> camera, sp<PipelineFactory> pipelineFactory, sp<RenderController> renderController, sp<PipelineConfiguration> pipelineLayout, PipelineDescriptor::Parameters parameters);
+    Shader(sp<Camera> camera, sp<PipelineFactory> pipelineFactory, sp<RenderController> renderController, sp<PipelineConfiguration> pipelineConfiguration, PipelineDescriptor::Parameters parameters);
 
     static sp<Builder<Shader>> fromDocument(BeanFactory& factory, const document& manifest, const String& defVertex = "shaders/default.vert", const String& defFragment = "shaders/texture.frag", const sp<Camera>& defaultCamera = nullptr);
 
@@ -40,8 +40,8 @@ public:
     const sp<RenderController>& renderController() const;
 
     void setCamera(const Camera& camera);
-    const sp<ShaderLayout>& layout() const;
-    const sp<PipelineConfiguration>& pipelineLayout() const;
+    const sp<PipelineLayout>& layout() const;
+    const sp<PipelineConfiguration>& pipelineConfiguration() const;
 
     const PipelineDescriptor::Parameters& descriptorParams() const;
 
@@ -85,8 +85,8 @@ private:
 
     sp<PipelineFactory> _pipeline_factory;
     sp<RenderController> _render_controller;
-    sp<PipelineConfiguration> _pipeline_layout;
-    sp<ShaderLayout> _layout;
+    sp<PipelineConfiguration> _pipeline_configuration;
+    sp<PipelineLayout> _layout;
 
     PipelineDescriptor::Parameters _descriptor_params;
 };

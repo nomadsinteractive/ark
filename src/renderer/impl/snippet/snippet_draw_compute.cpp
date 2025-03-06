@@ -50,7 +50,7 @@ private:
 
 }
 
-SnippetDrawCompute::SnippetDrawCompute(sp<ShaderLayout> shaderLayout, const std::array<uint32_t, 3> numWorkGroups, const bool atPostDraw)
+SnippetDrawCompute::SnippetDrawCompute(sp<PipelineLayout> shaderLayout, const std::array<uint32_t, 3> numWorkGroups, const bool atPostDraw)
     : _shader_layout(std::move(shaderLayout)), _num_work_groups(numWorkGroups), _at_post_draw(atPostDraw)
 {
 }

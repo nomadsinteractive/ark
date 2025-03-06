@@ -5,7 +5,7 @@
 
 namespace ark {
 
-const ShaderLayout& LayerContextSnapshot::pipelineInput() const
+const PipelineLayout& LayerContextSnapshot::pipelineInput() const
 {
     return _render_layer._stub->_pipeline_bindings->shaderLayout();
 }

@@ -5,7 +5,7 @@
 
 #include "graphics/forwarding.h"
 
-#include "renderer/base/shader_layout.h"
+#include "renderer/base/pipeline_layout.h"
 #include "renderer/base/shader_preprocessor.h"
 #include "renderer/base/texture.h"
 

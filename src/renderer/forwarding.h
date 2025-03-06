@@ -29,7 +29,7 @@ class Pipeline;
 class PipelineBindings;
 class PipelineContext;
 class PipelineFactory;
-class ShaderLayout;
+class PipelineLayout;
 class PipelineDescriptor;
 class PipelineBuildingContext;
 class PipelineConfiguration;

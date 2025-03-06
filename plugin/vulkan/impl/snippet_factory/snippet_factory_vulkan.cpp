@@ -5,7 +5,7 @@
 #include "renderer/base/render_controller.h"
 #include "renderer/base/pipeline_building_context.h"
 #include "renderer/base/pipeline_configuration.h"
-#include "renderer/base/shader_layout.h"
+#include "renderer/base/pipeline_layout.h"
 
 #include "renderer/inf/snippet.h"
 #include "renderer/util/render_util.h"
@@ -25,7 +25,7 @@ public:
             RenderUtil::setLayoutDescriptor(RenderUtil::setupLayoutLocation(context, firstStage._declaration_ins), sLocation, 0);
         }
 
-        const ShaderLayout& shaderLayout = pipelineLayout.shaderLayout();
+        const PipelineLayout& shaderLayout = pipelineLayout.pipelineLayout();
         if(ShaderPreprocessor* vertex = context.tryGetRenderStage(Enum::SHADER_STAGE_BIT_VERTEX))
         {
             RenderUtil::setLayoutDescriptor(vertex->_declaration_images, "binding", static_cast<uint32_t>(shaderLayout.ssbos().size() + shaderLayout.samplers().size()));

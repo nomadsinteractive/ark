@@ -11,7 +11,7 @@
 #include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/pipeline_descriptor.h"
 #include "renderer/base/pipeline_configuration.h"
-#include "renderer/base/shader_layout.h"
+#include "renderer/base/pipeline_layout.h"
 #include "renderer/inf/pipeline.h"
 #include "renderer/util/render_util.h"
 
@@ -22,7 +22,7 @@ namespace ark::plugin::sdl3 {
 
 namespace {
 
-SDL_GPUShader* createGraphicsShader(SDL_GPUDevice* device, const ShaderLayout& shaderLayout, const StringView source, const Enum::ShaderStageBit stageBit)
+SDL_GPUShader* createGraphicsShader(SDL_GPUDevice* device, const PipelineLayout& shaderLayout, const StringView source, const Enum::ShaderStageBit stageBit)
 {
 	const SDL_GPUShaderFormat backendFormats = SDL_ShaderCross_GetSPIRVShaderFormats();
 	const char* entrypoint = nullptr;
@@ -42,22 +42,22 @@ SDL_GPUShader* createGraphicsShader(SDL_GPUDevice* device, const ShaderLayout& s
     const void* bytecode = binaries.data();
 
     Uint32 samplerCount = 0;
-    for(const ShaderLayout::DescriptorSet& i : shaderLayout.samplers().values())
+    for(const PipelineLayout::DescriptorSet& i : shaderLayout.samplers().values())
         if(i._stages.has(stageBit))
             ++ samplerCount;
 
     Uint32 storageTextureCount = 0;
-    for(const ShaderLayout::DescriptorSet& i : shaderLayout.images().values())
+    for(const PipelineLayout::DescriptorSet& i : shaderLayout.images().values())
         if(i._stages.has(stageBit))
             ++ storageTextureCount;
 
     Uint32 uniformBufferCount = 0;
-    for(const ShaderLayout::UBO& i : shaderLayout.ubos())
+    for(const PipelineLayout::UBO& i : shaderLayout.ubos())
         if(i._stages.has(stageBit))
             ++ uniformBufferCount;
 
     Uint32 storageBufferCount = 0;
-    for(const ShaderLayout::SSBO& i : shaderLayout.ssbos())
+    for(const PipelineLayout::SSBO& i : shaderLayout.ssbos())
         if(i._stages.has(stageBit))
             ++ storageBufferCount;
 
@@ -203,10 +203,10 @@ SDL_GPUPrimitiveType toPrimitiveType(const Enum::RenderMode drawMode)
     return SDL_GPU_PRIMITIVETYPE_TRIANGLELIST;
 }
 
-void bindUBOSnapshots(SDL_GPUCommandBuffer* cmdbuf, const Vector<RenderLayerSnapshot::UBOSnapshot>& uboSnapshots, const ShaderLayout& shaderLayout, const ShaderStageSet stages)
+void bindUBOSnapshots(SDL_GPUCommandBuffer* cmdbuf, const Vector<RenderLayerSnapshot::UBOSnapshot>& uboSnapshots, const PipelineLayout& shaderLayout, const ShaderStageSet stages)
 {
     size_t binding = 0;
-    for(const sp<ShaderLayout::UBO>& ubo : shaderLayout.ubos())
+    for(const sp<PipelineLayout::UBO>& ubo : shaderLayout.ubos())
         if(const ShaderStageSet uboStages = ubo->_stages; uboStages & stages)
         {
             DCHECK(binding < uboSnapshots.size(), "UBO Snapshot and UBO Layout mismatch: %d vs %d", uboSnapshots.size(), shaderLayout.ubos().size());
@@ -270,7 +270,7 @@ public:
             const ContextSDL3_GPU& context = ensureContext(graphicsContext);
             SDL_GPUDevice* gpuDevice = context._gpu_gevice;
 
-            const ShaderLayout& shaderLayout = _pipeline_descriptor.shaderLayout();
+            const PipelineLayout& shaderLayout = _pipeline_descriptor.shaderLayout();
             SDL_GPUShader* vertexShader = createGraphicsShader(gpuDevice, shaderLayout, _vertex_shader, Enum::SHADER_STAGE_BIT_VERTEX);
             SDL_GPUShader* fragmentShader = createGraphicsShader(gpuDevice, shaderLayout, _fragment_shader, Enum::SHADER_STAGE_BIT_FRAGMENT);
 
@@ -495,24 +495,24 @@ public:
                 nullptr
             };
 
-            const ShaderLayout& shaderLayout = _pipeline_descriptor.shaderLayout();
+            const PipelineLayout& shaderLayout = _pipeline_descriptor.shaderLayout();
             Uint32 samplerCount = 0;
-            for(const ShaderLayout::DescriptorSet& i : shaderLayout.samplers().values())
+            for(const PipelineLayout::DescriptorSet& i : shaderLayout.samplers().values())
                 if(i._stages.has(Enum::SHADER_STAGE_BIT_COMPUTE))
                     ++ samplerCount;
 
             Uint32 storageTextureCount = 0;
-            for(const ShaderLayout::DescriptorSet& i : shaderLayout.images().values())
+            for(const PipelineLayout::DescriptorSet& i : shaderLayout.images().values())
                 if(i._stages.has(Enum::SHADER_STAGE_BIT_COMPUTE))
                     ++ storageTextureCount;
 
             Uint32 uniformBufferCount = 0;
-            for(const ShaderLayout::UBO& i : shaderLayout.ubos())
+            for(const PipelineLayout::UBO& i : shaderLayout.ubos())
                 if(i._stages.has(Enum::SHADER_STAGE_BIT_COMPUTE))
                     ++ uniformBufferCount;
 
             Uint32 storageBufferCount = 0;
-            for(const ShaderLayout::SSBO& i : shaderLayout.ssbos())
+            for(const PipelineLayout::SSBO& i : shaderLayout.ssbos())
                 if(i._stages.has(Enum::SHADER_STAGE_BIT_COMPUTE))
                     ++ storageBufferCount;
 

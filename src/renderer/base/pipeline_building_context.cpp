@@ -96,7 +96,7 @@ Attribute makePredefinedAttribute(const String& name, const String& type)
 }
 
 PipelineBuildingContext::PipelineBuildingContext()
-    : _shader_layout(sp<ShaderLayout>::make())
+    : _pipeline_layout(sp<PipelineLayout>::make())
 {
 }
 
@@ -165,7 +165,7 @@ void PipelineBuildingContext::initializeAttributes()
         }
 
     const uint32_t alignment = Ark::instance().renderController()->renderEngine()->rendererFactory()->features()._attribute_alignment;
-    for(auto &[k, v] : _shader_layout->streamLayouts())
+    for(auto &[k, v] : _pipeline_layout->streamLayouts())
         v.align(k == 0 ? 4 : alignment);
 
     //TODO: link all outputs to next stage's inputs
@@ -194,20 +194,19 @@ void PipelineBuildingContext::initializeAttributes()
 
 void PipelineBuildingContext::initializeSSBO() const
 {
-    Table<String, ShaderLayout::SSBO> sobs;
+    Table<String, PipelineLayout::SSBO> sobs;
     for(const ShaderPreprocessor* preprocessor : _stages)
         for(const auto& [name, bindings] : preprocessor->_ssbos)
         {
             if(!sobs.has(name))
             {
                 CHECK(_ssbos.has(name), "SSBO \"%s\" does not exist", name.c_str());
-                sobs[name] = ShaderLayout::SSBO(_ssbos.at(name), bindings);
+                sobs[name] = PipelineLayout::SSBO(_ssbos.at(name), bindings);
             }
             sobs[name]._stages.set(preprocessor->_shader_stage);
         }
 
-    for(auto& i : sobs.values())
-        _shader_layout->ssbos().push_back(std::move(i));
+    _pipeline_layout->_ssbos = std::move(sobs.values());
 }
 
 void PipelineBuildingContext::tryBindCamera(const ShaderPreprocessor& shaderPreprocessor, const Camera& camera)
@@ -248,9 +247,9 @@ void PipelineBuildingContext::initializeUniforms()
             for(const String& i : uniformNameSet)
                 hash += hash * 101 + i.hash();
 
-            sp<ShaderLayout::UBO>& ubo = _ubos[hash];
+            sp<PipelineLayout::UBO>& ubo = _ubos[hash];
             if(ubo == nullptr)
-                ubo = sp<ShaderLayout::UBO>::make(binding++);
+                ubo = sp<PipelineLayout::UBO>::make(binding++);
             ubo->_stages.set(stage->_shader_stage);
             for(const String& i : uniformNames)
                 ubo->addUniform(_uniforms.at(i));
@@ -272,11 +271,11 @@ const op<ShaderPreprocessor>& PipelineBuildingContext::computingStage() const
     return _computing_stage;
 }
 
-void PipelineBuildingContext::addAttribute(String name, String type, uint32_t divisor)
+void PipelineBuildingContext::addAttribute(String name, String type, const uint32_t divisor)
 {
     //TODO: add attribute to specified stage
-    const Attribute& attr = addPredefinedAttribute(name, type, divisor, Enum::SHADER_STAGE_BIT_VERTEX);
-    _shader_layout->addAttribute(std::move(name), attr);
+    const Attribute& attr = addPredefinedAttribute(name, std::move(type), divisor, Enum::SHADER_STAGE_BIT_VERTEX);
+    _pipeline_layout->addAttribute(std::move(name), attr);
 }
 
 void PipelineBuildingContext::addUniform(String name, Uniform::Type type, uint32_t length, sp<Uploader> input)
@@ -443,8 +442,8 @@ void PipelineBuildingContext::initializeStages(const Camera& camera)
         tryBindCamera(*vertex, camera);
 
     uint32_t binding = 0;
-    Table<String, ShaderLayout::DescriptorSet>& samplers = _shader_layout->_samplers;
-    Table<String, ShaderLayout::DescriptorSet>& images = _shader_layout->_images;
+    Table<String, PipelineLayout::DescriptorSet>& samplers = _pipeline_layout->_samplers;
+    Table<String, PipelineLayout::DescriptorSet>& images = _pipeline_layout->_images;
     {
         if(const ShaderPreprocessor* vertex = tryGetRenderStage(Enum::SHADER_STAGE_BIT_VERTEX))
         {

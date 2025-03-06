@@ -55,7 +55,7 @@ public:
 }
 
 PipelineConfiguration::PipelineConfiguration(sp<PipelineBuildingContext> buildingContext)
-    : _building_context(std::move(buildingContext)), _shader_layout(_building_context->_shader_layout), _predefined_samplers(std::move(_building_context->_samplers)), _predefined_images(std::move(_building_context->_images)), _definitions(_building_context->toDefinitions())
+    : _building_context(std::move(buildingContext)), _pipeline_layout(_building_context->_pipeline_layout), _predefined_samplers(std::move(_building_context->_samplers)), _predefined_images(std::move(_building_context->_images)), _definitions(_building_context->toDefinitions())
 {
 }
 
@@ -78,9 +78,9 @@ void PipelineConfiguration::preCompile(GraphicsContext& graphicsContext)
     }
 }
 
-const sp<ShaderLayout>& PipelineConfiguration::shaderLayout() const
+const sp<PipelineLayout>& PipelineConfiguration::pipelineLayout() const
 {
-    return _shader_layout;
+    return _pipeline_layout;
 }
 
 Map<Enum::ShaderStageBit, ShaderPreprocessor::Stage> PipelineConfiguration::getPreprocessedStages(const RenderEngineContext& renderEngineContext) const
@@ -105,7 +105,7 @@ void PipelineConfiguration::initialize(const Shader& shader)
     _snippet = createCoreSnippet(std::move(_snippet));
     _snippet->preInitialize(_building_context);
     _building_context->initialize(shader.camera());
-    _shader_layout->initialize(_building_context);
+    _pipeline_layout->initialize(_building_context);
 
     if(computeSnippetWrapper)
     {
@@ -126,29 +126,29 @@ void PipelineConfiguration::initialize(const Shader& shader)
     }
 }
 
-Vector<std::pair<sp<Texture>, ShaderLayout::DescriptorSet>> PipelineConfiguration::makeBindingSamplers() const
+Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>> PipelineConfiguration::makeBindingSamplers() const
 {
-    const ShaderLayout& shaderLayout = _shader_layout;
-    CHECK_WARN(shaderLayout._samplers.size() >= _predefined_samplers.size(), "Predefined samplers(%d) is more than samplers(%d) in PipelineLayout", _predefined_samplers.size(), shaderLayout._samplers.size());
+    const PipelineLayout& pipelineLayout = _pipeline_layout;
+    CHECK_WARN(pipelineLayout._samplers.size() >= _predefined_samplers.size(), "Predefined samplers(%d) is more than samplers(%d) in PipelineLayout", _predefined_samplers.size(), pipelineLayout._samplers.size());
 
-    Vector<std::pair<sp<Texture>, ShaderLayout::DescriptorSet>> samplers;
-    for(size_t i = 0; i < shaderLayout._samplers.size(); ++i)
+    Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>> samplers;
+    for(size_t i = 0; i < pipelineLayout._samplers.size(); ++i)
     {
-        const String& name = shaderLayout._samplers.keys().at(i);
+        const String& name = pipelineLayout._samplers.keys().at(i);
         const auto iter = _predefined_samplers.find(name);
-        samplers.emplace_back(iter != _predefined_samplers.end() ? iter->second : (i < _predefined_samplers.size() ? _predefined_samplers.values().at(i) : nullptr), shaderLayout._samplers.values().at(i));
+        samplers.emplace_back(iter != _predefined_samplers.end() ? iter->second : (i < _predefined_samplers.size() ? _predefined_samplers.values().at(i) : nullptr), pipelineLayout._samplers.values().at(i));
     }
     return samplers;
 }
 
-Vector<std::pair<sp<Texture>, ShaderLayout::DescriptorSet>> PipelineConfiguration::makeBindingImages() const
+Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>> PipelineConfiguration::makeBindingImages() const
 {
-    const ShaderLayout& shaderLayout = _shader_layout;
-    DASSERT(_predefined_images.size() == shaderLayout._images.size());
+    const PipelineLayout& pipelineLayout = _pipeline_layout;
+    DASSERT(_predefined_images.size() == pipelineLayout._images.size());
 
-    Vector<std::pair<sp<Texture>, ShaderLayout::DescriptorSet>> bindingImages;
-    for(size_t i = 0; i < shaderLayout._images.size(); ++i)
-        bindingImages.emplace_back(_predefined_images.values().at(i), shaderLayout._images.values().at(i));
+    Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>> bindingImages;
+    for(size_t i = 0; i < pipelineLayout._images.size(); ++i)
+        bindingImages.emplace_back(_predefined_images.values().at(i), pipelineLayout._images.values().at(i));
     return bindingImages;
 }
 

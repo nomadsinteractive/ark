@@ -5,7 +5,7 @@
 #include "core/collection/table.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/base/shader_layout.h"
+#include "renderer/base/pipeline_layout.h"
 #include "renderer/base/render_engine.h"
 #include "renderer/base/uniform.h"
 
@@ -156,8 +156,8 @@ public:
 
     sp<Uniform> makeUniformInput(String name, Uniform::Type type) const;
 
-    bool hasUBO(const ShaderLayout::UBO& ubo) const;
-    void declareUBOStruct(const ShaderLayout& shaderLayout, int32_t spaceSet = -1);
+    bool hasUBO(const PipelineLayout::UBO& ubo) const;
+    void declareUBOStruct(const PipelineLayout& shaderLayout, int32_t spaceSet = -1);
 
     String outputName() const;
 
@@ -171,7 +171,7 @@ private:
     sp<String> addUniform(const String& type, const String& name, uint32_t length, String declaration);
     uint32_t getUniformSize(Uniform::Type type, const String& declaredType) const;
 
-    void insertUBOStruct(const ShaderLayout::UBO& ubo, int32_t spaceSet);
+    void insertUBOStruct(const PipelineLayout::UBO& ubo, int32_t spaceSet);
 
     void linkParameters(const Vector<Parameter>& parameters, const ShaderPreprocessor& preStage, std::set<String>& passThroughVars);
 
@@ -188,7 +188,7 @@ private:
 
     friend class PipelineBuildingContext;
     friend class PipelineConfiguration;
-    friend class ShaderLayout;
+    friend class PipelineLayout;
 
 public:
     document _manifest;
@@ -210,7 +210,7 @@ public:
     Vector<Parameter> _predefined_parameters;
     Vector<ResultModifer> _result_modifiers;
 
-    Map<String, ShaderLayout::Binding> _ssbos;
+    Map<String, PipelineLayout::Binding> _ssbos;
 
     Optional<std::array<uint32_t, 3>> _compute_local_sizes;
 

@@ -9,7 +9,7 @@
 #include "graphics/base/layer_context_snapshot.h"
 #include "graphics/util/renderable_type.h"
 
-#include "renderer/base/shader_layout.h"
+#include "renderer/base/pipeline_layout.h"
 #include "renderer/base/shader.h"
 
 namespace ark {
@@ -112,7 +112,7 @@ bool LayerContext::processNewCreated()
     return true;
 }
 
-LayerContextSnapshot LayerContext::snapshot(RenderLayer renderLayer, const RenderRequest& renderRequest, const ShaderLayout& pipelineInput)
+LayerContextSnapshot LayerContext::snapshot(RenderLayer renderLayer, const RenderRequest& renderRequest, const PipelineLayout& pipelineInput)
 {
     const bool dirty = UpdatableUtil::update(renderRequest.timestamp(), _position, _visible, _discarded, _varyings);
     if(!_varyings)

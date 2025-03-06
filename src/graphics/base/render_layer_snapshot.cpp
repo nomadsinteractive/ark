@@ -104,7 +104,7 @@ DrawingContext RenderLayerSnapshot::toDrawingContext(Buffer::Snapshot vertices, 
 
 bool RenderLayerSnapshot::doAddLayerContext(const RenderRequest& renderRequest, LayerContext& layerContext)
 {
-    const ShaderLayout& shaderLayout = _stub->_shader->layout();
+    const PipelineLayout& shaderLayout = _stub->_shader->layout();
 
     _layer_context_snapshots.push_back(layerContext.snapshot(RenderLayer(_stub), renderRequest, shaderLayout));
     const LayerContextSnapshot& layerSnapshot = _layer_context_snapshots.back();

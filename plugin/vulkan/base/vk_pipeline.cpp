@@ -8,7 +8,7 @@
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/pipeline_configuration.h"
-#include "renderer/base/shader_layout.h"
+#include "renderer/base/pipeline_layout.h"
 #include "renderer/base/render_engine_context.h"
 #include "renderer/base/recycler.h"
 #include "renderer/base/pipeline_bindings.h"
@@ -239,7 +239,7 @@ VkPipelineColorBlendAttachmentState makeColorBlendAttachmentState(const Pipeline
     return cbaState;
 }
 
-VertexLayout setupVertexLayout(const ShaderLayout& shaderLayout)
+VertexLayout setupVertexLayout(const PipelineLayout& shaderLayout)
 {
     uint32_t location = 0;
     VertexLayout vertexLayout;
@@ -376,17 +376,17 @@ void VKPipeline::setupDescriptorSetLayout(GraphicsContext& graphicsContext, cons
 {
     const sp<VKDevice>& device = _renderer->device();
 
-    const ShaderLayout& shaderLayout = pipelineDescriptor.shaderLayout();
+    const PipelineLayout& shaderLayout = pipelineDescriptor.shaderLayout();
     Vector<VkDescriptorSetLayoutBinding> setLayoutBindings;
     Vector<VkDescriptorSetLayoutBinding> setLayoutBindingsUBO;
-    for(const sp<ShaderLayout::UBO>& i : shaderLayout.ubos())
+    for(const sp<PipelineLayout::UBO>& i : shaderLayout.ubos())
         if(shouldStageNeedBinding(i->_stages))
         {
             const VkShaderStageFlags stages = i->_stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, Enum::SHADER_STAGE_BIT_COUNT);
             setLayoutBindingsUBO.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, stages, i->binding()));
         }
 
-    for(const ShaderLayout::SSBO& i : shaderLayout.ssbos())
+    for(const PipelineLayout::SSBO& i : shaderLayout.ssbos())
         if(shouldStageNeedBinding(i._stages))
         {
             const VkShaderStageFlags stages = i._stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, Enum::SHADER_STAGE_BIT_COUNT);
@@ -424,7 +424,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
     Vector<VkWriteDescriptorSet> writeDescriptorSets;
 
     _ubos.clear();
-    for(const sp<ShaderLayout::UBO>& i : pipelineDescriptor.shaderLayout()->ubos())
+    for(const sp<PipelineLayout::UBO>& i : pipelineDescriptor.shaderLayout()->ubos())
     {
         if(shouldStageNeedBinding(i->_stages))
         {
@@ -440,7 +440,7 @@ void VKPipeline::setupDescriptorSet(GraphicsContext& graphicsContext, const Pipe
     }
 
     uint32_t binding = 0;
-    for(const ShaderLayout::SSBO& i : pipelineDescriptor.shaderLayout()->ssbos())
+    for(const PipelineLayout::SSBO& i : pipelineDescriptor.shaderLayout()->ssbos())
     {
         binding = std::max<uint32_t>(binding, i._binding._location);
         if(shouldStageNeedBinding(i._stages))
@@ -610,7 +610,7 @@ void VKPipeline::buildComputeCommandBuffer(GraphicsContext& graphicsContext, con
 sp<VKDescriptorPool> VKPipeline::makeDescriptorPool() const
 {
     Map<VkDescriptorType, uint32_t> poolSizes;
-    const ShaderLayout& shaderLayout = _pipeline_descriptor->shaderLayout();
+    const PipelineLayout& shaderLayout = _pipeline_descriptor->shaderLayout();
     if(!shaderLayout.ubos().empty())
         poolSizes[VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER] = static_cast<uint32_t>(shaderLayout.ubos().size());
     if(!shaderLayout.ssbos().empty())

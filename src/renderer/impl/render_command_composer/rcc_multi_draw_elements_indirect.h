@@ -10,7 +10,7 @@
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/model_bundle.h"
 #include "renderer/base/model.h"
-#include "renderer/base/shader_layout.h"
+#include "renderer/base/pipeline_layout.h"
 #include "renderer/inf/drawing_context_composer.h"
 
 

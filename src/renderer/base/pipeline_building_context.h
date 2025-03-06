@@ -40,7 +40,7 @@ public:
         int32_t _binding;
     };
 
-    sp<ShaderLayout> _shader_layout;
+    sp<PipelineLayout> _pipeline_layout;
 
     Map<String, Attribute> _attributes;
     Map<String, sp<StringVar>> _definitions;
@@ -49,7 +49,7 @@ public:
     Table<String, sp<Texture>> _samplers;
     Table<String, sp<Texture>> _images;
     Table<String, Buffer> _ssbos;
-    Map<HashId, sp<ShaderLayout::UBO>> _ubos;
+    Map<HashId, sp<PipelineLayout::UBO>> _ubos;
 
     Set<String> _input_vars;
 

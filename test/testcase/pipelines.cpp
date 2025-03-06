@@ -52,15 +52,15 @@ public:
         const sp<Snippet> snippet = sp<SnippetTest>::make();
         const sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(std::move(vert), std::move(frag));
 
-        const sp<PipelineConfiguration> pipelineLayout = sp<PipelineConfiguration>::make(buildingContext);
-        pipelineLayout->addSnippet(snippet);
-        pipelineLayout->initialize(Shader(nullptr, pipelineFactory, Ark::instance().renderController(), pipelineLayout, {}));
-        const sp<ShaderLayout>& pipelineInput = pipelineLayout->shaderLayout();
+        const sp<PipelineConfiguration> pipelineConfiguration = sp<PipelineConfiguration>::make(buildingContext);
+        pipelineConfiguration->addSnippet(snippet);
+        pipelineConfiguration->initialize(Shader(nullptr, pipelineFactory, Ark::instance().renderController(), pipelineConfiguration, {}));
+        const sp<PipelineLayout>& pipelineLayout = pipelineConfiguration->pipelineLayout();
 
-        TESTCASE_VALIDATE(pipelineInput->streamLayouts()[0].stride() != 0);
-        TESTCASE_VALIDATE(pipelineInput->getAttribute("Position")->length());
-        TESTCASE_VALIDATE(pipelineInput->getAttribute("TexCoordinate")->offset() != -1);
-        TESTCASE_VALIDATE(pipelineInput->getAttribute("Alpha01")->offset() == -1);
+        TESTCASE_VALIDATE(pipelineLayout->streamLayouts()[0].stride() != 0);
+        TESTCASE_VALIDATE(pipelineLayout->getAttribute("Position")->length());
+        TESTCASE_VALIDATE(pipelineLayout->getAttribute("TexCoordinate")->offset() != -1);
+        TESTCASE_VALIDATE(pipelineLayout->getAttribute("Alpha01")->offset() == -1);
 
         return 0;
     }

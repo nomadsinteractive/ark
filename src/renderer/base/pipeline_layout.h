@@ -14,11 +14,11 @@
 
 namespace ark {
 
-class ARK_API ShaderLayout {
+class ARK_API PipelineLayout {
 public:
     struct ARK_API AttributeOffsets {
         AttributeOffsets();
-        AttributeOffsets(const ShaderLayout& shaderLayout);
+        AttributeOffsets(const PipelineLayout& shaderLayout);
 
         uint32_t stride() const;
 
@@ -80,7 +80,7 @@ public:
         bytearray _buffer;
 
         friend class PipelineBuildingContext;
-        friend class ShaderLayout;
+        friend class PipelineLayout;
     };
 
     struct SSBO {
@@ -102,12 +102,11 @@ public:
     };
 
 public:
-    ShaderLayout();
+    PipelineLayout();
 
     void initialize(const PipelineBuildingContext& buildingContext);
 
     const Vector<sp<UBO>>& ubos() const;
-    Vector<SSBO>& ssbos();
     const Vector<SSBO>& ssbos() const;
 
     sp<RenderLayerSnapshot::BufferObject> takeBufferSnapshot(const RenderRequest& renderRequest, bool isComputeStage) const;
