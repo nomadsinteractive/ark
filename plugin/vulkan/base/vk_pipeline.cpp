@@ -7,7 +7,7 @@
 #include "renderer/base/compute_context.h"
 #include "renderer/base/drawing_context.h"
 #include "renderer/base/graphics_context.h"
-#include "renderer/base/pipeline_layout.h"
+#include "renderer/base/pipeline_configuration.h"
 #include "renderer/base/shader_layout.h"
 #include "renderer/base/render_engine_context.h"
 #include "renderer/base/recycler.h"
@@ -93,9 +93,9 @@ struct VertexLayout {
     Vector<VkVertexInputAttributeDescription> attributeDescriptions;
 };
 
-sp<VKPipeline::BakedRenderer> makeBakedRenderer(const PipelineDescriptor& bindings)
+sp<VKPipeline::BakedRenderer> makeBakedRenderer(const PipelineDescriptor& pipelineDescriptor)
 {
-    switch(bindings.drawProcedure())
+    switch(pipelineDescriptor.drawProcedure())
     {
         case Enum::DRAW_PROCEDURE_DRAW_ARRAYS:
             return sp<VKPipeline::BakedRenderer>::make<VKDrawArrays>();
@@ -108,7 +108,7 @@ sp<VKPipeline::BakedRenderer> makeBakedRenderer(const PipelineDescriptor& bindin
         default:
             break;
     }
-    DFATAL("Not render procedure creator for %d", bindings.drawProcedure());
+    DFATAL("Not render procedure creator for %d", pipelineDescriptor.drawProcedure());
     return nullptr;
 }
 
@@ -179,7 +179,7 @@ VkPipelineDepthStencilStateCreateInfo makeDepthStencilState(const PipelineDescri
 
     if(traits.has(PipelineDescriptor::TRAIT_TYPE_DEPTH_TEST))
     {
-        const PipelineDescriptor::TraitDepthTest& depthTest = traits.at(PipelineDescriptor::TRAIT_TYPE_DEPTH_TEST)._configure._depth_test;
+        const PipelineDescriptor::TraitDepthTest& depthTest = traits.at(PipelineDescriptor::TRAIT_TYPE_DEPTH_TEST)._depth_test;
         state.depthTestEnable = depthTest._enabled;
         state.depthWriteEnable = depthTest._write_enabled;
         state.depthCompareOp = VKUtil::toCompareOp(depthTest._func);
@@ -188,7 +188,7 @@ VkPipelineDepthStencilStateCreateInfo makeDepthStencilState(const PipelineDescri
     if(traits.has(PipelineDescriptor::TRAIT_TYPE_STENCIL_TEST))
     {
         state.stencilTestEnable = true;
-        const PipelineDescriptor::TraitStencilTest& stencilTest = traits.at(PipelineDescriptor::TRAIT_TYPE_STENCIL_TEST)._configure._stencil_test;
+        const PipelineDescriptor::TraitStencilTest& stencilTest = traits.at(PipelineDescriptor::TRAIT_TYPE_STENCIL_TEST)._stencil_test;
         if(stencilTest._front._type == PipelineDescriptor::FRONT_FACE_TYPE_DEFAULT && stencilTest._front._type == stencilTest._back._type)
             state.front = state.back = makeStencilState(stencilTest._front);
         else
@@ -206,7 +206,7 @@ VkPipelineRasterizationStateCreateInfo makeRasterizationState(const PipelineDesc
 {
     if(traits.has(PipelineDescriptor::TRAIT_TYPE_CULL_FACE_TEST))
     {
-        const PipelineDescriptor::TraitCullFaceTest& cullFaceTest = traits.at(PipelineDescriptor::TRAIT_TYPE_CULL_FACE_TEST)._configure._cull_face_test;
+        const PipelineDescriptor::TraitCullFaceTest& cullFaceTest = traits.at(PipelineDescriptor::TRAIT_TYPE_CULL_FACE_TEST)._cull_face_test;
         return vks::initializers::pipelineRasterizationStateCreateInfo(
                 VK_POLYGON_MODE_FILL, cullFaceTest._enabled ? VK_CULL_MODE_BACK_BIT : VK_CULL_MODE_NONE,
                 VKUtil::toFrontFace(cullFaceTest._front_face), 0);
@@ -225,16 +225,16 @@ VkPipelineColorBlendAttachmentState makeColorBlendAttachmentState(const Pipeline
     cbaState.colorBlendOp = VK_BLEND_OP_ADD;
     if(traits.has(PipelineDescriptor::TRAIT_TYPE_BLEND))
     {
-        const PipelineDescriptor::PipelineTraitMeta& tm = traits.at(PipelineDescriptor::TRAIT_TYPE_BLEND);
-        cbaState.blendEnable = tm._configure._blend._enabled;
-        if(tm._configure._blend._src_rgb_factor != PipelineDescriptor::BLEND_FACTOR_DEFAULT)
-            cbaState.srcColorBlendFactor = toBlendFactor(tm._configure._blend._src_rgb_factor);
-        if(tm._configure._blend._dst_rgb_factor != PipelineDescriptor::BLEND_FACTOR_DEFAULT)
-            cbaState.dstColorBlendFactor = toBlendFactor(tm._configure._blend._dst_rgb_factor);
-        if(tm._configure._blend._src_alpha_factor != PipelineDescriptor::BLEND_FACTOR_DEFAULT)
-            cbaState.srcAlphaBlendFactor = toBlendFactor(tm._configure._blend._src_alpha_factor);
-        if(tm._configure._blend._dst_alpha_factor != PipelineDescriptor::BLEND_FACTOR_DEFAULT)
-            cbaState.dstAlphaBlendFactor = toBlendFactor(tm._configure._blend._dst_alpha_factor);
+        const PipelineDescriptor::TraitConfigure& tm = traits.at(PipelineDescriptor::TRAIT_TYPE_BLEND);
+        cbaState.blendEnable = tm._blend._enabled;
+        if(tm._blend._src_rgb_factor != PipelineDescriptor::BLEND_FACTOR_DEFAULT)
+            cbaState.srcColorBlendFactor = toBlendFactor(tm._blend._src_rgb_factor);
+        if(tm._blend._dst_rgb_factor != PipelineDescriptor::BLEND_FACTOR_DEFAULT)
+            cbaState.dstColorBlendFactor = toBlendFactor(tm._blend._dst_rgb_factor);
+        if(tm._blend._src_alpha_factor != PipelineDescriptor::BLEND_FACTOR_DEFAULT)
+            cbaState.srcAlphaBlendFactor = toBlendFactor(tm._blend._src_alpha_factor);
+        if(tm._blend._dst_alpha_factor != PipelineDescriptor::BLEND_FACTOR_DEFAULT)
+            cbaState.dstAlphaBlendFactor = toBlendFactor(tm._blend._dst_alpha_factor);
     }
     return cbaState;
 }
@@ -272,8 +272,8 @@ VertexLayout setupVertexLayout(const ShaderLayout& shaderLayout)
 
 }
 
-VKPipeline::VKPipeline(const PipelineDescriptor& pipelineDescriptor, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, Map<Enum::ShaderStageBit, String> stages)
-    : _pipeline_descriptor(pipelineDescriptor), _recycler(recycler), _renderer(renderer), _baked_renderer(makeBakedRenderer(pipelineDescriptor)), _layout(VK_NULL_HANDLE), _pipeline(VK_NULL_HANDLE), _stages(std::move(stages)),
+VKPipeline::VKPipeline(sp<PipelineDescriptor> pipelineDescriptor, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, Map<Enum::ShaderStageBit, String> stages)
+    : _pipeline_descriptor(std::move(pipelineDescriptor)), _recycler(recycler), _renderer(renderer), _baked_renderer(makeBakedRenderer(_pipeline_descriptor)), _layout(VK_NULL_HANDLE), _pipeline(VK_NULL_HANDLE), _stages(std::move(stages)),
       _rebind_needed(true), _is_compute_pipeline(false)
 {
     for(const auto& i : _stages)
@@ -497,11 +497,11 @@ void VKPipeline::setupGraphicsPipeline(GraphicsContext& graphicsContext)
 
     VkPipelineInputAssemblyStateCreateInfo inputAssemblyState =
             vks::initializers::pipelineInputAssemblyStateCreateInfo(
-                VKUtil::toPrimitiveTopology(_pipeline_descriptor.mode()),
+                VKUtil::toPrimitiveTopology(_pipeline_descriptor->mode()),
                 0,
                 VK_FALSE);
 
-    const PipelineDescriptor::PipelineTraitTable& traits = _pipeline_descriptor.parameters()._traits;
+    const PipelineDescriptor::PipelineTraitTable& traits = _pipeline_descriptor->parameters()._traits;
     const VkPipelineRasterizationStateCreateInfo rasterizationState = makeRasterizationState(traits);
     const VkPipelineDepthStencilStateCreateInfo depthStencilState = makeDepthStencilState(traits);
     const VkPipelineColorBlendAttachmentState colorBlendAttachmentState = makeColorBlendAttachmentState(traits);
@@ -509,7 +509,7 @@ void VKPipeline::setupGraphicsPipeline(GraphicsContext& graphicsContext)
 
     Vector<VkDynamicState> dynamicStateEnables = { VK_DYNAMIC_STATE_VIEWPORT };
 
-    if(_pipeline_descriptor.hasFlag(PipelineDescriptor::FLAG_DYNAMIC_SCISSOR, PipelineDescriptor::FLAG_DYNAMIC_SCISSOR_BITMASK))
+    if(_pipeline_descriptor->hasTrait(PipelineDescriptor::TRAIT_TYPE_SCISSOR_TEST))
         dynamicStateEnables.push_back(VK_DYNAMIC_STATE_SCISSOR);
     const VkPipelineDynamicStateCreateInfo dynamicState = vks::initializers::pipelineDynamicStateCreateInfo(dynamicStateEnables.data(), static_cast<uint32_t>(dynamicStateEnables.size()), 0);
 
@@ -522,7 +522,7 @@ void VKPipeline::setupGraphicsPipeline(GraphicsContext& graphicsContext)
     VkGraphicsPipelineCreateInfo pipelineCreateInfo = vks::initializers::pipelineCreateInfo(_layout, state.acquireRenderPass(), 0);
 
     Vector<VkPipelineColorBlendAttachmentState> blendAttachmentStates;
-    const uint32_t colorAttachmentCount = std::max<uint32_t>(_pipeline_descriptor.layout()->colorAttachmentCount(), state.renderPassPhrase()->colorAttachmentCount());
+    const uint32_t colorAttachmentCount = std::max<uint32_t>(_pipeline_descriptor->shaderLayout()->colorAttachmentCount(), state.renderPassPhrase()->colorAttachmentCount());
     for(uint32_t i = 0; i < colorAttachmentCount; ++i)
     {
         //TODO: MRT only albedo needs blending for now, what about the others?
@@ -539,12 +539,12 @@ void VKPipeline::setupGraphicsPipeline(GraphicsContext& graphicsContext)
     VkRect2D vkScissors;
     VkPipelineViewportStateCreateInfo viewportState = vks::initializers::pipelineViewportStateCreateInfo(1, 1, 0);
     viewportState.pScissors = &vkScissors;
-    if(const Optional<Rect>& scissor = _pipeline_descriptor.scissor())
+    if(const Optional<Rect>& scissor = _pipeline_descriptor->scissor())
         vkScissors = VkRect2D({{static_cast<int32_t>(scissor->left()), static_cast<int32_t>(scissor->top())}, {static_cast<uint32_t>(scissor->width()), static_cast<uint32_t>(scissor->height())}});
     else
         vkScissors = VkRect2D({{0, 0}, {state.renderPassPhrase()->resolution().width, state.renderPassPhrase()->resolution().height}});
 
-    const VertexLayout vertexLayout = setupVertexLayout(_pipeline_descriptor.shaderLayout());
+    const VertexLayout vertexLayout = setupVertexLayout(_pipeline_descriptor->shaderLayout());
     pipelineCreateInfo.pVertexInputState = &vertexLayout.inputState;
     pipelineCreateInfo.pInputAssemblyState = &inputAssemblyState;
     pipelineCreateInfo.pRasterizationState = &rasterizationState;
@@ -588,7 +588,7 @@ void VKPipeline::buildDrawCommandBuffer(GraphicsContext& graphicsContext, const 
 
     if(const Optional<Rect>& scissor = drawingContext._scissor)
     {
-        CHECK(drawingContext._bindings->pipelineDescriptor()->hasFlag(PipelineDescriptor::FLAG_DYNAMIC_SCISSOR, PipelineDescriptor::FLAG_DYNAMIC_SCISSOR_BITMASK), "Pipeline has no DYNAMIC_SCISSOR flag set");
+        CHECK(drawingContext._bindings->pipelineDescriptor()->hasTrait(PipelineDescriptor::TRAIT_TYPE_SCISSOR_TEST), "Pipeline has no scissor_test trait set");
         const VkRect2D vkScissor{{static_cast<int32_t>(scissor->left()), static_cast<int32_t>(scissor->top())}, {static_cast<uint32_t>(scissor->width()), static_cast<uint32_t>(scissor->height())}};
         vkCmdSetScissor(commandBuffer, 0, 1, &vkScissor);
     }
@@ -610,14 +610,15 @@ void VKPipeline::buildComputeCommandBuffer(GraphicsContext& graphicsContext, con
 sp<VKDescriptorPool> VKPipeline::makeDescriptorPool() const
 {
     Map<VkDescriptorType, uint32_t> poolSizes;
-    if(!_pipeline_descriptor.shaderLayout()->ubos().empty())
-        poolSizes[VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER] = static_cast<uint32_t>(_pipeline_descriptor.shaderLayout()->ubos().size());
-    if(!_pipeline_descriptor.shaderLayout()->ssbos().empty())
-        poolSizes[VK_DESCRIPTOR_TYPE_STORAGE_BUFFER] = static_cast<uint32_t>(_pipeline_descriptor.shaderLayout()->ssbos().size());
-    if(!(_pipeline_descriptor.samplers().empty() && _pipeline_descriptor.images().empty()))
-        poolSizes[VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER] = static_cast<uint32_t>(_pipeline_descriptor.samplers().size() + _pipeline_descriptor.images().size());
-    if(!_pipeline_descriptor.images().empty())
-        poolSizes[VK_DESCRIPTOR_TYPE_STORAGE_IMAGE] = static_cast<uint32_t>(_pipeline_descriptor.images().size());
+    const ShaderLayout& shaderLayout = _pipeline_descriptor->shaderLayout();
+    if(!shaderLayout.ubos().empty())
+        poolSizes[VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER] = static_cast<uint32_t>(shaderLayout.ubos().size());
+    if(!shaderLayout.ssbos().empty())
+        poolSizes[VK_DESCRIPTOR_TYPE_STORAGE_BUFFER] = static_cast<uint32_t>(shaderLayout.ssbos().size());
+    if(!(_pipeline_descriptor->samplers().empty() && _pipeline_descriptor->images().empty()))
+        poolSizes[VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER] = static_cast<uint32_t>(_pipeline_descriptor->samplers().size() + _pipeline_descriptor->images().size());
+    if(!_pipeline_descriptor->images().empty())
+        poolSizes[VK_DESCRIPTOR_TYPE_STORAGE_IMAGE] = static_cast<uint32_t>(_pipeline_descriptor->images().size());
     return sp<VKDescriptorPool>::make(_recycler, _renderer->device(), std::move(poolSizes), _descriptor_set_layouts.size());
 }
 

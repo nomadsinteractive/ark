@@ -7,7 +7,7 @@
 #include "renderer/base/pipeline_building_context.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/shader_preprocessor.h"
-#include "renderer/base/pipeline_layout.h"
+#include "renderer/base/pipeline_configuration.h"
 #include "renderer/base/uniform.h"
 #include "renderer/inf/snippet.h"
 
@@ -27,7 +27,7 @@ public:
         context.addUniform("u_Color01", Uniform::TYPE_F4, 1, nullptr);
     }
 
-    void preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context, const PipelineLayout& /*pipelineLayout*/) override {
+    void preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context, const PipelineConfiguration& /*pipelineLayout*/) override {
         ShaderPreprocessor& vertex = context.getRenderStage(Enum::SHADER_STAGE_BIT_VERTEX);
         ShaderPreprocessor& fragment = context.getRenderStage(Enum::SHADER_STAGE_BIT_FRAGMENT);
 
@@ -50,9 +50,9 @@ public:
 
         const sp<PipelineFactory> pipelineFactory = Ark::instance().applicationContext()->renderEngine()->rendererFactory()->createPipelineFactory();
         const sp<Snippet> snippet = sp<SnippetTest>::make();
-        const sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(Ark::instance().applicationContext()->renderController(), std::move(vert), std::move(frag));
+        const sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(std::move(vert), std::move(frag));
 
-        const sp<PipelineLayout> pipelineLayout = sp<PipelineLayout>::make(buildingContext);
+        const sp<PipelineConfiguration> pipelineLayout = sp<PipelineConfiguration>::make(buildingContext);
         pipelineLayout->addSnippet(snippet);
         pipelineLayout->initialize(Shader(nullptr, pipelineFactory, Ark::instance().renderController(), pipelineLayout, {}));
         const sp<ShaderLayout>& pipelineInput = pipelineLayout->shaderLayout();

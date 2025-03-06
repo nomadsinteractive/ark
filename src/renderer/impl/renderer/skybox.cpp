@@ -42,15 +42,14 @@ void Skybox::render(RenderRequest& renderRequest, const V3& /*position*/)
     renderRequest.addRenderCommand(drawingContext.toRenderCommand(renderRequest));
 }
 
-Skybox::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _resource_loader_context(resourceLoaderContext), _shader(Shader::fromDocument(factory, manifest, resourceLoaderContext, "shaders/skybox.vert", "shaders/skybox.frag")),
-      _texture(factory.ensureBuilder<Texture>(manifest, constants::TEXTURE))
+Skybox::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+    : _shader(Shader::fromDocument(factory, manifest, "shaders/skybox.vert", "shaders/skybox.frag")), _texture(factory.ensureBuilder<Texture>(manifest, constants::TEXTURE))
 {
 }
 
 sp<Renderer> Skybox::BUILDER::build(const Scope& args)
 {
-    return sp<Renderer>::make<Skybox>(_shader->build(args), _texture->build(args), _resource_loader_context->renderController());
+    return sp<Renderer>::make<Skybox>(_shader->build(args), _texture->build(args), Ark::instance().renderController());
 }
 
 }

@@ -15,7 +15,7 @@ public:
     virtual ~Snippet() = default;
 
     virtual void preInitialize(PipelineBuildingContext& context) {}
-    virtual void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout) {}
+    virtual void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const PipelineConfiguration& pipelineLayout) {}
 
     virtual sp<DrawDecorator> makeDrawDecorator(const RenderRequest& /*renderRequest*/) { return sp<DrawDecorator>::make(); }
 };

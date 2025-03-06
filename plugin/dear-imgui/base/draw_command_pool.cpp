@@ -14,15 +14,16 @@ PipelineDescriptor::Parameters makePipelineBindingParameters(const PipelineDescr
     {
         PipelineDescriptor::TraitConfigure configure;
         configure._cull_face_test = PipelineDescriptor::TraitCullFaceTest{false, PipelineDescriptor::FRONT_FACE_DEFAULT};
-        traits.push_back(PipelineDescriptor::TRAIT_TYPE_CULL_FACE_TEST, PipelineDescriptor::PipelineTraitMeta(PipelineDescriptor::TRAIT_TYPE_CULL_FACE_TEST, configure));
+        traits.push_back(PipelineDescriptor::TRAIT_TYPE_CULL_FACE_TEST, configure);
     }
     if(!traits.has(PipelineDescriptor::TRAIT_TYPE_DEPTH_TEST))
     {
         PipelineDescriptor::TraitConfigure configure;
         configure._depth_test = PipelineDescriptor::TraitDepthTest{false, false, PipelineDescriptor::COMPARE_FUNC_DEFAULT};
-        traits.push_back(PipelineDescriptor::TRAIT_TYPE_DEPTH_TEST, PipelineDescriptor::PipelineTraitMeta(PipelineDescriptor::TRAIT_TYPE_DEPTH_TEST, configure));
+        traits.push_back(PipelineDescriptor::TRAIT_TYPE_DEPTH_TEST, configure);
     }
-    return {Optional<Rect>(), std::move(traits), PipelineDescriptor::FLAG_DYNAMIC_SCISSOR};
+    traits.push_back(PipelineDescriptor::TRAIT_TYPE_SCISSOR_TEST, {});
+    return {Optional<Rect>(), std::move(traits)};
 }
 
 }

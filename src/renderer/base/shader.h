@@ -28,9 +28,9 @@ public:
     typedef Vector<sp<Builder<Snippet>>> SnippetManifest;
 
 public:
-    Shader(sp<Camera> camera, sp<PipelineFactory> pipelineFactory, sp<RenderController> renderController, sp<PipelineLayout> pipelineLayout, PipelineDescriptor::Parameters parameters);
+    Shader(sp<Camera> camera, sp<PipelineFactory> pipelineFactory, sp<RenderController> renderController, sp<PipelineConfiguration> pipelineLayout, PipelineDescriptor::Parameters parameters);
 
-    static sp<Builder<Shader>> fromDocument(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext, const String& defVertex = "shaders/default.vert", const String& defFragment = "shaders/texture.frag", const sp<Camera>& defaultCamera = nullptr);
+    static sp<Builder<Shader>> fromDocument(BeanFactory& factory, const document& manifest, const String& defVertex = "shaders/default.vert", const String& defFragment = "shaders/texture.frag", const sp<Camera>& defaultCamera = nullptr);
 
     [[deprecated]]
     sp<RenderLayerSnapshot::BufferObject> takeBufferSnapshot(const RenderRequest& renderRequest, bool isComputeStage) const;
@@ -41,7 +41,7 @@ public:
 
     void setCamera(const Camera& camera);
     const sp<ShaderLayout>& layout() const;
-    const sp<PipelineLayout>& pipelineLayout() const;
+    const sp<PipelineConfiguration>& pipelineLayout() const;
 
     const PipelineDescriptor::Parameters& descriptorParams() const;
 
@@ -49,8 +49,7 @@ public:
 
     class BUILDER_IMPL final : public Builder<Shader> {
     public:
-        BUILDER_IMPL(BeanFactory& factory, const document& manifest, const ResourceLoaderContext& resourceLoaderContext, sp<Builder<Camera>> camera = nullptr,
-                     Optional<Vector<StageManifest>> stages = {}, Optional<SnippetManifest> snippets = {});
+        BUILDER_IMPL(BeanFactory& factory, const document& manifest, sp<Builder<Camera>> camera = nullptr, Optional<Vector<StageManifest>> stages = {}, Optional<SnippetManifest> snippets = {});
 
         sp<Shader> build(const Scope& args) override;
 
@@ -60,7 +59,6 @@ public:
     private:
         BeanFactory _factory;
         document _manifest;
-        sp<RenderController> _render_controller;
 
         Vector<StageManifest> _stages;
         SnippetManifest _snippets;
@@ -68,10 +66,10 @@ public:
         PipelineDescriptor::Parameters::BUILDER _parameters;
     };
 
-//  [[plugin::resource-loader]]
+//  [[plugin::builder]]
     class BUILDER final : public Builder<Shader> {
     public:
-        BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
+        BUILDER(BeanFactory& factory, const document& manifest);
 
         sp<Shader> build(const Scope& args) override;
 
@@ -87,7 +85,7 @@ private:
 
     sp<PipelineFactory> _pipeline_factory;
     sp<RenderController> _render_controller;
-    sp<PipelineLayout> _pipeline_layout;
+    sp<PipelineConfiguration> _pipeline_layout;
     sp<ShaderLayout> _layout;
 
     PipelineDescriptor::Parameters _descriptor_params;

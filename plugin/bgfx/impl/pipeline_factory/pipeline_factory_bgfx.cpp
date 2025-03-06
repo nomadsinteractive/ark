@@ -9,7 +9,7 @@
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/pipeline_descriptor.h"
-#include "renderer/base/pipeline_layout.h"
+#include "renderer/base/pipeline_configuration.h"
 #include "renderer/base/shader_layout.h"
 #include "renderer/inf/pipeline.h"
 #include "renderer/util/render_util.h"
@@ -417,14 +417,14 @@ private:
 
 }
 
-sp<Pipeline> PipelineFactoryBgfx::buildPipeline(GraphicsContext& graphicsContext, const PipelineDescriptor& pipelineDescriptor, std::map<Enum::ShaderStageBit, String> stages)
+sp<Pipeline> PipelineFactoryBgfx::buildPipeline(GraphicsContext& graphicsContext, const sp<PipelineDescriptor>& pipelineDescriptor, std::map<Enum::ShaderStageBit, String> stages)
 {
     if(const auto vIter = stages.find(Enum::SHADER_STAGE_BIT_VERTEX); vIter != stages.end())
     {
-        const Enum::DrawProcedure drawProcedure = pipelineDescriptor.drawProcedure();
+        const Enum::DrawProcedure drawProcedure = pipelineDescriptor->drawProcedure();
         const auto fIter = stages.find(Enum::SHADER_STAGE_BIT_FRAGMENT);
         CHECK(fIter != stages.end(), "Pipeline has no fragment shader(only vertex shader available)");
-        return sp<Pipeline>::make<DrawPipelineBgfx>(drawProcedure, pipelineDescriptor.mode(), pipelineDescriptor.shaderLayout(), std::move(vIter->second), std::move(fIter->second));
+        return sp<Pipeline>::make<DrawPipelineBgfx>(drawProcedure, pipelineDescriptor->mode(), pipelineDescriptor->shaderLayout(), std::move(vIter->second), std::move(fIter->second));
     }
     const auto cIter = stages.find(Enum::SHADER_STAGE_BIT_COMPUTE);
     CHECK(cIter != stages.end(), "Pipeline has no compute shader");

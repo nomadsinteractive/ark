@@ -21,7 +21,7 @@ void SnippetComposite::preInitialize(PipelineBuildingContext& context)
     _next->preInitialize(context);
 }
 
-void SnippetComposite::preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout)
+void SnippetComposite::preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const PipelineConfiguration& pipelineLayout)
 {
     _delegate->preCompile(graphicsContext, context, pipelineLayout);
     _next->preCompile(graphicsContext, context, pipelineLayout);

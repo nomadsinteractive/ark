@@ -15,7 +15,7 @@ namespace ark::plugin::vulkan {
 
 class VKPipeline final : public Pipeline {
 public:
-    VKPipeline(const PipelineDescriptor& pipelineDescriptor, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, Map<Enum::ShaderStageBit, String> stages);
+    VKPipeline(sp<PipelineDescriptor> pipelineDescriptor, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, Map<Enum::ShaderStageBit, String> stages);
     ~VKPipeline() override;
 
     VkPipeline vkPipeline() const;
@@ -50,7 +50,7 @@ private:
     bool shouldRebind(int64_t tick, const PipelineDescriptor& pipelineDescriptor) const;
 
 private:
-    PipelineDescriptor _pipeline_descriptor;
+    sp<PipelineDescriptor> _pipeline_descriptor;
 
     sp<Recycler> _recycler;
     sp<VKRenderer> _renderer;

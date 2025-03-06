@@ -32,7 +32,7 @@ class PipelineFactory;
 class ShaderLayout;
 class PipelineDescriptor;
 class PipelineBuildingContext;
-class PipelineLayout;
+class PipelineConfiguration;
 class Recycler;
 class Resource;
 class RenderEngineContext;

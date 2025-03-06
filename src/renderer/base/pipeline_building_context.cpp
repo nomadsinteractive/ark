@@ -5,7 +5,7 @@
 #include "core/inf/uploader.h"
 #include "core/util/strings.h"
 
-#include "renderer/base/pipeline_layout.h"
+#include "renderer/base/pipeline_configuration.h"
 #include "renderer/base/render_engine_context.h"
 #include "renderer/impl/snippet/snippet_composite.h"
 #include "renderer/inf/renderer_factory.h"
@@ -95,13 +95,13 @@ Attribute makePredefinedAttribute(const String& name, const String& type)
 
 }
 
-PipelineBuildingContext::PipelineBuildingContext(const sp<RenderController>& renderController)
-    : _render_controller(renderController), _shader_layout(sp<ShaderLayout>::make())
+PipelineBuildingContext::PipelineBuildingContext()
+    : _shader_layout(sp<ShaderLayout>::make())
 {
 }
 
-PipelineBuildingContext::PipelineBuildingContext(const sp<RenderController>& renderController, sp<String> vertex, sp<String> fragment)
-    : PipelineBuildingContext(renderController)
+PipelineBuildingContext::PipelineBuildingContext(sp<String> vertex, sp<String> fragment)
+    : PipelineBuildingContext()
 {
     addStage(std::move(vertex), nullptr, Enum::SHADER_STAGE_BIT_VERTEX, Enum::SHADER_STAGE_BIT_NONE);
     addStage(std::move(fragment), nullptr, Enum::SHADER_STAGE_BIT_FRAGMENT, Enum::SHADER_STAGE_BIT_VERTEX);
@@ -164,7 +164,7 @@ void PipelineBuildingContext::initializeAttributes()
             addAttribute(k, v, 0);
         }
 
-    const uint32_t alignment = _render_controller->renderEngine()->rendererFactory()->features()._attribute_alignment;
+    const uint32_t alignment = Ark::instance().renderController()->renderEngine()->rendererFactory()->features()._attribute_alignment;
     for(auto &[k, v] : _shader_layout->streamLayouts())
         v.align(k == 0 ? 4 : alignment);
 

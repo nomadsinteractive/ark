@@ -110,9 +110,9 @@ ImGuiKey toImGuiKey(Event::Code code) {
 
 }
 
-RendererImgui::RendererImgui(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Shader>& shader, const sp<Texture>& texture)
-    : _shader(shader), _render_controller(resourceLoaderContext->renderController()), _render_engine(_render_controller->renderEngine()), _texture(texture),
-      _pipeline_factory(shader->pipelineFactory()), _renderer_context(sp<RendererContext>::make(shader, resourceLoaderContext->renderController()))
+RendererImgui::RendererImgui(const sp<Shader>& shader, const sp<Texture>& texture)
+    : _shader(shader), _render_controller(Ark::instance().renderController()), _render_engine(_render_controller->renderEngine()), _texture(texture),
+      _pipeline_factory(shader->pipelineFactory()), _renderer_context(sp<RendererContext>::make(shader, _render_controller))
 {
     _renderer_context->addDefaultTexture(texture);
 }
@@ -272,9 +272,9 @@ sp<RendererImgui::DrawCommandRecycler> RendererImgui::obtainDrawCommandRecycler(
     return recycler;
 }
 
-RendererImgui::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _manifest(manifest), _resource_loader_context(resourceLoaderContext), _camera(sp<Camera>::make(Ark::instance().createCamera(Ark::COORDINATE_SYSTEM_LHS, Ark::instance().renderController()->renderEngine()->isBackendLHS()))),
-      _shader(Shader::fromDocument(factory, manifest, resourceLoaderContext, "shaders/imgui.vert", "shaders/imgui.frag"))
+RendererImgui::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+    : _manifest(manifest), _camera(sp<Camera>::make(Ark::instance().createCamera(Ark::COORDINATE_SYSTEM_LHS, Ark::instance().renderController()->renderEngine()->isBackendLHS()))),
+      _shader(Shader::fromDocument(factory, manifest, "shaders/imgui.vert", "shaders/imgui.frag"))
 {
 }
 
@@ -307,13 +307,14 @@ sp<Renderer> RendererImgui::BUILDER::build(const Scope& args)
     int32_t width, height, bytesPerPixel;
 
     io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height, &bytesPerPixel);
+    RenderController& renderController = Ark::instance().renderController();
     sp<Bitmap> bitmap = sp<Bitmap>::make(width, height, bytesPerPixel * width, 4, sp<ByteArray>::make<ByteArray::Borrowed>(pixels, width * height * bytesPerPixel));
-    sp<Texture> texture = _resource_loader_context->renderController()->createTexture2d(std::move(bitmap));
+    sp<Texture> texture = renderController.createTexture2d(std::move(bitmap));
     sp<Shader> shader = _shader->build(args);
-    const Viewport& viewport = _resource_loader_context->renderController()->renderEngine()->viewport();
+    const Viewport& viewport = renderController.renderEngine()->viewport();
     _camera->ortho(0, viewport.width(), viewport.height(), 0, viewport.clipNear(), viewport.clipFar());
     shader->setCamera(_camera);
-    return sp<RendererImgui>::make(_resource_loader_context, std::move(shader), texture);
+    return sp<RendererImgui>::make(std::move(shader), texture);
 }
 
 RendererImgui::DrawCommand::DrawCommand(RenderController& renderController)

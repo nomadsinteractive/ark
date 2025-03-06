@@ -10,9 +10,9 @@
 
 namespace ark::plugin::opengl {
 
-class GLEquirectangularCubemapUploader : public Texture::Uploader {
+class GLEquirectangularCubemapUploader final : public Texture::Uploader {
 public:
-    GLEquirectangularCubemapUploader(const sp<RenderController>& renderController, const Shader& shader, const sp<Texture>& texture, const sp<Size>& size);
+    GLEquirectangularCubemapUploader(const Shader& shader, const sp<Texture>& texture, const sp<Size>& size);
 
     virtual void initialize(GraphicsContext& graphicsContext, Texture::Delegate& delegate) override;
 
@@ -24,14 +24,12 @@ public:
         sp<Texture::Uploader> build(const Scope& args) override;
 
     private:
-        sp<RenderController> _render_controller;
         sp<Builder<Size>> _size;
         sp<Builder<Shader>> _shader;
         sp<Builder<Texture>> _texture;
     };
 
 private:
-    sp<RenderController> _render_controller;
     sp<PipelineBindings> _pipeline_bindings;
     sp<Texture> _texture;
     sp<Size> _size;

@@ -4,7 +4,7 @@
 
 #include "renderer/base/render_controller.h"
 #include "renderer/base/pipeline_building_context.h"
-#include "renderer/base/pipeline_layout.h"
+#include "renderer/base/pipeline_configuration.h"
 #include "renderer/base/shader_layout.h"
 
 #include "renderer/inf/snippet.h"
@@ -16,7 +16,7 @@ namespace {
 
 class CoreSnippetVulkan final : public Snippet {
 public:
-    void preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout) override {
+    void preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context, const PipelineConfiguration& pipelineLayout) override {
         const String sLocation = "location";
 
         if(!context.renderStages().empty())

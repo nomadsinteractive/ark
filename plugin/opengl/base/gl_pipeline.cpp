@@ -717,13 +717,13 @@ GLPipeline::GLPipeline(const sp<Recycler>& recycler, uint32_t version, Map<Enum:
     for(const auto& [k, v] : bindings.parameters()._traits)
     {
         if(k == PipelineDescriptor::TRAIT_TYPE_CULL_FACE_TEST)
-            _draw_decorators.push_back(sp<DrawDecorator>::make<GLCullFaceTest>(v._configure._cull_face_test));
+            _draw_decorators.push_back(sp<DrawDecorator>::make<GLCullFaceTest>(v._cull_face_test));
         else if(k == PipelineDescriptor::TRAIT_TYPE_DEPTH_TEST)
-            _draw_decorators.push_back(sp<DrawDecorator>::make<GLDepthTest>(v._configure._depth_test));
+            _draw_decorators.push_back(sp<DrawDecorator>::make<GLDepthTest>(v._depth_test));
         else if(k == PipelineDescriptor::TRAIT_TYPE_STENCIL_TEST)
         {
             Vector<sp<DrawDecorator>> delegate;
-            const PipelineDescriptor::TraitStencilTest& test = v._configure._stencil_test;
+            const PipelineDescriptor::TraitStencilTest& test = v._stencil_test;
             if(test._front._type == PipelineDescriptor::FRONT_FACE_TYPE_DEFAULT && test._front._type == test._back._type)
                 delegate.push_back(sp<DrawDecorator>::make<GLStencilTestSeparate>(test._front));
             else
@@ -737,7 +737,7 @@ GLPipeline::GLPipeline(const sp<Recycler>& recycler, uint32_t version, Map<Enum:
             _draw_decorators.push_back(sp<DrawDecorator>::make<GLStencilTest>(std::move(delegate)));
         }
         else if(k == PipelineDescriptor::TRAIT_TYPE_BLEND)
-            _draw_decorators.push_back(sp<DrawDecorator>::make<GLTraitBlend>(v._configure._blend));
+            _draw_decorators.push_back(sp<DrawDecorator>::make<GLTraitBlend>(v._blend));
     }
 }
 

@@ -10,7 +10,7 @@
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/pipeline_descriptor.h"
-#include "renderer/base/pipeline_layout.h"
+#include "renderer/base/pipeline_configuration.h"
 #include "renderer/base/shader_layout.h"
 #include "renderer/inf/pipeline.h"
 #include "renderer/util/render_util.h"
@@ -307,7 +307,7 @@ public:
                 false
             };
             const auto& traits = _pipeline_descriptor.parameters()._traits;
-            const SDL_GPUColorTargetBlendState blendState = traits.has(PipelineDescriptor::TRAIT_TYPE_BLEND) ? toColorTargetBlendState(traits.at(PipelineDescriptor::TRAIT_TYPE_BLEND)._configure._blend) : defaultBlendState;
+            const SDL_GPUColorTargetBlendState blendState = traits.has(PipelineDescriptor::TRAIT_TYPE_BLEND) ? toColorTargetBlendState(traits.at(PipelineDescriptor::TRAIT_TYPE_BLEND)._blend) : defaultBlendState;
 
             Uint32 numColorTargets = 0;
             SDL_GPUColorTargetDescription colorTargetDescriptions[8];
@@ -557,11 +557,11 @@ private:
 
 }
 
-sp<Pipeline> PipelineFactorySDL3_GPU::buildPipeline(GraphicsContext& graphicsContext, const PipelineDescriptor& pipelineDescriptor, std::map<Enum::ShaderStageBit, String> stages)
+sp<Pipeline> PipelineFactorySDL3_GPU::buildPipeline(GraphicsContext& graphicsContext, const sp<PipelineDescriptor>& pipelineDescriptor, std::map<Enum::ShaderStageBit, String> stages)
 {
     if(const auto vIter = stages.find(Enum::SHADER_STAGE_BIT_VERTEX); vIter != stages.end())
     {
-        const Enum::DrawProcedure drawProcedure = pipelineDescriptor.drawProcedure();
+        const Enum::DrawProcedure drawProcedure = pipelineDescriptor->drawProcedure();
         const auto fIter = stages.find(Enum::SHADER_STAGE_BIT_FRAGMENT);
         CHECK(fIter != stages.end(), "Pipeline has no fragment shader(only vertex shader available)");
         return sp<Pipeline>::make<DrawPipelineSDL3_GPU>(drawProcedure, pipelineDescriptor, std::move(vIter->second), std::move(fIter->second));

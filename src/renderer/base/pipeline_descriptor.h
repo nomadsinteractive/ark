@@ -16,17 +16,11 @@ namespace ark {
 
 class ARK_API PipelineDescriptor {
 public:
-    enum Flag {
-        FLAG_DYNAMIC_SCISSOR = 4,
-        FLAG_DYNAMIC_SCISSOR_BITMASK = 4,
-        FLAG_DEFAULT_VALUE = 0
-    };
-
     enum TraitType {
         TRAIT_TYPE_CULL_FACE_TEST,
         TRAIT_TYPE_DEPTH_TEST,
         TRAIT_TYPE_STENCIL_TEST,
-        TRAIT_TYPE_SCISSOR,
+        TRAIT_TYPE_SCISSOR_TEST,
         TRAIT_TYPE_BLEND
     };
 
@@ -118,46 +112,37 @@ public:
         BlendFactor _dst_alpha_factor;
     };
 
+    struct TraitScissorTest {
+    };
+
     union TraitConfigure {
         TraitDepthTest _depth_test;
         TraitStencilTest _stencil_test;
         TraitCullFaceTest _cull_face_test;
+        TraitScissorTest _scissor_test;
         TraitBlend _blend;
     };
 
-    struct ARK_API PipelineTraitMeta {
-        PipelineTraitMeta(const document& manifest);
-        PipelineTraitMeta(TraitType type, const TraitConfigure& configure);
-
-        TraitType _type;
-        TraitConfigure _configure;
-    };
-
-    typedef Table<TraitType, PipelineTraitMeta> PipelineTraitTable;
+    typedef Table<TraitType, TraitConfigure> PipelineTraitTable;
 
     struct Parameters {
         Optional<Rect> _scissor;
         PipelineTraitTable _traits;
-        uint32_t _flags;
 
         class BUILDER {
         public:
-            BUILDER(BeanFactory& factory, const document& manifest, const ResourceLoaderContext& resourceLoaderContext);
+            BUILDER(BeanFactory& factory, const document& manifest);
 
             Parameters build(const Scope& args) const;
 
         private:
-            sp<RenderController> _render_controller;
-
-            SafeBuilder<Vec4> _pipeline_bindings_scissor;
+            SafeBuilder<Vec4> _scissor;
             PipelineTraitTable _traits;
-            [[deprecated]]
-            uint32_t _pipeline_bindings_flags;
         };
     };
 
 public:
-    PipelineDescriptor(Enum::RenderMode mode, Enum::DrawProcedure renderProcedure, Parameters parameters, sp<PipelineLayout> pipelineLayout);
+    PipelineDescriptor(Enum::RenderMode mode, Enum::DrawProcedure drawProcedure, Parameters parameters, sp<PipelineConfiguration> configuration);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(PipelineDescriptor);
 
     Enum::RenderMode mode() const;
@@ -165,7 +150,7 @@ public:
 
     const Parameters& parameters() const;
     const Optional<Rect>& scissor() const;
-    const sp<PipelineLayout>& layout() const;
+    const sp<PipelineConfiguration>& configuration() const;
     const sp<ShaderLayout>& shaderLayout() const;
 
     const ShaderLayout::AttributeOffsets& attributes() const;
@@ -176,13 +161,21 @@ public:
     void bindSampler(sp<Texture> texture, uint32_t name = 0);
 
     bool hasDivisors() const;
-
-    Flag getFlag(Flag bitmask) const;
-    bool hasFlag(Flag flag, Flag bitmask) const;
+    bool hasTrait(TraitType traitType) const;
 
 private:
-    struct Stub;
-    sp<Stub> _stub;
+    Enum::RenderMode _mode;
+    Enum::DrawProcedure _render_procedure;
+
+    Parameters _parameters;
+
+    sp<PipelineConfiguration> _configuration;
+    sp<ShaderLayout> _shader_layout;
+    //TODO: move it to stream
+    ShaderLayout::AttributeOffsets _attributes;
+
+    Vector<std::pair<sp<Texture>, ShaderLayout::DescriptorSet>> _samplers;
+    Vector<std::pair<sp<Texture>, ShaderLayout::DescriptorSet>> _images;
 };
 
 }

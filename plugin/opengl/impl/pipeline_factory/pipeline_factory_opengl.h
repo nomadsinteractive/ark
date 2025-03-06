@@ -9,7 +9,7 @@ namespace ark::plugin::opengl {
 class PipelineFactoryOpenGL final : public PipelineFactory {
 public:
 
-    sp<Pipeline> buildPipeline(GraphicsContext& graphicsContext, const PipelineDescriptor& pipelineDescriptor, std::map<Enum::ShaderStageBit, String> stages) override;
+    sp<Pipeline> buildPipeline(GraphicsContext& graphicsContext, const sp<PipelineDescriptor>& pipelineDescriptor, std::map<Enum::ShaderStageBit, String> stages) override;
 
 };
 

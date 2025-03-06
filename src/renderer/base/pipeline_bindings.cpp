@@ -2,7 +2,7 @@
 
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/pipeline_descriptor.h"
-#include "renderer/base/pipeline_layout.h"
+#include "renderer/base/pipeline_configuration.h"
 #include "renderer/base/render_controller.h"
 #include "renderer/impl/snippet/snippet_composite.h"
 #include "renderer/inf/pipeline.h"
@@ -78,7 +78,7 @@ const sp<PipelineDescriptor>& PipelineBindings::pipelineDescriptor() const
 
 const sp<Snippet>& PipelineBindings::snippet() const
 {
-    return _pipeline_descriptor->layout()->snippet();
+    return _pipeline_descriptor->configuration()->snippet();
 }
 
 const sp<ShaderLayout>& PipelineBindings::shaderLayout() const
@@ -131,9 +131,9 @@ Map<uint32_t, Buffer::Factory> PipelineBindings::makeDividedBufferFactories() co
 
 void PipelineBindings::doEnsurePipeline(GraphicsContext& graphicsContext)
 {
-    _pipeline_descriptor->layout()->preCompile(graphicsContext);
+    _pipeline_descriptor->configuration()->preCompile(graphicsContext);
 
-    Map<Enum::ShaderStageBit, ShaderPreprocessor::Stage> stages = _pipeline_descriptor->layout()->getPreprocessedStages(graphicsContext.renderContext());
+    Map<Enum::ShaderStageBit, ShaderPreprocessor::Stage> stages = _pipeline_descriptor->configuration()->getPreprocessedStages(graphicsContext.renderContext());
     ASSERT(!stages.empty());
 
     Map<Enum::ShaderStageBit, String> sources;

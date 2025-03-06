@@ -15,8 +15,8 @@ namespace ark {
 
 class ARK_API PipelineBuildingContext {
 public:
-    PipelineBuildingContext(const sp<RenderController>& renderController);
-    PipelineBuildingContext(const sp<RenderController>& renderController, sp<String> vertex, sp<String> fragment);
+    PipelineBuildingContext();
+    PipelineBuildingContext(sp<String> vertex, sp<String> fragment);
 
     DISALLOW_COPY_AND_ASSIGN(PipelineBuildingContext);
 
@@ -40,7 +40,6 @@ public:
         int32_t _binding;
     };
 
-    sp<RenderController> _render_controller;
     sp<ShaderLayout> _shader_layout;
 
     Map<String, Attribute> _attributes;
@@ -93,7 +92,7 @@ private:
     op<ShaderPreprocessor> _computing_stage;
     Vector<ShaderPreprocessor*> _stages;
 
-    friend class PipelineLayout;
+    friend class PipelineConfiguration;
 };
 
 }

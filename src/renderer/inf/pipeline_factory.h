@@ -1,7 +1,5 @@
 #pragma once
 
-#include <map>
-
 #include "core/base/api.h"
 #include "core/base/enum.h"
 
@@ -15,7 +13,7 @@ class ARK_API PipelineFactory {
 public:
     virtual ~PipelineFactory() = default;
 
-    virtual sp<Pipeline> buildPipeline(GraphicsContext& graphicsContext, const PipelineDescriptor& pipelineDescriptor, std::map<Enum::ShaderStageBit, String> stages) = 0;
+    virtual sp<Pipeline> buildPipeline(GraphicsContext& graphicsContext, const sp<PipelineDescriptor>& pipelineDescriptor, std::map<Enum::ShaderStageBit, String> stages) = 0;
 
 };
 

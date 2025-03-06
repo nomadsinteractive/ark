@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(ark VERSION 0.9.5)
+project(ark VERSION 0.9.6)
 
 include(CMakeDependentOption)
 
@@ -237,8 +237,13 @@ endif()
 ark_export_libraries(${ARK_LIBRARIES})
 
 if(NOT ANDROID AND NOT IOS)
-    ark_add_executable(ark-launcher src/app/main/main.cpp)
-    target_link_libraries(ark-launcher PRIVATE ${ARK_LIBRARIES})
+    set(LAUNCHER_NAME ${PROJECT_NAME}-launcher)
+    ark_add_executable(${LAUNCHER_NAME} src/app/main/main.cpp)
+    set_target_properties(${LAUNCHER_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_NAME})
+    if(MSVC)
+        set_target_properties(${LAUNCHER_NAME} PROPERTIES LINK_FLAGS "/PDB:${LAUNCHER_NAME}.pdb" )
+    endif()
+    target_link_libraries(${LAUNCHER_NAME} PRIVATE ${ARK_LIBRARIES})
 endif()
 
 configure_file(ark-config.cmake.in "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${PROJECT_NAME}-config.cmake" @ONLY)

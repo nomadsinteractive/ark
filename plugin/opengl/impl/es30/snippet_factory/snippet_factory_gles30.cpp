@@ -14,7 +14,7 @@ namespace {
 
 class SnippetGLES30 final : public Snippet {
 public:
-    void preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context, const PipelineLayout& /*pipelineLayout*/) override {
+    void preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context, const PipelineConfiguration& /*pipelineLayout*/) override {
         if(ShaderPreprocessor* vertex = context.tryGetRenderStage(Enum::SHADER_STAGE_BIT_VERTEX))
             vertex->_predefined_macros.push_back("#define gl_InstanceIndex gl_InstanceID");
 

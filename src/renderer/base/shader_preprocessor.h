@@ -187,7 +187,8 @@ private:
     };
 
     friend class PipelineBuildingContext;
-    friend class PipelineLayout;
+    friend class PipelineConfiguration;
+    friend class ShaderLayout;
 
 public:
     document _manifest;

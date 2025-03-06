@@ -18,7 +18,7 @@ class ARK_API ShaderLayout {
 public:
     struct ARK_API AttributeOffsets {
         AttributeOffsets();
-        AttributeOffsets(const ShaderLayout& input);
+        AttributeOffsets(const ShaderLayout& shaderLayout);
 
         uint32_t stride() const;
 
@@ -118,13 +118,13 @@ public:
     const Table<String, DescriptorSet>& samplers() const;
     const Table<String, DescriptorSet>& images() const;
 
+    uint32_t colorAttachmentCount() const;
+
     void addAttribute(String name, Attribute attribute);
+    Optional<const Attribute&> getAttribute(const String& name) const;
+    sp<Uniform> getUniform(const String& name) const;
 
     const StreamLayout& getStreamLayout(uint32_t divisor) const;
-
-    Optional<const Attribute&> getAttribute(const String& name) const;
-
-    sp<Uniform> getUniform(const String& name) const;
 
 private:
     Vector<sp<UBO>> _ubos;
@@ -135,8 +135,10 @@ private:
     Table<String, DescriptorSet> _samplers;
     Table<String, DescriptorSet> _images;
 
+    uint32_t _color_attachment_count;
+
     friend class PipelineBuildingContext;
-    friend class PipelineLayout;
+    friend class PipelineConfiguration;
     friend class Shader;
 };
 

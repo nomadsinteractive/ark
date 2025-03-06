@@ -44,7 +44,7 @@ RenderLayer::Stub::Stub(sp<RenderController> renderController, sp<ModelLoader> m
       _pipeline_bindings(_drawing_context_composer->makePipelineBindings(_shader, _render_controller, _model_loader->renderMode())), _stride(_shader->layout()->getStreamLayout(0).stride())
 {
     _model_loader->bind(_pipeline_bindings);
-    CHECK(!_scissor || _pipeline_bindings->pipelineDescriptor()->hasFlag(PipelineDescriptor::FLAG_DYNAMIC_SCISSOR, PipelineDescriptor::FLAG_DYNAMIC_SCISSOR_BITMASK), "RenderLayer has a scissor while its Shader has no FLAG_DYNAMIC_SCISSOR set");
+    CHECK(!_scissor || _pipeline_bindings->pipelineDescriptor()->hasTrait(PipelineDescriptor::TRAIT_TYPE_SCISSOR_TEST), "RenderLayer has a scissor while its Shader has no scissor_test trait");
 }
 
 RenderLayer::RenderLayer(sp<RenderController> renderController, sp<ModelLoader> modelLoader, sp<Shader> shader, sp<Boolean> visible, sp<Boolean> discarded, sp<Varyings> varyings, sp<Vec4> scissor)

@@ -9,7 +9,7 @@
 
 #include "renderer/base/pipeline_building_context.h"
 #include "renderer/base/pipeline_descriptor.h"
-#include "renderer/base/pipeline_layout.h"
+#include "renderer/base/pipeline_configuration.h"
 #include "renderer/base/render_engine.h"
 #include "renderer/base/render_engine_context.h"
 #include "renderer/inf/snippet_factory.h"
@@ -61,7 +61,7 @@ private:
 
 class SnippetBgfx final : public Snippet {
 public:
-    void preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout) override {
+    void preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context, const PipelineConfiguration& pipelineLayout) override {
         const String sLocation = "location";
         const ShaderPreprocessor& firstStage = context.renderStages().begin()->second;
 

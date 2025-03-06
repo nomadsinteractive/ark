@@ -13,7 +13,7 @@ public:
     SnippetComposite(sp<Snippet> delegate, sp<Snippet> next);
 
     void preInitialize(PipelineBuildingContext& context) override;
-    void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const PipelineLayout& pipelineLayout) override;
+    void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const PipelineConfiguration& pipelineLayout) override;
     sp<DrawDecorator> makeDrawDecorator(const RenderRequest& renderRequest) override;
 
 //  [[plugin::builder::by-value]]

@@ -11,9 +11,9 @@
 
 namespace ark {
 
-class ARK_API PipelineLayout {
+class ARK_API PipelineConfiguration {
 public:
-    PipelineLayout(sp<PipelineBuildingContext> buildingContext);
+    PipelineConfiguration(sp<PipelineBuildingContext> buildingContext);
 
     void addSnippet(sp<Snippet> snippet);
     const sp<Snippet>& snippet() const;
@@ -25,8 +25,6 @@ public:
 
     Map<Enum::ShaderStageBit, ShaderPreprocessor::Stage> getPreprocessedStages(const RenderEngineContext& renderEngineContext) const;
 
-    size_t colorAttachmentCount() const;
-
     Vector<std::pair<sp<Texture>, ShaderLayout::DescriptorSet>> makeBindingSamplers() const;
     Vector<std::pair<sp<Texture>, ShaderLayout::DescriptorSet>> makeBindingImages() const;
 
@@ -35,12 +33,10 @@ private:
     sp<ShaderLayout> _shader_layout;
     sp<Snippet> _snippet;
 
-    Vector<ShaderPreprocessor::Stage> _preprocessed_stages;
+    Vector<ShaderPreprocessor::Stage> _stages;
 
     Table<String, sp<Texture>> _predefined_samplers;
     Table<String, sp<Texture>> _predefined_images;
-
-    size_t _color_attachment_count;
 
     Map<String, String> _definitions;
 

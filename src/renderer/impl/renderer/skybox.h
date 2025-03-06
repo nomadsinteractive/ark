@@ -17,16 +17,14 @@ public:
 
     void render(RenderRequest& renderRequest, const V3& position) override;
 
-//  [[plugin::resource-loader("skybox")]]
+//  [[plugin::builder("skybox")]]
     class BUILDER final : public Builder<Renderer> {
     public:
-        BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
+        BUILDER(BeanFactory& factory, const document& manifest);
 
         sp<Renderer> build(const Scope& args) override;
 
     private:
-        sp<ResourceLoaderContext> _resource_loader_context;
-
         sp<Builder<Shader>> _shader;
         sp<Builder<Texture>> _texture;
     };

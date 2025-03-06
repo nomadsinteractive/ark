@@ -33,10 +33,10 @@ ShaderLayout::AttributeOffsets::AttributeOffsets()
     std::fill_n(_offsets, Attribute::USAGE_COUNT, -1);
 }
 
-ShaderLayout::AttributeOffsets::AttributeOffsets(const ShaderLayout& input)
+ShaderLayout::AttributeOffsets::AttributeOffsets(const ShaderLayout& shaderLayout)
     : AttributeOffsets()
 {
-    const StreamLayout& stream = input.streamLayouts().at(0);
+    const StreamLayout& stream = shaderLayout.streamLayouts().at(0);
     _offsets[Attribute::USAGE_POSITION] = 0;
     _offsets[Attribute::USAGE_TEX_COORD] = stream.getAttributeOffset(Attribute::USAGE_TEX_COORD);
     _offsets[Attribute::USAGE_NORMAL] = stream.getAttributeOffset(Attribute::USAGE_NORMAL);
@@ -44,9 +44,9 @@ ShaderLayout::AttributeOffsets::AttributeOffsets(const ShaderLayout& input)
     _offsets[Attribute::USAGE_BITANGENT] = stream.getAttributeOffset(Attribute::USAGE_BITANGENT);
     _offsets[Attribute::USAGE_BONE_IDS] = stream.getAttributeOffset(Attribute::USAGE_BONE_IDS);
     _offsets[Attribute::USAGE_BONE_WEIGHTS] = stream.getAttributeOffset(Attribute::USAGE_BONE_WEIGHTS);
-    if(input.streamLayouts().size() > 1)
+    if(shaderLayout.streamLayouts().size() > 1)
     {
-        const StreamLayout& stream1 = input.streamLayouts().at(1);
+        const StreamLayout& stream1 = shaderLayout.streamLayouts().at(1);
         _offsets[Attribute::USAGE_MODEL_MATRIX] = stream1.getAttributeOffset("Model");
         _offsets[Attribute::USAGE_NODE_ID] = stream1.getAttributeOffset("NodeId");
         _offsets[Attribute::USAGE_MATERIAL_ID] = stream1.getAttributeOffset("MaterialId");
@@ -62,12 +62,15 @@ uint32_t ShaderLayout::AttributeOffsets::stride() const
 }
 
 ShaderLayout::ShaderLayout()
-    : _stream_layouts{{0, StreamLayout()}}
+    : _stream_layouts{{0, StreamLayout()}}, _color_attachment_count(0)
 {
 }
 
 void ShaderLayout::initialize(const PipelineBuildingContext& buildingContext)
 {
+    if(const ShaderPreprocessor* fragment = buildingContext.tryGetRenderStage(Enum::SHADER_STAGE_BIT_FRAGMENT))
+        _color_attachment_count = fragment->_main_block->outArgumentCount() + (fragment->_main_block->hasReturnValue() ? 1 : 0);
+
     for(const auto& [k, v] : buildingContext._ubos)
     {
         v->initialize();
@@ -123,6 +126,11 @@ const Table<String, ShaderLayout::DescriptorSet>& ShaderLayout::samplers() const
 const Table<String, ShaderLayout::DescriptorSet>& ShaderLayout::images() const
 {
     return _images;
+}
+
+uint32_t ShaderLayout::colorAttachmentCount() const
+{
+    return _color_attachment_count;
 }
 
 void ShaderLayout::addAttribute(String name, Attribute attribute)

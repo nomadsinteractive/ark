@@ -22,7 +22,7 @@ namespace ark::plugin::dear_imgui {
 
 class RendererImgui final : public Renderer, public Renderer::Group, public EventListener, public Implements<RendererImgui, Renderer, Renderer::Group, EventListener> {
 public:
-    RendererImgui(const sp<ResourceLoaderContext>& resourceLoaderContext, const sp<Shader>& shader, const sp<Texture>& texture);
+    RendererImgui(const sp<Shader>& shader, const sp<Texture>& texture);
 
     void render(RenderRequest& renderRequest, const V3& position) override;
     void addRenderer(sp<Renderer> renderer, const Traits& traits) override;
@@ -30,16 +30,15 @@ public:
 
     const sp<RendererContext>& rendererContext() const;
 
-//  [[plugin::resource-loader("imgui")]]
+//  [[plugin::builder("imgui")]]
     class BUILDER final : public Builder<Renderer> {
     public:
-        BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
+        BUILDER(BeanFactory& factory, const document& manifest);
 
         sp<Renderer> build(const Scope& args) override;
 
     private:
         document _manifest;
-        sp<ResourceLoaderContext> _resource_loader_context;
         sp<Camera> _camera;
         sp<Builder<Shader>> _shader;
     };
