@@ -14,7 +14,6 @@ public:
 
     void preInitialize(PipelineBuildingContext& context) override;
     void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const PipelineDescriptor& pipelineDescriptor) override;
-    sp<DrawDecorator> makeDrawDecorator(const RenderRequest& renderRequest) override;
 
     static sp<Snippet> compose(sp<Snippet> self, sp<Snippet> next);
 

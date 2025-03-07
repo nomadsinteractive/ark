@@ -9,6 +9,7 @@
 
 #include "graphics/forwarding.h"
 
+#include "renderer/forwarding.h"
 #include "renderer/base/pipeline_layout.h"
 #include "renderer/base/shader_preprocessor.h"
 #include "renderer/inf/model_loader.h"
@@ -130,7 +131,7 @@ public:
         PipelineTraitTable _traits;
         sp<Vec4> _scissor;
         sp<Snippet> _snippet;
-        sp<DrawDecorator> _draw_decorator;
+        sp<DrawDecoratorFactory> _draw_decorator_factory;
 
         class BUILDER {
         public:
@@ -149,7 +150,7 @@ public:
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(PipelineDescriptor);
 
     const Configuration& configuration() const;
-    void setParameters(Configuration parameters);
+    void setConfiguration(Configuration configuration);
 
     const Camera& camera() const;
     Camera& camera();

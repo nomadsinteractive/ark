@@ -13,6 +13,7 @@ class BitmapBundle;
 class Buffer;
 class ComputeContext;
 class DrawDecorator;
+class DrawDecoratorFactory;
 class DrawingBuffer;
 class DrawingContext;
 class Emitter;

@@ -1,10 +1,11 @@
 #include "renderer/base/drawing_context.h"
 
 #include "pipeline_descriptor.h"
-#include "graphics/base/camera.h"
 #include "graphics/inf/render_command.h"
 
 #include "renderer/base/pipeline_bindings.h"
+#include "renderer/impl/draw_decorator/draw_decorator_composite.h"
+#include "renderer/inf/draw_decorator.h"
 #include "renderer/inf/pipeline.h"
 
 namespace ark {
@@ -51,9 +52,9 @@ public:
     void draw(GraphicsContext& graphicsContext) override {
         DPROFILER_TRACE("DrawCommand");
 
+        _draw_decorator->preDraw(graphicsContext, _context);
         _context.upload(graphicsContext);
 
-        _draw_decorator->preDraw(graphicsContext, _context);
         const sp<Pipeline>& pipeline = _context._bindings->ensurePipeline(graphicsContext);
         pipeline->draw(graphicsContext, _context);
         _draw_decorator->postDraw(graphicsContext, _context);
@@ -93,6 +94,8 @@ DrawingContext::DrawingContext(sp<PipelineBindings> pipelineBindings, sp<RenderL
 sp<RenderCommand> DrawingContext::toRenderCommand(const RenderRequest& renderRequest, sp<DrawDecorator> drawDecorator)
 {
     DCHECK(_bindings, "DrawingContext cannot be converted to RenderCommand more than once");
+    if(const PipelineDescriptor::Configuration& conf = _bindings->pipelineDescriptor()->configuration(); conf._draw_decorator_factory)
+        drawDecorator = DrawDecoratorComposite::compose(conf._draw_decorator_factory->makeDrawDecorator(renderRequest), std::move(drawDecorator));
     if(drawDecorator)
         return sp<RenderCommand>::make<RenderCommandDrawWithDrawDecorator>(std::move(*this), std::move(drawDecorator));
     return sp<RenderCommand>::make<RenderCommandDraw>(std::move(*this));
@@ -101,6 +104,8 @@ sp<RenderCommand> DrawingContext::toRenderCommand(const RenderRequest& renderReq
 sp<RenderCommand> DrawingContext::toNoopCommand(const RenderRequest& renderRequest, sp<DrawDecorator> drawDecorator)
 {
     DCHECK(_bindings, "DrawingContext cannot be converted to RenderCommand more than once");
+    if(const PipelineDescriptor::Configuration& conf = _bindings->pipelineDescriptor()->configuration(); conf._draw_decorator_factory)
+        drawDecorator = DrawDecoratorComposite::compose(conf._draw_decorator_factory->makeDrawDecorator(renderRequest), std::move(drawDecorator));
     if(drawDecorator)
         return sp<RenderCommand>::make<RenderCommandNoopWithDrawDecorator>(std::move(*this), std::move(drawDecorator));
     return sp<RenderCommand>::make<RenderCommandNoop>(std::move(*this));

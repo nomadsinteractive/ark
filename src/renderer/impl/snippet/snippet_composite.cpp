@@ -4,7 +4,7 @@
 #include "core/util/strings.h"
 #include "core/base/identifier.h"
 
-#include "renderer/impl/snippet/draw_decorator_composite.h"
+#include "renderer/impl/draw_decorator/draw_decorator_composite.h"
 
 namespace ark {
 
@@ -25,11 +25,6 @@ void SnippetComposite::preCompile(GraphicsContext& graphicsContext, PipelineBuil
 {
     _delegate->preCompile(graphicsContext, context, pipelineDescriptor);
     _next->preCompile(graphicsContext, context, pipelineDescriptor);
-}
-
-sp<DrawDecorator> SnippetComposite::makeDrawDecorator(const RenderRequest& renderRequest)
-{
-    return DrawDecoratorComposite::compose(_delegate->makeDrawDecorator(renderRequest), _next->makeDrawDecorator(renderRequest));
 }
 
 sp<Snippet> SnippetComposite::compose(sp<Snippet> self, sp<Snippet> next)

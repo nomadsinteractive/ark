@@ -1,4 +1,4 @@
-#include "renderer/impl/snippet/draw_decorator_composite.h"
+#include "renderer/impl/draw_decorator/draw_decorator_composite.h"
 
 namespace ark {
 

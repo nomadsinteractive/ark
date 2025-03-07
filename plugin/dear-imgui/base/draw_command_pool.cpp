@@ -26,7 +26,7 @@ sp<PipelineDescriptor> makePipelineBindingParameters(const PipelineDescriptor& p
     traits.push_back(PipelineDescriptor::TRAIT_TYPE_SCISSOR_TEST, {});
 
     sp<PipelineDescriptor> pd = sp<PipelineDescriptor>::make(pipelineDescriptor);
-    pd->setParameters(std::move(parameters));
+    pd->setConfiguration(std::move(parameters));
     return pd;
 }
 

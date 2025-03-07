@@ -15,6 +15,7 @@
 #include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/texture.h"
 #include "renderer/base/uniform.h"
+#include "renderer/inf/draw_decorator.h"
 #include "renderer/inf/resource.h"
 #include "renderer/util/render_util.h"
 

@@ -4,13 +4,13 @@
 
 #include "core/types/shared_ptr.h"
 
-#include "renderer/inf/snippet.h"
+#include "renderer/inf/draw_decorator.h"
 
 namespace ark {
 
-class SnippetDrawCompute final : public Snippet {
+class DrawDecoratorFactoryCompute final : public DrawDecoratorFactory {
 public:
-    SnippetDrawCompute(sp<PipelineLayout> shaderLayout, std::array<uint32_t, 3> numWorkGroups, bool atPostDraw);
+    DrawDecoratorFactoryCompute(sp<PipelineLayout> shaderLayout, std::array<uint32_t, 3> numWorkGroups, bool atPostDraw);
 
     sp<DrawDecorator> makeDrawDecorator(const RenderRequest& renderRequest) override;
 

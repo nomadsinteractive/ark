@@ -1,6 +1,8 @@
 #pragma once
 
-#include "renderer/inf/snippet.h"
+#include "core/types/shared_ptr.h"
+
+#include "renderer/inf/draw_decorator.h"
 
 namespace ark {
 

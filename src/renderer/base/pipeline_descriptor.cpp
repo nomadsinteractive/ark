@@ -8,7 +8,8 @@
 #include "renderer/base/render_controller.h"
 #include "renderer/base/render_engine_context.h"
 #include "renderer/impl/snippet/snippet_composite.h"
-#include "renderer/impl/snippet/snippet_draw_compute.h"
+#include "renderer/impl/draw_decorator/draw_decorator_factory_compute.h"
+#include "renderer/impl/draw_decorator/draw_decorator_factory_composite.h"
 #include "renderer/inf/snippet_factory.h"
 
 namespace ark {
@@ -101,36 +102,24 @@ sp<Snippet> createCoreSnippet(sp<Snippet> next)
     return coreSnippet;
 }
 
-class ComputeSnippetWrapper final : public Snippet, public Wrapper<Snippet> {
-public:
-    ComputeSnippetWrapper()
-        : Wrapper() {
-    }
-
-    sp<DrawDecorator> makeDrawDecorator(const RenderRequest& renderRequest) override
-    {
-        return _wrapped->makeDrawDecorator(renderRequest);
-    }
-};
-
-
 sp<Snippet> createSnippet(const Camera& camera, sp<Snippet> snippet, PipelineBuildingContext& buildingContext)
 {
-    sp<ComputeSnippetWrapper> computeSnippetWrapper;
-    if(const op<ShaderPreprocessor>& computeStage = buildingContext.computingStage(); computeStage && !buildingContext.renderStages().empty())
-    {
-        computeSnippetWrapper = sp<ComputeSnippetWrapper>::make();
-        snippet = SnippetComposite::compose(std::move(snippet), std::move(snippet));
-    }
-
     snippet = createCoreSnippet(std::move(snippet));
     snippet->preInitialize(buildingContext);
     buildingContext.initialize(camera);
+    return snippet;
+}
 
-    if(computeSnippetWrapper)
+}
+
+PipelineDescriptor::PipelineDescriptor(Camera camera, sp<PipelineBuildingContext> buildingContext, Configuration configuration)
+    : _camera(std::move(camera)), _configuration(std::move(configuration)), _building_context(std::move(buildingContext)), _layout(_building_context->_pipeline_layout),
+      _predefined_samplers(std::move(_building_context->_samplers)), _predefined_images(std::move(_building_context->_images)), _definitions(_building_context->toDefinitions())
+{
+    _configuration._snippet = createSnippet(_camera, std::move(_configuration._snippet), _building_context);
+    if(const op<ShaderPreprocessor>& computeStage = _building_context->computingStage(); computeStage && !_building_context->renderStages().empty())
     {
         std::array<uint32_t, 3> numWorkGroupsArray = {1, 1, 1};
-        const op<ShaderPreprocessor>& computeStage = buildingContext.computingStage();
         if(const String numWorkGroupsAttr = Documents::getAttribute(computeStage->_manifest, "num-work-groups"))
         {
             const Vector<String> numWorkGroups = numWorkGroupsAttr.split(',');
@@ -142,19 +131,8 @@ sp<Snippet> createSnippet(const Camera& camera, sp<Snippet> snippet, PipelineBui
             CHECK(computeStage->_compute_local_sizes, "Compute stage local size layout undefined");
             numWorkGroupsArray = computeStage->_compute_local_sizes.value();
         }
-        computeSnippetWrapper->reset(sp<Snippet>::make<SnippetDrawCompute>(buildingContext._pipeline_layout, numWorkGroupsArray, computeStage->_pre_shader_stage != Enum::SHADER_STAGE_BIT_NONE));
+        _configuration._draw_decorator_factory = DrawDecoratorFactoryComposite::compose(std::move(_configuration._draw_decorator_factory), sp<DrawDecoratorFactory>::make<DrawDecoratorFactoryCompute>(_layout, numWorkGroupsArray, computeStage->_pre_shader_stage != Enum::SHADER_STAGE_BIT_NONE));
     }
-
-    return snippet;
-}
-
-}
-
-PipelineDescriptor::PipelineDescriptor(Camera camera, sp<PipelineBuildingContext> buildingContext, Configuration configuration)
-    : _camera(std::move(camera)), _configuration(std::move(configuration)), _building_context(std::move(buildingContext)), _layout(_building_context->_pipeline_layout),
-      _predefined_samplers(std::move(_building_context->_samplers)), _predefined_images(std::move(_building_context->_images)), _definitions(_building_context->toDefinitions())
-{
-    _configuration._snippet = createSnippet(_camera, std::move(_configuration._snippet), _building_context);
 }
 
 const sp<Vec4>& PipelineDescriptor::scissor() const
@@ -172,9 +150,9 @@ const PipelineDescriptor::Configuration& PipelineDescriptor::configuration() con
     return _configuration;
 }
 
-void PipelineDescriptor::setParameters(Configuration parameters)
+void PipelineDescriptor::setConfiguration(Configuration configuration)
 {
-    _configuration = std::move(parameters);;
+    _configuration = std::move(configuration);;
 }
 
 const Camera& PipelineDescriptor::camera() const
