@@ -16,11 +16,11 @@ namespace ark {
 
 class ARK_API PipelineLayout {
 public:
-    struct ARK_API AttributeOffsets {
-        AttributeOffsets();
-        AttributeOffsets(const PipelineLayout& shaderLayout);
+    struct VertexDescriptor {
+        VertexDescriptor();
+        VertexDescriptor(const PipelineLayout& pipelineLayout);
 
-        uint32_t stride() const;
+        void initialize(const PipelineLayout& pipelineLayout);
 
         int32_t _offsets[Attribute::USAGE_COUNT];
         uint32_t _stride;
@@ -112,7 +112,9 @@ public:
     sp<RenderLayerSnapshot::BufferObject> takeBufferSnapshot(const RenderRequest& renderRequest, bool isComputeStage) const;
 
     const Map<uint32_t, StreamLayout>& streamLayouts() const;
-    Map<uint32_t, StreamLayout>& streamLayouts();
+    void setStreamLayoutAlignment(uint32_t alignment);
+
+    const VertexDescriptor& vertexDescriptor() const;
 
     const Table<String, DescriptorSet>& samplers() const;
     const Table<String, DescriptorSet>& images() const;
@@ -129,7 +131,8 @@ private:
     Vector<sp<UBO>> _ubos;
     Vector<SSBO> _ssbos;
 
-    Map<uint32_t, StreamLayout> _stream_layouts;
+    Map<uint32_t, StreamLayout> _stream_layout;
+    VertexDescriptor _vertex_descriptor;
 
     Table<String, DescriptorSet> _samplers;
     Table<String, DescriptorSet> _images;
@@ -137,7 +140,7 @@ private:
     uint32_t _color_attachment_count;
 
     friend class PipelineBuildingContext;
-    friend class PipelineConfiguration;
+    friend class PipelineDescriptor;
     friend class Shader;
 };
 

@@ -5,8 +5,8 @@
 #include "core/inf/uploader.h"
 #include "core/util/strings.h"
 
-#include "renderer/base/pipeline_configuration.h"
 #include "renderer/base/render_engine_context.h"
+#include "renderer/base/render_controller.h"
 #include "renderer/impl/snippet/snippet_composite.h"
 #include "renderer/inf/renderer_factory.h"
 #include "renderer/util/render_util.h"
@@ -165,8 +165,7 @@ void PipelineBuildingContext::initializeAttributes()
         }
 
     const uint32_t alignment = Ark::instance().renderController()->renderEngine()->rendererFactory()->features()._attribute_alignment;
-    for(auto &[k, v] : _pipeline_layout->streamLayouts())
-        v.align(k == 0 ? 4 : alignment);
+    _pipeline_layout->setStreamLayoutAlignment(alignment);
 
     //TODO: link all outputs to next stage's inputs
     {
@@ -231,6 +230,8 @@ void PipelineBuildingContext::initialize(const Camera& camera)
     initializeSSBO();
     initializeAttributes();
     initializeUniforms();
+
+    _pipeline_layout->initialize(*this);
 }
 
 void PipelineBuildingContext::initializeUniforms()

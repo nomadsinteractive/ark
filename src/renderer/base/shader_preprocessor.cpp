@@ -9,7 +9,7 @@
 #include "core/util/strings.h"
 
 #include "renderer/base/pipeline_building_context.h"
-#include "renderer/base/pipeline_configuration.h"
+#include "renderer/base/render_controller.h"
 #include "renderer/util/render_util.h"
 
 #define ARRAY_PATTERN           "(?:\\[\\s*(\\d+)\\s*\\])?"

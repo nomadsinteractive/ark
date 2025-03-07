@@ -11,7 +11,7 @@ namespace ark {
 
 namespace {
 
-uint32_t getAttributeEndOffset(const PipelineLayout::AttributeOffsets& attrOffsets, const Attribute::Usage usage)
+uint32_t getAttributeEndOffset(const PipelineLayout::VertexDescriptor& attrOffsets, const Attribute::Usage usage)
 {
     switch(usage)
     {
@@ -27,16 +27,21 @@ uint32_t getAttributeEndOffset(const PipelineLayout::AttributeOffsets& attrOffse
 
 }
 
-PipelineLayout::AttributeOffsets::AttributeOffsets()
+PipelineLayout::VertexDescriptor::VertexDescriptor()
     : _stride(0)
 {
     std::fill_n(_offsets, Attribute::USAGE_COUNT, -1);
 }
 
-PipelineLayout::AttributeOffsets::AttributeOffsets(const PipelineLayout& shaderLayout)
-    : AttributeOffsets()
+PipelineLayout::VertexDescriptor::VertexDescriptor(const PipelineLayout& pipelineLayout)
+    : VertexDescriptor()
 {
-    const StreamLayout& stream = shaderLayout.streamLayouts().at(0);
+    initialize(pipelineLayout);
+}
+
+void PipelineLayout::VertexDescriptor::initialize(const PipelineLayout& pipelineLayout)
+{
+    const StreamLayout& stream = pipelineLayout.streamLayouts().at(0);
     _offsets[Attribute::USAGE_POSITION] = 0;
     _offsets[Attribute::USAGE_TEX_COORD] = stream.getAttributeOffset(Attribute::USAGE_TEX_COORD);
     _offsets[Attribute::USAGE_NORMAL] = stream.getAttributeOffset(Attribute::USAGE_NORMAL);
@@ -44,9 +49,9 @@ PipelineLayout::AttributeOffsets::AttributeOffsets(const PipelineLayout& shaderL
     _offsets[Attribute::USAGE_BITANGENT] = stream.getAttributeOffset(Attribute::USAGE_BITANGENT);
     _offsets[Attribute::USAGE_BONE_IDS] = stream.getAttributeOffset(Attribute::USAGE_BONE_IDS);
     _offsets[Attribute::USAGE_BONE_WEIGHTS] = stream.getAttributeOffset(Attribute::USAGE_BONE_WEIGHTS);
-    if(shaderLayout.streamLayouts().size() > 1)
+    if(pipelineLayout.streamLayouts().size() > 1)
     {
-        const StreamLayout& stream1 = shaderLayout.streamLayouts().at(1);
+        const StreamLayout& stream1 = pipelineLayout.streamLayouts().at(1);
         _offsets[Attribute::USAGE_MODEL_MATRIX] = stream1.getAttributeOffset("Model");
         _offsets[Attribute::USAGE_NODE_ID] = stream1.getAttributeOffset("NodeId");
         _offsets[Attribute::USAGE_MATERIAL_ID] = stream1.getAttributeOffset("MaterialId");
@@ -56,13 +61,8 @@ PipelineLayout::AttributeOffsets::AttributeOffsets(const PipelineLayout& shaderL
         _stride = std::max(getAttributeEndOffset(*this, static_cast<Attribute::Usage>(i)), _stride);
 }
 
-uint32_t PipelineLayout::AttributeOffsets::stride() const
-{
-    return _stride;
-}
-
 PipelineLayout::PipelineLayout()
-    : _stream_layouts{{0, StreamLayout()}}, _color_attachment_count(0)
+    : _stream_layout{{0, StreamLayout()}}, _color_attachment_count(0)
 {
 }
 
@@ -76,6 +76,8 @@ void PipelineLayout::initialize(const PipelineBuildingContext& buildingContext)
         v->initialize();
         _ubos.push_back(v);
     }
+
+    _vertex_descriptor.initialize(*this);
 }
 
 const Vector<sp<PipelineLayout::UBO>>& PipelineLayout::ubos() const
@@ -91,9 +93,9 @@ const Vector<PipelineLayout::SSBO>& PipelineLayout::ssbos() const
 sp<RenderLayerSnapshot::BufferObject> PipelineLayout::takeBufferSnapshot(const RenderRequest& renderRequest, const bool isComputeStage) const
 {
     Vector<RenderLayerSnapshot::UBOSnapshot> uboSnapshot;
-    for(const sp<UBO>& i : _ubos)
-        if(isComputeStage ? i->_stages.has(Enum::SHADER_STAGE_BIT_COMPUTE) : (i->_stages.has(Enum::SHADER_STAGE_BIT_VERTEX) || i->_stages.has(Enum::SHADER_STAGE_BIT_FRAGMENT)))
-            uboSnapshot.push_back(i->snapshot(renderRequest));
+    for(const UBO& i : _ubos)
+        if(isComputeStage ? i._stages.has(Enum::SHADER_STAGE_BIT_COMPUTE) : (i._stages.has(Enum::SHADER_STAGE_BIT_VERTEX) || i._stages.has(Enum::SHADER_STAGE_BIT_FRAGMENT)))
+            uboSnapshot.push_back(i.snapshot(renderRequest));
 
     Vector<std::pair<uint32_t, Buffer::Snapshot>> ssboSnapshot;
     for(const SSBO& i : _ssbos)
@@ -105,12 +107,18 @@ sp<RenderLayerSnapshot::BufferObject> PipelineLayout::takeBufferSnapshot(const R
 
 const Map<uint32_t, PipelineLayout::StreamLayout>& PipelineLayout::streamLayouts() const
 {
-    return _stream_layouts;
+    return _stream_layout;
 }
 
-Map<uint32_t, PipelineLayout::StreamLayout>& PipelineLayout::streamLayouts()
+void PipelineLayout::setStreamLayoutAlignment(const uint32_t alignment)
 {
-    return _stream_layouts;
+    for(auto &[k, v] : _stream_layout)
+        v.align(k == 0 ? 4 : alignment);
+}
+
+const PipelineLayout::VertexDescriptor& PipelineLayout::vertexDescriptor() const
+{
+    return _vertex_descriptor;
 }
 
 const Table<String, PipelineLayout::DescriptorSet>& PipelineLayout::samplers() const
@@ -130,19 +138,19 @@ uint32_t PipelineLayout::colorAttachmentCount() const
 
 void PipelineLayout::addAttribute(String name, Attribute attribute)
 {
-    _stream_layouts[attribute.divisor()].addAttribute(std::move(name), std::move(attribute));
+    _stream_layout[attribute.divisor()].addAttribute(std::move(name), std::move(attribute));
 }
 
 const PipelineLayout::StreamLayout& PipelineLayout::getStreamLayout(const uint32_t divisor) const
 {
-    const auto iter = _stream_layouts.find(divisor);
-    DCHECK(iter != _stream_layouts.end(), "PipelineInput has no stream(%d)", divisor);
+    const auto iter = _stream_layout.find(divisor);
+    DCHECK(iter != _stream_layout.end(), "PipelineInput has no stream(%d)", divisor);
     return iter->second;
 }
 
 Optional<const Attribute&> PipelineLayout::getAttribute(const String& name) const
 {
-    for(const auto& i : _stream_layouts)
+    for(const auto& i : _stream_layout)
         if(const Optional<const Attribute&> opt = i.second.getAttribute(name))
             return opt;
     return {};
@@ -150,8 +158,8 @@ Optional<const Attribute&> PipelineLayout::getAttribute(const String& name) cons
 
 sp<Uniform> PipelineLayout::getUniform(const String& name) const
 {
-    for(const sp<UBO>& i : _ubos)
-        if(const auto iter = i->uniforms().find(name); iter != i->uniforms().end())
+    for(const UBO& i : _ubos)
+        if(const auto iter = i.uniforms().find(name); iter != i.uniforms().end())
             return iter->second;
     return nullptr;
 }
@@ -204,10 +212,9 @@ int32_t PipelineLayout::StreamLayout::getAttributeOffset(const String& name) con
     return _attributes.has(name) ? static_cast<int32_t>(_attributes.at(name).offset()) : -1;
 }
 
-void PipelineLayout::StreamLayout::align(uint32_t alignment)
+void PipelineLayout::StreamLayout::align(const uint32_t alignment)
 {
-    const uint32_t mod = _stride % alignment;
-    if(mod != 0)
+    if(const uint32_t mod = _stride % alignment)
         _stride += (alignment - mod);
 }
 
@@ -216,7 +223,7 @@ PipelineLayout::UBO::UBO(const uint32_t binding)
 {
 }
 
-void PipelineLayout::UBO::doSnapshot(uint64_t timestamp, bool force) const
+void PipelineLayout::UBO::doSnapshot(const uint64_t timestamp, const bool force) const
 {
     uint8_t* buf = _buffer->buf();
     uint8_t* dirtyFlags = _dirty_flags->buf();

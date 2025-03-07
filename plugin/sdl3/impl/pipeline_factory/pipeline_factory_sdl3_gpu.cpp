@@ -10,7 +10,6 @@
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/pipeline_descriptor.h"
-#include "renderer/base/pipeline_configuration.h"
 #include "renderer/base/pipeline_layout.h"
 #include "renderer/inf/pipeline.h"
 #include "renderer/util/render_util.h"
@@ -206,19 +205,19 @@ SDL_GPUPrimitiveType toPrimitiveType(const Enum::DrawMode drawMode)
 void bindUBOSnapshots(SDL_GPUCommandBuffer* cmdbuf, const Vector<RenderLayerSnapshot::UBOSnapshot>& uboSnapshots, const PipelineLayout& shaderLayout, const ShaderStageSet stages)
 {
     size_t binding = 0;
-    for(const sp<PipelineLayout::UBO>& ubo : shaderLayout.ubos())
-        if(const ShaderStageSet uboStages = ubo->_stages; uboStages & stages)
+    for(const PipelineLayout::UBO& ubo : shaderLayout.ubos())
+        if(const ShaderStageSet uboStages = ubo._stages; uboStages & stages)
         {
             DCHECK(binding < uboSnapshots.size(), "UBO Snapshot and UBO Layout mismatch: %d vs %d", uboSnapshots.size(), shaderLayout.ubos().size());
             const RenderLayerSnapshot::UBOSnapshot& uboSnapshot = uboSnapshots.at(binding++);
             const void* data = uboSnapshot._buffer.buf();
             const uint32_t size = uboSnapshot._buffer.length();
             if(uboStages.has(Enum::SHADER_STAGE_BIT_VERTEX))
-                SDL_PushGPUVertexUniformData(cmdbuf, ubo->binding(), data, size);
+                SDL_PushGPUVertexUniformData(cmdbuf, ubo.binding(), data, size);
             if(uboStages.has(Enum::SHADER_STAGE_BIT_FRAGMENT))
-                SDL_PushGPUFragmentUniformData(cmdbuf, ubo->binding(), data, size);
+                SDL_PushGPUFragmentUniformData(cmdbuf, ubo.binding(), data, size);
             if(uboStages.has(Enum::SHADER_STAGE_BIT_COMPUTE))
-                SDL_PushGPUComputeUniformData(cmdbuf, ubo->binding(), data, size);
+                SDL_PushGPUComputeUniformData(cmdbuf, ubo.binding(), data, size);
         }
 }
 
@@ -393,8 +392,8 @@ public:
 
         SDL_GPUTextureSamplerBinding textureSamplerBinding[8];
         Uint32 samplerCount = 0;
-        ASSERT(pipelineBindings.pipelineDescriptor()->samplers().size() < 8);
-        for(const auto& [k, v] : pipelineBindings.pipelineDescriptor()->samplers())
+        ASSERT(pipelineBindings.samplers().size() < 8);
+        for(const auto& [k, v] : pipelineBindings.samplers())
         {
             TextureSDL3_GPU& texture = k->delegate().cast<TextureSDL3_GPU>();
             if(!texture.texture())

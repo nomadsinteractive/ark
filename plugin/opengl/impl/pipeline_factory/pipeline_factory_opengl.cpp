@@ -4,7 +4,6 @@
 
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/pipeline_bindings.h"
-#include "renderer/base/pipeline_configuration.h"
 #include "renderer/base/render_engine_context.h"
 
 #include "opengl/base/gl_pipeline.h"

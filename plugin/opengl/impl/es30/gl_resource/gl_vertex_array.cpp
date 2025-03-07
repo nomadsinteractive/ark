@@ -7,8 +7,8 @@
 
 namespace ark::plugin::opengl {
 
-GLVertexArray::GLVertexArray(sp<GLPipeline> pipeline, sp<Buffer::Delegate> vertices, const PipelineBindings& pipelineBindings)
-    : _pipeline(std::move(pipeline)), _vertex(std::move(vertices)), _pipeline_descriptor(pipelineBindings.pipelineDescriptor()), _streams(pipelineBindings.streams()), _id(0)
+GLVertexArray::GLVertexArray(const PipelineBindings& pipelineBindings, sp<GLPipeline> pipeline, sp<Buffer::Delegate> vertices)
+    : _pipeline_bindings(pipelineBindings), _pipeline(std::move(pipeline)), _vertex(std::move(vertices)), _id(0)
 {
 }
 
@@ -23,7 +23,7 @@ void GLVertexArray::upload(GraphicsContext& graphicsContext)
     glBindVertexArray(_id);
     _vertex->upload(graphicsContext);
     glBindBuffer(GL_ARRAY_BUFFER, static_cast<GLuint>(_vertex->id()));
-    _pipeline->bindBuffer(graphicsContext, _pipeline_descriptor->layout(), _streams);
+    _pipeline->bindBuffer(graphicsContext, _pipeline_bindings.pipelineLayout(), _pipeline_bindings.streams());
     glBindVertexArray(0);
 }
 

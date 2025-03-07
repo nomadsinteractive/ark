@@ -21,8 +21,8 @@ public:
     };
 
 public:
-    VertexWriter(const PipelineLayout::AttributeOffsets& attributes, bool doTransform, sp<Writer> writer);
-    VertexWriter(const PipelineLayout::AttributeOffsets& attributes, bool doTransform, uint8_t* ptr, size_t size, size_t stride);
+    VertexWriter(const PipelineLayout::VertexDescriptor& attributes, bool doTransform, sp<Writer> writer);
+    VertexWriter(const PipelineLayout::VertexDescriptor& attributes, bool doTransform, uint8_t* ptr, size_t size, size_t stride);
 
     template<typename T> void write(const T& value, uint32_t offset = 0) {
         _writer->write(&value, sizeof(T), offset);
@@ -70,7 +70,7 @@ private:
     void writeArray(ByteArray& array);
 
 private:
-    PipelineLayout::AttributeOffsets _attribute_offsets;
+    PipelineLayout::VertexDescriptor _attribute_offsets;
     sp<Writer> _writer;
 
     bool _do_transform;

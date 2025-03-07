@@ -3,10 +3,12 @@
 #include "core/util/string_convert.h"
 
 #include "renderer/base/graphics_context.h"
+#include "renderer/base/pipeline_building_context.h"
 #include "renderer/base/pipeline_layout.h"
-#include "renderer/base/pipeline_configuration.h"
+#include "renderer/base/render_controller.h"
 #include "renderer/base/render_engine_context.h"
 #include "renderer/impl/snippet/snippet_composite.h"
+#include "renderer/impl/snippet/snippet_draw_compute.h"
 #include "renderer/inf/snippet_factory.h"
 
 namespace ark {
@@ -72,42 +74,117 @@ PipelineDescriptor::TraitConfigure toPipelineTraitMeta(const document& manifest)
     return pipelineTrait;
 }
 
+String preprocess(const RenderEngineContext& renderEngineContext, const Map<String, String>& definitions, const String& source)
+{
+    DCHECK(renderEngineContext.version() > 0, "Unintialized RenderEngineContext");
+
+    static std::regex var_pattern(R"(\$\{([\w.]+)\})");
+    const Map<String, String>& engineDefinitions = renderEngineContext.definitions();
+
+    return source.replace(var_pattern, [&engineDefinitions, &definitions] (Array<String>& matches)->String {
+        const String& varName = matches.at(1);
+        auto iter = engineDefinitions.find(varName);
+        if(iter != engineDefinitions.end())
+            return iter->second;
+        iter = definitions.find(varName);
+        CHECK(iter != definitions.end(), "Undefinition \"%s\"", varName.c_str());
+        return iter->second;
+    });
 }
 
-PipelineDescriptor::PipelineDescriptor(Camera camera, sp<PipelineBuildingContext> buildingContext, sp<Snippet> snippet, Parameters parameters)
-    : _configuration(sp<PipelineConfiguration>::make(std::move(camera), std::move(buildingContext), std::move(snippet))), _parameters(std::move(parameters)), _layout(_configuration->pipelineLayout()), _attributes(_layout),
-      _samplers(_configuration->makeBindingSamplers()), _images(_configuration->makeBindingImages())
+sp<Snippet> createCoreSnippet(sp<Snippet> next)
 {
+    sp<Snippet> coreSnippet = Ark::instance().renderController()->renderEngine()->context()->snippetFactory()->createCoreSnippet();
+    DASSERT(coreSnippet);
+    if(next)
+        return sp<Snippet>::make<SnippetComposite>(std::move(coreSnippet), std::move(next));
+    return coreSnippet;
 }
 
-const Optional<Rect>& PipelineDescriptor::scissor() const
+class ComputeSnippetWrapper final : public Snippet, public Wrapper<Snippet> {
+public:
+    ComputeSnippetWrapper()
+        : Wrapper() {
+    }
+
+    sp<DrawDecorator> makeDrawDecorator(const RenderRequest& renderRequest) override
+    {
+        return _wrapped->makeDrawDecorator(renderRequest);
+    }
+};
+
+
+sp<Snippet> createSnippet(const Camera& camera, sp<Snippet> snippet, PipelineBuildingContext& buildingContext)
 {
-    return _parameters._scissor;
+    sp<ComputeSnippetWrapper> computeSnippetWrapper;
+    if(const op<ShaderPreprocessor>& computeStage = buildingContext.computingStage(); computeStage && !buildingContext.renderStages().empty())
+    {
+        computeSnippetWrapper = sp<ComputeSnippetWrapper>::make();
+        snippet = SnippetComposite::compose(std::move(snippet), std::move(snippet));
+    }
+
+    snippet = createCoreSnippet(std::move(snippet));
+    snippet->preInitialize(buildingContext);
+    buildingContext.initialize(camera);
+
+    if(computeSnippetWrapper)
+    {
+        std::array<uint32_t, 3> numWorkGroupsArray = {1, 1, 1};
+        const op<ShaderPreprocessor>& computeStage = buildingContext.computingStage();
+        if(const String numWorkGroupsAttr = Documents::getAttribute(computeStage->_manifest, "num-work-groups"))
+        {
+            const Vector<String> numWorkGroups = numWorkGroupsAttr.split(',');
+            for(size_t i = 0; i < std::min(numWorkGroups.size(), numWorkGroupsArray.size()); ++i)
+                numWorkGroupsArray[i] = Strings::eval<uint32_t>(numWorkGroups.at(i));
+        }
+        else
+        {
+            CHECK(computeStage->_compute_local_sizes, "Compute stage local size layout undefined");
+            numWorkGroupsArray = computeStage->_compute_local_sizes.value();
+        }
+        computeSnippetWrapper->reset(sp<Snippet>::make<SnippetDrawCompute>(buildingContext._pipeline_layout, numWorkGroupsArray, computeStage->_pre_shader_stage != Enum::SHADER_STAGE_BIT_NONE));
+    }
+
+    return snippet;
+}
+
+}
+
+PipelineDescriptor::PipelineDescriptor(Camera camera, sp<PipelineBuildingContext> buildingContext, Configuration configuration)
+    : _camera(std::move(camera)), _configuration(std::move(configuration)), _building_context(std::move(buildingContext)), _layout(_building_context->_pipeline_layout),
+      _predefined_samplers(std::move(_building_context->_samplers)), _predefined_images(std::move(_building_context->_images)), _definitions(_building_context->toDefinitions())
+{
+    _configuration._snippet = createSnippet(_camera, std::move(_configuration._snippet), _building_context);
+}
+
+const sp<Vec4>& PipelineDescriptor::scissor() const
+{
+    return _configuration._scissor;
 }
 
 const sp<Snippet>& PipelineDescriptor::snippet() const
 {
-    return _configuration->snippet();
+    return _configuration._snippet;
 }
 
-const PipelineDescriptor::Parameters& PipelineDescriptor::parameters() const
+const PipelineDescriptor::Configuration& PipelineDescriptor::parameters() const
 {
-    return _parameters;
+    return _configuration;
 }
 
-void PipelineDescriptor::setParameters(Parameters parameters)
+void PipelineDescriptor::setParameters(Configuration parameters)
 {
-    _parameters = std::move(parameters);;
+    _configuration = std::move(parameters);;
 }
 
 const Camera& PipelineDescriptor::camera() const
 {
-    return _configuration->_camera;
+    return _camera;
 }
 
 Camera& PipelineDescriptor::camera()
 {
-    return _configuration->_camera;
+    return _camera;
 }
 
 const sp<PipelineLayout>& PipelineDescriptor::layout() const
@@ -115,36 +192,9 @@ const sp<PipelineLayout>& PipelineDescriptor::layout() const
     return _layout;
 }
 
-const PipelineLayout::AttributeOffsets& PipelineDescriptor::attributes() const
+const PipelineLayout::VertexDescriptor& PipelineDescriptor::vertexDescriptor() const
 {
-    return _attributes;
-}
-
-const Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>>& PipelineDescriptor::samplers() const
-{
-    return _samplers;
-}
-
-const Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>>& PipelineDescriptor::images() const
-{
-    return _images;
-}
-
-void PipelineDescriptor::preCompile(GraphicsContext& graphicsContext)
-{
-    _configuration->preCompile(graphicsContext, *this);
-}
-
-Map<Enum::ShaderStageBit, ShaderPreprocessor::Stage> PipelineDescriptor::getPreprocessedStages(const RenderEngineContext& renderEngineContext) const
-{
-    return _configuration->getPreprocessedStages(renderEngineContext);
-}
-
-void PipelineDescriptor::bindSampler(sp<Texture> texture, const uint32_t name)
-{
-    CHECK_WARN(_samplers.size() > name, "Illegal sampler binding position: %d, sampler count: %d", name, _samplers.size());
-    if(_samplers.size() > name)
-        _samplers[name].first = std::move(texture);
+    return _layout->vertexDescriptor();
 }
 
 bool PipelineDescriptor::hasDivisors() const
@@ -154,20 +204,68 @@ bool PipelineDescriptor::hasDivisors() const
 
 bool PipelineDescriptor::hasTrait(const TraitType traitType) const
 {
-    return _parameters._traits.has(traitType);
+    return _configuration._traits.has(traitType);
 }
 
-PipelineDescriptor::Parameters::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+void PipelineDescriptor::preCompile(GraphicsContext& graphicsContext)
+{
+    if(_building_context)
+    {
+        _configuration._snippet->preCompile(graphicsContext, _building_context, *this);
+
+        for(const ShaderPreprocessor* preprocessor : _building_context->stages())
+            _stages.push_back(preprocessor->preprocess());
+
+        _building_context = nullptr;
+    }
+}
+
+Map<Enum::ShaderStageBit, ShaderPreprocessor::Stage> PipelineDescriptor::getPreprocessedStages(const RenderEngineContext& renderEngineContext) const
+{
+    Map<Enum::ShaderStageBit, ShaderPreprocessor::Stage> shaders;
+
+    for(const auto& [manifest, stage, source] : _stages)
+        shaders[stage] = {manifest, stage, preprocess(renderEngineContext, _definitions, source)};
+
+    return shaders;
+}
+
+Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>> PipelineDescriptor::makeBindingSamplers() const
+{
+    const PipelineLayout& pipelineLayout = _layout;
+    CHECK_WARN(pipelineLayout._samplers.size() >= _predefined_samplers.size(), "Predefined samplers(%d) is more than samplers(%d) in PipelineLayout", _predefined_samplers.size(), pipelineLayout._samplers.size());
+
+    Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>> samplers;
+    for(size_t i = 0; i < pipelineLayout._samplers.size(); ++i)
+    {
+        const String& name = pipelineLayout._samplers.keys().at(i);
+        const auto iter = _predefined_samplers.find(name);
+        samplers.emplace_back(iter != _predefined_samplers.end() ? iter->second : (i < _predefined_samplers.size() ? _predefined_samplers.values().at(i) : nullptr), pipelineLayout._samplers.values().at(i));
+    }
+    return samplers;
+}
+
+Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>> PipelineDescriptor::makeBindingImages() const
+{
+    const PipelineLayout& pipelineLayout = _layout;
+    DASSERT(_predefined_images.size() == pipelineLayout._images.size());
+
+    Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>> bindingImages;
+    for(size_t i = 0; i < pipelineLayout._images.size(); ++i)
+        bindingImages.emplace_back(_predefined_images.values().at(i), pipelineLayout._images.values().at(i));
+    return bindingImages;
+}
+
+PipelineDescriptor::Configuration::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _scissor(factory.getBuilder<Vec4>(manifest, "scissor"))
 {
     for(const document& i : manifest->children("trait"))
         _traits.push_back(Documents::ensureAttribute<TraitType>(i, constants::TYPE), toPipelineTraitMeta(i));
 }
 
-PipelineDescriptor::Parameters PipelineDescriptor::Parameters::BUILDER::build(const Scope& args) const
+PipelineDescriptor::Configuration PipelineDescriptor::Configuration::BUILDER::build(const Scope& args) const
 {
-    const sp<Vec4> scissor = _scissor.build(args);
-    return {scissor ? Optional<Rect>(Ark::instance().renderController()->renderEngine()->toRendererRect(Rect(scissor->val()))) : Optional<Rect>(), _traits};
+    return {_traits, _scissor.build(args)};
 }
 
 template<> ARK_API PipelineDescriptor::TraitType StringConvert::eval<PipelineDescriptor::TraitType>(const String& str)

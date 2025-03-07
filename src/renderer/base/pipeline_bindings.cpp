@@ -2,11 +2,9 @@
 
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/pipeline_descriptor.h"
-#include "renderer/base/pipeline_configuration.h"
 #include "renderer/base/render_controller.h"
 #include "renderer/impl/snippet/snippet_composite.h"
 #include "renderer/inf/pipeline.h"
-#include "renderer/inf/pipeline_factory.h"
 
 namespace ark {
 
@@ -55,49 +53,89 @@ public:
 
 }
 
+struct PipelineBindings::Stub {
+    Stub(const Enum::DrawMode drawMode, const Enum::DrawProcedure drawProcedure, Buffer vertices, sp<PipelineDescriptor> pipelineDescriptor, Map<uint32_t, Buffer> streams)
+        : _draw_mode(drawMode), _draw_procedure(drawProcedure), _vertices(std::move(vertices)), _pipeline_descriptor(std::move(pipelineDescriptor)), _attachments(sp<Traits>::make()), _streams(std::move(streams)),
+          _samplers(_pipeline_descriptor->makeBindingSamplers()), _images(_pipeline_descriptor->makeBindingImages())
+    {
+    }
+
+    Enum::DrawMode _draw_mode;
+    Enum::DrawProcedure _draw_procedure;
+    Buffer _vertices;
+
+    sp<PipelineDescriptor> _pipeline_descriptor;
+    sp<Traits> _attachments;
+
+    Map<uint32_t, Buffer> _streams;
+
+    Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>> _samplers;
+    Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>> _images;
+};
+
 PipelineBindings::PipelineBindings(const Enum::DrawMode drawMode, const Enum::DrawProcedure drawProcedure, Buffer vertices, sp<PipelineDescriptor> pipelineDescriptor, Map<uint32_t, Buffer> streams)
-    : _draw_mode(drawMode), _draw_procedure(drawProcedure), _vertices(std::move(vertices)), _pipeline_descriptor(std::move(pipelineDescriptor)), _streams(sp<Map<uint32_t, Buffer>>::make(std::move(streams))), _attachments(sp<Traits>::make())
+    : _stub(sp<Stub>::make(drawMode, drawProcedure, std::move(vertices), std::move(pipelineDescriptor), std::move(streams)))
 {
 }
 
 Enum::DrawMode PipelineBindings::drawMode() const
 {
-    return _draw_mode;
+    return _stub->_draw_mode;
 }
 
 Enum::DrawProcedure PipelineBindings::drawProcedure() const
 {
-    return _draw_procedure;
+    return _stub->_draw_procedure;
 }
 
 const Buffer& PipelineBindings::vertices() const
 {
-    return _vertices;
+    return _stub->_vertices;
 }
 
 const sp<PipelineDescriptor>& PipelineBindings::pipelineDescriptor() const
 {
-    return _pipeline_descriptor;
+    return _stub->_pipeline_descriptor;
 }
 
 const sp<Snippet>& PipelineBindings::snippet() const
 {
-    return _pipeline_descriptor->snippet();
+    return _stub->_pipeline_descriptor->snippet();
 }
 
 const sp<PipelineLayout>& PipelineBindings::pipelineLayout() const
 {
-    return _pipeline_descriptor->layout();
+    return _stub->_pipeline_descriptor->layout();
 }
 
-const sp<Map<uint32_t, Buffer>>& PipelineBindings::streams() const
+const Map<uint32_t, Buffer>& PipelineBindings::streams() const
 {
-    return _streams;
+    return _stub->_streams;
 }
 
 const sp<Traits>& PipelineBindings::attachments() const
 {
-    return _attachments;
+    return _stub->_attachments;
+}
+
+const Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>>& PipelineBindings::samplers() const
+{
+    return _stub->_samplers;
+}
+
+const Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>>& PipelineBindings::images() const
+{
+    return _stub->_images;
+}
+
+void PipelineBindings::bindSampler(sp<Texture> texture, const uint32_t name) const
+{
+    CHECK_WARN(_stub->_samplers.size() > name, "Illegal sampler binding position: %d, sampler count: %d", name, _stub->_samplers.size());
+    if(_stub->_samplers.size() > name)
+    {
+        CHECK_WARN(!_stub->_samplers[name].first, "Overriding existing sampler binding: %d", name);
+        _stub->_samplers[name].first = std::move(texture);
+    }
 }
 
 const sp<Pipeline>& PipelineBindings::ensurePipeline(GraphicsContext& graphicsContext)
@@ -113,31 +151,11 @@ const sp<Pipeline>& PipelineBindings::ensurePipeline(GraphicsContext& graphicsCo
     return _pipeline;
 }
 
-const sp<Pipeline>& PipelineBindings::ensureRenderPipeline(GraphicsContext& graphicsContext)
-{
-    const sp<Pipeline>& pipeline = ensurePipeline(graphicsContext);
-    if(pipeline.isInstance<PipelineComposite>())
-        return pipeline.cast<PipelineComposite>()->_pipeline_draw;
-    return pipeline;
-}
-
-Map<uint32_t, Buffer::Factory> PipelineBindings::makeDividedBufferFactories() const
-{
-    Map<uint32_t, Buffer::Factory> builders;
-    const sp<PipelineLayout>& shaderLayout = _pipeline_descriptor->layout();
-    for(const auto& i : *_streams)
-    {
-        const PipelineLayout::StreamLayout& stream = shaderLayout->getStreamLayout(i.first);
-        builders.insert(std::make_pair(i.first, Buffer::Factory(stream.stride())));
-    }
-    return builders;
-}
-
 void PipelineBindings::doEnsurePipeline(GraphicsContext& graphicsContext)
 {
-    _pipeline_descriptor->preCompile(graphicsContext);
+    _stub->_pipeline_descriptor->preCompile(graphicsContext);
 
-    Map<Enum::ShaderStageBit, ShaderPreprocessor::Stage> stages = _pipeline_descriptor->getPreprocessedStages(graphicsContext.renderContext());
+    Map<Enum::ShaderStageBit, ShaderPreprocessor::Stage> stages = _stub->_pipeline_descriptor->getPreprocessedStages(graphicsContext.renderContext());
     ASSERT(!stages.empty());
 
     Map<Enum::ShaderStageBit, String> sources;
@@ -156,6 +174,26 @@ void PipelineBindings::doEnsurePipeline(GraphicsContext& graphicsContext)
     else
         _pipeline = renderEngine.createPipeline(graphicsContext, *this, std::move(sources));
     _pipeline->upload(graphicsContext);
+}
+
+const sp<Pipeline>& PipelineBindings::ensureRenderPipeline(GraphicsContext& graphicsContext)
+{
+    const sp<Pipeline>& pipeline = ensurePipeline(graphicsContext);
+    if(pipeline.isInstance<PipelineComposite>())
+        return pipeline.cast<PipelineComposite>()->_pipeline_draw;
+    return pipeline;
+}
+
+Map<uint32_t, Buffer::Factory> PipelineBindings::makeDividedBufferFactories() const
+{
+    Map<uint32_t, Buffer::Factory> builders;
+    const sp<PipelineLayout>& shaderLayout = _stub->_pipeline_descriptor->layout();
+    for(const auto& i : _stub->_streams)
+    {
+        const PipelineLayout::StreamLayout& stream = shaderLayout->getStreamLayout(i.first);
+        builders.insert(std::make_pair(i.first, Buffer::Factory(stream.stride())));
+    }
+    return builders;
 }
 
 }

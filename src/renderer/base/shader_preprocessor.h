@@ -187,7 +187,6 @@ private:
     };
 
     friend class PipelineBuildingContext;
-    friend class PipelineConfiguration;
     friend class PipelineLayout;
 
 public:

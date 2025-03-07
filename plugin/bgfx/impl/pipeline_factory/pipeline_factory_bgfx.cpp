@@ -1,6 +1,5 @@
 #include "bgfx/impl/pipeline_factory/pipeline_factory_bgfx.h"
 
-#include <bx/hash.h>
 #include <bx/readerwriter.h>
 
 #include "core/util/uploader_type.h"
@@ -9,7 +8,6 @@
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/pipeline_descriptor.h"
-#include "renderer/base/pipeline_configuration.h"
 #include "renderer/base/pipeline_layout.h"
 #include "renderer/inf/pipeline.h"
 #include "renderer/util/render_util.h"
@@ -282,7 +280,7 @@ struct DrawPipelineBgfx final : ResourceBase<::bgfx::ProgramHandle, Pipeline> {
             for(size_t i = 0; i < samplerNames.size(); ++i)
             {
                 const String& name = samplerNames.at(i);
-                const auto& [texture, bindingSet] = drawingContext._bindings->pipelineDescriptor()->samplers().at(i);
+                const auto& [texture, bindingSet] = drawingContext._bindings->samplers().at(i);
                 sp<TextureBgfx> textureBgfx = texture->delegate().cast<TextureBgfx>();
                 _sampler_slots.push_back({::bgfx::createUniform(name.c_str(), ::bgfx::UniformType::Sampler), std::move(textureBgfx), textureUint++});
             }

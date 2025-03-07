@@ -7,7 +7,6 @@
 #include "renderer/base/pipeline_building_context.h"
 #include "renderer/base/shader.h"
 #include "renderer/base/shader_preprocessor.h"
-#include "renderer/base/pipeline_configuration.h"
 #include "renderer/base/uniform.h"
 #include "renderer/inf/snippet.h"
 
@@ -52,10 +51,10 @@ public:
         const sp<Snippet> snippet = sp<SnippetTest>::make();
         const sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(std::move(vert), std::move(frag));
 
-        const sp<PipelineConfiguration> pipelineConfiguration = sp<PipelineConfiguration>::make(Camera::createDefaultCamera(), buildingContext, snippet);
-        const sp<PipelineLayout>& pipelineLayout = pipelineConfiguration->pipelineLayout();
+        const sp<PipelineDescriptor> pipelineDescriptor = sp<PipelineDescriptor>::make(Camera::createDefaultCamera(), buildingContext, PipelineDescriptor::Configuration{{}, nullptr, std::move(snippet)});
+        const sp<PipelineLayout>& pipelineLayout = pipelineDescriptor->layout();
 
-        TESTCASE_VALIDATE(pipelineLayout->streamLayouts()[0].stride() != 0);
+        TESTCASE_VALIDATE(pipelineLayout->streamLayouts().at(0).stride() != 0);
         TESTCASE_VALIDATE(pipelineLayout->getAttribute("Position")->length());
         TESTCASE_VALIDATE(pipelineLayout->getAttribute("TexCoordinate")->offset() != -1);
         TESTCASE_VALIDATE(pipelineLayout->getAttribute("Alpha01")->offset() == -1);

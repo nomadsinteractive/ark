@@ -41,7 +41,7 @@ public:
     const sp<PipelineDescriptor>& pipelineDesciptor() const;
     const sp<PipelineLayout>& layout() const;
 
-    const PipelineDescriptor::Parameters& descriptorParams() const;
+    const PipelineDescriptor::Configuration& descriptorParams() const;
 
     sp<PipelineBindings> makeBindings(Buffer vertices, Enum::DrawMode mode, Enum::DrawProcedure renderProcedure, const Map<uint32_t, sp<Uploader>>& uploaders = {}) const;
 
@@ -61,7 +61,7 @@ public:
         Vector<StageManifest> _stages;
         SnippetManifest _snippets;
         SafeBuilder<Camera> _camera;
-        PipelineDescriptor::Parameters::BUILDER _parameters;
+        PipelineDescriptor::Configuration::BUILDER _configuration;
     };
 
 //  [[plugin::builder]]

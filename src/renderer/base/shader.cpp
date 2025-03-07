@@ -10,11 +10,9 @@
 
 #include "renderer/base/pipeline_descriptor.h"
 #include "renderer/base/pipeline_building_context.h"
-#include "renderer/base/pipeline_configuration.h"
 #include "renderer/base/render_controller.h"
 #include "renderer/base/pipeline_bindings.h"
 #include "renderer/impl/snippet/snippet_composite.h"
-#include "renderer/inf/renderer_factory.h"
 
 namespace ark {
 
@@ -81,7 +79,7 @@ const sp<PipelineDescriptor>& Shader::pipelineDesciptor() const
     return _pipeline_desciptor;
 }
 
-const PipelineDescriptor::Parameters& Shader::descriptorParams() const
+const PipelineDescriptor::Configuration& Shader::descriptorParams() const
 {
     return _pipeline_desciptor->parameters();
 }
@@ -107,7 +105,7 @@ Map<uint32_t, Buffer> Shader::makeDivivedBuffers(const Map<uint32_t, sp<Uploader
 Shader::BUILDER_IMPL::BUILDER_IMPL(BeanFactory& factory, const document& manifest, sp<Builder<Camera>> camera, Optional<Vector<StageManifest>> stages, Optional<SnippetManifest> snippets)
     : _factory(factory), _manifest(manifest), _stages(stages ? std::move(stages.value()) : factory.makeBuilderListObject<StageManifest>(manifest, "stage")),
       _snippets(snippets ? std::move(snippets.value()) : factory.makeBuilderList<Snippet>(manifest, "snippet")), _camera(camera ? std::move(camera) : factory.getBuilder<Camera>(manifest, constants::CAMERA)),
-      _parameters(factory, manifest)
+      _configuration(factory, manifest)
 {
 }
 
@@ -121,7 +119,9 @@ sp<Shader> Shader::BUILDER_IMPL::build(const Scope& args)
         snippet = SnippetComposite::compose(std::move(snippet), i->build(args));
 
     const sp<Camera> camera = _camera.build(args);
-    return sp<Shader>::make(sp<PipelineDescriptor>::make(camera ? *camera : Camera::createDefaultCamera(), std::move(buildingContext), std::move(snippet), _parameters.build(args)));
+    PipelineDescriptor::Configuration configuration = _configuration.build(args);
+    configuration._snippet = std::move(snippet);
+    return sp<Shader>::make(sp<PipelineDescriptor>::make(camera ? *camera : Camera::createDefaultCamera(), std::move(buildingContext), std::move(configuration)));
 }
 
 sp<PipelineBuildingContext> Shader::BUILDER_IMPL::makePipelineBuildingContext(const Scope& args) const

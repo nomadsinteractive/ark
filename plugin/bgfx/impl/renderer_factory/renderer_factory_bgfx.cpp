@@ -9,7 +9,6 @@
 
 #include "renderer/base/pipeline_building_context.h"
 #include "renderer/base/pipeline_descriptor.h"
-#include "renderer/base/pipeline_configuration.h"
 #include "renderer/base/render_engine.h"
 #include "renderer/base/render_engine_context.h"
 #include "renderer/inf/snippet_factory.h"

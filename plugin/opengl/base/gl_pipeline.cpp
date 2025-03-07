@@ -118,7 +118,7 @@ struct GLPipeline::Stub {
 
         uint32_t binding = 0;
         const Vector<String>& samplerNames = pipelineBindings.pipelineLayout()->samplers().keys();
-        const Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>>& samplers = pipelineBindings.pipelineDescriptor()->samplers();
+        const Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>>& samplers = pipelineBindings.samplers();
         DASSERT(samplerNames.size() == samplers.size());
         for(size_t i = 0; i < samplerNames.size(); ++i)
         {
@@ -131,7 +131,7 @@ struct GLPipeline::Stub {
         }
 
         const Vector<String>& imageNames = pipelineBindings.pipelineLayout()->images().keys();
-        const Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>>& images = pipelineBindings.pipelineDescriptor()->images();
+        const Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>>& images = pipelineBindings.images();
         for(size_t i = 0; i < images.size(); ++i)
             if(const sp<Texture>& image = images.at(i).first)
             {
@@ -140,22 +140,22 @@ struct GLPipeline::Stub {
             }
     }
 
-    void bindUBO(const RenderLayerSnapshot::UBOSnapshot& uboSnapshot, const sp<PipelineLayout::UBO>& ubo)
+    void bindUBO(const RenderLayerSnapshot::UBOSnapshot& uboSnapshot, const PipelineLayout::UBO& ubo)
     {
-        const Vector<sp<Uniform>>& uniforms = ubo->uniforms().values();
+        const Vector<sp<Uniform>>& uniforms = ubo.uniforms().values();
         for(size_t i = 0; i < uniforms.size(); ++i)
         {
             if(uboSnapshot._dirty_flags.buf()[i] || _rebind_needed)
             {
                 const sp<Uniform>& uniform = uniforms.at(i);
                 const uint8_t* buf = uboSnapshot._buffer.buf();
-                const auto& [offset, size] = ubo->slots().at(i);
+                const auto& [offset, size] = ubo.slots().at(i);
                 bindUniform(buf + offset, size, uniform);
             }
         }
     }
 
-    void bindUniform(const uint8_t* ptr, uint32_t size, const Uniform& uniform)
+    void bindUniform(const uint8_t* ptr, const uint32_t size, const Uniform& uniform)
     {
         const GLUniform& glUniform = getUniform(uniform.name());
         const float* ptrf = reinterpret_cast<const float*>(ptr);
@@ -555,7 +555,7 @@ void ensureVertexArray(GraphicsContext& graphicsContext, const DrawingContext& c
     uint64_t vertexArrayId = vertexArray ? vertexArray->id() : 0;
     if(!vertexArrayId) {
         const sp<Pipeline>& renderPipeline = context._bindings->ensureRenderPipeline(graphicsContext);
-        sp<GLVertexArray> va = sp<GLVertexArray>::make(renderPipeline.cast<GLPipeline>(), context._vertices.delegate(), context._bindings);
+        sp<GLVertexArray> va = sp<GLVertexArray>::make(*context._bindings, renderPipeline.cast<GLPipeline>(), context._vertices.delegate());
         va->upload(graphicsContext);
         graphicsContext.renderController()->upload(va, RenderController::US_ON_SURFACE_READY);
         vertexArrayId = va->id();
@@ -592,7 +592,7 @@ public:
     {
         _stub->bind(graphicsContext, drawingContext);
 
-        const GLScissor scissor(drawingContext._scissor ? drawingContext._scissor : _scissor);
+        const GLScissor scissor(drawingContext._scissor ? drawingContext._scissor : _scissor ? Optional<Rect>(_scissor->val()) : Optional<Rect>());
 
         for(const auto& [i, j] : drawingContext._buffer_object->_ssbos)
             _ssbo_binders.emplace_back(GL_SHADER_STORAGE_BUFFER, static_cast<GLuint>(i), static_cast<GLuint>(j.id()));
@@ -615,7 +615,7 @@ public:
 private:
     sp<GLPipeline::Stub> _stub;
 
-    Optional<Rect> _scissor;
+    sp<Vec4> _scissor;
     sp<PipelineDrawCommand> _renderer;
 
     Vector<GLBufferBaseBinder> _ssbo_binders;
@@ -804,11 +804,11 @@ void GLPipeline::compute(GraphicsContext& graphicsContext, const ComputeContext&
     _pipeline_operation->compute(graphicsContext, computeContext);
 }
 
-void GLPipeline::bindBuffer(GraphicsContext& graphicsContext, const PipelineLayout& shaderLayout, const Map<uint32_t, Buffer>& divisors)
+void GLPipeline::bindBuffer(GraphicsContext& graphicsContext, const PipelineLayout& shaderLayout, const Map<uint32_t, Buffer>& streams)
 {
     DCHECK(id(), "GLProgram unprepared");
     bindBuffer(graphicsContext, shaderLayout, 0);
-    for(const auto& [i, j] : divisors)
+    for(const auto& [i, j] : streams)
     {
         if(!j.id())
             j.upload(graphicsContext);

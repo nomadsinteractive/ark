@@ -18,9 +18,9 @@ Enum::DrawProcedure toDrawProcedure(const Buffer& indexBuffer, const Map<uint32_
 
 }
 
-RenderPass::RenderPass(sp<Shader> shader, Buffer vertexBuffer, Buffer indexBuffer, sp<Integer> drawCount, Enum::DrawMode mode, Enum::DrawProcedure drawProcedure, const Map<uint32_t, sp<Uploader>>& dividedUploaders)
+RenderPass::RenderPass(sp<Shader> shader, Buffer vertexBuffer, Buffer indexBuffer, sp<Integer> drawCount, const Enum::DrawMode drawMode, const Enum::DrawProcedure drawProcedure, const Map<uint32_t, sp<Uploader>>& dividedUploaders)
     : _shader(std::move(shader)), _index_buffer(std::move(indexBuffer)), _draw_count(std::move(drawCount)), _draw_procedure(drawProcedure),
-      _pipeline_bindings(_shader->makeBindings(std::move(vertexBuffer), mode, drawProcedure, dividedUploaders))
+      _pipeline_bindings(_shader->makeBindings(std::move(vertexBuffer), drawMode, drawProcedure, dividedUploaders))
 {
 }
 
@@ -33,7 +33,7 @@ void RenderPass::render(RenderRequest& renderRequest, const V3& /*position*/)
         if(_draw_procedure == Enum::DRAW_PROCEDURE_DRAW_INSTANCED)
         {
             std::vector<std::pair<uint32_t, Buffer::Snapshot>> dividedBufferSnapshots;
-            for(const auto& [i, j] : *_pipeline_bindings->streams())
+            for(const auto& [i, j] : _pipeline_bindings->streams())
                 dividedBufferSnapshots.emplace_back(i, j.snapshot(j.size()));
             drawParam = DrawingParams::DrawElementsInstanced{0, static_cast<uint32_t>(_index_buffer.size() / sizeof(element_index_t)), std::move(dividedBufferSnapshots)};
         }

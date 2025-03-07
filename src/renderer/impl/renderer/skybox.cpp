@@ -32,7 +32,7 @@ Skybox::Skybox(const sp<Shader>& shader, const sp<Texture>& texture, RenderContr
     : _shader(shader), _pipeline_bindings(shader->makeBindings(renderController.makeVertexBuffer({}, UploaderType::create(makeUnitCubeVertices(renderController))), Enum::DRAW_MODE_TRIANGLES, Enum::DRAW_PROCEDURE_DRAW_ELEMENTS)),
       _ib_snapshot(renderController.getSharedPrimitiveIndexBuffer(Global<Constants>()->MODEL_UNIT_QUAD_RHS, false)->snapshot(renderController, 6))
 {
-    _pipeline_bindings->pipelineDescriptor()->bindSampler(texture);
+    _pipeline_bindings->bindSampler(texture);
 }
 
 void Skybox::render(RenderRequest& renderRequest, const V3& /*position*/)

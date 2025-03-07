@@ -2,7 +2,6 @@
 
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/pipeline_bindings.h"
-#include "renderer/base/pipeline_configuration.h"
 #include "renderer/base/pipeline_descriptor.h"
 
 #include "vulkan/base/vk_pipeline.h"

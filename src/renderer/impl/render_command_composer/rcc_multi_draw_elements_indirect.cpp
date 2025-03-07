@@ -32,7 +32,7 @@ public:
     void upload(Writable& uploader) override {
         uint32_t offset = 0;
         const size_t stride = _pipeline_input->getStreamLayout(0).stride();
-        PipelineLayout::AttributeOffsets attributes(_pipeline_input);
+        PipelineLayout::VertexDescriptor attributes(_pipeline_input);
         for(const ModelBundle::ModelLayout& i : _model_bundle->modelLayouts().values())
         {
             const Model& model = i._model;
@@ -156,8 +156,8 @@ void RCCMultiDrawElementsIndirect::writeModelMatices(const RenderRequest& render
     }
 
     size_t instanceId = 0;
-    const PipelineLayout::AttributeOffsets& attributeOffsets = buf.pipelineBindings()->pipelineDescriptor()->attributes();
-    const size_t attributeStride = attributeOffsets.stride();
+    const PipelineLayout::VertexDescriptor& attributeOffsets = buf.pipelineBindings()->pipelineDescriptor()->vertexDescriptor();
+    const size_t attributeStride = attributeOffsets._stride;
     const bool hasModelMatrix = attributeOffsets._offsets[Attribute::USAGE_MODEL_MATRIX] != -1;
     const bool hasMaterialId = attributeOffsets._offsets[Attribute::USAGE_MATERIAL_ID] != -1;
     for(const IndirectCmds& i : _indirect_cmds.values())

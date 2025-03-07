@@ -3,7 +3,6 @@
 #include "core/impl/uploader/uploader_of_variable.h"
 
 #include "renderer/base/pipeline_building_context.h"
-#include "renderer/base/pipeline_configuration.h"
 #include "renderer/base/uniform.h"
 
 namespace ark {

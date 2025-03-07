@@ -9,7 +9,7 @@ namespace ark::plugin::dear_imgui {
 namespace {
 
 sp<PipelineDescriptor> makePipelineBindingParameters(const PipelineDescriptor& pipelineDescriptor) {
-    PipelineDescriptor::Parameters parameters = pipelineDescriptor.parameters();
+    PipelineDescriptor::Configuration parameters = pipelineDescriptor.parameters();
     PipelineDescriptor::PipelineTraitTable& traits = parameters._traits;
     if(!traits.has(PipelineDescriptor::TRAIT_TYPE_CULL_FACE_TEST))
     {
@@ -36,7 +36,7 @@ DrawCommandPool::DrawCommandPool(const Shader& shader, const sp<RenderController
     : _refcount(0), _draw_commands(sp<LFStack<sp<RendererImgui::DrawCommand>>>::make()), _render_controller(renderController),
       _pipeline_bindings(sp<PipelineBindings>::make(Enum::DRAW_MODE_TRIANGLES, Enum::DRAW_PROCEDURE_DRAW_ELEMENTS, Buffer(), makePipelineBindingParameters(shader.pipelineDesciptor()), Map<uint32_t, Buffer>{}))
 {
-    _pipeline_bindings->pipelineDescriptor()->bindSampler(std::move(texture));
+    _pipeline_bindings->bindSampler(std::move(texture));
 }
 
 sp<RendererImgui::DrawCommandRecycler> DrawCommandPool::obtainDrawCommandRecycler()

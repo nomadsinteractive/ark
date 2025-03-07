@@ -91,8 +91,6 @@ private:
     Map<Enum::ShaderStageBit, op<ShaderPreprocessor>> _rendering_stages;
     op<ShaderPreprocessor> _computing_stage;
     Vector<ShaderPreprocessor*> _stages;
-
-    friend class PipelineConfiguration;
 };
 
 }

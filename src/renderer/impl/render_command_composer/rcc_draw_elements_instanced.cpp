@@ -40,8 +40,8 @@ DrawingContext RCCDrawElementsInstanced::compose(const RenderRequest& renderRequ
         model.writeToStream(writer, V3(1.0f));
     }
 
-    const PipelineLayout::AttributeOffsets& attributeOffsets = buf.pipelineBindings()->pipelineDescriptor()->attributes();
-    const size_t attributeStride = attributeOffsets.stride();
+    const PipelineLayout::VertexDescriptor& attributeOffsets = buf.pipelineBindings()->pipelineDescriptor()->vertexDescriptor();
+    const size_t attributeStride = attributeOffsets._stride;
     const bool hasModelMatrix = attributeOffsets._offsets[Attribute::USAGE_MODEL_MATRIX] != -1;
 
     VertexWriter writer = buf.makeDividedVertexWriter(renderRequest, snapshot._elements.size(), 0, 1);

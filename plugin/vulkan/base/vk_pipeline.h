@@ -3,7 +3,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "renderer/forwarding.h"
-#include "renderer/base/pipeline_descriptor.h"
+#include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/shader.h"
 #include "renderer/inf/pipeline.h"
 
@@ -34,8 +34,8 @@ public:
 private:
     void addDescriptorSetLayout(VkDevice device, const Vector<VkDescriptorSetLayoutBinding>& setLayoutBindings);
 
-    void setupDescriptorSetLayout(GraphicsContext& graphicsContext, const PipelineDescriptor& pipelineDescriptor);
-    void setupDescriptorSet(GraphicsContext& graphicsContext, const PipelineDescriptor& pipelineDescriptor);
+    void setupDescriptorSetLayout(GraphicsContext& graphicsContext);
+    void setupDescriptorSet(GraphicsContext& graphicsContext);
 
     void setupGraphicsPipeline(GraphicsContext& graphicsContext);
     void setupComputePipeline(GraphicsContext& graphicsContext);
@@ -51,7 +51,7 @@ private:
 
 private:
     Enum::DrawMode _draw_mode;
-    sp<PipelineDescriptor> _pipeline_descriptor;
+    PipelineBindings _pipeline_bindings;
 
     sp<Recycler> _recycler;
     sp<VKRenderer> _renderer;

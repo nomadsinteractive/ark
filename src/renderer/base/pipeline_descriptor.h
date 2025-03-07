@@ -126,15 +126,17 @@ public:
 
     typedef Table<TraitType, TraitConfigure> PipelineTraitTable;
 
-    struct Parameters {
-        Optional<Rect> _scissor;
+    struct Configuration {
         PipelineTraitTable _traits;
+        sp<Vec4> _scissor;
+        sp<Snippet> _snippet;
+        sp<DrawDecorator> _draw_decorator;
 
         class BUILDER {
         public:
             BUILDER(BeanFactory& factory, const document& manifest);
 
-            Parameters build(const Scope& args) const;
+            Configuration build(const Scope& args) const;
 
         private:
             SafeBuilder<Vec4> _scissor;
@@ -143,43 +145,44 @@ public:
     };
 
 public:
-    PipelineDescriptor(Camera camera, sp<PipelineBuildingContext> buildingContext, sp<Snippet> snippet, Parameters parameters);
+    PipelineDescriptor(Camera camera, sp<PipelineBuildingContext> buildingContext, Configuration configuration);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(PipelineDescriptor);
 
-    const Parameters& parameters() const;
-    void setParameters(Parameters parameters);
+    const Configuration& parameters() const;
+    void setParameters(Configuration parameters);
 
     const Camera& camera() const;
     Camera& camera();
 
-    const Optional<Rect>& scissor() const;
+    const sp<Vec4>& scissor() const;
 
     const sp<Snippet>& snippet() const;
     const sp<PipelineLayout>& layout() const;
 
-    const PipelineLayout::AttributeOffsets& attributes() const;
+    const PipelineLayout::VertexDescriptor& vertexDescriptor() const;
 
-    const Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>>& samplers() const;
-    const Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>>& images() const;
+    Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>> makeBindingSamplers() const;
+    Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>> makeBindingImages() const;
 
     void preCompile(GraphicsContext& graphicsContext);
     Map<Enum::ShaderStageBit, ShaderPreprocessor::Stage> getPreprocessedStages(const RenderEngineContext& renderEngineContext) const;
-
-    void bindSampler(sp<Texture> texture, uint32_t name = 0);
 
     bool hasDivisors() const;
     bool hasTrait(TraitType traitType) const;
 
 private:
-    sp<PipelineConfiguration> _configuration;
-    Parameters _parameters;
+    Camera _camera;
+    Configuration _configuration;
 
+    sp<PipelineBuildingContext> _building_context;
     sp<PipelineLayout> _layout;
-    //TODO: move it to stream
-    PipelineLayout::AttributeOffsets _attributes;
 
-    Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>> _samplers;
-    Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>> _images;
+    Table<String, sp<Texture>> _predefined_samplers;
+    Table<String, sp<Texture>> _predefined_images;
+
+    Map<String, String> _definitions;
+
+    Vector<ShaderPreprocessor::Stage> _stages;
 };
 
 }

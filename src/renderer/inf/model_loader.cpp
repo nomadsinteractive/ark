@@ -17,7 +17,7 @@ Enum::DrawMode ModelLoader::renderMode() const
 void ModelLoader::bind(const PipelineBindings& pipelineBindings) const
 {
     if(_texture)
-        pipelineBindings.pipelineDescriptor()->bindSampler(_texture);
+        pipelineBindings.bindSampler(_texture);
 }
 
 const sp<Texture>& ModelLoader::texture() const
