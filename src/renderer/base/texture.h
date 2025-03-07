@@ -159,7 +159,7 @@ public:
 
     const sp<Uploader>& uploader() const;
 
-    bool update(int64_t timestamp) const;
+    bool update(uint64_t timestamp) const;
 
 //  [[plugin::resource-loader]]
     class BUILDER final : public Builder<Texture> {

@@ -9,7 +9,7 @@ Timestamp::Timestamp()
 {
 }
 
-bool Timestamp::update(uint64_t timestamp) const
+bool Timestamp::update(const uint64_t timestamp) const
 {
     if(_last_modified >= timestamp)
     {

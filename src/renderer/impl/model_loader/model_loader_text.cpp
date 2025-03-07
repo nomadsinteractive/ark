@@ -92,9 +92,9 @@ bool ModelLoaderText::GlyphBundle::prepareOne(uint64_t timestamp, int32_t c, int
     return true;
 }
 
-void ModelLoaderText::GlyphBundle::reload(uint64_t timestamp)
+void ModelLoaderText::GlyphBundle::reload(const uint64_t timestamp)
 {
-    std::vector<int32_t> reloadVector;
+    Vector<int32_t> reloadVector;
     for(const auto& [k, v] : _glyphs)
     {
         v._model->dispose();
@@ -181,7 +181,7 @@ ModelLoaderText::GlyphModel::GlyphModel()
 {
 }
 
-ModelLoaderText::GlyphModel::GlyphModel(sp<Model> model, uint64_t timestamp)
+ModelLoaderText::GlyphModel::GlyphModel(sp<Model> model, const uint64_t timestamp)
     : _model(std::move(model)), _timestamp(timestamp)
 {
 }

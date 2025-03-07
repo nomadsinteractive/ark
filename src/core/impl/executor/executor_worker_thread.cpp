@@ -49,8 +49,8 @@ ExecutorWorkerThread::Worker::Worker(Thread thread, sp<Strategy> strategy)
 void ExecutorWorkerThread::Worker::run()
 {
     DPROFILER_TRACE("Worker", ApplicationProfiler::CATEGORY_START_THREAD);
-    _strategy->onStart();
-
+    const sp<Strategy> strategy = _strategy;
+    strategy->onStart();
     while(_thread.status() != Thread::THREAD_STATE_TERMINATED)
     {
         _thread.wait(std::chrono::milliseconds(1));
@@ -64,17 +64,16 @@ void ExecutorWorkerThread::Worker::run()
                     task->run();
                 }
                 catch(const std::exception& e) {
-                    _strategy->onException(e);
+                    strategy->onException(e);
                 }
             } while(_pending_tasks.pop(task));
 
-            _strategy->onBusy();
+            strategy->onBusy();
         }
         else
-            _strategy->onIdle(_thread);
+            strategy->onIdle(_thread);
     }
-
-    _strategy->onExit();
+    strategy->onExit();
 }
 
 ExecutorWorkerThread::WaitPredicate::WaitPredicate(const TimePoint& until)

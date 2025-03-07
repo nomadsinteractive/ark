@@ -642,7 +642,7 @@ bool VKPipeline::shouldStageNeedBinding(const ShaderStageSet stages) const
     return _is_compute_pipeline ? stages.has(Enum::SHADER_STAGE_BIT_COMPUTE) : (stages.has(Enum::SHADER_STAGE_BIT_VERTEX) || stages.has(Enum::SHADER_STAGE_BIT_FRAGMENT));
 }
 
-bool VKPipeline::shouldRebind(const int64_t tick, const PipelineDescriptor& pipelineDescriptor) const
+bool VKPipeline::shouldRebind(const uint64_t tick, const PipelineDescriptor& pipelineDescriptor) const
 {
     bool rebindNeeded = false;
     for(const auto& [i, bindingSet] : pipelineDescriptor.samplers())
