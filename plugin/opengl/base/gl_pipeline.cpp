@@ -714,7 +714,7 @@ sp<Stage> makeShader(GraphicsContext& graphicsContext, uint32_t version, GLenum 
 GLPipeline::GLPipeline(const sp<Recycler>& recycler, const uint32_t version, Map<Enum::ShaderStageBit, String> stages, const PipelineBindings& bindings)
     : _stub(sp<Stub>::make(isComputePipeline(stages))), _recycler(recycler), _version(version), _stages(std::move(stages)), _pipeline_operation(makePipelineOperation(bindings))
 {
-    for(const auto& [k, v] : bindings.pipelineDescriptor()->parameters()._traits)
+    for(const auto& [k, v] : bindings.pipelineDescriptor()->configuration()._traits)
     {
         if(k == PipelineDescriptor::TRAIT_TYPE_CULL_FACE_TEST)
             _draw_decorators.push_back(sp<DrawDecorator>::make<GLCullFaceTest>(v._cull_face_test));

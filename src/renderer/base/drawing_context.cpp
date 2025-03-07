@@ -1,5 +1,6 @@
 #include "renderer/base/drawing_context.h"
 
+#include "pipeline_descriptor.h"
 #include "graphics/base/camera.h"
 #include "graphics/inf/render_command.h"
 
@@ -10,15 +11,51 @@ namespace ark {
 
 namespace {
 
-class RenderCommandNoop final : public RenderCommand {
+class RenderCommandNoopWithDrawDecorator final : public RenderCommand {
 public:
-    RenderCommandNoop(DrawingContext context, sp<DrawDecorator> drawDecorator)
+    RenderCommandNoopWithDrawDecorator(DrawingContext context, sp<DrawDecorator> drawDecorator)
         : _context(std::move(context)), _draw_decorator(std::move(drawDecorator)) {
     }
 
     void draw(GraphicsContext& graphicsContext) override {
-        _context._bindings->ensurePipeline(graphicsContext);
         _draw_decorator->preDraw(graphicsContext, _context);
+        _context._bindings->ensurePipeline(graphicsContext);
+        _draw_decorator->postDraw(graphicsContext, _context);
+    }
+
+private:
+    DrawingContext _context;
+    sp<DrawDecorator> _draw_decorator;
+};
+
+class RenderCommandNoop final : public RenderCommand {
+public:
+    RenderCommandNoop(DrawingContext context)
+        : _context(std::move(context)) {
+    }
+
+    void draw(GraphicsContext& graphicsContext) override {
+        _context._bindings->ensurePipeline(graphicsContext);
+    }
+
+private:
+    DrawingContext _context;
+};
+
+class RenderCommandDrawWithDrawDecorator final : public RenderCommand {
+public:
+    RenderCommandDrawWithDrawDecorator(DrawingContext context, sp<DrawDecorator> drawDecorator)
+        : _context(std::move(context)), _draw_decorator(std::move(drawDecorator)) {
+    }
+
+    void draw(GraphicsContext& graphicsContext) override {
+        DPROFILER_TRACE("DrawCommand");
+
+        _context.upload(graphicsContext);
+
+        _draw_decorator->preDraw(graphicsContext, _context);
+        const sp<Pipeline>& pipeline = _context._bindings->ensurePipeline(graphicsContext);
+        pipeline->draw(graphicsContext, _context);
         _draw_decorator->postDraw(graphicsContext, _context);
     }
 
@@ -29,8 +66,8 @@ private:
 
 class RenderCommandDraw final : public RenderCommand {
 public:
-    RenderCommandDraw(DrawingContext context, sp<DrawDecorator> drawDecorator)
-        : _context(std::move(context)), _draw_decorator(std::move(drawDecorator)) {
+    RenderCommandDraw(DrawingContext context)
+        : _context(std::move(context)) {
     }
 
     void draw(GraphicsContext& graphicsContext) override {
@@ -39,14 +76,11 @@ public:
         _context.upload(graphicsContext);
 
         const sp<Pipeline>& pipeline = _context._bindings->ensurePipeline(graphicsContext);
-        _draw_decorator->preDraw(graphicsContext, _context);
         pipeline->draw(graphicsContext, _context);
-        _draw_decorator->postDraw(graphicsContext, _context);
     }
 
 private:
     DrawingContext _context;
-    sp<DrawDecorator> _draw_decorator;
 };
 
 }
@@ -56,18 +90,20 @@ DrawingContext::DrawingContext(sp<PipelineBindings> pipelineBindings, sp<RenderL
 {
 }
 
-sp<RenderCommand> DrawingContext::toRenderCommand(const RenderRequest& renderRequest)
+sp<RenderCommand> DrawingContext::toRenderCommand(const RenderRequest& renderRequest, sp<DrawDecorator> drawDecorator)
 {
     DCHECK(_bindings, "DrawingContext cannot be converted to RenderCommand more than once");
-    sp<DrawDecorator> drawDecorator = _bindings->snippet()->makeDrawDecorator(renderRequest);
-    return sp<RenderCommand>::make<RenderCommandDraw>(std::move(*this), std::move(drawDecorator));
+    if(drawDecorator)
+        return sp<RenderCommand>::make<RenderCommandDrawWithDrawDecorator>(std::move(*this), std::move(drawDecorator));
+    return sp<RenderCommand>::make<RenderCommandDraw>(std::move(*this));
 }
 
-sp<RenderCommand> DrawingContext::toNoopCommand(const RenderRequest& renderRequest)
+sp<RenderCommand> DrawingContext::toNoopCommand(const RenderRequest& renderRequest, sp<DrawDecorator> drawDecorator)
 {
     DCHECK(_bindings, "DrawingContext cannot be converted to RenderCommand more than once");
-    sp<DrawDecorator> drawDecorator = _bindings->snippet()->makeDrawDecorator(renderRequest);
-    return sp<RenderCommand>::make<RenderCommandNoop>(std::move(*this), std::move(drawDecorator));
+    if(drawDecorator)
+        return sp<RenderCommand>::make<RenderCommandNoopWithDrawDecorator>(std::move(*this), std::move(drawDecorator));
+    return sp<RenderCommand>::make<RenderCommandNoop>(std::move(*this));
 }
 
 void DrawingContext::upload(GraphicsContext& graphicsContext) const

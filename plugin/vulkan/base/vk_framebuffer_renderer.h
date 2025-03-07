@@ -19,7 +19,7 @@ public:
 
 private:
     sp<RenderLayer> _render_layer;
-    sp<VKFramebuffer> _framebuffer;
+    sp<DrawDecorator> _draw_decorator;
 };
 
 }

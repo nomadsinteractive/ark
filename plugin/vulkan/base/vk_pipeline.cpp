@@ -502,7 +502,7 @@ void VKPipeline::setupGraphicsPipeline(GraphicsContext& graphicsContext)
                 0,
                 VK_FALSE);
 
-    const PipelineDescriptor::PipelineTraitTable& traits = pipelineDescriptor.parameters()._traits;
+    const PipelineDescriptor::PipelineTraitTable& traits = pipelineDescriptor.configuration()._traits;
     const VkPipelineRasterizationStateCreateInfo rasterizationState = makeRasterizationState(traits);
     const VkPipelineDepthStencilStateCreateInfo depthStencilState = makeDepthStencilState(traits);
     const VkPipelineColorBlendAttachmentState colorBlendAttachmentState = makeColorBlendAttachmentState(traits);

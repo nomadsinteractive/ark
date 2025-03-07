@@ -39,7 +39,7 @@ public:
 
     void render(RenderRequest& renderRequest, const V3& position) override;
 
-    sp<RenderCommand> compose(const RenderRequest& renderRequest);
+    sp<RenderCommand> compose(const RenderRequest& renderRequest, sp<DrawDecorator> drawDecorator = nullptr);
 
 //  [[script::bindings::property]]
     const sp<ModelLoader>& modelLoader() const;

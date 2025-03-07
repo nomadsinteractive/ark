@@ -125,9 +125,9 @@ void RenderLayer::render(RenderRequest& renderRequest, const V3& position)
     renderRequest.addRenderCommand(compose(renderRequest));
 }
 
-sp<RenderCommand> RenderLayer::compose(const RenderRequest& renderRequest)
+sp<RenderCommand> RenderLayer::compose(const RenderRequest& renderRequest, sp<DrawDecorator> drawDecorator)
 {
-    return snapshot(renderRequest).compose(renderRequest);
+    return snapshot(renderRequest).compose(renderRequest, std::move(drawDecorator));
 }
 
 RenderLayer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

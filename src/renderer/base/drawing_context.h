@@ -20,8 +20,8 @@ public:
                    DrawingParams parameters = {}, const sp<Traits>& attachments = nullptr);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(DrawingContext);
 
-    sp<RenderCommand> toRenderCommand(const RenderRequest& renderRequest);
-    sp<RenderCommand> toNoopCommand(const RenderRequest& renderRequest);
+    sp<RenderCommand> toRenderCommand(const RenderRequest& renderRequest, sp<DrawDecorator> drawDecorator = nullptr);
+    sp<RenderCommand> toNoopCommand(const RenderRequest& renderRequest, sp<DrawDecorator> drawDecorator = nullptr);
 
     void upload(GraphicsContext& graphicsContext) const;
 

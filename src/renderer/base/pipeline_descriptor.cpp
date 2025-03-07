@@ -167,7 +167,7 @@ const sp<Snippet>& PipelineDescriptor::snippet() const
     return _configuration._snippet;
 }
 
-const PipelineDescriptor::Configuration& PipelineDescriptor::parameters() const
+const PipelineDescriptor::Configuration& PipelineDescriptor::configuration() const
 {
     return _configuration;
 }

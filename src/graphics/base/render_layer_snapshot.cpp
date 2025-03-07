@@ -22,13 +22,13 @@ RenderLayerSnapshot::RenderLayerSnapshot(const RenderRequest& renderRequest, con
         _scissor = Rect(_stub->_scissor->val());
 }
 
-sp<RenderCommand> RenderLayerSnapshot::compose(const RenderRequest& renderRequest) const
+sp<RenderCommand> RenderLayerSnapshot::compose(const RenderRequest& renderRequest, sp<DrawDecorator> drawDecorator) const
 {
     if(!_elements.empty() && _stub->_visible.val())
-        return _stub->_drawing_context_composer->compose(renderRequest, *this).toRenderCommand(renderRequest);
+        return _stub->_drawing_context_composer->compose(renderRequest, *this).toRenderCommand(renderRequest, std::move(drawDecorator));
 
     DrawingContext drawingContext(_stub->_pipeline_bindings, _buffer_object);
-    return drawingContext.toNoopCommand(renderRequest);
+    return drawingContext.toNoopCommand(renderRequest, std::move(drawDecorator));
 }
 
 bool RenderLayerSnapshot::needsReload() const

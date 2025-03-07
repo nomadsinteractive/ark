@@ -305,7 +305,7 @@ public:
                 true,
                 false
             };
-            const auto& traits = _pipeline_descriptor->parameters()._traits;
+            const auto& traits = _pipeline_descriptor->configuration()._traits;
             const SDL_GPUColorTargetBlendState blendState = traits.has(PipelineDescriptor::TRAIT_TYPE_BLEND) ? toColorTargetBlendState(traits.at(PipelineDescriptor::TRAIT_TYPE_BLEND)._blend) : defaultBlendState;
 
             Uint32 numColorTargets = 0;

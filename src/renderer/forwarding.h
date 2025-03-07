@@ -29,6 +29,7 @@ class Node;
 class Pipeline;
 class PipelineBindings;
 class PipelineContext;
+class PipelineDrawCommand;
 class PipelineFactory;
 class PipelineLayout;
 class PipelineDescriptor;

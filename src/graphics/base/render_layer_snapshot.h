@@ -52,7 +52,7 @@ public:
 public:
     RenderLayerSnapshot(RenderLayerSnapshot&& other) = default;
 
-    sp<RenderCommand> compose(const RenderRequest& renderRequest) const;
+    sp<RenderCommand> compose(const RenderRequest& renderRequest, sp<DrawDecorator> drawDecorator) const;
 
     bool needsReload() const;
 

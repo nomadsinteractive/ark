@@ -148,7 +148,7 @@ public:
     PipelineDescriptor(Camera camera, sp<PipelineBuildingContext> buildingContext, Configuration configuration);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(PipelineDescriptor);
 
-    const Configuration& parameters() const;
+    const Configuration& configuration() const;
     void setParameters(Configuration parameters);
 
     const Camera& camera() const;

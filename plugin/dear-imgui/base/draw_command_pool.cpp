@@ -9,7 +9,7 @@ namespace ark::plugin::dear_imgui {
 namespace {
 
 sp<PipelineDescriptor> makePipelineBindingParameters(const PipelineDescriptor& pipelineDescriptor) {
-    PipelineDescriptor::Configuration parameters = pipelineDescriptor.parameters();
+    PipelineDescriptor::Configuration parameters = pipelineDescriptor.configuration();
     PipelineDescriptor::PipelineTraitTable& traits = parameters._traits;
     if(!traits.has(PipelineDescriptor::TRAIT_TYPE_CULL_FACE_TEST))
     {

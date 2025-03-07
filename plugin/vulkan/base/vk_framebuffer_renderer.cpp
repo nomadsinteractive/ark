@@ -4,6 +4,7 @@
 #include "graphics/base/render_layer_snapshot.h"
 #include "graphics/base/render_request.h"
 #include "graphics/inf/render_command.h"
+#include "renderer/inf/draw_decorator.h"
 
 #include "vulkan/base/vk_framebuffer.h"
 
@@ -11,37 +12,38 @@ namespace ark::plugin::vulkan {
 
 namespace {
 
-class RenderCommandFBO final : public RenderCommand {
+class DrawDecoratorFBO final : public DrawDecorator {
 public:
-    RenderCommandFBO(const sp<VKFramebuffer>& fbo, sp<RenderCommand> delegate)
-        : _fbo(fbo), _delegate(std::move(delegate))
+    DrawDecoratorFBO(sp<VKFramebuffer> fbo)
+        : _fbo(std::move(fbo))
     {
     }
 
-    void draw(GraphicsContext& graphicsContext) override
+    void preDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override
     {
         _fbo->beginRenderPass(graphicsContext);
-        _delegate->draw(graphicsContext);
+    }
+
+    void postDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override
+    {
         const VkCommandBuffer commandBuffer = _fbo->endRenderPass(graphicsContext);
         vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr, 0, nullptr, 0, nullptr);
     }
 
 private:
     sp<VKFramebuffer> _fbo;
-    sp<RenderCommand> _delegate;
 };
 
 }
 
 VKFramebufferRenderer::VKFramebufferRenderer(sp<RenderLayer> renderLayer, sp<VKFramebuffer> framebuffer)
-    : _render_layer(std::move(renderLayer)), _framebuffer(std::move(framebuffer))
+    : _render_layer(std::move(renderLayer)), _draw_decorator(sp<DrawDecorator>::make<DrawDecoratorFBO>(std::move(framebuffer)))
 {
 }
 
 void VKFramebufferRenderer::render(RenderRequest& renderRequest, const V3& position)
 {
-    sp<RenderCommand> renderCommand = _render_layer->compose(renderRequest);
-    renderRequest.addRenderCommand(sp<RenderCommand>::make<RenderCommandFBO>(_framebuffer, std::move(renderCommand)));
+    renderRequest.addRenderCommand(_render_layer->compose(renderRequest, _draw_decorator));
 }
 
 }
