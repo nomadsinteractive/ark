@@ -54,22 +54,23 @@ public:
 
 }
 
-PipelineConfiguration::PipelineConfiguration(sp<PipelineBuildingContext> buildingContext)
-    : _building_context(std::move(buildingContext)), _pipeline_layout(_building_context->_pipeline_layout), _predefined_samplers(std::move(_building_context->_samplers)), _predefined_images(std::move(_building_context->_images)), _definitions(_building_context->toDefinitions())
+PipelineConfiguration::PipelineConfiguration(Camera camera, sp<PipelineBuildingContext> buildingContext, sp<Snippet> snippet)
+    : _camera(std::move(camera)), _snippet(std::move(snippet)), _building_context(std::move(buildingContext)), _pipeline_layout(_building_context->_pipeline_layout), _predefined_samplers(std::move(_building_context->_samplers)), _predefined_images(std::move(_building_context->_images)), _definitions(_building_context->toDefinitions())
 {
+    initialize();
 }
 
 void PipelineConfiguration::addSnippet(sp<Snippet> snippet)
 {
     DASSERT(snippet);
-    _snippet = _snippet ? sp<Snippet>::make<SnippetComposite>(_snippet, std::move(snippet)) : std::move(snippet);
+    _snippet = SnippetComposite::compose(std::move(_snippet), std::move(snippet));
 }
 
-void PipelineConfiguration::preCompile(GraphicsContext& graphicsContext)
+void PipelineConfiguration::preCompile(GraphicsContext& graphicsContext, const PipelineDescriptor& pipelineDescriptor)
 {
     if(_building_context)
     {
-        _snippet->preCompile(graphicsContext, _building_context, *this);
+        _snippet->preCompile(graphicsContext, _building_context, pipelineDescriptor);
 
         for(const ShaderPreprocessor* preprocessor : _building_context->stages())
             _stages.push_back(preprocessor->preprocess());
@@ -93,7 +94,7 @@ Map<Enum::ShaderStageBit, ShaderPreprocessor::Stage> PipelineConfiguration::getP
     return shaders;
 }
 
-void PipelineConfiguration::initialize(const Shader& shader)
+void PipelineConfiguration::initialize()
 {
     sp<ComputeSnippetWrapper> computeSnippetWrapper;
     if(const op<ShaderPreprocessor>& computeStage = _building_context->computingStage(); computeStage && !_building_context->renderStages().empty())
@@ -104,7 +105,7 @@ void PipelineConfiguration::initialize(const Shader& shader)
 
     _snippet = createCoreSnippet(std::move(_snippet));
     _snippet->preInitialize(_building_context);
-    _building_context->initialize(shader.camera());
+    _building_context->initialize(_camera);
     _pipeline_layout->initialize(_building_context);
 
     if(computeSnippetWrapper)
@@ -122,7 +123,7 @@ void PipelineConfiguration::initialize(const Shader& shader)
             CHECK(computeStage->_compute_local_sizes, "Compute stage local size layout undefined");
             numWorkGroupsArray = computeStage->_compute_local_sizes.value();
         }
-        computeSnippetWrapper->reset(sp<Snippet>::make<SnippetDrawCompute>(shader.layout(), numWorkGroupsArray, computeStage->_pre_shader_stage != Enum::SHADER_STAGE_BIT_NONE));
+        computeSnippetWrapper->reset(sp<Snippet>::make<SnippetDrawCompute>(_pipeline_layout, numWorkGroupsArray, computeStage->_pre_shader_stage != Enum::SHADER_STAGE_BIT_NONE));
     }
 }
 

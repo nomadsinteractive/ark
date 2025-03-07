@@ -20,7 +20,7 @@ RCCDrawElementsInstanced::RCCDrawElementsInstanced(Model model)
 {
 }
 
-sp<PipelineBindings> RCCDrawElementsInstanced::makePipelineBindings(const Shader& shader, RenderController& renderController, Enum::RenderMode renderMode)
+sp<PipelineBindings> RCCDrawElementsInstanced::makePipelineBindings(const Shader& shader, RenderController& renderController, Enum::DrawMode renderMode)
 {
     _indices = renderController.makeIndexBuffer({}, _model.indices());
     return shader.makeBindings(renderController.makeVertexBuffer(), renderMode, Enum::DRAW_PROCEDURE_DRAW_INSTANCED);

@@ -404,8 +404,10 @@ def get_mark_studio() -> Optional[MarkStudio]:
 
 
 def close_main_window():
+    global _mark_studio
     if _mark_studio and not _mark_studio.discarded:
-        return _mark_studio.close()
+        _mark_studio.close()
+    _mark_studio = None
 
 
 def show_main_window(application_facade: ApplicationFacade, imgui: Renderer, resolution: Vec2, quick_bar_items: Optional[list[QuickBarItem]] = None, console_cmds: Optional[list[ConsoleCommand]] = None):

@@ -20,13 +20,13 @@ public:
     };
 
 //  [[script::bindings::enumeration]]
-    enum RenderMode {
-        RENDER_MODE_NONE = -1,
-        RENDER_MODE_LINES,
-        RENDER_MODE_POINTS,
-        RENDER_MODE_TRIANGLES,
-        RENDER_MODE_TRIANGLE_STRIP,
-        RENDER_MODE_COUNT,
+    enum DrawMode {
+        DRAW_MODE_NONE = -1,
+        DRAW_MODE_LINES,
+        DRAW_MODE_POINTS,
+        DRAW_MODE_TRIANGLES,
+        DRAW_MODE_TRIANGLE_STRIP,
+        DRAW_MODE_COUNT,
     };
 
 //  [[script::bindings::enumeration]]

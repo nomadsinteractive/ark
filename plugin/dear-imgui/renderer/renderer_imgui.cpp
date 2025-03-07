@@ -111,8 +111,7 @@ ImGuiKey toImGuiKey(Event::Code code) {
 }
 
 RendererImgui::RendererImgui(const sp<Shader>& shader, const sp<Texture>& texture)
-    : _shader(shader), _render_controller(Ark::instance().renderController()), _render_engine(_render_controller->renderEngine()), _texture(texture),
-      _pipeline_factory(shader->pipelineFactory()), _renderer_context(sp<RendererContext>::make(shader, _render_controller))
+    : _shader(shader), _render_controller(Ark::instance().renderController()), _render_engine(_render_controller->renderEngine()), _texture(texture), _renderer_context(sp<RendererContext>::make(shader, _render_controller))
 {
     _renderer_context->addDefaultTexture(texture);
 }

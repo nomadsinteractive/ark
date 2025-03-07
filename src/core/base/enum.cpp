@@ -6,18 +6,18 @@
 
 namespace ark {
 
-template<> Enum::RenderMode StringConvert::eval<Enum::RenderMode>(const String& str)
+template<> Enum::DrawMode StringConvert::eval<Enum::DrawMode>(const String& str)
 {
     if(str == "lines")
-        return Enum::RENDER_MODE_LINES;
+        return Enum::DRAW_MODE_LINES;
     if(str == "points")
-        return Enum::RENDER_MODE_POINTS;
+        return Enum::DRAW_MODE_POINTS;
     if(str == "triangles")
-        return Enum::RENDER_MODE_TRIANGLES;
+        return Enum::DRAW_MODE_TRIANGLES;
     DCHECK(str == "triangle_strip", "Unknow RenderMode: %s, possible values are: [lines, points, triangles, triangle_strip]", str.c_str());
     if(str == "triangle_strip")
-        return Enum::RENDER_MODE_TRIANGLE_STRIP;
-    return Enum::RENDER_MODE_NONE;
+        return Enum::DRAW_MODE_TRIANGLE_STRIP;
+    return Enum::DRAW_MODE_NONE;
 }
 
 template<> Enum::DrawProcedure StringConvert::eval<Enum::DrawProcedure>(const String& str)

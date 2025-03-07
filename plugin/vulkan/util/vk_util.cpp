@@ -231,10 +231,10 @@ VkShaderStageFlagBits VKUtil::toStage(Enum::ShaderStageBit stage)
     return vkStages[stage];
 }
 
-VkPrimitiveTopology VKUtil::toPrimitiveTopology(Enum::RenderMode mode)
+VkPrimitiveTopology VKUtil::toPrimitiveTopology(Enum::DrawMode mode)
 {
-    constexpr VkPrimitiveTopology topologies[Enum::RENDER_MODE_COUNT] = {VK_PRIMITIVE_TOPOLOGY_LINE_LIST, VK_PRIMITIVE_TOPOLOGY_POINT_LIST, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP};
-    CHECK(mode >= 0 && mode < Enum::RENDER_MODE_COUNT, "Unsupported render-mode: %d", mode);
+    constexpr VkPrimitiveTopology topologies[Enum::DRAW_MODE_COUNT] = {VK_PRIMITIVE_TOPOLOGY_LINE_LIST, VK_PRIMITIVE_TOPOLOGY_POINT_LIST, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP};
+    CHECK(mode >= 0 && mode < Enum::DRAW_MODE_COUNT, "Unsupported render-mode: %d", mode);
     return topologies[mode];
 }
 

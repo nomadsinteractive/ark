@@ -114,10 +114,10 @@ struct GLPipeline::Stub {
         glUseProgram(_id);
 
         const PipelineBindings& pipelineBindings = pipelineContext._bindings;
-        bindUBOSnapshots(pipelineContext._buffer_object->_ubos, pipelineBindings.shaderLayout());
+        bindUBOSnapshots(pipelineContext._buffer_object->_ubos, pipelineBindings.pipelineLayout());
 
         uint32_t binding = 0;
-        const Vector<String>& samplerNames = pipelineBindings.shaderLayout()->samplers().keys();
+        const Vector<String>& samplerNames = pipelineBindings.pipelineLayout()->samplers().keys();
         const Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>>& samplers = pipelineBindings.pipelineDescriptor()->samplers();
         DASSERT(samplerNames.size() == samplers.size());
         for(size_t i = 0; i < samplerNames.size(); ++i)
@@ -130,7 +130,7 @@ struct GLPipeline::Stub {
             ++ binding;
         }
 
-        const Vector<String>& imageNames = pipelineBindings.shaderLayout()->images().keys();
+        const Vector<String>& imageNames = pipelineBindings.pipelineLayout()->images().keys();
         const Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>>& images = pipelineBindings.pipelineDescriptor()->images();
         for(size_t i = 0; i < images.size(); ++i)
             if(const sp<Texture>& image = images.at(i).first)
@@ -564,9 +564,9 @@ void ensureVertexArray(GraphicsContext& graphicsContext, const DrawingContext& c
     glBindVertexArray(static_cast<GLuint>(vertexArrayId));
 }
 
-sp<PipelineDrawCommand> makeBakedRenderer(const PipelineDescriptor& bindings)
+sp<PipelineDrawCommand> makeBakedRenderer(const PipelineBindings& bindings)
 {
-    const GLenum mode = GLUtil::toEnum(bindings.mode());
+    const GLenum mode = GLUtil::toEnum(bindings.drawMode());
     switch(bindings.drawProcedure())
     {
         case Enum::DRAW_PROCEDURE_DRAW_ARRAYS:
@@ -584,8 +584,8 @@ sp<PipelineDrawCommand> makeBakedRenderer(const PipelineDescriptor& bindings)
 
 class PipelineOperationDraw final : public PipelineOperation {
 public:
-    PipelineOperationDraw(sp<GLPipeline::Stub> stub, const PipelineDescriptor& bindings)
-        : _stub(std::move(stub)), _scissor(bindings.scissor()), _renderer(makeBakedRenderer(bindings)) {
+    PipelineOperationDraw(sp<GLPipeline::Stub> stub, const PipelineBindings& bindings)
+        : _stub(std::move(stub)), _scissor(bindings.pipelineDescriptor()->scissor()), _renderer(makeBakedRenderer(bindings)) {
     }
 
     void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override
@@ -711,10 +711,10 @@ sp<Stage> makeShader(GraphicsContext& graphicsContext, uint32_t version, GLenum 
 
 }
 
-GLPipeline::GLPipeline(const sp<Recycler>& recycler, uint32_t version, Map<Enum::ShaderStageBit, String> stages, const PipelineDescriptor& bindings)
+GLPipeline::GLPipeline(const sp<Recycler>& recycler, const uint32_t version, Map<Enum::ShaderStageBit, String> stages, const PipelineBindings& bindings)
     : _stub(sp<Stub>::make(isComputePipeline(stages))), _recycler(recycler), _version(version), _stages(std::move(stages)), _pipeline_operation(makePipelineOperation(bindings))
 {
-    for(const auto& [k, v] : bindings.parameters()._traits)
+    for(const auto& [k, v] : bindings.pipelineDescriptor()->parameters()._traits)
     {
         if(k == PipelineDescriptor::TRAIT_TYPE_CULL_FACE_TEST)
             _draw_decorators.push_back(sp<DrawDecorator>::make<GLCullFaceTest>(v._cull_face_test));
@@ -838,9 +838,9 @@ void GLPipeline::bindBuffer(GraphicsContext& /*graphicsContext*/, const Pipeline
     }
 }
 
-sp<PipelineOperation> GLPipeline::makePipelineOperation(const PipelineDescriptor& pipelineDescriptor) const
+sp<PipelineOperation> GLPipeline::makePipelineOperation(const PipelineBindings& pipelineBindings) const
 {
-    return _stub->_is_compute_pipeline ?  sp<PipelineOperation>::make<PipelineOperationCompute>(_stub) : sp<PipelineOperation>::make<PipelineOperationDraw>(_stub, pipelineDescriptor);
+    return _stub->_is_compute_pipeline ?  sp<PipelineOperation>::make<PipelineOperationCompute>(_stub) : sp<PipelineOperation>::make<PipelineOperationDraw>(_stub, pipelineBindings);
 }
 
 GLPipeline::GLUniform::GLUniform(const GLint location)

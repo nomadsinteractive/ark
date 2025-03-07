@@ -5,6 +5,9 @@
 #include "renderer/base/graphics_context.h"
 #include "renderer/base/pipeline_layout.h"
 #include "renderer/base/pipeline_configuration.h"
+#include "renderer/base/render_engine_context.h"
+#include "renderer/impl/snippet/snippet_composite.h"
+#include "renderer/inf/snippet_factory.h"
 
 namespace ark {
 
@@ -71,20 +74,10 @@ PipelineDescriptor::TraitConfigure toPipelineTraitMeta(const document& manifest)
 
 }
 
-PipelineDescriptor::PipelineDescriptor(const Enum::RenderMode mode, const Enum::DrawProcedure drawProcedure, Parameters parameters, sp<PipelineConfiguration> configuration)
-    : _mode(mode), _draw_procedure(drawProcedure), _parameters(std::move(parameters)), _configuration(std::move(configuration)), _layout(_configuration->pipelineLayout()), _attributes(_layout),
+PipelineDescriptor::PipelineDescriptor(Camera camera, sp<PipelineBuildingContext> buildingContext, sp<Snippet> snippet, Parameters parameters)
+    : _configuration(sp<PipelineConfiguration>::make(std::move(camera), std::move(buildingContext), std::move(snippet))), _parameters(std::move(parameters)), _layout(_configuration->pipelineLayout()), _attributes(_layout),
       _samplers(_configuration->makeBindingSamplers()), _images(_configuration->makeBindingImages())
 {
-}
-
-Enum::RenderMode PipelineDescriptor::mode() const
-{
-    return _mode;
-}
-
-Enum::DrawProcedure PipelineDescriptor::drawProcedure() const
-{
-    return _draw_procedure;
 }
 
 const Optional<Rect>& PipelineDescriptor::scissor() const
@@ -92,17 +85,32 @@ const Optional<Rect>& PipelineDescriptor::scissor() const
     return _parameters._scissor;
 }
 
+const sp<Snippet>& PipelineDescriptor::snippet() const
+{
+    return _configuration->snippet();
+}
+
 const PipelineDescriptor::Parameters& PipelineDescriptor::parameters() const
 {
     return _parameters;
 }
 
-const sp<PipelineConfiguration>& PipelineDescriptor::configuration() const
+void PipelineDescriptor::setParameters(Parameters parameters)
 {
-    return _configuration;
+    _parameters = std::move(parameters);;
 }
 
-const sp<PipelineLayout>& PipelineDescriptor::shaderLayout() const
+const Camera& PipelineDescriptor::camera() const
+{
+    return _configuration->_camera;
+}
+
+Camera& PipelineDescriptor::camera()
+{
+    return _configuration->_camera;
+}
+
+const sp<PipelineLayout>& PipelineDescriptor::layout() const
 {
     return _layout;
 }
@@ -120,6 +128,16 @@ const Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>>& PipelineDes
 const Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>>& PipelineDescriptor::images() const
 {
     return _images;
+}
+
+void PipelineDescriptor::preCompile(GraphicsContext& graphicsContext)
+{
+    _configuration->preCompile(graphicsContext, *this);
+}
+
+Map<Enum::ShaderStageBit, ShaderPreprocessor::Stage> PipelineDescriptor::getPreprocessedStages(const RenderEngineContext& renderEngineContext) const
+{
+    return _configuration->getPreprocessedStages(renderEngineContext);
 }
 
 void PipelineDescriptor::bindSampler(sp<Texture> texture, const uint32_t name)

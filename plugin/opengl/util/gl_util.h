@@ -16,7 +16,7 @@ namespace ark::plugin::opengl {
 
 class GLUtil {
 public:
-    static GLenum toEnum(Enum::RenderMode renderMode);
+    static GLenum toEnum(Enum::DrawMode renderMode);
     static GLenum toBufferType(Buffer::Type type);
     static GLenum toShaderType(Enum::ShaderStageBit stage);
     static GLenum toCompareFunc(PipelineDescriptor::CompareFunc func);

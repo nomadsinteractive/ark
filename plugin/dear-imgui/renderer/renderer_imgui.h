@@ -74,7 +74,6 @@ private:
     sp<RenderEngine> _render_engine;
     sp<Texture> _texture;
 
-    sp<PipelineFactory> _pipeline_factory;
     sp<RendererContext> _renderer_context;
 
     std::vector<sp<Renderer>> _renderers;

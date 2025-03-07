@@ -85,6 +85,7 @@ public:
     void onSurfaceCreated();
 
     sp<RenderView> createRenderView(const sp<RenderController>& renderController, const Viewport& viewport) const;
+    sp<Pipeline> createPipeline(GraphicsContext& graphicsContext, const PipelineBindings& pipelineBindings, std::map<Enum::ShaderStageBit, String> stages);
 
     const PlatformInfo& info() const;
     PlatformInfo& info();
@@ -94,6 +95,7 @@ private:
     Ark::RendererCoordinateSystem _coordinate_system;
 
     sp<RendererFactory> _renderer_factory;
+    sp<PipelineFactory> _pipeline_factory;
     sp<RenderEngineContext> _render_context;
 };
 

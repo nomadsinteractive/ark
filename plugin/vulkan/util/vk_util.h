@@ -37,7 +37,7 @@ public:
 
     static VkImageAspectFlags toTextureAspect(Texture::Usage usage);
     static VkShaderStageFlagBits toStage(Enum::ShaderStageBit stage);
-    static VkPrimitiveTopology toPrimitiveTopology(Enum::RenderMode mode);
+    static VkPrimitiveTopology toPrimitiveTopology(Enum::DrawMode mode);
 
 };
 

@@ -96,7 +96,7 @@ RCCMultiDrawElementsIndirect::RCCMultiDrawElementsIndirect(sp<ModelBundle> multi
 {
 }
 
-sp<PipelineBindings> RCCMultiDrawElementsIndirect::makePipelineBindings(const Shader& shader, RenderController& renderController, Enum::RenderMode renderMode)
+sp<PipelineBindings> RCCMultiDrawElementsIndirect::makePipelineBindings(const Shader& shader, RenderController& renderController, Enum::DrawMode renderMode)
 {
     _indices = renderController.makeIndexBuffer({}, sp<IndicesUploader>::make(_model_bundle));
     _draw_indirect = renderController.makeBuffer(Buffer::TYPE_DRAW_INDIRECT, Buffer::USAGE_BIT_DYNAMIC, nullptr);

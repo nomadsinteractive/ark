@@ -1,6 +1,7 @@
 #include "vulkan/impl/pipeline_factory/pipeline_factory_vulkan.h"
 
 #include "renderer/base/graphics_context.h"
+#include "renderer/base/pipeline_bindings.h"
 #include "renderer/base/pipeline_configuration.h"
 #include "renderer/base/pipeline_descriptor.h"
 
@@ -13,9 +14,9 @@ PipelineFactoryVulkan::PipelineFactoryVulkan(const sp<Recycler>& recycler, const
 {
 }
 
-sp<Pipeline> PipelineFactoryVulkan::buildPipeline(GraphicsContext& graphicsContext, const sp<PipelineDescriptor>& pipelineDescriptor, Map<Enum::ShaderStageBit, String> stages)
+sp<Pipeline> PipelineFactoryVulkan::buildPipeline(GraphicsContext& graphicsContext, const PipelineBindings& pipelineBindings, Map<Enum::ShaderStageBit, String> stages)
 {
-    return sp<Pipeline>::make<VKPipeline>(pipelineDescriptor, _recycler, _renderer, std::move(stages));
+    return sp<Pipeline>::make<VKPipeline>(pipelineBindings, _recycler, _renderer, std::move(stages));
 }
 
 }

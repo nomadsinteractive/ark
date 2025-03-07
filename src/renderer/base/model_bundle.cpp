@@ -126,12 +126,12 @@ private:
 }
 
 ModelBundle::ModelBundle(sp<Importer> importer, sp<MaterialBundle> materialBundle)
-    : ModelLoader(Enum::RENDER_MODE_TRIANGLES, nullptr), _stub(sp<Stub>::make(std::move(importer), std::move(materialBundle)))
+    : ModelLoader(Enum::DRAW_MODE_TRIANGLES, nullptr), _stub(sp<Stub>::make(std::move(importer), std::move(materialBundle)))
 {
 }
 
 ModelBundle::ModelBundle(const sp<ModelBundle::Stub>& stub)
-    : ModelLoader(Enum::RENDER_MODE_TRIANGLES, nullptr), _stub(stub)
+    : ModelLoader(Enum::DRAW_MODE_TRIANGLES, nullptr), _stub(stub)
 {
 }
 

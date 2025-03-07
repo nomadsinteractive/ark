@@ -23,10 +23,10 @@
 
 namespace ark::plugin::opengl {
 
-GLenum GLUtil::toEnum(const Enum::RenderMode renderMode)
+GLenum GLUtil::toEnum(const Enum::DrawMode renderMode)
 {
-    constexpr GLenum models[Enum::RENDER_MODE_COUNT] = {GL_LINES, GL_POINTS, GL_TRIANGLES, GL_TRIANGLE_STRIP};
-    DCHECK(renderMode >= 0 && renderMode < Enum::RENDER_MODE_COUNT, "Unknown Mode: %d", renderMode);
+    constexpr GLenum models[Enum::DRAW_MODE_COUNT] = {GL_LINES, GL_POINTS, GL_TRIANGLES, GL_TRIANGLE_STRIP};
+    DCHECK(renderMode >= 0 && renderMode < Enum::DRAW_MODE_COUNT, "Unknown Mode: %d", renderMode);
     return models[renderMode];
 }
 

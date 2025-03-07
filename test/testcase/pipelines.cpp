@@ -27,7 +27,7 @@ public:
         context.addUniform("u_Color01", Uniform::TYPE_F4, 1, nullptr);
     }
 
-    void preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context, const PipelineConfiguration& /*pipelineLayout*/) override {
+    void preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context, const PipelineDescriptor& /*pipelineDescriptor*/) override {
         ShaderPreprocessor& vertex = context.getRenderStage(Enum::SHADER_STAGE_BIT_VERTEX);
         ShaderPreprocessor& fragment = context.getRenderStage(Enum::SHADER_STAGE_BIT_FRAGMENT);
 
@@ -52,9 +52,7 @@ public:
         const sp<Snippet> snippet = sp<SnippetTest>::make();
         const sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(std::move(vert), std::move(frag));
 
-        const sp<PipelineConfiguration> pipelineConfiguration = sp<PipelineConfiguration>::make(buildingContext);
-        pipelineConfiguration->addSnippet(snippet);
-        pipelineConfiguration->initialize(Shader(nullptr, pipelineFactory, Ark::instance().renderController(), pipelineConfiguration, {}));
+        const sp<PipelineConfiguration> pipelineConfiguration = sp<PipelineConfiguration>::make(Camera::createDefaultCamera(), buildingContext, snippet);
         const sp<PipelineLayout>& pipelineLayout = pipelineConfiguration->pipelineLayout();
 
         TESTCASE_VALIDATE(pipelineLayout->streamLayouts()[0].stride() != 0);

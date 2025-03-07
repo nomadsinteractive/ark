@@ -10,6 +10,7 @@
 #include "graphics/forwarding.h"
 
 #include "renderer/base/pipeline_layout.h"
+#include "renderer/base/shader_preprocessor.h"
 #include "renderer/inf/model_loader.h"
 
 namespace ark {
@@ -142,21 +143,27 @@ public:
     };
 
 public:
-    PipelineDescriptor(Enum::RenderMode mode, Enum::DrawProcedure drawProcedure, Parameters parameters, sp<PipelineConfiguration> configuration);
+    PipelineDescriptor(Camera camera, sp<PipelineBuildingContext> buildingContext, sp<Snippet> snippet, Parameters parameters);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(PipelineDescriptor);
 
-    Enum::RenderMode mode() const;
-    Enum::DrawProcedure drawProcedure() const;
-
     const Parameters& parameters() const;
+    void setParameters(Parameters parameters);
+
+    const Camera& camera() const;
+    Camera& camera();
+
     const Optional<Rect>& scissor() const;
-    const sp<PipelineConfiguration>& configuration() const;
-    const sp<PipelineLayout>& shaderLayout() const;
+
+    const sp<Snippet>& snippet() const;
+    const sp<PipelineLayout>& layout() const;
 
     const PipelineLayout::AttributeOffsets& attributes() const;
 
     const Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>>& samplers() const;
     const Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>>& images() const;
+
+    void preCompile(GraphicsContext& graphicsContext);
+    Map<Enum::ShaderStageBit, ShaderPreprocessor::Stage> getPreprocessedStages(const RenderEngineContext& renderEngineContext) const;
 
     void bindSampler(sp<Texture> texture, uint32_t name = 0);
 
@@ -164,12 +171,9 @@ public:
     bool hasTrait(TraitType traitType) const;
 
 private:
-    Enum::RenderMode _mode;
-    Enum::DrawProcedure _draw_procedure;
-
+    sp<PipelineConfiguration> _configuration;
     Parameters _parameters;
 
-    sp<PipelineConfiguration> _configuration;
     sp<PipelineLayout> _layout;
     //TODO: move it to stream
     PipelineLayout::AttributeOffsets _attributes;

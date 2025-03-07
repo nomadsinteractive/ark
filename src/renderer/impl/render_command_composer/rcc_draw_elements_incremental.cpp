@@ -14,7 +14,7 @@
 
 namespace ark {
 
-sp<PipelineBindings> RCCDrawElementsIncremental::makePipelineBindings(const Shader& shader, RenderController& renderController, Enum::RenderMode renderMode)
+sp<PipelineBindings> RCCDrawElementsIncremental::makePipelineBindings(const Shader& shader, RenderController& renderController, Enum::DrawMode renderMode)
 {
     _strips = renderController.gba().makeStrips(shader.layout()->getStreamLayout(0).stride());
     _indices = renderController.makeIndexBuffer();

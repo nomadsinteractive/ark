@@ -12,10 +12,9 @@
 #include "renderer/base/pipeline_building_context.h"
 #include "renderer/base/pipeline_configuration.h"
 #include "renderer/base/render_controller.h"
-#include "renderer/base/resource_loader_context.h"
 #include "renderer/base/pipeline_bindings.h"
+#include "renderer/impl/snippet/snippet_composite.h"
 #include "renderer/inf/renderer_factory.h"
-#include "renderer/inf/pipeline_factory.h"
 
 namespace ark {
 
@@ -41,10 +40,9 @@ Shader::StageManifest::StageManifest(BeanFactory& factory, const document& manif
 {
 }
 
-Shader::Shader(sp<Camera> camera, sp<PipelineFactory> pipelineFactory, sp<RenderController> renderController, sp<PipelineConfiguration> pipelineConfiguration, PipelineDescriptor::Parameters parameters)
-    : _camera(camera ? *camera : Camera::createDefaultCamera()), _pipeline_factory(std::move(pipelineFactory)), _render_controller(std::move(renderController)), _pipeline_configuration(std::move(pipelineConfiguration)), _layout(_pipeline_configuration->pipelineLayout()), _descriptor_params(std::move(parameters))
+Shader::Shader(sp<PipelineDescriptor> pipelineDescriptor)
+    : _pipeline_desciptor(std::move(pipelineDescriptor))
 {
-    _pipeline_configuration->initialize(*this);
 }
 
 sp<Builder<Shader>> Shader::fromDocument(BeanFactory& factory, const document& manifest, const String& defVertex, const String& defFragment, const sp<Camera>& defaultCamera)
@@ -60,58 +58,48 @@ sp<Builder<Shader>> Shader::fromDocument(BeanFactory& factory, const document& m
 
 sp<RenderLayerSnapshot::BufferObject> Shader::takeBufferSnapshot(const RenderRequest& renderRequest, const bool isComputeStage) const
 {
-    return _layout->takeBufferSnapshot(renderRequest, isComputeStage);
+    return _pipeline_desciptor->layout()->takeBufferSnapshot(renderRequest, isComputeStage);
 }
 
 const Camera& Shader::camera() const
 {
-    return _camera;
-}
-
-const sp<PipelineFactory>& Shader::pipelineFactory() const
-{
-    return _pipeline_factory;
+    return _pipeline_desciptor->camera();
 }
 
 const sp<PipelineLayout>& Shader::layout() const
 {
-    return _layout;
-}
-
-const sp<RenderController>& Shader::renderController() const
-{
-    return _render_controller;
+    return _pipeline_desciptor->layout();
 }
 
 void Shader::setCamera(const Camera& camera)
 {
-    _camera.assign(camera);
+    _pipeline_desciptor->camera().assign(camera);
 }
 
-const sp<PipelineConfiguration>& Shader::pipelineConfiguration() const
+const sp<PipelineDescriptor>& Shader::pipelineDesciptor() const
 {
-    return _pipeline_configuration;
+    return _pipeline_desciptor;
 }
 
 const PipelineDescriptor::Parameters& Shader::descriptorParams() const
 {
-    return _descriptor_params;
+    return _pipeline_desciptor->parameters();
 }
 
-sp<PipelineBindings> Shader::makeBindings(Buffer vertices, Enum::RenderMode mode, Enum::DrawProcedure drawProcedure, const Map<uint32_t, sp<Uploader>>& uploaders) const
+sp<PipelineBindings> Shader::makeBindings(Buffer vertices, const Enum::DrawMode mode, const Enum::DrawProcedure drawProcedure, const Map<uint32_t, sp<Uploader>>& uploaders) const
 {
-    return sp<PipelineBindings>::make(std::move(vertices), _pipeline_factory, sp<PipelineDescriptor>::make(mode, drawProcedure, _descriptor_params, _pipeline_configuration), makeDivivedBuffers(uploaders));
+    return sp<PipelineBindings>::make(mode, drawProcedure, std::move(vertices), _pipeline_desciptor, makeDivivedBuffers(uploaders));
 }
 
 Map<uint32_t, Buffer> Shader::makeDivivedBuffers(const Map<uint32_t, sp<Uploader>>& uploaders) const
 {
     Map<uint32_t, Buffer> dividedBuffers;
-    for(const auto& [divisor, _] : _layout->streamLayouts())
+    for(const auto& [divisor, _] : _pipeline_desciptor->layout()->streamLayouts())
         if(divisor != 0)
         {
             CHECK(dividedBuffers.find(divisor) == dividedBuffers.end(), "Duplicated stream divisor: %d", divisor);
             const auto iter = uploaders.find(divisor);
-            dividedBuffers.insert(std::make_pair(divisor, _render_controller->makeVertexBuffer(Buffer::USAGE_BIT_DYNAMIC, iter != uploaders.end() ? iter->second : nullptr)));
+            dividedBuffers.insert(std::make_pair(divisor, Ark::instance().renderController()->makeVertexBuffer(Buffer::USAGE_BIT_DYNAMIC, iter != uploaders.end() ? iter->second : nullptr)));
         }
     return dividedBuffers;
 }
@@ -128,12 +116,12 @@ sp<Shader> Shader::BUILDER_IMPL::build(const Scope& args)
     sp<PipelineBuildingContext> buildingContext = makePipelineBuildingContext(args);
     buildingContext->loadManifest(_manifest, _factory, args);
 
-    sp<PipelineConfiguration> pipelineLayout = sp<PipelineConfiguration>::make(std::move(buildingContext));
+    sp<Snippet> snippet;
     for(const sp<Builder<Snippet>>& i : _snippets)
-        pipelineLayout->addSnippet(i->build(args));
+        snippet = SnippetComposite::compose(std::move(snippet), i->build(args));
 
-    const sp<RenderController>& renderController = Ark::instance().renderController();
-    return sp<Shader>::make(_camera.build(args), renderController->createPipelineFactory(), renderController, std::move(pipelineLayout), _parameters.build(args));
+    const sp<Camera> camera = _camera.build(args);
+    return sp<Shader>::make(sp<PipelineDescriptor>::make(camera ? *camera : Camera::createDefaultCamera(), std::move(buildingContext), std::move(snippet), _parameters.build(args)));
 }
 
 sp<PipelineBuildingContext> Shader::BUILDER_IMPL::makePipelineBuildingContext(const Scope& args) const

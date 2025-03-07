@@ -5,6 +5,7 @@
 #include "graphics/base/camera.h"
 
 #include "renderer/base/render_engine_context.h"
+#include "renderer/inf/pipeline_factory.h"
 #include "renderer/inf/renderer_factory.h"
 
 namespace ark {
@@ -106,6 +107,13 @@ sp<RenderView> RenderEngine::createRenderView(const sp<RenderController>& render
 
     _render_context->setViewport(viewport);
     return _renderer_factory->createRenderView(_render_context, renderController);
+}
+
+sp<Pipeline> RenderEngine::createPipeline(GraphicsContext& graphicsContext, const PipelineBindings& pipelineBindings, std::map<Enum::ShaderStageBit, String> stages)
+{
+    if(!_pipeline_factory)
+        _pipeline_factory = _renderer_factory->createPipelineFactory();
+    return _pipeline_factory->buildPipeline(graphicsContext, pipelineBindings, std::move(stages));
 }
 
 const RenderEngine::PlatformInfo& RenderEngine::info() const

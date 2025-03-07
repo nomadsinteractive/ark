@@ -11,17 +11,16 @@
 
 namespace ark {
 
-class ARK_API PipelineConfiguration {
+class PipelineConfiguration {
 public:
-    PipelineConfiguration(sp<PipelineBuildingContext> buildingContext);
+    PipelineConfiguration(Camera camera, sp<PipelineBuildingContext> buildingContext, sp<Snippet> snippet = nullptr);
 
     void addSnippet(sp<Snippet> snippet);
     const sp<Snippet>& snippet() const;
-    void initialize(const Shader& shader);
 
     const sp<PipelineLayout>& pipelineLayout() const;
 
-    void preCompile(GraphicsContext& graphicsContext);
+    void preCompile(GraphicsContext& graphicsContext, const PipelineDescriptor& pipelineDescriptor);
 
     Map<Enum::ShaderStageBit, ShaderPreprocessor::Stage> getPreprocessedStages(const RenderEngineContext& renderEngineContext) const;
 
@@ -29,9 +28,14 @@ public:
     Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>> makeBindingImages() const;
 
 private:
-    sp<PipelineBuildingContext> _building_context;
-    sp<PipelineLayout> _pipeline_layout;
+    void initialize();
+
+private:
+    Camera _camera;
     sp<Snippet> _snippet;
+    sp<PipelineBuildingContext> _building_context;
+
+    sp<PipelineLayout> _pipeline_layout;
 
     Vector<ShaderPreprocessor::Stage> _stages;
 
@@ -41,6 +45,7 @@ private:
     Map<String, String> _definitions;
 
     friend class PipelineBuildingContext;
+    friend class PipelineDescriptor;
     friend class Shader;
 };
 

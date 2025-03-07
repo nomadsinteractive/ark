@@ -8,8 +8,9 @@ namespace ark::plugin::dear_imgui {
 
 namespace {
 
-PipelineDescriptor::Parameters makePipelineBindingParameters(const PipelineDescriptor::Parameters& defaultParams) {
-    PipelineDescriptor::PipelineTraitTable traits = defaultParams._traits;
+sp<PipelineDescriptor> makePipelineBindingParameters(const PipelineDescriptor& pipelineDescriptor) {
+    PipelineDescriptor::Parameters parameters = pipelineDescriptor.parameters();
+    PipelineDescriptor::PipelineTraitTable& traits = parameters._traits;
     if(!traits.has(PipelineDescriptor::TRAIT_TYPE_CULL_FACE_TEST))
     {
         PipelineDescriptor::TraitConfigure configure;
@@ -23,14 +24,17 @@ PipelineDescriptor::Parameters makePipelineBindingParameters(const PipelineDescr
         traits.push_back(PipelineDescriptor::TRAIT_TYPE_DEPTH_TEST, configure);
     }
     traits.push_back(PipelineDescriptor::TRAIT_TYPE_SCISSOR_TEST, {});
-    return {Optional<Rect>(), std::move(traits)};
+
+    sp<PipelineDescriptor> pd = sp<PipelineDescriptor>::make(pipelineDescriptor);
+    pd->setParameters(std::move(parameters));
+    return pd;
 }
 
 }
 
 DrawCommandPool::DrawCommandPool(const Shader& shader, const sp<RenderController>& renderController, sp<Texture> texture)
     : _refcount(0), _draw_commands(sp<LFStack<sp<RendererImgui::DrawCommand>>>::make()), _render_controller(renderController),
-      _pipeline_bindings(sp<PipelineBindings>::make(Buffer(), shader.pipelineFactory(), sp<PipelineDescriptor>::make(Enum::RENDER_MODE_TRIANGLES, Enum::DRAW_PROCEDURE_DRAW_ELEMENTS, makePipelineBindingParameters(shader.descriptorParams()), shader.pipelineConfiguration()), Map<uint32_t, Buffer>{}))
+      _pipeline_bindings(sp<PipelineBindings>::make(Enum::DRAW_MODE_TRIANGLES, Enum::DRAW_PROCEDURE_DRAW_ELEMENTS, Buffer(), makePipelineBindingParameters(shader.pipelineDesciptor()), Map<uint32_t, Buffer>{}))
 {
     _pipeline_bindings->pipelineDescriptor()->bindSampler(std::move(texture));
 }

@@ -2,6 +2,7 @@
 
 #include "core/base/api.h"
 #include "core/forwarding.h"
+#include "core/base/enum.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -14,15 +15,17 @@ namespace ark {
 
 class ARK_API PipelineBindings {
 public:
-    PipelineBindings(Buffer vertices, sp<PipelineFactory> pipelineFactory, sp<PipelineDescriptor> pipelineDescriptor, Map<uint32_t, Buffer> streams);
+    PipelineBindings(Enum::DrawMode drawMode, Enum::DrawProcedure drawProcedure, Buffer vertices, sp<PipelineDescriptor> pipelineDescriptor, Map<uint32_t, Buffer> streams);
+
+    Enum::DrawMode drawMode() const;
+    Enum::DrawProcedure drawProcedure() const;
 
     const Buffer& vertices() const;
-    Buffer& vertices();
 
     const sp<PipelineDescriptor>& pipelineDescriptor() const;
+    const sp<PipelineLayout>& pipelineLayout() const;
 
     const sp<Snippet>& snippet() const;
-    const sp<PipelineLayout>& shaderLayout() const;
 
     const sp<Map<uint32_t, Buffer>>& streams() const;
     const sp<Traits>& attachments() const;
@@ -36,8 +39,10 @@ private:
     void doEnsurePipeline(GraphicsContext& graphicsContext);
 
 private:
+    Enum::DrawMode _draw_mode;
+    Enum::DrawProcedure _draw_procedure;
+
     Buffer _vertices;
-    sp<PipelineFactory> _pipeline_factory;
     sp<PipelineDescriptor> _pipeline_descriptor;
 
     sp<Map<uint32_t, Buffer>> _streams;

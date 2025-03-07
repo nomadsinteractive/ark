@@ -21,15 +21,24 @@ void SnippetComposite::preInitialize(PipelineBuildingContext& context)
     _next->preInitialize(context);
 }
 
-void SnippetComposite::preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const PipelineConfiguration& pipelineLayout)
+void SnippetComposite::preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const PipelineDescriptor& pipelineDescriptor)
 {
-    _delegate->preCompile(graphicsContext, context, pipelineLayout);
-    _next->preCompile(graphicsContext, context, pipelineLayout);
+    _delegate->preCompile(graphicsContext, context, pipelineDescriptor);
+    _next->preCompile(graphicsContext, context, pipelineDescriptor);
 }
 
 sp<DrawDecorator> SnippetComposite::makeDrawDecorator(const RenderRequest& renderRequest)
 {
     return DrawDecoratorComposite::compose(_delegate->makeDrawDecorator(renderRequest), _next->makeDrawDecorator(renderRequest));
+}
+
+sp<Snippet> SnippetComposite::compose(sp<Snippet> self, sp<Snippet> next)
+{
+    if(self && next)
+        return sp<Snippet>::make<SnippetComposite>(std::move(self), std::move(next));
+    if(self)
+        return self;
+    return next;
 }
 
 SnippetComposite::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)

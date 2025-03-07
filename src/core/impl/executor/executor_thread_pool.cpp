@@ -108,15 +108,15 @@ sp<ExecutorWorkerThread> ExecutorThreadPool::obtainWorkerThread()
     return createWorkerThread();
 }
 
-void ExecutorThreadPool::releaseAll(bool wait)
+void ExecutorThreadPool::releaseAll(const bool wait)
 {
     Vector<sp<ExecutorWorkerThread>> waitThreads;
-    for(const sp<ExecutorWorkerThread>& i : _stub->_worker_threads)
-    {
-        if(wait)
+    if(wait)
+        for(const sp<ExecutorWorkerThread>& i : _stub->_worker_threads)
             waitThreads.push_back(i);
+
+    for(const sp<ExecutorWorkerThread>& i : _stub->_worker_threads)
         i->terminate();
-    }
 
     for(const sp<ExecutorWorkerThread>& i : waitThreads)
         i->tryJoin();
@@ -126,7 +126,7 @@ sp<ExecutorWorkerThread> ExecutorThreadPool::createWorkerThread()
 {
     const sp<ExecutorWorkerThread> workerThread = sp<ExecutorWorkerThread>::make(sp<WorkerThreadStrategy>::make(_stub), "Worker");
     _stub->_worker_threads.push(workerThread);
-    _stub->_worker_count ++;
+    ++ _stub->_worker_count;
     return workerThread;
 }
 

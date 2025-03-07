@@ -31,16 +31,16 @@ namespace {
 
 class SnippetSDL3_GPU final : public Snippet {
 public:
-    void preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context, const PipelineConfiguration& pipelineLayout) override {
+    void preCompile(GraphicsContext& /*graphicsContext*/, PipelineBuildingContext& context, const PipelineDescriptor& pipelineDescriptor) override {
         const String sLocation = "location";
         const ShaderPreprocessor& firstStage = context.renderStages().begin()->second;
 
         RenderUtil::setLayoutDescriptor(RenderUtil::setupLayoutLocation(context, firstStage._declaration_ins), sLocation, 0);
 
-        const PipelineLayout& shaderLayout = pipelineLayout.pipelineLayout();
+        const PipelineLayout& pipelineLayout = pipelineDescriptor.layout();
         if(ShaderPreprocessor* vertex = context.tryGetRenderStage(Enum::SHADER_STAGE_BIT_VERTEX))
         {
-            RenderUtil::setLayoutDescriptor(vertex->_declaration_images, "binding", static_cast<uint32_t>(shaderLayout.ubos().size() + shaderLayout.ssbos().size() + shaderLayout.samplers().size()));
+            RenderUtil::setLayoutDescriptor(vertex->_declaration_images, "binding", static_cast<uint32_t>(pipelineLayout.ubos().size() + pipelineLayout.ssbos().size() + pipelineLayout.samplers().size()));
             vertex->_predefined_macros.emplace_back("#define gl_InstanceID gl_InstanceIndex");
         }
         if(ShaderPreprocessor* fragment = context.tryGetRenderStage(Enum::SHADER_STAGE_BIT_FRAGMENT))
@@ -62,7 +62,7 @@ public:
 
         if(const ShaderPreprocessor* compute = context.computingStage().get())
         {
-            const uint32_t bindingOffset = static_cast<uint32_t>(shaderLayout.ubos().size() + shaderLayout.ssbos().size());
+            const uint32_t bindingOffset = static_cast<uint32_t>(pipelineLayout.ubos().size() + pipelineLayout.ssbos().size());
             RenderUtil::setLayoutDescriptor(compute->_declaration_images, "binding", bindingOffset);
         }
 
@@ -79,7 +79,7 @@ public:
 
         {
             Map<uint32_t, uint32_t> spaces;
-            for(const sp<PipelineLayout::UBO>& i : shaderLayout.ubos())
+            for(const sp<PipelineLayout::UBO>& i : pipelineLayout.ubos())
             {
                 uint32_t& binding = spaces[i->_stages.bits()];
                 i->_binding = binding;
@@ -91,7 +91,7 @@ public:
         {
             ShaderPreprocessor& preprocessor = v;
             preprocessor._version = 450;
-            preprocessor.declareUBOStruct(shaderLayout, k == Enum::SHADER_STAGE_BIT_VERTEX ? 1 : 3);
+            preprocessor.declareUBOStruct(pipelineLayout, k == Enum::SHADER_STAGE_BIT_VERTEX ? 1 : 3);
             preprocessor._predefined_macros.push_back("#extension GL_ARB_separate_shader_objects : enable");
             preprocessor._predefined_macros.push_back("#extension GL_ARB_shading_language_420pack : enable");
         }

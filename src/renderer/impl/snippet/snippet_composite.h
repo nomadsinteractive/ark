@@ -13,8 +13,10 @@ public:
     SnippetComposite(sp<Snippet> delegate, sp<Snippet> next);
 
     void preInitialize(PipelineBuildingContext& context) override;
-    void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const PipelineConfiguration& pipelineLayout) override;
+    void preCompile(GraphicsContext& graphicsContext, PipelineBuildingContext& context, const PipelineDescriptor& pipelineDescriptor) override;
     sp<DrawDecorator> makeDrawDecorator(const RenderRequest& renderRequest) override;
+
+    static sp<Snippet> compose(sp<Snippet> self, sp<Snippet> next);
 
 //  [[plugin::builder::by-value]]
     class DICTIONARY final : public Builder<Snippet> {

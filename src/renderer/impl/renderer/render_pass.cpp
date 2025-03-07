@@ -18,7 +18,7 @@ Enum::DrawProcedure toDrawProcedure(const Buffer& indexBuffer, const Map<uint32_
 
 }
 
-RenderPass::RenderPass(sp<Shader> shader, Buffer vertexBuffer, Buffer indexBuffer, sp<Integer> drawCount, Enum::RenderMode mode, Enum::DrawProcedure drawProcedure, const Map<uint32_t, sp<Uploader>>& dividedUploaders)
+RenderPass::RenderPass(sp<Shader> shader, Buffer vertexBuffer, Buffer indexBuffer, sp<Integer> drawCount, Enum::DrawMode mode, Enum::DrawProcedure drawProcedure, const Map<uint32_t, sp<Uploader>>& dividedUploaders)
     : _shader(std::move(shader)), _index_buffer(std::move(indexBuffer)), _draw_count(std::move(drawCount)), _draw_procedure(drawProcedure),
       _pipeline_bindings(_shader->makeBindings(std::move(vertexBuffer), mode, drawProcedure, dividedUploaders))
 {
@@ -48,7 +48,7 @@ void RenderPass::render(RenderRequest& renderRequest, const V3& /*position*/)
 RenderPass::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _shader(factory.ensureBuilder<Shader>(manifest, constants::SHADER)), _vertex_buffer(factory.ensureBuilder<Buffer>(manifest, "vertex-buffer")),
       _index_buffer(factory.getBuilder<Buffer>(manifest, "index-buffer")), _draw_count(factory.ensureBuilder<Integer>(manifest, "draw-count")),
-      _mode(Documents::getAttribute<Enum::RenderMode>(manifest, "mode", Enum::RENDER_MODE_TRIANGLES)), _draw_precedure(Documents::getAttribute<Enum::DrawProcedure>(manifest, "draw-precedure", Enum::DRAW_PROCEDURE_AUTO))
+      _mode(Documents::getAttribute<Enum::DrawMode>(manifest, "mode", Enum::DRAW_MODE_TRIANGLES)), _draw_precedure(Documents::getAttribute<Enum::DrawProcedure>(manifest, "draw-precedure", Enum::DRAW_PROCEDURE_AUTO))
 {
     for(const document& i : manifest->children("buffer"))
     {

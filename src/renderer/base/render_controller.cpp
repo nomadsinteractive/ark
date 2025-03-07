@@ -19,6 +19,7 @@
 #include "renderer/util/render_util.h"
 
 #include "platform/platform.h"
+#include "renderer/inf/pipeline_factory.h"
 
 namespace ark {
 
@@ -271,11 +272,6 @@ const sp<Recycler>& RenderController::recycler() const
 const sp<RenderEngine>& RenderController::renderEngine() const
 {
     return _render_engine;
-}
-
-sp<PipelineFactory> RenderController::createPipelineFactory() const
-{
-    return _render_engine->rendererFactory()->createPipelineFactory();
 }
 
 sp<Texture> RenderController::createTexture(sp<Size> size, sp<Texture::Parameters> parameters, sp<Texture::Uploader> uploader, RenderController::UploadStrategy us, sp<Future> future)

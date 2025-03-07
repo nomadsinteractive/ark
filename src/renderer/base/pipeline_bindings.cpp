@@ -55,18 +55,22 @@ public:
 
 }
 
-PipelineBindings::PipelineBindings(Buffer vertices, sp<PipelineFactory> pipelineFactory, sp<PipelineDescriptor> pipelineDescriptor, Map<uint32_t, Buffer> streams)
-    : _vertices(std::move(vertices)), _pipeline_factory(std::move(pipelineFactory)), _pipeline_descriptor(std::move(pipelineDescriptor)),
-      _streams(sp<Map<uint32_t, Buffer>>::make(std::move(streams))), _attachments(sp<Traits>::make())
+PipelineBindings::PipelineBindings(const Enum::DrawMode drawMode, const Enum::DrawProcedure drawProcedure, Buffer vertices, sp<PipelineDescriptor> pipelineDescriptor, Map<uint32_t, Buffer> streams)
+    : _draw_mode(drawMode), _draw_procedure(drawProcedure), _vertices(std::move(vertices)), _pipeline_descriptor(std::move(pipelineDescriptor)), _streams(sp<Map<uint32_t, Buffer>>::make(std::move(streams))), _attachments(sp<Traits>::make())
 {
+}
+
+Enum::DrawMode PipelineBindings::drawMode() const
+{
+    return _draw_mode;
+}
+
+Enum::DrawProcedure PipelineBindings::drawProcedure() const
+{
+    return _draw_procedure;
 }
 
 const Buffer& PipelineBindings::vertices() const
-{
-    return _vertices;
-}
-
-Buffer& PipelineBindings::vertices()
 {
     return _vertices;
 }
@@ -78,12 +82,12 @@ const sp<PipelineDescriptor>& PipelineBindings::pipelineDescriptor() const
 
 const sp<Snippet>& PipelineBindings::snippet() const
 {
-    return _pipeline_descriptor->configuration()->snippet();
+    return _pipeline_descriptor->snippet();
 }
 
-const sp<PipelineLayout>& PipelineBindings::shaderLayout() const
+const sp<PipelineLayout>& PipelineBindings::pipelineLayout() const
 {
-    return _pipeline_descriptor->shaderLayout();
+    return _pipeline_descriptor->layout();
 }
 
 const sp<Map<uint32_t, Buffer>>& PipelineBindings::streams() const
@@ -120,7 +124,7 @@ const sp<Pipeline>& PipelineBindings::ensureRenderPipeline(GraphicsContext& grap
 Map<uint32_t, Buffer::Factory> PipelineBindings::makeDividedBufferFactories() const
 {
     Map<uint32_t, Buffer::Factory> builders;
-    const sp<PipelineLayout>& shaderLayout = _pipeline_descriptor->shaderLayout();
+    const sp<PipelineLayout>& shaderLayout = _pipeline_descriptor->layout();
     for(const auto& i : *_streams)
     {
         const PipelineLayout::StreamLayout& stream = shaderLayout->getStreamLayout(i.first);
@@ -131,25 +135,26 @@ Map<uint32_t, Buffer::Factory> PipelineBindings::makeDividedBufferFactories() co
 
 void PipelineBindings::doEnsurePipeline(GraphicsContext& graphicsContext)
 {
-    _pipeline_descriptor->configuration()->preCompile(graphicsContext);
+    _pipeline_descriptor->preCompile(graphicsContext);
 
-    Map<Enum::ShaderStageBit, ShaderPreprocessor::Stage> stages = _pipeline_descriptor->configuration()->getPreprocessedStages(graphicsContext.renderContext());
+    Map<Enum::ShaderStageBit, ShaderPreprocessor::Stage> stages = _pipeline_descriptor->getPreprocessedStages(graphicsContext.renderContext());
     ASSERT(!stages.empty());
 
     Map<Enum::ShaderStageBit, String> sources;
     for(auto& [k, v] : stages)
         sources.emplace(k, std::move(v._source));
 
+    RenderEngine& renderEngine = Ark::instance().renderController()->renderEngine();
     if(const auto iter = sources.find(Enum::SHADER_STAGE_BIT_COMPUTE); iter != sources.end() && sources.size() > 1)
     {
-        sp<Pipeline> computePipeline = _pipeline_factory->buildPipeline(graphicsContext, _pipeline_descriptor, Map<Enum::ShaderStageBit, String>{{iter->first, iter->second}});
+        sp<Pipeline> computePipeline = renderEngine.createPipeline(graphicsContext, *this, Map<Enum::ShaderStageBit, String>{{iter->first, iter->second}});
         sources.erase(iter);
 
-        sp<Pipeline> renderPipeline = _pipeline_factory->buildPipeline(graphicsContext, _pipeline_descriptor, std::move(sources));
+        sp<Pipeline> renderPipeline = renderEngine.createPipeline(graphicsContext, *this, std::move(sources));
         _pipeline = sp<Pipeline>::make<PipelineComposite>(std::move(renderPipeline), std::move(computePipeline));
     }
     else
-        _pipeline = _pipeline_factory->buildPipeline(graphicsContext, _pipeline_descriptor, std::move(sources));
+        _pipeline = renderEngine.createPipeline(graphicsContext, *this, std::move(sources));
     _pipeline->upload(graphicsContext);
 }
 

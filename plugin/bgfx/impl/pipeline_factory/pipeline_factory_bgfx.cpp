@@ -260,23 +260,23 @@ struct alignas(1) BgfxShaderAttributeChunk {
 }
 
 struct DrawPipelineBgfx final : ResourceBase<::bgfx::ProgramHandle, Pipeline> {
-    DrawPipelineBgfx(Enum::DrawProcedure drawProcedure, Enum::RenderMode drawMode, const sp<PipelineLayout>& pipelineInput, String vertexShader, String fragmentShader)
-        : _draw_procedure(drawProcedure), _draw_mode(drawMode), _pipeline_input(pipelineInput), _vertex_shader(std::move(vertexShader)), _fragment_shader(std::move(fragmentShader)) {
+    DrawPipelineBgfx(const PipelineBindings& pipelineBindings, String vertexShader, String fragmentShader)
+        : _draw_procedure(pipelineBindings.drawProcedure()), _draw_mode(pipelineBindings.drawMode()), _pipeline_layout(pipelineBindings.pipelineDescriptor()->layout()), _vertex_shader(std::move(vertexShader)), _fragment_shader(std::move(fragmentShader)) {
     }
 
     void upload(GraphicsContext& graphicsContext) override
     {
         if(!_handle)
         {
-            const auto vHandle = createShader(_pipeline_input, _vertex_shader, Enum::SHADER_STAGE_BIT_VERTEX);
-            const auto fHandle = createShader(_pipeline_input, _fragment_shader, Enum::SHADER_STAGE_BIT_FRAGMENT);
+            const auto vHandle = createShader(_pipeline_layout, _vertex_shader, Enum::SHADER_STAGE_BIT_VERTEX);
+            const auto fHandle = createShader(_pipeline_layout, _fragment_shader, Enum::SHADER_STAGE_BIT_FRAGMENT);
             _handle.reset(::bgfx::createProgram(vHandle, fHandle, true));
         }
     }
 
     void bind(GraphicsContext& graphicsContext, const DrawingContext& drawingContext)
     {
-        if(const Vector<String>& samplerNames = drawingContext._bindings->shaderLayout()->samplers().keys(); _sampler_slots.empty() && !samplerNames.empty())
+        if(const Vector<String>& samplerNames = drawingContext._bindings->pipelineLayout()->samplers().keys(); _sampler_slots.empty() && !samplerNames.empty())
         {
             uint8_t textureUint = 0;
             for(size_t i = 0; i < samplerNames.size(); ++i)
@@ -309,7 +309,7 @@ struct DrawPipelineBgfx final : ResourceBase<::bgfx::ProgramHandle, Pipeline> {
 
         {
             uint64_t state = BGFX_STATE_DEFAULT | BGFX_STATE_BLEND_FUNC_SEPARATE(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA, BGFX_STATE_BLEND_ONE, BGFX_STATE_BLEND_ZERO);
-            if(_draw_mode == Enum::RENDER_MODE_TRIANGLE_STRIP)
+            if(_draw_mode == Enum::DRAW_MODE_TRIANGLE_STRIP)
                 state |= BGFX_STATE_PT_TRISTRIP;
             ::bgfx::setState(state);
         }
@@ -337,7 +337,7 @@ struct DrawPipelineBgfx final : ResourceBase<::bgfx::ProgramHandle, Pipeline> {
                 ::bgfx::InstanceDataBuffer idb;
                 for(const auto& [divisor, buffer] : param._divided_buffer_snapshots)
                 {
-                    const PipelineLayout::StreamLayout& sl = drawingContext._bindings->shaderLayout()->getStreamLayout(divisor);
+                    const PipelineLayout::StreamLayout& sl = drawingContext._bindings->pipelineLayout()->getStreamLayout(divisor);
                     const uint32_t availInstanceCount = ::bgfx::getAvailInstanceDataBuffer(instanceCount, sl.stride());
                     ::bgfx::allocInstanceDataBuffer(&idb, availInstanceCount, sl.stride());
                     if(buffer._uploader)
@@ -377,8 +377,8 @@ struct DrawPipelineBgfx final : ResourceBase<::bgfx::ProgramHandle, Pipeline> {
     };
 
     Enum::DrawProcedure _draw_procedure;
-    Enum::RenderMode _draw_mode;
-    sp<PipelineLayout> _pipeline_input;
+    Enum::DrawMode _draw_mode;
+    sp<PipelineLayout> _pipeline_layout;
     String _vertex_shader;
     String _fragment_shader;
 
@@ -417,14 +417,14 @@ private:
 
 }
 
-sp<Pipeline> PipelineFactoryBgfx::buildPipeline(GraphicsContext& graphicsContext, const sp<PipelineDescriptor>& pipelineDescriptor, std::map<Enum::ShaderStageBit, String> stages)
+sp<Pipeline> PipelineFactoryBgfx::buildPipeline(GraphicsContext& graphicsContext, const PipelineBindings& pipelineBindings, std::map<Enum::ShaderStageBit, String> stages)
 {
+    const sp<PipelineDescriptor>& pipelineDescriptor = pipelineBindings.pipelineDescriptor();
     if(const auto vIter = stages.find(Enum::SHADER_STAGE_BIT_VERTEX); vIter != stages.end())
     {
-        const Enum::DrawProcedure drawProcedure = pipelineDescriptor->drawProcedure();
         const auto fIter = stages.find(Enum::SHADER_STAGE_BIT_FRAGMENT);
         CHECK(fIter != stages.end(), "Pipeline has no fragment shader(only vertex shader available)");
-        return sp<Pipeline>::make<DrawPipelineBgfx>(drawProcedure, pipelineDescriptor->mode(), pipelineDescriptor->shaderLayout(), std::move(vIter->second), std::move(fIter->second));
+        return sp<Pipeline>::make<DrawPipelineBgfx>(pipelineBindings, std::move(vIter->second), std::move(fIter->second));
     }
     const auto cIter = stages.find(Enum::SHADER_STAGE_BIT_COMPUTE);
     CHECK(cIter != stages.end(), "Pipeline has no compute shader");

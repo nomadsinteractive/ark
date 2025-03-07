@@ -20,7 +20,7 @@ namespace ark::plugin::opengl {
 
 class GLPipeline final : public Pipeline {
 public:
-    GLPipeline(const sp<Recycler>& recycler, uint32_t version, Map<Enum::ShaderStageBit, String> stages, const PipelineDescriptor& bindings);
+    GLPipeline(const sp<Recycler>& recycler, uint32_t version, Map<Enum::ShaderStageBit, String> stages, const PipelineBindings& bindings);
     ~GLPipeline() override;
 
     uint64_t id() override;
@@ -61,7 +61,7 @@ public:
 
 private:
     void bindBuffer(GraphicsContext&, const PipelineLayout& shaderLayout, uint32_t divisor) const;
-    sp<PipelineOperation> makePipelineOperation(const PipelineDescriptor& pipelineDescriptor) const;
+    sp<PipelineOperation> makePipelineOperation(const PipelineBindings& pipelineBindings) const;
 
 private:
     sp<Stub> _stub;

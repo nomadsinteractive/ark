@@ -26,7 +26,7 @@
 namespace ark {
 
 ModelLoaderText::ModelLoaderText(sp<Alphabet> alphabet, sp<Atlas> atlas, const Font& font)
-    : ModelLoader(Enum::RENDER_MODE_TRIANGLES, atlas->texture(), MODEL_TRAIT_DISALLOW_CACHE), _alphabet(std::move(alphabet)), _atlas(std::move(atlas)), _glyph_attachment(_atlas->attachments().ensure<AtlasGlyphAttachment>(*_atlas)),
+    : ModelLoader(Enum::DRAW_MODE_TRIANGLES, atlas->texture(), MODEL_TRAIT_DISALLOW_CACHE), _alphabet(std::move(alphabet)), _atlas(std::move(atlas)), _glyph_attachment(_atlas->attachments().ensure<AtlasGlyphAttachment>(*_atlas)),
       _default_glyph_bundle(_glyph_attachment->ensureGlyphBundle(_alphabet, font))
 {
 }

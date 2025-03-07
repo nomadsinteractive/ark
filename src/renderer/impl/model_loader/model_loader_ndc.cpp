@@ -9,7 +9,7 @@
 namespace ark {
 
 ModelLoaderNDC::ModelLoaderNDC()
-    : ModelLoader(Enum::RENDER_MODE_TRIANGLES, nullptr)
+    : ModelLoader(Enum::DRAW_MODE_TRIANGLES, nullptr)
 {
 }
 

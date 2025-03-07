@@ -13,8 +13,7 @@ class ARK_API PipelineFactory {
 public:
     virtual ~PipelineFactory() = default;
 
-    virtual sp<Pipeline> buildPipeline(GraphicsContext& graphicsContext, const sp<PipelineDescriptor>& pipelineDescriptor, std::map<Enum::ShaderStageBit, String> stages) = 0;
-
+    virtual sp<Pipeline> buildPipeline(GraphicsContext& graphicsContext, const PipelineBindings& pipelineBindings, std::map<Enum::ShaderStageBit, String> stages) = 0;
 };
 
 }

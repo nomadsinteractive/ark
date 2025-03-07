@@ -18,7 +18,7 @@ namespace ark {
 class ARK_API RenderPass final : public Renderer {
 public:
 //  [[script::bindings::auto]]
-    RenderPass(sp<Shader> shader, Buffer vertexBuffer, Buffer indexBuffer, sp<Integer> drawCount, Enum::RenderMode mode, Enum::DrawProcedure drawProcedure, const std::map<uint32_t, sp<Uploader>>& dividedUploaders);
+    RenderPass(sp<Shader> shader, Buffer vertexBuffer, Buffer indexBuffer, sp<Integer> drawCount, Enum::DrawMode mode, Enum::DrawProcedure drawProcedure, const std::map<uint32_t, sp<Uploader>>& dividedUploaders);
 
     void render(RenderRequest& renderRequest, const V3& position) override;
 
@@ -34,7 +34,7 @@ public:
         sp<Builder<Buffer>> _vertex_buffer;
         sp<Builder<Buffer>> _index_buffer;
         sp<Builder<Integer>> _draw_count;
-        Enum::RenderMode _mode;
+        Enum::DrawMode _mode;
         Enum::DrawProcedure _draw_precedure;
         std::map<uint32_t, sp<Builder<Uploader>>> _divided_uploaders;
     };

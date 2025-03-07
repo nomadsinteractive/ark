@@ -184,17 +184,17 @@ SDL_GPUVertexElementFormat toVertexElementFormat(const Attribute& attribute)
     return SDL_GPU_VERTEXELEMENTFORMAT_INVALID;
 }
 
-SDL_GPUPrimitiveType toPrimitiveType(const Enum::RenderMode drawMode)
+SDL_GPUPrimitiveType toPrimitiveType(const Enum::DrawMode drawMode)
 {
     switch(drawMode)
     {
-        case Enum::RENDER_MODE_LINES:
+        case Enum::DRAW_MODE_LINES:
             return SDL_GPU_PRIMITIVETYPE_LINELIST;
-        case Enum::RENDER_MODE_POINTS:
+        case Enum::DRAW_MODE_POINTS:
             return SDL_GPU_PRIMITIVETYPE_POINTLIST;
-        case Enum::RENDER_MODE_TRIANGLES:
+        case Enum::DRAW_MODE_TRIANGLES:
             return SDL_GPU_PRIMITIVETYPE_TRIANGLELIST;
-        case Enum::RENDER_MODE_TRIANGLE_STRIP:
+        case Enum::DRAW_MODE_TRIANGLE_STRIP:
             return SDL_GPU_PRIMITIVETYPE_TRIANGLESTRIP;
         default:
             break;
@@ -243,8 +243,8 @@ void setupVertexAttributes(const Attribute& attribute, SDL_GPUVertexAttribute* a
 
 class DrawPipelineSDL3_GPU final : public Pipeline {
 public:
-    DrawPipelineSDL3_GPU(const Enum::DrawProcedure drawProcedure, const PipelineDescriptor& pipelineDescriptor, String vertexShader, String fragmentShader)
-        : _draw_procedure(drawProcedure), _draw_mode(pipelineDescriptor.mode()), _pipeline_descriptor(pipelineDescriptor), _vertex_shader(std::move(vertexShader)), _fragment_shader(std::move(fragmentShader)), _pipeline(nullptr) {
+    DrawPipelineSDL3_GPU(const PipelineBindings& pipelineBindings, String vertexShader, String fragmentShader)
+        : _draw_procedure(pipelineBindings.drawProcedure()), _draw_mode(pipelineBindings.drawMode()), _pipeline_descriptor(pipelineBindings.pipelineDescriptor()), _vertex_shader(std::move(vertexShader)), _fragment_shader(std::move(fragmentShader)), _pipeline(nullptr) {
     }
 
     uint64_t id() override
@@ -270,9 +270,9 @@ public:
             const ContextSDL3_GPU& context = ensureContext(graphicsContext);
             SDL_GPUDevice* gpuDevice = context._gpu_gevice;
 
-            const PipelineLayout& shaderLayout = _pipeline_descriptor.shaderLayout();
-            SDL_GPUShader* vertexShader = createGraphicsShader(gpuDevice, shaderLayout, _vertex_shader, Enum::SHADER_STAGE_BIT_VERTEX);
-            SDL_GPUShader* fragmentShader = createGraphicsShader(gpuDevice, shaderLayout, _fragment_shader, Enum::SHADER_STAGE_BIT_FRAGMENT);
+            const PipelineLayout& pipelineLayout = _pipeline_descriptor->layout();
+            SDL_GPUShader* vertexShader = createGraphicsShader(gpuDevice, pipelineLayout, _vertex_shader, Enum::SHADER_STAGE_BIT_VERTEX);
+            SDL_GPUShader* fragmentShader = createGraphicsShader(gpuDevice, pipelineLayout, _fragment_shader, Enum::SHADER_STAGE_BIT_FRAGMENT);
 
             SDL_GPUVertexBufferDescription vertexBufferDescription[8];
             Uint32 numVertexBuffers = 0;
@@ -281,7 +281,7 @@ public:
             Uint32 numVertexAttributes = 0;
             Uint32 location = 0;
 
-            for(const auto& [k, v] : shaderLayout.streamLayouts())
+            for(const auto& [k, v] : pipelineLayout.streamLayouts())
             {
                 vertexBufferDescription[numVertexBuffers] = {
                     numVertexBuffers,
@@ -306,7 +306,7 @@ public:
                 true,
                 false
             };
-            const auto& traits = _pipeline_descriptor.parameters()._traits;
+            const auto& traits = _pipeline_descriptor->parameters()._traits;
             const SDL_GPUColorTargetBlendState blendState = traits.has(PipelineDescriptor::TRAIT_TYPE_BLEND) ? toColorTargetBlendState(traits.at(PipelineDescriptor::TRAIT_TYPE_BLEND)._blend) : defaultBlendState;
 
             Uint32 numColorTargets = 0;
@@ -383,7 +383,7 @@ public:
         SDL_BindGPUGraphicsPipeline(renderPass, _pipeline);
 
         constexpr ShaderStageSet currentStageSets = {Enum::SHADER_STAGE_BIT_VERTEX, Enum::SHADER_STAGE_BIT_FRAGMENT};
-        bindUBOSnapshots(sdl3GC._command_buffer, drawingContext._buffer_object->_ubos, drawingContext._bindings->shaderLayout(), currentStageSets);
+        bindUBOSnapshots(sdl3GC._command_buffer, drawingContext._buffer_object->_ubos, drawingContext._bindings->pipelineLayout(), currentStageSets);
 
         const SDL_GPUBufferBinding vertexBufferBinding = {reinterpret_cast<SDL_GPUBuffer*>(drawingContext._vertices.id()), 0};
         SDL_BindGPUVertexBuffers(renderPass, 0, &vertexBufferBinding, 1);
@@ -431,8 +431,9 @@ public:
 
 private:
     Enum::DrawProcedure _draw_procedure;
-    Enum::RenderMode _draw_mode;
-    PipelineDescriptor _pipeline_descriptor;
+    Enum::DrawMode _draw_mode;
+
+    sp<PipelineDescriptor> _pipeline_descriptor;
     String _vertex_shader;
     String _fragment_shader;
 
@@ -495,7 +496,7 @@ public:
                 nullptr
             };
 
-            const PipelineLayout& shaderLayout = _pipeline_descriptor.shaderLayout();
+            const PipelineLayout& shaderLayout = _pipeline_descriptor.layout();
             Uint32 samplerCount = 0;
             for(const PipelineLayout::DescriptorSet& i : shaderLayout.samplers().values())
                 if(i._stages.has(Enum::SHADER_STAGE_BIT_COMPUTE))
@@ -557,14 +558,14 @@ private:
 
 }
 
-sp<Pipeline> PipelineFactorySDL3_GPU::buildPipeline(GraphicsContext& graphicsContext, const sp<PipelineDescriptor>& pipelineDescriptor, std::map<Enum::ShaderStageBit, String> stages)
+sp<Pipeline> PipelineFactorySDL3_GPU::buildPipeline(GraphicsContext& graphicsContext, const PipelineBindings& pipelineBindings, std::map<Enum::ShaderStageBit, String> stages)
 {
+    const sp<PipelineDescriptor>& pipelineDescriptor = pipelineBindings.pipelineDescriptor();
     if(const auto vIter = stages.find(Enum::SHADER_STAGE_BIT_VERTEX); vIter != stages.end())
     {
-        const Enum::DrawProcedure drawProcedure = pipelineDescriptor->drawProcedure();
         const auto fIter = stages.find(Enum::SHADER_STAGE_BIT_FRAGMENT);
         CHECK(fIter != stages.end(), "Pipeline has no fragment shader(only vertex shader available)");
-        return sp<Pipeline>::make<DrawPipelineSDL3_GPU>(drawProcedure, pipelineDescriptor, std::move(vIter->second), std::move(fIter->second));
+        return sp<Pipeline>::make<DrawPipelineSDL3_GPU>(pipelineBindings, std::move(vIter->second), std::move(fIter->second));
     }
     const auto cIter = stages.find(Enum::SHADER_STAGE_BIT_COMPUTE);
     CHECK(cIter != stages.end(), "Pipeline has no compute shader");

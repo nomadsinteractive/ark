@@ -28,7 +28,7 @@ public:
     typedef Vector<sp<Builder<Snippet>>> SnippetManifest;
 
 public:
-    Shader(sp<Camera> camera, sp<PipelineFactory> pipelineFactory, sp<RenderController> renderController, sp<PipelineConfiguration> pipelineConfiguration, PipelineDescriptor::Parameters parameters);
+    Shader(sp<PipelineDescriptor> pipelineDescriptor);
 
     static sp<Builder<Shader>> fromDocument(BeanFactory& factory, const document& manifest, const String& defVertex = "shaders/default.vert", const String& defFragment = "shaders/texture.frag", const sp<Camera>& defaultCamera = nullptr);
 
@@ -36,16 +36,14 @@ public:
     sp<RenderLayerSnapshot::BufferObject> takeBufferSnapshot(const RenderRequest& renderRequest, bool isComputeStage) const;
 
     const Camera& camera() const;
-    const sp<PipelineFactory>& pipelineFactory() const;
-    const sp<RenderController>& renderController() const;
-
     void setCamera(const Camera& camera);
+
+    const sp<PipelineDescriptor>& pipelineDesciptor() const;
     const sp<PipelineLayout>& layout() const;
-    const sp<PipelineConfiguration>& pipelineConfiguration() const;
 
     const PipelineDescriptor::Parameters& descriptorParams() const;
 
-    sp<PipelineBindings> makeBindings(Buffer vertices, Enum::RenderMode mode, Enum::DrawProcedure renderProcedure, const Map<uint32_t, sp<Uploader>>& uploaders = {}) const;
+    sp<PipelineBindings> makeBindings(Buffer vertices, Enum::DrawMode mode, Enum::DrawProcedure renderProcedure, const Map<uint32_t, sp<Uploader>>& uploaders = {}) const;
 
     class BUILDER_IMPL final : public Builder<Shader> {
     public:
@@ -81,14 +79,7 @@ private:
     Map<uint32_t, Buffer> makeDivivedBuffers(const Map<uint32_t, sp<Uploader>>& uploaders) const;
 
 private:
-    Camera _camera;
-
-    sp<PipelineFactory> _pipeline_factory;
-    sp<RenderController> _render_controller;
-    sp<PipelineConfiguration> _pipeline_configuration;
-    sp<PipelineLayout> _layout;
-
-    PipelineDescriptor::Parameters _descriptor_params;
+    sp<PipelineDescriptor> _pipeline_desciptor;
 };
 
 }

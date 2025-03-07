@@ -17,9 +17,9 @@ RCCDrawElements::RCCDrawElements(sp<Model> model)
 {
 }
 
-sp<PipelineBindings> RCCDrawElements::makePipelineBindings(const Shader& shader, RenderController& renderController, Enum::RenderMode renderMode)
+sp<PipelineBindings> RCCDrawElements::makePipelineBindings(const Shader& shader, RenderController& renderController, Enum::DrawMode renderMode)
 {
-    _primitive_index_buffer = renderController.getSharedPrimitiveIndexBuffer(_model, renderMode == Enum::RENDER_MODE_TRIANGLE_STRIP);
+    _primitive_index_buffer = renderController.getSharedPrimitiveIndexBuffer(_model, renderMode == Enum::DRAW_MODE_TRIANGLE_STRIP);
     return shader.makeBindings(renderController.makeVertexBuffer(), renderMode, Enum::DRAW_PROCEDURE_DRAW_ELEMENTS);
 }
 
