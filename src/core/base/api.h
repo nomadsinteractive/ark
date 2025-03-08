@@ -55,6 +55,7 @@
 #define THREAD_CHECK(threadId) __thread_check__(__ARK_FUNCTION__, threadId)
 #define CHECK(cond, ...) if(!(cond)) ark::__message__(ark::__fatal__, __ARK_FUNCTION__, #cond, __VA_ARGS__)
 #define CHECK_WARN(cond, ...) if(!(cond)) ark::__message__(ark::__warning__, __ARK_FUNCTION__, #cond, __VA_ARGS__)
+#define CHECK_WARN_OR_RETURN(cond, ...) while(!(cond)) { ark::__message__(ark::__warning__, __ARK_FUNCTION__, #cond, __VA_ARGS__); return; }
 #define TRACE(cond, ...) if(cond) ark::__message__(ark::__trace__, __ARK_FUNCTION__, #cond, __VA_ARGS__)
 
 #ifndef ARK_FLAG_PUBLISHING_BUILD
@@ -71,12 +72,14 @@
 #   define DFATAL(...) FATAL(__VA_ARGS__)
 #   define DCHECK(cond, ...) CHECK(cond, __VA_ARGS__)
 #   define DCHECK_WARN(cond, ...) CHECK_WARN(cond, __VA_ARGS__)
+#   define DCHECK_WARN_OR_RETURN(cond, ...) CHECK_WARN_OR_RETURN(cond, __VA_ARGS__)
 #   define DTRACE(cond, ...) TRACE(cond, __VA_ARGS__)
 #   define DTHREAD_CHECK(threadId) THREAD_CHECK(threadId)
 #else
 #   define DFATAL(...)
 #   define DCHECK(cond, ...) (void (cond))
 #   define DCHECK_WARN(cond, ...) (void (cond))
+#   define DCHECK_WARN_OR_RETURN(cond, ...) if (!(cond)) return
 #   define DTRACE(cond, ...) (void (cond))
 #   define DTHREAD_CHECK(threadId) (void (threadId))
 #endif

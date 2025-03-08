@@ -24,6 +24,12 @@
 
 #include "platform/platform.h"
 
+#ifdef ARK_FLAG_DEBUG
+#define GL_CHECK_ERROR(x) do { x; const GLenum err = glGetError(); CHECK(err == GL_NO_ERROR, "OpenGL error: 0x%x", err); } while(false)
+#else
+#define GL_CHECK_ERROR(x) x
+#endif
+
 namespace ark::plugin::opengl {
 
 namespace {
@@ -33,12 +39,12 @@ void setVertexPointer(const Attribute& attribute, const GLuint location, const G
     constexpr GLenum glTypes[Attribute::TYPE_COUNT] = {GL_BYTE, GL_FLOAT, GL_INT, GL_UNSIGNED_INT, GL_SHORT, GL_UNSIGNED_BYTE, GL_UNSIGNED_SHORT};
     glEnableVertexAttribArray(location);
     if(attribute.type() == Attribute::TYPE_FLOAT || attribute.normalized())
-        glVertexAttribPointer(location, length, glTypes[attribute.type()], attribute.normalized() ? GL_TRUE : GL_FALSE, stride, reinterpret_cast<const void*>(static_cast<uintptr_t>(offset)));
+        GL_CHECK_ERROR(glVertexAttribPointer(location, length, glTypes[attribute.type()], attribute.normalized() ? GL_TRUE : GL_FALSE, stride, reinterpret_cast<const void*>(static_cast<uintptr_t>(offset))));
     else
-        glVertexAttribIPointer(location, length, glTypes[attribute.type()], stride, reinterpret_cast<const void*>(static_cast<uintptr_t>(offset)));
+        GL_CHECK_ERROR(glVertexAttribIPointer(location, length, glTypes[attribute.type()], stride, reinterpret_cast<const void*>(static_cast<uintptr_t>(offset))));
 
     if(attribute.divisor())
-        glVertexAttribDivisor(location, attribute.divisor());
+        GL_CHECK_ERROR(glVertexAttribDivisor(location, attribute.divisor()));
 }
 
 GLuint compileShader(const uint32_t version, const GLenum type, const String& source)
@@ -78,7 +84,7 @@ public:
 
     void bind(const Attribute& attribute, const GLsizei stride) const
     {
-        CHECK_WARN(_location >= 0, "Attribute \"%s\" location: %d", attribute.name().c_str(), _location);
+        CHECK_WARN_OR_RETURN(_location >= 0, "Attribute \"%s\" location: %d", attribute.name().c_str(), _location);
         if(attribute.length() <= 4)
             setVertexPointer(attribute, _location, stride, attribute.length(), attribute.offset());
         else if(attribute.length() == 16)
@@ -112,7 +118,7 @@ struct GLPipeline::Stub {
 
     void bind(GraphicsContext& /*graphicsContext*/, const PipelineContext& pipelineContext)
     {
-        glUseProgram(_id);
+        GL_CHECK_ERROR(glUseProgram(_id));
 
         const PipelineBindings& pipelineBindings = pipelineContext._bindings;
         bindUBOSnapshots(pipelineContext._buffer_object->_ubos, pipelineBindings.pipelineLayout());
@@ -207,14 +213,14 @@ struct GLPipeline::Stub {
         const uint32_t componentSize = RenderUtil::getComponentSize(textureFormat);
         const GLenum format = GLUtil::getTextureInternalFormat(Texture::USAGE_AUTO, texture.parameters()->_format, channelSize, componentSize);
         uImage.setUniform1i(static_cast<GLint>(binding));
-        glBindImageTexture(binding, static_cast<GLuint>(texture.delegate()->id()), 0, GL_FALSE, 0, GL_READ_WRITE, format);
+        GL_CHECK_ERROR(glBindImageTexture(binding, static_cast<GLuint>(texture.delegate()->id()), 0, GL_FALSE, 0, GL_READ_WRITE, format));
     }
 
     void activeTexture(const Texture& texture, const String& name, const uint32_t binding)
     {
         constexpr GLenum glTargets[Texture::TYPE_COUNT] = {GL_TEXTURE_2D, GL_TEXTURE_CUBE_MAP};
         glActiveTexture(GL_TEXTURE0 + binding);
-        glBindTexture(glTargets[texture.type()], static_cast<GLuint>(texture.delegate()->id()));
+        GL_CHECK_ERROR(glBindTexture(glTargets[texture.type()], static_cast<GLuint>(texture.delegate()->id())));
 
         const GLUniform& uTexture = getUniform(name);
         uTexture.setUniform1i(static_cast<GLint>(binding));
@@ -283,7 +289,7 @@ public:
         : _enabled(static_cast<bool>(scissor)) {
         if(_enabled) {
             glEnable(GL_SCISSOR_TEST);
-            glScissor(static_cast<GLint>(scissor->left()), static_cast<GLint>(scissor->top()), static_cast<GLsizei>(scissor->width()), static_cast<GLsizei>(scissor->height()));
+            GL_CHECK_ERROR(glScissor(static_cast<GLint>(scissor->left()), static_cast<GLint>(scissor->top()), static_cast<GLsizei>(scissor->width()), static_cast<GLsizei>(scissor->height())));
         }
     }
     ~GLScissor() {
@@ -450,7 +456,7 @@ public:
     {
         const DrawingParams::DrawElements& param = drawingContext._parameters.drawElements();
         DASSERT(drawingContext._draw_count);
-        glDrawArrays(_mode, param._start * sizeof(element_index_t), static_cast<GLsizei>(drawingContext._draw_count));
+        GL_CHECK_ERROR(glDrawArrays(_mode, param._start * sizeof(element_index_t), static_cast<GLsizei>(drawingContext._draw_count)));
     }
 
 private:
@@ -467,7 +473,7 @@ public:
     {
         const DrawingParams::DrawElements& param = drawingContext._parameters.drawElements();
         DASSERT(drawingContext._draw_count);
-        glDrawElements(_mode, static_cast<GLsizei>(drawingContext._draw_count), GLIndexType, reinterpret_cast<GLvoid*>(param._start * sizeof(element_index_t)));
+        GL_CHECK_ERROR(glDrawElements(_mode, static_cast<GLsizei>(drawingContext._draw_count), GLIndexType, reinterpret_cast<GLvoid*>(param._start * sizeof(element_index_t))));
     }
 
 private:
@@ -490,7 +496,7 @@ public:
             j.upload(graphicsContext);
             DCHECK(j.id(), "Invaild Divided Buffer: %d", i);
         }
-        glDrawElementsInstanced(_mode, static_cast<GLsizei>(param._count), GLIndexType, nullptr, drawingContext._draw_count);
+        GL_CHECK_ERROR(glDrawElementsInstanced(_mode, static_cast<GLsizei>(param._count), GLIndexType, nullptr, drawingContext._draw_count));
     }
 
 private:
@@ -516,10 +522,10 @@ public:
 
         const volatile GLBufferBinder binder(GL_DRAW_INDIRECT_BUFFER, static_cast<GLuint>(param._indirect_cmds.id()));
 #ifndef ANDROID
-        glMultiDrawElementsIndirect(_mode, GLIndexType, nullptr, static_cast<GLsizei>(param._indirect_cmd_count), sizeof(DrawingParams::DrawElementsIndirectCommand));
+        GL_CHECK_ERROR(glMultiDrawElementsIndirect(_mode, GLIndexType, nullptr, static_cast<GLsizei>(param._indirect_cmd_count), sizeof(DrawingParams::DrawElementsIndirectCommand)));
 #else
         for(uint32_t i = 0; i < param._indirect_cmd_count; ++i)
-            glDrawElementsIndirect(_mode, GLIndexType, reinterpret_cast<const void *>(i * sizeof(DrawingParams::DrawElementsIndirectCommand)));
+            GL_CHECK_ERROR(glDrawElementsIndirect(_mode, GLIndexType, reinterpret_cast<const void *>(i * sizeof(DrawingParams::DrawElementsIndirectCommand))));
 #endif
     }
 
@@ -529,9 +535,9 @@ private:
 
 class GLBufferBaseBinder {
 public:
-    GLBufferBaseBinder(GLenum target, GLuint base, GLuint buffer)
+    GLBufferBaseBinder(const GLenum target, const GLuint base, const GLuint buffer)
         : _target(target), _base(base), _buffer(buffer) {
-        glBindBufferBase(_target, _base, _buffer);
+        GL_CHECK_ERROR(glBindBufferBase(_target, _base, _buffer));
     }
     GLBufferBaseBinder(GLBufferBaseBinder&& other)
         : _target(other._target), _base(other._base), _buffer(other._buffer) {
@@ -540,7 +546,7 @@ public:
     ~GLBufferBaseBinder()
     {
         if(_buffer)
-            glBindBufferBase(_target, _base, 0);
+            GL_CHECK_ERROR(glBindBufferBase(_target, _base, 0));
     }
     DISALLOW_COPY_AND_ASSIGN(GLBufferBaseBinder);
 
@@ -562,7 +568,7 @@ void ensureVertexArray(GraphicsContext& graphicsContext, const DrawingContext& c
         vertexArrayId = va->id();
         context._attachments->put(std::move(va));
     }
-    glBindVertexArray(static_cast<GLuint>(vertexArrayId));
+    GL_CHECK_ERROR(glBindVertexArray(static_cast<GLuint>(vertexArrayId)));
 }
 
 sp<PipelineDrawCommand> makeBakedRenderer(const PipelineBindings& bindings)
@@ -600,7 +606,7 @@ public:
 
         ensureVertexArray(graphicsContext, drawingContext);
         if(drawingContext._indices)
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLuint>(drawingContext._indices.id()));
+            GL_CHECK_ERROR(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLuint>(drawingContext._indices.id())));
 
         _renderer->draw(graphicsContext, drawingContext);
         glBindVertexArray(0);
@@ -639,7 +645,7 @@ public:
         for(const auto& [i, j] : computeContext._buffer_object->_ssbos)
             _ssbo_binders.emplace_back(GL_SHADER_STORAGE_BUFFER, static_cast<GLuint>(i), static_cast<GLuint>(j.id()));
 
-        glDispatchCompute(computeContext._num_work_groups.at(0), computeContext._num_work_groups.at(1), computeContext._num_work_groups.at(2));
+        GL_CHECK_ERROR(glDispatchCompute(computeContext._num_work_groups.at(0), computeContext._num_work_groups.at(1), computeContext._num_work_groups.at(2)));
 
         _ssbo_binders.clear();
     }
@@ -684,7 +690,7 @@ bool isComputePipeline(const Map<Enum::ShaderStageBit, String>& stages)
     return false;
 }
 
-String getInformationLog(GLuint id)
+String getInformationLog(const GLuint id)
 {
     GLint length = 0;
     glGetProgramiv(id, GL_INFO_LOG_LENGTH, &length);
@@ -856,37 +862,37 @@ GLPipeline::GLUniform::operator bool() const
 
 void GLPipeline::GLUniform::setUniform1i(const GLint x) const
 {
-    glUniform1i(_location, x);
+    GL_CHECK_ERROR(glUniform1i(_location, x));
 }
 
 void GLPipeline::GLUniform::setUniform1f(const GLfloat x) const
 {
-    glUniform1f(_location, x);
+    GL_CHECK_ERROR(glUniform1f(_location, x));
 }
 
 void GLPipeline::GLUniform::setUniform2f(const GLfloat x, const GLfloat y) const
 {
-    glUniform2f(_location, x, y);
+    GL_CHECK_ERROR(glUniform2f(_location, x, y));
 }
 
 void GLPipeline::GLUniform::setUniform3f(const GLfloat x, const GLfloat y, const GLfloat z) const
 {
-    glUniform3f(_location, x, y, z);
+    GL_CHECK_ERROR(glUniform3f(_location, x, y, z));
 }
 
 void GLPipeline::GLUniform::setUniform4f(const GLfloat r, const GLfloat g, const GLfloat b, const GLfloat a) const
 {
-    glUniform4f(_location, r, g, b, a);
+    GL_CHECK_ERROR(glUniform4f(_location, r, g, b, a));
 }
 
 void GLPipeline::GLUniform::setUniform4fv(const GLsizei count, const GLfloat* value) const
 {
-    glUniform4fv(_location, count, value);
+    GL_CHECK_ERROR(glUniform4fv(_location, count, value));
 }
 
 void GLPipeline::GLUniform::setUniformMatrix4fv(const GLsizei count, const GLboolean transpose, const GLfloat* value) const
 {
-    glUniformMatrix4fv(_location, count, transpose, value);
+    GL_CHECK_ERROR(glUniformMatrix4fv(_location, count, transpose, value));
 }
 
 }

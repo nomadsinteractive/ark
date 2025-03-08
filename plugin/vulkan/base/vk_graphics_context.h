@@ -51,6 +51,7 @@ public:
         VkCommandBuffer ensureRenderPass();
 
         const sp<RenderPassPhrase>& renderPassPhrase() const;
+        VkCommandBuffer commandBuffer() const;
 
     private:
         sp<RenderPassPhrase> _render_pass_phrase;

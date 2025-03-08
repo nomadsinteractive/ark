@@ -177,6 +177,11 @@ const sp<VKGraphicsContext::RenderPassPhrase>& VKGraphicsContext::State::renderP
     return _render_pass_phrase;
 }
 
+VkCommandBuffer VKGraphicsContext::State::commandBuffer() const
+{
+    return _command_buffer;
+}
+
 VkRenderPass VKGraphicsContext::State::acquireRenderPass() const
 {
     return _render_pass_phrase->acquire();
