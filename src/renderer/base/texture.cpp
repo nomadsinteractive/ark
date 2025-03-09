@@ -49,6 +49,8 @@ uint32_t toBitFormat(const StringView str, const uint32_t bitsOffset)
             return Texture::FORMAT_8_BIT;
         case 16:
             return Texture::FORMAT_16_BIT;
+        case 24:
+            return Texture::FORMAT_24_BIT;
         case 32:
             return Texture::FORMAT_32_BIT;
         default:
@@ -159,7 +161,7 @@ template<> ARK_API Texture::Type StringConvert::eval<Texture::Type>(const String
 
 template<> ARK_API Texture::Format StringConvert::eval<Texture::Format>(const String& str)
 {
-    constexpr BitSet<Texture::Format>::LookupTable<10> formats = {{
+    constexpr BitSet<Texture::Format>::LookupTable<11> formats = {{
             {"r", Texture::FORMAT_R},
             {"rg", Texture::FORMAT_RG},
             {"rgb", Texture::FORMAT_RGB},
@@ -169,13 +171,14 @@ template<> ARK_API Texture::Format StringConvert::eval<Texture::Format>(const St
             {"integer", Texture::FORMAT_INTEGER},
             {"8bit", Texture::FORMAT_8_BIT},
             {"16bit", Texture::FORMAT_16_BIT},
+            {"24bit", Texture::FORMAT_24_BIT},
             {"32bit", Texture::FORMAT_32_BIT}
         }};
     if(str)
     {
         uint32_t format = 0;
         for(const String& i : str.split('|'))
-            if(const Texture::Format f = Enum::lookup<StringView, Texture::Format, 10>(formats, i, Texture::FORMAT_AUTO); f == Texture::FORMAT_AUTO)
+            if(const Texture::Format f = Enum::lookup<StringView, Texture::Format, 11>(formats, i, Texture::FORMAT_AUTO); f == Texture::FORMAT_AUTO)
             {
                 if(i.startsWith("int"))
                     format |= Texture::FORMAT_INTEGER | Texture::FORMAT_SIGNED | toBitFormat(i, 3);

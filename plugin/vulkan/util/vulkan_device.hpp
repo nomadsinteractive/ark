@@ -209,7 +209,7 @@ namespace vks
 		*
 		* @return VkResult of the device creation call
 		*/
-		VkResult createLogicalDevice(const VkPhysicalDeviceFeatures& enabledFeatures, std::vector<const char*> enabledExtensions, const void* pNext = nullptr, bool useSwapChain = true, VkQueueFlags requestedQueueTypes = VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_COMPUTE_BIT)
+		VkResult createLogicalDevice(const VkPhysicalDeviceFeatures* enabledFeatures, std::vector<const char*> enabledExtensions, const void* pNext = nullptr, bool useSwapChain = true, VkQueueFlags requestedQueueTypes = VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_COMPUTE_BIT)
 		{			
 			// Desired queues need to be requested upon logical device creation
 			// Due to differing queue family configurations of Vulkan implementations this can be a bit tricky, especially if the application
@@ -292,7 +292,7 @@ namespace vks
 			deviceCreateInfo.pNext = pNext;
 			deviceCreateInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());;
 			deviceCreateInfo.pQueueCreateInfos = queueCreateInfos.data();
-			deviceCreateInfo.pEnabledFeatures = &enabledFeatures;
+			deviceCreateInfo.pEnabledFeatures = enabledFeatures;
 
 			// Enable the debug marker extension if it is present (likely meaning a debugging tool is present)
 			if (extensionSupported(VK_EXT_DEBUG_MARKER_EXTENSION_NAME))

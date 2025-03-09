@@ -334,13 +334,15 @@ uint32_t RenderUtil::getPixelSize(Texture::Format format)
     return (static_cast<uint32_t>(format & Texture::FORMAT_RGBA) + 1) * getComponentSize(format);
 }
 
-uint32_t RenderUtil::getComponentSize(Texture::Format format)
+uint32_t RenderUtil::getComponentSize(const Texture::Format format)
 {
-    const uint32_t componentFormat = format & Texture::FORMAT_32_BIT;
+    const uint32_t componentFormat = format & Texture::FORMAT_BIT_MASK;
     if(componentFormat == Texture::FORMAT_8_BIT || componentFormat == 0)
         return 1;
     if(componentFormat == Texture::FORMAT_16_BIT)
         return 2;
+    if(componentFormat == Texture::FORMAT_24_BIT)
+        return 3;
     CHECK(componentFormat == Texture::FORMAT_32_BIT, "Unknown component format %d", format);
     return 4;
 }

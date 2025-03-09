@@ -79,11 +79,6 @@ const sp<PipelineDescriptor>& Shader::pipelineDesciptor() const
     return _pipeline_desciptor;
 }
 
-const PipelineDescriptor::Configuration& Shader::descriptorParams() const
-{
-    return _pipeline_desciptor->configuration();
-}
-
 sp<PipelineBindings> Shader::makeBindings(Buffer vertices, const Enum::DrawMode mode, const Enum::DrawProcedure drawProcedure, const Map<uint32_t, sp<Uploader>>& uploaders) const
 {
     return sp<PipelineBindings>::make(mode, drawProcedure, std::move(vertices), _pipeline_desciptor, makeDivivedBuffers(uploaders));

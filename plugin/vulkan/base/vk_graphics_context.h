@@ -47,7 +47,7 @@ public:
     public:
         State(sp<RenderPassPhrase> renderPassPhrase, VkCommandBuffer commandBuffer, bool beginCommandBuffer);
 
-        VkRenderPass acquireRenderPass() const;
+        VkRenderPass acquireRenderPass();
         VkCommandBuffer ensureRenderPass();
 
         const sp<RenderPassPhrase>& renderPassPhrase() const;

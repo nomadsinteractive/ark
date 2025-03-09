@@ -8,7 +8,7 @@ namespace ark {
 
 class ARK_API Uploader : public Updatable {
 public:
-    Uploader(size_t size)
+    Uploader(const size_t size)
         : _size(size) {
     }
     ~Uploader() override = default;

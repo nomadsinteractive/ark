@@ -1285,6 +1285,9 @@ class Uploader:
     def mark_dirty(self):
         pass
 
+    def dye(self, message: str) -> Self:
+        return self
+
 
 class AnimationInput(Uploader):
 

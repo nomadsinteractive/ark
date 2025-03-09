@@ -17,13 +17,13 @@ namespace ark {
 
 namespace {
 
-class StringVarInteger : public StringVar {
+class StringVarInteger final : public StringVar {
 public:
     StringVarInteger(sp<Integer> delegate)
         : _delegate(std::move(delegate)), _text(sp<String>::make(Strings::toString(_delegate->val()))) {
     }
 
-    virtual bool update(uint64_t timestamp) override {
+    bool update(uint64_t timestamp) override {
         if(_delegate->update(timestamp)) {
             _text = sp<String>::make(Strings::toString(_delegate->val()));
             return true;
@@ -31,7 +31,7 @@ public:
         return false;
     }
 
-    virtual sp<String> val() override {
+    sp<String> val() override {
         return _text;
     }
 
@@ -40,10 +40,10 @@ private:
     sp<String> _text;
 };
 
-template<typename T> class StringVarFormatedOne : public StringVar {
+template<typename T> class StringVarFormatedOne final : public StringVar {
 public:
-    StringVarFormatedOne(sp<Variable<T>> value, String format = "")
-        : _value(std::move(value)), _format(Strings::sprintf("{%s}", format.c_str())), _formatted(sp<String>::make()) {
+    StringVarFormatedOne(sp<Variable<T>> value, const StringView format = "")
+        : _value(std::move(value)), _format(Strings::sprintf("{%s}", format.data())), _formatted(sp<String>::make()) {
     }
 
     bool update(uint64_t timestamp) override {
@@ -64,7 +64,7 @@ private:
     sp<String> _formatted;
 };
 
-class StringVarList : public StringVar {
+class StringVarList final : public StringVar {
 public:
     StringVarList(std::vector<sp<StringVar>> list)
         : _list(std::move(list)), _string(sp<String>::make()) {

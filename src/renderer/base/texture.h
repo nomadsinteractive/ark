@@ -31,7 +31,9 @@ public:
         FORMAT_FLOAT = 64,
         FORMAT_8_BIT = 128,
         FORMAT_16_BIT = 256,
-        FORMAT_32_BIT = FORMAT_8_BIT | FORMAT_16_BIT
+        FORMAT_24_BIT = FORMAT_8_BIT | FORMAT_16_BIT,
+        FORMAT_32_BIT = 512,
+        FORMAT_BIT_MASK = FORMAT_24_BIT | FORMAT_32_BIT
     };
 
     enum UsageBits {

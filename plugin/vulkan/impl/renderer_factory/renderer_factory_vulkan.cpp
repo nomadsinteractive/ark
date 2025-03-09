@@ -82,8 +82,6 @@ sp<Buffer::Delegate> RendererFactoryVulkan::createBuffer(const Buffer::Type type
     VkMemoryPropertyFlags flags = 0;
     if(usage.has(Buffer::USAGE_BIT_TRANSFER_SRC))
         usageFlags |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-    // if(usage.has(Buffer::USAGE_BIT_DYNAMIC))
-    //     flags |= VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
     if(usage.has(Buffer::USAGE_BIT_HOST_VISIBLE))
         flags |= VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT | VK_MEMORY_PROPERTY_HOST_CACHED_BIT;
     else

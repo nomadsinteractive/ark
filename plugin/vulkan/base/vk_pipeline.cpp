@@ -604,8 +604,10 @@ void VKPipeline::buildComputeCommandBuffer(GraphicsContext& graphicsContext, con
 {
     const sp<VKGraphicsContext>& vkGraphicsContext = graphicsContext.traits().ensure<VKGraphicsContext>();
     const VkCommandBuffer commandBuffer = vkGraphicsContext->currentState().commandBuffer();
+    // const sp<VKComputeContext>& vkComputeContext = graphicsContext.traits().ensure<VKComputeContext>();
+    // const VkCommandBuffer commandBuffer = vkComputeContext->buildCommandBuffer(graphicsContext);
 
-    vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 0, nullptr, 0, nullptr, 0, nullptr);
+    // vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 0, nullptr, 0, nullptr, 0, nullptr);
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, _pipeline);
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, _layout, 0, _descriptor_sets.size(), _descriptor_sets.data(), 0, nullptr);
     vkCmdDispatch(commandBuffer, computeContext._num_work_groups.at(0), computeContext._num_work_groups.at(1), computeContext._num_work_groups.at(2));

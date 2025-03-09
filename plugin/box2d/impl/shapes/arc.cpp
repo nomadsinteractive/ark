@@ -4,8 +4,6 @@
 #include "core/inf/variable.h"
 #include "core/util/math.h"
 
-#include "graphics/components/size.h"
-
 #include "box2d/impl/body_create_info.h"
 
 namespace ark::plugin::box2d {

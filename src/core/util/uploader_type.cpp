@@ -98,6 +98,27 @@ struct WritableRangeSnapshot final : Writable {
     Map<size_t, size_t> _records;
 };
 
+class UploaderDyed final : public Uploader, public Wrapper<Uploader> {
+public:
+    UploaderDyed(sp<Uploader> delegate, String message)
+        : Uploader(delegate->size()), Wrapper(std::move(delegate)), _message(std::move(message)) {
+    }
+
+    bool update(uint64_t timestamp) override
+    {
+        return _wrapped->update(timestamp);
+    }
+
+    void upload(Writable& buf) override
+    {
+        TRACE(true, _message.c_str());
+        _wrapped->upload(buf);
+    }
+
+private:
+    String _message;
+};
+
 sp<UploaderImpl> ensureImpl(const sp<Uploader>& self)
 {
     return self.ensureInstance<UploaderImpl>("This object is not a InputImpl instance. Use \"reserve\" method to create an InputImpl instance.");
@@ -200,6 +221,11 @@ void UploaderType::writeTo(Uploader& self, void* ptr)
 sp<Uploader> UploaderType::wrap(sp<Uploader> self)
 {
     return sp<Uploader>::make<UploaderWrapper>(std::move(self));
+}
+
+sp<Uploader> UploaderType::dye(sp<Uploader> self, String message)
+{
+    return sp<Uploader>::make<UploaderDyed>(std::move(self), std::move(message));
 }
 
 sp<Uploader> UploaderType::makeElementIndexInput(Vector<element_index_t> value)

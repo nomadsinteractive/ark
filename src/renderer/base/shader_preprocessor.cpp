@@ -313,19 +313,19 @@ bool ShaderPreprocessor::hasUBO(const PipelineLayout::UBO& ubo) const
     if(ubo._stages.has(_shader_stage))
     {
         for(const auto& i : ubo.uniforms().values())
-            if(!_main.contains(i->name()))
+            if(!_declaration_uniforms.has(i->name()))
                 return false;
         return true;
     }
     return false;
 }
 
-void ShaderPreprocessor::declareUBOStruct(const PipelineLayout& shaderLayout, const int32_t spaceSet)
+void ShaderPreprocessor::declareUBOStruct(const PipelineLayout& pipelineLayout, const int32_t spaceSet)
 {
     for(const Declaration& i : _declaration_uniforms.vars().values())
         i.setSource("");
 
-    for(const sp<PipelineLayout::UBO>& i : shaderLayout.ubos())
+    for(const sp<PipelineLayout::UBO>& i : pipelineLayout.ubos())
         if(hasUBO(i))
             insertUBOStruct(i, spaceSet);
 }

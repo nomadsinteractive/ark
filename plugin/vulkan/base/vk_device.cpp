@@ -23,13 +23,14 @@ VKDevice::VKDevice(const sp<VKInstance>& instance, const VkPhysicalDevice physic
     if(_features.features.independentBlend)
         _enabled_features.features.independentBlend = VK_TRUE;
 
-    if(version >= Enum::RENDERER_VERSION_VULKAN_12)
+    const bool enableFeatures12 = version >= Enum::RENDERER_VERSION_VULKAN_12;
+    if(enableFeatures12)
     {
         if(_features_vk12.separateDepthStencilLayouts)
             _enabled_features_vk12.separateDepthStencilLayouts = VK_TRUE;
     }
 
-    VKUtil::checkResult(_vulkan_device->createLogicalDevice(_enabled_features.features, _enabled_extensions, version >= Enum::RENDERER_VERSION_VULKAN_12 ? &_enabled_features : nullptr));
+    VKUtil::checkResult(_vulkan_device->createLogicalDevice(enableFeatures12 ? nullptr : &_enabled_features.features, _enabled_extensions, enableFeatures12 ? &_enabled_features : nullptr));
 
     initDeviceQueue(_vulkan_device->queueFamilyIndices.graphics);
     initDeviceQueue(_vulkan_device->queueFamilyIndices.compute);
@@ -95,7 +96,7 @@ const VkPhysicalDeviceMemoryProperties& VKDevice::vkMemoryProperties() const
     return _vulkan_device->memoryProperties;
 }
 
-uint32_t VKDevice::getMemoryType(uint32_t typeBits, VkMemoryPropertyFlags properties, VkBool32* memTypeFound) const
+uint32_t VKDevice::getMemoryType(const uint32_t typeBits, const VkMemoryPropertyFlags properties, VkBool32* memTypeFound) const
 {
     return _vulkan_device->getMemoryType(typeBits, properties, memTypeFound);
 }
@@ -112,12 +113,11 @@ sp<VKCommandPool> VKDevice::makeComputeCommandPool() const
 
 void VKDevice::createPipelineCache()
 {
-    VkPipelineCacheCreateInfo pipelineCacheCreateInfo = {};
-    pipelineCacheCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
+    constexpr VkPipelineCacheCreateInfo pipelineCacheCreateInfo = {VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO};
     VKUtil::checkResult(vkCreatePipelineCache(_vulkan_device->logicalDevice, &pipelineCacheCreateInfo, nullptr, &_pipeline_cache));
 }
 
-void VKDevice::initDeviceQueue(uint32_t familyIndex)
+void VKDevice::initDeviceQueue(const uint32_t familyIndex)
 {
     if(_queue_families.find(familyIndex) == _queue_families.end())
         vkGetDeviceQueue(_vulkan_device->logicalDevice, familyIndex, 0, &_queue_families[familyIndex]);

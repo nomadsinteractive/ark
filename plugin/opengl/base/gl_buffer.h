@@ -8,16 +8,16 @@
 
 namespace ark::plugin::opengl {
 
-class GLBuffer : public Buffer::Delegate {
+class GLBuffer final : public Buffer::Delegate {
 public:
     GLBuffer(Buffer::Type type, Buffer::Usage usage, sp<Recycler> recycler);
     ~GLBuffer() override;
 
-    virtual uint64_t id() override;
-    virtual void upload(GraphicsContext& graphicsContext) override;
-    virtual void uploadBuffer(GraphicsContext& graphicsContext, Uploader& input) override;
-    virtual void downloadBuffer(GraphicsContext& graphicsContext, size_t offset, size_t size, void* ptr) override;
-    virtual ResourceRecycleFunc recycle() override;
+    uint64_t id() override;
+    void upload(GraphicsContext& graphicsContext) override;
+    void uploadBuffer(GraphicsContext& graphicsContext, Uploader& uploader) override;
+    void downloadBuffer(GraphicsContext& graphicsContext, size_t offset, size_t size, void* ptr) override;
+    ResourceRecycleFunc recycle() override;
 
 private:
     void doUpload(GraphicsContext& graphicsContext, Uploader& input);
@@ -29,7 +29,6 @@ private:
     sp<Recycler> _recycler;
 
     uint32_t _id;
-
 };
 
 }

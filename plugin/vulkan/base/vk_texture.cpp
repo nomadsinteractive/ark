@@ -133,10 +133,7 @@ void VKTexture::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap& 
     VkDevice logicalDevice = _renderer->vkLogicalDevice();
     if(_parameters->_usage.has(Texture::USAGE_DEPTH_STENCIL_ATTACHMENT))
     {
-        VkFormat fbDepthFormat;
-        VkBool32 validDepthFormat = vks::tools::getSupportedDepthFormat(_renderer->vkPhysicalDevice(), &fbDepthFormat);
-        DASSERT(validDepthFormat);
-
+        const VkFormat fbDepthFormat = VKUtil::getSupportedDepthFormat(_renderer->vkPhysicalDevice(), _parameters->_format, _parameters->_usage);
         VkImageCreateInfo image = {VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO};
         image.format = fbDepthFormat;
         image.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
@@ -153,7 +150,7 @@ void VKTexture::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap& 
         depthStencilView.format = fbDepthFormat;
         depthStencilView.flags = 0;
         depthStencilView.subresourceRange = {};
-        depthStencilView.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
+        depthStencilView.subresourceRange.aspectMask = VKUtil::toTextureAspect(_parameters->_usage);
         depthStencilView.subresourceRange.baseMipLevel = 0;
         depthStencilView.subresourceRange.levelCount = 1;
         depthStencilView.subresourceRange.baseArrayLayer = 0;

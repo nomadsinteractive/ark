@@ -39,6 +39,8 @@ public:
     static VkShaderStageFlagBits toStage(Enum::ShaderStageBit stage);
     static VkPrimitiveTopology toPrimitiveTopology(Enum::DrawMode mode);
 
+    static VkFormat getSupportedDepthFormat(const VkPhysicalDevice physicalDevice, Texture::Format format, Texture::Usage usage);
+
 };
 
 }

@@ -127,10 +127,6 @@ VkRenderPass VKFramebuffer::Stub::acquire()
     const uint32_t width = _scissor.extent.width;
     const uint32_t height = _scissor.extent.height;
 
-    VkFormat fbDepthFormat;
-    const VkBool32 validDepthFormat = vks::tools::getSupportedDepthFormat(_renderer->vkPhysicalDevice(), &fbDepthFormat);
-    DASSERT(validDepthFormat);
-
     Vector<VkAttachmentDescription> attachmentDescriptions;
     Vector<VkAttachmentReference> attachmentReferences;
     Vector<VkImageView> attachments;
@@ -161,6 +157,9 @@ VkRenderPass VKFramebuffer::Stub::acquire()
     VkImageView depthstencilView = _configure._depth_stencil_attachment ? _configure._depth_stencil_attachment->delegate().cast<VKTexture>()->vkDescriptor().imageView : VK_NULL_HANDLE;
     if(depthstencilView)
     {
+        const Texture::Parameters& params = _configure._depth_stencil_attachment->parameters();
+        const VkFormat fbDepthFormat = VKUtil::getSupportedDepthFormat(_renderer->vkPhysicalDevice(), params._format, params._usage);
+
         attachments.push_back(depthstencilView);
 
         VkAttachmentDescription depthAttachmentDescription = {};

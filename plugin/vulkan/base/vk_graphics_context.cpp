@@ -182,9 +182,11 @@ VkCommandBuffer VKGraphicsContext::State::commandBuffer() const
     return _command_buffer;
 }
 
-VkRenderPass VKGraphicsContext::State::acquireRenderPass() const
+VkRenderPass VKGraphicsContext::State::acquireRenderPass()
 {
-    return _render_pass_phrase->acquire();
+    const VkRenderPass renderPass = _render_pass_phrase->acquire();
+    ensureRenderPass();
+    return renderPass;
 }
 
 VkCommandBuffer VKGraphicsContext::State::ensureRenderPass()

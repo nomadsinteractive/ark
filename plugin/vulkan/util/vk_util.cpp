@@ -21,6 +21,17 @@
 
 namespace ark::plugin::vulkan {
 
+namespace {
+
+bool isDepthFormatSupported(VkPhysicalDevice physicalDevice, VkFormat format)
+{
+    VkFormatProperties formatProps;
+    vkGetPhysicalDeviceFormatProperties(physicalDevice, format, &formatProps);
+    return formatProps.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT;
+}
+
+}
+
 void VKUtil::checkResult(const VkResult result)
 {
     CHECK(result == VK_SUCCESS, "Vulkan error: %s", vks::tools::errorString(result).c_str());
@@ -72,7 +83,7 @@ VkImageLayout VKUtil::toImageLayout(const Texture::Usage usage)
     return VK_IMAGE_LAYOUT_GENERAL;
 }
 
-VkImageLayout VKUtil::toAttachmentImageLayout(Texture::Usage usage)
+VkImageLayout VKUtil::toAttachmentImageLayout(const Texture::Usage usage)
 {
     switch(usage.bits() & Texture::USAGE_DEPTH_STENCIL_ATTACHMENT)
     {
@@ -168,7 +179,7 @@ VkFormat VKUtil::toTextureFormat(const uint32_t depths, const uint8_t channels, 
     return toVkChannelFormat(vkFormats + channel8, depths, format);
 }
 
-VkFormat VKUtil::toTextureFormat(const Bitmap& bitmap, Texture::Format format)
+VkFormat VKUtil::toTextureFormat(const Bitmap& bitmap, const Texture::Format format)
 {
     return toTextureFormat(bitmap.depth(), bitmap.channels(), format);
 }
@@ -209,7 +220,7 @@ VkStencilOp VKUtil::toStencilOp(PipelineDescriptor::StencilFunc func)
     return stencilOps[func];
 }
 
-VkImageAspectFlags VKUtil::toTextureAspect(Texture::Usage usage)
+VkImageAspectFlags VKUtil::toTextureAspect(const Texture::Usage usage)
 {
     VkImageAspectFlags vkFlags = usage.has(Texture::USAGE_DEPTH_STENCIL_ATTACHMENT) ? 0 : VK_IMAGE_ASPECT_COLOR_BIT;
     if(usage.has(Texture::USAGE_DEPTH_ATTACHMENT))
@@ -236,6 +247,35 @@ VkPrimitiveTopology VKUtil::toPrimitiveTopology(Enum::DrawMode mode)
     constexpr VkPrimitiveTopology topologies[Enum::DRAW_MODE_COUNT] = {VK_PRIMITIVE_TOPOLOGY_LINE_LIST, VK_PRIMITIVE_TOPOLOGY_POINT_LIST, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP};
     CHECK(mode >= 0 && mode < Enum::DRAW_MODE_COUNT, "Unsupported render-mode: %d", mode);
     return topologies[mode];
+}
+
+VkFormat findSupportedDepthFormat(const VkPhysicalDevice physicalDevice, const VkFormat choice)
+{
+    if(isDepthFormatSupported(physicalDevice, choice))
+        return choice;
+    return VK_FORMAT_UNDEFINED;
+}
+
+VkFormat VKUtil::getSupportedDepthFormat(const VkPhysicalDevice physicalDevice, const Texture::Format format, const Texture::Usage usage)
+{
+    const bool hasStencil = usage.has(Texture::USAGE_STENCIL_ATTACHMENT);
+    VkFormat depthFormat = VK_FORMAT_UNDEFINED;
+    switch(format & Texture::FORMAT_BIT_MASK)
+    {
+        case Texture::FORMAT_16_BIT:
+            depthFormat = hasStencil ? VK_FORMAT_D16_UNORM_S8_UINT : VK_FORMAT_D16_UNORM;
+            break;
+        case Texture::FORMAT_24_BIT:
+            depthFormat = hasStencil ? VK_FORMAT_D24_UNORM_S8_UINT : VK_FORMAT_UNDEFINED;
+            break;
+        case Texture::FORMAT_32_BIT:
+            depthFormat = hasStencil ? VK_FORMAT_D32_SFLOAT_S8_UINT : VK_FORMAT_D32_SFLOAT;
+            break;
+        default:
+            break;
+    }
+    CHECK(depthFormat != VK_FORMAT_UNDEFINED && isDepthFormatSupported(physicalDevice, depthFormat), "Unsupported depth texture format: %d", format);
+    return depthFormat;
 }
 
 }

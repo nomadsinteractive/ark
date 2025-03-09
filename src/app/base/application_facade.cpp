@@ -230,7 +230,7 @@ void ApplicationFacade::post(sp<Runnable> task, const Vector<float>& delays, con
         post(task, i, canceled);
 }
 
-void ApplicationFacade::schedule(sp<Runnable> task, float interval, sp<Boolean> canceled)
+void ApplicationFacade::schedule(sp<Runnable> task, const float interval, sp<Boolean> canceled)
 {
     _context->messageLoopApp()->schedule(std::move(task), interval, std::move(canceled));
 }

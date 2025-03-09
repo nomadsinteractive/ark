@@ -41,8 +41,6 @@ public:
     const sp<PipelineDescriptor>& pipelineDesciptor() const;
     const sp<PipelineLayout>& layout() const;
 
-    const PipelineDescriptor::Configuration& descriptorParams() const;
-
     sp<PipelineBindings> makeBindings(Buffer vertices, Enum::DrawMode mode, Enum::DrawProcedure renderProcedure, const Map<uint32_t, sp<Uploader>>& uploaders = {}) const;
 
     class BUILDER_IMPL final : public Builder<Shader> {

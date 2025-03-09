@@ -2,6 +2,7 @@
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
+#include "core/base/string.h"
 #include "core/inf/uploader.h"
 #include "core/types/shared_ptr.h"
 
@@ -66,6 +67,9 @@ public:
     static void reset(const sp<Uploader>& self, sp<Uploader> delegate);
 //  [[script::bindings::classmethod]]
     static sp<Uploader> wrap(sp<Uploader> self);
+
+//  [[script::bindings::classmethod]]
+    static sp<Uploader> dye(sp<Uploader> self, String message = "");
 
 //  [[script::bindings::auto]]
     static sp<Uploader> makeElementIndexInput(Vector<element_index_t> value);

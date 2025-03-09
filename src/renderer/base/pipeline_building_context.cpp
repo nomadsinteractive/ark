@@ -482,16 +482,14 @@ void PipelineBuildingContext::loadDefinitions(BeanFactory& factory, const Scope&
 
 template<> PipelineBuildingContext::LayoutBindingType StringConvert::eval<PipelineBuildingContext::LayoutBindingType>(const String& repr)
 {
-    if(repr == "image")
-        return PipelineBuildingContext::LAYOUT_BINDING_TYPE_IMAGE;
-    if(repr == "sampler")
-        return PipelineBuildingContext::LAYOUT_BINDING_TYPE_SAMPLER;
-    if(repr == "ssbo")
-        return PipelineBuildingContext::LAYOUT_BINDING_TYPE_SSBO;
-    if(repr == "ubo")
-        return PipelineBuildingContext::LAYOUT_BINDING_TYPE_UBO;
-    CHECK(repr == "auto", "Unknow LayoutBindingType: \"%s, supported values are [\"image\", \"sampler\", \"ssbo\", \"ubo\", ...]", repr.c_str());
-    return PipelineBuildingContext::LAYOUT_BINDING_TYPE_AUTO;
+    constexpr Enum::LookupTable<StringView, PipelineBuildingContext::LayoutBindingType, 5> table = {{
+        {"image", PipelineBuildingContext::LAYOUT_BINDING_TYPE_IMAGE},
+        {"sampler", PipelineBuildingContext::LAYOUT_BINDING_TYPE_SAMPLER},
+        {"ssbo", PipelineBuildingContext::LAYOUT_BINDING_TYPE_SSBO},
+        {"ubo", PipelineBuildingContext::LAYOUT_BINDING_TYPE_UBO},
+        {"auto", PipelineBuildingContext::LAYOUT_BINDING_TYPE_AUTO}
+    }};
+    return Enum::lookup<PipelineBuildingContext::LayoutBindingType, 5>(table, repr);
 }
 
 }

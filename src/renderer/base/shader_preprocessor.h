@@ -157,7 +157,7 @@ public:
     sp<Uniform> makeUniformInput(String name, Uniform::Type type) const;
 
     bool hasUBO(const PipelineLayout::UBO& ubo) const;
-    void declareUBOStruct(const PipelineLayout& shaderLayout, int32_t spaceSet = -1);
+    void declareUBOStruct(const PipelineLayout& pipelineLayout, int32_t spaceSet = -1);
 
     String outputName() const;
 

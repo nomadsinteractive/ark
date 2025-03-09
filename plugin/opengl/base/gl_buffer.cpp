@@ -29,10 +29,17 @@ private:
     size_t _size;
 };
 
+GLenum toGLUsage(const Buffer::Type type, const Buffer::Usage usage)
+{
+    if(type == Buffer::TYPE_STORAGE)
+        return GL_DYNAMIC_READ;
+    return usage.has(Buffer::USAGE_BIT_DYNAMIC) ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW;
+}
+
 }
 
 GLBuffer::GLBuffer(const Buffer::Type type, const Buffer::Usage usage, sp<Recycler> recycler)
-    : _type(GLUtil::toBufferType(type)), _usage(usage.has(Buffer::USAGE_BIT_DYNAMIC) ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW), _recycler(std::move(recycler)), _id(0)
+    : _type(GLUtil::toBufferType(type)), _usage(toGLUsage(type, usage)), _recycler(std::move(recycler)), _id(0)
 {
 }
 
@@ -66,10 +73,10 @@ void GLBuffer::upload(GraphicsContext& /*graphicsContext*/)
         glGenBuffers(1, &_id);
 }
 
-void GLBuffer::uploadBuffer(GraphicsContext& graphicsContext, Uploader& input)
+void GLBuffer::uploadBuffer(GraphicsContext& graphicsContext, Uploader& uploader)
 {
     upload(graphicsContext);
-    doUpload(graphicsContext, input);
+    doUpload(graphicsContext, uploader);
 }
 
 void GLBuffer::downloadBuffer(GraphicsContext& /*graphicsContext*/, size_t offset, size_t size, void* ptr)

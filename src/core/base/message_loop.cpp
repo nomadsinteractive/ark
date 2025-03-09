@@ -13,7 +13,7 @@ namespace ark {
 
 class MessageLoop::Task final : public Runnable {
 public:
-    Task(sp<Runnable> target, sp<Boolean> canceled, uint64_t nextFireTick, uint32_t interval)
+    Task(sp<Runnable> target, sp<Boolean> canceled, const uint64_t nextFireTick, const uint32_t interval)
         : _runnable(std::move(target)), _canceled(std::move(canceled), false), _next_fire_tick(nextFireTick), _interval(interval)
     {
     }
@@ -34,12 +34,13 @@ public:
     {
         return _next_fire_tick;
     }
+
     uint32_t interval() const
     {
         return _interval;
     }
 
-    void setNextFireTick(uint64_t tick)
+    void setNextFireTick(const uint64_t tick)
     {
         _next_fire_tick = tick;
     }
@@ -67,12 +68,12 @@ void MessageLoop::post(sp<Runnable> runnable, float delay, sp<Boolean> canceled)
     _scheduled.push(sp<Task>::make(std::move(runnable), std::move(canceled), delay == 0 ? 0 : _clock->val() + static_cast<uint64_t>(delay * 1000000), 0));
 }
 
-void MessageLoop::post(std::function<void()> task, float delay, sp<Boolean> canceled)
+void MessageLoop::post(std::function<void()> task, const float delay, sp<Boolean> canceled)
 {
     post(sp<RunnableByFunction>::make(std::move(task)), delay, std::move(canceled));
 }
 
-void MessageLoop::schedule(sp<Runnable> runnable, float interval, sp<Boolean> canceled)
+void MessageLoop::schedule(sp<Runnable> runnable, const float interval, sp<Boolean> canceled)
 {
     ASSERT(runnable);
     _scheduled.push(sp<Task>::make(std::move(runnable), std::move(canceled), 0, static_cast<uint32_t>(interval * 1000000)));
@@ -87,7 +88,7 @@ uint64_t MessageLoop::pollOnce()
     for(sp<Task>& task : _scheduled.clear())
         requestNextTask(std::move(task));
 
-    std::vector<sp<Runnable>> scheduled;
+    Vector<sp<Runnable>> scheduled;
     while(!_tasks.empty())
         if(Task& front = _tasks.front(); front.nextFireTick() <= now)
         {
@@ -127,7 +128,7 @@ void MessageLoop::requestNextTask(sp<Task> task)
     _tasks.push_back(std::move(task));
 }
 
-void MessageLoop::runScheduledTask(std::vector<sp<Runnable>> scheduled) const
+void MessageLoop::runScheduledTask(Vector<sp<Runnable>> scheduled) const
 {
     if(!scheduled.empty())
     {

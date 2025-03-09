@@ -11,7 +11,7 @@
 
 namespace ark::plugin::vulkan {
 
-VKBuffer::VKBuffer(sp<VKRenderer> renderer, sp<Recycler> recycler, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags)
+VKBuffer::VKBuffer(sp<VKRenderer> renderer, sp<Recycler> recycler, const VkBufferUsageFlags usageFlags, const VkMemoryPropertyFlags memoryPropertyFlags)
     : _renderer(std::move(renderer)), _recycler(std::move(recycler)), _usage_flags(usageFlags), _memory_property_flags(memoryPropertyFlags), _descriptor{}, _memory_requirements{}
 {
 }
