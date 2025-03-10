@@ -18,27 +18,27 @@ namespace unittest {
 
 namespace {
 
-class BuilderImpl1 : public Builder<uint8_t>, public RefCounter<BuilderImpl1> {
+class BuilderImpl1 : public IBuilder<uint8_t>, public RefCounter<BuilderImpl1> {
 public:
     ~BuilderImpl1() override {
     }
 
-    virtual sp<uint8_t> build(const Scope& /*args*/) override {
-        return sp<uint8_t>::make(1);
+    uint8_t build(const Scope& /*args*/) override {
+        return 1;
     }
 };
 
-class BuilderImpl2 : public Builder<uint16_t>, public RefCounter<BuilderImpl2> {
+class BuilderImpl2 : public IBuilder<uint16_t>, public RefCounter<BuilderImpl2> {
 public:
-    virtual sp<uint16_t> build(const Scope& /*args*/) override {
-        return sp<uint16_t>::make(2);
+    uint16_t build(const Scope& /*args*/) override {
+        return 2;
     }
 };
 
-class BuilderImpl3 : public Builder<uint32_t>, public RefCounter<BuilderImpl3> {
+class BuilderImpl3 : public IBuilder<uint32_t>, public RefCounter<BuilderImpl3> {
 public:
-    virtual sp<uint32_t> build(const Scope& /*args*/) override {
-        return sp<uint32_t>::make(3);
+    uint32_t build(const Scope& /*args*/) override {
+        return 3;
     }
 };
 
@@ -60,7 +60,7 @@ public:
 
 class BeanFactoriesTestCase : public TestCase {
 public:
-    virtual int launch() override {
+    int launch() override {
         {
             const sp<BeanFactory> beanFactory = sp<BeanFactory>::make(sp<DictionaryImpl>::make());
             BeanFactory::Factory factory;

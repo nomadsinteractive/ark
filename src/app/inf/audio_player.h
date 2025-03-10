@@ -1,5 +1,4 @@
-#ifndef ARK_APP_INF_AUDIO_PLAYER_H_
-#define ARK_APP_INF_AUDIO_PLAYER_H_
+#pragma once
 
 #include "core/base/api.h"
 #include "core/forwarding.h"
@@ -28,7 +27,7 @@ public:
     virtual bool isAudioFormatSupported(AudioFormat format) = 0;
 
 public:
-//[[script::bindings::classmethod]]
+//  [[script::bindings::classmethod]]
     static sp<Future> play(const sp<AudioPlayer>& self, const String& src, AudioPlayer::PlayOption options = AudioPlayer::PLAY_OPTION_DEFAULT);
 
 private:
@@ -36,5 +35,3 @@ private:
 };
 
 }
-
-#endif

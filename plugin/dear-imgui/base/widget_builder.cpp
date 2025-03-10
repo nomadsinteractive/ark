@@ -35,7 +35,7 @@ public:
     }
 
 private:
-    std::vector<sp<Widget>> _widgets;
+    Vector<sp<Widget>> _widgets;
 };
 
 namespace {
@@ -234,15 +234,15 @@ private:
 
 template<typename T> class WidgetInputText final : public Widget {
 public:
-    WidgetInputText(String label, sp<T> value, size_t maxLength, sp<StringVar> hint, sp<Observer> observer, ImGuiInputTextFlags flags)
+    WidgetInputText(String label, sp<T> value, size_t maxLength, sp<StringVar> hint, sp<Observer> observer, const ImGuiInputTextFlags flags)
         : _label(std::move(label)), _value(std::move(value)), _hint(std::move(hint)), _observer(std::move(observer)), _flags(flags), _text_buf(maxLength) {
         updateInputText();
     }
 
     void render() override {
-        const bool renderResult = ImGui::InputTextWithHint(_label.c_str(), _hint ? _hint->val()->c_str() : nullptr, &_text_buf[0], _text_buf.size(), _flags);
+        const bool renderResult = ImGui::InputTextWithHint(_label.c_str(), _hint ? _hint->val().data() : nullptr, &_text_buf[0], _text_buf.size(), _flags);
         if(renderResult) {
-            StringType::set(_value, sp<String>::make(_text_buf.data()));
+            StringType::set(_value, _text_buf.data());
             if(_observer) {
                 _observer->notify();
                 updateInputText();
@@ -257,7 +257,7 @@ public:
 
 private:
     void updateInputText() {
-        std::strncpy(&_text_buf[0], _value->val()->c_str(), _text_buf.size());
+        std::strncpy(&_text_buf[0], _value->val().data(), _text_buf.size());
     }
 
 private:
@@ -267,7 +267,7 @@ private:
     sp<StringVar> _hint;
     sp<Observer> _observer;
     ImGuiInputTextFlags _flags;
-    std::vector<char> _text_buf;
+    Vector<char> _text_buf;
 };
 
 
@@ -294,7 +294,7 @@ private:
 
 bool Items_VectorGetter(void* data, int idx, const char** out_text)
 {
-    const auto items = static_cast<const std::vector<String>*>(data);
+    const auto items = static_cast<const Vector<String>*>(data);
     if (out_text)
         *out_text = items->at(static_cast<size_t>(idx)).c_str();
     return true;
@@ -450,7 +450,7 @@ void WidgetBuilder::radioButton(const String& label, const sp<Integer>& option, 
     addWidget(sp<Input<int32_t>>::make([group](const char* l, int32_t* v) { return ImGui::RadioButton(l, v, group); }, label, option));
 }
 
-void WidgetBuilder::combo(const String& label, const sp<Integer>& option, const std::vector<String>& items)
+void WidgetBuilder::combo(const String& label, const sp<Integer>& option, const Vector<String>& items)
 {
     StringBuffer sb;
     for(const String& i : items)
@@ -464,9 +464,9 @@ void WidgetBuilder::combo(const String& label, const sp<Integer>& option, const 
     addWidget(sp<Input<int32_t>>::make([s](const char* l, int32_t* v) { return ImGui::Combo(l, v, s.c_str()); }, label, option));
 }
 
-void WidgetBuilder::listBox(const String& label, const sp<Integer>& option, const std::vector<String>& items)
+void WidgetBuilder::listBox(const String& label, const sp<Integer>& option, const Vector<String>& items)
 {
-    addWidget(sp<Input<int32_t>>::make([items](const char* l, int32_t* v) { return ImGui::ListBox(l, v, Items_VectorGetter, reinterpret_cast<void*>(const_cast<std::vector<String>*>(&items)), static_cast<int32_t>(items.size())); }, label, option));
+    addWidget(sp<Input<int32_t>>::make([items](const char* l, int32_t* v) { return ImGui::ListBox(l, v, Items_VectorGetter, reinterpret_cast<void*>(const_cast<Vector<String>*>(&items)), static_cast<int32_t>(items.size())); }, label, option));
 }
 
 void WidgetBuilder::indent(float w)
@@ -484,10 +484,10 @@ void WidgetBuilder::text(const String& content)
     addWidget(sp<WidgetText>::make(ImGui::Text, content));
 }
 
-sp<Observer> WidgetBuilder::inputText(String label, sp<StringVar::Impl> value, size_t maxLength, int32_t flags)
+sp<Observer> WidgetBuilder::inputText(String label, sp<StringVar> value, size_t maxLength, int32_t flags)
 {
     sp<Observer> observer = sp<Observer>::make();
-    addWidget(sp<WidgetInputText<StringVar::Impl>>::make(std::move(label), std::move(value), maxLength, nullptr, observer, flags));
+    addWidget(sp<WidgetInputText<StringVar>>::make(std::move(label), std::move(value), maxLength, nullptr, observer, flags));
     return observer;
 }
 

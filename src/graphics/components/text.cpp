@@ -337,8 +337,7 @@ struct Text::Content {
           _glyph_maker(std::move(glyphMaker)), _transform(std::move(transform)), _letter_spacing(letterSpacing), _layout_direction(Ark::instance().applicationContext()->renderEngine()->toLayoutDirection(1.0f)),
           _line_height(lineHeight), _line_indent(lineIndent), _size(sp<Size>::make(0.0f, 0.0f))
     {
-        if(_text->val() && !_text->val()->empty())
-            setText(Strings::fromUTF8(*_text->val()));
+        setText(Strings::fromUTF8(_text->val()));
     }
 
     bool update(uint64_t timestamp)
@@ -346,7 +345,7 @@ struct Text::Content {
         const bool contentDirty = _text->update(timestamp);
         const bool layoutDirty = _timestamp.update(timestamp);
         if(contentDirty)
-            setText(Strings::fromUTF8(*_text->val()));
+            setText(Strings::fromUTF8(_text->val()));
         else if(layoutDirty)
             updateLayoutContent();
         return contentDirty || layoutDirty || UpdatableUtil::update(timestamp, _updatable_layout);

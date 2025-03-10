@@ -74,7 +74,7 @@ class Annotation:
         func_arguments = parse_arguments(builder_arguments)
         lambda_arguments = parse_function_arguments(tplfunc, tplcontent)
         capture_args, passing_args = self._build_arguments(func_arguments, lambda_arguments)
-        return '%s<%s>(%s[%s](%s)->sp<Builder<%s>> { return sp<Builder<%s>>::make<%s::%s>(%s); });' % (statement, self._interface_class, name, capture_args, builder_arguments, self._interface_class, self._interface_class, self._main_class, self._implement_class, passing_args)
+        return '%s<sp<%s>>(%s[%s](%s)->sp<Builder<%s>> { return sp<Builder<%s>>::make<%s::%s>(%s); });' % (statement, self._interface_class, name, capture_args, builder_arguments, self._interface_class, self._interface_class, self._main_class, self._implement_class, passing_args)
 
 
 class ResourceLoader(Annotation):
@@ -128,7 +128,7 @@ class ResourceLoaderDictionaryNonamed(Annotation):
     def res_builder(self):
         func_arguments = parse_function_arguments('createResourceLoader', RES_BUILDER_TEMPLATE)
         capture_args, passing_args = self._build_arguments(parse_arguments('BeanFactory& factory, const String& value'), func_arguments)
-        return 'resBeanFactory.addDictionaryFactory<%s>([%s](BeanFactory& factory, const String& value)->sp<Builder<%s>> { return sp<Builder<%s>>::make<%s::%s>(%s); });' % (self._interface_class, capture_args, self._interface_class, self._interface_class, self._main_class, self._implement_class, passing_args)
+        return 'resBeanFactory.addDictionaryFactory<sp<%s>>([%s](BeanFactory& factory, const String& value)->sp<Builder<%s>> { return sp<Builder<%s>>::make<%s::%s>(%s); });' % (self._interface_class, capture_args, self._interface_class, self._interface_class, self._main_class, self._implement_class, passing_args)
 
 
 def parse_function_arguments(funcname, content):

@@ -6,7 +6,7 @@ BeanFactory::BeanFactory(sp<Dictionary<document>> documentRefs)
     : _stub(sp<Stub>::make(std::move(documentRefs))) {
 }
 
-void BeanFactory::add(BeanFactory::Factory factory, bool front)
+void BeanFactory::add(BeanFactory::Factory factory, const bool front)
 {
     if(front)
         _stub->_factories.push_front(std::move(factory));

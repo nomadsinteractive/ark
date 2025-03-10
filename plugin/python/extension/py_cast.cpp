@@ -17,6 +17,7 @@
 
 #include "app/base/event.h"
 #include "app/base/raycast_manifold.h"
+#include "core/util/string_type.h"
 
 #include "python/api.h"
 #include "python/extension/python_extension.h"
@@ -185,7 +186,7 @@ Optional<sp<Mat4>> PyCast::toMat4(PyObject* object)
 Optional<sp<StringVar>> PyCast::toStringVar(PyObject* object)
 {
     if(Optional<String> opt = toStringExact(object))
-        return sp<StringVar>::make<StringVar::Const>(sp<String>::make(opt.value()));
+        return {StringType::create(opt->c_str())};
 
     return toSharedPtrDefault<StringVar>(object);
 }

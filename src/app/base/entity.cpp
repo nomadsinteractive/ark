@@ -148,7 +148,7 @@ const Traits& Entity::components() const
 struct Entity::BUILDER::ComponentBuilder {
 
     ComponentBuilder(BeanFactory& beanFactory, document manifest)
-        : _wirable(beanFactory.findBuilderByDocument<Wirable>(manifest, manifest->name(), false)), _manifest(std::move(manifest))
+        : _wirable(beanFactory.findBuilderByDocument<sp<Wirable>>(manifest, manifest->name(), false)), _manifest(std::move(manifest))
     {
         CHECK(_wirable, "Unable to build component from \"%s\"", Documents::toString(_manifest).c_str());
     }

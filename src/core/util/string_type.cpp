@@ -17,84 +17,127 @@ namespace ark {
 
 namespace {
 
+class StringVarImpl final : public StringVar {
+public:
+    StringVarImpl(const StringView value)
+        : _value(value.data()) {
+    }
+
+    bool update(const uint64_t timestamp) override {
+        return _timestamp.update(timestamp);
+    }
+
+    void set(String value)
+    {
+        _value = std::move(value);
+    }
+
+    StringView val() override {
+        return _value;
+    }
+
+private:
+    String _value;
+    Timestamp _timestamp;
+};
+
 class StringVarInteger final : public StringVar {
 public:
     StringVarInteger(sp<Integer> delegate)
-        : _delegate(std::move(delegate)), _text(sp<String>::make(Strings::toString(_delegate->val()))) {
+        : _delegate(std::move(delegate)), _value(Strings::toString(_delegate->val())) {
     }
 
-    bool update(uint64_t timestamp) override {
+    bool update(const uint64_t timestamp) override {
         if(_delegate->update(timestamp)) {
-            _text = sp<String>::make(Strings::toString(_delegate->val()));
+            _value = Strings::toString(_delegate->val());
             return true;
         }
         return false;
     }
 
-    sp<String> val() override {
-        return _text;
+    StringView val() override {
+        return _value;
     }
 
 private:
     sp<Integer> _delegate;
-    sp<String> _text;
+    String _value;
 };
 
 template<typename T> class StringVarFormatedOne final : public StringVar {
 public:
     StringVarFormatedOne(sp<Variable<T>> value, const StringView format = "")
-        : _value(std::move(value)), _format(Strings::sprintf("{%s}", format.data())), _formatted(sp<String>::make()) {
+        : _value(std::move(value)), _format(Strings::sprintf("{%s}", format.data()))
+    {
+        doUpdate();
     }
 
-    bool update(uint64_t timestamp) override {
-        return _value->update(timestamp);
+    bool update(uint64_t timestamp) override
+    {
+        const bool dirty = _value->update(timestamp);
+        if(dirty)
+            doUpdate();
+        return dirty;
     }
 
-    sp<String> val() override {
-        if constexpr(std::is_same_v<T, sp<String>>)
-            *_formatted = fmt::format(_format.c_str(), _value->val()->c_str());
-        else
-            *_formatted = fmt::format(_format.c_str(), _value->val());
+    StringView val() override
+    {
         return _formatted;
+    }
+
+private:
+    void doUpdate()
+    {
+        if constexpr(std::is_same_v<T, String>)
+            _formatted = fmt::format(_format.c_str(), _value->val().c_str());
+        else
+            _formatted = fmt::format(_format.c_str(), _value->val());
     }
 
 private:
     sp<Variable<T>> _value;
     String _format;
-    sp<String> _formatted;
+    String _formatted;
 };
 
 class StringVarList final : public StringVar {
 public:
-    StringVarList(std::vector<sp<StringVar>> list)
-        : _list(std::move(list)), _string(sp<String>::make()) {
-        update(0);
+    StringVarList(Vector<sp<StringVar>> list)
+        : _list(std::move(list))
+    {
+        doUpdate();
     }
 
-    virtual bool update(uint64_t timestamp) override {
+    bool update(const uint64_t timestamp) override {
         bool dirty = false;
         for(const sp<StringVar>& i : _list)
             dirty = i->update(timestamp) | dirty;
+        if(dirty)
+            doUpdate();
         return dirty;
     }
 
-    virtual sp<String> val() override {
-        StringBuffer sb;
-        for(const sp<StringVar>& i : _list)
-            sb << *i->val();
-        *_string = sb.str();
-        return _string;
+    StringView val() override {
+        return _value;
     }
 
 private:
-    std::vector<sp<StringVar>> _list;
-    sp<String> _string;
+    void doUpdate()
+    {
+        StringBuffer sb;
+        for(const sp<StringVar>& i : _list)
+            sb << i->val();
+        _value = sb.str();
+    }
+
+private:
+    Vector<sp<StringVar>> _list;
+    String _value;
 };
 
 template<typename T, typename... ARGS> sp<StringVar> toStringVar(const Box& box, String format) {
-    sp<Variable<T>> var = box.as<Variable<T>>();
-    if(var)
-        return sp<StringVarFormatedOne<T>>::make(std::move(var), std::move(format));
+    if(sp<Variable<T>> var = box.as<Variable<T>>())
+        return sp<StringVar>::make<StringVarFormatedOne<T>>(std::move(var), std::move(format));
 
     if constexpr(sizeof...(ARGS) > 0)
         return toStringVar<ARGS...>(box, std::move(format));
@@ -104,27 +147,27 @@ template<typename T, typename... ARGS> sp<StringVar> toStringVar(const Box& box,
 
 }
 
-sp<StringVar> StringType::create(sp<String> value)
+sp<StringVar> StringType::create(StringView value)
 {
-    return sp<StringVar::Impl>::make(std::move(value));
+    return sp<StringVar>::make<StringVarImpl>(value);
 }
 
 sp<StringVar> StringType::create(sp<Integer> value)
 {
-    return sp<StringVarInteger>::make(std::move(value));
+    return sp<StringVar>::make<StringVarInteger>(std::move(value));
 }
 
 sp<StringVar> StringType::create(sp<StringVar> value)
 {
-    return sp<StringVarWrapper>::make(std::move(value));
+    return sp<StringVar>::make<StringVarWrapper>(std::move(value));
 }
 
 sp<StringVar> StringType::create()
 {
-    return sp<StringVar::Impl>::make(sp<String>());
+    return sp<StringVar>::make<StringVarImpl>("");
 }
 
-String StringType::val(const sp<StringVar>& self)
+StringView StringType::val(const sp<StringVar>& self)
 {
     return self->val();
 }
@@ -136,24 +179,21 @@ sp<StringVar> StringType::wrapped(const sp<StringVar>& self)
     return ib ? ib->wrapped() : nullptr;
 }
 
-void StringType::set(const sp<StringVar::Impl>& self, sp<String> value)
+void StringType::set(const sp<StringVar>& self, sp<StringVar> value)
 {
-    self->set(std::move(value));
+    const sp<StringVarWrapper>& svw = self.ensureInstance<StringVarWrapper>();
+    svw->set(std::move(value));
 }
 
-void StringType::set(const sp<StringVarWrapper>& self, sp<String> value)
+void StringType::set(const sp<StringVar>& self, String value)
 {
-    self->set(std::move(value));
-}
-
-void StringType::set(const sp<StringVarWrapper>& self, sp<StringVar> value)
-{
-    self->set(std::move(value));
+    const sp<StringVarImpl>& svi = self.ensureInstance<StringVarImpl>("Setting on an instance of non StringVarImpl");
+    svi->set(std::move(value));
 }
 
 sp<StringVar> StringType::ifElse(sp<StringVar> self, sp<Boolean> condition, sp<StringVar> negative)
 {
-    return sp<VariableTernary<sp<String>>>::make(std::move(condition), std::move(self), std::move(negative));
+    return sp<StringVar>::make<VariableTernary<StringView>>(std::move(condition), std::move(self), std::move(negative));
 }
 
 sp<StringVar> StringType::freeze(const sp<StringVar>& self)
@@ -161,26 +201,26 @@ sp<StringVar> StringType::freeze(const sp<StringVar>& self)
     return create(self->val());
 }
 
-sp<StringVar> StringType::format(String format, const Scope& kwargs)
+sp<StringVar> StringType::format(const String& format, const Scope& kwargs)
 {
     static std::regex VAR_PATTERN("\\{(\\w+)(\\:[^}]+)?\\}");
-    std::vector<sp<StringVar>> strList;
+    Vector<sp<StringVar>> strList;
     format.search(VAR_PATTERN, [&strList, &kwargs] (const std::smatch& matched) {
         const std::string name = matched[1].str();
         if(name.at(1) == '{') {
-            strList.push_back(sp<StringVar::Const>::make(sp<String>::make(name)));
+            strList.push_back(sp<StringVar>::make<StringVarImpl>(name));
             return true;
         }
 
         const std::string m2 = matched[2].str();
         const Optional<Box> value = kwargs.getObject(name);
         CHECK(value, "Unable to get keyword name \"%s\"", name.c_str());
-        sp<StringVar> formatted = toStringVar<int32_t, float, sp<String>>(value.value(), m2.c_str());
+        sp<StringVar> formatted = toStringVar<int32_t, float, String>(value.value(), m2.c_str());
         CHECK(formatted, "Unable to format key \"%s\"", name.c_str());
         strList.push_back(std::move(formatted));
         return true;
     }, [&strList] (const String& unmatched) {
-        strList.push_back(sp<StringVar::Const>::make(sp<String>::make(unmatched)));
+        strList.push_back(sp<StringVar>::make<StringVarImpl>(unmatched));
         return true;
     });
 
@@ -189,7 +229,7 @@ sp<StringVar> StringType::format(String format, const Scope& kwargs)
 
 sp<StringVar> StringType::dye(sp<StringVar> self, sp<Boolean> condition, String message)
 {
-    return sp<VariableDyed<sp<String>>>::make(std::move(self), std::move(condition), std::move(message));
+    return sp<StringVar>::make<VariableDyed<StringView>>(std::move(self), std::move(condition), std::move(message));
 }
 
 StringType::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr)
@@ -199,7 +239,7 @@ StringType::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr)
 
 sp<StringVar> StringType::DICTIONARY::build(const Scope& args)
 {
-    return StringType::create(_value->build(args));
+    return StringType::create(*_value->build(args));
 }
 
 StringType::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
@@ -208,7 +248,7 @@ StringType::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 
 sp<StringVar> StringType::BUILDER::build(const Scope& args)
 {
-    return StringType::create(_value->build(args));
+    return StringType::create(*_value->build(args));
 }
 
 }

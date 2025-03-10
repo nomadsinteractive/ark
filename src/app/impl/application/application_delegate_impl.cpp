@@ -34,7 +34,8 @@ void ApplicationDelegateImpl::onCreate(Application& application, const sp<Surfac
 
     applicationFacade->setBackgroundColor(Documents::getAttribute<Color>(appManifest, "background-color", Color(0, 0, 0)));
 
-    if(sp<Activity> activity = appResourceLoader->beanFactory().build<Activity>(appManifest, "activity", {}))
+    const SafeBuilder<Activity> activityBuilder(appResourceLoader->beanFactory().getBuilder<Activity>(appManifest, "activity"));
+    if(sp<Activity> activity = activityBuilder.build({}))
         applicationFacade->setActivity(std::move(activity));
 
     bool defaultEventListenerSet = false;

@@ -399,7 +399,7 @@ String Strings::toUTF8(const std::wstring& text)
     return utf8;
 }
 
-std::wstring Strings::fromUTF8(StringView text)
+std::wstring Strings::fromUTF8(const StringView text)
 {
     std::wstring wide;
     utf8ToWStr(text, wide);

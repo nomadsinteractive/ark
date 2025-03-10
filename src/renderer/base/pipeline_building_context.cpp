@@ -338,7 +338,7 @@ Map<String, String> PipelineBuildingContext::toDefinitions() const
 {
     Map<String, String> definitions;
     for(const auto& [i, j] : _definitions)
-        definitions.insert(std::make_pair(i, j->val()));
+        definitions.insert(std::make_pair(i, j->val().data()));
     return definitions;
 }
 

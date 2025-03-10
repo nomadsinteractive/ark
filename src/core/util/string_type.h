@@ -12,7 +12,7 @@ namespace ark {
 class ARK_API StringType {
 public:
 //  [[script::bindings::constructor]]
-    static sp<StringVar> create(sp<String> value);
+    static sp<StringVar> create(StringView value);
 //  [[script::bindings::constructor]]
     static sp<StringVar> create(sp<Integer> value);
 //  [[script::bindings::constructor]]
@@ -20,16 +20,14 @@ public:
     static sp<StringVar> create();
 
 //  [[script::bindings::property]]
-    static String val(const sp<StringVar>& self);
+    static StringView val(const sp<StringVar>& self);
 //  [[script::bindings::property]]
     static sp<StringVar> wrapped(const sp<StringVar>& self);
 
 //  [[script::bindings::classmethod]]
-    static void set(const sp<StringVar::Impl>& self, sp<String> value);
+    static void set(const sp<StringVar>& self, sp<StringVar> value);
 //  [[script::bindings::classmethod]]
-    static void set(const sp<StringVarWrapper>& self, sp<String> value);
-//  [[script::bindings::classmethod]]
-    static void set(const sp<StringVarWrapper>& self, sp<StringVar> value);
+    static void set(const sp<StringVar>& self, String value);
 
 //  [[script::bindings::classmethod]]
     static sp<StringVar> ifElse(sp<StringVar> self, sp<Boolean> condition, sp<StringVar> negative);
@@ -41,7 +39,7 @@ public:
     static sp<StringVar> dye(sp<StringVar> self, sp<Boolean> condition = nullptr, String message = "");
 
 //  [[script::bindings::auto]]
-    static sp<StringVar> format(String format, const Scope& kwargs);
+    static sp<StringVar> format(const String& format, const Scope& kwargs);
 
 //  [[plugin::builder::by-value]]
     class DICTIONARY final : public Builder<StringVar> {

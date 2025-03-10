@@ -107,16 +107,17 @@ class WithTag;
 class Writable;
 
 typedef Dictionary<Box> BoxBundle;
+typedef std::string_view StringView;
 
 typedef Variable<bool> Boolean;
 typedef Variable<int32_t> Integer;
 typedef Variable<float> Numeric;
-typedef Variable<sp<String>> StringVar;
+typedef Variable<StringView> StringVar;
 
 typedef VariableWrapper<bool> BooleanWrapper;
 typedef VariableWrapper<int32_t> IntegerWrapper;
 typedef VariableWrapper<float> NumericWrapper;
-typedef VariableWrapper<sp<String>> StringVarWrapper;
+typedef VariableWrapper<StringView> StringVarWrapper;
 
 typedef std::unordered_map<int32_t, int32_t> IntMap;
 typedef Importer<IntMap> IntMapImporter;
@@ -143,7 +144,6 @@ typedef sp<FloatArray> floatarray;
 typedef std::chrono::time_point<std::chrono::steady_clock> TimePoint;
 //TODO: change to std::span when c++20 or above arrives
 typedef std::string_view Span;
-typedef std::string_view StringView;
 
 typedef Loader<document> DocumentLoader;
 typedef LoaderBundle<document> DocumentLoaderBundle;
