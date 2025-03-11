@@ -18,12 +18,12 @@ namespace ark {
 
 namespace {
 
-Optional<const Shader::StageManifest&> findStageManifest(const Enum::ShaderStageBit type, const Vector<Shader::StageManifest>& stages)
+std::pair<Optional<const Shader::StageManifest&>, size_t> findStageManifest(const Enum::ShaderStageBit type, const Vector<Shader::StageManifest>& stages)
 {
-    for(const Shader::StageManifest& i : stages)
-        if(type == i._type)
-            return {i};
-    return {};
+    for(size_t i = 0; i < stages.size(); ++ i)
+        if(type == stages.at(i)._type)
+            return {stages.at(i), i};
+    return {{}, 0};
 }
 
 }
@@ -127,9 +127,9 @@ sp<Shader> Shader::BUILDER_IMPL::build(const Scope& args)
 sp<PipelineBuildingContext> Shader::BUILDER_IMPL::makePipelineBuildingContext(const Scope& args) const
 {
     sp<PipelineBuildingContext> context = sp<PipelineBuildingContext>::make();
-    const Optional<const StageManifest&> vertexOpt = findStageManifest(Enum::SHADER_STAGE_BIT_VERTEX, _stages);
-    const Optional<const StageManifest&> fragmentOpt = findStageManifest(Enum::SHADER_STAGE_BIT_FRAGMENT, _stages);
-    const Optional<const StageManifest&> computeOpt = findStageManifest(Enum::SHADER_STAGE_BIT_COMPUTE, _stages);
+    const auto [vertexOpt, vertexIndex] = findStageManifest(Enum::SHADER_STAGE_BIT_VERTEX, _stages);
+    const auto [fragmentOpt, fragmentIndex] = findStageManifest(Enum::SHADER_STAGE_BIT_FRAGMENT, _stages);
+    const auto [computeOpt, computeIndex] = findStageManifest(Enum::SHADER_STAGE_BIT_COMPUTE, _stages);
     if(vertexOpt || fragmentOpt || !computeOpt)
     {
         const Global<StringTable> globalStringTable;
@@ -140,7 +140,7 @@ sp<PipelineBuildingContext> Shader::BUILDER_IMPL::makePipelineBuildingContext(co
     else
         CHECK(computeOpt, "Shader must have at least one stage defined");
     if(computeOpt)
-        context->addStage(computeOpt->_source->build(args), computeOpt->_manifest, Enum::SHADER_STAGE_BIT_COMPUTE, fragmentOpt ? Enum::SHADER_STAGE_BIT_FRAGMENT : Enum::SHADER_STAGE_BIT_NONE);
+        context->addStage(computeOpt->_source->build(args), computeOpt->_manifest, Enum::SHADER_STAGE_BIT_COMPUTE, fragmentOpt && fragmentIndex < computeIndex ? Enum::SHADER_STAGE_BIT_FRAGMENT : Enum::SHADER_STAGE_BIT_NONE);
     return context;
 }
 
