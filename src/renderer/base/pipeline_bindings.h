@@ -37,6 +37,7 @@ public:
 
     const sp<Pipeline>& ensurePipeline(GraphicsContext& graphicsContext);
     const sp<Pipeline>& ensureRenderPipeline(GraphicsContext& graphicsContext);
+    const sp<Pipeline>& ensureComputePipeline(GraphicsContext& graphicsContext);
 
     void bindSampler(sp<Texture> texture, uint32_t name = 0) const;
 
@@ -48,6 +49,8 @@ private:
 private:
     struct Stub;
     sp<Stub> _stub;
+    sp<Pipeline> _render_pipeline;
+    sp<Pipeline> _compute_pipeline;
     sp<Pipeline> _pipeline;
 };
 

@@ -31,7 +31,7 @@ public:
         return renderTarget.vkRenderPassBeginInfo().renderPass;
     }
 
-    VkRenderPass begin(VkCommandBuffer commandBuffer) override {
+    VkRenderPass begin(const VkCommandBuffer commandBuffer) override {
         VkClearValue vkClearValues[2];
         vkClearValues[0].color = _clear_color_value;
         vkClearValues[1].depthStencil = {1.0f, 0};

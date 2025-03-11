@@ -51,7 +51,7 @@ public:
     Table<String, Buffer> _ssbos;
     Map<HashId, sp<PipelineLayout::UBO>> _ubos;
 
-    Set<String> _input_vars;
+    Table<String, std::pair<String, uint32_t>> _input_attributes;
 
     const Vector<ShaderPreprocessor*>& stages() const;
     const Map<Enum::ShaderStageBit, op<ShaderPreprocessor>>& renderStages() const;

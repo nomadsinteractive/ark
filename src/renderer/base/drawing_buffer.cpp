@@ -30,7 +30,7 @@ VertexWriter DrawingBuffer::makeDividedVertexWriter(const RenderRequest& renderR
 {
     Buffer::Factory& builder = getDividedBufferBuilder(divisor);
 
-    size_t size = length * builder._stride;
+    const size_t size = length * builder._stride;
     ByteArray::Borrowed content = renderRequest.allocator().sbrkSpan(size);
     builder.addStrip(offset * builder._stride, content);
     return VertexWriter(_pipeline_descriptor->vertexDescriptor(), !_is_instanced, content.buf(), size, builder._stride);

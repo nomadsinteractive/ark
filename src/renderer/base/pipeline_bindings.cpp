@@ -18,13 +18,15 @@ public:
 
     uint64_t id() override
     {
-        return _pipeline_draw->id();
+        return _pipeline_draw->id() ? _pipeline_draw->id() : 0;
     }
 
     void upload(GraphicsContext& graphicsContext) override
     {
-        _pipeline_draw->upload(graphicsContext);
-        _pipeline_compute->upload(graphicsContext);
+        if(_pipeline_draw->id() == 0)
+            _pipeline_draw->upload(graphicsContext);
+        if(_pipeline_compute->id() == 0)
+            _pipeline_compute->upload(graphicsContext);
     }
 
     ResourceRecycleFunc recycle() override
@@ -140,13 +142,11 @@ void PipelineBindings::bindSampler(sp<Texture> texture, const uint32_t name) con
 
 const sp<Pipeline>& PipelineBindings::ensurePipeline(GraphicsContext& graphicsContext)
 {
-    if(_pipeline)
-    {
-        if(_pipeline->id() == 0)
-            _pipeline->upload(graphicsContext);
-    }
-    else
+    if(!_pipeline)
         doEnsurePipeline(graphicsContext);
+
+    if(_pipeline->id() == 0)
+        _pipeline->upload(graphicsContext);
 
     return _pipeline;
 }
@@ -165,22 +165,36 @@ void PipelineBindings::doEnsurePipeline(GraphicsContext& graphicsContext)
     RenderEngine& renderEngine = Ark::instance().renderController()->renderEngine();
     if(const auto iter = sources.find(Enum::SHADER_STAGE_BIT_COMPUTE); iter != sources.end() && sources.size() > 1)
     {
-        sp<Pipeline> computePipeline = renderEngine.createPipeline(graphicsContext, *this, Map<Enum::ShaderStageBit, String>{{iter->first, iter->second}});
+        _compute_pipeline = renderEngine.createPipeline(graphicsContext, *this, Map<Enum::ShaderStageBit, String>{{iter->first, iter->second}});
         sources.erase(iter);
 
-        sp<Pipeline> renderPipeline = renderEngine.createPipeline(graphicsContext, *this, std::move(sources));
-        _pipeline = sp<Pipeline>::make<PipelineComposite>(std::move(renderPipeline), std::move(computePipeline));
+        _render_pipeline = renderEngine.createPipeline(graphicsContext, *this, std::move(sources));
+        _pipeline = sp<Pipeline>::make<PipelineComposite>(std::move(_render_pipeline), std::move(_compute_pipeline));
     }
     else
+    {
+        const bool hasComputeStage = iter != sources.end();
         _pipeline = renderEngine.createPipeline(graphicsContext, *this, std::move(sources));
-    _pipeline->upload(graphicsContext);
+        (hasComputeStage ? _compute_pipeline : _render_pipeline) = _pipeline;
+        _pipeline = hasComputeStage ? _compute_pipeline : _render_pipeline;
+    }
 }
 
 const sp<Pipeline>& PipelineBindings::ensureRenderPipeline(GraphicsContext& graphicsContext)
 {
-    const sp<Pipeline>& pipeline = ensurePipeline(graphicsContext);
-    if(pipeline.isInstance<PipelineComposite>())
-        return pipeline.cast<PipelineComposite>()->_pipeline_draw;
+    ensurePipeline(graphicsContext);
+    const sp<Pipeline>& pipeline = _render_pipeline ? _render_pipeline : _pipeline;
+    if(pipeline->id() == 0)
+        pipeline->upload(graphicsContext);
+    return pipeline;
+}
+
+const sp<Pipeline>& PipelineBindings::ensureComputePipeline(GraphicsContext& graphicsContext)
+{
+    ensurePipeline(graphicsContext);
+    const sp<Pipeline>& pipeline = _compute_pipeline ? _compute_pipeline : _pipeline;
+    if(pipeline->id() == 0)
+        pipeline->upload(graphicsContext);
     return pipeline;
 }
 

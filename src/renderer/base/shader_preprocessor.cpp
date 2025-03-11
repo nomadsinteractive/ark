@@ -277,7 +277,7 @@ void ShaderPreprocessor::linkNextStage(const String& returnValueName)
             _declaration_outs.declare(i._type, varPrefix, Strings::capitalizeFirst(i._name), Strings::sprintf("location = %d", ++location), i.getQualifierStr());
 }
 
-void ShaderPreprocessor::linkPreStage(const ShaderPreprocessor& preStage, std::set<String>& passThroughVars)
+void ShaderPreprocessor::linkPreStage(const ShaderPreprocessor& preStage, Set<String>& passThroughVars) const
 {
     linkParameters(_predefined_parameters, preStage, passThroughVars);
     linkParameters(_main_block->_args, preStage, passThroughVars);
@@ -374,7 +374,7 @@ uint32_t ShaderPreprocessor::getUniformSize(Uniform::Type type, const String& de
     return size;
 }
 
-void ShaderPreprocessor::linkParameters(const Vector<ShaderPreprocessor::Parameter>& parameters, const ShaderPreprocessor& preStage, std::set<String>& passThroughVars)
+void ShaderPreprocessor::linkParameters(const Vector<Parameter>& parameters, const ShaderPreprocessor& preStage, Set<String>& passThroughVars)
 {
     for(const auto& i : parameters)
         if(i._annotation & Parameter::PARAMETER_ANNOTATION_IN)

@@ -215,7 +215,7 @@ VkRenderPass VKFramebuffer::Stub::acquire()
 
     VKUtil::checkResult(vkCreateRenderPass(device, &renderPassInfo, nullptr, &_render_pass_begin_info.renderPass));
 
-    VkFramebufferCreateInfo fbufCreateInfo{ VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO };
+    VkFramebufferCreateInfo fbufCreateInfo = {VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO};
     fbufCreateInfo.renderPass = _render_pass_begin_info.renderPass;
     fbufCreateInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
     fbufCreateInfo.pAttachments = attachments.data();

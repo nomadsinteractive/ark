@@ -24,11 +24,11 @@ public:
     VertexWriter(const PipelineLayout::VertexDescriptor& attributes, bool doTransform, sp<Writer> writer);
     VertexWriter(const PipelineLayout::VertexDescriptor& attributes, bool doTransform, uint8_t* ptr, size_t size, size_t stride);
 
-    template<typename T> void write(const T& value, uint32_t offset = 0) {
+    template<typename T> void write(const T& value, const uint32_t offset = 0) {
         _writer->write(&value, sizeof(T), offset);
     }
 
-    template<typename T> void writeAttribute(const T& value, int32_t name) {
+    template<typename T> void writeAttribute(const T& value, const int32_t name) {
         if(_attribute_offsets._offsets[name] >= 0)
             write<T>(value, _attribute_offsets._offsets[name]);
     }

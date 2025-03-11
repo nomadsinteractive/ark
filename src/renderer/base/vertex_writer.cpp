@@ -39,7 +39,7 @@ void VertexWriter::writeBoneInfo(const Mesh::BoneInfo& boneInfo)
     writeAttribute(boneInfo._weights, Attribute::USAGE_BONE_WEIGHTS);
 }
 
-void VertexWriter::write(const void* buf, uint32_t size, uint32_t offset)
+void VertexWriter::write(const void* buf, const uint32_t size, const uint32_t offset)
 {
     _writer->write(buf, size, offset);
 }

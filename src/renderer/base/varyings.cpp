@@ -53,9 +53,9 @@ String findNearestAttribute(const PipelineLayout& shaderLayout, const String& na
 
 }
 
-Varyings::Varyings(const PipelineLayout& shaderLayout)
+Varyings::Varyings(const PipelineLayout& pipelineLayout)
 {
-    for(const auto& [k, v] : shaderLayout.streamLayouts())
+    for(const auto& [k, v] : pipelineLayout.streamLayouts())
     {
         for(const auto& [attrname, attr] : v.attributes())
             if(!(k == 0 && (attr.offset() == 0 || attr.offset() == 12)))  // slots with offset 0 and 12 in divisor 0 will always be the "a_Position" & "a_UV" attribute, which don't need to be recorded here.
@@ -136,12 +136,12 @@ sp<Varyings> Varyings::subscribe(const String& name)
     return subProp;
 }
 
-Varyings::Snapshot Varyings::snapshot(const PipelineLayout& pipelineInput, Allocator& allocator)
+Varyings::Snapshot Varyings::snapshot(const PipelineLayout& pipelineLayout, Allocator& allocator)
 {
     if(!_slots.size())
     {
         Snapshot snapshot;
-        snapshot.snapshotSubProperties(_sub_properties, pipelineInput, allocator);
+        snapshot.snapshotSubProperties(_sub_properties, pipelineLayout, allocator);
         return snapshot;
     }
 
@@ -149,12 +149,12 @@ Varyings::Snapshot Varyings::snapshot(const PipelineLayout& pipelineInput, Alloc
     {
         for(auto& [i, j] : _slots)
         {
-            Optional<const Attribute&> attr = pipelineInput.getAttribute(i);
-            CHECK(attr, "Varying has no attribute \"%s\". Did you mean \"%s\"?", i.c_str(), findNearestAttribute(pipelineInput, i).c_str());
+            Optional<const Attribute&> attr = pipelineLayout.getAttribute(i);
+            CHECK(attr, "Varying has no attribute \"%s\". Did you mean \"%s\"?", i.c_str(), findNearestAttribute(pipelineLayout, i).c_str());
             j._divisor = attr->divisor();
             j._offset = attr->offset();
         }
-        for(const auto& [k, v] : pipelineInput.streamLayouts())
+        for(const auto& [k, v] : pipelineLayout.streamLayouts())
             _slot_strides[k] = v.stride();
     }
 
@@ -171,7 +171,7 @@ Varyings::Snapshot Varyings::snapshot(const PipelineLayout& pipelineInput, Alloc
     }
 
     Snapshot snapshot(buffers);
-    snapshot.snapshotSubProperties(_sub_properties, pipelineInput, allocator);
+    snapshot.snapshotSubProperties(_sub_properties, pipelineLayout, allocator);
     return snapshot;
 }
 

@@ -21,7 +21,7 @@ public:
     void preDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override
     {
         _compute_context._bindings = context._bindings;
-        context._bindings->ensurePipeline(graphicsContext)->compute(graphicsContext, _compute_context);
+        context._bindings->ensureComputePipeline(graphicsContext)->compute(graphicsContext, _compute_context);
     }
 
 private:
@@ -38,7 +38,7 @@ public:
     void postDraw(GraphicsContext& graphicsContext, const DrawingContext& context) override
     {
         _compute_context._bindings = context._bindings;
-        context._bindings->ensurePipeline(graphicsContext)->compute(graphicsContext, _compute_context);
+        context._bindings->ensureComputePipeline(graphicsContext)->compute(graphicsContext, _compute_context);
     }
 
 private:

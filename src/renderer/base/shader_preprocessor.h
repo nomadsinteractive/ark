@@ -150,7 +150,7 @@ public:
     void passThroughDeclare(const String& type, const String& name);
 
     void linkNextStage(const String& returnValueName);
-    void linkPreStage(const ShaderPreprocessor& preStage, std::set<String>& passThroughVars);
+    void linkPreStage(const ShaderPreprocessor& preStage, Set<String>& passThroughVars) const;
 
     Stage preprocess() const;
 
@@ -173,8 +173,7 @@ private:
 
     void insertUBOStruct(const PipelineLayout::UBO& ubo, int32_t spaceSet);
 
-    void linkParameters(const Vector<Parameter>& parameters, const ShaderPreprocessor& preStage, std::set<String>& passThroughVars);
-
+    static void linkParameters(const Vector<Parameter>& parameters, const ShaderPreprocessor& preStage, Set<String>& passThroughVars);
     static const char* getOutAttributePrefix(Enum::ShaderStageBit preStage);
 
 private:

@@ -133,7 +133,7 @@ void PipelineBuildingContext::initializeAttributes()
             if(k._annotation & ShaderPreprocessor::Parameter::PARAMETER_ANNOTATION_IN)
                 j->inDeclare(k._type, Strings::capitalizeFirst(k._name));
 
-    std::set<String> passThroughVars;
+    Set<String> passThroughVars;
     const ShaderPreprocessor* prestage = nullptr;
     for(const auto& [k, v] : _rendering_stages)
     {
@@ -292,9 +292,9 @@ void PipelineBuildingContext::addUniform(sp<Uniform> uniform)
 
 void PipelineBuildingContext::addInputAttribute(const String& name, const String& type, uint32_t divisor)
 {
-    if(_input_vars.find(name) == _input_vars.end())
+    if(_input_attributes.find(name) == _input_attributes.end())
     {
-        _input_vars.insert(name);
+        _input_attributes.push_back(name, {type, divisor});
         addAttribute(name, type, divisor);
     }
 }

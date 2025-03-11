@@ -70,7 +70,7 @@ public:
 public:
 //[[script::bindings::auto]]
     Varyings() = default;
-    Varyings(const PipelineLayout& shaderLayout);
+    Varyings(const PipelineLayout& pipelineLayout);
 
     bool update(uint64_t timestamp);
 
@@ -93,7 +93,7 @@ public:
 //[[script::bindings::map(get)]]
     sp<Varyings> subscribe(const String& name);
 
-    Snapshot snapshot(const PipelineLayout& pipelineInput, Allocator& allocator);
+    Snapshot snapshot(const PipelineLayout& pipelineLayout, Allocator& allocator);
 
 //  [[plugin::builder]]
     class BUILDER final : public Builder<Varyings> {
