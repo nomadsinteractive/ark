@@ -40,6 +40,17 @@ public:
         int32_t _binding;
     };
 
+    struct VertexAttribute {
+        VertexAttribute(String name, String type, uint32_t divisor);
+
+        bool operator <(const VertexAttribute& other) const;
+
+        String _name;
+        String _type;
+        uint32_t _divisor;
+        Attribute::Usage _usage;
+    };
+
     sp<PipelineLayout> _pipeline_layout;
 
     Map<String, Attribute> _attributes;
@@ -51,17 +62,16 @@ public:
     Table<String, Buffer> _ssbos;
     Map<HashId, sp<PipelineLayout::UBO>> _ubos;
 
-    Table<String, std::pair<String, uint32_t>> _input_attributes;
+    Table<String, VertexAttribute> _vertex_attributes;
 
     const Vector<ShaderPreprocessor*>& stages() const;
     const Map<Enum::ShaderStageBit, op<ShaderPreprocessor>>& renderStages() const;
     const op<ShaderPreprocessor>& computingStage() const;
 
-    void addAttribute(String name, String type, uint32_t divisor);
     void addUniform(String name, Uniform::Type type, uint32_t length, sp<Uploader> input);
     void addUniform(sp<Uniform> uniform);
 
-    void addInputAttribute(const String& name, const String& type, uint32_t divisor);
+    void addAttribute(const String& name, const String& type, uint32_t divisor);
     Attribute& addPredefinedAttribute(const String& name, const String& type, uint32_t divisor,Enum::ShaderStageBit stage);
 
     ShaderPreprocessor* tryGetRenderStage(Enum::ShaderStageBit shaderStage) const;
@@ -78,6 +88,7 @@ private:
     void initializeSSBO() const;
     void initializeUniforms();
 
+    void doAddVertexAttribute(String name, String type, uint32_t divisor);
     void tryBindUniformMatrix(const ShaderPreprocessor& shaderPreprocessor, String name, const sp<Mat4>& matrix);
 
     void loadPredefinedAttribute(const document& manifest);

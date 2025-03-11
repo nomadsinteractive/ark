@@ -90,7 +90,7 @@ void ShaderPreprocessor::initializeAsFirst(PipelineBuildingContext& context)
     initialize(context);
     for(const auto& i : _main_block->_args)
         if(i._annotation & Parameter::PARAMETER_ANNOTATION_IN)
-            context.addInputAttribute(Strings::capitalizeFirst(i._name), i._type, i._divisor);
+            context.addAttribute(Strings::capitalizeFirst(i._name), i._type, i._divisor);
 }
 
 static bool sanitizer(const std::smatch& match) {
@@ -687,7 +687,7 @@ void ShaderPreprocessor::Source::insertBefore(const String& statement, const Str
 }
 
 ShaderPreprocessor::Declaration::Declaration(const String& name, const String& type, uint32_t length, sp<String> source)
-    : _name(name), _type(type), _length(length), _source(std::move(source))
+    : _name(name), _type(type), _length(length), _usage(RenderUtil::toAttributeLayoutType(_name, _type)), _source(std::move(source))
 {
 }
 
@@ -704,6 +704,13 @@ const String& ShaderPreprocessor::Declaration::type() const
 uint32_t ShaderPreprocessor::Declaration::length() const
 {
     return _length;
+}
+
+bool ShaderPreprocessor::Declaration::operator<(const Declaration& other) const
+{
+    const int32_t v1 = _usage == Attribute::USAGE_CUSTOM ? 1 : 0;
+    const int32_t v2 = other._usage == Attribute::USAGE_CUSTOM ? 1 : 0;
+    return v1 < v2;
 }
 
 const String& ShaderPreprocessor::Declaration::source() const

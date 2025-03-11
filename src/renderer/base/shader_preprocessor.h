@@ -31,6 +31,8 @@ public:
         const String& type() const;
         uint32_t length() const;
 
+        bool operator <(const Declaration& other) const;
+
         const String& source() const;
         void setSource(String source) const;
 
@@ -38,6 +40,7 @@ public:
         String _name;
         String _type;
         uint32_t _length;
+        Attribute::Usage _usage;
 
         sp<String> _source;
     };

@@ -23,10 +23,6 @@ public:
 
     void upload(GraphicsContext& graphicsContext) override
     {
-        if(_pipeline_draw->id() == 0)
-            _pipeline_draw->upload(graphicsContext);
-        if(_pipeline_compute->id() == 0)
-            _pipeline_compute->upload(graphicsContext);
     }
 
     ResourceRecycleFunc recycle() override
@@ -41,14 +37,19 @@ public:
 
     void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override
     {
+        if(_pipeline_draw->id() == 0)
+            _pipeline_draw->upload(graphicsContext);
         _pipeline_draw->draw(graphicsContext, drawingContext);
     }
 
     void compute(GraphicsContext& graphicsContext, const ComputeContext& computeContext) override
     {
+        if(_pipeline_compute->id() == 0)
+            _pipeline_compute->upload(graphicsContext);
         _pipeline_compute->compute(graphicsContext, computeContext);
     }
 
+private:
     sp<Pipeline> _pipeline_draw;
     sp<Pipeline> _pipeline_compute;
 };
@@ -169,14 +170,13 @@ void PipelineBindings::doEnsurePipeline(GraphicsContext& graphicsContext)
         sources.erase(iter);
 
         _render_pipeline = renderEngine.createPipeline(graphicsContext, *this, std::move(sources));
-        _pipeline = sp<Pipeline>::make<PipelineComposite>(std::move(_render_pipeline), std::move(_compute_pipeline));
+        _pipeline = sp<Pipeline>::make<PipelineComposite>(_render_pipeline, _compute_pipeline);
     }
     else
     {
         const bool hasComputeStage = iter != sources.end();
         _pipeline = renderEngine.createPipeline(graphicsContext, *this, std::move(sources));
         (hasComputeStage ? _compute_pipeline : _render_pipeline) = _pipeline;
-        _pipeline = hasComputeStage ? _compute_pipeline : _render_pipeline;
     }
 }
 

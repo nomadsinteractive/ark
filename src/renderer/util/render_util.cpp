@@ -312,6 +312,57 @@ uint32_t RenderUtil::hash(const element_index_t* buf, const size_t len)
     return h;
 }
 
+Attribute::Usage RenderUtil::toAttributeLayoutType(const String& name, const String& type)
+{
+    const String n = name.toLower();
+    if(n.startsWith("uv") || n.startsWith("texcoordinate"))
+    {
+        CHECK(type == "int" || type == "vec2" || type == "vec3", "Unacceptable TexCoordinate type: '%s', must be in [int, vec2, vec3]", type.c_str());
+        return Attribute::USAGE_TEX_COORD;
+    }
+    if(n.startsWith("position"))
+    {
+        CHECK(type == "int" || type == "vec2" || type == "vec3" || type == "vec4", "Unacceptable Position type: '%s', must be in [int, vec2, vec3, vec4]", type.c_str());
+        return Attribute::USAGE_POSITION;
+    }
+    if(n.startsWith("color"))
+    {
+        CHECK(type == "int" || type == "vec3" || type == "vec4"|| type == "vec3b" || type == "vec4b", "Unacceptable Color type: '%s', must be in [int, vec3, vec4, vec3b, vec4b]", type.c_str());
+        return Attribute::USAGE_COLOR;
+    }
+    if(n == "model")
+    {
+        CHECK(type == "mat4", "Unacceptable Model type: '%s', must be in [mat4]", type.c_str());
+        return Attribute::USAGE_MODEL_MATRIX;
+    }
+    if(n == "normal")
+    {
+        CHECK(type == "vec3" || type == "vec4", "Unacceptable Normal type: '%s', must be in [vec3, vec4]", type.c_str());
+        return Attribute::USAGE_NORMAL;
+    }
+    if(n == "tangent")
+    {
+        CHECK(type == "vec3" || type == "vec4", "Unacceptable Tangent type: '%s', must be in [vec3, vec4]", type.c_str());
+        return Attribute::USAGE_TANGENT;
+    }
+    if(n == "bitangent")
+    {
+        CHECK(type == "vec3" || type == "vec4", "Unacceptable Bitangent type: '%s', must be in [vec3, vec4]", type.c_str());
+        return Attribute::USAGE_BITANGENT;
+    }
+    if(n == "materialid")
+    {
+        CHECK(type == "int" || type == "uint", "Unacceptable MaterialId type: '%s', must be in [int, uint]", type.c_str());
+        return Attribute::USAGE_MATERIAL_ID;
+    }
+    if(n == "nodeid")
+    {
+        CHECK(type == "int" || type == "uint", "Unacceptable NodeId type: '%s', must be in [int, uint]", type.c_str());
+        return Attribute::USAGE_NODE_ID;
+    }
+    return Attribute::USAGE_CUSTOM;
+}
+
 String RenderUtil::outAttributeName(const String& name, Enum::ShaderStageBit preStage)
 {
     DCHECK(preStage == Enum::SHADER_STAGE_BIT_NONE || preStage == Enum::SHADER_STAGE_BIT_VERTEX, "Only none and vertex stage's out attribute name supported");
@@ -428,7 +479,10 @@ Vector<ShaderPreprocessor::Declaration> RenderUtil::setupLayoutLocation(const Pi
     Vector<ShaderPreprocessor::Declaration> locations;
     Map<uint32_t, Vector<const ShaderPreprocessor::Declaration*>> divisors;
 
-    for(const ShaderPreprocessor::Declaration& i : declarations.vars().values()) {
+    Vector<ShaderPreprocessor::Declaration> declares = declarations.vars().values();
+    std::stable_sort(declares.begin(), declares.end());
+
+    for(const ShaderPreprocessor::Declaration& i : declares) {
         const auto iter = context._attributes.find(i.name());
         DCHECK(iter != context._attributes.end(), "Cannot find attribute %s", i.name().c_str());
         const Attribute& attribute = iter->second;

@@ -237,11 +237,11 @@ VkPipelineColorBlendAttachmentState makeColorBlendAttachmentState(const Pipeline
     return cbaState;
 }
 
-VertexLayout setupVertexLayout(const PipelineLayout& shaderLayout)
+VertexLayout setupVertexLayout(const PipelineLayout& pipelineLayout)
 {
     uint32_t location = 0;
     VertexLayout vertexLayout;
-    for(const auto& [divsor, stream] : shaderLayout.streamLayouts())
+    for(const auto& [divsor, stream] : pipelineLayout.streamLayouts())
     {
         vertexLayout.bindingDescriptions.push_back(vks::initializers::vertexInputBindingDescription(
                                                    divsor,
@@ -311,9 +311,7 @@ void VKPipeline::upload(GraphicsContext& graphicsContext)
     if(_is_compute_pipeline)
         setupComputePipeline(graphicsContext);
     else
-    {
         setupGraphicsPipeline(graphicsContext);
-    }
 }
 
 ResourceRecycleFunc VKPipeline::recycle()

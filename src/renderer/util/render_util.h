@@ -18,6 +18,8 @@ public:
 
     static uint32_t hash(const element_index_t* buf, size_t len);
 
+    static Attribute::Usage toAttributeLayoutType(const String& name, const String& type);
+
     static String outAttributeName(const String& name, Enum::ShaderStageBit preStage);
 
     static bool isScissorEnabled(const Rect& scissor);

@@ -36,49 +36,9 @@ private:
     size_t _aligned_size;
 };
 
-Attribute::Usage toAttributeLayoutType(const String& name, const String& type)
-{
-    if(name.startsWith("uv") || name.startsWith("texcoordinate"))
-    {
-        CHECK(type == "int" || type == "vec2" || type == "vec3", "Unacceptable TexCoordinate type: '%s', must be in [int, vec2, vec3]", type.c_str());
-        return Attribute::USAGE_TEX_COORD;
-    }
-    if(name.startsWith("position"))
-    {
-        CHECK(type == "int" || type == "vec2" || type == "vec3" || type == "vec4", "Unacceptable Position type: '%s', must be in [int, vec2, vec3, vec4]", type.c_str());
-        return Attribute::USAGE_POSITION;
-    }
-    if(name.startsWith("color"))
-    {
-        CHECK(type == "int" || type == "vec3" || type == "vec4"|| type == "vec3b" || type == "vec4b", "Unacceptable Color type: '%s', must be in [int, vec3, vec4, vec3b, vec4b]", type.c_str());
-        return Attribute::USAGE_COLOR;
-    }
-    if(name == "model")
-    {
-        CHECK(type == "mat4", "Unacceptable Model type: '%s', must be in [mat4]", type.c_str());
-        return Attribute::USAGE_MODEL_MATRIX;
-    }
-    if(name == "normal")
-    {
-        CHECK(type == "vec3", "Unacceptable Normal type: '%s', must be in [vec3]", type.c_str());
-        return Attribute::USAGE_NORMAL;
-    }
-    if(name == "tangent")
-    {
-        CHECK(type == "vec3", "Unacceptable Tangent type: '%s', must be in [vec3]", type.c_str());
-        return Attribute::USAGE_TANGENT;
-    }
-    if(name == "bitangent")
-    {
-        CHECK(type == "vec3", "Unacceptable Bitangent type: '%s', must be in [vec3]", type.c_str());
-        return Attribute::USAGE_BITANGENT;
-    }
-    return Attribute::USAGE_CUSTOM;
-}
-
 Attribute makePredefinedAttribute(const String& name, const String& type)
 {
-    const Attribute::Usage layoutType = toAttributeLayoutType(name.toLower(), type);
+    const Attribute::Usage layoutType = RenderUtil::toAttributeLayoutType(name, type);
 
     if(layoutType == Attribute::USAGE_TEX_COORD)
         return {Attribute::USAGE_TEX_COORD, Strings::sprintf("a_%s", name.c_str()), Attribute::TYPE_USHORT, type, 2, true};
@@ -125,8 +85,8 @@ void PipelineBuildingContext::initializeAttributes()
 
     ShaderPreprocessor& firstStage = _rendering_stages.begin()->second;
 
-    for(const auto& i : firstStage._declaration_ins.vars().values())
-        addInputAttribute(i.name(), i.type(), 0);
+    // for(const auto& i : firstStage._declaration_ins.vars().values())
+    //     addInputAttribute(i.name(), i.type(), 0);
 
     for(const auto& [i, j] : _rendering_stages)
         for(const ShaderPreprocessor::Parameter& k : j->args())
@@ -163,6 +123,11 @@ void PipelineBuildingContext::initializeAttributes()
             generated.push_back(k);
             addAttribute(k, v, 0);
         }
+
+    Vector<VertexAttribute> vertexAttributes = _vertex_attributes.values();
+    std::stable_sort(vertexAttributes.begin(), vertexAttributes.end());
+    for(VertexAttribute& i : vertexAttributes)
+        doAddVertexAttribute(std::move(i._name), std::move(i._type), i._divisor);
 
     const uint32_t alignment = Ark::instance().renderController()->renderEngine()->rendererFactory()->features()._attribute_alignment;
     _pipeline_layout->setStreamLayoutAlignment(alignment);
@@ -272,7 +237,7 @@ const op<ShaderPreprocessor>& PipelineBuildingContext::computingStage() const
     return _computing_stage;
 }
 
-void PipelineBuildingContext::addAttribute(String name, String type, const uint32_t divisor)
+void PipelineBuildingContext::doAddVertexAttribute(String name, String type, const uint32_t divisor)
 {
     //TODO: add attribute to specified stage
     const Attribute& attr = addPredefinedAttribute(name, std::move(type), divisor, Enum::SHADER_STAGE_BIT_VERTEX);
@@ -290,16 +255,16 @@ void PipelineBuildingContext::addUniform(sp<Uniform> uniform)
     _uniforms.push_back(std::move(name), std::move(uniform));
 }
 
-void PipelineBuildingContext::addInputAttribute(const String& name, const String& type, uint32_t divisor)
+void PipelineBuildingContext::addAttribute(const String& name, const String& type, const uint32_t divisor)
 {
-    if(_input_attributes.find(name) == _input_attributes.end())
+    if(_vertex_attributes.find(name) == _vertex_attributes.end())
     {
-        _input_attributes.push_back(name, {type, divisor});
-        addAttribute(name, type, divisor);
+        _vertex_attributes.push_back(name, {name, type, divisor});
+        // doAddAttribute(name, type, divisor);
     }
 }
 
-Attribute& PipelineBuildingContext::addPredefinedAttribute(const String& name, const String& type, const uint32_t divisor, Enum::ShaderStageBit stage)
+Attribute& PipelineBuildingContext::addPredefinedAttribute(const String& name, const String& type, const uint32_t divisor, const Enum::ShaderStageBit stage)
 {
     if(_attributes.find(name) == _attributes.end())
     {
@@ -478,6 +443,18 @@ void PipelineBuildingContext::loadDefinitions(BeanFactory& factory, const Scope&
         CHECK_WARN(_definitions.find(name) == _definitions.end(), "Definition \"%s\" redefined", name.c_str());
         _definitions.insert(std::make_pair(name, factory.ensureBuilder<StringVar>(i, constants::VALUE)->build(args)));
     }
+}
+
+PipelineBuildingContext::VertexAttribute::VertexAttribute(String name, String type, const uint32_t divisor)
+    : _name(std::move(name)), _type(std::move(type)), _divisor(divisor), _usage(RenderUtil::toAttributeLayoutType(_name, _type))
+{
+}
+
+bool PipelineBuildingContext::VertexAttribute::operator<(const VertexAttribute& other) const
+{
+    const int32_t v1 = _usage == Attribute::USAGE_CUSTOM ? 1 : 0;
+    const int32_t v2 = other._usage == Attribute::USAGE_CUSTOM ? 1 : 0;
+    return v1 < v2;
 }
 
 template<> PipelineBuildingContext::LayoutBindingType StringConvert::eval<PipelineBuildingContext::LayoutBindingType>(const String& repr)
