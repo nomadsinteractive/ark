@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_IMPL_BOOLEAN_BY_TIMEOUT_H_
-#define ARK_CORE_IMPL_BOOLEAN_BY_TIMEOUT_H_
+#pragma once
 
 #include "core/forwarding.h"
 #include "core/inf/variable.h"
@@ -7,12 +6,12 @@
 
 namespace ark {
 
-class BooleanByTimeout : public Boolean {
+class BooleanByTimeout final : public Boolean {
 public:
     BooleanByTimeout(sp<Numeric> duration, float timeout, bool timeoutValue);
 
-    virtual bool val() override;
-    virtual bool update(uint64_t timestamp) override;
+    bool val() override;
+    bool update(uint64_t timestamp) override;
 
 private:
     sp<Numeric> _duration;
@@ -21,5 +20,3 @@ private:
 };
 
 }
-
-#endif

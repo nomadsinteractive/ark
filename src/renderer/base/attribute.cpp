@@ -7,7 +7,7 @@ Attribute::Attribute()
 {
 }
 
-Attribute::Attribute(Usage usage, const String& name, Type type, const String& declareType, uint32_t length, bool normalized)
+Attribute::Attribute(const Usage usage, const String& name, const Type type, const String& declareType, const uint32_t length, const bool normalized)
     : _usage(usage), _name(name), _type(type), _declare_type(declareType), _offset(0), _length(length), _normalized(normalized), _divisor(0)
 {
 }
@@ -37,7 +37,7 @@ uint32_t Attribute::offset() const
     return _offset;
 }
 
-void Attribute::setOffset(uint32_t offset)
+void Attribute::setOffset(const uint32_t offset)
 {
     _offset = offset;
 }
@@ -47,7 +47,7 @@ uint32_t Attribute::divisor() const
     return _divisor;
 }
 
-void Attribute::setDivisor(uint32_t divisor)
+void Attribute::setDivisor(const uint32_t divisor)
 {
     _divisor = divisor;
 }
@@ -65,7 +65,7 @@ uint32_t Attribute::componentSize() const
         return 1;
     if(_type == TYPE_SHORT || _type == TYPE_USHORT)
         return sizeof(int16_t);
-    FATAL("Unknow compoent type: %d", _type);
+    FATAL("Unknow component type: %d", _type);
     return 0;
 }
 
