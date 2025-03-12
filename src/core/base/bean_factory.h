@@ -397,7 +397,7 @@ private:
             if(Optional<T> opt = args.getObject<T>(_name))
                 return std::move(opt.value());
 
-            if(Optional<T> opt = _references.ensure()->getObject<T>(_name))
+            if(Optional<T> opt = _references.ensure()->template getObject<T>(_name))
                 return std::move(opt.value());
 
             CHECK(_fallback, "Cannot get argument \"%s\"", _name.c_str());
