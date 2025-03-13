@@ -370,7 +370,7 @@ void RenderController::addPreRenderRequest(sp<Runnable> task, sp<Boolean> cancel
     _on_pre_render_sync.push_back(std::move(var));
 }
 
-void RenderController::onPreCompose(uint64_t timestamp)
+void RenderController::onPreCompose(const uint64_t timestamp)
 {
     DPROFILER_TRACE("RendererPreUpdate");
 

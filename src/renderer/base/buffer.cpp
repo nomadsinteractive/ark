@@ -12,9 +12,9 @@ namespace ark {
 
 namespace {
 
-class InputBufferSnapshot final : public Uploader {
+class UploaderBufferSnapshot final : public Uploader {
 public:
-    InputBufferSnapshot(const size_t size, Vector<Buffer::Strip> strips)
+    UploaderBufferSnapshot(const size_t size, Vector<Buffer::Strip> strips)
         : Uploader(size), _blocks(std::move(strips)) {
     }
 
@@ -112,7 +112,7 @@ Buffer::operator bool() const
 
 Buffer::Snapshot Buffer::snapshot(const ByteArray::Borrowed& strip) const
 {
-    return Snapshot(_delegate, strip.length(), sp<InputBufferSnapshot>::make(strip.length(), Vector<Buffer::Strip>{{0, strip}}));
+    return Snapshot(_delegate, strip.length(), sp<UploaderBufferSnapshot>::make(strip.length(), Vector<Buffer::Strip>{{0, strip}}));
 }
 
 Buffer::Snapshot Buffer::snapshot(sp<Uploader> input, size_t size) const
@@ -125,11 +125,12 @@ uint64_t Buffer::id() const
     return _delegate->id();
 }
 
-sp<ByteArray> Buffer::synchronize(size_t offset, size_t size, sp<Boolean> cancelled)
+sp<ByteArray> Buffer::synchronize(const size_t offset, const size_t size, sp<Boolean> cancelled)
 {
-    sp<ByteArray> memory = sp<ByteArray::Allocated>::make(size);
+    sp<ByteArray> memory = sp<ByteArray>::make<ByteArray::Allocated>(size);
     RenderController& renderController = Ark::instance().renderController();
-    renderController.addPreRenderRequest(sp<RunnableBufferSynchronizer>::make(*this, memory, offset), std::move(cancelled));
+    memset(memory->buf(), 0, size);
+    renderController.addPreRenderRequest(sp<Runnable>::make<RunnableBufferSynchronizer>(*this, memory, offset), std::move(cancelled));
     return memory;
 }
 
@@ -143,7 +144,7 @@ const sp<Buffer::Delegate>& Buffer::delegate() const
     return _delegate;
 }
 
-Buffer::Factory::Factory(size_t stride)
+Buffer::Factory::Factory(const size_t stride)
     : _stride(stride), _size(0)
 {
 }
@@ -153,7 +154,7 @@ Buffer::Snapshot Buffer::Factory::toSnapshot(const Buffer& buffer)
     if(_strips.empty())
         return buffer.snapshot();
 
-    return buffer.snapshot(sp<InputBufferSnapshot>::make(_size, std::move(_strips)));
+    return buffer.snapshot(sp<Uploader>::make<UploaderBufferSnapshot>(_size, std::move(_strips)));
 }
 
 void Buffer::Factory::addStrip(size_t offset, ByteArray::Borrowed& content)

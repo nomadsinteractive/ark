@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include "core/base/api.h"
 #include "core/types/shared_ptr.h"
 
@@ -75,7 +73,7 @@ public:
     void schedule(sp<Runnable> task, float interval, sp<Boolean> canceled = nullptr);
 
 //  [[script::bindings::auto]]
-    sp<Future> expect(sp<Boolean> condition, sp<Observer> observer, sp<Boolean> canceled = nullptr);
+    sp<Future> expect(sp<Boolean> condition, sp<Runnable> observer, sp<Boolean> canceled = nullptr);
 
 //  [[script::bindings::auto]]
     void addStringBundle(const String& name, const sp<StringBundle>& stringBundle);

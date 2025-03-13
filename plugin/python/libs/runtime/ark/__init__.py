@@ -691,7 +691,7 @@ class ApplicationFacade:
     def schedule(self, task: Callable, interval: float, canceled: Optional['Boolean'] = None):
         pass
 
-    def expect(self, condition: 'Boolean', observer: 'Observer', canceled: Optional['Boolean'] = None) -> Future:
+    def expect(self, condition: 'Boolean', observer: Runnable, canceled: Optional['Boolean'] = None) -> Future:
         pass
 
 

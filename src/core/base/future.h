@@ -9,7 +9,7 @@ namespace ark {
 class ARK_API Future {
 public:
 //  [[script::bindings::auto]]
-    Future(sp<Boolean> canceled = nullptr, sp<Observer> observer = nullptr);
+    Future(sp<Boolean> canceled = nullptr, sp<Runnable> observer = nullptr);
 
 //  [[script::bindings::auto]]
     void cancel();
@@ -26,7 +26,7 @@ public:
 
 private:
     sp<VariableWrapper<bool>> _canceled;
-    sp<Observer> _observer;
+    sp<Runnable> _observer;
     bool _done;
 };
 

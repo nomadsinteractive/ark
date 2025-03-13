@@ -235,10 +235,10 @@ void ApplicationFacade::schedule(sp<Runnable> task, const float interval, sp<Boo
     _context->messageLoopApp()->schedule(std::move(task), interval, std::move(canceled));
 }
 
-sp<Future> ApplicationFacade::expect(sp<Boolean> condition, sp<Observer> observer, sp<Boolean> canceled)
+sp<Future> ApplicationFacade::expect(sp<Boolean> condition, sp<Runnable> observer, sp<Boolean> canceled)
 {
     sp<Future> future = sp<Future>::make(std::move(canceled), std::move(observer));
-    _context->renderController()->addPreComposeUpdatable(sp<UpdatableExpecting>::make(std::move(condition), future), future->canceled());
+    _context->renderController()->addPreComposeUpdatable(sp<Updatable>::make<UpdatableExpecting>(std::move(condition), future), future->canceled());
     return future;
 }
 

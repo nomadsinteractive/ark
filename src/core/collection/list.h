@@ -27,7 +27,6 @@ public:
         FilterAction operator() (const T& item) const {
             return item.unique() ? FA1 : FA2;
         }
-
     };
 
     template<typename T> class Disposable {
@@ -37,7 +36,6 @@ public:
         FilterAction operator() (const T& item) const {
             return item.isDiscarded() ? FILTER_ACTION_REMOVE : FILTER_ACTION_NONE;
         }
-
     };
 
     template<typename T, FilterAction FA1, FilterAction FA2, bool DF> class IsTrue {
@@ -46,7 +44,7 @@ public:
             : _condition(std::move(filter), DF) {
         }
 
-        void update(uint64_t timestamp) const {
+        void update(const uint64_t timestamp) const {
             _condition.update(timestamp);
         }
 
@@ -113,7 +111,7 @@ public:
             return *this;
         }
 
-        const FilteredIterator<U> operator ++(int) {
+        FilteredIterator<U> operator ++(int) {
             DASSERT(this->_iterator != _list.end());
             U iter = this->_iterator;
             ++(this->_iterator);
@@ -136,8 +134,8 @@ public:
                     break;
                 auto& i = *(this->_iterator);
                 _call_update_sfinae(i._filter, nullptr);
-                FilterAction fa = i._filter(i._item);
-                if(fa == FILTER_ACTION_REMOVE)
+
+                if(const FilterAction fa = i._filter(i._item); fa == FILTER_ACTION_REMOVE)
                     this->_iterator = _list.erase(this->_iterator);
                 else if(fa == FILTER_ACTION_SKIP)
                     ++(this->_iterator);
@@ -161,7 +159,7 @@ public:
 
     class UpdatedList {
     public:
-        UpdatedList(ListImpl& items, uint64_t timestamp)
+        UpdatedList(ListImpl& items, const uint64_t timestamp)
             : _items(items), _timestamp(timestamp) {
         }
 

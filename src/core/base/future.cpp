@@ -4,7 +4,7 @@
 
 namespace ark {
 
-Future::Future(sp<Boolean> canceled, sp<Observer> observer)
+Future::Future(sp<Boolean> canceled, sp<Runnable> observer)
     : _canceled(canceled ? sp<VariableWrapper<bool>>::make(std::move(canceled)) : sp<VariableWrapper<bool>>::make(false)), _observer(std::move(observer)), _done(false) {
 }
 
@@ -17,7 +17,7 @@ void Future::done()
 {
     _done = true;
     if(_observer)
-        _observer->notify();
+        _observer->run();
 }
 
 bool Future::isCancelled() const
