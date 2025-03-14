@@ -28,7 +28,7 @@ public:
         const PipelineLayout& pipelineLayout = pipelineDescriptor.layout();
         if(ShaderPreprocessor* vertex = context.tryGetRenderStage(Enum::SHADER_STAGE_BIT_VERTEX))
         {
-            RenderUtil::setLayoutDescriptor(vertex->_declaration_images, "binding", static_cast<uint32_t>(pipelineLayout.ssbos().size() + pipelineLayout.samplers().size()));
+            RenderUtil::setLayoutDescriptor(vertex->_declaration_images, "binding", pipelineLayout.samplers().size(), 2);
             vertex->_predefined_macros.emplace_back("#define gl_InstanceID gl_InstanceIndex");
         }
         if(ShaderPreprocessor* fragment = context.tryGetRenderStage(Enum::SHADER_STAGE_BIT_FRAGMENT))
