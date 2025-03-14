@@ -34,16 +34,12 @@ public:
         if(ShaderPreprocessor* fragment = context.tryGetRenderStage(Enum::SHADER_STAGE_BIT_FRAGMENT))
         {
             fragment->linkNextStage("FragColor");
-            const uint32_t bindingOffset = static_cast<uint32_t>(pipelineLayout.ssbos().size());
-            RenderUtil::setLayoutDescriptor(fragment->_declaration_samplers, "binding", bindingOffset, 2);
-            RenderUtil::setLayoutDescriptor(fragment->_declaration_images, "binding", bindingOffset + static_cast<uint32_t>(fragment->_declaration_samplers.vars().size()), 2);
+            RenderUtil::setLayoutDescriptor(fragment->_declaration_samplers, "binding", 0, 2);
+            RenderUtil::setLayoutDescriptor(fragment->_declaration_images, "binding", static_cast<uint32_t>(fragment->_declaration_samplers.vars().size()), 2);
         }
 
         if(const ShaderPreprocessor* compute = context.computingStage().get())
-        {
-            const uint32_t bindingOffset = static_cast<uint32_t>(pipelineLayout.ssbos().size());
-            RenderUtil::setLayoutDescriptor(compute->_declaration_images, "binding", bindingOffset, 2);
-        }
+            RenderUtil::setLayoutDescriptor(compute->_declaration_images, "binding", 0, 2);
 
         const ShaderPreprocessor* prestage = nullptr;
         for(const auto& [_, stage] : context.renderStages())
