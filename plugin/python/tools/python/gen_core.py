@@ -69,8 +69,9 @@ def parse_method_arguments(arguments):
             m = re.match(k, argtype)
             if m:
                 cast_signature = acg.format(l.cast_signature, *m.groups())
-                argument_meta = GenArgumentMeta(l.typename, cast_signature, l.parse_signature, l.is_base_type)
-                args.append(GenArgument(i, cast_signature, default_value, argument_meta, argtype, argname))
+                typename = acg.format(l.typename, *m.groups())
+                argument_meta = GenArgumentMeta(typename, cast_signature, l.parse_signature, l.is_base_type)
+                args.append(GenArgument(i, cast_signature, None if default_value == '' else default_value, argument_meta, argtype, argname))
                 break
         else:
             print(f'Undefined method argument: "{arguments[i]}"')
@@ -167,10 +168,11 @@ ARK_PY_ARGUMENTS = (
     (r'(V2|V3|V4)', GenArgumentMeta('PyObject*', '${0}', 'O')),
     (r'([^>]+|\w+<\w+>)\s*&', GenArgumentMeta('PyObject*', 'sp<${0}>', 'O')),
     (r'(^Buffer$)', GenArgumentMeta('PyObject*', 'sp<${0}>', 'O')),
-    (r'(uint32_t|unsigned int|uint8_t)', GenArgumentMeta('uint32_t', 'uint32_t', 'I')),
+    (r'(uint32_t|RefId|unsigned int|uint8_t)', GenArgumentMeta('uint32_t', 'uint32_t', 'I')),
     (r'size_t', GenArgumentMeta('size_t', 'size_t', 'n')),
     (r'ptrdiff_t', GenArgumentMeta('ptrdiff_t', 'ptrdiff_t', 'i')),
-    (r'(int64_t|uint64_t)', GenArgumentMeta('${0}', '${0}', 'i')),
+    (r'int64_t', GenArgumentMeta('int64_t', 'int64_t', 'L')),
+    (r'uint64_t', GenArgumentMeta('uint64_t', 'uint64_t', 'K')),
     (r'(int32_t|int16_t|int8_t)', GenArgumentMeta('int32_t', 'int32_t', 'i')),
     (r'float', GenArgumentMeta('float', 'float', 'f')),
     (r'bool', GenArgumentMeta('int32_t', 'bool', 'p', True)),

@@ -10,11 +10,16 @@ namespace ark {
 //[[script::bindings::class("Ref")]]
 class ARK_API RefType {
 public:
+//  [[script::bindings::constructor]]
+    static sp<Ref> create(RefId refid);
+
 //  [[script::bindings::operator(index)]]
 //  [[script::bindings::property]]
     static RefId id(const sp<Ref>& self);
 
-    static bool isDiscarded(const sp<Ref>& self);
+//  [[script::bindings::operator(bool)]]
+    static bool toBool(const sp<Ref>& self);
+
 //  [[script::bindings::property]]
     static const SafeVar<Boolean>& discarded(const sp<Ref>& self);
 //  [[script::bindings::property]]

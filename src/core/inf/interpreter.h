@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include "core/base/api.h"
 #include "core/forwarding.h"
 
@@ -11,7 +9,7 @@ class ARK_API Interpreter {
 public:
     virtual ~Interpreter() = default;
 
-    typedef std::vector<Box> Arguments;
+    typedef Vector<Box> Arguments;
 
     virtual void initialize() = 0;
 
@@ -19,7 +17,6 @@ public:
 
     virtual Box call(const Box& func, const Arguments& args) = 0;
     virtual Box attr(const Box& obj, StringView name) = 0;
-
 };
 
 }

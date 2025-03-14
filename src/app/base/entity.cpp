@@ -123,12 +123,12 @@ void Entity::addComponent(Box component)
     _components.put(component.typeId(), std::move(component));
 }
 
-bool Entity::hasComponent(TypeId typeId) const
+bool Entity::hasComponent(const TypeId typeId) const
 {
     return _components.has(typeId);
 }
 
-Optional<Box> Entity::getComponent(TypeId typeId) const
+Optional<Box> Entity::getComponent(const TypeId typeId) const
 {
     return _components.get(typeId);
 }

@@ -1,18 +1,25 @@
 #include "app/util/ref_type.h"
 
+#include "core/base/ref_manager.h"
 #include "core/types/class.h"
+#include "core/types/global.h"
 #include "core/types/ref.h"
 
 namespace ark {
+
+sp<Ref> RefType::create(const RefId refid)
+{
+    return Global<RefManager>()->toRef(refid);
+}
 
 RefId RefType::id(const sp<Ref>& self)
 {
     return self->id();
 }
 
-bool RefType::isDiscarded(const sp<Ref>& self)
+bool RefType::toBool(const sp<Ref>& self)
 {
-    return self->isDiscarded();
+    return !self->isDiscarded();
 }
 
 const SafeVar<Boolean>& RefType::discarded(const sp<Ref>& self)

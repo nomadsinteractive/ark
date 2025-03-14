@@ -1,13 +1,11 @@
 #include "core/components/with_debris.h"
 
-#include <vector>
-
 #include "core/types/weak_ptr.h"
 
 namespace ark {
 
 struct WithDebris::Tracker {
-    std::vector<WeakPtr<Debris>> _debris;
+    Vector<WeakPtr<Debris>> _debris;
 
     void track(const sp<Debris>& debris)
     {
@@ -33,7 +31,7 @@ WithDebris::WithDebris()
 
 void WithDebris::onWire(const WiringContext& context, const Box& self)
 {
-    std::vector<WeakPtr<Debris>> debris = std::move(_tracker->_debris);
+    Vector<WeakPtr<Debris>> debris = std::move(_tracker->_debris);
     _tracker = ensureTracker(context);
 
     for(WeakPtr<Debris>& i : debris)

@@ -9,7 +9,6 @@ Use it for:
 3. Unit test(maybe)
 
 """
-from turtle import Shape
 from typing import Callable, List, Type, TypeVar, Union, Optional, Dict, Tuple, Any, Self
 
 _BUILDABLE_TYPES = TypeVar('_BUILDABLE_TYPES', 'Arena', 'AudioPlayer', 'Boolean', 'Characters', 'Collider', 'Integer', 'ModelLoader', 'Numeric', 'NarrowPhrase',
@@ -349,6 +348,17 @@ class Behavior:
         pass
 
 
+class Crate:
+    def __init__(self):
+        pass
+
+    def set_component(self, type_id: int, component: Any):
+        pass
+
+    def get_component(self, type_id: int) -> Any:
+        pass
+
+
 class Json:
     def __init__(self):
         pass
@@ -473,6 +483,9 @@ class Future:
 
 
 class Ref:
+
+    def __init__(self, refid: int):
+        pass
 
     def __index__(self):
         pass
@@ -2828,6 +2841,9 @@ class Entity:
 
     @property
     def discarded(self) -> Discarded:
+        pass
+
+    def add_component(self, component: Any):
         pass
 
     def get_component(self, ctype: type):

@@ -268,7 +268,7 @@ std::vector<BroadPhrase::Candidate> ColliderImpl::Stub::toBroadPhraseCandidates(
     RefManager& refManager = Global<RefManager>();
     for(const BroadPhrase::CandidateIdType i : candidateSet)
     {
-        const RigidbodyImpl& rigidBody = refManager.toRef(i).instance<RigidbodyImpl>();
+        const RigidbodyImpl& rigidBody = refManager.toRef(i)->instance<RigidbodyImpl>();
         candidates.emplace_back(rigidBody.toBroadPhraseCandidate());
     }
     return candidates;

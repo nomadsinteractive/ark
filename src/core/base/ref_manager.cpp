@@ -7,31 +7,29 @@ sp<Ref> RefManager::makeRef(void* instance, sp<Boolean> discarded)
     RefId refId;
     if(_recycled_ids.pop(refId))
     {
-        DCHECK(!_ref_slots.at(refId)._allocated, "Ref(%d) has been already allocated while making a new Ref", refId);
-        auto& [ref, allocated] = _ref_slots[refId];
-        allocated = true;
-        *ref = Ref(refId, instance, std::move(discarded));
+        WeakPtr<Ref>& wp = _ref_slots[refId - 1];
+        DCHECK(!wp, "Ref(%d) has been already allocated while making a new Ref", refId);
+        sp<Ref> ref = sp<Ref>::make(refId, instance, std::move(discarded));
+        wp = {ref};
+        return ref;
     }
-    else
-    {
-        refId = static_cast<RefId>(_ref_slots.size());
-        _ref_slots.push_back({new Ref{refId, instance, std::move(discarded)}, true});
-    }
-    return {std::shared_ptr<Ref>(_ref_slots[refId]._ref.get(), [this](void* ref) { recycle(ref); }), nullptr};
+    refId = static_cast<RefId>(_ref_slots.size() + 1);
+    sp<Ref> ref = sp<Ref>::make(refId, instance, std::move(discarded));
+    _ref_slots.emplace_back(ref);
+    return ref;
 }
 
-Ref& RefManager::toRef(RefId id)
+sp<Ref> RefManager::toRef(const RefId refid) const
 {
-    CHECK(id < _ref_slots.size() && _ref_slots.at(id)._allocated, "Invaild Ref(%d)", id);
-    return _ref_slots.at(id)._ref;
+    CHECK(refid <= _ref_slots.size() && !_ref_slots.at(refid - 1).expired(), "Invaild Ref(%d)", refid);
+    return _ref_slots.at(refid - 1).ensure();
 }
 
-void RefManager::recycle(void* ref)
+void RefManager::recycle(const RefId refid)
 {
-    const Ref* r = static_cast<Ref*>(ref);
-    DCHECK(_ref_slots.at(r->id())._allocated, "Ref(%d) has not been allocated", r->id());
-    _ref_slots.at(r->id())._allocated = false;
-    _recycled_ids.push(r->id());
+    CHECK(refid <= _ref_slots.size() && !_ref_slots.at(refid - 1).expired(), "Ref(%d) has not been allocated", refid);
+    _ref_slots[refid - 1] = {};
+    _recycled_ids.push(refid);
 }
 
 }

@@ -127,7 +127,7 @@ class GenMethod(object):
                         dvalue = 'nullptr'
                 elif j.default_value is not None:
                     dmap = {'true': '1', 'false': '0'}
-                    if j.typename in ('uint32_t', 'int32_t', 'float', 'size_t'):
+                    if j.typename in ('uint32_t', 'int32_t', 'uint64_t', 'int64_t', 'float', 'size_t'):
                         dvalue = j.default_value if j.default_value not in dmap else dmap[j.default_value]
                     elif realtypename == 'bool' and j.accept_type == 'bool':
                         dvalue = 'true' if j.default_value == 'true' else 'false'
@@ -135,7 +135,7 @@ class GenMethod(object):
                         dvalue = j.default_value
                     else:
                         dvalue = 'nullptr'
-                if dvalue:
+                if dvalue is not None:
                     declares[typename] += ' = %s' % dvalue
         return [i + ';' for i in declares.values()]
 

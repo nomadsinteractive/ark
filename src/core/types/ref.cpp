@@ -1,17 +1,20 @@
 #include "core/types/ref.h"
 
 #include "core/base/ref_manager.h"
+#include "core/types/global.h"
 #include "core/util/log.h"
 
 namespace ark {
 
-Ref::Ref(RefId id, void* instance, sp<Boolean> discarded)
+Ref::Ref(const RefId id, void* instance, sp<Boolean> discarded)
     : _id(id), _instance(instance), _discarded(std::move(discarded), false)
 {
 }
 
 Ref::~Ref()
 {
+    if(_id)
+        Global<RefManager>()->recycle(_id);
     LOGD("Ref(%d) destroyed", id());
 }
 

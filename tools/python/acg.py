@@ -43,13 +43,13 @@ def camel_case_to_snake_case(name: str):
     return ALL_CAP_RE.sub(r'\1_\2', s1).lower()
 
 
-def format(str, *args, **kwargs):
+def format(content: str, *args, **kwargs):
     def repl(m):
         v = m.group(1)
         if _INTEGER_PATTERN.match(v):
             return args[int(v)]
         return kwargs[v]
-    return re.sub(r'\$\{([^}]+)\}', repl, str)
+    return re.sub(r'\$\{([^}]+)\}', repl, content)
 
 
 def match_header_patterns(paths, find_main_class: bool, *args):
