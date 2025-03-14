@@ -171,9 +171,8 @@ struct GhostObject : BtRigibodyObject {
         : BtRigibodyObject(std::move(btRigidbodyRef)), _position(std::move(position)), _quaternion(std::move(quaternion), constants::QUATERNION_ONE) {
     }
 
-    sp<Vec3> _position;
+    SafeVar<Vec3> _position;
     SafeVar<Vec4> _quaternion;
-
 };
 
 }
@@ -371,9 +370,9 @@ void ColliderBullet::myInternalPreTickCallback(btDynamicsWorld* dynamicsWorld, b
     const uint64_t tick = Ark::instance().applicationContext()->renderController()->tick();
     for(const GhostObject& i : self->_stub->_ghost_objects)
     {
-        i._position->update(tick);
+        i._position.update(tick);
         i._quaternion.update(tick);
-        V3 pos = i._position->val();
+        const V3 pos = i._position.val();
         const V4 quaternion = i._quaternion.val();
         btTransform transform;
         transform.setIdentity();

@@ -7,12 +7,12 @@
 
 namespace ark {
 
-class UploaderWrapper : public Wrapper<Uploader>, public Uploader {
+class UploaderWrapper final : public Wrapper<Uploader>, public Uploader {
 public:
     UploaderWrapper(sp<Uploader> delegate);
 
-    virtual bool update(uint64_t timestamp) override;
-    virtual void upload(Writable& buf) override;
+    bool update(uint64_t timestamp) override;
+    void upload(Writable& buf) override;
 
     void setDelegate(sp<Uploader> delegate);
 

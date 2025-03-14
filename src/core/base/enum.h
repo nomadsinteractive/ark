@@ -95,7 +95,7 @@ public:
         StringBuffer sb;
         for(size_t j = 0; j < N; ++j) {
             sb << table.at(j).first << '(' << static_cast<uint32_t>(table.at(j).second) << ')';
-            if(j == N - 1)
+            if(j != N - 1)
                 sb << ", ";
         }
         FATAL("Unknow value %s, possible values are [%s]", key.data(), sb.str().c_str());

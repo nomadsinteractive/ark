@@ -104,9 +104,11 @@ public:
         : Uploader(delegate->size()), Wrapper(std::move(delegate)), _message(std::move(message)) {
     }
 
-    bool update(uint64_t timestamp) override
+    bool update(const uint64_t timestamp) override
     {
-        return _wrapped->update(timestamp);
+        const bool dirty = _wrapped->update(timestamp);
+        TRACE(dirty, _message.c_str());
+        return dirty;
     }
 
     void upload(Writable& buf) override
@@ -254,7 +256,7 @@ sp<Uploader> UploaderType::reserve(sp<Uploader> self, size_t size)
     ASSERT(size >= self->size());
     sp<UploaderImpl> inputImpl = sp<UploaderImpl>::make(size);
     if(self->size() > 0)
-        inputImpl->addInput(0,  std::move(self));
+        inputImpl->put(0,  std::move(self));
     return inputImpl;
 }
 
@@ -262,7 +264,7 @@ sp<Uploader> UploaderType::remap(sp<Uploader> self, size_t size, size_t offset)
 {
     sp<UploaderImpl> inputImpl = sp<UploaderImpl>::make(size);
     if(self->size() > 0)
-        inputImpl->addInput(offset,  std::move(self));
+        inputImpl->put(offset,  std::move(self));
     return inputImpl;
 }
 
@@ -271,14 +273,14 @@ sp<Uploader> UploaderType::repeat(sp<Uploader> self, size_t length, size_t strid
     return sp<Uploader>::make<UploaderRepeat>(std::move(self), length, stride);
 }
 
-void UploaderType::put(const sp<Uploader>& self, size_t offset, sp<Uploader> input)
+void UploaderType::put(const sp<Uploader>& self, const size_t offset, sp<Uploader> input)
 {
-    ensureImpl(self)->addInput(offset, std::move(input));
+    ensureImpl(self)->put(offset, std::move(input));
 }
 
 void UploaderType::remove(const sp<Uploader>& self, size_t offset)
 {
-    ensureImpl(self)->removeInput(offset);
+    ensureImpl(self)->remove(offset);
 }
 
 void UploaderType::markDirty(const sp<Uploader>& self)

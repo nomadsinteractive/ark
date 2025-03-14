@@ -6,7 +6,7 @@ UploaderWrapper::UploaderWrapper(sp<Uploader> delegate)
     : Wrapper(std::move(delegate)), Uploader(_wrapped->size()) {
 }
 
-bool UploaderWrapper::update(uint64_t timestamp)
+bool UploaderWrapper::update(const uint64_t timestamp)
 {
     return _wrapped->update(timestamp) || _timestamp.update(timestamp);
 }

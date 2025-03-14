@@ -237,7 +237,7 @@ void RenderController::onDrawFrame(GraphicsContext& graphicsContext)
         runnable->run();
 }
 
-void RenderController::upload(sp<Resource> resource, UploadStrategy strategy, sp<Updatable> updatable, sp<Future> future, UploadPriority priority)
+void RenderController::upload(sp<Resource> resource, const UploadStrategy strategy, sp<Updatable> updatable, sp<Future> future, const UploadPriority priority)
 {
     if(strategy.has(US_ON_CHANGE))
     {

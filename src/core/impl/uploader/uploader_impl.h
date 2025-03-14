@@ -11,13 +11,13 @@ namespace ark {
 class UploaderImpl final : public Uploader {
 public:
     UploaderImpl(size_t size);
-    UploaderImpl(const std::map<size_t, sp<Uploader>>& inputMap, size_t size = 0);
+    UploaderImpl(const Map<size_t, sp<Uploader>>& inputMap, size_t size = 0);
 
     bool update(uint64_t timestamp) override;
     void upload(Writable& writable) override;
 
-    void addInput(size_t offset, sp<Uploader> input);
-    void removeInput(size_t offset);
+    void put(size_t offset, sp<Uploader> input);
+    void remove(size_t offset);
 
     void reset(sp<Uploader> uploader);
     void markDirty();
@@ -38,7 +38,7 @@ private:
     size_t calculateUploaderSize();
 
 private:
-    std::map<size_t, sp<Boolean::Impl>> _uploader_states;
+    Map<size_t, sp<Boolean::Impl>> _uploader_states;
     List<UploaderStub, ListFilters::Disposable<UploaderStub>> _uploaders;
 };
 
