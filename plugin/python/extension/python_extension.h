@@ -88,8 +88,8 @@ public:
     }
 
 private:
-    std::map<TypeId, PyArkType*> _type_by_id;
-    std::map<void*, PyArkType*> _type_by_py_object;
+    Map<TypeId, PyArkType*> _type_by_id;
+    Map<void*, PyArkType*> _type_by_py_object;
 
     sp<ReferenceManager> _reference_manager;
 };

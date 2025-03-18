@@ -2,9 +2,9 @@
 
 namespace ark::plugin::python {
 
-std::vector<sp<PyInstanceRef>> ReferenceManager::refs()
+Vector<sp<PyInstanceRef>> ReferenceManager::refs()
 {
-    std::vector<sp<PyInstanceRef>> r;
+    Vector<sp<PyInstanceRef>> r;
 
     for(auto iter = _refs.begin(); iter != _refs.end(); )
     {

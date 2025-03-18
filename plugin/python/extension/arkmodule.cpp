@@ -25,51 +25,17 @@ using namespace ark;
 
 namespace ark::plugin::python {
 
-static PyObject* ark_log(Log::LogLevel level, PyObject* args);
-static PyObject* ark_logd(PyObject* self, PyObject* args);
-static PyObject* ark_logw(PyObject* self, PyObject* args);
-static PyObject* ark_loge(PyObject* self, PyObject* args);
-static PyObject* ark_loadAsset(PyObject* self, PyObject* args);
-static PyObject* ark_openAsset(PyObject* self, PyObject* args);
-static PyObject* ark_loadAssetBundle(PyObject* self, PyObject* args);
-static PyObject* ark_buildType(PyObject* self, PyObject* args);
-static PyObject* ark_isDirectory(PyObject* self, PyObject* args);
-static PyObject* ark_isFile(PyObject* self, PyObject* args);
-static PyObject* ark_loadFile(PyObject* self, PyObject* args);
-static PyObject* ark_getRefManager(PyObject* self, PyObject* args);
-static PyObject* ark_dirSeparator(PyObject* self, PyObject* args);
-static PyObject* ark_is_NDC_Y_Up(PyObject* self, PyObject* args);
-static PyObject* ark_trace_(PyObject* self, PyObject* args);
+namespace {
 
-static int __traverse__(PyObject* module, visitproc visitor, void* args)
+int __traverse__(PyObject* module, visitproc visitor, void* args)
 {
     return 0;
 }
 
-static PyMethodDef ARK_METHODS[] = {
-    {"logd",  ark_logd, METH_VARARGS, "logd"},
-    {"logw",  ark_logw, METH_VARARGS, "logw"},
-    {"loge",  ark_loge, METH_VARARGS, "loge"},
-    {"load_asset",  ark_loadAsset, METH_VARARGS, "loadAsset"},
-    {"open_asset",  ark_openAsset, METH_VARARGS, "openAsset"},
-    {"load_asset_bundle",  ark_loadAssetBundle, METH_VARARGS, "loadAssetBundle"},
-    {"build_type",  ark_buildType, METH_VARARGS, "build_type"},
-    {"is_directory",  ark_isDirectory, METH_VARARGS, "isDirectory"},
-    {"is_file",  ark_isFile, METH_VARARGS, "isFile"},
-    {"load_file",  ark_loadFile, METH_VARARGS, "loadFile"},
-    {"dir_separator",  ark_dirSeparator, METH_VARARGS, "dir_separator"},
-    {"is_ndc_y_up",  ark_is_NDC_Y_Up, METH_VARARGS, "is_ndc_y_up"},
-    {"get_ref_manager",  ark_getRefManager, METH_VARARGS, "get_ref_manager"},
-    {"__trace__",  ark_trace_, METH_VARARGS, "__trace__"},
-    {nullptr, nullptr, 0, nullptr}
-};
-
-PyObject* ark_log(Log::LogLevel level, PyObject* args)
+PyObject* ark_log(const Log::LogLevel level, PyObject* args)
 {
     if(const size_t size = PyTuple_Size(args))
-    {
-        PyInstance pyContent = PyInstance::borrow(PyTuple_GetItem(args, 0));
-        if(pyContent.isNone())
+        if(const PyInstance pyContent = PyInstance::borrow(PyTuple_GetItem(args, 0)); pyContent.isNone())
             Log::log(level, "Python", "None");
         else
         {
@@ -79,7 +45,6 @@ PyObject* ark_log(Log::LogLevel level, PyObject* args)
             const String content = PyCast::toString(formatted.pyObject());
             Log::log(level, "Python", content.c_str());
         }
-    }
     Py_RETURN_NONE;
 }
 
@@ -150,6 +115,14 @@ PyObject* ark_isFile(PyObject* /*self*/, PyObject* args)
     return PyCast::toPyObject_impl<bool>(Platform::isFile(arg0));
 }
 
+PyObject* ark_isArkType(PyObject* /*self*/, PyObject* args)
+{
+    PyObject* arg0 = nullptr;
+    if(!PyArg_ParseTuple(args, "O", &arg0))
+        Py_RETURN_FALSE;
+    return PyCast::toPyObject_impl<bool>(PythonExtension::instance().isPyArkTypeObject(arg0));
+}
+
 PyObject* ark_loadFile(PyObject* /*self*/, PyObject* args)
 {
     const char* arg0, *arg1;
@@ -181,6 +154,27 @@ PyObject* ark_trace_(PyObject* /*self*/, PyObject* /*args*/)
 {
     TRACE(true, "");
     Py_RETURN_NONE;
+}
+
+PyMethodDef ARK_METHODS[] = {
+    {"logd",  ark_logd, METH_VARARGS, "logd"},
+    {"logw",  ark_logw, METH_VARARGS, "logw"},
+    {"loge",  ark_loge, METH_VARARGS, "loge"},
+    {"load_asset",  ark_loadAsset, METH_VARARGS, "loadAsset"},
+    {"open_asset",  ark_openAsset, METH_VARARGS, "openAsset"},
+    {"load_asset_bundle",  ark_loadAssetBundle, METH_VARARGS, "loadAssetBundle"},
+    {"build_type",  ark_buildType, METH_VARARGS, "build_type"},
+    {"is_directory",  ark_isDirectory, METH_VARARGS, "isDirectory"},
+    {"is_file",  ark_isFile, METH_VARARGS, "isFile"},
+    {"is_ark_type",  ark_isArkType, METH_VARARGS, "is_ark_type"},
+    {"load_file",  ark_loadFile, METH_VARARGS, "loadFile"},
+    {"dir_separator",  ark_dirSeparator, METH_VARARGS, "dir_separator"},
+    {"is_ndc_y_up",  ark_is_NDC_Y_Up, METH_VARARGS, "is_ndc_y_up"},
+    {"get_ref_manager",  ark_getRefManager, METH_VARARGS, "get_ref_manager"},
+    {"__trace__",  ark_trace_, METH_VARARGS, "__trace__"},
+    {nullptr, nullptr, 0, nullptr}
+};
+
 }
 
 PyObject* initarkmodule()

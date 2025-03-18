@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include "core/forwarding.h"
 #include "core/types/weak_ptr.h"
 
@@ -12,12 +10,12 @@ namespace ark::plugin::python {
 class ReferenceManager {
 public:
 //  [[script::bindings::property]]
-    std::vector<sp<PyInstanceRef>> refs();
+    Vector<sp<PyInstanceRef>> refs();
 
     void track(const WeakPtr<PyInstanceRef>& ref);
 
 private:
-    std::vector<WeakPtr<PyInstanceRef>> _refs;
+    Vector<WeakPtr<PyInstanceRef>> _refs;
 };
 
 }

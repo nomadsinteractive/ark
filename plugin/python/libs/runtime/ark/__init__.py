@@ -74,6 +74,10 @@ def is_ndc_y_up() -> bool:
     return True
 
 
+def is_ark_type(cls: type) -> bool:
+    return False
+
+
 class Enum:
     BUILD_TYPE_UNDEFINED = 0
     BUILD_TYPE_DEBUG = 1
