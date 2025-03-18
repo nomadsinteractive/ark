@@ -1,6 +1,6 @@
 #include "app/components/shape.h"
 
-#include "core/impl/variable/variable_dirty.h"
+#include "core/impl/variable/variable_dirty_mark.h"
 
 namespace ark {
 

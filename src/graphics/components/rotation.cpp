@@ -2,7 +2,7 @@
 
 #include "core/base/bean_factory.h"
 #include "core/base/constants.h"
-#include "core/impl/variable/variable_dirty.h"
+#include "core/impl/variable/variable_dirty_mark.h"
 
 #include "graphics/base/v3.h"
 #include "graphics/components/quaternion.h"
@@ -16,7 +16,7 @@ Rotation::Rotation(const V4& quat)
 }
 
 Rotation::Rotation(sp<Vec4> quaternion)
-    : Wrapper(sp<VariableDirty<V4>>::make(std::move(quaternion), *this))
+    : Wrapper(sp<VariableDirtyMark<V4>>::make(std::move(quaternion), *this))
 {
 }
 
@@ -44,7 +44,7 @@ bool Rotation::update(uint64_t timestamp)
 
 void Rotation::reset(sp<Vec4> quaternion)
 {
-    _wrapped = sp<VariableDirty<V4>>::make(Vec4Type::normalize(std::move(quaternion)), *this);
+    _wrapped = sp<VariableDirtyMark<V4>>::make(Vec4Type::normalize(std::move(quaternion)), *this);
 }
 
 const SafeVar<Numeric>& Rotation::theta() const
@@ -74,7 +74,7 @@ void Rotation::setRotation(sp<Numeric> theta, sp<Vec3> axis)
     _theta.reset(theta);
     _axis.reset(axis);
 
-    _wrapped = sp<VariableDirty<V4>>::make(sp<Quaternion>::make(std::move(theta), std::move(axis)), *this);
+    _wrapped = sp<VariableDirtyMark<V4>>::make(sp<Quaternion>::make(std::move(theta), std::move(axis)), *this);
 }
 
 void Rotation::setEuler(float pitch, float yaw, float roll)
@@ -87,7 +87,7 @@ void Rotation::setEuler(sp<Numeric> pitch, sp<Numeric> yaw, sp<Numeric> roll)
     _theta.reset(nullptr);
     _axis.reset(nullptr);
 
-    _wrapped = sp<VariableDirty<V4>>::make(sp<Quaternion>::make(std::move(pitch), std::move(yaw), std::move(roll)), *this);
+    _wrapped = sp<VariableDirtyMark<V4>>::make(sp<Quaternion>::make(std::move(pitch), std::move(yaw), std::move(roll)), *this);
 }
 
 Rotation::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

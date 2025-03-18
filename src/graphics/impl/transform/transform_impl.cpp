@@ -2,7 +2,7 @@
 
 #include "core/ark.h"
 #include "core/base/bean_factory.h"
-#include "core/impl/variable/variable_dirty.h"
+#include "core/impl/variable/variable_dirty_mark.h"
 #include "core/inf/variable.h"
 #include "core/types/global.h"
 #include "core/util/updatable_util.h"

@@ -72,6 +72,7 @@ public:
     {
         return _idled_cycle > 0;
     }
+
     void markBusy()
     {
         _idled_cycle = 0;
@@ -79,11 +80,10 @@ public:
 
 private:
     sp<Stub> _stub;
-
     uint32_t _idled_cycle;
 };
 
-ExecutorThreadPool::ExecutorThreadPool(sp<Executor> exceptionExecutor, uint32_t capacity)
+ExecutorThreadPool::ExecutorThreadPool(sp<Executor> exceptionExecutor, const uint32_t capacity)
     : _stub(sp<Stub>::make(std::move(exceptionExecutor), std::max<uint32_t>(2, capacity ? capacity : std::thread::hardware_concurrency())))
 {
 }
@@ -96,19 +96,16 @@ void ExecutorThreadPool::execute(sp<Runnable> task)
 sp<ExecutorWorkerThread> ExecutorThreadPool::obtainWorkerThread()
 {
     for(const sp<ExecutorWorkerThread>& i : _stub->_worker_threads)
-    {
-        const sp<WorkerThreadStrategy>& strategy = i->strategy();
-        if(strategy->isIdle())
+        if(const sp<WorkerThreadStrategy>& strategy = i->strategy(); strategy->isIdle())
         {
             strategy->markBusy();
             return i;
         }
-    }
 
     return createWorkerThread();
 }
 
-void ExecutorThreadPool::releaseAll(const bool wait)
+void ExecutorThreadPool::releaseAll(const bool wait) const
 {
     Vector<sp<ExecutorWorkerThread>> waitThreads;
     for(const sp<ExecutorWorkerThread>& i : _stub->_worker_threads)

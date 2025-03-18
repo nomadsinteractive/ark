@@ -11,6 +11,7 @@
 #include "core/impl/variable/integral.h"
 #include "core/impl/variable/lerp.h"
 #include "core/impl/variable/second_order_dynamics.h"
+#include "core/impl/variable/variable_dirty.h"
 #include "core/impl/variable/variable_dyed.h"
 #include "core/impl/variable/variable_op1.h"
 #include "core/impl/variable/variable_op2.h"
@@ -170,6 +171,11 @@ sp<Boolean> NumericType::eq(sp<Numeric> self, sp<Numeric> other)
 sp<Boolean> NumericType::ne(sp<Numeric> self, sp<Numeric> other)
 {
     return sp<Boolean>::make<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::NE<float>>>(std::move(self), std::move(other));
+}
+
+sp<Boolean> NumericType::dirty(sp<Numeric> self)
+{
+    return sp<Boolean>::make<VariableDirty<float>>(std::move(self));
 }
 
 float NumericType::val(const sp<Numeric>& self)

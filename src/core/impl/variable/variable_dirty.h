@@ -1,43 +1,36 @@
 #pragma once
 
-#include "core/inf/variable.h"
-#include "core/base/timestamp.h"
+#include "core/forwarding.h"
 #include "core/base/wrapper.h"
-#include "core/types/shared_ptr.h"
+#include "core/inf/variable.h"
+#include "core/types/implements.h"
 
 namespace ark {
 
-template<typename T> class VariableDirty final : public Variable<T> {
+template<typename T> class VariableDirty final : public Wrapper<Variable<T>>, public Boolean, Implements<VariableDirty<T>, Wrapper<Variable<T>>, Boolean> {
 public:
-    VariableDirty(sp<Variable<T>> delegate, Wrapper<Variable<T>>& wrapper)
-        : _delegate(std::move(delegate)), _wrapper(wrapper) {
-        ASSERT(_delegate);
-        _timestamp.markDirty();
-    }
-
-    T val() override {
-        return _delegate->val();
+    VariableDirty(sp<Variable<T>> delegate)
+        :  Wrapper<Variable<T>>(std::move(delegate)), _dirty(false) {
     }
 
     bool update(uint64_t timestamp) override {
-        _delegate->update(timestamp);
-        if(_wrapper.wrapped().get() == this) {
-            sp<Variable<T>> delegate = std::move(_delegate);
-            _wrapper.reset(std::move(delegate));
+        if(this->_wrapped->update(timestamp)) {
+            _dirty = true;
+            return true;
         }
-        else
-            WARN("Trying to overwrite a wrapper which doesn't contain myself");
-        return _timestamp.update(timestamp);
+        return false;
     }
 
-    static void reset(Wrapper<Variable<T>>& wrapper, sp<Variable<T>> delegate) {
-        wrapper.reset(sp<Variable<T>>::template make<VariableDirty>(std::move(delegate), wrapper));
+    bool val() override {
+        if(_dirty) {
+            _dirty = false;
+            return true;
+        }
+        return false;
     }
 
 private:
-    Timestamp _timestamp;
-    sp<Variable<T>> _delegate;
-    Wrapper<Variable<T>>& _wrapper;
+    bool _dirty;
 };
 
 }

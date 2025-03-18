@@ -43,55 +43,57 @@ public:
     static sp<Vec3> mul(sp<Integer> lhs, sp<Vec3> rhs);
 //  [[script::bindings::operator(*)]]
     static sp<Vec4> mul(sp<Integer> lhs, sp<Vec4> rhs);
-//[[script::bindings::operator(%)]]
+//  [[script::bindings::operator(%)]]
     static sp<Integer> mod(sp<Integer> lhs, sp<Integer> rhs);
-//[[script::bindings::operator(/)]]
+//  [[script::bindings::operator(/)]]
     static sp<Numeric> truediv(sp<Integer> lhs, sp<Integer> rhs);
-//[[script::bindings::operator(//)]]
+//  [[script::bindings::operator(//)]]
     static sp<Integer> floordiv(sp<Integer> lhs, sp<Integer> rhs);
-//[[script::bindings::operator(neg)]]
+//  [[script::bindings::operator(neg)]]
     static sp<Integer> negative(sp<Integer> self);
-//[[script::bindings::operator(int)]]
+//  [[script::bindings::operator(int)]]
     static int32_t toInt32(const sp<Integer>& self);
-//[[script::bindings::operator(float)]]
+//  [[script::bindings::operator(float)]]
     static float toFloat(const sp<Integer>& self);
 
-//[[script::bindings::operator(>)]]
+//  [[script::bindings::operator(>)]]
     static sp<Boolean> gt(const sp<Integer>& self, const sp<Integer>& other);
-//[[script::bindings::operator(>=)]]
+//  [[script::bindings::operator(>=)]]
     static sp<Boolean> ge(const sp<Integer>& self, const sp<Integer>& other);
-//[[script::bindings::operator(<)]]
+//  [[script::bindings::operator(<)]]
     static sp<Boolean> lt(const sp<Integer>& self, const sp<Integer>& other);
-//[[script::bindings::operator(<=)]]
+//  [[script::bindings::operator(<=)]]
     static sp<Boolean> le(const sp<Integer>& self, const sp<Integer>& other);
-//[[script::bindings::operator(==)]]
+//  [[script::bindings::operator(==)]]
     static sp<Boolean> eq(const sp<Integer>& self, const sp<Integer>& other);
-//[[script::bindings::operator(!=)]]
+//  [[script::bindings::operator(!=)]]
     static sp<Boolean> ne(const sp<Integer>& self, const sp<Integer>& other);
+//  [[script::bindings::classmethod]]
+    static sp<Boolean> dirty(sp<Integer> self);
 
-//[[script::bindings::property]]
+//  [[script::bindings::property]]
     static int32_t val(const sp<Integer>& self);
-//[[script::bindings::property]]
+//  [[script::bindings::property]]
     static sp<Integer> delegate(const sp<Integer>& self);
-//[[script::bindings::property]]
+//  [[script::bindings::property]]
     static void setDelegate(const sp<Integer>& self, const sp<Integer>& delegate);
 
 //  [[script::bindings::property]]
     static sp<Observer> observer(const sp<Integer>& self);
 
-//[[script::bindings::auto]]
+//  [[script::bindings::auto]]
     static int32_t toRepeat(const String& repeat);
-//[[script::bindings::auto]]
-    static sp<Integer> repeat(std::vector<int32_t> array, IntegerType::Repeat repeat = IntegerType::REPEAT_NONE, sp<Observer> observer = nullptr);
+//  [[script::bindings::auto]]
+    static sp<Integer> repeat(Vector<int32_t> array, IntegerType::Repeat repeat = IntegerType::REPEAT_NONE, sp<Observer> observer = nullptr);
 
-//[[script::bindings::classmethod]]
+//  [[script::bindings::classmethod]]
     static void set(const sp<Integer::Impl>& self, int32_t value);
-//[[script::bindings::classmethod]]
+//  [[script::bindings::classmethod]]
     static void set(const sp<IntegerWrapper>& self, int32_t value);
-//[[script::bindings::classmethod]]
+//  [[script::bindings::classmethod]]
     static void set(const sp<IntegerWrapper>& self, const sp<Integer>& value);
 
-//[[script::bindings::classmethod]]
+//  [[script::bindings::classmethod]]
     static sp<Integer> wrap(const sp<Integer>& self);
 //  [[script::bindings::classmethod]]
     static sp<Integer> freeze(const sp<Integer>& self);
@@ -112,7 +114,7 @@ public:
 //  [[script::bindings::classmethod]]
     static sp<Integer> ifElse(const sp<Integer>& self, const sp<Boolean>& condition, const sp<Integer>& negative);
 
-//[[script::bindings::classmethod]]
+//  [[script::bindings::classmethod]]
     static sp<Integer> dye(sp<Integer> self, sp<Boolean> condition = nullptr, String message = "");
 
 //  [[plugin::builder::by-value]]

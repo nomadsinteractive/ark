@@ -1,6 +1,6 @@
 #include "graphics/components/position.h"
 
-#include "core/impl/variable/variable_dirty.h"
+#include "core/impl/variable/variable_dirty_mark.h"
 #include "graphics/base/v3.h"
 
 namespace ark {
@@ -12,7 +12,7 @@ Position::Position(sp<Vec3> position)
 
 void Position::reset(sp<Vec3> position)
 {
-    VariableDirty<V3>::reset(*this, std::move(position));
+    VariableDirtyMark<V3>::markDirty(*this, std::move(position));
 }
 
 bool Position::update(uint64_t timestamp)

@@ -17,7 +17,7 @@ public:
 
     sp<ExecutorWorkerThread> obtainWorkerThread();
 
-    void releaseAll(bool wait);
+    void releaseAll(bool wait) const;
 
 private:
     class WorkerThreadStrategy;

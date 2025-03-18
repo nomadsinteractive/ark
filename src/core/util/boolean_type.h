@@ -11,21 +11,21 @@ namespace ark {
 //[[script::bindings::class("Boolean")]]
 class ARK_API BooleanType {
 public:
-//[[script::bindings::constructor]]
+//  [[script::bindings::constructor]]
     static sp<Boolean> create(const sp<Boolean>& value);
-//[[script::bindings::constructor]]
+//  [[script::bindings::constructor]]
     static sp<Boolean> create(bool value);
 
-//[[script::bindings::operator(&)]]
+//  [[script::bindings::operator(&)]]
     static sp<Boolean> __and__(sp<Boolean> self, sp<Boolean> rvalue);
-//[[script::bindings::operator(|)]]
+//  [[script::bindings::operator(|)]]
     static sp<Boolean> __or__(sp<Boolean> self, sp<Boolean> rvalue);
-//[[script::bindings::operator(bool)]]
+//  [[script::bindings::operator(bool)]]
     static bool toBool(const sp<Boolean>& self);
 
-//[[script::bindings::property]]
+//  [[script::bindings::property]]
     static bool val(const sp<Boolean>& self);
-//[[script::bindings::property]]
+//  [[script::bindings::property]]
     static sp<Boolean> wrapped(const sp<Boolean>& self);
 
 //  [[script::bindings::classmethod]]
@@ -38,18 +38,18 @@ public:
 //  [[script::bindings::classmethod]]
     static void set(const sp<BooleanWrapper>& self, bool value);
 
-//[[script::bindings::classmethod]]
+//  [[script::bindings::classmethod]]
     static void toggle(const sp<Boolean::Impl>& self);
-//[[script::bindings::classmethod]]
+//  [[script::bindings::classmethod]]
     static void toggle(const sp<BooleanWrapper>& self);
 
-//[[script::bindings::classmethod]]
+//  [[script::bindings::classmethod]]
     static sp<Boolean> observe(const sp<Boolean>& self, const sp<Observer>& observer);
 
-//[[script::bindings::classmethod]]
+//  [[script::bindings::classmethod]]
     static sp<Boolean> dye(sp<Boolean> self, sp<Boolean> condition = nullptr, String message = "");
 
-//[[script::bindings::classmethod]]
+//  [[script::bindings::classmethod]]
     static void fix(const sp<Boolean>& self);
 
 //  [[plugin::builder::by-value]]

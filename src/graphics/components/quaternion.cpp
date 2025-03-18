@@ -4,7 +4,7 @@
 
 #include "core/ark.h"
 #include "core/base/constants.h"
-#include "core/impl/variable/variable_dirty.h"
+#include "core/impl/variable/variable_dirty_mark.h"
 #include "core/util/updatable_util.h"
 #include "core/util/math.h"
 
@@ -127,12 +127,12 @@ bool Quaternion::update(uint64_t timestamp)
 
 void Quaternion::setRotation(sp<Numeric> theta, sp<Vec3> axis)
 {
-    _wrapped = sp<VariableDirty<V4>>::make(sp<Vec4>::make<AxisRotation>(std::move(theta), std::move(axis)), *this);
+    _wrapped = sp<VariableDirtyMark<V4>>::make(sp<Vec4>::make<AxisRotation>(std::move(theta), std::move(axis)), *this);
 }
 
 void Quaternion::setEuler(sp<Numeric> pitch, sp<Numeric> yaw, sp<Numeric> roll)
 {
-    _wrapped = sp<VariableDirty<V4>>::make(sp<Vec4>::make<EulerRotation>(std::move(pitch), std::move(yaw), std::move(roll)), *this);
+    _wrapped = sp<VariableDirtyMark<V4>>::make(sp<Vec4>::make<EulerRotation>(std::move(pitch), std::move(yaw), std::move(roll)), *this);
 }
 
 sp<Mat4> Quaternion::toMatrix() const
