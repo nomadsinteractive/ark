@@ -11,11 +11,14 @@
 
 namespace ark {
 
-static int _yaml_read_handler(void* data, unsigned char* buffer, size_t size, size_t* size_read)
+namespace {
+
+int32_t _yaml_read_handler(void* data, unsigned char* buffer, const size_t size, size_t* size_read)
 {
-    Readable* readable = reinterpret_cast<Readable*>(data);
-    *size_read = readable->read(buffer, size);
+    *size_read = static_cast<Readable*>(data)->read(buffer, size);
     return 1;
+}
+
 }
 
 StringBundleYAML::StringBundleYAML(sp<AssetBundle> assetBundle)
@@ -26,16 +29,15 @@ StringBundleYAML::StringBundleYAML(sp<AssetBundle> assetBundle)
 
 sp<String> StringBundleYAML::getString(const String& resid)
 {
-    sp<Node> node = _root.findNode(resid);
+    const sp<Node> node = _root.findNode(resid);
     CHECK_WARN(node, "YAML node \"%s\" not found", resid.c_str());
     return node ? node->value() : nullptr;
 }
 
-std::vector<String> StringBundleYAML::getStringArray(const String& resid)
+Vector<String> StringBundleYAML::getStringArray(const String& resid)
 {
-    sp<Node> node = _root.findNode(resid);
-    if(node)
-        return node->isSequence() ? node->sequence() : std::vector<String>({node->value()});
+    if(const sp<Node> node = _root.findNode(resid))
+        return node->isSequence() ? node->sequence() : Vector<String>({node->value()});
     return {};
 }
 
@@ -52,7 +54,7 @@ sp<StringBundleYAML::Directory> StringBundleYAML::loadAssetDirectory(Asset& asse
     yaml_event_t event;
     yaml_event_type_t eventType;
 
-    std::vector<String> keys;
+    Vector<String> keys;
     sp<Directory> directory = sp<Directory>::make(std::move(assetBundle));
     sp<Node> value;
     do {
@@ -113,7 +115,7 @@ StringBundleYAML::BUILDER::BUILDER(BeanFactory& factory, const document& manifes
 
 sp<StringBundle> StringBundleYAML::BUILDER::build(const Scope& args)
 {
-    return sp<StringBundleYAML>::make(Ark::instance().getAssetBundle(_src->build(args)));
+    return sp<StringBundle>::make<StringBundleYAML>(Ark::instance().getAssetBundle(_src->build(args)));
 }
 
 void StringBundleYAML::Node::setValue(String value)
@@ -129,7 +131,7 @@ void StringBundleYAML::Node::addSequenceValue(String value)
 
 void StringBundleYAML::Node::makeSequence()
 {
-    _sequence = sp<std::vector<String>>::make();
+    _sequence = sp<Vector<String>>::make();
 }
 
 bool StringBundleYAML::Node::isSequence() const
@@ -142,7 +144,7 @@ const sp<String>& StringBundleYAML::Node::value() const
     return _value;
 }
 
-const sp<std::vector<String> >& StringBundleYAML::Node::sequence() const
+const sp<Vector<String> >& StringBundleYAML::Node::sequence() const
 {
     return _sequence;
 }
@@ -174,7 +176,8 @@ sp<StringBundleYAML::Node> StringBundleYAML::Directory::findNode(const String& r
 
         return subdir->findNode(nodeNameOpt.value());
     }
-    else if(dirname)
+
+    if(dirname)
     {
         const auto iter = _nodes.find(dirname);
         return iter != _nodes.end() ? iter->second : nullptr;
@@ -182,7 +185,7 @@ sp<StringBundleYAML::Node> StringBundleYAML::Directory::findNode(const String& r
     return nullptr;
 }
 
-void StringBundleYAML::Directory::setNode(const std::vector<String>& keys, sp<Node> node)
+void StringBundleYAML::Directory::setNode(const Vector<String>& keys, sp<Node> node)
 {
     DASSERT(keys.size() > 0);
 

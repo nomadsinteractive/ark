@@ -86,7 +86,7 @@ public:
     static bool isVariableName(const String& name, bool allowDash = true);
 
 //  [[plugin::builder::by-value]]
-    class BUILDER : public Builder<String> {
+    class BUILDER final : public Builder<String> {
     public:
         BUILDER(BeanFactory& factory, const String& value);
 
@@ -96,6 +96,16 @@ public:
         sp<Builder<String>> _delegate;
     };
 
+//  [[plugin::builder::by-value]]
+    class BUILDER_STR final : public IBuilder<String> {
+    public:
+        BUILDER_STR(BeanFactory& factory, const String& value);
+
+        String build(const Scope& args) override;
+
+    private:
+        sp<Builder<String>> _delegate;
+    };
 };
 
 }

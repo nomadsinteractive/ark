@@ -878,7 +878,7 @@ class Renderer:
 
 
 class RenderPass(Renderer):
-    def __init__(self, shader: Shader, vertex_buffer: Buffer, index_buffer: Buffer, draw_count: 'Integer', render_mode: TYPE_ENUM, draw_procedure: TYPE_ENUM,
+    def __init__(self, shader, vertex_buffer: Buffer, index_buffer: Buffer, draw_count: 'Integer', render_mode: TYPE_ENUM, draw_procedure: TYPE_ENUM,
                  divided_uploaders: dict[int, 'Uploader']):
         super().__init__()
 
@@ -1593,7 +1593,7 @@ class LevelObject:
     def create_render_object(self) -> "RenderObject":
         pass
 
-    def create_rigidbody(self, collider: "Collider", body_type: int, shapes: dict[str, Shape], collision_filter: "CollisionFilter") -> "Rigidbody":
+    def create_rigidbody(self, collider: "Collider", body_type: int, shapes: dict[str, "Shape"], collision_filter: "CollisionFilter") -> "Rigidbody":
         pass
 
 
@@ -2328,7 +2328,7 @@ class Function:
 
 
 class EventListener:
-    def __init__(self, delegate: "EventListener" | Behavior | None, on_event_name: str = 'on_event'):
+    def __init__(self, delegate: Union["EventListener", Behavior, None], on_event_name: str = 'on_event'):
         pass
 
     def on_event(self, event: Event):
@@ -2779,10 +2779,10 @@ class View:
     def layout_param(self) -> LayoutParam:
         return LayoutParam()
 
-    def add_view(self, view: 'View'):
+    def add_view(self, view: "View"):
         pass
 
-    def find_view(self, name: str) -> Optional[View]:
+    def find_view(self, name: str) -> Optional["View"]:
         pass
 
 

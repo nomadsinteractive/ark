@@ -4,7 +4,7 @@
 #include "core/forwarding.h"
 #include "core/inf/builder.h"
 #include "core/inf/variable.h"
-#include "core/types/safe_builder.h"
+#include "core/impl/builder/safe_builder.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/base/v2.h"

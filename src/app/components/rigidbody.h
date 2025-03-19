@@ -1,7 +1,8 @@
 #pragma once
 
 #include "core/base/api.h"
-#include "core/inf/builder.h"
+#include "core/impl/builder/enum_builder.h"
+#include "core/impl/builder/safe_builder.h"
 #include "core/inf/wirable.h"
 #include "core/types/box.h"
 #include "core/types/safe_var.h"
@@ -11,8 +12,6 @@
 #include "graphics/base/v4.h"
 
 #include "app/forwarding.h"
-#include "core/impl/builder/enum_builder.h"
-#include "core/types/safe_builder.h"
 
 namespace ark {
 

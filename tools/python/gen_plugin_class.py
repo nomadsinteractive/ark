@@ -9,7 +9,7 @@ import acg
 from acg import HeaderPattern
 
 ANNOTATION_PATTERN = r'(?:\s*(?://)?\s*\[\[[^]]+\]\])*'
-BUILDER_IMPLEMENTATION_PATTERN = r'class\s+([\w_]+)\s*(?:final)?\s*:\s*public\s+Builder<([^{]+)>\s+\{'
+BUILDER_IMPLEMENTATION_PATTERN = r'class\s+([\w_]+)\s*(?:final)?\s*:\s*public\s+(I?Builder)<([^{]+)>\s+\{'
 BUILDER_PATTERN = re.compile(r'\[\[plugin::(builder|resource-loader)(?:\("([\w\-_]+)"\))?\]\]\s+' + BUILDER_IMPLEMENTATION_PATTERN)
 DICTIONARY_PATTERN = re.compile(r'\[\[plugin::(builder|resource-loader)::by-value(?:\("([\w\-_]+)"\))?\]\]\s+' + BUILDER_IMPLEMENTATION_PATTERN)
 
@@ -39,11 +39,12 @@ def to_member_name(name):
 
 
 class Annotation:
-    def __init__(self, filename, name, interface_class, implement_class, main_class, arguments):
+    def __init__(self, filename, name, interface_class, implement_class, implemented_interface, main_class, arguments):
         self._name = name
         self._filename = filename
         self._interface_class = interface_class
         self._implement_class = implement_class
+        self._implemented_interface = implemented_interface
         self._main_class = main_class
         self._arguments = arguments
 
@@ -74,12 +75,14 @@ class Annotation:
         func_arguments = parse_arguments(builder_arguments)
         lambda_arguments = parse_function_arguments(tplfunc, tplcontent)
         capture_args, passing_args = self._build_arguments(func_arguments, lambda_arguments)
-        return '%s<sp<%s>>(%s[%s](%s)->sp<Builder<%s>> { return sp<Builder<%s>>::make<%s::%s>(%s); });' % (statement, self._interface_class, name, capture_args, builder_arguments, self._interface_class, self._interface_class, self._main_class, self._implement_class, passing_args)
+        interface_class = self._interface_class if self._implemented_interface.startswith('I') else f'sp<{self._interface_class}>'
+        result_type = f'sp<{self._implemented_interface}<{self._interface_class}>>'
+        return '%s<%s>(%s[%s](%s)->%s { return %s::make<%s::%s>(%s); });' % (statement, interface_class, name, capture_args, builder_arguments, result_type, result_type, self._main_class, self._implement_class, passing_args)
 
 
 class ResourceLoader(Annotation):
     def __init__(self, filename, name, interface_class, main_class, builder_name, arguments):
-        super(ResourceLoader, self).__init__(filename, name, interface_class, builder_name, main_class, arguments)
+        super().__init__(filename, name, interface_class, builder_name, 'Builder', main_class, arguments)
 
     def res_builder(self):
         return self._make_call('resBeanFactory.addBuilderFactory', 'BeanFactory& factory, const document& doc', 'createResourceLoader', RES_BUILDER_TEMPLATE)
@@ -87,35 +90,23 @@ class ResourceLoader(Annotation):
 
 class Builder(Annotation):
     def __init__(self, filename, name, interface_class, main_class, builder_name, arguments):
-        super(Builder, self).__init__(filename, name, interface_class, builder_name, main_class, arguments)
+        super().__init__(filename, name, interface_class, builder_name, 'Builder', main_class, arguments)
 
     def ref_builder(self):
         return self._make_call('refBeanFactory.addBuilderFactory', 'BeanFactory& factory, const document& doc', 'createBeanFactory', REF_BUILDER_TEMPLATE)
 
 
 class Dictionary(Annotation):
-    def __init__(self, filename, name, interface_class, implement_class, main_class, arguments):
-        super(Dictionary, self).__init__(filename, name, interface_class, implement_class, main_class, arguments)
+    def __init__(self, filename, name, interface_class, implement_class, implemented_interface, main_class, arguments):
+        super().__init__(filename, name, interface_class, implement_class, implemented_interface, main_class, arguments)
 
     def ref_builder(self):
         return self._make_call('refBeanFactory.addDictionaryFactory', 'BeanFactory& factory, const String& value', 'createBeanFactory', REF_BUILDER_TEMPLATE)
 
 
-class Function(Annotation):
-    def __init__(self, filename, main_class, funcname, func, rettype, arguments):
-        super(Function, self).__init__(filename, None, None, None, main_class, arguments)
-        self._funcname = funcname
-        self._func = func
-        self._rettype = rettype
-        self._argtypes = arguments
-
-    def func(self):
-        return 'library.addCallable<%s(%s)>("%s", static_cast<%s(*)(%s)>(&%s));' % (self._rettype, self._argtypes, self._funcname, self._rettype, self._argtypes, self._func)
-
-
 class ResourceLoaderDictionaryNamed(Annotation):
     def __init__(self, filename, name, interface_class, main_class, builder_name, arguments):
-        super(ResourceLoaderDictionaryNamed, self).__init__(filename, name, interface_class, main_class, builder_name, arguments)
+        super().__init__(filename, name, interface_class, main_class, 'Builder', builder_name, arguments)
 
     def res_builder(self):
         return self._make_call('resBeanFactory.addDictionaryFactory', 'BeanFactory& factory, const String& value', 'createResourceLoader', RES_BUILDER_TEMPLATE)
@@ -123,7 +114,7 @@ class ResourceLoaderDictionaryNamed(Annotation):
 
 class ResourceLoaderDictionaryNonamed(Annotation):
     def __init__(self, filename, interface_class, implement_class, main_class, arguments):
-        super(ResourceLoaderDictionaryNonamed, self).__init__(filename, None, interface_class, implement_class, main_class, arguments)
+        super().__init__(filename, None, interface_class, implement_class, 'Builder', main_class, arguments)
 
     def res_builder(self):
         func_arguments = parse_function_arguments('createResourceLoader', RES_BUILDER_TEMPLATE)
@@ -188,7 +179,7 @@ def search_for_plugins(paths):
         builder_type = x[0]
         name = x[1]
         builder_name = x[2]
-        interface_class = x[3]
+        interface_class = x[4]
         arguments = [(i, j) for i, j in parse_function_arguments(builder_name, content) if not i.startswith('=')]
         if builder_type != 'resource-loader':
             result.append(Builder(filename, name, interface_class, main_class, builder_name, arguments))
@@ -196,30 +187,14 @@ def search_for_plugins(paths):
             result.append(ResourceLoader(filename, name, interface_class, main_class, builder_name, arguments))
 
     def match_dictionary(filename, content, main_class, x):
-        builder_type = x[0]
-        name = x[1]
-        implement_class = x[2]
-        interface_class = x[3]
+        builder_type, name, implement_class, implemented_interface, interface_class = x
         arguments = parse_function_arguments(implement_class, content)
         if builder_type != 'resource-loader':
-            result.append(Dictionary(filename, name, interface_class, implement_class, main_class, arguments))
+            result.append(Dictionary(filename, name, interface_class, implement_class, implemented_interface, main_class, arguments))
         elif name:
             result.append(ResourceLoaderDictionaryNamed(filename, name, interface_class, implement_class, main_class, arguments))
         else:
             result.append(ResourceLoaderDictionaryNonamed(filename, interface_class, implement_class, main_class, arguments))
-
-    def match_function(filename, content, main_class, x):
-        funcname = x[0]
-        s = x[1].split()
-        func = main_class + '::' + s[-1]
-        rettype = ' '.join(s[:-1])
-
-        def remove_arg_name(arg):
-            s = arg.split(' ')
-            return ' '.join(i for i in s[:-1] if i) if len(s) > 1 else arg
-
-        arguments = ', '.join(remove_arg_name(i) for i in x[2].split(','))
-        result.append(Function(filename, main_class, funcname, func, rettype, arguments))
 
     acg.match_header_patterns(paths, True,
                               HeaderPattern(BUILDER_PATTERN, match_builder),

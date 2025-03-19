@@ -4,7 +4,7 @@
 #include "core/base/timestamp.h"
 #include "core/inf/builder.h"
 #include "core/inf/updatable.h"
-#include "core/types/safe_builder.h"
+#include "core/impl/builder/safe_builder.h"
 #include "core/types/safe_var.h"
 
 #include "graphics/forwarding.h"

@@ -5,7 +5,7 @@
 #include "core/inf/runnable.h"
 #include "core/inf/variable.h"
 #include "core/types/implements.h"
-#include "core/types/safe_builder.h"
+#include "core/impl/builder/safe_builder.h"
 
 #include "renderer/forwarding.h"
 

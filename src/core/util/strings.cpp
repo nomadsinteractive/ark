@@ -518,14 +518,14 @@ bool Strings::isArgument(const String& value)
     return isVariableName(unwrap(str + 1, '{', '}'), false);
 }
 
-bool Strings::isVariableCharacter(char c, bool allowDash)
+bool Strings::isVariableCharacter(const char c, const bool allowDash)
 {
     if(!((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_' || c == '.' || (allowDash && c == '-')))
         return false;
     return true;
 }
 
-bool Strings::isVariableName(const String& name, bool allowDash)
+bool Strings::isVariableName(const String& name, const bool allowDash)
 {
     const char* str = name.c_str();
     while(*str)
@@ -544,6 +544,16 @@ Strings::BUILDER::BUILDER(BeanFactory& /*factory*/, const String& value)
 sp<String> Strings::BUILDER::build(const Scope& args)
 {
     return _delegate->build(args);
+}
+
+Strings::BUILDER_STR::BUILDER_STR(BeanFactory& /*factory*/, const String& value)
+    : _delegate(Strings::load(value))
+{
+}
+
+String Strings::BUILDER_STR::build(const Scope& args)
+{
+    return *_delegate->build(args);
 }
 
 }

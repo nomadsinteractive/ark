@@ -1,13 +1,10 @@
 #pragma once
 
-#include <vector>
 #include <unordered_set>
-#include <unordered_map>
 
-#include "core/inf/builder.h"
 #include "core/inf/updatable.h"
 #include "core/inf/variable.h"
-#include "core/types/safe_builder.h"
+#include "core/impl/builder/safe_builder.h"
 #include "core/types/shared_ptr.h"
 
 #include "renderer/forwarding.h"
@@ -22,21 +19,21 @@ namespace ark {
 
 class ColliderImpl final : public Collider {
 public:
-    ColliderImpl(std::vector<std::pair<sp<BroadPhrase>, sp<CollisionFilter>>> broadPhrase, sp<NarrowPhrase> narrowPhrase, RenderController& renderController);
+    ColliderImpl(Vector<std::pair<sp<BroadPhrase>, sp<CollisionFilter>>> broadPhrase, sp<NarrowPhrase> narrowPhrase, RenderController& renderController);
 
     Rigidbody::Impl createBody(Rigidbody::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded) override;
     sp<Shape> createShape(const NamedHash& type, sp<Vec3> size, sp<Vec3> origin) override;
-    std::vector<RayCastManifold> rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter) override;
+    Vector<RayCastManifold> rayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter) override;
 
     //  [[plugin::resource-loader]]
     class BUILDER : public Builder<Collider> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
-        virtual sp<Collider> build(const Scope& args) override;
+        sp<Collider> build(const Scope& args) override;
 
     private:
-        std::vector<std::pair<sp<Builder<BroadPhrase>>, SafeBuilder<CollisionFilter>>> _broad_phrases;
+        Vector<std::pair<sp<Builder<BroadPhrase>>, SafeBuilder<CollisionFilter>>> _broad_phrases;
         sp<Builder<NarrowPhrase>> _narrow_phrase;
         sp<RenderController> _render_controller;
     };
@@ -45,18 +42,18 @@ public:
     class RigidbodyImpl;
 
     struct Stub : public Updatable {
-        Stub(std::vector<std::pair<sp<BroadPhrase>, sp<CollisionFilter>>> broadPhrases, sp<NarrowPhrase> narrowPhrase);
+        Stub(Vector<std::pair<sp<BroadPhrase>, sp<CollisionFilter>>> broadPhrases, sp<NarrowPhrase> narrowPhrase);
 
-        std::vector<RayCastManifold> rayCast(const V2& from, const V2& to, const sp<CollisionFilter>& collisionFilter) const;
+        Vector<RayCastManifold> rayCast(const V2& from, const V2& to, const sp<CollisionFilter>& collisionFilter) const;
 
         void requestRigidBodyRemoval(int32_t rigidBodyId);
 
         sp<RigidbodyImpl> createRigidBody(Rigidbody::BodyType type, sp<Shape> shape, sp<Vec3> position, sp<Vec4> rotation, sp<CollisionFilter> collisionFilter, sp<Boolean> discarded);
 
-        std::vector<sp<Ref>> toRigidBodyRefs(const std::unordered_set<BroadPhrase::CandidateIdType>& candidateSet, uint32_t filter) const;
-        std::vector<BroadPhrase::Candidate> toBroadPhraseCandidates(const std::unordered_set<BroadPhrase::CandidateIdType>& candidateSet) const;
+        Vector<sp<Ref>> toRigidBodyRefs(const std::unordered_set<BroadPhrase::CandidateIdType>& candidateSet, uint32_t filter) const;
+        Vector<BroadPhrase::Candidate> toBroadPhraseCandidates(const std::unordered_set<BroadPhrase::CandidateIdType>& candidateSet) const;
 
-        void resolveCandidates(const Rigidbody& self, const BroadPhrase::Candidate& candidateSelf, const std::vector<BroadPhrase::Candidate>& candidates, std::set<BroadPhrase::CandidateIdType>& c);
+        void resolveCandidates(const Rigidbody& self, const BroadPhrase::Candidate& candidateSelf, const Vector<BroadPhrase::Candidate>& candidates, std::set<BroadPhrase::CandidateIdType>& c);
 
         const sp<NarrowPhrase>& narrowPhrase() const;
 
@@ -70,7 +67,7 @@ public:
         BroadPhrase::Result broadPhraseRayCast(const V3& from, const V3& to, const sp<CollisionFilter>& collisionFilter) const;
 
     private:
-        std::vector<std::pair<sp<BroadPhrase>, sp<CollisionFilter>>> _broad_phrases;
+        Vector<std::pair<sp<BroadPhrase>, sp<CollisionFilter>>> _broad_phrases;
         sp<NarrowPhrase> _narrow_phrase;
 
         std::unordered_map<BroadPhrase::CandidateIdType, sp<Ref>> _rigid_bodies;

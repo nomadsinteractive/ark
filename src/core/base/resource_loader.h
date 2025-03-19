@@ -5,7 +5,7 @@
 #include "core/base/bean_factory.h"
 #include "core/collection/traits.h"
 #include "core/inf/debris.h"
-#include "core/types/safe_builder.h"
+#include "../impl/builder/safe_builder.h"
 #include "core/types/shared_ptr.h"
 
 namespace ark {

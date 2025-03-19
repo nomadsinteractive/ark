@@ -2,7 +2,7 @@
 
 #include "core/base/api.h"
 #include "core/inf/builder.h"
-#include "core/types/safe_builder.h"
+#include "core/impl/builder/safe_builder.h"
 
 #include "graphics/inf/glyph_maker.h"
 
