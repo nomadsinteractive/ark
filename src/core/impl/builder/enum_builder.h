@@ -1,6 +1,7 @@
 #include "core/forwarding.h"
 
 #include "core/inf/builder.h"
+#include "core/inf/variable.h"
 #include "core/base/identifier.h"
 #include "core/base/scope.h"
 #include "core/util/documents.h"
