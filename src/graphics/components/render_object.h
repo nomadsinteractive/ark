@@ -59,7 +59,7 @@ public:
     V3 xyz() const;
 
 //  [[script::bindings::property]]
-    const sp<Vec3>& position();
+    sp<Vec3> position();
 //  [[script::bindings::property]]
     void setPosition(sp<Vec3> position);
 //  [[script::bindings::property]]
@@ -81,7 +81,7 @@ public:
     void setTag(Box tag);
 
 //  [[script::bindings::property]]
-    const sp<Boolean>& discarded();
+    sp<Boolean> discarded();
 //  [[script::bindings::property]]
     void setDiscarded(sp<Boolean> discarded);
 

@@ -140,7 +140,7 @@ V3 RenderObject::xyz() const
     return _position.val();
 }
 
-const sp<Vec3>& RenderObject::position()
+sp<Vec3> RenderObject::position()
 {
     return _position.ensure();
 }
@@ -182,7 +182,7 @@ void RenderObject::setTag(Box tag)
         _with_tag->setTag(std::move(tag));
 }
 
-const sp<Boolean>& RenderObject::discarded()
+sp<Boolean> RenderObject::discarded()
 {
     return _discarded.ensure();
 }

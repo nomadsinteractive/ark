@@ -87,11 +87,11 @@ public:
     sp<Vec3> toViewportPosition(sp<Vec3> worldPosition) const;
 
 //  [[script::bindings::property]]
-    const SafeVar<Vec3>& position() const;
+    sp<Vec3> position() const;
 //  [[script::bindings::property]]
-    const SafeVar<Vec3>& target() const;
+    sp<Vec3> target() const;
 //  [[script::bindings::property]]
-    const SafeVar<Vec3>& up() const;
+    sp<Vec3> up() const;
 
 //  [[script::bindings::property]]
     sp<Mat4> view() const;

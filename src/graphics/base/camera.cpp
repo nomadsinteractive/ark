@@ -25,7 +25,7 @@ namespace ark {
 
 struct Camera::Stub {
     Stub()
-        : _position(nullptr, V3(0, 0, 1)), _target(nullptr), _up(nullptr, V3(0, 1, 0)) {
+        : _position(nullptr, V3(0, 0, 1)), _up(nullptr, V3(0, 1, 0)) {
     }
 
     SafeVar<Vec3> _position;
@@ -46,7 +46,7 @@ public:
         return _matrix;
     }
 
-    bool update(uint64_t timestamp) override {
+    bool update(const uint64_t timestamp) override {
         if(UpdatableUtil::update(timestamp, _left_top, _right_bottom, _clip)) {
             _matrix = calcMatrix();
             return true;
@@ -83,7 +83,7 @@ public:
         return _matrix;
     }
 
-    bool update(uint64_t timestamp) override {
+    bool update(const uint64_t timestamp) override {
         if(UpdatableUtil::update(timestamp, _camera_stub->_position, _camera_stub->_target, _camera_stub->_up)) {
             _matrix = _delegate->lookAt(_camera_stub->_position.val(), _camera_stub->_target.val(), _camera_stub->_up.val());
             return true;
@@ -144,7 +144,7 @@ Camera::Camera(Camera&& other)
 {
 }
 
-Camera::Camera(Ark::RendererCoordinateSystem cs, sp<Delegate> delegate, sp<Mat4> view, sp<Mat4> projection)
+Camera::Camera(const Ark::RendererCoordinateSystem cs, sp<Delegate> delegate, sp<Mat4> view, sp<Mat4> projection)
     : _coordinate_system(cs), _delegate(std::move(delegate)), _view(sp<Mat4>::make<Mat4Wrapper>(view ? std::move(view) : Mat4Type::create())), _projection(sp<Mat4>::make<Mat4Wrapper>(projection ? std::move(projection) : Mat4Type::create())),
       _vp(sp<Mat4>::make<Mat4Wrapper>(Mat4Type::matmul(_projection.cast<Mat4>(), _view.cast<Mat4>()))), _stub(sp<Stub>::make())
 {
@@ -161,18 +161,18 @@ void Camera::ortho(sp<Vec2> leftTop, sp<Vec2> rightBottom, sp<Vec2> clip)
     _projection->set(sp<Mat4>::make<OrthoMatrixVariable>(_delegate, std::move(leftTop), std::move(rightBottom), std::move(clip)));
 }
 
-void Camera::ortho(float left, float right, float bottom, float top, float clipNear, float clipFar)
+void Camera::ortho(const float left, const float right, const float bottom, const float top, const float clipNear, const float clipFar)
 {
     _projection->set(_delegate->ortho(left, right, bottom, top, clipNear, clipFar));
 }
 
-void Camera::frustum(float left, float right, float bottom, float top, float clipNear, float clipFar)
+void Camera::frustum(const float left, const float right, const float bottom, const float top, const float clipNear, const float clipFar)
 {
     CHECK_WARN(clipFar > clipNear && clipNear > 0, sclipNearclipFarPlaneWarning, clipNear, clipFar);
     _projection->set(_delegate->frustum(left, right, bottom, top, clipNear, clipFar));
 }
 
-void Camera::perspective(float fov, float aspect, float clipNear, float clipFar)
+void Camera::perspective(const float fov, const float aspect, const float clipNear, const float clipFar)
 {
     CHECK_WARN(clipFar > clipNear && clipNear > 0, sclipNearclipFarPlaneWarning, clipNear, clipFar);
     _projection->set(_delegate->perspective(fov, aspect, clipNear, clipFar));
@@ -212,26 +212,28 @@ sp<Vec3> Camera::toViewportPosition(sp<Vec3> worldPosition) const
     return Vec3Type::mul(Vec3Type::add(Vec3Type::mul(Mat4Type::matmul(_vp, std::move(worldPosition)), scale), V3(0.5f, 0.5f, 0.5f)), V3(viewport.width(), viewport.height(), 1.0f));
 }
 
-const SafeVar<Vec3>& Camera::position() const
+sp<Vec3> Camera::position() const
 {
-    return _stub->_position;
+    return _stub->_position.toVar();
 }
 
-const SafeVar<Vec3>& Camera::target() const
+sp<Vec3> Camera::target() const
 {
-    return _stub->_target;
+    return _stub->_target.toVar();
 }
 
-const SafeVar<Vec3>& Camera::up() const
+sp<Vec3> Camera::up() const
 {
-    return _stub->_up;
+    return _stub->_up.toVar();
 }
 
 void Camera::assign(const Camera& other)
 {
     _coordinate_system = other._coordinate_system;
     _delegate = other._delegate;
-    _stub = other._stub;
+    _stub->_position.reset(other._stub->_position.toVar());
+    _stub->_target.reset(other._stub->_target.toVar());
+    _stub->_up.reset(other._stub->_up.toVar());
     _view->set(other.view());
     _projection->set(other.projection());
 }
