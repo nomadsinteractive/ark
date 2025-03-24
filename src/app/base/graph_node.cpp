@@ -60,7 +60,7 @@ const V3& GraphNode::position() const
     return _position;
 }
 
-void GraphNode::addRoute(GraphNode& toNode, float length, bool bidirectional)
+void GraphNode::addRoute(GraphNode& toNode, const float length, const bool bidirectional)
 {
     _out_routes.emplace_back(*this, toNode, length);
     toNode.inRoutes().emplace_back(*this, toNode, length);
@@ -89,9 +89,9 @@ void GraphNode::setTag(Box tag)
     _tag = std::move(tag);
 }
 
-std::vector<sp<GraphNode>> GraphNode::findRoute(GraphNode& goal)
+Vector<sp<GraphNode>> GraphNode::findRoute(GraphNode& goal)
 {
-    std::vector<sp<GraphNode>> result;
+    Vector<sp<GraphNode>> result;
     AStar<SearchingGraphNode> searchingGraph(*this, goal);
     for(const SearchingGraphNode& i : searchingGraph.findRoute())
         result.push_back(i._graph_node.toSharedPtr());
@@ -114,27 +114,27 @@ void GraphNode::detach()
     _out_routes.clear();
 }
 
-const std::vector<GraphRoute>& GraphNode::inRoutes() const
+const Vector<GraphRoute>& GraphNode::inRoutes() const
 {
     return _in_routes;
 }
 
-std::vector<GraphRoute>& GraphNode::inRoutes()
+Vector<GraphRoute>& GraphNode::inRoutes()
 {
     return _in_routes;
 }
 
-const std::vector<GraphRoute>& GraphNode::outRoutes() const
+const Vector<GraphRoute>& GraphNode::outRoutes() const
 {
     return _out_routes;
 }
 
-std::vector<GraphRoute>& GraphNode::outRoutes()
+Vector<GraphRoute>& GraphNode::outRoutes()
 {
     return _out_routes;
 }
 
-void GraphNode::doDisconnect(std::vector<GraphRoute>& routes, GraphNode* toNode, bool entryOrExit)
+void GraphNode::doDisconnect(Vector<GraphRoute>& routes, GraphNode* toNode, const bool entryOrExit)
 {
     for(auto iter = routes.begin(); iter != routes.end(); )
     {

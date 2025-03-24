@@ -14,27 +14,64 @@ struct Arena::Stub {
 
     Map<String, sp<Layer>> _layers;
     Map<String, sp<RenderLayer>> _render_layers;
+
+    sp<Layer> getLayer(const String& name)
+    {
+        const auto iter = _layers.find(name);
+        if(iter == _layers.end())
+        {
+            sp<Layer> layer = _resource_loader->load<Layer>(name, {});
+            _layers.insert(std::make_pair(name, layer));
+            return layer;
+        }
+        return iter->second;
+    }
+
+    sp<RenderLayer> getRenderLayer(const String& name)
+    {
+        const auto iter = _render_layers.find(name);
+        if(iter == _render_layers.end())
+        {
+            sp<RenderLayer> renderLayer = _resource_loader->load<RenderLayer>(name, {});
+            _render_layers.insert(std::make_pair(name, renderLayer));
+            return renderLayer;
+        }
+        return iter->second;
+    }
 };
 
-struct Arena::RenderLayerBundle final : BoxBundle {
+class Arena::LayerBundle final : public BoxBundle {
+public:
+    LayerBundle(const sp<Stub>& stub)
+        : _stub(stub) {
+    }
 
     Box get(const String& name) override
     {
-        const auto iter = _stub->_render_layers.find(name);
-        if(iter == _stub->_render_layers.end())
-        {
-            sp<RenderLayer> renderLayer = _stub->_resource_loader->load<RenderLayer>(name, {});
-            _stub->_render_layers.insert(std::make_pair(name, renderLayer));
-            return Box(renderLayer);
-        }
-        return Box(iter->second);
+        return Box(_stub->getLayer(name));
     }
 
+private:
+    sp<Stub> _stub;
+};
+
+class Arena::RenderLayerBundle final : public BoxBundle {
+public:
+    RenderLayerBundle(const sp<Stub>& stub)
+        : _stub(stub) {
+    }
+
+    Box get(const String& name) override
+    {
+        return Box(_stub->getRenderLayer(name));
+    }
+
+private:
     sp<Stub> _stub;
 };
 
 Arena::Arena(sp<RenderGroup> renderGroup, sp<ResourceLoader> resourceLoader)
-    : _stub(sp<Stub>::make(Stub{std::move(renderGroup), std::move(resourceLoader)}))
+    : _stub(sp<Stub>::make(Stub{std::move(renderGroup), std::move(resourceLoader)})), _layers(sp<LayerBundle>::make(_stub)), _render_layers(sp<RenderLayerBundle>::make(_stub))
 {
 }
 

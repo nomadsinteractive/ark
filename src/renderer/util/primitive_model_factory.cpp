@@ -53,20 +53,20 @@ private:
     Optional<Rect> _tex_coords;
 };
 
-class VerticesPlane : public Vertices {
+class VerticesPlane final : public Vertices {
 public:
-    VerticesPlane(uint32_t cols, uint32_t rows, Optional<Rect> texCoords, const sp<Mat4>& matrix)
+    VerticesPlane(const uint32_t cols, const uint32_t rows, Optional<Rect> texCoords, const sp<Mat4>& matrix)
         : Vertices((cols + 1) * (rows + 1)), _cols(cols), _rows(rows), _tex_coords(std::move(texCoords)), _matrix(matrix ? Optional<M4>(matrix->val()) : Optional<M4>()) {
     }
 
     void write(VertexWriter& buf, const V3& /*size*/) override {
-        float gridSize = 1.0f;
-        float x = -float(_cols) * gridSize / 2;
+        const float gridSize = 1.0f;
+        float x = -static_cast<float>(_cols) * gridSize / 2;
         float z = x;
         const bool hasTexCoords = static_cast<bool>(_tex_coords);
         const Rect texCoords = hasTexCoords ? _tex_coords.value() : Rect();
-        float ustep = texCoords.width() / _cols;
-        float vstep = texCoords.height() / _rows;
+        const float ustep = texCoords.width() / _cols;
+        const float vstep = texCoords.height() / _rows;
         float v = texCoords.top();
         CHECK(hasTexCoords || !buf.hasAttribute(Attribute::USAGE_TEX_COORD), "Plane doesn't have a tex coordinate configured, but the shader needs one");
         for(size_t i = 0; i < _rows + 1; ++i) {
@@ -92,19 +92,18 @@ private:
     Optional<M4> _matrix;
 };
 
-
-class UploaderPlane : public Uploader {
+class UploaderPlane final : public Uploader {
 public:
-    UploaderPlane(uint32_t cols, uint32_t rows)
+    UploaderPlane(const uint32_t cols, const uint32_t rows)
         : Uploader(cols * rows * 2 * 3 * sizeof(element_index_t)), _cols(cols), _rows(rows) {
     }
 
-    virtual bool update(uint64_t /*timestamp*/) override {
+    bool update(uint64_t /*timestamp*/) override {
         return false;
     }
 
-    virtual void upload(Writable& buf) override {
-        std::vector<element_index_t> indices;
+    void upload(Writable& buf) override {
+        Vector<element_index_t> indices;
         element_index_t s0 = 0;
         element_index_t s1 = static_cast<element_index_t>(_cols + 1);
         indices.reserve(_cols * _rows * 2 * 3);
@@ -152,14 +151,14 @@ PrimitiveModelFactory::PrimitiveModelFactory(sp<Mat4> transform)
 {
 }
 
-sp<Model> PrimitiveModelFactory::makeTriangle(Optional<Rect> texCoords)
+sp<Model> PrimitiveModelFactory::makeTriangle(Optional<Rect> texCoords) const
 {
-    return sp<Model>::make(UploaderType::makeElementIndexInput(std::vector<element_index_t>{0, 1, 2}), sp<VerticesTriangle>::make(std::move(texCoords)), sp<Boundaries>::make(V3(-0.5, -0.5, 0), V3(0.5, 0.5, 0)));
+    return sp<Model>::make(UploaderType::makeElementIndexInput(Vector<element_index_t>{0, 1, 2}), sp<Vertices>::make<VerticesTriangle>(std::move(texCoords)), sp<Boundaries>::make(V3(-0.5, -0.5, 0), V3(0.5, 0.5, 0)));
 }
 
-sp<Model> PrimitiveModelFactory::makePlane(uint32_t cols, uint32_t rows, Optional<Rect> texCoords)
+sp<Model> PrimitiveModelFactory::makePlane(uint32_t cols, uint32_t rows, Optional<Rect> texCoords) const
 {
-    return sp<Model>::make(sp<UploaderPlane>::make(cols, rows), sp<VerticesPlane>::make(cols, rows, std::move(texCoords), _transform), sp<Boundaries>::make(V3(cols * -0.5f, rows * -0.5f, 0), V3(cols * 0.5f, rows * 0.5f, 0)));
+    return sp<Model>::make(sp<Uploader>::make<UploaderPlane>(cols, rows), sp<Vertices>::make<VerticesPlane>(cols, rows, std::move(texCoords), _transform), sp<Boundaries>::make(V3(cols * -0.5f, rows * -0.5f, 0), V3(cols * 0.5f, rows * 0.5f, 0)));
 }
 
 }

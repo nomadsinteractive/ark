@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include "core/collection/list.h"
 
 #include "graphics/base/v3.h"
@@ -27,7 +25,7 @@ public:
     void setTag(Box tag);
 
 //  [[script::bindings::auto]]
-    std::vector<sp<GraphNode>> findRoute(GraphNode& goal);
+    Vector<sp<GraphNode>> findRoute(GraphNode& goal);
 
     sp<GraphNode> toSharedPtr() const;
 
@@ -35,23 +33,22 @@ public:
 
     void detach();
 
-    const std::vector<GraphRoute>& inRoutes() const;
-    std::vector<GraphRoute>& inRoutes();
+    const Vector<GraphRoute>& inRoutes() const;
+    Vector<GraphRoute>& inRoutes();
 
-    const std::vector<GraphRoute>& outRoutes() const;
-    std::vector<GraphRoute>& outRoutes();
+    const Vector<GraphRoute>& outRoutes() const;
+    Vector<GraphRoute>& outRoutes();
 
 private:
-    void doDisconnect(std::vector<GraphRoute>& routes, GraphNode* toNode, bool entryOrExit);
-
+    void doDisconnect(Vector<GraphRoute>& routes, GraphNode* toNode, bool entryOrExit);
 
 private:
     Graph& _graph;
     V3 _position;
     Box _tag;
 
-    std::vector<GraphRoute> _in_routes;
-    std::vector<GraphRoute> _out_routes;
+    Vector<GraphRoute> _in_routes;
+    Vector<GraphRoute> _out_routes;
 };
 
 }

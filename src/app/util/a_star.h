@@ -1,8 +1,6 @@
 #pragma once
 
 #include <memory>
-#include <unordered_set>
-#include <vector>
 
 #include "core/types/optional.h"
 
@@ -15,7 +13,7 @@ private:
     struct SearchingRoute {
         float _score;
         float _weight;
-        std::vector<T> _route_path;
+        Vector<T> _route_path;
 
         bool operator < (const SearchingRoute& other) const {
             return _score < other._score;
@@ -27,7 +25,7 @@ public:
         : _start(std::move(start)), _goal(std::move(goal)), _routes{ SearchingRoute{getHeuristicValue(_start), 0, {_start}} } {
     }
 
-    std::vector<T> findRoute() {
+    Vector<T> findRoute() {
         while(_routes.size() > 0) {
             if(_routes.begin()->_route_path.back() == _goal)
                 return _routes.begin()->_route_path;
@@ -76,7 +74,7 @@ private:
 private:
     T _start, _goal;
     std::multiset<SearchingRoute> _routes;
-    std::unordered_set<T, H> _close_set;
+    HashSet<T, H> _close_set;
 };
 
 }

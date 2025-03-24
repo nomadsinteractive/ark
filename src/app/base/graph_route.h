@@ -1,7 +1,5 @@
 #pragma once
 
-#include "core/types/weak_ptr.h"
-
 #include "app/forwarding.h"
 
 namespace ark {

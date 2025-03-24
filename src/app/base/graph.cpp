@@ -16,7 +16,7 @@ Graph::Graph()
 
 Graph::~Graph()
 {
-    std::vector<std::pair<GraphNode&, GraphNode&>> externalRoutes;
+    Vector<std::pair<GraphNode&, GraphNode&>> externalRoutes;
 
     for(GraphNode& i : _nodes)
     {
@@ -33,7 +33,7 @@ Graph::~Graph()
         i.disconnect(j);
 }
 
-const std::vector<sp<GraphNode>>& Graph::nodes() const
+const Vector<sp<GraphNode>>& Graph::nodes() const
 {
     return _nodes;
 }

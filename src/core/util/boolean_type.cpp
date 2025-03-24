@@ -4,7 +4,6 @@
 #include "core/base/bean_factory.h"
 #include "core/base/expression.h"
 #include "core/impl/variable/variable_dyed.h"
-#include "core/impl/variable/variable_observer.h"
 #include "core/impl/variable/variable_op1.h"
 #include "core/impl/variable/variable_op2.h"
 #include "core/inf/array.h"
@@ -30,11 +29,11 @@ private:
 
 class NegativeBooleanBuilder final : public Builder<Boolean> {
 public:
-    NegativeBooleanBuilder(const sp<Builder<Boolean>>& a1)
-        : _a1(a1) {
+    NegativeBooleanBuilder(sp<Builder<Boolean>> a1)
+        : _a1(std::move(a1)) {
     }
 
-    virtual sp<Boolean> build(const Scope& args) override {
+    sp<Boolean> build(const Scope& args) override {
         return BooleanType::negative(_a1->build(args));
     }
 
@@ -90,7 +89,6 @@ public:
 
     static Expression::Operator<bool> OPS[2];
     static String NEGATIVE_OPS[2];
-
 };
 
 Expression::Operator<bool> BooleanOperation::OPS[2] = {
@@ -99,6 +97,14 @@ Expression::Operator<bool> BooleanOperation::OPS[2] = {
 };
 
 String BooleanOperation::NEGATIVE_OPS[2] = {"!", "not "};
+
+
+String getDocumentValue(const document& manifest)
+{
+    DCHECK(!manifest->getAttribute(constants::CLASS), "Document \"%s\" has class named \"%s\", which cannot been built into a Boolean object",
+           Documents::toString(manifest).c_str(), manifest->getAttribute(constants::CLASS)->value().c_str());
+    return Documents::ensureAttribute(manifest, constants::VALUE).strip();
+}
 
 }
 
@@ -137,6 +143,11 @@ bool BooleanType::val(const sp<Boolean>& self)
     return self->val();
 }
 
+sp<Boolean> BooleanType::wrap(sp<Boolean> self)
+{
+    return sp<Boolean>::make<BooleanWrapper>(std::move(self));
+}
+
 sp<Boolean> BooleanType::wrapped(const sp<Boolean>& self)
 {
     const sp<BooleanWrapper>& ib = self.asInstance<BooleanWrapper>();
@@ -149,29 +160,15 @@ void BooleanType::set(const sp<BooleanWrapper>& self, sp<Boolean> value)
     self->set(std::move(value));
 }
 
-void BooleanType::set(const sp<Boolean::Impl>& self, bool value)
+void BooleanType::set(const sp<BooleanWrapper>& self, const bool value)
 {
     self->set(value);
 }
 
-void BooleanType::set(const sp<BooleanWrapper>& self, bool value)
+void BooleanType::toggle(const sp<Boolean>& self)
 {
-    self->set(value);
-}
-
-void BooleanType::toggle(const sp<Boolean::Impl>& self)
-{
-    self->set(!self->val());
-}
-
-void BooleanType::toggle(const sp<BooleanWrapper>& self)
-{
-    self->set(!self->val());
-}
-
-sp<Boolean> BooleanType::observe(const sp<Boolean>& self, const sp<Observer>& observer)
-{
-    return sp<Boolean>::make<VariableObserver<bool>>(self, observer);
+    const sp<BooleanWrapper>& ib = self.ensureInstance<BooleanWrapper>("Cannot toggle a non-BooleanWrapper instance");
+    ib->set(!ib->val());
 }
 
 sp<Boolean> BooleanType::dye(sp<Boolean> self, sp<Boolean> condition, String message)
@@ -203,19 +200,12 @@ sp<Boolean> BooleanType::DICTIONARY::build(const Scope& args)
 }
 
 BooleanType::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _value(Expression::Compiler<bool, BooleanOperation>().compile(factory, getValue(manifest))) {
+    : _value(Expression::Compiler<bool, BooleanOperation>().compile(factory, getDocumentValue(manifest))) {
 }
 
 sp<Boolean> BooleanType::BUILDER::build(const Scope& args)
 {
     return _value->build(args);
-}
-
-String BooleanType::BUILDER::getValue(const document& manifest) const
-{
-    DCHECK(!manifest->getAttribute(constants::CLASS), "Document \"%s\" has class named \"%s\", which cannot been built into a Boolean object",
-           Documents::toString(manifest).c_str(), manifest->getAttribute(constants::CLASS)->value().c_str());
-    return Documents::ensureAttribute(manifest, constants::VALUE).strip();
 }
 
 }

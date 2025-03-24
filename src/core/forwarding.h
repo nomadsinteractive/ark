@@ -7,6 +7,7 @@
 #include <set>
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 
 namespace ark {
 
@@ -36,6 +37,7 @@ template<typename T> class Wrapper;
 
 template <typename T> using Vector = std::vector<T>;
 template <typename T> using Set = std::set<T>;
+template <typename T, typename H = std::hash<T>> using HashSet = std::unordered_set<T, H>;
 
 template <typename T, typename U> using HashMap = std::unordered_map<T, U>;
 template <typename T, typename U> using Map = std::map<T, U>;

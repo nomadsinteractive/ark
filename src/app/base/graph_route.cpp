@@ -5,7 +5,7 @@
 
 namespace ark {
 
-GraphRoute::GraphRoute(GraphNode& entry, GraphNode& exit, float weight)
+GraphRoute::GraphRoute(GraphNode& entry, GraphNode& exit, const float weight)
     : _entry(&entry), _exit(&exit), _weight(weight), _external(!entry.graph().hasNode(exit))
 {
 }
