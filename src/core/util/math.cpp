@@ -211,42 +211,42 @@ float Math::distance(const V4& lvalue, const V4& rvalue)
 
 sp<Numeric> Math::distance(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue)
 {
-    return sp<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::Distance<V2>>>::make(lvalue, rvalue);
+    return sp<Numeric>::make<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::Distance<V2>>>(lvalue, rvalue);
 }
 
 sp<Numeric> Math::distance(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue)
 {
-    return sp<VariableOP2<sp<Vec3>, sp<Vec3>, Operators::Distance<V3>>>::make(lvalue, rvalue);
+    return sp<Numeric>::make<VariableOP2<sp<Vec3>, sp<Vec3>, Operators::Distance<V3>>>(lvalue, rvalue);
 }
 
 sp<Numeric> Math::distance(const sp<Vec4>& lvalue, const sp<Vec4>& rvalue)
 {
-    return sp<VariableOP2<sp<Vec4>, sp<Vec4>, Operators::Distance<V4>>>::make(lvalue, rvalue);
+    return sp<Numeric>::make<VariableOP2<sp<Vec4>, sp<Vec4>, Operators::Distance<V4>>>(lvalue, rvalue);
 }
 
 sp<Numeric> Math::dot(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue)
 {
-    return sp<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::Dot<V2>>>::make(lvalue, rvalue);
+    return sp<Numeric>::make<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::Dot<V2>>>(lvalue, rvalue);
 }
 
 sp<Numeric> Math::dot(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue)
 {
-    return sp<VariableOP2<sp<Vec3>, sp<Vec3>, Operators::Dot<V3>>>::make(lvalue, rvalue);
+    return sp<Numeric>::make<VariableOP2<sp<Vec3>, sp<Vec3>, Operators::Dot<V3>>>(lvalue, rvalue);
 }
 
 sp<Numeric> Math::dot(const sp<Vec4>& lvalue, const sp<Vec4>& rvalue)
 {
-    return sp<VariableOP2<sp<Vec4>, sp<Vec4>, Operators::Dot<V4>>>::make(lvalue, rvalue);
+    return sp<Numeric>::make<VariableOP2<sp<Vec4>, sp<Vec4>, Operators::Dot<V4>>>(lvalue, rvalue);
 }
 
-float Math::lerp(float a, float b, float t)
+float Math::lerp(const float a, const float b, const float t)
 {
     return a + (b - a) * t;
 }
 
-float Math::lerp(float a, float b, float t0, float t1, float t)
+float Math::lerp(const float a, const float b, const float t0, const float t1, const float t)
 {
-    float nt = t0 == t1 ? 0 : (t - t0) / (t1 - t0);
+    const float nt = t0 == t1 ? 0 : (t - t0) / (t1 - t0);
     return lerp(a, b, nt);
 }
 

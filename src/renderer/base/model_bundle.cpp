@@ -83,7 +83,7 @@ namespace {
 
 class AddModuleRunnable final : public Runnable {
 public:
-    AddModuleRunnable(int32_t type, sp<ModelBundle::Stub> stub, sp<Model> model, sp<Future> future)
+    AddModuleRunnable(const int32_t type, sp<ModelBundle::Stub> stub, sp<Model> model, sp<Future> future)
         : _type(type), _stub(std::move(stub)), _model(std::move(model)), _future(std::move(future))
     {
     }
@@ -104,7 +104,7 @@ private:
 
 class ImportModuleRunnable final : public Runnable {
 public:
-    ImportModuleRunnable(int32_t type, Manifest manifest, const sp<ModelBundle::Stub>& stub, sp<ModelLoader::Importer> importer, sp<Executor> executor, sp<Future> future)
+    ImportModuleRunnable(const int32_t type, Manifest manifest, const sp<ModelBundle::Stub>& stub, sp<ModelLoader::Importer> importer, sp<Executor> executor, sp<Future> future)
         : _type(type), _manifest(std::move(manifest)), _stub(stub), _importer(std::move(importer)), _executor(std::move(executor)), _future(std::move(future))
     {
     }

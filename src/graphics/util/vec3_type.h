@@ -121,7 +121,9 @@ public:
     static sp<Vec3> integralS2(sp<Vec3> self, const V3& s0, const Optional<V3>& s1 = Optional<V3>(), sp<Numeric> t = nullptr);
 
 //  [[script::bindings::classmethod]]
-    static sp<Numeric> distanceTo(const sp<Vec3>& self, const sp<Vec3>& other);
+    static sp<Numeric> distance(const sp<Vec3>& self, const sp<Vec3>& other);
+//  [[script::bindings::classmethod]]
+    static sp<Numeric> distance2(const sp<Vec3>& self, const sp<Vec3>& other);
 //  [[script::bindings::classmethod]]
     static sp<Numeric> hypot(sp<Vec3> self);
 **/

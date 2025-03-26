@@ -99,6 +99,14 @@ public:
         }
     };
 
+    template<typename T, typename P = T> class Distance2 {
+    public:
+        float operator()(const T& v1, const P& v2) {
+            const auto d = v1 - v2;
+            return d.dot(d);
+        }
+    };
+
     template<typename T> class Hypot {
     public:
         float operator()(const T& v) {

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "core/base/api.h"
-#include "core/impl/variable/variable_wrapper.h"
+#include "core/types/safe_var.h"
 #include "core/types/shared_ptr.h"
 
 namespace ark {
@@ -17,17 +17,16 @@ public:
     void done();
 
 //  [[script::bindings::property]]
-    bool isCancelled() const;
+    sp<Boolean> isCanceled() const;
 //  [[script::bindings::property]]
-    bool isDone() const;
-
+    sp<Boolean> isDone() const;
 //  [[script::bindings::property]]
-    sp<Boolean> canceled() const;
+    sp<Boolean> isDoneOrCanceled() const;
 
 private:
-    sp<VariableWrapper<bool>> _canceled;
+    SafeVar<Boolean> _done;
+    SafeVar<Boolean> _canceled;
     sp<Runnable> _observer;
-    bool _done;
 };
 
 }

@@ -122,8 +122,12 @@ public:
         return sp<IntegralS2<T>>::make(std::move(self), std::move(duration), s0, s1 ? s1.value() : s0);
     }
 
-    static sp<Numeric> distanceTo(sp<VarType> self, sp<VarType> other) {
+    static sp<Numeric> distance(sp<VarType> self, sp<VarType> other) {
         return Math::distance(std::move(self), std::move(other));
+    }
+
+    static sp<Numeric> distance2(sp<VarType> self, sp<VarType> other) {
+        return sp<Numeric>::make<VariableOP2<sp<VarType>, sp<VarType>, Operators::Distance2<T>>>(std::move(self), std::move(other));
     }
 
     static sp<Numeric> hypot(sp<VarType> self) {

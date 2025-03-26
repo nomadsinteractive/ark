@@ -1,38 +1,39 @@
 #include "core/base/future.h"
 
 #include "core/base/observer.h"
+#include "core/util/boolean_type.h"
 
 namespace ark {
 
 Future::Future(sp<Boolean> canceled, sp<Runnable> observer)
-    : _canceled(canceled ? sp<VariableWrapper<bool>>::make(std::move(canceled)) : sp<VariableWrapper<bool>>::make(false)), _observer(std::move(observer)), _done(false) {
+    : _done(nullptr, false), _canceled(std::move(canceled), false), _observer(std::move(observer)) {
 }
 
 void Future::cancel()
 {
-    _canceled->set(true);
+    _canceled.reset(true);
 }
 
 void Future::done()
 {
-    _done = true;
-    if(_observer)
-        _observer->run();
+    _done.reset(true);
+    if(const sp<Runnable> observer = std::move(_observer))
+        observer->run();
 }
 
-bool Future::isCancelled() const
+sp<Boolean> Future::isCanceled() const
 {
-    return _canceled->val();
+    return _canceled.toVar();
 }
 
-bool Future::isDone() const
+sp<Boolean> Future::isDone() const
 {
-    return _done;
+    return _done.toVar();
 }
 
-sp<Boolean> Future::canceled() const
+sp<Boolean> Future::isDoneOrCanceled() const
 {
-    return _canceled;
+    return BooleanType::__or__(_done.toVar(), _canceled.toVar());
 }
 
 }

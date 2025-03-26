@@ -238,8 +238,14 @@ void ApplicationFacade::schedule(sp<Runnable> task, const float interval, sp<Boo
 sp<Future> ApplicationFacade::expect(sp<Boolean> condition, sp<Runnable> observer, sp<Boolean> canceled)
 {
     sp<Future> future = sp<Future>::make(std::move(canceled), std::move(observer));
-    _context->renderController()->addPreComposeUpdatable(sp<Updatable>::make<UpdatableExpecting>(std::move(condition), future), future->canceled());
+    _context->renderController()->addPreComposeUpdatable(sp<Updatable>::make<UpdatableExpecting>(std::move(condition), future), future->isDoneOrCanceled());
     return future;
+}
+
+sp<Future> ApplicationFacade::expect(sp<Boolean> condition, sp<Future> observer, sp<Boolean> canceled)
+{
+    _context->renderController()->addPreComposeUpdatable(sp<Updatable>::make<UpdatableExpecting>(std::move(condition), observer), canceled ? std::move(canceled) : observer->isDoneOrCanceled());
+    return observer;
 }
 
 void ApplicationFacade::addStringBundle(const String& name, const sp<StringBundle>& stringBundle)

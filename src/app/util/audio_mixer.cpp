@@ -143,7 +143,7 @@ AudioMixer::Track::Track(const sp<Readable>& readable)
 size_t AudioMixer::Track::read(int16_t* in, int32_t* out, size_t size) const
 {
     size_t readSize = _readable->read(in, size);
-    if(readSize > 0 && !_future->isCancelled())
+    if(readSize > 0 && !_future->isCanceled())
     {
         size_t len = readSize / 2;
         for(size_t i = 0; i < len; i++)

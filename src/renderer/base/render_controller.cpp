@@ -242,7 +242,7 @@ void RenderController::upload(sp<Resource> resource, const UploadStrategy strate
     if(strategy.has(US_ON_CHANGE))
     {
         CHECK(updatable, "An updatable must be specified using \"on_change\" upload strategy");
-        sp<Boolean> discarded = future ? future->canceled() : sp<Boolean>::make<BooleanByWeakRef<Resource>>(resource, 1);
+        sp<Boolean> discarded = future ? future->isCanceled() : sp<Boolean>::make<BooleanByWeakRef<Resource>>(resource, 1);
         addPreComposeUpdatable(std::move(updatable), std::move(discarded));
     }
     if(strategy != US_ON_CHANGE)
@@ -428,7 +428,7 @@ bool RenderController::RenderResource::isExpired() const
 
 bool RenderController::RenderResource::isCancelled() const
 {
-    return _future ? _future->isCancelled() : false;
+    return _future ? _future->isCanceled()->val() : false;
 }
 
 void RenderController::RenderResource::upload(GraphicsContext& graphicsContext) const

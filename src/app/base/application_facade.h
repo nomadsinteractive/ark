@@ -74,6 +74,8 @@ public:
 
 //  [[script::bindings::auto]]
     sp<Future> expect(sp<Boolean> condition, sp<Runnable> observer, sp<Boolean> canceled = nullptr);
+//  [[script::bindings::auto]]
+    sp<Future> expect(sp<Boolean> condition, sp<Future> observer, sp<Boolean> canceled = nullptr);
 
 //  [[script::bindings::auto]]
     void addStringBundle(const String& name, const sp<StringBundle>& stringBundle);

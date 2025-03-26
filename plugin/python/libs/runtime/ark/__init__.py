@@ -468,7 +468,19 @@ class ApplicationBundle:
 
 
 class Future:
-    def __init__(self, canceled: Optional['Boolean'] = None, observer: Optional['Observer'] = None):
+    def __init__(self, canceled: Optional[Boolean] = None, observer: Optional[Runnable] = None):
+        pass
+
+    @property
+    def is_canceled(self) -> Boolean:
+        pass
+
+    @property
+    def is_done(self) -> Boolean:
+        pass
+
+    @property
+    def is_done_or_canceled(self) -> Boolean:
         pass
 
     def cancel(self):
@@ -477,13 +489,6 @@ class Future:
     def done(self):
         pass
 
-    @property
-    def is_cancelled(self) -> bool:
-        return False
-
-    @property
-    def is_done(self) -> bool:
-        return False
 
 
 class Ref:
@@ -708,7 +713,7 @@ class ApplicationFacade:
     def schedule(self, task: Callable, interval: float, canceled: Optional['Boolean'] = None):
         pass
 
-    def expect(self, condition: 'Boolean', observer: Runnable, canceled: Optional['Boolean'] = None) -> Future:
+    def expect(self, condition: 'Boolean', observer: Runnable | Future, canceled: Optional['Boolean'] = None) -> Future:
         pass
 
 
@@ -828,7 +833,7 @@ class ApplicationManifest:
         return Size(0, 0)
 
 
-class Observer:
+class Observer(Runnable):
     def __init__(self):
         pass
 
@@ -1129,7 +1134,10 @@ class Vec2(_Var):
     def normalize(self):
         pass
 
-    def distance_to(self, other) -> Numeric:
+    def distance(self, other) -> Numeric:
+        pass
+
+    def distance2(self, other) -> Numeric:
         pass
 
     def hypot(self) -> Numeric:
