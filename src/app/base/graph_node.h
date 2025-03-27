@@ -1,14 +1,16 @@
 #pragma once
 
-#include "core/collection/list.h"
+#include "core/types/box.h"
 
 #include "graphics/base/v3.h"
 
 #include "app/forwarding.h"
+#include "app/base/graph.h"
+#include "app/base/graph_route.h"
 
 namespace ark {
 
-class ARK_API GraphNode {
+class ARK_API GraphNode : public Graph::SearchingNodeProvider {
 public:
     GraphNode(Graph& graph, const V3& position, Box tag);
 
@@ -25,7 +27,7 @@ public:
     void setTag(Box tag);
 
 //  [[script::bindings::auto]]
-    Vector<sp<GraphNode>> findRoute(GraphNode& goal);
+    Vector<V3> findPath(GraphNode& goal);
 
     sp<GraphNode> toSharedPtr() const;
 
@@ -39,8 +41,7 @@ public:
     const Vector<GraphRoute>& outRoutes() const;
     Vector<GraphRoute>& outRoutes();
 
-private:
-    void doDisconnect(Vector<GraphRoute>& routes, GraphNode* toNode, bool entryOrExit);
+    void visitAdjacentNodes(const V3& position, const std::function<void(GraphSearchingNode, float)>& visitor) override;
 
 private:
     Graph& _graph;

@@ -2,53 +2,25 @@
 
 #include "app/base/graph.h"
 #include "app/base/graph_route.h"
+#include "app/base/graph_searching_node.h"
 #include "app/util/a_star.h"
 
 namespace ark {
 
 namespace {
 
-class SearchingGraphNode {
-public:
-    SearchingGraphNode(GraphNode& graphNode)
-        : _graph_node(graphNode) {
+void disconnectNode(Vector<GraphRoute>& routes, GraphNode* toNode, const bool entryOrExit)
+{
+    for(auto iter = routes.begin(); iter != routes.end(); )
+    {
+        if((entryOrExit ? &iter->entry() : &iter->exit()) == toNode)
+            iter = routes.erase(iter);
+        else
+            ++iter;
     }
-
-    const V3& position() const {
-        return _graph_node.position();
-    }
-
-    void visitAdjacentNodes(const std::function<void(SearchingGraphNode, float)>& visitor) {
-        for(GraphRoute& i : _graph_node.outRoutes())
-            visitor(i.exit(), i.weight());
-    }
-
-    bool operator == (const SearchingGraphNode& other) const {
-        return &_graph_node == &other._graph_node;
-    }
-
-    bool operator != (const SearchingGraphNode& other) const {
-        return &_graph_node != &other._graph_node;
-    }
-
-    GraphNode& _graph_node;
-};
-
 }
 
 }
-
-namespace std {
-
-template <> struct hash<ark::SearchingGraphNode> {
-    size_t operator()(const ark::SearchingGraphNode& str) const {
-        return reinterpret_cast<size_t>(&str._graph_node);
-    }
-};
-
-}
-
-namespace ark {
 
 GraphNode::GraphNode(Graph& graph, const V3& position, Box tag)
     : _graph(graph), _position(position), _tag(std::move(tag))
@@ -73,10 +45,10 @@ void GraphNode::addRoute(GraphNode& toNode, const float length, const bool bidir
 
 void GraphNode::disconnect(GraphNode& toNode)
 {
-    doDisconnect(_in_routes, &toNode, true);
-    doDisconnect(_out_routes, &toNode, false);
-    doDisconnect(toNode._in_routes, this, true);
-    doDisconnect(toNode._out_routes, this, false);
+    disconnectNode(_in_routes, &toNode, true);
+    disconnectNode(_out_routes, &toNode, false);
+    disconnectNode(toNode._in_routes, this, true);
+    disconnectNode(toNode._out_routes, this, false);
 }
 
 const Box& GraphNode::tag() const
@@ -89,12 +61,12 @@ void GraphNode::setTag(Box tag)
     _tag = std::move(tag);
 }
 
-Vector<sp<GraphNode>> GraphNode::findRoute(GraphNode& goal)
+Vector<V3> GraphNode::findPath(GraphNode& goal)
 {
-    Vector<sp<GraphNode>> result;
-    AStar<SearchingGraphNode> searchingGraph(*this, goal);
-    for(const SearchingGraphNode& i : searchingGraph.findRoute())
-        result.push_back(i._graph_node.toSharedPtr());
+    Vector<V3> result;
+    AStar<GraphSearchingNode> pathFinder(this->toSharedPtr(), goal.toSharedPtr());
+    for(const GraphSearchingNode& i : pathFinder.findPath())
+        result.push_back(i.position());
     return result;
 }
 
@@ -134,15 +106,10 @@ Vector<GraphRoute>& GraphNode::outRoutes()
     return _out_routes;
 }
 
-void GraphNode::doDisconnect(Vector<GraphRoute>& routes, GraphNode* toNode, const bool entryOrExit)
+void GraphNode::visitAdjacentNodes(const V3& /*position*/, const std::function<void(GraphSearchingNode, float)>& visitor)
 {
-    for(auto iter = routes.begin(); iter != routes.end(); )
-    {
-        if((entryOrExit ? &iter->entry() : &iter->exit()) == toNode)
-            iter = routes.erase(iter);
-        else
-            ++iter;
-    }
+    for(GraphRoute& i : _out_routes)
+        visitor(GraphSearchingNode(i.exit().toSharedPtr()), i.weight());
 }
 
 }

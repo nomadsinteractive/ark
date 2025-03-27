@@ -11,6 +11,12 @@ namespace ark {
 
 class ARK_API Graph {
 public:
+    class SearchingNodeProvider {
+    public:
+        virtual void visitAdjacentNodes(const V3& position, const std::function<void(GraphSearchingNode, float)>& visitor) = 0;
+    };
+
+public:
 //  [[script::bindings::auto]]
     Graph();
     ~Graph();
@@ -19,7 +25,6 @@ public:
     const Vector<sp<GraphNode>>& nodes() const;
 //  [[script::bindings::auto]]
     sp<GraphNode> makeNode(const V3& position, Box tag = nullptr);
-
 //  [[script::bindings::auto]]
     bool hasNode(const GraphNode& node) const;
 

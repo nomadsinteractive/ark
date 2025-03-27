@@ -102,7 +102,7 @@ private:
     };
 
     struct EnumStub {
-        EnumStub(int32_t value)
+        EnumStub(const int32_t value)
             : _value(value) {
         }
 

@@ -92,8 +92,7 @@ public:
         return n && !(n & (n - 1));
     }
 
-    template<class T> static typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type
-        almostEqual(T x, T y, int32_t ulp = 4) {
+    template<class T> static std::enable_if_t<!std::numeric_limits<T>::is_integer, bool> almostEqual(T x, T y, int32_t ulp = 4) {
         return std::abs(x - y) < std::numeric_limits<T>::epsilon() * std::abs(x + y) * ulp
                || std::abs(x - y) < std::numeric_limits<T>::min();
     }
@@ -105,7 +104,7 @@ public:
 
         using TSizeType = typename T::size_type;
         const TSizeType min_size = source.size(), max_size = target.size();
-        std::vector<TSizeType> lev_dist(min_size + 1);
+        Vector<TSizeType> lev_dist(min_size + 1);
 
         for (TSizeType i = 0; i <= min_size; ++i) {
             lev_dist[i] = i;

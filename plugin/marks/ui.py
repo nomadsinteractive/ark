@@ -412,6 +412,6 @@ def close_main_window():
 
 def show_main_window(application_facade: ApplicationFacade, imgui: Renderer, resolution: Vec2, quick_bar_items: Optional[list[QuickBarItem]] = None, console_cmds: Optional[list[ConsoleCommand]] = None):
     global _mark_studio
-    if not _mark_studio:
+    if not _mark_studio or _mark_studio.discarded:
         _mark_studio = MarkStudio(application_facade, imgui, resolution, quick_bar_items)
         _mark_studio.show(console_cmds)

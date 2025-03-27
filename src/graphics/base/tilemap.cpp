@@ -84,6 +84,12 @@ struct SearchingTilemapNode {
                     visitor(SearchingTilemapNode(_searching_tilemap, _col + i, _row + j), std::abs(i) + std::abs(j));
     }
 
+    bool operator < (const SearchingTilemapNode& other) const {
+        if(_col != other._col)
+            return _col < other._col;
+        return _row < other._row;
+    }
+
     bool operator == (const SearchingTilemapNode& other) const {
         return _col == other._col && _row == other._row;
     }
@@ -97,20 +103,14 @@ struct SearchingTilemapNode {
     int32_t _row;
 };
 
-struct SearchingTilemapNodeHasher {
-    size_t operator()(const SearchingTilemapNode& str) const {
-        return getCoordinateHasher(str._col, str._row);
-    }
-};
-
 class TilemapLayerMaker : public RendererMaker {
 public:
     TilemapLayerMaker(Tilemap& tilemap, sp<RendererMaker> delegate)
         : _tilemap(tilemap), _delegate(std::move(delegate)) {
     }
 
-    virtual std::vector<Box> make(float x, float y) override {
-        std::vector<Box> renderers = _delegate->make(x, y);
+    Vector<Box> make(float x, float y) override {
+        Vector<Box> renderers = _delegate->make(x, y);
         for(const Box& i : renderers) {
             sp<TilemapLayer> tilemapLayer = i.as<TilemapLayer>();
             CHECK_WARN(tilemapLayer, "Tilemap's RendererMaker should return TilemapLayer instance, others will be ignored");
@@ -120,7 +120,7 @@ public:
         return renderers;
     }
 
-    virtual void recycle(const Box& renderer) override {
+    void recycle(const Box& renderer) override {
         sp<TilemapLayer> tilemapLayer = renderer.as<TilemapLayer>();
         CHECK_WARN(tilemapLayer, "Tilemap's RendererMaker should return TilemapLayer instance, others will be ignored");
         _delegate->recycle(renderer);
@@ -293,7 +293,7 @@ Json Tilemap::jsonDump() const
             jLayer.set("collision_filter", jCollisionFilter);
         }
 
-        std::vector<int32_t> tiles(colCount * rowCount, 0);
+        Vector<int32_t> tiles(colCount * rowCount, 0);
         i->foreachTile([&tiles, rowCount, colCount] (uint32_t col, uint32_t row, const sp<Tile>& tile) {
             tiles[(rowCount - 1 - row) * colCount + col] = tile->id() + 1;
             return true;
@@ -308,17 +308,17 @@ Json Tilemap::jsonDump() const
     return jTilemap;
 }
 
-std::vector<std::array<int32_t, 2>> Tilemap::findRoute(const std::array<int32_t, 2>& start, const std::array<int32_t, 2>& goal)
+Vector<std::array<int32_t, 2>> Tilemap::findRoute(const std::array<int32_t, 2>& start, const std::array<int32_t, 2>& goal)
 {
-    std::vector<std::array<int32_t, 2>> result;
+    Vector<std::array<int32_t, 2>> result;
     SearchingTilemap searchingTilemap(*this);
-    AStar<SearchingTilemapNode, SearchingTilemapNodeHasher> astar(SearchingTilemapNode(searchingTilemap, start[0], start[1]), SearchingTilemapNode(searchingTilemap, goal[0], goal[1]));
-    for(const SearchingTilemapNode& i : astar.findRoute())
+    AStar<SearchingTilemapNode> pathFinder(SearchingTilemapNode(searchingTilemap, start[0], start[1]), SearchingTilemapNode(searchingTilemap, goal[0], goal[1]));
+    for(const SearchingTilemapNode& i : pathFinder.findPath())
         result.push_back({i._col, i._row});
     return result;
 }
 
-const std::vector<sp<TilemapLayer>>& Tilemap::layers() const
+const Vector<sp<TilemapLayer>>& Tilemap::layers() const
 {
     return _stub->_layers;
 }
@@ -335,7 +335,7 @@ sp<Tilemap> Tilemap::BUILDER::build(const Scope& args)
     return tilemap;
 }
 
-std::vector<sp<LayerContext>>& Tilemap::Stub::snapshot(const RenderRequest& renderRequest)
+Vector<sp<LayerContext>>& Tilemap::Stub::snapshot(const RenderRequest& renderRequest)
 {
     _layer_contexts.clear();
     for(TilemapLayer& i : _layers)

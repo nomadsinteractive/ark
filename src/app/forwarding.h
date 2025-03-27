@@ -25,6 +25,7 @@ class EventListenerList;
 class EventListenerWrapper;
 class Graph;
 class GraphNode;
+class GraphSearchingNode;
 class GraphRoute;
 class ViewHierarchy;
 class Level;

@@ -8,45 +8,45 @@
 
 namespace ark {
 
-template<typename T, typename H = std::hash<T>> class AStar {
+template<typename T> class AStar {
 private:
-    struct SearchingRoute {
+    struct SearchingPath {
         float _score;
         float _weight;
-        Vector<T> _route_path;
+        Vector<T> _nodes;
 
-        bool operator < (const SearchingRoute& other) const {
+        bool operator < (const SearchingPath& other) const {
             return _score < other._score;
         }
     };
 
 public:
     AStar(T start, T goal)
-        : _start(std::move(start)), _goal(std::move(goal)), _routes{ SearchingRoute{getHeuristicValue(_start), 0, {_start}} } {
+        : _start(std::move(start)), _goal(std::move(goal)), _paths{ SearchingPath{getHeuristicValue(_start), 0, {_start}} } {
     }
 
-    Vector<T> findRoute() {
-        while(_routes.size() > 0) {
-            if(_routes.begin()->_route_path.back() == _goal)
-                return _routes.begin()->_route_path;
+    Vector<T> findPath() {
+        while(_paths.size() > 0) {
+            if(_paths.begin()->_nodes.back() == _goal)
+                return _paths.begin()->_nodes;
 
-            if(Optional<SearchingRoute> inflated = inflate())
-                _routes.insert(std::move(inflated.value()));
+            if(Optional<SearchingPath> inflated = inflate())
+                _paths.insert(std::move(inflated.value()));
             else
-                _routes.erase(_routes.begin());
+                _paths.erase(_paths.begin());
         }
         return {};
     }
 
 private:
-    Optional<SearchingRoute> inflate() {
+    Optional<SearchingPath> inflate() {
         std::unique_ptr<T> nextNode;
         float nextWeight;
         float nextScore;
         float bestScore = std::numeric_limits<float>::max();
         const auto visitor = [this, &nextNode, &nextWeight, &nextScore, &bestScore] (T node, float weight) {
             if(_close_set.find(node) == _close_set.end()) {
-                const SearchingRoute& next = *_routes.begin();
+                const SearchingPath& next = *_paths.begin();
                 nextWeight = next._weight + weight;
                 nextScore = nextWeight + getHeuristicValue(node);
                 if(bestScore > nextScore) {
@@ -56,25 +56,25 @@ private:
             }
         };
 
-        T(_routes.begin()->_route_path.back()).visitAdjacentNodes(visitor);
+        T(_paths.begin()->_nodes.back()).visitAdjacentNodes(visitor);
         if(nextNode) {
-            SearchingRoute bestRoute{nextScore, nextWeight, _routes.begin()->_route_path};
+            SearchingPath bestRoute{nextScore, nextWeight, _paths.begin()->_nodes};
             _close_set.insert(*nextNode);
-            bestRoute._route_path.push_back(std::move(*nextNode));
+            bestRoute._nodes.push_back(std::move(*nextNode));
             return bestRoute;
         }
-        return Optional<SearchingRoute>();
+        return Optional<SearchingPath>();
     }
 
     float getHeuristicValue(T& from) const {
         const V3 d = from.position() - _goal.position();
-        return d.dot(d);
+        return d.hypot();
     }
 
 private:
     T _start, _goal;
-    std::multiset<SearchingRoute> _routes;
-    HashSet<T, H> _close_set;
+    std::multiset<SearchingPath> _paths;
+    Set<T> _close_set;
 };
 
 }

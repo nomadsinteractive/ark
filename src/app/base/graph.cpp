@@ -5,9 +5,13 @@
 
 namespace ark {
 
-static bool _graph_node_compare(const GraphNode& n1, const GraphNode& n2)
+namespace {
+
+bool _graph_node_compare(const GraphNode& n1, const GraphNode& n2)
 {
     return &n1 < &n2;
+}
+
 }
 
 Graph::Graph()
