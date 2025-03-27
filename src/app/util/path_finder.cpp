@@ -1,12 +1,12 @@
 #include "app/util/path_finder.h"
 
-#include "app/base/graph_searching_node.h"
+#include "core/util/math.h"
 #include "core/components/behavior.h"
 
 #include "graphics/base/v3.h"
 
+#include "app/base/graph_searching_node.h"
 #include "app/util/a_star.h"
-#include "core/util/math.h"
 
 namespace ark {
 
@@ -19,7 +19,7 @@ public:
 
     void visitAdjacentNodes(const V3& position, const std::function<void(GraphSearchingNode, float)>& visitor) override
     {
-        auto v = [this, position, visitor](const V3& pos) {
+        auto v = [this, &position, &visitor](const V3& pos) {
             const float weight = Math::distance(position, pos);
             visitor(GraphSearchingNode(pos, _path_finder._searching_node_provider), weight);
         };

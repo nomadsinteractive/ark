@@ -24,9 +24,9 @@ public:
         : _func(std::move(func)) {
     }
 
-    void call(const sp<PyInstanceRef>& pyref) override
+    void call(const PyInstance& pyobj) override
     {
-        const T a1 = PyCast::ensureCppObject<T>(pyref->instance());
+        const T a1 = PyCast::ensureCppObject<T>(pyobj.pyObject());
         _func(a1);
     }
 

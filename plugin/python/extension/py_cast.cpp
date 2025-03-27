@@ -501,6 +501,11 @@ template<> ARK_PLUGIN_PYTHON_API Optional<Color> PyCast::toCppObject_impl<Color>
     return Color();
 }
 
+template<> ARK_PLUGIN_PYTHON_API Optional<PyInstance> PyCast::toCppObject_impl<PyInstance>(PyObject* object)
+{
+    return PyInstance::own(object);
+}
+
 template<> ARK_PLUGIN_PYTHON_API PyObject* PyCast::toPyObject_impl<Box>(const Box& value)
 {
     return toPyObject(value);

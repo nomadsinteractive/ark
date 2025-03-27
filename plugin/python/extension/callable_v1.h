@@ -11,7 +11,7 @@ public:
     virtual ~CallableV1() = default;
 
 //  [[script::bindings::operator(call)]]
-    virtual void call(const sp<PyInstanceRef>& pyref) = 0;
+    virtual void call(const PyInstance& pyobj) = 0;
 };
 
 }
