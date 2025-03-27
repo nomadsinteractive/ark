@@ -7,12 +7,34 @@
 #include "core/types/global.h"
 #include "core/util/log.h"
 
+#include "python/extension/callable_v1.h"
 #include "python/extension/py_instance_ref.h"
+#include "python/extension/py_cast.h"
 #include "python/extension/reference_manager.h"
 
 #include "python/impl/adapter/runnable_python.h"
 
 namespace ark::plugin::python {
+
+namespace {
+
+template<typename T> class CallableV1Trivial final : public CallableV1 {
+public:
+    CallableV1Trivial(std::function<void(const T&)> func)
+        : _func(std::move(func)) {
+    }
+
+    void call(const sp<PyInstanceRef>& pyref) override
+    {
+        const T a1 = PyCast::ensureCppObject<T>(pyref->instance());
+        _func(a1);
+    }
+
+private:
+    std::function<void(const T&)> _func;
+};
+
+}
 
 const sp<ReferenceManager>& PythonExtension::referenceManager() const
 {
@@ -62,11 +84,17 @@ PyObject* PythonExtension::toPyObject(const Box& box)
         return object;
     }
 
+    if(box.typeId() == Type<std::function<void(const V3&)>>::id())
+    {
+        std::function<void(const V3&)> func = *box.as<std::function<void(const V3&)>>();
+        return pyNewObject(sp<CallableV1>::make<CallableV1Trivial<V3>>(std::move(func)));
+    }
+
     const auto iter = _type_by_id.find(box.typeId());
     return iter != _type_by_id.end() ? iter->second->create(box) : getPyArkType<Box>()->create(box);
 }
 
-bool PythonExtension::isPyObject(TypeId type) const
+bool PythonExtension::isPyObject(const TypeId type) const
 {
     return (type == Type<PyInstance>::id()) || _type_by_id.find(type) != _type_by_id.end();
 }
@@ -82,8 +110,7 @@ void PythonExtension::logErr() const
 
 bool PythonExtension::exceptErr(PyObject* type) const
 {
-    PyObject* err = PyErr_Occurred();
-    if(err)
+    if(PyObject* err = PyErr_Occurred())
     {
         if(PyErr_GivenExceptionMatches(err, type))
         {

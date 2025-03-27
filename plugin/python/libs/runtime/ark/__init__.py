@@ -2903,5 +2903,13 @@ class Position(Vec3):
         pass
 
 
+class PathFinder:
+    def __init__(self, behavior: Behavior, name: str = 'visit_adjacent_nodes'):
+        pass
+
+    def find_path(self, start: tuple[float, float, float], end: tuple[float, float, float]) -> list[tuple[float, float, float]]:
+        pass
+
+
 def __trace__():
     pass

@@ -381,8 +381,10 @@ class GenSetPropMethod(GenMethod):
 class GenOperatorMethod(GenMethod):
     def __init__(self, name, args, return_type: str, operator: str, is_static: bool):
         GenMethod.__init__(self, name, args, return_type, is_static)
-        self._self_argument = None if self._is_static else self._arguments and self._arguments[0]
-        self._arguments = self._arguments if self._is_static else self._arguments[1:]
+        is_call_operator = operator == 'call'
+        self._self_argument = None if self._is_static or is_call_operator else self._arguments and self._arguments[0]
+        if not is_call_operator:
+            self._arguments = self._arguments if self._is_static else self._arguments[1:]
         self._operator = operator
         self._return_int = self._return_type == 'bool'
 
@@ -399,7 +401,7 @@ class GenOperatorMethod(GenMethod):
     def gen_py_arguments(self):
         if self._operator == 'call':
             assert not self._is_static
-            return 'Instance* self, PyObject*, PyObject*'
+            return f'Instance* self, PyObject* args, PyObject* kws'
         arglen = len(self._arguments)
         args = ['PyObject* arg%d' % i for i in range(arglen)]
         if self._is_static:
@@ -420,7 +422,8 @@ class GenOperatorMethod(GenMethod):
         return super().gen_return_statement(return_type, py_return)
 
     def _gen_parse_tuple_code(self, lines, declares, args):
-        pass
+        if self._operator == 'call':
+            return super()._gen_parse_tuple_code(lines, declares, args)
 
     @property
     def err_return_value(self):
