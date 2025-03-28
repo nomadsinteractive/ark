@@ -23,7 +23,8 @@ namespace ark {
 
 namespace {
 
-struct UpdatableExpecting final : Updatable {
+class UpdatableExpecting final : public Updatable {
+public:
     UpdatableExpecting(sp<Boolean> condition, sp<Future> future)
         : _condition(std::move(condition)), _future(std::move(future)) {
     }
@@ -35,6 +36,7 @@ struct UpdatableExpecting final : Updatable {
         return dirty;
     }
 
+private:
     sp<Boolean> _condition;
     sp<Future> _future;
 };
@@ -219,7 +221,7 @@ void ApplicationFacade::exit()
     _controller->exit();
 }
 
-void ApplicationFacade::post(sp<Runnable> task, float delay, sp<Boolean> canceled)
+void ApplicationFacade::post(sp<Runnable> task, const float delay, sp<Boolean> canceled)
 {
     _context->messageLoopApp()->post(std::move(task), delay, std::move(canceled));
 }
@@ -230,22 +232,14 @@ void ApplicationFacade::post(sp<Runnable> task, const Vector<float>& delays, con
         post(task, i, canceled);
 }
 
-void ApplicationFacade::schedule(sp<Runnable> task, const float interval, sp<Boolean> canceled)
+void ApplicationFacade::schedule(sp<Runnable> task, const float interval, sp<Boolean> canceled) const
 {
     _context->messageLoopApp()->schedule(std::move(task), interval, std::move(canceled));
 }
 
-sp<Future> ApplicationFacade::expect(sp<Boolean> condition, sp<Runnable> observer, sp<Boolean> canceled)
+void ApplicationFacade::expect(sp<Boolean> condition, sp<Future> future) const
 {
-    sp<Future> future = sp<Future>::make(std::move(canceled), std::move(observer));
     _context->renderController()->addPreComposeUpdatable(sp<Updatable>::make<UpdatableExpecting>(std::move(condition), future), future->isDoneOrCanceled());
-    return future;
-}
-
-sp<Future> ApplicationFacade::expect(sp<Boolean> condition, sp<Future> observer, sp<Boolean> canceled)
-{
-    _context->renderController()->addPreComposeUpdatable(sp<Updatable>::make<UpdatableExpecting>(std::move(condition), observer), canceled ? std::move(canceled) : observer->isDoneOrCanceled());
-    return observer;
 }
 
 void ApplicationFacade::addStringBundle(const String& name, const sp<StringBundle>& stringBundle)

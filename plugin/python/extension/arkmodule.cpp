@@ -21,8 +21,6 @@
 #include "generated/py_ark_bindings.h"
 #include "renderer/base/render_engine.h"
 
-using namespace ark;
-
 namespace ark::plugin::python {
 
 namespace {
@@ -200,17 +198,17 @@ PyObject* initarkmodule()
 
 PyMODINIT_FUNC PyInit_ark(void)
 {
-    const std::vector<String>& paths = static_cast<ark::plugin::python::PythonInterpreter*>(Ark::instance().applicationContext()->interpreter().get())->paths();
+    const ark::Vector<ark::String>& paths = static_cast<ark::plugin::python::PythonInterpreter*>(ark::Ark::instance().applicationContext()->interpreter().get())->paths();
     PyObject* module = ark::plugin::python::initarkmodule();
     PyObject* path = PyList_New(static_cast<Py_ssize_t>(paths.size()));
     Py_ssize_t i = 0;
-    for(const String& str : paths)
+    for(const ark::String& str : paths)
         PyList_SetItem(path, i++, PyUnicode_FromString(str.c_str()));
     PyObject_SetAttrString(module, "path", path);
     Py_DECREF(path);
 
     //TODO: We should have it done better
-    const std::pair<const char*, const char*> type_hints[] = {
+    constexpr std::pair<const char*, const char*> type_hints[] = {
         {"TYPE_INTEGER", "ark.Integer"},
         {"TYPE_BOOLEAN", "ark.Boolean"},
         {"TYPE_ENUM", "Union[int, 'Enum']"},

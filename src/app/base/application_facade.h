@@ -70,12 +70,9 @@ public:
 //  [[script::bindings::auto]]
     void post(sp<Runnable> task, const Vector<float>& delays, const sp<Boolean>& canceled = nullptr);
 //  [[script::bindings::auto]]
-    void schedule(sp<Runnable> task, float interval, sp<Boolean> canceled = nullptr);
-
+    void schedule(sp<Runnable> task, float interval, sp<Boolean> canceled = nullptr) const;
 //  [[script::bindings::auto]]
-    sp<Future> expect(sp<Boolean> condition, sp<Runnable> observer, sp<Boolean> canceled = nullptr);
-//  [[script::bindings::auto]]
-    sp<Future> expect(sp<Boolean> condition, sp<Future> observer, sp<Boolean> canceled = nullptr);
+    void expect(sp<Boolean> condition, sp<Future> future) const;
 
 //  [[script::bindings::auto]]
     void addStringBundle(const String& name, const sp<StringBundle>& stringBundle);

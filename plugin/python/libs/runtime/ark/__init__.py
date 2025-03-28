@@ -468,7 +468,7 @@ class ApplicationBundle:
 
 
 class Future:
-    def __init__(self, canceled: Optional[Boolean] = None, observer: Optional[Runnable] = None):
+    def __init__(self, canceled: Optional[Boolean] = None, observer: Optional[Runnable] = None, cound_down: int = 1):
         pass
 
     @property
@@ -713,7 +713,7 @@ class ApplicationFacade:
     def schedule(self, task: Callable, interval: float, canceled: Optional['Boolean'] = None):
         pass
 
-    def expect(self, condition: 'Boolean', observer: Runnable | Future, canceled: Optional['Boolean'] = None) -> Future:
+    def expect(self, condition: Boolean, future: Future):
         pass
 
 

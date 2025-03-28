@@ -5,8 +5,10 @@
 
 namespace ark {
 
-Future::Future(sp<Boolean> canceled, sp<Runnable> observer)
-    : _done(nullptr, false), _canceled(std::move(canceled), false), _observer(std::move(observer)) {
+Future::Future(sp<Boolean> canceled, sp<Runnable> observer, const uint32_t countDown)
+    : _done(nullptr, false), _canceled(std::move(canceled), false), _observer(std::move(observer)), _count_down(countDown)
+{
+    CHECK(countDown != 0 || _observer, "You must provide an observer when creating a undonable Future(count down = 0)");
 }
 
 void Future::cancel()
@@ -16,9 +18,16 @@ void Future::cancel()
 
 void Future::done()
 {
-    _done.reset(true);
-    if(const sp<Runnable> observer = std::move(_observer))
-        observer->run();
+    if(_count_down == 1)
+    {
+        _done.reset(true);
+        if(const sp<Runnable> observer = std::move(_observer))
+            observer->run();
+    }
+    else if(_count_down == 0)
+        _observer->run();
+    else
+        -- _count_down;
 }
 
 sp<Boolean> Future::isCanceled() const
