@@ -21,7 +21,8 @@ struct Arena::Stub {
         if(iter == _layers.end())
         {
             sp<Layer> layer = _resource_loader->load<Layer>(name, {});
-            _layers.insert(std::make_pair(name, layer));
+            if(layer)
+                _layers.insert(std::make_pair(name, layer));
             return layer;
         }
         return iter->second;
@@ -33,7 +34,8 @@ struct Arena::Stub {
         if(iter == _render_layers.end())
         {
             sp<RenderLayer> renderLayer = _resource_loader->load<RenderLayer>(name, {});
-            _render_layers.insert(std::make_pair(name, renderLayer));
+            if(renderLayer)
+                _render_layers.insert(std::make_pair(name, renderLayer));
             return renderLayer;
         }
         return iter->second;
@@ -71,13 +73,20 @@ private:
 };
 
 Arena::Arena(sp<RenderGroup> renderGroup, sp<ResourceLoader> resourceLoader)
-    : _stub(sp<Stub>::make(Stub{std::move(renderGroup), std::move(resourceLoader)})), _layers(sp<LayerBundle>::make(_stub)), _render_layers(sp<RenderLayerBundle>::make(_stub))
+    : Niche("layer-name"), _stub(sp<Stub>::make(Stub{std::move(renderGroup), std::move(resourceLoader)})), _layers(sp<LayerBundle>::make(_stub)), _render_layers(sp<RenderLayerBundle>::make(_stub))
 {
 }
 
 const sp<BoxBundle>& Arena::renderLayers() const
 {
     return _render_layers;
+}
+
+void Arena::onPoll(Wirable::WiringContext& context, const StringView value)
+{
+    sp<Layer> layer = _stub->getLayer(value.data());
+    CHECK(layer, "Layer(%s) not found", value.data());
+    context.setComponent(std::move(layer));
 }
 
 const sp<BoxBundle>& Arena::layers() const

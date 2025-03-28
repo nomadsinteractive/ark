@@ -13,7 +13,7 @@
 
 namespace ark {
 
-WithRenderable::WithRenderable(std::vector<Manifest> manifests)
+WithRenderable::WithRenderable(Vector<Manifest> manifests)
     : _manifests(std::move(manifests))
 {
 }
@@ -61,7 +61,7 @@ WithRenderable::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 
 sp<Wirable> WithRenderable::BUILDER::build(const Scope& args)
 {
-    std::vector<Manifest> manifests;
+    Vector<Manifest> manifests;
     manifests.reserve(_manifests.size());
     for(const auto& [layer, renderable, renderObject, transformNode] : _manifests)
         manifests.push_back({layer->build(args), renderable ? renderable->build(args) : nullptr, renderObject ? renderObject->build(args) : nullptr, transformNode});

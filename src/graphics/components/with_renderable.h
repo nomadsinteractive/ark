@@ -32,7 +32,7 @@ public:
         String _transform_node;
     };
 
-//  [[plugin::builder("with_renderable")]]
+//  [[plugin::builder("with-renderable")]]
     class BUILDER final : public Builder<Wirable> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);

@@ -49,7 +49,7 @@ HashId NamedHash::hash() const
     return _hash;
 }
 
-const String& NamedHash::reverse(HashId hash)
+const String& NamedHash::reverse(const HashId hash)
 {
     return Global<HashNames>()->findName(hash);
 }

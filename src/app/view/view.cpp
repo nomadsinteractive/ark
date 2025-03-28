@@ -215,7 +215,7 @@ void View::onWire(const WiringContext& context, const Box& self)
         setDiscarded(std::move(discarded));
 }
 
-void View::onPoll(WiringContext& context, StringView value)
+void View::onPoll(WiringContext& context, const StringView value)
 {
     const sp<View> view = findView(value);
     view->onPoll(context);

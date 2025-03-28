@@ -468,7 +468,7 @@ class ApplicationBundle:
 
 
 class Future:
-    def __init__(self, canceled: Optional[Boolean] = None, observer: Optional[Runnable] = None, cound_down: int = 1):
+    def __init__(self, canceled: Optional[Boolean] = None, observer: Optional[Runnable] = None, count_down: int = 1):
         pass
 
     @property
@@ -1778,6 +1778,17 @@ class Layer:
         pass
 
 
+class Arena:
+
+    @property
+    def layers(self):
+        pass
+
+    @property
+    def render_layers(self):
+        pass
+
+
 class Activity:
 
     @property
@@ -1816,6 +1827,9 @@ class Activity:
         pass
 
     def add_event_listener(self, event_listener: Union[Callable[['Event'], bool], 'EventListener'], priority: int = 0):
+        pass
+
+    def make_arena(self) -> Arena:
         pass
 
 

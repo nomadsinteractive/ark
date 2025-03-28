@@ -242,10 +242,10 @@ void Atlas::AttachmentNinePatch::addNinePatch(int32_t type, uint32_t textureWidt
     };
 }
 
-const sp<Vertices>& Atlas::AttachmentNinePatch::ensureVerticesTriangleStrips(int32_t type, bool isLHS) const
+const sp<Vertices>& Atlas::AttachmentNinePatch::ensureVerticesTriangleStrips(const int32_t type, const bool isLHS) const
 {
     const auto iter = _nine_patch_vertices.find(type);
-    CHECK(iter != _nine_patch_vertices.end(), "Cannot find type: %d", type);
+    CHECK(iter != _nine_patch_vertices.end(), "Cannot find type: %d(%s)", type, NamedHash::reverse(type).c_str());
     return isLHS ? iter->second._triangle_strips_lhs : iter->second._triangle_strips_rhs;
 }
 

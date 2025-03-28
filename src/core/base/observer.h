@@ -19,7 +19,7 @@ public:
 //  [[script::bindings::auto]]
     void notify();
 //  [[script::bindings::auto]]
-    void addCallback(sp<Runnable> callback, bool oneshot = false, uint32_t triggerAfter = 1);
+    void addCallback(sp<Runnable> callback, bool oneshot = false, uint32_t countDown = 1);
 //  [[script::bindings::auto]]
     sp<Boolean> addBooleanSignal(bool value = false, bool oneshot = true);
 
@@ -28,7 +28,7 @@ private:
         sp<Runnable> _func;
         bool _oneshot;
         bool _owned;
-        uint32_t _trigger_after;
+        uint32_t _count_down;
     };
 
 private:
