@@ -1778,6 +1778,17 @@ class Layer:
         pass
 
 
+class Arena:
+
+    @property
+    def layers(self):
+        pass
+
+    @property
+    def render_layers(self):
+        pass
+
+
 class Activity:
 
     @property
@@ -1816,6 +1827,9 @@ class Activity:
         pass
 
     def add_event_listener(self, event_listener: Union[Callable[['Event'], bool], 'EventListener'], priority: int = 0):
+        pass
+
+    def make_arena(self) -> Arena:
         pass
 
 

@@ -50,10 +50,10 @@ void Observer::notify()
     }
 }
 
-void Observer::addCallback(sp<Runnable> callback, const bool oneshot, const uint32_t triggerAfter)
+void Observer::addCallback(sp<Runnable> callback, const bool oneshot, const uint32_t countDown)
 {
     ASSERT(callback);
-    _callbacks.push_back({std::move(callback), oneshot, false, triggerAfter});
+    _callbacks.push_back({std::move(callback), oneshot, false, countDown});
 }
 
 sp<Boolean> Observer::addBooleanSignal(bool value, const bool oneshot)

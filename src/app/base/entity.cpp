@@ -20,7 +20,7 @@ public:
     {
     }
 
-    bool update(uint64_t timestamp) override
+    bool update(const uint64_t timestamp) override
     {
         return _ref->discarded().update(timestamp);
     }

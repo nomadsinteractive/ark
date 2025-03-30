@@ -11,7 +11,7 @@ class Wirable {
 public:
     class WiringContext {
     public:
-        WiringContext(Traits& components, bool uploadOnClose = true)
+        WiringContext(Traits& components, const bool uploadOnClose = true)
             : _components(components), _upload_on_close(uploadOnClose) {
         }
         ~WiringContext() {
