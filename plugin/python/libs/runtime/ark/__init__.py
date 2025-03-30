@@ -468,7 +468,7 @@ class ApplicationBundle:
 
 
 class Future:
-    def __init__(self, canceled: Optional[Boolean] = None, observer: Optional[Runnable] = None, cound_down: int = 1):
+    def __init__(self, canceled: Optional[Boolean] = None, observer: Optional[Runnable] = None, count_down: int = 1):
         pass
 
     @property
