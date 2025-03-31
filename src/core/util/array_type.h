@@ -74,16 +74,16 @@ public:
         return self->length();
     }
 
-    static Optional<T> getItem(const sp<Array<T>>& self, ptrdiff_t index) {
+    static Optional<T> getItem(const sp<Array<T>>& self, const ptrdiff_t index) {
         return index >= 0 && static_cast<size_t>(index) < self->length() ? *getSubscriptionPtr(self, index) : Optional<T>();
     }
 
-    static int32_t setItem(const sp<Array<T>>& self, ptrdiff_t index, T value) {
+    static int32_t setItem(const sp<Array<T>>& self, const ptrdiff_t index, T value) {
         *getSubscriptionPtr(self, index) = value;
         return 0;
     }
 
-    static Optional<T> subscribe(const sp<Array<T>>& self, ptrdiff_t index) {
+    static Optional<T> subscribe(const sp<Array<T>>& self, const ptrdiff_t index) {
         return getItem(self, index);
     }
 
@@ -91,10 +91,10 @@ public:
         const Slice adjusted = slice.adjustIndices(self->length());
         CHECK(adjusted.begin() < adjusted.end() && adjusted.begin() >= 0 && adjusted.end() <= static_cast<ptrdiff_t>(self->length()), "Illegal slice(%d, %d)", slice.begin(), slice.end());
         CHECK(adjusted.step() == 1, "Non-continuous slicing is not supported");
-        return sp<Array<T>>::make<ArraySliced>(std::move(self), adjusted.begin(), adjusted.end() - adjusted.begin());
+        return sp<Array<T>>::template make<ArraySliced>(std::move(self), adjusted.begin(), adjusted.end() - adjusted.begin());
     }
 
-    static int32_t subscribeAssign(const sp<Array<T>>& self, ptrdiff_t index, T value) {
+    static int32_t subscribeAssign(const sp<Array<T>>& self, const ptrdiff_t index, T value) {
         return setItem(self, index, value);
     }
 
