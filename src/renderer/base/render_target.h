@@ -6,7 +6,6 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
-#include "graphics/impl/renderer/render_group.h"
 #include "graphics/inf/renderer.h"
 
 #include "renderer/forwarding.h"

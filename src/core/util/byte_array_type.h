@@ -36,7 +36,7 @@ public:
 //  [[script::bindings::map(set)]]
     static int32_t subscribeAssign(const sp<ByteArray>& self, ptrdiff_t index, uint8_t value);
 //  [[script::bindings::map(set)]]
-    static int32_t subscribeAssign(const sp<ByteArray>& self, const Slice& index, const std::vector<uint8_t>& value);
+    static int32_t subscribeAssign(const sp<ByteArray>& self, const Slice& index, const Vector<uint8_t>& value);
 
 //  [[script::bindings::classmethod]]
     static Span toBytes(const sp<ByteArray>& self);
@@ -55,7 +55,7 @@ public:
     static sp<Vec4> toVec4(sp<ByteArray> self);
 
 //  [[script::bindings::classmethod]]
-    static sp<Runnable> makeWatcher(sp<ByteArray> self, size_t stride, size_t offset, std::function<void (const std::vector<uintptr_t>&)> callback);
+    static sp<Runnable> makeWatcher(sp<ByteArray> self, size_t stride, size_t offset, std::function<void (const Vector<uintptr_t>&)> callback);
 };
 
 }

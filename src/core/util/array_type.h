@@ -14,7 +14,6 @@ namespace ark {
 
 template<typename T> class ArrayType {
 private:
-
     class ArraySliced final : public Array<T> {
     public:
         ArraySliced(sp<Array<T>> array, size_t offset, size_t length)
@@ -89,10 +88,10 @@ public:
     }
 
     static sp<Array<T>> subscribe(const sp<Array<T>>& self, const Slice& slice) {
-        Slice adjusted = slice.adjustIndices(self->length());
+        const Slice adjusted = slice.adjustIndices(self->length());
         CHECK(adjusted.begin() < adjusted.end() && adjusted.begin() >= 0 && adjusted.end() <= static_cast<ptrdiff_t>(self->length()), "Illegal slice(%d, %d)", slice.begin(), slice.end());
         CHECK(adjusted.step() == 1, "Non-continuous slicing is not supported");
-        return sp<ArraySliced>::make(std::move(self), adjusted.begin(), adjusted.end() - adjusted.begin());
+        return sp<Array<T>>::make<ArraySliced>(std::move(self), adjusted.begin(), adjusted.end() - adjusted.begin());
     }
 
     static int32_t subscribeAssign(const sp<Array<T>>& self, ptrdiff_t index, T value) {
@@ -100,7 +99,7 @@ public:
     }
 
     static int32_t subscribeAssign(const sp<Array<T>>& self, const Slice& slice, const std::vector<T>& values) {
-        Slice adjusted = slice.adjustIndices(self->length());
+        const Slice adjusted = slice.adjustIndices(self->length());
         size_t stepCount = std::abs(adjusted.length() / adjusted.step());
         CHECK(adjusted.step() > 0 ? adjusted.begin() < adjusted.end() && adjusted.begin() >= 0 && adjusted.end() <= static_cast<ptrdiff_t>(self->length())
               : adjusted.begin() > adjusted.end() && adjusted.end() >= -1 && adjusted.begin() <= static_cast<ptrdiff_t>(self->length()), "Illegal slice(%d, %d, %d)", slice.begin(), slice.end(), slice.step());

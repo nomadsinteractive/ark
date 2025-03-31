@@ -1820,10 +1820,7 @@ class Activity:
     def add_view(self, view: 'View', disposable: Optional[Boolean] = None):
         pass
 
-    def add_layer(self, layer: Renderer):
-        pass
-
-    def add_render_layer(self, render_layer: Renderer):
+    def add_render_layer(self, render_layer: Renderer, discarded: Optional[Boolean] = None):
         pass
 
     def add_event_listener(self, event_listener: Union[Callable[['Event'], bool], 'EventListener'], priority: int = 0):
