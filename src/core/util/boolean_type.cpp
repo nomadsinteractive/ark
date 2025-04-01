@@ -180,14 +180,6 @@ sp<Boolean> BooleanType::dye(sp<Boolean> self, sp<Boolean> condition, String mes
     return sp<Boolean>::make<VariableDyed<bool>>(std::move(self), std::move(condition), std::move(message));
 }
 
-void BooleanType::fix(const sp<Boolean>& self)
-{
-    const sp<BooleanWrapper>& ib = self.asInstance<BooleanWrapper>();
-    DCHECK_WARN(ib, "Calling fix on non-BooleanWrapper has no effect.");
-    if(ib)
-        ib->fix();
-}
-
 BooleanType::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr)
     : _value(Expression::Compiler<bool, BooleanOperation>().compile(factory, expr.strip()))
 {

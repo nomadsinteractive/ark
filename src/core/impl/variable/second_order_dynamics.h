@@ -9,7 +9,23 @@ namespace ark {
 
 template<typename T> class SecondOrderDynamics final : public Variable<T>, Implements<SecondOrderDynamics<T>, Variable<T>> {
 public:
-    SecondOrderDynamics(sp<Variable<T>> x, const T& d0, sp<Numeric> t, float f, float z = 1.0f, float r = 0)
+    /**
+     * @param x x
+     * @param d0 start: s0
+     * @param t time: y = sod(f(t))
+     * @param f nature frequence(HZ): the damping frequence that y follows x
+     * @param z zeta: damping coefficient, how the system settles at the target.
+     *          zeta(0)      undamped, y would be always damping around x.
+     *          zeta(0 - 1)  underdamped, y would be underdamping around x and then following x eventually.
+     *          zeta(1)      critical damping, there would be no vibrate motion.
+     *          zeta(1 - )   nodamp, same as critical damping. the greater z is, the slower motion is.
+     * @param r initial response:
+     *          r(0)         the system would take time to begin to acceleration.
+     *          r(0 - 1)     the system would react immediately to x.
+     *          r(1 - )      the system would overshoot x depends on the magnitude of r.
+     *          r( - 0)      the system would anticipate the motion(moving backward and then towards).
+     */
+    SecondOrderDynamics(sp<Variable<T>> x, const T& d0, sp<Numeric> t, const float f, const float z = 1.0f, const float r = 0)
          : _x(std::move(x)), _t(std::move(t)), _w(2 * Math::PI * f), _z(z), _d(_w * std::sqrt(std::abs(z * z - 1))), _k1(z / (Math::PI * f)), _k2(1 / _w / _w), _k3(r * z / _w),
            _last_t(_t->val()), _last_x(_x->val()), _y(d0), _dy(0) {
     }
@@ -41,7 +57,7 @@ public:
         return _y;
     }
 
-    bool update(uint64_t timestamp) override {
+    bool update(const uint64_t timestamp) override {
         return UpdatableUtil::update(timestamp, _x, _t);
     }
 

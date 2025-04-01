@@ -44,9 +44,6 @@ public:
 //  [[script::bindings::classmethod]]
     static sp<Boolean> dye(sp<Boolean> self, sp<Boolean> condition = nullptr, String message = "");
 
-//  [[script::bindings::classmethod]]
-    static void fix(const sp<Boolean>& self);
-
 //  [[plugin::builder::by-value]]
     class DICTIONARY final : public Builder<Boolean> {
     public:
