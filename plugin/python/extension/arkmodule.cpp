@@ -33,6 +33,7 @@ int __traverse__(PyObject* module, visitproc visitor, void* args)
 PyObject* ark_log(const Log::LogLevel level, PyObject* args)
 {
     if(const size_t size = PyTuple_Size(args))
+    {
         if(const PyInstance pyContent = PyInstance::borrow(PyTuple_GetItem(args, 0)); pyContent.isNone())
             Log::log(level, "Python", "None");
         else
@@ -43,6 +44,7 @@ PyObject* ark_log(const Log::LogLevel level, PyObject* args)
             const String content = PyCast::toString(formatted.pyObject());
             Log::log(level, "Python", content.c_str());
         }
+    }
     Py_RETURN_NONE;
 }
 

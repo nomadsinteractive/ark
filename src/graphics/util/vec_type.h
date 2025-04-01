@@ -215,11 +215,11 @@ public:
     }
 
     static sp<VarType> freeze(const sp<VarType>& self) {
-        return self ? sp<VarType>::make<typename VarType::Const>(self->val()) : nullptr;
+        return self ? sp<VarType>::template make<typename VarType::Const>(self->val()) : nullptr;
     }
 
     static sp<VarType> wrap(sp<VarType> self) {
-        return sp<VarType>::make<VariableWrapper<T>>(std::move(self));
+        return sp<VarType>::template make<VariableWrapper<T>>(std::move(self));
     }
 
     static sp<VarType> synchronize(sp<VarType> self, sp<Boolean> discarded) {
@@ -227,27 +227,27 @@ public:
     }
 
     static sp<VarType> floor(sp<VarType> self) {
-        return sp<VarType>::make<VariableOP1<T>>(Operators::Transform<T, typename Operators::Floor<float>, DIMENSION>(Operators::Floor<float>()), std::move(self));
+        return sp<VarType>::template make<VariableOP1<T>>(Operators::Transform<T, typename Operators::Floor<float>, DIMENSION>(Operators::Floor<float>()), std::move(self));
     }
 
     static sp<VarType> ceil(sp<VarType> self) {
-        return sp<VarType>::make<VariableOP1<T>>(Operators::Transform<T, typename Operators::Ceil<float>, DIMENSION>(Operators::Ceil<float>()), std::move(self));
+        return sp<VarType>::template make<VariableOP1<T>>(Operators::Transform<T, typename Operators::Ceil<float>, DIMENSION>(Operators::Ceil<float>()), std::move(self));
     }
 
     static sp<VarType> round(sp<VarType> self) {
-        return sp<VarType>::make<VariableOP1<T>>(Operators::Transform<T, typename Operators::Round<float>, DIMENSION>(Operators::Round<float>()), std::move(self));
+        return sp<VarType>::template make<VariableOP1<T>>(Operators::Transform<T, typename Operators::Round<float>, DIMENSION>(Operators::Round<float>()), std::move(self));
     }
 
     static sp<VarType> modFloor(sp<VarType> self, sp<Numeric> mod) {
-        return sp<VarType>::make<VariableOP2<sp<VarType>, sp<VarType>, Operators::ModFloor<T>>>(std::move(self), sp<IMPL>::make(std::move(mod)));
+        return sp<VarType>::template make<VariableOP2<sp<VarType>, sp<VarType>, Operators::ModFloor<T>>>(std::move(self), sp<IMPL>::make(std::move(mod)));
     }
 
     static sp<VarType> modFloor(sp<VarType> self, sp<VarType> mod) {
-        return sp<VarType>::make<VariableOP2<sp<VarType>, sp<VarType>, Operators::ModFloor<T>>>(std::move(self), std::move(mod));
+        return sp<VarType>::template make<VariableOP2<sp<VarType>, sp<VarType>, Operators::ModFloor<T>>>(std::move(self), std::move(mod));
     }
 
     static sp<VarType> ifElse(sp<VarType> self, sp<Boolean> condition, sp<VarType> otherwise) {
-        return sp<VarType>::make<VariableTernary<T>>(std::move(condition), std::move(self), std::move(otherwise));
+        return sp<VarType>::template make<VariableTernary<T>>(std::move(condition), std::move(self), std::move(otherwise));
     }
 
     static sp<VarType> wrapped(const sp<VarType>& self) {
@@ -263,17 +263,17 @@ public:
     static sp<VarType> lerp(sp<VarType> self, sp<VarType> b, sp<Numeric> t) {
         if(!t)
             t = Ark::instance().appClock()->duration();
-        return sp<VarType>::make<Lerp<T, float>>(std::move(self), std::move(b), std::move(t));
+        return sp<VarType>::template make<Lerp<T, float>>(std::move(self), std::move(b), std::move(t));
     }
 
     static sp<VarType> sod(sp<VarType> self, const T& d0, float k, float z, float r, sp<Numeric> t) {
         if(!t)
             t = Ark::instance().appClock()->duration();
-        return sp<VarType>::make<SecondOrderDynamics<T>>(std::move(self), d0, std::move(t), k, z, r);
+        return sp<VarType>::template make<SecondOrderDynamics<T>>(std::move(self), d0, std::move(t), k, z, r);
     }
 
     static sp<VarType> dye(sp<VarType> self, sp<Boolean> c, String message) {
-        return sp<VarType>::make<VariableDyed<T>>(std::move(self), std::move(c), std::move(message));
+        return sp<VarType>::template make<VariableDyed<T>>(std::move(self), std::move(c), std::move(message));
     }
 
 protected:
