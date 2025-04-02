@@ -13,13 +13,13 @@ public:
         : _d1(d1), _d2(d2) {
     }
 
-    virtual sp<String> getString(const String& name) override {
+    sp<String> getString(const String& name) override {
         const sp<String> value = _d1->getString(name);
         return value ? value : _d2->getString(name);
     }
 
-    virtual std::vector<String> getStringArray(const String& resid) override {
-        std::vector<String> sa = _d1->getStringArray(resid);
+    Vector<String> getStringArray(const String& resid) override {
+        Vector<String> sa = _d1->getStringArray(resid);
         return sa.size() ? sa : _d2->getStringArray(resid);
     }
 
@@ -62,7 +62,7 @@ sp<String> StringTable::getString(const String& name, bool alert) const
     return getString(name.substr(0, pos), name.substr(pos + 1), alert);
 }
 
-std::vector<String> StringTable::getStringArray(const String& stringTableName, const String& name, bool alert)
+Vector<String> StringTable::getStringArray(const String& stringTableName, const String& name, bool alert)
 {
     sp<StringBundle> sb = getStringBundle(stringTableName);
     CHECK(!alert || sb, "String bundle \"%s\" does not exist", stringTableName.c_str());
@@ -72,7 +72,7 @@ std::vector<String> StringTable::getStringArray(const String& stringTableName, c
     return {};
 }
 
-std::vector<String> StringTable::getStringArray(const String& name, bool alert)
+Vector<String> StringTable::getStringArray(const String& name, bool alert)
 {
     auto pos = name.find('/');
     DCHECK(pos != String::npos, "The name \"%s\" doest follow [stringtablename/stringname] pattern", name.c_str());

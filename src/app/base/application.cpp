@@ -32,7 +32,7 @@ public:
         return sp<String>::make(Strings::loadFromReadable(readable));
     }
 
-    std::vector<String> getStringArray(const String& /*resid*/) override {
+    Vector<String> getStringArray(const String& /*resid*/) override {
         return {};
     }
 };

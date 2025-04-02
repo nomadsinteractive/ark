@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include "core/forwarding.h"
 
 namespace ark {
@@ -13,7 +11,7 @@ public:
 //  [[script::bindings::auto]]
     virtual sp<String> getString(const String& resid) = 0;
 //  [[script::bindings::auto]]
-    virtual std::vector<String> getStringArray(const String& resid) = 0;
+    virtual Vector<String> getStringArray(const String& resid) = 0;
 };
 
 }

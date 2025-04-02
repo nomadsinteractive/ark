@@ -15,6 +15,7 @@ public:
     void cancel();
 //  [[script::bindings::auto]]
     void done();
+    void notify();
 
 //  [[script::bindings::property]]
     sp<Boolean> isCanceled() const;
