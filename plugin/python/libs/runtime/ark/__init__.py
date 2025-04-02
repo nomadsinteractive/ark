@@ -486,7 +486,7 @@ class Future:
     def cancel(self):
         pass
 
-    def done(self):
+    def notify(self):
         pass
 
 

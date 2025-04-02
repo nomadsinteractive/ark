@@ -15,21 +15,14 @@ void Future::cancel()
     _canceled.reset(true);
 }
 
-void Future::done()
+void Future::notify()
 {
     if(_canceled.val())
         return;
 
-    if(_count_down <= 1)
-        _done.reset(true);
-
-    notify();
-}
-
-void Future::notify()
-{
     if(_count_down == 1)
     {
+        _done.reset(true);
         if(const sp<Runnable> observer = std::move(_observer))
             observer->run();
     }
@@ -37,8 +30,11 @@ void Future::notify()
     {
         if(_count_down > 0)
             -- _count_down;
-        if(_observer)
-            _observer->run();
+        if(sp<Runnable> observer = std::move(_observer))
+        {
+            observer->run();
+            _observer = std::move(observer);
+        }
     }
 }
 

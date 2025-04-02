@@ -11,7 +11,7 @@ namespace ark {
 
 class ARK_API Strings {
 public:
-    static sp<Builder<String>> load(const String& resid);
+    static sp<IBuilder<String>> load(const String& resid);
 
     static String loadFromReadable(const sp<Readable>& readable);
 
@@ -93,7 +93,7 @@ public:
         sp<String> build(const Scope& args) override;
 
     private:
-        sp<Builder<String>> _delegate;
+        sp<IBuilder<String>> _delegate;
     };
 
 //  [[plugin::builder::by-value]]
@@ -104,7 +104,7 @@ public:
         String build(const Scope& args) override;
 
     private:
-        sp<Builder<String>> _delegate;
+        sp<IBuilder<String>> _delegate;
     };
 };
 

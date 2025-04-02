@@ -1,6 +1,8 @@
 #pragma once
 
 #include "core/base/api.h"
+#include "core/base/string.h"
+#include "core/types/optional.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -75,9 +77,9 @@ public:
 //  [[script::bindings::auto]]
     void addStringBundle(const String& name, const sp<StringBundle>& stringBundle);
 //  [[script::bindings::auto]]
-    sp<String> getString(const String& resid, const sp<String>& defValue = nullptr);
+    Optional<String> getString(const String& resid, const Optional<String>& defValue = {}) const;
 //  [[script::bindings::auto]]
-    Vector<String> getStringArray(const String& resid);
+    Vector<String> getStringArray(const String& resid) const;
 
 //  [[script::bindings::auto]]
     sp<Runnable> defer(const sp<Runnable>& task) const;

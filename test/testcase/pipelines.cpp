@@ -42,14 +42,14 @@ class PipelinesTestCase : public TestCase {
 public:
     virtual int launch() {
         Global<StringTable> stringTable;
-        const sp<String> vert = stringTable->getString("shaders", "default.vert", true);
-        const sp<String> frag = stringTable->getString("shaders", "texture.frag", true);
+        const Optional<String> vert = stringTable->getString("shaders", "default.vert", true);
+        const Optional<String> frag = stringTable->getString("shaders", "texture.frag", true);
         if(!vert || !frag)
             return -1;
 
         const sp<PipelineFactory> pipelineFactory = Ark::instance().applicationContext()->renderEngine()->rendererFactory()->createPipelineFactory();
         const sp<Snippet> snippet = sp<SnippetTest>::make();
-        const sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(std::move(vert), std::move(frag));
+        const sp<PipelineBuildingContext> buildingContext = sp<PipelineBuildingContext>::make(vert.value(), frag.value());
 
         const sp<PipelineDescriptor> pipelineDescriptor = sp<PipelineDescriptor>::make(Camera::createDefaultCamera(), buildingContext, PipelineDescriptor::Configuration{{}, nullptr, std::move(snippet)});
         const sp<PipelineLayout>& pipelineLayout = pipelineDescriptor->layout();

@@ -132,7 +132,7 @@ private:
     };
 
 public:
-    ShaderPreprocessor(sp<String> source, document manifest, Enum::ShaderStageBit shaderStage, Enum::ShaderStageBit preShaderStage);
+    ShaderPreprocessor(String source, document manifest, Enum::ShaderStageBit shaderStage, Enum::ShaderStageBit preShaderStage);
 
     void addPreMainSource(const String& source);
     void addPostMainSource(const String& source);
@@ -180,7 +180,7 @@ private:
     static const char* getOutAttributePrefix(Enum::ShaderStageBit preStage);
 
 private:
-    sp<String> _source;
+    String _source;
     sp<Function> _main_block;
 
     struct ResultModifer {

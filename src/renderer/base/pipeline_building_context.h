@@ -16,7 +16,7 @@ namespace ark {
 class ARK_API PipelineBuildingContext {
 public:
     PipelineBuildingContext();
-    PipelineBuildingContext(sp<String> vertex, sp<String> fragment);
+    PipelineBuildingContext(String vertex, String fragment);
 
     DISALLOW_COPY_AND_ASSIGN(PipelineBuildingContext);
 
@@ -76,7 +76,7 @@ public:
 
     ShaderPreprocessor* tryGetRenderStage(Enum::ShaderStageBit shaderStage) const;
     const op<ShaderPreprocessor>& getRenderStage(Enum::ShaderStageBit shaderStage) const;
-    const op<ShaderPreprocessor>& addStage(sp<String> source, document manifest, Enum::ShaderStageBit shaderStage, Enum::ShaderStageBit preShaderStage);
+    const op<ShaderPreprocessor>& addStage(String source, document manifest, Enum::ShaderStageBit shaderStage, Enum::ShaderStageBit preShaderStage);
 
     Map<String, String> toDefinitions() const;
 

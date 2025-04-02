@@ -27,11 +27,11 @@ StringBundleYAML::StringBundleYAML(sp<AssetBundle> assetBundle)
     DASSERT(_root._asset_bundle);
 }
 
-sp<String> StringBundleYAML::getString(const String& resid)
+Optional<String> StringBundleYAML::getString(const String& resid)
 {
     const sp<Node> node = _root.findNode(resid);
     CHECK_WARN(node, "YAML node \"%s\" not found", resid.c_str());
-    return node ? node->value() : nullptr;
+    return node ? Optional<String>(node->value()) : Optional<String>();
 }
 
 Vector<String> StringBundleYAML::getStringArray(const String& resid)

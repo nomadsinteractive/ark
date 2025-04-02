@@ -14,7 +14,6 @@ public:
 //  [[script::bindings::auto]]
     void cancel();
 //  [[script::bindings::auto]]
-    void done();
     void notify();
 
 //  [[script::bindings::property]]

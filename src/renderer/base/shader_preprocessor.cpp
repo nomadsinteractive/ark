@@ -55,7 +55,7 @@ size_t parseFunctionBody(const String& s, String& body)
 
 }
 
-ShaderPreprocessor::ShaderPreprocessor(sp<String> source, document manifest, const Enum::ShaderStageBit shaderStage, const Enum::ShaderStageBit preShaderStage)
+ShaderPreprocessor::ShaderPreprocessor(String source, document manifest, const Enum::ShaderStageBit shaderStage, const Enum::ShaderStageBit preShaderStage)
     : _source(std::move(source)), _manifest(std::move(manifest)), _shader_stage(shaderStage), _pre_shader_stage(preShaderStage), _version(0), _declaration_ins(_attribute_declaration_codes, shaderStage == Enum::SHADER_STAGE_BIT_VERTEX ? ANNOTATION_VERT_IN : ANNOTATION_FRAG_IN),
       _declaration_outs(_attribute_declaration_codes, shaderStage == Enum::SHADER_STAGE_BIT_VERTEX ? ANNOTATION_VERT_OUT : ANNOTATION_FRAG_OUT),
       _declaration_uniforms(_uniform_declaration_codes, "uniform"), _declaration_samplers(_uniform_declaration_codes, "uniform"), _declaration_images(_uniform_declaration_codes, "uniform"),
@@ -412,14 +412,14 @@ String ShaderPreprocessor::genDeclarations(const String& mainFunc) const
 void ShaderPreprocessor::addInclude(const String& filepath)
 {
     const Global<StringTable> stringtable;
-    sp<String> content;
-    const String::size_type pos = filepath.find(':');
-    if(pos == String::npos)
+
+    Optional<String> content;
+    if(const String::size_type pos = filepath.find(':'); pos == String::npos)
         content = stringtable->getString(filepath, false);
     else
         content = stringtable->getString(filepath.substr(0, pos), filepath.substr(pos + 1).lstrip('/'), false);
     CHECK(content, "Can't open include file \"%s\"", filepath.c_str());
-    _include_declaration_codes.push_back(std::move(content));
+    _include_declaration_codes.push_back(content ? std::move(sp<String>::make(std::move(content.value()))) : nullptr);
 }
 
 ShaderPreprocessor::Function::Function(String name, String params, String returnType, String body, sp<String> placeHolder)

@@ -11,11 +11,11 @@ StringBundleImpl::StringBundleImpl(Map<String, sp<StringBundle>> directories)
 {
 }
 
-sp<String> StringBundleImpl::getString(const String& resid)
+Optional<String> StringBundleImpl::getString(const String& resid)
 {
     String remains;
     const sp<StringBundle> sb = split(resid, remains);
-    return sb ? sb->getString(remains) : nullptr;
+    return sb ? sb->getString(remains) : Optional<String>();
 }
 
 Vector<String> StringBundleImpl::getStringArray(const String& resid)

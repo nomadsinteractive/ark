@@ -27,9 +27,9 @@ namespace {
 
 class AssetStringBundle final : public StringBundle {
 public:
-    sp<String> getString(const String& name) override {
+    Optional<String> getString(const String& name) override {
         const sp<Readable> readable = Ark::instance().openAsset(name);
-        return sp<String>::make(Strings::loadFromReadable(readable));
+        return {Strings::loadFromReadable(readable)};
     }
 
     Vector<String> getStringArray(const String& /*resid*/) override {

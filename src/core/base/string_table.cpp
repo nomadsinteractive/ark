@@ -7,14 +7,14 @@ namespace ark {
 
 namespace {
 
-class MergedStringBundle : public StringBundle {
+class MergedStringBundle final : public StringBundle {
 public:
-    MergedStringBundle(const sp<StringBundle>& d1, const sp<StringBundle>& d2)
-        : _d1(d1), _d2(d2) {
+    MergedStringBundle(sp<StringBundle> d1, sp<StringBundle> d2)
+        : _d1(std::move(d1)), _d2(std::move(d2)) {
     }
 
-    sp<String> getString(const String& name) override {
-        const sp<String> value = _d1->getString(name);
+    Optional<String> getString(const String& name) override {
+        Optional<String> value = _d1->getString(name);
         return value ? value : _d2->getString(name);
     }
 
@@ -32,9 +32,8 @@ private:
 
 void StringTable::addStringBundle(const String& name, const sp<StringBundle>& stringTable)
 {
-    DASSERT(stringTable);
-    const auto iter = _string_bundle_by_name.find(name);
-    if(iter != _string_bundle_by_name.end())
+    ASSERT(stringTable);
+    if(const auto iter = _string_bundle_by_name.find(name); iter != _string_bundle_by_name.end())
         _string_bundle_by_name[name] = sp<MergedStringBundle>::make(iter->second, stringTable);
     else
         _string_bundle_by_name[name] = stringTable;
@@ -46,25 +45,25 @@ sp<StringBundle> StringTable::getStringBundle(const String& name) const
     return iter != _string_bundle_by_name.end() ? iter->second : nullptr;
 }
 
-sp<String> StringTable::getString(const String& stringTableName, const String& stringName, bool alert) const
+Optional<String> StringTable::getString(const String& stringTableName, const String& stringName, const bool alert) const
 {
-    sp<StringBundle> sb = getStringBundle(stringTableName);
+    const sp<StringBundle> sb = getStringBundle(stringTableName);
     CHECK(!alert || sb, "String bundle \"%s\" does not exist", stringTableName.c_str());
-    const sp<String> str = sb ? sb->getString(stringName) : nullptr;
+    Optional<String> str = sb ? sb->getString(stringName) : Optional<String>();
     CHECK(!alert || str, "String bundle \"%s\" has no resource \"%s\"", stringTableName.c_str(), stringName.c_str());
     return str;
 }
 
-sp<String> StringTable::getString(const String& name, bool alert) const
+Optional<String> StringTable::getString(const String& name, bool alert) const
 {
-    auto pos = name.find('/');
+    const auto pos = name.find('/');
     CHECK(pos != String::npos, "The name \"%s\" doest follow [stringtablename/stringname] pattern", name.c_str());
     return getString(name.substr(0, pos), name.substr(pos + 1), alert);
 }
 
-Vector<String> StringTable::getStringArray(const String& stringTableName, const String& name, bool alert)
+Vector<String> StringTable::getStringArray(const String& stringTableName, const String& name, const bool alert) const
 {
-    sp<StringBundle> sb = getStringBundle(stringTableName);
+    const sp<StringBundle> sb = getStringBundle(stringTableName);
     CHECK(!alert || sb, "String bundle \"%s\" does not exist", stringTableName.c_str());
     if(sb)
         return sb->getStringArray(name);
@@ -72,7 +71,7 @@ Vector<String> StringTable::getStringArray(const String& stringTableName, const 
     return {};
 }
 
-Vector<String> StringTable::getStringArray(const String& name, bool alert)
+Vector<String> StringTable::getStringArray(const String& name, const bool alert) const
 {
     auto pos = name.find('/');
     DCHECK(pos != String::npos, "The name \"%s\" doest follow [stringtablename/stringname] pattern", name.c_str());

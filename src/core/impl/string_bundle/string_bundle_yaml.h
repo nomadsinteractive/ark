@@ -12,7 +12,7 @@ class StringBundleYAML final : public StringBundle {
 public:
     StringBundleYAML(sp<AssetBundle> assetBundle);
 
-    sp<String> getString(const String& resid) override;
+    Optional<String> getString(const String& resid) override;
     Vector<String> getStringArray(const String& resid) override;
 
 //  [[plugin::builder("yaml")]]

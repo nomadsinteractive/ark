@@ -32,7 +32,7 @@ public:
     bool update(const uint64_t timestamp) override {
         const bool dirty = _condition->update(timestamp);
         if(_condition->val())
-            _future->done();
+            _future->notify();
         return dirty;
     }
 
@@ -88,21 +88,6 @@ public:
 class RunnableFutureDone final : public Runnable {
 public:
     RunnableFutureDone(const sp<Future>& future)
-        : _future(future) {
-    }
-
-    void run() override
-    {
-        _future->done();
-    }
-
-private:
-    sp<Future> _future;
-};
-
-class RunnableFutureNotify final : public Runnable {
-public:
-    RunnableFutureNotify(const sp<Future>& future)
         : _future(future) {
     }
 
@@ -263,8 +248,7 @@ sp<Future> ApplicationFacade::post(sp<Runnable> task, const float delay, sp<Bool
 sp<Future> ApplicationFacade::schedule(sp<Runnable> task, const float interval, sp<Boolean> canceled, const uint32_t countDown) const
 {
     sp<Future> future = sp<Future>::make(std::move(canceled), std::move(task), countDown);
-    sp<Runnable> runnable = countDown == 0 ? sp<Runnable>::make<RunnableFutureNotify>(future) : sp<Runnable>::make<RunnableFutureDone>(future);
-    _context->messageLoopApp()->schedule(std::move(runnable), interval, future->isDoneOrCanceled());
+    _context->messageLoopApp()->schedule(sp<Runnable>::make<RunnableFutureDone>(future), interval, future->isDoneOrCanceled());
     return future;
 }
 
@@ -278,13 +262,14 @@ void ApplicationFacade::addStringBundle(const String& name, const sp<StringBundl
     _context->addStringBundle(name, stringBundle);
 }
 
-sp<String> ApplicationFacade::getString(const String& resid,  const sp<String>& defValue)
+Optional<String> ApplicationFacade::getString(const String& resid, const Optional<String>& defValue) const
 {
-    sp<String> val = _context->getString(resid, !static_cast<bool>(defValue));
-    return val ? val : defValue;
+    if(Optional<String> val = _context->getString(resid, !static_cast<bool>(defValue)))
+        return val;
+    return defValue;
 }
 
-Vector<String> ApplicationFacade::getStringArray(const String& resid)
+Vector<String> ApplicationFacade::getStringArray(const String& resid) const
 {
     return _context->getStringArray(resid);
 }

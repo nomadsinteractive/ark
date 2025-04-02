@@ -68,31 +68,25 @@ if __name__ == '__main__':
                 stringitems.append((category, strname, basename))
         stringtables.append('}\n')
 
-    macro = '_'.join([i.upper() for i in namespaces] + ([i.upper() for i in stringtablenames]) + ['H_'])
     classdeclare = acg.format('''
 class ${classname} : public ark::StringBundle {
 public:
     ${classname}();
 
-    virtual sp<String> getString(const String& name) override;
-    virtual std::vector<String> getStringArray(const String& name) override;
+    Optional<String> getString(const String& name) override;
+    Vector<String> getStringArray(const String& name) override;
 
 private:
-    std::unordered_map<String, sp<String>> _items;
-
+    HashMap<String, String> _items;
 };
 ''', classname=classname)
 
-    header = acg.format('''#ifndef ${macro}
-#define ${macro}
-
-#include <unordered_map>
+    header = acg.format('''#pragma once
 
 #include "core/inf/string_bundle.h"
 
 ${classdeclare}
-
-#endif''', macro=macro, classdeclare=declare_namespaces(namespaces, classdeclare))
+''', classdeclare=declare_namespaces(namespaces, classdeclare))
 
     classdefinition = acg.format('''
 ${classname}::${classname}()
@@ -100,18 +94,18 @@ ${classname}::${classname}()
     ${0};
 }
 
-sp<String> ${classname}::getString(const String& name)
+Optional<String> ${classname}::getString(const String& name)
 {
-    auto iter = _items.find(name);
-    return iter != _items.end() ? iter->second : nullptr;
+    const auto iter = _items.find(name);
+    return iter != _items.end() ? Optional<String>(iter->second) : Optional<String>();
 }
 
-std::vector<String> ${classname}::getStringArray(const String&)
+Vector<String> ${classname}::getStringArray(const String&)
 {
     return {};
 }
 
-''', ';\n    '.join(['_items["%s"] = sp<String>::make(%s::%s)' % (i[2], i[0], i[1]) for i in stringitems]), classname=classname)
+''', ';\n    '.join(['_items["%s"] = %s::%s' % (i[2], i[0], i[1]) for i in stringitems]), classname=classname)
     bootstrap_func = '__ark_bootstrap_%s__' % '_'.join(stringtablenames)
     source = acg.format('''#include "core/base/string_table.h"
 #include "core/types/global.h"

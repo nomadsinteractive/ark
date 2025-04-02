@@ -328,7 +328,7 @@ void ApplicationContext::addStringBundle(const String& name, const sp<StringBund
     _string_table->addStringBundle(name, stringBundle);
 }
 
-sp<String> ApplicationContext::getString(const String& resid, bool alert)
+Optional<String> ApplicationContext::getString(const String& resid, const bool alert)
 {
     ASSERT(resid);
     const Identifier id = resid.at(0) == '@' ? Identifier::parse(resid, Identifier::ID_TYPE_AUTO, false) : Identifier::parseRef(resid, false);

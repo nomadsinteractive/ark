@@ -60,8 +60,8 @@ public:
     void runAtCoreThread(std::function<void()> task);
 
     void addStringBundle(const String& name, const sp<StringBundle>& stringBundle);
-    sp<String> getString(const String& resid, bool alert);
-    std::vector<String> getStringArray(const String& resid);
+    Optional<String> getString(const String& resid, bool alert);
+    Vector<String> getStringArray(const String& resid);
 
     sp<Runnable> defer(const sp<Runnable>& task) const;
 

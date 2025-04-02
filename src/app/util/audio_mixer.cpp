@@ -150,7 +150,7 @@ size_t AudioMixer::Track::read(int16_t* in, int32_t* out, size_t size) const
             out[i] += in[i];
     }
     else
-        _future->done();
+        _future->notify();
     return readSize;
 }
 

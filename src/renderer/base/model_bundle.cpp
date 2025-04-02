@@ -92,7 +92,7 @@ public:
     {
         _stub->addModel(_type, std::move(_model));
         if(_future)
-            _future->done();
+            _future->notify();
     }
 
 private:

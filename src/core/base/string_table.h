@@ -1,7 +1,5 @@
 #pragma once
 
-#include <map>
-
 #include "core/forwarding.h"
 #include "core/base/api.h"
 #include "core/base/string.h"
@@ -15,15 +13,14 @@ public:
     void addStringBundle(const String& name, const sp<StringBundle>& stringTable);
     sp<StringBundle> getStringBundle(const String& name) const;
 
-    sp<String> getString(const String& stringTableName, const String& stringName, bool alert) const;
-    sp<String> getString(const String& name, bool alert) const;
+    Optional<String> getString(const String& stringTableName, const String& stringName, bool alert) const;
+    Optional<String> getString(const String& name, bool alert) const;
 
-    std::vector<String> getStringArray(const String& stringTableName, const String& name, bool alert);
-    std::vector<String> getStringArray(const String& name, bool alert);
+    Vector<String> getStringArray(const String& stringTableName, const String& name, bool alert) const;
+    Vector<String> getStringArray(const String& name, bool alert) const;
 
 private:
-    std::map<String, sp<StringBundle>> _string_bundle_by_name;
-
+    Map<String, sp<StringBundle>> _string_bundle_by_name;
 };
 
 }

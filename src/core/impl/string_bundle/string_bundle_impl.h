@@ -11,7 +11,7 @@ class StringBundleImpl final : public StringBundle {
 public:
     StringBundleImpl(Map<String, sp<StringBundle>> directories);
 
-    sp<String> getString(const String& resid) override;
+    Optional<String> getString(const String& resid) override;
     Vector<String> getStringArray(const String& resid) override;
 
 //  [[plugin::builder]]

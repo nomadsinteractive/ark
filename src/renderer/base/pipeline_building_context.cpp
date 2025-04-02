@@ -60,7 +60,7 @@ PipelineBuildingContext::PipelineBuildingContext()
 {
 }
 
-PipelineBuildingContext::PipelineBuildingContext(sp<String> vertex, sp<String> fragment)
+PipelineBuildingContext::PipelineBuildingContext(String vertex, String fragment)
     : PipelineBuildingContext()
 {
     addStage(std::move(vertex), nullptr, Enum::SHADER_STAGE_BIT_VERTEX, Enum::SHADER_STAGE_BIT_NONE);
@@ -290,7 +290,7 @@ const op<ShaderPreprocessor>& PipelineBuildingContext::getRenderStage(Enum::Shad
     return iter->second;
 }
 
-const op<ShaderPreprocessor>& PipelineBuildingContext::addStage(sp<String> source, document manifest, const Enum::ShaderStageBit shaderStage, const Enum::ShaderStageBit preShaderStage)
+const op<ShaderPreprocessor>& PipelineBuildingContext::addStage(String source, document manifest, const Enum::ShaderStageBit shaderStage, const Enum::ShaderStageBit preShaderStage)
 {
     op<ShaderPreprocessor>& stage = shaderStage == Enum::SHADER_STAGE_BIT_COMPUTE ? _computing_stage : _rendering_stages[shaderStage];
     CHECK(!stage, "Stage '%d' has been initialized already", shaderStage);

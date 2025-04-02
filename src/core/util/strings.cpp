@@ -20,104 +20,100 @@
 
 namespace ark {
 
-static Vector<sp<Builder<String>>> regexp_split(const std::string& s, const std::regex& pattern, const std::function<sp<Builder<String>>(const std::smatch&)>& replacer)
+namespace {
+
+Vector<sp<IBuilder<String>>> regexp_split(const std::string& s, const std::regex& pattern, const std::function<sp<IBuilder<String>>(const std::smatch&)>& replacer)
 {
     std::smatch match;
     std::string str = s;
-    Vector<sp<Builder<String>>> items;
+    Vector<sp<IBuilder<String>>> items;
 
     while(std::regex_search(str, match, pattern))
     {
         if(!match.prefix().str().empty())
-            items.push_back(sp<Builder<String>::Prebuilt>::make(sp<String>::make(match.prefix().str())));
+            items.push_back(sp<IBuilder<String>::Prebuilt>::make(match.prefix().str()));
         items.push_back(replacer(match));
         str = match.suffix().str();
     }
     if(!str.empty())
-        items.push_back(sp<Builder<String>::Prebuilt>::make(sp<String>::make(std::move(str))));
+        items.push_back(sp<IBuilder<String>::Prebuilt>::make(String(std::move(str))));
     return items;
 }
 
-
-namespace {
-
-class StringBuilderImpl1 final : public Builder<String> {
+class StringBuilderImpl1 final : public IBuilder<String> {
 public:
     StringBuilderImpl1(const String& package, const String& resid)
         : _package(package), _resid(resid) {
     }
 
-    virtual sp<String> build(const Scope& /*args*/) override {
+    String build(const Scope& /*args*/) override {
         const Global<StringTable> stringTable;
-        return stringTable->getString(_package, _resid, true);
+        return std::move(stringTable->getString(_package, _resid, true).value());
     }
 
 private:
     String _package;
     String _resid;
-
 };
 
-class StringBuilderImpl2 final : public Builder<String> {
+class StringBuilderImpl2 final : public IBuilder<String> {
 public:
     StringBuilderImpl2(const String& name)
         : _name(name) {
     }
 
-    sp<String> build(const Scope& args) override {
+    String build(const Scope& args) override {
         Optional<Box> optValue = args.getObject(_name);
-        sp<String> value = optValue ? optValue->as<String>() : nullptr;
+        const sp<String> value = optValue ? optValue->as<String>() : nullptr;
         CHECK(value, "Cannot get argument \"%s\"", _name.c_str());
-        return value;
+        return std::move(*value);
     }
 
 private:
     String _name;
 };
 
-class StringBuilderImpl3 final : public Builder<String> {
+class StringBuilderImpl3 final : public IBuilder<String> {
 public:
     StringBuilderImpl3(const String& value)
-        : _value(sp<String>::make(value)) {
+    {
         static const std::regex VAR_PATTERN("([$@])\\{?([\\w.:\\-?&/]+)\\}?");
-        _builders = regexp_split(_value->c_str(), VAR_PATTERN, [](const std::smatch& match) -> sp<Builder<String>> {
+        _builders = regexp_split(value.c_str(), VAR_PATTERN, [](const std::smatch& match) -> sp<IBuilder<String>> {
             const String& p = match[1].str();
             const String& s = match[2].str();
             if(p == "$")
-                return sp<StringBuilderImpl2>::make(s);
-            Identifier id = Identifier::parseRef(s, false);
-            return sp<StringBuilderImpl1>::make(id.package(), id.ref());
+                return sp<IBuilder<String>>::make<StringBuilderImpl2>(s);
+            const Identifier id = Identifier::parseRef(s, false);
+            return sp<IBuilder<String>>::make<StringBuilderImpl1>(id.package(), id.ref());
         });
     }
 
-    sp<String> build(const Scope& args) override {
+    String build(const Scope& args) override {
         StringBuffer sb;
-        for(const sp<Builder<String>>& i : _builders) {
-            const sp<String> v = i->build(args);
-            sb << v->c_str();
+        for(const sp<IBuilder<String>>& i : _builders) {
+            const String v = i->build(args);
+            sb << v.c_str();
         }
-        return sp<String>::make(sb.str());
+        return sb.str();
     }
 
 private:
-    sp<String> _value;
-
-    Vector<sp<Builder<String>>> _builders;
+    Vector<sp<IBuilder<String>>> _builders;
 };
 
 }
 
-sp<Builder<String>> Strings::load(const String& resid)
+sp<IBuilder<String>> Strings::load(const String& resid)
 {
     if(!resid || resid.find('{') != String::npos)
-        return sp<StringBuilderImpl3>::make(resid);
+        return sp<IBuilder<String>>::make<StringBuilderImpl3>(resid);
 
     const Identifier id = Identifier::parse(resid, Identifier::ID_TYPE_AUTO, false);
     if(id.isRef())
-        return sp<StringBuilderImpl1>::make(id.package(), id.ref());
+        return sp<IBuilder<String>>::make<StringBuilderImpl1>(id.package(), id.ref());
     if(id.isArg())
-        return sp<StringBuilderImpl2>::make(id.arg());
-    return sp<StringBuilderImpl3>::make(resid);
+        return sp<IBuilder<String>>::make<StringBuilderImpl2>(id.arg());
+    return sp<IBuilder<String>>::make<StringBuilderImpl3>(resid);
 }
 
 String Strings::loadFromReadable(const sp<Readable>& readable)
@@ -127,10 +123,10 @@ String Strings::loadFromReadable(const sp<Readable>& readable)
     char buffer[4096];
     while((len = readable->read(buffer, sizeof(buffer))) != 0)
         sb.write(buffer, len);
-    return sb.str().c_str();
+    return {sb.str().c_str()};
 }
 
-String Strings::unwrap(const String& str, char open, char close)
+String Strings::unwrap(const String& str, const char open, const char close)
 {
     if(!str.empty() && str.at(0) == open && str.at(str.length() - 1) == close)
         return str.substr(1, str.length() - 1);
@@ -139,7 +135,7 @@ String Strings::unwrap(const String& str, char open, char close)
 
 void Strings::parentheses(const String& expr, String& lvalue, String& remaining)
 {
-    size_t pos = parentheses(expr, 0);
+    const size_t pos = parentheses(expr, 0);
     lvalue = expr.substr(1, pos);
     remaining = expr.substr(pos + 1).strip();
 }
@@ -148,7 +144,7 @@ size_t Strings::parentheses(const String& expr, size_t start, char open, char cl
 {
     DCHECK(expr.length() > start, "Illegal expression: unexpected end");
     CHECK(expr.at(start) == open, "Illegal expression: \"%s\", parentheses unmatch", expr.c_str());
-    size_t size = expr.length();
+    const size_t size = expr.length();
     int32_t count = 1;
     for(size_t i = start + 1; i < size; i++)
     {
@@ -458,18 +454,18 @@ String Strings::svprintf(const char* format, va_list args)
 
 String Strings::dumpMemory(const uint8_t* memory, size_t length)
 {
-    char buf[256];
-    char padding[] = "         ";
+    constexpr char padding[] = "         ";
     StringBuffer sb;
 
     for(size_t i = 0; i < length; i += 16)
     {
+        char buf[256];
         std::snprintf(buf, sizeof(buf), "%08Xh: ", static_cast<uint32_t>(i));
         sb << buf;
 
         for(size_t j = 0; j < 16; j += 4)
         {
-            size_t offset = i + j;
+            const size_t offset = i + j;
             const int32_t* p1 = reinterpret_cast<const int32_t*>(memory + offset);
             if(offset < length)
             {
@@ -543,7 +539,7 @@ Strings::BUILDER::BUILDER(BeanFactory& /*factory*/, const String& value)
 
 sp<String> Strings::BUILDER::build(const Scope& args)
 {
-    return _delegate->build(args);
+    return sp<String>::make(_delegate->build(args));
 }
 
 Strings::BUILDER_STR::BUILDER_STR(BeanFactory& /*factory*/, const String& value)
@@ -553,7 +549,7 @@ Strings::BUILDER_STR::BUILDER_STR(BeanFactory& /*factory*/, const String& value)
 
 String Strings::BUILDER_STR::build(const Scope& args)
 {
-    return *_delegate->build(args);
+    return _delegate->build(args);
 }
 
 }

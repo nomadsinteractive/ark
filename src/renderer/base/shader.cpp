@@ -49,8 +49,8 @@ sp<Builder<Shader>> Shader::fromDocument(BeanFactory& factory, const document& m
         return shader;
     const Global<StringTable> stringTable;
     Vector<StageManifest> stageManifests;
-    stageManifests.emplace_back(Enum::SHADER_STAGE_BIT_VERTEX, builder<String>::make<Builder<String>::Prebuilt>(stringTable->getString(defVertex, true)));
-    stageManifests.emplace_back(Enum::SHADER_STAGE_BIT_FRAGMENT, builder<String>::make<Builder<String>::Prebuilt>(stringTable->getString(defFragment, true)));
+    stageManifests.emplace_back(Enum::SHADER_STAGE_BIT_VERTEX, builder<String>::make<Builder<String>::Prebuilt>(sp<String>::make(std::move(stringTable->getString(defVertex, true).value()))));
+    stageManifests.emplace_back(Enum::SHADER_STAGE_BIT_FRAGMENT, builder<String>::make<Builder<String>::Prebuilt>(sp<String>::make(std::move(stringTable->getString(defFragment, true).value()))));
     return builder<Shader>::make<BUILDER_IMPL>(factory, manifest, defaultCamera ? builder<Camera>::make<Builder<Camera>::Prebuilt>(defaultCamera) : nullptr, std::move(stageManifests));
 }
 
@@ -129,13 +129,13 @@ sp<PipelineBuildingContext> Shader::BUILDER_IMPL::makePipelineBuildingContext(co
     {
         const Global<StringTable> globalStringTable;
         document documentNone = Global<Constants>()->DOCUMENT_NONE;
-        context->addStage(vertexOpt ? vertexOpt->_source->build(args) : globalStringTable->getString("shaders", "default.vert", true), documentNone, Enum::SHADER_STAGE_BIT_VERTEX, Enum::SHADER_STAGE_BIT_NONE);
-        context->addStage(fragmentOpt ? fragmentOpt->_source->build(args) : globalStringTable->getString("shaders", "texture.frag", true), std::move(documentNone), Enum::SHADER_STAGE_BIT_FRAGMENT, Enum::SHADER_STAGE_BIT_VERTEX);
+        context->addStage(vertexOpt ? std::move(*vertexOpt->_source->build(args)) : std::move(globalStringTable->getString("shaders", "default.vert", true).value()), documentNone, Enum::SHADER_STAGE_BIT_VERTEX, Enum::SHADER_STAGE_BIT_NONE);
+        context->addStage(fragmentOpt ? std::move(*fragmentOpt->_source->build(args)) : std::move(globalStringTable->getString("shaders", "texture.frag", true).value()), std::move(documentNone), Enum::SHADER_STAGE_BIT_FRAGMENT, Enum::SHADER_STAGE_BIT_VERTEX);
     }
     else
         CHECK(computeOpt, "Shader must have at least one stage defined");
     if(computeOpt)
-        context->addStage(computeOpt->_source->build(args), computeOpt->_manifest, Enum::SHADER_STAGE_BIT_COMPUTE, fragmentOpt && fragmentIndex < computeIndex ? Enum::SHADER_STAGE_BIT_FRAGMENT : Enum::SHADER_STAGE_BIT_NONE);
+        context->addStage(std::move(*computeOpt->_source->build(args)), computeOpt->_manifest, Enum::SHADER_STAGE_BIT_COMPUTE, fragmentOpt && fragmentIndex < computeIndex ? Enum::SHADER_STAGE_BIT_FRAGMENT : Enum::SHADER_STAGE_BIT_NONE);
     return context;
 }
 
