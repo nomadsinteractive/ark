@@ -27,10 +27,13 @@ void Future::done()
         if(const sp<Runnable> observer = std::move(_observer))
             observer->run();
     }
-    else if(_count_down == 0)
-        _observer->run();
     else
-        -- _count_down;
+    {
+        if(_count_down > 0)
+            -- _count_down;
+        if(_observer)
+            _observer->run();
+    }
 }
 
 sp<Boolean> Future::isCanceled() const
