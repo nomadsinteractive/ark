@@ -221,20 +221,18 @@ void ApplicationFacade::exit()
     _controller->exit();
 }
 
-void ApplicationFacade::post(sp<Runnable> task, const float delay, sp<Boolean> canceled)
+sp<Future> ApplicationFacade::post(sp<Runnable> task, const float delay, sp<Boolean> canceled) const
 {
-    _context->messageLoopApp()->post(std::move(task), delay, std::move(canceled));
+    sp<Future> future = sp<Future>::make(std::move(canceled), task);
+    _context->messageLoopApp()->post(std::move(task), delay, future->isDoneOrCanceled());
+    return future;
 }
 
-void ApplicationFacade::post(sp<Runnable> task, const Vector<float>& delays, const sp<Boolean>& canceled)
+sp<Future> ApplicationFacade::schedule(sp<Runnable> task, const float interval, sp<Boolean> canceled, const uint32_t countDown) const
 {
-    for(float i : delays)
-        post(task, i, canceled);
-}
-
-void ApplicationFacade::schedule(sp<Runnable> task, const float interval, sp<Boolean> canceled) const
-{
-    _context->messageLoopApp()->schedule(std::move(task), interval, std::move(canceled));
+    sp<Future> future = sp<Future>::make(std::move(canceled), task, countDown);
+    _context->messageLoopApp()->schedule(std::move(task), interval, future->isDoneOrCanceled());
+    return future;
 }
 
 void ApplicationFacade::expect(sp<Boolean> condition, sp<Future> future) const

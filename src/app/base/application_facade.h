@@ -66,11 +66,9 @@ public:
     void exit();
 
 //  [[script::bindings::auto]]
-    void post(sp<Runnable> task, float delays, sp<Boolean> canceled = nullptr);
+    sp<Future> post(sp<Runnable> task, float delay, sp<Boolean> canceled = nullptr) const;
 //  [[script::bindings::auto]]
-    void post(sp<Runnable> task, const Vector<float>& delays, const sp<Boolean>& canceled = nullptr);
-//  [[script::bindings::auto]]
-    void schedule(sp<Runnable> task, float interval, sp<Boolean> canceled = nullptr) const;
+    sp<Future> schedule(sp<Runnable> task, float interval, sp<Boolean> canceled = nullptr, uint32_t countDown = 0) const;
 //  [[script::bindings::auto]]
     void expect(sp<Boolean> condition, sp<Future> future) const;
 

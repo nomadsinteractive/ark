@@ -11,13 +11,13 @@ Use it for:
 """
 from typing import Callable, List, Type, TypeVar, Union, Optional, Dict, Tuple, Any, Self
 
-_BUILDABLE_TYPES = TypeVar('_BUILDABLE_TYPES', 'Arena', 'AudioPlayer', 'Boolean', 'Characters', 'Collider', 'Integer', 'ModelLoader', 'Numeric', 'NarrowPhrase',
+_BUILDABLE_TYPES = TypeVar('_BUILDABLE_TYPES', 'Arena', 'AudioPlayer', "Boolean", 'Characters', 'Collider', 'Integer', 'ModelLoader', 'Numeric', 'NarrowPhrase',
                            'Layer', 'Vec2', 'Vec3', 'Vec4', 'Renderer', 'RenderLayer', 'RenderObject', 'Rotation', 'Size', 'StringBundle', 'Tilemap',
                            'TilemapImporter', 'Tileset', 'TilesetImporter', 'Transform', 'Varyings', 'View')
 
 
 TYPE_INTEGER = Union[int, "Integer"]
-TYPE_BOOLEAN = Union[bool, 'Boolean']
+TYPE_BOOLEAN = Union[bool, "Boolean"]
 TYPE_ENUM = Union[int, 'Enum']
 TYPE_INT_OR_FLOAT = Union[int, float]
 TYPE_NUMERIC = Union[TYPE_INT_OR_FLOAT, 'Numeric']
@@ -302,22 +302,22 @@ class _Var:
     def __mod__(self, other):
         pass
 
-    def __gt__(self, other) -> 'Boolean':
+    def __gt__(self, other) -> "Boolean":
         return Boolean(False)
 
-    def __ge__(self, other) -> 'Boolean':
+    def __ge__(self, other) -> "Boolean":
         return Boolean(False)
 
-    def __lt__(self, other) -> 'Boolean':
+    def __lt__(self, other) -> "Boolean":
         return Boolean(False)
 
-    def __le__(self, other) -> 'Boolean':
+    def __le__(self, other) -> "Boolean":
         return Boolean(False)
 
-    def __eq__(self, other) -> 'Boolean':
+    def __eq__(self, other) -> "Boolean":
         return Boolean(False)
 
-    def __ne__(self, other) -> 'Boolean':
+    def __ne__(self, other) -> "Boolean":
         return Boolean(False)
 
     def __float__(self) -> float:
@@ -334,13 +334,13 @@ class Boolean(_Var):
     def toggle(self):
         pass
 
-    def negative(self) -> 'Boolean':
+    def negative(self) -> "Boolean":
         pass
 
-    def __or__(self, other) -> 'Boolean':
+    def __or__(self, other) -> "Boolean":
         pass
 
-    def __and__(self, other) -> 'Boolean':
+    def __and__(self, other) -> "Boolean":
         pass
 
 
@@ -545,7 +545,7 @@ class Buffer:
     def upload(self, uploader: 'Uploader', future: Optional[Future] = None):
         pass
 
-    def synchronize(self, offset: int, size: int, cancelled: 'Boolean') -> ByteArray:
+    def synchronize(self, offset: int, size: int, cancelled: "Boolean") -> ByteArray:
         pass
 
 
@@ -683,19 +683,19 @@ class ApplicationFacade:
     def make_message_loop(self, clock: 'Clock') -> MessageLoop:
         pass
 
-    def add_pre_render_task(self, task: Callable, expired: 'Boolean' = None):
+    def add_pre_render_task(self, task: Callable, expired: "Boolean" = None):
         pass
 
     def add_control_layer(self, control: Union['Layer', 'Renderer']):
         pass
 
-    def add_event_listener(self, event_listener: Callable[['Event'], bool], discarded: Optional['Boolean'] = None):
+    def add_event_listener(self, event_listener: Callable[["Event"], bool], discarded: Optional["Boolean"] = None):
         pass
 
-    def push_event_listener(self, event_listener: Callable[['Event'], bool], discarded: Optional['Boolean'] = None):
+    def push_event_listener(self, event_listener: Callable[["Event"], bool], discarded: Optional["Boolean"] = None):
         pass
 
-    def set_default_event_listener(self, event_listener: Callable[['Event'], bool]):
+    def set_default_event_listener(self, event_listener: Callable[["Event"], bool]):
         pass
 
     def get_string(self, resid: str, def_value: Optional[str] = None) -> str:
@@ -707,10 +707,10 @@ class ApplicationFacade:
     def exit(self):
         pass
 
-    def post(self, task: Callable, delay: float | list[float], canceled: Optional['Boolean'] = None):
+    def post(self, task: Callable, delay: float | list[float], canceled: Optional["Boolean"] = None) -> Future:
         pass
 
-    def schedule(self, task: Callable, interval: float, canceled: Optional['Boolean'] = None):
+    def schedule(self, task: Callable, interval: float, canceled: Optional["Boolean"] = None, count_down: int = 0) -> Future:
         pass
 
     def expect(self, condition: Boolean, future: Future):
@@ -872,10 +872,10 @@ class Renderer:
     def translate(self, position: Union[tuple, 'Vec2']) -> 'Renderer':
         return self
 
-    def make_disposable(self, disposed: Union[bool, 'Boolean'] = None) -> 'Renderer':
+    def make_disposable(self, disposed: Union[bool, "Boolean"] = None) -> 'Renderer':
         pass
 
-    def make_visible(self, visibility: Union[bool, 'Boolean', 'Visibility']) -> 'Renderer':
+    def make_visible(self, visibility: Union[bool, "Boolean", 'Visibility']) -> 'Renderer':
         pass
 
     def make_auto_release(self, ref_count: int = 1) -> 'Renderer':
@@ -979,7 +979,7 @@ class String:
     def set(self, val: str):
         pass
 
-    def if_else(self, condition: 'Boolean', negative: Union[str, 'String']) -> 'String':
+    def if_else(self, condition: "Boolean", negative: Union[str, 'String']) -> 'String':
         pass
 
     @staticmethod
@@ -1823,7 +1823,7 @@ class Activity:
     def add_render_layer(self, render_layer: Renderer, discarded: Optional[Boolean] = None):
         pass
 
-    def add_event_listener(self, event_listener: Union[Callable[['Event'], bool], 'EventListener'], priority: int = 0):
+    def add_event_listener(self, event_listener: Union[Callable[["Event"], bool], 'EventListener'], priority: int = 0):
         pass
 
     def make_arena(self) -> Arena:
@@ -1839,7 +1839,7 @@ class Clock:
     def duration(self) -> 'Numeric':
         pass
 
-    def timeout(self, seconds: float, timeout_value: bool = True) -> 'Boolean':
+    def timeout(self, seconds: float, timeout_value: bool = True) -> "Boolean":
         pass
 
     def pause(self):
