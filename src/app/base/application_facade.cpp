@@ -41,7 +41,8 @@ private:
     sp<Future> _future;
 };
 
-struct FragCoordRevert final : Vec2 {
+class FragCoordRevert final : public Vec2 {
+public:
     FragCoordRevert(sp<Vec2> xy, const float height)
         : _xy(std::move(xy)), _height(height) {
     }
@@ -61,12 +62,13 @@ struct FragCoordRevert final : Vec2 {
     float _height;
 };
 
-struct FragCoordStretch final : Vec2 {
+class FragCoordStretch final : public Vec2 {
+public:
     FragCoordStretch(sp<Vec2> xy, const V2& viewportXY, sp<Size> resolution)
         : _xy(std::move(xy)), _viewport_xy(viewportXY), _resolution(std::move(resolution)) {
     }
 
-    bool update(uint64_t timestamp) override
+    bool update(const uint64_t timestamp) override
     {
         return UpdatableUtil::update(timestamp, _xy, _resolution);
     }
@@ -81,6 +83,21 @@ struct FragCoordStretch final : Vec2 {
     sp<Vec2> _xy;
     V2 _viewport_xy;
     sp<Size> _resolution;
+};
+
+class RunnableFuture final : public Runnable {
+public:
+    RunnableFuture(const sp<Future>& future)
+        : _future(future) {
+    }
+
+    void run() override
+    {
+        _future->done();
+    }
+
+private:
+    sp<Future> _future;
 };
 
 }
@@ -223,15 +240,15 @@ void ApplicationFacade::exit()
 
 sp<Future> ApplicationFacade::post(sp<Runnable> task, const float delay, sp<Boolean> canceled) const
 {
-    sp<Future> future = sp<Future>::make(std::move(canceled), task);
-    _context->messageLoopApp()->post(std::move(task), delay, future->isDoneOrCanceled());
+    sp<Future> future = sp<Future>::make(std::move(canceled), std::move(task));
+    _context->messageLoopApp()->post(sp<Runnable>::make<RunnableFuture>(future), delay, future->isDoneOrCanceled());
     return future;
 }
 
 sp<Future> ApplicationFacade::schedule(sp<Runnable> task, const float interval, sp<Boolean> canceled, const uint32_t countDown) const
 {
-    sp<Future> future = sp<Future>::make(std::move(canceled), task, countDown);
-    _context->messageLoopApp()->schedule(std::move(task), interval, future->isDoneOrCanceled());
+    sp<Future> future = sp<Future>::make(std::move(canceled), std::move(task), countDown);
+    _context->messageLoopApp()->schedule(sp<Runnable>::make<RunnableFuture>(future), interval, future->isDoneOrCanceled());
     return future;
 }
 

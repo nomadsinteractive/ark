@@ -707,10 +707,10 @@ class ApplicationFacade:
     def exit(self):
         pass
 
-    def post(self, task: Callable, delay: float | list[float], canceled: Optional["Boolean"] = None) -> Future:
+    def post(self, task: Optional[Callable], delay: float | list[float], canceled: Optional["Boolean"] = None) -> Future:
         pass
 
-    def schedule(self, task: Callable, interval: float, canceled: Optional["Boolean"] = None, count_down: int = 0) -> Future:
+    def schedule(self, task: Optional[Callable], interval: float, canceled: Optional["Boolean"] = None, count_down: int = 0) -> Future:
         pass
 
     def expect(self, condition: Boolean, future: Future):

@@ -18,6 +18,9 @@ void Future::cancel()
 
 void Future::done()
 {
+    if(_canceled.val())
+        return;
+
     if(_count_down == 1)
     {
         _done.reset(true);
