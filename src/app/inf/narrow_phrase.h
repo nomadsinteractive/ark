@@ -11,7 +11,6 @@
 
 namespace ark {
 
-//[[script::bindings::auto]]
 class ARK_API NarrowPhrase {
 public:
     class Ray {

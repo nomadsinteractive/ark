@@ -8,7 +8,7 @@ namespace ark {
 
 class BooleanByTimeout final : public Boolean {
 public:
-    BooleanByTimeout(sp<Numeric> duration, float timeout, bool timeoutValue);
+    BooleanByTimeout(sp<Numeric> duration, float timeout);
 
     bool val() override;
     bool update(uint64_t timestamp) override;
@@ -16,7 +16,6 @@ public:
 private:
     sp<Numeric> _duration;
     float _timeout;
-    bool _timeout_value;
 };
 
 }

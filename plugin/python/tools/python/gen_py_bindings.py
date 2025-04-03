@@ -38,7 +38,7 @@ AUTOBIND_METHOD_PATTERN = re.compile(r'\[\[script::bindings::(auto|classmethod|c
 AUTOBIND_AS_MAPPING_PATTERN = re.compile(r'\[\[script::bindings::map\(([^)]+)\)]]\s+%s' % METHOD_PATTERN)
 AUTOBIND_AS_SEQUENCE_PATTERN = re.compile(r'\[\[script::bindings::seq\(([^)]+)\)]]\s+%s' % METHOD_PATTERN)
 AUTOBIND_OPERATOR_PATTERN = re.compile(r'\[\[script::bindings::operator\(([^)]+)\)]]\s+%s%s' % (ANNOTATION_PATTERN, METHOD_PATTERN))
-AUTOBIND_CLASS_PATTERN = re.compile(r'\[\[script::bindings::(class|name)\(([^)]+)\)]]')
+AUTOBIND_CLASS_PATTERN = re.compile(r'\[\[script::bindings::(class|name)(?:\(([^)]+)\))?]]')
 AUTOBIND_EXTENDS_PATTERN = re.compile(r'\[\[script::bindings::extends\((\w+)\)]]')
 AUTOBIND_TYPEDEF_PATTERN = re.compile(r'\[\[script::bindings::auto]]\s+typedef\s+\w[\w<>\s]+\s+(\w+);')
 AUTOBIND_ANNOTATION_PATTERN = re.compile(r'\[\[script::bindings::(auto|debris)]]%sclass\s+([^{\r\n]+)\s*{' % ANNOTATION_PATTERN)
@@ -706,11 +706,11 @@ def main(params, paths):
         args = [i.strip() for i in x[1].replace('"', '').split(',')]
         assert x[0] in ('class', 'name') and len(args) in (1, 2)
         if x[0] == 'class':
-            genclass.binding_classname = args[0]
+            genclass.binding_classname = args[0] or main_class
             if len(args) > 1:
                 genclass.name = args[1]
         else:
-            genclass.name = args[0]
+            genclass.name = args[0] or main_class
 
     def autoextends(filename, content, main_class, x):
         genclass = get_result_class(binding_classes, filename, main_class)

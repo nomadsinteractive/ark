@@ -53,9 +53,6 @@ public:
     static sp<Vec3> toVec3(sp<ByteArray> self);
 //  [[script::bindings::classmethod]]
     static sp<Vec4> toVec4(sp<ByteArray> self);
-
-//  [[script::bindings::classmethod]]
-    static sp<Runnable> makeWatcher(sp<ByteArray> self, size_t stride, size_t offset, std::function<void (const Vector<uintptr_t>&)> callback);
 };
 
 }

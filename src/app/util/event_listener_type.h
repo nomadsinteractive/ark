@@ -12,9 +12,7 @@ namespace ark {
 class ARK_API EventListenerType {
 public:
 //  [[script::bindings::constructor]]
-    static sp<EventListener> create(sp<EventListener> delegate = nullptr, StringView onEventName = "");
-//  [[script::bindings::constructor]]
-    static sp<EventListener> create(Behavior& delegate, StringView onEventName = "on_event");
+    static sp<EventListener> create(sp<EventListener> delegate = nullptr);
 
 //  [[script::bindings::classmethod]]
     static bool onEvent(const sp<EventListener>& self, const Event& event);

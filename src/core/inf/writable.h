@@ -6,7 +6,6 @@
 
 namespace ark {
 
-//[[script::bindings::auto]]
 class ARK_API Writable {
 public:
     virtual ~Writable() = default;

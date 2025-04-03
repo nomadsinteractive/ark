@@ -68,29 +68,29 @@ public:
     };
 
 public:
-//[[script::bindings::auto]]
+//  [[script::bindings::auto]]
     Varyings() = default;
     Varyings(const PipelineLayout& pipelineLayout);
 
     bool update(uint64_t timestamp);
 
-//[[script::bindings::getprop]]
+//  [[script::bindings::getprop]]
     Box getProperty(const String& name) const;
 
-//[[script::bindings::setprop]]
+//  [[script::bindings::setprop]]
     void setProperty(const String& name, sp<Integer> var);
-//[[script::bindings::setprop]]
+//  [[script::bindings::setprop]]
     void setProperty(const String& name, sp<Numeric> var);
-//[[script::bindings::setprop]]
+//  [[script::bindings::setprop]]
     void setProperty(const String& name, sp<Vec2> var);
-//[[script::bindings::setprop]]
+//  [[script::bindings::setprop]]
     void setProperty(const String& name, sp<Vec3> var);
-//[[script::bindings::setprop]]
+//  [[script::bindings::setprop]]
     void setProperty(const String& name, sp<Vec4> var);
-//[[script::bindings::setprop]]
+//  [[script::bindings::setprop]]
     void setProperty(const String& name, sp<Mat4> var);
 
-//[[script::bindings::map(get)]]
+//  [[script::bindings::map(get)]]
     sp<Varyings> subscribe(const String& name);
 
     Snapshot snapshot(const PipelineLayout& pipelineLayout, Allocator& allocator);

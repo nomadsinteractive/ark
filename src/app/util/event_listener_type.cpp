@@ -1,6 +1,5 @@
 #include "app/util/event_listener_type.h"
 
-#include "core/components/behavior.h"
 #include "core/components/discarded.h"
 
 #include "app/base/event.h"
@@ -9,35 +8,9 @@
 
 namespace ark {
 
-namespace {
-
-class EventListenerImpl final : public EventListener {
-public:
-    EventListenerImpl(sp<Behavior::Method> onEvent)
-        : _on_event(std::move(onEvent))
-    {
-    }
-
-    bool onEvent(const Event& event) override
-    {
-        Box arg1(sp<Event>::make(event));
-        return static_cast<bool>(_on_event->call({std::move(arg1)}));
-    }
-
-private:
-    sp<Behavior::Method> _on_event;
-};
-
-}
-
-sp<EventListener> EventListenerType::create(sp<EventListener> delegate, StringView /*onEventName*/)
+sp<EventListener> EventListenerType::create(sp<EventListener> delegate)
 {
     return sp<EventListener>::make<EventListenerWrapper>(std::move(delegate));
-}
-
-sp<EventListener> EventListenerType::create(Behavior& delegate, StringView onEventName)
-{
-    return create(sp<EventListener>::make<EventListenerImpl>(delegate.getMethod(onEventName)), onEventName);
 }
 
 bool EventListenerType::onEvent(const sp<EventListener>& self, const Event& event)

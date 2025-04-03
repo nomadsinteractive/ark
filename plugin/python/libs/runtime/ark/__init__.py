@@ -348,7 +348,13 @@ class Behavior:
     def __init__(self, delegate: Any):
         pass
 
-    def __getattr__(self, name: str) -> Runnable:
+    def __getitem__(self, name: str) -> Runnable:
+        pass
+
+    def create_collision_callback(self, on_begin_contact:str = 'on_begin_contact', on_end_contact: str = 'on_end_contact') -> "CollisionCallback":
+        pass
+
+    def create_event_listener(self, on_event:str = 'on_event') -> "EventListener":
         pass
 
 
@@ -1839,7 +1845,7 @@ class Clock:
     def duration(self) -> 'Numeric':
         pass
 
-    def timeout(self, seconds: float, timeout_value: bool = True) -> "Boolean":
+    def timeout(self, seconds: float) -> "Boolean":
         pass
 
     def pause(self):

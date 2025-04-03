@@ -1,5 +1,4 @@
-#ifndef ARK_CORE_INF_READABLE_INF_
-#define ARK_CORE_INF_READABLE_INF_
+#pragma once
 
 #include <stdint.h>
 
@@ -7,7 +6,6 @@
 
 namespace ark {
 
-//[[script::bindings::auto]]
 class ARK_API Readable {
 public:
     virtual ~Readable() = default;
@@ -18,5 +16,3 @@ public:
 };
 
 }
-
-#endif

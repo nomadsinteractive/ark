@@ -9,6 +9,8 @@
 #include "core/types/box.h"
 #include "core/types/shared_ptr.h"
 
+#include "app/forwarding.h"
+
 namespace ark {
 
 //[[script::bindings::debris]]
@@ -20,8 +22,13 @@ public:
     void onWire(const WiringContext& context, const Box& self) override;
     void traverse(const Visitor& visitor) override;
 
-//  [[script::bindings::getprop]]
-    sp<Runnable> getRunnable(StringView name);
+//  [[script::bindings::map(get)]]
+    sp<Runnable> subscribe(StringView name);
+
+//  [[script::bindings::auto]]
+    sp<CollisionCallback> createCollisionCallback(StringView onBeginContact = "on_begin_contact", StringView onEndContact = "on_end_contact");
+//  [[script::bindings::auto]]
+    sp<EventListener> createEventListener(StringView onEvent = "on_event");
 
     class Method final : public Debris {
     public:

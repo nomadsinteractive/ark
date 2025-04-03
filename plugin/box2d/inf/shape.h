@@ -8,7 +8,6 @@
 
 namespace ark::plugin::box2d {
 
-//[[script::bindings::auto]]
 class Shape {
 public:
     virtual ~Shape() = default;

@@ -13,7 +13,7 @@
 
 namespace ark {
 
-//[[script::bindings::auto]]
+//[[script::bindings::class]]
 class ARK_API Shader {
 public:
     struct StageManifest {

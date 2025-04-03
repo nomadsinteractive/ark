@@ -1,7 +1,7 @@
 #include "app/util/path_finder.h"
 
 #include "core/util/math.h"
-#include "core/components/behavior.h"
+#include "app/components/behavior.h"
 
 #include "graphics/base/v3.h"
 

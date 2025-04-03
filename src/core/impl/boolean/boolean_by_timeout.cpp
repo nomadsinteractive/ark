@@ -2,14 +2,14 @@
 
 namespace ark {
 
-BooleanByTimeout::BooleanByTimeout(sp<Numeric> duration, const float timeout, const bool timeoutValue)
-    : _duration(std::move(duration)), _timeout(_duration->val() + timeout), _timeout_value(timeoutValue)
+BooleanByTimeout::BooleanByTimeout(sp<Numeric> duration, const float timeout)
+    : _duration(std::move(duration)), _timeout(_duration->val() + timeout)
 {
 }
 
 bool BooleanByTimeout::val()
 {
-    return _duration->val() > _timeout ? _timeout_value : !_timeout_value;
+    return _duration->val() > _timeout;
 }
 
 bool BooleanByTimeout::update(const uint64_t timestamp)
