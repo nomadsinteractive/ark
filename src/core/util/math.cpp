@@ -323,15 +323,6 @@ sp<Vec4> Math::lerp(sp<Vec4> a, sp<Vec4> b, sp<Numeric> t)
     return sp<Lerp<V4, float>>::make(std::move(a), std::move(b), std::move(t));
 }
 
-V3 Math::quadratic(float a, float b, float c)
-{
-    float d = b * b - 4.0f * a * c;
-    if(d < 0)
-        return {d, 0, 0};
-    const float sqrtd = std::sqrt(d);
-    return {d, (-b + sqrtd) / 2.0f / a, (-b - sqrtd) / 2.0f / a};
-}
-
 uint32_t Math::hash32(uint32_t x)
 {
     x = ((x >> 16) ^ x) * 0x45d9f3b;
@@ -340,15 +331,15 @@ uint32_t Math::hash32(uint32_t x)
     return x;
 }
 
-uint32_t Math::hash64(uint64_t key)
+uint32_t Math::hash64(uint64_t x)
 {
-    key = (~key) + (key << 18);
-    key = key ^ (key >> 31);
-    key = key * 21;
-    key = key ^ (key >> 11);
-    key = key + (key << 6);
-    key = key ^ (key >> 22);
-    return key;
+    x = (~x) + (x << 18);
+    x = x ^ (x >> 31);
+    x = x * 21;
+    x = x ^ (x >> 11);
+    x = x + (x << 6);
+    x = x ^ (x >> 22);
+    return x;
 }
 
 V2 Math::normalize(const V2& v2)

@@ -235,12 +235,8 @@ public:
 //  [[script::bindings::auto]]
     static sp<Vec4> lerp(sp<Vec4> a, sp<Vec4> b, sp<Numeric> t);
 
-    [[deprecated]]
-//  [[script::bindings::auto]]
-    static V3 quadratic(float a, float b, float c);
-
     static uint32_t hash32(uint32_t x);
-    static uint32_t hash64(uint64_t key);
+    static uint32_t hash64(uint64_t x);
 
     static V2 normalize(const V2& v2);
     static V3 normalize(const V3& v2);

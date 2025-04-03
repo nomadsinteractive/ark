@@ -294,12 +294,12 @@ public:
     }
 
     template<typename T> sp<IBuilder<T>> getBuilderByArg(String argname) {
-        return sp<IBuilder<T>>::make<BuilderByArgument<T>>(_stub->_references, std::move(argname));
+        return sp<IBuilder<T>>::template make<BuilderByArgument<T>>(_stub->_references, std::move(argname));
     }
 
     template<typename T> sp<IBuilder<T>> getBuilderByArg(const Identifier& id) {
         CHECK(id.isArg(), "Cannot build \"%s\" because it's not an argument", id.toString().c_str());
-        return sp<IBuilder<T>>::make<BuilderByArgument<T>>(_stub->_references, id.arg(), id.isOptional() ? sp<IBuilder<T>>::template make<typename IBuilder<T>::Null>() : findBuilderByValue<T>(id.toString()));
+        return sp<IBuilder<T>>::template make<BuilderByArgument<T>>(_stub->_references, id.arg(), id.isOptional() ? sp<IBuilder<T>>::template make<typename IBuilder<T>::Null>() : findBuilderByValue<T>(id.toString()));
     }
 
     template<typename T> sp<IBuilder<T>> getBuilderByRef(const Identifier& id) {
@@ -315,8 +315,8 @@ public:
         return nullptr;
     }
     template<typename T> sp<IBuilder<T>> getBuilderByRef_sfinae(const String& refid, std::enable_if_t<std::is_same_v<sp<typename T::_PtrType>, T>>*) const {
-        if(T inst = _stub->_references->get(refid).template as<T::_PtrType>())
-            return sp<IBuilder<T>>::make<typename IBuilder<T>::Prebuilt>(std::move(inst));
+        if(T inst = _stub->_references->get(refid).template as<typename T::_PtrType>())
+            return sp<IBuilder<T>>::template make<typename IBuilder<T>::Prebuilt>(std::move(inst));
         return nullptr;
     }
     template<typename T> sp<IBuilder<T>> getBuilderByRef_sfinae(const String& /*refid*/, ...) const {
@@ -379,7 +379,8 @@ public:
     template<typename... Args> void expand(const String& expr, sp<IBuilder<Args>>&... args) {
         const String value = Strings::unwrap(expr.strip(), '(', ')');
         CHECK(value, "Empty value being built");
-        doExpand<Args...>(Strings::split<std::list<String>>(value, ','), args...);
+        auto elements = Strings::split<std::list<String>>(value, ',');
+        doExpand<Args...>(elements, args...);
     }
 
 private:
