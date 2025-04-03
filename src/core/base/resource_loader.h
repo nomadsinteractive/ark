@@ -29,13 +29,13 @@ private:
             DCHECK(id.isRef(), "Id \"%s\" must be a reference", (id.isArg() ? id.arg().c_str() : id.val().c_str()));
 
             if(id.package())
-                return _bean_factory.createBuilderByRef<T>(id);
+                return _bean_factory.createBuilderByRef<sp<T>>(id);
 
             const auto iter = _builders.find(id.ref());
             if(iter != _builders.end())
                 return iter->second;
             SafeBuilder<T>& builder = _builders[id.ref()];
-            builder = _bean_factory.createBuilderByRef<T>(id);
+            builder = _bean_factory.createBuilderByRef<sp<T>>(id);
             return builder;
         }
 

@@ -3,7 +3,6 @@
 #include "core/ark.h"
 #include "core/base/bean_factory.h"
 #include "core/impl/variable/variable_wrapper.h"
-#include "core/util/bean_utils.h"
 #include "core/util/updatable_util.h"
 
 namespace ark {
@@ -40,10 +39,10 @@ Vec2Impl::Vec2Impl(Vec2& other) noexcept
 
 V2 Vec2Impl::val()
 {
-    return V2(_x->val(), _y->val());
+    return {_x->val(), _y->val()};
 }
 
-bool Vec2Impl::update(uint64_t timestamp)
+bool Vec2Impl::update(const uint64_t timestamp)
 {
     return UpdatableUtil::update(timestamp, _x, _y);
 }
@@ -70,16 +69,16 @@ void Vec2Impl::fix()
     _y->fix();
 }
 
-Vec2Impl::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& str)
+Vec2Impl::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr)
 {
-    BeanUtils::split<Numeric, Numeric>(factory, str, _x, _y);
+    factory.expand(expr, _x, _y);
 }
 
 sp<Vec2> Vec2Impl::DICTIONARY::build(const Scope& args)
 {
     const sp<Numeric> x = _x->build(args);
     const sp<Numeric> y = _y->build(args);
-    return sp<Vec2Impl>::make(x, y ? y : x);
+    return sp<Vec2>::make<Vec2Impl>(x, y ? y : x);
 }
 
 Vec2Impl::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
@@ -89,7 +88,7 @@ Vec2Impl::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 
 sp<Vec2> Vec2Impl::BUILDER::build(const Scope& args)
 {
-    return sp<Vec2Impl>::make(_x->build(args), _y.build(args));
+    return sp<Vec2>::make<Vec2Impl>(_x->build(args), _y.build(args));
 }
 
 }

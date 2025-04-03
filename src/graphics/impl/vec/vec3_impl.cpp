@@ -3,7 +3,6 @@
 #include "core/ark.h"
 #include "core/base/bean_factory.h"
 #include "core/impl/variable/variable_wrapper.h"
-#include "core/util/bean_utils.h"
 #include "core/util/updatable_util.h"
 
 #include "graphics/base/v3.h"
@@ -32,10 +31,10 @@ Vec3Impl::Vec3Impl(sp<Numeric> x, sp<Numeric> y, sp<Numeric> z) noexcept
 
 V3 Vec3Impl::val()
 {
-    return V3(_x->val(), _y->val(), _z->val());
+    return {_x->val(), _y->val(), _z->val()};
 }
 
-bool Vec3Impl::update(uint64_t timestamp)
+bool Vec3Impl::update(const uint64_t timestamp)
 {
     return UpdatableUtil::update(timestamp, _x, _y, _z);
 }
@@ -69,31 +68,31 @@ void Vec3Impl::fix()
     _z->fix();
 }
 
-Vec3Impl::BUILDER::BUILDER(BeanFactory& factory, const document& doc)
-    : _x(factory.ensureBuilder<Numeric>(doc, "x")), _y(factory.getBuilder<Numeric>(doc, "y")), _z(factory.getBuilder<Numeric>(doc, "z"))
+Vec3Impl::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+    : _x(factory.ensureBuilder<Numeric>(manifest, "x")), _y(factory.getBuilder<Numeric>(manifest, "y")), _z(factory.getBuilder<Numeric>(manifest, "z"))
 {
 }
 
 sp<Vec3> Vec3Impl::BUILDER::build(const Scope& args)
 {
-    return sp<Vec3Impl>::make(_x.build(args), _y.build(args), _z.build(args));
+    return sp<Vec3>::make<Vec3Impl>(_x.build(args), _y.build(args), _z.build(args));
 }
 
-Vec3Impl::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& str)
-    : _str(str)
+Vec3Impl::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr)
+    : _expr(expr)
 {
-    BeanUtils::split(factory, str, _x, _y, _z);
+    factory.expand(expr, _x, _y, _z);
 }
 
 sp<Vec3> Vec3Impl::DICTIONARY::build(const Scope& args)
 {
-    const sp<Numeric> x = _x->build(args);
-    const sp<Numeric> y = _y->build(args);
-    const sp<Numeric> z = _z->build(args);
-    DCHECK(x, "Cannot build Vec3 from \"%s\"", _str.c_str());
+    sp<Numeric> x = _x->build(args);
+    sp<Numeric> y = _y->build(args);
+    sp<Numeric> z = _z->build(args);
+    CHECK(x, "Cannot build Vec3 from \"%s\"", _expr.c_str());
     if(!y && !z)
-        return sp<Vec3Impl>::make(x, x, x);
-    return sp<Vec3Impl>::make(x, y, z);
+        return sp<Vec3>::make<Vec3Impl>(x, x, x);
+    return sp<Vec3>::make<Vec3Impl>(std::move(x), std::move(y), std::move(z));
 }
 
 }

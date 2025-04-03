@@ -1,7 +1,6 @@
 #include "opengl/base/gl_cubemap.h"
 
 #include "core/inf/variable.h"
-#include "core/util/bean_utils.h"
 #include "core/util/log.h"
 
 #include "graphics/base/bitmap.h"

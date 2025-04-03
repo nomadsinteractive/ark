@@ -2,7 +2,6 @@
 
 #include "core/ark.h"
 #include "core/impl/variable/variable_wrapper.h"
-#include "core/util/bean_utils.h"
 #include "core/util/boolean_type.h"
 
 #include "graphics/components/quaternion.h"

@@ -3,7 +3,6 @@
 #include "core/ark.h"
 #include "core/base/bean_factory.h"
 #include "core/impl/variable/variable_wrapper.h"
-#include "core/util/bean_utils.h"
 #include "core/util/updatable_util.h"
 
 #include "graphics/base/color.h"
@@ -32,10 +31,10 @@ Vec4Impl::Vec4Impl(sp<Numeric> x, sp<Numeric> y, sp<Numeric> z, sp<Numeric> w) n
 
 V4 Vec4Impl::val()
 {
-    return V4(_x->val(), _y->val(), _z->val(), _w->val());
+    return {_x->val(), _y->val(), _z->val(), _w->val()};
 }
 
-bool Vec4Impl::update(uint64_t timestamp)
+bool Vec4Impl::update(const uint64_t timestamp)
 {
     return UpdatableUtil::update(timestamp, _x, _y, _z, _w);
 }
@@ -87,22 +86,22 @@ sp<Vec4> Vec4Impl::BUILDER::build(const Scope& args)
 {
     if(_value)
         return _value->build(args);
-    return sp<Vec4Impl>::make(_x.build(args), _y.build(args), _z.build(args), _w.build(args));
+    return sp<Vec4>::make<Vec4Impl>(_x.build(args), _y.build(args), _z.build(args), _w.build(args));
 }
 
-Vec4Impl::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& str)
-    : _is_color(str.startsWith("#"))
+Vec4Impl::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr)
+    : _is_color(expr.startsWith("#"))
 {
     if(_is_color)
-        _color = Strings::eval<Color>(str);
+        _color = Strings::eval<Color>(expr);
     else
-        BeanUtils::split(factory, str, _x, _y, _z, _w);
+        factory.expand(expr, _x, _y, _z, _w);
 }
 
 sp<Vec4> Vec4Impl::DICTIONARY::build(const Scope& args)
 {
     if(_is_color)
-        return sp<Color>::make(_color);
+        return sp<Vec4>::make<Color>(_color);
     return sp<Vec4>::make<Vec4Impl>(_x->build(args), _y->build(args), _z->build(args), _w->build(args));
 }
 

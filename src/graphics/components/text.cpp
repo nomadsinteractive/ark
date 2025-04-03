@@ -6,7 +6,6 @@
 #include "core/base/resource_loader.h"
 #include "core/inf/variable.h"
 #include "core/types/global.h"
-#include "core/util/bean_utils.h"
 #include "core/util/log.h"
 #include "core/util/math.h"
 #include "core/util/string_type.h"
@@ -42,7 +41,7 @@ namespace ark {
 
 namespace {
 
-typedef std::vector<sp<Glyph>> GlyphContents;
+typedef Vector<sp<Glyph>> GlyphContents;
 
 struct Character {
     sp<Glyph> _glyph;

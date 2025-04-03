@@ -61,7 +61,7 @@ public:
         V getVariableBuilder(BeanFactory& factory, const String& expr) const {
             const char* str = expr.c_str();
             if(expr.length() > 1 && (*str == '@' || *str == '$') && Strings::isVariableName(str + 1)) {
-                const sp<Builder<N>> builder = *str == '@' ? factory.getBuilderByRef<N>(Identifier::parseRef(str + 1)) : factory.getBuilderByArg<N>(str + 1);
+                const sp<Builder<N>> builder = *str == '@' ? factory.getBuilderByRef<sp<N>>(Identifier::parseRef(str + 1)) : factory.getBuilderByArg<sp<N>>(str + 1);
                 DCHECK(builder, "Cannot build \"%s\"", expr.c_str());
                 return builder;
             }

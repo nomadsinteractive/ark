@@ -12,6 +12,7 @@
 #include "core/impl/variable/lerp.h"
 #include "core/impl/variable/variable_op1.h"
 #include "core/impl/variable/variable_op2.h"
+#include "core/types/safe_var.h"
 #include "core/util/operators.h"
 #include "core/util/log.h"
 
@@ -20,42 +21,92 @@
 #include "graphics/impl/vec/vec3_impl.h"
 #include "graphics/impl/vec/vec4_impl.h"
 
-
 namespace ark {
 
 namespace {
 
-class RandNumeric : public Numeric {
+class VolatileRandfv final : public Numeric {
 public:
-    virtual float val() override {
-        return Math::randf();
+    VolatileRandfv(sp<Numeric> a, sp<Numeric> b)
+        : _a(std::move(a)), _b(std::move(b), 1.0f)
+    {
     }
 
-    virtual bool update(uint64_t /*timestamp*/) override {
+    float val() override
+    {
+        const float a = _a.val();
+        const float b = _b.val();
+        return Math::randf() * (b - a) + a;
+    }
+
+    bool update(const uint64_t timestamp) override
+    {
         return true;
     }
+
+private:
+    SafeVar<Numeric> _a;
+    SafeVar<Numeric> _b;
+};
+
+class Randfv final : public Numeric {
+public:
+    Randfv(sp<Numeric> a, sp<Numeric> b)
+        : _a(std::move(a)), _b(std::move(b), 1.0f), _value(doGenerate())
+    {
+    }
+
+    float val() override
+    {
+        const float a = _a.val();
+        const float b = _b.val();
+        return Math::randf() * (b - a) + a;
+    }
+
+    bool update(const uint64_t timestamp) override
+    {
+        const bool dirty = _timestamp.update(timestamp);
+        if(dirty)
+            _value = doGenerate();
+        return dirty;
+    }
+
+private:
+    float doGenerate() const
+    {
+        const float a = _a.val();
+        const float b = _b.val();
+        return Math::randf() * (b - a) + a;
+    }
+
+private:
+    SafeVar<Numeric> _a;
+    SafeVar<Numeric> _b;
+
+    Timestamp _timestamp;
+    float _value;
 };
 
 }
 
 const float Math::PI = 3.14159265358979323846f;
-const float Math::PIx2 = Math::PI * 2.0f;
-const float Math::PI_2 = Math::PI / 2.0f;
-const float Math::PI_4 = Math::PI / 4.0f;
+const float Math::PI_HALF = Math::PI / 2.0f;
+const float Math::PI_QUARTER = Math::PI / 4.0f;
+const float Math::TAU = Math::PI * 2.0f;
 
-uint32_t Math::log2(uint32_t value)
+uint32_t Math::log2(uint32_t x)
 {
     static const uint32_t tab32[32] = {
         0,  9,  1, 10, 13, 21,  2, 29,
        11, 14, 16, 18, 22, 25,  3, 30,
         8, 12, 20, 28, 15, 17, 24,  7,
        19, 27, 23,  6, 26,  5,  4, 31};
-    value |= value >> 1;
-    value |= value >> 2;
-    value |= value >> 4;
-    value |= value >> 8;
-    value |= value >> 16;
-    return tab32[static_cast<uint32_t>((value * 0x07C4ACDD) >> 27)];
+    x |= x >> 1;
+    x |= x >> 2;
+    x |= x >> 4;
+    x |= x >> 8;
+    x |= x >> 16;
+    return tab32[static_cast<uint32_t>((x * 0x07C4ACDD) >> 27)];
 }
 
 float Math::abs(float x)
@@ -148,19 +199,19 @@ float Math::round(float x)
     return std::round(x);
 }
 
-V2 Math::round(const V2& v)
+V2 Math::round(const V2& x)
 {
-    return V2(std::round(v.x()), std::round(v.y()));
+    return {std::round(x.x()), std::round(x.y())};
 }
 
-V3 Math::round(const V3& v)
+V3 Math::round(const V3& x)
 {
-    return V3(std::round(v.x()), std::round(v.y()), std::round(v.z()));
+    return {std::round(x.x()), std::round(x.y()), std::round(x.z())};
 }
 
-V4 Math::round(const V4& v)
+V4 Math::round(const V4& x)
 {
-    return V4(std::round(v.x()), std::round(v.y()), std::round(v.z()), std::round(v.w()));
+    return {std::round(x.x()), std::round(x.y()), std::round(x.z()), std::round(x.w())};
 }
 
 float Math::randf()
@@ -168,30 +219,32 @@ float Math::randf()
     return rand() / static_cast<float>(RAND_MAX);
 }
 
-sp<Numeric> Math::randv()
+sp<Numeric> Math::randfv(sp<Numeric> a, sp<Numeric> b, bool isVolatile)
 {
-    return sp<Numeric>::make<RandNumeric>();
+    if(isVolatile)
+        return sp<Numeric>::make<VolatileRandfv>(std::move(a), std::move(b));
+    return sp<Numeric>::make<Randfv>(std::move(a), std::move(b));
 }
 
-float Math::hypot(float dx, float dy)
+float Math::hypot(const float dx, const float dy)
 {
     return sqrt(dx * dx + dy * dy);
 }
 
-float Math::hypot2(float dx, float dy)
+float Math::hypot2(const float dx, const float dy)
 {
     return dx * dx + dy * dy;
 }
 
-float Math::sqrt(float x)
+float Math::sqrt(const float x)
 {
-    DCHECK(x >= 0, "Illegal argument, negative value(%.2f)", x);
+    CHECK(x >= 0, "Illegal argument, negative value(%.2f)", x);
     return std::sqrt(x);
 }
 
 sp<Numeric> Math::sqrt(sp<Numeric> x)
 {
-    return sp<VariableOP1<float>>::make(static_cast<float(*)(float)>(Math::sqrt), std::move(x));
+    return sp<Numeric>::make<VariableOP1<float>>(static_cast<float(*)(float)>(Math::sqrt), std::move(x));
 }
 
 float Math::distance(const V2& lvalue, const V2& rvalue)
@@ -362,7 +415,7 @@ void Math::vibrate(float s0, float v0, float s1, float v1, float& o, float& a, f
         t1 = -t1;
 
     if(t0 == t1)
-        t0 -= (v0 == 0 ? PI : PIx2);
+        t0 -= (v0 == 0 ? PI : TAU);
 }
 
 }

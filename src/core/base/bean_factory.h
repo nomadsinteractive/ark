@@ -12,6 +12,7 @@
 #include "core/inf/builder.h"
 #include "core/inf/dictionary.h"
 #include "core/util/documents.h"
+#include "core/util/strings.h"
 #include "core/types/optional.h"
 #include "core/types/weak_ptr.h"
 
@@ -59,7 +60,7 @@ private:
             return createBuilder(factory, className, doc, wrapBuilder);
         }
 
-        BuilderType createBuilder(BeanFactory& factory, const String& className, const document& doc, bool wrapBuilder) const {
+        BuilderType createBuilder(BeanFactory& factory, const String& className, const document& doc, const bool wrapBuilder) const {
             const String& id = Documents::getAttribute(doc, constants::ID);
             const String& wrappedId = wrapBuilder ? id : "";
             if(const String& ref = Documents::getAttribute(doc, constants::REF); className.empty() && ref) {
@@ -68,10 +69,10 @@ private:
                     if(f.package().empty() && (f.ref() == id || ref == id))
                         return createBuilderInternal(factory, className, ref, doc);
 
-                    return makeReferencedBuilder<T>(factory.createBuilderByRef<typename T::_PtrType>(f), wrappedId, factory.references());
+                    return makeReferencedBuilder<T>(factory.createBuilderByRef<T>(f), wrappedId, factory.references());
                 }
                 if(f.isArg())
-                    return factory.getBuilderByArg<typename T::_PtrType>(f);
+                    return factory.getBuilderByArg<T>(f);
             }
             return createBuilderInternal(factory, className.empty() ? doc->name() : className, wrappedId, doc);
         }
@@ -172,8 +173,8 @@ public:
 
     ~BeanFactory() = default;
 
-    template<typename T> sp<Builder<T>> createBuilderByRef(const Identifier& id) {
-        sp<Builder<T>> builder;
+    template<typename T> sp<IBuilder<T>> createBuilderByRef(const Identifier& id) {
+        sp<IBuilder<T>> builder;
         if(id.package()) {
             sp<BeanFactory> factory = getPackage(id.package());
             CHECK(factory, "Id: \"%s\"'s package \"%s\" not found", id.toString().c_str(), id.package().c_str());
@@ -182,23 +183,23 @@ public:
         }
         else
             builder = getBuilderByRef<T>(id);
-        return builder ? builder : findBuilderByValue<sp<T>>(id.toString());
+        return builder ? builder : findBuilderByValue<T>(id.toString());
     }
 
     template<typename T> sp<T> build(const String& value, const Scope& args) {
-        return buildSafe<T>(getBuilder<T>(value), args);
+        return buildSafe(getBuilder<T>(value), args);
     }
 
     template<typename T> sp<T> build(const String& type, const String& value, const Scope& args) {
-        return buildSafe<T>(findBuilderByTypeValue<T>(type, value), args);
+        return buildSafe(findBuilderByTypeValue<sp<T>>(type, value), args);
     }
 
     template<typename T> sp<T> build(const document& doc, const Scope& args) {
-        return buildSafe<T>(findBuilderByDocument<sp<T>>(doc, true), args);
+        return buildSafe(findBuilderByDocument<sp<T>>(doc, true), args);
     }
 
     template<typename T> sp<T> build(const document& doc, const String& attr, const Scope& args) {
-        return buildSafe<T>(getBuilder<T>(doc, attr), args);
+        return buildSafe(getBuilder<T>(doc, attr), args);
     }
 
     template<typename T> sp<T> ensure(const String& value, const Scope& args) {
@@ -220,12 +221,15 @@ public:
     }
 
     template<typename T> sp<Builder<T>> getBuilder(const String& id, const Identifier::Type idType = Identifier::ID_TYPE_AUTO) {
+        return getIBuilder<sp<T>>(id, idType);
+    }
+    template<typename T> sp<IBuilder<T>> getIBuilder(const String& id, const Identifier::Type idType = Identifier::ID_TYPE_AUTO) {
         if(id.empty())
             return nullptr;
 
         const Identifier f = Identifier::parse(id, idType);
-        if constexpr (std::is_same_v<T, String>)
-            return f.isArg() ? getBuilderByArg<T>(f) : findBuilderByValue<sp<T>>(id);
+        if constexpr (std::is_same_v<T, String> || std::is_same_v<T, sp<String>>)
+            return f.isArg() ? getBuilderByArg<T>(f) : findBuilderByValue<T>(id);
         if(f.isRef())
             return createBuilderByRef<T>(f);
         if(f.isArg())
@@ -235,13 +239,13 @@ public:
             return findBuilderByTypeValue<T>(f.valType(), f.val());
 
         if(f.type() == Identifier::ID_TYPE_EXPRESSION)
-            return findBuilderByValue<sp<T>>(f.val());
+            return findBuilderByValue<T>(f.val());
 
-        return findBuilderByValue<sp<T>>(id);
+        return findBuilderByValue<T>(id);
     }
 
-    template<typename T> sp<Builder<T>> getBuilder(const document& doc, const String& attr, const String& defValue = "") {
-        const String attrValue = Documents::getAttribute(doc, attr, defValue);
+    template<typename T> sp<Builder<T>> getBuilder(const document& doc, const String& attr) {
+        const String attrValue = Documents::getAttribute(doc, attr);
         if(attrValue.empty()) {
             if(const document& child = doc->getChild(attr)) {
                 const sp<Builder<T>> builder = findBuilderByDocument<sp<T>>(child, true);
@@ -289,25 +293,33 @@ public:
         return ensureBuilder<T>(attrValue);
     }
 
-    template<typename T> sp<Builder<T>> getBuilderByArg(String argname) {
-        return sp<BuilderByArgument<sp<T>>>::make(_stub->_references, std::move(argname));
+    template<typename T> sp<IBuilder<T>> getBuilderByArg(String argname) {
+        return sp<IBuilder<T>>::make<BuilderByArgument<T>>(_stub->_references, std::move(argname));
     }
 
-    template<typename T> sp<Builder<T>> getBuilderByArg(const Identifier& id) {
+    template<typename T> sp<IBuilder<T>> getBuilderByArg(const Identifier& id) {
         CHECK(id.isArg(), "Cannot build \"%s\" because it's not an argument", id.toString().c_str());
-        return sp<BuilderByArgument<sp<T>>>::make(_stub->_references, id.arg(), id.isOptional() ? sp<Builder<T>>::template make<typename Builder<T>::Null>() : findBuilderByValue<sp<T>>(id.toString()));
+        return sp<IBuilder<T>>::make<BuilderByArgument<T>>(_stub->_references, id.arg(), id.isOptional() ? sp<IBuilder<T>>::template make<typename IBuilder<T>::Null>() : findBuilderByValue<T>(id.toString()));
     }
 
-    template<typename T> sp<Builder<T>> getBuilderByRef(const Identifier& id) {
+    template<typename T> sp<IBuilder<T>> getBuilderByRef(const Identifier& id) {
         const String& refid = id.ref();
-        if(sp<T> inst = _stub->_references->get(refid).template as<T>())
-            return sp<typename Builder<T>::Prebuilt>::make(std::move(inst));
+        if(sp<IBuilder<T>> r = getBuilderByRef_sfinae<T>(refid, nullptr))
+            return r;
 
         if(const document manifest = _stub->_document_refs->get(refid))
             for(const Factory& i : _stub->_factories)
-                if(const sp<Builder<T>> builder = i.createBuilder<sp<T>>(manifest, *this))
+                if(sp<IBuilder<T>> builder = i.createBuilder<T>(manifest, *this))
                     return builder;
 
+        return nullptr;
+    }
+    template<typename T> sp<IBuilder<T>> getBuilderByRef_sfinae(const String& refid, std::enable_if_t<std::is_same_v<sp<typename T::_PtrType>, T>>*) const {
+        if(T inst = _stub->_references->get(refid).template as<T::_PtrType>())
+            return sp<IBuilder<T>>::make<typename IBuilder<T>::Prebuilt>(std::move(inst));
+        return nullptr;
+    }
+    template<typename T> sp<IBuilder<T>> getBuilderByRef_sfinae(const String& /*refid*/, ...) const {
         return nullptr;
     }
 
@@ -337,7 +349,7 @@ public:
     }
 
     template<typename T> sp<Builder<T>> ensureBuilderByTypeValue(const String& type, const String& value) {
-        sp<Builder<T>> builder = findBuilderByTypeValue<T>(type, value);
+        sp<Builder<T>> builder = findBuilderByTypeValue<sp<T>>(type, value);
         CHECK(builder, "Cannot not build Type(%s) with value \"%s\"", type.c_str(), value.c_str());
         return builder;
     }
@@ -357,16 +369,34 @@ public:
         return nullptr;
     }
 
-    template<typename T> sp<Builder<T>> findBuilderByTypeValue(const String& type, const String& value) {
+    template<typename T> sp<IBuilder<T>> findBuilderByTypeValue(const String& type, const String& value) {
         for(const Factory& i : _stub->_factories)
-            if(sp<Builder<T>> builder = i.createValueBuilder<sp<T>>(*this, type, value))
+            if(sp<IBuilder<T>> builder = i.createValueBuilder<T>(*this, type, value))
                 return builder;
         return nullptr;
     }
 
+    template<typename... Args> void expand(const String& expr, sp<IBuilder<Args>>&... args) {
+        const String value = Strings::unwrap(expr.strip(), '(', ')');
+        CHECK(value, "Empty value being built");
+        doExpand<Args...>(Strings::split<std::list<String>>(value, ','), args...);
+    }
+
 private:
-    template<typename T> static sp<T> buildSafe(const sp<Builder<T>>& builder, const Scope& args) {
-        return builder ? builder->build(args) : nullptr;
+    template<typename T, typename... Args> void doExpand(std::list<String>& elems, sp<IBuilder<T>>& builder, sp<IBuilder<Args>>&... args) {
+        if(elems.empty())
+            builder = sp<IBuilder<T>>::template make<typename IBuilder<T>::Null>();
+        else {
+            const String str = elems.front().strip();
+            elems.pop_front();
+            builder = getIBuilder<T>(str);
+        }
+        if constexpr(sizeof...(args) > 0)
+            doExpand<Args...>(elems, args...);
+    }
+
+    template<typename T> static T buildSafe(const sp<IBuilder<T>>& builder, const Scope& args) {
+        return builder ? builder->build(args) : T();
     }
 
     template<typename T> sp<IBuilder<T>> findBuilderByDocument(const document& doc, const bool wrapBuilder) {

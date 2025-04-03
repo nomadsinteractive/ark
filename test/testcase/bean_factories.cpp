@@ -1,20 +1,17 @@
 #include "core/types/shared_ptr.h"
 
 #include "core/base/bean_factory.h"
-#include "core/dom/dom_document.h"
 #include "core/inf/builder.h"
 #include "core/inf/dictionary.h"
 #include "core/inf/variable.h"
 #include "core/impl/dictionary/dictionary_by_attribute_name.h"
-#include "core/util/bean_utils.h"
 
 #include "test/base/test_case.h"
 #include "test/base/ref_counter.h"
 
 #include "platform/platform.h"
 
-namespace ark {
-namespace unittest {
+namespace ark::unittest {
 
 namespace {
 
@@ -91,7 +88,6 @@ public:
     }
 };
 
-}
 }
 
 

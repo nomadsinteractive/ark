@@ -67,9 +67,9 @@ public:
 
             const Identifier id = Identifier::parse(expr);
             if(id.isRef())
-                return factory.getBuilderByRef<Boolean>(id);
+                return factory.getBuilderByRef<sp<Boolean>>(id);
             if(id.isArg())
-                return factory.getBuilderByArg<Boolean>(id.arg());
+                return factory.getBuilderByArg<sp<Boolean>>(id.arg());
         }
         CHECK(matches && matches->length() == 4, "Illegal expression: \"%s\" syntax error", expr.c_str());
         const String* ptr = matches->buf();

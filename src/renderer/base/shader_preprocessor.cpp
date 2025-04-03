@@ -35,14 +35,14 @@ const std::regex REGEX_LOCAL_SIZE_PATTERN(R"--(layout\s*\(((?:local_size_[xyz]\s
 #ifndef ANDROID
 constexpr char STAGE_ATTR_PREFIX[Enum::SHADER_STAGE_BIT_COUNT + 1][4] = {"a_", "v_", "t_", "e_", "g_", "f_", "c_"};
 #else
-char _STAGE_ATTR_PREFIX[Enum::SHADER_STAGE_COUNT + 1][4] = {"a_", "v_", "f_", "c_"};
+char STAGE_ATTR_PREFIX[Enum::SHADER_STAGE_COUNT + 1][4] = {"a_", "v_", "f_", "c_"};
 #endif
 
-const char* ANNOTATION_VERT_IN = "in";
-const char* ANNOTATION_VERT_OUT = "out";
-const char* ANNOTATION_FRAG_IN = "in";
-const char* ANNOTATION_FRAG_OUT = "out";
-const char* ANNOTATION_FRAG_COLOR = "f_FragColor";
+constexpr char ANNOTATION_VERT_IN[] = "in";
+constexpr char ANNOTATION_VERT_OUT[] = "out";
+constexpr char ANNOTATION_FRAG_IN[] = "in";
+constexpr char ANNOTATION_FRAG_OUT[] = "out";
+constexpr char ANNOTATION_FRAG_COLOR[] = "f_FragColor";
 
 size_t parseFunctionBody(const String& s, String& body)
 {
@@ -51,6 +51,12 @@ size_t parseFunctionBody(const String& s, String& body)
     const size_t end = Strings::parentheses(s, pos, '{', '}');
     body = s.substr(pos + 1, end - 1).strip();
     return end + 1;
+}
+
+bool sanitizer(const std::smatch& match)
+{
+    WARN(match.str().c_str());
+    return false;
 }
 
 }
@@ -91,11 +97,6 @@ void ShaderPreprocessor::initializeAsFirst(PipelineBuildingContext& context)
     for(const auto& i : _main_block->_args)
         if(i._annotation & Parameter::PARAMETER_ANNOTATION_IN)
             context.addAttribute(Strings::capitalizeFirst(i._name), i._type, i._divisor);
-}
-
-static bool sanitizer(const std::smatch& match) {
-    WARN(match.str().c_str());
-    return false;
 }
 
 void ShaderPreprocessor::parseMainBlock(const String& source, PipelineBuildingContext& buildingContext)
@@ -333,11 +334,11 @@ void ShaderPreprocessor::declareUBOStruct(const PipelineLayout& pipelineLayout, 
 String ShaderPreprocessor::outputName() const
 {
 #ifndef ANDROID
-    static const char* sOutputNames[Enum::SHADER_STAGE_BIT_COUNT] = {"gl_Position", "", "", "", ANNOTATION_FRAG_COLOR, ""};
+    constexpr StringView sOutputNames[Enum::SHADER_STAGE_BIT_COUNT] = {"gl_Position", "", "", "", ANNOTATION_FRAG_COLOR, ""};
 #else
-    static const char* sOutputNames[Enum::SHADER_STAGE_COUNT] = {"gl_Position", ANNOTATION_FRAG_COLOR, ""};
+    constexpr StringView sOutputNames[Enum::SHADER_STAGE_COUNT] = {"gl_Position", ANNOTATION_FRAG_COLOR, ""};
 #endif
-    return sOutputNames[_shader_stage];
+    return {sOutputNames[_shader_stage].data()};
 }
 
 sp<String> ShaderPreprocessor::addUniform(const String& type, const String& name, const uint32_t length, String declaration)

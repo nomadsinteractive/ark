@@ -182,24 +182,25 @@ public:
     static float tanh(float x);
 
     static int32_t floor(float x);
+
     static float round(float x);
-    static V2 round(const V2& v);
-    static V3 round(const V3& v);
-    static V4 round(const V4& v);
+    static V2 round(const V2& x);
+    static V3 round(const V3& x);
+    static V4 round(const V4& x);
 
 //  [[script::bindings::auto]]
     static float randf();
 //  [[script::bindings::auto]]
-    static sp<Numeric> randv();
+    static sp<Numeric> randfv(sp<Numeric> a, sp<Numeric> b, bool isVolatile = false);
 
 //  [[script::bindings::auto]]
     static float hypot(float dx, float dy);
 //  [[script::bindings::auto]]
     static float hypot2(float dx, float dy);
 //  [[script::bindings::auto]]
-    static float sqrt(float number);
+    static float sqrt(float x);
 //  [[script::bindings::auto]]
-    static sp<Numeric> sqrt(sp<Numeric> number);
+    static sp<Numeric> sqrt(sp<Numeric> x);
 
 //  [[script::bindings::auto]]
     static float distance(const V2& lvalue, const V2& rvalue);
@@ -250,9 +251,9 @@ public:
     static void vibrate(float s0, float v0, float s1, float v1, float& o, float& a, float& t0, float& t1);
 
     static const float PI;
-    static const float PIx2;
-    static const float PI_2;
-    static const float PI_4;
+    static const float PI_HALF;
+    static const float PI_QUARTER;
+    static const float TAU;
 };
 
 }

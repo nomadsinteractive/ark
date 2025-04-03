@@ -1,8 +1,9 @@
 #include "graphics/components/layout_param.h"
 
 #include "core/base/constants.h"
+#include "core/base/bean_factory.h"
 #include "core/inf/variable.h"
-#include "core/util/bean_utils.h"
+#include "core/util/documents.h"
 #include "core/util/string_convert.h"
 #include "core/util/strings.h"
 #include "core/util/updatable_util.h"
@@ -44,7 +45,7 @@ sp<Builder<LayoutParam::Length>> getLengthBuilder(BeanFactory& factory, const do
             return sp<typename Builder<LayoutParam::Length>::Prebuilt>::make(sp<LayoutParam::Length>::make(LayoutParam::LENGTH_TYPE_PIXEL, Strings::eval<float>(s.substr(0, s.length() - 2))));
         if(s.endsWith("%"))
             return sp<typename Builder<LayoutParam::Length>::Prebuilt>::make(sp<LayoutParam::Length>::make(LayoutParam::LENGTH_TYPE_PERCENTAGE, Strings::eval<float>(s.substr(0, s.length() - 1))));
-        return sp<BuilderLengthVar>::make(LayoutParam::LENGTH_TYPE_PIXEL, factory.ensureBuilder<Numeric>(s));
+        return sp<Builder<LayoutParam::Length>>::make<BuilderLengthVar>(LayoutParam::LENGTH_TYPE_PIXEL, factory.ensureBuilder<Numeric>(s));
     }
     return nullptr;
 }

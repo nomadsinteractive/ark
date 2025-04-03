@@ -2,7 +2,6 @@
 
 #include "core/base/api.h"
 #include "core/inf/builder.h"
-#include "core/inf/debris.h"
 #include "core/inf/variable.h"
 #include "core/impl/builder/safe_builder.h"
 #include "core/types/shared_ptr.h"
@@ -47,7 +46,7 @@ public:
 //  [[plugin::builder::by-value]]
     class DICTIONARY final : public Builder<Vec4> {
     public:
-        DICTIONARY(BeanFactory& parent, const String& str);
+        DICTIONARY(BeanFactory& factory, const String& expr);
 
         sp<Vec4> build(const Scope& args) override;
 
