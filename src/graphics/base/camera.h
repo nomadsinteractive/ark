@@ -60,7 +60,6 @@ public:
 //  [[script::bindings::auto]]
     Camera();
     Camera(const Camera& other);
-    Camera(Camera&& other);
     Camera(Ark::RendererCoordinateSystem cs, sp<Delegate> delegate, sp<Mat4> view = nullptr, sp<Mat4> projection = nullptr);
 
 //  [[script::bindings::auto]]
@@ -108,7 +107,6 @@ public:
     void assign(const Camera& other);
 
     bool isLHS() const;
-
 
     static Camera createDefaultCamera();
 

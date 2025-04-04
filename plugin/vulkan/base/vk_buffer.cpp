@@ -56,7 +56,7 @@ void VKBuffer::uploadBuffer(GraphicsContext& graphicsContext, Uploader& input)
     }
 }
 
-void VKBuffer::downloadBuffer(GraphicsContext& graphicsContext, size_t offset, size_t size, void* ptr)
+void VKBuffer::downloadBuffer(GraphicsContext& graphicsContext, const size_t offset, const size_t size, void* ptr)
 {
     if(isHostVisible())
     {

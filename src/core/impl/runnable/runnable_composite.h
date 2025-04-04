@@ -1,7 +1,6 @@
 #pragma once
 
-#include <vector>
-
+#include "core/forwarding.h"
 #include "core/inf/runnable.h"
 #include "core/types/shared_ptr.h"
 
@@ -9,12 +8,12 @@ namespace ark {
 
 class RunnableComposite final : public Runnable {
 public:
-    RunnableComposite(std::vector<sp<Runnable>> composites);
+    RunnableComposite(Vector<sp<Runnable>> composites);
 
     void run() override;
 
 private:
-    std::vector<sp<Runnable>> _composites;
+    Vector<sp<Runnable>> _composites;
 };
 
 }

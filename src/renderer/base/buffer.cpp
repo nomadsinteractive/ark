@@ -33,7 +33,7 @@ private:
 
 class RunnableBufferSynchronizer final : public Runnable {
 public:
-    RunnableBufferSynchronizer(Buffer buffer, sp<ByteArray> memory, size_t offset)
+    RunnableBufferSynchronizer(Buffer buffer, sp<ByteArray> memory, const size_t offset)
         : _buffer(std::move(buffer)), _memory(std::move(memory)), _offset(offset) {
     }
 
@@ -54,8 +54,8 @@ Buffer::Snapshot::Snapshot(sp<Delegate> stub)
 {
 }
 
-Buffer::Snapshot::Snapshot(sp<Delegate> stub, size_t size, sp<Uploader> input)
-    : _delegate(std::move(stub)), _uploader(std::move(input)), _size(size)
+Buffer::Snapshot::Snapshot(sp<Delegate> stub, const size_t size, sp<Uploader> uploader)
+    : _delegate(std::move(stub)), _uploader(std::move(uploader)), _size(size)
 {
 }
 
@@ -112,7 +112,7 @@ Buffer::operator bool() const
 
 Buffer::Snapshot Buffer::snapshot(const ByteArray::Borrowed& strip) const
 {
-    return Snapshot(_delegate, strip.length(), sp<UploaderBufferSnapshot>::make(strip.length(), Vector<Buffer::Strip>{{0, strip}}));
+    return {_delegate, strip.length(), sp<UploaderBufferSnapshot>::make(strip.length(), Vector<Buffer::Strip>{{0, strip}})};
 }
 
 Buffer::Snapshot Buffer::snapshot(sp<Uploader> input, size_t size) const
@@ -125,12 +125,12 @@ uint64_t Buffer::id() const
     return _delegate->id();
 }
 
-sp<ByteArray> Buffer::synchronize(const size_t offset, const size_t size, sp<Boolean> cancelled)
+sp<ByteArray> Buffer::synchronize(const size_t offset, const size_t size, sp<Boolean> canceled)
 {
     sp<ByteArray> memory = sp<ByteArray>::make<ByteArray::Allocated>(size);
     RenderController& renderController = Ark::instance().renderController();
     memset(memory->buf(), 0, size);
-    renderController.addPreRenderRequest(sp<Runnable>::make<RunnableBufferSynchronizer>(*this, memory, offset), std::move(cancelled));
+    renderController.addPreRenderRequest(sp<Runnable>::make<RunnableBufferSynchronizer>(*this, memory, offset), std::move(canceled));
     return memory;
 }
 

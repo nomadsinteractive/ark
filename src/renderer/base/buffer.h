@@ -55,7 +55,7 @@ public:
     public:
         Snapshot() = default;
         Snapshot(sp<Delegate> stub);
-        Snapshot(sp<Delegate> stub, size_t size, sp<Uploader> input);
+        Snapshot(sp<Delegate> stub, size_t size, sp<Uploader> uploader);
         DEFAULT_COPY_AND_ASSIGN(Snapshot);
 
         explicit operator bool() const;
@@ -111,7 +111,7 @@ public:
     uint64_t id() const;
 
 //  [[script::bindings::auto]]
-    sp<ByteArray> synchronize(size_t offset, size_t size, sp<Boolean> cancelled);
+    sp<ByteArray> synchronize(size_t offset, size_t size, sp<Boolean> canceled);
 
     void upload(GraphicsContext&) const;
 

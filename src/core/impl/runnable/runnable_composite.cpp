@@ -2,7 +2,7 @@
 
 namespace ark {
 
-RunnableComposite::RunnableComposite(std::vector<sp<Runnable>> composites)
+RunnableComposite::RunnableComposite(Vector<sp<Runnable>> composites)
     : _composites(std::move(composites))
 {
 }

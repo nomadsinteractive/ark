@@ -420,7 +420,7 @@ void ShaderPreprocessor::addInclude(const String& filepath)
     else
         content = stringtable->getString(filepath.substr(0, pos), filepath.substr(pos + 1).lstrip('/'), false);
     CHECK(content, "Can't open include file \"%s\"", filepath.c_str());
-    _include_declaration_codes.push_back(content ? std::move(sp<String>::make(std::move(content.value()))) : nullptr);
+    _include_declaration_codes.push_back(content ? sp<String>::make(std::move(content.value())) : sp<String>());
 }
 
 ShaderPreprocessor::Function::Function(String name, String params, String returnType, String body, sp<String> placeHolder)

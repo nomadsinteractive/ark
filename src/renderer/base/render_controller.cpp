@@ -43,8 +43,8 @@ public:
 
 class ResourceUploadBufferSnapshot final : public Resource {
 public:
-    ResourceUploadBufferSnapshot(sp<Buffer::Delegate> buffer, Uploader& input)
-        : _buffer(std::move(buffer)), _uploader_snapshot(input) {
+    ResourceUploadBufferSnapshot(sp<Buffer::Delegate> buffer, Uploader& uploader)
+        : _buffer(std::move(buffer)), _uploader_snapshot(uploader) {
     }
 
     uint64_t id() override {
@@ -249,14 +249,14 @@ void RenderController::upload(sp<Resource> resource, const UploadStrategy strate
         _uploading_resources.push(UploadingRenderResource(RenderResource(std::move(resource), std::move(future)), strategy, priority));
 }
 
-void RenderController::uploadBuffer(Buffer& buffer, sp<Uploader> uploader, RenderController::UploadStrategy strategy, sp<Future> future, RenderController::UploadPriority priority)
+void RenderController::uploadBuffer(Buffer& buffer, sp<Uploader> uploader, const RenderController::UploadStrategy strategy, sp<Future> future, RenderController::UploadPriority priority)
 {
     ASSERT(uploader);
     if(!future)
         future = sp<Future>::make(sp<BooleanByWeakRef<Buffer::Delegate>>::make(buffer.delegate(), 1));
     buffer.delegate()->setSize(uploader->size());
     Uploader& uploaderInstance = *uploader;
-    sp<Updatable> updatable = strategy.has(US_ON_CHANGE) ? sp<Updatable>::make<BufferUpdatable>(*this, std::move(uploader), buffer.delegate()) : nullptr;
+    sp<Updatable> updatable = strategy.has(US_ON_CHANGE) ? sp<Updatable>::make<BufferUpdatable>(*this, std::move(uploader), buffer.delegate()) : sp<Updatable>();
     //TODO: make this mess a bit more cleaner
     if(strategy == US_ON_CHANGE)
         upload(nullptr, strategy, std::move(updatable), std::move(future), priority);

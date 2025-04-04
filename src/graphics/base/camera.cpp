@@ -139,11 +139,6 @@ Camera::Camera(const Camera& other)
     _stub->_up.reset(sp<Vec3>::make<Vec3::Const>(other._stub->_up.val()));
 }
 
-Camera::Camera(Camera&& other)
-    : _coordinate_system(other._coordinate_system), _delegate(std::move(other._delegate)), _view(std::move(other._view)), _projection(std::move(other._projection)), _vp(std::move(other._vp)), _stub(std::move(other._stub))
-{
-}
-
 Camera::Camera(const Ark::RendererCoordinateSystem cs, sp<Delegate> delegate, sp<Mat4> view, sp<Mat4> projection)
     : _coordinate_system(cs), _delegate(std::move(delegate)), _view(sp<Mat4>::make<Mat4Wrapper>(view ? std::move(view) : Mat4Type::create())), _projection(sp<Mat4>::make<Mat4Wrapper>(projection ? std::move(projection) : Mat4Type::create())),
       _vp(sp<Mat4>::make<Mat4Wrapper>(Mat4Type::matmul(_projection.cast<Mat4>(), _view.cast<Mat4>()))), _stub(sp<Stub>::make())
