@@ -9,8 +9,8 @@
 #include "core/util/updatable_util.h"
 
 #include "graphics/impl/transform/transform_impl.h"
-#include "graphics/components/position.h"
 #include "graphics/components/rotation.h"
+#include "graphics/components/translation.h"
 #include "graphics/util/vec3_type.h"
 
 #include "renderer/base/model.h"
@@ -269,8 +269,8 @@ void RenderObject::onWire(const WiringContext& context, const Box& self)
     }
     else if(const auto boundaries = context.getComponent<Boundaries>())
         setPosition(boundaries->center());
-    else if(sp<Vec3> position = context.getComponent<Position>())
-        setPosition(std::move(position));
+    else if(sp<Vec3> translation = context.getComponent<Translation>())
+        setPosition(std::move(translation));
 
     if(auto transform = context.getComponent<Transform>())
         setTransform(std::move(transform));

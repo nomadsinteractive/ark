@@ -115,7 +115,7 @@ DrawingContext RCCMultiDrawElementsIndirect::compose(const RenderRequest& render
     writeModelMatices(renderRequest, buf, snapshot, reload);
 
     DrawingParams::DrawMultiElementsIndirect drawParams{buf.toDividedBufferSnapshots(), reload ? _draw_indirect.snapshot(makeIndirectBuffer(renderRequest)) : _draw_indirect.snapshot(), static_cast<uint32_t>(_indirect_cmds.size())};
-    return snapshot.toDrawingContext(vertices.snapshot(), _indices.snapshot(), 0, std::move(drawParams));
+    return snapshot.toDrawingContext(renderRequest, vertices.snapshot(), _indices.snapshot(), 0, std::move(drawParams));
 }
 
 ByteArray::Borrowed RCCMultiDrawElementsIndirect::makeIndirectBuffer(const RenderRequest& renderRequest) const

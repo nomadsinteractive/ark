@@ -90,9 +90,9 @@ const Vector<PipelineLayout::SSBO>& PipelineLayout::ssbos() const
     return _ssbos;
 }
 
-sp<RenderLayerSnapshot::BufferObject> PipelineLayout::takeBufferSnapshot(const RenderRequest& renderRequest, const bool isComputeStage) const
+sp<RenderBufferSnapshot> PipelineLayout::takeBufferSnapshot(const RenderRequest& renderRequest, const bool isComputeStage) const
 {
-    Vector<RenderLayerSnapshot::UBOSnapshot> uboSnapshot;
+    Vector<RenderBufferSnapshot::UBOSnapshot> uboSnapshot;
     for(const UBO& i : _ubos)
         if(isComputeStage ? i._stages.has(Enum::SHADER_STAGE_BIT_COMPUTE) : (i._stages.has(Enum::SHADER_STAGE_BIT_VERTEX) || i._stages.has(Enum::SHADER_STAGE_BIT_FRAGMENT)))
             uboSnapshot.push_back(i.snapshot(renderRequest));
@@ -102,7 +102,7 @@ sp<RenderLayerSnapshot::BufferObject> PipelineLayout::takeBufferSnapshot(const R
         if(isComputeStage ? i._stages.has(Enum::SHADER_STAGE_BIT_COMPUTE) : (i._stages.has(Enum::SHADER_STAGE_BIT_VERTEX) || i._stages.has(Enum::SHADER_STAGE_BIT_FRAGMENT)))
             ssboSnapshot.emplace_back(i._binding._location, i._buffer.snapshot());
 
-    return sp<RenderLayerSnapshot::BufferObject>::make(RenderLayerSnapshot::BufferObject{std::move(uboSnapshot), std::move(ssboSnapshot)});
+    return sp<RenderBufferSnapshot>::make(RenderBufferSnapshot{std::move(uboSnapshot), std::move(ssboSnapshot)});
 }
 
 const Map<uint32_t, PipelineLayout::StreamLayout>& PipelineLayout::streamLayouts() const
@@ -240,10 +240,10 @@ void PipelineLayout::UBO::doSnapshot(const uint64_t timestamp, const bool force)
     }
 }
 
-RenderLayerSnapshot::UBOSnapshot PipelineLayout::UBO::snapshot(const RenderRequest& renderRequest) const
+RenderBufferSnapshot::UBOSnapshot PipelineLayout::UBO::snapshot(const RenderRequest& renderRequest) const
 {
     doSnapshot(renderRequest.timestamp(), false);
-    RenderLayerSnapshot::UBOSnapshot ubo = {
+    RenderBufferSnapshot::UBOSnapshot ubo = {
         renderRequest.allocator().sbrkSpan(_dirty_flags->size()),
         renderRequest.allocator().sbrkSpan(_buffer->size())
     };

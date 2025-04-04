@@ -64,7 +64,7 @@ DrawingContext RCCDrawElementsIncremental::compose(const RenderRequest& renderRe
     }
 
     const Buffer& vertices = snapshot._stub->_pipeline_bindings->vertices();
-    return snapshot.toDrawingContext(buf.vertices().toSnapshot(vertices), _indices.snapshot(indexUploader), snapshot._index_count, DrawingParams::DrawElements{0});
+    return snapshot.toDrawingContext(renderRequest, buf.vertices().toSnapshot(vertices), _indices.snapshot(indexUploader), snapshot._index_count, DrawingParams::DrawElements{0});
 }
 
 }

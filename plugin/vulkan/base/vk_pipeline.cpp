@@ -340,7 +340,7 @@ void VKPipeline::bind(GraphicsContext& graphicsContext, const DrawingContext& dr
     if(_rebind_needed)
         setupDescriptorSet(graphicsContext);
 
-    bindUBOShapshots(graphicsContext, drawingContext._buffer_object->_ubos);
+    bindUBOShapshots(graphicsContext, drawingContext._buffer_snapshot->_ubos);
     _rebind_needed = false;
 }
 
@@ -355,7 +355,7 @@ void VKPipeline::draw(GraphicsContext& graphicsContext, const DrawingContext& dr
 void VKPipeline::compute(GraphicsContext& graphicsContext, const ComputeContext& computeContext)
 {
     DCHECK(_is_compute_pipeline, "Not a compute pipeline");
-    bindUBOShapshots(graphicsContext, computeContext._buffer_object->_ubos);
+    bindUBOShapshots(graphicsContext, computeContext._buffer_snapshot->_ubos);
     buildComputeCommandBuffer(graphicsContext, computeContext);
 }
 
@@ -626,13 +626,13 @@ sp<VKDescriptorPool> VKPipeline::makeDescriptorPool() const
     return sp<VKDescriptorPool>::make(_recycler, _renderer->device(), std::move(poolSizes), _descriptor_set_layouts.size());
 }
 
-void VKPipeline::bindUBOShapshots(GraphicsContext& graphicsContext, const Vector<RenderLayerSnapshot::UBOSnapshot>& uboSnapshots) const
+void VKPipeline::bindUBOShapshots(GraphicsContext& graphicsContext, const Vector<RenderBufferSnapshot::UBOSnapshot>& uboSnapshots) const
 {
     DCHECK(uboSnapshots.size() == _ubos.size(), "UBO Snapshot and UBO Layout mismatch: %d vs %d", uboSnapshots.size(), _ubos.size());
 
     for(size_t i = 0; i < uboSnapshots.size(); ++i)
     {
-        const RenderLayerSnapshot::UBOSnapshot& uboSnapshot = uboSnapshots.at(i);
+        const RenderBufferSnapshot::UBOSnapshot& uboSnapshot = uboSnapshots.at(i);
         if(_rebind_needed || isDirty(uboSnapshot._dirty_flags))
         {
             const sp<VKBuffer>& ubo = _ubos.at(i);

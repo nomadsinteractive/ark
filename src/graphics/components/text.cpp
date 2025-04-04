@@ -16,9 +16,9 @@
 #include "graphics/base/render_layer.h"
 #include "graphics/base/render_request.h"
 #include "graphics/components/layout_param.h"
-#include "graphics/components/position.h"
 #include "graphics/components/render_object.h"
 #include "graphics/components/size.h"
+#include "graphics/components/translation.h"
 #include "graphics/base/v3.h"
 #include "graphics/impl/glyph_maker/glyph_maker_span.h"
 #include "graphics/impl/renderable/renderable_with_transform.h"
@@ -524,8 +524,8 @@ void Text::onWire(const WiringContext& context, const Box& self)
     }
     else if(sp<Boundaries> boundaries = context.getComponent<Boundaries>())
         setBoundaries(std::move(boundaries));
-    else if(sp<Vec3> position = context.getComponent<Position>())
-        setPosition(std::move(position));
+    else if(sp<Vec3> translation = context.getComponent<Translation>())
+        setPosition(std::move(translation));
 
     if(sp<Mat4> transform = context.getComponent<Transform>())
         setTransform(std::move(transform));

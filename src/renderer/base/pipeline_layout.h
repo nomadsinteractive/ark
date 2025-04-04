@@ -7,6 +7,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/base/camera.h"
+#include "graphics/base/render_buffer_snapshot.h"
 #include "graphics/base/render_layer_snapshot.h"
 
 #include "renderer/forwarding.h"
@@ -57,7 +58,7 @@ public:
     struct ARK_API UBO {
         UBO(uint32_t binding);
 
-        RenderLayerSnapshot::UBOSnapshot snapshot(const RenderRequest& renderRequest) const;
+        RenderBufferSnapshot::UBOSnapshot snapshot(const RenderRequest& renderRequest) const;
 
         uint32_t binding() const;
         size_t size() const;
@@ -109,7 +110,7 @@ public:
     const Vector<sp<UBO>>& ubos() const;
     const Vector<SSBO>& ssbos() const;
 
-    sp<RenderLayerSnapshot::BufferObject> takeBufferSnapshot(const RenderRequest& renderRequest, bool isComputeStage) const;
+    sp<RenderBufferSnapshot> takeBufferSnapshot(const RenderRequest& renderRequest, bool isComputeStage) const;
 
     const Map<uint32_t, StreamLayout>& streamLayouts() const;
     void setStreamLayoutAlignment(uint32_t alignment);

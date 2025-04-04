@@ -202,14 +202,14 @@ SDL_GPUPrimitiveType toPrimitiveType(const Enum::DrawMode drawMode)
     return SDL_GPU_PRIMITIVETYPE_TRIANGLELIST;
 }
 
-void bindUBOSnapshots(SDL_GPUCommandBuffer* cmdbuf, const Vector<RenderLayerSnapshot::UBOSnapshot>& uboSnapshots, const PipelineLayout& shaderLayout, const ShaderStageSet stages)
+void bindUBOSnapshots(SDL_GPUCommandBuffer* cmdbuf, const Vector<RenderBufferSnapshot::UBOSnapshot>& uboSnapshots, const PipelineLayout& shaderLayout, const ShaderStageSet stages)
 {
     size_t binding = 0;
     for(const PipelineLayout::UBO& ubo : shaderLayout.ubos())
         if(const ShaderStageSet uboStages = ubo._stages; uboStages & stages)
         {
             DCHECK(binding < uboSnapshots.size(), "UBO Snapshot and UBO Layout mismatch: %d vs %d", uboSnapshots.size(), shaderLayout.ubos().size());
-            const RenderLayerSnapshot::UBOSnapshot& uboSnapshot = uboSnapshots.at(binding++);
+            const RenderBufferSnapshot::UBOSnapshot& uboSnapshot = uboSnapshots.at(binding++);
             const void* data = uboSnapshot._buffer.buf();
             const uint32_t size = uboSnapshot._buffer.length();
             if(uboStages.has(Enum::SHADER_STAGE_BIT_VERTEX))
@@ -382,7 +382,7 @@ public:
         SDL_BindGPUGraphicsPipeline(renderPass, _pipeline);
 
         constexpr ShaderStageSet currentStageSets = {Enum::SHADER_STAGE_BIT_VERTEX, Enum::SHADER_STAGE_BIT_FRAGMENT};
-        bindUBOSnapshots(sdl3GC._command_buffer, drawingContext._buffer_object->_ubos, drawingContext._bindings->pipelineLayout(), currentStageSets);
+        bindUBOSnapshots(sdl3GC._command_buffer, drawingContext._buffer_snapshot->_ubos, drawingContext._bindings->pipelineLayout(), currentStageSets);
 
         const SDL_GPUBufferBinding vertexBufferBinding = {reinterpret_cast<SDL_GPUBuffer*>(drawingContext._vertices.id()), 0};
         SDL_BindGPUVertexBuffers(renderPass, 0, &vertexBufferBinding, 1);

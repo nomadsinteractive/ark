@@ -1283,6 +1283,9 @@ class Translation:
     def __init__(self, translate: TYPE_VEC3):
         pass
 
+    def reset(self, position: TYPE_VEC3):
+        pass
+
     def to_matrix(self) -> Mat4:
         pass
 
@@ -2353,7 +2356,7 @@ class Function:
 
 
 class EventListener:
-    def __init__(self, delegate: Union["EventListener", Behavior, None], on_event_name: str = 'on_event'):
+    def __init__(self, delegate: Optional["EventListener"]):
         pass
 
     def on_event(self, event: Event):
@@ -2908,16 +2911,8 @@ class WithTag:
 
 
 class CollisionCallback:
-    def __init__(self, behavior: Behavior, on_begin_contact: str = 'on_begin_contact', on_end_contact: str = 'on_end_contact'):
-        pass
+    pass
 
-
-class Position(Vec3):
-    def __init__(self, position: TYPE_VEC3):
-        Vec3.__init__(self, 0, 0, 0)
-
-    def reset(self, position: TYPE_VEC3):
-        pass
 
 
 class PathFinder:

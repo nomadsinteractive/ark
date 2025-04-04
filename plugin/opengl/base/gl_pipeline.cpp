@@ -121,7 +121,7 @@ struct GLPipeline::Stub {
         GL_CHECK_ERROR(glUseProgram(_id));
 
         const PipelineBindings& pipelineBindings = pipelineContext._bindings;
-        bindUBOSnapshots(pipelineContext._buffer_object->_ubos, pipelineBindings.pipelineLayout());
+        bindUBOSnapshots(pipelineContext._buffer_snapshot->_ubos, pipelineBindings.pipelineLayout());
 
         uint32_t binding = 0;
         const Vector<String>& samplerNames = pipelineBindings.pipelineLayout()->samplers().keys();
@@ -147,7 +147,7 @@ struct GLPipeline::Stub {
             }
     }
 
-    void bindUBO(const RenderLayerSnapshot::UBOSnapshot& uboSnapshot, const PipelineLayout::UBO& ubo)
+    void bindUBO(const RenderBufferSnapshot::UBOSnapshot& uboSnapshot, const PipelineLayout::UBO& ubo)
     {
         const Vector<sp<Uniform>>& uniforms = ubo.uniforms().values();
         for(size_t i = 0; i < uniforms.size(); ++i)
@@ -254,14 +254,14 @@ struct GLPipeline::Stub {
         return glGetAttribLocation(_id, name.c_str());
     }
 
-    void bindUBOSnapshots(const Vector<RenderLayerSnapshot::UBOSnapshot>& uboSnapshots, const PipelineLayout& shaderLayout)
+    void bindUBOSnapshots(const Vector<RenderBufferSnapshot::UBOSnapshot>& uboSnapshots, const PipelineLayout& shaderLayout)
     {
         size_t binding = 0;
         for(const sp<PipelineLayout::UBO>& ubo : shaderLayout.ubos())
             if(shouldBeBinded(ubo->_stages))
             {
                 DCHECK(binding < uboSnapshots.size(), "UBO Snapshot and UBO Layout mismatch: %d vs %d", uboSnapshots.size(), shaderLayout.ubos().size());
-                const RenderLayerSnapshot::UBOSnapshot& uboSnapshot = uboSnapshots.at(binding++);
+                const RenderBufferSnapshot::UBOSnapshot& uboSnapshot = uboSnapshots.at(binding++);
                 bindUBO(uboSnapshot, ubo);
             }
         _rebind_needed = false;
@@ -601,7 +601,7 @@ public:
 
         const GLScissor scissor(drawingContext._scissor ? drawingContext._scissor : _scissor ? Optional<Rect>(_scissor->val()) : Optional<Rect>());
 
-        for(const auto& [i, j] : drawingContext._buffer_object->_ssbos)
+        for(const auto& [i, j] : drawingContext._buffer_snapshot->_ssbos)
             _ssbo_binders.emplace_back(GL_SHADER_STORAGE_BUFFER, static_cast<GLuint>(i), static_cast<GLuint>(j.id()));
 
         ensureVertexArray(graphicsContext, drawingContext);
@@ -642,7 +642,7 @@ public:
     {
         _stub->bind(graphicsContext, computeContext);
 
-        for(const auto& [i, j] : computeContext._buffer_object->_ssbos)
+        for(const auto& [i, j] : computeContext._buffer_snapshot->_ssbos)
             _ssbo_binders.emplace_back(GL_SHADER_STORAGE_BUFFER, static_cast<GLuint>(i), static_cast<GLuint>(j.id()));
 
         GL_CHECK_ERROR(glDispatchCompute(computeContext._num_work_groups.at(0), computeContext._num_work_groups.at(1), computeContext._num_work_groups.at(2)));

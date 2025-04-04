@@ -54,7 +54,7 @@ sp<Builder<Shader>> Shader::fromDocument(BeanFactory& factory, const document& m
     return builder<Shader>::make<BUILDER_IMPL>(factory, manifest, defaultCamera ? builder<Camera>::make<Builder<Camera>::Prebuilt>(defaultCamera) : nullptr, std::move(stageManifests));
 }
 
-sp<RenderLayerSnapshot::BufferObject> Shader::takeBufferSnapshot(const RenderRequest& renderRequest, const bool isComputeStage) const
+sp<RenderBufferSnapshot> Shader::takeBufferSnapshot(const RenderRequest& renderRequest, const bool isComputeStage) const
 {
     return _pipeline_desciptor->layout()->takeBufferSnapshot(renderRequest, isComputeStage);
 }

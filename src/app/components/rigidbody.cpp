@@ -10,8 +10,8 @@
 #include "core/util/string_convert.h"
 
 #include "graphics/base/boundaries.h"
-#include "graphics/components/position.h"
 #include "graphics/components/rotation.h"
+#include "graphics/components/translation.h"
 
 #include "app/base/application_context.h"
 #include "app/components/shape.h"
@@ -61,7 +61,7 @@ void Rigidbody::discard()
 
 void Rigidbody::onWire(const WiringContext& context, const Box& self)
 {
-    if(sp<Vec3> position = context.getComponent<Position>())
+    if(sp<Vec3> position = context.getComponent<Translation>())
         _impl._stub->_position.reset(std::move(position));
 
     if(sp<Vec4> rotation = context.getComponent<Rotation>())

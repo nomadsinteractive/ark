@@ -44,7 +44,7 @@ private:
     void buildComputeCommandBuffer(GraphicsContext& graphicsContext, const ComputeContext& drawingContext);
 
     sp<VKDescriptorPool> makeDescriptorPool() const;
-    void bindUBOShapshots(GraphicsContext& graphicsContext, const Vector<RenderLayerSnapshot::UBOSnapshot>& uboSnapshots) const;
+    void bindUBOShapshots(GraphicsContext& graphicsContext, const Vector<RenderBufferSnapshot::UBOSnapshot>& uboSnapshots) const;
 
     bool shouldStageNeedBinding(ShaderStageSet stages) const;
     bool shouldRebind(uint64_t tick, const PipelineDescriptor& pipelineDescriptor) const;

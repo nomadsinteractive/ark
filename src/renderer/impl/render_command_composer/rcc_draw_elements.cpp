@@ -52,7 +52,7 @@ DrawingContext RCCDrawElements::compose(const RenderRequest& renderRequest, cons
     Buffer::Snapshot vertices = buf.vertices().toSnapshot(vertexBuf);
     Buffer::Snapshot indices = _primitive_index_buffer->snapshot(snapshot._stub->_render_controller, snapshot._elements.size());
     const uint32_t drawCount = static_cast<uint32_t>(indices.length<element_index_t>());
-    return snapshot.toDrawingContext(std::move(vertices), std::move(indices), drawCount, DrawingParams::DrawElements{0});
+    return snapshot.toDrawingContext(renderRequest, std::move(vertices), std::move(indices), drawCount, DrawingParams::DrawElements{0});
 }
 
 }

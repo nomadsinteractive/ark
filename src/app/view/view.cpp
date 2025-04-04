@@ -9,7 +9,7 @@
 
 #include "graphics/components/layer.h"
 #include "graphics/components/layout_param.h"
-#include "graphics/components/position.h"
+#include "graphics/components/translation.h"
 #include "graphics/util/vec3_type.h"
 
 #include "renderer/base/model.h"
@@ -203,7 +203,7 @@ View::~View()
 TypeId View::onPoll(WiringContext& context)
 {
     context.setComponent(makeBoundaries());
-    context.setComponent(sp<Position>::make(layoutPosition()));
+    context.setComponent(sp<Translation>::make(layoutPosition()));
     context.setComponent(layoutSize());
     context.setComponent(sp<Shape>::make(Shape::TYPE_AABB, layoutSize()));
     return constants::TYPE_ID_NONE;

@@ -15,8 +15,24 @@
 
 namespace ark {
 
+class RenderLayerSnapshot::OnceGuard {
+public:
+    explicit OnceGuard(const RenderLayerSnapshot& snapshot)
+        : _stub(const_cast<RenderLayerSnapshot&>(snapshot)._stub)
+    {
+        CHECK(_stub, "This method can be only called once");
+    }
+    ~OnceGuard()
+    {
+        _stub = nullptr;
+    }
+
+private:
+    sp<RenderLayer::Stub>& _stub;
+};
+
 RenderLayerSnapshot::RenderLayerSnapshot(const RenderRequest& renderRequest, const sp<RenderLayer::Stub>& stub)
-    : _stub(stub), _index_count(0), _buffer_object(_stub->_shader->layout()->takeBufferSnapshot(renderRequest, false)), _vertices_dirty(false)
+    : _stub(stub), _index_count(0), _vertices_dirty(false)
 {
     if(_stub->_scissor && _stub->_scissor->update(renderRequest.timestamp()))
         _scissor = Rect(_stub->_scissor->val());
@@ -24,11 +40,23 @@ RenderLayerSnapshot::RenderLayerSnapshot(const RenderRequest& renderRequest, con
 
 sp<RenderCommand> RenderLayerSnapshot::compose(const RenderRequest& renderRequest, sp<DrawDecorator> drawDecorator) const
 {
+    const OnceGuard guard(*this);
     if(!_elements.empty() && _stub->_visible.val())
         return _stub->_drawing_context_composer->compose(renderRequest, *this).toRenderCommand(renderRequest, std::move(drawDecorator));
 
-    DrawingContext drawingContext(_stub->_pipeline_bindings, _buffer_object);
+    DrawingContext drawingContext(_stub->_pipeline_bindings, _stub->_shader->takeBufferSnapshot(renderRequest, false));
     return drawingContext.toNoopCommand(renderRequest, std::move(drawDecorator));
+}
+
+DrawingContext RenderLayerSnapshot::toDrawingContext(const RenderRequest& renderRequest, Buffer::Snapshot vertices, Buffer::Snapshot indices, const uint32_t drawCount, DrawingParams params) const
+{
+    const OnceGuard guard(*this);
+    DrawingContext drawingContext(_stub->_pipeline_bindings, _stub->_shader->takeBufferSnapshot(renderRequest, false), std::move(vertices), std::move(indices),
+                                  drawCount, std::move(params));
+    if(_stub->_scissor)
+        drawingContext._scissor = _stub->_render_controller->renderEngine()->toRendererRect(_scissor);
+
+    return drawingContext;
 }
 
 bool RenderLayerSnapshot::needsReload() const
@@ -80,26 +108,6 @@ void RenderLayerSnapshot::addDiscardedLayerContexts(const Vector<sp<LayerContext
 {
     for(const sp<LayerContext>& lc : layerContexts)
         addDiscardedLayerContext(lc);
-}
-
-sp<RenderCommand> RenderLayerSnapshot::toRenderCommand(const RenderRequest& renderRequest, Buffer::Snapshot vertices, Buffer::Snapshot indices, const uint32_t drawCount, DrawingParams params) const
-{
-    DrawingContext drawingContext(_stub->_pipeline_bindings, _buffer_object, std::move(vertices), std::move(indices),
-                                  drawCount, std::move(params));
-    if(_stub->_scissor)
-        drawingContext._scissor = _stub->_render_controller->renderEngine()->toRendererRect(_scissor);
-
-    return drawingContext.toRenderCommand(renderRequest);
-}
-
-DrawingContext RenderLayerSnapshot::toDrawingContext(Buffer::Snapshot vertices, Buffer::Snapshot indices, uint32_t drawCount, DrawingParams params) const
-{
-    DrawingContext drawingContext(_stub->_pipeline_bindings, _buffer_object, std::move(vertices), std::move(indices),
-                                  drawCount, std::move(params));
-    if(_stub->_scissor)
-        drawingContext._scissor = _stub->_render_controller->renderEngine()->toRendererRect(_scissor);
-
-    return drawingContext;
 }
 
 bool RenderLayerSnapshot::doAddLayerContext(const RenderRequest& renderRequest, LayerContext& layerContext)

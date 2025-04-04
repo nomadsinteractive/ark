@@ -86,8 +86,8 @@ private:
 
 }
 
-DrawingContext::DrawingContext(sp<PipelineBindings> pipelineBindings, sp<RenderLayerSnapshot::BufferObject> bufferObject, Buffer::Snapshot vertices, Buffer::Snapshot indices, const uint32_t drawCount, DrawingParams parameters, const sp<Traits>& attachments)
-    : PipelineContext{std::move(pipelineBindings), std::move(bufferObject)}, _vertices(std::move(vertices)), _indices(std::move(indices)), _draw_count(drawCount), _parameters(std::move(parameters)), _attachments(attachments ? attachments : _bindings->attachments())
+DrawingContext::DrawingContext(sp<PipelineBindings> pipelineBindings, sp<RenderBufferSnapshot> bufferSnapshot, Buffer::Snapshot vertices, Buffer::Snapshot indices, const uint32_t drawCount, DrawingParams parameters, const sp<Traits>& attachments)
+    : PipelineContext{std::move(pipelineBindings), std::move(bufferSnapshot)}, _vertices(std::move(vertices)), _indices(std::move(indices)), _draw_count(drawCount), _parameters(std::move(parameters)), _attachments(attachments ? attachments : _bindings->attachments())
 {
 }
 

@@ -56,7 +56,7 @@ DrawingContext RCCDrawElementsInstanced::compose(const RenderRequest& renderRequ
             writer.write(divided.buf() + attributeStride, divided.length() - attributeStride, attributeStride);
     }
 
-    return snapshot.toDrawingContext(buf.vertices().toSnapshot(vertices), _indices.snapshot(), static_cast<uint32_t>(snapshot._elements.size()), DrawingParams::DrawElementsInstanced{0, static_cast<uint32_t>(_model.indexCount()), buf.toDividedBufferSnapshots()});
+    return snapshot.toDrawingContext(renderRequest, buf.vertices().toSnapshot(vertices), _indices.snapshot(), static_cast<uint32_t>(snapshot._elements.size()), DrawingParams::DrawElementsInstanced{0, static_cast<uint32_t>(_model.indexCount()), buf.toDividedBufferSnapshots()});
 }
 
 }

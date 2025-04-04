@@ -32,8 +32,7 @@ public:
 
     static sp<Builder<Shader>> fromDocument(BeanFactory& factory, const document& manifest, const String& defVertex = "shaders/default.vert", const String& defFragment = "shaders/texture.frag", const sp<Camera>& defaultCamera = nullptr);
 
-    [[deprecated]]
-    sp<RenderLayerSnapshot::BufferObject> takeBufferSnapshot(const RenderRequest& renderRequest, bool isComputeStage) const;
+    sp<RenderBufferSnapshot> takeBufferSnapshot(const RenderRequest& renderRequest, bool isComputeStage) const;
 
     const Camera& camera() const;
     void setCamera(const Camera& camera);

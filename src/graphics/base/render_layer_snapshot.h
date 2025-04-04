@@ -21,23 +21,6 @@ namespace ark {
 
 class RenderLayerSnapshot {
 public:
-    struct UBOSnapshot {
-        ByteArray::Borrowed _dirty_flags;
-        ByteArray::Borrowed _buffer;
-    };
-
-    struct BufferObject {
-        Vector<UBOSnapshot> _ubos;
-        Vector<std::pair<uint32_t, Buffer::Snapshot>> _ssbos;
-    };
-
-    enum SnapshotFlag {
-        SNAPSHOT_FLAG_RELOAD,
-        SNAPSHOT_FLAG_DYNAMIC_UPDATE,
-        SNAPSHOT_FLAG_STATIC_MODIFIED,
-        SNAPSHOT_FLAG_STATIC_REUSE
-    };
-
     struct Element {
         Element(Renderable& renderable, const LayerContextSnapshot& layerContext, LayerContext::ElementState& state, const Renderable::Snapshot& snapshot);
 
@@ -53,19 +36,16 @@ public:
     RenderLayerSnapshot(RenderLayerSnapshot&& other) = default;
 
     sp<RenderCommand> compose(const RenderRequest& renderRequest, sp<DrawDecorator> drawDecorator) const;
+    DrawingContext toDrawingContext(const RenderRequest& renderRequest, Buffer::Snapshot vertices, Buffer::Snapshot indices, uint32_t drawCount, DrawingParams params) const;
 
     bool needsReload() const;
 
     void addLayerContext(const RenderRequest& renderRequest, Vector<sp<LayerContext>>& layerContexts);
     void snapshot(const RenderRequest& renderRequest);
 
-    DrawingContext toDrawingContext(Buffer::Snapshot vertices, Buffer::Snapshot indices, uint32_t drawCount, DrawingParams params) const;
-    sp<RenderCommand> toRenderCommand(const RenderRequest& renderRequest, Buffer::Snapshot vertices, Buffer::Snapshot indices, uint32_t drawCount, DrawingParams params) const;
-
     sp<RenderLayer::Stub> _stub;
 
     size_t _index_count;
-    sp<BufferObject> _buffer_object;
 
     std::deque<Element> _elements;
     std::deque<LayerContext::ElementState> _elements_deleted;
@@ -76,6 +56,7 @@ public:
 
 private:
     std::list<LayerContextSnapshot> _layer_context_snapshots;
+    class OnceGuard;
 
 private:
     RenderLayerSnapshot(const RenderRequest& renderRequest, const sp<RenderLayer::Stub>& stub);

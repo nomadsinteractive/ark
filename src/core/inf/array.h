@@ -2,7 +2,6 @@
 
 #include <array>
 #include <string_view>
-#include <vector>
 
 #include "core/forwarding.h"
 
@@ -74,12 +73,11 @@ public:
     class Sliced;
 
     template<size_t LEN> class Fixed;
-
     template<typename U> class Casted;
 };
 
 
-template<typename T> class Array<T>::Allocated : public Array<T> {
+template<typename T> class Array<T>::Allocated final : public Array<T> {
 public:
     Allocated(size_t length)
         : _data(new T[length]), _length(length) {
@@ -108,7 +106,7 @@ private:
 };
 
 
-template<typename T> class Array<T>::Borrowed : public Array<T> {
+template<typename T> class Array<T>::Borrowed final : public Array<T> {
 public:
     Borrowed()
         : _data(nullptr), _length(0) {
@@ -150,9 +148,9 @@ private:
 };
 
 
-template<typename T> class Array<T>::Vector : public Array<T> {
+template<typename T> class Array<T>::Vector final : public Array<T> {
 public:
-    Vector(std::vector<T> data)
+    Vector(ark::Vector<T> data)
         : _data(std::move(data)) {
     }
 
@@ -165,11 +163,11 @@ public:
     }
 
 private:
-    std::vector<T> _data;
+    ark::Vector<T> _data;
 };
 
 
-template<typename T> template<size_t LEN> class Array<T>::Fixed : public Array<T> {
+template<typename T> template<size_t LEN> class Array<T>::Fixed final : public Array<T> {
 public:
     Fixed() = default;
     Fixed(const std::initializer_list<T>& list) {
@@ -189,7 +187,7 @@ private:
     std::array<T, LEN> _data;
 };
 
-template<typename T> template<typename U> class Array<T>::Casted : public Array<T> {
+template<typename T> template<typename U> class Array<T>::Casted final : public Array<T> {
 public:
     Casted(sp<Array<U>> data)
         : _data(std::move(data)) {
@@ -207,9 +205,9 @@ private:
     sp<Array<U>> _data;
 };
 
-template<typename T> class Array<T>::Sliced : public Array<T> {
+template<typename T> class Array<T>::Sliced final : public Array<T> {
 public:
-    Sliced(sp<Array<T>> data, size_t offset, size_t length)
+    Sliced(sp<Array<T>> data, const size_t offset, const size_t length)
         : _data(std::move(data)), _offset(offset), _length(length) {
     }
 

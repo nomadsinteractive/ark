@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vector>
+#include "core/forwarding.h"
 
 #include "graphics/forwarding.h"
 
@@ -10,7 +10,7 @@ class RendererMaker {
 public:
     virtual ~RendererMaker() = default;
 
-    virtual std::vector<Box> make(float x, float y) = 0;
+    virtual Vector<Box> make(float x, float y) = 0;
     virtual void recycle(const Box& renderer) = 0;
 
 };
