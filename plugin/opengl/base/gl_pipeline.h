@@ -31,9 +31,9 @@ public:
     void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override;
     void compute(GraphicsContext& graphicsContext, const ComputeContext& computeContext) override;
 
-    void bindBuffer(GraphicsContext& graphicsContext, const PipelineLayout& shaderLayout, const Map<uint32_t, Buffer>& streams);
+    void bindBuffer(GraphicsContext& graphicsContext, const PipelineLayout& shaderLayout, const Vector<std::pair<uint32_t, Buffer>>& streams);
 
-    void activeTexture(const Texture& texture, const String& name, uint32_t binding);
+    void activeTexture(const Texture& texture, const String& name, uint32_t binding) const;
 
     class GLUniform {
     public:

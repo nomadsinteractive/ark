@@ -112,7 +112,7 @@ public:
 
     sp<RenderBufferSnapshot> takeBufferSnapshot(const RenderRequest& renderRequest, bool isComputeStage) const;
 
-    const Map<uint32_t, StreamLayout>& streamLayouts() const;
+    const Vector<std::pair<uint32_t, StreamLayout>>& streamLayouts() const;
     void setStreamLayoutAlignment(uint32_t alignment);
 
     const VertexDescriptor& vertexDescriptor() const;
@@ -132,7 +132,7 @@ private:
     Vector<sp<UBO>> _ubos;
     Vector<SSBO> _ssbos;
 
-    Map<uint32_t, StreamLayout> _stream_layout;
+    Vector<std::pair<uint32_t, StreamLayout>> _stream_layouts;
     VertexDescriptor _vertex_descriptor;
 
     Table<String, DescriptorSet> _samplers;

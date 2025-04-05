@@ -811,7 +811,7 @@ void GLPipeline::compute(GraphicsContext& graphicsContext, const ComputeContext&
     _pipeline_operation->compute(graphicsContext, computeContext);
 }
 
-void GLPipeline::bindBuffer(GraphicsContext& graphicsContext, const PipelineLayout& shaderLayout, const Map<uint32_t, Buffer>& streams)
+void GLPipeline::bindBuffer(GraphicsContext& graphicsContext, const PipelineLayout& shaderLayout, const Vector<std::pair<uint32_t, Buffer>>& streams)
 {
     DCHECK(id(), "GLProgram unprepared");
     bindBuffer(graphicsContext, shaderLayout, 0);
@@ -825,7 +825,7 @@ void GLPipeline::bindBuffer(GraphicsContext& graphicsContext, const PipelineLayo
     }
 }
 
-void GLPipeline::activeTexture(const Texture& texture, const String& name, uint32_t binding)
+void GLPipeline::activeTexture(const Texture& texture, const String& name, const uint32_t binding) const
 {
     _stub->activeTexture(texture, name, binding);
 }

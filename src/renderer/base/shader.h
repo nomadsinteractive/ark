@@ -40,7 +40,7 @@ public:
     const sp<PipelineDescriptor>& pipelineDesciptor() const;
     const sp<PipelineLayout>& layout() const;
 
-    sp<PipelineBindings> makeBindings(Buffer vertices, Enum::DrawMode mode, Enum::DrawProcedure renderProcedure, const Map<uint32_t, sp<Uploader>>& uploaders = {}) const;
+    sp<PipelineBindings> makeBindings(Buffer vertexBuffer, Enum::DrawMode drawMode, Enum::DrawProcedure drawProcedure, const Vector<std::pair<uint32_t, sp<Uploader>>>& uploaders = {}) const;
 
     class BUILDER_IMPL final : public Builder<Shader> {
     public:
@@ -71,9 +71,6 @@ public:
     private:
         BUILDER_IMPL _impl;
     };
-
-private:
-    Map<uint32_t, Buffer> makeDivivedBuffers(const Map<uint32_t, sp<Uploader>>& uploaders) const;
 
 private:
     sp<PipelineDescriptor> _pipeline_desciptor;

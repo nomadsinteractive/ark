@@ -268,7 +268,7 @@ class GenMethod(object):
 
         r = acg.strip_key_words(self._return_type, ['virtual', 'const', '&'])
         argtypes = [' '.join(i.gen_declare('t', 't').split('=')[0].strip().split()[:-1]) for i in self._arguments]
-        argvalues = ', '.join(gen_method_call_arg(f'obj{i}.value()' if optional_check and i in args_set else f'obj{i}', j.str(), argtypes[i]) for i, j in enumerate(self._arguments))
+        argvalues = ', '.join(gen_method_call_arg(f'obj{i}.value()' if optional_check and i in args_set else f'obj{i}', j, argtypes[i]) for i, j in enumerate(self._arguments))
         callstatement = self._gen_calling_statement(genclass, argvalues)
         py_return = self.gen_py_return()
         pyret = ['return 0;'] if py_return == 'int' else self.gen_return_statement(r, py_return)

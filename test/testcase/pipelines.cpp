@@ -13,8 +13,7 @@
 #include "app/base/application_context.h"
 #include "renderer/inf/renderer_factory.h"
 
-namespace ark {
-namespace unittest {
+namespace ark::unittest {
 
 namespace {
 
@@ -54,7 +53,7 @@ public:
         const sp<PipelineDescriptor> pipelineDescriptor = sp<PipelineDescriptor>::make(Camera::createDefaultCamera(), buildingContext, PipelineDescriptor::Configuration{{}, nullptr, std::move(snippet)});
         const sp<PipelineLayout>& pipelineLayout = pipelineDescriptor->layout();
 
-        TESTCASE_VALIDATE(pipelineLayout->streamLayouts().at(0).stride() != 0);
+        TESTCASE_VALIDATE(pipelineLayout->getStreamLayout(0).stride() != 0);
         TESTCASE_VALIDATE(pipelineLayout->getAttribute("Position")->length());
         TESTCASE_VALIDATE(pipelineLayout->getAttribute("TexCoordinate")->offset() != -1);
         TESTCASE_VALIDATE(pipelineLayout->getAttribute("Alpha01")->offset() == -1);
@@ -63,7 +62,6 @@ public:
     }
 };
 
-}
 }
 
 ark::unittest::TestCase* pipelines_create() {

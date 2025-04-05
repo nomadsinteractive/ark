@@ -147,7 +147,7 @@ GLenum GLUtil::getEnum(const String& name)
     return Enum::lookup<GLenum, 34>(glEnumTable, name);
 }
 
-GLenum GLUtil::getEnum(const String& name, GLenum defValue)
+GLenum GLUtil::getEnum(const String& name, const GLenum defValue)
 {
     return Enum::lookup<StringView, GLenum, 34>(glEnumTable, name, defValue);
 }

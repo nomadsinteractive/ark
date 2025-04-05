@@ -25,6 +25,24 @@ uint32_t getAttributeEndOffset(const PipelineLayout::VertexDescriptor& attrOffse
     }
 }
 
+const PipelineLayout::StreamLayout& findStreamLayout(const Vector<std::pair<uint32_t, PipelineLayout::StreamLayout>>& streamLayouts, const uint32_t divisor)
+{
+    for(const auto& [k, v] : streamLayouts)
+        if(k == divisor)
+            return v;
+    FATAL("PipelineInput has no stream(%d)", divisor);
+    return streamLayouts.back().second;
+}
+
+PipelineLayout::StreamLayout& ensureStreamLayout(Vector<std::pair<uint32_t, PipelineLayout::StreamLayout>>& streamLayouts, const uint32_t divisor)
+{
+    for(auto& [k, v] : streamLayouts)
+        if(k == divisor)
+            return v;
+    streamLayouts.emplace_back(divisor, PipelineLayout::StreamLayout());
+    return streamLayouts.back().second;
+}
+
 }
 
 PipelineLayout::VertexDescriptor::VertexDescriptor()
@@ -41,7 +59,7 @@ PipelineLayout::VertexDescriptor::VertexDescriptor(const PipelineLayout& pipelin
 
 void PipelineLayout::VertexDescriptor::initialize(const PipelineLayout& pipelineLayout)
 {
-    const StreamLayout& stream = pipelineLayout.streamLayouts().at(0);
+    const StreamLayout& stream = pipelineLayout.getStreamLayout(0);
     _offsets[Attribute::USAGE_POSITION] = 0;
     _offsets[Attribute::USAGE_TEX_COORD] = stream.getAttributeOffset(Attribute::USAGE_TEX_COORD);
     _offsets[Attribute::USAGE_NORMAL] = stream.getAttributeOffset(Attribute::USAGE_NORMAL);
@@ -51,7 +69,7 @@ void PipelineLayout::VertexDescriptor::initialize(const PipelineLayout& pipeline
     _offsets[Attribute::USAGE_BONE_WEIGHTS] = stream.getAttributeOffset(Attribute::USAGE_BONE_WEIGHTS);
     if(pipelineLayout.streamLayouts().size() > 1)
     {
-        const StreamLayout& stream1 = pipelineLayout.streamLayouts().at(1);
+        const StreamLayout& stream1 = pipelineLayout.getStreamLayout(1);
         _offsets[Attribute::USAGE_MODEL_MATRIX] = stream1.getAttributeOffset("Model");
         _offsets[Attribute::USAGE_NODE_ID] = stream1.getAttributeOffset("NodeId");
         _offsets[Attribute::USAGE_MATERIAL_ID] = stream1.getAttributeOffset("MaterialId");
@@ -62,7 +80,7 @@ void PipelineLayout::VertexDescriptor::initialize(const PipelineLayout& pipeline
 }
 
 PipelineLayout::PipelineLayout()
-    : _stream_layout{{0, StreamLayout()}}, _color_attachment_count(0)
+    : _stream_layouts{{0, StreamLayout()}}, _color_attachment_count(0)
 {
 }
 
@@ -105,14 +123,14 @@ sp<RenderBufferSnapshot> PipelineLayout::takeBufferSnapshot(const RenderRequest&
     return sp<RenderBufferSnapshot>::make(RenderBufferSnapshot{std::move(uboSnapshot), std::move(ssboSnapshot)});
 }
 
-const Map<uint32_t, PipelineLayout::StreamLayout>& PipelineLayout::streamLayouts() const
+const Vector<std::pair<uint32_t, PipelineLayout::StreamLayout>>& PipelineLayout::streamLayouts() const
 {
-    return _stream_layout;
+    return _stream_layouts;
 }
 
 void PipelineLayout::setStreamLayoutAlignment(const uint32_t alignment)
 {
-    for(auto &[k, v] : _stream_layout)
+    for(auto &[k, v] : _stream_layouts)
         v.align(k == 0 ? 4 : alignment);
 }
 
@@ -138,19 +156,17 @@ uint32_t PipelineLayout::colorAttachmentCount() const
 
 void PipelineLayout::addAttribute(String name, Attribute attribute)
 {
-    _stream_layout[attribute.divisor()].addAttribute(std::move(name), std::move(attribute));
+    ensureStreamLayout(_stream_layouts, attribute.divisor()).addAttribute(std::move(name), std::move(attribute));
 }
 
 const PipelineLayout::StreamLayout& PipelineLayout::getStreamLayout(const uint32_t divisor) const
 {
-    const auto iter = _stream_layout.find(divisor);
-    DCHECK(iter != _stream_layout.end(), "PipelineInput has no stream(%d)", divisor);
-    return iter->second;
+    return findStreamLayout(_stream_layouts, divisor);
 }
 
 Optional<const Attribute&> PipelineLayout::getAttribute(const String& name) const
 {
-    for(const auto& i : _stream_layout)
+    for(const auto& i : _stream_layouts)
         if(const Optional<const Attribute&> opt = i.second.getAttribute(name))
             return opt;
     return {};

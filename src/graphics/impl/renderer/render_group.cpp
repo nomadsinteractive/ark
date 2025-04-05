@@ -33,7 +33,7 @@ void RenderGroup::addRenderer(sp<Renderer> renderer, const Traits& traits)
     _phrases[phrase].emplace_back(std::move(renderer), discarded, visibility);
 }
 
-void RenderGroup::add(RendererType::Priority priority, sp<Renderer> renderer, sp<Boolean> discarded, sp<Boolean> visible)
+void RenderGroup::add(const RendererType::Priority priority, sp<Renderer> renderer, sp<Boolean> discarded, sp<Boolean> visible)
 {
     _phrases[priority].emplace_back(std::move(renderer), std::move(discarded), std::move(visible));
 }

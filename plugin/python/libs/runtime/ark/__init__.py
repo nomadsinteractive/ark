@@ -890,8 +890,8 @@ class Renderer:
 
 
 class RenderPass(Renderer):
-    def __init__(self, shader, vertex_buffer: Buffer, index_buffer: Buffer, draw_count: 'Integer', render_mode: TYPE_ENUM, draw_procedure: TYPE_ENUM,
-                 divided_uploaders: dict[int, 'Uploader']):
+    def __init__(self, shader, vertex_buffer: Buffer, index_buffer: Buffer, draw_count: "Integer", render_mode: TYPE_ENUM, draw_procedure: TYPE_ENUM,
+                 divided_uploaders: tuple[tuple[int, "Uploader"]] = tuple(), indirect_buffer: Optional[Buffer] = None):
         super().__init__()
 
 

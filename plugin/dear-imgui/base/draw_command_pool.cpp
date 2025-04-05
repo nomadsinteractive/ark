@@ -32,7 +32,7 @@ const sp<PipelineDescriptor>& makePipelineBindingParameters(const sp<PipelineDes
 
 DrawCommandPool::DrawCommandPool(const Shader& shader, const sp<RenderController>& renderController, sp<Texture> texture)
     : _refcount(0), _draw_commands(sp<LFStack<sp<RendererImgui::DrawCommand>>>::make()), _render_controller(renderController),
-      _pipeline_bindings(sp<PipelineBindings>::make(Enum::DRAW_MODE_TRIANGLES, Enum::DRAW_PROCEDURE_DRAW_ELEMENTS, Buffer(), makePipelineBindingParameters(shader.pipelineDesciptor()), Map<uint32_t, Buffer>{}))
+      _pipeline_bindings(sp<PipelineBindings>::make(Enum::DRAW_MODE_TRIANGLES, Enum::DRAW_PROCEDURE_DRAW_ELEMENTS, Buffer(), makePipelineBindingParameters(shader.pipelineDesciptor())))
 {
     _pipeline_bindings->bindSampler(std::move(texture));
 }

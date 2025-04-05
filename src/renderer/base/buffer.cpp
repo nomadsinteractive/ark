@@ -174,7 +174,7 @@ void Buffer::Delegate::setSize(size_t size)
 }
 
 Buffer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _uploader(factory.getBuilder<Uploader>(manifest, "uploader")), _usage(Documents::getAttribute<Usage>(manifest, "usage", USAGE_BIT_DYNAMIC))
+    : _uploader(factory.getBuilder<Uploader>(manifest, constants::UPLOADER)), _usage(Documents::getAttribute<Usage>(manifest, "usage", USAGE_BIT_DYNAMIC))
 {
 }
 

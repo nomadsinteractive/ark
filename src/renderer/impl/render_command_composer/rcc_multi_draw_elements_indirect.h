@@ -71,7 +71,7 @@ private:
 
     struct IndirectCmds {
         DrawingParams::DrawElementsIndirectCommand _command;
-        std::vector<MeshInstance> _mesh_instances;
+        Vector<MeshInstance> _mesh_instances;
     };
 
 private:

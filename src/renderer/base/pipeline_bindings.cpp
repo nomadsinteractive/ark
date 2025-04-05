@@ -57,7 +57,7 @@ private:
 }
 
 struct PipelineBindings::Stub {
-    Stub(const Enum::DrawMode drawMode, const Enum::DrawProcedure drawProcedure, Buffer vertices, sp<PipelineDescriptor> pipelineDescriptor, Map<uint32_t, Buffer> streams)
+    Stub(const Enum::DrawMode drawMode, const Enum::DrawProcedure drawProcedure, Buffer vertices, sp<PipelineDescriptor> pipelineDescriptor, Vector<std::pair<uint32_t, Buffer>> streams)
         : _draw_mode(drawMode), _draw_procedure(drawProcedure), _vertices(std::move(vertices)), _pipeline_descriptor(std::move(pipelineDescriptor)), _attachments(sp<Traits>::make()), _streams(std::move(streams)),
           _samplers(_pipeline_descriptor->makeBindingSamplers()), _images(_pipeline_descriptor->makeBindingImages())
     {
@@ -70,13 +70,12 @@ struct PipelineBindings::Stub {
     sp<PipelineDescriptor> _pipeline_descriptor;
     sp<Traits> _attachments;
 
-    Map<uint32_t, Buffer> _streams;
-
+    Vector<std::pair<uint32_t, Buffer>> _streams;
     Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>> _samplers;
     Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>> _images;
 };
 
-PipelineBindings::PipelineBindings(const Enum::DrawMode drawMode, const Enum::DrawProcedure drawProcedure, Buffer vertices, sp<PipelineDescriptor> pipelineDescriptor, Map<uint32_t, Buffer> streams)
+PipelineBindings::PipelineBindings(const Enum::DrawMode drawMode, const Enum::DrawProcedure drawProcedure, Buffer vertices, sp<PipelineDescriptor> pipelineDescriptor, Vector<std::pair<uint32_t, Buffer>> streams)
     : _stub(sp<Stub>::make(drawMode, drawProcedure, std::move(vertices), std::move(pipelineDescriptor), std::move(streams)))
 {
 }
@@ -111,14 +110,14 @@ const sp<PipelineLayout>& PipelineBindings::pipelineLayout() const
     return _stub->_pipeline_descriptor->layout();
 }
 
-const Map<uint32_t, Buffer>& PipelineBindings::streams() const
-{
-    return _stub->_streams;
-}
-
 const sp<Traits>& PipelineBindings::attachments() const
 {
     return _stub->_attachments;
+}
+
+const Vector<std::pair<uint32_t, Buffer>>& PipelineBindings::streams() const
+{
+    return _stub->_streams;
 }
 
 const Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>>& PipelineBindings::samplers() const

@@ -2,6 +2,7 @@ import getopt
 import importlib
 import re
 import sys
+from dataclasses import dataclass
 from typing import Optional
 
 acg = None
@@ -70,7 +71,7 @@ def parse_method_arguments(arguments):
             if m:
                 cast_signature = acg.format(l.cast_signature, *m.groups())
                 typename = acg.format(l.typename, *m.groups())
-                argument_meta = GenArgumentMeta(typename, cast_signature, l.parse_signature, l.is_base_type)
+                argument_meta = GenArgumentMeta(typename, cast_signature, l.parse_signature, l.is_base_type, l.has_defvalue, l.movable)
                 args.append(GenArgument(i, cast_signature, None if default_value == '' else default_value, argument_meta, argtype, argname))
                 break
         else:
@@ -90,14 +91,14 @@ def gen_cast_call(targettype: str, name: str) -> str:
     return f'static_cast<{targettype}>({name})'
 
 
-def gen_method_call_arg(name: str, targettype: str, argtype: str):
-    targettype = acg.remove_crv(targettype)
+def gen_method_call_arg(name: str, gen_arg, argtype: str):
+    targettype = acg.remove_crv(gen_arg.str())
     argtype = acg.remove_crv(argtype)
     if argtype.startswith('sp<') and acg.get_shared_ptr_type(argtype) == targettype:
         return f'*{name}'
     if targettype != argtype:
         return gen_cast_call(targettype, name)
-    if any(targettype.startswith(i) for i in (TYPE_COLLECTION_TEMPLATE_PREFIX + ['sp<', 'Box', 'Traits'])):
+    if gen_arg.meta.movable or any(targettype.startswith(i) for i in (TYPE_COLLECTION_TEMPLATE_PREFIX + ['sp<', 'Box', 'Traits'])):
         return f'std::move({name})'
     return name
     # if ctype in ARK_PY_ARGUMENT_CHECKERS:
@@ -127,33 +128,14 @@ ARK_PY_ARGUMENT_CHECKERS = {
 }
 
 
+@dataclass
 class GenArgumentMeta:
-    def __init__(self, typename: str, castsig: str, parsetuplesig: str, is_base_type: bool = False, has_defvalue: bool = False):
-        self._typename = typename
-        self._cast_signature = castsig
-        self._parse_signature = parsetuplesig
-        self._is_base_type = is_base_type
-        self._has_defvalue = has_defvalue
-
-    @property
-    def typename(self):
-        return self._typename
-
-    @property
-    def cast_signature(self):
-        return self._cast_signature
-
-    @property
-    def parse_signature(self):
-        return self._parse_signature
-
-    @property
-    def is_base_type(self):
-        return self._is_base_type
-
-    @property
-    def has_defvalue(self):
-        return self._has_defvalue
+    typename: str
+    cast_signature: str
+    parse_signature: str
+    is_base_type: bool = False
+    has_defvalue: bool = False
+    movable: bool = False
 
 
 ARK_PY_ARGUMENTS = (
@@ -167,7 +149,7 @@ ARK_PY_ARGUMENTS = (
     (r'(document|element|attribute)\s*&', GenArgumentMeta('PyObject*', '${0}', 'O')),
     (r'(V2|V3|V4)', GenArgumentMeta('PyObject*', '${0}', 'O')),
     (r'([^>]+|\w+<\w+>)\s*&', GenArgumentMeta('PyObject*', 'sp<${0}>', 'O')),
-    (r'(^Buffer$)', GenArgumentMeta('PyObject*', 'sp<${0}>', 'O')),
+    (r'(^Buffer$)', GenArgumentMeta('PyObject*', '${0}', 'O', movable=True)),
     (r'(uint32_t|RefId|unsigned int|uint8_t)', GenArgumentMeta('uint32_t', 'uint32_t', 'I')),
     (r'size_t', GenArgumentMeta('size_t', 'size_t', 'n')),
     (r'ptrdiff_t', GenArgumentMeta('ptrdiff_t', 'ptrdiff_t', 'i')),

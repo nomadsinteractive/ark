@@ -26,6 +26,23 @@ std::pair<Optional<const Shader::StageManifest&>, size_t> findStageManifest(cons
     return {{}, 0};
 }
 
+template<typename T, typename U> auto findInKeywordPairs(const T& kws, U key) -> decltype(std::declval<T>().front().second)
+{
+    for(const auto& [k, v] : kws)
+        if(k == key)
+            return v;
+    return {};
+}
+
+Vector<std::pair<uint32_t, Buffer>> makeDivivedBuffers(const PipelineLayout& pipelineLayout, const Vector<std::pair<uint32_t, sp<Uploader>>>& uploaders)
+{
+    Vector<std::pair<uint32_t, Buffer>> dividedBuffers;
+    for(const auto& [divisor, _] : pipelineLayout.streamLayouts())
+        if(divisor != 0)
+            dividedBuffers.emplace_back(divisor, Ark::instance().renderController()->makeVertexBuffer(Buffer::USAGE_BIT_DYNAMIC, findInKeywordPairs(uploaders, divisor)));
+    return dividedBuffers;
+}
+
 }
 
 Shader::StageManifest::StageManifest(Enum::ShaderStageBit type, builder<String> source)
@@ -79,22 +96,9 @@ const sp<PipelineDescriptor>& Shader::pipelineDesciptor() const
     return _pipeline_desciptor;
 }
 
-sp<PipelineBindings> Shader::makeBindings(Buffer vertices, const Enum::DrawMode mode, const Enum::DrawProcedure drawProcedure, const Map<uint32_t, sp<Uploader>>& uploaders) const
+sp<PipelineBindings> Shader::makeBindings(Buffer vertexBuffer, const Enum::DrawMode drawMode, const Enum::DrawProcedure drawProcedure, const Vector<std::pair<uint32_t, sp<Uploader>>>& uploaders) const
 {
-    return sp<PipelineBindings>::make(mode, drawProcedure, std::move(vertices), _pipeline_desciptor, makeDivivedBuffers(uploaders));
-}
-
-Map<uint32_t, Buffer> Shader::makeDivivedBuffers(const Map<uint32_t, sp<Uploader>>& uploaders) const
-{
-    Map<uint32_t, Buffer> dividedBuffers;
-    for(const auto& [divisor, _] : _pipeline_desciptor->layout()->streamLayouts())
-        if(divisor != 0)
-        {
-            CHECK(dividedBuffers.find(divisor) == dividedBuffers.end(), "Duplicated stream divisor: %d", divisor);
-            const auto iter = uploaders.find(divisor);
-            dividedBuffers.insert(std::make_pair(divisor, Ark::instance().renderController()->makeVertexBuffer(Buffer::USAGE_BIT_DYNAMIC, iter != uploaders.end() ? iter->second : nullptr)));
-        }
-    return dividedBuffers;
+    return sp<PipelineBindings>::make(drawMode, drawProcedure, std::move(vertexBuffer), _pipeline_desciptor, makeDivivedBuffers(_pipeline_desciptor->layout(), uploaders));
 }
 
 Shader::BUILDER_IMPL::BUILDER_IMPL(BeanFactory& factory, const document& manifest, sp<Builder<Camera>> camera, Optional<Vector<StageManifest>> stages, Optional<SnippetManifest> snippets)

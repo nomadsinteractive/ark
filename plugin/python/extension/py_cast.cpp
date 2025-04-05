@@ -506,6 +506,12 @@ template<> ARK_PLUGIN_PYTHON_API Optional<PyInstance> PyCast::toCppObject_impl<P
     return PyInstance::own(object);
 }
 
+template<> ARK_PLUGIN_PYTHON_API Optional<Buffer> PyCast::toCppObject_impl<Buffer>(PyObject* object)
+{
+    const sp<Buffer> ptr = toSharedPtrOrNull<Buffer>(object);
+    return ptr ? Optional<Buffer>(std::move(*ptr)) : Optional<Buffer>();
+}
+
 template<> ARK_PLUGIN_PYTHON_API PyObject* PyCast::toPyObject_impl<Box>(const Box& value)
 {
     return toPyObject(value);

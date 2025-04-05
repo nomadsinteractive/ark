@@ -1,5 +1,6 @@
 #include "graphics/util/renderer_type.h"
 
+#include "core/base/enum.h"
 #include "core/collection/traits.h"
 #include "core/components/discarded.h"
 #include "core/util/strings.h"
@@ -44,14 +45,17 @@ sp<Renderer> RendererType::reset(const sp<Renderer>& self, sp<Renderer> wrapped)
 template<> ARK_API RendererType::Priority StringConvert::eval<RendererType::Priority>(const String& expr)
 {
     if(Strings::isNumeric(expr))
-        return static_cast<RendererType::Priority>(Strings::eval<int32_t>(expr));
-    if(expr.startsWith("ui_text"))
-        return RendererType::PRIORITY_UI_TEXT;
-    if(expr.startsWith("ui_blend"))
-        return RendererType::PRIORITY_UI_BLEND;
-    if(expr.startsWith("ui"))
-        return RendererType::PRIORITY_UI;
-    return RendererType::PRIORITY_DEFAULT;
+        return static_cast<RendererType::Priority>(Strings::eval<uint32_t>(expr));
+
+    constexpr Enum::LookupTable<StringView, RendererType::Priority, RendererType::PRIORITY_COUNT> priorities = {{
+        {"ui", RendererType::PRIORITY_UI},
+        {"default", RendererType::PRIORITY_DEFAULT},
+        {"ui_blend", RendererType::PRIORITY_UI_BLEND},
+        {"ui_text", RendererType::PRIORITY_UI_TEXT},
+        {"render_layer", RendererType::PRIORITY_RENDER_LAYER},
+        {"control", RendererType::PRIORITY_CONTROL},
+    }};
+    return Enum::lookup<RendererType::Priority, RendererType::PRIORITY_COUNT>(priorities, expr);
 }
 
 }

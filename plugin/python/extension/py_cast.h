@@ -184,17 +184,32 @@ private:
             return {T(value.value())};
         return {};
     }
+    template<typename T> static Optional<T> toCppObject_sfinae(PyObject* obj, typename T::second_type*) {
+        if(PyBridge::PyTuple_Size(obj) != 2)
+            return {};
+
+        Optional<typename T::first_type> k = toCppObject<typename T::first_type>(PyBridge::PyTuple_GetItem(obj, 0));
+        if(!k)
+            return {};
+
+        Optional<typename T::second_type> v = toCppObject<typename T::second_type>(PyBridge::PyTuple_GetItem(obj, 1));
+        if(!v)
+            return {};
+
+        return {{std::move(k.value()), std::move(v.value())}};
+    }
     template<typename... Args> static PyObject* makeArgumentTuple(Args... args) {
         PyObject* tuple = PyTuple_New(sizeof...(Args));
-        reduceArgumentTuple(tuple, 0, args...);
+        if constexpr(sizeof...(args) > 0)
+            reduceArgumentTuple(tuple, 0, args...);
         return tuple;
     }
-    template<typename T, typename... Args> static void reduceArgumentTuple(PyObject *tuple, uint32_t idx, T arg, Args... args) {
+    template<typename T, typename... Args> static void reduceArgumentTuple(PyObject *tuple, const uint32_t idx, T arg, Args... args) {
         PyTuple_SetItem(tuple, idx, toPyObject(std::forward<T>(arg)));
-        reduceArgumentTuple(tuple, idx + 1, args...);
+        if constexpr(sizeof...(args) > 0)
+            reduceArgumentTuple(tuple, idx + 1, args...);
     }
-    static void reduceArgumentTuple(PyObject *tuple, uint32_t idx) {
-    }
+
     template<typename R, typename... Args> static Optional<std::function<R(Args...)>> toCppObject_function(PyObject* obj, std::function<R(Args...)>*) {
         if(!PyCallable_Check(obj))
             return {};

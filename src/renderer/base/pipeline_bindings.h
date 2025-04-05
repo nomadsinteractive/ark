@@ -16,7 +16,7 @@ namespace ark {
 
 class ARK_API PipelineBindings {
 public:
-    PipelineBindings(Enum::DrawMode drawMode, Enum::DrawProcedure drawProcedure, Buffer vertices, sp<PipelineDescriptor> pipelineDescriptor, Map<uint32_t, Buffer> streams);
+    PipelineBindings(Enum::DrawMode drawMode, Enum::DrawProcedure drawProcedure, Buffer vertices, sp<PipelineDescriptor> pipelineDescriptor, Vector<std::pair<uint32_t, Buffer>> streams = {});
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(PipelineBindings);
 
     Enum::DrawMode drawMode() const;
@@ -29,9 +29,9 @@ public:
 
     const sp<Snippet>& snippet() const;
 
-    const Map<uint32_t, Buffer>& streams() const;
     const sp<Traits>& attachments() const;
 
+    const Vector<std::pair<uint32_t, Buffer>>& streams() const;
     const Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>>& samplers() const;
     const Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>>& images() const;
 
