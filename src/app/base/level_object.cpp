@@ -36,18 +36,13 @@ std::pair<sp<RenderObject>, sp<Transform3D>> makeRenderObject(const LevelObject&
     return {std::move(renderObject), std::move(transform)};
 }
 
-sp<Rigidbody> makeRigidBody(LevelLibrary& library, const sp<Collider>& collider, const LevelObject& obj, Rigidbody::BodyType bodyType, const Map<String, sp<Shape>>& shapes, const sp<CollisionFilter>& collisionFilter)
+sp<Rigidbody> makeRigidBody(LevelLibrary& library, const sp<Collider>& collider, const LevelObject& obj, const Rigidbody::BodyType bodyType, const sp<CollisionFilter>& collisionFilter)
 {
     if(!collider)
         return nullptr;
 
     if(!library.shape())
-    {
-        if(const auto iter = shapes.find(library.name()); iter != shapes.end())
-            library.setShape(iter->second);
-        else
-            library.setShape(collider->createShape(library.name(), library.size()));
-    }
+        library.setShape(collider->createShape(library.name(), library.size()));
 
     const sp<Transform3D> transform = makeTransform(obj.rotation(), obj.scale());
     if(bodyType != Rigidbody::BODY_TYPE_DYNAMIC)
@@ -104,21 +99,17 @@ const Optional<V4>& LevelObject::rotation() const
     return _rotation;
 }
 
-int32_t LevelObject::instanceOf() const
+sp<LevelLibrary> LevelObject::library() const
 {
-    return _instance_of;
-}
-
-sp<Shape> LevelObject::shape() const
-{
-    return _instance_of != -1 ? library()->shape() : nullptr;
+    const auto iter = _level->_libraries.find(_instance_of);
+    return iter != _level->_libraries.end() ? iter->second : nullptr;
 }
 
 sp<RenderObject> LevelObject::createRenderObject()
 {
     if(_instance_of != -1)
     {
-        auto [renderObject, transform] = makeRenderObject(*this, library()->_name.hash());
+        auto [renderObject, transform] = makeRenderObject(*this, ensureLibrary()->_name.hash());
         _render_object = std::move(renderObject);
     }
     else if(_type == TYPE_ELEMENT)
@@ -129,14 +120,14 @@ sp<RenderObject> LevelObject::createRenderObject()
     return _render_object;
 }
 
-sp<Rigidbody> LevelObject::createRigidbody(const sp<Collider>& collider, Rigidbody::BodyType bodyType, const Map<String, sp<Shape>>& shapes, const sp<CollisionFilter>& collisionFilter)
+sp<Rigidbody> LevelObject::createRigidbody(const sp<Collider>& collider, Rigidbody::BodyType bodyType, const sp<CollisionFilter>& collisionFilter)
 {
     if(_instance_of != -1)
-        _rigidbody = makeRigidBody(library(), collider, *this, bodyType, shapes, collisionFilter);
+        _rigidbody = makeRigidBody(ensureLibrary(), collider, *this, bodyType, collisionFilter);
     return _rigidbody;
 }
 
-const sp<LevelLibrary>& LevelObject::library() const
+const sp<LevelLibrary>& LevelObject::ensureLibrary() const
 {
     const auto iter = _level->_libraries.find(_instance_of);
     ASSERT(iter != _level->_libraries.end());

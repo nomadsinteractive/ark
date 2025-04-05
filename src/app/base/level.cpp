@@ -21,10 +21,48 @@ namespace ark {
 Level::Level(const String& src)
     : _stub(sp<Stub>::make())
 {
-    load(src);
+    doLoad(src);
 }
 
-void Level::load(const String& src)
+const Map<int32_t, sp<LevelLibrary>>& Level::libraries() const
+{
+    return _stub->_libraries;
+}
+
+sp<LevelLayer> Level::getLayer(const StringView name) const
+{
+    const auto iter = _layers_by_name.find(name);
+    return iter != _layers_by_name.end() ? iter->second : nullptr;
+}
+
+const Map<String, sp<Camera>>& Level::cameras() const
+{
+    return _stub->_cameras;
+}
+
+sp<Camera> Level::getCamera(const String& name) const
+{
+    const auto iter = _stub->_cameras.find(name);
+    return iter != _stub->_cameras.end() ? iter->second : nullptr;
+}
+
+const Map<String, sp<Vec3>>& Level::lights() const
+{
+    return _stub->_lights;
+}
+
+sp<Vec3> Level::getLight(const String& name) const
+{
+    const auto iter = _stub->_lights.find(name);
+    return iter != _stub->_lights.end() ? iter->second : nullptr;
+}
+
+const Vector<sp<LevelLayer>>& Level::layers()
+{
+    return _layers;
+}
+
+void Level::doLoad(const String& src)
 {
     const document manifest = Ark::instance().applicationContext()->applicationBundle()->loadDocument(src);
     CHECK(manifest, "Cannot load manifest \"%s\"", src.c_str());
@@ -73,39 +111,6 @@ void Level::load(const String& src)
     for(const sp<LevelLayer>& i : _layers)
         if(i->name())
             _layers_by_name.emplace(i->name(), i);
-}
-
-sp<LevelLayer> Level::getLayer(const StringView name) const
-{
-    const auto iter = _layers_by_name.find(name);
-    return iter != _layers_by_name.end() ? iter->second : nullptr;
-}
-
-const Map<String, sp<Camera>>& Level::cameras() const
-{
-    return _stub->_cameras;
-}
-
-sp<Camera> Level::getCamera(const String& name) const
-{
-    const auto iter = _stub->_cameras.find(name);
-    return iter != _stub->_cameras.end() ? iter->second : nullptr;
-}
-
-const Map<String, sp<Vec3>>& Level::lights() const
-{
-    return _stub->_lights;
-}
-
-sp<Vec3> Level::getLight(const String& name) const
-{
-    const auto iter = _stub->_lights.find(name);
-    return iter != _stub->_lights.end() ? iter->second : nullptr;
-}
-
-const Vector<sp<LevelLayer>>& Level::layers()
-{
-    return _layers;
 }
 
 }

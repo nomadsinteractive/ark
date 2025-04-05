@@ -9,6 +9,7 @@ Use it for:
 3. Unit test(maybe)
 
 """
+from turtle import Shape
 from typing import Callable, List, Type, TypeVar, Union, Optional, Dict, Tuple, Any, Self
 
 _BUILDABLE_TYPES = TypeVar('_BUILDABLE_TYPES', 'Arena', 'AudioPlayer', "Boolean", 'Characters', 'Collider', 'Integer', 'ModelLoader', 'Numeric', 'NarrowPhrase',
@@ -1560,6 +1561,28 @@ class ModelBundle:
         pass
 
 
+class LevelLibrary:
+    @property
+    def id(self) -> int:
+        return 0
+
+    @property
+    def name(self) -> str:
+        return ''
+
+    @property
+    def size(self) -> Vec3:
+        pass
+
+    @property
+    def shape(self) -> "Shape":
+        pass
+
+    @shape.setter
+    def shape(self, shape: Shape):
+        pass
+
+
 class LevelObject:
 
     TYPE_INSTANCE = 0
@@ -1586,17 +1609,15 @@ class LevelObject:
     @property
     def scale(self) -> Optional[TYPE_FLOAT3]:
         pass
-
+    @property
+    def shape(self) -> Optional[TYPE_FLOAT3]:
+        pass
     @property
     def rotation(self) -> Optional[TYPE_FLOAT4]:
         pass
 
     @property
-    def instance_of(self) -> int:
-        pass
-
-    @property
-    def shape(self) -> Optional["Shape"]:
+    def library(self) -> Optional[LevelLibrary]:
         pass
 
     @property
@@ -1630,12 +1651,16 @@ class LevelLayer:
     def create_render_objects(self, layer: Optional["Layer"] = None):
         pass
 
-    def create_rigidbodies(self, collider: "Collider", body_type: int, shapes: dict[str, "Shape"] = None, collision_filter: Optional["CollisionFilter"] = None):
+    def create_rigidbodies(self, collider: "Collider", body_type: int, collision_filter: Optional["CollisionFilter"] = None):
         pass
 
 
 class Level:
     def __init__(self, src: str):
+        pass
+
+    @property
+    def libraries(self) -> dict[int, LevelLibrary]:
         pass
 
     @property

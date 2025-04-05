@@ -26,7 +26,7 @@ public:
 //  [[script::bindings::auto]]
     void createRenderObjects(const sp<Layer>& layer = nullptr) const;
 //  [[script::bindings::auto]]
-    void createRigidbodies(const sp<Collider>& collider, Rigidbody::BodyType bodyType, const Map<String, sp<Shape>>& shapes, const sp<CollisionFilter>& collisionFilter = nullptr) const;
+    void createRigidbodies(const sp<Collider>& collider, Rigidbody::BodyType bodyType, const sp<CollisionFilter>& collisionFilter = nullptr) const;
 
 private:
     sp<Level::Stub> _level;

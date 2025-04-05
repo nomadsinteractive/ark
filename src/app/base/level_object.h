@@ -37,9 +37,7 @@ public:
 //  [[script::bindings::property]]
     const Optional<V4>& rotation() const;
 //  [[script::bindings::property]]
-    int32_t instanceOf() const;
-//  [[script::bindings::property]]
-    sp<Shape> shape() const;
+    sp<LevelLibrary> library() const;
 
 //  [[script::bindings::property]]
     const sp<RenderObject>& renderObject() const;
@@ -49,10 +47,10 @@ public:
 //  [[script::bindings::auto]]
     sp<RenderObject> createRenderObject();
 //  [[script::bindings::auto]]
-    sp<Rigidbody> createRigidbody(const sp<Collider>& collider, Rigidbody::BodyType bodyType, const Map<String, sp<Shape>>& shapes, const sp<CollisionFilter>& collisionFilter);
+    sp<Rigidbody> createRigidbody(const sp<Collider>& collider, Rigidbody::BodyType bodyType, const sp<CollisionFilter>& collisionFilter);
 
 private:
-    const sp<LevelLibrary>& library() const;
+    const sp<LevelLibrary>& ensureLibrary() const;
 
 private:
     sp<Level::Stub> _level;

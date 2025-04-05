@@ -25,11 +25,6 @@ public:
     sp<Integer> type() const;
 
 //  [[script::bindings::property]]
-    float width();
-//  [[script::bindings::property]]
-    float height();
-
-//  [[script::bindings::property]]
     void setType(const NamedHash& type);
 //  [[script::bindings::property]]
     void setType(sp<Integer> type);

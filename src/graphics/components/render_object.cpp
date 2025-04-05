@@ -38,16 +38,6 @@ sp<Integer> RenderObject::type() const
     return _type;
 }
 
-float RenderObject::width()
-{
-    return _size.val().x();
-}
-
-float RenderObject::height()
-{
-    return _size.val().y();
-}
-
 const SafeVar<Vec3>& RenderObject::size()
 {
     return _size;
@@ -68,7 +58,6 @@ const sp<Varyings>& RenderObject::varyings()
 void RenderObject::setType(const NamedHash& type)
 {
     _type->set(type.hash());
-    _discarded.reset(nullptr);
     _timestamp.markDirty();
 }
 

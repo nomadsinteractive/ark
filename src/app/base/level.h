@@ -17,7 +17,8 @@ public:
 //  [[script::bindings::auto]]
     Level(const String& src);
 
-    void load(const String& src);
+//  [[script::bindings::property]]
+    const Map<int32_t, sp<LevelLibrary>>& libraries() const;
 
 //  [[script::bindings::property]]
     const Vector<sp<LevelLayer>>& layers();
@@ -35,6 +36,8 @@ public:
     sp<Vec3> getLight(const String& name) const;
 
 private:
+    void doLoad(const String& src);
+
     struct Stub {
         Map<int32_t, sp<LevelLibrary>> _libraries;
         Map<String, sp<Camera>> _cameras;
