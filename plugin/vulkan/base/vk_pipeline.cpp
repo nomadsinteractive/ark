@@ -56,7 +56,7 @@ struct VKDrawElementsInstanced final : VKPipeline::BakedRenderer {
     {
         VkDeviceSize offsets = 0;
         const DrawingParams::DrawElementsInstanced& param = drawingContext._parameters.drawElementsInstanced();
-        for(const auto& i : param._divided_buffer_snapshots)
+        for(const auto& i : param._instance_buffer_snapshots)
         {
             i.second.upload(graphicsContext);
             DCHECK(i.second.id(), "Invaild Instanced Array Buffer: %d", i.first);
@@ -72,7 +72,7 @@ struct VKMultiDrawElementsIndirect final : VKPipeline::BakedRenderer {
     {
         VkDeviceSize offsets = 0;
         const DrawingParams::DrawMultiElementsIndirect& param = drawingContext._parameters.drawMultiElementsIndirect();
-        for(const auto& [i, j] : param._divided_buffer_snapshots)
+        for(const auto& [i, j] : param._instance_buffer_snapshots)
         {
             j.upload(graphicsContext);
             DCHECK(j.id(), "Invaild Instanced Array Buffer: %d", i);

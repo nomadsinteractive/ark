@@ -13,12 +13,12 @@ namespace ark::plugin::vulkan {
 
 class VKFramebufferRenderer final : public Renderer {
 public:
-    VKFramebufferRenderer(sp<RenderLayer> renderLayer, sp<VKFramebuffer> framebuffer);
+    VKFramebufferRenderer(sp<Renderer> renderer, sp<VKFramebuffer> framebuffer);
 
     void render(RenderRequest& renderRequest, const V3& position, const sp<DrawDecorator>& drawDecorator) override;
 
 private:
-    sp<RenderLayer> _render_layer;
+    sp<Renderer> _renderer;
     sp<DrawDecorator> _draw_decorator;
 };
 

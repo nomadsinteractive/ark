@@ -30,13 +30,6 @@ GLenum GLUtil::toEnum(const Enum::DrawMode renderMode)
     return models[renderMode];
 }
 
-GLenum GLUtil::toBufferType(const Buffer::Type type)
-{
-    constexpr GLenum types[Buffer::TYPE_COUNT] = {GL_ARRAY_BUFFER, GL_ELEMENT_ARRAY_BUFFER, GL_DRAW_INDIRECT_BUFFER, GL_SHADER_STORAGE_BUFFER};
-    DCHECK(type >= 0 && type < Buffer::TYPE_COUNT, "Unknown buffer type: %d", type);
-    return types[type];
-}
-
 GLenum GLUtil::toShaderType(const Enum::ShaderStageBit stage)
 {
 #ifndef ANDROID
@@ -105,7 +98,7 @@ GLenum GLUtil::toFrontFaceType(PipelineDescriptor::FrontFaceType face)
     return glFaceTypes[face];
 }
 
-constexpr Enum::LookupTable<StringView, GLenum, 34> glEnumTable = {{
+constexpr Enum::LookupTable<GLenum, 34> glEnumTable = {{
     {"nearest", GL_NEAREST},
     {"linear", GL_LINEAR},
     {"texture_mag_filter", GL_TEXTURE_MAG_FILTER},
@@ -144,12 +137,12 @@ constexpr Enum::LookupTable<StringView, GLenum, 34> glEnumTable = {{
 
 GLenum GLUtil::getEnum(const String& name)
 {
-    return Enum::lookup<GLenum, 34>(glEnumTable, name);
+    return Enum::lookup(glEnumTable, name);
 }
 
 GLenum GLUtil::getEnum(const String& name, const GLenum defValue)
 {
-    return Enum::lookup<StringView, GLenum, 34>(glEnumTable, name, defValue);
+    return Enum::lookup(glEnumTable, name, defValue);
 }
 
 GLenum GLUtil::getEnum(const document& manifest, const String& name)

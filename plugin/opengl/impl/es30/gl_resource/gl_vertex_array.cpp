@@ -23,7 +23,7 @@ void GLVertexArray::upload(GraphicsContext& graphicsContext)
     glBindVertexArray(_id);
     _vertex->upload(graphicsContext);
     glBindBuffer(GL_ARRAY_BUFFER, static_cast<GLuint>(_vertex->id()));
-    _pipeline->bindBuffer(graphicsContext, _pipeline_bindings.pipelineLayout(), _pipeline_bindings.streams());
+    _pipeline->bindBuffer(graphicsContext, _pipeline_bindings.pipelineLayout(), _pipeline_bindings.instanceBuffers());
     glBindVertexArray(0);
 }
 

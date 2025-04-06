@@ -118,7 +118,7 @@ public:
 
     sp<PrimitiveIndexBuffer> getSharedPrimitiveIndexBuffer(const Model& model, bool degenerate);
 
-    sp<RenderTarget> makeRenderTarget(sp<RenderLayer> renderLayer, RenderTarget::Configure configure);
+    sp<RenderTarget> makeRenderTarget(sp<Renderer> renderer, RenderTarget::Configure configure);
 
     sp<DrawingContextComposer> makeDrawElementsIncremental(sp<Model> model) const;
 

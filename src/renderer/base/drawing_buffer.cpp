@@ -66,9 +66,9 @@ Buffer::Factory& DrawingBuffer::getDividedBufferBuilder(uint32_t divisor)
 std::vector<std::pair<uint32_t, Buffer::Snapshot>> DrawingBuffer::toDividedBufferSnapshots()
 {
     std::vector<std::pair<uint32_t, Buffer::Snapshot>> snapshots;
-    DCHECK(_divided_buffer_builders.size() == _pipeline_bindings->streams().size(), "Instanced buffer size mismatch: %d, %d", _divided_buffer_builders.size(), _pipeline_bindings->streams().size());
+    DCHECK(_divided_buffer_builders.size() == _pipeline_bindings->instanceBuffers().size(), "Instanced buffer size mismatch: %d, %d", _divided_buffer_builders.size(), _pipeline_bindings->instanceBuffers().size());
 
-    for(const auto& [i, j] : _pipeline_bindings->streams())
+    for(const auto& [i, j] : _pipeline_bindings->instanceBuffers())
         snapshots.emplace_back(i, _divided_buffer_builders.at(i).toSnapshot(j));
 
     _divided_buffer_builders.clear();

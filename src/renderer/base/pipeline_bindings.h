@@ -16,7 +16,7 @@ namespace ark {
 
 class ARK_API PipelineBindings {
 public:
-    PipelineBindings(Enum::DrawMode drawMode, Enum::DrawProcedure drawProcedure, Buffer vertices, sp<PipelineDescriptor> pipelineDescriptor, Vector<std::pair<uint32_t, Buffer>> streams = {});
+    PipelineBindings(Enum::DrawMode drawMode, Enum::DrawProcedure drawProcedure, Buffer vertices, sp<PipelineDescriptor> pipelineDescriptor, Vector<std::pair<uint32_t, Buffer>> instanceBuffers = {});
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(PipelineBindings);
 
     Enum::DrawMode drawMode() const;
@@ -31,7 +31,7 @@ public:
 
     const sp<Traits>& attachments() const;
 
-    const Vector<std::pair<uint32_t, Buffer>>& streams() const;
+    const Vector<std::pair<uint32_t, Buffer>>& instanceBuffers() const;
     const Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>>& samplers() const;
     const Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>>& images() const;
 
@@ -41,6 +41,7 @@ public:
 
     void bindSampler(sp<Texture> texture, uint32_t name = 0) const;
 
+    Vector<std::pair<uint32_t, Buffer::Snapshot>> makeInstanceBufferSnapshots() const;
     Map<uint32_t, Buffer::Factory> makeDividedBufferFactories() const;
 
 private:

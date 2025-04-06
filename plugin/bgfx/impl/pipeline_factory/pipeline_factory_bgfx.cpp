@@ -325,7 +325,7 @@ struct DrawPipelineBgfx final : ResourceBase<::bgfx::ProgramHandle, Pipeline> {
                 if(param._indirect_cmds._uploader)
                     indirectCommands = UploaderType::toBytes(param._indirect_cmds._uploader);
 
-                CHECK(param._divided_buffer_snapshots.size() < 2, "Only one stream of instance buffer allowed");
+                CHECK(param._instance_buffer_snapshots.size() < 2, "Only one stream of instance buffer allowed");
 
                 uint32_t instanceCount = 0;
                 const DrawingParams::DrawElementsIndirectCommand* ic = reinterpret_cast<const DrawingParams::DrawElementsIndirectCommand*>(indirectCommands.data());
@@ -333,7 +333,7 @@ struct DrawPipelineBgfx final : ResourceBase<::bgfx::ProgramHandle, Pipeline> {
                     instanceCount += ic[i]._instance_count;
 
                 ::bgfx::InstanceDataBuffer idb;
-                for(const auto& [divisor, buffer] : param._divided_buffer_snapshots)
+                for(const auto& [divisor, buffer] : param._instance_buffer_snapshots)
                 {
                     const PipelineLayout::StreamLayout& sl = drawingContext._bindings->pipelineLayout()->getStreamLayout(divisor);
                     const uint32_t availInstanceCount = ::bgfx::getAvailInstanceDataBuffer(instanceCount, sl.stride());

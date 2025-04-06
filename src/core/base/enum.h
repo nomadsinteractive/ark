@@ -80,26 +80,26 @@ public:
         SHADER_STAGE_BIT_COUNT
     };
 
-    template<typename K, typename V, size_t N> using LookupTable = std::array<std::pair<K, V>, N>;
-    template<typename K, typename V, size_t N> constexpr static V lookup(const LookupTable<K, V, N>& table, const K key, const V defaultValue) {
+    template<typename V, size_t N> using LookupTable = std::array<std::pair<StringView, V>, N>;
+    template<typename T> constexpr static auto lookup(const T& table, const StringView key, const decltype(std::declval<T>().front().second) defaultValue) -> decltype(std::declval<T>().front().second){
         for(const auto [k, v] : table)
             if(key == k)
                 return v;
         return defaultValue;
     }
-    template<typename T, size_t N> static T lookup(const LookupTable<StringView, T, N>& table, const StringView key) {
+    template<typename T> static auto lookup(const T& table, const StringView key) -> decltype(std::declval<T>().front().second) {
         for(const auto [k, v] : table)
             if(key == k)
                 return v;
 
         StringBuffer sb;
-        for(size_t j = 0; j < N; ++j) {
+        for(size_t j = 0; j < table.size(); ++j) {
             sb << table.at(j).first << '(' << static_cast<uint32_t>(table.at(j).second) << ')';
-            if(j != N - 1)
+            if(j != table.size() - 1)
                 sb << ", ";
         }
         FATAL("Unknow value %s, possible values are [%s]", key.data(), sb.str().c_str());
-        return static_cast<T>(0);
+        return static_cast<decltype(std::declval<T>().front().second)>(0);
     }
 
 //  [[script::bindings::operator(index)]]

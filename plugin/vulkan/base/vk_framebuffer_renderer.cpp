@@ -37,14 +37,14 @@ private:
 
 }
 
-VKFramebufferRenderer::VKFramebufferRenderer(sp<RenderLayer> renderLayer, sp<VKFramebuffer> framebuffer)
-    : _render_layer(std::move(renderLayer)), _draw_decorator(sp<DrawDecorator>::make<DrawDecoratorFBO>(std::move(framebuffer)))
+VKFramebufferRenderer::VKFramebufferRenderer(sp<Renderer> renderer, sp<VKFramebuffer> framebuffer)
+    : _renderer(std::move(renderer)), _draw_decorator(sp<DrawDecorator>::make<DrawDecoratorFBO>(std::move(framebuffer)))
 {
 }
 
 void VKFramebufferRenderer::render(RenderRequest& renderRequest, const V3& position, const sp<DrawDecorator>& drawDecorator)
 {
-    _render_layer->render(renderRequest, position, DrawDecoratorComposite::compose(drawDecorator, _draw_decorator));
+    _renderer->render(renderRequest, position, DrawDecoratorComposite::compose(drawDecorator, _draw_decorator));
 }
 
 }

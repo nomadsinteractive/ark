@@ -21,7 +21,7 @@ public:
 
     sp<Buffer::Delegate> createBuffer(Buffer::Type type, Buffer::Usage usage) override;
     sp<Camera::Delegate> createCamera(Ark::RendererCoordinateSystem rcs) override;
-    sp<RenderTarget> createRenderTarget(sp<RenderLayer> renderLayer, RenderTarget::Configure configure) override;
+    sp<RenderTarget> createRenderTarget(sp<Renderer> renderer, RenderTarget::Configure configure) override;
     sp<RenderView> createRenderView(const sp<RenderEngineContext>& renderContext, const sp<RenderController>& renderController) override;
     sp<PipelineFactory> createPipelineFactory() override;
     sp<Texture::Delegate> createTexture(sp<Size> size, sp<Texture::Parameters> parameters) override;

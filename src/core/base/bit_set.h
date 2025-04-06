@@ -72,11 +72,11 @@ public:
         return flags;
     }
 
-    template<size_t N> using LookupTable = Enum::LookupTable<StringView, T, N>;
+    template<size_t N> using LookupTable = Enum::LookupTable<T, N>;
     template<size_t N> static BitSet toBitSet(const String& value, const LookupTable<N>& bitNames) {
         convertable_type bitsets = 0;
         for(const String& i : value.split('|'))
-            bitsets |= toConvertableType(Enum::lookup<T, N>(bitNames, i.strip()));
+            bitsets |= toConvertableType(Enum::lookup(bitNames, i.strip()));
         return BitSet(bitsets);
     }
 

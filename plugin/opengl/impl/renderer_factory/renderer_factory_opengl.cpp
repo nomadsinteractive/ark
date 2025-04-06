@@ -93,14 +93,14 @@ sp<Camera::Delegate> RendererFactoryOpenGL::createCamera(Ark::RendererCoordinate
     return rcs == Ark::COORDINATE_SYSTEM_LHS ?  sp<Camera::Delegate>::make<Camera::DelegateLH_NO>() : sp<Camera::Delegate>::make<Camera::DelegateRH_NO>();
 }
 
-sp<RenderTarget> RendererFactoryOpenGL::createRenderTarget(sp<RenderLayer> renderLayer, RenderTarget::Configure configure)
+sp<RenderTarget> RendererFactoryOpenGL::createRenderTarget(sp<Renderer> renderer, RenderTarget::Configure configure)
 {
     CHECK(!configure._color_attachments.empty(), "Framebuffer object should have at least one color attachment");
     int32_t width = configure._color_attachments.at(0)->width();
     int32_t height = configure._color_attachments.at(0)->height();
     uint32_t drawBufferCount = static_cast<uint32_t>(configure._color_attachments.size());
     sp<GLFramebuffer> fbo = sp<GLFramebuffer>::make(Ark::instance().renderController()->recycler(), std::move(configure));
-    return sp<RenderTarget>::make(sp<GLFramebufferRenderer>::make(fbo, width, height, std::move(renderLayer), drawBufferCount, toClearMaskBits(configure)), std::move(fbo));
+    return sp<RenderTarget>::make(sp<GLFramebufferRenderer>::make(fbo, width, height, std::move(renderer), drawBufferCount, toClearMaskBits(configure)), std::move(fbo));
 }
 
 sp<PipelineFactory> RendererFactoryOpenGL::createPipelineFactory()

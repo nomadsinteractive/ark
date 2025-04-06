@@ -13,11 +13,12 @@ namespace {
 
 class WritableGLBuffer final : public Writable {
 public:
-    WritableGLBuffer(GLenum type, size_t size)
+    WritableGLBuffer(const GLenum type, const size_t size)
         : _type(type), _size(size) {
     }
 
-    uint32_t write(const void* buffer, uint32_t size, uint32_t offset) override {
+    uint32_t write(const void* buffer, const uint32_t size, const uint32_t offset) override
+    {
         DASSERT(buffer);
         DCHECK(offset + size <= _size, "GLBuffer data overflow");
         glBufferSubData(_type, static_cast<GLsizeiptr>(offset), static_cast<GLsizeiptr>(size), buffer);
@@ -29,6 +30,13 @@ private:
     size_t _size;
 };
 
+GLenum toBufferType(const Buffer::Type type)
+{
+    constexpr GLenum types[Buffer::TYPE_COUNT] = {GL_ARRAY_BUFFER, GL_ELEMENT_ARRAY_BUFFER, GL_DRAW_INDIRECT_BUFFER, GL_SHADER_STORAGE_BUFFER};
+    DCHECK(type >= 0 && type < Buffer::TYPE_COUNT, "Unknown buffer type: %d", type);
+    return types[type];
+}
+
 GLenum toGLUsage(const Buffer::Type type, const Buffer::Usage usage)
 {
     if(type == Buffer::TYPE_STORAGE)
@@ -39,7 +47,7 @@ GLenum toGLUsage(const Buffer::Type type, const Buffer::Usage usage)
 }
 
 GLBuffer::GLBuffer(const Buffer::Type type, const Buffer::Usage usage, sp<Recycler> recycler)
-    : _type(GLUtil::toBufferType(type)), _usage(toGLUsage(type, usage)), _recycler(std::move(recycler)), _id(0)
+    : _type(toBufferType(type)), _usage(toGLUsage(type, usage)), _recycler(std::move(recycler)), _id(0)
 {
 }
 
@@ -51,7 +59,7 @@ GLBuffer::~GLBuffer()
 void GLBuffer::doUpload(GraphicsContext& /*graphicsContext*/, Uploader& uploader)
 {
     GLint bufsize = 0;
-    const volatile GLBufferBinder glBinder(_type, _id);
+    const GLBufferBinder glBinder(_type, _id);
     glGetBufferParameteriv(_type, GL_BUFFER_SIZE, &bufsize);
     DCHECK_WARN(_usage != GL_STATIC_DRAW || bufsize == 0, "Uploading transient data to GL_STATIC_DRAW GLBuffer");
 
@@ -79,7 +87,7 @@ void GLBuffer::uploadBuffer(GraphicsContext& graphicsContext, Uploader& uploader
     doUpload(graphicsContext, uploader);
 }
 
-void GLBuffer::downloadBuffer(GraphicsContext& /*graphicsContext*/, size_t offset, size_t size, void* ptr)
+void GLBuffer::downloadBuffer(GraphicsContext& /*graphicsContext*/, const size_t offset, const size_t size, void* ptr)
 {
     const volatile GLBufferBinder glBinder(_type, _id);
 

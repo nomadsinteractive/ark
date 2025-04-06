@@ -1,12 +1,13 @@
 #pragma once
 
+#include "core/base/api.h"
 #include "core/types/shared_ptr.h"
 
 #include "renderer/inf/draw_decorator.h"
 
 namespace ark {
 
-class DrawDecoratorComposite final : public DrawDecorator {
+class ARK_API DrawDecoratorComposite final : public DrawDecorator {
 public:
     DrawDecoratorComposite(sp<DrawDecorator> delegate, sp<DrawDecorator> next);
 

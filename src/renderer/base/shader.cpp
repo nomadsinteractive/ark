@@ -6,7 +6,6 @@
 #include "core/util/documents.h"
 
 #include "graphics/base/camera.h"
-#include "renderer/base/varyings.h"
 
 #include "renderer/base/pipeline_descriptor.h"
 #include "renderer/base/pipeline_building_context.h"
@@ -32,15 +31,6 @@ template<typename T, typename U> auto findInKeywordPairs(const T& kws, U key) ->
         if(k == key)
             return v;
     return {};
-}
-
-Vector<std::pair<uint32_t, Buffer>> makeDivivedBuffers(const PipelineLayout& pipelineLayout, const Vector<std::pair<uint32_t, sp<Uploader>>>& uploaders)
-{
-    Vector<std::pair<uint32_t, Buffer>> dividedBuffers;
-    for(const auto& [divisor, _] : pipelineLayout.streamLayouts())
-        if(divisor != 0)
-            dividedBuffers.emplace_back(divisor, Ark::instance().renderController()->makeVertexBuffer(Buffer::USAGE_BIT_DYNAMIC, findInKeywordPairs(uploaders, divisor)));
-    return dividedBuffers;
 }
 
 }
@@ -96,9 +86,13 @@ const sp<PipelineDescriptor>& Shader::pipelineDesciptor() const
     return _pipeline_desciptor;
 }
 
-sp<PipelineBindings> Shader::makeBindings(Buffer vertexBuffer, const Enum::DrawMode drawMode, const Enum::DrawProcedure drawProcedure, const Vector<std::pair<uint32_t, sp<Uploader>>>& uploaders) const
+sp<PipelineBindings> Shader::makeBindings(Buffer vertexBuffer, Enum::DrawMode drawMode, Enum::DrawProcedure drawProcedure, Vector<std::pair<uint32_t, Buffer>> instanceBuffers) const
 {
-    return sp<PipelineBindings>::make(drawMode, drawProcedure, std::move(vertexBuffer), _pipeline_desciptor, makeDivivedBuffers(_pipeline_desciptor->layout(), uploaders));
+    for(const auto& [divisor, _] : _pipeline_desciptor->layout()->streamLayouts())
+        if(divisor != 0 && !findInKeywordPairs(instanceBuffers, divisor))
+            instanceBuffers.emplace_back(divisor, Ark::instance().renderController()->makeVertexBuffer(Buffer::USAGE_BIT_DYNAMIC));
+
+    return sp<PipelineBindings>::make(drawMode, drawProcedure, std::move(vertexBuffer), _pipeline_desciptor, std::move(instanceBuffers));
 }
 
 Shader::BUILDER_IMPL::BUILDER_IMPL(BeanFactory& factory, const document& manifest, sp<Builder<Camera>> camera, Optional<Vector<StageManifest>> stages, Optional<SnippetManifest> snippets)
@@ -143,16 +137,14 @@ sp<PipelineBuildingContext> Shader::BUILDER_IMPL::makePipelineBuildingContext(co
     return context;
 }
 
-template<> ARK_API Enum::ShaderStageBit StringConvert::eval<Enum::ShaderStageBit>(const String& val)
+template<> ARK_API Enum::ShaderStageBit StringConvert::eval<Enum::ShaderStageBit>(const String& expr)
 {
-    if(val == "vertex")
-        return Enum::SHADER_STAGE_BIT_VERTEX;
-    if(val == "fragment")
-        return Enum::SHADER_STAGE_BIT_FRAGMENT;
-    if(val == "compute")
-        return Enum::SHADER_STAGE_BIT_COMPUTE;
-    CHECK(val.empty(), "Unknown stage: \"%s\"", val.c_str());
-    return Enum::SHADER_STAGE_BIT_NONE;
+    constexpr Enum::LookupTable<Enum::ShaderStageBit, 3> table = {{
+        {"vertex", Enum::SHADER_STAGE_BIT_VERTEX},
+        {"fragment", Enum::SHADER_STAGE_BIT_FRAGMENT},
+        {"compute", Enum::SHADER_STAGE_BIT_COMPUTE}
+    }};
+    return Enum::lookup(table, expr);
 }
 
 Shader::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

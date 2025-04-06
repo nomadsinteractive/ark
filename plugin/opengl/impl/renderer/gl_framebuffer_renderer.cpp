@@ -65,15 +65,15 @@ struct PostDrawElementsToFBO final : RenderCommand {
 
 }
 
-GLFramebufferRenderer::GLFramebufferRenderer(sp<GLFramebuffer> fbo, int32_t width, int32_t height, sp<RenderLayer> renderLayer, uint32_t drawBufferCount, int32_t clearMask)
-    : _render_layer(std::move(renderLayer)), _pre_draw(sp<PreDrawElementsToFBO>::make(std::move(fbo), width, height, drawBufferCount, clearMask)), _post_draw(sp<PostDrawElementsToFBO>::make())
+GLFramebufferRenderer::GLFramebufferRenderer(sp<GLFramebuffer> fbo, int32_t width, int32_t height, sp<Renderer> renderer, uint32_t drawBufferCount, int32_t clearMask)
+    : _renderer(std::move(renderer)), _pre_draw(sp<PreDrawElementsToFBO>::make(std::move(fbo), width, height, drawBufferCount, clearMask)), _post_draw(sp<PostDrawElementsToFBO>::make())
 {
 }
 
 void GLFramebufferRenderer::render(RenderRequest& renderRequest, const V3& position, const sp<DrawDecorator>& drawDecorator)
 {
     renderRequest.addRenderCommand(_pre_draw);
-    _render_layer->render(renderRequest, position, drawDecorator);
+    _renderer->render(renderRequest, position, drawDecorator);
     renderRequest.addRenderCommand(_post_draw);
 }
 

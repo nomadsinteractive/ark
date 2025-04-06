@@ -183,10 +183,18 @@ sp<Buffer> Buffer::BUILDER::build(const Scope& args)
     return sp<Buffer>::make(Ark::instance().renderController()->makeBuffer(Buffer::TYPE_STORAGE, _usage, _uploader.build(args)));
 }
 
-template<> ARK_API Buffer::Usage StringConvert::eval<Buffer::Usage>(const String& str)
+template<> ARK_API Buffer::Usage StringConvert::eval<Buffer::Usage>(const String& expr)
 {
-    constexpr Buffer::Usage::LookupTable<3> bits = {{{"dynamic", Buffer::USAGE_BIT_DYNAMIC}, {"transfer_src", Buffer::USAGE_BIT_TRANSFER_SRC}, {"host_visible", Buffer::USAGE_BIT_HOST_VISIBLE}}};
-    return Buffer::Usage::toBitSet(str, bits);
+    constexpr Buffer::Usage::LookupTable<7> bits = {{
+        {"vertex", Buffer::USAGE_BIT_VERTEX},
+        {"index", Buffer::USAGE_BIT_INDEX},
+        {"indirect", Buffer::USAGE_BIT_DRAW_INDIRECT},
+        {"storage", Buffer::USAGE_BIT_STORAGE},
+        {"dynamic", Buffer::USAGE_BIT_DYNAMIC},
+        {"transfer_src", Buffer::USAGE_BIT_TRANSFER_SRC},
+        {"host_visible", Buffer::USAGE_BIT_HOST_VISIBLE}
+    }};
+    return Buffer::Usage::toBitSet(expr, bits);
 }
 
 }

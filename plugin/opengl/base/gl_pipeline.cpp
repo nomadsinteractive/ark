@@ -491,7 +491,7 @@ public:
         const DrawingParams::DrawElementsInstanced& param = drawingContext._parameters.drawElementsInstanced();
         DASSERT(param._count);
         DASSERT(drawingContext._draw_count);
-        for(const auto& [i, j] : param._divided_buffer_snapshots)
+        for(const auto& [i, j] : param._instance_buffer_snapshots)
         {
             j.upload(graphicsContext);
             DCHECK(j.id(), "Invaild Divided Buffer: %d", i);
@@ -513,7 +513,7 @@ public:
     {
         const DrawingParams::DrawMultiElementsIndirect& param = drawingContext._parameters.drawMultiElementsIndirect();
 
-        for(const auto& [k, v] : param._divided_buffer_snapshots)
+        for(const auto& [k, v] : param._instance_buffer_snapshots)
         {
             v.upload(graphicsContext);
             DCHECK(v.id(), "Invaild Divided Buffer Buffer: %d", k);

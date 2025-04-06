@@ -311,9 +311,9 @@ Buffer RenderController::makeVertexBuffer(const Buffer::Usage usage, sp<Uploader
     return makeBuffer(Buffer::TYPE_VERTEX, usage, std::move(uploader));
 }
 
-Buffer RenderController::makeIndexBuffer(Buffer::Usage usage, sp<Uploader> uploader)
+Buffer RenderController::makeIndexBuffer(const Buffer::Usage usage, sp<Uploader> uploader)
 {
-    return makeBuffer(Buffer::TYPE_INDEX, usage, uploader);
+    return makeBuffer(Buffer::TYPE_INDEX, usage, std::move(uploader));
 }
 
 sp<RenderController::PrimitiveIndexBuffer> RenderController::getSharedPrimitiveIndexBuffer(const Model& model, bool degenerate)
@@ -335,9 +335,9 @@ sp<RenderController::PrimitiveIndexBuffer> RenderController::getSharedPrimitiveI
     return pib;
 }
 
-sp<RenderTarget> RenderController::makeRenderTarget(sp<RenderLayer> renderLayer, RenderTarget::Configure configure)
+sp<RenderTarget> RenderController::makeRenderTarget(sp<Renderer> renderer, RenderTarget::Configure configure)
 {
-    sp<RenderTarget> renderTarget = renderEngine()->rendererFactory()->createRenderTarget(std::move(renderLayer), std::move(configure));
+    sp<RenderTarget> renderTarget = renderEngine()->rendererFactory()->createRenderTarget(std::move(renderer), std::move(configure));
     if(renderTarget->resource())
         upload(renderTarget->resource(), US_ONCE_AND_ON_SURFACE_READY, nullptr, nullptr, UPLOAD_PRIORITY_LOW);
     return renderTarget;

@@ -94,10 +94,10 @@ sp<Camera::Delegate> RendererFactoryVulkan::createCamera(const Ark::RendererCoor
     return rcs == Ark::COORDINATE_SYSTEM_RHS ? sp<Camera::Delegate>::make<Camera::DelegateRH_ZO>() : sp<Camera::Delegate>::make<Camera::DelegateLH_ZO>();
 }
 
-sp<RenderTarget> RendererFactoryVulkan::createRenderTarget(sp<RenderLayer> renderLayer, RenderTarget::Configure configure)
+sp<RenderTarget> RendererFactoryVulkan::createRenderTarget(sp<Renderer> renderer, RenderTarget::Configure configure)
 {
     sp<VKFramebuffer> fbo = sp<VKFramebuffer>::make(_renderer, Ark::instance().renderController()->recycler(), std::move(configure));
-    sp<Renderer> fbr = sp<Renderer>::make<VKFramebufferRenderer>(std::move(renderLayer), fbo);
+    sp<Renderer> fbr = sp<Renderer>::make<VKFramebufferRenderer>(std::move(renderer), fbo);
     return sp<RenderTarget>::make(std::move(fbr), std::move(fbo));
 }
 

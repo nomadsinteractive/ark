@@ -25,8 +25,8 @@ const sp<Resource>& RenderTarget::resource() const
 }
 
 RenderTarget::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _render_layer(factory.ensureBuilder<RenderLayer>(manifest, constants::RENDER_LAYER)), _clear_mask(Documents::getAttribute<ClearBitSet>(manifest, "clear-mask", CLEAR_BIT_ALL)),
-      _color_attachment_op(Documents::getAttribute<AttachmentOp>(manifest, "color-attachment-op", {ATTACHMENT_OP_BIT_CLEAR, ATTACHMENT_OP_BIT_STORE})),
+    : _renderer(factory.getBuilder<RenderLayer>(manifest, constants::RENDERER)), _render_layer(factory.getBuilder<RenderLayer>(manifest, constants::RENDER_LAYER)),
+      _clear_mask(Documents::getAttribute<ClearBitSet>(manifest, "clear-mask", CLEAR_BIT_ALL)), _color_attachment_op(Documents::getAttribute<AttachmentOp>(manifest, "color-attachment-op", {ATTACHMENT_OP_BIT_CLEAR, ATTACHMENT_OP_BIT_STORE})),
       _depth_stencil_op(Documents::getAttribute<AttachmentOp>(manifest, "depth-stencil-op", {ATTACHMENT_OP_BIT_CLEAR, ATTACHMENT_OP_BIT_STORE}))
 {
     for(const document& i : manifest->children(constants::TEXTURE))
@@ -50,7 +50,12 @@ sp<RenderTarget> RenderTarget::BUILDER::build(const Scope& args)
             configure._depth_stencil_attachment = std::move(tex);
         }
     }
-    return Ark::instance().renderController()->makeRenderTarget(_render_layer->build(args), std::move(configure));
+
+    sp<Renderer> renderer = _renderer.build(args);
+    sp<Renderer> renderLayer = _render_layer.build(args);
+    ASSERT(renderer || renderLayer);
+    CHECK(!(renderer && renderLayer), "Unimplemented");
+    return Ark::instance().renderController()->makeRenderTarget(renderer ? std::move(renderer) : std::move(renderLayer), std::move(configure));
 }
 
 RenderTarget::RENDERER_BUILDER::RENDERER_BUILDER(BeanFactory& factory, const document& manifest)

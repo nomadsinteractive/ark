@@ -7,22 +7,22 @@ namespace ark {
 
 namespace {
 
-class UploaderVertices : public Uploader {
+class UploaderVertices final : public Uploader {
 public:
     UploaderVertices(sp<PipelineLayout> shaderLayout, sp<Vertices> vertices, const V3& bounds)
         : Uploader(shaderLayout->getStreamLayout(0).stride() * vertices->length()), _shader_layout(std::move(shaderLayout)), _vertices(std::move(vertices)), _bounds(bounds) {
     }
 
-    virtual bool update(uint64_t /*timestamp*/) override {
+    bool update(uint64_t /*timestamp*/) override {
         return false;
     }
 
 public:
     void upload(Writable& writable) override {
-        size_t stride = _shader_layout->getStreamLayout(0).stride();
-        PipelineLayout::VertexDescriptor attributes(_shader_layout);
-        uint32_t size = static_cast<uint32_t>(_vertices->length() * stride);
-        std::vector<uint8_t> buf(size);
+        const size_t stride = _shader_layout->getStreamLayout(0).stride();
+        const PipelineLayout::VertexDescriptor attributes(_shader_layout);
+        const uint32_t size = static_cast<uint32_t>(_vertices->length() * stride);
+        Vector<uint8_t> buf(size);
         VertexWriter stream(attributes, false, buf.data(), size, stride);
         _vertices->write(stream, _bounds);
         writable.write(buf.data(), size, 0);
@@ -37,7 +37,7 @@ private:
 }
 
 
-Vertices::Vertices(size_t length)
+Vertices::Vertices(const size_t length)
     : _length(length)
 {
 }
@@ -49,7 +49,7 @@ size_t Vertices::length() const
 
 sp<Uploader> Vertices::toUploader(sp<Vertices> self, Shader& shader, const V3& bounds)
 {
-    return sp<UploaderVertices>::make(shader.layout(), std::move(self), bounds);
+    return sp<Uploader>::make<UploaderVertices>(shader.layout(), std::move(self), bounds);
 }
 
 }

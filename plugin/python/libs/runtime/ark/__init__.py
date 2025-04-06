@@ -851,6 +851,10 @@ class Observer(Runnable):
         pass
 
 
+class Shader:
+    pass
+
+
 class Renderer:
 
     PRIORITY_UI = -10,

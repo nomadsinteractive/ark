@@ -2,7 +2,7 @@
 
 #include "core/base/api.h"
 #include "core/base/bit_set.h"
-#include "core/inf/builder.h"
+#include "core/impl/builder/safe_builder.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
@@ -55,7 +55,8 @@ public:
         sp<RenderTarget> build(const Scope& args) override;
 
     private:
-        builder<RenderLayer> _render_layer;
+        SafeBuilder<RenderLayer> _renderer;
+        SafeBuilder<RenderLayer> _render_layer;
         Vector<std::pair<sp<Builder<Texture>>, document>> _attachments;
         ClearBitSet _clear_mask;
         AttachmentOp _color_attachment_op;

@@ -57,8 +57,8 @@ private:
 }
 
 struct PipelineBindings::Stub {
-    Stub(const Enum::DrawMode drawMode, const Enum::DrawProcedure drawProcedure, Buffer vertices, sp<PipelineDescriptor> pipelineDescriptor, Vector<std::pair<uint32_t, Buffer>> streams)
-        : _draw_mode(drawMode), _draw_procedure(drawProcedure), _vertices(std::move(vertices)), _pipeline_descriptor(std::move(pipelineDescriptor)), _attachments(sp<Traits>::make()), _streams(std::move(streams)),
+    Stub(const Enum::DrawMode drawMode, const Enum::DrawProcedure drawProcedure, Buffer vertices, sp<PipelineDescriptor> pipelineDescriptor, Vector<std::pair<uint32_t, Buffer>> instanceBuffers)
+        : _draw_mode(drawMode), _draw_procedure(drawProcedure), _vertices(std::move(vertices)), _pipeline_descriptor(std::move(pipelineDescriptor)), _attachments(sp<Traits>::make()), _instance_buffers(std::move(instanceBuffers)),
           _samplers(_pipeline_descriptor->makeBindingSamplers()), _images(_pipeline_descriptor->makeBindingImages())
     {
     }
@@ -70,13 +70,13 @@ struct PipelineBindings::Stub {
     sp<PipelineDescriptor> _pipeline_descriptor;
     sp<Traits> _attachments;
 
-    Vector<std::pair<uint32_t, Buffer>> _streams;
+    Vector<std::pair<uint32_t, Buffer>> _instance_buffers;
     Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>> _samplers;
     Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>> _images;
 };
 
-PipelineBindings::PipelineBindings(const Enum::DrawMode drawMode, const Enum::DrawProcedure drawProcedure, Buffer vertices, sp<PipelineDescriptor> pipelineDescriptor, Vector<std::pair<uint32_t, Buffer>> streams)
-    : _stub(sp<Stub>::make(drawMode, drawProcedure, std::move(vertices), std::move(pipelineDescriptor), std::move(streams)))
+PipelineBindings::PipelineBindings(const Enum::DrawMode drawMode, const Enum::DrawProcedure drawProcedure, Buffer vertices, sp<PipelineDescriptor> pipelineDescriptor, Vector<std::pair<uint32_t, Buffer>> instanceBuffers)
+    : _stub(sp<Stub>::make(drawMode, drawProcedure, std::move(vertices), std::move(pipelineDescriptor), std::move(instanceBuffers)))
 {
 }
 
@@ -115,9 +115,9 @@ const sp<Traits>& PipelineBindings::attachments() const
     return _stub->_attachments;
 }
 
-const Vector<std::pair<uint32_t, Buffer>>& PipelineBindings::streams() const
+const Vector<std::pair<uint32_t, Buffer>>& PipelineBindings::instanceBuffers() const
 {
-    return _stub->_streams;
+    return _stub->_instance_buffers;
 }
 
 const Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>>& PipelineBindings::samplers() const
@@ -138,6 +138,14 @@ void PipelineBindings::bindSampler(sp<Texture> texture, const uint32_t name) con
         CHECK_WARN(!_stub->_samplers[name].first, "Overriding existing sampler binding: %d", name);
         _stub->_samplers[name].first = std::move(texture);
     }
+}
+
+Vector<std::pair<uint32_t, Buffer::Snapshot>> PipelineBindings::makeInstanceBufferSnapshots() const
+{
+    Vector<std::pair<uint32_t, Buffer::Snapshot>> instanceBufferSnapshots;
+    for(const auto& [i, j] : _stub->_instance_buffers)
+        instanceBufferSnapshots.emplace_back(i, j.snapshot(j.size()));
+    return instanceBufferSnapshots;
 }
 
 const sp<Pipeline>& PipelineBindings::ensurePipeline(GraphicsContext& graphicsContext)
@@ -201,7 +209,7 @@ Map<uint32_t, Buffer::Factory> PipelineBindings::makeDividedBufferFactories() co
 {
     Map<uint32_t, Buffer::Factory> builders;
     const sp<PipelineLayout>& shaderLayout = _stub->_pipeline_descriptor->layout();
-    for(const auto& i : _stub->_streams)
+    for(const auto& i : _stub->_instance_buffers)
     {
         const PipelineLayout::StreamLayout& stream = shaderLayout->getStreamLayout(i.first);
         builders.insert(std::make_pair(i.first, Buffer::Factory(stream.stride())));

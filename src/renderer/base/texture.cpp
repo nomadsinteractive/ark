@@ -178,7 +178,7 @@ template<> ARK_API Texture::Format StringConvert::eval<Texture::Format>(const St
     {
         uint32_t format = 0;
         for(const String& i : str.split('|'))
-            if(const Texture::Format f = Enum::lookup<StringView, Texture::Format, 11>(formats, i, Texture::FORMAT_AUTO); f == Texture::FORMAT_AUTO)
+            if(const Texture::Format f = Enum::lookup(formats, i, Texture::FORMAT_AUTO); f == Texture::FORMAT_AUTO)
             {
                 if(i.startsWith("int"))
                     format |= Texture::FORMAT_INTEGER | Texture::FORMAT_SIGNED | toBitFormat(i, 3);

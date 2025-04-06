@@ -459,14 +459,14 @@ bool PipelineBuildingContext::VertexAttribute::operator<(const VertexAttribute& 
 
 template<> PipelineBuildingContext::LayoutBindingType StringConvert::eval<PipelineBuildingContext::LayoutBindingType>(const String& repr)
 {
-    constexpr Enum::LookupTable<StringView, PipelineBuildingContext::LayoutBindingType, 5> table = {{
+    constexpr Enum::LookupTable<PipelineBuildingContext::LayoutBindingType, 5> table = {{
         {"image", PipelineBuildingContext::LAYOUT_BINDING_TYPE_IMAGE},
         {"sampler", PipelineBuildingContext::LAYOUT_BINDING_TYPE_SAMPLER},
         {"ssbo", PipelineBuildingContext::LAYOUT_BINDING_TYPE_SSBO},
         {"ubo", PipelineBuildingContext::LAYOUT_BINDING_TYPE_UBO},
         {"auto", PipelineBuildingContext::LAYOUT_BINDING_TYPE_AUTO}
     }};
-    return Enum::lookup<PipelineBuildingContext::LayoutBindingType, 5>(table, repr);
+    return Enum::lookup(table, repr);
 }
 
 }

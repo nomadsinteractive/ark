@@ -22,13 +22,13 @@ template<> Enum::DrawMode StringConvert::eval<Enum::DrawMode>(const String& str)
 
 template<> Enum::DrawProcedure StringConvert::eval<Enum::DrawProcedure>(const String& str)
 {
-    constexpr Enum::LookupTable<StringView, Enum::DrawProcedure, 4> table = {{
+    constexpr Enum::LookupTable<Enum::DrawProcedure, 4> table = {{
         {"auto", Enum::DRAW_PROCEDURE_AUTO},
         {"draw_arrays", Enum::DRAW_PROCEDURE_DRAW_ARRAYS},
         {"draw_elements", Enum::DRAW_PROCEDURE_DRAW_ELEMENTS},
         {"draw_instanced", Enum::DRAW_PROCEDURE_DRAW_INSTANCED}
     }};
-    return Enum::lookup<Enum::DrawProcedure, 4>(table, str);
+    return Enum::lookup(table, str);
 }
 
 uint32_t Enum::__index__(const Box& self)

@@ -28,6 +28,10 @@ public:
 
 //  [[script::bindings::enumeration]]
     enum UsageBit {
+        USAGE_BIT_VERTEX,
+        USAGE_BIT_INDEX,
+        USAGE_BIT_DRAW_INDIRECT,
+        USAGE_BIT_STORAGE,
         USAGE_BIT_DYNAMIC,
         USAGE_BIT_TRANSFER_SRC,
         USAGE_BIT_HOST_VISIBLE

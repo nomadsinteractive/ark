@@ -20,7 +20,7 @@ public:
     ResourceRecycleFunc recycle() override;
 
 private:
-    void doUpload(GraphicsContext& graphicsContext, Uploader& input);
+    void doUpload(GraphicsContext& graphicsContext, Uploader& uploader);
 
 private:
     GLenum _type;

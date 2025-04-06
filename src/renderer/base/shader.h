@@ -40,7 +40,7 @@ public:
     const sp<PipelineDescriptor>& pipelineDesciptor() const;
     const sp<PipelineLayout>& layout() const;
 
-    sp<PipelineBindings> makeBindings(Buffer vertexBuffer, Enum::DrawMode drawMode, Enum::DrawProcedure drawProcedure, const Vector<std::pair<uint32_t, sp<Uploader>>>& uploaders = {}) const;
+    sp<PipelineBindings> makeBindings(Buffer vertexBuffer, Enum::DrawMode drawMode, Enum::DrawProcedure drawProcedure, Vector<std::pair<uint32_t, Buffer>> instanceBuffers = {}) const;
 
     class BUILDER_IMPL final : public Builder<Shader> {
     public:

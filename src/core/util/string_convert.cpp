@@ -67,13 +67,13 @@ template<> ARK_API float StringConvert::eval<float>(const String& repr)
 
 template<> Enum::RenderingBackendBit StringConvert::eval<Enum::RenderingBackendBit>(const String& repr)
 {
-    constexpr Enum::LookupTable<StringView, Enum::RenderingBackendBit, 4> table ={{
+    constexpr Enum::LookupTable<Enum::RenderingBackendBit, 4> table ={{
         {"opengl", Enum::RENDERING_BACKEND_BIT_OPENGL},
         {"vulkan", Enum::RENDERING_BACKEND_BIT_VULKAN},
         {"direct_x", Enum::RENDERING_BACKEND_BIT_DIRECT_X},
         {"metal", Enum::RENDERING_BACKEND_BIT_METAL},
     }};
-    return Enum::lookup<Enum::RenderingBackendBit, 4>(table, repr.toLower());
+    return Enum::lookup(table, repr.toLower());
 }
 
 template<> Enum::RendererVersion StringConvert::eval<Enum::RendererVersion>(const String& repr)
