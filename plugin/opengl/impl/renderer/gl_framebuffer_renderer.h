@@ -15,7 +15,7 @@ class GLFramebufferRenderer final : public Renderer {
 public:
     GLFramebufferRenderer(sp<GLFramebuffer> fbo, int32_t width, int32_t height, sp<RenderLayer> renderLayer, uint32_t drawBufferCount, int32_t clearMask);
 
-    void render(RenderRequest& renderRequest, const V3& position) override;
+    void render(RenderRequest& renderRequest, const V3& position, const sp<DrawDecorator>& drawDecorator) override;
 
 private:
     sp<RenderLayer> _render_layer;

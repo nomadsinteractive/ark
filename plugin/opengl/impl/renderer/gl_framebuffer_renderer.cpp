@@ -70,10 +70,10 @@ GLFramebufferRenderer::GLFramebufferRenderer(sp<GLFramebuffer> fbo, int32_t widt
 {
 }
 
-void GLFramebufferRenderer::render(RenderRequest& renderRequest, const V3& position)
+void GLFramebufferRenderer::render(RenderRequest& renderRequest, const V3& position, const sp<DrawDecorator>& drawDecorator)
 {
     renderRequest.addRenderCommand(_pre_draw);
-    _render_layer->render(renderRequest, position);
+    _render_layer->render(renderRequest, position, drawDecorator);
     renderRequest.addRenderCommand(_post_draw);
 }
 

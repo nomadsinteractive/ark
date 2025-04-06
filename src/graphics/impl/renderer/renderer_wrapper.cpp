@@ -7,10 +7,10 @@ RendererWrapper::RendererWrapper(const sp<Renderer>& delegate)
 {
 }
 
-void RendererWrapper::render(RenderRequest& renderRequest, const V3& position)
+void RendererWrapper::render(RenderRequest& renderRequest, const V3& position, const sp<DrawDecorator>& drawDecorator)
 {
     if(_wrapped)
-        _wrapped->render(renderRequest, position);
+        _wrapped->render(renderRequest, position, drawDecorator);
 }
 
 }

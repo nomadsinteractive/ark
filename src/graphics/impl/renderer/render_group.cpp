@@ -17,11 +17,12 @@ template<typename T, RendererType::Priority P> struct RenderGroup::BUILDER::Phra
     RendererType::Priority _priority;
 };
 
-void RenderGroup::render(RenderRequest& renderRequest, const V3& position)
+void RenderGroup::render(RenderRequest& renderRequest, const V3& position, const sp<DrawDecorator>& drawDecorator)
 {
+    CHECK(!drawDecorator, "Unimplemented");
     for(auto& [k, v] : _phrases)
         for(const sp<Renderer>& i : v.update(renderRequest.timestamp()))
-            i->render(renderRequest, position);
+            i->render(renderRequest, position, nullptr);
 }
 
 void RenderGroup::addRenderer(sp<Renderer> renderer, const Traits& traits)

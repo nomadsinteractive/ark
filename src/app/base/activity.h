@@ -23,7 +23,7 @@ public:
 //  [[script::bindings::auto]]
     void addRenderer(sp<Renderer> renderer, const Traits& traits) override;
 
-    void render(RenderRequest& renderRequest, const V3& position) override;
+    void render(RenderRequest& renderRequest, const V3& position, const sp<DrawDecorator>& drawDecorator) override;
     bool onEvent(const Event& event) override;
 
     sp<Entity> makeEntity(Traits components = Traits()) const;

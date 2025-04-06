@@ -15,7 +15,7 @@ class VKFramebufferRenderer final : public Renderer {
 public:
     VKFramebufferRenderer(sp<RenderLayer> renderLayer, sp<VKFramebuffer> framebuffer);
 
-    void render(RenderRequest& renderRequest, const V3& position) override;
+    void render(RenderRequest& renderRequest, const V3& position, const sp<DrawDecorator>& drawDecorator) override;
 
 private:
     sp<RenderLayer> _render_layer;

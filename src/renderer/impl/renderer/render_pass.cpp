@@ -27,7 +27,7 @@ RenderPass::RenderPass(sp<Shader> shader, Buffer vertexBuffer, Buffer indexBuffe
     CHECK(drawProcedure != Enum::DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT || indirectBuffer, "Must provide an indirectBuffer in DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT rendering mode");
 }
 
-void RenderPass::render(RenderRequest& renderRequest, const V3& /*position*/)
+void RenderPass::render(RenderRequest& renderRequest, const V3& /*position*/, const sp<DrawDecorator>& drawDecorator)
 {
     if(const uint32_t drawCount = static_cast<uint32_t>(_draw_count->val()); drawCount > 0)
     {
@@ -60,7 +60,7 @@ void RenderPass::render(RenderRequest& renderRequest, const V3& /*position*/)
         }
         DrawingContext drawingContext(_pipeline_bindings, _shader->takeBufferSnapshot(renderRequest, false), _pipeline_bindings->vertices().snapshot(),
                                       _index_buffer.snapshot(), drawCount, std::move(drawParam));
-        renderRequest.addRenderCommand(drawingContext.toRenderCommand(renderRequest));
+        renderRequest.addRenderCommand(drawingContext.toRenderCommand(renderRequest, drawDecorator));
     }
 }
 

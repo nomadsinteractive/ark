@@ -16,7 +16,7 @@ public:
 [[deprecated]]
     FPSCounter(const sp<Clock>& clock, float refreshInterval, const sp<Text>& characters, const String& message);
 
-    virtual void render(RenderRequest& renderRequest, const V3& position) override;
+    virtual void render(RenderRequest& renderRequest, const V3& position, const sp<DrawDecorator>& drawDecorator) override;
 
     void updateFPS(float fps);
 

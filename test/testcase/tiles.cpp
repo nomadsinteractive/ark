@@ -29,7 +29,7 @@ public:
         : _tile_x(tileX), _tile_y(tileY) {
     }
 
-    virtual void render(RenderRequest& /*pipeline*/, const V3& position) override {
+    virtual void render(RenderRequest& /*pipeline*/, const V3& position, const sp<DrawDecorator>& drawDecorator) override {
         const float idx = (_tile_y + _tile_height) / _tile_height;
         if(_render_position[static_cast<int32_t>(idx)] != position.y())
             _error_code = _error_base + idx;
@@ -99,7 +99,7 @@ private:
         _render_position[2] = p3;
         _render_position[3] = p4;
         RenderRequest renderRequest(Platform::getSteadyClock()->val(), nullptr);
-        scrollable->render(renderRequest, V3(0));
+        scrollable->render(renderRequest, V3(0), nullptr);
         return _error_code;
     }
 };

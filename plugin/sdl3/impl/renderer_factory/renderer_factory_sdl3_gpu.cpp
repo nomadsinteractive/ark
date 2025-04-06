@@ -3,7 +3,6 @@
 #include "core/util/uploader_type.h"
 #include "core/util/log.h"
 
-#include "graphics/base/bitmap.h"
 #include "graphics/components/size.h"
 #include "graphics/inf/render_command.h"
 #include "graphics/inf/render_view.h"
@@ -181,10 +180,10 @@ public:
     {
     }
 
-    void render(RenderRequest& renderRequest, const V3& position) override
+    void render(RenderRequest& renderRequest, const V3& position, const sp<DrawDecorator>& drawDecorator) override
     {
         renderRequest.addRenderCommand(_pre_draw);
-        _delegate->render(renderRequest, position);
+        _delegate->render(renderRequest, position, drawDecorator);
         renderRequest.addRenderCommand(_post_draw);
     }
 

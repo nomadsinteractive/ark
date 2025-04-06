@@ -24,7 +24,7 @@ class RendererImgui final : public Renderer, public Renderer::Group, public Even
 public:
     RendererImgui(const sp<Shader>& shader, const sp<Texture>& texture);
 
-    void render(RenderRequest& renderRequest, const V3& position) override;
+    void render(RenderRequest& renderRequest, const V3& position, const sp<DrawDecorator>& drawDecorator) override;
     void addRenderer(sp<Renderer> renderer, const Traits& traits) override;
     bool onEvent(const Event& event) override;
 

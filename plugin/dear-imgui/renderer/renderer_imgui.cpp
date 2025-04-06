@@ -116,7 +116,7 @@ RendererImgui::RendererImgui(const sp<Shader>& shader, const sp<Texture>& textur
     _renderer_context->addDefaultTexture(texture);
 }
 
-void RendererImgui::render(RenderRequest& renderRequest, const V3& position)
+void RendererImgui::render(RenderRequest& renderRequest, const V3& position, const sp<DrawDecorator>& /*drawDecorator*/)
 {
     ImGuiIO& io = ImGui::GetIO();
 
@@ -126,7 +126,7 @@ void RendererImgui::render(RenderRequest& renderRequest, const V3& position)
     ImGui::NewFrame();
     ImGuizmo::BeginFrame();
     for(const sp<Renderer>& i : _renderers)
-        i->render(renderRequest, position);
+        i->render(renderRequest, position, nullptr);
     ImGui::EndFrame();
     ImGui::Render();
     MyImGuiRenderFunction(renderRequest, ImGui::GetDrawData());

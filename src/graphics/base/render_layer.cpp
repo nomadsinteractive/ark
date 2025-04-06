@@ -120,9 +120,9 @@ sp<Layer> RenderLayer::makeLayer(sp<ModelLoader> modelLoader, sp<Vec3> position,
     return sp<Layer>::make(addLayerContext(std::move(modelLoader), std::move(position), std::move(visible), std::move(discarded)));
 }
 
-void RenderLayer::render(RenderRequest& renderRequest, const V3& position)
+void RenderLayer::render(RenderRequest& renderRequest, const V3& position, const sp<DrawDecorator>& drawDecorator)
 {
-    renderRequest.addRenderCommand(compose(renderRequest));
+    renderRequest.addRenderCommand(compose(renderRequest, drawDecorator));
 }
 
 sp<RenderCommand> RenderLayer::compose(const RenderRequest& renderRequest, sp<DrawDecorator> drawDecorator)

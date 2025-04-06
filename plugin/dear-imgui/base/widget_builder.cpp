@@ -1,7 +1,5 @@
 #include "dear-imgui/base/widget_builder.h"
 
-#include <vector>
-
 #include <imgui.h>
 #include <ImGuizmo.h>
 
@@ -423,7 +421,7 @@ void WidgetBuilder::end()
 
 void WidgetBuilder::bulletText(const String& content)
 {
-    addWidget(sp<WidgetText>::make(ImGui::BulletText, content));
+    addWidget(sp<Widget>::make<WidgetText>(ImGui::BulletText, content));
 }
 
 sp<Observer> WidgetBuilder::button(const String& label, const V2& size)
@@ -442,12 +440,12 @@ sp<Observer> WidgetBuilder::smallButton(const String& label)
 
 void WidgetBuilder::checkbox(const String& label, const sp<Boolean>& option)
 {
-    addWidget(sp<Input<bool>>::make(ImGui::Checkbox, label, option));
+    addWidget(sp<Widget>::make<Input<bool>>(ImGui::Checkbox, label, option));
 }
 
 void WidgetBuilder::radioButton(const String& label, const sp<Integer>& option, int32_t group)
 {
-    addWidget(sp<Input<int32_t>>::make([group](const char* l, int32_t* v) { return ImGui::RadioButton(l, v, group); }, label, option));
+    addWidget(sp<Widget>::make<Input<int32_t>>([group](const char* l, int32_t* v) { return ImGui::RadioButton(l, v, group); }, label, option));
 }
 
 void WidgetBuilder::combo(const String& label, const sp<Integer>& option, const Vector<String>& items)
@@ -461,12 +459,12 @@ void WidgetBuilder::combo(const String& label, const sp<Integer>& option, const 
     sb << '\0';
 
     const String s = sb.str();
-    addWidget(sp<Input<int32_t>>::make([s](const char* l, int32_t* v) { return ImGui::Combo(l, v, s.c_str()); }, label, option));
+    addWidget(sp<Widget>::make<Input<int32_t>>([s](const char* l, int32_t* v) { return ImGui::Combo(l, v, s.c_str()); }, label, option));
 }
 
 void WidgetBuilder::listBox(const String& label, const sp<Integer>& option, const Vector<String>& items)
 {
-    addWidget(sp<Input<int32_t>>::make([items](const char* l, int32_t* v) { return ImGui::ListBox(l, v, Items_VectorGetter, reinterpret_cast<void*>(const_cast<Vector<String>*>(&items)), static_cast<int32_t>(items.size())); }, label, option));
+    addWidget(sp<Widget>::make<Input<int32_t>>([items](const char* l, int32_t* v) { return ImGui::ListBox(l, v, Items_VectorGetter, reinterpret_cast<void*>(const_cast<Vector<String>*>(&items)), static_cast<int32_t>(items.size())); }, label, option));
 }
 
 void WidgetBuilder::indent(float w)
@@ -481,34 +479,34 @@ void WidgetBuilder::unindent(float w)
 
 void WidgetBuilder::text(const String& content)
 {
-    addWidget(sp<WidgetText>::make(ImGui::Text, content));
+    addWidget(sp<Widget>::make<WidgetText>(ImGui::Text, content));
 }
 
 sp<Observer> WidgetBuilder::inputText(String label, sp<StringVar> value, size_t maxLength, int32_t flags)
 {
     sp<Observer> observer = sp<Observer>::make();
-    addWidget(sp<WidgetInputText<StringVar>>::make(std::move(label), std::move(value), maxLength, nullptr, observer, flags));
+    addWidget(sp<Widget>::make<WidgetInputText<StringVar>>(std::move(label), std::move(value), maxLength, nullptr, observer, flags));
     return observer;
 }
 
 void WidgetBuilder::inputInt(const String& label, const sp<Integer>& value, int32_t step, int32_t step_fast, int32_t flags)
 {
-    addWidget(sp<Input<int32_t>>::make([step, step_fast, flags](const char* l, int32_t* v) { return ImGui::InputInt(l, v, step, step_fast, flags); }, label, value));
+    addWidget(sp<Widget>::make<Input<int32_t>>([step, step_fast, flags](const char* l, int32_t* v) { return ImGui::InputInt(l, v, step, step_fast, flags); }, label, value));
 }
 
 void WidgetBuilder::sliderInt(const String& label, const sp<Integer>& value, int32_t vmin, int32_t vmax, const String& format)
 {
-    addWidget(sp<Input<int32_t>>::make([vmin, vmax, format](const char* l, int32_t* v) { return ImGui::SliderInt(l, v, vmin, vmax, format.c_str()); }, label, value));
+    addWidget(sp<Widget>::make<Input<int32_t>>([vmin, vmax, format](const char* l, int32_t* v) { return ImGui::SliderInt(l, v, vmin, vmax, format.c_str()); }, label, value));
 }
 
 void WidgetBuilder::inputFloat(const String& label, const sp<Numeric>& value, float step, float step_fast, const String& format, int32_t extra_flags)
 {
-    addWidget(sp<Input<float>>::make([step, step_fast, format, extra_flags](const char* l, float* v) { return ImGui::InputFloat(l, v, step, step_fast, format.c_str(), extra_flags); }, label, value));
+    addWidget(sp<Widget>::make<Input<float>>([step, step_fast, format, extra_flags](const char* l, float* v) { return ImGui::InputFloat(l, v, step, step_fast, format.c_str(), extra_flags); }, label, value));
 }
 
 void WidgetBuilder::inputFloat2(const String& label, const sp<Vec2>& value, const String& format, int32_t flags)
 {
-    addWidget(sp<InputWithType<V2, Vec2Impl>>::make([format, flags](const char* l, V2* v) { return ImGui::InputFloat2(l, reinterpret_cast<float*>(v), format.c_str(), flags); }, label, value));
+    addWidget(sp<Widget>::make<InputWithType<V2, Vec2Impl>>([format, flags](const char* l, V2* v) { return ImGui::InputFloat2(l, reinterpret_cast<float*>(v), format.c_str(), flags); }, label, value));
 }
 
 void WidgetBuilder::inputFloat3(const String& label, const sp<Size>& value, const String& format, int32_t flags)
@@ -518,22 +516,22 @@ void WidgetBuilder::inputFloat3(const String& label, const sp<Size>& value, cons
 
 void WidgetBuilder::inputFloat3(const String& label, const sp<Vec3>& value, const String& format, int32_t flags)
 {
-    addWidget(sp<InputWithType<V3, Vec3Impl>>::make([format, flags](const char* l, V3* v) { return ImGui::InputFloat3(l, reinterpret_cast<float*>(v), format.c_str(), flags); }, label, value));
+    addWidget(sp<Widget>::make<InputWithType<V3, Vec3Impl>>([format, flags](const char* l, V3* v) { return ImGui::InputFloat3(l, reinterpret_cast<float*>(v), format.c_str(), flags); }, label, value));
 }
 
 void WidgetBuilder::inputFloat4(const String& label, const sp<Vec4>& value, const String& format, int32_t flags)
 {
-    addWidget(sp<InputWithType<V4, Vec4Impl>>::make([format, flags](const char* l, V4* v) { return ImGui::InputFloat4(l, reinterpret_cast<float*>(v), format.c_str(), flags); }, label, value));
+    addWidget(sp<Widget>::make<InputWithType<V4, Vec4Impl>>([format, flags](const char* l, V4* v) { return ImGui::InputFloat4(l, reinterpret_cast<float*>(v), format.c_str(), flags); }, label, value));
 }
 
 void WidgetBuilder::sliderFloat(const String& label, const sp<Numeric>& value, float v_min, float v_max, const String& format, float power)
 {
-    addWidget(sp<Input<float>>::make([v_min, v_max, format, power](const char* l, float* v) { return ImGui::SliderFloat(l, v, v_min, v_max, format.c_str(), power); }, label, value));
+    addWidget(sp<Widget>::make<Input<float>>([v_min, v_max, format, power](const char* l, float* v) { return ImGui::SliderFloat(l, v, v_min, v_max, format.c_str(), power); }, label, value));
 }
 
 void WidgetBuilder::sliderFloat2(const String& label, const sp<Vec2>& value, float v_min, float v_max, const String& format, float power)
 {
-    addWidget(sp<InputWithType<V2, Vec2Impl>>::make([v_min, v_max, format, power](const char* l, V2* v) { return ImGui::SliderFloat2(l, reinterpret_cast<float*>(v), v_min, v_max, format.c_str(), power); }, label, value));
+    addWidget(sp<Widget>::make<InputWithType<V2, Vec2Impl>>([v_min, v_max, format, power](const char* l, V2* v) { return ImGui::SliderFloat2(l, reinterpret_cast<float*>(v), v_min, v_max, format.c_str(), power); }, label, value));
 }
 
 void WidgetBuilder::sliderFloat3(const String& label, const sp<Size>& value, float v_min, float v_max, const String& format, float power)
@@ -543,42 +541,42 @@ void WidgetBuilder::sliderFloat3(const String& label, const sp<Size>& value, flo
 
 void WidgetBuilder::sliderFloat3(const String& label, const sp<Vec3>& value, float v_min, float v_max, const String& format, float power)
 {
-    addWidget(sp<InputWithType<V3, Vec3Impl>>::make([v_min, v_max, format, power](const char* l, V3* v) { return ImGui::SliderFloat3(l, reinterpret_cast<float*>(v), v_min, v_max, format.c_str(), power); }, label, value));
+    addWidget(sp<Widget>::make<InputWithType<V3, Vec3Impl>>([v_min, v_max, format, power](const char* l, V3* v) { return ImGui::SliderFloat3(l, reinterpret_cast<float*>(v), v_min, v_max, format.c_str(), power); }, label, value));
 }
 
 void WidgetBuilder::sliderFloat4(const String& label, const sp<Vec4>& value, float v_min, float v_max, const String& format, float power)
 {
-    addWidget(sp<InputWithType<V4, Vec4Impl>>::make([v_min, v_max, format, power](const char* l, V4* v) { return ImGui::SliderFloat4(l, reinterpret_cast<float*>(v), v_min, v_max, format.c_str(), power); }, label, value));
+    addWidget(sp<Widget>::make<InputWithType<V4, Vec4Impl>>([v_min, v_max, format, power](const char* l, V4* v) { return ImGui::SliderFloat4(l, reinterpret_cast<float*>(v), v_min, v_max, format.c_str(), power); }, label, value));
 }
 
 void WidgetBuilder::colorEdit3(const String& label, const sp<Vec3>& value)
 {
-    addWidget(sp<InputWithType<V3, Vec3Impl>>::make([](const char* l, V3* v) { return ImGui::ColorEdit3(l, reinterpret_cast<float*>(v)); }, label, value));
+    addWidget(sp<Widget>::make<InputWithType<V3, Vec3Impl>>([](const char* l, V3* v) { return ImGui::ColorEdit3(l, reinterpret_cast<float*>(v)); }, label, value));
 }
 
 void WidgetBuilder::colorEdit4(const String& label, const sp<Color>& color)
 {
-    addWidget(sp<InputWithType<V4, Vec4Impl>>::make([](const char* l, V4* v) { return ImGui::ColorEdit4(l, reinterpret_cast<float*>(v)); }, label, color->wrapped()));
+    addWidget(sp<Widget>::make<InputWithType<V4, Vec4Impl>>([](const char* l, V4* v) { return ImGui::ColorEdit4(l, reinterpret_cast<float*>(v)); }, label, color->wrapped()));
 }
 
 void WidgetBuilder::colorEdit4(const String& label, const sp<Vec4>& value)
 {
-    addWidget(sp<InputWithType<V4, Vec4Impl>>::make([](const char* l, V4* v) { return ImGui::ColorEdit4(l, reinterpret_cast<float*>(v)); }, label, value));
+    addWidget(sp<Widget>::make<InputWithType<V4, Vec4Impl>>([](const char* l, V4* v) { return ImGui::ColorEdit4(l, reinterpret_cast<float*>(v)); }, label, value));
 }
 
 void WidgetBuilder::colorPicker3(const String& label, const sp<Vec3>& value)
 {
-    addWidget(sp<InputWithType<V3, Vec3Impl>>::make([](const char* l, V3* v) { return ImGui::ColorPicker3(l, reinterpret_cast<float*>(v)); }, label, value));
+    addWidget(sp<Widget>::make<InputWithType<V3, Vec3Impl>>([](const char* l, V3* v) { return ImGui::ColorPicker3(l, reinterpret_cast<float*>(v)); }, label, value));
 }
 
 void WidgetBuilder::colorPicker4(const String& label, const sp<Color>& value)
 {
-    addWidget(sp<InputWithType<V4, Vec4Impl>>::make([](const char* l, V4* v) { return ImGui::ColorPicker4(l, reinterpret_cast<float*>(v)); }, label, value->wrapped()));
+    addWidget(sp<Widget>::make<InputWithType<V4, Vec4Impl>>([](const char* l, V4* v) { return ImGui::ColorPicker4(l, reinterpret_cast<float*>(v)); }, label, value->wrapped()));
 }
 
 void WidgetBuilder::colorPicker4(const String& label, const sp<Vec4>& value)
 {
-    addWidget(sp<InputWithType<V4, Vec4Impl>>::make([](const char* l, V4* v) { return ImGui::ColorPicker4(l, reinterpret_cast<float*>(v)); }, label, value));
+    addWidget(sp<Widget>::make<InputWithType<V4, Vec4Impl>>([](const char* l, V4* v) { return ImGui::ColorPicker4(l, reinterpret_cast<float*>(v)); }, label, value));
 }
 
 void WidgetBuilder::pushID(const String& id)
@@ -599,7 +597,7 @@ void WidgetBuilder::popID()
 
 void WidgetBuilder::image(sp<Texture> texture, sp<Vec2> size, const V2& uv0, const V2& uv1, const sp<Vec4>& color, const sp<Vec4>& borderColor)
 {
-    addWidget(sp<Image>::make(std::move(texture), std::move(size), uv0, uv1, color ? color : sp<Vec4>::make<Vec4::Const>(V4(1.0f)), borderColor ? borderColor : sp<Vec4>::make<Vec4::Const>(V4(0)), _renderer_context));
+    addWidget(sp<Widget>::make<Image>(std::move(texture), std::move(size), uv0, uv1, color ? color : sp<Vec4>::make<Vec4::Const>(V4(1.0f)), borderColor ? borderColor : sp<Vec4>::make<Vec4::Const>(V4(0)), _renderer_context));
 }
 
 void WidgetBuilder::sameLine(float localPosX, float spacingW)
@@ -675,7 +673,7 @@ void WidgetBuilder::addWidgetGroupAndPush(sp<WidgetGroup> widgetGroup)
 
 void WidgetBuilder::addFunctionCall(std::function<void()> func)
 {
-    addWidget(sp<FunctionCall>::make(std::move(func)));
+    addWidget(sp<Widget>::make<FunctionCall>(std::move(func)));
 }
 
 void WidgetBuilder::addWidget(sp<Widget> widget)

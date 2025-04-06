@@ -12,7 +12,7 @@ namespace ark {
 class ARK_API RenderGroup final : public Renderer, public Renderer::Group {
 public:
 
-    void render(RenderRequest& renderRequest, const V3& position) override;
+    void render(RenderRequest& renderRequest, const V3& position, const sp<DrawDecorator>& drawDecorator) override;
     void addRenderer(sp<Renderer> renderer, const Traits& traits) override;
 
     void add(RendererType::Priority priority, sp<Renderer> renderer, sp<Boolean> discarded = nullptr, sp<Boolean> visible = nullptr);

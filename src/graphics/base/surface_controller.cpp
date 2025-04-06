@@ -26,7 +26,7 @@ void SurfaceController::requestUpdate(uint64_t timestamp)
     {
         const V3 position(0);
         RenderRequest renderRequest(timestamp, _allocator_pool);
-        _renderer_phrase.render(renderRequest, position);
+        _renderer_phrase.render(renderRequest, position, nullptr);
         _render_requests->add(std::move(renderRequest));
     }
     DCHECK_WARN(size < 3, "Frame skipped. RenderCommand size: %d. Rendering thread busy?", size);

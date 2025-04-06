@@ -32,10 +32,10 @@ void Activity::addRenderer(sp<Renderer> renderer, const Traits& traits)
     _render_group->addRenderer(std::move(renderer), traits);
 }
 
-void Activity::render(RenderRequest& renderRequest, const V3& position)
+void Activity::render(RenderRequest& renderRequest, const V3& position, const sp<DrawDecorator>& drawDecorator)
 {
     ASSERT(_view);
-    _render_group->render(renderRequest, position);
+    _render_group->render(renderRequest, position, drawDecorator);
 }
 
 bool Activity::onEvent(const Event& event)

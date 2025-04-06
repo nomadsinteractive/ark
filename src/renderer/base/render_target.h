@@ -43,7 +43,7 @@ public:
 
     RenderTarget(sp<Renderer> renderer, sp<Resource> resource);
 
-    void render(RenderRequest& renderRequest, const V3& position) override;
+    void render(RenderRequest& renderRequest, const V3& position, const sp<DrawDecorator>& drawDecorator) override;
 
     const sp<Resource>& resource() const;
 

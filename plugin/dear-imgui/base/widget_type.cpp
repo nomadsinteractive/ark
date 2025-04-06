@@ -14,13 +14,13 @@ namespace ark::plugin::dear_imgui {
 
 namespace {
 
-class RendererWidget : public Renderer {
+class RendererWidget final : public Renderer {
 public:
     RendererWidget(sp<Widget> widget)
         : _widget(std::move(widget)) {
     }
 
-    virtual void render(RenderRequest& /*renderRequest*/, const V3& /*position*/) override {
+    void render(RenderRequest& /*renderRequest*/, const V3& /*position*/, const sp<DrawDecorator>& /*drawDecorator*/) override {
         _widget->render();
     }
 
@@ -28,19 +28,19 @@ private:
     sp<Widget> _widget;
 };
 
-class WidgetWrapper : public Widget, public Wrapper<Widget>, public Implements<WidgetWrapper, Wrapper<Widget>, Widget> {
+class WidgetWrapper final : public Widget, public Wrapper<Widget>, public Implements<WidgetWrapper, Wrapper<Widget>, Widget> {
 public:
     WidgetWrapper(sp<Widget> delegate)
         : Wrapper(std::move(delegate)) {
     }
 
-    virtual void render() override {
+    void render() override {
         if(_wrapped)
             _wrapped->render();
     }
 };
 
-class WidgetBefore : public Widget, public Wrapper<Widget>, public Implements<WidgetBefore, Wrapper<Widget>, Widget> {
+class WidgetBefore final : public Widget, public Wrapper<Widget>, public Implements<WidgetBefore, Wrapper<Widget>, Widget> {
 public:
     WidgetBefore(sp<Widget> before, sp<Widget> after)
         : Wrapper(std::move(after)), _before(std::move(before)) {
@@ -60,17 +60,17 @@ private:
 
 sp<Widget> WidgetType::create(sp<Widget> wrapped)
 {
-    return sp<WidgetWrapper>::make(std::move(wrapped));
+    return sp<Widget>::make<WidgetWrapper>(std::move(wrapped));
 }
 
 sp<Widget> WidgetType::makeVisible(sp<Widget> self, sp<Boolean> visibility)
 {
-    return sp<WidgetWithVisibility>::make(std::move(self), std::move(visibility));
+    return sp<Widget>::make<WidgetWithVisibility>(std::move(self), std::move(visibility));
 }
 
 sp<Widget> WidgetType::before(sp<Widget> self, sp<Widget> after)
 {
-    return sp<WidgetBefore>::make(std::move(self), std::move(after));
+    return sp<Widget>::make<WidgetBefore>(std::move(self), std::move(after));
 }
 
 void WidgetType::reset(const sp<Widget>& self, sp<Widget> wrapped)
@@ -81,7 +81,7 @@ void WidgetType::reset(const sp<Widget>& self, sp<Widget> wrapped)
 
 sp<Renderer> WidgetType::toRenderer(sp<Widget> self)
 {
-    return sp<RendererWidget>::make(std::move(self));
+    return sp<Renderer>::make<RendererWidget>(std::move(self));
 }
 
 }

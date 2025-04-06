@@ -11,6 +11,7 @@ class Bounds;
 class Camera;
 class GlyphMaker;
 class Color;
+class DrawDecorator;
 class Font;
 class Glyph;
 class Layer;
@@ -56,7 +57,6 @@ class Vec4Impl;
 class V2;
 class V3;
 class V4;
-class Vec2Type;
 class Viewport;
 
 template<typename T> class RectT;

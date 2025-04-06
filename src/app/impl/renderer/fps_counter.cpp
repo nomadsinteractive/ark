@@ -22,7 +22,7 @@ FPSCounter::FPSCounter(const sp<Clock>& clock, float refreshInterval, const sp<T
 {
 }
 
-void FPSCounter::render(RenderRequest& renderequest, const V3& position)
+void FPSCounter::render(RenderRequest& renderequest, const V3& position, const sp<DrawDecorator>& drawDecorator)
 {
     ++ _frame_rendered;
     float duration = _duration->val();

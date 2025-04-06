@@ -2,8 +2,9 @@
 
 #include "graphics/base/render_layer.h"
 #include "graphics/base/render_layer_snapshot.h"
-#include "graphics/base/render_request.h"
 #include "graphics/inf/render_command.h"
+
+#include "renderer/impl/draw_decorator/draw_decorator_composite.h"
 #include "renderer/inf/draw_decorator.h"
 
 #include "vulkan/base/vk_framebuffer.h"
@@ -41,9 +42,9 @@ VKFramebufferRenderer::VKFramebufferRenderer(sp<RenderLayer> renderLayer, sp<VKF
 {
 }
 
-void VKFramebufferRenderer::render(RenderRequest& renderRequest, const V3& position)
+void VKFramebufferRenderer::render(RenderRequest& renderRequest, const V3& position, const sp<DrawDecorator>& drawDecorator)
 {
-    renderRequest.addRenderCommand(_render_layer->compose(renderRequest, _draw_decorator));
+    _render_layer->render(renderRequest, position, DrawDecoratorComposite::compose(drawDecorator, _draw_decorator));
 }
 
 }

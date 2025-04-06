@@ -14,9 +14,9 @@ RenderTarget::RenderTarget(sp<Renderer> renderer, sp<Resource> resource)
 {
 }
 
-void RenderTarget::render(RenderRequest& renderRequest, const V3& position)
+void RenderTarget::render(RenderRequest& renderRequest, const V3& position, const sp<DrawDecorator>& drawDecorator)
 {
-    _renderer->render(renderRequest, position);
+    _renderer->render(renderRequest, position, drawDecorator);
 }
 
 const sp<Resource>& RenderTarget::resource() const

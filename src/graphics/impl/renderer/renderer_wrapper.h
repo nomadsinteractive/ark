@@ -12,8 +12,7 @@ class RendererWrapper : public Renderer, public Wrapper<Renderer> {
 public:
     RendererWrapper(const sp<Renderer>& delegate);
 
-    virtual void render(RenderRequest& renderRequest, const V3& position) override;
-
+    void render(RenderRequest& renderRequest, const V3& position, const sp<DrawDecorator>& drawDecorator) override;
 };
 
 }

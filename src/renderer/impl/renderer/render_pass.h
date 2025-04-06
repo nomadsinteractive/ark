@@ -18,7 +18,7 @@ public:
 //  [[script::bindings::auto]]
     RenderPass(sp<Shader> shader, Buffer vertexBuffer, Buffer indexBuffer, sp<Integer> drawCount, Enum::DrawMode drawMode, Enum::DrawProcedure drawProcedure, const Vector<std::pair<uint32_t, sp<Uploader>>>& dividedUploaders = {}, Buffer indirectBuffer = {});
 
-    void render(RenderRequest& renderRequest, const V3& position) override;
+    void render(RenderRequest& renderRequest, const V3& position, const sp<DrawDecorator>& drawDecorator) override;
 
 //  [[plugin::builder("render-pass")]]
     class BUILDER final : public Builder<Renderer> {

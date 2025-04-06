@@ -10,7 +10,7 @@ class ARK_API Renderer {
 public:
     virtual ~Renderer() = default;
 
-    virtual void render(RenderRequest& renderRequest, const V3& position) = 0;
+    virtual void render(RenderRequest& renderRequest, const V3& position, const sp<DrawDecorator>& drawDecorator) = 0;
 
     class ARK_API Group {
     public:
@@ -18,7 +18,6 @@ public:
 
         virtual void addRenderer(sp<Renderer> renderer, const Traits& traits) = 0;
     };
-
 };
 
 }
