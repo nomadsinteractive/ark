@@ -42,7 +42,7 @@ public:
     void bindSampler(sp<Texture> texture, uint32_t name = 0) const;
 
     Vector<std::pair<uint32_t, Buffer::Snapshot>> makeInstanceBufferSnapshots() const;
-    Map<uint32_t, Buffer::Factory> makeDividedBufferFactories() const;
+    Map<uint32_t, Buffer::SnapshotFactory> makeDividedBufferFactories() const;
 
 private:
     void doEnsurePipeline(GraphicsContext& graphicsContext);

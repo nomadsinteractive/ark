@@ -85,8 +85,8 @@ const sp<Buffer::Delegate>& Buffer::Snapshot::delegate() const
     return _delegate;
 }
 
-Buffer::Buffer(const Type type, const UsageBit usageBits, sp<Uploader> uploader)
-    : _delegate(Ark::instance().renderController()->makeBuffer(type, Usage(usageBits), std::move(uploader))._delegate)
+Buffer::Buffer(const UsageBit usageBits, sp<Uploader> uploader)
+    : _delegate(Ark::instance().renderController()->makeBuffer(Usage(usageBits), std::move(uploader))._delegate)
 {
 }
 
@@ -115,9 +115,9 @@ Buffer::Snapshot Buffer::snapshot(const ByteArray::Borrowed& strip) const
     return {_delegate, strip.length(), sp<UploaderBufferSnapshot>::make(strip.length(), Vector<Buffer::Strip>{{0, strip}})};
 }
 
-Buffer::Snapshot Buffer::snapshot(sp<Uploader> input, size_t size) const
+Buffer::Snapshot Buffer::snapshot(sp<Uploader> uploader, size_t size) const
 {
-    return {_delegate, size, std::move(input)};
+    return {_delegate, size, std::move(uploader)};
 }
 
 uint64_t Buffer::id() const
@@ -144,12 +144,12 @@ const sp<Buffer::Delegate>& Buffer::delegate() const
     return _delegate;
 }
 
-Buffer::Factory::Factory(const size_t stride)
+Buffer::SnapshotFactory::SnapshotFactory(const size_t stride)
     : _stride(stride), _size(0)
 {
 }
 
-Buffer::Snapshot Buffer::Factory::toSnapshot(const Buffer& buffer)
+Buffer::Snapshot Buffer::SnapshotFactory::toSnapshot(const Buffer& buffer)
 {
     if(_strips.empty())
         return buffer.snapshot();
@@ -157,7 +157,7 @@ Buffer::Snapshot Buffer::Factory::toSnapshot(const Buffer& buffer)
     return buffer.snapshot(sp<Uploader>::make<UploaderBufferSnapshot>(_size, std::move(_strips)));
 }
 
-void Buffer::Factory::addStrip(size_t offset, ByteArray::Borrowed& content)
+void Buffer::SnapshotFactory::addStrip(const size_t offset, ByteArray::Borrowed& content)
 {
     _strips.emplace_back(offset, content);
     _size = std::max(_size, content.length() + offset);
@@ -168,19 +168,19 @@ size_t Buffer::Delegate::size() const
     return _size;
 }
 
-void Buffer::Delegate::setSize(size_t size)
+void Buffer::Delegate::setSize(const size_t size)
 {
     _size = size;
 }
 
 Buffer::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _uploader(factory.getBuilder<Uploader>(manifest, constants::UPLOADER)), _usage(Documents::getAttribute<Usage>(manifest, "usage", USAGE_BIT_DYNAMIC))
+    : _uploader(factory.getBuilder<Uploader>(manifest, constants::UPLOADER)), _usage(Documents::getAttribute<Usage>(manifest, "usage", {USAGE_BIT_STORAGE, USAGE_BIT_DYNAMIC}))
 {
 }
 
 sp<Buffer> Buffer::BUILDER::build(const Scope& args)
 {
-    return sp<Buffer>::make(Ark::instance().renderController()->makeBuffer(Buffer::TYPE_STORAGE, _usage, _uploader.build(args)));
+    return sp<Buffer>::make(Ark::instance().renderController()->makeBuffer(_usage, _uploader.build(args)));
 }
 
 template<> ARK_API Buffer::Usage StringConvert::eval<Buffer::Usage>(const String& expr)

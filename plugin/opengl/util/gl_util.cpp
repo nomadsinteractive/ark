@@ -359,12 +359,6 @@ GLBufferBinder::GLBufferBinder(GLenum target, GLuint buffer)
     glBindBuffer(_target, _buffer);
 }
 
-GLBufferBinder::GLBufferBinder(GLBufferBinder&& other)
-    : _target(other._target), _buffer(other._buffer)
-{
-    other._buffer = 0;
-}
-
 GLBufferBinder::~GLBufferBinder()
 {
     if(_buffer)

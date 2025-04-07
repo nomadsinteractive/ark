@@ -5,7 +5,7 @@
 namespace ark::plugin::bgfx {
 
 StaticIndexBufferBgfx::StaticIndexBufferBgfx()
-    : BufferBase(Buffer::TYPE_INDEX, {})
+    : BufferBase(Buffer::Usage(Buffer::USAGE_BIT_INDEX))
 {
 }
 

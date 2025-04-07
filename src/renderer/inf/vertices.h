@@ -19,7 +19,7 @@ public:
     size_t length() const;
 
 //  [[script::bindings::classmethod]]
-    static sp<Uploader> toUploader(sp<Vertices> self, Shader& shader, const V3& bounds);
+    static sp<Uploader> makeUploader(sp<Vertices> self, const Shader& shader, const V3& bounds);
 
 private:
     size_t _length;

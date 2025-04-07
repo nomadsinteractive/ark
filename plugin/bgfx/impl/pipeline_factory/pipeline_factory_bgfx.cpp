@@ -314,8 +314,8 @@ struct DrawPipelineBgfx final : ResourceBase<::bgfx::ProgramHandle, Pipeline> {
 
         const sp<BufferBase> vertices = drawingContext._vertices.delegate().cast<BufferBase>();
         const sp<BufferBase> indices = drawingContext._indices.delegate().cast<BufferBase>();
-        DASSERT(vertices->type() == Buffer::TYPE_VERTEX);
-        DASSERT(indices->type() == Buffer::TYPE_INDEX);
+        DASSERT(vertices->usages().has(Buffer::USAGE_BIT_VERTEX));
+        DASSERT(indices->usages().has(Buffer::USAGE_BIT_INDEX));
 
         switch(_draw_procedure)
         {

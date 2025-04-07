@@ -167,7 +167,7 @@ size_t RenderController::PrimitiveIndexBuffer::upload(RenderController& renderCo
 {
     sp<Uploader> uploader = _degenerate ? sp<Uploader>::make<UploaderDegenerate>(_primitive_count, _model_vertex_count, _model_indices) : sp<Uploader>::make<UploaderConcat>(_primitive_count, _model_vertex_count, _model_indices);
     const size_t uploaderSize = uploader->size();
-    _buffer = renderController.makeBuffer(Buffer::TYPE_INDEX, {}, std::move(uploader));
+    _buffer = renderController.makeBuffer({Buffer::USAGE_BIT_INDEX}, std::move(uploader));
     return uploaderSize;
 }
 
@@ -289,31 +289,31 @@ sp<Texture> RenderController::createTexture2d(sp<Bitmap> bitmap, Texture::Format
     return createTexture(std::move(size), sp<Texture::Parameters>::make(Texture::TYPE_2D, nullptr, format), sp<Texture::UploaderBitmap>::make(std::move(bitmap)), us, std::move(future));
 }
 
-Buffer RenderController::makeBuffer(const Buffer::Type type, const Buffer::Usage usage, sp<Uploader> uploader, const UploadStrategy us, sp<Future> future)
+Buffer RenderController::makeBuffer(const Buffer::Usage usage, sp<Uploader> uploader, const UploadStrategy us, sp<Future> future)
 {
     DTHREAD_CHECK(THREAD_ID_CORE);
-    Buffer buffer(_render_engine->rendererFactory()->createBuffer(type, usage));
+    Buffer buffer(_render_engine->rendererFactory()->createBuffer(usage));
     if(uploader)
         uploadBuffer(buffer, std::move(uploader), us, std::move(future));
     return buffer;
 }
 
-Buffer RenderController::makeBuffer(const Buffer::Type type, const Buffer::Usage usage, sp<Uploader> uploader)
+Buffer RenderController::makeBuffer(const Buffer::Usage usage, sp<Uploader> uploader)
 {
     UploadStrategy us = uploader ? US_ONCE_AND_ON_SURFACE_READY : US_ON_SURFACE_READY;
     if(usage.has(Buffer::USAGE_BIT_DYNAMIC) && uploader)
         us = us | US_ON_CHANGE;
-    return makeBuffer(type, usage, std::move(uploader), us);
+    return makeBuffer(usage, std::move(uploader), us);
 }
 
 Buffer RenderController::makeVertexBuffer(const Buffer::Usage usage, sp<Uploader> uploader)
 {
-    return makeBuffer(Buffer::TYPE_VERTEX, usage, std::move(uploader));
+    return makeBuffer(usage | Buffer::USAGE_BIT_VERTEX, std::move(uploader));
 }
 
 Buffer RenderController::makeIndexBuffer(const Buffer::Usage usage, sp<Uploader> uploader)
 {
-    return makeBuffer(Buffer::TYPE_INDEX, usage, std::move(uploader));
+    return makeBuffer(usage | Buffer::USAGE_BIT_INDEX, std::move(uploader));
 }
 
 sp<RenderController::PrimitiveIndexBuffer> RenderController::getSharedPrimitiveIndexBuffer(const Model& model, bool degenerate)

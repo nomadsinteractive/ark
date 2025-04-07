@@ -109,8 +109,8 @@ public:
     sp<Texture> createTexture2d(sp<Bitmap> bitmap, Texture::Format format = Texture::FORMAT_AUTO, RenderController::UploadStrategy us = RenderController::US_ONCE_AND_ON_SURFACE_READY, sp<Future> future = nullptr);
 
 //  [[script::bindings::auto]]
-    Buffer makeBuffer(Buffer::Type type, Buffer::Usage usage, sp<Uploader> uploader, RenderController::UploadStrategy us, sp<Future> future = nullptr);
-    Buffer makeBuffer(Buffer::Type type, Buffer::Usage usage, sp<Uploader> uploader);
+    Buffer makeBuffer(Buffer::Usage usage, sp<Uploader> uploader, RenderController::UploadStrategy us, sp<Future> future = nullptr);
+    Buffer makeBuffer(Buffer::Usage usage, sp<Uploader> uploader);
 //  [[script::bindings::auto]]
     Buffer makeVertexBuffer(Buffer::Usage usage = Buffer::USAGE_BIT_DYNAMIC, sp<Uploader> uploader = nullptr);
 //  [[script::bindings::auto]]

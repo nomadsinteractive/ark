@@ -24,12 +24,12 @@ public:
 
     const sp<PipelineBindings>& pipelineBindings() const;
 
-    const Buffer::Factory& vertices() const;
-    Buffer::Factory& vertices();
+    const Buffer::SnapshotFactory& vertices() const;
+    Buffer::SnapshotFactory& vertices();
 
     bool isInstanced() const;
 
-    Buffer::Factory& getDividedBufferBuilder(uint32_t divisor);
+    Buffer::SnapshotFactory& getDividedBufferBuilder(uint32_t divisor);
 
     std::vector<std::pair<uint32_t, Buffer::Snapshot>> toDividedBufferSnapshots();
 
@@ -37,8 +37,8 @@ private:
     sp<PipelineBindings> _pipeline_bindings;
     sp<PipelineDescriptor> _pipeline_descriptor;
 
-    Buffer::Factory _vertices;
-    Map<uint32_t, Buffer::Factory> _divided_buffer_builders;
+    Buffer::SnapshotFactory _vertices;
+    Map<uint32_t, Buffer::SnapshotFactory> _divided_buffer_builders;
 
     bool _is_instanced;
 };

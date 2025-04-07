@@ -41,7 +41,6 @@ public:
 class GLBufferBinder {
 public:
     GLBufferBinder(GLenum target, GLuint buffer);
-    GLBufferBinder(GLBufferBinder&& other);
     ~GLBufferBinder();
     DISALLOW_COPY_AND_ASSIGN(GLBufferBinder);
 
