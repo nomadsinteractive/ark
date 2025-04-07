@@ -205,14 +205,14 @@ const sp<Pipeline>& PipelineBindings::ensureComputePipeline(GraphicsContext& gra
     return pipeline;
 }
 
-Map<uint32_t, Buffer::Factory> PipelineBindings::makeDividedBufferFactories() const
+Map<uint32_t, Buffer::SnapshotFactory> PipelineBindings::makeDividedBufferFactories() const
 {
-    Map<uint32_t, Buffer::Factory> builders;
+    Map<uint32_t, Buffer::SnapshotFactory> builders;
     const sp<PipelineLayout>& shaderLayout = _stub->_pipeline_descriptor->layout();
     for(const auto& i : _stub->_instance_buffers)
     {
         const PipelineLayout::StreamLayout& stream = shaderLayout->getStreamLayout(i.first);
-        builders.insert(std::make_pair(i.first, Buffer::Factory(stream.stride())));
+        builders.insert(std::make_pair(i.first, Buffer::SnapshotFactory(stream.stride())));
     }
     return builders;
 }

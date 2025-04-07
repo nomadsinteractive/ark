@@ -53,19 +53,14 @@ namespace {
 
 }
 
-BufferBase::BufferBase(Buffer::Type type, Buffer::Usage usage)
-    : _type(type), _usage(usage)
+BufferBase::BufferBase(const Buffer::Usage usages)
+    : _usages(usages)
 {
 }
 
-Buffer::Type BufferBase::type() const
+Buffer::Usage BufferBase::usages() const
 {
-    return _type;
-}
-
-Buffer::Usage BufferBase::usage() const
-{
-    return _usage;
+    return _usages;
 }
 
 void BufferBase::setupVertexBufferLayout(::bgfx::VertexLayout& vertexLayout, const PipelineDescriptor& pipelineDescriptor)

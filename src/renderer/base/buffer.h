@@ -18,15 +18,6 @@ namespace ark {
 class ARK_API Buffer {
 public:
 //  [[script::bindings::enumeration]]
-    enum Type {
-        TYPE_VERTEX,
-        TYPE_INDEX,
-        TYPE_DRAW_INDIRECT,
-        TYPE_STORAGE,
-        TYPE_COUNT
-    };
-
-//  [[script::bindings::enumeration]]
     enum UsageBit {
         USAGE_BIT_VERTEX,
         USAGE_BIT_INDEX,
@@ -80,10 +71,10 @@ public:
         size_t _size;
     };
 
-    class ARK_API Factory {
+    class ARK_API SnapshotFactory {
     public:
-        Factory(size_t stride);
-        DEFAULT_COPY_AND_ASSIGN(Factory);
+        SnapshotFactory(size_t stride);
+        DEFAULT_COPY_AND_ASSIGN(SnapshotFactory);
 
         Snapshot toSnapshot(const Buffer& buffer);
 
@@ -97,7 +88,7 @@ public:
 
 public:
 //  [[script::bindings::auto]]
-    Buffer(Buffer::Type type, Buffer::UsageBit usageBits, sp<Uploader> uploader);
+    Buffer(Buffer::UsageBit usageBits, sp<Uploader> uploader);
     Buffer(sp<Delegate> delegate) noexcept;
     Buffer() noexcept = default;
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Buffer);
@@ -109,7 +100,7 @@ public:
 
     Snapshot snapshot(size_t size) const;
     Snapshot snapshot(const ByteArray::Borrowed& strip) const;
-    Snapshot snapshot(sp<Uploader> input = nullptr, size_t size = 0) const;
+    Snapshot snapshot(sp<Uploader> uploader = nullptr, size_t size = 0) const;
 
 //  [[script::bindings::property]]
     uint64_t id() const;

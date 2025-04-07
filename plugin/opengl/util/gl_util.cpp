@@ -348,27 +348,29 @@ void GLUtil::renderCubemap(GraphicsContext& graphicsContext, uint32_t id, Render
     glViewport(0, 0, static_cast<GLsizei>(resolution.width), static_cast<GLsizei>(resolution.height));
 }
 
-void GLUtil::glTexImage2D(uint32_t index, int32_t n, void* data)
+void GLUtil::glTexImage2D(const uint32_t index, const int32_t n, const void* data)
 {
     ::glTexImage2D(static_cast<GLenum>(GL_TEXTURE_CUBE_MAP_POSITIVE_X + index), 0, static_cast<GLint>(GL_RGBA8), n, n, 0, GL_RGBA, GL_FLOAT, data);
 }
 
-GLBufferBinder::GLBufferBinder(GLenum target, GLuint buffer)
-    : _target(target), _buffer(buffer)
+GLBufferBinder::GLBufferBinder(const Buffer::Usage usage, const GLuint buffer)
+    : _usage(usage), _buffer(buffer)
 {
-    glBindBuffer(_target, _buffer);
-}
-
-GLBufferBinder::GLBufferBinder(GLBufferBinder&& other)
-    : _target(other._target), _buffer(other._buffer)
-{
-    other._buffer = 0;
+    doBindBuffer(_buffer);
 }
 
 GLBufferBinder::~GLBufferBinder()
 {
     if(_buffer)
-        glBindBuffer(_target, 0);
+        doBindBuffer(0);
+}
+
+void GLBufferBinder::doBindBuffer(const GLuint buffer) const
+{
+    constexpr GLenum types[] = {GL_ARRAY_BUFFER, GL_ELEMENT_ARRAY_BUFFER, GL_DRAW_INDIRECT_BUFFER, GL_SHADER_STORAGE_BUFFER};
+    for(uint32_t i = Buffer::USAGE_BIT_VERTEX; i <= Buffer::USAGE_BIT_STORAGE; ++i)
+        if(_usage.has(static_cast<Buffer::UsageBit>(i)))
+            glBindBuffer(types[i], buffer);
 }
 
 }

@@ -178,22 +178,17 @@ sp<RenderEngineContext> RendererFactoryBgfx::createRenderEngineContext(const App
     return renderContext;
 }
 
-sp<Buffer::Delegate> RendererFactoryBgfx::createBuffer(Buffer::Type type, Buffer::Usage usage)
+sp<Buffer::Delegate> RendererFactoryBgfx::createBuffer(const Buffer::Usage usage)
 {
-    switch(type)
-    {
-        case Buffer::TYPE_VERTEX:
-            return usage.has(Buffer::USAGE_BIT_DYNAMIC) ? sp<Buffer::Delegate>::make<DynamicVertexBufferBgfx>() : sp<Buffer::Delegate>::make<StaticVertexBufferBgfx>();
-        case Buffer::TYPE_INDEX:
-            return usage.has(Buffer::USAGE_BIT_DYNAMIC) ? sp<Buffer::Delegate>::make<DynamicIndexBufferBgfx>() : sp<Buffer::Delegate>::make<StaticIndexBufferBgfx>();
-        case Buffer::TYPE_DRAW_INDIRECT:
-            return sp<Buffer::Delegate>::make<IndirectBufferBgfx>();
-        case Buffer::TYPE_STORAGE:
-            return sp<Buffer::Delegate>::make<StorageBufferBgfx>();
-        default:
-            FATAL("Unknow buffer type: %d", type);
-            break;
-    }
+    if(usage.has(Buffer::USAGE_BIT_STORAGE))
+        return sp<Buffer::Delegate>::make<StorageBufferBgfx>();
+    if(usage.has(Buffer::USAGE_BIT_VERTEX))
+        return usage.has(Buffer::USAGE_BIT_DYNAMIC) ? sp<Buffer::Delegate>::make<DynamicVertexBufferBgfx>() : sp<Buffer::Delegate>::make<StaticVertexBufferBgfx>();
+    if(usage.has(Buffer::USAGE_BIT_INDEX))
+        return usage.has(Buffer::USAGE_BIT_DYNAMIC) ? sp<Buffer::Delegate>::make<DynamicIndexBufferBgfx>() : sp<Buffer::Delegate>::make<StaticIndexBufferBgfx>();
+    if(usage.has(Buffer::USAGE_BIT_DRAW_INDIRECT))
+        return sp<Buffer::Delegate>::make<IndirectBufferBgfx>();
+    FATAL("Unknow buffer type: %d", usage.bits());
     return nullptr;
 }
 

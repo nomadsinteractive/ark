@@ -529,16 +529,16 @@ class Ref:
 
 
 class Buffer:
-    TYPE_VERTEX = 0
-    TYPE_INDEX = 1
-    TYPE_DRAW_INDIRECT = 2
-    TYPE_STORAGE = 3
-    TYPE_COUNT = 4
 
-    USAGE_BIT_DYNAMIC = 1
-    USAGE_BIT_HOST_VISIBLE = 2
+    USAGE_BIT_VERTEX = 1
+    USAGE_BIT_INDEX = 2
+    USAGE_BIT_DRAW_INDIRECT = 4
+    USAGE_BIT_STORAGE = 8
+    USAGE_BIT_DYNAMIC = 16
+    USAGE_BIT_TRANSFER_SRC = 32
+    USAGE_BIT_HOST_VISIBLE = 64
 
-    def __init__(self, type: int, usage_bits: int, uploader: "Uploader"):
+    def __init__(self, usage_bits: int, uploader: "Uploader"):
         pass
 
     @property
@@ -1480,6 +1480,16 @@ class Boundaries:
         return 0, 0, 0
 
 
+class Vertices:
+
+    @property
+    def length(self) -> int:
+        return 0
+
+    def make_uploader(self, shader: Shader, bounds: TYPE_VEC3) -> Uploader:
+        pass
+
+
 class Model:
 
     @property
@@ -1519,7 +1529,7 @@ class Model:
         return Uploader(None)
 
     @property
-    def vertices(self):
+    def vertices(self) -> Vertices:
         pass
 
     def find_node(self, name: str) -> Optional[Node]:

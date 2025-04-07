@@ -83,9 +83,9 @@ sp<RenderView> RendererFactoryOpenGL::createRenderView(const sp<RenderEngineCont
     return sp<RenderView>::make<RenderViewOpenGL>(renderContext, renderController);
 }
 
-sp<Buffer::Delegate> RendererFactoryOpenGL::createBuffer(Buffer::Type type, Buffer::Usage usage)
+sp<Buffer::Delegate> RendererFactoryOpenGL::createBuffer(const Buffer::Usage usage)
 {
-    return sp<Buffer::Delegate>::make<GLBuffer>(type, usage, Ark::instance().renderController()->recycler());
+    return sp<Buffer::Delegate>::make<GLBuffer>(usage, Ark::instance().renderController()->recycler());
 }
 
 sp<Camera::Delegate> RendererFactoryOpenGL::createCamera(Ark::RendererCoordinateSystem rcs)

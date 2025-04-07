@@ -285,22 +285,17 @@ sp<RenderEngineContext> RendererFactorySDL3_GPU::createRenderEngineContext(const
     return renderContext;
 }
 
-sp<Buffer::Delegate> RendererFactorySDL3_GPU::createBuffer(Buffer::Type type, Buffer::Usage usage)
+sp<Buffer::Delegate> RendererFactorySDL3_GPU::createBuffer(const Buffer::Usage usage)
 {
-    switch(type)
-    {
-        case Buffer::TYPE_VERTEX:
-            return usage.has(Buffer::USAGE_BIT_DYNAMIC) ? sp<Buffer::Delegate>::make<BufferSDL3_GPU>(SDL_GPU_BUFFERUSAGE_VERTEX) : sp<Buffer::Delegate>::make<BufferSDL3_GPU>(SDL_GPU_BUFFERUSAGE_VERTEX);
-        case Buffer::TYPE_INDEX:
-            return usage.has(Buffer::USAGE_BIT_DYNAMIC) ? sp<Buffer::Delegate>::make<BufferSDL3_GPU>(SDL_GPU_BUFFERUSAGE_INDEX) : sp<Buffer::Delegate>::make<BufferSDL3_GPU>(SDL_GPU_BUFFERUSAGE_INDEX);
-        case Buffer::TYPE_DRAW_INDIRECT:
-            return sp<Buffer::Delegate>::make<BufferSDL3_GPU>(SDL_GPU_BUFFERUSAGE_INDIRECT);
-        case Buffer::TYPE_STORAGE:
-            return sp<Buffer::Delegate>::make<BufferSDL3_GPU>(SDL_GPU_BUFFERUSAGE_GRAPHICS_STORAGE_READ | SDL_GPU_BUFFERUSAGE_COMPUTE_STORAGE_READ | SDL_GPU_BUFFERUSAGE_COMPUTE_STORAGE_WRITE);
-        default:
-            FATAL("Unknow buffer type: %d", type);
-            break;
-    }
+    if(usage.has(Buffer::USAGE_BIT_STORAGE))
+        return sp<Buffer::Delegate>::make<BufferSDL3_GPU>(SDL_GPU_BUFFERUSAGE_GRAPHICS_STORAGE_READ | SDL_GPU_BUFFERUSAGE_COMPUTE_STORAGE_READ | SDL_GPU_BUFFERUSAGE_COMPUTE_STORAGE_WRITE);
+    if(usage.has(Buffer::USAGE_BIT_VERTEX))
+        return usage.has(Buffer::USAGE_BIT_DYNAMIC) ? sp<Buffer::Delegate>::make<BufferSDL3_GPU>(SDL_GPU_BUFFERUSAGE_VERTEX) : sp<Buffer::Delegate>::make<BufferSDL3_GPU>(SDL_GPU_BUFFERUSAGE_VERTEX);
+    if(usage.has(Buffer::USAGE_BIT_INDEX))
+        return usage.has(Buffer::USAGE_BIT_DYNAMIC) ? sp<Buffer::Delegate>::make<BufferSDL3_GPU>(SDL_GPU_BUFFERUSAGE_INDEX) : sp<Buffer::Delegate>::make<BufferSDL3_GPU>(SDL_GPU_BUFFERUSAGE_INDEX);
+    if(usage.has(Buffer::USAGE_BIT_DRAW_INDIRECT))
+        return sp<Buffer::Delegate>::make<BufferSDL3_GPU>(SDL_GPU_BUFFERUSAGE_INDIRECT);
+    FATAL("Unknow buffer type: %d", usage.bits());
     return nullptr;
 }
 

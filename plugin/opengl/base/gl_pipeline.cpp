@@ -520,7 +520,7 @@ public:
         }
         param._indirect_cmds.upload(graphicsContext);
 
-        const volatile GLBufferBinder binder(GL_DRAW_INDIRECT_BUFFER, static_cast<GLuint>(param._indirect_cmds.id()));
+        const GLBufferBinder binder({Buffer::USAGE_BIT_DRAW_INDIRECT}, static_cast<GLuint>(param._indirect_cmds.id()));
 #ifndef ANDROID
         GL_CHECK_ERROR(glMultiDrawElementsIndirect(_mode, GLIndexType, nullptr, static_cast<GLsizei>(param._indirect_cmd_count), sizeof(DrawingParams::DrawElementsIndirectCommand)));
 #else
@@ -820,7 +820,7 @@ void GLPipeline::bindBuffer(GraphicsContext& graphicsContext, const PipelineLayo
         if(!j.id())
             j.upload(graphicsContext);
 
-        const volatile GLBufferBinder binder(GL_ARRAY_BUFFER, static_cast<GLuint>(j.id()));
+        const GLBufferBinder binder({Buffer::USAGE_BIT_VERTEX}, static_cast<GLuint>(j.id()));
         bindBuffer(graphicsContext, shaderLayout, i);
     }
 }

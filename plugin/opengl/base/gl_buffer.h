@@ -10,7 +10,7 @@ namespace ark::plugin::opengl {
 
 class GLBuffer final : public Buffer::Delegate {
 public:
-    GLBuffer(Buffer::Type type, Buffer::Usage usage, sp<Recycler> recycler);
+    GLBuffer(Buffer::Usage usage, sp<Recycler> recycler);
     ~GLBuffer() override;
 
     uint64_t id() override;
@@ -23,8 +23,9 @@ private:
     void doUpload(GraphicsContext& graphicsContext, Uploader& uploader);
 
 private:
-    GLenum _type;
-    GLenum _usage;
+    Buffer::Usage _usage;
+    GLenum _gl_type;
+    GLenum _gl_usage;
 
     sp<Recycler> _recycler;
 

@@ -75,10 +75,14 @@ void RendererFactoryVulkan::onSurfaceCreated(RenderEngine& renderEngine)
     _renderer->_render_target = sp<VKSwapChain>::make(renderEngine, _renderer->_device);
 }
 
-sp<Buffer::Delegate> RendererFactoryVulkan::createBuffer(const Buffer::Type type, const Buffer::Usage usage)
+sp<Buffer::Delegate> RendererFactoryVulkan::createBuffer(const Buffer::Usage usage)
 {
-    constexpr VkBufferUsageFlags usageFlagsFromType[Buffer::TYPE_COUNT] = {VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT};
-    VkBufferUsageFlags usageFlags = usageFlagsFromType[type];
+    VkBufferUsageFlags usageFlags = 0;
+    constexpr VkBufferUsageFlags usageFlagsFromType[] = {VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT};
+    for(uint32_t i = Buffer::USAGE_BIT_VERTEX; i <= Buffer::USAGE_BIT_STORAGE; ++i)
+        if(usage.has(static_cast<Buffer::UsageBit>(i)))
+            usageFlags |= usageFlagsFromType[i];
+
     VkMemoryPropertyFlags flags = 0;
     if(usage.has(Buffer::USAGE_BIT_TRANSFER_SRC))
         usageFlags |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;

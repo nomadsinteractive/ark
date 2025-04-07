@@ -15,7 +15,7 @@ struct DrawElementsIndirectCommandBgfx {
 
 
 IndirectBufferBgfx::IndirectBufferBgfx()
-    : BufferBase(Buffer::TYPE_DRAW_INDIRECT, Buffer::USAGE_BIT_DYNAMIC)
+    : BufferBase(Buffer::Usage(Buffer::USAGE_BIT_DRAW_INDIRECT, Buffer::USAGE_BIT_DYNAMIC))
 {
 }
 
