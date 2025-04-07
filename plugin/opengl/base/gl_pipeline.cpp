@@ -337,12 +337,16 @@ private:
 class GLDepthTest final : public DrawDecorator {
 public:
     GLDepthTest(const PipelineDescriptor::TraitDepthTest& trait)
-        : _func(GLUtil::toCompareFunc(trait._func)), _pre_func(GL_ZERO), _enabled(trait._enabled), _read_only(!trait._write_enabled) {
+        : _func(GLUtil::toCompareFunc(trait._func)), _pre_func(GL_ZERO), _enabled(trait._enabled), _read_only(!trait._write_enabled), _depth_test_enabled_pre_test(false)
+    {
     }
 
-    void preDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override {
-        if(_enabled) {
-            if(_func != GL_ZERO) {
+    void preDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override
+    {
+        if(_enabled)
+        {
+            if(_func != GL_ZERO)
+            {
                 if(_pre_func == GL_ZERO)
                     glGetIntegerv(GL_DEPTH_FUNC, reinterpret_cast<GLint*>(&_pre_func));
                 glDepthFunc(_func);
@@ -351,16 +355,22 @@ public:
                 glDepthMask(GL_FALSE);
         }
         else
+        {
+            glGetBooleanv(GL_DEPTH_TEST, &_depth_test_enabled_pre_test);
             glDisable(GL_DEPTH_TEST);
+        }
     }
 
     void postDraw(GraphicsContext& /*graphicsContext*/, const DrawingContext& /*context*/) override {
-        if(!_enabled)
+        if(_enabled)
+        {
+            if(_func != GL_ZERO)
+                glDepthFunc(_pre_func);
+            if(_read_only)
+                glDepthMask(GL_TRUE);
+        }
+        else if(_depth_test_enabled_pre_test)
             glEnable(GL_DEPTH_TEST);
-        if(_func != GL_ZERO)
-            glDepthFunc(_pre_func);
-        if(_read_only)
-            glDepthMask(GL_TRUE);
     }
 
 private:
@@ -368,6 +378,7 @@ private:
     GLenum _pre_func;
     bool _enabled;
     bool _read_only;
+    GLboolean _depth_test_enabled_pre_test;
 };
 
 class GLStencilTest final : public DrawDecorator {
@@ -494,7 +505,7 @@ public:
         for(const auto& [i, j] : param._instance_buffer_snapshots)
         {
             j.upload(graphicsContext);
-            DCHECK(j.id(), "Invaild Divided Buffer: %d", i);
+            DCHECK(j.id(), "Invaild Instance Buffer: %d", i);
         }
         GL_CHECK_ERROR(glDrawElementsInstanced(_mode, static_cast<GLsizei>(param._count), GLIndexType, nullptr, drawingContext._draw_count));
     }
@@ -520,7 +531,7 @@ public:
         }
         param._indirect_cmds.upload(graphicsContext);
 
-        const GLBufferBinder binder({Buffer::USAGE_BIT_DRAW_INDIRECT}, static_cast<GLuint>(param._indirect_cmds.id()));
+        const GLBufferBinder binder(GL_DRAW_INDIRECT_BUFFER, static_cast<GLuint>(param._indirect_cmds.id()));
 #ifndef ANDROID
         GL_CHECK_ERROR(glMultiDrawElementsIndirect(_mode, GLIndexType, nullptr, static_cast<GLsizei>(param._indirect_cmd_count), sizeof(DrawingParams::DrawElementsIndirectCommand)));
 #else
@@ -560,7 +571,8 @@ void ensureVertexArray(GraphicsContext& graphicsContext, const DrawingContext& c
 {
     const sp<GLVertexArray>& vertexArray = context._attachments->get<GLVertexArray>();
     uint64_t vertexArrayId = vertexArray ? vertexArray->id() : 0;
-    if(!vertexArrayId) {
+    if(!vertexArrayId)
+    {
         const sp<Pipeline>& renderPipeline = context._bindings->ensureRenderPipeline(graphicsContext);
         sp<GLVertexArray> va = sp<GLVertexArray>::make(*context._bindings, renderPipeline.cast<GLPipeline>(), context._vertices.delegate());
         va->upload(graphicsContext);
@@ -577,13 +589,13 @@ sp<PipelineDrawCommand> makeBakedRenderer(const PipelineBindings& bindings)
     switch(bindings.drawProcedure())
     {
         case Enum::DRAW_PROCEDURE_DRAW_ARRAYS:
-            return sp<GLDrawArrays>::make(mode);
+            return sp<PipelineDrawCommand>::make<GLDrawArrays>(mode);
         case Enum::DRAW_PROCEDURE_DRAW_ELEMENTS:
-            return sp<GLDrawElements>::make(mode);
+            return sp<PipelineDrawCommand>::make<GLDrawElements>(mode);
         case Enum::DRAW_PROCEDURE_DRAW_INSTANCED:
-            return sp<GLDrawElementsInstanced>::make(mode);
+            return sp<PipelineDrawCommand>::make<GLDrawElementsInstanced>(mode);
         case Enum::DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT:
-            return sp<GLMultiDrawElementsIndirect>::make(mode);
+            return sp<PipelineDrawCommand>::make<GLMultiDrawElementsIndirect>(mode);
     }
     DFATAL("Not render procedure creator for %d", bindings.drawProcedure());
     return nullptr;
@@ -648,6 +660,8 @@ public:
         GL_CHECK_ERROR(glDispatchCompute(computeContext._num_work_groups.at(0), computeContext._num_work_groups.at(1), computeContext._num_work_groups.at(2)));
 
         _ssbo_binders.clear();
+
+        glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
     }
 
 private:
@@ -820,7 +834,7 @@ void GLPipeline::bindBuffer(GraphicsContext& graphicsContext, const PipelineLayo
         if(!j.id())
             j.upload(graphicsContext);
 
-        const GLBufferBinder binder({Buffer::USAGE_BIT_VERTEX}, static_cast<GLuint>(j.id()));
+        const GLBufferBinder binder(GL_ARRAY_BUFFER, static_cast<GLuint>(j.id()));
         bindBuffer(graphicsContext, shaderLayout, i);
     }
 }

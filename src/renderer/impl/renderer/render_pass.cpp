@@ -40,7 +40,7 @@ void RenderPass::render(RenderRequest& renderRequest, const V3& /*position*/, co
                 break;
             case Enum::DRAW_PROCEDURE_DRAW_INSTANCED:
             {
-                drawParam = DrawingParams::DrawElementsInstanced{0, drawCount, _pipeline_bindings->makeInstanceBufferSnapshots()};
+                drawParam = DrawingParams::DrawElementsInstanced{0, static_cast<uint32_t>(_index_buffer.size() / sizeof(element_index_t)), _pipeline_bindings->makeInstanceBufferSnapshots()};
                 break;
             }
             case Enum::DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT:

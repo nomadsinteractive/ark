@@ -40,15 +40,12 @@ public:
 
 class GLBufferBinder {
 public:
-    GLBufferBinder(Buffer::Usage usage, GLuint buffer);
+    GLBufferBinder(GLenum target, GLuint buffer);
     ~GLBufferBinder();
     DISALLOW_COPY_AND_ASSIGN(GLBufferBinder);
 
 private:
-    void doBindBuffer(GLuint buffer) const;
-
-private:
-    Buffer::Usage _usage;
+    GLenum _target;
     GLuint _buffer;
 };
 

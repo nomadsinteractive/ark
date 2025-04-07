@@ -23,9 +23,8 @@ private:
     void doUpload(GraphicsContext& graphicsContext, Uploader& uploader);
 
 private:
-    Buffer::Usage _usage;
-    GLenum _gl_type;
-    GLenum _gl_usage;
+    GLenum _target;
+    GLenum _usage;
 
     sp<Recycler> _recycler;
 
