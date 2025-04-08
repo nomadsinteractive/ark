@@ -48,7 +48,7 @@ public:
         : _matrix(std::move(matrix)) {
     }
 
-    bool update(uint64_t timestamp) override
+    bool update(const uint64_t timestamp) override
     {
         return _matrix->update(timestamp);
     }
@@ -74,7 +74,7 @@ private:
 
 }
 
-TransformImpl::TransformImpl(TransformType::Type type, sp<Vec4> rotation, sp<Vec3> scale, sp<Vec3> translation)
+TransformImpl::TransformImpl(const TransformType::Type type, sp<Vec4> rotation, sp<Vec3> scale, sp<Vec3> translation)
     : _type(type), _stub(sp<Stub>::make(Stub{{std::move(translation)}, {std::move(rotation), constants::QUATERNION_ONE}, {std::move(scale), constants::SCALE_ONE}}))
 {
     doUpdateDelegate();

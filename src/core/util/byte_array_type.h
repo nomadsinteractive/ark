@@ -53,6 +53,13 @@ public:
     static sp<Vec3> toVec3(sp<ByteArray> self);
 //  [[script::bindings::classmethod]]
     static sp<Vec4> toVec4(sp<ByteArray> self);
+
+//  [[script::bindings::classmethod]]
+    static sp<Mat2> toMat2(sp<ByteArray> self);
+//  [[script::bindings::classmethod]]
+    static sp<Mat3> toMat3(sp<ByteArray> self);
+//  [[script::bindings::classmethod]]
+    static sp<Mat4> toMat4(sp<ByteArray> self);
 };
 
 }

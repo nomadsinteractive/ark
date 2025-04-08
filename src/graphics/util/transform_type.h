@@ -2,7 +2,6 @@
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
-#include "core/base/json.h"
 
 #include "graphics/forwarding.h"
 
@@ -20,7 +19,7 @@ public:
     };
 
 //  [[script::bindings::constructor]]
-    static sp<Transform> create(sp<Vec4> rotation = nullptr, sp<Vec3> scale = nullptr, sp<Vec3> translation = nullptr, TransformType::Type type = TransformType::TYPE_NONE);
+    static sp<Transform> create(sp<Mat4> matrix);
 
 //  [[script::bindings::property]]
     static sp<Vec3> translation(const sp<Transform>& self);

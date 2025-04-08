@@ -15,11 +15,12 @@ namespace {
 class UploaderBufferSnapshot final : public Uploader {
 public:
     UploaderBufferSnapshot(const size_t size, Vector<Buffer::Strip> strips)
-        : Uploader(size), _blocks(std::move(strips)) {
+        : Uploader(size), _strips(std::move(strips)) {
     }
 
-    void upload(Writable& uploader) override {
-        for(const auto& [i, j] : _blocks)
+    void upload(Writable& uploader) override
+    {
+        for(const auto& [i, j] : _strips)
             uploader.write(j.buf(), static_cast<uint32_t>(j.length()), static_cast<uint32_t>(i));
     }
 
@@ -28,16 +29,18 @@ public:
     }
 
 private:
-    Vector<std::pair<size_t, ByteArray::Borrowed>> _blocks;
+    Vector<std::pair<size_t, ByteArray::Borrowed>> _strips;
 };
 
 class RunnableBufferSynchronizer final : public Runnable {
 public:
     RunnableBufferSynchronizer(Buffer buffer, sp<ByteArray> memory, const size_t offset)
-        : _buffer(std::move(buffer)), _memory(std::move(memory)), _offset(offset) {
+        : _buffer(std::move(buffer)), _memory(std::move(memory)), _offset(offset)
+    {
     }
 
-    void run() override {
+    void run() override
+    {
         _buffer.delegate()->downloadBuffer(GraphicsContext::mocked(), _offset, _memory->size(), _memory->buf());
     }
 

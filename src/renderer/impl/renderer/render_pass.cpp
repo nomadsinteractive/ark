@@ -29,33 +29,31 @@ RenderPass::RenderPass(sp<Shader> shader, Buffer vertexBuffer, Buffer indexBuffe
 
 void RenderPass::render(RenderRequest& renderRequest, const V3& /*position*/, const sp<DrawDecorator>& drawDecorator)
 {
-    if(const uint32_t drawCount = static_cast<uint32_t>(_draw_count->val()); drawCount > 0)
+    const uint32_t drawCount = static_cast<uint32_t>(_draw_count->val());
+    DrawingParams drawParam = DrawingParams::DrawElements{0};
+    switch(_draw_procedure)
     {
-        DrawingParams drawParam = DrawingParams::DrawElements{0};
-        switch(_draw_procedure)
+        case Enum::DRAW_PROCEDURE_DRAW_ARRAYS:
+            break;
+        case Enum::DRAW_PROCEDURE_DRAW_ELEMENTS:
+            break;
+        case Enum::DRAW_PROCEDURE_DRAW_INSTANCED:
         {
-            case Enum::DRAW_PROCEDURE_DRAW_ARRAYS:
-                break;
-            case Enum::DRAW_PROCEDURE_DRAW_ELEMENTS:
-                break;
-            case Enum::DRAW_PROCEDURE_DRAW_INSTANCED:
-            {
-                drawParam = DrawingParams::DrawElementsInstanced{0, static_cast<uint32_t>(_index_buffer.size() / sizeof(element_index_t)), _pipeline_bindings->makeInstanceBufferSnapshots()};
-                break;
-            }
-            case Enum::DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT:
-            {
-                drawParam = DrawingParams::DrawMultiElementsIndirect{_pipeline_bindings->makeInstanceBufferSnapshots(), _indirect_buffer.snapshot(), drawCount};
-                break;
-            }
-            default:
-                FATAL("Unknown draw procedure: %d", _draw_procedure);
-                break;
+            drawParam = DrawingParams::DrawElementsInstanced{0, static_cast<uint32_t>(_index_buffer.size() / sizeof(element_index_t)), _pipeline_bindings->makeInstanceBufferSnapshots()};
+            break;
         }
-        DrawingContext drawingContext(_pipeline_bindings, _shader->takeBufferSnapshot(renderRequest, false), _pipeline_bindings->vertices().snapshot(),
-                                      _index_buffer.snapshot(), drawCount, std::move(drawParam));
-        renderRequest.addRenderCommand(drawingContext.toRenderCommand(renderRequest, drawDecorator));
+        case Enum::DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT:
+        {
+            drawParam = DrawingParams::DrawMultiElementsIndirect{_pipeline_bindings->makeInstanceBufferSnapshots(), _indirect_buffer.snapshot(), drawCount};
+            break;
+        }
+        default:
+            FATAL("Unknown draw procedure: %d", _draw_procedure);
+            break;
     }
+    DrawingContext drawingContext(_pipeline_bindings, _shader->takeBufferSnapshot(renderRequest, false), _pipeline_bindings->vertices().snapshot(),
+                                  _index_buffer.snapshot(), drawCount, std::move(drawParam));
+    renderRequest.addRenderCommand(drawingContext.toRenderCommand(renderRequest, drawDecorator));
 }
 
 RenderPass::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

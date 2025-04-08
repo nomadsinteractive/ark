@@ -35,6 +35,14 @@ public:
         return _value;
     }
 
+    bool operator ==(const Mat& other) const {
+        return std::memcmp(_value, other._value, sizeof(_value)) == 0;
+    }
+
+    bool operator !=(const Mat& other) const {
+        return std::memcmp(_value, other._value, sizeof(_value)) != 0;
+    }
+
     template<typename T> const T& mat() const {
         DCHECK(sizeof(_value) == sizeof(T), "Matrix size unmatch: %d != %d", sizeof(_value), sizeof(T));
         return *reinterpret_cast<const T*>(_value);

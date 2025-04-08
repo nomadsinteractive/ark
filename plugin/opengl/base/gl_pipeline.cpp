@@ -465,9 +465,11 @@ public:
 
     void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override
     {
-        const DrawingParams::DrawElements& param = drawingContext._parameters.drawElements();
-        DASSERT(drawingContext._draw_count);
-        GL_CHECK_ERROR(glDrawArrays(_mode, param._start * sizeof(element_index_t), static_cast<GLsizei>(drawingContext._draw_count)));
+        if(drawingContext._draw_count > 0)
+        {
+            const DrawingParams::DrawElements& param = drawingContext._parameters.drawElements();
+            GL_CHECK_ERROR(glDrawArrays(_mode, param._start * sizeof(element_index_t), static_cast<GLsizei>(drawingContext._draw_count)));
+        }
     }
 
 private:
@@ -482,9 +484,11 @@ public:
 
     void draw(GraphicsContext& graphicsContext, const DrawingContext& drawingContext) override
     {
-        const DrawingParams::DrawElements& param = drawingContext._parameters.drawElements();
-        DASSERT(drawingContext._draw_count);
-        GL_CHECK_ERROR(glDrawElements(_mode, static_cast<GLsizei>(drawingContext._draw_count), GLIndexType, reinterpret_cast<GLvoid*>(param._start * sizeof(element_index_t))));
+        if(drawingContext._draw_count > 0)
+        {
+            const DrawingParams::DrawElements& param = drawingContext._parameters.drawElements();
+            GL_CHECK_ERROR(glDrawElements(_mode, static_cast<GLsizei>(drawingContext._draw_count), GLIndexType, reinterpret_cast<GLvoid*>(param._start * sizeof(element_index_t))));
+        }
     }
 
 private:
@@ -501,13 +505,15 @@ public:
     {
         const DrawingParams::DrawElementsInstanced& param = drawingContext._parameters.drawElementsInstanced();
         DASSERT(param._count);
-        DASSERT(drawingContext._draw_count);
-        for(const auto& [i, j] : param._instance_buffer_snapshots)
+        if(drawingContext._draw_count > 0)
         {
-            j.upload(graphicsContext);
-            DCHECK(j.id(), "Invaild Instance Buffer: %d", i);
+            for(const auto& [i, j] : param._instance_buffer_snapshots)
+            {
+                j.upload(graphicsContext);
+                DCHECK(j.id(), "Invaild Instance Buffer: %d", i);
+            }
+            GL_CHECK_ERROR(glDrawElementsInstanced(_mode, static_cast<GLsizei>(param._count), GLIndexType, nullptr, drawingContext._draw_count));
         }
-        GL_CHECK_ERROR(glDrawElementsInstanced(_mode, static_cast<GLsizei>(param._count), GLIndexType, nullptr, drawingContext._draw_count));
     }
 
 private:

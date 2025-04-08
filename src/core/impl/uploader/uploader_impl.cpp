@@ -47,7 +47,6 @@ void UploaderImpl::upload(Writable& writable)
 
 void UploaderImpl::put(const size_t offset, sp<Uploader> input)
 {
-    LOGD("[%p] offset: %zd, size: %zd", this, offset, input->size());
     CHECK(_size >= offset + input->size(), "Input size overflow, size(%zd) is not big enough to fit this one(offset: %zd, size: %zd)", _size, offset, input->size());
     sp<Boolean::Impl>& discarded = _uploader_states[offset];
     if(discarded != nullptr)
@@ -62,7 +61,6 @@ void UploaderImpl::put(const size_t offset, sp<Uploader> input)
 
 void UploaderImpl::remove(const size_t offset)
 {
-    LOGD("[%p] offset: %zd", this, offset);
     const auto iter = _uploader_states.find(offset);
     CHECK(iter != _uploader_states.end(), "Input offset(%zd) unoccupied", offset);
     iter->second->set(true);

@@ -221,6 +221,18 @@ class ByteArray(_Array):
 
     def to_vec4(self) -> "Vec4":
         pass
+    
+    def to_mat2(self) -> "Mat2":
+        pass
+
+    def to_mat3(self) -> "Mat3":
+        pass
+
+    def to_mat4(self) -> "Mat4":
+        pass
+
+    def __getitem__(self, item: slice) -> Self:
+        pass
 
 
 class _Var:
@@ -941,23 +953,23 @@ class Camera:
         return None
 
     @property
-    def view(self) -> 'Mat4':
+    def view(self) -> "Mat4":
         pass
 
     @view.setter
-    def view(self, view: 'Mat4'):
+    def view(self, view: "Mat4"):
         pass
 
     @property
-    def projection(self) -> 'Mat4':
+    def projection(self) -> "Mat4":
         pass
 
     @projection.setter
-    def projection(self, projection: 'Mat4'):
+    def projection(self, projection: "Mat4"):
         pass
 
     @property
-    def vp(self) -> 'Mat4':
+    def vp(self) -> "Mat4":
         return None
 
     def ortho(self, left_top: TYPE_VEC2, right_bottom: TYPE_VEC2, clip: TYPE_VEC2):
@@ -2046,7 +2058,7 @@ class Transform(Mat4):
     TYPE_LINEAR_2D = 1
     TYPE_LINEAR_3D = 2
 
-    def __init__(self, rotation: Optional[TYPE_VEC4] = None, scale: Optional[TYPE_VEC3] = None, translation: Optional[TYPE_VEC3] = None, type: int = TYPE_NONE):
+    def __init__(self, matrix: Mat4):
         pass
 
     @property

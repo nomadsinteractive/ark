@@ -2,6 +2,7 @@
 
 #include "core/base/bean_factory.h"
 #include "core/base/named_hash.h"
+#include "core/components/with_id.h"
 #include "core/components/with_tag.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/inf/variable.h"
@@ -9,16 +10,16 @@
 #include "core/util/updatable_util.h"
 
 #include "graphics/impl/transform/transform_impl.h"
+#include "graphics/base/transform_3d.h"
 #include "graphics/components/rotation.h"
 #include "graphics/components/translation.h"
 #include "graphics/util/vec3_type.h"
 
 #include "renderer/base/model.h"
+#include "renderer/base/shader.h"
 #include "renderer/base/varyings.h"
 
 #include "app/view/view.h"
-#include "core/components/with_id.h"
-#include "renderer/base/shader.h"
 
 namespace ark {
 
@@ -268,7 +269,7 @@ void RenderObject::onWire(const WiringContext& context, const Box& self)
         sp<Vec4> rotation = context.getComponent<Rotation>();
         //TODO: Scale and translation
         if(rotation)
-            setTransform(TransformType::create(std::move(rotation), nullptr, nullptr, TransformType::TYPE_LINEAR_3D));
+            setTransform(sp<Transform>::make<Transform3D>(std::move(rotation)));
     }
 
     if(sp<Boolean> discarded = context.getComponent<Discarded>())
