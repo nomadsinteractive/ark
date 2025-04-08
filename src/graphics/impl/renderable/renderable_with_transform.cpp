@@ -12,7 +12,7 @@ public:
         : _transform(std::move(transform)), _matrix(matrix), _origin(origin) {
     }
 
-    bool update(uint64_t timestamp) override
+    bool update(const uint64_t timestamp) override
     {
         return _transform->update(timestamp);
     }

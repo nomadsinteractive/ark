@@ -35,9 +35,9 @@ public:
     }
 
 private:
-    Timestamp _timestamp;
     sp<Variable<T>> _delegate;
     Wrapper<Variable<T>>& _wrapper;
+    Timestamp _timestamp;
 };
 
 }

@@ -32,6 +32,7 @@ TYPE_FLOAT3 = tuple[float, float, float]
 TYPE_FLOAT4 = tuple[float, float, float, float]
 TYPE_M4 = tuple[TYPE_FLOAT4, TYPE_FLOAT4, TYPE_FLOAT4, TYPE_FLOAT4]
 TYPE_NAMED_HASH = Union[int, str]
+TYPE_RUNNABLE = Union["Runnable", Callable[[], None]]
 
 
 def logd(*args):
@@ -362,6 +363,9 @@ class Behavior:
         pass
 
     def __getitem__(self, name: str) -> Runnable:
+        pass
+
+    def create_runnable(self, name: str) -> Optional[Runnable]:
         pass
 
     def create_collision_callback(self, on_begin_contact:str = 'on_begin_contact', on_end_contact: str = 'on_end_contact') -> "CollisionCallback":
@@ -2430,7 +2434,7 @@ class EventDispatcher(EventListener):
     def on_event(self, event):
         pass
 
-    def on_key_event(self, code, on_press: Optional[Runnable] = None, on_release: Optional[Runnable] = None, on_repeat: Optional[Runnable] = None):
+    def on_key_event(self, code, on_press: Optional[TYPE_RUNNABLE] = None, on_release: Optional[TYPE_RUNNABLE] = None, on_repeat: Optional[TYPE_RUNNABLE] = None):
         pass
 
     def on_motion_event(self, on_press: Optional[EventListener] = None, on_release: Optional[EventListener] = None, on_click: Optional[EventListener] = None, on_move: Optional[EventListener] = None):

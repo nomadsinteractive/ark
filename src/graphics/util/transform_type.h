@@ -7,6 +7,7 @@
 
 namespace ark {
 
+//[[script::bindings::extends(Mat4)]]
 //[[script::bindings::class("Transform")]]
 class ARK_API TransformType {
 public:
@@ -36,7 +37,7 @@ public:
 //  [[script::bindings::property]]
     static void setScale(const sp<Transform>& self, sp<Vec3> scale);
 
-//  [[script::bindings::auto]]
+//  [[script::bindings::classmethod]]
     static void reset(const sp<Transform>& self, sp<Mat4> matrix);
 };
 

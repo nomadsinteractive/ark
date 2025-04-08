@@ -16,7 +16,6 @@
 namespace ark {
 
 namespace {
-
 class TransformNone final : public Transform {
 public:
     TransformNone() = default;
@@ -42,15 +41,17 @@ public:
     }
 };
 
-class TransformDelegateMat4 final : public Transform {
+}
+
+class TransformImpl::TransformDelegateMat4 final : public Transform {
 public:
-    TransformDelegateMat4(sp<Mat4> matrix)
-        : _matrix(std::move(matrix)) {
+    TransformDelegateMat4(const TransformImpl& transform, sp<Mat4> matrix)
+        : _transform(transform), _matrix(std::move(matrix)) {
     }
 
     bool update(const uint64_t timestamp) override
     {
-        return _matrix->update(timestamp);
+        return UpdatableUtil::update(timestamp, _transform._stub, _matrix);
     }
 
     Snapshot snapshot() override
@@ -69,10 +70,9 @@ public:
     }
 
 private:
+    const TransformImpl& _transform;
     sp<Mat4> _matrix;
 };
-
-}
 
 TransformImpl::TransformImpl(const TransformType::Type type, sp<Vec4> rotation, sp<Vec3> scale, sp<Vec3> translation)
     : _type(type), _stub(sp<Stub>::make(Stub{{std::move(translation)}, {std::move(rotation), constants::QUATERNION_ONE}, {std::move(scale), constants::SCALE_ONE}}))
@@ -87,7 +87,7 @@ TransformImpl::TransformImpl(sp<Transform> delegate)
 }
 
 TransformImpl::TransformImpl(sp<Mat4> delegate)
-    : TransformImpl(sp<Transform>::make<TransformDelegateMat4>(std::move(delegate)))
+    : TransformImpl(sp<Transform>::make<TransformDelegateMat4>(*this, std::move(delegate)))
 {
 }
 
@@ -106,7 +106,7 @@ M4 TransformImpl::toMatrix(const Snapshot& snapshot)
     return _wrapped->toMatrix(snapshot);
 }
 
-bool TransformImpl::update(uint64_t timestamp)
+bool TransformImpl::update(const uint64_t timestamp)
 {
     return _wrapped->update(timestamp);
 }
@@ -152,22 +152,20 @@ void TransformImpl::setTranslation(sp<Vec3> translation)
 void TransformImpl::reset(sp<Mat4> transform)
 {
     _type = TransformType::TYPE_DELEGATED;
-    _wrapped = sp<Transform>::make<TransformDelegateMat4>(std::move(transform));
+    _wrapped = sp<Transform>::make<TransformDelegateMat4>(*this, std::move(transform));
     doUpdateDelegate();
 }
 
 void TransformImpl::doUpdateDelegate()
 {
-    if(_type != TransformType::TYPE_NONE)
-    {
-        if(_type != TransformType::TYPE_DELEGATED)
-            _wrapped = makeDelegate();
-    }
+    _stub->_timestamp.markDirty();
+    if(_type != TransformType::TYPE_NONE && _type != TransformType::TYPE_DELEGATED)
+        _wrapped = makeDelegate();
 }
 
-bool TransformImpl::Stub::update(uint64_t timestamp) const
+bool TransformImpl::Stub::update(const uint64_t timestamp) const
 {
-    return UpdatableUtil::update(timestamp, _translation, _rotation, _scale);
+    return UpdatableUtil::update(timestamp, _translation, _rotation, _scale, _timestamp);
 }
 
 sp<Transform> TransformImpl::makeDelegate() const

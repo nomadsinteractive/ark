@@ -1,5 +1,6 @@
 #include "graphics/util/transform_type.h"
 
+#include "core/impl/variable/variable_dirty_mark.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/impl/transform/transform_impl.h"

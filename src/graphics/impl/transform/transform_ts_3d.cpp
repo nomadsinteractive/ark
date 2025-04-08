@@ -24,7 +24,7 @@ TransformTS3D::TransformTS3D(const TransformImpl& transform)
 
 bool TransformTS3D::update(uint64_t timestamp)
 {
-    return UpdatableUtil::update(timestamp, _stub->_translation, _stub->_scale);
+    return _stub->update(timestamp);
 }
 
 Transform::Snapshot TransformTS3D::snapshot()

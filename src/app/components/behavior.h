@@ -26,6 +26,8 @@ public:
     sp<Runnable> subscribe(StringView name);
 
 //  [[script::bindings::auto]]
+    sp<Runnable> createRunnable(StringView name);
+//  [[script::bindings::auto]]
     sp<CollisionCallback> createCollisionCallback(StringView onBeginContact = "on_begin_contact", StringView onEndContact = "on_end_contact");
 //  [[script::bindings::auto]]
     sp<EventListener> createEventListener(StringView onEvent = "on_event");
@@ -44,6 +46,9 @@ public:
     };
 
     sp<Method> getMethod(StringView name);
+
+private:
+    sp<Runnable> doCreateRunnable(Box function);
 
 private:
     sp<Interpreter> _interpreter;

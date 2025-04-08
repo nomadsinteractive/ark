@@ -105,9 +105,14 @@ sp<Runnable> Behavior::subscribe(const StringView name)
 {
     Box function = _interpreter->attr(_delegate, name);
     CHECK(function, "Object has no attribute \"%s\"", name.data());
-    sp<RunnableImpl> runnable = sp<RunnableImpl>::make(_interpreter, function);
-    _with_debris.track(runnable);
-    return runnable;
+    return doCreateRunnable(std::move(function));
+}
+
+sp<Runnable> Behavior::createRunnable(const StringView name)
+{
+    if(Box function = _interpreter->attr(_delegate, name))
+        return doCreateRunnable(std::move(function));
+    return nullptr;
 }
 
 sp<CollisionCallback> Behavior::createCollisionCallback(const StringView onBeginContact, const StringView onEndContact)
@@ -121,6 +126,13 @@ sp<CollisionCallback> Behavior::createCollisionCallback(const StringView onBegin
 sp<EventListener> Behavior::createEventListener(const StringView onEvent)
 {
     return sp<EventListener>::make<EventListenerImpl>(getMethod(onEvent));
+}
+
+sp<Runnable> Behavior::doCreateRunnable(Box function)
+{
+    sp<RunnableImpl> runnable = sp<RunnableImpl>::make(_interpreter, std::move(function));
+    _with_debris.track(runnable);
+    return runnable;
 }
 
 Behavior::Method::Method(sp<Interpreter> interpreter, Box function)

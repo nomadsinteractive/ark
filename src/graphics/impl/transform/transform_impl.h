@@ -50,8 +50,12 @@ private:
         SafeVar<Vec4> _rotation;
         SafeVar<Vec3> _scale;
 
+        Timestamp _timestamp;
+
         bool update(uint64_t timestamp) const;
     };
+
+    class TransformDelegateMat4;
 
 private:
     TransformType::Type _type;

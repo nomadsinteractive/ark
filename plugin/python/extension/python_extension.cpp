@@ -110,13 +110,10 @@ void PythonExtension::logErr() const
 
 bool PythonExtension::exceptErr(PyObject* type) const
 {
-    if(PyObject* err = PyErr_Occurred())
+    if(PyObject* err = PyErr_Occurred(); err && PyErr_GivenExceptionMatches(err, type))
     {
-        if(PyErr_GivenExceptionMatches(err, type))
-        {
-            PyErr_Clear();
-            return true;
-        }
+        PyErr_Clear();
+        return true;
     }
     logErr();
     return false;

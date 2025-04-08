@@ -173,10 +173,10 @@ Box PythonInterpreter::call(const Box& func, const Interpreter::Arguments& args)
         return r;
     }
     PythonExtension::instance().logErr();
-    return Box();
+    return {};
 }
 
-Box PythonInterpreter::attr(const Box& obj, StringView name)
+Box PythonInterpreter::attr(const Box& obj, const StringView name)
 {
     DCHECK_THREAD_FLAG();
     if(!obj)
@@ -185,8 +185,8 @@ Box PythonInterpreter::attr(const Box& obj, StringView name)
     const PyInstance pyobj = PyInstance::steal(PyCast::toPyObject(obj));
     ASSERT(!pyobj.isNullptr());
     const PyInstance pyattr = pyobj.getAttr(name.data());
-    if(PyErr_Occurred())
-        PythonExtension::instance().logErr();
+    if(PythonExtension::instance().exceptErr(PyExc_AttributeError))
+        return {};
     return pyattr.toBox();
 }
 
