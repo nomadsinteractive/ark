@@ -41,7 +41,9 @@ private:
 Generator::Generator(const NoiseType type, const int32_t seed, const float frequence)
     : _seed(seed), _frequency(frequence)
 {
-    if(type == NOISE_TYPE_SIMPLEX)
+    if(type == NOISE_TYPE_CELLULAR)
+        _source_generator = FastNoise::New<FastNoise::CellularDistance>();
+    else if(type == NOISE_TYPE_SIMPLEX)
         _source_generator = FastNoise::New<FastNoise::Simplex>();
     else if(type == NOISE_TYPE_PERLIN)
         _source_generator = FastNoise::New<FastNoise::Perlin>();

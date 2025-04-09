@@ -15,6 +15,7 @@ class ARK_PLUGIN_NOISE_API Generator {
 public:
 //  [[script::bindings::enumeration]]
     enum NoiseType {
+        NOISE_TYPE_CELLULAR,
         NOISE_TYPE_SIMPLEX,
         NOISE_TYPE_PERLIN
     };

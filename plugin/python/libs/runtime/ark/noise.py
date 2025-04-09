@@ -4,8 +4,9 @@ from ark import FloatArray, Future
 
 
 class Generator:
-    NOISE_TYPE_SIMPLEX = 0
-    NOISE_TYPE_PERLIN = 0
+    NOISE_TYPE_CELLULAR = 0
+    NOISE_TYPE_SIMPLEX = 1
+    NOISE_TYPE_PERLIN = 2
 
     def __init__(self, noise_type: int = NOISE_TYPE_SIMPLEX, seed: int = 0, frequence: float = 1.0):
         pass
