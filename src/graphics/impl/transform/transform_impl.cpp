@@ -16,6 +16,7 @@
 namespace ark {
 
 namespace {
+
 class TransformNone final : public Transform {
 public:
     TransformNone() = default;

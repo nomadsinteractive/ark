@@ -16,7 +16,7 @@ public:
         ID_TYPE_EXPRESSION = '{'
     };
     Identifier() = default;
-    Identifier(Type type, String package, String val, String valueType = {}, bool isOptional = false);
+    Identifier(Type type, String package, String value, String valueType = {}, bool isOptional = false);
 
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Identifier);
 

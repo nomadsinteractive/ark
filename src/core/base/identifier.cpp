@@ -7,7 +7,7 @@ namespace ark {
 
 namespace {
 
-bool parseAndValidate(const String& s, String& package, String& value, bool strictMode)
+bool parseAndValidate(const String& s, String& package, String& value, const bool strictMode)
 {
     if(auto [packageCut, valueOpt] = s.cut(':'); valueOpt)
     {
@@ -35,7 +35,7 @@ bool parseTypeAndValue(const String& s, String& type, String& value)
     return false;
 }
 
-Optional<Identifier> tryParse(Identifier::Type tokenType, const String& s, bool strict)
+Optional<Identifier> tryParse(const Identifier::Type tokenType, const String& s, const bool strict)
 {
     String package;
     String value;
@@ -66,7 +66,7 @@ Optional<Identifier> tryParse(Identifier::Type tokenType, const String& s, bool 
 
 }
 
-Identifier::Identifier(Type type, String package, String value, String valueType, bool isOptional)
+Identifier::Identifier(const Type type, String package, String value, String valueType, const bool isOptional)
     : _type(type), _package(std::move(package)), _value(std::move(value)), _value_type(std::move(valueType)), _is_optional(isOptional)
 {
 }

@@ -60,7 +60,7 @@ bool isCJK(const int32_t c)
            Math::between<int32_t>(0x2B740, 0x2B81F, c) || Math::between<int32_t>(0x2F800, 0x2FA1F, c);
 }
 
-bool isWordBreaker(wchar_t c)
+bool isWordBreaker(const wchar_t c)
 {
     return c != '_' && !std::iswalpha(c);
 }
@@ -76,11 +76,11 @@ V2 getCharacterOffset(const Model& model)
     return {bitmapPos.x(), bitmapOccupySize.y() - bitmapPos.y() - bitmapContentSize.y()};
 }
 
-std::vector<Character> toLayoutCharacters(const GlyphContents& glyphs, ModelLoader& modelLoader)
+Vector<Character> toLayoutCharacters(const GlyphContents& glyphs, ModelLoader& modelLoader)
 {
     HashMap<wchar_t, std::tuple<sp<Model>, V2, bool, bool>> mmap;
     float integral = 0;
-    std::vector<Character> layoutChars;
+    Vector<Character> layoutChars;
     layoutChars.reserve(glyphs.size());
     for(const sp<Glyph>& i : glyphs)
     {
@@ -118,7 +118,7 @@ GlyphContents makeGlyphs(GlyphMaker& gm, const std::wstring& text)
     return glyphs;
 }
 
-void doFlowLayout(const std::vector<Layout::Hierarchy>& childNodes, float letterSpacing, float flowX, float flowY)
+void doFlowLayout(const Vector<Layout::Hierarchy>& childNodes, const float letterSpacing, float flowX, const float flowY)
 {
     for(const Layout::Hierarchy& i : childNodes) {
         Layout::Node& node = i._node;
@@ -215,7 +215,7 @@ struct UpdatableParagraph final : Updatable {
         return false;
     }
 
-    void doParagraphLayout(const std::vector<Layout::Hierarchy>& childNodes, float flowx, float flowy, float boundary, float layoutDirection) const
+    void doParagraphLayout(const Vector<Layout::Hierarchy>& childNodes, float flowx, float flowy, float boundary, float layoutDirection) const
     {
         size_t begin = 0, end = 1;
         const float paragraphX = flowx;
@@ -249,7 +249,7 @@ struct UpdatableParagraph final : Updatable {
         }
     }
 
-    void place(const std::vector<Layout::Hierarchy>& childNodes, size_t begin, size_t end, float& flowx, float& flowy) const
+    void place(const Vector<Layout::Hierarchy>& childNodes, size_t begin, size_t end, float& flowx, float& flowy) const
     {
         for(size_t i = begin; i < end; ++i)
         {
@@ -478,9 +478,9 @@ struct Text::Content {
     sp<Boundaries> _boundaries;
 
     std::wstring _text_unicode;
-    std::vector<sp<Glyph>> _glyphs;
-    std::vector<Character> _layout_chars;
-    std::vector<sp<RenderObject>> _render_objects;
+    Vector<sp<Glyph>> _glyphs;
+    Vector<Character> _layout_chars;
+    Vector<sp<RenderObject>> _render_objects;
 
     sp<LayerContext> _layer_context;
     sp<Updatable> _updatable_layout;
@@ -494,7 +494,7 @@ public:
         : RenderBatch(std::move(discarded)), _content(std::move(content)) {
     }
 
-    std::vector<sp<LayerContext>>& snapshot(const RenderRequest& renderRequest) override {
+    Vector<sp<LayerContext>>& snapshot(const RenderRequest& renderRequest) override {
         _layer_contexts.clear();
         _content->update(renderRequest.timestamp());
         _layer_contexts.push_back(_content->_layer_context);
@@ -503,7 +503,7 @@ public:
 
 private:
     sp<Text::Content> _content;
-    std::vector<sp<LayerContext>> _layer_contexts;
+    Vector<sp<LayerContext>> _layer_contexts;
 };
 
 Text::Text(sp<RenderLayer> renderLayer, sp<StringVar> text, sp<Vec3> position, sp<LayoutParam> layoutParam, sp<GlyphMaker> glyphMaker, sp<Mat4> transform, float letterSpacing, float lineHeight, float lineIndent)
