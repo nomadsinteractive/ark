@@ -197,11 +197,11 @@ private:
     RenderResourceList _on_surface_ready;
     RenderResourceList _on_every_frame;
 
-    DList<sp<Updatable>> _on_pre_compose_updatable;
-    DList<sp<Runnable>> _on_pre_compose_runnable;
+    D_FList<sp<Updatable>> _on_pre_compose_updatable;
+    D_FList<sp<Runnable>> _on_pre_compose_runnable;
 
     Vector<UpdatableSynchronized<bool>> _on_pre_render_sync;
-    DList<sp<Runnable>> _on_pre_render_runnable;
+    D_FList<sp<Runnable>> _on_pre_render_runnable;
 
     Vector<Box> _defered_instances;
     std::map<uint32_t, sp<PrimitiveIndexBuffer>> _shared_primitive_index_buffer;

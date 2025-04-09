@@ -66,7 +66,7 @@ public:
     static String sprintf(const char* format, ...);
     static String svprintf(const char* format, va_list args);
 
-    template<typename T> static String join(const T* data, size_t offset, size_t length) {
+    template<typename T> static String join(const T* data, const size_t offset, const size_t length) {
         StringBuffer sb;
         for(size_t i = 0; i < length; i++) {
             if(i != 0)

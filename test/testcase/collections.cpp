@@ -18,7 +18,7 @@ class CollectionsTestCase : public TestCase {
 public:
     virtual int launch() override {
         sp<Discarded> expirable = sp<Discarded>::make();
-        DList<uint32_t> expirableList;
+        D_FList<uint32_t> expirableList;
 
         for(uint32_t i = 0; i < 10; i++)
             expirableList.emplace_back(i, i % 4 == 1 ? expirable : nullptr);

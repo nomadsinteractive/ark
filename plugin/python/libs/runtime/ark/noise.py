@@ -1,6 +1,6 @@
 from typing import Optional
 
-from ark import ByteArray, FloatArray
+from ark import FloatArray, Future
 
 
 class Generator:
@@ -38,5 +38,8 @@ class Generator:
     def set_fractal_weighted_strength(self, weighted_strength: float):
         pass
 
-    def noise_map2d(self, bounds: tuple[int, int, int, int]) -> FloatArray:
+    def noise2d(self, x: float, y: float) -> float:
+        pass
+
+    def noise_map2d(self, bounds: tuple[int, int, int, int], future: Optional[Future] = None) -> FloatArray:
         pass

@@ -1,12 +1,14 @@
 #pragma once
 
 #include "core/base/api.h"
+#include "core/inf/runnable.h"
 #include "core/types/safe_var.h"
 #include "core/types/shared_ptr.h"
 
 namespace ark {
 
-class ARK_API Future {
+//[[script::bindings::extends(Runnable)]]
+class ARK_API Future : public Runnable {
 public:
 //  [[script::bindings::auto]]
     Future(sp<Boolean> canceled = nullptr, sp<Runnable> observer = nullptr, uint32_t countDown = 1);
@@ -22,6 +24,8 @@ public:
     sp<Boolean> isDone() const;
 //  [[script::bindings::property]]
     sp<Boolean> isDoneOrCanceled() const;
+
+    void run() override;
 
 private:
     SafeVar<Boolean> _done;

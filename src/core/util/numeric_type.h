@@ -134,6 +134,9 @@ public:
 //  [[script::bindings::classmethod]]
     static sp<Numeric> dye(sp<Numeric> self, sp<Boolean> condition = nullptr, String message = "");
 
+//  [[script::bindings::operator(str)]]
+    static String str(const sp<Numeric>& self);
+
 //  [[plugin::builder::by-value]]
     class DICTIONARY final : public Builder<Numeric> {
     public:

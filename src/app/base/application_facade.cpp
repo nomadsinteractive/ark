@@ -85,21 +85,6 @@ public:
     sp<Size> _resolution;
 };
 
-class RunnableFutureDone final : public Runnable {
-public:
-    RunnableFutureDone(const sp<Future>& future)
-        : _future(future) {
-    }
-
-    void run() override
-    {
-        _future->notify();
-    }
-
-private:
-    sp<Future> _future;
-};
-
 }
 
 ApplicationFacade::ApplicationFacade(Application& app, const Surface& surface)
@@ -241,14 +226,14 @@ void ApplicationFacade::exit()
 sp<Future> ApplicationFacade::post(sp<Runnable> task, const float delay, sp<Boolean> canceled) const
 {
     sp<Future> future = sp<Future>::make(std::move(canceled), std::move(task));
-    _context->messageLoopApp()->post(sp<Runnable>::make<RunnableFutureDone>(future), delay, future->isDoneOrCanceled());
+    _context->messageLoopApp()->post(future, delay, future->isDoneOrCanceled());
     return future;
 }
 
 sp<Future> ApplicationFacade::schedule(sp<Runnable> task, const float interval, sp<Boolean> canceled, const uint32_t countDown) const
 {
     sp<Future> future = sp<Future>::make(std::move(canceled), std::move(task), countDown);
-    _context->messageLoopApp()->schedule(sp<Runnable>::make<RunnableFutureDone>(future), interval, future->isDoneOrCanceled());
+    _context->messageLoopApp()->schedule(future, interval, future->isDoneOrCanceled());
     return future;
 }
 

@@ -42,7 +42,7 @@ public:
     };
 
 private:
-    Map<RendererType::Priority, DVList<sp<Renderer>>> _phrases;
+    Map<RendererType::Priority, DV_FList<sp<Renderer>>> _phrases;
 };
 
 }

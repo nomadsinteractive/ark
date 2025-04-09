@@ -34,7 +34,7 @@ public:
     const sp<Interpreter>& interpreter() const;
 
     const sp<Executor>& executorMain() const;
-    const sp<ExecutorThreadPool>& executorThreadPool() const;
+    const sp<Executor>& executorThreadPool() const;
 
     const Vector<String>& argv() const;
 
@@ -85,7 +85,7 @@ public:
 
 private:
     void initialize(const document& manifest);
-    void finalize();
+    void finalize() const;
 
     sp<ResourceLoader> createResourceLoaderImpl(const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
     document createResourceLoaderManifest(const document& manifest) const;
@@ -107,12 +107,13 @@ private:
     sp<Clock> _sys_clock;
     sp<Clock> _app_clock;
     sp<ExecutorWorkerStrategy> _worker_strategy;
+
     sp<Executor> _executor_main;
+    sp<Executor> _executor_thread_pool;
 
     sp<MessageLoop> _message_loop_renderer;
     sp<MessageLoop> _message_loop_core;
     sp<MessageLoop> _message_loop_app;
-    sp<ExecutorThreadPool> _executor_thread_pool;
 
     sp<EventListener> _default_event_listener;
 

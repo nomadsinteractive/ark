@@ -84,7 +84,7 @@ public:
             }
         }
         {
-            const sp<Executor> executor = Ark::instance().applicationContext()->executorThreadPool();
+            const sp<Executor>& executor = Ark::instance().applicationContext()->executorThreadPool();
             const sp<LFStack<int32_t>> stack = sp<LFStack<int32_t>>::make();
 
             bool flag1 = true, flag2 = true, flag3 = true;

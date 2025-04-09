@@ -2172,11 +2172,15 @@ class Math:
         pass
 
     @staticmethod
+    def rand() -> int:
+        return 0
+
+    @staticmethod
     def randf() -> float:
         return 0
 
     @staticmethod
-    def randv() -> Numeric:
+    def randfv(a: Optional[Numeric], b: Optional[Numeric], is_volatile: bool = True) -> Numeric:
         return Numeric(0)
 
     @staticmethod

@@ -30,13 +30,9 @@
 using namespace noise;
 using namespace ark::plugin::noise;
 
-namespace ark {
-namespace plugin {
-namespace noise {
+namespace ark::plugin::noise {
 
 namespace {
-
-
 
 void CreateTextureColor (CommandLineOptions& options) {
     options._gradient_points.push_back(GradientPoint(-1.0000, utils::Color (  0,   0,   0, 255)));
@@ -95,6 +91,4 @@ int granite (CommandLineOptions& options)
   return 0;
 }
 
-}
-}
 }

@@ -279,6 +279,7 @@ def gen_class_body_source(genclass, includes, lines, buildables):
             tp_method_lines.append('}')
 
     genclass.gen_tp_call_code(tp_method_lines)
+    genclass.gen_tp_str_code(tp_method_lines)
     genclass.gen_py_type_constructor_codes(tp_method_lines)
 
     tp_method_lines.extend(f'_enum_constants["{k}"] = Box({v});' for k, v in genclass.enum_constants.items())
@@ -610,6 +611,13 @@ class GenClass(object):
             assert len(tp_call_operator_methods) == 1, "Only one tp_call method allowed"
             tp_call_method = tp_call_operator_methods[0]
             lines.append(f'pyTypeObject->tp_call = reinterpret_cast<ternaryfunc>({self.py_class_name}::{tp_call_method.name}_r);')
+
+    def gen_tp_str_code(self, lines):
+        tp_str_operator_methods = [i for i in self.operator_methods() if i.operator == 'str']
+        if tp_str_operator_methods:
+            assert len(tp_str_operator_methods) == 1, "Only one tp_str method allowed"
+            tp_str_method = tp_str_operator_methods[0]
+            lines.append(f'pyTypeObject->tp_str = reinterpret_cast<reprfunc>({self.py_class_name}::{tp_str_method.name}_r);')
 
     def gen_py_type_constructor_codes(self, lines):
         if any(i.is_constructor() for i in self.methods):

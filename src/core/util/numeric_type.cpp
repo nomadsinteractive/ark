@@ -273,6 +273,11 @@ sp<Numeric> NumericType::dye(sp<Numeric> self, sp<Boolean> condition, String mes
     return sp<Numeric>::make<VariableDyed<float>>(std::move(self), std::move(condition), std::move(message));
 }
 
+String NumericType::str(const sp<Numeric>& self)
+{
+    return Strings::sprintf("%.2f", self->val());
+}
+
 sp<Numeric> NumericType::lerp(const sp<Numeric>& self, const sp<Numeric>& b, const sp<Numeric>& t)
 {
     return sp<Numeric>::make<Lerp<float, float>>(self, b, t);

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <list>
-#include <vector>
 
 #include "core/forwarding.h"
 #include "core/base/api.h"

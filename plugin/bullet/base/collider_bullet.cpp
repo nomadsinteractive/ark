@@ -222,7 +222,7 @@ struct ColliderBullet::Stub final : Runnable {
     op<btConstraintSolver> _solver;
     op<btDiscreteDynamicsWorld> _dynamics_world;
 
-    List<GhostObject, GhostObject::ListFilter> _ghost_objects;
+    FList<GhostObject, GhostObject::ListFilter> _ghost_objects;
 
     sp<Numeric> _app_clock_interval;
 };

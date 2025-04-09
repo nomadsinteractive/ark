@@ -14,7 +14,7 @@ public:
     void pushEventListener(sp<EventListener> eventListener, sp<Boolean> discarded = nullptr);
 
 private:
-    DList<sp<EventListener>> _event_listeners;
+    D_FList<sp<EventListener>> _event_listeners;
 };
 
 }

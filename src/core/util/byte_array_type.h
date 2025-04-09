@@ -40,6 +40,9 @@ public:
 
 //  [[script::bindings::classmethod]]
     static Span toBytes(const sp<ByteArray>& self);
+
+//  [[script::bindings::operator(str)]]
+    static String str(const sp<ByteArray>& self);
 */
 
 //  [[script::bindings::classmethod]]

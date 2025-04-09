@@ -10,16 +10,16 @@ UploaderImpl::UploaderImpl(const size_t size)
 {
 }
 
-UploaderImpl::UploaderImpl(const Map<size_t, sp<Uploader>>& inputMap, const size_t size)
+UploaderImpl::UploaderImpl(const Map<size_t, sp<Uploader>>& uploaderMap, const size_t size)
     : Uploader(size)
 {
-    for(const auto& [i, j] : inputMap)
-        put(i, j);
+    for(const auto& [k, v] : uploaderMap)
+        put(k, v);
 
     if(_size == 0)
         _size = calculateUploaderSize();
     else
-        CHECK(calculateUploaderSize() <= _size, "Input size overflow, size %zd is not long enough to fit all the inputs", _size);
+        CHECK(calculateUploaderSize() <= _size, "Uploader size overflow, size %zd is not long enough to fit all the inputs", _size);
 }
 
 bool UploaderImpl::update(const uint64_t timestamp)
@@ -27,7 +27,7 @@ bool UploaderImpl::update(const uint64_t timestamp)
     bool dirty = false;
     for(UploaderStub& i : _uploaders)
     {
-        i._dirty_updated = i._input->update(timestamp);
+        i._dirty_updated = i._uploader->update(timestamp);
         dirty = dirty || i._dirty_updated || i._dirty_marked;
     }
     return dirty;
@@ -40,29 +40,29 @@ void UploaderImpl::upload(Writable& writable)
         if(i._dirty_updated || i._dirty_marked)
         {
             WritableWithOffset wwo(writable, i._offset);
-            i._input->upload(wwo);
+            i._uploader->upload(wwo);
             i._dirty_marked = false;
         }
 }
 
-void UploaderImpl::put(const size_t offset, sp<Uploader> input)
+void UploaderImpl::put(const size_t offset, sp<Uploader> uploader)
 {
-    CHECK(_size >= offset + input->size(), "Input size overflow, size(%zd) is not big enough to fit this one(offset: %zd, size: %zd)", _size, offset, input->size());
+    CHECK(_size >= offset + uploader->size(), "Uploader size overflow, size(%zd) is not big enough to fit this one(offset: %zd, size: %zd)", _size, offset, uploader->size());
     sp<Boolean::Impl>& discarded = _uploader_states[offset];
     if(discarded != nullptr)
     {
         remove(offset);
-        return put(offset, std::move(input));
+        return put(offset, std::move(uploader));
     }
     if(!discarded)
         discarded = sp<Boolean::Impl>::make(false);
-    _uploaders.emplace_back(UploaderStub(offset, std::move(input), discarded));
+    _uploaders.emplace_back({offset, std::move(uploader), discarded});
 }
 
 void UploaderImpl::remove(const size_t offset)
 {
     const auto iter = _uploader_states.find(offset);
-    CHECK(iter != _uploader_states.end(), "Input offset(%zd) unoccupied", offset);
+    CHECK(iter != _uploader_states.end(), "Uploader offset(%zd) unoccupied", offset);
     iter->second->set(true);
     _uploader_states.erase(iter);
 }
@@ -87,22 +87,11 @@ size_t UploaderImpl::calculateUploaderSize()
     size_t size = 0;
     for(const UploaderStub& i : _uploaders)
     {
-        size_t maxSize = i._offset + i._input->size();
+        size_t maxSize = i._offset + i._uploader->size();
         if(maxSize > size)
             size = maxSize;
     }
     return size;
-}
-
-UploaderImpl::UploaderStub::UploaderStub(size_t offset, sp<Uploader> input, sp<Boolean> discarded)
-    : _offset(offset), _input(std::move(input)), _dirty_updated(true), _dirty_marked(true), _discarded(std::move(discarded))
-{
-    DASSERT(_input);
-}
-
-bool UploaderImpl::UploaderStub::isDiscarded() const
-{
-    return _discarded->val();
 }
 
 }

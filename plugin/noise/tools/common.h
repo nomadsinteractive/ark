@@ -1,14 +1,11 @@
-#ifndef ARK_PLUGIN_NOISE_TOOLS_COMMON_H_
-#define ARK_PLUGIN_NOISE_TOOLS_COMMON_H_
+#pragma once
 
 #include <stdint.h>
 #include <list>
 
 #include "noiseutils.h"
 
-namespace ark {
-namespace plugin {
-namespace noise {
+namespace ark::plugin::noise {
 
 struct GradientPoint {
     GradientPoint(double pos, const ::noise::utils::Color& color);
@@ -43,7 +40,4 @@ void CreateWhiteNoiseTexture(const int seed, int size, const char* filename);
 void CreateTexture(const module::Module& noiseModule, const CommandLineOptions& options);
 
 }
-}
-}
 
-#endif

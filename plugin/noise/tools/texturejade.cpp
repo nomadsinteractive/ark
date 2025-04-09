@@ -29,9 +29,7 @@
 
 using namespace noise;
 
-namespace ark {
-namespace plugin {
-namespace noise {
+namespace ark::plugin::noise {
 
 namespace {
 
@@ -105,6 +103,4 @@ int jade(CommandLineOptions& options)
   return 0;
 }
 
-}
-}
 }

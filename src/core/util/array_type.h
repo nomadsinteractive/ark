@@ -1,12 +1,14 @@
 #pragma once
 
 #include "core/forwarding.h"
-#include "core/base/slice.h"
 #include "core/base/wrapper.h"
+#include "core/base/slice.h"
+#include "core/base/string.h"
 #include "core/inf/array.h"
 #include "core/types/implements.h"
 #include "core/types/optional.h"
 #include "core/types/shared_ptr.h"
+#include "core/util/string_convert.h"
 
 #include "graphics/forwarding.h"
 
@@ -116,6 +118,10 @@ public:
 
     static sp<ByteArray> toByteArray(sp<Array<T>> self) {
         return sp<typename ByteArray::Casted<T>>::make(std::move(self));
+    }
+
+    static String str(const sp<Array<T>>& self) {
+        return StringConvert::repr<sp<Array<T>>>(self);
     }
 
 private:

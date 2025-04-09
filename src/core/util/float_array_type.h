@@ -11,7 +11,6 @@ namespace ark {
 //[[script::bindings::class("FloatArray")]]
 class ARK_API FloatArrayType final : public ArrayType<float> {
 public:
-
 /*
 //  [[script::bindings::constructor]]
     static sp<FloatArray> create(size_t length, float fill = 0);
@@ -44,6 +43,10 @@ public:
     static Span toBytes(const sp<FloatArray>& self);
 //  [[script::bindings::classmethod]]
     static sp<ByteArray> toByteArray(sp<FloatArray> self);
+
+//  [[script::bindings::operator(str)]]
+    static String str(const sp<FloatArray>& self);
+
 */
 
 };

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "noise/api.h"
+
 #include "FastNoise/FastNoise.h"
 
 #include "core/forwarding.h"
@@ -8,9 +9,7 @@
 
 #include "graphics/forwarding.h"
 
-namespace ark {
-namespace plugin {
-namespace noise {
+namespace ark::plugin::noise {
 
 class ARK_PLUGIN_NOISE_API Generator {
 public:
@@ -30,7 +29,7 @@ public:
     void setSeed(int32_t seed);
 
 //  [[script::bindings::property]]
-    float frequency();
+    float frequency() const;
 //  [[script::bindings::property]]
     void setFrequency(float frequency);
 
@@ -44,12 +43,12 @@ public:
     void setFractalWeightedStrength(float weightedStrength);
 
 //  [[script::bindings::auto]]
-    float noise2d(float x, float y);
+    float noise2d(float x, float y) const;
 //  [[script::bindings::auto]]
-    float noise3d(float x, float y, float z);
+    float noise3d(float x, float y, float z) const;
 
 //  [[script::bindings::auto]]
-    sp<FloatArray> noiseMap2d(const RectI& bounds);
+    sp<FloatArray> noiseMap2d(const RectI& bounds, sp<Future> future = nullptr) const;
 
 private:
     void ensureFractalGenerator();
@@ -63,6 +62,4 @@ private:
     FastNoise::SmartNode<FastNoise::Fractal<>> _fractal_generator;
 };
 
-}
-}
 }

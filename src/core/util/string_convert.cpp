@@ -190,6 +190,13 @@ template<> String StringConvert::repr<floatarray>(const floatarray& val)
     return sb.str();
 }
 
+template<> String StringConvert::repr<intarray>(const intarray& val)
+{
+    StringBuffer sb;
+    sb << '[' << Strings::join<int32_t>(val->buf(), 0, val->length()) << ']';
+    return sb.str();
+}
+
 template<> String StringConvert::repr<indexarray>(const indexarray& val)
 {
     StringBuffer sb;

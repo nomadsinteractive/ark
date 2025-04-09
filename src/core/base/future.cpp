@@ -53,4 +53,9 @@ sp<Boolean> Future::isDoneOrCanceled() const
     return BooleanType::__or__(_done.toVar(), _canceled.toVar());
 }
 
+void Future::run()
+{
+    notify();
+}
+
 }

@@ -120,14 +120,14 @@ public:
     }
 
     sp<MessageLoop> _message_loop;
-    UList<sp<MessageLoop>> _app_message_loops;
+    U_FList<sp<MessageLoop>> _app_message_loops;
 };
 
 ApplicationContext::ApplicationContext(sp<ApplicationBundle> applicationBundle, sp<RenderEngine> renderEngine)
     : _ticker(sp<Ticker>::make()), _cursor_position(sp<Vec2Impl>::make()), _cursor_frag_coord(sp<Vec2Impl>::make()), _application_bundle(std::move(applicationBundle)), _render_engine(std::move(renderEngine)),
       _render_controller(sp<RenderController>::make(_render_engine, _application_bundle->bitmapBundle(), _application_bundle->bitmapBoundsBundle())), _app_clock_ticker(sp<Variable<uint64_t>::Impl>::make(0)),
       _app_clock_interval(sp<Numeric::Impl>::make(0)), _sys_clock(sp<Clock>::make(_ticker)), _app_clock(sp<Clock>::make(_app_clock_ticker)), _worker_strategy(sp<ExecutorWorkerStrategy>::make(sp<MessageLoop>::make(_ticker))),
-      _executor_main(sp<ExecutorWorkerThread>::make(_worker_strategy, "Executor")), _executor_thread_pool(sp<ExecutorThreadPool>::make(_executor_main)), _string_table(Global<StringTable>()), _background_color(0, 0, 0), _paused(false)
+      _executor_main(sp<Executor>::make<ExecutorWorkerThread>(_worker_strategy, "Executor")), _executor_thread_pool(sp<Executor>::make<ExecutorThreadPool>(_executor_main)), _string_table(Global<StringTable>()), _background_color(0, 0, 0), _paused(false)
 {
     const Ark& ark = Ark::instance();
 
@@ -152,10 +152,10 @@ void ApplicationContext::initialize(const document& manifest)
         _interpreter = sp<Interpreter>::make<NoneInterpreter>();
 }
 
-void ApplicationContext::finalize()
+void ApplicationContext::finalize() const
 {
     _executor_main.cast<ExecutorWorkerThread>()->terminate();
-    _executor_thread_pool->releaseAll(true);
+    _executor_thread_pool.cast<ExecutorThreadPool>()->releaseAll(true);
     _executor_main.cast<ExecutorWorkerThread>()->tryJoin();
 }
 
@@ -231,7 +231,7 @@ const sp<Executor>& ApplicationContext::executorMain() const
     return _executor_main;
 }
 
-const sp<ExecutorThreadPool>& ApplicationContext::executorThreadPool() const
+const sp<Executor>& ApplicationContext::executorThreadPool() const
 {
     return _executor_thread_pool;
 }

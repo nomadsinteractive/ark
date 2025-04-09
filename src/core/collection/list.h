@@ -29,15 +29,6 @@ public:
         }
     };
 
-    template<typename T> class Disposable {
-    public:
-        Disposable() = default;
-
-        FilterAction operator() (const T& item) const {
-            return item.isDiscarded() ? FILTER_ACTION_REMOVE : FILTER_ACTION_NONE;
-        }
-    };
-
     template<typename T, FilterAction FA1, FilterAction FA2, bool DF> class IsTrue {
     public:
         IsTrue(sp<Boolean> filter)
@@ -82,7 +73,7 @@ public:
     template <typename T> using IsDV = IsBoth<T, IsDiscarded<T>, IsVisible<T>>;
 };
 
-template<typename T, typename Filter> class List {
+template<typename T, typename Filter> class FList {
 private:
     struct Item {
         Item(T item, Filter filter)
@@ -206,9 +197,8 @@ private:
     ListImpl _items;
 };
 
-
-template <typename T> using UList = List<T, typename ListFilters::Unique<T>>;
-template <typename T> using DList = List<T, typename ListFilters::IsDiscarded<T>>;
-template <typename T> using DVList = List<T, typename ListFilters::IsDV<T>>;
+template <typename T> using U_FList = FList<T, typename ListFilters::Unique<T>>;
+template <typename T> using D_FList = FList<T, typename ListFilters::IsDiscarded<T>>;
+template <typename T> using DV_FList = FList<T, typename ListFilters::IsDV<T>>;
 
 }

@@ -10,6 +10,7 @@
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
+#include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
 #include "graphics/base/v4.h"
@@ -189,9 +190,11 @@ public:
     static V4 round(const V4& x);
 
 //  [[script::bindings::auto]]
+    static int32_t rand();
+//  [[script::bindings::auto]]
     static float randf();
 //  [[script::bindings::auto]]
-    static sp<Numeric> randfv(sp<Numeric> a, sp<Numeric> b, bool isVolatile = false);
+    static sp<Numeric> randfv(sp<Numeric> a = nullptr, sp<Numeric> b = nullptr, bool isVolatile = true);
 
 //  [[script::bindings::auto]]
     static float hypot(float dx, float dy);

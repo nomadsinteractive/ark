@@ -25,6 +25,14 @@ namespace ark {
 
 namespace {
 
+class Randomizer {
+public:
+    Randomizer()
+    {
+        std::srand(std::time(nullptr));
+    }
+};
+
 class VolatileRandfv final : public Numeric {
 public:
     VolatileRandfv(sp<Numeric> a, sp<Numeric> b)
@@ -129,34 +137,34 @@ V4 Math::abs(const V4& x)
     return V4(std::abs(x.x()), std::abs(x.y()), std::abs(x.z()), std::abs(x.w()));
 }
 
-float Math::sin(float x)
+float Math::sin(const float x)
 {
     return std::sin(x);
 }
 
 sp<Numeric> Math::sin(const sp<Numeric>& x)
 {
-    return sp<VariableOP1<float>>::make(static_cast<float(*)(float)>(Math::sin), x);
+    return sp<Numeric>::make<VariableOP1<float>>(static_cast<float(*)(float)>(Math::sin), x);
 }
 
-float Math::cos(float x)
+float Math::cos(const float x)
 {
     return std::cos(x);
 }
 
 sp<Numeric> Math::cos(const sp<Numeric>& x)
 {
-    return sp<VariableOP1<float>>::make(static_cast<float(*)(float)>(Math::cos), x);
+    return sp<Numeric>::make<VariableOP1<float>>(static_cast<float(*)(float)>(Math::cos), x);
 }
 
 sp<Numeric> Math::min(sp<Numeric> a1, sp<Numeric> a2)
 {
-    return sp<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::Min<float>>>::make(std::move(a1), std::move(a2));
+    return sp<Numeric>::make<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::Min<float>>>(std::move(a1), std::move(a2));
 }
 
 sp<Numeric> Math::max(sp<Numeric> a1, sp<Numeric> a2)
 {
-    return sp<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::Max<float>>>::make(std::move(a1), std::move(a2));
+    return sp<Numeric>::make<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::Max<float>>>(std::move(a1), std::move(a2));
 }
 
 float Math::acos(float x)
@@ -166,7 +174,7 @@ float Math::acos(float x)
 
 sp<Numeric> Math::acos(const sp<Numeric>& x)
 {
-    return sp<VariableOP1<float>>::make(static_cast<float(*)(float)>(Math::acos), x);
+    return sp<Numeric>::make<VariableOP1<float>>(static_cast<float(*)(float)>(Math::acos), x);
 }
 
 float Math::atan2(float y, float x)
@@ -214,12 +222,18 @@ V4 Math::round(const V4& x)
     return {std::round(x.x()), std::round(x.y()), std::round(x.z()), std::round(x.w())};
 }
 
+int32_t Math::rand()
+{
+    static const Randomizer randomizer;
+    return std::rand();
+}
+
 float Math::randf()
 {
     return rand() / static_cast<float>(RAND_MAX);
 }
 
-sp<Numeric> Math::randfv(sp<Numeric> a, sp<Numeric> b, bool isVolatile)
+sp<Numeric> Math::randfv(sp<Numeric> a, sp<Numeric> b, const bool isVolatile)
 {
     if(isVolatile)
         return sp<Numeric>::make<VolatileRandfv>(std::move(a), std::move(b));

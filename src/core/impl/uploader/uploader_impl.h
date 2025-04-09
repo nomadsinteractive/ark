@@ -9,12 +9,12 @@ namespace ark {
 class UploaderImpl final : public Uploader {
 public:
     UploaderImpl(size_t size);
-    UploaderImpl(const Map<size_t, sp<Uploader>>& inputMap, size_t size = 0);
+    UploaderImpl(const Map<size_t, sp<Uploader>>& uploaderMap, size_t size = 0);
 
     bool update(uint64_t timestamp) override;
     void upload(Writable& writable) override;
 
-    void put(size_t offset, sp<Uploader> input);
+    void put(size_t offset, sp<Uploader> uploader);
     void remove(size_t offset);
 
     void reset(sp<Uploader> uploader);
@@ -22,22 +22,27 @@ public:
 
 private:
     struct UploaderStub {
-        UploaderStub(size_t offset, sp<Uploader> input, sp<Boolean> discarded);
-
-        bool isDiscarded() const;
-
         size_t _offset;
-        sp<Uploader> _input;
-        bool _dirty_updated;
-        bool _dirty_marked;
+        sp<Uploader> _uploader;
         sp<Boolean> _discarded;
+        bool _dirty_updated = true;
+        bool _dirty_marked = true;
     };
 
     size_t calculateUploaderSize();
 
+    class Discardable {
+    public:
+        Discardable() = default;
+
+        FilterAction operator() (const UploaderStub& item) const {
+            return item._discarded->val() ? FILTER_ACTION_REMOVE : FILTER_ACTION_NONE;
+        }
+    };
+
 private:
     Map<size_t, sp<Boolean::Impl>> _uploader_states;
-    List<UploaderStub, ListFilters::Disposable<UploaderStub>> _uploaders;
+    FList<UploaderStub, Discardable> _uploaders;
 };
 
 }
