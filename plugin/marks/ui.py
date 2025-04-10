@@ -81,9 +81,9 @@ class ConsoleCommand:
 
 
 class PropertyBundle:
-    def __init__(self, input_fields: list[InputField]):
+    def __init__(self, input_fields: list[InputField] = None):
         self._items = []
-        self._input_fields = input_fields
+        self._input_fields = input_fields or []
 
     @property
     def input_fields(self) -> list[InputField]:
@@ -95,10 +95,9 @@ class PropertyBundle:
         self._input_fields.append(input_field)
         return value
 
-    def dispose(self):
-        for i in self._items:
-            self._input_fields.remove(i)
-        self._items = []
+    def build(self, builder: dear_imgui.WidgetBuilder):
+        for i in self._input_fields:
+            i.build(builder)
 
 
 class VisibilityController:
@@ -288,7 +287,7 @@ class ConsoleWindow(Window):
 
             if isinstance(result, Window):
                 result.show()
-            else:
+            elif not isinstance(result, bool):
                 builder = dear_imgui.WidgetBuilder(self._imgui)
                 builder.separator()
                 builder.add_widget(self._make_tab_panel_widget(ConsoleCommand('', result), tab_panel))
