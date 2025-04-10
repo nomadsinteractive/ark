@@ -602,6 +602,9 @@ class Texture:
     def size(self) -> 'Size':
         return Size(0, 0)
 
+    def reset(self, texture: "Texture"):
+        pass
+
 
 class RenderController:
     US_ONCE = 0

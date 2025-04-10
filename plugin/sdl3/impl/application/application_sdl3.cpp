@@ -150,8 +150,8 @@ private:
 
 class SDLApplicationController final : public ApplicationController {
 public:
-    SDLApplicationController(sp<ApplicationContext> applicationContext)
-        : _application_context(std::move(applicationContext)) {
+    SDLApplicationController(sp<ApplicationContext> applicationContext, SDL_Window* mainWindow)
+        : _application_context(std::move(applicationContext)), _main_window(mainWindow) {
     }
 
     Box createCursor(const sp<Bitmap>& bitmap, int32_t hotX, int32_t hotY) override {
@@ -243,12 +243,21 @@ public:
 #endif
     }
 
+    void setTextInput(const bool enabled) override
+    {
+        if(enabled && !SDL_TextInputActive(_main_window))
+            SDL_StartTextInput(_main_window);
+        else if(!enabled && SDL_TextInputActive(_main_window))
+            SDL_StopTextInput(_main_window);
+    }
+
     void exit() override {
         gQuit = true;
     }
 
 private:
     sp<ApplicationContext> _application_context;
+    SDL_Window* _main_window;
 };
 
 V2 toFragCoordXY(const V2& xy, Ark::RendererCoordinateSystem rcs, float surfaceHeight)
@@ -271,9 +280,10 @@ int32_t toWindowPosition(int32_t pos)
 
 ApplicationSDL3::ApplicationSDL3(sp<ApplicationDelegate> applicationDelegate, sp<ApplicationContext> applicationContext, const ApplicationManifest& manifest)
     : Application(std::move(applicationDelegate), applicationContext, manifest), _main_window(nullptr), _cond(SDL_CreateCondition()), _lock(SDL_CreateMutex()),
-      _controller(sp<SDLApplicationController>::make(std::move(applicationContext))), _vsync(manifest.renderer()._vsync)
+      _vsync(manifest.renderer()._vsync)
 {
     initialize();
+    _controller = sp<ApplicationController>::make<SDLApplicationController>(std::move(applicationContext), _main_window);
 }
 
 int ApplicationSDL3::run()

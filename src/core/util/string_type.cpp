@@ -16,7 +16,7 @@ namespace ark {
 
 namespace {
 
-class StringVarImpl final : public StringVar {
+class StringVarImpl final : public StringVar, Implements<StringVarImpl, StringVar> {
 public:
     StringVarImpl(const StringView value)
         : _value(value.data()) {

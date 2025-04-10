@@ -7,6 +7,7 @@ class Application;
 class ApplicationContext;
 class ApplicationController;
 class ApplicationDelegate;
+class ApplicationFacade;
 class ApplicationProfiler;
 class ApplicationBundle;
 class Arena;

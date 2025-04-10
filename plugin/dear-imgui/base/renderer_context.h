@@ -17,8 +17,8 @@ public:
     void addDefaultTexture(sp<Texture> texture);
     const sp<DrawCommandPool>& obtainDrawCommandPool(void* texture) const;
 
-    void addTextureRefCount(Texture* texture);
-    void relTextureRefCount(Texture* texture);
+    void addTextureRef(const sp<Texture>& texture);
+    void releaseTextureRef(const sp<Texture>& texture);
 
 private:
     sp<Shader> _shader;

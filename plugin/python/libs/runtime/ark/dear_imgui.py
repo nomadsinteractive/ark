@@ -39,6 +39,9 @@ class WidgetBuilder:
     def button(self, title: str) -> Observer:
         pass
 
+    def checkbox(self, label: str, option: Boolean):
+        pass
+
     def slider_int(self, label: str, value: Integer, v_min: int, v_max: int, prompt_format: str = '%d'):
         pass
 

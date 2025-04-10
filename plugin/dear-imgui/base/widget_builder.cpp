@@ -148,12 +148,12 @@ public:
         : _texture(std::move(texture)), _size(!size && _texture ? Vec3Type::xy(_texture->size()) : std::move(size)), _uv0(*reinterpret_cast<const ImVec2*>(&uv0)), _uv1(*reinterpret_cast<const ImVec2*>(&uv1)),
           _color(std::move(color), {1.0f, 1.0f, 1.0f, 1.0f}), _border_color(std::move(borderColor)), _renderer_context(std::move(rendererContext)) {
         if(_texture)
-            _renderer_context->addTextureRefCount(_texture.get());
+            _renderer_context->addTextureRef(_texture);
         ASSERT(_size);
     }
     ~Image() override {
         if(_texture)
-            _renderer_context->relTextureRefCount(_texture.get());
+            _renderer_context->releaseTextureRef(_texture);
     }
 
     void render() override {

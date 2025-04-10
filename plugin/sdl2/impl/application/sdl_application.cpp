@@ -239,6 +239,14 @@ public:
 #endif
     }
 
+    void setTextInput(const bool enabled) override
+    {
+        if(enabled && !SDL_IsTextInputActive())
+            SDL_StartTextInput();
+        else if(!enabled && SDL_IsTextInputActive())
+            SDL_StopTextInput();
+    }
+
     void exit() override {
         gQuit = true;
     }

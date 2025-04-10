@@ -598,9 +598,9 @@ template<> ARK_PLUGIN_PYTHON_API PyObject* PyCast::toPyObject_impl<RayCastManifo
     return toPyObject_SharedPtr<RayCastManifold>(sp<RayCastManifold>::make(manifold));
 }
 
-template<> ARK_PLUGIN_PYTHON_API PyObject* PyCast::toPyObject_impl<Span>(const Span& strview)
+template<> ARK_PLUGIN_PYTHON_API PyObject* PyCast::toPyObject_impl<StringView>(const StringView& strview)
 {
-    return PyBytes_FromStringAndSize(strview.data(), static_cast<size_t>(strview.size()));
+    return PyUnicode_FromString(strview.data());
 }
 
 template<> ARK_PLUGIN_PYTHON_API PyObject* PyCast::toPyObject_impl<NamedHash>(const NamedHash& obj)

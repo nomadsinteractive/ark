@@ -22,7 +22,9 @@
 #include "renderer/base/render_engine.h"
 
 #include "app/base/application_context.h"
+#include "app/base/application_facade.h"
 #include "app/base/event.h"
+#include "app/inf/application_controller.h"
 
 #include "dear-imgui/base/draw_command_pool.h"
 #include "dear-imgui/base/imgui_context.h"
@@ -48,7 +50,7 @@ private:
     sp<RendererImgui::DrawCommandRecycler> _recycler;
 };
 
-ImGuiKey toImGuiKey(Event::Code code) {
+ImGuiKey toImGuiKey(const Event::Code code) {
     switch(code)
     {
         case Event::CODE_KEYBOARD_LSHIFT:
@@ -111,7 +113,8 @@ ImGuiKey toImGuiKey(Event::Code code) {
 }
 
 RendererImgui::RendererImgui(const sp<Shader>& shader, const sp<Texture>& texture)
-    : _shader(shader), _render_controller(Ark::instance().renderController()), _render_engine(_render_controller->renderEngine()), _texture(texture), _renderer_context(sp<RendererContext>::make(shader, _render_controller))
+    : _shader(shader), _application_controller(Ark::instance().applicationContext()->applicationFacade()->applicationController()), _render_controller(Ark::instance().renderController()), _render_engine(_render_controller->renderEngine()),
+      _texture(texture), _renderer_context(sp<RendererContext>::make(shader, _render_controller))
 {
     _renderer_context->addDefaultTexture(texture);
 }
@@ -147,8 +150,10 @@ void RendererImgui::addRenderer(sp<Renderer> renderer, const Traits& traits)
 
 bool RendererImgui::onEvent(const Event& event)
 {
-    static const int32_t MouseIndex[5] = {0, 2, 1, 0, 0};
+    constexpr int32_t MouseIndex[5] = {0, 2, 1, 0, 0};
     ImGuiIO& io = ImGui::GetIO();
+    _application_controller->setTextInput(io.WantTextInput);
+
     switch(event.action())
     {
     case Event::ACTION_UP:

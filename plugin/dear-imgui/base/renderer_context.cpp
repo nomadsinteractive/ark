@@ -26,19 +26,19 @@ const sp<DrawCommandPool>& RendererContext::obtainDrawCommandPool(void* texture)
     return iter->second;
 }
 
-void RendererContext::addTextureRefCount(Texture* texture)
+void RendererContext::addTextureRef(const sp<Texture>& texture)
 {
     ASSERT(texture);
-    sp<DrawCommandPool>& pool = _draw_commands[texture];
+    sp<DrawCommandPool>& pool = _draw_commands[texture.get()];
     if(!pool)
-        pool = sp<DrawCommandPool>::make(_shader, _render_controller, sp<Texture>::make(*texture));
+        pool = sp<DrawCommandPool>::make(_shader, _render_controller, texture);
     ++ pool->_refcount;
 }
 
-void RendererContext::relTextureRefCount(Texture* texture)
+void RendererContext::releaseTextureRef(const sp<Texture>& texture)
 {
     ASSERT(texture);
-    const auto iter = _draw_commands.find(texture);
+    const auto iter = _draw_commands.find(texture.get());
     DASSERT(iter != _draw_commands.end());
     sp<DrawCommandPool>& pool = iter->second;
     if(-- pool->_refcount <= 0)

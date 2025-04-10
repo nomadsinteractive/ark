@@ -28,6 +28,7 @@ public:
     sp<ResourceLoader> createResourceLoader(const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext);
 
     const sp<ApplicationBundle>& applicationBundle() const;
+    const sp<ApplicationFacade>& applicationFacade() const;
     const sp<RenderEngine>& renderEngine() const;
     const sp<RenderController>& renderController() const;
     const sp<ResourceLoader>& resourceLoader() const;
@@ -100,6 +101,7 @@ private:
     sp<Vec2Impl> _cursor_frag_coord;
 
     sp<ApplicationBundle> _application_bundle;
+    sp<ApplicationFacade> _application_facade;
     sp<RenderEngine> _render_engine;
     sp<RenderController> _render_controller;
     sp<Variable<uint64_t>::Impl> _app_clock_ticker;
@@ -129,6 +131,7 @@ private:
     friend class Ark;
     friend class Application;
     friend class SurfaceUpdater;
+    friend class ApplicationDelegateImpl;
 };
 
 }

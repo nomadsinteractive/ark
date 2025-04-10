@@ -206,6 +206,11 @@ const sp<ApplicationBundle>& ApplicationContext::applicationBundle() const
     return _application_bundle;
 }
 
+const sp<ApplicationFacade>& ApplicationContext::applicationFacade() const
+{
+    return _application_facade;
+}
+
 const sp<RenderEngine>& ApplicationContext::renderEngine() const
 {
     return _render_engine;

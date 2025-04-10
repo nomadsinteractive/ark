@@ -70,6 +70,7 @@ private:
 
 private:
     sp<Shader> _shader;
+    sp<ApplicationController> _application_controller;
     sp<RenderController> _render_controller;
     sp<RenderEngine> _render_engine;
     sp<Texture> _texture;

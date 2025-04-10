@@ -29,14 +29,15 @@ void ApplicationDelegateImpl::onCreate(Application& application, const sp<Surfac
     DASSERT(appResourceLoader);
 
     const sp<Scope> vars = sp<Scope>::make();
-    const sp<ApplicationFacade> applicationFacade = sp<ApplicationFacade>::make(application, surface);
-    vars->put("_application", Box(applicationFacade));
-
+    sp<ApplicationFacade> applicationFacade = sp<ApplicationFacade>::make(application, surface);
     applicationFacade->setBackgroundColor(Documents::getAttribute<Color>(appManifest, "background-color", Color(0, 0, 0)));
 
     const SafeBuilder<Activity> activityBuilder(appResourceLoader->beanFactory().getBuilder<Activity>(appManifest, "activity"));
     if(sp<Activity> activity = activityBuilder.build({}))
         applicationFacade->setActivity(std::move(activity));
+
+    applicationContext->_application_facade = applicationFacade;
+    vars->put("_application", Box(std::move(applicationFacade)));
 
     bool defaultEventListenerSet = false;
     for(const document& i : appManifest->children("script"))

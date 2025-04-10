@@ -20,11 +20,11 @@ class Generator:
         pass
 
     @property
-    def frequence(self) -> float:
+    def frequency(self) -> float:
         return 0
 
-    @frequence.setter
-    def frequence(self, frequence: float):
+    @frequency.setter
+    def frequency(self, frequency: float):
         pass
 
     def set_fractal_octaves(self, octaves: int):
