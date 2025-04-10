@@ -16,6 +16,8 @@ public:
 //  [[script::bindings::constructor]]
     static sp<Uploader> create(sp<ByteArray> value, size_t size = 0);
 //  [[script::bindings::constructor]]
+    static sp<Uploader> create(sp<FloatArray> value, size_t size = 0);
+//  [[script::bindings::constructor]]
     static sp<Uploader> create(sp<IntArray> value, size_t size = 0);
 //  [[script::bindings::constructor]]
     static sp<Uploader> create(sp<Integer> value, size_t size = 0);

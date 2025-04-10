@@ -107,6 +107,7 @@ float Generator::noise3d(const float x, const float y, const float z) const
 
 sp<FloatArray> Generator::noiseMap2d(const RectI& bounds, sp<Future> future) const
 {
+    ASSERT(bounds.width() > 0 && bounds.height() > 0);
     sp<FloatArray> floatArray = FloatArrayType::create(bounds.width() * bounds.height());
     if(future)
         Ark::instance().applicationContext()->executorThreadPool()->execute(sp<Runnable>::make<RunnableGenUniformGrid2D>(_generator, std::move(future), floatArray, bounds, _seed, _frequency));

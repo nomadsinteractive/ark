@@ -16,7 +16,7 @@ namespace ark::plugin::opengl {
 
 namespace {
 
-class TextureUploaderCubemap : public Texture::Uploader {
+class TextureUploaderCubemap final : public Texture::Uploader {
 public:
     TextureUploaderCubemap(std::vector<sp<Variable<bitmap>>> bitmaps)
         : _bitmaps(std::move(bitmaps)) {

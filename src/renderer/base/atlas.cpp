@@ -100,12 +100,12 @@ const sp<Texture>& Atlas::texture() const
     return _texture;
 }
 
-const std::unordered_map<HashId, Atlas::Item>& Atlas::items() const
+const HashMap<HashId, Atlas::Item>& Atlas::items() const
 {
     return _items;
 }
 
-std::unordered_map<HashId, Atlas::Item>& Atlas::items()
+HashMap<HashId, Atlas::Item>& Atlas::items()
 {
     return _items;
 }

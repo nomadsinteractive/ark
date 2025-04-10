@@ -112,7 +112,7 @@ class VisibilityController:
         self._visibility.set(False)
 
 
-class BaseWindow:
+class Window:
     def __init__(self, imgui: Renderer, is_open: Optional[bool]):
         self._imgui = imgui
         self._is_open = None if is_open is None else Boolean(is_open)
@@ -120,30 +120,34 @@ class BaseWindow:
         self._imgui.add_renderer(self._renderer)
 
     @property
+    def title(self) -> str:
+        return ''
+
+    @property
     def is_open(self) -> Optional[Boolean]:
         return self._is_open
 
-    def show(self, title: str, *args, **kwargs):
+    def show(self, args: Any = None):
         if self._is_open is not None:
             self._is_open.set(True)
 
         builder = dear_imgui.WidgetBuilder(self._imgui)
-        builder.begin(title, self._is_open)
-        self.on_show(builder, *args, **kwargs)
+        builder.begin(self.title, self._is_open)
+        self.on_show(builder, args)
         builder.end()
         self._renderer.reset(builder.make_widget().to_renderer())
 
     def hide(self):
         self._is_open.set(False)
 
-    def on_show(self, builder: dear_imgui.WidgetBuilder, **kwargs):
+    def on_show(self, builder: dear_imgui.WidgetBuilder, args: Any):
         pass
 
 
-class MainWindow(BaseWindow):
+class MainWindow(Window):
 
     class ConsoleCommand:
-        def __init__(self, toolbox: 'MainWindow'):
+        def __init__(self, toolbox: "MainWindow"):
             self._toolbox = toolbox
 
         def imgui_show_demo(self):
@@ -152,7 +156,7 @@ class MainWindow(BaseWindow):
         def imgui_show_about(self):
             self._toolbox._imgui_about_is_open.set(True)
 
-    def __init__(self, mark_studio: 'MarkStudio', imgui: Renderer, is_open: Optional[bool] = None, quick_bar_items: Optional[list[QuickBarItem]] = None):
+    def __init__(self, mark_studio: "MarkStudio", imgui: Renderer, is_open: Optional[bool] = None, quick_bar_items: Optional[list[QuickBarItem]] = None):
         super().__init__(imgui, is_open)
         self._mark_studio = mark_studio
         self._quick_bar_items = quick_bar_items or []
@@ -162,15 +166,10 @@ class MainWindow(BaseWindow):
         self._quick_bar_widget = dear_imgui.Widget()
 
     @property
-    def quick_bar_items(self) -> list[QuickBarItem]:
-        return self._quick_bar_items
+    def title(self) -> str:
+        return 'My Ark Studio'
 
-    @quick_bar_items.setter
-    def quick_bar_items(self, quick_bar_items: Optional[list[QuickBarItem]] = None):
-        self._quick_bar_items = quick_bar_items or []
-        self._build_quick_bar()
-
-    def on_show(self, builder: dear_imgui.WidgetBuilder, **kwargs):
+    def on_show(self, builder: dear_imgui.WidgetBuilder, args: Any):
         builder.text('Debugger')
         builder.small_button('Start').add_callback(self.pydevd_start)
         builder.same_line()
@@ -187,7 +186,7 @@ class MainWindow(BaseWindow):
         builder.add_widget(builder.make_demo_widget(self._imgui_demo_is_open))
         builder.add_widget(builder.make_about_widget(self._imgui_about_is_open))
 
-    def _build_quick_bar(self) -> dear_imgui.Widget:
+    def _build_quick_bar(self):
         quick_bar_builder = dear_imgui.WidgetBuilder(self._imgui)
 
         for i, j in enumerate(self._quick_bar_items):
@@ -216,9 +215,13 @@ class MainWindow(BaseWindow):
         return onclick
 
 
-class ConsoleWindow(BaseWindow):
+class ConsoleWindow(Window):
     def __init__(self, imgui: Renderer, is_open: Optional[bool]):
         super().__init__(imgui, is_open)
+
+    @property
+    def title(self) -> str:
+        return 'Console'
 
     def on_show(self, builder: dear_imgui.WidgetBuilder, console_cmds: list[ConsoleCommand]):
         text_cmd = String('')
@@ -283,17 +286,24 @@ class ConsoleWindow(BaseWindow):
             if result is None:
                 return close_main_window()
 
-            builder = dear_imgui.WidgetBuilder(self._imgui)
-            builder.separator()
-            builder.add_widget(self._make_tab_panel_widget(ConsoleCommand('', result), tab_panel))
-            sub_tab_panel.reset(builder.make_widget())
+            if isinstance(result, Window):
+                result.show()
+            else:
+                builder = dear_imgui.WidgetBuilder(self._imgui)
+                builder.separator()
+                builder.add_widget(self._make_tab_panel_widget(ConsoleCommand('', result), tab_panel))
+                sub_tab_panel.reset(builder.make_widget())
 
         return _callback
 
 
-class PropertiesWindow(BaseWindow):
+class PropertiesWindow(Window):
     def __init__(self, imgui: Renderer, is_open: Optional[bool]):
         super().__init__(imgui, is_open)
+
+    @property
+    def title(self) -> str:
+        return 'Properties'
 
     def on_show(self, builder: dear_imgui.WidgetBuilder, properties: Any):
         if isinstance(properties, list):
@@ -303,24 +313,10 @@ class PropertiesWindow(BaseWindow):
             properties.build(builder)
 
 
-class ResourceWindow(BaseWindow):
-    def __init__(self, imgui: Renderer, is_open: Optional[bool]):
-        super().__init__(imgui, is_open)
-        self._textures = []
-
-    @property
-    def textures(self):
-        return self._textures
-
-    def on_show(self, builder: dear_imgui.WidgetBuilder):
-        for i in self._textures:
-            builder.image(i)
-
-
 class MarkStudio:
 
     class CommandDelegate:
-        def __init__(self, mark_studio: 'MarkStudio', properties_visibility: Boolean):
+        def __init__(self, mark_studio: "MarkStudio", properties_visibility: Boolean):
             self._mark_studio = mark_studio
             self._properties = VisibilityController(properties_visibility)
 
@@ -337,28 +333,18 @@ class MarkStudio:
         self._discarded = Boolean(False)
         self._renderer_quickbar = None
         self._renderer_properties = None
-        self._layer_editor_visibility = Boolean(False)
         self._main_window = MainWindow(self, self._imgui, None, quick_bar_items)
         self._console_window = ConsoleWindow(self._imgui, True)
         self._properties_window = PropertiesWindow(self._imgui, True)
-        self._resource_window = ResourceWindow(self._imgui, True)
         self._resolution = resolution
+
+    @property
+    def imgui(self) -> Renderer:
+        return self._imgui
 
     @property
     def discarded(self) -> Boolean:
         return self._discarded
-
-    @property
-    def main_window(self) -> MainWindow:
-        return self._main_window
-
-    @property
-    def properties_window(self) -> PropertiesWindow:
-        return self._properties_window
-
-    @property
-    def resource_window(self) -> ResourceWindow:
-        return self._resource_window
 
     def show_properties(self, properties: Any = None, **kwargs):
         if kwargs:
@@ -367,14 +353,14 @@ class MarkStudio:
         self.show(properties=properties)
 
     def show(self, console_cmds: Optional[list[ConsoleCommand]] = None, properties: Any = None):
-        self._main_window.show('My Ark Studio')
+        self._main_window.show()
 
         if properties:
-            self._properties_window.show('Properties', properties)
+            self._properties_window.show(properties)
         else:
             self._properties_window.hide()
         if console_cmds:
-            self._console_window.show('Console', console_cmds)
+            self._console_window.show(console_cmds)
         else:
             self._console_window.hide()
 
@@ -390,10 +376,6 @@ class MarkStudio:
         self._renderer_quickbar = None
         self._renderer_properties = None
         return True
-
-    def make_default_command_items(self):
-        return [ConsoleCommand('marks', MarkStudio.CommandDelegate(self, self._properties_window.is_open)),
-                ConsoleCommand('tool_box', MainWindow.ConsoleCommand(self._main_window))]
 
 
 _mark_studio: Optional[MarkStudio] = None

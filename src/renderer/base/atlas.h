@@ -55,8 +55,8 @@ public:
 
     Traits& attachments();
 
-    const std::unordered_map<HashId, Item>& items() const;
-    std::unordered_map<HashId, Item>& items();
+    const HashMap<HashId, Item>& items() const;
+    HashMap<HashId, Item>& items();
 
     void add(int32_t id, uint32_t ux, uint32_t uy, uint32_t vx, uint32_t vy, const Rect& bounds, const V2& size, const V2& pivot);
     Item makeItem(uint32_t ux, uint32_t uy, uint32_t vx, uint32_t vy, const Rect& bounds, const V2& size, const V2& pivot) const;
@@ -106,7 +106,7 @@ public:
 
 private:
     sp<Texture> _texture;
-    std::unordered_map<HashId, Item> _items;
+    HashMap<HashId, Item> _items;
 
     Traits _attachments;
 

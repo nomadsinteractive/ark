@@ -61,7 +61,7 @@ ModelLoaderText::GlyphBundle::GlyphBundle(AtlasGlyphAttachment& atlasAttachment,
     ASSERT(_font);
 }
 
-bool ModelLoaderText::GlyphBundle::prepareOne(uint64_t timestamp, int32_t c, int32_t ckey)
+bool ModelLoaderText::GlyphBundle::prepareOne(const uint64_t timestamp, int32_t c, int32_t ckey)
 {
     if(Optional<Alphabet::Metrics> optMetrics = _alphabet->measure(c))
     {
@@ -107,7 +107,7 @@ void ModelLoaderText::GlyphBundle::reload(const uint64_t timestamp)
         ensureGlyphModel(timestamp, i, false);
 }
 
-const ModelLoaderText::GlyphModel& ModelLoaderText::GlyphBundle::ensureGlyphModel(uint64_t timestamp, int32_t c, bool oneshot)
+const ModelLoaderText::GlyphModel& ModelLoaderText::GlyphBundle::ensureGlyphModel(const uint64_t timestamp, const int32_t c, const bool oneshot)
 {
     const auto iter = _glyphs.find(c);
     if(iter == _glyphs.end())
@@ -152,7 +152,7 @@ void ModelLoaderText::AtlasGlyphAttachment::initialize(uint32_t textureWidth, ui
     _bin_pack.Init(textureWidth, textureHeight, false);
 }
 
-bool ModelLoaderText::AtlasGlyphAttachment::resize(uint32_t textureWidth, uint32_t textureHeight)
+bool ModelLoaderText::AtlasGlyphAttachment::resize(const uint32_t textureWidth, const uint32_t textureHeight)
 {
     const uint64_t timestamp = Ark::instance().appClock()->tick();
 
@@ -172,8 +172,8 @@ void ModelLoaderText::AtlasGlyphAttachment::reloadTexture()
 
     _texture_reload_future = sp<Future>::make();
     sp<Size> size = sp<Size>::make(static_cast<float>(_glyph_bitmap->width()), static_cast<float>(_glyph_bitmap->height()));
-    const sp<Texture> texture = Ark::instance().renderController()->createTexture(size, _atlas.texture()->parameters(), sp<Texture::Uploader>::make<Texture::UploaderBitmap>(_glyph_bitmap), RenderController::US_RELOAD, _texture_reload_future);
-    _atlas.texture()->setDelegate(texture->delegate(), std::move(size));
+    const sp<Texture> texture = Ark::instance().renderController()->createTexture(std::move(size), _atlas.texture()->parameters(), sp<Texture::Uploader>::make<Texture::UploaderBitmap>(_glyph_bitmap), RenderController::US_RELOAD, _texture_reload_future);
+    _atlas.texture()->reset(*texture);
 }
 
 ModelLoaderText::GlyphModel::GlyphModel()

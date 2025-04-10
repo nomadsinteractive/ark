@@ -116,7 +116,7 @@ public:
 
         virtual void clear(GraphicsContext& graphicsContext) = 0;
         virtual bool download(GraphicsContext& graphicsContext, Bitmap& bitmap) = 0;
-        virtual void uploadBitmap(GraphicsContext& graphicsContext, const Bitmap& bitmap, const std::vector<sp<ByteArray>>& imagedata) = 0;
+        virtual void uploadBitmap(GraphicsContext& graphicsContext, const Bitmap& bitmap, const Vector<sp<ByteArray>>& imagedata) = 0;
 
     protected:
         Type _type;
@@ -152,12 +152,13 @@ public:
 //  [[script::bindings::property]]
     const sp<Size>& size() const;
 
+//  [[script::bindings::auto]]
+    void reset(const Texture& texture);
+
     const sp<Parameters>& parameters() const;
     void setParameters(sp<Parameters> parameters);
 
     const sp<Delegate>& delegate() const;
-    void setDelegate(sp<Delegate> delegate);
-    void setDelegate(sp<Delegate> delegate, sp<Size> size);
 
     const sp<Uploader>& uploader() const;
 
@@ -176,6 +177,7 @@ public:
         BeanFactory _factory;
         document _manifest;
         SafeBuilder<String> _src;
+        SafeBuilder<Bitmap> _bitmap;
         SafeBuilder<Uploader> _uploader;
         uint32_t _upload_strategy;
     };

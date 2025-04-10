@@ -113,7 +113,7 @@ public:
     void popID();
 
 // [[script::bindings::auto]]
-    void image(sp<Texture> texture, sp<Vec2> size = nullptr, const V2& uv0 = V2(0), const V2& uv1 = V2(1.0f), const sp<Vec4>& color = nullptr, const sp<Vec4>& borderColor = nullptr);
+    void image(sp<Texture> texture, sp<Vec2> size = nullptr, const V2& uv0 = V2(0), const V2& uv1 = V2(1.0f), sp<Vec4> color = nullptr, sp<Vec4> borderColor = nullptr);
 
 // [[script::bindings::auto]]
     sp<Boolean> beginTabBar(String strId, int32_t flags = 0);

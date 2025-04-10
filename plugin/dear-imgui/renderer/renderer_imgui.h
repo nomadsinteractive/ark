@@ -76,7 +76,8 @@ private:
 
     sp<RendererContext> _renderer_context;
 
-    std::vector<sp<Renderer>> _renderers;
+    Vector<sp<Renderer>> _renderers;
+    Vector<sp<Renderer>> _renderer_increasement;
 };
 
 }

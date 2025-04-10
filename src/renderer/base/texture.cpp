@@ -20,7 +20,7 @@ namespace {
 
 class UploaderClear final : public Texture::Uploader {
 public:
-    UploaderClear(const Size& size, Texture::Format format)
+    UploaderClear(const Size& size, const Texture::Format format)
         : _bitmap(static_cast<uint32_t>(size.widthAsFloat()), static_cast<uint32_t>(size.heightAsFloat()), static_cast<uint32_t>(size.widthAsFloat()) * RenderUtil::getPixelSize(format),
                   (format & Texture::FORMAT_RGBA) + 1, true) {
     }
@@ -128,16 +128,10 @@ const sp<Texture::Delegate>& Texture::delegate() const
     return _delegate;
 }
 
-void Texture::setDelegate(sp<Delegate> delegate)
+void Texture::reset(const Texture& texture)
 {
-    _delegate = std::move(delegate);
-    _timestamp.markDirty();
-}
-
-void Texture::setDelegate(sp<Delegate> delegate, sp<Size> size)
-{
-    _delegate = std::move(delegate);
-    _size = std::move(size);
+    _delegate = texture._delegate;
+    _size = texture._size;
     _timestamp.markDirty();
 }
 
@@ -270,7 +264,7 @@ void Texture::Parameters::loadParameters(const document& parameters, BeanFactory
     _wrap_r = getEnumValue(byName, "wrap_r", factory, args, _wrap_r);
 }
 
-Texture::Filter Texture::Parameters::getEnumValue(Dictionary<document>& dict, const String& name, BeanFactory& factory, const Scope& args, Texture::Filter defValue)
+Texture::Filter Texture::Parameters::getEnumValue(Dictionary<document>& dict, const String& name, BeanFactory& factory, const Scope& args, const Texture::Filter defValue)
 {
     const document doc = dict.get(name);
     return doc ? Strings::eval<Texture::Filter>(factory.ensure<String>(doc, constants::VALUE, args)) : defValue;
@@ -287,7 +281,7 @@ Texture::Type Texture::Delegate::type() const
 }
 
 Texture::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
-    : _resource_loader_context(resourceLoaderContext), _factory(factory), _manifest(manifest), _src(factory.getBuilder<String>(manifest, constants::SRC)),
+    : _resource_loader_context(resourceLoaderContext), _factory(factory), _manifest(manifest), _src(factory.getBuilder<String>(manifest, constants::SRC)), _bitmap(factory.getBuilder<Bitmap>(manifest, constants::BITMAP)),
       _uploader(factory.getBuilder<Texture::Uploader>(manifest, constants::UPLOADER)), _upload_strategy(Documents::getAttribute<RenderController::UploadStrategy>(manifest, "upload-strategy", {RenderController::US_ONCE_AND_ON_SURFACE_READY}).bits())
 {
 }
@@ -300,6 +294,9 @@ sp<Texture> Texture::BUILDER::build(const Scope& args)
 
     if(const sp<String> src = _src.build(args))
        return _resource_loader_context->textureBundle()->createTexture(*src, parameters);
+
+    if(sp<Bitmap> bitmap = _bitmap.build(args))
+        return _resource_loader_context->renderController()->createTexture2d(std::move(bitmap), parameters->_format, RenderController::UploadStrategy(_upload_strategy));
 
     const sp<Size> size = _factory.ensureConcreteClassBuilder<Size>(_manifest, constants::SIZE)->build(args);
     CHECK(size->widthAsFloat() != 0 && size->heightAsFloat() != 0, "Cannot build texture from \"%s\"", Documents::toString(_manifest).c_str());

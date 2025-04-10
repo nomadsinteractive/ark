@@ -146,7 +146,7 @@ class Image final : public Widget {
 public:
     Image(sp<Texture> texture, sp<Vec2> size, const V2& uv0, const V2& uv1, sp<Vec4> color, sp<Vec4> borderColor, sp<RendererContext> rendererContext)
         : _texture(std::move(texture)), _size(!size && _texture ? Vec3Type::xy(_texture->size()) : std::move(size)), _uv0(*reinterpret_cast<const ImVec2*>(&uv0)), _uv1(*reinterpret_cast<const ImVec2*>(&uv1)),
-          _color(std::move(color)), _border_color(std::move(borderColor)), _renderer_context(std::move(rendererContext)) {
+          _color(std::move(color), {1.0f, 1.0f, 1.0f, 1.0f}), _border_color(std::move(borderColor)), _renderer_context(std::move(rendererContext)) {
         if(_texture)
             _renderer_context->addTextureRefCount(_texture.get());
         ASSERT(_size);
@@ -158,8 +158,8 @@ public:
 
     void render() override {
         const V2 size = _size->val();
-        const V4 color = _color->val();
-        const V4 borderColor = _border_color->val();
+        const V4 color = _color.val();
+        const V4 borderColor = _border_color.val();
         ImGui::Image(reinterpret_cast<ImTextureID>(_texture ? _texture.get() : nullptr), *reinterpret_cast<const ImVec2*>(&size), _uv0, _uv1, *reinterpret_cast<const ImVec4*>(&color), *reinterpret_cast<const ImVec4*>(&borderColor));
     }
 
@@ -167,8 +167,8 @@ private:
     sp<Texture> _texture;
     sp<Vec2> _size;
     ImVec2 _uv0, _uv1;
-    sp<Vec4> _color;
-    sp<Vec4> _border_color;
+    SafeVar<Vec4> _color;
+    SafeVar<Vec4> _border_color;
 
     sp<RendererContext> _renderer_context;
 };
@@ -595,9 +595,9 @@ void WidgetBuilder::popID()
     addFunctionCall(ImGui::PopID);
 }
 
-void WidgetBuilder::image(sp<Texture> texture, sp<Vec2> size, const V2& uv0, const V2& uv1, const sp<Vec4>& color, const sp<Vec4>& borderColor)
+void WidgetBuilder::image(sp<Texture> texture, sp<Vec2> size, const V2& uv0, const V2& uv1, sp<Vec4> color, sp<Vec4> borderColor)
 {
-    addWidget(sp<Widget>::make<Image>(std::move(texture), std::move(size), uv0, uv1, color ? color : sp<Vec4>::make<Vec4::Const>(V4(1.0f)), borderColor ? borderColor : sp<Vec4>::make<Vec4::Const>(V4(0)), _renderer_context));
+    addWidget(sp<Widget>::make<Image>(std::move(texture), std::move(size), uv0, uv1, std::move(color), std::move(borderColor), _renderer_context));
 }
 
 void WidgetBuilder::sameLine(float localPosX, float spacingW)
@@ -657,12 +657,12 @@ void WidgetBuilder::guizmoViewEdit(const sp<Mat4>& view, sp<Numeric> length, sp<
 
 sp<Widget> WidgetBuilder::makeAboutWidget(sp<Boolean> isOpen)
 {
-    return sp<DemoWindow>::make(ImGui::ShowAboutWindow, std::move(isOpen));
+    return sp<Widget>::make<DemoWindow>(ImGui::ShowAboutWindow, std::move(isOpen));
 }
 
 sp<Widget> WidgetBuilder::makeDemoWidget(sp<Boolean> isOpen)
 {
-    return sp<DemoWindow>::make(ImGui::ShowDemoWindow, std::move(isOpen));
+    return sp<Widget>::make<DemoWindow>(ImGui::ShowDemoWindow, std::move(isOpen));
 }
 
 void WidgetBuilder::addWidgetGroupAndPush(sp<WidgetGroup> widgetGroup)

@@ -1,5 +1,4 @@
-#ifndef ARK_RENDERER_BASE_TEXTURE_PACKER_H_
-#define ARK_RENDERER_BASE_TEXTURE_PACKER_H_
+#pragma once
 
 #include <vector>
 
@@ -38,17 +37,17 @@ private:
         int32_t _y;
     };
 
-    class PackedTextureUploader : public Texture::Uploader {
+    class PackedTextureUploader final : public Texture::Uploader {
     public:
-        PackedTextureUploader(uint32_t width, uint32_t height, uint8_t channels, std::vector<PackedBitmap> bitmaps);
+        PackedTextureUploader(uint32_t width, uint32_t height, uint8_t channels, Vector<PackedBitmap> bitmaps);
 
-        virtual void initialize(GraphicsContext& graphicsContext, Texture::Delegate& delegate) override;
+        void initialize(GraphicsContext& graphicsContext, Texture::Delegate& delegate) override;
 
     private:
         uint32_t _width;
         uint32_t _height;
         uint8_t _channels;
-        std::vector<PackedBitmap> _bitmaps;
+        Vector<PackedBitmap> _bitmaps;
     };
 
 private:
@@ -58,8 +57,7 @@ private:
     sp<Texture> _texture;
     uint8_t _channels;
 
-    std::vector<PackedBitmap> _packed_bitmaps;
+    Vector<PackedBitmap> _packed_bitmaps;
 };
 
 }
-#endif

@@ -125,6 +125,14 @@ void RendererImgui::render(RenderRequest& renderRequest, const V3& position, con
 
     ImGui::NewFrame();
     ImGuizmo::BeginFrame();
+
+    if(!_renderer_increasement.empty())
+    {
+        for(sp<Renderer>& i : _renderer_increasement)
+            _renderers.push_back(std::move(i));
+        _renderer_increasement.clear();
+    }
+
     for(const sp<Renderer>& i : _renderers)
         i->render(renderRequest, position, nullptr);
     ImGui::EndFrame();
@@ -134,7 +142,7 @@ void RendererImgui::render(RenderRequest& renderRequest, const V3& position, con
 
 void RendererImgui::addRenderer(sp<Renderer> renderer, const Traits& traits)
 {
-    _renderers.push_back(std::move(renderer));
+    _renderer_increasement.push_back(std::move(renderer));
 }
 
 bool RendererImgui::onEvent(const Event& event)

@@ -45,13 +45,13 @@ bool GLTexture2D::download(GraphicsContext& /*graphicsContext*/, Bitmap& bitmap)
     return true;
 }
 
-void GLTexture2D::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap& bitmap, const std::vector<sp<ByteArray>>& imagedata)
+void GLTexture2D::uploadBitmap(GraphicsContext& /*graphicContext*/, const Bitmap& bitmap, const Vector<sp<ByteArray>>& imagedata)
 {
     DASSERT(imagedata.size() == 1);
-    uint8_t channels = bitmap.channels();
-    GLenum format = GLUtil::getTextureFormat(_parameters->_usage, _parameters->_format, channels);
-    GLenum pixelType = GLUtil::getPixelType(_parameters->_format, bitmap);
-    GLenum internalFormat = GLUtil::getTextureInternalFormat(_parameters->_usage, _parameters->_format, bitmap);
+    const uint8_t channels = bitmap.channels();
+    const GLenum format = GLUtil::getTextureFormat(_parameters->_usage, _parameters->_format, channels);
+    const GLenum pixelType = GLUtil::getPixelType(_parameters->_format, bitmap);
+    const GLenum internalFormat = GLUtil::getTextureInternalFormat(_parameters->_usage, _parameters->_format, bitmap);
     const sp<ByteArray>& bytes = imagedata.at(0);
     glTexImage2D(GL_TEXTURE_2D, 0, static_cast<GLint>(internalFormat), static_cast<int32_t>(bitmap.width()), static_cast<int32_t>(bitmap.height()), 0, format, pixelType, bytes ? bytes->buf() : nullptr);
     LOGD("Texture Uploaded, id = %d, width = %d, height = %d", static_cast<uint32_t>(id()), bitmap.width(), bitmap.height());

@@ -59,8 +59,7 @@ void TexturePacker::updateTexture()
     if(_channels)
     {
         sp<Texture::Uploader> uploader = sp<PackedTextureUploader>::make(_texture->width(), _texture->height(), _channels, std::move(_packed_bitmaps));
-        const sp<Texture> tex = _render_controller->createTexture(_texture->size(), _texture->parameters(), std::move(uploader));
-        _texture->setDelegate(tex->delegate());
+        _texture->reset(*_render_controller->createTexture(_texture->size(), _texture->parameters(), std::move(uploader)));
     }
 }
 

@@ -274,7 +274,7 @@ const sp<RenderEngine>& RenderController::renderEngine() const
     return _render_engine;
 }
 
-sp<Texture> RenderController::createTexture(sp<Size> size, sp<Texture::Parameters> parameters, sp<Texture::Uploader> uploader, RenderController::UploadStrategy us, sp<Future> future)
+sp<Texture> RenderController::createTexture(sp<Size> size, sp<Texture::Parameters> parameters, sp<Texture::Uploader> uploader, const RenderController::UploadStrategy us, sp<Future> future)
 {
     sp<Texture::Delegate> delegate = _render_engine->rendererFactory()->createTexture(size, parameters);
     DCHECK(delegate, "Unsupported TextureType: %d", parameters->_type);
@@ -283,7 +283,7 @@ sp<Texture> RenderController::createTexture(sp<Size> size, sp<Texture::Parameter
     return texture;
 }
 
-sp<Texture> RenderController::createTexture2d(sp<Bitmap> bitmap, Texture::Format format, UploadStrategy us, sp<Future> future)
+sp<Texture> RenderController::createTexture2d(sp<Bitmap> bitmap, Texture::Format format, const UploadStrategy us, sp<Future> future)
 {
     sp<Size> size = sp<Size>::make(static_cast<float>(bitmap->width()), static_cast<float>(bitmap->height()));
     return createTexture(std::move(size), sp<Texture::Parameters>::make(Texture::TYPE_2D, nullptr, format), sp<Texture::UploaderBitmap>::make(std::move(bitmap)), us, std::move(future));

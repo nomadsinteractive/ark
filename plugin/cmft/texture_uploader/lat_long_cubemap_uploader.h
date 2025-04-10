@@ -1,5 +1,4 @@
-#ifndef ARK_PLUGIN_CMFT_TEXTURE_UPLOADER_LAT_LONG_CUBEMAP_UPLOADER_H_
-#define ARK_PLUGIN_CMFT_TEXTURE_UPLOADER_LAT_LONG_CUBEMAP_UPLOADER_H_
+#pragma once
 
 #include "core/forwarding.h"
 #include "core/inf/builder.h"
@@ -9,22 +8,20 @@
 
 #include "renderer/base/texture.h"
 
-namespace ark {
-namespace plugin {
-namespace cmft {
+namespace ark::plugin::cmft {
 
-class LatLongCubemapUploader : public Texture::Uploader {
+class LatLongCubemapUploader final : public Texture::Uploader {
 public:
     LatLongCubemapUploader(sp<Bitmap> bitmap, sp<Size> size);
 
-    virtual void initialize(GraphicsContext& graphicsContext, Texture::Delegate& delegate) override;
+    void initialize(GraphicsContext& graphicsContext, Texture::Delegate& delegate) override;
 
 //  [[plugin::builder("lat-long")]]
     class BUILDER : public Builder<Texture::Uploader> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Texture::Uploader> build(const Scope& args) override;
+        sp<Texture::Uploader> build(const Scope& args) override;
 
     private:
         sp<Builder<Bitmap>> _bitmap;
@@ -37,7 +34,3 @@ private:
 };
 
 }
-}
-}
-
-#endif

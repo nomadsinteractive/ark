@@ -128,67 +128,72 @@ sp<UploaderImpl> ensureImpl(const sp<Uploader>& self)
 
 }
 
-sp<Uploader> UploaderType::create(sp<ByteArray> value, size_t size)
+sp<Uploader> UploaderType::create(sp<ByteArray> value, const size_t size)
 {
     return reserve(sp<Uploader>::make<UploaderArray<uint8_t>>(std::move(value)), size);
 }
 
-sp<Uploader> UploaderType::create(sp<IntArray> value, size_t size)
+sp<Uploader> UploaderType::create(sp<FloatArray> value, const size_t size)
+{
+    return reserve(sp<Uploader>::make<UploaderArray<float>>(std::move(value)), size);
+}
+
+sp<Uploader> UploaderType::create(sp<IntArray> value, const size_t size)
 {
     return reserve(sp<Uploader>::make<UploaderArray<int32_t>>(std::move(value)), size);
 }
 
-sp<Uploader> UploaderType::create(sp<Integer> value, size_t size)
+sp<Uploader> UploaderType::create(sp<Integer> value, const size_t size)
 {
     return reserve(sp<Uploader>::make<UploaderOfVariable<int32_t>>(std::move(value)), size);
 }
 
-sp<Uploader> UploaderType::create(sp<Numeric> value, size_t size)
+sp<Uploader> UploaderType::create(sp<Numeric> value, const size_t size)
 {
     return reserve(sp<Uploader>::make<UploaderOfVariable<float>>(std::move(value)), size);
 }
 
-sp<Uploader> UploaderType::create(sp<Vec2> value, size_t size)
+sp<Uploader> UploaderType::create(sp<Vec2> value, const size_t size)
 {
     return reserve(sp<Uploader>::make<UploaderOfVariable<V2>>(std::move(value)), size);
 }
 
-sp<Uploader> UploaderType::create(sp<Vec3> value, size_t size)
+sp<Uploader> UploaderType::create(sp<Vec3> value, const size_t size)
 {
     return reserve(sp<Uploader>::make<UploaderOfVariable<V3>>(std::move(value)), size);
 }
 
-sp<Uploader> UploaderType::create(sp<Vec4> value, size_t size)
+sp<Uploader> UploaderType::create(sp<Vec4> value, const size_t size)
 {
     return reserve(sp<Uploader>::make<UploaderOfVariable<V4>>(std::move(value)), size);
 }
 
-sp<Uploader> UploaderType::create(Map<size_t, sp<Uploader>> value, size_t size)
+sp<Uploader> UploaderType::create(Map<size_t, sp<Uploader>> value, const size_t size)
 {
     return sp<Uploader>::make<UploaderImpl>(std::move(value), size);
 }
 
-sp<Uploader> UploaderType::create(Vector<sp<Mat4>> value, size_t size)
+sp<Uploader> UploaderType::create(Vector<sp<Mat4>> value, const size_t size)
 {
     return reserve(sp<Uploader>::make<UploaderVariableArray<M4>>(std::move(value)), size);
 }
 
-sp<Uploader> UploaderType::create(Vector<sp<Uploader>> value, size_t size)
+sp<Uploader> UploaderType::create(Vector<sp<Uploader>> value, const size_t size)
 {
     return reserve(sp<Uploader>::make<UploaderList>(std::move(value)), size);
 }
 
-sp<Uploader> UploaderType::create(Vector<V3> value, size_t size)
+sp<Uploader> UploaderType::create(Vector<V3> value, const size_t size)
 {
     return reserve(sp<Uploader>::make<UploaderArray<V3>>(std::move(value)), size);
 }
 
-sp<Uploader> UploaderType::create(Vector<V4> value, size_t size)
+sp<Uploader> UploaderType::create(Vector<V4> value, const size_t size)
 {
     return reserve(sp<Uploader>::make<UploaderArray<V4>>(std::move(value)), size);
 }
 
-sp<Uploader> UploaderType::create(Vector<uint32_t> value, size_t size)
+sp<Uploader> UploaderType::create(Vector<uint32_t> value, const size_t size)
 {
     return reserve(sp<Uploader>::make<UploaderArray<uint32_t>>(std::move(value)), size);
 }

@@ -9,9 +9,7 @@
 #include "graphics/components/size.h"
 
 
-namespace ark {
-namespace plugin {
-namespace cmft {
+namespace ark::plugin::cmft {
 
 LatLongCubemapUploader::LatLongCubemapUploader(sp<Bitmap> bitmap, sp<Size> size)
     : _bitmap(std::move(bitmap)), _size(std::move(size))
@@ -33,7 +31,7 @@ void LatLongCubemapUploader::initialize(GraphicsContext& graphicsContext, Textur
     input.m_numMips = 1;
     input.m_numFaces = 1;
 
-    uint32_t n = static_cast<uint32_t>(_size->widthAsFloat());
+    const uint32_t n = static_cast<uint32_t>(_size->widthAsFloat());
 
     ::cmft::Image output;
     ::cmft::imageCubemapFromLatLong(output, input);
@@ -67,9 +65,7 @@ LatLongCubemapUploader::BUILDER::BUILDER(BeanFactory& factory, const document& m
 
 sp<Texture::Uploader> LatLongCubemapUploader::BUILDER::build(const Scope& args)
 {
-    return sp<LatLongCubemapUploader>::make(_bitmap->build(args), _size->build(args));
+    return sp<Texture::Uploader>::make<LatLongCubemapUploader>(_bitmap->build(args), _size->build(args));
 }
 
-}
-}
 }
