@@ -71,6 +71,19 @@ void Generator::setFrequency(const float frequency)
     _frequency = frequency;
 }
 
+bool Generator::ensureFractal() const
+{
+    return static_cast<bool>(_fractal_generator);
+}
+
+void Generator::setEnsureFractal(const bool enabled)
+{
+    if(!enabled && ensureFractal())
+        _fractal_generator = nullptr;
+    else if(enabled && !ensureFractal())
+        setFractalOctaves(4);
+}
+
 void Generator::setFractalOctaves(const int32_t octaves)
 {
     ensureFractalGenerator();

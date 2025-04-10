@@ -34,6 +34,11 @@ public:
 //  [[script::bindings::property]]
     void setFrequency(float frequency);
 
+//  [[script::bindings::property]]
+    bool ensureFractal() const;
+//  [[script::bindings::property]]
+    void setEnsureFractal(bool enabled);
+
 //  [[script::bindings::auto]]
     void setFractalOctaves(int32_t octaves);
 //  [[script::bindings::auto]]

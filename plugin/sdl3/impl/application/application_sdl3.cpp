@@ -18,6 +18,7 @@
 #include "renderer/base/render_engine_context.h"
 
 #include "app/base/application_context.h"
+#include "app/base/application_facade.h"
 #include "app/base/application_manifest.h"
 #include "app/base/event.h"
 #include "app/impl/application/application_delegate_impl.h"
@@ -243,14 +244,6 @@ public:
 #endif
     }
 
-    void setTextInput(const bool enabled) override
-    {
-        if(enabled && !SDL_TextInputActive(_main_window))
-            SDL_StartTextInput(_main_window);
-        else if(!enabled && SDL_TextInputActive(_main_window))
-            SDL_StopTextInput(_main_window);
-    }
-
     void exit() override {
         gQuit = true;
     }
@@ -417,7 +410,14 @@ void ApplicationSDL3::initialize()
 
 void ApplicationSDL3::pollEvents(uint64_t timestamp)
 {
+    const bool textInputEnabled = _application_context->applicationFacade()->textInputEnabled().val();
+    if(textInputEnabled && !SDL_TextInputActive(_main_window))
+        SDL_StartTextInput(_main_window);
+    else if(!textInputEnabled && SDL_TextInputActive(_main_window))
+        SDL_StopTextInput(_main_window);
+
     const Ark::RendererCoordinateSystem rcs = _application_context->renderController()->renderEngine()->rendererFactory()->features()._default_coordinate_system;
+
     SDL_Event event;
     while(SDL_PollEvent(&event))
     {

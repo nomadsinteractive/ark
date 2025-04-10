@@ -23,6 +23,7 @@ namespace ark::plugin::dear_imgui {
 class RendererImgui final : public Renderer, public Renderer::Group, public EventListener, public Implements<RendererImgui, Renderer, Renderer::Group, EventListener> {
 public:
     RendererImgui(const sp<Shader>& shader, const sp<Texture>& texture);
+    ~RendererImgui();
 
     void render(RenderRequest& renderRequest, const V3& position, const sp<DrawDecorator>& drawDecorator) override;
     void addRenderer(sp<Renderer> renderer, const Traits& traits) override;
@@ -70,8 +71,6 @@ private:
 
 private:
     sp<Shader> _shader;
-    sp<ApplicationController> _application_controller;
-    sp<RenderController> _render_controller;
     sp<RenderEngine> _render_engine;
     sp<Texture> _texture;
 
@@ -79,6 +78,8 @@ private:
 
     Vector<sp<Renderer>> _renderers;
     Vector<sp<Renderer>> _renderer_increasement;
+
+    sp<BooleanWrapper> _text_input_enabled;
 };
 
 }

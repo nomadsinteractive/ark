@@ -6,17 +6,16 @@
 
 #include "dear-imgui/base/draw_command_pool.h"
 
-
 namespace ark::plugin::dear_imgui {
 
-RendererContext::RendererContext(const sp<Shader>& shader, const sp<RenderController>& renderController)
-    : _shader(shader), _render_controller(renderController)
+RendererContext::RendererContext(const sp<Shader>& shader)
+    : _shader(shader)
 {
 }
 
 void RendererContext::addDefaultTexture(sp<Texture> texture)
 {
-    _draw_commands[nullptr] = sp<DrawCommandPool>::make(_shader, _render_controller, std::move(texture));
+    _draw_commands[nullptr] = sp<DrawCommandPool>::make(_shader, Ark::instance().renderController(), std::move(texture));
 }
 
 const sp<DrawCommandPool>& RendererContext::obtainDrawCommandPool(void* texture) const
@@ -31,7 +30,7 @@ void RendererContext::addTextureRef(const sp<Texture>& texture)
     ASSERT(texture);
     sp<DrawCommandPool>& pool = _draw_commands[texture.get()];
     if(!pool)
-        pool = sp<DrawCommandPool>::make(_shader, _render_controller, texture);
+        pool = sp<DrawCommandPool>::make(_shader, Ark::instance().renderController(), texture);
     ++ pool->_refcount;
 }
 

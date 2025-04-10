@@ -10,6 +10,7 @@
 #include "renderer/forwarding.h"
 
 #include "app/forwarding.h"
+#include "core/types/safe_var.h"
 
 namespace ark {
 
@@ -89,6 +90,11 @@ public:
 //  [[script::bindings::property]]
     void setBackgroundColor(const Color& backgroundColor);
 
+//  [[script::bindings::property]]
+    const SafeVar<Boolean>& textInputEnabled() const;
+//  [[script::bindings::property]]
+    void setTextInputEnabled(sp<Boolean> enabled);
+
 private:
     sp<ApplicationContext> _context;
     sp<ApplicationController> _controller;
@@ -97,6 +103,8 @@ private:
 
     sp<Activity> _activity;
     sp<Discarded> _activity_discarded;
+
+    SafeVar<Boolean> _text_input_enabled;
 };
 
 }

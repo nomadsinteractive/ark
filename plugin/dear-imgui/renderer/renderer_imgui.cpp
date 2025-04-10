@@ -25,6 +25,7 @@
 #include "app/base/application_facade.h"
 #include "app/base/event.h"
 #include "app/inf/application_controller.h"
+#include "core/impl/variable/variable_wrapper.h"
 
 #include "dear-imgui/base/draw_command_pool.h"
 #include "dear-imgui/base/imgui_context.h"
@@ -113,10 +114,15 @@ ImGuiKey toImGuiKey(const Event::Code code) {
 }
 
 RendererImgui::RendererImgui(const sp<Shader>& shader, const sp<Texture>& texture)
-    : _shader(shader), _application_controller(Ark::instance().applicationContext()->applicationFacade()->applicationController()), _render_controller(Ark::instance().renderController()), _render_engine(_render_controller->renderEngine()),
-      _texture(texture), _renderer_context(sp<RendererContext>::make(shader, _render_controller))
+    : _shader(shader), _render_engine(Ark::instance().renderController()->renderEngine()), _texture(texture), _renderer_context(sp<RendererContext>::make(shader)), _text_input_enabled(sp<BooleanWrapper>::make(false))
 {
     _renderer_context->addDefaultTexture(texture);
+    Ark::instance().applicationContext()->applicationFacade()->setTextInputEnabled(_text_input_enabled);
+}
+
+RendererImgui::~RendererImgui()
+{
+    Ark::instance().applicationContext()->applicationFacade()->setTextInputEnabled(nullptr);
 }
 
 void RendererImgui::render(RenderRequest& renderRequest, const V3& position, const sp<DrawDecorator>& /*drawDecorator*/)
@@ -152,7 +158,7 @@ bool RendererImgui::onEvent(const Event& event)
 {
     constexpr int32_t MouseIndex[5] = {0, 2, 1, 0, 0};
     ImGuiIO& io = ImGui::GetIO();
-    _application_controller->setTextInput(io.WantTextInput);
+    _text_input_enabled->set(io.WantTextInput);
 
     switch(event.action())
     {
@@ -278,7 +284,7 @@ sp<RendererImgui::DrawCommandRecycler> RendererImgui::obtainDrawCommandRecycler(
 
     sp<DrawCommand> drawCommand;
     if(!drawCommandPool->_draw_commands->pop(drawCommand))
-        drawCommand = sp<DrawCommand>::make(_render_controller);
+        drawCommand = sp<DrawCommand>::make(Ark::instance().renderController());
 
     sp<DrawCommandRecycler> recycler = sp<DrawCommandRecycler>::make(drawCommandPool->_draw_commands, drawCommand);
     return recycler;

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <map>
-
 #include "core/types/shared_ptr.h"
 
 #include "renderer/forwarding.h"
@@ -12,7 +10,7 @@ namespace ark::plugin::dear_imgui {
 
 class RendererContext {
 public:
-    RendererContext(const sp<Shader>& shader, const sp<RenderController>& renderController);
+    RendererContext(const sp<Shader>& shader);
 
     void addDefaultTexture(sp<Texture> texture);
     const sp<DrawCommandPool>& obtainDrawCommandPool(void* texture) const;
@@ -22,9 +20,8 @@ public:
 
 private:
     sp<Shader> _shader;
-    sp<RenderController> _render_controller;
 
-    std::map<void*, sp<DrawCommandPool>> _draw_commands;
+    Map<void*, sp<DrawCommandPool>> _draw_commands;
 };
 
 }

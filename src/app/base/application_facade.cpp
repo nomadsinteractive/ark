@@ -274,4 +274,14 @@ void ApplicationFacade::setBackgroundColor(const Color& backgroundColor)
     _context->setBackgroundColor(backgroundColor);
 }
 
+const SafeVar<Boolean>& ApplicationFacade::textInputEnabled() const
+{
+    return _text_input_enabled;
+}
+
+void ApplicationFacade::setTextInputEnabled(sp<Boolean> enabled)
+{
+    _text_input_enabled.reset(std::move(enabled));
+}
+
 }
