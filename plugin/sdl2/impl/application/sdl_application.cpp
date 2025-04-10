@@ -403,7 +403,7 @@ uint32_t SDLApplication::toSDLWindowFlag(const sp<ApplicationContext>& applicati
 
 void SDLApplication::pollEvents(uint64_t timestamp)
 {
-    const bool textInputEnabled = _application_context->applicationFacade()->textInputEnabled().val();
+    const bool textInputEnabled = _application_context->applicationFacade() ? _application_context->applicationFacade()->textInputEnabled().val() : false;
     if(textInputEnabled && !SDL_IsTextInputActive())
         SDL_StartTextInput();
     else if(!textInputEnabled && SDL_IsTextInputActive())
