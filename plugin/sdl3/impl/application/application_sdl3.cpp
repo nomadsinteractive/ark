@@ -151,8 +151,8 @@ private:
 
 class SDLApplicationController final : public ApplicationController {
 public:
-    SDLApplicationController(sp<ApplicationContext> applicationContext, SDL_Window* mainWindow)
-        : _application_context(std::move(applicationContext)), _main_window(mainWindow) {
+    SDLApplicationController(sp<ApplicationContext> applicationContext)
+        : _application_context(std::move(applicationContext)) {
     }
 
     Box createCursor(const sp<Bitmap>& bitmap, int32_t hotX, int32_t hotY) override {
@@ -250,7 +250,6 @@ public:
 
 private:
     sp<ApplicationContext> _application_context;
-    SDL_Window* _main_window;
 };
 
 V2 toFragCoordXY(const V2& xy, Ark::RendererCoordinateSystem rcs, float surfaceHeight)
@@ -273,10 +272,9 @@ int32_t toWindowPosition(int32_t pos)
 
 ApplicationSDL3::ApplicationSDL3(sp<ApplicationDelegate> applicationDelegate, sp<ApplicationContext> applicationContext, const ApplicationManifest& manifest)
     : Application(std::move(applicationDelegate), applicationContext, manifest), _main_window(nullptr), _cond(SDL_CreateCondition()), _lock(SDL_CreateMutex()),
-      _vsync(manifest.renderer()._vsync)
+      _controller(sp<ApplicationController>::make<SDLApplicationController>(std::move(applicationContext))), _vsync(manifest.renderer()._vsync)
 {
     initialize();
-    _controller = sp<ApplicationController>::make<SDLApplicationController>(std::move(applicationContext), _main_window);
 }
 
 int ApplicationSDL3::run()

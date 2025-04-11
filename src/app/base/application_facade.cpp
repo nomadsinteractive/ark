@@ -58,6 +58,7 @@ public:
         return {xy.x(), _height - xy.y()};
     }
 
+private:
     sp<Vec2> _xy;
     float _height;
 };
@@ -80,6 +81,7 @@ public:
         return xy / V2(_viewport_xy.x(), _viewport_xy.y()) * V2(resolution.x(), resolution.y());
     }
 
+private:
     sp<Vec2> _xy;
     V2 _viewport_xy;
     sp<Size> _resolution;
@@ -113,7 +115,7 @@ sp<Vec2> ApplicationFacade::toFragCoord(sp<Vec2> xy, sp<Size> resolution) const
     const Viewport& viewport = renderEngine.viewport();
     if(renderEngine.isViewportFlipped())
         xy = sp<Vec2>::make<FragCoordRevert>(std::move(xy), viewport.height());
-    return resolution ? sp<Vec2>::make<FragCoordStretch>(std::move(xy), V2(viewport.width(), viewport.height()), std::move(resolution)) : xy;
+    return resolution ? sp<Vec2>::make<FragCoordStretch>(std::move(xy), V2(viewport.width(), viewport.height()), std::move(resolution)) : std::move(xy);
 }
 
 const sp<Size>& ApplicationFacade::surfaceSize() const
