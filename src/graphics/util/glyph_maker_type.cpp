@@ -5,7 +5,7 @@
 
 #include "graphics/base/glyph.h"
 
-#include "renderer/base/varyings.h"
+#include "renderer/components/varyings.h"
 
 namespace ark {
 

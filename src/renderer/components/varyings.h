@@ -98,10 +98,10 @@ public:
 //  [[plugin::builder]]
     class BUILDER final : public Builder<Varyings> {
     private:
-        class InputBuilder {
+        class UploaderBuilder {
         public:
-            InputBuilder(BeanFactory& factory, const document& manifest);
-            DEFAULT_COPY_AND_ASSIGN(InputBuilder);
+            UploaderBuilder(BeanFactory& factory, const document& manifest);
+            DEFAULT_COPY_AND_ASSIGN(UploaderBuilder);
 
             String _name;
             sp<Builder<Uploader>> _input;
@@ -113,18 +113,18 @@ public:
         sp<Varyings> build(const Scope& args) override;
 
     private:
-        Vector<InputBuilder> _input_builders;
+        Vector<UploaderBuilder> _uploader_builders;
     };
 
 private:
     template<typename T> void setProperty(const String& name, sp<Variable<T>> var) {
         String cname = Strings::capitalizeFirst(name);
         _properties[cname] = Box(var);
-        setSlotInput(std::move(cname), sp<Uploader>::make<UploaderOfVariable<T>>(std::move(var)));
+        setSlotUploader(std::move(cname), sp<Uploader>::make<UploaderOfVariable<T>>(std::move(var)));
         _timestamp.markDirty();
     }
 
-    void setSlotInput(const String& name, sp<Uploader> input);
+    void setSlotUploader(const String& name, sp<Uploader> uploader);
 
 private:
     Map<String, Box> _properties;

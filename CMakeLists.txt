@@ -107,6 +107,7 @@ aux_source_directory(src/graphics/impl/vec LOCAL_SRC_LIST)
 aux_source_directory(src/graphics/util LOCAL_SRC_LIST)
 
 aux_source_directory(src/renderer/base LOCAL_SRC_LIST)
+aux_source_directory(src/renderer/components LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/impl/draw_decorator LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/impl/importer LOCAL_SRC_LIST)
 aux_source_directory(src/renderer/impl/model_loader LOCAL_SRC_LIST)
@@ -191,9 +192,9 @@ ark_setup_tools(ark_gen_plugin_class)
 ark_setup_tools(ark_gen_bootstrap)
 ark_setup_tools(ark_gen_class_hierarchy)
 
-ark_gen_plugin_class(base builtin ark src/core src/graphics src/renderer/base src/renderer/impl src/renderer/util src/app)
+ark_gen_plugin_class(base builtin ark src/core src/graphics src/renderer src/app)
 
-ark_gen_class_hierarchy(ark ark ${ARK_SRC_DIR}/src core graphics renderer/base renderer/impl renderer/inf app)
+ark_gen_class_hierarchy(ark ark ${ARK_SRC_DIR}/src core graphics renderer app)
 
 ark_gen_string_table(shaders ark::res src/renderer/shaders)
 ark_gen_bootstrap(ark_bootstrap)

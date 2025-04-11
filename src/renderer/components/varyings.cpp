@@ -1,4 +1,4 @@
-#include "renderer/base/varyings.h"
+#include "renderer/components/varyings.h"
 
 #include "core/base/allocator.h"
 #include "core/base/bean_factory.h"
@@ -83,18 +83,18 @@ Box Varyings::getProperty(const String& name) const
     return iter->second;
 }
 
-void Varyings::setSlotInput(const String& name, sp<Uploader> input)
+void Varyings::setSlotUploader(const String& name, sp<Uploader> uploader)
 {
     if(const auto iter = _slots.find(name); iter == _slots.end())
     {
-        _slots.emplace(name, Slot{std::move(input)});
+        _slots.emplace(name, Slot{std::move(uploader)});
         _slot_strides.clear();
     }
     else
     {
         const Slot& preslot = iter->second;
-        CHECK(preslot._uploader->size() == input->size(), "Replacing existing varying \"%s\"(%d) with a different size value(%d)", name.c_str(), preslot._uploader->size(), input->size());
-        iter->second = {std::move(input), preslot._divisor, preslot._offset};
+        CHECK(preslot._uploader->size() == uploader->size(), "Replacing existing varying \"%s\"(%d) with a different size value(%d)", name.c_str(), preslot._uploader->size(), uploader->size());
+        iter->second = {std::move(uploader), preslot._divisor, preslot._offset};
     }
 }
 
@@ -138,14 +138,14 @@ sp<Varyings> Varyings::subscribe(const String& name)
 
 Varyings::Snapshot Varyings::snapshot(const PipelineLayout& pipelineLayout, Allocator& allocator)
 {
-    if(!_slots.size())
+    if(_slots.empty())
     {
         Snapshot snapshot;
         snapshot.snapshotSubProperties(_sub_properties, pipelineLayout, allocator);
         return snapshot;
     }
 
-    if(!_slot_strides.size())
+    if(_slot_strides.empty())
     {
         for(auto& [i, j] : _slots)
         {
@@ -176,22 +176,22 @@ Varyings::Snapshot Varyings::snapshot(const PipelineLayout& pipelineLayout, Allo
 }
 
 Varyings::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _input_builders(factory.makeBuilderListObject<InputBuilder>(manifest, "varying"))
+    : _uploader_builders(factory.makeBuilderListObject<UploaderBuilder>(manifest, "varying"))
 {
 }
 
 sp<Varyings> Varyings::BUILDER::build(const Scope& args)
 {
-    if(_input_builders.empty())
+    if(_uploader_builders.empty())
         return nullptr;
 
     const sp<Varyings> varyings = sp<Varyings>::make();
-    for(const InputBuilder& i : _input_builders)
-        varyings->setSlotInput(i._name,  i._input->build(args));
+    for(const UploaderBuilder& i : _uploader_builders)
+        varyings->setSlotUploader(i._name,  i._input->build(args));
     return varyings;
 }
 
-Varyings::BUILDER::InputBuilder::InputBuilder(BeanFactory& factory, const document& manifest)
+Varyings::BUILDER::UploaderBuilder::UploaderBuilder(BeanFactory& factory, const document& manifest)
     : _name(Documents::ensureAttribute(manifest, constants::NAME)), _input(factory.ensureBuilderByTypeValue<Uploader>(Documents::ensureAttribute(manifest, constants::TYPE),
                                                                                                                                Documents::ensureAttribute(manifest, constants::VALUE)))
 {

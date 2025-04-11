@@ -6,7 +6,7 @@
 #include "graphics/inf/transform.h"
 #include "graphics/base/v3.h"
 
-#include "renderer/base/varyings.h"
+#include "renderer/components/varyings.h"
 
 namespace ark {
 

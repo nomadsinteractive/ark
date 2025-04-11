@@ -17,7 +17,7 @@
 
 #include "renderer/base/model.h"
 #include "renderer/base/shader.h"
-#include "renderer/base/varyings.h"
+#include "renderer/components/varyings.h"
 
 #include "app/view/view.h"
 
@@ -271,6 +271,9 @@ void RenderObject::onWire(const WiringContext& context, const Box& self)
         if(rotation)
             setTransform(sp<Transform>::make<Transform3D>(std::move(rotation)));
     }
+
+    if(sp<Varyings> varyings = context.getComponent<Varyings>())
+        setVaryings(std::move(varyings));
 
     if(sp<Boolean> discarded = context.getComponent<Discarded>())
         setDiscarded(std::move(discarded));

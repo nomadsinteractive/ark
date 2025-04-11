@@ -3,7 +3,7 @@
 #include "graphics/base/v3.h"
 #include "graphics/base/render_layer.h"
 
-#include "renderer/base/varyings.h"
+#include "renderer/components/varyings.h"
 
 namespace ark {
 

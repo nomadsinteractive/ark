@@ -9,7 +9,7 @@
 
 #include "renderer/forwarding.h"
 #include "renderer/base/buffer.h"
-#include "renderer/base/varyings.h"
+#include "renderer/components/varyings.h"
 
 namespace ark {
 
