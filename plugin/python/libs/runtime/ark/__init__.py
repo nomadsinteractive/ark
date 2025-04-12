@@ -237,8 +237,6 @@ class ByteArray(_Array):
 
 
 class _Var:
-    def __init__(self, val: Any):
-        pass
 
     @property
     def val(self):
@@ -343,7 +341,7 @@ class _Var:
 
 class Boolean(_Var):
     def __init__(self, value):
-        _Var.__init__(self, value)
+        pass
 
     def toggle(self):
         pass
@@ -1034,7 +1032,7 @@ class _Scalar(_Var):
 
 class Numeric(_Scalar):
     def __init__(self, val):
-        _Var.__init__(self, val)
+        pass
 
     def approach(self, expectation) -> Self:
         pass
@@ -1105,7 +1103,7 @@ class Discarded(Boolean):
 
 
 class Vec2(_Var):
-    def __init__(self, x, y):
+    def __init__(self, x: TYPE_NUMERIC, y: Optional[TYPE_NUMERIC] = None):
         self._x = x
         self._y = y
 
@@ -1199,7 +1197,7 @@ class Vec2(_Var):
 
 
 class Vec3(Vec2):
-    def __init__(self, x, y, z):
+    def __init__(self, x: TYPE_NUMERIC, y: Optional[TYPE_NUMERIC] = None, z: Optional[TYPE_NUMERIC] = None):
         Vec2.__init__(self, x, y)
         self._z = z
 
@@ -1235,7 +1233,7 @@ class Vec3(Vec2):
 
 
 class Vec4(Vec3):
-    def __init__(self, x, y, z, w):
+    def __init__(self, x: TYPE_NUMERIC, y: Optional[TYPE_NUMERIC] = None, z: Optional[TYPE_NUMERIC] = None, w: Optional[TYPE_NUMERIC] = None):
         Vec3.__init__(self, x, y, z)
         self._w = w
 

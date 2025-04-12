@@ -53,26 +53,14 @@ ResourceRecycleFunc VKFramebuffer::recycle()
 {
     const sp<VKDevice> device = _stub->_renderer->device();
 
-    VkImage depthstencilImage = _stub->_depthstencil_image;
-    VkDeviceMemory depthstencilMemory = _stub->_depthstencil_memory;
-    VkImageView depthstencilView = _stub->_depthstencil_view;
-
     VkFramebuffer framebuffer = _stub->_render_pass_begin_info.framebuffer;
     VkRenderPass renderPass = _stub->_render_pass_begin_info.renderPass;
 
-    _stub->_depthstencil_image = VK_NULL_HANDLE;
-    _stub->_depthstencil_memory = VK_NULL_HANDLE;
-    _stub->_depthstencil_view = VK_NULL_HANDLE;
     _stub->_render_pass_begin_info.framebuffer = VK_NULL_HANDLE;
     _stub->_render_pass_begin_info.renderPass = VK_NULL_HANDLE;
 
     return [=](GraphicsContext&) {
         const VkDevice logicalDevice = device->vkLogicalDevice();
-        if(depthstencilImage) {
-            vkDestroyImageView(logicalDevice, depthstencilView, nullptr);
-            vkDestroyImage(logicalDevice, depthstencilImage, nullptr);
-            vkFreeMemory(logicalDevice, depthstencilMemory, nullptr);
-        }
         vkDestroyRenderPass(logicalDevice, renderPass, nullptr);
         vkDestroyFramebuffer(logicalDevice, framebuffer, nullptr);
     };
@@ -96,8 +84,8 @@ VkRect2D VKFramebuffer::Stub::getFramebufferScissor() const
 }
 
 VKFramebuffer::Stub::Stub(const sp<VKRenderer>& renderer, const sp<Recycler>& recycler, RenderTarget::Configure configure)
-    : RenderPassPhrase(getFramebufferResolution(configure._color_attachments), configure._color_attachments.size()), _renderer(renderer), _recycler(recycler), _configure(std::move(configure)), _depthstencil_image(VK_NULL_HANDLE),
-      _depthstencil_memory(VK_NULL_HANDLE), _depthstencil_view(VK_NULL_HANDLE), _render_pass_begin_info(vks::initializers::renderPassBeginInfo()), _scissor(vks::initializers::rect2D(_resolution.width, _resolution.height, 0, 0)),
+    : RenderPassPhrase(getFramebufferResolution(configure._color_attachments), configure._color_attachments.size()), _renderer(renderer), _recycler(recycler), _configure(std::move(configure)),
+      _render_pass_begin_info(vks::initializers::renderPassBeginInfo()), _scissor(vks::initializers::rect2D(_resolution.width, _resolution.height, 0, 0)),
       _viewport(vks::initializers::viewport(static_cast<float>(_resolution.width), static_cast<float>(_resolution.height), 0, 1.0f))
 {
     VkClearValue clearColor;

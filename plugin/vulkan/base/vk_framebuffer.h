@@ -46,10 +46,6 @@ private:
         sp<Recycler> _recycler;
         RenderTarget::Configure _configure;
 
-        VkImage _depthstencil_image;
-        VkDeviceMemory _depthstencil_memory;
-        VkImageView _depthstencil_view;
-
         VkRenderPassBeginInfo _render_pass_begin_info;
         VkRect2D _scissor;
         VkViewport _viewport;

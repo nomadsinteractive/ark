@@ -7,14 +7,17 @@
 
 namespace ark {
 
-sp<Vec4> Vec4Type::create(float x, float y, float z, float w)
+sp<Vec4> Vec4Type::create(const float x, const float y, const float z, const float w)
 {
-    return sp<Vec4Impl>::make(x, y, z, w);
+    return sp<Vec4>::make<Vec4Impl>(x, y, z, w);
 }
 
 sp<Vec4> Vec4Type::create(sp<Numeric> x, sp<Numeric> y, sp<Numeric> z, sp<Numeric> w)
 {
-    return sp<Vec4Impl>::make(std::move(x), std::move(y), std::move(z), std::move(w));
+    ASSERT((x && y && z && w) || (x && !y && !z && !w));
+    if(!y)
+        return sp<Vec4>::make<Vec4Impl>(std::move(x));
+    return sp<Vec4>::make<Vec4Impl>(std::move(x), std::move(y), std::move(z), std::move(w));
 }
 
 sp<Numeric> Vec4Type::w(const sp<Vec4>& self)
@@ -23,7 +26,7 @@ sp<Numeric> Vec4Type::w(const sp<Vec4>& self)
     return impl ? static_cast<sp<Numeric>>(impl->w()) : sp<Numeric>::make<VariableOP1<float, V4>>(Operators::Subscript<V4, float>(3), self);
 }
 
-void Vec4Type::setW(const sp<Vec4>& self, float w)
+void Vec4Type::setW(const sp<Vec4>& self, const float w)
 {
     ensureImpl(self)->w()->set(w);
 }

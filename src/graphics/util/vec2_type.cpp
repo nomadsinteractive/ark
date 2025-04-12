@@ -53,32 +53,35 @@ float _atan2(const V2& val)
 
 sp<Vec2> Vec2Type::create(sp<Numeric> x, sp<Numeric> y)
 {
-    return sp<Vec2Impl>::make(std::move(x), std::move(y));
+    ASSERT(x);
+    if(!y)
+        sp<Vec2>::make<Vec2Impl>(std::move(x));
+    return sp<Vec2>::make<Vec2Impl>(std::move(x), std::move(y));
 }
 
 sp<Vec2> Vec2Type::create(float x, float y)
 {
-    return sp<Vec2Impl>::make(x, y);
+    return sp<Vec2>::make<Vec2Impl>(x, y);
 }
 
 sp<Vec3> Vec2Type::extend(sp<Vec2> self, sp<Numeric> z)
 {
-    return sp<VariableOP2<sp<Vec2>, sp<Numeric>, Operators::Extend<V2, float>>>::make(std::move(self), std::move(z));
+    return sp<Vec3>::make<VariableOP2<sp<Vec2>, sp<Numeric>, Operators::Extend<V2, float>>>(std::move(self), std::move(z));
 }
 
 sp<Vec4> Vec2Type::extend(sp<Vec2> self, sp<Vec2> z)
 {
-    return sp<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::Extend<V2, V2>>>::make(std::move(self), std::move(z));
+    return sp<Vec4>::make<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::Extend<V2, V2>>>(std::move(self), std::move(z));
 }
 
 sp<Vec2> Vec2Type::fence(sp<Vec2> self, sp<Vec3> plane, sp<Observer> observer)
 {
-    return sp<Vec2Fence>::make(std::move(self), std::move(plane), std::move(observer));
+    return sp<Vec2>::make<Vec2Fence>(std::move(self), std::move(plane), std::move(observer));
 }
 
 sp<Numeric> Vec2Type::atan2(sp<Vec2> self)
 {
-    return sp<VariableOP1<float, V2>>::make(_atan2, std::move(self));
+    return sp<Numeric>::make<VariableOP1<float, V2>>(_atan2, std::move(self));
 }
 
 }

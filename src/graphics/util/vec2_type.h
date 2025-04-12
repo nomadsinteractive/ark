@@ -14,7 +14,7 @@ namespace ark {
 class ARK_API Vec2Type final : public VecType<V2, Vec2Impl> {
 public:
 //  [[script::bindings::constructor]]
-    static sp<Vec2> create(sp<Numeric> x, sp<Numeric> y);
+    static sp<Vec2> create(sp<Numeric> x, sp<Numeric> y = nullptr);
 //  [[script::bindings::constructor]]
     static sp<Vec2> create(float x, float y);
 
