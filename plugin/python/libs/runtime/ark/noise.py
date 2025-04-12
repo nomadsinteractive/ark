@@ -27,6 +27,14 @@ class Generator:
     def frequency(self, frequency: float):
         pass
 
+    @property
+    def use_fractal(self) -> bool:
+        return False
+
+    @use_fractal.setter
+    def use_fractal(self, use_fractal: bool):
+        pass
+
     def set_fractal_octaves(self, octaves: int):
         pass
 

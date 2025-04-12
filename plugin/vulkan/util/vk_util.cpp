@@ -184,13 +184,13 @@ VkFormat VKUtil::toTextureFormat(const Bitmap& bitmap, const Texture::Format for
     return toTextureFormat(bitmap.depth(), bitmap.channels(), format);
 }
 
-VkFormat VKUtil::toTextureFormat(Texture::Format format)
+VkFormat VKUtil::toTextureFormat(const Texture::Format format)
 {
     DCHECK(format != Texture::FORMAT_AUTO, "Cannot determine texture format(auto) without a bitmap");
     return toTextureFormat(RenderUtil::getComponentSize(format), (format & Texture::FORMAT_RGBA) + 1, format);
 }
 
-VkFrontFace VKUtil::toFrontFace(PipelineDescriptor::FrontFace frontFace)
+VkFrontFace VKUtil::toFrontFace(const PipelineDescriptor::FrontFace frontFace)
 {
     switch(frontFace) {
         case PipelineDescriptor::FRONT_FACE_DEFAULT:
@@ -204,7 +204,7 @@ VkFrontFace VKUtil::toFrontFace(PipelineDescriptor::FrontFace frontFace)
     return VK_FRONT_FACE_COUNTER_CLOCKWISE;
 }
 
-VkCompareOp VKUtil::toCompareOp(PipelineDescriptor::CompareFunc func)
+VkCompareOp VKUtil::toCompareOp(const PipelineDescriptor::CompareFunc func)
 {
     constexpr VkCompareOp compareOps[] = {VK_COMPARE_OP_LESS_OR_EQUAL, VK_COMPARE_OP_ALWAYS, VK_COMPARE_OP_NEVER, VK_COMPARE_OP_EQUAL, VK_COMPARE_OP_NOT_EQUAL, VK_COMPARE_OP_LESS,
                                           VK_COMPARE_OP_GREATER, VK_COMPARE_OP_LESS_OR_EQUAL, VK_COMPARE_OP_GREATER_OR_EQUAL};
@@ -212,7 +212,7 @@ VkCompareOp VKUtil::toCompareOp(PipelineDescriptor::CompareFunc func)
     return compareOps[func];
 }
 
-VkStencilOp VKUtil::toStencilOp(PipelineDescriptor::StencilFunc func)
+VkStencilOp VKUtil::toStencilOp(const PipelineDescriptor::StencilFunc func)
 {
     constexpr VkStencilOp stencilOps[] = {VK_STENCIL_OP_KEEP, VK_STENCIL_OP_ZERO, VK_STENCIL_OP_REPLACE, VK_STENCIL_OP_INCREMENT_AND_CLAMP, VK_STENCIL_OP_INCREMENT_AND_WRAP,
                                           VK_STENCIL_OP_DECREMENT_AND_CLAMP, VK_STENCIL_OP_DECREMENT_AND_WRAP, VK_STENCIL_OP_INVERT};

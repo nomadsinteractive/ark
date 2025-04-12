@@ -35,9 +35,9 @@ public:
     void setFrequency(float frequency);
 
 //  [[script::bindings::property]]
-    bool ensureFractal() const;
+    bool useFractal() const;
 //  [[script::bindings::property]]
-    void setEnsureFractal(bool enabled);
+    void setUseFractal(bool enabled);
 
 //  [[script::bindings::auto]]
     void setFractalOctaves(int32_t octaves);
