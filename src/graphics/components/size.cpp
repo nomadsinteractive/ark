@@ -117,6 +117,21 @@ const sp<Vec3Impl>& Size::impl() const
     return _impl;
 }
 
+Size::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr)
+    : _expr(expr)
+{
+    factory.expand(expr, _width, _height, _depth);
+}
+
+sp<Size> Size::DICTIONARY::build(const Scope& args)
+{
+    sp<Numeric> w = _width->build(args);
+    sp<Numeric> h = _height->build(args);
+    sp<Numeric> d = _depth->build(args);
+    CHECK(w && h, "Cannot build Size from \"%s\"", _expr.c_str());
+    return sp<Size>::make(std::move(w), std::move(h), std::move(d));
+}
+
 Size::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _size(factory.getBuilder<Size>(manifest, constants::SIZE)),
       _width(_size ? sp<Builder<Numeric>>() : factory.getBuilder<Numeric>(manifest, constants::WIDTH)),

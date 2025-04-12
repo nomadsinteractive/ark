@@ -20,12 +20,17 @@ constexpr uint32_t FONT_STYLE_MASK = (1 << (FONT_STYLE_BITS + 1)) - 1;
 
 constexpr uint32_t UNICODE_MASK = (1 << (FONT_SIZE_VALUE_BIT_SHIFT + 1)) - 1;
 
-Font::Font(const TextSize size, Style style)
+Font::Font(const String& size, const Style style)
     : _size(size), _style(style)
 {
 }
 
-Font::Font(uint32_t size, SizeUnit sizeUnit, Style style)
+Font::Font(const TextSize size, const Style style)
+    : _size(size), _style(style)
+{
+}
+
+Font::Font(const uint32_t size, const SizeUnit sizeUnit, const Style style)
     : _size(size, sizeUnit), _style(style)
 {
 }

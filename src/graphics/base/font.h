@@ -1,12 +1,14 @@
 #pragma once
 
+#include "core/base/api.h"
 #include "core/base/string.h"
 #include "core/inf/builder.h"
 
 namespace ark {
 
-class Font {
+class ARK_API Font {
 public:
+//  [[script::bindings::enumeration]]
     enum Style {
         FONT_STYLE_REGULAR = 0,
         FONT_STYLE_BOLD = 1,
@@ -14,6 +16,7 @@ public:
         FONT_STYLE_MONOCHROME = 4
     };
 
+//  [[script::bindings::enumeration]]
     enum SizeUnit {
         FONT_SIZE_UNIT_PX = 0,
         FONT_SIZE_UNIT_PT = 1
@@ -28,7 +31,9 @@ public:
         SizeUnit _unit;
     };
 
-    Font(TextSize size = {}, Style style = FONT_STYLE_REGULAR);
+//  [[script::bindings::auto]]
+    Font(const String& size, Font::Style style = Font::FONT_STYLE_REGULAR);
+    Font(TextSize size, Style style = FONT_STYLE_REGULAR);
     Font(uint32_t size, SizeUnit sizeUnit, Style style = FONT_STYLE_REGULAR);
 
     explicit operator bool() const;
@@ -38,7 +43,8 @@ public:
     uint32_t sizeValue() const;
     SizeUnit sizeUnit() const;
 
-    Style style() const;
+//  [[script::bindings::property]]
+    Font::Style style() const;
 
     uint32_t combine(uint32_t unicode) const;
 

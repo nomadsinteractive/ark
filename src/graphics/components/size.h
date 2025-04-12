@@ -53,12 +53,24 @@ public:
 
     const sp<Vec3Impl>& impl() const;
 
+//  [[plugin::builder::by-value]]
+    class DICTIONARY final : public Builder<Size> {
+    public:
+        DICTIONARY(BeanFactory& factory, const String& expr);
+
+        sp<Size> build(const Scope& args) override;
+
+    private:
+        sp<Builder<Numeric>> _width, _height, _depth;
+        String _expr;
+    };
+
 //  [[plugin::builder]]
     class BUILDER final : public Builder<Size> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
-        virtual sp<Size> build(const Scope& args) override;
+        sp<Size> build(const Scope& args) override;
 
     private:
         sp<Builder<Size>> _size;

@@ -2,6 +2,7 @@
 
 #include "core/base/constants.h"
 #include "core/base/bean_factory.h"
+#include "core/base/enum.h"
 #include "core/inf/variable.h"
 #include "core/util/documents.h"
 #include "core/util/string_convert.h"
@@ -299,64 +300,53 @@ sp<LayoutParam> LayoutParam::BUILDER::build(const Scope& args)
                                  Length(), std::move(margins), std::move(paddings), std::move(offset));
 }
 
-template<> ARK_API LayoutParam::FlexDirection StringConvert::eval<LayoutParam::FlexDirection>(const String& s)
+template<> ARK_API LayoutParam::FlexDirection StringConvert::eval<LayoutParam::FlexDirection>(const String& expr)
 {
-    if(s == "column")
-        return LayoutParam::FLEX_DIRECTION_COLUMN;
-    if(s == "column_reverse")
-        return LayoutParam::FLEX_DIRECTION_COLUMN_REVERSE;
-
-    if(s == "row")
-        return LayoutParam::FLEX_DIRECTION_ROW;
-
-    CHECK(s == "row_reverse", "Unknow enum %s(\"%s\"), possible values are: [%s]", s.c_str(), "FlexDirection", "'column', 'column_reverse', 'row', 'row_reverse'");
-    return LayoutParam::FLEX_DIRECTION_ROW_REVERSE;
+    constexpr Enum::LookupTable<LayoutParam::FlexDirection, 4> table = {{
+        {"column", LayoutParam::FLEX_DIRECTION_COLUMN},
+        {"column-reverse", LayoutParam::FLEX_DIRECTION_COLUMN_REVERSE},
+        {"row", LayoutParam::FLEX_DIRECTION_ROW},
+        {"row-reverse", LayoutParam::FLEX_DIRECTION_ROW_REVERSE}
+    }};
+    return Enum::lookup(table, expr);
 }
 
-template<> ARK_API LayoutParam::FlexWrap StringConvert::eval<LayoutParam::FlexWrap>(const String& s)
+template<> ARK_API LayoutParam::FlexWrap StringConvert::eval<LayoutParam::FlexWrap>(const String& expr)
 {
-    if(s == "nowrap")
-        return LayoutParam::FLEX_WRAP_NOWRAP;
-    if(s == "wrap")
-        return LayoutParam::FLEX_WRAP_WRAP;
-    CHECK(s == "wrap_reverse", "Unknow enum %s(\"%s\"), possible values are: [%s]", s.c_str(), "FlexWrap", "'nowrap', 'wrap_reverse'");
-    return LayoutParam::FLEX_WRAP_WRAP_REVERSE;
+    constexpr Enum::LookupTable<LayoutParam::FlexWrap, 3> table = {{
+        {"nowrap", LayoutParam::FLEX_WRAP_NOWRAP},
+        {"wrap", LayoutParam::FLEX_WRAP_WRAP},
+        {"wrap-reverse", LayoutParam::FLEX_WRAP_WRAP}
+    }};
+    return Enum::lookup(table, expr);
 }
 
-template<> ARK_API LayoutParam::JustifyContent StringConvert::eval<LayoutParam::JustifyContent>(const String& s)
+template<> ARK_API LayoutParam::JustifyContent StringConvert::eval<LayoutParam::JustifyContent>(const String& expr)
 {
-    if(s == "flex_start")
-        return LayoutParam::JUSTIFY_CONTENT_FLEX_START;
-    if(s == "flex_end")
-        return LayoutParam::JUSTIFY_CONTENT_FLEX_END;
-    if(s == "center")
-        return LayoutParam::JUSTIFY_CONTENT_CENTER;
-    if(s == "space_between")
-        return LayoutParam::JUSTIFY_CONTENT_SPACE_BETWEEN;
-    if(s == "space_around")
-        return LayoutParam::JUSTIFY_CONTENT_SPACE_AROUND;
-    CHECK(s == "space_evenly", "Unknow enum %s(\"%s\"), possible values are: [%s]", s.c_str(), "JustifyContent", "'flex_start', 'flex_end', 'center', 'space_between', 'space_around', 'space_evenly'");
-    return LayoutParam::JUSTIFY_CONTENT_SPACE_EVENLY;
+    constexpr Enum::LookupTable<LayoutParam::JustifyContent, 6> table = {{
+        {"flex-start", LayoutParam::JUSTIFY_CONTENT_FLEX_START},
+        {"flex-end", LayoutParam::JUSTIFY_CONTENT_FLEX_END},
+        {"center", LayoutParam::JUSTIFY_CONTENT_CENTER},
+        {"space-between", LayoutParam::JUSTIFY_CONTENT_SPACE_BETWEEN},
+        {"space-around", LayoutParam::JUSTIFY_CONTENT_SPACE_AROUND},
+        {"space-evenly", LayoutParam::JUSTIFY_CONTENT_SPACE_EVENLY}
+    }};
+    return Enum::lookup(table, expr);
 }
 
-template<> ARK_API LayoutParam::Align StringConvert::eval<LayoutParam::Align>(const String& s)
+template<> ARK_API LayoutParam::Align StringConvert::eval<LayoutParam::Align>(const String& expr)
 {
-    if(s == "auto")
-        return LayoutParam::ALIGN_AUTO;
-    if(s == "flex_start")
-        return LayoutParam::ALIGN_FLEX_START;
-    if(s == "flex_end")
-        return LayoutParam::ALIGN_FLEX_END;
-    if(s == "center")
-        return LayoutParam::ALIGN_CENTER;
-    if(s == "stretch")
-        return LayoutParam::ALIGN_STRETCH;
-    if(s == "baseline")
-        return LayoutParam::ALIGN_BASELINE;
-    if(s == "space_between")
-        return LayoutParam::ALIGN_SPACE_BETWEEN;
-    CHECK(s == "space_around", "Unknow enum %s(\"%s\"), possible values are: [%s]", s.c_str(), "Align", "'auto', 'flex_start', 'flex_end', 'center', 'stretch', 'baseline', 'space_between', 'space_around'");
-    return LayoutParam::ALIGN_SPACE_AROUND;
+    constexpr Enum::LookupTable<LayoutParam::Align, 8> table = {{
+        {"auto", LayoutParam::ALIGN_AUTO},
+        {"flex-start", LayoutParam::ALIGN_FLEX_START},
+        {"flex-end", LayoutParam::ALIGN_FLEX_END},
+        {"center", LayoutParam::ALIGN_CENTER},
+        {"stretch", LayoutParam::ALIGN_STRETCH},
+        {"baseline", LayoutParam::ALIGN_BASELINE},
+        {"space-between", LayoutParam::ALIGN_SPACE_BETWEEN},
+        {"space-around", LayoutParam::ALIGN_SPACE_AROUND}
+    }};
+    return Enum::lookup(table, expr);
 }
 
 LayoutParam::Length::Length()

@@ -23,7 +23,7 @@ sp<Readable> getFontResource(const String& name)
 }
 
 AlphabetTrueType::AlphabetTrueType(const String& src)
-    : _free_types(Global<FreeTypes>())
+    : _free_types(Global<FreeTypes>()), _font(Font::TextSize())
 {
     sp<Readable> readable = getFontResource(src);
     CHECK(readable, "Font \"%s\" does not exists", src.c_str());

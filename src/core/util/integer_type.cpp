@@ -294,7 +294,7 @@ sp<Integer> IntegerType::dye(sp<Integer> self, sp<Boolean> condition, String mes
 IntegerType::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& value)
     : _value(value && value.at(0) == '#' ? sp<Builder<Integer>>::make<Prebuilt>(sp<Integer>::make<Integer::Const>(value.substr(1).hash())) : Expression::Compiler<int32_t, NumericOperation<int32_t>>().compile(factory, value))
 {
-    CHECK(_value, "Numeric expression compile failed: %s", value.c_str());
+    CHECK(_value, "Numeric expression compile failed: %s. Use \"#%s\" if you need to build a NamedHash integer", value.c_str(), value.c_str());
 }
 
 sp<Integer> IntegerType::DICTIONARY::build(const Scope& args)

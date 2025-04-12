@@ -22,11 +22,11 @@ public:
 
         size_t isMatch(const String& expr, size_t o) const {
             const char* c = op;
-            while(*c)
+            while(*c) {
                 if(*c != expr.at(o++))
                     return 0;
-                else
-                    c++;
+                c++;
+            }
             return o;
         }
     };
@@ -113,17 +113,14 @@ public:
                     continue;
                 if(c == '(')
                     i = Strings::parentheses(expr, i) + 1;
-                else {
-                    for(const Operator<T>& iter : OP::OPS) {
-                        size_t c = iter.isMatch(expr, i);
-                        if(c) {
-                            op = iter;
+                else
+                    for(const Operator<T>& j : OP::OPS)
+                        if(size_t c = j.isMatch(expr, i)) {
+                            op = j;
                             lvalue = expr.substr(0, i).strip();
                             remaining = expr.substr(c).strip();
                             return compile(factory, lvalue);
                         }
-                    }
-                }
             }
             return OP::eval(factory, expr.strip());
         }
@@ -173,7 +170,9 @@ public:
     }
 
     static BuilderType eval(BeanFactory& /*factory*/, const String& expr) {
-        return sp<typename Builder<Variable<T>>::Prebuilt>::make(sp<typename Variable<T>::Const>::make(Strings::eval<T>(expr)));
+        if(Strings::isNumeric(expr))
+            return sp<typename Builder<Variable<T>>::Prebuilt>::make(sp<typename Variable<T>::Const>::make(Strings::eval<T>(expr)));
+        return nullptr;
     }
 
     static Expression::Operator<T> OPS[4];

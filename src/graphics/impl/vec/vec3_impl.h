@@ -33,7 +33,7 @@ public:
 //  [[plugin::builder("vec3")]]
     class BUILDER final : public Builder<Vec3> {
     public:
-        BUILDER(BeanFactory& parent, const document& manifest);
+        BUILDER(BeanFactory& factory, const document& manifest);
 
         sp<Vec3> build(const Scope& args) override;
 
@@ -44,7 +44,7 @@ public:
 //  [[plugin::builder::by-value]]
     class DICTIONARY final : public Builder<Vec3> {
     public:
-        DICTIONARY(BeanFactory& parent, const String& expr);
+        DICTIONARY(BeanFactory& factory, const String& expr);
 
         sp<Vec3> build(const Scope& args) override;
 

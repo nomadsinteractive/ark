@@ -817,6 +817,21 @@ class AudioPlayer:
         pass
 
 
+class Font:
+
+    FONT_STYLE_REGULAR = 0
+    FONT_STYLE_BOLD = 1
+    FONT_STYLE_ITALIC = 2
+    FONT_STYLE_MONOCHROME = 4
+
+    def __init__(self, size: str, style: int = 0):
+        pass
+
+    @property
+    def style(self) -> int:
+        return 0
+
+
 class Bitmap:
     def __init__(self, width: int, height: int, row_bytes: int, channels: int, data: Optional[ByteArray]):
         pass
