@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include "core/base/api.h"
 #include "core/base/bean_factory.h"
 #include "core/inf/builder.h"
@@ -10,7 +8,7 @@
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
-#include "graphics/inf/renderable.h"
+#include "graphics/base/layout_length.h"
 #include "graphics/inf/render_batch.h"
 
 namespace ark {
@@ -18,7 +16,7 @@ namespace ark {
 class ARK_API Text final : public Wirable {
 public:
 //  [[script::bindings::auto]]
-    Text(sp<RenderLayer> renderLayer, sp<StringVar> text = nullptr, sp<Vec3> position = nullptr, sp<LayoutParam> layoutParam = nullptr, sp<GlyphMaker> glyphMaker = nullptr, sp<Mat4> transform = nullptr, float letterSpacing = 0.0f, float lineHeight = 0.0f, float lineIndent = 0.0f);
+    Text(sp<RenderLayer> renderLayer, sp<StringVar> text = nullptr, sp<Vec3> position = nullptr, sp<LayoutParam> layoutParam = nullptr, sp<GlyphMaker> glyphMaker = nullptr, sp<Mat4> transform = nullptr, float letterSpacing = 0.0f, LayoutLength lineHeight = {}, float lineIndent = 0.0f);
 
     void onWire(const WiringContext& context, const Box& self) override;
 
@@ -77,7 +75,7 @@ public:
         SafeBuilder<GlyphMaker> _glyph_maker;
         SafeBuilder<Mat4> _transform;
         SafeBuilder<Numeric> _letter_spacing;
-        float _line_height;
+        SafeIBuilder<LayoutLength> _line_height;
         float _line_indent;
     };
 

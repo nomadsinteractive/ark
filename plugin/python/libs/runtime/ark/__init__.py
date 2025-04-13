@@ -2841,6 +2841,22 @@ class Emitter:
         pass
 
 
+class LayoutLength:
+
+    LENGTH_TYPE_AUTO = 0
+    LENGTH_TYPE_PIXEL = 1
+    LENGTH_TYPE_PERCENTAGE = 2
+
+    def __init__(self, value: TYPE_NUMERIC | str, type: int = LENGTH_TYPE_AUTO):
+        pass
+
+    def value(self) -> TYPE_NUMERIC:
+        pass
+
+    def type(self) -> int:
+        pass
+
+
 class LayoutParam:
     DISPLAY_BLOCK = 0
     DISPLAY_FLOAT = 1

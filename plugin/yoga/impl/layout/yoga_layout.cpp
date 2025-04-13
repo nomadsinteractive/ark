@@ -135,28 +135,28 @@ template<typename T, typename U> Optional<T> updateVar(uint64_t timestamp, U& va
 
 void updateLayoutParam(const LayoutParam& layoutParam, YGNodeRef node, uint64_t timestamp)
 {
-    if(const Optional<float> width = updateVar<float>(timestamp, layoutParam.width()._value))
+    if(const Optional<float> width = updateVar<float>(timestamp, layoutParam.width().value()))
     {
-        if(layoutParam.width()._type == LayoutParam::LENGTH_TYPE_AUTO)
+        if(layoutParam.width().type() == LayoutLength::LENGTH_TYPE_AUTO)
             YGNodeStyleSetWidthAuto(node);
-        else if(layoutParam.width()._type == LayoutParam::LENGTH_TYPE_PIXEL)
+        else if(layoutParam.width().type() == LayoutLength::LENGTH_TYPE_PIXEL)
             YGNodeStyleSetWidth(node, width.value());
         else
         {
-            ASSERT(layoutParam.width()._type == LayoutParam::LENGTH_TYPE_PERCENTAGE);
+            ASSERT(layoutParam.width().type() == LayoutLength::LENGTH_TYPE_PERCENTAGE);
             YGNodeStyleSetWidthPercent(node, width.value());
         }
     }
 
-    if(const Optional<float> height = updateVar<float>(timestamp, layoutParam.height()._value))
+    if(const Optional<float> height = updateVar<float>(timestamp, layoutParam.height().value()))
     {
-        if(layoutParam.height()._type == LayoutParam::LENGTH_TYPE_AUTO)
+        if(layoutParam.height().type() == LayoutLength::LENGTH_TYPE_AUTO)
             YGNodeStyleSetHeightAuto(node);
-        else if(layoutParam.height()._type == LayoutParam::LENGTH_TYPE_PIXEL)
+        else if(layoutParam.height().type() == LayoutLength::LENGTH_TYPE_PIXEL)
             YGNodeStyleSetHeight(node, height.value());
         else
         {
-            ASSERT(layoutParam.height()._type == LayoutParam::LENGTH_TYPE_PERCENTAGE);
+            ASSERT(layoutParam.height().type() == LayoutLength::LENGTH_TYPE_PERCENTAGE);
             YGNodeStyleSetHeightPercent(node, height.value());
         }
     }
@@ -166,13 +166,13 @@ void updateLayoutParam(const LayoutParam& layoutParam, YGNodeRef node, uint64_t 
 
     if(const Optional<float> flexBasis = updateVar<float, const SafeVar<Numeric>>(timestamp, layoutParam.flexBasis()))
     {
-        if(layoutParam.flexBasisType() == LayoutParam::LENGTH_TYPE_AUTO)
+        if(layoutParam.flexBasisType() == LayoutLength::LENGTH_TYPE_AUTO)
             YGNodeStyleSetFlexBasisAuto(node);
-        else if(layoutParam.flexBasisType() == LayoutParam::LENGTH_TYPE_PIXEL)
+        else if(layoutParam.flexBasisType() == LayoutLength::LENGTH_TYPE_PIXEL)
             YGNodeStyleSetFlexBasis(node, flexBasis.value());
         else
         {
-            ASSERT(layoutParam.flexBasisType() == LayoutParam::LENGTH_TYPE_PERCENTAGE);
+            ASSERT(layoutParam.flexBasisType() == LayoutLength::LENGTH_TYPE_PERCENTAGE);
             YGNodeStyleSetFlexBasisPercent(node, flexBasis.value());
         }
     }
@@ -231,15 +231,18 @@ void doUpdate(const Layout::Hierarchy& hierarchy, uint64_t timestamp)
 class UpdatableYogaLayout final : public Updatable {
 public:
     UpdatableYogaLayout(Layout::Hierarchy hierarchy)
-        : _hierarchy(std::move(hierarchy)), _yg_node(doInflate(Global<YogaConfig>(), _hierarchy, nullptr)) {
+        : _hierarchy(std::move(hierarchy)), _yg_node(doInflate(Global<YogaConfig>(), _hierarchy, nullptr))
+    {
     }
-    ~UpdatableYogaLayout() override {
+    ~UpdatableYogaLayout() override
+    {
         YGNodeFreeRecursive(_yg_node);
     }
 
-    bool update(uint64_t timestamp) override {
+    bool update(const uint64_t timestamp) override
+    {
         const LayoutParam& layoutParam = _hierarchy._node->_layout_param;
-        ASSERT(layoutParam.width()._type != LayoutParam::LENGTH_TYPE_PERCENTAGE && layoutParam.height()._type != LayoutParam::LENGTH_TYPE_PERCENTAGE);
+        ASSERT(layoutParam.width().type() != LayoutLength::LENGTH_TYPE_PERCENTAGE && layoutParam.height().type() != LayoutLength::LENGTH_TYPE_PERCENTAGE);
         doUpdate(_hierarchy, timestamp);
         YGNodeCalculateLayout(_yg_node, layoutParam.contentWidth(), layoutParam.contentHeight(), YGDirectionLTR);
         updateLayoutResult(_hierarchy);
@@ -260,7 +263,7 @@ sp<Updatable> YogaLayout::inflate(Hierarchy hierarchy)
 
 sp<Layout> YogaLayout::BUILDER::build(const Scope& args)
 {
-    return sp<YogaLayout>::make();
+    return sp<Layout>::make<YogaLayout>();
 }
 
 }

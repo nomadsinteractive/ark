@@ -35,7 +35,9 @@ public:
     wchar_t character() const;
     void setCharacter(wchar_t character);
 
+//  [[script::bindings::property]]
     const V2& occupySize() const;
+//  [[script::bindings::property]]
     const V2& contentSize() const;
 
     void setSize(const V2& occupySize, const V2& contentSize);

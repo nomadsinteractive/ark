@@ -81,16 +81,16 @@ class Annotation:
 
 
 class ResourceLoader(Annotation):
-    def __init__(self, filename, name, interface_class, main_class, builder_name, arguments):
-        super().__init__(filename, name, interface_class, builder_name, 'Builder', main_class, arguments)
+    def __init__(self, filename, name, interface_class, implement_class, implemented_interface, main_class, arguments):
+        super().__init__(filename, name, interface_class, implement_class, implemented_interface, main_class, arguments)
 
     def res_builder(self):
         return self._make_call('resBeanFactory.addBuilderFactory', 'BeanFactory& factory, const document& doc', 'createResourceLoader', RES_BUILDER_TEMPLATE)
 
 
 class Builder(Annotation):
-    def __init__(self, filename, name, interface_class, main_class, builder_name, arguments):
-        super().__init__(filename, name, interface_class, builder_name, 'Builder', main_class, arguments)
+    def __init__(self, filename, name, interface_class, implement_class, implemented_interface, main_class, arguments):
+        super().__init__(filename, name, interface_class, implement_class, implemented_interface, main_class, arguments)
 
     def ref_builder(self):
         return self._make_call('refBeanFactory.addBuilderFactory', 'BeanFactory& factory, const document& doc', 'createBeanFactory', REF_BUILDER_TEMPLATE)
@@ -176,15 +176,12 @@ def search_for_plugins(paths):
     result = []
 
     def match_builder(filename, content, main_class, x):
-        builder_type = x[0]
-        name = x[1]
-        builder_name = x[2]
-        interface_class = x[4]
-        arguments = [(i, j) for i, j in parse_function_arguments(builder_name, content) if not i.startswith('=')]
+        builder_type, name, implement_class, implemented_interface, interface_class = x
+        arguments = [(i, j) for i, j in parse_function_arguments(implement_class, content) if not i.startswith('=')]
         if builder_type != 'resource-loader':
-            result.append(Builder(filename, name, interface_class, main_class, builder_name, arguments))
+            result.append(Builder(filename, name, interface_class, implement_class, implemented_interface, main_class, arguments))
         else:
-            result.append(ResourceLoader(filename, name, interface_class, main_class, builder_name, arguments))
+            result.append(ResourceLoader(filename, name, interface_class, implement_class, implemented_interface, main_class, arguments))
 
     def match_dictionary(filename, content, main_class, x):
         builder_type, name, implement_class, implemented_interface, interface_class = x

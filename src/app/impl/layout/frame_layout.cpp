@@ -11,10 +11,11 @@ namespace {
 class UpdatableFrameLayout final : public Updatable {
 public:
     UpdatableFrameLayout(Layout::Hierarchy hierarchy)
-        : _hierarchy(std::move(hierarchy)) {
+        : _hierarchy(std::move(hierarchy))
+    {
     }
 
-    bool update(uint64_t timestamp) override {
+    bool update(const uint64_t timestamp) override {
         Layout::Node& rootNode = _hierarchy._node;
         bool dirty = rootNode.update(timestamp);
         for(const Layout::Hierarchy& i : _hierarchy._child_nodes)

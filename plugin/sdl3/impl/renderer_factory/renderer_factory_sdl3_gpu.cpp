@@ -136,7 +136,7 @@ public:
         const SDL_GPULoadOp loadOp = configure._color_attachment_op == RenderTarget::ATTACHMENT_OP_BIT_DONT_CARE ? SDL_GPU_LOADOP_DONT_CARE
                                                 : configure._color_attachment_op.has(RenderTarget::ATTACHMENT_OP_BIT_CLEAR) ? SDL_GPU_LOADOP_CLEAR : SDL_GPU_LOADOP_LOAD;
         const SDL_GPUStoreOp storeOp = configure._color_attachment_op.has(RenderTarget::ATTACHMENT_OP_BIT_STORE) ? SDL_GPU_STOREOP_STORE : SDL_GPU_STOREOP_DONT_CARE;
-        for(const sp<Texture>& i : _configure._color_attachments)
+        for(const sp<Texture>& _ : _configure._color_attachments)
             _render_targets.push_back({
                 nullptr,
                 0,

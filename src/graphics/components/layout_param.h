@@ -8,6 +8,7 @@
 #include "core/types/safe_var.h"
 
 #include "graphics/forwarding.h"
+#include "graphics/base/layout_length.h"
 #include "graphics/base/v4.h"
 
 namespace ark {
@@ -51,31 +52,12 @@ public:
         FLEX_WRAP_WRAP_REVERSE
     };
 
-//  [[script::bindings::enumeration]]
-    enum LengthType {
-        LENGTH_TYPE_AUTO,
-        LENGTH_TYPE_PIXEL,
-        LENGTH_TYPE_PERCENTAGE
-    };
-
-    struct Length {
-        Length();
-        Length(float pixels);
-        Length(LengthType type, float value);
-        Length(LengthType type, sp<Numeric> value);
-        DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Length);
-
-        bool update(uint64_t timestamp) const;
-
-        LengthType _type;
-        SafeVar<Numeric> _value;
-    };
-
 public:
-    LayoutParam(Length width, Length height, sp<Layout> layout = nullptr, LayoutParam::FlexDirection flexDirection = LayoutParam::FLEX_DIRECTION_ROW, LayoutParam::FlexWrap flexWrap = LayoutParam::FLEX_WRAP_NOWRAP,
+//  [[script::bindings::auto]]
+    LayoutParam(LayoutLength width, LayoutLength height, sp<Layout> layout = nullptr, LayoutParam::FlexDirection flexDirection = LayoutParam::FLEX_DIRECTION_ROW, LayoutParam::FlexWrap flexWrap = LayoutParam::FLEX_WRAP_NOWRAP,
                 LayoutParam::JustifyContent justifyContent = LayoutParam::JUSTIFY_CONTENT_FLEX_START, LayoutParam::Align alignItems = LayoutParam::ALIGN_STRETCH,
                 LayoutParam::Align alignSelf = LayoutParam::ALIGN_AUTO, LayoutParam::Align alignContent = LayoutParam::ALIGN_STRETCH,
-                float flexGrow = 0, Length flexBasis = {}, sp<Vec4> margins = nullptr, sp<Vec4> paddings = nullptr, sp<Vec3> offset = nullptr);
+                float flexGrow = 0, LayoutLength flexBasis = {}, sp<Vec4> margins = nullptr, sp<Vec4> paddings = nullptr, sp<Vec3> offset = nullptr);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(LayoutParam);
 
     bool update(uint64_t timestamp) override;
@@ -103,9 +85,9 @@ public:
     void setStopPropagation(sp<Boolean> stopPropagation);
 
 //  [[script::bindings::property]]
-    LayoutParam::LengthType flexBasisType() const;
+    LayoutLength::LengthType flexBasisType() const;
 //  [[script::bindings::property]]
-    void setFlexBasisType(LayoutParam::LengthType basisType);
+    void setFlexBasisType(LayoutLength::LengthType basisType);
 //  [[script::bindings::property]]
     const SafeVar<Numeric>& flexBasis() const;
 //  [[script::bindings::property]]
@@ -117,11 +99,11 @@ public:
     void setFlexGrow(float weight);
     bool hasFlexGrow() const;
 
-    const Length& width() const;
-    void setWidth(Length width);
+    const LayoutLength& width() const;
+    void setWidth(LayoutLength width);
 
-    const Length& height() const;
-    void setHeight(Length height);
+    const LayoutLength& height() const;
+    void setHeight(LayoutLength height);
 
 //  [[script::bindings::property]]
     LayoutParam::FlexDirection flexDirection() const;
@@ -165,8 +147,8 @@ public:
         sp<LayoutParam> build(const Scope& args) override;
 
     private:
-        sp<Builder<Length>> _width;
-        sp<Builder<Length>> _height;
+        sp<IBuilder<LayoutLength>> _width;
+        sp<IBuilder<LayoutLength>> _height;
         SafeBuilder<Layout> _layout;
         FlexDirection _flex_direction;
         FlexWrap _flex_wrap;
@@ -184,8 +166,8 @@ public:
     };
 
 private:
-    Length _width;
-    Length _height;
+    LayoutLength _width;
+    LayoutLength _height;
     sp<Layout> _layout;
 
     FlexDirection _flex_direction;
@@ -198,7 +180,7 @@ private:
 
     sp<Boolean> _stop_propagation;
 
-    Length _flex_basis;
+    LayoutLength _flex_basis;
     float _flex_grow;
     SafeVar<Vec4> _margins;
     SafeVar<Vec4> _paddings;

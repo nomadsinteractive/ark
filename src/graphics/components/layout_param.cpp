@@ -13,48 +13,8 @@
 
 namespace ark {
 
-namespace {
-
-bool isLengthMatchParent(const LayoutParam::Length& length)
-{
-    return length._type == LayoutParam::LENGTH_TYPE_PERCENTAGE && length._value.val() == 100.0f;
-}
-
-class BuilderLengthVar final : public Builder<LayoutParam::Length> {
-public:
-    BuilderLengthVar(LayoutParam::LengthType varType, sp<Builder<Numeric>> var)
-        : _var_type(varType), _var(std::move(var)) {
-    }
-
-    sp<LayoutParam::Length> build(const Scope& args) override {
-        return sp<LayoutParam::Length>::make(_var_type, _var->build(args));
-    }
-
-private:
-    LayoutParam::LengthType _var_type;
-    sp<Builder<Numeric>> _var;
-};
-
-sp<Builder<LayoutParam::Length>> getLengthBuilder(BeanFactory& factory, const document& manifest, const String& attrName)
-{
-    if(const Optional<String> attrOpt = Documents::getAttributeOptional<String>(manifest, attrName))
-    {
-        const String& s = attrOpt.value();
-        if(s == "auto")
-            return sp<typename Builder<LayoutParam::Length>::Prebuilt>::make(sp<LayoutParam::Length>::make());
-        if(s.endsWith("px"))
-            return sp<typename Builder<LayoutParam::Length>::Prebuilt>::make(sp<LayoutParam::Length>::make(LayoutParam::LENGTH_TYPE_PIXEL, Strings::eval<float>(s.substr(0, s.length() - 2))));
-        if(s.endsWith("%"))
-            return sp<typename Builder<LayoutParam::Length>::Prebuilt>::make(sp<LayoutParam::Length>::make(LayoutParam::LENGTH_TYPE_PERCENTAGE, Strings::eval<float>(s.substr(0, s.length() - 1))));
-        return sp<Builder<LayoutParam::Length>>::make<BuilderLengthVar>(LayoutParam::LENGTH_TYPE_PIXEL, factory.ensureBuilder<Numeric>(s));
-    }
-    return nullptr;
-}
-
-}
-
-LayoutParam::LayoutParam(Length width, Length height, sp<Layout> layout, FlexDirection flexDirection, FlexWrap flexWrap, JustifyContent justifyContent, Align alignItems, Align alignSelf,
-                         Align alignContent, float flexGrow, Length flexBasis, sp<Vec4> margins, sp<Vec4> paddings, sp<Vec3> offset)
+LayoutParam::LayoutParam(LayoutLength width, LayoutLength height, sp<Layout> layout, FlexDirection flexDirection, FlexWrap flexWrap, JustifyContent justifyContent, Align alignItems, Align alignSelf,
+                         Align alignContent, float flexGrow, LayoutLength flexBasis, sp<Vec4> margins, sp<Vec4> paddings, sp<Vec3> offset)
     : _width(std::move(width)), _height(std::move(height)), _layout(std::move(layout)), _flex_direction(flexDirection), _flex_wrap(flexWrap), _justify_content(justifyContent), _align_items(alignItems), _align_self(alignSelf), _align_content(alignContent),
       _flex_basis(std::move(flexBasis)), _flex_grow(flexGrow), _margins(std::move(margins)), _paddings(std::move(paddings)), _offset(std::move(offset))
 {
@@ -76,10 +36,10 @@ void LayoutParam::setLayout(sp<Layout> layout)
     _layout = std::move(layout);
 }
 
-float LayoutParam::calcLayoutWidth(float available)
+float LayoutParam::calcLayoutWidth(const float available)
 {
     const V4 margins = _margins.val();
-    if(isLengthMatchParent(_width))
+    if(_width.isMatchParent())
     {
         _width._value.reset(sp<Numeric>::make<Numeric::Const>(available - margins.w() - margins.y()));
         return available;
@@ -90,7 +50,7 @@ float LayoutParam::calcLayoutWidth(float available)
 float LayoutParam::calcLayoutHeight(float available)
 {
     const V4 margins = _margins.val();
-    if(isLengthMatchParent(_height))
+    if(_height.isMatchParent())
     {
         _height._value.reset(sp<Numeric>::make<Numeric::Const>(available - margins.x() - margins.z()));
         return available;
@@ -140,12 +100,12 @@ void LayoutParam::setStopPropagation(sp<Boolean> stopPropagation)
     _stop_propagation = std::move(stopPropagation);
 }
 
-LayoutParam::LengthType LayoutParam::flexBasisType() const
+LayoutLength::LengthType LayoutParam::flexBasisType() const
 {
     return _flex_basis._type;
 }
 
-void LayoutParam::setFlexBasisType(LengthType basisType)
+void LayoutParam::setFlexBasisType(LayoutLength::LengthType basisType)
 {
     _flex_basis._type = basisType;
     _timestamp.markDirty();
@@ -176,23 +136,23 @@ bool LayoutParam::hasFlexGrow() const
     return _flex_grow != 0.0f;
 }
 
-const LayoutParam::Length& LayoutParam::width() const
+const LayoutLength& LayoutParam::width() const
 {
     return _width;
 }
 
-void LayoutParam::setWidth(Length width)
+void LayoutParam::setWidth(LayoutLength width)
 {
     _width = std::move(width);
     _timestamp.markDirty();
 }
 
-const LayoutParam::Length& LayoutParam::height() const
+const LayoutLength& LayoutParam::height() const
 {
     return _height;
 }
 
-void LayoutParam::setHeight(Length height)
+void LayoutParam::setHeight(LayoutLength height)
 {
     _height = std::move(height);
     _timestamp.markDirty();
@@ -270,16 +230,16 @@ bool LayoutParam::isMatchParent() const
 
 bool LayoutParam::isWidthMatchParent() const
 {
-    return isLengthMatchParent(_width);
+    return _width.isMatchParent();
 }
 
 bool LayoutParam::isHeightMatchParent() const
 {
-    return isLengthMatchParent(_height);
+    return _height.isMatchParent();
 }
 
 LayoutParam::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _width(getLengthBuilder(factory, manifest, constants::WIDTH)), _height(getLengthBuilder(factory, manifest, constants::HEIGHT)), _layout(factory.getBuilder<Layout>(manifest, constants::LAYOUT)),
+    : _width(factory.getIBuilder<LayoutLength>(manifest, constants::WIDTH)), _height(factory.getIBuilder<LayoutLength>(manifest, constants::HEIGHT)), _layout(factory.getBuilder<Layout>(manifest, constants::LAYOUT)),
       _flex_direction(Documents::getAttribute<FlexDirection>(manifest, "flex-direction", FLEX_DIRECTION_ROW)), _flex_wrap(Documents::getAttribute<FlexWrap>(manifest, "flex-wrap", FLEX_WRAP_NOWRAP)),
       _justify_content(Documents::getAttribute<JustifyContent>(manifest, "justify-content", JUSTIFY_CONTENT_FLEX_START)), _align_items(Documents::getAttribute<Align>(manifest, "align-items", ALIGN_STRETCH)),
       _align_self(Documents::getAttribute<Align>(manifest, "align-self", ALIGN_AUTO)), _align_content(Documents::getAttribute<Align>(manifest, "align-content", ALIGN_FLEX_START)),
@@ -294,10 +254,10 @@ sp<LayoutParam> LayoutParam::BUILDER::build(const Scope& args)
     sp<Vec4> margins = _margins.build(args);
     sp<Vec4> paddings = _paddings.build(args);
     sp<Vec3> offset = _offset.build(args);
-    Length width = size ? Length(LENGTH_TYPE_PIXEL, size->width()) : _width ? _width->build(args) : Length();
-    Length height = size ? Length(LENGTH_TYPE_PIXEL, size->height()) : _height ? _height->build(args) : Length();
+    LayoutLength width = size ? LayoutLength(size->width(), LayoutLength::LENGTH_TYPE_PIXEL) : _width ? _width->build(args) : LayoutLength();
+    LayoutLength height = size ? LayoutLength(size->height(), LayoutLength::LENGTH_TYPE_PIXEL) : _height ? _height->build(args) : LayoutLength();
     return sp<LayoutParam>::make(std::move(width), std::move(height), _layout.build(args), _flex_direction, _flex_wrap, _justify_content, _align_items, _align_self, _align_content, _flex_grow,
-                                 Length(), std::move(margins), std::move(paddings), std::move(offset));
+                                 LayoutLength(), std::move(margins), std::move(paddings), std::move(offset));
 }
 
 template<> ARK_API LayoutParam::FlexDirection StringConvert::eval<LayoutParam::FlexDirection>(const String& expr)
@@ -347,31 +307,6 @@ template<> ARK_API LayoutParam::Align StringConvert::eval<LayoutParam::Align>(co
         {"space-around", LayoutParam::ALIGN_SPACE_AROUND}
     }};
     return Enum::lookup(table, expr);
-}
-
-LayoutParam::Length::Length()
-    : _type(LENGTH_TYPE_AUTO), _value(nullptr, 0)
-{
-}
-
-LayoutParam::Length::Length(float pixels)
-    : Length(LENGTH_TYPE_PIXEL, pixels)
-{
-}
-
-LayoutParam::Length::Length(LengthType type, float value)
-    : _type(type), _value(sp<Numeric>::make<Numeric::Const>(value))
-{
-}
-
-LayoutParam::Length::Length(LengthType type, sp<Numeric> value)
-    : _type(type), _value(std::move(value))
-{
-}
-
-bool LayoutParam::Length::update(uint64_t timestamp) const
-{
-    return _value.update(timestamp);
 }
 
 }

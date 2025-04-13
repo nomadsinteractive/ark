@@ -14,7 +14,7 @@ public:
     sp<Updatable> inflate(Hierarchy hierarchy) override;
 
 //  [[plugin::builder::by-value("yoga")]]
-    class BUILDER : public Builder<Layout> {
+    class BUILDER final : public Builder<Layout> {
     public:
         BUILDER() = default;
 

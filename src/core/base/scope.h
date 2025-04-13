@@ -49,7 +49,7 @@ private:
 
     template<typename T> Optional<T> getObject_sfinae(const String& name, ...) const {
         if(const Optional<Box> box = getObject(name)) {
-            sp<typename T::_PtrType> inst = box->template as<typename T::_PtrType>();
+            sp<T> inst = box->template as<T>();
             return inst ? Optional<T>(*inst) : Optional<T>();
         }
         return {};

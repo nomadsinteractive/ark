@@ -126,15 +126,15 @@ V2 LayoutUtil::calcItemSize(const LayoutParam& layoutParam, const Layout::Node& 
     float width = 0;
     float height = 0;
 
-    if(layoutParam.width()._type == LayoutParam::LENGTH_TYPE_PIXEL)
-        width = layoutParam.width()._value.val();
-    else if(layoutParam.width()._type == LayoutParam::LENGTH_TYPE_PERCENTAGE)
-        width = layoutParam.width()._value.val() * parent.size()->x() * 0.01f;
+    if(layoutParam.width().type() == LayoutLength::LENGTH_TYPE_PIXEL)
+        width = layoutParam.width().value().val();
+    else if(layoutParam.width().type() == LayoutLength::LENGTH_TYPE_PERCENTAGE)
+        width = layoutParam.width().value().val() * parent.size()->x() * 0.01f;
 
-    if(layoutParam.height()._type == LayoutParam::LENGTH_TYPE_PIXEL)
-        height = layoutParam.height()._value.val();
-    else if(layoutParam.height()._type == LayoutParam::LENGTH_TYPE_PERCENTAGE)
-        height = layoutParam.height()._value.val() * parent.size()->y() * 0.01f;
+    if(layoutParam.height().type() == LayoutLength::LENGTH_TYPE_PIXEL)
+        height = layoutParam.height().value().val();
+    else if(layoutParam.height().type() == LayoutLength::LENGTH_TYPE_PERCENTAGE)
+        height = layoutParam.height().value().val() * parent.size()->y() * 0.01f;
 
     return {width, height};
 }

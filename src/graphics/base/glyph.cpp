@@ -71,6 +71,11 @@ const V2& Glyph::occupySize() const
     return _occupy_size;
 }
 
+const V2& Glyph::contentSize() const
+{
+    return _content_size;
+}
+
 void Glyph::setSize(const V2& occupySize, const V2& contentSize)
 {
     _occupy_size = occupySize;

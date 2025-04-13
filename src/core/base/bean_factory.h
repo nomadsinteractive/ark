@@ -244,17 +244,20 @@ public:
         return findBuilderByValue<T>(id);
     }
 
-    template<typename T> sp<Builder<T>> getBuilder(const document& doc, const String& attr) {
+    template<typename T> sp<IBuilder<T>> getIBuilder(const document& doc, const String& attr) {
         const String attrValue = Documents::getAttribute(doc, attr);
         if(attrValue.empty()) {
             if(const document& child = doc->getChild(attr)) {
-                const sp<Builder<T>> builder = findBuilderByDocument<sp<T>>(child, true);
+                sp<IBuilder<T>> builder = findBuilderByDocument<T>(child, true);
                 CHECK(builder, "Cannot build \"%s\" from \"%s\"", attr.c_str(), Documents::toString(doc).c_str());
                 return builder;
             }
             return nullptr;
         }
-        return ensureBuilder<T>(attrValue);
+        return ensureIBuilder<T>(attrValue);
+    }
+    template<typename T> sp<Builder<T>> getBuilder(const document& doc, const String& attr) {
+        return getIBuilder<sp<T>>(doc, attr);
     }
 
     template<typename T> Vector<std::pair<String, builder<T>>> makeValueBuilderList() {
@@ -323,11 +326,14 @@ public:
         return nullptr;
     }
 
-    template<typename T> sp<Builder<T>> ensureBuilder(const String& id, const Identifier::Type idType = Identifier::ID_TYPE_AUTO) {
+    template<typename T> sp<IBuilder<T>> ensureIBuilder(const String& id, const Identifier::Type idType = Identifier::ID_TYPE_AUTO) {
         DCHECK(id, "Empty value being built");
-        sp<Builder<T>> builder = getBuilder<T>(id, idType);
+        sp<IBuilder<T>> builder = getIBuilder<T>(id, idType);
         CHECK(builder, "Cannot find builder \"%s\"", id.c_str());
         return builder;
+    }
+    template<typename T> sp<Builder<T>> ensureBuilder(const String& id, const Identifier::Type idType = Identifier::ID_TYPE_AUTO) {
+        return ensureIBuilder<sp<T>>(id, idType);
     }
 
     template<typename T> sp<Builder<T>> ensureBuilder(const document& manifest) {
@@ -432,7 +438,7 @@ private:
                 return std::move(opt.value());
 
             CHECK(_fallback, "Cannot get argument \"%s\"", _name.c_str());
-            return _fallback ? _fallback->build(args) : nullptr;
+            return _fallback ? _fallback->build(args) : T();
         }
 
     private:

@@ -60,17 +60,17 @@ public:
     PyObject* create(const Box& box);
 
     typedef Box (*LoaderFunction)(Instance&, const String&, const Scope&);
-    std::map<TypeId, LoaderFunction>& ensureLoader(const String& name);
+    Map<TypeId, LoaderFunction>& ensureLoader(const String& name);
 
     void onReady();
 
 protected:
-    std::map<String, Box> _enum_constants;
-    std::map<String, std::map<TypeId, LoaderFunction>> _loaders;
+    Map<String, Box> _enum_constants;
+    Map<String, Map<TypeId, LoaderFunction>> _loaders;
 
 private:
     int32_t doReady(TypeId typeId);
-    const std::map<TypeId, LoaderFunction>& getLoader(const String& name) const;
+    const Map<TypeId, LoaderFunction>& getLoader(const String& name) const;
 
     static PyTypeObject* basetype();
 

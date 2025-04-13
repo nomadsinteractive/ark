@@ -18,6 +18,7 @@
 #include "app/base/event.h"
 #include "app/base/raycast_manifold.h"
 #include "core/util/string_type.h"
+#include "graphics/base/layout_length.h"
 
 #include "python/api.h"
 #include "python/extension/python_extension.h"
@@ -464,6 +465,30 @@ template<> ARK_PLUGIN_PYTHON_API Optional<Slice> PyCast::toCppObject_impl<Slice>
         return Slice(begin, end, step);
     }
     return Optional<Slice>();
+}
+
+template<> ARK_PLUGIN_PYTHON_API Optional<LayoutLength> PyCast::toCppObject_impl<LayoutLength>(PyObject* object)
+{
+    if(const sp<LayoutLength> layoutLength = toSharedPtrOrNull<LayoutLength>(object))
+        return {std::move(*layoutLength)};
+    if(sp<Numeric> value = toSharedPtrOrNull<Numeric>(object))
+        return {LayoutLength(std::move(value))};
+    if(PyTuple_CheckExact(object))
+    {
+        const Py_ssize_t size = PyTuple_Size(object);
+        if(size != 1 && size != 2)
+            return {};
+
+        PyObject* a1 = PyTuple_GetItem(object, 0);
+        PyObject* a2 = size == 2 ? PyTuple_GetItem(object, 1) : nullptr;
+        Optional<int32_t> optLengthType = a2 ? toCppObject<int32_t>(a2) : Optional<int32_t>(0);
+        const LayoutLength::LengthType lengthType = static_cast<LayoutLength::LengthType>(optLengthType ? optLengthType.value() : 0);
+        if(PyFloat_CheckExact(a1))
+            return {LayoutLength(static_cast<float>(PyFloat_AsDouble(a1)), lengthType)};
+        if(sp<Numeric> value = toSharedPtrOrNull<Numeric>(a1))
+            return {LayoutLength(std::move(value), lengthType)};
+    }
+    return {};
 }
 
 template<typename T> RectT<T> toRectType(PyObject* obj)

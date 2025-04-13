@@ -166,7 +166,7 @@ struct UpdatableFlexStart final : Updatable {
 };
 
 struct UpdatableCenter final : Updatable {
-    UpdatableCenter(Layout::Hierarchy hierarchy, Size size, float letterSpacing)
+    UpdatableCenter(Layout::Hierarchy hierarchy, Size size, const float letterSpacing)
         : _hierarchy((std::move(hierarchy))), _letter_spacing(letterSpacing), _size(std::move(size)) {
     }
 
@@ -183,7 +183,7 @@ struct UpdatableCenter final : Updatable {
 };
 
 struct UpdatableFlexEnd final : Updatable {
-    UpdatableFlexEnd(Layout::Hierarchy hierarchy, Size size, float letterSpacing)
+    UpdatableFlexEnd(Layout::Hierarchy hierarchy, Size size, const float letterSpacing)
         : _hierarchy((std::move(hierarchy))), _letter_spacing(letterSpacing), _size(std::move(size)) {
     }
 
@@ -200,37 +200,37 @@ struct UpdatableFlexEnd final : Updatable {
 };
 
 struct UpdatableParagraph final : Updatable {
-    UpdatableParagraph(Layout::Hierarchy hierarchy, sp<LayoutParam> layoutParam, float letterSpacing, float lineHeightPercentage)
-        : _hierarchy((std::move(hierarchy))), _layout_param(std::move(layoutParam)), _letter_spacing(letterSpacing), _line_height_percentage(lineHeightPercentage), _line_indent(0)
+    UpdatableParagraph(Layout::Hierarchy hierarchy, sp<LayoutParam> layoutParam, sp<Boundaries> boundaries, const float letterSpacing, LayoutLength lineHeight)
+        : _hierarchy((std::move(hierarchy))), _layout_param(std::move(layoutParam)), _boundaries(std::move(boundaries)), _letter_spacing(letterSpacing), _line_height(std::move(lineHeight)), _line_indent(0)
     {
     }
 
-    bool update(uint64_t timestamp) override
+    bool update(const uint64_t timestamp) override
     {
-        const V2& size = _hierarchy._node->size();
-        const float layoutDirection = Ark::instance().applicationContext()->renderEngine()->toLayoutDirection(size.y() * _line_height_percentage);
-        const float x = _layout_param->alignSelf() == LayoutParam::ALIGN_CENTER ? -_layout_param->contentWidth() / 2 : 0;
-        const float boundary = x + _layout_param->contentWidth();
-        doParagraphLayout(_hierarchy._child_nodes, x, 0, boundary, layoutDirection);
+        const V2 size = _boundaries->size()->val();
+        const float x = _layout_param->alignSelf() == LayoutParam::ALIGN_CENTER ? -size.x() / 2 : 0;
+        const float boundary = x + size.x();
+        doParagraphLayout(_hierarchy._child_nodes, x, 0, boundary);
         return false;
     }
 
-    void doParagraphLayout(const Vector<Layout::Hierarchy>& childNodes, float flowx, float flowy, float boundary, float layoutDirection) const
+    void doParagraphLayout(const Vector<Layout::Hierarchy>& childNodes, float flowx, float flowy, const float boundary) const
     {
         size_t begin = 0, end = 1;
         const float paragraphX = flowx;
+        float charMaxHeight = std::numeric_limits<float>::min();
         for(const Layout::Hierarchy& i : childNodes)
         {
             const Character& currentChar = *static_cast<Character*>(i._node->_tag);
-            bool allowLineBreak = currentChar._is_cjk || currentChar._is_word_break;
-            if(end == childNodes.size() || allowLineBreak)
+            charMaxHeight = std::max(currentChar._glyph->occupySize().y(), charMaxHeight);
+            if(const bool allowLineBreak = currentChar._is_cjk || currentChar._is_word_break; end == childNodes.size() || allowLineBreak)
             {
-                float beginWidth = begin > 0 ? static_cast<Character*>(childNodes.at(begin - 1)._node->_tag)->_width_integral : 0;
-                float placingWidth = currentChar._width_integral - beginWidth;
-                if(flowx + placingWidth > boundary && allowLineBreak)
+                const float beginWidth = begin > 0 ? static_cast<Character*>(childNodes.at(begin - 1)._node->_tag)->_width_integral : 0;
+                if(const float placingWidth = currentChar._width_integral - beginWidth; flowx + placingWidth > boundary && allowLineBreak)
                 {
                     if(flowx != _line_indent)
                     {
+                        const float layoutDirection = Ark::instance().applicationContext()->renderEngine()->toLayoutDirection(_line_height.toPixelLength(charMaxHeight));
                         flowy += layoutDirection;
                         flowx = paragraphX + _line_indent;
                     }
@@ -238,18 +238,14 @@ struct UpdatableParagraph final : Updatable {
                         LOGW("No other choices, placing word out of boundary(%.2f)", boundary);
                 }
 
-                if(end - begin == 1)
-                    i._node->setOffsetPosition({flowx, flowy});
-                else
-                    place(childNodes, begin, end, flowx, flowy);
-
+                place(childNodes, begin, end, flowx, flowy);
                 begin = end;
             }
             ++ end;
         }
     }
 
-    void place(const Vector<Layout::Hierarchy>& childNodes, size_t begin, size_t end, float& flowx, float& flowy) const
+    void place(const Vector<Layout::Hierarchy>& childNodes, const size_t begin, const size_t end, float& flowx, float& flowy) const
     {
         for(size_t i = begin; i < end; ++i)
         {
@@ -261,13 +257,14 @@ struct UpdatableParagraph final : Updatable {
 
     Layout::Hierarchy _hierarchy;
     sp<LayoutParam> _layout_param;
+    sp<Boundaries> _boundaries;
     float _letter_spacing;
-    float _line_height_percentage;
+    LayoutLength _line_height;
     float _line_indent;
 };
 
 struct LayoutLabel final : Layout {
-    LayoutLabel(float letterSpacing)
+    LayoutLabel(const float letterSpacing)
         : _letter_spacing(letterSpacing) {
     }
 
@@ -276,7 +273,7 @@ struct LayoutLabel final : Layout {
         if(hierarchy._node->_layout_param)
         {
             const LayoutParam& lp = hierarchy._node->_layout_param;
-            Size size(lp.width()._value.val(), lp.height()._value.val());
+            Size size(lp.width().value().val(), lp.height().value().val());
             switch(lp.justifyContent()) {
                 case LayoutParam::JUSTIFY_CONTENT_CENTER:
                     return sp<Updatable>::make<UpdatableCenter>(std::move(hierarchy), std::move(size), _letter_spacing);
@@ -294,19 +291,21 @@ struct LayoutLabel final : Layout {
 };
 
 struct LayoutParagraph final : Layout {
-    LayoutParagraph(sp<LayoutParam> layoutParam, float letterSpacing, float lineHeightPercentage)
-        : _layout_param(std::move(layoutParam)), _letter_spacing(letterSpacing), _line_height_percentage(lineHeightPercentage)
+    LayoutParagraph(sp<LayoutParam> layoutParam, sp<Boundaries> boundaries, const float letterSpacing, LayoutLength lineHeight)
+        : _layout_param(std::move(layoutParam)), _boundaries(std::move(boundaries)), _letter_spacing(letterSpacing), _line_height(std::move(lineHeight))
     {
     }
 
     sp<Updatable> inflate(Hierarchy hierarchy) override
     {
-        return sp<Updatable>::make<UpdatableParagraph>(std::move(hierarchy), _layout_param, _letter_spacing, _line_height_percentage);
+        return sp<Updatable>::make<UpdatableParagraph>(std::move(hierarchy), _layout_param, _boundaries, _letter_spacing, _line_height);
     }
 
+private:
     sp<LayoutParam> _layout_param;
+    sp<Boundaries> _boundaries;
     float _letter_spacing;
-    float _line_height_percentage;
+    LayoutLength _line_height;
 };
 
 float doCreateRichContent(GlyphContents& cm, GlyphMaker& gm, const document& richtext, BeanFactory& factory, const Scope& args, float& flowx, float& flowy, float boundary)
@@ -331,15 +330,15 @@ float doCreateRichContent(GlyphContents& cm, GlyphMaker& gm, const document& ric
 }
 
 struct Text::Content {
-    Content(sp<RenderLayer> renderLayer, sp<StringVar> text, sp<Vec3> position, sp<LayoutParam> layoutParam, sp<GlyphMaker> glyphMaker, sp<Mat4> transform, float letterSpacing, float lineHeight, float lineIndent)
+    Content(sp<RenderLayer> renderLayer, sp<StringVar> text, sp<Vec3> position, sp<LayoutParam> layoutParam, sp<GlyphMaker> glyphMaker, sp<Mat4> transform, const float letterSpacing, LayoutLength lineHeight, const float lineIndent)
         : _render_layer(std::move(renderLayer)), _text(text ? std::move(text) : StringType::create()), _position(sp<VariableWrapper<V3>>::make(position ? std::move(position) : sp<Vec3>::make<Vec3::Const>(V3(0)))), _layout_param(std::move(layoutParam)),
           _glyph_maker(std::move(glyphMaker)), _transform(std::move(transform)), _letter_spacing(letterSpacing), _layout_direction(Ark::instance().applicationContext()->renderEngine()->toLayoutDirection(1.0f)),
-          _line_height(lineHeight), _line_indent(lineIndent), _size(sp<Size>::make(0.0f, 0.0f))
+          _line_height(std::move(lineHeight)), _line_indent(lineIndent), _size(sp<Size>::make(0.0f, 0.0f))
     {
         setText(Strings::fromUTF8(_text->val()));
     }
 
-    bool update(uint64_t timestamp)
+    bool update(const uint64_t timestamp)
     {
         const bool contentDirty = _text->update(timestamp);
         const bool layoutDirty = _timestamp.update(timestamp);
@@ -384,7 +383,7 @@ struct Text::Content {
     {
         if(!_boundaries || _layout_direction > 0)
             return 0;
-        return _boundaries->size()->val().y() + _line_height;
+        return _boundaries->size()->val().y();
     }
 
     float getLayoutBoundary() const
@@ -392,10 +391,12 @@ struct Text::Content {
         return _boundaries ? _boundaries->size()->val().x() : 0;
     }
 
-    V2 doLayoutWithoutBoundary() const {
+    V2 doLayoutWithoutBoundary() const
+    {
         float lineHeight = 0;
         float flowx = _layout_chars.empty() ? 0 : -_letter_spacing;
-        for(const Character& i : _layout_chars) {
+        for(const Character& i : _layout_chars)
+        {
             const Model& model = i._model;
             const V2 bitmapOccupySize(model.occupy()->size()->val());
             const V2 bitmapContentSize(model.content()->size()->val());
@@ -406,7 +407,8 @@ struct Text::Content {
         return {flowx, lineHeight};
     }
 
-    void createLayerContent(const V2& layoutSize) {
+    void createLayerContent(const V2& layoutSize)
+    {
         _render_objects.clear();
         for(const sp<Glyph>& i : _glyphs)
             _render_objects.push_back(i->toRenderObject());
@@ -445,16 +447,18 @@ struct Text::Content {
             if(_layout_param->layout())
                 return _layout_param->layout();
 
-            if(!(_layout_param->isWrapContent() || _layout_param->flexWrap() == LayoutParam::FLEX_WRAP_NOWRAP))
-                return sp<Layout>::make<LayoutParagraph>(_layout_param, _letter_spacing, _line_height);
+            if(_layout_param->isWrapContent())
+                return sp<Layout>::make<LayoutParagraph>(_layout_param, _boundaries, _letter_spacing, _line_height);
         }
         return sp<Layout>::make<LayoutLabel>(_letter_spacing);
     }
 
-    Layout::Hierarchy makeHierarchy() {
-        Layout::Hierarchy hierarchy{sp<Layout::Node>::make(_layout_param)};
+    Layout::Hierarchy makeHierarchy()
+    {
+        Layout::Hierarchy hierarchy = {sp<Layout::Node>::make(_layout_param)};
         hierarchy._node->setSize(_size->val());
-        for(Character& i : _layout_chars) {
+        for(Character& i : _layout_chars)
+        {
             sp<Layout::Node> node = sp<Layout::Node>::make(sp<LayoutParam>::make(i._glyph->occupySize().x(), i._glyph->occupySize().y()), &i);
             node->_tag = &i;
             hierarchy._child_nodes.push_back({std::move(node)});
@@ -471,7 +475,7 @@ struct Text::Content {
 
     float _letter_spacing;
     float _layout_direction;
-    float _line_height;
+    LayoutLength _line_height;
     float _line_indent;
 
     sp<Size> _size;
@@ -506,8 +510,8 @@ private:
     Vector<sp<LayerContext>> _layer_contexts;
 };
 
-Text::Text(sp<RenderLayer> renderLayer, sp<StringVar> text, sp<Vec3> position, sp<LayoutParam> layoutParam, sp<GlyphMaker> glyphMaker, sp<Mat4> transform, float letterSpacing, float lineHeight, float lineIndent)
-    : _content(sp<Content>::make(std::move(renderLayer), std::move(text), std::move(position), std::move(layoutParam), glyphMaker ? std::move(glyphMaker) : sp<GlyphMaker>::make<GlyphMakerSpan>(std::move(nullptr)), std::move(transform), letterSpacing, lineHeight, lineIndent))
+Text::Text(sp<RenderLayer> renderLayer, sp<StringVar> text, sp<Vec3> position, sp<LayoutParam> layoutParam, sp<GlyphMaker> glyphMaker, sp<Mat4> transform, float letterSpacing, LayoutLength lineHeight, float lineIndent)
+    : _content(sp<Content>::make(std::move(renderLayer), std::move(text), std::move(position), std::move(layoutParam), glyphMaker ? std::move(glyphMaker) : sp<GlyphMaker>::make<GlyphMakerSpan>(std::move(nullptr)), std::move(transform), letterSpacing, std::move(lineHeight), lineIndent))
 {
 }
 
@@ -515,12 +519,16 @@ void Text::onWire(const WiringContext& context, const Box& self)
 {
     if(const sp<View> view = context.getComponent<View>())
     {
-        LayoutParam& layoutParam = view->layoutParam();
+        sp<LayoutParam> layoutParam = view->layoutParam();
         setBoundaries(view->makeBoundaries());
-        if(layoutParam.width()._type == LayoutParam::LENGTH_TYPE_AUTO)
-            layoutParam.setWidth({LayoutParam::LENGTH_TYPE_PIXEL, size()->width()});
-        if(layoutParam.height()._type == LayoutParam::LENGTH_TYPE_AUTO)
-            layoutParam.setHeight({LayoutParam::LENGTH_TYPE_PIXEL, size()->height()});
+        if(!layoutParam->isWrapContent())
+        {
+            if(layoutParam->width().type() == LayoutLength::LENGTH_TYPE_AUTO)
+                layoutParam->setWidth({size()->width(), LayoutLength::LENGTH_TYPE_PIXEL});
+            if(layoutParam->height().type() == LayoutLength::LENGTH_TYPE_AUTO)
+                layoutParam->setHeight({size()->height(), LayoutLength::LENGTH_TYPE_PIXEL});
+        }
+        _content->_layout_param = std::move(layoutParam);
     }
     else if(sp<Boundaries> boundaries = context.getComponent<Boundaries>())
         setBoundaries(std::move(boundaries));
@@ -628,7 +636,7 @@ void Text::setRichText(std::wstring richText, const sp<ResourceLoader>& resource
 Text::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
     : _render_layer(factory.ensureBuilder<RenderLayer>(manifest, constants::RENDER_LAYER)), _text(factory.getBuilder<StringVar>(manifest, constants::TEXT)), _font(factory.getBuilder<Font>(manifest, constants::FONT)), _position(factory.getBuilder<Vec3>(manifest, constants::POSITION)),
       _layout_param(factory.getBuilder<LayoutParam>(manifest, constants::LAYOUT_PARAM)), _glyph_maker(factory.getBuilder<GlyphMaker>(manifest, "glyph-maker")), _transform(factory.getBuilder<Mat4>(manifest, constants::TRANSFORM)), _letter_spacing(factory.getBuilder<Numeric>(manifest, "letter-spacing")),
-      _line_height(Documents::getAttribute<float>(manifest, "line-height", 0.0f)), _line_indent(Documents::getAttribute<float>(manifest, "line-indent", 0.0f))
+      _line_height(factory.getIBuilder<LayoutLength>(manifest, "line-height"), LayoutLength(100.0f, LayoutLength::LENGTH_TYPE_PERCENTAGE)), _line_indent(Documents::getAttribute<float>(manifest, "line-indent", 0.0f))
 {
 }
 
@@ -636,7 +644,7 @@ sp<Text> Text::BUILDER::build(const Scope& args)
 {
     sp<GlyphMaker> glyphMaker = _glyph_maker.build(args);
     float letterSpacing = _letter_spacing ? _letter_spacing.build(args)->val() : 0.0f;
-    return sp<Text>::make(_render_layer->build(args), _text.build(args), _position.build(args), _layout_param.build(args), glyphMaker ? std::move(glyphMaker) : sp<GlyphMaker>::make<GlyphMakerSpan>(_font.build(args)), _transform.build(args), letterSpacing, _line_height, _line_indent);
+    return sp<Text>::make(_render_layer->build(args), _text.build(args), _position.build(args), _layout_param.build(args), glyphMaker ? std::move(glyphMaker) : sp<GlyphMaker>::make<GlyphMakerSpan>(_font.build(args)), _transform.build(args), letterSpacing, _line_height.build(args), _line_indent);
 }
 
 Text::BUILDER_WIRABLE::BUILDER_WIRABLE(BeanFactory& factory, const document& manifest)
