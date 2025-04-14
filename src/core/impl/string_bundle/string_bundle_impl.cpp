@@ -29,7 +29,7 @@ sp<StringBundle> StringBundleImpl::split(const String& resid, String& remains)
 {
     auto [dirname, filename] = resid.cut('/');
 
-    ASSERT(filename);
+    CHECK(filename, "Resid(\"%s\") should have at least one '/' in it to indicate its filename", resid.c_str());
     if(const auto iter = _directories.find(dirname); iter != _directories.end())
     {
         remains = std::move(filename.value());

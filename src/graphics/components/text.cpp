@@ -208,10 +208,13 @@ struct UpdatableParagraph final : Updatable {
     bool update(const uint64_t timestamp) override
     {
         const V2 size = _boundaries->size()->val();
+        if(size.x() == 0)
+            return false;
+
         const float x = _layout_param->alignSelf() == LayoutParam::ALIGN_CENTER ? -size.x() / 2 : 0;
         const float boundary = x + size.x();
         doParagraphLayout(_hierarchy._child_nodes, x, 0, boundary);
-        return false;
+        return true;
     }
 
     void doParagraphLayout(const Vector<Layout::Hierarchy>& childNodes, float flowx, float flowy, const float boundary) const
