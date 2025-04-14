@@ -21,16 +21,15 @@ LayoutLength::LayoutLength(const float value, const LengthType type)
 {
 }
 
-LayoutLength::LayoutLength(const StringView value, const LengthType type)
+LayoutLength::LayoutLength(const String& value, const LengthType type)
     : _value(nullptr, 0), _type(type)
 {
     if(value == "auto")
         return;
 
-    const String sValue(value.data());
-    if(sValue.endsWith("%"))
+    if(value.endsWith("%"))
     {
-        const String sNumber = sValue.substr(0, sValue.length() - 1);
+        const String sNumber = value.substr(0, value.length() - 1);
         ASSERT(Strings::isNumeric(sNumber));
         ASSERT(_type == LENGTH_TYPE_AUTO || _type == LENGTH_TYPE_PERCENTAGE);
         _value.reset(Strings::eval<float>(sNumber));
@@ -40,16 +39,16 @@ LayoutLength::LayoutLength(const StringView value, const LengthType type)
 
     ASSERT(_type == LENGTH_TYPE_AUTO || _type == LENGTH_TYPE_PIXEL);
     _type = LENGTH_TYPE_PIXEL;
-    if(sValue.endsWith("px"))
+    if(value.endsWith("px"))
     {
-        const String sNumber = sValue.substr(0, sValue.length() - 2);
+        const String sNumber = value.substr(0, value.length() - 2);
         ASSERT(Strings::isNumeric(sNumber));
         _value.reset(Strings::eval<float>(sNumber));
     }
     else
     {
-        ASSERT(Strings::isNumeric(sValue));
-        _value.reset(Strings::eval<float>(sValue));
+        ASSERT(Strings::isNumeric(value));
+        _value.reset(Strings::eval<float>(value));
     }
 }
 

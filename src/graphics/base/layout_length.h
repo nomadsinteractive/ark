@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/base/api.h"
 #include "core/base/string.h"
 #include "core/inf/builder.h"
 #include "core/inf/variable.h"
@@ -7,7 +8,7 @@
 
 namespace ark {
 
-class LayoutLength {
+class ARK_API LayoutLength {
 public:
 //  [[script::bindings::enumeration]]
     enum LengthType {
@@ -21,7 +22,7 @@ public:
     LayoutLength(float pixels);
     LayoutLength(float value, LengthType type);
 //  [[script::bindings::auto]]
-    LayoutLength(StringView value, LayoutLength::LengthType type = LayoutLength::LENGTH_TYPE_AUTO);
+    LayoutLength(const String& value, LayoutLength::LengthType type = LayoutLength::LENGTH_TYPE_AUTO);
 //  [[script::bindings::auto]]
     LayoutLength(sp<Numeric> value, LayoutLength::LengthType type = LayoutLength::LENGTH_TYPE_PIXEL);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(LayoutLength);
