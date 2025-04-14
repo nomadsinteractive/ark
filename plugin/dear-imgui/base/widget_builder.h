@@ -44,9 +44,9 @@ public:
     void radioButton(const String& label, const sp<Integer>& option, int32_t group);
 
 // [[script::bindings::auto]]
-    void combo(const String& label, const sp<Integer>& option, const std::vector<String>& items);
+    void combo(const String& label, const sp<Integer>& option, const Vector<String>& items);
 // [[script::bindings::auto]]
-    void listBox(const String& label, const sp<Integer>& option, const std::vector<String>& items);
+    void listBox(const String& label, const sp<Integer>& option, const Vector<String>& items);
 
 // [[script::bindings::auto]]
     void indent(float w = 0);

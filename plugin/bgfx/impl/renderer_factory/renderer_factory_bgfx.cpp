@@ -67,12 +67,12 @@ public:
         RenderUtil::setLayoutDescriptor(RenderUtil::setupLayoutLocation(context, firstStage._declaration_ins), sLocation, 0);
 
         const PipelineLayout& pipelineLayout = pipelineDescriptor.layout();
-        if(ShaderPreprocessor* vertex = context.tryGetRenderStage(Enum::SHADER_STAGE_BIT_VERTEX))
+        if(ShaderPreprocessor* vertex = context.tryGetRenderStage(enums::SHADER_STAGE_BIT_VERTEX))
         {
             RenderUtil::setLayoutDescriptor(vertex->_declaration_images, "binding", static_cast<uint32_t>(pipelineLayout.ubos().size() + pipelineLayout.ssbos().size() + pipelineLayout.samplers().size()));
             vertex->_predefined_macros.emplace_back("#define gl_InstanceID gl_InstanceIndex");
         }
-        if(ShaderPreprocessor* fragment = context.tryGetRenderStage(Enum::SHADER_STAGE_BIT_FRAGMENT))
+        if(ShaderPreprocessor* fragment = context.tryGetRenderStage(enums::SHADER_STAGE_BIT_FRAGMENT))
         {
             fragment->linkNextStage("FragColor");
             const uint32_t bindingOffset = std::max<uint32_t>(2, pipelineLayout.ubos().size() + pipelineLayout.ssbos().size());
@@ -126,7 +126,7 @@ public:
     }
 };
 
-void setVersion(Enum::RendererVersion version, RenderEngineContext& vkContext)
+void setVersion(enums::RendererVersion version, RenderEngineContext& vkContext)
 {
     LOGD("Choose Bgfx Version = %d", version);
     Map<String, String>& definitions = vkContext.definitions();
@@ -142,14 +142,14 @@ void setVersion(Enum::RendererVersion version, RenderEngineContext& vkContext)
 }
 
 RendererFactoryBgfx::RendererFactoryBgfx()
-    : RendererFactory({{Enum::RENDERING_BACKEND_ALL}, Ark::COORDINATE_SYSTEM_RHS, false, 16})
+    : RendererFactory({{enums::RENDERING_BACKEND_ALL}, Ark::COORDINATE_SYSTEM_RHS, false, 16})
 {
 }
 
 void RendererFactoryBgfx::onSurfaceCreated(RenderEngine& renderEngine)
 {
     ::bgfx::Init init;
-    init.type = renderEngine.version() >= Enum::RENDERER_VERSION_VULKAN ? ::bgfx::RendererType::Vulkan : ::bgfx::RendererType::OpenGL;
+    init.type = renderEngine.version() >= enums::RENDERER_VERSION_VULKAN ? ::bgfx::RendererType::Vulkan : ::bgfx::RendererType::OpenGL;
     init.vendorId = BGFX_PCI_ID_NONE;
 
     const RenderEngine::PlatformInfo& info = Ark::instance().applicationContext()->renderEngine()->info();
@@ -174,7 +174,7 @@ void RendererFactoryBgfx::onSurfaceCreated(RenderEngine& renderEngine)
 sp<RenderEngineContext> RendererFactoryBgfx::createRenderEngineContext(const ApplicationManifest::Renderer& renderer)
 {
     const sp<RenderEngineContext> renderContext = sp<RenderEngineContext>::make(renderer, Viewport(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f));
-    setVersion(renderer._version == Enum::RENDERER_VERSION_AUTO ? Enum::RENDERER_VERSION_VULKAN_13 : renderer._version, renderContext);
+    setVersion(renderer._version == enums::RENDERER_VERSION_AUTO ? enums::RENDERER_VERSION_VULKAN_13 : renderer._version, renderContext);
     return renderContext;
 }
 

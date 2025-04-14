@@ -366,7 +366,7 @@ void ApplicationSDL3::initialize()
         SDL_HideCursor();
 
     RenderEngine& renderEngine = _application_context->renderEngine();
-    _use_open_gl = renderEngine.version() < Enum::RENDERER_VERSION_VULKAN_11;
+    _use_open_gl = renderEngine.version() < enums::RENDERER_VERSION_VULKAN_11;
 
     const SDL_PropertiesID props = SDL_CreateProperties();
     SDL_SetStringProperty(props, SDL_PROP_WINDOW_CREATE_TITLE_STRING, window._title.c_str());

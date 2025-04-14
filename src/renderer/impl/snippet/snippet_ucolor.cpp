@@ -14,7 +14,7 @@ SnippetUColor::SnippetUColor(sp<Vec4> color)
 
 void SnippetUColor::preInitialize(PipelineBuildingContext& context)
 {
-    ShaderPreprocessor& fragment = context.getRenderStage(Enum::SHADER_STAGE_BIT_FRAGMENT);
+    ShaderPreprocessor& fragment = context.getRenderStage(enums::SHADER_STAGE_BIT_FRAGMENT);
     context.addUniform("u_Color", Uniform::TYPE_F4, 1, sp<UploaderOfVariable<V4>>::make(_color));
     fragment.addOutputModifier("", " * u_Color");
 }

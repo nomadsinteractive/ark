@@ -75,7 +75,7 @@ public:
         Table<String, sp<Uniform>> _uniforms;
 
         Vector<std::pair<uintptr_t, size_t>> _slots;
-        ShaderStageSet _stages;
+        enums::ShaderStageSet _stages;
 
         bytearray _dirty_flags;
         bytearray _buffer;
@@ -92,14 +92,14 @@ public:
         Buffer _buffer;
         Binding _binding;
 
-        ShaderStageSet _stages;
+        enums::ShaderStageSet _stages;
     };
 
     struct DescriptorSet {
-        ShaderStageSet _stages;
+        enums::ShaderStageSet _stages;
         Binding _binding;
 
-        uint32_t addStage(Enum::ShaderStageBit stage, uint32_t binding);
+        uint32_t addStage(enums::ShaderStageBit stage, uint32_t binding);
     };
 
 public:

@@ -131,7 +131,7 @@ PipelineDescriptor::PipelineDescriptor(Camera camera, sp<PipelineBuildingContext
             CHECK(computeStage->_compute_local_sizes, "Compute stage local size layout undefined");
             numWorkGroupsArray = computeStage->_compute_local_sizes.value();
         }
-        _configuration._draw_decorator_factory = DrawDecoratorFactoryComposite::compose(std::move(_configuration._draw_decorator_factory), sp<DrawDecoratorFactory>::make<DrawDecoratorFactoryCompute>(_layout, numWorkGroupsArray, computeStage->_pre_shader_stage != Enum::SHADER_STAGE_BIT_NONE));
+        _configuration._draw_decorator_factory = DrawDecoratorFactoryComposite::compose(std::move(_configuration._draw_decorator_factory), sp<DrawDecoratorFactory>::make<DrawDecoratorFactoryCompute>(_layout, numWorkGroupsArray, computeStage->_pre_shader_stage != enums::SHADER_STAGE_BIT_NONE));
     }
 }
 
@@ -198,9 +198,9 @@ void PipelineDescriptor::preCompile(GraphicsContext& graphicsContext)
     }
 }
 
-Map<Enum::ShaderStageBit, ShaderPreprocessor::Stage> PipelineDescriptor::getPreprocessedStages(const RenderEngineContext& renderEngineContext) const
+Map<enums::ShaderStageBit, ShaderPreprocessor::Stage> PipelineDescriptor::getPreprocessedStages(const RenderEngineContext& renderEngineContext) const
 {
-    Map<Enum::ShaderStageBit, ShaderPreprocessor::Stage> shaders;
+    Map<enums::ShaderStageBit, ShaderPreprocessor::Stage> shaders;
 
     for(const auto& [manifest, stage, source] : _stages)
         shaders[stage] = {manifest, stage, preprocess(renderEngineContext, _definitions, source)};
@@ -248,19 +248,19 @@ PipelineDescriptor::Configuration PipelineDescriptor::Configuration::BUILDER::bu
 
 template<> ARK_API PipelineDescriptor::TraitType StringConvert::eval<PipelineDescriptor::TraitType>(const String& str)
 {
-    constexpr Enum::LookupTable<PipelineDescriptor::TraitType, 5> table = {{
+    constexpr enums::LookupTable<PipelineDescriptor::TraitType, 5> table = {{
         {"cull_face_test", PipelineDescriptor::TRAIT_TYPE_CULL_FACE_TEST},
         {"depth_test", PipelineDescriptor::TRAIT_TYPE_DEPTH_TEST},
         {"scissor_test", PipelineDescriptor::TRAIT_TYPE_SCISSOR_TEST},
         {"stencil_test", PipelineDescriptor::TRAIT_TYPE_STENCIL_TEST},
         {"blend", PipelineDescriptor::TRAIT_TYPE_BLEND}
     }};
-    return Enum::lookup(table, str);
+    return enums::lookup(table, str);
 }
 
 template<> ARK_API PipelineDescriptor::CompareFunc StringConvert::eval<PipelineDescriptor::CompareFunc>(const String& str)
 {
-    constexpr Enum::LookupTable<PipelineDescriptor::CompareFunc, 8> table = {{
+    constexpr enums::LookupTable<PipelineDescriptor::CompareFunc, 8> table = {{
         {"always", PipelineDescriptor::COMPARE_FUNC_ALWAYS},
         {"never", PipelineDescriptor::COMPARE_FUNC_NEVER},
         {"equal", PipelineDescriptor::COMPARE_FUNC_EQUAL},
@@ -270,12 +270,12 @@ template<> ARK_API PipelineDescriptor::CompareFunc StringConvert::eval<PipelineD
         {"less_equal", PipelineDescriptor::COMPARE_FUNC_LEQUAL},
         {"greater_equal", PipelineDescriptor::COMPARE_FUNC_GEQUAL}
     }};
-    return Enum::lookup(table, str);
+    return enums::lookup(table, str);
 }
 
 template<> ARK_API PipelineDescriptor::StencilFunc StringConvert::eval<PipelineDescriptor::StencilFunc>(const String& str)
 {
-    constexpr Enum::LookupTable<PipelineDescriptor::StencilFunc, 8> table = {{
+    constexpr enums::LookupTable<PipelineDescriptor::StencilFunc, 8> table = {{
         {"keep", PipelineDescriptor::STENCIL_FUNC_KEEP},
         {"zero", PipelineDescriptor::STENCIL_FUNC_ZERO},
         {"replace", PipelineDescriptor::STENCIL_FUNC_REPLACE},
@@ -285,7 +285,7 @@ template<> ARK_API PipelineDescriptor::StencilFunc StringConvert::eval<PipelineD
         {"decrease_and_wrap", PipelineDescriptor::STENCIL_FUNC_DECREASE_AND_WRAP},
         {"invert", PipelineDescriptor::STENCIL_FUNC_INVERT}
     }};
-    return Enum::lookup(table, str);
+    return enums::lookup(table, str);
 }
 
 template<> ARK_API PipelineDescriptor::FrontFace StringConvert::eval<PipelineDescriptor::FrontFace>(const String& str)
@@ -298,16 +298,16 @@ template<> ARK_API PipelineDescriptor::FrontFace StringConvert::eval<PipelineDes
 
 template<> ARK_API PipelineDescriptor::FrontFaceType StringConvert::eval<PipelineDescriptor::FrontFaceType>(const String& str)
 {
-    constexpr Enum::LookupTable<PipelineDescriptor::FrontFaceType, 2> table = {{
+    constexpr enums::LookupTable<PipelineDescriptor::FrontFaceType, 2> table = {{
         {"front", PipelineDescriptor::FRONT_FACE_TYPE_FRONT},
         {"back", PipelineDescriptor::FRONT_FACE_TYPE_BACK}
     }};
-    return Enum::lookup(table, str);
+    return enums::lookup(table, str);
 }
 
 template<> ARK_API PipelineDescriptor::BlendFactor StringConvert::eval<PipelineDescriptor::BlendFactor>(const String& str)
 {
-    constexpr Enum::LookupTable<PipelineDescriptor::BlendFactor, 13> table = {{
+    constexpr enums::LookupTable<PipelineDescriptor::BlendFactor, 13> table = {{
         {"default", PipelineDescriptor::BLEND_FACTOR_DEFAULT},
         {"zero", PipelineDescriptor::BLEND_FACTOR_ZERO},
         {"one", PipelineDescriptor::BLEND_FACTOR_ONE},
@@ -322,7 +322,7 @@ template<> ARK_API PipelineDescriptor::BlendFactor StringConvert::eval<PipelineD
         {"const_color", PipelineDescriptor::BLEND_FACTOR_CONST_COLOR},
         {"const_alpha", PipelineDescriptor::BLEND_FACTOR_CONST_ALPHA}
     }};
-    return Enum::lookup(table, str);
+    return enums::lookup(table, str);
 }
 
 }

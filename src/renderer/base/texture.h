@@ -3,7 +3,7 @@
 #include "core/base/api.h"
 #include "core/base/string.h"
 #include "core/base/bean_factory.h"
-#include "core/base/bit_set.h"
+#include "core/base/bit_set_types.h"
 #include "core/base/timestamp.h"
 #include "core/inf/builder.h"
 #include "core/impl/builder/safe_builder.h"
@@ -88,9 +88,6 @@ public:
         Filter _wrap_s;
         Filter _wrap_t;
         Filter _wrap_r;
-
-    private:
-        Filter getEnumValue(Dictionary<document>& dict, const String& name, BeanFactory& factory, const Scope& args, Texture::Filter defValue);
     };
 
     class Delegate;
@@ -131,6 +128,9 @@ public:
     private:
         bitmap _bitmap;
     };
+
+//  [[script::bindings::auto]]
+    Texture(sp<Bitmap> bitmap, Texture::Format textureFormat = Texture::FORMAT_AUTO, enums::UploadStrategy uploadStrategy = enums::UPLOAD_STRATEGY_ONCE_AND_ON_SURFACE_READY, sp<Future> future = nullptr);
 
     Texture(sp<Delegate> delegate, sp<Size> size, sp<Uploader> uploader, sp<Parameters> parameters);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Texture);
@@ -183,12 +183,9 @@ public:
     };
 
 private:
-    sp<Delegate> _delegate;
-    sp<Size> _size;
-    sp<Uploader> _uploader;
-    sp<Parameters> _parameters;
+    struct Stub;
 
-    Timestamp _timestamp;
+    sp<Stub> _stub;
 };
 
 }

@@ -73,7 +73,7 @@ public:
     bool update(uint64_t timestamp) override {
         const bool dirty = _uploader->update(timestamp) || _buffer->id() == 0;
         if(dirty)
-            _render_controller.upload(sp<Resource>::make<ResourceUploadBufferSnapshot>(_buffer, _uploader), RenderController::US_ONCE);
+            _render_controller.upload(sp<Resource>::make<ResourceUploadBufferSnapshot>(_buffer, _uploader), enums::UPLOAD_STRATEGY_ONCE);
         return dirty;
     }
 
@@ -209,15 +209,15 @@ void RenderController::prepare(GraphicsContext& graphicsContext, LFQueue<Uploadi
     while(items.pop(front)) {
         if(!front._resource.isCancelled())
         {
-            if(front._strategy == RenderController::US_RELOAD && front._resource.id() != 0)
+            if(front._strategy == enums::UPLOAD_STRATEGY_RELOAD && front._resource.id() != 0)
                 front._resource.recycle(graphicsContext);
 
-            if((front._strategy.has(US_ONCE)) || front._strategy == US_RELOAD)
+            if((front._strategy.has(enums::UPLOAD_STRATEGY_ONCE)) || front._strategy == enums::UPLOAD_STRATEGY_RELOAD)
                 front._resource.upload(graphicsContext);
 
-            if(front._strategy.has(US_ON_EVERY_FRAME))
+            if(front._strategy.has(enums::UPLOAD_STRATEGY_ON_EVERY_FRAME))
                 _on_every_frame.append(front._priority, std::move(front._resource));
-            else if(front._strategy.has(US_ON_SURFACE_READY))
+            else if(front._strategy.has(enums::UPLOAD_STRATEGY_ON_SURFACE_READY))
                 _on_surface_ready.append(front._priority, std::move(front._resource));
         }
     }
@@ -237,28 +237,28 @@ void RenderController::onDrawFrame(GraphicsContext& graphicsContext)
         runnable->run();
 }
 
-void RenderController::upload(sp<Resource> resource, const UploadStrategy strategy, sp<Updatable> updatable, sp<Future> future, const UploadPriority priority)
+void RenderController::upload(sp<Resource> resource, const enums::UploadStrategy strategy, sp<Updatable> updatable, sp<Future> future, const enums::UploadPriority priority)
 {
-    if(strategy.has(US_ON_CHANGE))
+    if(strategy.has(enums::UPLOAD_STRATEGY_ON_CHANGE))
     {
         CHECK(updatable, "An updatable must be specified using \"on_change\" upload strategy");
         sp<Boolean> discarded = future ? future->isCanceled() : sp<Boolean>::make<BooleanByWeakRef<Resource>>(resource, 1);
         addPreComposeUpdatable(std::move(updatable), std::move(discarded));
     }
-    if(strategy != US_ON_CHANGE)
+    if(strategy != enums::UPLOAD_STRATEGY_ON_CHANGE)
         _uploading_resources.push(UploadingRenderResource(RenderResource(std::move(resource), std::move(future)), strategy, priority));
 }
 
-void RenderController::uploadBuffer(Buffer& buffer, sp<Uploader> uploader, const RenderController::UploadStrategy strategy, sp<Future> future, RenderController::UploadPriority priority)
+void RenderController::uploadBuffer(const Buffer& buffer, sp<Uploader> uploader, const enums::UploadStrategy strategy, sp<Future> future, enums::UploadPriority priority)
 {
     ASSERT(uploader);
     if(!future)
         future = sp<Future>::make(sp<BooleanByWeakRef<Buffer::Delegate>>::make(buffer.delegate(), 1));
     buffer.delegate()->setSize(uploader->size());
     Uploader& uploaderInstance = *uploader;
-    sp<Updatable> updatable = strategy.has(US_ON_CHANGE) ? sp<Updatable>::make<BufferUpdatable>(*this, std::move(uploader), buffer.delegate()) : sp<Updatable>();
+    sp<Updatable> updatable = strategy.has(enums::UPLOAD_STRATEGY_ON_CHANGE) ? sp<Updatable>::make<BufferUpdatable>(*this, std::move(uploader), buffer.delegate()) : sp<Updatable>();
     //TODO: make this mess a bit more cleaner
-    if(strategy == US_ON_CHANGE)
+    if(strategy == enums::UPLOAD_STRATEGY_ON_CHANGE)
         upload(nullptr, strategy, std::move(updatable), std::move(future), priority);
     else
         upload(sp<Resource>::make<ResourceUploadBufferSnapshot>(buffer.delegate(), uploaderInstance), strategy, std::move(updatable), std::move(future), priority);
@@ -274,22 +274,22 @@ const sp<RenderEngine>& RenderController::renderEngine() const
     return _render_engine;
 }
 
-sp<Texture> RenderController::createTexture(sp<Size> size, sp<Texture::Parameters> parameters, sp<Texture::Uploader> uploader, const RenderController::UploadStrategy us, sp<Future> future)
+sp<Texture> RenderController::createTexture(sp<Size> size, sp<Texture::Parameters> parameters, sp<Texture::Uploader> uploader, const enums::UploadStrategy us, sp<Future> future)
 {
     sp<Texture::Delegate> delegate = _render_engine->rendererFactory()->createTexture(size, parameters);
     DCHECK(delegate, "Unsupported TextureType: %d", parameters->_type);
-    const sp<Texture> texture = sp<Texture>::make(std::move(delegate), std::move(size), std::move(uploader), std::move(parameters));
+    sp<Texture> texture = sp<Texture>::make(std::move(delegate), std::move(size), std::move(uploader), std::move(parameters));
     upload(texture, us, nullptr, std::move(future));
     return texture;
 }
 
-sp<Texture> RenderController::createTexture2d(sp<Bitmap> bitmap, Texture::Format format, const UploadStrategy us, sp<Future> future)
+sp<Texture> RenderController::createTexture2d(sp<Bitmap> bitmap, Texture::Format format, const enums::UploadStrategy us, sp<Future> future)
 {
     sp<Size> size = sp<Size>::make(static_cast<float>(bitmap->width()), static_cast<float>(bitmap->height()));
     return createTexture(std::move(size), sp<Texture::Parameters>::make(Texture::TYPE_2D, nullptr, format), sp<Texture::UploaderBitmap>::make(std::move(bitmap)), us, std::move(future));
 }
 
-Buffer RenderController::makeBuffer(const Buffer::Usage usage, sp<Uploader> uploader, const UploadStrategy us, sp<Future> future)
+Buffer RenderController::makeBuffer(const Buffer::Usage usage, sp<Uploader> uploader, const enums::UploadStrategy us, sp<Future> future)
 {
     DTHREAD_CHECK(THREAD_ID_CORE);
     Buffer buffer(_render_engine->rendererFactory()->createBuffer(usage));
@@ -300,9 +300,9 @@ Buffer RenderController::makeBuffer(const Buffer::Usage usage, sp<Uploader> uplo
 
 Buffer RenderController::makeBuffer(const Buffer::Usage usage, sp<Uploader> uploader)
 {
-    UploadStrategy us = uploader ? US_ONCE_AND_ON_SURFACE_READY : US_ON_SURFACE_READY;
+    enums::UploadStrategy us = uploader ? enums::UPLOAD_STRATEGY_ONCE_AND_ON_SURFACE_READY : enums::UPLOAD_STRATEGY_ON_SURFACE_READY;
     if(usage.has(Buffer::USAGE_BIT_DYNAMIC) && uploader)
-        us = us | US_ON_CHANGE;
+        us = us | enums::UPLOAD_STRATEGY_ON_CHANGE;
     return makeBuffer(usage, std::move(uploader), us);
 }
 
@@ -339,7 +339,7 @@ sp<RenderTarget> RenderController::makeRenderTarget(sp<Renderer> renderer, Rende
 {
     sp<RenderTarget> renderTarget = renderEngine()->rendererFactory()->createRenderTarget(std::move(renderer), std::move(configure));
     if(renderTarget->resource())
-        upload(renderTarget->resource(), US_ONCE_AND_ON_SURFACE_READY, nullptr, nullptr, UPLOAD_PRIORITY_LOW);
+        upload(renderTarget->resource(), enums::UPLOAD_STRATEGY_ONCE_AND_ON_SURFACE_READY, nullptr, nullptr, enums::UPLOAD_PRIORITY_LOW);
     return renderTarget;
 }
 
@@ -446,19 +446,19 @@ uint64_t RenderController::RenderResource::id() const
     return _resource->id();
 }
 
-RenderController::UploadingRenderResource::UploadingRenderResource(RenderResource resource, UploadStrategy strategy, UploadPriority priority)
+RenderController::UploadingRenderResource::UploadingRenderResource(RenderResource resource, const enums::UploadStrategy strategy, const enums::UploadPriority priority)
     : _resource(std::move(resource)), _strategy(strategy), _priority(priority)
 {
 }
 
-void RenderController::RenderResourceList::append(UploadPriority priority, RenderResource ur)
+void RenderController::RenderResourceList::append(enums::UploadPriority priority, RenderResource ur)
 {
     _resources[priority].push_back(std::move(ur));
 }
 
 void RenderController::RenderResourceList::foreach(GraphicsContext& graphicsContext, bool recycle, bool upload)
 {
-    for(size_t i = 0; i < UPLOAD_PRIORITY_COUNT; ++i)
+    for(size_t i = 0; i < enums::UPLOAD_PRIORITY_COUNT; ++i)
         for(auto iter = _resources[i].begin(); iter != _resources[i].end(); )
         {
             const RenderResource& resource = *iter;
@@ -473,18 +473,6 @@ void RenderController::RenderResourceList::foreach(GraphicsContext& graphicsCont
                 ++iter;
             }
         }
-}
-
-template<> ARK_API RenderController::UploadStrategy StringConvert::eval<RenderController::UploadStrategy>(const String& str)
-{
-    constexpr RenderController::UploadStrategy::LookupTable<5> uploadStrategies = {{
-        {"reload", RenderController::US_RELOAD},
-        {"once", RenderController::US_ONCE},
-        {"on_surface_ready", RenderController::US_ON_SURFACE_READY},
-        {"on_change", RenderController::US_ON_CHANGE},
-        {"on_every_frame", RenderController::US_ON_EVERY_FRAME}
-    }};
-    return RenderController::UploadStrategy::toBitSet(str, uploadStrategies);
 }
 
 }

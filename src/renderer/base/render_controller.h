@@ -25,25 +25,6 @@ namespace ark {
 
 class ARK_API RenderController {
 public:
-//  [[script::bindings::enumeration]]
-    enum UploadStrategyBit {
-        US_RELOAD = 0,
-        US_ONCE = 1,
-        US_ON_SURFACE_READY = 2,
-        US_ONCE_AND_ON_SURFACE_READY = 3,
-        US_ON_CHANGE = 4,
-        US_ON_EVERY_FRAME = 8
-    };
-    typedef BitSet<UploadStrategyBit> UploadStrategy;
-
-//  [[script::bindings::enumeration]]
-    enum UploadPriority {
-        UPLOAD_PRIORITY_HIGH = 0,
-        UPLOAD_PRIORITY_NORMAL,
-        UPLOAD_PRIORITY_LOW,
-        UPLOAD_PRIORITY_COUNT
-    };
-
     class ARK_API PrimitiveIndexBuffer {
     public:
         PrimitiveIndexBuffer(Vector<element_index_t> modelIndices, size_t modelVertexCount, bool degenerate, size_t primitiveCount);
@@ -97,19 +78,19 @@ public:
 
     void onDrawFrame(GraphicsContext& graphicsContext);
 
-    void upload(sp<Resource> resource, RenderController::UploadStrategy strategy, sp<Updatable> updatable = nullptr, sp<Future> future = nullptr, UploadPriority priority = UPLOAD_PRIORITY_NORMAL);
+    void upload(sp<Resource> resource, enums::UploadStrategy strategy, sp<Updatable> updatable = nullptr, sp<Future> future = nullptr, enums::UploadPriority priority = enums::UPLOAD_PRIORITY_NORMAL);
 
 //  [[script::bindings::auto]]
-    void uploadBuffer(Buffer& buffer, sp<Uploader> input, RenderController::UploadStrategy strategy, sp<Future> future = nullptr, RenderController::UploadPriority priority = RenderController::UPLOAD_PRIORITY_NORMAL);
+    void uploadBuffer(const Buffer& buffer, sp<Uploader> input, enums::UploadStrategy strategy, sp<Future> future = nullptr, enums::UploadPriority priority = enums::UPLOAD_PRIORITY_NORMAL);
 
     const sp<RenderEngine>& renderEngine() const;
 
-    sp<Texture> createTexture(sp<Size> size, sp<Texture::Parameters> parameters, sp<Texture::Uploader> uploader, RenderController::UploadStrategy us = US_ONCE_AND_ON_SURFACE_READY, sp<Future> future = nullptr);
+    sp<Texture> createTexture(sp<Size> size, sp<Texture::Parameters> parameters, sp<Texture::Uploader> uploader, enums::UploadStrategy us = enums::UPLOAD_STRATEGY_ONCE_AND_ON_SURFACE_READY, sp<Future> future = nullptr);
 //  [[script::bindings::auto]]
-    sp<Texture> createTexture2d(sp<Bitmap> bitmap, Texture::Format format = Texture::FORMAT_AUTO, RenderController::UploadStrategy us = RenderController::US_ONCE_AND_ON_SURFACE_READY, sp<Future> future = nullptr);
+    sp<Texture> createTexture2d(sp<Bitmap> bitmap, Texture::Format format = Texture::FORMAT_AUTO, enums::UploadStrategy us = enums::UPLOAD_STRATEGY_ONCE_AND_ON_SURFACE_READY, sp<Future> future = nullptr);
 
 //  [[script::bindings::auto]]
-    Buffer makeBuffer(Buffer::Usage usage, sp<Uploader> uploader, RenderController::UploadStrategy us, sp<Future> future = nullptr);
+    Buffer makeBuffer(Buffer::Usage usage, sp<Uploader> uploader, enums::UploadStrategy us, sp<Future> future = nullptr);
     Buffer makeBuffer(Buffer::Usage usage, sp<Uploader> uploader);
 //  [[script::bindings::auto]]
     Buffer makeVertexBuffer(Buffer::Usage usage = Buffer::USAGE_BIT_DYNAMIC, sp<Uploader> uploader = nullptr);
@@ -164,22 +145,22 @@ private:
 
     struct UploadingRenderResource {
         UploadingRenderResource() = default;
-        UploadingRenderResource(RenderResource resource, UploadStrategy strategy, UploadPriority priority);
+        UploadingRenderResource(RenderResource resource, enums::UploadStrategy strategy, enums::UploadPriority priority);
         DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(UploadingRenderResource);
 
         RenderResource _resource;
-        UploadStrategy _strategy;
-        UploadPriority _priority;
+        enums::UploadStrategy _strategy;
+        enums::UploadPriority _priority;
     };
 
     class RenderResourceList {
     public:
-        void append(UploadPriority priority, RenderResource ur);
+        void append(enums::UploadPriority priority, RenderResource ur);
 
         void foreach(GraphicsContext& graphicsContext, bool recycle, bool upload);
 
     private:
-        Vector<RenderResource> _resources[UPLOAD_PRIORITY_COUNT];
+        Vector<RenderResource> _resources[enums::UPLOAD_PRIORITY_COUNT];
     };
 
 private:

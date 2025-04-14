@@ -39,9 +39,6 @@ class WidgetBuilder:
     def button(self, title: str) -> Observer:
         pass
 
-    def checkbox(self, label: str, option: Boolean):
-        pass
-
     def slider_int(self, label: str, value: Integer, v_min: int, v_max: int, prompt_format: str = '%d'):
         pass
 
@@ -86,6 +83,18 @@ class WidgetBuilder:
         pass
 
     def small_button(self, label: str) -> Observer:
+        pass
+
+    def checkbox(self, label: str, option: Boolean):
+        pass
+
+    def radio_button(self, label: str, option: Integer, group: int):
+        pass
+
+    def combo(self, label: str, option: Integer, items: list[str]):
+        pass
+
+    def list_box(self, label: str, option: Integer, items: list[str]):
         pass
 
     def begin_tab_bar(self, str_id: str, flags: int = 0) -> Boolean:

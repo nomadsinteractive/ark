@@ -29,7 +29,7 @@ ANNOTATION_PATTERN = r'(?:\s*(?://)?\s*\[\[[^]]+]]\s+)*'
 METHOD_PATTERN = r'([^(\r\n]+)\(([^\r\n]*)\)[^;\r\n]*;'
 DECLARATION_PATTERN = r'(static\s+)?(const\s+)?([\w\s]+);'
 
-AUTOBIND_ENUMERATION_PATTERN = re.compile(r'\[\[script::bindings::enumeration]]\s*enum\s+(\w+)\s*{([^}]+)};')
+AUTOBIND_ENUMERATION_PATTERN = re.compile(r'\[\[script::bindings::enumeration(?:\(([\w_]+)\))?]]\s*enum\s+(\w+)\s*{([^}]+)};')
 AUTOBIND_PROPERTY_PATTERN = re.compile(r'\[\[script::bindings::property]]\s+%s' % METHOD_PATTERN)
 AUTOBIND_GETPROP_PATTERN = re.compile(r'\[\[script::bindings::getprop]]\s+%s' % METHOD_PATTERN)
 AUTOBIND_SETPROP_PATTERN = re.compile(r'\[\[script::bindings::setprop]]\s+%s' % METHOD_PATTERN)
@@ -69,8 +69,8 @@ def gen_cmakelist_source(arguments, paths, output_dir, output_file, results):
     dependencies = []
     macro_calls = []
     for k, genclass in results.items():
-        generated_unit = [make_abs_path(path.join(output_dir, genclass.py_src_name + '.h')),
-                          make_abs_path(path.join(output_dir, genclass.py_src_name + '.cpp'))]
+        unit_name = make_abs_path(path.join(output_dir, genclass.py_src_name))
+        generated_unit = [f'{unit_name}.h', f'{unit_name}.cpp']
         generated = [genclass.filename, make_abs_path(genclass.filename)] + generated_unit
         dependencies.extend(generated_unit)
         macro_calls.append(generated)
@@ -572,7 +572,7 @@ class GenClass(object):
         self._methods.append(method)
         self._method_dict[method.name] = method
 
-    def add_enum_constant(self, name, value):
+    def add_enum_constant(self, name: str, value: str):
         self._enum_constants[name] = value
 
     def has_methods(self):
@@ -761,11 +761,12 @@ def main(params, paths):
         bindables.add(x)
 
     def autoenumeration(filename, content, main_class, x):
-        genclass = get_result_class(binding_classes, filename, main_class)
-        for i in x[1].split(',\n'):
+        enum_declared_class, enum_name, enum_members = x
+        genclass = get_result_class(binding_classes, filename, enum_declared_class or main_class)
+        for i in enum_members.split(',\n'):
             varname = i.split('=')[0].strip()
             if varname:
-                genclass.add_enum_constant(varname, '%s::%s' % (main_class, varname))
+                genclass.add_enum_constant(varname, '%s::%s' % ('enums' if enum_declared_class else main_class, varname))
 
     acg.match_header_patterns(paths, True,
                               HeaderPattern(AUTOBIND_ANNOTATION_PATTERN, autoannotation),

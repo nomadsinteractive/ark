@@ -26,7 +26,7 @@
 namespace ark {
 
 ModelLoaderText::ModelLoaderText(sp<Alphabet> alphabet, sp<Atlas> atlas, const Font& font)
-    : ModelLoader(Enum::DRAW_MODE_TRIANGLES, atlas->texture(), MODEL_TRAIT_DISALLOW_CACHE), _alphabet(std::move(alphabet)), _atlas(std::move(atlas)), _glyph_attachment(_atlas->attachments().ensure<AtlasGlyphAttachment>(*_atlas)),
+    : ModelLoader(enums::DRAW_MODE_TRIANGLES, atlas->texture(), MODEL_TRAIT_DISALLOW_CACHE), _alphabet(std::move(alphabet)), _atlas(std::move(atlas)), _glyph_attachment(_atlas->attachments().ensure<AtlasGlyphAttachment>(*_atlas)),
       _default_glyph_bundle(_glyph_attachment->ensureGlyphBundle(_alphabet, font))
 {
 }
@@ -172,7 +172,7 @@ void ModelLoaderText::AtlasGlyphAttachment::reloadTexture()
 
     _texture_reload_future = sp<Future>::make();
     sp<Size> size = sp<Size>::make(static_cast<float>(_glyph_bitmap->width()), static_cast<float>(_glyph_bitmap->height()));
-    const sp<Texture> texture = Ark::instance().renderController()->createTexture(std::move(size), _atlas.texture()->parameters(), sp<Texture::Uploader>::make<Texture::UploaderBitmap>(_glyph_bitmap), RenderController::US_RELOAD, _texture_reload_future);
+    const sp<Texture> texture = Ark::instance().renderController()->createTexture(std::move(size), _atlas.texture()->parameters(), sp<Texture::Uploader>::make<Texture::UploaderBitmap>(_glyph_bitmap), enums::UPLOAD_STRATEGY_RELOAD, _texture_reload_future);
     _atlas.texture()->reset(*texture);
 }
 

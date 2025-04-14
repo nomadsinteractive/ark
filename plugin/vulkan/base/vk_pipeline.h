@@ -15,7 +15,7 @@ namespace ark::plugin::vulkan {
 
 class VKPipeline final : public Pipeline {
 public:
-    VKPipeline(const PipelineBindings& pipelineBindings, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, Map<Enum::ShaderStageBit, String> stages);
+    VKPipeline(const PipelineBindings& pipelineBindings, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, Map<enums::ShaderStageBit, String> stages);
     ~VKPipeline() override;
 
     VkPipeline vkPipeline() const;
@@ -46,11 +46,11 @@ private:
     sp<VKDescriptorPool> makeDescriptorPool() const;
     void bindUBOShapshots(GraphicsContext& graphicsContext, const Vector<RenderBufferSnapshot::UBOSnapshot>& uboSnapshots) const;
 
-    bool shouldStageNeedBinding(ShaderStageSet stages) const;
+    bool shouldStageNeedBinding(enums::ShaderStageSet stages) const;
     bool shouldRebind(uint64_t tick, const PipelineDescriptor& pipelineDescriptor) const;
 
 private:
-    Enum::DrawMode _draw_mode;
+    enums::DrawMode _draw_mode;
     PipelineBindings _pipeline_bindings;
 
     sp<Recycler> _recycler;
@@ -63,7 +63,7 @@ private:
     Vector<VkDescriptorSet> _descriptor_sets;
     VkPipeline _pipeline;
 
-    Map<Enum::ShaderStageBit, String> _stages;
+    Map<enums::ShaderStageBit, String> _stages;
 
     Vector<sp<VKBuffer>> _ubos;
     Vector<sp<Boolean>> _texture_observers;

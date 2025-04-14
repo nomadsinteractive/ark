@@ -95,13 +95,13 @@ sp<VKPipeline::BakedRenderer> makeBakedRenderer(const PipelineBindings& pipeline
 {
     switch(pipelineBindings.drawProcedure())
     {
-        case Enum::DRAW_PROCEDURE_DRAW_ARRAYS:
+        case enums::DRAW_PROCEDURE_DRAW_ARRAYS:
             return sp<VKPipeline::BakedRenderer>::make<VKDrawArrays>();
-        case Enum::DRAW_PROCEDURE_DRAW_ELEMENTS:
+        case enums::DRAW_PROCEDURE_DRAW_ELEMENTS:
             return sp<VKPipeline::BakedRenderer>::make<VKDrawElements>();
-        case Enum::DRAW_PROCEDURE_DRAW_INSTANCED:
+        case enums::DRAW_PROCEDURE_DRAW_INSTANCED:
             return sp<VKPipeline::BakedRenderer>::make<VKDrawElementsInstanced>();
-        case Enum::DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT:
+        case enums::DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT:
             return sp<VKPipeline::BakedRenderer>::make<VKMultiDrawElementsIndirect>();
         default:
             break;
@@ -270,12 +270,12 @@ VertexLayout setupVertexLayout(const PipelineLayout& pipelineLayout)
 
 }
 
-VKPipeline::VKPipeline(const PipelineBindings& pipelineBindings, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, Map<Enum::ShaderStageBit, String> stages)
+VKPipeline::VKPipeline(const PipelineBindings& pipelineBindings, const sp<Recycler>& recycler, const sp<VKRenderer>& renderer, Map<enums::ShaderStageBit, String> stages)
     : _draw_mode(pipelineBindings.drawMode()), _pipeline_bindings(pipelineBindings), _recycler(recycler), _renderer(renderer), _baked_renderer(makeBakedRenderer(pipelineBindings)), _layout(VK_NULL_HANDLE), _pipeline(VK_NULL_HANDLE), _stages(std::move(stages)),
       _rebind_needed(true), _is_compute_pipeline(false)
 {
     for(const auto& i : _stages)
-        if(i.first == Enum::SHADER_STAGE_BIT_COMPUTE)
+        if(i.first == enums::SHADER_STAGE_BIT_COMPUTE)
         {
             _is_compute_pipeline = true;
             CHECK(_stages.size() == 1, "Compute stage is exclusive");
@@ -379,25 +379,25 @@ void VKPipeline::setupDescriptorSetLayout(GraphicsContext& graphicsContext)
     for(const sp<PipelineLayout::UBO>& i : shaderLayout.ubos())
         if(shouldStageNeedBinding(i->_stages))
         {
-            const VkShaderStageFlags stages = i->_stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, Enum::SHADER_STAGE_BIT_COUNT);
+            const VkShaderStageFlags stages = i->_stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, enums::SHADER_STAGE_BIT_COUNT);
             setLayoutBindingsUBO.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, stages, i->binding()));
         }
 
     for(const PipelineLayout::SSBO& i : shaderLayout.ssbos())
         if(shouldStageNeedBinding(i._stages))
         {
-            const VkShaderStageFlags stages = i._stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, Enum::SHADER_STAGE_BIT_COUNT);
+            const VkShaderStageFlags stages = i._stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, enums::SHADER_STAGE_BIT_COUNT);
             setLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, stages, i._binding._location));
         }
 
     Vector<VkDescriptorSetLayoutBinding> setLayoutBindingsTexture;
     for(const auto& [_stages, _binding] : pipelineDescriptor.layout()->samplers().values())
         if(shouldStageNeedBinding(_stages))
-            setLayoutBindingsTexture.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, Enum::SHADER_STAGE_BIT_COUNT), _binding._location));
+            setLayoutBindingsTexture.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, enums::SHADER_STAGE_BIT_COUNT), _binding._location));
 
     for(const auto& [_stages, _binding] : pipelineDescriptor.layout()->images().values())
         if(shouldStageNeedBinding(_stages))
-            setLayoutBindingsTexture.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, _stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, Enum::SHADER_STAGE_BIT_COUNT), _binding._location));
+            setLayoutBindingsTexture.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, _stages.toFlags<VkShaderStageFlagBits>(VKUtil::toStage, enums::SHADER_STAGE_BIT_COUNT), _binding._location));
 
     addDescriptorSetLayout(device->vkLogicalDevice(), setLayoutBindings);
     addDescriptorSetLayout(device->vkLogicalDevice(), setLayoutBindingsUBO);
@@ -641,9 +641,9 @@ void VKPipeline::bindUBOShapshots(GraphicsContext& graphicsContext, const Vector
     }
 }
 
-bool VKPipeline::shouldStageNeedBinding(const ShaderStageSet stages) const
+bool VKPipeline::shouldStageNeedBinding(const enums::ShaderStageSet stages) const
 {
-    return _is_compute_pipeline ? stages.has(Enum::SHADER_STAGE_BIT_COMPUTE) : (stages.has(Enum::SHADER_STAGE_BIT_VERTEX) || stages.has(Enum::SHADER_STAGE_BIT_FRAGMENT));
+    return _is_compute_pipeline ? stages.has(enums::SHADER_STAGE_BIT_COMPUTE) : (stages.has(enums::SHADER_STAGE_BIT_VERTEX) || stages.has(enums::SHADER_STAGE_BIT_FRAGMENT));
 }
 
 bool VKPipeline::shouldRebind(const uint64_t tick, const PipelineDescriptor& pipelineDescriptor) const

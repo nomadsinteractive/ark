@@ -103,9 +103,9 @@ String Platform::getRealPath(const String& path)
     return path;
 }
 
-Vector<Enum::RendererVersion> Platform::getRendererVersionPreferences()
+Vector<enums::RendererVersion> Platform::getRendererVersionPreferences()
 {
-    return {Enum::RENDERER_VERSION_VULKAN_12, Enum::RENDERER_VERSION_OPENGL_41};
+    return {enums::RENDERER_VERSION_VULKAN_12, enums::RENDERER_VERSION_OPENGL_41};
 }
 
 String Platform::getUserStoragePath(const String& path)

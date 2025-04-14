@@ -384,7 +384,7 @@ void SDLApplication::initialize()
 
 uint32_t SDLApplication::toSDLWindowFlag(const sp<ApplicationContext>& applicationContext, const ApplicationManifest::WindowFlags appWindowFlag)
 {
-    const Enum::RendererVersion version = applicationContext->renderEngine()->version();
+    const enums::RendererVersion version = applicationContext->renderEngine()->version();
 
     uint32_t windowFlag = SDL_WINDOW_SHOWN;
     if(appWindowFlag.has(ApplicationManifest::WINDOW_FLAG_FULL_SCREEN))
@@ -396,7 +396,7 @@ uint32_t SDLApplication::toSDLWindowFlag(const sp<ApplicationContext>& applicati
     if(appWindowFlag.has(ApplicationManifest::WINDOW_FLAG_RESIZABLE))
         windowFlag |= SDL_WINDOW_RESIZABLE;
 
-    _use_open_gl = version < Enum::RENDERER_VERSION_VULKAN_11;
+    _use_open_gl = version < enums::RENDERER_VERSION_VULKAN_11;
     windowFlag |= (_use_open_gl ? SDL_WINDOW_OPENGL : 0);
     return windowFlag;
 }

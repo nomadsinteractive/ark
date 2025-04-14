@@ -101,9 +101,9 @@ PyObject* ark_isDirectory(PyObject* /*self*/, PyObject* args)
 PyObject* ark_buildType(PyObject* /*self*/, PyObject* /*args*/)
 {
 #ifdef ARK_FLAG_DEBUG
-    return PyCast::toPyObject(static_cast<Enum::BuildType>(ARK_FLAG_DEBUG));
+    return PyCast::toPyObject(static_cast<enums::BuildType>(ARK_FLAG_DEBUG));
 #else
-    return PyCast::toPyObject(Enum::BUILD_TYPE_UNDEFINED);
+    return PyCast::toPyObject(enums::BUILD_TYPE_UNDEFINED);
 #endif
 }
 

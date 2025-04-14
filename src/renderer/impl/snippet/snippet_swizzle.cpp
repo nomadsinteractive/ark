@@ -39,7 +39,7 @@ SnippetSwizzle::SnippetSwizzle(const String& components)
 
 void SnippetSwizzle::preInitialize(PipelineBuildingContext& context)
 {
-    ShaderPreprocessor& fragment = context.getRenderStage(Enum::SHADER_STAGE_BIT_FRAGMENT);
+    ShaderPreprocessor& fragment = context.getRenderStage(enums::SHADER_STAGE_BIT_FRAGMENT);
     fragment.addOutputModifier(_pre_modifier, _post_modifier);
 }
 

@@ -13,7 +13,7 @@ namespace ark::plugin::vulkan {
 
 class VKDevice {
 public:
-    VKDevice(const sp<VKInstance>& instance, VkPhysicalDevice physicalDevice, Enum::RendererVersion version);
+    VKDevice(const sp<VKInstance>& instance, VkPhysicalDevice physicalDevice, enums::RendererVersion version);
     ~VKDevice();
 
     VkInstance vkInstance() const;

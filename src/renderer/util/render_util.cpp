@@ -150,8 +150,8 @@ public:
         glslang::FinalizeProcess();
     }
 
-    EShLanguage toShLanguage(Enum::ShaderStageBit stage) const {
-        DCHECK(stage > Enum::SHADER_STAGE_BIT_NONE && stage < Enum::SHADER_STAGE_BIT_COUNT, "Illegal ShaderStage::BitSet: %d", stage);
+    EShLanguage toShLanguage(enums::ShaderStageBit stage) const {
+        DCHECK(stage > enums::SHADER_STAGE_BIT_NONE && stage < enums::SHADER_STAGE_BIT_COUNT, "Illegal ShaderStage::BitSet: %d", stage);
         return _languages[stage];
     }
 
@@ -160,7 +160,7 @@ public:
     }
 
 private:
-    EShLanguage _languages[Enum::SHADER_STAGE_BIT_COUNT];
+    EShLanguage _languages[enums::SHADER_STAGE_BIT_COUNT];
     TBuiltInResource _built_in_resource;
 };
 
@@ -363,9 +363,9 @@ Attribute::Usage RenderUtil::toAttributeLayoutType(const String& name, const Str
     return Attribute::USAGE_CUSTOM;
 }
 
-String RenderUtil::outAttributeName(const String& name, Enum::ShaderStageBit preStage)
+String RenderUtil::outAttributeName(const String& name, enums::ShaderStageBit preStage)
 {
-    DCHECK(preStage == Enum::SHADER_STAGE_BIT_NONE || preStage == Enum::SHADER_STAGE_BIT_VERTEX, "Only none and vertex stage's out attribute name supported");
+    DCHECK(preStage == enums::SHADER_STAGE_BIT_NONE || preStage == enums::SHADER_STAGE_BIT_VERTEX, "Only none and vertex stage's out attribute name supported");
     constexpr char sPrefix[][8] = {"a_", "v_"};
     const String prefix = sPrefix[preStage + 1];
     return name.startsWith(prefix) ? name : prefix + Strings::capitalizeFirst(name);
@@ -398,7 +398,7 @@ uint32_t RenderUtil::getComponentSize(const Texture::Format format)
     return 4;
 }
 
-Vector<uint32_t> RenderUtil::compileSPIR(const StringView source, Enum::ShaderStageBit stage, Enum::RenderingBackendBit renderTarget, const uint32_t targetLanguageVersion)
+Vector<uint32_t> RenderUtil::compileSPIR(const StringView source, enums::ShaderStageBit stage, enums::RenderingBackendBit renderTarget, const uint32_t targetLanguageVersion)
 {
     const Global<GLSLLangInitializer> initializer;
     EShLanguage esStage = initializer->toShLanguage(stage);
@@ -433,11 +433,11 @@ Vector<uint32_t> RenderUtil::compileSPIR(const StringView source, Enum::ShaderSt
 //TODO: Use the specified version
     switch(renderTarget)
     {
-        case Enum::RENDERING_BACKEND_BIT_OPENGL:
+        case enums::RENDERING_BACKEND_BIT_OPENGL:
             shader.setEnvInput(glslang::EShSourceGlsl, esStage, glslang::EShClientOpenGL, 450);
             shader.setEnvClient(glslang::EShClientOpenGL, glslang::EShTargetOpenGL_450);
             break;
-        case Enum::RENDERING_BACKEND_BIT_VULKAN:
+        case enums::RENDERING_BACKEND_BIT_VULKAN:
             shader.setEnvInput(glslang::EShSourceGlsl, esStage, glslang::EShClientVulkan, 100);
             shader.setEnvClient(glslang::EShClientVulkan, glslang::EShTargetVulkan_1_2);
             break;

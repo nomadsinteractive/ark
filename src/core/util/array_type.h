@@ -10,15 +10,13 @@
 #include "core/types/shared_ptr.h"
 #include "core/util/string_convert.h"
 
-#include "graphics/forwarding.h"
-
 namespace ark {
 
 template<typename T> class ArrayType {
 private:
-    class ArraySliced final : public Array<T> {
+    class ArraySliced final : public Array<T>, Implements<ArraySliced, Array<T>> {
     public:
-        ArraySliced(sp<Array<T>> array, size_t offset, size_t length)
+        ArraySliced(sp<Array<T>> array, const size_t offset, const size_t length)
             : _array(std::move(array)), _slice_offset(offset), _slice_length(length) {
         }
 
@@ -34,7 +32,6 @@ private:
         sp<Array<T>> _array;
         size_t _slice_offset;
         size_t _slice_length;
-
     };
 
     class ArrayWrapper final : public Wrapper<Array<T>>, public Array<T>, Implements<ArrayWrapper, Array<T>> {
@@ -50,13 +47,12 @@ private:
         T* buf() override {
             return this->_wrapped->buf();
         }
-
     };
 
 public:
 
     static sp<Array<T>> create(size_t length, T fill = 0) {
-        return sp<typename Array<T>::Vector>::make(std::vector<T>(length, fill));
+        return sp<typename Array<T>::Vector>::make(Vector<T>(length, fill));
     }
 
     static sp<Array<T>> wrap(sp<Array<T>> self) {
@@ -100,7 +96,7 @@ public:
         return setItem(self, index, value);
     }
 
-    static int32_t subscribeAssign(const sp<Array<T>>& self, const Slice& slice, const std::vector<T>& values) {
+    static int32_t subscribeAssign(const sp<Array<T>>& self, const Slice& slice, const Vector<T>& values) {
         const Slice adjusted = slice.adjustIndices(self->length());
         size_t stepCount = std::abs(adjusted.length() / adjusted.step());
         CHECK(adjusted.step() > 0 ? adjusted.begin() < adjusted.end() && adjusted.begin() >= 0 && adjusted.end() <= static_cast<ptrdiff_t>(self->length())
@@ -118,6 +114,26 @@ public:
 
     static sp<ByteArray> toByteArray(sp<Array<T>> self) {
         return sp<typename ByteArray::Casted<T>>::make(std::move(self));
+    }
+
+    static sp<Array<T>> intertwine(Array<T>& self, const Vector<sp<Array<T>>>& components) {
+        const size_t componentSize = components.size();
+        ASSERT(componentSize > 0);
+        const size_t length = self.length();
+        for(size_t i = 0; i < componentSize; ++i)
+            CHECK(components.at(i)->length() == length, "All intertwined components should have the same length(%zu), but components[%d] does not(%zu)", length, i, components.at(i)->length());
+
+        sp<Array<T>> array = create(length * (componentSize + 1));
+        for(size_t i = 0; i <= componentSize; ++i) {
+            T* dstbuf = array->buf() + i;
+            T* srcbuf = i == 0 ? self.buf() : components.at(i - 1)->buf();
+            for(size_t j = 0; j < length; ++j) {
+                *dstbuf = srcbuf[j];
+                dstbuf += (componentSize + 1);
+            }
+        }
+
+        return array;
     }
 
     static String str(const sp<Array<T>>& self) {

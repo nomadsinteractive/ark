@@ -5,11 +5,11 @@
 
 namespace ark {
 
-ModelLoader::ModelLoader(Enum::DrawMode renderMode, sp<Texture> texture, ModelTrait trait)
+ModelLoader::ModelLoader(enums::DrawMode renderMode, sp<Texture> texture, ModelTrait trait)
     : _render_mode(renderMode), _texture(std::move(texture)), _trait(trait) {
 }
 
-Enum::DrawMode ModelLoader::renderMode() const
+enums::DrawMode ModelLoader::renderMode() const
 {
     return _render_mode;
 }

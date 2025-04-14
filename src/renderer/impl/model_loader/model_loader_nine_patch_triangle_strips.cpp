@@ -12,7 +12,7 @@
 namespace ark {
 
 ModelLoaderNinePatchTriangleStrips::ModelLoaderNinePatchTriangleStrips(sp<Atlas> atlas)
-    : ModelLoader(Enum::DRAW_MODE_TRIANGLE_STRIP, atlas->texture()), _atlas(std::move(atlas)), _nine_patch_attachment(_atlas->attachments().ensure<Atlas::AttachmentNinePatch>()),
+    : ModelLoader(enums::DRAW_MODE_TRIANGLE_STRIP, atlas->texture()), _atlas(std::move(atlas)), _nine_patch_attachment(_atlas->attachments().ensure<Atlas::AttachmentNinePatch>()),
       _unit_model(Global<Constants>()->MODEL_UNIT_NINE_PATCH_TRIANGLE_STRIPS)
 {
 }

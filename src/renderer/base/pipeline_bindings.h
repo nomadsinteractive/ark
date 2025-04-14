@@ -16,11 +16,11 @@ namespace ark {
 
 class ARK_API PipelineBindings {
 public:
-    PipelineBindings(Enum::DrawMode drawMode, Enum::DrawProcedure drawProcedure, Buffer vertices, sp<PipelineDescriptor> pipelineDescriptor, Vector<std::pair<uint32_t, Buffer>> instanceBuffers = {});
+    PipelineBindings(enums::DrawMode drawMode, enums::DrawProcedure drawProcedure, Buffer vertices, sp<PipelineDescriptor> pipelineDescriptor, Vector<std::pair<uint32_t, Buffer>> instanceBuffers = {});
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(PipelineBindings);
 
-    Enum::DrawMode drawMode() const;
-    Enum::DrawProcedure drawProcedure() const;
+    enums::DrawMode drawMode() const;
+    enums::DrawProcedure drawProcedure() const;
 
     const Buffer& vertices() const;
 

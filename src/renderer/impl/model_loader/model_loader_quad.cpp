@@ -15,7 +15,7 @@
 namespace ark {
 
 ModelLoaderQuad::ModelLoaderQuad(sp<Atlas> atlas)
-    : ModelLoader(Enum::DRAW_MODE_TRIANGLES, atlas->texture()), _atlas(std::move(atlas)), _unit_model(Global<Constants>()->MODEL_UNIT_QUAD_RHS)
+    : ModelLoader(enums::DRAW_MODE_TRIANGLES, atlas->texture()), _atlas(std::move(atlas)), _unit_model(Global<Constants>()->MODEL_UNIT_QUAD_RHS)
 {
 }
 

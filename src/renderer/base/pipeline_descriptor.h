@@ -166,7 +166,7 @@ public:
     Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>> makeBindingImages() const;
 
     void preCompile(GraphicsContext& graphicsContext);
-    Map<Enum::ShaderStageBit, ShaderPreprocessor::Stage> getPreprocessedStages(const RenderEngineContext& renderEngineContext) const;
+    Map<enums::ShaderStageBit, ShaderPreprocessor::Stage> getPreprocessedStages(const RenderEngineContext& renderEngineContext) const;
 
     bool hasDivisors() const;
     bool hasTrait(TraitType traitType) const;

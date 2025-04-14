@@ -57,14 +57,14 @@ private:
 }
 
 struct PipelineBindings::Stub {
-    Stub(const Enum::DrawMode drawMode, const Enum::DrawProcedure drawProcedure, Buffer vertices, sp<PipelineDescriptor> pipelineDescriptor, Vector<std::pair<uint32_t, Buffer>> instanceBuffers)
+    Stub(const enums::DrawMode drawMode, const enums::DrawProcedure drawProcedure, Buffer vertices, sp<PipelineDescriptor> pipelineDescriptor, Vector<std::pair<uint32_t, Buffer>> instanceBuffers)
         : _draw_mode(drawMode), _draw_procedure(drawProcedure), _vertices(std::move(vertices)), _pipeline_descriptor(std::move(pipelineDescriptor)), _attachments(sp<Traits>::make()), _instance_buffers(std::move(instanceBuffers)),
           _samplers(_pipeline_descriptor->makeBindingSamplers()), _images(_pipeline_descriptor->makeBindingImages())
     {
     }
 
-    Enum::DrawMode _draw_mode;
-    Enum::DrawProcedure _draw_procedure;
+    enums::DrawMode _draw_mode;
+    enums::DrawProcedure _draw_procedure;
     Buffer _vertices;
 
     sp<PipelineDescriptor> _pipeline_descriptor;
@@ -75,17 +75,17 @@ struct PipelineBindings::Stub {
     Vector<std::pair<sp<Texture>, PipelineLayout::DescriptorSet>> _images;
 };
 
-PipelineBindings::PipelineBindings(const Enum::DrawMode drawMode, const Enum::DrawProcedure drawProcedure, Buffer vertices, sp<PipelineDescriptor> pipelineDescriptor, Vector<std::pair<uint32_t, Buffer>> instanceBuffers)
+PipelineBindings::PipelineBindings(const enums::DrawMode drawMode, const enums::DrawProcedure drawProcedure, Buffer vertices, sp<PipelineDescriptor> pipelineDescriptor, Vector<std::pair<uint32_t, Buffer>> instanceBuffers)
     : _stub(sp<Stub>::make(drawMode, drawProcedure, std::move(vertices), std::move(pipelineDescriptor), std::move(instanceBuffers)))
 {
 }
 
-Enum::DrawMode PipelineBindings::drawMode() const
+enums::DrawMode PipelineBindings::drawMode() const
 {
     return _stub->_draw_mode;
 }
 
-Enum::DrawProcedure PipelineBindings::drawProcedure() const
+enums::DrawProcedure PipelineBindings::drawProcedure() const
 {
     return _stub->_draw_procedure;
 }
@@ -163,17 +163,17 @@ void PipelineBindings::doEnsurePipeline(GraphicsContext& graphicsContext)
 {
     _stub->_pipeline_descriptor->preCompile(graphicsContext);
 
-    Map<Enum::ShaderStageBit, ShaderPreprocessor::Stage> stages = _stub->_pipeline_descriptor->getPreprocessedStages(graphicsContext.renderContext());
+    Map<enums::ShaderStageBit, ShaderPreprocessor::Stage> stages = _stub->_pipeline_descriptor->getPreprocessedStages(graphicsContext.renderContext());
     ASSERT(!stages.empty());
 
-    Map<Enum::ShaderStageBit, String> sources;
+    Map<enums::ShaderStageBit, String> sources;
     for(auto& [k, v] : stages)
         sources.emplace(k, std::move(v._source));
 
     RenderEngine& renderEngine = Ark::instance().renderController()->renderEngine();
-    if(const auto iter = sources.find(Enum::SHADER_STAGE_BIT_COMPUTE); iter != sources.end() && sources.size() > 1)
+    if(const auto iter = sources.find(enums::SHADER_STAGE_BIT_COMPUTE); iter != sources.end() && sources.size() > 1)
     {
-        _compute_pipeline = renderEngine.createPipeline(graphicsContext, *this, Map<Enum::ShaderStageBit, String>{{iter->first, iter->second}});
+        _compute_pipeline = renderEngine.createPipeline(graphicsContext, *this, Map<enums::ShaderStageBit, String>{{iter->first, iter->second}});
         sources.erase(iter);
 
         _render_pipeline = renderEngine.createPipeline(graphicsContext, *this, std::move(sources));

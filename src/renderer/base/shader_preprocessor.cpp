@@ -33,7 +33,7 @@ const std::regex REGEX_SSBO_PATTERN(LAYOUT_PATTERN ACCESSIBILITY_PATTERN "buffer
 const std::regex REGEX_LOCAL_SIZE_PATTERN(R"--(layout\s*\(((?:local_size_[xyz]\s*=\s*\d+\s*,?\s*)+)\)\s+in\s*;)--");
 
 #ifndef ANDROID
-constexpr char STAGE_ATTR_PREFIX[Enum::SHADER_STAGE_BIT_COUNT + 1][4] = {"a_", "v_", "t_", "e_", "g_", "f_", "c_"};
+constexpr char STAGE_ATTR_PREFIX[enums::SHADER_STAGE_BIT_COUNT + 1][4] = {"a_", "v_", "t_", "e_", "g_", "f_", "c_"};
 #else
 char STAGE_ATTR_PREFIX[Enum::SHADER_STAGE_COUNT + 1][4] = {"a_", "v_", "f_", "c_"};
 #endif
@@ -61,9 +61,9 @@ bool sanitizer(const std::smatch& match)
 
 }
 
-ShaderPreprocessor::ShaderPreprocessor(String source, document manifest, const Enum::ShaderStageBit shaderStage, const Enum::ShaderStageBit preShaderStage)
-    : _source(std::move(source)), _manifest(std::move(manifest)), _shader_stage(shaderStage), _pre_shader_stage(preShaderStage), _version(0), _declaration_ins(_attribute_declaration_codes, shaderStage == Enum::SHADER_STAGE_BIT_VERTEX ? ANNOTATION_VERT_IN : ANNOTATION_FRAG_IN),
-      _declaration_outs(_attribute_declaration_codes, shaderStage == Enum::SHADER_STAGE_BIT_VERTEX ? ANNOTATION_VERT_OUT : ANNOTATION_FRAG_OUT),
+ShaderPreprocessor::ShaderPreprocessor(String source, document manifest, const enums::ShaderStageBit shaderStage, const enums::ShaderStageBit preShaderStage)
+    : _source(std::move(source)), _manifest(std::move(manifest)), _shader_stage(shaderStage), _pre_shader_stage(preShaderStage), _version(0), _declaration_ins(_attribute_declaration_codes, shaderStage == enums::SHADER_STAGE_BIT_VERTEX ? ANNOTATION_VERT_IN : ANNOTATION_FRAG_IN),
+      _declaration_outs(_attribute_declaration_codes, shaderStage == enums::SHADER_STAGE_BIT_VERTEX ? ANNOTATION_VERT_OUT : ANNOTATION_FRAG_OUT),
       _declaration_uniforms(_uniform_declaration_codes, "uniform"), _declaration_samplers(_uniform_declaration_codes, "uniform"), _declaration_images(_uniform_declaration_codes, "uniform"),
       _pre_main(sp<String>::make()), _post_main(sp<String>::make())
 {
@@ -162,7 +162,7 @@ void ShaderPreprocessor::parseDeclarations()
     _include_declaration_codes.search(REGEX_SSBO_PATTERN, ssboPattern);
     _main.search(REGEX_SSBO_PATTERN, ssboPattern);
 
-    if(_shader_stage == Enum::SHADER_STAGE_BIT_COMPUTE)
+    if(_shader_stage == enums::SHADER_STAGE_BIT_COMPUTE)
     {
         const auto localSizeTraveller = [this] (const std::smatch& m)
         {
@@ -253,7 +253,7 @@ const Vector<ShaderPreprocessor::Parameter>& ShaderPreprocessor::args() const
 
 void ShaderPreprocessor::inDeclare(const String& type, const String& name)
 {
-    _declaration_ins.declare(type, inVarPrefix(), name, "", nullptr, _shader_stage == Enum::SHADER_STAGE_BIT_FRAGMENT && (type == "int" || type == "uint"));
+    _declaration_ins.declare(type, inVarPrefix(), name, "", nullptr, _shader_stage == enums::SHADER_STAGE_BIT_FRAGMENT && (type == "int" || type == "uint"));
 }
 
 void ShaderPreprocessor::outDeclare(const String& type, const String& name)
@@ -334,7 +334,7 @@ void ShaderPreprocessor::declareUBOStruct(const PipelineLayout& pipelineLayout, 
 String ShaderPreprocessor::outputName() const
 {
 #ifndef ANDROID
-    constexpr StringView sOutputNames[Enum::SHADER_STAGE_BIT_COUNT] = {"gl_Position", "", "", "", ANNOTATION_FRAG_COLOR, ""};
+    constexpr StringView sOutputNames[enums::SHADER_STAGE_BIT_COUNT] = {"gl_Position", "", "", "", ANNOTATION_FRAG_COLOR, ""};
 #else
     constexpr StringView sOutputNames[Enum::SHADER_STAGE_COUNT] = {"gl_Position", ANNOTATION_FRAG_COLOR, ""};
 #endif
@@ -383,7 +383,7 @@ void ShaderPreprocessor::linkParameters(const Vector<Parameter>& parameters, con
                 passThroughVars.insert(Strings::capitalizeFirst(i._name));
 }
 
-const char* ShaderPreprocessor::getOutAttributePrefix(Enum::ShaderStageBit preStage)
+const char* ShaderPreprocessor::getOutAttributePrefix(enums::ShaderStageBit preStage)
 {
     return STAGE_ATTR_PREFIX[preStage + 1];
 }
@@ -442,7 +442,7 @@ void ShaderPreprocessor::Function::parse(PipelineBuildingContext& buildingContex
             stride += attr.size();
         }
         if(param._annotation & Parameter::PARAMETER_ANNOTATION_IN)
-            buildingContext.addPredefinedAttribute(Strings::capitalizeFirst(param._name), param._type, param._divisor, Enum::SHADER_STAGE_BIT_VERTEX);
+            buildingContext.addPredefinedAttribute(Strings::capitalizeFirst(param._name), param._type, param._divisor, enums::SHADER_STAGE_BIT_VERTEX);
 
         _args.push_back(std::move(param));
     }
@@ -510,7 +510,7 @@ void ShaderPreprocessor::Function::genDefinition()
     *_place_hoder = sb.str();
 }
 
-String ShaderPreprocessor::Function::genOutCall(const Enum::ShaderStageBit preShaderStage, const Enum::ShaderStageBit shaderStage) const
+String ShaderPreprocessor::Function::genOutCall(const enums::ShaderStageBit preShaderStage, const enums::ShaderStageBit shaderStage) const
 {
     StringBuffer sb;
     sb << "ark_main(";

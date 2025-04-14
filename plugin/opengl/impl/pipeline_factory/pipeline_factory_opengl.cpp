@@ -10,7 +10,7 @@
 
 namespace ark::plugin::opengl {
 
-sp<Pipeline> PipelineFactoryOpenGL::buildPipeline(GraphicsContext& graphicsContext, const PipelineBindings& pipelineBindings, Map<Enum::ShaderStageBit, String> stages)
+sp<Pipeline> PipelineFactoryOpenGL::buildPipeline(GraphicsContext& graphicsContext, const PipelineBindings& pipelineBindings, Map<enums::ShaderStageBit, String> stages)
 {
     const sp<RenderEngineContext>& renderContext = graphicsContext.renderContext();
     return sp<Pipeline>::make<GLPipeline>(graphicsContext.recycler(), renderContext->getGLSLVersion(), std::move(stages), pipelineBindings);

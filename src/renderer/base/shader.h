@@ -17,10 +17,10 @@ namespace ark {
 class ARK_API Shader {
 public:
     struct StageManifest {
-        StageManifest(Enum::ShaderStageBit type, builder<String> source);
+        StageManifest(enums::ShaderStageBit type, builder<String> source);
         StageManifest(BeanFactory& factory, const document& manifest);
 
-        Enum::ShaderStageBit _type;
+        enums::ShaderStageBit _type;
         builder<String> _source;
         document _manifest;
     };
@@ -40,7 +40,7 @@ public:
     const sp<PipelineDescriptor>& pipelineDesciptor() const;
     const sp<PipelineLayout>& layout() const;
 
-    sp<PipelineBindings> makeBindings(Buffer vertexBuffer, Enum::DrawMode drawMode, Enum::DrawProcedure drawProcedure, Vector<std::pair<uint32_t, Buffer>> instanceBuffers = {}) const;
+    sp<PipelineBindings> makeBindings(Buffer vertexBuffer, enums::DrawMode drawMode, enums::DrawProcedure drawProcedure, Vector<std::pair<uint32_t, Buffer>> instanceBuffers = {}) const;
 
     class BUILDER_IMPL final : public Builder<Shader> {
     public:

@@ -41,6 +41,9 @@ public:
     static int32_t subscribeAssign(const sp<IntArray>& self, const Slice& index, const std::vector<int32_t>& value);
 
 //  [[script::bindings::classmethod]]
+    static sp<IntArray> intertwine(IntArray& self, const Vector<sp<IntArray>>& components);
+
+//  [[script::bindings::classmethod]]
     static Span toBytes(const sp<IntArray>& self);
 
 //  [[script::bindings::operator(str)]]

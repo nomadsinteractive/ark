@@ -13,7 +13,7 @@ PipelineFactoryVulkan::PipelineFactoryVulkan(const sp<Recycler>& recycler, const
 {
 }
 
-sp<Pipeline> PipelineFactoryVulkan::buildPipeline(GraphicsContext& graphicsContext, const PipelineBindings& pipelineBindings, Map<Enum::ShaderStageBit, String> stages)
+sp<Pipeline> PipelineFactoryVulkan::buildPipeline(GraphicsContext& graphicsContext, const PipelineBindings& pipelineBindings, Map<enums::ShaderStageBit, String> stages)
 {
     return sp<Pipeline>::make<VKPipeline>(pipelineBindings, _recycler, _renderer, std::move(stages));
 }

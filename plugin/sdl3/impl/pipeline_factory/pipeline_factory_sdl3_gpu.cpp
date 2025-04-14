@@ -21,7 +21,7 @@ namespace ark::plugin::sdl3 {
 
 namespace {
 
-SDL_GPUShader* createGraphicsShader(SDL_GPUDevice* device, const PipelineLayout& shaderLayout, const StringView source, const Enum::ShaderStageBit stageBit)
+SDL_GPUShader* createGraphicsShader(SDL_GPUDevice* device, const PipelineLayout& shaderLayout, const StringView source, const enums::ShaderStageBit stageBit)
 {
 	const SDL_GPUShaderFormat backendFormats = SDL_ShaderCross_GetSPIRVShaderFormats();
 	const char* entrypoint = nullptr;
@@ -37,7 +37,7 @@ SDL_GPUShader* createGraphicsShader(SDL_GPUDevice* device, const PipelineLayout&
         return nullptr;
     }
 
-    const Vector<uint32_t> binaries = RenderUtil::compileSPIR(source, stageBit, Enum::RENDERING_BACKEND_BIT_VULKAN, 10);
+    const Vector<uint32_t> binaries = RenderUtil::compileSPIR(source, stageBit, enums::RENDERING_BACKEND_BIT_VULKAN, 10);
     const void* bytecode = binaries.data();
 
     Uint32 samplerCount = 0;
@@ -64,7 +64,7 @@ SDL_GPUShader* createGraphicsShader(SDL_GPUDevice* device, const PipelineLayout&
         static_cast<const Uint8*>(bytecode),
         binaries.size() * sizeof(uint32_t),
         entrypoint,
-        stageBit == Enum::SHADER_STAGE_BIT_VERTEX ? SDL_SHADERCROSS_SHADERSTAGE_VERTEX : SDL_SHADERCROSS_SHADERSTAGE_FRAGMENT,
+        stageBit == enums::SHADER_STAGE_BIT_VERTEX ? SDL_SHADERCROSS_SHADERSTAGE_VERTEX : SDL_SHADERCROSS_SHADERSTAGE_FRAGMENT,
 #ifdef ARK_FLAG_DEBUG
         true,
 #else
@@ -183,17 +183,17 @@ SDL_GPUVertexElementFormat toVertexElementFormat(const Attribute& attribute)
     return SDL_GPU_VERTEXELEMENTFORMAT_INVALID;
 }
 
-SDL_GPUPrimitiveType toPrimitiveType(const Enum::DrawMode drawMode)
+SDL_GPUPrimitiveType toPrimitiveType(const enums::DrawMode drawMode)
 {
     switch(drawMode)
     {
-        case Enum::DRAW_MODE_LINES:
+        case enums::DRAW_MODE_LINES:
             return SDL_GPU_PRIMITIVETYPE_LINELIST;
-        case Enum::DRAW_MODE_POINTS:
+        case enums::DRAW_MODE_POINTS:
             return SDL_GPU_PRIMITIVETYPE_POINTLIST;
-        case Enum::DRAW_MODE_TRIANGLES:
+        case enums::DRAW_MODE_TRIANGLES:
             return SDL_GPU_PRIMITIVETYPE_TRIANGLELIST;
-        case Enum::DRAW_MODE_TRIANGLE_STRIP:
+        case enums::DRAW_MODE_TRIANGLE_STRIP:
             return SDL_GPU_PRIMITIVETYPE_TRIANGLESTRIP;
         default:
             break;
@@ -202,21 +202,21 @@ SDL_GPUPrimitiveType toPrimitiveType(const Enum::DrawMode drawMode)
     return SDL_GPU_PRIMITIVETYPE_TRIANGLELIST;
 }
 
-void bindUBOSnapshots(SDL_GPUCommandBuffer* cmdbuf, const Vector<RenderBufferSnapshot::UBOSnapshot>& uboSnapshots, const PipelineLayout& shaderLayout, const ShaderStageSet stages)
+void bindUBOSnapshots(SDL_GPUCommandBuffer* cmdbuf, const Vector<RenderBufferSnapshot::UBOSnapshot>& uboSnapshots, const PipelineLayout& shaderLayout, const enums::ShaderStageSet stages)
 {
     size_t binding = 0;
     for(const PipelineLayout::UBO& ubo : shaderLayout.ubos())
-        if(const ShaderStageSet uboStages = ubo._stages; uboStages & stages)
+        if(const enums::ShaderStageSet uboStages = ubo._stages; uboStages & stages)
         {
             DCHECK(binding < uboSnapshots.size(), "UBO Snapshot and UBO Layout mismatch: %d vs %d", uboSnapshots.size(), shaderLayout.ubos().size());
             const RenderBufferSnapshot::UBOSnapshot& uboSnapshot = uboSnapshots.at(binding++);
             const void* data = uboSnapshot._buffer.buf();
             const uint32_t size = uboSnapshot._buffer.length();
-            if(uboStages.has(Enum::SHADER_STAGE_BIT_VERTEX))
+            if(uboStages.has(enums::SHADER_STAGE_BIT_VERTEX))
                 SDL_PushGPUVertexUniformData(cmdbuf, ubo.binding(), data, size);
-            if(uboStages.has(Enum::SHADER_STAGE_BIT_FRAGMENT))
+            if(uboStages.has(enums::SHADER_STAGE_BIT_FRAGMENT))
                 SDL_PushGPUFragmentUniformData(cmdbuf, ubo.binding(), data, size);
-            if(uboStages.has(Enum::SHADER_STAGE_BIT_COMPUTE))
+            if(uboStages.has(enums::SHADER_STAGE_BIT_COMPUTE))
                 SDL_PushGPUComputeUniformData(cmdbuf, ubo.binding(), data, size);
         }
 }
@@ -270,8 +270,8 @@ public:
             SDL_GPUDevice* gpuDevice = context._gpu_gevice;
 
             const PipelineLayout& pipelineLayout = _pipeline_descriptor->layout();
-            SDL_GPUShader* vertexShader = createGraphicsShader(gpuDevice, pipelineLayout, _vertex_shader, Enum::SHADER_STAGE_BIT_VERTEX);
-            SDL_GPUShader* fragmentShader = createGraphicsShader(gpuDevice, pipelineLayout, _fragment_shader, Enum::SHADER_STAGE_BIT_FRAGMENT);
+            SDL_GPUShader* vertexShader = createGraphicsShader(gpuDevice, pipelineLayout, _vertex_shader, enums::SHADER_STAGE_BIT_VERTEX);
+            SDL_GPUShader* fragmentShader = createGraphicsShader(gpuDevice, pipelineLayout, _fragment_shader, enums::SHADER_STAGE_BIT_FRAGMENT);
 
             SDL_GPUVertexBufferDescription vertexBufferDescription[8];
             Uint32 numVertexBuffers = 0;
@@ -381,7 +381,7 @@ public:
 
         SDL_BindGPUGraphicsPipeline(renderPass, _pipeline);
 
-        constexpr ShaderStageSet currentStageSets = {Enum::SHADER_STAGE_BIT_VERTEX, Enum::SHADER_STAGE_BIT_FRAGMENT};
+        constexpr enums::ShaderStageSet currentStageSets = {enums::SHADER_STAGE_BIT_VERTEX, enums::SHADER_STAGE_BIT_FRAGMENT};
         bindUBOSnapshots(sdl3GC._command_buffer, drawingContext._buffer_snapshot->_ubos, drawingContext._bindings->pipelineLayout(), currentStageSets);
 
         const SDL_GPUBufferBinding vertexBufferBinding = {reinterpret_cast<SDL_GPUBuffer*>(drawingContext._vertices.id()), 0};
@@ -408,10 +408,10 @@ public:
 
         switch(_draw_procedure)
         {
-            case Enum::DRAW_PROCEDURE_DRAW_ELEMENTS:
+            case enums::DRAW_PROCEDURE_DRAW_ELEMENTS:
                 SDL_DrawGPUIndexedPrimitives(renderPass, drawingContext._draw_count, 1, 0, 0, 0);
                 break;
-            case Enum::DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT: {
+            case enums::DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT: {
                 const DrawingParams::DrawMultiElementsIndirect& param = drawingContext._parameters.drawMultiElementsIndirect();
                 SDL_DrawGPUIndexedPrimitivesIndirect(renderPass, reinterpret_cast<SDL_GPUBuffer*>(param._indirect_cmds.id()), 0, param._indirect_cmd_count);
                 break;
@@ -429,8 +429,8 @@ public:
     }
 
 private:
-    Enum::DrawProcedure _draw_procedure;
-    Enum::DrawMode _draw_mode;
+    enums::DrawProcedure _draw_procedure;
+    enums::DrawMode _draw_mode;
 
     sp<PipelineDescriptor> _pipeline_descriptor;
     String _vertex_shader;
@@ -479,7 +479,7 @@ public:
                 return;
             }
 
-            const Vector<uint32_t> binaries = RenderUtil::compileSPIR(_compute_shader, Enum::SHADER_STAGE_BIT_COMPUTE, Enum::RENDERING_BACKEND_BIT_VULKAN, 10);
+            const Vector<uint32_t> binaries = RenderUtil::compileSPIR(_compute_shader, enums::SHADER_STAGE_BIT_COMPUTE, enums::RENDERING_BACKEND_BIT_VULKAN, 10);
             const void* bytecode = binaries.data();
 
             const SDL_ShaderCross_SPIRV_Info spirvInfo = {
@@ -498,22 +498,22 @@ public:
             const PipelineLayout& shaderLayout = _pipeline_descriptor.layout();
             Uint32 samplerCount = 0;
             for(const PipelineLayout::DescriptorSet& i : shaderLayout.samplers().values())
-                if(i._stages.has(Enum::SHADER_STAGE_BIT_COMPUTE))
+                if(i._stages.has(enums::SHADER_STAGE_BIT_COMPUTE))
                     ++ samplerCount;
 
             Uint32 storageTextureCount = 0;
             for(const PipelineLayout::DescriptorSet& i : shaderLayout.images().values())
-                if(i._stages.has(Enum::SHADER_STAGE_BIT_COMPUTE))
+                if(i._stages.has(enums::SHADER_STAGE_BIT_COMPUTE))
                     ++ storageTextureCount;
 
             Uint32 uniformBufferCount = 0;
             for(const PipelineLayout::UBO& i : shaderLayout.ubos())
-                if(i._stages.has(Enum::SHADER_STAGE_BIT_COMPUTE))
+                if(i._stages.has(enums::SHADER_STAGE_BIT_COMPUTE))
                     ++ uniformBufferCount;
 
             Uint32 storageBufferCount = 0;
             for(const PipelineLayout::SSBO& i : shaderLayout.ssbos())
-                if(i._stages.has(Enum::SHADER_STAGE_BIT_COMPUTE))
+                if(i._stages.has(enums::SHADER_STAGE_BIT_COMPUTE))
                     ++ storageBufferCount;
 
             SDL_ShaderCross_ComputePipelineMetadata shaderMetadata = {
@@ -557,16 +557,16 @@ private:
 
 }
 
-sp<Pipeline> PipelineFactorySDL3_GPU::buildPipeline(GraphicsContext& graphicsContext, const PipelineBindings& pipelineBindings, std::map<Enum::ShaderStageBit, String> stages)
+sp<Pipeline> PipelineFactorySDL3_GPU::buildPipeline(GraphicsContext& graphicsContext, const PipelineBindings& pipelineBindings, std::map<enums::ShaderStageBit, String> stages)
 {
     const sp<PipelineDescriptor>& pipelineDescriptor = pipelineBindings.pipelineDescriptor();
-    if(const auto vIter = stages.find(Enum::SHADER_STAGE_BIT_VERTEX); vIter != stages.end())
+    if(const auto vIter = stages.find(enums::SHADER_STAGE_BIT_VERTEX); vIter != stages.end())
     {
-        const auto fIter = stages.find(Enum::SHADER_STAGE_BIT_FRAGMENT);
+        const auto fIter = stages.find(enums::SHADER_STAGE_BIT_FRAGMENT);
         CHECK(fIter != stages.end(), "Pipeline has no fragment shader(only vertex shader available)");
         return sp<Pipeline>::make<DrawPipelineSDL3_GPU>(pipelineBindings, std::move(vIter->second), std::move(fIter->second));
     }
-    const auto cIter = stages.find(Enum::SHADER_STAGE_BIT_COMPUTE);
+    const auto cIter = stages.find(enums::SHADER_STAGE_BIT_COMPUTE);
     CHECK(cIter != stages.end(), "Pipeline has no compute shader");
     return sp<Pipeline>::make<ComputePipelineSDL3_GPU>(pipelineDescriptor, std::move(cIter->second));
 }

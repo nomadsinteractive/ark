@@ -11,7 +11,7 @@
 namespace ark::plugin::opengl {
 
 GLEquirectangularCubemapUploader::GLEquirectangularCubemapUploader(const Shader& shader, const sp<Texture>& texture, const sp<Size>& size)
-    : _pipeline_bindings(shader.makeBindings(Buffer(), Enum::DRAW_MODE_TRIANGLES, Enum::DRAW_PROCEDURE_DRAW_ELEMENTS)), _texture(texture), _size(size)
+    : _pipeline_bindings(shader.makeBindings(Buffer(), enums::DRAW_MODE_TRIANGLES, enums::DRAW_PROCEDURE_DRAW_ELEMENTS)), _texture(texture), _size(size)
 {
 }
 

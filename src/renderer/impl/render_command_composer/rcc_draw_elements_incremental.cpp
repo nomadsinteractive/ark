@@ -14,11 +14,11 @@
 
 namespace ark {
 
-sp<PipelineBindings> RCCDrawElementsIncremental::makePipelineBindings(const Shader& shader, RenderController& renderController, Enum::DrawMode renderMode)
+sp<PipelineBindings> RCCDrawElementsIncremental::makePipelineBindings(const Shader& shader, RenderController& renderController, enums::DrawMode renderMode)
 {
     _strips = renderController.gba().makeStrips(shader.layout()->getStreamLayout(0).stride());
     _indices = renderController.makeIndexBuffer();
-    return shader.makeBindings(_strips->buffer(), renderMode, Enum::DRAW_PROCEDURE_DRAW_ELEMENTS);
+    return shader.makeBindings(_strips->buffer(), renderMode, enums::DRAW_PROCEDURE_DRAW_ELEMENTS);
 }
 
 DrawingContext RCCDrawElementsIncremental::compose(const RenderRequest& renderRequest, const RenderLayerSnapshot& snapshot)

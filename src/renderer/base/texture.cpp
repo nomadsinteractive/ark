@@ -60,89 +60,109 @@ uint32_t toBitFormat(const StringView str, const uint32_t bitsOffset)
     return 0;
 }
 
+Texture::Filter getEnumValue(Dictionary<document>& dict, const String& name, BeanFactory& factory, const Scope& args, const Texture::Filter defValue)
+{
+    const document doc = dict.get(name);
+    return doc ? Strings::eval<Texture::Filter>(factory.ensure<String>(doc, constants::VALUE, args)) : defValue;
 }
 
-Texture::Texture(sp<Delegate> delegate, sp<Size> size, sp<Texture::Uploader> uploader, sp<Parameters> parameters)
-    : _delegate(std::move(delegate)), _size(std::move(size)), _uploader(std::move(uploader)), _parameters(std::move(parameters))
+}
+
+struct Texture::Stub {
+    sp<Delegate> _delegate;
+    sp<Size> _size;
+    sp<Uploader> _uploader;
+    sp<Parameters> _parameters;
+
+    Timestamp _timestamp;
+};
+
+Texture::Texture(sp<Bitmap> bitmap, const Format textureFormat, const enums::UploadStrategy uploadStrategy, sp<Future> future)
+    : Texture(*Ark::instance().renderController()->createTexture2d(std::move(bitmap), textureFormat, uploadStrategy, std::move(future)))
+{
+}
+
+Texture::Texture(sp<Delegate> delegate, sp<Size> size, sp<Uploader> uploader, sp<Parameters> parameters)
+    : _stub(sp<Stub>::make(Stub{std::move(delegate), std::move(size), std::move(uploader), std::move(parameters)}))
 {
 }
 
 void Texture::upload(GraphicsContext& graphicsContext)
 {
-    _delegate->upload(graphicsContext, _uploader);
+    _stub->_delegate->upload(graphicsContext, _stub->_uploader);
 }
 
 ResourceRecycleFunc Texture::recycle()
 {
-    return _delegate->recycle();
+    return _stub->_delegate->recycle();
 }
 
 Texture::Type Texture::type() const
 {
-    return _parameters->_type;
+    return _stub->_parameters->_type;
 }
 
 Texture::Usage Texture::usage() const
 {
-    return _parameters->_usage;
+    return _stub->_parameters->_usage;
 }
 
 uint64_t Texture::id()
 {
-    return _delegate->id();
+    return _stub->_delegate->id();
 }
 
 int32_t Texture::width() const
 {
-    return static_cast<int32_t>(_size->widthAsFloat());
+    return static_cast<int32_t>(_stub->_size->widthAsFloat());
 }
 
 int32_t Texture::height() const
 {
-    return static_cast<int32_t>(_size->heightAsFloat());
+    return static_cast<int32_t>(_stub->_size->heightAsFloat());
 }
 
 int32_t Texture::depth() const
 {
-    return static_cast<int32_t>(_size->depthAsFloat());
+    return static_cast<int32_t>(_stub->_size->depthAsFloat());
 }
 
 const sp<Size>& Texture::size() const
 {
-    return _size;
+    return _stub->_size;
 }
 
 const sp<Texture::Parameters>& Texture::parameters() const
 {
-    return _parameters;
+    return _stub->_parameters;
 }
 
 void Texture::setParameters(sp<Parameters> parameters)
 {
-    _parameters = std::move(parameters);
-    _timestamp.markDirty();
+    _stub->_parameters = std::move(parameters);
+    _stub->_timestamp.markDirty();
 }
 
 const sp<Texture::Delegate>& Texture::delegate() const
 {
-    return _delegate;
+    return _stub->_delegate;
 }
 
 void Texture::reset(const Texture& texture)
 {
-    _delegate = texture._delegate;
-    _size = texture._size;
-    _timestamp.markDirty();
+    _stub->_delegate = texture._stub->_delegate;
+    _stub->_size = texture._stub->_size;
+    _stub->_timestamp.markDirty();
 }
 
 const sp<Texture::Uploader>& Texture::uploader() const
 {
-    return _uploader;
+    return _stub->_uploader;
 }
 
 bool Texture::update(const uint64_t timestamp) const
 {
-    return _timestamp.update(timestamp);
+    return _stub->_timestamp.update(timestamp);
 }
 
 template<> ARK_API Texture::Type StringConvert::eval<Texture::Type>(const String& str)
@@ -172,7 +192,7 @@ template<> ARK_API Texture::Format StringConvert::eval<Texture::Format>(const St
     {
         uint32_t format = 0;
         for(const String& i : str.split('|'))
-            if(const Texture::Format f = Enum::lookup(formats, i, Texture::FORMAT_AUTO); f == Texture::FORMAT_AUTO)
+            if(const Texture::Format f = enums::lookup(formats, i, Texture::FORMAT_AUTO); f == Texture::FORMAT_AUTO)
             {
                 if(i.startsWith("int"))
                     format |= Texture::FORMAT_INTEGER | Texture::FORMAT_SIGNED | toBitFormat(i, 3);
@@ -264,13 +284,7 @@ void Texture::Parameters::loadParameters(const document& parameters, BeanFactory
     _wrap_r = getEnumValue(byName, "wrap_r", factory, args, _wrap_r);
 }
 
-Texture::Filter Texture::Parameters::getEnumValue(Dictionary<document>& dict, const String& name, BeanFactory& factory, const Scope& args, const Texture::Filter defValue)
-{
-    const document doc = dict.get(name);
-    return doc ? Strings::eval<Texture::Filter>(factory.ensure<String>(doc, constants::VALUE, args)) : defValue;
-}
-
-Texture::Delegate::Delegate(Texture::Type type)
+Texture::Delegate::Delegate(const Type type)
     : _type(type)
 {
 }
@@ -282,26 +296,26 @@ Texture::Type Texture::Delegate::type() const
 
 Texture::BUILDER::BUILDER(BeanFactory& factory, const document& manifest, const sp<ResourceLoaderContext>& resourceLoaderContext)
     : _resource_loader_context(resourceLoaderContext), _factory(factory), _manifest(manifest), _src(factory.getBuilder<String>(manifest, constants::SRC)), _bitmap(factory.getBuilder<Bitmap>(manifest, constants::BITMAP)),
-      _uploader(factory.getBuilder<Texture::Uploader>(manifest, constants::UPLOADER)), _upload_strategy(Documents::getAttribute<RenderController::UploadStrategy>(manifest, "upload-strategy", {RenderController::US_ONCE_AND_ON_SURFACE_READY}).bits())
+      _uploader(factory.getBuilder<Texture::Uploader>(manifest, constants::UPLOADER)), _upload_strategy(Documents::getAttribute<enums::UploadStrategy>(manifest, "upload-strategy", {enums::UPLOAD_STRATEGY_ONCE_AND_ON_SURFACE_READY}).bits())
 {
 }
 
 sp<Texture> Texture::BUILDER::build(const Scope& args)
 {
     const Type type = Documents::getAttribute<Type>(_manifest, constants::TYPE, TYPE_2D);
-    const sp<Texture::Parameters> parameters = sp<Texture::Parameters>::make(type, _manifest);
+    const sp<Parameters> parameters = sp<Texture::Parameters>::make(type, _manifest);
     parameters->loadParameters(_manifest, _factory, args);
 
     if(const sp<String> src = _src.build(args))
        return _resource_loader_context->textureBundle()->createTexture(*src, parameters);
 
     if(sp<Bitmap> bitmap = _bitmap.build(args))
-        return _resource_loader_context->renderController()->createTexture2d(std::move(bitmap), parameters->_format, RenderController::UploadStrategy(_upload_strategy));
+        return _resource_loader_context->renderController()->createTexture2d(std::move(bitmap), parameters->_format, enums::UploadStrategy(_upload_strategy));
 
     const sp<Size> size = _factory.ensureConcreteClassBuilder<Size>(_manifest, constants::SIZE)->build(args);
     CHECK(size->widthAsFloat() != 0 && size->heightAsFloat() != 0, "Cannot build texture from \"%s\"", Documents::toString(_manifest).c_str());
     sp<Uploader> uploader = _uploader.build(args);
-    return _resource_loader_context->renderController()->createTexture(size, parameters, uploader ? std::move(uploader) : sp<Uploader>::make<UploaderClear>(size, parameters->_format), RenderController::UploadStrategy(_upload_strategy));
+    return _resource_loader_context->renderController()->createTexture(size, parameters, uploader ? std::move(uploader) : sp<Uploader>::make<UploaderClear>(size, parameters->_format), enums::UploadStrategy(_upload_strategy));
 }
 
 Texture::UploaderBitmap::UploaderBitmap(sp<Bitmap> bitmap)

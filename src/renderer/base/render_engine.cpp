@@ -16,7 +16,7 @@ RenderEngine::RenderEngine(const ApplicationManifest::Renderer& renderer, sp<Ren
 {
 }
 
-Enum::RendererVersion RenderEngine::version() const
+enums::RendererVersion RenderEngine::version() const
 {
     return _render_context->version();
 }
@@ -109,7 +109,7 @@ sp<RenderView> RenderEngine::createRenderView(const sp<RenderController>& render
     return _renderer_factory->createRenderView(_render_context, renderController);
 }
 
-sp<Pipeline> RenderEngine::createPipeline(GraphicsContext& graphicsContext, const PipelineBindings& pipelineBindings, std::map<Enum::ShaderStageBit, String> stages)
+sp<Pipeline> RenderEngine::createPipeline(GraphicsContext& graphicsContext, const PipelineBindings& pipelineBindings, std::map<enums::ShaderStageBit, String> stages)
 {
     if(!_pipeline_factory)
         _pipeline_factory = _renderer_factory->createPipelineFactory();

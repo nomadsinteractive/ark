@@ -23,21 +23,21 @@
 
 namespace ark::plugin::opengl {
 
-GLenum GLUtil::toEnum(const Enum::DrawMode renderMode)
+GLenum GLUtil::toEnum(const enums::DrawMode renderMode)
 {
-    constexpr GLenum models[Enum::DRAW_MODE_COUNT] = {GL_LINES, GL_POINTS, GL_TRIANGLES, GL_TRIANGLE_STRIP};
-    DCHECK(renderMode >= 0 && renderMode < Enum::DRAW_MODE_COUNT, "Unknown Mode: %d", renderMode);
+    constexpr GLenum models[enums::DRAW_MODE_COUNT] = {GL_LINES, GL_POINTS, GL_TRIANGLES, GL_TRIANGLE_STRIP};
+    DCHECK(renderMode >= 0 && renderMode < enums::DRAW_MODE_COUNT, "Unknown Mode: %d", renderMode);
     return models[renderMode];
 }
 
-GLenum GLUtil::toShaderType(const Enum::ShaderStageBit stage)
+GLenum GLUtil::toShaderType(const enums::ShaderStageBit stage)
 {
 #ifndef ANDROID
-    constexpr GLenum types[Enum::SHADER_STAGE_BIT_COUNT] = {GL_VERTEX_SHADER, GL_TESS_CONTROL_SHADER, GL_TESS_EVALUATION_SHADER, GL_GEOMETRY_SHADER, GL_FRAGMENT_SHADER, GL_COMPUTE_SHADER};
+    constexpr GLenum types[enums::SHADER_STAGE_BIT_COUNT] = {GL_VERTEX_SHADER, GL_TESS_CONTROL_SHADER, GL_TESS_EVALUATION_SHADER, GL_GEOMETRY_SHADER, GL_FRAGMENT_SHADER, GL_COMPUTE_SHADER};
 #else
     constexpr GLenum types[Enum::SHADER_STAGE_COUNT] = {GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, GL_COMPUTE_SHADER};
 #endif
-    DASSERT(stage >= 0 && stage < Enum::SHADER_STAGE_BIT_COUNT);
+    DASSERT(stage >= 0 && stage < enums::SHADER_STAGE_BIT_COUNT);
     return types[stage];
 }
 
@@ -98,7 +98,7 @@ GLenum GLUtil::toFrontFaceType(PipelineDescriptor::FrontFaceType face)
     return glFaceTypes[face];
 }
 
-constexpr Enum::LookupTable<GLenum, 34> glEnumTable = {{
+constexpr enums::LookupTable<GLenum, 34> glEnumTable = {{
     {"nearest", GL_NEAREST},
     {"linear", GL_LINEAR},
     {"texture_mag_filter", GL_TEXTURE_MAG_FILTER},
@@ -137,12 +137,12 @@ constexpr Enum::LookupTable<GLenum, 34> glEnumTable = {{
 
 GLenum GLUtil::getEnum(const String& name)
 {
-    return Enum::lookup(glEnumTable, name);
+    return enums::lookup(glEnumTable, name);
 }
 
 GLenum GLUtil::getEnum(const String& name, const GLenum defValue)
 {
-    return Enum::lookup(glEnumTable, name, defValue);
+    return enums::lookup(glEnumTable, name, defValue);
 }
 
 GLenum GLUtil::getEnum(const document& manifest, const String& name)

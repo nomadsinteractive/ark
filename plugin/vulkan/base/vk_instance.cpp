@@ -90,13 +90,13 @@ void VKInstance::initialize(const RenderEngine& renderEngine)
     appInfo.pEngineName = "ark";
     switch(renderEngine.context()->renderer()._version)
     {
-        case Enum::RENDERER_VERSION_VULKAN_11:
+        case enums::RENDERER_VERSION_VULKAN_11:
             appInfo.apiVersion = VK_API_VERSION_1_1;
         break;
-        case Enum::RENDERER_VERSION_VULKAN_12:
+        case enums::RENDERER_VERSION_VULKAN_12:
             appInfo.apiVersion = VK_API_VERSION_1_2;
         break;
-        case Enum::RENDERER_VERSION_VULKAN_13:
+        case enums::RENDERER_VERSION_VULKAN_13:
             appInfo.apiVersion = VK_API_VERSION_1_3;
         break;
         default:

@@ -19,8 +19,8 @@ class VKUtil {
 public:
     static void checkResult(VkResult result);
 
-    static VkPipelineShaderStageCreateInfo loadShader(VkDevice device, const String& resid, Enum::ShaderStageBit stage);
-    static VkPipelineShaderStageCreateInfo createShader(VkDevice device, const String& source, Enum::ShaderStageBit stage);
+    static VkPipelineShaderStageCreateInfo loadShader(VkDevice device, const String& resid, enums::ShaderStageBit stage);
+    static VkPipelineShaderStageCreateInfo createShader(VkDevice device, const String& source, enums::ShaderStageBit stage);
 
     static void createImage(const VKDevice& device, const VkImageCreateInfo& imageCreateInfo, VkImage* image, VkDeviceMemory* memory, VkMemoryPropertyFlags propertyFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
@@ -36,8 +36,8 @@ public:
     static VkStencilOp toStencilOp(PipelineDescriptor::StencilFunc func);
 
     static VkImageAspectFlags toTextureAspect(Texture::Usage usage);
-    static VkShaderStageFlagBits toStage(Enum::ShaderStageBit stage);
-    static VkPrimitiveTopology toPrimitiveTopology(Enum::DrawMode mode);
+    static VkShaderStageFlagBits toStage(enums::ShaderStageBit stage);
+    static VkPrimitiveTopology toPrimitiveTopology(enums::DrawMode mode);
 
     static VkFormat getSupportedDepthFormat(const VkPhysicalDevice physicalDevice, Texture::Format format, Texture::Usage usage);
 

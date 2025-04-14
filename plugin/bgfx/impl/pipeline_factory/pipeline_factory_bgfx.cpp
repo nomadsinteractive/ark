@@ -24,15 +24,15 @@ namespace ark::plugin::bgfx {
 
 namespace {
 
-char toBgfxShaderTypeMagic(Enum::ShaderStageBit stage)
+char toBgfxShaderTypeMagic(enums::ShaderStageBit stage)
 {
     switch(stage)
     {
-        case Enum::SHADER_STAGE_BIT_VERTEX:
+        case enums::SHADER_STAGE_BIT_VERTEX:
             return 'V';
-        case Enum::SHADER_STAGE_BIT_FRAGMENT:
+        case enums::SHADER_STAGE_BIT_FRAGMENT:
             return 'F';
-        case Enum::SHADER_STAGE_BIT_COMPUTE:
+        case enums::SHADER_STAGE_BIT_COMPUTE:
             return 'C';
         default:
             FATAL("Unsupported shader type: %d", stage);
@@ -179,10 +179,10 @@ struct alignas(1) BgfxShaderAttributeChunk {
 
 #pragma pack(pop)
 
-::bgfx::ShaderHandle createShader(const PipelineLayout& shaderLayout, const String& source, const Enum::ShaderStageBit stage)
+::bgfx::ShaderHandle createShader(const PipelineLayout& shaderLayout, const String& source, const enums::ShaderStageBit stage)
 {
     const char bgfxChunkMagic[4] = {toBgfxShaderTypeMagic(stage), 'S', 'H', 11};
-    const Vector<uint32_t> binaries = RenderUtil::compileSPIR(source, stage, Enum::RENDERING_BACKEND_BIT_VULKAN);
+    const Vector<uint32_t> binaries = RenderUtil::compileSPIR(source, stage, enums::RENDERING_BACKEND_BIT_VULKAN);
     const void* bytecode = binaries.data();
     const uint32_t bytecodeSize = binaries.size() * sizeof(uint32_t);
     // const void* bytecode = source.c_str();
@@ -210,7 +210,7 @@ struct alignas(1) BgfxShaderAttributeChunk {
             }
 
     uint32_t binding = 2;
-    if(stage == Enum::SHADER_STAGE_BIT_FRAGMENT)
+    if(stage == enums::SHADER_STAGE_BIT_FRAGMENT)
         for(const String& i : shaderLayout.samplers().keys())
         {
             dynamicDataSize += (i.size() + 1);
@@ -229,7 +229,7 @@ struct alignas(1) BgfxShaderAttributeChunk {
 
     uint32_t customId = 0;
     Vector<BgfxShaderAttributeChunk> attributeChunks;
-    if(stage == Enum::SHADER_STAGE_BIT_VERTEX)
+    if(stage == enums::SHADER_STAGE_BIT_VERTEX)
         for(const auto& [name, attribute] : shaderLayout.getStreamLayout(0).attributes())
             attributeChunks.push_back({toBgfxAttribId(attribute.usage(), customId)});
 
@@ -266,8 +266,8 @@ struct DrawPipelineBgfx final : ResourceBase<::bgfx::ProgramHandle, Pipeline> {
     {
         if(!_handle)
         {
-            const auto vHandle = createShader(_pipeline_layout, _vertex_shader, Enum::SHADER_STAGE_BIT_VERTEX);
-            const auto fHandle = createShader(_pipeline_layout, _fragment_shader, Enum::SHADER_STAGE_BIT_FRAGMENT);
+            const auto vHandle = createShader(_pipeline_layout, _vertex_shader, enums::SHADER_STAGE_BIT_VERTEX);
+            const auto fHandle = createShader(_pipeline_layout, _fragment_shader, enums::SHADER_STAGE_BIT_FRAGMENT);
             _handle.reset(::bgfx::createProgram(vHandle, fHandle, true));
         }
     }
@@ -307,7 +307,7 @@ struct DrawPipelineBgfx final : ResourceBase<::bgfx::ProgramHandle, Pipeline> {
 
         {
             uint64_t state = BGFX_STATE_DEFAULT | BGFX_STATE_BLEND_FUNC_SEPARATE(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA, BGFX_STATE_BLEND_ONE, BGFX_STATE_BLEND_ZERO);
-            if(_draw_mode == Enum::DRAW_MODE_TRIANGLE_STRIP)
+            if(_draw_mode == enums::DRAW_MODE_TRIANGLE_STRIP)
                 state |= BGFX_STATE_PT_TRISTRIP;
             ::bgfx::setState(state);
         }
@@ -319,7 +319,7 @@ struct DrawPipelineBgfx final : ResourceBase<::bgfx::ProgramHandle, Pipeline> {
 
         switch(_draw_procedure)
         {
-            case Enum::DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT: {
+            case enums::DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT: {
                 const DrawingParams::DrawMultiElementsIndirect& param = drawingContext._parameters.drawMultiElementsIndirect();
                 const sp<IndirectBufferBgfx> indirectBuffer = param._indirect_cmds.delegate().cast<IndirectBufferBgfx>();
                 if(param._indirect_cmds._uploader)
@@ -374,8 +374,8 @@ struct DrawPipelineBgfx final : ResourceBase<::bgfx::ProgramHandle, Pipeline> {
         uint8_t _stage;
     };
 
-    Enum::DrawProcedure _draw_procedure;
-    Enum::DrawMode _draw_mode;
+    enums::DrawProcedure _draw_procedure;
+    enums::DrawMode _draw_mode;
     sp<PipelineLayout> _pipeline_layout;
     String _vertex_shader;
     String _fragment_shader;
@@ -415,16 +415,16 @@ private:
 
 }
 
-sp<Pipeline> PipelineFactoryBgfx::buildPipeline(GraphicsContext& graphicsContext, const PipelineBindings& pipelineBindings, std::map<Enum::ShaderStageBit, String> stages)
+sp<Pipeline> PipelineFactoryBgfx::buildPipeline(GraphicsContext& graphicsContext, const PipelineBindings& pipelineBindings, std::map<enums::ShaderStageBit, String> stages)
 {
     const sp<PipelineDescriptor>& pipelineDescriptor = pipelineBindings.pipelineDescriptor();
-    if(const auto vIter = stages.find(Enum::SHADER_STAGE_BIT_VERTEX); vIter != stages.end())
+    if(const auto vIter = stages.find(enums::SHADER_STAGE_BIT_VERTEX); vIter != stages.end())
     {
-        const auto fIter = stages.find(Enum::SHADER_STAGE_BIT_FRAGMENT);
+        const auto fIter = stages.find(enums::SHADER_STAGE_BIT_FRAGMENT);
         CHECK(fIter != stages.end(), "Pipeline has no fragment shader(only vertex shader available)");
         return sp<Pipeline>::make<DrawPipelineBgfx>(pipelineBindings, std::move(vIter->second), std::move(fIter->second));
     }
-    const auto cIter = stages.find(Enum::SHADER_STAGE_BIT_COMPUTE);
+    const auto cIter = stages.find(enums::SHADER_STAGE_BIT_COMPUTE);
     CHECK(cIter != stages.end(), "Pipeline has no compute shader");
     return sp<Pipeline>::make<ComputePipelineBgfx>(std::move(cIter->second));
 }

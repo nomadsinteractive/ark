@@ -100,6 +100,17 @@ class Enum:
     DRAW_PROCEDURE_DRAW_INSTANCED = 3
     DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT = 4
 
+    UPLOAD_STRATEGY_ONCE = 0
+    UPLOAD_STRATEGY_RELOAD = 1
+    UPLOAD_STRATEGY_ON_SURFACE_READY = 2
+    UPLOAD_STRATEGY_ONCE_AND_ON_SURFACE_READY = 3
+    UPLOAD_STRATEGY_ON_CHANGE = 4
+    UPLOAD_STRATEGY_ON_EVERY_FRAME = 8
+
+    UPLOAD_PRIORITY_LOW = 0
+    UPLOAD_PRIORITY_NORMAL = 1
+    UPLOAD_PRIORITY_HIGH = 2
+
     def __init__(self, value: int):
         pass
 
@@ -176,6 +187,9 @@ class _Array:
         pass
 
     def reset(self, other):
+        pass
+
+    def intertwine(self, components: list[Self]) -> Self:
         pass
 
     def to_bytes(self) -> bytes:
@@ -584,6 +598,9 @@ class Texture:
     FORMAT_16_BIT = 256
     FORMAT_32_BIT = FORMAT_8_BIT | FORMAT_16_BIT
 
+    def __init__(self, bitmap: "Bitmap", texture_format: int = FORMAT_AUTO, upload_strategy: int = Enum.UPLOAD_STRATEGY_ONCE_AND_ON_SURFACE_READY, future: Optional[Future] = None):
+        pass
+
     @property
     def width(self) -> int:
         return 0
@@ -605,19 +622,9 @@ class Texture:
 
 
 class RenderController:
-    US_ONCE = 0
-    US_RELOAD = 1
-    US_ON_SURFACE_READY = 2
-    US_ONCE_AND_ON_SURFACE_READY = 3
-    US_ON_CHANGE = 4
-    US_ON_EVERY_FRAME = 8
-
-    UPLOAD_PRIORITY_LOW = 0
-    UPLOAD_PRIORITY_NORMAL = 1
-    UPLOAD_PRIORITY_HIGH = 2
 
     def upload_buffer(self, buffer: Buffer, uploader: 'Uploader', upload_strategy: int, future: Optional[Future] = None,
-                      upload_priority: int = UPLOAD_PRIORITY_NORMAL):
+                      upload_priority: int = Enum.UPLOAD_PRIORITY_NORMAL):
         pass
 
     def make_buffer(self, buffer_type: int, buffer_usage: int, uploader: Optional['Uploader'], upload_strategy: int, future: Optional[Future] = None) -> Buffer:
@@ -629,7 +636,7 @@ class RenderController:
     def make_index_buffer(self, buffer_usage: int = Buffer.USAGE_BIT_DYNAMIC, uploader: Optional['Uploader'] = None) -> Buffer:
         pass
 
-    def create_texture2d(self, bitmap: 'Bitmap', texture_format: int = Texture.FORMAT_AUTO, upload_strategy: int = US_ONCE_AND_ON_SURFACE_READY,
+    def create_texture2d(self, bitmap: 'Bitmap', texture_format: int = Texture.FORMAT_AUTO, upload_strategy: int = Enum.UPLOAD_STRATEGY_ONCE_AND_ON_SURFACE_READY,
                          future: Optional[Future] = None) -> Texture:
         pass
 

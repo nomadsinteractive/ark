@@ -47,7 +47,7 @@ template<> ARK_API RendererType::Priority StringConvert::eval<RendererType::Prio
     if(Strings::isNumeric(expr))
         return static_cast<RendererType::Priority>(Strings::eval<uint32_t>(expr));
 
-    constexpr Enum::LookupTable<RendererType::Priority, RendererType::PRIORITY_COUNT> priorities = {{
+    constexpr enums::LookupTable<RendererType::Priority, RendererType::PRIORITY_COUNT> priorities = {{
         {"ui", RendererType::PRIORITY_UI},
         {"default", RendererType::PRIORITY_DEFAULT},
         {"ui_blend", RendererType::PRIORITY_UI_BLEND},
@@ -55,7 +55,7 @@ template<> ARK_API RendererType::Priority StringConvert::eval<RendererType::Prio
         {"render_layer", RendererType::PRIORITY_RENDER_LAYER},
         {"control", RendererType::PRIORITY_CONTROL},
     }};
-    return Enum::lookup(priorities, expr);
+    return enums::lookup(priorities, expr);
 }
 
 }

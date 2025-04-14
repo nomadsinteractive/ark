@@ -36,12 +36,12 @@ public:
         RenderUtil::setLayoutDescriptor(RenderUtil::setupLayoutLocation(context, firstStage._declaration_ins), sLocation, 0);
 
         const PipelineLayout& pipelineLayout = pipelineDescriptor.layout();
-        if(ShaderPreprocessor* vertex = context.tryGetRenderStage(Enum::SHADER_STAGE_BIT_VERTEX))
+        if(ShaderPreprocessor* vertex = context.tryGetRenderStage(enums::SHADER_STAGE_BIT_VERTEX))
         {
             RenderUtil::setLayoutDescriptor(vertex->_declaration_images, "binding", static_cast<uint32_t>(pipelineLayout.ubos().size() + pipelineLayout.ssbos().size() + pipelineLayout.samplers().size()));
             vertex->_predefined_macros.emplace_back("#define gl_InstanceID gl_InstanceIndex");
         }
-        if(ShaderPreprocessor* fragment = context.tryGetRenderStage(Enum::SHADER_STAGE_BIT_FRAGMENT))
+        if(ShaderPreprocessor* fragment = context.tryGetRenderStage(enums::SHADER_STAGE_BIT_FRAGMENT))
         {
             fragment->linkNextStage("FragColor");
             RenderUtil::setLayoutDescriptor(fragment->_declaration_images, "binding", static_cast<uint32_t>(fragment->_declaration_samplers.vars().size()));
@@ -89,7 +89,7 @@ public:
         {
             ShaderPreprocessor& preprocessor = v;
             preprocessor._version = 450;
-            preprocessor.declareUBOStruct(pipelineLayout, k == Enum::SHADER_STAGE_BIT_VERTEX ? 1 : 3);
+            preprocessor.declareUBOStruct(pipelineLayout, k == enums::SHADER_STAGE_BIT_VERTEX ? 1 : 3);
             preprocessor._predefined_macros.push_back("#extension GL_ARB_separate_shader_objects : enable");
             preprocessor._predefined_macros.push_back("#extension GL_ARB_shading_language_420pack : enable");
         }
@@ -104,7 +104,7 @@ public:
     }
 };
 
-void setVersion(const Enum::RendererVersion version, RenderEngineContext& vkContext)
+void setVersion(const enums::RendererVersion version, RenderEngineContext& vkContext)
 {
     LOGD("Choose Renderer Version = %d", version);
     vkContext.setSnippetFactory(sp<SnippetFactory>::make<SnippetFactorySDL3>());
@@ -254,7 +254,7 @@ private:
 }
 
 RendererFactorySDL3_GPU::RendererFactorySDL3_GPU()
-    : RendererFactory({{Enum::RENDERING_BACKEND_BIT_DIRECT_X, Enum::RENDERING_BACKEND_BIT_METAL}, Ark::COORDINATE_SYSTEM_RHS, false, 16}), _gpu_device(nullptr)
+    : RendererFactory({{enums::RENDERING_BACKEND_BIT_DIRECT_X, enums::RENDERING_BACKEND_BIT_METAL}, Ark::COORDINATE_SYSTEM_RHS, false, 16}), _gpu_device(nullptr)
 {
 }
 
@@ -281,7 +281,7 @@ void RendererFactorySDL3_GPU::onSurfaceCreated(RenderEngine& renderEngine)
 sp<RenderEngineContext> RendererFactorySDL3_GPU::createRenderEngineContext(const ApplicationManifest::Renderer& renderer)
 {
     const sp<RenderEngineContext> renderContext = sp<RenderEngineContext>::make(renderer, Viewport(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f));
-    setVersion(renderer._version == Enum::RENDERER_VERSION_AUTO ? Enum::RENDERER_VERSION_VULKAN_13 : renderer._version, renderContext);
+    setVersion(renderer._version == enums::RENDERER_VERSION_AUTO ? enums::RENDERER_VERSION_VULKAN_13 : renderer._version, renderContext);
     return renderContext;
 }
 

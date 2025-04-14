@@ -86,7 +86,7 @@ PipelineLayout::PipelineLayout()
 
 void PipelineLayout::initialize(const PipelineBuildingContext& buildingContext)
 {
-    if(const ShaderPreprocessor* fragment = buildingContext.tryGetRenderStage(Enum::SHADER_STAGE_BIT_FRAGMENT))
+    if(const ShaderPreprocessor* fragment = buildingContext.tryGetRenderStage(enums::SHADER_STAGE_BIT_FRAGMENT))
         _color_attachment_count = fragment->_main_block->outArgumentCount() + (fragment->_main_block->hasReturnValue() ? 1 : 0);
 
     for(const auto& [k, v] : buildingContext._ubos)
@@ -112,12 +112,12 @@ sp<RenderBufferSnapshot> PipelineLayout::takeBufferSnapshot(const RenderRequest&
 {
     Vector<RenderBufferSnapshot::UBOSnapshot> uboSnapshot;
     for(const UBO& i : _ubos)
-        if(isComputeStage ? i._stages.has(Enum::SHADER_STAGE_BIT_COMPUTE) : (i._stages.has(Enum::SHADER_STAGE_BIT_VERTEX) || i._stages.has(Enum::SHADER_STAGE_BIT_FRAGMENT)))
+        if(isComputeStage ? i._stages.has(enums::SHADER_STAGE_BIT_COMPUTE) : (i._stages.has(enums::SHADER_STAGE_BIT_VERTEX) || i._stages.has(enums::SHADER_STAGE_BIT_FRAGMENT)))
             uboSnapshot.push_back(i.snapshot(renderRequest));
 
     Vector<std::pair<uint32_t, Buffer::Snapshot>> ssboSnapshot;
     for(const SSBO& i : _ssbos)
-        if(isComputeStage ? i._stages.has(Enum::SHADER_STAGE_BIT_COMPUTE) : (i._stages.has(Enum::SHADER_STAGE_BIT_VERTEX) || i._stages.has(Enum::SHADER_STAGE_BIT_FRAGMENT)))
+        if(isComputeStage ? i._stages.has(enums::SHADER_STAGE_BIT_COMPUTE) : (i._stages.has(enums::SHADER_STAGE_BIT_VERTEX) || i._stages.has(enums::SHADER_STAGE_BIT_FRAGMENT)))
             ssboSnapshot.emplace_back(i._binding._location, i._buffer.snapshot());
 
     return sp<RenderBufferSnapshot>::make(RenderBufferSnapshot{std::move(uboSnapshot), std::move(ssboSnapshot)});
@@ -316,7 +316,7 @@ PipelineLayout::SSBO::SSBO(Buffer buffer, const Binding binding)
 {
 }
 
-uint32_t PipelineLayout::DescriptorSet::addStage(Enum::ShaderStageBit stage, uint32_t binding)
+uint32_t PipelineLayout::DescriptorSet::addStage(enums::ShaderStageBit stage, uint32_t binding)
 {
     _stages.set(stage);
     if(_binding._location != -1)

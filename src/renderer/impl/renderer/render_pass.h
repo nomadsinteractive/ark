@@ -16,7 +16,7 @@ namespace ark {
 class ARK_API RenderPass final : public Renderer {
 public:
 //  [[script::bindings::auto]]
-    RenderPass(sp<Shader> shader, Buffer vertexBuffer, Buffer indexBuffer, sp<Integer> drawCount, Enum::DrawMode drawMode, Enum::DrawProcedure drawProcedure, Vector<std::pair<uint32_t, Buffer>> instanceBuffers = {}, Buffer indirectBuffer = {});
+    RenderPass(sp<Shader> shader, Buffer vertexBuffer, Buffer indexBuffer, sp<Integer> drawCount, enums::DrawMode drawMode, enums::DrawProcedure drawProcedure, Vector<std::pair<uint32_t, Buffer>> instanceBuffers = {}, Buffer indirectBuffer = {});
 
     void render(RenderRequest& renderRequest, const V3& position, const sp<DrawDecorator>& drawDecorator) override;
 
@@ -33,8 +33,8 @@ public:
         sp<Builder<Buffer>> _index_buffer;
         sp<Builder<Buffer>> _indirect_buffer;
         sp<Builder<Integer>> _draw_count;
-        Enum::DrawMode _mode;
-        Enum::DrawProcedure _draw_precedure;
+        enums::DrawMode _mode;
+        enums::DrawProcedure _draw_precedure;
         Vector<std::pair<uint32_t, sp<Builder<Buffer>>>> _instance_buffers;
     };
 
@@ -42,7 +42,7 @@ private:
     sp<Shader> _shader;
     Buffer _index_buffer;
     sp<Integer> _draw_count;
-    Enum::DrawProcedure _draw_procedure;
+    enums::DrawProcedure _draw_procedure;
     Buffer _indirect_buffer;
     sp<PipelineBindings> _pipeline_bindings;
 };

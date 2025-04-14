@@ -63,8 +63,8 @@ PipelineBuildingContext::PipelineBuildingContext()
 PipelineBuildingContext::PipelineBuildingContext(String vertex, String fragment)
     : PipelineBuildingContext()
 {
-    addStage(std::move(vertex), nullptr, Enum::SHADER_STAGE_BIT_VERTEX, Enum::SHADER_STAGE_BIT_NONE);
-    addStage(std::move(fragment), nullptr, Enum::SHADER_STAGE_BIT_FRAGMENT, Enum::SHADER_STAGE_BIT_VERTEX);
+    addStage(std::move(vertex), nullptr, enums::SHADER_STAGE_BIT_VERTEX, enums::SHADER_STAGE_BIT_NONE);
+    addStage(std::move(fragment), nullptr, enums::SHADER_STAGE_BIT_FRAGMENT, enums::SHADER_STAGE_BIT_VERTEX);
 }
 
 void PipelineBuildingContext::loadManifest(const document& manifest, BeanFactory& factory, const Scope& args)
@@ -227,7 +227,7 @@ const Vector<ShaderPreprocessor*>& PipelineBuildingContext::stages() const
     return _stages;
 }
 
-const Map<Enum::ShaderStageBit, op<ShaderPreprocessor>>& PipelineBuildingContext::renderStages() const
+const Map<enums::ShaderStageBit, op<ShaderPreprocessor>>& PipelineBuildingContext::renderStages() const
 {
     return _rendering_stages;
 }
@@ -240,7 +240,7 @@ const op<ShaderPreprocessor>& PipelineBuildingContext::computingStage() const
 void PipelineBuildingContext::doAddVertexAttribute(String name, String type, const uint32_t divisor)
 {
     //TODO: add attribute to specified stage
-    const Attribute& attr = addPredefinedAttribute(name, std::move(type), divisor, Enum::SHADER_STAGE_BIT_VERTEX);
+    const Attribute& attr = addPredefinedAttribute(name, std::move(type), divisor, enums::SHADER_STAGE_BIT_VERTEX);
     _pipeline_layout->addAttribute(std::move(name), attr);
 }
 
@@ -264,7 +264,7 @@ void PipelineBuildingContext::addAttribute(const String& name, const String& typ
     }
 }
 
-Attribute& PipelineBuildingContext::addPredefinedAttribute(const String& name, const String& type, const uint32_t divisor, const Enum::ShaderStageBit stage)
+Attribute& PipelineBuildingContext::addPredefinedAttribute(const String& name, const String& type, const uint32_t divisor, const enums::ShaderStageBit stage)
 {
     if(_attributes.find(name) == _attributes.end())
     {
@@ -277,22 +277,22 @@ Attribute& PipelineBuildingContext::addPredefinedAttribute(const String& name, c
     return _attributes[name];
 }
 
-ShaderPreprocessor* PipelineBuildingContext::tryGetRenderStage(Enum::ShaderStageBit shaderStage) const
+ShaderPreprocessor* PipelineBuildingContext::tryGetRenderStage(enums::ShaderStageBit shaderStage) const
 {
     const auto iter = _rendering_stages.find(shaderStage);
     return iter != _rendering_stages.end() ? iter->second.get() : nullptr;
 }
 
-const op<ShaderPreprocessor>& PipelineBuildingContext::getRenderStage(Enum::ShaderStageBit shaderStage) const
+const op<ShaderPreprocessor>& PipelineBuildingContext::getRenderStage(enums::ShaderStageBit shaderStage) const
 {
     const auto iter = _rendering_stages.find(shaderStage);
     CHECK(iter != _rendering_stages.end(), "Stage '%d' not found", shaderStage);
     return iter->second;
 }
 
-const op<ShaderPreprocessor>& PipelineBuildingContext::addStage(String source, document manifest, const Enum::ShaderStageBit shaderStage, const Enum::ShaderStageBit preShaderStage)
+const op<ShaderPreprocessor>& PipelineBuildingContext::addStage(String source, document manifest, const enums::ShaderStageBit shaderStage, const enums::ShaderStageBit preShaderStage)
 {
-    op<ShaderPreprocessor>& stage = shaderStage == Enum::SHADER_STAGE_BIT_COMPUTE ? _computing_stage : _rendering_stages[shaderStage];
+    op<ShaderPreprocessor>& stage = shaderStage == enums::SHADER_STAGE_BIT_COMPUTE ? _computing_stage : _rendering_stages[shaderStage];
     CHECK(!stage, "Stage '%d' has been initialized already", shaderStage);
     stage.reset(new ShaderPreprocessor(std::move(source), std::move(manifest), shaderStage, preShaderStage));
     _stages.emplace_back(stage.get());
@@ -317,7 +317,7 @@ void PipelineBuildingContext::loadPredefinedAttribute(const document& manifest)
         const String attrName = name.startsWith("a_") ? name.substr(2) : name;
         const String& type = Documents::ensureAttribute(i, constants::TYPE);
         const uint32_t divisor = Documents::getAttribute<uint32_t>(i, "divisor", 0);
-        addPredefinedAttribute(attrName, type, divisor, Enum::SHADER_STAGE_BIT_VERTEX);
+        addPredefinedAttribute(attrName, type, divisor, enums::SHADER_STAGE_BIT_VERTEX);
     }
 }
 
@@ -399,29 +399,29 @@ void PipelineBuildingContext::loadLayoutBindings(BeanFactory& factory, const Sco
 void PipelineBuildingContext::initializeStages(const Camera& camera)
 {
     for(ShaderPreprocessor* preprocessor : _stages)
-        if(preprocessor->_shader_stage == Enum::SHADER_STAGE_BIT_VERTEX)
+        if(preprocessor->_shader_stage == enums::SHADER_STAGE_BIT_VERTEX)
             preprocessor->initializeAsFirst(*this);
         else
             preprocessor->initialize(*this);
 
-    if(const ShaderPreprocessor* vertex = tryGetRenderStage(Enum::SHADER_STAGE_BIT_VERTEX))
+    if(const ShaderPreprocessor* vertex = tryGetRenderStage(enums::SHADER_STAGE_BIT_VERTEX))
         tryBindCamera(*vertex, camera);
 
     uint32_t binding = 0;
     Table<String, PipelineLayout::DescriptorSet>& samplers = _pipeline_layout->_samplers;
     Table<String, PipelineLayout::DescriptorSet>& images = _pipeline_layout->_images;
     {
-        if(const ShaderPreprocessor* vertex = tryGetRenderStage(Enum::SHADER_STAGE_BIT_VERTEX))
+        if(const ShaderPreprocessor* vertex = tryGetRenderStage(enums::SHADER_STAGE_BIT_VERTEX))
         {
             for(const String& i : vertex->_declaration_images.vars().keys())
-                binding = images[i].addStage(Enum::SHADER_STAGE_BIT_VERTEX, binding);
+                binding = images[i].addStage(enums::SHADER_STAGE_BIT_VERTEX, binding);
         }
-        if(const ShaderPreprocessor* fragment = tryGetRenderStage(Enum::SHADER_STAGE_BIT_FRAGMENT))
+        if(const ShaderPreprocessor* fragment = tryGetRenderStage(enums::SHADER_STAGE_BIT_FRAGMENT))
         {
             for(const String& i : fragment->_declaration_samplers.vars().keys())
-                binding = samplers[i].addStage(Enum::SHADER_STAGE_BIT_FRAGMENT, binding);
+                binding = samplers[i].addStage(enums::SHADER_STAGE_BIT_FRAGMENT, binding);
             for(const String& i : fragment->_declaration_images.vars().keys())
-                binding = images[i].addStage(Enum::SHADER_STAGE_BIT_FRAGMENT, binding);
+                binding = images[i].addStage(enums::SHADER_STAGE_BIT_FRAGMENT, binding);
         }
     }
 
@@ -429,9 +429,9 @@ void PipelineBuildingContext::initializeStages(const Camera& camera)
     {
         tryBindCamera(*compute, camera);
         for(const String& i : compute->_declaration_samplers.vars().keys())
-            binding = samplers[i].addStage(Enum::SHADER_STAGE_BIT_COMPUTE, binding);
+            binding = samplers[i].addStage(enums::SHADER_STAGE_BIT_COMPUTE, binding);
         for(const String& i : compute->_declaration_images.vars().keys())
-            binding = images[i].addStage(Enum::SHADER_STAGE_BIT_COMPUTE, binding);
+            binding = images[i].addStage(enums::SHADER_STAGE_BIT_COMPUTE, binding);
     }
 }
 
@@ -459,14 +459,14 @@ bool PipelineBuildingContext::VertexAttribute::operator<(const VertexAttribute& 
 
 template<> PipelineBuildingContext::LayoutBindingType StringConvert::eval<PipelineBuildingContext::LayoutBindingType>(const String& repr)
 {
-    constexpr Enum::LookupTable<PipelineBuildingContext::LayoutBindingType, 5> table = {{
+    constexpr enums::LookupTable<PipelineBuildingContext::LayoutBindingType, 5> table = {{
         {"image", PipelineBuildingContext::LAYOUT_BINDING_TYPE_IMAGE},
         {"sampler", PipelineBuildingContext::LAYOUT_BINDING_TYPE_SAMPLER},
         {"ssbo", PipelineBuildingContext::LAYOUT_BINDING_TYPE_SSBO},
         {"ubo", PipelineBuildingContext::LAYOUT_BINDING_TYPE_UBO},
         {"auto", PipelineBuildingContext::LAYOUT_BINDING_TYPE_AUTO}
     }};
-    return Enum::lookup(table, repr);
+    return enums::lookup(table, repr);
 }
 
 }

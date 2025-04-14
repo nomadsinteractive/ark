@@ -75,9 +75,9 @@ String Platform::getRealPath(const String& path)
     return realpath;
 }
 
-Vector<Enum::RendererVersion> Platform::getRendererVersionPreferences()
+Vector<enums::RendererVersion> Platform::getRendererVersionPreferences()
 {
-    return {Enum::RENDERER_VERSION_OPENGL_46, Enum::RENDERER_VERSION_VULKAN_12};
+    return {enums::RENDERER_VERSION_OPENGL_46, enums::RENDERER_VERSION_VULKAN_12};
 }
 
 sp<Alphabet> Platform::getSystemAlphabet(const Font& font, const String& lang)

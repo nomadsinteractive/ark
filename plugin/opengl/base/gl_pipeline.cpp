@@ -267,9 +267,9 @@ struct GLPipeline::Stub {
         _rebind_needed = false;
     }
 
-    bool shouldBeBinded(const ShaderStageSet& stages) const
+    bool shouldBeBinded(const enums::ShaderStageSet& stages) const
     {
-        return _is_compute_pipeline ? stages.has(Enum::SHADER_STAGE_BIT_COMPUTE) : !stages.has(Enum::SHADER_STAGE_BIT_COMPUTE);
+        return _is_compute_pipeline ? stages.has(enums::SHADER_STAGE_BIT_COMPUTE) : !stages.has(enums::SHADER_STAGE_BIT_COMPUTE);
     }
 
     bool _is_compute_pipeline;
@@ -582,7 +582,7 @@ void ensureVertexArray(GraphicsContext& graphicsContext, const DrawingContext& c
         const sp<Pipeline>& renderPipeline = context._bindings->ensureRenderPipeline(graphicsContext);
         sp<GLVertexArray> va = sp<GLVertexArray>::make(*context._bindings, renderPipeline.cast<GLPipeline>(), context._vertices.delegate());
         va->upload(graphicsContext);
-        graphicsContext.renderController()->upload(va, RenderController::US_ON_SURFACE_READY);
+        graphicsContext.renderController()->upload(va, enums::UPLOAD_STRATEGY_ON_SURFACE_READY);
         vertexArrayId = va->id();
         context._attachments->put(std::move(va));
     }
@@ -594,13 +594,13 @@ sp<PipelineDrawCommand> makeBakedRenderer(const PipelineBindings& bindings)
     const GLenum mode = GLUtil::toEnum(bindings.drawMode());
     switch(bindings.drawProcedure())
     {
-        case Enum::DRAW_PROCEDURE_DRAW_ARRAYS:
+        case enums::DRAW_PROCEDURE_DRAW_ARRAYS:
             return sp<PipelineDrawCommand>::make<GLDrawArrays>(mode);
-        case Enum::DRAW_PROCEDURE_DRAW_ELEMENTS:
+        case enums::DRAW_PROCEDURE_DRAW_ELEMENTS:
             return sp<PipelineDrawCommand>::make<GLDrawElements>(mode);
-        case Enum::DRAW_PROCEDURE_DRAW_INSTANCED:
+        case enums::DRAW_PROCEDURE_DRAW_INSTANCED:
             return sp<PipelineDrawCommand>::make<GLDrawElementsInstanced>(mode);
-        case Enum::DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT:
+        case enums::DRAW_PROCEDURE_DRAW_INSTANCED_INDIRECT:
             return sp<PipelineDrawCommand>::make<GLMultiDrawElementsIndirect>(mode);
     }
     DFATAL("Not render procedure creator for %d", bindings.drawProcedure());
@@ -700,9 +700,9 @@ private:
     uint32_t _id;
 };
 
-bool isComputePipeline(const Map<Enum::ShaderStageBit, String>& stages)
+bool isComputePipeline(const Map<enums::ShaderStageBit, String>& stages)
 {
-    if(const auto iter = stages.find(Enum::SHADER_STAGE_BIT_COMPUTE); iter != stages.end())
+    if(const auto iter = stages.find(enums::SHADER_STAGE_BIT_COMPUTE); iter != stages.end())
     {
         DCHECK(stages.size() == 1, "Compute shader is an exclusive stage");
         return true;
@@ -738,7 +738,7 @@ sp<Stage> makeShader(GraphicsContext& graphicsContext, uint32_t version, GLenum 
 
 }
 
-GLPipeline::GLPipeline(const sp<Recycler>& recycler, const uint32_t version, Map<Enum::ShaderStageBit, String> stages, const PipelineBindings& bindings)
+GLPipeline::GLPipeline(const sp<Recycler>& recycler, const uint32_t version, Map<enums::ShaderStageBit, String> stages, const PipelineBindings& bindings)
     : _stub(sp<Stub>::make(isComputePipeline(stages))), _recycler(recycler), _version(version), _stages(std::move(stages)), _pipeline_operation(makePipelineOperation(bindings))
 {
     for(const auto& [k, v] : bindings.pipelineDescriptor()->configuration()._traits)
@@ -785,7 +785,7 @@ void GLPipeline::upload(GraphicsContext& graphicsContext)
     _stub->_rebind_needed = true;
     _stub->_id = id;
 
-    Map<Enum::ShaderStageBit, sp<Stage>> compiledStages;
+    Map<enums::ShaderStageBit, sp<Stage>> compiledStages;
     for(const auto& [k, v] : _stages)
     {
         sp<Stage>& shader = compiledStages[k];

@@ -262,28 +262,28 @@ sp<LayoutParam> LayoutParam::BUILDER::build(const Scope& args)
 
 template<> ARK_API LayoutParam::FlexDirection StringConvert::eval<LayoutParam::FlexDirection>(const String& expr)
 {
-    constexpr Enum::LookupTable<LayoutParam::FlexDirection, 4> table = {{
+    constexpr enums::LookupTable<LayoutParam::FlexDirection, 4> table = {{
         {"column", LayoutParam::FLEX_DIRECTION_COLUMN},
         {"column-reverse", LayoutParam::FLEX_DIRECTION_COLUMN_REVERSE},
         {"row", LayoutParam::FLEX_DIRECTION_ROW},
         {"row-reverse", LayoutParam::FLEX_DIRECTION_ROW_REVERSE}
     }};
-    return Enum::lookup(table, expr);
+    return enums::lookup(table, expr);
 }
 
 template<> ARK_API LayoutParam::FlexWrap StringConvert::eval<LayoutParam::FlexWrap>(const String& expr)
 {
-    constexpr Enum::LookupTable<LayoutParam::FlexWrap, 3> table = {{
+    constexpr enums::LookupTable<LayoutParam::FlexWrap, 3> table = {{
         {"nowrap", LayoutParam::FLEX_WRAP_NOWRAP},
         {"wrap", LayoutParam::FLEX_WRAP_WRAP},
         {"wrap-reverse", LayoutParam::FLEX_WRAP_WRAP}
     }};
-    return Enum::lookup(table, expr);
+    return enums::lookup(table, expr);
 }
 
 template<> ARK_API LayoutParam::JustifyContent StringConvert::eval<LayoutParam::JustifyContent>(const String& expr)
 {
-    constexpr Enum::LookupTable<LayoutParam::JustifyContent, 6> table = {{
+    constexpr enums::LookupTable<LayoutParam::JustifyContent, 6> table = {{
         {"flex-start", LayoutParam::JUSTIFY_CONTENT_FLEX_START},
         {"flex-end", LayoutParam::JUSTIFY_CONTENT_FLEX_END},
         {"center", LayoutParam::JUSTIFY_CONTENT_CENTER},
@@ -291,12 +291,12 @@ template<> ARK_API LayoutParam::JustifyContent StringConvert::eval<LayoutParam::
         {"space-around", LayoutParam::JUSTIFY_CONTENT_SPACE_AROUND},
         {"space-evenly", LayoutParam::JUSTIFY_CONTENT_SPACE_EVENLY}
     }};
-    return Enum::lookup(table, expr);
+    return enums::lookup(table, expr);
 }
 
 template<> ARK_API LayoutParam::Align StringConvert::eval<LayoutParam::Align>(const String& expr)
 {
-    constexpr Enum::LookupTable<LayoutParam::Align, 8> table = {{
+    constexpr enums::LookupTable<LayoutParam::Align, 8> table = {{
         {"auto", LayoutParam::ALIGN_AUTO},
         {"flex-start", LayoutParam::ALIGN_FLEX_START},
         {"flex-end", LayoutParam::ALIGN_FLEX_END},
@@ -306,7 +306,7 @@ template<> ARK_API LayoutParam::Align StringConvert::eval<LayoutParam::Align>(co
         {"space-between", LayoutParam::ALIGN_SPACE_BETWEEN},
         {"space-around", LayoutParam::ALIGN_SPACE_AROUND}
     }};
-    return Enum::lookup(table, expr);
+    return enums::lookup(table, expr);
 }
 
 }

@@ -32,7 +32,7 @@ namespace ark::plugin::opengl {
 
 namespace {
 
-void setVersion(const Enum::RendererVersion version, RenderEngineContext& glContext)
+void setVersion(const enums::RendererVersion version, RenderEngineContext& glContext)
 {
     LOGD("Choose GLVersion = %d", version);
     glContext.setSnippetFactory(sp<SnippetFactory>::make<SnippetFactoryGLES30>());
@@ -52,14 +52,14 @@ int32_t toClearMaskBits(const RenderTarget::Configure& configure)
 }
 
 RendererFactoryOpenGL::RendererFactoryOpenGL()
-    : RendererFactory({{Enum::RENDERING_BACKEND_BIT_OPENGL}, Ark::COORDINATE_SYSTEM_RHS, true, sizeof(float)})
+    : RendererFactory({{enums::RENDERING_BACKEND_BIT_OPENGL}, Ark::COORDINATE_SYSTEM_RHS, true, sizeof(float)})
 {
 }
 
 sp<RenderEngineContext> RendererFactoryOpenGL::createRenderEngineContext(const ApplicationManifest::Renderer& renderer)
 {
     const sp<RenderEngineContext> renderContext = sp<RenderEngineContext>::make(renderer, Viewport(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f));
-    if(renderer._version != Enum::RENDERER_VERSION_AUTO)
+    if(renderer._version != enums::RENDERER_VERSION_AUTO)
         setVersion(renderer._version, renderContext);
     return renderContext;
 }
@@ -69,12 +69,12 @@ void RendererFactoryOpenGL::onSurfaceCreated(RenderEngine& renderEngine)
     DTHREAD_CHECK(THREAD_ID_RENDERER);
     glbinding::Binding::initialize(nullptr);
 
-    if(renderEngine.version() == Enum::RENDERER_VERSION_AUTO)
+    if(renderEngine.version() == enums::RENDERER_VERSION_AUTO)
     {
         int glMajorVersion = 0, glMinorVersion = 0;
         glGetIntegerv(GL_MAJOR_VERSION, &glMajorVersion);
         glGetIntegerv(GL_MINOR_VERSION, &glMinorVersion);
-        setVersion(static_cast<Enum::RendererVersion>(glMajorVersion * 10 + glMinorVersion), renderEngine.context());
+        setVersion(static_cast<enums::RendererVersion>(glMajorVersion * 10 + glMinorVersion), renderEngine.context());
     }
 }
 

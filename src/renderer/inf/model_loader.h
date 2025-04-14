@@ -17,13 +17,13 @@ public:
         MODEL_TRAIT_DISALLOW_CACHE = 2,
     };
 
-    ModelLoader(Enum::DrawMode renderMode, sp<Texture> texture, ModelTrait trait = MODEL_TRAIT_NONE);
+    ModelLoader(enums::DrawMode renderMode, sp<Texture> texture, ModelTrait trait = MODEL_TRAIT_NONE);
     virtual ~ModelLoader() = default;
 
     void bind(const PipelineBindings& pipelineBindings) const;
 
 //  [[script::bindings::property]]
-    Enum::DrawMode renderMode() const;
+    enums::DrawMode renderMode() const;
 //  [[script::bindings::property]]
     const sp<Texture>& texture() const;
 
@@ -44,7 +44,7 @@ public:
     };
 
 private:
-    Enum::DrawMode _render_mode;
+    enums::DrawMode _render_mode;
     sp<Texture> _texture;
     ModelTrait _trait;
 };

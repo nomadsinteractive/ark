@@ -69,8 +69,8 @@ public:
 
         String _class;
 
-        Enum::RenderingBackendBit _backend;
-        Enum::RendererVersion _version;
+        enums::RenderingBackendBit _backend;
+        enums::RendererVersion _version;
         Ark::RendererCoordinateSystem _coordinate_system;
 
         bool _vsync;

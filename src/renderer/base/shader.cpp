@@ -17,7 +17,7 @@ namespace ark {
 
 namespace {
 
-std::pair<Optional<const Shader::StageManifest&>, size_t> findStageManifest(const Enum::ShaderStageBit type, const Vector<Shader::StageManifest>& stages)
+std::pair<Optional<const Shader::StageManifest&>, size_t> findStageManifest(const enums::ShaderStageBit type, const Vector<Shader::StageManifest>& stages)
 {
     for(size_t i = 0; i < stages.size(); ++ i)
         if(type == stages.at(i)._type)
@@ -35,13 +35,13 @@ template<typename T, typename U> auto findInKeywordPairs(const T& kws, U key) ->
 
 }
 
-Shader::StageManifest::StageManifest(Enum::ShaderStageBit type, builder<String> source)
+Shader::StageManifest::StageManifest(enums::ShaderStageBit type, builder<String> source)
     : _type(type), _source(std::move(source)), _manifest(Global<Constants>()->DOCUMENT_NONE)
 {
 }
 
 Shader::StageManifest::StageManifest(BeanFactory& factory, const document& manifest)
-    : _type(Documents::ensureAttribute<Enum::ShaderStageBit>(manifest, constants::TYPE)), _source(factory.ensureBuilder<String>(manifest, constants::SRC)), _manifest(manifest)
+    : _type(Documents::ensureAttribute<enums::ShaderStageBit>(manifest, constants::TYPE)), _source(factory.ensureBuilder<String>(manifest, constants::SRC)), _manifest(manifest)
 {
 }
 
@@ -56,8 +56,8 @@ sp<Builder<Shader>> Shader::fromDocument(BeanFactory& factory, const document& m
         return shader;
     const Global<StringTable> stringTable;
     Vector<StageManifest> stageManifests;
-    stageManifests.emplace_back(Enum::SHADER_STAGE_BIT_VERTEX, builder<String>::make<Builder<String>::Prebuilt>(sp<String>::make(std::move(stringTable->getString(defVertex, true).value()))));
-    stageManifests.emplace_back(Enum::SHADER_STAGE_BIT_FRAGMENT, builder<String>::make<Builder<String>::Prebuilt>(sp<String>::make(std::move(stringTable->getString(defFragment, true).value()))));
+    stageManifests.emplace_back(enums::SHADER_STAGE_BIT_VERTEX, builder<String>::make<Builder<String>::Prebuilt>(sp<String>::make(std::move(stringTable->getString(defVertex, true).value()))));
+    stageManifests.emplace_back(enums::SHADER_STAGE_BIT_FRAGMENT, builder<String>::make<Builder<String>::Prebuilt>(sp<String>::make(std::move(stringTable->getString(defFragment, true).value()))));
     return builder<Shader>::make<BUILDER_IMPL>(factory, manifest, defaultCamera ? builder<Camera>::make<Builder<Camera>::Prebuilt>(defaultCamera) : nullptr, std::move(stageManifests));
 }
 
@@ -86,7 +86,7 @@ const sp<PipelineDescriptor>& Shader::pipelineDesciptor() const
     return _pipeline_desciptor;
 }
 
-sp<PipelineBindings> Shader::makeBindings(Buffer vertexBuffer, Enum::DrawMode drawMode, Enum::DrawProcedure drawProcedure, Vector<std::pair<uint32_t, Buffer>> instanceBuffers) const
+sp<PipelineBindings> Shader::makeBindings(Buffer vertexBuffer, enums::DrawMode drawMode, enums::DrawProcedure drawProcedure, Vector<std::pair<uint32_t, Buffer>> instanceBuffers) const
 {
     for(const auto& [divisor, _] : _pipeline_desciptor->layout()->streamLayouts())
         if(divisor != 0 && !findInKeywordPairs(instanceBuffers, divisor))
@@ -120,31 +120,31 @@ sp<Shader> Shader::BUILDER_IMPL::build(const Scope& args)
 sp<PipelineBuildingContext> Shader::BUILDER_IMPL::makePipelineBuildingContext(const Scope& args) const
 {
     sp<PipelineBuildingContext> context = sp<PipelineBuildingContext>::make();
-    const auto [vertexOpt, vertexIndex] = findStageManifest(Enum::SHADER_STAGE_BIT_VERTEX, _stages);
-    const auto [fragmentOpt, fragmentIndex] = findStageManifest(Enum::SHADER_STAGE_BIT_FRAGMENT, _stages);
-    const auto [computeOpt, computeIndex] = findStageManifest(Enum::SHADER_STAGE_BIT_COMPUTE, _stages);
+    const auto [vertexOpt, vertexIndex] = findStageManifest(enums::SHADER_STAGE_BIT_VERTEX, _stages);
+    const auto [fragmentOpt, fragmentIndex] = findStageManifest(enums::SHADER_STAGE_BIT_FRAGMENT, _stages);
+    const auto [computeOpt, computeIndex] = findStageManifest(enums::SHADER_STAGE_BIT_COMPUTE, _stages);
     if(vertexOpt || fragmentOpt || !computeOpt)
     {
         const Global<StringTable> globalStringTable;
         document documentNone = Global<Constants>()->DOCUMENT_NONE;
-        context->addStage(vertexOpt ? std::move(*vertexOpt->_source->build(args)) : std::move(globalStringTable->getString("shaders", "default.vert", true).value()), documentNone, Enum::SHADER_STAGE_BIT_VERTEX, Enum::SHADER_STAGE_BIT_NONE);
-        context->addStage(fragmentOpt ? std::move(*fragmentOpt->_source->build(args)) : std::move(globalStringTable->getString("shaders", "texture.frag", true).value()), std::move(documentNone), Enum::SHADER_STAGE_BIT_FRAGMENT, Enum::SHADER_STAGE_BIT_VERTEX);
+        context->addStage(vertexOpt ? std::move(*vertexOpt->_source->build(args)) : std::move(globalStringTable->getString("shaders", "default.vert", true).value()), documentNone, enums::SHADER_STAGE_BIT_VERTEX, enums::SHADER_STAGE_BIT_NONE);
+        context->addStage(fragmentOpt ? std::move(*fragmentOpt->_source->build(args)) : std::move(globalStringTable->getString("shaders", "texture.frag", true).value()), std::move(documentNone), enums::SHADER_STAGE_BIT_FRAGMENT, enums::SHADER_STAGE_BIT_VERTEX);
     }
     else
         CHECK(computeOpt, "Shader must have at least one stage defined");
     if(computeOpt)
-        context->addStage(std::move(*computeOpt->_source->build(args)), computeOpt->_manifest, Enum::SHADER_STAGE_BIT_COMPUTE, fragmentOpt && fragmentIndex < computeIndex ? Enum::SHADER_STAGE_BIT_FRAGMENT : Enum::SHADER_STAGE_BIT_NONE);
+        context->addStage(std::move(*computeOpt->_source->build(args)), computeOpt->_manifest, enums::SHADER_STAGE_BIT_COMPUTE, fragmentOpt && fragmentIndex < computeIndex ? enums::SHADER_STAGE_BIT_FRAGMENT : enums::SHADER_STAGE_BIT_NONE);
     return context;
 }
 
-template<> ARK_API Enum::ShaderStageBit StringConvert::eval<Enum::ShaderStageBit>(const String& expr)
+template<> ARK_API enums::ShaderStageBit StringConvert::eval<enums::ShaderStageBit>(const String& expr)
 {
-    constexpr Enum::LookupTable<Enum::ShaderStageBit, 3> table = {{
-        {"vertex", Enum::SHADER_STAGE_BIT_VERTEX},
-        {"fragment", Enum::SHADER_STAGE_BIT_FRAGMENT},
-        {"compute", Enum::SHADER_STAGE_BIT_COMPUTE}
+    constexpr enums::LookupTable<enums::ShaderStageBit, 3> table = {{
+        {"vertex", enums::SHADER_STAGE_BIT_VERTEX},
+        {"fragment", enums::SHADER_STAGE_BIT_FRAGMENT},
+        {"compute", enums::SHADER_STAGE_BIT_COMPUTE}
     }};
-    return Enum::lookup(table, expr);
+    return enums::lookup(table, expr);
 }
 
 Shader::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

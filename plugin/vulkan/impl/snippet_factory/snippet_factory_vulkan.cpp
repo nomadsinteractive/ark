@@ -26,12 +26,12 @@ public:
         }
 
         const PipelineLayout& pipelineLayout = pipelineDescriptor.layout();
-        if(ShaderPreprocessor* vertex = context.tryGetRenderStage(Enum::SHADER_STAGE_BIT_VERTEX))
+        if(ShaderPreprocessor* vertex = context.tryGetRenderStage(enums::SHADER_STAGE_BIT_VERTEX))
         {
             RenderUtil::setLayoutDescriptor(vertex->_declaration_images, "binding", pipelineLayout.samplers().size(), 2);
             vertex->_predefined_macros.emplace_back("#define gl_InstanceID gl_InstanceIndex");
         }
-        if(ShaderPreprocessor* fragment = context.tryGetRenderStage(Enum::SHADER_STAGE_BIT_FRAGMENT))
+        if(ShaderPreprocessor* fragment = context.tryGetRenderStage(enums::SHADER_STAGE_BIT_FRAGMENT))
         {
             fragment->linkNextStage("FragColor");
             RenderUtil::setLayoutDescriptor(fragment->_declaration_samplers, "binding", 0, 2);

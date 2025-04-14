@@ -6,8 +6,8 @@ namespace ark {
 
 void SnippetTint::preInitialize(PipelineBuildingContext& context)
 {
-    ShaderPreprocessor& fragment = context.getRenderStage(Enum::SHADER_STAGE_BIT_FRAGMENT);
-    context.addPredefinedAttribute("Color", "vec4", 0, Enum::SHADER_STAGE_BIT_FRAGMENT);
+    ShaderPreprocessor& fragment = context.getRenderStage(enums::SHADER_STAGE_BIT_FRAGMENT);
+    context.addPredefinedAttribute("Color", "vec4", 0, enums::SHADER_STAGE_BIT_FRAGMENT);
     fragment.addOutputModifier("", " * v_Color");
 }
 

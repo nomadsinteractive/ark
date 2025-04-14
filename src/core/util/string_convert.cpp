@@ -65,30 +65,30 @@ template<> ARK_API float StringConvert::eval<float>(const String& repr)
     return static_cast<float>(atof(repr.c_str()));
 }
 
-template<> Enum::RenderingBackendBit StringConvert::eval<Enum::RenderingBackendBit>(const String& repr)
+template<> enums::RenderingBackendBit StringConvert::eval<enums::RenderingBackendBit>(const String& repr)
 {
-    constexpr Enum::LookupTable<Enum::RenderingBackendBit, 4> table ={{
-        {"opengl", Enum::RENDERING_BACKEND_BIT_OPENGL},
-        {"vulkan", Enum::RENDERING_BACKEND_BIT_VULKAN},
-        {"direct_x", Enum::RENDERING_BACKEND_BIT_DIRECT_X},
-        {"metal", Enum::RENDERING_BACKEND_BIT_METAL},
+    constexpr enums::LookupTable<enums::RenderingBackendBit, 4> table ={{
+        {"opengl", enums::RENDERING_BACKEND_BIT_OPENGL},
+        {"vulkan", enums::RENDERING_BACKEND_BIT_VULKAN},
+        {"direct_x", enums::RENDERING_BACKEND_BIT_DIRECT_X},
+        {"metal", enums::RENDERING_BACKEND_BIT_METAL},
     }};
-    return Enum::lookup(table, repr.toLower());
+    return enums::lookup(table, repr.toLower());
 }
 
-template<> Enum::RendererVersion StringConvert::eval<Enum::RendererVersion>(const String& repr)
+template<> enums::RendererVersion StringConvert::eval<enums::RendererVersion>(const String& repr)
 {
     const String version = repr.toLower();
     if(version == "opengl")
-        return Enum::RENDERER_VERSION_OPENGL;
+        return enums::RENDERER_VERSION_OPENGL;
     if(version == "vulkan")
-        return Enum::RENDERER_VERSION_VULKAN;
+        return enums::RENDERER_VERSION_VULKAN;
     if(version.startsWith("opengl_"))
-        return static_cast<Enum::RendererVersion>(atoi(version.c_str() + 7));
+        return static_cast<enums::RendererVersion>(atoi(version.c_str() + 7));
     if(version.startsWith("vulkan_"))
-        return static_cast<Enum::RendererVersion>(atoi(version.c_str() + 7) + Enum::RENDERER_VERSION_VULKAN);
+        return static_cast<enums::RendererVersion>(atoi(version.c_str() + 7) + enums::RENDERER_VERSION_VULKAN);
     CHECK(repr == "auto", "Unknow RendererVersion: \"%s, supported values are [\"opengl_31\", \"opengl_46\", \"vulkan_11\", ...]", repr.c_str());
-    return Enum::RENDERER_VERSION_AUTO;
+    return enums::RENDERER_VERSION_AUTO;
 }
 
 template<> Ark::RendererCoordinateSystem StringConvert::eval<Ark::RendererCoordinateSystem>(const String& str)

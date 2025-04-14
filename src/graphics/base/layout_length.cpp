@@ -106,14 +106,14 @@ LayoutLength LayoutLength::DICTIONARY::build(const Scope& args)
 
 template<> ARK_API LayoutLength::LengthType StringConvert::eval<LayoutLength::LengthType>(const String& expr)
 {
-    constexpr Enum::LookupTable<LayoutLength::LengthType, 5> table = {{
+    constexpr enums::LookupTable<LayoutLength::LengthType, 5> table = {{
         {"auto", LayoutLength::LENGTH_TYPE_AUTO},
         {"px", LayoutLength::LENGTH_TYPE_PIXEL},
         {"%", LayoutLength::LENGTH_TYPE_PERCENTAGE},
         {"pixel", LayoutLength::LENGTH_TYPE_PIXEL},
         {"percentage", LayoutLength::LENGTH_TYPE_PERCENTAGE}
     }};
-    return Enum::lookup(table, expr);
+    return enums::lookup(table, expr);
 }
 
 }

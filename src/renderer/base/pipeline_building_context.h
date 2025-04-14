@@ -65,18 +65,18 @@ public:
     Table<String, VertexAttribute> _vertex_attributes;
 
     const Vector<ShaderPreprocessor*>& stages() const;
-    const Map<Enum::ShaderStageBit, op<ShaderPreprocessor>>& renderStages() const;
+    const Map<enums::ShaderStageBit, op<ShaderPreprocessor>>& renderStages() const;
     const op<ShaderPreprocessor>& computingStage() const;
 
     void addUniform(String name, Uniform::Type type, uint32_t length, sp<Uploader> input);
     void addUniform(sp<Uniform> uniform);
 
     void addAttribute(const String& name, const String& type, uint32_t divisor);
-    Attribute& addPredefinedAttribute(const String& name, const String& type, uint32_t divisor,Enum::ShaderStageBit stage);
+    Attribute& addPredefinedAttribute(const String& name, const String& type, uint32_t divisor,enums::ShaderStageBit stage);
 
-    ShaderPreprocessor* tryGetRenderStage(Enum::ShaderStageBit shaderStage) const;
-    const op<ShaderPreprocessor>& getRenderStage(Enum::ShaderStageBit shaderStage) const;
-    const op<ShaderPreprocessor>& addStage(String source, document manifest, Enum::ShaderStageBit shaderStage, Enum::ShaderStageBit preShaderStage);
+    ShaderPreprocessor* tryGetRenderStage(enums::ShaderStageBit shaderStage) const;
+    const op<ShaderPreprocessor>& getRenderStage(enums::ShaderStageBit shaderStage) const;
+    const op<ShaderPreprocessor>& addStage(String source, document manifest, enums::ShaderStageBit shaderStage, enums::ShaderStageBit preShaderStage);
 
     Map<String, String> toDefinitions() const;
 
@@ -99,7 +99,7 @@ private:
     void loadLayoutBindings(BeanFactory& factory, const Scope& args, const document& manifest);
     void loadDefinitions(BeanFactory& factory, const Scope& args, const document& manifest);
 
-    Map<Enum::ShaderStageBit, op<ShaderPreprocessor>> _rendering_stages;
+    Map<enums::ShaderStageBit, op<ShaderPreprocessor>> _rendering_stages;
     op<ShaderPreprocessor> _computing_stage;
     Vector<ShaderPreprocessor*> _stages;
 };

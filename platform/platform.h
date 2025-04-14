@@ -27,7 +27,7 @@ public:
     static String getDefaultFontDirectory();
     static String getExecutablePath();
     static String getRealPath(const String& path);
-    static Vector<Enum::RendererVersion> getRendererVersionPreferences();
+    static Vector<enums::RendererVersion> getRendererVersionPreferences();
 
     static void glInitialize();
     static void vkInitialize();

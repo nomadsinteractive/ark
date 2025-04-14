@@ -18,7 +18,7 @@ private:
 public:
     struct Stage {
         document _manifest;
-        Enum::ShaderStageBit _type;
+        enums::ShaderStageBit _type;
         String _source;
     };
 
@@ -113,7 +113,7 @@ private:
         void parse(PipelineBuildingContext& buildingContext);
 
         void genDefinition();
-        String genOutCall(Enum::ShaderStageBit preShaderStage, Enum::ShaderStageBit shaderStage) const;
+        String genOutCall(enums::ShaderStageBit preShaderStage, enums::ShaderStageBit shaderStage) const;
 
         bool hasOutAttribute(const String& name) const;
         bool hasReturnValue() const;
@@ -132,7 +132,7 @@ private:
     };
 
 public:
-    ShaderPreprocessor(String source, document manifest, Enum::ShaderStageBit shaderStage, Enum::ShaderStageBit preShaderStage);
+    ShaderPreprocessor(String source, document manifest, enums::ShaderStageBit shaderStage, enums::ShaderStageBit preShaderStage);
 
     void addPreMainSource(const String& source);
     void addPostMainSource(const String& source);
@@ -177,7 +177,7 @@ private:
     void insertUBOStruct(const PipelineLayout::UBO& ubo, int32_t spaceSet);
 
     static void linkParameters(const Vector<Parameter>& parameters, const ShaderPreprocessor& preStage, Set<String>& passThroughVars);
-    static const char* getOutAttributePrefix(Enum::ShaderStageBit preStage);
+    static const char* getOutAttributePrefix(enums::ShaderStageBit preStage);
 
 private:
     String _source;
@@ -193,8 +193,8 @@ private:
 
 public:
     document _manifest;
-    Enum::ShaderStageBit _shader_stage;
-    Enum::ShaderStageBit _pre_shader_stage;
+    enums::ShaderStageBit _shader_stage;
+    enums::ShaderStageBit _pre_shader_stage;
 
     Source _main;
 

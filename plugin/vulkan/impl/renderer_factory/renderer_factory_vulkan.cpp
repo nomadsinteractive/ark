@@ -37,7 +37,7 @@ namespace ark::plugin::vulkan {
 
 namespace {
 
-void setVersion(const Enum::RendererVersion version, RenderEngineContext& vkContext)
+void setVersion(const enums::RendererVersion version, RenderEngineContext& vkContext)
 {
     LOGD("Choose Vulkan Version = %d", version);
     vkContext.setSnippetFactory(sp<SnippetFactory>::make<SnippetFactoryVulkan>());
@@ -47,14 +47,14 @@ void setVersion(const Enum::RendererVersion version, RenderEngineContext& vkCont
 }
 
 RendererFactoryVulkan::RendererFactoryVulkan()
-    : RendererFactory({{Enum::RENDERING_BACKEND_BIT_VULKAN}, Ark::COORDINATE_SYSTEM_LHS, true, sizeof(float)}), _renderer(sp<VKRenderer>::make())
+    : RendererFactory({{enums::RENDERING_BACKEND_BIT_VULKAN}, Ark::COORDINATE_SYSTEM_LHS, true, sizeof(float)}), _renderer(sp<VKRenderer>::make())
 {
 }
 
 sp<RenderEngineContext> RendererFactoryVulkan::createRenderEngineContext(const ApplicationManifest::Renderer& renderer)
 {
     sp<RenderEngineContext> vkContext = sp<RenderEngineContext>::make(renderer, Viewport(0, 0.0f, 1.0f, 1.0f, 0, 1.0f));
-    if(renderer._version != Enum::RENDERER_VERSION_AUTO)
+    if(renderer._version != enums::RENDERER_VERSION_AUTO)
         setVersion(renderer._version, vkContext);
     return vkContext;
 }
@@ -63,7 +63,7 @@ void RendererFactoryVulkan::onSurfaceCreated(RenderEngine& renderEngine)
 {
     DTHREAD_CHECK(THREAD_ID_RENDERER);
 
-    setVersion(Enum::RENDERER_VERSION_VULKAN_12, renderEngine.context());
+    setVersion(enums::RENDERER_VERSION_VULKAN_12, renderEngine.context());
 
     Platform::vkInitialize();
 

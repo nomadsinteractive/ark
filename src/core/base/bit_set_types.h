@@ -3,9 +3,10 @@
 #include "core/base/bit_set.h"
 #include "core/base/enum.h"
 
-namespace ark {
+namespace ark::enums {
 
-typedef BitSet<Enum::ShaderStageBit, true> ShaderStageSet;
-typedef BitSet<Enum::RenderingBackendBit> RenderingBackendSet;
+typedef BitSet<RenderingBackendBit> RenderingBackendSet;
+typedef BitSet<ShaderStageBit, true> ShaderStageSet;
+typedef BitSet<UploadStrategyBit> UploadStrategy;
 
 }

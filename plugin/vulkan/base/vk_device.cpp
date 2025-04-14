@@ -9,9 +9,9 @@
 
 namespace ark::plugin::vulkan {
 
-VKDevice::VKDevice(const sp<VKInstance>& instance, const VkPhysicalDevice physicalDevice, const Enum::RendererVersion version)
-    : _instance(instance), _vulkan_device(new vks::VulkanDevice(physicalDevice)), _features_vk12{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES}, _features{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2, version >= Enum::RENDERER_VERSION_VULKAN_12 ? &_features_vk12 : nullptr},
-      _enabled_features_vk12{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES}, _enabled_features{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2, version >= Enum::RENDERER_VERSION_VULKAN_12 ? &_enabled_features_vk12 : nullptr}
+VKDevice::VKDevice(const sp<VKInstance>& instance, const VkPhysicalDevice physicalDevice, const enums::RendererVersion version)
+    : _instance(instance), _vulkan_device(new vks::VulkanDevice(physicalDevice)), _features_vk12{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES}, _features{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2, version >= enums::RENDERER_VERSION_VULKAN_12 ? &_features_vk12 : nullptr},
+      _enabled_features_vk12{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES}, _enabled_features{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2, version >= enums::RENDERER_VERSION_VULKAN_12 ? &_enabled_features_vk12 : nullptr}
 {
     vkGetPhysicalDeviceFeatures2(physicalDevice, &_features);
     if(_features.features.samplerAnisotropy)
@@ -23,7 +23,7 @@ VKDevice::VKDevice(const sp<VKInstance>& instance, const VkPhysicalDevice physic
     if(_features.features.independentBlend)
         _enabled_features.features.independentBlend = VK_TRUE;
 
-    const bool enableFeatures12 = version >= Enum::RENDERER_VERSION_VULKAN_12;
+    const bool enableFeatures12 = version >= enums::RENDERER_VERSION_VULKAN_12;
     if(enableFeatures12)
     {
         if(_features_vk12.separateDepthStencilLayouts)
