@@ -148,8 +148,9 @@ ARK_PY_ARGUMENTS = (
     (r'(Optional<[^\s]+>)(?:\s*&)?', GenArgumentMeta('PyObject*', '${0}', 'O')),
     (r'(document|element|attribute)\s*&', GenArgumentMeta('PyObject*', '${0}', 'O')),
     (r'(V2|V3|V4)', GenArgumentMeta('PyObject*', '${0}', 'O')),
-    (r'([^>]+|\w+<\w+>)\s*&', GenArgumentMeta('PyObject*', 'sp<${0}>', 'O')),
+    (rf'((?:{"|".join(TYPE_COLLECTION_TEMPLATE_PREFIX)}|[^:]+::).+)', GenArgumentMeta('PyObject*', '${0}', 'O')),
     (r'(^(?:Buffer|LayoutLength)$)', GenArgumentMeta('PyObject*', '${0}', 'O', movable=True)),
+    (r'([^>]+|\w+<\w+>)\s*&', GenArgumentMeta('PyObject*', 'sp<${0}>', 'O')),
     (r'(uint32_t|RefId|unsigned int|uint8_t)', GenArgumentMeta('uint32_t', 'uint32_t', 'I')),
     (r'size_t', GenArgumentMeta('size_t', 'size_t', 'n')),
     (r'ptrdiff_t', GenArgumentMeta('ptrdiff_t', 'ptrdiff_t', 'i')),
@@ -158,8 +159,7 @@ ARK_PY_ARGUMENTS = (
     (r'(int32_t|int16_t|int8_t)', GenArgumentMeta('int32_t', 'int32_t', 'i')),
     (r'float', GenArgumentMeta('float', 'float', 'f')),
     (r'bool', GenArgumentMeta('int32_t', 'bool', 'p', True)),
-    (r'HashId|TypeId', GenArgumentMeta('PyObject*', 'uint32_t', 'O')),
-    (rf'((?:{"|".join(TYPE_COLLECTION_TEMPLATE_PREFIX)}|[^:]+::).+)', GenArgumentMeta('PyObject*', '${0}', 'O')),
+    (r'HashId|TypeId', GenArgumentMeta('PyObject*', 'uint32_t', 'O'))
 )
 
 

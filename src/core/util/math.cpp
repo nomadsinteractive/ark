@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <math.h>
+#include <random>
 #include <stdlib.h>
 
 #include <glm/glm.hpp>
@@ -25,12 +26,21 @@ namespace ark {
 
 namespace {
 
-class Randomizer {
+template<typename T> class Randomizer {
 public:
     Randomizer()
-    {
-        std::srand(std::time(nullptr));
+        : _generator(_random_device()), _distribution(std::numeric_limits<T>::min(), std::numeric_limits<T>::max()) {
     }
+
+    T rand()
+    {
+        return _distribution(_generator);
+    }
+
+private:
+    std::random_device _random_device;
+    std::mt19937 _generator;
+    std::uniform_int_distribution<> _distribution;
 };
 
 class VolatileRandfv final : public Numeric {
@@ -224,13 +234,13 @@ V4 Math::round(const V4& x)
 
 int32_t Math::rand()
 {
-    static const Randomizer randomizer;
-    return std::rand();
+    static Randomizer<int32_t> randomizer;
+    return randomizer.rand();
 }
 
 float Math::randf()
 {
-    return rand() / static_cast<float>(RAND_MAX);
+    return static_cast<float>(rand() - std::numeric_limits<int32_t>::min()) / std::numeric_limits<int32_t>::max();
 }
 
 sp<Numeric> Math::randfv(sp<Numeric> a, sp<Numeric> b, const bool isVolatile)
