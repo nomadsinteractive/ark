@@ -1,9 +1,9 @@
 import inspect
+import math
 from typing import Callable, Any, Optional
 
-from ark import Renderer, Vec2, Boolean, Vec3, Numeric, Vec4, String, Color, Integer, ApplicationFacade
+from ark import Renderer, Vec2, Boolean, Vec3, Numeric, Vec4, String, Color, Integer, ApplicationFacade, Texture, Bitmap, Math, TYPE_BOOLEAN
 from ark import dear_imgui
-from marks import pydevd_start, pydevd_stop
 
 
 class QuickBarItem:
@@ -112,7 +112,7 @@ class VisibilityController:
 
 
 class Window:
-    def __init__(self, imgui: Renderer, is_open: Optional[bool]):
+    def __init__(self, imgui: Renderer, is_open: Optional[TYPE_BOOLEAN] = None):
         self._imgui = imgui
         self._is_open = None if is_open is None else Boolean(is_open)
         self._renderer = Renderer()
@@ -144,18 +144,7 @@ class Window:
 
 
 class MainWindow(Window):
-
-    class ConsoleCommand:
-        def __init__(self, toolbox: "MainWindow"):
-            self._toolbox = toolbox
-
-        def imgui_show_demo(self):
-            self._toolbox._imgui_demo_is_open.set(True)
-
-        def imgui_show_about(self):
-            self._toolbox._imgui_about_is_open.set(True)
-
-    def __init__(self, mark_studio: "MarkStudio", imgui: Renderer, is_open: Optional[bool] = None, quick_bar_items: Optional[list[QuickBarItem]] = None):
+    def __init__(self, mark_studio: "MarkStudio", imgui: Renderer, is_open: Optional[TYPE_BOOLEAN] = None, quick_bar_items: Optional[list[QuickBarItem]] = None):
         super().__init__(imgui, is_open)
         self._mark_studio = mark_studio
         self._quick_bar_items = quick_bar_items or []
@@ -169,11 +158,13 @@ class MainWindow(Window):
         return 'My Ark Studio'
 
     def on_show(self, builder: dear_imgui.WidgetBuilder, args: Any):
-        builder.text('Debugger')
-        builder.small_button('Start').add_callback(self.pydevd_start)
-        builder.same_line()
-        builder.small_button('Stop').add_callback(self.pydevd_stop)
+        builder.text('Windows')
+        builder.small_button('Noise Generator').add_callback(self._show_noise_generator)
         builder.separator()
+        builder.small_button('Imgui Demo').add_callback(self._show_imgui_demo)
+        builder.same_line()
+        builder.small_button('Imgui About').add_callback(self._show_imgui_about)
+        self._build_quick_bar()
 
         builder.text('Quick Bar')
         builder.add_widget(self._quick_bar_widget)
@@ -195,15 +186,14 @@ class MainWindow(Window):
 
         self._quick_bar_widget.reset(quick_bar_builder.make_widget())
 
-    def pydevd_start(self):
-        pydevd_start()
-        self._pydevd_started.set(True)
-        self._mark_studio.close()
+    def _show_noise_generator(self):
+        NoiseGeneratorWindow(self._mark_studio.imgui).show()
 
-    def pydevd_stop(self):
-        pydevd_stop()
-        self._pydevd_started.set(False)
-        self._mark_studio.close()
+    def _show_imgui_demo(self):
+        self._imgui_demo_is_open.set(True)
+
+    def _show_imgui_about(self):
+        self._imgui_about_is_open.set(True)
 
     def _make_quickbar_onclick(self, quick_bar_item: QuickBarItem):
 
@@ -310,6 +300,68 @@ class PropertiesWindow(Window):
                 i.build(builder)
         else:
             properties.build(builder)
+
+
+class NoiseGeneratorWindow(Window):
+    def __init__(self, imgui: Renderer):
+        super().__init__(imgui, True)
+        try:
+            from ark import noise
+        except ImportError:
+            noise = None
+        self._noise = noise
+        self._type = Integer(int(self._noise.Generator.NOISE_TYPE_PERLIN) if self._noise else 0)
+        self._type_options = ['NOISE_TYPE_CELLULAR', 'NOISE_TYPE_SIMPLEX', 'NOISE_TYPE_PERLIN']
+        self._components = Integer(1)
+        self._size = Vec2(256, 256)
+        self._position = Vec2(0, 0)
+        self._frequency = Numeric(0.04)
+        self._enable_fractal = Boolean(False)
+        self._fractal_octaves = Integer(4)
+        self._fractal_gain = Numeric(0.2)
+        self._fractal_lacunarity = Numeric(1.0)
+        self._texture = self._do_generate()
+
+    @property
+    def title(self) -> str:
+        return 'Noise Generator'
+
+    def on_show(self, builder: dear_imgui.WidgetBuilder, args: Any):
+        builder.combo('Type', self._type, self._type_options)
+        builder.slider_int('Components', self._components, 1, 4)
+        builder.input_float2('Position', self._position)
+        builder.input_float2('Size', self._size)
+        builder.input_float('Frequency', self._frequency)
+        builder.checkbox('Enable Fractal', self._enable_fractal)
+        builder.slider_int('Fractal Octaves', self._fractal_octaves, 2, 8)
+        builder.input_float('Fractal Gain', self._fractal_gain)
+        builder.input_float('Fractal Lacunarity', self._fractal_lacunarity)
+        if self._noise:
+            builder.button('Generate').add_callback(lambda: self._texture.reset(self._do_generate()))
+            builder.image(self._texture)
+        else:
+            builder.text_wrapped('Cannot import noise library, please make sure you have declared "ark-noise" and "ark-noise-pybindings" plugin in the ApplicationManifest')
+
+    def _do_generate(self) -> Optional[Texture]:
+        if not self._noise:
+            return None
+
+        generator_type = getattr(self._noise.Generator, self._type_options[self._type.val])
+        x, y = (int(i) for i in self._position)
+        width, height = (int(i) for i in self._size)
+
+        float_arrays = []
+        component_size = self._components.val
+        for i in range(component_size):
+            generator = self._noise.Generator(generator_type, Math.rand(), self._frequency.val)
+            if self._enable_fractal:
+                generator.set_fractal_octaves(self._fractal_octaves.val)
+                generator.set_fractal_gain(self._fractal_gain.val)
+                generator.set_fractal_lacunarity(self._fractal_lacunarity.val)
+            float_arrays.append(generator.noise_map2d((x, y, x + width, y + height)))
+        buf_arrays = float_arrays[0] if len(float_arrays) == 1 else float_arrays[0].intertwine(float_arrays[1:])
+        bitmap = Bitmap(width, height, width * 4 * component_size, component_size, buf_arrays.to_byte_array())
+        return Texture(bitmap, Texture.FORMAT_FLOAT | [Texture.FORMAT_R, Texture.FORMAT_RG, Texture.FORMAT_RGB, Texture.FORMAT_RGBA][component_size - 1])
 
 
 class MarkStudio:

@@ -467,19 +467,24 @@ void WidgetBuilder::listBox(const String& label, const sp<Integer>& option, cons
     addWidget(sp<Widget>::make<Input<int32_t>>([items](const char* l, int32_t* v) { return ImGui::ListBox(l, v, Items_VectorGetter, reinterpret_cast<void*>(const_cast<Vector<String>*>(&items)), static_cast<int32_t>(items.size())); }, label, option));
 }
 
-void WidgetBuilder::indent(float w)
+void WidgetBuilder::indent(const float w)
 {
     addInvocation<float>(ImGui::Indent, w);
 }
 
-void WidgetBuilder::unindent(float w)
+void WidgetBuilder::unindent(const float w)
 {
     addInvocation<float>(ImGui::Unindent, w);
 }
 
-void WidgetBuilder::text(const String& content)
+void WidgetBuilder::text(String text)
 {
-    addWidget(sp<Widget>::make<WidgetText>(ImGui::Text, content));
+    addWidget(sp<Widget>::make<WidgetText>(ImGui::Text, std::move(text)));
+}
+
+void WidgetBuilder::textWrapped(String text)
+{
+    addWidget(sp<Widget>::make<WidgetText>(ImGui::TextWrapped, std::move(text)));
 }
 
 sp<Observer> WidgetBuilder::inputText(String label, sp<StringVar> value, size_t maxLength, int32_t flags)
@@ -489,14 +494,14 @@ sp<Observer> WidgetBuilder::inputText(String label, sp<StringVar> value, size_t 
     return observer;
 }
 
-void WidgetBuilder::inputInt(const String& label, const sp<Integer>& value, int32_t step, int32_t step_fast, int32_t flags)
+void WidgetBuilder::inputInt(const String& label, const sp<Integer>& value, int32_t step, int32_t stepFast, int32_t flags)
 {
-    addWidget(sp<Widget>::make<Input<int32_t>>([step, step_fast, flags](const char* l, int32_t* v) { return ImGui::InputInt(l, v, step, step_fast, flags); }, label, value));
+    addWidget(sp<Widget>::make<Input<int32_t>>([step, stepFast, flags](const char* l, int32_t* v) { return ImGui::InputInt(l, v, step, stepFast, flags); }, label, value));
 }
 
-void WidgetBuilder::sliderInt(const String& label, const sp<Integer>& value, int32_t vmin, int32_t vmax, const String& format)
+void WidgetBuilder::sliderInt(const String& label, const sp<Integer>& value, const int32_t vMin, const int32_t vMax, const String& format)
 {
-    addWidget(sp<Widget>::make<Input<int32_t>>([vmin, vmax, format](const char* l, int32_t* v) { return ImGui::SliderInt(l, v, vmin, vmax, format.c_str()); }, label, value));
+    addWidget(sp<Widget>::make<Input<int32_t>>([vMin, vMax, format](const char* l, int32_t* v) { return ImGui::SliderInt(l, v, vMin, vMax, format.c_str()); }, label, value));
 }
 
 void WidgetBuilder::inputFloat(const String& label, const sp<Numeric>& value, float step, float step_fast, const String& format, int32_t extra_flags)
@@ -524,29 +529,29 @@ void WidgetBuilder::inputFloat4(const String& label, const sp<Vec4>& value, cons
     addWidget(sp<Widget>::make<InputWithType<V4, Vec4Impl>>([format, flags](const char* l, V4* v) { return ImGui::InputFloat4(l, reinterpret_cast<float*>(v), format.c_str(), flags); }, label, value));
 }
 
-void WidgetBuilder::sliderFloat(const String& label, const sp<Numeric>& value, float v_min, float v_max, const String& format, float power)
+void WidgetBuilder::sliderFloat(const String& label, const sp<Numeric>& value, float vMin, float vMax, const String& format, float power)
 {
-    addWidget(sp<Widget>::make<Input<float>>([v_min, v_max, format, power](const char* l, float* v) { return ImGui::SliderFloat(l, v, v_min, v_max, format.c_str(), power); }, label, value));
+    addWidget(sp<Widget>::make<Input<float>>([vMin, vMax, format, power](const char* l, float* v) { return ImGui::SliderFloat(l, v, vMin, vMax, format.c_str(), power); }, label, value));
 }
 
-void WidgetBuilder::sliderFloat2(const String& label, const sp<Vec2>& value, float v_min, float v_max, const String& format, float power)
+void WidgetBuilder::sliderFloat2(const String& label, const sp<Vec2>& value, float vMin, float vMax, const String& format, float power)
 {
-    addWidget(sp<Widget>::make<InputWithType<V2, Vec2Impl>>([v_min, v_max, format, power](const char* l, V2* v) { return ImGui::SliderFloat2(l, reinterpret_cast<float*>(v), v_min, v_max, format.c_str(), power); }, label, value));
+    addWidget(sp<Widget>::make<InputWithType<V2, Vec2Impl>>([vMin, vMax, format, power](const char* l, V2* v) { return ImGui::SliderFloat2(l, reinterpret_cast<float*>(v), vMin, vMax, format.c_str(), power); }, label, value));
 }
 
-void WidgetBuilder::sliderFloat3(const String& label, const sp<Size>& value, float v_min, float v_max, const String& format, float power)
+void WidgetBuilder::sliderFloat3(const String& label, const sp<Size>& value, float vMin, float vMax, const String& format, float power)
 {
-    sliderFloat3(label, value->impl().cast<Vec3>(), v_min, v_max, format, power);
+    sliderFloat3(label, value->impl().cast<Vec3>(), vMin, vMax, format, power);
 }
 
-void WidgetBuilder::sliderFloat3(const String& label, const sp<Vec3>& value, float v_min, float v_max, const String& format, float power)
+void WidgetBuilder::sliderFloat3(const String& label, const sp<Vec3>& value, float vMin, float vMax, const String& format, float power)
 {
-    addWidget(sp<Widget>::make<InputWithType<V3, Vec3Impl>>([v_min, v_max, format, power](const char* l, V3* v) { return ImGui::SliderFloat3(l, reinterpret_cast<float*>(v), v_min, v_max, format.c_str(), power); }, label, value));
+    addWidget(sp<Widget>::make<InputWithType<V3, Vec3Impl>>([vMin, vMax, format, power](const char* l, V3* v) { return ImGui::SliderFloat3(l, reinterpret_cast<float*>(v), vMin, vMax, format.c_str(), power); }, label, value));
 }
 
-void WidgetBuilder::sliderFloat4(const String& label, const sp<Vec4>& value, float v_min, float v_max, const String& format, float power)
+void WidgetBuilder::sliderFloat4(const String& label, const sp<Vec4>& value, float vMin, float vMax, const String& format, float power)
 {
-    addWidget(sp<Widget>::make<InputWithType<V4, Vec4Impl>>([v_min, v_max, format, power](const char* l, V4* v) { return ImGui::SliderFloat4(l, reinterpret_cast<float*>(v), v_min, v_max, format.c_str(), power); }, label, value));
+    addWidget(sp<Widget>::make<InputWithType<V4, Vec4Impl>>([vMin, vMax, format, power](const char* l, V4* v) { return ImGui::SliderFloat4(l, reinterpret_cast<float*>(v), vMin, vMax, format.c_str(), power); }, label, value));
 }
 
 void WidgetBuilder::colorEdit3(const String& label, const sp<Vec3>& value)

@@ -33,6 +33,9 @@ class WidgetBuilder:
     def text(self, text: str):
         pass
 
+    def text_wrapped(self, text: str):
+        pass
+
     def bullet_text(self, text: str):
         pass
 
