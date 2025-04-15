@@ -88,6 +88,10 @@ class GenMethod(object):
     def is_static(self):
         return self._is_static
 
+    @property
+    def self_argument(self):
+        return self._self_argument
+
     def gen_py_method_def(self, genclass):
         return None
 
@@ -256,7 +260,7 @@ class GenMethod(object):
         bodylines = []
         args = [(i, j) for i, j in enumerate(not_overloaded_args) if j]
         args_set = {i for i, j in args}
-        argdeclare = [j.gen_declare(f'obj{i}', f'arg{i}', exact_cast, optional_check) for i, j in args]
+        argdeclare = [j.gen_declare(self, f'obj{i}', f'arg{i}', exact_cast, optional_check) for i, j in args]
         self_type_checks = []
         if self._self_argument:
             if not self._self_argument.type_compare(f'sp<{genclass.binding_classname}>', f'{genclass.binding_classname}&', 'Box'):
@@ -267,7 +271,7 @@ class GenMethod(object):
             bodylines.append("if(%s) %s;" % (' || '.join([f'!obj{i}' for i, j in args]), self.err_return_value))
 
         r = acg.strip_key_words(self._return_type, ['virtual', 'const', '&'])
-        argtypes = [' '.join(i.gen_declare('t', 't').split('=')[0].strip().split()[:-1]) for i in self._arguments]
+        argtypes = [' '.join(i.gen_declare(self, 't', 't').split('=')[0].strip().split()[:-1]) for i in self._arguments]
         argvalues = ', '.join(gen_method_call_arg(f'obj{i}.value()' if optional_check and i in args_set else f'obj{i}', j, argtypes[i]) for i, j in enumerate(self._arguments))
         callstatement = self._gen_calling_statement(genclass, argvalues)
         py_return = self.gen_py_return()
@@ -334,7 +338,7 @@ class GenGetPropMethod(GenMethod):
             arg0 = self._arguments[0]
             meta = GenArgumentMeta('PyObject*', arg0.accept_type, 'O')
             ga = GenArgument(0, arg0.accept_type, arg0.default_value, meta, str(arg0))
-            lines.append(ga.gen_declare('obj0', 'arg0'))
+            lines.append(ga.gen_declare(self, 'obj0', 'arg0'))
 
     def gen_py_arguments(self):
         return 'Instance* self, PyObject* arg0'
@@ -491,7 +495,7 @@ class GenMappingMethod(GenSubscribableMethod):
             for i, j in enumerate(self._arguments):
                 meta = GenArgumentMeta('PyObject*', j.accept_type, 'O')
                 ga = GenArgument(j.index, j.accept_type, j.default_value, meta, str(j))
-                lines.append(ga.gen_declare(f'obj{i}', f'arg{i}', False, optional_check))
+                lines.append(ga.gen_declare(self, f'obj{i}', f'arg{i}', False, optional_check))
 
     def gen_py_arguments(self):
         self_arg = f'Instance* self'
@@ -513,7 +517,7 @@ class GenSequenceMethod(GenSubscribableMethod):
             for i, j in enumerate(self._arguments[1:]):
                 meta = GenArgumentMeta('PyObject*', j.accept_type, 'O')
                 ga = GenArgument(j.index, j.accept_type, j.default_value, meta, str(j))
-                lines.append(ga.gen_declare(f'obj{i + 1}', f'arg{i + 1}', False, optional_check))
+                lines.append(ga.gen_declare(self, f'obj{i + 1}', f'arg{i + 1}', False, optional_check))
 
     def gen_py_arguments(self):
         self_arg = f'Instance* self'

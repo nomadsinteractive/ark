@@ -359,7 +359,7 @@ class GenPropertyMethod(GenMethod):
             arg0 = self._arguments[0]
             meta = GenArgumentMeta('PyObject*', arg0.accept_type, 'O')
             ga = GenArgument(0, arg0.accept_type, arg0.default_value, meta, str(arg0))
-            lines.append(ga.gen_declare('obj0', 'arg0', optional_check=optional_check))
+            lines.append(ga.gen_declare(self, 'obj0', 'arg0', optional_check=optional_check))
 
     def gen_py_arguments(self):
         if self._is_setter:
@@ -483,7 +483,7 @@ class GenRichCompareMethod(GenMethod):
         if args:
             meta = GenArgumentMeta('PyObject*', args[0].accept_type, 'O')
             ga = GenArgument(0, args[0].accept_type, args[0].default_value, meta, str(args[0]))
-            lines.append(ga.gen_declare('obj0', 'args'))
+            lines.append(ga.gen_declare(self, 'obj0', 'args'))
 
     @property
     def operator(self):

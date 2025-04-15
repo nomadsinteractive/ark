@@ -215,7 +215,7 @@ class GenArgument:
             return "%s && %s" % (varname, ARK_PY_OVERLOADED_ARGUMENT_TYPE_CHECKERS[self._accept_type].check(varname))
         return None
 
-    def gen_declare(self, objname, argname, extract_cast=False, optional_check=False):
+    def gen_declare(self, gen_method, objname, argname, extract_cast=False, optional_check=False):
         typename = self._meta.cast_signature
         if self._meta.is_base_type:
             return '%s %s = %s;' % (typename, objname, gen_cast_call(typename, argname))
@@ -225,7 +225,7 @@ class GenArgument:
         if m == 'Scope':
             return f'const Scope {objname} = PyCast::toScope(kws);'
         elif m == 'Traits':
-            return f'Traits {objname} = PyCast::toTraits(args, {self._index});'
+            return f'Traits {objname} = PyCast::toTraits(args, {self._index - 1 if gen_method.self_argument else self._index});'
 
         is_optional_type = 'Optional<' in m
         optional_cast_prefix = 'to' if optional_check or is_optional_type else 'ensure'
@@ -281,7 +281,7 @@ def create_overloaded_method_type(base_type, **kwargs):
                         not_overloaded_args[j] = None
 
             m0 = self._overloaded_methods[0]
-            not_overloaded_declar = [j.gen_declare('obj%d' % i, 'arg%d' % i, not m0.check_argument_type) for i, j in enumerate(not_overloaded_args) if j]
+            not_overloaded_declar = [j.gen_declare(self, 'obj%d' % i, 'arg%d' % i, not m0.check_argument_type) for i, j in enumerate(not_overloaded_args) if j]
             self._gen_convert_args_code(lines, not_overloaded_declar)
             for i in self._overloaded_methods:
                 type_checks = [k.gen_type_check('arg%d' % j) for j, k, l in zip(range(len(i.arguments)), i.arguments, not_overloaded_args) if not l]
