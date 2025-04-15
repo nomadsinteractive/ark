@@ -9,7 +9,6 @@ Use it for:
 3. Unit test(maybe)
 
 """
-from turtle import Shape
 from typing import Callable, List, Type, TypeVar, Union, Optional, Dict, Tuple, Any, Self
 
 _BUILDABLE_TYPES = TypeVar('_BUILDABLE_TYPES', 'Arena', 'AudioPlayer', "Boolean", 'Characters', 'Collider', 'Integer', 'ModelLoader', 'Numeric', 'NarrowPhrase',
@@ -1516,6 +1515,10 @@ class Boundaries:
 
     @property
     def size(self) -> Vec3:
+        return 0, 0, 0
+
+    @property
+    def center(self) -> Vec3:
         return 0, 0, 0
 
 

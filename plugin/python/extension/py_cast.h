@@ -123,7 +123,7 @@ private:
     template<typename T> static Optional<sp<T>> toSharedPtrDefault(PyObject* object) {
         ASSERT(!PyBridge::isPyNone(object));
         if(PyBridge::isPyNone(object))
-            return Optional<sp<T>>(sp<T>());
+            return {sp<T>()};
 
         if(PyTypeObject* pyType = reinterpret_cast<PyTypeObject*>(PyBridge::PyObject_Type(object)); PythonExtension::instance().isPyArkTypeObject(pyType)) {
             const PyArkType::Instance* instance = reinterpret_cast<PyArkType::Instance*>(object);
@@ -131,7 +131,7 @@ private:
             sp<T> s = instance->box->as<T>();
             return s ? Optional<sp<T>>(std::move(s)) : Optional<sp<T>>();
         }
-        return Optional<sp<T>>();
+        return {};
     }
 
     template<typename T> static PyObject* fromIterable_sfinae(const T& list, std::remove_reference_t<decltype(list.front())>*) {

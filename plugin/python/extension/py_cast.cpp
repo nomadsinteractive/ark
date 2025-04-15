@@ -298,15 +298,15 @@ template<> ARK_PLUGIN_PYTHON_API Optional<String> PyCast::toCppObject_impl<Strin
 
 template<> ARK_PLUGIN_PYTHON_API Optional<std::wstring> PyCast::toCppObject_impl<std::wstring>(PyObject* object)
 {
-    return toWString(object);
+    return {toWString(object)};
 }
 
 template<> ARK_PLUGIN_PYTHON_API Optional<NamedHash> PyCast::toCppObject_impl<NamedHash>(PyObject* object)
 {
     if(Optional<String> strOpt = toStringExact(object))
-        return NamedHash(std::move(strOpt.value()));
+        return {NamedHash(std::move(strOpt.value()))};
     if(Optional<int32_t> intOpt = toCppInteger<int32_t>(object))
-        return NamedHash(intOpt.value());
+        return {NamedHash(intOpt.value())};
     return {};
 }
 
@@ -319,33 +319,27 @@ template<> ARK_PLUGIN_PYTHON_API Optional<Json> PyCast::toCppObject_impl<Json>(P
 template<> ARK_PLUGIN_PYTHON_API Optional<Box> PyCast::toCppObject_impl<Box>(PyObject* object)
 {
     if(PythonExtension::instance().isPyArkTypeObject(Py_TYPE(object)))
-        return *reinterpret_cast<PyArkType::Instance*>(object)->box;
+        return {*reinterpret_cast<PyArkType::Instance*>(object)->box};
     return object != Py_None ? Box(PyInstance::track(object).ref()) : Box();
 }
 
 template<> ARK_PLUGIN_PYTHON_API Optional<bool> PyCast::toCppObject_impl<bool>(PyObject* object)
 {
-    if(object == Py_None)
-        return false;
-    if(PyBool_Check(object))
-        return object == Py_True;
-    if(PyLong_Check(object))
-        return PyLong_AsLong(object) != 0;
-    const sp<Boolean> b = toSharedPtrDefault<Boolean>(object).value();
-    DCHECK(b, "Casting %s to bool failed", Py_TYPE(object)->tp_name);
-    return b->val();
+    if(const Optional<sp<Boolean>> optBoolean = toSharedPtrDefault<Boolean>(object))
+        return {optBoolean.value()->val()};
+    return {static_cast<bool>(PyObject_IsTrue(object))};
 }
 
 template<> ARK_PLUGIN_PYTHON_API Optional<float> PyCast::toCppObject_impl<float>(PyObject* object)
 {
-    DCHECK(PyNumber_Check(object), "Cannot cast Python object \"%s\" to float", object->ob_type->tp_name);
-    return static_cast<float>(PyFloat_AsDouble(object));
+    if(PyNumber_Check(object))
+        return {static_cast<float>(PyFloat_AsDouble(object))};
+    return {};
 }
 
 template<> ARK_PLUGIN_PYTHON_API Optional<uint32_t> PyCast::toCppObject_impl<uint32_t>(PyObject* object)
 {
-    PythonExtension& pi = PythonExtension::instance();
-    if(pi.isPyArkTypeObject(object))
+    if(PythonExtension& pi = PythonExtension::instance(); pi.isPyArkTypeObject(object))
     {
         PyArkType* pyArkType = pi.getPyArkType(object);
         DCHECK(pyArkType, "Cannot convert PyObject to PyArkType");

@@ -12,9 +12,9 @@ namespace ark {
 class ARK_API Discarded final : public Boolean {
 public:
 //  [[script::bindings::auto]]
-    Discarded(bool discarded = false);
-//  [[script::bindings::auto]]
     Discarded(sp<Boolean> discarded);
+//  [[script::bindings::auto]]
+    Discarded(bool discarded = false);
 
     bool val() override;
     bool update(uint64_t timestamp) override;
@@ -23,9 +23,9 @@ public:
     void discard();
 
 //  [[script::bindings::auto]]
-    void set(bool discarded);
-//  [[script::bindings::auto]]
     void set(sp<Boolean> discarded);
+//  [[script::bindings::auto]]
+    void set(bool discarded);
 
 //  [[plugin::builder::by-value]]
     class DICTIONARY final : public Builder<Discarded> {

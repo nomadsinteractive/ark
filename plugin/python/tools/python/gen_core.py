@@ -114,8 +114,8 @@ class GenConverter:
         return self._check_func.format(var)
 
 
-ARK_PY_ARGUMENT_CHECKERS = {
-    'bool': GenConverter('(PyBridge::isPyLongExact({0}) || PyBridge::isPyBool({0}))'),
+ARK_PY_OVERLOADED_ARGUMENT_TYPE_CHECKERS = {
+    'bool': GenConverter('!PythonExtension::instance().isInstance<Boolean>({0})'),
     'int32_t': GenConverter('PyBridge::isPyLongExact({0})'),
     'uint32_t': GenConverter('PyBridge::isPyLongExact({0})'),
     'float': GenConverter('(PyBridge::isPyLongExact({0}) || PyBridge::isPyFloatExact({0}))'),
@@ -211,8 +211,8 @@ class GenArgument:
         return any(acg.type_compare(i, self._str) for i in typenames)
 
     def gen_type_check(self, varname):
-        if self._accept_type in ARK_PY_ARGUMENT_CHECKERS:
-            return "%s && %s" % (varname, ARK_PY_ARGUMENT_CHECKERS[self._accept_type].check(varname))
+        if self._accept_type in ARK_PY_OVERLOADED_ARGUMENT_TYPE_CHECKERS:
+            return "%s && %s" % (varname, ARK_PY_OVERLOADED_ARGUMENT_TYPE_CHECKERS[self._accept_type].check(varname))
         return None
 
     def gen_declare(self, objname, argname, extract_cast=False, optional_check=False):
