@@ -2,8 +2,8 @@
 
 namespace ark {
 
-RendererWrapper::RendererWrapper(const sp<Renderer>& delegate)
-    : Wrapper<Renderer>(delegate)
+RendererWrapper::RendererWrapper(sp<Renderer> delegate)
+    : Wrapper(std::move(delegate))
 {
 }
 

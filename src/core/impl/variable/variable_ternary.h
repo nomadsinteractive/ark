@@ -11,14 +11,15 @@ template<typename T> class VariableTernary final : public Variable<T> {
 public:
     VariableTernary(sp<Boolean> condition, sp<Variable<T>> a, sp<Variable<T>> b)
         : _condition(std::move(condition)), _a(std::move(a)), _b(std::move(b)) {
+        ASSERT(_condition && _a && _b);
     }
 
-    virtual T val() override {
+    T val() override {
         return _condition->val() ? _a->val() : _b->val();
     }
 
-    virtual bool update(uint64_t timestamp) override {
-        bool dirty = _condition->update(timestamp);
+    bool update(const uint64_t timestamp) override {
+        const bool dirty = _condition->update(timestamp);
         return (_condition->val() ? _a->update(timestamp) : _b->update(timestamp)) || dirty;
     }
 

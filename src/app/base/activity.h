@@ -26,7 +26,7 @@ public:
     void render(RenderRequest& renderRequest, const V3& position, const sp<DrawDecorator>& drawDecorator) override;
     bool onEvent(const Event& event) override;
 
-    sp<Entity> makeEntity(Traits components = Traits()) const;
+    sp<Entity> makeEntity(Traits components = {}) const;
 
 //  [[script::bindings::auto]]
     sp<Arena> makeArena() const;

@@ -423,7 +423,7 @@ Animation loadAnimation(const tinygltf::Model& model, const tinygltf::Animation&
 	return animation;
 }
 
-void updateAnimation(Animation& animation, Vector<NodeTransform>& nodeTransforms, const std::map<uint32_t, uint32_t>& channelNodeIds, float time)
+void updateAnimation(Animation& animation, Vector<NodeTransform>& nodeTransforms, const Map<uint32_t, uint32_t>& channelNodeIds, float time)
 {
 	for(AnimationChannel& i : animation.channels)
 	{
@@ -452,7 +452,7 @@ void updateAnimation(Animation& animation, Vector<NodeTransform>& nodeTransforms
 	}
 }	
 
-void initNodeTransforms(const Vector<sp<Node>>& nodes, Vector<NodeTransform>& nodeTransforms, std::map<uint32_t, uint32_t> channelNodeIds)
+void initNodeTransforms(const Vector<sp<Node>>& nodes, Vector<NodeTransform>& nodeTransforms, Map<uint32_t, uint32_t> channelNodeIds)
 {
 	for(const auto [k, v] : channelNodeIds)
 	{
@@ -499,7 +499,7 @@ Model GltfImporter::loadModel()
 	if(!_model->animations.empty())
 	{
 		Vector<Animation> loadingAnimations;
-		std::map<uint32_t, uint32_t> channelNodeIds;
+		Map<uint32_t, uint32_t> channelNodeIds;
 
 		for(const tinygltf::Animation& i : _model->animations)
 		{
@@ -561,7 +561,7 @@ Model GltfImporter::loadModel()
 	return {std::move(_materials), std::move(_primitives), std::move(rootNode), sp<Boundaries>::make(V3(aabbMinX, aabbMinY, aabbMinZ), V3(aabbMaxX, aabbMaxY, aabbMaxZ)), nullptr, std::move(animations)};
 }
 
-sp<Node> GltfImporter::loadNode(WeakPtr<Node> parentNode, int32_t nodeId)
+sp<Node> GltfImporter::loadNode(WeakPtr<Node> parentNode, const int32_t nodeId)
 {
 	const tinygltf::Node& node = _model->nodes.at(nodeId);
 	sp<Node> n = makeNode(std::move(parentNode), node);

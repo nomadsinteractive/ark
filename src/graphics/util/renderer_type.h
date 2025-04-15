@@ -24,14 +24,14 @@ public:
 
 public:
 //  [[script::bindings::constructor]]
-    static sp<Renderer> create(const sp<Renderer>& other = nullptr);
+    static sp<Renderer> create(sp<Renderer> delegate = nullptr);
 //  [[script::bindings::constructor]]
-    static sp<Renderer> create(const Vector<sp<Renderer>>& other);
+    static sp<Renderer> create(Vector<sp<Renderer>> delegate);
 
 //  [[script::bindings::classmethod]]
-    static void addRenderer(const sp<Renderer>& self, const sp<Renderer>& renderer, const Traits& traits);
+    static void addRenderer(const sp<Renderer>& self, sp<Renderer> renderer, const Traits& traits);
 //  [[script::bindings::classmethod]]
-    static sp<Renderer> wrap(const sp<Renderer>& self);
+    static sp<Renderer> wrap(sp<Renderer> self);
 
 //  [[script::bindings::classmethod]]
     static sp<Renderer> reset(const sp<Renderer>& self, sp<Renderer> wrapped);

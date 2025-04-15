@@ -35,6 +35,7 @@ public:
 
     static PyObject* PyTuple_New(Py_ssize_t size);
     static PyObject* PyTuple_GetItem(PyObject* obj, Py_ssize_t idx);
+    static PyObject* PyTuple_GetSlice(PyObject* obj, Py_ssize_t low, Py_ssize_t high);
     static Py_ssize_t PyTuple_Size(PyObject* obj);
 
     static PyObject* PyIter_Next(PyObject* iter);

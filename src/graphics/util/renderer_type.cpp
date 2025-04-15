@@ -12,28 +12,28 @@
 
 namespace ark {
 
-sp<Renderer> RendererType::create(const sp<Renderer>& other)
+sp<Renderer> RendererType::create(sp<Renderer> delegate)
 {
-    return wrap(other);
+    return wrap(std::move(delegate));
 }
 
-sp<Renderer> RendererType::create(const std::vector<sp<Renderer>>& other)
+sp<Renderer> RendererType::create(Vector<sp<Renderer>> delegate)
 {
     const sp<RenderGroup> rendererGroup = sp<RenderGroup>::make();
-    for(const sp<Renderer>& i : other)
-        rendererGroup->addRenderer(i, {});
+    for(sp<Renderer>& i : delegate)
+        rendererGroup->addRenderer(std::move(i), {});
     return wrap(rendererGroup);
 }
 
-void RendererType::addRenderer(const sp<Renderer>& self, const sp<Renderer>& renderer, const Traits& traits)
+void RendererType::addRenderer(const sp<Renderer>& self, sp<Renderer> renderer, const Traits& traits)
 {
     const sp<Renderer::Group> rendererGroup = self.ensureInstance<Renderer::Group>("Cannot call addRenderer on a none-group renderer");
-    rendererGroup->addRenderer(renderer, traits);
+    rendererGroup->addRenderer(std::move(renderer), traits);
 }
 
-sp<Renderer> RendererType::wrap(const sp<Renderer>& self)
+sp<Renderer> RendererType::wrap(sp<Renderer> self)
 {
-    return sp<Renderer>::make<RendererWrapper>(self);
+    return sp<Renderer>::make<RendererWrapper>(std::move(self));
 }
 
 sp<Renderer> RendererType::reset(const sp<Renderer>& self, sp<Renderer> wrapped)

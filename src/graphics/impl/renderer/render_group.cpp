@@ -1,6 +1,7 @@
 #include "graphics/impl/renderer/render_group.h"
 
 #include "core/base/bean_factory.h"
+
 #include "graphics/components/layer.h"
 #include "graphics/base/render_layer.h"
 

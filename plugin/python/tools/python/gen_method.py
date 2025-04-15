@@ -79,7 +79,9 @@ class GenMethod(object):
         self._return_type = return_type
         self._is_static = is_static
         self._arguments = parse_method_arguments(args)
-        self._has_scope_or_traits_argument = args and (self._arguments[-1].type_compare('Scope') or self._arguments[-1].type_compare('Traits'))
+        self._has_args_argument = args and self._arguments[-1].type_compare('Traits')
+        self._has_kwargs_argument = args and self._arguments[-1].type_compare('Scope')
+        self._has_scope_or_traits_argument = self._has_args_argument or self._has_kwargs_argument
         self._has_keyword_arguments = self._has_scope_or_traits_argument or self._has_keyword_names()
         self._flags = ('METH_VARARGS|METH_KEYWORDS' if self._has_keyword_arguments else 'METH_VARARGS')
         self._self_argument = None
@@ -202,11 +204,19 @@ class GenMethod(object):
         {self.err_return_value};
     '''
         else:
-            parsestatement = f'''if(!PyBridge::PyArg_ParseTuple(args, "{parse_format}", {parse_arg_refnames}))
+            args_name, args_declare = self._gen_parse_tuple_args()
+            parsestatement = f'''{args_declare}if(!PyBridge::PyArg_ParseTuple({args_name}, "{parse_format}", {parse_arg_refnames}))
         {self.err_return_value};
     '''
         if parse_format:
             lines.append(parsestatement)
+
+    def _gen_parse_tuple_args(self) -> (str, str):
+        if self._has_args_argument:
+            args_idx = len(self._arguments) - 1
+            args_name = f'args0_{args_idx}'
+            return f'{args_name}.pyObject()', f'const PyInstance {args_name} = PyInstance::steal(PyBridge::PyTuple_GetSlice(args, 0, {args_idx}));\n    '
+        return 'args', ''
 
     def _make_argname_declares(self):
         return '''const char* argnames[] = {

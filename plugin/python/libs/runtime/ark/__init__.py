@@ -12,7 +12,7 @@ Use it for:
 from typing import Callable, List, Type, TypeVar, Union, Optional, Dict, Tuple, Any, Self
 
 _BUILDABLE_TYPES = TypeVar('_BUILDABLE_TYPES', 'Arena', 'AudioPlayer', "Boolean", 'Characters', 'Collider', 'Integer', 'ModelLoader', 'Numeric', 'NarrowPhrase',
-                           'Layer', 'Vec2', 'Vec3', 'Vec4', 'Renderer', 'RenderLayer', 'RenderObject', 'Rotation', 'Size', 'StringBundle', 'Tilemap',
+                           'Layer', 'Vec2', 'Vec3', 'Vec4', "Renderer", 'RenderLayer', 'RenderObject', 'Rotation', 'Size', 'StringBundle', 'Tilemap',
                            'TilemapImporter', 'Tileset', 'TilesetImporter', 'Transform', 'Varyings', 'View')
 
 
@@ -716,7 +716,7 @@ class ApplicationFacade:
     def add_pre_render_task(self, task: Callable, expired: "Boolean" = None):
         pass
 
-    def add_control_layer(self, control: Union['Layer', 'Renderer']):
+    def add_control_layer(self, control: Union['Layer', "Renderer"]):
         pass
 
     def add_event_listener(self, event_listener: Callable[["Event"], bool], discarded: Optional["Boolean"] = None):
@@ -902,32 +902,16 @@ class Renderer:
     PRIORITY_RENDER_LAYER = 30
     PRIORITY_CONTROL = 50
 
-    def __init__(self, delegate: Optional['Renderer'] | list['Renderer'] = None):
+    def __init__(self, delegate: Optional["Renderer"] | list["Renderer"] = None):
         self._delegate = delegate
 
-    def add_renderer(self, renderer: 'Renderer'):
+    def add_renderer(self, renderer: "Renderer", *traits):
         pass
 
-    def dispose(self):
+    def reset(self, v: "Renderer") -> Optional["Renderer"]:
         pass
 
-    @property
-    def size(self) -> 'Size':
-        return Size(0, 0)
-
-    def reset(self, v: 'Renderer') -> Optional['Renderer']:
-        pass
-
-    def translate(self, position: Union[tuple, 'Vec2']) -> 'Renderer':
-        return self
-
-    def make_disposable(self, disposed: Union[bool, "Boolean"] = None) -> 'Renderer':
-        pass
-
-    def make_visible(self, visibility: Union[bool, "Boolean", 'Visibility']) -> 'Renderer':
-        pass
-
-    def make_auto_release(self, ref_count: int = 1) -> 'Renderer':
+    def wrap(self) -> Self:
         pass
 
 
@@ -1904,10 +1888,10 @@ class Activity:
     def resource_loader(self):
         return None
 
-    def add_renderer(self, renderer: Renderer):
+    def add_renderer(self, renderer: Renderer, *traits):
         pass
 
-    def add_view(self, view: 'View', disposable: Optional[Boolean] = None):
+    def add_view(self, view: 'View', discarded: Optional[Boolean] = None):
         pass
 
     def add_render_layer(self, render_layer: Renderer, discarded: Optional[Boolean] = None):

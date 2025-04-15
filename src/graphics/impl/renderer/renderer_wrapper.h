@@ -8,9 +8,9 @@
 
 namespace ark {
 
-class RendererWrapper : public Renderer, public Wrapper<Renderer> {
+class RendererWrapper final : public Renderer, public Wrapper<Renderer> {
 public:
-    RendererWrapper(const sp<Renderer>& delegate);
+    RendererWrapper(sp<Renderer> delegate);
 
     void render(RenderRequest& renderRequest, const V3& position, const sp<DrawDecorator>& drawDecorator) override;
 };

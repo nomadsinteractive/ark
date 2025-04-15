@@ -27,7 +27,7 @@ public:
         return _op2(std::move(lv), std::move(rv));
     }
 
-    bool update(uint64_t timestamp) override {
+    bool update(const uint64_t timestamp) override {
         const bool d1 = _update_sfinae(_lv, timestamp, nullptr);
         const bool d2 = _update_sfinae(_rv, timestamp, nullptr);
         return d1 || d2;

@@ -143,11 +143,6 @@ bool BooleanType::val(const sp<Boolean>& self)
     return self->val();
 }
 
-sp<Boolean> BooleanType::wrap(sp<Boolean> self)
-{
-    return sp<Boolean>::make<BooleanWrapper>(std::move(self));
-}
-
 sp<Boolean> BooleanType::wrapped(const sp<Boolean>& self)
 {
     const sp<BooleanWrapper>& ib = self.asInstance<BooleanWrapper>();
@@ -155,20 +150,22 @@ sp<Boolean> BooleanType::wrapped(const sp<Boolean>& self)
     return ib ? ib->wrapped() : nullptr;
 }
 
+sp<Boolean> BooleanType::wrap(sp<Boolean> self)
+{
+    return sp<Boolean>::make<BooleanWrapper>(std::move(self));
+}
+
 void BooleanType::set(const sp<BooleanWrapper>& self, sp<Boolean> value)
 {
-    self->set(std::move(value));
+    if(value)
+        self->set(std::move(value));
+    else
+        self->set(false);
 }
 
 void BooleanType::set(const sp<BooleanWrapper>& self, const bool value)
 {
     self->set(value);
-}
-
-void BooleanType::toggle(const sp<Boolean>& self)
-{
-    const sp<BooleanWrapper>& ib = self.ensureInstance<BooleanWrapper>("Cannot toggle a non-BooleanWrapper instance");
-    ib->set(!ib->val());
 }
 
 sp<Boolean> BooleanType::dye(sp<Boolean> self, sp<Boolean> condition, String message)

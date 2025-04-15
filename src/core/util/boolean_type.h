@@ -25,10 +25,11 @@ public:
 
 //  [[script::bindings::property]]
     static bool val(const sp<Boolean>& self);
-//  [[script::bindings::classmethod]]
-    static sp<Boolean> wrap(sp<Boolean> self);
 //  [[script::bindings::property]]
     static sp<Boolean> wrapped(const sp<Boolean>& self);
+
+//  [[script::bindings::classmethod]]
+    static sp<Boolean> wrap(sp<Boolean> self);
 
 //  [[script::bindings::classmethod]]
     static sp<Boolean> negative(sp<Boolean> self);
@@ -37,9 +38,6 @@ public:
     static void set(const sp<BooleanWrapper>& self, sp<Boolean> value);
 //  [[script::bindings::classmethod]]
     static void set(const sp<BooleanWrapper>& self, bool value);
-
-//  [[script::bindings::classmethod]]
-    static void toggle(const sp<Boolean>& self);
 
 //  [[script::bindings::classmethod]]
     static sp<Boolean> dye(sp<Boolean> self, sp<Boolean> condition = nullptr, String message = "");
