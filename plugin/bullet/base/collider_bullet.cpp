@@ -253,9 +253,15 @@ Rigidbody::Impl ColliderBullet::createBody(Rigidbody::BodyType type, sp<Shape> s
                 btShape = new btSphereShape(size.x() / 2);
                 break;
             case Shape::TYPE_CAPSULE:
-                CHECK_WARN(size.y() > size.x(), "When constructing a capsule shape, its height(%.2f) needs be greater than its width(%.2f)", size.y(), size.x());
-                btShape = new btCapsuleShape(size.x() / 2, size.y() - size.x());
-                break;
+                {
+                    const float diameter = std::min(size.x(), size.z());
+                    ASSERT(diameter > 0);
+                    const float radius = diameter / 2.0f;
+                    const float height = size.y() - diameter;
+                    CHECK_WARN(height >= 0, "When constructing a btCapsuleShapeY, its height(%.2f) should be greater than its diameter(%.2f)", size.y(), diameter);
+                    btShape = new btCapsuleShape(radius, std::max(height, 0.0f));
+                    break;
+                }
             default:
                 FATAL("Undefined shape type %d(%s) in this world", shape->type().hash(), shape->type().name().c_str());
                 break;

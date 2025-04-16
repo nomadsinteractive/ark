@@ -393,14 +393,14 @@ class Behavior:
         pass
 
 
-class Crate:
+class Tags:
     def __init__(self):
         pass
 
-    def set_component(self, type_id: int, component: Any):
+    def set_tag(self, type_id: int, tag: Any):
         pass
 
-    def get_component(self, type_id: int) -> Any:
+    def get_tag(self, type_id: int) -> Any:
         pass
 
 
@@ -2961,6 +2961,10 @@ class PrimitiveModelFactory:
 class Entity:
     def __init__(self, *components):
         pass
+
+    @property
+    def id(self) -> int:
+        return 0
 
     @property
     def ref(self) -> Ref:

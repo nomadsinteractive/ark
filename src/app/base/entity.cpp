@@ -94,6 +94,11 @@ void Entity::traverse(const Visitor& visitor)
             holder->traverse(visitor);
 }
 
+RefId Entity::id() const
+{
+    return _ref->id();
+}
+
 const sp<Ref>& Entity::ref() const
 {
     return _ref;

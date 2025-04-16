@@ -35,6 +35,8 @@ public:
     }
 
 //  [[script::bindings::property]]
+    RefId id() const;
+//  [[script::bindings::property]]
     const sp<Ref>& ref() const;
 //  [[script::bindings::auto]]
     void discard();
