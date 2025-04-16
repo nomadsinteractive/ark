@@ -27,10 +27,13 @@ public:
 
 //  [[script::bindings::auto]]
     sp<Runnable> createRunnable(StringView name);
+
 //  [[script::bindings::auto]]
     sp<CollisionCallback> createCollisionCallback(StringView onBeginContact = "on_begin_contact", StringView onEndContact = "on_end_contact");
 //  [[script::bindings::auto]]
     sp<EventListener> createEventListener(StringView onEvent = "on_event");
+//  [[script::bindings::auto]]
+    sp<SearchingNodeProvider> createSearchingNodeProvider(StringView onVisitAdjacentNodes = "on_visit_adjacent_nodes");
 
     class Method final : public Debris {
     public:

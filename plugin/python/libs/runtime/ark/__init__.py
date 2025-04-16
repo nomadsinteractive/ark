@@ -177,6 +177,10 @@ class AssetBundle:
         pass
 
 
+class SearchingNodeProvider:
+    pass
+
+
 class _Array:
     @property
     def native_ptr(self) -> int:
@@ -383,6 +387,9 @@ class Behavior:
         pass
 
     def create_event_listener(self, on_event:str = 'on_event') -> "EventListener":
+        pass
+
+    def create_searching_node_provider(self, on_visit_adjacent_nodes: str = "on_visit_adjacent_nodes") -> "SearchingNodeProvider":
         pass
 
 
@@ -3001,7 +3008,7 @@ class CollisionCallback:
 
 
 class PathFinder:
-    def __init__(self, behavior: Behavior, name: str = 'visit_adjacent_nodes'):
+    def __init__(self, searching_node_provider: SearchingNodeProvider):
         pass
 
     def find_path(self, start: tuple[float, float, float], end: tuple[float, float, float]) -> list[tuple[float, float, float]]:

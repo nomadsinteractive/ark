@@ -60,7 +60,7 @@ public:
 
     void writeRenderable(VertexWriter& buf, const Renderable::Snapshot& renderable) const;
 
-    void dispose();
+    void discard();
     bool isDiscarded() const;
 
     template<typename T> Vector<T> toFlatLayouts() const {

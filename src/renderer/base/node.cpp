@@ -1,7 +1,6 @@
 #include "renderer/base/node.h"
 
-#include "mesh.h"
-
+#include "renderer/base/mesh.h"
 
 namespace ark {
 
@@ -23,17 +22,17 @@ sp<Node> Node::parentNode() const
     return _parent_node.lock();
 }
 
-const std::vector<sp<Node>>& Node::childNodes() const
+const Vector<sp<Node>>& Node::childNodes() const
 {
     return _child_nodes;
 }
 
-std::vector<sp<Node>>& Node::childNodes()
+Vector<sp<Node>>& Node::childNodes()
 {
     return _child_nodes;
 }
 
-const std::vector<sp<Mesh>>& Node::meshes() const
+const Vector<sp<Mesh>>& Node::meshes() const
 {
     return _meshes;
 }

@@ -544,21 +544,7 @@ Model GltfImporter::loadModel()
 		}
 	}
 
-	float aabbMinX(std::numeric_limits<float>::max()), aabbMinY(std::numeric_limits<float>::max()), aabbMinZ(std::numeric_limits<float>::max());
-	float aabbMaxX(std::numeric_limits<float>::min()), aabbMaxY(std::numeric_limits<float>::min()), aabbMaxZ(std::numeric_limits<float>::min());
-	for(const sp<Mesh>& i : _primitives)
-		for(const V3& j : i->vertices())
-		{
-			if(aabbMinX > j.x()) aabbMinX = j.x();
-			if(aabbMinY > j.y()) aabbMinY = j.y();
-			if(aabbMinZ > j.z()) aabbMinZ = j.z();
-
-			if(aabbMaxX < j.x()) aabbMaxX = j.x();
-			if(aabbMaxY < j.y()) aabbMaxY = j.y();
-			if(aabbMaxZ < j.z()) aabbMaxZ = j.z();
-		}
-
-	return {std::move(_materials), std::move(_primitives), std::move(rootNode), sp<Boundaries>::make(V3(aabbMinX, aabbMinY, aabbMinZ), V3(aabbMaxX, aabbMaxY, aabbMaxZ)), nullptr, std::move(animations)};
+	return {std::move(_materials), std::move(_primitives), std::move(rootNode), nullptr, nullptr, std::move(animations)};
 }
 
 sp<Node> GltfImporter::loadNode(WeakPtr<Node> parentNode, const int32_t nodeId)

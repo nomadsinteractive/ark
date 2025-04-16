@@ -598,7 +598,7 @@ def gen_template_defs(py_class_name: str, methods, code_templates: list[str], op
     if methods:
         args = {'py_class_name': py_class_name}
         methods_dict = dict((i.operator, f'{py_class_name}::{i.name}_r') for i in methods)
-        args.update((j, methods_dict[i] if i in methods_dict else 'nullptr') for i, j in operator_templates.items())
+        args.update((v, methods_dict[k] if k in methods_dict else 'nullptr') for k, v in operator_templates.items())
         code_lines.extend(acg.format(i, **args) for i in code_templates)
     return code_lines
 

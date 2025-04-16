@@ -240,7 +240,7 @@ int32_t Math::rand()
 
 float Math::randf()
 {
-    return static_cast<float>(rand() - std::numeric_limits<int32_t>::min()) / std::numeric_limits<int32_t>::max();
+    return static_cast<float>(static_cast<int64_t>(rand()) - std::numeric_limits<int32_t>::min()) / static_cast<float>(std::numeric_limits<uint32_t>::max());
 }
 
 sp<Numeric> Math::randfv(sp<Numeric> a, sp<Numeric> b, const bool isVolatile)

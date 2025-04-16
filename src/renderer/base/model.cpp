@@ -71,7 +71,6 @@ public:
 
 private:
     Vector<sp<Mesh>> _meshes;
-    V3 _size;
 };
 
 struct NodeLayout {
@@ -84,13 +83,14 @@ struct NodeLayout {
 
     void calcTransformedBoudingAABB(const V3& a0, const V3& a1, V3& aabbMin, V3& aabbMax) const {
         calcTransformedPosition(a0, aabbMin, aabbMax);
-        calcTransformedPosition(V3(a0.x(), a0.y(), a1.z()), aabbMin, aabbMax);
-        calcTransformedPosition(V3(a0.x(), a1.y(), a0.z()), aabbMin, aabbMax);
-        calcTransformedPosition(V3(a0.x(), a1.y(), a1.z()), aabbMin, aabbMax);
+        // calcTransformedPosition(V3(a0.x(), a0.y(), a1.z()), aabbMin, aabbMax);
+        // calcTransformedPosition(V3(a0.x(), a1.y(), a0.z()), aabbMin, aabbMax);
+        // calcTransformedPosition(V3(a0.x(), a1.y(), a1.z()), aabbMin, aabbMax);
+
         calcTransformedPosition(a1, aabbMin, aabbMax);
-        calcTransformedPosition(V3(a1.x(), a0.y(), a1.z()), aabbMin, aabbMax);
-        calcTransformedPosition(V3(a1.x(), a1.y(), a0.z()), aabbMin, aabbMax);
-        calcTransformedPosition(V3(a1.x(), a1.y(), a1.z()), aabbMin, aabbMax);
+        // calcTransformedPosition(V3(a1.x(), a0.y(), a1.z()), aabbMin, aabbMax);
+        // calcTransformedPosition(V3(a1.x(), a1.y(), a0.z()), aabbMin, aabbMax);
+        // calcTransformedPosition(V3(a1.x(), a1.y(), a1.z()), aabbMin, aabbMax);
     }
 
     void calcTransformedPosition(const V3& p0, V3& aabbMin, V3& aabbMax) const {
@@ -208,7 +208,7 @@ void Model::writeRenderable(VertexWriter& writer, const Renderable::Snapshot& re
     writeToStream(writer, renderable._size);
 }
 
-void Model::dispose()
+void Model::discard()
 {
     _indices = nullptr;
     _vertices = nullptr;
@@ -223,7 +223,7 @@ bool Model::isDiscarded() const
 
 Boundaries Model::calcBoundingAABB() const
 {
-    std::map<Mesh*, std::pair<V3, V3>> meshBounds;
+    Map<Mesh*, std::pair<V3, V3>> meshBounds;
 
     for(const sp<Mesh>& i : _meshes)
         meshBounds.insert(std::make_pair(i.get(), i->calcBoundingAABB()));

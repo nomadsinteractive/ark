@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include "core/base/string.h"
 #include "core/types/weak_ptr.h"
 #include "core/types/shared_ptr.h"
@@ -26,11 +24,11 @@ public:
     sp<Node> parentNode() const;
 
 //  [[script::bindings::property]]
-    const std::vector<sp<Node>>& childNodes() const;
-    std::vector<sp<Node>>& childNodes();
+    const Vector<sp<Node>>& childNodes() const;
+    Vector<sp<Node>>& childNodes();
 
 //  [[script::bindings::property]]
-    const std::vector<sp<Mesh>>& meshes() const;
+    const Vector<sp<Mesh>>& meshes() const;
     void addMesh(sp<Mesh> mesh);
 
 //  [[script::bindings::property]]
@@ -50,8 +48,8 @@ private:
     WeakPtr<Node> _parent_node;
     String _name;
 
-    std::vector<sp<Node>> _child_nodes;
-    std::vector<sp<Mesh>> _meshes;
+    Vector<sp<Node>> _child_nodes;
+    Vector<sp<Mesh>> _meshes;
 
     V3 _translation;
     V4 _rotation;

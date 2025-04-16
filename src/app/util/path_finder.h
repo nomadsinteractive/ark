@@ -1,23 +1,24 @@
 #pragma once
 
 #include "core/base/api.h"
+#include "core/types/shared_ptr.h"
 
-#include "app/base/graph.h"
+#include "graphics/forwarding.h"
+
+#include "app/forwarding.h"
 
 namespace ark {
 
 class ARK_API PathFinder {
 public:
 //  [[script::bindings::auto]]
-    PathFinder(Behavior& behavior, StringView name = "visit_adjacent_nodes");
+    PathFinder(sp<SearchingNodeProvider> searchingNodeProvider);
 
 //  [[script::bindings::auto]]
     Vector<V3> findPath(const V3& start, const V3& end) const;
 
 private:
-    sp<Graph::SearchingNodeProvider> _searching_node_provider;
-
-    class SearchingNodeProviderImpl;
+    sp<SearchingNodeProvider> _searching_node_provider;
 };
 
 }

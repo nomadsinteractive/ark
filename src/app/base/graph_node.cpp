@@ -2,7 +2,7 @@
 
 #include "app/base/graph.h"
 #include "app/base/graph_route.h"
-#include "app/base/graph_searching_node.h"
+#include "app/base/searching_node.h"
 #include "app/util/a_star.h"
 
 namespace ark {
@@ -64,8 +64,8 @@ void GraphNode::setTag(Box tag)
 Vector<V3> GraphNode::findPath(GraphNode& goal)
 {
     Vector<V3> result;
-    AStar<GraphSearchingNode> pathFinder(this->toSharedPtr(), goal.toSharedPtr());
-    for(const GraphSearchingNode& i : pathFinder.findPath())
+    AStar<SearchingNode> pathFinder(this->toSharedPtr(), goal.toSharedPtr());
+    for(const SearchingNode& i : pathFinder.findPath())
         result.push_back(i.position());
     return result;
 }
@@ -106,10 +106,10 @@ Vector<GraphRoute>& GraphNode::outRoutes()
     return _out_routes;
 }
 
-void GraphNode::visitAdjacentNodes(const V3& /*position*/, const std::function<void(GraphSearchingNode, float)>& visitor)
+void GraphNode::onVisitAdjacentNodes(const V3& /*position*/, const std::function<void(SearchingNode, float)>& visitor)
 {
     for(GraphRoute& i : _out_routes)
-        visitor(GraphSearchingNode(i.exit().toSharedPtr()), i.weight());
+        visitor(SearchingNode(i.exit().toSharedPtr()), i.weight());
 }
 
 }

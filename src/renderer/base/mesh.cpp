@@ -20,7 +20,7 @@ Mesh::Tangent::Tangent(const V3& tangent, const V3& bitangent)
 {
 }
 
-Mesh::Mesh(uint32_t id, String name, std::vector<element_index_t> indices, std::vector<V3> vertices, sp<Array<UV>> uvs, sp<Array<V3>> normals, sp<Array<Tangent>> tangents, sp<Array<BoneInfo>> boneInfos, sp<Material> material)
+Mesh::Mesh(uint32_t id, String name, Vector<element_index_t> indices, Vector<V3> vertices, sp<Array<UV>> uvs, sp<Array<V3>> normals, sp<Array<Tangent>> tangents, sp<Array<BoneInfo>> boneInfos, sp<Material> material)
     : _id(id), _name(std::move(name)), _indices(std::move(indices)), _vertices(std::move(vertices)), _uvs(std::move(uvs)), _normals(std::move(normals)), _tangents(std::move(tangents)), _bone_infos(std::move(boneInfos)),
       _material(std::move(material))
 {
@@ -50,12 +50,12 @@ size_t Mesh::vertexCount() const
     return _vertices.size();
 }
 
-const std::vector<element_index_t>& Mesh::indices() const
+const Vector<element_index_t>& Mesh::indices() const
 {
     return _indices;
 }
 
-const std::vector<V3>& Mesh::vertices() const
+const Vector<V3>& Mesh::vertices() const
 {
     return _vertices;
 }
@@ -115,15 +115,13 @@ std::pair<V3, V3> Mesh::calcBoundingAABB() const
 
     for(const V3& i : _vertices)
     {
-        if(i.x() < aabbMin.x() || i.y() < aabbMin.y() || i.z() < aabbMin.z())
-            aabbMin = V3(std::min(i.x(), aabbMin.x()), std::min(i.y(), aabbMin.y()), std::min(i.z(), aabbMin.z()));
-        if(i.x() > aabbMax.x() || i.y() > aabbMax.y() || i.z() > aabbMax.z())
-            aabbMax = V3(std::max(i.x(), aabbMax.x()), std::max(i.y(), aabbMax.y()), std::max(i.z(), aabbMax.z()));
+        aabbMin = {std::min(i.x(), aabbMin.x()), std::min(i.y(), aabbMin.y()), std::min(i.z(), aabbMin.z())};
+        aabbMax = {std::max(i.x(), aabbMax.x()), std::max(i.y(), aabbMax.y()), std::max(i.z(), aabbMax.z())};
     }
     return {aabbMin, aabbMax};
 }
 
-void Mesh::BoneInfo::add(uint32_t id, float weight)
+void Mesh::BoneInfo::add(const uint32_t id, const float weight)
 {
     for(size_t i = 0; i < _weights.size(); ++i)
         if(_weights.at(i) == 0)

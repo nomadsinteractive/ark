@@ -7,10 +7,11 @@
 #include "app/forwarding.h"
 #include "app/base/graph.h"
 #include "app/base/graph_route.h"
+#include "app/inf/searching_node_provider.h"
 
 namespace ark {
 
-class ARK_API GraphNode : public Graph::SearchingNodeProvider {
+class ARK_API GraphNode final : public SearchingNodeProvider {
 public:
     GraphNode(Graph& graph, const V3& position, Box tag);
 
@@ -41,7 +42,7 @@ public:
     const Vector<GraphRoute>& outRoutes() const;
     Vector<GraphRoute>& outRoutes();
 
-    void visitAdjacentNodes(const V3& position, const std::function<void(GraphSearchingNode, float)>& visitor) override;
+    void onVisitAdjacentNodes(const V3& position, const std::function<void(SearchingNode, float)>& visitor) override;
 
 private:
     Graph& _graph;

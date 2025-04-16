@@ -6,8 +6,10 @@
 #include "app/base/application_context.h"
 #include "app/base/collision_manifold.h"
 #include "app/base/event.h"
+#include "app/base/searching_node.h"
 #include "app/components/rigidbody.h"
 #include "app/inf/collision_callback.h"
+#include "app/inf/searching_node_provider.h"
 
 namespace ark {
 
@@ -83,6 +85,29 @@ private:
     sp<Behavior::Method> _on_event;
 };
 
+class SearchingNodeProviderImpl final : public SearchingNodeProvider {
+public:
+    SearchingNodeProviderImpl(sp<Behavior::Method> method)
+        : _method(std::move(method)) {
+    }
+
+    void onVisitAdjacentNodes(const V3& position, const std::function<void(SearchingNode, float)>& visitor) override
+    {
+        auto v = [this, &position, &visitor](const V3& pos) {
+            const float weight = Math::distance(position, pos);
+            visitor(SearchingNode(*this, pos), weight);
+        };
+
+        _method->call({
+            Box(sp<Vec3>::make<Vec3::Const>(position)),
+            Box(sp<std::function<void(const V3&)>>::make(std::move(v)))
+        });
+    }
+
+private:
+    sp<Behavior::Method> _method;
+};
+
 }
 
 Behavior::Behavior(Box delegate)
@@ -126,6 +151,11 @@ sp<CollisionCallback> Behavior::createCollisionCallback(const StringView onBegin
 sp<EventListener> Behavior::createEventListener(const StringView onEvent)
 {
     return sp<EventListener>::make<EventListenerImpl>(getMethod(onEvent));
+}
+
+sp<SearchingNodeProvider> Behavior::createSearchingNodeProvider(const StringView onVisitAdjacentNodes)
+{
+    return sp<SearchingNodeProvider>::make<SearchingNodeProviderImpl>(getMethod(onVisitAdjacentNodes));
 }
 
 sp<Runnable> Behavior::doCreateRunnable(Box function)

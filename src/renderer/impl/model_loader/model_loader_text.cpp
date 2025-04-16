@@ -97,7 +97,7 @@ void ModelLoaderText::GlyphBundle::reload(const uint64_t timestamp)
     Vector<int32_t> reloadVector;
     for(const auto& [k, v] : _glyphs)
     {
-        v._model->dispose();
+        v._model->discard();
         if(timestamp - v._timestamp < 1000000)
             reloadVector.push_back(k);
     }

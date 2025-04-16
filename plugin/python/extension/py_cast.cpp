@@ -84,21 +84,19 @@ std::wstring toWString(PyObject* object)
 {
     if(PyUnicode_Check(object))
         return pyUnicodeToWString(object);
-    else if (PyBytes_Check(object))
+
+    if(PyBytes_Check(object))
     {
         PyObject* unicode = PyUnicode_FromString(PyBytes_AsString(object));
         const std::wstring r = pyUnicodeToWString(unicode);
         Py_DECREF(unicode);
         return r;
     }
-    else
-    {
-        PyObject* unicode = PyObject_Str(object);
-        const std::wstring r = pyUnicodeToWString(unicode);
-        Py_DECREF(unicode);
-        return r;
-    }
-    return L"";
+
+    PyObject* unicode = PyObject_Str(object);
+    const std::wstring r = pyUnicodeToWString(unicode);
+    Py_DECREF(unicode);
+    return r;
 }
 
 String unicodeToUTF8String(PyObject* object, const char* encoding, const char* error)
