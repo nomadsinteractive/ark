@@ -242,17 +242,15 @@ public:
     static uint32_t hash64(uint64_t x);
 
     static V2 normalize(const V2& v2);
-    static V3 normalize(const V3& v2);
-    static V4 normalize(const V4& v2);
+    static V3 normalize(const V3& v3);
+    static V4 normalize(const V4& v4);
 
     static V4 slerp(const V4& x, const V4& y, float t);
 
-    static void vibrate(float s0, float v0, float s1, float v1, float& o, float& a, float& t0, float& t1);
-
-    static const float PI;
-    static const float PI_HALF;
-    static const float PI_QUARTER;
-    static const float TAU;
+    static constexpr float PI = 3.14159265358979323846f;
+    static constexpr float PI_HALF = PI / 2.0f;
+    static constexpr float PI_QUARTER = PI / 4.0f;
+    static constexpr float TAU = PI * 2.0f;
 };
 
 }

@@ -266,10 +266,10 @@ public:
         return sp<VarType>::template make<Lerp<T, float>>(std::move(self), std::move(b), std::move(t));
     }
 
-    static sp<VarType> sod(sp<VarType> self, const T& d0, float k, float z, float r, sp<Numeric> t) {
+    static sp<VarType> sod(sp<VarType> self, const T& s0, const float f, const float z, const float r, sp<Numeric> t) {
         if(!t)
             t = Ark::instance().appClock()->duration();
-        return sp<VarType>::template make<SecondOrderDynamics<T>>(std::move(self), d0, std::move(t), k, z, r);
+        return sp<VarType>::template make<SecondOrderDynamics<T>>(std::move(self), s0, std::move(t), f, z, r);
     }
 
     static sp<VarType> dye(sp<VarType> self, sp<Boolean> c, String message) {

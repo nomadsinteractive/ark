@@ -57,9 +57,9 @@ public:
     Range<float> subscribe(const Slice& slice, size_t length);
 
 protected:
-    void initialize(const std::initializer_list<float>& values, size_t len);
+    static constexpr float MIN_NORMALIZE_LENGTH = 0.000000001f;
 
-    static const float MIN_NORMALIZE_LENGTH;
+    void initialize(const std::initializer_list<float>& values, size_t len);
 
 protected:
     float _x;

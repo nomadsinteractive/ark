@@ -11,7 +11,7 @@ template<typename T> class SecondOrderDynamics final : public Variable<T>, Imple
 public:
     /**
      * @param x x
-     * @param d0 start: s0
+     * @param s0 start: s0
      * @param t time: y = sod(f(t))
      * @param f nature frequence(HZ): the damping frequence that y follows x
      * @param z zeta: damping coefficient, how the system settles at the target.
@@ -25,9 +25,9 @@ public:
      *          r(1 - )      the system would overshoot x depends on the magnitude of r.
      *          r( - 0)      the system would anticipate the motion(moving backward and then towards).
      */
-    SecondOrderDynamics(sp<Variable<T>> x, const T& d0, sp<Numeric> t, const float f, const float z = 1.0f, const float r = 0)
-         : _x(std::move(x)), _t(std::move(t)), _w(2 * Math::PI * f), _z(z), _d(_w * std::sqrt(std::abs(z * z - 1))), _k1(z / (Math::PI * f)), _k2(1 / _w / _w), _k3(r * z / _w),
-           _last_t(_t->val()), _last_x(_x->val()), _y(d0), _dy(0) {
+    SecondOrderDynamics(sp<Variable<T>> x, const T& s0, sp<Numeric> t, const float f, const float z = 1.0f, const float r = 0)
+         : _x(std::move(x)), _t(std::move(t)), _w(Math::TAU * f), _z(z), _d(_w * std::sqrt(std::abs(z * z - 1))), _k1(z / (Math::PI * f)), _k2(1 / _w / _w), _k3(r * z / _w),
+           _last_t(_t->val()), _last_x(_x->val()), _y(s0), _dy(0) {
     }
 
     T val() override {

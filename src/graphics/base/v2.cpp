@@ -7,14 +7,12 @@
 
 namespace ark {
 
-const float V2::MIN_NORMALIZE_LENGTH = 0.000000001f;
-
-V2::V2(float v)
+V2::V2(const float v)
     : V2(v, v)
 {
 }
 
-V2::V2(float x, float y)
+V2::V2(const float x, const float y)
     : _x(x), _y(y)
 {
     DASSERT(!(std::isinf(_x) || std::isinf(_y)));
@@ -159,25 +157,25 @@ float* V2::value()
     return &_x;
 }
 
-const float& V2::operator[](size_t idx) const
+const float& V2::operator[](const size_t idx) const
 {
     return reinterpret_cast<const float*>(this)[idx];
 }
 
-Range<float> V2::subscribe(const Slice& slice, size_t length)
+Range<float> V2::subscribe(const Slice& slice, const size_t length)
 {
     const Slice adjusted = slice.adjustIndices(length);
     return {&_x + adjusted.begin(), &_x + adjusted.end(), slice.step()};
 }
 
-float& V2::operator[](size_t idx)
+float& V2::operator[](const size_t idx)
 {
     return reinterpret_cast<float*>(this)[idx];
 }
 
-void V2::initialize(const std::initializer_list<float>& values, size_t len)
+void V2::initialize(const std::initializer_list<float>& values, const size_t len)
 {
-    DASSERT(values.size() <= len);
+    ASSERT(values.size() <= len);
 
     memset(this, 0, sizeof(float) * len);
 

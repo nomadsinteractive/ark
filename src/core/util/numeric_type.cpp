@@ -283,11 +283,11 @@ sp<Numeric> NumericType::lerp(const sp<Numeric>& self, const sp<Numeric>& b, con
     return sp<Numeric>::make<Lerp<float, float>>(self, b, t);
 }
 
-sp<Numeric> NumericType::sod(sp<Numeric> self, float d0, float k, float z, float r, sp<Numeric> t)
+sp<Numeric> NumericType::sod(sp<Numeric> self, const float s0, const float f, const float z, const float r, sp<Numeric> t)
 {
     if(!t)
         t = Ark::instance().appClock()->duration();
-    return sp<Numeric>::make<SecondOrderDynamics<float>>(std::move(self), d0, std::move(t), k, z, r);
+    return sp<Numeric>::make<SecondOrderDynamics<float>>(std::move(self), s0, std::move(t), f, z, r);
 }
 
 sp<Numeric> NumericType::modFloor(const sp<Numeric>& self, const sp<Numeric>& mod)
