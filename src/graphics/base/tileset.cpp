@@ -2,7 +2,6 @@
 
 #include "core/ark.h"
 #include "core/base/bean_factory.h"
-#include "core/inf/asset.h"
 #include "core/inf/storage.h"
 #include "core/util/documents.h"
 
@@ -12,11 +11,11 @@
 namespace ark {
 
 Tileset::Tileset(sp<Size> tileSize, sp<TilesetImporter> importer)
-    : _tile_size(std::move(tileSize)), _importer(importer)
+    : _tile_size(std::move(tileSize)), _importer(std::move(importer))
 {
 }
 
-const std::unordered_map<int32_t, sp<Tile>>& Tileset::tiles() const
+const HashMap<int32_t, sp<Tile>>& Tileset::tiles() const
 {
     return _tiles;
 }
@@ -43,7 +42,7 @@ void Tileset::addTile(sp<Tile> t)
     tile = std::move(t);
 }
 
-sp<Tile> Tileset::getTile(int32_t id) const
+sp<Tile> Tileset::getTile(const int32_t id) const
 {
     const auto iter = _tiles.find(id);
     return iter != _tiles.end() ? iter->second : nullptr;

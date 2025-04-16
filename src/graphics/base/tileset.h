@@ -14,7 +14,7 @@ public:
     Tileset(sp<Size> tileSize, sp<TilesetImporter> importer = nullptr);
 
 //  [[script::bindings::property]]
-    const std::unordered_map<int32_t, sp<Tile>>& tiles() const;
+    const HashMap<int32_t, sp<Tile>>& tiles() const;
 
 //  [[script::bindings::property]]
     const sp<Size>& tileSize() const;

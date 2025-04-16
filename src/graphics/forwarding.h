@@ -72,6 +72,10 @@ typedef Mat<2> M2;
 typedef Mat<3> M3;
 typedef Mat<4> M4;
 
+typedef std::array<int32_t, 2> V2i;
+typedef std::array<int32_t, 3> V3i;
+typedef std::array<int32_t, 4> V4i;
+
 typedef Variable<M2> Mat2;
 typedef Variable<M3> Mat3;
 typedef Variable<M4> Mat4;

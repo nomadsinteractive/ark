@@ -1,5 +1,4 @@
-#ifndef ARK_GRAPHICS_IMPL_STORAGE_TILESET_IMPORTER_TSX_H_
-#define ARK_GRAPHICS_IMPL_STORAGE_TILESET_IMPORTER_TSX_H_
+#pragma once
 
 #include "core/inf/builder.h"
 #include "core/inf/storage.h"
@@ -8,21 +7,19 @@
 
 namespace ark {
 
-class TilesetImporterTsx : public TilesetImporter {
+class TilesetImporterTsx final : public TilesetImporter {
 public:
 
-    virtual void import(Tileset& tileset, const sp<Readable>& src) override;
+    void import(Tileset& tileset, const sp<Readable>& src) override;
 
 //  [[plugin::builder::by-value("tsx")]]
-    class DICTIONARY : public Builder<TilesetImporter> {
+    class DICTIONARY final : public Builder<TilesetImporter> {
     public:
         DICTIONARY() = default;
 
-        virtual sp<TilesetImporter> build(const Scope& args) override;
+        sp<TilesetImporter> build(const Scope& args) override;
     };
 
 };
 
 }
-
-#endif

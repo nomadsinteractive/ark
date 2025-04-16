@@ -4,7 +4,6 @@
 #include "core/util/strings.h"
 
 #include "graphics/base/tilemap.h"
-#include "graphics/base/tileset.h"
 #include "graphics/base/tilemap_layer.h"
 
 namespace ark {
@@ -42,7 +41,7 @@ void TilemapImporterTmx::import(Tilemap& tilemap, const sp<Readable>& src)
 
 sp<Importer<Tilemap>> TilemapImporterTmx::DICTIONARY::build(const Scope& /*args*/)
 {
-    return sp<TilemapImporterTmx>::make();
+    return sp<Importer<Tilemap>>::make<TilemapImporterTmx>();
 }
 
 }

@@ -12,7 +12,7 @@ _paths = None
 
 INDENT = '    '
 
-TYPE_DEFINED_OBJ = ('V2', 'V3', 'V4', 'M3', 'M4', 'NamedHash', 'Rect', 'RectI', 'RectF', 'Slice', 'PyInstance')
+TYPE_DEFINED_OBJ = ('V2', 'V3', 'V4', 'V2i', 'V3i', 'V4i', 'M3', 'M4', 'NamedHash', 'Rect', 'RectI', 'RectF', 'Slice', 'PyInstance')
 TYPE_DEFINED_SP = ('document', 'element', 'attribute', 'bitmap')
 TYPE_COLLECTION_TEMPLATE_PREFIX = ['std::vector<', 'std::map<', 'Map<', 'HashMap<', 'Vector<', 'Set<']
 
@@ -147,7 +147,7 @@ ARK_PY_ARGUMENTS = (
     (r'sp<([^>]+|\w+<\w+>)>(?:\s*&|$)', GenArgumentMeta('PyObject*', 'sp<${0}>', 'O')),
     (r'(Optional<[^\s]+>)(?:\s*&)?', GenArgumentMeta('PyObject*', '${0}', 'O')),
     (r'(document|element|attribute)\s*&', GenArgumentMeta('PyObject*', '${0}', 'O')),
-    (r'(V2|V3|V4)', GenArgumentMeta('PyObject*', '${0}', 'O')),
+    (r'(V2i?|V3i?|V4i?)', GenArgumentMeta('PyObject*', '${0}', 'O')),
     (rf'((?:{"|".join(TYPE_COLLECTION_TEMPLATE_PREFIX)}|[^:]+::).+)', GenArgumentMeta('PyObject*', '${0}', 'O')),
     (r'(^(?:Buffer|LayoutLength)$)', GenArgumentMeta('PyObject*', '${0}', 'O', movable=True)),
     (r'([^>]+|\w+<\w+>)\s*&', GenArgumentMeta('PyObject*', 'sp<${0}>', 'O')),

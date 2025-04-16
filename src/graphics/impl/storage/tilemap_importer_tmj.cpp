@@ -16,7 +16,7 @@ void TilemapImporterTmj::import(Tilemap& tilemap, const sp<Readable>& src)
 
 sp<Importer<Tilemap>> TilemapImporterTmj::DICTIONARY::build(const Scope& /*args*/)
 {
-    return sp<TilemapImporterTmj>::make();
+    return sp<Importer<Tilemap>>::make<TilemapImporterTmj>();
 }
 
 }

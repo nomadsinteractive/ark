@@ -1,14 +1,11 @@
 #pragma once
 
-#include <vector>
-
 #include "core/base/api.h"
 #include "core/inf/builder.h"
+#include "core/impl/builder/safe_builder.h"
 #include "core/types/shared_ptr.h"
 
 #include "graphics/forwarding.h"
-#include "graphics/base/render_layer.h"
-#include "graphics/inf/render_batch.h"
 
 #include "app/forwarding.h"
 
@@ -17,12 +14,10 @@ namespace ark {
 class ARK_API Tilemap {
 public:
 // [[script::bindings::auto]]
-    Tilemap(sp<Tileset> tileset, sp<RenderLayer> renderLayer = nullptr, sp<Importer<Tilemap>> importer = nullptr, sp<Outputer<Tilemap>> outputer = nullptr);
+    Tilemap(sp<Tileset> tileset, sp<Importer<Tilemap>> importer = nullptr, sp<Outputer<Tilemap>> outputer = nullptr);
 
 // [[script::bindings::property]]
     const sp<Tileset>& tileset() const;
-// [[script::bindings::property]]
-    const sp<RenderLayer>& renderLayer() const;
 
 // [[script::bindings::property]]
     const sp<Storage>& storage() const;
@@ -34,7 +29,7 @@ public:
     void clear();
 
 //  [[script::bindings::property]]
-    const std::vector<sp<TilemapLayer>>& layers() const;
+    const Vector<sp<TilemapLayer>>& layers() const;
 
 //  [[script::bindings::auto]]
     void load(const sp<Readable>& src);
@@ -50,10 +45,10 @@ public:
     Json jsonDump() const;
 
 //  [[script::bindings::auto]]
-    std::vector<std::array<int32_t, 2>> findRoute(const std::array<int32_t, 2>& start, const std::array<int32_t, 2>& goal);
+    Vector<V2i> findRoute(const V2i& start, const V2i& goal);
 
 //  [[plugin::builder]]
-    class BUILDER : public Builder<Tilemap> {
+    class BUILDER final : public Builder<Tilemap> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
@@ -61,29 +56,15 @@ public:
 
     private:
         sp<Builder<Tileset>> _tileset;
-        SafeBuilder<RenderLayer> _render_layer;
         SafeBuilder<Importer<Tilemap>> _importer;
         SafeBuilder<Outputer<Tilemap>> _outputer;
     };
 
 private:
-
-    class Stub final : public RenderBatch {
-    public:
-
-        std::vector<sp<LayerContext>>& snapshot(const RenderRequest& renderRequest) override;
-
-        std::vector<sp<TilemapLayer>> _layers;
-        std::vector<sp<LayerContext>> _layer_contexts;
-    };
-
-private:
-    sp<RenderLayer> _render_layer;
     sp<Tileset> _tileset;
     sp<Storage> _storage;
 
-    sp<Stub> _stub;
-    sp<LayerContext> _layer_context;
+    Vector<sp<TilemapLayer>> _layers;
 
     friend class TilemapLayer;
     friend class BUILDER;

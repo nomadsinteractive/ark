@@ -168,27 +168,19 @@ sp<CollisionFilter> toCollisionFilter(const sp<Json>& jCollisionFilter)
 
 }
 
-Tilemap::Tilemap(sp<Tileset> tileset, sp<RenderLayer> renderLayer, sp<Importer<Tilemap>> importer, sp<Outputer<Tilemap>> outputer)
-    : _render_layer(std::move(renderLayer)), _tileset(std::move(tileset)), _storage(sp<TilemapStorage>::make(*this, std::move(importer), std::move(outputer))),
-      _stub(sp<Stub>::make())/*, _layer_context(_render_layer ? _render_layer->addLayerContext(_stub, nullptr, nullptr) : nullptr)*/
+Tilemap::Tilemap(sp<Tileset> tileset, sp<Importer<Tilemap>> importer, sp<Outputer<Tilemap>> outputer)
+    : _tileset(std::move(tileset)), _storage(sp<TilemapStorage>::make(*this, std::move(importer), std::move(outputer)))
 {
-    if(_render_layer)
-        _render_layer->addRenderBatch(_stub);
 }
 
 void Tilemap::clear()
 {
-    _stub->_layers.clear();
+    _layers.clear();
 }
 
 const sp<Tileset>& Tilemap::tileset() const
 {
     return _tileset;
-}
-
-const sp<RenderLayer>& Tilemap::renderLayer() const
-{
-    return _render_layer;
 }
 
 const sp<Storage>& Tilemap::storage() const
@@ -215,17 +207,15 @@ sp<TilemapLayer> Tilemap::makeLayer(const String& name, uint32_t colCount, uint3
 
 void Tilemap::addLayer(sp<TilemapLayer> layer, float zorder)
 {
-    if(_render_layer)
-        layer->setLayerContext(_render_layer->makeLayerContext(nullptr, layer->position().wrapped(), layer->visible().wrapped(), nullptr));
     layer->setZorder(zorder);
-    _stub->_layers.insert(std::upper_bound(_stub->_layers.begin(), _stub->_layers.end(), layer, _tilemapLayerCompareGreater), std::move(layer));
+    _layers.insert(std::upper_bound(_layers.begin(), _layers.end(), layer, _tilemapLayerCompareGreater), std::move(layer));
 }
 
 void Tilemap::removeLayer(const sp<TilemapLayer>& layer)
 {
-    const auto iter = std::find(_stub->_layers.begin(), _stub->_layers.end(), layer);
-    DCHECK(iter != _stub->_layers.end(), "Layer does not belong to this Tilemap");
-    _stub->_layers.erase(iter);
+    const auto iter = std::find(_layers.begin(), _layers.end(), layer);
+    DCHECK(iter != _layers.end(), "Layer does not belong to this Tilemap");
+    _layers.erase(iter);
 }
 
 void Tilemap::jsonLoad(const Json& json)
@@ -308,9 +298,9 @@ Json Tilemap::jsonDump() const
     return jTilemap;
 }
 
-Vector<std::array<int32_t, 2>> Tilemap::findRoute(const std::array<int32_t, 2>& start, const std::array<int32_t, 2>& goal)
+Vector<V2i> Tilemap::findRoute(const V2i& start, const V2i& goal)
 {
-    Vector<std::array<int32_t, 2>> result;
+    Vector<V2i> result;
     SearchingTilemap searchingTilemap(*this);
     AStar<SearchingTilemapNode> pathFinder(SearchingTilemapNode(searchingTilemap, start[0], start[1]), SearchingTilemapNode(searchingTilemap, goal[0], goal[1]));
     for(const SearchingTilemapNode& i : pathFinder.findPath())
@@ -320,28 +310,18 @@ Vector<std::array<int32_t, 2>> Tilemap::findRoute(const std::array<int32_t, 2>& 
 
 const Vector<sp<TilemapLayer>>& Tilemap::layers() const
 {
-    return _stub->_layers;
+    return _layers;
 }
 
 Tilemap::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
-    : _tileset(factory.ensureBuilder<Tileset>(manifest, "tileset")), _render_layer(factory.getBuilder<RenderLayer>(manifest, constants::RENDER_LAYER)),
-      _importer(factory.getBuilder<Importer<Tilemap>>(manifest, "importer")), _outputer(factory.getBuilder<Outputer<Tilemap>>(manifest, "outputer"))
+    : _tileset(factory.ensureBuilder<Tileset>(manifest, "tileset")), _importer(factory.getBuilder<Importer<Tilemap>>(manifest, "importer")), _outputer(factory.getBuilder<Outputer<Tilemap>>(manifest, "outputer"))
 {
 }
 
 sp<Tilemap> Tilemap::BUILDER::build(const Scope& args)
 {
-    sp<Tilemap> tilemap = sp<Tilemap>::make(_tileset->build(args), _render_layer.build(args), _importer.build(args), _outputer.build(args));
+    sp<Tilemap> tilemap = sp<Tilemap>::make(_tileset->build(args), _importer.build(args), _outputer.build(args));
     return tilemap;
-}
-
-Vector<sp<LayerContext>>& Tilemap::Stub::snapshot(const RenderRequest& renderRequest)
-{
-    _layer_contexts.clear();
-    for(TilemapLayer& i : _layers)
-        if(i._layer_context)
-            _layer_contexts.push_back(i._layer_context);
-    return _layer_contexts;
 }
 
 }
