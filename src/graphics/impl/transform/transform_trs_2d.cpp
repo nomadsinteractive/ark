@@ -2,7 +2,6 @@
 
 #include "core/util/updatable_util.h"
 
-#include "graphics/components/quaternion.h"
 #include "graphics/util/matrix_util.h"
 
 namespace ark {

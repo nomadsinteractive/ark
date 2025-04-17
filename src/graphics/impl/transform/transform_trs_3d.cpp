@@ -3,7 +3,6 @@
 #include "core/util/updatable_util.h"
 
 #include "graphics/base/mat.h"
-#include "graphics/components/quaternion.h"
 #include "graphics/base/v4.h"
 #include "graphics/util/matrix_util.h"
 

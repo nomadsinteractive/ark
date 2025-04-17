@@ -3,7 +3,6 @@
 #include "core/ark.h"
 
 #include "graphics/base/camera.h"
-#include "graphics/components/quaternion.h"
 #include "graphics/base/transform_3d.h"
 #include "graphics/util/vec3_type.h"
 #include "graphics/util/vec4_type.h"
@@ -15,6 +14,7 @@
 #include "app/base/level_object.h"
 #include "app/base/level_layer.h"
 #include "app/base/level_library.h"
+#include "graphics/components/rotation.h"
 
 namespace ark {
 
@@ -89,8 +89,7 @@ void Level::doLoad(const String& src)
                 const float fovy = Documents::ensureAttribute<float>(j, "fov_y");
                 const float clipNear = Documents::ensureAttribute<float>(j, "clip-near");
                 const float clipFar = Documents::ensureAttribute<float>(j, "clip-far");
-                const Quaternion quaternion(sp<Vec4>::make<Vec4::Const>(obj._rotation ? obj._rotation.value() : constants::QUATERNION_ONE));
-                const M4 matrix = quaternion.toMatrix()->val();
+                const M4 matrix = Rotation::toMatrix(sp<Vec4>::make<Vec4::Const>(obj._rotation ? obj._rotation.value() : constants::QUATERNION_ONE))->val();
                 const V3 front = MatrixUtil::mul(matrix, V3(0, -1.0f, 0));
                 const V3 up = MatrixUtil::mul(matrix, V3(0, 0, -1.0f));
                 Camera c = Ark::instance().createCamera(Ark::COORDINATE_SYSTEM_RHS, false, Ark::instance().renderController()->renderEngine()->isBackendLHS());

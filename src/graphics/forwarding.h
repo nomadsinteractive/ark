@@ -5,6 +5,7 @@
 namespace ark {
 
 class Alphabet;
+class RotationAxisTheta;
 class Bitmap;
 class Boundaries;
 class Bounds;
@@ -12,6 +13,7 @@ class Camera;
 class GlyphMaker;
 class Color;
 class DrawDecorator;
+class RotationEuler;
 class Font;
 class Glyph;
 class Layer;

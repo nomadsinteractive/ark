@@ -7,22 +7,21 @@
 
 namespace ark {
 
-template<typename T> class VariableDirtyMark final : public Variable<T> {
+template<typename T> class VariableDirtyMark final : public Wrapper<Variable<T>>, public Variable<T> {
 public:
     VariableDirtyMark(sp<Variable<T>> delegate, Wrapper<Variable<T>>& wrapper)
-        : _delegate(std::move(delegate)), _wrapper(wrapper) {
-        ASSERT(_delegate);
+        : Wrapper<Variable<T>>(std::move(delegate)), _wrapper(wrapper) {
         _timestamp.markDirty();
     }
 
     T val() override {
-        return _delegate->val();
+        return this->_wrapped->val();
     }
 
     bool update(uint64_t timestamp) override {
-        _delegate->update(timestamp);
+        this->_wrapped->update(timestamp);
         if(_wrapper.wrapped().get() == this) {
-            sp<Variable<T>> delegate = std::move(_delegate);
+            sp<Variable<T>> delegate = std::move(this->_wrapped);
             _wrapper.reset(std::move(delegate));
         }
         else
@@ -35,7 +34,6 @@ public:
     }
 
 private:
-    sp<Variable<T>> _delegate;
     Wrapper<Variable<T>>& _wrapper;
     Timestamp _timestamp;
 };

@@ -4,7 +4,6 @@
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/util/boolean_type.h"
 
-#include "graphics/components/quaternion.h"
 #include "graphics/base/rect.h"
 #include "graphics/base/v2.h"
 #include "graphics/components/rotation.h"
@@ -21,6 +20,7 @@
 #include "box2d/impl/shapes/ball.h"
 #include "box2d/impl/shapes/box.h"
 #include "core/types/ref.h"
+#include "graphics/base/rotation_axis_theta.h"
 
 namespace ark::plugin::box2d {
 
@@ -46,9 +46,10 @@ Rigidbody::Impl ColliderBox2D::createBody(Rigidbody::BodyType type, sp<ark::Shap
     CHECK(iter != _stub->_body_manifests.end(), "RigidBody shape-type: %ud not found", shape->type().hash());
     const BodyCreateInfo& manifest = iter->second;
     const sp<Rotation> rot = rotation.asInstance<Rotation>();
-    const sp<RigidbodyBox2D> body = sp<RigidbodyBox2D>::make(*this, type, position, shape->size().val(), rot ? rot->theta() : nullptr, std::move(collisionFilter), manifest);
-    if(rot)
-        body->setAngle(rot->theta().val());
+    const sp<RotationAxisTheta> axisTheta = rot.asInstance<RotationAxisTheta>();
+    const sp<RigidbodyBox2D> body = sp<RigidbodyBox2D>::make(*this, type, position, shape->size().val(), axisTheta ? axisTheta->theta() : nullptr, std::move(collisionFilter), manifest);
+    if(axisTheta)
+        body->setAngle(axisTheta->theta()->val());
     CHECK(!discarded, "Unimplemented");
 
     if(manifest.category || manifest.mask || manifest.group)

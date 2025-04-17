@@ -12,7 +12,6 @@
 
 #include "graphics/base/rect.h"
 #include "graphics/components/render_object.h"
-#include "graphics/components/quaternion.h"
 #include "graphics/base/v2.h"
 
 #include "app/base/application_context.h"

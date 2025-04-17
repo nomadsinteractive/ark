@@ -2049,31 +2049,50 @@ class Event:
         return 0
 
 
-class Rotation(Vec4):
-    def __init__(self, theta: Union[float, Numeric], axis: Union[Vec3, tuple] = None):
-        super().__init__(0, 0, 0, 0)
-        self._theta = theta
-        self._axis = axis
-
-
-    def reset(self, quaternion: Vec4):
-        pass
-    @property
-    def theta(self) -> Numeric:
-        return self._theta
-
-    @theta.setter
-    def theta(self, theta: float | Numeric):
-        pass
+class RotationAxisTheta(Vec4):
+    def __init__(self, axis: TYPE_VEC3, theta: TYPE_NUMERIC):
+        super().__init__(0)
 
     @property
     def axis(self) -> Vec3:
-        return self._axis
-
-    def set_rotation(self, theta: Union[float, Numeric], axis: Union[Vec3, tuple]):
         pass
 
-    def set_euler(self, pitch: Union[float, Numeric], yaw: Union[float, Numeric], roll: Union[float, Numeric]):
+    @property
+    def theta(self) -> Numeric:
+        pass
+
+
+class RotationEuler(Vec4):
+    def __init__(self, pitch: TYPE_NUMERIC, yaw: TYPE_NUMERIC, roll: TYPE_NUMERIC):
+        super().__init__(0)
+
+    @property
+    def pitch(self) -> Vec3:
+        pass
+
+    @property
+    def yaw(self) -> Numeric:
+        pass
+
+    @property
+    def roll(self) -> Numeric:
+        pass
+
+
+class Rotation(Vec4):
+    def __init__(self, quaternion: Vec4):
+        super().__init__(0)
+
+    def reset(self, quaternion: Vec4):
+        pass
+
+    def set_axis_theta(self, axis: TYPE_VEC3, theta: TYPE_NUMERIC):
+        pass
+
+    def set_euler(self, pitch: TYPE_NUMERIC, yaw: TYPE_NUMERIC, roll: TYPE_NUMERIC):
+        pass
+
+    def to_matrix(self) -> Mat4:
         pass
 
 

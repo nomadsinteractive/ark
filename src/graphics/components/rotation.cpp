@@ -1,35 +1,55 @@
 #include "graphics/components/rotation.h"
 
+#include <glm/gtx/quaternion.hpp>
+
 #include "core/base/bean_factory.h"
-#include "core/base/constants.h"
 #include "core/impl/variable/variable_dirty_mark.h"
 
-#include "graphics/base/v3.h"
-#include "graphics/components/quaternion.h"
-#include "graphics/util/vec4_type.h"
+#include "graphics/base/rotation_axis_theta.h"
+#include "graphics/base/rotation_euler.h"
+#include "graphics/base/mat.h"
 
 namespace ark {
 
-Rotation::Rotation(const V4& quat)
-    : Rotation(sp<Vec4>::make<Vec4::Const>(quat))
+namespace {
+
+class Mat4Quaternion final : public Mat4 {
+public:
+    Mat4Quaternion(sp<Vec4> quaternion)
+        : _quaternion(std::move(quaternion)) {
+    }
+
+    bool update(const uint64_t timestamp) override
+    {
+        if(_quaternion->update(timestamp))
+        {
+            const V4 quaternion = _quaternion->val();
+            _matrix = {glm::toMat4(glm::quat(quaternion.w(), quaternion.x(), quaternion.y(), quaternion.z()))};
+            return true;
+        }
+        return false;
+    }
+
+    M4 val() override
+    {
+        return _matrix;
+    }
+
+private:
+    sp<Vec4> _quaternion;
+    M4 _matrix;
+};
+
+}
+
+Rotation::Rotation(const V4& quaternion)
+    : Rotation(sp<Vec4>::make<Vec4::Const>(quaternion))
 {
 }
 
 Rotation::Rotation(sp<Vec4> quaternion)
-    : Wrapper(sp<VariableDirtyMark<V4>>::make(std::move(quaternion), *this))
+    : Wrapper(sp<Vec4>::make<VariableDirtyMark<V4>>(std::move(quaternion), *this))
 {
-}
-
-Rotation::Rotation(float theta, const V3& axis)
-    : Rotation(sp<Numeric::Const>::make(theta), sp<Vec3::Const>::make(axis))
-{
-}
-
-Rotation::Rotation(sp<Numeric> theta, sp<Vec3> axis)
-    : Rotation(sp<Vec4>::make<Quaternion>(theta, axis))
-{
-    _theta = SafeVar(std::move(theta), 0);
-    _axis = SafeVar(std::move(axis), constants::AXIS_Z);
 }
 
 V4 Rotation::val()
@@ -37,44 +57,29 @@ V4 Rotation::val()
     return _wrapped->val();
 }
 
-bool Rotation::update(uint64_t timestamp)
+bool Rotation::update(const uint64_t timestamp)
 {
     return _wrapped->update(timestamp);
 }
 
 void Rotation::reset(sp<Vec4> quaternion)
 {
-    _wrapped = sp<VariableDirtyMark<V4>>::make(Vec4Type::normalize(std::move(quaternion)), *this);
+    _wrapped = sp<Vec4>::make<VariableDirtyMark<V4>>(std::move(quaternion), *this);
 }
 
-const SafeVar<Numeric>& Rotation::theta() const
+void Rotation::setRotation(const V3& axis, float theta)
 {
-    return _theta;
+    setRotation(sp<Vec3>::make<Vec3::Const>(axis), sp<Numeric>::make<Numeric::Const>(theta));
 }
 
-void Rotation::setTheta(sp<Numeric> theta)
+void Rotation::setRotation(sp<Vec3> axis, sp<Numeric> theta)
 {
-    CHECK(_theta, "Theta can only be set in Theta-Axis mode");
-    _theta.reset(std::move(theta));
-    setRotation(std::move(theta), _axis.wrapped());
+    _wrapped = sp<Vec4>::make<VariableDirtyMark<V4>>(sp<Vec4>::make<RotationAxisTheta>(std::move(axis), std::move(theta)), *this);
 }
 
-const SafeVar<Vec3>& Rotation::axis() const
+sp<RotationAxisTheta> Rotation::getAxisTheta() const
 {
-    return _axis;
-}
-
-void Rotation::setRotation(float theta, const V3& axis)
-{
-    setRotation(sp<Numeric::Const>::make(theta), sp<Vec3::Const>::make(axis));
-}
-
-void Rotation::setRotation(sp<Numeric> theta, sp<Vec3> axis)
-{
-    _theta.reset(theta);
-    _axis.reset(axis);
-
-    _wrapped = sp<VariableDirtyMark<V4>>::make(sp<Quaternion>::make(std::move(theta), std::move(axis)), *this);
+    return _wrapped.asInstance<RotationAxisTheta>();
 }
 
 void Rotation::setEuler(float pitch, float yaw, float roll)
@@ -84,10 +89,17 @@ void Rotation::setEuler(float pitch, float yaw, float roll)
 
 void Rotation::setEuler(sp<Numeric> pitch, sp<Numeric> yaw, sp<Numeric> roll)
 {
-    _theta.reset(nullptr);
-    _axis.reset(nullptr);
+    _wrapped = sp<Vec4>::make<VariableDirtyMark<V4>>(sp<Vec4>::make<RotationEuler>(std::move(pitch), std::move(yaw), std::move(roll)), *this);
+}
 
-    _wrapped = sp<VariableDirtyMark<V4>>::make(sp<Quaternion>::make(std::move(pitch), std::move(yaw), std::move(roll)), *this);
+sp<RotationEuler> Rotation::getEuler() const
+{
+    return _wrapped.asInstance<RotationEuler>();
+}
+
+sp<Mat4> Rotation::toMatrix(sp<Vec4> self)
+{
+    return sp<Mat4>::make<Mat4Quaternion>(std::move(self));
 }
 
 Rotation::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
@@ -97,7 +109,7 @@ Rotation::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
 
 sp<Rotation> Rotation::BUILDER::build(const Scope& args)
 {
-    return sp<Rotation>::make(_theta.build(args), _axis.build(args));
+    return sp<Rotation>::make(sp<Vec4>::make<RotationAxisTheta>(_axis.build(args), _theta.build(args)));
 }
 
 Rotation::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& str)
@@ -107,7 +119,7 @@ Rotation::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& str)
 
 sp<Rotation> Rotation::DICTIONARY::build(const Scope& args)
 {
-    return sp<Rotation>::make(_theta.build(args));
+    return sp<Rotation>::make(sp<Vec4>::make<RotationAxisTheta>(sp<Vec3>::make<Vec3::Const>(V3(constants::AXIS_Z)), _theta.build(args)));
 }
 
 }
