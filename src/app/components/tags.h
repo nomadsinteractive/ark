@@ -8,12 +8,12 @@ namespace ark {
 class ARK_API Tags final : public Debris {
 public:
 //  [[script::bindings::auto]]
-    Tags();
+    Tags() = default;
 
 //  [[script::bindings::auto]]
-    void setTag(uint64_t typeId, Box tag);
+    void setTag(Box tag, uint64_t typeId);
 //  [[script::bindings::auto]]
-    Box getTag(uint64_t typeId) const;
+    Box getTag(uint64_t typeId = 0) const;
 
     void traverse(const Visitor& visitor) override;
 

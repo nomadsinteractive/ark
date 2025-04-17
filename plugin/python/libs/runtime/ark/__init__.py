@@ -283,6 +283,9 @@ class _Var:
     def wrap(self):
         pass
 
+    def update(self, canceled: Optional["Boolean"] = None) -> Self:
+        pass
+
     def clamp(self, a, b):
         pass
 
@@ -397,10 +400,10 @@ class Tags:
     def __init__(self):
         pass
 
-    def set_tag(self, type_id: int, tag: Any):
+    def set_tag(self, tag: Any, type_id: int = 0):
         pass
 
-    def get_tag(self, type_id: int) -> Any:
+    def get_tag(self, type_id: int = 0) -> Any:
         pass
 
 

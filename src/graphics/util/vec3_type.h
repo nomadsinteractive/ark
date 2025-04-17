@@ -89,7 +89,9 @@ public:
 //  [[script::bindings::classmethod]]
     static sp<Vec3> wrap(const sp<Vec3>& self);
 //  [[script::bindings::classmethod]]
-    static sp<Vec3> synchronize(sp<Vec3> self, sp<Boolean> discarded = nullptr);
+    static sp<Vec3> update(sp<Vec3> self, sp<Boolean> canceled = nullptr);
+//  [[script::bindings::classmethod]]
+    static sp<Vec3> synchronize(sp<Vec3> self, sp<Boolean> canceled = nullptr);
 
 //  [[script::bindings::classmethod]]
     static sp<Vec3> modFloor(sp<Vec3> self, sp<Numeric> mod);

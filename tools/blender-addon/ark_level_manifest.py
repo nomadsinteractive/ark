@@ -11,7 +11,7 @@ from bpy_extras.io_utils import ExportHelper
 bl_info = {
     "name": "Ark Level Manifest",
     "author": "Nomads Interactive",
-    "version": (1, 0, 2),
+    "version": (1, 0, 3),
     "blender": (2, 81, 6),
     "location": "File > Export > Ark Level Manifest",
     "category": "Import-Export",
@@ -289,9 +289,9 @@ class ArkLevelManifestExporter(Operator, ExportHelper):
     data_format: EnumProperty(
         name="Data Format",
         description="Choose the data format",
-        items=(('OPT_JSON', "JSON", "JavaScript Object Notation"),
-               ('OPT_YAML', "YAML", "YAML Ain't Markup Language"),
-               ('OPT_XML', "XML", "eXtensible Markup Language")),
+        items=(('OPT_JSON', "JSON", "JavaScript Object Notation", 0),
+               ('OPT_YAML', "YAML", "YAML Ain't Markup Language", 1),
+               ('OPT_XML', "XML", "eXtensible Markup Language", 2)),
         default='OPT_XML',
         update=on_file_selector_data_format_update
     )

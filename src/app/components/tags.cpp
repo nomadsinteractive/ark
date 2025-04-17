@@ -4,19 +4,16 @@
 
 namespace ark {
 
-Tags::Tags()
-{
-}
-
-void Tags::setTag(const uint64_t typeId, Box tag)
+void Tags::setTag(Box tag, const uint64_t typeId)
 {
     _tags[typeId] = std::move(tag);
 }
 
 Box Tags::getTag(const uint64_t typeId) const
 {
-    const auto iter = _tags.find(typeId);
-    return iter != _tags.end() ? iter->second : Box();
+    if(const auto iter = _tags.find(typeId); iter != _tags.end())
+        return iter->second;
+    return {};
 }
 
 void Tags::traverse(const Visitor& visitor)

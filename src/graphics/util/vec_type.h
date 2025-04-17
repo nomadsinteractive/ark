@@ -222,8 +222,13 @@ public:
         return sp<VarType>::template make<VariableWrapper<T>>(std::move(self));
     }
 
-    static sp<VarType> synchronize(sp<VarType> self, sp<Boolean> discarded) {
-        return Ark::instance().applicationContext()->synchronize(std::move(self), std::move(discarded));
+    static sp<VarType> update(sp<VarType> self, sp<Boolean> canceled) {
+        Ark::instance().renderController()->addPreComposeUpdatable(self, std::move(canceled));
+        return self;
+    }
+
+    static sp<VarType> synchronize(sp<VarType> self, sp<Boolean> canceled) {
+        return Ark::instance().renderController()->synchronize(std::move(self), std::move(canceled));
     }
 
     static sp<VarType> floor(sp<VarType> self) {
