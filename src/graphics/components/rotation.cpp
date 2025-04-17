@@ -3,9 +3,10 @@
 #include "core/base/bean_factory.h"
 #include "core/base/constants.h"
 #include "core/impl/variable/variable_dirty_mark.h"
+#include "graphics/base/euler.h"
 
 #include "graphics/base/v3.h"
-#include "graphics/components/quaternion.h"
+#include "graphics/base/quaternion.h"
 #include "graphics/util/vec4_type.h"
 
 namespace ark {
@@ -74,7 +75,7 @@ void Rotation::setRotation(sp<Numeric> theta, sp<Vec3> axis)
     _theta.reset(theta);
     _axis.reset(axis);
 
-    _wrapped = sp<VariableDirtyMark<V4>>::make(sp<Quaternion>::make(std::move(theta), std::move(axis)), *this);
+    _wrapped = sp<VariableDirtyMark<V4>>::make(sp<Vec4>::make<Quaternion>(std::move(theta), std::move(axis)), *this);
 }
 
 void Rotation::setEuler(float pitch, float yaw, float roll)
@@ -87,7 +88,7 @@ void Rotation::setEuler(sp<Numeric> pitch, sp<Numeric> yaw, sp<Numeric> roll)
     _theta.reset(nullptr);
     _axis.reset(nullptr);
 
-    _wrapped = sp<VariableDirtyMark<V4>>::make(sp<Quaternion>::make(std::move(pitch), std::move(yaw), std::move(roll)), *this);
+    _wrapped = sp<VariableDirtyMark<V4>>::make(sp<Vec4>::make<Euler>(std::move(pitch), std::move(yaw), std::move(roll)), *this);
 }
 
 Rotation::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)

@@ -1,4 +1,4 @@
-#include "graphics/components/quaternion.h"
+#include "graphics/base/quaternion.h"
 
 #include <glm/gtx/quaternion.hpp>
 
@@ -48,37 +48,6 @@ private:
     V4 _val;
 };
 
-class EulerRotation final : public Vec4 {
-public:
-    EulerRotation(sp<Numeric> pitch, sp<Numeric> yaw, sp<Numeric> roll)
-        : _pitch(std::move(pitch)), _yaw(std::move(yaw)), _roll(std::move(roll)), _val(updateQuaternion()) {
-    }
-
-    bool update(uint64_t timestamp) override {
-        if(UpdatableUtil::update(timestamp, _pitch, _yaw, _roll)) {
-            _val = updateQuaternion();
-            return true;
-        }
-        return false;
-    }
-
-    V4 val() override {
-        return _val;
-    }
-
-private:
-    V4 updateQuaternion() const {
-        const glm::quat quat(glm::vec3(_pitch->val(), _yaw->val(), _roll->val()));
-        return {quat.x, quat.y, quat.z, quat.w};
-    }
-
-private:
-    sp<Numeric> _pitch;
-    sp<Numeric> _yaw;
-    sp<Numeric> _roll;
-    V4 _val;
-};
-
 struct MatrixQuaternion final : Mat4 {
     MatrixQuaternion(sp<Vec4> quaternion)
         : _quaternion(std::move(quaternion)) {
@@ -110,11 +79,6 @@ Quaternion::Quaternion(sp<Numeric> theta, sp<Vec3> axis)
 {
 }
 
-Quaternion::Quaternion(sp<Numeric> pitch, sp<Numeric> yaw, sp<Numeric> roll)
-    : Wrapper(sp<Vec4>::make<EulerRotation>(std::move(pitch), std::move(yaw), std::move(roll)))
-{
-}
-
 V4 Quaternion::val()
 {
     return _wrapped->val();
@@ -128,11 +92,6 @@ bool Quaternion::update(uint64_t timestamp)
 void Quaternion::setRotation(sp<Numeric> theta, sp<Vec3> axis)
 {
     _wrapped = sp<VariableDirtyMark<V4>>::make(sp<Vec4>::make<AxisRotation>(std::move(theta), std::move(axis)), *this);
-}
-
-void Quaternion::setEuler(sp<Numeric> pitch, sp<Numeric> yaw, sp<Numeric> roll)
-{
-    _wrapped = sp<VariableDirtyMark<V4>>::make(sp<Vec4>::make<EulerRotation>(std::move(pitch), std::move(yaw), std::move(roll)), *this);
 }
 
 sp<Mat4> Quaternion::toMatrix() const

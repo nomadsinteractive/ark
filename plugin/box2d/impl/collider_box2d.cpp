@@ -4,7 +4,7 @@
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/util/boolean_type.h"
 
-#include "graphics/components/quaternion.h"
+#include "graphics/base/quaternion.h"
 #include "graphics/base/rect.h"
 #include "graphics/base/v2.h"
 #include "graphics/components/rotation.h"

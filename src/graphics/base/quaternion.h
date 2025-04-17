@@ -13,14 +13,12 @@ class ARK_API Quaternion final : public Vec4, public Wrapper<Vec4> {
 public:
     Quaternion(sp<Vec4> quaternion);
     Quaternion(sp<Numeric> theta, sp<Vec3> axis);
-    Quaternion(sp<Numeric> pitch, sp<Numeric> yaw, sp<Numeric> roll);
     DEFAULT_COPY_AND_ASSIGN_NOEXCEPT(Quaternion);
 
     V4 val() override;
     bool update(uint64_t timestamp) override;
 
     void setRotation(sp<Numeric> theta, sp<Vec3> axis);
-    void setEuler(sp<Numeric> pitch, sp<Numeric> yaw, sp<Numeric> roll);
 
     sp<Mat4> toMatrix() const;
 };

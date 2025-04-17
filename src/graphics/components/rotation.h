@@ -47,7 +47,7 @@ public:
     void setEuler(sp<Numeric> pitch, sp<Numeric> yaw, sp<Numeric> roll);
 
 //  [[plugin::builder]]
-    class BUILDER : public Builder<Rotation> {
+    class BUILDER final : public Builder<Rotation> {
     public:
         BUILDER(BeanFactory& factory, const document& manifest);
 
@@ -59,7 +59,7 @@ public:
     };
 
 //  [[plugin::builder::by-value]]
-    class DICTIONARY : public Builder<Rotation> {
+    class DICTIONARY final : public Builder<Rotation> {
     public:
         DICTIONARY(BeanFactory& factory, const String& str);
 

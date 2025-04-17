@@ -8,7 +8,7 @@
 #include "core/util/boolean_type.h"
 
 #include "graphics/base/v3.h"
-#include "graphics/components/quaternion.h"
+#include "graphics/base/quaternion.h"
 #include "graphics/util/vec3_type.h"
 
 #include "renderer/base/mesh.h"
