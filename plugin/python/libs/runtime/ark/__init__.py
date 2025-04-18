@@ -2167,6 +2167,10 @@ class Random:
 class Math:
 
     @staticmethod
+    def log2(x):
+        return x
+
+    @staticmethod
     def abs(x):
         return x
 

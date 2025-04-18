@@ -85,7 +85,7 @@ public:
     }
 
     template<typename U> SharedPtr<U> asInstance() const {
-        if(this && _ptr) {
+        if(_ptr) {
             const Box self(Type<T>::id(), getClass(), this, _ptr.get(), [](const void*) {});
             return self.as<U>();
         }

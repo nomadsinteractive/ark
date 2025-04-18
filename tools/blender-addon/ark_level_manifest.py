@@ -106,7 +106,7 @@ class ArkScene:
 class ArkInstanceCollection:
     def __init__(self, _id, collection):
         self._id = _id
-        self._name = '%s/%s' % (collection.library.name, collection.name) if collection.library else collection.name
+        self._name = collection.name
         self._collection = collection
 
     @property
