@@ -33,6 +33,8 @@ public:
 
 //  [[script::bindings::property]]
     const M4& localMatrix() const;
+//  [[script::bindings::property]]
+    M4 globalMatrix() const;
 
 //  [[script::bindings::property]]
     const V3& translation() const;
@@ -43,6 +45,11 @@ public:
 
 //  [[script::bindings::auto]]
     sp<Node> findChildNode(const String& name) const;
+
+//  [[script::bindings::property]]
+    std::pair<V3, V3> localAABB() const;
+
+    void calculateLocalAABB();
 
 private:
     WeakPtr<Node> _parent_node;
@@ -56,6 +63,9 @@ private:
     V3 _scale;
 
     M4 _local_matrix;
+
+    V3 _local_aabb_min;
+    V3 _local_aabb_max;
 };
 
 }

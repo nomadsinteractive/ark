@@ -293,19 +293,19 @@ sp<Numeric> Math::distance(const sp<Vec4>& lvalue, const sp<Vec4>& rvalue)
     return sp<Numeric>::make<VariableOP2<sp<Vec4>, sp<Vec4>, Operators::Distance<V4>>>(lvalue, rvalue);
 }
 
-sp<Numeric> Math::dot(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue)
+sp<Numeric> Math::dot(sp<Vec2> lvalue, sp<Vec2> rvalue)
 {
-    return sp<Numeric>::make<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::Dot<V2>>>(lvalue, rvalue);
+    return sp<Numeric>::make<VariableOP2<sp<Vec2>, sp<Vec2>, Operators::Dot<V2>>>(std::move(lvalue), std::move(rvalue));
 }
 
-sp<Numeric> Math::dot(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue)
+sp<Numeric> Math::dot(sp<Vec3> lvalue, sp<Vec3> rvalue)
 {
-    return sp<Numeric>::make<VariableOP2<sp<Vec3>, sp<Vec3>, Operators::Dot<V3>>>(lvalue, rvalue);
+    return sp<Numeric>::make<VariableOP2<sp<Vec3>, sp<Vec3>, Operators::Dot<V3>>>(std::move(lvalue), std::move(rvalue));
 }
 
-sp<Numeric> Math::dot(const sp<Vec4>& lvalue, const sp<Vec4>& rvalue)
+sp<Numeric> Math::dot(sp<Vec4> lvalue, sp<Vec4> rvalue)
 {
-    return sp<Numeric>::make<VariableOP2<sp<Vec4>, sp<Vec4>, Operators::Dot<V4>>>(lvalue, rvalue);
+    return sp<Numeric>::make<VariableOP2<sp<Vec4>, sp<Vec4>, Operators::Dot<V4>>>(std::move(lvalue), std::move(rvalue));
 }
 
 float Math::lerp(const float a, const float b, const float t)

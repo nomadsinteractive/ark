@@ -307,28 +307,28 @@ class _Var:
     def if_else(self, condition, otherwise):
         pass
 
-    def __int__(self):
+    def __int__(self) -> int:
         return 0
 
-    def __add__(self, other):
+    def __add__(self, other: TYPE_NUMERIC | TYPE_INTEGER | Self) -> Self:
         return 0
 
     def __radd__(self, other):
         pass
 
-    def __mul__(self, other):
+    def __mul__(self, other: TYPE_NUMERIC | TYPE_INTEGER | Self) -> Self:
         pass
 
     def __rmul__(self, other):
         pass
 
-    def __sub__(self, other):
+    def __sub__(self, other: TYPE_NUMERIC | TYPE_INTEGER | Self) -> Self:
         pass
 
     def __rsub__(self, other):
         pass
 
-    def __truediv__(self, other):
+    def __truediv__(self, other: TYPE_NUMERIC | TYPE_INTEGER | Self) -> Self:
         pass
 
     def __mod__(self, other):
@@ -1482,6 +1482,10 @@ class Node:
         return ((0,) * 4, ) * 4
 
     @property
+    def global_matrix(self) -> TYPE_M4:
+        return ((0,) * 4, ) * 4
+
+    @property
     def translation(self) -> TYPE_FLOAT3:
         pass
 
@@ -1491,6 +1495,10 @@ class Node:
 
     @property
     def scale(self) -> TYPE_FLOAT3:
+        pass
+
+    @property
+    def local_aabb(self) -> tuple[TYPE_FLOAT3, TYPE_FLOAT3]:
         pass
 
     def find_child_node(self, name: str) -> Optional['Node']:

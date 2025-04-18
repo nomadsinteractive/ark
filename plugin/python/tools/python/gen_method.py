@@ -289,7 +289,7 @@ class GenMethod(object):
         if r != 'void' and r:
             callstatement = '%s ret = %s' % (acg.strip_key_words(self._return_type, ['virtual']), callstatement)
         calling_lines = [callstatement] + pyret
-        type_checks = [(i, j.gen_type_check('t')) for i, j in enumerate(gen_type_check_args) if j]
+        type_checks = [(i, j.gen_type_check('t', False)) for i, j in enumerate(gen_type_check_args) if j]
         nullptr_check = [f'(obj{i} || {i} >= argc)' for i, j in type_checks if not j]
         if optional_check:
             nullptr_check.extend(f'obj{i}' for i in args_set)

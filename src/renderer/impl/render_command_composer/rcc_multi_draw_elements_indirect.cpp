@@ -234,7 +234,7 @@ sp<Mat4> RCCMultiDrawElementsIndirect::NodeLayoutInstance::makeGlobalTransform(s
     return parentTransform ? Mat4Type::matmul(std::move(parentTransform), std::move(nodeTransform)) : nodeTransform;
 }
 
-RCCMultiDrawElementsIndirect::ModelInstance::ModelInstance(size_t snapshotIndex, const ModelBundle::ModelLayout& modelLayout)
+RCCMultiDrawElementsIndirect::ModelInstance::ModelInstance(const size_t snapshotIndex, const ModelBundle::ModelLayout& modelLayout)
     : _model(modelLayout._model), _snapshot_index(snapshotIndex)
 {
     for(const ModelBundle::NodeLayout& i : modelLayout._node_layouts)
@@ -260,15 +260,15 @@ void RCCMultiDrawElementsIndirect::ModelInstance::toDynamicLayout()
         _node_layout_instances[i._node_id] = std::move(i);
 }
 
-void RCCMultiDrawElementsIndirect::ModelInstance::setNodeTransform(size_t nodeId, const M4& transform)
+void RCCMultiDrawElementsIndirect::ModelInstance::setNodeTransform(const size_t nodeId, const M4& transform)
 {
     const auto iter = _node_layout_instances.find(nodeId);
-    DASSERT(iter != _node_layout_instances.end());
-    DASSERT(iter->second._node_transform);
+    ASSERT(iter != _node_layout_instances.end());
+    ASSERT(iter->second._node_transform);
     iter->second._node_transform->set(transform);
 }
 
-RCCMultiDrawElementsIndirect::NodeInstance::NodeInstance(ModelInstance& modelInstance, HashId nodeId)
+RCCMultiDrawElementsIndirect::NodeInstance::NodeInstance(ModelInstance& modelInstance, const HashId nodeId)
     : _model_instance(modelInstance), _node_id(nodeId)
 {
 }

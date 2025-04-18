@@ -69,7 +69,7 @@ public:
 
     void write(VertexWriter& buf) const;
 
-    std::pair<V3, V3> calcBoundingAABB() const;
+    std::pair<V3, V3> calculateBoundingAABB() const;
 
 private:
     uint32_t _id;

@@ -109,7 +109,7 @@ void Mesh::write(VertexWriter& buf) const
     }
 }
 
-std::pair<V3, V3> Mesh::calcBoundingAABB() const
+std::pair<V3, V3> Mesh::calculateBoundingAABB() const
 {
     V3 aabbMin(std::numeric_limits<float>::max()), aabbMax(std::numeric_limits<float>::min());
 
