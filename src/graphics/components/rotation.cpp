@@ -17,14 +17,14 @@ class Mat4Quaternion final : public Mat4 {
 public:
     Mat4Quaternion(sp<Vec4> quaternion)
         : _quaternion(std::move(quaternion)) {
+        doUpdate();
     }
 
     bool update(const uint64_t timestamp) override
     {
         if(_quaternion->update(timestamp))
         {
-            const V4 quaternion = _quaternion->val();
-            _matrix = {glm::toMat4(glm::quat(quaternion.w(), quaternion.x(), quaternion.y(), quaternion.z()))};
+            doUpdate();
             return true;
         }
         return false;
@@ -33,6 +33,13 @@ public:
     M4 val() override
     {
         return _matrix;
+    }
+
+private:
+    void doUpdate()
+    {
+        const V4 quaternion = _quaternion->val();
+        _matrix = {glm::toMat4(glm::quat(quaternion.w(), quaternion.x(), quaternion.y(), quaternion.z()))};
     }
 
 private:

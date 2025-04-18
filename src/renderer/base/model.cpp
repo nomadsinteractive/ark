@@ -41,7 +41,7 @@ public:
         for(const Mesh& i : _meshes)
         {
             const Vector<element_index_t>& indices = i.indices();
-            uint32_t size = static_cast<uint32_t>(indices.size() * sizeof(element_index_t));
+            const uint32_t size = static_cast<uint32_t>(indices.size() * sizeof(element_index_t));
             uploader.write(indices.data(), size, offset);
             offset += size;
         }
@@ -81,16 +81,9 @@ struct NodeLayout {
         : _node(&node), _transform(parentLayout._transform* node.localMatrix()) {
     }
 
-    void calcTransformedBoudingAABB(const V3& a0, const V3& a1, V3& aabbMin, V3& aabbMax) const {
+    void calculateTransformedBoundingAABB(const V3& a0, const V3& a1, V3& aabbMin, V3& aabbMax) const {
         calcTransformedPosition(a0, aabbMin, aabbMax);
-        // calcTransformedPosition(V3(a0.x(), a0.y(), a1.z()), aabbMin, aabbMax);
-        // calcTransformedPosition(V3(a0.x(), a1.y(), a0.z()), aabbMin, aabbMax);
-        // calcTransformedPosition(V3(a0.x(), a1.y(), a1.z()), aabbMin, aabbMax);
-
         calcTransformedPosition(a1, aabbMin, aabbMax);
-        // calcTransformedPosition(V3(a1.x(), a0.y(), a1.z()), aabbMin, aabbMax);
-        // calcTransformedPosition(V3(a1.x(), a1.y(), a0.z()), aabbMin, aabbMax);
-        // calcTransformedPosition(V3(a1.x(), a1.y(), a1.z()), aabbMin, aabbMax);
     }
 
     void calcTransformedPosition(const V3& p0, V3& aabbMin, V3& aabbMax) const {
@@ -116,7 +109,7 @@ Model::Model(sp<Uploader> indices, sp<Vertices> vertices, sp<Boundaries> content
 
 Model::Model(Vector<sp<Material>> materials, Vector<sp<Mesh>> meshes, sp<Node> rootNode, sp<Boundaries> bounds, sp<Boundaries> occupies, Table<String, sp<Animation>> animations)
     : _indices(sp<InputMeshIndices>::make(meshes)), _vertices(sp<MeshVertices>::make(meshes)), _root_node(std::move(rootNode)), _materials(std::move(materials)), _meshes(std::move(meshes)),
-      _content(bounds ? std::move(bounds) : sp<Boundaries>::make(calcBoundingAABB())), _occupy(occupies ? std::move(occupies) : sp<Boundaries>(_content)), _animations(std::move(animations))
+      _content(bounds ? std::move(bounds) : sp<Boundaries>::make(calculateBoundingAABB())), _occupy(occupies ? std::move(occupies) : sp<Boundaries>(_content)), _animations(std::move(animations))
 {
 }
 
@@ -221,24 +214,17 @@ bool Model::isDiscarded() const
     return !static_cast<bool>(_indices);
 }
 
-Boundaries Model::calcBoundingAABB() const
+Boundaries Model::calculateBoundingAABB() const
 {
-    Map<Mesh*, std::pair<V3, V3>> meshBounds;
-
-    for(const sp<Mesh>& i : _meshes)
-        meshBounds.insert(std::make_pair(i.get(), i->calcBoundingAABB()));
-
-    V3 aabbMin(std::numeric_limits<float>::max()), aabbMax(std::numeric_limits<float>::min());
-
     Vector<NodeLayout> nodeLayouts;
     loadFlatLayouts(_root_node, NodeLayout(), nodeLayouts);
 
+    V3 aabbMin(std::numeric_limits<float>::max()), aabbMax(std::numeric_limits<float>::min());
     for(const NodeLayout& i : nodeLayouts)
-        for(const sp<Mesh>& j : i._node->meshes())
-        {
-            const auto& [p0, p1] = meshBounds.at(j.get());
-            i.calcTransformedBoudingAABB(p0, p1, aabbMin, aabbMax);
-        }
+    {
+        const auto [p0, p1] = i._node->localAABB();
+        i.calculateTransformedBoundingAABB(p0, p1, aabbMin, aabbMax);
+    }
 
     return Boundaries(aabbMin, aabbMax);
 }

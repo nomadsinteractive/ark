@@ -48,6 +48,18 @@ const M4& Node::localMatrix() const
     return _local_matrix;
 }
 
+M4 Node::globalMatrix() const
+{
+    M4 m = _local_matrix;
+    sp<Node> parent = _parent_node.lock();
+    while(parent)
+    {
+        m = MatrixUtil::mul(parent->localMatrix(), m);
+        parent = parent->parentNode();
+    }
+    return m;
+}
+
 const V3& Node::translation() const
 {
     return _translation;
@@ -73,6 +85,24 @@ sp<Node> Node::findChildNode(const String& name) const
             return childHit;
     }
     return nullptr;
+}
+
+std::pair<V3, V3> Node::localAABB() const
+{
+    return {_local_aabb_min, _local_aabb_max};
+}
+
+void Node::calculateLocalAABB()
+{
+    _local_aabb_min = {std::numeric_limits<float>::max()};
+    _local_aabb_max = {std::numeric_limits<float>::min()};
+
+    for(const sp<Mesh>& i : _meshes)
+    {
+        const auto [mMin, mMax] = i->calculateBoundingAABB();
+        _local_aabb_min = {std::min(mMin.x(), _local_aabb_min.x()), std::min(mMin.y(), _local_aabb_min.y()), std::min(mMin.z(), _local_aabb_min.z())};
+        _local_aabb_max = {std::max(mMax.x(), _local_aabb_max.x()), std::max(mMax.y(), _local_aabb_max.y()), std::max(mMax.z(), _local_aabb_max.z())};
+    }
 }
 
 }

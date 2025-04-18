@@ -558,6 +558,7 @@ sp<Node> GltfImporter::loadNode(WeakPtr<Node> parentNode, const int32_t nodeId)
 		ASSERT(node.mesh < _primitives_in_mesh.size());
 		for(const uint32_t i : _primitives_in_mesh.at(node.mesh))
 			n->addMesh(_primitives.at(i));
+		n->calculateLocalAABB();
 	}
 
 	for(const int32_t i : node.children)

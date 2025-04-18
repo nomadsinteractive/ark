@@ -107,23 +107,25 @@ def gen_method_call_arg(name: str, gen_arg, argtype: str):
 
 
 class GenConverter:
-    def __init__(self, check_func: str):
+    def __init__(self, check_func: str, overloaded_check_func: str = 'true'):
         self._check_func = check_func
+        self._overloaded_check_func = overloaded_check_func
 
-    def check(self, var):
-        return self._check_func.format(var)
+    def check(self, var, is_overloaded_func: bool) -> str:
+        check_func = self._check_func.format(var)
+        return f'{self._overloaded_check_func.format(var)} && {check_func}' if is_overloaded_func else check_func
 
 
-ARK_PY_OVERLOADED_ARGUMENT_TYPE_CHECKERS = {
-    'bool': GenConverter('!PythonExtension::instance().isInstance<Boolean>({0})'),
+ARK_PY_ARGUMENT_TYPE_CHECKERS = {
+    'bool': GenConverter('true', '!PythonExtension::instance().isInstance<Boolean>({0})'),
     'int32_t': GenConverter('PyBridge::isPyLongExact({0})'),
     'uint32_t': GenConverter('PyBridge::isPyLongExact({0})'),
     'float': GenConverter('(PyBridge::isPyLongExact({0}) || PyBridge::isPyFloatExact({0}))'),
-    'std::vector<float>': GenConverter('(PyBridge::isPySequence({0})'),
-    'std::vector<int32_t>': GenConverter('(PyBridge::isPySequence({0})'),
-    'V2': GenConverter('(PyBridge::isPySequence({0}) && PyBridge::PyObject_Size({0}) == 2)'),
-    'V3': GenConverter('(PyBridge::isPySequence({0}) && PyBridge::PyObject_Size({0}) == 3)'),
-    'V4': GenConverter('(PyBridge::isPySequence({0}) && PyBridge::PyObject_Size({0}) == 4)'),
+    'std::vector<float>': GenConverter('PyBridge::isPySequence({0})'),
+    'std::vector<int32_t>': GenConverter('PyBridge::isPySequence({0})'),
+    'V2': GenConverter('PyBridge::isPySequence({0}) && PyBridge::PyObject_Size({0}) == 2', '!PythonExtension::instance().isInstance<Vec2>({0})'),
+    'V3': GenConverter('PyBridge::isPySequence({0}) && PyBridge::PyObject_Size({0}) == 3', '!PythonExtension::instance().isInstance<Vec3>({0})'),
+    'V4': GenConverter('PyBridge::isPySequence({0}) && PyBridge::PyObject_Size({0}) == 4', '!PythonExtension::instance().isInstance<Vec4>({0})'),
     'std::wstring': GenConverter('PyBridge::isPyUnicodeExact({0})')
 }
 
@@ -210,9 +212,9 @@ class GenArgument:
     def type_compare(self, *typenames) -> bool:
         return any(acg.type_compare(i, self._str) for i in typenames)
 
-    def gen_type_check(self, varname):
-        if self._accept_type in ARK_PY_OVERLOADED_ARGUMENT_TYPE_CHECKERS:
-            return "%s && %s" % (varname, ARK_PY_OVERLOADED_ARGUMENT_TYPE_CHECKERS[self._accept_type].check(varname))
+    def gen_type_check(self, varname, is_overloaded_func: bool):
+        if self._accept_type in ARK_PY_ARGUMENT_TYPE_CHECKERS:
+            return f'{varname} && {ARK_PY_ARGUMENT_TYPE_CHECKERS[self._accept_type].check(varname, is_overloaded_func)}'
         return None
 
     def gen_declare(self, gen_method, objname, argname, extract_cast=False, optional_check=False):
@@ -284,7 +286,7 @@ def create_overloaded_method_type(base_type, **kwargs):
             not_overloaded_declar = [j.gen_declare(self, 'obj%d' % i, 'arg%d' % i, not m0.check_argument_type) for i, j in enumerate(not_overloaded_args) if j]
             self._gen_convert_args_code(lines, not_overloaded_declar)
             for i in self._overloaded_methods:
-                type_checks = [k.gen_type_check('arg%d' % j) for j, k, l in zip(range(len(i.arguments)), i.arguments, not_overloaded_args) if not l]
+                type_checks = [k.gen_type_check('arg%d' % j, True) for j, k, l in zip(range(len(i.arguments)), i.arguments, not_overloaded_args) if not l]
                 lines.extend(['if(%s)' % ' && '.join(([j for j in type_checks if j]) or ['true']), '{'])
                 body_lines = []
                 overloaded_args = [None if j else k for j, k in zip(not_overloaded_args, i.arguments)]
@@ -293,7 +295,9 @@ def create_overloaded_method_type(base_type, **kwargs):
                 lines.append('}')
             return_type = m0.err_return_value
             if m0.check_argument_type:
-                lines.append('PyBridge::setTypeErrString(Strings::sprintf("Calling overloaded method(%%s::%%s) failed, no arguments matched", "%s", "%s").c_str());' % (genclass.name, self._name))
+                lines.append(f'constexpr char errstr[] = "Calling overloaded method({genclass.name}::{self._name}) failed, no arguments matched";')
+                lines.append('PyBridge::setTypeErrString(errstr);')
+                lines.append('DFATAL(errstr);')
             lines.append(return_type + ';')
 
         def add_overloaded_method(self, method):

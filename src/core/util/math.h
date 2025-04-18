@@ -220,11 +220,11 @@ public:
     static sp<Numeric> distance(const sp<Vec4>& lvalue, const sp<Vec4>& rvalue);
 
 //  [[script::bindings::auto]]
-    static sp<Numeric> dot(const sp<Vec2>& lvalue, const sp<Vec2>& rvalue);
+    static sp<Numeric> dot(sp<Vec2> lvalue, sp<Vec2> rvalue);
 //  [[script::bindings::auto]]
-    static sp<Numeric> dot(const sp<Vec3>& lvalue, const sp<Vec3>& rvalue);
+    static sp<Numeric> dot(sp<Vec3> lvalue, sp<Vec3> rvalue);
 //  [[script::bindings::auto]]
-    static sp<Numeric> dot(const sp<Vec4>& lvalue, const sp<Vec4>& rvalue);
+    static sp<Numeric> dot(sp<Vec4> lvalue, sp<Vec4> rvalue);
 
 //  [[script::bindings::auto]]
     static float lerp(float a, float b, float t);

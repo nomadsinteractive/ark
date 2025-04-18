@@ -66,7 +66,7 @@ private:
 
         sp<Model> _model;
         size_t _snapshot_index;
-        std::map<HashId, NodeLayoutInstance> _node_layout_instances;
+        Map<HashId, NodeLayoutInstance> _node_layout_instances;
     };
 
     struct IndirectCmds {

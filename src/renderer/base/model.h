@@ -80,7 +80,7 @@ private:
             loadFlatLayouts(childNode, layout, nodeLayouts);
     }
 
-    Boundaries calcBoundingAABB() const;
+    Boundaries calculateBoundingAABB() const;
 
 private:
     sp<Uploader> _indices;

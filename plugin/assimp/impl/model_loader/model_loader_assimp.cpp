@@ -344,6 +344,7 @@ sp<Node> ModelImporterAssimp::loadNodeHierarchy(WeakPtr<Node> parentNode, const 
         DASSERT(node->mMeshes[i] < meshes.size());
         n->addMesh(meshes[node->mMeshes[i]]);
     }
+    n->calculateLocalAABB();
     for(uint32_t i = 0; i < node->mNumChildren; ++i)
         n->childNodes().push_back(loadNodeHierarchy(n, node->mChildren[i], meshes));
     return n;
