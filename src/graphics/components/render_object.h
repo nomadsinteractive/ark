@@ -152,7 +152,7 @@ private:
     SafeVar<Boolean> _visible;
     SafeVar<Boolean> _discarded;
 
-    sp<WithTag> _with_tag;
+    sp<Tags> _tags;
 
     Timestamp _timestamp;
 };

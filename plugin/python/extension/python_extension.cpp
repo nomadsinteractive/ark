@@ -99,13 +99,28 @@ bool PythonExtension::isPyObject(const TypeId type) const
     return (type == Type<PyInstance>::id()) || _type_by_id.find(type) != _type_by_id.end();
 }
 
+void PythonExtension::printStack() const
+{
+    const PyInstance module = PyInstance::steal(PyImport_ImportModule("traceback"));
+    const PyInstance callable = PyInstance::steal(PyObject_GetAttrString(module.pyObject(), "print_stack"));
+    const PyInstance args = PyInstance::steal(PyTuple_New(0));
+    const PyInstance kwargs = PyInstance::steal(PyDict_New());
+    const PyInstance r = PyInstance::steal(PyObject_Call(callable.pyObject(), args.pyObject(), kwargs.pyObject()));
+    flushErr();
+}
+
 void PythonExtension::logErr() const
 {
     PyErr_Print();
+    flushErr();
+    PyErr_Clear();
+}
+
+void PythonExtension::flushErr() const
+{
     PyObject* ferr = PySys_GetObject("stderr");
     PyObject* ret = ferr ? PyObject_CallMethod(ferr, "flush", nullptr) : nullptr;
     Py_XDECREF(ret);
-    PyErr_Clear();
 }
 
 bool PythonExtension::exceptErr(PyObject* type) const

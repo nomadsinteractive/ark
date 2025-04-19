@@ -171,12 +171,12 @@ class GenMethod(object):
     def _gen_calling_body(self, genclass, calling_lines):
         return calling_lines
 
-    def gen_return_statement(self, return_type, py_return):
+    def gen_return_statement(self, return_type: str, py_return: str):
         if acg.type_compare(return_type, py_return):
             return ['return ret;']
 
         if py_return != 'PyObject*':
-            return ['return %s;' % gen_cast_call(py_return, 'ret')]
+            return [f'return {0 if return_type == "void" else gen_cast_call(py_return, "ret")};']
 
         if return_type == 'void':
             return [f'{PY_RETURN_NONE};']
@@ -400,10 +400,10 @@ class GenOperatorMethod(GenMethod):
         if not is_call_operator:
             self._arguments = self._arguments if self._is_static else self._arguments[1:]
         self._operator = operator
-        self._return_int = self._return_type == 'bool'
+        self._return_bool = self._return_type == 'bool'
 
     def gen_py_return(self):
-        return 'int32_t' if self._return_int else 'PyObject*'
+        return 'int32_t' if self._return_bool else 'PyObject*'
 
     def need_unpack_statement(self):
         return not self._is_static and super().need_unpack_statement()
@@ -441,7 +441,7 @@ class GenOperatorMethod(GenMethod):
 
     @property
     def err_return_value(self):
-        return 'return 0' if self._return_int else 'Py_RETURN_NOTIMPLEMENTED'
+        return 'return 0' if self._return_bool else 'Py_RETURN_NOTIMPLEMENTED'
 
     @property
     def operator(self):

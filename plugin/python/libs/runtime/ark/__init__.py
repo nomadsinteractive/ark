@@ -397,13 +397,17 @@ class Behavior:
 
 
 class Tags:
-    def __init__(self):
+    def __init__(self, tag: Any = None):
         pass
 
-    def set_tag(self, tag: Any, type_id: int = 0):
+    @property
+    def tag(self) -> Any:
+        return None
+
+    def __getitem__(self, item: Any) -> Any:
         pass
 
-    def get_tag(self, type_id: int = 0) -> Any:
+    def __setitem__(self, key: Any, value: Any):
         pass
 
 
@@ -3025,19 +3029,6 @@ class WithId:
     @property
     def id(self) -> int:
         return 0
-
-
-class WithTag:
-    def __init__(self, tag: Any):
-        pass
-
-    @property
-    def tag(self) -> Any:
-        return None
-
-    @tag.setter
-    def tag(self, tag: Any):
-        pass
 
 
 class CollisionCallback:

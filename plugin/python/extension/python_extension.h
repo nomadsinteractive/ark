@@ -66,7 +66,9 @@ public:
 
     const sp<ReferenceManager>& referenceManager() const;
 
+    void printStack() const;
     void logErr() const;
+    void flushErr() const;
     bool exceptErr(PyObject* type) const;
 
     template<typename T> void addModulePlugin(T& plugin, Interpreter& script, const char* name, const char* documentation, const PyMethodDef* methods) {

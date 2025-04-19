@@ -41,7 +41,7 @@ public:
         SafeVar<Vec4> _rotation;
         sp<CollisionFilter> _collision_filter;
         sp<CollisionCallback> _collision_callback;
-        sp<WithTag> _with_tag;
+        sp<Tags> _tags;
     };
 
     struct Impl {

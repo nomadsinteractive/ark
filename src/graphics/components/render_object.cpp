@@ -3,7 +3,6 @@
 #include "core/base/bean_factory.h"
 #include "core/base/named_hash.h"
 #include "core/components/with_id.h"
-#include "core/components/with_tag.h"
 #include "core/impl/variable/variable_wrapper.h"
 #include "core/inf/variable.h"
 #include "core/inf/wirable.h"
@@ -20,6 +19,7 @@
 #include "renderer/components/varyings.h"
 
 #include "app/view/view.h"
+#include "core/components/tags.h"
 
 namespace ark {
 
@@ -161,15 +161,15 @@ void RenderObject::setVaryings(sp<Varyings> varyings)
 
 Box RenderObject::tag() const
 {
-    return _with_tag ? _with_tag->tag() : nullptr;
+    return _tags ? _tags->tag() : Box();
 }
 
 void RenderObject::setTag(Box tag)
 {
-    if(!_with_tag)
-        _with_tag = sp<WithTag>::make(std::move(tag));
+    if(_tags)
+        _tags->setTag(0, std::move(tag));
     else
-        _with_tag->setTag(std::move(tag));
+        _tags = sp<Tags>::make(std::move(tag));
 }
 
 sp<Boolean> RenderObject::discarded()
@@ -278,8 +278,8 @@ void RenderObject::onWire(const WiringContext& context, const Box& self)
     if(sp<Boolean> discarded = context.getComponent<Discarded>())
         setDiscarded(std::move(discarded));
 
-    if(auto withTag = context.getComponent<WithTag>())
-        _with_tag = std::move(withTag);
+    if(auto tags = context.getComponent<Tags>())
+        _tags = std::move(tags);
 
     if(const auto layer = context.getComponent<Layer>())
     {

@@ -3,7 +3,7 @@
 #include "core/base/bean_factory.h"
 #include "core/base/ref_manager.h"
 #include "core/base/string.h"
-#include "core/components/with_tag.h"
+#include "core/components/tags.h"
 #include "core/inf/variable.h"
 #include "core/types/global.h"
 #include "core/types/ref.h"
@@ -80,7 +80,7 @@ void Rigidbody::onWire(const WiringContext& context, const Box& self)
         _impl = collider->createBody(impl._stub->_type, std::move(shape), impl._stub->_position.wrapped(), impl._stub->_rotation.wrapped(), std::move(impl._stub->_collision_filter), impl._stub->_ref->discarded().wrapped());
         _impl._stub->_collision_callback = std::move(impl._stub->_collision_callback);
         _impl._stub->_collision_filter = std::move(impl._stub->_collision_filter);
-        _impl._stub->_with_tag = std::move(impl._stub->_with_tag);
+        _impl._stub->_tags = std::move(impl._stub->_tags);
         _is_shadow = false;
     }
 
@@ -88,8 +88,8 @@ void Rigidbody::onWire(const WiringContext& context, const Box& self)
         if(auto collisionCallback = context.getComponent<CollisionCallback>())
             _impl._stub->_collision_callback = std::move(collisionCallback);
 
-    if(sp<WithTag> withTag = context.getComponent<WithTag>())
-        _impl._stub->_with_tag = std::move(withTag);
+    if(sp<Tags> tags = context.getComponent<Tags>())
+        _impl._stub->_tags = std::move(tags);
 }
 
 RefId Rigidbody::id() const
@@ -144,15 +144,15 @@ void Rigidbody::setCollisionFilter(sp<CollisionFilter> collisionFilter)
 
 Box Rigidbody::tag() const
 {
-    return _impl._stub->_with_tag ? _impl._stub->_with_tag->tag() : nullptr;
+    return _impl._stub->_tags ? _impl._stub->_tags->tag() : nullptr;
 }
 
 void Rigidbody::setTag(Box tag)
 {
-    if(_impl._stub->_with_tag)
-        _impl._stub->_with_tag->setTag(std::move(tag));
+    if(_impl._stub->_tags)
+        _impl._stub->_tags->setTag(0, std::move(tag));
     else
-        _impl._stub->_with_tag = sp<WithTag>::make(std::move(tag));
+        _impl._stub->_tags = sp<Tags>::make(std::move(tag));
 }
 
 const Box& Rigidbody::impl() const

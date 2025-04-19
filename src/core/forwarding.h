@@ -96,6 +96,7 @@ class String;
 class StringBundle;
 class StringBuffer;
 class StringTable;
+class Tags;
 class Thread;
 class Traits;
 class Ref;
@@ -105,7 +106,6 @@ class UpdatableWrapper;
 class UploaderWrapper;
 class Visibility;
 class Wirable;
-class WithTag;
 class Writable;
 
 typedef Dictionary<Box> BoxBundle;

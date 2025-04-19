@@ -1,10 +1,21 @@
-#include "app/components/tags.h"
+#include "core/components/tags.h"
 
 #include "core/types/box.h"
 
 namespace ark {
 
-void Tags::setTag(Box tag, const uint64_t typeId)
+Tags::Tags(Box tag)
+{
+    if(tag)
+        setTag(0, std::move(tag));
+}
+
+Box Tags::tag() const
+{
+    return getTag(0);
+}
+
+void Tags::setTag(const uint64_t typeId, Box tag)
 {
     _tags[typeId] = std::move(tag);
 }

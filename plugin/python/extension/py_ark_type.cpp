@@ -12,7 +12,7 @@ namespace ark::plugin::python {
 
 namespace {
 
-PyObject* __richcmp__(PyArkType::Instance* obj1, PyObject* obj2, int op)
+PyObject* __richcmp__(PyArkType::Instance* obj1, PyObject* obj2, const int32_t op)
 {
     if(PyIndex_Check(reinterpret_cast<PyObject*>(obj1)) && PyIndex_Check(obj2))
     {

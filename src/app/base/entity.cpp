@@ -1,11 +1,11 @@
 #include "entity.h"
 
 #include "core/components/discarded.h"
-#include "core/components/with_tag.h"
 #include "core/inf/wirable.h"
 
 #include "core/base/constants.h"
 #include "core/base/ref_manager.h"
+#include "core/components/tags.h"
 #include "core/components/with_id.h"
 #include "core/types/global.h"
 
@@ -140,8 +140,8 @@ Optional<Box> Entity::getComponent(const TypeId typeId) const
 
 Box Entity::tag() const
 {
-    if(const sp<WithTag> withTag = _components.get<WithTag>())
-        return withTag->tag();
+    if(const sp<Tags> tags = _components.get<Tags>())
+        return tags->tag();
     return {};
 }
 

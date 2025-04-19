@@ -296,7 +296,7 @@ def create_overloaded_method_type(base_type, **kwargs):
             return_type = m0.err_return_value
             if m0.check_argument_type:
                 lines.append(f'constexpr char errstr[] = "Calling overloaded method({genclass.name}::{self._name}) failed, no arguments matched";')
-                lines.append('PyBridge::setTypeErrString(errstr);')
+                lines.append('PyBridge::setRuntimeErrString(errstr);')
                 lines.append('DFATAL(errstr);')
             lines.append(return_type + ';')
 
