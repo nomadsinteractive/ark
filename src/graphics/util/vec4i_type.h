@@ -2,6 +2,7 @@
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
+#include "core/impl/builder/safe_builder.h"
 #include "core/inf/variable.h"
 #include "core/types/optional.h"
 #include "core/types/shared_ptr.h"
@@ -26,6 +27,29 @@ public:
 //  [[script::bindings::seq(get)]]
     static Optional<int32_t> getItem(const sp<Vec4i>& self, ptrdiff_t index);
 
+
+//  [[plugin::builder]]
+    class BUILDER final : public Builder<Vec4i> {
+    public:
+        BUILDER(BeanFactory& factory, const document& manifest);
+
+        sp<Vec4i> build(const Scope& args) override;
+
+    private:
+        SafeBuilder<Integer> _x, _y, _z, _w;
+        sp<Builder<Vec4i>> _value;
+    };
+
+//  [[plugin::builder::by-value]]
+    class DICTIONARY final : public Builder<Vec4i> {
+    public:
+        DICTIONARY(BeanFactory& factory, const String& expr);
+
+        sp<Vec4i> build(const Scope& args) override;
+
+    private:
+        sp<Builder<Integer>> _x, _y, _z, _w;
+    };
 };
 
 }

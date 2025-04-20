@@ -1,5 +1,6 @@
 #include "graphics/util/vec4i_type.h"
 
+#include "core/base/bean_factory.h"
 #include "core/util/updatable_util.h"
 
 namespace ark {
@@ -58,9 +59,33 @@ size_t Vec4iType::len(const sp<Vec4i>& /*self*/)
     return 4;
 }
 
-Optional<int32_t> Vec4iType::getItem(const sp<Vec4i>& self, ptrdiff_t index)
+Optional<int32_t> Vec4iType::getItem(const sp<Vec4i>& self, const ptrdiff_t index)
 {
     return {self->val()[index]};
 }
 
+Vec4iType::BUILDER::BUILDER(BeanFactory& factory, const document& manifest)
+    : _x(factory.getBuilder<Integer>(manifest, "x")), _y(factory.getBuilder<Integer>(manifest, "y")), _z(factory.getBuilder<Integer>(manifest, "z")), _w(factory.getBuilder<Integer>(manifest, "w")),
+      _value(factory.getBuilder<Vec4i>(manifest, "value"))
+{
+}
+
+sp<Vec4i> Vec4iType::BUILDER::build(const Scope& args)
+{
+    if(_value)
+        return _value->build(args);
+    return Vec4iType::create(_x.build(args), _y.build(args), _z.build(args), _w.build(args));
+}
+
+Vec4iType::DICTIONARY::DICTIONARY(BeanFactory& factory, const String& expr)
+{
+    factory.expand(expr, _x, _y, _z, _w);
+}
+
+sp<Vec4i> Vec4iType::DICTIONARY::build(const Scope& args)
+{
+    return Vec4iType::create(_x->build(args), _y->build(args), _z->build(args), _w->build(args));
+}
+
+    
 }

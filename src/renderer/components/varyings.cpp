@@ -187,12 +187,12 @@ sp<Varyings> Varyings::BUILDER::build(const Scope& args)
 
     const sp<Varyings> varyings = sp<Varyings>::make();
     for(const UploaderBuilder& i : _uploader_builders)
-        varyings->setSlotUploader(i._name,  i._input->build(args));
+        varyings->setSlotUploader(Strings::capitalizeFirst(i._name),  i._uploader->build(args));
     return varyings;
 }
 
 Varyings::BUILDER::UploaderBuilder::UploaderBuilder(BeanFactory& factory, const document& manifest)
-    : _name(Documents::ensureAttribute(manifest, constants::NAME)), _input(factory.ensureBuilderByTypeValue<Uploader>(Documents::ensureAttribute(manifest, constants::TYPE),
+    : _name(Documents::ensureAttribute(manifest, constants::NAME)), _uploader(factory.ensureBuilderByTypeValue<Uploader>(Documents::ensureAttribute(manifest, constants::TYPE),
                                                                                                                                Documents::ensureAttribute(manifest, constants::VALUE)))
 {
 }

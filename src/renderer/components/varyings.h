@@ -104,7 +104,7 @@ public:
             DEFAULT_COPY_AND_ASSIGN(UploaderBuilder);
 
             String _name;
-            sp<Builder<Uploader>> _input;
+            sp<Builder<Uploader>> _uploader;
         };
 
     public:

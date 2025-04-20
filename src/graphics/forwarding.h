@@ -1,5 +1,7 @@
 #pragma once
 
+#include <array>
+
 #include "core/forwarding.h"
 
 namespace ark {
