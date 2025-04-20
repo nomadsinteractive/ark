@@ -117,8 +117,6 @@ public:
 //  [[script::bindings::classmethod]]
     static sp<Vec4> wrap(sp<Vec4> self);
 //  [[script::bindings::classmethod]]
-    static sp<Vec4> update(sp<Vec4> self, sp<Boolean> canceled = nullptr);
-//  [[script::bindings::classmethod]]
     static sp<Vec4> synchronize(sp<Vec4> self, sp<Boolean> canceled = nullptr);
 
 //  [[script::bindings::classmethod]]

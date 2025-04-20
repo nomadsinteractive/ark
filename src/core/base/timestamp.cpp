@@ -11,6 +11,9 @@ Timestamp::Timestamp()
 
 bool Timestamp::update(const uint64_t timestamp) const
 {
+    if(timestamp == 0)
+        return true;
+
     if(_last_modified >= timestamp)
     {
         _last_modified = timestamp;

@@ -33,6 +33,7 @@ public:
     };
 
     static T val(const sp<VarType>& self) {
+        self->update(0);
         return self->val();
     }
 
@@ -193,7 +194,7 @@ public:
         return DIMENSION;
     }
 
-    static Optional<float> getItem(const sp<VarType>& self, ptrdiff_t idx) {
+    static Optional<float> getItem(const sp<VarType>& self, const ptrdiff_t idx) {
         return idx < DIMENSION ? Optional<float>(self->val()[idx]) : Optional<float>();
     }
 
@@ -215,16 +216,11 @@ public:
     }
 
     static sp<VarType> freeze(const sp<VarType>& self) {
-        return self ? sp<VarType>::template make<typename VarType::Const>(self->val()) : nullptr;
+        return self ? sp<VarType>::template make<typename VarType::Const>(val(self)) : nullptr;
     }
 
     static sp<VarType> wrap(sp<VarType> self) {
         return sp<VarType>::template make<VariableWrapper<T>>(std::move(self));
-    }
-
-    static sp<VarType> update(sp<VarType> self, sp<Boolean> canceled) {
-        Ark::instance().renderController()->addPreComposeUpdatable(self, std::move(canceled));
-        return self;
     }
 
     static sp<VarType> synchronize(sp<VarType> self, sp<Boolean> canceled) {

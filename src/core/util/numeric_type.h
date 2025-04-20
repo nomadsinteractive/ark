@@ -101,8 +101,6 @@ public:
 //  [[script::bindings::classmethod]]
     static sp<Numeric> wrap(sp<Numeric> self);
 //  [[script::bindings::classmethod]]
-    static sp<Numeric> update(sp<Numeric> self, sp<Boolean> canceled = nullptr);
-//  [[script::bindings::classmethod]]
     static sp<Numeric> synchronize(sp<Numeric> self, sp<Boolean> canceled = nullptr);
 
 //  [[script::bindings::classmethod]]

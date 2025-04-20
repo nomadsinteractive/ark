@@ -283,9 +283,6 @@ class _Var:
     def wrap(self):
         pass
 
-    def update(self, canceled: Optional["Boolean"] = None) -> Self:
-        pass
-
     def clamp(self, a, b):
         pass
 

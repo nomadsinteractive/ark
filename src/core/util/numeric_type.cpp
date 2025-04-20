@@ -236,12 +236,6 @@ sp<Numeric> NumericType::wrap(sp<Numeric> self)
     return sp<Numeric>::make<NumericWrapper>(std::move(self));
 }
 
-sp<Numeric> NumericType::update(sp<Numeric> self, sp<Boolean> canceled)
-{
-    Ark::instance().renderController()->addPreComposeUpdatable(self, std::move(canceled));
-    return self;
-}
-
 sp<Numeric> NumericType::synchronize(sp<Numeric> self, sp<Boolean> canceled)
 {
     return Ark::instance().renderController()->synchronize(std::move(self), std::move(canceled));
