@@ -1,13 +1,14 @@
 #include "graphics/util/vec4i_type.h"
 
 #include "core/base/bean_factory.h"
+#include "core/types/implements.h"
 #include "core/util/updatable_util.h"
 
 namespace ark {
 
 namespace {
 
-class Vec4iImpl final : public Vec4i {
+class Vec4iImpl final : public Vec4i, Implements<Vec4iImpl, Vec4i> {
 public:
     Vec4iImpl(sp<Integer> x)
         : _x(x), _y(x), _z(x), _w(std::move(x)) {

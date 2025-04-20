@@ -2,6 +2,7 @@
 
 #include "core/forwarding.h"
 #include "core/base/api.h"
+#include "core/base/scope.h"
 #include "core/base/string.h"
 #include "core/base/timestamp.h"
 #include "core/inf/array.h"
@@ -69,7 +70,7 @@ public:
 
 public:
 //  [[script::bindings::auto]]
-    Varyings() = default;
+    Varyings(const Scope& kwargs = {});
     Varyings(const PipelineLayout& pipelineLayout);
 
     bool update(uint64_t timestamp);
@@ -88,12 +89,21 @@ public:
 //  [[script::bindings::setprop]]
     void setProperty(const String& name, sp<Vec4> var);
 //  [[script::bindings::setprop]]
+    void setProperty(const String& name, sp<Vec4i> var);
+//  [[script::bindings::setprop]]
     void setProperty(const String& name, sp<Mat4> var);
 
 //  [[script::bindings::map(get)]]
     sp<Varyings> subscribe(const String& name);
 
     Snapshot snapshot(const PipelineLayout& pipelineLayout, Allocator& allocator);
+
+    template<typename T> void setProperty(const String& name, sp<Variable<T>> var) {
+        String cname = Strings::capitalizeFirst(name);
+        _properties[cname] = Box(var);
+        setSlotUploader(std::move(cname), sp<Uploader>::make<UploaderOfVariable<T>>(std::move(var)));
+        _timestamp.markDirty();
+    }
 
 //  [[plugin::builder]]
     class BUILDER final : public Builder<Varyings> {
@@ -117,13 +127,6 @@ public:
     };
 
 private:
-    template<typename T> void setProperty(const String& name, sp<Variable<T>> var) {
-        String cname = Strings::capitalizeFirst(name);
-        _properties[cname] = Box(var);
-        setSlotUploader(std::move(cname), sp<Uploader>::make<UploaderOfVariable<T>>(std::move(var)));
-        _timestamp.markDirty();
-    }
-
     void setSlotUploader(const String& name, sp<Uploader> uploader);
 
 private:

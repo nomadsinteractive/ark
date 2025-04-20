@@ -51,6 +51,23 @@ String findNearestAttribute(const PipelineLayout& shaderLayout, const String& na
     return nearest;
 }
 
+template<typename T, typename... Args> void setVaryingProperties(Varyings& varyings, const String& name, const Box& value)
+{
+    if(sp<Variable<T>> var = value.as<Variable<T>>())
+        return varyings.setProperty<T>(name, std::move(var));
+
+    if constexpr(sizeof...(Args) > 0)
+        return setVaryingProperties<Args...>(varyings, name, value);
+    FATAL("Cannot set property \"%s\", all option types tried out.", name.c_str());
+}
+
+}
+
+
+Varyings::Varyings(const Scope& kwargs)
+{
+    for(const auto& [k, v] : kwargs.variables())
+        setVaryingProperties<float, int32_t, V2, V3, V4, V4i, M3, M4>(*this, k, v);
 }
 
 Varyings::Varyings(const PipelineLayout& pipelineLayout)
@@ -121,6 +138,11 @@ void Varyings::setProperty(const String& name, sp<Vec3> var)
 void Varyings::setProperty(const String& name, sp<Vec4> var)
 {
     setProperty<V4>(name, std::move(var));
+}
+
+void Varyings::setProperty(const String& name, sp<Vec4i> var)
+{
+    setProperty<V4i>(name, std::move(var));
 }
 
 void Varyings::setProperty(const String& name, sp<Mat4> var)

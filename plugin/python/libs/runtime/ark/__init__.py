@@ -1118,6 +1118,11 @@ class Discarded(Boolean):
         return False
 
 
+class Vec4i:
+    def __init__(self, x: TYPE_INTEGER, y: TYPE_INTEGER, z: TYPE_INTEGER, w: TYPE_INTEGER):
+        pass
+
+
 class Vec2(_Var):
     def __init__(self, x: TYPE_NUMERIC, y: Optional[TYPE_NUMERIC] = None):
         self._x = x
@@ -2580,7 +2585,7 @@ class Color(Vec4):
 
 
 class Varyings:
-    def __init__(self):
+    def __init__(self, **kwargs):
         pass
 
     def __setattr__(self, key: str, value):
