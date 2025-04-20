@@ -5,7 +5,6 @@
 namespace ark {
 
 class Alphabet;
-class RotationAxisTheta;
 class Bitmap;
 class Boundaries;
 class Bounds;
@@ -13,6 +12,7 @@ class Camera;
 class GlyphMaker;
 class Color;
 class DrawDecorator;
+class RotationAxisTheta;
 class RotationEuler;
 class Font;
 class Glyph;
@@ -42,7 +42,6 @@ class RenderView;
 class RenderRequest;
 class Renderer;
 class RenderGroup;
-class RenderLayer;
 class RenderLayerSnapshot;
 class Rotation;
 class Size;
@@ -85,6 +84,10 @@ typedef Variable<M4> Mat4;
 typedef Variable<V2> Vec2;
 typedef Variable<V3> Vec3;
 typedef Variable<V4> Vec4;
+
+typedef Variable<V2i> Vec2i;
+typedef Variable<V3i> Vec3i;
+typedef Variable<V4i> Vec4i;
 
 typedef VariableWrapper<M3> Mat3Wrapper;
 typedef VariableWrapper<M4> Mat4Wrapper;

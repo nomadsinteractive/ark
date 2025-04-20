@@ -253,7 +253,7 @@ const Vector<ShaderPreprocessor::Parameter>& ShaderPreprocessor::args() const
 
 void ShaderPreprocessor::inDeclare(const String& type, const String& name)
 {
-    _declaration_ins.declare(type, inVarPrefix(), name, "", nullptr, _shader_stage == enums::SHADER_STAGE_BIT_FRAGMENT && (type == "int" || type == "uint"));
+    _declaration_ins.declare(type, inVarPrefix(), name, "", nullptr, _shader_stage == enums::SHADER_STAGE_BIT_FRAGMENT && (type == "int" || type == "uint" || type.startsWith("ivec")));
 }
 
 void ShaderPreprocessor::outDeclare(const String& type, const String& name)
