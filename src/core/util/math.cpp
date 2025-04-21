@@ -119,6 +119,11 @@ uint32_t Math::log2(uint32_t x)
     return tab32[static_cast<uint32_t>((x * 0x07C4ACDD) >> 27)];
 }
 
+int32_t Math::abs(const int32_t x)
+{
+    return std::abs(x);
+}
+
 float Math::abs(const float x)
 {
     return std::abs(x);

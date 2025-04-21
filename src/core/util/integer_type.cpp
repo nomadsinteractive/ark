@@ -132,14 +132,19 @@ sp<Integer> IntegerType::negative(sp<Integer> self)
     return sp<Integer>::make<VariableOP1<int32_t>>(Operators::Neg<int32_t>(), std::move(self));
 }
 
+sp<Integer> IntegerType::absolute(sp<Integer> self)
+{
+    return sp<Integer>::make<VariableOP1<int32_t>>(Operators::Abs<int32_t>(), std::move(self));
+}
+
 int32_t IntegerType::toInt32(const sp<Integer>& self)
 {
-    return self->val();
+    return val(self);
 }
 
 float IntegerType::toFloat(const sp<Integer>& self)
 {
-    return static_cast<float>(self->val());
+    return static_cast<float>(val(self));
 }
 
 sp<Boolean> IntegerType::gt(const sp<Integer>& self, const sp<Integer>& other)
@@ -179,6 +184,7 @@ sp<Boolean> IntegerType::dirty(sp<Integer> self)
 
 int32_t IntegerType::val(const sp<Integer>& self)
 {
+    self->update(0);
     return self->val();
 }
 
@@ -223,7 +229,7 @@ sp<Integer> IntegerType::wrap(const sp<Integer>& self)
 
 sp<Integer> IntegerType::freeze(const sp<Integer>& self)
 {
-    return sp<Integer>::make<Integer::Const>(self->val());
+    return sp<Integer>::make<Integer::Const>(val(self));
 }
 
 int32_t IntegerType::toRepeat(const String& repeat)

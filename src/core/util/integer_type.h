@@ -51,6 +51,8 @@ public:
     static sp<Integer> floordiv(sp<Integer> lhs, sp<Integer> rhs);
 //  [[script::bindings::operator(neg)]]
     static sp<Integer> negative(sp<Integer> self);
+//  [[script::bindings::operator(abs)]]
+    static sp<Integer> absolute(sp<Integer> self);
 //  [[script::bindings::operator(int)]]
     static int32_t toInt32(const sp<Integer>& self);
 //  [[script::bindings::operator(float)]]

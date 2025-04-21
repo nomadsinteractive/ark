@@ -114,14 +114,14 @@ sp<Numeric> NumericType::mod(sp<Numeric> lhs, sp<Numeric> rhs)
     return sp<Numeric>::make<VariableOP2<sp<Numeric>, sp<Numeric>, Operators::Mod<float>>>(std::move(lhs), std::move(rhs));
 }
 
-sp<Numeric> NumericType::negative(const sp<Numeric>& self)
+sp<Numeric> NumericType::negative(sp<Numeric> self)
 {
-    return sp<Numeric>::make<VariableOP1<float>>(Operators::Neg<float>(), self);
+    return sp<Numeric>::make<VariableOP1<float>>(Operators::Neg<float>(), std::move(self));
 }
 
-sp<Numeric> NumericType::absolute(const sp<Numeric>& self)
+sp<Numeric> NumericType::absolute(sp<Numeric> self)
 {
-    return sp<Numeric>::make<VariableOP1<float>>(Operators::Abs<float>(), self);
+    return sp<Numeric>::make<VariableOP1<float>>(Operators::Abs<float>(), std::move(self));
 }
 
 sp<Numeric> NumericType::pow(const sp<Numeric>& x, const sp<Integer>& y, const sp<Integer>& /*z*/)
@@ -136,12 +136,12 @@ sp<Numeric> NumericType::pow(const sp<Numeric>& x, const sp<Numeric>& y, const s
 
 int32_t NumericType::toInt32(const sp<Numeric>& self)
 {
-    return static_cast<int32_t>(self->val());
+    return static_cast<int32_t>(val(self));
 }
 
 float NumericType::toFloat(const sp<Numeric>& self)
 {
-    return self->val();
+    return val(self);
 }
 
 sp<Boolean> NumericType::gt(sp<Numeric> self, sp<Numeric> other)
@@ -181,6 +181,7 @@ sp<Boolean> NumericType::dirty(sp<Numeric> self)
 
 float NumericType::val(const sp<Numeric>& self)
 {
+    self->update(0);
     return self->val();
 }
 
@@ -229,7 +230,7 @@ float NumericType::fix(const sp<Numeric>& self)
 
 sp<Numeric> NumericType::freeze(const sp<Numeric>& self)
 {
-    return sp<Numeric>::make<NumericWrapper>(self->val());
+    return sp<Numeric>::make<NumericWrapper>(val(self));
 }
 
 sp<Numeric> NumericType::wrap(sp<Numeric> self)
@@ -276,7 +277,7 @@ sp<Numeric> NumericType::dye(sp<Numeric> self, sp<Boolean> condition, String mes
 
 String NumericType::str(const sp<Numeric>& self)
 {
-    return Strings::sprintf("%.2f", self->val());
+    return Strings::sprintf("%.2f", val(self));
 }
 
 sp<Numeric> NumericType::lerp(const sp<Numeric>& self, const sp<Numeric>& b, const sp<Numeric>& t)

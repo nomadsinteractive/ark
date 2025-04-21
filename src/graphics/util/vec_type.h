@@ -195,7 +195,7 @@ public:
     }
 
     static Optional<float> getItem(const sp<VarType>& self, const ptrdiff_t idx) {
-        return idx < DIMENSION ? Optional<float>(self->val()[idx]) : Optional<float>();
+        return (idx >= 0 && idx < DIMENSION) ? Optional<float>(self->val()[idx]) : Optional<float>();
     }
 
     static sp<Vec2> xy(sp<VarType> self) {

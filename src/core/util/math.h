@@ -149,6 +149,7 @@ public:
 
     static uint32_t log2(uint32_t x);
 
+    static int32_t abs(int32_t x);
     static float abs(float x);
     static V2 abs(const V2& x);
     static V3 abs(const V3& x);
